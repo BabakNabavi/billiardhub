@@ -1,16 +1,31 @@
 /* ─────────────────────────────────────────────────────────────
-   پیامک خدماتی — اطلاع‌رسانی تراکنش خود کاربر (رزرو، لغو، تسویه).
+   پیامک خدماتی — اطلاع‌رسانی تراکنش خود کاربر (رزرو، نقش، تسویه).
 
-   ⚠ این فایل فقط برای پیامک «خدماتی» است. پیامک تبلیغاتی لاین و مجوز
+   ⚠ این فایل فقط برای پیامک «خدماتی» است. پیامک تبلیغاتی خط و مجوز
    جدا دارد و از نظر قانونی به رضایت صریح کاربر و راه لغو اشتراک نیاز
    دارد؛ هرگز از این‌جا تبلیغات نفرستید.
 
+   ── چرا الگو، نه متنِ آزاد ──
+   خطِ خدماتیِ اشتراکیِ ملی‌پیامک متنِ دلخواه نمی‌پذیرد. هر متن یک‌بار
+   در پنل ثبت و تأیید می‌شود و بعد فقط با `bodyId` و آرایه‌ی متغیرها
+   فرستاده می‌شود:
+
+     POST /api/send/shared/{key}
+     { bodyId: 524, to: '0912…', args: ['بابک نبوی', 'باشگاه هافظ'] }
+
+   `{0}` جای `args[0]` می‌نشیند و همین‌طور تا آخر. متنِ هر الگو در
+   `docs/sms-patterns.md` هست — همان که در پنل ثبت می‌شود.
+
+   ── چرا bodyId در تنظیمات است نه در کد ──
+   کدِ هر متن را پنل بعد از تأیید می‌دهد، و اگر روزی متنی اصلاح یا
+   اضافه شود کدش عوض می‌شود. گذاشتنش در کد یعنی هر بار یک دیپلوی.
+
    کلید خاموش/روشن: SMS_NOTIFICATIONS=on
-   پیش‌فرض خاموش است تا در دوره‌ی تست، هر رزرو آزمایشی هزینه نسازد.
-   روشن‌کردنش فقط تغییر متغیر محیطی است، نه دیپلوی مجدد.
    ───────────────────────────────────────────────────────────── */
 
-const SEND_URL = 'https://s.api.ir/api/sw1/SendSms'
+import { sb } from './finance/db'
+
+const SEND_URL = (key: string) => `https://console.melipayamak.com/api/send/shared/${key}`
 
 const normMobile = (m: string) =>
   String(m || '')
@@ -21,130 +36,121 @@ const isMobile = (m: string) => /^09\d{9}$/.test(m)
 
 export interface SmsResult {
   ok: boolean
-  skipped?: boolean      // خاموش بود یا شماره‌ای نبود
+  skipped?: boolean      // خاموش بود، شماره نبود، یا کدِ متن ثبت نشده
   message?: string
 }
-
-interface Envelope { success?: boolean; code?: number; message?: string | null; data?: number | string | null }
 
 /** آیا ارسال پیامک اطلاع‌رسانی روشن است؟ */
 export const smsEnabled = () => process.env.SMS_NOTIFICATIONS === 'on'
 
-/** ارسال پیامک به یک یا چند شماره. هیچ‌وقت throw نمی‌کند. */
-export async function sendSms(mobiles: string[], message: string): Promise<SmsResult> {
-  const list = [...new Set(mobiles.map(normMobile).filter(isMobile))]
-  if (list.length === 0) return { ok: false, skipped: true, message: 'شماره‌ی معتبری نبود' }
-  if (!message.trim()) return { ok: false, skipped: true, message: 'متن پیامک خالی است' }
+/* ── الگوها ──
+   کلیدها با همان نام‌هایی که در `docs/sms-patterns.md` آمده‌اند. */
+export const PATTERNS = [
+  'booking_confirmed',
+  'booking_cancelled_refund',
+  'booking_cancelled',
+  'booking_for_owner',
+  'settlement_paid',
+  'role_approved',
+  'role_approved_tick',
+  'role_rejected',
+  'club_approved',
+  'club_rejected',
+  'tournament_registered',
+  'tournament_cancelled',
+  'waitlist_promoted',
+  'report_created',
+] as const
+export type PatternKey = typeof PATTERNS[number]
+
+/* نگاشتِ کلید → کدِ متنِ پنل. یک ردیفِ JSON در `app_settings`:
+     { "booking_confirmed": 524, "role_approved": 531, … }
+
+   کوتاه کش می‌شود چون هر پیامک یک بار می‌خواندش و این مقدار عملاً
+   هرگز عوض نمی‌شود؛ ولی کش هم نباید آن‌قدر بماند که بعد از افزودنِ
+   کدِ تازه، ادمین مجبور به ریستارت شود. */
+let cache: { at: number; map: Record<string, number> } | null = null
+
+async function bodyIds(): Promise<Record<string, number>> {
+  if (cache && Date.now() - cache.at < 60_000) return cache.map
+  try {
+    const { data } = await sb().from('app_settings')
+      .select('value').eq('key', 'sms_body_ids').maybeSingle()
+    const raw = (data as { value?: unknown } | null)?.value
+    const map: Record<string, number> = {}
+    if (raw && typeof raw === 'object') {
+      for (const [k, v] of Object.entries(raw as Record<string, unknown>)) {
+        const n = Number(v)
+        if (Number.isInteger(n) && n > 0) map[k] = n
+      }
+    }
+    cache = { at: Date.now(), map }
+    return map
+  } catch {
+    return cache?.map ?? {}
+  }
+}
+
+/** فراموش‌کردنِ کش — بعد از ویرایشِ کدهای متن در پنل ادمین */
+export const invalidateSmsCache = () => { cache = null }
+
+/**
+ * ارسال یک الگو به یک شماره. هیچ‌وقت throw نمی‌کند.
+ *
+ * ترتیبِ `args` باید دقیقاً همان ترتیبی باشد که متن در پنل ثبت شده،
+ * وگرنه مقدارها جابه‌جا می‌نشینند و پیامکِ بی‌معنی می‌رود.
+ */
+export async function sendPattern(
+  key: PatternKey, mobile: string | null | undefined, args: (string | number)[],
+): Promise<SmsResult> {
+  const to = normMobile(String(mobile ?? ''))
+  if (!isMobile(to)) return { ok: false, skipped: true, message: 'شماره‌ی معتبری نبود' }
 
   if (!smsEnabled()) {
     /* در حالت خاموش فقط لاگ می‌شود تا بشود جریان را دنبال کرد */
-    console.info('[sms:off]', list.join(','), '|', message.replace(/\s+/g, ' ').slice(0, 80))
+    console.info('[sms:off]', key, to, '|', args.join(' · ').slice(0, 90))
     return { ok: false, skipped: true, message: 'ارسال پیامک خاموش است' }
   }
 
-  const key = process.env.SMS_API_KEY
-  if (!key) return { ok: false, skipped: true, message: 'کلید سرویس پیامک تنظیم نشده' }
+  const apiKey = process.env.SMS_API_KEY
+  if (!apiKey) return { ok: false, skipped: true, message: 'کلید سرویس پیامک تنظیم نشده' }
+
+  const bodyId = (await bodyIds())[key]
+  if (!bodyId) {
+    /* متن هنوز در پنل ثبت/تأیید نشده. این خطا نیست — حالتِ عادیِ
+       پیش از راه‌اندازی است — ولی باید دیده شود، وگرنه ساکت گم می‌شود. */
+    console.warn('[sms] کد متن ثبت نشده:', key)
+    return { ok: false, skipped: true, message: `کد متن «${key}» ثبت نشده است` }
+  }
 
   try {
-    const r = await fetch(SEND_URL, {
+    const r = await fetch(SEND_URL(apiKey), {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${key}` },
-      body: JSON.stringify({ message, mobiles: list }),
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ bodyId, to, args: args.map(a => String(a)) }),
     })
-    const j = await r.json().catch(() => null) as Envelope | null
+    const j = await r.json().catch(() => null) as { recId?: number | string; status?: string } | null
 
-    if (!j || j.success !== true) {
-      console.error('SendSms failed:', j?.message || r.status)
-      return { ok: false, message: 'ارسال پیامک ناموفق بود' }
-    }
-    return { ok: true }
+    /* پاسخِ موفق `recId` بزرگ‌تر از ۱۵ رقم می‌دهد؛ عددهای کوچک کدِ
+       خطا هستند و `status` متنِ فارسی‌اش را دارد. */
+    const rec = String(j?.recId ?? '')
+    if (rec.length > 10 && !/^-/.test(rec)) return { ok: true }
+
+    console.error('[sms] ارسال ناموفق:', key, '| recId:', rec, '| status:', j?.status)
+    return { ok: false, message: j?.status || 'ارسال پیامک ناموفق بود' }
   } catch {
-    console.error('SendSms: network error')
+    console.error('[sms] خطای شبکه:', key)
     return { ok: false, message: 'خطا در اتصال به سرویس پیامک' }
   }
 }
 
-/* بی‌صدا و بدون انتظار — اطلاع‌رسانی هیچ‌وقت نباید جریان اصلی (پرداخت،
-   لغو، تسویه) را کند یا خراب کند. */
-export function notify(mobile: string | null | undefined, message: string): void {
+/** بی‌صدا و بدون انتظار — اطلاع‌رسانی هیچ‌وقت نباید جریان اصلی را بشکند */
+export function notifyPattern(
+  mobile: string | null | undefined, key: PatternKey, args: (string | number)[],
+): void {
   if (!mobile) return
-  void sendSms([mobile], message).catch(() => { /* بی‌صدا */ })
+  void sendPattern(key, mobile, args).catch(() => { /* بی‌صدا */ })
 }
 
-/* ── متن‌ها — یک‌جا تا لحن و قالب یکدست بماند ────────────────────── */
-
-const fa = (n: unknown) => Math.round(Number(n) || 0).toLocaleString('fa-IR')
-
-/* ── قالبِ مشترک ──────────────────────────────────────────────
-   هر پیامک سه بخش دارد:
-
-     خطِ اول   «{نام} گرامی» — یا اگر نام نداشتیم، نامِ برند
-     بدنه      خودِ خبر
-     خطِ آخر   www.billiardhub.net
-
-   نشانیِ سایت جای سرصفحه‌ی «بیلیارد هاب» را گرفت: هم برند را
-   می‌رساند، هم گیرنده می‌تواند مستقیم برود و ببیند. دو خط برای یک
-   کار لازم نیست، و پیامکِ فارسی هر ۷۰ کاراکتر یک بخش هزینه دارد.
-
-   نامِ خالی حالتِ عادی است — کاربری که نامش را ثبت نکرده باید همان
-   پیامک را بگیرد، فقط بی‌خطاب. */
-const SITE = 'www.billiardhub.net'
-
-const wrap = (name: string, body: string) =>
-  `${name.trim() ? `${name.trim()} گرامی` : 'بیلیارد هاب'}\n${body}\n${SITE}`
-
-export const SMS = {
-  /* سرصفحه‌ی پیام‌هایی که گیرنده‌ی نام‌دار ندارند */
-  brand: 'بیلیارد هاب',
-
-  /** پوششِ عمومی — برای پیام‌هایی که قالبِ اختصاصی ندارند */
-  wrap,
-
-  bookingConfirmed: (name: string, club: string, date: string, time: string, ref: string) =>
-    wrap(name, `رزرو شما در ${club} برای ${date} ساعت ${time} قطعی شد.\nکد پیگیری: ${ref}`),
-
-  bookingCancelled: (name: string, club: string, date: string, refund: number) =>
-    wrap(name, refund > 0
-      ? `رزرو شما در ${club} برای ${date} لغو شد.\nمبلغ ${fa(refund)} تومان تا ۷۲ ساعت آینده بازمی‌گردد.`
-      : `رزرو شما در ${club} برای ${date} لغو شد.`),
-
-  /* پیام باشگاه‌دار عمداً کامل است: مدیر باید بدون بازکردن سایت
-     بداند کدام میز، چه ساعتی، چه روزی و به نام چه کسی رزرو شده. */
-  newBookingForOwner: (owner: string, club: string, date: string, time: string, table: string, by: string) =>
-    wrap(owner, `${table || 'یک میز'} در باشگاه ${club}\n`
-      + `تاریخ ${date} از ساعت ${time}`
-      + `${by ? ` توسط ${by}` : ''} رزرو شد.`),
-
-  settlementPaid: (name: string, amount: number) =>
-    wrap(name, `تسویه به مبلغ ${fa(amount)} تومان به حساب شما واریز شد.`),
-
-  /* ── نقشِ حرفه‌ای ──
-     خطِ دومِ اختصاصیِ هر نقش. «داور ارزنده‌ی کشور» به داور می‌گوید
-     پیام برای اوست، نه یک اعلانِ عمومی — و همان یک خط، پیامکِ خشکِ
-     سیستمی را به پیامِ یک آدم تبدیل می‌کند.
-
-     نقشی که این‌جا نباشد خطِ دوم نمی‌گیرد و پیامش کوتاه‌تر می‌شود؛
-     نبودنِ خطاب بهتر از خطابِ اشتباه است. */
-  roleApproved: (name: string, roleLine: string, withTick: boolean) =>
-    wrap(name, `${roleLine ? `${roleLine}\n` : ''}`
-      /* متن عمداً کوتاه است: پیامکِ فارسی بخشِ اول ۷۰ کاراکتر و
-         بخش‌های بعدی ۶۷ تا دارد. نسخه‌ی بلندترِ این جمله پیام را از
-         دو بخش به سه می‌برد، یعنی ۵۰٪ هزینه‌ی بیشتر برای یک خبر. */
-      + `پروفایل شما تأیید و منتشر شد.`
-      + (withTick ? '\nتیک آبی تأیید نیز ثبت شد.' : '')),
-
-  /* دلیل اجباری است: ردِ بی‌دلیل یعنی کاربر همان پروفایل را دوباره
-     می‌فرستد و هر دو طرف وقت تلف می‌کنند. */
-  roleRejected: (name: string, roleLine: string, reason: string) =>
-    wrap(name, `${roleLine ? `${roleLine}\n` : ''}`
-      + `پروفایل شما تأیید نشد.`
-      + (reason.trim() ? `\nعلت: ${reason.trim()}` : '')
-      + `\nپس از اصلاح، دوباره ثبت کنید.`),
-
-  /* هشدارِ گزارشِ تخلف به ادمین. عنوانِ آگهی داخلش می‌آید تا ادمین
-     بدونِ بازکردنِ پنل بداند موضوع چیست و فوریتش را بسنجد. */
-  reportCreated: (kind: string, title: string, reason: string) =>
-    wrap('', `گزارش تخلف تازه روی ${kind}${title ? ` «${title.slice(0, 40)}»` : ''}\n`
-      + `دلیل: ${reason}\n`
-      + `بررسی: /admin/reports`),
-}
+/* عددها در پیامک فارسی خوانده می‌شوند */
+export const faNum = (n: unknown) => Math.round(Number(n) || 0).toLocaleString('fa-IR')

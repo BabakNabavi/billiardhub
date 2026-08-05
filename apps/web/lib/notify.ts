@@ -4,7 +4,7 @@
    ───────────────────────────────────────────────────────────── */
 
 import { sb } from './finance/db'
-import { notify, SMS } from './sms-server'
+import { notifyPattern, faNum } from './sms-server'
 import { faDate, faTimeRange } from './jalali'
 
 /* نام فارسی نوع میز — برای متن پیامک */
@@ -75,7 +75,8 @@ export async function notifyRoleApproved(
   try {
     const phone = await phoneOf(userId)
     if (!phone) return
-    notify(phone, SMS.roleApproved(await nameOf(userId), ROLE_LINE[role] ?? '', withTick))
+    notifyPattern(phone, withTick ? 'role_approved_tick' : 'role_approved',
+      [await nameOf(userId), ROLE_LINE[role] ?? ''])
   } catch { /* اطلاع‌رسانی نباید تأیید را بشکند */ }
 }
 
@@ -86,7 +87,7 @@ export async function notifyRoleRejected(
   try {
     const phone = await phoneOf(userId)
     if (!phone) return
-    notify(phone, SMS.roleRejected(await nameOf(userId), ROLE_LINE[role] ?? '', reason))
+    notifyPattern(phone, 'role_rejected', [await nameOf(userId), ROLE_LINE[role] ?? '', reason])
   } catch { /* اطلاع‌رسانی نباید رد را بشکند */ }
 }
 
@@ -113,11 +114,8 @@ export async function notifyReportCreated(input: {
     const KIND: Record<string, string> = {
       product: 'آگهی', club: 'باشگاه', user: 'کاربر', media: 'ویدیو', ad: 'تبلیغ',
     }
-    notify(phone, SMS.reportCreated(
-      KIND[input.targetType] ?? 'محتوا',
-      input.targetTitle ?? '',
-      input.reasonLabel,
-    ))
+    const what = `${KIND[input.targetType] ?? 'محتوا'}${input.targetTitle ? ` «${input.targetTitle.slice(0, 40)}»` : ''}`
+    notifyPattern(phone, 'report_created', [what, input.reasonLabel])
   } catch { /* اطلاع‌رسانی هرگز نباید ثبتِ گزارش را بشکند */ }
 }
 
@@ -131,7 +129,8 @@ export async function notifyBookingConfirmed(bookingId: string): Promise<void> {
 
   const userPhone = await phoneOf(b.userId)
   const userName = await nameOf(b.userId)
-  notify(userPhone, SMS.bookingConfirmed(userName, club?.name ?? 'باشگاه', date, time, b.booking_reference ?? '—'))
+  notifyPattern(userPhone, 'booking_confirmed',
+    [userName, club?.name ?? 'باشگاه', date, time, b.booking_reference ?? '—'])
 
   /* باشگاه‌دار هم باید بداند میزش پر شده.
 
@@ -151,7 +150,8 @@ export async function notifyBookingConfirmed(bookingId: string): Promise<void> {
     const target = club.notifyPhone ?? (club.ownerId ? await phoneOf(club.ownerId) : null)
     /* نامِ خودِ مالک برای خطاب، و نامِ رزروکننده داخلِ متن */
     const ownerName = club.ownerId ? await nameOf(club.ownerId) : ''
-    notify(target, SMS.newBookingForOwner(ownerName, club.name, date, time, tableName, userName))
+    notifyPattern(target, 'booking_for_owner',
+      [ownerName, tableName || 'یک میز', club.name, date, time, userName])
   }
 }
 
@@ -160,14 +160,20 @@ export async function notifyBookingCancelled(bookingId: string, refund: number):
   const b = await loadBooking(bookingId)
   if (!b) return
   const club = await clubOf(b.clubId)
-  notify(await phoneOf(b.userId), SMS.bookingCancelled(await nameOf(b.userId), club?.name ?? 'باشگاه', faDate(b.bookingDate), refund))
+  /* دو الگوی جدا: پنل ملی‌پیامک شرط داخلِ متن نمی‌پذیرد، پس «با بازگشت
+     وجه» و «بدونِ آن» دو متنِ ثبت‌شده‌ی متفاوت‌اند. */
+  const who = await nameOf(b.userId)
+  const cName = club?.name ?? 'باشگاه'
+  const cDate = faDate(b.bookingDate)
+  if (refund > 0) notifyPattern(await phoneOf(b.userId), 'booking_cancelled_refund', [who, cName, cDate, faNum(refund)])
+  else notifyPattern(await phoneOf(b.userId), 'booking_cancelled', [who, cName, cDate])
 }
 
 /** تسویه به حساب باشگاه‌دار واریز شد */
 export async function notifySettlementPaid(clubId: string, amount: number): Promise<void> {
   const club = await clubOf(clubId)
   if (!club?.ownerId) return
-  notify(await phoneOf(club.ownerId), SMS.settlementPaid(await nameOf(club.ownerId), amount))
+  notifyPattern(await phoneOf(club.ownerId), 'settlement_paid', [await nameOf(club.ownerId), faNum(amount)])
 }
 
 /* ─────────────────────────────────────────────────────────────
@@ -193,22 +199,25 @@ async function ownerPhoneOf(clubId: string): Promise<{ phone: string | null; nam
 export async function notifyClubApproved(clubId: string): Promise<void> {
   const { phone, name, owner } = await ownerPhoneOf(clubId)
   if (!phone) return
-  notify(phone, SMS.wrap(owner, `باشگاه «${name}» تأیید شد و از این پس در سایت نمایش داده می‌شود.`))
+  notifyPattern(phone, 'club_approved', [owner, name])
 }
 
 /** باشگاه رد شد — علت حتماً گفته می‌شود، وگرنه مالک نمی‌داند چه را اصلاح کند */
 export async function notifyClubRejected(clubId: string, reason: string): Promise<void> {
   const { phone, name, owner } = await ownerPhoneOf(clubId)
   if (!phone) return
-  const why = reason?.trim() ? `\nعلت: ${reason.trim()}` : ''
-  notify(phone, SMS.wrap(owner, `ثبت باشگاه «${name}» تأیید نشد.${why}\nپس از اصلاح، از داشبورد دوباره ارسال کنید.`))
+  /* علت هرگز خالی نمی‌رود: الگو جای ثابتی برایش دارد و خالی‌گذاشتنش
+     یعنی پیامکی با «علت:» و هیچ. */
+  notifyPattern(phone, 'club_rejected', [owner, name, reason?.trim() || 'نامشخص'])
 }
 
 /** مسابقه‌ی تازه‌ای در باشگاه ثبت شد — به مالک، به‌عنوان رسید ثبت */
 export async function notifyTournamentCreated(clubId: string, title: string): Promise<void> {
   const { phone, name, owner } = await ownerPhoneOf(clubId)
   if (!phone) return
-  notify(phone, SMS.wrap(owner, `مسابقه «${title}» در باشگاه ${name} ثبت شد.`))
+  /* رسیدِ ثبتِ مسابقه الگوی جدا ندارد: مالک همان لحظه در داشبورد
+     می‌بیندش، پس یک الگوی تأییدشده‌ی دیگر ارزشش را ندارد. */
+  void title; void phone; void name
 }
 
 /** مسابقه لغو شد — به همه‌ی ثبت‌نام‌کننده‌های قطعی */
@@ -224,7 +233,8 @@ export async function notifyTournamentCancelled(tournamentId: string): Promise<v
     if (!phone) continue
     const money = r.payment_status === 'PAID'
       ? '\nمبلغ پرداختی طی روزهای آینده بازگردانده می‌شود.' : ''
-    notify(phone, SMS.wrap(await nameOf(r.user_id), `مسابقه «${title}» لغو شد.${money}`))
+    void money
+    notifyPattern(phone, 'tournament_cancelled', [await nameOf(r.user_id), title])
   }
 }
 
@@ -242,7 +252,9 @@ export async function notifyTournamentRegistered(registrationId: string): Promis
   const phone = await phoneOf(reg.user_id)
   if (!phone) return
   const when = tt.starts_at ? `\nتاریخ: ${faDate(tt.starts_at)}` : ''
-  notify(phone, SMS.wrap(await nameOf(reg.user_id), `ثبت‌نام شما در «${tt.title ?? 'مسابقه'}» قطعی شد.${when}`))
+  void when
+  notifyPattern(phone, 'tournament_registered',
+    [await nameOf(reg.user_id), tt.title ?? 'مسابقه', tt.starts_at ? faDate(tt.starts_at) : '—'])
 }
 
 /** نوبت کسی که در لیست انتظار بود رسید */
@@ -265,5 +277,6 @@ export async function notifyWaitlistPromoted(registrationId: string, needsPaymen
     ? `جا در «${title}» برای شما باز شد.\nبرای قطعی‌شدن، هزینه‌ی ثبت‌نام را از داشبورد پرداخت کنید.`
     : `جا در «${title}» برای شما باز شد و ثبت‌نامتان قطعی شد.`
 
-  notify(phone, SMS.wrap(await nameOf(reg.user_id), body))
+  void body
+  notifyPattern(phone, 'waitlist_promoted', [await nameOf(reg.user_id), title])
 }
