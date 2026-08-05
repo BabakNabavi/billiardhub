@@ -6,6 +6,7 @@
 import { sb } from './finance/db'
 import { notifyPattern, faNum } from './sms-server'
 import { faDate, faTimeRange } from './jalali'
+import { rejectLabel } from './moderation/reasons'
 
 /* نام فارسی نوع میز — برای متن پیامک */
 const TABLE_LABEL: Record<string, string> = {
@@ -80,14 +81,23 @@ export async function notifyRoleApproved(
   } catch { /* اطلاع‌رسانی نباید تأیید را بشکند */ }
 }
 
-/** نقش رد شد — دلیل همیشه همراهش می‌رود */
+/* نقش رد شد — دلیل همیشه همراهش می‌رود.
+
+   `reason` از فهرستِ بسته‌ی `REJECT_REASONS` می‌آید. سرویسِ پیامک
+   مقدارهای ممکنِ این متغیر را از قبل می‌خواهد، پس متنِ آزاد این‌جا
+   قابلِ ارسال نیست. `rejectLabel` هر ورودیِ ناشناخته را به «موارد
+   دیگر» می‌برد — سدِ آخر، تا حتی یک مسیرِ قدیمی هم نتواند مقدارِ
+   اعلام‌نشده بفرستد.
+
+   یادداشتِ آزادِ ادمین از بین نمی‌رود؛ در داشبورد و ممیزی می‌ماند. */
 export async function notifyRoleRejected(
   userId: string, role: string, reason: string,
 ): Promise<void> {
   try {
     const phone = await phoneOf(userId)
     if (!phone) return
-    notifyPattern(phone, 'role_rejected', [await nameOf(userId), ROLE_LINE[role] ?? '', reason])
+    notifyPattern(phone, 'role_rejected',
+      [await nameOf(userId), ROLE_LINE[role] ?? '', rejectLabel(reason)])
   } catch { /* اطلاع‌رسانی نباید رد را بشکند */ }
 }
 
@@ -206,9 +216,10 @@ export async function notifyClubApproved(clubId: string): Promise<void> {
 export async function notifyClubRejected(clubId: string, reason: string): Promise<void> {
   const { phone, name, owner } = await ownerPhoneOf(clubId)
   if (!phone) return
-  /* علت هرگز خالی نمی‌رود: الگو جای ثابتی برایش دارد و خالی‌گذاشتنش
-     یعنی پیامکی با «علت:» و هیچ. */
-  notifyPattern(phone, 'club_rejected', [owner, name, reason?.trim() || 'نامشخص'])
+  /* علت از فهرستِ بسته می‌آید — سرویسِ پیامک مقدارهای ممکنِ این
+     متغیر را از قبل می‌خواهد. `rejectLabel` خالی و ناشناخته را هم
+     به «موارد دیگر» می‌برد، پس جای علت هیچ‌وقت خالی نمی‌ماند. */
+  notifyPattern(phone, 'club_rejected', [owner, name, rejectLabel(reason)])
 }
 
 /** مسابقه‌ی تازه‌ای در باشگاه ثبت شد — به مالک، به‌عنوان رسید ثبت */

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { ROLE_MAP, RoleValue, RoleStatus, toFarsiDigits, hexToRgba, STATUS_COLOR, STATUS_LABEL } from '@/lib/roles'
 import { csrfToken, apiFetch } from '../../../lib/http'
 import Ti from '../../../components/ui/Ti'
+import { REJECT_REASONS, rejectLabel } from '../../../lib/moderation/reasons'
 
 function authHeader(): Record<string,string> {
   /* نشست روی کوکی httpOnly است؛ فقط توکن CSRF لازم است */
@@ -127,14 +128,27 @@ function RequestRow({ req, onAction }: {
 
       {rejecting && (
         <div style={{ display: 'flex', gap: 7, marginTop: 8, flexWrap: 'wrap' }}>
-          <input value={note} onChange={e => setNote(e.target.value)}
-            placeholder="دلیل رد — به کاربر نشان داده می‌شود"
+          {/* فهرستِ بسته، نه متنِ آزاد: این متن داخلِ پیامک می‌رود و
+              سرویسِ پیامک مقدارهای ممکنِ آن را از قبل می‌خواهد. */}
+          <select value={note} onChange={e => setNote(e.target.value)}
             style={{
-              flex: 1, minWidth: 170, background: '#F7F7F5', border: '1px solid rgba(0,0,0,0.08)',
+              flex: 1, minWidth: 190, background: '#F7F7F5', border: '1px solid rgba(0,0,0,0.08)',
               borderRadius: 9, padding: '7px 11px', fontSize: 12.5, fontFamily: 'inherit', outline: 'none',
-            }} />
-          <button onClick={() => act('reject')} disabled={busy}
-            style={{ padding: '7px 13px', borderRadius: 9, border: 'none', background: '#ef4444', color: '#fff', fontSize: 12.5, fontWeight: 700, fontFamily: 'inherit', cursor: 'pointer' }}>
+              color: note ? '#111' : 'rgba(0,0,0,0.4)', cursor: 'pointer',
+            }}>
+            <option value="">دلیل رد را انتخاب کنید…</option>
+            {REJECT_REASONS.map(r => (
+              <option key={r.code} value={r.code}>{r.label}</option>
+            ))}
+          </select>
+          <button onClick={() => act('reject')} disabled={busy || !note}
+            style={{
+              padding: '7px 13px', borderRadius: 9, border: 'none',
+              background: busy || !note ? 'rgba(0,0,0,0.12)' : '#ef4444',
+              color: busy || !note ? 'rgba(0,0,0,0.35)' : '#fff',
+              fontSize: 12.5, fontWeight: 700, fontFamily: 'inherit',
+              cursor: busy || !note ? 'not-allowed' : 'pointer',
+            }}>
             تأیید رد
           </button>
           <button onClick={() => setRejecting(false)}
@@ -144,9 +158,11 @@ function RequestRow({ req, onAction }: {
         </div>
       )}
 
+      {/* در ردیف‌های تازه کدِ دلیل ذخیره می‌شود، در ردیف‌های قدیمی
+          متنِ آزاد. `rejectLabel` هر دو را می‌فهمد. */}
       {req.status === 'rejected' && req.rejection_note && (
         <div style={{ fontSize: 12, color: '#ef4444', marginTop: 6 }}>
-          دلیل: {req.rejection_note}
+          دلیل: {rejectLabel(req.rejection_note)}
         </div>
       )}
     </div>

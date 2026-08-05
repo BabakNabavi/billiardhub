@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useAuthStore } from '../../../store/auth.store';
 import { Check, X, ExternalLink, FileText, Clock, Eye } from 'lucide-react';
 import { apiFetch } from '../../../lib/http';
+import { REJECT_REASONS } from '../../../lib/moderation/reasons';
 
 const GOLD = '#C7A66A';
 
@@ -84,18 +85,23 @@ export default function AdminClubsPage() {
   }, [_hydrated, user]);
 
   const [err, setErr] = useState('');
+  /* باشگاهی که در حالِ رد کردنش هستیم، و کدِ علتِ انتخاب‌شده */
+  const [rejectFor, setRejectFor] = useState<string | null>(null);
+  const [rejectCode, setRejectCode] = useState('');
 
   const setStatus = async (id: string, status: string) => {
     /* رد کردن بدون علت پذیرفته نمی‌شود — مالک باید بداند چه را اصلاح کند.
        سرور هم همین را اجبار می‌کند؛ این‌جا فقط زودتر پرسیده می‌شود. */
-    let reason: string | undefined;
-    if (status === 'rejected') {
-      const r = window.prompt('علت رد را بنویسید (برای مالک باشگاه پیامک می‌شود):');
-      if (r === null) return;                 // انصراف
-      if (!r.trim()) { setErr('علت رد نمی‌تواند خالی باشد'); return; }
-      reason = r.trim();
-    }
+    /* رد کردن از پنجره‌ی جدا می‌گذرد، چون علت باید از فهرستِ بسته
+       انتخاب شود: این متن داخلِ پیامکِ مالک می‌رود و سرویسِ پیامک
+       مقدارهای ممکنِ آن را از قبل می‌خواهد. `window.prompt` متنِ آزاد
+       می‌داد و چنین چیزی قابلِ اعلام نیست. */
+    if (status === 'rejected') { setRejectFor(id); setRejectCode(''); return; }
 
+    await applyStatus(id, status);
+  };
+
+  const applyStatus = async (id: string, status: string, reason?: string) => {
     setActionLoading(id + status); setErr('');
     try {
       await updateStatus(id, status, reason);
@@ -249,6 +255,70 @@ export default function AdminClubsPage() {
               </div>
             );
           })}
+        </div>
+      )}
+
+      {/* ── علتِ رد ──
+          فهرستِ بسته، نه متنِ آزاد: این متن داخلِ پیامکِ مالک می‌رود و
+          سرویسِ پیامک مقدارهای ممکنِ آن را از قبل می‌خواهد. */}
+      {rejectFor && (
+        <div
+          onClick={() => setRejectFor(null)}
+          style={{
+            position: 'fixed', inset: 0, zIndex: 1300, background: 'rgba(28,27,23,0.44)',
+            display: 'grid', placeItems: 'center', padding: 18,
+          }}>
+          <div onClick={e => e.stopPropagation()} dir="rtl" style={{
+            width: '100%', maxWidth: 380, background: '#fff', borderRadius: 18,
+            padding: '20px 20px 18px', fontFamily: 'var(--font-base)',
+            boxShadow: '0 10px 44px rgba(28,27,23,0.2)',
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+              <X size={16} style={{ color: '#dc2626' }} />
+              <span style={{ fontSize: 15, fontWeight: 900, color: '#1C1B17' }}>رد ثبت باشگاه</span>
+            </div>
+            <p style={{ fontSize: 12, color: '#8A8474', lineHeight: 1.95, margin: '0 0 14px' }}>
+              علت برای مالک باشگاه پیامک می‌شود تا بداند چه را اصلاح کند.
+            </p>
+
+            <select
+              value={rejectCode} onChange={e => setRejectCode(e.target.value)}
+              style={{
+                width: '100%', boxSizing: 'border-box', background: '#F7F7F5',
+                border: '1px solid rgba(0,0,0,0.08)', borderRadius: 10, padding: '10px 12px',
+                fontSize: 13, fontFamily: 'inherit', outline: 'none', marginBottom: 16,
+                color: rejectCode ? '#111' : 'rgba(0,0,0,0.4)', cursor: 'pointer',
+              }}>
+              <option value="">علت رد را انتخاب کنید…</option>
+              {REJECT_REASONS.map(r => (
+                <option key={r.code} value={r.code}>{r.label}</option>
+              ))}
+            </select>
+
+            <div style={{ display: 'flex', gap: 9 }}>
+              <button
+                disabled={!rejectCode || !!actionLoading}
+                onClick={async () => {
+                  const id = rejectFor; const code = rejectCode;
+                  setRejectFor(null);
+                  await applyStatus(id, 'rejected', code);
+                }}
+                style={{
+                  flex: 1, border: 'none', borderRadius: 10, padding: '10px 16px',
+                  background: rejectCode ? '#dc2626' : 'rgba(0,0,0,0.12)',
+                  color: rejectCode ? '#fff' : 'rgba(0,0,0,0.35)',
+                  fontSize: 13, fontWeight: 700, fontFamily: 'inherit',
+                  cursor: rejectCode ? 'pointer' : 'not-allowed',
+                }}>
+                رد کن و پیامک بفرست
+              </button>
+              <button onClick={() => setRejectFor(null)} style={{
+                border: '1px solid rgba(0,0,0,0.08)', background: 'transparent',
+                color: 'rgba(0,0,0,0.5)', borderRadius: 10, padding: '10px 16px',
+                fontSize: 13, fontWeight: 700, fontFamily: 'inherit', cursor: 'pointer',
+              }}>انصراف</button>
+            </div>
+          </div>
         </div>
       )}
     </div>
