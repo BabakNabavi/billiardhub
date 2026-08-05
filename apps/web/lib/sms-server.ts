@@ -133,6 +133,12 @@ async function bodyIds(): Promise<Record<string, number>> {
 /** فراموش‌کردنِ کش — بعد از ویرایشِ کدهای متن در پنل ادمین */
 export const invalidateSmsCache = () => { cache = null }
 
+/** آیا کدِ متنِ این الگوها ثبت شده؟ — برای بستنِ راهِ خریدِ الگوی بی‌کد */
+export async function registeredPatterns(keys: readonly string[]): Promise<Set<string>> {
+  const map = await bodyIds()
+  return new Set(keys.filter(k => !!map[k]))
+}
+
 /**
  * ارسال یک الگو به یک شماره. هیچ‌وقت throw نمی‌کند.
  *

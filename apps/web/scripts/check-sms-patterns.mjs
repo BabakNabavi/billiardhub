@@ -9,8 +9,14 @@ import path from 'path'
    وسطِ پیامک به نظر می‌رسد. پیش از فرستادنِ هر متنِ تازه به پنل،
    این را اجرا کنید.
 
-   ⚠️ چهار الگو عمداً ❌ می‌مانند: تأیید شده‌اند و کار می‌کنند، و
+   ⚠️ پنج الگو عمداً ❌ می‌مانند: تأیید شده‌اند و کار می‌کنند، و
    «اصلاح»شان یعنی ابطالِ کد و یک دورِ تأییدِ دیگر. جزئیات در سند. */
+
+/* تأییدشده‌ها — گزارش می‌شوند ولی «مشکل‌دار» شمرده نمی‌شوند */
+const APPROVED_EXEMPT = new Set([
+  'booking_confirmed', 'booking_for_owner', 'role_approved',
+  'tournament_registered', 'login_otp',
+])
 const doc = fs.readFileSync(path.join(process.cwd(), 'docs/sms-patterns.md'), 'utf8')
 
 /* فقط بلوک‌هایی که یک الگوی واقعی‌اند: زیرشان خطِ `key` — args دارد */
@@ -39,8 +45,16 @@ while ((m = re.exec(doc))) {
     problems.push('نشانی سایت در انتها نیست')
   }
 
-  if (problems.length) { bad++; console.log('❌', key); problems.forEach(p => console.log('     ', p)) }
-  else console.log('✅', key)
+  if (!problems.length) { console.log('✅', key); continue }
+
+  if (APPROVED_EXEMPT.has(key)) {
+    console.log('🔒', key, '— قاعده را می‌شکند ولی تأیید شده؛ دست نزنید')
+    continue
+  }
+  bad++
+  console.log('❌', key)
+  problems.forEach(p => console.log('     ', p))
 }
 
 console.log(`\n${total} الگو بررسی شد — ${bad} مشکل‌دار`)
+process.exit(bad ? 1 : 0)

@@ -31,8 +31,12 @@ interface History {
   id: string; template_key: string; recipient_count: number; total_amount: number
   status: string; sent_count: number; failed_count: number; created_at: string
 }
+/* `ready` یعنی کدِ متن در پنلِ ملی‌پیامک ثبت شده. تا آن لحظه این
+   الگو واقعاً وجود ندارد و خریدش یعنی پولِ گرفته‌شده و پیامکِ نرفته. */
+type Tpl = ClubTemplate & { ready?: boolean }
+
 interface Payload {
-  templates: ClubTemplate[]
+  templates: Tpl[]
   pricing: { unitPrice: number; setupFee: number; enabled: boolean }
   estimate: Estimate | { error: string } | null
   history: History[]
@@ -117,7 +121,12 @@ export default function SmsToMembers({ clubId }: { clubId: string }) {
     )
   }
 
-  if (!data.pricing.enabled) {
+  /* هیچ متنی کد ندارد ⇒ همان پیامِ «هنوز فعال نشده».
+     نشان‌دادنِ فرمی که هیچ گزینه‌ی قابلِ انتخابی ندارد بدتر از
+     نشان‌ندادنش است. */
+  const anyReady = data.templates.some(t => t.ready !== false)
+
+  if (!data.pricing.enabled || !anyReady) {
     return (
       <div style={{
         display: 'flex', gap: 9, alignItems: 'flex-start', border: `1px solid ${LINE}`,
@@ -147,13 +156,17 @@ export default function SmsToMembers({ clubId }: { clubId: string }) {
       <div style={{ display: 'grid', gap: 8, gridTemplateColumns: 'repeat(auto-fit,minmax(180px,1fr))', marginBottom: 16 }}>
         {data.templates.map(t => {
           const on = t.key === tplKey
+          const off = t.ready === false
           return (
             <button
-              key={t.key} type="button" onClick={() => pickTemplate(t.key)}
+              key={t.key} type="button" disabled={off}
+              onClick={() => pickTemplate(t.key)}
+              title={off ? 'این متن هنوز آماده نشده است' : undefined}
               style={{
                 border: '1px solid', borderColor: on ? 'rgba(199,166,106,0.44)' : LINE,
-                background: on ? 'rgba(199,166,106,0.10)' : '#fff',
-                borderRadius: 13, padding: '12px 14px', cursor: 'pointer', textAlign: 'right',
+                background: off ? '#F7F6F2' : on ? 'rgba(199,166,106,0.10)' : '#fff',
+                borderRadius: 13, padding: '12px 14px', textAlign: 'right',
+                cursor: off ? 'not-allowed' : 'pointer', opacity: off ? 0.72 : 1,
                 fontFamily: 'var(--font-base)', display: 'flex', alignItems: 'center', gap: 8,
               }}>
               <span style={{
@@ -162,7 +175,15 @@ export default function SmsToMembers({ clubId }: { clubId: string }) {
                 border: `1px solid ${on ? GOLD_D : LINE}`,
                 background: on ? GOLD_D : 'transparent', color: '#fff',
               }}>{on ? <Check size={12} /> : null}</span>
-              <span style={{ fontSize: 13, fontWeight: 800, color: on ? GOLD_D : SEC }}>{t.title}</span>
+              <span style={{ flex: 1, fontSize: 13, fontWeight: 800, color: off ? MUT : on ? GOLD_D : SEC }}>
+                {t.title}
+              </span>
+              {off ? (
+                <span style={{
+                  fontSize: 10.5, fontWeight: 800, color: MUT, background: '#EFEDE7',
+                  borderRadius: 20, padding: '3px 8px', whiteSpace: 'nowrap',
+                }}>به‌زودی</span>
+              ) : null}
             </button>
           )
         })}

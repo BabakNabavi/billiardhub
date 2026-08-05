@@ -4,6 +4,7 @@ import { sb, actorFromRequest, isAdmin, ownsClub, audit, clientIp } from '@/lib/
 import { getPaymentProvider } from '@/lib/payments';
 import { CLUB_TEMPLATES, clubTemplate } from '@/lib/sms/club-templates';
 import { pricing, quote } from '@/lib/sms/club-campaign';
+import { registeredPatterns } from '@/lib/sms-server';
 
 /* پیامک باشگاه به اعضا — برآورد هزینه و ساخت سفارش.
 
@@ -75,8 +76,15 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string 
     .select('id,template_key,recipient_count,total_amount,status,sent_count,failed_count,created_at,sent_at')
     .eq('club_id', id).order('created_at', { ascending: false }).limit(20);
 
+  /* ── متنی که کدش ثبت نشده قابلِ خرید نیست ──
+     بدونِ این، باشگاه‌دار می‌توانست پول بدهد و هیچ پیامکی نرود:
+     `sendPattern` بی‌صدا رد می‌کند و کمپین «ناموفق» می‌شود. کدِ متن
+     را پنلِ ملی‌پیامک بعد از تأییدِ هر متن می‌دهد، پس تا آن لحظه این
+     الگو واقعاً وجود ندارد. */
+  const ready = await registeredPatterns(CLUB_TEMPLATES.map(t => t.key));
+
   return NextResponse.json({
-    templates: CLUB_TEMPLATES,
+    templates: CLUB_TEMPLATES.map(t => ({ ...t, ready: ready.has(t.key) })),
     pricing: p,
     estimate: est,
     history: history ?? [],
@@ -93,6 +101,15 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string
   const key = String(body.template ?? '');
   const args = cleanArgs(key, body.args);
   if (!Array.isArray(args)) return NextResponse.json({ message: args.error }, { status: 400 });
+
+  /* سدِ دوم، سمتِ سرور: رابط دکمه را خاموش می‌کند ولی یک درخواستِ
+     دستی همچنان می‌رسید — و نتیجه‌اش پولِ گرفته‌شده و پیامکِ نرفته
+     بود. */
+  if (!(await registeredPatterns([key])).has(key)) {
+    return NextResponse.json({
+      message: 'این متن هنوز آماده‌ی ارسال نیست؛ کمی بعد دوباره تلاش کنید',
+    }, { status: 409 });
+  }
 
   /* قیمت دوباره سمت سرور حساب می‌شود. عددی که کلاینت فرستاده هرگز
      استفاده نمی‌شود — وگرنه یک درخواستِ دستکاری‌شده می‌توانست
