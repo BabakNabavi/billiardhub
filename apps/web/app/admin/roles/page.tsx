@@ -6,6 +6,7 @@ import { ROLE_MAP, RoleValue, RoleStatus, toFarsiDigits, hexToRgba, STATUS_COLOR
 import { csrfToken, apiFetch } from '../../../lib/http'
 import Ti from '../../../components/ui/Ti'
 import { REJECT_REASONS, rejectLabel } from '../../../lib/moderation/reasons'
+import ReviewDetails from '../../../components/admin/ReviewDetails'
 
 function authHeader(): Record<string,string> {
   /* نشست روی کوکی httpOnly است؛ فقط توکن CSRF لازم است */
@@ -46,6 +47,9 @@ function RequestRow({ req, onAction }: {
   const [rejecting, setRejecting] = useState(false)
   const [note, setNote] = useState('')
   const [busy, setBusy] = useState(false)
+  /* بدونِ جزئیات، تأیید یعنی امضای نادیده: معلوم نیست طرف کیست، چه
+     ثبت کرده، و اطلاعاتش با هویتِ حسابش می‌خواند یا نه. */
+  const [showDetails, setShowDetails] = useState(false)
 
   const act = async (action: 'approve' | 'reject', verified = false) => {
     setBusy(true)
@@ -87,6 +91,17 @@ function RequestRow({ req, onAction }: {
 
         {req.status === 'pending' && !rejecting && (
           <>
+            <button onClick={() => setShowDetails(v => !v)} disabled={busy}
+              title="دیدن اطلاعات کامل پیش از تصمیم"
+              style={{
+                padding: '6px 12px', borderRadius: 9, fontSize: 12.5, fontWeight: 700,
+                fontFamily: 'inherit', cursor: 'pointer',
+                border: `1px solid ${showDetails ? 'rgba(199,166,106,0.4)' : 'rgba(0,0,0,0.1)'}`,
+                background: showDetails ? 'rgba(199,166,106,0.12)' : 'transparent',
+                color: showDetails ? '#9A6E38' : 'rgba(0,0,0,0.5)',
+              }}>
+              {showDetails ? 'بستن' : 'جزئیات'}
+            </button>
             {/* تأیید همیشه ممکن است — مدرک اجباری نیست. نبودنش فقط
                 یعنی تیک آبی داده نمی‌شود. */}
             <button onClick={() => act('approve')} disabled={busy}
@@ -125,6 +140,12 @@ function RequestRow({ req, onAction }: {
           </>
         )}
       </div>
+
+      {showDetails && (
+        <div style={{ marginTop: 10, padding: '12px 0 2px' }}>
+          <ReviewDetails type="role" id={req.id} />
+        </div>
+      )}
 
       {rejecting && (
         <div style={{ display: 'flex', gap: 7, marginTop: 8, flexWrap: 'wrap' }}>

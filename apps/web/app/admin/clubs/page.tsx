@@ -6,6 +6,7 @@ import { useAuthStore } from '../../../store/auth.store';
 import { Check, X, ExternalLink, FileText, Clock, Eye } from 'lucide-react';
 import { apiFetch } from '../../../lib/http';
 import { REJECT_REASONS } from '../../../lib/moderation/reasons';
+import ReviewDetails from '../../../components/admin/ReviewDetails';
 
 const GOLD = '#C7A66A';
 
@@ -88,6 +89,7 @@ export default function AdminClubsPage() {
   /* باشگاهی که در حالِ رد کردنش هستیم، و کدِ علتِ انتخاب‌شده */
   const [rejectFor, setRejectFor] = useState<string | null>(null);
   const [rejectCode, setRejectCode] = useState('');
+  const [openClub, setOpenClub] = useState<string | null>(null);
 
   const setStatus = async (id: string, status: string) => {
     /* رد کردن بدون علت پذیرفته نمی‌شود — مالک باید بداند چه را اصلاح کند.
@@ -199,7 +201,30 @@ export default function AdminClubsPage() {
                       <FileText size={12} /> بدون مدرک
                     </span>
                   )}
+
+                  {/* ── جزئیات ──
+                      تا امروز این کارت فقط نام و شهر و مدرک را نشان
+                      می‌داد. برای تصمیم‌گرفتن باید دید باشگاه چند میز
+                      دارد، مالکش کیست، و هویتش تأیید شده یا نه. */}
+                  <button type="button"
+                    onClick={() => setOpenClub(openClub === club.id ? null : club.id)}
+                    style={{
+                      display: 'flex', alignItems: 'center', gap: 5, borderRadius: 10,
+                      padding: '6px 14px', fontSize: 12, fontWeight: 600, cursor: 'pointer',
+                      fontFamily: 'var(--font-base)', flexShrink: 0,
+                      border: `1px solid ${openClub === club.id ? 'rgba(199,166,106,0.30)' : '#e5e7eb'}`,
+                      background: openClub === club.id ? 'rgba(199,166,106,0.10)' : '#fff',
+                      color: openClub === club.id ? GOLD : '#6b7280',
+                    }}>
+                    <FileText size={12} /> {openClub === club.id ? 'بستن' : 'جزئیات'}
+                  </button>
                 </div>
+
+                {openClub === club.id && (
+                  <div style={{ marginTop: 14, paddingTop: 14, borderTop: '1px solid #f0ede8' }}>
+                    <ReviewDetails type="club" id={club.id} />
+                  </div>
+                )}
 
                 {/* دکمه‌های اقدام */}
                 {club.verificationStatus !== 'verified' && (

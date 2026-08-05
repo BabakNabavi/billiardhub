@@ -73,6 +73,10 @@ export async function loadProfileRows(kind: ProfileKind): Promise<AdminRow[]> {
     /* ProfileAdmin فقط دو حالت می‌شناسد؛ «در انتظار» هم معلق است */
     status: p.status === 'approved' ? 'approved' : 'rejected',
     href: HREF[kind](p.slug),
+    /* برای پنجره‌ی جزئیات — تا ادمین پیش از تصمیم ببیند طرف کیست و
+       چه ثبت کرده. `slug` این‌جا خودش شناسه است، ولی صریح بودنش
+       بهتر از تکیه بر آن قرارداد است. */
+    profileId: p.id,
   }))
 }
 

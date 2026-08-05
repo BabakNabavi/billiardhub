@@ -10,7 +10,8 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuthStore } from '../../store/auth.store';
-import { ArrowLeft, Eye, Trash2, ShieldCheck, ShieldOff, Inbox } from 'lucide-react';
+import { ArrowLeft, Eye, Trash2, ShieldCheck, ShieldOff, Inbox, FileSearch } from 'lucide-react';
+import ReviewDetails from '../../components/admin/ReviewDetails';
 
 const GOLD_D = '#9A6E38';
 const TEXT   = '#1C1B17';
@@ -24,6 +25,10 @@ export interface AdminRow {
   subtitle: string;
   status: 'approved' | 'rejected';
   href: string;
+  /* شناسه‌ی ردیفِ `profiles` — برای نشان‌دادنِ جزئیات پیش از تصمیم.
+     اختیاری است تا صفحه‌هایی که هنوز آن را نمی‌دهند نشکنند؛ بدونش
+     فقط دکمه‌ی «جزئیات» دیده نمی‌شود. */
+  profileId?: string;
 }
 
 export default function ProfileAdmin({
@@ -44,6 +49,7 @@ export default function ProfileAdmin({
   const [rows, setRows] = useState<AdminRow[]>([]);
   const [ready, setReady] = useState(false);
   const [toast, setToast] = useState('');
+  const [open, setOpen] = useState<string | null>(null);
 
   const refresh = async () => {
     try { setRows(await load()); } catch { setRows([]); }
@@ -92,7 +98,8 @@ export default function ProfileAdmin({
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
             {rows.map(r => (
-              <div key={r.slug} style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap', background: '#fff', border: `1px solid ${LINE}`, borderRadius: 14, padding: '12px 16px' }}>
+              <div key={r.slug} style={{ background: '#fff', border: `1px solid ${LINE}`, borderRadius: 14 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap', padding: '12px 16px' }}>
                 <span style={{ width: 40, height: 40, borderRadius: '50%', flexShrink: 0, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, fontWeight: 900, color: '#fff', background: 'linear-gradient(135deg,#C7A66A,#8A6020)' }}>
                   {r.title.slice(0, 1)}
                 </span>
@@ -107,6 +114,24 @@ export default function ProfileAdmin({
                   {r.status === 'approved' ? 'منتشر شده' : 'معلق'}
                 </span>
                 <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
+                  {/* ── جزئیات ──
+                      تا امروز این فهرست فقط یک نام و سه دکمه بود.
+                      تصمیم‌گرفتن درباره‌ی چیزی که دیده نمی‌شود تأیید
+                      نیست. */}
+                  {r.profileId ? (
+                    <button onClick={() => setOpen(open === r.slug ? null : r.slug)}
+                      title="جزئیات کامل"
+                      style={{
+                        height: 34, padding: '0 12px', borderRadius: 10,
+                        border: `1px solid ${open === r.slug ? 'rgba(199,166,106,0.4)' : LINE}`,
+                        background: open === r.slug ? 'rgba(199,166,106,0.12)' : '#FAFAF7',
+                        color: open === r.slug ? GOLD_D : SEC, cursor: 'pointer',
+                        display: 'flex', alignItems: 'center', gap: 5,
+                        fontSize: 12, fontWeight: 800, fontFamily: 'inherit',
+                      }}>
+                      <FileSearch size={14} />{open === r.slug ? 'بستن' : 'جزئیات'}
+                    </button>
+                  ) : null}
                   <button onClick={async () => { await toggle(r.slug); await refresh(); flash(r.status === 'approved' ? 'پروفایل معلق شد' : 'پروفایل منتشر شد'); }}
                     title={r.status === 'approved' ? 'تعلیق' : 'انتشار'}
                     style={{ width: 34, height: 34, borderRadius: 10, border: `1px solid ${LINE}`, background: '#FAFAF7', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: r.status === 'approved' ? '#B23B2E' : '#0E7A38' }}>
@@ -122,6 +147,13 @@ export default function ProfileAdmin({
                     <Trash2 size={15} />
                   </button>
                 </div>
+              </div>
+
+              {open === r.slug && r.profileId ? (
+                <div style={{ borderTop: `1px solid ${LINE}`, padding: '14px 16px', background: '#FAFAF7' }}>
+                  <ReviewDetails type="profile" id={r.profileId} />
+                </div>
+              ) : null}
               </div>
             ))}
           </div>
