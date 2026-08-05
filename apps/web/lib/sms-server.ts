@@ -27,6 +27,18 @@ import { sb } from './finance/db'
 
 const SEND_URL = (key: string) => `https://console.melipayamak.com/api/send/shared/${key}`
 
+/* پنلِ ملی‌پیامک کلید را داخلِ یک نشانیِ کامل نشان می‌دهد:
+     https://console.melipayamak.com/api/send/shared/<کلید>
+
+   طبیعی است که همان را یک‌جا کپی و در متغیر بگذارند. آن‌وقت نشانیِ
+   نهایی دوتایی می‌شود و هر پیامک شکست می‌خورد — بی‌صدا، چون
+   اطلاع‌رسانی عمداً هیچ‌وقت جریان اصلی را نمی‌شکند. یعنی خرابی ماه‌ها
+   دیده نمی‌شود.
+
+   پس هر شکلی داده شود، تکه‌ی آخر برداشته می‌شود. */
+const cleanKey = (raw: string) =>
+  String(raw || '').trim().replace(/[/\s]+$/, '').split('/').pop() ?? ''
+
 const normMobile = (m: string) =>
   String(m || '')
     .replace(/[۰-۹]/g, d => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(d)))
@@ -112,8 +124,15 @@ export async function sendPattern(
     return { ok: false, skipped: true, message: 'ارسال پیامک خاموش است' }
   }
 
-  const apiKey = process.env.SMS_API_KEY
+  const apiKey = cleanKey(process.env.SMS_API_KEY ?? '')
   if (!apiKey) return { ok: false, skipped: true, message: 'کلید سرویس پیامک تنظیم نشده' }
+
+  /* کلیدِ ملی‌پیامک یک GUID بی‌خط‌تیره است. شکلِ دیگر یعنی احتمالاً
+     کلیدِ سرویسِ قبلی هنوز آن‌جاست. جلویش را نمی‌گیریم — شاید روزی
+     شکلش عوض شود — ولی باید در لاگ دیده شود. */
+  if (!/^[0-9a-fA-F]{32}$/.test(apiKey)) {
+    console.warn('[sms] شکلِ کلید به کلیدِ ملی‌پیامک نمی‌خورد — SMS_API_KEY را بررسی کنید')
+  }
 
   const bodyId = (await bodyIds())[key]
   if (!bodyId) {
