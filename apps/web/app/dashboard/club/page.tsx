@@ -1206,18 +1206,39 @@ export default function ClubDashboardPage() {
 
 
   // Coach actions
-  const openCoachPicker = () => {
+  /* فهرستِ مربیان از روی پروفایل‌های واقعیِ تأییدشده خوانده می‌شود.
+
+     تا امروز چهار مربیِ ساختگی هاردکد بود («استاد احمد رضایی»،
+     «حسین نوری»، …). باشگاه‌دار آن‌ها را به باشگاهش اضافه می‌کرد و
+     روی صفحه‌ی عمومیِ باشگاه هم می‌نشستند — یعنی سایت مربیانی را
+     نشان می‌داد که وجود ندارند. */
+  const openCoachPicker = async () => {
     setShowCoachPicker(true);
     setCoachSearch('');
     setLoadingCoaches(true);
-    const MOCK_COACHES: ApiCoach[] = [
-      { id: '1', firstName: 'استاد احمد', lastName: 'رضایی', verificationStatus: 'verified', city: 'تهران', bio: 'مربی ملی‌پوش با ۱۵ سال سابقه', coachProfile: { specialty: 'snooker', experience: '۱۵' } },
-      { id: '2', firstName: 'حسین', lastName: 'نوری', verificationStatus: 'verified', city: 'مشهد', bio: 'قهرمان آسیا و مربی دسته برتر', coachProfile: { specialty: 'snooker', experience: '۱۲' } },
-      { id: '3', firstName: 'مریم', lastName: 'کاظمی', verificationStatus: 'verified', city: 'اصفهان', bio: 'مربی بانوان و متخصص پاکت بیلیارد', coachProfile: { specialty: 'pocket', experience: '۸' } },
-      { id: '4', firstName: 'سینا', lastName: 'محمدی', verificationStatus: 'pending', city: 'شیراز', bio: 'مربی جوان و قهرمان لیگ برتر', coachProfile: { specialty: 'pocket', experience: '۵' } },
-    ];
-    setAvailableCoaches(MOCK_COACHES);
-    setLoadingCoaches(false);
+    try {
+      const r = await fetch('/api/profiles/coach', { cache: 'no-store' });
+      const j = await r.json().catch(() => null) as { profiles?: Record<string, unknown>[] } | null;
+      const list = (j?.profiles ?? []).map(p => {
+        const d = (p as { data?: Record<string, unknown> }).data ?? {};
+        const s = (v: unknown) => (typeof v === 'string' ? v : '');
+        return {
+          id: String((p as { id?: string }).id ?? ''),
+          firstName: s(d.firstNameFa) || s(d.name),
+          lastName: s(d.lastNameFa),
+          verificationStatus: (p as { verified?: boolean }).verified ? 'verified' : 'pending',
+          city: s(d.city),
+          bio: s(d.bio) || s(d.fullBio),
+          coachProfile: {
+            specialty: Array.isArray(d.disciplines) ? String(d.disciplines[0] ?? '') : s(d.discipline),
+            experience: s(d.experience),
+          },
+        } as ApiCoach;
+      }).filter(c => c.id && (c.firstName || c.lastName));
+      setAvailableCoaches(list);
+    } catch {
+      setAvailableCoaches([]);
+    } finally { setLoadingCoaches(false); }
   };
 
   const selectCoach = (c: ApiCoach) => {

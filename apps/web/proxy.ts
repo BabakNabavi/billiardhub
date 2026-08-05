@@ -21,6 +21,31 @@ import {
 
 /* مسیرهایی که پیش از وجود نشست صدا زده می‌شوند و نمی‌توانند
    توکن CSRF داشته باشند */
+/* ── بازگشت از درگاه پرداخت ──
+   این‌ها تنها مسیرهایی‌اند که بررسیِ **Origin** هم رویشان اجرا نمی‌شود.
+
+   چرا لازم شد: پی‌پینگ با یک POSTِ مرورگری به `returnUrl` برمی‌گردد و
+   مرورگر روی آن `Origin` دامنه‌ی درگاه را می‌گذارد. `sameSite` آن را
+   بیگانه می‌دید و با «درخواست از دامنه‌ی نامعتبر رد شد» جواب می‌داد —
+   یعنی پول از حساب کم می‌شد و رزرو هرگز قطعی نمی‌شد.
+
+   فهرستِ `CSRF_EXEMPT` این مسیرها را داشت، ولی آن فهرست فقط از لایه‌ی
+   *دوم* (تطبیق توکن) معاف می‌کرد؛ بررسیِ Origin پیش از آن اجرا می‌شد
+   و هیچ‌وقت نوبت به معافیت نمی‌رسید.
+
+   ⚠️ این معافیت امن است و بی‌دقتی نیست: هیچ‌چیزِ آمده از این درخواست‌ها
+   باور نمی‌شود. هر کدام پرداخت را سمتِ سرور از خودِ درگاه verify
+   می‌کنند، مبلغِ واقعی را با مبلغِ سفارش می‌سنجند، و اثرشان idempotent
+   است. یک درخواستِ جعلی هیچ کاری نمی‌تواند بکند. */
+const GATEWAY_CALLBACKS = [
+  '/api/payments/callback',
+  '/api/ads/campaigns/callback',
+  '/api/ads/plans/callback',
+  '/api/stories/plans/callback',
+  '/api/tournaments/callback',
+  '/api/clubs/sms/callback',
+]
+
 const CSRF_EXEMPT = [
   '/api/auth/login',
   '/api/auth/register',
@@ -80,7 +105,9 @@ export default async function proxy(req: NextRequest) {
 
   /* ── ۱) CSRF روی APIها ── */
   if (pathname.startsWith('/api/')) {
-    if (!SAFE_METHODS.has(req.method)) {
+    const fromGateway = GATEWAY_CALLBACKS.some(p => pathname.startsWith(p))
+
+    if (!SAFE_METHODS.has(req.method) && !fromGateway) {
       if (!sameSite(req)) {
         return NextResponse.json(
           { message: 'درخواست از دامنه‌ی نامعتبر رد شد' },
