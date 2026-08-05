@@ -1,6 +1,7 @@
 export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { sb, actorFromRequest, isAdmin, ownsClub } from '@/lib/finance/db';
+import { bankOfIban } from '@/lib/bank';
 
 /* داشبورد مالی باشگاه — فقط مالک همان باشگاه یا ادمین (RBAC).
    موجودی از club_accounts (کَش) و صحتش از ledger بازبینی می‌شود. */
@@ -50,8 +51,12 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string 
   const todayISO = now.toISOString().slice(0, 10);
 
   /* شماره‌ی شبا فقط به‌صورت ماسک‌شده برمی‌گردد */
-  const bk = bank.data as { iban?: string } | null;
+  const bk = bank.data as { iban?: string; bank_name?: string | null } | null;
   const maskedIban = bk?.iban ? `${bk.iban.slice(0, 6)}${'•'.repeat(Math.max(0, bk.iban.length - 10))}${bk.iban.slice(-4)}` : null;
+  /* ردیف‌هایی که پیش از اصلاحِ `syncClubSettlementAccount` ساخته شده‌اند
+     نامِ بانک ندارند. شبا خودش آن را در خود دارد، پس به‌جای «—» از
+     همان مشتق می‌شود — بدونِ دست‌زدن به داده‌ی ذخیره‌شده. */
+  const bankName = bk?.bank_name || (bk?.iban ? bankOfIban(bk.iban) : null);
 
   return NextResponse.json({
     balance: {
@@ -74,7 +79,7 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string 
       clubShare: sum(),
       reversed: -sumType('CLUB_EARNING_REVERSAL'),
     },
-    bankAccount: bank.data ? { ...(bank.data as object), iban: maskedIban } : null,
+    bankAccount: bank.data ? { ...(bank.data as object), iban: maskedIban, bank_name: bankName } : null,
     bookings: {
       today: rows.filter(r => r.bookingDate === todayISO).length,
       upcoming: rows.filter(r => String(r.bookingDate) > todayISO && r.booking_status === 'CONFIRMED').length,

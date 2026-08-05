@@ -8,7 +8,7 @@
    دسترس نیست» — همان اشتباهی که در PersonInfo رخ داده بود.
    ───────────────────────────────────────────────────────────── */
 
-import { digitsOnly, isValidCard, formatIban, isValidIban } from './bank'
+import { digitsOnly, isValidCard, formatIban, isValidIban, bankOfIban } from './bank'
 import { inquiryKey } from './inquiry-key'
 
 const CARD_TO_IBAN_URL = 'https://s.api.ir/api/sw1/CardToIban'
@@ -201,7 +201,11 @@ export async function syncClubSettlementAccount(opts: {
   await sb().from('club_bank_accounts').insert({
     club_id: clubId,
     account_holder_name: holder || 'صاحب باشگاه',
-    bank_name: opts.bankName ?? null,
+    /* نامِ بانک از خودِ شبا مشتق می‌شود اگر فراخواننده نفرستاده باشد.
+       پیش‌تر هر مسیری که آن را پاس نمی‌داد، ردیفی با نامِ بانکِ خالی
+       می‌ساخت — و در تبِ مالی «—» دیده می‌شد، در حالی که شبا از اول
+       نامِ بانک را در خودش دارد. */
+    bank_name: opts.bankName ?? bankOfIban(iban) ?? null,
     iban,
     card_number_last4: opts.cardLast4 ?? null,
     verification_status: 'VERIFIED',
