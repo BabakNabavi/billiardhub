@@ -37,7 +37,15 @@ while ((m = re.exec(doc))) {
   const nums = [...body.matchAll(/\{(\d+)\}/g)].map(x => Number(x[1]))
   const uniq = [...new Set(nums)].sort((a, b) => a - b)
   if (uniq.length && (uniq[0] !== 0 || uniq.some((n, i) => n !== i))) {
-    problems.push(`شماره‌گذاری: ${uniq.join(',')}`)
+    problems.push(`شماره‌گذاری با پرش: ${uniq.join(',')}`)
+  }
+
+  /* ...و به همان ترتیب هم در متن ظاهر شوند.
+     نمونه‌ی خودِ پنل «{0} … {1} … {2} … {3}» است — صعودی. متنی که
+     {2} را پیش از {1} دارد شماره‌گذاریِ درست دارد ولی ترتیبش
+     به‌هم‌ریخته است، و همین کافی است که رد شود. */
+  if (nums.some((n, i) => i > 0 && n < nums[i - 1])) {
+    problems.push(`ترتیبِ ظاهرشدن صعودی نیست: ${nums.join(',')}`)
   }
 
   /* نشانیِ سایت باید آخر باشد */

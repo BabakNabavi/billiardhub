@@ -49,7 +49,9 @@ export const CLUB_TEMPLATES: ClubTemplate[] = [
   {
     key: 'club_class',
     title: 'دوره یا کلاس آموزشی',
-    body: '{0} عزیز\nدوره {2} در {1} از {3} آغاز می‌شود.\nwww.billiardhub.net',
+    /* ترتیبِ جای‌گذارها عمداً صعودی است — پنل متنی که {2} را پیش از
+       {1} دارد رد می‌کند، حتی اگر شماره‌گذاری کامل باشد. */
+    body: '{0} عزیز\nدر {1} دوره {2} از {3} آغاز می‌شود.\nwww.billiardhub.net',
     fields: [
       { index: 2, label: 'عنوان دوره', placeholder: 'مقدماتی اسنوکر', maxLength: 24 },
       { index: 3, label: 'تاریخ شروع', placeholder: 'انتخاب از تقویم', type: 'jalali' },
