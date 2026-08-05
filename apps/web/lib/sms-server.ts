@@ -40,11 +40,21 @@ const SEND_URL = (key: string) => `https://console.melipayamak.com/api/send/shar
    طبیعی است که کسی آن را بی‌ضرر بداند.
 
    پس هر شکلی داده شود، تکه‌ی آخر برداشته می‌شود. */
-const cleanKey = (raw: string) =>
-  String(raw || '').trim()
+const cleanKey = (raw: string) => {
+  const key = String(raw || '').trim()
     .replace(/^["']|["']$/g, '')
     .replace(/[/\s]+$/, '')
     .split('/').pop() ?? ''
+
+  /* پنل کلید را گاهی با خط‌تیره نشان می‌دهد
+     (f616728d-bea2-…) و گاهی بدونِ آن. هر دو یک شناسه‌اند، ولی
+     سرویس فقط شکلِ بی‌خط‌تیره را می‌پذیرد.
+
+     شرطِ «نتیجه دقیقاً ۳۲ رقمِ شانزده‌شانزدهی شود» عمدی است: خط‌تیره
+     را از هر مقداری برنمی‌داریم، فقط وقتی مطمئنیم همان GUID است. */
+  const bare = key.replace(/-/g, '')
+  return /^[0-9a-fA-F]{32}$/.test(bare) ? bare : key
+}
 
 const normMobile = (m: string) =>
   String(m || '')

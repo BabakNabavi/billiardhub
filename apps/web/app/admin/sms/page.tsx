@@ -38,7 +38,7 @@ const LABEL: Record<string, { fa: string; when: string }> = {
   report_created:           { fa: '۱۴) گزارش تخلف', when: 'به شماره‌ی هشدارِ ادمین' },
 }
 
-interface KeyInfo { len: number; guid: boolean; wasUrl: boolean; quoted: boolean; padded: boolean }
+interface KeyInfo { len: number; guid: boolean; dashed: boolean; wasUrl: boolean; quoted: boolean; padded: boolean }
 interface State {
   patterns: string[]; ids: Record<string, number>
   enabled: boolean; hasKey: boolean; keyInfo: KeyInfo | null
@@ -175,6 +175,7 @@ export default function AdminSms() {
               }}>
                 {d.text}
                 {st.keyInfo.wasUrl ? ' (نشانیِ کامل داده شده بود — کلید از آخرش برداشته شد.)' : ''}
+                {st.keyInfo.dashed ? ' (کلید خط‌تیره داشت — برداشته شد.)' : ''}
               </span>
             )
           })()}

@@ -101,7 +101,11 @@ export async function GET(req: NextRequest) {
      بیرون نمی‌دهد — نه حتی چند حرفِ اولش. */
   const envKey = process.env.SMS_API_KEY ?? '';
   const trimmed = envKey.trim().replace(/^["']|["']$/g, '');
-  const key = trimmed.replace(/[/\s]+$/, '').split('/').pop() ?? '';
+  const seg = trimmed.replace(/[/\s]+$/, '').split('/').pop() ?? '';
+  /* خط‌تیره‌های GUID فقط وقتی برداشته می‌شوند که نتیجه واقعاً یک
+     شناسه‌ی ۳۲ رقمی شود — همان کاری که خودِ ارسال می‌کند. */
+  const bare = seg.replace(/-/g, '');
+  const key = /^[0-9a-fA-F]{32}$/.test(bare) ? bare : seg;
 
   return NextResponse.json({
     patterns: PATTERNS,
@@ -112,7 +116,9 @@ export async function GET(req: NextRequest) {
     keyInfo: envKey ? {
       len: key.length,
       guid: /^[0-9a-fA-F]{32}$/.test(key),
-      wasUrl: trimmed !== key,
+      /* خط‌تیره داشت و برداشته شد — نه خطا، ولی خوب است دیده شود */
+      dashed: seg !== key,
+      wasUrl: trimmed !== seg,
       /* گیومه یا فاصله‌ی چسبیده — تله‌ی همیشگیِ کپی از پنل */
       quoted: /^["']|["']$/.test(envKey.trim()),
       padded: envKey !== envKey.trim(),
