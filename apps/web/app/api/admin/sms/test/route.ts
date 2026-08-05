@@ -90,11 +90,32 @@ export async function GET(req: NextRequest) {
     }
   }
 
+  /* ── تشخیصِ کلید، بدونِ فاش‌کردنِ کلید ──
+     وقتی سرویس می‌گوید «کلید معتبر نیست»، سه حالتِ کاملاً متفاوت
+     ممکن است و از بیرون یکی به نظر می‌رسند:
+       • کلیدِ سرویسِ قبلی هنوز آن‌جاست (دیپلوی تازه نشده)
+       • کلید با گیومه یا فاصله کپی شده
+       • کلید درست است ولی خودش باطل/غیرفعال است
+
+     طول و شکل هر سه را از هم جدا می‌کند و هیچ کاراکتری از کلید
+     بیرون نمی‌دهد — نه حتی چند حرفِ اولش. */
+  const envKey = process.env.SMS_API_KEY ?? '';
+  const trimmed = envKey.trim().replace(/^["']|["']$/g, '');
+  const key = trimmed.replace(/[/\s]+$/, '').split('/').pop() ?? '';
+
   return NextResponse.json({
     patterns: PATTERNS,
     ids,
     /* فقط روشن/خاموش — نه خودِ کلید */
     enabled: process.env.SMS_NOTIFICATIONS === 'on',
-    hasKey: !!process.env.SMS_API_KEY,
+    hasKey: !!envKey,
+    keyInfo: envKey ? {
+      len: key.length,
+      guid: /^[0-9a-fA-F]{32}$/.test(key),
+      wasUrl: trimmed !== key,
+      /* گیومه یا فاصله‌ی چسبیده — تله‌ی همیشگیِ کپی از پنل */
+      quoted: /^["']|["']$/.test(envKey.trim()),
+      padded: envKey !== envKey.trim(),
+    } : null,
   }, { headers: { 'Cache-Control': 'no-store' } });
 }

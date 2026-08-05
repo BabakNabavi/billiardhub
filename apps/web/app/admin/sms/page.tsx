@@ -38,7 +38,33 @@ const LABEL: Record<string, { fa: string; when: string }> = {
   report_created:           { fa: '۱۴) گزارش تخلف', when: 'به شماره‌ی هشدارِ ادمین' },
 }
 
-interface State { patterns: string[]; ids: Record<string, number>; enabled: boolean; hasKey: boolean }
+interface KeyInfo { len: number; guid: boolean; wasUrl: boolean; quoted: boolean; padded: boolean }
+interface State {
+  patterns: string[]; ids: Record<string, number>
+  enabled: boolean; hasKey: boolean; keyInfo: KeyInfo | null
+}
+
+/* ── چرا این تشخیص هست ──
+   وقتی سرویس می‌گوید «کلید معتبر نیست»، سه علتِ کاملاً متفاوت ممکن
+   است و از بیرون یکی به نظر می‌رسند. طولِ کلید هر سه را از هم جدا
+   می‌کند — بدونِ این‌که حتی یک کاراکتر از کلید نشان داده شود. */
+function keyDiagnosis(k: KeyInfo): { tone: 'ok' | 'bad'; text: string } | null {
+  if (k.quoted) return { tone: 'bad', text: 'کلید داخلِ گیومه است. در Vercel گیومه بخشی از مقدار می‌شود — بدونِ گیومه ذخیره کنید.' }
+  if (k.len === 0) return { tone: 'bad', text: 'مقدارِ کلید تهی است.' }
+  if (k.guid) {
+    return {
+      tone: 'ok',
+      text: 'شکلِ کلید درست است (۳۲ حرف). اگر باز هم «کلید کنسول معتبر نیست» می‌آید، یعنی خودِ کلید در پنلِ ملی‌پیامک باطل یا غیرفعال است — نه اشتباهِ تایپی.',
+    }
+  }
+  if (k.len > 40) {
+    return {
+      tone: 'bad',
+      text: `کلید ${toFaDigits(k.len)} کاراکتر است، ولی کلیدِ ملی‌پیامک ۳۲ کاراکتر است. به احتمال زیاد کلیدِ سرویسِ قبلی هنوز آن‌جاست — یا مقدار عوض شده ولی هنوز ری‌دیپلوی نشده.`,
+    }
+  }
+  return { tone: 'bad', text: `کلید ${toFaDigits(k.len)} کاراکتر است، ولی باید ۳۲ کاراکترِ حروف‌وعدد باشد.` }
+}
 
 export default function AdminSms() {
   const [st, setSt] = useState<State | null>(null)
@@ -134,6 +160,24 @@ export default function AdminSms() {
         }}>
           <Flag2 ok={st.enabled} label="ارسال پیامک" on="روشن" off="خاموش — SMS_NOTIFICATIONS را on کنید" />
           <Flag2 ok={st.hasKey} label="کلید سرویس" on="تنظیم شده" off="تنظیم نشده — SMS_API_KEY را بگذارید" />
+
+          {/* «تنظیم شده» کافی نیست: کلیدِ اشتباه هم تنظیم‌شده است.
+              این خط می‌گوید کلید چه شکلی دارد — بدونِ نشان‌دادنش. */}
+          {(() => {
+            if (!st.keyInfo) return null
+            const d = keyDiagnosis(st.keyInfo)
+            if (!d) return null
+            return (
+              <span style={{
+                flex: '1 1 100%', fontSize: 11.5, lineHeight: 1.9, fontWeight: 600,
+                color: d.tone === 'ok' ? SEC : RED,
+                borderTop: `1px solid ${LINE}`, paddingTop: 9, marginTop: 2,
+              }}>
+                {d.text}
+                {st.keyInfo.wasUrl ? ' (نشانیِ کامل داده شده بود — کلید از آخرش برداشته شد.)' : ''}
+              </span>
+            )
+          })()}
         </div>
       ) : null}
 

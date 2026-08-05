@@ -35,9 +35,16 @@ const SEND_URL = (key: string) => `https://console.melipayamak.com/api/send/shar
    اطلاع‌رسانی عمداً هیچ‌وقت جریان اصلی را نمی‌شکند. یعنی خرابی ماه‌ها
    دیده نمی‌شود.
 
+   گیومه هم همین‌جا برداشته می‌شود: در فرمِ متغیرهای محیطیِ Vercel
+   گیومه بخشی از مقدار می‌شود، ولی چون در فایلِ .env معنایی ندارد،
+   طبیعی است که کسی آن را بی‌ضرر بداند.
+
    پس هر شکلی داده شود، تکه‌ی آخر برداشته می‌شود. */
 const cleanKey = (raw: string) =>
-  String(raw || '').trim().replace(/[/\s]+$/, '').split('/').pop() ?? ''
+  String(raw || '').trim()
+    .replace(/^["']|["']$/g, '')
+    .replace(/[/\s]+$/, '')
+    .split('/').pop() ?? ''
 
 const normMobile = (m: string) =>
   String(m || '')
