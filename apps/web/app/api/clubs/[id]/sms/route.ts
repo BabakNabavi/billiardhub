@@ -2,7 +2,7 @@ export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { sb, actorFromRequest, isAdmin, ownsClub, audit, clientIp } from '@/lib/finance/db';
 import { getPaymentProvider } from '@/lib/payments';
-import { CLUB_TEMPLATES, clubTemplate } from '@/lib/sms/club-templates';
+import { CLUB_TEMPLATES, clubTemplate, faJalali } from '@/lib/sms/club-templates';
 import { pricing, quote } from '@/lib/sms/club-campaign';
 import { registeredPatterns } from '@/lib/sms-server';
 
@@ -27,10 +27,15 @@ async function guard(req: NextRequest, clubId: string) {
   return { actor, clubName: (club as { name?: string }).name ?? 'باشگاه' };
 }
 
-/* مقدارهای فرم — هر کدام کوتاه و بی‌لینک.
-   لینک عمداً رد می‌شود: سرویس پیامک لینکِ داخلِ متغیر را رد می‌کند، و
-   مهم‌تر این‌که یک لینکِ دلخواه در پیامکی که از طرفِ سایت می‌رود
-   دقیقاً همان چیزی است که کلاهبرداری با آن انجام می‌شود. */
+/* مقدارهای فرم.
+
+   هیچ‌کدام متنِ آزاد نیستند و این عمدی است: سرویسِ پیامک مقدارهای
+   ممکنِ هر متغیر را از قبل می‌خواهد، و متنی که باشگاه‌دار تایپ کند
+   قابلِ اعلام نیست. جدا از آن، یک فیلدِ بی‌قید در پیامکی که از طرفِ
+   سایت می‌رود دقیقاً ابزارِ کلاهبرداری است.
+
+   تاریخ به قالبِ ثابتِ «۲۵ مرداد ۱۴۰۵» درمی‌آید — هم خواناتر، هم
+   قابلِ اعلام. */
 function cleanArgs(tplKey: string, raw: unknown): string[] | { error: string } {
   const tpl = clubTemplate(tplKey);
   if (!tpl) return { error: 'متن انتخابی معتبر نیست' };
@@ -40,11 +45,26 @@ function cleanArgs(tplKey: string, raw: unknown): string[] | { error: string } {
   for (const f of tpl.fields) {
     const v = String(arr[out.length] ?? '').trim().replace(/\s+/g, ' ');
     if (!v) return { error: `«${f.label}» را پر کنید` };
-    if (v.length > (f.maxLength ?? 40)) return { error: `«${f.label}» بیش از حد بلند است` };
-    if (/https?:|www\.|\.(ir|com|net|org)\b/i.test(v)) {
-      return { error: `در «${f.label}» نمی‌توان نشانی اینترنتی نوشت` };
+
+    if (f.type === 'select') {
+      if (!(f.options ?? []).includes(v)) return { error: `«${f.label}» از فهرست انتخاب شود` };
+      out.push(v);
+      continue;
     }
-    out.push(v);
+
+    if (f.type === 'number') {
+      const n = Number(v.replace(/[۰-۹]/g, d => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(d))).replace(/[^0-9]/g, ''));
+      if (!Number.isInteger(n) || n < (f.min ?? 1) || n > (f.max ?? 99)) {
+        return { error: `«${f.label}» باید عددی بین ${f.min ?? 1} و ${f.max ?? 99} باشد` };
+      }
+      out.push(String(n).replace(/[0-9]/g, d => '۰۱۲۳۴۵۶۷۸۹'[Number(d)]!));
+      continue;
+    }
+
+    /* jalali — فقط قالبِ خودِ تقویم پذیرفته است */
+    const fa = faJalali(v);
+    if (fa === v) return { error: `«${f.label}» را از تقویم انتخاب کنید` };
+    out.push(fa);
   }
   return out;
 }

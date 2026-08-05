@@ -19,9 +19,37 @@ export interface ClubTemplateField {
   index: number
   label: string
   placeholder: string
-  /** تاریخِ جلالی از تقویم گرفته می‌شود، نه تایپِ دستی */
-  type?: 'text' | 'jalali' | 'number'
-  maxLength?: number
+  /* هیچ فیلدی متنِ آزاد نیست.
+     سرویسِ پیامک مقدارهای ممکنِ هر متغیر را از قبل می‌خواهد، و
+     متنی که باشگاه‌دار تایپ کند قابلِ اعلام نیست. پس یا از تقویم
+     می‌آید، یا از فهرست، یا عدد است. */
+  type: 'jalali' | 'select' | 'number'
+  /** برای `select` — تنها مقدارهای مجاز */
+  options?: string[]
+  /** برای `number` — بازه‌ی مجاز */
+  min?: number
+  max?: number
+}
+
+/* ── تاریخ ──
+   تقویم `۱۴۰۵/۵/۲۵` می‌دهد؛ همان‌طور در پیامک زشت است و قالبش هم
+   قابلِ اعلام نیست. این‌جا به «۲۵ مرداد ۱۴۰۵» درمی‌آید — یک قالبِ
+   ثابت که می‌شود در تیکت اعلامش کرد. */
+const J_MONTHS = [
+  'فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور',
+  'مهر', 'آبان', 'آذر', 'دی', 'بهمن', 'اسفند',
+]
+const faDigits = (s: string | number) =>
+  String(s).replace(/[0-9]/g, d => '۰۱۲۳۴۵۶۷۸۹'[Number(d)]!)
+
+/** `۱۴۰۵/۵/۲۵` یا `1405/5/25` ← `۲۵ مرداد ۱۴۰۵` */
+export function faJalali(raw: string): string {
+  const s = String(raw ?? '').replace(/[۰-۹]/g, d => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(d)))
+  const m = s.match(/^(\d{4})\/(\d{1,2})\/(\d{1,2})$/)
+  if (!m) return String(raw ?? '')
+  const mo = Number(m[2])
+  if (mo < 1 || mo > 12) return String(raw ?? '')
+  return `${faDigits(Number(m[3]))} ${J_MONTHS[mo - 1]} ${faDigits(m[1] ?? '')}`
 }
 
 export interface ClubTemplate {
@@ -46,6 +74,7 @@ export const CLUB_TEMPLATES: ClubTemplate[] = [
       { index: 2, label: 'تاریخ برگزاری', placeholder: 'انتخاب از تقویم', type: 'jalali' },
     ],
   },
+
   {
     key: 'club_class',
     title: 'دوره یا کلاس آموزشی',
@@ -53,7 +82,17 @@ export const CLUB_TEMPLATES: ClubTemplate[] = [
        {1} دارد رد می‌کند، حتی اگر شماره‌گذاری کامل باشد. */
     body: '{0} عزیز\nدر {1} دوره {2} از {3} آغاز می‌شود.\nwww.billiardhub.net',
     fields: [
-      { index: 2, label: 'عنوان دوره', placeholder: 'مقدماتی اسنوکر', maxLength: 24 },
+      {
+        index: 2, label: 'عنوان دوره', placeholder: 'انتخاب کنید', type: 'select',
+        /* فهرست از رشته‌های خودِ سایت ساخته شده (اسنوکر، پاکت، هی‌بال)
+           به‌علاوه‌ی دوره‌هایی که به رشته وابسته نیستند. */
+        options: [
+          'مقدماتی اسنوکر', 'پیشرفته اسنوکر',
+          'مقدماتی پاکت بیلیارد', 'پیشرفته پاکت بیلیارد',
+          'مقدماتی هی‌بال', 'پیشرفته هی‌بال',
+          'آمادگی مسابقات', 'داوری', 'مربیگری',
+        ],
+      },
       { index: 3, label: 'تاریخ شروع', placeholder: 'انتخاب از تقویم', type: 'jalali' },
     ],
   },
@@ -63,7 +102,7 @@ export const CLUB_TEMPLATES: ClubTemplate[] = [
     body: '{0} عزیز\n{1} تا {2} تخفیف {3} درصدی دارد.\nwww.billiardhub.net',
     fields: [
       { index: 2, label: 'تا تاریخ', placeholder: 'انتخاب از تقویم', type: 'jalali' },
-      { index: 3, label: 'درصد تخفیف', placeholder: '۲۰', type: 'number', maxLength: 2 },
+      { index: 3, label: 'درصد تخفیف', placeholder: '۲۰', type: 'number', min: 5, max: 90 },
     ],
   },
   {
@@ -72,7 +111,10 @@ export const CLUB_TEMPLATES: ClubTemplate[] = [
     body: '{0} عزیز\n{1} در {2} {3} است.\nwww.billiardhub.net',
     fields: [
       { index: 2, label: 'تاریخ', placeholder: 'انتخاب از تقویم', type: 'jalali' },
-      { index: 3, label: 'وضعیت', placeholder: 'تعطیل', maxLength: 20 },
+      {
+        index: 3, label: 'وضعیت', placeholder: 'انتخاب کنید', type: 'select',
+        options: ['تعطیل', 'نیمه‌وقت', 'دایر', 'در حال بازسازی'],
+      },
     ],
   },
 ]

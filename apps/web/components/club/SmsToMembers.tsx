@@ -208,16 +208,23 @@ export default function SmsToMembers({ clubId }: { clubId: string }) {
                     <label style={{ display: 'block', fontSize: 12.5, fontWeight: 800, color: SEC, marginBottom: 6 }}>
                       {f.label}
                     </label>
-                    <input
-                      value={args[i] ?? ''}
-                      onChange={e => setArgs(a => a.map((x, j) => (j === i ? e.target.value : x)))}
-                      placeholder={f.placeholder} maxLength={f.maxLength ?? 40}
-                      inputMode={f.type === 'number' ? 'numeric' : undefined}
-                      style={{
-                        width: '100%', boxSizing: 'border-box', border: `1px solid ${LINE}`,
-                        borderRadius: 11, padding: '10px 12px', fontSize: 13.5,
-                        fontFamily: 'var(--font-base)', color: INK, outline: 'none', background: '#FCFBF8',
-                      }} />
+                    {/* فهرستِ بسته، نه متنِ آزاد — مقدارهای هر متغیر
+                        از قبل به سرویسِ پیامک اعلام شده‌اند. */}
+                    {f.type === 'select' ? (
+                      <select
+                        value={args[i] ?? ''}
+                        onChange={e => setArgs(a => a.map((x, j) => (j === i ? e.target.value : x)))}
+                        style={{ ...fieldStyle, cursor: 'pointer', color: args[i] ? INK : MUT }}>
+                        <option value="">{f.placeholder}</option>
+                        {(f.options ?? []).map(o => <option key={o} value={o}>{o}</option>)}
+                      </select>
+                    ) : (
+                      <input
+                        value={args[i] ?? ''}
+                        onChange={e => setArgs(a => a.map((x, j) => (j === i ? e.target.value : x)))}
+                        placeholder={f.placeholder} inputMode="numeric" maxLength={2}
+                        style={fieldStyle} />
+                    )}
                   </>
                 )}
               </div>
@@ -385,6 +392,12 @@ export default function SmsToMembers({ clubId }: { clubId: string }) {
       ) : null}
     </div>
   )
+}
+
+const fieldStyle: React.CSSProperties = {
+  width: '100%', boxSizing: 'border-box', border: `1px solid ${LINE}`,
+  borderRadius: 11, padding: '10px 12px', fontSize: 13.5,
+  fontFamily: 'var(--font-base)', color: INK, outline: 'none', background: '#FCFBF8',
 }
 
 function Row({ label, value, bold, icon }: {
