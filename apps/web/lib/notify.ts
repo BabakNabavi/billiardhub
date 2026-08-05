@@ -50,6 +50,46 @@ async function nameOf(userId: string): Promise<string> {
   return `${u.firstName ?? ''} ${u.lastName ?? ''}`.trim()
 }
 
+/* ── نقشِ حرفه‌ای ────────────────────────────────────────────────
+   خطِ دومِ پیامک، مخصوصِ هر نقش. عمداً این‌جاست نه در `lib/roles`:
+   آن فایل به کلاینت هم می‌رود و این متن‌ها فقط سمتِ سرور لازم‌اند.
+
+   «کاربر عادی» عمداً نیست — نقشی که بررسی نمی‌شود پیامکِ تأیید هم
+   ندارد. */
+/* ⚠️ هیچ‌کدام به «گرامی» ختم نمی‌شوند: خطِ اول از قبل «{نام} گرامی»
+   است و «سارا رضایی گرامی / مربی گرامی» دو بار سلام‌کردن است. */
+const ROLE_LINE: Record<string, string> = {
+  referee: 'داور ارزنده‌ی کشور',
+  coach: 'مربی ارجمند',
+  player: 'بازیکن ارجمند',
+  club_owner: 'مدیر محترم باشگاه',
+  seller: 'فروشنده‌ی محترم',
+  manufacturer: 'تولیدکننده‌ی محترم',
+  technician: 'متخصص محترم',
+}
+
+/** نقش تأیید شد — با یا بدونِ تیکِ آبی */
+export async function notifyRoleApproved(
+  userId: string, role: string, withTick: boolean,
+): Promise<void> {
+  try {
+    const phone = await phoneOf(userId)
+    if (!phone) return
+    notify(phone, SMS.roleApproved(await nameOf(userId), ROLE_LINE[role] ?? '', withTick))
+  } catch { /* اطلاع‌رسانی نباید تأیید را بشکند */ }
+}
+
+/** نقش رد شد — دلیل همیشه همراهش می‌رود */
+export async function notifyRoleRejected(
+  userId: string, role: string, reason: string,
+): Promise<void> {
+  try {
+    const phone = await phoneOf(userId)
+    if (!phone) return
+    notify(phone, SMS.roleRejected(await nameOf(userId), ROLE_LINE[role] ?? '', reason))
+  } catch { /* اطلاع‌رسانی نباید رد را بشکند */ }
+}
+
 /* ── گزارشِ تخلف ────────────────────────────────────────────────
    تا امروز گزارش فقط در جدول می‌نشست و ادمین تنها وقتی خبردار می‌شد
    که خودش سراغِ صفحه‌ی گزارش‌ها می‌رفت. برای آگهیِ کلاهبرداری، آن

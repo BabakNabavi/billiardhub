@@ -1,6 +1,7 @@
 export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { sb, actorFromRequest, audit, clientIp } from '@/lib/finance/db';
+import { notifyRoleApproved, notifyRoleRejected } from '@/lib/notify';
 import { can } from '@/lib/admin/permissions';
 
 /* بررسیِ درخواست‌های نقش توسطِ ادمین.
@@ -195,6 +196,19 @@ export async function PATCH(req: NextRequest) {
   if (error) {
     console.error('[admin/roles] update', error.message);
     return NextResponse.json({ message: 'ثبت نتیجه انجام نشد' }, { status: 500 });
+  }
+
+  /* ── خبر به کاربر ──
+     نتیجه‌ی بررسی تنها چیزی است که کاربر خودش نمی‌تواند ببیند: موقعِ
+     ثبت روی صفحه تأییدیه گرفته، ولی از تصمیمِ ادمین جز با سرزدنِ
+     دوباره خبردار نمی‌شود.
+
+     عمداً یک پیامک، نه دو: تیکِ آبی داخلِ همان پیامکِ تأیید می‌آید.
+     بی‌صداست — شکستِ پیامک نباید تأیید را برگرداند. */
+  if (action === 'approve') {
+    void notifyRoleApproved(rr.user_id, rr.role, withTick);
+  } else {
+    void notifyRoleRejected(rr.user_id, rr.role, note);
   }
 
   void audit({
