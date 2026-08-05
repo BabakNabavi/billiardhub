@@ -19,7 +19,15 @@ import { getPaymentProvider, hasRealGateway } from '@/lib/payments';
    بدونِ `probe=1` فقط تنظیمات گزارش می‌شود و هیچ درخواستی بیرون
    نمی‌رود. */
 
-const PROBE_AMOUNT = 10_000;   // تومان — فقط برای ساخت و حذف
+/* ── نردبانِ مبلغ ──
+   توکنِ آزمایشیِ پی‌پینگ هر مبلغی را نمی‌پذیرد و خطایش
+   («مبلغ تراکنش برای مشتری آزمایشی معتبر نیست») نمی‌گوید چه مبلغی
+   مجاز است. به‌جای حدس‌زدن، چند مقدارِ متعارف امتحان می‌شود تا
+   مرزش پیدا شود.
+
+   هر دستورِ ساخته‌شده بی‌درنگ حذف می‌شود و چون کسی به صفحه‌ی درگاه
+   نمی‌رود، هیچ پولی جابه‌جا نمی‌شود. */
+const PROBE_LADDER = [1_000, 2_000, 5_000, 10_000, 50_000, 100_000];
 
 export async function GET(req: NextRequest) {
   const actor = actorFromRequest(req);
@@ -48,47 +56,64 @@ export async function GET(req: NextRequest) {
     return NextResponse.json(out, { headers: { 'Cache-Control': 'no-store' } });
   }
 
-  /* ── آزمونِ زنده ── */
-  const created = await provider.createPayment({
-    paymentId: `health-${Date.now().toString(36)}`,
-    amount: PROBE_AMOUNT,
-    description: 'آزمون سلامت درگاه — بدون پرداخت',
-    callbackUrl: `${req.nextUrl.origin}/api/admin/payments/health`,
-  });
+  /* ── آزمونِ زنده ──
+     یک مبلغِ مشخص با `?amount=`، وگرنه کلِ نردبان. */
+  const one = Number(req.nextUrl.searchParams.get('amount') || 0);
+  const ladder = one > 0 ? [Math.round(one)] : PROBE_LADDER;
+  const callbackUrl = `${req.nextUrl.origin}/api/admin/payments/health`;
 
-  /* در شکست، پاسخِ خامِ درگاه هم برمی‌گردد. این مسیر فقط برای ادمین
-     باز است و پیامِ کوتاهِ درگاه («PolicyException») به‌تنهایی هیچ
-     نمی‌گوید؛ کدِ HTTP و `detail` تفاوتِ «توکن» و «دسترسی» و
-     «ترمینالِ غیرفعال» را روشن می‌کنند. */
-  out.probe = created.ok
-    ? { ok: true, message: 'درگاه پاسخ داد و دستور پرداخت ساخته شد' }
-    : {
-      ok: false,
-      message: created.message ?? 'ساخت دستور پرداخت ناموفق بود',
-      amountSent: PROBE_AMOUNT,
-      returnUrlSent: `${req.nextUrl.origin}/api/admin/payments/health`,
-      gateway: created.raw ?? null,
-    };
+  const results: Record<string, unknown>[] = [];
+  let okCount = 0;
 
-  /* دستورِ ساخته‌شده پاک می‌شود تا در گزارش‌ها نماند. اگر حذف نشد،
-     مهم نیست — دستورِ پرداخت‌نشده خودش منقضی می‌شود. */
-  if (created.ok && created.authority && selected === 'payping') {
-    try {
-      await fetch('https://api.payping.ir/v3/pay', {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${process.env.PAYPING_TOKEN ?? ''}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ paymentCode: created.authority }),
-      });
-    } catch { /* حذف نشد — دستورِ پرداخت‌نشده خودش می‌میرد */ }
+  for (const amount of ladder) {
+    const created = await provider.createPayment({
+      paymentId: `health-${Date.now().toString(36)}-${amount}`,
+      amount,
+      description: 'آزمون سلامت درگاه — بدون پرداخت',
+      callbackUrl,
+    });
+
+    /* در شکست، پاسخِ خامِ درگاه هم برمی‌گردد. این مسیر فقط برای ادمین
+       باز است و پیامِ کوتاهِ درگاه («PolicyException») به‌تنهایی هیچ
+       نمی‌گوید؛ کدِ HTTP و `metaData` علت را روشن می‌کنند. */
+    results.push(created.ok
+      ? { amount, ok: true }
+      : { amount, ok: false, message: created.message, gateway: created.raw ?? null });
+
+    /* دستورِ ساخته‌شده پاک می‌شود تا در گزارش‌ها نماند. اگر حذف نشد،
+       مهم نیست — دستورِ پرداخت‌نشده خودش منقضی می‌شود. */
+    if (created.ok && created.authority && selected === 'payping') {
+      try {
+        await fetch('https://api.payping.ir/v3/pay', {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${process.env.PAYPING_TOKEN ?? ''}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ paymentCode: created.authority }),
+        });
+      } catch { /* حذف نشد — دستورِ پرداخت‌نشده خودش می‌میرد */ }
+    }
+
+    /* دو موفقیت برای فهمیدنِ بازه کافی است؛ ادامه فقط دستورِ اضافه
+       می‌سازد. */
+    if (created.ok && ++okCount >= 2) break;
   }
+
+  const accepted = results.filter(r => r.ok).map(r => r.amount);
+  out.probe = {
+    ok: accepted.length > 0,
+    acceptedAmounts: accepted,
+    message: accepted.length
+      ? `درگاه پاسخ داد — این مبلغ‌ها پذیرفته شدند: ${accepted.join('، ')} تومان`
+      : 'هیچ مبلغی پذیرفته نشد',
+    tried: results,
+  };
 
   void audit({
     actorId: actor.id, actorRole: actor.role, action: 'PAYMENT_HEALTH_PROBE',
     entityType: 'payment_provider', entityId: provider.name,
-    newValue: { ok: created.ok },
+    newValue: { accepted },
   });
 
   return NextResponse.json(out, { headers: { 'Cache-Control': 'no-store' } });
