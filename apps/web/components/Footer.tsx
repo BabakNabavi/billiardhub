@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { MapPin, Phone, Mail, ChevronLeft } from 'lucide-react';
 import EnamadSeal from './EnamadSeal';
+import PayPingSeal from './PayPingSeal';
 
 const GOLD    = '#C7A66A';
 /* همان طلایی ولی خوانا برای متن روی پس‌زمینه‌ی روشن فوتر (۵٫۰۲:۱) */
@@ -260,8 +261,20 @@ export default function Footer() {
             در فوترِ عمومی است تا شرطِ اینماد — دیده‌شدن بدونِ ورود به
             حساب — برقرار بماند. */}
         {/* `flex-end` در چیدمانِ راست‌به‌چپ یعنی سمتِ چپ — همان‌جایی که
-            نشان‌های اعتماد در سایت‌های فارسی می‌نشینند. */}
-        <div style={{ display: 'flex', justifyContent: 'flex-end', paddingBottom: '16px' }}>
+            نشان‌های اعتماد در سایت‌های فارسی می‌نشینند.
+
+            دو نشان از پایین هم‌تراز می‌شوند نه از وسط: قدشان یکی نیست
+            (پی‌پینگ ۱۷۳ و اینماد کوتاه‌تر) و هم‌ترازیِ وسط باعث می‌شد
+            کوتاه‌تری معلق به نظر برسد. `align-items: flex-end` هر دو
+            را روی یک خطِ کف می‌نشاند.
+
+            `gap: 20px` — کمتر از آن دو نشان به هم می‌چسبند و مثل یک
+            تصویر دیده می‌شوند؛ بیشتر از آن ربطشان به هم گم می‌شود. */}
+        <div style={{
+          display: 'flex', justifyContent: 'flex-end', alignItems: 'flex-end',
+          gap: '20px', flexWrap: 'wrap', paddingBottom: '16px',
+        }}>
+          <PayPingSeal />
           <EnamadSeal />
         </div>
 

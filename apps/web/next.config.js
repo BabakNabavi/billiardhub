@@ -86,7 +86,11 @@ const nextConfig = {
               "object-src 'none'",
               "frame-ancestors 'self'",
               "form-action 'self'",
-              "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+              /* `statics.payping.ir` — نشانِ اعتمادِ پرداختِ پی‌پینگ در
+                 فوتر. برخلافِ اینماد که فقط یک تصویر است، پی‌پینگ یک
+                 اسکریپت می‌دهد که خودش تصویر و لینک را می‌سازد؛ پس
+                 هم این‌جا و هم در `img-src` لازم است. */
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://statics.payping.ir",
               "style-src 'self' 'unsafe-inline'",
               /* `trustseal.enamad.ir` — نشانِ اعتمادِ الکترونیکی در فوتر.
                  تصویرِ نشان مستقیم از سرورِ اینماد می‌آید و بدونِ این
@@ -94,7 +98,7 @@ const nextConfig = {
                  دیده می‌شود — یعنی نشان باطل می‌شود، چون اینماد دوره‌ای
                  وجودش را بررسی می‌کند. میزبانیِ محلیِ تصویر هم مجاز
                  نیست؛ باید از دامنه‌ی خودشان بیاید. */
-              "img-src 'self' data: blob: https://*.supabase.co https://trustseal.enamad.ir",
+              "img-src 'self' data: blob: https://*.supabase.co https://trustseal.enamad.ir https://statics.payping.ir",
               "media-src 'self' data: blob: https://*.supabase.co",
               "font-src 'self' data:",
               "connect-src 'self' https://*.supabase.co wss://*.supabase.co",
