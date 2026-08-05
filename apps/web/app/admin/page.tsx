@@ -16,7 +16,7 @@ import {
   Users, ShoppingBag, Trophy, Newspaper, Crown, UserCheck,
   CheckCircle, TrendingUp, Building2, Star, Megaphone, Scale, Store,
   Clapperboard, Factory, Wrench, ShieldCheck, KeyRound, Wallet,
-  CalendarDays, Flag, Package, LifeBuoy, UserPlus, Tag,
+  CalendarDays, Flag, Package, LifeBuoy, UserPlus, Tag, MessageSquare,
 } from 'lucide-react';
 
 const GOLD   = '#C7A66A';
@@ -97,6 +97,9 @@ const SECTIONS: AdminSection[] = [
       { title: 'بیلیارد مدیا', desc: 'مدیریت ویدیوها و کانال‌ها', icon: <Clapperboard size={20} />, link: '/admin/media' },
       { title: 'گزارش‌های تخلف', desc: 'بررسی گزارش کاربران درباره آگهی‌ها و محتوا', icon: <Flag size={20} />, link: '/admin/reports' },
       { title: 'قابلیت‌های پلتفرم', desc: 'روشن/خاموش کردن تعاملات اجتماعی — لایک، ری‌اکشن، پاسخ استوری و پیام خصوصی', icon: <ShieldCheck size={20} />, link: '/admin/features' },
+      /* تا پیش از این، کدِ متنِ هر الگو فقط با نوشتنِ مستقیم در
+         دیتابیس وارد می‌شد — یعنی عملاً هیچ راهی نبود. */
+      { title: 'پیامک‌های سایت', desc: 'کد متن هر الگوی پیامک و ارسال آزمایشی برای اطمینان از درستی', icon: <MessageSquare size={20} />, link: '/admin/sms' },
     ],
   },
 ];
