@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import ClubFinance from '../../../components/club/ClubFinance';
 import SmsToMembers from '../../../components/club/SmsToMembers';
+import { rejectLabel } from '../../../lib/moderation/reasons';
 import GoLive from '../../../components/club/GoLive';
 import api from '../../../lib/api';
 import ProvinceCitySelect from '../../../components/ProvinceCitySelect';
@@ -1414,16 +1415,11 @@ export default function ClubDashboardPage() {
             {selectedClub?.name} — {selectedClub?.city}
           </p>
         </div>
-        <Link href="/clubs/new" style={{
-          display: 'inline-flex', alignItems: 'center', gap: 6,
-          background: 'rgba(199,166,106,0.14)', color: '#A07840',
-          border: '1px solid rgba(199,166,106,0.42)',
-          padding: '9px 18px', borderRadius: 20,
-          fontWeight: 700, textDecoration: 'none', fontSize: 13,
-        }}>
-          <Plus size={14} />
-          باشگاه جدید
-        </Link>
+        {/* دکمه‌ی «باشگاه جدید» این‌جا نیست.
+            کسی که باشگاهی دارد تقریباً هیچ‌وقت دومی نمی‌سازد، ولی این
+            دکمه بزرگ‌ترین چیزِ بالای صفحه بود و هر بار دیده می‌شد.
+            کارتِ «هنوز باشگاهی ثبت نکردی» سرِ جایش است، پس اگر باشگاه
+            حذف شود راهِ ساختن دوباره پیدا می‌شود. */}
       </div>
 
       {/* وضعیت تأیید — هویت، مدارک و ایمیل */}
@@ -1540,7 +1536,9 @@ export default function ClubDashboardPage() {
               <b>ثبت این باشگاه تأیید نشد.</b>
               {selectedClub.rejectionReason && (
                 <div style={{ marginTop: 4, color: '#1C1B17', fontWeight: 500 }}>
-                  علت: {selectedClub.rejectionReason}
+                  {/* ادمین از فهرستِ بسته انتخاب می‌کند و کدِ انگلیسی
+                      ذخیره می‌شود؛ کاربر باید برچسبِ فارسی ببیند. */}
+                  علت: {rejectLabel(selectedClub.rejectionReason)}
                 </div>
               )}
               <div style={{ marginTop: 6, color: 'rgba(0,0,0,0.55)', fontWeight: 500 }}>

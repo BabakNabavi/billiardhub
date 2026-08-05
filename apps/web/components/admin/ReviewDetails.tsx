@@ -16,6 +16,7 @@ import { useEffect, useState } from 'react'
 import { Loader2, AlertCircle, FileText, ExternalLink, ShieldCheck, ShieldAlert, Search } from 'lucide-react'
 import { apiFetch } from '../../lib/http'
 import { toFaDigits, faBirthDate } from '../../lib/jalali'
+import { rejectLabel } from '../../lib/moderation/reasons'
 
 const INK = '#1C1B17', SEC = '#5B564B', MUT = '#8A8474', LINE = '#EAE5DA'
 const GOLD_D = '#9A6E38', FELT = '#0E7A38', RED = '#B23B2E'
@@ -340,7 +341,15 @@ export default function ReviewDetails({ type, id }: { type: ReviewType; id: stri
           <Grid>
             {Object.entries(fields)
               .filter(([, v]) => v !== null && v !== undefined && v !== '' && !(Array.isArray(v) && !v.length))
-              .map(([k, v]) => <F key={k} k={faLabel(k)} v={show(v)} />)}
+              .map(([k, v]) => (
+                <F key={k} k={faLabel(k)} v={
+                  /* این دو کدِ انگلیسی ذخیره می‌شوند، نه متن — بدونِ
+                     ترجمه، «info_incomplete» روی صفحه می‌نشست. */
+                  k === 'rejectionReason' ? rejectLabel(v)
+                    : k === 'birthDate' || k === 'birth_date' ? faBirthDate(v as string)
+                      : show(v)
+                } />
+              ))}
           </Grid>
         )}
       </Box>

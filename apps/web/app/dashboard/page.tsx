@@ -351,7 +351,7 @@ export default function DashboardPage() {
                 {notifOpen && (
                   <div className="notif-panel">
                     <div style={{ padding: '16px 18px 12px', borderBottom: '1px solid rgba(0,0,0,0.07)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                      <div style={{ fontSize: '16px', fontWeight: 800, color: '#111111' }}>اعلان‌ها</div>
+                      <div style={{ fontSize: '13.5px', fontWeight: 800, color: '#111111' }}>اعلان‌ها</div>
                       {unread > 0 && <span style={{ fontSize: '12px', color: '#ef4444', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: '20px', padding: '2px 9px', fontWeight: 700 }}>{toFa(unread)} جدید</span>}
                     </div>
                     <div style={{ maxHeight: '320px', overflowY: 'auto', padding: '8px' }}>
@@ -410,25 +410,25 @@ export default function DashboardPage() {
               <div style={{ fontSize: '12px', fontWeight: 800, color: 'rgba(0,0,0,0.45)', marginBottom: '12px' }}>
                 نقش‌های شما
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '14px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(158px, 1fr))', gap: '10px' }}>
 
                 {/* Club Owner Card */}
                 {isClubOwner && !clubLoading && (
                   myClub ? (
                     <Link href="/dashboard/club" style={{ textDecoration: 'none' }}>
                       <div style={{
-                        padding: '20px', borderRadius: '18px', cursor: 'pointer',
+                        padding: '13px 14px', borderRadius: '14px', cursor: 'pointer',
                         background: 'linear-gradient(135deg, rgba(199,166,106,0.12), rgba(199,166,106,0.04))',
                         border: '1.5px solid rgba(199,166,106,0.35)',
                         transition: 'all 0.28s cubic-bezier(0.22,1,0.36,1)',
                         boxShadow: '0 2px 12px rgba(199,166,106,0.10)',
                       }}>
-                        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '14px' }}>
-                          <div style={{ width: '44px', height: '44px', borderRadius: '14px', background: 'rgba(199,166,106,0.15)', border: '1px solid rgba(199,166,106,0.30)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '22px' }}>🏢</div>
+                        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '9px' }}>
+                          <div style={{ width: '34px', height: '34px', borderRadius: '11px', background: 'rgba(199,166,106,0.15)', border: '1px solid rgba(199,166,106,0.30)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '17px' }}>🏢</div>
                           <span style={{ fontSize: '10px', background: 'rgba(48,197,90,0.12)', color: '#166534', border: '1px solid rgba(48,197,90,0.25)', borderRadius: '20px', padding: '3px 9px', fontWeight: 700 }}>فعال</span>
                         </div>
-                        <div style={{ fontSize: '16px', fontWeight: 800, color: '#1A1A18', marginBottom: '4px' }}>مدیریت باشگاه</div>
-                        <div style={{ fontSize: '13px', color: 'rgba(0,0,0,0.42)', marginBottom: '16px' }}>{myClub.name} — {myClub.city}</div>
+                        <div style={{ fontSize: '13.5px', fontWeight: 800, color: '#1A1A18', marginBottom: '4px' }}>مدیریت باشگاه</div>
+                        <div style={{ fontSize: '13px', color: 'rgba(0,0,0,0.42)', marginBottom: '9px' }}>{myClub.name} — {myClub.city}</div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '13px', color: '#C7A66A', fontWeight: 700 }}>
                           ورود به پنل <span style={{ fontSize: '16px' }}>←</span>
                         </div>
@@ -437,17 +437,17 @@ export default function DashboardPage() {
                   ) : (
                     <Link href="/clubs/new" style={{ textDecoration: 'none' }}>
                       <div style={{
-                        padding: '20px', borderRadius: '18px', cursor: 'pointer',
+                        padding: '13px 14px', borderRadius: '14px', cursor: 'pointer',
                         background: 'linear-gradient(135deg, rgba(199,166,106,0.08), rgba(199,166,106,0.02))',
                         border: '1.5px dashed rgba(199,166,106,0.40)',
                         transition: 'all 0.28s cubic-bezier(0.22,1,0.36,1)',
                       }}>
-                        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '14px' }}>
-                          <div style={{ width: '44px', height: '44px', borderRadius: '14px', background: 'rgba(199,166,106,0.10)', border: '1px dashed rgba(199,166,106,0.35)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '22px' }}>🏢</div>
+                        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '9px' }}>
+                          <div style={{ width: '34px', height: '34px', borderRadius: '11px', background: 'rgba(199,166,106,0.10)', border: '1px dashed rgba(199,166,106,0.35)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '17px' }}>🏢</div>
                           <span style={{ fontSize: '10px', background: 'rgba(245,158,11,0.10)', color: '#92600A', border: '1px solid rgba(245,158,11,0.25)', borderRadius: '20px', padding: '3px 9px', fontWeight: 700 }}>ثبت نشده</span>
                         </div>
-                        <div style={{ fontSize: '16px', fontWeight: 800, color: '#1A1A18', marginBottom: '4px' }}>ایجاد باشگاه</div>
-                        <div style={{ fontSize: '13px', color: 'rgba(0,0,0,0.42)', marginBottom: '16px', lineHeight: 1.6 }}>
+                        <div style={{ fontSize: '13.5px', fontWeight: 800, color: '#1A1A18', marginBottom: '4px' }}>ایجاد باشگاه</div>
+                        <div style={{ fontSize: '13px', color: 'rgba(0,0,0,0.42)', marginBottom: '9px', lineHeight: 1.6 }}>
                           باشگاه خود را ثبت کنید و پنل مدیریت را فعال کنید
                         </div>
                         <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '8px 16px', background: '#C7A66A', borderRadius: '10px', fontSize: '13px', fontWeight: 700, color: '#fff' }}>
@@ -462,14 +462,14 @@ export default function DashboardPage() {
                 {isPlayer && (
                   <Link href="/dashboard/player" style={{ textDecoration: 'none' }}>
                     <div style={{
-                      padding: '20px', borderRadius: '18px', cursor: 'pointer',
+                      padding: '13px 14px', borderRadius: '14px', cursor: 'pointer',
                       background: 'linear-gradient(135deg, rgba(6,182,212,0.08), rgba(6,182,212,0.02))',
                       border: '1.5px solid rgba(6,182,212,0.25)',
                       transition: 'all 0.28s cubic-bezier(0.22,1,0.36,1)',
                     }}>
-                      <div style={{ width: '44px', height: '44px', borderRadius: '14px', background: 'rgba(6,182,212,0.10)', border: '1px solid rgba(6,182,212,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '22px', marginBottom: '14px' }}>🎱</div>
-                      <div style={{ fontSize: '16px', fontWeight: 800, color: '#1A1A18', marginBottom: '4px' }}>پروفایل بازیکن</div>
-                      <div style={{ fontSize: '13px', color: 'rgba(0,0,0,0.42)', marginBottom: '16px', lineHeight: 1.6 }}>
+                      <div style={{ width: '34px', height: '34px', borderRadius: '11px', background: 'rgba(6,182,212,0.10)', border: '1px solid rgba(6,182,212,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '17px', marginBottom: '9px' }}>🎱</div>
+                      <div style={{ fontSize: '13.5px', fontWeight: 800, color: '#1A1A18', marginBottom: '4px' }}>پروفایل بازیکن</div>
+                      <div style={{ fontSize: '13px', color: 'rgba(0,0,0,0.42)', marginBottom: '9px', lineHeight: 1.6 }}>
                         هویت، بیوگرافی، افتخارات، مسابقات و آلبوم‌های خود را کامل کنید تا در بخش بازیکنان دیده شوید
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '13px', color: '#0891b2', fontWeight: 700 }}>
@@ -483,14 +483,14 @@ export default function DashboardPage() {
                 {isCoach && (
                   <Link href="/dashboard/coach" style={{ textDecoration: 'none' }}>
                     <div style={{
-                      padding: '20px', borderRadius: '18px', cursor: 'pointer',
+                      padding: '13px 14px', borderRadius: '14px', cursor: 'pointer',
                       background: 'linear-gradient(135deg, rgba(167,139,250,0.08), rgba(167,139,250,0.02))',
                       border: '1.5px solid rgba(167,139,250,0.25)',
                       transition: 'all 0.28s cubic-bezier(0.22,1,0.36,1)',
                     }}>
-                      <div style={{ width: '44px', height: '44px', borderRadius: '14px', background: 'rgba(167,139,250,0.10)', border: '1px solid rgba(167,139,250,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '22px', marginBottom: '14px' }}>👨‍🏫</div>
-                      <div style={{ fontSize: '16px', fontWeight: 800, color: '#1A1A18', marginBottom: '4px' }}>پروفایل مربی</div>
-                      <div style={{ fontSize: '13px', color: 'rgba(0,0,0,0.42)', marginBottom: '16px', lineHeight: 1.6 }}>
+                      <div style={{ width: '34px', height: '34px', borderRadius: '11px', background: 'rgba(167,139,250,0.10)', border: '1px solid rgba(167,139,250,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '17px', marginBottom: '9px' }}>👨‍🏫</div>
+                      <div style={{ fontSize: '13.5px', fontWeight: 800, color: '#1A1A18', marginBottom: '4px' }}>پروفایل مربی</div>
+                      <div style={{ fontSize: '13px', color: 'rgba(0,0,0,0.42)', marginBottom: '9px', lineHeight: 1.6 }}>
                         {hasCoachProfile ? 'پروفایل مربیگری شما ساخته شده است — می‌توانید ویرایش کنید' : 'پروفایل مربیگری خود را بسازید و شاگردان را به خود جذب کنید'}
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '13px', color: '#7c3aed', fontWeight: 700 }}>
@@ -504,14 +504,14 @@ export default function DashboardPage() {
                 {isReferee && (
                   <Link href="/referees/dashboard" style={{ textDecoration: 'none' }}>
                     <div style={{
-                      padding: '20px', borderRadius: '18px', cursor: 'pointer',
+                      padding: '13px 14px', borderRadius: '14px', cursor: 'pointer',
                       background: 'linear-gradient(135deg, rgba(8,145,178,0.08), rgba(8,145,178,0.02))',
                       border: '1.5px solid rgba(8,145,178,0.25)',
                       transition: 'all 0.28s cubic-bezier(0.22,1,0.36,1)',
                     }}>
-                      <div style={{ width: '44px', height: '44px', borderRadius: '14px', background: 'rgba(8,145,178,0.10)', border: '1px solid rgba(8,145,178,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '22px', marginBottom: '14px' }}>🧑‍⚖️</div>
-                      <div style={{ fontSize: '16px', fontWeight: 800, color: '#1A1A18', marginBottom: '4px' }}>پروفایل داور</div>
-                      <div style={{ fontSize: '13px', color: 'rgba(0,0,0,0.42)', marginBottom: '16px', lineHeight: 1.6 }}>
+                      <div style={{ width: '34px', height: '34px', borderRadius: '11px', background: 'rgba(8,145,178,0.10)', border: '1px solid rgba(8,145,178,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '17px', marginBottom: '9px' }}>🧑‍⚖️</div>
+                      <div style={{ fontSize: '13.5px', fontWeight: 800, color: '#1A1A18', marginBottom: '4px' }}>پروفایل داور</div>
+                      <div style={{ fontSize: '13px', color: 'rgba(0,0,0,0.42)', marginBottom: '9px', lineHeight: 1.6 }}>
                         {hasRefereeProfile ? 'پروفایل داوری شما ساخته شده است — می‌توانید ویرایش کنید' : 'پروفایل داوری خود را بسازید (درجات و مدرک داوری) و استوری منتشر کنید'}
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '13px', color: '#0891b2', fontWeight: 700 }}>
@@ -525,14 +525,14 @@ export default function DashboardPage() {
                 {isSeller && (
                   <Link href="/dashboard/seller" style={{ textDecoration: 'none' }}>
                     <div style={{
-                      padding: '20px', borderRadius: '18px', cursor: 'pointer',
+                      padding: '13px 14px', borderRadius: '14px', cursor: 'pointer',
                       background: 'linear-gradient(135deg, rgba(249,115,22,0.08), rgba(249,115,22,0.02))',
                       border: '1.5px solid rgba(249,115,22,0.25)',
                       transition: 'all 0.28s cubic-bezier(0.22,1,0.36,1)',
                     }}>
-                      <div style={{ width: '44px', height: '44px', borderRadius: '14px', background: 'rgba(249,115,22,0.10)', border: '1px solid rgba(249,115,22,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '22px', marginBottom: '14px' }}>🏪</div>
-                      <div style={{ fontSize: '16px', fontWeight: 800, color: '#1A1A18', marginBottom: '4px' }}>پنل فروشگاه</div>
-                      <div style={{ fontSize: '13px', color: 'rgba(0,0,0,0.42)', marginBottom: '16px', lineHeight: 1.6 }}>
+                      <div style={{ width: '34px', height: '34px', borderRadius: '11px', background: 'rgba(249,115,22,0.10)', border: '1px solid rgba(249,115,22,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '17px', marginBottom: '9px' }}>🏪</div>
+                      <div style={{ fontSize: '13.5px', fontWeight: 800, color: '#1A1A18', marginBottom: '4px' }}>پنل فروشگاه</div>
+                      <div style={{ fontSize: '13px', color: 'rgba(0,0,0,0.42)', marginBottom: '9px', lineHeight: 1.6 }}>
                         نام، لوگو، توضیحات، راه‌های ارتباطی، استوری و گالری فروشگاه خود را تنظیم کنید
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '13px', color: '#ea580c', fontWeight: 700 }}>
@@ -546,14 +546,14 @@ export default function DashboardPage() {
                 {isTechnician && (
                   <Link href="/dashboard/technician" style={{ textDecoration: 'none' }}>
                     <div style={{
-                      padding: '20px', borderRadius: '18px', cursor: 'pointer',
+                      padding: '13px 14px', borderRadius: '14px', cursor: 'pointer',
                       background: 'linear-gradient(135deg, rgba(6,182,212,0.08), rgba(6,182,212,0.02))',
                       border: '1.5px solid rgba(6,182,212,0.25)',
                       transition: 'all 0.28s cubic-bezier(0.22,1,0.36,1)',
                     }}>
-                      <div style={{ width: '44px', height: '44px', borderRadius: '14px', background: 'rgba(6,182,212,0.10)', border: '1px solid rgba(6,182,212,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '22px', marginBottom: '14px' }}>🔧</div>
-                      <div style={{ fontSize: '16px', fontWeight: 800, color: '#1A1A18', marginBottom: '4px' }}>پنل خدمات فنی</div>
-                      <div style={{ fontSize: '13px', color: 'rgba(0,0,0,0.42)', marginBottom: '16px', lineHeight: 1.6 }}>
+                      <div style={{ width: '34px', height: '34px', borderRadius: '11px', background: 'rgba(6,182,212,0.10)', border: '1px solid rgba(6,182,212,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '17px', marginBottom: '9px' }}>🔧</div>
+                      <div style={{ fontSize: '13.5px', fontWeight: 800, color: '#1A1A18', marginBottom: '4px' }}>پنل خدمات فنی</div>
+                      <div style={{ fontSize: '13px', color: 'rgba(0,0,0,0.42)', marginBottom: '9px', lineHeight: 1.6 }}>
                         تخصص، خدمات، پروژه‌ها و آلبوم‌های کاری خود را تکمیل کنید تا در دایرکتوری دیده شوید
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '13px', color: '#0891b2', fontWeight: 700 }}>
@@ -567,14 +567,14 @@ export default function DashboardPage() {
                 {isManufacturer && (
                   <Link href="/dashboard/manufacturer" style={{ textDecoration: 'none' }}>
                     <div style={{
-                      padding: '20px', borderRadius: '18px', cursor: 'pointer',
+                      padding: '13px 14px', borderRadius: '14px', cursor: 'pointer',
                       background: 'linear-gradient(135deg, rgba(160,120,64,0.08), rgba(160,120,64,0.02))',
                       border: '1.5px solid rgba(160,120,64,0.25)',
                       transition: 'all 0.28s cubic-bezier(0.22,1,0.36,1)',
                     }}>
-                      <div style={{ width: '44px', height: '44px', borderRadius: '14px', background: 'rgba(160,120,64,0.10)', border: '1px solid rgba(160,120,64,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '22px', marginBottom: '14px' }}>🏭</div>
-                      <div style={{ fontSize: '16px', fontWeight: 800, color: '#1A1A18', marginBottom: '4px' }}>پنل تولیدکننده</div>
-                      <div style={{ fontSize: '13px', color: 'rgba(0,0,0,0.42)', marginBottom: '16px', lineHeight: 1.6 }}>
+                      <div style={{ width: '34px', height: '34px', borderRadius: '11px', background: 'rgba(160,120,64,0.10)', border: '1px solid rgba(160,120,64,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '17px', marginBottom: '9px' }}>🏭</div>
+                      <div style={{ fontSize: '13.5px', fontWeight: 800, color: '#1A1A18', marginBottom: '4px' }}>پنل تولیدکننده</div>
+                      <div style={{ fontSize: '13px', color: 'rgba(0,0,0,0.42)', marginBottom: '9px', lineHeight: 1.6 }}>
                         هویت کارخانه، محصولات و راه‌های ارتباطی خود را کامل کنید تا در بخش تولیدکنندگان دیده شوید
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '13px', color: '#A07840', fontWeight: 700 }}>
@@ -586,10 +586,10 @@ export default function DashboardPage() {
 
                 {/* Add / manage roles */}
                 <Link href="/profile/role" style={{ textDecoration: 'none' }}>
-                  <div style={{ padding: '20px', borderRadius: '18px', cursor: 'pointer', background: 'rgba(0,0,0,0.015)', border: '1.5px dashed rgba(0,0,0,0.14)', height: '100%', display: 'flex', flexDirection: 'column', transition: 'all 0.28s cubic-bezier(0.22,1,0.36,1)' }}>
-                    <div style={{ width: '44px', height: '44px', borderRadius: '14px', background: 'rgba(0,0,0,0.04)', border: '1px dashed rgba(0,0,0,0.16)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '22px', marginBottom: '14px' }}>➕</div>
-                    <div style={{ fontSize: '16px', fontWeight: 800, color: '#1A1A18', marginBottom: '4px' }}>افزودن نقش جدید</div>
-                    <div style={{ fontSize: '13px', color: 'rgba(0,0,0,0.42)', marginBottom: '16px', lineHeight: 1.6 }}>نقش دیگری (مثلاً تولیدکننده، فروشنده، داور) به حساب خود اضافه کنید</div>
+                  <div style={{ padding: '13px 14px', borderRadius: '14px', cursor: 'pointer', background: 'rgba(0,0,0,0.015)', border: '1.5px dashed rgba(0,0,0,0.14)', height: '100%', display: 'flex', flexDirection: 'column', transition: 'all 0.28s cubic-bezier(0.22,1,0.36,1)' }}>
+                    <div style={{ width: '34px', height: '34px', borderRadius: '11px', background: 'rgba(0,0,0,0.04)', border: '1px dashed rgba(0,0,0,0.16)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '17px', marginBottom: '9px' }}>➕</div>
+                    <div style={{ fontSize: '13.5px', fontWeight: 800, color: '#1A1A18', marginBottom: '4px' }}>افزودن نقش جدید</div>
+                    <div style={{ fontSize: '13px', color: 'rgba(0,0,0,0.42)', marginBottom: '9px', lineHeight: 1.6 }}>نقش دیگری (مثلاً تولیدکننده، فروشنده، داور) به حساب خود اضافه کنید</div>
                     <div style={{ marginTop: 'auto', display: 'flex', alignItems: 'center', gap: '5px', fontSize: '13px', color: '#111111', fontWeight: 700 }}>مدیریت نقش‌ها <span style={{ fontSize: '16px' }}>←</span></div>
                   </div>
                 </Link>
@@ -619,7 +619,7 @@ export default function DashboardPage() {
                       { href: '/coaches', icon: <Trophy size={20} />, label: 'مربیان', color: '#f59e0b' },
                     ].map((a, i) => (
                       <Link key={i} href={a.href} className="quick-action">
-                        <div style={{ width: '44px', height: '44px', borderRadius: '14px', background: `${a.color}12`, border: `1px solid ${a.color}22`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: a.color }}>
+                        <div style={{ width: '34px', height: '34px', borderRadius: '11px', background: `${a.color}12`, border: `1px solid ${a.color}22`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: a.color }}>
                           {a.icon}
                         </div>
                         <span style={{ fontSize: '13px', color: 'rgba(0,0,0,0.50)', fontWeight: 600, textAlign: 'center', lineHeight: 1.3 }}>{a.label}</span>
@@ -649,7 +649,7 @@ export default function DashboardPage() {
                         }[reg.status];
                         return (
                           <div key={reg.id} className="booking-row">
-                            <div style={{ width: '42px', height: '42px', borderRadius: '12px', background: statusCfg.bg, border: `1px solid ${statusCfg.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '22px', flexShrink: 0 }}>🏆</div>
+                            <div style={{ width: '42px', height: '42px', borderRadius: '12px', background: statusCfg.bg, border: `1px solid ${statusCfg.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '17px', flexShrink: 0 }}>🏆</div>
                             <div style={{ flex: 1, minWidth: 0 }}>
                               <div style={{ fontSize: '15px', fontWeight: 700, color: '#111111', marginBottom: '3px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{reg.tournamentName}</div>
                               <div style={{ fontSize: '12px', color: 'rgba(0,0,0,0.38)' }}>{reg.registeredAt}</div>
@@ -723,8 +723,8 @@ export default function DashboardPage() {
                     <span style={{ background: 'linear-gradient(180deg,#f59e0b,#ef4444)' }} />
                     مسابقه پیش رو
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '14px' }}>
-                    <div style={{ width: '44px', height: '44px', borderRadius: '14px', background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px', flexShrink: 0 }}>🏆</div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '9px' }}>
+                    <div style={{ width: '34px', height: '34px', borderRadius: '11px', background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px', flexShrink: 0 }}>🏆</div>
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ fontSize: '15px', fontWeight: 700, color: '#111111', marginBottom: '3px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{upcomingTournament.name}</div>
                       <div style={{ fontSize: '13px', color: 'rgba(0,0,0,0.42)' }}>{upcomingTournament.date} · {upcomingTournament.clubName}</div>
@@ -748,7 +748,7 @@ export default function DashboardPage() {
                     <span style={{ background: 'linear-gradient(135deg,#C7A66A,#A07840)' }} />
                     تکمیل پروفایل
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '14px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '9px' }}>
                     <Ring value={72} size={52} stroke={5} color="#06b6d4" label />
                     <div>
                       <div style={{ fontSize: '17px', fontWeight: 800, color: '#111111', marginBottom: '4px' }}>۷۲٪ تکمیل شده</div>

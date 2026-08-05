@@ -7,6 +7,7 @@ import api from '../../../lib/api';
 import { useAuthStore } from '../../../store/auth.store';
 import AuthGuard from '../../../components/AuthGuard';
 import CancellationPolicy from '../../../components/booking/CancellationPolicy';
+import AlertDialog from '../../../components/ui/AlertDialog';
 import { surchargeOf, extraPlayers, playerMultiplier } from '../../../lib/finance/pricing';
 import { sortTables, tableTypeRank } from '../../../lib/tables/order';
 import { closureState, isDateClosed, closedHours, closureLabel, type ClosureState } from '../../../lib/booking/closure';
@@ -467,13 +468,11 @@ function BookingContent() {
 
         <div style={{maxWidth:'720px',margin:'0 auto',padding:'clamp(20px,4vw,36px) clamp(16px,3vw,24px)'}}>
 
-          {error && (
-            <div style={{display:'flex',alignItems:'center',gap:'10px',padding:'13px 16px',background:'rgba(239,68,68,0.08)',border:'1px solid rgba(239,68,68,0.2)',borderRadius:'12px',marginBottom:'18px',animation:'fadeUp 0.3s ease both'}}>
-              <AlertCircle size={15} style={{color:'#ef4444',flexShrink:0}}/>
-              <span style={{fontSize: '15px',color:'#fca5a5',flex:1}}>{error}</span>
-              <button onClick={()=>setError('')} style={{background:'none',border:'none',cursor:'pointer',color:'rgba(239,68,68,0.5)',padding:0,display:'flex'}}><X size={13}/></button>
-            </div>
-          )}
+          {/* ── خطا در پنجره، نه در نوارِ بالای صفحه ──
+              نوارِ قبلی این‌جا بود، ولی دکمه‌ی پرداخت پایینِ صفحه است.
+              کاربر دکمه را می‌زد، صفحه تکان نمی‌خورد، و علتش بیرون از
+              دید ظاهر می‌شد. */}
+          <AlertDialog open={!!error} onClose={() => setError('')} message={error} />
 
           {/* ── قفلِ جزئی ──
               رزرو باز است ولی بعضی روزها یا ساعت‌ها بسته‌اند. بدونِ این

@@ -27,7 +27,7 @@ const BASE = 'https://api.payping.ir'
 
 interface PayPingError {
   detail?: string; title?: string
-  metaData?: { code?: number; message?: string }
+  metaData?: { code?: number; message?: string; errors?: { message?: string }[] }
 }
 
 export class PayPingProvider implements PaymentProvider {
@@ -157,7 +157,31 @@ export class PayPingProvider implements PaymentProvider {
   }
 }
 
-/* پیامِ خطای پی‌پینگ در چند جای مختلف می‌آید */
+/* ── پیامِ خطای پی‌پینگ ──
+   در چند جای مختلف می‌آید و ترتیب مهم است. `metaData.errors[].message`
+   متنِ فارسی و دقیق است («مبلغ تراکنش برای مشتری آزمایشی معتبر
+   نیست»)، ولی `title` یک نامِ فنیِ انگلیسی است («PolicyException»).
+
+   پیش‌تر `errors` خوانده نمی‌شد، پس همان «PolicyException» تا صفحه‌ی
+   کاربر می‌رفت — که نه فارسی است، نه چیزی می‌گوید، نه راهی نشان
+   می‌دهد. */
 function errText(j: PayPingError | null): string {
-  return String(j?.metaData?.message || j?.detail || j?.title || '').trim()
+  const list = (j?.metaData?.errors ?? [])
+    .map(e => String(e?.message ?? '').trim())
+    .filter(Boolean)
+  if (list.length) return list.join(' · ')
+
+  const m = String(j?.metaData?.message || j?.detail || '').trim()
+  if (m) return m
+
+  /* آخرین چاره: نامِ فنی. تنها چیزی که مانده، ولی به کاربر نشان
+     دادنش بی‌فایده است — پس به فارسی ترجمه‌اش می‌کنیم. */
+  const title = String(j?.title ?? '').trim()
+  return TITLE_FA[title] ?? (title ? 'درگاه پرداخت این درخواست را نپذیرفت' : '')
+}
+
+const TITLE_FA: Record<string, string> = {
+  PolicyException: 'درگاه پرداخت این درخواست را نپذیرفت',
+  ValidationException: 'اطلاعات پرداخت مورد قبول درگاه نبود',
+  UnauthorizedException: 'دسترسی به درگاه پرداخت تأیید نشد',
 }
