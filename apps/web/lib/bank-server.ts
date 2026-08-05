@@ -9,6 +9,7 @@
    ───────────────────────────────────────────────────────────── */
 
 import { digitsOnly, isValidCard, formatIban, isValidIban } from './bank'
+import { inquiryKey } from './inquiry-key'
 
 const CARD_TO_IBAN_URL = 'https://s.api.ir/api/sw1/CardToIban'
 const CARD_MATCH_URL   = 'https://s.api.ir/api/sw1/CardMatch'
@@ -38,7 +39,7 @@ export async function cardToIban(card: string): Promise<CardToIbanResult> {
   if (cardNumber.length !== 16) return { ok: false, message: 'شماره کارت باید ۱۶ رقم باشد' }
   if (!isValidCard(cardNumber)) return { ok: false, message: 'شماره کارت معتبر نیست' }
 
-  const key = process.env.SMS_API_KEY
+  const key = inquiryKey()
   if (!key) return { ok: false, unavailable: true, message: 'سرویس استعلام بانکی پیکربندی نشده است' }
 
   let r: Response
@@ -104,7 +105,7 @@ export interface MatchResult {
 interface MatchEnvelope { success?: boolean; code?: number; message?: string | null; data?: boolean | null }
 
 async function callMatch(url: string, body: Record<string, string>, what: string): Promise<MatchResult> {
-  const key = process.env.SMS_API_KEY
+  const key = inquiryKey()
   if (!key) return { ok: false, unavailable: true, message: 'سرویس استعلام بانکی پیکربندی نشده است' }
 
   let r: Response

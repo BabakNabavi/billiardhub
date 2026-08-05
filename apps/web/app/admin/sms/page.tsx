@@ -48,6 +48,7 @@ interface KeyInfo { len: number; guid: boolean; dashed: boolean; wasUrl: boolean
 interface State {
   patterns: string[]; ids: Record<string, number>
   enabled: boolean; hasKey: boolean; keyInfo: KeyInfo | null
+  inquiry?: { set: boolean; wrongKey: boolean }
 }
 
 /* ── چرا این تشخیص هست ──
@@ -208,6 +209,33 @@ export default function AdminSms() {
           مقدارها ساختگی‌اند («کاربر آزمایشی»، «باشگاه نمونه») — هیچ داده‌ی واقعی فرستاده نمی‌شود.
         </span>
       </div>
+
+      {/* ── سرویس‌های استعلام ──
+          کلیدشان جداست. اگر کلیدِ ملی‌پیامک اشتباهی در جایشان بنشیند،
+          شش سرویس با هم می‌افتند — کد ورود، شاهکار، استعلام بانکی،
+          جواز کسب، کد پستی و ایمیل. و چون پیامک درست کار می‌کند،
+          هیچ نشانه‌ای نیست. پس این هشدار عمداً بزرگ و قرمز است. */}
+      {st?.inquiry && !st.inquiry.set ? (
+        <div style={{
+          border: `1px solid rgba(178,59,46,0.3)`, background: 'rgba(178,59,46,0.06)',
+          borderRadius: 14, padding: '13px 16px', marginBottom: 16,
+          fontSize: 12.5, color: RED, lineHeight: 2,
+        }}>
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center', fontWeight: 900, marginBottom: 5 }}>
+            <AlertCircle size={16} /> سرویس‌های استعلام کار نمی‌کنند
+          </div>
+          {st.inquiry.wrongKey
+            ? <>کلیدِ ملی‌پیامک در <code>SMS_API_KEY</code> نشسته است. آن متغیر مالِ سرویسِ
+              استعلام (s.api.ir) است، نه پیامک.<br />
+              کلیدِ s.api.ir را در <code>SAPIR_API_KEY</code> بگذارید و
+              کلیدِ ملی‌پیامک را در <code>MELIPAYAMAK_KEY</code>.</>
+            : <>کلیدِ سرویسِ استعلام تنظیم نشده. آن را در <code>SAPIR_API_KEY</code> بگذارید.</>}
+          <div style={{ marginTop: 6, fontWeight: 800 }}>
+            تا آن موقع این‌ها کار نمی‌کنند: کد ورود و ثبت‌نام · احراز هویت (شاهکار) ·
+            استعلام بانکی · جواز کسب · کد پستی · اعتبارسنجی ایمیل
+          </div>
+        </div>
+      ) : null}
 
       {err ? (
         <div style={{

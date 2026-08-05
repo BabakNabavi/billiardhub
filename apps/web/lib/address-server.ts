@@ -9,6 +9,8 @@
    «بعداً دوباره امتحان کن».
    ───────────────────────────────────────────────────────────── */
 
+import { inquiryKey } from './inquiry-key'
+
 const POSTAL_CODE_URL = 'https://s.api.ir/api/sw1/PostalCodePro'
 
 export interface PostalAddress {
@@ -88,7 +90,7 @@ export async function lookupPostalCode(raw: string): Promise<PostalCodeResult> {
     return { ok: false, message: 'کد پستی باید ۱۰ رقم باشد' }
   }
 
-  const key = process.env.SMS_API_KEY
+  const key = inquiryKey()
   if (!key) return { ok: false, unavailable: true, message: 'سرویس استعلام کد پستی پیکربندی نشده است' }
 
   let r: Response

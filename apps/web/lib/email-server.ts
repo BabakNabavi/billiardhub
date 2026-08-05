@@ -10,6 +10,8 @@
    هر ایمیل الکی تأیید می‌شود.
    ───────────────────────────────────────────────────────────── */
 
+import { inquiryKey } from './inquiry-key'
+
 const CHECK_URL = 'https://s.api.ir/api/sw1/CheckEmail'
 
 /* ساده و سخت‌گیرانه؛ فرم کلاینت هم همین را چک می‌کند */
@@ -30,7 +32,7 @@ export async function checkEmail(email: string): Promise<EmailCheck> {
   const e = normalizeEmail(email)
   if (!EMAIL_RE.test(e)) return { ok: true, valid: false, message: 'نشانی ایمیل معتبر نیست' }
 
-  const key = process.env.SMS_API_KEY
+  const key = inquiryKey()
   /* بدون کلید نمی‌شود استعلام گرفت — و «تأیید الکی» بدترین حالت است */
   if (!key) return { ok: false, unavailable: true, message: 'سرویس اعتبارسنجی ایمیل پیکربندی نشده است' }
 

@@ -42,7 +42,7 @@ export default function PayPingSeal() {
     const s = document.createElement('script')
     s.src = 'https://statics.payping.ir/trust-v3.js'
     s.setAttribute('theme', 'dark')   // لوگوی سرمه‌ای — روی فوترِ روشن خواناست
-    s.setAttribute('size', 'lg')
+    s.setAttribute('size', 'sm')      // ۶۴×۷۷ — هم‌اندازه‌ی اینماد
     s.async = true
     host.appendChild(s)
   }, [])

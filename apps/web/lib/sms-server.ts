@@ -72,6 +72,22 @@ export interface SmsResult {
 /** آیا ارسال پیامک اطلاع‌رسانی روشن است؟ */
 export const smsEnabled = () => process.env.SMS_NOTIFICATIONS === 'on'
 
+/* ── کلیدِ ملی‌پیامک ──
+   متغیرِ خودش را دارد. پیش‌تر `SMS_API_KEY` را می‌خواند — همان متغیری
+   که شش سرویسِ استعلامِ s.api.ir هم از آن می‌خوانند (کد ورود، شاهکار،
+   بانک، جواز، کد پستی، ایمیل). وقتی مقدارش برای ملی‌پیامک عوض شد،
+   هر شش‌تا با هم افتادند و چون پیامک درست کار می‌کرد، هیچ نشانه‌ای
+   نبود که مشکل از کلید است.
+
+   `SMS_API_KEY` فقط وقتی پذیرفته می‌شود که شکلش به کلیدِ ملی‌پیامک
+   بخورد — برای دوره‌ی گذار، تا `MELIPAYAMAK_KEY` تنظیم شود. */
+export function melipayamakKey(): string {
+  const explicit = cleanKey(process.env.MELIPAYAMAK_KEY ?? '')
+  if (explicit) return explicit
+  const legacy = cleanKey(process.env.SMS_API_KEY ?? '')
+  return /^[0-9a-fA-F]{32}$/.test(legacy) ? legacy : ''
+}
+
 /* ── الگوها ──
    کلیدها با همان نام‌هایی که در `docs/sms-patterns.md` آمده‌اند. */
 export const PATTERNS = [
@@ -157,15 +173,8 @@ export async function sendPattern(
     return { ok: false, skipped: true, message: 'ارسال پیامک خاموش است' }
   }
 
-  const apiKey = cleanKey(process.env.SMS_API_KEY ?? '')
+  const apiKey = melipayamakKey()
   if (!apiKey) return { ok: false, skipped: true, message: 'کلید سرویس پیامک تنظیم نشده' }
-
-  /* کلیدِ ملی‌پیامک یک GUID بی‌خط‌تیره است. شکلِ دیگر یعنی احتمالاً
-     کلیدِ سرویسِ قبلی هنوز آن‌جاست. جلویش را نمی‌گیریم — شاید روزی
-     شکلش عوض شود — ولی باید در لاگ دیده شود. */
-  if (!/^[0-9a-fA-F]{32}$/.test(apiKey)) {
-    console.warn('[sms] شکلِ کلید به کلیدِ ملی‌پیامک نمی‌خورد — SMS_API_KEY را بررسی کنید')
-  }
 
   const bodyId = (await bodyIds())[key]
   if (!bodyId) {

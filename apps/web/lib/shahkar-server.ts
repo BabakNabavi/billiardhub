@@ -1,4 +1,5 @@
 import { wasOtpVerified } from './otp-server'
+import { inquiryKey } from './inquiry-key'
 
 /* احراز هویت شاهکار — تطبیق «کد ملی ↔ شماره موبایل» از سامانه‌ی شاهکار
    (s.api.ir / ShahkarPro). فقط برای شماره‌ای که کدش تازه تأیید شده مجاز است. */
@@ -31,7 +32,7 @@ export async function verifyPerson(
     return { ok: false, message: 'ابتدا شماره را با کد پیامکی تأیید کنید' }
   }
 
-  const key = process.env.SMS_API_KEY
+  const key = inquiryKey()
   if (!key) return { ok: true, match: true }
 
   try {
@@ -86,7 +87,7 @@ export async function verifyIdentity(
     return { ok: false, message: 'ابتدا شماره را با کد پیامکی تأیید کنید' }
   }
 
-  const key = process.env.SMS_API_KEY
+  const key = inquiryKey()
   if (!key) return { ok: true, match: true }   // محیط توسعه بدون کلید ⇒ رد نکن
 
   try {

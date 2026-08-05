@@ -7,6 +7,7 @@
    ───────────────────────────────────────────────────────────── */
 
 import { toJalali } from './jalali'
+import { inquiryKey } from './inquiry-key'
 
 const LICENSE_URL = 'https://s.api.ir/api/sw1/License'
 
@@ -54,7 +55,7 @@ export async function lookupLicense(trackingCode: string): Promise<LicenseResult
   const code = String(trackingCode ?? '').trim()
   if (!code) return { ok: false, message: 'کد پیگیری مجوز را وارد کنید' }
 
-  const key = process.env.SMS_API_KEY
+  const key = inquiryKey()
   if (!key) return { ok: false, unavailable: true, message: 'سرویس استعلام مجوز پیکربندی نشده است' }
 
   let r: Response

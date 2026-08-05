@@ -2,6 +2,7 @@ export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { sb, actorFromRequest, isAdmin, audit } from '@/lib/finance/db';
 import { PATTERNS, sendPattern, invalidateSmsCache, type PatternKey } from '@/lib/sms-server';
+import { inquiryKeyState } from '@/lib/inquiry-key';
 
 /* ارسال آزمایشیِ یک الگوی پیامک.
 
@@ -105,7 +106,7 @@ export async function GET(req: NextRequest) {
 
      طول و شکل هر سه را از هم جدا می‌کند و هیچ کاراکتری از کلید
      بیرون نمی‌دهد — نه حتی چند حرفِ اولش. */
-  const envKey = process.env.SMS_API_KEY ?? '';
+  const envKey = process.env.MELIPAYAMAK_KEY || process.env.SMS_API_KEY || '';
   const trimmed = envKey.trim().replace(/^["']|["']$/g, '');
   const seg = trimmed.replace(/[/\s]+$/, '').split('/').pop() ?? '';
   /* خط‌تیره‌های GUID فقط وقتی برداشته می‌شوند که نتیجه واقعاً یک
@@ -119,6 +120,11 @@ export async function GET(req: NextRequest) {
     /* فقط روشن/خاموش — نه خودِ کلید */
     enabled: process.env.SMS_NOTIFICATIONS === 'on',
     hasKey: !!envKey,
+    /* ── سرویس‌های استعلام ──
+       کلیدِ جدایی دارند و اگر کلیدِ ملی‌پیامک اشتباهی در جایشان
+       بنشیند، شش سرویس با هم می‌افتند — از جمله کد ورود. یک‌بار
+       همین شد و هیچ‌جا دیده نمی‌شد؛ حالا این‌جا دیده می‌شود. */
+    inquiry: inquiryKeyState(),
     keyInfo: envKey ? {
       len: key.length,
       guid: /^[0-9a-fA-F]{32}$/.test(key),

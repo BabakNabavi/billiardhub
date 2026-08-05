@@ -1,4 +1,5 @@
 import { createHmac } from 'crypto'
+import { inquiryKey } from './inquiry-key'
 import { writeJson, readJsonFresh, safeKey } from './social-server'
 import { hasAssignedPrefix, INVALID_MOBILE_MESSAGE } from './auth/phone'
 
@@ -62,7 +63,7 @@ export async function sendOtp(mobile: string): Promise<{ ok: boolean; message?: 
   const code = String(Math.floor(10000 + Math.random() * 90000))   // ۵ رقمی
   await writeJson(otpPath(m), { hash: hashCode(code), at: now, tries: 0 })
 
-  const key = process.env.SMS_API_KEY
+  const key = inquiryKey()
   if (!key) {
     /* پیش‌تر این‌جا `ok: true` برمی‌گشت — یعنی کلید تنظیم نبود، هیچ
        پیامکی نمی‌رفت، ولی همه‌ی لایه‌های بالاتر «ارسال شد» می‌دیدند و
