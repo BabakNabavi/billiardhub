@@ -61,6 +61,34 @@ export function faDate(input: string | Date | null | undefined): string {
   return `${toFaDigits(jd)} ${J_MONTHS[jm - 1]} ${toFaDigits(jy)}`
 }
 
+/* ── تاریخ تولد ──
+   دو قالب در دیتابیس هست و هر دو معتبرند:
+     «۱۳۶۳/۶/۲»   — از تقویمِ سایت، همان شمسی
+     «1984-08-24» — میلادی، از مسیرهای قدیمی و از استعلامِ ثبت‌احوال
+
+   `faDate` دومی را درست می‌خواند ولی اولی را هم میلادی فرض می‌کند و
+   نتیجه‌اش بی‌معنی می‌شود (سالِ ۱۳۶۳ میلادی!). این تابع اول تشخیص
+   می‌دهد کدام است.
+
+   مرزِ ۱۷۰۰ دلخواه نیست: سالِ شمسی هرگز به آن نمی‌رسد و سالِ میلادیِ
+   یک تاریخِ تولد هرگز کمتر از آن نیست. */
+export function faBirthDate(input: string | null | undefined): string {
+  const s = String(input ?? '').trim()
+  if (!s) return '—'
+
+  const j = s.replace(/[۰-۹]/g, d => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(d)))
+    .match(/^(\d{3,4})[/-](\d{1,2})[/-](\d{1,2})$/)
+  if (j) {
+    const [y, m, d] = [Number(j[1]), Number(j[2]), Number(j[3])]
+    if (y < 1700) {
+      /* از قبل شمسی است — فقط خوانا می‌شود */
+      if (m < 1 || m > 12) return s
+      return `${toFaDigits(d)} ${J_MONTHS[m - 1]} ${toFaDigits(y)}`
+    }
+  }
+  return faDate(s)
+}
+
 /** «پنج‌شنبه، ۸ مرداد ۱۴۰۵» */
 export function faDateLong(input: string | Date | null | undefined): string {
   if (!input) return '—'

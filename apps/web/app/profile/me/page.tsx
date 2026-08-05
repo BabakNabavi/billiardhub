@@ -6,6 +6,7 @@ import ProvinceCitySelect from '../../../components/ProvinceCitySelect'
 import { useAuthStore } from '../../../store/auth.store'
 import ClubPicker from '../../../components/ClubPicker'
 import { csrfToken, apiFetch } from '../../../lib/http'
+import { faBirthDate } from '../../../lib/jalali'
 import VerificationBadges from '../../../components/VerificationBadges'
 import ChangePhone from '../../../components/auth/ChangePhone'
 import ChangePassword from '../../../components/auth/ChangePassword'
@@ -535,7 +536,10 @@ export default function ProfileMePage() {
                   <input value={toFa(profile.nationalId ?? '—')} disabled style={{ ...lockedStyle, direction: 'ltr', textAlign: 'right' }} />
                 </Field>
                 <Field label="تاریخ تولد">
-                  <input value={toFa(profile.birthDate ?? '—')} disabled style={{ ...lockedStyle, direction: 'ltr', textAlign: 'right' }} />
+                  {/* حساب‌های قدیمی تاریخِ تولد را میلادی ذخیره کرده‌اند
+                      (از استعلامِ ثبت‌احوال). `faBirthDate` هر دو قالب را
+                      شمسی نشان می‌دهد؛ خودِ مقدار دست نمی‌خورد. */}
+                  <input value={faBirthDate(profile.birthDate)} disabled style={lockedStyle} />
                 </Field>
               </div>
 

@@ -377,9 +377,8 @@ export default function ClubDashboardPage() {
   const [licDocName, setLicDocName] = useState('');
   const [licDocMsg, setLicDocMsg] = useState<{ ok: boolean; text: string } | null>(null);
   const [needsIdentity, setNeedsIdentity] = useState(false);
-  /* استعلام جواز کسب */
-  const [licBusy, setLicBusy] = useState(false);
-  const [licMsg, setLicMsg] = useState<{ ok: boolean; text: string } | null>(null);
+  /* استعلامِ جواز از این‌جا برداشته شد — کارِ ادمین است، نه صاحبِ
+     باشگاه. توضیحش کنارِ بخشِ بارگذاریِ جواز آمده. */
   const [tablePhotoDataUrl, setTablePhotoDataUrl] = useState('');
   const [editingTableId, setEditingTableId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState({
@@ -986,29 +985,6 @@ export default function ClubDashboardPage() {
     } catch {
       setLicDocMsg({ ok: false, text: 'خطا در ارتباط با سرور' });
     }
-  };
-
-  /* استعلام جواز کسب. کد ملی داخل جواز باید با کد ملی احرازشده‌ی
-     مالک یکی باشد، وگرنه تیک تأیید صادر نمی‌شود. */
-  const verifyLicense = async () => {
-    if (!selectedClub || !clubInfo.licenseNumber.trim()) return;
-    setLicBusy(true); setLicMsg(null);
-    try {
-      const r = await apiFetch(`/api/clubs/${selectedClub.id}/verify-license`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ trackingCode: clubInfo.licenseNumber.trim() }),
-      });
-      const j = await r.json().catch(() => ({}));
-      if (j?.needsIdentity) { setNeedsIdentity(true); setLicMsg({ ok: false, text: j.message }); return; }
-      if (!r.ok) { setLicMsg({ ok: false, text: j?.message || 'استعلام انجام نشد' }); return; }
-      setLicMsg({
-        ok: true,
-        text: `تأیید شد — «${j.data?.title ?? 'جواز کسب'}» تا ${j.data?.expireDate ?? '—'} معتبر است`,
-      });
-    } catch {
-      setLicMsg({ ok: false, text: 'خطا در ارتباط با سرور' });
-    } finally { setLicBusy(false); }
   };
 
   /* ذخیره‌ی تنظیم هزینه‌ی بازیکن اضافه — همین مقدار ملاک محاسبه‌ی سروری است */
@@ -1923,35 +1899,19 @@ export default function ClubDashboardPage() {
               <InputField label="تلفن"         value={clubInfo.phone}       onChange={v => setClubInfo(p => ({...p, phone: v}))} placeholder="021-..." />
               <InputField label="وبسایت"       value={clubInfo.website}     onChange={v => setClubInfo(p => ({...p, website: v}))} placeholder="https://..." />
               <div style={{ gridColumn: '1 / -1' }}>
-                <InputField label="کد پیگیری جواز کسب" value={clubInfo.licenseNumber}
-                  onChange={v => { setClubInfo(p => ({ ...p, licenseNumber: v.trim() })); setLicMsg(null); }}
-                  placeholder="کد پیگیری روی جواز — برای استعلام و تیک تأیید" />
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 8, flexWrap: 'wrap' }}>
-                  <button type="button" onClick={verifyLicense}
-                    disabled={licBusy || !clubInfo.licenseNumber.trim() || !selectedClub}
-                    style={{
-                      display: 'inline-flex', alignItems: 'center', gap: 7, padding: '9px 16px', borderRadius: 10,
-                      fontFamily: 'var(--font-base)', fontSize: 12.5, fontWeight: 700,
-                      cursor: (licBusy || !clubInfo.licenseNumber.trim()) ? 'not-allowed' : 'pointer',
-                      background: 'rgba(199,166,106,0.14)', border: '1px solid rgba(199,166,106,0.42)', color: '#A07840',
-                      opacity: (licBusy || !clubInfo.licenseNumber.trim()) ? 0.5 : 1,
-                    }}>
-                    {licBusy ? <Loader2 size={14} style={{ animation: 'spin 1s linear infinite' }} /> : <CheckCircle size={14} />}
-                    {licBusy ? 'در حال استعلام…' : 'استعلام اعتبار جواز'}
-                  </button>
-                  {licMsg && (
-                    <span style={{ fontSize: 11.5, fontWeight: 700, lineHeight: 1.9, color: licMsg.ok ? '#0E7A38' : '#B23B2E' }}>
-                      {licMsg.text}
-                    </span>
-                  )}
-                </div>
+                {/* ── جواز کسب ──
+                    ورودیِ «کد پیگیری» و دکمه‌ی استعلام از این‌جا برداشته
+                    شد. استعلام حالا کارِ ادمین است: او تصویرِ جواز را
+                    می‌بیند، شماره را از رویش می‌خواند و خودش استعلام
+                    می‌گیرد.
 
-                {/* ── تصویر/فایل جواز کسب ──
-                    کدِ پیگیری فقط اعتبار را ثابت می‌کند؛ خودِ مدرک برای
-                    بررسیِ ادمین لازم است. تا امروز فقط در فرمِ ثبتِ اولیه
-                    قابل بارگذاری بود و بعد از آن هیچ راهی برای افزودن یا
-                    عوض‌کردنش نبود. */}
-                <div style={{ marginTop: 14, paddingTop: 14, borderTop: '1px dashed #EFEBE4' }}>
+                    دلیلش این است که پیش‌تر نتیجه‌ی استعلامی که خودِ
+                    باشگاه‌دار آغاز می‌کرد، مستقیماً تیکِ تأیید می‌داد —
+                    یعنی تأییدِ یک کسب‌وکار به ورودیِ خودش وابسته بود.
+
+                    آنچه مانده همان چیزی است که واقعاً از او لازم است:
+                    خودِ مدرک. */}
+                <div style={{ marginTop: 4 }}>
                   <div style={{ fontSize: 12, color: '#6B7280', fontWeight: 500, marginBottom: 8 }}>
                     تصویر یا فایل جواز کسب
                   </div>

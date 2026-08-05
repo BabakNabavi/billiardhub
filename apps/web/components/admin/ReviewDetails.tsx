@@ -13,9 +13,9 @@
    ───────────────────────────────────────────────────────────── */
 
 import { useEffect, useState } from 'react'
-import { Loader2, AlertCircle, FileText, ExternalLink, ShieldCheck, ShieldAlert } from 'lucide-react'
+import { Loader2, AlertCircle, FileText, ExternalLink, ShieldCheck, ShieldAlert, Search } from 'lucide-react'
 import { apiFetch } from '../../lib/http'
-import { toFaDigits } from '../../lib/jalali'
+import { toFaDigits, faBirthDate } from '../../lib/jalali'
 
 const INK = '#1C1B17', SEC = '#5B564B', MUT = '#8A8474', LINE = '#EAE5DA'
 const GOLD_D = '#9A6E38', FELT = '#0E7A38', RED = '#B23B2E'
@@ -41,9 +41,22 @@ const LABEL: Record<string, string> = {
   snookerTables: 'میز اسنوکر', pocketTables: 'میز پاکت',
   highballTables: 'میز هی‌بال', vipSnookerTables: 'میز اسنوکر VIP',
   hasCafe: 'کافه', hasParking: 'پارکینگ', hasWifi: 'اینترنت بی‌سیم',
-  hasProfessionalCoach: 'مربی حرفه‌ای', latitude: 'عرض جغرافیایی', longitude: 'طول جغرافیایی',
+  hasProfessionalCoach: 'مربی', latitude: 'عرض جغرافیایی', longitude: 'طول جغرافیایی',
   verificationStatus: 'وضعیت تأیید', isActive: 'فعال', country: 'کشور',
   openTime: 'ساعت بازگشایی', closeTime: 'ساعت بستن', rating: 'امتیاز',
+  reviewCount: 'تعداد نظرها', memberCount: 'تعداد اعضا', totalTables: 'مجموع میزها',
+  licenseVerified: 'جواز تأییدشده', licenseCheckedAt: 'تاریخ استعلام جواز',
+  licenseDocumentUrl: 'فایل جواز', rejectionReason: 'علت رد',
+  bankCard: 'شماره کارت', bankCardOwner: 'صاحب کارت', bankName: 'بانک', iban: 'شبا',
+  isDemo: 'نمایشی', isVerified: 'تأییدشده', isOpen: 'باز است',
+  hoursNote: 'توضیح ساعات کاری', closedDays: 'روزهای تعطیل',
+  /* پروفایل‌ها */
+  photo: 'عکس', avatar: 'عکس', logo: 'نشان', cover: 'تصویر جلد',
+  freeCoach: 'مربی آزاد', verified: 'تیک تأیید', status: 'وضعیت',
+  price: 'قیمت', priceFrom: 'شروع قیمت', unit: 'واحد',
+  years: 'سال‌های فعالیت', level: 'سطح', rank: 'رتبه',
+  shopName: 'نام فروشگاه', storeName: 'نام فروشگاه', factoryName: 'نام کارخانه',
+  workHours: 'ساعات کاری', workDays: 'روزهای کاری',
 }
 
 const faLabel = (k: string) => LABEL[k] ?? k
@@ -89,6 +102,64 @@ export default function ReviewDetails({ type, id }: { type: ReviewType; id: stri
   const [data, setData] = useState<Payload | null>(null)
   const [err, setErr] = useState('')
 
+  const [code, setCode] = useState('')
+  const [licBusy, setLicBusy] = useState(false)
+  const [licMsg, setLicMsg] = useState<{ ok: boolean; text: string; rows: [string, string][] } | null>(null)
+  const [docBusy, setDocBusy] = useState(false)
+  const [docErr, setDocErr] = useState('')
+
+  /* ── بازکردنِ مدرک ──
+     مدرکِ باشگاه در باکتِ خصوصی است و لینکِ مستقیم ندارد؛ باید از
+     مسیرِ مجوزدار یک لینکِ امضاشده‌ی کوتاه‌عمر گرفت. پنجره **پیش از**
+     await باز می‌شود، وگرنه مرورگر آن را pop-up ناخواسته می‌شمارد و
+     می‌بندد. */
+  const openDoc = async () => {
+    setDocErr('')
+    const url = (data?.docUrl as string) || data?.license?.url || data?.profile?.licenseUrl || ''
+    if (type !== 'club') { if (url) window.open(String(url), '_blank', 'noopener'); return }
+
+    const w = window.open('', '_blank')
+    setDocBusy(true)
+    try {
+      const r = await apiFetch(`/api/clubs/${id}/license-doc`, { cache: 'no-store' })
+      const j = await r.json().catch(() => ({}))
+      if (!r.ok || !j?.url) { w?.close(); setDocErr(j?.message || 'مدرک باز نشد'); return }
+      if (w) w.location.href = j.url; else window.open(j.url, '_blank', 'noopener')
+    } catch { w?.close(); setDocErr('خطا در ارتباط با سرور') } finally { setDocBusy(false) }
+  }
+
+  const checkLicense = async () => {
+    setLicBusy(true); setLicMsg(null)
+    try {
+      const r = await apiFetch('/api/admin/license-check', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type, id, trackingCode: code.trim() }),
+      })
+      const j = await r.json().catch(() => ({}))
+      const d = (j?.data ?? {}) as Record<string, unknown>
+      /* آنچه استعلام برمی‌گرداند باید دیده شود، نه فقط «تأیید شد» —
+         ادمین باید بتواند با تصویرِ جواز بسنجدش. */
+      const rows: [string, string][] = []
+      for (const [k, label] of [
+        ['name', 'نام دارنده'], ['nationalCode', 'کد ملی'], ['jobTitle', 'صنف'],
+        ['address', 'نشانی'], ['issueDate', 'تاریخ صدور'], ['expireDate', 'تاریخ انقضا'],
+      ] as [string, string][]) {
+        if (d[k]) rows.push([label, toFaDigits(String(d[k]))])
+      }
+      setLicMsg({
+        ok: r.ok && j?.match === true && !j?.expired,
+        text: j?.message || (r.ok ? 'استعلام انجام شد' : 'استعلام ناموفق بود'),
+        rows,
+      })
+      if (r.ok && j?.match === true) {
+        /* شماره‌ی ثبت‌شده عوض شده — تازه‌اش را نشان بده */
+        setData(p => (p ? { ...p, license: { ...(p.license ?? {}), number: code.trim(), verified: !j?.expired } } : p))
+      }
+    } catch {
+      setLicMsg({ ok: false, text: 'خطا در ارتباط با سرور', rows: [] })
+    } finally { setLicBusy(false) }
+  }
+
   useEffect(() => {
     let alive = true
     setData(null); setErr('')
@@ -122,6 +193,7 @@ export default function ReviewDetails({ type, id }: { type: ReviewType; id: stri
   const fields = data.fields ?? data.profile?.fields ?? {}
   const lic = data.license ?? (data.profile ? { url: data.profile.licenseUrl } : undefined)
   const docUrl = (data.docUrl as string) || lic?.url || null
+  const hasDoc = !!docUrl
 
   return (
     <div dir="rtl" style={{ display: 'flex', flexDirection: 'column', gap: 14, fontFamily: 'var(--font-base)' }}>
@@ -135,7 +207,9 @@ export default function ReviewDetails({ type, id }: { type: ReviewType; id: stri
             <F k="نام و نام خانوادگی" v={String(o.name ?? '—')} strong />
             <F k="موبایل" v={toFaDigits(String(o.phone ?? '—'))} ltr />
             <F k="کد ملی" v={toFaDigits(String(o.nationalId ?? '—'))} ltr />
-            <F k="تاریخ تولد" v={toFaDigits(String(o.birthDate ?? '—'))} />
+            {/* دو قالب در دیتابیس هست — شمسی و میلادی. `faBirthDate`
+                هر دو را شمسی نشان می‌دهد. */}
+            <F k="تاریخ تولد" v={faBirthDate(o.birthDate as string)} />
             <F k="استان / شهر" v={[o.province, o.city].filter(Boolean).join('، ') || '—'} />
             <F k="عضویت در باشگاه" v={String(o.clubName ?? '—')} />
             <F k="نقش اصلی" v={String(o.primaryRole ?? '—')} />
@@ -156,24 +230,85 @@ export default function ReviewDetails({ type, id }: { type: ReviewType; id: stri
         </Box>
       )}
 
-      {/* ── مدرک ── */}
-      <Box title="مدرک">
-        {docUrl ? (
-          <a href={String(docUrl)} target="_blank" rel="noopener noreferrer"
+      {/* ── مدرک و استعلام ── */}
+      <Box title="جواز کسب / مدرک">
+        {hasDoc ? (
+          <button type="button" onClick={() => void openDoc()} disabled={docBusy}
             style={{
-              display: 'inline-flex', alignItems: 'center', gap: 7, textDecoration: 'none',
+              display: 'inline-flex', alignItems: 'center', gap: 7, cursor: docBusy ? 'wait' : 'pointer',
               border: '1px solid rgba(37,99,235,0.22)', background: 'rgba(37,99,235,0.07)',
               color: '#2563EB', borderRadius: 10, padding: '9px 14px', fontSize: 12.5, fontWeight: 800,
+              fontFamily: 'inherit',
             }}>
-            <FileText size={14} /> مشاهده مدرک <ExternalLink size={12} />
-          </a>
+            {docBusy ? <Loader2 size={14} className="animate-spin" /> : <FileText size={14} />}
+            مشاهده مدرک <ExternalLink size={12} />
+          </button>
         ) : (
           <p style={{ fontSize: 12.5, color: MUT, margin: 0, lineHeight: 1.9 }}>
             مدرکی بارگذاری نشده. <span style={{ color: SEC }}>تأیید همچنان ممکن است — فقط نشانِ تأیید داده نمی‌شود.</span>
           </p>
         )}
+        {docErr ? (
+          <p style={{ fontSize: 11.5, color: RED, margin: '8px 0 0', lineHeight: 1.9 }}>{docErr}</p>
+        ) : null}
+
+        {/* ── استعلام ──
+            پیش‌تر خودِ صاحبِ کسب‌وکار شماره را وارد می‌کرد و استعلام
+            می‌گرفت، و نتیجه‌اش تیکِ تأیید می‌داد — یعنی تأییدِ یک
+            کسب‌وکار به ورودیِ خودش وابسته بود. حالا ادمین شماره را از
+            روی تصویرِ جواز می‌خواند و خودش استعلام می‌گیرد. */}
+        {type !== 'role' ? (
+          <div style={{ marginTop: 13, paddingTop: 12, borderTop: `1px solid ${LINE}` }}>
+            <div style={{ fontSize: 11.5, fontWeight: 800, color: SEC, marginBottom: 7 }}>
+              استعلام شماره جواز
+            </div>
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+              <input
+                value={code} onChange={e => { setCode(e.target.value); setLicMsg(null) }}
+                placeholder="شماره جواز را از روی مدرک وارد کنید"
+                dir="ltr" inputMode="numeric"
+                style={{
+                  flex: '1 1 200px', minWidth: 0, border: `1px solid ${LINE}`, borderRadius: 10,
+                  padding: '9px 12px', fontSize: 13, fontFamily: 'inherit', color: INK,
+                  outline: 'none', background: '#FCFBF8', textAlign: 'center', letterSpacing: 1,
+                }} />
+              <button type="button" onClick={() => void checkLicense()}
+                disabled={!code.trim() || licBusy}
+                style={{
+                  display: 'inline-flex', alignItems: 'center', gap: 6, borderRadius: 10,
+                  padding: '9px 16px', fontSize: 12.5, fontWeight: 800, fontFamily: 'inherit',
+                  cursor: !code.trim() || licBusy ? 'not-allowed' : 'pointer',
+                  border: `1px solid ${code.trim() ? 'rgba(199,166,106,0.34)' : LINE}`,
+                  background: code.trim() ? 'rgba(199,166,106,0.12)' : '#F7F6F2',
+                  color: code.trim() ? GOLD_D : MUT,
+                }}>
+                {licBusy ? <Loader2 size={13} className="animate-spin" /> : <Search size={13} />}
+                استعلام
+              </button>
+            </div>
+
+            {licMsg ? (
+              <div style={{
+                marginTop: 10, borderRadius: 11, padding: '10px 13px', fontSize: 12, lineHeight: 1.95,
+                color: licMsg.ok ? FELT : RED,
+                background: licMsg.ok ? 'rgba(14,122,56,0.06)' : 'rgba(178,59,46,0.06)',
+                border: `1px solid ${licMsg.ok ? 'rgba(14,122,56,0.22)' : 'rgba(178,59,46,0.22)'}`,
+              }}>
+                <div style={{ fontWeight: 800 }}>{licMsg.text}</div>
+                {licMsg.rows.length ? (
+                  <div style={{ marginTop: 8, display: 'grid', gap: '6px 16px', gridTemplateColumns: 'repeat(auto-fit,minmax(170px,1fr))' }}>
+                    {licMsg.rows.map(([k, v]) => <F key={k} k={k} v={v} />)}
+                  </div>
+                ) : null}
+              </div>
+            ) : null}
+          </div>
+        ) : null}
+
         {lic?.number ? (
-          <div style={{ marginTop: 9 }}><F k="شماره جواز" v={toFaDigits(String(lic.number))} ltr /></div>
+          <div style={{ marginTop: 11 }}>
+            <F k="شماره جواز ثبت‌شده" v={toFaDigits(String(lic.number))} ltr />
+          </div>
         ) : null}
         {lic?.note ? (
           <p style={{ fontSize: 12, color: SEC, margin: '9px 0 0', lineHeight: 1.9 }}>یادداشت: {String(lic.note)}</p>

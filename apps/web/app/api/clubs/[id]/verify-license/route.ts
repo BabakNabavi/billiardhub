@@ -14,12 +14,20 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string
   const actor = actorFromRequest(req);
   if (!actor) return NextResponse.json({ message: 'احراز هویت الزامی است' }, { status: 401 });
 
-  const admin = await isAdmin(actor.id);
+  /* ── فقط ادمین ──
+     پیش‌تر خودِ باشگاه‌دار هم می‌توانست این را صدا بزند و نتیجه‌اش
+     مستقیماً تیکِ تأیید می‌داد — یعنی تأییدِ یک کسب‌وکار به ورودیِ
+     خودش وابسته بود. رابطش برداشته شد، ولی بستنِ مسیر هم لازم است:
+     رابطِ برداشته‌شده یعنی «سخت‌تر»، نه «ممکن نیست».
+
+     ⚠️ این مسیر بازمانده است؛ نسخه‌ی تازه `/api/admin/license-check`
+     است که هر دو نوعِ باشگاه و پروفایل را می‌پذیرد و کد ملی را با
+     صاحبِ همان کسب‌وکار می‌سنجد، نه با فراخواننده. */
+  if (!(await isAdmin(actor.id))) {
+    return NextResponse.json({ message: 'استعلام جواز فقط توسط مدیریت انجام می‌شود' }, { status: 403 });
+  }
   const { data: clubRow } = await sb().from('clubs').select('"ownerId"').eq('id', clubId).maybeSingle();
   if (!clubRow) return NextResponse.json({ message: 'باشگاه یافت نشد' }, { status: 404 });
-  if ((clubRow as { ownerId?: string }).ownerId !== actor.id && !admin) {
-    return NextResponse.json({ message: 'دسترسی مجاز نیست' }, { status: 403 });
-  }
 
   const body = await req.json().catch(() => ({}));
   const trackingCode = String(body?.trackingCode ?? '').trim();
