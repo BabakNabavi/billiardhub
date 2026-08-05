@@ -56,9 +56,19 @@ export async function GET(req: NextRequest) {
     callbackUrl: `${req.nextUrl.origin}/api/admin/payments/health`,
   });
 
+  /* در شکست، پاسخِ خامِ درگاه هم برمی‌گردد. این مسیر فقط برای ادمین
+     باز است و پیامِ کوتاهِ درگاه («PolicyException») به‌تنهایی هیچ
+     نمی‌گوید؛ کدِ HTTP و `detail` تفاوتِ «توکن» و «دسترسی» و
+     «ترمینالِ غیرفعال» را روشن می‌کنند. */
   out.probe = created.ok
     ? { ok: true, message: 'درگاه پاسخ داد و دستور پرداخت ساخته شد' }
-    : { ok: false, message: created.message ?? 'ساخت دستور پرداخت ناموفق بود' };
+    : {
+      ok: false,
+      message: created.message ?? 'ساخت دستور پرداخت ناموفق بود',
+      amountSent: PROBE_AMOUNT,
+      returnUrlSent: `${req.nextUrl.origin}/api/admin/payments/health`,
+      gateway: created.raw ?? null,
+    };
 
   /* دستورِ ساخته‌شده پاک می‌شود تا در گزارش‌ها نماند. اگر حذف نشد،
      مهم نیست — دستورِ پرداخت‌نشده خودش منقضی می‌شود. */

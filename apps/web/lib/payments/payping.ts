@@ -72,7 +72,14 @@ export class PayPingProvider implements PaymentProvider {
       if (r.ok && j?.paymentCode && j?.url) {
         return { ok: true, authority: j.paymentCode, redirectUrl: j.url, raw: j }
       }
-      return { ok: false, message: errText(j) || 'ایجاد پرداخت در پی‌پینگ ناموفق بود', raw: j }
+      /* کدِ HTTP در پاسخِ خطا نیست ولی برای تشخیص حیاتی است: ۴۰۱ یعنی
+         توکن، ۴۰۳ یعنی دسترسی، ۴۰۰ یعنی خودِ درخواست. بدونِ آن، یک
+         «PolicyException» تنها هیچ نمی‌گوید. */
+      return {
+        ok: false,
+        message: errText(j) || 'ایجاد پرداخت در پی‌پینگ ناموفق بود',
+        raw: { httpStatus: r.status, body: j },
+      }
     } catch { return { ok: false, message: 'خطا در اتصال به پی‌پینگ' } }
   }
 
