@@ -190,11 +190,19 @@ export default function RegisterPage() {
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>فیش واریزی — بیلیارد هاب</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700;900&display=swap" rel="stylesheet">
   <style>
+    /* ── چرا فونت محلی، نه Google Fonts ──
+       تنها جای سایت بود که به دامنه‌ی خارجی وصل می‌شد. کلِ بقیه از
+       IRANSansX محلی (public/fonts) استفاده می‌کند.
+
+       دو ایراد داشت: در ایران کند یا بلاک است، و اگر اینترنتِ بین‌الملل
+       قطع باشد فیش بدون فونت باز می‌شود — دقیقاً همان لحظه‌ای که کاربر
+       سندِ پرداختش را می‌خواهد. */
+    @font-face { font-family:'IRANSansX'; src:url('/fonts/IranSans/IRANSansX-Regular.woff2') format('woff2'); font-weight:400; font-display:swap }
+    @font-face { font-family:'IRANSansX'; src:url('/fonts/IranSans/IRANSansX-Bold.woff2') format('woff2'); font-weight:700; font-display:swap }
+    @font-face { font-family:'IRANSansX'; src:url('/fonts/IranSans/IRANSansX-Black.woff2') format('woff2'); font-weight:900; font-display:swap }
     *{box-sizing:border-box;margin:0;padding:0}
-    body{font-family:'Vazirmatn',Tahoma,Arial,sans-serif;background:#F7F7F5;min-height:100vh;
+    body{font-family:'IRANSansX',Tahoma,Arial,sans-serif;background:#F7F7F5;min-height:100vh;
          display:flex;align-items:center;justify-content:center;padding:24px}
     .card{background:#fff;border-radius:20px;overflow:hidden;max-width:400px;width:100%;
           box-shadow:0 8px 40px rgba(0,0,0,0.12)}
