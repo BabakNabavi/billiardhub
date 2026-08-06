@@ -20,6 +20,7 @@ import GoLive from '../../../components/club/GoLive';
 import api from '../../../lib/api';
 import ProvinceCitySelect from '../../../components/ProvinceCitySelect';
 import SiteAddressField, { type SlugStatus } from '../../../components/SiteAddressField';
+import DragScroll from '../../../components/ui/DragScroll';
 import { provinceOfCity } from '../../../lib/iran-geo';
 import { useAuthStore } from '../../../store/auth.store';
 import { formatCard, isValidCard, bankOfCard, formatIban, isValidIban, bankOfIban, prettyIban } from '../../../lib/bank';
@@ -1693,12 +1694,14 @@ export default function ClubDashboardPage() {
         </div>
       )}
 
-      {/* Tab bar */}
-      <div style={{
-        display: 'flex', gap: 4, overflowX: 'auto', marginBottom: 20,
+      {/* ── Tab bar ──
+          `DragScroll` به‌جای ظرفِ اسکرولِ ساده: دوازده تب روی دسکتاپ
+          جا نمی‌شوند و چون اسکرول‌بار پنهان است، تب‌های آخر عملاً
+          دست‌نیافتنی بودند — نوار «قفل» به نظر می‌رسید. */}
+      <DragScroll style={{
+        display: 'flex', gap: 4, marginBottom: 20,
         background: '#fff', borderRadius: 14, padding: 6,
         boxShadow: '0 1px 4px rgba(0,0,0,0.06)', border: '1px solid #F0EDE8',
-        scrollbarWidth: 'none',
       }}>
         {TABS.map(tab => {
           const active = activeTab === tab.key;
@@ -1726,7 +1729,7 @@ export default function ClubDashboardPage() {
             </button>
           );
         })}
-      </div>
+      </DragScroll>
 
       {/* ════ Tab: Dashboard ════ */}
       {activeTab === 'dashboard' && (
@@ -2230,7 +2233,7 @@ export default function ClubDashboardPage() {
               }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12.5, fontWeight: 800, color: '#166534' }}>
                   <CheckCircle size={15} />
-                  حساب تأیید شده و قفل است
+                  حساب تأیید شده
                 </div>
                 <a
                   href={`/contact?subject=${encodeURIComponent('درخواست ویرایش اطلاعات بانکی')}${selectedClub ? `&clubId=${selectedClub.id}` : ''}`}

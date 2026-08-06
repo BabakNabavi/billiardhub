@@ -7,7 +7,7 @@ import {
   Search, Bell, ChevronDown, User, X, Trophy,
   Users, BookOpen, ShoppingBag, Building2, Radio, Star, Wrench,
   Newspaper, Calendar, Menu, ArrowLeft, LogOut, Settings,
-  Zap, Crown, LayoutDashboard, Factory, GraduationCap, Home, Store, Clapperboard, Send,
+  Zap, Crown, LayoutDashboard, Factory, GraduationCap, Home, Store, Clapperboard, Send, LifeBuoy,
 } from 'lucide-react';
 import { useRouter, usePathname } from 'next/navigation';
 import { fetchConversations, fetchNotifs, markNotifsRead, type Notif } from '../lib/social';
@@ -540,6 +540,9 @@ export default function Navbar() {
                         ...(roles.includes('seller') ? [{ href: '/dashboard/shop', label: 'فروشگاه من', icon: <ShoppingBag size={13} /> }] : []),
                         ...(roles.includes('club_owner') ? [{ href: '/dashboard/club', label: 'مدیریت باشگاه', icon: <Building2 size={13} /> }] : []),
                         { href: '/profile/me', label: 'ویرایش پروفایل', icon: <Settings size={13} /> },
+                        /* بدونِ این، پاسخِ پشتیبانی جایی برای دیده‌شدن ندارد
+                           و تیکت همان صندوقِ یک‌طرفه می‌ماند. */
+                        { href: '/support', label: 'تیکت‌های من', icon: <LifeBuoy size={13} /> },
                       ];
                     })().map((item, i) => (
                       <Link key={i} href={item.href} onClick={() => setProfileOpen(false)}

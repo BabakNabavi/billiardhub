@@ -47,8 +47,23 @@ export default function SiteAddressField({
   required = false, label = 'آدرس اختصاصی سایت شما', error,
 }: SiteAddressFieldProps) {
   const [status, setStatus] = useState<SlugStatus>('idle');
+  /* ── چرا هر دو تابع در ref می‌نشینند ──
+     هر دو به‌صورتِ تابعِ درجا (`s => …`) از والد می‌آیند، پس در هر
+     رندر شناسه‌ی تازه می‌گیرند. اگر در آرایه‌ی وابستگیِ افکت باشند،
+     حلقه‌ی بی‌پایان می‌سازند:
+
+       رندر → checkUrl تازه → افکت دوباره → setStatus('checking')
+       → onStatusChange → setState در والد → رندر → …
+
+     چیزی که کاربر می‌دید همین بود: «در حال بررسی…» و پیامِ سبز که
+     بدونِ دست‌زدن به فیلد پشتِ سرِ هم روشن و خاموش می‌شدند، و یک
+     درخواستِ slug-check در هر دور.
+
+     ref مقدارِ تازه را نگه می‌دارد بدونِ آن‌که وابستگی باشد. */
   const statusRef = useRef(onStatusChange);
   statusRef.current = onStatusChange;
+  const checkRef = useRef(checkUrl);
+  checkRef.current = checkUrl;
 
   useEffect(() => { statusRef.current?.(status); }, [status]);
 
@@ -57,13 +72,13 @@ export default function SiteAddressField({
   useEffect(() => {
     if (!value) { setStatus('idle'); return; }
     if (!isValidSlug(value)) { setStatus('invalid'); return; }
-    if (!checkUrl) { setStatus('ok'); return; }
+    if (!checkRef.current) { setStatus('ok'); return; }
 
     setStatus('checking');
     let alive = true;
     const t = setTimeout(async () => {
       try {
-        const r = await fetch(checkUrl(value), { cache: 'no-store' });
+        const r = await fetch(checkRef.current!(value), { cache: 'no-store' });
         const j = await r.json() as { available?: boolean };
         if (alive) setStatus(j?.available ? 'ok' : 'taken');
       } catch {
@@ -72,7 +87,7 @@ export default function SiteAddressField({
       }
     }, 450);
     return () => { alive = false; clearTimeout(t); };
-  }, [value, checkUrl]);
+  }, [value]);
 
   const borderColor =
     status === 'ok' ? 'rgba(14,122,56,0.45)'

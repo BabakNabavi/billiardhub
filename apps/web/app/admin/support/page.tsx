@@ -4,7 +4,7 @@ import { apiFetch } from '../../../lib/http'
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '../../../store/auth.store';
-import { LifeBuoy, Unlock, Check, X, Loader2, MapPin, CreditCard } from 'lucide-react';
+import { LifeBuoy, Unlock, Check, X, Loader2, MapPin, CreditCard, Send } from 'lucide-react';
 
 /* تیکت‌های پشتیبانی.
 
@@ -58,6 +58,8 @@ export default function AdminSupportPage() {
   const [err, setErr] = useState('');
   const [tab, setTab] = useState('open');
   const [busy, setBusy] = useState('');
+  /* متنِ در حالِ تایپِ پاسخ، به ازای هر تیکت */
+  const [reply, setReply] = useState<Record<string, string>>({});
 
   const load = useCallback(async () => {
     setLoading(true); setErr('');
@@ -174,6 +176,52 @@ export default function AdminSupportPage() {
 
             <div style={{ fontSize: 13, color: DARK, lineHeight: 2, background: '#F9FAFB', border: '1px solid rgba(0,0,0,0.05)', borderRadius: 10, padding: '10px 12px', whiteSpace: 'pre-wrap', wordBreak: 'break-word', marginBottom: 12 }}>
               {t.message}
+            </div>
+
+            {/* ── پاسخ به کاربر ──
+                ستونِ `admin_note` از روزِ اول در جدول بود و مسیرِ PATCH هم
+                می‌پذیرفتش، ولی هیچ کادری برای نوشتنش وجود نداشت — یعنی
+                تیکت یک صندوقِ یک‌طرفه بود: کاربر می‌نوشت و هیچ‌وقت جوابی
+                نمی‌گرفت.
+
+                پاسخ در «تیکت‌های من» به کاربر نشان داده می‌شود. پیامک
+                ممکن نیست (خطِ خدماتی متنِ آزاد نمی‌پذیرد) و ایمیل هم در
+                پروژه تنظیم نشده. */}
+            <div style={{ marginBottom: 12 }}>
+              <label style={{ display: 'block', fontSize: 11.5, fontWeight: 700, color: '#6B7280', marginBottom: 5 }}>
+                پاسخ به کاربر {t.admin_note ? '— قبلاً پاسخ داده شده' : ''}
+              </label>
+              <textarea
+                value={reply[t.id] ?? t.admin_note ?? ''}
+                onChange={e => setReply(p => ({ ...p, [t.id]: e.target.value }))}
+                rows={2}
+                placeholder="پاسخی که کاربر در «تیکت‌های من» می‌بیند…"
+                style={{
+                  width: '100%', boxSizing: 'border-box', resize: 'vertical',
+                  border: '1px solid rgba(0,0,0,0.14)', borderRadius: 10, padding: '9px 12px',
+                  fontSize: 13, lineHeight: 2, fontFamily: 'inherit', color: DARK,
+                  background: '#fff', outline: 'none',
+                }}
+              />
+              <div style={{ display: 'flex', gap: 8, marginTop: 7, flexWrap: 'wrap' }}>
+                <button
+                  disabled={busy === t.id || !(reply[t.id] ?? t.admin_note ?? '').trim()
+                    || (reply[t.id] ?? '') === (t.admin_note ?? '')}
+                  onClick={() => act(t.id, { adminNote: (reply[t.id] ?? '').trim() })}
+                  style={{
+                    ...btn(busy !== t.id && !!(reply[t.id] ?? '').trim() && reply[t.id] !== t.admin_note),
+                    background: 'rgba(199,166,106,0.14)', border: `1px solid ${GOLD}66`, color: '#A07840',
+                  }}>
+                  <Send size={13} /> ثبت پاسخ
+                </button>
+                {/* پاسخ‌دادن معمولاً یعنی کار تمام شده — یک کلیک به‌جای دو تا */}
+                <button
+                  disabled={busy === t.id || !(reply[t.id] ?? '').trim()}
+                  onClick={() => act(t.id, { adminNote: (reply[t.id] ?? '').trim(), status: 'resolved' })}
+                  style={btn(busy !== t.id && !!(reply[t.id] ?? '').trim())}>
+                  <Check size={13} /> پاسخ و بستن تیکت
+                </button>
+              </div>
             </div>
 
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>

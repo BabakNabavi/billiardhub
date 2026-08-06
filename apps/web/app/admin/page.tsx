@@ -126,11 +126,28 @@ const STAT_CARDS: { key: string; label: string; link: string }[] = [
 
      «درخواست نقش» هم برداشته شد — دلیلش عمیق‌تر است و در
      `docs/roles.md` نوشته شده: آن صف تصمیمی بود که هیچ اثری نداشت. */
-  { key: 'pendingProfiles', label: 'پروفایل در انتظار', link: '/admin/coaches' },
   /* گزارشِ تخلف از `/api/admin/stats` می‌آمد ولی هیچ کارتی نداشت —
      یعنی گزارش ثبت می‌شد و ادمین تا وقتی خودش سراغِ صفحه‌ی گزارش‌ها
      نمی‌رفت خبردار نمی‌شد. */
   { key: 'openReports',     label: 'گزارش تخلف باز',   link: '/admin/reports' },
+];
+
+/* ── چرا کارتِ واحدِ «پروفایل در انتظار» شکسته شد ──
+   آن کارت مجموعِ **شش نوع** پروفایل را نشان می‌داد ولی همیشه به
+   `/admin/coaches` می‌رفت. یعنی یک پروفایلِ داور یا فروشگاهِ در انتظار،
+   عدد را بالا می‌برد و ادمین به صفحه‌ی مربیان می‌رسید که خالی بود و
+   نمی‌فهمید آن عدد از کجا آمده.
+
+   حالا هر نوع کارتِ خودش را دارد و فقط وقتی دیده می‌شود که واقعاً
+   کاری در آن صف باشد — داشبورد شلوغ نمی‌شود و هر عدد دقیقاً به همان
+   صفی می‌رود که عددش را ساخته. */
+const PROFILE_QUEUES: { kind: string; label: string; link: string }[] = [
+  { kind: 'coach',        label: 'مربی در انتظار',        link: '/admin/coaches' },
+  { kind: 'referee',      label: 'داور در انتظار',        link: '/admin/referees' },
+  { kind: 'seller',       label: 'فروشگاه در انتظار',     link: '/admin/sellers' },
+  { kind: 'manufacturer', label: 'تولیدکننده در انتظار',  link: '/admin/manufacturers' },
+  { kind: 'technician',   label: 'خدمات فنی در انتظار',   link: '/admin/technicians' },
+  { kind: 'player',       label: 'بازیکن در انتظار',      link: '/admin/players' },
 ];
 
 export default function AdminPage() {
@@ -141,7 +158,16 @@ export default function AdminPage() {
      کند یا شبکه‌ی سنگین نمی‌شد و ادمین به صفحه‌ی ورود پرت می‌شد.
      خودِ استور دقیقاً می‌گوید کِی خوانده شد؛ حدس لازم نیست. */
   const { user, _hydrated } = useAuthStore();
-  const [stats, setStats] = useState<Record<string, number> | null>(null);
+  /* `pendingByKind` تنها کلیدی است که عدد نیست، بلکه خودش یک نگاشت
+     است — پس نوعِ مقدار باید هر دو را بپذیرد. */
+  const [stats, setStats] = useState<Record<string, number | Record<string, number>> | null>(null);
+
+  /* شمارِ صفِ یک نوع پروفایل؛ نبودنش (مهاجرت/نسخه‌ی قدیمیِ API) ⇒ صفر */
+  const pendingOf = (kind: string): number => {
+    const byKind = stats?.pendingByKind;
+    if (!byKind || typeof byKind !== 'object') return 0;
+    return Number((byKind as Record<string, number>)[kind] ?? 0);
+  };
 
   /* ── دسترسی‌های تفکیک‌شده ──
      `null` یعنی هنوز نمی‌دانیم؛ تا آن لحظه هیچ کارتی نشان داده
@@ -230,6 +256,19 @@ export default function AdminPage() {
               <div style={{ fontSize: 11, color: SEC, marginTop: 3, fontWeight: 700 }}>{s.label}</div>
             </Link>
           ))}
+
+          {/* صف‌های پروفایل — فقط آن‌هایی که واقعاً کاری در آن‌ها هست */}
+          {PROFILE_QUEUES
+            .filter(q => allowed(q.link) && pendingOf(q.kind) > 0)
+            .map((q, i) => (
+              <Link key={q.kind} href={q.link} className="ad-stat"
+                style={{ animation: `adUp .4s ${(STAT_CARDS.length + i) * 40}ms ease both` }}>
+                <div style={{ fontSize: 20, fontWeight: 900, color: '#B45309', fontVariantNumeric: 'tabular-nums' }}>
+                  {pendingOf(q.kind).toLocaleString('fa-IR')}
+                </div>
+                <div style={{ fontSize: 11, color: SEC, marginTop: 3, fontWeight: 700 }}>{q.label}</div>
+              </Link>
+            ))}
         </div>
 
         {/* بخش‌ها — فقط آن‌هایی که این ادمین دسترسی دارد.

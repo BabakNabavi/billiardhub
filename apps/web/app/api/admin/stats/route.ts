@@ -52,6 +52,11 @@ export async function GET(req: NextRequest) {
        درخواستِ نقش و پروفایلِ حرفه‌ای می‌توانستند روزها بی‌پاسخ بمانند
        بدونِ آنکه ادمین بداند چیزی منتظر است. */
     countOf('role_requests', { col: 'status', val: 'pending' }),
+    /* ⚠️ این عدد **همه‌ی شش نوع** پروفایل را می‌شمرد (مربی، داور،
+       فروشگاه، تولیدکننده، خدمات فنی، بازیکن) ولی کارتش روی داشبورد
+       فقط به `/admin/coaches` می‌رفت. یعنی اگر یک پروفایلِ داور در
+       انتظار بود، عدد بالا می‌رفت و ادمین به صفحه‌ی مربیان می‌رسید که
+       چیزی در آن نبود. تفکیک پایین‌تر اضافه شد. */
     countOf('profiles', { col: 'status', val: 'pending' }),
     /* ⚠️ `'OPEN'` با حروفِ بزرگ — همان مقداری که جدول ذخیره می‌کند
        (مهاجرتِ ۰۰۳: `DEFAULT 'OPEN'` با قیدِ چهارمقداریِ بزرگ‌حرف).
@@ -61,10 +66,29 @@ export async function GET(req: NextRequest) {
     countOf('reports', { col: 'status', val: 'OPEN' }),
   ]);
 
+  /* ── تفکیکِ پروفایل‌های در انتظار به تفکیکِ نوع ──
+     هر نوع صفحه‌ی بررسیِ خودش را دارد، پس عدد هم باید به همان‌جا
+     اشاره کند. یک شمارشِ سبک به ازای هر نوع؛ هر شش تا موازی. */
+  const PROFILE_KINDS = ['coach', 'referee', 'seller', 'manufacturer', 'technician', 'player'] as const;
+  const kindCounts = await Promise.all(
+    PROFILE_KINDS.map(async k => {
+      try {
+        const { count } = await sb().from('profiles')
+          .select('id', { count: 'exact', head: true })
+          .eq('status', 'pending').eq('kind', k);
+        return count ?? 0;
+      } catch { return 0; }
+    }),
+  );
+  const pendingByKind = Object.fromEntries(
+    PROFILE_KINDS.map((k, i) => [k, kindCounts[i] ?? 0]),
+  ) as Record<typeof PROFILE_KINDS[number], number>;
+
   return NextResponse.json(
     {
       users, products, clubs, news, bookings,
       pendingClubs, pendingRoles, pendingProfiles, openReports,
+      pendingByKind,
       /* مجموعِ کارهای روی میز — برای نشانِ کلی */
       pendingTotal: pendingClubs + pendingRoles + pendingProfiles + openReports,
     },
