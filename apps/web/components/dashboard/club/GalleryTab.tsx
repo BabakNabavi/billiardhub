@@ -304,6 +304,31 @@ export default function GalleryTab({ club, onLogoChange }: {
                 <input type="file" accept="image/*" style={{ display: 'none' }}
                   onChange={e => { const f = e.target.files?.[0]; if (f) uploadLogo(f); e.target.value = ''; }} />
               </label>
+
+              {/* ── حذفِ لوگو ──
+                  تا امروز فقط جایگزینی ممکن بود. باشگاهی که لوگوی
+                  اشتباهی گذاشته بود هیچ راهی برای برگشتن به حالتِ
+                  بی‌لوگو نداشت. فقط وقتی دیده می‌شود که لوگویی باشد. */}
+              {club?.logo ? (
+                <button type="button" title="حذف لوگو"
+                  onClick={async () => {
+                    if (!confirm('لوگوی باشگاه حذف شود؟')) return;
+                    setLogoUploading(true);
+                    try {
+                      await api.put(`/clubs/${club.id}`, { logo: '' });
+                      onLogoChange?.('');
+                    } finally { setLogoUploading(false); }
+                  }}
+                  style={{
+                    position: 'absolute', bottom: 0, right: 0,
+                    width: 26, height: 26, borderRadius: '50%',
+                    background: '#DC2626', border: '2px solid #fff',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    cursor: 'pointer', padding: 0,
+                  }}>
+                  <Trash2 size={12} color="#fff" />
+                </button>
+              ) : null}
             </div>
             <div>
               <div style={{ fontSize: 15, fontWeight: 700, color: DARK, marginBottom: 4 }}>{club?.name}</div>

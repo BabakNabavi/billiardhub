@@ -102,6 +102,14 @@ const nextConfig = {
               "media-src 'self' data: blob: https://*.supabase.co",
               "font-src 'self' data:",
               "connect-src 'self' https://*.supabase.co wss://*.supabase.co",
+              /* ── نقشه‌ی باشگاه ──
+                 صفحه‌ی باشگاه نقشه را در یک iframe از گوگل می‌آورد.
+                 `frame-src` تعریف نشده بود، پس `default-src 'self'`
+                 جایش می‌نشست و نقشه بلاک می‌شد — کنسول دقیقاً همین را
+                 می‌گفت: «Framing maps.google.com violates default-src».
+
+                 فقط دامنه‌های نقشه باز می‌شوند، نه هر قابی. */
+              "frame-src 'self' https://maps.google.com https://www.google.com https://maps.googleapis.com",
               "worker-src 'self' blob:",
               "manifest-src 'self'",
             ].join('; '),
