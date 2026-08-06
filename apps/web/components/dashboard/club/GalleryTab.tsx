@@ -15,7 +15,7 @@
    ───────────────────────────────────────────────────────────── */
 
 import { useState, useEffect, useCallback } from 'react';
-import { Camera, Loader2, Trash2, Plus, X, Image as ImageIcon, Upload, FolderPlus, AlertCircle } from 'lucide-react';
+import { Camera, Loader2, Trash2, Plus, X, Image as ImageIcon, Upload, FolderPlus, AlertCircle, Pencil, Check } from 'lucide-react';
 import api from '../../../lib/api';
 import { apiFetch } from '../../../lib/http';
 import { uploadFile } from '../../../lib/supabase';
@@ -55,6 +55,9 @@ export default function GalleryTab({ club, onLogoChange }: {
   const [albums, setAlbums] = useState<ClubAlbum[]>([]);
   const [newAlbumName, setNewAlbumName] = useState('');
   const [openAlbumId, setOpenAlbumId] = useState<string | null>(null);
+  /* آلبومی که نامش در حالِ ویرایش است */
+  const [editingAlbumId, setEditingAlbumId] = useState<string | null>(null);
+  const [editingAlbumName, setEditingAlbumName] = useState('');
   const [uploadingAlbum, setUploadingAlbum] = useState<string | null>(null);
   const [singlePhotos, setSinglePhotos] = useState<ClubPhoto[]>([]);
   const [photoError, setPhotoError] = useState('');
@@ -179,6 +182,13 @@ export default function GalleryTab({ club, onLogoChange }: {
   const deleteAlbum = (id: string) => {
     void saveAlbums(albums.filter(a => a.id !== id));
     if (openAlbumId === id) setOpenAlbumId(null);
+  };
+
+  const commitAlbumName = (id: string) => {
+    const name = editingAlbumName.trim();
+    setEditingAlbumId(null);
+    if (!name || name === albums.find(a => a.id === id)?.name) return;
+    void saveAlbums(albums.map(a => (a.id === id ? { ...a, name } : a)));
   };
 
   /* تصویر به Storage می‌رود و فقط نشانی‌اش ذخیره می‌شود.
@@ -627,21 +637,65 @@ export default function GalleryTab({ club, onLogoChange }: {
                         ? <img loading="lazy" decoding="async" src={cover} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                         : '🖼'}
                     </div>
-                    <div style={{ flex: 1 }}>
-                      <div style={{ fontWeight: 700, fontSize: 15, color: DARK }}>{album.name}</div>
-                      <div style={{ fontSize: 12, color: '#9CA3AF', marginTop: 2 }}>
-                        {album.items.length} تصویر · {new Date(album.createdAt).toLocaleDateString('fa-IR')}
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      {/* ── تغییرِ نام ──
+                          آلبوم فقط دکمه‌ی حذف داشت، یعنی یک غلطِ املایی در
+                          نام یعنی ساختنِ آلبومِ تازه و آپلودِ دوباره‌ی همه‌ی
+                          عکس‌ها. */}
+                      {editingAlbumId === album.id ? (
+                        <div style={{ display: 'flex', gap: 6 }} onClick={e => e.stopPropagation()}>
+                          <input
+                            autoFocus
+                            value={editingAlbumName}
+                            onChange={e => setEditingAlbumName(e.target.value)}
+                            onKeyDown={e => {
+                              if (e.key === 'Enter') commitAlbumName(album.id);
+                              if (e.key === 'Escape') setEditingAlbumId(null);
+                            }}
+                            style={{
+                              flex: 1, minWidth: 0, boxSizing: 'border-box',
+                              border: `1px solid ${GOLD}66`, borderRadius: 8, padding: '7px 10px',
+                              fontSize: 14, fontFamily: 'var(--font-base)', color: DARK,
+                              background: '#fff', outline: 'none',
+                            }}
+                          />
+                          <button onClick={() => commitAlbumName(album.id)} title="ذخیره"
+                            style={{ background: `${GOLD}1F`, color: '#A07840', border: `1px solid ${GOLD}55`, borderRadius: 8, padding: '0 11px', cursor: 'pointer' }}>
+                            <Check size={14} />
+                          </button>
+                          <button onClick={() => setEditingAlbumId(null)} title="انصراف"
+                            style={{ background: 'rgba(0,0,0,0.04)', color: '#6B7280', border: '1px solid rgba(0,0,0,0.12)', borderRadius: 8, padding: '0 11px', cursor: 'pointer' }}>
+                            <X size={14} />
+                          </button>
+                        </div>
+                      ) : (
+                        <>
+                          <div style={{ fontWeight: 700, fontSize: 15, color: DARK }}>{album.name}</div>
+                          <div style={{ fontSize: 12, color: '#9CA3AF', marginTop: 2 }}>
+                            {album.items.length} تصویر · {new Date(album.createdAt).toLocaleDateString('fa-IR')}
+                          </div>
+                        </>
+                      )}
+                    </div>
+                    {editingAlbumId !== album.id && (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <button
+                          title="تغییر نام آلبوم"
+                          onClick={e => { e.stopPropagation(); setEditingAlbumId(album.id); setEditingAlbumName(album.name); }}
+                          style={{
+                            display: 'inline-flex', alignItems: 'center', gap: 5,
+                            background: `${GOLD}14`, color: '#A07840', border: `1px solid ${GOLD}44`, borderRadius: 8,
+                            padding: '5px 10px', fontSize: 12, cursor: 'pointer', fontFamily: 'var(--font-base)',
+                          }}><Pencil size={12} /> ویرایش</button>
+                        <button
+                          onClick={e => { e.stopPropagation(); deleteAlbum(album.id); }}
+                          style={{
+                            background: '#FEE2E2', color: '#991B1B', border: 'none', borderRadius: 8,
+                            padding: '5px 10px', fontSize: 12, cursor: 'pointer', fontFamily: 'var(--font-base)',
+                          }}>حذف</button>
+                        <span style={{ fontSize: 18, color: '#ccc', transition: 'transform .2s', transform: isOpen ? 'rotate(180deg)' : 'none', display: 'inline-block' }}>▾</span>
                       </div>
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <button
-                        onClick={e => { e.stopPropagation(); deleteAlbum(album.id); }}
-                        style={{
-                          background: '#FEE2E2', color: '#991B1B', border: 'none', borderRadius: 8,
-                          padding: '5px 10px', fontSize: 12, cursor: 'pointer', fontFamily: 'var(--font-base)',
-                        }}>حذف</button>
-                      <span style={{ fontSize: 18, color: '#ccc', transition: 'transform .2s', transform: isOpen ? 'rotate(180deg)' : 'none', display: 'inline-block' }}>▾</span>
-                    </div>
+                    )}
                   </div>
                    {/* Expanded */}
                   {isOpen && (

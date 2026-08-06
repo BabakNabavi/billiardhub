@@ -89,6 +89,10 @@ export function useHorizontalScroll(
     let startX = 0
     let startPos = 0
     let moved = 0
+    /* شناسه‌ی اشاره‌گرِ گرفته‌شده — صفر یعنی هنوز نگرفته‌ایم */
+    let captured = 0
+    /* لحظه‌ی پایانِ آخرین کشیدنِ واقعی؛ برای بلعیدنِ کلیکِ بلافاصله بعدش */
+    let draggedAt = 0
     let raf = 0
     /* نمونه‌های اخیر برای تخمینِ سرعت — یک نقطه کافی نیست، چون آخرین
        حرکت ممکن است لرزشِ دست باشد نه قصدِ کاربر. */
@@ -118,29 +122,48 @@ export function useHorizontalScroll(
       raf = requestAnimationFrame(step)
     }
 
+    /* ── چرا گرفتنِ اشاره‌گر و preventDefault به تعویق افتادند ──
+       این دو، *هر* کلیکِ ساده روی کارت‌های نوار را می‌خوردند و لینک
+       هیچ‌وقت باز نمی‌شد — فقط روی دسکتاپ، چون لمس بالاتر زودتر
+       برمی‌گردد. دقیقاً همان چیزی که به‌نظر می‌رسید «کارت باشگاه کلیک
+       نمی‌شود».
+
+       `setPointerCapture` رویدادهای بعدی را به خودِ نوار می‌برد، پس
+       رویدادِ `click` هم به‌جای `<a>`ی کارت روی ظرف می‌نشیند و
+       ناوبری اصلاً اتفاق نمی‌افتد. `preventDefault` روی `pointerdown`
+       هم رفتارِ پیش‌فرضِ فشردن را می‌گیرد.
+
+       هر دو حالا فقط وقتی اعمال می‌شوند که واقعاً کشیدنی در کار باشد.
+       جلوگیری از درگِ بومیِ تصویر — که هدفِ اصلیِ آن preventDefault بود
+       — به `dragstart` منتقل شد که کارِ درست‌ترش هم همان است. */
+    const onDragStart = (e: Event) => { if (down) e.preventDefault() }
+
     const onDown = (e: PointerEvent) => {
       /* لمس دست‌نخورده می‌ماند: اسکرولِ بومی نرم‌تر است */
       if (e.pointerType !== 'mouse' || e.button !== 0) return
       stopInertia()
-      /* بدونِ این، کشیدن روی عکسِ کارت‌ها درگِ بومیِ تصویر را شروع
-         می‌کند و مرورگر پس از اولین حرکت pointermove را قطع می‌کند —
-         نوار یک تکان می‌خورد و می‌ایستد. */
-      e.preventDefault()
       down = true
       moved = 0
+      captured = 0
       startX = e.clientX
       startPos = getPos(el)
       samples = [{ t: performance.now(), x: e.clientX }]
-      el.style.cursor = 'grabbing'
-      el.style.userSelect = 'none'
-      try { el.setPointerCapture(e.pointerId) } catch { /* پشتیبانی نشد */ }
       busy()
     }
 
     const onMove = (e: PointerEvent) => {
       if (!down) return
       const dx = e.clientX - startX
-      if (Math.abs(dx) > DRAG_THRESHOLD) moved = Math.abs(dx)
+      if (Math.abs(dx) > DRAG_THRESHOLD) {
+        moved = Math.abs(dx)
+        /* از این لحظه واقعاً «کشیدن» است، نه کلیک */
+        if (!captured) {
+          captured = e.pointerId
+          el.style.cursor = 'grabbing'
+          el.style.userSelect = 'none'
+          try { el.setPointerCapture(e.pointerId) } catch { /* پشتیبانی نشد */ }
+        }
+      }
 
       const now = performance.now()
       /* یک حرکتِ اشاره‌گر می‌تواند دوبار برسد (هدف و مسیرِ حباب). نمونه‌ی
@@ -162,8 +185,16 @@ export function useHorizontalScroll(
     const stop = () => {
       if (!down) return
       down = false
+      if (captured) {
+        try { el.releasePointerCapture(captured) } catch { /* آزاد شده */ }
+        captured = 0
+      }
       el.style.cursor = ''
       el.style.userSelect = ''
+      /* مهرِ زمان، نه فقط مقدار: اگر کاربر بیرونِ نوار رها کند هیچ
+         `click`ی نمی‌آید، `moved` بزرگ می‌ماند و **کلیکِ بعدی** —
+         که کلیکِ واقعیِ کاربر است — بی‌صدا بلعیده می‌شود. */
+      draggedAt = moved > DRAG_THRESHOLD ? performance.now() : 0
 
       /* سرعت از قدیمی‌ترین نمونه‌ی پنجره تا آخرین حساب می‌شود، نه از دو
          فریمِ آخر که نویزِ دست را بزرگ‌نمایی می‌کند. */
@@ -184,9 +215,14 @@ export function useHorizontalScroll(
       glide(sign === -1 ? vx : -vx)
     }
 
-    /* درگ نباید به کلیکِ روی کارت تبدیل شود */
+    /* درگ نباید به کلیکِ روی کارت تبدیل شود — ولی فقط کلیکی که بلافاصله
+       پس از همان درگ می‌آید. پنجره‌ی کوتاه تضمین می‌کند یک درگِ قدیمی،
+       کلیکِ چند ثانیه بعد را نخورد. */
     const onClick = (e: MouseEvent) => {
-      if (moved > DRAG_THRESHOLD + 2) { e.preventDefault(); e.stopPropagation() }
+      if (draggedAt && performance.now() - draggedAt < 300) {
+        e.preventDefault(); e.stopPropagation()
+      }
+      draggedAt = 0
       moved = 0
     }
 
@@ -243,6 +279,7 @@ export function useHorizontalScroll(
     el.addEventListener('pointercancel', stop)
     window.addEventListener('pointerup', stop)
     el.addEventListener('click', onClick, true)
+    el.addEventListener('dragstart', onDragStart)
 
     return () => {
       if (idle) clearTimeout(idle)
@@ -254,6 +291,7 @@ export function useHorizontalScroll(
       el.removeEventListener('pointercancel', stop)
       window.removeEventListener('pointerup', stop)
       el.removeEventListener('click', onClick, true)
+      el.removeEventListener('dragstart', onDragStart)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ref])

@@ -117,6 +117,8 @@ export default function ClubProfilePage() {
   const [activeCoach, setActiveCoach] = useState<number | null>(null);
   const [coaches, setCoaches]         = useState<CoachEntry[]>([]);
   const [clubAlbums, setClubAlbums]   = useState<ClubAlbum[]>([]);
+  /* آلبومِ انتخاب‌شده در تبِ گالری — `null` یعنی «همه تصاویر» */
+  const [pickedAlbum, setPickedAlbum] = useState<string | null>(null);
   const [clubStats, setClubStats]     = useState<ClubStats>(DEFAULT_STATS);
   /* شمرده‌شده‌ها جدا از آمارِ دستی نگه داشته می‌شوند تا با مقدارِ
      localStorage قاطی نشوند. `null` یعنی هنوز از سرور نیامده. */
@@ -1038,46 +1040,103 @@ export default function ClubProfilePage() {
                   <span style={{ width: 3, height: 16, background: 'linear-gradient(135deg,#C7A66A,#A07840)', borderRadius: 2, display: 'inline-block' }} />
                   <h3 style={{ fontSize: 17, fontWeight: 800, color: '#111111', margin: 0 }}>آلبوم‌ها</h3>
                 </div>
+                {/* ── انتخابِ آلبوم ──
+                    کارت‌های آلبوم `cursor: pointer` داشتند ولی هیچ
+                    `onClick`ی نداشتند — یعنی شبیهِ دکمه بودند و هیچ کاری
+                    نمی‌کردند، و شبکه‌ی پایین همیشه *همه‌ی* عکس‌های همه‌ی
+                    آلبوم‌ها را می‌ریخت. حالا انتخابِ آلبوم شبکه را فیلتر
+                    می‌کند و «همه تصاویر» به حالتِ کامل برمی‌گردد. */}
                 <div className="album-scroll">
                   {clubAlbums.length === 0 ? (
                     <div style={{ fontSize: 13, color: 'rgba(0,0,0,0.35)', padding: '8px 4px' }}>هنوز آلبومی ایجاد نشده</div>
-                  ) : clubAlbums.map(album => {
-                    const cover = album.items[0]?.dataUrl;
-                    return (
-                      <div key={album.id} style={{ flexShrink: 0, width: 110, cursor: 'pointer' }}>
-                        <div style={{ width: 110, height: 110, borderRadius: 14, overflow: 'hidden', position: 'relative', boxShadow: '0 4px 18px rgba(0,0,0,0.12)', background: 'rgba(199,166,106,0.12)' }}>
-                          {cover
-                            ? <img loading="lazy" decoding="async" src={cover} alt={album.name} style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.62) saturate(0.80)' }} />
-                            : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 30 }}>🖼</div>
-                          }
-                          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom,transparent 35%,rgba(0,0,0,0.82) 100%)' }} />
-                          <div style={{ position: 'absolute', bottom: 0, right: 0, left: 0, padding: 10 }}>
-                            <div style={{ fontSize: 13, fontWeight: 800, color: '#fff', lineHeight: 1.3, marginBottom: 3 }}>📁 {album.name}</div>
-                            <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.55)', fontWeight: 600 }}>{toFa(album.items.length)} عکس</div>
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
+                  ) : (
+                    <>
+                      <button type="button"
+                        onClick={() => setPickedAlbum(null)}
+                        style={{
+                          flexShrink: 0, width: 110, height: 110, borderRadius: 14, cursor: 'pointer',
+                          padding: 10, textAlign: 'center', fontFamily: 'inherit',
+                          display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 4,
+                          background: pickedAlbum === null ? 'rgba(199,166,106,0.16)' : 'rgba(0,0,0,0.03)',
+                          border: `2px solid ${pickedAlbum === null ? 'rgba(199,166,106,0.62)' : 'rgba(0,0,0,0.08)'}`,
+                          transition: 'background .15s, border-color .15s',
+                        }}>
+                        <span style={{ fontSize: 24 }}>🖼</span>
+                        <span style={{ fontSize: 12.5, fontWeight: 800, color: pickedAlbum === null ? '#9A6E38' : '#4B5563' }}>همه تصاویر</span>
+                        <span style={{ fontSize: 10, fontWeight: 600, color: 'rgba(0,0,0,0.38)' }}>
+                          {toFa(clubAlbums.reduce((n, a) => n + a.items.length, 0))} عکس
+                        </span>
+                      </button>
+
+                      {clubAlbums.map(album => {
+                        const cover = album.items[0]?.dataUrl;
+                        const on = pickedAlbum === album.id;
+                        return (
+                          <button key={album.id} type="button"
+                            onClick={() => setPickedAlbum(on ? null : album.id)}
+                            style={{
+                              flexShrink: 0, width: 110, height: 110, padding: 0, cursor: 'pointer',
+                              borderRadius: 14, overflow: 'hidden', position: 'relative', background: 'rgba(199,166,106,0.12)',
+                              border: `2px solid ${on ? 'rgba(199,166,106,0.85)' : 'transparent'}`,
+                              boxShadow: on ? '0 6px 22px rgba(199,166,106,0.38)' : '0 4px 18px rgba(0,0,0,0.12)',
+                              transition: 'border-color .15s, box-shadow .15s',
+                            }}>
+                            {cover
+                              ? <img loading="lazy" decoding="async" src={cover} alt={album.name} style={{ width: '100%', height: '100%', objectFit: 'cover', filter: on ? 'brightness(0.78) saturate(0.95)' : 'brightness(0.62) saturate(0.80)' }} />
+                              : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 30 }}>🖼</div>
+                            }
+                            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom,transparent 35%,rgba(0,0,0,0.82) 100%)' }} />
+                            <div style={{ position: 'absolute', bottom: 0, right: 0, left: 0, padding: 10, textAlign: 'right' }}>
+                              <div style={{ fontSize: 13, fontWeight: 800, color: '#fff', lineHeight: 1.3, marginBottom: 3 }}>📁 {album.name}</div>
+                              <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.55)', fontWeight: 600 }}>{toFa(album.items.length)} عکس</div>
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </>
+                  )}
                 </div>
               </div>
 
-              {/* All images grid — flattened from club albums */}
-              {clubAlbums.some(a => a.items.length > 0) && (
-                <div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
-                    <span style={{ width: 3, height: 16, background: 'linear-gradient(180deg,#06b6d4,#a78bfa)', borderRadius: 2, display: 'inline-block' }} />
-                    <h3 style={{ fontSize: 17, fontWeight: 800, color: '#111111', margin: 0 }}>همه تصاویر</h3>
-                  </div>
-                  <div className="gallery-grid">
-                    {clubAlbums.flatMap(a => a.items).map((item, i) => (
-                      <div key={item.id || i} style={{ aspectRatio: '1', borderRadius: 14, overflow: 'hidden', cursor: 'pointer', boxShadow: '0 2px 10px rgba(0,0,0,0.08)' }}>
-                        <img loading="lazy" decoding="async" src={item.dataUrl} alt={item.name} style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.82) saturate(0.78)' }} />
+              {/* شبکه‌ی تصاویر — آلبومِ انتخاب‌شده، یا همه */}
+              {(() => {
+                const picked = pickedAlbum ? clubAlbums.find(a => a.id === pickedAlbum) ?? null : null;
+                const items = picked ? picked.items : clubAlbums.flatMap(a => a.items);
+                if (!clubAlbums.some(a => a.items.length > 0)) return null;
+                return (
+                  <div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14, flexWrap: 'wrap' }}>
+                      <span style={{ width: 3, height: 16, background: 'linear-gradient(180deg,#06b6d4,#a78bfa)', borderRadius: 2, display: 'inline-block' }} />
+                      <h3 style={{ fontSize: 17, fontWeight: 800, color: '#111111', margin: 0 }}>
+                        {picked ? picked.name : 'همه تصاویر'}
+                      </h3>
+                      <span style={{ fontSize: 12, color: 'rgba(0,0,0,0.38)', fontWeight: 600 }}>
+                        {toFa(items.length)} عکس
+                      </span>
+                      {picked && (
+                        <button type="button" onClick={() => setPickedAlbum(null)} style={{
+                          marginRight: 'auto', padding: '5px 12px', borderRadius: 20, cursor: 'pointer',
+                          fontSize: 12, fontWeight: 700, fontFamily: 'inherit',
+                          background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.34)', color: '#9A6E38',
+                        }}>نمایش همه</button>
+                      )}
+                    </div>
+                    {items.length === 0 ? (
+                      <div style={{ fontSize: 13, color: 'rgba(0,0,0,0.35)', padding: '8px 4px' }}>
+                        این آلبوم هنوز عکسی ندارد.
                       </div>
-                    ))}
+                    ) : (
+                      <div className="gallery-grid">
+                        {items.map((item, i) => (
+                          <div key={item.id || i} style={{ aspectRatio: '1', borderRadius: 14, overflow: 'hidden', boxShadow: '0 2px 10px rgba(0,0,0,0.08)' }}>
+                            <img loading="lazy" decoding="async" src={item.dataUrl} alt={item.name} style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.82) saturate(0.78)' }} />
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
-                </div>
-              )}
+                );
+              })()}
             </div>
           )}
 
