@@ -21,22 +21,52 @@
    باشد و هرگز داخلِ گیت نروند.
 */
 
-import { mkdirSync, writeFileSync } from 'node:fs'
-import { join } from 'node:path'
+import { mkdirSync, writeFileSync, readFileSync, existsSync } from 'node:fs'
+import { join, dirname } from 'node:path'
+import { fileURLToPath } from 'node:url'
+
+/* ── کلیدها از فایلِ env محلی ──
+   کپی‌کردنِ دستیِ کلیدِ سرویس در خطِ فرمان یعنی نشستنش در تاریخچه‌ی
+   PowerShell — جایی که هیچ‌کس پاکش نمی‌کند. همان فایلی که خودِ برنامه
+   می‌خواند این‌جا هم خوانده می‌شود.
+
+   متغیرِ محیطیِ واقعی اولویت دارد، تا در سرور یا CI بشود بدونِ فایل
+   اجرا کرد. */
+const HERE = dirname(fileURLToPath(import.meta.url))
+const WEB = join(HERE, '..')
+for (const f of ['.env.local', '.env', join('..', '..', '.env')]) {
+  const p = join(WEB, f)
+  if (!existsSync(p)) continue
+  try {
+    /* ⚠️ تقسیم با `/\r?\n/` نه `'\n'`.
+       فایلِ env روی ویندوز CRLF است و در جاوااسکریپت `.` کاراکترِ `\r`
+       را نمی‌گیرد (خودش پایان‌خط شمرده می‌شود). با `split('\n')` هر خط
+       یک `\r` ته‌اش می‌ماند، `(.*)$` تا آن‌جا نمی‌رسد و **هیچ کلیدی
+       خوانده نمی‌شود** — جز آخرین خط که `\r` ندارد. دقیقاً همین شد:
+       هشت کلید در فایل بود و فقط یکی پیدا شد. */
+    for (const line of readFileSync(p, 'utf8').split(/\r?\n/)) {
+      const m = line.match(/^\s*([A-Za-z0-9_]+)\s*=\s*(.*)$/)
+      if (!m) continue
+      const k = m[1]
+      if (process.env[k]) continue                       // محیط برنده است
+      process.env[k] = (m[2] ?? '').trim().replace(/^["']|["']$/g, '')
+    }
+  } catch { /* خواندنی نبود — سراغِ بعدی */ }
+}
 
 const URL_ = (process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL || '').replace(/\/$/, '')
 const KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY || ''
 
 if (!URL_ || !KEY) {
   console.error(`
-✗ متغیرهای محیطی تنظیم نشده‌اند.
+✗ نشانی یا کلیدِ سرویس پیدا نشد.
 
-  در PowerShell:
-    $env:NEXT_PUBLIC_SUPABASE_URL   = "https://xxxx.supabase.co"
-    $env:SUPABASE_SERVICE_ROLE_KEY  = "…"
-    node apps/web/scripts/backup.mjs
+  معمولاً یعنی در apps/web/.env.local این دو نیستند:
+    NEXT_PUBLIC_SUPABASE_URL=https://xxxx.supabase.co
+    SUPABASE_SERVICE_ROLE_KEY=…
 
-  کلید را جایی ننویسید که در گیت برود.
+  کلیدِ service_role را از داشبورد Supabase ← Project Settings ← API
+  بردارید. (کلیدِ anon کافی نیست؛ با آن بیشترِ جدول‌ها خالی برمی‌گردند.)
 `)
   process.exit(1)
 }
