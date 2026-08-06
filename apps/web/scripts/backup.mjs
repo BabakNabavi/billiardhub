@@ -74,8 +74,16 @@ if (!URL_ || !KEY) {
 const PAGE = 1000
 const headers = { apikey: KEY, Authorization: `Bearer ${KEY}` }
 
+/* ── مقصد ──
+   اولویت: آرگومانِ خطِ فرمان ← متغیرِ `BH_BACKUP_DIR` ← پوشه‌ی پروژه.
+
+   پیش‌فرضِ داخلِ پروژه بهتر از هیچ است ولی هدف را کامل نمی‌کند: بکاپی
+   که روی همان دیسکِ پروژه بماند، با خرابیِ همان دیسک از بین می‌رود.
+   `BH_BACKUP_DIR` در `.env.local` یعنی یک‌بار تنظیم و بعد هر بار فقط
+   `npm run backup`. */
 const stamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-')
-const OUT = join(process.argv[2] || join(process.cwd(), 'backups'), stamp)
+const DEST = process.argv[2] || process.env.BH_BACKUP_DIR || join(process.cwd(), 'backups')
+const OUT = join(DEST, stamp)
 mkdirSync(join(OUT, 'tables'), { recursive: true })
 
 const fa = n => Number(n).toLocaleString('fa-IR')
