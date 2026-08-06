@@ -37,8 +37,11 @@ export async function GET(req: NextRequest) {
     /* تسویه‌های باز = دستورِ پرداختی که ساخته شده ولی هنوز واریز نشده */
     sb().from('settlements').select('*').in('status', ['PENDING', 'PROCESSING'])
       .order('requested_at', { ascending: true }),
+    /* `FAILED` هم می‌آید: تلاشِ واریز شکست خورده یعنی پول **هنوز**
+       نرسیده و بدهی سرِ جایش است. کنارگذاشتنش یعنی همان بازپرداختی
+       که یک‌بار نشد، برای همیشه از چشم پنهان بماند. */
     sb().from('refunds').select('id,booking_id,club_id,user_id,amount,reason,status,created_at')
-      .in('status', ['REQUESTED', 'PROCESSING'])
+      .in('status', ['REQUESTED', 'PROCESSING', 'FAILED'])
       .order('created_at', { ascending: true }),
   ]);
 
@@ -182,20 +185,72 @@ export async function GET(req: NextRequest) {
     };
   });
 
+  /* ── ۴) بازپرداختِ تبلیغات ──
+     این‌ها در جدولِ `refunds` نیستند — آن جدول فقط بازپرداختِ رزرو
+     است. سفارشِ تبلیغِ `REFUNDED` بدهیِ ثبت‌شده در دفتر دارد ولی تا
+     مهاجرتِ ۰۶۷ هیچ‌جا فهرست نمی‌شد؛ یعنی پولی که باید می‌رفت هیچ
+     صفحه‌ای یادآوری‌اش نمی‌کرد.
+
+     ستونِ `refund_paid_at` تازه است؛ اگر مهاجرت اجرا نشده باشد این
+     پرس‌وجو خطا می‌دهد و به‌جای شکستنِ کلِ صفحه، فهرست خالی می‌ماند. */
+  let toAdvertisers: Record<string, unknown>[] = [];
+  try {
+    const { data: adRefunds } = await sb().from('campaign_orders')
+      .select('id,user_id,amount,refund_amount,refund_reason,refunded_at,placement_key')
+      .eq('status', 'REFUNDED').is('refund_paid_at', null)
+      .order('refunded_at', { ascending: true });
+
+    const adUserIds = [...new Set((adRefunds ?? []).map(o => String((o as { user_id: string }).user_id)))]
+      .filter(id => id && id !== 'null' && !userBy.has(id));
+    if (adUserIds.length) {
+      const { data: more } = await sb().from('users')
+        .select('id,"firstName","lastName",phone,bank_card,bank_card_owner,bank_iban,bank_card_verified')
+        .in('id', adUserIds);
+      for (const u of (more ?? [])) userBy.set(String((u as User).id), u as User);
+    }
+
+    toAdvertisers = (adRefunds ?? []).map(o => {
+      const r = o as Record<string, unknown>;
+      const u = userBy.get(String(r.user_id));
+      const iban = String(u?.bank_iban ?? '').replace(/\s/g, '').toUpperCase();
+      const card = String(u?.bank_card ?? '').replace(/\D/g, '');
+      return {
+        id: String(r.id),
+        userName: `${u?.firstName ?? ''} ${u?.lastName ?? ''}`.trim() || '—',
+        holder: String(u?.bank_card_owner ?? '').trim(),
+        phone: String(u?.phone ?? ''),
+        amount: n(r.refund_amount ?? r.amount),
+        placement: String(r.placement_key ?? ''),
+        reason: String(r.refund_reason ?? ''),
+        createdAt: String(r.refunded_at ?? ''),
+        dest: iban || card,
+        destKind: iban ? 'iban' : 'card',
+        blocked: (iban || card) ? null
+          : 'حساب بانکی آگهی‌دهنده ثبت نشده — از او بخواهید در پروفایلش وارد کند',
+      };
+    });
+  } catch {
+    console.error('[payouts] بازپرداختِ تبلیغات خوانده نشد — مهاجرتِ ۰۶۷ اجرا نشده؟');
+  }
+
   const toClubs = [...openSettlements, ...unordered]
     .sort((a, b) => b.amount - a.amount);
 
   const sum = (rows: { amount: number }[]) => rows.reduce((s, r) => s + r.amount, 0);
-  const ready = [...toClubs, ...toUsers].filter(r => !r.blocked);
-  const blocked = [...toClubs, ...toUsers].filter(r => !!r.blocked);
+  const ads = toAdvertisers as unknown as { amount: number; blocked: string | null }[];
+  const every = [...toClubs, ...toUsers, ...ads];
+  const ready = every.filter(r => !r.blocked);
+  const blocked = every.filter(r => !!r.blocked);
 
   return NextResponse.json({
     toClubs,
     toUsers,
+    toAdvertisers,
     totals: {
       clubs: sum(toClubs),
       users: sum(toUsers),
-      all: sum(toClubs) + sum(toUsers),
+      advertisers: sum(ads),
+      all: sum(every),
       ready: sum(ready),
       blocked: sum(blocked),
       readyCount: ready.length,

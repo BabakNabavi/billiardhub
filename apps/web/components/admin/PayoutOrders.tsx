@@ -18,7 +18,7 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import { apiFetch } from '../../lib/http'
-import { Landmark, RotateCcw, Copy, Check, Loader2, AlertCircle, CircleDollarSign } from 'lucide-react'
+import { Landmark, RotateCcw, Copy, Check, Loader2, AlertCircle, CircleDollarSign, Megaphone } from 'lucide-react'
 
 const INK = '#1C1B17', SEC = '#5B564B', MUT = '#8A8474', LINE = '#EAE5DA'
 const GOLD = '#C7A66A', GOLD_D = '#9A6E38', FELT = '#0E7A38', RED = '#B23B2E'
@@ -49,10 +49,16 @@ interface UserRow {
   verified: boolean; reason: string
   status: string; createdAt: string; blocked: string | null; warn: string | null
 }
+/* بازپرداختِ تبلیغات — در جدولِ `refunds` نیست و مسیرِ جدا دارد */
+interface AdRow {
+  id: string; userName: string; holder: string; phone: string
+  amount: number; placement: string; reason: string; createdAt: string
+  dest: string; destKind: 'iban' | 'card'; blocked: string | null
+}
 interface Payload {
-  toClubs: ClubRow[]; toUsers: UserRow[]
+  toClubs: ClubRow[]; toUsers: UserRow[]; toAdvertisers?: AdRow[]
   totals: {
-    clubs: number; users: number; all: number
+    clubs: number; users: number; advertisers?: number; all: number
     ready: number; blocked: number; readyCount: number; blockedCount: number
   }
 }
@@ -89,7 +95,8 @@ export default function PayoutOrders({ onChanged }: { onChanged?: () => void }) 
   if (!d) return <div style={{ padding: 40, textAlign: 'center' }}><Loader2 size={22} style={{ color: MUT, animation: 'poSpin 1s linear infinite' }} /><style>{`@keyframes poSpin{to{transform:rotate(360deg)}}`}</style></div>
 
   const t = d.totals
-  const nothing = d.toClubs.length === 0 && d.toUsers.length === 0
+  const ads = d.toAdvertisers ?? []
+  const nothing = d.toClubs.length === 0 && d.toUsers.length === 0 && ads.length === 0
 
   return (
     <div>
@@ -172,7 +179,9 @@ export default function PayoutOrders({ onChanged }: { onChanged?: () => void }) 
                 name={u.userName}
                 sub={`${u.clubName}${u.reason ? ` — ${u.reason}` : ' — لغو رزرو'}`}
                 amount={u.amount}
-                badge={{ text: u.status === 'PROCESSING' ? 'در جریان' : 'در انتظار', tone: 'gold' }}
+                badge={u.status === 'FAILED'
+                  ? { text: 'واریز قبلی ناموفق', tone: 'warn' }
+                  : { text: u.status === 'PROCESSING' ? 'در جریان' : 'در انتظار', tone: 'gold' }}
               />
               {u.blocked ? (
                 <Blocked text={u.blocked} />
@@ -193,6 +202,36 @@ export default function PayoutOrders({ onChanged }: { onChanged?: () => void }) 
               )}
               <div style={{ fontSize: 11.5, color: MUT, marginTop: 10 }}>
                 ثبت‌شده در {faDate(u.createdAt)} — پس از واریز، از تب «بازپرداخت‌ها» وضعیتش را ببندید.
+              </div>
+            </Card>
+          ))}
+        </Section>
+      )}
+
+      {/* ── به آگهی‌دهندگان ──
+          سفارشِ تبلیغِ بازپرداخت‌شده در جدولِ `refunds` نیست و تا امروز
+          هیچ‌جا فهرست نمی‌شد: بدهی در دفتر ثبت می‌شد و هیچ صفحه‌ای
+          یادآوری‌اش نمی‌کرد. */}
+      {ads.length > 0 && (
+        <Section icon={<Megaphone size={15} />} title="بازپرداخت تبلیغات" sum={t.advertisers ?? 0}>
+          {ads.map(a => (
+            <Card key={a.id} blocked={!!a.blocked}>
+              <Head
+                name={a.userName}
+                sub={`${a.placement || 'کمپین تبلیغاتی'}${a.reason ? ` — ${a.reason}` : ''}`}
+                amount={a.amount}
+                badge={{ text: 'در انتظار واریز', tone: 'gold' }}
+              />
+              {a.blocked ? <Blocked text={a.blocked} /> : (
+                <Dest
+                  rows={[['به نام', a.holder || a.userName], ['موبایل', a.phone || '—']]}
+                  copyLabel={a.destKind === 'iban' ? 'شبا' : 'شماره کارت'}
+                  copyValue={a.destKind === 'iban' ? prettyIban(a.dest) : prettyCard(a.dest)}
+                  raw={a.destKind === 'iban' ? prettyIban(a.dest).replace(/\s/g, '') : a.dest.replace(/\D/g, '')}
+                />
+              )}
+              <div style={{ fontSize: 11.5, color: MUT, marginTop: 10 }}>
+                تأییدشده در {faDate(a.createdAt)} — پس از واریز، از «بسته‌های آگهی» ثبتش کنید.
               </div>
             </Card>
           ))}
