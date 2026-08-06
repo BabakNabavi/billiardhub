@@ -1,4 +1,5 @@
 export const dynamic = 'force-dynamic';
+import { callbackOrigin } from '@/lib/site-url';
 import { NextRequest, NextResponse } from 'next/server';
 import { actorOf, UNAUTHENTICATED } from '@/lib/auth/ownership';
 import { hitRateLimit, tooMany } from '@/lib/auth/rate-limit';
@@ -89,7 +90,7 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string
   }
 
   const provider = getPaymentProvider();
-  const origin = req.headers.get('origin') || req.nextUrl.origin;
+  const origin = callbackOrigin();
   const pay = await provider.createPayment({
     paymentId: out.registrationId!,
     amount: out.amount ?? 0,

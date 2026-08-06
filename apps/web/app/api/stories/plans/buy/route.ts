@@ -1,4 +1,5 @@
 export const dynamic = 'force-dynamic';
+import { callbackOrigin } from '@/lib/site-url';
 import { NextRequest, NextResponse } from 'next/server';
 import { sb, actorFromRequest, audit, clientIp } from '@/lib/finance/db';
 import { getPaymentProvider } from '@/lib/payments';
@@ -22,7 +23,7 @@ export async function POST(req: NextRequest) {
   if (!order) return NextResponse.json({ message: 'ثبت سفارش انجام نشد' }, { status: 500 });
 
   const provider = getPaymentProvider();
-  const callbackUrl = `${req.nextUrl.origin}/api/stories/plans/callback/${provider.name}?order=${order.id}`;
+  const callbackUrl = `${callbackOrigin()}/api/stories/plans/callback/${provider.name}?order=${order.id}`;
 
   const res = await provider.createPayment({
     paymentId: order.id,

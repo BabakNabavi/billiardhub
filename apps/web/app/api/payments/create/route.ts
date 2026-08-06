@@ -1,4 +1,5 @@
 export const dynamic = 'force-dynamic';
+import { callbackOrigin } from '@/lib/site-url';
 import { NextRequest, NextResponse } from 'next/server';
 import { sb, actorFromRequest, audit, clientIp } from '@/lib/finance/db';
 import { getPaymentProvider, hasRealGateway } from '@/lib/payments';
@@ -73,7 +74,7 @@ export async function POST(req: NextRequest) {
     paymentId = (created as { id: string }).id;
   }
 
-  const origin = req.nextUrl.origin;
+  const origin = callbackOrigin();
   const callbackUrl = `${origin}/api/payments/callback/${provider.name}?payment=${paymentId}`;
   const res = await provider.createPayment({
     paymentId, amount: b.final_amount,

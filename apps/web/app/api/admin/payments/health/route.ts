@@ -1,4 +1,5 @@
 export const dynamic = 'force-dynamic';
+import { callbackOrigin } from '@/lib/site-url';
 import { NextRequest, NextResponse } from 'next/server';
 import { actorFromRequest, isAdmin, audit } from '@/lib/finance/db';
 import { getPaymentProvider, hasRealGateway } from '@/lib/payments';
@@ -60,7 +61,7 @@ export async function GET(req: NextRequest) {
      یک مبلغِ مشخص با `?amount=`، وگرنه کلِ نردبان. */
   const one = Number(req.nextUrl.searchParams.get('amount') || 0);
   const ladder = one > 0 ? [Math.round(one)] : PROBE_LADDER;
-  const callbackUrl = `${req.nextUrl.origin}/api/admin/payments/health`;
+  const callbackUrl = `${callbackOrigin()}/api/admin/payments/health`;
 
   const results: Record<string, unknown>[] = [];
   let okCount = 0;

@@ -1,4 +1,5 @@
 export const dynamic = 'force-dynamic';
+import { callbackOrigin } from '@/lib/site-url';
 import { NextRequest, NextResponse } from 'next/server';
 import { sb, actorFromRequest, isAdmin, ownsClub, audit, clientIp } from '@/lib/finance/db';
 import { getPaymentProvider } from '@/lib/payments';
@@ -156,7 +157,7 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string
   }
   const campaignId = (created as { id: string }).id;
 
-  const origin = req.nextUrl.origin;
+  const origin = callbackOrigin();
   const res = await provider.createPayment({
     paymentId: campaignId, amount: q.total,
     description: `پیامک به اعضای ${g.clubName}`,

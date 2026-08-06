@@ -1,4 +1,5 @@
 export const dynamic = 'force-dynamic';
+import { callbackOrigin } from '@/lib/site-url';
 import { NextRequest, NextResponse } from 'next/server';
 import { sb, actorFromRequest, audit, clientIp } from '@/lib/finance/db';
 import { getPaymentProvider } from '@/lib/payments';
@@ -78,7 +79,7 @@ export async function POST(req: NextRequest) {
 
   /* ── درگاه ── */
   const provider = getPaymentProvider();
-  const callbackUrl = `${req.nextUrl.origin}/api/ads/campaigns/callback/${provider.name}?order=${draft.orderId}`;
+  const callbackUrl = `${callbackOrigin()}/api/ads/campaigns/callback/${provider.name}?order=${draft.orderId}`;
 
   const res = await provider.createPayment({
     paymentId: draft.orderId,
