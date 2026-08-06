@@ -298,10 +298,28 @@ export default function ClubProfilePage() {
         @keyframes fadeIn    { from{opacity:0;transform:translate(-50%,-48%) scale(0.94)} to{opacity:1;transform:translate(-50%,-50%) scale(1)} }
         @keyframes pulse     { 0%,100%{opacity:1} 50%{opacity:0.4} }
 
-        .tab-btn { padding:10px 20px;border-radius:20px;font-size:13px;font-weight:700;border:1px solid transparent;cursor:pointer;font-family:inherit;transition:all 0.25s;white-space:nowrap;flex-shrink:0 }
-        .tab-btn.active { background:rgba(199,166,106,0.12);border-color:rgba(199,166,106,0.35);color:#C7A66A }
-        .tab-btn:not(.active) { background:rgba(0,0,0,0.04);color:rgba(0,0,0,0.42);border-color:rgba(0,0,0,0.06) }
-        .tab-btn:not(.active):hover { background:rgba(199,166,106,0.08);color:#C7A66A;border-color:rgba(199,166,106,0.25);box-shadow:0 4px 14px rgba(199,166,106,0.15) }
+        /* ── تب‌های جعبه‌ای با خطِ رنگیِ بالا ──
+           تب‌ها به هم چسبیده‌اند و یک نوارِ یکپارچه می‌سازند؛ تبِ فعال
+           سفید است با یک خطِ بنفشِ نازک بالای خودش.
+
+           خطِ جداکننده فقط روی تب‌های دوم به بعد گذاشته می‌شود،
+           وگرنه حاشیه‌ی دو تبِ همسایه کنارِ هم می‌نشیند و جداکننده
+           دو برابر ضخیم دیده می‌شود. */
+        .tab-bar { display:inline-flex;border-radius:12px;overflow:hidden;
+                   border:1px solid rgba(0,0,0,0.09);background:#FAFAFA }
+        .tab-btn { position:relative;padding:13px 26px;font-size:13.5px;font-weight:600;
+                   border:none;cursor:pointer;font-family:inherit;white-space:nowrap;flex-shrink:0;
+                   background:transparent;color:rgba(0,0,0,0.55);transition:color .2s,background .2s }
+        .tab-btn + .tab-btn { border-right:1px solid rgba(0,0,0,0.09) }
+        .tab-btn::before { content:'';position:absolute;top:0;left:0;right:0;height:2.5px;
+                           background:#7C5CFC;opacity:0;transition:opacity .22s }
+        .tab-btn.active { background:#FFFFFF;color:#7C5CFC;font-weight:700 }
+        .tab-btn.active::before { opacity:1 }
+        .tab-btn:not(.active):hover { color:#7C5CFC;background:rgba(124,92,252,0.05) }
+        @media(max-width:600px){
+          .tab-bar { display:flex;width:100% }
+          .tab-btn { flex:1;padding:12px 8px;font-size:12.5px }
+        }
 
         .coach-card { padding:16px;background:#FFFFFF;border:1px solid rgba(0,0,0,0.07);border-radius:16px;transition:all 0.3s;cursor:pointer }
         .coach-card:hover { background:rgba(199,166,106,0.03);border-color:rgba(199,166,106,0.28);transform:translateY(-3px) }
@@ -353,6 +371,11 @@ export default function ClubProfilePage() {
 
         .hero-top-btn { top: 32px }
         @media(min-width:961px){ .hero-top-btn { top: 36px } }
+        /* ۱۰٪ کوچک‌تر. اندازه‌ها اینلاین‌اند و بدونِ important
+           بازنویسی نمی‌شوند — همان تله‌ای که در این پروژه بارها
+           پیش آمده. */
+        .hero-top-btn { font-size: 13.5px !important; padding: 7px 14px !important; }
+        .hero-top-btn > span:last-child { font-size: 12.5px !important; }
       `}</style>
 
       <div style={{ minHeight: '100vh', background: '#F7F7F5', direction: 'rtl', fontFamily: 'Vazirmatn, sans-serif', paddingBottom: 90 }}>
@@ -423,7 +446,10 @@ export default function ClubProfilePage() {
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 5, background: 'rgba(255,255,255,0.08)', backdropFilter: 'blur(12px)', borderRadius: 20, padding: '5px 12px', fontSize: 14, color: 'rgba(255,255,255,0.82)' }}>
                 <MapPin size={11} style={{ color: '#C7A66A' }} />
-                {club.province ? `${club.province} / ` : ''}{club.city}
+                {/* استان فقط وقتی می‌آید که با شهر یکی نباشد. برای
+                    «تهران / تهران» یا «اصفهان / اصفهان» تکرارِ بی‌فایده
+                    بود و فضای هدر را می‌گرفت. */}
+                {club.province && club.province.trim() !== club.city?.trim() ? `${club.province} / ` : ''}{club.city}
               </div>
               {distance && (
                 <div style={{ display: 'flex', alignItems: 'center', gap: 5, background: 'rgba(48,197,90,0.10)', border: '1px solid rgba(48,197,90,0.22)', borderRadius: 20, padding: '5px 12px', fontSize: 14, color: '#30C55A' }}>
@@ -442,17 +468,19 @@ export default function ClubProfilePage() {
         <div style={{ maxWidth: 1200, margin: '0 auto', padding: 'clamp(16px,3vw,32px) clamp(12px,3vw,28px)' }}>
 
           {/* #8: tab bar — centered on mobile, 'مسابقات' replaces 'میز و قیمت' */}
-          <div style={{ display: 'flex', gap: 8, marginBottom: 24, flexWrap: 'wrap', justifyContent: 'center' }}>
-            {([
-              { key: 'info',        label: 'اطلاعات' },
-              { key: 'gallery',     label: 'گالری' },
-              { key: 'tournaments', label: 'مسابقات' },
-              { key: 'schedule',    label: 'ساعت کاری' },
-            ] as const).map(t => (
-              <button key={t.key} className={`tab-btn ${tab === t.key ? 'active' : ''}`} onClick={() => setTab(t.key)}>
-                {t.label}
-              </button>
-            ))}
+          <div style={{ display: 'flex', marginBottom: 24, justifyContent: 'center' }}>
+            <div className="tab-bar">
+              {([
+                { key: 'info',        label: 'اطلاعات' },
+                { key: 'gallery',     label: 'گالری' },
+                { key: 'tournaments', label: 'مسابقات' },
+                { key: 'schedule',    label: 'ساعت کاری' },
+              ] as const).map(t => (
+                <button key={t.key} className={`tab-btn ${tab === t.key ? 'active' : ''}`} onClick={() => setTab(t.key)}>
+                  {t.label}
+                </button>
+              ))}
+            </div>
           </div>
 
           {/* ── INFO TAB ── */}

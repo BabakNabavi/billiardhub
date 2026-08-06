@@ -170,10 +170,13 @@ export default function Footer() {
           .ft-bottom, .ft-bottom .ft-legal { font-size: 11.5px !important; }
           .ft-bottom > div:first-child { font-size: 11.5px !important; }
           .ft-dev-desk { display: none !important; }
-          .ft-dev-mob { display: block !important; flex-basis: 100% !important; margin-top: 2px; }
-          /* در موبایل نشان‌ها وسط می‌نشینند و کمی بالاتر، تا نوارِ
-             حقوقیِ زیرشان هم بالا بیاید و انتهای فوتر جمع‌تر شود. */
-          .ft-seals { justify-content: center !important; margin-top: -38px !important; padding-bottom: 0 !important; }
+          /* اعتبارِ توسعه‌دهنده و نوارِ حقوقی نزدیکِ هم بمانند */
+          .ft-dev-mob { display: block !important; flex-basis: 100% !important; margin-top: 0; }
+          /* در موبایل نشان‌ها وسط می‌نشینند و کمی بالاتر. فاصله‌ی
+             پایینشان همان چیزی است که نوارِ حقوقی را از نشان جدا
+             نگه می‌دارد — بدونِ آن، نوار به نشان می‌چسبد و نشان به
+             خطِ بالای خودش. */
+          .ft-seals { justify-content: center !important; margin-top: -38px !important; padding-bottom: 14px !important; }
           .ft-link { font-size: 12px !important; padding: 4px 0 !important; min-height: 24px !important; }
           .ft-link svg { display: none; }
           .ft-heading { margin-bottom: 10px !important; }

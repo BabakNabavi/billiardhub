@@ -34,7 +34,7 @@ export default function EnamadSeal() {
           اینماد نبودِ grayscale و کم‌کردنِ opacity است، نه اندازه. */}
       <style>{`
         .bh-enamad img { max-width: 100%; height: auto; display: block;
-                         transform: scale(0.8); transform-origin: bottom left; }
+                         transform: scale(0.76); transform-origin: bottom left; }
       `}</style>
       <div dangerouslySetInnerHTML={{ __html: ENAMAD_HTML }} />
     </div>
