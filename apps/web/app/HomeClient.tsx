@@ -1186,8 +1186,6 @@ export default function HomeClient({ initialPlacements, initialFeatured, service
       const root = c?.parentElement ?? document;
       root.querySelectorAll<HTMLElement>('.hero-parallax')
         .forEach(el => { el.style.transform = `scale(${(1 + y * 0.00013) * 1.02})` });
-      const arrows = root.querySelector<HTMLElement>('.hero-arrows');
-      if (arrows) arrows.style.opacity = fade;
     };
 
     const fn = () => {
@@ -1300,13 +1298,22 @@ useEffect(() => {
 
         .sec-label{display:inline-flex;align-items:center;gap:7px;font-size:9.5px;font-weight:800;letter-spacing:0.26em;text-transform:uppercase;margin-bottom:14px;padding:5px 13px;border-radius:999px;border:1px solid currentColor;}
         .sec-label::before{content:'';width:6px;height:6px;border-radius:50%;background:currentColor;}
-        /* ── مهار رندر سکشن‌های پایین صفحه ──
-           «content-visibility:auto» به مرورگر می‌گوید محتوای بیرون دید
-           را اصلاً چیدمان و رنگ نکند. «contain-intrinsic-size» ارتفاع
-           حدسی می‌دهد تا نوار اسکرول نپرد (CLS).
-           این بزرگ‌ترین برنده‌ی «Style & Layout» است، چون صفحه‌ی اصلی
-           چندین سکشن سنگین دارد که کاربر شاید هیچ‌وقت به آن‌ها نرسد. */
-        .hm-defer { content-visibility: auto; contain-intrinsic-size: auto 700px; }
+        /* ── چرا content-visibility برداشته شد ──
+           هدفش درست بود: مرورگر محتوای بیرونِ دید را چیدمان نکند.
+           ولی هزینه‌اش در عمل بیشتر از سودش درآمد.
+
+           contain-intrinsic-size یعنی «فعلاً فرض کن ۷۰۰ پیکسل
+           است». وقتی بخش وارد کادرِ دید می‌شود، مرورگر
+           واقعاً چیدمانش می‌کند و ارتفاعِ واقعی معمولاً ۷۰۰ نیست —
+           پس ارتفاعِ کلِ صفحه همان لحظه عوض می‌شود و موقعیتِ اسکرول
+           می‌پرد. در اسکرولِ تند، چند بخش پشتِ‌سرِ هم این کار را
+           می‌کنند و اسکرول عملاً قفل می‌شود؛ و لحظه‌ای که بخش هنوز
+           چیده نشده، جای خالی‌اش تیره دیده می‌شود — همان «صفحه‌ی
+           سیاهی که چند صدم ثانیه می‌آید و می‌رود».
+
+           این هزینه برای صفحه‌ای با چند بخشِ متوسط نمی‌ارزد. اگر روزی
+           لازم شد، باید با ارتفاعِ واقعیِ هر بخش برگردد، نه یک عددِ
+           حدسیِ مشترک. */
 
         /* احترام به «کاهش حرکت» — تنظیم سیستمی کاربر، نه سلیقه‌ی ما.
            همه‌ی حلقه‌های بی‌پایان خاموش می‌شوند. */
@@ -1576,8 +1583,17 @@ useEffect(() => {
       {/* تصویرِ اسلایدِ اول روی خودِ ظرف می‌نشیند، نه فقط به‌عنوان
           `poster` ویدیو. دلیلش پایین‌تر، کنارِ محوشدنِ ویدیو. */}
       <div style={{
-        position: 'relative', height: isMobile ? 'auto' : '100dvh',
-        minHeight: isMobile ? '100dvh' : '640px', overflow: 'hidden',
+        /* ── چرا svh و نه dvh ──
+           `dvh` یعنی «ارتفاعِ *پویا*ی کادرِ دید». در مرورگرِ موبایل
+           نوارِ نشانی هنگام اسکرول جمع و باز می‌شود و همان لحظه مقدارِ
+           dvh هم عوض می‌شود — یعنی **قدِ هیرو حین اسکرول تغییر
+           می‌کند**، و چون همه‌ی بخش‌های بعدی زیرِ آن‌اند، کلِ صفحه بالا
+           و پایین می‌پرد. همان لرزشی که دیده می‌شد.
+
+           `svh` ارتفاعِ کادرِ دید را در حالتِ *کوچک* می‌گیرد و ثابت
+           می‌ماند؛ نوار باز باشد یا بسته، عدد عوض نمی‌شود. */
+        position: 'relative', height: isMobile ? 'auto' : '100svh',
+        minHeight: isMobile ? '100svh' : '640px', overflow: 'hidden',
         background: '#04020A',
         backgroundImage: 'url(/images/hero/1.webp)',
         backgroundSize: 'cover', backgroundPosition: 'center',
@@ -1728,7 +1744,7 @@ useEffect(() => {
         <div className="hero-content" ref={heroContentRef} style={{
           position: isMobile ? 'relative' : 'absolute',
           inset: isMobile ? undefined : 0,
-          minHeight: isMobile ? '100dvh' : undefined,
+          minHeight: isMobile ? '100svh' : undefined,
           zIndex: 10,
           display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start',
           /* +60px جای eyebrow حذف‌شده — وگرنه تیتر می‌رفت زیر نوار استوری */
@@ -1873,25 +1889,16 @@ useEffect(() => {
 
 
         {/* ── Prev/next arrows — hidden on mobile ── */}
-        <div className="hero-arrows" style={{ opacity: 1 }}>
-          {[{ fn: prev, icon: <ArrowRight size={13} /> }, { fn: next, icon: <ArrowLeft size={13} /> }].map((b, i) => (
-            <button key={i} onClick={b.fn} style={{ width: '34px', height: '34px', borderRadius: '50%',
-              background: 'rgba(255,255,255,0.06)',
-              border: '1px solid rgba(255,255,255,0.22)', display: 'flex', alignItems: 'center',
-              justifyContent: 'center', cursor: 'pointer', color: 'rgba(255,255,255,0.60)', transition: 'background 0.2s' }}
-              onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.background = 'rgba(255,255,255,0.12)'; el.style.color = '#fff'; }}
-              onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.background = 'rgba(255,255,255,0.06)'; el.style.color = 'rgba(255,255,255,0.60)'; }}>
-              {b.icon}
-            </button>
-          ))}
-        </div>
+        {/* فلش‌های چپ/راستِ گوشه‌ی هیرو برداشته شدند. کاروسل خودش
+            هر هفت ثانیه می‌چرخد و آن دو دکمه فقط گوشه‌ی تصویر را
+            شلوغ می‌کردند. */}
 
       </div>
 
       {/* §2 CLUB DISCOVERY ══════════════════════════════════════
           جایگاه featured_clubs_homepage غیرفعال ⇒ کل سکشن حذف */}
       {showClubs && (
-      <section className="clubs-section hm-defer" style={{ position: 'relative', overflow: 'hidden', background: 'linear-gradient(180deg,#F3F1ED 0%,#EEECE6 100%)', padding: 'clamp(36px,3.5vw,52px) clamp(16px,5%,80px) clamp(56px,5.5vw,80px)' }}>
+      <section className="clubs-section" style={{ position: 'relative', overflow: 'hidden', background: 'linear-gradient(180deg,#F3F1ED 0%,#EEECE6 100%)', padding: 'clamp(36px,3.5vw,52px) clamp(16px,5%,80px) clamp(56px,5.5vw,80px)' }}>
         <div aria-hidden style={{ position: 'absolute', top: '-18%', right: '-6%', width: 'min(520px,50vw)', height: 420, borderRadius: '50%', background: 'radial-gradient(circle, rgba(20,83,45,0.10) 0%, transparent 62%)', filter: 'blur(52px)', pointerEvents: 'none' }} />
         <div aria-hidden className="sec-hair" style={{ left: '28%', background: 'linear-gradient(180deg,transparent,rgba(20,83,45,0.28),transparent)' }} />
         <div aria-hidden className="sec-word" style={{ ['--wc' as never]: 'rgba(20,83,45,0.07)' }}>CLUBS</div>
@@ -1942,7 +1949,7 @@ useEffect(() => {
       {/* §3 MARKETPLACE ═════════════════════════════════════════
           جایگاه market_featured_products_homepage غیرفعال ⇒ حذف سکشن */}
       {showProducts && (
-      <section className="marketplace-section hm-defer" style={{ position: 'relative', overflow: 'hidden', background: 'linear-gradient(180deg,#FFFFFF 0%,#FBF9F5 100%)', padding: 'clamp(36px,3.5vw,52px) clamp(16px,5%,80px) clamp(20px,2vw,32px)' }}>
+      <section className="marketplace-section" style={{ position: 'relative', overflow: 'hidden', background: 'linear-gradient(180deg,#FFFFFF 0%,#FBF9F5 100%)', padding: 'clamp(36px,3.5vw,52px) clamp(16px,5%,80px) clamp(20px,2vw,32px)' }}>
         <div aria-hidden style={{ position: 'absolute', top: '-16%', left: '-5%', width: 'min(480px,46vw)', height: 400, borderRadius: '50%', background: 'radial-gradient(circle, rgba(160,120,64,0.09) 0%, transparent 62%)', filter: 'blur(50px)', pointerEvents: 'none' }} />
         <div aria-hidden style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(rgba(28,27,23,0.035) 1px, transparent 1px)', backgroundSize: '20px 20px', WebkitMaskImage: 'linear-gradient(100deg, transparent 55%, black 90%)', maskImage: 'linear-gradient(100deg, transparent 55%, black 90%)', pointerEvents: 'none' }} />
         <div aria-hidden className="sec-word" style={{ ['--wc' as never]: 'rgba(160,120,64,0.09)' }}>BAZAAR</div>
@@ -2027,7 +2034,7 @@ useEffect(() => {
           سکشن تا وقتی «فهرست فروشگاه‌ها» یا یکی از دو بنر کناری
           محتوایی دارد رندر می‌شود — هر سه جایگاه مستقل‌اند. */}
       {showSellersSection && (
-      <section className="sellers-section hm-defer" style={{ position: 'relative', overflow: 'hidden', background: 'linear-gradient(180deg,#F3F1ED 0%,#F0EDE7 100%)', padding: 'clamp(36px,3.5vw,52px) clamp(16px,5%,80px) clamp(20px,2vw,32px)' }}>
+      <section className="sellers-section" style={{ position: 'relative', overflow: 'hidden', background: 'linear-gradient(180deg,#F3F1ED 0%,#F0EDE7 100%)', padding: 'clamp(36px,3.5vw,52px) clamp(16px,5%,80px) clamp(20px,2vw,32px)' }}>
         <div aria-hidden style={{ position: 'absolute', top: '-20%', right: '10%', width: 'min(500px,48vw)', height: 400, borderRadius: '50%', background: 'radial-gradient(circle, rgba(199,166,106,0.13) 0%, transparent 62%)', filter: 'blur(52px)', pointerEvents: 'none' }} />
         <div aria-hidden className="sec-hair" style={{ left: '34%', background: 'linear-gradient(180deg,transparent,rgba(199,166,106,0.35),transparent)' }} />
         <div aria-hidden className="sec-word" style={{ ['--wc' as never]: 'rgba(154,110,56,0.08)' }}>SELLERS</div>
