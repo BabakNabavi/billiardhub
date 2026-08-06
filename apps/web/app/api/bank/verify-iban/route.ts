@@ -57,10 +57,21 @@ export async function POST(req: NextRequest) {
 
   const bankName = bankOfIban(iban);
   if (clubId) {
+    /* نامِ صاحبِ حساب هم روی خودِ باشگاه نوشته می‌شود.
+       پنلِ باشگاه‌دار `clubs.bankCardOwner` را نشان می‌دهد، نه
+       `club_bank_accounts.account_holder_name`. تا امروز فقط دومی پر
+       می‌شد، پس فیلدِ «نام صاحب حساب» همیشه خالی می‌ماند در حالی که
+       استعلام موفق بوده. */
+    const { data: me } = await sb().from('users')
+      .select('"firstName","lastName"').eq('id', actor.id).maybeSingle();
+    const u = (me ?? {}) as { firstName?: string; lastName?: string };
+    const holder = `${u.firstName ?? ''} ${u.lastName ?? ''}`.trim();
+
     await sb().from('clubs').update({
       iban,
       ibanVerified: true,
       ...(bankName ? { bankName } : {}),
+      ...(holder ? { bankCardOwner: holder } : {}),
     }).eq('id', clubId);
 
     /* همین شبا باید در `club_bank_accounts` هم بنشیند — تسویه از آن جدول

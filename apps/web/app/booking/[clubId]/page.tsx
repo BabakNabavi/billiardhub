@@ -196,7 +196,9 @@ function JalaliCalendar({ jYear, jMonth, selectedDay, todayJY, todayJM, todayJD,
           );
         })}
       </div>
-      <div style={{marginTop:'10px',fontSize: '12px',color:'rgba(0,0,0,0.30)',textAlign:'center'}}>رزرو تا حداکثر ۴ هفته آینده امکان‌پذیر است</div>
+      <div style={{marginTop:'10px',fontSize: '12px',color:'rgba(0,0,0,0.30)',textAlign:'center'}}>{/* عدد از همان منبعی می‌آید که سرور با آن رد می‌کند، تا این
+          جمله هیچ‌وقت با رفتارِ واقعی جدا نیفتد. */}
+      رزرو تا حداکثر {toFa(BOOKING_HORIZON_DAYS)} روز آینده امکان‌پذیر است</div>
     </div>
   );
 }

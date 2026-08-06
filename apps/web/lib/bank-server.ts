@@ -180,9 +180,13 @@ export async function syncClubSettlementAccount(opts: {
   const { sb, clubId, actorId, iban } = opts
   if (!clubId || !isValidIban(iban)) return
 
+  /* ⚠️ پیش‌تر این‌جا `select('name')` بود — ستونی که در جدولِ users
+     وجود ندارد. کوئری خطا می‌داد، `catch` بی‌صدا می‌بلعیدش، و نامِ
+     صاحبِ حساب همیشه به «صاحب باشگاه» می‌افتاد. */
   const holder = String(opts.holderName || '').trim()
-    || await sb().from('users').select('name').eq('id', actorId).maybeSingle()
-      .then((r: { data: { name?: string } | null }) => String(r.data?.name || '').trim())
+    || await sb().from('users').select('"firstName","lastName"').eq('id', actorId).maybeSingle()
+      .then((r: { data: { firstName?: string; lastName?: string } | null }) =>
+        `${r.data?.firstName ?? ''} ${r.data?.lastName ?? ''}`.trim())
       .catch(() => '')
 
   const { data: prev } = await sb().from('club_bank_accounts')
