@@ -43,12 +43,30 @@ for (const [path, origin, mustReject] of CASES) {
 
   const rejected = status === 403 && /دامنه/.test(body)
   const ok = rejected === mustReject
-  if (ok) { pass++; console.log('  ✅', mustReject ? 'رد شد' : 'گذشت  ', path) }
+  if (ok) { pass++; console.log('  ✅', mustReject ? 'رد شد' : 'گذشت  ', path, mustReject ? '' : `(HTTP ${status})`) }
   else {
     fail++
     console.log('  ❌', path, '\n       انتظار:', mustReject ? 'رد' : 'عبور',
       '| گرفت: HTTP', status, rejected ? '(رد بر اساس دامنه)' : '')
   }
+}
+
+/* ── ریدایرکت باید ۳۰۳ باشد، نه ۳۰۷ ──
+   ۳۰۷ متدِ درخواست را نگه می‌دارد. یعنی مرورگر بعد از POSTِ درگاه،
+   دوباره POST می‌کرد — این‌بار به صفحه‌ی نتیجه، که فقط GET می‌شناسد.
+   نتیجه: صفحه‌ی سفید، در حالی که پرداخت و رزرو کاملاً درست انجام
+   شده بود. ۳۰۳ صریحاً می‌گوید «حالا GET بزن». */
+console.log('\n── وضعیتِ ریدایرکت ──')
+for (const [path] of CASES.filter(c => !c[2])) {
+  try {
+    const r = await fetch(BASE + path, {
+      method: 'POST',
+      headers: { 'Origin': 'https://api.payping.ir', 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: 'status=0', redirect: 'manual',
+    })
+    if (r.status === 303) { pass++; console.log('  ✅ ۳۰۳', path) }
+    else { fail++; console.log('  ❌ HTTP', r.status, '— باید ۳۰۳ باشد وگرنه صفحه‌ی سفید می‌دهد:', path) }
+  } catch { fail++; console.log('  ⚠️  سرور پاسخ نداد:', path) }
 }
 
 console.log(`\n${pass} قبول · ${fail} رد\n`)
