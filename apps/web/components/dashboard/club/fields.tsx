@@ -14,12 +14,22 @@ import FaNumberInput from '../../ui/FaNumberInput';
 const GOLD = '#C7A66A';
 const DARK = '#1A1A18';
 
-export function Card({ children, style }: { children: React.ReactNode; style?: React.CSSProperties }) {
+export function Card({ children, style, onClick }: {
+  children: React.ReactNode; style?: React.CSSProperties
+  /* کارت‌های آمارِ داشبورد باید به تبِ مربوطشان ببرند. تا امروز فقط
+     عدد بودند و زدنشان هیچ کاری نمی‌کرد. */
+  onClick?: () => void
+}) {
   return (
-    <div style={{
-      background: '#fff', borderRadius: 16, padding: 20,
-      boxShadow: '0 1px 4px rgba(0,0,0,0.06)', border: '1px solid #F0EDE8', ...style,
-    }}>
+    <div
+      onClick={onClick}
+      role={onClick ? 'button' : undefined}
+      tabIndex={onClick ? 0 : undefined}
+      onKeyDown={onClick ? e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick() } } : undefined}
+      style={{
+        background: '#fff', borderRadius: 16, padding: 20,
+        boxShadow: '0 1px 4px rgba(0,0,0,0.06)', border: '1px solid #F0EDE8', ...style,
+      }}>
       {children}
     </div>
   );

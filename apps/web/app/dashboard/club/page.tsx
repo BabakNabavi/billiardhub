@@ -1649,16 +1649,24 @@ export default function ClubDashboardPage() {
       {/* ════ Tab: Dashboard ════ */}
       {activeTab === 'dashboard' && (
         <div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 12, marginBottom: 20 }}>
+          {/* ── چهار عدد، همیشه در یک سطر ──
+              `minmax(150px,…)` در موبایل دو تا در سطر می‌گذاشت و کارت‌ها
+              نصفِ صفحه را می‌گرفتند. `repeat(4,1fr)` هر چهار را کنارِ هم
+              نگه می‌دارد و اندازه‌ها نصف شدند.
+
+              هر کارت حالا به همان تب می‌برد — پیش‌تر فقط عدد بود و
+              زدنش هیچ کاری نمی‌کرد. */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8, marginBottom: 20 }}>
             {[
-              { label: 'در انتظار تأیید', value: pendingBookings.length, color: '#D97706' },
-              { label: 'کل رزروها',       value: bookings.length,        color: '#059669' },
-              { label: 'میزها',           value: tables.length,          color: '#2563EB' },
-              { label: 'مسابقات',         value: myTournaments.length,   color: GOLD      },
+              { label: 'در انتظار', value: pendingBookings.length, color: '#D97706', go: () => { setActiveTab('bookings'); setBookingFilter('pending'); } },
+              { label: 'کل رزروها', value: bookings.length,        color: '#059669', go: () => setActiveTab('bookings') },
+              { label: 'میزها',     value: tables.length,          color: '#2563EB', go: () => setActiveTab('tables') },
+              { label: 'مسابقات',   value: myTournaments.length,   color: GOLD,      go: () => setActiveTab('tournaments') },
             ].map(s => (
-              <Card key={s.label} style={{ textAlign: 'center', padding: '20px 16px' }}>
-                <div style={{ fontSize: 32, fontWeight: 800, color: s.color }}>{s.value}</div>
-                <div style={{ fontSize: 12, color: '#6B7280', marginTop: 4 }}>{s.label}</div>
+              <Card key={s.label} onClick={s.go}
+                style={{ textAlign: 'center', padding: '11px 4px', cursor: 'pointer' }}>
+                <div style={{ fontSize: 20, fontWeight: 800, color: s.color, lineHeight: 1.3 }}>{s.value}</div>
+                <div style={{ fontSize: 10.5, color: '#6B7280', marginTop: 2, whiteSpace: 'nowrap' }}>{s.label}</div>
               </Card>
             ))}
           </div>

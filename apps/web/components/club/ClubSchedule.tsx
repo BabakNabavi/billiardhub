@@ -154,8 +154,11 @@ export default function ClubSchedule({ clubId }: { clubId: string }) {
         })}
       </div>
 
-      {/* ── روزِ انتخاب‌شده ── */}
-      {selected ? (
+      {/* ── روزِ انتخاب‌شده ──
+          وقتی همان «فردا» انتخاب است، این کادر عیناً کادرِ بالا را
+          تکرار می‌کند. برای روزهای دیگر لازم است، پس فقط در همان یک
+          حالت پنهان می‌شود. */}
+      {selected && selected.date !== tomorrow?.date ? (
         <div style={{ border: `1px solid ${LINE}`, borderRadius: 15, padding: '14px 16px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 9, marginBottom: 11, flexWrap: 'wrap' }}>
             <span style={{ fontSize: 13.5, fontWeight: 900, color: INK }}>

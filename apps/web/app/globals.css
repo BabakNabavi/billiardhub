@@ -1151,11 +1151,24 @@ select:disabled { opacity: 0.55; cursor: not-allowed; }
 .wh-cell { display: flex; align-items: center; gap: 6px; min-width: 0; }
 
 @media (max-width: 560px) {
-  .wh-day-row { grid-template-columns: 74px 1fr 1fr; gap: 7px; padding: 10px 11px !important; }
+  .wh-day-row { grid-template-columns: 68px 1fr 1fr; gap: 6px; padding: 10px 9px !important; }
   .wh-day-name { font-size: 12.5px !important; }
   /* «از» و «تا» حذف: جای دو ساعت را می‌گرفتند و ترتیبشان خودش گویاست */
   .wh-lb { display: none; }
   .wh-cell { justify-content: center; }
+
+  /* ── چرا این‌جا لازم شد ──
+     هر انتخابگرِ ساعت دو جعبه دارد (ساعت و دقیقه) که هرکدام ۶۲px
+     ثابت‌اند. مجموعِ یک سطر می‌شد ۶۸ + ۶ + ۱۳۰ + ۶ + ۱۳۰ ≈ ۳۴۰px —
+     روی صفحه‌ی ۳۶۰ لبه‌ی لبه، و روی ۳۲۰ سرریز؛ همان روی‌هم‌افتادن.
+
+     عرضِ ثابت با `!important` شکسته می‌شود چون اینلاین است، و جعبه‌ها
+     کشسان می‌شوند. */
+  .wh-cell > * { width: auto !important; flex: 1 1 0; min-width: 0; }
+  .wh-cell select { width: 100% !important; min-width: 0; padding-left: 4px !important; padding-right: 4px !important; }
+  /* فلشِ بومیِ select حذف می‌شود: عرض می‌گیرد و کاری نمی‌کند — خودِ
+     جعبه با یک ضربه باز می‌شود. */
+  .wh-cell select { appearance: none; -webkit-appearance: none; background-image: none; text-align: center; }
 }
 
 /* ── دسترسی سریع (داشبورد باشگاه) ───────────────────────────────
