@@ -29,7 +29,14 @@ export async function GET(
   if (error || !data) {
     return NextResponse.json({ message: 'باشگاه یافت نشد' }, { status: 404, headers: CORS });
   }
-  return NextResponse.json(data, { headers: CORS });
+  /* `hasActiveStory` ستون نیست — از تاریخِ انقضا ساخته می‌شود تا هیچ‌وقت
+     کهنه نماند. صفحه‌ی باشگاه رینگِ استوری را از همین می‌خواند. */
+  const row = data as Record<string, unknown>;
+  return NextResponse.json({
+    ...row,
+    isVerified: row.verificationStatus === 'verified',
+    hasActiveStory: !!row.storyExpiresAt && new Date(String(row.storyExpiresAt)).getTime() > Date.now(),
+  }, { headers: CORS });
 }
 
 export async function PUT(
@@ -198,7 +205,11 @@ export async function PUT(
 
      فقط فیلدهای واقعاً اختیاری این‌طور کنار گذاشته می‌شوند؛ هر ستونِ
      ناشناخته‌ی دیگری همان خطای قبلی را می‌دهد تا بی‌صدا گم نشود. */
-  const OPTIONAL_COLUMNS = ['postalCode', 'addressNote'];
+  const OPTIONAL_COLUMNS = [
+    'postalCode', 'addressNote',
+    /* مهاجرتِ ۰۶۵ — محتوای نمایشیِ باشگاه */
+    'coaches', 'albums', 'clubStats',
+  ];
   if (error && /does not exist|PGRST204/i.test(`${error.message} ${error.code ?? ''}`)) {
     const dropped = OPTIONAL_COLUMNS.filter(
       k => Object.prototype.hasOwnProperty.call(body, k) && error!.message.includes(k));

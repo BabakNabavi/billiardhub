@@ -1,0 +1,153 @@
+'use client';
+
+/* ─────────────────────────────────────────────────────────────
+   «آدرس اختصاصی سایت شما» — منبعِ واحد
+
+   تا امروز سه نسخه‌ی جداگانه از این فیلد وجود داشت (ثبتِ باشگاه،
+   داشبوردِ مربی، داشبوردِ داور) و پنلِ مدیریتِ باشگاه اصلاً نداشت —
+   یعنی باشگاه‌دار پس از ثبت، دیگر راهی برای دیدن یا عوض‌کردنِ نشانیِ
+   صفحه‌اش نداشت.
+
+   نکته‌ی اصلیِ طراحی: کاربر باید *همان لحظه‌ی تایپِ هر حرف* نشانیِ
+   نهایی را کامل — با `.net` — ببیند. نسخه‌های قبلی یا پیشوند را جدا و
+   کم‌رنگ کنارِ فیلد می‌گذاشتند یا فقط `www.billiardhub.net/...` را با سه
+   نقطه نشان می‌دادند؛ در هر دو حالت کاربر نمی‌فهمید نشانیِ واقعی چه
+   می‌شود.
+   ───────────────────────────────────────────────────────────── */
+
+import { useEffect, useRef, useState } from 'react';
+import { persianToSlug, isValidSlug } from '@/lib/slug';
+
+const GOLD = '#C7A66A';
+const GOLD_D = '#9A6E38';
+const OK = '#0E7A38';
+const BAD = '#B23B2E';
+
+export type SlugStatus = 'idle' | 'invalid' | 'checking' | 'ok' | 'taken';
+
+export interface SiteAddressFieldProps {
+  value: string;
+  onChange: (v: string) => void;
+  /** بخشِ ثابتِ مسیر — `clubs` ⇒ billiardhub.net/clubs/… */
+  basePath: 'clubs' | 'coaches' | 'referees' | 'sellers';
+  /** نامِ فارسی که دکمه‌ی «پیشنهاد» از رویش نشانی می‌سازد */
+  suggestFrom?: string;
+  /** سازنده‌ی نشانیِ بررسیِ در‌دسترس‌بودن؛ باید `{ available: boolean }` برگرداند.
+   *  نبودنش یعنی بررسی‌ای انجام نشود (برای موجودیت‌هایی که هنوز مسیرش را ندارند). */
+  checkUrl?: (slug: string) => string;
+  /** وضعیت به بیرون هم داده می‌شود تا فرم بتواند جلوی ذخیره‌ی نشانیِ تکراری را بگیرد */
+  onStatusChange?: (s: SlugStatus) => void;
+  required?: boolean;
+  label?: string;
+  error?: string;
+}
+
+export default function SiteAddressField({
+  value, onChange, basePath, suggestFrom, checkUrl, onStatusChange,
+  required = false, label = 'آدرس اختصاصی سایت شما', error,
+}: SiteAddressFieldProps) {
+  const [status, setStatus] = useState<SlugStatus>('idle');
+  const statusRef = useRef(onStatusChange);
+  statusRef.current = onStatusChange;
+
+  useEffect(() => { statusRef.current?.(status); }, [status]);
+
+  /* ── بررسیِ در دسترس بودن ──
+     با تأخیر، وگرنه هر حرفی که تایپ می‌شود یک درخواست می‌فرستد. */
+  useEffect(() => {
+    if (!value) { setStatus('idle'); return; }
+    if (!isValidSlug(value)) { setStatus('invalid'); return; }
+    if (!checkUrl) { setStatus('ok'); return; }
+
+    setStatus('checking');
+    let alive = true;
+    const t = setTimeout(async () => {
+      try {
+        const r = await fetch(checkUrl(value), { cache: 'no-store' });
+        const j = await r.json() as { available?: boolean };
+        if (alive) setStatus(j?.available ? 'ok' : 'taken');
+      } catch {
+        /* شبکه قطع ⇒ راه را نمی‌بندیم؛ سرور موقعِ ذخیره تصمیم می‌گیرد */
+        if (alive) setStatus('idle');
+      }
+    }, 450);
+    return () => { alive = false; clearTimeout(t); };
+  }, [value, checkUrl]);
+
+  const borderColor =
+    status === 'ok' ? 'rgba(14,122,56,0.45)'
+      : status === 'taken' || status === 'invalid' || error ? 'rgba(178,59,46,0.45)'
+        : '#E5E7EB';
+
+  const suggestion = suggestFrom ? persianToSlug(suggestFrom) : '';
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 4, minWidth: 0 }}>
+      <label style={{ fontSize: 12, color: '#6B7280', fontWeight: 500 }}>
+        {label}{required && <span style={{ color: BAD }}> *</span>}
+      </label>
+
+      <div style={{ display: 'flex', gap: 6, alignItems: 'stretch' }}>
+        <input
+          type="text"
+          value={value}
+          dir="ltr"
+          lang="en"
+          spellCheck={false}
+          autoCapitalize="none"
+          autoCorrect="off"
+          inputMode="url"
+          placeholder="arta-club"
+          aria-label={label}
+          onChange={e => onChange(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '').slice(0, 60))}
+          style={{
+            flex: 1, minWidth: 0, boxSizing: 'border-box',
+            border: `1px solid ${borderColor}`, borderRadius: 8, padding: '9px 12px',
+            fontSize: 14, background: '#FAFAFA', color: '#1A1A18', outline: 'none',
+            direction: 'ltr', textAlign: 'left',
+            fontFamily: '"Courier New", Courier, monospace',
+          }}
+        />
+        {suggestion && suggestion !== value && (
+          <button
+            type="button"
+            onClick={() => onChange(suggestion)}
+            style={{
+              flexShrink: 0, padding: '0 12px', borderRadius: 8, cursor: 'pointer',
+              fontSize: 12, fontWeight: 700, whiteSpace: 'nowrap', fontFamily: 'var(--font-base)',
+              background: 'rgba(199,166,106,0.12)', border: `1px solid ${GOLD}55`, color: GOLD_D,
+            }}>
+            پیشنهاد
+          </button>
+        )}
+      </div>
+
+      {/* ── پیش‌نمایشِ زنده ──
+          همیشه دیده می‌شود، حتی وقتی فیلد خالی است: کاربر باید بداند
+          چه چیزی دارد می‌سازد پیش از آنکه اولین حرف را بزند. */}
+      <div className="bh-latin" style={{
+        marginTop: 3, direction: 'ltr', textAlign: 'left',
+        fontSize: 13, fontWeight: 700, lineHeight: 1.8,
+        color: value ? '#1C1B17' : 'rgba(0,0,0,0.32)',
+        background: value ? 'rgba(199,166,106,0.08)' : 'rgba(0,0,0,0.03)',
+        border: `1px solid ${value ? 'rgba(199,166,106,0.22)' : 'rgba(0,0,0,0.07)'}`,
+        borderRadius: 9, padding: '7px 11px', wordBreak: 'break-all',
+        transition: 'background .15s, border-color .15s',
+      }}>
+        www.billiardhub.net/{basePath}/
+        <span style={{ color: value ? GOLD_D : 'inherit' }}>{value || '…'}</span>
+      </div>
+
+      <div style={{ fontSize: 11.5, minHeight: 16, lineHeight: 1.9 }}>
+        {error                     && <span style={{ color: BAD }}>{error}</span>}
+        {!error && status === 'checking' && <span style={{ color: 'rgba(0,0,0,0.40)' }}>در حال بررسی…</span>}
+        {!error && status === 'ok' && checkUrl && <span style={{ color: OK }}>✓ این نشانی در دسترس است</span>}
+        {!error && status === 'taken'    && <span style={{ color: BAD }}>✗ این نشانی قبلاً رزرو شده — نامِ دیگری بگذارید</span>}
+        {!error && status === 'invalid'  && <span style={{ color: BAD }}>فقط حروف انگلیسی کوچک، عدد و خط تیره — دستِ‌کم ۲ حرف</span>}
+        {!error && status === 'idle' && !value && (
+          <span style={{ color: 'rgba(0,0,0,0.35)' }}>نشانیِ کوتاهی که به‌جای شناسه‌ی بلند در نوار مرورگر دیده می‌شود</span>
+        )}
+      </div>
+    </div>
+  );
+}

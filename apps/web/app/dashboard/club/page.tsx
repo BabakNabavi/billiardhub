@@ -19,6 +19,7 @@ import { rejectLabel } from '../../../lib/moderation/reasons';
 import GoLive from '../../../components/club/GoLive';
 import api from '../../../lib/api';
 import ProvinceCitySelect from '../../../components/ProvinceCitySelect';
+import SiteAddressField, { type SlugStatus } from '../../../components/SiteAddressField';
 import { provinceOfCity } from '../../../lib/iran-geo';
 import { useAuthStore } from '../../../store/auth.store';
 import { formatCard, isValidCard, bankOfCard, formatIban, isValidIban, bankOfIban, prettyIban } from '../../../lib/bank';
@@ -49,7 +50,7 @@ interface Club {
   id: string; name: string; city: string; isActive: boolean;
   verificationStatus?: string; rejectionReason?: string | null;
   bankCard?: string; bankCardOwner?: string; bankName?: string; iban?: string; licenseNumber?: string;
-  logo?: string;
+  logo?: string; slug?: string;
 }
 
 
@@ -406,12 +407,20 @@ export default function ClubDashboardPage() {
     hasCafe: false, hasParking: false, hasWifi: false, hasProfessionalCoach: false,
     specialFeatures: '',
     bankCard: '', bankCardOwner: '', bankName: '', iban: '', licenseNumber: '',
+    /* نشانیِ کوتاهِ صفحه‌ی باشگاه. موقعِ ثبتِ باشگاه گرفته می‌شد ولی بعد
+       از آن هیچ‌جا دیده و ویرایش نمی‌شد. */
+    slug: '',
   });
   const [infoSaving, setInfoSaving] = useState(false);
+  /* نتیجه‌ی ذخیره باید دیده شود؛ تا امروز خطا بی‌صدا بلعیده می‌شد و
+     باشگاه‌دار خیال می‌کرد ذخیره شده. */
+  const [infoMsg, setInfoMsg] = useState<{ ok: boolean; text: string } | null>(null);
+  const [slugStatus, setSlugStatus] = useState<SlugStatus>('idle');
 
   // Stats
   const [clubStats, setClubStats] = useState<ClubStats>(DEFAULT_STATS);
   const [statsSaving, setStatsSaving] = useState(false);
+  const [statsMsg, setStatsMsg] = useState<{ ok: boolean; text: string } | null>(null);
   /* اعضا و مسابقات شمرده می‌شوند، نه تایپ — از /api/clubs/:id/stats.
      `null` یعنی هنوز نیامده، که با صفر فرق دارد: نباید لحظه‌ای «۰ عضو»
      نشان بدهیم و بعد عدد واقعی بپرد. */
@@ -462,10 +471,25 @@ export default function ClubDashboardPage() {
     `club-${type}-${selectedClub?.id ?? 'none'}`, [selectedClub]);
 
 
-  const saveCoaches = useCallback((next: CoachEntry[]) => {
+  /* ── مربیانِ باشگاه روی سرور ذخیره می‌شوند ──
+     تا امروز فقط در `localStorage`ِ خودِ باشگاه‌دار می‌نشستند و صفحه‌ی
+     عمومیِ باشگاه هم همان کلید را از `localStorage`ِ **بازدیدکننده**
+     می‌خواند — که همیشه خالی است. یعنی این فهرست را هیچ‌کس جز خودِ
+     باشگاه‌دار، روی همان مرورگر، نمی‌دید. */
+  const [coachesError, setCoachesError] = useState('');
+  const saveCoaches = useCallback(async (next: CoachEntry[]) => {
+    const before = coaches;
     setCoaches(next);
-    try { localStorage.setItem(lsKey('coaches'), JSON.stringify(next)); } catch {}
-  }, [lsKey]);
+    setCoachesError('');
+    if (!selectedClub) return;
+    try {
+      await api.put(`/clubs/${selectedClub.id}`, { coaches: next });
+      try { localStorage.removeItem(lsKey('coaches')); } catch { /* ignore */ }
+    } catch {
+      setCoaches(before);
+      setCoachesError('ذخیره‌ی مربیان روی سرور انجام نشد؛ دوباره تلاش کنید.');
+    }
+  }, [lsKey, selectedClub, coaches]);
 
 
   /* میزها روی سرور ذخیره می‌شوند (نه فقط در مرورگر) تا صفحه‌ی رزرو
@@ -540,7 +564,10 @@ export default function ClubDashboardPage() {
         bankName: c.bankName ?? '',
         iban: c.iban ?? '',
         licenseNumber: c.licenseNumber ?? '',
+        slug: c.slug ?? '',
       });
+      setInfoMsg(null);
+      setSlugStatus('idle');
 
       setIbanVerified(!!c.ibanVerified);
       /* مختصات؛ صفر یعنی ثبت‌نشده، نه «جزیره‌ی صفر درجه» */
@@ -562,14 +589,32 @@ export default function ClubDashboardPage() {
         percent: String(c.playerSurchargePercent ?? 15),
         from: String(c.playerSurchargeFrom ?? 2),
       });
-    }).catch(() => {});
 
-    // Load localStorage data
-    try {
-      const s = localStorage.getItem(`club-stats-${selectedClub.id}`);
-      if (s) setClubStats(JSON.parse(s));
-      else setClubStats(DEFAULT_STATS);
-    } catch { setClubStats(DEFAULT_STATS); }
+      /* ── مربیان و آمار: سرور منبعِ حقیقت است ──
+         نسخه‌ی مرورگری فقط برای باشگاهی می‌ماند که هنوز چیزی روی سرور
+         ندارد (داده‌ی پیش از مهاجرتِ ۰۶۵). ترتیب صریح است تا مثلِ باگِ
+         قدیمیِ عکس‌ها، مقدارِ کهنه‌ی مرورگر روی داده‌ی واقعی نیفتد. */
+      const srvCoaches = Array.isArray(c.coaches) ? c.coaches as CoachEntry[] : [];
+      if (srvCoaches.length) setCoaches(srvCoaches);
+      else {
+        try {
+          const legacy = localStorage.getItem(`club-coaches-${selectedClub.id}`);
+          setCoaches(legacy ? JSON.parse(legacy) : []);
+        } catch { setCoaches([]); }
+      }
+      setCoachesError('');
+
+      const srvStats = (c.clubStats ?? null) as Partial<ClubStats> | null;
+      if (srvStats && Object.keys(srvStats).length) {
+        setClubStats({ ...DEFAULT_STATS, ...srvStats });
+      } else {
+        try {
+          const legacy = localStorage.getItem(`club-stats-${selectedClub.id}`);
+          setClubStats(legacy ? { ...DEFAULT_STATS, ...JSON.parse(legacy) } : DEFAULT_STATS);
+        } catch { setClubStats(DEFAULT_STATS); }
+      }
+      setStatsMsg(null);
+    }).catch(() => {});
 
     /* آمار شمردنی از سرور. شکستش کارت را خالی نمی‌کند — `null` می‌ماند
        و به‌جای عدد، خط تیره نشان داده می‌شود. */
@@ -580,11 +625,7 @@ export default function ClubDashboardPage() {
       .catch(() => { /* بی‌صدا */ });
 
 
-    try {
-      const c = localStorage.getItem(`club-coaches-${selectedClub.id}`);
-      if (c) setCoaches(JSON.parse(c));
-      else setCoaches([]);
-    } catch { setCoaches([]); }
+    /* مربیان و آمار بالاتر، همراه با خودِ رکوردِ باشگاه، خوانده می‌شوند */
 
 
     /* میزها از دیتابیس می‌آیند — همان منبعی که صفحه‌ی رزرو می‌خواند.
@@ -820,17 +861,46 @@ export default function ClubDashboardPage() {
 
   const saveInfo = async () => {
     if (!selectedClub) return;
+
+    /* نشانیِ تکراری را همین‌جا می‌گیریم: سرور فقط خطای یکتاییِ دیتابیس
+       می‌دهد که پیامش برای کاربر معنایی ندارد. */
+    if (clubInfo.slug && (slugStatus === 'taken' || slugStatus === 'invalid')) {
+      setInfoMsg({ ok: false, text: 'آدرس اختصاصی سایت را اصلاح کنید' });
+      return;
+    }
+
     setInfoSaving(true);
+    setInfoMsg(null);
     try {
       /* نام بانک مشتق است و در state نمی‌نشیند؛ موقع ذخیره از روی شبا
          حساب و فرستاده می‌شود تا صفحه‌ی عمومی هم آن را داشته باشد.
          آدرس عمداً فرستاده نمی‌شود وقتی از استعلام آمده — سرور خودش
          آن را نوشته و بازفرستادنش فقط راه را برای دست‌کاری باز می‌کند. */
-      await api.put(`/clubs/${selectedClub.id}`, {
+      const res = await api.put(`/clubs/${selectedClub.id}`, {
         ...clubInfo,
+        /* خالی ⇒ `null`، نه رشته‌ی تهی: ستون `slug` یکتاست و دو رشته‌ی
+           خالی با هم برخورد می‌کنند، ولی چند `null` مشکلی ندارند. */
+        slug: clubInfo.slug || null,
         bankName: derivedBankName || clubInfo.bankName,
       });
-    } catch { /* پیام در UI با وضعیت دکمه دیده می‌شود */ }
+      setInfoMsg({ ok: true, text: 'اطلاعات باشگاه ذخیره شد' });
+      /* اگر نشانی عوض شده، فهرستِ باشگاه‌های بالای صفحه هم باید بداند */
+      const savedSlug = (res?.data as { slug?: string | null } | undefined)?.slug;
+      if (savedSlug !== undefined) {
+        setClubs(prev => prev.map(c => c.id === selectedClub.id ? { ...c, slug: savedSlug ?? undefined } : c));
+      }
+    } catch (e) {
+      /* axios خطای HTTP را پرتاب می‌کند و پیامِ خودِ سرور در
+         `response.data.message` است، نه در `Error.message`. */
+      const r = (e as { response?: { data?: { message?: string } } })?.response;
+      const raw = `${r?.data?.message ?? ''} ${e instanceof Error ? e.message : ''}`;
+      setInfoMsg({
+        ok: false,
+        text: /slug|duplicate|unique|23505/i.test(raw)
+          ? 'این آدرس اختصاصی قبلاً رزرو شده — نامِ دیگری بگذارید'
+          : (r?.data?.message || 'ذخیره انجام نشد؛ دوباره تلاش کنید'),
+      });
+    }
     finally { setInfoSaving(false); }
   };
 
@@ -1035,13 +1105,19 @@ export default function ClubDashboardPage() {
     finally { setSurchargeSaving(false); }
   };
 
-  const saveStats = () => {
+  /* آمارِ دستی (سال‌های فعالیت و ظرفیتِ روزانه) هم مثلِ مربیان تا امروز
+     فقط در مرورگر بود و در صفحه‌ی عمومی خالی می‌ماند. */
+  const saveStats = async () => {
     if (!selectedClub) return;
     setStatsSaving(true);
+    setStatsMsg(null);
     try {
-      localStorage.setItem(`club-stats-${selectedClub.id}`, JSON.stringify(clubStats));
-    } catch {}
-    setTimeout(() => setStatsSaving(false), 500);
+      await api.put(`/clubs/${selectedClub.id}`, { clubStats });
+      try { localStorage.removeItem(`club-stats-${selectedClub.id}`); } catch { /* ignore */ }
+      setStatsMsg({ ok: true, text: 'آمار باشگاه ذخیره شد' });
+    } catch {
+      setStatsMsg({ ok: false, text: 'ذخیره‌ی آمار انجام نشد؛ دوباره تلاش کنید.' });
+    } finally { setStatsSaving(false); }
   };
 
   const deleteClub = async () => {
@@ -1810,6 +1886,20 @@ export default function ClubDashboardPage() {
                   onChange={v => setClubInfo(p => ({ ...p, province: v.province, city: v.city }))}
                 />
               </div>
+              {/* ── آدرس اختصاصی سایت ──
+                  موقعِ ثبتِ باشگاه گرفته می‌شد ولی از آن به بعد هیچ‌جای
+                  پنل دیده نمی‌شد، پس باشگاه‌دار نه می‌دانست نشانی‌اش چیست
+                  نه می‌توانست عوضش کند. */}
+              <div style={{ gridColumn: '1 / -1' }}>
+                <SiteAddressField
+                  value={clubInfo.slug}
+                  onChange={v => setClubInfo(p => ({ ...p, slug: v }))}
+                  basePath="clubs"
+                  suggestFrom={clubInfo.name}
+                  onStatusChange={setSlugStatus}
+                  checkUrl={s => `/api/clubs/slug-check?slug=${encodeURIComponent(s)}${selectedClub ? `&excludeId=${selectedClub.id}` : ''}`}
+                />
+              </div>
               {/* «کشور» برداشته شد — همه‌ی باشگاه‌ها ایران‌اند و آن فیلد
                   فقط داده‌ی ناهمگون می‌ساخت. جایش کد پستی، که آدرس را
                   خودش می‌آورد. */}
@@ -2083,13 +2173,22 @@ export default function ClubDashboardPage() {
 
             <div style={{ display: 'flex', gap: 10 }}>
               <SaveBtn onClick={saveInfo} loading={infoSaving} />
-              <button onClick={() => router.push(`/clubs/${selectedClub?.id}`)} style={{
+              {/* «مشاهده» باید همان نشانی‌ای را باز کند که کاربر بالاتر
+                  ساخته، نه شناسه‌ی بلند — وگرنه معلوم نمی‌شود slug کار
+                  می‌کند یا نه. */}
+              <button onClick={() => router.push(`/clubs/${clubInfo.slug || selectedClub?.id}`)} style={{
                 display: 'inline-flex', alignItems: 'center', gap: 6,
                 padding: '10px 20px', borderRadius: 20, border: '1px solid rgba(0,0,0,0.12)',
                 background: 'rgba(0,0,0,0.04)', fontSize: 14, cursor: 'pointer',
                 fontFamily: 'var(--font-base)', color: '#6B7280',
               }}><Eye size={14} /> مشاهده پروفایل</button>
             </div>
+            {infoMsg && (
+              <div style={{
+                marginTop: 12, fontSize: 12.5, fontWeight: 700, lineHeight: 1.9,
+                color: infoMsg.ok ? '#0E7A38' : '#B23B2E',
+              }}>{infoMsg.text}</div>
+            )}
           </Card>
 
           {/* Bank card card */}
@@ -2229,6 +2328,12 @@ export default function ClubDashboardPage() {
               <InputField label="ظرفیت روزانه"  value={clubStats.dailyCapacity} onChange={v => setClubStats(p => ({...p, dailyCapacity: v}))} placeholder="مثال: ۸۰ نفر" />
             </div>
             <SaveBtn onClick={saveStats} loading={statsSaving} label="ذخیره آمار" />
+            {statsMsg && (
+              <div style={{
+                marginTop: 12, fontSize: 12.5, fontWeight: 700, lineHeight: 1.9,
+                color: statsMsg.ok ? '#0E7A38' : '#B23B2E',
+              }}>{statsMsg.text}</div>
+            )}
           </Card>
         </div>
       )}
@@ -3276,6 +3381,14 @@ export default function ClubDashboardPage() {
               padding: '9px 18px', fontSize: 13, fontWeight: 700, cursor: 'pointer', fontFamily: 'var(--font-base)',
             }}>+ مربی جدید</button>
           </div>
+
+          {coachesError && (
+            <div style={{
+              marginBottom: 16, padding: '10px 12px', borderRadius: 10, lineHeight: 1.9,
+              background: 'rgba(220,38,38,0.06)', border: '1px solid rgba(220,38,38,0.28)',
+              fontSize: 12.5, fontWeight: 700, color: '#B91C1C',
+            }}>{coachesError}</div>
+          )}
 
           {/* Coach Picker — inline dropdown */}
           {showCoachPicker && (

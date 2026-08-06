@@ -15,7 +15,7 @@
    ───────────────────────────────────────────────────────────── */
 
 import { useState, useEffect, useCallback } from 'react';
-import { Camera, Loader2, Trash2, Plus, X, Image as ImageIcon, Upload, FolderPlus } from 'lucide-react';
+import { Camera, Loader2, Trash2, Plus, X, Image as ImageIcon, Upload, FolderPlus, AlertCircle } from 'lucide-react';
 import api from '../../../lib/api';
 import { apiFetch } from '../../../lib/http';
 import { uploadFile } from '../../../lib/supabase';
@@ -37,29 +37,12 @@ export interface ClubPhoto { id: string; dataUrl: string; name: string }
 export interface ClubAlbumItem { id: string; dataUrl: string; name: string; caption: string }
 export interface ClubAlbum { id: string; name: string; createdAt: string; items: ClubAlbumItem[] }
 
-interface ClubLike { id: string; name?: string; logo?: string; images?: unknown }
+interface ClubLike { id: string; name?: string; logo?: string; images?: unknown; albums?: unknown }
 
 const uid = (): string => Math.random().toString(36).slice(2, 10);
 
-/* عکسِ آلبوم هنوز data-URL است (فقط در مرورگر می‌ماند)، پس فشرده
-   می‌شود. عکس‌های خودِ باشگاه برعکس، به Storage می‌روند. */
-function compressImage(file: File): Promise<string> {
-  return new Promise(resolve => {
-    const img = new Image();
-    const url = URL.createObjectURL(file);
-    img.onload = () => {
-      const MAX = 900;
-      const scale = Math.min(MAX / img.width, MAX / img.height, 1);
-      const canvas = document.createElement('canvas');
-      canvas.width  = Math.round(img.width  * scale);
-      canvas.height = Math.round(img.height * scale);
-      canvas.getContext('2d')!.drawImage(img, 0, 0, canvas.width, canvas.height);
-      URL.revokeObjectURL(url);
-      resolve(canvas.toDataURL('image/jpeg', 0.75));
-    };
-    img.src = url;
-  });
-}
+/* `compressImage` حذف شد: عکسِ آلبوم دیگر data-URL نمی‌شود و مثلِ بقیه‌ی
+   عکس‌های باشگاه به Storage می‌رود. */
 
 /* سقفِ عکس‌های باشگاه. این‌ها پس‌زمینه‌ی صفحه‌ی عمومی می‌شوند و
    بی‌سقف‌بودن هم ردیفِ دیتابیس را سنگین می‌کرد و هم صفحه را. */
@@ -80,6 +63,9 @@ export default function GalleryTab({ club, onLogoChange }: {
   const [logoUploading, setLogoUploading] = useState(false);
   const [storyUploading, setStoryUploading] = useState(false);
   const [storyList, setStoryList] = useState<ClubStory[]>([]);
+  /* خطای انتشار/حذفِ استوری و لوگو — تا امروز بی‌صدا بلعیده می‌شد */
+  const [storyError, setStoryError] = useState('');
+  const [albumError, setAlbumError] = useState('');
   const [storyTextColor, setStoryTextColor] = useState('#ffffff');
   const [storyTextSize, setStoryTextSize] = useState(15);
   const [storyTextBold, setStoryTextBold] = useState(false);
@@ -88,10 +74,26 @@ export default function GalleryTab({ club, onLogoChange }: {
 
   const lsKey = useCallback((type: string) => `club-${type}-${club?.id ?? 'none'}`, [club]);
 
-  const saveAlbums = useCallback((next: ClubAlbum[]) => {
+  /* ── آلبوم‌ها روی سرور ذخیره می‌شوند ──
+     تا امروز فقط در `localStorage`ِ خودِ باشگاه‌دار بودند و صفحه‌ی عمومیِ
+     باشگاه هم همان کلید را از `localStorage`ِ بازدیدکننده می‌خواند — که
+     همیشه خالی است. یعنی آلبوم‌ها را هیچ‌کس جز خودِ باشگاه‌دار نمی‌دید.
+
+     ستون `albums` فقط **نشانی** نگه می‌دارد؛ تصویرها مثلِ عکس‌های باشگاه
+     به Storage می‌روند. */
+  const saveAlbums = useCallback(async (next: ClubAlbum[]) => {
+    if (!club) return;
+    const before = albums;
     setAlbums(next);
-    try { localStorage.setItem(lsKey('albums'), JSON.stringify(next)); } catch {}
-  }, [lsKey]);
+    setAlbumError('');
+    try {
+      await api.put(`/clubs/${club.id}`, { albums: next });
+      try { localStorage.removeItem(lsKey('albums')); } catch { /* ignore */ }
+    } catch {
+      setAlbums(before);
+      setAlbumError('ذخیره‌ی آلبوم روی سرور انجام نشد؛ دوباره تلاش کنید.');
+    }
+  }, [lsKey, club, albums]);
 
   const savePhotos = useCallback(async (next: ClubPhoto[]) => {
     if (!club) return;
@@ -108,67 +110,110 @@ export default function GalleryTab({ club, onLogoChange }: {
   /* با عوض‌شدنِ باشگاه، همه‌چیزِ این تب دوباره خوانده می‌شود */
   useEffect(() => {
     if (!club) { setAlbums([]); setSinglePhotos([]); setStoryList([]); return; }
+    const clubId = club.id;
+    let alive = true;
 
-    /* منبعِ حقیقتِ عکس‌ها سرور است.
-       نسخه‌ی قبلی هم از سرور می‌خواند و هم از localStorage، در دو افکتِ
-       جدا — و هر کدام دیرتر اجرا می‌شد برنده بود. یعنی یک مقدارِ کهنه‌ی
-       مرورگر می‌توانست عکس‌های واقعیِ سرور را بپوشاند. حالا ترتیب صریح
-       است: اگر سرور عکسی دارد، همان؛ نسخه‌ی مرورگر فقط برای باشگاهی
-       که هنوز چیزی روی سرور ندارد (داده‌ی پیش از انتقال). */
-    const fromServer = Array.isArray(club.images)
-      ? (club.images as string[]).filter(Boolean).slice(0, MAX_CLUB_PHOTOS)
-          .map((u, i) => ({ id: `srv-${i}`, dataUrl: u, name: '' }))
-      : [];
-    if (fromServer.length) {
-      setSinglePhotos(fromServer);
-    } else {
-      try {
-        const p = localStorage.getItem(`club-photos-${club.id}`);
-        setSinglePhotos(p ? JSON.parse(p) : []);
-      } catch { setSinglePhotos([]); }
-    }
     setPhotoError('');
+    setAlbumError('');
+    setStoryError('');
     setStoryDraft(null);
     setOpenAlbumId(null);
 
-    try {
-      const a = localStorage.getItem(`club-albums-${club.id}`);
-      setAlbums(a ? JSON.parse(a) : []);
-    } catch { setAlbums([]); }
+    /* ── چرا دوباره از سرور می‌خوانیم و از prop استفاده نمی‌کنیم ──
+       `club` یک عکسِ لحظه‌ایِ فهرستی است که موقعِ بازشدنِ داشبورد گرفته
+       شده. پس از ذخیره‌ی یک آلبوم یا عکس، آن فهرست به‌روز نمی‌شود؛
+       کافی بود کاربر باشگاه را عوض کند و برگردد تا نسخه‌ی پیش از ذخیره
+       را ببیند و خیال کند کارش گم شده. */
+    const applyRow = (c: Record<string, unknown> | null) => {
+      if (!alive) return;
 
-    fetch(`/api/clubs/${club.id}/stories`)
+      /* منبعِ حقیقتِ عکس‌ها سرور است. نسخه‌ی مرورگری فقط برای باشگاهی
+         می‌ماند که هنوز چیزی روی سرور ندارد (داده‌ی پیش از انتقال). */
+      const imgs = Array.isArray(c?.images) ? c!.images as string[] : (club.images as string[] | undefined) ?? [];
+      const fromServer = imgs.filter(Boolean).slice(0, MAX_CLUB_PHOTOS)
+        .map((u, i) => ({ id: `srv-${i}`, dataUrl: u, name: '' }));
+      if (fromServer.length) setSinglePhotos(fromServer);
+      else {
+        try {
+          const p = localStorage.getItem(`club-photos-${clubId}`);
+          setSinglePhotos(p ? JSON.parse(p) : []);
+        } catch { setSinglePhotos([]); }
+      }
+
+      /* آلبومِ پیش از مهاجرتِ ۰۶۵ فقط در مرورگر بود؛ تا وقتی سرور خالی
+         است همان نشان داده می‌شود و اولین ذخیره منتقلش می‌کند. */
+      const srvAlbums = Array.isArray(c?.albums) ? c!.albums as ClubAlbum[] : [];
+      if (srvAlbums.length) setAlbums(srvAlbums);
+      else {
+        try {
+          const a = localStorage.getItem(`club-albums-${clubId}`);
+          setAlbums(a ? JSON.parse(a) : []);
+        } catch { setAlbums([]); }
+      }
+    };
+
+    apiFetch(`/api/clubs/${clubId}`, { cache: 'no-store' })
+      .then(r => (r.ok ? r.json() : null))
+      .then(applyRow)
+      .catch(() => applyRow(null));
+
+    /* `sync=1` رکوردِ باشگاه را از روی فایلِ استوری‌ها تعمیر می‌کند —
+       برای استوری‌هایی که پیش از مهاجرتِ ۰۶۴ ثبت شده‌اند و رکوردشان
+       ستون‌های استوری را ندارد. */
+    fetch(`/api/clubs/${clubId}/stories?sync=1`, { cache: 'no-store' })
       .then(r => r.json())
-      .then(d => { if (Array.isArray(d)) setStoryList(d); })
-      .catch(() => setStoryList([]));
+      .then(d => { if (alive && Array.isArray(d)) setStoryList(d); })
+      .catch(() => { if (alive) setStoryList([]); });
+
+    return () => { alive = false; };
   }, [club]);
 
   const createAlbum = () => {
     if (!newAlbumName.trim()) return;
     const album: ClubAlbum = { id: uid(), name: newAlbumName.trim(), createdAt: new Date().toISOString(), items: [] };
-    saveAlbums([album, ...albums]);
+    void saveAlbums([album, ...albums]);
     setNewAlbumName('');
     setOpenAlbumId(album.id);
   };
 
   const deleteAlbum = (id: string) => {
-    saveAlbums(albums.filter(a => a.id !== id));
+    void saveAlbums(albums.filter(a => a.id !== id));
     if (openAlbumId === id) setOpenAlbumId(null);
   };
 
+  /* تصویر به Storage می‌رود و فقط نشانی‌اش ذخیره می‌شود.
+     پیش‌تر base64ِ فشرده مستقیم داخلِ داده می‌نشست — که در
+     `localStorage` هم سنگین بود و در یک ستونِ jsonb فاجعه می‌شد: هر
+     `select('*')` روی جدولِ باشگاه‌ها چند مگابایت می‌آورد و صفحه‌ی اولِ
+     سایت همان را می‌زند. */
   const uploadToAlbum = async (albumId: string, files: FileList) => {
+    if (!club) return;
     setUploadingAlbum(albumId);
+    setAlbumError('');
     const newItems: ClubAlbumItem[] = [];
-    for (const file of Array.from(files)) {
-      if (!file.type.startsWith('image/')) continue;
-      const dataUrl = await compressImage(file);
-      newItems.push({ id: uid(), dataUrl, name: file.name, caption: '' });
+    try {
+      for (const file of Array.from(files)) {
+        if (!file.type.startsWith('image/')) continue;
+        const fd = new FormData();
+        fd.append('file', file);
+        fd.append('path', `clubs/${club.id}/albums/${albumId}/${Date.now()}-${newItems.length}`);
+        const r = await apiFetch('/api/upload', { method: 'POST', body: fd });
+        const j = await r.json().catch(() => ({} as { url?: string; message?: string }));
+        if (!r.ok || !j?.url) throw new Error(j?.message);
+        newItems.push({ id: uid(), dataUrl: j.url, name: file.name, caption: '' });
+      }
+      if (newItems.length) {
+        await saveAlbums(albums.map(a => a.id === albumId ? { ...a, items: [...a.items, ...newItems] } : a));
+      }
+    } catch {
+      setAlbumError('آپلود عکسِ آلبوم انجام نشد؛ دوباره تلاش کنید.');
+    } finally {
+      setUploadingAlbum(null);
     }
-    saveAlbums(albums.map(a => a.id === albumId ? { ...a, items: [...a.items, ...newItems] } : a));
-    setUploadingAlbum(null);
   };
 
   const deletePhotoFromAlbum = (albumId: string, itemId: string) => {
-    saveAlbums(albums.map(a =>
+    void saveAlbums(albums.map(a =>
       a.id === albumId ? { ...a, items: a.items.filter(i => i.id !== itemId) } : a
     ));
   };
@@ -216,61 +261,82 @@ export default function GalleryTab({ club, onLogoChange }: {
   const uploadLogo = async (file: File) => {
     if (!club) return;
     setLogoUploading(true);
+    setStoryError('');
     try {
       const url = await uploadFile('club-media', file, `clubs/${club.id}/logo/${file.name}`);
-      if (url) {
-        await api.put(`/clubs/${club.id}`, { logo: url });
-        onLogoChange(url);
-      }
-    } catch {}
+      if (!url) throw new Error('آپلود انجام نشد');
+      await api.put(`/clubs/${club.id}`, { logo: url });
+      onLogoChange(url);
+    } catch {
+      setStoryError('ذخیره‌ی لوگو انجام نشد؛ دوباره تلاش کنید.');
+    }
     setLogoUploading(false);
   };
 
+  /* ── چرا نتیجه‌ی سرور این‌جا مهم است ──
+     تا امروز POST داخل یک `try {} catch {}`ِ خالی بود و کدِ وضعیت هم
+     خوانده نمی‌شد. یعنی اگر سرور ۴۰۳ می‌داد (استوری فقط دستِ مالکِ همان
+     باشگاه است) استوری در فهرستِ محلی نشان داده می‌شد و باشگاه‌دار خیال
+     می‌کرد منتشر شده — در حالی که هیچ‌جا ثبت نشده بود. */
   const uploadStory = async (file: File, text: string) => {
     if (!club) return;
-    if (storyList.length >= 10) { alert('حداکثر ۱۰ استوری مجاز است'); return; }
+    if (storyList.length >= 10) { setStoryError('حداکثر ۱۰ استوری مجاز است'); return; }
     setStoryUploading(true);
+    setStoryError('');
     try {
       const url = await uploadFile('club-media', file, `clubs/${club.id}/stories/${Date.now()}-${file.name}`);
-      if (url) {
-        const newStory: ClubStory = {
-          id: `s_${Date.now()}`,
-          mediaUrl: url,
-          mediaType: file.type.startsWith('video/') ? 'video' : 'image',
-          text,
-          textColor: storyTextColor,
-          textSize: storyTextSize,
-          textBold: storyTextBold,
-          textAlign: storyTextAlign,
-          textPos: storyTextPos,
-          createdAt: new Date().toISOString(),
-          expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
-        };
-        try {
-          await apiFetch(`/api/clubs/${club.id}/stories`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(newStory),
-          });
-        } catch {}
-        setStoryList(prev => [...prev, newStory]);
-        setStoryDraft(null);
-        setStoryTextColor('#ffffff');
-        setStoryTextSize(15);
-        setStoryTextBold(false);
-        setStoryTextAlign('center');
-        setStoryTextPos('bottom');
+      if (!url) throw new Error('آپلود فایل انجام نشد');
+
+      const newStory: ClubStory = {
+        id: `s_${Date.now()}`,
+        mediaUrl: url,
+        mediaType: file.type.startsWith('video/') ? 'video' : 'image',
+        text,
+        textColor: storyTextColor,
+        textSize: storyTextSize,
+        textBold: storyTextBold,
+        textAlign: storyTextAlign,
+        textPos: storyTextPos,
+        createdAt: new Date().toISOString(),
+        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+      };
+      const r = await apiFetch(`/api/clubs/${club.id}/stories`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newStory),
+      });
+      if (!r.ok) {
+        const j = await r.json().catch(() => ({} as { message?: string }));
+        throw new Error(j?.message || 'ثبت استوری روی سرور انجام نشد');
       }
-    } catch {}
+
+      setStoryList(prev => [...prev, newStory]);
+      setStoryDraft(null);
+      setStoryTextColor('#ffffff');
+      setStoryTextSize(15);
+      setStoryTextBold(false);
+      setStoryTextAlign('center');
+      setStoryTextPos('bottom');
+    } catch (e) {
+      setStoryError(e instanceof Error && e.message ? e.message : 'انتشار استوری انجام نشد؛ دوباره تلاش کنید.');
+    }
     setStoryUploading(false);
   };
 
   const deleteStory = async (storyId: string) => {
     if (!club) return;
+    const before = storyList;
     setStoryList(prev => prev.filter(s => s.id !== storyId));
+    setStoryError('');
     try {
-      await apiFetch(`/api/clubs/${club.id}/stories?storyId=${storyId}`, { method: 'DELETE' });
-    } catch {}
+      const r = await apiFetch(`/api/clubs/${club.id}/stories?storyId=${storyId}`, { method: 'DELETE' });
+      if (!r.ok) throw new Error();
+    } catch {
+      /* حذف روی سرور نشد ⇒ فهرست را برگردان، وگرنه استوری در پنل نیست
+         ولی روی سایت هست. */
+      setStoryList(before);
+      setStoryError('حذف استوری انجام نشد؛ دوباره تلاش کنید.');
+    }
   };
 
   if (!club) return null;
@@ -364,6 +430,17 @@ export default function GalleryTab({ club, onLogoChange }: {
           <div style={{ fontSize: 12, color: '#9CA3AF', marginBottom: 14 }}>
             فرمت ۹:۱۶ — عکس یا ویدیو — هر استوری پس از ۲۴ ساعت حذف می‌شود — حداکثر ۱۰ استوری
           </div>
+          {storyError && (
+            <div style={{
+              display: 'flex', alignItems: 'flex-start', gap: 7, marginBottom: 14,
+              padding: '10px 12px', borderRadius: 10, lineHeight: 1.9,
+              background: 'rgba(220,38,38,0.06)', border: '1px solid rgba(220,38,38,0.28)',
+              fontSize: 12.5, fontWeight: 700, color: '#B91C1C',
+            }}>
+              <AlertCircle size={14} style={{ flexShrink: 0, marginTop: 2 }} />
+              <span>{storyError}</span>
+            </div>
+          )}
            {/* Draft preview */}
           {storyDraft && (
             <div style={{ display: 'flex', gap: 20, alignItems: 'flex-start', flexWrap: 'wrap', direction: 'ltr', marginBottom: 16 }}>
@@ -513,6 +590,17 @@ export default function GalleryTab({ club, onLogoChange }: {
               fontFamily: 'var(--font-base)', opacity: newAlbumName.trim() ? 1 : 0.5,
             }}>+ ایجاد</button>
           </div>
+          {albumError && (
+            <div style={{
+              display: 'flex', alignItems: 'flex-start', gap: 7, marginTop: 12,
+              padding: '10px 12px', borderRadius: 10, lineHeight: 1.9,
+              background: 'rgba(220,38,38,0.06)', border: '1px solid rgba(220,38,38,0.28)',
+              fontSize: 12.5, fontWeight: 700, color: '#B91C1C',
+            }}>
+              <AlertCircle size={14} style={{ flexShrink: 0, marginTop: 2 }} />
+              <span>{albumError}</span>
+            </div>
+          )}
         </Card>
          {/* Albums list */}
         {albums.length === 0 ? (

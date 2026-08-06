@@ -96,9 +96,15 @@ export async function GET(req: NextRequest) {
        باشگاه‌های عمومی `verified` بودند و نبودِ تیک به چشم نمی‌آمد.
        حالا که «تأییدشده بدونِ تیک» هم داریم، این تمایز دیده می‌شود و
        باید درست باشد. */
+    /* `hasActiveStory` هم مشتق است، نه ستون.
+       اگر ذخیره‌اش می‌کردیم، لحظه‌ی انقضای استوری کسی نبود که پرچم را
+       پایین بیاورد و ۲۴ ساعت بعد رینگی نشان داده می‌شد که پشتش چیزی
+       نیست. مقایسه با «حالا» هیچ‌وقت کهنه نمی‌شود. */
+    const now = Date.now();
     const withBadge = (clubs ?? []).map((c: Record<string, unknown>) => ({
       ...c,
       isVerified: c.verificationStatus === 'verified',
+      hasActiveStory: !!c.storyExpiresAt && new Date(String(c.storyExpiresAt)).getTime() > now,
     }));
 
     return NextResponse.json(withBadge, { status: 200, headers: CORS_HEADERS });

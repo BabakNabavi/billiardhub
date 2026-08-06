@@ -30,6 +30,9 @@ interface Club {
   specialFeatures: string; workingHours: any; images: string[]; videos: string[];
   logo?: string; hasActiveStory?: boolean; storyMediaUrl?: string; storyType?: string; storyText?: string;
   verificationStatus?: string;
+  /* محتوای نمایشی که باشگاه‌دار در پنلش وارد می‌کند — از مهاجرتِ ۰۶۵ به
+     بعد روی خودِ رکورد است، نه در مرورگرِ او. */
+  coaches?: unknown; albums?: unknown; clubStats?: unknown;
 }
 
 /* قالب خالی — فقط برای اینکه state پیش از رسیدن پاسخ تایپ درست
@@ -155,12 +158,21 @@ export default function ClubProfilePage() {
     setTournAlbums(albums);
   }, [clubTournaments]);
 
+  /* ── مربیان، آمارِ دستی و آلبوم‌ها از خودِ رکوردِ باشگاه می‌آیند ──
+     تا امروز این سه از `localStorage`ِ **بازدیدکننده** خوانده می‌شدند —
+     با کلیدهایی که فقط در مرورگرِ خودِ باشگاه‌دار وجود داشتند. یعنی
+     باشگاه‌دار همه‌چیز را می‌دید و مطمئن بود منتشر شده، ولی هیچ
+     بازدیدکننده‌ای هرگز نه مربی‌ای می‌دید نه آلبومی. */
+  useEffect(() => {
+    if (Array.isArray(club.coaches)) setCoaches(club.coaches as CoachEntry[]);
+    if (Array.isArray(club.albums)) setClubAlbums(club.albums as ClubAlbum[]);
+    if (club.clubStats && typeof club.clubStats === 'object') {
+      setClubStats(p => ({ ...p, ...(club.clubStats as Partial<ClubStats>) }));
+    }
+  }, [club]);
+
   useEffect(() => {
     if (!id) return;
-    try { const c = localStorage.getItem(`club-coaches-${id}`); if (c) setCoaches(JSON.parse(c)); } catch {}
-    try { const s = localStorage.getItem(`club-stats-${id}`);   if (s) setClubStats(JSON.parse(s)); } catch {}
-    try { const a = localStorage.getItem(`club-albums-${id}`);  if (a) setClubAlbums(JSON.parse(a)); } catch {}
-
     /* اعضا و مسابقات از سرور شمرده می‌آیند. تا امروز از localStorage
        خوانده می‌شدند، یعنی فقط در مرورگرِ خودِ باشگاه‌دار عددی داشتند و
        هر بازدیدکننده‌ی دیگری جای آن‌ها را خالی می‌دید. */

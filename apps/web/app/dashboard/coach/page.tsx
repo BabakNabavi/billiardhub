@@ -11,6 +11,7 @@ import { isValidSlug } from '../../../lib/slug'
 import { fetchMyProfile, saveProfileRemote } from '../../../lib/profiles/client'
 import ProvinceCitySelect from '../../../components/ProvinceCitySelect'
 import ClubPicker from '../../../components/ClubPicker'
+import SiteAddressField from '../../../components/SiteAddressField'
 import {
   GRADES, DISCIPLINES, getCoachProfiles, saveCoachProfile, findCoachByOwner, findUnclaimedCoach,
   type CoachProfile, type CoachGrade, type CoachMedia, type CoachVideo,
@@ -189,10 +190,7 @@ export default function CoachDashboardPage() {
   const setGradeYear = (k: string, year: string) =>
     setForm(f => ({ ...f, grades: f.grades.map(g => (g.key === k ? { ...g, year } : g)) }))
 
-  const suggestSlug = () => {
-    const base = `${form.firstNameEn} ${form.lastNameEn}`.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
-    if (base) set('slug', base)
-  }
+  /* پیشنهادِ نشانی حالا داخلِ خودِ `SiteAddressField` است */
   const slugTaken = () => {
     const p = getCoachProfiles()[form.slug]
     if (!p) return false
@@ -455,15 +453,13 @@ export default function CoachDashboardPage() {
               <div style={{ gridColumn: '1 / -1' }}>
                 <ClubPicker />
               </div>
-              <div>
-                <label style={lbl}>نشانی اختصاصی پروفایل (URL){star}</label>
-                <div style={{ display: 'flex', gap: 6 }}>
-                  <input style={{ ...inp, direction: 'ltr', textAlign: 'left' }} value={form.slug}
-                    onChange={e => set('slug', e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))} placeholder="ahmad-rezaei" />
-                  <button type="button" onClick={suggestSlug} style={{ ...lqBtn, padding: '0 12px', fontSize: 12, whiteSpace: 'nowrap' }}>پیشنهاد</button>
-                </div>
-                <div style={{ fontSize: 11.5, color: TEXT_M, marginTop: 5, direction: 'ltr', textAlign: 'left' }}>www.billiardhub.net/coaches/{form.slug || '...'}</div>
-                {err('slug')}
+              <div style={{ gridColumn: '1 / -1' }}>
+                <SiteAddressField
+                  value={form.slug} onChange={v => set('slug', v)}
+                  basePath="coaches" required
+                  suggestFrom={`${form.firstNameEn} ${form.lastNameEn}`.trim()}
+                  error={errors.slug}
+                />
               </div>
             </div>
 

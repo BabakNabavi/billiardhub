@@ -1,14 +1,15 @@
 'use client';
 export const dynamic = 'force-dynamic';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { AlertCircle, Loader2, Lock } from 'lucide-react';
 import api from '../../../lib/api';
 import { uploadFile } from '../../../lib/supabase';
 import ProvinceCitySelect from '../../../components/ProvinceCitySelect';
 import { useAuthStore } from '../../../store/auth.store';
-import { persianToSlug, isValidSlug } from '../../../lib/slug';
+import { persianToSlug } from '../../../lib/slug';
+import SiteAddressField, { type SlugStatus } from '../../../components/SiteAddressField';
 import WorkingHours, { DAYS, type Hours } from '../../../components/club/WorkingHours';
 import BankCardVerify, { type BankResult } from '../../../components/club/BankCardVerify';
 
@@ -56,8 +57,7 @@ export default function NewClubPage() {
   // Slug state
   const [slug, setSlug] = useState('');
   const [slugEdited, setSlugEdited] = useState(false);
-  const [slugStatus, setSlugStatus] = useState<'idle' | 'checking' | 'ok' | 'taken' | 'invalid'>('idle');
-  const slugTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [slugStatus, setSlugStatus] = useState<SlugStatus>('idle');
 
   // Media
   const [imageFiles, setImageFiles] = useState<File[]>([]);
@@ -112,21 +112,8 @@ export default function NewClubPage() {
     if (!slugEdited && form.name) setSlug(persianToSlug(form.name));
   }, [form.name, slugEdited]);
 
-  // Debounced slug availability check
-  useEffect(() => {
-    if (!slug) { setSlugStatus('idle'); return; }
-    if (!isValidSlug(slug)) { setSlugStatus('invalid'); return; }
-    setSlugStatus('checking');
-    if (slugTimer.current) clearTimeout(slugTimer.current);
-    slugTimer.current = setTimeout(async () => {
-      try {
-        const r = await fetch(`/api/clubs/slug-check?slug=${encodeURIComponent(slug)}`);
-        const d = await r.json();
-        setSlugStatus(d.available ? 'ok' : 'taken');
-      } catch { setSlugStatus('idle'); }
-    }, 500);
-    return () => { if (slugTimer.current) clearTimeout(slugTimer.current); };
-  }, [slug]);
+  /* بررسیِ در دسترس بودنِ نشانی داخلِ `SiteAddressField` انجام می‌شود و
+     نتیجه‌اش از `onStatusChange` به همین‌جا برمی‌گردد. */
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
@@ -353,56 +340,17 @@ export default function NewClubPage() {
               </div>
             </div>
 
-            {/* نام سایت باشگاه */}
-            <div>
-              <label className={labelCls} style={labelStyle}>نام سایت باشگاه شما</label>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <span className="bh-latin" style={{ fontSize: 13, color: 'rgba(0,0,0,0.35)', whiteSpace: 'nowrap', flexShrink: 0, direction: 'ltr' }}>billiardhub.net/clubs/</span>
-                <div style={{ flex: 1, position: 'relative' }}>
-                  <input
-                    type="text" value={slug}
-                    onChange={e => { setSlugEdited(true); setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '')); }}
-                    className={`${inputCls} dark-input bh-latin`}
-                    style={{
-                      ...inputStyle, direction: 'ltr',
-                      borderColor: slugStatus === 'ok' ? 'rgba(14,122,56,0.45)'
-                        : slugStatus === 'taken' || slugStatus === 'invalid' ? 'rgba(178,59,46,0.45)'
-                        : undefined,
-                    }}
-                    placeholder="hafez-shiraz"
-                  />
-                </div>
-                {slug && slugEdited && (
-                  <button type="button" onClick={() => { setSlug(persianToSlug(form.name)); setSlugEdited(false); }}
-                    style={{ fontSize: 12, color: '#9A6E38', background: 'rgba(199,166,106,0.10)', border: '1px solid rgba(199,166,106,0.28)', borderRadius: 8, padding: '6px 10px', cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0, fontFamily: 'inherit' }}>
-                    بازنشانی
-                  </button>
-                )}
-              </div>
-              {/* ── پیش‌نمایشِ زنده ──
-                  پیشوندِ کنارِ فیلد کوچک و کم‌رنگ است و کاربر موقعِ تایپ
-                  نمی‌بیند نشانیِ نهایی چه شکلی می‌شود. این خط همان
-                  نشانیِ کامل را همان‌طور که در مرورگر باز خواهد شد نشان
-                  می‌دهد. */}
-              {slug && (
-                <div className="bh-latin" style={{
-                  marginTop: 7, direction: 'ltr', textAlign: 'left',
-                  fontSize: 13, fontWeight: 700, color: '#1C1B17',
-                  background: 'rgba(199,166,106,0.08)', border: '1px solid rgba(199,166,106,0.22)',
-                  borderRadius: 9, padding: '7px 11px', wordBreak: 'break-all',
-                }}>
-                  billiardhub.net/clubs/<span style={{ color: '#9A6E38' }}>{slug}</span>
-                </div>
-              )}
-
-              <div style={{ marginTop: 5, fontSize: 12, minHeight: 16 }}>
-                {slugStatus === 'checking' && <span style={{ color: 'rgba(0,0,0,0.40)' }}>در حال بررسی…</span>}
-                {slugStatus === 'ok'       && <span style={{ color: '#0E7A38' }}>✓ این نشانی در دسترس است</span>}
-                {slugStatus === 'taken'    && <span style={{ color: '#B23B2E' }}>✗ این نشانی قبلاً رزرو شده</span>}
-                {slugStatus === 'invalid'  && <span style={{ color: '#B23B2E' }}>فقط حروف انگلیسی کوچک، عدد و خط تیره مجاز است</span>}
-                {slugStatus === 'idle' && !slug && <span style={{ color: 'rgba(0,0,0,0.35)' }}>نشانی اختصاصی صفحه‌ی باشگاه شما — مثلاً hafez-shiraz</span>}
-              </div>
-            </div>
+            {/* آدرس اختصاصی سایت — همان کامپوننتی که پنلِ باشگاه‌دار و
+                پروفایلِ مربی/داور هم از آن استفاده می‌کنند، تا یک ظاهر و
+                یک قاعده در کلِ سایت بماند. */}
+            <SiteAddressField
+              value={slug}
+              onChange={v => { setSlugEdited(true); setSlug(v); }}
+              basePath="clubs"
+              suggestFrom={form.name}
+              onStatusChange={setSlugStatus}
+              checkUrl={s => `/api/clubs/slug-check?slug=${encodeURIComponent(s)}`}
+            />
           </div>
 
           {/* آدرس */}
