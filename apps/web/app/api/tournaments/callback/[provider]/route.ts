@@ -1,4 +1,5 @@
 export const dynamic = 'force-dynamic';
+import { callbackOrigin } from '@/lib/site-url';
 import { NextRequest, NextResponse } from 'next/server';
 import { sb, audit, clientIp } from '@/lib/finance/db';
 import { notifyTournamentRegistered } from '@/lib/notify';
@@ -43,7 +44,7 @@ async function handle(req: NextRequest, providerName: string) {
   const authority = ret.authority || q.get('token') || '';
 
   const back = (state: string, extra = '') =>
-    NextResponse.redirect(`${url.origin}/tournaments/result?state=${state}${extra}`, { status: 303 });
+    NextResponse.redirect(`${callbackOrigin()}/tournaments/result?state=${state}${extra}`, { status: 303 });
 
   if (!UUID.test(registrationId)) return back('invalid');
 

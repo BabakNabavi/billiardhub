@@ -43,21 +43,43 @@ console.log(`\n■ ${routes.length} مسیرِ API بررسی شد\n`);
    هر جا `callbackUrl` یا `returnUrl` ساخته می‌شود، مبدأش نباید از
    درخواست بیاید. دو دلیل: پشتِ پروکسی غلط است، و قابلِ جعل هم هست —
    مهاجم می‌تواند کاربر را پس از پرداخت به دامنه‌ی خودش بفرستد. */
+const fromRequest = src =>
+  /nextUrl\.origin/.test(src)
+  || /\burl\.origin\b/.test(src)
+  || /headers\.get\(['"]origin['"]\)/.test(src)
+  || /headers\.get\(['"]x-forwarded-host['"]\)/i.test(src);
+
 const offenders = [];
 for (const p of routes) {
   const src = readFileSync(p, 'utf8');
   const buildsCallback = /(callbackUrl|returnUrl|callback_url)\s*[:=]/.test(src);
   if (!buildsCallback) continue;
-  const fromRequest =
-    /nextUrl\.origin/.test(src)
-    || /headers\.get\(['"]origin['"]\)/.test(src)
-    || /headers\.get\(['"]x-forwarded-host['"]\)/i.test(src);
-  if (fromRequest) offenders.push(relative(ROOT, p).replace(/\\/g, '/'));
+  if (fromRequest(src)) offenders.push(relative(ROOT, p).replace(/\\/g, '/'));
 }
 
 t('هیچ مسیرِ پرداختی مبدأ را از درخواست نمی‌سازد',
   offenders.length === 0,
   offenders.join(' · '));
+
+/* ── لایه‌ی دوم ──
+   نسخه‌ی اول فقط نشانیِ *رفت* را می‌گرفت. ولی خودِ مسیرِ کالبک هم پس از
+   تأییدِ پرداخت کاربر را با ۳۰۳ به صفحه‌ی نتیجه می‌فرستد — و آن هم از
+   `url.origin` ساخته می‌شد.
+
+   نتیجه‌اش موذی‌تر بود: پرداخت **واقعاً تأیید می‌شد** و در دیتابیس
+   `PAID` می‌نشست، ولی کاربر روی `localhost` می‌افتاد و فکر می‌کرد
+   پرداختش شکست خورده. */
+const redirectors = [];
+for (const p of routes) {
+  if (!/[\\/]callback[\\/]/.test(p)) continue;
+  const src = readFileSync(p, 'utf8');
+  if (/NextResponse\.redirect/.test(src) && fromRequest(src)) {
+    redirectors.push(relative(ROOT, p).replace(/\\/g, '/'));
+  }
+}
+t('هیچ کالبکی کاربر را به مبدأِ درخواست برنمی‌گرداند',
+  redirectors.length === 0,
+  redirectors.join(' · '));
 
 const siteUrl = readFileSync(join(ROOT, 'lib', 'site-url.ts'), 'utf8');
 t('`callbackOrigin()` وجود دارد', /export function callbackOrigin/.test(siteUrl));

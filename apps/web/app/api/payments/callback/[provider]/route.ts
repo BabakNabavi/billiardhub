@@ -1,4 +1,5 @@
 export const dynamic = 'force-dynamic';
+import { callbackOrigin } from '@/lib/site-url';
 import { NextRequest, NextResponse } from 'next/server';
 import { sb, rpc, audit, clientIp } from '@/lib/finance/db';
 import { getPaymentProvider } from '@/lib/payments';
@@ -23,7 +24,7 @@ async function handle(req: NextRequest, providerName: string) {
      می‌گیرد. */
   const paymentId = url.searchParams.get('payment') || ret.clientRefId || '';
 
-  const fail = (msg: string) => NextResponse.redirect(new URL(`/booking/result?ok=0&reason=${encodeURIComponent(msg)}`, url.origin), { status: 303 });
+  const fail = (msg: string) => NextResponse.redirect(new URL(`/booking/result?ok=0&reason=${encodeURIComponent(msg)}`, callbackOrigin()), { status: 303 });
   if (!paymentId) return fail('پرداخت نامعتبر');
 
   const { data: pRow } = await sb().from('payments')
@@ -33,7 +34,7 @@ async function handle(req: NextRequest, providerName: string) {
 
   /* قبلاً تأیید شده ⇒ فقط به نتیجه هدایت کن (بدون هیچ عملیات مالی تکراری) */
   if (pay.status === 'PAID') {
-    return NextResponse.redirect(new URL(`/booking/result?ok=1&booking=${pay.booking_id}`, url.origin), { status: 303 });
+    return NextResponse.redirect(new URL(`/booking/result?ok=1&booking=${pay.booking_id}`, callbackOrigin()), { status: 303 });
   }
 
   /* کاربر پرداخت را لغو کرده است */
@@ -91,7 +92,7 @@ async function handle(req: NextRequest, providerName: string) {
   /* اطلاع‌رسانی — بی‌صدا و بدون انتظار؛ نباید ریدایرکت کاربر را کند کند */
   void notifyBookingConfirmed(pay.booking_id).catch(() => { /* بی‌صدا */ });
 
-  return NextResponse.redirect(new URL(`/booking/result?ok=1&booking=${pay.booking_id}`, url.origin), { status: 303 });
+  return NextResponse.redirect(new URL(`/booking/result?ok=1&booking=${pay.booking_id}`, callbackOrigin()), { status: 303 });
 }
 
 export async function GET(req: NextRequest, ctx: { params: Promise<{ provider: string }> }) {

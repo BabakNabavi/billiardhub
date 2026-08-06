@@ -1,4 +1,5 @@
 export const dynamic = 'force-dynamic';
+import { callbackOrigin } from '@/lib/site-url';
 import { NextRequest, NextResponse } from 'next/server';
 import { sb, audit, clientIp } from '@/lib/finance/db';
 import { getPaymentProvider } from '@/lib/payments';
@@ -22,7 +23,7 @@ async function handle(req: NextRequest, providerName: string) {
   const campaignId = url.searchParams.get('campaign') || ret.clientRefId || '';
 
   const done = (ok: boolean, extra = '') =>
-    NextResponse.redirect(new URL(`/dashboard/club?sms=${ok ? 'ok' : 'fail'}${extra}`, url.origin), { status: 303 });
+    NextResponse.redirect(new URL(`/dashboard/club?sms=${ok ? 'ok' : 'fail'}${extra}`, callbackOrigin()), { status: 303 });
   const fail = (msg: string) => done(false, `&reason=${encodeURIComponent(msg)}`);
 
   if (!campaignId) return fail('سفارش نامعتبر');

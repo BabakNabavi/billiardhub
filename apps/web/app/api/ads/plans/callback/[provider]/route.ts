@@ -1,4 +1,5 @@
 export const dynamic = 'force-dynamic';
+import { callbackOrigin } from '@/lib/site-url';
 import { NextRequest, NextResponse } from 'next/server';
 import { sb, rpc, audit, clientIp } from '@/lib/finance/db';
 import { getPaymentProvider } from '@/lib/payments';
@@ -17,7 +18,7 @@ async function handle(req: NextRequest, providerName: string) {
   const orderId = url.searchParams.get('order') || ret.clientRefId || '';
 
   const done = (ok: boolean, extra = '') =>
-    NextResponse.redirect(new URL(`/plans/result?ok=${ok ? 1 : 0}${extra}`, url.origin), { status: 303 });
+    NextResponse.redirect(new URL(`/plans/result?ok=${ok ? 1 : 0}${extra}`, callbackOrigin()), { status: 303 });
   const fail = (msg: string) => done(false, `&reason=${encodeURIComponent(msg)}`);
 
   if (!orderId) return fail('سفارش نامعتبر');
