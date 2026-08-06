@@ -24,6 +24,7 @@
     "test:club-public": "node scripts/test-club-public-content.mjs",
     "test:password-ux": "node scripts/test-password-ux.mjs",
     "test:session-identity": "node scripts/test-session-identity.mjs",
+    "backup": "node scripts/backup.mjs",
     "test:club-info": "node scripts/test-club-info.mjs",
     "test:club-info:ui": "node scripts/test-club-info-ui.mjs",
     "test:ui-polish": "node scripts/test-ui-polish.mjs",
