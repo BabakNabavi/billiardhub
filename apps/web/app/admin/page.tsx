@@ -15,7 +15,7 @@ import { apiFetch } from '../../lib/http';
 import {
   Users, ShoppingBag, Trophy, Newspaper, Crown, UserCheck,
   CheckCircle, TrendingUp, Building2, Star, Megaphone, Scale, Store,
-  Clapperboard, Factory, Wrench, ShieldCheck, KeyRound, Wallet,
+  Clapperboard, Factory, Wrench, ShieldCheck, Wallet,
   CalendarDays, Flag, Package, LifeBuoy, UserPlus, Tag, MessageSquare, Percent,
 } from 'lucide-react';
 
@@ -45,7 +45,13 @@ const SECTIONS: AdminSection[] = [
     title: 'کاربران و دسترسی', en: 'USERS & ACCESS', dot: '#1D4ED8',
     items: [
       { title: 'مدیریت کاربران', desc: 'مشاهده، ویرایش و مسدودسازی کاربران', icon: <Users size={20} />, link: '/admin/users' },
-      { title: 'مدیریت نقش‌ها', desc: 'اعطا و لغو نقش‌ها (مربی، داور، فروشنده…)', icon: <KeyRound size={20} />, link: '/admin/roles' },
+      /* کارتِ «مدیریت نقش‌ها» برداشته شد. آن صف تصمیمی بود که هیچ
+         اثری نداشت: نقش هنگام انتخاب داده می‌شود و «رد کردن» هیچ‌وقت
+         پسش نمی‌گرفت — فقط یک پیامکِ «رد شد» می‌فرستاد. تصمیمِ واقعی
+         همان تأییدِ پروفایل و باشگاه است. شرحش در `docs/roles.md`.
+
+         خودِ صفحه‌ی /admin/roles فعلاً می‌ماند (برای دیدنِ سابقه)، ولی
+         از پنل لینک نمی‌شود. */
       { title: 'احراز هویت', desc: 'بررسی درخواست‌های تأیید هویت کاربران', icon: <ShieldCheck size={20} />, link: '/admin/verifications' },
       { title: 'تیکت‌های پشتیبانی', desc: 'پیام‌های تماس با ما و درخواست تغییر کد پستی و اطلاعات بانکی', icon: <LifeBuoy size={20} />, link: '/admin/support' },
       { title: 'دسترسی ادمین', desc: 'دادن یا برداشتن دسترسی ادمین به کاربران', icon: <Crown size={20} />, link: '/admin/access' },
@@ -114,10 +120,12 @@ const STAT_CARDS: { key: string; label: string; link: string }[] = [
   { key: 'products',     label: 'محصولات',        link: '/admin/products' },
   { key: 'clubs',        label: 'باشگاه‌ها',       link: '/admin/clubs' },
   { key: 'bookings',     label: 'رزروها',         link: '/admin/bookings' },
-  { key: 'news',         label: 'اخبار',          link: '/admin/news' },
-  { key: 'pendingClubs',    label: 'باشگاه در انتظار', link: '/admin/clubs' },
-  /* این دو صف تا امروز هیچ‌جای پنل دیده نمی‌شدند */
-  { key: 'pendingRoles',    label: 'درخواست نقش',     link: '/admin/roles' },
+  /* «اخبار» و «باشگاه در انتظار» برداشته شدند: اولی عددِ محتوایی است
+     نه صفِ کار، و دومی همان کارتِ «باشگاه‌ها» را تکرار می‌کرد که
+     خودش فیلترِ «در انتظار» دارد.
+
+     «درخواست نقش» هم برداشته شد — دلیلش عمیق‌تر است و در
+     `docs/roles.md` نوشته شده: آن صف تصمیمی بود که هیچ اثری نداشت. */
   { key: 'pendingProfiles', label: 'پروفایل در انتظار', link: '/admin/coaches' },
   /* گزارشِ تخلف از `/api/admin/stats` می‌آمد ولی هیچ کارتی نداشت —
      یعنی گزارش ثبت می‌شد و ادمین تا وقتی خودش سراغِ صفحه‌ی گزارش‌ها
