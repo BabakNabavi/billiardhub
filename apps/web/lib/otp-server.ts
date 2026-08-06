@@ -48,7 +48,12 @@ async function readOtp(m: string): Promise<OtpRec | null> {
   return rec ?? null
 }
 
-export async function sendOtp(mobile: string): Promise<{ ok: boolean; message?: string; wait?: number }> {
+/** کدام متن؟ `reset` متنِ اختصاصیِ تغییرِ رمز را می‌فرستد. */
+export type OtpPurpose = 'generic' | 'reset'
+
+export async function sendOtp(
+  mobile: string, purpose: OtpPurpose = 'generic',
+): Promise<{ ok: boolean; message?: string; wait?: number }> {
   const m = normMobile(mobile)
   if (!/^09\d{9}$/.test(m)) return { ok: false, message: 'شماره‌ی موبایل معتبر نیست' }
 
@@ -62,6 +67,27 @@ export async function sendOtp(mobile: string): Promise<{ ok: boolean; message?: 
 
   const code = String(Math.floor(10000 + Math.random() * 90000))   // ۵ رقمی
   await writeJson(otpPath(m), { hash: hashCode(code), at: now, tries: 0 })
+
+  /* ── متنِ اختصاصیِ تغییرِ رمز، اگر ثبت شده باشد ──
+     قالبِ عمومیِ `s.api.ir` فقط می‌گوید «کد تایید: ۱۲۳۴۵». کسی که آن
+     را می‌گیرد در حالی که خودش چیزی نخواسته، نمی‌فهمد یک نفر دارد
+     رمزش را عوض می‌کند — و همان جمله تنها هشداری است که می‌گیرد.
+
+     تا وقتی کدِ متن در `/admin/sms` وارد نشده، `sendPattern` بی‌صدا
+     رد می‌شود و مسیرِ قدیمی کارش را می‌کند. یعنی این تغییر هیچ‌چیز را
+     نمی‌شکند و به‌محضِ واردکردنِ کد خودش فعال می‌شود. */
+  if (purpose === 'reset') {
+    try {
+      const { sendPattern } = await import('./sms-server')
+      const r = await sendPattern('password_reset_otp', m, [code])
+      if (r.ok) return { ok: true }
+      if (!r.skipped) {
+        /* ثبت شده بود ولی ارسالش شکست خورد — با مسیرِ دیگر دوباره
+           تلاش نمی‌کنیم، چون کد یکی است و دو پیامکِ متفاوت گیج‌کننده. */
+        return { ok: false, message: r.message ?? 'ارسال کد پیامکی ناموفق بود' }
+      }
+    } catch { /* به مسیرِ قدیمی می‌افتیم */ }
+  }
 
   const key = inquiryKey()
   if (!key) {

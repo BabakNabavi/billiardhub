@@ -64,7 +64,10 @@ export async function POST(req: NextRequest) {
     const uid = await userIdOf(phone);
     /* شماره‌ی ناموجود: نه پیامکی، نه تفاوتی در پاسخ */
     if (uid) {
-      const r = await sendOtp(phone);
+      /* `reset` ⇒ متنِ اختصاصی: «شما در حال تغییر رمز عبور خود هستید».
+         قالبِ عمومی فقط کد را می‌گفت و کسی که خودش درخواستی نداده بود
+         نمی‌فهمید چه خبر است. */
+      const r = await sendOtp(phone, 'reset');
 
       if (!r.ok && r.wait) {
         return NextResponse.json({ ok: true, message: GENERIC, wait: r.wait });

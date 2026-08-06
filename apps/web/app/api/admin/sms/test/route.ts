@@ -37,6 +37,10 @@ const SAMPLE: Record<PatternKey, string[]> = {
   club_class:               ['کاربر آزمایشی', 'باشگاه نمونه', 'مقدماتی اسنوکر', '۲۵ شهریور'],
   club_offer:               ['کاربر آزمایشی', 'باشگاه نمونه', '۲۵ شهریور', '۲۰'],
   club_notice:              ['کاربر آزمایشی', 'باشگاه نمونه', '۲۵ شهریور', 'تعطیل'],
+
+  /* امنیتِ حساب — تنها متن‌هایی که نامِ گیرنده ندارند */
+  password_reset_otp:       ['۱۲۳۴۵'],
+  login_locked:             ['۵'],
 };
 
 export async function POST(req: NextRequest) {

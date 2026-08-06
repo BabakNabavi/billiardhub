@@ -352,8 +352,11 @@ export default function ClubProfilePage() {
         .album-scroll { display:flex;gap:14px;overflow-x:auto;padding-bottom:8px;scrollbar-width:none }
         .album-scroll::-webkit-scrollbar { display:none }
 
-        .gallery-grid { display:grid;grid-template-columns:repeat(4,1fr);gap:6px }
-        @media(max-width:480px){ .gallery-grid{grid-template-columns:repeat(3,1fr)} }
+        /* هشت عکس در هر ردیف. با ۴ ستون، هر خانه بزرگ بود و فهرست
+           بی‌جهت بلند می‌شد؛ گالری برای مرور است نه تماشای تک‌تک. */
+        .gallery-grid { display:grid;grid-template-columns:repeat(8,1fr);gap:6px }
+        @media(max-width:900px){ .gallery-grid{grid-template-columns:repeat(6,1fr)} }
+        @media(max-width:600px){ .gallery-grid{grid-template-columns:repeat(4,1fr)} }
 
         .amenity-grid { display:grid;grid-template-columns:1fr 1fr;gap:8px }
         @media(max-width:400px){ .amenity-grid{grid-template-columns:1fr} }
@@ -1051,19 +1054,21 @@ export default function ClubProfilePage() {
                     <div style={{ fontSize: 13, color: 'rgba(0,0,0,0.35)', padding: '8px 4px' }}>هنوز آلبومی ایجاد نشده</div>
                   ) : (
                     <>
+                      {/* ۱۱۰ ⇒ ۷۷ پیکسل (۳۰٪ کوچک‌تر) — متن‌ها هم به همان
+                          نسبت، وگرنه در قابِ کوچک‌تر جا نمی‌شوند. */}
                       <button type="button"
                         onClick={() => setPickedAlbum(null)}
                         style={{
-                          flexShrink: 0, width: 110, height: 110, borderRadius: 14, cursor: 'pointer',
-                          padding: 10, textAlign: 'center', fontFamily: 'inherit',
-                          display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 4,
+                          flexShrink: 0, width: 77, height: 77, borderRadius: 11, cursor: 'pointer',
+                          padding: 6, textAlign: 'center', fontFamily: 'inherit',
+                          display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 2,
                           background: pickedAlbum === null ? 'rgba(199,166,106,0.16)' : 'rgba(0,0,0,0.03)',
                           border: `2px solid ${pickedAlbum === null ? 'rgba(199,166,106,0.62)' : 'rgba(0,0,0,0.08)'}`,
                           transition: 'background .15s, border-color .15s',
                         }}>
-                        <span style={{ fontSize: 24 }}>🖼</span>
-                        <span style={{ fontSize: 12.5, fontWeight: 800, color: pickedAlbum === null ? '#9A6E38' : '#4B5563' }}>همه تصاویر</span>
-                        <span style={{ fontSize: 10, fontWeight: 600, color: 'rgba(0,0,0,0.38)' }}>
+                        <span style={{ fontSize: 17 }}>🖼</span>
+                        <span style={{ fontSize: 10, fontWeight: 800, lineHeight: 1.3, color: pickedAlbum === null ? '#9A6E38' : '#4B5563' }}>همه تصاویر</span>
+                        <span style={{ fontSize: 8.5, fontWeight: 600, color: 'rgba(0,0,0,0.38)' }}>
                           {toFa(clubAlbums.reduce((n, a) => n + a.items.length, 0))} عکس
                         </span>
                       </button>
@@ -1075,20 +1080,20 @@ export default function ClubProfilePage() {
                           <button key={album.id} type="button"
                             onClick={() => setPickedAlbum(on ? null : album.id)}
                             style={{
-                              flexShrink: 0, width: 110, height: 110, padding: 0, cursor: 'pointer',
-                              borderRadius: 14, overflow: 'hidden', position: 'relative', background: 'rgba(199,166,106,0.12)',
+                              flexShrink: 0, width: 77, height: 77, padding: 0, cursor: 'pointer',
+                              borderRadius: 11, overflow: 'hidden', position: 'relative', background: 'rgba(199,166,106,0.12)',
                               border: `2px solid ${on ? 'rgba(199,166,106,0.85)' : 'transparent'}`,
-                              boxShadow: on ? '0 6px 22px rgba(199,166,106,0.38)' : '0 4px 18px rgba(0,0,0,0.12)',
+                              boxShadow: on ? '0 5px 16px rgba(199,166,106,0.38)' : '0 3px 12px rgba(0,0,0,0.12)',
                               transition: 'border-color .15s, box-shadow .15s',
                             }}>
                             {cover
                               ? <img loading="lazy" decoding="async" src={cover} alt={album.name} style={{ width: '100%', height: '100%', objectFit: 'cover', filter: on ? 'brightness(0.78) saturate(0.95)' : 'brightness(0.62) saturate(0.80)' }} />
-                              : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 30 }}>🖼</div>
+                              : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 21 }}>🖼</div>
                             }
                             <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom,transparent 35%,rgba(0,0,0,0.82) 100%)' }} />
-                            <div style={{ position: 'absolute', bottom: 0, right: 0, left: 0, padding: 10, textAlign: 'right' }}>
-                              <div style={{ fontSize: 13, fontWeight: 800, color: '#fff', lineHeight: 1.3, marginBottom: 3 }}>📁 {album.name}</div>
-                              <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.55)', fontWeight: 600 }}>{toFa(album.items.length)} عکس</div>
+                            <div style={{ position: 'absolute', bottom: 0, right: 0, left: 0, padding: 6, textAlign: 'right' }}>
+                              <div style={{ fontSize: 10, fontWeight: 800, color: '#fff', lineHeight: 1.3, marginBottom: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>📁 {album.name}</div>
+                              <div style={{ fontSize: 8.5, color: 'rgba(255,255,255,0.55)', fontWeight: 600 }}>{toFa(album.items.length)} عکس</div>
                             </div>
                           </button>
                         );
@@ -1113,13 +1118,9 @@ export default function ClubProfilePage() {
                       <span style={{ fontSize: 12, color: 'rgba(0,0,0,0.38)', fontWeight: 600 }}>
                         {toFa(items.length)} عکس
                       </span>
-                      {picked && (
-                        <button type="button" onClick={() => setPickedAlbum(null)} style={{
-                          marginRight: 'auto', padding: '5px 12px', borderRadius: 20, cursor: 'pointer',
-                          fontSize: 12, fontWeight: 700, fontFamily: 'inherit',
-                          background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.34)', color: '#9A6E38',
-                        }}>نمایش همه</button>
-                      )}
+                      {/* دکمه‌ی «نمایش همه» برداشته شد — کارتِ «همه تصاویر»
+                          در نوارِ بالا همان کار را می‌کند و دو راه برای یک
+                          کار فقط شلوغی است. */}
                     </div>
                     {items.length === 0 ? (
                       <div style={{ fontSize: 13, color: 'rgba(0,0,0,0.35)', padding: '8px 4px' }}>

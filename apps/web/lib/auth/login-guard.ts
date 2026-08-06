@@ -67,14 +67,39 @@ export async function loginGuard(req: NextRequest, account: string): Promise<Gua
   }
 }
 
-/** ثبت تلاش ناموفق — قفل را در صورت رسیدن به آستانه اعمال می‌کند */
-export async function loginFailed(req: NextRequest, account: string): Promise<void> {
+/** ثبت تلاش ناموفق — قفل را در صورت رسیدن به آستانه اعمال می‌کند.
+ *
+ *  `accountExists` تعیین می‌کند هشدارِ پیامکی برود یا نه: شماره‌ای که
+ *  اصلاً حساب ندارد نباید پیامک بگیرد. نه به‌خاطرِ نشتِ اطلاعات (پیام
+ *  اصلاً فرستاده نمی‌شود، پس چیزی هم فاش نمی‌شود) بلکه چون آن پیامک
+ *  برای کسی می‌رود که هیچ ربطی به ماجرا ندارد — و پولش را ما می‌دهیم.
+ */
+export async function loginFailed(
+  req: NextRequest, account: string, accountExists = false,
+): Promise<void> {
   try {
-    await rpc('bh_login_fail', {
-      p_account: account, p_ip: ipOf(req),
-      p_threshold: LOGIN_THRESHOLD, p_windows: LOGIN_WINDOWS,
-      p_ip_threshold: IP_THRESHOLD, p_ip_windows: IP_WINDOWS,
-    })
+    const { data } = await rpc<{ account?: { locked?: boolean; seconds?: number } }>(
+      'bh_login_fail', {
+        p_account: account, p_ip: ipOf(req),
+        p_threshold: LOGIN_THRESHOLD, p_windows: LOGIN_WINDOWS,
+        p_ip_threshold: IP_THRESHOLD, p_ip_windows: IP_WINDOWS,
+      })
+
+    /* ── هشدارِ امنیتی ──
+       این تنها پیامکی است که وقتی می‌رود که کاربر **پشتِ سایت نیست**.
+       اگر کسی دارد رمزِ حسابی را حدس می‌زند، صاحبِ حساب هیچ راهِ
+       دیگری برای فهمیدنش ندارد — نه ایمیلی هست، نه اعلانِ درون‌برنامه‌ای.
+
+       فقط لحظه‌ی *بسته‌شدنِ* قفل فرستاده می‌شود، نه به ازای هر تلاش.
+       تابعِ دیتابیس پس از قفل `fails` را صفر می‌کند، پس این شرط در هر
+       دوره‌ی قفل دقیقاً یک بار درست می‌شود — وگرنه خودِ هشدار به ابزارِ
+       آزار تبدیل می‌شد: مهاجم پشتِ سرِ هم رمزِ غلط می‌زد و گوشیِ قربانی
+       از پیامک پر می‌شد. */
+    if (accountExists && data?.account?.locked) {
+      const { sendPattern } = await import('../sms-server')
+      void sendPattern('login_locked', account, [LOGIN_THRESHOLD])
+        .catch(() => { /* هشدار هرگز نباید مسیرِ ورود را بشکند */ })
+    }
   } catch { /* شمارنده مهم‌تر از پاسخ نیست */ }
 }
 
