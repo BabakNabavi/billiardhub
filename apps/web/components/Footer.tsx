@@ -171,6 +171,9 @@ export default function Footer() {
           .ft-bottom > div:first-child { font-size: 11.5px !important; }
           .ft-dev-desk { display: none !important; }
           .ft-dev-mob { display: block !important; flex-basis: 100% !important; margin-top: 2px; }
+          /* در موبایل نشان‌ها وسط می‌نشینند و کمی بالاتر، تا نوارِ
+             حقوقیِ زیرشان هم بالا بیاید و انتهای فوتر جمع‌تر شود. */
+          .ft-seals { justify-content: center !important; margin-top: -38px !important; padding-bottom: 0 !important; }
           .ft-link { font-size: 12px !important; padding: 4px 0 !important; min-height: 24px !important; }
           .ft-link svg { display: none; }
           .ft-heading { margin-bottom: 10px !important; }
@@ -294,10 +297,10 @@ export default function Footer() {
 
             پس جبران باید بالا باشد نه پایین. حاشیه‌ی منفیِ پایین
             (تلاشِ قبلی) نشان‌ها را روی نوارِ زیرشان می‌نشاند. */}
-        <div style={{
+        <div className="ft-seals" style={{
           display: 'flex', justifyContent: 'flex-end', alignItems: 'flex-end',
           gap: '8px', flexWrap: 'wrap',
-          marginTop: '-22px', paddingBottom: '10px',
+          marginTop: '-30px', paddingBottom: '4px',
         }}>
           <PayPingSeal />
           <EnamadSeal />
@@ -305,7 +308,7 @@ export default function Footer() {
 
         {/* ── Bottom bar ────────────────────────────── */}
         <div className="ft-bottom" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
-          <div style={{ fontSize: '13px', color: DIM2, whiteSpace: 'nowrap' }}>© ۱۴۰۵ Billiardhub</div>
+          <div style={{ fontSize: '13px', color: DIM2, whiteSpace: 'nowrap' }}>© ۱۴۰۵ بیلیارد هاب</div>
           <div className="ft-bottom-links" style={{ display: 'flex', gap: '22px', flexWrap: 'wrap' }}>
             {/* لینک‌های حقوقی — «درباره ما / تماس با ما» در ستون «اطلاعات و قوانین» بالا هستند */}
             {[

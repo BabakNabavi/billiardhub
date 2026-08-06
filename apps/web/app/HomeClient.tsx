@@ -1573,7 +1573,15 @@ useEffect(() => {
       {/* ╔══════════════════════════════════════════════════════╗
           ║  HERO — cinematic  video + wallpaper crossfade      ║
           ╚══════════════════════════════════════════════════════╝ */}
-      <div style={{ position: 'relative', height: isMobile ? 'auto' : '100dvh', minHeight: isMobile ? '100dvh' : '640px', overflow: 'hidden', background: '#04020A' }}>
+      {/* تصویرِ اسلایدِ اول روی خودِ ظرف می‌نشیند، نه فقط به‌عنوان
+          `poster` ویدیو. دلیلش پایین‌تر، کنارِ محوشدنِ ویدیو. */}
+      <div style={{
+        position: 'relative', height: isMobile ? 'auto' : '100dvh',
+        minHeight: isMobile ? '100dvh' : '640px', overflow: 'hidden',
+        background: '#04020A',
+        backgroundImage: 'url(/images/hero/1.webp)',
+        backgroundSize: 'cover', backgroundPosition: 'center',
+      }}>
 
         {/* ── Layer 1: video (continuous motion background) ──
 
@@ -1587,10 +1595,22 @@ useEffect(() => {
             ۳) `willChange:'transform'` دائمی یک لایه‌ی کامپوزیت
                تمام‌صفحه را همیشه زنده نگه می‌داشت. حالا فقط وقتی
                اسکرول واقعاً هیرو را تغییر می‌دهد اعمال می‌شود. */}
+        {/* ── چرا ویدیو محو می‌شود، نه اینکه یک‌باره بیاید ──
+            پوستر و اسلایدِ اول یک تصویرند، ولی فریمِ اولِ ویدیو صحنه‌ی
+            دیگری است. تا امروز لحظه‌ی آماده‌شدنِ ویدیو، آن تصویرِ ثابت
+            **یک‌باره** جایش را به ویدیو می‌داد — و همان پرشی بود که
+            دیده می‌شد.
+
+            حالا تصویر روی خودِ ظرف است و ویدیو از شفافیتِ صفر روی آن
+            محو می‌شود. عوض‌شدن همچنان همان لحظه است، ولی به‌جای پرش،
+            یک گذارِ نرم دیده می‌شود.
+
+            `poster` برداشته شد چون کارش را پس‌زمینه‌ی ظرف می‌کند؛
+            نگه‌داشتنش یعنی همان تصویر دو بار کشیده شود. */}
         <video ref={el => { videoRef.current = el; heroVideoRef.current = el }}
           autoPlay muted loop playsInline preload="metadata"
-          poster="/images/hero/1.webp"
           aria-hidden="true"
+          onPlaying={e => { e.currentTarget.style.opacity = '1' }}
           style={{
             position: 'absolute', inset: 0, width: '100%', height: '100%',
             objectFit: 'cover', zIndex: 1,
@@ -1605,6 +1625,7 @@ useEffect(() => {
                   تیرگی‌ای وجود نداشت و متنِ سفید روی صحنه‌ی روشن
                   ناخوانا می‌ماند — همان حالتِ یک‌ونیم ثانیه‌ای. پرده از
                   فریمِ اول آن‌جاست، پس آن پنجره اصلاً پیش نمی‌آید. */
+            opacity: 0, transition: 'opacity 0.9s ease',
             /* مقدارِ اولیه؛ از این به بعد مستقیم روی گره نوشته می‌شود
                تا اسکرول رندرِ دوباره‌ی React نخواهد. */
             transform: 'scale(1)', transformOrigin: 'center',
