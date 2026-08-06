@@ -6,17 +6,12 @@ import { notifyReportCreated } from '@/lib/notify';
 /* ثبت گزارش تخلف — مثل دیوار: هر کاربر می‌تواند یک آگهی/محتوا را
    با دلیل مشخص گزارش کند و ادمین در پنل خودش بررسی می‌کند. */
 
-export const REPORT_REASONS: { code: string; label: string }[] = [
-  { code: 'fake',      label: 'آگهی جعلی یا گمراه‌کننده' },
-  { code: 'sold',      label: 'کالا فروخته شده / موجود نیست' },
-  { code: 'price',     label: 'قیمت غیرواقعی یا فریب‌آمیز' },
-  { code: 'duplicate', label: 'آگهی تکراری' },
-  { code: 'scam',      label: 'کلاهبرداری یا درخواست بیعانه' },
-  { code: 'contact',   label: 'شماره تماس اشتباه یا پاسخگو نیست' },
-  { code: 'illegal',   label: 'کالای غیرمجاز یا خلاف قوانین' },
-  { code: 'abuse',     label: 'محتوای توهین‌آمیز یا نامناسب' },
-  { code: 'other',     label: 'موارد دیگر' },
-];
+/* فهرست از `lib/moderation/reasons` می‌آید — پیش‌تر این‌جا و در
+   `ReportButton` دو نسخه‌ی جدا بود و هر واگرایی یعنی کاربر دلیلی
+   می‌بیند که سرور نمی‌شناسد. `export` برای سازگاریِ واردکننده‌های
+   قبلی می‌ماند. */
+export { REPORT_REASONS } from '@/lib/moderation/reasons';
+import { REPORT_REASONS } from '@/lib/moderation/reasons';
 
 const TARGETS = new Set(['product', 'club', 'user', 'media', 'ad']);
 

@@ -7,21 +7,12 @@
 import { useEffect, useState } from 'react'
 import { Flag, X, Loader2, CheckCircle2 } from 'lucide-react'
 import { apiFetch } from '../lib/http'
+/* همان فهرستی که سرور می‌شناسد — نسخه‌ی جدا داشتن یعنی کاربر دلیلی
+   انتخاب کند که `POST /api/reports` ردش می‌کند. */
+import { REPORT_REASONS as REASONS } from '../lib/moderation/reasons'
 
 const INK = '#1C1B17', SEC = '#5B564B', MUT = '#8A8474', LINE = '#EAE5DA'
 const GOLD_D = '#9A6E38', FELT = '#0E7A38', RED = '#B23B2E'
-
-const REASONS = [
-  { code: 'fake',      label: 'آگهی جعلی یا گمراه‌کننده' },
-  { code: 'sold',      label: 'کالا فروخته شده / موجود نیست' },
-  { code: 'price',     label: 'قیمت غیرواقعی یا فریب‌آمیز' },
-  { code: 'duplicate', label: 'آگهی تکراری' },
-  { code: 'scam',      label: 'کلاهبرداری یا درخواست بیعانه' },
-  { code: 'contact',   label: 'شماره تماس اشتباه یا پاسخگو نیست' },
-  { code: 'illegal',   label: 'کالای غیرمجاز یا خلاف قوانین' },
-  { code: 'abuse',     label: 'محتوای توهین‌آمیز یا نامناسب' },
-  { code: 'other',     label: 'موارد دیگر' },
-]
 
 
 interface Props {

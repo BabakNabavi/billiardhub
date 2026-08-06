@@ -47,3 +47,44 @@ export function rejectLabel(input: unknown): string {
   if (LABELS.has(s)) return s
   return 'موارد دیگر'
 }
+
+/* ─────────────────────────────────────────────────────────────
+   دلیلِ گزارشِ تخلف — همان قاعده، همان تنگنا.
+
+   این فهرست تا امروز **دو نسخه** داشت: یکی در `ReportButton.tsx` و
+   یکی در `app/api/reports/route.ts`. هر تغییری باید در هر دو انجام
+   می‌شد وگرنه کاربر دلیلی می‌دید که سرور نمی‌شناخت و گزارش با
+   «دلیل گزارش را انتخاب کنید» رد می‌شد. حالا یک نسخه است.
+
+   ── ⚠️ فیلترِ واژه در سرویسِ پیامک ──
+   ملی‌پیامک دو واژه را در متغیرها فیلتر می‌کند و پیامک را رد:
+       «کلاهبرداری»  و  «خلاف»
+   پس دو برچسب با مترادف بازنویسی شدند. معنی دست‌نخورده مانده و
+   `code`ها هم عوض نشده‌اند تا داده‌ی ثبت‌شده معتبر بماند.
+
+   هر تغییرِ بعدی در این `label`ها باید با تیکت به سرویس اعلام شود.
+   ───────────────────────────────────────────────────────────── */
+export const REPORT_REASONS: RejectReason[] = [
+  { code: 'fake',      label: 'آگهی جعلی یا گمراه‌کننده' },
+  { code: 'sold',      label: 'کالا فروخته شده / موجود نیست' },
+  { code: 'price',     label: 'قیمت غیرواقعی یا فریب‌آمیز' },
+  { code: 'duplicate', label: 'آگهی تکراری' },
+  /* بود: «کلاهبرداری یا درخواست بیعانه» */
+  { code: 'scam',      label: 'درخواست بیعانه یا وجه پیش از معامله' },
+  { code: 'contact',   label: 'شماره تماس اشتباه یا پاسخگو نیست' },
+  /* بود: «کالای غیرمجاز یا خلاف قوانین» */
+  { code: 'illegal',   label: 'کالای غیرمجاز یا مغایر با قوانین' },
+  { code: 'abuse',     label: 'محتوای توهین‌آمیز یا نامناسب' },
+  { code: 'other',     label: 'موارد دیگر' },
+]
+
+const REPORT_BY_CODE = new Map(REPORT_REASONS.map(r => [r.code, r.label]))
+const REPORT_LABELS = new Set(REPORT_REASONS.map(r => r.label))
+
+/** همتای `rejectLabel` برای گزارشِ تخلف — ناشناخته ⇒ «موارد دیگر». */
+export function reportLabel(input: unknown): string {
+  const s = String(input ?? '').trim()
+  if (REPORT_BY_CODE.has(s)) return REPORT_BY_CODE.get(s)!
+  if (REPORT_LABELS.has(s)) return s
+  return 'موارد دیگر'
+}
