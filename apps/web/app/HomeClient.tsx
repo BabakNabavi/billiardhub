@@ -708,7 +708,8 @@ export default function HomeClient({ initialPlacements, initialFeatured, service
   exploreSlot?: React.ReactNode
 }) {
   const [slide, setSlide]     = useState(0);
-  const [scrollY, setScrollY] = useState(0);
+  /* `scrollY` دیگر state نیست — دیدنِ آن در state یعنی هر فریمِ
+     اسکرول یک رندرِ کامل. جزئیات کنارِ همان useEffect. */
   const [playing, setPlaying] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
 
@@ -1150,11 +1151,50 @@ export default function HomeClient({ initialPlacements, initialFeatured, service
     return () => slider.removeEventListener('scroll', handleMktScroll);
   }, [handleMktScroll]);
 
+  /* ── چرا اسکرول از React رد نمی‌شود ──
+     پیش‌تر این‌جا `setScrollY(window.scrollY)` بود. یعنی هر فریمِ
+     اسکرول یک state تازه می‌شد و **کلِ این کامپوننتِ دوهزارخطی** از
+     نو رندر می‌گرفت. rAF جلوی تعدادِ فراخوانی را می‌گرفت ولی نه
+     هزینه‌ی هر فراخوانی را — و همان هزینه از بودجه‌ی ۱۶ میلی‌ثانیه‌ای
+     هر فریم بیشتر می‌شد. نتیجه‌اش همان لرزشِ اسکرول بود.
+
+     مقدارهایی که به اسکرول وابسته‌اند همه استایلِ محض‌اند (شفافیت و
+     جابه‌جایی). این‌ها را می‌شود مستقیم روی گره نوشت؛ آن‌وقت هزینه‌ی
+     هر فریم دو نوشتنِ استایل است، نه یک آشتی‌دهیِ کاملِ درخت. */
+  const heroVideoRef = useRef<HTMLVideoElement | null>(null);
+  const heroContentRef = useRef<HTMLDivElement | null>(null);
+
   useEffect(() => {
+    const apply = () => {
+      const y = window.scrollY;
+      const v = heroVideoRef.current;
+      const c = heroContentRef.current;
+      if (v) {
+        v.style.transform = `scale(${1 + y * 0.00013})`;
+        /* `will-change` فقط در همان بازه‌ای که واقعاً حرکت هست روشن
+           می‌ماند؛ دائمی‌بودنش یک لایه‌ی کامپوزیتِ همیشگی می‌سازد. */
+        v.style.willChange = y > 0 && y < 700 ? 'transform' : 'auto';
+      }
+      const fade = String(Math.max(0, 1 - y / 700));
+      if (c) {
+        c.style.opacity = fade;
+        c.style.transform = `translateY(${y * 0.055}px)`;
+      }
+      /* تصویرهای پس‌زمینه و فلش‌ها هم به همان اسکرول وابسته‌اند.
+         با کوئری‌سلکتور نوشته می‌شوند نه با ref، چون چندتایند و
+         تعدادشان با اسلایدها عوض می‌شود. */
+      const root = c?.parentElement ?? document;
+      root.querySelectorAll<HTMLElement>('.hero-parallax')
+        .forEach(el => { el.style.transform = `scale(${(1 + y * 0.00013) * 1.02})` });
+      const arrows = root.querySelector<HTMLElement>('.hero-arrows');
+      if (arrows) arrows.style.opacity = fade;
+    };
+
     const fn = () => {
       cancelAnimationFrame(rafRef.current);
-      rafRef.current = requestAnimationFrame(() => setScrollY(window.scrollY));
+      rafRef.current = requestAnimationFrame(apply);
     };
+    apply();
     window.addEventListener('scroll', fn, { passive: true });
     return () => { window.removeEventListener('scroll', fn); cancelAnimationFrame(rafRef.current); };
   }, []);
@@ -1169,8 +1209,8 @@ useEffect(() => {
     return () => { if (timerRef.current) clearInterval(timerRef.current); };
   }, [spin, playing, next]);
 
-  const heroO = Math.max(0, 1 - scrollY / 700);
-  const heroS = 1 + scrollY * 0.00013;
+  /* heroO و heroS حذف شدند — مقدارهایشان مستقیم در rAF روی گره‌ها
+     نوشته می‌شوند تا اسکرول رندرِ دوباره‌ی React نخواهد. */
   const sl    = HERO_SLIDES[slide]!;
 
   return (
@@ -1547,15 +1587,18 @@ useEffect(() => {
             ۳) `willChange:'transform'` دائمی یک لایه‌ی کامپوزیت
                تمام‌صفحه را همیشه زنده نگه می‌داشت. حالا فقط وقتی
                اسکرول واقعاً هیرو را تغییر می‌دهد اعمال می‌شود. */}
-        <video ref={videoRef} autoPlay muted loop playsInline preload="metadata"
+        <video ref={el => { videoRef.current = el; heroVideoRef.current = el }}
+          autoPlay muted loop playsInline preload="metadata"
           poster="/images/hero/1.webp"
           aria-hidden="true"
           style={{
             position: 'absolute', inset: 0, width: '100%', height: '100%',
             objectFit: 'cover', zIndex: 1,
             filter: 'brightness(0.52) saturate(0.62) contrast(1.08)',
-            transform: `scale(${heroS})`, transformOrigin: 'center',
-            willChange: scrollY > 0 && scrollY < 700 ? 'transform' : 'auto',
+            /* مقدارِ اولیه؛ از این به بعد مستقیم روی گره نوشته می‌شود
+               تا اسکرول رندرِ دوباره‌ی React نخواهد. */
+            transform: 'scale(1)', transformOrigin: 'center',
+            willChange: 'auto',
           }}>
           {/* منبعِ ویدیو تا آرام‌شدنِ مرورگر گذاشته نمی‌شود.
 
@@ -1599,9 +1642,10 @@ useEffect(() => {
                 loading={i === 0 ? 'eager' : 'lazy'}
                 fetchPriority={i === 0 ? 'high' : 'low'}
                 decoding="async"
+                className="hero-parallax"
                 style={{ width: '100%', height: '100%', objectFit: 'cover',
                   filter: 'brightness(0.78) saturate(0.85) contrast(1.06) blur(1.5px)',
-                  transform: `scale(${heroS * 1.02})`, transformOrigin: 'center' }}
+                  transform: 'scale(1.02)', transformOrigin: 'center' }}
                 onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
             )}
           </div>
@@ -1627,7 +1671,7 @@ useEffect(() => {
         {/* Story bar is handled by Navbar → Stories.tsx */}
 
         {/* ── CONTENT — no key prop → animates exactly ONCE on page load ── */}
-        <div className="hero-content" style={{
+        <div className="hero-content" ref={heroContentRef} style={{
           position: isMobile ? 'relative' : 'absolute',
           inset: isMobile ? undefined : 0,
           minHeight: isMobile ? '100dvh' : undefined,
@@ -1635,7 +1679,8 @@ useEffect(() => {
           display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start',
           /* +60px جای eyebrow حذف‌شده — وگرنه تیتر می‌رفت زیر نوار استوری */
           padding: 'calc(clamp(189px,25vh,236px) + 60px + env(safe-area-inset-top)) clamp(16px,5%,80px) 0',
-          opacity: heroO, transform: `translateY(${scrollY * 0.055}px)`,
+          /* مقدارِ اولیه؛ اسکرول مستقیم روی گره می‌نویسد */
+          opacity: 1, transform: 'translateY(0)',
         }}>
           {/* Headline — رنگی با spans */}
           <h1 className="hb hero-h1" style={{
@@ -1774,7 +1819,7 @@ useEffect(() => {
 
 
         {/* ── Prev/next arrows — hidden on mobile ── */}
-        <div className="hero-arrows" style={{ opacity: heroO }}>
+        <div className="hero-arrows" style={{ opacity: 1 }}>
           {[{ fn: prev, icon: <ArrowRight size={13} /> }, { fn: next, icon: <ArrowLeft size={13} /> }].map((b, i) => (
             <button key={i} onClick={b.fn} style={{ width: '34px', height: '34px', borderRadius: '50%',
               background: 'rgba(255,255,255,0.06)',

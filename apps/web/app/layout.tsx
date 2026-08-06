@@ -99,6 +99,29 @@ export default function RootLayout({
             iOS پیش از ۱۵٫۴ فقط همان را می‌فهمد — بدونش آیکون صفحه‌ی
             اصلی به‌جای اپ، سافاری را باز می‌کند. */}
         <meta name="apple-mobile-web-app-capable" content="yes" />
+
+        {/* ── پیش‌بارگذاریِ فونت ──
+            فونت‌ها `font-display: swap` دارند، پس مرورگر اول با
+            Tahoma می‌کشد و بعد که فایل رسید عوض می‌کند. آن لحظه
+            همان چیزی است که دیده می‌شد: نوشته «تار» ظاهر می‌شود،
+            مکث می‌کند، بعد واضح می‌شود — و چون عرضِ حروف فرق دارد،
+            چیدمان هم تکان می‌خورد.
+
+            علتش این بود که مرورگر تا **پارس‌کردنِ CSS و رسیدن به
+            متنی که آن وزن را می‌خواهد** اصلاً نمی‌دانست این فایل
+            لازم است. با `preload` همان اول شروع می‌شود و معمولاً
+            پیش از اولین رنگ‌آمیزی حاضر است.
+
+            فقط سه وزنی که واقعاً بالای صفحه‌اند: متنِ عادی، تیترها،
+            و تیترِ درشتِ هیرو. پیش‌بارگذاریِ هر یازده وزن، پهنای باندِ
+            اولِ صفحه را می‌خورد و خودش کند می‌کند. */}
+        <link rel="preload" as="font" type="font/woff2" crossOrigin="anonymous"
+          href="/fonts/IranSans/IRANSansX-Regular.woff2" />
+        <link rel="preload" as="font" type="font/woff2" crossOrigin="anonymous"
+          href="/fonts/IranSans/IRANSansX-Bold.woff2" />
+        <link rel="preload" as="font" type="font/woff2" crossOrigin="anonymous"
+          href="/fonts/IranSans/IRANSansX-Black.woff2" />
+
         <style>{`
           @font-face { font-family:'IRANSansX'; src:url('/fonts/IranSans/IRANSansX-Thin.woff2') format('woff2'); font-weight:100; font-style:normal; font-display:swap; }
           @font-face { font-family:'IRANSansX'; src:url('/fonts/IranSans/IRANSansX-UltraLight.woff2') format('woff2'); font-weight:200; font-style:normal; font-display:swap; }
