@@ -153,7 +153,26 @@ for (const n of names) {
 }
 
 console.log('')
-const buckets = ['club-media', 'documents']
+
+/* ── باکت‌ها را نباید هاردکد کرد ──
+   نسخه‌ی اول `['club-media','documents']` بود. ولی باکتِ خصوصی نامش
+   `bh-private` است نه `documents` — یعنی پشتیبان **۳۴۰ فایلِ مدارک**
+   را اصلاً نمی‌دید و به‌جایش باکتی را می‌شمرد که وجود نداشت (و صفر
+   گزارش می‌کرد، که شبیهِ «مدرکی نیست» به‌نظر می‌رسید).
+
+   همان درسِ فهرستِ جدول‌ها: هرچه هاردکد شود، روزی از پشتیبان جا
+   می‌ماند و تا روزِ بازیابی کسی نمی‌فهمد. */
+async function bucketNames() {
+  try {
+    const r = await fetch(`${URL_}/storage/v1/bucket`, { headers })
+    if (!r.ok) return []
+    const list = await r.json()
+    return Array.isArray(list) ? list.map(b => String(b.name)).filter(Boolean) : []
+  } catch { return [] }
+}
+
+const buckets = await bucketNames()
+if (!buckets.length) console.log('  ⚠ فهرستِ باکت‌ها گرفته نشد')
 const files = {}
 for (const b of buckets) {
   const list = await listBucket(b)
