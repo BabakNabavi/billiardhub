@@ -1140,8 +1140,19 @@ select:disabled { opacity: 0.55; cursor: not-allowed; }
 }
 
 /* ── ردیفِ ساعاتِ کاری (تبِ داشبورد) ────────────────────────────
-   نامِ روز + دو انتخابگرِ ساعت. با flex و انتخابگرهای غیرفشرده،
-   مجموعِ عرض از موبایل بیشتر می‌شد و ساعت‌ها بیرون می‌زدند. */
+
+   ⚠️ این بخش چند بار «درست شد» و هر بار هیچ تغییری نکرد. علتش یک
+   سلکتورِ اشتباه بود: قاعده‌ها `.wh-cell select` را هدف می‌گرفتند، در
+   حالی که `FaTimeSelect` از کامپوننتِ `Select` پروژه استفاده می‌کند
+   که `<select>` بومی **ندارد** — یک `<div><button>` است.
+
+   یعنی آن قاعده‌ها به عنصری اشاره می‌کردند که در DOM وجود نداشت، هیچ
+   خطایی هم نمی‌دادند، و بی‌صدا بی‌اثر می‌ماندند. درسش: وقتی یک قاعده‌ی
+   CSS «اثر نمی‌کند»، اول در Elements ببین اصلاً چیزی را match می‌کند
+   یا نه.
+
+   حالا عرضِ ثابتِ جعبه‌ها از خودِ `FaTimeSelect` برداشته شده و کشسان‌اند،
+   پس این‌جا فقط چیدمانِ ردیف می‌ماند. */
 .wh-day-row {
   display: grid;
   grid-template-columns: minmax(88px, 118px) 1fr 1fr;
@@ -1149,26 +1160,17 @@ select:disabled { opacity: 0.55; cursor: not-allowed; }
   gap: 10px;
 }
 .wh-cell { display: flex; align-items: center; gap: 6px; min-width: 0; }
+/* قابِ ساعت باید کلِ خانه را بگیرد تا جعبه‌ها جا برای کوچک‌شدن داشته باشند */
+.wh-cell .fa-time { flex: 1 1 0; min-width: 0; }
 
 @media (max-width: 560px) {
-  .wh-day-row { grid-template-columns: 68px 1fr 1fr; gap: 6px; padding: 10px 9px !important; }
+  .wh-day-row { grid-template-columns: 62px 1fr 1fr; gap: 5px; padding: 10px 8px !important; }
   .wh-day-name { font-size: 12.5px !important; }
   /* «از» و «تا» حذف: جای دو ساعت را می‌گرفتند و ترتیبشان خودش گویاست */
   .wh-lb { display: none; }
-  .wh-cell { justify-content: center; }
-
-  /* ── چرا این‌جا لازم شد ──
-     هر انتخابگرِ ساعت دو جعبه دارد (ساعت و دقیقه) که هرکدام ۶۲px
-     ثابت‌اند. مجموعِ یک سطر می‌شد ۶۸ + ۶ + ۱۳۰ + ۶ + ۱۳۰ ≈ ۳۴۰px —
-     روی صفحه‌ی ۳۶۰ لبه‌ی لبه، و روی ۳۲۰ سرریز؛ همان روی‌هم‌افتادن.
-
-     عرضِ ثابت با `!important` شکسته می‌شود چون اینلاین است، و جعبه‌ها
-     کشسان می‌شوند. */
-  .wh-cell > * { width: auto !important; flex: 1 1 0; min-width: 0; }
-  .wh-cell select { width: 100% !important; min-width: 0; padding-left: 4px !important; padding-right: 4px !important; }
-  /* فلشِ بومیِ select حذف می‌شود: عرض می‌گیرد و کاری نمی‌کند — خودِ
-     جعبه با یک ضربه باز می‌شود. */
-  .wh-cell select { appearance: none; -webkit-appearance: none; background-image: none; text-align: center; }
+  .wh-cell { gap: 0; }
+  /* در باریک‌ترین صفحه‌ها هم عدد باید کامل دیده شود */
+  .wh-cell .fa-time button { padding-left: 2px; padding-right: 2px; font-size: 12px; }
 }
 
 /* ── دسترسی سریع (داشبورد باشگاه) ───────────────────────────────

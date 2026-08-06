@@ -58,9 +58,83 @@ const LABEL: Record<string, string> = {
   years: 'سال‌های فعالیت', level: 'سطح', rank: 'رتبه',
   shopName: 'نام فروشگاه', storeName: 'نام فروشگاه', factoryName: 'نام کارخانه',
   workHours: 'ساعات کاری', workDays: 'روزهای کاری',
+
+  /* ── ستون‌هایی که هنوز انگلیسی روی صفحه می‌نشستند ──
+     هرکدام از این‌ها یک‌بار به‌صورتِ `storyMediaUrl` یا `albums` در
+     پنل دیده شد. فهرست باید کاملِ ستون‌های واقعی باشد، وگرنه هر ستونِ
+     تازه‌ای دوباره خام ظاهر می‌شود. */
+  storyMediaUrl: 'استوری', storyText: 'متن استوری',
+  storyType: 'نوع استوری', storyExpiresAt: 'انقضای استوری',
+  hasActiveStory: 'استوری فعال',
+  albums: 'آلبوم‌ها', images: 'تصاویر', coaches: 'مربیان', clubStats: 'آمار باشگاه',
+  workingHours: 'ساعات کاری', addressNote: 'توضیح نشانی', timezone: 'منطقه‌ی زمانی',
+  managerName: 'نام مدیر', specialFeatures: 'امکانات ویژه',
+  vipPocketTables: 'میز پاکت VIP', airHockeyTables: 'میز ایرهاکی',
+  dartBoards: 'دارت', playstations: 'پلی‌استیشن',
+  postalCodeVerified: 'کد پستی تأییدشده', ibanVerified: 'شبا تأییدشده',
+  bankCardVerified: 'کارت تأییدشده', bankConfirmedByOwner: 'تأیید مالک',
+  bankCardCheckedAt: 'تاریخ استعلام کارت', ibanOwnerName: 'نام دارنده‌ی شبا',
+  reserveClosedUntil: 'بستن رزرو تا', submissionCount: 'دفعات ارسال',
+  reviewedAt: 'تاریخ بررسی', reviewedBy: 'بررسی‌کننده',
+  createdAt: 'تاریخ ثبت', updatedAt: 'آخرین تغییر',
+  ownerId: 'شناسه‌ی مالک', id: 'شناسه', userId: 'شناسه‌ی کاربر',
+  playerSurchargeEnabled: 'اضافه‌بهای نفرات', playerSurchargePercent: 'درصد اضافه‌بها',
+  playerSurchargeFrom: 'اضافه‌بها از نفر',
+  nationalId: 'کد ملی', national_id: 'کد ملی', firstName: 'نام', lastName: 'نام خانوادگی',
+  primaryRole: 'نقش اصلی', secondaryRoles: 'نقش‌های دیگر',
+  smsOptOut: 'انصراف از پیامک', memberSince: 'عضو از',
 }
 
+/* ── فیلدهایی که مقدارشان نشانیِ فایل است ──
+   نشانیِ کاملِ Supabase حدودِ ۱۲۰ نویسه است و در جدولِ دوستونی کلِ
+   ردیف را می‌بلعد — بدونِ اینکه ادمین بتواند کاری با آن بکند. آنچه
+   واقعاً می‌خواهد بداند این است که «هست یا نیست». */
+const MEDIA_URL_KEYS = new Set([
+  'storyMediaUrl', 'logo', 'avatar', 'photo', 'cover', 'image',
+  'licenseDocumentUrl', 'certificate', 'doc_url',
+])
+
+/* ── فیلدهایی که فهرست‌اند ──
+   ادمین از دیدنِ ده نشانیِ عکس چیزی دستگیرش نمی‌شود؛ تعداد را
+   می‌خواهد. */
+const COUNT_KEYS = new Set([
+  'albums', 'images', 'gallery', 'videos', 'products', 'coaches',
+  'services', 'achievements', 'team',
+])
+
 const faLabel = (k: string) => LABEL[k] ?? k
+
+/* شمارشِ عناصر — آلبوم علاوه بر تعدادِ خودش، مجموعِ عکس‌هایش را هم دارد */
+function countOf(k: string, v: unknown): string {
+  if (!Array.isArray(v)) return v ? 'دارد' : '—'
+  if (!v.length) return '—'
+  const n = toFaDigits(String(v.length))
+  if (k === 'albums') {
+    const photos = v.reduce((s: number, a: unknown) =>
+      s + (Array.isArray((a as { items?: unknown[] })?.items) ? (a as { items: unknown[] }).items.length : 0), 0)
+    return `${n} آلبوم · ${toFaDigits(String(photos))} عکس`
+  }
+  return `${n} مورد`
+}
+
+/* ── مقدارهایی که خودشان کدِ انگلیسی‌اند ──
+   برچسبِ فارسی وقتی کافی است که مقدارش هم فارسی باشد؛ «وضعیت تأیید:
+   pending» هنوز نصفه‌انگلیسی است. */
+const VALUE: Record<string, string> = {
+  pending: 'در انتظار', approved: 'تأیید شده', verified: 'تأیید شده',
+  rejected: 'رد شده', unverified: 'تأیید نشده', draft: 'پیش‌نویس',
+  active: 'فعال', inactive: 'غیرفعال', suspended: 'معلق',
+  male: 'مرد', female: 'زن',
+  image: 'عکس', video: 'ویدیو',
+  'Asia/Tehran': 'تهران',
+  admin: 'مدیر سیستم', user: 'کاربر', club_owner: 'باشگاه‌دار',
+  coach: 'مربی', referee: 'داور', seller: 'فروشنده',
+  manufacturer: 'تولیدکننده', technician: 'متخصص فنی', player: 'بازیکن',
+}
+
+/* نشانیِ فایل — هر کلیدی که در فهرست نباشد هم نباید نشانیِ صدنویسه‌ای
+   روی جدول بریزد. */
+const isUrl = (s: string) => /^(https?:)?\/\//i.test(s) || /^[\w./-]+\/[\w.-]+\.(jpe?g|png|webp|gif|mp4|pdf)$/i.test(s)
 
 /* مقدارها شکل‌های گوناگونی دارند — آرایه، شیء، بولی، تاریخ */
 function show(v: unknown): string {
@@ -78,7 +152,11 @@ function show(v: unknown): string {
     return Object.values(o).filter(x => x && typeof x !== 'object').map(String).join(' — ') || '—'
   }
   const s = String(v)
-  return /^\d{4}-\d{2}-\d{2}T/.test(s) ? faDateTime(s) : toFaDigits(s)
+  if (/^\d{4}-\d{2}-\d{2}T/.test(s)) return faDateTime(s)
+  if (VALUE[s]) return VALUE[s]
+  /* سدِ آخر برای ستون‌های تازه‌ای که هنوز در فهرست نیستند */
+  if (isUrl(s)) return 'دارد'
+  return toFaDigits(s)
 }
 
 function faDateTime(iso: string) {
@@ -347,7 +425,11 @@ export default function ReviewDetails({ type, id }: { type: ReviewType; id: stri
                      ترجمه، «info_incomplete» روی صفحه می‌نشست. */
                   k === 'rejectionReason' ? rejectLabel(v)
                     : k === 'birthDate' || k === 'birth_date' ? faBirthDate(v as string)
-                      : show(v)
+                      /* نشانیِ فایل و فهرست‌ها خلاصه می‌شوند — نشانیِ
+                         کامل کلِ ردیف را می‌گرفت و هیچ کمکی نمی‌کرد. */
+                      : MEDIA_URL_KEYS.has(k) ? (v ? 'دارد' : '—')
+                        : COUNT_KEYS.has(k) ? countOf(k, v)
+                          : show(v)
                 } />
               ))}
           </Grid>

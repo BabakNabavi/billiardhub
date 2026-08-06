@@ -22,7 +22,7 @@ export interface SelectOption<T extends string | number = string> {
 
 export default function Select<T extends string | number = string>({
   value, options, onChange, placeholder = 'انتخاب کنید…', disabled, ariaLabel, style, compact,
-  latin,
+  latin, noChevron, center,
 }: {
   value: T | ''
   options: SelectOption<T>[]
@@ -40,6 +40,14 @@ export default function Select<T extends string | number = string>({
    *  کلاسِ `bh-latin` همان راهِ کنارگذاشتنی است که خودِ آن کامپوننت
    *  تعریف کرده. */
   latin?: boolean
+  /** فلشِ رو‌به‌پایین رندر نشود.
+   *
+   *  برای جعبه‌های خیلی باریک مثلِ ساعت و دقیقه: آن‌جا فلش با فاصله‌اش
+   *  حدودِ ۲۲px از یک جعبه‌ی ۶۲پیکسلی را می‌گیرد — یعنی یک‌سومِ عرض —
+   *  و چیزی هم نمی‌گوید که از خودِ عدد و اشاره‌گر معلوم نباشد. */
+  noChevron?: boolean
+  /** متن وسط‌چین — برای جعبه‌های عددیِ باریک */
+  center?: boolean
 }) {
   const [open, setOpen] = useState(false)
   const [up, setUp] = useState(false)
@@ -82,9 +90,13 @@ export default function Select<T extends string | number = string>({
         aria-label={ariaLabel} aria-expanded={open} aria-haspopup="listbox"
         className={latin ? 'bh-latin' : undefined}
         style={{
-          width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8,
-          padding: pad, borderRadius: 11, fontFamily: 'inherit',
-          fontSize: compact ? 12.5 : 13.5, fontWeight: 700, textAlign: 'right',
+          width: '100%', display: 'flex', alignItems: 'center',
+          justifyContent: center ? 'center' : 'space-between',
+          gap: noChevron ? 0 : 8,
+          padding: noChevron ? (compact ? '8px 4px' : '10px 6px') : pad,
+          borderRadius: 11, fontFamily: 'inherit',
+          fontSize: compact ? 12.5 : 13.5, fontWeight: 700,
+          textAlign: center ? 'center' : 'right',
           color: current ? INK : MUT,
           background: disabled ? 'rgba(0,0,0,0.03)' : open ? 'rgba(199,166,106,0.08)' : '#fff',
           border: `1px solid ${open ? 'rgba(199,166,106,0.55)' : LINE}`,
@@ -96,11 +108,13 @@ export default function Select<T extends string | number = string>({
         <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
           {current?.label ?? placeholder}
         </span>
-        <ChevronDown size={14} style={{
-          color: open ? GOLD_D : MUT, flexShrink: 0,
-          transform: open ? 'rotate(180deg)' : 'none',
-          transition: 'transform .25s cubic-bezier(.22,1,.36,1)',
-        }} />
+        {!noChevron && (
+          <ChevronDown size={14} style={{
+            color: open ? GOLD_D : MUT, flexShrink: 0,
+            transform: open ? 'rotate(180deg)' : 'none',
+            transition: 'transform .25s cubic-bezier(.22,1,.36,1)',
+          }} />
+        )}
       </button>
 
       {open && !disabled && (
