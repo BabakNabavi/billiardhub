@@ -663,6 +663,22 @@ export default function ClubDashboardPage() {
      `catch` خالیِ قبلی هم برداشته شد: مسیرِ وضعیت اصلاً وجود نداشت و
      ۴۰۴ بی‌صدا بلعیده می‌شد، در حالی که UI خوش‌بینانه وضعیت را
      عوض‌شده نشان می‌داد. */
+  /* ── تعدادِ رزروهای فردا — برای نشانِ روی تب ──
+     ⚠️ این هوک باید این‌جا بماند، بالای همه‌ی `return`های شرطی.
+     پیش‌تر پایین‌تر بود — بعد از «اگر در حال بارگذاری است برگرد» و
+     «اگر باشگاهی ندارد برگرد». نتیجه‌اش این بود که در رندرِ اول دو
+     هوک کمتر اجرا می‌شد و به‌محضِ آمدنِ داده، React با
+     «تعداد هوک‌ها عوض شد» کلِ صفحه را می‌انداخت — همان
+     «مشکلی پیش آمد». */
+  const [tomorrowCount, setTomorrowCount] = useState(0);
+  useEffect(() => {
+    if (!selectedClub) { setTomorrowCount(0); return; }
+    void apiFetch(`/api/clubs/${selectedClub.id}/schedule`, { cache: 'no-store' })
+      .then(r => (r.ok ? r.json() : null))
+      .then(j => setTomorrowCount(Number(j?.tomorrow?.count ?? 0)))
+      .catch(() => { });
+  }, [selectedClub]);
+
   /* ── مهلتِ لغو توسط باشگاه ──
      همان قاعده‌ای که سرور اجرا می‌کند، فقط زودتر گفته می‌شود: بدونِ
      این، دکمه دیده می‌شود، زده می‌شود، و خطا می‌گیرد. */
@@ -1288,17 +1304,6 @@ export default function ClubDashboardPage() {
   // ── Derived ───────────────────────────────────────────────────────────────
 
   const pendingBookings = bookings.filter(b => b.status === 'pending');
-
-  /* تعدادِ رزروهای فردا — برای نشانِ روی تب. سبک است و همان مسیرِ
-     تقویم را صدا می‌زند، پس عددِ نشان و عددِ داخلِ تب همیشه یکی‌اند. */
-  const [tomorrowCount, setTomorrowCount] = useState(0);
-  useEffect(() => {
-    if (!selectedClub) { setTomorrowCount(0); return; }
-    void apiFetch(`/api/clubs/${selectedClub.id}/schedule`, { cache: 'no-store' })
-      .then(r => (r.ok ? r.json() : null))
-      .then(j => setTomorrowCount(Number(j?.tomorrow?.count ?? 0)))
-      .catch(() => { });
-  }, [selectedClub]);
   const filteredBookings = bookingFilter === 'all' ? bookings : bookings.filter(b => b.status === bookingFilter);
 
   /* رزرو آنلاین بسته است؟ (همیشه یا تا زمان آینده) */
