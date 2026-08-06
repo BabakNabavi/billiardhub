@@ -132,6 +132,7 @@ export default function Footer() {
           box-shadow: 0 4px 14px rgba(199,166,106,0.18);
         }
         .ft-dev-mob { display: none; }
+        .ft-copy-short { display: none; }
         /* سه ستونِ PLATFORM/EXPLORE/ACCOUNT در یک سطر می‌مانند. با دو
            ستون، ستونِ سوم به سطرِ بعد می‌افتاد و فوتر بی‌دلیل بلند
            می‌شد — در حالی که برچسب‌ها کوتاه‌اند و جا هست. */
@@ -169,6 +170,8 @@ export default function Footer() {
           .ft-bottom-links { justify-content: center !important; gap: 12px !important; flex-wrap: nowrap !important; }
           .ft-bottom, .ft-bottom .ft-legal { font-size: 11.5px !important; }
           .ft-bottom > div:first-child { font-size: 11.5px !important; }
+          .ft-copy-long { display: none !important; }
+          .ft-copy-short { display: inline !important; }
           .ft-dev-desk { display: none !important; }
           /* اعتبارِ توسعه‌دهنده و نوارِ حقوقی نزدیکِ هم بمانند */
           .ft-dev-mob { display: block !important; flex-basis: 100% !important; margin-top: 0; }
@@ -311,7 +314,12 @@ export default function Footer() {
 
         {/* ── Bottom bar ────────────────────────────── */}
         <div className="ft-bottom" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
-          <div style={{ fontSize: '13px', color: DIM2, whiteSpace: 'nowrap' }}>© ۱۴۰۵ بیلیارد هاب</div>
+          {/* دسکتاپ جا دارد و جمله‌ی کامل رسمی‌تر است؛ موبایل جا ندارد
+              و باید در همان یک سطر با دو لینکِ حقوقی بماند. */}
+          <div style={{ fontSize: '13px', color: DIM2, whiteSpace: 'nowrap' }}>
+            <span className="ft-copy-long">© ۱۴۰۵ تمامی حقوق برای بیلیارد هاب محفوظ است</span>
+            <span className="ft-copy-short">© ۱۴۰۵ بیلیارد هاب</span>
+          </div>
           <div className="ft-bottom-links" style={{ display: 'flex', gap: '22px', flexWrap: 'wrap' }}>
             {/* لینک‌های حقوقی — «درباره ما / تماس با ما» در ستون «اطلاعات و قوانین» بالا هستند */}
             {[

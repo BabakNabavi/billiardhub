@@ -486,7 +486,10 @@ function BookingContent() {
               background:'rgba(245,158,11,0.08)',border:'1px solid rgba(245,158,11,0.28)',borderRadius:14}}>
               <AlertCircle size={15} style={{color:'#B45309',flexShrink:0,marginTop:2}}/>
               <span style={{fontSize:13.5,color:'#92600A',lineHeight:1.9}}>
-                {closureLabel(closure)} — روزها و ساعت‌های قرمز قابل انتخاب نیستند؛ بقیه باز است.
+                {/* متنِ قبلی سه جمله بود و تاریخ و ساعت را هم می‌گفت؛
+                    کاربر فقط می‌خواهد بداند امروز می‌تواند رزرو کند یا
+                    نه. روزهای بسته در تقویم قرمزند و خودشان گویا. */}
+                رزروهای این باشگاه برای امروز بسته است
               </span>
             </div>
           )}

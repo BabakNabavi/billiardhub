@@ -764,7 +764,7 @@ export default function ClubsPage() {
                 ))}
               </div>
 
-              <div className="tb-count" style={{ order: 5, marginRight: 'auto', fontSize: 14, color: 'rgba(0,0,0,0.40)', whiteSpace: 'nowrap' }}>{toFa(filtered.length)} باشگاه</div>
+              <div className="tb-count" style={{ order: 5, marginRight: 'auto', fontSize: 14, color: 'rgba(0,0,0,0.40)', whiteSpace: 'nowrap' }}>باشگاه‌ها</div>
             </div>
 
             {/* location hint */}

@@ -1296,6 +1296,10 @@ useEffect(() => {
         /* روی سکشن‌های تیره متن طلایی روشن‌تر تا خوانا بماند */
         .see-all-lq.on-dark { color:${GOLD}; border-color:rgba(199,166,106,0.42); }
 
+        /* ظرفِ محتوای هیرو کلیک را رد می‌کند (توضیحش کنارِ خودش)، ولی
+           هرچه داخلش است باید کلیک‌پذیر بماند. */
+        .hero-content > * { pointer-events: auto; }
+
         .sec-label{display:inline-flex;align-items:center;gap:7px;font-size:9.5px;font-weight:800;letter-spacing:0.26em;text-transform:uppercase;margin-bottom:14px;padding:5px 13px;border-radius:999px;border:1px solid currentColor;}
         .sec-label::before{content:'';width:6px;height:6px;border-radius:50%;background:currentColor;}
         /* ── چرا content-visibility برداشته شد ──
@@ -1749,6 +1753,15 @@ useEffect(() => {
           display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start',
           /* +60px جای eyebrow حذف‌شده — وگرنه تیتر می‌رفت زیر نوار استوری */
           padding: 'calc(clamp(189px,25vh,236px) + 60px + env(safe-area-inset-top)) clamp(16px,5%,80px) 0',
+          /* ── چرا pointerEvents اینجاست ──
+             در دسکتاپ این لایه `position:absolute; inset:0` است و
+             کلِ هیرو را می‌پوشاند، با zIndex ۱۰. یعنی هر چیزی زیرش
+             کلیک‌ناپذیر می‌شود، حتی جایی که هیچ متنی نیست.
+
+             ظرف کلیک نمی‌خواهد؛ فقط فرزندانش (دکمه‌ها و لینک‌ها)
+             می‌خواهند. پس ظرف شفافِ کلیک می‌شود و بچه‌ها دوباره
+             فعال. */
+          pointerEvents: 'none',
           /* مقدارِ اولیه؛ اسکرول مستقیم روی گره می‌نویسد */
           opacity: 1, transform: 'translateY(0)',
         }}>
