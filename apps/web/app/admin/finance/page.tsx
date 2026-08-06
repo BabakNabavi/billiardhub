@@ -6,6 +6,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { apiFetch } from '../../../lib/http'
 import CommissionPanel from '../../../components/admin/CommissionPanel'
+import PayoutOrders from '../../../components/admin/PayoutOrders'
 import {
   Wallet, TrendingUp, CreditCard, Landmark, RotateCcw, Loader2,
   ArrowDownToLine, CheckCircle2, AlertCircle, X,
@@ -35,13 +36,15 @@ interface Data {
   }
   payments: Row[]; clubBalances: Row[]; settlements: Row[]; refunds: Row[]
 }
-type TabKey = 'overview' | 'payments' | 'balances' | 'settlements' | 'refunds' | 'commission'
+/* `payouts` عمداً اول است: پرسشِ روزمره‌ی ادمین «الان چقدر به چه کسی
+   باید بدهم؟» است، نه «درآمدِ کل چقدر بوده». */
+type TabKey = 'payouts' | 'overview' | 'payments' | 'balances' | 'settlements' | 'refunds' | 'commission'
 
 export default function AdminFinance() {
   const [d, setD] = useState<Data | null>(null)
   const [loading, setLoading] = useState(true)
   const [err, setErr] = useState('')
-  const [tab, setTab] = useState<TabKey>('overview')
+  const [tab, setTab] = useState<TabKey>('payouts')
   const [busy, setBusy] = useState('')
   const [modal, setModal] = useState<{ id: string; amount: number } | null>(null)
 
@@ -73,6 +76,7 @@ export default function AdminFinance() {
 
   const o = d.overview
   const TABS: [TabKey, string, number][] = [
+    ['payouts', 'دستور پرداخت', 0],
     ['overview', 'نمای کلی', 0], ['payments', 'پرداخت‌ها', d.payments.length],
     ['balances', 'موجودی باشگاه‌ها', d.clubBalances.length], ['settlements', 'تسویه‌ها', d.settlements.length],
     ['refunds', 'بازپرداخت‌ها', d.refunds.length], ['commission', 'کمیسیون', 0],
@@ -95,6 +99,8 @@ export default function AdminFinance() {
           </button>
         ))}
       </div>
+
+      {tab === 'payouts' && <PayoutOrders onChanged={load} />}
 
       {tab === 'overview' && (
         <>
@@ -158,7 +164,16 @@ export default function AdminFinance() {
           rows={d.clubBalances.map(b => [
             String(b.clubName ?? '—'), <b key="a" style={{ color: GOLD_D }}>{fa(b.available_balance)}</b>,
             fa(b.pending_balance), fa(b.total_earnings), fa(b.total_settled),
-            Number(b.pending_balance) > 0
+            /* ── شرط وارونه بود ──
+               از مهاجرتِ ۰۴۰/۰۴۱ به بعد معنا صریح است:
+               `available_balance` = بدهیِ پرداختنیِ اکنون،
+               `pending_balance`   = تسویه‌ای که ساخته شده ولی هنوز
+                                     پرداخت نشده.
+               دکمه روی `pending` بود، یعنی دقیقاً برعکس: باشگاهی که
+               واقعاً طلبکار بود هیچ دکمه‌ای نداشت، و باشگاهی که تسویه‌اش
+               در جریان بود دکمه‌ای می‌گرفت که سرور با
+               `nothing_to_settle` ردش می‌کرد. */
+            Number(b.available_balance) > 0
               ? <button key="btn" onClick={() => act({ action: 'create', clubId: b.club_id }, String(b.club_id))} disabled={busy === b.club_id}
                   style={btnPrimary}>{busy === b.club_id ? '…' : 'ایجاد تسویه'}</button>
               : <span key="btn" style={{ fontSize: 11.5, color: MUT }}>—</span>,
