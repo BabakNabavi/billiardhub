@@ -30,6 +30,41 @@ async function writeIndex(id: string, stories: any[]): Promise<void> {
     });
 }
 
+/* ── نشتِ فضای ذخیره‌سازی ────────────────────────────────────────────
+   استوری ۲۴ ساعت عمر دارد و بعد از فهرست بیرون می‌رود. ولی تا امروز
+   **فقط از فهرست** بیرون می‌رفت: خودِ فایلِ عکس یا ویدیو تا ابد در
+   `club-media` می‌ماند — نامرئی، بی‌استفاده، و پولش پرداخت‌شده.
+
+   اندازه‌اش را می‌شود حساب کرد: صد باشگاه، روزی دو استوریِ دومگابایتی،
+   می‌شود روزی ۴۰۰ مگابایت — سالی حدودِ ۱۴۶ گیگابایت زباله. این دقیقاً
+   همان چیزی است که فضای ذخیره‌سازی را بی‌دلیل به ترابایت می‌رساند.
+
+   نشانیِ عمومیِ Supabase قالبِ ثابتی دارد و مسیرِ داخلِ باکت بعد از
+   نامِ باکت می‌آید؛ از همان استخراج می‌شود. اگر نشانی از جای دیگری
+   بود (داده‌ی قدیمی یا میزبانِ دیگر) رد می‌شود، چون پاک‌کردنِ کورکورانه
+   بدتر از نگه‌داشتن است. */
+function storagePathOf(url: unknown): string | null {
+  const s = String(url ?? '');
+  const m = s.match(new RegExp(`/${BUCKET}/(.+)$`));
+  if (!m?.[1]) return null;
+  const path = decodeURIComponent(m[1].split('?')[0] ?? '');
+  /* فایلِ فهرست هرگز نباید پاک شود */
+  if (!path || path.endsWith('/index.json')) return null;
+  return path;
+}
+
+/** فایل‌های استوری‌هایی که دیگر در فهرست نیستند را پاک می‌کند */
+async function purgeMedia(gone: any[]): Promise<void> {
+  const paths = gone.map(s => storagePathOf(s?.mediaUrl)).filter((p): p is string => !!p);
+  if (!paths.length) return;
+  try {
+    await getSupabaseServer().storage.from(BUCKET).remove(paths);
+  } catch (e) {
+    /* پاک‌نشدن نباید مسیر را بشکند — بدترین حالتش همان نشتِ قبلی است */
+    console.error('[clubs/:id/stories] پاک‌کردنِ فایل انجام نشد:', e);
+  }
+}
+
 /* ── چرا رکوردِ باشگاه هم به‌روز می‌شود ─────────────────────────────────
    خودِ استوری‌ها در همین فایلِ ذخیره‌سازی می‌مانند، ولی صفحه‌ی اول و
    کارتِ باشگاه و صفحه‌ی باشگاه هیچ‌کدام این فایل را نمی‌خوانند: آن‌ها
@@ -78,6 +113,8 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
   const wantsSync = req.nextUrl.searchParams.get('sync') === '1';
   if (active.length !== all.length) {
     writeIndex(id, active).catch(() => { });
+    /* منقضی‌شده‌ها فقط از فهرست بیرون نروند — فایلشان هم برود */
+    void purgeMedia(all.filter((s: any) => new Date(s.expiresAt) <= now));
   }
   if (wantsSync || active.length !== all.length) {
     void syncClubRow(id, active);
@@ -125,5 +162,8 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
   );
   await writeIndex(id, updated);
   await syncClubRow(id, updated);
+  /* هرچه از فهرست افتاد — چه حذفِ دستی چه انقضا — فایلش هم می‌رود */
+  const keep = new Set(updated.map((s: any) => s?.id));
+  void purgeMedia(current.filter((s: any) => !keep.has(s?.id)));
   return NextResponse.json({ ok: true }, { headers: CORS });
 }
