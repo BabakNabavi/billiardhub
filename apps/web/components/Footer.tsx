@@ -160,14 +160,17 @@ export default function Footer() {
 
              هر سه کوتاه‌اند و روی صفحه‌ی ۳۲۰ پیکسلی هم در یک خط جا
              می‌شوند؛ فونت کمی کوچک‌تر و فاصله‌ی کمتر کافی است. */
-          .ft-bottom { flex-direction: row !important; flex-wrap: nowrap !important; justify-content: center !important;
-                       gap: 12px !important; text-align: center; margin-top: 0 !important; line-height: 1.5; }
+          /* کپی‌رایت و دو لینک در یک ردیف؛ اعتبارِ توسعه‌دهنده سطرِ
+             بعد. flex-wrap با flex-basis صد درصد روی آخری دقیقاً
+             همین را می‌دهد — بدونِ گرید یا مدیا-کوئریِ دوم. */
+          .ft-bottom { flex-direction: row !important; flex-wrap: wrap !important; justify-content: center !important;
+                       gap: 6px 12px !important; text-align: center; margin-top: 0 !important; line-height: 1.5; }
           .ft-bottom > div { padding: 0; }
           .ft-bottom-links { justify-content: center !important; gap: 12px !important; flex-wrap: nowrap !important; }
           .ft-bottom, .ft-bottom .ft-legal { font-size: 11.5px !important; }
           .ft-bottom > div:first-child { font-size: 11.5px !important; }
           .ft-dev-desk { display: none !important; }
-          .ft-dev-mob { display: block !important; margin-top: 3px; }
+          .ft-dev-mob { display: block !important; flex-basis: 100% !important; margin-top: 2px; }
           .ft-link { font-size: 12px !important; padding: 4px 0 !important; min-height: 24px !important; }
           .ft-link svg { display: none; }
           .ft-heading { margin-bottom: 10px !important; }
@@ -284,12 +287,17 @@ export default function Footer() {
 
             `gap: 20px` — کمتر از آن دو نشان به هم می‌چسبند و مثل یک
             تصویر دیده می‌شوند؛ بیشتر از آن ربطشان به هم گم می‌شود. */}
-        {/* `scale(0.8)` روی نشان‌ها فضای خالیِ ۲۰٪ به‌جا می‌گذارد چون
-            جعبه‌ی عنصر کوچک نمی‌شود. حاشیه‌ی منفی همان را برمی‌دارد،
-            وگرنه فوتر با نشانِ کوچک‌تر هم به همان بلندی می‌ماند. */}
+        {/* ── جبرانِ فضای خالیِ scale ──
+            `scale(0.8)` جعبه‌ی عنصر را کوچک نمی‌کند، پس ۲۰٪ فضای
+            خالی می‌ماند. `transform-origin` روی *پایین* است، یعنی
+            فضای خالی **بالای** نشان جمع می‌شود نه پایینش.
+
+            پس جبران باید بالا باشد نه پایین. حاشیه‌ی منفیِ پایین
+            (تلاشِ قبلی) نشان‌ها را روی نوارِ زیرشان می‌نشاند. */}
         <div style={{
           display: 'flex', justifyContent: 'flex-end', alignItems: 'flex-end',
-          gap: '8px', flexWrap: 'wrap', paddingBottom: '2px', marginBottom: '-14px',
+          gap: '8px', flexWrap: 'wrap',
+          marginTop: '-22px', paddingBottom: '10px',
         }}>
           <PayPingSeal />
           <EnamadSeal />
