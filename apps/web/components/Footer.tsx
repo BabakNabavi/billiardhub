@@ -153,11 +153,19 @@ export default function Footer() {
           /* نوار آدرس/تلفن: gap ۲۴ برای چیدمان یک‌سطری دسکتاپ بود. در موبایل آیتم‌ها می‌شکنند و
              همان عدد به فاصله‌ی عمودی بین سطرها تبدیل می‌شد — سطری ۲۴px. حالا عمودی ۴، افقی ۱۶. */
           .ft-contact { gap: 4px 16px !important; padding: 9px 0 !important; margin-bottom: 8px !important; }
-          /* سه خط آخر (کپی‌رایت / لینک‌ها / اعتبار). gap صفر است و فاصله فقط از line-height
-             می‌آید — که خودش برای متن ۱۳px حدود ۶px فضای نامرئی می‌سازد، پس مهارش می‌کنیم. */
-          .ft-bottom { flex-direction: column !important; gap: 0 !important; text-align: center; margin-top: 0 !important; line-height: 1.5; }
-          .ft-bottom > div { padding: 1px 0; }
-          .ft-bottom-links { justify-content: center !important; gap: 16px !important; }
+          /* ── نوار آخر در موبایل: یک خط، نه سه ──
+             پیش‌تر ستونی بود و کپی‌رایت، «قوانین» و «حریم خصوصی» هر
+             کدام یک سطر می‌گرفتند — سه سطر برای سه عبارتِ کوتاه، که
+             فوتر را بی‌دلیل بلند می‌کرد.
+
+             هر سه کوتاه‌اند و روی صفحه‌ی ۳۲۰ پیکسلی هم در یک خط جا
+             می‌شوند؛ فونت کمی کوچک‌تر و فاصله‌ی کمتر کافی است. */
+          .ft-bottom { flex-direction: row !important; flex-wrap: nowrap !important; justify-content: center !important;
+                       gap: 12px !important; text-align: center; margin-top: 0 !important; line-height: 1.5; }
+          .ft-bottom > div { padding: 0; }
+          .ft-bottom-links { justify-content: center !important; gap: 12px !important; flex-wrap: nowrap !important; }
+          .ft-bottom, .ft-bottom .ft-legal { font-size: 11.5px !important; }
+          .ft-bottom > div:first-child { font-size: 11.5px !important; }
           .ft-dev-desk { display: none !important; }
           .ft-dev-mob { display: block !important; margin-top: 3px; }
           .ft-link { font-size: 12px !important; padding: 4px 0 !important; min-height: 24px !important; }
@@ -195,7 +203,10 @@ export default function Footer() {
               </div>
             </div>
 
-            <p className="ft-tagline" style={{ color: DIM, fontSize: '13.5px', lineHeight: 1.7, marginBottom: '16px', maxWidth: '260px', marginTop: '-2px' }}>
+            {/* `marginTop` منفی‌تر: شعار باید زیرِ لوگو بنشیند نه جدا از
+                آن. line-height پیش‌فرض فاصله‌ی نامرئی می‌سازد و همان
+                باعث می‌شد دو خطِ مرتبط، دو بلوکِ جدا به نظر برسند. */}
+            <p className="ft-tagline" style={{ color: DIM, fontSize: '13.5px', lineHeight: 1.65, marginBottom: '14px', maxWidth: '260px', marginTop: '-8px' }}>
               اولین و بزرگترین پلتفرم تخصصی بیلیارد ایران
             </p>
 
@@ -229,9 +240,12 @@ export default function Footer() {
         </div>
 
         {/* ── Contact strip ─────────────────────────── */}
-        <div className="ft-contact" style={{ borderTop: `1px solid ${BORDER}`, borderBottom: `1px solid ${BORDER}`, padding: '13px 0', marginBottom: '16px', display: 'flex', gap: '24px', flexWrap: 'wrap' }}>
+        {/* `marginTop` منفی نوار را به شبکه‌ی بالا نزدیک می‌کند؛ پیش‌تر
+            فاصله‌ی پایینِ شبکه و padding این نوار روی هم می‌نشستند و
+            یک شکافِ بی‌دلیل می‌ساختند. */}
+        <div className="ft-contact" style={{ borderTop: `1px solid ${BORDER}`, borderBottom: `1px solid ${BORDER}`, padding: '11px 0', marginTop: '-10px', marginBottom: '14px', display: 'flex', gap: '24px', flexWrap: 'wrap' }}>
           {[
-            { icon: <MapPin size={13} style={{ color: GOLD, flexShrink: 0 }} />, text: 'تهران، پاسداران، خیابان شهید محمود گل نبی، پلاک ۳۶' },
+            { icon: <MapPin size={13} style={{ color: GOLD, flexShrink: 0 }} />, text: 'تهران، پاسداران' },
             { icon: <Phone  size={13} style={{ color: GOLD, flexShrink: 0 }} />, text: '۰۲۱-۲۲۸۵۹۵۵۱' },
             { icon: <Mail   size={13} style={{ color: GOLD, flexShrink: 0 }} />, text: 'info@billiardhub.net' },
           ].map((c, i) => (
@@ -270,9 +284,12 @@ export default function Footer() {
 
             `gap: 20px` — کمتر از آن دو نشان به هم می‌چسبند و مثل یک
             تصویر دیده می‌شوند؛ بیشتر از آن ربطشان به هم گم می‌شود. */}
+        {/* `scale(0.8)` روی نشان‌ها فضای خالیِ ۲۰٪ به‌جا می‌گذارد چون
+            جعبه‌ی عنصر کوچک نمی‌شود. حاشیه‌ی منفی همان را برمی‌دارد،
+            وگرنه فوتر با نشانِ کوچک‌تر هم به همان بلندی می‌ماند. */}
         <div style={{
           display: 'flex', justifyContent: 'flex-end', alignItems: 'flex-end',
-          gap: '20px', flexWrap: 'wrap', paddingBottom: '16px',
+          gap: '8px', flexWrap: 'wrap', paddingBottom: '2px', marginBottom: '-14px',
         }}>
           <PayPingSeal />
           <EnamadSeal />
@@ -280,7 +297,7 @@ export default function Footer() {
 
         {/* ── Bottom bar ────────────────────────────── */}
         <div className="ft-bottom" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
-          <div style={{ fontSize: '13px', color: DIM2 }}>© ۱۴۰۵ BilliardHub</div>
+          <div style={{ fontSize: '13px', color: DIM2, whiteSpace: 'nowrap' }}>© ۱۴۰۵ Billiardhub</div>
           <div className="ft-bottom-links" style={{ display: 'flex', gap: '22px', flexWrap: 'wrap' }}>
             {/* لینک‌های حقوقی — «درباره ما / تماس با ما» در ستون «اطلاعات و قوانین» بالا هستند */}
             {[

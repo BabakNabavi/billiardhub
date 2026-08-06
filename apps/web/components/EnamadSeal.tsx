@@ -30,8 +30,11 @@ export default function EnamadSeal() {
       {/* اندازه فقط روی *ظرف* مهار می‌شود، نه روی خودِ تصویر — تا کدِ
           اینماد دست‌نخورده بماند. `max-width` تنها چیزی است که لازم
           است تا روی صفحه‌ی ۳۲۰ پیکسلی سرریز نکند. */}
+      {/* ۲۰٪ کوچک‌تر. مقیاسِ متناسب است، نه دستکاریِ رنگ — قاعده‌ی
+          اینماد نبودِ grayscale و کم‌کردنِ opacity است، نه اندازه. */}
       <style>{`
-        .bh-enamad img { max-width: 100%; height: auto; display: block; }
+        .bh-enamad img { max-width: 100%; height: auto; display: block;
+                         transform: scale(0.8); transform-origin: bottom left; }
       `}</style>
       <div dangerouslySetInnerHTML={{ __html: ENAMAD_HTML }} />
     </div>

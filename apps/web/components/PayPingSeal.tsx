@@ -54,10 +54,11 @@ export default function PayPingSeal() {
       className="bh-payping"
       style={{ display: 'inline-flex', alignItems: 'flex-end' }}>
       <style>{`
-        /* اسکریپت اندازه را اینلاین روی تصویر می‌گذارد (۱۴۴×۱۷۳).
-           این‌جا فقط سقفِ عرض گذاشته می‌شود تا روی صفحه‌ی باریک
-           سرریز نکند؛ نسبت حفظ می‌شود. */
-        .bh-payping img { max-width: 100%; height: auto; display: block; }
+        /* اسکریپت اندازه را اینلاین روی تصویر می‌گذارد و بدونِ
+           important نمی‌شود عوضش کرد؛ پس مقیاس روی خودِ عنصر.
+           ۲۰٪ کوچک‌تر، هم‌اندازه‌ی اینماد. */
+        .bh-payping img { max-width: 100%; height: auto; display: block;
+                          transform: scale(0.8); transform-origin: bottom right; }
       `}</style>
     </span>
   )
