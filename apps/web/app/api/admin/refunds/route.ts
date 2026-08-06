@@ -2,6 +2,7 @@ export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { sb, rpc, actorFromRequest, audit, clientIp } from '@/lib/finance/db';
 import { can } from '@/lib/admin/permissions';
+import { normalizeReference, referenceProblem, findDuplicateReference } from '@/lib/finance/reference';
 
 /* ─────────────────────────────────────────────────────────────
    بستنِ بازپرداخت پس از واریزِ دستی.
@@ -34,9 +35,19 @@ export async function POST(req: NextRequest) {
 
   /* ── بازپرداختِ رزرو ── */
   if (b?.action === 'complete') {
-    const reference = String(b?.reference ?? '').trim();
+    const reference = normalizeReference(b?.reference);
     if (!reference) {
       return NextResponse.json({ message: 'شماره پیگیری بانک الزامی است' }, { status: 400 });
+    }
+    const bad = referenceProblem(reference);
+    if (bad) return NextResponse.json({ message: bad }, { status: 400 });
+
+    const dup = await findDuplicateReference(reference, { table: 'refunds', id });
+    if (dup) {
+      return NextResponse.json({
+        message: `این شماره پیگیری قبلاً برای «${dup.where}» ثبت شده است.`
+          + ' اگر واریزِ تازه‌ای انجام داده‌اید، شماره پیگیریِ همان تراکنش را وارد کنید.',
+      }, { status: 409 });
     }
 
     const { data, error } = await rpc('bh_complete_refund', {
@@ -61,13 +72,23 @@ export async function POST(req: NextRequest) {
      مهاجرتِ ۰۶۷ پر می‌شوند. شرطِ `is('refund_paid_at', null)` جلوی ثبتِ
      دوباره را می‌گیرد. */
   if (b?.action === 'complete-ad') {
-    const reference = String(b?.reference ?? '').trim();
+    const reference = normalizeReference(b?.reference);
     if (!reference) {
       return NextResponse.json({ message: 'شماره پیگیری بانک الزامی است' }, { status: 400 });
     }
+    const bad = referenceProblem(reference);
+    if (bad) return NextResponse.json({ message: bad }, { status: 400 });
+
+    const dup = await findDuplicateReference(reference, { table: 'campaign_orders', id });
+    if (dup) {
+      return NextResponse.json({
+        message: `این شماره پیگیری قبلاً برای «${dup.where}» ثبت شده است.`
+          + ' اگر واریزِ تازه‌ای انجام داده‌اید، شماره پیگیریِ همان تراکنش را وارد کنید.',
+      }, { status: 409 });
+    }
 
     const { data, error } = await sb().from('campaign_orders')
-      .update({ refund_paid_at: new Date().toISOString(), refund_reference: reference.slice(0, 120) })
+      .update({ refund_paid_at: new Date().toISOString(), refund_reference: reference })
       .eq('id', id).eq('status', 'REFUNDED').is('refund_paid_at', null)
       .select('id').maybeSingle();
 

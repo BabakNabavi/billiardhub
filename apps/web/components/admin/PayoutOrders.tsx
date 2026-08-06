@@ -451,7 +451,15 @@ function btn(enabled: boolean, primary = false): React.CSSProperties {
 }
 
 /* شماره‌ی پیگیریِ بانک اجباری است: بدونش، «واریز شد» فقط یک ادعاست و
-   موقعِ اختلاف هیچ ردی برای دنبال‌کردن نمی‌ماند. */
+   موقعِ اختلاف هیچ ردی برای دنبال‌کردن نمی‌ماند.
+
+   ⚠️ این عدد **استعلام نمی‌شود** — هیچ سرویسی در دسترسِ ما نیست که
+   بپرسد یک شماره‌ی پیگیری واقعاً متعلق به انتقالی انجام‌شده است. پس
+   سند است نه اثبات، و همین صریح به ادمین گفته می‌شود؛ رابطی که
+   وانمود کند تأیید شده، بدتر از رابطی است که راستش را بگوید.
+
+   دو کنترلِ واقعی سمتِ سرور است: قالب، و تکرارِ همان عدد روی
+   پرداختِ دیگر. */
 function RefModal({ amount, to, onClose, onSubmit }: {
   amount: number; to: string; onClose: () => void; onSubmit: (ref: string) => void | Promise<void>
 }) {
@@ -473,6 +481,10 @@ function RefModal({ amount, to, onClose, onSubmit }: {
         <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: SEC, marginBottom: 6 }}>
           شماره پیگیری بانک
         </label>
+        <p style={{ fontSize: 11.5, color: MUT, margin: '0 0 8px', lineHeight: 1.9 }}>
+          از رسیدِ همان انتقال. این عدد استعلام نمی‌شود؛ به‌عنوان سندِ
+          واریز با نام و زمانِ شما ثبت می‌شود.
+        </p>
         <input value={ref} onChange={e => setRef(e.target.value)} autoFocus
           placeholder="مثلاً ۱۲۳۴۵۶۷۸"
           style={{

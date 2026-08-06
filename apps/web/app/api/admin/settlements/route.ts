@@ -4,6 +4,7 @@ import { actorFromRequest, audit, clientIp } from '@/lib/finance/db';
 import { can } from '@/lib/admin/permissions';
 import { getSettlementProvider } from '@/lib/settlement';
 import { notifySettlementPaid } from '@/lib/notify';
+import { normalizeReference, referenceProblem, findDuplicateReference } from '@/lib/finance/reference';
 
 /* تسویه — فقط ادمین. عملیات مالی داخل توابع اتمیک دیتابیس انجام می‌شود. */
 
@@ -37,10 +38,30 @@ export async function POST(req: NextRequest) {
 
   if (b?.action === 'complete') {
     if (!b?.id || !b?.reference) return NextResponse.json({ message: 'id و reference الزامی هستند' }, { status: 400 });
-    const r = await provider.completeSettlement(String(b.id), String(b.reference));
+
+    /* ── شماره‌ی پیگیری استعلام نمی‌شود ──
+       هیچ سرویسی در دسترس نیست که بپرسد این عدد واقعاً یک انتقالِ
+       انجام‌شده است. پس دو کنترلی که *ممکن* است انجام می‌شود: قالب، و
+       تکرار. دومی مهم‌تر است — همان عدد روی دو پرداخت یعنی یکی از
+       آن‌ها واقعاً واریز نشده. */
+    const reference = normalizeReference(b.reference);
+    const bad = referenceProblem(reference);
+    if (bad) return NextResponse.json({ message: bad }, { status: 400 });
+
+    const dup = await findDuplicateReference(reference, { table: 'settlements', id: String(b.id) });
+    if (dup) {
+      return NextResponse.json({
+        message: `این شماره پیگیری قبلاً برای «${dup.where}» ثبت شده است.`
+          + ' اگر واریزِ تازه‌ای انجام داده‌اید، شماره پیگیریِ همان تراکنش را وارد کنید.',
+      }, { status: 409 });
+    }
+
+    const r = await provider.completeSettlement(String(b.id), reference);
     if (!r.ok) return NextResponse.json({ message: r.message }, { status: 400 });
+    /* ثبتِ ممیزی همان چیزی است که این عدد را به یک سند تبدیل می‌کند:
+       چه کسی، چه زمانی، چه عددی را اعلام کرد. */
     audit({ actorId: actor.id, actorRole: 'admin', action: 'SETTLEMENT_COMPLETED',
-            entityType: 'settlement', entityId: String(b.id), newValue: { reference: b.reference }, ip });
+            entityType: 'settlement', entityId: String(b.id), newValue: { reference }, ip });
 
     /* خبر واریز به باشگاه‌دار — بی‌صدا */
     const st = r.settlement as { club_id?: string; amount?: number } | undefined;
