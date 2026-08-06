@@ -42,9 +42,12 @@ interface ClubRow {
   status: string; requestedAt: string; blocked: string | null
 }
 interface UserRow {
-  id: string; bookingId: string; clubName: string; userName: string; phone: string
-  amount: number; card: string; verified: boolean; reason: string
-  status: string; createdAt: string; blocked: string | null
+  id: string; bookingId: string; clubName: string; userName: string; holder: string; phone: string
+  amount: number
+  /* شبا اگر باشد، وگرنه شماره کارت — بازپرداخت به شبا می‌رود */
+  dest: string; destKind: 'iban' | 'card'
+  verified: boolean; reason: string
+  status: string; createdAt: string; blocked: string | null; warn: string | null
 }
 interface Payload {
   toClubs: ClubRow[]; toUsers: UserRow[]
@@ -174,12 +177,19 @@ export default function PayoutOrders({ onChanged }: { onChanged?: () => void }) 
               {u.blocked ? (
                 <Blocked text={u.blocked} />
               ) : (
-                <Dest
-                  rows={[['موبایل', u.phone || '—'], ['رزرو', u.bookingId.slice(0, 8) || '—']]}
-                  copyLabel="شماره کارت"
-                  copyValue={prettyCard(u.card)}
-                  raw={u.card.replace(/\D/g, '')}
-                />
+                <>
+                  <Dest
+                    rows={[
+                      ['به نام', u.holder || u.userName],
+                      ['موبایل', u.phone || '—'],
+                      ['رزرو', u.bookingId.slice(0, 8) || '—'],
+                    ]}
+                    copyLabel={u.destKind === 'iban' ? 'شبا' : 'شماره کارت'}
+                    copyValue={u.destKind === 'iban' ? prettyIban(u.dest) : prettyCard(u.dest)}
+                    raw={u.destKind === 'iban' ? prettyIban(u.dest).replace(/\s/g, '') : u.dest.replace(/\D/g, '')}
+                  />
+                  {u.warn && <Warn text={u.warn} />}
+                </>
               )}
               <div style={{ fontSize: 11.5, color: MUT, marginTop: 10 }}>
                 ثبت‌شده در {faDate(u.createdAt)} — پس از واریز، از تب «بازپرداخت‌ها» وضعیتش را ببندید.
@@ -324,6 +334,22 @@ function Blocked({ text }: { text: string }) {
       color: RED, lineHeight: 1.9,
     }}>
       <AlertCircle size={14} style={{ flexShrink: 0, marginTop: 2 }} />
+      <span>{text}</span>
+    </div>
+  )
+}
+
+/* هشدار — برخلافِ `Blocked` جلوی پرداخت را نمی‌گیرد، فقط می‌گوید
+   پیش از واریز یک نگاه بیندازید. */
+function Warn({ text }: { text: string }) {
+  return (
+    <div style={{
+      display: 'flex', alignItems: 'flex-start', gap: 7, marginTop: 8,
+      background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.28)',
+      borderRadius: 11, padding: '9px 12px', fontSize: 12, fontWeight: 700,
+      color: '#B45309', lineHeight: 1.9,
+    }}>
+      <AlertCircle size={13} style={{ flexShrink: 0, marginTop: 2 }} />
       <span>{text}</span>
     </div>
   )

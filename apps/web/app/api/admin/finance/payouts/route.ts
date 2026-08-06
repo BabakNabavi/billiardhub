@@ -32,7 +32,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ message: 'دسترسی مجاز نیست' }, { status: 403 });
   }
 
-  const [accounts, settlements, refunds, clubs, users] = await Promise.all([
+  const [accounts, settlements, refunds] = await Promise.all([
     sb().from('club_accounts').select('club_id,available_balance,pending_balance'),
     /* تسویه‌های باز = دستورِ پرداختی که ساخته شده ولی هنوز واریز نشده */
     sb().from('settlements').select('*').in('status', ['PENDING', 'PROCESSING'])
@@ -40,12 +40,43 @@ export async function GET(req: NextRequest) {
     sb().from('refunds').select('id,booking_id,club_id,user_id,amount,reason,status,created_at')
       .in('status', ['REQUESTED', 'PROCESSING'])
       .order('created_at', { ascending: true }),
-    sb().from('clubs').select('id,name,iban,"ibanOwnerName","bankName","ibanVerified"'),
-    sb().from('users').select('id,"firstName","lastName",phone,bank_card,bank_card_verified'),
   ]);
 
   type Club = { id: string; name: string; iban?: string; ibanOwnerName?: string; bankName?: string; ibanVerified?: boolean };
-  type User = { id: string; firstName?: string; lastName?: string; phone?: string; bank_card?: string; bank_card_verified?: boolean };
+  type User = {
+    id: string; firstName?: string; lastName?: string; phone?: string
+    bank_card?: string; bank_card_owner?: string; bank_iban?: string; bank_card_verified?: boolean
+  };
+
+  /* ── فقط همان ردیف‌هایی که لازم است ──
+     نسخه‌ی اول کلِ `users` و `clubs` را می‌گرفت. PostgREST سقفِ
+     پیش‌فرضِ سطر دارد، پس با رشدِ جدولِ کاربران، کاربرِ یک بازپرداخت
+     می‌توانست بیرونِ صفحه‌ی برگشتی بماند و بی‌دلیل «حساب ثبت نشده»
+     بگیرد — بدترین نوعِ باگ در صفحه‌ی پرداخت. */
+  const clubIds = [...new Set([
+    ...((settlements.data ?? []) as Record<string, unknown>[]).map(s => String(s.club_id)),
+    ...((accounts.data ?? []) as Record<string, unknown>[]).map(a => String(a.club_id)),
+    ...((refunds.data ?? []) as Record<string, unknown>[]).map(r => String(r.club_id)),
+  ])].filter(Boolean);
+  const userIds = [...new Set(
+    ((refunds.data ?? []) as Record<string, unknown>[]).map(r => String(r.user_id)),
+  )].filter(id => id && id !== 'null');
+
+  const [clubs, users] = await Promise.all([
+    clubIds.length
+      ? sb().from('clubs').select('id,name,iban,"ibanOwnerName","bankName","ibanVerified"').in('id', clubIds)
+      : Promise.resolve({ data: [] as unknown[] }),
+    /* ── چرا `bank_iban` هم لازم است ──
+       بازپرداخت در نهایت به **شبا** می‌رود نه به کارت — همان‌طور که
+       `api/users/bank-card` موقعِ ثبت می‌نویسد و در توضیحش هم آمده.
+       نسخه‌ی اول این مسیر فقط `bank_card` را می‌خواند، یعنی مقصدی
+       نشان می‌داد که پول از آن راه نمی‌رود. */
+    userIds.length
+      ? sb().from('users')
+        .select('id,"firstName","lastName",phone,bank_card,bank_card_owner,bank_iban,bank_card_verified')
+        .in('id', userIds)
+      : Promise.resolve({ data: [] as unknown[] }),
+  ]);
 
   const clubBy = new Map((clubs.data ?? []).map((c) => [String((c as Club).id), c as Club]));
   const userBy = new Map((users.data ?? []).map((u) => [String((u as User).id), u as User]));
@@ -110,24 +141,44 @@ export async function GET(req: NextRequest) {
     });
 
   /* ── ۳) بازپرداختِ کاربر ──
-     مقصدش کارتِ خودِ کاربر است، نه شبا. */
+     مقصد شبا است؛ کارت فقط وقتی می‌ماند که شبایی ثبت نشده باشد.
+
+     ── چرا «استعلام‌نشده» دیگر مسدود نمی‌کند ──
+     نسخه‌ی اول اگر `bank_card_verified` روشن نبود پرداخت را می‌بست.
+     ولی کارت **فقط** پس از تطابقِ موفقِ شاهکار ذخیره می‌شود؛ یعنی
+     کارتِ ثبت‌شده ذاتاً استعلام‌شده است و آن شرط عملاً چیزی جز
+     داده‌ی قدیمی یا حسابِ بازشده‌ی ادمین را نمی‌گرفت — و در هر دو
+     حالت پول باید پرداخت شود.
+
+     پرچمِ خاموش حالا فقط هشدار است، نه سد: یعنی کاربر درخواستِ تغییرِ
+     حساب داده و ادمین قفلش را باز کرده، پس بهتر است پیش از واریز
+     مطمئن شود مقصد همان است که کاربر می‌خواهد. */
   const toUsers = ((refunds.data ?? []) as Record<string, unknown>[]).map(r => {
     const u = userBy.get(String(r.user_id));
+    const iban = String(u?.bank_iban ?? '').replace(/\s/g, '').toUpperCase();
     const card = String(u?.bank_card ?? '').replace(/\D/g, '');
+    const hasDest = !!(iban || card);
     return {
       id: String(r.id),
       bookingId: String(r.booking_id ?? ''),
       clubName: clubBy.get(String(r.club_id))?.name ?? '—',
       userName: `${u?.firstName ?? ''} ${u?.lastName ?? ''}`.trim() || '—',
+      holder: String(u?.bank_card_owner ?? '').trim(),
       phone: String(u?.phone ?? ''),
       amount: n(r.amount),
-      card,
+      /* شبا اولویت دارد؛ اگر نبود، کارت */
+      dest: iban || card,
+      destKind: iban ? ('iban' as const) : ('card' as const),
       verified: !!u?.bank_card_verified,
       reason: String(r.reason ?? ''),
       status: String(r.status),
       createdAt: String(r.created_at ?? ''),
-      blocked: !card ? 'کارت بانکی کاربر ثبت نشده — از او بخواهید در پروفایلش وارد کند'
-        : !u?.bank_card_verified ? 'کارت کاربر استعلام نشده' : null,
+      blocked: hasDest ? null
+        : 'حساب بانکی کاربر ثبت نشده — از او بخواهید در پروفایلش کارت بانکی‌اش را وارد کند',
+      /* هشدار، نه سد */
+      warn: hasDest && !u?.bank_card_verified
+        ? 'حساب این کاربر توسط ادمین باز شده (در حال تغییر) — پیش از واریز مقصد را تأیید کنید'
+        : null,
     };
   });
 
