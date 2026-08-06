@@ -67,7 +67,11 @@ export default function PayoutOrders({ onChanged }: { onChanged?: () => void }) 
   const [d, setD] = useState<Payload | null>(null)
   const [err, setErr] = useState('')
   const [busy, setBusy] = useState('')
-  const [modal, setModal] = useState<{ id: string; amount: number; to: string } | null>(null)
+  /* `kind` تعیین می‌کند پس از گرفتنِ شماره‌ی پیگیری کدام مسیر صدا زده
+     شود — تسویه‌ی باشگاه، بازپرداختِ رزرو، یا بازپرداختِ تبلیغات. */
+  const [modal, setModal] = useState<
+    { id: string; amount: number; to: string; kind: 'settlement' | 'refund' | 'ad' } | null
+  >(null)
 
   const load = useCallback(async () => {
     try {
@@ -78,10 +82,10 @@ export default function PayoutOrders({ onChanged }: { onChanged?: () => void }) 
   }, [])
   useEffect(() => { void load() }, [load])
 
-  const act = async (body: Record<string, unknown>, key: string) => {
+  const post = async (url: string, body: Record<string, unknown>, key: string) => {
     setBusy(key)
     try {
-      const r = await apiFetch('/api/admin/settlements', {
+      const r = await apiFetch(url, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
       })
@@ -90,6 +94,8 @@ export default function PayoutOrders({ onChanged }: { onChanged?: () => void }) 
       await load(); onChanged?.()
     } finally { setBusy('') }
   }
+  const act = (body: Record<string, unknown>, key: string) =>
+    post('/api/admin/settlements', body, key)
 
   if (err) return <Note tone="bad">{err}</Note>
   if (!d) return <div style={{ padding: 40, textAlign: 'center' }}><Loader2 size={22} style={{ color: MUT, animation: 'poSpin 1s linear infinite' }} /><style>{`@keyframes poSpin{to{transform:rotate(360deg)}}`}</style></div>
@@ -159,7 +165,7 @@ export default function PayoutOrders({ onChanged }: { onChanged?: () => void }) 
                         style={btn(busy !== c.id)}>شروع پردازش</button>
                     )}
                     <button disabled={!!c.blocked}
-                      onClick={() => setModal({ id: c.id, amount: c.amount, to: c.clubName })}
+                      onClick={() => setModal({ id: c.id, amount: c.amount, to: c.clubName, kind: 'settlement' })}
                       style={btn(!c.blocked, true)}>ثبت واریز</button>
                     <span style={{ fontSize: 11.5, color: MUT }}>ثبت‌شده در {faDate(c.requestedAt)}</span>
                   </>
@@ -200,8 +206,16 @@ export default function PayoutOrders({ onChanged }: { onChanged?: () => void }) 
                   {u.warn && <Warn text={u.warn} />}
                 </>
               )}
-              <div style={{ fontSize: 11.5, color: MUT, marginTop: 10 }}>
-                ثبت‌شده در {faDate(u.createdAt)} — پس از واریز، از تب «بازپرداخت‌ها» وضعیتش را ببندید.
+              {/* ── دکمه‌ای که تا امروز نبود ──
+                  تابعِ `bh_complete_refund` در دیتابیس بود ولی هیچ مسیری
+                  صدایش نمی‌زد. یعنی ادمین پول را واریز می‌کرد و راهی
+                  نداشت به سیستم بگوید انجام شد — بازپرداخت تا ابد باز
+                  می‌ماند و خطرِ پرداختِ دوباره داشت. */}
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center', marginTop: 12 }}>
+                <button disabled={!!u.blocked || busy === u.id}
+                  onClick={() => setModal({ id: u.id, amount: u.amount, to: u.userName, kind: 'refund' })}
+                  style={btn(!u.blocked && busy !== u.id, true)}>ثبت واریز</button>
+                <span style={{ fontSize: 11.5, color: MUT }}>ثبت‌شده در {faDate(u.createdAt)}</span>
               </div>
             </Card>
           ))}
@@ -230,8 +244,11 @@ export default function PayoutOrders({ onChanged }: { onChanged?: () => void }) 
                   raw={a.destKind === 'iban' ? prettyIban(a.dest).replace(/\s/g, '') : a.dest.replace(/\D/g, '')}
                 />
               )}
-              <div style={{ fontSize: 11.5, color: MUT, marginTop: 10 }}>
-                تأییدشده در {faDate(a.createdAt)} — پس از واریز، از «بسته‌های آگهی» ثبتش کنید.
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center', marginTop: 12 }}>
+                <button disabled={!!a.blocked || busy === a.id}
+                  onClick={() => setModal({ id: a.id, amount: a.amount, to: a.userName, kind: 'ad' })}
+                  style={btn(!a.blocked && busy !== a.id, true)}>ثبت واریز</button>
+                <span style={{ fontSize: 11.5, color: MUT }}>تأییدشده در {faDate(a.createdAt)}</span>
               </div>
             </Card>
           ))}
@@ -240,7 +257,20 @@ export default function PayoutOrders({ onChanged }: { onChanged?: () => void }) 
 
       {modal && (
         <RefModal amount={modal.amount} to={modal.to} onClose={() => setModal(null)}
-          onSubmit={async ref => { await act({ action: 'complete', id: modal.id, reference: ref }, modal.id); setModal(null) }} />
+          onSubmit={async ref => {
+            /* هر سه یک پنجره دارند ولی سه مسیرِ متفاوت — تسویه تابعِ
+               اتمیکِ خودش را دارد، بازپرداختِ رزرو `bh_complete_refund`،
+               و بازپرداختِ تبلیغات فقط دو ستونِ مهاجرتِ ۰۶۷. */
+            if (modal.kind === 'settlement') {
+              await act({ action: 'complete', id: modal.id, reference: ref }, modal.id)
+            } else {
+              await post('/api/admin/refunds', {
+                action: modal.kind === 'ad' ? 'complete-ad' : 'complete',
+                id: modal.id, reference: ref,
+              }, modal.id)
+            }
+            setModal(null)
+          }} />
       )}
     </div>
   )
