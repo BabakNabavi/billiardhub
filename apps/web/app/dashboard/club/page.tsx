@@ -894,11 +894,17 @@ export default function ClubDashboardPage() {
          `response.data.message` است، نه در `Error.message`. */
       const r = (e as { response?: { data?: { message?: string } } })?.response;
       const raw = `${r?.data?.message ?? ''} ${e instanceof Error ? e.message : ''}`;
+      /* «ستون نیست» و «مقدار تکراری» هر دو کلمه‌ی slug دارند ولی دو چیزِ
+         کاملاً متفاوت‌اند: یکی مهاجرتِ اجرانشده است و دستِ کاربر نیست،
+         آن یکی واقعاً باید نشانی را عوض کند. */
+      const missingColumn = /does not exist|schema cache|PGRST204|42703/i.test(raw);
       setInfoMsg({
         ok: false,
-        text: /slug|duplicate|unique|23505/i.test(raw)
-          ? 'این آدرس اختصاصی قبلاً رزرو شده — نامِ دیگری بگذارید'
-          : (r?.data?.message || 'ذخیره انجام نشد؛ دوباره تلاش کنید'),
+        text: missingColumn
+          ? 'این فیلد هنوز در دیتابیس ساخته نشده است (مهاجرت ۰۶۶ اجرا نشده).'
+          : /slug|duplicate|unique|23505/i.test(raw)
+            ? 'این آدرس اختصاصی قبلاً رزرو شده — نامِ دیگری بگذارید'
+            : (r?.data?.message || 'ذخیره انجام نشد؛ دوباره تلاش کنید'),
       });
     }
     finally { setInfoSaving(false); }

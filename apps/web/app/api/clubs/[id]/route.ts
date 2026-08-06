@@ -4,7 +4,7 @@ import { getSupabaseServer } from '@/lib/supabase-server';
 import { sessionFromRequest } from '@/lib/auth/session';
 import { notifyClubApproved, notifyClubRejected } from '@/lib/notify';
 import { audit, clientIp } from '@/lib/finance/db';
-import { isUUID } from '@/lib/slug';
+import { isUUID, isValidSlug } from '@/lib/slug';
 
 const CORS = {
   'Vary': 'Origin',
@@ -77,6 +77,26 @@ export async function PUT(
       'isActive',
     ]) {
       if (Object.prototype.hasOwnProperty.call(body, k)) delete (body as Record<string, unknown>)[k];
+    }
+  }
+
+  /* ── نشانیِ اختصاصی: قالبش سمتِ سرور هم بررسی می‌شود ──────────────
+     مرورگر ورودی را پاک می‌کند، ولی یک درخواستِ دستی می‌تواند هر چیزی
+     بفرستد. نشانیِ بدقالب یعنی مسیرِ `/clubs/<slug>` که یا باز نمی‌شود
+     یا با شناسه‌ی UUID اشتباه گرفته می‌شود. یکتایی را ایندکسِ
+     `clubs_slug_uniq` (مهاجرتِ ۰۶۶) تضمین می‌کند. */
+  if (Object.prototype.hasOwnProperty.call(body, 'slug')) {
+    const raw = String(body.slug ?? '').trim().toLowerCase();
+    if (!raw) {
+      /* خالی ⇒ NULL، نه رشته‌ی تهی: چند NULL با ایندکسِ یکتا مشکلی
+         ندارند ولی دو رشته‌ی خالی با هم برخورد می‌کنند. */
+      (body as Record<string, unknown>).slug = null;
+    } else if (!isValidSlug(raw) || isUUID(raw)) {
+      return NextResponse.json(
+        { message: 'آدرس اختصاصی نامعتبر است — فقط حروف انگلیسی کوچک، عدد و خط تیره' },
+        { status: 400, headers: CORS });
+    } else {
+      (body as Record<string, unknown>).slug = raw;
     }
   }
 

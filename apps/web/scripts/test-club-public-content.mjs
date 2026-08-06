@@ -93,7 +93,24 @@ t('آلبوم از `/api/upload` استفاده می‌کند نه data-URL',
   'base64 در jsonb یعنی چند مگابایت در هر select(*)');
 
 // ───────────────────────────────────────────────────────────────────────────
-head('۴) شکستِ ذخیره باید دیده شود');
+head('۴) آدرس اختصاصی سایت');
+
+t('یک کامپوننتِ مشترک، نه نسخه‌ی جدا در هر فرم',
+  ['app/dashboard/club/page.tsx', 'app/clubs/new/page.tsx',
+   'app/dashboard/coach/page.tsx', 'app/referees/dashboard/page.tsx']
+    .every(p => /SiteAddressField/.test(read(p))));
+t('پیش‌نمایش نشانیِ کامل با `.net` را نشان می‌دهد',
+  /billiardhub\.net/.test(read('components/SiteAddressField.tsx')));
+t('پیش‌نمایش شرطی نیست — از اولین حرف دیده می‌شود',
+  !/\{\s*value\s*&&\s*\(?\s*<div[^>]*billiardhub/.test(read('components/SiteAddressField.tsx')));
+t('سرور هم قالبِ نشانی را بررسی می‌کند',
+  /isValidSlug/.test(clubApi), 'بررسیِ فقط‌مرورگری با درخواستِ دستی دور زده می‌شود');
+t('یکتاییِ نشانی قیدِ دیتابیس دارد',
+  /clubs_slug_uniq/.test(read(join('..', '..', 'supabase', 'migrations', '066_clubs_slug_unique.sql'))),
+  'دو نفر هم‌زمان می‌توانند یک نشانی بگیرند');
+
+// ───────────────────────────────────────────────────────────────────────────
+head('۵) شکستِ ذخیره باید دیده شود');
 
 t('انتشارِ استوری کدِ وضعیتِ سرور را می‌خواند',
   /if \(!r\.ok\)[\s\S]{0,220}throw/.test(gallery),
