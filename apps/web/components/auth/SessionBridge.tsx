@@ -28,9 +28,39 @@ const LAST_REFRESH_KEY = 'bh_last_refresh'
 const REFRESH_EVERY_MS = 12 * 60 * 1000   // کوکی ۱۵ دقیقه‌ای، با حاشیه‌ی امن
 const MIN_GAP_MS = 4 * 60 * 1000          // برای جلوگیری از تمدید پشت‌هم
 
+/* نگهبانِ حلقه: اگر به هر دلیلی تشخیصِ تغییرِ هویت اشتباه بود، نباید
+   صفحه بی‌نهایت بار بارگذاری شود. */
+const RELOAD_GUARD = 'bh_identity_reload'
+
 const readRaw = () => { try { return localStorage.getItem('auth-storage') } catch { return null } }
 const legacyToken = (): string | null => {
   try { return JSON.parse(readRaw() || '{}')?.state?.token || null } catch { return null }
+}
+const storedUserId = (raw?: string | null): string | null => {
+  try { return JSON.parse((raw ?? readRaw()) || '{}')?.state?.user?.id ?? null } catch { return null }
+}
+
+/* ── چرا بارگذاریِ کامل، نه فقط به‌روزرسانیِ استور ─────────────────────
+   یک مرورگر = یک ظرفِ کوکی. پس دو تب نمی‌توانند دو حسابِ متفاوت داشته
+   باشند: ورود در تبِ دوم، کوکیِ تبِ اول را هم عوض می‌کند و از آن لحظه
+   نشستِ هر دو تب یکی است.
+
+   تا امروز تبِ اول این را بی‌صدا می‌پذیرفت: استور را با کاربرِ تازه
+   عوض می‌کرد ولی صفحه‌ای که روی آن نشسته بود همچنان با دادهٔ حسابِ
+   قبلی رندر شده بود. نتیجه یک تبِ دورگه بود — هویتِ یکی، محتوای
+   دیگری. همان چیزی که به‌نظر می‌رسید «تب خودش تبدیل به ادمین شد».
+
+   خطرِ واقعی‌اش جهتِ عکس است: اگر روی رایانه‌ی مشترک کسی خارج شود و
+   دیگری وارد، صفحهٔ رندرشده‌ی نفرِ قبلی روی صفحه می‌ماند.
+
+   بارگذاریِ کامل تنها راهِ مطمئن است: کلِ درخت با هویتِ تازه دوباره
+   ساخته می‌شود و هیچ تکه‌ی کهنه‌ای باقی نمی‌ماند. */
+function reloadForIdentityChange() {
+  try {
+    if (sessionStorage.getItem(RELOAD_GUARD)) return
+    sessionStorage.setItem(RELOAD_GUARD, '1')
+  } catch { /* حافظه در دسترس نبود — یک‌بار بارگذاری بهتر از هیچ */ }
+  window.location.reload()
 }
 
 export default function SessionBridge() {
@@ -62,27 +92,78 @@ export default function SessionBridge() {
   useEffect(() => {
     if (!hydrated) return
     let stopped = false
-    void (async () => {
+
+    const sync = async () => {
       try {
         const r = await fetch('/api/users/profile', { credentials: 'include', cache: 'no-store' })
-        if (stopped || !r.ok) return
+        if (stopped) return
+
+        /* ── نشست تمام شده ولی صفحه هنوز کاربر را نشان می‌دهد ──
+           روی رایانه‌ی مشترک یعنی محتوای حسابِ قبلی روی صفحه مانده. */
+        if (r.status === 401) {
+          if (useAuthStore.getState().user) reloadForIdentityChange()
+          return
+        }
+        if (!r.ok) return
+
         const me = await r.json().catch(() => null)
         if (stopped || !me?.id) return
-        /* اگر چیزی عوض نشده، دست به استور نزن — وگرنه هر بارگذاری یک
-           رندرِ بی‌دلیل به کلِ درخت می‌دهد. */
-        const same = user
-          && user.id === me.id
-          && user.firstName === me.firstName
-          && user.lastName === me.lastName
-          && user.primaryRole === me.primaryRole
-          && (user.avatar ?? '') === (me.avatar ?? '')
-          && JSON.stringify(user.secondaryRoles ?? []) === JSON.stringify(me.secondaryRoles ?? [])
+
+        const cur = useAuthStore.getState().user
+
+        /* ── هویت عوض شده ──
+           یعنی در تبی دیگر (یا پنجره‌ای دیگر) با حسابِ دیگری وارد
+           شده‌اند و کوکیِ مشترک عوض شده. عوض‌کردنِ بی‌صدای استور یک
+           تبِ دورگه می‌سازد؛ باید کلِ صفحه از نو ساخته شود. */
+        if (cur && cur.id !== me.id) { reloadForIdentityChange(); return }
+
+        /* هویت جور است ⇒ نگهبان آزاد می‌شود تا تعویضِ *بعدی* هم بتواند
+           بارگذاری کند. بدونِ این، هر تب فقط یک‌بار در طولِ عمرش
+           می‌فهمید حساب عوض شده. */
+        try { sessionStorage.removeItem(RELOAD_GUARD) } catch { /* ignore */ }
+
+        /* از این‌جا به بعد همان کاربر است و فقط جزئیاتش ممکن است عوض
+           شده باشد — این‌جا به‌روزرسانیِ ساده کافی و درست است. */
+        const same = cur
+          && cur.firstName === me.firstName
+          && cur.lastName === me.lastName
+          && cur.primaryRole === me.primaryRole
+          && (cur.avatar ?? '') === (me.avatar ?? '')
+          && JSON.stringify(cur.secondaryRoles ?? []) === JSON.stringify(me.secondaryRoles ?? [])
         if (!same) login(me, '')
       } catch { /* شبکه قطع بود؛ همان چیزی که هست می‌ماند */ }
-    })()
-    return () => { stopped = true }
+    }
+
+    void sync()
+
+    /* ── تبِ دیگر حساب را عوض کرد ──
+       `storage` فقط در *سایر* تب‌ها شلیک می‌شود؛ یعنی دقیقاً همان تبی
+       که باید بفهمد. بدونِ این، تبِ اول تا اولین ناوبری چیزی نمی‌فهمید
+       — و همان چند دقیقه‌ی «تبِ دورگه» بود. */
+    const onStorage = (e: StorageEvent) => {
+      if (e.key !== 'auth-storage') return
+      const next = storedUserId(e.newValue)
+      const cur = useAuthStore.getState().user?.id ?? null
+      if (next !== cur) reloadForIdentityChange()
+    }
+
+    /* ── برگشت از حافظه‌ی پشت/جلو ──
+       مرورگر صفحه را عیناً از کش برمی‌گرداند؛ هیچ کدی دوباره اجرا
+       نمی‌شود. اگر بین رفتن و برگشتن حساب عوض شده باشد، دقیقاً همان
+       صفحه‌ی حسابِ قبلی برمی‌گردد. همین بود که با زدنِ «بازگشت» دیده
+       شد. */
+    const onShow = (e: PageTransitionEvent) => { if (e.persisted) void sync() }
+
+    window.addEventListener('storage', onStorage)
+    window.addEventListener('pageshow', onShow)
+    return () => {
+      stopped = true
+      window.removeEventListener('storage', onStorage)
+      window.removeEventListener('pageshow', onShow)
+    }
     /* عمداً فقط به `hydrated` وابسته است: افزودنِ `user` این افکت را
-       بعد از هر به‌روزرسانی دوباره اجرا می‌کرد و حلقه می‌ساخت. */
+       بعد از هر به‌روزرسانی دوباره اجرا می‌کرد و حلقه می‌ساخت.
+       مقدارِ تازه‌ی کاربر از `getState()` خوانده می‌شود، نه از closure. */
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hydrated])
 
