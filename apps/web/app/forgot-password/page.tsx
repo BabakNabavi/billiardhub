@@ -10,6 +10,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Phone, Lock, ShieldCheck, Eye, EyeOff, AlertCircle, CheckCircle2, ArrowLeft, Check } from 'lucide-react';
 import { apiFetch } from '../../lib/http';
+import { passwordHint, capsFrom } from '../../lib/auth/password-hints';
 
 const toFa    = (v: string) => v.replace(/[0-9]/g, d => '۰۱۲۳۴۵۶۷۸۹'[+d] ?? d);
 const toLatin = (v: string) => v.replace(/[۰-۹]/g, ch => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(ch))).replace(/[^0-9]/g, '');
@@ -47,7 +48,11 @@ export default function ForgotPasswordPage() {
   const [loading, setLoading]   = useState(false);
   const [wait, setWait]         = useState(0);
   const [focus, setFocus]       = useState('');
+  const [caps, setCaps]         = useState(false);
   const tick = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  /* هشدارِ چیدمانِ کیبورد — از خودِ مقدارِ فیلد، نه از حدس */
+  const hint = passwordHint(pass, caps);
 
   /* شمارش معکوس ارسال دوباره */
   useEffect(() => {
@@ -98,8 +103,11 @@ export default function ForgotPasswordPage() {
   };
 
   const resetPass = async () => {
+    /* رمزی که با کیبوردِ فارسی ساخته شود، بعداً هم فقط با همان چیدمان
+       تایپ می‌شود — یعنی کاربر خودش را از حسابش بیرون می‌کند. */
+    if (hint.persian) { setError('کیبورد روی فارسی است — رمز را با حروف انگلیسی بنویسید.'); return; }
     if (!RULES.every(r => r.ok(pass))) { setError('رمز عبور همه‌ی شرط‌های زیر را ندارد'); return; }
-    if (pass !== pass2) { setError('رمز تازه و تکرارش یکی نیستند'); return; }
+    if (pass !== pass2) { setError('رمز جدید و تکرارش یکی نیستند'); return; }
     setLoading(true); setError('');
     try {
       const j = await call({ step: 'reset', password: pass });
@@ -122,14 +130,14 @@ export default function ForgotPasswordPage() {
   const lead =
     step === 'phone'    ? 'شماره موبایل حسابتان را وارد کنید تا کد تأیید بفرستیم' :
     step === 'code'     ? (note || 'کد تأیید پیامک‌شده را وارد کنید') :
-    step === 'password' ? 'رمز تازه‌ای برای حسابتان انتخاب کنید' :
-                          'همه‌ی دستگاه‌های دیگر از حساب خارج شدند. با رمز تازه وارد شوید.';
+    step === 'password' ? 'رمز جدیدی برای حسابتان انتخاب کنید' :
+                          'همه‌ی دستگاه‌های دیگر از حساب خارج شدند. با رمز جدید وارد شوید.';
 
   const btnLabel =
     step === 'phone'    ? 'ارسال کد تأیید' :
     step === 'code'     ? 'تأیید کد' :
-    step === 'password' ? 'ثبت رمز تازه' :
-                          'ورود با رمز تازه';
+    step === 'password' ? 'ثبت رمز جدید' :
+                          'ورود با رمز جدید';
 
   return (
     <div dir="rtl" className="au-root">
@@ -158,11 +166,20 @@ export default function ForgotPasswordPage() {
         .au-inp { flex: 1; min-width: 0; background: transparent; border: none; outline: none;
           padding: 14px 14px; font-size: 14.5px; color: ${TEXT}; font-family: inherit; direction: ltr; text-align: right; }
         .au-inp::placeholder { color: #B7B0A0; direction: rtl; font-size: 12.5px; letter-spacing: normal; }
-        /* text-indent برابر با letter-spacing است و عمدی.
-           CSS بعد از *هر* نویسه — از جمله آخری — فاصله می‌گذارد، پس متن
-           وسط‌چین همیشه به اندازه‌ی نصف آن فاصله کج می‌افتد. این تورفتگی
-           دقیقاً همان را جبران می‌کند و خط‌تیره‌ها واقعاً وسط می‌نشینند. */
-        .au-inp.otp { text-align: center; letter-spacing: 8px; text-indent: 8px; font-size: 19px; font-weight: 800; padding-inline: 8px; }
+        /* ── وسط‌چینِ واقعی ──
+           CSS بعد از *هر* نویسه — از جمله آخری — فاصله می‌گذارد. پس
+           جعبه‌ی متن به اندازه‌ی یک letter-spacing از خودِ نوشته
+           پهن‌تر است و وسط‌چین‌کردنِ جعبه، نوشته را نصفِ آن فاصله به چپ
+           می‌اندازد.
+
+           جبرانش **نصفِ** letter-spacing است، نه تمامش. مقدارِ قبلی
+           تمامِ ۸px بود، یعنی ۴px به سمتِ دیگر کج می‌کرد — همان کجی که
+           دیده می‌شد. */
+        .au-inp.otp { text-align: center; letter-spacing: 8px; text-indent: 4px; font-size: 19px; font-weight: 800; padding-inline: 8px; }
+        /* جای‌نگهدار همان قاعده را می‌خواهد، وگرنه قاعده‌ی عمومیِ بالا
+           letter-spacing را normal می‌کند و خط‌تیره‌ها با تورفتگیِ
+           جبران‌نشده کج می‌نشینند. */
+        .au-inp.otp::placeholder { letter-spacing: inherit; font-size: inherit; direction: ltr; }
 
         .au-btn { width: 100%; padding: 15px; border: none; border-radius: 13px; cursor: pointer;
           font-family: inherit; font-size: 15px; font-weight: 800; color: #241B08;
@@ -278,7 +295,10 @@ export default function ForgotPasswordPage() {
                 onFocus={() => setFocus('code')}
                 onBlur={() => setFocus('')}
                 onKeyDown={e => e.key === 'Enter' && submit()}
-                placeholder="- - - - -"
+                /* بدونِ فاصله: خودِ letter-spacing فاصله‌ها را می‌سازد و
+                   جای‌نگهدار دقیقاً مثلِ پنج رقمِ واقعی می‌نشیند. با
+                   فاصله‌های دستی، پنج خط‌تیره می‌شد نُه نویسه و کج. */
+                placeholder="-----"
                 autoComplete="one-time-code"
                 autoFocus
               />
@@ -318,10 +338,10 @@ export default function ForgotPasswordPage() {
           </div>
         )}
 
-        {/* ── گام ۳: رمز تازه ── */}
+        {/* ── گام ۳: رمز جدید ── */}
         {step === 'password' && (
           <div style={{ marginBottom: 6 }}>
-            <label style={{ display: 'block', fontSize: 12.5, fontWeight: 700, color: SEC, marginBottom: 8 }}>رمز تازه</label>
+            <label style={{ display: 'block', fontSize: 12.5, fontWeight: 700, color: SEC, marginBottom: 8 }}>رمز جدید</label>
             <div className={`au-wrap${focus === 'p1' ? ' on' : ''}`}>
               <span className="au-ic"><Lock size={16} /></span>
               <input
@@ -331,7 +351,9 @@ export default function ForgotPasswordPage() {
                 onChange={e => setPass(e.target.value)}
                 onFocus={() => setFocus('p1')}
                 onBlur={() => setFocus('')}
-                placeholder="رمز تازه"
+                onKeyDown={e => setCaps(capsFrom(e))}
+                onKeyUp={e => setCaps(capsFrom(e))}
+                placeholder="رمز جدید"
                 autoComplete="new-password"
                 autoFocus
               />
@@ -344,7 +366,7 @@ export default function ForgotPasswordPage() {
               </button>
             </div>
 
-            <label style={{ display: 'block', fontSize: 12.5, fontWeight: 700, color: SEC, margin: '14px 0 8px' }}>تکرار رمز تازه</label>
+            <label style={{ display: 'block', fontSize: 12.5, fontWeight: 700, color: SEC, margin: '14px 0 8px' }}>تکرار رمز جدید</label>
             <div className={`au-wrap${focus === 'p2' ? ' on' : ''}`}>
               <span className="au-ic"><Lock size={16} /></span>
               <input
@@ -354,11 +376,30 @@ export default function ForgotPasswordPage() {
                 onChange={e => setPass2(e.target.value)}
                 onFocus={() => setFocus('p2')}
                 onBlur={() => setFocus('')}
-                onKeyDown={e => e.key === 'Enter' && submit()}
+                onKeyDown={e => { setCaps(capsFrom(e)); if (e.key === 'Enter') submit(); }}
+                onKeyUp={e => setCaps(capsFrom(e))}
                 placeholder="دوباره همان رمز"
                 autoComplete="new-password"
               />
             </div>
+
+            {/* ── هشدارِ چیدمانِ کیبورد ──
+                این‌جا از صفحه‌ی ورود هم مهم‌تر است: رمزی که با کیبوردِ
+                فارسی ساخته شود، بعداً هم فقط با همان چیدمان قابلِ
+                تایپ است — یعنی کاربر خودش را از حسابش بیرون می‌کند. */}
+            {hint.message && (
+              <div style={{
+                display: 'flex', alignItems: 'flex-start', gap: 7, marginTop: 10,
+                padding: '9px 11px', borderRadius: 10, lineHeight: 1.9,
+                background: hint.persian ? 'rgba(178,59,46,0.07)' : 'rgba(199,166,106,0.10)',
+                border: `1px solid ${hint.persian ? 'rgba(178,59,46,0.28)' : 'rgba(199,166,106,0.32)'}`,
+                fontSize: 12, fontWeight: 700,
+                color: hint.persian ? '#B23B2E' : '#9A6E38',
+              }}>
+                <AlertCircle size={14} style={{ flexShrink: 0, marginTop: 2 }} />
+                <span>{hint.message}</span>
+              </div>
+            )}
 
             <ul className="au-rules">
               {RULES.map(r => {

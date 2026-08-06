@@ -12,7 +12,7 @@ import { normalizePhone, hasAssignedPrefix, INVALID_MOBILE_MESSAGE } from '@/lib
    موازی. سه گام:
      send   → ارسال کد به شماره
      verify → بررسی کد (نشان تأیید روی همان رکورد OTP می‌نشیند)
-     reset  → تعیین رمز تازه، فقط اگر همان شماره تازه تأیید شده باشد
+     reset  → تعیین رمز جدید، فقط اگر همان شماره تازه تأیید شده باشد
 
    دو تصمیم امنیتی که شکل این فایل را تعیین کرده‌اند:
 
@@ -106,7 +106,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: true });
   }
 
-  /* ── گام ۳: تعیین رمز تازه ── */
+  /* ── گام ۳: تعیین رمز جدید ── */
   if (step === 'reset') {
     const rl = await hitRateLimit(req, RULES.otpVerify, phone);
     if (!rl.ok) return tooMany(rl.retryAfterSec);
@@ -123,11 +123,11 @@ export async function POST(req: NextRequest) {
     const uid = await userIdOf(phone);
     if (!uid) return NextResponse.json({ ok: false, message: 'انجام نشد' }, { status: 400 });
 
-    /* رمز تازه نباید همان رمز فعلی باشد */
+    /* رمز جدید نباید همان رمز فعلی باشد */
     const { data: cur } = await sb().from('users').select('password').eq('id', uid).maybeSingle();
     const currentHash = (cur as { password?: string } | null)?.password ?? '';
     if (currentHash && await bcrypt.compare(pw, currentHash)) {
-      return NextResponse.json({ ok: false, message: 'رمز تازه نباید همان رمز فعلی باشد' }, { status: 400 });
+      return NextResponse.json({ ok: false, message: 'رمز جدید نباید همان رمز فعلی باشد' }, { status: 400 });
     }
 
     const hashed = await bcrypt.hash(pw, 10);

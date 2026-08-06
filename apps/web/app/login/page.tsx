@@ -13,6 +13,7 @@ import api from '../../lib/api';
 import { useAuthStore } from '../../store/auth.store';
 import { Eye, EyeOff, Phone, Lock, AlertCircle, ArrowLeft } from 'lucide-react';
 import { toAuthError } from '../../lib/auth/error-message';
+import { passwordHint, capsFrom } from '../../lib/auth/password-hints';
 
 /* نمایش فارسی ارقام — مقدار ارسالی به سرور همچنان لاتین می‌ماند */
 const toFa = (v: string) => v.replace(/[0-9]/g, d => '۰۱۲۳۴۵۶۷۸۹'[+d] ?? d);
@@ -31,6 +32,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [showPass, setShowPass] = useState(false);
   const [error, setError]       = useState('');
+  const [caps, setCaps]         = useState(false);
   const [loading, setLoading]   = useState(false);
   const [phoneFocus, setPhoneFocus] = useState(false);
   /* آیا خطا مربوط به ورودی کاربر بود؟ خطای شبکه نباید فیلدها را قرمز کند */
@@ -58,9 +60,15 @@ export default function LoginPage() {
      یا متن را کامل نخوانده بود، پیام را از دست می‌داد و نمی‌فهمید چه
      شده. حالا تا زدن «متوجه شدم» یا تغییر ورودی می‌ماند. */
 
+  /* هشدارِ کیبورد از خودِ مقدارِ فیلد ساخته می‌شود، نه از حدس */
+  const hint = passwordHint(password, caps);
+
   const handleLogin = async () => {
     if (!phone.trim())    { setError('لطفاً شماره موبایل را وارد کنید'); return; }
     if (!password.trim()) { setError('لطفاً رمز عبور را وارد کنید'); return; }
+    /* جلوی درخواستِ محکوم‌به‌شکست را می‌گیریم — وگرنه یکی از پنج تلاشِ
+       مجاز برای چیزی می‌سوزد که همین‌جا معلوم است اشتباه است. */
+    if (hint.persian) { setError('کیبورد روی فارسی است — رمز را با حروف انگلیسی بنویسید.'); return; }
 
     setLoading(true); setError(''); setErrIsCred(true);
     try {
@@ -75,6 +83,12 @@ export default function LoginPage() {
       const e = toAuthError(err, 'شماره یا رمز عبور اشتباه است');
       setError(e.message);
       setErrIsCred(e.isCredentialError);
+      /* ── رمزِ اشتباه پاک می‌شود ──
+         نگه‌داشتنش کمکی نمی‌کند: چون با نقطه نمایش داده می‌شود، کاربر
+         نمی‌تواند اشتباه را ببیند و اصلاحش کند — عملاً باید کلِ فیلد را
+         پاک کند تا از نو بنویسد. اگر خطا از شبکه بوده نه از رمز، دست
+         نمی‌زنیم؛ آن‌جا رمز درست بوده و پاک‌کردنش فقط آزاردهنده است. */
+      if (e.isCredentialError) { setPassword(''); setCaps(false); }
     } finally {
       setLoading(false);
     }
@@ -205,7 +219,8 @@ export default function LoginPage() {
               onChange={e => { setPassword(e.target.value); setError(''); }}
               onFocus={() => setPassFocus(true)}
               onBlur={() => setPassFocus(false)}
-              onKeyDown={e => e.key === 'Enter' && handleLogin()}
+              onKeyDown={e => { setCaps(capsFrom(e)); if (e.key === 'Enter') handleLogin(); }}
+              onKeyUp={e => setCaps(capsFrom(e))}
               className="au-inp"
               placeholder="رمز عبور"
               autoComplete="current-password"
@@ -217,6 +232,25 @@ export default function LoginPage() {
               {showPass ? <EyeOff size={15} /> : <Eye size={15} />}
             </button>
           </div>
+
+          {/* ── هشدارِ چیدمانِ کیبورد ──
+              رمز با نقطه نشان داده می‌شود، پس کاربر نمی‌بیند چه تایپ
+              کرده. با کیبوردِ فارسی، به‌جای رمز یک رشته‌ی فارسی می‌رود و
+              تنها بازخوردش «اطلاعات ورود صحیح نیست» است — بی‌هیچ سرنخی،
+              و چند بار تکرارش حساب را قفل می‌کند. */}
+          {hint.message && (
+            <div style={{
+              display: 'flex', alignItems: 'flex-start', gap: 7, marginTop: 9,
+              padding: '9px 11px', borderRadius: 10, lineHeight: 1.9,
+              background: hint.persian ? 'rgba(178,59,46,0.07)' : 'rgba(199,166,106,0.10)',
+              border: `1px solid ${hint.persian ? 'rgba(178,59,46,0.28)' : 'rgba(199,166,106,0.32)'}`,
+              fontSize: 12, fontWeight: 700,
+              color: hint.persian ? '#B23B2E' : '#9A6E38',
+            }}>
+              <AlertCircle size={14} style={{ flexShrink: 0, marginTop: 2 }} />
+              <span>{hint.message}</span>
+            </div>
+          )}
         </div>
 
         <button className="au-btn" onClick={handleLogin} disabled={loading}>

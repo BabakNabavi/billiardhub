@@ -17,6 +17,7 @@ import { sendOtp as apiSendOtp, verifyOtp as apiVerifyOtp, verifyIdentity as api
 import { Phone, Lock, User, AlertCircle, ArrowLeft, ArrowRight, Check, Fingerprint, Eye, EyeOff, MessageSquare, ShieldCheck, CalendarDays } from 'lucide-react';
 import { toAuthError } from '../../lib/auth/error-message';
 import { apiFetch } from '@/lib/http';
+import { passwordHint } from '@/lib/auth/password-hints';
 import ClubPicker, { type ClubPickerValue } from '@/components/ClubPicker';
 
 type Step = 1 | 2;
@@ -172,7 +173,9 @@ export default function RegisterPage() {
   const set = (key: keyof FormData) => (e: React.ChangeEvent<HTMLInputElement>) => {
     const raw = e.target.value;
     if (key === 'password' || key === 'confirmPassword') {
-      setPwWarn(/[؀-ۿ]/.test(raw));
+      /* از تشخیصِ مشترک — بازه‌ی این‌جا فقط `؀-ۿ` بود و نویسه‌های
+         فارسیِ فرم‌های نمایشی (ﭐ-﷿) را نمی‌گرفت. */
+      setPwWarn(passwordHint(raw).persian);
     }
     const v = sanitize(key, raw);
     setForm((prev) => ({ ...prev, [key]: v }));
@@ -494,8 +497,11 @@ export default function RegisterPage() {
                 className="au-inp" value={otp} inputMode="numeric" maxLength={6} autoFocus
                 onChange={e => { setOtp(e.target.value.replace(/[۰-۹]/g, d => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(d))).replace(/[^0-9]/g, '').slice(0, 6)); setOtpMsg(''); }}
                 onKeyDown={e => { if (e.key === 'Enter') handleVerify(); }}
-                placeholder="- - - - -"
-                style={{ width: '100%', boxSizing: 'border-box', textAlign: 'center', letterSpacing: '0.5em', textIndent: '0.5em', fontSize: 26, fontWeight: 800, direction: 'ltr', padding: '14px', borderRadius: 14, border: `1px solid ${LINE}`, background: '#fff', color: TEXT, outline: 'none', fontFamily: 'inherit' }}
+                /* بدونِ فاصله‌ی دستی، و تورفتگی **نصفِ** letter-spacing —
+                   جبرانِ فاصله‌ای که CSS پس از آخرین نویسه هم می‌گذارد.
+                   با مقدارِ کامل، همان اندازه به سمتِ دیگر کج می‌شد. */
+                placeholder="-----"
+                style={{ width: '100%', boxSizing: 'border-box', textAlign: 'center', letterSpacing: '0.5em', textIndent: '0.25em', fontSize: 26, fontWeight: 800, direction: 'ltr', padding: '14px', borderRadius: 14, border: `1px solid ${LINE}`, background: '#fff', color: TEXT, outline: 'none', fontFamily: 'inherit' }}
               />
               {otpMsg && <p style={{ fontSize: 12, fontWeight: 700, color: otpMsg.includes('ارسال شد') ? '#0E7A38' : '#B23B2E', margin: '10px 0 0', textAlign: 'center' }}>{otpMsg}</p>}
               <button className="au-btn" onClick={handleVerify} disabled={otpBusy} style={{ marginTop: 16 }}>

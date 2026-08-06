@@ -89,8 +89,9 @@ export default function IdentityVerify({ open, onClose, onVerified }: { open: bo
           )}
           {phase === 'otp' && (
             <>
-              <input value={otp} onChange={e => { setOtp(digits(e.target.value, 6)); setMsg('') }} onKeyDown={e => e.key === 'Enter' && doVerifyOtp()} inputMode="numeric" maxLength={6} autoFocus placeholder="- - - - -"
-                style={{ width: '100%', boxSizing: 'border-box', textAlign: 'center', letterSpacing: '0.5em', textIndent: '0.5em', fontSize: 24, fontWeight: 800, direction: 'ltr', padding: '13px', borderRadius: 13, border: `1px solid ${LINE}`, background: '#FAF8F3', color: INK, outline: 'none', fontFamily: 'inherit' }} />
+              <input value={otp} onChange={e => { setOtp(digits(e.target.value, 6)); setMsg('') }} onKeyDown={e => e.key === 'Enter' && doVerifyOtp()} inputMode="numeric" maxLength={6} autoFocus placeholder="-----"
+                /* تورفتگی نصفِ letter-spacing است؛ توضیحش در فرمِ ثبت‌نام */
+                style={{ width: '100%', boxSizing: 'border-box', textAlign: 'center', letterSpacing: '0.5em', textIndent: '0.25em', fontSize: 24, fontWeight: 800, direction: 'ltr', padding: '13px', borderRadius: 13, border: `1px solid ${LINE}`, background: '#FAF8F3', color: INK, outline: 'none', fontFamily: 'inherit' }} />
               <Btn onClick={doVerifyOtp} busy={busy} label="تأیید کد" icon={<Check size={16} />} />
               <button onClick={doSend} disabled={resendIn > 0 || busy} style={{ background: 'none', border: 'none', cursor: resendIn > 0 ? 'default' : 'pointer', fontFamily: 'inherit', fontSize: 12.5, fontWeight: 700, color: resendIn > 0 ? MUT : GOLD_D, padding: 0 }}>
                 {resendIn > 0 ? `ارسال مجدد تا ${resendIn.toLocaleString('fa-IR')} ثانیه` : 'ارسال مجدد کد'}

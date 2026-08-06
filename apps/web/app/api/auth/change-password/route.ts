@@ -39,7 +39,7 @@ export async function POST(req: NextRequest) {
   const confirm = String(b?.confirmPassword ?? '');
 
   if (next !== confirm) {
-    return NextResponse.json({ message: 'رمز تازه و تکرارش یکی نیستند' }, { status: 400 });
+    return NextResponse.json({ message: 'رمز جدید و تکرارش یکی نیستند' }, { status: 400 });
   }
 
   const check = checkPassword(next);
@@ -54,7 +54,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ message: 'رمز فعلی درست نیست' }, { status: 400 });
     }
     if (await bcrypt.compare(next, currentHash)) {
-      return NextResponse.json({ message: 'رمز تازه نباید همان رمز فعلی باشد' }, { status: 400 });
+      return NextResponse.json({ message: 'رمز جدید نباید همان رمز فعلی باشد' }, { status: 400 });
     }
   }
 

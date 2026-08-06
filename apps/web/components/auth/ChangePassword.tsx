@@ -13,8 +13,9 @@
    ───────────────────────────────────────────────────────────── */
 
 import { useEffect, useState } from 'react'
-import { Loader2, Lock, Eye, EyeOff, Check, X } from 'lucide-react'
+import { Loader2, Lock, Eye, EyeOff, Check, X, AlertCircle } from 'lucide-react'
 import { apiFetch } from '../../lib/http'
+import { passwordHint, capsFrom } from '../../lib/auth/password-hints'
 
 const INK = '#1C1B17', SEC = '#5B564B', MUT = '#8A8474', LINE = '#E7E2D6'
 const GOLD_D = '#9A6E38', FELT = '#0E7A38', RED = '#B23B2E'
@@ -39,12 +40,14 @@ const BTN: React.CSSProperties = {
   color: GOLD_D, fontSize: 13, fontWeight: 800, fontFamily: 'inherit', padding: '10px 16px', cursor: 'pointer',
 }
 
-function Secret({ value, onChange, placeholder, autoFocus, onEnter }: {
+function Secret({ value, onChange, placeholder, autoFocus, onEnter, onCaps }: {
   value: string
   onChange: (v: string) => void
   placeholder: string
   autoFocus?: boolean
   onEnter?: () => void
+  /** وضعیتِ Caps Lock به بالا گزارش می‌شود تا هشدارِ مشترک ساخته شود */
+  onCaps?: (on: boolean) => void
 }) {
   const [show, setShow] = useState(false)
   return (
@@ -53,7 +56,8 @@ function Secret({ value, onChange, placeholder, autoFocus, onEnter }: {
         type={show ? 'text' : 'password'}
         value={value}
         onChange={e => onChange(e.target.value)}
-        onKeyDown={e => { if (e.key === 'Enter' && onEnter) onEnter() }}
+        onKeyUp={e => onCaps?.(capsFrom(e))}
+        onKeyDown={e => { onCaps?.(capsFrom(e)); if (e.key === 'Enter' && onEnter) onEnter() }}
         placeholder={placeholder}
         autoComplete={placeholder.includes('فعلی') ? 'current-password' : 'new-password'}
         autoFocus={autoFocus}
@@ -79,6 +83,7 @@ export default function ChangePassword({ onChanged }: { onChanged?: () => void }
   const [next, setNext] = useState('')
   const [confirm, setConfirm] = useState('')
   const [busy, setBusy] = useState(false)
+  const [caps, setCaps] = useState(false)
   const [msg, setMsg] = useState<{ text: string; bad: boolean } | null>(null)
 
   /* «رمز دارد یا نه» را از سرور می‌پرسیم — خود هش هرگز برنمی‌گردد */
@@ -95,10 +100,15 @@ export default function ChangePassword({ onChanged }: { onChanged?: () => void }
     setOpen(false); setCurrent(''); setNext(''); setConfirm(''); setMsg(null)
   }
 
+  /* هشدارِ چیدمانِ کیبورد برای رمزِ جدید — رمزی که با کیبوردِ فارسی
+     ساخته شود بعداً هم فقط با همان چیدمان تایپ می‌شود. */
+  const hint = passwordHint(next, caps)
+
   const submit = async () => {
     if (hasPassword && !current.trim()) { setMsg({ text: 'رمز فعلی را وارد کنید', bad: true }); return }
-    if (!RULES.every(r => r.ok(next)))  { setMsg({ text: 'رمز تازه همه‌ی شرط‌های زیر را ندارد', bad: true }); return }
-    if (next !== confirm)               { setMsg({ text: 'رمز تازه و تکرارش یکی نیستند', bad: true }); return }
+    if (hint.persian)                   { setMsg({ text: 'کیبورد روی فارسی است — رمز را با حروف انگلیسی بنویسید.', bad: true }); return }
+    if (!RULES.every(r => r.ok(next)))  { setMsg({ text: 'رمز جدید همه‌ی شرط‌های زیر را ندارد', bad: true }); return }
+    if (next !== confirm)               { setMsg({ text: 'رمز جدید و تکرارش یکی نیستند', bad: true }); return }
 
     setBusy(true); setMsg(null)
     try {
@@ -108,7 +118,13 @@ export default function ChangePassword({ onChanged }: { onChanged?: () => void }
         body: JSON.stringify({ currentPassword: current, newPassword: next, confirmPassword: confirm }),
       })
       const j = await r.json().catch(() => ({} as Record<string, unknown>))
-      if (!r.ok) { setMsg({ text: String(j.message ?? 'تغییر رمز انجام نشد'), bad: true }); return }
+      if (!r.ok) {
+        setMsg({ text: String(j.message ?? 'تغییر رمز انجام نشد'), bad: true })
+        /* رمزِ فعلیِ اشتباه پاک می‌شود: با نقطه نمایش داده می‌شود و
+           کاربر نمی‌تواند اشتباه را ببیند و اصلاح کند. */
+        if (r.status === 400 || r.status === 401) setCurrent('')
+        return
+      }
 
       setCurrent(''); setNext(''); setConfirm('')
       setMsg({ text: String(j.message ?? 'رمز عبور تغییر کرد؛ دوباره وارد شوید.'), bad: false })
@@ -196,10 +212,24 @@ export default function ChangePassword({ onChanged }: { onChanged?: () => void }
           <Secret value={current} onChange={v => { setCurrent(v); setMsg(null) }}
             placeholder="رمز فعلی" autoFocus />
         )}
-        <Secret value={next} onChange={v => { setNext(v); setMsg(null) }}
-          placeholder="رمز تازه" autoFocus={hasPassword === false} />
-        <Secret value={confirm} onChange={v => { setConfirm(v); setMsg(null) }}
-          placeholder="تکرار رمز تازه" onEnter={() => void submit()} />
+        <Secret value={next} onChange={v => { setNext(v); setMsg(null) }} onCaps={setCaps}
+          placeholder="رمز جدید" autoFocus={hasPassword === false} />
+        <Secret value={confirm} onChange={v => { setConfirm(v); setMsg(null) }} onCaps={setCaps}
+          placeholder="تکرار رمز جدید" onEnter={() => void submit()} />
+
+        {hint.message && (
+          <div style={{
+            display: 'flex', alignItems: 'flex-start', gap: 7,
+            padding: '9px 11px', borderRadius: 10, lineHeight: 1.9,
+            background: hint.persian ? 'rgba(178,59,46,0.07)' : 'rgba(199,166,106,0.10)',
+            border: `1px solid ${hint.persian ? 'rgba(178,59,46,0.28)' : 'rgba(199,166,106,0.32)'}`,
+            fontSize: 12, fontWeight: 700,
+            color: hint.persian ? '#B23B2E' : '#9A6E38',
+          }}>
+            <AlertCircle size={14} style={{ flexShrink: 0, marginTop: 2 }} />
+            <span>{hint.message}</span>
+          </div>
+        )}
 
         <ul style={{ listStyle: 'none', padding: 0, margin: '2px 0 0', display: 'grid', gap: 5 }}>
           {RULES.map(r => {
@@ -223,7 +253,7 @@ export default function ChangePassword({ onChanged }: { onChanged?: () => void }
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 2 }}>
           <button type="button" onClick={() => void submit()} disabled={busy}
             style={{ ...BTN, opacity: busy ? 0.6 : 1 }}>
-            {busy ? <Loader2 size={14} className="animate-spin" /> : null} ثبت رمز تازه
+            {busy ? <Loader2 size={14} className="animate-spin" /> : null} ثبت رمز جدید
           </button>
           <button type="button" onClick={reset} disabled={busy}
             style={{ ...BTN, background: 'rgba(0,0,0,0.03)', borderColor: LINE, color: SEC }}>
