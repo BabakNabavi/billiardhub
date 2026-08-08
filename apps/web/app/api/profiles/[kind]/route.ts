@@ -1,6 +1,6 @@
 export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
-import { actorFromRequest, isAdmin } from '@/lib/finance/db';
+import { sb, actorFromRequest, isAdmin } from '@/lib/finance/db';
 import {
   PROFILE_KINDS, getProfileByOwner, getProfileBySlug, listProfiles, saveProfile,
   type ProfileKind,
@@ -94,6 +94,46 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ kind: stri
       ...(licenseNumber !== undefined ? { licenseNumber } : {}),
       ...(licenseUrl !== undefined ? { licenseUrl } : {}),
     });
+    /* ── ساختنِ پروفایل یعنی داشتنِ آن نقش ──
+       تا امروز این مسیر فقط پروفایل را ذخیره می‌کرد و به نقشِ کاربر
+       دست نمی‌زد. نتیجه‌اش باگی بود که کاربر این‌طور دیدش: فروشگاه
+       را ساخت، پنلش کار کرد، **بعد از خروج و ورودِ دوباره نقش و
+       پنل ناپدید شدند** — در حالی که فروشگاه در صفحه‌ی فروشگاه‌ها و
+       صفحه‌ی اصلی دیده می‌شد.
+
+       دلیلش این بود که پنل به حالتِ کلاینت تکیه داشت، ولی ورودِ
+       دوباره نقش‌ها را از دیتابیس می‌خواند و آن‌جا خبری از `seller`
+       نبود. در دیتابیس هم دیده شد: `role_requests` ردیفِ `pending`
+       داشت ولی `secondaryRoles` کاربر خالیِ آن نقش بود.
+
+       این‌جا همان قاعده‌ی `/api/roles/request` تکرار می‌شود: نقش
+       داده می‌شود تا کاربر بتواند کارش را شروع کند. امن است چون هر
+       چیزی که می‌سازد صفِ تأییدِ خودش را دارد و تا تأیید، روی سایت
+       نشانِ تأییدشده نمی‌گیرد.
+
+       `primaryRole` فقط وقتی جابه‌جا می‌شود که کاربر هنوز نقشِ
+       معناداری ندارد — وگرنه ساختنِ فروشگاه، باشگاه‌داری‌اش را از
+       دستش درمی‌آورد. */
+    try {
+      const { data: u } = await sb().from('users')
+        .select('"primaryRole","secondaryRoles"').eq('id', actor.id).maybeSingle();
+      const cur = (u ?? {}) as { primaryRole?: string; secondaryRoles?: string[] };
+      const owned = [cur.primaryRole, ...(cur.secondaryRoles ?? [])].filter(Boolean);
+      if (!owned.includes(kind)) {
+        const roles = [...new Set([...(cur.secondaryRoles ?? []), kind])].filter(Boolean);
+        const promote = !cur.primaryRole || cur.primaryRole === 'user';
+        await sb().from('users').update({
+          secondaryRoles: roles,
+          ...(promote ? { primaryRole: kind } : {}),
+          updatedAt: new Date().toISOString(),
+        }).eq('id', actor.id);
+      }
+    } catch (roleErr) {
+      /* نقش ندادن نباید ذخیره‌ی پروفایل را بشکند؛ لاگ می‌شود و
+         کاربر می‌تواند از مسیرِ «نقش‌ها» هم بگیردش. */
+      console.error('[profiles] grant role failed:', roleErr);
+    }
+
     return NextResponse.json({ profile: saved }, { status: 201 });
   } catch (e) {
     const msg = e instanceof Error ? e.message : '';
