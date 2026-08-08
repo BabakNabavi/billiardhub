@@ -1044,6 +1044,44 @@ t('نوع مهم‌تر از برند است',
 t('کارتِ «مشابه» هم دو خطی است',
   /const rp = productTitleParts/.test(detail2));
 
+/* ── ۱۲ · عکسِ آگهی در Storage، نه در دیتابیس ──
+   عکس با FileReader به base64 تبدیل و همان رشته در ستونِ `images`
+   ذخیره می‌شد: عکسِ دومگابایتی ⇒ ۲٫۷ مگابایت متن داخلِ ردیف، و
+   `/api/market/ads` همه‌ی آن را در هر بارگذاریِ بازار برمی‌گرداند. */
+console.log('\n― عکسِ آگهی ―');
+const imgLib = read('lib/market/images.ts');
+const adsApi = read('app/api/market/ads/route.ts');
+const adApi = read('app/api/market/ads/[id]/route.ts');
+t('منبعِ واحدِ تصویرِ آگهی هست',
+  /export async function normalizeAdImages/.test(imgLib));
+t('هر دو مسیرِ نوشتن از آن می‌گذرند',
+  /await normalizeAdImages\(b\?\.images, actor\.id\)/.test(adsApi)
+  && /await normalizeAdImages\(b\.images, actor\.id\)/.test(adApi),
+  'قاعده‌ای که در یکی باشد و در دیگری نه، باگِ فرداست');
+t('base64 روی سرور به Storage می‌رود',
+  /storage\.from\('club-media'\)\s*\n?\s*\.upload/.test(imgLib)
+  || /\.from\('club-media'\)\.upload/.test(imgLib),
+  'تبِ کهنه هنوز base64 می‌فرستد و نباید در دیتابیس بنشیند');
+t('نوعِ فایل از بایت‌ها خوانده می‌شود نه از برچسبِ data URI',
+  /sniff\(bytes\)/.test(imgLib) && /capFor\(kind\.mime\)/.test(imgLib));
+t('نشانیِ بیگانه ذخیره نمی‌شود',
+  /storagePublicPrefix/.test(imgLib) && /alreadySafe/.test(imgLib),
+  'وگرنه صفحه‌ی عمومیِ ما تصویری از دامنه‌ی دلخواهِ آگهی‌دهنده را سرو می‌کند');
+t('فرمِ ثبت پیش از ارسال آپلود می‌کند',
+  /uploadFile\('club-media', slot\.file/.test(newAd)
+  && !/images\.map\(i => i\.data\)/.test(newAd));
+t('آپلودِ ناموفق آگهی را بی‌صدا بی‌عکس نمی‌کند',
+  /بارگذاری تصویر \$\{i \+ 1\} انجام نشد/.test(newAd));
+const imgMig = read('scripts/migrate-ad-images.mjs');
+t('اسکریپتِ انتقالِ آگهی‌های موجود هست',
+  /--apply/.test(imgMig) && /products\?select=id,title,images/.test(imgMig));
+t('انتقال پیش‌فرض فقط گزارش می‌دهد',
+  /const APPLY = process\.argv\.includes\('--apply'\)/.test(imgMig));
+t('عکسی که آپلودش نشد گم نمی‌شود',
+  /out\.push\(s\);\s*\n\s*rowAfter \+= s\.length;\s*\n\s*failed\+\+/.test(imgMig)
+  && /APPLY && allOk/.test(imgMig),
+  'ردیف فقط وقتی نوشته می‌شود که همه‌ی عکس‌هایش منتقل شده باشند');
+
 /* ── چهار چیزی که «درست نشده» بود ──
    هر چهار مورد یک جنس داشتند: داده در دیتابیس بود، فرم درست پرش
    کرده بود، و نمایش یا نمی‌خواندش یا اشتباه نشانش می‌داد. */

@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { sb, rpc, actorFromRequest, isAdmin, clientIp } from '@/lib/finance/db';
 import { viewerHash } from '@/lib/ads/preroll';
 import { normalizeCategory, normalizeCondition } from '@/lib/market/categories';
+import { normalizeAdImages } from '@/lib/market/images';
 
 /* یک آگهی بیلیارد بازار — خواندن، ویرایش و حذف.
    ویرایش و حذف فقط برای صاحب آگهی یا ادمین. */
@@ -100,7 +101,10 @@ export async function PATCH(req: NextRequest, ctx: { params: Promise<{ id: strin
   if (b?.sellerPhone !== undefined) patch.sellerPhone = str(b?.sellerPhone, 20);
   if (b?.sellerWhatsapp !== undefined) patch.sellerWhatsapp = str(b?.sellerWhatsapp, 20);
   if (b?.specs !== undefined) patch.specs = b?.specs && typeof b.specs === 'object' ? b.specs : null;
-  if (Array.isArray(b?.images)) patch.images = (b.images as string[]).slice(0, 8);
+  /* همان قاعده‌ی مسیرِ ثبت: base64 به Storage می‌رود و نشانی ذخیره
+     می‌شود. قاعده‌ای که در یکی از دو مسیرِ نوشتن باشد و در دیگری نه،
+     یعنی ویرایشِ آگهی همان متنِ چندمگابایتی را برمی‌گرداند. */
+  if (Array.isArray(b?.images)) patch.images = await normalizeAdImages(b.images, actor.id);
 
   /* وضعیت‌هایی که خودِ فروشنده می‌تواند بگذارد.
 

@@ -25,6 +25,7 @@
     "test:password-ux": "node scripts/test-password-ux.mjs",
     "test:callback-origin": "node scripts/test-callback-origin.mjs",
     "test:tournaments": "node scripts/test-tournaments.mjs",
+    "migrate:ad-images": "node scripts/migrate-ad-images.mjs",
     "test:session-identity": "node scripts/test-session-identity.mjs",
     "backup": "node scripts/backup.mjs",
     "test:club-info": "node scripts/test-club-info.mjs",

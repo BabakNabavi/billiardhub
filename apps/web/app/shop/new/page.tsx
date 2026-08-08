@@ -8,6 +8,7 @@ import { useAuthStore } from '../../../store/auth.store'
 import { findSellerByOwner } from '../../../lib/seller-store'
 import ProvinceCitySelect from '../../../components/ProvinceCitySelect'
 import { apiFetch } from '../../../lib/http'
+import { uploadFile } from '../../../lib/supabase'
 import { CATEGORY_OPTIONS } from '../../../lib/market/categories'
 import { productTitleParts } from '../../../lib/market/title'
 
@@ -615,7 +616,10 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
 }
 
 // ── Image slot ────────────────────────────────────────────────
-interface ImgSlot { data: string; name: string }
+/* `data` فقط برای پیش‌نمایشِ محلی است؛ چیزی که ثبت می‌شود `file` است
+   که پیش از ارسال به Storage می‌رود. پیش‌تر همان `data` — رشته‌ی
+   base64 — در دیتابیس ذخیره می‌شد. */
+interface ImgSlot { data: string; name: string; file: File }
 
 // ── Main Page ─────────────────────────────────────────────────
 export default function NewProductPage() {
@@ -733,7 +737,7 @@ export default function NewProductPage() {
       const reader = new FileReader()
       reader.onload = ev => {
         setImages(prev => prev.length < 5
-          ? [...prev, { data: ev.target?.result as string, name: file.name }]
+          ? [...prev, { data: ev.target?.result as string, name: file.name, file }]
           : prev
         )
         setErrors(e => { const n = { ...e }; delete n.images; return n })
@@ -795,7 +799,6 @@ export default function NewProductPage() {
     const rawPrice = Number(toAsciiDigits(form.price).replace(/\D/g, ''))
     const rawOld   = form.oldPrice ? Number(toAsciiDigits(form.oldPrice).replace(/\D/g, '')) : rawPrice
     const disc     = rawOld > rawPrice ? Math.round((1 - rawPrice / rawOld) * 100) : 0
-    const imgList  = images.map(i => i.data)
 
     const finalSpecs: Record<string, string> = { نوع: effType, مدل: effModel }
     Object.entries(specs).forEach(([k, v]) => {
@@ -815,6 +818,30 @@ export default function NewProductPage() {
        localStorage می‌ماند و عملاً هیچ‌کس جز خود آگهی‌دهنده نمی‌دیدش. */
     void (async () => {
       try {
+        /* ── عکس‌ها اول به Storage ──
+           پیش‌تر رشته‌ی base64 داخلِ همین بدنه‌ی JSON می‌رفت و همان‌جا
+           در ستونِ `images` می‌نشست: پنج عکسِ دومگابایتی ⇒ بدنه‌ی
+           ۱۴ مگابایتی، و بعد همان متن در هر بارگذاریِ بازار
+           برمی‌گشت. حالا فایل بالا می‌رود و فقط نشانی‌اش ثبت می‌شود.
+
+           آپلود از `/api/upload` می‌گذرد که نوعِ واقعیِ فایل را از
+           بایت‌ها می‌سنجد و مسیر را محدود می‌کند. */
+        const stamp = Date.now()
+        const uploaded: string[] = []
+        for (let i = 0; i < images.length; i++) {
+          const slot = images[i]!
+          const url = await uploadFile('club-media', slot.file, `products/${stamp}-${i}`)
+          /* یک عکسِ بالا نرفته، آگهی را بی‌صدا بی‌عکس نمی‌کند:
+             فروشنده باید بداند و دوباره تلاش کند. */
+          if (!url) {
+            setErrors({ submit: `بارگذاری تصویر ${i + 1} انجام نشد؛ دوباره تلاش کنید` })
+            setSubmitting(false)
+            return
+          }
+          uploaded.push(url)
+        }
+        const imgList = uploaded
+
         const r = await apiFetch('/api/market/ads', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },

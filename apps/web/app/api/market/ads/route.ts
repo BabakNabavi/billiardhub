@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { sb, actorFromRequest } from '@/lib/finance/db';
 import { consumeAdQuota, releaseConsumption, attachConsumptionRef } from '@/lib/ads/quota';
 import { normalizeCategory, normalizeCondition } from '@/lib/market/categories';
+import { normalizeAdImages } from '@/lib/market/images';
 import { getSetting } from '@/lib/ads/quota';
 
 /* آگهی‌های بیلیارد بازار — روی سرور، نه در مرورگر کاربر.
@@ -139,7 +140,12 @@ export async function POST(req: NextRequest) {
 
   const old = Math.max(price, Math.round(num(b?.old, price)));
   const disc = old > price ? Math.round((1 - price / old) * 100) : 0;
-  const images = Array.isArray(b?.images) ? (b.images as string[]).slice(0, 8) : [];
+  /* ── تصویرها هرگز base64 در دیتابیس نمی‌نشینند ──
+     پیش‌تر هرچه کلاینت می‌فرستاد همان ذخیره می‌شد، و کلاینت data URI
+     می‌فرستاد: تصویرِ دومگابایتی ⇒ ۲٫۷ مگابایت متن داخلِ ردیف، و
+     `/api/market/ads` همه‌ی آن را در هر بارگذاریِ بازار برمی‌گرداند.
+     `normalizeAdImages` بایت‌ها را به Storage می‌برد و نشانی می‌دهد. */
+  const images = await normalizeAdImages(b?.images, actor.id);
 
   const approvalRequired = await getSetting<boolean>('market_approval_required', false);
 
