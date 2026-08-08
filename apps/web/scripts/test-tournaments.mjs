@@ -19,6 +19,8 @@
 */
 
 import { readFileSync, existsSync } from 'node:fs';
+/* `readdirSync` پایین‌تر import شده؛ import ها بالا برده می‌شوند پس
+   همین‌جا هم در دسترس است. */
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 
@@ -1120,6 +1122,34 @@ t('کارتِ «مشابه» قیمتِ پرداختی را نشان می‌ده
 t('اسکریپتِ اصلاحِ آگهی‌های قدیمی هست',
   /roundNice/.test(read('scripts/fix-ad-discounts.mjs')));
 
+/* ── هر کالبکِ درگاه باید از بررسیِ Origin معاف باشد ──
+   مرورگر موقعِ بازگشت از درگاه `Origin` را دامنه‌ی درگاه می‌گذارد؛
+   بدونِ ثبت در `GATEWAY_CALLBACKS`، پروکسی ۴۰۳ می‌دهد و کاربری که
+   همین حالا پول داده، صفحه‌ی خالیِ «درخواست از دامنه‌ی نامعتبر رد
+   شد» می‌بیند — پول رفته و سفارش ثبت نشده.
+
+   این دقیقاً برای ارتقای آگهی اتفاق افتاد. پس به‌جای فهرست‌کردنِ
+   دستیِ مسیرها، خودِ پوشه گشته می‌شود: هر کالبکِ تازه‌ای که یادش
+   برود، همین‌جا قرمز می‌شود. */
+console.log('\n― کالبکِ درگاه‌ها ―');
+const proxySrc = read('proxy.ts');
+const callbackDirs = [];
+(function walk(rel) {
+  for (const e of readdirSync(join(ROOT, rel), { withFileTypes: true })) {
+    if (!e.isDirectory()) continue;
+    const next = `${rel}/${e.name}`;
+    if (e.name === 'callback') callbackDirs.push(next.replace(/^app/, ''));
+    else walk(next);
+  }
+})('app/api');
+
+t(`همه‌ی کالبک‌ها پیدا شدند (${callbackDirs.length} مسیر)`, callbackDirs.length >= 7);
+for (const dir of callbackDirs) {
+  t(`«${dir}» از بررسیِ Origin معاف است`,
+    proxySrc.includes(`'${dir}'`),
+    'کاربر پس از پرداخت ۴۰۳ می‌گیرد و پولش رفته');
+}
+
 t('عکسی که آپلودش نشد گم نمی‌شود',
   /out\.push\(s\);\s*\n\s*rowAfter \+= s\.length;\s*\n\s*failed\+\+/.test(imgMig)
   && /APPLY && allOk/.test(imgMig),
@@ -1305,6 +1335,10 @@ t('نشانِ اسکرول فقط روی مرز عوض می‌شود',
 t('بارِ اول کاربر را به بالا پرت نمی‌کند',
   /if \(first\.current\) \{ first\.current = false; return; \}/.test(read('components/ScrollToTop.tsx')),
   'افکت بعد از hydration می‌آمد و اسکرولِ شروع‌شده را برمی‌گرداند');
+t('نگهبانِ بازیابی به نسخه گره خورده، نه «یک‌بار برای همیشه»',
+  /sessionStorage\.getItem\(KEY\) === mine/.test(read('components/AppBoot.tsx'))
+  && /const mine = process\.env\.NEXT_PUBLIC_BUILD_SHA/.test(read('components/AppBoot.tsx')),
+  'پرچمِ ثابت یعنی تب فقط یک‌بار در عمرش خودش را درست می‌کند؛ دیپلویِ دوم صفحه‌ی سفیدِ ماندگار می‌دهد');
 t('بازبارگذاری وسطِ فرم انجام نمی‌شود',
   /const isMidTask = \(\) =>/.test(boot)
   && (boot.match(/if \(isMidTask\(\)\) return/g) ?? []).length >= 2,

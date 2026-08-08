@@ -38,18 +38,29 @@ export default function AppBoot() {
      وجود ندارد، import شکست می‌خورد، و چون داخلِ رندر نیست هیچ
      مرزِ خطایی نمی‌گیردش — صفحه سفید می‌ماند.
 
-     همان‌جا یک‌بار reload می‌کنیم. `sessionStorage` جلوی حلقه را
-     می‌گیرد: اگر بعد از بازبارگذاری هم خطا بدهد، دیگر تکرار
-     نمی‌شود و مرزِ خطای معمولی کارش را می‌کند. */
+     همان‌جا یک‌بار reload می‌کنیم.
+
+     ── چرا نگهبان به نسخه گره خورده، نه به «یک‌بار برای همیشه» ──
+     نسخه‌ی اول یک پرچمِ ساده‌ی `'1'` می‌گذاشت و هرگز پاکش نمی‌کرد.
+     یعنی هر تب فقط **یک‌بار در تمامِ عمرش** بازیابی می‌شد. شبی که سه
+     دیپلوی پشتِ‌هم رفت، همان یک شانس در دیپلویِ اول سوخت و
+     دیپلوی‌های بعدی صفحه‌ی سفیدی دادند که دیگر خودش را درست
+     نمی‌کرد — کاربر روی هر لینکی می‌زد سفید می‌ماند.
+
+     حالا کلید شناسه‌ی همین build است: هر نسخه یک بازیابی می‌گیرد.
+     حلقه هم ممکن نیست، چون بعد از reload شناسه عوض می‌شود و اگر
+     بازهم بشکند دیگر برای آن نسخه تلاش نمی‌کند. */
   useEffect(() => {
     const STALE = /ChunkLoadError|Loading chunk|Failed to fetch dynamically imported|Importing a module script failed|error loading dynamically imported module/i
+    const KEY = 'bh-chunk-reload'
+    const mine = process.env.NEXT_PUBLIC_BUILD_SHA || 'dev'
     const recover = (msg: string) => {
       if (!STALE.test(msg)) return
-      if (sessionStorage.getItem('bh-chunk-reload') === '1') return
+      if (sessionStorage.getItem(KEY) === mine) return
       /* این یکی بازیابیِ خرابیِ واقعی است، ولی باز هم نباید فرمِ
          نیمه‌پرشده را ببلعد. */
       if (isMidTask()) return
-      sessionStorage.setItem('bh-chunk-reload', '1')
+      sessionStorage.setItem(KEY, mine)
       location.reload()
     }
     const onErr = (e: ErrorEvent) => recover(String(e?.message ?? ''))

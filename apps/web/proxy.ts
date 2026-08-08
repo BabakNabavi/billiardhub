@@ -44,6 +44,15 @@ const GATEWAY_CALLBACKS = [
   '/api/stories/plans/callback',
   '/api/tournaments/callback',
   '/api/clubs/sms/callback',
+  /* ارتقای آگهی (مهاجرت ۰۷۹). این‌جا نبود و دقیقاً همان اتفاقی افتاد
+     که این فهرست برای جلوگیری از آن ساخته شده بود: فروشنده پول
+     ارتقا را داد، درگاه با POST برگشت، و به‌جای آگهیِ ارتقایافته یک
+     صفحه‌ی خالی با «درخواست از دامنه‌ی نامعتبر رد شد» دید.
+
+     هر کالبکِ تازه‌ای باید این‌جا ثبت شود؛ آزمونِ
+     `test-tournaments.mjs` حالا خودش پوشه‌ی مسیرها را می‌گردد تا
+     نفرِ بعدی این را از قلم نیندازد. */
+  '/api/market/boost/callback',
 ]
 
 const CSRF_EXEMPT = [
@@ -65,6 +74,7 @@ const CSRF_EXEMPT = [
      ما را ندارد. امنیت از راه verify سرورساید و تطبیق authority
      می‌آید، نه از توکن. */
   '/api/tournaments/callback',
+  '/api/market/boost/callback',
   /* بیکن شمارش تبلیغات: sendBeacon نمی‌تواند هدر x-csrf-token بگذارد و
      برای کاربر واردشده ۴۰۳ می‌شد؛ فقط شمارنده را زیاد می‌کند و بررسی
      Origin همچنان اعمال می‌شود. */
