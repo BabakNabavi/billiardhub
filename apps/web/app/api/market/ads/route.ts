@@ -39,16 +39,23 @@ const str = (v: unknown, max = 300) => String(v ?? '').trim().slice(0, max);
    آدرسِ *همه‌ی* فروشنده‌ها در یک درخواستِ بی‌نام برمی‌گشت — کافی بود
    کسی `/api/market/ads` را باز کند تا فهرستِ کاملِ شماره‌ها را داشته
    باشد. کارتِ بازار هیچ‌کدام از این‌ها را نشان نمی‌دهد؛ صفحه‌ی
-   جزئیات آن‌ها را جدا می‌گیرد. */
+   جزئیات آن‌ها را جدا می‌گیرد.
+
+   `model` این‌جا اضافه شد چون کارت عنوان را دو تکه نشان می‌دهد —
+   «چوب اسنوکر» درشت و «O'min classic» ریزتر. بدونِ این ستون، تکه‌ی
+   دومِ عنوان روی کارت‌های فهرست خالی می‌ماند و فقط در صفحه‌ی محصول
+   دیده می‌شود. مشخصه‌ی کالاست، نه داده‌ی شخصی. */
 const LIST_COLS = [
   'id', 'title', 'price', 'negotiable', '"discountPercent"', 'category', 'condition',
-  'city', 'province', 'brand', 'images', 'status', 'views',
+  'city', 'province', 'brand', 'model', 'images', 'status', 'views',
   '"createdAt"', '"expiresAt"', '"soldAt"', '"storeSlug"', '"isOfficialStore"',
+  /* ارتقا (مهاجرت ۰۷۹): اولی کلیدِ مرتب‌سازی است و دومی نشانِ فوری */
+  'bumped_at', 'urgent_until',
 ].join(',');
 
 /* فهرستِ کاملِ ستون‌ها فقط برای فهرستِ خودِ فروشنده — آگهیِ خودش را
    با همه‌ی جزئیات می‌بیند. */
-const MINE_COLS = `${LIST_COLS},description,model,type,specs,address,"sellerName","sellerPhone","sellerWhatsapp","sellerId"`;
+const MINE_COLS = `${LIST_COLS},description,type,specs,address,"sellerName","sellerPhone","sellerWhatsapp","sellerId"`;
 
 /* ── فهرست آگهی‌ها ─────────────────────────────────────────────── */
 export async function GET(req: NextRequest) {
@@ -56,9 +63,18 @@ export async function GET(req: NextRequest) {
   const mine = searchParams.get('mine') === '1';
   const limit = Math.min(200, Math.max(1, num(searchParams.get('limit'), 100)));
 
+  /* فقط آگهی‌های فوری — برای نوارِ بالای بازار */
+  const urgentOnly = searchParams.get('urgent') === '1';
+
+  /* ── چرا دو ستون و نه `createdAt` تنها ──
+     «تازه‌سازی» آگهی را مثلِ آگهیِ تازه بالا می‌برد؛ اگر مرتب‌سازی
+     فقط تاریخِ ثبت باشد، آن ارتقا هیچ اثری ندارد. `bumped_at` تهی
+     یعنی هرگز تازه‌سازی نشده، پس همان تاریخِ ثبت ملاک می‌ماند. */
   let q = sb().from('products')
     .select(mine ? MINE_COLS : LIST_COLS)
-    .order('createdAt', { ascending: false }).limit(limit);
+    .order('bumped_at', { ascending: false, nullsFirst: false })
+    .order('createdAt', { ascending: false })
+    .limit(limit);
 
   if (mine) {
     const actor = actorFromRequest(req);
@@ -71,6 +87,10 @@ export async function GET(req: NextRequest) {
        ۰۰۶ ستونش وجود داشت — هرگز خوانده نمی‌شد. یعنی آگهیِ دو سال
        پیش هنوز بالای فهرست بود. */
     q = q.eq('status', 'active').or(`expiresAt.is.null,expiresAt.gt.${new Date().toISOString()}`);
+    /* انقضای «فوری» در خواندن سنجیده می‌شود، نه با کرانی که بولینی
+       را خاموش کند. تابعی که کسی صدایش نزند، همان چیزی است که چند
+       بار در این پروژه بی‌صدا از کار افتاد. */
+    if (urgentOnly) q = q.gt('urgent_until', new Date().toISOString());
   }
 
   const { data, error } = await q;
@@ -123,6 +143,10 @@ export async function POST(req: NextRequest) {
 
   const approvalRequired = await getSetting<boolean>('market_approval_required', false);
 
+  const { data: meRow } = await sb().from('users')
+    .select('"primaryRole"').eq('id', actor.id).maybeSingle();
+  const sellerRole = (meRow as { primaryRole?: string } | null)?.primaryRole ?? 'user';
+
   const { data, error } = await sb().from('products').insert({
     title,
     description: str(b?.description, 3000),
@@ -165,6 +189,11 @@ export async function POST(req: NextRequest) {
     requestedVerification: false,
     isOfficialStore: !!b?.storeSlug,
     sellerId: actor.id,
+    /* ── نشانِ نقش، Snapshot در لحظه‌ی انتشار ──
+       کسی که هم فروشنده است هم مربی، آگهی را با نقشِ اصلیِ همان
+       لحظه منتشر می‌کند. اگر بعداً از نقشِ فعلیِ کاربر خوانده شود،
+       تغییرِ نقش بی‌صدا نشانِ همه‌ی آگهی‌های قدیمی را عوض می‌کند. */
+    seller_role: sellerRole,
     views: 0,
   }).select().single();
 

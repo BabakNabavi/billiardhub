@@ -20,7 +20,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
 import {
   Search, MapPin, X, Check, ChevronDown,
-  Sparkles, Store, Bookmark, Home, Plus, LayoutGrid,
+  Sparkles, Store, Bookmark, Home, Plus, LayoutGrid, Zap,
   ScrollText, ArrowLeft,
 } from 'lucide-react'
 import ReportButton from '../../components/ReportButton'
@@ -30,6 +30,7 @@ import {
   MARKET_CATEGORIES, normalizeCategory, categoryLabel,
   CONDITIONS, conditionLabel,
 } from '../../lib/market/categories'
+import { productTitleParts } from '../../lib/market/title'
 
 const GOLD   = '#C7A66A'
 const GOLD_D = '#9A6E38'
@@ -62,9 +63,15 @@ const COND_LABEL = Object.fromEntries(CONDITIONS.map(c => [c.id, c.label])) as R
 interface Listing {
   key: string
   id: string | number
+  /** تکه‌ی درشتِ عنوان — دسته‌بندی و نوع */
   name: string
   img: string
   brand: string
+  /* برند و مدل تکه‌ی ریزِ عنوان را می‌سازند: «چوب اسنوکر O'min classic».
+     پیش‌تر کارت فقط تکه‌ی اول را داشت و خریدار نمی‌دانست کدام چوب. */
+  model: string
+  /** «برند مدل» آماده‌ی نمایش — تکراری‌ها حذف شده */
+  sub: string
   price: number
   old: number
   disc: number
@@ -76,6 +83,9 @@ interface Listing {
      نه «۰ تومان» */
   negotiable: boolean
   sold: boolean
+  /* آگهیِ فوری (مهاجرت ۰۷۹) — تا این لحظه در نوارِ بالای بازار
+     می‌نشیند و نشانِ قرمز می‌گیرد. */
+  urgentUntil: number | null
   source: 'shop' | 'user'
 }
 
@@ -88,11 +98,14 @@ function serverAdToListing(a: Record<string, any>): Listing {
   const imgs = Array.isArray(a.images) ? a.images : []
   const price = Number(a.price) || 0
   const disc = Number(a.discountPercent) || 0
+  const { head, tail } = productTitleParts(a)
   return {
     key: `db-${a.id}`, id: a.id,
-    name: a.title || 'محصول',
+    name: head,
     img: imgs[0] || '/images/shop/cue_billiard_2.webp',
     brand: a.brand || '',
+    model: a.model || '',
+    sub: tail,
     price, old: disc > 0 ? Math.round(price / (1 - disc / 100)) : price, disc,
     cat: normCat(a.category),
     city: a.city || '',
@@ -100,6 +113,7 @@ function serverAdToListing(a: Record<string, any>): Listing {
     createdAt: a.createdAt ? new Date(a.createdAt).getTime() : null,
     negotiable: a.negotiable === true,
     sold: a.status === 'sold',
+    urgentUntil: a.urgent_until ? new Date(a.urgent_until).getTime() : null,
     source: 'user',
   }
 }
@@ -156,24 +170,36 @@ async function migrateLocalAds(): Promise<void> {
 }
 
 
+/* عنوانِ یک‌خطی از دو تکه‌ی کارت — همان چیزی که در جستجو و alt لازم است */
+const fullTitle = (l: Listing) => [l.name, l.sub].filter(Boolean).join(' ')
+
 /* ── کارت محصول — همان فرمت عمودی کارت‌های فعلی بازار (ایزوله) ── */
 function MarketCard({ l, i, saved, onSave }: { l: Listing; i: number; saved: boolean; onSave: () => void }) {
+  /* گزارشِ تخلف و alt تصویر عنوانِ کامل را می‌خواهند، نه فقط تکه‌ی اول */
+  const full = fullTitle(l)
   return (
     <Link href={`/shop/${l.id}`} className="mk-card" style={{ animationDelay: `${Math.min(i, 12) * 40}ms`, position: 'relative' }}>
       <button type="button" className={`mk-bk${saved ? ' on' : ''}`} aria-label="نشان کردن"
         onClick={e => { e.preventDefault(); e.stopPropagation(); onSave() }}>
         <Bookmark size={16} />
       </button>
-      <ReportButton targetId={l.id} targetTitle={l.name} className="mk-rp" />
+      <ReportButton targetId={l.id} targetTitle={full} className="mk-rp" />
       <div className="mk-img">
-        <img src={l.img} alt={l.name} loading="lazy"
+        <img src={l.img} alt={full} loading="lazy"
           onError={e => { (e.target as HTMLImageElement).style.display = 'none' }} />
-        {l.source === 'user' && l.createdAt && Date.now() - l.createdAt < 86400000 * 2 && (
+        {/* نشانِ فوری بر «جدید» مقدم است: آگهیِ فوری ممکن است تازه
+            هم باشد و دو نشانِ روی هم کارت را شلوغ می‌کند. */}
+        {l.urgentUntil && l.urgentUntil > Date.now() ? (
+          <span className="mk-urg"><Zap size={9} /> فوری</span>
+        ) : l.source === 'user' && l.createdAt && Date.now() - l.createdAt < 86400000 * 2 ? (
           <span className="mk-new"><Sparkles size={9} /> جدید</span>
-        )}
+        ) : null}
       </div>
       <div className="mk-body">
-        <span className="mk-name">{l.brand ? `${l.name}` : l.name}</span>
+        <span className="mk-name">
+          <span className="mk-h">{l.name}</span>
+          {l.sub && <span className="mk-t"> {l.sub}</span>}
+        </span>
         <div className="mk-meta">
           <MapPin size={10} style={{ color: GOLD, flexShrink: 0 }} />
           <span>{l.city || 'ایران'}</span>
@@ -201,10 +227,14 @@ function MarketCard({ l, i, saved, onSave }: { l: Listing; i: number; saved: boo
 
 /* ── ردیف افقی موبایل — به سبک دیوار با هویت بازار ── */
 function MarketRow({ l, i, saved, onSave }: { l: Listing; i: number; saved: boolean; onSave: () => void }) {
+  const full = fullTitle(l)
   return (
     <Link href={`/shop/${l.id}`} className="mk-row" style={{ animationDelay: `${Math.min(i, 10) * 35}ms` }}>
       <div className="info">
-        <span className="ttl">{l.name}</span>
+        <span className="ttl">
+          <span className="mk-h">{l.name}</span>
+          {l.sub && <span className="mk-t"> {l.sub}</span>}
+        </span>
         <span className="cnd">{COND_LABEL[l.condition]}</span>
         {/* «تومان» روی خط خط‌خورده تا خط قیمت جا برای مبلغ + پیل ٪ داشته باشد */}
         <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
@@ -218,9 +248,9 @@ function MarketRow({ l, i, saved, onSave }: { l: Listing; i: number; saved: bool
         onClick={e => { e.preventDefault(); e.stopPropagation(); onSave() }}>
         <Bookmark size={16} />
       </button>
-      <ReportButton targetId={l.id} targetTitle={l.name} className="mk-rp" />
+      <ReportButton targetId={l.id} targetTitle={full} className="mk-rp" />
       <span className="pic">
-        <img src={l.img} alt={l.name} loading="lazy"
+        <img src={l.img} alt={full} loading="lazy"
           onError={e => { (e.target as HTMLImageElement).style.display = 'none' }} />
       </span>
     </Link>
@@ -385,6 +415,29 @@ export default function MarketNewPage() {
     return m
   }, [listings])
 
+  /* ── نوارِ فوری ──
+     نشانِ قرمز روی آگهی‌ای که در جایگاهِ چهارصدم است هیچ ارزشی
+     ندارد؛ کسی که تا آن‌جا اسکرول نکرده رنگش را هم نمی‌بیند. پس
+     «فوری» یک جایگاهِ رزروشده‌ی بالای بازار می‌خرد، نه فقط برچسب.
+
+     ── چرا ترتیب چرخشی است ──
+     اگر بر اساسِ زمانِ خرید مرتب شود، همان مشکل برمی‌گردد: کسی که
+     دیروز خریده ته نوار می‌رود. کلیدِ مرتب‌سازی هر ساعت عوض می‌شود،
+     پس هر آگهیِ فوری در طولِ روز چند ساعت جلوی نوار است. */
+  const urgent = useMemo(() => {
+    const now = Date.now()
+    const hour = Math.floor(now / 3600000)
+    const seed = (s: string) => {
+      let h = hour
+      for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0
+      return h
+    }
+    return listings
+      .filter(l => !l.sold && l.urgentUntil !== null && l.urgentUntil > now)
+      .sort((a, b) => seed(String(a.id)) - seed(String(b.id)))
+      .slice(0, 24)
+  }, [listings])
+
   const filtered = useMemo(() => {
     const lo = parsePrice(minP), hi = parsePrice(maxP)
     const term = q.trim()
@@ -401,7 +454,9 @@ export default function MarketNewPage() {
         if (time === 'day' && age > 86400000) return false
         if (time === 'week' && age > 86400000 * 7) return false
       }
-      if (term && !(`${l.name} ${l.brand}`.includes(term))) return false
+      /* مدل هم جستجو می‌شود: کسی که «classic» را می‌نویسد دنبالِ مدل
+         است، و پیش‌تر همان جستجو هیچ نتیجه‌ای نمی‌داد. */
+      if (term && !(`${l.name} ${l.brand} ${l.model}`.includes(term))) return false
       if (showSaved && !savedKeys.has(l.key)) return false
       return true
     })
@@ -523,9 +578,22 @@ export default function MarketNewPage() {
         .mk-card:hover .mk-img img { transform: scale(1.045); }
         .mk-new { position: absolute; top: 8px; right: 8px; display: inline-flex; align-items: center; gap: 3px;
           font-size: 9px; font-weight: 800; color: #fff; background: rgba(27,122,75,0.92); border-radius: 999px; padding: '3px 8px'; padding: 3px 8px; }
+        /* نوارِ فوری: افقی و کشیدنی، تا تعدادِ زیاد آن را نشکند */
+        .mk-urgrow { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 6px;
+          scroll-snap-type: x proximity; scrollbar-width: thin; }
+        .mk-urgrow::-webkit-scrollbar { height: 6px; }
+        .mk-urgcell { flex: 0 0 auto; width: 168px; scroll-snap-align: start; }
+        @media (max-width: 560px) { .mk-urgcell { width: 144px; } }
+        .mk-urg { position: absolute; top: 8px; right: 8px; display: inline-flex; align-items: center; gap: 3px;
+          font-size: 9px; font-weight: 800; color: #fff; background: rgba(178,59,46,0.94); border-radius: 999px; padding: 3px 8px; }
         .mk-body { display: flex; flex-direction: column; gap: 6px; padding: 9px 9px 10px; flex: 1; }
         .mk-name { font-size: 12.5px; color: ${TEXT}; line-height: 1.55; display: -webkit-box;
           -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-height: 39px; }
+        /* ── دو تکه‌ی عنوان ──
+           دسته‌بندی و نوع درشت‌تر و پررنگ‌تر چون همان چیزی است که چشم
+           اول دنبالش می‌گردد؛ برند و مدل ریزتر، ولی دیده می‌شوند. */
+        .mk-h { font-size: 13.5px; font-weight: 800; }
+        .mk-t { font-size: 11.5px; font-weight: 600; color: ${MUT}; }
         .mk-meta { display: flex; align-items: center; gap: 4px; font-size: 10px; color: ${MUT}; }
         .mk-cond { margin-inline-start: auto; background: #F4F3F1; border-radius: 999px; padding: 1.5px 7px; font-weight: 700; }
         .mk-priceline { margin-top: auto; display: flex; align-items: center; gap: 5px; }
@@ -613,6 +681,9 @@ export default function MarketNewPage() {
         .mk-row .info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 5px; padding-top: 2px; }
         .mk-row .ttl { font-size: 13px; font-weight: 700; color: ${TEXT}; line-height: 1.6; display: -webkit-box;
           -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        /* ردیفِ موبایل کمی درشت‌تر از کارت است، پس تکه‌ها هم یک پله بالاتر */
+        .mk-row .ttl .mk-h { font-size: 14px; font-weight: 800; }
+        .mk-row .ttl .mk-t { font-size: 12px; font-weight: 600; color: ${MUT}; }
         .mk-row .cnd { font-size: 10.5px; color: ${MUT}; }
         .mk-row .prc { font-size: 13.5px; font-weight: 900; color: ${TEXT}; font-variant-numeric: tabular-nums; }
         .mk-row .prc i { font-style: normal; font-size: 10px; font-weight: 600; color: ${MUT}; }
@@ -864,6 +935,29 @@ export default function MarketNewPage() {
               </div>
             ) : (
               <>
+                {/* ── نوارِ فوری ──
+                    بالای فهرستِ عادی و آشکارا جدا از آن. همین
+                    آشکاربودن است که یک جایگاهِ خریدنی را قابلِ قبول
+                    می‌کند؛ اگر آگهیِ فوری در خودِ فهرستِ عادی هم بالا
+                    می‌رفت، کاربر حس می‌کرد هیچ‌جای بازار دستِ آگهیِ
+                    بی‌پول نیست. */}
+                {urgent.length > 0 && (
+                  <section style={{ marginBottom: 22 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 10 }}>
+                      <Zap size={15} style={{ color: '#B23B2E' }} />
+                      <h2 style={{ fontSize: 14.5, fontWeight: 900, color: TEXT, margin: 0 }}>فوری</h2>
+                      <span style={{ fontSize: 11.5, color: MUT }}>فروشنده عجله دارد</span>
+                    </div>
+                    <div className="mk-urgrow">
+                      {urgent.map((l, i) => (
+                        <div key={l.key} className="mk-urgcell">
+                          <MarketCard l={l} i={i} saved={savedKeys.has(l.key)} onSave={() => toggleSave(l.key)} />
+                        </div>
+                      ))}
+                    </div>
+                  </section>
+                )}
+
                 {/* دسکتاپ: گرید کارت‌های عمودی */}
                 <div className="mk-grid">
                   {filtered.map((l, i) => (

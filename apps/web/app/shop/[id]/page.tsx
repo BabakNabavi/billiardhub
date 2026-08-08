@@ -3,9 +3,10 @@
 import { useState, useMemo, useEffect } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
-import { ChevronLeft, Store, Phone, Heart, ShieldCheck, Truck, ArrowLeftRight } from 'lucide-react'
+import { ChevronLeft, Store, Phone, Heart, ShieldCheck } from 'lucide-react'
 import { CAT_LABELS, type ShopProduct } from '../products'
 import ReportButton from '../../../components/ReportButton'
+import { productTitleParts, productTitle } from '../../../lib/market/title'
 
 /* ─── tokens (تم بازار: طلایی/برنزی روی کاغذ روشن) ─── */
 const BG    = '#F7F6F4'
@@ -43,21 +44,12 @@ const lqWhite: React.CSSProperties = {
   color: TEXT, fontWeight: 700,
 }
 
-function Stars({ r, size = 15 }: { r: number; size?: number }) {
-  return (
-    <span style={{ display: 'inline-flex', gap: 1 }} aria-hidden="true">
-      {[1, 2, 3, 4, 5].map(i => (
-        <svg key={i} width={size} height={size} viewBox="0 0 24 24"
-          fill={i <= Math.round(r) ? '#D9A441' : 'none'} stroke={i <= Math.round(r) ? 'none' : 'rgba(217,164,65,0.35)'} strokeWidth="1.5">
-          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
-        </svg>
-      ))}
-    </span>
-  )
-}
 
-/* آگهی کاربر روی سرور uuid دارد، محصولات کاتالوگ عدد؛ این صفحه هر دو را نشان می‌دهد */
-type Detail = Omit<ShopProduct, 'id'> & { id: number | string }
+/* آگهی کاربر روی سرور uuid دارد، محصولات کاتالوگ عدد؛ این صفحه هر دو را نشان می‌دهد.
+
+   `model` این‌جا اضافه شده چون تیترِ صفحه دو تکه است — «چوب اسنوکر»
+   درشت و «O'min classic» ریزتر — و مدل در `ShopProduct` نبود. */
+type Detail = Omit<ShopProduct, 'id'> & { id: number | string; model?: string }
 
 /* شکلِ سبکی که مسیرِ «مشابه» برمی‌گرداند — نه کلِ محصول */
 interface RelatedItem {
@@ -89,6 +81,7 @@ function normalizeUserProduct(up: Record<string, unknown>): Detail {
     name:           str(up.name) || str(up.title, 'محصول'),
     desc:           str(up.description),
     brand:          str(up.brand),
+    model:          str(up.model),
     price,
     old:            num(up.old, disc > 0 ? Math.round(price / (1 - disc / 100)) : price),
     disc,
@@ -189,7 +182,17 @@ export default function ProductDetailPage() {
     )
   }
 
-  const waLink = `https://wa.me/${product.sellerWhatsapp}?text=${encodeURIComponent(`سلام، درباره «${product.name}» در بیلیارد بازار سوال داشتم`)}`
+  /* ── تیتر در دو تکه ──
+     «چوب اسنوکر» درشت، «O'min classic» ریزتر کنارش. پیش‌تر فقط تکه‌ی
+     اول بود و برند و مدل — که فروشنده نوشته بود — تا پایینِ صفحه در
+     جدولِ مشخصات دیده نمی‌شدند. */
+  const { head: titleHead, tail: titleTail } = productTitleParts(product)
+  /* هرجا یک رشته لازم است (واتساپ، گزارشِ تخلف) عنوانِ کامل می‌رود؛
+     «سلام، درباره چوب اسنوکر سوال داشتم» به فروشنده‌ای که پنج چوب
+     گذاشته هیچ‌چیز نمی‌گوید. */
+  const fullName = productTitle(product)
+
+  const waLink = `https://wa.me/${product.sellerWhatsapp}?text=${encodeURIComponent(`سلام، درباره «${fullName}» در بیلیارد بازار سوال داشتم`)}`
 
   return (
     <div style={{ minHeight: '100vh', background: BG, direction: 'rtl', fontFamily: 'Vazirmatn,Tahoma,sans-serif', color: TEXT }}>
@@ -231,7 +234,7 @@ export default function ProductDetailPage() {
         <span style={{ margin: '0 6px' }}>/</span>
         <Link href="/shop" style={{ color: TMUT, textDecoration: 'none' }}>{CAT_LABELS[product.cat] ?? 'محصولات'}</Link>
         <span style={{ margin: '0 6px' }}>/</span>
-        <span style={{ color: TSEC }}>{product.name}</span>
+        <span style={{ color: TSEC }}>{fullName}</span>
       </div>
 
       {/* ── جزئیات محصول ── */}
@@ -241,7 +244,7 @@ export default function ProductDetailPage() {
           {/* تصویر */}
           <div className="lq-sheen pd-media" style={{ ...glassPanel, borderRadius: 26, padding: 14, position: 'sticky', top: 74 }}>
             <div style={{ position: 'relative', width: '100%', paddingTop: '92%', borderRadius: 16, overflow: 'hidden', background: '#EFEDE9' }}>
-              <img loading="lazy" decoding="async" src={product.img} alt={product.name} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
+              <img loading="lazy" decoding="async" src={product.img} alt={fullName} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
               {product.disc > 0 && (
                 <div style={{ position: 'absolute', top: 12, insetInlineEnd: 12, background: '#E53935', color: '#fff', fontSize: 12, fontWeight: 800, borderRadius: 8, padding: '3px 10px' }}>
                   {toFa(product.disc)}٪ تخفیف
@@ -262,13 +265,19 @@ export default function ProductDetailPage() {
               {CAT_LABELS[product.cat] ?? product.cat}
             </span>
             <h1 style={{ fontSize: 'clamp(20px,2.6vw,27px)', fontWeight: 800, lineHeight: 1.45, margin: '0 0 12px', letterSpacing: '-0.01em' }}>
-              {product.name}
+              {titleHead}
+              {titleTail && (
+                <span style={{ fontSize: 'clamp(14px,1.7vw,18px)', fontWeight: 600, color: TSEC, marginInlineStart: 8 }}>
+                  {titleTail}
+                </span>
+              )}
             </h1>
 
+            {/* ── امتیاز برداشته شد ──
+                عددش ثابت و ساختگی بود (۵٫۰ با ۰ نظر) — هیچ نظری در
+                کار نیست و ستاره‌ی پنج روی هر آگهی یعنی دروغِ کوچکی که
+                به همه‌ی صفحه بی‌اعتمادی می‌دهد. */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 18 }}>
-              <Stars r={product.rating} />
-              <span style={{ fontSize: 12.5, color: TSEC, fontVariantNumeric: 'tabular-nums' }}>{toFa(product.rating.toFixed(1))} ({toFa(product.reviews)} نظر)</span>
-              <span style={{ width: 4, height: 4, borderRadius: '50%', background: TMUT }} />
               <span style={{ fontSize: 12.5, color: '#16803C', fontWeight: 700 }}>موجود در انبار</span>
             </div>
 
@@ -336,8 +345,8 @@ export default function ProductDetailPage() {
                   نشان «فروشگاه» هم نباید روی آگهی شخصی دیده شود. */}
               {!hasStore && (
                 <p style={{ fontSize: 11.5, color: TMUT, lineHeight: 1.95, margin: '0 0 12px' }}>
-                  این یک آگهی شخصی در بیلیارد بازار است. بیلیارد هاب طرف معامله نیست؛
-                  پیش از پرداخت، کالا را از نزدیک بررسی کنید.
+                  بیلیارد هاب طرف معامله نیست؛ پیش از پرداخت، کالا را کامل بررسی و
+                  از صحت اطلاعات مطمئن شوید.
                 </p>
               )}
 
@@ -354,23 +363,17 @@ export default function ProductDetailPage() {
                 <a href={`tel:${product.sellerPhone}`} className="lq-lift" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6, padding: '11px', borderRadius: 10, ...lqGold, fontSize: 12.5, textDecoration: 'none' }}>
                   <Phone size={15} strokeWidth={2.2} /> تماس
                 </a>
-                <ReportButton variant="button" targetId={product.id} targetTitle={product.name}
+                <ReportButton variant="button" targetId={product.id} targetTitle={fullName}
                   stopPropagation={false} style={{ gridColumn: '1 / -1' }} />
               </div>
             </div>
 
-            {/* تضمین‌ها */}
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, marginTop: 18, padding: '2px 4px' }}>
-              {[
-                { icon: <ShieldCheck size={17} strokeWidth={2} />, t: 'گارانتی اصالت کالا' },
-                { icon: <Truck size={17} strokeWidth={2} />,        t: 'ارسال به سراسر کشور' },
-                { icon: <ArrowLeftRight size={17} strokeWidth={2} />, t: '۷ روز ضمانت بازگشت' },
-              ].map((f, i) => (
-                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 7, fontSize: 12, color: TSEC }}>
-                  <span style={{ color: GOLDD }}>{f.icon}</span>{f.t}
-                </div>
-              ))}
-            </div>
+            {/* ── سه «تضمین» برداشته شدند ──
+                «گارانتی اصالت کالا»، «ارسال به سراسر کشور» و «۷ روز
+                ضمانت بازگشت» هیچ‌کدام پشتوانه‌ای نداشتند: بیلیارد هاب
+                طرفِ معامله نیست و کالا را نه می‌فرستد نه پس می‌گیرد.
+                نوشتنشان درست کنارِ متنی که می‌گوید «طرف معامله نیستیم»
+                هم متناقض بود و هم می‌توانست تعهدِ حقوقی بسازد. */}
           </div>
         </div>
 

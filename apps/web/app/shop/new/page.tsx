@@ -10,6 +10,7 @@ import { findSellerByOwner } from '../../../lib/seller-store'
 import ProvinceCitySelect from '../../../components/ProvinceCitySelect'
 import { apiFetch } from '../../../lib/http'
 import { CATEGORY_OPTIONS } from '../../../lib/market/categories'
+import { productTitleParts } from '../../../lib/market/title'
 
 const GOLD     = '#C7A66A'
 const GOLD_D   = '#9A6E38'
@@ -115,7 +116,9 @@ const CATEGORY_SPECS: Record<string, SpecFieldDef[]> = {
 const TYPE_OPTIONS: Record<string, string[]> = {
   cue:        ['پاکت بیلیارد', 'اسنوکر', 'هی‌بال', 'کارامبول'],
   table:      ['پاکت بیلیارد', 'اسنوکر', 'هی‌بال', 'کارامبول', 'خانگی'],
-  ball:       ['۱۵ تایی پاکت بیلیارد', '۲۲ تایی اسنوکر', '۳ تایی کارامبول'],
+  /* «کیوبال» توپِ ضربه است و جدا فروخته می‌شود؛ «سایر» برای هر
+     چیزی که در این سه نمی‌گنجد، با فیلدِ توضیح. */
+  ball:       ['۱۵ تایی پاکت بیلیارد', '۲۲ تایی اسنوکر', '۳ تایی کارامبول', 'کیوبال', 'سایر'],
   tip:        ['اسنوکر', 'پاکت بیلیارد', 'هی‌بال'],
   'case-bag': ['کیس سخت', 'کیس نرم', 'کیف', 'کوله‌پشتی'],
   /* گچ: نوع فقط برای دسته‌بندی؛ لیست برند مستقل از نوع است (هرکدام که انتخاب شود همان برندهای گچ می‌آید) */
@@ -621,13 +624,12 @@ export default function NewProductPage() {
   const fileRef = useRef<HTMLInputElement>(null)
 
   const [form, setForm] = useState({
-    category: '', type: '', model: '', modelOther: '', price: '', oldPrice: '', negotiable: false,
+    category: '', type: '', typeOther: '', model: '', modelOther: '', price: '', oldPrice: '', negotiable: false,
     description: '', brand: '', brandOther: '', condition: 'new',
     shopName: '', ownerName: '', sellerPhone: '', sellerWhatsapp: '',
     province: '', city: '', address: '',
   })
   const [storeSlug, setStoreSlug] = useState('')
-  const [showSection, setShowSection] = useState(false)   // مودال انتخاب سکشن قبل از ثبت
   const [geoLocked, setGeoLocked] = useState(false)       // استان/شهر/آدرس از فروشگاه ⇒ قفل
   const [images,   setImages]   = useState<ImgSlot[]>([])
   const [dragging, setDragging] = useState(false)
@@ -694,6 +696,8 @@ export default function NewProductPage() {
   /* مقدار مؤثر: اگر «سایر» انتخاب شده، متن دستی جای آن می‌نشیند */
   const effBrand = form.brand === 'سایر' ? form.brandOther.trim() : form.brand.trim()
   const effModel = form.model === 'سایر' ? form.modelOther.trim() : form.model.trim()
+  /* «سایر» یعنی متنی که خودِ فروشنده نوشته، نه واژه‌ی «سایر» */
+  const effType = form.type === 'سایر' ? form.typeOther.trim() : form.type.trim()
 
   const handleCategoryChange = (cat: string) => {
     setForm(f => ({ ...f, category: cat, type: '', brand: '', brandOther: '', model: '', modelOther: '' }))
@@ -704,7 +708,9 @@ export default function NewProductPage() {
   /* تغییر نوع ⇒ در دسته‌های نوع‌محور (چوب/میز/تیپ/گچ) برند/مدل ریست می‌شوند */
   const typeDrivenCat = (c: string) => !!TYPE_BRANDS[c]
   const setType = (v: string) => {
-    setForm(f => ({ ...f, type: v, ...(typeDrivenCat(f.category) ? { brand: '', brandOther: '', model: '', modelOther: '' } : {}) }))
+    /* عوض‌شدنِ نوع ⇒ توضیحِ «سایر» هم پاک می‌شود، وگرنه متنِ
+       نوعِ قبلی روی نوعِ تازه می‌ماند */
+    setForm(f => ({ ...f, type: v, typeOther: '', ...(typeDrivenCat(f.category) ? { brand: '', brandOther: '', model: '', modelOther: '' } : {}) }))
     setErrors(e => { const n = { ...e }; delete n.type; if (typeDrivenCat(form.category)) { delete n.brand; delete n.model } return n })
   }
   /* تغییر برند ⇒ ریست مدل */
@@ -743,11 +749,24 @@ export default function NewProductPage() {
   const validate = () => {
     const e: Record<string, string> = {}
     if (!form.category)           e.category    = 'دسته‌بندی را انتخاب کنید'
-    if (!form.type.trim())        e.type        = 'نوع را مشخص کنید'
+    if (!effType)                 e.type        = form.type === 'سایر'
+      ? 'برای «سایر» توضیح بنویسید' : 'نوع را مشخص کنید'
     if (!effBrand)                e.brand       = 'برند الزامی است'
-    if (!effModel)                e.model       = 'مدل الزامی است'
+    /* مدل اختیاری است: خیلی از فروشنده‌ها مدلِ دقیقِ جنسِ دستِ دوم
+       را نمی‌دانند و اجبارِ آن یعنی یا آگهی ثبت نمی‌شود یا چیزی
+       الکی نوشته می‌شود — که بدتر است. */
     /* آگهیِ توافقی قیمت نمی‌خواهد — همان قاعده‌ای که سرور هم دارد */
     if (!form.negotiable && !form.price) e.price = 'قیمت را وارد کنید یا «توافقی» را بزنید'
+
+    /* ── قیمتِ قبل از تخفیف ──
+       اگر کمتر از قیمتِ اصلی باشد یعنی «تخفیفِ منفی»، و کد پایین‌تر
+       بی‌صدا درصد را صفر می‌کرد. فروشنده فکر می‌کرد تخفیف گذاشته و
+       آگهی هیچ تخفیفی نشان نمی‌داد. */
+    if (!form.negotiable && form.price && form.oldPrice) {
+      const p = Number(toAsciiDigits(form.price).replace(/D/g, ''))
+      const o = Number(toAsciiDigits(form.oldPrice).replace(/D/g, ''))
+      if (o > 0 && o <= p) e.oldPrice = 'قیمت قبل از تخفیف باید بیشتر از قیمت فعلی باشد'
+    }
     if (!form.shopName.trim())    e.shopName    = 'نام فروشگاه | فروشنده الزامی است'
     if (!form.sellerPhone.trim()) e.sellerPhone = 'شماره تماس الزامی است'
     else if (!/^(\+98|0)9\d{9}$/.test(form.sellerPhone.trim()))
@@ -763,11 +782,16 @@ export default function NewProductPage() {
     e.preventDefault()
     const errs = validate()
     if (Object.keys(errs).length > 0) { setErrors(errs); return }
-    setShowSection(true)
+    /* ── چرا پنجره‌ی «محصول کجا نمایش داده شود» برداشته شد ──
+       آن پنجره جایگاهِ نمایش را از فروشنده می‌پرسید، در حالی که
+       ثبتِ آگهی رایگان است و هیچ جایگاهی فروخته نمی‌شود. یعنی یک
+       تصمیمِ بی‌اثر که فقط یک قدم به مسیرِ ثبت اضافه می‌کرد.
+
+       جایگاه حالا از راهِ درستش خریده می‌شود: «فوری» (مهاجرت ۰۷۹). */
+    finalize('newest')
   }
 
   const finalize = (section: 'weekly' | 'party' | 'newest') => {
-    setShowSection(false)
     setSubmitting(true)
 
     const rawPrice = Number(toAsciiDigits(form.price).replace(/\D/g, ''))
@@ -775,15 +799,19 @@ export default function NewProductPage() {
     const disc     = rawOld > rawPrice ? Math.round((1 - rawPrice / rawOld) * 100) : 0
     const imgList  = images.map(i => i.data)
 
-    const finalSpecs: Record<string, string> = { نوع: form.type.trim(), مدل: effModel }
+    const finalSpecs: Record<string, string> = { نوع: effType, مدل: effModel }
     Object.entries(specs).forEach(([k, v]) => {
       if (v === 'سایر' && specOthers[k]) finalSpecs[k] = `سایر: ${specOthers[k]}`
       else if (v) finalSpecs[k] = v
     })
 
-    /* نام محصول از دسته/نوع/برند/مدل ساخته می‌شود (فیلد «نام محصول» حذف شده) */
-    const composedName = [effBrand, effModel].filter(Boolean).join(' ')
-      || [catLabel, form.type.trim()].filter(Boolean).join(' ') || 'محصول'
+    /* ── نامِ آگهی: دسته‌بندی و بعد نوع ──
+       پیش‌تر برند و مدل بود، یعنی کارتِ آگهی «Aramith Tournament
+       Champion» نشان می‌داد و خریدار نمی‌فهمید اصلاً توپ است یا
+       چوب. دسته و نوع همان چیزی است که چشم دنبالش می‌گردد؛ برند و
+       مدل داخلِ مشخصات هستند. */
+    const composedName = [catLabel, effType].filter(Boolean).join(' ')
+      || [effBrand, effModel].filter(Boolean).join(' ') || 'محصول'
 
     /* آگهی روی سرور ثبت می‌شود تا بقیه هم ببینندش. پیش‌تر فقط در
        localStorage می‌ماند و عملاً هیچ‌کس جز خود آگهی‌دهنده نمی‌دیدش. */
@@ -793,7 +821,7 @@ export default function NewProductPage() {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            name: composedName, category: form.category, type: form.type.trim(),
+            name: composedName, category: form.category, type: effType,
             brand: effBrand, model: effModel,
             price: form.negotiable ? 0 : rawPrice, old: form.negotiable ? 0 : rawOld,
             negotiable: form.negotiable,
@@ -849,8 +877,15 @@ export default function NewProductPage() {
   )
 
   const catLabel = CATEGORIES.find(c => c.id === form.category)?.label ?? ''
-  const previewName = [effBrand, effModel].filter(Boolean).join(' ')
-    || [catLabel, form.type.trim()].filter(Boolean).join(' ')
+  /* پیش‌نمایش دقیقاً همان دو تکه‌ای را نشان می‌دهد که کارتِ بازار
+     نشان خواهد داد: «چوب اسنوکر» درشت و «O'min classic» ریزتر.
+     اگر دسته و نوع هنوز انتخاب نشده‌اند، برند و مدل خودشان تکه‌ی
+     درشت می‌شوند تا پیش‌نمایش خالی نماند. */
+  const previewName = [catLabel, effType].filter(Boolean).join(' ')
+    || [effBrand, effModel].filter(Boolean).join(' ')
+  const previewParts = productTitleParts({
+    name: previewName || 'محصول', brand: effBrand, model: effModel,
+  })
 
   return (
     <>
@@ -952,6 +987,17 @@ export default function NewProductPage() {
                       ) : (
                         <input className="nf" type="text" placeholder="مثال: اسنوکر" value={form.type} onChange={e => set('type', e.target.value)} style={inp(errors.type)} />
                       )}
+                      {/* ── «سایر» ──
+                          فهرستِ بسته هرچقدر هم کامل باشد، همیشه چیزی
+                          بیرونش می‌ماند. بدونِ این فیلد، فروشنده یا
+                          نزدیک‌ترین گزینه‌ی غلط را می‌زند یا آگهی را
+                          رها می‌کند. */}
+                      {form.type === 'سایر' && (
+                        <input className="nf" type="text" value={form.typeOther}
+                          onChange={e => set('typeOther', e.target.value)}
+                          placeholder="توضیح دهید — مثال: توپِ تمرینیِ نشانه‌دار"
+                          style={{ ...inp(errors.type), marginTop: 8, background: 'rgba(199,166,106,0.05)', borderColor: 'rgba(199,166,106,0.30)' }} />
+                      )}
                       <ErrMsg msg={errors.type} />
                     </div>
 
@@ -982,7 +1028,7 @@ export default function NewProductPage() {
                         <>
                           <FancySelect value={form.model} onChange={v => set('model', v)}
                             options={withOther(modelOptions).map(o => ({ value: o, label: o }))}
-                            placeholder="انتخاب مدل..." error={!!errors.model} />
+                            placeholder="انتخاب مدل... (اختیاری)" error={!!errors.model} />
                           {form.model === 'سایر' && (
                             <input className="nf" type="text" placeholder="مدل را وارد کنید..." value={form.modelOther}
                               onChange={e => set('modelOther', e.target.value)}
@@ -1156,7 +1202,8 @@ export default function NewProductPage() {
                         <div>
                           <Label optional>قیمت قبل از تخفیف</Label>
                           <input className="nf" type="text" inputMode="numeric" placeholder="۰" disabled={form.negotiable}
-                            value={form.negotiable ? '' : form.oldPrice} onChange={e => set('oldPrice', fmtPrice(e.target.value))} style={inp()} />
+                            value={form.negotiable ? '' : form.oldPrice} onChange={e => set('oldPrice', fmtPrice(e.target.value))} style={inp(errors.oldPrice)} />
+                          <ErrMsg msg={errors.oldPrice} />
                         </div>
                       </div>
                       {form.price && form.oldPrice && (() => {
@@ -1288,7 +1335,12 @@ export default function NewProductPage() {
                         }
                       </div>
                       <div style={{ flex: 1, minWidth: 0 }}>
-                        <p style={{ fontSize: 13.5, fontWeight: 700, color: TEXT, margin: '0 0 3px', lineHeight: 1.4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{previewName || 'محصول'}</p>
+                        <p style={{ fontSize: 13.5, fontWeight: 700, color: TEXT, margin: '0 0 3px', lineHeight: 1.4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          {previewParts.head}
+                          {previewParts.tail && (
+                            <span style={{ fontSize: 11.5, fontWeight: 600, color: TEXT_MUT }}> {previewParts.tail}</span>
+                          )}
+                        </p>
                         <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
                           {catLabel && <span style={{ fontSize: 11, color: GOLD, fontWeight: 600, background: 'rgba(199,166,106,0.1)', padding: '1px 7px', borderRadius: 10 }}>{catLabel}</span>}
                           {form.condition !== 'new' && <span style={{ fontSize: 11, color: '#B45309', fontWeight: 600, background: 'rgba(180,83,9,0.08)', padding: '1px 7px', borderRadius: 10 }}>{form.condition === 'like-new' ? 'در حد نو' : 'کارکرده'}</span>}
@@ -1370,37 +1422,6 @@ export default function NewProductPage() {
           </form>
         </div>
 
-        {/* ── مودال انتخاب محل نمایش محصول (قبل از ثبت نهایی) ── */}
-        {showSection && (
-          <div onClick={() => setShowSection(false)} style={{ position: 'fixed', inset: 0, zIndex: 100, background: 'rgba(20,18,14,0.42)', backdropFilter: 'blur(4px)', WebkitBackdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 18, animation: 'fadeIn 0.2s ease both' }}>
-            <div onClick={e => e.stopPropagation()} style={{ width: 'min(460px,100%)', background: '#fff', borderRadius: 22, border: '1px solid rgba(28,28,26,0.08)', boxShadow: '0 24px 60px rgba(20,18,14,0.28)', padding: '24px', animation: 'popIn 0.28s cubic-bezier(0.34,1.56,0.64,1) both' }}>
-              <h3 style={{ fontSize: 17, fontWeight: 900, color: TEXT, margin: '0 0 4px' }}>محصول کجا نمایش داده شود؟</h3>
-              <p style={{ fontSize: 13, color: TEXT_SEC, margin: '0 0 18px', lineHeight: 1.6 }}>محل نمایش محصول در بیلیارد بازار را انتخاب کنید.</p>
-
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                {([
-                  ['weekly', 'هفته‌های بیلیاردی', 'در سکشن اول بیلیارد بازار (تخفیف‌های هفته)'],
-                  ['party',  'بیلیارد پارتی',      'در سکشن بیلیارد پارتی'],
-                  ['newest', 'جدیدترین‌ها',        'انتخاب پیش‌فرض — در سکشن جدیدترین‌ها'],
-                ] as ['weekly'|'party'|'newest', string, string][]).map(([val, title, sub]) => (
-                  <button key={val} type="button" onClick={() => finalize(val)}
-                    style={{ textAlign: 'right', padding: '14px 16px', borderRadius: 14, cursor: 'pointer', fontFamily: 'Vazirmatn,Tahoma,sans-serif',
-                      background: 'rgba(199,166,106,0.10)', border: '1px solid rgba(199,166,106,0.30)', transition: 'all 0.18s', display: 'flex', flexDirection: 'column', gap: 3 }}
-                    onMouseEnter={e => { e.currentTarget.style.background = 'rgba(199,166,106,0.18)'; e.currentTarget.style.transform = 'translateY(-1px)' }}
-                    onMouseLeave={e => { e.currentTarget.style.background = 'rgba(199,166,106,0.10)'; e.currentTarget.style.transform = 'none' }}>
-                    <span style={{ fontSize: 14.5, fontWeight: 800, color: GOLD_D }}>{title}</span>
-                    <span style={{ fontSize: 12, color: TEXT_SEC }}>{sub}</span>
-                  </button>
-                ))}
-              </div>
-
-              <button type="button" onClick={() => setShowSection(false)}
-                style={{ marginTop: 14, width: '100%', padding: '11px', borderRadius: 12, cursor: 'pointer', fontFamily: 'Vazirmatn,Tahoma,sans-serif', background: 'rgba(28,28,26,0.04)', border: '1px solid rgba(28,28,26,0.1)', color: TEXT_SEC, fontSize: 13, fontWeight: 600 }}>
-                انصراف
-              </button>
-            </div>
-          </div>
-        )}
       </div>
     </>
   )
