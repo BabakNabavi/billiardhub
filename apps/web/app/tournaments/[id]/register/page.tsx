@@ -52,7 +52,7 @@ export default function RegisterPage() {
     return () => { alive = false; };
   }, [id]);
 
-  const { user, _hydrated } = useAuthStore();
+  const { user, _hydrated, authChecked } = useAuthStore();
   const isLoggedIn = !!user;
   const userName   = user ? `${user.firstName} ${user.lastName}` : '';
 
@@ -265,7 +265,7 @@ export default function RegisterPage() {
   };
 
   /* ─── Loading ─────────────────────────────────────────────────── */
-  if (!_hydrated || loadingT) return (
+  if (!_hydrated || !authChecked || loadingT) return (
     <div style={{ minHeight: '100vh', background: '#F7F7F5', display: 'flex',
       alignItems: 'center', justifyContent: 'center' }}>
       <div style={{ width: 36, height: 36, borderRadius: '50%',
@@ -376,8 +376,11 @@ export default function RegisterPage() {
           overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
           {t.name}
         </div>
+        {/* ساعت کنارِ تاریخ. پیش‌تر فقط روز نوشته می‌شد و بازیکن
+            نمی‌دانست مسابقه صبح است یا شب — همان اطلاعاتی که دقیقاً
+            سرِ لحظه‌ی پرداخت لازم دارد. */}
         <div style={{ fontSize: 13, color: '#999', marginTop: 3 }}>
-          {t.date} • {t.clubName}
+          {t.date}{t.startTime ? ` — ساعت ${toFa(t.startTime)}` : ''} • {t.clubName}
         </div>
       </div>
       <div style={{ fontSize: 19, fontWeight: 900, color: '#C7A66A', flexShrink: 0 }}>
@@ -671,8 +674,15 @@ export default function RegisterPage() {
                 {formatFee(t.entryFee)}
               </div>
             </div>
-            <div style={{ textAlign: 'left' }}>
-              <div style={{ fontSize: 13, color: '#aaa' }}>مهلت: {t.registrationDeadline}</div>
+            <div style={{ textAlign: 'left', display: 'flex', flexDirection: 'column', gap: 3 }}>
+              <div style={{ fontSize: 13, color: '#aaa' }}>
+                مهلت ثبت‌نام: {t.registrationDeadline || '—'}
+                {t.registrationDeadlineTime ? ` — ساعت ${toFa(t.registrationDeadlineTime)}` : ''}
+              </div>
+              <div style={{ fontSize: 13, color: '#aaa' }}>
+                برگزاری: {t.date || '—'}
+                {t.startTime ? ` — ساعت ${toFa(t.startTime)}` : ''}
+              </div>
             </div>
           </div>
 

@@ -10,8 +10,9 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
+import TabStrip from '../../../components/ui/TabStrip'
 import { apiFetch } from '../../../lib/http'
-import { Trophy, Loader2, AlertCircle, Users, Wallet, ExternalLink, Plus, Trash2 } from 'lucide-react'
+import { Trophy, Loader2, AlertCircle, Users, Wallet, ExternalLink, Plus, Trash2, Star } from 'lucide-react'
 
 const INK = '#1C1B17', SEC = '#5B564B', MUT = '#8A8474', LINE = '#EAE5DA'
 const GOLD_D = '#9A6E38', FELT = '#0E7A38'
@@ -26,6 +27,8 @@ interface T {
   entry_fee: number; max_players: number; starts_at: string | null; created_at: string
   registrations: number; paidRegistrations: number
   grossRevenue: number; platformCommission: number; clubShare: number
+  /* «رویداد اصلی» صفحه‌ی مسابقات — مهاجرت ۰۷۰ */
+  is_featured?: boolean
 }
 
 const STATUS: Record<string, { label: string; bg: string; fg: string }> = {
@@ -75,6 +78,22 @@ export default function AdminTournaments() {
       })
       const j = await r.json().catch(() => ({}))
       if (!r.ok) { setErr(j?.message ?? 'تغییر وضعیت انجام نشد'); return }
+      await load()
+    } catch { setErr('خطا در ارتباط با سرور') }
+    finally { setBusy('') }
+  }
+
+  /* `null` یعنی «هیچ رویداد اصلی‌ای نباشد» — آن‌وقت بیلبورد اصلاً
+     نمایش داده نمی‌شود و همه‌ی مسابقات در گرید می‌آیند. */
+  const setFeatured = async (id: string | null) => {
+    setBusy(id ?? 'featured'); setErr('')
+    try {
+      const r = await apiFetch('/api/admin/tournaments/featured', {
+        method: 'PUT', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tournamentId: id }),
+      })
+      const j = await r.json().catch(() => ({}))
+      if (!r.ok) { setErr(j?.message ?? 'انتخاب رویداد اصلی انجام نشد'); return }
       await load()
     } catch { setErr('خطا در ارتباط با سرور') }
     finally { setBusy('') }
@@ -140,20 +159,18 @@ export default function AdminTournaments() {
         این با «رویدادها» فرق دارد؛ آن‌ها محتوای دستیِ خودِ شماست.
       </p>
 
-      <div style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 4, marginBottom: 16 }}>
+      <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 12 }}>
         <button onClick={() => setShowNew(v => !v)} style={{
           flexShrink: 0, display: 'inline-flex', alignItems: 'center', gap: 5,
           padding: '8px 14px', borderRadius: 999, cursor: 'pointer', fontFamily: 'inherit',
           fontSize: 12.5, fontWeight: 800,
           border: '1px solid rgba(48,197,90,0.34)', background: 'rgba(48,197,90,0.12)', color: FELT,
         }}><Plus size={13} /> مسابقه‌ی جدید</button>
-        <button onClick={() => setFilter('')} style={chip(filter === '')}>همه</button>
-        {Object.entries(STATUS).map(([k, v]) => (
-          <button key={k} onClick={() => setFilter(k)} style={chip(filter === k)}>
-            {v.label}{(counts[k] ?? 0) > 0 && <span style={{ fontSize: 10.5, opacity: .75 }}> ({fa(counts[k])})</span>}
-          </button>
-        ))}
       </div>
+      <TabStrip value={filter} onChange={setFilter}
+        tabs={[{ key: '', label: 'همه' }, ...Object.entries(STATUS).map(([k, v]) => ({
+          key: k, label: v.label, count: counts[k] || undefined,
+        }))]} />
 
       {err && (
         <div style={{
@@ -251,10 +268,19 @@ export default function AdminTournaments() {
                 {t.starts_at ? `برگزاری: ${faDate(t.starts_at)}` : 'تاریخ ثبت نشده'} · ساخت: {faDate(t.created_at)}
               </div>
             </div>
-            <span style={{
-              padding: '4px 11px', borderRadius: 999, fontSize: 11.5, fontWeight: 800, whiteSpace: 'nowrap',
-              background: STATUS[t.status]?.bg, color: STATUS[t.status]?.fg,
-            }}>{STATUS[t.status]?.label ?? t.status}</span>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 7, flexWrap: 'wrap' }}>
+              {t.is_featured && (
+                <span style={{
+                  display: 'inline-flex', alignItems: 'center', gap: 4,
+                  padding: '4px 11px', borderRadius: 999, fontSize: 11.5, fontWeight: 800,
+                  background: 'rgba(199,166,106,0.14)', color: GOLD_D, whiteSpace: 'nowrap',
+                }}><Star size={12} /> رویداد اصلی</span>
+              )}
+              <span style={{
+                padding: '4px 11px', borderRadius: 999, fontSize: 11.5, fontWeight: 800, whiteSpace: 'nowrap',
+                background: STATUS[t.status]?.bg, color: STATUS[t.status]?.fg,
+              }}>{STATUS[t.status]?.label ?? t.status}</span>
+            </span>
           </div>
 
           {/* ارقام از ثبت‌نام‌های واقعی می‌آیند، نه از تخمین */}
@@ -281,6 +307,23 @@ export default function AdminTournaments() {
               fontSize: 12, fontWeight: 700, textDecoration: 'none',
               border: `1px solid ${LINE}`, background: '#fff', color: SEC,
             }}><ExternalLink size={12} /> صفحه‌ی عمومی</Link>
+
+            {/* ── رویداد اصلی ──
+                بیلبوردِ بالای صفحه‌ی مسابقات تا امروز خودکار پر
+                می‌شد: «اولین مسابقه‌ای که ثبت‌نامش باز است». چون
+                فهرست بر اساسِ تاریخِ شروع مرتب می‌شود، عملاً هر
+                باشگاهی که زودتر برگزار می‌کرد بزرگ‌ترین جای صفحه را
+                می‌گرفت — جایگاهی که ارزشِ تبلیغاتی دارد و نباید
+                قرعه‌کشی باشد. حالا فقط از این‌جا انتخاب می‌شود. */}
+            {t.is_featured ? (
+              <Act on={busy !== t.id} onClick={() => void setFeatured(null)}>
+                برداشتن از رویداد اصلی
+              </Act>
+            ) : ['published', 'registration_open', 'registration_closed', 'ongoing'].includes(t.status) && (
+              <Act on={busy !== t.id} tone="go" onClick={() => void setFeatured(t.id)}>
+                رویداد اصلی شود
+              </Act>
+            )}
 
             {t.status !== 'registration_open' && t.status !== 'cancelled' && t.status !== 'completed' && (
               <Act on={busy !== t.id} tone="go" onClick={() => void setStatus(t.id, 'registration_open')}>

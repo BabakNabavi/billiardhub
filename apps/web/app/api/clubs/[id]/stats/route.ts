@@ -24,10 +24,23 @@ const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const EMPTY = { members: 0, tournaments: 0 };
 
 export async function GET(_req: Request, { params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
-  /* شناسه‌ی نامعتبر خطا نیست: این آماره روی صفحه‌ی عمومی رندر می‌شود و
-     نباید به‌خاطر یک URL دستکاری‌شده کل کارت را بشکند. */
-  if (!UUID.test(id)) return NextResponse.json(EMPTY, { headers: { 'Cache-Control': 'no-store' } });
+  const { id: raw } = await params;
+
+  /* ── نامک هم قبول است ──
+     صفحه‌ی عمومی باشگاه نشانیِ خودش را `‌/clubs/{slug}` تبلیغ می‌کند و
+     همان مسیر این آمار را از `/api/clubs/{slug}/stats` می‌خواست. این‌جا
+     فقط UUID پذیرفته می‌شد، پس جواب `{members:0,tournaments:0}` بود —
+     باشگاهی با یک عضو و دو مسابقه، به هر بازدیدکننده‌ای صفر نشان
+     می‌داد و باشگاه‌دار فکر می‌کرد عضویت و مسابقه‌اش ثبت نشده. */
+  let id = raw;
+  if (!UUID.test(id)) {
+    const { data } = await sb().from('clubs').select('id').eq('slug', raw).maybeSingle();
+    const found = (data as { id?: string } | null)?.id;
+    /* نامکِ ناشناس خطا نیست: این آماره روی صفحه‌ی عمومی رندر می‌شود و
+       نباید به‌خاطر یک URL دستکاری‌شده کل کارت را بشکند. */
+    if (!found) return NextResponse.json(EMPTY, { headers: { 'Cache-Control': 'no-store' } });
+    id = found;
+  }
 
   const count = async (table: string) => {
     const { count: n, error } = await sb()

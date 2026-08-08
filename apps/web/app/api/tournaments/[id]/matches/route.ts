@@ -48,10 +48,14 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string
 
   const b = await req.json().catch(() => ({}));
   const shuffle = b?.shuffle !== false;
+  /* حالتِ خالی: ساختارِ جدول ساخته می‌شود ولی جایگاه‌ها خالی می‌مانند
+     تا برگزارکننده دستی بچیند. تا امروز تنها راهِ ساختِ جدول،
+     قرعه‌کشیِ تصادفی بود. */
+  const empty = b?.empty === true;
 
   /* کل براکت در یک تراکنش ساخته می‌شود — براکت نصفه از نبودش بدتر است */
   const { data, error } = await sb().rpc('bh_tournament_draw', {
-    p_tournament_id: id, p_shuffle: shuffle,
+    p_tournament_id: id, p_shuffle: shuffle, p_empty: empty,
   });
   if (error) {
     console.error('[tournaments/draw]', error.message);

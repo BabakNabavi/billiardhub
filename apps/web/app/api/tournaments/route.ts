@@ -19,11 +19,32 @@ const STATUSES = new Set([
 
 /* فرمت مسابقه از فهرست بسته می‌آید، نه متن آزاد — پیش‌تر هرچه کاربر
    تایپ می‌کرد ذخیره می‌شد و «bo5» و «Best of 5» و «حذفی» کنار هم
-   می‌نشستند و قابل گروه‌بندی نبودند. */
-const FORMATS = new Set(['bo3', 'bo5', 'bo7', 'bo9', 'bo11']);
+   می‌نشستند و قابل گروه‌بندی نبودند.
+
+   فهرست از `lib/tournaments/formats` می‌آید تا با آنچه فرم نشان
+   می‌دهد یکی بماند. پیش‌تر همین‌جا هاردکد بود و فقط پنج مقدارِ `bo`
+   را می‌پذیرفت — یعنی هر فرمتِ تازه‌ای که به فرم اضافه می‌شد، بی‌صدا
+   NULL ذخیره می‌شد. */
+import { ALL_FORMATS, normalizeDiscipline, optionsFor } from '@/lib/tournaments/formats';
 
 /* تاریخ باید واقعاً تاریخ باشد. رشته‌ی بی‌معنی به‌جای خطای Postgres،
    همین‌جا NULL می‌شود. */
+/* نشانیِ پوستر. فقط چیزی که خودِ آپلودِ ما ساخته یا فایلِ داخلیِ
+   سایت است — وگرنه باشگاه‌دار می‌توانست هر نشانی‌ای بگذارد و صفحه‌ی
+   عمومیِ ما تصویری از دامنه‌ی دلخواهِ او را سرو کند (هم ردیابیِ
+   بازدیدکننده، هم محتوایی که هر لحظه می‌تواند عوض شود). */
+export const safeCover = (v: unknown): string | null => {
+  const s = String(v ?? '').trim();
+  if (!s) return null;
+  if (s.startsWith('/images/')) return s.slice(0, 500);
+  try {
+    const u = new URL(s);
+    const supa = process.env.NEXT_PUBLIC_SUPABASE_URL ?? '';
+    if (supa && u.origin === new URL(supa).origin) return s.slice(0, 500);
+  } catch { /* نشانیِ نامعتبر */ }
+  return null;
+};
+
 const isoOrNull = (v: unknown): string | null => {
   const s = String(v ?? '').trim();
   if (!s) return null;
@@ -73,27 +94,59 @@ export async function POST(req: NextRequest) {
   const maxPlayers = Math.max(2, Math.min(512, Math.round(Number(b?.maxPlayers) || 16)));
   const entryFee = Math.max(0, Math.min(500_000_000, Math.round(Number(b?.entryFee) || 0)));
 
+  /* نوعِ بازی نرمال می‌شود تا نامِ قدیمی (`pocket`) و نامِ تازه
+     (`8ball`) هر دو به یک مقدار برسند و صفحه‌های عمومی بتوانند
+     برچسبش را پیدا کنند. */
+  const discipline = normalizeDiscipline(b?.discipline);
+
+  /* فرمت باید هم معتبر باشد هم به همین نوعِ بازی بخورد: «Best of 5»
+     برای ناین‌بال بی‌معنی است و «۹۰ دقیقه» برای اسنوکر. */
+  const rawFormat = String(b?.matchFormat ?? '');
+  const okForGame = optionsFor(discipline).some(o => o.value === rawFormat);
+  const matchFormat = ALL_FORMATS.has(rawFormat) && okForGame ? rawFormat : null;
+
   const row = {
     club_id: clubId,
     created_by: actor.id,
     title: title.slice(0, 200),
     description: String(b?.description ?? '').slice(0, 5000) || null,
-    discipline: String(b?.discipline ?? 'snooker').slice(0, 40),
+    discipline,
     max_players: maxPlayers,
     entry_fee: entryFee,
     prize: String(b?.prize ?? '').slice(0, 200) || null,
+    /* قوانین پیش‌تر اصلاً خوانده نمی‌شد: فرم آن را می‌گرفت، هیچ‌کس
+       نمی‌فرستاد، و ستونش هم وجود نداشت (مهاجرت ۰۶۸). */
+    rules: String(b?.rules ?? '').slice(0, 5000) || null,
     venue: String(b?.venue ?? '').slice(0, 200) || null,
     province: String(b?.province ?? '').slice(0, 80) || null,
     city: String(b?.city ?? '').slice(0, 80) || null,
     starts_at: isoOrNull(b?.startsAt),
+    /* ── شروعِ زمان‌بندی‌شده‌ی ثبت‌نام ──
+       تهی یعنی «همین حالا» و وضعیت را خودِ فرم تعیین می‌کند. مقداردار
+       یعنی مسابقه در «بزودی» می‌ماند و `bh_tournaments_autoopen`
+       (مهاجرت ۰۷۵) سرِ وقت بازش می‌کند. */
+    registration_starts_at: isoOrNull(b?.registrationStartsAt),
     registration_ends_at: isoOrNull(b?.registrationEndsAt),
-    match_format: FORMATS.has(String(b?.matchFormat)) ? String(b.matchFormat) : null,
+    match_format: matchFormat,
+    /* پوسترِ اختیاری. تهی یعنی «پوسترِ پیش‌فرضِ همان بازی» — که در
+       نگاشتِ سمتِ نمایش انتخاب می‌شود، نه این‌جا؛ وگرنه اگر بعداً
+       نوعِ بازی عوض شود، پوستر روی بازیِ قبلی جا می‌ماند. */
+    cover_url: safeCover(b?.coverUrl),
     status,
   };
 
   /* مهلت ثبت‌نام نباید بعد از خود مسابقه باشد */
   if (row.starts_at && row.registration_ends_at && row.registration_ends_at > row.starts_at) {
     return NextResponse.json({ message: 'مهلت ثبت‌نام نمی‌تواند بعد از تاریخ برگزاری باشد' }, { status: 400 });
+  }
+  if (row.registration_starts_at && row.registration_ends_at
+      && row.registration_starts_at >= row.registration_ends_at) {
+    return NextResponse.json({ message: 'زمان باز شدن ثبت‌نام باید پیش از مهلت پایان آن باشد' }, { status: 400 });
+  }
+  /* مسابقه‌ای که ثبت‌نامش زمان‌بندی شده باید در «بزودی» بماند، وگرنه
+     همان لحظه باز است و زمان‌بندی بی‌اثر می‌شود. */
+  if (row.registration_starts_at && row.status === 'registration_open') {
+    row.status = 'published';
   }
 
   const { data, error } = await sb().from('tournaments').insert(row).select().single();

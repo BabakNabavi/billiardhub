@@ -7,6 +7,7 @@ import {
   certificationLines, isLatinGrade, GRADES, type RefereeProfile,
 } from '../../../lib/referee-store'
 import { fetchAdminProfiles, patchAdminProfile } from '../../../lib/admin/profile-rows'
+import ScrollList from '../../../components/ui/ScrollList'
 
 const ADMIN_PHONE = '09121327283'
 
@@ -92,7 +93,7 @@ export default function AdminRefereesPage() {
         {list.length === 0 ? (
           <div style={{ ...card, padding: '48px 24px', textAlign: 'center', color: TEXT_M, fontSize: 14 }}>هنوز درخواستی ثبت نشده است.</div>
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <ScrollList count={list.length} min={5} gap={12}>
             {list.map(c => {
               const st = STATUS[c.status] ?? STATUS.pending!
               const b  = badgeFromGrades(c.grades)
@@ -181,7 +182,7 @@ export default function AdminRefereesPage() {
                 </div>
               )
             })}
-          </div>
+          </ScrollList>
         )}
       </div>
     </div>

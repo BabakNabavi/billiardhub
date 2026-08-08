@@ -5,6 +5,9 @@
    (بازپرداخت، دفتر کل، رکورد refund) دقیقاً مثل لغو کاربر ثبت شود. */
 
 import { useCallback, useEffect, useState } from 'react'
+import { notify } from '../../../lib/ui/dialogs'
+import TabStrip from '@/components/ui/TabStrip'
+import ScrollList from '@/components/ui/ScrollList'
 import {
   CalendarDays, Loader2, AlertCircle, Search, X, CheckCircle2, AlertTriangle, RotateCcw,
 } from 'lucide-react'
@@ -66,7 +69,7 @@ export default function AdminBookings() {
         body: JSON.stringify({ reason: reason.trim() || 'لغو توسط ادمین' }),
       })
       const j = await r.json().catch(() => ({}))
-      if (!r.ok) { alert(j?.message || 'لغو رزرو ممکن نشد'); return }
+      if (!r.ok) { notify(j?.message || 'لغو رزرو ممکن نشد'); return }
       setConfirm(null); setReason(''); await load()
     } finally { setBusy('') }
   }
@@ -86,15 +89,8 @@ export default function AdminBookings() {
           <input value={q} onChange={e => setQ(e.target.value)} placeholder="جستجوی کد پیگیری…"
             style={{ width: '100%', boxSizing: 'border-box', padding: '10px 34px 10px 12px', borderRadius: 11, border: `1px solid ${LINE}`, background: '#fff', fontSize: 13, fontFamily: 'inherit', outline: 'none', color: INK }} />
         </div>
-        <div style={{ display: 'flex', gap: 7, overflowX: 'auto', paddingBottom: 2 }}>
-          {FILTERS.map(([k, label]) => (
-            <button key={k || 'all'} onClick={() => setStatus(k)}
-              style={{ flexShrink: 0, padding: '8px 14px', borderRadius: 999, cursor: 'pointer', fontFamily: 'inherit', fontSize: 12.5, fontWeight: 800,
-                background: status === k ? INK : '#fff', color: status === k ? '#fff' : SEC, border: `1px solid ${status === k ? INK : LINE}` }}>
-              {label}
-            </button>
-          ))}
-        </div>
+        <TabStrip value={status} onChange={setStatus} style={{ marginBottom: 0 }}
+          tabs={FILTERS.map(([k, label]) => ({ key: k, label }))} />
       </div>
 
       {pending && (
@@ -125,7 +121,7 @@ export default function AdminBookings() {
       )}
 
       {rows && rows.length > 0 && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+        <ScrollList count={rows.length} min={5}>
           {rows.map(b => {
             const st = STATUS[b.booking_status] ?? STATUS.COMPLETED!
             const cancelled = b.booking_status === 'CANCELLED'
@@ -172,7 +168,7 @@ export default function AdminBookings() {
               </div>
             )
           })}
-        </div>
+        </ScrollList>
       )}
 
       {/* ── پنجره‌ی تأیید لغو ── */}

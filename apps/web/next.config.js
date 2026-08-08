@@ -1,10 +1,45 @@
+import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+import { dirname, join } from 'node:path';
+
+/* این فایل ESM است (`"type": "module"` در package.json)، پس نه
+   `require` دارد نه `__dirname`. */
+const HERE = dirname(fileURLToPath(import.meta.url));
+
+/* شناسه‌ی این build — از فایلی که `deploy.sh` می‌نویسد. نبودنش یعنی
+   محیطِ توسعه، و آن‌جا بازبارگذاریِ خودکار لازم نیست. */
+function buildSha() {
+  try {
+    return readFileSync(join(HERE, '.build-sha'), 'utf8').trim() || 'dev';
+  } catch { return 'dev'; }
+}
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  /* ── چرا مقصدِ build قابل تنظیم است ──
+     دیپلوی روی سرور، build را در همان پوشه‌ای اجرا می‌کرد که سرورِ
+     در حالِ اجرا از آن می‌خواند. یعنی در دو دقیقه‌ی build، `.next`
+     نصفه‌کاره بود و هر بازدیدکننده‌ای که همان لحظه صفحه‌ای باز
+     می‌کرد «Internal Server Error» می‌گرفت — از جمله کسی که تازه
+     از درگاهِ پرداخت برمی‌گشت.
+
+     حالا build در پوشه‌ی دیگری انجام می‌شود و فقط در پایان، با یک
+     rename، جایش عوض می‌شود. */
+  distDir: process.env.NEXT_DIST_DIR || '.next',
   transpilePackages: ["@repo/ui"],
   serverExternalPackages: ["bcrypt"],
   // نسخه‌ی build را به کلاینت هم می‌دهیم تا PWA بتواند کد کهنه را تشخیص و reload کند
   env: {
-    NEXT_PUBLIC_BUILD_SHA: process.env.VERCEL_GIT_COMMIT_SHA || 'dev',
+    /* ── چرا از فایل و نه از `VERCEL_GIT_COMMIT_SHA` ──
+       سایت از Vercel به سرورِ خودمان منتقل شد و آن متغیر دیگر وجود
+       ندارد. نتیجه‌اش این بود که هم این مقدار و هم پاسخِ
+       `/api/version` برابرِ 'dev' می‌شدند، و شرطِ بازبارگذاری — که
+       دقیقاً برای همین ساخته شده بود — همیشه رد می‌شد.
+
+       یعنی از روزِ مهاجرت، مرورگری که نسخه‌ی کهنه‌ی صفحه را داشت
+       هیچ‌وقت خودش را تازه نمی‌کرد؛ اولین ناوبری به دنبالِ chunkی
+       می‌رفت که دیگر روی سرور نبود و صفحه سفید می‌ماند. */
+    NEXT_PUBLIC_BUILD_SHA: buildSha(),
   },
   async redirects() {
     return [

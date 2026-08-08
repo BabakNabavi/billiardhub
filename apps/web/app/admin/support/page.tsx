@@ -5,6 +5,8 @@ import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '../../../store/auth.store';
 import { LifeBuoy, Unlock, Check, X, Loader2, MapPin, CreditCard, Send } from 'lucide-react';
+import TabStrip from '../../../components/ui/TabStrip';
+import ScrollList from '../../../components/ui/ScrollList';
 
 /* تیکت‌های پشتیبانی.
 
@@ -121,19 +123,10 @@ export default function AdminSupportPage() {
         استعلام واقعاً انجام شود.
       </p>
 
-      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 16 }}>
-        {Object.entries(STATUS).map(([k, v]) => (
-          <button key={k} onClick={() => setTab(k)} style={{
-            padding: '7px 14px', borderRadius: 20, fontSize: 12.5, fontWeight: 700, cursor: 'pointer',
-            fontFamily: 'inherit',
-            background: tab === k ? v.bg : '#fff',
-            border: `1px solid ${tab === k ? v.fg + '55' : 'rgba(0,0,0,0.12)'}`,
-            color: tab === k ? v.fg : '#6B7280',
-          }}>
-            {v.label} ({count(k).toLocaleString('fa-IR')})
-          </button>
-        ))}
-      </div>
+<TabStrip value={tab} onChange={setTab}
+        tabs={Object.entries(STATUS).map(([k, v]) => ({
+          key: k, label: v.label, count: count(k), fg: v.fg, bg: v.bg,
+        }))} />
 
       {err && (
         <div style={{ padding: '11px 14px', borderRadius: 12, background: 'rgba(178,59,46,0.07)', border: '1px solid rgba(178,59,46,0.22)', color: '#B23B2E', fontSize: 12.5, fontWeight: 700, marginBottom: 14, lineHeight: 1.9 }}>
@@ -149,7 +142,9 @@ export default function AdminSupportPage() {
         <div style={{ ...card, textAlign: 'center', color: '#9CA3AF', fontSize: 13 }}>
           تیکتی در این وضعیت نیست.
         </div>
-      ) : shown.map(t => {
+      ) : (
+        <ScrollList count={shown.length} min={4}>
+        {shown.map(t => {
         const club = clubs.find(c => c.id === t.club_id);
         const owner = users.find(u => u.id === t.user_id);
         const isPostal = t.subject === POSTAL_SUBJECT;
@@ -259,7 +254,9 @@ export default function AdminSupportPage() {
             </div>
           </div>
         );
-      })}
+        })}
+        </ScrollList>
+      )}
     </div>
   );
 }

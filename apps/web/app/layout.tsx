@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import DialogHost from "../components/ui/DialogHost";
 import FooterGate from "../components/FooterGate";
 import SessionBridge from "../components/auth/SessionBridge";
 import { ToastProvider } from '../components/ui/Toast';
@@ -169,6 +170,10 @@ export default function RootLayout({
         {/* گیت ده‌خطی کلاینتی تصمیم می‌گیرد فوتر دیده شود یا نه؛ خود
             فوتر Server Component است و هیچ JSای همراهش نمی‌رود. */}
         <FooterGate><Footer /></FooterGate>
+        {/* پنجره‌ی تأیید و پیامِ کوتاه — یک‌جا برای کلِ سایت، به‌جای
+            پنجره‌ی بومیِ مرورگر که چپ‌به‌راست است و نشانیِ سایت را
+            بالای خودش می‌نویسد. */}
+        <DialogHost />
         <ToastProvider />
         {/* راهنمای «افزودن به صفحه‌ی اصلی» — فقط iOS/Safari و فقط وقتی
             هنوز نصب نشده. گیت سبک است؛ خود شیت lazy بارگذاری می‌شود. */}

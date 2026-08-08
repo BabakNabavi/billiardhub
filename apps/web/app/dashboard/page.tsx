@@ -1,6 +1,8 @@
 ﻿'use client';
 
 import { useEffect, useState, useRef } from 'react';
+import PageLoader from '@/components/ui/PageLoader';
+import ConfirmDialog from '@/components/ui/ConfirmDialog';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '../../store/auth.store';
@@ -25,7 +27,12 @@ import MyBookings from '../../components/booking/MyBookings';
 
 
 /* ══ types ══ */
-interface MyReg { id: string; tournamentId: string; tournamentName: string; status: 'pending' | 'approved' | 'rejected'; registeredAt: string; }
+interface MyReg {
+  id: string; tournamentId: string; tournamentName: string;
+  status: 'pending' | 'approved' | 'rejected'; registeredAt: string;
+  /* قاعده‌ی لغو در دیتابیس است؛ این فقط جوابش است (مهاجرت ۰۷۴) */
+  cancel?: { can: boolean; reason?: string; hoursLeft?: number };
+}
 
 /* اعلان‌های نمونه حذف شدند: چهار اعلان ساختگی («رزرو شما در باشگاه
    سنچوری تأیید شد»، «مدال ۵۰ مسابقه را دریافت کردید») به هر کاربری
@@ -71,12 +78,16 @@ function Ring({ value, size = 64, stroke = 5, color = '#C7A66A', label }: { valu
 }
 
 export default function DashboardPage() {
-  const { user } = useAuthStore();
+  const { user, _hydrated, authChecked } = useAuthStore();
   const router = useRouter();
   const [notifOpen, setNotifOpen] = useState(false);
   const [scrollY, setScrollY] = useState(0);
   const [greeting, setGreeting] = useState('');
   const [myRegs, setMyRegs] = useState<MyReg[]>([]);
+  /* ثبت‌نامی که کاربر می‌خواهد لغو کند — تا تأیید در دیالوگ */
+  const [cancelReg, setCancelReg] = useState<MyReg | null>(null);
+  const [cancelBusy, setCancelBusy] = useState(false);
+  const [cancelMsg, setCancelMsg] = useState('');
   const [myClub, setMyClub] = useState<{ id: string; name: string; city: string } | null>(null);
   const [clubLoading, setClubLoading] = useState(false);
   const [hasCoachProfile, setHasCoachProfile] = useState(false);
@@ -117,6 +128,23 @@ export default function DashboardPage() {
     })();
   }, []);
 
+  const doCancel = async () => {
+    if (!cancelReg) return;
+    setCancelBusy(true);
+    try {
+      const r = await apiFetch(
+        `/api/tournaments/${cancelReg.tournamentId}/register?registrationId=${cancelReg.id}`,
+        { method: 'DELETE' });
+      const j = await r.json().catch(() => ({})) as { message?: string };
+      if (!r.ok) { setCancelMsg(j.message ?? 'لغو انجام نشد'); return; }
+      setCancelReg(null);
+      setCancelMsg(j.message ?? 'ثبت‌نام لغو شد');
+      setMyRegs(prev => prev.filter(x => x.id !== cancelReg.id));
+      window.setTimeout(() => setCancelMsg(''), 6000);
+    } catch { setCancelMsg('ارتباط با سرور برقرار نشد'); }
+    finally { setCancelBusy(false); }
+  };
+
   useEffect(() => {
     const h = new Date().getHours();
     setGreeting(h < 12 ? 'صبح بخیر' : h < 18 ? 'عصر بخیر' : 'شب بخیر');
@@ -137,6 +165,7 @@ export default function DashboardPage() {
         const j = await r.json() as { registrations?: Array<{
           id: string; tournamentId: string; tournamentTitle: string;
           status: string; createdAt: string;
+          cancel?: { can: boolean; reason?: string; hoursLeft?: number };
         }> };
         setMyRegs((j.registrations ?? []).map(x => ({
           id: x.id,
@@ -147,6 +176,7 @@ export default function DashboardPage() {
             : x.status === 'PENDING_PAYMENT' ? 'pending'
             : 'rejected',
           registeredAt: x.createdAt,
+          cancel: x.cancel,
         })));
       } catch { /* آفلاین ⇒ فهرست خالی می‌ماند، نه داده‌ی کهنه */ }
     })();
@@ -189,6 +219,14 @@ export default function DashboardPage() {
     return () => { window.removeEventListener('scroll', fn); cancelAnimationFrame(rafRef.current); };
   }, []);
 
+  /* ── چرا این‌جا هم صفحه‌ی سفید می‌شد ──
+     `if (!user) return null` یعنی صفحه هیچ‌چیز رندر نمی‌کند. تا وقتی
+     استور از localStorage پر بود مشکلی نداشت؛ ولی وقتی ذخیره‌گاه پاک
+     شده و کوکی زنده است — یا صرفاً تا رسیدنِ جوابِ سرور — کاربر یک
+     صفحه‌ی کاملاً خالی می‌دید.
+
+     صفحه‌ی خالی برای کاربر یعنی «خراب است»، نه «صبر کن». */
+  if (!_hydrated || !authChecked) return <PageLoader />;
   if (!user) return null;
   if (user.primaryRole === 'admin') return null;
   const isBasicUser = user.primaryRole === 'user' && (user.secondaryRoles ?? []).length === 0;
@@ -422,6 +460,9 @@ export default function DashboardPage() {
                         border: '1.5px solid rgba(199,166,106,0.35)',
                         transition: 'all 0.28s cubic-bezier(0.22,1,0.36,1)',
                         boxShadow: '0 2px 12px rgba(199,166,106,0.10)',
+                        /* بدونِ این، کارتِ کوتاه‌تر ته ردیف جا می‌ماند و
+                           دو کارتِ کنارِ هم دو ارتفاع دارند */
+                        height: '100%', display: 'flex', flexDirection: 'column',
                       }}>
                         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '9px' }}>
                           <div style={{ width: '34px', height: '34px', borderRadius: '11px', background: 'rgba(199,166,106,0.15)', border: '1px solid rgba(199,166,106,0.30)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '17px' }}>🏢</div>
@@ -589,7 +630,10 @@ export default function DashboardPage() {
                   <div style={{ padding: '13px 14px', borderRadius: '14px', cursor: 'pointer', background: 'rgba(0,0,0,0.015)', border: '1.5px dashed rgba(0,0,0,0.14)', height: '100%', display: 'flex', flexDirection: 'column', transition: 'all 0.28s cubic-bezier(0.22,1,0.36,1)' }}>
                     <div style={{ width: '34px', height: '34px', borderRadius: '11px', background: 'rgba(0,0,0,0.04)', border: '1px dashed rgba(0,0,0,0.16)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '17px', marginBottom: '9px' }}>➕</div>
                     <div style={{ fontSize: '13.5px', fontWeight: 800, color: '#1A1A18', marginBottom: '4px' }}>افزودن نقش جدید</div>
-                    <div style={{ fontSize: '13px', color: 'rgba(0,0,0,0.42)', marginBottom: '9px', lineHeight: 1.6 }}>نقش دیگری (مثلاً تولیدکننده، فروشنده، داور) به حساب خود اضافه کنید</div>
+                    {/* کپشنِ کوتاه، هم‌اندازه‌ی کارتِ «مدیریت باشگاه»:
+                        متنِ سه‌خطیِ قبلی این کارت را از بقیه بلندتر
+                        می‌کرد و ردیف را نامرتب. */}
+                    <div style={{ fontSize: '13px', color: 'rgba(0,0,0,0.42)', marginBottom: '9px', lineHeight: 1.6 }}>در صورت صلاحیت نقش جدید را انتخاب کنید</div>
                     <div style={{ marginTop: 'auto', display: 'flex', alignItems: 'center', gap: '5px', fontSize: '13px', color: '#111111', fontWeight: 700 }}>مدیریت نقش‌ها <span style={{ fontSize: '16px' }}>←</span></div>
                   </div>
                 </Link>
@@ -654,8 +698,24 @@ export default function DashboardPage() {
                               <div style={{ fontSize: '15px', fontWeight: 700, color: '#111111', marginBottom: '3px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{reg.tournamentName}</div>
                               <div style={{ fontSize: '12px', color: 'rgba(0,0,0,0.38)' }}>{reg.registeredAt}</div>
                             </div>
-                            <div style={{ fontSize: '12px', color: statusCfg.color, background: statusCfg.bg, border: `1px solid ${statusCfg.border}`, borderRadius: '20px', padding: '4px 12px', fontWeight: 700, flexShrink: 0 }}>
-                              {statusCfg.label}
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 7, flexShrink: 0 }}>
+                              <span style={{ fontSize: '12px', color: statusCfg.color, background: statusCfg.bg, border: `1px solid ${statusCfg.border}`, borderRadius: '20px', padding: '4px 12px', fontWeight: 700 }}>
+                                {statusCfg.label}
+                              </span>
+                              {/* ── انصراف ──
+                                  تا امروز راهی نبود و بازیکن باید به باشگاه
+                                  زنگ می‌زد. مهلت و قاعده‌اش را سرور تعیین
+                                  می‌کند؛ اگر گذشته باشد دکمه اصلاً نمی‌آید
+                                  تا کسی روی چیزی که کار نمی‌کند نزند. */}
+                              {reg.cancel?.can && (
+                                <button type="button" onClick={() => setCancelReg(reg)}
+                                  style={{
+                                    fontSize: 11.5, fontWeight: 700, borderRadius: 20,
+                                    padding: '4px 11px', cursor: 'pointer', fontFamily: 'inherit',
+                                    border: '1px solid rgba(239,68,68,0.26)',
+                                    background: 'rgba(239,68,68,0.06)', color: '#dc2626',
+                                  }}>انصراف</button>
+                              )}
                             </div>
                           </div>
                         );
@@ -711,6 +771,27 @@ export default function DashboardPage() {
                   </p>
                   <Link href="/advertise/dashboard" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '12px', background: 'rgba(199,166,106,0.10)', border: '1px solid rgba(199,166,106,0.28)', borderRadius: '12px', color: '#A07840', fontSize: '15px', fontWeight: 700, textDecoration: 'none' }}>
                     پنل تبلیغات من
+                  </Link>
+                </div>
+              </ScrollReveal>
+
+              {/* ── آگهی‌های من ──
+                  ثبتِ آگهی در بازار برای هر کاربرِ واردشده باز است، پس
+                  مدیریتش هم باید از داشبوردِ همه در دسترس باشد. تا
+                  امروز تنها راهش منوی پروفایل بود و آن هم فقط به نقشِ
+                  «فروشنده» نشان داده می‌شد — یعنی کاربرِ عادی آگهی ثبت
+                  می‌کرد و بعد هیچ راهی برای حذف یا ارتقایش نداشت. */}
+              <ScrollReveal>
+                <div className="dash-card">
+                  <div className="card-label">
+                    <span style={{ background: 'linear-gradient(180deg,#C7A66A,#A07840)' }} />
+                    بیلیارد بازار
+                  </div>
+                  <p style={{ fontSize: '14px', color: 'rgba(0,0,0,0.45)', lineHeight: 2, margin: '0 0 14px' }}>
+                    آگهی‌های ثبت‌شده‌ی شما — ویرایش، حذف، تازه‌سازی و «فوری».
+                  </p>
+                  <Link href="/dashboard/shop" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '12px', background: 'rgba(199,166,106,0.10)', border: '1px solid rgba(199,166,106,0.28)', borderRadius: '12px', color: '#A07840', fontSize: '15px', fontWeight: 700, textDecoration: 'none' }}>
+                    آگهی‌های من
                   </Link>
                 </div>
               </ScrollReveal>
@@ -781,6 +862,29 @@ export default function DashboardPage() {
           </div>
         </div>
       </div>
+
+      <ConfirmDialog
+        open={!!cancelReg}
+        title="انصراف از مسابقه"
+        body={<>ثبت‌نام شما در <b style={{ color: '#1A1A18' }}>{cancelReg?.tournamentName}</b> لغو
+          می‌شود و مبلغ پرداختی طیِ روزهای آینده بازگردانده می‌شود. جای شما به نفرِ بعدیِ
+          صفِ انتظار داده می‌شود.</>}
+        confirmLabel="بله، انصراف می‌دهم"
+        busy={cancelBusy}
+        onConfirm={() => void doCancel()}
+        onCancel={() => setCancelReg(null)}
+      />
+
+      {cancelMsg && (
+        <div role="status" style={{
+          position: 'fixed', insetInlineStart: '50%', bottom: 22, zIndex: 10000,
+          transform: 'translateX(50%)', maxWidth: 'min(92vw,430px)',
+          padding: '12px 16px', borderRadius: 14,
+          background: '#14311F', color: '#EAF6EE',
+          fontSize: 13, fontWeight: 700, lineHeight: 1.9,
+          boxShadow: '0 14px 40px rgba(0,0,0,0.30)',
+        }}>{cancelMsg}</div>
+      )}
     </>
 
     </AuthGuard>

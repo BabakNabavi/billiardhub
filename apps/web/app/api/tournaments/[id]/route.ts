@@ -15,8 +15,10 @@ import { notifyTournamentCancelled } from '@/lib/notify';
    مالی دارد و پاک‌کردنش یعنی گم‌شدن رد پول. «لغو» جای حذف را می‌گیرد
    و فقط مسابقه‌ی پیش‌نویس بدون ثبت‌نام واقعاً حذف می‌شود. */
 
+import { ALL_FORMATS, normalizeDiscipline, optionsFor } from '@/lib/tournaments/formats';
+import { safeCover } from '../route';
+
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-const FORMATS = new Set(['bo3', 'bo5', 'bo7', 'bo9', 'bo11']);
 
 /* وضعیت‌هایی که بعدشان دیگر ویرایش محتوایی مجاز نیست — مسابقه‌ی در
    حال اجرا یا تمام‌شده نباید تاریخ و مبلغش عوض شود. */
@@ -133,12 +135,26 @@ export async function PATCH(req: NextRequest, ctx: { params: Promise<{ id: strin
   }
   if (b.description !== undefined) patch.description = String(b.description ?? '').slice(0, 5000) || null;
   if (b.prize !== undefined) patch.prize = String(b.prize ?? '').slice(0, 200) || null;
-  if (typeof b.discipline === 'string') patch.discipline = b.discipline.slice(0, 40);
+  if (b.rules !== undefined) patch.rules = String(b.rules ?? '').slice(0, 5000) || null;
+  /* تهی یعنی «برگرد به پوسترِ پیش‌فرض» — پس پاک‌کردن هم ممکن است */
+  if (b.coverUrl !== undefined) patch.cover_url = safeCover(b.coverUrl);
+  if (typeof b.discipline === 'string') patch.discipline = normalizeDiscipline(b.discipline);
   if (b.matchFormat !== undefined) {
-    patch.match_format = FORMATS.has(String(b.matchFormat)) ? String(b.matchFormat) : null;
+    /* فرمت باید با نوعِ بازی بخواند — و نوعِ بازی ممکن است در همین
+       درخواست عوض شده باشد، پس مقدارِ تازه ملاک است نه ردیفِ فعلی. */
+    const disc = normalizeDiscipline(
+      typeof b.discipline === 'string' ? b.discipline : t.discipline);
+    const raw = String(b.matchFormat ?? '');
+    const fits = optionsFor(disc).some(o => o.value === raw);
+    patch.match_format = ALL_FORMATS.has(raw) && fits ? raw : null;
   }
   if (b.startsAt !== undefined) patch.starts_at = isoOrNull(b.startsAt);
   if (b.registrationEndsAt !== undefined) patch.registration_ends_at = isoOrNull(b.registrationEndsAt);
+  /* زمانِ باز شدنِ ثبت‌نام. تهی‌کردنش یعنی «دیگر زمان‌بندی نیست» —
+     مسابقه همان‌جا که هست می‌ماند تا باشگاه‌دار دستی بازش کند. */
+  if (b.registrationStartsAt !== undefined) {
+    patch.registration_starts_at = isoOrNull(b.registrationStartsAt);
+  }
 
   /* ظرفیت را نمی‌شود زیر تعداد ثبت‌نام فعلی آورد — وگرنه مسابقه‌ای
      می‌ماند که بیش از ظرفیتش بازیکن دارد و قرعه‌کشی‌اش بی‌معنی است. */
@@ -159,14 +175,27 @@ export async function PATCH(req: NextRequest, ctx: { params: Promise<{ id: strin
      پرداخت یعنی دو نفر با دو قیمت متفاوت در یک مسابقه — و بازپرداخت
      هم مبهم می‌شود. */
   if (b.entryFee !== undefined) {
-    const { count } = await sb().from('tournament_registrations')
-      .select('id', { count: 'exact', head: true })
-      .eq('tournament_id', id).eq('payment_status', 'PAID');
-    if ((count ?? 0) > 0) {
-      return NextResponse.json(
-        { message: 'پس از اولین پرداخت، مبلغ ورودی تغییر نمی‌کند' }, { status: 409 });
+    const next = Math.max(0, Math.min(500_000_000, Math.round(Number(b.entryFee) || 0)));
+
+    /* ── چرا مقایسه لازم است ──
+       شرط پیش‌تر فقط «آیا مبلغ در بدنه هست؟» را می‌پرسید. ولی فرمِ
+       ویرایش همه‌ی فیلدها را با هم می‌فرستد، پس مبلغ همیشه در بدنه
+       است — حتی وقتی کاربر دستش هم به آن نزده. نتیجه‌اش این بود که
+       اصلاحِ یک غلطِ تایپی در عنوان با پیامِ «پس از اولین پرداخت،
+       مبلغ ورودی تغییر نمی‌کند» رد می‌شد.
+
+       مقدارِ یکسان اصلاً تغییر نیست؛ فقط مقدارِ متفاوت باید بسته
+       باشد. */
+    if (next !== t.entry_fee) {
+      const { count } = await sb().from('tournament_registrations')
+        .select('id', { count: 'exact', head: true })
+        .eq('tournament_id', id).eq('payment_status', 'PAID');
+      if ((count ?? 0) > 0) {
+        return NextResponse.json(
+          { message: 'پس از اولین پرداخت، مبلغ ورودی تغییر نمی‌کند' }, { status: 409 });
+      }
+      patch.entry_fee = next;
     }
-    patch.entry_fee = Math.max(0, Math.min(500_000_000, Math.round(Number(b.entryFee) || 0)));
   }
 
   const startsAt = (patch.starts_at ?? t.starts_at) as string | null;
@@ -174,6 +203,39 @@ export async function PATCH(req: NextRequest, ctx: { params: Promise<{ id: strin
   if (startsAt && regEnds && regEnds > startsAt) {
     return NextResponse.json(
       { message: 'مهلت ثبت‌نام نمی‌تواند بعد از تاریخ برگزاری باشد' }, { status: 400 });
+  }
+
+  /* ── زمان‌بندیِ باز شدنِ ثبت‌نام: همان قاعده‌ی مسیرِ ساخت ──
+     مسیرِ POST این را داشت و این‌جا نداشت. نتیجه‌اش دقیقاً همان چیزی
+     بود که زمان‌بندی باید جلویش را می‌گرفت: باشگاه‌دار تاریخِ باز
+     شدن را روی فردا می‌گذاشت و «انتشار و باز کردن ثبت‌نام» را می‌زد،
+     ثبت‌نام **همان لحظه** باز می‌شد و مسابقه هرگز به تبِ «بزودی»
+     نمی‌رفت. هیچ خطایی هم نمی‌داد — قاعده‌ای که در یکی از دو مسیرِ
+     نوشتن باشد و در دیگری نه، همین شکلی بی‌صدا از کار می‌افتد.
+
+     `patch` با `in` خوانده می‌شود نه با `??`: تهی‌کردنِ زمان‌بندی
+     («دیگر زمان‌بندی نیست») مقدارِ `null` می‌فرستد و `??` آن را با
+     مقدارِ قبلیِ ردیف جایگزین می‌کرد — یعنی لغوِ زمان‌بندی کار
+     نمی‌کرد. */
+  const regStarts = ('registration_starts_at' in patch
+    ? patch.registration_starts_at
+    : t.registration_starts_at) as string | null;
+
+  /* رشته‌های تاریخ با عدد سنجیده می‌شوند نه با `>`: مقدارِ `patch`
+     همیشه ISOیِ نرمال است ولی مقدارِ ردیف از PostgREST با
+     `+00:00` می‌آید، و مقایسه‌ی حرفیِ دو قالبِ متفاوت غلط جواب
+     می‌دهد. */
+  const ms = (v: string | null) => (v ? Date.parse(v) : NaN);
+  if (regStarts && regEnds && ms(regStarts) >= ms(regEnds)) {
+    return NextResponse.json(
+      { message: 'زمان باز شدن ثبت‌نام باید پیش از مهلت پایان آن باشد' }, { status: 400 });
+  }
+
+  /* «در آینده» شرطِ لازم است: مسابقه‌ای که هفته‌ی پیش سرِ وقت باز
+     شده نباید با ویرایشِ جایزه‌اش به «بزودی» برگردد. */
+  const nextStatus = String(patch.status ?? t.status);
+  if (regStarts && nextStatus === 'registration_open' && ms(regStarts) > Date.now()) {
+    patch.status = 'published';
   }
 
   if (Object.keys(patch).length === 1) {

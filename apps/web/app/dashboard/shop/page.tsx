@@ -1,13 +1,17 @@
 'use client';
 
 import { useEffect, useState, useRef, useCallback } from 'react';
+import { ask, notify } from '../../../lib/ui/dialogs'
+import PageLoader from '@/components/ui/PageLoader';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { apiFetch } from '../../../lib/http';
 import { useAuthStore } from '../../../store/auth.store';
 import { uploadFile } from '../../../lib/supabase';
 import { findSellerByOwner } from '../../../lib/seller-store';
-import { Package, Edit, Trash2, Eye, CheckCircle, Clock, XCircle, Plus, ShoppingBag, Camera, X, Share2, Loader2 } from 'lucide-react';
+import { Package, Edit, Trash2, Eye, CheckCircle, Clock, XCircle, Plus, ShoppingBag, Camera, X, Share2, Loader2, ArrowUp, Zap } from 'lucide-react';
+import BoostDialog from '../../../components/market/BoostDialog';
+import { productTitleParts } from '../../../lib/market/title';
 
 /* طرح LQ (تینت طلایی) — همه‌ی دکمه‌های این صفحه از این استفاده می‌کنند */
 const LQ = 'bg-[rgba(199,166,106,0.12)] border border-[rgba(199,166,106,0.34)] text-[#9A6E38] rounded-[10px] transition-all duration-200 hover:-translate-y-0.5 hover:bg-[rgba(199,166,106,0.18)]';
@@ -23,7 +27,7 @@ function mapLocalProduct(up: Record<string, unknown>): Product {
   const cond = str(up.condition, 'new');
   return {
     id: String(up.id),
-    title: str(up.name, 'محصول'),
+    ...(() => { const t = productTitleParts(up); return { title: t.head, sub: t.tail }; })(),
     price: disc > 0 ? old : price,
     discountPrice: disc > 0 ? price : undefined,
     discountPercent: disc > 0 ? disc : undefined,
@@ -49,7 +53,7 @@ function mapServerAd(a: Record<string, unknown>): Product {
   const disc = n(a.discountPercent);
   return {
     id: String(a.id),
-    title: s(a.title, 'محصول'),
+    ...(() => { const t = productTitleParts(a); return { title: t.head, sub: t.tail }; })(),
     price: disc > 0 ? Math.round(price / (1 - disc / 100)) : price,
     discountPrice: disc > 0 ? price : undefined,
     discountPercent: disc > 0 ? disc : undefined,
@@ -81,6 +85,9 @@ function loadLocalProducts(owner: { id?: string; phone?: string }): Product[] {
 interface Product {
   id: string;
   title: string;
+  /* برند و مدل — خطِ دومِ عنوان. صاحبِ آگهی هم باید پنج چوبش را از
+     هم تشخیص بدهد، مخصوصاً وقتی می‌خواهد یکی را حذف یا ارتقا کند. */
+  sub: string;
   price: number;
   discountPrice?: number;
   discountPercent?: number;
@@ -135,11 +142,36 @@ const STORY_TEXT_SIZES  = [{ label: 'S', value: 13 }, { label: 'M', value: 17 },
 
 export default function MyShopPage() {
   const router = useRouter();
-  const { user } = useAuthStore();
+  const { user, _hydrated, authChecked } = useAuthStore();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('all');
   const [deleting, setDeleting] = useState<string | null>(null);
+  /* آگهی‌ای که پنجره‌ی ارتقایش باز است */
+  const [boostFor, setBoostFor] = useState<{ id: string; title: string } | null>(null);
+  /* پیامِ بازگشت از درگاهِ ارتقا — از کوئریِ نشانی */
+  const [boostMsg, setBoostMsg] = useState("");
+
+  /* ── بازگشت از درگاهِ ارتقا ──
+     کالبک به همین صفحه برمی‌گردد با `?boost=...`. بدونِ این پیام،
+     فروشنده پول داده و فقط یک صفحه‌ی معمولی می‌بیند و نمی‌داند
+     کارش انجام شد یا نه. */
+  useEffect(() => {
+    const q = new URLSearchParams(window.location.search);
+    const st = q.get("boost");
+    if (!st) return;
+    const kind = q.get("kind");
+    setBoostMsg(
+      st === "ok"
+        ? (kind === "urgent" ? "آگهی شما فوری شد و در نوارِ فوریِ بازار نشسته است."
+                             : "آگهی شما تازه‌سازی شد و به بالای فهرست رفت.")
+      : st === "cancelled" ? "پرداخت لغو شد — مبلغی کم نشده است."
+      : (q.get("reason") || "ارتقای آگهی انجام نشد."),
+    );
+    /* نشانی تمیز می‌شود تا رفرش دوباره همین پیام را نیاورد */
+    window.history.replaceState({}, "", window.location.pathname);
+    window.setTimeout(() => setBoostMsg(""), 8000);
+  }, []);
 
   // ── Story state ──
   const [stories, setStories] = useState<SellerStory[]>([]);
@@ -174,7 +206,7 @@ export default function MyShopPage() {
   }, [user]);
 
   const handleDelete = async (id: string) => {
-    if (!confirm('آیا مطمئنی؟')) return;
+    if (!(await ask('این آگهی حذف شود؟', { body: 'آگهی از بیلیارد بازار برداشته می‌شود و برنمی‌گردد.' }))) return;
     setDeleting(id);
     /* آگهی قدیمی باقی‌مانده در همین مرورگر را هم پاک کن */
     try {
@@ -221,7 +253,7 @@ export default function MyShopPage() {
       URL.revokeObjectURL(storyDraft.previewUrl);
       setStoryDraft(null);
     } catch {
-      alert('خطا در آپلود استوری. لطفاً دوباره تلاش کنید.');
+      notify('آپلود استوری انجام نشد — دوباره تلاش کنید.');
     } finally {
       setUploadingStory(false);
     }
@@ -253,12 +285,22 @@ export default function MyShopPage() {
     totalViews: products.reduce((sum, p) => sum + (p.views || 0), 0),
   };
 
+  /* تا تأییدِ سرور «هیچ» نشان نمی‌دهیم — صفحه‌ی خالی برای کاربر یعنی
+     «خراب است»، نه «صبر کن». */
+  if (!_hydrated || !authChecked) return <PageLoader />;
   if (!user) return null;
+
+  /* ── فروشنده یا آگهی‌دهنده‌ی معمولی ──
+     همین صفحه هر دو را سرویس می‌دهد، چون ثبتِ آگهی برای همه باز است.
+     ولی «فروشگاه من» و استوریِ فروشگاه فقط برای فروشنده معنا دارند؛
+     برای کاربری که یک چوب دستِ‌دوم گذاشته، جعبه‌ی استوریِ خالی یعنی
+     یک قابلیتِ ناموجود که به‌نظر خراب می‌رسد. */
+  const isSeller = [user.primaryRole, ...(user.secondaryRoles ?? [])].includes('seller');
 
   return (
     <div className="max-w-5xl mx-auto pb-10">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">فروشگاه من</h1>
+        <h1 className="text-2xl font-bold text-gray-800">{isSeller ? 'فروشگاه من' : 'آگهی‌های من'}</h1>
         <Link href="/shop/new"
           className={`${LQ} px-5 py-2.5 text-sm flex items-center gap-2 font-bold`}>
           <Plus size={16} />
@@ -266,7 +308,8 @@ export default function MyShopPage() {
         </Link>
       </div>
 
-      {/* ── بخش استوری‌ها ── */}
+      {/* ── بخش استوری‌ها — فقط فروشنده ── */}
+      {isSeller && (
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 mb-6 overflow-hidden">
         <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
           <div className="flex items-center gap-2">
@@ -400,6 +443,7 @@ export default function MyShopPage() {
           ) : null}
         </div>
       </div>
+      )}
 
       {/* آمار */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
@@ -486,6 +530,10 @@ export default function MyShopPage() {
                         </span>
                       )}
                     </div>
+                    {/* برند و مدل، خطِ دوم با فونتِ معمولی */}
+                    {product.sub && (
+                      <div className="text-xs text-gray-500 truncate mb-1">{product.sub}</div>
+                    )}
                     <div className="flex flex-wrap gap-2 text-xs text-gray-500 mb-2">
                       <span>{categoryLabels[product.category]}</span>
                       <span>•</span>
@@ -522,6 +570,19 @@ export default function MyShopPage() {
                       className="p-2 text-gray-400 hover:text-[#9A6E38] hover:bg-[rgba(199,166,106,0.12)] rounded-xl transition-colors" title="ویرایش">
                       <Edit size={18} />
                     </Link>
+                    {/* ── ارتقا ──
+                        کنارِ خودِ آگهی، چون کاری است که روی همان یک
+                        آگهی انجام می‌شود. صفحه‌ی جدا یعنی فروشنده
+                        باید آگهی را آن‌جا دوباره پیدا کند. */}
+                    <button onClick={() => setBoostFor({
+                      id: product.id,
+                      /* پنجره‌ی ارتقا باید بگوید کدام آگهی — «چوب اسنوکر»
+                         تنها، بینِ پنج چوب، هیچ‌چیز نمی‌گوید. */
+                      title: [product.title, product.sub].filter(Boolean).join(' '),
+                    })}
+                      className="p-2 text-gray-400 hover:text-[#9A6E38] hover:bg-[rgba(199,166,106,0.12)] rounded-xl transition-colors" title="ارتقای آگهی">
+                      <ArrowUp size={18} />
+                    </button>
                     <button onClick={() => handleDelete(product.id)} disabled={deleting === product.id}
                       className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-colors disabled:opacity-50" title="حذف">
                       <Trash2 size={18} />
@@ -533,6 +594,24 @@ export default function MyShopPage() {
           )}
         </div>
       </div>
+
+      {boostFor && (
+        <BoostDialog productId={boostFor.id} title={boostFor.title}
+          onClose={() => setBoostFor(null)} />
+      )}
+
+      {boostMsg && (
+        <div style={{
+          position: "fixed", insetInline: 0, bottom: 22, margin: "0 auto", zIndex: 95,
+          width: "fit-content", maxWidth: "calc(100% - 32px)",
+          background: "#1A1A18", color: "#fff", borderRadius: 12,
+          padding: "11px 18px", fontSize: 13, fontWeight: 700,
+          fontFamily: "var(--font-base)", boxShadow: "0 10px 30px rgba(0,0,0,0.25)",
+          display: "flex", alignItems: "center", gap: 8,
+        }}>
+          <Zap size={15} /> {boostMsg}
+        </div>
+      )}
     </div>
   );
 }

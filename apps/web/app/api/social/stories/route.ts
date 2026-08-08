@@ -7,6 +7,8 @@ import { redactList } from '@/lib/privacy'
 import { getSupabaseServer } from '@/lib/supabase-server'
 import { pickStoryRole } from '@/lib/story-store'
 import { publicDisplayName } from '@/lib/public-name'
+import { ROLE_MAP, type RoleValue } from '@/lib/roles'
+import { sb } from '@/lib/finance/db'
 
 /* سقف استوری دیگر هاردکد نیست — از تنظیمات ادمین (به تفکیک نقش) و
    بسته‌ی خریداری‌شده می‌آید. اعداد قبلی به‌عنوان پیش‌فرض در مایگریشن
@@ -155,10 +157,22 @@ export async function POST(req: NextRequest) {
     )
   }
 
+  /* نقشِ اصلیِ کاربر — همان نشانی که روی استوری می‌نشیند */
+  const { data: meRow } = await sb().from('users')
+    .select('"primaryRole"').eq('id', ownerKey).maybeSingle()
+  const myRole = (meRow as { primaryRole?: string } | null)?.primaryRole ?? ''
+  const roleMeta = myRole ? ROLE_MAP[myRole as RoleValue] : undefined
+
   const story: SStory = {
     id: `st-${Date.now()}-${Math.floor(Math.random() * 1e4)}`,
     ownerKey, userName: s.userName || 'کاربر',
-    roleKey: s.roleKey || 'player', roleLabel: s.roleLabel || 'بازیکن', roleColor: s.roleColor || '#06b6d4',
+    /* ── نشانِ نقش از سرور، نه از کلاینت ──
+       تا امروز این سه هرچه مرورگر می‌فرستاد پذیرفته می‌شد — یعنی هر
+       کسی می‌توانست استوری‌اش را با نشانِ «باشگاه‌دار» منتشر کند.
+       حالا از نقشِ اصلیِ خودِ کاربر خوانده می‌شود. */
+    roleKey: roleMeta?.value ?? 'player',
+    roleLabel: roleMeta?.label ?? 'بازیکن',
+    roleColor: roleMeta?.color ?? '#06b6d4',
     avatar: s.avatar || 'ک', logoUrl: s.logoUrl, mediaUrl: s.mediaUrl, caption: s.caption || '', createdAt: now,
   }
   live.unshift(story)

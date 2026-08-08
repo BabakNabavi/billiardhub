@@ -27,7 +27,7 @@ const LINE   = '#E7E2D6';
 
 export default function LoginPage() {
   const router          = useRouter();
-  const { setAuth, user, _hydrated } = useAuthStore();
+  const { setAuth, user, _hydrated, authChecked } = useAuthStore();
   const [phone, setPhone]       = useState('');
   const [password, setPassword] = useState('');
   const [showPass, setShowPass] = useState(false);
@@ -49,10 +49,27 @@ export default function LoginPage() {
     return n && /^\/(?!\/)/.test(n) ? n : '/dashboard';
   })();
 
-  /* اگه کاربر لاگین هست مستقیم برود سر کارش */
+  /* ── اگه کاربر لاگین هست مستقیم برود سر کارش ──
+     ⚠️ اینجا حلقه‌ی ریدایرکت می‌ساخت و همان «صفحه‌ی سفید» بود:
+
+       ۱) کوکیِ نشست منقضی می‌شد، ولی شیءِ کاربر در localStorage
+          می‌ماند (آن‌جا تاریخِ انقضا ندارد).
+       ۲) کاربر /dashboard/club را باز می‌کرد؛ میدل‌ور کوکیِ معتبر
+          نمی‌دید و ۳۰۷ می‌داد به /login?next=/dashboard/club
+       ۳) همین افکت `user` را در localStorage می‌دید و دوباره به
+          /dashboard/club می‌فرستاد
+       ۴) برگرد به مرحله‌ی ۲ — بی‌پایان
+
+     مرورگر وسطِ این رفت‌وبرگشت هیچ‌وقت چیزی رندر نمی‌کرد: صفحه‌ی
+     سفید با نوارِ بالا. و چون فقط وقتی رخ می‌داد که نشست منقضی شده
+     باشد، «گاهی» اتفاق می‌افتاد.
+
+     `authChecked` یعنی سرور هویت را تأیید کرده. با آن، کاربری که
+     فقط در localStorage «وارد» است این‌جا نگه داشته می‌شود تا
+     دوباره وارد شود. */
   useEffect(() => {
-    if (_hydrated && user) router.replace(nextPath);
-  }, [_hydrated, user, router, nextPath]);
+    if (_hydrated && authChecked && user) router.replace(nextPath);
+  }, [_hydrated, authChecked, user, router, nextPath]);
 
   /* پیام خطا دیگر خودش بسته نمی‌شود.
 
@@ -101,7 +118,15 @@ export default function LoginPage() {
     </div>
   );
 
-  if (user) return null;
+  /* ── چرا اینجا هم `authChecked` لازم است ──
+     `if (user) return null` یعنی صفحه هیچ‌چیز رندر نمی‌کند و منتظر
+     می‌ماند تا افکتِ بالا کاربر را ببرد. ولی اگر آن افکت (به‌درستی)
+     نبرد — چون سرور هنوز تأیید نکرده — این خطْ صفحه را برای همیشه
+     خالی نگه می‌داشت.
+
+     یعنی حتی بعد از بستنِ حلقه‌ی ریدایرکت، همین یک خط به‌تنهایی
+     صفحه‌ی سفید می‌ساخت. */
+  if (user && authChecked) return null;
 
   return (
     <div dir="rtl" className="au-root">

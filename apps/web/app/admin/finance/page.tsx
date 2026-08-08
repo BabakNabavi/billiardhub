@@ -4,6 +4,7 @@
    همه‌ی داده‌ها از /api/admin/finance می‌آید (RBAC سمت سرور: فقط ادمین). */
 
 import { useCallback, useEffect, useState } from 'react'
+import { notify } from '../../../lib/ui/dialogs'
 import { apiFetch } from '../../../lib/http'
 import CommissionPanel from '../../../components/admin/CommissionPanel'
 import PayoutOrders from '../../../components/admin/PayoutOrders'
@@ -26,6 +27,7 @@ interface Data {
     platformCommission: number; cancellationFee: number; netPlatformRevenue: number
     /* درآمدِ تبلیغات — مهاجرتِ ۰۵۸ */
     adRevenue: number; adRefunds: number; adNetRevenue: number
+    boostRevenue: number; boostRefunds: number; boostNetRevenue: number
     commissionFromReservations: number; commissionFromTournaments: number
     /* بدهی به باشگاه‌ها */
     clubEarnings: number; payableNow: number; inFlightSettlement: number
@@ -65,7 +67,7 @@ export default function AdminFinance() {
         body: JSON.stringify(body),
       })
       const j = await r.json().catch(() => ({}))
-      if (!r.ok) alert(j?.message || 'عملیات ناموفق بود')
+      if (!r.ok) notify(j?.message || 'عملیات ناموفق بود')
       await load()
     } finally { setBusy('') }
   }
@@ -125,6 +127,7 @@ export default function AdminFinance() {
             <Stat label="از مسابقات" value={o.tournamentRevenue} icon={<TrendingUp size={15} />} muted />
             {/* تبلیغات سهمِ باشگاه ندارد: کلِ مبلغ درآمدِ پلتفرم است */}
             <Stat label="از تبلیغات" value={o.adNetRevenue ?? 0} icon={<TrendingUp size={15} />} />
+            <Stat label="از ارتقای آگهی" value={o.boostNetRevenue ?? 0} icon={<TrendingUp size={15} />} />
             <Stat label="کمیسیون" value={o.platformCommission} icon={<Wallet size={15} />} />
             <Stat label="جریمه لغو" value={o.cancellationFee} icon={<Wallet size={15} />} />
             <Stat label="در انتظار تسویه" value={o.inFlightSettlement} icon={<ArrowDownToLine size={15} />} />

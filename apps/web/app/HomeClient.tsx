@@ -1224,7 +1224,17 @@ useEffect(() => {
               اتصال بی‌مصرف باز می‌کرد */}
       <style>{`
         :root { --hero-bottom-gap: 5px; }
-        @keyframes fadeUp      { from{opacity:0;transform:translateY(30px) scale(0.97);filter:blur(5px);}to{opacity:1;transform:none;filter:blur(0);} }
+        /* ── چرا blur از این کی‌فریم برداشته شد ──
+           حالتِ شروع filter:blur(5px) داشت. یعنی در تمام مدتِ ورود،
+           تیتر و زیرنویس مه‌آلود بودند — و چون تایم‌لاین کند بود، کاربر
+           یک ثانیه‌ی کامل متنِ ناخوانا می‌دید و فکر می‌کرد صفحه گیر
+           کرده. روی متنِ فارسی بدتر هم هست: حروفِ چسبان در بلور به هم
+           می‌ریزند.
+
+           جابه‌جایی هم از ۳۰ به ۱۴ پیکسل و مقیاس از ۰٫۹۷ به ۰٫۹۹ آمد.
+           حسِ ورود می‌ماند، ولی به‌جای «چیزی دارد می‌آید» می‌شود «چیزی
+           همین‌جا بود». */
+        @keyframes fadeUp      { from{opacity:0;transform:translateY(14px) scale(0.99);}to{opacity:1;transform:none;} }
         @keyframes fadeTagIn   { from{opacity:0;transform:translateY(-5px);}to{opacity:1;transform:none;} }
         @keyframes pulse2      { 0%,100%{opacity:1;}50%{opacity:0.20;} }
         @keyframes slideBar    { from{width:0;}to{width:100%;} }
@@ -1232,13 +1242,25 @@ useEffect(() => {
         @keyframes dropUp      { from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;} }
         @keyframes gentlePulse { 0%,100%{opacity:1;}50%{opacity:0.25;} }
 
-        /* Hero entrance — runs ONCE on mount. No key prop = no replay on slide change. */
-        .ha { animation:fadeUp 1.5s cubic-bezier(0.22,1,0.36,1) 0.08s both; }
-        .hb { animation:fadeUp 1.3s cubic-bezier(0.22,1,0.36,1) 0.26s both; }
-        .hc { animation:fadeUp 1.1s cubic-bezier(0.22,1,0.36,1) 0.46s both; }
-        .hd { animation:fadeUp 1.0s cubic-bezier(0.22,1,0.36,1) 0.63s both; }
-        .he { animation:fadeUp 0.9s cubic-bezier(0.22,1,0.36,1) 0.78s both; }
-        .hf { animation:fadeUp 0.8s cubic-bezier(0.22,1,0.36,1) 0.90s both; }
+        /* Hero entrance — runs ONCE on mount. No key prop = no replay on slide change.
+
+           ── چرا تایم‌لاین کوتاه شد ──
+           نسخه‌ی قبلی تا ۱٫۷ ثانیه طول می‌کشید (hf. = ۰٫۹۰ تأخیر +
+           ۰٫۸ اجرا). واژه‌ی both یعنی هر عنصر در طولِ تأخیرش کاملاً نامرئی
+           است، پس کاربر روی اتصالِ سریع هم صفحه‌ای می‌دید که تکه‌تکه و
+           کند جا می‌افتاد — شبیهِ کندیِ سایت، در حالی که سرور در ۰٫۲
+           ثانیه جواب داده بود.
+
+           انیمیشنی که بیش از نیم‌ثانیه طول بکشد دیگر «ورود» خوانده
+           نمی‌شود؛ «تأخیر» خوانده می‌شود. حالا کلِ زنجیره زیرِ
+           ۰٫۷ ثانیه تمام می‌شود و پلکانِ بینشان هم تنگ‌تر شده تا
+           به‌جای شش موجِ جدا، یک موج دیده شود. */
+        .ha { animation:fadeUp 0.52s cubic-bezier(0.22,1,0.36,1) 0.00s both; }
+        .hb { animation:fadeUp 0.52s cubic-bezier(0.22,1,0.36,1) 0.04s both; }
+        .hc { animation:fadeUp 0.48s cubic-bezier(0.22,1,0.36,1) 0.10s both; }
+        .hd { animation:fadeUp 0.46s cubic-bezier(0.22,1,0.36,1) 0.16s both; }
+        .he { animation:fadeUp 0.44s cubic-bezier(0.22,1,0.36,1) 0.22s both; }
+        .hf { animation:fadeUp 0.42s cubic-bezier(0.22,1,0.36,1) 0.28s both; }
 
         /* ══ LQ (Liquid Quality) Buttons — pill style ══ */
         .btn-primary,.btn-green,.btn-outline,.btn-ghost-dark {

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState, useCallback } from 'react';
+import { notify } from '../../../lib/ui/dialogs'
 import Select from '../../../components/ui/Select'
 import VerificationBadges from '../../../components/VerificationBadges'
 import { useRouter } from 'next/navigation';
@@ -31,9 +32,12 @@ import type { ClosureOption } from '../../../lib/booking/closure';
 import { bookingStartsAt } from '../../../lib/finance/cancellation';
 import FaTimeSelect from '../../../components/ui/FaTimeSelect';
 import ClubLogo from '../../../components/club/ClubLogo';
-import { Card, SectionTitle, InputField, SelectField, ClosedToggle, SaveBtn } from '../../../components/dashboard/club/fields';
+import { Card, SectionTitle, InputField, SelectField, TimeField, ClosedToggle, SaveBtn } from '../../../components/dashboard/club/fields';
 import HoursTab from '../../../components/dashboard/club/HoursTab';
 import GalleryTab from '../../../components/dashboard/club/GalleryTab';
+import TournamentRegistrations from '../../../components/dashboard/club/TournamentRegistrations';
+import TournamentPoster from '../../../components/dashboard/club/TournamentPoster';
+import ConfirmDialog from '../../../components/ui/ConfirmDialog';
 import JalaliDatePicker from '../../../components/ui/JalaliDatePicker';
 import { toJalali, jalaliToGregorian, faDate, faTimeRange } from '../../../lib/jalali';
 import FaNumberInput, { toFa as faDigit, groupFa, amountInWords } from '../../../components/ui/FaNumberInput';
@@ -41,6 +45,10 @@ import {
   GAME_TYPE_LABELS, STATUS_LABELS, STATUS_COLORS, formatFee,
   type Tournament, type GameType,
 } from '../../../lib/mock-tournaments';
+import {
+  DISCIPLINE_CHOICES, defaultFormat, formatLabel, formatIsLatin, KIND_LABELS,
+  kindsFor, kindOf, optionsForKind, normalizeDiscipline, posterFor, type Discipline,
+} from '../../../lib/tournaments/formats';
 
 const GOLD = '#C7A66A';
 const DARK = '#1A1A18';
@@ -225,17 +233,17 @@ type TabKey = 'dashboard' | 'info' | 'tables' | 'hours' | 'bookings' | 'schedule
 interface DbTournament {
   id: string; club_id: string; title: string; description?: string | null;
   discipline?: string; max_players: number; entry_fee: number;
-  prize?: string | null; venue?: string | null; city?: string | null;
+  prize?: string | null; rules?: string | null; cover_url?: string | null;
+  venue?: string | null; city?: string | null;
   starts_at?: string | null; registration_ends_at?: string | null;
+  registration_starts_at?: string | null;
   status: string; seatsLeft?: number; match_format?: string | null;
 }
 
-/* برچسب فرمت مسابقه — همان فهرستی که دراپ‌داون ساخت نشان می‌دهد،
-   تا کارت فهرست و فرم یک زبان داشته باشند. */
-const FORMAT_LABELS: Record<string, string> = {
-  bo3: 'Best of 3', bo5: 'Best of 5', bo7: 'Best of 7',
-  bo9: 'Best of 9', bo11: 'Best of 11',
-};
+/* برچسبِ فرمت از منبعِ واحد می‌آید (`lib/tournaments/formats`) — همان
+   جایی که فرم و اعتبارسنجیِ سرور هم از آن می‌خوانند. پیش‌تر همین
+   جدول سه‌جا تکرار شده بود و هر بار که فرمتِ تازه‌ای اضافه می‌شد،
+   یکی از آن سه از قلم می‌افتاد. */
 
 /* نگاشت وضعیت‌های سرور به همان چیزی که این صفحه از قبل می‌شناسد */
 const T_STATUS: Record<string, Tournament['status']> = {
@@ -267,18 +275,26 @@ function isoToTehranParts(iso: string): { jy: number; jm: number; jd: number; hh
 function fromDbTournament(r: DbTournament): Tournament {
   const parts = r.starts_at ? isoToTehranParts(r.starts_at) : null;
   const deadline = r.registration_ends_at ? isoToTehranParts(r.registration_ends_at) : null;
+  const opens = r.registration_starts_at ? isoToTehranParts(r.registration_starts_at) : null;
   return {
     id: r.id,
     clubId: r.club_id, clubName: r.venue ?? '',
-    banner: '/images/clubs/club1.png',
+    banner: r.cover_url || posterFor(normalizeDiscipline(r.discipline)),
+    /* نشانیِ خامِ پوستر هم نگه داشته می‌شود: `banner` همیشه پر است
+       (با پیش‌فرض)، پس از رویش نمی‌شود فهمید باشگاه‌دار پوستری
+       گذاشته یا نه — و فرمِ ویرایش دقیقاً همین را لازم دارد. */
+    coverUrl: r.cover_url ?? '',
     name: r.title, description: r.description ?? '',
-    gameType: (r.discipline ?? 'snooker') as Tournament['gameType'],
+    gameType: normalizeDiscipline(r.discipline),
     date: parts ? `${parts.jy}/${parts.jm}/${parts.jd}` : '',
     startTime: parts ? `${parts.hh}:${parts.mm}` : '',
     registrationDeadline: deadline ? `${deadline.jy}/${deadline.jm}/${deadline.jd}` : '',
+    registrationDeadlineTime: deadline ? `${deadline.hh}:${deadline.mm}` : '',
+    regOpenDate: opens ? `${opens.jy}/${opens.jm}/${opens.jd}` : '',
+    regOpenTime: opens ? `${opens.hh}:${opens.mm}` : '',
     maxPlayers: (r.max_players as Tournament['maxPlayers']),
     entryFee: r.entry_fee,
-    prizeInfo: r.prize ?? '', rules: '', matchFormat: r.match_format ?? '',
+    prizeInfo: r.prize ?? '', rules: r.rules ?? '', matchFormat: r.match_format ?? '',
     paymentMethod: 'online',
     cardNumber: '', cardHolder: '', bankName: '',
     status: T_STATUS[r.status] ?? 'upcoming',
@@ -288,14 +304,18 @@ function fromDbTournament(r: DbTournament): Tournament {
        نمی‌شود فهمید مسابقه منتشر شده یا نه — و دکمه‌ی انتشار دقیقاً
        همین را لازم دارد. */
     rawStatus: r.status,
+    /* زمانِ خامِ باز شدنِ ثبت‌نام. `regOpenDate` شمسیِ نمایشی است و با
+       آن نمی‌شود فهمید زمان‌بندی گذشته یا هنوز نیامده — و دکمه‌ی
+       انتشار دقیقاً همین را لازم دارد. */
+    rawRegOpen: r.registration_starts_at ?? '',
     /* ظرفیت پرشده از سرور می‌آید — شمارش محلی قابل اتکا نیست */
     registeredCount: Math.max(0, r.max_players - (r.seatsLeft ?? r.max_players)),
-  } as Tournament & { rawStatus: string };
+  } as Tournament & { rawStatus: string; rawRegOpen: string };
 }
 
 export default function ClubDashboardPage() {
   const router = useRouter();
-  const { user, _hydrated } = useAuthStore();
+  const { user, _hydrated, authChecked } = useAuthStore();
 
   /* نام مدیرِ باشگاه = نام و نام خانوادگیِ همان شخصی که موقع ثبت‌نام
      احراز هویت شده. این فیلد ویرایش‌پذیر نیست؛ اگر باشد، باشگاه می‌تواند
@@ -304,10 +324,17 @@ export default function ClubDashboardPage() {
      این‌جا فقط بازتابِ همان است، نه تنها خط دفاع. */
   const verifiedManagerName = `${user?.firstName ?? ''} ${user?.lastName ?? ''}`.trim();
 
-  /* بدون این گارد، کاربر لاگین‌نشده برای همیشه در «در حال بارگذاری» می‌ماند */
+  /* بدون این گارد، کاربر لاگین‌نشده برای همیشه در «در حال بارگذاری» می‌ماند.
+     ── چرا `authChecked` هم لازم است ──
+     `_hydrated` فقط یعنی localStorage خوانده شد. اگر ذخیره‌گاه پاک
+     شده باشد ولی کوکیِ نشست زنده باشد — که در سافاریِ آی‌اواس عادی
+     است — همین گارد کاربرِ کاملاً واردشده را به /login می‌فرستاد،
+     و چون بلافاصله برمی‌گشت، نتیجه‌اش یک صفحه‌ی سفید بود.
+
+     حالا تا وقتی سرور جواب نداده، تصمیمی گرفته نمی‌شود. */
   useEffect(() => {
-    if (_hydrated && !user) router.push('/login');
-  }, [_hydrated, user, router]);
+    if (_hydrated && authChecked && !user) router.push('/login');
+  }, [_hydrated, authChecked, user, router]);
 
   const [clubs, setClubs] = useState<Club[]>([]);
   const [selectedClub, setSelectedClub] = useState<Club | null>(null);
@@ -428,6 +455,12 @@ export default function ClubDashboardPage() {
   const [liveStats, setLiveStats] = useState<{ members: number; tournaments: number } | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
+  /* حذفِ مسابقه — تأیید در پنجره‌ی خودِ پنل، نه `confirm` مرورگر */
+  /* کدام مسابقه‌ی پایان‌یافته باز است — خالی یعنی همه جمع */
+  const [openPast, setOpenPast] = useState('');
+  const [delTourn, setDelTourn] = useState<{ id: string; name: string } | null>(null);
+  const [delTournBusy, setDelTournBusy] = useState(false);
+  const [delTournMsg, setDelTournMsg] = useState('');
 
   // Working hours
   const [hoursForm, setHoursForm] = useState<WorkingHours>(DEFAULT_HOURS);
@@ -440,13 +473,29 @@ export default function ClubDashboardPage() {
   const [tForm, setTForm] = useState({
     name: '', description: '', gameType: 'snooker' as GameType,
     date: '', startTime: '', registrationDeadline: '', registrationDeadlineTime: '23:59',
+    /* ── باز شدنِ ثبت‌نام ──
+       `now` یعنی با انتشار همان لحظه باز می‌شود. `scheduled` یعنی
+       مسابقه در «بزودی» می‌ماند و سرِ ساعتِ زیر خودش باز می‌شود
+       (مهاجرت ۰۷۵). */
+    regOpenMode: 'now' as 'now' | 'scheduled',
+    regOpenDate: '', regOpenTime: '10:00',
     maxPlayers: '16', entryFee: '', prizeInfo: '', rules: '', matchFormat: 'bo5',
+    /* خالی یعنی «پوسترِ پیش‌فرضِ همان بازی» */
+    coverUrl: '',
     paymentMethod: 'card_transfer' as 'online' | 'card_transfer',
     cardNumber: '', cardHolder: '', bankName: '',
   });
   const [tLoading, setTLoading] = useState(false);
   /* خطای فرمِ مسابقه — درون صفحه، نه پنجره‌ی خودِ مرورگر */
   const [tError, setTError] = useState('');
+  /* ── ویرایشِ مسابقه ──
+     شناسه‌ی مسابقه‌ای که در حالِ ویرایش است؛ خالی یعنی فرم در حالتِ
+     «ساخت» است. تا امروز هیچ راهی برای اصلاحِ مسابقه‌ی ساخته‌شده
+     نبود: یک غلطِ تایپی در عنوان یا قانونی که جا افتاده بود، فقط با
+     لغو و ساختِ دوباره درست می‌شد — و مسابقه‌ای که ثبت‌نام داشت
+     اصلاً قابلِ لغو نبود. مسیرِ PATCH از قبل وجود داشت و بی‌استفاده
+     مانده بود. */
+  const [tEditingId, setTEditingId] = useState('');
   /* شناسه‌ی مسابقه‌ای که وضعیتش در حالِ تغییر است */
   const [tStatusBusy, setTStatusBusy] = useState('');
 
@@ -1141,7 +1190,7 @@ export default function ClubDashboardPage() {
       setDeleteConfirm(false);
     } catch (err: any) {
       const msg = err?.response?.data?.message ?? 'خطا در حذف باشگاه';
-      alert(msg);
+      notify(msg);
     } finally {
       setDeleteLoading(false);
     }
@@ -1197,6 +1246,188 @@ export default function ClubDashboardPage() {
     });
   };
 
+  /* ── کارتِ کاملِ یک مسابقه ──
+     چون هم در فهرستِ جاری رندر می‌شود و هم داخلِ ردیفِ بازشده‌ی
+     مسابقاتِ پایان‌یافته. دو نسخه‌ی جدا یعنی هر تغییری باید دو جا
+     انجام شود و یکی‌شان دیر یا زود جا می‌ماند. */
+  const renderTournamentCard = (t: Tournament) => (
+            <Card key={t.id}>
+              <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 12 }}>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontWeight: 800, fontSize: 16, color: DARK }}>{t.name}</div>
+                  <div style={{ fontSize: 12, color: '#6B7280', marginTop: 4 }}>
+                    {GAME_TYPE_LABELS[t.gameType]} | {t.date} ساعت {t.startTime}
+                  </div>
+                  <div style={{ fontSize: 12, color: '#6B7280', marginTop: 2 }}>
+                    {t.registeredCount}/{t.maxPlayers} بازیکن | {formatFee(t.entryFee)}
+                    {/* `bh-latin` وگرنه PersianDigits همین‌جا هم
+                        «Race to 5» را «Race to ۵» می‌کند. ولی
+                        «۹۰ دقیقه» فارسی است و نباید لاتین شود. */}
+                    {t.matchFormat && (
+                      <span className={formatIsLatin(t.matchFormat) ? 'bh-latin' : undefined}>
+                        {' | '}{formatLabel(t.matchFormat)}
+                      </span>
+                    )}
+                  </div>
+                  {t.registrationDeadline && (
+                    <div style={{ fontSize: 11.5, color: '#9CA3AF', marginTop: 2 }}>
+                      مهلت ثبت‌نام تا {t.registrationDeadline}
+                    </div>
+                  )}
+                </div>
+                {/* نشانِ «دیده می‌شود / دیده نمی‌شود» مهم‌تر از نامِ
+                    فنیِ وضعیت است: باشگاه‌دار می‌خواهد بداند مسابقه‌اش
+                    عمومی هست یا نه. */}
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 5 }}>
+                  <span style={{
+                    fontSize: 11, padding: '4px 10px', borderRadius: 20, fontWeight: 700, whiteSpace: 'nowrap',
+                    background: `${STATUS_COLORS[t.status]}22`, color: STATUS_COLORS[t.status],
+                  }}>{STATUS_LABELS[t.status]}</span>
+                  {(() => {
+                    const raw = (t as Tournament & { rawStatus?: string }).rawStatus ?? '';
+                    const publicNow = raw !== 'draft' && raw !== 'cancelled';
+                    return (
+                      <span style={{
+                        fontSize: 10.5, padding: '3px 9px', borderRadius: 20, fontWeight: 700, whiteSpace: 'nowrap',
+                        background: publicNow ? 'rgba(48,197,90,0.12)' : 'rgba(0,0,0,0.05)',
+                        color: publicNow ? '#166534' : '#6B7280',
+                      }}>{publicNow ? 'در سایت دیده می‌شود' : 'پیش‌نویس — دیده نمی‌شود'}</span>
+                    );
+                  })()}
+                </div>
+              </div>
+              {/* ── چیدمانِ دکمه‌های کارت ──
+                  هفت دکمه با `flexWrap` و پهنای متن‌محور: در
+                  گوشی یک خطِ بلند، یک خطِ کوتاه، و یکی تنها زیرِ
+                  آن‌ها می‌ساخت — ته‌سطرها ناهموار و کارت شلوغ.
+
+                  حالا گریدِ ستون‌مساوی است: در گوشی دو ستون، در
+                  تبلت سه، و در دسکتاپ چهار. هر دکمه دقیقاً عرضِ
+                  ستونش را می‌گیرد، پس هر سطر تا انتها پر است. */}
+              <div className="tcard-actions">
+                {/* ── انتشار و ثبت‌نام ──
+                    پیش‌تر مسابقه با `draft` ساخته می‌شد و هیچ راهی
+                    برای انتشارش نبود؛ برای همیشه نامرئی می‌ماند. */}
+                {(() => {
+                  const raw = (t as Tournament & { rawStatus?: string }).rawStatus ?? '';
+                  const openAt = (t as Tournament & { rawRegOpen?: string }).rawRegOpen ?? '';
+                  /* زمان‌بندیِ باز شدنِ ثبت‌نام که هنوز نرسیده */
+                  const scheduled = !!openAt && Date.parse(openAt) > Date.now();
+                  const busy = tStatusBusy === t.id;
+                  const btn = (
+                    label: string, next: string, tone: 'go' | 'stop',
+                    extra: Record<string, unknown> = {},
+                  ) => (
+                    <button key={label} type="button" disabled={busy}
+                      onClick={() => void setTournamentStatus(t.id, next, extra)}
+                      style={{
+                        display: 'inline-flex', alignItems: 'center', gap: 5,
+                        padding: '6px 13px', borderRadius: 20, fontSize: 12, fontWeight: 700,
+                        fontFamily: 'var(--font-base)', cursor: busy ? 'not-allowed' : 'pointer',
+                        opacity: busy ? 0.55 : 1,
+                        border: `1px solid ${tone === 'go' ? 'rgba(48,197,90,0.34)' : 'rgba(0,0,0,0.14)'}`,
+                        background: tone === 'go' ? 'rgba(48,197,90,0.12)' : 'rgba(0,0,0,0.04)',
+                        color: tone === 'go' ? '#166534' : '#6B7280',
+                      }}>{busy ? 'در حال ذخیره…' : label}</button>
+                  );
+                  if (raw === 'draft' || raw === 'published') {
+                    /* ── وقتی باز شدنِ ثبت‌نام زمان‌بندی شده ──
+                       دکمه نباید وعده‌ی کاری را بدهد که سرور — درست —
+                       انجام نمی‌دهد: تا رسیدنِ آن ساعت، ثبت‌نام باز
+                       نمی‌شود. پیش‌تر همین دکمه زده می‌شد، هیچ‌چیز
+                       عوض نمی‌شد و باشگاه‌دار فکر می‌کرد خراب است.
+
+                       و راهِ نظرعوض‌کردن هم لازم است: «همین حالا»
+                       زمان‌بندی را برمی‌دارد و واقعاً باز می‌کند. */
+                    if (scheduled) {
+                      return <>
+                        {raw === 'draft' && btn('انتشار در «بزودی»', 'registration_open', 'go')}
+                        {btn('باز کردن ثبت‌نام همین حالا', 'registration_open', 'go',
+                          { registrationStartsAt: null })}
+                      </>;
+                    }
+                    return btn('انتشار و باز کردن ثبت‌نام', 'registration_open', 'go');
+                  }
+                  if (raw === 'registration_open') {
+                    return <>{btn('بستن ثبت‌نام', 'registration_closed', 'stop')}{btn('بازگشت به پیش‌نویس', 'draft', 'stop')}</>;
+                  }
+                  if (raw === 'registration_closed') {
+                    return btn('باز کردن دوباره‌ی ثبت‌نام', 'registration_open', 'go');
+                  }
+                  return null;
+                })()}
+                <Link href={`/tournaments/${t.id}`} style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '6px 13px', borderRadius: 20, fontSize: 12, fontWeight: 600, textDecoration: 'none', background: 'rgba(0,0,0,0.05)', border: '1px solid rgba(0,0,0,0.11)', color: '#374151' }}><Eye size={12} /> مشاهده</Link>
+                {/* دکمه‌ی «براکت» برداشته شد: از داخلِ «مدیریت و
+                    قرعه‌کشی» در دسترس است و آن‌جا جای درستش
+                    است — کنارِ خودِ قرعه‌کشی و ثبتِ نتیجه. یک
+                    ردیفِ هفت‌دکمه‌ای هم چیزی را آسان نمی‌کند. */}
+                {t.status === 'live' && (
+                  <Link href={`/tournaments/${t.id}/live`} style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '6px 13px', borderRadius: 20, fontSize: 12, fontWeight: 600, textDecoration: 'none', background: 'rgba(239,68,68,0.09)', border: '1px solid rgba(239,68,68,0.28)', color: '#dc2626' }}>● لایو</Link>
+                )}
+                {/* پنل برگزاری — قرعه‌کشی و ثبت نتیجه. بدون این لینک،
+                    هیچ راهی برای رسیدن به صفحه‌ی مدیریت مسابقه نبود.
+                    جای دکمه‌ی «ویرایش» را گرفت که هیچ‌وقت onClick نداشت. */}
+                {/* ویرایش — عنوان، توضیحات، قوانین، تاریخ، فرمت.
+                    مسیرِ PATCH از قبل بود و هیچ دکمه‌ای صدایش
+                    نمی‌زد؛ یک غلطِ تایپی در عنوان راهِ اصلاح
+                    نداشت. */}
+                <button type="button" onClick={() => startEditTournament(t)} style={{
+                  display: 'inline-flex', alignItems: 'center', gap: 5,
+                  padding: '6px 13px', borderRadius: 20, fontSize: 12, fontWeight: 700,
+                  border: '1px solid rgba(199,166,106,0.32)', background: 'rgba(199,166,106,0.08)',
+                  color: '#A07840', cursor: 'pointer', fontFamily: 'var(--font-base)',
+                }}><Pencil size={12} /> ویرایش</button>
+                <Link href={`/tournaments/${t.id}/admin`} style={{
+                  display: 'inline-flex', alignItems: 'center', gap: 5,
+                  padding: '6px 13px', borderRadius: 20, fontSize: 12, fontWeight: 700,
+                  textDecoration: 'none',
+                  border: '1px solid rgba(199,166,106,0.32)', background: 'rgba(199,166,106,0.08)', color: '#A07840',
+                }}><Settings size={12} /> مدیریت و قرعه‌کشی</Link>
+                <button onClick={() => setDelTourn({ id: t.id, name: t.name })} style={{
+                  display: 'inline-flex', alignItems: 'center', gap: 5,
+                  padding: '6px 13px', borderRadius: 20, fontSize: 12, fontWeight: 600,
+                  border: '1px solid rgba(239,68,68,0.28)', background: 'rgba(239,68,68,0.08)', color: '#dc2626', cursor: 'pointer', fontFamily: 'var(--font-base)',
+                }}><Trash2 size={12} /> حذف مسابقه</button>
+              </div>
+              <style>{`
+                .tcard-actions{
+                  display:grid; gap:7px; margin-top:2px;
+                  grid-template-columns:repeat(2,minmax(0,1fr));
+                }
+                .tcard-actions > *{
+                  width:100%; justify-content:center; text-align:center;
+                  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+                }
+                @media (min-width: 560px){
+                  .tcard-actions{ grid-template-columns:repeat(3,minmax(0,1fr)) }
+                }
+                @media (min-width: 900px){
+                  .tcard-actions{ grid-template-columns:repeat(4,minmax(0,1fr)) }
+                }
+              `}</style>
+
+              {/* فهرستِ ثبت‌نام‌کنندگان + ثبت‌نامِ حضوری.
+                  برای پیش‌نویس معنی ندارد: هنوز منتشر نشده و
+                  کسی نمی‌تواند ثبت‌نام کند. */}
+              {(t as Tournament & { rawStatus?: string }).rawStatus !== 'draft' && (
+                <TournamentRegistrations tournamentId={t.id}
+                  onChanged={() => selectedClub ? loadTournaments(selectedClub.id) : undefined} />
+              )}
+            </Card>
+  );
+  /* تأییدِ حذف — و بعدش یک پیامِ کوتاه. بدونِ پیام، کارت از فهرست
+     غیب می‌شد و باشگاه‌دار مطمئن نبود حذف انجام شد یا صفحه پرید. */
+  const confirmDeleteTournament = async () => {
+    if (!delTourn) return;
+    setDelTournBusy(true);
+    try {
+      await deleteTournament(delTourn.id);
+      setDelTournMsg(`«${delTourn.name}» از فهرستِ مسابقات حذف شد.`);
+      setDelTourn(null);
+      window.setTimeout(() => setDelTournMsg(''), 6000);
+    } finally { setDelTournBusy(false); }
+  };
+
   /* `JalaliDatePicker` مقدارش را «۱۴۰۵/۵/۱۵» می‌دهد، ولی ستون
      `starts_at` در دیتابیس timestamptz است. بدون این تبدیل، همان رشته‌ی
      شمسی مستقیم به Postgres می‌رفت و یا خطا می‌داد یا تاریخ بی‌معنی
@@ -1214,13 +1445,15 @@ export default function ClubDashboardPage() {
   /* انتشار / بستنِ ثبت‌نام / بازگشت به پیش‌نویس.
      گذرهای مجاز را سرور تعیین می‌کند؛ این‌جا فقط دکمه‌ی مناسب نشان
      داده می‌شود و پاسخِ خطا همان‌جا خوانده می‌شود. */
-  const setTournamentStatus = async (id: string, status: string) => {
+  const setTournamentStatus = async (
+    id: string, status: string, extra: Record<string, unknown> = {},
+  ) => {
     setTStatusBusy(id);
     setTError('');
     try {
       const r = await apiFetch(`/api/tournaments/${id}`, {
         method: 'PATCH', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status }),
+        body: JSON.stringify({ status, ...extra }),
       });
       const j = await r.json().catch(() => ({} as Record<string, unknown>));
       if (!r.ok) { setTError(String(j.message ?? 'تغییر وضعیت انجام نشد')); return; }
@@ -1259,12 +1492,23 @@ export default function ClubDashboardPage() {
           maxPlayers: parseInt(tForm.maxPlayers) || 16,
           entryFee: parseFloat(tForm.entryFee) || 0,
           prize: tForm.prizeInfo,
+          /* قوانین تا امروز اصلاً فرستاده نمی‌شد: فرم یک textarea
+             داشت، این‌جا در بدنه نبود، و ستونش هم در دیتابیس وجود
+             نداشت (مهاجرت ۰۶۸). یعنی هرچه باشگاه‌دار می‌نوشت با
+             اولین رفرش می‌رفت و صفحه‌ی عمومی همیشه خالی بود. */
+          rules: tForm.rules,
+          coverUrl: tForm.coverUrl,
           venue: selectedClub.name,
           city: (selectedClub as { city?: string }).city ?? '',
           startsAt: jalaliToIso(tForm.date, tForm.startTime || '00:00'),
           /* مهلت ثبت‌نام پیش‌تر اصلاً فرستاده نمی‌شد و همیشه NULL می‌ماند.
              حالا ساعتش هم از خودِ فرم می‌آید، نه ۲۳:۵۹ ثابت. */
           registrationEndsAt: jalaliToIso(tForm.registrationDeadline, tForm.registrationDeadlineTime || '23:59'),
+          /* زمان‌بندیِ باز شدن. سرور خودش وضعیت را به «بزودی»
+             برمی‌گرداند وقتی این پر باشد، پس این‌جا لازم نیست
+             دو جا یک تصمیم تکرار شود. */
+          registrationStartsAt: tForm.regOpenMode === 'scheduled'
+            ? jalaliToIso(tForm.regOpenDate, tForm.regOpenTime || '10:00') : null,
           matchFormat: tForm.matchFormat,
           status: publish ? 'registration_open' : 'draft',
         }),
@@ -1277,10 +1521,87 @@ export default function ClubDashboardPage() {
       setTForm({
         name: '', description: '', gameType: 'snooker', date: '', startTime: '',
         registrationDeadline: '', registrationDeadlineTime: '23:59',
+        regOpenMode: 'now', regOpenDate: '', regOpenTime: '10:00',
         maxPlayers: '16', entryFee: '', prizeInfo: '',
-        rules: '', matchFormat: 'bo5', paymentMethod: 'card_transfer',
+        rules: '', matchFormat: 'bo5', coverUrl: '', paymentMethod: 'card_transfer',
         cardNumber: '', cardHolder: '', bankName: '',
       });
+    } catch {
+      setTError('ارتباط با سرور برقرار نشد؛ دوباره تلاش کنید.');
+    } finally { setTLoading(false); }
+  };
+
+  /* ── ویرایشِ مسابقه ───────────────────────────────────────────
+     همان فرمِ ساخت دوباره استفاده می‌شود، نه یک فرمِ دوم: دو فرم
+     برای یک چیز یعنی هر تغییری باید دو جا انجام شود و یکی‌شان
+     دیر یا زود جا می‌ماند. */
+  const resetTForm = () => {
+    setTEditingId('');
+    setTForm({
+      name: '', description: '', gameType: 'snooker', date: '', startTime: '',
+      registrationDeadline: '', registrationDeadlineTime: '23:59',
+      regOpenMode: 'now', regOpenDate: '', regOpenTime: '10:00',
+      maxPlayers: '16', entryFee: '', prizeInfo: '',
+      rules: '', matchFormat: 'bo5', coverUrl: '', paymentMethod: 'card_transfer',
+      cardNumber: '', cardHolder: '', bankName: '',
+    });
+  };
+
+  const startEditTournament = (t: Tournament) => {
+    setTError('');
+    setTEditingId(t.id);
+    setTForm({
+      name: t.name, description: t.description ?? '',
+      gameType: t.gameType,
+      date: t.date, startTime: t.startTime || '14:00',
+      registrationDeadline: t.registrationDeadline,
+      registrationDeadlineTime: t.registrationDeadlineTime || '23:59',
+      regOpenMode: t.regOpenDate ? 'scheduled' : 'now',
+      regOpenDate: t.regOpenDate ?? '', regOpenTime: t.regOpenTime || '10:00',
+      maxPlayers: String(t.maxPlayers), entryFee: String(t.entryFee || ''),
+      prizeInfo: t.prizeInfo ?? '', rules: t.rules ?? '',
+      coverUrl: (t as Tournament & { coverUrl?: string }).coverUrl ?? '',
+      matchFormat: t.matchFormat || defaultFormat(t.gameType as Discipline),
+      paymentMethod: 'card_transfer',
+      cardNumber: '', cardHolder: '', bankName: '',
+    });
+    setTournamentTab('create');
+    if (typeof window !== 'undefined') window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const saveTournamentEdit = async () => {
+    if (!selectedClub || !tEditingId) return;
+    setTError('');
+    if (!tForm.name.trim()) { setTError('نام مسابقه الزامی است'); return; }
+    if (!tForm.date) { setTError('تاریخ برگزاری را انتخاب کنید'); return; }
+    setTLoading(true);
+    try {
+      /* فقط فیلدهای محتوایی. وضعیت مسیرِ خودش را دارد و مبلغ را هم
+         سرور اگر پرداختی انجام شده باشد رد می‌کند. */
+      const r = await apiFetch(`/api/tournaments/${tEditingId}`, {
+        method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: tForm.name,
+          description: tForm.description,
+          discipline: tForm.gameType,
+          matchFormat: tForm.matchFormat,
+          prize: tForm.prizeInfo,
+          rules: tForm.rules,
+          coverUrl: tForm.coverUrl,
+          maxPlayers: parseInt(tForm.maxPlayers) || 16,
+          entryFee: parseFloat(tForm.entryFee) || 0,
+          startsAt: jalaliToIso(tForm.date, tForm.startTime || '00:00'),
+          registrationEndsAt: jalaliToIso(tForm.registrationDeadline, tForm.registrationDeadlineTime || '23:59'),
+          registrationStartsAt: tForm.regOpenMode === 'scheduled'
+            ? jalaliToIso(tForm.regOpenDate, tForm.regOpenTime || '10:00') : null,
+        }),
+      });
+      const j = await r.json().catch(() => ({} as Record<string, unknown>));
+      if (!r.ok) { setTError(String(j.message ?? 'ویرایش انجام نشد')); return; }
+
+      await loadTournaments(selectedClub.id);
+      setTournamentTab('list');
+      resetTForm();
     } catch {
       setTError('ارتباط با سرور برقرار نشد؛ دوباره تلاش کنید.');
     } finally { setTLoading(false); }
@@ -1317,7 +1638,11 @@ export default function ClubDashboardPage() {
     setCoachSearch('');
     setLoadingCoaches(true);
     try {
-      const r = await fetch('/api/profiles/coach', { cache: 'no-store' });
+      /* `all=1` یعنی مربیانِ در انتظارِ تأیید هم بیایند. بدونِ آن، تا
+         وقتی ادمین اولین پروفایل را تأیید نکرده بود این فهرست خالی
+         بود و شبیهِ خرابی به‌نظر می‌رسید. تأییدنشده‌ها با نشانِ
+         «در انتظار تأیید» می‌آیند و قابلِ افزودن نیستند. */
+      const r = await apiFetch('/api/profiles/coach?all=1', { cache: 'no-store' });
       const j = await r.json().catch(() => null) as { profiles?: Record<string, unknown>[] } | null;
       const list = (j?.profiles ?? []).map(p => {
         const d = (p as { data?: Record<string, unknown> }).data ?? {};
@@ -1326,7 +1651,7 @@ export default function ClubDashboardPage() {
           id: String((p as { id?: string }).id ?? ''),
           firstName: s(d.firstNameFa) || s(d.name),
           lastName: s(d.lastNameFa),
-          verificationStatus: (p as { verified?: boolean }).verified ? 'verified' : 'pending',
+          verificationStatus: (p as { status?: string }).status === 'approved' ? 'verified' : 'pending',
           city: s(d.city),
           bio: s(d.bio) || s(d.fullBio),
           coachProfile: {
@@ -2973,7 +3298,15 @@ export default function ClubDashboardPage() {
             </div>
           </Card>
 
-          <div style={{ display: 'flex', gap: 8, marginBottom: 16, flexWrap: 'wrap' }}>
+          {/* ── فیلترها ──
+              `flexWrap` روی موبایل «لغو شده» را به خطِ دوم می‌انداخت
+              و ردیف نصفه می‌ماند. همان نوارِ کشیدنیِ تب‌های بالای
+              همین پنل: یک ردیف می‌ماند و اگر جا نشد کشیده می‌شود. */}
+          <DragScroll style={{
+            display: 'flex', gap: 5, marginBottom: 16,
+            background: '#fff', borderRadius: 14, padding: 5,
+            border: '1px solid #F0EDE8',
+          }}>
             {[
               { key: 'all',       label: 'همه'       },
               { key: 'pending',   label: 'در انتظار' },
@@ -2981,16 +3314,20 @@ export default function ClubDashboardPage() {
               { key: 'active',    label: 'فعال'      },
               { key: 'completed', label: 'تکمیل شده' },
               { key: 'cancelled', label: 'لغو شده'   },
-            ].map(f => (
-              <button key={f.key} onClick={() => setBookingFilter(f.key)} style={{
-                padding: '7px 14px', borderRadius: 20, fontSize: 12, fontWeight: 600, cursor: 'pointer',
-                border: `1px solid ${bookingFilter === f.key ? 'rgba(199,166,106,0.50)' : 'rgba(0,0,0,0.12)'}`,
-                background: bookingFilter === f.key ? 'rgba(199,166,106,0.14)' : 'rgba(0,0,0,0.04)',
-                color: bookingFilter === f.key ? '#A07840' : '#6B7280',
-                fontFamily: 'var(--font-base)',
-              }}>{f.label}</button>
-            ))}
-          </div>
+            ].map(f => {
+              const on = bookingFilter === f.key;
+              return (
+                <button key={f.key} onClick={() => setBookingFilter(f.key)} style={{
+                  flex: '0 0 auto', whiteSpace: 'nowrap',
+                  padding: '8px 14px', borderRadius: 20, fontSize: 12.5, fontWeight: 600, cursor: 'pointer',
+                  border: `1px solid ${on ? 'rgba(199,166,106,0.50)' : 'transparent'}`,
+                  background: on ? 'rgba(199,166,106,0.14)' : 'transparent',
+                  color: on ? '#A07840' : '#6B7280',
+                  fontFamily: 'var(--font-base)',
+                }}>{f.label}</button>
+              );
+            })}
+          </DragScroll>
           {bookingsError && (
             <div style={{ marginBottom: 12, padding: '10px 14px', borderRadius: 10, fontSize: 12.5, fontWeight: 700,
               background: 'rgba(239,68,68,0.07)', border: '1px solid rgba(239,68,68,0.22)', color: '#991B1B' }}>
@@ -3103,114 +3440,139 @@ export default function ClubDashboardPage() {
                     fontFamily: 'var(--font-base)', fontWeight: 700, marginTop: 12,
                   }}><Plus size={14} /> ثبت اولین مسابقه</button>
                 </Card>
-              ) : myTournaments.map(t => (
-                <Card key={t.id}>
-                  <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 12 }}>
-                    <div style={{ flex: 1 }}>
-                      <div style={{ fontWeight: 800, fontSize: 16, color: DARK }}>{t.name}</div>
-                      <div style={{ fontSize: 12, color: '#6B7280', marginTop: 4 }}>
-                        {GAME_TYPE_LABELS[t.gameType]} | {t.date} ساعت {t.startTime}
-                      </div>
-                      <div style={{ fontSize: 12, color: '#6B7280', marginTop: 2 }}>
-                        {t.registeredCount}/{t.maxPlayers} بازیکن | {formatFee(t.entryFee)}
-                        {/* `bh-latin` وگرنه PersianDigits همین‌جا هم
-                            «Best of 5» را «Best of ۵» می‌کند */}
-                        {t.matchFormat && <span className="bh-latin"> | {FORMAT_LABELS[t.matchFormat] ?? t.matchFormat}</span>}
-                      </div>
-                      {t.registrationDeadline && (
-                        <div style={{ fontSize: 11.5, color: '#9CA3AF', marginTop: 2 }}>
-                          مهلت ثبت‌نام تا {t.registrationDeadline}
-                        </div>
-                      )}
-                    </div>
-                    {/* نشانِ «دیده می‌شود / دیده نمی‌شود» مهم‌تر از نامِ
-                        فنیِ وضعیت است: باشگاه‌دار می‌خواهد بداند مسابقه‌اش
-                        عمومی هست یا نه. */}
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 5 }}>
-                      <span style={{
-                        fontSize: 11, padding: '4px 10px', borderRadius: 20, fontWeight: 700, whiteSpace: 'nowrap',
-                        background: `${STATUS_COLORS[t.status]}22`, color: STATUS_COLORS[t.status],
-                      }}>{STATUS_LABELS[t.status]}</span>
-                      {(() => {
-                        const raw = (t as Tournament & { rawStatus?: string }).rawStatus ?? '';
-                        const publicNow = raw !== 'draft' && raw !== 'cancelled';
-                        return (
+              ) : (() => {
+                /* ── مسابقه‌ی تمام‌شده جمع می‌شود ──
+                   کارتِ کامل هفت دکمه و فهرستِ ثبت‌نام‌کنندگان دارد؛
+                   برای مسابقه‌ای که برگزار شده هیچ‌کدام کاری نمی‌کند
+                   و فقط باعث می‌شود مسابقاتِ جاری زیرِ انبوهی از
+                   کارتِ مرده گم شوند. جمع‌شده فقط عنوان و تاریخ را
+                   نشان می‌دهد و با یک کلیک کامل باز می‌شود. */
+                const live = myTournaments.filter(x => x.status !== 'finished');
+                const past = myTournaments.filter(x => x.status === 'finished');
+                return (
+                  <>
+                    {live.map(t => renderTournamentCard(t))}
+
+                    {past.length > 0 && (
+                      <div style={{ marginTop: live.length ? 6 : 0 }}>
+                        <div style={{
+                          display: 'flex', alignItems: 'center', gap: 8, marginBottom: 9,
+                        }}>
+                          <span style={{ fontSize: 12.5, fontWeight: 800, color: '#6B7280' }}>
+                            مسابقات پایان‌یافته
+                          </span>
                           <span style={{
-                            fontSize: 10.5, padding: '3px 9px', borderRadius: 20, fontWeight: 700, whiteSpace: 'nowrap',
-                            background: publicNow ? 'rgba(48,197,90,0.12)' : 'rgba(0,0,0,0.05)',
-                            color: publicNow ? '#166534' : '#6B7280',
-                          }}>{publicNow ? 'در سایت دیده می‌شود' : 'پیش‌نویس — دیده نمی‌شود'}</span>
-                        );
-                      })()}
-                    </div>
-                  </div>
-                  <div style={{ display: 'flex', gap: 7, flexWrap: 'wrap' }}>
-                    {/* ── انتشار و ثبت‌نام ──
-                        پیش‌تر مسابقه با `draft` ساخته می‌شد و هیچ راهی
-                        برای انتشارش نبود؛ برای همیشه نامرئی می‌ماند. */}
-                    {(() => {
-                      const raw = (t as Tournament & { rawStatus?: string }).rawStatus ?? '';
-                      const busy = tStatusBusy === t.id;
-                      const btn = (label: string, next: string, tone: 'go' | 'stop') => (
-                        <button key={next} type="button" disabled={busy}
-                          onClick={() => void setTournamentStatus(t.id, next)}
-                          style={{
-                            display: 'inline-flex', alignItems: 'center', gap: 5,
-                            padding: '6px 13px', borderRadius: 20, fontSize: 12, fontWeight: 700,
-                            fontFamily: 'var(--font-base)', cursor: busy ? 'not-allowed' : 'pointer',
-                            opacity: busy ? 0.55 : 1,
-                            border: `1px solid ${tone === 'go' ? 'rgba(48,197,90,0.34)' : 'rgba(0,0,0,0.14)'}`,
-                            background: tone === 'go' ? 'rgba(48,197,90,0.12)' : 'rgba(0,0,0,0.04)',
-                            color: tone === 'go' ? '#166534' : '#6B7280',
-                          }}>{busy ? 'در حال ذخیره…' : label}</button>
-                      );
-                      if (raw === 'draft' || raw === 'published') {
-                        return btn('انتشار و باز کردن ثبت‌نام', 'registration_open', 'go');
-                      }
-                      if (raw === 'registration_open') {
-                        return <>{btn('بستن ثبت‌نام', 'registration_closed', 'stop')}{btn('بازگشت به پیش‌نویس', 'draft', 'stop')}</>;
-                      }
-                      if (raw === 'registration_closed') {
-                        return btn('باز کردن دوباره‌ی ثبت‌نام', 'registration_open', 'go');
-                      }
-                      return null;
-                    })()}
-                    <Link href={`/tournaments/${t.id}`} style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '6px 13px', borderRadius: 20, fontSize: 12, fontWeight: 600, textDecoration: 'none', background: 'rgba(0,0,0,0.05)', border: '1px solid rgba(0,0,0,0.11)', color: '#374151' }}><Eye size={12} /> مشاهده</Link>
-                    <Link href={`/tournaments/${t.id}/bracket`} style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '6px 13px', borderRadius: 20, fontSize: 12, fontWeight: 600, textDecoration: 'none', background: 'rgba(199,166,106,0.08)', border: '1px solid rgba(199,166,106,0.28)', color: '#A07840' }}>براکت</Link>
-                    {t.status === 'live' && (
-                      <Link href={`/tournaments/${t.id}/live`} style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '6px 13px', borderRadius: 20, fontSize: 12, fontWeight: 600, textDecoration: 'none', background: 'rgba(239,68,68,0.09)', border: '1px solid rgba(239,68,68,0.28)', color: '#dc2626' }}>● لایو</Link>
+                            fontSize: 11, fontWeight: 800, color: '#6B7280',
+                            background: 'rgba(0,0,0,0.05)', borderRadius: 999, padding: '2px 9px',
+                          }}>{past.length}</span>
+                        </div>
+
+                        {/* بیش از چهار تا، خودِ باکس اسکرول می‌گیرد —
+                            همان الگویی که «رزروهای شما» دارد. */}
+                        <div style={{
+                          display: 'flex', flexDirection: 'column', gap: 8,
+                          maxHeight: past.length > 4 ? 'min(58vh, 300px)' : undefined,
+                          overflowY: past.length > 4 ? 'auto' : undefined,
+                          paddingInlineEnd: past.length > 4 ? 4 : 0,
+                          scrollbarWidth: 'thin',
+                        }}>
+                          {past.map(t => {
+                            const open = openPast === t.id;
+                            return (
+                              <div key={t.id}>
+                                <button type="button"
+                                  onClick={() => setOpenPast(open ? '' : t.id)}
+                                  style={{
+                                    width: '100%', display: 'flex', alignItems: 'center', gap: 10,
+                                    padding: '11px 14px', borderRadius: 14, cursor: 'pointer',
+                                    textAlign: 'right', fontFamily: 'var(--font-base)',
+                                    background: open ? 'rgba(199,166,106,0.07)' : '#fff',
+                                    border: `1px solid ${open ? 'rgba(199,166,106,0.34)' : 'rgba(0,0,0,0.07)'}`,
+                                  }}>
+                                  <div style={{ flex: 1, minWidth: 0 }}>
+                                    <div style={{
+                                      fontSize: 14, fontWeight: 800, color: DARK,
+                                      overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                                    }}>{t.name}</div>
+                                    <div style={{ fontSize: 11.5, color: '#9CA3AF', marginTop: 3 }}>
+                                      {GAME_TYPE_LABELS[t.gameType]} | {t.date}
+                                      {t.startTime ? ` ساعت ${t.startTime}` : ''}
+                                    </div>
+                                  </div>
+                                  {t.champion && (
+                                    <span style={{
+                                      fontSize: 11, fontWeight: 800, color: '#A07840',
+                                      background: 'rgba(199,166,106,0.12)',
+                                      border: '1px solid rgba(199,166,106,0.3)',
+                                      borderRadius: 8, padding: '3px 9px', whiteSpace: 'nowrap',
+                                      overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: 150,
+                                    }}>🏆 {t.champion}</span>
+                                  )}
+                                  <ChevronDown size={15} color="#9CA3AF" style={{
+                                    flexShrink: 0,
+                                    transform: open ? 'rotate(180deg)' : 'none',
+                                    transition: 'transform .2s',
+                                  }} />
+                                </button>
+                                {open && (
+                                  <div style={{ marginTop: 8 }}>{renderTournamentCard(t)}</div>
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
                     )}
-                    {/* پنل برگزاری — قرعه‌کشی و ثبت نتیجه. بدون این لینک،
-                        هیچ راهی برای رسیدن به صفحه‌ی مدیریت مسابقه نبود.
-                        جای دکمه‌ی «ویرایش» را گرفت که هیچ‌وقت onClick نداشت. */}
-                    <Link href={`/tournaments/${t.id}/admin`} style={{
-                      display: 'inline-flex', alignItems: 'center', gap: 5,
-                      padding: '6px 13px', borderRadius: 20, fontSize: 12, fontWeight: 700,
-                      textDecoration: 'none',
-                      border: '1px solid rgba(199,166,106,0.32)', background: 'rgba(199,166,106,0.08)', color: '#A07840',
-                    }}><Settings size={12} /> مدیریت و قرعه‌کشی</Link>
-                    <button onClick={() => { if (confirm(`مسابقه «${t.name}» حذف شود؟`)) deleteTournament(t.id); }} style={{
-                      display: 'inline-flex', alignItems: 'center', gap: 5,
-                      padding: '6px 13px', borderRadius: 20, fontSize: 12, fontWeight: 600,
-                      border: '1px solid rgba(239,68,68,0.28)', background: 'rgba(239,68,68,0.08)', color: '#dc2626', cursor: 'pointer', fontFamily: 'var(--font-base)',
-                    }}><Trash2 size={12} /> حذف</button>
-                  </div>
-                </Card>
-              ))}
+                  </>
+                );
+              })()}
             </div>
           )}
 
           {tournamentTab === 'create' && (
             <Card>
-              <SectionTitle>ثبت مسابقه جدید</SectionTitle>
+              <SectionTitle>{tEditingId ? `ویرایش مسابقه «${tForm.name}»` : 'ثبت مسابقه جدید'}</SectionTitle>
+              {tEditingId && (
+                <div style={{
+                  fontSize: 12, color: '#92400E', background: 'rgba(245,158,11,0.08)',
+                  border: '1px solid rgba(245,158,11,0.22)', borderRadius: 10,
+                  padding: '9px 12px', marginBottom: 14, lineHeight: 1.9,
+                }}>
+                  اگر کسی ثبت‌نام کرده باشد، مبلغ ورودی و ظرفیت محدود می‌شوند:
+                  مبلغ فقط تا پیش از اولین پرداخت قابل تغییر است و ظرفیت را نمی‌شود
+                  کمتر از تعداد ثبت‌نام‌های فعلی گذاشت.
+                </div>
+              )}
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 20 }}>
                 <div style={{ gridColumn: '1 / -1' }}>
                   <InputField label="نام مسابقه" value={tForm.name} onChange={v => setTForm(p => ({...p, name: v}))} placeholder="جام اسنوکر تابستان ۱۴۰۵" />
                 </div>
-                <SelectField label="نوع بازی" value={tForm.gameType} onChange={v => setTForm(p => ({...p, gameType: v as GameType}))}
-                  options={[{ value:'snooker',label:'اسنوکر' },{ value:'8ball',label:'ایت بال' },{ value:'9ball',label:'ناین بال' },{ value:'other',label:'سایر' }]} />
+                {selectedClub && (
+                  <div style={{ gridColumn: '1 / -1' }}>
+                    <TournamentPoster
+                      clubId={selectedClub.id}
+                      discipline={tForm.gameType as Discipline}
+                      value={tForm.coverUrl}
+                      onChange={v => setTForm(p => ({ ...p, coverUrl: v }))} />
+                  </div>
+                )}
+                {/* گزینه‌ی «سایر» برداشته شد و «هی‌بال» جایش آمد.
+                    «سایر» نه فرمتِ مشخصی داشت نه قاعده‌ای، و در
+                    عمل فقط یک سطلِ بی‌شکل بود؛ هی‌بال بازیِ واقعی و
+                    پرتکراری است که اصلاً گزینه نداشت.
+
+                    عوض‌کردنِ نوعِ بازی، فرمت را هم به پیش‌فرضِ همان
+                    بازی می‌برد — وگرنه «Best of 5» روی ناین‌بال جا
+                    می‌ماند و سرور ردش می‌کند. */}
+                <SelectField label="نوع بازی" value={tForm.gameType}
+                  onChange={v => setTForm(p => ({
+                    ...p,
+                    gameType: v as GameType,
+                    matchFormat: defaultFormat(v as Discipline),
+                  }))}
+                  options={DISCIPLINE_CHOICES.map(d => ({ value: d.key, label: d.label }))} />
                 <SelectField label="ظرفیت (نفر)" value={tForm.maxPlayers} onChange={v => setTForm(p => ({...p, maxPlayers: v}))}
-                  options={['8','16','32','64'].map(v => ({ value: v, label: v + ' نفر' }))} />
+                  options={['8','16','32','64','128'].map(v => ({ value: v, label: v + ' نفر' }))} />
                 {/* تاریخ‌ها با تقویم شمسی انتخاب می‌شوند نه تایپ آزاد —
                     تایپ آزاد یعنی هر کسی هر قالبی بنویسد و بعد قابل
                     مرتب‌سازی و مقایسه نباشد.
@@ -3223,11 +3585,8 @@ export default function ClubDashboardPage() {
                   onChange={v => setTForm(p => ({ ...p, date: v }))}
                   direction="future" />
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 4, minWidth: 0 }}>
-                  <label style={{ fontSize: 12, color: '#6B7280', fontWeight: 500 }}>ساعت شروع</label>
-                  <FaTimeSelect value={tForm.startTime || '14:00'}
-                    onChange={v => setTForm(p => ({ ...p, startTime: v }))} ariaLabel="شروع مسابقه" />
-                </div>
+                <TimeField label="ساعت شروع" value={tForm.startTime || '14:00'}
+                  onChange={v => setTForm(p => ({ ...p, startTime: v }))} ariaLabel="شروع مسابقه" />
 
                 {/* مهلت ثبت‌نام هم ساعت دارد: پیش‌تر همیشه ۲۳:۵۹ فرض
                     می‌شد، پس باشگاهی که می‌خواست ثبت‌نام ظهر بسته شود
@@ -3236,11 +3595,52 @@ export default function ClubDashboardPage() {
                   onChange={v => setTForm(p => ({ ...p, registrationDeadline: v }))}
                   direction="future" />
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 4, minWidth: 0 }}>
-                  <label style={{ fontSize: 12, color: '#6B7280', fontWeight: 500 }}>ساعت پایان ثبت‌نام</label>
-                  <FaTimeSelect value={tForm.registrationDeadlineTime || '23:59'}
-                    onChange={v => setTForm(p => ({ ...p, registrationDeadlineTime: v }))}
-                    ariaLabel="پایان ثبت‌نام" />
+                <TimeField label="ساعت پایان ثبت‌نام" value={tForm.registrationDeadlineTime || '23:59'}
+                  onChange={v => setTForm(p => ({ ...p, registrationDeadlineTime: v }))}
+                  ariaLabel="پایان ثبت‌نام" />
+
+                {/* ── چه وقت ثبت‌نام باز شود ──
+                    تا امروز فقط یک حالت بود: با زدنِ «انتشار» همان
+                    لحظه باز می‌شد. باشگاهی که می‌خواست مسابقه از
+                    قبل اعلام شود ولی ثبت‌نامش جمعه ساعت ۱۰ باز شود،
+                    باید یادش می‌ماند سرِ همان ساعت برگردد و دکمه را
+                    بزند. */}
+                <div style={{ gridColumn: '1 / -1', display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  <label style={{ fontSize: 12, color: '#6B7280', fontWeight: 500 }}>باز شدن ثبت‌نام</label>
+                  <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                    {([['now', 'با انتشار، همین حالا'], ['scheduled', 'در زمان مشخص']] as const).map(([k, l]) => {
+                      const on = tForm.regOpenMode === k;
+                      return (
+                        <button key={k} type="button"
+                          onClick={() => setTForm(p => ({ ...p, regOpenMode: k }))}
+                          style={{
+                            flex: '1 1 160px', padding: '9px 14px', borderRadius: 10,
+                            fontSize: 12.5, fontWeight: 700, cursor: 'pointer',
+                            fontFamily: 'var(--font-base)',
+                            border: `1px solid ${on ? 'rgba(199,166,106,0.55)' : 'rgba(0,0,0,0.12)'}`,
+                            background: on ? 'rgba(199,166,106,0.12)' : '#fff',
+                            color: on ? '#9A6E38' : '#6B7280',
+                          }}>{l}</button>
+                      );
+                    })}
+                  </div>
+
+                  {tForm.regOpenMode === 'scheduled' && (
+                    <>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(150px,1fr))', gap: 12 }}>
+                        <JalaliDatePicker label="تاریخ باز شدن" value={tForm.regOpenDate}
+                          onChange={v => setTForm(p => ({ ...p, regOpenDate: v }))}
+                          direction="future" />
+                        <TimeField label="ساعت باز شدن" value={tForm.regOpenTime || '10:00'}
+                          onChange={v => setTForm(p => ({ ...p, regOpenTime: v }))}
+                          ariaLabel="باز شدن ثبت‌نام" />
+                      </div>
+                      <div style={{ fontSize: 11.5, color: '#9CA3AF', lineHeight: 1.9 }}>
+                        مسابقه تا آن لحظه در تبِ «بزودی» دیده می‌شود و سرِ همان ساعت
+                        خودکار به «در حال ثبت‌نام» می‌رود.
+                      </div>
+                    </>
+                  )}
                 </div>
 
                 {/* مبلغ: سه‌رقم‌جدا، فارسی، و به حروف زیرش */}
@@ -3257,19 +3657,65 @@ export default function ClubDashboardPage() {
                   )}
                 </div>
 
-                {/* عدد انگلیسی می‌ماند: «Best of» یک اصطلاحِ لاتین است و
-                    «Best Of ۱۱» نه فارسی است نه انگلیسی. بقیه‌ی سایت
-                    (صفحه‌ی مسابقه و فرمِ عمومی) هم از قبل همین شکل را
-                    داشتند؛ فقط همین یک جا فرق می‌کرد. */}
-                <SelectField label="فرمت مسابقه" value={tForm.matchFormat} latin
-                  onChange={v => setTForm(p => ({ ...p, matchFormat: v }))}
-                  options={[
-                    { value: 'bo3',  label: 'Best of 3'  },
-                    { value: 'bo5',  label: 'Best of 5'  },
-                    { value: 'bo7',  label: 'Best of 7'  },
-                    { value: 'bo9',  label: 'Best of 9'  },
-                    { value: 'bo11', label: 'Best of 11' },
-                  ]} />
+                {/* ── فرمت، وابسته به نوعِ بازی ──
+                    هر بازی اصطلاحِ خودش را دارد و نمایشِ همه‌ی آن‌ها
+                    به همه فقط اشتباه می‌سازد:
+
+                      اسنوکر            Best of N
+                      ایت‌بال / ناین‌بال  Race to N
+                      هی‌بال             هر دو — هم مسابقه‌ای
+                                        (Race to N) هم زمان‌دار
+                                        (۹۰ دقیقه)
+
+                    عددِ لاتین می‌ماند: «Best Of ۱۱» نه فارسی است نه
+                    انگلیسی. ولی «۹۰ دقیقه» فارسی است، پس `latin`
+                    فقط وقتی روشن می‌شود که خانواده‌ی فرمت لاتین
+                    باشد. */}
+                {kindsFor(tForm.gameType as Discipline).length === 1 ? (
+                  (() => {
+                    const kind = kindsFor(tForm.gameType as Discipline)[0]!;
+                    return (
+                      <SelectField label="فرمت مسابقه" value={tForm.matchFormat} latin
+                        onChange={v => setTForm(p => ({ ...p, matchFormat: v }))}
+                        options={optionsForKind(kind).map(o => ({ value: o.value, label: o.label }))} />
+                    );
+                  })()
+                ) : (
+                  /* هی‌بال: اول خانواده، بعد مقدار. یک دراپ‌داونِ
+                     مخلوط از «Race to 7» و «۹۰ دقیقه» هم بد خوانده
+                     می‌شود هم دو فونتِ متفاوت را کنار هم می‌گذارد. */
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8, minWidth: 0 }}>
+                    <label style={{ fontSize: 12, color: '#6B7280', fontWeight: 500 }}>فرمت مسابقه</label>
+                    <div style={{ display: 'flex', gap: 8 }}>
+                      {([
+                        { k: 'race' as const, label: KIND_LABELS.race },
+                        { k: 'time' as const, label: KIND_LABELS.time },
+                      ]).map(o => {
+                        const on = (kindOf(tForm.matchFormat) ?? 'race') === o.k;
+                        return (
+                          <button key={o.k} type="button"
+                            onClick={() => setTForm(p => ({
+                              ...p,
+                              matchFormat: o.k === 'time' ? 'time90' : 'race7',
+                            }))}
+                            style={{
+                              flex: 1, padding: '9px 10px', borderRadius: 10, cursor: 'pointer',
+                              fontFamily: 'var(--font-base)', fontSize: 13, fontWeight: 700,
+                              border: `1px solid ${on ? GOLD : '#E5E7EB'}`,
+                              background: on ? '#FFFBF0' : '#FAFAFA',
+                              color: on ? '#A07840' : '#6B7280',
+                            }}>{o.label}</button>
+                        );
+                      })}
+                    </div>
+                    <Select
+                      value={tForm.matchFormat} ariaLabel="فرمت مسابقه"
+                      latin={(kindOf(tForm.matchFormat) ?? 'race') === 'race'}
+                      options={optionsForKind(kindOf(tForm.matchFormat) ?? 'race')
+                        .map(o => ({ value: o.value, label: o.label }))}
+                      onChange={v => setTForm(p => ({ ...p, matchFormat: v }))} />
+                  </div>
+                )}
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 14, marginBottom: 20 }}>
                 {/* اعداد همان‌جا که تایپ می‌شوند فارسی می‌شوند.
@@ -3291,30 +3737,20 @@ export default function ClubDashboardPage() {
                   </div>
                 ))}
               </div>
-              <SectionTitle>روش پرداخت</SectionTitle>
-              <div style={{ display: 'flex', gap: 10, marginBottom: 16 }}>
-                {[{ value:'card_transfer',label:'واریز مستقیم' },{ value:'online',label:'درگاه بانکی' }].map(o => (
-                  <label key={o.value} style={{
-                    display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer',
-                    padding: '10px 16px', borderRadius: 10,
-                    background: tForm.paymentMethod === o.value ? '#FFFBF0' : '#FAFAFA',
-                    border: `1px solid ${tForm.paymentMethod === o.value ? GOLD : '#E5E7EB'}`,
-                  }}>
-                    <input type="radio" name="paymentMethod" value={o.value}
-                      checked={tForm.paymentMethod === o.value}
-                      onChange={() => setTForm(p => ({...p, paymentMethod: o.value as 'online'|'card_transfer'}))}
-                      style={{ accentColor: GOLD }} />
-                    <span style={{ fontSize: 14, fontWeight: 600, color: DARK }}>{o.label}</span>
-                  </label>
-                ))}
-              </div>
-              {tForm.paymentMethod === 'card_transfer' && (
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 20 }}>
-                  <InputField label="شماره کارت" value={tForm.cardNumber} onChange={v => setTForm(p => ({...p, cardNumber: v}))} placeholder="6037-XXXX-XXXX-XXXX" />
-                  <InputField label="نام صاحب کارت" value={tForm.cardHolder} onChange={v => setTForm(p => ({...p, cardHolder: v}))} />
-                  <InputField label="نام بانک" value={tForm.bankName} onChange={v => setTForm(p => ({...p, bankName: v}))} placeholder="ملت" />
-                </div>
-              )}
+              {/* ── چرا «روش پرداخت» برداشته شد ──
+                  دو گزینه داشت: «واریز مستقیم» و «درگاه بانکی». حالا
+                  که درگاه فعال است، واریز مستقیم فقط راهِ کنارگذاشتنِ
+                  سیستم بود — پولی که بیرونِ سایت جابه‌جا می‌شود نه در
+                  دفترِ مالی می‌نشیند، نه تسویه‌ی خودکار دارد، و نه اگر
+                  مسابقه لغو شود قابلِ بازپرداخت است.
+
+                  آن سه فیلدِ شماره‌ی کارت هم با آن رفتند: حسابِ تسویه
+                  از پروفایلِ تأییدشده‌ی باشگاه می‌آید، نه از فرمِ هر
+                  مسابقه. (این را `createTournament` از قبل هم
+                  نمی‌فرستاد.)
+
+                  برای مسابقه‌ی رایگان کافی است ورودی را صفر بگذارید؛
+                  ثبت‌نام همان‌جا قطعی می‌شود و به درگاه نمی‌رود. */}
               {/* خطا کنارِ خودِ دکمه دیده می‌شود، نه در پنجره‌ای که
                   کاربر باید ببندد تا دوباره فرم را ببیند. */}
               {tError && (
@@ -3327,24 +3763,46 @@ export default function ClubDashboardPage() {
                   <span style={{ fontSize: 12.5, fontWeight: 700, color: '#991B1B', lineHeight: 1.9 }}>{tError}</span>
                 </div>
               )}
-              <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-                <SaveBtn onClick={() => void createTournament(true)} loading={tLoading} label="ثبت و انتشار" />
-                {/* پیش‌نویس برای وقتی است که جزئیات هنوز قطعی نیست.
-                    برخلافِ قبل، از فهرست می‌شود منتشرش کرد. */}
-                <button type="button" disabled={tLoading} onClick={() => void createTournament(false)} style={{
-                  display: 'inline-flex', alignItems: 'center', gap: 6,
-                  padding: '10px 20px', borderRadius: 20, fontSize: 13, fontWeight: 700,
-                  fontFamily: 'var(--font-base)', cursor: tLoading ? 'not-allowed' : 'pointer',
-                  border: '1px solid rgba(0,0,0,0.14)', background: 'rgba(0,0,0,0.04)', color: '#6B7280',
-                  opacity: tLoading ? 0.6 : 1,
-                }}>ذخیره‌ی پیش‌نویس</button>
-                <button onClick={() => setTournamentTab('list')} style={{
-                  display: 'inline-flex', alignItems: 'center', gap: 6,
-                  padding: '10px 20px', borderRadius: 20, border: '1px solid rgba(0,0,0,0.12)',
-                  background: 'rgba(0,0,0,0.04)', fontSize: 14, cursor: 'pointer',
+              {/* ── چیدمانِ دکمه‌های فرم ──
+                  `flexWrap` بود، یعنی دکمه‌ها هر کدام به اندازه‌ی
+                  متنشان کش می‌آمدند و در گوشی یک خطِ بلند و یک خطِ
+                  کوتاه می‌ساختند با ته‌سطرهای ناهموار. حالا در گوشی
+                  گریدِ تک‌ستونه‌اند (هر دکمه تمامِ عرض) و از ۵۲۰
+                  پیکسل به بالا کنارِ هم با عرضِ برابر. */}
+              <div className="tform-actions">
+                {tEditingId ? (
+                  /* در حالتِ ویرایش «پیش‌نویس» معنی ندارد: مسابقه از
+                     قبل وضعیتی دارد و تغییرش کارِ همان دکمه‌های
+                     وضعیت در فهرست است، نه این فرم. */
+                  <SaveBtn onClick={() => void saveTournamentEdit()} loading={tLoading} label="ذخیره‌ی تغییرات" />
+                ) : (
+                  <>
+                    <SaveBtn onClick={() => void createTournament(true)} loading={tLoading} label="ثبت و انتشار" />
+                    {/* پیش‌نویس برای وقتی است که جزئیات هنوز قطعی نیست.
+                        برخلافِ قبل، از فهرست می‌شود منتشرش کرد. */}
+                    <button type="button" disabled={tLoading} onClick={() => void createTournament(false)} style={{
+                      display: 'inline-flex', alignItems: 'center', gap: 6,
+                      padding: '10px 20px', borderRadius: 20, fontSize: 13, fontWeight: 700,
+                      fontFamily: 'var(--font-base)', cursor: tLoading ? 'not-allowed' : 'pointer',
+                      border: '1px solid rgba(0,0,0,0.14)', background: 'rgba(0,0,0,0.04)', color: '#6B7280',
+                      opacity: tLoading ? 0.6 : 1,
+                    }}>ذخیره‌ی پیش‌نویس</button>
+                  </>
+                )}
+                <button onClick={() => { setTournamentTab('list'); resetTForm(); }} style={{
+                  display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+                  padding: '11px 20px', borderRadius: 14, border: '1px solid rgba(0,0,0,0.12)',
+                  background: 'rgba(0,0,0,0.04)', fontSize: 13.5, fontWeight: 700, cursor: 'pointer',
                   fontFamily: 'var(--font-base)', color: '#6B7280',
                 }}>انصراف</button>
               </div>
+              <style>{`
+                .tform-actions{ display:grid; gap:10px; grid-template-columns:1fr }
+                .tform-actions > *{ width:100%; justify-content:center }
+                @media (min-width: 520px){
+                  .tform-actions{ grid-auto-flow:column; grid-auto-columns:1fr }
+                }
+              `}</style>
             </Card>
           )}
         </div>
@@ -3436,18 +3894,23 @@ export default function ClubDashboardPage() {
                   return filtered.map(c => {
                     const fullName = `${c.firstName ?? ''} ${c.lastName ?? ''}`.trim() || 'بدون نام';
                     const alreadyAdded = !!coaches.find(e => e.id === c.id);
+                    /* مربیِ تأییدنشده دیده می‌شود ولی افزوده نمی‌شود:
+                       صفحه‌ی عمومیِ باشگاه نباید مربی‌ای را نشان دهد که
+                       هنوز مدارکش بررسی نشده. */
+                    const pending = c.verificationStatus !== 'verified';
+                    const locked = alreadyAdded || pending;
                     return (
                       <div
                         key={c.id}
-                        onClick={() => !alreadyAdded && selectCoach(c)}
+                        onClick={() => !locked && selectCoach(c)}
                         style={{
                           display: 'flex', alignItems: 'center', gap: 12, padding: '10px 16px',
-                          cursor: alreadyAdded ? 'default' : 'pointer',
-                          opacity: alreadyAdded ? 0.5 : 1,
+                          cursor: locked ? 'default' : 'pointer',
+                          opacity: locked ? 0.55 : 1,
                           borderBottom: `1px solid #F3F4F6`,
                           transition: 'background 0.15s',
                         }}
-                        onMouseEnter={e => { if (!alreadyAdded) (e.currentTarget as HTMLDivElement).style.background = `${GOLD}0A`; }}
+                        onMouseEnter={e => { if (!locked) (e.currentTarget as HTMLDivElement).style.background = `${GOLD}0A`; }}
                         onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.background = ''; }}
                       >
                         <div style={{ width: 36, height: 36, borderRadius: 10, background: `linear-gradient(135deg,${GOLD},#A07840)`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 900, fontSize: 15, flexShrink: 0 }}>
@@ -3460,8 +3923,10 @@ export default function ClubDashboardPage() {
                             {c.city ? ` · ${c.city}` : ''}
                           </div>
                         </div>
-                        {c.verificationStatus === 'verified' && (
+                        {c.verificationStatus === 'verified' ? (
                           <span style={{ fontSize: 10, color: '#1d9bf0', background: 'rgba(29,155,240,0.08)', border: '1px solid rgba(29,155,240,0.20)', borderRadius: 20, padding: '2px 7px', flexShrink: 0 }}>✓ تأیید</span>
+                        ) : (
+                          <span style={{ fontSize: 10, color: '#B45309', background: 'rgba(217,119,6,0.09)', border: '1px solid rgba(217,119,6,0.24)', borderRadius: 20, padding: '2px 7px', flexShrink: 0, whiteSpace: 'nowrap' }}>در انتظار تأیید</span>
                         )}
                         {alreadyAdded && <span style={{ fontSize: 11, color: '#9CA3AF', flexShrink: 0 }}>افزوده شده</span>}
                       </div>
@@ -3511,6 +3976,28 @@ export default function ClubDashboardPage() {
           )}
         </div>
       )}
+      <ConfirmDialog
+        open={!!delTourn}
+        title="حذف مسابقه"
+        body={<>مسابقه‌ی <b style={{ color: '#1A1A18' }}>{delTourn?.name}</b> از فهرست برداشته
+          می‌شود. ثبت‌نام‌ها و سابقه‌ی مالی‌اش برای حسابرسی می‌ماند، ولی دیگر در سایت
+          دیده نمی‌شود.</>}
+        confirmLabel="بله، حذف کن"
+        busy={delTournBusy}
+        onConfirm={() => void confirmDeleteTournament()}
+        onCancel={() => setDelTourn(null)}
+      />
+
+      {delTournMsg && (
+        <div style={{
+          position: 'fixed', insetInline: 0, bottom: 22, margin: '0 auto', zIndex: 90,
+          width: 'fit-content', maxWidth: 'calc(100% - 32px)',
+          background: '#1A1A18', color: '#fff', borderRadius: 12,
+          padding: '11px 18px', fontSize: 13, fontWeight: 700,
+          fontFamily: 'var(--font-base)', boxShadow: '0 10px 30px rgba(0,0,0,0.25)',
+        }}>{delTournMsg}</div>
+      )}
+
     </div>
   );
 }

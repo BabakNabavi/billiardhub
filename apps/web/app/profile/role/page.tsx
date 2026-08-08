@@ -1,6 +1,7 @@
 ﻿'use client'
 
 import { useState, useEffect, type ElementType } from 'react'
+import { notify } from '../../../lib/ui/dialogs'
 import { useRouter } from 'next/navigation'
 import { User, BarChart3, GraduationCap, Scale, Wrench, ShoppingBag, Factory, Store } from 'lucide-react'
 import { useAuthStore } from '../../../store/auth.store'
@@ -383,6 +384,8 @@ export default function RolePage() {
   const { user, updateUser } = useAuthStore()
   const [requests, setRequests] = useState<RoleRequest[]>([])
   const [queued, setQueued]     = useState<Set<RoleValue>>(new Set())
+  /* در حالِ تغییرِ نقشِ اصلی — تا دو کلیکِ پشتِ هم دو درخواست نفرستد */
+  const [primaryBusy, setPrimaryBusy] = useState(false)
   const [step, setStep]         = useState<'select' | 'upload'>('select')
   const [toast, setToast]       = useState<string | null>(null)
   const [loading, setLoading]   = useState(true)
@@ -542,6 +545,57 @@ export default function RolePage() {
                   می‌توانید همزمان چند نقش داشته باشید
                 </p>
               </div>
+
+              {/* ── نقشِ اصلی ──
+                  کسی که چند نقش دارد باید بگوید کدام «خودش» است:
+                  همان نشانی که روی آگهی و استوری‌اش می‌نشیند. تا امروز
+                  نقشِ اصلی فقط با گرفتنِ نقشِ تازه عوض می‌شد و کاربر
+                  هیچ کنترلی رویش نداشت. */}
+              {(() => {
+                const mine = [user?.primaryRole, ...(user?.secondaryRoles ?? [])]
+                  .filter((r): r is string => !!r && r !== 'admin')
+                const uniq = Array.from(new Set(mine))
+                if (uniq.length < 2) return null
+                return (
+                  <div style={{ background: '#fff', border: '1px solid rgba(199,166,106,0.34)', borderRadius: 16, padding: '14px 16px', marginBottom: 16, boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
+                    <div style={{ fontSize: 12.5, fontWeight: 800, color: '#9A6E38', marginBottom: 4 }}>نقش اصلی شما</div>
+                    <p style={{ fontSize: 12, color: 'rgba(0,0,0,0.45)', margin: '0 0 10px', lineHeight: 1.9 }}>
+                      آگهی و استوری شما با نشانِ همین نقش منتشر می‌شود.
+                    </p>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                      {uniq.map(r => {
+                        const on = user?.primaryRole === r
+                        return (
+                          <button key={r} type="button" disabled={on || primaryBusy}
+                            onClick={async () => {
+                              setPrimaryBusy(true)
+                              try {
+                                const res = await apiFetch('/api/roles/my', {
+                                  method: 'PUT', headers: { 'Content-Type': 'application/json' },
+                                  body: JSON.stringify({ primaryRole: r }),
+                                })
+                                const j = await res.json().catch(() => ({}))
+                                if (!res.ok) { notify(j?.message ?? 'تغییر نقش اصلی انجام نشد'); return }
+                                updateUser({ primaryRole: j.primaryRole, secondaryRoles: j.secondaryRoles })
+                              } finally { setPrimaryBusy(false) }
+                            }}
+                            style={{
+                              display: 'inline-flex', alignItems: 'center', gap: 6,
+                              fontSize: 12.5, fontWeight: 800, borderRadius: 999, padding: '7px 14px',
+                              fontFamily: 'inherit', cursor: on ? 'default' : 'pointer',
+                              border: `1px solid ${on ? 'rgba(199,166,106,0.5)' : 'rgba(0,0,0,0.12)'}`,
+                              background: on ? 'rgba(199,166,106,0.14)' : '#fff',
+                              color: on ? '#9A6E38' : 'rgba(0,0,0,0.5)',
+                              opacity: primaryBusy ? 0.6 : 1,
+                            }}>
+                            {on && '✓ '}{ROLE_MAP[r as RoleValue]?.label ?? r}
+                          </button>
+                        )
+                      })}
+                    </div>
+                  </div>
+                )
+              })()}
 
               {/* نقش‌های فعال — با امکان حذف نقش اشتباه */}
               {(user?.secondaryRoles ?? []).length > 0 && (

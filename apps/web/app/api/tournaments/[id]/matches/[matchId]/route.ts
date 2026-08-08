@@ -37,6 +37,44 @@ export async function PATCH(
 
   const b = await req.json().catch(() => ({}));
 
+  /* ── امتیازِ زنده ──
+     فقط عدد را جابه‌جا می‌کند. تا امروز تنها راهِ نوشتنِ امتیاز
+     `bh_match_report` بود که همان لحظه برنده اعلام می‌کرد و به دورِ
+     بعد صعود می‌داد — یعنی برای اینکه روی مانیتور ۱–۰ دیده شود،
+     بازی باید تمام‌شده اعلام می‌شد. */
+  if (b?.live === true) {
+    const s1 = Math.max(0, Math.round(Number(b?.score1) || 0));
+    const s2 = Math.max(0, Math.round(Number(b?.score2) || 0));
+    const { data, error } = await sb().rpc('bh_match_live_score', {
+      p_match_id: matchId, p_score1: s1, p_score2: s2,
+    });
+    if (error) {
+      console.error('[matches/live]', error.message);
+      return NextResponse.json({ message: 'ثبت امتیاز انجام نشد' }, { status: 500 });
+    }
+    const res = data as { ok: boolean; message?: string };
+    return NextResponse.json(res, { status: res?.ok ? 200 : 409 });
+  }
+
+  /* ── بالاترین برک ── */
+  if (b?.highBreak !== undefined) {
+    const raw = b.highBreak;
+    const value = raw === null || raw === '' ? null : Math.round(Number(raw));
+    const player = Number(b?.highBreakPlayer) === 2 ? 2 : 1;
+    if (value !== null && !Number.isFinite(value)) {
+      return NextResponse.json({ message: 'مقدار برک معتبر نیست' }, { status: 400 });
+    }
+    const { data, error } = await sb().rpc('bh_match_set_break', {
+      p_match_id: matchId, p_player: player, p_value: value,
+    });
+    if (error) {
+      console.error('[matches/break]', error.message);
+      return NextResponse.json({ message: 'ثبت برک انجام نشد' }, { status: 500 });
+    }
+    const res = data as { ok: boolean; message?: string };
+    return NextResponse.json(res, { status: res?.ok ? 200 : 409 });
+  }
+
   /* ── ثبت نتیجه ── */
   if (b?.score1 !== undefined || b?.score2 !== undefined) {
     const s1 = Math.round(Number(b?.score1));

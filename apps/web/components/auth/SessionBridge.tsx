@@ -132,6 +132,14 @@ export default function SessionBridge() {
           && JSON.stringify(cur.secondaryRoles ?? []) === JSON.stringify(me.secondaryRoles ?? [])
         if (!same) login(me, '')
       } catch { /* شبکه قطع بود؛ همان چیزی که هست می‌ماند */ }
+      finally {
+        /* ── چرا حتی در خطا هم علامت می‌خورد ──
+           صفحه‌هایی که منتظرِ این پرچم‌اند، تا نیامدنش لودر نشان
+           می‌دهند. اگر شبکه قطع باشد و این‌جا علامت نخورد، آن صفحه‌ها
+           برای همیشه در حالِ بارگذاری می‌مانند — که از پیامِ اشتباه هم
+           بدتر است. */
+        if (!stopped) useAuthStore.getState().setAuthChecked()
+      }
     }
 
     void sync()

@@ -47,7 +47,7 @@ export default function DirectPage() {
 
 function DirectInner() {
   const router = useRouter()
-  const { user, _hydrated } = useAuthStore()
+  const { user, _hydrated, authChecked } = useAuthStore()
   const [convs, setConvs] = useState<ConvIndexItem[]>([])
   const [active, setActive] = useState<ConvIndexItem | null>(null)
   const [msgs, setMsgs] = useState<DMsg[]>([])
@@ -79,7 +79,7 @@ function DirectInner() {
   /* نامی که روی پیامِ ارسالی می‌نشیند و طرفِ مقابل می‌بیند */
   const meName = user ? publicDisplayName(user) : ''
 
-  useEffect(() => { if (_hydrated && !user) router.replace('/login') }, [_hydrated, user, router])
+  useEffect(() => { if (_hydrated && authChecked && !user) router.replace('/login') }, [_hydrated, authChecked, user, router])
 
   /* فقط نتیجه‌ی آخرین درخواست اعمال می‌شود؛ یک loadConvs کهنه‌ی در راه نمی‌تواند
      چت تازه‌پاک‌شده را دوباره برگرداند */
@@ -245,7 +245,7 @@ function DirectInner() {
 
   const totalUnread = useMemo(() => convs.reduce((n, c) => n + (c.unread || 0), 0), [convs])
 
-  if (!_hydrated || !user) return null
+  if (!_hydrated || !authChecked || !user) return null
 
   return (
     /* ستون ثابت که دقیقاً روی ناحیه‌ی دیدنی می‌نشیند (height=vp.height، translateY=offsetTop).

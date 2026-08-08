@@ -20,8 +20,8 @@ export type Gender = 'm' | 'f'
 export const DISCIPLINES: { key: Discipline; fa: string; en: string; ranked: boolean }[] = [
   { key: 'snooker',  fa: 'اسنوکر',        en: 'SNOOKER',  ranked: true  },
   { key: 'pool',     fa: 'پاکت بیلیارد',  en: 'POOL',     ranked: true  },
-  /* های‌بال هنوز جدول رنکینگ ندارد؛ انتخابش آزاد است ولی به رنکینگ وصل نمی‌شود */
-  { key: 'highball', fa: 'های‌بال',       en: 'HIGHBALL', ranked: false },
+  /* هی‌بال هنوز جدول رنکینگ ندارد؛ انتخابش آزاد است ولی به رنکینگ وصل نمی‌شود */
+  { key: 'highball', fa: 'هی‌بال',       en: 'HEYBALL', ranked: false },
 ]
 
 export const AGE_GROUPS: { key: AgeGroup; fa: string }[] = [

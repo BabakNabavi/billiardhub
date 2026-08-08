@@ -20,6 +20,9 @@ export interface MatchRow {
   score2: number
   winner: 1 | 2 | null
   status: 'waiting' | 'in_progress' | 'completed'
+  /* «عمداً بی‌حریف» — با «هنوز خالی» فرق دارد (مهاجرت ۰۷۵) */
+  p1_bye: boolean
+  p2_bye: boolean
   table_number: number | null
   started_at: string | null
   completed_at: string | null
@@ -49,8 +52,11 @@ export interface BracketView {
   totalRounds: number
   champion: { name: string; registrationId: string | null } | null
   runnerUp: { name: string } | null
-  /* نفر سوم در حذفی یک‌طرفه وجود ندارد مگر بازی رده‌بندی برگزار شود؛
-     عمداً حدس زده نمی‌شود. */
+  /* ── سومِ مشترک ──
+     در حذفیِ یک‌طرفه بدونِ بازیِ رده‌بندی، نفرِ سوم یکی نیست: دو
+     بازنده‌ی نیمه‌نهایی هر دو سوم‌اند. حدس زده نمی‌شود کدام بالاتر
+     است — هر دو با هم می‌آیند و صفحه هم همین را می‌نویسد. */
+  thirds: string[]
 }
 
 export function buildBracket(matches: MatchRow[]): BracketView {
@@ -76,5 +82,15 @@ export function buildBracket(matches: MatchRow[]): BracketView {
     runnerUp = { name: (win ? final.p2_name : final.p1_name) ?? '—' }
   }
 
-  return { rounds, totalRounds, champion, runnerUp }
+  /* فقط وقتی فینال تمام شده باشد. پیش از آن، بازنده‌ی
+     نیمه‌نهایی هنوز «سوم» نیست — مسابقه تمام نشده. */
+  const thirds = final?.winner
+    ? matches
+        .filter(m => m.round === totalRounds - 1 && m.winner !== null)
+        .sort((a, b) => a.match_index - b.match_index)
+        .map(m => (m.winner === 1 ? m.p2_name : m.p1_name))
+        .filter((n): n is string => !!n)
+    : []
+
+  return { rounds, totalRounds, champion, runnerUp, thirds }
 }

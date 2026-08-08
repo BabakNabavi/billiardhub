@@ -15,6 +15,7 @@
    ───────────────────────────────────────────────────────────── */
 
 import { useState, useEffect, useCallback } from 'react';
+import { ask } from '../../../lib/ui/dialogs'
 import { Camera, Loader2, Trash2, Plus, X, Image as ImageIcon, Upload, FolderPlus, AlertCircle, Pencil, Check } from 'lucide-react';
 import api from '../../../lib/api';
 import { apiFetch } from '../../../lib/http';
@@ -388,7 +389,7 @@ export default function GalleryTab({ club, onLogoChange }: {
               {club?.logo ? (
                 <button type="button" title="حذف لوگو"
                   onClick={async () => {
-                    if (!confirm('لوگوی باشگاه حذف شود؟')) return;
+                    if (!(await ask('لوگوی باشگاه حذف شود؟'))) return;
                     setLogoUploading(true);
                     try {
                       await api.put(`/clubs/${club.id}`, { logo: '' });

@@ -4,7 +4,10 @@
    ادمین می‌تواند وضعیت را عوض کند و یادداشت بگذارد. */
 
 import { useCallback, useEffect, useState } from 'react'
+import { notify } from '../../../lib/ui/dialogs'
 import Link from 'next/link'
+import TabStrip from '@/components/ui/TabStrip'
+import ScrollList from '@/components/ui/ScrollList'
 import { Flag, Loader2, AlertCircle, ExternalLink, CheckCircle2, XCircle, Eye, RotateCcw } from 'lucide-react'
 import { faDateTime, toFaDigits } from '../../../lib/jalali'
 import { apiFetch } from '../../../lib/http'
@@ -90,7 +93,7 @@ export default function AdminReports() {
         body: JSON.stringify({ id, status: next, adminNote: note[id] ?? '' }),
       })
       const j = await r.json().catch(() => ({}))
-      if (!r.ok) { alert(j?.message || 'به‌روزرسانی انجام نشد'); return }
+      if (!r.ok) { notify(j?.message || 'به‌روزرسانی انجام نشد'); return }
       await load()
     } finally { setBusy('') }
   }
@@ -143,15 +146,8 @@ export default function AdminReports() {
         )}
       </div>
 
-      <div style={{ display: 'flex', gap: 7, overflowX: 'auto', paddingBottom: 4, marginBottom: 16 }}>
-        {FILTERS.map(([k, label]) => (
-          <button key={k || 'all'} onClick={() => setStatus(k)}
-            style={{ flexShrink: 0, padding: '8px 15px', borderRadius: 999, cursor: 'pointer', fontFamily: 'inherit', fontSize: 12.5, fontWeight: 800,
-              background: status === k ? INK : '#fff', color: status === k ? '#fff' : SEC, border: `1px solid ${status === k ? INK : LINE}` }}>
-            {label}
-          </button>
-        ))}
-      </div>
+      <TabStrip value={status} onChange={setStatus}
+        tabs={FILTERS.map(([k, label]) => ({ key: k, label }))} />
 
       {pending && (
         <div style={{ padding: '12px 15px', borderRadius: 13, background: 'rgba(199,166,106,0.10)', border: '1px solid rgba(199,166,106,0.30)', color: GOLD_D, fontSize: 12.5, fontWeight: 700, marginBottom: 14, lineHeight: 1.9 }}>
@@ -181,7 +177,7 @@ export default function AdminReports() {
       )}
 
       {rows && rows.length > 0 && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+        <ScrollList count={rows.length} min={5}>
           {rows.map(r => {
             const st = STATUS[r.status] ?? STATUS.OPEN!
             return (
@@ -234,7 +230,7 @@ export default function AdminReports() {
               </div>
             )
           })}
-        </div>
+        </ScrollList>
       )}
 
       <button onClick={() => load()} title="به‌روزرسانی"

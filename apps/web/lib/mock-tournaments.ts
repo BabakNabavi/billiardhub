@@ -1,6 +1,15 @@
 // ── Tournament Module — تایپ‌ها، برچسب‌ها و رنگ‌ها ─────────────────────────
 
-export type GameType         = '8ball' | '9ball' | 'snooker' | 'other';
+/* نوعِ بازی و برچسب‌هایش از `lib/tournaments/formats` می‌آیند — همان
+   فایلی که فرمِ ساخت و اعتبارسنجیِ سرور هم از آن می‌خوانند. این‌جا
+   فقط دوباره صادر می‌شود تا صفحه‌هایی که از قبل از این ماژول
+   می‌خواندند دست نخورند. */
+export type { Discipline } from './tournaments/formats';
+import {
+  DISCIPLINE_LABELS, DISCIPLINE_COLORS, type Discipline,
+} from './tournaments/formats';
+
+export type GameType = Discipline;
 export type TournamentStatus = 'upcoming' | 'registration_open' | 'bracket_ready' | 'live' | 'finished';
 export type RegistrationStatus = 'pending' | 'approved' | 'rejected';
 export type PaymentMethod    = 'online' | 'card_transfer';
@@ -34,6 +43,15 @@ export interface Tournament {
   date: string;
   startTime: string;
   registrationDeadline: string;
+  /* ساعتِ بسته‌شدنِ ثبت‌نام. تا امروز فقط روزش نگه داشته می‌شد، پس
+     بازیکن نمی‌فهمید ثبت‌نام ظهر بسته می‌شود یا نیمه‌شب. */
+  registrationDeadlineTime?: string;
+  /* زمانِ باز شدنِ ثبت‌نام. خالی یعنی «با انتشار باز می‌شود»؛
+     پرشده یعنی مسابقه در «بزودی» می‌ماند تا این لحظه (مهاجرت ۰۷۵). */
+  regOpenDate?: string;
+  regOpenTime?: string;
+  /* لحظه‌ی ثبتِ مسابقه (ISO) — برای «تازه‌ترین اول» */
+  createdAt?: string;
   maxPlayers: 8 | 16 | 32 | 64;
   entryFee: number;
   prizeInfo: string;
@@ -45,6 +63,8 @@ export interface Tournament {
   matchFormat?: string;
   status: TournamentStatus;
   registeredCount: number;
+  /* «رویداد اصلی» صفحه‌ی مسابقات — فقط ادمین می‌زند (مهاجرت ۰۷۰) */
+  isFeatured?: boolean;
   champion?: string;
   runnerUp?: string;
   thirdPlace?: string;
@@ -69,12 +89,8 @@ export interface BracketTemplate {
 
 // ── Labels & Colors ───────────────────────────────────────────────────────────
 
-export const GAME_TYPE_LABELS: Record<GameType, string> = {
-  '8ball': 'ایت بال', '9ball': 'ناین بال', 'snooker': 'اسنوکر', 'other': 'سایر',
-};
-export const GAME_TYPE_COLORS: Record<GameType, string> = {
-  '8ball': '#3b82f6', '9ball': '#30C55A', 'snooker': '#C7A66A', 'other': '#8b5cf6',
-};
+export const GAME_TYPE_LABELS = DISCIPLINE_LABELS;
+export const GAME_TYPE_COLORS = DISCIPLINE_COLORS;
 export const STATUS_LABELS: Record<TournamentStatus, string> = {
   'upcoming': 'به زودی', 'registration_open': 'ثبت‌نام باز',
   'bracket_ready': 'براکت آماده', 'live': 'در حال برگزاری', 'finished': 'پایان یافته',

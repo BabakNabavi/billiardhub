@@ -9,15 +9,24 @@ import { sb } from '@/lib/finance/db';
    شد. «چند آگهیِ تصادفی» هم جایگزینِ درستی نیست: کاربری که دنبالِ
    چوبِ Predator است، با دیدنِ گچ زیرِ صفحه چیزی به‌دست نمی‌آورد.
 
-   ── رتبه‌بندی ──
-   امتیازِ شباهت از روی چیزهایی که واقعاً معنا دارند ساخته می‌شود:
+   ── دسته، مرزِ سخت است نه امتیاز ──
+   پیش‌تر دسته ۵۰ امتیاز داشت و اگر هم‌دسته کمتر از شش تا بود، فهرست
+   با «تازه‌ترین آگهی‌ها» از هر دسته‌ای پر می‌شد. نتیجه این بود که
+   زیرِ صفحه‌ی یک چوبِ اسنوکر، توپ و گچ نشان داده می‌شد — و امتیاز هم
+   کاری نمی‌کرد، چون رقیبی نبود.
 
-     دسته‌ی یکسان        ۵۰   بدونِ این اصلاً «مشابه» نیست
-     برندِ یکسان         ۳۰   چوبِ Predator شبیهِ چوبِ Predator است
-     نوعِ یکسان          ۱۵   زیرشاخه‌ی خودِ فروشنده
+   بخشِ کوتاه یا خالی از بخشِ بی‌ربط بهتر است: کسی که چوب می‌بیند و
+   زیرش توپ می‌بیند، یاد می‌گیرد به این بخش نگاه نکند.
+
+   ── رتبه‌بندی، بینِ هم‌دسته‌ها ──
+     نوعِ یکسان          ۴۰   «چوب اسنوکر» با «چوب اسنوکر»، نه با «چوب پول»
+     برندِ یکسان         ۲۵   چوبِ Predator شبیهِ چوبِ Predator است
      شهرِ یکسان          ۱۲   قابلِ دیدن و تحویلِ حضوری
      وضعیتِ یکسان         ۸   نو با نو، کارکرده با کارکرده
      قیمتِ نزدیک       ۰–۲۰   هرچه اختلافِ نسبی کمتر، امتیاز بیشتر
+
+   نوع بالاتر از برند نشسته: خریدارِ چوبِ اسنوکر، چوبِ اسنوکرِ برندِ
+   دیگر را می‌خرد، ولی چوبِ پولِ همان برند را نه.
 
    ── چرا این‌جا و نه در کلاینت؟ ──
    رتبه‌بندی در مرورگر یعنی همه‌ی آگهی‌ها باید دانلود شوند. با هزار
@@ -32,12 +41,12 @@ import { sb } from '@/lib/finance/db';
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-const COLS = 'id,title,price,negotiable,"discountPercent",category,condition,city,brand,type,images,"createdAt"';
+const COLS = 'id,title,price,negotiable,"discountPercent",category,condition,city,brand,model,type,images,"createdAt"';
 
 type Row = {
   id: string; title: string; price: number; negotiable: boolean;
   category: string; condition: string; city: string | null;
-  brand: string | null; type: string | null; images: unknown;
+  brand: string | null; model: string | null; type: string | null; images: unknown;
 };
 
 export async function GET(_req: NextRequest, ctx: { params: Promise<{ id: string }> }) {
@@ -49,32 +58,25 @@ export async function GET(_req: NextRequest, ctx: { params: Promise<{ id: string
   const me = selfRow as unknown as Row | null;
   if (!me) return NextResponse.json({ related: [] });
 
-  /* نامزدها: هم‌دسته‌ها اول. اگر هم‌دسته کم بود، فهرست با تازه‌ترین‌ها
-     پر می‌شود — بهتر از بخشِ خالی، و امتیازدهی ترتیبشان را درست
-     می‌کند. */
+  /* نامزدها: **فقط** هم‌دسته‌ها. هیچ پرکردنی از دسته‌های دیگر نیست. */
   const now = new Date().toISOString();
-  const base = () => sb().from('products')
+  const { data: sameCat } = await sb().from('products')
     .select(COLS)
     .eq('status', 'active')
+    .eq('category', me.category)
     .neq('id', id)
-    .or(`expiresAt.is.null,expiresAt.gt.${now}`);
+    .or(`expiresAt.is.null,expiresAt.gt.${now}`)
+    .limit(60);
+  const pool = (sameCat as unknown as Row[]) ?? [];
 
-  const { data: sameCat } = await base().eq('category', me.category).limit(60);
-  let pool = (sameCat as unknown as Row[]) ?? [];
-
-  if (pool.length < 6) {
-    const { data: fill } = await base().order('createdAt', { ascending: false }).limit(40);
-    const seen = new Set(pool.map(r => r.id));
-    for (const r of ((fill as unknown as Row[]) ?? [])) {
-      if (!seen.has(r.id)) { pool.push(r); seen.add(r.id); }
-    }
-  }
+  const norm = (v: string | null) => String(v ?? '').trim().toLowerCase();
 
   const score = (r: Row): number => {
     let s = 0;
-    if (r.category === me.category) s += 50;
-    if (r.brand && me.brand && r.brand.trim() === me.brand.trim()) s += 30;
-    if (r.type && me.type && r.type.trim() === me.type.trim()) s += 15;
+    /* دسته امتیاز ندارد چون همه‌ی نامزدها هم‌دسته‌اند — امتیازِ ثابت
+       فقط عددها را بزرگ می‌کند و ترتیب را عوض نمی‌کند. */
+    if (norm(r.type) && norm(r.type) === norm(me.type)) s += 40;
+    if (norm(r.brand) && norm(r.brand) === norm(me.brand)) s += 25;
     if (r.city && me.city && r.city === me.city) s += 12;
     if (r.condition === me.condition) s += 8;
     /* قیمت فقط وقتی معنا دارد که هر دو عدد داشته باشند — آگهیِ
@@ -92,7 +94,7 @@ export async function GET(_req: NextRequest, ctx: { params: Promise<{ id: string
     .slice(0, 8)
     .map(({ r }) => ({
       id: r.id, title: r.title, price: r.price, negotiable: r.negotiable,
-      category: r.category, condition: r.condition, city: r.city, brand: r.brand,
+      category: r.category, condition: r.condition, city: r.city, brand: r.brand, model: r.model,
       image: Array.isArray(r.images) ? String((r.images as unknown[])[0] ?? '') : '',
     }));
 

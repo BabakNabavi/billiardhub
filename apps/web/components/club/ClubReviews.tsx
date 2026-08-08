@@ -8,6 +8,7 @@
    ───────────────────────────────────────────────────────────── */
 
 import { useCallback, useEffect, useState } from 'react'
+import { ask } from '../../lib/ui/dialogs'
 import { Star, Loader2, Trash2, Pencil } from 'lucide-react'
 import { apiFetch } from '../../lib/http'
 
@@ -61,7 +62,7 @@ export default function ClubReviews({ clubId }: { clubId: string }) {
   }
 
   const remove = async () => {
-    if (!window.confirm('نظر شما حذف شود؟')) return
+    if (!(await ask('نظر شما حذف شود؟'))) return
     setBusy(true)
     try {
       await apiFetch(`/api/clubs/${clubId}/reviews`, { method: 'DELETE' })

@@ -198,7 +198,7 @@ function MarketCard({ l, i, saved, onSave }: { l: Listing; i: number; saved: boo
       <div className="mk-body">
         <span className="mk-name">
           <span className="mk-h">{l.name}</span>
-          {l.sub && <span className="mk-t"> {l.sub}</span>}
+          {l.sub && <span className="mk-t">{l.sub}</span>}
         </span>
         <div className="mk-meta">
           <MapPin size={10} style={{ color: GOLD, flexShrink: 0 }} />
@@ -233,7 +233,7 @@ function MarketRow({ l, i, saved, onSave }: { l: Listing; i: number; saved: bool
       <div className="info">
         <span className="ttl">
           <span className="mk-h">{l.name}</span>
-          {l.sub && <span className="mk-t"> {l.sub}</span>}
+          {l.sub && <span className="mk-t">{l.sub}</span>}
         </span>
         <span className="cnd">{COND_LABEL[l.condition]}</span>
         {/* «تومان» روی خط خط‌خورده تا خط قیمت جا برای مبلغ + پیل ٪ داشته باشد */}
@@ -587,13 +587,19 @@ export default function MarketNewPage() {
         .mk-urg { position: absolute; top: 8px; right: 8px; display: inline-flex; align-items: center; gap: 3px;
           font-size: 9px; font-weight: 800; color: #fff; background: rgba(178,59,46,0.94); border-radius: 999px; padding: 3px 8px; }
         .mk-body { display: flex; flex-direction: column; gap: 6px; padding: 9px 9px 10px; flex: 1; }
-        .mk-name { font-size: 12.5px; color: ${TEXT}; line-height: 1.55; display: -webkit-box;
-          -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-height: 39px; }
-        /* ── دو تکه‌ی عنوان ──
-           دسته‌بندی و نوع درشت‌تر و پررنگ‌تر چون همان چیزی است که چشم
-           اول دنبالش می‌گردد؛ برند و مدل ریزتر، ولی دیده می‌شوند. */
-        .mk-h { font-size: 13.5px; font-weight: 800; }
-        .mk-t { font-size: 11.5px; font-weight: 600; color: ${MUT}; }
+        .mk-name { font-size: 12.5px; color: ${TEXT}; line-height: 1.55; min-height: 39px; }
+        /* ── دو خطِ عنوان ──
+           خطِ اول دسته‌بندی و نوع، بولد — همان چیزی که چشم اول دنبالش
+           می‌گردد. خطِ دوم برند و مدل با وزنِ معمولی.
+
+           کلامپ روی خودِ mk-name نیست (بکتیک این‌جا رشته‌ی style را
+           می‌بندد): با آن، خطِ دومِ عنوان قربانیِ
+           محدودیتِ دو خط می‌شد و برند و مدل — که تازه اضافه شده‌اند —
+           دوباره ناپدید می‌شدند. هر خط کلامپِ خودش را دارد. */
+        .mk-h { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+          overflow: hidden; font-size: 13px; font-weight: 800; }
+        .mk-t { display: block; font-size: 11.5px; font-weight: 400; color: ${MUT};
+          white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .mk-meta { display: flex; align-items: center; gap: 4px; font-size: 10px; color: ${MUT}; }
         .mk-cond { margin-inline-start: auto; background: #F4F3F1; border-radius: 999px; padding: 1.5px 7px; font-weight: 700; }
         .mk-priceline { margin-top: auto; display: flex; align-items: center; gap: 5px; }
@@ -679,11 +685,10 @@ export default function MarketNewPage() {
           animation: mkUp .45s cubic-bezier(.22,1,.36,1) both; }
         .mk-row:active { transform: scale(0.99); }
         .mk-row .info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 5px; padding-top: 2px; }
-        .mk-row .ttl { font-size: 13px; font-weight: 700; color: ${TEXT}; line-height: 1.6; display: -webkit-box;
-          -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-        /* ردیفِ موبایل کمی درشت‌تر از کارت است، پس تکه‌ها هم یک پله بالاتر */
-        .mk-row .ttl .mk-h { font-size: 14px; font-weight: 800; }
-        .mk-row .ttl .mk-t { font-size: 12px; font-weight: 600; color: ${MUT}; }
+        .mk-row .ttl { font-size: 13px; font-weight: 700; color: ${TEXT}; line-height: 1.6; }
+        /* ردیفِ موبایل کمی درشت‌تر از کارت است، پس هر دو خط یک پله بالاتر */
+        .mk-row .ttl .mk-h { font-size: 13.5px; font-weight: 800; }
+        .mk-row .ttl .mk-t { font-size: 12px; font-weight: 400; color: ${MUT}; }
         .mk-row .cnd { font-size: 10.5px; color: ${MUT}; }
         .mk-row .prc { font-size: 13.5px; font-weight: 900; color: ${TEXT}; font-variant-numeric: tabular-nums; }
         .mk-row .prc i { font-style: normal; font-size: 10px; font-weight: 600; color: ${MUT}; }

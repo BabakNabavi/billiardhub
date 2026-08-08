@@ -69,6 +69,33 @@ export async function recipientsOf(clubId: string, ownerId: string): Promise<Rec
   return out
 }
 
+/* ── چرا «هیچ عضوی پیدا نشد» کافی نیست ──
+   این جمله شبیهِ خرابی است، در حالی که سه حالتِ کاملاً متفاوت به
+   آن می‌رسند و کارِ باشگاه‌دار در هر سه فرق می‌کند:
+
+     • هنوز کسی عضو نشده        ⇒ باید نشانیِ باشگاهش را پخش کند
+     • تنها عضو خودش است        ⇒ همه‌چیز درست است، فقط کسی نیست
+     • همه پیامک را خاموش کرده  ⇒ کاری از دستش برنمی‌آید
+
+   باشگاه‌داری که «پیدا نشد» می‌بیند فکر می‌کند سیستم عضوهایش را
+   گم کرده. */
+async function noRecipientReason(clubId: string, ownerId: string): Promise<string> {
+  const { data } = await sb().from('club_members')
+    .select('user_id,sms_opt_out').eq('club_id', clubId)
+  const rows = (data ?? []) as { user_id: string; sms_opt_out?: boolean }[]
+
+  if (!rows.length) return 'هنوز هیچ‌کس عضو این باشگاه نشده است'
+
+  const others = rows.filter(r => r.user_id !== ownerId)
+  if (!others.length) {
+    return 'تنها عضو این باشگاه خودتان هستید — پیامک به خودتان فرستاده نمی‌شود'
+  }
+  if (others.every(r => r.sms_opt_out === true)) {
+    return 'همه‌ی اعضا دریافت پیامک باشگاه را خاموش کرده‌اند'
+  }
+  return 'هیچ عضوی با شماره‌ی موبایلِ معتبر پیدا نشد'
+}
+
 export interface Quote {
   recipients: number
   unitPrice: number
@@ -91,7 +118,7 @@ export async function quote(
   if (!p.enabled) return { error: 'ارسال پیامک به اعضا فعلاً غیرفعال است' }
 
   const list = await recipientsOf(clubId, ownerId)
-  if (!list.length) return { error: 'هیچ عضوی برای ارسال پیدا نشد' }
+  if (!list.length) return { error: await noRecipientReason(clubId, ownerId) }
 
   /* `{1}` نامِ باشگاه است و از دیتابیس می‌آید — نه از فرم */
   const full = [clubName, ...args]

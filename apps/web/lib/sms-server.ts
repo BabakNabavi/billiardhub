@@ -102,6 +102,11 @@ export const PATTERNS = [
   'club_approved',
   'club_rejected',
   'tournament_registered',
+  /* ── خبرِ ثبت‌نام برای برگزارکننده ──
+     قرینه‌ی `booking_for_owner`. باشگاه‌دار تا امروز هیچ خبری از
+     پرشدنِ مسابقه‌اش نداشت و باید مرتب پنل را باز می‌کرد؛ برای
+     مسابقه‌ای که در چند ساعت پر می‌شود این یعنی دیر فهمیدن. */
+  'tournament_reg_for_owner',
   'tournament_cancelled',
   'waitlist_promoted',
   'report_created',
@@ -202,7 +207,14 @@ export async function sendPattern(
     /* پاسخِ موفق `recId` بزرگ‌تر از ۱۵ رقم می‌دهد؛ عددهای کوچک کدِ
        خطا هستند و `status` متنِ فارسی‌اش را دارد. */
     const rec = String(j?.recId ?? '')
-    if (rec.length > 10 && !/^-/.test(rec)) return { ok: true }
+    if (rec.length > 10 && !/^-/.test(rec)) {
+      /* ── چرا موفقیت هم لاگ می‌شود ──
+         تا امروز فقط شکست لاگ می‌شد، پس «پیامک نیامد» هیچ ردی در
+         لاگ نداشت و نمی‌شد فهمید اصلاً فرستاده شده یا نه. شماره
+         نیمه‌پوشیده می‌آید — لاگ جای شماره‌ی کاملِ کاربر نیست. */
+      console.info('[sms] ارسال شد:', key, to.slice(0, 4) + '***' + to.slice(-3))
+      return { ok: true }
+    }
 
     console.error('[sms] ارسال ناموفق:', key, '| recId:', rec, '| status:', j?.status)
     return { ok: false, message: j?.status || 'ارسال پیامک ناموفق بود' }

@@ -12,7 +12,7 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
-import { Package, Plus, Save, Power, Loader2, AlertCircle, CheckCircle2, Wallet, ArrowLeft, Users } from 'lucide-react'
+import { Package, Plus, Save, Power, Loader2, AlertCircle, CheckCircle2, ArrowLeft, Users } from 'lucide-react'
 import { apiFetch } from '../../../lib/http'
 import { toFaDigits } from '../../../lib/jalali'
 import Select from '../../../components/ui/Select'
@@ -77,8 +77,11 @@ export default function AdminAdPlans() {
   const [toast, setToast] = useState('')
 
   const [quotaOn, setQuotaOn] = useState(false)
+  /* تعرفه‌ی ارتقای آگهی — تازه‌سازی و فوری (مهاجرت ۰۷۹) */
+  const [boost, setBoost] = useState({
+    enabled: false, bumpPrice: '20000', cooldown: '24', urgentPrice: '50000', urgentDays: '7',
+  })
   const [roleQuota, setRoleQuota] = useState<Record<string, RoleQuota>>({})
-  const [bank, setBank] = useState({ ownerName: '', bankName: '', cardNumber: '', iban: '' })
 
   const flash = (m: string) => { setToast(m); setTimeout(() => setToast(''), 2600) }
 
@@ -96,6 +99,15 @@ export default function AdminAdPlans() {
       const s = sj?.settings ?? {}
       setQuotaOn(!!s.ads_quota_enabled)
 
+      const bp = s.ad_boost_pricing ?? {}
+      setBoost({
+        enabled: bp.enabled === true,
+        bumpPrice: String(bp.bump?.price ?? 20000),
+        cooldown: String(bp.bump?.cooldownHours ?? 24),
+        urgentPrice: String(bp.urgent?.price ?? 50000),
+        urgentDays: String(bp.urgent?.days ?? 7),
+      })
+
       /* شکل ذخیره‌شده ممکن است قدیمی باشد ({quota,period} برای همه) */
       const raw = s.ads_free_quota ?? {}
       const legacy = typeof raw.quota === 'number' ? { quota: raw.quota, period: raw.period ?? 'week' } : null
@@ -107,10 +119,6 @@ export default function AdminAdPlans() {
       }
       setRoleQuota(next)
 
-      if (s.platform_bank) setBank({
-        ownerName: s.platform_bank.ownerName ?? '', bankName: s.platform_bank.bankName ?? '',
-        cardNumber: s.platform_bank.cardNumber ?? '', iban: s.platform_bank.iban ?? '',
-      })
     } catch { setErr('خطا در ارتباط با سرور'); setPlans([]) }
   }, [])
   useEffect(() => { void load() }, [load])
@@ -265,33 +273,68 @@ export default function AdminAdPlans() {
         </div>
       </section>
 
-      {/* ── حساب واریز ── */}
+      {/* ── تعرفه‌ی ارتقای آگهی ──
+          دو محصولِ متفاوت، نه دو برچسب: «تازه‌سازی» کلیدِ مرتب‌سازی
+          را به حالا می‌برد (آگهی مثلِ آگهیِ تازه بالا می‌رود و بعد
+          طبیعتاً پایین می‌آید)، «فوری» جایگاهی در نوارِ رزروشده‌ی
+          بالای بازار می‌خرد که تا پایانِ مدت پایین نمی‌آید. */}
       <section style={CARD}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 5 }}>
-          <Wallet size={17} style={{ color: GOLD_D }} />
-          <h2 style={{ fontSize: 15, fontWeight: 900, color: INK, margin: 0 }}>حساب واریز فروش بسته‌ها</h2>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap', marginBottom: 16 }}>
+          <div style={{ minWidth: 250, flex: 1 }}>
+            <div style={{ fontSize: 15, fontWeight: 900, color: INK, marginBottom: 5 }}>ارتقای آگهی</div>
+            <p style={{ fontSize: 12.5, color: MUT, margin: 0, lineHeight: 1.95 }}>
+              «تازه‌سازی» آگهی را به بالای فهرست می‌برد و بعد طبیعتاً پایین می‌آید.
+              «فوری» تا چند روز در نوارِ رزروشده‌ی بالای بازار می‌ماند و نشانِ قرمز می‌گیرد.
+            </p>
+          </div>
+          <button
+            onClick={() => saveSettings(
+              { ad_boost_pricing: {
+                enabled: !boost.enabled,
+                bump: { price: Number(boost.bumpPrice) || 0, cooldownHours: Number(boost.cooldown) || 24 },
+                urgent: { price: Number(boost.urgentPrice) || 0, days: Number(boost.urgentDays) || 7 },
+              } },
+              boost.enabled ? 'ارتقای آگهی خاموش شد' : 'ارتقای آگهی روشن شد')}
+            disabled={busy === 'settings'}
+            style={{
+              ...BTN,
+              background: boost.enabled ? 'rgba(14,122,56,0.10)' : 'rgba(0,0,0,0.04)',
+              borderColor: boost.enabled ? 'rgba(14,122,56,0.32)' : LINE,
+              color: boost.enabled ? FELT : SEC,
+            }}>
+            {boost.enabled ? 'روشن' : 'خاموش'}
+          </button>
         </div>
-        <p style={{ fontSize: 12.5, color: MUT, margin: '0 0 16px', lineHeight: 1.95 }}>
-          پول خرید بسته‌ها به این حساب می‌نشیند. تا پر نشود، در صورتحساب ادمین «تعیین‌نشده» نمایش داده می‌شود.
+
+        <div style={{ display: 'grid', gap: 14, gridTemplateColumns: 'repeat(auto-fit,minmax(170px,1fr))' }}>
+          <div><label style={LABEL}>قیمت تازه‌سازی (تومان)</label>
+            <input style={INPUT} inputMode="numeric" value={fa(boost.bumpPrice)}
+              onChange={e => setBoost(b => ({ ...b, bumpPrice: digits(e.target.value) }))} /></div>
+          <div><label style={LABEL}>فاصله‌ی مجاز تازه‌سازی (ساعت)</label>
+            <input style={INPUT} inputMode="numeric" value={fa(boost.cooldown)}
+              onChange={e => setBoost(b => ({ ...b, cooldown: digits(e.target.value) }))} /></div>
+          <div><label style={LABEL}>قیمت فوری (تومان)</label>
+            <input style={INPUT} inputMode="numeric" value={fa(boost.urgentPrice)}
+              onChange={e => setBoost(b => ({ ...b, urgentPrice: digits(e.target.value) }))} /></div>
+          <div><label style={LABEL}>مدت فوری (روز)</label>
+            <input style={INPUT} inputMode="numeric" value={fa(boost.urgentDays)}
+              onChange={e => setBoost(b => ({ ...b, urgentDays: digits(e.target.value) }))} /></div>
+        </div>
+
+        <p style={{ fontSize: 11.5, color: MUT, margin: '12px 0 0', lineHeight: 1.95 }}>
+          «فاصله‌ی مجاز» جلوی خریدِ پشتِ‌هم را می‌گیرد. بدونِ آن، کسی که پول دارد
+          هر دقیقه تازه‌سازی می‌خرد و برای همیشه نفرِ اول می‌ماند — و آن دیگر ارتقا
+          نیست، اجاره‌ی صدرِ فهرست است.
         </p>
-        <div style={{ display: 'grid', gap: 14, gridTemplateColumns: 'repeat(auto-fit,minmax(190px,1fr))' }}>
-          <div><label style={LABEL}>نام صاحب حساب</label>
-            <input style={INPUT} value={bank.ownerName} onChange={e => setBank(b => ({ ...b, ownerName: e.target.value }))} /></div>
-          <div><label style={LABEL}>بانک</label>
-            <input style={INPUT} value={bank.bankName} onChange={e => setBank(b => ({ ...b, bankName: e.target.value }))} /></div>
-          <div><label style={LABEL}>شماره کارت</label>
-            <input style={{ ...INPUT, direction: 'ltr', textAlign: 'right' }} inputMode="numeric"
-              value={fa(bank.cardNumber)}
-              onChange={e => setBank(b => ({ ...b, cardNumber: digits(e.target.value).slice(0, 16) }))}
-              placeholder="۶۰۳۷••••••••••••" /></div>
-          <div><label style={LABEL}>شبا</label>
-            <input style={{ ...INPUT, direction: 'ltr', textAlign: 'right' }} value={bank.iban}
-              onChange={e => setBank(b => ({ ...b, iban: e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 26) }))}
-              placeholder="IR…" /></div>
-        </div>
-        <button onClick={() => saveSettings({ platform_bank: bank }, 'حساب واریز ذخیره شد')}
+
+        <button onClick={() => saveSettings(
+          { ad_boost_pricing: {
+            enabled: boost.enabled,
+            bump: { price: Number(boost.bumpPrice) || 0, cooldownHours: Number(boost.cooldown) || 24 },
+            urgent: { price: Number(boost.urgentPrice) || 0, days: Number(boost.urgentDays) || 7 },
+          } }, 'تعرفه‌ی ارتقا ذخیره شد')}
           disabled={busy === 'settings'} style={{ ...BTN, marginTop: 16 }}>
-          <Save size={14} /> ذخیره‌ی حساب
+          <Save size={14} /> ذخیره‌ی تعرفه
         </button>
       </section>
 

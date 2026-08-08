@@ -7,9 +7,11 @@ import {
   ChevronRight, Star, ClipboardList,
 } from 'lucide-react';
 import {
-  formatFee, toFa, type Tournament,
+  formatFee, toFa, GAME_TYPE_LABELS, type Tournament,
 } from '../../../lib/mock-tournaments';
 import { fetchTournament } from '../../../lib/tournaments/client';
+import { fetchBracket, type Bracket } from '../../../lib/tournaments/bracket-client';
+import { formatLabel, formatIsLatin } from '../../../lib/tournaments/formats';
 
 export default function TournamentPublicPage() {
   const { id } = useParams() as { id: string };
@@ -21,6 +23,10 @@ export default function TournamentPublicPage() {
      می‌کنیم و اگر نبود «پیدا نشد» می‌گوییم. */
   const [t, setT] = useState<Tournament | null>(null);
   const [loading, setLoading] = useState(true);
+  /* سکوی نفراتِ برتر — فقط وقتی مسابقه تمام شده. براکت جدا خوانده
+     می‌شود چون ردیفِ مسابقه اسمِ قهرمان را ندارد؛ نتیجه در
+     tournament_matches است. */
+  const [podium, setPodium] = useState<Bracket | null>(null);
 
   useEffect(() => {
     let alive = true;
@@ -30,18 +36,20 @@ export default function TournamentPublicPage() {
     return () => { alive = false; };
   }, [id]);
 
-  const [matchFormat, setMatchFormat] = useState('bo3');
-
   useEffect(() => {
-    try {
-      const stored = localStorage.getItem(`matchFormat_${id}`);
-      if (stored) setMatchFormat(stored);
-    } catch {}
-  }, [id]);
+    if (t?.status !== 'finished') return;
+    let alive = true;
+    void fetchBracket(id).then(b => { if (alive) setPodium(b); });
+    return () => { alive = false; };
+  }, [id, t?.status]);
 
-  const FORMAT_LABELS: Record<string, string> = {
-    bo3: 'Best of 3', bo5: 'Best of 5', bo7: 'Best of 7', bo9: 'Best of 9', bo11: 'Best of 11',
-  };
+  /* ── فرمت از سرور، نه از localStorage ──
+     پیش‌تر این مقدار از `localStorage.matchFormat_${id}` خوانده
+     می‌شد — کلیدی که فقط صفحه‌ی مرده‌ی `/tournaments/new` روی
+     مرورگرِ سازنده می‌نوشت (آن هم با شناسه‌ی ثابتِ `t1`). یعنی هر
+     بازدیدکننده‌ای «Best of 3» می‌دید، صرفِ‌نظر از اینکه باشگاه چه
+     انتخاب کرده بود. */
+  const matchFormat = t?.matchFormat ?? '';
 
   if (loading) return (
     <div dir="rtl" style={{ minHeight: '60vh', background: '#F7F7F5', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Vazirmatn, sans-serif', color: '#8A8474', fontSize: 14 }}>
@@ -65,6 +73,22 @@ export default function TournamentPublicPage() {
   const full = t.registeredCount >= t.maxPlayers;
 
   const canRegister = t.status === 'registration_open' && !full;
+
+  /* خطوطِ خالی و بولتِ دستیِ کاربر برداشته می‌شوند — خودمان بولت
+     می‌گذاریم و دو بولت پشتِ هم زشت است. */
+  const rules = t.rules
+    .split('\n')
+    .map(r => r.replace(/^\s*[•\-*]\s*/, '').trim())
+    .filter(Boolean);
+
+  /* مهلتِ ثبت‌نام با ساعتش. باشگاه‌دار ساعت را در فرم انتخاب می‌کند
+     ولی تا امروز فقط روزش نمایش داده می‌شد — یعنی کسی که ثبت‌نام را
+     ظهر می‌بست، بازیکنانش تا شب فکر می‌کردند فرصت دارند. */
+  const deadlineText = t.registrationDeadline
+    ? t.registrationDeadlineTime
+      ? `${t.registrationDeadline} — ساعت ${toFa(t.registrationDeadlineTime)}`
+      : t.registrationDeadline
+    : '—';
 
   return (
     <div style={{ minHeight: '100vh', background: '#F7F7F5', direction: 'rtl',
@@ -120,22 +144,27 @@ export default function TournamentPublicPage() {
               </p>
             </div>
 
-            {/* Rules */}
-            <div style={{ background: '#fff', borderRadius: 20, padding: '22px 24px',
-              border: '1px solid rgba(0,0,0,0.06)' }}>
-              <h2 style={{ fontSize: 16, fontWeight: 800, color: '#111', margin: '0 0 14px' }}>
-                قوانین مسابقه
-              </h2>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                {t.rules.split('\n').map((rule, i) => (
-                  <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 10,
-                    fontSize: 15, color: '#555', lineHeight: 1.6 }}>
-                    <span style={{ color: '#C7A66A', fontWeight: 800, flexShrink: 0 }}>•</span>
-                    <span>{rule.replace(/^•\s*/, '')}</span>
-                  </div>
-                ))}
+            {/* Rules — فقط وقتی چیزی هست.
+                پیش‌تر این کارت همیشه رندر می‌شد و چون `t.rules` در
+                نگاشت همیشه رشته‌ی خالی بود، هر مسابقه یک کادرِ
+                «قوانین مسابقه»ی خالی با یک بولتِ تنها داشت. */}
+            {rules.length > 0 && (
+              <div style={{ background: '#fff', borderRadius: 20, padding: '22px 24px',
+                border: '1px solid rgba(0,0,0,0.06)' }}>
+                <h2 style={{ fontSize: 16, fontWeight: 800, color: '#111', margin: '0 0 14px' }}>
+                  قوانین مسابقه
+                </h2>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  {rules.map((rule, i) => (
+                    <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 10,
+                      fontSize: 15, color: '#555', lineHeight: 1.6 }}>
+                      <span style={{ color: '#C7A66A', fontWeight: 800, flexShrink: 0 }}>•</span>
+                      <span>{rule}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
 
           </div>
 
@@ -181,9 +210,10 @@ export default function TournamentPublicPage() {
               {/* Info rows */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 20 }}>
                 {[
-                  { label: 'مهلت ثبت‌نام', value: t.registrationDeadline },
+                  { label: 'مهلت ثبت‌نام', value: deadlineText },
                   { label: 'تاریخ برگزاری', value: t.date },
                   { label: 'ساعت شروع', value: toFa(t.startTime) },
+                  { label: 'نوع بازی', value: GAME_TYPE_LABELS[t.gameType] },
                 ].map(row => (
                   <div key={row.label} style={{
                     display: 'flex', justifyContent: 'space-between',
@@ -198,17 +228,18 @@ export default function TournamentPublicPage() {
                   fontSize: 14, paddingBottom: 10, borderBottom: '1px solid rgba(0,0,0,0.05)',
                 }}>
                   <span style={{ color: '#aaa' }}>فرمت مسابقه</span>
-                  <span className="lat" style={{ fontWeight: 500, color: '#111',
-                    direction: 'ltr', unicodeBidi: 'isolate' }}>
-                    {FORMAT_LABELS[matchFormat] ?? matchFormat}
+                  {/* برچسبِ «۹۰ دقیقه» فارسی است و نباید در فونتِ
+                      لاتین و جهتِ چپ‌به‌راست بنشیند؛ «Race to 7»
+                      برعکس. پس هر کدام سبکِ خودش را می‌گیرد. */}
+                  <span
+                    className={formatIsLatin(matchFormat) ? 'lat' : undefined}
+                    style={{
+                      fontWeight: formatIsLatin(matchFormat) ? 500 : 700, color: '#111',
+                      direction: formatIsLatin(matchFormat) ? 'ltr' : 'rtl',
+                      unicodeBidi: 'isolate',
+                    }}>
+                    {matchFormat ? formatLabel(matchFormat) : '—'}
                   </span>
-                </div>
-                <div style={{
-                  display: 'flex', justifyContent: 'space-between',
-                  fontSize: 14, paddingBottom: 10, borderBottom: '1px solid rgba(0,0,0,0.05)',
-                }}>
-                  <span style={{ color: '#aaa' }}>نوع مسابقه</span>
-                  <span style={{ fontWeight: 700, color: '#111' }}>تک حذفی</span>
                 </div>
               </div>
 
@@ -260,22 +291,105 @@ export default function TournamentPublicPage() {
 
             </div>
 
-            {/* Admin link */}
-            <div style={{ marginTop: 12 }}>
-              <Link href={`/tournaments/${t.id}/admin`} style={{
-                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-                fontSize: 14, color: '#999', textDecoration: 'none',
-                padding: '10px', borderRadius: 12,
-                border: '1px solid rgba(0,0,0,0.07)',
-                background: '#fff', transition: 'all 0.18s',
+            {/* لینکِ «پنل مدیریت مسابقه» برداشته شد: این صفحه عمومی
+                است و همه — از جمله بازیکن — آن را می‌دیدند. جای
+                درستش پنلِ باشگاه است، کنارِ خودِ مسابقه. */}
+          </div>
+        </div>
+      </div>
+
+      {/* ── سکوی نفراتِ برتر ──
+          تا امروز مسابقه‌ی تمام‌شده هیچ نشانی از نتیجه‌اش روی صفحه‌ی
+          خودش نداشت؛ برای دیدنِ قهرمان باید به براکت می‌رفتی. حالا
+          همین‌جا، آخرِ صفحه.
+
+          نفرِ سوم دو نفر است: در حذفیِ یک‌طرفه بدونِ بازیِ رده‌بندی
+          هیچ‌کدام از دو بازنده‌ی نیمه‌نهایی بالاتر از دیگری نیست، و
+          حدس‌زدنش یعنی نوشتنِ چیزی که برگزار نشده. */}
+      {t.status === 'finished' && podium?.champion && (
+        <div style={{ maxWidth: 1100, margin: '0 auto', padding: '0 clamp(16px,4vw,40px) 8px' }}>
+          <div style={{
+            position: 'relative', overflow: 'hidden',
+            background: 'linear-gradient(150deg,#17150F 0%,#241F14 55%,#12100B 100%)',
+            border: '1px solid rgba(199,166,106,0.34)', borderRadius: 22,
+            padding: 'clamp(22px,4vw,34px) clamp(18px,4vw,32px)',
+          }}>
+            <div aria-hidden style={{
+              position: 'absolute', inset: '-40% 55% auto -30%', height: '180%',
+              background: 'radial-gradient(circle,rgba(199,166,106,0.16),transparent 62%)',
+              pointerEvents: 'none',
+            }} />
+
+            <div style={{ position: 'relative', textAlign: 'center', marginBottom: 22 }}>
+              <div style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.26em', color: '#C7A66A' }}>
+                FINAL STANDINGS
+              </div>
+              <h2 style={{ margin: '8px 0 0', fontSize: 19, fontWeight: 900, color: '#fff' }}>
+                نفرات برتر
+              </h2>
+            </div>
+
+            <div style={{ position: 'relative', display: 'grid', gap: 12,
+              gridTemplateColumns: 'repeat(auto-fit,minmax(190px,1fr))' }}>
+
+              {/* قهرمان */}
+              <div style={{
+                gridColumn: '1 / -1',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12,
+                background: 'linear-gradient(135deg,rgba(232,206,150,0.20),rgba(199,166,106,0.09))',
+                border: '1px solid rgba(199,166,106,0.5)', borderRadius: 16,
+                padding: '18px 20px', flexWrap: 'wrap',
               }}>
-                <Star size={13} />
-                پنل مدیریت مسابقه
+                <span style={{ fontSize: 26, lineHeight: 1 }}>🏆</span>
+                <div style={{ textAlign: 'center' }}>
+                  <div style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: '0.14em', color: '#C7A66A' }}>قهرمان</div>
+                  <div style={{ fontSize: 'clamp(19px,3vw,25px)', fontWeight: 900, color: '#fff', marginTop: 4 }}>
+                    {podium.champion.name}
+                  </div>
+                </div>
+              </div>
+
+              {podium.runnerUp && (
+                <div style={{
+                  background: 'rgba(255,255,255,0.045)', border: '1px solid rgba(255,255,255,0.10)',
+                  borderRadius: 14, padding: '14px 16px', textAlign: 'center',
+                }}>
+                  <div style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: '0.12em', color: '#C9C3B4' }}>
+                    🥈 نایب‌قهرمان
+                  </div>
+                  <div style={{ fontSize: 15.5, fontWeight: 800, color: '#fff', marginTop: 6 }}>
+                    {podium.runnerUp.name}
+                  </div>
+                </div>
+              )}
+
+              {(podium.thirds ?? []).map((name, i) => (
+                <div key={i} style={{
+                  background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)',
+                  borderRadius: 14, padding: '14px 16px', textAlign: 'center',
+                }}>
+                  <div style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: '0.12em', color: '#B99A6E' }}>
+                    🥉 سوم مشترک
+                  </div>
+                  <div style={{ fontSize: 15.5, fontWeight: 800, color: '#fff', marginTop: 6 }}>{name}</div>
+                </div>
+              ))}
+            </div>
+
+            <div style={{ position: 'relative', textAlign: 'center', marginTop: 18 }}>
+              <Link href={`/tournaments/${t.id}/bracket`} style={{
+                display: 'inline-flex', alignItems: 'center', gap: 7,
+                fontSize: 12.5, fontWeight: 800, textDecoration: 'none',
+                color: '#E8CE96', background: 'rgba(199,166,106,0.12)',
+                border: '1px solid rgba(199,166,106,0.34)', borderRadius: 10,
+                padding: '9px 18px',
+              }}>
+                <Star size={13} /> دیدن جدول کامل
               </Link>
             </div>
           </div>
         </div>
-      </div>
+      )}
 
       <style>{`
         .lat { font-family: system-ui,-apple-system,Arial,sans-serif !important; }

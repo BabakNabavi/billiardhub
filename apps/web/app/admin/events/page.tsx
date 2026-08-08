@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { ask } from '../../../lib/ui/dialogs'
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '../../../store/auth.store';
 import { Trophy, Plus, X, Save, Edit, Trash2 } from 'lucide-react';
@@ -61,7 +62,7 @@ const emptyForm = {
 
 export default function AdminEventsPage() {
   const router = useRouter();
-  const { user, _hydrated } = useAuthStore();
+  const { user, _hydrated, authChecked } = useAuthStore();
   /* خالی شروع می‌شود. پیش‌تر با دو مسابقه‌ی ساختگی («قهرمانی اسنوکر
      ایران ۱۴۰۳» و «لیگ پاکت دسته برتر») پر می‌شد که هیچ‌وقت در
      دیتابیس نبودند و ادمین فکر می‌کرد داده‌ی واقعی است. */
@@ -73,8 +74,8 @@ export default function AdminEventsPage() {
 
   /* گارد بعد از hydrate — وگرنه ادمین موقع رفرش بی‌دلیل bounce می‌شد */
   useEffect(() => {
-    if (_hydrated && (!user || user.primaryRole !== 'admin')) router.push('/');
-  }, [_hydrated, user, router]);
+    if (_hydrated && authChecked && (!user || user.primaryRole !== 'admin')) router.push('/');
+  }, [_hydrated, authChecked, user, router]);
 
   /* ستون‌های دیتابیس snake_case‌اند و این صفحه camelCase */
   const fromDb = (r: DbEvent): EventItem => ({
@@ -110,7 +111,7 @@ export default function AdminEventsPage() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('این مسابقه حذف شود؟')) return;
+    if (!(await ask('این مسابقه حذف شود؟'))) return;
     if (await deleteContent('events', id)) setEvents(evts => evts.filter(e => e.id !== id));
     else setErr('حذف انجام نشد');
   };

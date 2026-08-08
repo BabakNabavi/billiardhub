@@ -36,6 +36,60 @@ export async function GET(req: NextRequest) {
   }, { headers: { 'Cache-Control': 'no-store' } });
 }
 
+/* ── انتخابِ نقشِ اصلی ──
+   کسی که چند نقش دارد باید یکی را «اصلی» کند: همان نشانی است که
+   روی آگهی و استوری‌اش می‌نشیند. تا امروز نقشِ اصلی فقط با گرفتنِ
+   نقشِ تازه عوض می‌شد و کاربر هیچ کنترلی رویش نداشت. */
+export async function PUT(req: NextRequest) {
+  const actor = actorFromRequest(req);
+  if (!actor) return NextResponse.json({ message: 'ابتدا وارد شوید' }, { status: 401 });
+
+  const { primaryRole } = await req.json().catch(() => ({}));
+  const role = String(primaryRole ?? '').trim();
+  if (!role) return NextResponse.json({ message: 'نقش انتخاب نشده است' }, { status: 400 });
+
+  const { data: u } = await sb().from('users')
+    .select('"primaryRole","secondaryRoles"').eq('id', actor.id).maybeSingle();
+  if (!u) return NextResponse.json({ message: 'کاربر پیدا نشد' }, { status: 404 });
+  const cur = u as { primaryRole?: string; secondaryRoles?: string[] };
+
+  /* فقط نقشی که واقعاً دارد. بدونِ این بررسی، هر کسی با یک درخواستِ
+     دستی خودش را «باشگاه‌دار» می‌کرد. */
+  const owned = [cur.primaryRole, ...(cur.secondaryRoles ?? [])].filter(Boolean);
+  if (!owned.includes(role)) {
+    return NextResponse.json({ message: 'این نقش را ندارید' }, { status: 403 });
+  }
+  /* نقشِ ادمین جای دیگری مدیریت می‌شود و نباید از این مسیر
+     نقشِ نمایشیِ آگهی شود. */
+  if (role === 'admin') {
+    return NextResponse.json({ message: 'نقش ادمین نقشِ نمایشی نیست' }, { status: 400 });
+  }
+  if (cur.primaryRole === role) return NextResponse.json({ ok: true, primaryRole: role });
+
+  /* نقشِ قبلی گم نمی‌شود — به فهرستِ دوم می‌رود */
+  const nextSecondary = Array.from(new Set([
+    ...(cur.secondaryRoles ?? []).filter(r => r && r !== role),
+    ...(cur.primaryRole && cur.primaryRole !== 'user' ? [cur.primaryRole] : []),
+  ]));
+
+  const { error } = await sb().from('users').update({
+    primaryRole: role, secondaryRoles: nextSecondary,
+    updatedAt: new Date().toISOString(),
+  }).eq('id', actor.id);
+  if (error) {
+    console.error('[roles/my] primary', error.message);
+    return NextResponse.json({ message: 'تغییر نقش اصلی انجام نشد' }, { status: 500 });
+  }
+
+  void audit({
+    actorId: actor.id, actorRole: actor.role, action: 'PRIMARY_ROLE_CHANGED',
+    entityType: 'user', entityId: actor.id,
+    newValue: { from: cur.primaryRole, to: role },
+  });
+
+  return NextResponse.json({ ok: true, primaryRole: role, secondaryRoles: nextSecondary });
+}
+
 /* DELETE ?role=… — کاربر نقشی را از خودش برمی‌دارد.
 
    ── چرا این مسیر لازم شد ──

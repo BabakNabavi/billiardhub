@@ -146,7 +146,15 @@ export default function Navbar() {
   const [search, setSearch] = useState('');
   const [searchOpen, setSearchOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [scrollY, setScrollY] = useState(0);
+  /* ── چرا `scrollY` دیگر state نیست ──
+     این مقدار فقط محوشدنِ نوارِ استوری را می‌راند، ولی چون state بود،
+     هر فریمِ اسکرول کلِ نوارِ بالا — و زیرمجموعه‌اش `Stories` — را
+     دوباره رندر می‌کرد: شصت رندرِ کاملِ سنگین‌ترین کامپوننتِ روی صفحه
+     در هر ثانیه. همان لنگیِ اسکرول در صفحه‌ی اصلی.
+
+     حالا مستقیم روی خودِ گره نوشته می‌شود و React اصلاً خبردار
+     نمی‌شود. */
+  const barRef = useRef<HTMLDivElement>(null);
   const profileRef   = useRef<HTMLDivElement>(null);
   const exploreRef   = useRef<HTMLDivElement>(null);
   const searchRef    = useRef<HTMLDivElement>(null);
@@ -159,9 +167,15 @@ export default function Navbar() {
     const fn = () => {
       if (!ticking) {
         requestAnimationFrame(() => {
-          setScrolled(window.scrollY > 50);
-          setScrollY(window.scrollY);
-          if (window.scrollY > 30) setSearchOpen(false);
+          const y = window.scrollY;
+          /* فقط وقتی مرزِ ۵۰ رد شود، نه در هر فریم */
+          setScrolled(prev => (prev === y > 50 ? prev : y > 50));
+          if (y > 30) setSearchOpen(false);
+          const bar = barRef.current;
+          if (bar) {
+            bar.style.opacity = String(Math.max(0, 1 - y / 700));
+            bar.style.pointerEvents = y > 560 ? 'none' : 'auto';
+          }
           ticking = false;
         });
         ticking = true;
@@ -218,6 +232,10 @@ export default function Navbar() {
   if (isShopPage) return null;
   /* دایرکت تجربه‌ی تمام‌صفحه‌ی خودش را دارد (هدر + دکمه‌ی بازگشت) */
   if (pathname === '/direct') return null;
+  /* صفحه‌ی نمایشِ بزرگ (مانیتورِ سالن): فوتر از قبل پنهان می‌شد ولی
+     نوارِ بالا نه، پس روی پروژکتور یک منوی سایت بالای جدول می‌ماند.
+     این صفحه چیزی برای کلیک‌کردن ندارد. */
+  if (/^\/tournaments\/[^/]+\/(stage|control)$/.test(pathname)) return null;
 
   return (
     <>
@@ -537,7 +555,19 @@ export default function Navbar() {
                       const roles = [user.primaryRole, ...(user.secondaryRoles ?? [])];
                       return [
                         { href: '/dashboard', label: 'داشبورد', icon: <LayoutDashboard size={13} /> },
-                        ...(roles.includes('seller') ? [{ href: '/dashboard/shop', label: 'فروشگاه من', icon: <ShoppingBag size={13} /> }] : []),
+                        /* ── چرا این گزینه نقش‌محور نیست ──
+                           ثبتِ آگهی در بیلیارد بازار برای هر کاربرِ
+                           واردشده باز است — فروشنده بودن شرط نیست. ولی
+                           این لینک فقط به `seller` نشان داده می‌شد،
+                           یعنی کاربرِ عادی و باشگاه‌داری که آگهی ثبت
+                           کرده بود **هیچ راهی** به آگهی‌های خودش
+                           نداشت: نه دیدن، نه ویرایش، نه حذف، نه ارتقا.
+                           صفحه وجود داشت و هیچ‌چیز به آن نمی‌رسید.
+
+                           برچسب نقش‌محور می‌ماند: «فروشگاه من» برای
+                           فروشنده معنا دارد، برای بقیه نه. */
+                        { href: '/dashboard/shop', icon: <ShoppingBag size={13} />,
+                          label: roles.includes('seller') ? 'فروشگاه من' : 'آگهی‌های من' },
                         ...(roles.includes('club_owner') ? [{ href: '/dashboard/club', label: 'مدیریت باشگاه', icon: <Building2 size={13} /> }] : []),
                         { href: '/profile/me', label: 'ویرایش پروفایل', icon: <Settings size={13} /> },
                         /* بدونِ این، پاسخِ پشتیبانی جایی برای دیده‌شدن ندارد
@@ -718,14 +748,13 @@ export default function Navbar() {
 
       {/* Stories — home only, slides down when search opens */}
       {isHomePage && (
-        <div className="hero-stories-bar" style={{
+        <div ref={barRef} className="hero-stories-bar" style={{
           position: 'fixed',
           top: searchOpen ? 'calc(130px + env(safe-area-inset-top))' : 'calc(72px + env(safe-area-inset-top))',
           left: 0, right: 0, zIndex: 49,
           padding: '6px clamp(16px,3vw,32px) 4px',
           background: 'linear-gradient(to bottom,rgba(4,2,10,0.48) 0%,rgba(4,2,10,0) 100%)',
-          opacity: Math.max(0, 1 - scrollY / 700),
-          pointerEvents: scrollY > 560 ? 'none' : 'auto',
+          opacity: 1, pointerEvents: 'auto',
           transition: 'top 0.38s cubic-bezier(0.22,1,0.36,1)',
         }}>
           <div style={{ maxWidth: '1440px', margin: '0 auto' }}>

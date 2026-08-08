@@ -268,6 +268,62 @@ export async function notifyTournamentRegistered(registrationId: string): Promis
     [await nameOf(reg.user_id), tt.title ?? 'مسابقه', tt.starts_at ? faDate(tt.starts_at) : '—'])
 }
 
+/** خبرِ ثبت‌نامِ تازه برای برگزارکننده — «فلانی ثبت‌نام کرد، نفر ۵ از ۱۶»
+ *
+ *  ── چرا شمارنده در متن است ──
+ *  خبرِ خالیِ «یک نفر ثبت‌نام کرد» باشگاه‌دار را مجبور می‌کند پنل را
+ *  باز کند تا بفهمد چقدر مانده. با «نفر ۵ از ۱۶» همان پیامک به
+ *  سؤالِ اصلی جواب می‌دهد و اگر مسابقه دارد پر می‌شود، خودش را
+ *  نشان می‌دهد.
+ *
+ *  شمارش شاملِ ثبت‌نامِ حضوری هم هست — همان عددی که ظرفیت را
+ *  می‌بندد، نه فقط آنلاین‌ها. */
+export async function notifyOrganizerOfRegistration(registrationId: string): Promise<void> {
+  const { data: r } = await sb().from('tournament_registrations')
+    .select('tournament_id,player_name,user_id,source').eq('id', registrationId).maybeSingle()
+  const reg = r as {
+    tournament_id?: string; player_name?: string | null
+    user_id?: string | null; source?: string
+  } | null
+  if (!reg?.tournament_id) return
+
+  const { data: t } = await sb().from('tournaments')
+    .select('title,club_id,max_players').eq('id', reg.tournament_id).maybeSingle()
+  const tt = (t ?? {}) as { title?: string; club_id?: string; max_players?: number }
+  if (!tt.club_id) return
+
+  const club = await clubOf(tt.club_id)
+  /* `notifyPhone` شماره‌ای است که باشگاه برای اطلاع‌رسانی داده؛ اگر
+     نداشت، شماره‌ی خودِ مالک. */
+  const phone = club?.notifyPhone
+    ?? (club?.ownerId ? await phoneOf(club.ownerId) : null)
+  if (!phone) return
+
+  /* همان قاعده‌ی ظرفیت که تابعِ دیتابیس دارد: رزروشده = قطعی +
+     در انتظارِ پرداخت. */
+  const { count } = await sb().from('tournament_registrations')
+    .select('id', { count: 'exact', head: true })
+    .eq('tournament_id', reg.tournament_id)
+    .in('status', ['PENDING_PAYMENT', 'CONFIRMED'])
+
+  const who = (reg.player_name ?? '').trim()
+    || (reg.user_id ? await nameOf(reg.user_id) : '')
+    || 'یک بازیکن'
+
+  /* خطاب به مالک، دقیقاً مثلِ `booking_for_owner`. اگر شماره‌ی
+     اطلاع‌رسانی دستِ کسِ دیگری باشد باز هم نامِ مالک نوشته می‌شود —
+     همان رفتاری که آن الگو دارد و تأیید شده است. */
+  const ownerName = club?.ownerId ? await nameOf(club.ownerId) : ''
+
+  notifyPattern(phone, 'tournament_reg_for_owner', [
+    ownerName || 'مدیر باشگاه',
+    who,
+    tt.title ?? 'مسابقه',
+    faNum(count ?? 0),
+    faNum(tt.max_players ?? 0),
+  ])
+}
+
 /** نوبت کسی که در لیست انتظار بود رسید */
 export async function notifyWaitlistPromoted(registrationId: string, needsPayment: boolean): Promise<void> {
   const { data: r } = await sb().from('tournament_registrations')

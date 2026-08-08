@@ -1,12 +1,15 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { notify } from '../../../lib/ui/dialogs'
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '../../../store/auth.store';
 import { Check, X, ExternalLink, FileText, Clock, Eye } from 'lucide-react';
 import { apiFetch } from '../../../lib/http';
 import { REJECT_REASONS } from '../../../lib/moderation/reasons';
 import ReviewDetails from '../../../components/admin/ReviewDetails';
+import TabStrip from '../../../components/ui/TabStrip';
+import ScrollList from '../../../components/ui/ScrollList';
 
 const GOLD = '#C7A66A';
 
@@ -49,11 +52,11 @@ async function openLicenseDoc(id: string) {
   try {
     const r = await apiFetch(`/api/clubs/${id}/license-doc`);
     const j = await r.json().catch(() => ({})) as { url?: string; message?: string };
-    if (!r.ok || !j.url) { w?.close(); alert(j.message ?? 'مدرک در دسترس نیست'); return; }
+    if (!r.ok || !j.url) { w?.close(); notify(j.message ?? 'مدرک در دسترس نیست'); return; }
     if (w) w.location.href = j.url; else window.open(j.url, '_blank', 'noopener,noreferrer');
   } catch {
     w?.close();
-    alert('خطا در ارتباط با سرور');
+    notify('خطا در ارتباط با سرور');
   }
 }
 
@@ -139,29 +142,18 @@ export default function AdminClubsPage() {
       )}
 
       {/* فیلتر */}
-      <div style={{ display: 'flex', gap: 8, marginBottom: 20, flexWrap: 'wrap' }}>
-        {(['all', 'pending', 'verified', 'approved', 'rejected', 'unverified'] as const).map(f => (
-          <button key={f} onClick={() => setFilter(f)}
-            style={{ padding: '6px 16px', borderRadius: 20, border: '1px solid', fontSize: 13, fontWeight: 600, fontFamily: 'var(--font-base)', cursor: 'pointer',
-              background: filter === f ? GOLD : '#fff',
-              color: filter === f ? '#fff' : '#374151',
-              borderColor: filter === f ? GOLD : '#e5e7eb',
-            }}>
-            {f === 'all' ? 'همه' : STATUS_LABEL[f]?.label ?? f}
-            {f !== 'all' && (
-              <span style={{ marginRight: 6, background: filter === f ? 'rgba(255,255,255,0.25)' : '#f3f4f6', borderRadius: 10, padding: '1px 7px', fontSize: 11 }}>
-                {clubs.filter(c => c.verificationStatus === f).length}
-              </span>
-            )}
-          </button>
-        ))}
-      </div>
+      <TabStrip value={filter} onChange={(v: string) => setFilter(v as typeof filter)}
+        tabs={(['all', 'pending', 'verified', 'approved', 'rejected', 'unverified'] as const).map(f => ({
+          key: f,
+          label: f === 'all' ? 'همه' : STATUS_LABEL[f]?.label ?? f,
+          count: f === 'all' ? undefined : clubs.filter(c => c.verificationStatus === f).length,
+        }))} />
 
       {/* لیست */}
       {filtered.length === 0 ? (
         <div style={{ textAlign: 'center', padding: '48px 20px', color: '#9ca3af' }}>موردی یافت نشد</div>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+        <ScrollList count={filtered.length} min={5} gap={12}>
           {filtered.map(club => {
             const st = STATUS_LABEL[club.verificationStatus] ?? STATUS_LABEL['unverified'] ?? { label: club.verificationStatus, color: '#6b7280', bg: 'rgba(156,163,175,0.1)', icon: null };
             return (
@@ -280,7 +272,7 @@ export default function AdminClubsPage() {
               </div>
             );
           })}
-        </div>
+        </ScrollList>
       )}
 
       {/* ── علتِ رد ──

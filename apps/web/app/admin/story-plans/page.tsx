@@ -15,7 +15,7 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
-import { Package, Plus, Save, Power, Loader2, AlertCircle, CheckCircle2, Wallet, ArrowLeft, Users } from 'lucide-react'
+import { Package, Plus, Save, Power, Loader2, AlertCircle, CheckCircle2, ArrowLeft, Users } from 'lucide-react'
 import { apiFetch } from '../../../lib/http'
 import { toFaDigits } from '../../../lib/jalali'
 import Select from '../../../components/ui/Select'
@@ -81,7 +81,6 @@ export default function AdminStoryPlans() {
 
   const [quotaOn, setQuotaOn] = useState(false)
   const [roleQuota, setRoleQuota] = useState<Record<string, RoleQuota>>({})
-  const [bank, setBank] = useState({ ownerName: '', bankName: '', cardNumber: '', iban: '' })
 
   const flash = (m: string) => { setToast(m); setTimeout(() => setToast(''), 2600) }
 
@@ -110,10 +109,6 @@ export default function AdminStoryPlans() {
       }
       setRoleQuota(next)
 
-      if (s.story_platform_bank) setBank({
-        ownerName: s.story_platform_bank.ownerName ?? '', bankName: s.story_platform_bank.bankName ?? '',
-        cardNumber: s.story_platform_bank.cardNumber ?? '', iban: s.story_platform_bank.iban ?? '',
-      })
     } catch { setErr('خطا در ارتباط با سرور'); setPlans([]) }
   }, [])
   useEffect(() => { void load() }, [load])
@@ -266,36 +261,6 @@ export default function AdminStoryPlans() {
             {busy === 'settings' ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />} ذخیره‌ی سهمیه‌ی نقش‌ها
           </button>
         </div>
-      </section>
-
-      {/* ── حساب واریز ── */}
-      <section style={CARD}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 5 }}>
-          <Wallet size={17} style={{ color: GOLD_D }} />
-          <h2 style={{ fontSize: 15, fontWeight: 900, color: INK, margin: 0 }}>حساب واریز فروش بسته‌ها</h2>
-        </div>
-        <p style={{ fontSize: 12.5, color: MUT, margin: '0 0 16px', lineHeight: 1.95 }}>
-          پول خرید بسته‌ها به این حساب می‌نشیند. تا پر نشود، در صورتحساب ادمین «تعیین‌نشده» نمایش داده می‌شود.
-        </p>
-        <div style={{ display: 'grid', gap: 14, gridTemplateColumns: 'repeat(auto-fit,minmax(190px,1fr))' }}>
-          <div><label style={LABEL}>نام صاحب حساب</label>
-            <input style={INPUT} value={bank.ownerName} onChange={e => setBank(b => ({ ...b, ownerName: e.target.value }))} /></div>
-          <div><label style={LABEL}>بانک</label>
-            <input style={INPUT} value={bank.bankName} onChange={e => setBank(b => ({ ...b, bankName: e.target.value }))} /></div>
-          <div><label style={LABEL}>شماره کارت</label>
-            <input style={{ ...INPUT, direction: 'ltr', textAlign: 'right' }} inputMode="numeric"
-              value={fa(bank.cardNumber)}
-              onChange={e => setBank(b => ({ ...b, cardNumber: digits(e.target.value).slice(0, 16) }))}
-              placeholder="۶۰۳۷••••••••••••" /></div>
-          <div><label style={LABEL}>شبا</label>
-            <input style={{ ...INPUT, direction: 'ltr', textAlign: 'right' }} value={bank.iban}
-              onChange={e => setBank(b => ({ ...b, iban: e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 26) }))}
-              placeholder="IR…" /></div>
-        </div>
-        <button onClick={() => saveSettings({ story_platform_bank: bank }, 'حساب واریز ذخیره شد')}
-          disabled={busy === 'settings'} style={{ ...BTN, marginTop: 16 }}>
-          <Save size={14} /> ذخیره‌ی حساب
-        </button>
       </section>
 
       {/* ── ساخت بسته‌ی تازه ── */}

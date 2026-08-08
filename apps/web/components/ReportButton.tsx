@@ -5,6 +5,7 @@
    (variant="icon") و در صفحه‌ی جزئیات (variant="link" یا "button"). */
 
 import { useEffect, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { Flag, X, Loader2, CheckCircle2 } from 'lucide-react'
 import { apiFetch } from '../lib/http'
 /* همان فهرستی که سرور می‌شناسد — نسخه‌ی جدا داشتن یعنی کاربر دلیلی
@@ -37,13 +38,22 @@ export default function ReportButton({
   const [done, setDone] = useState(false)
   const [err, setErr] = useState('')
 
-  /* قفل اسکرول پس‌زمینه وقتی پنجره باز است */
+  /* پرتال فقط بعد از mount ممکن است (روی سرور `document` نیست) */
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => { setMounted(true) }, [])
+
+  /* قفل اسکرول پس‌زمینه + بستن با Escape */
   useEffect(() => {
     if (!open) return
     const prev = document.body.style.overflow
     document.body.style.overflow = 'hidden'
-    return () => { document.body.style.overflow = prev }
-  }, [open])
+    const esc = (e: KeyboardEvent) => { if (e.key === 'Escape' && !busy) setOpen(false) }
+    document.addEventListener('keydown', esc)
+    return () => {
+      document.body.style.overflow = prev
+      document.removeEventListener('keydown', esc)
+    }
+  }, [open, busy])
 
   const submit = async () => {
     if (!code) { setErr('لطفاً دلیل گزارش را انتخاب کنید'); return }
@@ -93,11 +103,31 @@ export default function ReportButton({
         </button>
       )}
 
-      {open && (
-        <div onClick={() => !busy && setOpen(false)}
-          style={{ position: 'fixed', inset: 0, zIndex: 4000, background: 'rgba(20,18,14,0.5)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}>
-          <div dir="rtl" onClick={e => e.stopPropagation()}
-            style={{ width: '100%', maxWidth: 420, maxHeight: '90vh', overflowY: 'auto', background: '#fff', borderRadius: 20, border: `1px solid ${LINE}`, padding: 20, fontFamily: 'var(--font-base)' }}>
+      {/* ── چرا پرتال ──
+          این پنجره تا امروز همان‌جا که دکمه بود رندر می‌شد — یعنی
+          داخلِ کارتِ آگهی. و آن کارت سه ویژگی دارد که با هم پنجره را
+          نابود می‌کردند:
+
+            • `transform` روی hover ⇒ برای `position: fixed` یک
+              «قابِ مرجع» می‌سازد. پس پنجره به‌جای پرکردنِ صفحه، اندازه‌ی
+              همان کارتِ کوچک می‌شد — همان چیزی که نامتقارن و بچگانه
+              دیده می‌شد.
+            • `overflow: hidden` ⇒ هرچه بیرونِ کادرِ کارت می‌افتاد
+              بریده می‌شد؛ از جمله دکمه‌ی «انصراف» و ضربدر. برای همین
+              پنجره «با هیچ کاری بسته نمی‌شد».
+            • کلِ کارت یک `<Link>` است ⇒ هر کلیکی داخلش ناوبری بود.
+
+          با پرتال، پنجره فرزندِ `body` می‌شود و از هر سه رها. جلوی
+          حبابِ رویداد در درختِ React را هم صریح می‌گیریم، چون پرتال
+          آن را نمی‌گیرد. */}
+      {open && mounted && createPortal(
+        <div
+          onClick={() => !busy && setOpen(false)}
+          onMouseDown={e => e.stopPropagation()}
+          role="dialog" aria-modal="true" aria-label="گزارش تخلف"
+          style={{ position: 'fixed', inset: 0, zIndex: 4000, background: 'rgba(20,18,14,0.5)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}>
+          <div dir="rtl" onClick={e => { e.preventDefault(); e.stopPropagation() }}
+            style={{ width: '100%', maxWidth: 460, maxHeight: '88vh', overflowY: 'auto', background: '#fff', borderRadius: 20, border: `1px solid ${LINE}`, padding: 'clamp(18px,4vw,24px)', fontFamily: 'var(--font-base)', boxShadow: '0 24px 60px rgba(20,18,14,0.3)' }}>
 
             {done ? (
               <div style={{ textAlign: 'center', padding: '22px 6px' }}>
@@ -178,7 +208,8 @@ export default function ReportButton({
             )}
             <style>{`@keyframes rbspin{to{transform:rotate(360deg)}}`}</style>
           </div>
-        </div>
+        </div>,
+        document.body,
       )}
     </>
   )

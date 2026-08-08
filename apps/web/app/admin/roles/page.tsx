@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { ROLE_MAP, RoleValue, RoleStatus, toFarsiDigits, hexToRgba, STATUS_COLOR, STATUS_LABEL } from '@/lib/roles'
 import { csrfToken, apiFetch } from '../../../lib/http'
+import TabStrip from '../../../components/ui/TabStrip'
 import Ti from '../../../components/ui/Ti'
 import { REJECT_REASONS, rejectLabel } from '../../../lib/moderation/reasons'
 import ReviewDetails from '../../../components/admin/ReviewDetails'
@@ -279,23 +280,11 @@ export default function AdminRolesPage() {
           </div>
 
           {/* Filter tabs */}
-          <div style={{ display: 'flex', gap: 6, marginBottom: 20 }}>
-            {tabs.map(t => (
-              <button
-                key={t.status}
-                onClick={() => setFilter(t.status)}
-                style={{
-                  flex: 1, padding: '8px', borderRadius: 10,
-                  border: `1px solid ${filter === t.status ? hexToRgba(STATUS_COLOR[t.status], 0.5) : 'rgba(0,0,0,0.07)'}`,
-                  background: filter === t.status ? hexToRgba(STATUS_COLOR[t.status], 0.1) : 'rgba(0,0,0,0.04)',
-                  color: filter === t.status ? STATUS_COLOR[t.status] : '#64748b',
-                  fontSize: 14, fontFamily: 'inherit', cursor: 'pointer', transition: 'all 0.2s',
-                }}
-              >
-                {t.label}
-              </button>
-            ))}
-          </div>
+          <TabStrip value={filter} onChange={(v: string) => setFilter(v as RoleStatus)}
+            tabs={tabs.map(t => ({
+              key: t.status, label: t.label,
+              fg: STATUS_COLOR[t.status], bg: hexToRgba(STATUS_COLOR[t.status], 0.1),
+            }))} />
 
           {/* سرویس در دسترس نیست */}
           {svcDown && !loading && (

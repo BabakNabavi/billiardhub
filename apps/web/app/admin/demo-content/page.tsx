@@ -15,9 +15,11 @@
    ───────────────────────────────────────────────────────────── */
 
 import { useEffect, useState } from 'react'
+import { ask } from '../../../lib/ui/dialogs'
 import { useRouter } from 'next/navigation'
 import { useAuthStore } from '../../../store/auth.store'
 import { apiFetch } from '../../../lib/http'
+import ScrollList from '../../../components/ui/ScrollList'
 import ProvinceCitySelect from '../../../components/ProvinceCitySelect'
 import { Trash2, Plus, Loader2, Users, ExternalLink } from 'lucide-react'
 
@@ -212,7 +214,7 @@ export default function DemoContentPage() {
   }
 
   const remove = async (id: string, name: string) => {
-    if (!confirm(`«${name}» حذف شود؟`)) return
+    if (!(await ask(`«${name}» حذف شود؟`))) return
     try {
       const r = await apiFetch(
         `/api/admin/demo-profiles?id=${encodeURIComponent(id)}${isClub ? '&kind=club' : ''}`,
@@ -400,7 +402,7 @@ export default function DemoContentPage() {
           هنوز {cur.fa} نمایشی‌ای ساخته نشده.
         </div>
       ) : (
-        <div style={{ border: `1px solid ${LINE}`, borderRadius: 12, overflow: 'hidden' }}>
+        <ScrollList count={rows.length} min={8} gap={0} style={{ border: `1px solid ${LINE}`, borderRadius: 12, overflow: rows.length > 8 ? undefined : "hidden" }}>
           {rows.map((r, i) => (
             <div key={r.id} style={{
               display: 'flex', alignItems: 'center', gap: 11, padding: '10px 13px',
@@ -428,7 +430,7 @@ export default function DemoContentPage() {
               }}><Trash2 size={13} /></button>
             </div>
           ))}
-        </div>
+        </ScrollList>
       )}
     </div>
   )

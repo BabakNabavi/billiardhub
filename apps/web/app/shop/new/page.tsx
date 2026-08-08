@@ -3,7 +3,6 @@
 import { useState, useRef, useCallback, useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
 import { ChevronLeft } from 'lucide-react'
 import { useAuthStore } from '../../../store/auth.store'
 import { findSellerByOwner } from '../../../lib/seller-store'
@@ -620,7 +619,6 @@ interface ImgSlot { data: string; name: string }
 
 // ── Main Page ─────────────────────────────────────────────────
 export default function NewProductPage() {
-  const router  = useRouter()
   const fileRef = useRef<HTMLInputElement>(null)
 
   const [form, setForm] = useState({
@@ -843,8 +841,12 @@ export default function NewProductPage() {
         }
         if (!r.ok) { setErrors({ submit: j?.message || 'ثبت آگهی روی سرور انجام نشد' }); setSubmitting(false); return }
 
+        /* ── چرا دیگر خودکار به بازار نمی‌رود ──
+           آگهی‌دهنده پرت می‌شد وسطِ فهرستِ بازار و هیچ‌وقت نمی‌فهمید
+           آگهیِ خودش کجا مدیریت می‌شود — برای حذف یا ارتقا باید
+           صفحه‌ای را حدس می‌زد که هیچ لینکی به آن نداشت. حالا همان
+           لحظه دو راه پیشِ رویش است. */
         setSuccess(true)
-        setTimeout(() => router.push('/shop'), 2000)
       } catch {
         setErrors({ submit: 'خطا در ارتباط با سرور؛ دوباره تلاش کنید' })
         setSubmitting(false)
@@ -861,17 +863,25 @@ export default function NewProductPage() {
             <path d="M5 13l4 4L19 7" stroke="#fff" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
         </div>
-        <h2 style={{ fontSize: 24, fontWeight: 900, color: TEXT, marginBottom: 10 }}>محصول با موفقیت ثبت شد!</h2>
-        <p style={{ fontSize: 15, color: TEXT_SEC, marginBottom: 24 }}>در حال انتقال به فروشگاه...</p>
-        <div style={{ display: 'flex', gap: 3, justifyContent: 'center' }}>
-          {[0,1,2].map(i => (
-            <div key={i} style={{ width: 8, height: 8, borderRadius: '50%', background: GOLD, opacity: 0.3 + i * 0.35, animation: `pulse 1s ${i * 0.25}s infinite` }} />
-          ))}
+        <h2 style={{ fontSize: 24, fontWeight: 900, color: TEXT, marginBottom: 10 }}>آگهی شما ثبت شد!</h2>
+        <p style={{ fontSize: 14.5, color: TEXT_SEC, marginBottom: 22, lineHeight: 1.9 }}>
+          ویرایش، حذف و ارتقای آگهی از «آگهی‌های من» انجام می‌شود.
+        </p>
+        <div style={{ display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap' }}>
+          <Link href="/dashboard/shop" style={{
+            padding: '11px 20px', borderRadius: 12, fontSize: 13.5, fontWeight: 700,
+            textDecoration: 'none', color: '#9A6E38',
+            background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.34)',
+          }}>آگهی‌های من</Link>
+          <Link href="/shop" style={{
+            padding: '11px 20px', borderRadius: 12, fontSize: 13.5, fontWeight: 700,
+            textDecoration: 'none', color: TEXT_SEC,
+            background: 'rgba(28,28,26,0.04)', border: '1px solid rgba(28,28,26,0.10)',
+          }}>دیدن در بازار</Link>
         </div>
       </div>
       <style>{`
         @keyframes popIn { from{opacity:0;transform:scale(0.7)} to{opacity:1;transform:scale(1)} }
-        @keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.4)} }
       `}</style>
     </div>
   )
@@ -1335,12 +1345,16 @@ export default function NewProductPage() {
                         }
                       </div>
                       <div style={{ flex: 1, minWidth: 0 }}>
-                        <p style={{ fontSize: 13.5, fontWeight: 700, color: TEXT, margin: '0 0 3px', lineHeight: 1.4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {/* همان دو خطی که کارتِ بازار نشان می‌دهد:
+                            بولد بالا، برند و مدل با وزنِ معمولی پایینش */}
+                        <p style={{ fontSize: 13.5, fontWeight: 800, color: TEXT, margin: '0 0 3px', lineHeight: 1.4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                           {previewParts.head}
-                          {previewParts.tail && (
-                            <span style={{ fontSize: 11.5, fontWeight: 600, color: TEXT_MUT }}> {previewParts.tail}</span>
-                          )}
                         </p>
+                        {previewParts.tail && (
+                          <p style={{ fontSize: 11.5, fontWeight: 400, color: TEXT_MUT, margin: '0 0 4px', lineHeight: 1.4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                            {previewParts.tail}
+                          </p>
+                        )}
                         <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
                           {catLabel && <span style={{ fontSize: 11, color: GOLD, fontWeight: 600, background: 'rgba(199,166,106,0.1)', padding: '1px 7px', borderRadius: 10 }}>{catLabel}</span>}
                           {form.condition !== 'new' && <span style={{ fontSize: 11, color: '#B45309', fontWeight: 600, background: 'rgba(180,83,9,0.08)', padding: '1px 7px', borderRadius: 10 }}>{form.condition === 'like-new' ? 'در حد نو' : 'کارکرده'}</span>}

@@ -15,6 +15,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { MessageSquare, Loader2, Send, Check, AlertCircle, Save } from 'lucide-react'
 import { toFaDigits } from '../../../lib/jalali'
 import { apiFetch } from '../../../lib/http'
+import ScrollList from '../../../components/ui/ScrollList'
 
 const INK = '#1C1B17', SEC = '#5B564B', MUT = '#8A8474', LINE = '#EAE5DA'
 const GOLD_D = '#9A6E38', FELT = '#0E7A38', RED = '#B23B2E'
@@ -33,9 +34,17 @@ const LABEL: Record<string, { fa: string; when: string }> = {
   club_approved:            { fa: '۹) تأیید باشگاه', when: 'به مالک، پس از تأییدِ باشگاه' },
   club_rejected:            { fa: '۱۰) رد ثبت باشگاه', when: 'به مالک، وقتی باشگاه رد شود' },
   tournament_registered:    { fa: '۱۱) ثبت‌نام مسابقه', when: 'پس از قطعی‌شدنِ ثبت‌نام' },
+  tournament_reg_for_owner: { fa: '۱۱ب) ثبت‌نام جدید — به برگزارکننده', when: 'به باشگاه‌دار، با شمارنده‌ی ظرفیت' },
   tournament_cancelled:     { fa: '۱۲) لغو مسابقه', when: 'به همه‌ی ثبت‌نام‌کننده‌ها' },
   waitlist_promoted:        { fa: '۱۳) باز شدن جا', when: 'وقتی از لیستِ انتظار جا باز شود' },
   report_created:           { fa: '۱۴) گزارش تخلف', when: 'به شماره‌ی هشدارِ ادمین' },
+
+  /* ── امنیتِ حساب ──
+     این دو برچسب نداشتند و در صفحه با کلیدِ انگلیسیِ خودشان دیده
+     می‌شدند — تنها ردیف‌هایی که ادمین نمی‌فهمید چه‌کاره‌اند. شماره‌ها
+     همان شماره‌ی سندِ docs/sms-patterns.md هستند. */
+  password_reset_otp:       { fa: '۲۰) کد تغییر رمز عبور', when: 'وقتی کاربر رمزش را فراموش کند' },
+  login_locked:             { fa: '۲۱) هشدار قفل حساب', when: 'پس از چند رمزِ اشتباه — حتی وقتی کاربر پشتِ سایت نیست' },
 
   /* این چهارتا را باشگاه‌دار می‌خرد و به اعضای باشگاهش می‌فرستد */
   club_tournament:          { fa: '۱۶) باشگاه — برگزاری مسابقه', when: 'باشگاه‌دار خریداری می‌کند — به اعضای باشگاه' },
@@ -252,7 +261,7 @@ export default function AdminSms() {
         </div>
       ) : (
         <>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 9 }}>
+          <ScrollList count={st.patterns.length} min={8} gap={9}>
             {st.patterns.map(k => {
               const meta = LABEL[k] ?? { fa: k, when: '' }
               const has = !!st.ids[k]
@@ -305,7 +314,7 @@ export default function AdminSms() {
                 </div>
               )
             })}
-          </div>
+          </ScrollList>
 
           <div style={{ display: 'flex', gap: 10, alignItems: 'center', marginTop: 18, flexWrap: 'wrap' }}>
             <button

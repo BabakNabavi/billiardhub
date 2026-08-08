@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '../../../store/auth.store';
+import ScrollList from '../../../components/ui/ScrollList';
 import { apiFetch } from '../../../lib/http';
 import { Users, Search, CheckCircle, XCircle, Eye, Shield } from 'lucide-react';
 import UserDetailDialog from '../../../components/admin/UserDetailDialog';
@@ -51,7 +52,7 @@ export default function AdminUsersPage() {
   /* بدونِ `_hydrated`، نخستین رندر `user` را تهی می‌بیند (استور از
      localStorage خوانده می‌شود) و ادمین را پیش از باز شدنِ صفحه به
      صفحه‌ی اصلی پرت می‌کند — یعنی رفرش یا ورود از بوکمارک کار نمی‌کرد. */
-  const { user, _hydrated } = useAuthStore();
+  const { user, _hydrated, authChecked } = useAuthStore();
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [detail, setDetail] = useState<string | null>(null);
@@ -67,7 +68,7 @@ export default function AdminUsersPage() {
      می‌شد و صفحه فهرستِ خالی نشان می‌داد، در حالی که کارتِ داشبورد
      همان لحظه ۲۱ کاربر می‌شمرد. */
   useEffect(() => {
-    if (!_hydrated) return;
+    if (!_hydrated || !authChecked) return;
     if (!user || user.primaryRole !== 'admin') { router.push('/'); return; }
     void (async () => {
       try {
@@ -78,7 +79,7 @@ export default function AdminUsersPage() {
       } catch { setErr('خطا در ارتباط با سرور'); }
       finally { setLoading(false); }
     })();
-  }, [_hydrated, user, router]);
+  }, [_hydrated, authChecked, user, router]);
 
   const handleVerify = async (userId: string, status: string) => {
     setErr('');
@@ -167,7 +168,11 @@ export default function AdminUsersPage() {
         ) : filtered.length === 0 ? (
           <div className="text-center py-16 text-gray-400">کاربری پیدا نشد</div>
         ) : (
-          <div className="divide-y divide-gray-50">
+          /* ── چرا قاب ──
+             فهرست بدونِ سقف رها بود: با پانصد کاربر صفحه چند ده هزار
+             پیکسل بلند می‌شد و هرچه پایینِ فهرست بود ناپیدا. */
+          <ScrollList count={filtered.length} min={8} gap={0}
+            className="divide-y divide-gray-50">
             {filtered.map(u => (
               <div key={u.id} className="grid grid-cols-12 items-center px-5 py-3 hover:bg-gray-50">
                 <div className="col-span-3 flex items-center gap-3">
@@ -230,7 +235,7 @@ export default function AdminUsersPage() {
                 </div>
               </div>
             ))}
-          </div>
+          </ScrollList>
         )}
       </div>
 

@@ -73,7 +73,14 @@ export async function GET(req: NextRequest) {
   const adRefunded = -sum('AD_REFUND');               // منفی ذخیره می‌شود
   const adNet = adGross - adRefunded;
 
-  const grossIn = sum('BOOKING_PAYMENT') + sum('TOURNAMENT_PAYMENT') + adGross;
+  /* ارتقای آگهی (مهاجرتِ ۰۷۹) — تازه‌سازی و فوری. مثلِ تبلیغات
+     صددرصد درآمدِ پلتفرم است و سهمِ باشگاه ندارد. جدا شمرده می‌شود
+     چون تصمیمِ قیمت‌گذاری‌اش جداست. */
+  const boostGross = sum('AD_BOOST_REVENUE');
+  const boostRefunded = -sum('AD_BOOST_REFUND');
+  const boostNet = boostGross - boostRefunded;
+
+  const grossIn = sum('BOOKING_PAYMENT') + sum('TOURNAMENT_PAYMENT') + adGross + boostGross;
   const commission = sum('PLATFORM_COMMISSION');
   const cancellationFee = sum('CANCELLATION_FEE');
   const refunded = -sum('REFUND');                    // منفی ذخیره می‌شود
@@ -92,10 +99,15 @@ export async function GET(req: NextRequest) {
       adRefunds: adRefunded,
       adNetRevenue: adNet,
 
+      /* ارتقای آگهی */
+      boostRevenue: boostGross,
+      boostRefunds: boostRefunded,
+      boostNetRevenue: boostNet,
+
       /* درآمدِ واقعیِ پلتفرم */
       platformCommission: commission,
       cancellationFee,
-      netPlatformRevenue: commission + cancellationFee + adNet,
+      netPlatformRevenue: commission + cancellationFee + adNet + boostNet,
       commissionFromReservations: sumFrom('PLATFORM_COMMISSION', 'reservation'),
       commissionFromTournaments: sumFrom('PLATFORM_COMMISSION', 'tournament'),
 

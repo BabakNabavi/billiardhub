@@ -247,7 +247,21 @@ function StoryViewer({ groups, activeGroup, activeStory, liked, showEmojis, comm
       <div onClick={onClose} style={{ position:'fixed',inset:0,zIndex:99999,background:'rgba(0,0,0,0.96)',backdropFilter:'blur(8px)',animation:'overlayFadeIn .2s ease' }}>
 
         {/* ── کارت استوری: تمام‌ارتفاع و ثابت ── */}
-        <div onClick={e => e.stopPropagation()} style={{ position:'absolute',top:0,bottom:0,left:'50%',transform:'translateX(-50%)',width:'min(440px,100vw)',overflow:'hidden',animation:'storyModalIn .3s cubic-bezier(.22,1,.36,1)',boxShadow:'0 0 80px rgba(0,0,0,0.6)' }}>
+        {/* ── چرا وسط‌چینی با margin و نه translateX ──
+            پیش‌تر `left:50%` با `transform:translateX(-50%)` وسط‌چین
+            می‌شد. ولی `storyModalIn` هم روی `transform` کار می‌کند و
+            یک عنصر فقط **یک** `transform` دارد: انیمیشن مقدارِ
+            اینلاین را کنار می‌زد.
+
+            نتیجه‌اش همان چیزی بود که دیده می‌شد — استوری از سمتِ
+            راست وارد می‌شد (چون `translateX(-50%)` در طولِ انیمیشن
+            وجود نداشت و لبه‌ی راستش روی وسطِ صفحه می‌نشست)، و در
+            فریمِ آخر که انیمیشن تمام می‌شد ناگهان به مرکز می‌پرید.
+            همان «سکته».
+
+            با `left:0; right:0; margin:0 auto` وسط‌چینی کارِ چیدمان
+            است نه transform، و انیمیشن آزاد می‌ماند. */}
+        <div onClick={e => e.stopPropagation()} style={{ position:'absolute',top:0,bottom:0,left:0,right:0,margin:'0 auto',width:'min(440px,100vw)',overflow:'hidden',animation:'storyModalIn .3s cubic-bezier(.22,1,.36,1) both',boxShadow:'0 0 80px rgba(0,0,0,0.6)' }}>
 
           {hasMedia ? (
             <div style={{ position:'absolute', inset:0, background:'#0B0B0C' }}>
@@ -429,6 +443,9 @@ export default function Stories() {
   const dailyLimit = quota ? quota.limit : localLimit;
   const usedToday = quota ? quota.used : countTodayStories(ownerKey);
   const canPost = quota ? (quota.limit > 0 || !quota.enabled) : localLimit > 0;
+  /* یک‌بار که نوار نشان داده شد، دیگر پنهان نمی‌شود — جزئیاتش کنارِ
+     خودِ شرط پایینِ فایل. */
+  const shownOnceRef = useRef(false);
   const [postErr, setPostErr] = useState('');
   const [publishing, setPublishing] = useState(false);
   const [replyFocus, setReplyFocus] = useState(false);
@@ -756,8 +773,22 @@ export default function Stories() {
   };
 
   /* نه استوری‌ای هست و نه کاربر اجازه‌ی ساختن دارد ⇒ نوار خالی نشان
-     نده. پیش‌تر این حالت پیش نمی‌آمد چون همیشه استوری‌های نمونه بودند. */
-  if (groups.length === 0 && !(user && canPost)) return null;
+     نده. پیش‌تر این حالت پیش نمی‌آمد چون همیشه استوری‌های نمونه بودند.
+
+     ── چرا «یک‌بار که آمد، می‌ماند» ──
+     هر سه ورودیِ این شرط جدا و ناهم‌زمان می‌رسند: `groups` از فتچ،
+     `user` از استور (که `SessionBridge` بعداً با جوابِ سرور
+     به‌روزش می‌کند)، و `canPost` از سهمیه‌ای که تا لحظه‌ی انتشار
+     اصلاً خوانده نمی‌شود. یعنی این شرط در ثانیه‌ی اولِ بارگذاری چند
+     بار جواب عوض می‌کرد و نوار می‌آمد، می‌رفت، و برمی‌گشت — و چون
+     نوار `fixed` است و بالای هیرو می‌نشیند، هر بار المان‌های وسطِ
+     هیرو هم می‌پریدند.
+
+     حالا فقط تا **اولین** رندرِ واقعی می‌تواند پنهان بماند؛ از آن به
+     بعد سرِ جایش می‌ماند حتی اگر یکی از ورودی‌ها لحظه‌ای عوض شود. */
+  const shouldShow = groups.length > 0 || !!(user && canPost);
+  if (shouldShow) shownOnceRef.current = true;
+  if (!shouldShow && !shownOnceRef.current) return null;
 
   return (
     <>

@@ -34,7 +34,8 @@ export async function GET(req: NextRequest) {
   /* جدولی که هنوز ساخته نشده ⇒ صفر، نه خطا */
   const [
     users, products, clubs, news, bookings,
-    pendingClubs, pendingRoles, pendingProfiles, openReports,
+    pendingClubs, pendingRoles, pendingProfiles, openReports, openTickets,
+    pendingProducts, pendingAdRequests, pendingSettlements, pendingRefunds,
   ] = await Promise.all([
     countOf('users'),
     countOf('products'),
@@ -64,6 +65,19 @@ export async function GET(req: NextRequest) {
        باز» روی داشبورد هرگز روشن نمی‌شد — یعنی گزارشِ تخلف ثبت
        می‌شد و ادمین هیچ‌وقت خبردار نمی‌شد. */
     countOf('reports', { col: 'status', val: 'OPEN' }),
+    /* تیکتِ بازِ پشتیبانی — تا امروز هیچ‌جای داشبورد دیده نمی‌شد.
+       کاربر تیکت می‌زد و تا وقتی ادمین خودش سراغِ صفحه‌ی پشتیبانی
+       نمی‌رفت، هیچ نشانه‌ای نبود. */
+    countOf('support_tickets', { col: 'status', val: 'open' }),
+
+    /* ── بقیه‌ی صف‌ها ──
+       تا امروز فقط بعضی از این‌ها روی داشبورد عدد داشتند. بقیه
+       بی‌صدا جمع می‌شدند و ادمین فقط وقتی خبردار می‌شد که خودش
+       سرِ صفحه‌شان می‌رفت — یعنی دقیقاً همان چیزی که نباید. */
+    countOf('products', { col: 'status', val: 'pending' }),
+    countOf('ad_requests', { col: 'status', val: 'pending' }),
+    countOf('settlements', { col: 'status', val: 'REQUESTED' }),
+    countOf('refunds', { col: 'status', val: 'REQUESTED' }),
   ]);
 
   /* ── تفکیکِ پروفایل‌های در انتظار به تفکیکِ نوع ──
@@ -87,10 +101,12 @@ export async function GET(req: NextRequest) {
   return NextResponse.json(
     {
       users, products, clubs, news, bookings,
-      pendingClubs, pendingRoles, pendingProfiles, openReports,
+      pendingClubs, pendingRoles, pendingProfiles, openReports, openTickets,
+      pendingProducts, pendingAdRequests, pendingSettlements, pendingRefunds,
       pendingByKind,
       /* مجموعِ کارهای روی میز — برای نشانِ کلی */
-      pendingTotal: pendingClubs + pendingRoles + pendingProfiles + openReports,
+      pendingTotal: pendingClubs + pendingRoles + pendingProfiles + openReports
+        + openTickets + pendingProducts + pendingAdRequests + pendingSettlements + pendingRefunds,
     },
     { headers: { 'Cache-Control': 'no-store' } },
   );

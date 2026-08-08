@@ -10,6 +10,7 @@
 import { Loader2, Check } from 'lucide-react';
 import Select from '../../ui/Select';
 import FaNumberInput from '../../ui/FaNumberInput';
+import FaTimeSelect from '../../ui/FaTimeSelect';
 
 const GOLD = '#C7A66A';
 const DARK = '#1A1A18';
@@ -119,6 +120,36 @@ export function SelectField({ label, value, onChange, options, latin }: {
         value={value} ariaLabel={label} latin={latin}
         options={options.filter(o => !o.disabled).map(o => ({ value: o.value, label: o.label }))}
         onChange={onChange} />
+    </div>
+  );
+}
+
+/* ── فیلدِ ساعت، هم‌تراز با تقویمِ کنارش ──────────────────────────
+   دو ایراد داشت و هر دو از یک ریشه می‌آمدند: `FaTimeSelect` مستقیم
+   در گرید گذاشته می‌شد.
+
+   ۱) **چند پیکسل بالاتر می‌نشست.** برچسبش `۱۲px / وزن ۵۰۰` با
+      `gap: 4` بود، ولی `JalaliDatePicker` که روبه‌رویش قرار می‌گیرد
+      `۱۲٫۵px / وزن ۷۰۰` با `marginBottom: 6` دارد. اختلافِ ارتفاعِ
+      همین دو برچسب، دو کنترل را ناهم‌تراز می‌کرد.
+
+   ۲) **اندازه‌اش با بقیه‌ی فرم نمی‌خواند.** اول با سقفِ ۱۲۸ پیکسل
+      کوچکش کردم، ولی نتیجه بدتر شد: در گریدِ دوستونی یک سلولِ
+      نصفه‌پُر می‌ماند و ردیف ناهموار می‌شد. کنترل باید تمامِ سلولِ
+      خودش را بگیرد، دقیقاً مثلِ تقویم و دراپ‌داونِ کنارش — چیزی که
+      بزرگ به‌نظر می‌رسید خودِ کنترل نبود، ناهم‌ترازیِ برچسب بود.
+
+   حالا برچسب همان استایلِ تقویم را دارد و کنترل هم‌عرضِ سلول است. */
+export function TimeField({ label, value, onChange, ariaLabel }: {
+  label: string; value: string; onChange: (v: string) => void; ariaLabel?: string;
+}) {
+  return (
+    <div style={{ minWidth: 0 }}>
+      <label style={{
+        display: 'block', fontSize: 12.5, fontWeight: 700,
+        color: '#8A8474', marginBottom: 6,
+      }}>{label}</label>
+      <FaTimeSelect value={value} onChange={onChange} ariaLabel={ariaLabel ?? label} />
     </div>
   );
 }

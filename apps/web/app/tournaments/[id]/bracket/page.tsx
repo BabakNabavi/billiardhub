@@ -8,25 +8,33 @@
    حالا فقط همان براکتی را نشان می‌دهد که برگزارکننده در
    /tournaments/:id/admin قرعه‌کشی کرده است.
 
-   چیدمان: هر دور یک ستون. ستون‌ها اسکرول افقی خودشان را دارند تا
-   براکت ۳۲ نفره عرض صفحه را نشکند.
+   چیدمان دوطرفه است — نیمی راست، نیمی چپ، فینال در وسط. جزئیاتش
+   در components/tournaments/BracketTree.tsx.
    ───────────────────────────────────────────────────────────── */
 
 import { useEffect, useState, useCallback } from 'react';
-import Link from 'next/link';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { ChevronRight, Trophy, Loader2, GitBranch, Radio, RefreshCw } from 'lucide-react';
 import {
-  fetchBracket, faDigits, slotLabel, isBye,
-  type Bracket, type Match,
+  fetchBracket,
+  type Bracket,
 } from '../../../../lib/tournaments/bracket-client';
+import BracketTree from '../../../../components/tournaments/BracketTree';
 
-const GOLD = '#C7A66A', GOLD_D = '#9A6E38', INK = '#1C1B17';
-const MUT = '#8A8474', LINE = '#EAE5DA', FELT = '#0E7A38', RED = '#B23B2E';
+const GOLD_D = '#9A6E38', INK = '#1C1B17';
+const MUT = '#8A8474', LINE = '#EAE5DA', RED = '#B23B2E';
 
 export default function BracketPage() {
   const params = useParams();
+  const router = useRouter();
   const id = String(params?.id ?? '');
+
+  /* اگر کاربر مستقیم وارد این نشانی شده باشد تاریخچه‌ای برای بازگشت
+     نیست؛ آن‌وقت صفحه‌ی مسابقه مقصدِ منطقی است. */
+  const goBack = () => {
+    if (typeof window !== 'undefined' && window.history.length > 1) router.back();
+    else router.push(`/tournaments/${id}`);
+  };
 
   const [b, setB] = useState<Bracket | null>(null);
   const [loading, setLoading] = useState(true);
@@ -58,9 +66,21 @@ export default function BracketPage() {
     <div dir="rtl" style={{ maxWidth: 1200, margin: '0 auto', padding: '0 16px 70px' }}>
 
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '18px 0 6px', flexWrap: 'wrap' }}>
-        <Link href={`/tournaments/${id}`} style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 12.5, color: MUT, textDecoration: 'none' }}>
-          <ChevronRight size={14} /> صفحه‌ی مسابقه
-        </Link>
+        {/* ── چرا بازگشتِ مرورگر و نه لینکِ ثابت ──
+            لینک همیشه به صفحه‌ی مسابقه می‌رفت، حتی وقتی کاربر از
+            فهرستِ مسابقات آمده بود. یعنی برای برگشتن به همان تب و
+            همان اسکرول، باید یک‌بار دیگر هم دستی برمی‌گشت.
+
+            `router.back()` دقیقاً همان‌جایی برمی‌گردد که بود — با
+            تبِ انتخاب‌شده و جای اسکرول. اگر تاریخچه‌ای نباشد (لینکِ
+            مستقیم یا تبِ تازه)، صفحه‌ی مسابقه پشتیبان است. */}
+        <button type="button" onClick={goBack} style={{
+          display: 'inline-flex', alignItems: 'center', gap: 4,
+          fontSize: 12.5, color: MUT, background: 'none', border: 'none',
+          cursor: 'pointer', fontFamily: 'inherit', padding: 0,
+        }}>
+          <ChevronRight size={14} /> بازگشت
+        </button>
         <span style={{ color: LINE }}>/</span>
         <h1 style={{ fontSize: 17, fontWeight: 900, color: INK, margin: 0 }}>براکت</h1>
         {hasLive && (
@@ -102,73 +122,21 @@ export default function BracketPage() {
             </div>
           )}
 
-          <div style={{ overflowX: 'auto', paddingBottom: 12 }}>
-            <div style={{ display: 'flex', gap: 16, minWidth: 'min-content', alignItems: 'stretch' }}>
-              {b.rounds.map(r => (
-                <div key={r.round} style={{ minWidth: 230, flex: '0 0 auto', display: 'flex', flexDirection: 'column' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 10 }}>
-                    <span style={{ width: 3, height: 15, borderRadius: 2, background: GOLD }} />
-                    <h2 style={{ fontSize: 13.5, fontWeight: 900, color: INK, margin: 0 }}>{r.label}</h2>
-                  </div>
-                  {/* بازی‌های دورهای بعد بین دو بازی قبلی پخش می‌شوند تا
-                      شکل درختی براکت خوانده شود */}
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 10, justifyContent: 'space-around', flex: 1 }}>
-                    {r.matches.map(m => <MatchCard key={m.id} m={m} />)}
-                  </div>
-                </div>
-              ))}
-            </div>
+          {/* ── چیدمانِ دوطرفه ──
+              پیش‌تر هر دور یک ستون بود و همه پشتِ سرِ هم از راست به
+              چپ می‌آمدند، با اسکرولِ افقی. براکتِ ۳۲ نفره یعنی پنج
+              ستون که روی هیچ نمایشگری یک‌جا جا نمی‌شد — و روی
+              مانیتورِ سالن یعنی تماشاگر نصفِ جدول را نمی‌دید.
+
+              حالا نیمی از بازی‌ها سمتِ راست و نیمی سمتِ چپ‌اند و
+              فینال وسط می‌نشیند؛ همان تعداد بازی در نصفِ عرض. */}
+          <div style={{ ...card, padding: '16px 10px' }}>
+            <BracketTree bracket={b} />
           </div>
         </>
       )}
 
       <style>{`@keyframes bkspin{to{transform:rotate(360deg)}}`}</style>
-    </div>
-  );
-}
-
-function MatchCard({ m }: { m: Match }) {
-  const live = m.status === 'in_progress';
-  const done = m.winner !== null;
-  const bye = isBye(m);
-
-  return (
-    <div style={{
-      ...card, padding: '9px 11px',
-      borderColor: live ? 'rgba(178,59,46,0.45)' : done ? 'rgba(14,122,56,0.25)' : LINE,
-      background: live ? 'rgba(178,59,46,0.03)' : '#fff',
-    }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
-        <span style={{ fontSize: 10, color: MUT }}>#{faDigits(m.match_index + 1)}</span>
-        {live && <span style={{ ...liveDot, fontSize: 9.5, padding: '2px 7px' }}><Radio size={9} /> زنده</span>}
-        {bye && <span style={{ fontSize: 9.5, fontWeight: 800, color: GOLD_D, background: 'rgba(199,166,106,0.13)', borderRadius: 999, padding: '2px 7px' }}>بای</span>}
-        {m.table_number != null && <span style={{ marginInlineStart: 'auto', fontSize: 10, color: MUT }}>میز {faDigits(m.table_number)}</span>}
-      </div>
-
-      <Slot name={slotLabel(m, 1)} score={m.score1} win={m.winner === 1} known={!!m.p1_name} show={done} />
-      <div style={{ height: 1, background: LINE, margin: '5px 0' }} />
-      <Slot name={slotLabel(m, 2)} score={m.score2} win={m.winner === 2} known={!!m.p2_name} show={done} />
-    </div>
-  );
-}
-
-function Slot({ name, score, win, known, show }: {
-  name: string; score: number; win: boolean; known: boolean; show: boolean;
-}) {
-  return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
-      <span style={{
-        flex: 1, minWidth: 0, fontSize: 12.5,
-        fontWeight: win ? 900 : 700,
-        color: !known ? MUT : win ? FELT : INK,
-        overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-      }}>{name}</span>
-      {show && known && (
-        <span style={{
-          fontSize: 13, fontWeight: 900, fontVariantNumeric: 'tabular-nums',
-          color: win ? FELT : MUT, minWidth: 16, textAlign: 'center',
-        }}>{faDigits(score)}</span>
-      )}
     </div>
   );
 }

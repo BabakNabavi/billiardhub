@@ -1,8 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { ask } from '../../../lib/ui/dialogs'
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '../../../store/auth.store';
+import ScrollList from '../../../components/ui/ScrollList';
 import api from '../../../lib/api';
 import { apiFetch } from '../../../lib/http';
 import { ShoppingBag, Search, CheckCircle, XCircle, Eye, Trash2, Ban, PauseCircle, PlayCircle } from 'lucide-react';
@@ -117,17 +119,18 @@ export default function AdminProductsPage() {
      منتشر شده یا نه. تا امروز فقط تیک بود، پس ادمین راهی برای رد
      کردنِ آگهی نداشت جز حذفِ کامل — که برگشت‌ناپذیر است و فروشنده هم
      هرگز نمی‌فهمید چرا. */
-  const setStatus = async (productId: string, next: ListingStatus) => {
+  /* آگهی‌ای که در حالِ رد کردنش هستیم — تا نوشتنِ دلیل در پنجره */
+  const [rejectFor, setRejectFor] = useState<string | null>(null);
+  const [rejectNote, setRejectNote] = useState('');
+  const [rejectBusy, setRejectBusy] = useState(false);
+
+  const setStatus = async (productId: string, next: ListingStatus, note: string | null = null) => {
     setErr('');
-    let note: string | null = null;
-    if (next === 'rejected') {
-      /* دلیل اجباری است: رد کردنِ بی‌دلیل یعنی فروشنده همان آگهی را
-         دوباره می‌فرستد و هر دو طرف وقت تلف می‌کنند. */
-      const answer = window.prompt('دلیل رد کردن (به فروشنده نشان داده می‌شود):');
-      if (answer === null) return;
-      if (!answer.trim()) { setErr('برای رد کردن، دلیل بنویسید'); return; }
-      note = answer.trim();
-    }
+    /* ── چرا پنجره و نه  ──
+       پنجره‌ی بومیِ مرورگر چپ‌به‌راست است، نشانیِ سایت را بالای خودش
+       می‌نویسد، و متنِ چندخطی نمی‌گیرد — در حالی که این متن مستقیم
+       به فروشنده نشان داده می‌شود و باید جا برای توضیح داشته باشد. */
+    if (next === 'rejected' && !note) { setRejectFor(productId); setRejectNote(''); return; }
     try {
       await api.put(`/products/${productId}`, { status: next, ...(note ? { adminNote: note } : {}) });
       setProducts(ps => ps.map(p => p.id === productId
@@ -139,7 +142,7 @@ export default function AdminProductsPage() {
   };
 
   const handleDelete = async (productId: string) => {
-    if (!confirm('آیا مطمئنی؟')) return;
+    if (!(await ask('این آگهی برای همیشه حذف شود؟', { body: 'برگشت‌پذیر نیست. اگر فقط می‌خواهید از سایت برداشته شود، «رد کردن» یا «توقف موقت» را بزنید.' }))) return;
     setErr('');
     try {
       await api.delete(`/products/${productId}`);
@@ -277,7 +280,7 @@ export default function AdminProductsPage() {
         ) : filtered.length === 0 ? (
           <div className="text-center py-16 text-gray-400">محصولی پیدا نشد</div>
         ) : (
-          <div className="divide-y divide-gray-50">
+          <ScrollList count={filtered.length} min={8} gap={0} className="divide-y divide-gray-50">
             {filtered.map(product => (
               <div key={product.id} className={`grid grid-cols-12 items-center px-5 py-3 hover:bg-gray-50 ${product.requestedVerification && !product.isVerified ? 'bg-yellow-50' : ''}`}>
                 <div className="col-span-4 flex items-center gap-3">
@@ -379,9 +382,65 @@ export default function AdminProductsPage() {
                 </div>
               </div>
             ))}
-          </div>
+          </ScrollList>
         )}
       </div>
+
+      {/* ── دلیلِ رد ──
+          متن مستقیم به فروشنده نشان داده می‌شود، پس باید جا برای
+          توضیحِ چندخطی داشته باشد — چیزی که  نمی‌دهد. */}
+      {rejectFor && (
+        <div role="dialog" aria-modal="true"
+          onClick={e => { if (e.target === e.currentTarget && !rejectBusy) setRejectFor(null); }}
+          style={{
+            position: 'fixed', inset: 0, zIndex: 200, background: 'rgba(20,18,14,0.5)',
+            backdropFilter: 'blur(6px)', display: 'flex', alignItems: 'center',
+            justifyContent: 'center', padding: 18, direction: 'rtl',
+          }}>
+          <div style={{
+            width: '100%', maxWidth: 460, background: '#fff', borderRadius: 20,
+            border: '1px solid #EAE5DA', padding: 'clamp(18px,4vw,26px)',
+            fontFamily: 'var(--font-base)', boxShadow: '0 24px 60px rgba(20,18,14,0.3)',
+          }}>
+            <h3 style={{ fontSize: 17, fontWeight: 900, color: '#1C1B17', margin: '0 0 6px' }}>
+              رد کردن آگهی
+            </h3>
+            <p style={{ fontSize: 12.5, color: '#8A8474', margin: '0 0 16px', lineHeight: 1.95 }}>
+              دلیل را بنویسید — همین متن به فروشنده نشان داده می‌شود. رد کردنِ بی‌دلیل
+              یعنی همان آگهی دوباره فرستاده می‌شود و وقتِ هر دو طرف تلف می‌شود.
+            </p>
+            <textarea value={rejectNote} onChange={e => setRejectNote(e.target.value)} rows={4}
+              placeholder="مثال: تصویر محصول با عنوان آگهی نمی‌خواند."
+              style={{
+                width: '100%', boxSizing: 'border-box', padding: '12px 14px', borderRadius: 12,
+                border: '1px solid #EAE5DA', fontSize: 13, fontFamily: 'inherit',
+                outline: 'none', resize: 'vertical', lineHeight: 2, color: '#1C1B17',
+              }} />
+            <div style={{ display: 'flex', gap: 10, marginTop: 16 }}>
+              <button type="button" onClick={() => setRejectFor(null)} disabled={rejectBusy}
+                style={{
+                  flex: 1, padding: 12, borderRadius: 12, border: '1px solid #EAE5DA',
+                  background: '#F4F3F1', color: '#5B564B', fontSize: 13.5, fontWeight: 800,
+                  cursor: 'pointer', fontFamily: 'inherit',
+                }}>انصراف</button>
+              <button type="button" disabled={rejectBusy || !rejectNote.trim()}
+                onClick={async () => {
+                  const id = rejectFor; const note = rejectNote.trim();
+                  setRejectBusy(true);
+                  await setStatus(id, 'rejected', note);
+                  setRejectBusy(false); setRejectFor(null);
+                }}
+                style={{
+                  flex: 1, padding: 12, borderRadius: 12, border: 'none',
+                  background: rejectNote.trim() ? '#dc2626' : 'rgba(0,0,0,0.12)',
+                  color: rejectNote.trim() ? '#fff' : 'rgba(0,0,0,0.35)',
+                  fontSize: 13.5, fontWeight: 800, fontFamily: 'inherit',
+                  cursor: rejectNote.trim() ? 'pointer' : 'not-allowed',
+                }}>{rejectBusy ? 'در حال ثبت…' : 'رد کردن آگهی'}</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

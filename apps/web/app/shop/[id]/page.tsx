@@ -49,7 +49,15 @@ const lqWhite: React.CSSProperties = {
 
    `model` این‌جا اضافه شده چون تیترِ صفحه دو تکه است — «چوب اسنوکر»
    درشت و «O'min classic» ریزتر — و مدل در `ShopProduct` نبود. */
-type Detail = Omit<ShopProduct, 'id'> & { id: number | string; model?: string }
+type Detail = Omit<ShopProduct, 'id'> & {
+  id: number | string
+  model?: string
+  /* ── همه‌ی تصویرها، نه فقط اولی ──
+     فروشنده تا هشت عکس آپلود می‌کند و سرور هر هشت را ذخیره می‌کند،
+     ولی این صفحه فقط `images[0]` را می‌خواند و بقیه هیچ‌جا دیده
+     نمی‌شدند — نه گالری‌ای بود، نه نشانه‌ای که عکسِ دیگری هم هست. */
+  images?: string[]
+}
 
 /* شکلِ سبکی که مسیرِ «مشابه» برمی‌گرداند — نه کلِ محصول */
 interface RelatedItem {
@@ -61,6 +69,7 @@ interface RelatedItem {
   condition: string
   city: string | null
   brand: string | null
+  model: string | null
   image: string
 }
 
@@ -71,13 +80,18 @@ function normalizeUserProduct(up: Record<string, unknown>): Detail {
     return Number.isFinite(n) && v !== null && v !== '' ? n : d
   }
   const str = (v: unknown, d = '') => (typeof v === 'string' ? v : d)
-  const imgs = up.images as string[] | undefined
+  const imgs = Array.isArray(up.images)
+    ? (up.images as unknown[]).map(x => str(x)).filter(Boolean)
+    : undefined
   const price = num(up.price)
   const disc  = num(up.disc, num(up.discountPercent))
   return {
     id:             typeof up.id === 'string' ? up.id : num(up.id),
     cat:            str(up.category, 'other'),
     img:            str(up.img) || imgs?.[0] || '/images/shop/cue_billiard_2.webp',
+    /* `img` تصویرِ اصلی می‌ماند (آگهیِ قدیمیِ محلی فقط همین را دارد)؛
+       گالری از این فهرست ساخته می‌شود. */
+    images:         imgs && imgs.length > 0 ? imgs : undefined,
     name:           str(up.name) || str(up.title, 'محصول'),
     desc:           str(up.description),
     brand:          str(up.brand),
@@ -149,6 +163,11 @@ export default function ProductDetailPage() {
 
   const [wished, setWished] = useState(false)
 
+  /* تصویرِ انتخاب‌شده‌ی گالری. با عوض‌شدنِ آگهی به اولی برمی‌گردد،
+     وگرنه رفتن از آگهیِ هشت‌عکسه به آگهیِ دوعکسه تصویرِ خالی می‌داد. */
+  const [imgIdx, setImgIdx] = useState(0)
+  useEffect(() => { setImgIdx(0) }, [id])
+
   /* ── محصولات مشابه ──
      رتبه‌بندی سمتِ سرور انجام می‌شود: دسته، برند، نوع، شهر، وضعیت و
      نزدیکیِ قیمت. رتبه‌بندی در مرورگر یعنی همه‌ی آگهی‌ها باید دانلود
@@ -191,6 +210,11 @@ export default function ProductDetailPage() {
      «سلام، درباره چوب اسنوکر سوال داشتم» به فروشنده‌ای که پنج چوب
      گذاشته هیچ‌چیز نمی‌گوید. */
   const fullName = productTitle(product)
+
+  /* گالری: همه‌ی عکس‌های آگهی. آگهیِ بی‌عکس و آگهیِ قدیمیِ محلی که
+     فقط یک نشانی دارد، هر دو به همان یک تصویر می‌رسند. */
+  const gallery = product.images && product.images.length > 0 ? product.images : [product.img]
+  const shown = Math.min(imgIdx, gallery.length - 1)
 
   const waLink = `https://wa.me/${product.sellerWhatsapp}?text=${encodeURIComponent(`سلام، درباره «${fullName}» در بیلیارد بازار سوال داشتم`)}`
 
@@ -244,7 +268,7 @@ export default function ProductDetailPage() {
           {/* تصویر */}
           <div className="lq-sheen pd-media" style={{ ...glassPanel, borderRadius: 26, padding: 14, position: 'sticky', top: 74 }}>
             <div style={{ position: 'relative', width: '100%', paddingTop: '92%', borderRadius: 16, overflow: 'hidden', background: '#EFEDE9' }}>
-              <img loading="lazy" decoding="async" src={product.img} alt={fullName} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
+              <img loading="lazy" decoding="async" src={gallery[shown]} alt={fullName} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
               {product.disc > 0 && (
                 <div style={{ position: 'absolute', top: 12, insetInlineEnd: 12, background: '#E53935', color: '#fff', fontSize: 12, fontWeight: 800, borderRadius: 8, padding: '3px 10px' }}>
                   {toFa(product.disc)}٪ تخفیف
@@ -257,6 +281,27 @@ export default function ProductDetailPage() {
                 <Heart size={19} fill={wished ? '#E53935' : 'none'} strokeWidth={2} />
               </button>
             </div>
+
+            {/* ── نوارِ عکس‌ها ──
+                فقط وقتی بیش از یک عکس هست. یک تصویرِ تنها با نوارِ
+                تک‌خانه‌ای زیرش، شبیهِ چیزی است که کار نمی‌کند. */}
+            {gallery.length > 1 && (
+              <div style={{ display: 'flex', gap: 8, marginTop: 12, overflowX: 'auto', paddingBottom: 2 }}>
+                {gallery.map((src, i) => (
+                  <button key={`${src}-${i}`} type="button" onClick={() => setImgIdx(i)}
+                    aria-label={`تصویر ${toFa(i + 1)}`} aria-current={i === shown}
+                    style={{
+                      flex: '0 0 auto', width: 62, height: 62, borderRadius: 12,
+                      overflow: 'hidden', cursor: 'pointer', padding: 0, background: '#EFEDE9',
+                      border: i === shown ? `2px solid ${GOLD}` : `1.5px solid ${HAIR}`,
+                      opacity: i === shown ? 1 : 0.72, transition: 'opacity .2s, border-color .2s',
+                    }}>
+                    <img loading="lazy" decoding="async" src={src} alt=""
+                      style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* اطلاعات */}
@@ -264,22 +309,27 @@ export default function ProductDetailPage() {
             <span style={{ display: 'inline-block', fontSize: 11.5, fontWeight: 700, color: GOLDD, background: 'rgba(184,147,58,0.12)', border: '1px solid rgba(184,147,58,0.28)', borderRadius: 999, padding: '4px 12px', marginBottom: 12 }}>
               {CAT_LABELS[product.cat] ?? product.cat}
             </span>
-            <h1 style={{ fontSize: 'clamp(20px,2.6vw,27px)', fontWeight: 800, lineHeight: 1.45, margin: '0 0 12px', letterSpacing: '-0.01em' }}>
+            <h1 style={{ fontSize: 'clamp(20px,2.6vw,27px)', fontWeight: 800, lineHeight: 1.45, margin: '0 0 18px', letterSpacing: '-0.01em' }}>
               {titleHead}
+              {/* برند و مدل خطِ خودشان را دارند، با وزنِ معمولی */}
               {titleTail && (
-                <span style={{ fontSize: 'clamp(14px,1.7vw,18px)', fontWeight: 600, color: TSEC, marginInlineStart: 8 }}>
-                  {titleTail}
-                </span>
+                <span style={{
+                  display: 'block', marginTop: 4,
+                  fontSize: 'clamp(14px,1.7vw,18px)', fontWeight: 400, color: TSEC,
+                }}>{titleTail}</span>
               )}
             </h1>
 
-            {/* ── امتیاز برداشته شد ──
-                عددش ثابت و ساختگی بود (۵٫۰ با ۰ نظر) — هیچ نظری در
-                کار نیست و ستاره‌ی پنج روی هر آگهی یعنی دروغِ کوچکی که
-                به همه‌ی صفحه بی‌اعتمادی می‌دهد. */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 18 }}>
-              <span style={{ fontSize: 12.5, color: '#16803C', fontWeight: 700 }}>موجود در انبار</span>
-            </div>
+            {/* ── امتیاز و «موجود در انبار» هر دو برداشته شدند ──
+                امتیاز عددش ثابت و ساختگی بود (۵٫۰ با ۰ نظر).
+
+                «موجود در انبار» هم پشتوانه‌ای نداشت: این‌جا آگهیِ
+                دستِ‌دوم است، نه فروشگاهی با انبار. موجودی هیچ‌جا
+                شمرده نمی‌شود (`stock` همیشه ۱ ذخیره می‌شود) و آگهی
+                ممکن است همین حالا فروخته شده باشد. برچسبِ سبزِ
+                «موجود» روی چنین چیزی، همان دروغِ کوچکی است که به
+                همه‌ی صفحه بی‌اعتمادی می‌دهد. وضعیتِ واقعی — «فروخته
+                شد» — جای خودش نشان داده می‌شود. */}
 
             {/* قیمت — آگهیِ توافقی عدد ندارد، پس عدد هم نشان نمی‌دهیم */}
             <div style={{ ...lqWhite, borderRadius: 18, padding: '16px 18px', marginBottom: 16 }}>
@@ -387,7 +437,9 @@ export default function ProductDetailPage() {
               </Link>
             </div>
             <div className="rel-grid" style={{ display: 'grid', gap: 12 }}>
-              {related.map(p => (
+              {related.map(p => {
+                const rp = productTitleParts({ name: p.title, brand: p.brand, model: p.model })
+                return (
                 <Link key={p.id} href={`/shop/${p.id}`} className="pd-card" style={{ textDecoration: 'none', background: '#fff', borderRadius: 14, border: `1.5px solid ${HAIR}`, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
                   <div style={{ width: '100%', paddingTop: '100%', position: 'relative', background: '#F4F3F1', borderBottom: `1.5px solid ${HAIR}` }}>
                     {p.image && (
@@ -395,8 +447,13 @@ export default function ProductDetailPage() {
                     )}
                   </div>
                   <div style={{ padding: '10px 10px 12px', flex: 1, display: 'flex', flexDirection: 'column', gap: 6 }}>
-                    <span style={{ fontSize: 12, color: TEXT, lineHeight: 1.55, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{p.title}</span>
-                    <span style={{ fontSize: 10.5, color: TMUT }}>{[p.brand, p.city].filter(Boolean).join(' · ')}</span>
+                    {/* همان دو خطِ کارتِ بازار: بولد بالا، برند و مدل پایینش */}
+                    <span style={{ fontSize: 12, fontWeight: 800, color: TEXT, lineHeight: 1.5, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{rp.head}</span>
+                    {rp.tail && (
+                      <span style={{ fontSize: 11, fontWeight: 400, color: TSEC, lineHeight: 1.5, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{rp.tail}</span>
+                    )}
+                    {/* برند حالا در خطِ عنوان است؛ دوباره گفتنش تکرار بود */}
+                    {p.city && <span style={{ fontSize: 10.5, color: TMUT }}>{p.city}</span>}
                     <div style={{ marginTop: 'auto', fontSize: 13, fontWeight: 800, color: '#1A6B3A' }}>
                       {/* آگهیِ توافقی قیمت ندارد؛ «۰ تومان» دروغ است */}
                       {p.negotiable
@@ -405,7 +462,8 @@ export default function ProductDetailPage() {
                     </div>
                   </div>
                 </Link>
-              ))}
+                )
+              })}
             </div>
           </div>
         )}

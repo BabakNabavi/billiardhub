@@ -33,6 +33,32 @@ interface AdminItem {
   link?: string;          // بدون لینک ⇒ به‌زودی
 }
 
+/* ── نشانِ صف روی هر کارت ──
+   کاربر گزارش می‌داد و ادمین فقط وقتی خبردار می‌شد که خودش سرِ
+   صفحه‌ی گزارش‌ها می‌رفت. با ده مورد قابل تحمل بود؛ با صد مورد
+   یعنی درخواست‌ها بی‌پاسخ می‌مانند.
+
+   هر کارتی که پشتش صفی هست، کلیدِ آن صف را دارد و اگر عددش صفر
+   نباشد یک نشانِ قرمز می‌گیرد. کلیدها همان‌هایی‌اند که
+   /api/admin/stats برمی‌گرداند. */
+const QUEUE_OF: Record<string, string> = {
+  '/admin/reports':       'openReports',
+  '/admin/support':       'openTickets',
+  '/admin/clubs':         'pendingClubs',
+  '/admin/products':      'pendingProducts',
+  '/admin/verifications': 'pendingRoles',
+};
+
+/* پروفایل‌های در انتظار به تفکیکِ نوع — از pendingByKind */
+const KIND_OF: Record<string, string> = {
+  '/admin/coaches':       'coach',
+  '/admin/referees':      'referee',
+  '/admin/sellers':       'seller',
+  '/admin/manufacturers': 'manufacturer',
+  '/admin/technicians':   'technician',
+  '/admin/players':       'player',
+};
+
 interface AdminSection {
   title: string;
   en: string;
@@ -130,6 +156,10 @@ const STAT_CARDS: { key: string; label: string; link: string }[] = [
      یعنی گزارش ثبت می‌شد و ادمین تا وقتی خودش سراغِ صفحه‌ی گزارش‌ها
      نمی‌رفت خبردار نمی‌شد. */
   { key: 'openReports',     label: 'گزارش تخلف باز',   link: '/admin/reports' },
+  /* تیکتِ پشتیبانی هم صفِ کار است: کاربر می‌نویسد و منتظر جواب
+     می‌ماند. بدونِ این کارت، تنها راهِ خبردارشدن سرزدنِ دستی به
+     صفحه‌ی پشتیبانی بود. */
+  { key: 'openTickets',     label: 'تیکت باز',         link: '/admin/support' },
 ];
 
 /* ── چرا کارتِ واحدِ «پروفایل در انتظار» شکسته شد ──
@@ -157,7 +187,7 @@ export default function AdminPage() {
      تایمر یعنی «امیدواریم تا نیم‌ثانیه خوانده شده باشد» — روی دستگاهِ
      کند یا شبکه‌ی سنگین نمی‌شد و ادمین به صفحه‌ی ورود پرت می‌شد.
      خودِ استور دقیقاً می‌گوید کِی خوانده شد؛ حدس لازم نیست. */
-  const { user, _hydrated } = useAuthStore();
+  const { user, _hydrated, authChecked } = useAuthStore();
   /* `pendingByKind` تنها کلیدی است که عدد نیست، بلکه خودش یک نگاشت
      است — پس نوعِ مقدار باید هر دو را بپذیرد. */
   const [stats, setStats] = useState<Record<string, number | Record<string, number>> | null>(null);
@@ -197,10 +227,10 @@ export default function AdminPage() {
   }, []);
 
   useEffect(() => {
-    if (!_hydrated) return;
+    if (!_hydrated || !authChecked) return;
     if (!user) { router.push('/login'); return; }
     if (user.primaryRole !== 'admin') { router.push('/'); return; }
-  }, [_hydrated, user, router]);
+  }, [_hydrated, authChecked, user, router]);
 
   if (!_hydrated) return <div style={{ textAlign: 'center', padding: '80px 0', color: MUT, fontFamily: 'Vazirmatn,Tahoma,sans-serif' }}>در حال بارگذاری…</div>;
   if (!user || user.primaryRole !== 'admin') return null;
@@ -245,6 +275,50 @@ export default function AdminPage() {
           </span>
         </div>
 
+        {/* ── نوارِ کارهای روی میز ──
+            نشانِ روی کارت‌ها وقتی کار می‌کند که ادمین کارت را ببیند.
+            این نوار بالای همه‌چیز است و مجموعِ همه‌ی صف‌ها را می‌گوید،
+            پس هیچ درخواستی بی‌آنکه دیده شود روی زمین نمی‌ماند. */}
+        {(() => {
+          const total = Number(stats?.pendingTotal ?? 0);
+          if (!total) return null;
+          const rows: { label: string; n: number; link: string }[] = [
+            { label: 'گزارش تخلف', n: Number(stats?.openReports ?? 0), link: '/admin/reports' },
+            { label: 'تیکت پشتیبانی', n: Number(stats?.openTickets ?? 0), link: '/admin/support' },
+            { label: 'باشگاه در انتظار', n: Number(stats?.pendingClubs ?? 0), link: '/admin/clubs' },
+            { label: 'آگهی در انتظار', n: Number(stats?.pendingProducts ?? 0), link: '/admin/products' },
+            { label: 'احراز هویت', n: Number(stats?.pendingRoles ?? 0), link: '/admin/verifications' },
+            { label: 'پروفایل در انتظار', n: Number(stats?.pendingProfiles ?? 0), link: '/admin/coaches' },
+            { label: 'درخواست تبلیغ', n: Number(stats?.pendingAdRequests ?? 0), link: '/admin/advertising' },
+            { label: 'درخواست تسویه', n: Number(stats?.pendingSettlements ?? 0), link: '/admin/finance' },
+            { label: 'درخواست بازپرداخت', n: Number(stats?.pendingRefunds ?? 0), link: '/admin/finance' },
+          ].filter(r => r.n > 0);
+          return (
+            <div style={{
+              display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap',
+              background: 'rgba(220,38,38,0.05)', border: '1px solid rgba(220,38,38,0.24)',
+              borderRadius: 14, padding: '12px 16px', marginBottom: 18,
+            }}>
+              <span style={{ fontSize: 13, fontWeight: 900, color: '#991B1B' }}>
+                {total.toLocaleString('fa-IR')} کارِ بی‌پاسخ
+              </span>
+              {rows.map(r => (
+                <Link key={r.label} href={r.link} style={{
+                  display: 'inline-flex', alignItems: 'center', gap: 6, textDecoration: 'none',
+                  fontSize: 11.5, fontWeight: 800, color: '#991B1B',
+                  background: '#fff', border: '1px solid rgba(220,38,38,0.22)',
+                  borderRadius: 999, padding: '4px 11px', whiteSpace: 'nowrap',
+                }}>
+                  {r.label}
+                  <span style={{ fontSize: 10.5, fontWeight: 900, color: '#fff', background: '#dc2626', borderRadius: 999, padding: '1px 6px' }}>
+                    {r.n.toLocaleString('fa-IR')}
+                  </span>
+                </Link>
+              ))}
+            </div>
+          );
+        })()}
+
         {/* آمار سریع — هر کارت به صفحه‌ای می‌رود، پس همان دسترسی را
             می‌خواهد. نشان‌دادنِ عددی که با کلیک ۴۰۳ می‌دهد بی‌فایده است. */}
         <div className="ad-stats" style={{ marginBottom: 28 }}>
@@ -287,12 +361,26 @@ export default function AdminPage() {
             </div>
             <div className="ad-grid">
               {sec.items.map((item, i) => {
+                /* عددِ صفِ این کارت — از کلیدِ مستقیم یا از تفکیکِ نوع */
+                const qKey = item.link ? QUEUE_OF[item.link] : undefined;
+                const kKey = item.link ? KIND_OF[item.link] : undefined;
+                const byKind = (stats?.pendingByKind ?? {}) as Record<string, number>;
+                const pending = qKey ? Number(stats?.[qKey] ?? 0)
+                  : kKey ? Number(byKind[kKey] ?? 0) : 0;
                 const inner = (
                   <>
                     <span className="ad-ic">{item.icon}</span>
                     <span style={{ minWidth: 0 }}>
                       <span style={{ display: 'flex', alignItems: 'center', gap: 7, fontSize: 13.5, fontWeight: 900, color: TEXT }}>
                         {item.title}
+                        {/* نشانِ صف — قرمز، چون کارِ روی‌میز است نه آمار */}
+                        {pending > 0 && (
+                          <span title={`${pending} مورد در انتظار`} style={{
+                            fontSize: 10, fontWeight: 900, color: '#fff', background: '#dc2626',
+                            borderRadius: 999, padding: '2px 8px', minWidth: 20, textAlign: 'center',
+                            boxShadow: '0 0 0 3px rgba(220,38,38,0.14)',
+                          }}>{pending.toLocaleString('fa-IR')}</span>
+                        )}
                         {!item.link && (
                           <span style={{ fontSize: 9.5, fontWeight: 800, color: GOLD_D, background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.3)', borderRadius: 999, padding: '2px 8px' }}>به‌زودی</span>
                         )}

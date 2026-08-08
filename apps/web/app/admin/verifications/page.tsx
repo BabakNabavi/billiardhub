@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '../../../store/auth.store';
+import ScrollList from '../../../components/ui/ScrollList';
 import { apiFetch } from '../../../lib/http';
 import { CheckCircle, XCircle, Eye, Star, Clock } from 'lucide-react';
 
@@ -129,7 +130,7 @@ export default function AdminVerificationsPage() {
           <p>درخواستی در این بخش وجود ندارد</p>
         </div>
       ) : (
-        <div className="space-y-4">
+        <ScrollList count={filtered.length} min={5} gap={16}>
           {filtered.map(req => (
             <div key={req.id} className="bg-white rounded-2xl border border-gray-100 p-5 hover:border-green-200 transition-all">
               <div className="flex items-start justify-between gap-4">
@@ -178,7 +179,7 @@ export default function AdminVerificationsPage() {
               </div>
             </div>
           ))}
-        </div>
+        </ScrollList>
       )}
     </div>
   );

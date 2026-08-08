@@ -12,8 +12,12 @@ import { usePathname } from 'next/navigation'
 
 const HIDDEN = new Set(['/login', '/register', '/shop', '/direct'])
 
+/* صفحه‌ی نمایشِ بزرگ (مانیتورِ سالن) هیچ‌کدام از عناصرِ سایت را
+   نمی‌خواهد — از ده متر آن‌طرف‌تر دیده می‌شود، نه خوانده. */
+const isStage = (p: string) => /^\/tournaments\/[^/]+\/(stage|control)$/.test(p)
+
 export default function FooterGate({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
-  if (HIDDEN.has(pathname)) return null
+  if (HIDDEN.has(pathname) || isStage(pathname)) return null
   return <>{children}</>
 }

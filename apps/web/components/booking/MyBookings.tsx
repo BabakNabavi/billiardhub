@@ -3,6 +3,7 @@
 /* رزروهای کاربر — با لغو رزرو و نمایش شفاف سیاست بازپرداخت پیش از تأیید. */
 
 import { useCallback, useEffect, useState } from 'react'
+import { notify } from '../../lib/ui/dialogs'
 import Link from 'next/link'
 import { Calendar, Clock3, MapPin, X, Loader2, AlertTriangle, CheckCircle2, CalendarDays } from 'lucide-react'
 import { faDate, faTimeRange, faNum, toFaDigits } from '../../lib/jalali'
@@ -50,7 +51,7 @@ export default function MyBookings() {
         body: JSON.stringify({ reason: 'لغو توسط کاربر' }),
       })
       const j = await r.json().catch(() => ({}))
-      if (!r.ok) alert(j?.message || 'لغو رزرو ممکن نشد')
+      if (!r.ok) notify(j?.message || 'لغو رزرو ممکن نشد')
       setConfirm(null); await load()
     } finally { setBusy('') }
   }
@@ -68,7 +69,20 @@ export default function MyBookings() {
   )
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+    /* ── چرا اسکرولِ داخلی ──
+       فهرست هرچه بلندتر می‌شد، کلِ داشبورد را پایین می‌راند: کاربری
+       با ۱۲ رزرو، برای رسیدن به بخش‌های بعدی باید از دوازده کارت رد
+       می‌شد. حالا تا چهار کارت کاملاً باز است و بعد از آن خودِ باکس
+       اسکرول می‌گیرد. حد بر حسبِ ارتفاع است نه تعداد، چون کارت‌ها
+       ارتفاعِ یکسان ندارند. */
+    <div style={{
+      display: 'flex', flexDirection: 'column', gap: 10,
+      maxHeight: 'min(60vh, 420px)', overflowY: 'auto',
+      /* بدونِ این، کارتِ آخر دقیقاً روی لبه می‌چسبد و به‌نظر می‌رسد
+         فهرست تمام شده */
+      paddingBottom: 2, paddingInlineEnd: 2,
+      scrollbarWidth: 'thin',
+    }}>
       {rows.map(b => {
         const st = STATUS[b.booking_status] ?? STATUS.COMPLETED!
         const timeLabel = faTimeRange(b.timeSlots)

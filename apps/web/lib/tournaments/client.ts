@@ -12,7 +12,8 @@
    وصل می‌شوند و ریسک شکستن چیدمان صفر است.
    ───────────────────────────────────────────────────────────── */
 
-import type { Tournament, GameType, TournamentStatus } from '../mock-tournaments'
+import type { Tournament, TournamentStatus } from '../mock-tournaments'
+import { normalizeDiscipline, posterFor } from './formats'
 
 export interface DbTournament {
   id: string
@@ -23,13 +24,18 @@ export interface DbTournament {
   max_players: number
   entry_fee: number
   prize?: string | null
+  rules?: string | null
+  match_format?: string | null
   venue?: string | null
   province?: string | null
   city?: string | null
   starts_at?: string | null
   registration_ends_at?: string | null
+  registration_starts_at?: string | null
+  created_at?: string | null
   status: string
   cover_url?: string | null
+  is_featured?: boolean
   seatsLeft?: number
 }
 
@@ -44,19 +50,18 @@ const STATUS: Record<string, TournamentStatus> = {
   cancelled: 'finished',
 }
 
-/* رشته‌ی دیتابیس ← نوع بازی صفحه‌ها.
+/* ── نگاشتِ نوعِ بازی ──
+   این‌جا یک جدولِ سه‌سطریِ هاردکد بود:
+     { snooker → snooker, pocket → 8ball, highball → 9ball }
 
-   واژگان دو طرف یکی نیست: دیتابیس با اصطلاح ایرانی کار می‌کند
-   (pocket / highball) و این صفحه‌ها با اصطلاح بین‌المللی (8ball /
-   9ball). هرچیز ناشناخته به `other` می‌افتد تا رنگ و برچسب نشکند. */
-const GAME: Record<string, GameType> = {
-  snooker: 'snooker',
-  pocket: '8ball',
-  highball: '9ball',
-}
+   دو خرابیِ ساکت داشت. اول اینکه فرمِ پنل مقدارِ `8ball` و `9ball`
+   را مستقیم ذخیره می‌کرد و این جدول هیچ‌کدام را نمی‌شناخت — پس هر
+   مسابقه‌ی ایت‌بال یا ناین‌بالی برای بازدیدکننده «سایر» می‌شد. دوم
+   اینکه `highball` را به `9ball` می‌برد، یعنی هی‌بال هیچ‌وقت
+   خودش نبود.
 
-const pad = (n: number) => String(n).padStart(2, '0')
-
+   حالا از منبعِ واحد می‌آید که هم نام‌های تازه را می‌شناسد هم
+   نام‌های قدیمی را. */
 /** تاریخ شمسی از ISO — همان شکلی که صفحه‌ها نمایش می‌دهند */
 function faDate(iso: string): string {
   try {
@@ -66,31 +71,59 @@ function faDate(iso: string): string {
   } catch { return '' }
 }
 
+/* ساعت باید در وقتِ تهران خوانده شود، نه وقتِ محلیِ مرورگر.
+   `new Date(iso).getHours()` ساعتِ دستگاهِ کاربر را می‌دهد؛ برای
+   کاربری که ساعتِ سیستمش روی منطقه‌ی دیگری است، ساعتِ شروعِ مسابقه
+   چند ساعت جابه‌جا نمایش داده می‌شد. */
+function tehranTime(iso: string): string {
+  try {
+    const p = new Intl.DateTimeFormat('en-GB', {
+      timeZone: 'Asia/Tehran', hour: '2-digit', minute: '2-digit', hour12: false,
+    }).formatToParts(new Date(iso))
+      .reduce<Record<string, string>>((a, x) => (a[x.type] = x.value, a), {})
+    return `${p.hour === '24' ? '00' : p.hour}:${p.minute}`
+  } catch { return '' }
+}
+
 export function toTournament(r: DbTournament): Tournament {
-  const starts = r.starts_at ? new Date(r.starts_at) : null
   const taken = Math.max(0, r.max_players - (r.seatsLeft ?? r.max_players))
 
   return {
     id: r.id,
     clubId: r.club_id,
     clubName: r.venue ?? '',
-    banner: r.cover_url || '/images/clubs/club1.png',
+    /* بی‌پوستر ⇒ پوسترِ همان بازی، نه عکسِ یک باشگاهِ نمونه */
+    banner: r.cover_url || posterFor(normalizeDiscipline(r.discipline)),
     name: r.title,
     description: r.description ?? '',
-    gameType: GAME[r.discipline ?? 'snooker'] ?? 'other',
-    date: starts ? faDate(r.starts_at!) : '',
-    startTime: starts
-      ? `${pad(starts.getHours())}:${pad(starts.getMinutes())}`
-      : '',
+    gameType: normalizeDiscipline(r.discipline),
+    date: r.starts_at ? faDate(r.starts_at) : '',
+    startTime: r.starts_at ? tehranTime(r.starts_at) : '',
     registrationDeadline: r.registration_ends_at ? faDate(r.registration_ends_at) : '',
+    /* ساعتِ مهلت پیش‌تر هیچ‌جا نمی‌آمد. باشگاه‌دار می‌توانست ثبت‌نام
+       را ساعت ۱۲ ظهر ببندد ولی بازیکن فقط روز را می‌دید و تا شب
+       فرصت خیال می‌کرد. */
+    registrationDeadlineTime: r.registration_ends_at ? tehranTime(r.registration_ends_at) : '',
+    /* «بزودی» بدونِ تاریخ یعنی هیچ. اگر ثبت‌نام زمان‌بندی شده،
+       بازیکن باید بداند کِی باید برگردد. */
+    regOpenDate: r.registration_starts_at ? faDate(r.registration_starts_at) : '',
+    regOpenTime: r.registration_starts_at ? tehranTime(r.registration_starts_at) : '',
+    /* برای مرتب‌سازیِ «تازه‌ترین اول» — تاریخِ برگزاری این را
+       نمی‌دهد: مسابقه‌ای که امروز ثبت شده ممکن است ماهِ بعد باشد. */
+    createdAt: r.created_at ?? '',
     maxPlayers: (r.max_players as Tournament['maxPlayers']),
     entryFee: r.entry_fee,
     prizeInfo: r.prize ?? '',
-    rules: '',
-    matchFormat: '',
+    /* این دو تا امروز رشته‌ی خالیِ ثابت بودند — یعنی هرچه باشگاه‌دار
+       در «قوانین» می‌نوشت، صفحه‌ی عمومی خالی نشان می‌داد و فرمت هم
+       از localStorage خوانده می‌شد (که فقط روی مرورگرِ خودِ سازنده
+       چیزی داشت). */
+    rules: r.rules ?? '',
+    matchFormat: r.match_format ?? '',
     paymentMethod: 'online',
     status: STATUS[r.status] ?? 'upcoming',
     registeredCount: taken,
+    isFeatured: r.is_featured === true,
     /* آمار نتایج هنوز از سرور نمی‌آید — این‌ها بعد از پیاده‌سازی
        جدول نتایج پر می‌شوند و تا آن روز خالی می‌مانند، نه ساختگی. */
   } as Tournament
@@ -107,10 +140,27 @@ export async function fetchTournaments(clubId?: string): Promise<Tournament[]> {
   } catch { return [] }
 }
 
-/** یک مسابقه با شناسه */
+/** یک مسابقه با شناسه.
+ *
+ *  ── چرا مستقیم و نه از فهرست ──
+ *  پیش‌تر کلِ فهرستِ عمومی گرفته می‌شد و بینش دنبالِ شناسه می‌گشتیم.
+ *  سه ایراد داشت: صدها ردیف برای یک صفحه، سقفِ ۲۰۰ ردیفیِ فهرست (که
+ *  با زیادشدنِ مسابقات، قدیمی‌ترها را نامرئی می‌کرد)، و مهم‌تر از
+ *  همه اینکه مالکِ باشگاه هم نمی‌توانست پیش‌نویسِ خودش را ببیند —
+ *  چون فهرستِ عمومی پیش‌نویس‌ها را فیلتر می‌کند در حالی که مسیرِ
+ *  تک‌مسابقه‌ای برای مالک بازش می‌گذارد.
+ *
+ *  ظرفیت را همان مسیر برنمی‌گرداند، پس جداگانه پرسیده می‌شود. */
 export async function fetchTournament(id: string): Promise<Tournament | null> {
-  const all = await fetchTournaments()
-  return all.find(t => t.id === id) ?? null
+  try {
+    const r = await fetch(`/api/tournaments/${encodeURIComponent(id)}`, { cache: 'no-store' })
+    if (!r.ok) return null
+    const j = await r.json().catch(() => null) as { tournament?: DbTournament } | null
+    const row = j?.tournament
+    if (!row) return null
+    const seats = await fetchSeats(id)
+    return toTournament({ ...row, seatsLeft: seats?.seatsLeft ?? row.max_players })
+  } catch { return null }
 }
 
 /** ظرفیت و وضعیت لحظه‌ای — برای صفحه‌ی ثبت‌نام */

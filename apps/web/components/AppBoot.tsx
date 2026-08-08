@@ -31,6 +31,55 @@ export default function AppBoot() {
     }
   }, [user, interactionsOn])
 
+  /* ── تورِ ایمنیِ chunkِ گمشده ──
+     بررسیِ نسخه فقط وقتی اجرا می‌شود که صفحه visible یا focus شود.
+     ولی کاربری که تبِ باز و کهنه دارد ممکن است پیش از آن روی لینکی
+     بزند؛ آن‌جا Next دنبالِ فایلی می‌گردد که با دیپلویِ تازه دیگر
+     وجود ندارد، import شکست می‌خورد، و چون داخلِ رندر نیست هیچ
+     مرزِ خطایی نمی‌گیردش — صفحه سفید می‌ماند.
+
+     همان‌جا یک‌بار reload می‌کنیم. `sessionStorage` جلوی حلقه را
+     می‌گیرد: اگر بعد از بازبارگذاری هم خطا بدهد، دیگر تکرار
+     نمی‌شود و مرزِ خطای معمولی کارش را می‌کند. */
+  useEffect(() => {
+    const STALE = /ChunkLoadError|Loading chunk|Failed to fetch dynamically imported|Importing a module script failed|error loading dynamically imported module/i
+    const recover = (msg: string) => {
+      if (!STALE.test(msg)) return
+      if (sessionStorage.getItem('bh-chunk-reload') === '1') return
+      /* این یکی بازیابیِ خرابیِ واقعی است، ولی باز هم نباید فرمِ
+         نیمه‌پرشده را ببلعد. */
+      if (isMidTask()) return
+      sessionStorage.setItem('bh-chunk-reload', '1')
+      location.reload()
+    }
+    const onErr = (e: ErrorEvent) => recover(String(e?.message ?? ''))
+    const onRej = (e: PromiseRejectionEvent) => {
+      const r = e?.reason as { name?: string; message?: string } | undefined
+      recover(`${r?.name ?? ''} ${r?.message ?? String(r ?? '')}`)
+    }
+    window.addEventListener('error', onErr)
+    window.addEventListener('unhandledrejection', onRej)
+    return () => {
+      window.removeEventListener('error', onErr)
+      window.removeEventListener('unhandledrejection', onRej)
+    }
+  }, [])
+
+  /* آیا کاربر وسطِ کاری است؟ اگر بله، بازبارگذاری صبر می‌کند. */
+  const isMidTask = () => {
+    const el = document.activeElement as HTMLElement | null
+    if (el && /^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName)) return true
+    if (el?.isContentEditable) return true
+    /* فرمی که کاربر شروع به پرکردنش کرده — حتی اگر همین حالا فوکوس
+       جای دیگری باشد.  و  حساب نمی‌شوند چون
+       مقدارِ پیش‌فرض دارند. */
+    const filled = document.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>(
+      'form input:not([type=hidden]):not([type=checkbox]):not([type=radio]), form textarea',
+    )
+    for (const f of filled) if (f.value && f.value.trim()) return true
+    return false
+  }
+
   // آپدیت خودکار: هر بار اپ visible/focus شد، نسخه‌ی سرور را چک کن؛ اگر فرق داشت reload
   useEffect(() => {
     const check = async () => {
@@ -41,6 +90,17 @@ export default function AppBoot() {
         const mine = process.env.NEXT_PUBLIC_BUILD_SHA
         if (!sha || !mine || sha === 'dev' || mine === 'dev' || sha === mine) return
         if (sessionStorage.getItem('bh-reloaded-for') === sha) return   // فقط یک‌بار برای هر نسخه
+
+        /* ── چرا وسطِ کار بازبارگذاری نمی‌کنیم ──
+           این بازبارگذاری برای رفعِ صفحه‌ی سفید است، ولی خودش می‌تواند
+           بدترین کار را بکند: کاربری که وسطِ ثبتِ فروشگاه یا آگهی است،
+           فرمش را از دست می‌دهد و حس می‌کند «پرت شده بیرون».
+
+           پس اگر چیزی در حالِ نوشتن است — فوکوس روی ورودی، یا فرمی که
+           مقدارِ پرشده دارد — صبر می‌کنیم. نسخه‌ی تازه در بازدیدِ بعدی
+           می‌آید و هیچ‌چیز از دست نمی‌رود. */
+        if (isMidTask()) return
+
         sessionStorage.setItem('bh-reloaded-for', sha)
         location.reload()
       } catch { /* آفلاین ⇒ بی‌خیال */ }

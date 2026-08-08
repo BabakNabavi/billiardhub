@@ -3,9 +3,11 @@ import { callbackOrigin } from '@/lib/site-url';
 import { NextRequest, NextResponse } from 'next/server';
 import { actorOf, UNAUTHENTICATED } from '@/lib/auth/ownership';
 import { hitRateLimit, tooMany } from '@/lib/auth/rate-limit';
-import { audit, clientIp, sb } from '@/lib/finance/db';
+import { audit, clientIp, sb, rpc } from '@/lib/finance/db';
 import { getTournament, registerForTournament, seatsLeft } from '@/lib/tournaments/server';
 import { getPaymentProvider, hasRealGateway } from '@/lib/payments';
+import { notifyOrganizerOfRegistration } from '@/lib/notify';
+import { promoteWaitlist } from '@/lib/tournaments/waitlist';
 
 /* ثبت‌نام در مسابقه + شروع پرداخت.
 
@@ -68,6 +70,9 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string
 
   /* مسابقه‌ی رایگان — همان‌جا قطعی شد، درگاهی لازم نیست */
   if (out.free) {
+    /* مسیرِ رایگان هیچ‌وقت از کالبک نمی‌گذرد، پس اگر خبردادن فقط
+       آن‌جا باشد، برگزارکننده‌ی مسابقه‌ی رایگان هرگز خبردار نمی‌شود. */
+    void notifyOrganizerOfRegistration(out.registrationId!).catch(() => { /* بی‌صدا */ });
     return NextResponse.json({
       ok: true, free: true, registrationId: out.registrationId,
       message: 'ثبت‌نام شما قطعی شد.',
@@ -126,4 +131,53 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string 
     entryFee: t.entry_fee,
     status: t.status,
   }, { headers: { 'Cache-Control': 'no-store' } });
+}
+
+/* ── لغوِ ثبت‌نام توسطِ خودِ بازیکن ───────────────────────────────
+   تا امروز راهی نبود: بازیکن پول می‌داد و برای انصراف باید به
+   باشگاه زنگ می‌زد — کاری که برای رزروِ میز از اول خودکار بود.
+
+   قاعده و مهلت در تابعِ دیتابیس است (مهاجرت ۰۷۴)، نه این‌جا: اگر
+   بررسی سمتِ برنامه باشد، دو درخواستِ هم‌زمان می‌توانند از آن رد
+   شوند و صندلی دوبار آزاد شود. */
+export async function DELETE(req: NextRequest, ctx: { params: Promise<{ id: string }> }) {
+  const { id } = await ctx.params;
+  if (!UUID.test(id)) return NextResponse.json({ message: 'مسابقه پیدا نشد' }, { status: 404 });
+
+  const actor = await actorOf(req);
+  if (!actor) return NextResponse.json(UNAUTHENTICATED, { status: 401 });
+
+  const registrationId = req.nextUrl.searchParams.get('registrationId') ?? '';
+  if (!UUID.test(registrationId)) {
+    return NextResponse.json({ message: 'شناسه‌ی ثبت‌نام معتبر نیست' }, { status: 400 });
+  }
+
+  const { data, error } = await rpc<{
+    ok: boolean; reason?: string; refunded?: number; hoursLeft?: number;
+  }>('bh_tournament_self_cancel', { p_registration: registrationId, p_user: actor.id });
+
+  if (error || !data?.ok) {
+    const msg = data?.reason === 'too_late'
+      ? 'مهلتِ انصراف گذشته است — تا ۴ ساعت پیش از پایانِ ثبت‌نام امکان‌پذیر بود'
+      : data?.reason === 'bracket_drawn' ? 'جدول قرعه‌کشی شده و جایگاه‌ها قطعی‌اند'
+      : data?.reason === 'not_yours' ? 'این ثبت‌نام متعلق به شما نیست'
+      : 'لغو ثبت‌نام انجام نشد';
+    return NextResponse.json({ message: msg, reason: data?.reason }, { status: 400 });
+  }
+
+  void audit({
+    actorId: actor.id, actorRole: actor.role, action: 'TOURNAMENT_SELF_CANCELLED',
+    entityType: 'tournament_registration', entityId: registrationId,
+    newValue: { refunded: data.refunded ?? 0 }, ip: clientIp(req) ?? undefined,
+  });
+
+  /* صندلی آزاد شد ⇒ نفرِ اولِ صفِ انتظار بالا می‌آید */
+  const promoted = await promoteWaitlist(id);
+
+  return NextResponse.json({
+    ok: true, refunded: data.refunded ?? 0, promoted,
+    message: (data.refunded ?? 0) > 0
+      ? 'ثبت‌نام لغو شد. مبلغ طیِ روزهای آینده بازگردانده می‌شود.'
+      : 'ثبت‌نام لغو شد.',
+  });
 }

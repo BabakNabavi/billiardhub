@@ -45,7 +45,7 @@ export default function ProfileAdmin({
   remove: (slug: string) => void | Promise<void>;
 }) {
   const router = useRouter();
-  const { user, _hydrated } = useAuthStore();
+  const { user, _hydrated, authChecked } = useAuthStore();
   const [rows, setRows] = useState<AdminRow[]>([]);
   const [ready, setReady] = useState(false);
   const [toast, setToast] = useState('');
@@ -58,8 +58,8 @@ export default function ProfileAdmin({
   useEffect(() => { void refresh().finally(() => setReady(true)); }, []);
 
   useEffect(() => {
-    if (_hydrated && (!user || user.primaryRole !== 'admin')) router.push('/');
-  }, [_hydrated, user, router]);
+    if (_hydrated && authChecked && (!user || user.primaryRole !== 'admin')) router.push('/');
+  }, [_hydrated, authChecked, user, router]);
 
   if (!_hydrated || !ready) return null;
   if (!user || user.primaryRole !== 'admin') return null;

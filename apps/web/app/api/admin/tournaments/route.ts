@@ -16,8 +16,10 @@ const STATUSES = new Set([
 ]);
 
 /* همان مجموعه‌ای که مسیرِ باشگاه می‌پذیرد — دو مسیر نباید فرمت‌های
-   متفاوتی قبول کنند. */
-const FORMATS = new Set(['bo3', 'bo5', 'bo7', 'bo9', 'bo11']);
+   متفاوتی قبول کنند. پیش‌تر این‌جا هاردکد بود و فقط پنج مقدارِ bo را
+   می‌شناخت، یعنی مسابقه‌ای که ادمین با فرمتِ race یا زمان‌دار می‌ساخت
+   بی‌صدا NULL می‌گرفت. */
+import { ALL_FORMATS as FORMATS } from '@/lib/tournaments/formats';
 
 export async function GET(req: NextRequest) {
   const actor = actorFromRequest(req);

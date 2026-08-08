@@ -14,6 +14,7 @@
    ───────────────────────────────────────────────────────────── */
 
 import { useEffect, useState, useCallback } from 'react';
+import { ask } from '../../../lib/ui/dialogs'
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuthStore } from '../../../store/auth.store';
@@ -61,7 +62,7 @@ const dur = (s: number | null) => {
 
 export default function AdminMediaPage() {
   const router = useRouter();
-  const { user, _hydrated } = useAuthStore();
+  const { user, _hydrated, authChecked } = useAuthStore();
 
   const [videos, setVideos] = useState<AdminVideo[]>([]);
   const [filter, setFilter] = useState<'' | Status>('');
@@ -84,10 +85,10 @@ export default function AdminMediaPage() {
   }, [filter, q]);
 
   useEffect(() => {
-    if (!_hydrated) return;
+    if (!_hydrated || !authChecked) return;
     if (!user || user.primaryRole !== 'admin') { router.push('/'); return; }
     void load();
-  }, [_hydrated, user, router, load]);
+  }, [_hydrated, authChecked, user, router, load]);
 
   /* هر تغییر بی‌درنگ روی همان ردیف نشان داده می‌شود و بعد از سرور
      تأیید می‌گیرد — وگرنه پنل تا آمدنِ پاسخ بی‌جان به نظر می‌رسد. */
@@ -105,7 +106,7 @@ export default function AdminMediaPage() {
   };
 
   const remove = async (v: AdminVideo) => {
-    if (!confirm(`«${v.title}» و فایل‌هایش برای همیشه حذف شوند؟`)) return;
+    if (!(await ask(`«${v.title}» حذف شود؟`, { body: 'ویدیو و همه‌ی فایل‌هایش برای همیشه پاک می‌شوند.' }))) return;
     setBusy(v.id);
     try {
       const r = await apiFetch(`/api/admin/videos?id=${encodeURIComponent(v.id)}`, { method: 'DELETE' });

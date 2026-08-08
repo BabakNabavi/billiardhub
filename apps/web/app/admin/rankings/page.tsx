@@ -12,7 +12,7 @@ import { apiFetch } from '../../../lib/http';
 
 export default function AdminRankingsPage() {
   const router = useRouter();
-  const { user, _hydrated } = useAuthStore();
+  const { user, _hydrated, authChecked } = useAuthStore();
   const [sport, setSport] = useState('snooker');
   const [gender, setGender] = useState('آقایان');
   const [category, setCategory] = useState('دسته برتر');
@@ -44,8 +44,8 @@ export default function AdminRankingsPage() {
 
   /* گارد بعد از hydrate — وگرنه ادمین موقع رفرش بی‌دلیل bounce می‌شد */
   useEffect(() => {
-    if (_hydrated && (!user || user.primaryRole !== 'admin')) router.push('/');
-  }, [_hydrated, user, router]);
+    if (_hydrated && authChecked && (!user || user.primaryRole !== 'admin')) router.push('/');
+  }, [_hydrated, authChecked, user, router]);
 
   if (!_hydrated) return null;
   if (!user || user.primaryRole !== 'admin') return null;

@@ -13,6 +13,7 @@
    ───────────────────────────────────────────────────────────── */
 
 import { useEffect, useState } from 'react'
+import { ask } from '../../lib/ui/dialogs'
 import { Loader2, Lock, Eye, EyeOff, Check, X, AlertCircle } from 'lucide-react'
 import { apiFetch } from '../../lib/http'
 import { passwordHint, capsFrom } from '../../lib/auth/password-hints'
@@ -141,7 +142,7 @@ export default function ChangePassword({ onChanged }: { onChanged?: () => void }
   const logoutAll = async () => {
     /* `confirm` این‌جا نام فیلد «تکرار رمز» است و تابع مرورگر را
        سایه می‌اندازد؛ پس صریح از window خوانده می‌شود. */
-    if (!window.confirm('از همه‌ی دستگاه‌ها خارج می‌شوید و باید دوباره وارد شوید. ادامه می‌دهید؟')) return
+    if (!(await ask('از همه‌ی دستگاه‌ها خارج می‌شوید؟', { body: 'باید دوباره وارد شوید.', confirmLabel: 'خروج از همه' }))) return
     setBusy(true)
     try {
       const r = await apiFetch('/api/auth/logout', {

@@ -1,7 +1,7 @@
 export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { actorOf, UNAUTHENTICATED } from '@/lib/auth/ownership';
-import { sb } from '@/lib/finance/db';
+import { sb, rpc } from '@/lib/finance/db';
 import { myRegistrations } from '@/lib/tournaments/server';
 
 /* ثبت‌نام‌های خود کاربر.
@@ -16,6 +16,17 @@ export async function GET(req: NextRequest) {
   if (!regs.length) return NextResponse.json({ registrations: [] }, { headers: { 'Cache-Control': 'no-store' } });
 
   const ids = [...new Set(regs.map(r => r.tournament_id))];
+
+  /* ── آیا این ثبت‌نام قابلِ لغو است؟ ──
+     قاعده‌اش (۴ ساعت پیش از پایانِ مهلت، و پیش از قرعه‌کشی) در
+     دیتابیس است تا یک جا بماند. رابط فقط جواب را می‌گیرد، وگرنه
+     دکمه‌ای نشان می‌دهد که وقتی زده شود خطا می‌گیرد. */
+  const cancellable = new Map<string, { can: boolean; reason?: string; hoursLeft?: number }>();
+  await Promise.all(regs.map(async r => {
+    const { data } = await rpc<{ can: boolean; reason?: string; hoursLeft?: number }>(
+      'bh_tournament_cancellable', { p_registration: r.id });
+    if (data) cancellable.set(r.id, data);
+  }));
   const { data: ts } = await sb().from('tournaments')
     .select('id,title,starts_at,venue,city,status,entry_fee').in('id', ids);
   const map = new Map((ts ?? []).map((t: Record<string, unknown>) => [String(t.id), t]));
@@ -39,6 +50,7 @@ export async function GET(req: NextRequest) {
         refundAmount: r.refund_amount,
         /* اگر پرداخت نیمه‌کاره مانده، کاربر می‌تواند ادامه دهد */
         canResumePayment: r.status === 'PENDING_PAYMENT' && r.payment_status !== 'PAID',
+        cancel: cancellable.get(r.id) ?? { can: false },
         createdAt: r.created_at,
       };
     }),

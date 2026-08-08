@@ -42,6 +42,26 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ kind: strin
     return NextResponse.json({ profile: p }, { headers: { 'Cache-Control': 'no-store' } });
   }
 
+  /* ── فهرستِ کامل برای پنل‌ها ──
+     پنلِ باشگاه می‌خواهد هر مربی‌ای که ثبت‌نام کرده را ببیند، نه فقط
+     تأییدشده‌ها: تا امروز فهرستِ «افزودن مربی» خالی بود و باشگاه‌دار
+     فکر می‌کرد وصل نیست، در حالی که فقط هیچ پروفایلی هنوز تأیید نشده
+     بود. تأییدنشده‌ها فقط برای کاربرِ واردشده برگردانده می‌شوند و با
+     `status` می‌آیند تا رابط بتواند نشانشان کند. */
+  if (searchParams.get('all') === '1') {
+    const actor = actorFromRequest(req);
+    if (!actor) return NextResponse.json({ message: 'ابتدا وارد شوید' }, { status: 401 });
+    try {
+      const all = await listProfiles(kind, {});
+      return NextResponse.json(
+        { profiles: all.filter(p => p.status !== 'rejected') },
+        { headers: { 'Cache-Control': 'no-store' } },
+      );
+    } catch {
+      return NextResponse.json({ message: 'خطا در دریافت پروفایل‌ها' }, { status: 500 });
+    }
+  }
+
   try {
     const all = await listProfiles(kind, { status: 'approved' });
     return NextResponse.json({ profiles: all }, { headers: { 'Cache-Control': 'no-store' } });

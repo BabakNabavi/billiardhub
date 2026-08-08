@@ -29,13 +29,46 @@ const MUT    = '#8A8474'
 const LINE   = '#E7E2D6'
 const BG     = '#F7F7F5'
 
+/* ── چرا «ثبت‌نام بسته» اضافه شد ──
+   وضعیتِ `registration_closed` دیتابیس در این صفحه `bracket_ready`
+   می‌شود، و هیچ تبی نداشت. یعنی مسابقه‌ای که باشگاه‌دار ثبت‌نامش را
+   می‌بست، از هر پنج تب ناپدید می‌شد جز «همه» — و چون شمارنده‌ی
+   کنارِ تب‌ها هم صفر نشان می‌داد، به‌نظر می‌رسید مسابقه پاک شده.
+
+   مسابقه‌ای که ثبت‌نامش بسته است هنوز برگزار می‌شود و مردم باید
+   بتوانند پیدایش کنند. */
+/* ترتیب از «قابلِ اقدام» به «تمام‌شده» است: کاری که همین حالا
+   می‌شود کرد اول، بعد آنچه در جریان است، بعد آنچه در راه است، و
+   آخر از همه آنچه دیگر تمام شده. */
 const TABS: { key: TournamentStatus | 'all'; label: string; pulse?: boolean }[] = [
   { key: 'all',               label: 'همه' },
   { key: 'registration_open', label: 'در حال ثبت‌نام', pulse: true },
   { key: 'live',              label: 'در حال برگزاری', pulse: true },
   { key: 'upcoming',          label: 'به زودی' },
+  { key: 'bracket_ready',     label: 'ثبت‌نام بسته' },
   { key: 'finished',          label: 'پایان یافته' },
 ]
+
+/* ── نشانِ وضعیت در حالتِ فهرست ──
+   روی تصویرِ کارت، پیلِ تیره لازم است تا خوانده شود. در ردیفِ سفیدِ
+   فهرست همان پیل مثلِ یک وصله‌ی تیره می‌نشیند. این نسخه طرحِ LQ
+   دارد — همان تینتِ طلاییِ CTAهای سایت — و رنگِ خودِ وضعیت فقط در
+   یک نقطه‌ی کوچک می‌ماند تا هنوز از هم تشخیص داده شوند. */
+function StatusChipLQ({ t }: { t: Tournament }) {
+  const c = STATUS_COLORS[t.status]
+  return (
+    <span style={{
+      display: 'inline-flex', alignItems: 'center', gap: 6, flexShrink: 0,
+      fontSize: 11.5, fontWeight: 800, color: '#9A6E38',
+      background: 'rgba(199,166,106,0.12)',
+      border: '1px solid rgba(199,166,106,0.34)',
+      borderRadius: 10, padding: '6px 12px', whiteSpace: 'nowrap',
+    }}>
+      <span style={{ width: 6, height: 6, borderRadius: '50%', background: c, flexShrink: 0 }} />
+      {STATUS_LABELS[t.status]}
+    </span>
+  )
+}
 
 /* پیل وضعیت روی تصویر */
 function StatusPill({ t }: { t: Tournament }) {
@@ -77,7 +110,7 @@ function TournamentCard({ t, i }: { t: Tournament; i: number }) {
       </div>
 
       {/* بدنه */}
-      <div style={{ padding: '15px 17px 16px', flex: 1, display: 'flex', flexDirection: 'column', gap: 10 }}>
+      <div style={{ padding: '12px 15px 13px', flex: 1, display: 'flex', flexDirection: 'column', gap: 7 }}>
         <h3 className="tn-title">{t.name}</h3>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: 7, fontSize: 12.5, color: SEC }}>
@@ -88,6 +121,21 @@ function TournamentCard({ t, i }: { t: Tournament; i: number }) {
           <Trophy size={13} style={{ color: GOLD_D, flexShrink: 0 }} />
           <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t.prizeInfo}</span>
         </div>
+
+        {/* «به زودی» بدونِ تاریخ یعنی هیچ: بازیکن نمی‌داند کِی برگردد.
+            وقتی باشگاه‌دار بازشدنِ ثبت‌نام را زمان‌بندی کرده، همان
+            لحظه این‌جا نوشته می‌شود. */}
+        {t.status === 'upcoming' && t.regOpenDate && (
+          <div style={{
+            display: 'flex', alignItems: 'center', gap: 7, fontSize: 12,
+            fontWeight: 700, color: '#9A6E38',
+            background: 'rgba(199,166,106,0.10)', border: '1px solid rgba(199,166,106,0.26)',
+            borderRadius: 9, padding: '6px 10px',
+          }}>
+            <Calendar size={12} style={{ flexShrink: 0 }} />
+            <span>ثبت‌نام از {t.regOpenDate}{t.regOpenTime ? ` — ساعت ${toFa(t.regOpenTime)}` : ''}</span>
+          </div>
+        )}
 
         {/* نوار قهرمان برای پایان‌یافته‌ها / ظرفیت برای بقیه */}
         {t.status === 'finished' && t.champion ? (
@@ -104,14 +152,28 @@ function TournamentCard({ t, i }: { t: Tournament; i: number }) {
                 {toFa(t.registeredCount)} / {toFa(t.maxPlayers)}
               </span>
             </div>
+            {/* ── نوارِ ظرفیت ──
+                رنگ خودش خبر می‌دهد: سبز یعنی جا هست، آبی یعنی
+                نصفه، قرمز یعنی دارد تمام می‌شود. گرادیان روی کلِ
+                نوار ثابت است نه روی بخشِ پرشده — وگرنه هر نواری در
+                هر درصدی همان سه رنگ را داشت و رنگ دیگر معنایی
+                نمی‌داد. `background-size` همان کار را می‌کند:
+                گرادیان به اندازه‌ی نوارِ کامل کشیده و از سمتِ راست
+                (شروعِ RTL) لنگر می‌شود. */}
             <div style={{ height: 5, background: '#EFEBE1', borderRadius: 99, overflow: 'hidden' }}>
-              <div style={{ height: '100%', borderRadius: 99, width: `${pct}%`, background: full ? '#B23B2E' : `linear-gradient(90deg, ${GOLD}, #8A6020)`, transition: 'width .6s cubic-bezier(.22,1,.36,1)' }} />
+              <div style={{
+                height: '100%', borderRadius: 99, width: `${pct}%`,
+                backgroundImage: 'linear-gradient(to left, #30C55A 0%, #0EA5E9 55%, #B23B2E 100%)',
+                backgroundSize: `${pct > 0 ? 10000 / pct : 100}% 100%`,
+                backgroundPosition: 'right center', backgroundRepeat: 'no-repeat',
+                transition: 'width .6s cubic-bezier(.22,1,.36,1)',
+              }} />
             </div>
           </div>
         )}
 
         {/* فوتر */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 'auto', paddingTop: 12, borderTop: '1px solid #F0EDE5' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 'auto', paddingTop: 9, borderTop: '1px solid #F0EDE5' }}>
           <span style={{ fontSize: 14.5, fontWeight: 900, color: GOLD_D }}>{formatFee(t.entryFee)}</span>
           <span className="tn-cta">
             {t.status === 'registration_open' && !full ? 'ثبت‌نام' : t.status === 'live' ? 'مشاهده زنده' : 'جزئیات'}
@@ -142,8 +204,26 @@ export default function TournamentsPage() {
   })
 
   const isBrowsing = tab === 'all' && !search
-  const mainEvent  = all.find(t => t.status === 'registration_open')
-  const gridItems  = isBrowsing && mainEvent ? filtered.filter(t => t.id !== mainEvent.id) : filtered
+
+  /* ── رویداد اصلی ──
+     پیش‌تر `all.find(t => t.status === 'registration_open')` بود:
+     یعنی **اولین ردیفِ فهرست**، که ترتیبش بر اساسِ تاریخِ شروع است.
+     پس هر باشگاهی که مسابقه‌اش زودتر برگزار می‌شد، بی‌آنکه کسی
+     تصمیم بگیرد، بزرگ‌ترین جای صفحه را می‌گرفت.
+
+     حالا پرچمی است که فقط ادمینِ سیستم می‌زند (مهاجرت ۰۷۰). اگر
+     هیچ‌کدام علامت نخورده باشد، بیلبورد اصلاً نمایش داده نمی‌شود و
+     همه‌ی مسابقات در گرید می‌آیند — بهتر از انتخابِ تصادفی. */
+  const mainEvent  = all.find(t => t.isFeatured)
+  const visible    = isBrowsing && mainEvent ? filtered.filter(t => t.id !== mainEvent.id) : filtered
+
+  /* ── تازه‌ترین اول، فقط در تبِ «همه» ──
+     فهرست از سرور بر اساسِ تاریخِ برگزاری می‌آید، که برای تب‌های
+     دیگر درست است. ولی «همه» ویترین است: مسابقه‌ای که همین امروز
+     ثبت شده باید بالا باشد، حتی اگر ماهِ بعد برگزار شود. */
+  const gridItems = tab === 'all'
+    ? [...visible].sort((a, b) => (b.createdAt ?? '').localeCompare(a.createdAt ?? ''))
+    : visible
 
   const liveCount = all.filter(t => t.status === 'live').length
   const openCount = all.filter(t => t.status === 'registration_open').length
@@ -159,7 +239,14 @@ export default function TournamentsPage() {
 
         /* ═══ پوستر قهرمانی (هیرو) ═══ */
         .tn-hero { position: relative; overflow: hidden; color: #fff; background: #0B0A08; }
-        .tn-hero-img { position: absolute; inset: 0; background: url('/images/shop/Pro_table.webp') center 62%/cover;
+        /* ── چرا تصویرِ اختصاصی ──
+           پیش‌تر عکسِ Pro_table.webp پوشه‌ی shop بود — عکسِ محصولِ
+           صفحه‌ی فروشگاه. ربطی به مسابقات نداشت، در دو صفحه‌ی
+           متفاوت تکرار می‌شد، و چون عکسِ واقعی بود متنِ روی آن هر
+           بار روی جزئیاتِ متفاوتی می‌افتاد و خواناییِ تیتر قابلِ
+           پیش‌بینی نبود. حالا رَکی است که عمداً سمتِ چپ چیده شده تا
+           سمتِ راست — جایی که تیتر و جستجو می‌نشینند — آرام بماند. */
+        .tn-hero-img { position: absolute; inset: 0; background: url('/images/tournaments/hero.svg') center/cover;
           filter: grayscale(0.35) brightness(0.5) contrast(1.1) saturate(1.15); transform: scale(1.04); }
         .tn-hero-grade { position: absolute; inset: 0; background:
           radial-gradient(ellipse 60% 90% at 74% 8%, rgba(255,238,204,0.20), transparent 55%),
@@ -232,7 +319,9 @@ export default function TournamentsPage() {
           transition: transform .3s cubic-bezier(.22,1,.36,1), box-shadow .3s, border-color .3s;
           animation: tnFadeUp .55s ease both; }
         .tn-card:hover { transform: translateY(-5px); box-shadow: 0 20px 44px rgba(28,27,23,0.12); border-color: rgba(199,166,106,0.4); }
-        .tn-thumb { position: relative; aspect-ratio: 16/8.6; overflow: hidden; background: #14120E; }
+        /* ۱۶:۸٫۶ ← ۱۶:۷ — پوسترها متنِ خودشان را دارند و بریدنِ
+           بیشترشان چیزی از دست نمی‌دهد، ولی کارت را کوتاه‌تر می‌کند */
+        .tn-thumb { position: relative; aspect-ratio: 16/7; overflow: hidden; background: #14120E; }
         .tn-thumb img { width: 100%; height: 100%; object-fit: cover; display: block;
           filter: brightness(0.72) contrast(1.05); transition: transform .6s cubic-bezier(.22,1,.36,1); }
         .tn-card:hover .tn-thumb img { transform: scale(1.06); }
@@ -242,7 +331,7 @@ export default function TournamentsPage() {
           background: linear-gradient(90deg, transparent, ${GOLD}, transparent);
           transform: scaleX(0); transition: transform .4s cubic-bezier(.22,1,.36,1); }
         .tn-card:hover .tn-line { transform: scaleX(1); }
-        .tn-title { font-size: 14.5px; font-weight: 900; line-height: 1.65; margin: 0; color: ${TEXT};
+        .tn-title { font-size: 14.5px; font-weight: 900; line-height: 1.45; margin: 0; color: ${TEXT};
           display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; transition: color .2s; }
         .tn-card:hover .tn-title { color: ${GOLD_D}; }
         .tn-cta { display: inline-flex; align-items: center; gap: 5px; font-size: 12.5px; font-weight: 800; color: ${GOLD_D}; }
@@ -257,7 +346,8 @@ export default function TournamentsPage() {
           .tn-view { padding: 3px; }
           .tn-view button { width: 30px; height: 30px; }
           .tn-sbox input { padding: 9px 34px 9px 10px !important; font-size: 12px !important; }
-          .lr-thumb { width: 74px; }
+          .lr-thumb { width: 46px; aspect-ratio: 1; border-radius: 12px; }
+          .lr-ball img { object-position: 71.5% 50%; transform: scale(1.55); transform-origin: 71.5% 50%; }
           .lr-fee { display: none; }
         }
         @media (prefers-reduced-motion: reduce) { .tn-hero::after { animation: none; display: none; } .tn-card, .tn-main { animation: none; } }
@@ -271,15 +361,15 @@ export default function TournamentsPage() {
         <div className="tn-hero-word">CHAMPIONSHIP</div>
         <div className="tn-wrap" style={{ position: 'relative', padding: 'clamp(36px,5.4vw,70px) clamp(16px,3vw,28px) clamp(30px,4.6vw,54px)', display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: '20px 32px', flexWrap: 'wrap' }}>
           <div style={{ minWidth: 0 }}>
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, fontSize: 9.5, fontWeight: 800, letterSpacing: '0.26em', color: GOLD, border: '1px solid rgba(199,166,106,0.4)', background: 'rgba(199,166,106,0.10)', borderRadius: 999, padding: '5px 14px', marginBottom: 16 }}>
-              <Trophy size={11} /> OFFICIAL TOURNAMENTS
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 8, fontWeight: 800, letterSpacing: '0.24em', color: GOLD, border: '1px solid rgba(199,166,106,0.4)', background: 'rgba(199,166,106,0.10)', borderRadius: 999, padding: '4px 11px', marginTop: -34, marginBottom: 14 }}>
+              <Trophy size={9} /> OFFICIAL TOURNAMENTS
             </span>
             <h1 style={{ fontSize: 'clamp(30px,5vw,54px)', fontWeight: 900, margin: 0, lineHeight: 1.2, letterSpacing: '-0.02em' }}>
               مسابقات <span style={{ background: `linear-gradient(135deg,#E8CE96,${GOLD} 50%,#8A6020)`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>بیلیارد</span>
             </h1>
             <div style={{ width: 70, height: 3, borderRadius: 2, marginTop: 14, background: `linear-gradient(90deg,${GOLD},#8A6020)`, transformOrigin: 'right', animation: 'tnScaleX .55s .3s ease both' }} />
             <p style={{ margin: '14px 0 0', fontSize: 'clamp(12px,1.4vw,14px)', color: 'rgba(255,255,255,0.6)', maxWidth: 470, lineHeight: 2, animation: 'tnFadeUp .5s .35s ease both' }}>
-              از لیگ‌های باشگاهی تا جام‌های قهرمانی ، رویدادهای رسمی را در پلتفرم بیلیارد هاب را دنبال کنید.
+              از لیگ‌های باشگاهی تا جام‌های قهرمانی ، رویدادها را در پلتفرم بیلیارد هاب را دنبال کنید.
             </p>
           </div>
 
@@ -412,7 +502,16 @@ export default function TournamentsPage() {
             <div className="tn-list">
               {gridItems.map((t, i) => (
                 <Link key={t.id} href={`/tournaments/${t.id}`} className="tn-lrow" style={{ animationDelay: `${Math.min(i, 10) * 40}ms` }}>
-                  <span className="lr-thumb"><img src={t.banner} alt={t.name} loading="lazy" /></span>
+                  {/* روی موبایل تصویر به یک آیکونِ مربعی جمع می‌شود و
+                      روی خودِ توپِ پوستر زوم می‌کند — عرضِ ردیف کم
+                      است و یک تصویرِ ۱۶:۹ نصفِ آن را می‌گرفت.
+                      قابِ توپ فقط برای پوسترهای خودمان معتبر است
+                      (مرکزِ توپ ۷۱٫۵٪ × ۵۰٪)؛ پوسترِ آپلودیِ باشگاه
+                      همان قابِ مرکزی را می‌گیرد تا چیزِ تصادفی
+                      نمایش داده نشود. */}
+                  <span className={`lr-thumb${t.banner.startsWith('/images/tournaments/') ? ' lr-ball' : ''}`}>
+                    <img src={t.banner} alt={t.name} loading="lazy" />
+                  </span>
                   <div style={{ minWidth: 0, flex: 1 }}>
                     <div style={{ fontSize: 13.5, fontWeight: 900, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t.name}</div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11.5, color: MUT, marginTop: 4, minWidth: 0 }}>
@@ -422,9 +521,13 @@ export default function TournamentsPage() {
                       <span style={{ flexShrink: 0 }}>{t.date}</span>
                     </div>
                   </div>
-                  <StatusPill t={t} />
+                  {/* مبلغ اول، وضعیت آخر: در RTL آخرین عنصر سمتِ چپِ
+                      ردیف می‌نشیند و همان‌جاست که چشم دنبالِ «چه
+                      کاری می‌شود کرد» می‌گردد. فلشِ انتهای ردیف هم
+                      برداشته شد — کلِ ردیف لینک است و فلش چیزی به
+                      آن اضافه نمی‌کرد. */}
                   <span className="lr-fee" style={{ fontSize: 13, fontWeight: 900, color: GOLD_D, whiteSpace: 'nowrap' }}>{formatFee(t.entryFee)}</span>
-                  <ChevronLeft size={16} style={{ color: GOLD_D, flexShrink: 0 }} />
+                  <StatusChipLQ t={t} />
                 </Link>
               ))}
             </div>

@@ -7,6 +7,7 @@
    Mode (رایگان/دستی/پولی) خودش را دارد — طبق تصمیم D1. */
 
 import { useCallback, useEffect, useState } from 'react'
+import { ask, askText } from '../../../lib/ui/dialogs'
 import {
   Megaphone, Save, Power, Loader2, AlertCircle, Plus, Trash2, Inbox, Phone, Package, LayoutGrid,
   BarChart3, Eye, MousePointerClick, Wallet, RotateCw, Check,
@@ -643,8 +644,13 @@ function CampaignsSection({ placements, campaigns, orders, onChanged, flash, cal
   const refund = async (order: AdOrder) => {
     /* بازپرداخت پول را برمی‌گرداند و کمپین را می‌خواباند — برگشت‌ناپذیر
        است، پس تأییدِ صریح می‌گیریم. */
-    const reason = window.prompt(
-      `بازگرداندن ${fa(order.amount)} تومان و لغو کمپین.\nدلیل بازپرداخت (در گزارش مالی ثبت می‌شود):`,
+    const reason = await askText(
+      `بازگرداندن ${fa(order.amount)} تومان و لغو کمپین`,
+      {
+        body: 'دلیل بازپرداخت در گزارش مالی ثبت می‌شود و برگشت‌پذیر نیست.',
+        placeholder: 'مثال: کمپین به‌درخواست خودِ تبلیغ‌دهنده لغو شد.',
+        confirmLabel: 'بازپرداخت',
+      },
     )
     if (reason === null) return
     setBusy(order.id)
@@ -682,7 +688,7 @@ function CampaignsSection({ placements, campaigns, orders, onChanged, flash, cal
   }
 
   const remove = async (id: string) => {
-    if (!confirm('این کمپین حذف شود؟')) return
+    if (!(await ask('این کمپین حذف شود؟'))) return
     setBusy(id)
     try { if (await call('DELETE', undefined, `?campaign=${id}`)) { await onChanged(); flash('کمپین حذف شد') } }
     finally { setBusy('') }
@@ -954,7 +960,7 @@ function PlanRow({ p, placements, onChanged, flash, call }: {
   }
 
   const remove = async () => {
-    if (!confirm(`پلن «${p.name}» حذف شود؟ اگر سفارشی داشته باشد فقط غیرفعال می‌شود.`)) return
+    if (!(await ask(`پلن «${p.name}» حذف شود؟`, { body: 'اگر سفارشی داشته باشد فقط غیرفعال می‌شود.' }))) return
     setBusy(true)
     try {
       const r = await call('DELETE', undefined, `?plan=${p.id}`)

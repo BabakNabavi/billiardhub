@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { ask } from '../../../lib/ui/dialogs'
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '../../../store/auth.store';
 import { Newspaper, Plus, X, Save, Edit, Trash2 } from 'lucide-react';
@@ -38,7 +39,7 @@ const emptyForm = { title: '', summary: '', content: '', category: 'general', ta
 
 export default function AdminNewsPage() {
   const router = useRouter();
-  const { user, _hydrated } = useAuthStore();
+  const { user, _hydrated, authChecked } = useAuthStore();
   /* خالی شروع می‌شود و از دیتابیس پر می‌شود. پیش‌تر دو خبر ساختگی
      («قهرمانی اسنوکر ۱۴۰۳» و «رنکینگ جدید») نشان داده می‌شد که
      هیچ‌وقت واقعی نبودند. */
@@ -51,8 +52,8 @@ export default function AdminNewsPage() {
 
   /* گارد بعد از hydrate — وگرنه ادمین موقع رفرش بی‌دلیل bounce می‌شد */
   useEffect(() => {
-    if (_hydrated && (!user || user.primaryRole !== 'admin')) router.push('/');
-  }, [_hydrated, user, router]);
+    if (_hydrated && authChecked && (!user || user.primaryRole !== 'admin')) router.push('/');
+  }, [_hydrated, authChecked, user, router]);
 
   const refresh = async () => {
     const rows = await listContent<DbNews>('news');
@@ -84,7 +85,7 @@ export default function AdminNewsPage() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('این خبر حذف شود؟')) return;
+    if (!(await ask('این خبر حذف شود؟'))) return;
     if (await deleteContent('news', id)) setNews(rows => rows.filter(n => n.id !== id));
     else setErr('حذف انجام نشد');
   };

@@ -17,6 +17,7 @@
    ───────────────────────────────────────────────────────────── */
 
 import { useCallback, useEffect, useState } from 'react'
+import { notify } from '../../lib/ui/dialogs'
 import { apiFetch } from '../../lib/http'
 import { Landmark, RotateCcw, Copy, Check, Loader2, AlertCircle, CircleDollarSign, Megaphone } from 'lucide-react'
 
@@ -90,7 +91,7 @@ export default function PayoutOrders({ onChanged }: { onChanged?: () => void }) 
         body: JSON.stringify(body),
       })
       const j = await r.json().catch(() => ({}))
-      if (!r.ok) { alert(j?.message || 'عملیات ناموفق بود'); return }
+      if (!r.ok) { notify(j?.message || 'عملیات ناموفق بود'); return }
       await load(); onChanged?.()
     } finally { setBusy('') }
   }
