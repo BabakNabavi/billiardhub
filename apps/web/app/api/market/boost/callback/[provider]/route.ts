@@ -48,6 +48,21 @@ async function handle(req: NextRequest, providerName: string) {
   const auth = ret.authority || o.provider_authority || '';
   if (!auth) return fail('شناسه‌ی پرداخت نامعتبر است');
 
+  /* ── درخواستِ بی‌داده سفارش را «ناموفق» نمی‌کند ──
+     پی‌پینگ برای تأیید به کدِ رهگیری نیاز دارد و آن را فقط در همان
+     بازگشتِ اصلی می‌فرستد. اگر کسی بعداً همین نشانی را بدونِ
+     پارامتر باز کند — کاربری که تبِ قدیمی را رفرش می‌کند، یک
+     خزنده، یا حتی تلاشِ دستیِ ما برای بازیابی — verify شکست
+     می‌خورد و سفارشی که واقعاً پرداخت شده `FAILED` برچسب می‌خورد.
+
+     یعنی یک درخواستِ بی‌ضرر، سندِ یک پرداختِ واقعی را خراب می‌کند.
+     پس وقتی هیچ نشانی از خودِ درگاه در درخواست نیست، دست به وضعیت
+     نمی‌زنیم و همان `PENDING` می‌ماند تا پی‌گیری شود. */
+  const fromGateway = !!(ret.refId || ret.authority || ret.canceled);
+  if (!fromGateway) {
+    return done('pending', `&kind=${o.kind}`);
+  }
+
   const v = await provider.verifyPayment({
     paymentId: o.id, authority: auth, amount: o.price, refId: ret.refId,
   });
