@@ -40,6 +40,15 @@ import { MEDIA_VIDEOS, compactViews } from '../lib/media-data';
 import { getHiddenVideoIds, getFeaturedOverride } from '../lib/media-admin-store';
 import { sharedJson } from '../lib/shared-fetch';
 import { useDeferredStart } from '../lib/useDeferredStart';
+import { thumbUrl } from '../lib/supabase-config';
+
+/* ── عرضِ واقعیِ کادرها ──
+   عددها از اندازه‌ی نمایشِ همین کارت‌ها می‌آیند و دو برابر شده‌اند
+   برای صفحه‌های با چگالیِ بالا. پیش از این، تصویرِ خامِ آپلودشده
+   (تا ۲٫۳ مگابایت) در کادرِ ۳۲۰ پیکسلی نمایش داده می‌شد. */
+const CLUB_W = 640;   // کارتِ باشگاه ~۳۲۰px
+const PROD_W = 420;   // کارتِ محصول ~۲۱۰px
+const LOGO_W = 160;   // لوگوی فروشگاه ~۸۰px
 
 /* ═══════════════════════════════════════════════════════════════
    SCROLL REVEAL
@@ -845,15 +854,15 @@ export default function HomeClient({ initialPlacements, initialFeatured, service
           highball: c.highballTables ?? 0,
         },
         rating: 0, reviews: 0, type: 'اسنوکر',
-        img: c.images?.[0] || CLUB_IMG_FALLBACK[i % CLUB_IMG_FALLBACK.length]!,
-        img2: c.images?.[1] || CLUB_IMG_FALLBACK[(i + 1) % CLUB_IMG_FALLBACK.length]!,
+        img: thumbUrl(c.images?.[0], CLUB_W) || CLUB_IMG_FALLBACK[i % CLUB_IMG_FALLBACK.length]!,
+        img2: thumbUrl(c.images?.[1], CLUB_W) || CLUB_IMG_FALLBACK[(i + 1) % CLUB_IMG_FALLBACK.length]!,
         price: 0, badge: null as string | null, tags: [] as string[],
         hasStory: !!c.hasActiveStory,
       })));
 
       setRealProducts(pr.slice(0, 14).map(p => ({
         id: p.id, name: p.title, sub: p.brand || p.category || 'بیلیارد بازار',
-        img: p.images?.[0] || IMG.cue,
+        img: thumbUrl(p.images?.[0], PROD_W) || IMG.cue,
         brand: (p.brand || 'BILLIARD').toUpperCase(),
         price: p.price ?? 0, sale: p.discountPrice ?? p.price ?? 0,
         pct: p.discountPercent ?? 0,
@@ -870,7 +879,7 @@ export default function HomeClient({ initialPlacements, initialFeatured, service
           city: sp.city ?? '',
           specialty: sp.specialty || 'تجهیزات بیلیارد',
           rating: 0, reviews: 0,
-          img: sp.logo || s.avatar || IMG.store1,
+          img: thumbUrl(sp.logo || s.avatar, LOGO_W) || IMG.store1,
           badge: null as string | null,
         };
       }));
@@ -888,7 +897,7 @@ export default function HomeClient({ initialPlacements, initialFeatured, service
     const snaps = uniqByRef((featProducts ?? []).map(c => c.entity).filter((e): e is EntitySnapshot => !!e));
     if (!snaps.length) return demoOk(prodSlot) ? realProducts : [];
     return snaps.map(e => ({
-      id: e.ref, name: e.title, sub: e.subtitle || 'بیلیارد بازار', img: e.image,
+      id: e.ref, name: e.title, sub: e.subtitle || 'بیلیارد بازار', img: thumbUrl(e.image, PROD_W),
       brand: (e.subtitle || 'BILLIARD').toUpperCase(),
       price: e.oldPrice ?? e.price ?? 0, sale: e.price ?? 0, pct: e.discountPercent ?? 0,
     }));
@@ -907,7 +916,7 @@ export default function HomeClient({ initialPlacements, initialFeatured, service
       ...(e.stats?.tables
         ? { breakdown: { snooker: e.stats.snooker ?? 0, pocket: e.stats.pocket ?? 0, highball: e.stats.highball ?? 0 } }
         : {}),
-      rating: 0, reviews: 0, type: 'اسنوکر', img: e.image, img2: e.image,
+      rating: 0, reviews: 0, type: 'اسنوکر', img: thumbUrl(e.image, CLUB_W), img2: thumbUrl(e.image, CLUB_W),
       price: 0, badge: e.badge ?? null as string | null, tags: [] as string[], hasStory: false,
     }));
   }, [featClubs, clubSlot.mode, clubSlot.status, realClubs]);
@@ -919,7 +928,7 @@ export default function HomeClient({ initialPlacements, initialFeatured, service
        نظر، امتیاز صفر می‌ماند و کارت اصلاً نشانش نمی‌دهد */
     return snaps.map(e => ({
       id: e.ref, name: e.title, city: e.city || '',
-      specialty: 'تجهیزات بیلیارد', rating: 0, reviews: 0, img: e.image, badge: e.badge ?? null,
+      specialty: 'تجهیزات بیلیارد', rating: 0, reviews: 0, img: thumbUrl(e.image, LOGO_W), badge: e.badge ?? null,
     }));
   }, [featStores, storeSlot.mode, storeSlot.status, realStores]);
 
