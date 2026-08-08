@@ -47,7 +47,10 @@ const str = (v: unknown, max = 300) => String(v ?? '').trim().slice(0, max);
    دومِ عنوان روی کارت‌های فهرست خالی می‌ماند و فقط در صفحه‌ی محصول
    دیده می‌شود. مشخصه‌ی کالاست، نه داده‌ی شخصی. */
 const LIST_COLS = [
-  'id', 'title', 'price', 'negotiable', '"discountPercent"', 'category', 'condition',
+  /* `discountPrice` قیمتِ پرداختی است و کارت بدونش نمی‌داند تخفیف
+     چقدر بوده — پیش‌تر عددِ خط‌خورده از روی درصدِ گردشده بازسازی
+     می‌شد و غلط درمی‌آمد. */
+  'id', 'title', 'price', 'negotiable', '"discountPrice"', '"discountPercent"', 'category', 'condition',
   'city', 'province', 'brand', 'model', 'images', 'status', 'views',
   '"createdAt"', '"expiresAt"', '"soldAt"', '"storeSlug"', '"isOfficialStore"',
   /* ارتقا (مهاجرت ۰۷۹): اولی کلیدِ مرتب‌سازی است و دومی نشانِ فوری */
@@ -138,8 +141,24 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(gate.body, { status: gate.status });
   }
 
-  const old = Math.max(price, Math.round(num(b?.old, price)));
+  /* ── قیمتِ قبل از تخفیف باید ذخیره شود، نه بازسازی ──
+     پیش‌تر فقط `price` (قیمتِ تخفیف‌خورده) و درصدِ **گردشده** ذخیره
+     می‌شد و صفحه‌ها عددِ خط‌خورده را از روی همان درصد بازمی‌ساختند:
+
+         old = round(price / (1 - disc/100))
+
+     نتیجه‌اش عددی بود که هیچ‌کس تایپش نکرده بود — آگهیِ ۷۵۰٬۰۰۰٬۰۰۰
+     با ٪۹ تخفیف، «۸۲۴٬۱۷۵٬۸۲۴» نشان می‌داد به‌جای ۸۲۵٬۰۰۰٬۰۰۰. یک
+     درصدِ صحیح نمی‌تواند عددِ اصلی را نگه دارد.
+
+     حالا هر دو عدد ذخیره می‌شوند، با همان قراردادی که بقیه‌ی پروژه
+     از قبل دارد (`app/shop/products.ts`، `lib/home-featured.ts`،
+     `store/cart.store.ts`): **`price` قیمتِ خط‌خورده و
+     `discountPrice` قیمتِ پرداختی.** درصد فقط برای نشانِ روی کارت
+     می‌ماند. */
+  const old = Math.max(price, Math.min(100_000_000_000, Math.round(num(b?.old, price))));
   const disc = old > price ? Math.round((1 - price / old) * 100) : 0;
+  const discounted = !negotiable && disc > 0;
   /* ── تصویرها هرگز base64 در دیتابیس نمی‌نشینند ──
      پیش‌تر هرچه کلاینت می‌فرستاد همان ذخیره می‌شد، و کلاینت data URI
      می‌فرستاد: تصویرِ دومگابایتی ⇒ ۲٫۷ مگابایت متن داخلِ ردیف، و
@@ -156,11 +175,12 @@ export async function POST(req: NextRequest) {
   const { data, error } = await sb().from('products').insert({
     title,
     description: str(b?.description, 3000),
-    price,
+    /* تخفیف‌دار ⇒ `price` همان قیمتِ قبل از تخفیف است */
+    price: discounted ? old : price,
     negotiable,
     /* آگهیِ توافقی تخفیف ندارد — «۲۰٪ تخفیف روی قیمتی که نگفته‌ام»
        بی‌معناست و روی کارت هم بد می‌نشیند. */
-    discountPrice: !negotiable && disc > 0 ? price : null,
+    discountPrice: discounted ? price : null,
     discountPercent: negotiable ? 0 : disc,
     category,
     condition: normalizeCondition(str(b?.condition, 20)),

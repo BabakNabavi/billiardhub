@@ -144,11 +144,15 @@ export async function PATCH(req: NextRequest, ctx: { params: Promise<{ id: strin
     if (price > 100_000_000_000) {
       return NextResponse.json({ message: 'مبلغ واردشده معتبر نیست' }, { status: 400 });
     }
-    const old = Math.max(price, Math.round(num(b?.old, price)));
-    patch.price = price;
+    /* همان قراردادِ مسیرِ ثبت: `price` قیمتِ خط‌خورده و `discountPrice`
+       قیمتِ پرداختی. اگر این‌جا برعکس بنویسیم، ویرایشِ یک آگهی عددِ
+       خط‌خورده‌اش را دوباره خراب می‌کند. */
+    const old = Math.max(price, Math.min(100_000_000_000, Math.round(num(b?.old, price))));
+    const discounted = !negotiable && old > price;
+    patch.price = discounted ? old : price;
     patch.negotiable = negotiable;
-    patch.discountPercent = !negotiable && old > price ? Math.round((1 - price / old) * 100) : 0;
-    patch.discountPrice = !negotiable && old > price ? price : null;
+    patch.discountPercent = discounted ? Math.round((1 - price / old) * 100) : 0;
+    patch.discountPrice = discounted ? price : null;
   }
 
   if (Object.keys(patch).length === 0) return NextResponse.json({ ad });

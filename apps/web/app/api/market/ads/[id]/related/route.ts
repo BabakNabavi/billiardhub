@@ -41,10 +41,10 @@ import { sb } from '@/lib/finance/db';
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-const COLS = 'id,title,price,negotiable,"discountPercent",category,condition,city,brand,model,type,images,"createdAt"';
+const COLS = 'id,title,price,negotiable,"discountPrice","discountPercent",category,condition,city,brand,model,type,images,"createdAt"';
 
 type Row = {
-  id: string; title: string; price: number; negotiable: boolean;
+  id: string; title: string; price: number; discountPrice: number | null; negotiable: boolean;
   category: string; condition: string; city: string | null;
   brand: string | null; model: string | null; type: string | null; images: unknown;
 };
@@ -93,7 +93,9 @@ export async function GET(_req: NextRequest, ctx: { params: Promise<{ id: string
     .sort((a, b) => b.s - a.s || String(a.r.id).localeCompare(String(b.r.id)))
     .slice(0, 8)
     .map(({ r }) => ({
-      id: r.id, title: r.title, price: r.price, negotiable: r.negotiable,
+      id: r.id, title: r.title, negotiable: r.negotiable,
+      /* قیمتِ پرداختی روی کارت می‌نشیند، نه قیمتِ خط‌خورده */
+      price: (r.discountPrice && r.discountPrice > 0 && r.discountPrice < r.price) ? r.discountPrice : r.price,
       category: r.category, condition: r.condition, city: r.city, brand: r.brand, model: r.model,
       image: Array.isArray(r.images) ? String((r.images as unknown[])[0] ?? '') : '',
     }));

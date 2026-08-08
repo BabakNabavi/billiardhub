@@ -83,8 +83,16 @@ function normalizeUserProduct(up: Record<string, unknown>): Detail {
   const imgs = Array.isArray(up.images)
     ? (up.images as unknown[]).map(x => str(x)).filter(Boolean)
     : undefined
-  const price = num(up.price)
-  const disc  = num(up.disc, num(up.discountPercent))
+  /* `price` قیمتِ خط‌خورده است و `discountPrice` پرداختی — همان
+     قراردادی که `app/shop/products.ts` دارد. پیش‌تر این‌جا عددِ
+     خط‌خورده از روی درصدِ گردشده بازسازی می‌شد و غلط درمی‌آمد. */
+  const listed = num(up.price)
+  const paid   = num(up.discountPrice)
+  const hasDisc = paid > 0 && paid < listed
+  const price = hasDisc ? paid : listed
+  const disc  = hasDisc
+    ? (num(up.discountPercent) || Math.round(((listed - paid) / listed) * 100))
+    : num(up.disc, 0)
   return {
     id:             typeof up.id === 'string' ? up.id : num(up.id),
     cat:            str(up.category, 'other'),
@@ -97,7 +105,9 @@ function normalizeUserProduct(up: Record<string, unknown>): Detail {
     brand:          str(up.brand),
     model:          str(up.model),
     price,
-    old:            num(up.old, disc > 0 ? Math.round(price / (1 - disc / 100)) : price),
+    /* آگهیِ قدیمیِ محلی `old` دارد؛ ردیفِ سرور قیمتِ فهرست را در
+       `price` نگه می‌دارد. */
+    old:            num(up.old, hasDisc ? listed : price),
     disc,
     rating:         5,
     reviews:        0,

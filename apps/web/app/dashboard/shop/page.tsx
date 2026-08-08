@@ -49,14 +49,18 @@ function mapLocalProduct(up: Record<string, unknown>): Product {
 function mapServerAd(a: Record<string, unknown>): Product {
   const n = (v: unknown, d = 0) => { const x = Number(v); return Number.isFinite(x) ? x : d; };
   const s = (v: unknown, d = '') => (typeof v === 'string' ? v : d);
-  const price = n(a.price);
-  const disc = n(a.discountPercent);
+  /* `price` قیمتِ خط‌خورده و `discountPrice` پرداختی — پیش‌تر عددِ
+     خط‌خورده از روی درصدِ گردشده بازسازی می‌شد و غلط درمی‌آمد. */
+  const listed = n(a.price);
+  const paid = n(a.discountPrice);
+  const hasDisc = paid > 0 && paid < listed;
+  const disc = hasDisc ? (n(a.discountPercent) || Math.round(((listed - paid) / listed) * 100)) : 0;
   return {
     id: String(a.id),
     ...(() => { const t = productTitleParts(a); return { title: t.head, sub: t.tail }; })(),
-    price: disc > 0 ? Math.round(price / (1 - disc / 100)) : price,
-    discountPrice: disc > 0 ? price : undefined,
-    discountPercent: disc > 0 ? disc : undefined,
+    price: listed,
+    discountPrice: hasDisc ? paid : undefined,
+    discountPercent: hasDisc ? disc : undefined,
     category: s(a.category, 'other'),
     condition: s(a.condition, 'new'),
     city: s(a.city),

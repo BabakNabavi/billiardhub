@@ -1077,6 +1077,27 @@ t('اسکریپتِ انتقالِ آگهی‌های موجود هست',
   /--apply/.test(imgMig) && /products\?select=id,title,images/.test(imgMig));
 t('انتقال پیش‌فرض فقط گزارش می‌دهد',
   /const APPLY = process\.argv\.includes\('--apply'\)/.test(imgMig));
+/* ── قیمتِ قبل از تخفیف ذخیره می‌شود، نه بازسازی ──
+   فقط درصدِ گردشده نگه داشته می‌شد و عددِ خط‌خورده از رویش بازسازی
+   می‌شد: ۷۵۰٬۰۰۰٬۰۰۰ با ٪۹ ⇒ «۸۲۴٬۱۷۵٬۸۲۴» روی کارت. */
+t('قیمتِ خط‌خورده در دیتابیس ذخیره می‌شود',
+  /price: discounted \? old : price/.test(adsApi)
+  && /discountPrice: discounted \? price : null/.test(adsApi),
+  'یک درصدِ صحیح نمی‌تواند عددِ اصلی را نگه دارد');
+t('ویرایش هم همان قرارداد را دارد',
+  /patch\.price = discounted \? old : price/.test(adApi));
+t('`discountPrice` در فهرستِ عمومی هست',
+  /'"discountPrice"'/.test(adsApi),
+  'بدونش کارت باز هم مجبور است عدد را حدس بزند');
+t('هیچ‌جا عددِ خط‌خورده بازسازی نمی‌شود',
+  !/Math\.round\(price \/ \(1 - disc \/ 100\)\)/.test(shopPage)
+  && !/Math\.round\(price \/ \(1 - disc \/ 100\)\)/.test(read('app/dashboard/shop/page.tsx'))
+  && !/disc > 0 \? Math\.round\(price \/ \(1 - disc \/ 100\)\)/.test(detail2));
+t('کارتِ «مشابه» قیمتِ پرداختی را نشان می‌دهد',
+  /r\.discountPrice < r\.price/.test(relApi));
+t('اسکریپتِ اصلاحِ آگهی‌های قدیمی هست',
+  /roundNice/.test(read('scripts/fix-ad-discounts.mjs')));
+
 t('عکسی که آپلودش نشد گم نمی‌شود',
   /out\.push\(s\);\s*\n\s*rowAfter \+= s\.length;\s*\n\s*failed\+\+/.test(imgMig)
   && /APPLY && allOk/.test(imgMig),

@@ -96,8 +96,17 @@ interface Listing {
    بودند و هیچ‌کس دیگری نمی‌دیدشان. */
 function serverAdToListing(a: Record<string, any>): Listing {
   const imgs = Array.isArray(a.images) ? a.images : []
-  const price = Number(a.price) || 0
-  const disc = Number(a.discountPercent) || 0
+  /* ── قیمت: خط‌خورده و پرداختی، هر دو از دیتابیس ──
+     پیش‌تر عددِ خط‌خورده از روی درصدِ گردشده بازسازی می‌شد
+     (`price / (1 - disc/100)`) و عددی درمی‌آمد که هیچ فروشنده‌ای
+     تایپ نکرده بود: ۷۵۰٬۰۰۰٬۰۰۰ با ٪۹ ⇒ «۸۲۴٬۱۷۵٬۸۲۴». */
+  const listed = Number(a.price) || 0
+  const paid = Number(a.discountPrice) || 0
+  const hasDisc = paid > 0 && paid < listed
+  const price = hasDisc ? paid : listed
+  const disc = hasDisc
+    ? (Number(a.discountPercent) || Math.round(((listed - paid) / listed) * 100))
+    : 0
   const { head, tail } = productTitleParts(a)
   return {
     key: `db-${a.id}`, id: a.id,
@@ -106,7 +115,7 @@ function serverAdToListing(a: Record<string, any>): Listing {
     brand: a.brand || '',
     model: a.model || '',
     sub: tail,
-    price, old: disc > 0 ? Math.round(price / (1 - disc / 100)) : price, disc,
+    price, old: listed, disc,
     cat: normCat(a.category),
     city: a.city || '',
     condition: (COND_LABEL[a.condition as Cond] ? a.condition : 'new') as Cond,
