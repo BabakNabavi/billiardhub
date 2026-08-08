@@ -1162,6 +1162,44 @@ for (const type of [...used].sort()) {
     'درج شکست می‌خورد و کلِ تراکنشِ پرداخت برمی‌گردد');
 }
 
+/* ── فقط آخرین تعریفِ هر تابع ملاک است ──
+   مهاجرت سندِ تاریخ است و ویرایش نمی‌شود؛ `CREATE OR REPLACE` یعنی
+   آنچه در دیتابیس می‌نشیند آخرین نسخه است. پس بررسی روی همان انجام
+   می‌شود، نه روی نسخه‌های کنارگذاشته‌شده. */
+const latestFn = new Map();
+for (const f of migFiles) {
+  const src = readFileSync(join(migDir, f), 'utf8');
+  for (const m of src.matchAll(/CREATE OR REPLACE FUNCTION public\.(\w+)([\s\S]*?)\$\$;/g)) {
+    latestFn.set(m[1], m[2]);
+  }
+}
+const liveFns = [...latestFn.entries()].filter(([, body]) => /INSERT INTO ledger_entries/.test(body));
+t(`توابعی که در دفتر می‌نویسند پیدا شدند (${liveFns.length})`, liveFns.length > 0);
+
+/* ── وضعیتِ سطرِ دفتر ──
+   قید فقط `POSTED` و `REVERSED` را می‌پذیرد. مهاجرتِ ۰۷۹ نوشته بود
+   `SETTLED` — کلمه‌ای که در تسویه‌ی باشگاه معنا دارد نه در دفتر — و
+   همان درج، کلِ تراکنشِ ارتقا را برمی‌گرداند. */
+for (const [name, body] of liveFns) {
+  const bad = [...body.matchAll(/INSERT INTO ledger_entries[\s\S]{0,400}?'IRT',\s*'([A-Z_]+)'/g)]
+    .map(m => m[1]).filter(s => s !== 'POSTED' && s !== 'REVERSED');
+  if (bad.length) t(`«${name}» وضعیتِ مجاز می‌نویسد`, false, `وضعیتِ ناشناخته: ${bad.join(', ')}`);
+}
+t('هیچ تابعی وضعیتِ ناشناخته در دفتر نمی‌نویسد',
+  liveFns.every(([, body]) =>
+    [...body.matchAll(/INSERT INTO ledger_entries[\s\S]{0,400}?'IRT',\s*'([A-Z_]+)'/g)]
+      .every(m => m[1] === 'POSTED' || m[1] === 'REVERSED')));
+
+/* ── ایندکسِ یکتای جزئی ──
+   `ledger_source_key_uidx` شرطِ `WHERE source_key IS NOT NULL` دارد.
+   بدونِ تکرارِ همان شرط در دستور، Postgres ایندکس را برای
+   `ON CONFLICT` پیدا نمی‌کند و درج می‌شکند. */
+const liveConflicts = liveFns.flatMap(([, body]) =>
+  [...body.matchAll(/ON CONFLICT \(source_key\)([^;]{0,60})/g)].map(m => m[1]));
+t(`ON CONFLICTهای زنده شرطِ ایندکسِ جزئی را دارند (${liveConflicts.length} مورد)`,
+  liveConflicts.every(c => /WHERE source_key IS NOT NULL/.test(c)),
+  'ایندکسِ جزئی بدونِ تکرارِ شرط استنتاج نمی‌شود');
+
 console.log('\n― کالبکِ درگاه‌ها ―');
 const proxySrc = read('proxy.ts');
 const callbackDirs = [];
