@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState, useCallback } from 'react';
-import { notify } from '../../../lib/ui/dialogs'
+import { notify, askText } from '../../../lib/ui/dialogs'
 import Select from '../../../components/ui/Select'
 import VerificationBadges from '../../../components/VerificationBadges'
 import { useRouter } from 'next/navigation';
@@ -29,7 +29,7 @@ import { apiFetch } from '../../../lib/http';
 import { sortTables } from '../../../lib/tables/order';
 import { closureState, closureLabel, activeOption, isOptionDisabled } from '../../../lib/booking/closure';
 import type { ClosureOption } from '../../../lib/booking/closure';
-import { bookingStartsAt } from '../../../lib/finance/cancellation';
+import { bookingStartsAt, computeRefund } from '../../../lib/finance/cancellation';
 import FaTimeSelect from '../../../components/ui/FaTimeSelect';
 import ClubLogo from '../../../components/club/ClubLogo';
 import { Card, SectionTitle, InputField, SelectField, TimeField, ClosedToggle, SaveBtn } from '../../../components/dashboard/club/fields';
@@ -777,6 +777,61 @@ export default function ClubDashboardPage() {
   const hoursToStart = (b: Booking) =>
     (bookingStartsAt(b.bookingDate, b.timeSlots ?? null).getTime() - Date.now()) / 3_600_000;
   const canOwnerCancel = (b: Booking) => hoursToStart(b) >= OWNER_CANCEL_HOURS;
+
+  /* ── لغوِ رزروِ تأییدشده توسط باشگاه ──
+     تا امروز دکمه‌ی لغو فقط روی رزروِ `pending` بود (با عنوانِ «رد»).
+     یعنی رزروی که تأیید و پرداخت شده بود، از پنلِ باشگاه هیچ راهی
+     برای لغو نداشت — در حالی که سرور از قبل اجازه‌اش را می‌داد.
+     باشگاه‌داری که میزش خراب می‌شد باید به پشتیبانی زنگ می‌زد.
+
+     ── چرا مبلغ همیشه کامل برمی‌گردد ──
+     قاعده‌ی «باشگاه فقط تا ۴ ساعت قبل» با پله‌ی اولِ سیاستِ بازپرداخت
+     (بیش از ۴ ساعت ⇒ ۱۰۰٪) یکی می‌شود. پس لغو از سوی باشگاه هیچ‌وقت
+     جریمه‌ای به مشتری نمی‌زند — که درست هم همین است، چون تقصیرِ او
+     نیست. عدد این‌جا فقط نمایش داده می‌شود؛ محاسبه‌ی معتبر سمتِ سرور
+     انجام می‌شود. */
+  const cancelBookingByOwner = async (b: Booking) => {
+    if (!canOwnerCancel(b)) {
+      notify('لغو از سوی باشگاه تنها تا ۴ ساعت پیش از شروع رزرو ممکن است.');
+      return;
+    }
+    const paid = Number((b as Booking & { final_amount?: number }).final_amount ?? b.totalPrice ?? 0);
+    const back = paid > 0
+      ? computeRefund(paid, bookingStartsAt(b.bookingDate, b.timeSlots ?? null)).refundAmount
+      : 0;
+
+    /* ── دلیل کجا می‌رود ──
+       در `refunds.reason` و سابقه‌ی حسابرسی ثبت می‌شود و ادمین در
+       «دستور پرداخت» می‌بیندش. **در پیامک نمی‌رود**: الگوهای
+       ملی‌پیامک از پیش ثبت‌شده‌اند و پارامترِ اضافه نمی‌پذیرند. این
+       جمله همان را می‌گوید تا وعده‌ای داده نشود که انجام نمی‌شود. */
+    const reason = await askText('لغو رزرو توسط باشگاه', {
+      body: back > 0
+        ? `مبلغ ${back.toLocaleString('fa-IR')} تومان به‌طور کامل به مشتری بازگردانده می‌شود، و پیامکِ لغو با همین مبلغ برایش می‌رود.`
+        : 'این رزرو پرداختی نداشته و مبلغی بازگردانده نمی‌شود. پیامکِ لغو برای مشتری فرستاده می‌شود.',
+      placeholder: 'دلیل لغو — در سابقه‌ی رزرو ثبت می‌شود',
+      confirmLabel: 'لغو رزرو',
+    });
+    if (reason === null) return;
+
+    setBookingsError('');
+    try {
+      const r = await apiFetch(`/api/bookings/${b.id}/cancel`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ reason: `لغو توسط باشگاه${reason.trim() ? ` — ${reason.trim()}` : ''}` }),
+      });
+      const j = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error((j as { message?: string })?.message || 'لغو رزرو انجام نشد');
+      setBookings(bs => bs.map(x => x.id === b.id ? { ...x, status: 'cancelled' } : x));
+      notify(back > 0
+        ? `رزرو لغو شد. ${back.toLocaleString('fa-IR')} تومان در دستورِ پرداختِ ادمین ثبت شد.`
+        : 'رزرو لغو شد.', 'ok');
+    } catch (e: unknown) {
+      const msg = (e as { message?: string })?.message;
+      setBookingsError(msg || 'لغو رزرو انجام نشد');
+      notify(msg || 'لغو رزرو انجام نشد');
+    }
+  };
 
   const updateBookingStatus = async (id: string, status: string) => {
     setBookingsError('');
@@ -3388,6 +3443,27 @@ export default function ClubDashboardPage() {
                         padding: '9px 0', fontSize: 13, fontFamily: 'var(--font-base)', fontWeight: 700,
                       }}><XCircle size={14} /> رد</button>
                     </div>
+                  )}
+                  {/* ── رزروِ تأییدشده ──
+                      دکمه‌اش جدا از «رد» است چون کارِ دیگری می‌کند:
+                      این‌جا پولی برگشت می‌خورد و مشتری باید خبردار
+                      شود. تا ۴ ساعت پیش از شروع؛ بعد از آن غیرفعال
+                      می‌ماند با همان دلیل روی تولتیپ. */}
+                  {b.status === 'confirmed' && (
+                    <button onClick={() => void cancelBookingByOwner(b)}
+                      disabled={!canOwnerCancel(b)}
+                      title={canOwnerCancel(b)
+                        ? 'مبلغ به‌طور کامل به مشتری بازگردانده می‌شود'
+                        : 'لغو تنها تا ۴ ساعت پیش از شروع رزرو ممکن است'}
+                      style={{
+                        opacity: canOwnerCancel(b) ? 1 : 0.45,
+                        cursor: canOwnerCancel(b) ? 'pointer' : 'not-allowed',
+                        width: '100%', display: 'inline-flex', alignItems: 'center',
+                        justifyContent: 'center', gap: 6,
+                        background: 'rgba(239,68,68,0.09)', color: '#dc2626',
+                        border: '1px solid rgba(239,68,68,0.28)', borderRadius: 20,
+                        padding: '9px 0', fontSize: 13, fontFamily: 'var(--font-base)', fontWeight: 700,
+                      }}><XCircle size={14} /> لغو رزرو</button>
                   )}
                 </Card>
               );

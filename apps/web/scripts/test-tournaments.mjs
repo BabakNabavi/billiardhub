@@ -1300,6 +1300,39 @@ t('داشبورد هم کارتِ آگهی‌های من دارد',
   /href="\/dashboard\/shop"/.test(read('app/dashboard/page.tsx')),
   'داشبورد جایی است که کاربر اول نگاه می‌کند');
 
+/* ── ۱۳ · لغو رزرو توسط باشگاه ──
+   سرور از قبل اجازه‌اش را می‌داد و قاعده‌ی ۴ ساعت را هم اجرا می‌کرد،
+   ولی دکمه فقط روی رزروِ `pending` بود. یعنی رزروِ تأییدشده و
+   پرداخت‌شده از پنلِ باشگاه هیچ راهِ لغوی نداشت و باشگاه‌داری که
+   میزش خراب می‌شد باید به پشتیبانی زنگ می‌زد. */
+console.log('\n― لغو رزرو توسط باشگاه ―');
+const cancelApi = read('app/api/bookings/[id]/cancel/route.ts');
+const policy = read('lib/finance/cancellation.ts');
+t('باشگاه دکمه‌ی لغو برای رزروِ تأییدشده دارد',
+  /b\.status === 'confirmed' && \(/.test(clubPage) && /cancelBookingByOwner/.test(clubPage));
+t('مهلتِ ۴ ساعت در سرور اجرا می‌شود',
+  /OWNER_CANCEL_HOURS = 4/.test(cancelApi) && /hoursLeft < OWNER_CANCEL_HOURS/.test(cancelApi),
+  'قاعده‌ای که فقط در کلاینت باشد با یک درخواستِ دستی دور می‌خورد');
+t('کلاینت هم همان عدد را می‌شناسد',
+  /OWNER_CANCEL_HOURS = 4/.test(clubPage),
+  'وگرنه دکمه دیده می‌شود، زده می‌شود، و خطا می‌گیرد');
+t('لغوِ باشگاه بازگشتِ کامل می‌دهد',
+  /minHoursBefore: 4, refundPercent: 100/.test(policy),
+  'مرزِ ۴ ساعت با پله‌ی اولِ سیاست یکی است، پس مشتری هیچ‌وقت جریمه نمی‌شود');
+t('مبلغِ بازگشتی پیش از تأیید نشان داده می‌شود',
+  /computeRefund\(paid, bookingStartsAt/.test(clubPage));
+t('دلیلِ لغو ثبت می‌شود',
+  /لغو توسط باشگاه\$\{reason/.test(clubPage) && /reason, status: 'REQUESTED'/.test(cancelApi));
+t('بازپرداخت به دستورِ پرداختِ ادمین می‌رود',
+  /from\('refunds'\)\.insert/.test(cancelApi)
+  && /kind: 'refund'/.test(read('components/admin/PayoutOrders.tsx')));
+t('مشتری پیامکِ لغو با مبلغ می‌گیرد',
+  /notifyBookingCancelled\(b\.id, refund\)/.test(cancelApi)
+  && /booking_cancelled_refund/.test(read('lib/notify.ts')));
+t('وعده‌ی بی‌پشتوانه به باشگاه‌دار داده نمی‌شود',
+  !/دلیل لغو — برای مشتری فرستاده می‌شود/.test(clubPage),
+  'دلیل در پیامک نمی‌رود؛ الگوهای ملی‌پیامک پارامترِ اضافه نمی‌پذیرند');
+
 /* ── نقشِ اصلی ── */
 console.log('\n― نقشِ اصلی ―');
 t('کاربر می‌تواند نقشِ اصلی را انتخاب کند',
