@@ -1131,6 +1131,37 @@ t('اسکریپتِ اصلاحِ آگهی‌های قدیمی هست',
    این دقیقاً برای ارتقای آگهی اتفاق افتاد. پس به‌جای فهرست‌کردنِ
    دستیِ مسیرها، خودِ پوشه گشته می‌شود: هر کالبکِ تازه‌ای که یادش
    برود، همین‌جا قرمز می‌شود. */
+/* ── هر نوعِ دفترِ مالی باید در قیدِ دیتابیس مجاز باشد ──
+   `bh_boost_apply` سطری با نوعِ `AD_BOOST_REVENUE` می‌نوشت که قیدِ
+   `ledger_type_chk` نمی‌شناختش. درج شکست می‌خورد، **کلِ تراکنش
+   برمی‌گشت**، و فروشنده‌ای که همین حالا پول داده بود می‌دید
+   «پرداخت انجام شد ولی ارتقا اعمال نشد».
+
+   نوعِ تازه در یک مهاجرت و قید در مهاجرتی دیگر — همان الگوی «دو جا
+   که باید با هم بخوانند». پس به‌جای فهرستِ دستی، همه‌ی نوع‌هایی که
+   جایی نوشته می‌شوند از خودِ فایل‌ها درمی‌آیند. */
+console.log('\n― نوع‌های دفترِ مالی ―');
+const migDir = join(ROOT, '../../supabase/migrations');
+const migFiles = readdirSync(migDir).filter(f => f.endsWith('.sql')).sort();
+const allSql = migFiles.map(f => readFileSync(join(migDir, f), 'utf8')).join('\n');
+
+/* آخرین تعریفِ قید در فایل‌ها ملاک است */
+const chkBlocks = [...allSql.matchAll(/ADD CONSTRAINT ledger_type_chk CHECK \(type IN \(([\s\S]*?)\)\)/g)];
+const allowed = new Set(
+  (chkBlocks.at(-1)?.[1] ?? '').match(/'([A-Z_]+)'/g)?.map(s => s.replace(/'/g, '')) ?? [],
+);
+t(`قیدِ نوعِ دفتر پیدا شد (${allowed.size} نوع)`, allowed.size > 5);
+
+/* نوع‌هایی که واقعاً در INSERTهای دفتر استفاده می‌شوند */
+const used = new Set(
+  [...allSql.matchAll(/INSERT INTO ledger_entries[\s\S]{0,400}?VALUES\s*\([^)]*?'([A-Z_]+)'/g)]
+    .map(m => m[1]),
+);
+for (const type of [...used].sort()) {
+  t(`نوعِ «${type}» در قید مجاز است`, allowed.has(type),
+    'درج شکست می‌خورد و کلِ تراکنشِ پرداخت برمی‌گردد');
+}
+
 console.log('\n― کالبکِ درگاه‌ها ―');
 const proxySrc = read('proxy.ts');
 const callbackDirs = [];

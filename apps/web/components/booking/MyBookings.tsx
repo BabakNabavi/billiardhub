@@ -125,7 +125,15 @@ export default function MyBookings() {
       {confirm && (
         <div onClick={() => !busy && setConfirm(null)}
           style={{ position: 'fixed', inset: 0, zIndex: 3000, background: 'rgba(20,18,14,0.5)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 18 }}>
-          <div onClick={e => e.stopPropagation()} dir="rtl"
+          {/* ── چرا این پنجره ارتفاع و اسکرولِ خودش را دارد ──
+              با بازشدنِ «قوانین لغو رزرو» بلندتر از صفحه‌ی گوشی
+              می‌شد و چون پوشش وسط‌چین است، از **بالا و پایین** بریده
+              می‌شد: نه عنوان دیده می‌شد نه دکمه‌ی تأیید. یعنی کاربر
+              پنجره‌ای می‌دید که نه می‌شد خواندش نه بستنش.
+
+              `dvh` برای نوارِ آدرسِ موبایل است که ارتفاعِ واقعی را
+              کم می‌کند؛ `vh` قبلش برای مرورگرهای قدیمی می‌ماند. */}
+          <div onClick={e => e.stopPropagation()} dir="rtl" className="bh-cancel-card"
             style={{ width: '100%', maxWidth: 380, background: '#fff', borderRadius: 20, border: `1px solid ${LINE}`, padding: 22, textAlign: 'center', fontFamily: 'var(--font-base)' }}>
             <span style={{ display: 'inline-flex', width: 54, height: 54, borderRadius: 17, background: 'rgba(178,59,46,0.09)', color: RED, alignItems: 'center', justifyContent: 'center', marginBottom: 14 }}>
               <AlertTriangle size={25} />
@@ -170,6 +178,16 @@ export default function MyBookings() {
               </button>
             </div>
           </div>
+          <style>{`
+            .bh-cancel-card {
+              max-height: 86vh;
+              max-height: 86dvh;
+              overflow-y: auto;
+              /* اسکرولِ داخلِ پنجره نباید صفحه‌ی زیرین را هم بلغزاند */
+              overscroll-behavior: contain;
+              -webkit-overflow-scrolling: touch;
+            }
+          `}</style>
         </div>
       )}
     </div>
