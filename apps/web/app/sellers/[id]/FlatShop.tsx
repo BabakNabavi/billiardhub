@@ -332,8 +332,13 @@ export default function FlatShop() {
       hours:        pick(profile.hours, STORE.hours),
       whatsapp:     pick(profile.whatsapp, STORE.whatsapp),
       instagram:    pick(profile.instagram, STORE.instagram),
-      storyImage:   pick(profile.storyImage, STORE.storyImage),
-      storyText:    pick(profile.storyText, STORE.storyText),
+      /* ── استوری از داده‌ی نمونه پر نمی‌شود ──
+         پیش‌تر فروشگاهی که هیچ استوری نگذاشته بود، حلقه‌ی رنگیِ
+         استوری می‌گرفت و با زدنش یک استوریِ ساختگی باز می‌شد
+         («کالکشن چوب‌های کربنی Predator»). یعنی سایت از طرفِ
+         فروشنده چیزی تبلیغ می‌کرد که او نگذاشته بود. */
+      storyImage:   profile.storyImage ?? '',
+      storyText:    profile.storyText ?? '',
       phones:       phones.length ? phones : STORE.phones,
     }
   }, [profile, sellerId])
@@ -353,6 +358,8 @@ export default function FlatShop() {
   /* wishlist + story */
   const [wish, setWish] = useState<Set<string>>(new Set())
   const [storyOpen, setStoryOpen] = useState(false)
+  /* استوریِ واقعی = فروشنده تصویری گذاشته باشد */
+  const hasStory = !!String(store.storyImage ?? '').trim()
   const router = useRouter()
 
   const catCounts = useMemo(() => {
@@ -443,10 +450,16 @@ export default function FlatShop() {
           {/* کارت فروشگاه — لوگو نیمی روی بنر، بقیه زیر هم */}
           <div className="relative px-4 pb-5 sm:px-6 sm:pb-6">
             {/* لوگو با حلقه‌ی استوری — نیمی روی عکس */}
+            {/* حلقه‌ی رنگی و کلیک فقط وقتی استوریِ واقعی هست؛ وگرنه
+                لوگوی ساده — بدونِ وعده‌ی چیزی که وجود ندارد. */}
             <button
-              type="button" onClick={() => setStoryOpen(true)} aria-label="مشاهده استوری فروشگاه"
-              className="-mt-12 block shrink-0 rounded-full p-[3px] transition-transform duration-200 hover:scale-105 active:scale-95 sm:-mt-14"
-              style={{ background: 'linear-gradient(135deg,#feda75,#fa7e1e,#d62976,#962fbf,#4f5bd5)', boxShadow: '0 6px 18px rgba(214,41,118,0.30)', width: 'fit-content' }}
+              type="button" onClick={() => { if (hasStory) setStoryOpen(true) }}
+              aria-label={hasStory ? 'مشاهده استوری فروشگاه' : store.brand}
+              disabled={!hasStory}
+              className={`-mt-12 block shrink-0 rounded-full p-[3px] transition-transform duration-200 sm:-mt-14${hasStory ? ' hover:scale-105 active:scale-95' : ''}`}
+              style={hasStory
+                ? { background: 'linear-gradient(135deg,#feda75,#fa7e1e,#d62976,#962fbf,#4f5bd5)', boxShadow: '0 6px 18px rgba(214,41,118,0.30)', width: 'fit-content' }
+                : { background: 'rgba(28,28,26,0.10)', width: 'fit-content', cursor: 'default' }}
             >
               <span className="flex h-[80px] w-[80px] items-center justify-center overflow-hidden rounded-full border-[3px] border-white bg-gradient-to-bl from-[#14532D] to-[#1E6B3C] text-white sm:h-[94px] sm:w-[94px]">
                 {store.logo
@@ -722,7 +735,7 @@ export default function FlatShop() {
       </footer>
 
       {/* ═══ استوری فروشگاه (مثل صفحه‌ی باشگاه) ═══ */}
-      {storyOpen && (
+      {storyOpen && hasStory && (
         <ClubStoryModal
           club={{ name: store.brand, storyMediaUrl: store.storyImage, storyText: store.storyText, badge: 'فروشگاه' }}
           onClose={() => setStoryOpen(false)}

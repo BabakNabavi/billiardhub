@@ -46,7 +46,15 @@ const QUEUE_OF: Record<string, string> = {
   '/admin/support':       'openTickets',
   '/admin/clubs':         'pendingClubs',
   '/admin/products':      'pendingProducts',
-  '/admin/verifications': 'pendingRoles',
+  /* ── چرا 'روی /admin/roles' و نه /admin/verifications ──
+     شمارنده‌ی 'pendingRoles' ردیف‌های 'role_requests' با وضعیتِ
+     pending را می‌شمرد، ولی '/admin/verifications' اصلاً آن جدول را
+     نمی‌خواند — از '/api/admin/users' احرازِ هویتِ کاربران را نشان
+     می‌دهد. یعنی ادمین نشانِ «۱ مورد در انتظار» می‌دید، کلیک می‌کرد و
+     به صفی می‌رسید که تبِ «در انتظار»اش خالی بود.
+
+     صفِ واقعیِ درخواستِ نقش '/admin/roles' است. */
+  '/admin/roles':         'pendingRoles',
 };
 
 /* پروفایل‌های در انتظار به تفکیکِ نوع — از pendingByKind */
@@ -287,7 +295,7 @@ export default function AdminPage() {
             { label: 'تیکت پشتیبانی', n: Number(stats?.openTickets ?? 0), link: '/admin/support' },
             { label: 'باشگاه در انتظار', n: Number(stats?.pendingClubs ?? 0), link: '/admin/clubs' },
             { label: 'آگهی در انتظار', n: Number(stats?.pendingProducts ?? 0), link: '/admin/products' },
-            { label: 'احراز هویت', n: Number(stats?.pendingRoles ?? 0), link: '/admin/verifications' },
+            { label: 'درخواست نقش', n: Number(stats?.pendingRoles ?? 0), link: '/admin/roles' },
             { label: 'پروفایل در انتظار', n: Number(stats?.pendingProfiles ?? 0), link: '/admin/coaches' },
             { label: 'درخواست تبلیغ', n: Number(stats?.pendingAdRequests ?? 0), link: '/admin/advertising' },
             { label: 'درخواست تسویه', n: Number(stats?.pendingSettlements ?? 0), link: '/admin/finance' },
