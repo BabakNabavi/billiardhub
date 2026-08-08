@@ -1,6 +1,6 @@
 export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
-import { getSupabaseServer } from '@/lib/supabase-server';
+import { listPublicStores } from '@/lib/sellers-source';
 
 const CORS = {
   'Vary': 'Origin',
@@ -12,13 +12,14 @@ export async function OPTIONS() {
   return new NextResponse(null, { status: 204, headers: CORS });
 }
 
+/* فهرستِ فروشگاه‌های عمومی. منبع و دلیلِ عوض‌شدنش در
+   `lib/sellers-source.ts` توضیح داده شده — خلاصه‌اش: این مسیر
+   `users.sellerProfile` را می‌خواند که هیچ‌جای پروژه نمی‌نویسدش، و
+   در Production `[]` برمی‌گرداند در حالی که فروشگاهِ واقعی وجود دارد. */
 export async function GET() {
-  const { data, error } = await getSupabaseServer()
-    .from('users')
-    .select('id, firstName, lastName, avatar, sellerProfile')
-    .eq('primaryRole', 'seller')
-    .eq('isActive', true);
-
-  if (error) return NextResponse.json([], { headers: CORS });
-  return NextResponse.json(data ?? [], { headers: CORS });
+  try {
+    return NextResponse.json(await listPublicStores(), { headers: CORS });
+  } catch {
+    return NextResponse.json([], { headers: CORS });
+  }
 }

@@ -5,14 +5,13 @@ import { createPortal } from 'react-dom';
 import { X, Plus, Heart, Send, Check, Smile } from 'lucide-react';
 import { useAuthStore } from '../store/auth.store';
 import api from '../lib/api';
-import { getStoredStories, addStoredStory, pickStoryRole, STORY_ROLES, storyLimitFor, countTodayStories, type StoredStory } from '../lib/story-store';
+import { getStoredStories, addStoredStory, pickStoryRole, storyLimitFor, countTodayStories, type StoredStory } from '../lib/story-store';
 import { publicDisplayName } from '../lib/public-name';
 import { addStoryReply } from '../lib/story-inbox';
 import { useSocialInteractions } from './features/FeatureFlags';
 import Avatar from './ui/Avatar';
 import { uploadFile } from '../lib/supabase';
 import { fetchStories, postStory, sendDM, fetchSeen, markSeen, type SStory } from '../lib/social';
-import { listSellerProfiles } from '../lib/seller-store';
 import { useVisualViewport } from '../lib/useVisualViewport';
 import { sharedJson } from '../lib/shared-fetch';
 
@@ -128,24 +127,14 @@ function buildServerGroups(stories: SStory[]): StoryGroup[] {
   });
 }
 
-/* استوری فروشگاه‌ها — مستقیم از پروفایل فروشگاه (لوکال) خوانده می‌شود؛
-   هر فروشگاه تاییدشده که عکس استوری دارد، خودکار در نوار می‌آید (بدون نیاز به ذخیره‌ی مجدد). */
-function buildSellerStoreGroups(): StoryGroup[] {
-  const meta = STORY_ROLES.seller ?? { label: 'فروشگاه', color: '#f59e0b' };
-  return listSellerProfiles()
-    .filter(p => p.storyImage && p.status === 'approved')
-    .map(p => ({
-      userId: `store-${p.slug}`,
-      userName: p.title || 'فروشگاه',
-      userAvatar: (p.title || 'ف').charAt(0) || 'ف',
-      logoUrl: p.logo || undefined,
-      userRole: 'seller',
-      roleColor: meta.color,
-      roleLabel: meta.label,
-      allSeen: false,
-      stories: [{ id: `store-story-${p.slug}`, caption: p.storyText || undefined, createdAt: 'به‌تازگی', mediaUrl: p.storyImage, mediaType: 'image' }],
-    }));
-}
+/* ── استوریِ فروشگاه از لوکال‌استوریج حذف شد ──
+   تابعِ قبلی `listSellerProfiles()` را می‌خواند، یعنی حافظه‌ی همان
+   مرورگر. نتیجه‌اش این بود که استوریِ فروشگاه فقط روی دستگاهِ خودِ
+   فروشنده دیده می‌شد و برای بقیه‌ی دنیا اصلاً وجود نداشت — و با
+   پاک‌شدنِ حافظه، برای خودش هم.
+
+   حالا هر دو شکلِ استوریِ فروشگاه از سرور می‌آیند و در همان شاخه‌ی
+   `apiGroups` پایینِ فایل ساخته می‌شوند. */
 
 /* Downscale + re-encode a story image before storing (localStorage quota). */
 function compressStory(file: File): Promise<string> {
@@ -399,7 +388,6 @@ export default function Stories() {
   const [apiGroups, setApiGroups]     = useState<StoryGroup[]>([]);
   const [localGroups, setLocalGroups] = useState<StoryGroup[]>([]);
   const [serverGroups, setServerGroups] = useState<StoryGroup[]>([]);
-  const [storeGroups, setStoreGroups] = useState<StoryGroup[]>([]);
   const [seenGroups, setSeenGroups] = useState<Set<string>>(new Set());
   const [seenIds, setSeenIds] = useState<Set<string>>(new Set());   // storyId‌های دیده‌شده (سروری، per-viewer)
   const [activeGroup, setActiveGroup] = useState<number | null>(null);
@@ -415,7 +403,7 @@ export default function Stories() {
 
   // استوری سمت‌سرور (بین دستگاه‌ها) اولویت دارد؛ اگر سرور خالی/آفلاین بود، لوکال فالبک
   const userStoryGroups = serverGroups.length > 0 ? serverGroups : localGroups;
-  const rawGroups: StoryGroup[] = [...userStoryGroups, ...storeGroups, ...apiGroups];
+  const rawGroups: StoryGroup[] = [...userStoryGroups, ...apiGroups];
   const roleInfo = pickStoryRole(user ? [user.primaryRole, ...(user.secondaryRoles ?? [])] : []);
   const myRoles = user ? [user.primaryRole, ...(user.secondaryRoles ?? [])] : [];
   const ownerKey = user ? (user.phone || user.id || (user.firstName ?? 'user')) : '';
@@ -465,7 +453,6 @@ export default function Stories() {
 
   const reloadLocal = () => {
     setLocalGroups(buildLocalGroups(getStoredStories()));
-    setStoreGroups(buildSellerStoreGroups());
   };
   const reloadServer = async () => {
     const s = await fetchStories();
@@ -635,12 +622,22 @@ export default function Stories() {
               .catch(() => ({ c, stories: [] as any[] }))
           )
         ),
+        /* ── چرا `ownerId` و نه `id` ──
+           `id` نامکِ فروشگاه است (مقصدِ `/sellers/<slug>`)، ولی پنلِ
+           فروشگاه استوری را با **شناسه‌ی کاربر** ذخیره می‌کند
+           (`/api/sellers/<user.id>/stories`). با نامک، پاسخ همیشه
+           خالی برمی‌گشت.
+
+           فروشگاهی که تک‌عکسِ `storyImage` دارد اصلاً پرسیده نمی‌شود
+           — همان یکی کافی است و یک درخواستِ شبکه کمتر می‌شود. */
         Promise.all(
-          sellers.filter((s: any) => s.id).map((s: any) =>
-            fetch(`/api/sellers/${s.id}/stories`)
-              .then(r => r.json())
-              .then((stories: any[]) => ({ s, stories: Array.isArray(stories) ? stories : [] }))
-              .catch(() => ({ s, stories: [] as any[] }))
+          sellers.map((s: any) =>
+            (s.ownerId && !s.storyImage)
+              ? fetch(`/api/sellers/${s.ownerId}/stories`)
+                  .then(r => r.json())
+                  .then((stories: any[]) => ({ s, stories: Array.isArray(stories) ? stories : [] }))
+                  .catch(() => ({ s, stories: [] as any[] }))
+              : Promise.resolve({ s, stories: [] as any[] })
           )
         ),
       ]);
@@ -665,25 +662,48 @@ export default function Stories() {
           })),
         }));
 
+      /* ── دو شکلِ استوریِ فروشگاه ──
+         ۱) فهرستِ چنداستوریِ پنلِ فروشگاه (`/api/sellers/<ownerId>/stories`)
+         ۲) تک‌عکسِ «استوری» داخلِ خودِ پروفایل (`storyImage`) که در
+            فرمِ ثبتِ فروشگاه گرفته می‌شود.
+
+         تا امروز هیچ‌کدام به نوار نمی‌رسید: اولی چون فهرستِ فروشگاه‌ها
+         از منبعِ خالی می‌آمد، و دومی چون اصلاً کسی سراغش نمی‌رفت. اگر
+         فروشگاهی هر دو را داشته باشد، فهرست مقدم است و تک‌عکس فقط
+         وقتی می‌آید که فهرست خالی باشد — وگرنه یک محتوا دو بار
+         نشان داده می‌شود. */
       const sellerGroups: StoryGroup[] = sellerResults
-        .filter(({ stories }) => stories.length > 0)
-        .map(({ s, stories }): StoryGroup => ({
-          userId: `api-seller-${s.id}`,
-          userName: (s.sellerProfile as any)?.shopName || `${s.firstName || ''} ${s.lastName || ''}`.trim() || 'فروشگاه',
-          userAvatar: ((s.sellerProfile as any)?.shopName || s.firstName || 'ف')[0],
-          logoUrl: s.avatar || undefined,
-          userRole: 'shop',
-          roleColor: '#f59e0b',
-          roleLabel: 'فروشگاه',
-          allSeen: false,
-          stories: stories.map((st: any) => ({
-            id: st.id,
-            caption: st.text || undefined,
-            createdAt: relativeTime(st.expiresAt),
-            mediaUrl: st.mediaUrl,
-            mediaType: st.mediaType || 'image',
-          })),
-        }));
+        .map(({ s, stories }): StoryGroup | null => {
+          const items: StoryItem[] = stories.length
+            ? stories.map((st: any) => ({
+                id: st.id,
+                caption: st.text || undefined,
+                createdAt: relativeTime(st.expiresAt),
+                mediaUrl: st.mediaUrl,
+                mediaType: st.mediaType || 'image',
+              }))
+            : s.storyImage
+              ? [{ id: `store-story-${s.id}`, caption: s.storyText || undefined, createdAt: 'به‌تازگی', mediaUrl: s.storyImage, mediaType: 'image' }]
+              : [];
+          if (!items.length) return null;
+          const shopName = s.sellerProfile?.storeName || `${s.firstName || ''} ${s.lastName || ''}`.trim() || 'فروشگاه';
+          return {
+            userId: `api-seller-${s.id}`,
+            /* پاسخ به استوریِ فروشگاه باید به دایرکتِ **مالک** برسد.
+               بدونِ این، کلیدِ گیرنده از `userId` ساخته می‌شد و نامکِ
+               فروشگاه بود — یعنی پیام به هیچ‌کس نمی‌رسید. */
+            ownerKey: s.ownerId || undefined,
+            userName: shopName,
+            userAvatar: shopName[0] ?? 'ف',
+            logoUrl: s.sellerProfile?.logo || s.avatar || undefined,
+            userRole: 'shop',
+            roleColor: '#f59e0b',
+            roleLabel: 'فروشگاه',
+            allSeen: false,
+            stories: items,
+          };
+        })
+        .filter((g): g is StoryGroup => g !== null);
 
       const allApiGroups = [...clubGroups, ...sellerGroups];
       setApiGroups(allApiGroups);

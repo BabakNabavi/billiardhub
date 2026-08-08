@@ -1446,5 +1446,35 @@ t('بازبارگذاری وسطِ فرم انجام نمی‌شود',
   && (boot.match(/if \(isMidTask\(\)\) return/g) ?? []).length >= 2,
   'کاربری که وسطِ ثبتِ فروشگاه بود، فرمش می‌پرید و حس می‌کرد پرت شده بیرون');
 
+/* ── فروشگاه: یک منبع، نه دو ──
+   دو سیستمِ فروشگاه هم‌زمان زنده بودند و صفحه‌ی اصلی از آن که هیچ‌کس
+   نمی‌نویسدش می‌خواند؛ Production `[]` می‌داد در حالی که فروشگاهِ
+   واقعی وجود داشت. این نگهبان‌ها جلوی برگشتنش را می‌گیرند. */
+console.log('\n― فروشگاه: منبعِ واحد ―');
+/* توضیحات کنار گذاشته می‌شوند — خودشان نامِ ستونِ قدیمی را می‌برند */
+const noComments = (s) => s.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
+const sellersApi = noComments(read('app/api/sellers/route.ts'));
+const homeFeat = read('lib/home-featured.ts');
+const storiesBar = read('components/Stories.tsx');
+
+t('`/api/sellers` از منبعِ واحد می‌خواند',
+  /listPublicStores/.test(sellersApi) && !/sellerProfile/.test(sellersApi),
+  '`users.sellerProfile` را هیچ کدی نمی‌نویسد — خواندنش یعنی فهرستِ خالی');
+t('مقدارِ اولیه‌ی سرور هم از همان منبع است',
+  /listPublicStores/.test(homeFeat) && !/'primaryRole', 'seller'/.test(homeFeat),
+  'دو منبعِ متفاوت یعنی کارت‌ها بعد از hydration جابه‌جا می‌شوند');
+t('کارتِ فروشگاه به نامک لینک می‌دهد نه شناسه‌ی کاربر',
+  /id: s\(r\.slug\)/.test(read('lib/sellers-source.ts')),
+  '`/sellers/<id>` با نامک کار می‌کند؛ با شناسه‌ی کاربر به «پیدا نشد» می‌رسید');
+t('استوریِ فروشگاه با شناسه‌ی مالک پرسیده می‌شود',
+  /\/api\/sellers\/\$\{s\.ownerId\}\/stories/.test(storiesBar),
+  'پنلِ فروشگاه با user.id ذخیره می‌کند؛ با نامک پاسخ همیشه خالی است');
+t('نوارِ استوری دیگر از لوکال‌استوریج فروشگاه نمی‌خواند',
+  !/listSellerProfiles/.test(storiesBar.replace(/\/\*[\s\S]*?\*\//g, '')),
+  'استوری فقط روی مرورگرِ خودِ فروشنده دیده می‌شد');
+t('تک‌عکسِ استوریِ پروفایل هم به نوار می‌رسد',
+  /s\.storyImage/.test(storiesBar),
+  'فرمِ ثبتِ فروشگاه یک «عکس استوری» می‌گیرد که هیچ‌جا دیده نمی‌شد');
+
 console.log(`\n${fail === 0 ? '✅' : '❌'}  ${pass} قبول · ${fail} رد\n`);
 process.exit(fail === 0 ? 0 : 1);

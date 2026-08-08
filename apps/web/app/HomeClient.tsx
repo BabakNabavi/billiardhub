@@ -868,8 +868,10 @@ export default function HomeClient({ initialPlacements, initialFeatured, service
         pct: p.discountPercent ?? 0,
       })));
 
-      /* «فروشگاه» جدول جدا ندارد: /api/sellers کاربران با نقش seller
-         را برمی‌گرداند، پس نام و شهر داخل sellerProfile است. */
+      /* `/api/sellers` از جدولِ `profiles` می‌خواند (kind=seller،
+         تأییدشده) و شکلِ قدیمیِ پاسخ را نگه می‌دارد. `id` همان
+         **نامک** است، پس `/sellers/<id>` درست باز می‌شود — پیش‌تر
+         شناسه‌ی کاربر بود و کارت به فروشگاهِ پیدانشده می‌رسید. */
       setRealStores(st.slice(0, 12).map(s => {
         const sp = s.sellerProfile ?? {};
         const person = [s.firstName, s.lastName].filter(Boolean).join(' ').trim();

@@ -1,5 +1,6 @@
 import 'server-only'
 import { getSupabaseServer } from './supabase-server'
+import { listPublicStores, type PublicStore } from './sellers-source'
 import type { RealClub, RealProduct, RealStore, HomeFeatured } from './home-types'
 
 /* ─────────────────────────────────────────────────────────────
@@ -29,19 +30,22 @@ const STORE_IMG = '/images/shop/store-1.jpg'
 export async function loadHomeFeatured(): Promise<HomeFeatured> {
   const sb = getSupabaseServer()
 
-  const [clubsRes, productsRes, storesRes] = await Promise.allSettled([
+  /* فروشگاه‌ها از همان منبعی که `/api/sellers` می‌خواند — وگرنه
+     مقدارِ اولیه‌ی سرور و فتچِ کلاینت دو چیزِ متفاوت می‌شدند و
+     کارت‌ها بعد از hydration جابه‌جا می‌شدند. زودتر شروع می‌شود تا
+     همچنان موازیِ دو کوئریِ دیگر بماند. */
+  const storesP = listPublicStores(FEATURED_STORES_MAX).catch(() => [] as PublicStore[])
+
+  const [clubsRes, productsRes] = await Promise.allSettled([
     sb.from('clubs')
       .select('id,name,city,images,hasActiveStory,snookerTables,pocketTables,highballTables,vipSnookerTables,vipPocketTables')
       .eq('isActive', true).order('createdAt', { ascending: false }).limit(FEATURED_CLUBS_MAX),
     sb.from('products')
       .select('id,title,brand,category,images,price,discountPrice,discountPercent')
       .eq('status', 'active').order('createdAt', { ascending: false }).limit(FEATURED_PRODUCTS_MAX),
-    /* «فروشگاه» جدول جدا ندارد — کاربر با نقش seller است،
-       دقیقاً همان چیزی که /api/sellers هم می‌خواند. */
-    sb.from('users')
-      .select('id,firstName,lastName,avatar,sellerProfile')
-      .eq('primaryRole', 'seller').eq('isActive', true).limit(FEATURED_STORES_MAX),
   ])
+
+  const storeRows = await storesP
 
   const rows = <T>(r: PromiseSettledResult<{ data: unknown }>): T[] =>
     r.status === 'fulfilled' && Array.isArray(r.value?.data) ? (r.value.data as T[]) : []
@@ -55,11 +59,6 @@ export async function loadHomeFeatured(): Promise<HomeFeatured> {
     id: string; title: string; brand?: string | null; category?: string | null
     images?: string[] | null; price?: number | null; discountPrice?: number | null; discountPercent?: number | null
   }
-  type S = {
-    id: string; firstName?: string | null; lastName?: string | null; avatar?: string | null
-    sellerProfile?: { storeName?: string; city?: string; logo?: string; specialty?: string } | null
-  }
-
   const n = (v: number | null | undefined) => v ?? 0
 
   /* امتیاز و تعداد نظر صفر می‌ماند تا سیستم نظر واقعاً وجود داشته باشد؛
@@ -93,14 +92,14 @@ export async function loadHomeFeatured(): Promise<HomeFeatured> {
     pct: n(p.discountPercent),
   }))
 
-  const stores: RealStore[] = rows<S>(storesRes).map(s => {
-    const p = s.sellerProfile ?? {}
+  const stores: RealStore[] = storeRows.map(s => {
+    const p = s.sellerProfile
     const person = [s.firstName, s.lastName].filter(Boolean).join(' ').trim()
     return {
       id: s.id,
       name: p.storeName || person || 'فروشگاه',
-      city: p.city ?? '',
-      specialty: p.specialty || 'تجهیزات بیلیارد',
+      city: p.city,
+      specialty: p.specialty,
       rating: 0, reviews: 0,
       img: p.logo || s.avatar || STORE_IMG,
       badge: null,
