@@ -1028,7 +1028,29 @@ t('نوارِ تامبنیل فقط با بیش از یک عکس',
   /gallery\.length > 1 &&/.test(detail2),
   'نوارِ تک‌خانه‌ای شبیهِ چیزی است که کار نمی‌کند');
 t('عوض‌شدنِ آگهی تصویر را به اولی برمی‌گرداند',
-  /setImgIdx\(0\) \}, \[id\]/.test(detail2));
+  /setImgIdx\(0\); setZoomed\(false\) \}, \[id\]/.test(detail2));
+
+/* ── نمای تمام‌صفحه‌ی عکس ──
+   کادرِ صفحه عکس را `cover` می‌برد؛ خریدارِ کالای دستِ‌دوم دقیقاً
+   همان بخشِ بریده‌شده — خط‌وخشِ کالا — را می‌خواهد ببیند. */
+const lb = read('components/market/ImageLightbox.tsx');
+t('نمای تمام‌صفحه‌ی تصویر هست', /export default function ImageLightbox/.test(lb));
+t('زدن روی عکس بازش می‌کند',
+  /onClick=\{\(\) => setZoomed\(true\)\}/.test(detail2) && /<ImageLightbox/.test(detail2));
+t('پنجره پرتال می‌شود', /createPortal\(/.test(lb));
+t('ضربدرِ بستن دارد', /aria-label="بستن"/.test(lb) && /<X size=/.test(lb));
+t('با Escape هم بسته می‌شود', /e\.key === 'Escape'/.test(lb));
+t('کشیدنِ افقی عکس را عوض می‌کند',
+  /onTouchStart/.test(lb) && /go\(dx < 0 \? 1 : -1\)/.test(lb));
+t('کشیدنِ عمودی سهواً عکس را عوض نمی‌کند',
+  /Math\.abs\(dx\) < Math\.abs\(dy\)/.test(lb));
+t('شمارنده‌ی «تصویر ۱ از ۳» دارد', /تصویر \{toFa\(at \+ 1\)\} از \{toFa\(total\)\}/.test(lb));
+t('اسکرولِ پس‌زمینه قفل می‌شود', /document\.body\.style\.overflow = 'hidden'/.test(lb));
+t('تصویر بریده نمی‌شود', /objectFit: 'contain'/.test(lb),
+  'در نمای تمام‌صفحه، cover یعنی همان مشکلِ اول یک پله بزرگ‌تر');
+t('دکمه‌ی بازگشتِ گوشی نما را می‌بندد',
+  /history\.pushState\(\{ bhLightbox: true \}/.test(lb) && /popstate/.test(lb),
+  'وگرنه «بازگشت» کاربر را از صفحه‌ی محصول بیرون می‌اندازد');
 t('«موجود در انبار» برداشته شد',
   !/موجود در انبار/.test(detail2S),
   'موجودی هیچ‌جا شمرده نمی‌شود و آگهی ممکن است فروخته شده باشد');
@@ -1124,7 +1146,7 @@ t('صفحه‌ی محصول گالری دارد، نه یک عکس',
 t('همه‌ی عکس‌ها از ردیف خوانده می‌شوند',
   /images:\s+imgs && imgs\.length > 0/.test(detail2));
 t('عوض‌شدنِ آگهی گالری را از اول شروع می‌کند',
-  /setImgIdx\(0\) \}, \[id\]/.test(detail2),
+  /setImgIdx\(0\); setZoomed\(false\) \}, \[id\]/.test(detail2),
   'وگرنه رفتن از آگهیِ هشت‌عکسه به دوعکسه تصویرِ خالی می‌داد');
 
 t('«موجود در انبار» برداشته شد',

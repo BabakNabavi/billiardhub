@@ -7,6 +7,7 @@ import { ChevronLeft, Store, Phone, Heart, ShieldCheck } from 'lucide-react'
 import { CAT_LABELS, type ShopProduct } from '../products'
 import ReportButton from '../../../components/ReportButton'
 import { productTitleParts, productTitle } from '../../../lib/market/title'
+import ImageLightbox from '../../../components/market/ImageLightbox'
 
 /* ─── tokens (تم بازار: طلایی/برنزی روی کاغذ روشن) ─── */
 const BG    = '#F7F6F4'
@@ -176,7 +177,9 @@ export default function ProductDetailPage() {
   /* تصویرِ انتخاب‌شده‌ی گالری. با عوض‌شدنِ آگهی به اولی برمی‌گردد،
      وگرنه رفتن از آگهیِ هشت‌عکسه به آگهیِ دوعکسه تصویرِ خالی می‌داد. */
   const [imgIdx, setImgIdx] = useState(0)
-  useEffect(() => { setImgIdx(0) }, [id])
+  /* نمای تمام‌صفحه‌ی عکس‌ها */
+  const [zoomed, setZoomed] = useState(false)
+  useEffect(() => { setImgIdx(0); setZoomed(false) }, [id])
 
   /* ── محصولات مشابه ──
      رتبه‌بندی سمتِ سرور انجام می‌شود: دسته، برند، نوع، شهر، وضعیت و
@@ -278,7 +281,15 @@ export default function ProductDetailPage() {
           {/* تصویر */}
           <div className="lq-sheen pd-media" style={{ ...glassPanel, borderRadius: 26, padding: 14, position: 'sticky', top: 74 }}>
             <div style={{ position: 'relative', width: '100%', paddingTop: '92%', borderRadius: 16, overflow: 'hidden', background: '#EFEDE9' }}>
-              <img loading="lazy" decoding="async" src={gallery[shown]} alt={fullName} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
+              {/* ── زدن روی عکس ⇒ نمای تمام‌صفحه ──
+                  کادرِ کارت عکس را `cover` می‌برد؛ خریداری که دنبالِ
+                  خط‌وخشِ یک کالای دستِ‌دوم است دقیقاً همان بخشِ
+                  بریده‌شده را می‌خواهد ببیند. */}
+              <button type="button" onClick={() => setZoomed(true)}
+                aria-label="بزرگ‌نماییِ تصویر"
+                style={{ position: 'absolute', inset: 0, padding: 0, border: 'none', background: 'none', cursor: 'zoom-in', display: 'block' }}>
+                <img loading="lazy" decoding="async" src={gallery[shown]} alt={fullName} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+              </button>
               {product.disc > 0 && (
                 <div style={{ position: 'absolute', top: 12, insetInlineEnd: 12, background: '#E53935', color: '#fff', fontSize: 12, fontWeight: 800, borderRadius: 8, padding: '3px 10px' }}>
                   {toFa(product.disc)}٪ تخفیف
@@ -476,6 +487,12 @@ export default function ProductDetailPage() {
               })}
             </div>
           </div>
+        )}
+
+        {zoomed && (
+          <ImageLightbox
+            images={gallery} index={shown} alt={fullName}
+            onIndex={setImgIdx} onClose={() => setZoomed(false)} />
         )}
       </div>
     </div>
