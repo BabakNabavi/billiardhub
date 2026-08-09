@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { ChevronLeft } from 'lucide-react'
 import { useAuthStore } from '../../../store/auth.store'
 import { findSellerByOwner } from '../../../lib/seller-store'
+import { fetchMyProfile } from '../../../lib/profiles/client'
 import ProvinceCitySelect from '../../../components/ProvinceCitySelect'
 import { apiFetch } from '../../../lib/http'
 import { uploadFile } from '../../../lib/supabase'
@@ -567,7 +568,33 @@ export default function NewProductPage() {
     if (!user) return
     const u = user as any
     const authName = [u.firstName || '', u.lastName || ''].filter(Boolean).join(' ') || u.name || ''
-    /* فروشگاه ثبت‌شده‌ی همین فروشنده — منبع نام فروشگاه/شهر/آدرس/تماس روی فرم محصول */
+    /* ── فروشگاه از سرور، نه از localStorage ──
+       `findSellerByOwner()` حافظه‌ی همین مرورگر را می‌خواند، ولی
+       فروشگاه‌ها مدت‌هاست در جدولِ `profiles` هستند. پس این تابع
+       چیزی پیدا نمی‌کرد و کلِ این بلوک بی‌اثر بود: نه نامِ فروشگاه
+       پیش‌پر می‌شد، نه شهر و آدرس، و نه نامکِ فروشگاه به آگهی
+       می‌چسبید.
+
+       نسخه‌ی محلی به‌عنوان فالبکِ آفلاین می‌ماند تا فرم روی شبکه‌ی
+       قطع هم پیش‌پر شود. */
+    void (async () => {
+      const mine = await fetchMyProfile<Record<string, any>>('seller').catch(() => null)
+      const p = mine?.data
+      if (!p) return
+      setStoreSlug(mine.slug || '')
+      if (p.title) { setForm(f => ({ ...f, shopName: String(p.title) })); setShopNameLocked(true) }
+      if (p.ownerName) { setForm(f => ({ ...f, ownerName: String(p.ownerName) })); setOwnerNameLocked(true) }
+      setGeoLocked(!!(p.province || p.city || p.address))
+      setForm(f => ({
+        ...f,
+        province:       p.province || f.province,
+        city:           p.city || f.city,
+        address:        p.address || f.address,
+        sellerPhone:    p.contactPhone || f.sellerPhone,
+        sellerWhatsapp: p.whatsapp || f.sellerWhatsapp,
+      }))
+    })()
+
     const store = findSellerByOwner({ id: u.id, phone: u.phone })
 
     // نام فروشگاه: از پروفایل فروشگاه، وگرنه از حساب. قفل — روی محصول قابل تغییر نیست.

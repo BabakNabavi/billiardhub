@@ -1502,6 +1502,23 @@ t('کارتِ صفحه‌ی اصلی برای توافقی صفر نمی‌نو�
   && /negotiable: p\.negotiable === true/.test(read('lib/home-featured.ts')),
   '«۰ تومان» یعنی سایت از طرفِ فروشنده قیمتی اعلام می‌کند که او نگفته');
 
+/* ── محصولِ فروشگاه: دو کلیدی که با هم اشتباه می‌شدند ── */
+console.log('\n― محصولاتِ فروشگاه ―');
+const adsPost = stripComments(read('app/api/market/ads/route.ts'));
+t('نامکِ فروشگاه روی سرور پیدا می‌شود نه از مرورگر',
+  /\.eq\('kind', 'seller'\)\.eq\('owner_id', actor\.id\)/.test(adsPost)
+  && !/storeSlug: str\(b\?\.storeSlug/.test(adsPost),
+  'فرم آن را از localStorage می‌خواند و همیشه خالی بود ⇒ صفحه‌ی فروشگاه بی‌محصول');
+t('نشانِ «فروشگاه رسمی» هم از همان مقدار می‌آید',
+  /isOfficialStore: !!storeSlug/.test(adsPost));
+t('کارتِ محصول نامک را حمل می‌کند نه شناسه‌ی کاربر',
+  /sellerId: s\(r\.storeSlug\)/.test(read('app/shop/products.ts')),
+  '`sellerId` اصلاً در ستون‌های فهرستِ عمومی نیست — همیشه رشته‌ی خالی می‌شد');
+t('فرمِ ثبتِ آگهی فروشگاه را از سرور می‌گیرد',
+  /fetchMyProfile<Record<string, any>>\('seller'\)/.test(read('app/shop/new/page.tsx')));
+t('آگهی‌های قبلی مهاجرتِ جبرانی دارند',
+  /storeSlug.*=\s*pr\.slug/s.test(read('../../supabase/migrations/084_backfill_product_store_slug.sql')));
+
 console.log('\n― فروشگاه: منبعِ واحد ―');
 /* توضیحات کنار گذاشته می‌شوند — خودشان نامِ ستونِ قدیمی را می‌برند */
 const noComments = (s) => s.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');

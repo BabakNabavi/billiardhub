@@ -74,7 +74,15 @@ export function toShopProduct(r: Record<string, unknown>): ShopProduct {
     rating: n(r.rating),
     reviews: n(r.reviewCount),
     sales: n(r.views),
-    sellerId: s(r.sellerId),
+    /* ── چرا `storeSlug` و نه `sellerId` ──
+       تعریفِ خودِ این فیلد بالا نوشته: «→ /sellers/{sellerId}»، یعنی
+       نامکِ فروشگاه. ولی این‌جا `r.sellerId` خوانده می‌شد که شناسه‌ی
+       *کاربر* است — و اصلاً در ستون‌های فهرستِ عمومی نیست، پس همیشه
+       رشته‌ی خالی درمی‌آمد.
+
+       نتیجه: `fetchProductsBySeller(slug)` خالی در برابر نامک
+       مقایسه می‌کرد و صفحه‌ی هر فروشگاهی بدونِ محصول می‌ماند. */
+    sellerId: s(r.storeSlug),
     sellerName: s(r.sellerName),
     sellerPhone: s(r.sellerPhone),
     sellerWhatsapp: s(r.sellerWhatsapp),

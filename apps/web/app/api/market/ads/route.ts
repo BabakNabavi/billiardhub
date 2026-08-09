@@ -172,6 +172,28 @@ export async function POST(req: NextRequest) {
     .select('"primaryRole"').eq('id', actor.id).maybeSingle();
   const sellerRole = (meRow as { primaryRole?: string } | null)?.primaryRole ?? 'user';
 
+  /* ── فروشگاهِ آگهی‌دهنده از سرور پیدا می‌شود، نه از مرورگر ──
+     تا امروز `storeSlug` هرچه فرم می‌فرستاد پذیرفته می‌شد، و فرم آن
+     را با `findSellerByOwner()` از **localStorage** می‌خواند. ولی
+     فروشگاه‌ها مدت‌هاست در جدولِ `profiles` زندگی می‌کنند، پس آن
+     تابع چیزی پیدا نمی‌کرد و هر آگهی با `storeSlug: null` ذخیره
+     می‌شد.
+
+     نتیجه‌اش دقیقاً همان چیزی بود که دیده شد: صاحبِ فروشگاه ده‌ها
+     محصول ثبت می‌کرد و صفحه‌ی فروشگاهش خالی می‌ماند — حتی آگهی‌ای که
+     *بعد از* ساختنِ فروشگاه ثبت شده بود.
+
+     خواندن از سرور علاوه بر رفعِ باگ، جعل را هم می‌بندد: پیش‌تر هر
+     کسی می‌توانست نامکِ فروشگاهِ دیگری را بفرستد و آگهی‌اش را داخلِ
+     ویترینِ او بنشاند. */
+  let storeSlug: string | null = null;
+  try {
+    const { data: shop } = await sb().from('profiles')
+      .select('slug').eq('kind', 'seller').eq('owner_id', actor.id)
+      .eq('status', 'approved').maybeSingle();
+    storeSlug = (shop as { slug?: string } | null)?.slug ?? null;
+  } catch { /* جدول نبود ⇒ آگهیِ بی‌فروشگاه، مثل قبل */ }
+
   const { data, error } = await sb().from('products').insert({
     title,
     description: str(b?.description, 3000),
@@ -208,12 +230,12 @@ export async function POST(req: NextRequest) {
     sellerPhone: str(b?.sellerPhone, 20),
     sellerWhatsapp: str(b?.sellerWhatsapp, 20),
     address: str(b?.address, 300),
-    storeSlug: str(b?.storeSlug, 80) || null,
+    storeSlug,
     isDailyDeal: false,
     isSpecialSale: false,
     isVerified: false,
     requestedVerification: false,
-    isOfficialStore: !!b?.storeSlug,
+    isOfficialStore: !!storeSlug,
     sellerId: actor.id,
     /* ── نشانِ نقش، Snapshot در لحظه‌ی انتشار ──
        کسی که هم فروشنده است هم مربی، آگهی را با نقشِ اصلیِ همان
