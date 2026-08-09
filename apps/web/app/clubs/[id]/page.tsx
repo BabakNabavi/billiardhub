@@ -1247,6 +1247,24 @@ export default function ClubProfilePage() {
         </>
       )}
 
+      {/* ── نوارِ پایانیِ باشگاه ──
+          فوترِ سایت از این صفحه برداشته شد (مثل صفحه‌ی فروشگاه)، ولی
+          صفحه نباید بی‌پایان بماند. این نوار همان کاری را می‌کند که
+          فوترِ فروشگاه می‌کند: کپی‌رایتِ خودِ باشگاه، و نشانِ پلتفرمی
+          که میزبانش است. */}
+      <footer style={{ padding: '0 clamp(16px,4vw,32px) 28px' }}>
+        <div style={{
+          maxWidth: 1240, margin: '0 auto', borderTop: '1px solid #E8E3D6',
+          paddingTop: 16, display: 'flex', flexWrap: 'wrap', alignItems: 'center',
+          justifyContent: 'space-between', gap: 8, fontSize: 11.5, color: '#8A8474',
+        }}>
+          <span>© ۱۴۰۵ {club.name} — تمام حقوق محفوظ است</span>
+          <Link href="/" style={{ color: 'inherit', textDecoration: 'none' }}>
+            قدرت‌گرفته از بیلیارد <span style={{ fontWeight: 700, color: '#C7A66A' }}>هاب</span>
+          </Link>
+        </div>
+      </footer>
+
       {storyViewer && club.storyMediaUrl && (
         <ClubStoryModal
           club={{ name: club.name, logo: club.logo, storyMediaUrl: club.storyMediaUrl, storyType: club.storyType, storyText: club.storyText }}

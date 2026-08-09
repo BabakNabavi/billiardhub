@@ -959,6 +959,9 @@ export default function FlatShop() {
           <div className="border-t border-[#E8E3D6] px-6 py-4 sm:px-8">
             <div className="flex flex-wrap items-center justify-between gap-2 text-[11.5px] text-[#8A8474]">
               <span>© {toFa(1405)} {store.title} — تمام حقوق محفوظ است</span>
+              {/* نشانِ پلتفرم — فروشگاه فوترِ خودش را دارد، ولی
+                  بازدیدکننده باید بداند این صفحه کجا میزبانی می‌شود. */}
+              <Link href="/" className="transition-colors hover:opacity-80">قدرت‌گرفته از بیلیارد <span className="font-bold text-[#C7A66A]">هاب</span></Link>
             </div>
           </div>
         </div>

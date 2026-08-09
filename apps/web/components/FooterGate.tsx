@@ -21,7 +21,10 @@ const isStage = (p: string) => /^\/tournaments\/[^/]+\/(stage|control)$/.test(p)
    کپی‌رایتِ همان فروشگاه). فوترِ سایت زیرِ آن یعنی دو فوترِ پشتِ سرِ
    هم و دو کپی‌رایت. فهرستِ `/sellers` خودش فوتر دارد و دست‌نخورده
    می‌ماند. */
-const isStorePage = (p: string) => /^\/sellers\/[^/]+$/.test(p)
+const isStorePage = (p: string) =>
+  /^\/sellers\/[^/]+$/.test(p)
+  || /^\/clubs\/[^/]+$/.test(p)
+  || /^\/manufacturers\/[^/]+$/.test(p)
 
 export default function FooterGate({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
