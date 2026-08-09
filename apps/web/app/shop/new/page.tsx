@@ -18,6 +18,7 @@ import { TYPE_OPTIONS, brandOptionsFor, modelOptionsFor, isTypeDrivenCategory, w
 import {
   GOLD, GOLD_D, TEXT, TEXT_SEC, TEXT_MUT, LQ_BG, LQ_BOR, LQ_SHAD, ERR,
   AD_FORM_CSS, inp, toAsciiDigits, fmtPrice, FancySelect, Label, ErrMsg, SectionTitle, SpecField,
+  AlertDialog, type AlertAction,
 } from '../../../components/market/AdFormFields'
 
 
@@ -62,6 +63,10 @@ export default function NewProductPage() {
   const [quotaNeedsIdentity, setQuotaNeedsIdentity] = useState(false)   // ۴۲۹ به‌خاطر نبود هویت تأییدشده
   const [specs,     setSpecs]     = useState<Record<string, string>>({})
   const [specOthers, setSpecOthers] = useState<Record<string, string>>({})
+  /* هر پیامِ خطا از این‌جا می‌گذرد و وسطِ صفحه نمایش داده می‌شود */
+  const [alert, setAlert] = useState<{ title: string; lines: string[]; tone?: 'error' | 'warn'; action?: AlertAction } | null>(null)
+  const showAlert = (title: string, lines: string[], tone: 'error' | 'warn' = 'error', action?: AlertAction) =>
+    setAlert({ title, lines, tone, action })
 
   const { user } = useAuthStore()
   const [shopNameLocked,  setShopNameLocked]  = useState(false)
@@ -222,7 +227,13 @@ export default function NewProductPage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     const errs = validate()
-    if (Object.keys(errs).length > 0) { setErrors(errs); return }
+    if (Object.keys(errs).length > 0) {
+      setErrors(errs)
+      /* روی موبایل کاربر پایینِ فرم است و فیلدِ ناقص را نمی‌بیند؛
+         فهرستِ کامل همان‌جا جلوی چشمش می‌آید. */
+      showAlert('فرم کامل نیست', Object.values(errs))
+      return
+    }
     /* ── چرا پنجره‌ی «محصول کجا نمایش داده شود» برداشته شد ──
        آن پنجره جایگاهِ نمایش را از فروشنده می‌پرسید، در حالی که
        ثبتِ آگهی رایگان است و هیچ جایگاهی فروخته نمی‌شود. یعنی یک
@@ -273,7 +284,7 @@ export default function NewProductPage() {
           /* یک عکسِ بالا نرفته، آگهی را بی‌صدا بی‌عکس نمی‌کند:
              فروشنده باید بداند و دوباره تلاش کند. */
           if (!url) {
-            setErrors({ submit: `بارگذاری تصویر ${i + 1} انجام نشد؛ دوباره تلاش کنید` })
+            showAlert('بارگذاری تصویر انجام نشد', [`تصویر ${i + 1} بالا نرفت؛ دوباره تلاش کنید.`])
             setSubmitting(false)
             return
           }
@@ -301,11 +312,18 @@ export default function NewProductPage() {
 
         if (r.status === 429) {
           /* دو حالت متفاوت: سهمیه تمام شده، یا هویت هنوز تأیید نشده */
-          setQuotaNeedsIdentity(!!j?.identityRequired)
+          const needsId = !!j?.identityRequired
+          setQuotaNeedsIdentity(needsId)
           setQuotaMsg(j?.message || 'سهمیه‌ی آگهی شما تمام شده است')
+          showAlert(
+            needsId ? 'هویت شما هنوز تأیید نشده است' : 'سهمیه‌ی آگهی شما تمام شده است',
+            [j?.message || 'سهمیه‌ی آگهی شما تمام شده است'],
+            'warn',
+            needsId ? { href: '/profile/verify', label: 'تأیید هویت' } : { href: '/plans', label: 'بسته‌های آگهی' },
+          )
           setSubmitting(false); return
         }
-        if (!r.ok) { setErrors({ submit: j?.message || 'ثبت آگهی روی سرور انجام نشد' }); setSubmitting(false); return }
+        if (!r.ok) { showAlert('ثبت آگهی انجام نشد', [j?.message || 'ثبت آگهی روی سرور انجام نشد']); setSubmitting(false); return }
 
         /* ── چرا دیگر خودکار به بازار نمی‌رود ──
            آگهی‌دهنده پرت می‌شد وسطِ فهرستِ بازار و هیچ‌وقت نمی‌فهمید
@@ -314,7 +332,7 @@ export default function NewProductPage() {
            لحظه دو راه پیشِ رویش است. */
         setSuccess(true)
       } catch {
-        setErrors({ submit: 'خطا در ارتباط با سرور؛ دوباره تلاش کنید' })
+        showAlert('خطا در ارتباط با سرور', ['ارتباط برقرار نشد؛ دوباره تلاش کنید.'])
         setSubmitting(false)
       }
     })()
@@ -817,24 +835,8 @@ export default function NewProductPage() {
               </div>
             </div>
 
-            {/* سهمیه تمام شد ⇒ راهنمایی خرید بسته (وقتی ادمین سهمیه را روشن کند) */}
-            {quotaMsg && (
-              <div style={{ background: 'rgba(199,166,106,0.10)', border: '1px solid rgba(199,166,106,0.38)', borderRadius: 16, padding: '16px 18px', marginBottom: 14 }}>
-                <div style={{ fontSize: 14, fontWeight: 900, color: '#A07840', marginBottom: 7 }}>
-                  {quotaNeedsIdentity ? 'هویت شما هنوز تأیید نشده است' : 'سهمیه‌ی آگهی شما تمام شده است'}
-                </div>
-                <p style={{ fontSize: 12.5, color: 'rgba(0,0,0,0.58)', margin: '0 0 12px', lineHeight: 2 }}>{quotaMsg}</p>
-                <Link href={quotaNeedsIdentity ? '/profile/verify' : '/plans'} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '10px 20px', borderRadius: 12, textDecoration: 'none', fontSize: 13, fontWeight: 800, background: 'rgba(199,166,106,0.18)', border: '1px solid rgba(199,166,106,0.45)', color: '#9A6E38' }}>
-                  {quotaNeedsIdentity ? 'تأیید هویت' : 'مشاهده بسته‌های آگهی'}
-                </Link>
-              </div>
-            )}
-
-            {errors.submit && (
-              <div style={{ background: 'rgba(178,59,46,0.06)', border: '1px solid rgba(178,59,46,0.28)', borderRadius: 14, padding: '13px 16px', marginBottom: 14, fontSize: 13, fontWeight: 700, color: '#B23B2E', lineHeight: 1.9 }}>
-                {errors.submit}
-              </div>
-            )}
+            {/* پیام‌های خطا و سهمیه در پنجره‌ی وسطِ صفحه می‌آیند (AlertDialog)،
+                نه نوارِ بالای فرم — روی موبایل آن نوار هرگز دیده نمی‌شد. */}
 
             {/* ── پذیرش قوانین بازار ── */}
             <div style={{ background: LQ_BG, backdropFilter: 'blur(40px)', WebkitBackdropFilter: 'blur(40px)', border: errors.acceptRules ? '1.5px solid rgba(200,60,60,0.42)' : LQ_BOR, borderRadius: 20, boxShadow: LQ_SHAD, padding: '16px 22px', marginBottom: 14, transition: 'border-color .2s' }}>
@@ -855,31 +857,38 @@ export default function NewProductPage() {
               )}
             </div>
 
-            {/* ── Submit bar ── */}
-            <div style={{ background: LQ_BG, backdropFilter: 'blur(40px)', WebkitBackdropFilter: 'blur(40px)', border: LQ_BOR, borderRadius: 20, boxShadow: LQ_SHAD, padding: '20px 24px', display: 'flex', gap: 12, alignItems: 'center', animation: 'fadeUp 0.6s ease both', position: 'relative', overflow: 'hidden' }}>
+            {/* ── Submit bar ──
+                دو دکمه هم‌اندازه در یک سطر (هرکدام `flex:1`). راهنمای
+                «* فیلدهای الزامی» برداشته شد: فیلدهای نیازمند، خودشان
+                ستاره دارند و پیامِ خطا حالا وسطِ صفحه می‌آید. */}
+            <div style={{ background: LQ_BG, backdropFilter: 'blur(40px)', WebkitBackdropFilter: 'blur(40px)', border: LQ_BOR, borderRadius: 20, boxShadow: LQ_SHAD, padding: '14px 16px', display: 'flex', gap: 10, alignItems: 'stretch', animation: 'fadeUp 0.6s ease both', position: 'relative', overflow: 'hidden' }}>
               <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '46%', background: 'linear-gradient(180deg,rgba(255,255,255,0.55) 0%,transparent 100%)', pointerEvents: 'none' }} />
 
-              <button type="submit" disabled={submitting} style={{ flex: 1, padding: '16px 24px', borderRadius: 14, border: `1.5px solid ${GOLD}`, cursor: submitting ? 'not-allowed' : 'pointer', background: 'rgba(199,166,106,0.14)', backdropFilter: 'blur(24px) saturate(180%)', WebkitBackdropFilter: 'blur(24px) saturate(180%)', color: GOLD_D, fontSize: 16, fontWeight: 800, fontFamily: 'Vazirmatn,Tahoma,sans-serif', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 9, boxShadow: '0 6px 24px rgba(199,166,106,0.22), inset 0 1px 0 rgba(255,255,255,0.55)', transition: 'opacity 0.2s, transform 0.15s, box-shadow 0.2s', opacity: submitting ? 0.65 : 1, position: 'relative', zIndex: 1 }}
-                onMouseEnter={e => { if (!submitting) { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = `0 8px 28px rgba(199,166,106,0.34), inset 0 1px 0 rgba(255,255,255,0.55)`; } }}
-                onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 6px 24px rgba(199,166,106,0.22), inset 0 1px 0 rgba(255,255,255,0.55)'; }}>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+              <button type="submit" disabled={submitting} style={{ flex: 1, minWidth: 0, padding: '12px 10px', borderRadius: 13, border: `1.5px solid ${GOLD}`, cursor: submitting ? 'not-allowed' : 'pointer', background: 'rgba(199,166,106,0.14)', backdropFilter: 'blur(24px) saturate(180%)', WebkitBackdropFilter: 'blur(24px) saturate(180%)', color: GOLD_D, fontSize: 14, fontWeight: 800, fontFamily: 'Vazirmatn,Tahoma,sans-serif', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, boxShadow: '0 5px 18px rgba(199,166,106,0.20), inset 0 1px 0 rgba(255,255,255,0.55)', transition: 'opacity 0.2s, transform 0.15s, box-shadow 0.2s', opacity: submitting ? 0.65 : 1, position: 'relative', zIndex: 1 }}
+                onMouseEnter={e => { if (!submitting) { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = `0 7px 22px rgba(199,166,106,0.32), inset 0 1px 0 rgba(255,255,255,0.55)`; } }}
+                onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 5px 18px rgba(199,166,106,0.20), inset 0 1px 0 rgba(255,255,255,0.55)'; }}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style={{ flexShrink: 0 }}>
                   <path d="M5 13l4 4L19 7" stroke={GOLD_D} strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
                 ثبت محصول
               </button>
 
-              <Link href="/shop" style={{ padding: '16px 20px', borderRadius: 14, border: '1px solid rgba(255,255,255,0.88)', background: 'rgba(255,255,255,0.78)', backdropFilter: 'blur(20px) saturate(200%)', WebkitBackdropFilter: 'blur(20px) saturate(200%)', color: TEXT_SEC, fontSize: 14, fontWeight: 600, textDecoration: 'none', display: 'flex', alignItems: 'center', whiteSpace: 'nowrap', boxShadow: 'inset 0 1.5px 0 rgba(255,255,255,0.95), 0 4px 14px rgba(0,0,0,0.06)', transition: 'color 0.2s', position: 'relative', zIndex: 1 }}
+              <Link href="/shop" style={{ flex: 1, minWidth: 0, padding: '12px 10px', borderRadius: 13, border: '1px solid rgba(255,255,255,0.88)', background: 'rgba(255,255,255,0.78)', backdropFilter: 'blur(20px) saturate(200%)', WebkitBackdropFilter: 'blur(20px) saturate(200%)', color: TEXT_SEC, fontSize: 14, fontWeight: 700, textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', whiteSpace: 'nowrap', boxShadow: 'inset 0 1.5px 0 rgba(255,255,255,0.95), 0 4px 14px rgba(0,0,0,0.06)', transition: 'color 0.2s', position: 'relative', zIndex: 1 }}
                 onMouseEnter={e => (e.currentTarget.style.color = TEXT)}
                 onMouseLeave={e => (e.currentTarget.style.color = TEXT_SEC)}>
                 انصراف
               </Link>
-
-              {/* required fields hint */}
-              <p style={{ fontSize: 12, color: TEXT_MUT, whiteSpace: 'nowrap', position: 'relative', zIndex: 1 }}>
-                <span style={{ color: ERR }}>*</span> فیلدهای الزامی
-              </p>
             </div>
           </form>
+
+          <AlertDialog
+            open={!!alert}
+            title={alert?.title ?? ''}
+            lines={alert?.lines ?? []}
+            tone={alert?.tone ?? 'error'}
+            action={alert?.action}
+            onClose={() => setAlert(null)}
+          />
         </div>
 
       </div>

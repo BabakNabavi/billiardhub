@@ -41,6 +41,7 @@ import { TYPE_OPTIONS, brandOptionsFor, modelOptionsFor, isTypeDrivenCategory, w
 import {
   GOLD, GOLD_D, TEXT, TEXT_SEC, TEXT_MUT, LQ_BG, LQ_BOR, LQ_SHAD,
   AD_FORM_CSS, inp, toAsciiDigits, fmtPrice, FancySelect, Label, ErrMsg, SectionTitle, SpecField,
+  AlertDialog,
 } from '../../../../components/market/AdFormFields'
 
 /* کلیدهایی که فرمِ ثبت داخلِ specs می‌گذارد ولی بالای فرم فیلدِ خودشان را دارند */
@@ -59,6 +60,8 @@ export default function EditProductPage() {
   const [submitting, setSubmitting] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [saved, setSaved] = useState(false)
+  /* پیام‌ها وسطِ صفحه می‌آیند، نه نوارِ بالای فرم — همان دلیلِ فرمِ ثبت */
+  const [alert, setAlert] = useState<{ title: string; lines: string[] } | null>(null)
 
   /* آگهیِ محلی (userProducts) — آگهی‌های قدیمیِ ساخته‌شده پیش از انتقال به سرور */
   const [isLocal, setIsLocal] = useState(false)
@@ -274,7 +277,11 @@ export default function EditProductPage() {
   const handleSubmit = (ev: React.FormEvent) => {
     ev.preventDefault()
     const errs = validate()
-    if (Object.keys(errs).length > 0) { setErrors(errs); return }
+    if (Object.keys(errs).length > 0) {
+      setErrors(errs)
+      setAlert({ title: 'فرم کامل نیست', lines: Object.values(errs) })
+      return
+    }
     setSubmitting(true)
 
     const price = Number(toAsciiDigits(form.price).replace(/\D/g, '')) || 0
@@ -320,7 +327,7 @@ export default function EditProductPage() {
         for (let i = 0; i < newImages.length; i++) {
           const url = await uploadFile('club-media', newImages[i]!.file, `products/${stamp}-${i}`)
           if (!url) {
-            setErrors({ submit: `بارگذاری تصویر ${i + 1} انجام نشد؛ دوباره تلاش کنید` })
+            setAlert({ title: 'بارگذاری تصویر انجام نشد', lines: [`تصویر ${i + 1} بالا نرفت؛ دوباره تلاش کنید.`] })
             setSubmitting(false); return
           }
           uploaded.push(url)
@@ -344,12 +351,12 @@ export default function EditProductPage() {
         })
         if (!r.ok) {
           const j = await r.json().catch(() => ({}))
-          setErrors({ submit: j?.message || 'ویرایش آگهی انجام نشد' })
+          setAlert({ title: 'ویرایش انجام نشد', lines: [j?.message || 'ویرایش آگهی روی سرور انجام نشد'] })
           setSubmitting(false); return
         }
         setSaved(true)
       } catch {
-        setErrors({ submit: 'خطا در ارتباط با سرور؛ دوباره تلاش کنید' })
+        setAlert({ title: 'خطا در ارتباط با سرور', lines: ['ارتباط برقرار نشد؛ دوباره تلاش کنید.'] })
         setSubmitting(false)
       }
     })()
@@ -696,22 +703,33 @@ export default function EditProductPage() {
               </div>
             </div>
 
-            {errors.submit && (
-              <div style={{ padding: '12px 16px', borderRadius: 12, background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.25)', color: '#B91C1C', fontSize: 13.5 }}>
-                {errors.submit}
-              </div>
-            )}
-
-            <button type="submit" disabled={submitting}
-              style={{
-                width: '100%', padding: '15px 0', borderRadius: 14, border: 'none', cursor: submitting ? 'default' : 'pointer',
-                background: `linear-gradient(135deg,${GOLD},#A07840)`, color: '#fff', fontSize: 15.5, fontWeight: 800,
-                fontFamily: 'Vazirmatn,Tahoma,sans-serif', opacity: submitting ? 0.6 : 1,
-                boxShadow: '0 10px 28px rgba(199,166,106,0.38)',
-              }}>
-              {submitting ? 'در حال ذخیره...' : 'ذخیره تغییرات'}
-            </button>
+            {/* دو دکمه‌ی هم‌اندازه در یک سطر — مثلِ فرمِ ثبت */}
+            <div style={{ display: 'flex', gap: 10, alignItems: 'stretch' }}>
+              <button type="submit" disabled={submitting}
+                style={{
+                  flex: 1, minWidth: 0, padding: '12px 10px', borderRadius: 13, cursor: submitting ? 'not-allowed' : 'pointer',
+                  border: `1.5px solid ${GOLD}`, background: 'rgba(199,166,106,0.14)',
+                  color: GOLD_D, fontSize: 14, fontWeight: 800, fontFamily: 'Vazirmatn,Tahoma,sans-serif',
+                  opacity: submitting ? 0.65 : 1, boxShadow: '0 5px 18px rgba(199,166,106,0.20), inset 0 1px 0 rgba(255,255,255,0.55)',
+                }}>
+                {submitting ? 'در حال ذخیره...' : 'ذخیره تغییرات'}
+              </button>
+              <Link href="/dashboard/shop" style={{
+                flex: 1, minWidth: 0, padding: '12px 10px', borderRadius: 13, textDecoration: 'none',
+                border: '1px solid rgba(255,255,255,0.88)', background: 'rgba(255,255,255,0.78)',
+                color: TEXT_SEC, fontSize: 14, fontWeight: 700, whiteSpace: 'nowrap',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                boxShadow: 'inset 0 1.5px 0 rgba(255,255,255,0.95), 0 4px 14px rgba(0,0,0,0.06)',
+              }}>انصراف</Link>
+            </div>
           </form>
+
+          <AlertDialog
+            open={!!alert}
+            title={alert?.title ?? ''}
+            lines={alert?.lines ?? []}
+            onClose={() => setAlert(null)}
+          />
         </div>
       </div>
     </>

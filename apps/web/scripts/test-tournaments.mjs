@@ -1015,6 +1015,17 @@ t('سرتیترِ صفحه‌ی ثبت آگهی برداشته شد',
   && !/مستقیماً با خریداران در ارتباط باشید/.test(newAdS));
 t('سه مرحله در یک سطر می‌مانند', /flexWrap: 'nowrap'/.test(newAd));
 t('دکمه‌ی بازگشت فلشِ راست دارد', /<ChevronRight size=\{13\.5\}/.test(newAd));
+t('پیامِ خطا وسطِ صفحه می‌آید نه بالای فرم',
+  /export function AlertDialog/.test(formFields)
+  && /<AlertDialog/.test(newAd) && /<AlertDialog/.test(editAd)
+  && !/errors\.submit &&/.test(newAdS) && !/errors\.submit &&/.test(strip(editAd)),
+  'روی موبایل کاربر پایینِ فرم است و نوارِ بالای صفحه را هرگز نمی‌بیند');
+t('فهرستِ فیلدهای ناقص در همان پنجره می‌آید',
+  /showAlert\('فرم کامل نیست', Object\.values\(errs\)\)/.test(newAd)
+  && /title: 'فرم کامل نیست', lines: Object\.values\(errs\)/.test(editAd));
+t('دو دکمه‌ی هم‌اندازه در یک سطر',
+  !/فیلدهای الزامی/.test(newAdS)
+  && (newAd.match(/flex: 1, minWidth: 0, padding: '12px 10px'/g) ?? []).length === 2);
 
 console.log('\n― پروفایلِ نقش‌ها ―');
 /* فرمِ عمومیِ `/profile/setup` برای هر هشت نقش روی مسیری ذخیره
@@ -1179,7 +1190,8 @@ t('فرمِ ثبت پیش از ارسال آپلود می‌کند',
   /uploadFile\('club-media', slot\.file/.test(newAd)
   && !/images\.map\(i => i\.data\)/.test(newAd));
 t('آپلودِ ناموفق آگهی را بی‌صدا بی‌عکس نمی‌کند',
-  /بارگذاری تصویر \$\{i \+ 1\} انجام نشد/.test(newAd));
+  /showAlert\('بارگذاری تصویر انجام نشد'/.test(newAd)
+  && /تصویر \$\{i \+ 1\} بالا نرفت/.test(newAd));
 const imgMig = read('scripts/migrate-ad-images.mjs');
 t('اسکریپتِ انتقالِ آگهی‌های موجود هست',
   /--apply/.test(imgMig) && /products\?select=id,title,images/.test(imgMig));

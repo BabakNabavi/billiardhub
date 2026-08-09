@@ -214,6 +214,95 @@ export function SectionTitle({ children }: { children: React.ReactNode }) {
   )
 }
 
+/* ── پنجره‌ی پیام ──
+   خطاها تا امروز به‌صورت یک نوارِ رنگی بالای فرم نشان داده می‌شدند.
+   روی دسکتاپ دیده می‌شد؛ روی موبایل نه — کاربر پایینِ فرم دکمه را
+   می‌زد، صفحه تکان نمی‌خورد و هیچ نمی‌فهمید چرا. حالا هر پیامی وسطِ
+   صفحه می‌آید، جایی که چشم همان‌جاست.
+
+   قفلِ بدنه عمداً دست نمی‌خورد: `touchAction:none` روی پوشش کافی است
+   تا پس‌زمینه با لمس اسکرول نشود، بدونِ اینکه استایلِ body عوض شود. */
+export interface AlertAction { href: string; label: string }
+
+export function AlertDialog({ open, title, lines, tone = 'error', action, onClose }: {
+  open: boolean
+  title: string
+  lines: string[]
+  tone?: 'error' | 'warn'
+  action?: AlertAction
+  onClose: () => void
+}) {
+  useEffect(() => {
+    if (!open) return
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
+    document.addEventListener('keydown', onKey)
+    return () => document.removeEventListener('keydown', onKey)
+  }, [open, onClose])
+
+  if (!open || typeof document === 'undefined') return null
+
+  const accent = tone === 'warn' ? GOLD_D : '#C0392B'
+  const accentBg = tone === 'warn' ? 'rgba(199,166,106,0.13)' : 'rgba(192,57,43,0.10)'
+
+  return createPortal(
+    <div role="dialog" aria-modal="true" onClick={onClose}
+      style={{
+        position: 'fixed', inset: 0, zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center',
+        padding: 20, direction: 'rtl', fontFamily: 'Vazirmatn,Tahoma,sans-serif',
+        background: 'rgba(20,19,16,0.42)', backdropFilter: 'blur(7px)', WebkitBackdropFilter: 'blur(7px)',
+        touchAction: 'none', animation: 'fadeIn 0.16s ease both',
+      }}>
+      <div onClick={e => e.stopPropagation()}
+        style={{
+          width: '100%', maxWidth: 380, maxHeight: '80vh', display: 'flex', flexDirection: 'column',
+          background: '#fff', borderRadius: 22, padding: '26px 22px 20px', textAlign: 'center',
+          boxShadow: '0 26px 70px rgba(20,19,16,0.32)', animation: 'popIn 0.22s cubic-bezier(0.34,1.4,0.64,1) both',
+          touchAction: 'auto',
+        }}>
+        <span style={{ width: 52, height: 52, borderRadius: '50%', background: accentBg, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 14px', flexShrink: 0 }}>
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke={accent} strokeWidth="2.3" strokeLinecap="round">
+            <circle cx="12" cy="12" r="9" /><line x1="12" y1="7.5" x2="12" y2="13" /><line x1="12" y1="16.5" x2="12.01" y2="16.5" />
+          </svg>
+        </span>
+
+        <h3 style={{ fontSize: 16.5, fontWeight: 900, color: TEXT, margin: '0 0 10px' }}>{title}</h3>
+
+        <div style={{ overflowY: 'auto', minHeight: 0, marginBottom: 18 }}>
+          {lines.length === 1 ? (
+            <p style={{ fontSize: 13.5, color: TEXT_SEC, lineHeight: 2, margin: 0 }}>{lines[0]}</p>
+          ) : (
+            <ul style={{ listStyle: 'none', padding: 0, margin: 0, textAlign: 'right' }}>
+              {lines.map((l, i) => (
+                <li key={i} style={{ display: 'flex', gap: 8, alignItems: 'flex-start', fontSize: 13.2, color: TEXT_SEC, lineHeight: 1.95, padding: '3px 0' }}>
+                  <span style={{ width: 5, height: 5, borderRadius: '50%', background: accent, marginTop: 9, flexShrink: 0 }} />
+                  {l}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+
+        <div style={{ display: 'flex', gap: 9, flexShrink: 0 }}>
+          {action && (
+            <a href={action.href} style={{
+              flex: 1, padding: '12px 0', borderRadius: 13, textDecoration: 'none', textAlign: 'center',
+              fontSize: 14, fontWeight: 800, color: '#fff', background: `linear-gradient(135deg,${GOLD},#A07840)`,
+            }}>{action.label}</a>
+          )}
+          <button type="button" onClick={onClose} style={{
+            flex: 1, padding: '12px 0', borderRadius: 13, cursor: 'pointer', fontSize: 14, fontWeight: 800,
+            fontFamily: 'Vazirmatn,Tahoma,sans-serif',
+            border: action ? '1px solid rgba(28,28,26,0.12)' : 'none',
+            background: action ? 'rgba(28,28,26,0.04)' : `linear-gradient(135deg,${GOLD},#A07840)`,
+            color: action ? TEXT_SEC : '#fff',
+          }}>{action ? 'بستن' : 'متوجه شدم'}</button>
+        </div>
+      </div>
+    </div>,
+    document.body,
+  )
+}
+
 export function SpecField({ field, value, otherValue, onChange, onOtherChange, dependencyValue }: {
   field: SpecFieldDef; value: string; otherValue: string
   onChange: (v: string) => void; onOtherChange: (v: string) => void
