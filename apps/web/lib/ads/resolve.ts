@@ -108,7 +108,10 @@ async function resolveSellers(refs: string[]): Promise<Map<string, EntitySnapsho
     out.set(s(r.slug), {
       entityType: 'seller', ref: s(r.slug),
       title: s(d.title, 'فروشگاه'),
-      image: s(d.logo) || (Array.isArray(d.banners) ? s((d.banners as string[])[0]) : '') || '/images/stores/store1.jpg',
+      /* خالی می‌ماند تا کارت پوسترِ پیش‌فرضِ خودش را بسازد. نشانیِ
+         قبلی (`store1.jpg`) اصلاً روی دیسک نبود ⇒ ۴۰۴ ⇒ کارت
+         بی‌عکس. */
+      image: s(d.logo) || (Array.isArray(d.banners) ? s((d.banners as string[])[0]) : ''),
       subtitle: s(d.city),
       href: `/sellers/${s(r.slug)}`,
       city: s(d.city),
