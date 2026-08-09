@@ -25,7 +25,11 @@ const CLUB_IMG = [
   '/images/clubs/club9.jpeg', '/images/clubs/club5.jpeg', '/images/clubs/club4.png',
 ]
 const PRODUCT_IMG = '/images/shop/cue_billiard_1.jpg'
-const STORE_IMG = '/images/shop/store-1.jpg'
+/* ── این فایل وجود نداشت ──
+   کارتِ فروشگاه در صفحه‌ی اصلی بی‌عکس می‌ماند چون نشانیِ فالبک ۴۰۴
+   می‌داد و onError عکس را پنهان می‌کرد. کلاینت نشانیِ درست را داشت و
+   فقط این مقدارِ سمتِ سرور جا مانده بود. */
+const STORE_IMG = '/images/stores/IMG_0974.png'
 
 export async function loadHomeFeatured(): Promise<HomeFeatured> {
   const sb = getSupabaseServer()

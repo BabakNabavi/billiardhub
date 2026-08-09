@@ -9,6 +9,7 @@ import { getSellerProfile, type SellerProfile } from '../../../lib/seller-store'
 import { fetchProfile } from '../../../lib/profiles/client'
 import { telPrefix, provinceOfCity } from '../../../lib/iran-geo'
 import { getMockSeller } from '../../../lib/sellers-data'
+import { MARKET_CATEGORIES } from '../../../lib/market/categories'
 
 /*
   نسخه‌ی فلت — UX فروشگاه واقعی
@@ -396,13 +397,16 @@ export default function FlatShop() {
   }
 
   return (
-    <div dir="rtl" className="min-h-screen bg-[#F7F5F0] font-[Vazirmatn,Tahoma,sans-serif] text-[#1C1B17]">
+    <div dir="rtl" className="shop-shell min-h-screen font-[Vazirmatn,Tahoma,sans-serif] text-[#1C1B17]">
 
       <style>{`
         /* کارت محصول — هم‌فرم کارت sec1 در صفحه‌ی بیلیارد بازار.
            عرض را گرید تعیین می‌کند (برخلاف sec1 که کاروسل با عرض ثابت است)، ولی نسبت،
            سهم عکس، گردی، بوردر و فونت‌ها عیناً همان‌اند. */
         .prod-card-sec1 {
+          background: linear-gradient(158deg, rgba(255,255,255,0.94), rgba(250,248,243,0.86));
+          backdrop-filter: blur(10px);
+          -webkit-backdrop-filter: blur(10px);
           /* ۱.۷۵ = ۱.۹۴۴ منهای ۱۰٪ */
           aspect-ratio: 1 / 1.75;
           /* ── ۱۰٪ کوچک‌تر ──
@@ -428,6 +432,93 @@ export default function FlatShop() {
           .pc-body-sec1 { padding: 14px 7px 7px; }
           .pc-name-sec1 { font-size: 13.05px; line-height: 1.35; color: #666; }
         }
+        /* ══ پوسته‌ی صفحه ══
+           پس‌زمینه خاکستریِ تختِ #F7F5F0 بود و همه‌چیز رویش سفیدِ
+           بی‌سایه؛ صفحه «خشک» دیده می‌شد چون هیچ عمق و هیچ رنگی
+           نداشت. سه هاله‌ی نرم — طلایی، نمدِ سبز، و کِرِمِ گرم — بدونِ
+           اینکه خوانایی را کم کنند به صفحه عمق می‌دهند. ثابت‌اند و با
+           اسکرول حرکت نمی‌کنند، پس هزینه‌ی رندر ندارند. */
+        .shop-shell {
+          position: relative;
+          background:
+            radial-gradient(1100px 520px at 88% -8%,  rgba(199,166,106,0.16), transparent 62%),
+            radial-gradient(900px 460px at 4% 12%,    rgba(20,83,45,0.09),    transparent 60%),
+            radial-gradient(760px 520px at 50% 108%,  rgba(199,166,106,0.10), transparent 62%),
+            linear-gradient(180deg, #FBFAF7 0%, #F5F2EB 100%);
+          background-attachment: fixed;
+        }
+
+        /* ══ هدرِ گلس ══
+           کارتِ سفیدِ بوردردار جای خودش را به یک سطحِ شیشه‌ای می‌دهد:
+           بلورِ اشباع‌شده، لبه‌ی روشنِ داخلی، و یک هالهٔ طلاییِ نرم که
+           از گوشه رد می‌شود (حالتِ «liquid»). زیرِ بنر می‌نشیند و
+           عکسِ بنر از پشتش کمی پیدا می‌شود. */
+        .shop-head {
+          position: relative;
+          background: linear-gradient(150deg, rgba(255,255,255,0.80) 0%, rgba(252,250,245,0.62) 48%, rgba(247,243,234,0.72) 100%);
+          border: 1px solid rgba(255,255,255,0.85);
+          box-shadow:
+            inset 0 1.5px 0 rgba(255,255,255,0.96),
+            inset 0 -1px 0 rgba(199,166,106,0.16),
+            0 18px 48px rgba(28,27,23,0.10);
+          backdrop-filter: blur(34px) saturate(2.1);
+          -webkit-backdrop-filter: blur(34px) saturate(2.1);
+        }
+        /* هالهٔ لیکویید — کند و بی‌صدا */
+        .shop-head::before {
+          content: ''; position: absolute; inset: -40% -20% auto -20%; height: 150%;
+          pointer-events: none; z-index: 0;
+          background: radial-gradient(closest-side, rgba(199,166,106,0.20), transparent 70%);
+          filter: blur(26px);
+          animation: shopGlow 14s ease-in-out infinite alternate;
+        }
+        .shop-head > * { position: relative; z-index: 1; }
+        @keyframes shopGlow {
+          from { transform: translate3d(-8%, -4%, 0) scale(1); }
+          to   { transform: translate3d(10%,  6%, 0) scale(1.12); }
+        }
+        @media (prefers-reduced-motion: reduce) { .shop-head::before { animation: none } }
+
+        /* ── نوارِ دسته‌بندیِ افقی (هم‌شکلِ بیلیارد بازار) ── */
+        .scat-wrap {
+          border-radius: 16px; padding: 9px 10px;
+          background: linear-gradient(135deg, rgba(255,255,255,0.86) 0%, rgba(247,245,240,0.72) 100%);
+          border: 1px solid rgba(199,166,106,0.26);
+          box-shadow: inset 0 1px 0 rgba(255,255,255,0.9), 0 6px 22px rgba(28,27,23,0.06);
+          backdrop-filter: blur(18px) saturate(1.6);
+          -webkit-backdrop-filter: blur(18px) saturate(1.6);
+        }
+        .scat-strip {
+          display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none;
+          -ms-overflow-style: none; padding-bottom: 1px;
+        }
+        .scat-strip::-webkit-scrollbar { display: none; }
+        .scat {
+          flex: 0 0 auto; display: flex; flex-direction: column; align-items: center; gap: 4px;
+          width: 74px; padding: 8px 4px 7px; border-radius: 13px; cursor: pointer;
+          background: #fff; border: 1px solid rgba(28,27,23,0.09);
+          transition: transform .2s cubic-bezier(.22,1,.36,1), border-color .2s, box-shadow .2s, background .2s;
+        }
+        .scat:hover { transform: translateY(-2px); border-color: rgba(199,166,106,0.55); box-shadow: 0 8px 20px rgba(28,27,23,0.10); }
+        .scat.on {
+          background: linear-gradient(160deg, rgba(199,166,106,0.20), rgba(199,166,106,0.07));
+          border-color: rgba(199,166,106,0.70);
+          box-shadow: 0 6px 18px rgba(199,166,106,0.24);
+        }
+        .scat-ic {
+          width: 38px; height: 38px; border-radius: 11px; display: flex;
+          align-items: center; justify-content: center; overflow: hidden;
+          background: radial-gradient(circle at 34% 28%, #FFFDF8, #F1EDE3);
+          border: 1px solid rgba(28,27,23,0.07);
+        }
+        .scat-ic img { width: 30px; height: 30px; object-fit: contain; }
+        .scat-all { color: #9A6E38; background: radial-gradient(circle at 34% 28%, #FFF6E4, #F3E6CB); }
+        .scat-lb { font-size: 11px; font-weight: 700; color: #3E3A32; white-space: nowrap; }
+        .scat.on .scat-lb { color: #7A5626; }
+        .scat-ct { font-size: 10px; font-weight: 700; color: #A69F8E; font-variant-numeric: tabular-nums; }
+        .scat.on .scat-ct { color: #9A6E38; }
+        @media (prefers-reduced-motion: reduce) { .scat { transition: none } .scat:hover { transform: none } }
+
         /* ── نشانِ برندِ نمایندگی ── */
         .brand-chip {
           position: relative; overflow: hidden;
@@ -481,7 +572,7 @@ export default function FlatShop() {
 
       {/* ═══ هدر: بنر اسلایدی + کارت فروشگاه ═══ */}
       <div className="mx-auto mt-4 max-w-[1240px] px-4 sm:px-6">
-        <div className="overflow-hidden rounded-2xl border border-[#E7E2D6] bg-white">
+        <div className="shop-head overflow-hidden rounded-[22px]">
           {/* بنر — اسلایدر عکس آپلودشده؛ اگر چیزی نگذاشته، اسلایدر ۳ پوستر پیش‌فرض */}
           <div className="relative" style={{ height: 'clamp(150px,24vw,250px)', background: '#0a2f22' }}>
             {store.banners.length
@@ -561,6 +652,32 @@ export default function FlatShop() {
           />
           <span className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-[#8A8474]">{Icon.search}</span>
         </div>
+
+        {/* ── نوارِ دسته‌بندی ──
+            همان آیکون‌ها و همان ترتیبِ صفحه‌ی «بیلیارد بازار»
+            (`MARKET_CATEGORIES` — منبعِ واحد)، این‌بار افقی و کشیدنی
+            زیرِ سرچ. جای دراپ‌داونِ قبلی را می‌گیرد که کنارِ تیتر
+            پنهان بود و کاربر باید بازش می‌کرد تا بفهمد فروشگاه چه
+            دارد. دسته‌ای که محصولی ندارد اصلاً نشان داده نمی‌شود. */}
+        <div className="scat-wrap mt-3">
+          <div className="scat-strip">
+            <button type="button" onClick={() => setCat('all')}
+              className={`scat${cat === 'all' ? ' on' : ''}`}>
+              <span className="scat-ic scat-all">{Icon.storefront}</span>
+              <span className="scat-lb">همه</span>
+              <span className="scat-ct">{faNum(PRODUCTS.length)}</span>
+            </button>
+            {MARKET_CATEGORIES.filter(c => (catCounts[c.id as CatKey] ?? 0) > 0).map(c => (
+              <button key={c.id} type="button"
+                onClick={() => setCat(cat === c.id ? 'all' : (c.id as CatKey))}
+                className={`scat${cat === c.id ? ' on' : ''}`}>
+                <span className="scat-ic"><img src={c.img} alt="" loading="lazy" /></span>
+                <span className="scat-lb">{c.label}</span>
+                <span className="scat-ct">{faNum(catCounts[c.id as CatKey] ?? 0)}</span>
+              </button>
+            ))}
+          </div>
+        </div>
       </div>
 
       {/* ═══ محصولات فروشگاه ═══ */}
@@ -574,9 +691,11 @@ export default function FlatShop() {
               <span className="h-5 w-[3px] rounded bg-gradient-to-b from-[#C7A66A] to-[#8A6020]" />
               <h1 className="text-xl font-bold text-[#1C1B17] sm:text-2xl">محصولات فروشگاه</h1>
             </div>
-            <span className="mr-[11px] text-[12.5px] text-[#8A8474]">{faNum(visible.length)} محصول</span>
+            <span className="mr-[11px] text-[12.5px] text-[#8A8474]">
+              {faNum(visible.length)} محصول{cat !== 'all' ? ` در «${CAT_LABEL[cat]}»` : ''}
+            </span>
           </div>
-          <CategoryDropdown value={cat} onChange={setCat} counts={catCounts} />
+          {/* دراپ‌داونِ دسته‌بندی برداشته شد — جایش نوارِ افقیِ زیرِ سرچ. */}
         </div>
 
         {/* گرید — ۵ ستون در دسکتاپ (۲ ردیف ۵تایی = ۱۰ در هر صفحه) */}
@@ -634,7 +753,7 @@ export default function FlatShop() {
           </div>
 
         {visible.length === 0 && (
-          <div className="rounded-2xl border border-[#E7E2D6] bg-white px-6 py-14 text-center text-[13.5px] text-[#8A8474]">
+          <div className="shop-head rounded-[22px] px-6 py-14 text-center text-[13.5px] text-[#8A8474]">
             محصولی در این دسته‌بندی پیدا نشد.
             {cat !== 'all' && <button onClick={() => setCat('all')} className="mr-2 font-bold text-[#9A6E38] transition hover:opacity-70">نمایش همه محصولات</button>}
           </div>
@@ -667,29 +786,15 @@ export default function FlatShop() {
         )}
       </div>
 
-      {/* ═══ درباره ما — ۱/۳ اسلایدر سمت راست، متن سمت چپ ═══ */}
-      <div className="mx-auto max-w-[1240px] px-4 pb-14 sm:px-6">
-        <div className="grid grid-cols-1 overflow-hidden rounded-2xl border border-[#E7E2D6] bg-white min-[760px]:grid-cols-[1fr_2fr]">
-          {/* اسلایدر ۳ عکسی (سمت راست، یک‌سوم)؛ اگر خالی، پوستر پیش‌فرض «درباره ما» */}
-          <div className="relative min-h-[147px] bg-[#0a2a28] min-[760px]:min-h-[270px]">
-            {store.aboutImages.length
-              ? <ImageSlider images={store.aboutImages} />
-              : <StorePoster variant={3} title={store.title} about />}
-          </div>
-          {/* متن (دو سوم) */}
-          <div className="flex flex-col justify-center p-6 sm:p-8">
-            <div className="mb-2 flex items-center gap-2">
-              <span className="h-4 w-[3px] rounded bg-gradient-to-b from-[#C7A66A] to-[#8A6020]" />
-              <h3 className="text-[17px] font-bold sm:text-[19px]">درباره ما</h3>
-            </div>
-            <p className="text-[13.5px] leading-[2] text-[#5B564B]">{store.desc}</p>
-          </div>
-        </div>
-      </div>
+      {/* ── بخشِ «درباره ما» حذف شد ──
+          همان متنِ «درباره‌ی فروشگاه» سه جای صفحه تکرار می‌شد: زیرِ
+          نامِ فروشگاه در هدر، این‌جا، و در فوتر. یک متن سه بار یعنی
+          صفحه پُر به‌نظر می‌رسد ولی چیزی به خواننده اضافه نمی‌کند.
+          جای اصلی‌اش هدر است، همان‌جا که چشم اول می‌رود. */}
 
       {/* ═══ FOOTER — کارت اختصاصی فروشگاه (سبک sellers/2) ═══ */}
       <footer className="px-4 pb-8 pt-2 sm:px-6">
-        <div className="mx-auto max-w-[1240px] overflow-hidden rounded-2xl border border-[#E8E3D6] bg-[#FAFAF7] shadow-[0_4px_20px_rgba(28,27,23,0.05)]">
+        <div className="mx-auto max-w-[1240px] overflow-hidden shop-head rounded-[22px]">
           {/* موبایل: فاصله‌ی بلوک‌ها ۳۶ ⇒ ۱۸ و پدینگ ۲۴ ⇒ ۱۸، تا فوتر جمع‌تر شود. دسکتاپ دست‌نخورده. */}
           <div className="grid grid-cols-1 gap-x-8 gap-y-[18px] p-[18px] sm:grid-cols-2 sm:gap-y-9 sm:p-8 lg:grid-cols-4">
 
@@ -699,13 +804,9 @@ export default function FlatShop() {
                 <span className="flex h-[26px] w-[26px] items-center justify-center rounded-full bg-[radial-gradient(circle_at_32%_30%,#2b2b2b,#0a0a0a_70%)]">
                   <span className="flex h-[13px] w-[13px] items-center justify-center rounded-full bg-white text-[8px] font-bold text-[#111]">۸</span>
                 </span>
-                {store.brand}
+                {store.title}
               </div>
-              {/* همان متنی که صاحب فروشگاه در «درباره‌ی فروشگاه» می‌نویسد — منبع واحد با هدر،
-                  نه یک جمله‌ی هاردکد. فقط دسکتاپ؛ در موبایل فوتر باید جمع باشد. */}
-              <p className="mt-1.5 hidden max-w-[240px] text-[12.5px] leading-relaxed text-[#5B564B] sm:mt-3 sm:block">
-                {store.desc}
-              </p>
+              {/* توضیحات این‌جا تکرار می‌شد؛ جای اصلی‌اش هدر است. */}
             </div>
 
             {/* دسته‌بندی‌ها — روی موبایل حذف */}
@@ -785,8 +886,7 @@ export default function FlatShop() {
           {/* نوار پایین */}
           <div className="border-t border-[#E8E3D6] px-6 py-4 sm:px-8">
             <div className="flex flex-wrap items-center justify-between gap-2 text-[11.5px] text-[#8A8474]">
-              <span>© {toFa(1405)} {store.brand} — تمام حقوق محفوظ است</span>
-              <Link href="/" className="transition-colors hover:opacity-80">قدرت‌گرفته از بیلیارد <span className="font-bold text-[#C7A66A]">هاب</span></Link>
+              <span>© {toFa(1405)} {store.title} — تمام حقوق محفوظ است</span>
             </div>
           </div>
         </div>

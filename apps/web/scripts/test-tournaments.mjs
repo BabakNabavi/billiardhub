@@ -1584,6 +1584,38 @@ t('نقطه‌ی پایانِ راهنمای واتساپ برداشته شد',
   /مثل ۹۸۹۱۲۱۲۳۴۵۶۷<\/p>/.test(sellerPanel),
   'بلافاصله بعد از رقم می‌آمد و با صفر اشتباه گرفته می‌شد');
 
+/* ── صفحه‌ی فروشگاه: انتشار، تکرار، و ظاهر ── */
+console.log('\n― صفحه‌ی فروشگاه ―');
+const shopFlat = stripComments(read('app/sellers/[id]/FlatShop.tsx'));
+const sellerDash = stripComments(read('app/dashboard/seller/page.tsx'));
+
+t('فروشگاه خودش را منتشرشده اعلام نمی‌کند',
+  !/status: 'approved'/.test(sellerDash),
+  'صفِ تأیید تشریفاتی می‌شد و «رد»ِ ادمین با اولین ویرایش برمی‌گشت');
+t('مدرکِ بی‌تیک هم روی میزِ ادمین شمرده می‌شود',
+  /license_verified', false/.test(read('app/api/admin/stats/route.ts')),
+  'مدرکی که بعد از تأیید آپلود می‌شد هیچ‌جا دیده نمی‌شد');
+t('عکسِ فالبکِ کارتِ فروشگاه واقعاً وجود دارد',
+  existsSync(join(ROOT, 'public', read('lib/home-featured.ts').match(/const STORE_IMG = '([^']+)'/)?.[1] ?? 'x')),
+  'نشانیِ قبلی ۴۰۴ می‌داد و onError عکس را پنهان می‌کرد');
+t('بخشِ تکراریِ «درباره ما» حذف شد',
+  !/درباره ما<\/h3>/.test(shopFlat),
+  'یک متن سه جای صفحه تکرار می‌شد');
+t('توضیحاتِ فروشگاه فقط یک جا نوشته می‌شود',
+  (shopFlat.match(/\{store\.desc\}/g) ?? []).length === 1,
+  'همان متن در هدر، «درباره ما» و فوتر تکرار می‌شد');
+t('فوتر نامِ کاملِ فروشگاه را نشان می‌دهد نه نامِ کوتاه',
+  /© \{toFa\(1405\)\} \{store\.title\}/.test(shopFlat));
+t('نوارِ «قدرت‌گرفته از بیلیارد هاب» از صفحه‌ی فروشگاه رفت',
+  !/قدرت‌گرفته از بیلیارد/.test(shopFlat));
+t('دسته‌بندی افقی از منبعِ واحدِ بازار می‌آید',
+  /MARKET_CATEGORIES\.filter/.test(shopFlat) && /scat-strip/.test(shopFlat));
+t('دراپ‌داونِ دسته‌بندی برداشته شد',
+  !/<CategoryDropdown/.test(shopFlat));
+t('هدر و پوسته‌ی صفحه گلس شدند',
+  /\.shop-head \{/.test(shopFlat) && /\.shop-shell \{/.test(shopFlat)
+  && /backdrop-filter: blur\(34px\)/.test(shopFlat));
+
 /* ── محصولِ فروشگاه: دو کلیدی که با هم اشتباه می‌شدند ── */
 console.log('\n― محصولاتِ فروشگاه ―');
 const adsPost = stripComments(read('app/api/market/ads/route.ts'));

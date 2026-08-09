@@ -84,13 +84,32 @@ export async function GET(req: NextRequest) {
      هر نوع صفحه‌ی بررسیِ خودش را دارد، پس عدد هم باید به همان‌جا
      اشاره کند. یک شمارشِ سبک به ازای هر نوع؛ هر شش تا موازی. */
   const PROFILE_KINDS = ['coach', 'referee', 'seller', 'manufacturer', 'technician', 'player'] as const;
+  /* ── چرا دو شمارش و نه یکی ──
+     «کارِ روی میزِ ادمین» دو حالت دارد و تا امروز فقط اولی شمرده
+     می‌شد:
+
+       ۱) پروفایلِ تازه که هنوز تأیید نشده (`status = 'pending'`).
+       ۲) پروفایلِ **تأییدشده‌ای** که صاحبش بعداً مدرک/جوازش را آپلود
+          کرده و منتظرِ تیکِ آبی است.
+
+     حالتِ دوم اصلاً هیچ‌جا دیده نمی‌شد: مدرک بالا می‌رفت و تا ابد
+     می‌ماند، چون هیچ شمارنده‌ای و هیچ نشانی نمی‌گفت چیزی تازه رسیده.
+     تنها راهش این بود که ادمین شانسی صفحه‌ی هر نقش را باز کند.
+
+     مدرکِ بی‌تیک هم همان‌قدر «منتظرِ تصمیم» است، پس در همان عددِ
+     کارتِ همان نقش شمرده می‌شود — و مقصدِ کارت هم همان صفحه‌ای است
+     که فایل را نشان می‌دهد و دکمه‌ی تیک را دارد. */
   const kindCounts = await Promise.all(
     PROFILE_KINDS.map(async k => {
       try {
-        const { count } = await sb().from('profiles')
-          .select('id', { count: 'exact', head: true })
-          .eq('status', 'pending').eq('kind', k);
-        return count ?? 0;
+        const [pending, unverifiedDoc] = await Promise.all([
+          sb().from('profiles').select('id', { count: 'exact', head: true })
+            .eq('status', 'pending').eq('kind', k),
+          sb().from('profiles').select('id', { count: 'exact', head: true })
+            .eq('kind', k).eq('status', 'approved')
+            .eq('license_verified', false).not('license_url', 'is', null).neq('license_url', ''),
+        ]);
+        return (pending.count ?? 0) + (unverifiedDoc.count ?? 0);
       } catch { return 0; }
     }),
   );

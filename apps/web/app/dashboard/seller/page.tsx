@@ -184,14 +184,20 @@ export default function SellerDashboard() {
 
   const persist = async () => {
     const ownerName = form.ownerName || [user?.firstName, user?.lastName].filter(Boolean).join(' ')
-    /* انتشار هنگام ذخیره: فروشگاه بلافاصله در «فروشگاه‌ها» دیده می‌شود (جواز کسب اجباری است).
-       اگر ادمین قبلاً ردش کرده بود، ویرایش دوباره منتشرش می‌کند. */
+    /* ── وضعیت را فروشنده تعیین نمی‌کند ──
+       تا امروز این‌جا `status: 'approved'` نوشته می‌شد، یعنی فروشگاه
+       لحظه‌ی ذخیره خودش را منتشرشده اعلام می‌کرد و در «فروشگاه‌ها» و
+       صفحه‌ی اصلی می‌نشست — بی‌آنکه ادمین چیزی دیده باشد. صفِ تأیید
+       عملاً تشریفاتی بود و «رد»ِ ادمین هم با اولین ویرایش برمی‌گشت.
+
+       حالا وضعیت اصلاً فرستاده نمی‌شود: سرور برای پروفایلِ تازه
+       `pending` می‌گذارد و در ویرایش دست نمی‌زند، پس تصمیمِ ادمین
+       سرِ جایش می‌ماند. */
     const next: SellerProfile = {
       ...form,
       ownerName,
       ownerId: user?.id || form.ownerId,           // مالکیت به کاربر فعلی گره می‌خورد تا همیشه پیدا شود
       ownerPhone: user?.phone || form.ownerPhone,
-      status: 'approved',
       submittedAt: form.submittedAt || new Date().toISOString(),
     }
 
