@@ -202,6 +202,26 @@ export async function saveProfile(input: SaveInput): Promise<ProfileRow> {
   if (existing) {
     const { data, error } = await sb().from('profiles').update(row).eq('id', existing.id).select().single()
     if (error) throw new Error(error.message)
+
+    /* ── نامک که عوض شود، آگهی‌ها یتیم می‌شوند ──
+       `products."storeSlug"` نامکِ لحظه‌ی ثبت را نگه می‌دارد و صفحه‌ی
+       فروشگاه با همان فیلتر می‌کند. یک‌بار که نامک از `7` به
+       `artasho` رفت، هر چهار آگهی هنوز به `7` اشاره می‌کردند و
+       ویترینِ فروشگاه یک‌شبه خالی شد.
+
+       تغییرِ نامک از این پس قفل است (فرم اجازه نمی‌دهد)، ولی این‌جا
+       هم مهاجرت انجام می‌شود: هر تغییری که از هر مسیری برسد نباید
+       محصولات را جا بگذارد. */
+    if (existing.slug !== slug && input.kind === 'seller') {
+      try {
+        await sb().from('products')
+          .update({ storeSlug: slug })
+          .eq('storeSlug', existing.slug)
+          .eq('sellerId', input.ownerId)
+      } catch (e) {
+        console.error('[profiles] migrate storeSlug failed:', e)
+      }
+    }
     return toProfile(data as DbRow)
   }
 

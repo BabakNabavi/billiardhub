@@ -40,6 +40,8 @@ export interface SiteAddressFieldProps {
   checkUrl?: (slug: string) => string;
   /** وضعیت به بیرون هم داده می‌شود تا فرم بتواند جلوی ذخیره‌ی نشانیِ تکراری را بگیرد */
   onStatusChange?: (s: SlugStatus) => void;
+  /** پس از ثبتِ اولیه دیگر قابلِ تغییر نیست — نشانیِ منتشرشده باید بماند */
+  locked?: boolean;
   required?: boolean;
   label?: string;
   error?: string;
@@ -47,7 +49,7 @@ export interface SiteAddressFieldProps {
 
 export default function SiteAddressField({
   value, onChange, basePath, suggestFrom, checkUrl, onStatusChange,
-  required = false, label = 'آدرس اختصاصی سایت شما', error,
+  locked = false, required = false, label = 'آدرس اختصاصی سایت شما', error,
 }: SiteAddressFieldProps) {
   const [status, setStatus] = useState<SlugStatus>('idle');
   const [copied, setCopied] = useState(false);
@@ -106,9 +108,26 @@ export default function SiteAddressField({
         {label}{required && <span style={{ color: BAD }}> *</span>}
       </label>
 
+      {/* ── چرا پس از ثبت قفل می‌شود ──
+          نشانی منتشر می‌شود: در گوگل، در پیام‌ها، روی کارتِ ویزیت.
+          عوض‌شدنش یعنی هر لینکِ قبلی می‌شکند. یک‌بار هم که عوض شد،
+          آگهی‌های همان فروشگاه — که نامکِ قدیمی را در خودشان دارند —
+          یتیم شدند و ویترین یک‌شبه خالی شد. */}
+      {locked && (
+        <p style={{ fontSize: 11.5, color: '#9A6E38', background: 'rgba(199,166,106,0.10)', border: '1px solid rgba(199,166,106,0.26)', borderRadius: 9, padding: '7px 10px', margin: 0, lineHeight: 1.9 }}>
+          این نشانی ثبت شده و دیگر قابلِ تغییر نیست — نشانیِ اینترنتیِ دائمیِ شماست.
+        </p>
+      )}
+      {!locked && (
+        <p style={{ fontSize: 11.5, color: 'rgba(0,0,0,0.50)', margin: 0, lineHeight: 1.9 }}>
+          در انتخابِ نام دقت کنید: پس از ذخیره <b style={{ color: '#B23B2E' }}>غیرقابلِ تغییر</b> است و نشانیِ اینترنتیِ دائمیِ شما می‌شود.
+        </p>
+      )}
+
       <div style={{ display: 'flex', gap: 6, alignItems: 'stretch' }}>
         <input
           type="text"
+          readOnly={locked}
           value={value}
           dir="ltr"
           lang="en"
@@ -125,9 +144,10 @@ export default function SiteAddressField({
             fontSize: 14, background: '#FAFAFA', color: '#1A1A18', outline: 'none',
             direction: 'ltr', textAlign: 'left',
             fontFamily: '"Courier New", Courier, monospace',
+            ...(locked ? { background: '#F1EFEA', color: 'rgba(0,0,0,0.55)', cursor: 'not-allowed' } : {}),
           }}
         />
-        {suggestion && suggestion !== value && (
+        {!locked && suggestion && suggestion !== value && (
           <button
             type="button"
             onClick={() => onChange(suggestion)}

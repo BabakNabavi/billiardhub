@@ -277,11 +277,19 @@ export default function FlatShop() {
   /* پروفایل ذخیره‌شده‌ی همین فروشگاه (از /dashboard/seller).
      بعد از mount خوانده می‌شود تا SSR و کلاینت یکی باشند. */
   const [profile, setProfile] = useState<SellerProfile | null>(null)
+  /* ── نامکی که وجود ندارد ──
+     تا امروز اگر نشانی به فروشگاهی می‌رفت که نبود، صفحه داده‌ی
+     نمونه‌ی قدیمی را نشان می‌داد — «فروشگاه تجهیزات بیلیارد بابی» با
+     تلفن و آدرسِ ساختگی. یعنی سایت فروشگاهی را تبلیغ می‌کرد که وجود
+     خارجی ندارد. حالا صریح می‌گوید پیدا نشد. */
+  const [missing, setMissing] = useState(false)
   useEffect(() => {
     setProfile(getSellerProfile(sellerId))
+    setMissing(false)
     /* منبع حقیقت سرور است — فروشگاه کاربران دیگر فقط از این‌جا می‌آید */
     void fetchProfile<SellerProfile>('seller', sellerId).then(p => {
       if (p) setProfile({ ...p.data, slug: p.slug, verified: p.verified } as SellerProfile)
+      else if (!getSellerProfile(sellerId) && !getMockSeller(sellerId)) setMissing(true)
     })
   }, [sellerId])
 
@@ -395,6 +403,26 @@ export default function FlatShop() {
   const goToPage = (n: number) => {
     setPage(n)
     requestAnimationFrame(() => gridRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }))
+  }
+
+  if (missing) {
+    return (
+      <div dir="rtl" className="shop-shell flex min-h-screen items-center justify-center px-4 font-[Vazirmatn,Tahoma,sans-serif] text-[#1C1B17]">
+        <div className="w-full max-w-[420px] rounded-2xl border border-[#E7E2D6] bg-white px-6 py-12 text-center">
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-[rgba(199,166,106,0.12)] text-[#9A6E38]">
+            {Icon.storefront}
+          </div>
+          <h1 className="text-[17px] font-bold">این فروشگاه پیدا نشد</h1>
+          <p className="mt-2 text-[13px] leading-[2] text-[#8A8474]">
+            نشانی <span dir="ltr" className={MONO}>/sellers/{sellerId}</span> به فروشگاهی وصل نیست.
+            ممکن است نشانی اشتباه تایپ شده باشد.
+          </p>
+          <Link href="/sellers" className="mt-5 inline-flex items-center justify-center rounded-[10px] border border-[rgba(199,166,106,0.34)] bg-[rgba(199,166,106,0.12)] px-4 py-2.5 text-[13px] font-bold text-[#9A6E38] transition hover:-translate-y-0.5">
+            فهرست فروشگاه‌ها
+          </Link>
+        </div>
+      </div>
+    )
   }
 
   return (
