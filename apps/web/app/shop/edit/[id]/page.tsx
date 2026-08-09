@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useRouter, useParams } from 'next/navigation';
+import Link from 'next/link';
 import { useAuthStore } from '../../../../store/auth.store';
 import { uploadFile } from '../../../../lib/supabase';
 import { Package, X, Upload, Info, Plus, ChevronDown, Check } from 'lucide-react';
@@ -304,6 +305,15 @@ export default function EditProductPage() {
 
   return (
     <div className="max-w-3xl mx-auto pb-10">
+      {/* راهِ برگشت — صفحه هیچ دکمه‌ای نداشت و تنها راهِ خروج،
+          دکمه‌ی back مرورگر بود. */}
+      <Link
+        href="/dashboard/shop"
+        className="mb-3 inline-flex items-center gap-1.5 text-[13px] font-bold text-[#9A6E38] transition hover:opacity-70"
+      >
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
+        بازگشت به آگهی‌های من
+      </Link>
       <h1 className="text-2xl font-bold text-gray-800 mb-6">ویرایش محصول</h1>
       {error && <div className="bg-red-50 text-red-600 p-3 rounded-xl mb-4 text-sm">{error}</div>}
 

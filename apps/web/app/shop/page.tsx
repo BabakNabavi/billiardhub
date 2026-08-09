@@ -556,6 +556,36 @@ export default function MarketNewPage() {
   const [urgHold, setUrgHold] = useState(false)
   useHorizontalScroll(urgRef, busy => setUrgHold(busy))
 
+  /* ── چرا توقف باید هر نوع تماسی را بگیرد ──
+     `useHorizontalScroll` عمداً لمس را نادیده می‌گیرد (اسکرولِ بومی
+     نرم‌تر است)، پس روی موبایل هیچ‌وقت خبر نمی‌داد که کاربر دست
+     گذاشته. نتیجه‌اش دقیقاً همان «حالتِ فنری» بود: انگشت نوار را
+     می‌کشید و انیمیشن همان لحظه به جای خودش برمی‌گرداندش.
+
+     این‌جا خودِ ظرف گوش می‌دهد — لمس، اشاره‌گر، و حتی اسکرولِ بومی —
+     و انیمیشن تا یک ثانیه پس از آخرین تماس متوقف می‌ماند. */
+  useEffect(() => {
+    const el = urgRef.current
+    if (!el) return
+    let idle: ReturnType<typeof setTimeout> | null = null
+    const touch = () => {
+      setUrgHold(true)
+      if (idle) clearTimeout(idle)
+      idle = setTimeout(() => setUrgHold(false), 1100)
+    }
+    el.addEventListener('pointerdown', touch, { passive: true })
+    el.addEventListener('touchstart', touch, { passive: true })
+    el.addEventListener('touchmove', touch, { passive: true })
+    el.addEventListener('scroll', touch, { passive: true })
+    return () => {
+      if (idle) clearTimeout(idle)
+      el.removeEventListener('pointerdown', touch)
+      el.removeEventListener('touchstart', touch)
+      el.removeEventListener('touchmove', touch)
+      el.removeEventListener('scroll', touch)
+    }
+  }, [urgent.length])
+
   const chips: { label: string; clear: () => void }[] = []
   if (cat)      chips.push({ label: catLabel(cat), clear: () => setCat('') })
   cities.forEach(c => chips.push({ label: c, clear: () => toggleCity(c) }))
