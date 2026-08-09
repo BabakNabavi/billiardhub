@@ -872,15 +872,23 @@ export default function MarketNewPage() {
         .mk-topbar { position: sticky; top: 0; z-index: 150; padding-top: env(safe-area-inset-top);
           background: rgba(255,255,255,0.9); backdrop-filter: blur(24px) saturate(1.6); -webkit-backdrop-filter: blur(24px) saturate(1.6);
           border-bottom: 1px solid ${LINE}; }
-        /* بالای سرچ‌بار ۱۶ پیکسل فاصله بود در حالی که نوارِ سایت روی
-           این صفحه اصلاً نمایش داده نمی‌شود — یعنی فضای خالیِ محض.
-           تنها چیزی که می‌ماند inset ایمنِ خودِ گوشی است. */
-        .mk-msearch { display: none; position: sticky; top: 0; z-index: 150; padding: calc(4px + env(safe-area-inset-top)) 14px 8px;
+        /* ── فاصله‌ی بالای سرچ‌بار ──
+           نوارِ سایت روی این صفحه اصلاً رندر نمی‌شود، پس سرچ‌بار
+           نخستین چیزِ صفحه است. فاصله از ۱۶ به ۴ و حالا به ۲ رسید،
+           ارتفاعِ خودِ فیلد هم از ۱۲ به ۱۰ کم شد و فاصله‌ی پایین از
+           ۸ به ۶ — یعنی همه‌ی المان‌های زیرش هم بالا می‌آیند.
+
+           آنچه از این پایین‌تر نمی‌رود همان inset ایمنِ گوشی است
+           (بک‌تیک این‌جا ممنوع — داخلِ template literal است):
+           چون layout با viewport-fit=cover کار می‌کند، روی
+           گوشیِ ناچ‌دار در حالتِ PWA این عدد بزرگ است. برداشتنش
+           یعنی رفتنِ فیلد زیرِ ساعت و باتری. */
+        .mk-msearch { display: none; position: sticky; top: 0; z-index: 150; padding: calc(2px + env(safe-area-inset-top)) 14px 6px;
           background: rgba(247,245,240,0.94); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
           border-bottom: 1px solid ${LINE}; }
 
         /* ── گرید دسته‌های موبایل: ۳ ردیف ۵تایی ── */
-        .mk-mcats { display: none; grid-template-columns: repeat(5, 1fr); gap: 11px 6px; padding: 0 4px 4px; margin-top: -20px; }
+        .mk-mcats { display: none; grid-template-columns: repeat(5, 1fr); gap: 11px 6px; padding: 0 4px 4px; margin-top: -26px; }
         .mk-mcat { display: flex; flex-direction: column; align-items: center; gap: 6px; background: none; border: none;
           cursor: pointer; font-family: inherit; padding: 0; }
         /* ۵٪+۵٪ بزرگ‌تر (۵۲ ⇒ ۵۸) */
@@ -1075,7 +1083,7 @@ export default function MarketNewPage() {
           <Search size={15} style={{ color: MUT, flexShrink: 0, margin: '0 12px 0 4px' }} />
           <div style={{ position: 'relative', flex: 1, minWidth: 0 }}>
             <input value={q} onChange={e => setQ(e.target.value)} aria-label="جستجو در بیلیارد بازار"
-              style={{ width: '100%', boxSizing: 'border-box', padding: '12px 0', background: 'none', border: 'none', outline: 'none', fontSize: 13.5, fontFamily: 'inherit', color: TEXT }} />
+              style={{ width: '100%', boxSizing: 'border-box', padding: '10px 0', background: 'none', border: 'none', outline: 'none', fontSize: 13.5, fontFamily: 'inherit', color: TEXT }} />
             {!q && (
               <span aria-hidden className="mk-ph" style={{ position: 'absolute', right: 0, top: 0, bottom: 0, fontSize: 12.5, color: MUT, pointerEvents: 'none', whiteSpace: 'nowrap' }}>
                 جستجو در بیلیارد <span className="mk-rollwrap"><b className="mk-roll">بازار</b></span>

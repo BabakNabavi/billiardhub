@@ -1028,7 +1028,9 @@ t('توقف را فقط زمان لغو می‌کند، نه قلابِ درگ',
   && !/holdRef\.current = busy/.test(shopPage),
   'onInteract(false) قلاب، تایمرِ پنج ثانیه‌ای را پاک می‌کرد و نوار بلافاصله راه می‌افتاد');
 t('سرچ‌بارِ موبایل فاصله‌ی اضافه‌ی بالا را ندارد',
-  /\.mk-msearch \{[^}]*padding: calc\(4px \+ env\(safe-area-inset-top\)\)/.test(shopPage));
+  /\.mk-msearch \{[^}]*padding: calc\(2px \+ env\(safe-area-inset-top\)\) 14px 6px/.test(shopPage)
+  && /padding: '10px 0', background: 'none'/.test(shopPage),
+  'نوارِ سایت روی این صفحه رندر نمی‌شود، پس فاصله‌ی بالا فضای خالیِ محض بود');
 t('بازگشتِ فرمِ ثبت به صفحه‌ی قبلی می‌رود',
   /بازگشت به فروشگاه من/.test(newAd) && /router\.back\(\)/.test(newAd)
   && /window\.history\.length > 1/.test(newAd),
