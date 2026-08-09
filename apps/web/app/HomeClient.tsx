@@ -41,6 +41,7 @@ import { getHiddenVideoIds, getFeaturedOverride } from '../lib/media-admin-store
 import { sharedJson } from '../lib/shared-fetch';
 import { useDeferredStart } from '../lib/useDeferredStart';
 import { modernizeType } from '../lib/market/title';
+import ProductTitle from '../components/market/ProductTitle';
 import { thumbUrl } from '../lib/supabase-config';
 
 /* ── عرضِ واقعیِ کادرها ──
@@ -567,10 +568,10 @@ function BazaarCard({ p, className, style }: { p: RealProduct; className?: strin
           onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
       </div>
       <div className="bz-body">
-        <span className="bz-name">
-          <span className="bz-h">{p.name}</span>
-          {p.sub && <span className="bz-t">{p.sub}</span>}
-        </span>
+        {/* همان کامپوننتی که کارتِ فروشگاه و فهرستِ بازار هم از آن
+            استفاده می‌کنند — تا یک محصول در سه صفحه یک‌شکل باشد. */}
+        <ProductTitle p={{ name: p.name, brand: p.sub }}
+          className="bz-name" headClassName="bz-h" tailClassName="bz-t" />
         <div className="bz-row">
           {/* ── آگهیِ توافقی ──
               فروشنده عمداً قیمت نگذاشته، پس ردیفِ قیمت در دیتابیس صفر
@@ -626,8 +627,12 @@ function SellerCard({ s }: { s: RealStore }) {
         cursor: 'pointer',
       }}
     >
-      {/* Image area — curved bottom via border-radius clip */}
-      <div style={{ position: 'relative', height: '150px', overflow: 'hidden', borderRadius: '0 0 60% 60% / 0 0 42px 42px' }}>
+      {/* ── قوسِ پایینِ ملایم‌تر ──
+          قوسِ قبلی (۶۰٪ / ۴۲px) با عکسِ واقعی زیبا بود، ولی روی
+          پوسترِ تخت گوشه‌های سفیدِ درشتی می‌ساخت که مثل هاله‌ی سفیدِ
+          دورِ کارت دیده می‌شد. کارت سفید می‌ماند — فقط برش کم‌عمق‌تر
+          شد تا آن دو لکه از بین برود. */}
+      <div style={{ position: 'relative', height: '150px', overflow: 'hidden', borderRadius: '0 0 26% 26% / 0 0 20px 20px' }}>
         {/* ── فروشگاهِ بی‌لوگو ⇒ پوسترِ پیش‌فرض، نه عکسِ عمومی ──
             تا امروز یک عکسِ ثابتِ فروشگاه نشان داده می‌شد که ربطی به
             این فروشگاه نداشت (و پیش‌تر حتی نشانی‌اش ۴۰۴ می‌داد و کارت

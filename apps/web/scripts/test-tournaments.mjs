@@ -1010,8 +1010,14 @@ const sizeOf = (src, cls) => {
   return m ? Number(m[1]) : null;
 };
 const hSize = sizeOf(shopPage, 'mk-h'), tSize = sizeOf(shopPage, 'mk-t');
+/* ساختارِ دوتکه حالا در `components/market/ProductTitle.tsx` است و
+   هر سه کارت (بازار، صفحه‌ی اصلی، فروشگاه) از همان می‌آیند. */
 t('کارت عنوان را دو تکه نشان می‌دهد',
-  /className="mk-h"/.test(shopPage) && /className="mk-t"/.test(shopPage));
+  /headClassName="mk-h"/.test(shopPage) && /tailClassName="mk-t"/.test(shopPage));
+t('عنوانِ محصول یک کامپوننتِ مشترک دارد',
+  ['app/shop/page.tsx', 'app/HomeClient.tsx', 'app/sellers/[id]/FlatShop.tsx']
+    .every(f => /<ProductTitle/.test(read(f))),
+  'یک محصول در سه صفحه سه‌جور دیده می‌شد');
 t('دسته و نوع درشت‌تر از برند و مدل است',
   !!hSize && !!tSize && hSize > tSize, `${hSize} ≤ ${tSize}`);
 t('ردیفِ موبایل هم دو تکه است',

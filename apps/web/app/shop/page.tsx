@@ -31,6 +31,7 @@ import {
   CONDITIONS, conditionLabel,
 } from '../../lib/market/categories'
 import { productTitleParts } from '../../lib/market/title'
+import ProductTitle from '../../components/market/ProductTitle'
 /* همان موتورِ کاروسل‌های صفحه‌ی اصلی: درگِ روان + حرکتِ خودکار */
 import { useHorizontalScroll, scrollSign, getPos, setPos } from '../../lib/useHorizontalScroll'
 
@@ -218,10 +219,7 @@ function MarketCard({ l, i, saved, onSave }: { l: Listing; i: number; saved: boo
         ) : null}
       </div>
       <div className="mk-body">
-        <span className="mk-name">
-          <span className="mk-h">{l.name}</span>
-          {l.sub && <span className="mk-t">{l.sub}</span>}
-        </span>
+        <ProductTitle p={{ name: l.name, brand: l.sub }} className="mk-name" headClassName="mk-h" tailClassName="mk-t" />
         <div className="mk-meta">
           <MapPin size={10} style={{ color: GOLD, flexShrink: 0 }} />
           <span>{l.city || 'ایران'}</span>
@@ -253,10 +251,7 @@ function MarketRow({ l, i, saved, onSave }: { l: Listing; i: number; saved: bool
   return (
     <Link href={`/shop/${l.id}`} className="mk-row" style={{ animationDelay: `${Math.min(i, 10) * 35}ms` }}>
       <div className="info">
-        <span className="ttl">
-          <span className="mk-h">{l.name}</span>
-          {l.sub && <span className="mk-t">{l.sub}</span>}
-        </span>
+        <ProductTitle p={{ name: l.name, brand: l.sub }} className="ttl" headClassName="mk-h" tailClassName="mk-t" />
         <span className="cnd">{COND_LABEL[l.condition]}</span>
         {/* «تومان» روی خط خط‌خورده تا خط قیمت جا برای مبلغ + پیل ٪ داشته باشد */}
         <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>

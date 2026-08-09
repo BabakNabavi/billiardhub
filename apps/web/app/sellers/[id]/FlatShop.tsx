@@ -10,6 +10,7 @@ import { fetchProfile } from '../../../lib/profiles/client'
 import { telPrefix, provinceOfCity } from '../../../lib/iran-geo'
 import { getMockSeller } from '../../../lib/sellers-data'
 import { MARKET_CATEGORIES } from '../../../lib/market/categories'
+import ProductTitle from '../../../components/market/ProductTitle'
 /* بدونِ این، نوار روی دسکتاپ فقط با شیفت+چرخ حرکت می‌کرد و با موس
    «قفل» حس می‌شد. همان قلابی که کاروسل‌های صفحه‌ی اصلی دارند. */
 import { useHorizontalScroll } from '../../../lib/useHorizontalScroll'
@@ -455,6 +456,10 @@ export default function FlatShop() {
         .prod-card-sec1:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(28,28,26,0.12); }
         .pc-body-sec1 { padding: 21px 10px 12px; }
         /* نام محصول — حداکثر دو خط، مثل sec1 */
+        .pc-h { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+          overflow: hidden; font-weight: 800; }
+        .pc-t { display: block; font-size: 11.5px; font-weight: 400; color: #8A8474;
+          white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .pc-name-sec1 {
           display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
         }
@@ -797,7 +802,7 @@ export default function FlatShop() {
                   </div>
 
                   <div className="pc-body-sec1 flex flex-1 flex-col gap-1.5">
-                    <span className="pc-name-sec1 text-[14.5px] leading-[1.55] text-[#1C1C1A]">{p.name}</span>
+                    <ProductTitle p={p} className="pc-name-sec1 text-[14.5px] leading-[1.55] text-[#1C1C1A]" headClassName="pc-h" tailClassName="pc-t" />
                     <div className="mt-auto flex items-center gap-1.5">
                       {p.disc > 0 && (
                         <span dir="ltr" className={`inline-flex shrink-0 items-center justify-center rounded-full bg-[#b400ae] px-2.5 pb-0.5 pt-1 text-[16px] font-extrabold leading-none text-white ${MONO}`}>
