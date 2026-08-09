@@ -523,28 +523,56 @@ export default function MarketNewPage() {
      نمی‌کشد. حرکتِ آرام و پیوسته به راست همه‌ی آگهی‌ها را از جلوی چشم
      رد می‌کند. فهرست دوبل می‌شود تا حلقه بدونِ پرش بسته شود، و با
      لمس/موس/کیبورد می‌ایستد تا با دستِ کاربر نجنگد. */
+  /* ── نوارِ فوری: همیشه در حرکت، همیشه قابلِ کشیدن ──
+     دو بارِ قبل ثابت ماند و دلیلش هر بار یکی بود: با سه کارت، محتوا
+     از عرضِ نوار بیرون نمی‌زد. چیزی که سرریز نکند نه حرکت می‌کند نه
+     کشیده می‌شود — نه ایرادِ کد، بلکه ایرادِ فرض.
+
+     پس فهرست آن‌قدر تکرار می‌شود که پهنایش دستِ‌کم دو برابرِ نوار
+     شود. آن‌وقت همیشه سرریز هست، حلقه بدونِ پرش بسته می‌شود، و
+     کشیدن هم — با موس و با لمس — کار می‌کند. */
   const urgRef = useRef<HTMLDivElement>(null)
   const urgPaused = useRef(false)
   useHorizontalScroll(urgRef, busy => { urgPaused.current = busy })
-  /* دوبل‌سازی وقتی لازم است که فهرست از عرضِ نوار بیرون بزند؛ با
-     دو-سه کارتی که جا می‌شوند، حرکت بی‌معناست و فقط آزار می‌دهد. */
-  const urgLoop = urgent.length >= 2 ? [...urgent, ...urgent] : urgent
+  const [urgReps, setUrgReps] = useState(2)
+  const urgLoop = urgent.length
+    ? Array.from({ length: urgReps }, () => urgent).flat()
+    : []
+
+  /* تعدادِ تکرار از عرضِ واقعی حساب می‌شود، نه حدس. با تغییرِ اندازه‌ی
+     پنجره دوباره سنجیده می‌شود. */
   useEffect(() => {
-    if (urgent.length < 2) return
+    if (!urgent.length) return
+    const el = urgRef.current
+    if (!el) return
+    const measure = () => {
+      const one = el.scrollWidth / Math.max(1, urgReps)
+      if (one <= 0) return
+      const want = Math.max(2, Math.ceil((el.clientWidth * 2) / one))
+      if (want !== urgReps) setUrgReps(want)
+    }
+    measure()
+    const ro = new ResizeObserver(measure)
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [urgent.length, urgReps])
+
+  useEffect(() => {
+    if (!urgent.length) return
     if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return
     const el = urgRef.current
     if (!el) return
-    /* اگر همه‌ی کارت‌ها جا می‌شوند، چیزی برای حرکت نیست */
     if (el.scrollWidth <= el.clientWidth + 8) return
-    const SPEED = 26                       // پیکسل بر ثانیه — عمداً کند
+    const SPEED = 22                       // پیکسل بر ثانیه — عمداً کند
     const sign = scrollSign(el)
-    setPos(el, sign, el.scrollWidth / 2)
+    /* یک دورِ کامل = پهنای یک نسخه از فهرست */
+    const cycle = el.scrollWidth / Math.max(1, urgReps)
+    setPos(el, sign, cycle)
     let last = 0, raf = 0
     const tick = (t: number) => {
       if (last && !urgPaused.current) {
-        const half = el.scrollWidth / 2
         let p = getPos(el, sign) - (SPEED * (t - last)) / 1000
-        if (p <= 0) p += half
+        if (p <= 0) p += cycle
         setPos(el, sign, p)
       }
       last = t
@@ -552,7 +580,7 @@ export default function MarketNewPage() {
     }
     raf = requestAnimationFrame(tick)
     return () => cancelAnimationFrame(raf)
-  }, [urgent.length])
+  }, [urgent.length, urgReps])
 
   const chips: { label: string; clear: () => void }[] = []
   if (cat)      chips.push({ label: catLabel(cat), clear: () => setCat('') })
@@ -681,10 +709,9 @@ export default function MarketNewPage() {
         .mk-urgrow { display: flex; align-items: stretch; gap: 10px;
           min-width: 0; max-width: 100%;
           overflow-x: auto; padding-bottom: 8px;
-          scroll-snap-type: x proximity; scrollbar-width: thin;
+          scroll-snap-type: x proximity; scrollbar-width: none; -ms-overflow-style: none;
           -webkit-overflow-scrolling: touch; }
-        .mk-urgrow::-webkit-scrollbar { height: 6px; }
-        .mk-urgrow::-webkit-scrollbar-thumb { background: rgba(28,27,23,0.20); border-radius: 999px; }
+        .mk-urgrow::-webkit-scrollbar { display: none; }
         .mk-urgcell { flex: 0 0 auto; width: 168px; scroll-snap-align: start; display: flex; }
         .mk-urgcell > * { width: 100%; }
         @media (max-width: 560px) { .mk-urgcell { width: 144px; } }

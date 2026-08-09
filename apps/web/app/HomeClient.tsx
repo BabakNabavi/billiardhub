@@ -1391,6 +1391,9 @@ useEffect(() => {
 
         .sec-label{display:inline-flex;align-items:center;gap:7px;font-size:9.5px;font-weight:800;letter-spacing:0.26em;text-transform:uppercase;margin-bottom:14px;padding:5px 13px;border-radius:999px;border:1px solid currentColor;}
         .sec-label::before{content:'';width:6px;height:6px;border-radius:50%;background:currentColor;}
+        /* نشانِ سکشنِ بازار کمی بالاتر می‌نشیند؛ در موبایل ۱۰٪ کوچک‌تر */
+        .mkt-label{margin-top:-10px;}
+        @media(max-width:768px){.mkt-label{font-size:8.55px;letter-spacing:0.22em;padding:4px 11px;margin-top:-12px;}}
         /* ── چرا content-visibility برداشته شد ──
            هدفش درست بود: مرورگر محتوای بیرونِ دید را چیدمان نکند.
            ولی هزینه‌اش در عمل بیشتر از سودش درآمد.
@@ -2059,7 +2062,7 @@ useEffect(() => {
           <SR>
             <div className="marketplace-hd" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '44px', flexWrap: 'wrap', gap: '20px' }}>
               <div>
-                <span className="sec-label" style={{ color: `${BRN}CC` }}>BILLIARD BAZAAR</span>
+                <span className="sec-label mkt-label" style={{ color: `${BRN}CC` }}>BILLIARD BAZAAR</span>
                 <h2 className="sec-title" style={{ color: TEXT, fontSize: 'clamp(20px,2.84vw,37px)' }}>بیلیارد بازار</h2>
                 <div className="sec-rule" style={{ color: BRN }} />
               </div>
@@ -2082,7 +2085,7 @@ useEffect(() => {
           {/* موبایل — همان BazaarCard (فرمت یکسان با دسکتاپ) */}
           <div ref={mktSliderRef} className="mkt-mobile-slider">
             {HOME_PRODUCTS.map((p) => (
-              <BazaarCard key={p.id} p={p} className="mkt-mob-card" style={{ width: '36.9vw', minWidth: 136, scrollSnapAlign: 'center', height: 'clamp(214px,62.5vw,289px)' }} />
+              <BazaarCard key={p.id} p={p} className="mkt-mob-card" style={{ width: '37.8vw', minWidth: 139, scrollSnapAlign: 'center', height: 'clamp(219px,64vw,296px)' }} />
             ))}
           </div>
           {/* ── Ad banners ── */}
