@@ -8,6 +8,7 @@ import VerificationBadges from '../../../components/VerificationBadges'
 import Link from 'next/link'
 import { useAuthStore } from '../../../store/auth.store'
 import ProvinceCitySelect from '../../../components/ProvinceCitySelect'
+import ProfileSlugField from '../../../components/ProfileSlugField'
 import ClubPicker from '../../../components/ClubPicker'
 import SiteAddressField from '../../../components/SiteAddressField'
 import AuthGuard from '../../../components/AuthGuard'
@@ -440,7 +441,15 @@ function RefereeDashboardInner() {
               <div style={{ gridColumn: '1 / -1', fontSize: 11.5, color: TEXT_M, marginTop: -6 }}>نام و نام خانوادگی از اطلاعات حساب کاربری شما گرفته شده و قابل تغییر نیست.</div>
               <div><label style={lbl}>Last name (English){star}</label><input style={{ ...inp, direction: 'ltr', textAlign: 'left' }} value={form.lastNameEn} onChange={e => set('lastNameEn', e.target.value)} placeholder="Talebi" />{err('lastNameEn')}</div>
               <div><label style={lbl}>First name (English){star}</label><input style={{ ...inp, direction: 'ltr', textAlign: 'left' }} value={form.firstNameEn} onChange={e => set('firstNameEn', e.target.value)} placeholder="Kaveh" />{err('firstNameEn')}</div>
+                            {/* نشانیِ اختصاصیِ سایت — همان چیزی که پنلِ باشگاه از اول داشت */}
               <div style={{ gridColumn: '1 / -1' }}>
+                <ProfileSlugField
+                  kind="referee" value={form.slug}
+                  onChange={v => setForm(f => ({ ...f, slug: v }))}
+                  suggestFrom={`${form.firstNameEn || form.firstNameFa} ${form.lastNameEn || form.lastNameFa}`}
+                />
+              </div>
+<div style={{ gridColumn: '1 / -1' }}>
                 <ProvinceCitySelect
                   value={{ province: form.province, city: form.city }}
                   onChange={v => setForm(f => ({ ...f, province: v.province, city: v.city }))}

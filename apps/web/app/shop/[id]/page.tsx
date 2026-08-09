@@ -298,9 +298,13 @@ export default function ProductDetailPage() {
                 style={{ position: 'absolute', inset: 0, padding: 0, border: 'none', background: 'none', cursor: 'zoom-in', display: 'block' }}>
                 <img loading="lazy" decoding="async" src={gallery[shown]} alt={fullName} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
               </button>
+              {/* ── همان برچسبِ بازار ──
+                  قرمزِ مستطیلیِ «۱۵٪ تخفیف» با پیلِ بنفشِ «٪۱۵» در
+                  فهرستِ بازار فرق داشت؛ یک محصول در دو صفحه دو نشانِ
+                  متفاوت می‌گرفت. رنگ و شکل و متن هر سه یکی شد. */}
               {product.disc > 0 && (
-                <div style={{ position: 'absolute', top: 12, insetInlineEnd: 12, background: '#E53935', color: '#fff', fontSize: 12, fontWeight: 800, borderRadius: 8, padding: '3px 10px' }}>
-                  {toFa(product.disc)}٪ تخفیف
+                <div dir="ltr" style={{ position: 'absolute', top: 12, insetInlineEnd: 12, background: '#b400ae', color: '#fff', fontSize: 12, fontWeight: 800, borderRadius: 999, padding: '4px 10px 2px', lineHeight: 1 }}>
+                  ٪{toFa(product.disc)}
                 </div>
               )}
               <button
@@ -378,8 +382,13 @@ export default function ProductDetailPage() {
                     )}
                   </div>
                   {product.disc > 0 && (
-                    <div style={{ marginTop: 6, fontSize: 12, color: '#B23B2E', fontWeight: 700 }}>
-                      {toFa(product.disc)}٪ تخفیف — {fmt(product.old - product.price)} تومان سود شما
+                    <div style={{ marginTop: 8, display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <span dir="ltr" style={{ background: '#b400ae', color: '#fff', fontSize: 11.5, fontWeight: 800, borderRadius: 999, padding: '3px 9px 1px', lineHeight: 1 }}>
+                        ٪{toFa(product.disc)}
+                      </span>
+                      <span style={{ fontSize: 12, color: TSEC, fontWeight: 600 }}>
+                        {fmt(product.old - product.price)} تومان سود شما
+                      </span>
                     </div>
                   )}
                 </>
@@ -398,8 +407,24 @@ export default function ProductDetailPage() {
               </div>
             )}
 
-            {/* توضیحات */}
-            <p style={{ fontSize: 13.5, lineHeight: 2, color: TSEC, margin: '0 0 20px' }}>{product.desc}</p>
+            {/* ── توضیحاتِ فروشنده ──
+                یک پاراگرافِ لخت بود؛ کنارِ کارتِ شیشه‌ایِ فروشنده و
+                جدولِ مشخصات، مثل متنی می‌ماند که جا مانده. حالا خودش
+                یک بلوکِ مستقل است: نشانِ طلاییِ عمودی، تیترِ کوچک، و
+                علامتِ نقل‌قول در پس‌زمینه که به متن وزن می‌دهد بدونِ
+                آنکه خواندنش را سخت کند. */}
+            {!!product.desc.trim() && (
+              <div style={{ ...glassPanel, borderRadius: 20, padding: '16px 18px 18px', marginBottom: 20, position: 'relative', overflow: 'hidden' }}>
+                <span aria-hidden style={{ position: 'absolute', top: -18, insetInlineStart: 10, fontSize: 96, lineHeight: 1, color: 'rgba(199,166,106,0.13)', fontWeight: 900, pointerEvents: 'none', userSelect: 'none' }}>”</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 9, marginBottom: 11, position: 'relative' }}>
+                  <span style={{ width: 3, height: 18, borderRadius: 2, background: `linear-gradient(180deg,${GOLD},${GOLDD})` }} />
+                  <h2 style={{ fontSize: 14.5, fontWeight: 800, color: TEXT, margin: 0 }}>توضیحات فروشنده</h2>
+                </div>
+                <p style={{ fontSize: 14, lineHeight: 2.1, color: 'rgba(28,28,26,0.72)', margin: 0, position: 'relative', whiteSpace: 'pre-line' }}>
+                  {product.desc}
+                </p>
+              </div>
+            )}
 
             {/* ── مشخصات فنی ──
                 فروشنده هنگام ثبتِ آگهی ده‌ها مشخصه پر می‌کند — طول،

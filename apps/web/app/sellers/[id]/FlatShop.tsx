@@ -405,6 +405,14 @@ export default function FlatShop() {
         .prod-card-sec1 {
           /* ۱.۷۵ = ۱.۹۴۴ منهای ۱۰٪ */
           aspect-ratio: 1 / 1.75;
+          /* ── ۱۰٪ کوچک‌تر ──
+             عرضِ ستون دست‌نخورده می‌ماند و کارت داخلش وسط‌چین می‌شود؛
+             چون نسبتِ ابعاد ثابت است، ارتفاع هم خودبه‌خود همان ۱۰٪ کم
+             می‌شود. اگر به‌جای این، تعدادِ ستون‌ها زیاد می‌شد، کوچک‌شدن
+             در هر بریک‌پوینت عددِ دیگری می‌داد.
+             (بک‌تیک در این کامنت ممنوع — داخلِ template literal است) */
+          width: 90%;
+          margin-inline: auto;
           border-radius: 10px;
           border: 1.5px solid rgba(28,28,26,0.18);
           transition: transform .22s cubic-bezier(0.22,1,0.36,1), box-shadow .22s;
@@ -420,6 +428,41 @@ export default function FlatShop() {
           .pc-body-sec1 { padding: 14px 7px 7px; }
           .pc-name-sec1 { font-size: 13.05px; line-height: 1.35; color: #666; }
         }
+        /* ── نشانِ برندِ نمایندگی ── */
+        .brand-chip {
+          position: relative; overflow: hidden;
+          display: inline-flex; align-items: center;
+          padding: 5px 13px 4px;
+          border-radius: 8px;
+          background: linear-gradient(145deg,#23201A 0%,#14120E 60%,#1D1A14 100%);
+          border: 1px solid rgba(199,166,106,0.42);
+          box-shadow: 0 2px 10px rgba(28,27,23,0.22), inset 0 1px 0 rgba(199,166,106,0.20);
+          transition: transform .22s cubic-bezier(.22,1,.36,1), box-shadow .22s, border-color .22s;
+        }
+        .brand-chip-txt {
+          font-size: 11.5px; font-weight: 800; letter-spacing: 0.07em; white-space: nowrap;
+          background: linear-gradient(100deg,#E8CE96 0%,#C7A66A 45%,#F0DDB0 70%,#A07840 100%);
+          -webkit-background-clip: text; background-clip: text;
+          -webkit-text-fill-color: transparent; color: transparent;
+        }
+        /* برقِ نرمی که با هاور از روی نشان رد می‌شود */
+        .brand-chip::after {
+          content: ''; position: absolute; top: 0; bottom: 0; width: 45%;
+          left: -60%; transform: skewX(-18deg); pointer-events: none;
+          background: linear-gradient(90deg,transparent,rgba(255,255,255,0.16),transparent);
+          transition: left .55s ease;
+        }
+        .brand-chip:hover {
+          transform: translateY(-1.5px);
+          border-color: rgba(199,166,106,0.72);
+          box-shadow: 0 6px 18px rgba(28,27,23,0.30), inset 0 1px 0 rgba(199,166,106,0.30);
+        }
+        .brand-chip:hover::after { left: 115%; }
+        @media (prefers-reduced-motion: reduce) {
+          .brand-chip, .brand-chip::after { transition: none; }
+          .brand-chip:hover { transform: none; }
+        }
+
         /* دکمه‌ی علاقه‌مندی */
         .wish-btn { transition: transform .18s cubic-bezier(0.22,1,0.36,1), color .18s, background .18s, border-color .18s; }
         .wish-btn:hover  { transform: scale(1.08); }
@@ -486,11 +529,21 @@ export default function FlatShop() {
             <p className="mt-2 max-w-[720px] text-[13px] leading-relaxed text-[#5B564B]">{store.desc}</p>
 
             {/* برندهای نمایندگی */}
+            {/* ── برندهای نمایندگی ──
+                چیپ‌های خاکستریِ قبلی مثل برچسبِ فیلتر بودند، در حالی
+                که این‌ها ادعای اعتبارِ فروشگاه‌اند. حالا هر برند یک
+                نشانِ لاکی‌مشکی با متنِ طلاییِ گرادیانی و حروفِ
+                فاصله‌دار است — همان زبانی که برندهای بین‌المللیِ
+                تجهیزات روی جعبه‌هایشان به کار می‌برند. برقِ نرمی هم
+                با هاور از رویش رد می‌شود. */}
             {store.brands.length > 0 && (
-              <div className="mt-2.5 flex flex-wrap items-center gap-2">
-                <span className="text-[11.5px] text-[#8A8474]">نماینده‌ی:</span>
+              <div className="mt-3 flex flex-wrap items-center gap-2">
+                <span className="text-[10.5px] font-bold uppercase tracking-[0.14em] text-[#A69F8E]">Authorized</span>
+                <span className="h-[13px] w-px bg-[#E0DAC8]" />
                 {store.brands.map((b, i) => (
-                  <span key={i} className="rounded-full border border-[#E7E2D6] bg-[#FAFAF7] px-2.5 py-1 text-[11.5px] font-semibold text-[#5B564B]">{b}</span>
+                  <span key={i} className="brand-chip" dir="auto">
+                    <span className="brand-chip-txt">{b}</span>
+                  </span>
                 ))}
               </div>
             )}

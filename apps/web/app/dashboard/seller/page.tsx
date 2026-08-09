@@ -7,6 +7,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { Camera, X } from 'lucide-react'
 import { useAuthStore } from '../../../store/auth.store'
 import {
   type SellerProfile,
@@ -15,6 +16,8 @@ import {
 import { fetchMyProfile, saveProfileRemote } from '../../../lib/profiles/client'
 import ProvinceCitySelect from '../../../components/ProvinceCitySelect'
 import ClubPicker from '../../../components/ClubPicker'
+import ProfileSlugField from '../../../components/ProfileSlugField'
+import type { SlugStatus } from '../../../components/SiteAddressField'
 import VerificationPrompt from '../../../components/VerificationPrompt'
 import VerificationBadges from '../../../components/VerificationBadges'
 
@@ -61,6 +64,8 @@ export default function SellerDashboard() {
   const [warn, setWarn]     = useState(false)   // هشدار «بدون جواز کسب»
   const [warnAck, setWarnAck] = useState(false) // کاربر یادآوری را دید و ادامه داد
   const [brandInput, setBrandInput] = useState('')
+  /* نشانیِ تکراری نباید ذخیره شود — دکمه‌ی ذخیره منتظرِ همین می‌ماند */
+  const [slugStatus, setSlugStatus] = useState<SlugStatus>('idle')
 
   const logoRef   = useRef<HTMLInputElement>(null)
   const storyRef  = useRef<HTMLInputElement>(null)
@@ -205,6 +210,10 @@ export default function SellerDashboard() {
   const submit = (e: React.FormEvent) => {
     e.preventDefault()
     if (!form.title.trim()) { setErr('نام فروشگاه لازم است.'); return }
+    /* نشانیِ تکراری یا نامعتبر را نگذار به سرور برسد — آن‌جا فقط یک
+       ۴۰۹ می‌گیرد و کاربر نمی‌فهمد کدام فیلد مقصر بوده. */
+    if (slugStatus === 'taken')   { setErr('این نشانی قبلاً گرفته شده است؛ یکی دیگر انتخاب کنید.'); return }
+    if (slugStatus === 'invalid') { setErr('نشانی نامعتبر است — فقط حروف انگلیسی، عدد و خط تیره.'); return }
     /* جواز کسب اجباری نیست (فقط داور مدرکش الزامی است) — یک‌بار یادآوری
        می‌شود و اگر کاربر ادامه بدهد، فروشگاه بدون تیک تأیید ثبت می‌شود. */
     if (!form.certificate && !warnAck) { setWarn(true); return }
@@ -297,6 +306,15 @@ export default function SellerDashboard() {
                 <input id="f-brand" className={INPUT} value={form.brand}
                   onChange={e => set('brand', e.target.value)} placeholder="پروکیو"/>
                 <p className={HINT}>در فوتر فروشگاه کنار نشان استفاده می‌شود.</p>
+              </div>
+              {/* نشانیِ اختصاصی — همان چیزی که باشگاه از اول داشت */}
+              <div className="sm:col-span-2">
+                <ProfileSlugField
+                  kind="seller" value={form.slug}
+                  onChange={v => set('slug', v)}
+                  suggestFrom={form.title}
+                  onStatusChange={setSlugStatus}
+                />
               </div>
               <div className="sm:col-span-2">
                 <ProvinceCitySelect
@@ -428,7 +446,9 @@ export default function SellerDashboard() {
                 <label className={LABEL} htmlFor="f-wa">واتساپ</label>
                 <input id="f-wa" className={INPUT} inputMode="tel" value={form.whatsapp}
                   onChange={e => set('whatsapp', e.target.value)} placeholder="989121234567"/>
-                <p className={HINT}>با کد کشور و بدون + — مثل ۹۸۹۱۲۱۲۳۴۵۶۷.</p>
+                {/* نقطه‌ی پایانِ جمله عمداً نیست: بلافاصله بعد از رقم
+                    می‌آید و در فونتِ فارسی با صفر اشتباه گرفته می‌شود. */}
+                <p className={HINT}>با کد کشور و بدون + — مثل ۹۸۹۱۲۱۲۳۴۵۶۷</p>
               </div>
               <div>
                 <label className={LABEL} htmlFor="f-insta">اینستاگرام</label>
@@ -457,20 +477,34 @@ export default function SellerDashboard() {
               با کلیک روی لوگوی فروشگاه باز می‌شود، و پس از ذخیره تا ۲۴ ساعت در نوار استوری‌های صفحه‌ی اول سایت هم دیده می‌شود.
             </p>
             <div className="flex flex-wrap items-start gap-4">
+              {/* ── «آپلود» داخلِ خودِ کادر ──
+                  پیش‌تر دکمه‌ها زیرِ کادر بودند و ردیفشان کادر را بالا
+                  می‌کشید و کنارِ متنِ استوری ناهم‌تراز می‌شد. حالا کلِ
+                  کادر خودش دکمه‌ی آپلود است — الگوی رایجِ همین کار — و
+                  «حذف» یک دایره‌ی کوچک روی گوشه‌ی عکس. */}
               <div className="shrink-0">
-                <div className="flex h-28 w-20 items-center justify-center overflow-hidden rounded-xl border border-[#E7E2D6] bg-[#F7F5F0]">
-                  {form.storyImage
-                    ? <img loading="lazy" decoding="async" src={form.storyImage} alt="" className="h-full w-full object-cover"/>
-                    : <span className="text-[11px] text-[#A69F8E]">بدون عکس</span>}
-                </div>
-                <div className="mt-2 flex gap-2">
+                <div className="relative h-28 w-20">
                   <button type="button" onClick={() => storyRef.current?.click()} disabled={busy}
-                    className="text-[12px] font-bold text-[#9A6E38] transition hover:opacity-70 disabled:opacity-45">
-                    {form.storyImage ? 'تغییر' : 'آپلود'}
+                    aria-label={form.storyImage ? 'تغییر عکس استوری' : 'آپلود عکس استوری'}
+                    className="group relative block h-full w-full overflow-hidden rounded-xl border border-dashed border-[rgba(199,166,106,0.55)] bg-[#F7F5F0] transition hover:border-[#C7A66A] disabled:opacity-45">
+                    {form.storyImage && (
+                      <img loading="lazy" decoding="async" src={form.storyImage} alt="" className="absolute inset-0 h-full w-full object-cover"/>
+                    )}
+                    <span
+                      className={`absolute inset-0 flex flex-col items-center justify-center gap-1 text-[11.5px] font-bold transition ${
+                        form.storyImage
+                          ? 'bg-[rgba(20,18,14,0.42)] text-white opacity-0 group-hover:opacity-100'
+                          : 'text-[#9A6E38]'
+                      }`}>
+                      <Camera size={17} />
+                      {form.storyImage ? 'تغییر' : 'آپلود'}
+                    </span>
                   </button>
                   {form.storyImage && (
-                    <button type="button" onClick={() => set('storyImage', '')}
-                      className="text-[12px] text-[#5B564B] transition hover:text-[#B23B2E]">حذف</button>
+                    <button type="button" onClick={() => set('storyImage', '')} aria-label="حذف عکس استوری"
+                      className="absolute -left-1.5 -top-1.5 flex h-6 w-6 items-center justify-center rounded-full border border-[#E7E2D6] bg-white text-[#5B564B] shadow-sm transition hover:text-[#B23B2E]">
+                      <X size={13} />
+                    </button>
                   )}
                 </div>
                 <input ref={storyRef} type="file" accept="image/*" className="hidden"
@@ -581,20 +615,11 @@ export default function SellerDashboard() {
               <VerificationPrompt role="seller" done={!!form.certificate} compact />
             </div>
 
-            {/* شماره‌ی جواز — بدون آن ادمین راهی برای استعلام ندارد */}
-            <div className="mb-4">
-              <label className={LABEL}>شماره‌ی جواز کسب</label>
-              <input
-                className={INPUT} dir="ltr" style={{ textAlign: 'right' }}
-                value={form.licenseNumber}
-                onChange={e => set('licenseNumber', e.target.value.replace(/[^0-9A-Za-z\-/]/g, '').slice(0, 40))}
-                placeholder="مثال: 1234567890"
-              />
-              <p className="mt-1.5 text-[11.5px] text-[#8A8474]">
-                برای گرفتن تیک تأیید، شماره باید با فایل آپلودشده یکی باشد.
-              </p>
-            </div>
-
+            {/* ── فیلدِ «شماره‌ی جواز کسب» برداشته شد ──
+                فروشنده خودِ فایلِ جواز را آپلود می‌کند و شماره روی
+                همان برگه هست؛ تایپِ دوباره‌اش فقط یک جای دیگر برای
+                غلطِ تایپی می‌ساخت. استعلام از روی فایل در پنل ادمین
+                انجام می‌شود. */}
             {form.certificate ? (
               <div className="flex flex-wrap items-center gap-3 rounded-xl border border-[#E7E2D6] bg-[#FAFAF7] p-3">
                 {form.certificate.url.startsWith('data:image')

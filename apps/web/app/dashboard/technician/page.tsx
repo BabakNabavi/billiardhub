@@ -12,6 +12,7 @@ import Select from '../../../components/ui/Select'
 import Link from 'next/link'
 import { useAuthStore } from '../../../store/auth.store'
 import ProvinceCitySelect from '../../../components/ProvinceCitySelect'
+import ProfileSlugField from '../../../components/ProfileSlugField'
 import ClubPicker from '../../../components/ClubPicker'
 import { compressImage } from '../../../lib/seller-store'
 import { TECH_SERVICES, type TechService, type TechProject, type TechAlbum } from '../../../lib/technicians-data'
@@ -236,7 +237,15 @@ export default function TechnicianDashboard() {
                 <label className="mb-1.5 block text-[12.5px] font-bold text-[#5B564B]">عنوان تخصصی *</label>
                 <input className={INPUT} value={form.title} onChange={e => set('title', e.target.value)} placeholder="مثال: متخصص پارچه و رگلاژ" />
               </div>
+                            {/* نشانیِ اختصاصیِ سایت — همان چیزی که پنلِ باشگاه از اول داشت */}
               <div className="sm:col-span-2">
+                <ProfileSlugField
+                  kind="technician" value={form.slug}
+                  onChange={v => setForm(f => ({ ...f, slug: v }))}
+                  suggestFrom={form.name}
+                />
+              </div>
+<div className="sm:col-span-2">
                 <ProvinceCitySelect
                   value={{ province: form.province, city: form.city }}
                   onChange={v => { set('province', v.province); set('city', v.city) }}

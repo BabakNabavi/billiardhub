@@ -13,6 +13,7 @@ import Select from '../../../components/ui/Select'
 import Link from 'next/link'
 import { useAuthStore } from '../../../store/auth.store'
 import ProvinceCitySelect from '../../../components/ProvinceCitySelect'
+import ProfileSlugField from '../../../components/ProfileSlugField'
 import ClubPicker from '../../../components/ClubPicker'
 import { provinceOfCity } from '../../../lib/iran-geo'
 import { fetchClubOptions, type ClubOption } from '../../../lib/clubs-data'
@@ -218,7 +219,15 @@ export default function PlayerDashboard() {
                   }}
                 />
               </div>
+                            {/* نشانیِ اختصاصیِ سایت — همان چیزی که پنلِ باشگاه از اول داشت */}
               <div className="sm:col-span-2">
+                <ProfileSlugField
+                  kind="player" value={form.slug}
+                  onChange={v => setForm(f => ({ ...f, slug: v }))}
+                  suggestFrom={form.name}
+                />
+              </div>
+<div className="sm:col-span-2">
                 <ProvinceCitySelect
                   value={{ province: form.province || provinceOfCity(form.city) || '', city: form.city }}
                   onChange={v => { setForm(f => ({ ...f, province: v.province, city: v.city })); setSaved(false); setErr('') }}

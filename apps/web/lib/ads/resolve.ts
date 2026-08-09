@@ -19,9 +19,12 @@ export interface EntitySnapshot {
   image: string
   subtitle: string          // برند / شهر / تخصص — بسته به نوع
   href: string
-  price?: number            // فقط محصول
-  oldPrice?: number
+  price?: number            // فقط محصول — قیمتِ پرداختی
+  oldPrice?: number         // قیمتِ خط‌خورده
   discountPercent?: number
+  /** آگهیِ توافقی قیمتِ قابلِ نمایش ندارد؛ کارت باید «توافقی» بنویسد
+      نه «۰ تومان». */
+  negotiable?: boolean
   city?: string
   badge?: string | null
   /** آمار واقعی موجودیت — نبودنش یعنی «نداریم»، نه صفر */
@@ -39,11 +42,18 @@ async function resolveProducts(rawRefs: string[]): Promise<Map<string, EntitySna
   const refs = rawRefs.filter(x => UUID.test(x))
   if (!refs.length) return out
   const { data } = await sb().from('products')
-    .select('id,title,price,"discountPercent",images,brand,city,status')
+    .select('id,title,price,negotiable,"discountPrice","discountPercent",images,brand,city,status')
     .in('id', refs)
   for (const r of (data as Record<string, unknown>[] ?? [])) {
     if (s(r.status) !== 'active') continue
-    const price = n(r.price)
+    /* ── همان قراردادِ بقیه‌ی سایت ──
+       `price` قیمتِ فهرست است و `discountPrice` پرداختی. تا امروز
+       این‌جا `price` مستقیم به کارت می‌رفت و قیمتِ خط‌خورده از روی
+       درصدِ گِردشده بازسازی می‌شد — عددی که هیچ‌وقت دقیق درنمی‌آمد. */
+    const listed = n(r.price)
+    const paid = n(r.discountPrice)
+    const hasDisc = paid > 0 && paid < listed
+    const price = hasDisc ? paid : listed
     const disc = n(r.discountPercent)
     const imgs = Array.isArray(r.images) ? r.images as string[] : []
     out.set(s(r.id), {
@@ -53,8 +63,8 @@ async function resolveProducts(rawRefs: string[]): Promise<Map<string, EntitySna
       subtitle: s(r.brand),
       href: `/shop/${s(r.id)}`,
       price,
-      /* تخفیف ۱۰۰٪ تقسیم بر صفر می‌شد و قیمت خط‌خورده Infinity می‌داد */
-      oldPrice: disc > 0 && disc < 100 ? Math.round(price / (1 - disc / 100)) : price,
+      oldPrice: listed,
+      negotiable: r.negotiable === true,
       discountPercent: disc,
       city: s(r.city),
     })

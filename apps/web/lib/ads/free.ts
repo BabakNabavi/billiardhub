@@ -18,7 +18,7 @@ const n = (v: unknown, d = 0) => { const x = Number(v); return Number.isFinite(x
 /** تازه‌ترین محصولات فعال بازار */
 async function freeProducts(limit: number): Promise<EntitySnapshot[]> {
   const { data, error } = await sb().from('products')
-    .select('id,title,price,"discountPercent",images,brand,city,status,"createdAt"')
+    .select('id,title,price,negotiable,"discountPrice","discountPercent",images,brand,city,status,"createdAt"')
     .eq('status', 'active')
     .order('createdAt', { ascending: false })
     /* شکست تساوی: داده‌ی seed همه یک زمان ثبت دارند و بدون این کلید،
@@ -28,7 +28,11 @@ async function freeProducts(limit: number): Promise<EntitySnapshot[]> {
   if (error || !data) return []
 
   return (data as Record<string, unknown>[]).map(r => {
-    const price = n(r.price)
+    /* همان قراردادِ `resolve.ts`: `price` فهرست، `discountPrice` پرداختی */
+    const listed = n(r.price)
+    const paid = n(r.discountPrice)
+    const hasDisc = paid > 0 && paid < listed
+    const price = hasDisc ? paid : listed
     const disc = n(r.discountPercent)
     const imgs = Array.isArray(r.images) ? r.images as string[] : []
     return {
@@ -38,8 +42,8 @@ async function freeProducts(limit: number): Promise<EntitySnapshot[]> {
       subtitle: s(r.brand),
       href: `/shop/${s(r.id)}`,
       price,
-      /* تخفیف ۱۰۰٪ تقسیم بر صفر می‌شد و قیمت خط‌خورده Infinity می‌داد */
-      oldPrice: disc > 0 && disc < 100 ? Math.round(price / (1 - disc / 100)) : price,
+      oldPrice: listed,
+      negotiable: r.negotiable === true,
       discountPercent: disc,
       city: s(r.city),
     }

@@ -1531,6 +1531,59 @@ t('انتخابِ نقشِ اصلی از منو در دسترس است',
   /href: '\/profile\/role', label: 'نقش‌های من'/.test(read('components/Navbar.tsx')),
   'تنها جای انتخابِ نقشِ اصلی بود و فقط از چند کارتِ داشبورد به آن لینک بود');
 
+/* ── نشانیِ اختصاصی برای همه‌ی نقش‌ها ── */
+console.log('\n― نشانیِ اختصاصی ―');
+const slugPanels = [
+  ['app/dashboard/seller/page.tsx', 'seller'],
+  ['app/dashboard/coach/page.tsx', 'coach'],
+  ['app/referees/dashboard/page.tsx', 'referee'],
+  ['app/dashboard/technician/page.tsx', 'technician'],
+  ['app/dashboard/manufacturer/page.tsx', 'manufacturer'],
+  ['app/dashboard/player/page.tsx', 'player'],
+];
+for (const [file, kind] of slugPanels) {
+  const src = read(file);
+  t(`پنلِ ${kind} نشانیِ اختصاصی دارد`,
+    /<ProfileSlugField/.test(src) && new RegExp(`kind="${kind}"`).test(src),
+    'تا امروز فقط باشگاه می‌توانست نشانیِ خوانا انتخاب کند');
+}
+t('سرور تغییرِ نامک را می‌پذیرد',
+  /wanted && wanted !== existing\?\.slug/.test(read('lib/profiles/server.ts')),
+  'نامک قفل بود و هر نقشی با نامکِ خودکارِ لحظه‌ی ثبت می‌ماند');
+t('مسیرِ بررسیِ یکتاییِ نامک هست',
+  read('app/api/profiles/[kind]/slug-check/route.ts').includes(`from('profiles')`));
+t('پیش‌نمایشِ لینک بدونِ www است',
+  !/www\.billiardhub\.net\/\{basePath\}/.test(read('components/SiteAddressField.tsx')),
+  'دامنه یکی شده و www با ۳۰۱ می‌آید؛ کپی‌کردنش یک پرشِ اضافه دارد');
+
+/* ── ظاهرِ بازار و فروشگاه ── */
+console.log('\n― ظاهر ―');
+const flat = read('app/sellers/[id]/FlatShop.tsx');
+const detailPg = stripComments(read('app/shop/[id]/page.tsx'));
+const sellerPanel = stripComments(read('app/dashboard/seller/page.tsx'));
+
+t('«توافقی» از خودِ اسنپ‌شاتِ جایگاه می‌آید',
+  /negotiable: r\.negotiable === true/.test(read('lib/ads/resolve.ts'))
+  && /negotiable: r\.negotiable === true/.test(read('lib/ads/free.ts'))
+  && /negotiable: e\.negotiable === true/.test(read('app/HomeClient.tsx')),
+  'سه بار فقط مسیرِ realProducts درست شد و مسیرِ واقعیِ رندر دست‌نخورده ماند');
+t('قیمتِ خط‌خورده از discountPrice می‌آید نه از درصدِ گِردشده',
+  /oldPrice: listed/.test(read('lib/ads/resolve.ts')));
+t('کارت‌های فروشگاه ۱۰٪ کوچک‌تر شدند', /width: 90%/.test(flat));
+t('برچسبِ برند طرحِ اختصاصی دارد', /\.brand-chip \{/.test(flat) && /Authorized/.test(flat));
+t('برچسبِ تخفیفِ جزئیات مثل بازار است — بنفش',
+  (detailPg.match(/#b400ae/g) ?? []).length >= 2 && !/٪ تخفیف/.test(detailPg));
+t('توضیحاتِ محصول باکسِ مستقل دارد',
+  /توضیحات فروشنده/.test(detailPg));
+t('«آپلود» داخلِ کادرِ عکسِ استوری است',
+  /aria-label=\{form\.storyImage \? 'تغییر عکس استوری'/.test(sellerPanel));
+t('فیلدِ شماره‌ی جواز برداشته شد',
+  !/شماره‌ی جواز کسب/.test(sellerPanel),
+  'شماره روی خودِ برگه هست؛ تایپِ دوباره فقط جای غلطِ تایپی می‌ساخت');
+t('نقطه‌ی پایانِ راهنمای واتساپ برداشته شد',
+  /مثل ۹۸۹۱۲۱۲۳۴۵۶۷<\/p>/.test(sellerPanel),
+  'بلافاصله بعد از رقم می‌آمد و با صفر اشتباه گرفته می‌شد');
+
 /* ── محصولِ فروشگاه: دو کلیدی که با هم اشتباه می‌شدند ── */
 console.log('\n― محصولاتِ فروشگاه ―');
 const adsPost = stripComments(read('app/api/market/ads/route.ts'));

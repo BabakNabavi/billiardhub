@@ -170,8 +170,21 @@ export interface SaveInput {
 export async function saveProfile(input: SaveInput): Promise<ProfileRow> {
   const existing = await getProfileByOwner(input.kind, input.ownerId)
 
-  /* نامک تغییر نمی‌کند — نشانی عمومی که یک‌بار منتشر شد باید بماند */
-  const slug = existing?.slug ?? input.slug
+  /* ── نامکِ اختصاصی ──
+     تا امروز نامک قفل بود («نشانی عمومی که یک‌بار منتشر شد باید
+     بماند»)، ولی نتیجه‌اش این بود که فروشنده و مربی و داور تا ابد با
+     نامکِ خودکارِ لحظه‌ی ثبت می‌ماندند — چیزی مثل `7` — در حالی که
+     باشگاه از همان اول می‌توانست نشانیِ خوانا انتخاب کند.
+
+     حالا تغییر ممکن است ولی فقط وقتی کاربر **صراحتاً** نامکِ تازه‌ای
+     بفرستد که با نامکِ فعلی فرق دارد. اگر فرم چیزی نفرستد یا همان
+     قبلی را بفرستد، هیچ‌چیز عوض نمی‌شود — پس ذخیره‌های معمولی
+     نشانیِ منتشرشده را جابه‌جا نمی‌کنند.
+
+     یکتایی را ایندکسِ دیتابیس تضمین می‌کند؛ تصادم به‌صورت خطای
+     «تکراری» بالا می‌آید و مسیرِ POST آن را ۴۰۹ می‌کند. */
+  const wanted = String(input.slug ?? '').trim().toLowerCase()
+  const slug = wanted && wanted !== existing?.slug ? wanted : (existing?.slug ?? input.slug)
 
   const clean = await offloadImages(input.data, `profiles/${input.kind}/${input.ownerId}`) as Record<string, unknown>
 

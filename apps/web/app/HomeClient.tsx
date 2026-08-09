@@ -917,9 +917,12 @@ export default function HomeClient({ initialPlacements, initialFeatured, service
       id: e.ref, name: e.title, sub: e.subtitle || 'بیلیارد بازار', img: thumbUrl(e.image, PROD_W),
       brand: (e.subtitle || 'BILLIARD').toUpperCase(),
       price: e.oldPrice ?? e.price ?? 0, sale: e.price ?? 0, pct: e.discountPercent ?? 0,
-      /* اسنپ‌شاتِ جایگاهِ تبلیغاتی «توافقی» را حمل نمی‌کند؛ جایگاهِ
-         پولی هم همیشه با قیمت انتخاب می‌شود. */
-      negotiable: false,
+      /* ── چرا این خط سه بار اشتباه بود ──
+         کارت‌های سکشنِ «بیلیارد بازار» از اسنپ‌شاتِ جایگاه می‌آیند، نه
+         از ردیفِ خامِ محصول. دو بارِ قبل فقط مسیرِ `realProducts`
+         درست شد و این مسیر — که در عمل همانی است که رندر می‌شود —
+         دست‌نخورده ماند. حالا خودِ اسنپ‌شات پرچم را حمل می‌کند. */
+      negotiable: e.negotiable === true,
     }));
   }, [featProducts, prodSlot.mode, prodSlot.status, realProducts]);
 

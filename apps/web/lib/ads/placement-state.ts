@@ -37,6 +37,8 @@ export interface EntitySnapshot {
   price?: number
   oldPrice?: number
   discountPercent?: number
+  /** آگهیِ توافقی — کارت به‌جای عدد «توافقی» می‌نویسد */
+  negotiable?: boolean
   city?: string
   badge?: string | null
   /** آمار واقعی موجودیت (مثلاً تعداد میز باشگاه)؛ نبودنش = نداریم */

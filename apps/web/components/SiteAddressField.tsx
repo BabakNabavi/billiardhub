@@ -29,7 +29,10 @@ export interface SiteAddressFieldProps {
   value: string;
   onChange: (v: string) => void;
   /** بخشِ ثابتِ مسیر — `clubs` ⇒ billiardhub.net/clubs/… */
-  basePath: 'clubs' | 'coaches' | 'referees' | 'sellers';
+  /* هر نقشی که صفحه‌ی عمومی دارد. `services` مسیرِ تکنسین است و
+     `players`/`manufacturers` هم همین‌طور — تا امروز فقط باشگاه از
+     این فیلد استفاده می‌کرد و بقیه با نامکِ خودکار می‌ماندند. */
+  basePath: 'clubs' | 'coaches' | 'referees' | 'sellers' | 'services' | 'players' | 'manufacturers';
   /** نامِ فارسی که دکمه‌ی «پیشنهاد» از رویش نشانی می‌سازد */
   suggestFrom?: string;
   /** سازنده‌ی نشانیِ بررسیِ در‌دسترس‌بودن؛ باید `{ available: boolean }` برگرداند.
@@ -149,7 +152,10 @@ export default function SiteAddressField({
         borderRadius: 9, padding: '7px 11px', wordBreak: 'break-all',
         transition: 'background .15s, border-color .15s',
       }}>
-        www.billiardhub.net/{basePath}/
+        {/* بدونِ `www` — دامنه یکی شده و `www` با ۳۰۱ به همین‌جا
+            می‌آید (`nginx-canonical.sh`). نشان‌دادنِ نشانیِ هدایت‌شونده
+            یعنی کاربر لینکی را کپی کند که یک پرش اضافه دارد. */}
+        billiardhub.net/{basePath}/
         <span style={{ color: value ? GOLD_D : 'inherit' }}>{value || '…'}</span>
       </div>
 

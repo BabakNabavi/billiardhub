@@ -11,6 +11,7 @@ import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { useAuthStore } from '../../../store/auth.store'
 import ProvinceCitySelect from '../../../components/ProvinceCitySelect'
+import ProfileSlugField from '../../../components/ProfileSlugField'
 import ClubPicker from '../../../components/ClubPicker'
 import { compressImage } from '../../../lib/seller-store'
 import type { MfrProduct } from '../../../lib/manufacturers-data'
@@ -219,7 +220,15 @@ export default function ManufacturerDashboard() {
                 <label className={LABEL}>سال تأسیس</label>
                 <input className={INPUT} value={form.sinceYear} onChange={e => set('sinceYear', e.target.value)} placeholder="مثال: ۱۳۷۸" />
               </div>
+                            {/* نشانیِ اختصاصیِ سایت — همان چیزی که پنلِ باشگاه از اول داشت */}
               <div className="sm:col-span-2">
+                <ProfileSlugField
+                  kind="manufacturer" value={form.slug}
+                  onChange={v => setForm(f => ({ ...f, slug: v }))}
+                  suggestFrom={form.name}
+                />
+              </div>
+<div className="sm:col-span-2">
                 <ProvinceCitySelect
                   value={{ province: form.province, city: form.city }}
                   onChange={v => { set('province', v.province); set('city', v.city) }}
