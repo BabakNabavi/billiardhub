@@ -289,7 +289,7 @@ export default function SellerDashboard() {
               <div>
                 <label className={LABEL} htmlFor="f-title">نام فروشگاه *</label>
                 <input id="f-title" className={INPUT} value={form.title}
-                  onChange={e => set('title', e.target.value)} placeholder="فروشگاه تجهیزات بیلیارد بابی"/>
+                  onChange={e => set('title', e.target.value)}/>
                 <p className={HINT}>تیتر اصلی بالای صفحه‌ی فروشگاه.</p>
               </div>
               <div>

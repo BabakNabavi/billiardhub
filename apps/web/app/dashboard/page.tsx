@@ -15,16 +15,17 @@ import {
   Calendar, Trophy, Bell,
   Award, Clock, MapPin,
   CheckCircle, Circle, ArrowLeft, Users,
-  ShoppingBag, Play, Plus, Shield, ShieldCheck,
+  ShoppingBag, Plus, Shield, ShieldCheck,
   ClipboardList,
 } from 'lucide-react';
-import { fetchTournaments } from '../../lib/tournaments/client';
-import type { Tournament } from '../../lib/mock-tournaments';
 import ScrollReveal from '../../components/ScrollReveal/ScrollReveal';
 import AuthGuard from '../../components/AuthGuard';
 import MyBookings from '../../components/booking/MyBookings';
 
 
+
+/* سیستمِ تبلیغات هنوز رونمایی نشده — جزئیات کنارِ خودِ کارت پایین‌تر */
+const ADS_LAUNCHED = false;
 
 /* ══ types ══ */
 interface MyReg {
@@ -112,21 +113,24 @@ export default function DashboardPage() {
     setNotifications(prev => prev.map(n => ({ ...n, read: true })));
   }, [notifOpen]);   // eslint-disable-line react-hooks/exhaustive-deps
 
-  /* مسابقه‌ی پیش‌رو از سرور می‌آید. پیش‌تر از آرایه‌ی نمونه خوانده
-     می‌شد و `?? SAMPLE_TOURNAMENTS[0]` تضمین می‌کرد همیشه یک مسابقه‌ی
-     ساختگی نمایش داده شود — حتی وقتی هیچ مسابقه‌ای وجود نداشت.
-     حالا اگر چیزی نباشد، کارت اصلاً نمایش داده نمی‌شود. */
-  const [upcomingTournament, setUpcoming] = useState<Tournament | null>(null);
-  useEffect(() => {
-    void (async () => {
-      const all = await fetchTournaments();
-      setUpcoming(
-        all.find(t => t.status === 'registration_open')
-        ?? all.find(t => t.status === 'upcoming')
-        ?? null,
-      );
-    })();
-  }, []);
+  /* ── کارتِ «مسابقه‌ی پیش‌رو» حذف شد ──
+     مسابقه‌ی واقعی نشان می‌داد، ولی *هر* مسابقه‌ای — نه مسابقه‌ای که
+     این کاربر در آن ثبت‌نام کرده. روی داشبوردِ شخصی، یک تبلیغِ عمومی
+     بود که جای کارت‌های خودِ کاربر را می‌گرفت. مسابقاتِ خودش همین
+     بالاتر در «ثبت‌نام‌های من» می‌آیند و فهرستِ کامل در `/tournaments`
+     است. */
+
+  /* ── درصدِ واقعیِ تکمیلِ پروفایل ──
+     هر مورد فیلدی است که واقعاً در حساب وجود دارد و کاربر می‌تواند
+     پرش کند؛ نه ادعایی که راهی برای انجامش نباشد. */
+  const profileSteps = [
+    { label: 'نام و نام خانوادگی', done: !!(user?.firstName && user?.lastName) },
+    { label: 'شماره‌ی موبایل تأییدشده', done: !!user?.verified },
+    { label: 'تصویر پروفایل', done: !!user?.avatar },
+    { label: 'شهر', done: !!user?.city },
+    { label: 'درباره‌ی من', done: !!user?.bio },
+  ];
+  const profilePct = Math.round((profileSteps.filter(s => s.done).length / profileSteps.length) * 100);
 
   const doCancel = async () => {
     if (!cancelReg) return;
@@ -760,6 +764,11 @@ export default function DashboardPage() {
                   جایش را به معماری Placement/Campaign داد؛ سهمیه هم اکنون
                   خاموش است (ads_quota_enabled=false). نگه‌داشتنشان یعنی نشان
                   دادن بسته‌ای که کاربر نه خریده و نه می‌تواند بخرد. */}
+              {/* ── «تبلیغات» تا زمانِ رونماییِ سیستمِ تبلیغات پنهان است ──
+                  جایگاه‌ها ساخته شده‌اند ولی هنوز فروش نمی‌روند؛ کارتی
+                  که به پنلِ خالی می‌رساند فقط سؤال می‌سازد. برای
+                  برگرداندنش کافی است این ثابت `true` شود. */}
+              {ADS_LAUNCHED && (
               <ScrollReveal>
                 <div className="dash-card">
                   <div className="card-label">
@@ -774,55 +783,23 @@ export default function DashboardPage() {
                   </Link>
                 </div>
               </ScrollReveal>
-
-              {/* ── آگهی‌های من ──
-                  ثبتِ آگهی در بازار برای هر کاربرِ واردشده باز است، پس
-                  مدیریتش هم باید از داشبوردِ همه در دسترس باشد. تا
-                  امروز تنها راهش منوی پروفایل بود و آن هم فقط به نقشِ
-                  «فروشنده» نشان داده می‌شد — یعنی کاربرِ عادی آگهی ثبت
-                  می‌کرد و بعد هیچ راهی برای حذف یا ارتقایش نداشت. */}
-              <ScrollReveal>
-                <div className="dash-card">
-                  <div className="card-label">
-                    <span style={{ background: 'linear-gradient(180deg,#C7A66A,#A07840)' }} />
-                    بیلیارد بازار
-                  </div>
-                  <p style={{ fontSize: '14px', color: 'rgba(0,0,0,0.45)', lineHeight: 2, margin: '0 0 14px' }}>
-                    آگهی‌های ثبت‌شده‌ی شما — ویرایش، حذف، تازه‌سازی و «فوری».
-                  </p>
-                  <Link href="/dashboard/shop" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '12px', background: 'rgba(199,166,106,0.10)', border: '1px solid rgba(199,166,106,0.28)', borderRadius: '12px', color: '#A07840', fontSize: '15px', fontWeight: 700, textDecoration: 'none' }}>
-                    آگهی‌های من
-                  </Link>
-                </div>
-              </ScrollReveal>
-
-              {/* مسابقه‌ی پیش‌رو — فقط وقتی واقعاً مسابقه‌ای هست */}
-              {upcomingTournament && (
-              <ScrollReveal>
-                <div className="dash-card" style={{ background: 'rgba(245,158,11,0.04)', border: '1px solid rgba(245,158,11,0.15)' }}>
-                  <div className="card-label">
-                    <span style={{ background: 'linear-gradient(180deg,#f59e0b,#ef4444)' }} />
-                    مسابقه پیش رو
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '9px' }}>
-                    <div style={{ width: '34px', height: '34px', borderRadius: '11px', background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px', flexShrink: 0 }}>🏆</div>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontSize: '15px', fontWeight: 700, color: '#111111', marginBottom: '3px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{upcomingTournament.name}</div>
-                      <div style={{ fontSize: '13px', color: 'rgba(0,0,0,0.42)' }}>{upcomingTournament.date} · {upcomingTournament.clubName}</div>
-                    </div>
-                  </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px', fontSize: '14px' }}>
-                    <span style={{ color: 'rgba(0,0,0,0.42)' }}>جایزه</span>
-                    <span style={{ color: '#f59e0b', fontWeight: 700, fontSize: '13px', maxWidth: '60%', textAlign: 'left' }}>{(upcomingTournament.prizeInfo.split('|')[0] ?? '').trim()}</span>
-                  </div>
-                  <Link href={`/tournaments/${upcomingTournament.id}`} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', padding: '11px', background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.2)', borderRadius: '12px', color: '#f59e0b', fontSize: '15px', fontWeight: 700, textDecoration: 'none', transition: 'all 0.2s' }}>
-                    <Play size={13} /> مشاهده مسابقه
-                  </Link>
-                </div>
-              </ScrollReveal>
               )}
 
-              {/* Profile completion */}
+              {/* کارتِ «آگهی‌های من» برداشته شد — همان لینک در منوی
+                  پروفایلِ نوارِ بالا برای همه‌ی نقش‌ها هست
+                  (`components/Navbar.tsx`)، پس این کارت فقط تکرارش بود. */}
+
+              {/* ── تکمیل پروفایل ──
+                  تا امروز این کارت تماماً ساختگی بود: عدد ۷۲٪ هاردکد
+                  شده بود و فهرستش پنج موردِ ثابت داشت که سه‌تایشان
+                  همیشه «انجام‌شده» بودند. دو موردِ آخر — «ویدیوی
+                  هایلایت» و «تأیید فدراسیون» — اصلاً در سایت وجود
+                  ندارند: نه فیلدی برایشان هست، نه صفحه‌ای، نه
+                  فرآیندی. یعنی به هر کاربری گفته می‌شد کاری ناتمام
+                  دارد که هیچ راهی برای تمام‌کردنش نبود.
+
+                  حالا هر پنج مورد فیلدِ واقعیِ همین حساب‌اند و درصد
+                  از روی خودشان شمرده می‌شود. */}
               <ScrollReveal>
                 <div className="dash-card">
                   <div className="card-label">
@@ -830,20 +807,16 @@ export default function DashboardPage() {
                     تکمیل پروفایل
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '9px' }}>
-                    <Ring value={72} size={52} stroke={5} color="#06b6d4" label />
+                    <Ring value={profilePct} size={52} stroke={5} color="#C7A66A" label />
                     <div>
-                      <div style={{ fontSize: '17px', fontWeight: 800, color: '#111111', marginBottom: '4px' }}>۷۲٪ تکمیل شده</div>
-                      <div style={{ fontSize: '14px', color: 'rgba(0,0,0,0.42)', lineHeight: 1.5 }}>پروفایل کامل‌تر = رتبه بهتر</div>
+                      <div style={{ fontSize: '17px', fontWeight: 800, color: '#111111', marginBottom: '4px' }}>{profilePct.toLocaleString('fa-IR')}٪ تکمیل شده</div>
+                      <div style={{ fontSize: '14px', color: 'rgba(0,0,0,0.42)', lineHeight: 1.5 }}>
+                        {profilePct === 100 ? 'پروفایل شما کامل است' : 'پروفایل کامل‌تر، اعتمادِ بیشتر'}
+                      </div>
                     </div>
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                    {[
-                      { label: 'اطلاعات پایه', done: true },
-                      { label: 'تصویر پروفایل', done: true },
-                      { label: 'سابقه مسابقات', done: true },
-                      { label: 'ویدیوی هایلایت', done: false },
-                      { label: 'تأیید فدراسیون', done: false },
-                    ].map((r, i) => (
+                    {profileSteps.map((r, i) => (
                       <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '14px', color: r.done ? '#111111' : 'rgba(0,0,0,0.40)' }}>
                         {r.done
                           ? <CheckCircle size={14} style={{ color: '#C7A66A', flexShrink: 0 }} />

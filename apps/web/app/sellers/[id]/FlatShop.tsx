@@ -256,7 +256,7 @@ function CategoryDropdown({
               }${it.key === 'all' ? ' border-b border-[#EFEBE1] mb-1 rounded-b-none' : ''}`}
             >
               <span className="flex-1">{it.label}</span>
-              <span className={`text-[11.5px] ${MONO} ${selected ? 'text-[#14532D]' : 'text-[#A69F8E]'}`}>{faNum(it.count)}</span>
+              <span className={`text-[11.5px] ${MONO} ${selected ? 'text-[#14532D]' : 'text-[#9A6E38]'}`}>{faNum(it.count)}</span>
               {selected && <span className="text-[#14532D]">{Icon.check}</span>}
             </button>
           )
@@ -469,7 +469,7 @@ export default function FlatShop() {
             </button>
 
             {/* نام، شهر (با دکمه‌ی تلفن روبه‌رویش سمت چپ)، توضیحات — زیر هم */}
-            <h2 className="mt-3 text-[17px] font-bold sm:text-[19px]">{store.title}</h2>
+            <h2 className="mt-3 text-[17px] font-bold text-[#1C1B17] sm:text-[19px]">{store.title}</h2>
             <div className="mt-1.5 flex flex-wrap items-center justify-between gap-2">
               <div className="flex items-center gap-1.5 text-[12.5px] text-[#8A8474]">
                 <span className="text-[#14532D]">{Icon.pin}</span>{[store.province, store.city].filter(Boolean).join('، ')}
@@ -515,8 +515,13 @@ export default function FlatShop() {
         {/* تیتر + دراپ‌داون دسته‌بندی */}
         <div className="mb-5 flex flex-wrap items-end justify-between gap-4">
           <div>
-            <h1 className="text-xl font-bold sm:text-2xl">محصولات فروشگاه</h1>
-            <span className="text-[12.5px] text-[#8A8474]">{faNum(visible.length)} محصول</span>
+            {/* همان نشانِ طلاییِ «درباره ما» — دو تیترِ اصلیِ صفحه باید
+                یک‌شکل باشند؛ این یکی بی‌رنگ و بی‌نشان مانده بود. */}
+            <div className="flex items-center gap-2">
+              <span className="h-5 w-[3px] rounded bg-gradient-to-b from-[#C7A66A] to-[#8A6020]" />
+              <h1 className="text-xl font-bold text-[#1C1B17] sm:text-2xl">محصولات فروشگاه</h1>
+            </div>
+            <span className="mr-[11px] text-[12.5px] text-[#8A8474]">{faNum(visible.length)} محصول</span>
           </div>
           <CategoryDropdown value={cat} onChange={setCat} counts={catCounts} />
         </div>
@@ -652,7 +657,7 @@ export default function FlatShop() {
 
             {/* دسته‌بندی‌ها — روی موبایل حذف */}
             <div className="hidden sm:block">
-              <h4 className="mb-2 text-[10.5px] font-bold tracking-[0.08em] text-[#A69F8E] sm:mb-4">دسته‌بندی‌ها</h4>
+              <h4 className="mb-2 text-[10.5px] font-bold tracking-[0.08em] text-[#9A6E38] sm:mb-4">دسته‌بندی‌ها</h4>
               <ul className="grid grid-cols-2 gap-x-4 gap-y-3 text-[13px] text-[#5B564B]">
                 {BAZAAR_CATS.slice(0, 8).map(c => (
                   <li key={c.id}>
@@ -669,7 +674,7 @@ export default function FlatShop() {
 
             {/* راه‌های ارتباطی */}
             <div>
-              <h4 className="mb-2 text-[10.5px] font-bold tracking-[0.08em] text-[#A69F8E] sm:mb-4">راه‌های ارتباطی</h4>
+              <h4 className="mb-2 text-[10.5px] font-bold tracking-[0.08em] text-[#9A6E38] sm:mb-4">راه‌های ارتباطی</h4>
               <ul className="space-y-1.5 text-[13px] text-[#5B564B] sm:space-y-3">
                 <li className="flex flex-wrap items-center gap-x-5 gap-y-1.5">
                   {store.phones.map(ph => (
@@ -697,7 +702,7 @@ export default function FlatShop() {
 
             {/* موقعیت فروشگاه */}
             <div>
-              <h4 className="mb-2 text-[10.5px] font-bold tracking-[0.08em] text-[#A69F8E] sm:mb-4">موقعیت فروشگاه</h4>
+              <h4 className="mb-2 text-[10.5px] font-bold tracking-[0.08em] text-[#9A6E38] sm:mb-4">موقعیت فروشگاه</h4>
               <p className="mb-1.5 flex items-start gap-2 text-[13px] leading-relaxed text-[#5B564B] sm:mb-3">
                 <span className="mt-0.5 shrink-0 text-[#14532D]">{Icon.pin}</span>
                 {store.address}
