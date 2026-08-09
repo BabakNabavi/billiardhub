@@ -1502,6 +1502,35 @@ t('کارتِ صفحه‌ی اصلی برای توافقی صفر نمی‌نو�
   && /negotiable: p\.negotiable === true/.test(read('lib/home-featured.ts')),
   '«۰ تومان» یعنی سایت از طرفِ فروشنده قیمتی اعلام می‌کند که او نگفته');
 
+/* ── قوانین باید همان چیزی را بگویند که کد انجام می‌دهد ── */
+console.log('\n― قوانین و مالی ―');
+const legalDoc = read('lib/legal-content.ts');
+const finPolicy = read('lib/finance/policy.ts');
+const cancelRoute = read('app/api/bookings/[id]/cancel/route.ts');
+
+t('کمیسیون در قوانین از منبعِ واحد می‌آید',
+  /FEE_RULES/.test(legalDoc) && /PLATFORM_FEE_PERCENT = 5/.test(finPolicy),
+  'عددِ هاردکد در متنِ حقوقی با کد از هم دور می‌افتد');
+t('جدابودنِ کارمزد درگاه صریح نوشته شده',
+  /کارمزد درگاه پرداخت جدا/.test(finPolicy),
+  'باشگاه‌دار ۵٪ را می‌بیند و انتظار دارد بقیه دقیقاً به حسابش بنشیند');
+t('کمیسیونِ ثبت‌نام مسابقه هم آمده',
+  /ثبت‌نام موفق در مسابقات/.test(finPolicy));
+t('قاعده‌ی ۴ ساعتِ باشگاه در قوانین هست',
+  /CLUB_CANCEL_RULES/.test(legalDoc) && /CLUB_CANCEL_HOURS = 4/.test(finPolicy));
+t('همان عدد در کدِ لغو هم هست',
+  /const OWNER_CANCEL_HOURS = 4/.test(cancelRoute),
+  'اگر این دو از هم جدا شوند، قانون چیزی می‌گوید و سایت کارِ دیگری می‌کند');
+t('چرخه‌ی تسویه توضیح داده شده',
+  /SETTLEMENT_RULES/.test(legalDoc) && /تا پایان ساعتِ رزروشده نزد بیلیارد هاب/.test(finPolicy),
+  'باشگاه‌دار فکر می‌کرد تسویه عقب افتاده یا پولی گم شده');
+t('لوگوی پوستر کشیده نمی‌شود',
+  /flexDirection: 'column', alignItems: 'flex-start', gap: 9/.test(read('app/sellers/[id]/FlatShop.tsx')),
+  'در ستونِ flex بدونِ align-items، عکس تا عرضِ کانتینر کش می‌آید');
+t('انتخابِ نقشِ اصلی از منو در دسترس است',
+  /href: '\/profile\/role', label: 'نقش‌های من'/.test(read('components/Navbar.tsx')),
+  'تنها جای انتخابِ نقشِ اصلی بود و فقط از چند کارتِ داشبورد به آن لینک بود');
+
 /* ── محصولِ فروشگاه: دو کلیدی که با هم اشتباه می‌شدند ── */
 console.log('\n― محصولاتِ فروشگاه ―');
 const adsPost = stripComments(read('app/api/market/ads/route.ts'));

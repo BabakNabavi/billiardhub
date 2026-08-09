@@ -22,8 +22,17 @@ cd "$(dirname "$0")"
 #
 # امن است چون `tar -xzf` روی پوشه‌ی موجود می‌ریزد و چیزی پاک نمی‌کند:
 # نبودنِ `public` در بسته یعنی نسخه‌ی سرور دست‌نخورده می‌ماند.
+#
+# ── تله‌ی خروجیِ `sha1sum` ──
+# نسخه‌ی Git Bash روی ویندوز فایل را باینری می‌بیند و می‌نویسد
+# `hash *./path`، ولی لینوکس `hash  ./path` (دو فاصله). بدونِ
+# یکسان‌سازی، دو اثرِ انگشت **هرگز** برابر نمی‌شوند و این بهینه‌سازی
+# بی‌صدا بی‌اثر می‌ماند — بسته هر بار کامل می‌رود و کسی نمی‌فهمد چرا.
+# `LC_ALL=C` هم برای ترتیبِ یکسانِ مرتب‌سازی لازم است.
+PUB_FP="find . -type f -exec sha1sum {} + | sed 's/^\([0-9a-f]*\) \*/\1  /' | LC_ALL=C sort -k2 | sha1sum | cut -d' ' -f1"
+
 echo "── بررسیِ public ──"
-PUB_SHA=$(cd apps/web/public && find . -type f -exec sha1sum {} + | sort -k2 | sha1sum | cut -d' ' -f1)
+PUB_SHA=$(cd apps/web/public && eval "$PUB_FP")
 REMOTE_PUB=$(ssh -n -i "$KEY" -o ServerAliveInterval=15 "$SRV" 'cat /opt/billiardhub/.public-sha 2>/dev/null || true')
 if [ "$PUB_SHA" = "$REMOTE_PUB" ]; then
   PUB_EXCLUDE="--exclude=apps/web/public"

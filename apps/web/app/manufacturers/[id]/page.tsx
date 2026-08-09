@@ -90,7 +90,7 @@ function MfrPoster({ variant, title, about = false }: { variant: number; title?:
   return (
     <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', background: p.bg }}>
       {layers}
-      <div style={{ position: 'absolute', top: '50%', insetInlineEnd: 'clamp(22px,5vw,54px)', transform: 'translateY(-50%)', display: 'flex', flexDirection: 'column', gap: 9, maxWidth: 'min(62%,520px)' }}>
+      <div style={{ position: 'absolute', top: '50%', insetInlineEnd: 'clamp(22px,5vw,54px)', transform: 'translateY(-50%)', display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 9, maxWidth: 'min(62%,520px)' }}>
         <img loading="lazy" decoding="async" src="/images/Logo/bh-header-v4.png" alt="بیلیارد هاب" style={{ height: 'clamp(22px,3.3vw,36px)', width: 'auto' }}/>
         {title && <div style={{ fontSize: 'clamp(15px,2.3vw,24px)', fontWeight: 800, color: '#fff', lineHeight: 1.25, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{title}</div>}
         {subtitleRow(false)}

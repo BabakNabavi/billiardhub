@@ -7,7 +7,7 @@ import {
   Search, Bell, ChevronDown, User, X, Trophy,
   Users, BookOpen, ShoppingBag, Building2, Radio, Star, Wrench,
   Newspaper, Calendar, Menu, ArrowLeft, LogOut, Settings,
-  Zap, Crown, LayoutDashboard, Factory, GraduationCap, Home, Store, Clapperboard, Send, LifeBuoy,
+  Zap, Crown, LayoutDashboard, Factory, GraduationCap, Home, Store, Clapperboard, Send, LifeBuoy, BadgeCheck,
 } from 'lucide-react';
 import { useRouter, usePathname } from 'next/navigation';
 import { fetchConversations, fetchNotifs, markNotifsRead, type Notif } from '../lib/social';
@@ -549,7 +549,14 @@ export default function Navbar() {
                            می‌فرستاد و دو گزینه عملاً یک کار می‌کردند */
                         return [
                           { href: '/admin', label: 'پنل ادمین', icon: <Crown size={13} /> },
-                          { href: '/profile/me', label: 'ویرایش پروفایل', icon: <Settings size={13} /> },
+                          /* ── چرا این‌جا ──
+                           صفحه‌ی نقش‌ها تنها جایی است که «نقشِ اصلی»
+                           انتخاب می‌شود — همان نشانی که روی آگهی و
+                           استوریِ کاربر می‌نشیند. ولی فقط از چند کارتِ
+                           داشبورد به آن لینک بود، پس کاربرِ چندنقشی
+                           دنبالش می‌گشت و پیدا نمی‌کرد. */
+                        { href: '/profile/role', label: 'نقش‌های من', icon: <BadgeCheck size={13} /> },
+                        { href: '/profile/me', label: 'ویرایش پروفایل', icon: <Settings size={13} /> },
                         ];
                       }
                       const roles = [user.primaryRole, ...(user.secondaryRoles ?? [])];
