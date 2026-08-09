@@ -1018,10 +1018,26 @@ t('کیس چوب و کیف توپ فهرستِ نوع و برند دارند',
   /'cue-case', 'ball-bag'/.test(chainSrc),
   'تفکیکِ case-bag نصفه مانده بود و این دو دسته به متنِ آزاد می‌افتادند');
 t('نوارِ فوری با اسکرولِ کاربر می‌ایستد و ۵ ثانیه بعد راه می‌افتد',
-  /idle = setTimeout\(\(\) => \{ holdRef\.current = false \}, 5000\)/.test(shopPage)
+  /holdUntilRef\.current = performance\.now\(\) \+ 5000/.test(shopPage)
+  && /t >= holdUntilRef\.current/.test(shopPage)
   && /el\.addEventListener\('scroll', onScroll/.test(shopPage)
   && /writtenRef/.test(shopPage),
   'بدونِ writtenRef، اسکرولی که خودِ انیمیشن می‌سازد خودش را متوقف می‌کرد');
+t('توقف را فقط زمان لغو می‌کند، نه قلابِ درگ',
+  /useHorizontalScroll\(urgRef, busy => \{ if \(busy\) hold\(\) \}\)/.test(shopPage)
+  && !/holdRef\.current = busy/.test(shopPage),
+  'onInteract(false) قلاب، تایمرِ پنج ثانیه‌ای را پاک می‌کرد و نوار بلافاصله راه می‌افتاد');
+t('سرچ‌بارِ موبایل فاصله‌ی اضافه‌ی بالا را ندارد',
+  /\.mk-msearch \{[^}]*padding: calc\(4px \+ env\(safe-area-inset-top\)\)/.test(shopPage));
+t('بازگشتِ فرمِ ثبت به صفحه‌ی قبلی می‌رود',
+  /بازگشت به فروشگاه من/.test(newAd) && /router\.back\(\)/.test(newAd)
+  && /window\.history\.length > 1/.test(newAd),
+  'همیشه به /shop می‌رفت، حتی وقتی کاربر از «آگهی‌های من» آمده بود');
+t('کارتِ قفلِ اطلاعات فروشنده نمایش داده نمی‌شود',
+  /const sellerLocked = shopNameLocked && geoLocked/.test(newAd)
+  && /\{!sellerLocked && \(/.test(newAd)
+  && /SectionTitle>اطلاعات تماس/.test(newAd),
+  'اطلاعات تماس باید بماند — شماره واقعاً قابلِ تغییر است');
 t('لیستِ استان/شهر از کارت بیرون می‌زند نه زیرِ آن',
   /createPortal/.test(pcs) && /position: fixed; z-index: 9999/.test(pcs)
   && /const openUp = below < 200/.test(pcs),

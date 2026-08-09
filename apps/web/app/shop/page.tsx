@@ -555,9 +555,18 @@ export default function MarketNewPage() {
   const urgRef = useRef<HTMLDivElement>(null)
   /* توقف در ref نگه داشته می‌شود نه state: حلقه هر فریم می‌خواندش و
      نباید هر بار رندرِ تازه بسازد. */
-  const holdRef = useRef(false)
+  /* ── چرا مهرِ زمان و نه یک بولین با تایمر ──
+     نسخه‌ی قبلی `holdRef` بولین بود و `useHorizontalScroll` هم با
+     `onInteract(false)` مستقیم رویش می‌نوشت — هم موقعِ رها کردنِ ماوس،
+     هم با تایمرِ ۹۰۰ میلی‌ثانیه‌ایِ خودش. یعنی هر بار تایمرِ پنج
+     ثانیه‌ایِ ما را پاک می‌کرد و نوار بلافاصله راه می‌افتاد.
+
+     حالا فقط یک عدد است: «تا این لحظه ساکت بمان». هرکس می‌تواند
+     جلوترش ببرد، هیچ‌کس نمی‌تواند لغوش کند. */
+  const holdUntilRef = useRef(0)
+  const hold = () => { holdUntilRef.current = performance.now() + 5000 }
   const [urgReps, setUrgReps] = useState(3)
-  useHorizontalScroll(urgRef, busy => { holdRef.current = busy })
+  useHorizontalScroll(urgRef, busy => { if (busy) hold() })
 
   /* آخرین موقعیتی که خودِ حلقه نوشته — برای جداکردنِ اسکرولِ کاربر
      از اسکرولِ خودِ انیمیشن. بدونِ این، رویدادِ `scroll` که انیمیشن
@@ -573,24 +582,18 @@ export default function MarketNewPage() {
   useEffect(() => {
     const el = urgRef.current
     if (!el || !urgent.length) return
-    let idle: ReturnType<typeof setTimeout> | null = null
-    const touch = () => {
-      holdRef.current = true
-      if (idle) clearTimeout(idle)
-      idle = setTimeout(() => { holdRef.current = false }, 5000)
-    }
     const onScroll = () => {
       /* اگر جابه‌جایی همانی است که حلقه نوشته، کارِ کاربر نبوده */
-      if (Math.abs(getPos(el, scrollSign(el)) - writtenRef.current) > 2) touch()
+      if (Math.abs(getPos(el, scrollSign(el)) - writtenRef.current) > 2) hold()
     }
     const EV = ['pointerdown', 'touchstart', 'touchmove', 'wheel'] as const
-    for (const ev of EV) el.addEventListener(ev, touch, { passive: true })
+    for (const ev of EV) el.addEventListener(ev, hold, { passive: true })
     el.addEventListener('scroll', onScroll, { passive: true })
     return () => {
-      if (idle) clearTimeout(idle)
-      for (const ev of EV) el.removeEventListener(ev, touch)
+      for (const ev of EV) el.removeEventListener(ev, hold)
       el.removeEventListener('scroll', onScroll)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [urgent.length])
 
   /* تعدادِ تکرار از عرضِ واقعی — تا همیشه سرریز باشد و حلقه بسته شود */
@@ -625,7 +628,8 @@ export default function MarketNewPage() {
     writtenRef.current = cycle
     let last = 0, raf = 0
     const tick = (t: number) => {
-      if (last && !holdRef.current) {
+      /* `t` همان مبنای `performance.now()` را دارد، پس مقایسه مستقیم است */
+      if (last && t >= holdUntilRef.current) {
         let p = getPos(el, sign) - (SPEED * (t - last)) / 1000
         while (p <= 0) p += cycle
         setPos(el, sign, p)
@@ -850,7 +854,10 @@ export default function MarketNewPage() {
         .mk-topbar { position: sticky; top: 0; z-index: 150; padding-top: env(safe-area-inset-top);
           background: rgba(255,255,255,0.9); backdrop-filter: blur(24px) saturate(1.6); -webkit-backdrop-filter: blur(24px) saturate(1.6);
           border-bottom: 1px solid ${LINE}; }
-        .mk-msearch { display: none; position: sticky; top: 0; z-index: 150; padding: calc(16px + env(safe-area-inset-top)) 14px 12px;
+        /* بالای سرچ‌بار ۱۶ پیکسل فاصله بود در حالی که نوارِ سایت روی
+           این صفحه اصلاً نمایش داده نمی‌شود — یعنی فضای خالیِ محض.
+           تنها چیزی که می‌ماند inset ایمنِ خودِ گوشی است. */
+        .mk-msearch { display: none; position: sticky; top: 0; z-index: 150; padding: calc(4px + env(safe-area-inset-top)) 14px 8px;
           background: rgba(247,245,240,0.94); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
           border-bottom: 1px solid ${LINE}; }
 

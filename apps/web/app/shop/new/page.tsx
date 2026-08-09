@@ -2,6 +2,7 @@
 
 import { useState, useRef, useCallback, useEffect } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { ChevronRight } from 'lucide-react'
 import { useAuthStore } from '../../../store/auth.store'
 import { findSellerByOwner } from '../../../lib/seller-store'
@@ -43,6 +44,7 @@ interface ImgSlot { data: string; name: string; file: File }
 
 // ── Main Page ─────────────────────────────────────────────────
 export default function NewProductPage() {
+  const router = useRouter()
   const fileRef = useRef<HTMLInputElement>(null)
 
   const [form, setForm] = useState({
@@ -144,6 +146,9 @@ export default function NewProductPage() {
   const effModel = form.model === 'سایر' ? form.modelOther.trim() : form.model.trim()
   /* «سایر» یعنی متنی که خودِ فروشنده نوشته، نه واژه‌ی «سایر» */
   const effType = form.type === 'سایر' ? form.typeOther.trim() : form.type.trim()
+  /* هر چهار فیلدِ کارتِ «اطلاعات فروشنده» از فروشگاه قفل شده‌اند؟
+     پس کارتی که هیچ‌کدامش قابلِ تغییر نیست نمایش داده نمی‌شود. */
+  const sellerLocked = shopNameLocked && geoLocked
 
   const handleCategoryChange = (cat: string) => {
     setForm(f => ({ ...f, category: cat, type: '', brand: '', brandOther: '', model: '', modelOther: '' }))
@@ -398,12 +403,23 @@ export default function NewProductPage() {
           {/* ── Top nav ──
               فلش به راست است، نه چپ: در RTL «برگشت» یعنی حرکت به راست. */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: -6, marginBottom: 16 }}>
-            <Link href="/shop" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12.2, color: TEXT_SEC, textDecoration: 'none', padding: '7px 12.5px', borderRadius: 10, background: LQ_BG, border: LQ_BOR, boxShadow: LQ_SHAD, backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', transition: 'color 0.2s' }}
+            {/* ── چرا router.back و نه یک نشانیِ ثابت ──
+                این دکمه همیشه به `/shop` می‌رفت، حتی وقتی کاربر از
+                «آگهی‌های من» آمده بود — یعنی «بازگشت» او را جایی
+                می‌برد که نبوده. حالا به همان صفحه‌ی قبلی برمی‌گردد؛
+                و اگر تاریخچه‌ای نباشد (نشانی مستقیم باز شده)، به
+                «آگهی‌های من» می‌رود. */}
+            <button type="button"
+              onClick={() => {
+                if (typeof window !== 'undefined' && window.history.length > 1) router.back()
+                else router.push('/dashboard/shop')
+              }}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12.2, color: TEXT_SEC, cursor: 'pointer', fontFamily: 'Vazirmatn,Tahoma,sans-serif', padding: '7px 12.5px', borderRadius: 10, background: LQ_BG, border: LQ_BOR, boxShadow: LQ_SHAD, backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', transition: 'color 0.2s' }}
               onMouseEnter={e => (e.currentTarget.style.color = GOLD)}
               onMouseLeave={e => (e.currentTarget.style.color = TEXT_SEC)}>
               <ChevronRight size={13.5} />
-              بازگشت به فروشگاه
-            </Link>
+              بازگشت به فروشگاه من
+            </button>
           </div>
 
           {/* ── Steps indicator ──
@@ -704,7 +720,16 @@ export default function NewProductPage() {
               ═══════════════════════════════════════════════════ */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
 
-                {/* card: shop info */}
+                {/* ── چرا این کارت گاهی نیست ──
+                    نام فروشگاه، نام مالک، استان/شهر و آدرس همگی از
+                    پروفایلِ فروشگاه پر و قفل می‌شوند. وقتی هر چهارتا
+                    قفل‌اند، کارت فقط چهار فیلدِ غیرقابلِ تغییر را نشان
+                    می‌دهد و بی‌جهت ارتفاع می‌گیرد — پس نمایش داده
+                    نمی‌شود. مقدارها سرِ جایشان‌اند و با آگهی ثبت می‌شوند.
+
+                    «اطلاعات تماس» جدا می‌ماند، چون شماره‌ی تماس واقعاً
+                    قابلِ تغییر است. */}
+                {!sellerLocked && (
                 <div style={{ background: LQ_BG, backdropFilter: 'blur(40px) saturate(220%)', WebkitBackdropFilter: 'blur(40px) saturate(220%)', border: LQ_BOR, borderRadius: 20, boxShadow: LQ_SHAD, padding: '24px', position: 'relative', overflow: 'hidden', animation: 'fadeUp 0.5s ease both' }}>
                   <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '46%', background: 'linear-gradient(180deg,rgba(255,255,255,0.55) 0%,transparent 100%)', pointerEvents: 'none' }} />
                   <SectionTitle>اطلاعات فروشنده</SectionTitle>
@@ -751,6 +776,7 @@ export default function NewProductPage() {
 
                   </div>
                 </div>
+                )}
 
                 {/* card: contact info */}
                 <div style={{ background: LQ_BG, backdropFilter: 'blur(40px) saturate(220%)', WebkitBackdropFilter: 'blur(40px) saturate(220%)', border: LQ_BOR, borderRadius: 20, boxShadow: LQ_SHAD, padding: '24px', position: 'relative', overflow: 'hidden', animation: 'fadeUp 0.54s ease both' }}>
