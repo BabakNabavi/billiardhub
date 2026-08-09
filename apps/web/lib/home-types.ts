@@ -42,6 +42,10 @@ export interface RealProduct {
   /* آگهیِ توافقی قیمتِ قابلِ نمایش ندارد — کارت باید «توافقی»
      بنویسد، نه «۰ تومان». */
   negotiable: boolean
+  /* شهر و وضعیتِ کالا — کارتِ صفحه‌ی اصلی این دو را نداشت، در حالی
+     که همان آگهی در فهرستِ بازار نشانشان می‌داد */
+  city: string
+  condition: string
 }
 
 export interface RealStore {

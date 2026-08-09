@@ -32,6 +32,7 @@ import {
 } from '../../lib/market/categories'
 import { productTitleParts } from '../../lib/market/title'
 import ProductTitle from '../../components/market/ProductTitle'
+import { CardMeta, CardPrice } from '../../components/market/CardFacts'
 /* همان موتورِ کاروسل‌های صفحه‌ی اصلی: درگِ روان + حرکتِ خودکار */
 import { useHorizontalScroll, scrollSign, getPos, setPos } from '../../lib/useHorizontalScroll'
 
@@ -220,25 +221,11 @@ function MarketCard({ l, i, saved, onSave }: { l: Listing; i: number; saved: boo
       </div>
       <div className="mk-body">
         <ProductTitle p={{ name: l.name, brand: l.sub }} className="mk-name" headClassName="mk-h" tailClassName="mk-t" />
-        <div className="mk-meta">
-          <MapPin size={10} style={{ color: GOLD, flexShrink: 0 }} />
-          <span>{l.city || 'ایران'}</span>
-          <span className="mk-cond">{COND_LABEL[l.condition]}</span>
-        </div>
+        {/* شهر/وضعیت و قیمت از منبعِ واحد — همان چیزی که کارتِ صفحه‌ی
+            اصلی و کارتِ فروشگاه هم رندر می‌کنند */}
+        <CardMeta p={l} />
         <div className="mk-priceline">
-          {!l.negotiable && l.disc > 0 && <span className="mk-pct" dir="ltr">٪{toFa(l.disc)}</span>}
-          <div style={{ marginInlineStart: 'auto', textAlign: 'left' }}>
-            {/* آگهیِ توافقی قیمت ندارد؛ «۰ تومان» نوشتن دروغ است */}
-            {l.negotiable ? (
-              <div className="mk-price">توافقی</div>
-            ) : (
-              <>
-                {/* «تومان» روی خط خط‌خورده تا خط قیمت اصلی جا برای مبلغ + پیل ٪ داشته باشد */}
-                {l.disc > 0 && <div className="mk-old">{toFa(l.old.toLocaleString('en-US'))} <span style={{ fontStyle: 'normal' }}>تومان</span></div>}
-                <div className="mk-price">{toFa(l.price.toLocaleString('en-US'))}{l.disc === 0 && <i> تومان</i>}</div>
-              </>
-            )}
-          </div>
+          <CardPrice p={l} cls={{ pct: 'mk-pct', box: 'mk-pricebox', old: 'mk-old', now: 'mk-price', unit: 'mk-unit' }} />
         </div>
       </div>
     </Link>
@@ -252,13 +239,10 @@ function MarketRow({ l, i, saved, onSave }: { l: Listing; i: number; saved: bool
     <Link href={`/shop/${l.id}`} className="mk-row" style={{ animationDelay: `${Math.min(i, 10) * 35}ms` }}>
       <div className="info">
         <ProductTitle p={{ name: l.name, brand: l.sub }} className="ttl" headClassName="mk-h" tailClassName="mk-t" />
-        <span className="cnd">{COND_LABEL[l.condition]}</span>
-        {/* «تومان» روی خط خط‌خورده تا خط قیمت جا برای مبلغ + پیل ٪ داشته باشد */}
+        <span className="cnd">{conditionLabel(l.condition)}</span>
         <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          {!l.negotiable && l.disc > 0 && <span className="pctn" dir="ltr">٪{toFa(l.disc)}</span>}
-          <span className="prc">{l.negotiable ? 'توافقی' : <>{toFa(l.price.toLocaleString('en-US'))}{l.disc === 0 && <i> تومان</i>}</>}</span>
+          <CardPrice p={l} cls={{ pct: 'pctn', old: 'oldp', now: 'prc', unit: 'mk-unit' }} />
         </span>
-        {l.disc > 0 && <span className="oldp">{toFa(l.old.toLocaleString('en-US'))} تومان</span>}
         <span className="cty"><MapPin size={10} style={{ color: GOLD }} /> {l.city || 'ایران'}</span>
       </div>
       <button type="button" className={`mk-bk${saved ? ' on' : ''}`} aria-label="نشان کردن"
@@ -806,6 +790,11 @@ export default function MarketNewPage() {
         .mk-old { font-size: 10px; color: ${MUT}; text-decoration: line-through; font-variant-numeric: tabular-nums; }
         .mk-price { font-size: 13px; font-weight: 900; color: ${TEXT}; font-variant-numeric: tabular-nums; white-space: nowrap; }
         .mk-price i { font-style: normal; font-size: 10px; font-weight: 600; color: ${MUT}; }
+        /* ظرفِ دو خطِ قیمت و واژه‌ی «تومان» — پیش‌تر اینلاین بودند و
+           با انتقالِ قیمت به کامپوننتِ مشترک کلاسِ خودشان را گرفتند */
+        .mk-pricebox { margin-inline-start: auto; text-align: left; }
+        .mk-unit { font-style: normal; font-size: 10px; font-weight: 600; color: ${MUT}; }
+        .mk-old .mk-unit { color: inherit; }
 
         /* ── سایدبار ── */
         .mk-catrow { display: flex; align-items: center; gap: 9px; width: 100%; padding: 7px 8px; border-radius: 10px;

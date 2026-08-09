@@ -1042,6 +1042,39 @@ t('لیستِ استان/شهر از کارت بیرون می‌زند نه زی
   /createPortal/.test(pcs) && /position: fixed; z-index: 9999/.test(pcs)
   && /const openUp = below < 200/.test(pcs),
   'کارت‌های overflow:hidden لیست را می‌بریدند');
+console.log('\n― یک کارت، سه صفحه ―');
+/* یک آگهی در فهرستِ بازار، سکشنِ بازارِ صفحه‌ی اصلی و صفحه‌ی فروشگاه
+   نشان داده می‌شود. «شهر + وضعیت» فقط در فهرستِ بازار بود و «توافقی»
+   در صفحه‌ی فروشگاه اصلاً نبود (کارت «۰» چاپ می‌کرد). */
+const cardFacts = read('components/market/CardFacts.tsx');
+const homeCl = read('app/HomeClient.tsx');
+const flatShop = read('app/sellers/[id]/FlatShop.tsx');
+t('حقایقِ کارت یک منبع دارند',
+  /export function CardMeta/.test(cardFacts) && /export function CardPrice/.test(cardFacts));
+t('هر سه کارت از همان منبع می‌خوانند',
+  ['<CardMeta', '<CardPrice'].every(tag =>
+    [shopPage, homeCl, flatShop].every(f => f.includes(tag))),
+  'فهرستِ بازار، صفحه‌ی اصلی و صفحه‌ی فروشگاه');
+t('«توافقی» فقط یک‌جا نوشته شده',
+  (cardFacts.match(/توافقی/g) ?? []).length >= 1
+  && !/negotiable \?/.test(strip(homeCl)) && !/negotiable \?/.test(strip(flatShop)),
+  'صفحه‌ی فروشگاه صفرِ دیتابیس را چاپ می‌کرد');
+t('شهر و وضعیت به کارتِ فروشگاه می‌رسند',
+  /city: sp\.city,/.test(flatShop) && /condition: sp\.condition,/.test(flatShop)
+  && /negotiable: sp\.negotiable,/.test(flatShop));
+t('شهر و وضعیت به کارتِ صفحه‌ی اصلی می‌رسند',
+  /city: string\r?\n  condition: string/.test(read('lib/home-types.ts'))
+  && /city: p\.city \?\? '', condition: p\.condition \?\? 'new'/.test(homeCl),
+  'مسیرِ اسنپ‌شاتِ جایگاه هم باید همین‌ها را حمل کند');
+t('اسنپ‌شاتِ جایگاه وضعیتِ کالا را حمل می‌کند',
+  /images,brand,city,condition,status/.test(read('lib/ads/resolve.ts'))
+  && /images,brand,city,condition,status/.test(read('lib/ads/free.ts'))
+  && /city: e\.city \?\? '', condition: e\.condition \?\? 'new'/.test(homeCl),
+  'کارت‌های سکشنِ بازار از اسنپ‌شات می‌آیند، نه از ردیفِ خامِ محصول');
+t('تب‌های آگهی‌های من در یک سطر جا می‌شوند',
+  /grid grid-cols-4 border-b/.test(read('app/dashboard/shop/page.tsx')),
+  '«در انتظار تأیید» نصفه بیرون می‌ماند');
+
 t('محل کالا بالای قیمت‌گذاری است',
   editAd.indexOf('محل کالا') < editAd.indexOf('SectionTitle>قیمت‌گذاری'));
 t('دراپ‌داون از لبه‌ی صفحه بیرون نمی‌زند',
@@ -1646,9 +1679,12 @@ t('نشانِ «جدید» ۲۴ ساعته است',
   /const NEW_BADGE_MS = 24 \* 60 \* 60 \* 1000/.test(market));
 t('«فروشنده عجله دارد» برداشته شد',
   !/عجله دارد/.test(market));
-t('کارتِ صفحه‌ی اصلی برای توافقی صفر نمی‌نویسد',
-  /p\.negotiable \? \(/.test(read('app/HomeClient.tsx'))
-  && /negotiable: p\.negotiable === true/.test(read('lib/home-featured.ts')),
+/* منطقِ «توافقی» از سه کارت به `CardFacts` رفت؛ چیزی که این‌جا
+   می‌ماند رسیدنِ خودِ پرچم به هر سه مسیرِ داده است. */
+t('پرچمِ توافقی به هر سه مسیرِ داده می‌رسد',
+  /negotiable: p\.negotiable === true/.test(read('lib/home-featured.ts'))
+  && /negotiable: e\.negotiable === true/.test(read('app/HomeClient.tsx'))
+  && /negotiable: r\.negotiable === true/.test(read('app/shop/products.ts')),
   '«۰ تومان» یعنی سایت از طرفِ فروشنده قیمتی اعلام می‌کند که او نگفته');
 
 /* ── اسکرولِ صفحه مالِ مرورگر است ──

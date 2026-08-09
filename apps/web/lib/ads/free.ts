@@ -18,7 +18,7 @@ const n = (v: unknown, d = 0) => { const x = Number(v); return Number.isFinite(x
 /** تازه‌ترین محصولات فعال بازار */
 async function freeProducts(limit: number): Promise<EntitySnapshot[]> {
   const { data, error } = await sb().from('products')
-    .select('id,title,price,negotiable,"discountPrice","discountPercent",images,brand,city,status,"createdAt"')
+    .select('id,title,price,negotiable,"discountPrice","discountPercent",images,brand,city,condition,status,"createdAt"')
     .eq('status', 'active')
     .order('createdAt', { ascending: false })
     /* شکست تساوی: داده‌ی seed همه یک زمان ثبت دارند و بدون این کلید،
@@ -46,6 +46,7 @@ async function freeProducts(limit: number): Promise<EntitySnapshot[]> {
       negotiable: r.negotiable === true,
       discountPercent: disc,
       city: s(r.city),
+      condition: s(r.condition, 'new'),
     }
   })
 }

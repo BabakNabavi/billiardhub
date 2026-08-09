@@ -42,6 +42,7 @@ import { sharedJson } from '../lib/shared-fetch';
 import { useDeferredStart } from '../lib/useDeferredStart';
 import { modernizeType } from '../lib/market/title';
 import ProductTitle from '../components/market/ProductTitle';
+import { CardMeta, CardPrice } from '../components/market/CardFacts';
 import { thumbUrl } from '../lib/supabase-config';
 
 /* ── عرضِ واقعیِ کادرها ──
@@ -307,6 +308,7 @@ interface ApiProduct {
   id: string; title: string; brand?: string | null; category?: string | null
   images?: string[]; price?: number; negotiable?: boolean
   discountPrice?: number | null; discountPercent?: number | null
+  city?: string | null; condition?: string | null
 }
 interface ApiStore {
   id: string; firstName?: string; lastName?: string; avatar?: string
@@ -572,36 +574,15 @@ function BazaarCard({ p, className, style }: { p: RealProduct; className?: strin
             استفاده می‌کنند — تا یک محصول در سه صفحه یک‌شکل باشد. */}
         <ProductTitle p={{ name: p.name, brand: p.sub }}
           className="bz-name" headClassName="bz-h" tailClassName="bz-t" />
+        {/* شهر و وضعیت — این نوار فقط در فهرستِ بازار بود و همان آگهی
+            روی صفحه‌ی اصلی بدونِ آن نشان داده می‌شد */}
+        <CardMeta p={p} style={{ marginTop: 2 }} />
         <div className="bz-row">
-          {/* ── آگهیِ توافقی ──
-              فروشنده عمداً قیمت نگذاشته، پس ردیفِ قیمت در دیتابیس صفر
-              است. کارت همان صفر را چاپ می‌کرد و «۰ تومان» نشان می‌داد
-              — یعنی سایت از طرفِ فروشنده قیمتی اعلام می‌کرد که او
-              نگفته بود. صفحه‌ی بازار این را درست نشان می‌داد و فقط
-              همین کارتِ صفحه‌ی اصلی جا مانده بود. */}
-          {p.negotiable ? (
-            <div className="bz-prices">
-              <div className="bz-new">توافقی</div>
-            </div>
-          ) : (
-            <>
-              {p.pct > 0 && (
-                <span dir="ltr" className="bz-pct">٪{p.pct.toLocaleString('fa-IR')}</span>
-              )}
-              <div className="bz-prices">
-                {/* «تومان» روی خط خط‌خورده تا خط قیمت اصلی جا برای مبلغ + پیل تخفیف داشته باشد */}
-                {p.pct > 0 && (
-                  <div className="bz-old">
-                    {p.price.toLocaleString('fa-IR')} <span className="bz-unit">تومان</span>
-                  </div>
-                )}
-                <div className="bz-new">
-                  {p.sale.toLocaleString('fa-IR')}
-                  {p.pct === 0 && <span className="bz-unit" style={{ color: '#8A8474' }}> تومان</span>}
-                </div>
-              </div>
-            </>
-          )}
+          {/* قیمت از منبعِ واحد — منطقِ «توافقی» و تخفیف یک‌جا نوشته شده */}
+          <CardPrice
+            p={{ negotiable: p.negotiable, price: p.sale, old: p.price, disc: p.pct }}
+            cls={{ pct: 'bz-pct', box: 'bz-prices', old: 'bz-old', now: 'bz-new', unit: 'bz-unit' }}
+          />
         </div>
       </div>
     </Link>
@@ -915,6 +896,7 @@ export default function HomeClient({ initialPlacements, initialFeatured, service
         brand: (p.brand || 'BILLIARD').toUpperCase(),
         price: p.price ?? 0, sale: p.discountPrice ?? p.price ?? 0,
         pct: p.discountPercent ?? 0, negotiable: p.negotiable === true,
+        city: p.city ?? '', condition: p.condition ?? 'new',
       })));
 
       /* `/api/sellers` از جدولِ `profiles` می‌خواند (kind=seller،
@@ -958,6 +940,7 @@ export default function HomeClient({ initialPlacements, initialFeatured, service
          درست شد و این مسیر — که در عمل همانی است که رندر می‌شود —
          دست‌نخورده ماند. حالا خودِ اسنپ‌شات پرچم را حمل می‌کند. */
       negotiable: e.negotiable === true,
+      city: e.city ?? '', condition: e.condition ?? 'new',
     }));
   }, [featProducts, prodSlot.mode, prodSlot.status, realProducts]);
 

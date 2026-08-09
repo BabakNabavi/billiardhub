@@ -239,7 +239,11 @@ export default function MyShopPage() {
 
       {/* تب‌ها */}
       <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
-        <div className="flex border-b overflow-x-auto">
+        {/* ── چرا گرید و نه فلکسِ اسکرول‌دار ──
+            چهار تب با `flex-shrink-0` و پدینگِ ۵ روی موبایل جا نمی‌شدند
+            و «در انتظار تأیید» نصفه بیرون می‌ماند — با اسکرولِ افقی که
+            هیچ نشانه‌ای هم نداشت. حالا چهار ستونِ مساوی‌اند و جا هست. */}
+        <div className="grid grid-cols-4 border-b">
           {[
             { id: 'all', label: 'همه', count: stats.total },
             { id: 'active', label: 'فعال', count: stats.active },
@@ -247,12 +251,12 @@ export default function MyShopPage() {
             { id: 'pending', label: 'در انتظار تأیید', count: stats.pending },
           ].map(tab => (
             <button key={tab.id} onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 px-5 py-3.5 text-sm font-bold flex-shrink-0 border-b-2 transition-colors ${
+              className={`flex items-center justify-center gap-1.5 px-1 py-3 text-[11.5px] sm:text-sm font-bold border-b-2 transition-colors ${
                 activeTab === tab.id ? 'border-[#C7A66A] text-[#9A6E38]' : 'border-transparent text-gray-500 hover:text-gray-700'
               }`}>
-              {tab.label}
+              <span className="truncate">{tab.label}</span>
               {tab.count > 0 && (
-                <span className={`text-xs px-2 py-0.5 rounded-full ${activeTab === tab.id ? 'bg-[rgba(199,166,106,0.16)] text-[#9A6E38]' : 'bg-gray-100 text-gray-500'}`}>
+                <span className={`text-[10px] px-1.5 py-0.5 rounded-full flex-shrink-0 ${activeTab === tab.id ? 'bg-[rgba(199,166,106,0.16)] text-[#9A6E38]' : 'bg-gray-100 text-gray-500'}`}>
                   {tab.count.toLocaleString('fa-IR')}
                 </span>
               )}

@@ -123,6 +123,7 @@ function normalizeUserProduct(up: Record<string, unknown>): Detail {
     sellerWhatsapp: str(up.sellerWhatsapp),
     city:           str(up.city),
     condition:      str(up.condition, 'new'),
+    negotiable:     up.negotiable === true,
     createdAt:      up.createdAt ? (Date.parse(String(up.createdAt)) || null) : null,
   }
 }

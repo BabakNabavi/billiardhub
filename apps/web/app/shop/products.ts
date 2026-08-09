@@ -31,6 +31,8 @@ export interface ShopProduct {
   sellerWhatsapp: string
   city: string
   condition: string
+  /* آگهیِ توافقی — بدونِ این، کارتِ فروشگاه صفرِ دیتابیس را چاپ می‌کرد */
+  negotiable: boolean
   createdAt: number | null
 }
 
@@ -88,6 +90,7 @@ export function toShopProduct(r: Record<string, unknown>): ShopProduct {
     sellerWhatsapp: s(r.sellerWhatsapp),
     city: s(r.city),
     condition: s(r.condition, 'new'),
+    negotiable: r.negotiable === true,
     createdAt: Number.isFinite(created) ? created : null,
   }
 }

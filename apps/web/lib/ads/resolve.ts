@@ -25,6 +25,8 @@ export interface EntitySnapshot {
   /** آگهیِ توافقی قیمتِ قابلِ نمایش ندارد؛ کارت باید «توافقی» بنویسد
       نه «۰ تومان». */
   negotiable?: boolean
+  /** وضعیتِ کالا (نو/کارکرده) — کارت آن را کنارِ شهر نشان می‌دهد */
+  condition?: string
   city?: string
   badge?: string | null
   /** آمار واقعی موجودیت — نبودنش یعنی «نداریم»، نه صفر */
@@ -42,7 +44,7 @@ async function resolveProducts(rawRefs: string[]): Promise<Map<string, EntitySna
   const refs = rawRefs.filter(x => UUID.test(x))
   if (!refs.length) return out
   const { data } = await sb().from('products')
-    .select('id,title,price,negotiable,"discountPrice","discountPercent",images,brand,city,status')
+    .select('id,title,price,negotiable,"discountPrice","discountPercent",images,brand,city,condition,status')
     .in('id', refs)
   for (const r of (data as Record<string, unknown>[] ?? [])) {
     if (s(r.status) !== 'active') continue
@@ -67,6 +69,7 @@ async function resolveProducts(rawRefs: string[]): Promise<Map<string, EntitySna
       negotiable: r.negotiable === true,
       discountPercent: disc,
       city: s(r.city),
+      condition: s(r.condition, 'new'),
     })
   }
   return out

@@ -11,6 +11,7 @@ import { telPrefix, provinceOfCity } from '../../../lib/iran-geo'
 import { getMockSeller } from '../../../lib/sellers-data'
 import { MARKET_CATEGORIES } from '../../../lib/market/categories'
 import ProductTitle from '../../../components/market/ProductTitle'
+import { CardMeta, CardPrice } from '../../../components/market/CardFacts'
 /* بدونِ این، نوار روی دسکتاپ فقط با شیفت+چرخ حرکت می‌کرد و با موس
    «قفل» حس می‌شد. همان قلابی که کاروسل‌های صفحه‌ی اصلی دارند. */
 import { useHorizontalScroll } from '../../../lib/useHorizontalScroll'
@@ -44,6 +45,9 @@ const CAT_LABEL = Object.fromEntries(BAZAAR_CATS.map(c => [c.id, c.label])) as R
 interface Product {
   id: string; name: string; cat: CatKey; brand: string
   price: number; old?: number; disc: number; rating: number; reviews: number; sales: number
+  /* شهر، وضعیت و توافقی‌بودن — همان چیزهایی که کارتِ فهرستِ
+     بازار نشان می‌دهد و این‌جا اصلاً به کارت نمی‌رسیدند */
+  city: string; condition: string; negotiable: boolean
   badge?: { text: string; kind: 'sale' | 'new' }; img: string
 }
 
@@ -83,6 +87,9 @@ function productsForSeller(rows: ShopProduct[]): Product[] {
     rating: sp.rating,
     reviews: sp.reviews,
     sales: sp.sales,
+    city: sp.city,
+    condition: sp.condition,
+    negotiable: sp.negotiable,
     badge: sp.disc > 0 ? { text: `${toFa(sp.disc)}٪ تخفیف`, kind: 'sale' as const } : undefined,
     img: sp.img,
   }))
@@ -803,20 +810,18 @@ export default function FlatShop() {
 
                   <div className="pc-body-sec1 flex flex-1 flex-col gap-1.5">
                     <ProductTitle p={p} className="pc-name-sec1 text-[14.5px] leading-[1.55] text-[#1C1C1A]" headClassName="pc-h" tailClassName="pc-t" />
+                    {/* شهر و وضعیت — همان نواری که فهرستِ بازار دارد */}
+                    <CardMeta p={p} />
                     <div className="mt-auto flex items-center gap-1.5">
-                      {p.disc > 0 && (
-                        <span dir="ltr" className={`inline-flex shrink-0 items-center justify-center rounded-full bg-[#b400ae] px-2.5 pb-0.5 pt-1 text-[16px] font-extrabold leading-none text-white ${MONO}`}>
-                          ٪{toFa(p.disc)}
-                        </span>
-                      )}
-                      <div className="ms-auto text-right">
-                        {p.disc > 0 && p.old !== undefined && (
-                          <div className={`-mb-[3px] mt-[3px] text-[12.3px] leading-[1.1] text-[rgba(28,28,26,0.5)] line-through tabular-nums ${MONO}`}>
-                            {faNum(p.old)} <span className="inline-block text-[10.6px] font-medium no-underline">تومان</span>
-                          </div>
-                        )}
-                        <div className={`text-[15.5px] font-bold tabular-nums text-[#1C1C1A] ${MONO}`}>{faNum(p.price)}</div>
-                      </div>
+                      {/* قیمت از منبعِ واحد: «توافقی» این‌جا چاپ نمی‌شد و
+                          کارت صفرِ دیتابیس را «۰» نشان می‌داد */}
+                      <CardPrice p={p} cls={{
+                        pct: `inline-flex shrink-0 items-center justify-center rounded-full bg-[#b400ae] px-2.5 pb-0.5 pt-1 text-[16px] font-extrabold leading-none text-white ${MONO}`,
+                        box: 'ms-auto text-right',
+                        old: `-mb-[3px] mt-[3px] text-[12.3px] leading-[1.1] text-[rgba(28,28,26,0.5)] line-through tabular-nums ${MONO}`,
+                        now: `text-[15.5px] font-bold tabular-nums text-[#1C1C1A] ${MONO}`,
+                        unit: 'inline-block text-[10.6px] font-medium no-underline',
+                      }} />
                     </div>
                   </div>
                 </article>

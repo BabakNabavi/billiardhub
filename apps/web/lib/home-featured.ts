@@ -64,6 +64,7 @@ export async function loadHomeFeatured(): Promise<HomeFeatured> {
     id: string; title: string; brand?: string | null; category?: string | null
     images?: string[] | null; price?: number | null; negotiable?: boolean | null
     discountPrice?: number | null; discountPercent?: number | null
+    city?: string | null; condition?: string | null
   }
   const n = (v: number | null | undefined) => v ?? 0
 
@@ -93,6 +94,7 @@ export async function loadHomeFeatured(): Promise<HomeFeatured> {
     sub: p.brand || p.category || 'بیلیارد بازار',
     img: p.images?.[0] || PRODUCT_IMG,
     brand: (p.brand || 'BILLIARD').toUpperCase(),
+    city: p.city ?? '', condition: p.condition ?? 'new',
     price: n(p.price),
     sale: p.discountPrice ?? n(p.price),
     pct: n(p.discountPercent),
