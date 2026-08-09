@@ -618,24 +618,27 @@ export default function MarketNewPage() {
           font-size: 9px; font-weight: 800; color: #fff; background: rgba(27,122,75,0.92); border-radius: 999px; padding: '3px 8px'; padding: 3px 8px; }
         /* نوارِ فوری: افقی و کشیدنی، تا تعدادِ زیاد آن را نشکند */
         /* ── نوارِ فوری ──
-           سه ایراد داشت: کارت‌ها هم‌ارتفاع نبودند (نامِ یک‌خطی در
-           برابر دوخطی)، روی موبایل سومی نصفه بریده می‌شد بی‌آنکه
-           معلوم باشد ادامه دارد، و اسکرولِ لمسی روان نبود.
+           افقی و کشیدنی. سه چیز این‌جا حیاتی است و یک‌بار با
+           دست‌کاریِ بی‌دقت شکست:
 
-           کششِ عمودیِ سلول به‌علاوه‌ی ارتفاعِ صد درصدِ کارت،
-           هم‌ارتفاعشان می‌کند. عرضِ موبایل کمی کمتر شد تا لبه‌ی کارتِ
-           سوم عمداً پیدا باشد — همان چیزی که به چشم می‌گوید «بکش».
-           (بک‌تیک این‌جا ممنوع — داخلِ template literal است) */
+             ۱) min-width صفر روی خودِ نوار. بدونِ آن، ستونِ گریدِ
+                والد به عرضِ *محتوا* باز می‌شود (پیش‌فرضِ آیتمِ گرید
+                auto است) و کلِ صفحه‌ی موبایل به‌جای نوار اسکرولِ افقی
+                می‌گیرد — کارتِ افقی و نوارِ قوانین از لبه می‌زدند
+                بیرون. (بک‌تیک این‌جا ممنوع — داخلِ template literal است)
+             ۲) عرضِ ثابتِ سلول، نه درصدِ ویوپورت.
+             ۳) کششِ عمودی تا کارتِ یک‌خطی و دوخطی هم‌ارتفاع بمانند. */
         .mk-urgrow { display: flex; align-items: stretch; gap: 10px;
-          overflow-x: auto; overflow-y: hidden; padding-bottom: 8px;
-          scroll-snap-type: x mandatory; scrollbar-width: thin;
-          -webkit-overflow-scrolling: touch; overscroll-behavior-x: contain; }
+          min-width: 0; max-width: 100%;
+          overflow-x: auto; padding-bottom: 8px;
+          scroll-snap-type: x proximity; scrollbar-width: thin;
+          -webkit-overflow-scrolling: touch; }
         .mk-urgrow::-webkit-scrollbar { height: 6px; }
-        .mk-urgrow::-webkit-scrollbar-thumb { background: rgba(28,27,23,0.18); border-radius: 999px; }
+        .mk-urgrow::-webkit-scrollbar-thumb { background: rgba(28,27,23,0.20); border-radius: 999px; }
         .mk-urgcell { flex: 0 0 auto; width: 168px; scroll-snap-align: start; display: flex; }
-        /* خودِ کارت باید کلِ سلول را پر کند، وگرنه ارتفاعش تابعِ متن است */
-        .mk-urgcell > * { width: 100%; height: 100%; }
-        @media (max-width: 560px) { .mk-urgcell { width: 41vw; min-width: 132px; max-width: 152px; } }
+        .mk-urgcell > * { width: 100%; }
+        @media (max-width: 560px) { .mk-urgcell { width: 144px; } }
+
         .mk-urg { position: absolute; top: 8px; right: 8px; display: inline-flex; align-items: center; gap: 3px;
           font-size: 9px; font-weight: 800; color: #fff; background: rgba(178,59,46,0.94); border-radius: 999px; padding: 3px 8px; }
         .mk-body { display: flex; flex-direction: column; gap: 6px; padding: 9px 9px 10px; flex: 1; }
@@ -825,7 +828,7 @@ export default function MarketNewPage() {
           .mk-hr { align-self: center; height: 1px;
             background: linear-gradient(to left, rgba(154,110,56,0.38), rgba(154,110,56,0.03)); }
           .mk-mcats { display: grid; }
-          .mk-layout { grid-template-columns: 1fr; }
+          .mk-layout { grid-template-columns: minmax(0,1fr); }
           .mk-sidebar { display: none; }
           .mk-mobilebar { display: flex; }
           .mk-grid { display: none; }

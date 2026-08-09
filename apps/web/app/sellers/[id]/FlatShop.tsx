@@ -697,13 +697,15 @@ export default function FlatShop() {
               <span className="scat-lb">همه</span>
               <span className="scat-ct">{faNum(PRODUCTS.length)}</span>
             </button>
-            {MARKET_CATEGORIES.filter(c => (catCounts[c.id as CatKey] ?? 0) > 0).map(c => (
+            {MARKET_CATEGORIES.map(c => (
               <button key={c.id} type="button"
                 onClick={() => setCat(cat === c.id ? 'all' : (c.id as CatKey))}
                 className={`scat${cat === c.id ? ' on' : ''}`}>
                 <span className="scat-ic"><img src={c.img} alt="" loading="lazy" /></span>
                 <span className="scat-lb">{c.label}</span>
-                <span className="scat-ct">{faNum(catCounts[c.id as CatKey] ?? 0)}</span>
+                {(catCounts[c.id as CatKey] ?? 0) > 0
+                  ? <span className="scat-ct">{faNum(catCounts[c.id as CatKey] ?? 0)}</span>
+                  : <span className="scat-ct scat-ct-0">—</span>}
               </button>
             ))}
           </div>
