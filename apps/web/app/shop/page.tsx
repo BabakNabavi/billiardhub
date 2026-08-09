@@ -526,12 +526,16 @@ export default function MarketNewPage() {
   const urgRef = useRef<HTMLDivElement>(null)
   const urgPaused = useRef(false)
   useHorizontalScroll(urgRef, busy => { urgPaused.current = busy })
-  const urgLoop = urgent.length >= 4 ? [...urgent, ...urgent] : urgent
+  /* دوبل‌سازی وقتی لازم است که فهرست از عرضِ نوار بیرون بزند؛ با
+     دو-سه کارتی که جا می‌شوند، حرکت بی‌معناست و فقط آزار می‌دهد. */
+  const urgLoop = urgent.length >= 2 ? [...urgent, ...urgent] : urgent
   useEffect(() => {
-    if (urgent.length < 4) return
+    if (urgent.length < 2) return
     if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return
     const el = urgRef.current
     if (!el) return
+    /* اگر همه‌ی کارت‌ها جا می‌شوند، چیزی برای حرکت نیست */
+    if (el.scrollWidth <= el.clientWidth + 8) return
     const SPEED = 26                       // پیکسل بر ثانیه — عمداً کند
     const sign = scrollSign(el)
     setPos(el, sign, el.scrollWidth / 2)

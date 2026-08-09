@@ -2084,7 +2084,7 @@ useEffect(() => {
           {/* موبایل — همان BazaarCard (فرمت یکسان با دسکتاپ) */}
           <div ref={mktSliderRef} className="mkt-mobile-slider">
             {HOME_PRODUCTS.map((p) => (
-              <BazaarCard key={p.id} p={p} className="mkt-mob-card" style={{ width: '36vw', minWidth: 133, scrollSnapAlign: 'center', height: 'clamp(209px,61vw,282px)' }} />
+              <BazaarCard key={p.id} p={p} className="mkt-mob-card" style={{ width: '36.9vw', minWidth: 136, scrollSnapAlign: 'center', height: 'clamp(214px,62.5vw,289px)' }} />
             ))}
           </div>
           {/* ── Ad banners ── */}

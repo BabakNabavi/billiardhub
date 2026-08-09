@@ -60,18 +60,34 @@ export interface ProductTitleParts {
    فقط عبارتِ دقیق جایگزین می‌شود، نه هر تطبیقِ جزئی — وگرنه عنوانی
    مثل «ست ۲۲ تایی اسنوکر دست‌دوم» بی‌دلیل دست‌کاری می‌شد. */
 const LEGACY_TYPE: Record<string, string> = {
-  '۲۲ تایی اسنوکر': 'توپ اسنوکر',
-  '۱۵ تایی پاکت بیلیارد': 'توپ پاکت بیلیارد',
-  '۳ تایی کارامبول': 'توپ کارامبول',
+  /* ── چرا بدونِ واژه‌ی «توپ» ──
+     عنوان موقعِ ثبت از «دسته‌بندی + نوع» ساخته می‌شود، پس رشته‌ی
+     ذخیره‌شده از قبل نامِ دسته را دارد: «توپ ۱۵ تایی پاکت بیلیارد».
+     نسخه‌ی اولِ این نگاشت به «توپ پاکت بیلیارد» تبدیل می‌کرد و
+     نتیجه‌اش «توپ توپ پاکت بیلیارد» می‌شد. نگاشت باید فقط *نوع* را
+     بدهد؛ دسته سرِ جایش هست. */
+  '۲۲ تایی اسنوکر': 'اسنوکر',
+  '۱۵ تایی پاکت بیلیارد': 'پاکت بیلیارد',
+  '۳ تایی کارامبول': 'کارامبول',
+}
+
+/** «توپ توپ پاکت» ⇒ «توپ پاکت» — واژه‌ی تکراریِ چسبیده حذف می‌شود */
+function dedupeWords(s: string): string {
+  const w = s.split(' ')
+  const out: string[] = []
+  for (const x of w) if (out[out.length - 1] !== x) out.push(x)
+  return out.join(' ')
 }
 
 export function modernizeType(s: string): string {
+  let out = s
   for (const [old, neo] of Object.entries(LEGACY_TYPE)) {
-    if (s === old) return neo
-    if (s.startsWith(`${old} `)) return `${neo}${s.slice(old.length)}`
-    if (s.endsWith(` ${old}`)) return `${s.slice(0, -old.length)}${neo}`
+    if (out === old) { out = neo; break }
+    if (out.startsWith(`${old} `)) { out = `${neo}${out.slice(old.length)}`; break }
+    if (out.endsWith(` ${old}`)) { out = `${out.slice(0, -old.length)}${neo}`; break }
   }
-  return s
+  /* تورِ ایمنی: هر تکرارِ چسبیده — از هر منشأیی — جمع می‌شود. */
+  return dedupeWords(out)
 }
 
 export function productTitleParts(p: ProductTitleFields): ProductTitleParts {
