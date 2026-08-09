@@ -953,6 +953,7 @@ const newAdS = strip(newAd);
 const chainSrc = read('lib/market/chain.ts');
 const editAd = read('app/shop/edit/[id]/page.tsx');
 const formFields = read('components/market/AdFormFields.tsx');
+const pcs = read('components/ProvinceCitySelect.tsx');
 const detail2 = read('app/shop/[id]/page.tsx');
 const detail2S = strip(detail2);
 const relApi = read('app/api/market/ads/[id]/related/route.ts');
@@ -1005,6 +1006,17 @@ t('وضعیتِ کالا از CONDITIONS می‌آید نه رشته‌ی دست
 t('کیس چوب و کیف توپ فهرستِ نوع و برند دارند',
   /'cue-case', 'ball-bag'/.test(chainSrc),
   'تفکیکِ case-bag نصفه مانده بود و این دو دسته به متنِ آزاد می‌افتادند');
+t('نوارِ فوری با اسکرولِ کاربر می‌ایستد و ۵ ثانیه بعد راه می‌افتد',
+  /idle = setTimeout\(\(\) => \{ holdRef\.current = false \}, 5000\)/.test(shopPage)
+  && /el\.addEventListener\('scroll', onScroll/.test(shopPage)
+  && /writtenRef/.test(shopPage),
+  'بدونِ writtenRef، اسکرولی که خودِ انیمیشن می‌سازد خودش را متوقف می‌کرد');
+t('لیستِ استان/شهر از کارت بیرون می‌زند نه زیرِ آن',
+  /createPortal/.test(pcs) && /position: fixed; z-index: 9999/.test(pcs)
+  && /const openUp = below < 200/.test(pcs),
+  'کارت‌های overflow:hidden لیست را می‌بریدند');
+t('محل کالا بالای قیمت‌گذاری است',
+  editAd.indexOf('محل کالا') < editAd.indexOf('SectionTitle>قیمت‌گذاری'));
 t('دراپ‌داون از لبه‌ی صفحه بیرون نمی‌زند',
   /const openUp = below < 190/.test(formFields) && /maxHeight: rect\.maxH/.test(formFields),
   'روی موبایل نیمی از فهرست بیرونِ نمایشگر بود و گزینه‌های پایین انتخاب نمی‌شدند');
@@ -1382,9 +1394,15 @@ t('برچسب با نقش عوض می‌شود',
   '«فروشگاه من» برای کسی که فروشگاه ندارد بی‌معنی است');
 t('عنوانِ صفحه هم با نقش عوض می‌شود',
   /isSeller \? 'فروشگاه من' : 'آگهی‌های من'/.test(myShop));
-t('استوریِ فروشگاه به غیرفروشنده نشان داده نمی‌شود',
-  /\{isSeller && \(/.test(myShop),
-  'جعبه‌ی خالیِ یک قابلیتِ ناموجود به‌نظر خراب می‌رسد');
+/* استوری از «فروشگاه من» (فهرستِ آگهی‌ها) به پنلِ فروشگاه رفت — همان
+   جایی که نام و لوگو و گالریِ ویترین تنظیم می‌شوند. پنلِ فروشگاه
+   خودش فقط برای فروشنده است، پس شرطِ نقش دیگر لازم نیست. */
+t('استوری از فهرستِ آگهی‌ها برداشته شد',
+  !/استوری/.test(myShop) && !/SellerStory/.test(myShop),
+  'استوری نه آگهی است نه ربطی به فهرستِ آگهی‌ها دارد');
+t('استوری در پنلِ فروشگاه است',
+  /<StoryManager ownerId=\{user\.id\}/.test(read('app/dashboard/seller/page.tsx'))
+  && /export default function StoryManager/.test(read('components/seller/StoryManager.tsx')));
 t('حذفِ آگهی از همین صفحه ممکن است',
   /handleDelete/.test(myShop) && /method: 'DELETE'/.test(myShop));
 t('پس از ثبتِ آگهی، راهِ مدیریتش گفته می‌شود',

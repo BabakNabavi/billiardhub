@@ -12,6 +12,7 @@
      <ProvinceCitySelect value={geo} onChange={setGeo} required />
    ───────────────────────────────────────────────────────────── */
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { getProvinceNames, getCities } from '../lib/iran-geo'
 
 export interface ProvinceCityValue { province: string; city: string }
@@ -68,10 +69,33 @@ const CSS = `
 .pcs-val.ph { color: var(--pcs-mut); font-size: 11.5px; }
 .pcs-chev { flex-shrink: 0; color: var(--pcs-mut); transition: transform .2s ease; }
 .pcs-btn.open .pcs-chev { transform: rotate(180deg); color: var(--pcs-gold-d); }
+/* ── چرا fixed و از راهِ Portal ──
+   پنل تا امروز absolute بود و داخلِ همان کارتی می‌ماند که فیلد در
+   آن است. هر کارتی که overflow:hidden داشت (یا با backdrop-filter
+   — بک‌تیک این‌جا ممنوع است، این متن داخلِ template literal است —
+   بافتِ چینشِ خودش را می‌ساخت) لیست را می‌برید — کاربر باکس را باز
+   می‌کرد و فهرست زیرِ لبه‌ی کارت گم می‌شد.
+
+   حالا روی body رندر می‌شود و جای واقعی‌اش هر بار اندازه گرفته
+   می‌شود؛ اگر پایینِ صفحه جا نبود، رو به بالا باز می‌شود. */
 .pcs-panel {
-  position: absolute; z-index: 60; top: calc(100% + 6px); left: 0; right: 0;
+  position: fixed; z-index: 9999;
+  display: flex; flex-direction: column;
   background: var(--pcs-panel); border: 1px solid var(--pcs-border); border-radius: 12px; overflow: hidden;
   box-shadow: var(--pcs-shadow); animation: pcsIn .14s ease both;
+  direction: rtl; font-family: inherit;
+  --pcs-gold: #C7A66A; --pcs-gold-d: #9A6E38;
+  --pcs-text: #1C1B17; --pcs-mut: #A69F8E; --pcs-sub: #5B564B;
+  --pcs-border: #E7E2D6; --pcs-field: #FAFAF7; --pcs-panel: #fff;
+  --pcs-opt-hover: rgba(199,166,106,0.12);
+  --pcs-shadow: 0 12px 32px rgba(28,27,23,0.14), 0 2px 8px rgba(28,27,23,0.06);
+}
+.pcs-panel.dark {
+  --pcs-gold-d: #D4B87F;
+  --pcs-text: #E8E8E6; --pcs-mut: rgba(232,232,230,0.42); --pcs-sub: rgba(232,232,230,0.62);
+  --pcs-border: rgba(255,255,255,0.14); --pcs-field: rgba(255,255,255,0.05); --pcs-panel: #16201B;
+  --pcs-opt-hover: rgba(199,166,106,0.18);
+  --pcs-shadow: 0 14px 36px rgba(0,0,0,0.5);
 }
 @keyframes pcsIn { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: reduce) { .pcs-panel { animation: none; } .pcs-chev { transition: none; } }
@@ -82,7 +106,8 @@ const CSS = `
 }
 .pcs-search input:focus { border-color: var(--pcs-gold); }
 .pcs-search svg { position: absolute; right: 20px; top: 50%; transform: translateY(-50%); color: var(--pcs-mut); }
-.pcs-list { max-height: 240px; overflow-y: auto; padding: 5px; }
+.pcs-list { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; padding: 5px; }
+.pcs-search { flex-shrink: 0; }
 .pcs-opt {
   display: flex; align-items: center; gap: 7px; padding: 8px 10px; border-radius: 8px;
   font-size: 13px; color: var(--pcs-text); cursor: pointer; transition: background .12s;
@@ -105,7 +130,7 @@ const IconTick = () => (
 
 /* ── یک combobox سرچ‌دار (برای هر دو فیلد استفاده می‌شود) ── */
 function Combobox({
-  value, options, placeholder, searchPlaceholder, onSelect, disabled, error, size,
+  value, options, placeholder, searchPlaceholder, onSelect, disabled, error, size, dark,
 }: {
   value: string
   options: string[]
@@ -115,11 +140,14 @@ function Combobox({
   disabled?: boolean
   error?: boolean
   size: 'sm' | 'md'
+  dark?: boolean
 }) {
   const [open, setOpen]   = useState(false)
   const [query, setQuery] = useState('')
   const [active, setActive] = useState(0)
+  const [rect, setRect] = useState<{ top: number; left: number; width: number; maxH: number } | null>(null)
   const wrapRef  = useRef<HTMLDivElement>(null)
+  const panelRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
   const filtered = useMemo(() => {
@@ -128,17 +156,48 @@ function Combobox({
     return options.filter(o => o.includes(q))
   }, [options, query])
 
-  /* بستن با کلیک بیرون */
+  /* جای پنل از فضای واقعیِ بالا و پایینِ دکمه حساب می‌شود */
+  const place = () => {
+    const r = wrapRef.current?.getBoundingClientRect()
+    if (!r) return
+    const GAP = 6, EDGE = 10
+    const vh = window.innerHeight, vw = window.innerWidth
+    const below = vh - r.bottom - GAP - EDGE
+    const above = r.top - GAP - EDGE
+    const openUp = below < 200 && above > below
+    const maxH = Math.max(160, Math.min(320, openUp ? above : below))
+    const top = openUp ? Math.max(EDGE, r.top - GAP - maxH) : r.bottom + GAP
+    const width = Math.min(Math.max(r.width, 180), vw - EDGE * 2)
+    const left = Math.min(Math.max(EDGE, r.left), Math.max(EDGE, vw - width - EDGE))
+    setRect({ top, left, width, maxH })
+  }
+
+  /* بستن با کلیک بیرون — پنل حالا بیرونِ wrap است، پس جدا چک می‌شود */
   useEffect(() => {
     if (!open) return
-    const onDoc = (e: MouseEvent) => { if (wrapRef.current && !wrapRef.current.contains(e.target as Node)) setOpen(false) }
+    const onDoc = (e: MouseEvent) => {
+      const t = e.target as Node
+      if (wrapRef.current?.contains(t) || panelRef.current?.contains(t)) return
+      setOpen(false)
+    }
     document.addEventListener('mousedown', onDoc)
-    return () => document.removeEventListener('mousedown', onDoc)
+    window.addEventListener('scroll', place, true)
+    window.addEventListener('resize', place)
+    return () => {
+      document.removeEventListener('mousedown', onDoc)
+      window.removeEventListener('scroll', place, true)
+      window.removeEventListener('resize', place)
+    }
   }, [open])
 
-  /* فوکوس روی سرچ هنگام باز شدن */
+  /* فوکوس روی سرچ هنگام باز شدن — روی موبایل نه، چون کیبورد همان
+     پنلی را که تازه جا شده دوباره از صفحه بیرون می‌اندازد */
   useEffect(() => {
-    if (open) { setQuery(''); setActive(0); const t = setTimeout(() => inputRef.current?.focus(), 20); return () => clearTimeout(t) }
+    if (!open) return
+    setQuery(''); setActive(0)
+    if (typeof window !== 'undefined' && window.innerWidth <= 820) return
+    const t = setTimeout(() => inputRef.current?.focus(), 20)
+    return () => clearTimeout(t)
   }, [open])
 
   const choose = (v: string) => { onSelect(v); setOpen(false) }
@@ -154,7 +213,7 @@ function Combobox({
     <div className="pcs-field" ref={wrapRef}>
       <button
         type="button" disabled={disabled}
-        onClick={() => setOpen(o => !o)}
+        onClick={() => { if (disabled) return; if (!open) place(); setOpen(o => !o) }}
         className={`pcs-btn ${size}${open ? ' open' : ''}${error ? ' err' : ''}`}
         aria-haspopup="listbox" aria-expanded={open}
       >
@@ -162,8 +221,9 @@ function Combobox({
         <IconChev />
       </button>
 
-      {open && (
-        <div className="pcs-panel" role="listbox">
+      {open && rect && typeof document !== 'undefined' && createPortal(
+        <div ref={panelRef} className={`pcs-panel${dark ? ' dark' : ''}`} role="listbox"
+          style={{ top: rect.top, left: rect.left, width: rect.width, maxHeight: rect.maxH }}>
           <div className="pcs-search">
             <input
               ref={inputRef} value={query} onChange={e => { setQuery(e.target.value); setActive(0) }}
@@ -187,7 +247,8 @@ function Combobox({
               ))
             )}
           </div>
-        </div>
+        </div>,
+        document.body,
       )}
     </div>
   )
@@ -224,7 +285,7 @@ export default function ProvinceCitySelect({
         <Combobox
           value={value.province} options={provinces}
           placeholder="انتخاب استان…" searchPlaceholder="جستجوی استان…"
-          onSelect={pickProvince} disabled={disabled} error={!!provinceError} size={size}
+          onSelect={pickProvince} disabled={disabled} error={!!provinceError} size={size} dark={theme === 'dark'}
         />
         {provinceError && <p style={{ margin: '5px 0 0', fontSize: 11.5, color: '#B23B2E' }}>{provinceError}</p>}
       </div>
@@ -234,7 +295,7 @@ export default function ProvinceCitySelect({
           value={value.city} options={cities}
           placeholder={value.province ? 'انتخاب شهر…' : 'ابتدا استان را انتخاب کنید'}
           searchPlaceholder="جستجوی شهر…"
-          onSelect={pickCity} disabled={disabled || !value.province} error={!!cityError} size={size}
+          onSelect={pickCity} disabled={disabled || !value.province} error={!!cityError} size={size} dark={theme === 'dark'}
         />
         {cityError && <p style={{ margin: '5px 0 0', fontSize: 11.5, color: '#B23B2E' }}>{cityError}</p>}
       </div>

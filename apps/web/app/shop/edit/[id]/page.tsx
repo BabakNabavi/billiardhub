@@ -644,6 +644,19 @@ export default function EditProductPage() {
               </div>
             </div>
 
+            {/* ── محل ── */}
+            <div style={{ ...card, animation: 'fadeUp 0.54s ease both' }}>
+              <div style={gloss} />
+              <div style={{ position: 'relative', zIndex: 1 }}>
+                <SectionTitle>محل کالا</SectionTitle>
+                <ProvinceCitySelect
+                  value={{ province: form.province, city: form.city }}
+                  onChange={v => setForm(f => ({ ...f, province: v.province, city: v.city }))}
+                  required provinceError={errors.province} cityError={errors.city}
+                />
+              </div>
+            </div>
+
             {/* ── قیمت ── */}
             <div style={{ ...card, animation: 'fadeUp 0.52s ease both' }}>
               <div style={gloss} />
@@ -687,19 +700,6 @@ export default function EditProductPage() {
                     )
                   })()}
                 </div>
-              </div>
-            </div>
-
-            {/* ── محل ── */}
-            <div style={{ ...card, animation: 'fadeUp 0.54s ease both' }}>
-              <div style={gloss} />
-              <div style={{ position: 'relative', zIndex: 1 }}>
-                <SectionTitle>محل کالا</SectionTitle>
-                <ProvinceCitySelect
-                  value={{ province: form.province, city: form.city }}
-                  onChange={v => setForm(f => ({ ...f, province: v.province, city: v.city }))}
-                  required provinceError={errors.province} cityError={errors.city}
-                />
               </div>
             </div>
 

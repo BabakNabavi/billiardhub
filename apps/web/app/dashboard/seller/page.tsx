@@ -9,6 +9,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Camera, X } from 'lucide-react'
 import { useAuthStore } from '../../../store/auth.store'
+import StoryManager from '../../../components/seller/StoryManager'
 import {
   type SellerProfile,
   emptySellerProfile, findSellerByOwner, findUnclaimedSeller, newSellerSlug, saveSellerProfile, compressImage,
@@ -527,6 +528,12 @@ export default function SellerDashboard() {
               </div>
             </div>
           </section>
+
+          {/* ═══ استوری‌های ۲۴ ساعته ═══
+              این جعبه پیش‌تر در «فروشگاه من» (فهرستِ آگهی‌ها) بود —
+              جایی که هیچ ربطی به آن نداشت. استوری کنارِ بقیه‌ی
+              تنظیماتِ ویترینِ فروشگاه است. */}
+          {user?.id && <StoryManager ownerId={user.id} />}
 
           {/* ═══ عکس‌های «درباره ما» (اسلایدر، حداکثر ۳) ═══ */}
           <section className={CARD}>

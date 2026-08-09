@@ -559,23 +559,37 @@ export default function MarketNewPage() {
   const [urgReps, setUrgReps] = useState(3)
   useHorizontalScroll(urgRef, busy => { holdRef.current = busy })
 
-  /* هر تماسی — ماوس، لمس، چرخ — حرکت را موقت متوقف می‌کند.
-     `useHorizontalScroll` عمداً لمس را نادیده می‌گیرد، پس روی موبایل
-     هیچ‌وقت خبر نمی‌داد کاربر دست گذاشته و انگشت با حلقه می‌جنگید. */
+  /* آخرین موقعیتی که خودِ حلقه نوشته — برای جداکردنِ اسکرولِ کاربر
+     از اسکرولِ خودِ انیمیشن. بدونِ این، رویدادِ `scroll` که انیمیشن
+     می‌سازد، خودش را متوقف می‌کرد و نوار برای همیشه می‌ایستاد. */
+  const writtenRef = useRef(0)
+
+  /* هر تماسی — ماوس، لمس، چرخ — و هر اسکرولِ واقعیِ کاربر، حرکت را
+     متوقف می‌کند و پنج ثانیه پس از آخرین تماس دوباره راه می‌افتد.
+
+     `scroll` لازم است چون بعد از رها کردنِ انگشت، اسکرولِ اینرسی
+     ادامه دارد ولی هیچ رویدادِ لمسی نمی‌آید — و انیمیشن همان‌جا با
+     حرکتِ آزادِ نوار می‌جنگید. */
   useEffect(() => {
     const el = urgRef.current
     if (!el || !urgent.length) return
     let idle: ReturnType<typeof setTimeout> | null = null
-    const EV = ['pointerdown', 'touchstart', 'touchmove', 'wheel'] as const
     const touch = () => {
       holdRef.current = true
       if (idle) clearTimeout(idle)
-      idle = setTimeout(() => { holdRef.current = false }, 1000)
+      idle = setTimeout(() => { holdRef.current = false }, 5000)
     }
+    const onScroll = () => {
+      /* اگر جابه‌جایی همانی است که حلقه نوشته، کارِ کاربر نبوده */
+      if (Math.abs(getPos(el, scrollSign(el)) - writtenRef.current) > 2) touch()
+    }
+    const EV = ['pointerdown', 'touchstart', 'touchmove', 'wheel'] as const
     for (const ev of EV) el.addEventListener(ev, touch, { passive: true })
+    el.addEventListener('scroll', onScroll, { passive: true })
     return () => {
       if (idle) clearTimeout(idle)
       for (const ev of EV) el.removeEventListener(ev, touch)
+      el.removeEventListener('scroll', onScroll)
     }
   }, [urgent.length])
 
@@ -608,12 +622,14 @@ export default function MarketNewPage() {
     const SPEED = 45
     const sign = scrollSign(el)
     setPos(el, sign, cycle)
+    writtenRef.current = cycle
     let last = 0, raf = 0
     const tick = (t: number) => {
       if (last && !holdRef.current) {
         let p = getPos(el, sign) - (SPEED * (t - last)) / 1000
         while (p <= 0) p += cycle
         setPos(el, sign, p)
+        writtenRef.current = p
       }
       last = t
       raf = requestAnimationFrame(tick)
