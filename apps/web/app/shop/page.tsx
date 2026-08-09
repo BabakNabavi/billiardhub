@@ -553,39 +553,74 @@ export default function MarketNewPage() {
      می‌کند و درگِ ماوس هم با همان قلابِ همیشگی. با هاور یا دستِ کاربر
      انیمیشن می‌ایستد تا با او نجنگد. */
   const urgRef = useRef<HTMLDivElement>(null)
-  const [urgHold, setUrgHold] = useState(false)
-  useHorizontalScroll(urgRef, busy => setUrgHold(busy))
+  /* توقف در ref نگه داشته می‌شود نه state: حلقه هر فریم می‌خواندش و
+     نباید هر بار رندرِ تازه بسازد. */
+  const holdRef = useRef(false)
+  const [urgReps, setUrgReps] = useState(3)
+  useHorizontalScroll(urgRef, busy => { holdRef.current = busy })
 
-  /* ── چرا توقف باید هر نوع تماسی را بگیرد ──
-     `useHorizontalScroll` عمداً لمس را نادیده می‌گیرد (اسکرولِ بومی
-     نرم‌تر است)، پس روی موبایل هیچ‌وقت خبر نمی‌داد که کاربر دست
-     گذاشته. نتیجه‌اش دقیقاً همان «حالتِ فنری» بود: انگشت نوار را
-     می‌کشید و انیمیشن همان لحظه به جای خودش برمی‌گرداندش.
-
-     این‌جا خودِ ظرف گوش می‌دهد — لمس، اشاره‌گر، و حتی اسکرولِ بومی —
-     و انیمیشن تا یک ثانیه پس از آخرین تماس متوقف می‌ماند. */
+  /* هر تماسی — ماوس، لمس، چرخ — حرکت را موقت متوقف می‌کند.
+     `useHorizontalScroll` عمداً لمس را نادیده می‌گیرد، پس روی موبایل
+     هیچ‌وقت خبر نمی‌داد کاربر دست گذاشته و انگشت با حلقه می‌جنگید. */
   useEffect(() => {
     const el = urgRef.current
-    if (!el) return
+    if (!el || !urgent.length) return
     let idle: ReturnType<typeof setTimeout> | null = null
+    const EV = ['pointerdown', 'touchstart', 'touchmove', 'wheel'] as const
     const touch = () => {
-      setUrgHold(true)
+      holdRef.current = true
       if (idle) clearTimeout(idle)
-      idle = setTimeout(() => setUrgHold(false), 1100)
+      idle = setTimeout(() => { holdRef.current = false }, 1000)
     }
-    el.addEventListener('pointerdown', touch, { passive: true })
-    el.addEventListener('touchstart', touch, { passive: true })
-    el.addEventListener('touchmove', touch, { passive: true })
-    el.addEventListener('scroll', touch, { passive: true })
+    for (const ev of EV) el.addEventListener(ev, touch, { passive: true })
     return () => {
       if (idle) clearTimeout(idle)
-      el.removeEventListener('pointerdown', touch)
-      el.removeEventListener('touchstart', touch)
-      el.removeEventListener('touchmove', touch)
-      el.removeEventListener('scroll', touch)
+      for (const ev of EV) el.removeEventListener(ev, touch)
     }
   }, [urgent.length])
 
+  /* تعدادِ تکرار از عرضِ واقعی — تا همیشه سرریز باشد و حلقه بسته شود */
+  useEffect(() => {
+    const el = urgRef.current
+    const track = el?.firstElementChild as HTMLElement | null
+    if (!el || !track || !urgent.length) return
+    const measure = () => {
+      const one = track.scrollWidth / Math.max(1, urgReps)
+      if (one <= 0) return
+      const want = Math.max(3, Math.ceil((el.clientWidth * 3) / one))
+      if (want !== urgReps) setUrgReps(want)
+    }
+    measure()
+    const ro = new ResizeObserver(measure)
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [urgent.length, urgReps])
+
+  /* حلقه‌ی بی‌پایان: گذشتن از یک دور، همان اندازه عقب کشیده می‌شود.
+     چون نسخه‌ها عینِ هم‌اند، پرش دیده نمی‌شود و «آخر» وجود ندارد. */
+  useEffect(() => {
+    const el = urgRef.current
+    const track = el?.firstElementChild as HTMLElement | null
+    if (!el || !track || !urgent.length) return
+    if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return
+    const cycle = track.scrollWidth / Math.max(1, urgReps)
+    if (cycle <= 0) return
+    const SPEED = 45
+    const sign = scrollSign(el)
+    setPos(el, sign, cycle)
+    let last = 0, raf = 0
+    const tick = (t: number) => {
+      if (last && !holdRef.current) {
+        let p = getPos(el, sign) - (SPEED * (t - last)) / 1000
+        while (p <= 0) p += cycle
+        setPos(el, sign, p)
+      }
+      last = t
+      raf = requestAnimationFrame(tick)
+    }
+    raf = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(raf)
+  }, [urgent.length, urgReps])
   const chips: { label: string; clear: () => void }[] = []
   if (cat)      chips.push({ label: catLabel(cat), clear: () => setCat('') })
   cities.forEach(c => chips.push({ label: c, clear: () => toggleCity(c) }))
@@ -859,10 +894,10 @@ export default function MarketNewPage() {
           background: rgba(255,255,255,0.96); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
           border-top: 1px solid ${LINE}; padding: 7px 8px calc(7px + env(safe-area-inset-bottom));
           grid-template-columns: repeat(4, 1fr); }
-        /* اندازه‌ها ۲۰٪ بزرگ‌تر از قبل: آیکون ۱۹→۲۳، برچسب ۱۰→۱۲ */
+        /* ۵٪ کوچک‌تر از نسخه‌ی قبل: آیکون ۲۳→۲۲، برچسب ۱۲→۱۱٫۴ */
         .mk-bnav { display: flex; flex-direction: column; align-items: center; gap: 4px; background: none; border: none;
           cursor: pointer; font-family: inherit; text-decoration: none; padding: 4px 0; color: ${MUT}; }
-        .mk-bnav .lb { font-size: 12px; font-weight: 700; }
+        .mk-bnav .lb { font-size: 11.4px; font-weight: 700; }
         .mk-bnav.on { color: ${GOLD_D}; }
         .mk-bnav.on svg { fill: rgba(199,166,106,0.2); }
 
@@ -1098,8 +1133,8 @@ export default function MarketNewPage() {
                     <div className="mk-urgrow" ref={urgRef}>
                       {/* دو نسخه‌ی پشتِ‌هم — ریل نصفِ خودش را می‌پیماید و
                           چون نسخه‌ی دوم عینِ اولی است، بازگشت دیده نمی‌شود. */}
-                      <div className={`mk-urgtrack${urgHold ? ' hold' : ''}`}>
-                        {[...urgent, ...urgent].map((l, i) => (
+                      <div className="mk-urgtrack">
+                        {Array.from({ length: urgReps }, () => urgent).flat().map((l, i) => (
                           <div key={`${l.key}-${i}`} className="mk-urgcell">
                             <MarketCard l={l} i={i} saved={savedKeys.has(l.key)} onSave={() => toggleSave(l.key)} />
                           </div>
@@ -1139,17 +1174,17 @@ export default function MarketNewPage() {
       {/* ═══ نوار پایین موبایل ═══ */}
       <nav className="mk-bottomnav">
         <Link href="/" className="mk-bnav">
-          <Home size={23} />
+          <Home size={22} />
           <span className="lb">خانه</span>
         </Link>
         <button type="button" className={`mk-bnav${!showSaved ? ' on' : ''}`}
           onClick={() => { setShowSaved(false); window.scrollTo({ top: 0, behavior: 'smooth' }) }}>
-          <LayoutGrid size={23} />
+          <LayoutGrid size={22} />
           <span className="lb">آگهی‌ها</span>
         </button>
         <button type="button" className={`mk-bnav${showSaved ? ' on' : ''}`}
           onClick={() => { setShowSaved(p => !p); window.scrollTo({ top: 0, behavior: 'smooth' }) }}>
-          <Bookmark size={23} />
+          <Bookmark size={22} />
           <span className="lb">نشان‌ها</span>
         </button>
         <Link href="/shop/new" className="mk-bnav">
