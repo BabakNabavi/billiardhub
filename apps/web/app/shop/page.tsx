@@ -523,64 +523,38 @@ export default function MarketNewPage() {
      نمی‌کشد. حرکتِ آرام و پیوسته به راست همه‌ی آگهی‌ها را از جلوی چشم
      رد می‌کند. فهرست دوبل می‌شود تا حلقه بدونِ پرش بسته شود، و با
      لمس/موس/کیبورد می‌ایستد تا با دستِ کاربر نجنگد. */
-  /* ── نوارِ فوری: همیشه در حرکت، همیشه قابلِ کشیدن ──
-     دو بارِ قبل ثابت ماند و دلیلش هر بار یکی بود: با سه کارت، محتوا
-     از عرضِ نوار بیرون نمی‌زد. چیزی که سرریز نکند نه حرکت می‌کند نه
-     کشیده می‌شود — نه ایرادِ کد، بلکه ایرادِ فرض.
+  /* ── نوارِ فوری ──
+     سه نسخه‌ی قبلی با جاوااسکریپت  را حرکت می‌دادند و هر
+     بار به یک اندازه‌گیری وابسته بودند (سرریز داریم یا نه، پهنای یک
+     دور چقدر است). هر بار هم همان اندازه‌گیری بود که سرِ کاربرِ واقعی
+     غلط درمی‌آمد و نوار ثابت می‌ماند.
 
-     پس فهرست آن‌قدر تکرار می‌شود که پهنایش دستِ‌کم دو برابرِ نوار
-     شود. آن‌وقت همیشه سرریز هست، حلقه بدونِ پرش بسته می‌شود، و
-     کشیدن هم — با موس و با لمس — کار می‌کند. */
+     حالا حرکت کارِ CSS است: یک ریلِ داخلی با  که
+     با  نصفِ خودش را می‌پیماید. دو نسخه از فهرست کنارِ
+     هم‌اند، پس در لحظه‌ی بازگشت هیچ پرشی دیده نمی‌شود. این روش به هیچ
+     عددِ اندازه‌گیری‌شده‌ای وابسته نیست — چه سه کارت باشد چه دوازده‌تا،
+     حرکت می‌کند.
+
+     کشیدن هم سرِ جایش است: ظرفِ بیرونی  دارد، پس
+     لمس بومی کار می‌کند و درگِ ماوس هم با همان قلابِ همیشگی. با هاور
+     یا دستِ کاربر انیمیشن می‌ایستد تا با او نجنگد. */
+  /* ── نوارِ فوری ──
+     سه نسخه‌ی قبلی حرکت را با جاوااسکریپت و `scrollLeft` می‌ساختند و
+     هر بار به یک اندازه‌گیری وابسته بودند: سرریز داریم یا نه، پهنای
+     یک دور چقدر است. همان اندازه‌گیری هر بار سرِ کاربرِ واقعی غلط
+     درمی‌آمد و نوار ثابت می‌ماند.
+
+     حالا حرکت کارِ CSS است: یک ریلِ داخلی با عرضِ محتوا که با
+     translateX نصفِ خودش را می‌پیماید. دو نسخه از فهرست کنارِ هم‌اند،
+     پس لحظه‌ی بازگشت هیچ پرشی دیده نمی‌شود. این روش به هیچ عددِ
+     اندازه‌گیری‌شده‌ای وابسته نیست — چه سه کارت باشد چه دوازده‌تا.
+
+     کشیدن سرِ جایش است: ظرفِ بیرونی overflow-x دارد، پس لمس بومی کار
+     می‌کند و درگِ ماوس هم با همان قلابِ همیشگی. با هاور یا دستِ کاربر
+     انیمیشن می‌ایستد تا با او نجنگد. */
   const urgRef = useRef<HTMLDivElement>(null)
-  const urgPaused = useRef(false)
-  useHorizontalScroll(urgRef, busy => { urgPaused.current = busy })
-  const [urgReps, setUrgReps] = useState(2)
-  const urgLoop = urgent.length
-    ? Array.from({ length: urgReps }, () => urgent).flat()
-    : []
-
-  /* تعدادِ تکرار از عرضِ واقعی حساب می‌شود، نه حدس. با تغییرِ اندازه‌ی
-     پنجره دوباره سنجیده می‌شود. */
-  useEffect(() => {
-    if (!urgent.length) return
-    const el = urgRef.current
-    if (!el) return
-    const measure = () => {
-      const one = el.scrollWidth / Math.max(1, urgReps)
-      if (one <= 0) return
-      const want = Math.max(2, Math.ceil((el.clientWidth * 2) / one))
-      if (want !== urgReps) setUrgReps(want)
-    }
-    measure()
-    const ro = new ResizeObserver(measure)
-    ro.observe(el)
-    return () => ro.disconnect()
-  }, [urgent.length, urgReps])
-
-  useEffect(() => {
-    if (!urgent.length) return
-    if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return
-    const el = urgRef.current
-    if (!el) return
-    if (el.scrollWidth <= el.clientWidth + 8) return
-    const SPEED = 22                       // پیکسل بر ثانیه — عمداً کند
-    const sign = scrollSign(el)
-    /* یک دورِ کامل = پهنای یک نسخه از فهرست */
-    const cycle = el.scrollWidth / Math.max(1, urgReps)
-    setPos(el, sign, cycle)
-    let last = 0, raf = 0
-    const tick = (t: number) => {
-      if (last && !urgPaused.current) {
-        let p = getPos(el, sign) - (SPEED * (t - last)) / 1000
-        if (p <= 0) p += cycle
-        setPos(el, sign, p)
-      }
-      last = t
-      raf = requestAnimationFrame(tick)
-    }
-    raf = requestAnimationFrame(tick)
-    return () => cancelAnimationFrame(raf)
-  }, [urgent.length, urgReps])
+  const [urgHold, setUrgHold] = useState(false)
+  useHorizontalScroll(urgRef, busy => setUrgHold(busy))
 
   const chips: { label: string; clear: () => void }[] = []
   if (cat)      chips.push({ label: catLabel(cat), clear: () => setCat('') })
@@ -706,12 +680,19 @@ export default function MarketNewPage() {
                 بیرون. (بک‌تیک این‌جا ممنوع — داخلِ template literal است)
              ۲) عرضِ ثابتِ سلول، نه درصدِ ویوپورت.
              ۳) کششِ عمودی تا کارتِ یک‌خطی و دوخطی هم‌ارتفاع بمانند. */
-        .mk-urgrow { display: flex; align-items: stretch; gap: 10px;
+        .mk-urgrow { display: block;
           min-width: 0; max-width: 100%;
           overflow-x: auto; padding-bottom: 8px;
           scroll-snap-type: x proximity; scrollbar-width: none; -ms-overflow-style: none;
           -webkit-overflow-scrolling: touch; }
         .mk-urgrow::-webkit-scrollbar { display: none; }
+        /* ریلِ متحرک — عرضش را محتوا تعیین می‌کند، پس همیشه
+           چیزی برای پیمودن هست. توقف با هاور یا دستِ کاربر. */
+        .mk-urgtrack { display: flex; align-items: stretch; gap: 10px; width: max-content;
+          animation: mkUrgRoll 42s linear infinite; will-change: transform; }
+        .mk-urgrow:hover .mk-urgtrack, .mk-urgtrack.hold { animation-play-state: paused; }
+        @keyframes mkUrgRoll { from { transform: translateX(0) } to { transform: translateX(50%) } }
+        @media (prefers-reduced-motion: reduce) { .mk-urgtrack { animation: none } }
         .mk-urgcell { flex: 0 0 auto; width: 168px; scroll-snap-align: start; display: flex; }
         .mk-urgcell > * { width: 100%; }
         @media (max-width: 560px) { .mk-urgcell { width: 144px; } }
@@ -1085,11 +1066,15 @@ export default function MarketNewPage() {
                       <h2 style={{ fontSize: 14.5, fontWeight: 900, color: TEXT, margin: 0 }}>فوری</h2>
                     </div>
                     <div className="mk-urgrow" ref={urgRef}>
-                      {urgLoop.map((l, i) => (
-                        <div key={`${l.key}-${i}`} className="mk-urgcell">
-                          <MarketCard l={l} i={i} saved={savedKeys.has(l.key)} onSave={() => toggleSave(l.key)} />
-                        </div>
-                      ))}
+                      {/* دو نسخه‌ی پشتِ‌هم — ریل نصفِ خودش را می‌پیماید و
+                          چون نسخه‌ی دوم عینِ اولی است، بازگشت دیده نمی‌شود. */}
+                      <div className={`mk-urgtrack${urgHold ? ' hold' : ''}`}>
+                        {[...urgent, ...urgent].map((l, i) => (
+                          <div key={`${l.key}-${i}`} className="mk-urgcell">
+                            <MarketCard l={l} i={i} saved={savedKeys.has(l.key)} onSave={() => toggleSave(l.key)} />
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   </section>
                 )}
