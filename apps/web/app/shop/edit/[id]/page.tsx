@@ -423,15 +423,11 @@ export default function EditProductPage() {
             </Link>
           </div>
 
-          <div style={{ marginBottom: 28, animation: 'fadeUp 0.4s ease both' }}>
-            <p style={{ fontSize: 11, color: GOLD, letterSpacing: '0.2em', fontWeight: 700, margin: '0 0 3px' }}>EDIT LISTING</p>
-            <h1 style={{ fontSize: 'clamp(20px,2.6vw,26px)', fontWeight: 900, color: TEXT, margin: 0, letterSpacing: '-0.02em' }}>ویرایش آگهی</h1>
-            {catLabel && (
-              <p style={{ fontSize: 13.5, color: TEXT_SEC, margin: '8px 0 0' }}>
-                {[catLabel, effType].filter(Boolean).join(' ')}
-                {effBrand ? <span style={{ color: TEXT_MUT }}>{' — '}{[effBrand, effModel].filter(Boolean).join(' ')}</span> : null}
-              </p>
-            )}
+          <div style={{ marginBottom: 16, animation: 'fadeUp 0.4s ease both' }}>
+            {/* «EDIT LISTING» و سطرِ خلاصه‌ی محصول برداشته شدند: روی
+                موبایل فقط ارتفاع می‌گرفتند و همان اطلاعات چند سانتیمتر
+                پایین‌تر داخلِ خودِ فیلدها هست. */}
+            <h1 style={{ fontSize: 'clamp(19px,2.6vw,26px)', fontWeight: 900, color: TEXT, margin: 0, letterSpacing: '-0.02em' }}>ویرایش آگهی</h1>
           </div>
 
           <form onSubmit={handleSubmit} noValidate style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>

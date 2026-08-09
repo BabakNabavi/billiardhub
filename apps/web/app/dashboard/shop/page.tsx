@@ -108,22 +108,10 @@ interface Product {
   createdAt: string;
 }
 
-const categoryLabels: Record<string, string> = {
-  table: 'میز بیلیارد',
-  cue: 'چوب بیلیارد',
-  ball: 'توپ',
-  accessory: 'لوازم جانبی',
-  clothing: 'پوشاک',
-  educational: 'آموزشی',
-  other: 'سایر',
-};
-
-const conditionLabels: Record<string, string> = {
-  new: 'نو',
-  like_new: 'در حد نو',
-  used: 'کارکرده',
-};
-
+/* `categoryLabels` و `conditionLabels` حذف شدند: کارتِ فهرست دیگر
+   دسته و وضعیتِ کالا را جدا نمی‌نویسد (عنوانِ آگهی خودش «دسته + نوع»
+   است). آن فهرستِ دسته هم یک کپیِ کهنه‌ی دیگر بود — «آموزشی» داشت که
+   اصلاً دسته نیست و نیمی از دسته‌های واقعی را نداشت. */
 const statusLabels: Record<string, { label: string; color: string; icon: any }> = {
   active: { label: 'فعال', color: 'bg-green-100 text-green-700', icon: <CheckCircle size={12} /> },
   sold: { label: 'فروخته شده', color: 'bg-gray-100 text-gray-600', icon: <CheckCircle size={12} /> },
@@ -288,74 +276,67 @@ export default function MyShopPage() {
               )}
             </div>
           ) : (
-            <div className="space-y-3">
+            /* ── چرا کادرِ اسکرول‌دار ──
+               فهرست بی‌انتها زیرِ هم می‌رفت؛ با ده آگهی، رسیدن به تهِ
+               صفحه یعنی چند صفحه اسکرول. حالا خودِ فهرست کادرِ خودش را
+               دارد و بقیه‌ی صفحه سرِ جایش می‌ماند. */
+            <div className="max-h-[62vh] overflow-y-auto overscroll-contain pl-1 space-y-2.5">
               {filtered.map(product => (
-                <div key={product.id} className="flex items-center gap-4 border border-gray-100 rounded-2xl p-4 hover:border-green-200 transition-colors">
-                  {/* عکس */}
-                  <div className="w-20 h-20 bg-gray-50 rounded-xl flex items-center justify-center flex-shrink-0 overflow-hidden">
-                    {product.images?.length > 0 ? (
-                      <img loading="lazy" decoding="async" src={product.images[0]} alt="" className="w-full h-full object-cover" />
-                    ) : (
-                      <Package size={28} className="text-gray-300" />
-                    )}
-                  </div>
-
-                  {/* اطلاعات */}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
-                      <h3 className="font-bold text-gray-800 text-sm truncate">{product.title}</h3>
-                      {product.isVerified && (
-                        <span className="bg-green-100 text-green-700 text-xs px-2 py-0.5 rounded-full flex items-center gap-1 flex-shrink-0">
-                          <CheckCircle size={10} />
-                          تأیید شده
-                        </span>
-                      )}
-                      {product.requestedVerification && !product.isVerified && (
-                        <span className="bg-yellow-100 text-yellow-700 text-xs px-2 py-0.5 rounded-full flex items-center gap-1 flex-shrink-0">
-                          <Clock size={10} />
-                          در انتظار تأیید
-                        </span>
-                      )}
-                    </div>
-                    {/* برند و مدل، خطِ دوم با فونتِ معمولی */}
-                    {product.sub && (
-                      <div className="text-xs text-gray-500 truncate mb-1">{product.sub}</div>
-                    )}
-                    <div className="flex flex-wrap gap-2 text-xs text-gray-500 mb-2">
-                      <span>{categoryLabels[product.category]}</span>
-                      <span>•</span>
-                      <span>{conditionLabels[product.condition]}</span>
-                      <span>•</span>
-                      <span>{product.city}</span>
-                      <span>•</span>
-                      <span>{(product.views || 0).toLocaleString('fa-IR')} بازدید</span>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      {product.discountPrice ? (
-                        <div className="flex items-center gap-2">
-                          <span className="text-xs text-gray-400 line-through">{product.price.toLocaleString('fa-IR')}</span>
-                          <span className="font-bold text-green-700 text-sm">{product.discountPrice.toLocaleString('fa-IR')} تومان</span>
-                          <span className="bg-red-100 text-red-600 text-xs px-1.5 py-0.5 rounded">{product.discountPercent}٪</span>
-                        </div>
+                <div key={product.id} className="border border-gray-100 rounded-2xl p-3 hover:border-[rgba(199,166,106,0.45)] transition-colors">
+                  <div className="flex items-start gap-3">
+                    {/* عکس */}
+                    <div className="w-16 h-16 bg-gray-50 rounded-xl flex items-center justify-center flex-shrink-0 overflow-hidden">
+                      {product.images?.length > 0 ? (
+                        <img loading="lazy" decoding="async" src={product.images[0]} alt="" className="w-full h-full object-cover" />
                       ) : (
-                        <span className="font-bold text-green-700 text-sm">{product.price.toLocaleString('fa-IR')} تومان</span>
+                        <Package size={24} className="text-gray-300" />
                       )}
-                      <span className={`text-xs px-2 py-0.5 rounded-full flex items-center gap-1 ${statusLabels[product.status]?.color || 'bg-gray-100 text-gray-600'}`}>
-                        {statusLabels[product.status]?.icon}
-                        {statusLabels[product.status]?.label || product.status}
-                      </span>
+                    </div>
+
+                    {/* ── فقط چهار چیز ──
+                        دسته‌بندی و نوع (عنوان)، برند و مدل (زیرنویس)، و
+                        قیمت. وضعیت و شهر و بازدید از این‌جا رفتند: در
+                        فهرست، هرچه بیشتر نوشته شود کمتر خوانده می‌شود، و
+                        روی موبایل همه‌شان روی هم می‌افتادند. */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-start justify-between gap-2">
+                        <h3 className="font-bold text-gray-800 text-[13.5px] leading-6 truncate">{product.title}</h3>
+                        <span className={`text-[10.5px] px-2 py-0.5 rounded-full flex items-center gap-1 flex-shrink-0 ${statusLabels[product.status]?.color || 'bg-gray-100 text-gray-600'}`}>
+                          {statusLabels[product.status]?.icon}
+                          {statusLabels[product.status]?.label || product.status}
+                        </span>
+                      </div>
+                      {product.sub && (
+                        <div className="text-[12px] text-gray-500 truncate mt-0.5" dir="auto">{product.sub}</div>
+                      )}
+                      <div className="mt-1.5">
+                        {product.discountPrice ? (
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="text-[11px] text-gray-400 line-through">{product.price.toLocaleString('fa-IR')}</span>
+                            <span className="font-bold text-green-700 text-[13px]">{product.discountPrice.toLocaleString('fa-IR')} تومان</span>
+                            <span className="bg-red-100 text-red-600 text-[10.5px] px-1.5 py-0.5 rounded">{product.discountPercent}٪</span>
+                          </div>
+                        ) : (
+                          <span className="font-bold text-green-700 text-[13px]">{product.price.toLocaleString('fa-IR')} تومان</span>
+                        )}
+                      </div>
                     </div>
                   </div>
 
-                  {/* دکمه‌ها */}
-                  <div className="flex items-center gap-2 flex-shrink-0">
+                  {/* ── دکمه‌ها با نام ──
+                      تا امروز فقط آیکون بودند و `title` روی موبایل هیچ‌وقت
+                      نشان داده نمی‌شود؛ کاربر جز سطلِ آشغال هیچ‌کدام را
+                      نمی‌شناخت. جا هم هست. */}
+                  <div className="mt-2.5 grid grid-cols-4 gap-1.5">
                     <Link href={`/shop/${product.id}`}
-                      className="p-2 text-gray-400 hover:text-[#9A6E38] hover:bg-[rgba(199,166,106,0.12)] rounded-xl transition-colors" title="مشاهده">
-                      <Eye size={18} />
+                      className={`${LQ_NEUTRAL} flex flex-col items-center justify-center gap-0.5 py-1.5 text-[11px] font-bold`}>
+                      <Eye size={15} />
+                      نمایش
                     </Link>
                     <Link href={`/shop/edit/${product.id}`}
-                      className="p-2 text-gray-400 hover:text-[#9A6E38] hover:bg-[rgba(199,166,106,0.12)] rounded-xl transition-colors" title="ویرایش">
-                      <Edit size={18} />
+                      className={`${LQ} flex flex-col items-center justify-center gap-0.5 py-1.5 text-[11px] font-bold`}>
+                      <Edit size={15} />
+                      ویرایش
                     </Link>
                     {/* ── ارتقا ──
                         کنارِ خودِ آگهی، چون کاری است که روی همان یک
@@ -367,12 +348,14 @@ export default function MyShopPage() {
                          تنها، بینِ پنج چوب، هیچ‌چیز نمی‌گوید. */
                       title: [product.title, product.sub].filter(Boolean).join(' '),
                     })}
-                      className="p-2 text-gray-400 hover:text-[#9A6E38] hover:bg-[rgba(199,166,106,0.12)] rounded-xl transition-colors" title="ارتقای آگهی">
-                      <ArrowUp size={18} />
+                      className={`${LQ} flex flex-col items-center justify-center gap-0.5 py-1.5 text-[11px] font-bold`}>
+                      <ArrowUp size={15} />
+                      ارتقا
                     </button>
                     <button onClick={() => handleDelete(product.id)} disabled={deleting === product.id}
-                      className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-colors disabled:opacity-50" title="حذف">
-                      <Trash2 size={18} />
+                      className="flex flex-col items-center justify-center gap-0.5 py-1.5 text-[11px] font-bold rounded-[10px] border border-red-100 bg-red-50 text-red-500 transition-all duration-200 hover:-translate-y-0.5 hover:bg-red-100 disabled:opacity-50">
+                      <Trash2 size={15} />
+                      حذف
                     </button>
                   </div>
                 </div>

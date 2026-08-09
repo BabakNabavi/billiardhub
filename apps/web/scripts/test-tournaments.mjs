@@ -670,8 +670,19 @@ t('سومِ مشترک از بازنده‌های نیمه‌نهایی محاس
 t('توضیحِ اضافیِ قرعه‌کشی برداشته شد', !/هر دو راه ثبت‌نام را می‌بندند/.test(adminPg));
 t('«در انتظار دور قبل» هیچ‌جا نمی‌آید',
   !/return 'در انتظار دور قبل'/.test(read('lib/tournaments/bracket-client.ts')));
-t('کپشنِ کارتِ نقش کوتاه شد',
-  /در صورت صلاحیت نقش جدید را انتخاب کنید/.test(read('app/dashboard/page.tsx')));
+/* کپشنِ کارت‌های نقش کلاً برداشته شد و همه‌ی کارت‌ها از یک تعریف
+   ساخته می‌شوند — پس هم‌اندازه‌بودنشان دیگر به طولِ متن بند نیست. */
+const dashPg = read('app/dashboard/page.tsx');
+t('کارت‌های نقش از یک تعریفِ واحد ساخته می‌شوند',
+  /const roleCards: RoleCardDef\[\] = \[\]/.test(dashPg)
+  && /\{roleCards\.map\(c => \(/.test(dashPg)
+  && (dashPg.match(/<div className="role-card"/g) ?? []).length === 1,
+  'نه کارتِ دست‌نویس یعنی نه اندازه‌ی متفاوت');
+t('کارتِ «افزودن نقش» هم همان کارت است، نه استثنا',
+  /href: '\/profile\/role', icon: '➕'/.test(dashPg));
+t('توضیحِ داخلِ کارت‌های نقش برداشته شد',
+  !/در صورت صلاحیت نقش جدید را انتخاب کنید/.test(dashPg)
+  && !/هویت کارخانه، محصولات و راه‌های ارتباطی/.test(dashPg));
 
 /* ── ثبتِ نتیجه: امتیازِ زنده، سقفِ فرمت، برک ── */
 console.log('\n― ثبتِ نتیجه ―');
@@ -1400,6 +1411,17 @@ t('عنوانِ صفحه هم با نقش عوض می‌شود',
 t('استوری از فهرستِ آگهی‌ها برداشته شد',
   !/استوری/.test(myShop) && !/SellerStory/.test(myShop),
   'استوری نه آگهی است نه ربطی به فهرستِ آگهی‌ها دارد');
+t('کارتِ آگهی فقط دسته/نوع، برند/مدل و قیمت را نشان می‌دهد',
+  !/categoryLabels\[product\.category\]/.test(myShop)
+  && !/بازدید<\/span>/.test(myShop) && !/conditionLabels\[/.test(myShop),
+  'روی موبایل همه‌ی این‌ها روی هم می‌افتادند');
+t('دکمه‌های کارتِ آگهی نام دارند',
+  ['نمایش', 'ویرایش', 'ارتقا', 'حذف'].every(w => new RegExp(`>\\s*${w}\\s*<`).test(myShop)),
+  'روی موبایل title نشان داده نمی‌شود و کاربر آیکون‌ها را نمی‌شناخت');
+t('فهرستِ آگهی‌ها کادرِ اسکرول‌دار دارد',
+  /max-h-\[62vh\] overflow-y-auto/.test(myShop));
+t('سرتیترِ صفحه‌ی ویرایش کوتاه شد',
+  !/EDIT LISTING/.test(strip(editAd)) && !/effBrand \? <span/.test(editAd));
 t('استوری در پنلِ فروشگاه است',
   /<StoryManager ownerId=\{user\.id\}/.test(read('app/dashboard/seller/page.tsx'))
   && /export default function StoryManager/.test(read('components/seller/StoryManager.tsx')));
