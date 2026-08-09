@@ -373,9 +373,6 @@ export default function ProductDetailPage() {
                   marginTop: 8, paddingTop: 10, borderTop: '1px dashed rgba(28,28,26,0.12)',
                   display: 'flex', alignItems: 'baseline', gap: 9, flexWrap: 'wrap',
                 }}>
-                  <span style={{ fontSize: 11.5, fontWeight: 700, color: GOLDD, background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.30)', borderRadius: 999, padding: '3px 10px', flexShrink: 0 }}>
-                    برند و مدل
-                  </span>
                   <span style={{ fontSize: 'clamp(16px,2vw,21px)', fontWeight: 800, color: TEXT, letterSpacing: '-0.01em' }}>
                     {titleTail}
                   </span>
