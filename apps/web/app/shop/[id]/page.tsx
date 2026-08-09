@@ -8,6 +8,7 @@ import { CAT_LABELS, type ShopProduct } from '../products'
 import ReportButton from '../../../components/ReportButton'
 import { productTitleParts, productTitle } from '../../../lib/market/title'
 import ImageLightbox from '../../../components/market/ImageLightbox'
+import { specRows } from '../../../lib/market/specs'
 
 /* ─── tokens (تم بازار: طلایی/برنزی روی کاغذ روشن) ─── */
 const BG    = '#F7F6F4'
@@ -163,6 +164,13 @@ export default function ProductDetailPage() {
   const product: Detail | undefined = staticProduct ?? userProduct ?? undefined
   /* از خودِ ردیفِ سرور خوانده می‌شوند، نه از شکلِ نگاشت‌شده — تا اگر
      روزی نگاشت عوض شد، این دو بی‌صدا خاموش نشوند. */
+  /* برچسبِ فارسیِ هر کلید از همان تعریفی می‌آید که فرمِ ثبت با آن
+     ساخته می‌شود (`lib/market/specs.ts`)، پس هیچ‌وقت از هم دور
+     نمی‌افتند. */
+  const specs = useMemo(
+    () => specRows(product?.cat, rawAd?.specs),
+    [product?.cat, rawAd],
+  )
   const negotiable = rawAd?.negotiable === true
   const sold = String(rawAd?.status ?? '') === 'sold'
 
@@ -392,6 +400,39 @@ export default function ProductDetailPage() {
 
             {/* توضیحات */}
             <p style={{ fontSize: 13.5, lineHeight: 2, color: TSEC, margin: '0 0 20px' }}>{product.desc}</p>
+
+            {/* ── مشخصات فنی ──
+                فروشنده هنگام ثبتِ آگهی ده‌ها مشخصه پر می‌کند — طول،
+                وزن، قطرِ تیپ، جنسِ شفت، ضخامتِ سنگ — و همه‌شان در
+                دیتابیس می‌نشستند و **هیچ‌جا دیده نمی‌شدند**. بازدیدکننده
+                فقط عنوان و قیمت را می‌دید، یعنی دقیقاً همان چیزی که
+                خریدِ آنلاینِ تجهیزات را غیرممکن می‌کند.
+
+                طرح عمداً با بقیه‌ی جدول‌های سایت فرق دارد: خطِ نقطه‌چینِ
+                رابط بینِ نام و مقدار — همان چیزی که در برگه‌ی مشخصاتِ
+                کاتالوگ‌های حرفه‌ای دیده می‌شود — به‌جای ردیف‌های
+                راه‌راه. چشم بدونِ مکث از نامِ مشخصه به مقدارش می‌رسد،
+                حتی وقتی طولِ نام‌ها یکی نیست. */}
+            {specs.length > 0 && (
+              <div style={{ ...glassPanel, borderRadius: 20, padding: '18px 18px 8px', marginBottom: 20 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 9, marginBottom: 14 }}>
+                  <span style={{ width: 3, height: 18, borderRadius: 2, background: `linear-gradient(180deg,${GOLD},${GOLDD})` }} />
+                  <h2 style={{ fontSize: 14.5, fontWeight: 800, color: TEXT, margin: 0 }}>مشخصات فنی</h2>
+                  <span style={{ fontSize: 11, fontWeight: 700, color: GOLDD, background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.30)', borderRadius: 999, padding: '2px 9px' }}>
+                    {specs.length.toLocaleString('fa-IR')} مورد
+                  </span>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(240px,1fr))', columnGap: 26 }}>
+                  {specs.map(s => (
+                    <div key={s.key} style={{ display: 'flex', alignItems: 'baseline', gap: 8, padding: '9px 0', borderBottom: '1px solid rgba(28,28,26,0.06)' }}>
+                      <span style={{ fontSize: 12.5, color: TSEC, whiteSpace: 'nowrap', flexShrink: 0 }}>{s.label}</span>
+                      <span aria-hidden style={{ flex: 1, minWidth: 12, alignSelf: 'center', height: 1, borderBottom: '1.5px dotted rgba(28,28,26,0.20)' }} />
+                      <span style={{ fontSize: 13, fontWeight: 700, color: TEXT, whiteSpace: 'nowrap', flexShrink: 0 }}>{s.value}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* کارت فروشنده — رفتن به فروشگاه + تماس */}
             <div style={{ ...glassPanel, borderRadius: 20, padding: 18 }}>

@@ -39,6 +39,9 @@ export interface RealProduct {
   price: number
   sale: number
   pct: number
+  /* آگهیِ توافقی قیمتِ قابلِ نمایش ندارد — کارت باید «توافقی»
+     بنویسد، نه «۰ تومان». */
+  negotiable: boolean
 }
 
 export interface RealStore {

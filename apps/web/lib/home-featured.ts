@@ -41,7 +41,7 @@ export async function loadHomeFeatured(): Promise<HomeFeatured> {
       .select('id,name,city,images,hasActiveStory,snookerTables,pocketTables,highballTables,vipSnookerTables,vipPocketTables')
       .eq('isActive', true).order('createdAt', { ascending: false }).limit(FEATURED_CLUBS_MAX),
     sb.from('products')
-      .select('id,title,brand,category,images,price,discountPrice,discountPercent')
+      .select('id,title,brand,category,images,price,negotiable,discountPrice,discountPercent')
       .eq('status', 'active').order('createdAt', { ascending: false }).limit(FEATURED_PRODUCTS_MAX),
   ])
 
@@ -57,7 +57,8 @@ export async function loadHomeFeatured(): Promise<HomeFeatured> {
   }
   type P = {
     id: string; title: string; brand?: string | null; category?: string | null
-    images?: string[] | null; price?: number | null; discountPrice?: number | null; discountPercent?: number | null
+    images?: string[] | null; price?: number | null; negotiable?: boolean | null
+    discountPrice?: number | null; discountPercent?: number | null
   }
   const n = (v: number | null | undefined) => v ?? 0
 
@@ -90,6 +91,7 @@ export async function loadHomeFeatured(): Promise<HomeFeatured> {
     price: n(p.price),
     sale: p.discountPrice ?? n(p.price),
     pct: n(p.discountPercent),
+    negotiable: p.negotiable === true,
   }))
 
   const stores: RealStore[] = storeRows.map(s => {

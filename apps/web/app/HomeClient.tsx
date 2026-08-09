@@ -303,7 +303,8 @@ interface ApiClub {
 }
 interface ApiProduct {
   id: string; title: string; brand?: string | null; category?: string | null
-  images?: string[]; price?: number; discountPrice?: number | null; discountPercent?: number | null
+  images?: string[]; price?: number; negotiable?: boolean
+  discountPrice?: number | null; discountPercent?: number | null
 }
 interface ApiStore {
   id: string; firstName?: string; lastName?: string; avatar?: string
@@ -559,21 +560,35 @@ function BazaarCard({ p, className, style }: { p: RealProduct; className?: strin
       <div className="bz-body">
         <span className="bz-name">{p.name} — {p.sub}</span>
         <div className="bz-row">
-          {p.pct > 0 && (
-            <span dir="ltr" className="bz-pct">٪{p.pct.toLocaleString('fa-IR')}</span>
-          )}
-          <div className="bz-prices">
-            {/* «تومان» روی خط خط‌خورده تا خط قیمت اصلی جا برای مبلغ + پیل تخفیف داشته باشد */}
-            {p.pct > 0 && (
-              <div className="bz-old">
-                {p.price.toLocaleString('fa-IR')} <span className="bz-unit">تومان</span>
-              </div>
-            )}
-            <div className="bz-new">
-              {p.sale.toLocaleString('fa-IR')}
-              {p.pct === 0 && <span className="bz-unit" style={{ color: '#8A8474' }}> تومان</span>}
+          {/* ── آگهیِ توافقی ──
+              فروشنده عمداً قیمت نگذاشته، پس ردیفِ قیمت در دیتابیس صفر
+              است. کارت همان صفر را چاپ می‌کرد و «۰ تومان» نشان می‌داد
+              — یعنی سایت از طرفِ فروشنده قیمتی اعلام می‌کرد که او
+              نگفته بود. صفحه‌ی بازار این را درست نشان می‌داد و فقط
+              همین کارتِ صفحه‌ی اصلی جا مانده بود. */}
+          {p.negotiable ? (
+            <div className="bz-prices">
+              <div className="bz-new">توافقی</div>
             </div>
-          </div>
+          ) : (
+            <>
+              {p.pct > 0 && (
+                <span dir="ltr" className="bz-pct">٪{p.pct.toLocaleString('fa-IR')}</span>
+              )}
+              <div className="bz-prices">
+                {/* «تومان» روی خط خط‌خورده تا خط قیمت اصلی جا برای مبلغ + پیل تخفیف داشته باشد */}
+                {p.pct > 0 && (
+                  <div className="bz-old">
+                    {p.price.toLocaleString('fa-IR')} <span className="bz-unit">تومان</span>
+                  </div>
+                )}
+                <div className="bz-new">
+                  {p.sale.toLocaleString('fa-IR')}
+                  {p.pct === 0 && <span className="bz-unit" style={{ color: '#8A8474' }}> تومان</span>}
+                </div>
+              </div>
+            </>
+          )}
         </div>
       </div>
     </Link>
@@ -865,7 +880,7 @@ export default function HomeClient({ initialPlacements, initialFeatured, service
         img: thumbUrl(p.images?.[0], PROD_W) || IMG.cue,
         brand: (p.brand || 'BILLIARD').toUpperCase(),
         price: p.price ?? 0, sale: p.discountPrice ?? p.price ?? 0,
-        pct: p.discountPercent ?? 0,
+        pct: p.discountPercent ?? 0, negotiable: p.negotiable === true,
       })));
 
       /* `/api/sellers` از جدولِ `profiles` می‌خواند (kind=seller،
@@ -902,6 +917,9 @@ export default function HomeClient({ initialPlacements, initialFeatured, service
       id: e.ref, name: e.title, sub: e.subtitle || 'بیلیارد بازار', img: thumbUrl(e.image, PROD_W),
       brand: (e.subtitle || 'BILLIARD').toUpperCase(),
       price: e.oldPrice ?? e.price ?? 0, sale: e.price ?? 0, pct: e.discountPercent ?? 0,
+      /* اسنپ‌شاتِ جایگاهِ تبلیغاتی «توافقی» را حمل نمی‌کند؛ جایگاهِ
+         پولی هم همیشه با قیمت انتخاب می‌شود. */
+      negotiable: false,
     }));
   }, [featProducts, prodSlot.mode, prodSlot.status, realProducts]);
 

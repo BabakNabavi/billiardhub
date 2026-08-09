@@ -885,7 +885,10 @@ t('دو اهرمِ متفاوت، نه دو برچسب',
 t('فهرستِ بازار به تازه‌سازی نگاه می‌کند',
   /\.order\('bumped_at'/.test(marketApi),
   'اگر مرتب‌سازی فقط تاریخِ ثبت باشد، تازه‌سازی هیچ اثری ندارد');
-t('نوارِ فوری در بازار هست', /const urgent = useMemo/.test(shopPage) && /فروشنده عجله دارد/.test(shopPage));
+/* زیرنویسِ «فروشنده عجله دارد» برداشته شد — خودِ واژه‌ی «فوری» منظور
+   را می‌رساند. آنچه باید بماند خودِ نوار است، نه آن جمله. */
+t('نوارِ فوری در بازار هست',
+  /const urgent = useMemo/.test(shopPage) && />فوری<\/h2>/.test(shopPage));
 t('ترتیبِ نوارِ فوری هر ساعت می‌چرخد',
   /Math\.floor\(now \/ 3600000\)/.test(shopPage),
   'ترتیبِ ثابت یعنی خریدارِ دیروز ته نوار — همان مشکلی که فوری قرار بود حلش کند');
@@ -1466,6 +1469,38 @@ t('موردی که در سایت وجود ندارد در فهرست نیست',
   'کاربر کاری ناتمام می‌دید که هیچ راهی برای تمام‌کردنش نبود');
 t('«تبلیغات» تا رونمایی پشتِ کلید است',
   /const ADS_LAUNCHED = false/.test(dashPage) && /\{ADS_LAUNCHED && \(/.test(dashPage));
+
+/* ── بازار: مشخصات، فوری، توافقی، جدید ── */
+console.log('\n― بازار ―');
+const adDetail = read('app/shop/[id]/page.tsx');
+const market = stripComments(read('app/shop/page.tsx'));
+const newAdPage = read('app/shop/new/page.tsx');
+
+t('تعریفِ مشخصاتِ فنی یک‌جاست',
+  /export const CATEGORY_SPECS/.test(read('lib/market/specs.ts'))
+  && /from '\.\.\/\.\.\/\.\.\/lib\/market\/specs'/.test(newAdPage),
+  'اگر فرم نسخه‌ی خودش را داشته باشد، برچسبِ صفحه‌ی نمایش از آن دور می‌افتد');
+t('صفحه‌ی جزئیات مشخصاتِ فنی را نشان می‌دهد',
+  /specRows\(product\?\.cat, rawAd\?\.specs\)/.test(adDetail) && /مشخصات فنی/.test(adDetail),
+  'ده‌ها مشخصه ذخیره می‌شد و هیچ‌جا دیده نمی‌شد');
+t('آگهیِ فوری از فهرستِ عادی برداشته می‌شود',
+  /const inBar = new Set\(urgent\.map/.test(market),
+  'آگهیِ فوری هم در نوار بود هم وسطِ فهرست — دو بار دیده می‌شد');
+t('نوارِ فوری فیلترها را رعایت می‌کند',
+  /return matched\s*\n?\s*\.filter\(l => !l\.sold && l\.urgentUntil/.test(market)
+  || /matched\r?\n?\s*\.filter\(l => !l\.sold/.test(market),
+  'جستجوی «چوب» در نوارِ فوری میز و توپ هم نشان می‌داد');
+t('«پیدا نشد» با فهرستِ خالیِ عادی اشتباه نمی‌شود',
+  /ready && matched\.length === 0/.test(market),
+  'اگر همه‌ی نتیجه‌ها فوری بودند، هم‌زمان نوار و پیامِ «پیدا نشد» می‌آمد');
+t('نشانِ «جدید» ۲۴ ساعته است',
+  /const NEW_BADGE_MS = 24 \* 60 \* 60 \* 1000/.test(market));
+t('«فروشنده عجله دارد» برداشته شد',
+  !/عجله دارد/.test(market));
+t('کارتِ صفحه‌ی اصلی برای توافقی صفر نمی‌نویسد',
+  /p\.negotiable \? \(/.test(read('app/HomeClient.tsx'))
+  && /negotiable: p\.negotiable === true/.test(read('lib/home-featured.ts')),
+  '«۰ تومان» یعنی سایت از طرفِ فروشنده قیمتی اعلام می‌کند که او نگفته');
 
 console.log('\n― فروشگاه: منبعِ واحد ―');
 /* توضیحات کنار گذاشته می‌شوند — خودشان نامِ ستونِ قدیمی را می‌برند */

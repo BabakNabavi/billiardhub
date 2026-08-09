@@ -33,6 +33,10 @@ import {
 import { productTitleParts } from '../../lib/market/title'
 
 const GOLD   = '#C7A66A'
+/* عمرِ نشانِ «جدید» — دو روز بود و بیش‌ازحد سخاوتمند: در بازارِ کم‌حجم
+   عملاً همه‌ی آگهی‌ها نشان می‌گرفتند و نشان بی‌معنا می‌شد. */
+const NEW_BADGE_MS = 24 * 60 * 60 * 1000
+
 const GOLD_D = '#9A6E38'
 const TEXT   = '#1C1B17'
 const SEC    = '#5B564B'
@@ -200,7 +204,7 @@ function MarketCard({ l, i, saved, onSave }: { l: Listing; i: number; saved: boo
             هم باشد و دو نشانِ روی هم کارت را شلوغ می‌کند. */}
         {l.urgentUntil && l.urgentUntil > Date.now() ? (
           <span className="mk-urg"><Zap size={9} /> فوری</span>
-        ) : l.source === 'user' && l.createdAt && Date.now() - l.createdAt < 86400000 * 2 ? (
+        ) : l.source === 'user' && l.createdAt && Date.now() - l.createdAt < NEW_BADGE_MS ? (
           <span className="mk-new"><Sparkles size={9} /> جدید</span>
         ) : null}
       </div>
@@ -433,21 +437,7 @@ export default function MarketNewPage() {
      اگر بر اساسِ زمانِ خرید مرتب شود، همان مشکل برمی‌گردد: کسی که
      دیروز خریده ته نوار می‌رود. کلیدِ مرتب‌سازی هر ساعت عوض می‌شود،
      پس هر آگهیِ فوری در طولِ روز چند ساعت جلوی نوار است. */
-  const urgent = useMemo(() => {
-    const now = Date.now()
-    const hour = Math.floor(now / 3600000)
-    const seed = (s: string) => {
-      let h = hour
-      for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0
-      return h
-    }
-    return listings
-      .filter(l => !l.sold && l.urgentUntil !== null && l.urgentUntil > now)
-      .sort((a, b) => seed(String(a.id)) - seed(String(b.id)))
-      .slice(0, 24)
-  }, [listings])
-
-  const filtered = useMemo(() => {
+  const matched = useMemo(() => {
     const lo = parsePrice(minP), hi = parsePrice(maxP)
     const term = q.trim()
     let out = listings.filter(l => {
@@ -474,6 +464,45 @@ export default function MarketNewPage() {
     if (sort === 'newest') out = [...out].sort((a, b) => (b.createdAt ?? 0) - (a.createdAt ?? 0))
     return out
   }, [listings, cat, cities, minP, maxP, cond, onlyDisc, time, q, sort, showSaved, savedKeys])
+
+  /* ── نوارِ فوری ──
+     نشانِ قرمز روی آگهی‌ای که در جایگاهِ چهارصدم است هیچ ارزشی
+     ندارد؛ کسی که تا آن‌جا اسکرول نکرده رنگش را هم نمی‌بیند. پس
+     «فوری» یک جایگاهِ رزروشده‌ی بالای بازار می‌خرد، نه فقط برچسب.
+
+     ── چرا ترتیب چرخشی است ──
+     اگر بر اساسِ زمانِ خرید مرتب شود، همان مشکل برمی‌گردد: کسی که
+     دیروز خریده ته نوار می‌رود. کلیدِ مرتب‌سازی هر ساعت عوض می‌شود،
+     پس هر آگهیِ فوری در طولِ روز چند ساعت جلوی نوار است.
+
+     ── دو چیزی که این‌جا عوض شد ──
+     ۱) از `matched` ساخته می‌شود نه از کلِ `listings`. پیش‌تر
+        بازدیدکننده‌ای که «چوب» را جستجو می‌کرد، در نوارِ فوری میز و
+        توپ هم می‌دید — نوار فیلترها را نادیده می‌گرفت.
+     ۲) هر آگهی‌ای که این‌جا بیاید، از فهرستِ پایین برداشته می‌شود.
+        تا امروز آگهیِ فوری **دو بار** دیده می‌شد: یک بار در نوار و
+        یک بار وسطِ فهرستِ عادی. با تمام‌شدنِ زمانِ فوری خودبه‌خود
+        به فهرست برمی‌گردد، چون این فیلتر روی همان زمان است. */
+  const urgent = useMemo(() => {
+    const now = Date.now()
+    const hour = Math.floor(now / 3600000)
+    const seed = (s: string) => {
+      let h = hour
+      for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0
+      return h
+    }
+    return matched
+      .filter(l => !l.sold && l.urgentUntil !== null && l.urgentUntil > now)
+      .sort((a, b) => seed(String(a.id)) - seed(String(b.id)))
+      .slice(0, 24)
+  }, [matched])
+
+  /* فهرستِ عادی = هرچه در نوارِ فوری نیامده. */
+  const filtered = useMemo(() => {
+    if (urgent.length === 0) return matched
+    const inBar = new Set(urgent.map(l => l.key))
+    return matched.filter(l => !inBar.has(l.key))
+  }, [matched, urgent])
 
   const chips: { label: string; clear: () => void }[] = []
   if (cat)      chips.push({ label: catLabel(cat), clear: () => setCat('') })
@@ -938,7 +967,7 @@ export default function MarketNewPage() {
             )}
 
             {/* ── گرید کارت‌های عمودی ── */}
-            {ready && filtered.length === 0 ? (
+            {ready && matched.length === 0 ? (
               <div style={{ textAlign: 'center', padding: '70px 20px', background: '#fff', border: `1px solid ${LINE}`, borderRadius: 16 }}>
                 <Store size={34} style={{ color: MUT, opacity: 0.4, marginBottom: 12 }} />
                 <p style={{ fontSize: 14.5, fontWeight: 800, margin: '0 0 6px' }}>آگهی‌ای با این فیلترها پیدا نشد</p>
@@ -960,7 +989,6 @@ export default function MarketNewPage() {
                     <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 10 }}>
                       <Zap size={15} style={{ color: '#B23B2E' }} />
                       <h2 style={{ fontSize: 14.5, fontWeight: 900, color: TEXT, margin: 0 }}>فوری</h2>
-                      <span style={{ fontSize: 11.5, color: MUT }}>فروشنده عجله دارد</span>
                     </div>
                     <div className="mk-urgrow">
                       {urgent.map((l, i) => (
