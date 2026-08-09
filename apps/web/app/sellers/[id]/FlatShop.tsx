@@ -10,6 +10,9 @@ import { fetchProfile } from '../../../lib/profiles/client'
 import { telPrefix, provinceOfCity } from '../../../lib/iran-geo'
 import { getMockSeller } from '../../../lib/sellers-data'
 import { MARKET_CATEGORIES } from '../../../lib/market/categories'
+/* بدونِ این، نوار روی دسکتاپ فقط با شیفت+چرخ حرکت می‌کرد و با موس
+   «قفل» حس می‌شد. همان قلابی که کاروسل‌های صفحه‌ی اصلی دارند. */
+import { useHorizontalScroll } from '../../../lib/useHorizontalScroll'
 
 /*
   نسخه‌ی فلت — UX فروشگاه واقعی
@@ -368,6 +371,8 @@ export default function FlatShop() {
   const [wish, setWish] = useState<Set<string>>(new Set())
   const [storyOpen, setStoryOpen] = useState(false)
   const [urlCopied, setUrlCopied] = useState(false)
+  const catStripRef = useRef<HTMLDivElement>(null)
+  useHorizontalScroll(catStripRef)
   /* استوریِ واقعی = فروشنده تصویری گذاشته باشد */
   const hasStory = !!String(store.storyImage ?? '').trim()
   const router = useRouter()
@@ -718,7 +723,7 @@ export default function FlatShop() {
             پنهان بود و کاربر باید بازش می‌کرد تا بفهمد فروشگاه چه
             دارد. دسته‌ای که محصولی ندارد اصلاً نشان داده نمی‌شود. */}
         <div className="scat-wrap mt-3">
-          <div className="scat-strip">
+          <div className="scat-strip" ref={catStripRef}>
             <button type="button" onClick={() => setCat('all')}
               className={`scat${cat === 'all' ? ' on' : ''}`}>
               <span className="scat-ic scat-all">{Icon.storefront}</span>

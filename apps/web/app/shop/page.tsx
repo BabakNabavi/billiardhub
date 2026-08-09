@@ -31,11 +31,17 @@ import {
   CONDITIONS, conditionLabel,
 } from '../../lib/market/categories'
 import { productTitleParts } from '../../lib/market/title'
+/* همان موتورِ کاروسل‌های صفحه‌ی اصلی: درگِ روان + حرکتِ خودکار */
+import { useHorizontalScroll, scrollSign, getPos, setPos } from '../../lib/useHorizontalScroll'
 
 const GOLD   = '#C7A66A'
 /* عمرِ نشانِ «جدید» — دو روز بود و بیش‌ازحد سخاوتمند: در بازارِ کم‌حجم
    عملاً همه‌ی آگهی‌ها نشان می‌گرفتند و نشان بی‌معنا می‌شد. */
 const NEW_BADGE_MS = 24 * 60 * 60 * 1000
+
+/* سقفِ نوارِ فوری. بیشتر از این، نوار به فهرستِ دومِ بازار تبدیل
+   می‌شود و جایگاهی که فروشنده پولش را داده بی‌ارزش می‌شود. */
+const URGENT_MAX = 12
 
 const GOLD_D = '#9A6E38'
 const TEXT   = '#1C1B17'
@@ -90,6 +96,8 @@ interface Listing {
   /* آگهیِ فوری (مهاجرت ۰۷۹) — تا این لحظه در نوارِ بالای بازار
      می‌نشیند و نشانِ قرمز می‌گیرد. */
   urgentUntil: number | null
+  /* شمارشِ بازدید — پایه‌ی ترتیبِ منصفانه‌ی نوارِ فوری */
+  views: number
   source: 'shop' | 'user'
 }
 
@@ -127,6 +135,7 @@ function serverAdToListing(a: Record<string, any>): Listing {
     negotiable: a.negotiable === true,
     sold: a.status === 'sold',
     urgentUntil: a.urgent_until ? new Date(a.urgent_until).getTime() : null,
+    views: Number(a.views ?? 0) || 0,
     source: 'user',
   }
 }
@@ -483,18 +492,28 @@ export default function MarketNewPage() {
         تا امروز آگهیِ فوری **دو بار** دیده می‌شد: یک بار در نوار و
         یک بار وسطِ فهرستِ عادی. با تمام‌شدنِ زمانِ فوری خودبه‌خود
         به فهرست برمی‌گردد، چون این فیلتر روی همان زمان است. */
+  /* ── نمایشِ منصفانه ──
+     چرخشِ ساعتی به‌تنهایی کافی نیست: نوار پیوسته به راست می‌رود، پس
+     جایگاه‌های اولِ نوار بیشتر دیده می‌شوند. اگر ترتیب فقط تصادفی
+     باشد، آگهی‌ای که شانس آورده هر ساعت جلو می‌افتد و بازدیدش از
+     بقیه فاصله می‌گیرد.
+
+     پس بازدیدِ تاکنونی هم در ترتیب دخالت می‌کند: آگهیِ کم‌بازدیدتر
+     جلوتر می‌نشیند. عاملِ ساعتی سرِ جایش می‌ماند تا مساوی‌ها هر ساعت
+     جابه‌جا شوند و ترتیب یخ نزند. */
   const urgent = useMemo(() => {
     const now = Date.now()
     const hour = Math.floor(now / 3600000)
-    const seed = (s: string) => {
+    const jitter = (s: string) => {
       let h = hour
       for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0
-      return h
+      return (h % 1000) / 1000
     }
-    return matched
-      .filter(l => !l.sold && l.urgentUntil !== null && l.urgentUntil > now)
-      .sort((a, b) => seed(String(a.id)) - seed(String(b.id)))
-      .slice(0, 24)
+    const live = matched.filter(l => !l.sold && l.urgentUntil !== null && l.urgentUntil > now)
+    /* بازدید به بازه‌ی ۰..۱ نرمال می‌شود تا با jitter هم‌مقیاس بماند */
+    const maxViews = Math.max(1, ...live.map(l => l.views))
+    const score = (l: typeof live[number]) => l.views / maxViews + jitter(String(l.id))
+    return [...live].sort((a, b) => score(a) - score(b)).slice(0, URGENT_MAX)
   }, [matched])
 
   /* فهرستِ عادی = هرچه در نوارِ فوری نیامده. */
@@ -503,6 +522,38 @@ export default function MarketNewPage() {
     const inBar = new Set(urgent.map(l => l.key))
     return matched.filter(l => !inBar.has(l.key))
   }, [matched, urgent])
+
+  /* ── نوارِ فوری: حرکتِ خودکارِ نرم ──
+     جایگاهِ فوری وقتی ارزش دارد که دیده شود، و کاربر لزوماً نوار را
+     نمی‌کشد. حرکتِ آرام و پیوسته به راست همه‌ی آگهی‌ها را از جلوی چشم
+     رد می‌کند. فهرست دوبل می‌شود تا حلقه بدونِ پرش بسته شود، و با
+     لمس/موس/کیبورد می‌ایستد تا با دستِ کاربر نجنگد. */
+  const urgRef = useRef<HTMLDivElement>(null)
+  const urgPaused = useRef(false)
+  useHorizontalScroll(urgRef, busy => { urgPaused.current = busy })
+  const urgLoop = urgent.length >= 4 ? [...urgent, ...urgent] : urgent
+  useEffect(() => {
+    if (urgent.length < 4) return
+    if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return
+    const el = urgRef.current
+    if (!el) return
+    const SPEED = 26                       // پیکسل بر ثانیه — عمداً کند
+    const sign = scrollSign(el)
+    setPos(el, sign, el.scrollWidth / 2)
+    let last = 0, raf = 0
+    const tick = (t: number) => {
+      if (last && !urgPaused.current) {
+        const half = el.scrollWidth / 2
+        let p = getPos(el, sign) - (SPEED * (t - last)) / 1000
+        if (p <= 0) p += half
+        setPos(el, sign, p)
+      }
+      last = t
+      raf = requestAnimationFrame(tick)
+    }
+    raf = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(raf)
+  }, [urgent.length])
 
   const chips: { label: string; clear: () => void }[] = []
   if (cat)      chips.push({ label: catLabel(cat), clear: () => setCat('') })
@@ -1007,9 +1058,9 @@ export default function MarketNewPage() {
                       <Zap size={15} style={{ color: '#B23B2E' }} />
                       <h2 style={{ fontSize: 14.5, fontWeight: 900, color: TEXT, margin: 0 }}>فوری</h2>
                     </div>
-                    <div className="mk-urgrow">
-                      {urgent.map((l, i) => (
-                        <div key={l.key} className="mk-urgcell">
+                    <div className="mk-urgrow" ref={urgRef}>
+                      {urgLoop.map((l, i) => (
+                        <div key={`${l.key}-${i}`} className="mk-urgcell">
                           <MarketCard l={l} i={i} saved={savedKeys.has(l.key)} onSave={() => toggleSave(l.key)} />
                         </div>
                       ))}
