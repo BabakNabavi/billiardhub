@@ -2,7 +2,7 @@
 
 import { useState, useRef, useCallback, useEffect } from 'react'
 import Link from 'next/link'
-import { ChevronLeft } from 'lucide-react'
+import { ChevronRight } from 'lucide-react'
 import { useAuthStore } from '../../../store/auth.store'
 import { findSellerByOwner } from '../../../lib/seller-store'
 import { fetchMyProfile } from '../../../lib/profiles/client'
@@ -377,40 +377,29 @@ export default function NewProductPage() {
 
         <div style={{ position: 'relative', zIndex: 1, maxWidth: 1100, margin: '0 auto', padding: 'clamp(20px,3vw,36px) clamp(16px,3vw,32px) 80px' }}>
 
-          {/* ── Top nav ── */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 36 }}>
-            <Link href="/shop" style={{ display: 'inline-flex', alignItems: 'center', gap: 7, fontSize: 13.5, color: TEXT_SEC, textDecoration: 'none', padding: '8px 14px', borderRadius: 11, background: LQ_BG, border: LQ_BOR, boxShadow: LQ_SHAD, backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', transition: 'color 0.2s' }}
+          {/* ── Top nav ──
+              فلش به راست است، نه چپ: در RTL «برگشت» یعنی حرکت به راست. */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: -6, marginBottom: 16 }}>
+            <Link href="/shop" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12.2, color: TEXT_SEC, textDecoration: 'none', padding: '7px 12.5px', borderRadius: 10, background: LQ_BG, border: LQ_BOR, boxShadow: LQ_SHAD, backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', transition: 'color 0.2s' }}
               onMouseEnter={e => (e.currentTarget.style.color = GOLD)}
               onMouseLeave={e => (e.currentTarget.style.color = TEXT_SEC)}>
-              <ChevronLeft size={15} />
+              <ChevronRight size={13.5} />
               بازگشت به فروشگاه
             </Link>
           </div>
 
-          {/* ── Page Header ── */}
-          <div style={{ marginBottom: 40, animation: 'fadeUp 0.4s ease both' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10, flexWrap: 'wrap' }}>
-              <div style={{ width: 44, height: 44, borderRadius: 13, background: `linear-gradient(135deg,${GOLD},#A07840)`, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: `0 6px 20px rgba(199,166,106,0.36)` }}>
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round">
-                  <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
-                </svg>
-              </div>
-              <div>
-                <p style={{ fontSize: 11, color: GOLD, letterSpacing: '0.2em', fontWeight: 700, margin: '0 0 2px' }}>NEW PRODUCT</p>
-                <h1 style={{ fontSize: 'clamp(21px,2.8vw,28px)', fontWeight: 900, color: TEXT, margin: 0, letterSpacing: '-0.02em' }}>ثبت محصول جدید</h1>
-              </div>
-            </div>
-            <p style={{ fontSize: 14.5, color: TEXT_SEC, margin: '0 0 0 54px', lineHeight: 1.6 }}>
-              محصول خود را در بیلیارد هاب معرفی کنید و مستقیماً با خریداران در ارتباط باشید
-            </p>
-          </div>
+          {/* ── Steps indicator ──
+              سرتیترِ صفحه («NEW PRODUCT»، «ثبت محصول جدید» و توضیحش)
+              برداشته شد: روی موبایل یک صفحه‌ی کامل جا می‌گرفت و کاربر
+              باید اسکرول می‌کرد تا به اولین فیلد برسد.
 
-          {/* ── Steps indicator ── (flex-wrap تا روی موبایل سرریز افقی نسازد) */}
-          <div style={{ display: 'flex', gap: 8, marginBottom: 28, flexWrap: 'wrap', animation: 'fadeUp 0.45s ease both' }}>
+              nowrap تا هر سه در یک سطر بمانند؛ اندازه‌ها کوچک‌اند و
+              متن کوتاه نمی‌شود، پس روی باریک‌ترین صفحه هم جا می‌شود. */}
+          <div style={{ display: 'flex', gap: 6, marginBottom: 20, flexWrap: 'nowrap', animation: 'fadeUp 0.45s ease both' }}>
             {[{ n: '۱', t: 'اطلاعات محصول' }, { n: '۲', t: 'اطلاعات فروشنده' }, { n: '۳', t: 'ثبت نهایی' }].map((s, i) => (
-              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '7px 14px', borderRadius: 20, background: i < 2 ? `rgba(199,166,106,0.10)` : 'rgba(28,28,26,0.05)', border: `1px solid ${i < 2 ? 'rgba(199,166,106,0.28)' : 'rgba(28,28,26,0.08)'}` }}>
-                <span style={{ width: 22, height: 22, borderRadius: '50%', background: i < 2 ? `linear-gradient(135deg,${GOLD},#A07840)` : 'rgba(28,28,26,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 800, color: i < 2 ? '#fff' : TEXT_MUT, flexShrink: 0 }}>{s.n}</span>
-                <span style={{ fontSize: 12.5, fontWeight: 700, color: i < 2 ? GOLD : TEXT_MUT }}>{s.t}</span>
+              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '5px 9px', borderRadius: 16, minWidth: 0, background: i < 2 ? `rgba(199,166,106,0.10)` : 'rgba(28,28,26,0.05)', border: `1px solid ${i < 2 ? 'rgba(199,166,106,0.28)' : 'rgba(28,28,26,0.08)'}` }}>
+                <span style={{ width: 18, height: 18, borderRadius: '50%', background: i < 2 ? `linear-gradient(135deg,${GOLD},#A07840)` : 'rgba(28,28,26,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 9.5, fontWeight: 800, color: i < 2 ? '#fff' : TEXT_MUT, flexShrink: 0 }}>{s.n}</span>
+                <span style={{ fontSize: 10.8, fontWeight: 700, color: i < 2 ? GOLD : TEXT_MUT, whiteSpace: 'nowrap' }}>{s.t}</span>
               </div>
             ))}
           </div>
@@ -876,7 +865,7 @@ export default function NewProductPage() {
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
                   <path d="M5 13l4 4L19 7" stroke={GOLD_D} strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
-                ثبت محصول در فروشگاه
+                ثبت محصول
               </button>
 
               <Link href="/shop" style={{ padding: '16px 20px', borderRadius: 14, border: '1px solid rgba(255,255,255,0.88)', background: 'rgba(255,255,255,0.78)', backdropFilter: 'blur(20px) saturate(200%)', WebkitBackdropFilter: 'blur(20px) saturate(200%)', color: TEXT_SEC, fontSize: 14, fontWeight: 600, textDecoration: 'none', display: 'flex', alignItems: 'center', whiteSpace: 'nowrap', boxShadow: 'inset 0 1.5px 0 rgba(255,255,255,0.95), 0 4px 14px rgba(0,0,0,0.06)', transition: 'color 0.2s', position: 'relative', zIndex: 1 }}

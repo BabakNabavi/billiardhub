@@ -1005,6 +1005,38 @@ t('وضعیتِ کالا از CONDITIONS می‌آید نه رشته‌ی دست
 t('کیس چوب و کیف توپ فهرستِ نوع و برند دارند',
   /'cue-case', 'ball-bag'/.test(chainSrc),
   'تفکیکِ case-bag نصفه مانده بود و این دو دسته به متنِ آزاد می‌افتادند');
+t('دراپ‌داون از لبه‌ی صفحه بیرون نمی‌زند',
+  /const openUp = below < 190/.test(formFields) && /maxHeight: rect\.maxH/.test(formFields),
+  'روی موبایل نیمی از فهرست بیرونِ نمایشگر بود و گزینه‌های پایین انتخاب نمی‌شدند');
+t('راهنمای داخلِ فیلد ریزتر و کم‌رنگ‌تر است',
+  /\.nf::placeholder \{ color: rgba\(28,28,26,0\.22\); font-size: 12\.6px; \}/.test(formFields));
+t('سرتیترِ صفحه‌ی ثبت آگهی برداشته شد',
+  !/NEW PRODUCT/.test(newAdS) && !/ثبت محصول جدید/.test(newAdS)
+  && !/مستقیماً با خریداران در ارتباط باشید/.test(newAdS));
+t('سه مرحله در یک سطر می‌مانند', /flexWrap: 'nowrap'/.test(newAd));
+t('دکمه‌ی بازگشت فلشِ راست دارد', /<ChevronRight size=\{13\.5\}/.test(newAd));
+
+console.log('\n― پروفایلِ نقش‌ها ―');
+/* فرمِ عمومیِ `/profile/setup` برای هر هشت نقش روی مسیری ذخیره
+   می‌کرد که وجود ندارد، و فهرستِ نقش‌ها را هم نمی‌ساخت. */
+const roleSetup = read('app/profile/setup/page.tsx');
+const rolesLib = read('lib/roles.ts');
+t('پنلِ هر نقش منبعِ واحد دارد',
+  /export const ROLE_PANEL/.test(rolesLib)
+  && ['user', 'player', 'coach', 'referee', 'technician', 'seller', 'manufacturer', 'club_owner']
+    .every(r => new RegExp(`\\b${r}:\\s*\\{ path:`).test(rolesLib)),
+  'هر هشت نقش باید در همان جدول باشند');
+t('فرمِ مرده‌ی پروفایلِ نقش برداشته شد',
+  !/roles\/\$\{role\.value\}\/profile/.test(roleSetup) && !/RoleForm/.test(roleSetup),
+  'مسیرِ PUT /api/roles/<role>/profile وجود ندارد و در تولید ۴۰۴ می‌داد');
+t('کپیِ سومِ فهرستِ نقش‌ها حذف شد',
+  !/const ROLES: RoleMeta\[\]/.test(roleSetup) && /from '\.\.\/\.\.\/\.\.\/lib\/roles'/.test(roleSetup));
+t('نقشِ دادهٔ ادمین هم دیده می‌شود',
+  /cur\.primaryRole/.test(roleSetup) && /secondaryRoles/.test(roleSetup),
+  'خواندنِ فقطِ role_requests یعنی نقشِ مستقیمِ ادمین نامرئی می‌ماند');
+t('پاسخِ /roles/my شیء است نه آرایه',
+  /j\.requests \?\? \[\]/.test(roleSetup),
+  'کدِ قبلی data.filter می‌زد، خطا در catch خفه می‌شد و فهرست همیشه خالی بود');
 
 t('امتیازِ ساختگی از صفحه‌ی محصول رفت',
   !/product\.rating\.toFixed/.test(detail2) && !/function Stars/.test(detail2));

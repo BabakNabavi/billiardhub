@@ -31,7 +31,9 @@ export const AD_FORM_CSS = `
   @keyframes popIn { from{opacity:0;transform:scale(0.94)} to{opacity:1;transform:scale(1)} }
   * { box-sizing: border-box; }
   .nf:focus { border-color: ${GOLD} !important; box-shadow: 0 0 0 3px rgba(199,166,106,0.14) !important; }
-  .nf::placeholder { color: rgba(28,28,26,0.28); }
+  /* راهنمای داخلِ فیلد ریزتر و کم‌رنگ‌تر از متنِ واقعی است، تا با
+     چیزی که کاربر نوشته اشتباه گرفته نشود */
+  .nf::placeholder { color: rgba(28,28,26,0.22); font-size: 12.6px; }
   .drop-area { transition: border-color 0.2s, background 0.2s, transform 0.15s; }
   .drop-area:hover { border-color: ${GOLD} !important; background: rgba(199,166,106,0.04) !important; }
   .img-thumb { transition: transform 0.2s, box-shadow 0.2s; }
@@ -78,14 +80,34 @@ export function FancySelect({ value, onChange, options, placeholder = 'انتخ�
 }) {
   const [open, setOpen] = useState(false)
   const [q, setQ] = useState('')
-  const [rect, setRect] = useState<{ top: number; left: number; width: number } | null>(null)
+  const [rect, setRect] = useState<{ top: number; left: number; width: number; maxH: number } | null>(null)
   const btnRef = useRef<HTMLButtonElement>(null)
   const panelRef = useRef<HTMLDivElement>(null)
   const searchable = options.length > 8
 
+  /* ── چرا این‌قدر حساب‌وکتاب برای یک دراپ‌داون ──
+     نسخه‌ی قبلی همیشه پنل را زیرِ دکمه می‌گذاشت با ارتفاعِ ثابتِ
+     ۲۶۴ پیکسل. روی موبایل، دکمه‌ای که پایینِ صفحه بود پنلی می‌ساخت
+     که نیمی از آن بیرونِ نمایشگر بود — و چون پنل `position:fixed`
+     است، اسکرول هم به آن نمی‌رسید. یعنی گزینه‌های پایینِ فهرست
+     عملاً قابلِ انتخاب نبودند.
+
+     حالا فضای واقعیِ بالا و پایینِ دکمه اندازه گرفته می‌شود: اگر
+     پایین جا نبود پنل رو به بالا باز می‌شود، و ارتفاعش هرگز از
+     فضای موجود بیشتر نمی‌شود. */
   const place = () => {
     const r = btnRef.current?.getBoundingClientRect()
-    if (r) setRect({ top: r.bottom + 6, left: r.left, width: r.width })
+    if (!r) return
+    const GAP = 6, EDGE = 10
+    const vh = window.innerHeight, vw = window.innerWidth
+    const below = vh - r.bottom - GAP - EDGE
+    const above = r.top - GAP - EDGE
+    const openUp = below < 190 && above > below
+    const maxH = Math.max(150, Math.min(300, openUp ? above : below))
+    const top = openUp ? Math.max(EDGE, r.top - GAP - maxH) : r.bottom + GAP
+    const width = Math.min(r.width, vw - EDGE * 2)
+    const left = Math.min(Math.max(EDGE, r.left), Math.max(EDGE, vw - width - EDGE))
+    setRect({ top, left, width, maxH })
   }
   const toggle = () => { if (disabled) return; if (!open) place(); setOpen(o => !o) }
 
@@ -116,27 +138,31 @@ export function FancySelect({ value, onChange, options, placeholder = 'انتخ�
           padding: '12px 14px', borderRadius: 11, fontSize: 14.5, textAlign: 'right',
           border: `1.5px solid ${error ? ERR : open ? GOLD : disabled ? 'rgba(28,28,26,0.07)' : 'rgba(28,28,26,0.13)'}`,
           background: disabled ? 'rgba(28,28,26,0.03)' : '#FAFAFA',
-          color: cur ? TEXT : (disabled ? 'rgba(28,28,26,0.30)' : TEXT_MUT),
+          color: cur ? TEXT : (disabled ? 'rgba(28,28,26,0.30)' : 'rgba(28,28,26,0.24)'),
           fontFamily: 'Vazirmatn,Tahoma,sans-serif', cursor: disabled ? 'not-allowed' : 'pointer',
           boxShadow: open ? '0 0 0 3px rgba(199,166,106,0.14)' : 'none', transition: 'border-color .18s, box-shadow .18s',
         }}>
-        <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{cur ? cur.label : placeholder}</span>
+        <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontSize: cur ? undefined : 12.6 }}>{cur ? cur.label : placeholder}</span>
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={GOLD} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, transition: 'transform .2s', transform: open ? 'rotate(180deg)' : 'none' }}><polyline points="6 9 12 15 18 9"/></svg>
       </button>
 
       {open && !disabled && rect && typeof document !== 'undefined' && createPortal(
         <div ref={panelRef} style={{
           position: 'fixed', zIndex: 9999, top: rect.top, left: rect.left, width: rect.width,
+          maxHeight: rect.maxH, display: 'flex', flexDirection: 'column',
           background: '#fff', border: '1px solid rgba(28,28,26,0.1)', borderRadius: 13, overflow: 'hidden',
           boxShadow: '0 18px 44px rgba(28,27,23,0.20)', animation: 'fadeIn 0.14s ease both', direction: 'rtl',
         }}>
           {searchable && (
-            <div style={{ padding: 8, borderBottom: '1px solid rgba(28,28,26,0.07)' }}>
-              <input autoFocus value={q} onChange={e => setQ(e.target.value)} placeholder="جستجو..." dir="rtl"
+            <div style={{ padding: 8, borderBottom: '1px solid rgba(28,28,26,0.07)', flexShrink: 0 }}>
+              {/* روی موبایل فوکوسِ خودکار کیبورد را بالا می‌آورد و همان
+                  پنلی را که تازه جا شده بود دوباره از صفحه بیرون می‌اندازد */}
+              <input autoFocus={typeof window !== 'undefined' && window.innerWidth > 820}
+                value={q} onChange={e => setQ(e.target.value)} placeholder="جستجو..." dir="rtl"
                 style={{ width: '100%', boxSizing: 'border-box', padding: '8px 11px', borderRadius: 9, fontSize: 13, border: '1.5px solid rgba(28,28,26,0.12)', background: '#FAFAFA', color: TEXT, outline: 'none', fontFamily: 'Vazirmatn,Tahoma,sans-serif' }} />
             </div>
           )}
-          <div style={{ maxHeight: 264, overflowY: 'auto', padding: 6 }}>
+          <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', WebkitOverflowScrolling: 'touch', overscrollBehavior: 'contain', padding: 6 }}>
             {list.length === 0 ? (
               <div style={{ padding: '18px 10px', textAlign: 'center', fontSize: 13, color: TEXT_MUT }}>موردی یافت نشد</div>
             ) : list.map(o => {

@@ -28,7 +28,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import Link from 'next/link'
-import { ChevronLeft } from 'lucide-react'
+import { ChevronRight } from 'lucide-react'
 import { useAuthStore } from '../../../../store/auth.store'
 import { uploadFile } from '../../../../lib/supabase'
 import { apiFetch } from '../../../../lib/http'
@@ -409,9 +409,9 @@ export default function EditProductPage() {
         <div style={{ position: 'relative', zIndex: 1, maxWidth: 860, margin: '0 auto', padding: 'clamp(18px,3vw,32px) clamp(14px,3vw,28px) 80px' }}>
 
           {/* ── راهِ برگشت ── */}
-          <div style={{ marginBottom: 26 }}>
-            <Link href="/dashboard/shop" style={{ display: 'inline-flex', alignItems: 'center', gap: 7, fontSize: 13.5, color: TEXT_SEC, textDecoration: 'none', padding: '8px 14px', borderRadius: 11, background: LQ_BG, border: LQ_BOR, boxShadow: LQ_SHAD, backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)' }}>
-              <ChevronLeft size={15} />
+          <div style={{ marginTop: -6, marginBottom: 20 }}>
+            <Link href="/dashboard/shop" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12.2, color: TEXT_SEC, textDecoration: 'none', padding: '7px 12.5px', borderRadius: 10, background: LQ_BG, border: LQ_BOR, boxShadow: LQ_SHAD, backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)' }}>
+              <ChevronRight size={13.5} />
               بازگشت به آگهی‌های من
             </Link>
           </div>

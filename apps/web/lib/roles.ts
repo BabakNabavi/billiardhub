@@ -142,6 +142,38 @@ export const ROLE_MAP = Object.fromEntries(
   ROLES.map(r => [r.value, r])
 ) as Record<RoleValue, RoleMeta>
 
+/* ═══════════════════════════════════════════════════════════════
+   پنلِ واقعیِ هر نقش — منبعِ واحد.
+   ───────────────────────────────────────────────────────────────
+   هر نقش یک صفحه دارد که پروفایلش آن‌جا ساخته و ویرایش می‌شود، و
+   همان صفحه روی جدولِ `profiles` می‌نویسد.
+
+   کنارِ آن، `/profile/setup` یک فرمِ دومِ عمومی داشت که از روی
+   `profileFields` ساخته می‌شد و روی `PUT /api/roles/<role>/profile`
+   ذخیره می‌کرد — مسیری که در این پروژه **وجود ندارد** و در تولید
+   ۴۰۴ می‌دهد. یعنی کاربر برای هر هشت نقش فرم را پر می‌کرد، پیامِ
+   «ذخیره شد» می‌گرفت و هیچ‌چیز ذخیره نمی‌شد.
+
+   حالا هر جایی که می‌خواهد کاربر را به «فرمِ پروفایلِ نقشش»
+   بفرستد، از این جدول می‌خواند. یک نقشِ تازه یعنی یک ردیفِ این‌جا،
+   نه یک فرمِ تازه.
+   ═══════════════════════════════════════════════════════════════ */
+export interface RolePanel { path: string; label: string }
+
+export const ROLE_PANEL: Record<RoleValue, RolePanel> = {
+  user:         { path: '/profile/me',             label: 'پروفایل من' },
+  player:       { path: '/dashboard/player',       label: 'پروفایل بازیکن' },
+  coach:        { path: '/dashboard/coach',        label: 'پروفایل مربی' },
+  referee:      { path: '/referees/dashboard',     label: 'پروفایل داور' },
+  technician:   { path: '/dashboard/technician',   label: 'پنل خدمات فنی' },
+  seller:       { path: '/dashboard/seller',       label: 'پنل فروشگاه' },
+  manufacturer: { path: '/dashboard/manufacturer', label: 'پنل تولیدکننده' },
+  club_owner:   { path: '/dashboard/club',         label: 'پنل باشگاه' },
+}
+
+export const rolePanelPath = (r: RoleValue): string => ROLE_PANEL[r]?.path ?? '/dashboard'
+export const rolePanelLabel = (r: RoleValue): string => ROLE_PANEL[r]?.label ?? 'پنل من'
+
 // ─── Helpers ──────────────────────────────────────────────────
 export function toFarsiDigits(n: number | string): string {
   const fa = ['۰','۱','۲','۳','۴','۵','۶','۷','۸','۹']
