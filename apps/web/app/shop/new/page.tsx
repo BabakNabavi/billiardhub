@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useRef, useCallback, useEffect } from 'react'
-import { createPortal } from 'react-dom'
 import Link from 'next/link'
 import { ChevronLeft } from 'lucide-react'
 import { useAuthStore } from '../../../store/auth.store'
@@ -10,21 +9,17 @@ import { fetchMyProfile } from '../../../lib/profiles/client'
 import ProvinceCitySelect from '../../../components/ProvinceCitySelect'
 import { apiFetch } from '../../../lib/http'
 import { uploadFile } from '../../../lib/supabase'
-import { CATEGORY_OPTIONS } from '../../../lib/market/categories'
+import { CATEGORY_OPTIONS, CONDITIONS, conditionLabel } from '../../../lib/market/categories'
 /* تعریفِ مشخصاتِ فنی از این‌جا رفت به `lib/market/specs.ts` تا صفحه‌ی
    جزئیاتِ محصول هم بتواند برچسبِ فارسیِ هر کلید را بخواند. */
-import { GENERIC_SPECS, CATEGORY_SPECS, HIDDEN_SPEC_KEYS, type SpecFieldDef } from '../../../lib/market/specs'
+import { GENERIC_SPECS, CATEGORY_SPECS, HIDDEN_SPEC_KEYS } from '../../../lib/market/specs'
 import { productTitleParts } from '../../../lib/market/title'
+import { TYPE_OPTIONS, brandOptionsFor, modelOptionsFor, isTypeDrivenCategory, withOther } from '../../../lib/market/chain'
+import {
+  GOLD, GOLD_D, TEXT, TEXT_SEC, TEXT_MUT, LQ_BG, LQ_BOR, LQ_SHAD, ERR,
+  AD_FORM_CSS, inp, toAsciiDigits, fmtPrice, FancySelect, Label, ErrMsg, SectionTitle, SpecField,
+} from '../../../components/market/AdFormFields'
 
-const GOLD     = '#C7A66A'
-const GOLD_D   = '#9A6E38'
-const TEXT     = '#1C1C1A'
-const TEXT_SEC = 'rgba(28,28,26,0.52)'
-const TEXT_MUT = 'rgba(28,28,26,0.30)'
-const LQ_BG    = 'rgba(255,255,255,0.82)'
-const LQ_BOR   = '1px solid rgba(255,255,255,0.85)'
-const LQ_SHAD  = 'inset 0 1.5px 0 rgba(255,255,255,0.95), 0 8px 32px rgba(0,0,0,0.07)'
-const ERR      = '#EF4444'
 
 /* دسته‌ها از منبعِ واحد (lib/market/categories).
 
@@ -37,504 +32,7 @@ const CATEGORIES = CATEGORY_OPTIONS
 // شهر/استان از ProvinceCitySelect می‌آید — لیست هاردکد حذف شد (single source of truth)
 
 
-/* «نوع» برای هر دسته — دراپ‌داون بالای فرم (اجباری). دسته‌هایی که اینجا نیستند، «نوع» متن آزاد می‌گیرند.
-   توجه: در «چوب» گزینه‌ی «سایر» حذف شده است. */
-const TYPE_OPTIONS: Record<string, string[]> = {
-  cue:        ['پاکت بیلیارد', 'اسنوکر', 'هی‌بال', 'کارامبول'],
-  table:      ['پاکت بیلیارد', 'اسنوکر', 'هی‌بال', 'کارامبول', 'خانگی'],
-  /* «کیوبال» توپِ ضربه است و جدا فروخته می‌شود؛ «سایر» برای هر
-     چیزی که در این سه نمی‌گنجد، با فیلدِ توضیح. */
-  /* ── چرا اول رشته و بعد تعداد ──
-     گزینه‌های قبلی با عدد شروع می‌شدند («۱۵ تایی پاکت بیلیارد») و
-     خریدار اول باید عدد را می‌خواند تا بفهمد اصلاً توپِ کدام رشته
-     است. حالا نام رشته جلو است و «توپ تکی» هم اضافه شد — فروشِ تکیِ
-     توپ رایج است و تا امروز جایی در فهرست نداشت. */
-  ball:       ['اسنوکر', 'پاکت بیلیارد', 'کارامبول', 'کیوبال', 'تکی', 'سایر'],
-  tip:        ['اسنوکر', 'پاکت بیلیارد', 'هی‌بال'],
-  'case-bag': ['کیس سخت', 'کیس نرم', 'کیف', 'کوله‌پشتی'],
-  /* گچ: نوع فقط برای دسته‌بندی؛ لیست برند مستقل از نوع است (هرکدام که انتخاب شود همان برندهای گچ می‌آید) */
-  chalk:      ['اسنوکر', 'پاکت بیلیارد', 'هی‌بال'],
-}
 
-/* برندهای «چوب» بر اساس نوع (اسنوکر / پاکت بیلیارد). «سایر» ⇒ فیلد متن دستی باز می‌شود.
-   نوع‌های دیگر (هی‌بال/کارامبول) برند متن آزاد می‌گیرند. */
-const CUE_BRANDS: Record<string, string[]> = {
-  'اسنوکر': ['John Parris', 'Peradon', 'Cue Craft', "O'Min", 'Ton Praram', 'Phoenix', 'PowerGlide', 'Trevor White', 'Jason Owen', 'Mike Wooldridge', 'Woods Cues', 'BCE', 'Precision', 'Master Cue', 'Maximus', 'Paochan', 'سایر'],
-  'پاکت بیلیارد': ['Predator', 'Mezz', 'McDermott', 'Meucci', 'Jacoby', 'Pechauer', 'Viking', 'Cuetec', 'Joss', 'Lucasi', 'Longoni', 'Becue', 'Tiger', 'Schon', 'Players', 'Action', 'Poison', 'OB', 'Falcon', 'Dufferin', 'سایر'],
-}
-
-/* مدل‌های «چوب» بر اساس برند. برندهایی که اینجا نیستند ⇒ مدل متن دستی. «سایر» ⇒ فیلد متن. */
-const CUE_MODELS: Record<string, string[]> = {
-  'Peradon':        ['Winchester', 'Newbury', 'Guildford', 'Harlow', 'Knight', 'Joe Davis 600', 'Chiltern', 'Royal', 'Edwardian', 'Salisbury', 'Cannon', 'Crown', 'Lazer', 'Warwick', 'Oxford', 'Trafalgar', 'Stamford', 'Liverpool', 'York', 'Sheffield', 'سایر'],
-  'McDermott':      ['SN801', 'SN802', 'SN401', 'SN402', 'SN404', 'SN503', 'SN504', 'سایر'],
-  'Predator':       ['Classic', 'Crown', 'Royal', 'Edwardian', 'Winchester', 'Newbury', 'Guildford', 'Harlow', 'Knight', 'York', 'King', 'Pro Cue', 'Joe Davis', 'Walter Lindrum', 'Lazer', 'Salisbury', 'Trafalgar', 'Oxford', 'Liverpool', 'Sheffield', 'Warwick', 'Cannon', 'سایر'],
-  'John Parris':    ['Traditional', 'Professional', 'Ultimate', 'Ultimate Pro', 'Paragon', 'Ambassador', 'Exclusive', 'Custom Built', 'Signature', 'Titanium Ferrule Series', 'سایر'],
-  "O'Min":          ['Classic', 'Traditional', 'Champion', 'Professional', 'Master', 'Black Series', 'Signature', 'Prestige', 'Supreme', 'Ultimate', 'Handmade Series', 'Custom Series', 'Limited Edition', 'سایر'],
-  'Cue Craft':      ['Traditional', 'Heritage', '3 Lions', 'Signature', 'Champion', 'Professional', 'Custom Handmade', 'Limited Edition', 'سایر'],
-  'PowerGlide':     ['Heritage', 'Classic', 'Deluxe', 'Supreme', 'Diamond', 'Challenger', 'Club', 'Competition', 'Professional', 'Custom', 'سایر'],
-  'Ton Praram':     ['Classic', 'Champion', 'Professional', 'Ultimate', 'Signature', 'Handmade', 'Custom', 'سایر'],
-  'Phoenix':        ['Master', 'Supreme', 'Professional', 'Classic', 'Maple Series', 'Ash Series', 'Handmade', 'سایر'],
-  'Maximus':        ['Ultimate', 'Impression', 'Master', 'Professional', 'Handmade', 'Custom', 'سایر'],
-  'Trevor White':   ['Traditional', 'Professional', 'Handmade', 'Signature', 'Custom', 'سایر'],
-  'Mike Wooldridge':['Professional', 'Signature', 'Handmade', 'Traditional', 'Custom', 'سایر'],
-}
-
-/* برندهای دسته‌های دیگر (توپ/کیس/پارچه/گچ/تیپ/اکستنشن/اکسسوری/رست) — مستقل از نوع.
-   «سایر» به‌صورت خودکار ته لیست اضافه می‌شود (withOther). */
-const CAT_BRANDS: Record<string, string[]> = {
-  ball:       ['Aramith', 'Dynaspheres', 'Predator', 'Cyclop', 'Super Aramith', 'Riley', 'Brunswick', 'Molinari', 'Diamond'],
-  'case-bag': ['Predator', 'Mezz', 'Cuetec', 'Poison', 'Instroke', 'Justis', 'Whitten', 'JB Cases', 'Kronos', 'Longoni', 'Omin'],
-  cloth:      ['Simonis', 'Strachan', 'Hainsworth', 'Milliken', 'Championship', 'Gorina', 'Iwan Simonis'],
-  extension:  ['Predator', 'Mezz', 'Cuetec', 'Longoni', 'Peradon', 'John Parris', 'Riley', 'Omin', 'Universal'],
-  accessory:  ['Predator', 'Kamui', 'Mezz', 'Cuetec', 'Longoni', 'Aramith', 'Magic Ball Rack', 'Accu Rack', 'Q-Wiz', 'Tweeten', 'Master', 'Tiger', 'Universal'],
-  rest:       ['Peradon', 'Riley', 'Hamilton', 'PowerGlide', 'Master', 'Tweeten', 'Longoni', 'Predator'],
-}
-
-/* مدل‌های هر دسته بر اساس برند. برندهایی که اینجا نیستند ⇒ مدل متن دستی. «سایر» خودکار اضافه می‌شود. */
-const CAT_MODELS: Record<string, Record<string, string[]>> = {
-  ball: {
-    'Aramith':       ['Tournament Champion', 'Tournament Black', 'Premium', 'Super Pro', 'Premier', 'Pro Cup', 'Pro Cup TV', 'Duramith', 'Stone Collection', 'Philosophy Collection'],
-    'Dynaspheres':   ['Platinum', 'Titanium', 'Earth', 'Carom'],
-    'Predator':      ['Arcos II', 'Arcos'],
-    'Cyclop':        ['Hyperion', 'TV Pro', 'Super Pro', 'Prime'],
-    'Super Aramith': ['Pro', 'Premium', 'Tournament'],
-    'Riley':         ['Standard', 'Tournament'],
-    'Brunswick':     ['Centennial', 'Pro Cup'],
-    'Molinari':      ['Tournament Set'],
-    'Diamond':       ['Tournament Balls'],
-  },
-  'case-bag': {
-    'Predator': ['Metro Case', 'Roadline Case', 'Urban Case', 'Hard Case'],
-    'Mezz':     ['MZ Series', 'MP Series', 'Hybrid Case'],
-    'Cuetec':   ['Pro Case', 'Cynergy Case'],
-    'Poison':   ['Voodoo Case', 'Smash Case'],
-    'Instroke': ['Cowboy', 'Deluxe', 'Buffalo', 'Leather Case'],
-    'Justis':   ['Custom Leather', 'Traditional'],
-    'Whitten':  ['Custom Case', 'Leather Series'],
-    'JB Cases': ['Hybrid', 'Custom', 'GTF', 'Butterfly'],
-    'Kronos':   ['Hard Case', 'Soft Case'],
-    'Longoni':  ['Luxury Case', 'Leather Case'],
-    'Omin':     ['Classic Case', 'Premium Case'],
-  },
-  cloth: {
-    'Simonis':      ['860', '860 HR', '760', '920', '300 Rapide', '300 Tournament'],
-    'Strachan':     ['6811', '6811 Tournament', '777', '10K'],
-    'Hainsworth':   ['Match', 'Smart', 'Precision', 'Elite Pro'],
-    'Milliken':     ['Tournament Cloth', 'Super Pro'],
-    'Championship': ['Tour Edition', 'Invitational', 'Mercury Ultra'],
-    'Gorina':       ['Super Pro', 'Basalt', 'Granito'],
-    'Iwan Simonis': ['860 Tournament', '760 Tournament'],
-  },
-  extension: {
-    'Predator':    ['QR Extension', 'Uni-Loc Extension', 'Air II Extension'],
-    'Mezz':        ['Mezz Extension', 'Exceed Extension', 'Wavy Extension'],
-    'Cuetec':      ['Cynergy Extension', 'AVID Extension'],
-    'Longoni':     ['Longoni Extension', 'Quick Release Extension'],
-    'Peradon':     ['Telescopic Extension', 'Mini Extension'],
-    'John Parris': ['Snooker Extension', 'Classic Extension'],
-    'Riley':       ['Riley Extension', 'Telescopic Extension'],
-    'Omin':        ['Classic Extension', 'Premium Extension'],
-    'Universal':   ['Universal Screw Extension', 'Universal Quick Release Extension'],
-  },
-  accessory: {
-    'Predator':        ['Second Skin Glove', 'Chalk Holder', 'Joint Protector', 'Tip Tool', 'Ball Rack'],
-    'Kamui':           ['Kamui Glove', 'Tip Tool', 'Gator Grip', 'Tip Shaper', 'Joint Protector'],
-    'Mezz':            ['Mezz Glove', 'Tip Tool', 'Joint Protector', 'Extension Holder'],
-    'Cuetec':          ['Cynergy Glove', 'Tip Tool', 'Cue Towel', 'Joint Protector'],
-    'Longoni':         ['Professional Glove', 'Tip Tool', 'Cue Towel', 'Joint Protector'],
-    'Aramith':         ['Ball Rack', 'Triangle Rack', 'Ball Cleaner', 'Ball Polisher'],
-    'Magic Ball Rack': ['9 Ball Rack', '10 Ball Rack', '8 Ball Rack'],
-    'Accu Rack':       ['9 Ball', '10 Ball', '8 Ball', 'Template Rack'],
-    'Q-Wiz':           ['Shaft Cleaner', 'Burnisher', 'Microfiber Cloth'],
-    'Tweeten':         ['Tip Pick', 'Tip Tool', 'Cue Wax'],
-    'Master':          ['Tip Scuffer', 'Tip Pick', 'Chalk Holder'],
-    'Tiger':           ['Tip Tool', 'Tip Shaper', 'Burnisher'],
-    'Universal':       ['Cue Towel', 'Glove', 'Chalk Holder', 'Extension Holder', 'Cue Stand'],
-  },
-  rest: {
-    'Peradon':    ['Spider Rest', 'Swan Rest', 'Cross Rest', 'Hook Rest', 'Half Butt', 'Full Butt', 'Telescopic Rest'],
-    'Riley':      ['Spider', 'Cross', 'Rest Head', 'Telescopic Rest'],
-    'Hamilton':   ['Tournament Rest', 'Club Rest'],
-    'PowerGlide': ['Spider Rest', 'Cross Rest', 'Rest Set'],
-    'Master':     ['Spider', 'Cross', 'Rest Head'],
-    'Tweeten':    ['Bridge Head', 'Rest Accessories'],
-    'Longoni':    ['Carom Bridge', 'Pool Bridge'],
-    'Predator':   ['Extension Bridge', 'Pool Bridge'],
-  },
-}
-
-/* برندهای «میز» بر اساس نوع (اسنوکر/پاکت/هی‌بال) — مثل چوب، وابسته به نوع.
-   نوع‌های دیگر (کارامبول/خانگی) برند متن آزاد می‌گیرند. */
-const TABLE_BRANDS: Record<string, string[]> = {
-  'اسنوکر':       ['Wiraka', 'JOY', 'Rasson', 'Xingpai (Star)', 'Riley', 'BCE', 'Hamilton', 'Thurston', 'Shender', 'DPT'],
-  'پاکت بیلیارد': ['Diamond', 'Brunswick', 'Olhausen', 'Rasson', 'Riley', 'Dynamic', 'Buffalo', 'Valley', 'Connelly', 'Imperial', 'Toulet', 'SAM'],
-  'هی‌بال':        ['JOY', 'Wiraka', 'Xingpai (Star)', 'Rasson', 'Shender', 'Xingjue', 'Super Power', 'Hans Delta'],
-}
-
-/* مدل‌های «میز» بر اساس نوع سپس برند (یک برند در نوع‌های مختلف مدل‌های متفاوت دارد). */
-const TABLE_MODELS: Record<string, Record<string, string[]>> = {
-  'اسنوکر': {
-    'Wiraka':         ['M1 Tournament Steelblock', 'M1 Classic', 'M1 Classic Gold', 'M1 1980', 'Jewel', 'Armour Rocky', 'Berlin Commercial', 'Morris'],
-    'JOY':            ['Q7 Snooker'],
-    'Rasson':         ['Magnum Pro', 'Sword II', 'Strong II', 'Victory II Snooker', 'Ambassador', 'OX Snooker'],
-    'Xingpai (Star)': ['S101', 'S102', 'S103', 'S104', 'S105', 'S106', 'S107', 'XW101-12S', 'XW102', 'XW103', 'Champion Series', 'Tournament Series'],
-    'Riley':          ['Aristocrat', 'Renaissance', 'Clubmaster', 'Tournament', 'Match', 'Burwat'],
-    'BCE':            ['Westbury', 'Supreme', 'Club', 'Tournament'],
-    'Hamilton':       ['Tournament', 'Club', 'Heritage'],
-    'Thurston':       ['Tournament Table', 'Club Table', 'Heritage'],
-    'Shender':        ['S100', 'S200', 'S300', 'S500', 'Champion'],
-    'DPT':            ['Professional Snooker', 'Tournament Snooker'],
-  },
-  'پاکت بیلیارد': {
-    'Diamond':   ['Professional', 'Professional Tournament', 'Pro-Am', 'Paragon', 'League', 'Smart Table'],
-    'Brunswick': ['Gold Crown I', 'Gold Crown II', 'Gold Crown III', 'Gold Crown IV', 'Gold Crown V', 'Gold Crown VI', 'Gold Crown VII', 'Anniversary', 'Centennial', 'Black Wolf', 'Black Wolf Pro', 'Allenton', 'Botanic', 'Bristol', 'Canton', 'Glenwood', 'Oakland', 'Sanibel', 'Winfield', 'Bayfield', 'Contender', 'Metro'],
-    'Olhausen':  ['Americana', 'Augusta', 'Belmont', 'Eclipse', 'Grand Champion', 'Hampton', 'Monaco', 'Orleans', 'Pasadena', 'Reno', 'Tahoe', 'West End'],
-    'Rasson':    ['Victory II', 'Victory II Plus', 'Acurra', 'Challenger', 'Challenger Plus', 'OX', 'Leo', 'Shadow', 'Black Hole', 'Caesar'],
-    'Riley':     ['Elegance', 'Windsor', 'Hamilton', 'Classic'],
-    'Dynamic':   ['Dynamic II', 'Dynamic III', 'Triumph'],
-    'Buffalo':   ['Eliminator', 'Dominator', 'Gladiator', 'Harwood', 'Royal'],
-    'Valley':    ['Panther', 'Cougar', 'Tiger', 'Black Cat'],
-    'Connelly':  ['Catalina', 'Cochise', 'Presidio', 'Ventura'],
-    'Imperial':  ['Eliminator', 'Penelope', 'Reno', 'Bishop'],
-    'Toulet':    ['BlackLight', 'Crystal', 'Dining Collection'],
-    'SAM':       ['Atlantic', 'K Steel', 'Competition'],
-  },
-  'هی‌بال': {
-    'JOY':            ['Q3+', 'Q7', 'Q8', 'Q8 Pro', 'Q9', 'G3'],
-    'Wiraka':         ['Classic M1 Chinese Pool', 'CM1'],
-    'Xingpai (Star)': ['Champion Series', 'Tournament Series'],
-    'Rasson':         ['Victory II Heyball', 'Victory II Plus Heyball', 'Acurra Heyball'],
-    'Shender':        ['Heyball Professional', 'Tournament Heyball'],
-    'Xingjue':        ['Professional Series', 'Tournament Series'],
-    'Super Power':    ['Competition Series', 'Professional Series'],
-    'Hans Delta':     ['Tournament Series', 'Club Series'],
-  },
-}
-
-/* برندهای «تیپ» بر اساس نوع (اسنوکر/پاکت/هی‌بال) — مثل چوب/میز، وابسته به نوع. */
-const TIP_BRANDS: Record<string, string[]> = {
-  'اسنوکر':       ['Kamui', 'Century', 'Elk Master', 'Blue Diamond', 'ADR147', 'Talisman', 'Moori', 'Zan', 'G2', 'Navigator', 'HOW', 'Tiger', 'Taom', 'Le Professional', 'Triangle', 'Peradon', 'Riley', 'PowerGlide'],
-  'پاکت بیلیارد': ['Kamui', 'Predator', 'Tiger', 'HOW', 'Zan', 'Moori', 'Navigator', 'G2', 'Taom', 'Le Professional', 'Triangle', 'Blue Diamond', 'Molinari', 'Longoni', 'Caiden', 'KO Brothers', 'Techno Dud'],
-  'هی‌بال':        ['Kamui', 'Predator', 'HOW', 'Tiger', 'Zan', 'Navigator', 'G2', 'Taom', 'Molinari', 'Caiden', 'KO Brothers'],
-}
-
-/* مدل‌های «تیپ» بر اساس نوع سپس برند. */
-const TIP_MODELS: Record<string, Record<string, string[]>> = {
-  'اسنوکر': {
-    'Kamui':          ['Black', 'Original', 'Clear Black', 'Clear Original', 'Athlete'],
-    'Century':        ['G1'],
-    'Elk Master':     ['Elk Master'],
-    'Blue Diamond':   ['Blue Diamond'],
-    'ADR147':         ['Ultimate'],
-    'Talisman':       ['Pro', 'WB'],
-    'Moori':          ['Moori', 'Quick'],
-    'Zan':            ['Plus', 'Hybrid Max', 'Boost'],
-    'G2':             ['G2'],
-    'Navigator':      ['Alpha', 'Black'],
-    'HOW':            ['HOW'],
-    'Tiger':          ['Sniper', 'Everest', 'Onyx'],
-    'Taom':           ['Fusion'],
-    'Le Professional':['Le Professional'],
-    'Triangle':       ['Triangle'],
-    'Peradon':        ['Peradon'],
-    'Riley':          ['Riley'],
-    'PowerGlide':     ['PowerGlide'],
-  },
-  'پاکت بیلیارد': {
-    'Kamui':          ['Black', 'Original', 'Clear Black', 'Clear Original', 'Athlete'],
-    'Predator':       ['Victory'],
-    'Tiger':          ['Sniper', 'Everest', 'Onyx', 'Dynamite', 'Emerald', 'Icebreaker'],
-    'HOW':            ['HOW', 'Titan'],
-    'Zan':            ['Plus', 'Hybrid Max', 'Boost'],
-    'Moori':          ['Moori', 'Quick'],
-    'Navigator':      ['Alpha', 'Black', 'Blue Impact'],
-    'G2':             ['G2'],
-    'Taom':           ['Fusion'],
-    'Le Professional':['Le Professional'],
-    'Triangle':       ['Triangle'],
-    'Blue Diamond':   ['Blue Diamond'],
-    'Molinari':       ['Molinari'],
-    'Longoni':        ['Longoni'],
-    'Caiden':         ['Warrior', 'Fenrir'],
-    'KO Brothers':    ['KO Brothers'],
-    'Techno Dud':     ['Techno Dud'],
-  },
-  'هی‌بال': {
-    'Kamui':       ['Black', 'Original', 'Athlete'],
-    'Predator':    ['Victory'],
-    'HOW':         ['HOW', 'Titan'],
-    'Tiger':       ['Sniper', 'Everest', 'Onyx'],
-    'Zan':         ['Plus', 'Hybrid Max'],
-    'Navigator':   ['Alpha', 'Black'],
-    'G2':          ['G2'],
-    'Taom':        ['Fusion'],
-    'Molinari':    ['Molinari'],
-    'Caiden':      ['Warrior', 'Fenrir'],
-    'KO Brothers': ['KO Brothers'],
-  },
-}
-
-/* گچ — برند/مدل بر اساس نوع. اسنوکر و هی‌بال یک داده‌ی مشترک؛ پاکت داده‌ی جدا. */
-const SNOOKER_CHALK_BRANDS = ['Taom', 'Kamui', 'Master', 'Triangle', 'Blue Diamond', 'Silver Cup', 'Peradon', 'Riley', 'PowerGlide', 'Century', 'Pioneer']
-const SNOOKER_CHALK_MODELS: Record<string, string[]> = {
-  'Taom':         ['V10', 'Snooker Chalk 2.0', 'Soft', 'Pyro'],
-  'Kamui':        ['Roku'],
-  'Master':       ['Master Chalk'],
-  'Triangle':     ['Triangle Chalk'],
-  'Blue Diamond': ['Blue Diamond'],
-  'Silver Cup':   ['Silver Cup'],
-  'Peradon':      ['Peradon Chalk'],
-  'Riley':        ['Riley Chalk'],
-  'PowerGlide':   ['PowerGlide Chalk'],
-  'Century':      ['Century Chalk'],
-  'Pioneer':      ['Pioneer Chalk'],
-}
-const CHALK_BRANDS: Record<string, string[]> = {
-  'اسنوکر':       SNOOKER_CHALK_BRANDS,
-  'هی‌بال':        SNOOKER_CHALK_BRANDS,
-  'پاکت بیلیارد': ['Taom', 'Kamui', 'Predator', 'Master', 'Triangle', 'Blue Diamond', 'Silver Cup', 'Tiger', 'Molinari', 'Navigator', 'HOW', 'Mezz', 'Outsville', 'Great White', 'Lava', 'Magic Chalk', 'Pagulayan', 'Turning Point', 'Triple 60', 'Viking'],
-}
-const CHALK_MODELS: Record<string, Record<string, string[]>> = {
-  'اسنوکر': SNOOKER_CHALK_MODELS,
-  'هی‌بال':  SNOOKER_CHALK_MODELS,
-  'پاکت بیلیارد': {
-    'Taom':          ['V10', 'Pyro', 'Pool Chalk 2.0', 'Soft'],
-    'Kamui':         ['Roku', '0.98', '1.21', 'Sai', 'Kageki'],
-    'Predator':      ['1080', '1080 Pure'],
-    'Master':        ['Master Chalk'],
-    'Triangle':      ['Triangle Chalk', 'Triangle Pro'],
-    'Blue Diamond':  ['Blue Diamond'],
-    'Silver Cup':    ['Silver Cup'],
-    'Tiger':         ['Tiger Chalk'],
-    'Molinari':      ['Molinari Chalk'],
-    'Navigator':     ['Navigator Chalk'],
-    'HOW':           ['HOW Chalk'],
-    'Mezz':          ['Smart Chalk'],
-    'Outsville':     ['TechnoDud'],
-    'Great White':   ['Great White Chalk'],
-    'Lava':          ['Lava Chalk'],
-    'Magic Chalk':   ['Magic Chalk'],
-    'Pagulayan':     ['Pagulayan Chalk'],
-    'Turning Point': ['TP Chalk'],
-    'Triple 60':     ['Triple 60 Chalk'],
-    'Viking':        ['Viking Chalk'],
-  },
-}
-
-/* دسته‌های نوع‌محور. برند بر اساس نوع؛ مدل بر اساس (نوع، برند) — به‌جز چوب که مدلش فقط بر اساس برند است. */
-const TYPE_BRANDS: Record<string, Record<string, string[]>> = { cue: CUE_BRANDS, table: TABLE_BRANDS, tip: TIP_BRANDS, chalk: CHALK_BRANDS }
-const TYPE_MODELS: Record<string, Record<string, Record<string, string[]>>> = { table: TABLE_MODELS, tip: TIP_MODELS, chalk: CHALK_MODELS }
-
-/* «سایر» را یک‌بار ته لیست تضمین می‌کند (چه در داده باشد چه نباشد) */
-const withOther = (arr: string[]): string[] => (arr.includes('سایر') ? arr : [...arr, 'سایر'])
-
-function SpecField({ field, value, otherValue, onChange, onOtherChange, dependencyValue }: {
-  field: SpecFieldDef; value: string; otherValue: string
-  onChange: (v: string) => void; onOtherChange: (v: string) => void
-  dependencyValue?: string
-}) {
-  const hasDep   = Boolean(field.dependsOn)
-  // cueType === 'سایر' → free-text input for brand
-  const depOther = hasDep && dependencyValue === 'سایر'
-  // no cueType selected yet → disable the brand dropdown
-  const noDepYet = hasDep && !dependencyValue
-
-  // resolve the correct options list
-  const resolvedOptions: string[] =
-    hasDep && field.optionsByDependency && dependencyValue && !depOther
-      ? field.optionsByDependency[dependencyValue] ?? []
-      : field.options ?? []
-
-  const effectiveType = depOther ? 'text' : field.type
-  const showOther = effectiveType === 'dropdown' && resolvedOptions.includes('سایر') && value === 'سایر'
-  const labelText = field.unit ? `${field.label} (${field.unit})` : field.label
-
-  return (
-    <div style={{ gridColumn: field.wide ? '1 / -1' : undefined }}>
-      <Label optional>{labelText}</Label>
-
-      {/* Wrap in a keyed div so the fade-in triggers every time dependency changes */}
-      <div key={`dep-${dependencyValue ?? '__none__'}`}
-        style={{ animation: hasDep ? 'fadeIn 0.25s ease both' : undefined }}>
-
-        {effectiveType === 'dropdown' ? (
-          <FancySelect value={value} onChange={onChange}
-            options={resolvedOptions.map(o => ({ value: o, label: o }))}
-            placeholder={noDepYet ? 'ابتدا نوع را انتخاب کنید' : 'انتخاب...'}
-            disabled={noDepYet} />
-        ) : effectiveType === 'number' ? (
-          <input className="nf" type="number" step="any" inputMode="decimal" placeholder={field.placeholder ?? ''} value={value}
-            onChange={e => onChange(e.target.value)}
-            style={{ ...inp(), direction: 'ltr', textAlign: 'right' }} />
-        ) : (
-          <input className="nf" type="text"
-            placeholder={depOther ? 'نام برند را وارد کنید...' : (field.placeholder ?? '')}
-            value={depOther ? otherValue : value}
-            onChange={e => depOther ? onOtherChange(e.target.value) : onChange(e.target.value)}
-            style={{ ...inp(), ...(depOther ? { background: 'rgba(199,166,106,0.05)', borderColor: 'rgba(199,166,106,0.30)' } : {}) }} />
-        )}
-
-        {showOther && (
-          <div style={{ marginTop: 8, animation: 'fadeIn 0.25s ease both' }}>
-            <input className="nf" type="text" placeholder="لطفاً توضیح دهید..." value={otherValue}
-              onChange={e => onOtherChange(e.target.value)}
-              style={{ ...inp(), background: 'rgba(199,166,106,0.05)', borderColor: 'rgba(199,166,106,0.30)' }} />
-          </div>
-        )}
-      </div>
-    </div>
-  )
-}
-
-// parse Persian/Arabic numerals → pure digits
-function toAsciiDigits(s: string) {
-  return s.replace(/[۰-۹]/g, c => String(c.charCodeAt(0) - 0x06f0))
-         .replace(/[٠-٩]/g, c => String(c.charCodeAt(0) - 0x0660))
-}
-
-function fmtPrice(v: string) {
-  const n = toAsciiDigits(v).replace(/\D/g, '')
-  return n ? Number(n).toLocaleString('fa-IR') : ''
-}
-
-// ── Shared input style ─────────────────────────────────────────
-function inp(err?: string, locked?: boolean): React.CSSProperties {
-  return {
-    width: '100%', boxSizing: 'border-box',
-    padding: '12px 14px', borderRadius: 11, fontSize: 14.5,
-    border: `1.5px solid ${err ? ERR : locked ? 'rgba(199,166,106,0.32)' : 'rgba(28,28,26,0.13)'}`,
-    background: locked ? 'rgba(199,166,106,0.06)' : '#FAFAFA',
-    color: TEXT, fontFamily: 'Vazirmatn,Tahoma,sans-serif',
-    outline: 'none', direction: 'rtl',
-    transition: 'border-color 0.2s, box-shadow 0.2s',
-    cursor: locked ? 'default' : undefined,
-  }
-}
-
-// ── Modern select style ─────────────────────────────────────────
-/* (استایل <select> بومی حذف شد — همه‌ی دراپ‌داون‌ها حالا FancySelect هستند) */
-
-/* ── دراپ‌داون حرفه‌ای — پنل با Portal روی document.body و position:fixed رندر می‌شود
-   تا از overflow:hidden و stacking-context کارت‌ها فرار کند و زیر المان بعدی نرود. ── */
-function FancySelect({ value, onChange, options, placeholder = 'انتخاب...', disabled, error }: {
-  value: string
-  onChange: (v: string) => void
-  options: { value: string; label: string }[]
-  placeholder?: string
-  disabled?: boolean
-  error?: boolean
-}) {
-  const [open, setOpen] = useState(false)
-  const [q, setQ] = useState('')
-  const [rect, setRect] = useState<{ top: number; left: number; width: number } | null>(null)
-  const btnRef = useRef<HTMLButtonElement>(null)
-  const panelRef = useRef<HTMLDivElement>(null)
-  const searchable = options.length > 8
-
-  const place = () => {
-    const r = btnRef.current?.getBoundingClientRect()
-    if (r) setRect({ top: r.bottom + 6, left: r.left, width: r.width })
-  }
-  const toggle = () => { if (disabled) return; if (!open) place(); setOpen(o => !o) }
-
-  useEffect(() => {
-    if (!open) return
-    const onDoc = (ev: MouseEvent) => {
-      const t = ev.target as Node
-      if (btnRef.current?.contains(t) || panelRef.current?.contains(t)) return
-      setOpen(false)
-    }
-    const onKey = (ev: KeyboardEvent) => { if (ev.key === 'Escape') setOpen(false) }
-    document.addEventListener('mousedown', onDoc); document.addEventListener('keydown', onKey)
-    window.addEventListener('scroll', place, true); window.addEventListener('resize', place)
-    return () => {
-      document.removeEventListener('mousedown', onDoc); document.removeEventListener('keydown', onKey)
-      window.removeEventListener('scroll', place, true); window.removeEventListener('resize', place)
-    }
-  }, [open])
-
-  const cur = options.find(o => o.value === value)
-  const list = searchable && q.trim() ? options.filter(o => o.label.toLowerCase().includes(q.trim().toLowerCase())) : options
-
-  return (
-    <>
-      <button ref={btnRef} type="button" disabled={disabled} onClick={toggle}
-        style={{
-          width: '100%', boxSizing: 'border-box', display: 'flex', alignItems: 'center', gap: 8,
-          padding: '12px 14px', borderRadius: 11, fontSize: 14.5, textAlign: 'right',
-          border: `1.5px solid ${error ? ERR : open ? GOLD : disabled ? 'rgba(28,28,26,0.07)' : 'rgba(28,28,26,0.13)'}`,
-          background: disabled ? 'rgba(28,28,26,0.03)' : '#FAFAFA',
-          color: cur ? TEXT : (disabled ? 'rgba(28,28,26,0.30)' : TEXT_MUT),
-          fontFamily: 'Vazirmatn,Tahoma,sans-serif', cursor: disabled ? 'not-allowed' : 'pointer',
-          boxShadow: open ? '0 0 0 3px rgba(199,166,106,0.14)' : 'none', transition: 'border-color .18s, box-shadow .18s',
-        }}>
-        <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{cur ? cur.label : placeholder}</span>
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={GOLD} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, transition: 'transform .2s', transform: open ? 'rotate(180deg)' : 'none' }}><polyline points="6 9 12 15 18 9"/></svg>
-      </button>
-
-      {open && !disabled && rect && typeof document !== 'undefined' && createPortal(
-        <div ref={panelRef} style={{
-          position: 'fixed', zIndex: 9999, top: rect.top, left: rect.left, width: rect.width,
-          background: '#fff', border: '1px solid rgba(28,28,26,0.1)', borderRadius: 13, overflow: 'hidden',
-          boxShadow: '0 18px 44px rgba(28,27,23,0.20)', animation: 'fadeIn 0.14s ease both', direction: 'rtl',
-        }}>
-          {searchable && (
-            <div style={{ padding: 8, borderBottom: '1px solid rgba(28,28,26,0.07)' }}>
-              <input autoFocus value={q} onChange={e => setQ(e.target.value)} placeholder="جستجو..." dir="rtl"
-                style={{ width: '100%', boxSizing: 'border-box', padding: '8px 11px', borderRadius: 9, fontSize: 13, border: '1.5px solid rgba(28,28,26,0.12)', background: '#FAFAFA', color: TEXT, outline: 'none', fontFamily: 'Vazirmatn,Tahoma,sans-serif' }} />
-            </div>
-          )}
-          <div style={{ maxHeight: 264, overflowY: 'auto', padding: 6 }}>
-            {list.length === 0 ? (
-              <div style={{ padding: '18px 10px', textAlign: 'center', fontSize: 13, color: TEXT_MUT }}>موردی یافت نشد</div>
-            ) : list.map(o => {
-              const s = o.value === value
-              return (
-                <button key={o.value} type="button" onClick={() => { onChange(o.value); setOpen(false); setQ('') }}
-                  style={{
-                    display: 'flex', width: '100%', alignItems: 'center', justifyContent: 'space-between', gap: 8,
-                    padding: '10px 12px', border: 'none', borderRadius: 9, cursor: 'pointer', textAlign: 'right',
-                    fontFamily: 'Vazirmatn,Tahoma,sans-serif', fontSize: 14,
-                    background: s ? 'rgba(199,166,106,0.14)' : 'transparent', color: s ? GOLD_D : TEXT, fontWeight: s ? 800 : 500,
-                  }}
-                  onMouseEnter={e => { if (!s) e.currentTarget.style.background = 'rgba(28,28,26,0.04)' }}
-                  onMouseLeave={e => { if (!s) e.currentTarget.style.background = 'transparent' }}>
-                  <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{o.label}</span>
-                  {s && <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={GOLD_D} strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>}
-                </button>
-              )
-            })}
-          </div>
-        </div>,
-        document.body,
-      )}
-    </>
-  )
-}
-
-/* optional دیگر برچسب «(اختیاری)» نمی‌گذارد — کلمه‌ی «اختیاری» از کل فرم حذف شد */
-function Label({ children, required }: { children: React.ReactNode; required?: boolean; optional?: boolean }) {
-  return (
-    <label style={{ display: 'block', fontSize: 13, fontWeight: 700, color: TEXT, marginBottom: 7 }}>
-      {children}
-      {required && <span style={{ color: ERR, marginRight: 3 }}>*</span>}
-    </label>
-  )
-}
-
-function ErrMsg({ msg }: { msg?: string }) {
-  if (!msg) return null
-  return <p style={{ fontSize: 12, color: ERR, marginTop: 4, margin: '4px 0 0' }}>{msg}</p>
-}
-
-function SectionTitle({ children }: { children: React.ReactNode }) {
-  return (
-    <h2 style={{ fontSize: 15, fontWeight: 800, color: TEXT, margin: '0 0 22px', display: 'flex', alignItems: 'center', gap: 9, position: 'relative', zIndex: 1 }}>
-      <span style={{ width: 3, height: 17, background: `linear-gradient(180deg,${GOLD},#A07840)`, borderRadius: 2, flexShrink: 0, display: 'inline-block' }} />
-      {children}
-    </h2>
-  )
-}
 
 // ── Image slot ────────────────────────────────────────────────
 /* `data` فقط برای پیش‌نمایشِ محلی است؛ چیزی که ثبت می‌شود `file` است
@@ -634,14 +132,8 @@ export default function NewProductPage() {
 
   /* برند/مدل — اگر لیست داشت دراپ‌داون، وگرنه متن دستی.
      چوب: برند بر اساس نوع (اسنوکر/پاکت). بقیه‌ی دسته‌ها: برند ثابت همان دسته. مدل همیشه بر اساس برند. */
-  const brandOptions = TYPE_BRANDS[form.category]
-    ? (TYPE_BRANDS[form.category]![form.type] ?? null)          // نوع‌محور (چوب/میز/تیپ/گچ)
-    : (CAT_BRANDS[form.category] ?? null)                        // برند ثابت همان دسته
-  const modelOptions = form.category === 'cue'
-    ? (CUE_MODELS[form.brand] ?? null)                          // چوب: مدل فقط بر اساس برند
-    : TYPE_MODELS[form.category]
-      ? (TYPE_MODELS[form.category]![form.type]?.[form.brand] ?? null)  // میز/تیپ/گچ: مدل بر اساس (نوع، برند)
-      : (CAT_MODELS[form.category]?.[form.brand] ?? null)
+  const brandOptions = brandOptionsFor(form.category, form.type)
+  const modelOptions = modelOptionsFor(form.category, form.type, form.brand)
   /* مقدار مؤثر: اگر «سایر» انتخاب شده، متن دستی جای آن می‌نشیند */
   const effBrand = form.brand === 'سایر' ? form.brandOther.trim() : form.brand.trim()
   const effModel = form.model === 'سایر' ? form.modelOther.trim() : form.model.trim()
@@ -655,7 +147,7 @@ export default function NewProductPage() {
     setSpecOthers({})
   }
   /* تغییر نوع ⇒ در دسته‌های نوع‌محور (چوب/میز/تیپ/گچ) برند/مدل ریست می‌شوند */
-  const typeDrivenCat = (c: string) => !!TYPE_BRANDS[c]
+  const typeDrivenCat = isTypeDrivenCategory
   const setType = (v: string) => {
     /* عوض‌شدنِ نوع ⇒ توضیحِ «سایر» هم پاک می‌شود، وگرنه متنِ
        نوعِ قبلی روی نوعِ تازه می‌ماند */
@@ -873,21 +365,7 @@ export default function NewProductPage() {
 
   return (
     <>
-      <style>{`
-        @keyframes fadeUp { from{opacity:0;transform:translateY(18px)} to{opacity:1;transform:none} }
-        @keyframes fadeIn { from{opacity:0} to{opacity:1} }
-        @keyframes popIn { from{opacity:0;transform:scale(0.94)} to{opacity:1;transform:scale(1)} }
-        * { box-sizing: border-box; }
-        .nf:focus { border-color: ${GOLD} !important; box-shadow: 0 0 0 3px rgba(199,166,106,0.14) !important; }
-        .nf::placeholder { color: rgba(28,28,26,0.28); }
-        .drop-area { transition: border-color 0.2s, background 0.2s, transform 0.15s; }
-        .drop-area:hover { border-color: ${GOLD} !important; background: rgba(199,166,106,0.04) !important; }
-        .img-thumb { transition: transform 0.2s, box-shadow 0.2s; }
-        .img-thumb:hover { transform: scale(1.04); box-shadow: 0 8px 24px rgba(0,0,0,0.18); }
-        .cond-btn { transition: all 0.2s; cursor: pointer; }
-        .cond-btn:hover { border-color: ${GOLD} !important; }
-        @media(max-width:820px) { .two-col { grid-template-columns: 1fr !important; } .spec-grid { grid-template-columns: 1fr !important; } }
-      `}</style>
+      <style>{AD_FORM_CSS}</style>
 
       <div style={{ minHeight: '100vh', background: '#F7F7F5', direction: 'rtl', fontFamily: 'Vazirmatn,Tahoma,sans-serif', color: TEXT, overflowX: 'hidden' }}>
 
@@ -1091,8 +569,13 @@ export default function NewProductPage() {
                         {/* condition — دراپ‌داون حرفه‌ای */}
                         <div style={{ marginBottom: 16 }}>
                           <Label required>وضعیت کالا</Label>
+                          {/* ── چرا از CONDITIONS خوانده می‌شود ──
+                              این‌جا دستی «like-new» نوشته شده بود، ولی کلیدِ
+                              معتبر «like_new» است. سرور کلیدِ ناشناخته را به
+                              «نو» برمی‌گرداند، پس هر آگهیِ «در حد نو» بی‌صدا
+                              «نو» ذخیره می‌شد. */}
                           <FancySelect value={form.condition} onChange={v => set('condition', v)}
-                            options={[{ value: 'new', label: 'نو' }, { value: 'like-new', label: 'در حد نو' }, { value: 'used', label: 'کارکرده' }]} />
+                            options={CONDITIONS.map(c => ({ value: c.id, label: c.label }))} />
                         </div>
 
                         {/* description */}
@@ -1331,7 +814,7 @@ export default function NewProductPage() {
                         )}
                         <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
                           {catLabel && <span style={{ fontSize: 11, color: GOLD, fontWeight: 600, background: 'rgba(199,166,106,0.1)', padding: '1px 7px', borderRadius: 10 }}>{catLabel}</span>}
-                          {form.condition !== 'new' && <span style={{ fontSize: 11, color: '#B45309', fontWeight: 600, background: 'rgba(180,83,9,0.08)', padding: '1px 7px', borderRadius: 10 }}>{form.condition === 'like-new' ? 'در حد نو' : 'کارکرده'}</span>}
+                          {form.condition !== 'new' && <span style={{ fontSize: 11, color: '#B45309', fontWeight: 600, background: 'rgba(180,83,9,0.08)', padding: '1px 7px', borderRadius: 10 }}>{conditionLabel(form.condition)}</span>}
                         </div>
                         {form.price && (
                           <p style={{ fontSize: 14, fontWeight: 800, color: GOLD, margin: '5px 0 0' }}>

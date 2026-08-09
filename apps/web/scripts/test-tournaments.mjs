@@ -948,6 +948,11 @@ t('خریدِ بسته همچنان از درگاه می‌رود',
 console.log('\n― بازار ―');
 const newAd = read('app/shop/new/page.tsx');
 const newAdS = strip(newAd);
+/* زنجیره‌ی دسته→نوع→برند→مدل و اجزای فرم از فرمِ ثبت بیرون آمدند تا
+   فرمِ ویرایش هم از همان‌ها بخواند. */
+const chainSrc = read('lib/market/chain.ts');
+const editAd = read('app/shop/edit/[id]/page.tsx');
+const formFields = read('components/market/AdFormFields.tsx');
 const detail2 = read('app/shop/[id]/page.tsx');
 const detail2S = strip(detail2);
 const relApi = read('app/api/market/ads/[id]/related/route.ts');
@@ -962,11 +967,44 @@ t('نامِ آگهی از دسته و نوع ساخته می‌شود',
   /const composedName = \[catLabel, effType\]/.test(newAd),
   'برند و مدل نمی‌گویند اصلاً توپ است یا چوب');
 t('دسته‌ی توپ فهرستِ رشته‌محور دارد',
-  newAd.includes(`'اسنوکر', 'پاکت بیلیارد', 'کارامبول', 'کیوبال', 'تکی', 'سایر'`),
+  chainSrc.includes(`'اسنوکر', 'پاکت بیلیارد', 'کارامبول', 'کیوبال', 'تکی', 'سایر'`),
   'واژه‌ی «توپ» کنارِ هر گزینه تکرارِ نامِ خودِ دسته بود');
 t('«سایر» فیلدِ توضیح باز می‌کند',
   /form\.type === 'سایر' && \(/.test(newAd) && /typeOther/.test(newAd));
 t('«سایر» بدونِ توضیح پذیرفته نمی‌شود', /برای «سایر» توضیح بنویسید/.test(newAd));
+
+console.log('\n― فرمِ ویرایشِ آگهی ―');
+/* فرمِ ویرایش تا امروز فرمِ جداگانه‌ای بود با فهرستِ دسته‌ی دستی و
+   غلط، بدونِ «نوع»، با جدولِ خامِ برچسب/مقدار، و با خواندنِ برعکسِ
+   قیمتِ تخفیف‌دار. حالا آینه‌ی فرمِ ثبت است. */
+t('فهرستِ دسته از منبعِ واحد می‌آید نه دستی',
+  /CATEGORY_OPTIONS/.test(editAd) && !/'educational'/.test(editAd),
+  'دسته‌ی ساختگیِ «آموزشی» باعث می‌شد ذخیره، دسته‌ی آگهی را عوض کند');
+t('فیلدِ «نوع» دارد', /TYPE_OPTIONS\[form\.category\]/.test(editAd));
+t('برند و مدل زنجیره‌ای‌اند',
+  /brandOptionsFor\(form\.category, form\.type\)/.test(editAd)
+  && /modelOptionsFor\(form\.category, form\.type, form\.brand\)/.test(editAd));
+t('مشخصاتِ فنی از تعریفِ همان دسته می‌آید',
+  /CATEGORY_SPECS\[form\.category\]/.test(editAd) && !/placeholder="مثال: ابعاد"/.test(editAd),
+  'پیش‌تر جدولِ خامِ برچسب/مقدار بود و فروشنده «shaftMaterial» می‌دید');
+t('کلیدِ ناشناخته حذف نمی‌شود', /legacySpecs/.test(editAd));
+t('قیمتِ تخفیف‌دار درست خوانده می‌شود',
+  /discounted > 0 \? discounted : listed/.test(editAd)
+  && !/price \/ \(1 - disc \/ 100\)/.test(editAd),
+  'ستونِ price قیمتِ خط‌خورده است؛ فرمولِ قبلی عددی نجومی می‌ساخت');
+t('نامِ آگهی با همان قاعده‌ی ثبت بازسازی می‌شود',
+  /const composedName = \[catLabel, effType\]/.test(editAd));
+t('دکمه‌ی بازگشت دارد', /بازگشت به آگهی‌های من/.test(editAd));
+t('هر دو فرم یک اجزای مشترک دارند',
+  /AdFormFields/.test(editAd) && /AdFormFields/.test(newAd)
+  && /export function FancySelect/.test(formFields));
+t('وضعیتِ کالا از CONDITIONS می‌آید نه رشته‌ی دستی',
+  /CONDITIONS\.map/.test(newAd) && /CONDITIONS\.map/.test(editAd)
+  && !/'like-new'/.test(newAdS),
+  'کلیدِ «like-new» معتبر نبود و سرور «در حد نو» را بی‌صدا «نو» ذخیره می‌کرد');
+t('کیس چوب و کیف توپ فهرستِ نوع و برند دارند',
+  /'cue-case', 'ball-bag'/.test(chainSrc),
+  'تفکیکِ case-bag نصفه مانده بود و این دو دسته به متنِ آزاد می‌افتادند');
 
 t('امتیازِ ساختگی از صفحه‌ی محصول رفت',
   !/product\.rating\.toFixed/.test(detail2) && !/function Stars/.test(detail2));
