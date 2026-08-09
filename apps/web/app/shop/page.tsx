@@ -34,7 +34,7 @@ import { productTitleParts } from '../../lib/market/title'
 import ProductTitle from '../../components/market/ProductTitle'
 import { CardMeta, CardPrice } from '../../components/market/CardFacts'
 /* همان موتورِ کاروسل‌های صفحه‌ی اصلی: درگِ روان + حرکتِ خودکار */
-import { useHorizontalScroll, scrollSign, getPos, setPos } from '../../lib/useHorizontalScroll'
+import { useHorizontalScroll, scrollSign, getPos, setPos, maxScroll } from '../../lib/useHorizontalScroll'
 
 const GOLD   = '#C7A66A'
 /* عمرِ نشانِ «جدید» — دو روز بود و بیش‌ازحد سخاوتمند: در بازارِ کم‌حجم
@@ -548,6 +548,9 @@ export default function MarketNewPage() {
      حالا فقط یک عدد است: «تا این لحظه ساکت بمان». هرکس می‌تواند
      جلوترش ببرد، هیچ‌کس نمی‌تواند لغوش کند. */
   const holdUntilRef = useRef(0)
+  /* پهنای یک دورِ کامل — هم حلقه‌ی خودکار و هم اصلاحِ اسکرولِ کاربر
+     از همین می‌خوانند، پس در ref می‌نشیند نه داخلِ یک افکت. */
+  const cycleRef = useRef(0)
   const hold = () => { holdUntilRef.current = performance.now() + 5000 }
   const [urgReps, setUrgReps] = useState(3)
   useHorizontalScroll(urgRef, busy => { if (busy) hold() })
@@ -566,9 +569,34 @@ export default function MarketNewPage() {
   useEffect(() => {
     const el = urgRef.current
     if (!el || !urgent.length) return
+    /* ── حلقه‌ی بی‌پایان برای دستِ کاربر هم ──
+       حرکتِ خودکار داخلِ یک دور می‌چرخید، ولی کشیدنِ دستی به لبه‌ی
+       واقعیِ نوار می‌رسید و به دیوار می‌خورد — همان «ابتدا و انتهایش
+       معلوم است».
+
+       چون همه‌ی تکرارها عینِ هم‌اند، هر جا موقعیت از دورِ میانی بیرون
+       بزند دقیقاً یک دور جابه‌جا می‌شود: تصویر ذره‌ای عوض نمی‌شود ولی
+       همیشه یک دورِ کامل جا برای کشیدن باقی می‌ماند. اصلاح فقط نزدیکِ
+       لبه انجام می‌شود تا وسطِ کشیدن با اینرسی نجنگد. */
+    const wrap = () => {
+      const cycle = cycleRef.current
+      if (cycle <= 0) return
+      const sign = scrollSign(el)
+      const p = getPos(el, sign)
+      const max = maxScroll(el)
+      if (p >= cycle * 0.5 && p <= max - cycle * 0.5) return
+      let x = p
+      while (x < cycle) x += cycle
+      while (x >= cycle * 2) x -= cycle
+      if (Math.abs(x - p) < 1) return
+      setPos(el, sign, x)
+      writtenRef.current = getPos(el, sign)
+    }
     const onScroll = () => {
       /* اگر جابه‌جایی همانی است که حلقه نوشته، کارِ کاربر نبوده */
-      if (Math.abs(getPos(el, scrollSign(el)) - writtenRef.current) > 2) hold()
+      if (Math.abs(getPos(el, scrollSign(el)) - writtenRef.current) <= 2) return
+      hold()
+      wrap()
     }
     const EV = ['pointerdown', 'touchstart', 'touchmove', 'wheel'] as const
     for (const ev of EV) el.addEventListener(ev, hold, { passive: true })
@@ -588,6 +616,7 @@ export default function MarketNewPage() {
     const measure = () => {
       const one = track.scrollWidth / Math.max(1, urgReps)
       if (one <= 0) return
+      cycleRef.current = one
       const want = Math.max(3, Math.ceil((el.clientWidth * 3) / one))
       if (want !== urgReps) setUrgReps(want)
     }
@@ -904,12 +933,17 @@ export default function MarketNewPage() {
         /* left/right صریح — insetInline در CSS معتبر نیست و نوار جمع می‌شد */
         .mk-bottomnav { display: none; position: fixed; left: 0; right: 0; bottom: 0; z-index: 200; width: 100%; box-sizing: border-box;
           background: rgba(255,255,255,0.96); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
-          border-top: 1px solid ${LINE}; padding: 7px 8px calc(7px + env(safe-area-inset-bottom));
+          border-top: 1px solid ${LINE}; padding: 4px 8px calc(4px + env(safe-area-inset-bottom));
           grid-template-columns: repeat(4, 1fr); }
-        /* ۵٪ کوچک‌تر از نسخه‌ی قبل: آیکون ۲۳→۲۲، برچسب ۱۲→۱۱٫۴ */
-        .mk-bnav { display: flex; flex-direction: column; align-items: center; gap: 4px; background: none; border: none;
-          cursor: pointer; font-family: inherit; text-decoration: none; padding: 4px 0; color: ${MUT}; }
-        .mk-bnav .lb { font-size: 11.4px; font-weight: 700; }
+        /* ── چرا خانه‌ی ثابتِ ۲۴ برای آیکون ──
+           سه گزینه آیکونِ ۲۲ داشتند و «ثبت آگهی» یک دایره‌ی ۲۸. یعنی
+           بلندیِ آیکون‌ها یکی نبود و برچسب‌ها روی یک خط نمی‌نشستند —
+           همان چیزی که «یک اندازه نیستند» دیده می‌شد. حالا هر چهارتا
+           در خانه‌ای با ارتفاعِ ثابت می‌نشینند. */
+        .mk-bnav { display: flex; flex-direction: column; align-items: center; gap: 3px; background: none; border: none;
+          cursor: pointer; font-family: inherit; text-decoration: none; padding: 2px 0; color: ${MUT}; }
+        .mk-bnav .ic { height: 24px; display: flex; align-items: center; justify-content: center; }
+        .mk-bnav .lb { font-size: 11.4px; font-weight: 700; line-height: 1.35; }
         .mk-bnav.on { color: ${GOLD_D}; }
         .mk-bnav.on svg { fill: rgba(199,166,106,0.2); }
 
@@ -1186,23 +1220,25 @@ export default function MarketNewPage() {
       {/* ═══ نوار پایین موبایل ═══ */}
       <nav className="mk-bottomnav">
         <Link href="/" className="mk-bnav">
-          <Home size={22} />
+          <span className="ic"><Home size={21} /></span>
           <span className="lb">خانه</span>
         </Link>
         <button type="button" className={`mk-bnav${!showSaved ? ' on' : ''}`}
           onClick={() => { setShowSaved(false); window.scrollTo({ top: 0, behavior: 'smooth' }) }}>
-          <LayoutGrid size={22} />
+          <span className="ic"><LayoutGrid size={21} /></span>
           <span className="lb">آگهی‌ها</span>
         </button>
         <button type="button" className={`mk-bnav${showSaved ? ' on' : ''}`}
           onClick={() => { setShowSaved(p => !p); window.scrollTo({ top: 0, behavior: 'smooth' }) }}>
-          <Bookmark size={22} />
+          <span className="ic"><Bookmark size={21} /></span>
           <span className="lb">نشان‌ها</span>
         </button>
         <Link href="/shop/new" className="mk-bnav">
-          {/* گرد + بوردر، طرح LQ */}
-          <span style={{ width: 28, height: 28, borderRadius: '50%', background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: GOLD_D, boxSizing: 'border-box' }}>
-            <Plus size={17} />
+          {/* گرد + بوردر، طرح LQ — قطرش هم‌اندازه‌ی خانه‌ی آیکون است */}
+          <span className="ic">
+            <span style={{ width: 24, height: 24, borderRadius: '50%', background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: GOLD_D, boxSizing: 'border-box' }}>
+              <Plus size={15} />
+            </span>
           </span>
           <span className="lb">ثبت آگهی</span>
         </Link>

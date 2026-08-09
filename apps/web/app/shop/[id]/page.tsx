@@ -9,6 +9,7 @@ import ReportButton from '../../../components/ReportButton'
 import { productTitleParts, productTitle } from '../../../lib/market/title'
 import ImageLightbox from '../../../components/market/ImageLightbox'
 import { specRows } from '../../../lib/market/specs'
+import { CONDITIONS, normalizeCondition } from '../../../lib/market/categories'
 import { fetchProfile } from '../../../lib/profiles/client'
 
 /* ─── tokens (تم بازار: طلایی/برنزی روی کاغذ روشن) ─── */
@@ -455,6 +456,49 @@ export default function ProductDetailPage() {
                 </div>
               </div>
             )}
+
+            {/* ── وضعیت کالا ──
+                هر آگهی در دیتابیس ستونِ `condition` دارد و فرمِ ثبت هم
+                اجباری پرش می‌کند، ولی صفحه‌ی جزئیات هیچ‌جا نشانش
+                نمی‌داد — خریدار نمی‌فهمید کالا نو است یا کارکرده، در
+                حالی که کارتِ فهرست این را می‌گفت.
+
+                برچسبِ فارسی از `conditionLabel` می‌آید (همان منبعی که
+                فرم و کارت‌ها هم از آن می‌خوانند)، و رنگ با خودِ وضعیت
+                عوض می‌شود تا در یک نگاه خوانده شود. */}
+            {(() => {
+              const cond = normalizeCondition(product.condition)
+              const tone: Record<string, { bg: string; bd: string; fg: string }> = {
+                new:          { bg: 'rgba(22,101,52,0.08)',  bd: 'rgba(22,101,52,0.22)',  fg: '#166534' },
+                like_new:     { bg: 'rgba(8,145,178,0.08)',  bd: 'rgba(8,145,178,0.22)',  fg: '#0E7490' },
+                used:         { bg: 'rgba(199,166,106,0.12)', bd: 'rgba(199,166,106,0.32)', fg: GOLDD },
+                needs_repair: { bg: 'rgba(180,83,9,0.08)',   bd: 'rgba(180,83,9,0.24)',   fg: '#B45309' },
+              }
+              const t = tone[cond] ?? tone.new!
+              return (
+                <div style={{ ...glassPanel, borderRadius: 20, padding: '16px 18px', marginBottom: 20 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 9, marginBottom: 12 }}>
+                    <span style={{ width: 3, height: 18, borderRadius: 2, background: `linear-gradient(180deg,${GOLD},${GOLDD})` }} />
+                    <h2 style={{ fontSize: 14.5, fontWeight: 800, color: TEXT, margin: 0 }}>وضعیت کالا</h2>
+                  </div>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                    {CONDITIONS.map(c => {
+                      const on = c.id === cond
+                      return (
+                        <span key={c.id} style={{
+                          fontSize: 12.5, fontWeight: on ? 800 : 600, padding: '7px 14px', borderRadius: 999,
+                          background: on ? t.bg : 'rgba(28,28,26,0.03)',
+                          border: `1px solid ${on ? t.bd : 'rgba(28,28,26,0.08)'}`,
+                          color: on ? t.fg : 'rgba(28,28,26,0.32)',
+                        }}>
+                          {c.label}
+                        </span>
+                      )
+                    })}
+                  </div>
+                </div>
+              )
+            })()}
 
             {/* قیمت — آگهیِ توافقی عدد ندارد، پس عدد هم نشان نمی‌دهیم */}
             <div style={{ ...lqWhite, borderRadius: 18, padding: '16px 18px', marginBottom: 16 }}>

@@ -1071,6 +1071,21 @@ t('اسنپ‌شاتِ جایگاه وضعیتِ کالا را حمل می‌ک�
   && /images,brand,city,condition,status/.test(read('lib/ads/free.ts'))
   && /city: e\.city \?\? '', condition: e\.condition \?\? 'new'/.test(homeCl),
   'کارت‌های سکشنِ بازار از اسنپ‌شات می‌آیند، نه از ردیفِ خامِ محصول');
+t('کشیدنِ دستیِ نوارِ فوری هم به دیوار نمی‌خورد',
+  /const wrap = \(\) => \{/.test(shopPage) && /while \(x < cycle\) x \+= cycle/.test(shopPage)
+  && /cycleRef\.current = one/.test(shopPage),
+  'حرکتِ خودکار حلقه می‌زد ولی کشیدنِ دستی به لبه‌ی واقعی می‌رسید');
+t('آیکون‌های نوارِ پایین یک خانه‌ی هم‌اندازه دارند',
+  /\.mk-bnav \.ic \{ height: 24px/.test(shopPage)
+  && ['Home', 'LayoutGrid', 'Bookmark'].every(i => new RegExp(`<span className="ic"><${i} size=\\{21\\}`).test(shopPage))
+  && /width: 24, height: 24, borderRadius: '50%'/.test(shopPage),
+  'سه آیکونِ ۲۲ و یک دایره‌ی ۲۸ یعنی برچسب‌ها روی یک خط نمی‌نشستند');
+t('وضعیتِ کالا در صفحه‌ی جزئیات نشان داده می‌شود',
+  /<h2[^>]*>وضعیت کالا<\/h2>/.test(detail2)
+  && /normalizeCondition\(product\.condition\)/.test(detail2)
+  && /CONDITIONS\.map/.test(detail2),
+  'ستونش در دیتابیس بود و فرم پرش می‌کرد، ولی هیچ‌جای صفحه دیده نمی‌شد');
+
 t('تب‌های آگهی‌های من در یک سطر جا می‌شوند',
   /grid grid-cols-4 border-b/.test(read('app/dashboard/shop/page.tsx')),
   '«در انتظار تأیید» نصفه بیرون می‌ماند');
