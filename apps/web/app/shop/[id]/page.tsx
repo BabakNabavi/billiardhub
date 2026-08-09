@@ -9,6 +9,7 @@ import ReportButton from '../../../components/ReportButton'
 import { productTitleParts, productTitle } from '../../../lib/market/title'
 import ImageLightbox from '../../../components/market/ImageLightbox'
 import { specRows } from '../../../lib/market/specs'
+import { fetchProfile } from '../../../lib/profiles/client'
 
 /* ─── tokens (تم بازار: طلایی/برنزی روی کاغذ روشن) ─── */
 const BG    = '#F7F6F4'
@@ -180,6 +181,21 @@ export default function ProductDetailPage() {
      «رفتن به فروشگاه» به صفحه‌ی خالی می‌رسید. */
   const hasStore = !!staticProduct || !!(userProduct && String(userProduct.sellerId ?? '').trim())
 
+  /* ── نشانِ سبزِ «فروشگاه» فقط برای فروشگاهِ تأییدشده ──
+     تا امروز هر آگهی‌ای که به فروشگاهی وصل بود این نشان را می‌گرفت،
+     حتی فروشگاهی که جواز آپلود نکرده و تیک ندارد. یعنی سایت از طرفِ
+     خودش اعتبار می‌داد. حالا از خودِ پروفایل خوانده می‌شود. */
+  const [storeVerified, setStoreVerified] = useState(false)
+  useEffect(() => {
+    const slug = String(userProduct?.sellerId ?? '').trim()
+    if (!slug) { setStoreVerified(false); return }
+    let alive = true
+    void fetchProfile<Record<string, unknown>>('seller', slug)
+      .then(pr => { if (alive) setStoreVerified(pr?.verified === true) })
+      .catch(() => { if (alive) setStoreVerified(false) })
+    return () => { alive = false }
+  }, [userProduct?.sellerId])
+
   const [wished, setWished] = useState(false)
 
   /* تصویرِ انتخاب‌شده‌ی گالری. با عوض‌شدنِ آگهی به اولی برمی‌گردد،
@@ -303,7 +319,7 @@ export default function ProductDetailPage() {
                   فهرستِ بازار فرق داشت؛ یک محصول در دو صفحه دو نشانِ
                   متفاوت می‌گرفت. رنگ و شکل و متن هر سه یکی شد. */}
               {product.disc > 0 && (
-                <div dir="ltr" style={{ position: 'absolute', top: 12, insetInlineEnd: 12, background: '#b400ae', color: '#fff', fontSize: 12, fontWeight: 800, borderRadius: 999, padding: '4px 10px 2px', lineHeight: 1 }}>
+                <div dir="ltr" style={{ position: 'absolute', top: 12, insetInlineStart: 12, background: '#b400ae', color: '#fff', fontSize: 13.8, fontWeight: 800, borderRadius: 999, padding: '5px 12px 3px', lineHeight: 1 }}>
                   ٪{toFa(product.disc)}
                 </div>
               )}
@@ -339,19 +355,33 @@ export default function ProductDetailPage() {
 
           {/* اطلاعات */}
           <div>
-            <span style={{ display: 'inline-block', fontSize: 11.5, fontWeight: 700, color: GOLDD, background: 'rgba(184,147,58,0.12)', border: '1px solid rgba(184,147,58,0.28)', borderRadius: 999, padding: '4px 12px', marginBottom: 12 }}>
-              {CAT_LABELS[product.cat] ?? product.cat}
-            </span>
-            <h1 style={{ fontSize: 'clamp(20px,2.6vw,27px)', fontWeight: 800, lineHeight: 1.45, margin: '0 0 18px', letterSpacing: '-0.01em' }}>
-              {titleHead}
-              {/* برند و مدل خطِ خودشان را دارند، با وزنِ معمولی */}
+            {/* ── باکسِ هویتِ محصول ──
+                چیپِ دسته‌بندیِ کادردار برداشته شد: همان واژه در نانِ
+                بالای صفحه و در سرِ عنوان هم هست، پس سه بار تکرار
+                می‌شد.
+
+                برند و مدل حالا هم‌وزنِ عنوان‌اند، نه زیرنویسِ ریز.
+                برای خریدارِ تجهیزات «O'min Classic» مهم‌تر از «چوب
+                اسنوکر» است — آن یکی می‌گوید چه چیزی است، این یکی
+                می‌گوید کدام. جهتشان هم خودکار است: با                 نامِ لاتین از چپ و نامِ فارسی از راست چیده می‌شود. */}
+            <div style={{ ...glassPanel, borderRadius: 20, padding: '16px 18px', marginBottom: 16 }}>
+              <h1 style={{ fontSize: 'clamp(19px,2.4vw,25px)', fontWeight: 800, lineHeight: 1.45, margin: 0, letterSpacing: '-0.01em' }}>
+                {titleHead}
+              </h1>
               {titleTail && (
-                <span style={{
-                  display: 'block', marginTop: 4,
-                  fontSize: 'clamp(14px,1.7vw,18px)', fontWeight: 400, color: TSEC,
-                }}>{titleTail}</span>
+                <div dir="auto" style={{
+                  marginTop: 8, paddingTop: 10, borderTop: '1px dashed rgba(28,28,26,0.12)',
+                  display: 'flex', alignItems: 'baseline', gap: 9, flexWrap: 'wrap',
+                }}>
+                  <span style={{ fontSize: 11.5, fontWeight: 700, color: GOLDD, background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.30)', borderRadius: 999, padding: '3px 10px', flexShrink: 0 }}>
+                    برند و مدل
+                  </span>
+                  <span style={{ fontSize: 'clamp(16px,2vw,21px)', fontWeight: 800, color: TEXT, letterSpacing: '-0.01em' }}>
+                    {titleTail}
+                  </span>
+                </div>
               )}
-            </h1>
+            </div>
 
             {/* ── امتیاز و «موجود در انبار» هر دو برداشته شدند ──
                 امتیاز عددش ثابت و ساختگی بود (۵٫۰ با ۰ نظر).
@@ -363,37 +393,6 @@ export default function ProductDetailPage() {
                 «موجود» روی چنین چیزی، همان دروغِ کوچکی است که به
                 همه‌ی صفحه بی‌اعتمادی می‌دهد. وضعیتِ واقعی — «فروخته
                 شد» — جای خودش نشان داده می‌شود. */}
-
-            {/* قیمت — آگهیِ توافقی عدد ندارد، پس عدد هم نشان نمی‌دهیم */}
-            <div style={{ ...lqWhite, borderRadius: 18, padding: '16px 18px', marginBottom: 16 }}>
-              {negotiable ? (
-                <div style={{ display: 'flex', alignItems: 'baseline', gap: 10 }}>
-                  <span style={{ fontSize: 13, fontWeight: 600, color: TSEC }}>قیمت:</span>
-                  <span style={{ fontSize: 22, fontWeight: 900, color: '#1A6B3A' }}>توافقی</span>
-                  <span style={{ marginInlineStart: 'auto', fontSize: 12, color: TMUT }}>با فروشنده تماس بگیرید</span>
-                </div>
-              ) : (
-                <>
-                  <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, flexWrap: 'wrap' }}>
-                    <span style={{ fontSize: 24, fontWeight: 900, color: '#1A6B3A', fontVariantNumeric: 'tabular-nums' }}>{fmt(product.price)}</span>
-                    <span style={{ fontSize: 13, fontWeight: 600, color: TSEC }}>تومان</span>
-                    {product.disc > 0 && product.old > product.price && (
-                      <span style={{ marginInlineStart: 'auto', fontSize: 13.5, color: TMUT, textDecoration: 'line-through', fontVariantNumeric: 'tabular-nums' }}>{fmt(product.old)}</span>
-                    )}
-                  </div>
-                  {product.disc > 0 && (
-                    <div style={{ marginTop: 8, display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <span dir="ltr" style={{ background: '#b400ae', color: '#fff', fontSize: 11.5, fontWeight: 800, borderRadius: 999, padding: '3px 9px 1px', lineHeight: 1 }}>
-                        ٪{toFa(product.disc)}
-                      </span>
-                      <span style={{ fontSize: 12, color: TSEC, fontWeight: 600 }}>
-                        {fmt(product.old - product.price)} تومان سود شما
-                      </span>
-                    </div>
-                  )}
-                </>
-              )}
-            </div>
 
             {/* آگهیِ فروخته‌شده باز می‌ماند (لینکش ممکن است جایی باشد)
                 ولی خریدار باید بی‌درنگ بفهمد که دیگر موجود نیست. */}
@@ -418,7 +417,7 @@ export default function ProductDetailPage() {
                 <span aria-hidden style={{ position: 'absolute', top: -18, insetInlineStart: 10, fontSize: 96, lineHeight: 1, color: 'rgba(199,166,106,0.13)', fontWeight: 900, pointerEvents: 'none', userSelect: 'none' }}>”</span>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 9, marginBottom: 11, position: 'relative' }}>
                   <span style={{ width: 3, height: 18, borderRadius: 2, background: `linear-gradient(180deg,${GOLD},${GOLDD})` }} />
-                  <h2 style={{ fontSize: 14.5, fontWeight: 800, color: TEXT, margin: 0 }}>توضیحات فروشنده</h2>
+                  <h2 style={{ fontSize: 14.5, fontWeight: 800, color: TEXT, margin: 0 }}>توضیحات محصول</h2>
                 </div>
                 <p style={{ fontSize: 14, lineHeight: 2.1, color: 'rgba(28,28,26,0.72)', margin: 0, position: 'relative', whiteSpace: 'pre-line' }}>
                   {product.desc}
@@ -459,6 +458,37 @@ export default function ProductDetailPage() {
               </div>
             )}
 
+            {/* قیمت — آگهیِ توافقی عدد ندارد، پس عدد هم نشان نمی‌دهیم */}
+            <div style={{ ...lqWhite, borderRadius: 18, padding: '16px 18px', marginBottom: 16 }}>
+              {negotiable ? (
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: 10 }}>
+                  <span style={{ fontSize: 13, fontWeight: 600, color: TSEC }}>قیمت:</span>
+                  <span style={{ fontSize: 22, fontWeight: 900, color: '#1A6B3A' }}>توافقی</span>
+                  <span style={{ marginInlineStart: 'auto', fontSize: 12, color: TMUT }}>با فروشنده تماس بگیرید</span>
+                </div>
+              ) : (
+                <>
+                  <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, flexWrap: 'wrap' }}>
+                    <span style={{ fontSize: 24, fontWeight: 900, color: '#1A6B3A', fontVariantNumeric: 'tabular-nums' }}>{fmt(product.price)}</span>
+                    <span style={{ fontSize: 13, fontWeight: 600, color: TSEC }}>تومان</span>
+                    {product.disc > 0 && product.old > product.price && (
+                      <span style={{ marginInlineStart: 'auto', fontSize: 13.5, color: TMUT, textDecoration: 'line-through', fontVariantNumeric: 'tabular-nums' }}>{fmt(product.old)}</span>
+                    )}
+                  </div>
+                  {product.disc > 0 && (
+                    <div style={{ marginTop: 8, display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <span dir="ltr" style={{ background: '#b400ae', color: '#fff', fontSize: 11.5, fontWeight: 800, borderRadius: 999, padding: '3px 9px 1px', lineHeight: 1 }}>
+                        ٪{toFa(product.disc)}
+                      </span>
+                      <span style={{ fontSize: 12, color: TSEC, fontWeight: 600 }}>
+                        {fmt(product.old - product.price)} تومان سود شما
+                      </span>
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+
             {/* کارت فروشنده — رفتن به فروشگاه + تماس */}
             <div style={{ ...glassPanel, borderRadius: 20, padding: 18 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 14 }}>
@@ -471,7 +501,7 @@ export default function ProductDetailPage() {
                   </div>
                   <div style={{ fontSize: 14, fontWeight: 800, color: TEXT, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{product.sellerName}</div>
                 </div>
-                {hasStore && (
+                {hasStore && storeVerified && (
                   <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 700, color: '#16803C', background: 'rgba(22,128,60,0.10)', border: '1px solid rgba(22,128,60,0.25)', borderRadius: 999, padding: '4px 10px' }}>
                     <ShieldCheck size={13} strokeWidth={2.2} /> فروشگاه
                   </span>

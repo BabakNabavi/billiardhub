@@ -632,7 +632,7 @@ function SellerCard({ s }: { s: RealStore }) {
           پوسترِ تخت گوشه‌های سفیدِ درشتی می‌ساخت که مثل هاله‌ی سفیدِ
           دورِ کارت دیده می‌شد. کارت سفید می‌ماند — فقط برش کم‌عمق‌تر
           شد تا آن دو لکه از بین برود. */}
-      <div style={{ position: 'relative', height: '150px', overflow: 'hidden', borderRadius: '0 0 26% 26% / 0 0 20px 20px' }}>
+      <div style={{ position: 'relative', height: '150px', overflow: 'hidden', borderRadius: 0 }}>
         {/* ── فروشگاهِ بی‌لوگو ⇒ پوسترِ پیش‌فرض، نه عکسِ عمومی ──
             تا امروز یک عکسِ ثابتِ فروشگاه نشان داده می‌شد که ربطی به
             این فروشگاه نداشت (و پیش‌تر حتی نشانی‌اش ۴۰۴ می‌داد و کارت
@@ -644,15 +644,13 @@ function SellerCard({ s }: { s: RealStore }) {
             style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.5s ease', transform: hov ? 'scale(1.07)' : 'scale(1)' }}
             onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
         ) : (
-          <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', background: 'linear-gradient(120deg,#07231a 0%,#0e3a2a 55%,#0a2f22 100%)' }}>
-            <div style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.05) 1px, transparent 1px)', backgroundSize: '14px 14px' }} />
-            <div style={{ position: 'absolute', insetInlineStart: '-10%', top: '-45%', width: '55%', height: '190%', background: 'radial-gradient(ellipse, rgba(199,166,106,0.28) 0%, transparent 66%)', filter: 'blur(16px)' }} />
-            <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 7 }}>
-              <span style={{ width: 44, height: 44, borderRadius: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, fontWeight: 900, color: '#F0DDB0', background: 'rgba(199,166,106,0.16)', border: '1px solid rgba(199,166,106,0.42)' }}>
-                {s.name.trim().charAt(0) || 'ف'}
-              </span>
-              <span dir="ltr" style={{ fontSize: 8.5, fontWeight: 800, letterSpacing: '0.2em', color: 'rgba(199,166,106,0.92)' }}>BILLIARD SHOP</span>
-            </div>
+          /* پوسترِ ساده و بی‌افکت: یک زمینه‌ی نمدیِ یکدست و حرفِ اولِ
+             نام. بافتِ نقطه‌ای، هالهٔ بلور و زیرنویسِ لاتین برداشته
+             شدند — روی کارتی به این کوچکی شلوغی می‌ساختند. */
+          <div style={{ position: 'absolute', inset: 0, background: '#0d3a29', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <span style={{ fontSize: 34, fontWeight: 900, color: 'rgba(199,166,106,0.85)' }}>
+              {s.name.trim().charAt(0) || 'ف'}
+            </span>
           </div>
         )}
         {/* gradient overlay */}
