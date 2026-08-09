@@ -219,7 +219,7 @@ export default function Footer() {
                 آن. line-height پیش‌فرض فاصله‌ی نامرئی می‌سازد و همان
                 باعث می‌شد دو خطِ مرتبط، دو بلوکِ جدا به نظر برسند. */}
             <p className="ft-tagline" style={{ color: DIM, fontSize: '13.5px', lineHeight: 1.65, marginBottom: '14px', maxWidth: '260px', marginTop: '-8px' }}>
-              اولین و بزرگترین پلتفرم تخصصی بیلیارد ایران
+              اولین پلتفرم تخصصی بیلیارد ایران
             </p>
 
             {/* Socials */}

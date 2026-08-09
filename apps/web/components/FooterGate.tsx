@@ -16,8 +16,15 @@ const HIDDEN = new Set(['/login', '/register', '/shop', '/direct'])
    نمی‌خواهد — از ده متر آن‌طرف‌تر دیده می‌شود، نه خوانده. */
 const isStage = (p: string) => /^\/tournaments\/[^/]+\/(stage|control)$/.test(p)
 
+/* ── صفحه‌ی یک فروشگاه ──
+   خودش فوترِ اختصاصی دارد (دسته‌بندی‌ها، راه‌های ارتباطی، موقعیت، و
+   کپی‌رایتِ همان فروشگاه). فوترِ سایت زیرِ آن یعنی دو فوترِ پشتِ سرِ
+   هم و دو کپی‌رایت. فهرستِ `/sellers` خودش فوتر دارد و دست‌نخورده
+   می‌ماند. */
+const isStorePage = (p: string) => /^\/sellers\/[^/]+$/.test(p)
+
 export default function FooterGate({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
-  if (HIDDEN.has(pathname) || isStage(pathname)) return null
+  if (HIDDEN.has(pathname) || isStage(pathname) || isStorePage(pathname)) return null
   return <>{children}</>
 }
