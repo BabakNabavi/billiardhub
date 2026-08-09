@@ -63,7 +63,6 @@ const MIN_VELOCITY = 0.03    // زیر این مقدار حرکت تمام‌ش�
 const MAX_VELOCITY = 4.5     // سقفِ سرعت (پیکسل بر میلی‌ثانیه)
 const SAMPLE_MS = 90         // پنجره‌ی تخمینِ سرعت
 const DRAG_THRESHOLD = 4     // زیر این جابه‌جایی هنوز «کلیک» است
-const WHEEL_EASE = 0.22      // کسری از فاصله‌ی باقی‌مانده در هر فریم
 
 export function useHorizontalScroll(
   ref: RefObject<HTMLElement | null>,
@@ -226,51 +225,32 @@ export function useHorizontalScroll(
       moved = 0
     }
 
-    /* ── چرخِ ماوس: بازگرداندنِ اسکرولِ صفحه ──
-       شنونده فقط برای *خنثی‌کردن* ترجمه‌ی خودکارِ مرورگر است، نه برای
-       حرکت‌دادنِ کارت‌ها. مقدار به یک هدف انباشته می‌شود و صفحه با
-       کاهشِ نمایی به آن می‌رسد؛ این هم نرم‌تر از پرشِ خام است و هم
-       چند چرخِ پشتِ‌هم را روی هم جمع می‌کند. */
-    let target = 0
-    let wheelRaf = 0
+    /* ── چرخِ ماوس: هیچ شنونده‌ای ──
+       این‌جا یک شنونده‌ی non-passive بود که روی *هر* چرخشِ عمودی
+       preventDefault می‌زد و بعد اسکرولِ صفحه را با یک حلقه‌ی rAF
+       بازسازی می‌کرد. هدفش «خنثی‌کردنِ ترجمه‌ی خودکارِ مرورگر» بود،
+       ولی بهایش این شد که اسکرولِ کلِ صفحه از دستِ مرورگر گرفته شود —
+       و هر سه ایرادی که کاربر گزارش کرد از همان‌جا می‌آمد:
 
-    /* `html` در این پروژه `scroll-behavior: smooth` دارد. یعنی
-       `scrollTo` پیش‌فرض خودش انیمیشن می‌سازد و `window.scrollY`
-       بلافاصله عوض نمی‌شود — که هم با میراییِ ما می‌جنگد و هم تشخیصِ
-       «به ته رسیدیم» را خراب می‌کند. پس صریحاً `instant` می‌خواهیم. */
-    let stalled = 0
-    const follow = () => {
-      const cur = window.scrollY
-      const gap = target - cur
-      if (Math.abs(gap) < 0.5) { window.scrollTo({ top: target, behavior: 'instant' }); wheelRaf = 0; return }
-      window.scrollTo({ top: cur + gap * WHEEL_EASE, behavior: 'instant' })
-      /* دو فریمِ پشتِ‌هم بی‌حرکت یعنی صفحه به ته/سرِ خود رسیده */
-      stalled = Math.abs(window.scrollY - cur) < 0.5 ? stalled + 1 : 0
-      if (stalled >= 2) { wheelRaf = 0; return }
-      wheelRaf = requestAnimationFrame(follow)
-    }
+         • «موس وسط صفحه قفل می‌شود»
+           شرطِ توقفِ حلقه (دو فریمِ بی‌حرکت) در فریمِ سنگین یا نزدیکِ
+           هدف برقرار می‌شد؛ حلقه می‌مُرد ولی preventDefault سرِ جایش
+           می‌ماند، پس هیچ‌چیز صفحه را حرکت نمی‌داد.
 
-    const onWheel = (e: WheelEvent) => {
-      /* ژستِ افقیِ ترک‌پد قصدِ صریحِ کاربر است — بومی بماند */
-      if (Math.abs(e.deltaX) >= Math.abs(e.deltaY)) return
-      if (e.ctrlKey) return                        // زوم
+         • «حالتِ فنری»
+           میراییِ نمایی جاوااسکریپت با scroll-behavior: smooth روی
+           html می‌جنگید.
 
-      e.preventDefault()
-      const px = e.deltaMode === 1 ? e.deltaY * 16
-               : e.deltaMode === 2 ? e.deltaY * window.innerHeight
-               : e.deltaY
+         • «ناگهان به ابتدای صفحه برمی‌گردد»
+           هدف با scrollHeight - innerHeight بریده می‌شد. لودشدنِ یک
+           تصویر یا تغییرِ ارتفاعِ یک کاروسل، لحظه‌ای scrollHeight را
+           کوچک می‌کرد، هدف به عددی کوچک بریده می‌شد و حلقه صفحه را
+           به بالا می‌کشید.
 
-      if (reduced) { window.scrollBy(0, px); return }
+       اسکرولِ عمودی کارِ مرورگر است و باید همان‌جا بماند. کاروسل‌ها
+       با درگ و لمس و کیبورد کار می‌کنند؛ چرخِ عمودی به آن‌ها ربطی
+       ندارد. */
 
-      const max = document.documentElement.scrollHeight - window.innerHeight
-      /* هدف از موقعیتِ فعلی شروع می‌شود مگر آن‌که هنوز در حالِ رسیدن
-         به هدفِ قبلی باشیم — وگرنه چرخِ دوم، چرخِ اول را باطل می‌کند. */
-      const base = wheelRaf ? target : window.scrollY
-      target = Math.max(0, Math.min(max, base + px))
-      if (!wheelRaf) { stalled = 0; wheelRaf = requestAnimationFrame(follow) }
-    }
-
-    el.addEventListener('wheel', onWheel, { passive: false })
     /* حرکت و رهاکردن فقط روی `window` گوش داده می‌شود: با گرفتنِ
        اشاره‌گر، رویدادها به هر حال تا `window` حباب می‌کنند، و ثبتِ
        هم‌زمان روی خودِ نوار هر حرکت را دوبار می‌رساند. */
@@ -284,8 +264,6 @@ export function useHorizontalScroll(
     return () => {
       if (idle) clearTimeout(idle)
       stopInertia()
-      if (wheelRaf) cancelAnimationFrame(wheelRaf)
-      el.removeEventListener('wheel', onWheel)
       el.removeEventListener('pointerdown', onDown)
       window.removeEventListener('pointermove', onMove)
       el.removeEventListener('pointercancel', stop)

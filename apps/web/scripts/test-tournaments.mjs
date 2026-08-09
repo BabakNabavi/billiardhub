@@ -1509,6 +1509,21 @@ t('کارتِ صفحه‌ی اصلی برای توافقی صفر نمی‌نو�
   && /negotiable: p\.negotiable === true/.test(read('lib/home-featured.ts')),
   '«۰ تومان» یعنی سایت از طرفِ فروشنده قیمتی اعلام می‌کند که او نگفته');
 
+/* ── اسکرولِ صفحه مالِ مرورگر است ──
+   یک شنونده‌ی non-passive روی `wheel` که preventDefault می‌زد و
+   اسکرول را با rAF بازسازی می‌کرد، سه ایراد می‌ساخت: قفل‌شدنِ موس
+   وسطِ صفحه، حالتِ فنری، و پرشِ ناگهانی به بالای صفحه. */
+console.log('\n― اسکرول ―');
+const hScroll = read('lib/useHorizontalScroll.ts');
+t('کاروسل چرخِ عمودی را نمی‌دزدد',
+  !/addEventListener\('wheel'/.test(hScroll),
+  'preventDefault روی چرخ یعنی اسکرولِ صفحه دستِ جاوااسکریپت می‌افتد');
+t('هیچ‌جای سایت چرخ را preventDefault نمی‌کند',
+  !/onWheel[\s\S]{0,400}preventDefault/.test(hScroll));
+t('اسکرولِ صفحه با scrollTo شبیه‌سازی نمی‌شود',
+  !/window\.scrollTo\(\{ top: cur \+ gap/.test(hScroll),
+  'هدفِ بریده‌شده با scrollHeight، صفحه را به بالا می‌کشید');
+
 /* ── قوانین باید همان چیزی را بگویند که کد انجام می‌دهد ── */
 console.log('\n― قوانین و مالی ―');
 const legalDoc = read('lib/legal-content.ts');
