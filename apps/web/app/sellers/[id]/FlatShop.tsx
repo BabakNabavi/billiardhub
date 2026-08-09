@@ -409,14 +409,11 @@ export default function FlatShop() {
           -webkit-backdrop-filter: blur(10px);
           /* ۱.۷۵ = ۱.۹۴۴ منهای ۱۰٪ */
           aspect-ratio: 1 / 1.75;
-          /* ── ۱۰٪ کوچک‌تر ──
-             عرضِ ستون دست‌نخورده می‌ماند و کارت داخلش وسط‌چین می‌شود؛
-             چون نسبتِ ابعاد ثابت است، ارتفاع هم خودبه‌خود همان ۱۰٪ کم
-             می‌شود. اگر به‌جای این، تعدادِ ستون‌ها زیاد می‌شد، کوچک‌شدن
-             در هر بریک‌پوینت عددِ دیگری می‌داد.
+          /* کوچک‌شدن حالا کارِ خودِ گرید است (شش ستون در دسکتاپ)، پس
+             محدودکردنِ عرضِ کارت داخلِ سلول لازم نیست و فقط فاصله‌ی
+             بصری را زیاد می‌کرد.
              (بک‌تیک در این کامنت ممنوع — داخلِ template literal است) */
-          width: 90%;
-          margin-inline: auto;
+          width: 100%;
           border-radius: 10px;
           border: 1.5px solid rgba(28,28,26,0.18);
           transition: transform .22s cubic-bezier(0.22,1,0.36,1), box-shadow .22s;
@@ -699,7 +696,9 @@ export default function FlatShop() {
         </div>
 
         {/* گرید — ۵ ستون در دسکتاپ (۲ ردیف ۵تایی = ۱۰ در هر صفحه) */}
-        <div className="grid grid-cols-2 gap-3 sm:gap-4 min-[640px]:grid-cols-3 min-[900px]:grid-cols-4 min-[1120px]:grid-cols-5">
+        {/* شش کارت در هر سطرِ دسکتاپ. فاصله‌ها هم کم شد: با پنج ستون و
+            گَپِ ۱۶، فاصله‌ی بینِ کارت‌ها از خودِ کارت‌ها به چشم می‌آمد. */}
+        <div className="grid grid-cols-2 gap-2 sm:gap-2.5 min-[640px]:grid-cols-3 min-[860px]:grid-cols-4 min-[1040px]:grid-cols-5 min-[1200px]:grid-cols-6">
             {paged.map(p => {
               const isWished = wish.has(p.id)
               return (

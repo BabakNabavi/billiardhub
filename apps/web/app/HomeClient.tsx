@@ -536,8 +536,16 @@ const BAZAAR_CSS = `
   .bz-img img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
   .bz-body { padding:9px 8px 8px; flex:1; display:flex; flex-direction:column;
     gap:4px; overflow:hidden; }
-  .bz-name { font-size:12.5px; color:#1C1B17; line-height:1.5;
-    display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+  /* ── تیترِ دوتکه، هم‌شکلِ کارتِ «بیلیارد بازار» ──
+     تا امروز کلِ تیتر یک رشته بود («چوب اسنوکر — Predator») با وزنِ
+     معمولی، پس دسته‌بندی و نوع هیچ برجستگی‌ای نداشتند و چشم مجبور بود
+     کلِ خط را بخواند. حالا سرِ تیتر بولد است و برند/مدل زیرش با وزنِ
+     عادی — دقیقاً همان چیزی که در فهرستِ بازار هست. */
+  .bz-name { font-size:12.5px; color:#1C1B17; line-height:1.5; display:block; overflow:hidden; }
+  .bz-h { display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;
+    overflow:hidden; font-weight:800; }
+  .bz-t { display:block; font-size:11px; font-weight:400; color:#6E695C;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .bz-row { margin-top:auto; display:flex; align-items:center; gap:5px; }
   .bz-pct { background:#b400ae; color:#fff; font-size:12px; font-weight:800;
     border-radius:999px; padding:3px 8px 1px; line-height:1;
@@ -558,7 +566,10 @@ function BazaarCard({ p, className, style }: { p: RealProduct; className?: strin
           onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
       </div>
       <div className="bz-body">
-        <span className="bz-name">{p.name} — {p.sub}</span>
+        <span className="bz-name">
+          <span className="bz-h">{p.name}</span>
+          {p.sub && <span className="bz-t">{p.sub}</span>}
+        </span>
         <div className="bz-row">
           {/* ── آگهیِ توافقی ──
               فروشنده عمداً قیمت نگذاشته، پس ردیفِ قیمت در دیتابیس صفر
