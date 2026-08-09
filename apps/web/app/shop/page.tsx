@@ -34,7 +34,7 @@ import { productTitleParts } from '../../lib/market/title'
 import ProductTitle from '../../components/market/ProductTitle'
 import { CardMeta, CardPrice } from '../../components/market/CardFacts'
 /* همان موتورِ کاروسل‌های صفحه‌ی اصلی: درگِ روان + حرکتِ خودکار */
-import { useHorizontalScroll, scrollSign, getPos, setPos, maxScroll } from '../../lib/useHorizontalScroll'
+import { useHorizontalScroll } from '../../lib/useHorizontalScroll'
 
 const GOLD   = '#C7A66A'
 /* عمرِ نشانِ «جدید» — دو روز بود و بیش‌ازحد سخاوتمند: در بازارِ کم‌حجم
@@ -480,9 +480,18 @@ export default function MarketNewPage() {
      پس بازدیدِ تاکنونی هم در ترتیب دخالت می‌کند: آگهیِ کم‌بازدیدتر
      جلوتر می‌نشیند. عاملِ ساعتی سرِ جایش می‌ماند تا مساوی‌ها هر ساعت
      جابه‌جا شوند و ترتیب یخ نزند. */
+  /* ── ترتیبِ منصفانه ──
+     چیدمان تا امروز ساعتی عوض می‌شد، یعنی در یک نشست همیشه همان
+     آگهی جلو بود. حالا هر بار که صفحه باز می‌شود دانه عوض می‌شود.
+
+     دانه بعد از mount گذاشته می‌شود نه هنگام رندر: عددِ تصادفی در
+     رندر یعنی خروجیِ سرور و کلاینت یکی نباشد و هیدریشن بشکند. */
+  const [urgSeed, setUrgSeed] = useState(0)
+  useEffect(() => { setUrgSeed(Math.floor(Math.random() * 1e9)) }, [])
+
   const urgent = useMemo(() => {
     const now = Date.now()
-    const hour = Math.floor(now / 3600000)
+    const hour = Math.floor(now / 3600000) + urgSeed
     const jitter = (s: string) => {
       let h = hour
       for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0
@@ -493,7 +502,7 @@ export default function MarketNewPage() {
     const maxViews = Math.max(1, ...live.map(l => l.views))
     const score = (l: typeof live[number]) => l.views / maxViews + jitter(String(l.id))
     return [...live].sort((a, b) => score(a) - score(b)).slice(0, URGENT_MAX)
-  }, [matched])
+  }, [matched, urgSeed])
 
   /* فهرستِ عادی = هرچه در نوارِ فوری نیامده. */
   const filtered = useMemo(() => {
@@ -502,158 +511,21 @@ export default function MarketNewPage() {
     return matched.filter(l => !inBar.has(l.key))
   }, [matched, urgent])
 
-  /* ── نوارِ فوری: حرکتِ خودکارِ نرم ──
-     جایگاهِ فوری وقتی ارزش دارد که دیده شود، و کاربر لزوماً نوار را
-     نمی‌کشد. حرکتِ آرام و پیوسته به راست همه‌ی آگهی‌ها را از جلوی چشم
-     رد می‌کند. فهرست دوبل می‌شود تا حلقه بدونِ پرش بسته شود، و با
-     لمس/موس/کیبورد می‌ایستد تا با دستِ کاربر نجنگد. */
-  /* ── نوارِ فوری ──
-     سه نسخه‌ی قبلی با جاوااسکریپت  را حرکت می‌دادند و هر
-     بار به یک اندازه‌گیری وابسته بودند (سرریز داریم یا نه، پهنای یک
-     دور چقدر است). هر بار هم همان اندازه‌گیری بود که سرِ کاربرِ واقعی
-     غلط درمی‌آمد و نوار ثابت می‌ماند.
+  /* ── نوارِ فوری: اسکرولِ ساده، بدونِ حرکتِ خودکار ──
+     چهار نسخه‌ی مختلفِ حرکتِ خودکار امتحان شد (انیمیشنِ CSS، ترجمه‌ی
+     transform، حلقه‌ی scrollLeft، و حلقه با اصلاحِ لبه) و هرکدام یک
+     جای دیگر با اسکرولِ بومی جنگید: روی لمس فنری برمی‌گشت، روی
+     دسکتاپ قفل حس می‌شد، و توقف و ازسرگیری هیچ‌وقت طبیعی نشد.
 
-     حالا حرکت کارِ CSS است: یک ریلِ داخلی با  که
-     با  نصفِ خودش را می‌پیماید. دو نسخه از فهرست کنارِ
-     هم‌اند، پس در لحظه‌ی بازگشت هیچ پرشی دیده نمی‌شود. این روش به هیچ
-     عددِ اندازه‌گیری‌شده‌ای وابسته نیست — چه سه کارت باشد چه دوازده‌تا،
-     حرکت می‌کند.
+     ریشه‌اش یکی است: نوشتنِ scrollLeft از جاوااسکریپت روی عنصری که
+     کاربر هم دارد اسکرولش می‌کند، یعنی دو کنترل‌کننده روی یک مقدار.
+     پس حرکتِ خودکار برداشته شد؛ نوار فقط با انگشت و با درگِ ماوس
+     حرکت می‌کند — همان کاری که مرورگر خودش بی‌نقص انجام می‌دهد.
 
-     کشیدن هم سرِ جایش است: ظرفِ بیرونی  دارد، پس
-     لمس بومی کار می‌کند و درگِ ماوس هم با همان قلابِ همیشگی. با هاور
-     یا دستِ کاربر انیمیشن می‌ایستد تا با او نجنگد. */
-  /* ── نوارِ فوری ──
-     سه نسخه‌ی قبلی حرکت را با جاوااسکریپت و `scrollLeft` می‌ساختند و
-     هر بار به یک اندازه‌گیری وابسته بودند: سرریز داریم یا نه، پهنای
-     یک دور چقدر است. همان اندازه‌گیری هر بار سرِ کاربرِ واقعی غلط
-     درمی‌آمد و نوار ثابت می‌ماند.
-
-     حالا حرکت کارِ CSS است: یک ریلِ داخلی با عرضِ محتوا که با
-     translateX نصفِ خودش را می‌پیماید. دو نسخه از فهرست کنارِ هم‌اند،
-     پس لحظه‌ی بازگشت هیچ پرشی دیده نمی‌شود. این روش به هیچ عددِ
-     اندازه‌گیری‌شده‌ای وابسته نیست — چه سه کارت باشد چه دوازده‌تا.
-
-     کشیدن سرِ جایش است: ظرفِ بیرونی overflow-x دارد، پس لمس بومی کار
-     می‌کند و درگِ ماوس هم با همان قلابِ همیشگی. با هاور یا دستِ کاربر
-     انیمیشن می‌ایستد تا با او نجنگد. */
+     «منصفانه‌بودن» از ترتیب می‌آید نه از حرکت: چیدمان هر بار که
+     صفحه باز می‌شود عوض می‌شود، پس همیشه یک آگهی جلوی چشم نیست. */
   const urgRef = useRef<HTMLDivElement>(null)
-  /* توقف در ref نگه داشته می‌شود نه state: حلقه هر فریم می‌خواندش و
-     نباید هر بار رندرِ تازه بسازد. */
-  /* ── چرا مهرِ زمان و نه یک بولین با تایمر ──
-     نسخه‌ی قبلی `holdRef` بولین بود و `useHorizontalScroll` هم با
-     `onInteract(false)` مستقیم رویش می‌نوشت — هم موقعِ رها کردنِ ماوس،
-     هم با تایمرِ ۹۰۰ میلی‌ثانیه‌ایِ خودش. یعنی هر بار تایمرِ پنج
-     ثانیه‌ایِ ما را پاک می‌کرد و نوار بلافاصله راه می‌افتاد.
-
-     حالا فقط یک عدد است: «تا این لحظه ساکت بمان». هرکس می‌تواند
-     جلوترش ببرد، هیچ‌کس نمی‌تواند لغوش کند. */
-  const holdUntilRef = useRef(0)
-  /* پهنای یک دورِ کامل — هم حلقه‌ی خودکار و هم اصلاحِ اسکرولِ کاربر
-     از همین می‌خوانند، پس در ref می‌نشیند نه داخلِ یک افکت. */
-  const cycleRef = useRef(0)
-  const hold = () => { holdUntilRef.current = performance.now() + 5000 }
-  const [urgReps, setUrgReps] = useState(3)
-  useHorizontalScroll(urgRef, busy => { if (busy) hold() })
-
-  /* آخرین موقعیتی که خودِ حلقه نوشته — برای جداکردنِ اسکرولِ کاربر
-     از اسکرولِ خودِ انیمیشن. بدونِ این، رویدادِ `scroll` که انیمیشن
-     می‌سازد، خودش را متوقف می‌کرد و نوار برای همیشه می‌ایستاد. */
-  const writtenRef = useRef(0)
-
-  /* هر تماسی — ماوس، لمس، چرخ — و هر اسکرولِ واقعیِ کاربر، حرکت را
-     متوقف می‌کند و پنج ثانیه پس از آخرین تماس دوباره راه می‌افتد.
-
-     `scroll` لازم است چون بعد از رها کردنِ انگشت، اسکرولِ اینرسی
-     ادامه دارد ولی هیچ رویدادِ لمسی نمی‌آید — و انیمیشن همان‌جا با
-     حرکتِ آزادِ نوار می‌جنگید. */
-  useEffect(() => {
-    const el = urgRef.current
-    if (!el || !urgent.length) return
-    /* ── حلقه‌ی بی‌پایان برای دستِ کاربر هم ──
-       حرکتِ خودکار داخلِ یک دور می‌چرخید، ولی کشیدنِ دستی به لبه‌ی
-       واقعیِ نوار می‌رسید و به دیوار می‌خورد — همان «ابتدا و انتهایش
-       معلوم است».
-
-       چون همه‌ی تکرارها عینِ هم‌اند، هر جا موقعیت از دورِ میانی بیرون
-       بزند دقیقاً یک دور جابه‌جا می‌شود: تصویر ذره‌ای عوض نمی‌شود ولی
-       همیشه یک دورِ کامل جا برای کشیدن باقی می‌ماند. اصلاح فقط نزدیکِ
-       لبه انجام می‌شود تا وسطِ کشیدن با اینرسی نجنگد. */
-    const wrap = () => {
-      const cycle = cycleRef.current
-      if (cycle <= 0) return
-      const sign = scrollSign(el)
-      const p = getPos(el, sign)
-      const max = maxScroll(el)
-      if (p >= cycle * 0.5 && p <= max - cycle * 0.5) return
-      let x = p
-      while (x < cycle) x += cycle
-      while (x >= cycle * 2) x -= cycle
-      if (Math.abs(x - p) < 1) return
-      setPos(el, sign, x)
-      writtenRef.current = getPos(el, sign)
-    }
-    const onScroll = () => {
-      /* اگر جابه‌جایی همانی است که حلقه نوشته، کارِ کاربر نبوده */
-      if (Math.abs(getPos(el, scrollSign(el)) - writtenRef.current) <= 2) return
-      hold()
-      wrap()
-    }
-    const EV = ['pointerdown', 'touchstart', 'touchmove', 'wheel'] as const
-    for (const ev of EV) el.addEventListener(ev, hold, { passive: true })
-    el.addEventListener('scroll', onScroll, { passive: true })
-    return () => {
-      for (const ev of EV) el.removeEventListener(ev, hold)
-      el.removeEventListener('scroll', onScroll)
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [urgent.length])
-
-  /* تعدادِ تکرار از عرضِ واقعی — تا همیشه سرریز باشد و حلقه بسته شود */
-  useEffect(() => {
-    const el = urgRef.current
-    const track = el?.firstElementChild as HTMLElement | null
-    if (!el || !track || !urgent.length) return
-    const measure = () => {
-      const one = track.scrollWidth / Math.max(1, urgReps)
-      if (one <= 0) return
-      cycleRef.current = one
-      const want = Math.max(3, Math.ceil((el.clientWidth * 3) / one))
-      if (want !== urgReps) setUrgReps(want)
-    }
-    measure()
-    const ro = new ResizeObserver(measure)
-    ro.observe(el)
-    return () => ro.disconnect()
-  }, [urgent.length, urgReps])
-
-  /* حلقه‌ی بی‌پایان: گذشتن از یک دور، همان اندازه عقب کشیده می‌شود.
-     چون نسخه‌ها عینِ هم‌اند، پرش دیده نمی‌شود و «آخر» وجود ندارد. */
-  useEffect(() => {
-    const el = urgRef.current
-    const track = el?.firstElementChild as HTMLElement | null
-    if (!el || !track || !urgent.length) return
-    if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return
-    const cycle = track.scrollWidth / Math.max(1, urgReps)
-    if (cycle <= 0) return
-    const SPEED = 45
-    const sign = scrollSign(el)
-    setPos(el, sign, cycle)
-    writtenRef.current = cycle
-    let last = 0, raf = 0
-    const tick = (t: number) => {
-      /* `t` همان مبنای `performance.now()` را دارد، پس مقایسه مستقیم است */
-      if (last && t >= holdUntilRef.current) {
-        let p = getPos(el, sign) - (SPEED * (t - last)) / 1000
-        while (p <= 0) p += cycle
-        setPos(el, sign, p)
-        writtenRef.current = p
-      }
-      last = t
-      raf = requestAnimationFrame(tick)
-    }
-    raf = requestAnimationFrame(tick)
-    return () => cancelAnimationFrame(raf)
-  }, [urgent.length, urgReps])
+  useHorizontalScroll(urgRef)
   const chips: { label: string; clear: () => void }[] = []
   if (cat)      chips.push({ label: catLabel(cat), clear: () => setCat('') })
   cities.forEach(c => chips.push({ label: c, clear: () => toggleCity(c) }))
@@ -784,13 +656,13 @@ export default function MarketNewPage() {
           scroll-snap-type: x proximity; scrollbar-width: none; -ms-overflow-style: none;
           -webkit-overflow-scrolling: touch; }
         .mk-urgrow::-webkit-scrollbar { display: none; }
-        /* ریلِ متحرک — عرضش را محتوا تعیین می‌کند، پس همیشه
-           چیزی برای پیمودن هست. توقف با هاور یا دستِ کاربر. */
-        .mk-urgtrack { display: flex; align-items: stretch; gap: 10px; width: max-content;
-          animation: mkUrgRoll 42s linear infinite; will-change: transform; }
-        .mk-urgrow:hover .mk-urgtrack, .mk-urgtrack.hold { animation-play-state: paused; }
-        @keyframes mkUrgRoll { from { transform: translateX(0) } to { transform: translateX(50%) } }
-        @media (prefers-reduced-motion: reduce) { .mk-urgtrack { animation: none } }
+        /* ریلِ ساده — عرضش را محتوا تعیین می‌کند و اسکرول کارِ مرورگر است */
+        .mk-urgtrack { display: flex; align-items: stretch; gap: 10px; width: max-content; }
+        /* چشمکِ نرم: فقط شفافیت، بدونِ تغییرِ اندازه — تکانِ آیکون
+           کنارِ یک تیترِ ثابت، بی‌قرار به‌نظر می‌رسد نه زنده. */
+        .mk-urgzap { animation: mkZap 2.4s ease-in-out infinite; }
+        @keyframes mkZap { 0%, 100% { opacity: 1 } 50% { opacity: 0.35 } }
+        @media (prefers-reduced-motion: reduce) { .mk-urgzap { animation: none } }
         .mk-urgcell { flex: 0 0 auto; width: 168px; scroll-snap-align: start; display: flex; }
         .mk-urgcell > * { width: 100%; }
         @media (max-width: 560px) { .mk-urgcell { width: 144px; } }
@@ -888,7 +760,7 @@ export default function MarketNewPage() {
           border-bottom: 1px solid ${LINE}; }
 
         /* ── گرید دسته‌های موبایل: ۳ ردیف ۵تایی ── */
-        .mk-mcats { display: none; grid-template-columns: repeat(5, 1fr); gap: 11px 6px; padding: 0 4px 4px; margin-top: -26px; }
+        .mk-mcats { display: none; grid-template-columns: repeat(5, 1fr); gap: 6px 6px; padding: 0 4px 4px; margin-top: -26px; }
         .mk-mcat { display: flex; flex-direction: column; align-items: center; gap: 6px; background: none; border: none;
           cursor: pointer; font-family: inherit; padding: 0; }
         /* ۵٪+۵٪ بزرگ‌تر (۵۲ ⇒ ۵۸) */
@@ -927,15 +799,15 @@ export default function MarketNewPage() {
           border-radius: 999px; padding: 2px 7px 1px; line-height: 1.4; flex-shrink: 0; }
         .mk-row .oldp { font-size: 10.5px; color: ${MUT}; text-decoration: line-through;
           font-variant-numeric: tabular-nums; margin-top: -2px; }
-        .mk-bk { position: absolute; top: 8px; left: 8px; background: none; border: none; cursor: pointer;
+        .mk-bk { position: absolute; top: 10px; left: 11px; background: none; border: none; cursor: pointer;
           color: ${MUT}; padding: 4px; display: flex; z-index: 2; }
         .mk-bk.on { color: ${GOLD_D}; }
         .mk-bk.on svg { fill: ${GOLD_D}; }
         /* گزارش تخلف — زیر آیکون نشان، با همان تراز */
-        .mk-rp { position: absolute; top: 34px; left: 8px; z-index: 2;
+        .mk-rp { position: absolute; top: 35px; left: 11px; z-index: 2;
           color: rgba(0,0,0,0.22) !important; transition: color .2s; }
         .mk-rp:hover { color: #B23B2E !important; }
-        .mk-row .mk-rp { top: auto; bottom: 8px; left: 8px; }
+        .mk-row .mk-rp { top: auto; bottom: 10px; left: 11px; }
 
         /* ── نوار پایین موبایل ── */
         /* left/right صریح — insetInline در CSS معتبر نیست و نوار جمع می‌شد */
@@ -1181,15 +1053,15 @@ export default function MarketNewPage() {
                 {urgent.length > 0 && (
                   <section style={{ marginBottom: 22 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 10 }}>
-                      <Zap size={15} style={{ color: '#B23B2E' }} />
+                      <Zap size={15} className="mk-urgzap" style={{ color: '#B23B2E' }} />
                       <h2 style={{ fontSize: 14.5, fontWeight: 900, color: TEXT, margin: 0 }}>فوری</h2>
                     </div>
                     <div className="mk-urgrow" ref={urgRef}>
-                      {/* دو نسخه‌ی پشتِ‌هم — ریل نصفِ خودش را می‌پیماید و
-                          چون نسخه‌ی دوم عینِ اولی است، بازگشت دیده نمی‌شود. */}
+                      {/* یک نسخه، بدونِ تکرار — نوار دیگر خودکار حرکت
+                          نمی‌کند، پس نیازی به دورِ اضافه نیست. */}
                       <div className="mk-urgtrack">
-                        {Array.from({ length: urgReps }, () => urgent).flat().map((l, i) => (
-                          <div key={`${l.key}-${i}`} className="mk-urgcell">
+                        {urgent.map((l, i) => (
+                          <div key={l.key} className="mk-urgcell">
                             <MarketCard l={l} i={i} saved={savedKeys.has(l.key)} onSave={() => toggleSave(l.key)} />
                           </div>
                         ))}

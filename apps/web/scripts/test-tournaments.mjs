@@ -1017,16 +1017,7 @@ t('وضعیتِ کالا از CONDITIONS می‌آید نه رشته‌ی دست
 t('کیس چوب و کیف توپ فهرستِ نوع و برند دارند',
   /'cue-case', 'ball-bag'/.test(chainSrc),
   'تفکیکِ case-bag نصفه مانده بود و این دو دسته به متنِ آزاد می‌افتادند');
-t('نوارِ فوری با اسکرولِ کاربر می‌ایستد و ۵ ثانیه بعد راه می‌افتد',
-  /holdUntilRef\.current = performance\.now\(\) \+ 5000/.test(shopPage)
-  && /t >= holdUntilRef\.current/.test(shopPage)
-  && /el\.addEventListener\('scroll', onScroll/.test(shopPage)
-  && /writtenRef/.test(shopPage),
-  'بدونِ writtenRef، اسکرولی که خودِ انیمیشن می‌سازد خودش را متوقف می‌کرد');
-t('توقف را فقط زمان لغو می‌کند، نه قلابِ درگ',
-  /useHorizontalScroll\(urgRef, busy => \{ if \(busy\) hold\(\) \}\)/.test(shopPage)
-  && !/holdRef\.current = busy/.test(shopPage),
-  'onInteract(false) قلاب، تایمرِ پنج ثانیه‌ای را پاک می‌کرد و نوار بلافاصله راه می‌افتاد');
+
 t('سرچ‌بارِ موبایل فاصله‌ی اضافه‌ی بالا را ندارد',
   /\.mk-msearch \{[^}]*padding: calc\(2px \+ env\(safe-area-inset-top\)\) 14px 6px/.test(shopPage)
   && /padding: '10px 0', background: 'none'/.test(shopPage),
@@ -1073,10 +1064,32 @@ t('اسنپ‌شاتِ جایگاه وضعیتِ کالا را حمل می‌ک�
   && /images,brand,city,condition,status/.test(read('lib/ads/free.ts'))
   && /city: e\.city \?\? '', condition: e\.condition \?\? 'new'/.test(homeCl),
   'کارت‌های سکشنِ بازار از اسنپ‌شات می‌آیند، نه از ردیفِ خامِ محصول');
-t('کشیدنِ دستیِ نوارِ فوری هم به دیوار نمی‌خورد',
-  /const wrap = \(\) => \{/.test(shopPage) && /while \(x < cycle\) x \+= cycle/.test(shopPage)
-  && /cycleRef\.current = one/.test(shopPage),
-  'حرکتِ خودکار حلقه می‌زد ولی کشیدنِ دستی به لبه‌ی واقعی می‌رسید');
+
+/* ── نوارِ فوری: حرکتِ خودکار برداشته شد ──
+   چهار پیاده‌سازیِ مختلف با اسکرولِ بومی جنگیدند. علتِ مشترک: نوشتنِ
+   scrollLeft از جاوااسکریپت روی عنصری که کاربر هم اسکرولش می‌کند. */
+t('نوارِ فوری حرکتِ خودکار ندارد',
+  !/holdUntilRef/.test(shopPage) && !/cycleRef/.test(shopPage)
+  && !/writtenRef/.test(shopPage) && !/urgReps/.test(shopPage)
+  && !/mkUrgRoll/.test(shopPage),
+  'هر نسخه‌ی خودکار یک جای دیگر با لمس یا درگ می‌جنگید');
+t('اسکرولِ افقی همچنان کار می‌کند',
+  /useHorizontalScroll\(urgRef\)/.test(shopPage)
+  && /\.mk-urgrow \{[^}]*overflow-x/.test(shopPage));
+t('ترتیبِ نوارِ فوری هر بار عوض می‌شود',
+  /const \[urgSeed, setUrgSeed\] = useState\(0\)/.test(shopPage)
+  && /}, \[matched, urgSeed\]\)/.test(shopPage)
+  && /setUrgSeed\(Math\.floor\(Math\.random\(\)/.test(shopPage),
+  'دانه بعد از mount گذاشته می‌شود وگرنه هیدریشن می‌شکند');
+t('آیکونِ فوری نرم چشمک می‌زند',
+  /\.mk-urgzap \{ animation: mkZap/.test(shopPage)
+  && /@keyframes mkZap \{ 0%, 100% \{ opacity: 1 \} 50% \{ opacity: 0\.35 \} \}/.test(shopPage));
+t('ردیف‌های دسته‌بندیِ موبایل فشرده‌تر شدند',
+  /\.mk-mcats \{[^}]*gap: 6px 6px/.test(shopPage));
+t('نشان و گزارش کمی داخل‌تر آمدند',
+  /\.mk-bk \{ position: absolute; top: 10px; left: 11px;/.test(shopPage)
+  && /\.mk-rp \{ position: absolute; top: 35px; left: 11px;/.test(shopPage));
+
 t('آیکون‌های نوارِ پایین یک خانه‌ی هم‌اندازه دارند',
   /\.mk-bnav \.ic \{ height: 24px/.test(shopPage)
   && ['Home', 'LayoutGrid', 'Bookmark'].every(i => new RegExp(`<span className="ic"><${i} size=\\{21\\}`).test(shopPage))
