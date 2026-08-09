@@ -51,8 +51,31 @@ export interface ProductTitleParts {
 }
 
 /** عنوان را به دو تکه‌ی نمایشی می‌شکند. */
+/* ── نام‌های قدیمیِ «نوع» در دسته‌ی توپ ──
+   فهرستِ فرم عوض شد («۲۲ تایی اسنوکر» ⇒ «توپ اسنوکر»)، ولی آگهی‌های
+   ثبت‌شده هنوز رشته‌ی قدیمی را در `title` دارند. مهاجرتِ دیتابیس برای
+   یک برچسبِ نمایشی بیش‌ازحد است و عنوانی را هم که فروشنده دستی
+   ویرایش کرده خراب می‌کند؛ پس نگاشت هنگامِ نمایش انجام می‌شود.
+
+   فقط عبارتِ دقیق جایگزین می‌شود، نه هر تطبیقِ جزئی — وگرنه عنوانی
+   مثل «ست ۲۲ تایی اسنوکر دست‌دوم» بی‌دلیل دست‌کاری می‌شد. */
+const LEGACY_TYPE: Record<string, string> = {
+  '۲۲ تایی اسنوکر': 'توپ اسنوکر',
+  '۱۵ تایی پاکت بیلیارد': 'توپ پاکت بیلیارد',
+  '۳ تایی کارامبول': 'توپ کارامبول',
+}
+
+export function modernizeType(s: string): string {
+  for (const [old, neo] of Object.entries(LEGACY_TYPE)) {
+    if (s === old) return neo
+    if (s.startsWith(`${old} `)) return `${neo}${s.slice(old.length)}`
+    if (s.endsWith(` ${old}`)) return `${s.slice(0, -old.length)}${neo}`
+  }
+  return s
+}
+
 export function productTitleParts(p: ProductTitleFields): ProductTitleParts {
-  const head = plain(p.name) || plain(p.title) || 'محصول'
+  const head = modernizeType(plain(p.name) || plain(p.title) || 'محصول')
 
   /* ترتیب همان ترتیبِ فرم است: برند، بعد مدل. */
   const raw = [plain(p.brand), plain(p.model)]

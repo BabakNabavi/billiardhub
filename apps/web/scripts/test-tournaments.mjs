@@ -1579,7 +1579,22 @@ t('تیترِ کارتِ صفحه‌ی اصلی دوتکه و بولد است',
   /\.bz-h \{[^}]*font-weight:800/.test(read('app/HomeClient.tsx').replace(/\s+/g, ' '))
   || /font-weight:800/.test(read('app/HomeClient.tsx')),
   'دسته‌بندی و نوع باید از برند برجسته‌تر باشند');
-t('برچسبِ برند طرحِ اختصاصی دارد', /\.brand-chip \{/.test(flat) && /Authorized/.test(flat));
+t('برچسبِ برند طرحِ اختصاصی دارد',
+  /\.brand-chip \{/.test(flat) && /نمایندگی :/.test(flat),
+  'برچسبِ انگلیسیِ Authorized جایش را به «نمایندگی :» داد');
+t('نشانیِ اختصاصی در هدرِ فروشگاه دیده و کپی می‌شود',
+  /billiardhub\.net\/sellers\/\{sellerId\}/.test(flat) && /setUrlCopied/.test(flat));
+t('فیلدِ نشانی دکمه‌ی کپی دارد',
+  /aria-label="کپیِ نشانی"/.test(read('components/SiteAddressField.tsx')));
+t('نقش‌های فعال شاملِ نقشِ اصلی است',
+  /const activeRoles = Array\.from\(new Set\(/.test(read('app/profile/role/page.tsx')),
+  'فقط secondaryRoles فهرست می‌شد و نقشِ اصلی اصلاً دیده نمی‌شد');
+t('نام‌های قدیمیِ نوعِ توپ در نمایش به‌روز می‌شوند',
+  /export function modernizeType/.test(read('lib/market/title.ts'))
+  && /modernizeType\(p\.title\)/.test(read('app/HomeClient.tsx')),
+  'آگهی‌های قبلی «۲۲ تایی اسنوکر» را در عنوان دارند');
+t('فیلدِ «نام کوتاه (برند)» حذف شد',
+  !/f-brand/.test(read('app/dashboard/seller/page.tsx')));
 t('برچسبِ تخفیفِ جزئیات مثل بازار است — بنفش',
   (detailPg.match(/#b400ae/g) ?? []).length >= 2 && !/٪ تخفیف/.test(detailPg));
 t('توضیحاتِ محصول باکسِ مستقل دارد',

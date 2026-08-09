@@ -307,16 +307,14 @@ export default function SellerDashboard() {
                   onChange={e => set('title', e.target.value)}/>
                 <p className={HINT}>تیتر اصلی بالای صفحه‌ی فروشگاه.</p>
               </div>
-              <div>
-                <label className={LABEL} htmlFor="f-brand">نام کوتاه (برند)</label>
-                <input id="f-brand" className={INPUT} value={form.brand}
-                  onChange={e => set('brand', e.target.value)} placeholder="پروکیو"/>
-                <p className={HINT}>در فوتر فروشگاه کنار نشان استفاده می‌شود.</p>
-              </div>
+              {/* فیلدِ «نام کوتاه (برند)» حذف شد — تنها مصرفش فوترِ
+                  فروشگاه بود و فوتر حالا نامِ کاملِ فروشگاه را نشان
+                  می‌دهد، پس یک فیلدِ اضافه برای پرکردن باقی می‌ماند
+                  که هیچ‌جا دیده نمی‌شد. */}
               {/* نشانیِ اختصاصی — همان چیزی که باشگاه از اول داشت */}
               <div className="sm:col-span-2">
                 <ProfileSlugField
-                  kind="seller" value={form.slug}
+                  kind="seller" value={form.slug} label="آدرس اختصاصی سایت فروشگاه شما"
                   onChange={v => set('slug', v)}
                   suggestFrom={form.title}
                   onStatusChange={setSlugStatus}
@@ -488,8 +486,13 @@ export default function SellerDashboard() {
                   می‌کشید و کنارِ متنِ استوری ناهم‌تراز می‌شد. حالا کلِ
                   کادر خودش دکمه‌ی آپلود است — الگوی رایجِ همین کار — و
                   «حذف» یک دایره‌ی کوچک روی گوشه‌ی عکس. */}
+              {/* ── هم‌ترازی با کادرِ متن ──
+                  ستونِ متن یک برچسب بالای خودش دارد و این ستون نداشت،
+                  پس کادرِ عکس یک ردیف بالاتر می‌نشست و دو ستون
+                  ناهم‌تراز به‌نظر می‌رسیدند. برچسبِ خودش را گرفت. */}
               <div className="shrink-0">
-                <div className="relative h-28 w-20">
+                <label className={LABEL}>عکس استوری</label>
+                <div className="relative h-[104px] w-[74px]">
                   <button type="button" onClick={() => storyRef.current?.click()} disabled={busy}
                     aria-label={form.storyImage ? 'تغییر عکس استوری' : 'آپلود عکس استوری'}
                     className="group relative block h-full w-full overflow-hidden rounded-xl border border-dashed border-[rgba(199,166,106,0.55)] bg-[#F7F5F0] transition hover:border-[#C7A66A] disabled:opacity-45">

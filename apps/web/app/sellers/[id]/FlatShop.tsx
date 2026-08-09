@@ -359,6 +359,7 @@ export default function FlatShop() {
   /* wishlist + story */
   const [wish, setWish] = useState<Set<string>>(new Set())
   const [storyOpen, setStoryOpen] = useState(false)
+  const [urlCopied, setUrlCopied] = useState(false)
   /* استوریِ واقعی = فروشنده تصویری گذاشته باشد */
   const hasStory = !!String(store.storyImage ?? '').trim()
   const router = useRouter()
@@ -516,34 +517,42 @@ export default function FlatShop() {
         .scat.on .scat-ct { color: #9A6E38; }
         @media (prefers-reduced-motion: reduce) { .scat { transition: none } .scat:hover { transform: none } }
 
-        /* ── نشانِ برندِ نمایندگی ── */
+        /* ── نشانِ برندِ نمایندگی ──
+           نسخه‌ی قبلی لاکی‌مشکی با متنِ طلایی بود؛ روی کاغذِ روشنِ صفحه
+           مثل یک وصله‌ی تیره می‌نشست. حالا شیشه‌ی نمدیِ سبز است — رنگِ
+           متضادِ زمینه‌ی کرِمی — با متنِ روشن و همان زبانِ liquid که
+           هدر دارد: بلور، لبه‌ی روشنِ داخلی، و برقی که با هاور رد
+           می‌شود. */
         .brand-chip {
           position: relative; overflow: hidden;
           display: inline-flex; align-items: center;
-          padding: 5px 13px 4px;
-          border-radius: 8px;
-          background: linear-gradient(145deg,#23201A 0%,#14120E 60%,#1D1A14 100%);
-          border: 1px solid rgba(199,166,106,0.42);
-          box-shadow: 0 2px 10px rgba(28,27,23,0.22), inset 0 1px 0 rgba(199,166,106,0.20);
+          padding: 6px 14px 5px;
+          border-radius: 999px;
+          background: linear-gradient(135deg, rgba(13,90,63,0.92) 0%, rgba(9,66,47,0.86) 55%, rgba(16,110,76,0.90) 100%);
+          border: 1px solid rgba(255,255,255,0.30);
+          box-shadow:
+            inset 0 1px 0 rgba(255,255,255,0.30),
+            inset 0 -1px 0 rgba(0,0,0,0.18),
+            0 4px 14px rgba(9,66,47,0.28);
+          backdrop-filter: blur(14px) saturate(1.7);
+          -webkit-backdrop-filter: blur(14px) saturate(1.7);
           transition: transform .22s cubic-bezier(.22,1,.36,1), box-shadow .22s, border-color .22s;
         }
         .brand-chip-txt {
-          font-size: 11.5px; font-weight: 800; letter-spacing: 0.07em; white-space: nowrap;
-          background: linear-gradient(100deg,#E8CE96 0%,#C7A66A 45%,#F0DDB0 70%,#A07840 100%);
-          -webkit-background-clip: text; background-clip: text;
-          -webkit-text-fill-color: transparent; color: transparent;
+          font-size: 11.5px; font-weight: 800; letter-spacing: 0.04em; white-space: nowrap;
+          color: #F3F8F4;
+          text-shadow: 0 1px 2px rgba(0,0,0,0.28);
         }
-        /* برقِ نرمی که با هاور از روی نشان رد می‌شود */
         .brand-chip::after {
           content: ''; position: absolute; top: 0; bottom: 0; width: 45%;
           left: -60%; transform: skewX(-18deg); pointer-events: none;
-          background: linear-gradient(90deg,transparent,rgba(255,255,255,0.16),transparent);
+          background: linear-gradient(90deg,transparent,rgba(255,255,255,0.26),transparent);
           transition: left .55s ease;
         }
         .brand-chip:hover {
           transform: translateY(-1.5px);
-          border-color: rgba(199,166,106,0.72);
-          box-shadow: 0 6px 18px rgba(28,27,23,0.30), inset 0 1px 0 rgba(199,166,106,0.30);
+          border-color: rgba(255,255,255,0.52);
+          box-shadow: inset 0 1px 0 rgba(255,255,255,0.38), 0 8px 22px rgba(9,66,47,0.36);
         }
         .brand-chip:hover::after { left: 115%; }
         @media (prefers-reduced-motion: reduce) {
@@ -624,10 +633,34 @@ export default function FlatShop() {
                 فاصله‌دار است — همان زبانی که برندهای بین‌المللیِ
                 تجهیزات روی جعبه‌هایشان به کار می‌برند. برقِ نرمی هم
                 با هاور از رویش رد می‌شود. */}
+            {/* ── نشانیِ اختصاصیِ فروشگاه ──
+                فروشنده در پنل نشانی می‌سازد ولی هیچ‌جای خودِ صفحه دیده
+                نمی‌شد — نه خودش می‌دانست چه شد، نه بازدیدکننده
+                می‌توانست کپی‌اش کند. کره‌ی خطی همان زبانِ آیکونیِ بقیه‌ی
+                صفحه است و تینتِ طلاییِ سیستم را می‌گیرد. */}
+            <button
+              type="button"
+              onClick={() => {
+                const url = `https://billiardhub.net/sellers/${sellerId}`
+                void navigator.clipboard?.writeText(url).then(
+                  () => { setUrlCopied(true); window.setTimeout(() => setUrlCopied(false), 1800) },
+                  () => { /* مرورگر اجازه نداد — نشانی همچنان خوانا روی صفحه هست */ },
+                )
+              }}
+              title="کپیِ نشانیِ فروشگاه"
+              className="mt-2.5 inline-flex max-w-full items-center gap-1.5 rounded-[10px] border border-[rgba(199,166,106,0.34)] bg-[rgba(199,166,106,0.12)] px-3 py-1.5 text-[12px] font-bold text-[#9A6E38] transition hover:-translate-y-0.5"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
+                <circle cx="12" cy="12" r="10" /><path d="M2 12h20" />
+                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+              </svg>
+              <span dir="ltr" className={`truncate ${MONO}`}>billiardhub.net/sellers/{sellerId}</span>
+              <span className="shrink-0 text-[11px] opacity-70">{urlCopied ? '✓' : '⧉'}</span>
+            </button>
+
             {store.brands.length > 0 && (
               <div className="mt-3 flex flex-wrap items-center gap-2">
-                <span className="text-[10.5px] font-bold uppercase tracking-[0.14em] text-[#A69F8E]">Authorized</span>
-                <span className="h-[13px] w-px bg-[#E0DAC8]" />
+                <span className="text-[11.5px] font-bold text-[#5B564B]">نمایندگی :</span>
                 {store.brands.map((b, i) => (
                   <span key={i} className="brand-chip" dir="auto">
                     <span className="brand-chip-txt">{b}</span>

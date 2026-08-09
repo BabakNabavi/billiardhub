@@ -40,6 +40,7 @@ import { MEDIA_VIDEOS, compactViews } from '../lib/media-data';
 import { getHiddenVideoIds, getFeaturedOverride } from '../lib/media-admin-store';
 import { sharedJson } from '../lib/shared-fetch';
 import { useDeferredStart } from '../lib/useDeferredStart';
+import { modernizeType } from '../lib/market/title';
 import { thumbUrl } from '../lib/supabase-config';
 
 /* ── عرضِ واقعیِ کادرها ──
@@ -627,9 +628,28 @@ function SellerCard({ s }: { s: RealStore }) {
     >
       {/* Image area — curved bottom via border-radius clip */}
       <div style={{ position: 'relative', height: '150px', overflow: 'hidden', borderRadius: '0 0 60% 60% / 0 0 42px 42px' }}>
-        <img loading="lazy" decoding="async" src={s.img} alt={s.name}
-          style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.5s ease', transform: hov ? 'scale(1.07)' : 'scale(1)' }}
-          onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+        {/* ── فروشگاهِ بی‌لوگو ⇒ پوسترِ پیش‌فرض، نه عکسِ عمومی ──
+            تا امروز یک عکسِ ثابتِ فروشگاه نشان داده می‌شد که ربطی به
+            این فروشگاه نداشت (و پیش‌تر حتی نشانی‌اش ۴۰۴ می‌داد و کارت
+            کاملاً بی‌عکس می‌ماند). حالا همان پوسترِ لایه‌ایِ صفحه‌ی
+            فروشگاه این‌جا هم ساخته می‌شود: گرادیانِ نمدِ سبز، بافتِ
+            نقطه‌ای، هالهٔ طلایی، و حرفِ اولِ نامِ فروشگاه. */}
+        {s.img ? (
+          <img loading="lazy" decoding="async" src={s.img} alt={s.name}
+            style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.5s ease', transform: hov ? 'scale(1.07)' : 'scale(1)' }}
+            onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+        ) : (
+          <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', background: 'linear-gradient(120deg,#07231a 0%,#0e3a2a 55%,#0a2f22 100%)' }}>
+            <div style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.05) 1px, transparent 1px)', backgroundSize: '14px 14px' }} />
+            <div style={{ position: 'absolute', insetInlineStart: '-10%', top: '-45%', width: '55%', height: '190%', background: 'radial-gradient(ellipse, rgba(199,166,106,0.28) 0%, transparent 66%)', filter: 'blur(16px)' }} />
+            <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 7 }}>
+              <span style={{ width: 44, height: 44, borderRadius: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, fontWeight: 900, color: '#F0DDB0', background: 'rgba(199,166,106,0.16)', border: '1px solid rgba(199,166,106,0.42)' }}>
+                {s.name.trim().charAt(0) || 'ف'}
+              </span>
+              <span dir="ltr" style={{ fontSize: 8.5, fontWeight: 800, letterSpacing: '0.2em', color: 'rgba(199,166,106,0.92)' }}>BILLIARD SHOP</span>
+            </div>
+          </div>
+        )}
         {/* gradient overlay */}
         <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.28) 100%)' }} />
         {s.badge && (
@@ -887,7 +907,7 @@ export default function HomeClient({ initialPlacements, initialFeatured, service
       })));
 
       setRealProducts(pr.slice(0, 14).map(p => ({
-        id: p.id, name: p.title, sub: p.brand || p.category || 'بیلیارد بازار',
+        id: p.id, name: modernizeType(p.title), sub: p.brand || p.category || 'بیلیارد بازار',
         img: thumbUrl(p.images?.[0], PROD_W) || IMG.cue,
         brand: (p.brand || 'BILLIARD').toUpperCase(),
         price: p.price ?? 0, sale: p.discountPrice ?? p.price ?? 0,
@@ -907,7 +927,8 @@ export default function HomeClient({ initialPlacements, initialFeatured, service
           city: sp.city ?? '',
           specialty: sp.specialty || 'تجهیزات بیلیارد',
           rating: 0, reviews: 0,
-          img: thumbUrl(sp.logo || s.avatar, LOGO_W) || IMG.store1,
+          /* خالی یعنی «لوگو ندارد» ⇒ کارت پوسترِ پیش‌فرض می‌سازد */
+          img: thumbUrl(sp.logo || s.avatar, LOGO_W),
           badge: null as string | null,
         };
       }));
@@ -925,7 +946,7 @@ export default function HomeClient({ initialPlacements, initialFeatured, service
     const snaps = uniqByRef((featProducts ?? []).map(c => c.entity).filter((e): e is EntitySnapshot => !!e));
     if (!snaps.length) return demoOk(prodSlot) ? realProducts : [];
     return snaps.map(e => ({
-      id: e.ref, name: e.title, sub: e.subtitle || 'بیلیارد بازار', img: thumbUrl(e.image, PROD_W),
+      id: e.ref, name: modernizeType(e.title), sub: e.subtitle || 'بیلیارد بازار', img: thumbUrl(e.image, PROD_W),
       brand: (e.subtitle || 'BILLIARD').toUpperCase(),
       price: e.oldPrice ?? e.price ?? 0, sale: e.price ?? 0, pct: e.discountPercent ?? 0,
       /* ── چرا این خط سه بار اشتباه بود ──

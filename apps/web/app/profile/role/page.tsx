@@ -382,6 +382,12 @@ function DocUploadStep({
 export default function RolePage() {
   const router = useRouter()
   const { user, updateUser } = useAuthStore()
+  /* همه‌ی نقش‌های کاربر — اصلی و فرعی با هم. `user` عمداً حذف می‌شود:
+     «کاربر عادی» نقش نیست، حالتِ نداشتنِ نقش است. */
+  const activeRoles = Array.from(new Set(
+    [user?.primaryRole, ...(user?.secondaryRoles ?? [])]
+      .filter((r): r is string => !!r && r !== 'user'),
+  ))
   const [requests, setRequests] = useState<RoleRequest[]>([])
   const [queued, setQueued]     = useState<Set<RoleValue>>(new Set())
   /* در حالِ تغییرِ نقشِ اصلی — تا دو کلیکِ پشتِ هم دو درخواست نفرستد */
@@ -597,15 +603,25 @@ export default function RolePage() {
                 )
               })()}
 
-              {/* نقش‌های فعال — با امکان حذف نقش اشتباه */}
-              {(user?.secondaryRoles ?? []).length > 0 && (
+              {/* ── نقش‌های فعال ──
+                  تا امروز فقط `secondaryRoles` فهرست می‌شد و نقشِ
+                  **اصلی** اصلاً در آن نبود. کاربری که مثلاً فروشنده
+                  (اصلی) و باشگاه‌دار (فرعی) بود، این‌جا فقط یکی را
+                  می‌دید و فکر می‌کرد نقشِ دیگرش از بین رفته.
+
+                  حذف فقط برای نقش‌های فرعی است: نقشِ اصلی اول باید در
+                  کادرِ بالا عوض شود، وگرنه کاربر بی‌نقش می‌ماند. */}
+              {activeRoles.length > 0 && (
                 <div style={{ background: '#fff', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 16, padding: '14px 16px', marginBottom: 16, boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
                   <div style={{ fontSize: 12.5, fontWeight: 800, color: 'rgba(0,0,0,0.55)', marginBottom: 10 }}>نقش‌های فعال شما</div>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-                    {(user?.secondaryRoles ?? []).map(r => (
+                    {activeRoles.map(r => (
                       <span key={r} style={{ display: 'inline-flex', alignItems: 'center', gap: 7, fontSize: 12.5, fontWeight: 700, color: '#9A6E38', background: 'rgba(199,166,106,0.10)', border: '1px solid rgba(199,166,106,0.3)', borderRadius: 999, padding: '6px 8px 6px 6px' }}>
                         {ROLE_MAP[r as RoleValue]?.label ?? r}
-                        <button
+                        {r === user?.primaryRole && (
+                          <span style={{ fontSize: 10, fontWeight: 800, color: '#7A5626', background: 'rgba(199,166,106,0.22)', borderRadius: 999, padding: '2px 7px' }}>اصلی</span>
+                        )}
+                        {r !== user?.primaryRole && <button
                           /* حذف باید *سمتِ سرور* انجام شود. پیش‌تر فقط
                              `updateUser` صدا زده می‌شد: نقش از استورِ
                              مرورگر پاک می‌شد، پیام «نقش حذف شد» می‌آمد، و
@@ -624,7 +640,7 @@ export default function RolePage() {
                           title="حذف نقش"
                           style={{ width: 18, height: 18, borderRadius: '50%', border: 'none', cursor: 'pointer', background: 'rgba(178,59,46,0.12)', color: '#B23B2E', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, lineHeight: 1, fontFamily: 'inherit' }}>
                           ×
-                        </button>
+                        </button>}
                       </span>
                     ))}
                   </div>

@@ -35,11 +35,13 @@ export interface ProfileSlugFieldProps {
   suggestFrom?: string
   /** شناسه‌ی پروفایلِ خودِ کاربر — تا نامکِ فعلی «گرفته‌شده» گزارش نشود */
   excludeId?: string
+  /** برچسبِ فیلد — پیش‌فرضِ عمومی برای نقشی که واژه‌ی خاصی ندارد */
+  label?: string
   onStatusChange?: (s: SlugStatus) => void
 }
 
 export default function ProfileSlugField({
-  kind, value, onChange, suggestFrom, excludeId, onStatusChange,
+  kind, value, onChange, suggestFrom, excludeId, onStatusChange, label,
 }: ProfileSlugFieldProps) {
   return (
     <SiteAddressField
@@ -48,6 +50,7 @@ export default function ProfileSlugField({
       basePath={BASE_PATH[kind]}
       {...(suggestFrom ? { suggestFrom } : {})}
       {...(onStatusChange ? { onStatusChange } : {})}
+      {...(label ? { label } : {})}
       checkUrl={s =>
         `/api/profiles/${kind}/slug-check?slug=${encodeURIComponent(s)}${
           excludeId ? `&excludeId=${encodeURIComponent(excludeId)}` : ''

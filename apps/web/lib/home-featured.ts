@@ -1,6 +1,7 @@
 import 'server-only'
 import { getSupabaseServer } from './supabase-server'
 import { listPublicStores, type PublicStore } from './sellers-source'
+import { modernizeType } from './market/title'
 import type { RealClub, RealProduct, RealStore, HomeFeatured } from './home-types'
 
 /* ─────────────────────────────────────────────────────────────
@@ -88,7 +89,7 @@ export async function loadHomeFeatured(): Promise<HomeFeatured> {
 
   const products: RealProduct[] = rows<P>(productsRes).map(p => ({
     id: p.id,
-    name: p.title,
+    name: modernizeType(p.title ?? ''),
     sub: p.brand || p.category || 'بیلیارد بازار',
     img: p.images?.[0] || PRODUCT_IMG,
     brand: (p.brand || 'BILLIARD').toUpperCase(),
@@ -107,7 +108,8 @@ export async function loadHomeFeatured(): Promise<HomeFeatured> {
       city: p.city,
       specialty: p.specialty,
       rating: 0, reviews: 0,
-      img: p.logo || s.avatar || STORE_IMG,
+      /* خالی یعنی «لوگو ندارد» ⇒ کارت پوسترِ پیش‌فرض می‌سازد */
+      img: p.logo || s.avatar || '',
       badge: null,
     }
   })

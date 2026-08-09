@@ -50,6 +50,7 @@ export default function SiteAddressField({
   required = false, label = 'آدرس اختصاصی سایت شما', error,
 }: SiteAddressFieldProps) {
   const [status, setStatus] = useState<SlugStatus>('idle');
+  const [copied, setCopied] = useState(false);
   /* ── چرا هر دو تابع در ref می‌نشینند ──
      هر دو به‌صورتِ تابعِ درجا (`s => …`) از والد می‌آیند، پس در هر
      رندر شناسه‌ی تازه می‌گیرند. اگر در آرایه‌ی وابستگیِ افکت باشند،
@@ -143,20 +144,55 @@ export default function SiteAddressField({
       {/* ── پیش‌نمایشِ زنده ──
           همیشه دیده می‌شود، حتی وقتی فیلد خالی است: کاربر باید بداند
           چه چیزی دارد می‌سازد پیش از آنکه اولین حرف را بزند. */}
-      <div className="bh-latin" style={{
-        marginTop: 3, direction: 'ltr', textAlign: 'left',
-        fontSize: 13, fontWeight: 700, lineHeight: 1.8,
-        color: value ? '#1C1B17' : 'rgba(0,0,0,0.32)',
-        background: value ? 'rgba(199,166,106,0.08)' : 'rgba(0,0,0,0.03)',
-        border: `1px solid ${value ? 'rgba(199,166,106,0.22)' : 'rgba(0,0,0,0.07)'}`,
-        borderRadius: 9, padding: '7px 11px', wordBreak: 'break-all',
-        transition: 'background .15s, border-color .15s',
+      <div style={{
+        marginTop: 3, display: 'flex', alignItems: 'stretch', gap: 6,
       }}>
-        {/* بدونِ `www` — دامنه یکی شده و `www` با ۳۰۱ به همین‌جا
-            می‌آید (`nginx-canonical.sh`). نشان‌دادنِ نشانیِ هدایت‌شونده
-            یعنی کاربر لینکی را کپی کند که یک پرش اضافه دارد. */}
-        billiardhub.net/{basePath}/
-        <span style={{ color: value ? GOLD_D : 'inherit' }}>{value || '…'}</span>
+        <div className="bh-latin" style={{
+          flex: 1, minWidth: 0, direction: 'ltr', textAlign: 'left',
+          fontSize: 13, fontWeight: 700, lineHeight: 1.8,
+          color: value ? '#1C1B17' : 'rgba(0,0,0,0.32)',
+          background: value ? 'rgba(199,166,106,0.08)' : 'rgba(0,0,0,0.03)',
+          border: `1px solid ${value ? 'rgba(199,166,106,0.22)' : 'rgba(0,0,0,0.07)'}`,
+          borderRadius: 9, padding: '7px 11px', wordBreak: 'break-all',
+          transition: 'background .15s, border-color .15s',
+        }}>
+          {/* بدونِ `www` — دامنه یکی شده و `www` با ۳۰۱ به همین‌جا
+              می‌آید (`nginx-canonical.sh`). نشان‌دادنِ نشانیِ هدایت‌شونده
+              یعنی کاربر لینکی را کپی کند که یک پرش اضافه دارد. */}
+          billiardhub.net/{basePath}/
+          <span style={{ color: value ? GOLD_D : 'inherit' }}>{value || '…'}</span>
+        </div>
+        {/* ── کپی ──
+            نشانی برای این ساخته می‌شود که جایی فرستاده شود؛ بدونِ این
+            دکمه کاربر باید متنِ سه‌تکه را دستی انتخاب می‌کرد.
+            `navigator.clipboard` روی HTTP در دسترس نیست، پس فالبکِ
+            انتخاب‌ومتنِ قدیمی هم هست. */}
+        <button
+          type="button" disabled={!value} aria-label="کپیِ نشانی"
+          onClick={async () => {
+            const url = `https://billiardhub.net/${basePath}/${value}`
+            try { await navigator.clipboard.writeText(url) }
+            catch {
+              const ta = document.createElement('textarea')
+              ta.value = url; ta.style.position = 'fixed'; ta.style.opacity = '0'
+              document.body.appendChild(ta); ta.select()
+              try { document.execCommand('copy') } catch { /* مرورگر اجازه نداد */ }
+              document.body.removeChild(ta)
+            }
+            setCopied(true)
+            window.setTimeout(() => setCopied(false), 1800)
+          }}
+          style={{
+            flexShrink: 0, width: 40, borderRadius: 9, cursor: value ? 'pointer' : 'not-allowed',
+            fontFamily: 'inherit', fontSize: 11, fontWeight: 800,
+            color: copied ? OK : GOLD_D,
+            background: copied ? 'rgba(14,122,56,0.10)' : 'rgba(199,166,106,0.12)',
+            border: `1px solid ${copied ? 'rgba(14,122,56,0.34)' : 'rgba(199,166,106,0.34)'}`,
+            opacity: value ? 1 : 0.45,
+            transition: 'background .15s, border-color .15s, color .15s',
+          }}>
+          {copied ? '✓' : 'کپی'}
+        </button>
       </div>
 
       <div style={{ fontSize: 11.5, minHeight: 16, lineHeight: 1.9 }}>
