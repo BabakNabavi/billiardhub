@@ -14,5 +14,18 @@
       "Bash(vercel ls *)",
       "Bash(xargs grep -l \"position.*fixed\")"
     ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/post-edit.mjs"
+          }
+        ]
+      }
+    ]
   }
 }

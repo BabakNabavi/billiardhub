@@ -11,7 +11,8 @@
     "backup": "node apps/web/scripts/backup.mjs"
   },
   "devDependencies": {
-    "prettier": "^3.7.4",
+    "prettier": "^3.9.6",
+    "prettier-plugin-tailwindcss": "^0.8.1",
     "turbo": "^2.9.12",
     "typescript": "5.9.2"
   },
