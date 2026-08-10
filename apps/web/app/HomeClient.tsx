@@ -990,9 +990,23 @@ export default function HomeClient({ initialPlacements, initialFeatured, service
   useHorizontalScroll(mktDeskRef, busy => { mktPausedRef.current = busy });
   const mktTickerRef = useRef<number | null>(null);
 
+  /* ── چرا یک پرچمِ «سوار شد» جدا ──
+     سکشنِ بازار دو فهرست دارد: مارکیِ دسکتاپ (با تکرار برای حلقه) و
+     اسلایدرِ موبایل. تا امروز **هر دو همیشه** در DOM بودند و CSS
+     یکی را پنهان می‌کرد. اندازه‌گیری روی عرضِ ۳۹۰: بیست‌وچهار کارتِ
+     محصول رندر می‌شد که فقط سه‌تایش دیده می‌شود — ۴۷۹ نود از
+     ۱۴۲۹ نودِ کلِ صفحه در همین یک سکشن.
+
+     حالا هر دو در HTMLِ سرور می‌مانند (پس نه محتوا از دست می‌رود نه
+     چیزی دیر می‌آید)، و **پس از سوارشدن** آن که به این عرض نمی‌خورد
+     برداشته می‌شود. جهتش عمداً همین است: اگر یکی را از SSR حذف
+     می‌کردیم، کاربرِ همان عرض تا پایانِ هیدریشن جای خالی می‌دید. */
+  const [mktMounted, setMktMounted] = useState(false);
+
   useEffect(() => {
     const mq = window.matchMedia('(max-width: 768px)');
     setIsMobile(mq.matches);
+    setMktMounted(true);
     const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
     mq.addEventListener('change', handler);
     return () => mq.removeEventListener('change', handler);
@@ -1000,6 +1014,9 @@ export default function HomeClient({ initialPlacements, initialFeatured, service
 
   useEffect(() => {
     if (!spin) return;
+    /* روی موبایل مارکی اصلاً در DOM نیست؛ بدونِ این شرط حلقه‌ی rAF روی
+       یک عنصرِ جداشده تا ابد هر فریم اجرا می‌شد. */
+    if (mktMounted && isMobile) return;
     const el = mktDeskRef.current;
     if (!el) return;
     const SPEED = 50;
@@ -1020,7 +1037,7 @@ export default function HomeClient({ initialPlacements, initialFeatured, service
     };
     mktTickerRef.current = requestAnimationFrame(tick);
     return () => { if (mktTickerRef.current) cancelAnimationFrame(mktTickerRef.current); };
-  }, [spin]);
+  }, [spin, isMobile, mktMounted]);
 
 
   // ── Sellers auto-scroll ──
@@ -2054,23 +2071,29 @@ useEffect(() => {
               </Link>
             </div>
           </SR>
-          <div
-            ref={mktDeskRef}
-            className="mkt-split"
-            style={{ display: 'flex', flexWrap: 'nowrap', gap: '14px', overflowX: 'auto', scrollbarWidth: 'none', padding: '4px 2px 16px', cursor: 'grab', userSelect: 'none' }}
-            onMouseEnter={() => { mktPausedRef.current = true; }}
-            onMouseLeave={() => { mktPausedRef.current = false; }}
-          >
-            {MKT_LOOP.map((p, i) => (
-              <BazaarCard key={`${p.id}-${i}`} p={p} style={{ width: 143, height: 274 }} />
-            ))}
-          </div>
+          {/* هر دو تا پیش از سوارشدن رندر می‌شوند (همان HTMLِ امروز)؛
+              بعد آن که به این عرض نمی‌خورد از DOM می‌رود. */}
+          {(!mktMounted || !isMobile) && (
+            <div
+              ref={mktDeskRef}
+              className="mkt-split"
+              style={{ display: 'flex', flexWrap: 'nowrap', gap: '14px', overflowX: 'auto', scrollbarWidth: 'none', padding: '4px 2px 16px', cursor: 'grab', userSelect: 'none' }}
+              onMouseEnter={() => { mktPausedRef.current = true; }}
+              onMouseLeave={() => { mktPausedRef.current = false; }}
+            >
+              {MKT_LOOP.map((p, i) => (
+                <BazaarCard key={`${p.id}-${i}`} p={p} style={{ width: 143, height: 274 }} />
+              ))}
+            </div>
+          )}
           {/* موبایل — همان BazaarCard (فرمت یکسان با دسکتاپ) */}
-          <div ref={mktSliderRef} className="mkt-mobile-slider">
-            {HOME_PRODUCTS.map((p) => (
-              <BazaarCard key={p.id} p={p} className="mkt-mob-card" style={{ width: '37.8vw', minWidth: 139, scrollSnapAlign: 'center', height: 'clamp(219px,64vw,296px)' }} />
-            ))}
-          </div>
+          {(!mktMounted || isMobile) && (
+            <div ref={mktSliderRef} className="mkt-mobile-slider">
+              {HOME_PRODUCTS.map((p) => (
+                <BazaarCard key={p.id} p={p} className="mkt-mob-card" style={{ width: '37.8vw', minWidth: 139, scrollSnapAlign: 'center', height: 'clamp(219px,64vw,296px)' }} />
+              ))}
+            </div>
+          )}
           {/* ── Ad banners ── */}
           <div className="mkt-banners" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginTop: '4px' }}>
             <MktBanner
