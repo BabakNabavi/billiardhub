@@ -294,9 +294,13 @@ export default function RegisterPage() {
 
   /* ─── Shared header ───────────────────────────────────────────── */
   const Header = () => (
+    /* ناحیه‌ی امنِ iOS داخلِ خودِ padding حساب می‌شود، نه با کلاسِ
+       `safe-top`: این عنصر `padding` اینلاین دارد و استایلِ اینلاین بر
+       کلاس مقدم است، پس کلاس بی‌صدا بی‌اثر می‌ماند. */
     <div style={{
       background: '#fff', borderBottom: '1px solid rgba(0,0,0,0.06)',
       padding: '18px clamp(16px,4vw,48px)',
+      paddingTop: 'calc(18px + env(safe-area-inset-top))',
       position: 'sticky', top: 0, zIndex: 10,
     }}>
       <div style={{ maxWidth: 560, margin: '0 auto', display: 'flex', alignItems: 'center', gap: 8 }}>

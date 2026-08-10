@@ -92,7 +92,7 @@ export function ToastProvider() {
   _setToasts = setToasts;
 
   return (
-    <div style={{ position: 'fixed', bottom: '24px', left: '24px', zIndex: 9999, display: 'flex', flexDirection: 'column', gap: '10px' }}>
+    <div style={{ position: 'fixed', bottom: 'calc(24px + env(safe-area-inset-bottom))', left: '24px', zIndex: 9999, display: 'flex', flexDirection: 'column', gap: '10px' }}>
       {toasts.map(t => (
         <Toast key={t.id} message={t.message} type={t.type}
           onClose={() => setToasts(prev => prev.filter(x => x.id !== t.id))} />

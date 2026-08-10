@@ -185,7 +185,7 @@ export default function AdminBrandsPage() {
 
       {toast && (
         <div style={{
-          position: 'fixed', insetInlineStart: 20, bottom: 20, zIndex: 60,
+          position: 'fixed', insetInlineStart: 20, bottom: `calc(20px + env(safe-area-inset-bottom))`, zIndex: 60,
           background: INK, color: '#fff', borderRadius: 12, padding: '11px 18px',
           fontSize: 13, fontWeight: 700,
         }}>{toast}</div>

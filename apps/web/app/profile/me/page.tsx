@@ -777,7 +777,7 @@ export default function ProfileMePage() {
 
         {/* Toast */}
         {toast && (
-          <div style={{ position: 'fixed', bottom: 32, left: '50%', transform: 'translateX(-50%)', background: toast.type === 'success' ? '#C7A66A' : '#ef4444', color: '#FFFFFF', fontSize: 14, fontWeight: 700, fontFamily: 'Vazirmatn, Tahoma, sans-serif', padding: '10px 24px', borderRadius: 24, zIndex: 100, whiteSpace: 'nowrap', boxShadow: '0 4px 24px rgba(0,0,0,0.4)' }}>
+          <div style={{ position: 'fixed', bottom: `calc(32px + env(safe-area-inset-bottom))`, left: '50%', transform: 'translateX(-50%)', background: toast.type === 'success' ? '#C7A66A' : '#ef4444', color: '#FFFFFF', fontSize: 14, fontWeight: 700, fontFamily: 'Vazirmatn, Tahoma, sans-serif', padding: '10px 24px', borderRadius: 24, zIndex: 100, whiteSpace: 'nowrap', boxShadow: '0 4px 24px rgba(0,0,0,0.4)' }}>
             {toast.type === 'success' ? '✓' : '✕'} {toast.msg}
           </div>
         )}

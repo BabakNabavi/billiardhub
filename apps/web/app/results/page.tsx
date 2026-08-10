@@ -60,7 +60,8 @@ export default function ResultsPage() {
       </div>
 
       {/* Sticky Filter */}
-      <div style={{ position: 'sticky', top: 0, zIndex: 40, background: 'rgba(247,247,245,0.95)', backdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(0,0,0,0.07)' }}>
+      {/* `safe-top` — زیرِ نوارِ وضعیتِ iOS در حالتِ نصب‌شده */}
+      <div className="safe-top" style={{ position: 'sticky', top: 0, zIndex: 40, background: 'rgba(247,247,245,0.95)', backdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(0,0,0,0.07)' }}>
         <div style={{ maxWidth: 680, margin: '0 auto', padding: '10px 16px', display: 'flex', gap: 6, overflowX: 'auto', scrollbarWidth: 'none' }}>
           {DISCIPLINES.map(d => (
             <button key={d} onClick={() => setDisc(d)}

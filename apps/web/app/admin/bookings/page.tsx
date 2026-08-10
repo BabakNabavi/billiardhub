@@ -227,7 +227,7 @@ export default function AdminBookings() {
       )}
 
       <button onClick={() => load()} title="به‌روزرسانی"
-        style={{ position: 'fixed', bottom: 22, insetInlineStart: 22, width: 44, height: 44, borderRadius: '50%', border: `1px solid ${LINE}`, background: '#fff', color: SEC, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 8px 24px rgba(28,27,23,0.10)' }}>
+        style={{ position: 'fixed', bottom: `calc(22px + env(safe-area-inset-bottom))`, insetInlineStart: 22, width: 44, height: 44, borderRadius: '50%', border: `1px solid ${LINE}`, background: '#fff', color: SEC, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 8px 24px rgba(28,27,23,0.10)' }}>
         <RotateCcw size={17} />
       </button>
     </div>

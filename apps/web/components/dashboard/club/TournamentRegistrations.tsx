@@ -447,7 +447,7 @@ export default function TournamentRegistrations({ tournamentId, onChanged }: {
       {/* پیامِ موفقیت */}
       {toast && (
         <div role="status" style={{
-          position: 'fixed', insetInlineStart: '50%', bottom: 22, zIndex: 10000,
+          position: 'fixed', insetInlineStart: '50%', bottom: `calc(22px + env(safe-area-inset-bottom))`, zIndex: 10000,
           transform: 'translateX(50%)', maxWidth: 'min(92vw,420px)',
           display: 'flex', alignItems: 'center', gap: 9,
           padding: '12px 16px', borderRadius: 14,
