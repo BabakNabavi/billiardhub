@@ -41,7 +41,33 @@ export async function GET(req: NextRequest) {
       }
     }
 
-    let q = getSupabaseServer().from('clubs').select('*');
+    /* ── چرا فهرستِ عمومی ستون‌هایش را نام می‌برد ──
+       این‌جا `select('*')` بود و کلِ ردیف برمی‌گشت — از جمله ستونِ
+       `albums`. اندازه‌گیری روی پروداکشن: پاسخ ۶۱۵ کیلوبایت بود و
+       **۵۹۸ کیلوبایتش فقط `albums` یک باشگاه** — چهار عکس که به‌جای
+       نشانیِ Storage به‌صورت base64 داخلِ همان ستون نشسته‌اند.
+
+       این پاسخ در هر بارگذاریِ صفحه‌ی اصلی گرفته می‌شود (هم
+       `HomeClient` هم نوارِ استوری، که با `sharedJson` یکی شده‌اند).
+       روی Fast 3G دانلودش ۱۵ ثانیه طول می‌کشید و کلِ پنجره‌ی بحرانی
+       را اشغال می‌کرد.
+
+       هیچ‌کدام از مصرف‌کننده‌های عمومی `albums` را نمی‌خوانند:
+         · HomeClient  → id, name, city, images, تعدادِ میزها, hasActiveStory
+         · Stories     → id, name, logo, hasActiveStory
+       مسیرِ ادمین (`?all=true`) دست‌نخورده `*` می‌گیرد، چون پنل به
+       همه‌ی ستون‌ها نیاز دارد.
+
+       ستونِ تازه‌ای که کارت لازم داشته باشد باید همین‌جا اضافه شود —
+       نبودنش یعنی `undefined`، نه خطا. */
+    const PUBLIC_COLUMNS = [
+      'id', 'slug', 'name', 'city', 'province', 'address', 'logo', 'images',
+      'snookerTables', 'pocketTables', 'highballTables', 'vipSnookerTables', 'vipPocketTables',
+      'playstations', 'hasCafe', 'hasParking', 'hasWifi', 'hasProfessionalCoach',
+      'verificationStatus', 'storyExpiresAt', 'hasActiveStory', 'isActive', 'createdAt',
+    ].join(',');
+
+    let q = getSupabaseServer().from('clubs').select(isAdminReq ? '*' : PUBLIC_COLUMNS);
 
     if (!isAdminReq) {
       /* دیده‌شدن عمومی = هم منتشرشده، هم تأییدشده.
@@ -101,7 +127,11 @@ export async function GET(req: NextRequest) {
        پایین بیاورد و ۲۴ ساعت بعد رینگی نشان داده می‌شد که پشتش چیزی
        نیست. مقایسه با «حالا» هیچ‌وقت کهنه نمی‌شود. */
     const now = Date.now();
-    const withBadge = (clubs ?? []).map((c: Record<string, unknown>) => ({
+    /* فهرستِ ستون‌ها در زمانِ اجرا انتخاب می‌شود (عمومی در برابر ادمین)،
+       پس PostgREST نمی‌تواند شکلِ ردیف را استنتاج کند. ردیف‌ها این‌جا
+       همان چیزی‌اند که بالا انتخاب شده. */
+    const rows = (clubs ?? []) as unknown as Record<string, unknown>[];
+    const withBadge = rows.map((c: Record<string, unknown>) => ({
       ...c,
       isVerified: c.verificationStatus === 'verified',
       hasActiveStory: !!c.storyExpiresAt && new Date(String(c.storyExpiresAt)).getTime() > now,
