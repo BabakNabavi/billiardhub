@@ -83,6 +83,14 @@ rm -f /tmp/bh-deploy.tgz
 echo "── نصب و بیلد (چند دقیقه) ──"
 ssh -i "$KEY" -o ServerAliveInterval=15 "$SRV" 'bash -s' <<'REMOTE'
 set -e
+# ── چرا pipefail ──
+# خطِ build از یک لوله به `tail -3` می‌گذرد، و بدونِ این گزینه خروجیِ
+# لوله همان خروجیِ `tail` است — یعنی همیشه صفر. `set -e` بیلدِ شکسته
+# را نمی‌دید و اجرا ادامه پیدا می‌کرد: `.next` سالم به `.next-old`
+# می‌رفت، `mv .next-build .next` شکست می‌خورد و سرور **بدونِ** پوشه‌ی
+# `.next` می‌ماند. یعنی یک بیلدِ ناموفق، سایتِ زنده را از کار
+# می‌انداخت — دقیقاً برعکسِ کاری که این ساختار برای انجامش هست.
+set -o pipefail
 cd /opt/billiardhub
 cp apps/web/.env.local /tmp/.env.keep          # env سرور نباید گم شود
 tar -xzf /tmp/bh-deploy.tgz && rm /tmp/bh-deploy.tgz
@@ -106,7 +114,19 @@ date +%Y%m%d-%H%M%S > .build-sha
 
 rm -rf .next-build .next-old
 NEXT_DIST_DIR=.next-build npm run build 2>&1 | tail -3
-[ -d .next ] && mv .next .next-old
+
+# ── هیچ‌چیز پیش از داشتنِ خروجیِ سالم جابه‌جا نمی‌شود ──
+# با pipefail بالا، بیلدِ شکسته همین‌جا اجرا را تمام می‌کند و `.next`
+# دست‌نخورده می‌ماند. این بررسی برای حالتِ نادرتر است: بیلدی که با
+# کدِ صفر تمام شود ولی پوشه‌ای نساخته باشد.
+if [ ! -d .next-build ]; then
+  echo "✗ بیلد خروجی نساخت — .next دست‌نخورده ماند و سرویس ری‌استارت نشد"
+  exit 1
+fi
+
+# `if` به‌جای `[ … ] && …`: آن شکل وقتی `.next` وجود نداشت (دیپلویِ
+# نخست) کلِ لیست را ناموفق می‌کرد و `set -e` همان‌جا خارج می‌شد.
+if [ -d .next ]; then mv .next .next-old; fi
 mv .next-build .next
 systemctl restart billiardhub
 rm -rf .next-old
