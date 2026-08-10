@@ -27,8 +27,8 @@ export interface ShopProduct {
   sales: number
   sellerId: string      // → /sellers/{sellerId}
   sellerName: string
-  sellerPhone: string
-  sellerWhatsapp: string
+  /* تماس عمداً این‌جا نیست: هیچ کارتی نمایشش نمی‌دهد و /api/products
+     هم دیگر نمی‌فرستدش. صفحه‌ی تکِ آگهی از /api/market/ads/[id] می‌گیرد. */
   city: string
   condition: string
   /* آگهیِ توافقی — بدونِ این، کارتِ فروشگاه صفرِ دیتابیس را چاپ می‌کرد */
@@ -86,8 +86,6 @@ export function toShopProduct(r: Record<string, unknown>): ShopProduct {
        مقایسه می‌کرد و صفحه‌ی هر فروشگاهی بدونِ محصول می‌ماند. */
     sellerId: s(r.storeSlug),
     sellerName: s(r.sellerName),
-    sellerPhone: s(r.sellerPhone),
-    sellerWhatsapp: s(r.sellerWhatsapp),
     city: s(r.city),
     condition: s(r.condition, 'new'),
     negotiable: r.negotiable === true,
