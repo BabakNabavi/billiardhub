@@ -356,7 +356,7 @@ function ClubCard({ club, h = '360px', featured = false }: { club: RealClub; h?:
 
   return (
     <div style={{ position: 'relative' }}>
-      <Link href={`/clubs/${club.id}`} style={{ textDecoration: 'none', display: 'block' }}>
+      <Link prefetch={false} href={`/clubs/${club.id}`} style={{ textDecoration: 'none', display: 'block' }}>
         <div
           className="club-card-x"
           onMouseEnter={() => setHov(true)}
@@ -564,7 +564,7 @@ const BAZAAR_CSS = `
 
 function BazaarCard({ p, className, style }: { p: RealProduct; className?: string; style?: React.CSSProperties }) {
   return (
-    <Link href={`/shop/${p.id}`} className={`prod-hover bz-card${className ? ` ${className}` : ''}`} style={style}>
+    <Link prefetch={false} href={`/shop/${p.id}`} className={`prod-hover bz-card${className ? ` ${className}` : ''}`} style={style}>
       <div className="bz-img">
         <img loading="lazy" decoding="async" src={p.img} alt={p.name}
           onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
@@ -681,7 +681,7 @@ function MktBanner({ slides, label, body, cta, accent, href, initialIdx = 0, lqC
   }, [ready, slides.length]);
   const isDark = accent === GOLD;
   return (
-    <Link href={href} style={{ textDecoration: 'none', display: 'block', position: 'relative', borderRadius: '14px', overflow: 'hidden', height: 'clamp(120px,11vw,160px)', cursor: 'pointer' }}>
+    <Link prefetch={false} href={href} style={{ textDecoration: 'none', display: 'block', position: 'relative', borderRadius: '14px', overflow: 'hidden', height: 'clamp(120px,11vw,160px)', cursor: 'pointer' }}>
       {slides.map((img, i) => (
         <img loading="lazy" decoding="async" key={i} src={img} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: i === idx ? 1 : 0, transition: 'opacity 0.85s ease' }} onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
       ))}
@@ -1881,7 +1881,7 @@ useEffect(() => {
                   const isDup  = i >= FEATURE_CARDS.length;
                   const active = i % FEATURE_CARDS.length === activeCard;
                   return (
-                    <Link key={i} href={card.href} className={`feat-card${isDup ? ' feat-dup' : ''}`} style={{ textDecoration: 'none', flexShrink: 0, display: 'flex', scrollSnapAlign: 'center' }}>
+                    <Link prefetch={false} key={i} href={card.href} className={`feat-card${isDup ? ' feat-dup' : ''}`} style={{ textDecoration: 'none', flexShrink: 0, display: 'flex', scrollSnapAlign: 'center' }}>
                       <div style={{
                         width: '118px', padding: '18px 10px 16px',
                         background: `linear-gradient(180deg, rgba(${card.rgb},0.11) 0%, rgba(10,9,14,0.34) 40%, rgba(10,9,14,0.42) 100%)`,
@@ -1998,7 +1998,7 @@ useEffect(() => {
                 <h2 className="sec-title" style={{ color: TEXT, fontSize: 'clamp(20px,2.84vw,37px)' }}>باشگاه‌های پیشنهادی</h2>
                 <div className="sec-rule" style={{ color: GRN }} />
               </div>
-              <Link href="/clubs" className="see-all-lq">
+              <Link prefetch={false} href="/clubs" className="see-all-lq">
                 مشاهده همه <ArrowLeft size={12} />
               </Link>
             </div>
@@ -2049,7 +2049,7 @@ useEffect(() => {
                 <h2 className="sec-title" style={{ color: TEXT, fontSize: 'clamp(20px,2.84vw,37px)' }}>بیلیارد بازار</h2>
                 <div className="sec-rule" style={{ color: BRN }} />
               </div>
-              <Link href="/shop" className="see-all-lq">
+              <Link prefetch={false} href="/shop" className="see-all-lq">
                 مشاهده همه <ArrowLeft size={12} />
               </Link>
             </div>
@@ -2137,7 +2137,7 @@ useEffect(() => {
                 <h2 className="sec-title" style={{ color: TEXT, fontSize: 'clamp(20px,2.84vw,37px)' }}>فروشندگان تجهیزات</h2>
                 <div className="sec-rule" style={{ color: GOLD }} />
               </div>
-              <Link href="/sellers" className="see-all-lq">
+              <Link prefetch={false} href="/sellers" className="see-all-lq">
                 مشاهده همه <ArrowLeft size={12} />
               </Link>
             </div>
@@ -2163,7 +2163,7 @@ useEffect(() => {
                   onMouseLeave={() => { sellersPaused.current = false; }}
                 >
                   {SELLERS_LOOP.map((s, i) => (
-                    <Link key={`${s.id}-${i}`} href={`/sellers/${s.id}`} style={{ width: '220px', flexShrink: 0, textDecoration: 'none', display: 'block' }}>
+                    <Link prefetch={false} key={`${s.id}-${i}`} href={`/sellers/${s.id}`} style={{ width: '220px', flexShrink: 0, textDecoration: 'none', display: 'block' }}>
                       <SellerCard s={s} />
                     </Link>
                   ))}
@@ -2172,7 +2172,7 @@ useEffect(() => {
                 {/* Mobile slider */}
                 <div className="sellers-mob">
                   {HOME_SELLERS.map((s) => (
-                    <Link key={s.id} href={`/sellers/${s.id}`} style={{ width: '53vw', minWidth: '176px', flexShrink: 0, scrollSnapAlign: 'center', textDecoration: 'none', display: 'block' }}>
+                    <Link prefetch={false} key={s.id} href={`/sellers/${s.id}`} style={{ width: '53vw', minWidth: '176px', flexShrink: 0, scrollSnapAlign: 'center', textDecoration: 'none', display: 'block' }}>
                       <SellerCard s={s} />
                     </Link>
                   ))}

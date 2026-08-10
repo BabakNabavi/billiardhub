@@ -241,7 +241,7 @@ export default function Footer() {
                 /* `ft-only-desk` در موبایل مخفی می‌شود — با CSS و نه با
                    شرط جاوااسکریپتی، تا فوتر Server Component بماند و
                    هیچ JSای همراهش نرود. */
-                <Link key={item.href} href={item.href}
+                <Link prefetch={false} key={item.href} href={item.href}
                   className={`ft-link${(item as { mobile?: boolean }).mobile === false ? ' ft-only-desk' : ''}`}>
                   <ChevronLeft size={10} />
                   {item.label}
@@ -326,7 +326,7 @@ export default function Footer() {
               { label: 'قوانین و مقررات', href: '/terms' },
               { label: 'حریم خصوصی', href: '/privacy' },
             ].map(item => (
-              <Link key={item.href} href={item.href} className="ft-legal">
+              <Link prefetch={false} key={item.href} href={item.href} className="ft-legal">
                 {item.label}
               </Link>
             ))}

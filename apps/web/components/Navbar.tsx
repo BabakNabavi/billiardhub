@@ -159,6 +159,16 @@ export default function Navbar() {
   const exploreRef   = useRef<HTMLDivElement>(null);
   const searchRef    = useRef<HTMLDivElement>(null);
   const searchBtnRef = useRef<HTMLButtonElement>(null);
+  /* ── چرا `prefetch={false}` روی لینک‌های این نوار ──
+     Next هر لینکی را که وارد ویوپورت شود پیش‌واکشی می‌کند. نوار و
+     فوتر در هر صفحه‌اند، پس همان اولِ بارگذاری ده‌ها درخواستِ `_rsc`
+     می‌رفت. اندازه‌گیری روی صفحه‌ی اصلی با Fast 3G: **۶۲ درخواست**
+     که آخری در ۲۰٫۵ ثانیه تمام می‌شد — درست در همان پنجره‌ای که
+     مرورگر باید متن و تصویر و ویدیو را می‌کشید.
+
+     `false` پیش‌واکشیِ ویوپورت را می‌بندد ولی پیش‌واکشیِ روی هاور سرِ
+     جایش می‌ماند؛ یعنی وقتی کاربر قصدِ رفتن نشان می‌دهد باز هم آماده
+     است، بدونِ اینکه در ثانیه‌ی اولِ بارگذاری هزینه بدهد. */
   const isHomePage   = pathname === '/';
   const isShopPage   = pathname.startsWith('/shop');
 
@@ -333,7 +343,7 @@ export default function Navbar() {
         <div className="nav-inner" style={{ maxWidth: '1440px', margin: '0 auto', padding: '0 clamp(16px,3vw,32px)', height: '72px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
 
           {/* Logo */}
-          <Link href="/" onClick={e => { if (pathname === '/') { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); } }} style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none', flexShrink: 0 }}>
+          <Link prefetch={false} href="/" onClick={e => { if (pathname === '/') { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); } }} style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none', flexShrink: 0 }}>
             {/* سایه‌ی خیلی نرم + بول ظریف (هایلایت بالا، تیرگی پایین) */}
             <div style={{ position: 'relative', width: '40px', height: '40px', borderRadius: '12px', overflow: 'hidden', flexShrink: 0,
               boxShadow: '0 1px 2px rgba(28,27,23,0.12), 0 4px 9px rgba(184,147,58,0.13)' }}>
@@ -349,10 +359,10 @@ export default function Navbar() {
 
           {/* Desktop links */}
           <div className="desk" style={{ alignItems: 'center', gap: '24px', marginRight: '12px', flexShrink: 0 }}>
-            <Link href="/clubs"   className={`nav-a ${pathname === '/clubs'   ? 'active' : ''}`}>باشگاه‌ها</Link>
-            <Link href="/shop"    className={`nav-a ${pathname === '/shop'    ? 'active' : ''}`}>بیلیارد بازار</Link>
-            <Link href="/players"     className={`nav-a ${pathname === '/players'     ? 'active' : ''}`}>بازیکنان</Link>
-            <Link href="/tournaments" className={`nav-a ${pathname.startsWith('/tournaments') ? 'active' : ''}`}>مسابقات</Link>
+            <Link prefetch={false} href="/clubs"   className={`nav-a ${pathname === '/clubs'   ? 'active' : ''}`}>باشگاه‌ها</Link>
+            <Link prefetch={false} href="/shop"    className={`nav-a ${pathname === '/shop'    ? 'active' : ''}`}>بیلیارد بازار</Link>
+            <Link prefetch={false} href="/players"     className={`nav-a ${pathname === '/players'     ? 'active' : ''}`}>بازیکنان</Link>
+            <Link prefetch={false} href="/tournaments" className={`nav-a ${pathname.startsWith('/tournaments') ? 'active' : ''}`}>مسابقات</Link>
 
             <div ref={exploreRef} style={{ position: 'relative' }}>
               <button className="exp-btn" onClick={() => setExploreOpen(p => !p)}>
@@ -399,7 +409,7 @@ export default function Navbar() {
                             <span style={{ fontSize: '10px', color: `${colColor}BB`, letterSpacing: '0.18em', fontWeight: 700, textTransform: 'uppercase' }}>{section.title}</span>
                           </div>
                           {section.items.map((item, ii) => (
-                            <Link key={ii} href={item.href} onClick={() => setExploreOpen(false)}
+                            <Link prefetch={false} key={ii} href={item.href} onClick={() => setExploreOpen(false)}
                               style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 10px', borderRadius: '12px', textDecoration: 'none', marginBottom: '2px', border: '1px solid transparent', transition: 'background 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease' }}
                               onMouseEnter={e => {
                                 const el = e.currentTarget as HTMLElement;
@@ -433,7 +443,7 @@ export default function Navbar() {
                       <div style={{ fontSize: '12px', fontWeight: 700, color: 'rgba(28,28,26,0.7)' }}>اولین پلتفرم تخصصی بیلیارد ایران</div>
                       <div style={{ fontSize: '11px', color: 'rgba(28,28,26,0.36)', marginTop: '2px' }}>اتصال بی واسطه و خانه‌ی دیجیتال جامعه‌ی بیلیارد کشور</div>
                     </div>
-                    <Link href="/register" onClick={() => setExploreOpen(false)} style={{ fontSize: '13px', color: '#9A6E38', fontWeight: 700, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '5px', background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.34)', borderRadius: '10px', padding: '7px 16px', whiteSpace: 'nowrap', transition: 'transform .25s cubic-bezier(.22,1,.36,1), background .2s' }}
+                    <Link prefetch={false} href="/register" onClick={() => setExploreOpen(false)} style={{ fontSize: '13px', color: '#9A6E38', fontWeight: 700, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '5px', background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.34)', borderRadius: '10px', padding: '7px 16px', whiteSpace: 'nowrap', transition: 'transform .25s cubic-bezier(.22,1,.36,1), background .2s' }}
                       onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.background = 'rgba(199,166,106,0.18)'; }}
                       onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.background = 'rgba(199,166,106,0.12)'; }}>
                       ثبت‌نام رایگان <ArrowLeft size={10} />
@@ -481,13 +491,13 @@ export default function Navbar() {
                   <div style={{ position: 'absolute', top: 'calc(100% + 10px)', left: 0, width: '320px', maxWidth: '92vw', background: 'rgba(252,251,249,0.98)', border: '1px solid rgba(28,28,26,0.08)', borderRadius: '18px', boxShadow: '0 24px 60px rgba(28,28,26,0.16)', backdropFilter: 'blur(30px)', zIndex: 320, overflow: 'hidden', animation: 'fadeDown 0.2s ease both' }}>
                     <div style={{ padding: '14px 18px 10px', borderBottom: '1px solid rgba(28,28,26,0.06)', display: 'flex', alignItems: 'center', gap: 8 }}>
                       <span style={{ fontSize: 14, fontWeight: 900, color: TEXT }}>اعلان‌ها</span>
-                      <Link href="/direct" onClick={() => setNotifOpen(false)} style={{ marginInlineStart: 'auto', fontSize: 11.5, fontWeight: 700, color: '#9A6E38', textDecoration: 'none' }}>دایرکت</Link>
+                      <Link prefetch={false} href="/direct" onClick={() => setNotifOpen(false)} style={{ marginInlineStart: 'auto', fontSize: 11.5, fontWeight: 700, color: '#9A6E38', textDecoration: 'none' }}>دایرکت</Link>
                     </div>
                     <div style={{ maxHeight: '340px', overflowY: 'auto' }}>
                       {notifs.length === 0 ? (
                         <div style={{ padding: '30px 18px', textAlign: 'center', fontSize: 12.5, color: 'rgba(28,28,26,0.4)' }}>اعلانی نیست</div>
                       ) : notifs.slice(0, 20).map(n => (
-                        <Link key={n.id} href="/direct" onClick={() => setNotifOpen(false)}
+                        <Link prefetch={false} key={n.id} href="/direct" onClick={() => setNotifOpen(false)}
                           style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: '11px 16px', textDecoration: 'none', color: 'inherit', borderBottom: '1px solid rgba(28,28,26,0.04)', background: n.read ? 'transparent' : 'rgba(199,166,106,0.06)' }}>
                           <span style={{ width: 30, height: 30, borderRadius: '50%', flexShrink: 0, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 900, color: '#241B08', background: 'linear-gradient(135deg,#E8CE96,#8A6020)' }}>{n.fromName.charAt(0)}</span>
                           <span style={{ minWidth: 0, flex: 1 }}>
@@ -503,7 +513,7 @@ export default function Navbar() {
 
             {/* دایرکت استوری — همه‌ی کاربران لاگین، با بج نخوانده */}
             {user && interactionsOn && (
-              <Link href="/direct" aria-label="دایرکت" className="nav-ico"
+              <Link prefetch={false} href="/direct" aria-label="دایرکت" className="nav-ico"
                 style={{ position: 'relative', width: '44px', height: '44px', display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none', borderRadius: '12px', color: TEXT_MUT, flexShrink: 0, transition: 'color 0.2s' }}
                 onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = GOLD }}
                 onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = TEXT_MUT }}>
@@ -517,7 +527,7 @@ export default function Navbar() {
             )}
 
             {!user ? (
-              <Link href="/login">
+              <Link prefetch={false} href="/login">
                 <button className="nav-login-btn" style={{ display: 'flex', alignItems: 'center', gap: '6px', background: GOLD_LIGHT, border: `1px solid ${GOLD_BORDER}`, borderRadius: '12px', padding: '9px 16px', color: GOLD, fontSize: '14px', fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap', fontFamily: 'inherit', transition: 'all 0.3s', backdropFilter: 'blur(12px)', height: '40px' }}
                   onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(184,147,58,0.15)' }}
                   onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = GOLD_LIGHT }}>
@@ -586,7 +596,7 @@ export default function Navbar() {
                         { href: '/support', label: 'تیکت‌های من', icon: <LifeBuoy size={13} /> },
                       ];
                     })().map((item, i) => (
-                      <Link key={i} href={item.href} onClick={() => setProfileOpen(false)}
+                      <Link prefetch={false} key={i} href={item.href} onClick={() => setProfileOpen(false)}
                         style={{ display: 'flex', alignItems: 'center', gap: '9px', padding: '9px 12px', borderRadius: '10px', fontSize: '15px', color: 'rgba(28,28,26,0.55)', fontWeight: 500, textDecoration: 'none', transition: 'all 0.2s' }}
                         onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(28,28,26,0.05)'; (e.currentTarget as HTMLElement).style.color = '#1C1C1A' }}
                         onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent'; (e.currentTarget as HTMLElement).style.color = 'rgba(28,28,26,0.55)' }}>
@@ -685,7 +695,7 @@ export default function Navbar() {
           {/* User section */}
           <div style={{ padding: '16px 20px' }}>
             {!user ? (
-              <Link href="/login" onClick={() => setMobileOpen(false)}
+              <Link prefetch={false} href="/login" onClick={() => setMobileOpen(false)}
                 style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', padding: '15px', borderRadius: '16px', background: 'linear-gradient(135deg,rgba(184,147,58,0.15),rgba(184,147,58,0.06))', border: `1px solid ${GOLD}`, color: GOLD, fontSize: '17px', fontWeight: 800, textDecoration: 'none' }}>
                 <User size={17} /> ورود | ثبت‌نام رایگان
               </Link>
@@ -710,7 +720,7 @@ export default function Navbar() {
           <div style={{ padding: '0 16px 8px' }}>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '8px' }}>
               {mobileLinks.map((item, i) => (
-                <Link key={i} href={item.href} onClick={() => setMobileOpen(false)}
+                <Link prefetch={false} key={i} href={item.href} onClick={() => setMobileOpen(false)}
                   style={{
                     display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '7px',
                     padding: '12px 5px', borderRadius: '14px',
@@ -750,7 +760,7 @@ export default function Navbar() {
               <div style={{ fontSize: '12px', fontWeight: 700, color: 'rgba(28,28,26,0.78)' }}>اولین پلتفرم تخصصی بیلیارد ایران</div>
               <div style={{ fontSize: '11px', color: 'rgba(28,28,26,0.42)', marginTop: '2px' }}>خانه‌ی دیجیتال جامعه‌ی بیلیارد کشور</div>
             </div>
-            <Link href="/register" onClick={() => setMobileOpen(false)} style={{ fontSize: '13px', color: '#1a1a1a', fontWeight: 700, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '4px', background: GOLD, borderRadius: '20px', padding: '8px 16px', whiteSpace: 'nowrap' }}>
+            <Link prefetch={false} href="/register" onClick={() => setMobileOpen(false)} style={{ fontSize: '13px', color: '#1a1a1a', fontWeight: 700, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '4px', background: GOLD, borderRadius: '20px', padding: '8px 16px', whiteSpace: 'nowrap' }}>
               ثبت‌نام <ArrowLeft size={10} />
             </Link>
           </div>
