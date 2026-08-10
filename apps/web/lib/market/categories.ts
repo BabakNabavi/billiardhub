@@ -35,22 +35,22 @@ export interface MarketCategory {
 }
 
 export const MARKET_CATEGORIES: MarketCategory[] = [
-  { id: 'cue',       label: 'چوب',      img: '/images/icon/cue/cue-icon-256.png' },
-  { id: 'table',     label: 'میز',      img: '/images/icon/table/wiraka.png' },
-  { id: 'ball',      label: 'توپ',      img: '/images/icon/ball/ballset-icon-256.png' },
-  { id: 'tip',       label: 'تیپ',      img: '/images/icon/tip/tip-icon-256.png' },
-  { id: 'chalk',     label: 'گچ',       img: '/images/icon/chalk/chalk-icon-256.png' },
-  { id: 'extension', label: 'اکستنشن',  img: '/images/icon/ex/shaft-icon-256.png' },
-  { id: 'cue-case',  label: 'کیس چوب',  img: '/images/icon/case/case-icon-256.png' },
-  { id: 'ball-bag',  label: 'کیف توپ',  img: '/images/icon/kif/ballcase-icon-256.png' },
-  { id: 'rest',      label: 'رست',      img: '/images/icon/rest/rest.png' },
-  { id: 'cloth',     label: 'پارچه',    img: '/images/icon/parche/parche.png' },
+  { id: 'cue',       label: 'چوب',      img: '/images/icon/cue/cue-icon-256-144.webp' },
+  { id: 'table',     label: 'میز',      img: '/images/icon/table/wiraka-144.webp' },
+  { id: 'ball',      label: 'توپ',      img: '/images/icon/ball/ballset-icon-256-144.webp' },
+  { id: 'tip',       label: 'تیپ',      img: '/images/icon/tip/tip-icon-256-144.webp' },
+  { id: 'chalk',     label: 'گچ',       img: '/images/icon/chalk/chalk-icon-256-144.webp' },
+  { id: 'extension', label: 'اکستنشن',  img: '/images/icon/ex/shaft-icon-256-144.webp' },
+  { id: 'cue-case',  label: 'کیس چوب',  img: '/images/icon/case/case-icon-256-144.webp' },
+  { id: 'ball-bag',  label: 'کیف توپ',  img: '/images/icon/kif/ballcase-icon-256-144.webp' },
+  { id: 'rest',      label: 'رست',      img: '/images/icon/rest/rest-144.webp' },
+  { id: 'cloth',     label: 'پارچه',    img: '/images/icon/parche/parche-144.webp' },
   /* تصویر روغن در فایلش چپ‌نشین است — کمی به راست هل داده می‌شود */
-  { id: 'oil',       label: 'روغن',     img: '/images/icon/oil/oil.png', imgStyle: { transform: 'translateX(9%)' } },
-  { id: 'towel',     label: 'حوله',     img: '/images/icon/hole/hole.png' },
-  { id: 'clothing',  label: 'پوشاک',    img: '/images/icon/pooshak/pooshak.png' },
-  { id: 'accessory', label: 'اکسسوری',  img: '/images/icon/accessori/accessori.png' },
-  { id: 'other',     label: 'سایر',     img: '/images/icon/other/other.png' },
+  { id: 'oil',       label: 'روغن',     img: '/images/icon/oil/oil-144.webp', imgStyle: { transform: 'translateX(9%)' } },
+  { id: 'towel',     label: 'حوله',     img: '/images/icon/hole/hole-144.webp' },
+  { id: 'clothing',  label: 'پوشاک',    img: '/images/icon/pooshak/pooshak-144.webp' },
+  { id: 'accessory', label: 'اکسسوری',  img: '/images/icon/accessori/accessori-144.webp' },
+  { id: 'other',     label: 'سایر',     img: '/images/icon/other/other-144.webp' },
 ]
 
 export const CATEGORY_IDS = new Set(MARKET_CATEGORIES.map(c => c.id))

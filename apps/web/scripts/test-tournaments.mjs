@@ -2030,6 +2030,28 @@ console.log('\n― مرزِ سرور و کلاینت ―');
    نمی‌فرستد. یعنی فایلی بود که شبیهِ یک کنترلِ امنیتی خوانده می‌شد ولی
    نبود — و همین خطرناک‌تر است، چون خواننده فکر می‌کند سیاستی برقرار
    است. همه‌ی ترافیکِ واقعی same-origin است. */
+/* ── آیکون‌های دسته‌بندی ──
+   پانزده آیکون به‌صورت PNG در ۲۵۶ تا ۵۱۲ پیکسل سرو می‌شدند، مجموعاً
+   ۱۰۰۷ کیلوبایت — برای جایی که بیشترین اندازه‌ی نمایششان ۴۵ پیکسل
+   است. روی Fast 3G آخرین آیکون در ۸٫۶ ثانیه می‌رسید و کاربر می‌دید
+   که یکی‌یکی ظاهر می‌شوند. */
+console.log('\n― آیکون‌های دسته‌بندی ―');
+{
+  const cats = read('lib/market/categories.ts');
+  const paths = [...cats.matchAll(/img: '(\/images\/icon\/[^']+)'/g)].map(m => m[1]);
+  t('هر پانزده دسته آیکون دارد', paths.length === 15, `${paths.length} پیدا شد`);
+  t('هیچ آیکونی PNG نیست',
+    paths.every(p => p.endsWith('.webp')),
+    paths.filter(p => !p.endsWith('.webp')).join(', '));
+  const missing = paths.filter(p => !existsSync(join(ROOT, 'public', p)));
+  t('فایلِ هر آیکون واقعاً هست', missing.length === 0, missing.join(', '));
+  const { statSync } = await import('node:fs');
+  const total = paths.reduce((s, p) => s + (existsSync(join(ROOT, 'public', p)) ? statSync(join(ROOT, 'public', p)).size : 0), 0);
+  t('مجموعِ آیکون‌ها زیر ۲۰۰ کیلوبایت است',
+    total < 200 * 1024,
+    `${Math.round(total / 1024)}KB`);
+}
+
 console.log('\n― CORS ―');
 {
   t('فایلِ مرده‌ی CORS حذف شد',
