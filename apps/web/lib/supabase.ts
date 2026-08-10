@@ -1,12 +1,18 @@
-import { createClient } from '@supabase/supabase-js';
 import { SUPABASE_URL_RAW } from './supabase-url';
 
-/* نشانی از منبعِ واحد می‌آید؛ پیش‌تر این‌جا `!` بود که فقط تایپ‌چک را
-   ساکت می‌کرد و در نبودِ مقدار خطای مبهمِ createClient می‌داد. */
-const supabaseUrl = SUPABASE_URL_RAW;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? '';
+/* ── چرا کلاینتِ سوپابیس این‌جا ساخته نمی‌شود ──
+   این ماژول `uploadFile` را می‌دهد و ده کامپوننت واردش می‌کنند —
+   از جمله `Stories` که داخلِ `Navbar` است، یعنی **هر صفحه‌ی سایت**.
+   با `import` ایستا، کلِ `@supabase/supabase-js` (۲۰۱ کیلوبایتِ خام)
+   در باندلِ هر صفحه می‌نشست و روی موبایل باید پارس و کامپایل می‌شد.
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+   ولی خودِ کلاینت فقط در یک حالت لازم است: فایلِ بزرگ‌تر از سه
+   مگابایت که از مسیرِ آپلودِ مستقیم می‌رود. مسیرِ معمول — که تقریباً
+   همه‌ی آپلودهاست — فقط `fetch` به `/api/upload` است.
+
+   پس کتابخانه با `import()` پویا و فقط در همان لحظه بارگذاری
+   می‌شود. خروجیِ `supabase` هم که هیچ‌جا وارد نمی‌شد، برداشته شد. */
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? '';
 
 /* آپلود فایل — از مسیر سرور، نه مستقیم به Storage.
 
@@ -43,7 +49,11 @@ async function uploadDirect(file: File, path: string): Promise<string | null> {
     return null;
   }
 
-  const { error } = await supabase.storage
+  /* کتابخانه فقط همین‌جا لازم است — بیرونِ باندلِ صفحه می‌ماند */
+  const { createClient } = await import('@supabase/supabase-js');
+  const sb = createClient(SUPABASE_URL_RAW, supabaseAnonKey);
+
+  const { error } = await sb.storage
     .from(String(sign.bucket))
     .uploadToSignedUrl(String(sign.path), String(sign.token), file);
   if (error) {
