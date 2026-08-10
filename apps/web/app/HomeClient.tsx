@@ -43,7 +43,7 @@ import { useDeferredStart } from '../lib/useDeferredStart';
 import { modernizeType } from '../lib/market/title';
 import ProductTitle from '../components/market/ProductTitle';
 import { CardMeta, CardPrice } from '../components/market/CardFacts';
-import { thumbUrl } from '../lib/supabase-config';
+import { thumbUrl } from '../lib/media/thumb';
 
 /* ── عرضِ واقعیِ کادرها ──
    عددها از اندازه‌ی نمایشِ همین کارت‌ها می‌آیند و دو برابر شده‌اند

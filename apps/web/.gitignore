@@ -27,6 +27,9 @@ yarn-error.log*
 
 # env files (can opt-in for commiting if needed)
 .env*
+# نمونه‌ی بدونِ مقدار عمداً کامیت می‌شود: با حذفِ نشانیِ پیش‌فرضِ
+# هاردکد، کلونِ تازه بدونِ این راهنما اصلاً بالا نمی‌آید.
+!.env.example
 
 # vercel
 .vercel

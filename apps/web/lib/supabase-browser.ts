@@ -1,11 +1,12 @@
 'use client'
 import { createClient, SupabaseClient } from '@supabase/supabase-js'
+import { SUPABASE_URL_RAW } from './supabase-url'
 
 /* کلاینت سمت‌مرورگر با anon key — فقط برای Realtime (اشتراک کانال دایرکت). */
 let _c: SupabaseClient | null = null
 export function getSupabaseBrowser(): SupabaseClient | null {
   if (_c) return _c
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const url = SUPABASE_URL_RAW
   const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
   if (!url || !anon) return null
   _c = createClient(url, anon, {

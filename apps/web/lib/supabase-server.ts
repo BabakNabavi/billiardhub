@@ -10,7 +10,7 @@ export function getSupabaseServer(): SupabaseClient {
   if (!key) {
     throw new Error(
       'Missing environment variable: SUPABASE_SERVICE_ROLE_KEY. ' +
-        'Add it to .env.local (local) and Vercel Environment Variables (production).',
+        'آن را در apps/web/.env.local بگذارید — در توسعه روی همین دستگاه، و در پروداکشن روی سرور (/opt/billiardhub/apps/web/.env.local). deploy.sh این فایل را دست نمی‌زند.',
     );
   }
 

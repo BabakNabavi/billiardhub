@@ -1932,5 +1932,113 @@ t('تک‌عکسِ استوریِ پروفایل هم به نوار می‌رس�
   /s\.storyImage/.test(storiesBar),
   'فرمِ ثبتِ فروشگاه یک «عکس استوری» می‌گیرد که هیچ‌جا دیده نمی‌شد');
 
+/* ── پیکربندیِ Supabase نباید به مرورگر برسد ──
+   `lib/supabase-config.ts` هنگام بارگذاری متغیرِ محیطی را می‌سنجد و
+   اگر نبود (یا نشانیِ ابری بود) خطا می‌دهد. اگر یک کامپوننتِ
+   `'use client'` — مستقیم یا با چند واسطه — واردش کند، آن خطا داخلِ
+   باندلِ مرورگر می‌نشیند و یک بیلدِ بدونِ متغیر، به‌جای خطای سرور،
+   صفحه‌ی سفید به بازدیدکننده می‌دهد.
+
+   یک بار همین اتفاق افتاد: `HomeClient` برای `thumbUrl` واردش می‌کرد.
+   `thumbUrl` به `lib/media/thumb.ts` منتقل شد چون اصلاً به آن متغیر
+   کاری ندارد. این تست جلوی برگشتش را می‌گیرد.
+
+   (به‌جای بسته‌ی `server-only` — که یک dependency تازه بود — همین
+   بازرسیِ ایستا این مرز را نگه می‌دارد.) */
+console.log('\n― مرزِ سرور و کلاینت ―');
+{
+  const { readdirSync, statSync } = await import('node:fs');
+  const { relative, resolve, extname } = await import('node:path');
+
+  const files = [];
+  const walk = d => {
+    for (const name of readdirSync(d)) {
+      if (name === 'node_modules' || name.startsWith('.')) continue;
+      const p = join(d, name);
+      if (statSync(p).isDirectory()) walk(p);
+      else if (/\.(ts|tsx)$/.test(name)) files.push(p);
+    }
+  };
+  for (const dir of ['app', 'components', 'lib', 'hooks', 'store']) {
+    const abs = join(ROOT, dir);
+    if (existsSync(abs)) walk(abs);
+  }
+
+  /* گرافِ importهای نسبی */
+  const src = new Map(files.map(f => [f, readFileSync(f, 'utf8')]));
+  const resolveImport = (from, spec) => {
+    const base = resolve(dirname(from), spec);
+    for (const c of [base, base + '.ts', base + '.tsx', join(base, 'index.ts'), join(base, 'index.tsx')]) {
+      if (src.has(c)) return c;
+      if (existsSync(c) && !extname(c)) continue;
+    }
+    return null;
+  };
+  /* هم مسیرِ نسبی و هم نامِ مستعارِ `@/` دنبال می‌شود. با دنبال‌نکردنِ
+     `@/`، یک `import … from '@/lib/supabase-config'` داخلِ فایلِ
+     `'use client'` بی‌صدا از تست رد می‌شد — یعنی دقیقاً همان چیزی که
+     این تست برای گرفتنش هست. */
+  const importsOf = f => [...(src.get(f) ?? '').matchAll(/from\s+['"]((?:\.|@\/)[^'"]+)['"]/g)]
+    .map(m => (m[1].startsWith('@/')
+      ? resolveImport(join(ROOT, 'x'), './' + m[1].slice(2))
+      : resolveImport(f, m[1])))
+    .filter(Boolean);
+
+  const TARGET = join(ROOT, 'lib', 'supabase-config.ts');
+  const clientRoots = files.filter(f => /^\s*['"]use client['"]/.test(src.get(f) ?? ''));
+
+  /* BFS از هر ریشه‌ی کلاینت تا رسیدن به هدف */
+  const offenders = [];
+  for (const root of clientRoots) {
+    const seen = new Set([root]);
+    const queue = [[root, [root]]];
+    while (queue.length) {
+      const [cur, path] = queue.shift();
+      for (const next of importsOf(cur)) {
+        if (seen.has(next)) continue;
+        if (next === TARGET) { offenders.push(path.concat(next).map(p => relative(ROOT, p)).join(' → ')); queue.length = 0; break; }
+        seen.add(next);
+        queue.push([next, path.concat(next)]);
+      }
+    }
+  }
+
+  t('lib/supabase-config از هیچ کامپوننتِ کلاینتی وارد نمی‌شود',
+    offenders.length === 0,
+    offenders[0] ?? '');
+  t('thumbUrl ماژولِ مستقلِ خودش را دارد',
+    existsSync(join(ROOT, 'lib/media/thumb.ts'))
+    && !/export function thumbUrl/.test(read('lib/supabase-config.ts')));
+  t('فقط یک جا متغیرِ نشانی خوانده می‌شود',
+    files.filter(f => /process\.env\.NEXT_PUBLIC_SUPABASE_URL/.test(src.get(f) ?? ''))
+      .map(f => relative(ROOT, f))
+      .filter(f => f !== join('lib', 'supabase-url.ts')).length === 0,
+    'پنج خواننده‌ی جدا با پنج رفتارِ متفاوت در نبودِ مقدار');
+  t('گاردِ نشانی، میزبانِ ابری را هم رد می‌کند',
+    /isCloudHost/.test(read('lib/supabase-config.ts'))
+    && /endsWith\('\.supabase\.co'\)/.test(read('lib/supabase-config.ts')),
+    'شرطِ «خالی» تنها، همان حالتی را می‌گرفت که هرگز داده را خراب نمی‌کرد');
+}
+
+/* ── CORS ──
+   lib/cors.ts حذف شد. یک الگوی وایلدکارتِ vercel.app داشت که هر کسی
+   می‌توانست با ساختنِ یک ساب‌دامین از آن رد شود — و چون آن هدرها
+   credentialed بودند، یعنی دسترسی با کوکیِ کاربرانِ ما.
+
+   ولی بازبینی نشان داد آن فایل **هیچ وارد‌کننده‌ای نداشت**: هیچ route
+   handlerی صدایش نمی‌زد و هیچ‌جای پروژه هدرِ Access-Control-Allow-Origin
+   نمی‌فرستد. یعنی فایلی بود که شبیهِ یک کنترلِ امنیتی خوانده می‌شد ولی
+   نبود — و همین خطرناک‌تر است، چون خواننده فکر می‌کند سیاستی برقرار
+   است. همه‌ی ترافیکِ واقعی same-origin است. */
+console.log('\n― CORS ―');
+{
+  t('فایلِ مرده‌ی CORS حذف شد',
+    !existsSync(join(ROOT, 'lib/cors.ts')),
+    'هیچ وارد‌کننده‌ای نداشت و الگوی وایلدکارتِ vercel.app را مجاز می‌کرد');
+  t('نمونه‌ی متغیرهای محیطی هست',
+    existsSync(join(ROOT, '.env.example')),
+    'با حذفِ مقدارِ پیش‌فرض، کلونِ تازه بدونِ راهنما بالا نمی‌آید');
+}
+
 console.log(`\n${fail === 0 ? '✅' : '❌'}  ${pass} قبول · ${fail} رد\n`);
 process.exit(fail === 0 ? 0 : 1);

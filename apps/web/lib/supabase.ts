@@ -1,7 +1,10 @@
 import { createClient } from '@supabase/supabase-js';
+import { SUPABASE_URL_RAW } from './supabase-url';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+/* نشانی از منبعِ واحد می‌آید؛ پیش‌تر این‌جا `!` بود که فقط تایپ‌چک را
+   ساکت می‌کرد و در نبودِ مقدار خطای مبهمِ createClient می‌داد. */
+const supabaseUrl = SUPABASE_URL_RAW;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? '';
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 

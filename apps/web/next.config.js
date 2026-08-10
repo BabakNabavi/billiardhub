@@ -87,7 +87,7 @@ const nextConfig = {
         // هدرهای امنیتی پایه — تا امروز هیچ‌کدام ست نمی‌شدند.
         source: '/:path*',
         headers: [
-          // HTTPS اجباری برای یک سال (ورسل خودش HTTPS می‌دهد)
+          // HTTPS اجباری برای یک سال (گواهی و ریدایرکت را nginx می‌دهد)
           { key: 'Strict-Transport-Security', value: 'max-age=31536000; includeSubDomains' },
           // جلوگیری از قاب‌شدن سایت در iframe (clickjacking)
           { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
@@ -108,8 +108,34 @@ const nextConfig = {
 
              پس این CSP «سخت‌گیرترین ممکن» نیست، ولی چیزهای واقعی را
              می‌بندد: تزریق <object>/<embed>، بازنویسی <base>، فرم به
-             دامنه‌ی بیگانه، و قاب‌شدن در سایت دیگر. مقصدهای شبکه هم
-             به خودمان و Supabase محدود می‌شوند.
+             دامنه‌ی بیگانه، و قاب‌شدن در سایت دیگر.
+
+             ── مقصدهای شبکه ──
+             فقط دامنه‌ی خودمان. Storage هم روی همان دامنه است
+             (Supabase خودمیزبان). درگاه پرداخت و پیامک و استعلام
+             همگی از سرور صدا زده می‌شوند و به مرورگر نمی‌رسند؛
+             ریدایرکتِ درگاه هم ناوبری است نه fetch، پس تحتِ CSP
+             نیست.
+
+             ── چرا STUN این‌جا نیست ──
+             یک بازبینی هشدار داد که پخشِ زنده
+             (lib/live/webrtc.ts) نشانیِ سرورهای STUN را به
+             RTCPeerConnection می‌دهد و connect-src آن‌ها را می‌بندد.
+             با آزمایشِ واقعی در کرومیوم بررسی شد و **درست نبود**:
+             بدونِ هیچ اجازه‌ی STUN، جمع‌آوریِ کاندیدا کامل شد و یک
+             کاندیدای srflx گرفت — همانی که فقط از سرورِ STUN می‌آید.
+             هیچ رویدادِ securitypolicyviolation هم ثبت نشد.
+
+             افزودنشان علاوه بر بی‌فایده‌بودن، ضرر داشت: گرامرِ
+             منبعِ CSP شکلِ `stun:host:port` را نمی‌پذیرد و مرورگر
+             برای هر کدام یک خطای «invalid source» در کنسولِ **هر
+             صفحه** می‌نوشت.
+
+             در پروداکشن 'self' خودش کافی است چون مبدأ صفحه همان
+             billiardhub.net است. نامِ صریح برای محیطِ توسعه لازم
+             است: آن‌جا مبدأ localhost است و بدونِ این خط، تصویرها
+             بی‌صدا بلاک می‌شوند و هر بازبینیِ ظاهری بی‌عکس دیده
+             می‌شود.
 
              سفت‌کردن بیشتر (nonce به‌جای unsafe-inline) نیازمند
              بازنویسی استایل‌هاست و کار جداگانه‌ای است. */
@@ -133,10 +159,10 @@ const nextConfig = {
                  دیده می‌شود — یعنی نشان باطل می‌شود، چون اینماد دوره‌ای
                  وجودش را بررسی می‌کند. میزبانیِ محلیِ تصویر هم مجاز
                  نیست؛ باید از دامنه‌ی خودشان بیاید. */
-              "img-src 'self' data: blob: https://*.supabase.co https://trustseal.enamad.ir https://statics.payping.ir",
-              "media-src 'self' data: blob: https://*.supabase.co",
+              "img-src 'self' data: blob: https://billiardhub.net https://trustseal.enamad.ir https://statics.payping.ir",
+              "media-src 'self' data: blob: https://billiardhub.net",
               "font-src 'self' data:",
-              "connect-src 'self' https://*.supabase.co wss://*.supabase.co",
+              "connect-src 'self' https://billiardhub.net wss://billiardhub.net",
               /* ── نقشه‌ی باشگاه ──
                  صفحه‌ی باشگاه نقشه را در یک iframe از گوگل می‌آورد.
                  `frame-src` تعریف نشده بود، پس `default-src 'self'`

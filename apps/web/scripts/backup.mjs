@@ -62,11 +62,14 @@ if (!URL_ || !KEY) {
 ✗ نشانی یا کلیدِ سرویس پیدا نشد.
 
   معمولاً یعنی در apps/web/.env.local این دو نیستند:
-    NEXT_PUBLIC_SUPABASE_URL=https://xxxx.supabase.co
+    NEXT_PUBLIC_SUPABASE_URL=https://billiardhub.net
     SUPABASE_SERVICE_ROLE_KEY=…
 
-  کلیدِ service_role را از داشبورد Supabase ← Project Settings ← API
-  بردارید. (کلیدِ anon کافی نیست؛ با آن بیشترِ جدول‌ها خالی برمی‌گردند.)
+  این پروژه از Supabase خودمیزبان استفاده می‌کند (داکر روی همان سرور)،
+  نه از پروژه‌ی ابری؛ پس داشبوردِ supabase.co در کار نیست. کلیدِ
+  service_role در تنظیماتِ همان نصب است — روی سرور کنارِ بقیه‌ی
+  متغیرها در /opt/billiardhub/apps/web/.env.local.
+  (کلیدِ anon کافی نیست؛ با آن بیشترِ جدول‌ها خالی برمی‌گردند.)
 `)
   process.exit(1)
 }

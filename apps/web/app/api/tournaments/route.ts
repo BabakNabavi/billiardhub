@@ -4,6 +4,7 @@ import { actorOf, ownsClub, UNAUTHENTICATED, FORBIDDEN } from '@/lib/auth/owners
 import { sb, audit, clientIp } from '@/lib/finance/db';
 import { listPublicTournaments, listClubTournaments, seatsLeft } from '@/lib/tournaments/server';
 import { notifyTournamentCreated } from '@/lib/notify';
+import { SUPABASE_URL_RAW } from '@/lib/supabase-url';
 
 /* فهرست مسابقات + ساخت مسابقه توسط باشگاه.
 
@@ -39,7 +40,7 @@ export const safeCover = (v: unknown): string | null => {
   if (s.startsWith('/images/')) return s.slice(0, 500);
   try {
     const u = new URL(s);
-    const supa = process.env.NEXT_PUBLIC_SUPABASE_URL ?? '';
+    const supa = SUPABASE_URL_RAW;
     if (supa && u.origin === new URL(supa).origin) return s.slice(0, 500);
   } catch { /* نشانیِ نامعتبر */ }
   return null;

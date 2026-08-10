@@ -1,5 +1,6 @@
 import { getSupabaseServer } from '@/lib/supabase-server'
 import { sniff, capFor } from '@/lib/upload/policy'
+import { SUPABASE_URL_RAW } from '@/lib/supabase-url'
 
 /* ═══════════════════════════════════════════════════════════════
    تصویرهای آگهی — چه چیزی اجازه دارد در `products.images` بنشیند.
@@ -40,7 +41,7 @@ export const MAX_AD_IMAGES = 8
 
 /** پیشوندِ نشانیِ عمومیِ Storage — تهی اگر env تنظیم نشده باشد */
 export const storagePublicPrefix = (): string => {
-  const base = String(process.env.NEXT_PUBLIC_SUPABASE_URL ?? '').replace(/\/$/, '')
+  const base = SUPABASE_URL_RAW
   return base ? `${base}/storage/v1/object/public/` : ''
 }
 
