@@ -204,7 +204,7 @@ export default function LegalDoc({ doc, icon = 'terms' }: { doc: LegalDocument; 
       {/* بازگشت به بالا */}
       {showTop && (
         <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} aria-label="بازگشت به بالا"
-          style={{ position: 'fixed', insetInlineStart: 20, bottom: fromRegister ? 92 : 24, zIndex: 50, width: 44, height: 44, borderRadius: '50%',
+          style={{ position: 'fixed', insetInlineStart: 20, bottom: `calc(${fromRegister ? 92 : 24}px + env(safe-area-inset-bottom))`, zIndex: 50, width: 44, height: 44, borderRadius: '50%',
             border: `1px solid ${LINE}`, background: '#fff', color: GOLD_D, cursor: 'pointer', display: 'flex',
             alignItems: 'center', justifyContent: 'center', boxShadow: '0 10px 26px rgba(28,27,23,0.14)' }}>
           <ArrowUp size={18} />

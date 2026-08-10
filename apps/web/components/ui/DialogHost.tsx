@@ -153,7 +153,7 @@ export default function DialogHost() {
 
       {s.toast && createPortal(
         <div key={s.toast.id} style={{
-          position: 'fixed', insetInline: 0, bottom: 22, margin: '0 auto', zIndex: 5000,
+          position: 'fixed', insetInline: 0, bottom: 'calc(22px + env(safe-area-inset-bottom))', margin: '0 auto', zIndex: 5000,
           width: 'fit-content', maxWidth: 'calc(100% - 32px)', direction: 'rtl',
           display: 'flex', alignItems: 'center', gap: 9,
           background: '#1A1A18', color: '#fff', borderRadius: 12,

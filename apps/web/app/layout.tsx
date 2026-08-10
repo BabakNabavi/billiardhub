@@ -143,6 +143,36 @@ export default function RootLayout({
           @media (max-width: 900px) {
             input, textarea, select { font-size: 16px !important; }
           }
+
+          /* ══ ناحیه‌ی امنِ iOS ══
+             (بک‌تیک این‌جا ممنوع — داخلِ template literal است)
+
+             در حالتِ نصب‌شده (standalone) دو تنظیمِ این پروژه —
+             viewport-fit=cover و
+             apple-mobile-web-app-status-bar-style: black-translucent —
+             صفحه را زیرِ نوارِ وضعیت و نوارِ home indicator می‌کشند.
+             یعنی هر عنصرِ چسبیده به بالا زیرِ ساعت و آنتن می‌افتد و
+             دکمه‌هایش لمس‌نشدنی می‌شوند.
+
+             در سافاری و کروم این اتفاق نمی‌افتد چون کرومِ مرورگر بالای
+             محتواست و env() صفر برمی‌گردد. روی اندروید و دسکتاپ هم صفر
+             است، پس این کلاس‌ها آن‌جا هیچ فضایی اضافه نمی‌کنند.
+
+             ── چرا left/right و نه ps/pe ──
+             این تنها استثنای قاعده‌ی RTL پروژه است: ناچ در لنداسکیپ روی
+             یک سمتِ فیزیکی از دستگاه است و به جهتِ متن ربطی ندارد.
+             خاصیتِ منطقی (padding-inline-start) با چرخشِ جهت جابه‌جا
+             می‌شود و فاصله را سمتِ اشتباه می‌گذارد.
+
+             ── نکته هنگام استفاده ──
+             اگر عنصری padding اینلاین داشته باشد، استایلِ اینلاین بر
+             این کلاس مقدم است و کلاس بی‌صدا بی‌اثر می‌ماند؛ آن‌جا باید
+             خودِ paddingTop با calc نوشته شود. */
+          .safe-top    { padding-top:    env(safe-area-inset-top); }
+          .safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
+          .safe-x      { padding-left:   env(safe-area-inset-left);
+                         padding-right:  env(safe-area-inset-right); }
+
           ::-webkit-scrollbar { width: 5px; }
           ::-webkit-scrollbar-track { background: rgba(28,28,26,0.04); }
           ::-webkit-scrollbar-thumb { background: rgba(184,147,58,0.3); border-radius: 3px; }

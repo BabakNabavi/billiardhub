@@ -4066,7 +4066,7 @@ export default function ClubDashboardPage() {
 
       {delTournMsg && (
         <div style={{
-          position: 'fixed', insetInline: 0, bottom: 22, margin: '0 auto', zIndex: 90,
+          position: 'fixed', insetInline: 0, bottom: `calc(22px + env(safe-area-inset-bottom))`, margin: '0 auto', zIndex: 90,
           width: 'fit-content', maxWidth: 'calc(100% - 32px)',
           background: '#1A1A18', color: '#fff', borderRadius: 12,
           padding: '11px 18px', fontSize: 13, fontWeight: 700,

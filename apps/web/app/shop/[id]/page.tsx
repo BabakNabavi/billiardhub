@@ -276,7 +276,10 @@ export default function ProductDetailPage() {
       `}</style>
 
       {/* ── سربرگ باریک ── */}
-      <header style={{ position: 'sticky', top: 0, zIndex: 40, background: 'rgba(255,255,255,0.82)', backdropFilter: 'blur(28px) saturate(1.8)', WebkitBackdropFilter: 'blur(28px) saturate(1.8)', borderBottom: `1px solid ${HAIR}` }}>
+      {/* `safe-top`: در حالتِ نصب‌شده‌ی iOS این هدر زیرِ نوارِ وضعیت
+          می‌افتاد و دکمه‌ی بازگشت و عنوان زیرِ ساعت و آنتن قرار
+          می‌گرفتند. تعریفِ کلاس در `app/layout.tsx`. */}
+      <header className="safe-top" style={{ position: 'sticky', top: 0, zIndex: 40, background: 'rgba(255,255,255,0.82)', backdropFilter: 'blur(28px) saturate(1.8)', WebkitBackdropFilter: 'blur(28px) saturate(1.8)', borderBottom: `1px solid ${HAIR}` }}>
         <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 clamp(14px,3vw,28px)', height: 58, display: 'flex', alignItems: 'center', gap: 14 }}>
           <Link href="/shop" style={{ display: 'flex', alignItems: 'center', gap: 8, textDecoration: 'none', flexShrink: 0 }}>
             <div style={{ width: 32, height: 32, borderRadius: 8, overflow: 'hidden' }}>

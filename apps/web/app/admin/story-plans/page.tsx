@@ -308,7 +308,7 @@ export default function AdminStoryPlans() {
 
       {toast && (
         <div style={{
-          position: 'fixed', bottom: 26, insetInline: 0, margin: '0 auto', width: 'fit-content', zIndex: 60,
+          position: 'fixed', bottom: `calc(26px + env(safe-area-inset-bottom))`, insetInline: 0, margin: '0 auto', width: 'fit-content', zIndex: 60,
           background: INK, color: '#fff', fontSize: 13, fontWeight: 800, padding: '10px 20px', borderRadius: 22,
         }}>{toast}</div>
       )}
