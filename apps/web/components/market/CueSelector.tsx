@@ -71,7 +71,7 @@ export interface CueValue {
 export const EMPTY_CUE: CueValue = { brandId: null, brandCustom: '', modelId: null, modelCustom: '' }
 
 export default function CueSelector({
-  cueType, value, onChange, errors = {},
+  cueType, value, onChange, errors = {}, resolveFrom,
 }: {
   /** یکی از چهار نوعِ چوب؛ خالی یعنی هنوز انتخاب نشده */
   cueType: string
@@ -80,6 +80,10 @@ export default function CueSelector({
      ندارد و نباید برای ساختنِ نامِ برند دوباره fetch کند. */
   onChange: (v: CueValue, labels: { brand: string; model: string }) => void
   errors?: Record<string, string>
+  /* آگهیِ موجود فقط نامِ رشته‌ای دارد، نه شناسه. یک‌بار پس از
+     آمدنِ داده تلاش می‌کنیم نام را به برندِ کاتالوگ نگاشت کنیم؛ اگر
+     نشد، همان نام در «سایر» می‌نشیند تا چیزی گم نشود. */
+  resolveFrom?: { brand: string; model: string }
 }) {
   const [data, setData] = useState<Payload | null>(() => cache.get(cueType) ?? null)
   const [loading, setLoading] = useState(false)
@@ -108,6 +112,34 @@ export default function CueSelector({
       }
     })()
   }, [cueType])
+
+  /* ── بازیابیِ آگهیِ قدیمی ──
+     فقط یک‌بار و فقط وقتی هنوز چیزی انتخاب نشده. تطبیق بدونِ
+     حساسیتِ حروف و فاصله، روی نامِ انگلیسی و فارسی. ناموفق ⇒ همان
+     رشته در «سایر» می‌نشیند؛ هیچ داده‌ای دور ریخته نمی‌شود. */
+  const resolved = useRef(false)
+  useEffect(() => {
+    if (resolved.current || !data || !resolveFrom) return
+    if (value.brandId || value.brandCustom) { resolved.current = true; return }
+    const want = resolveFrom.brand.trim()
+    if (!want) return
+    resolved.current = true
+    const norm = (x: string) => x.toLowerCase().replace(/s+/g, "")
+    const hit = data.brands.find(b => norm(b.name_en) === norm(want) || norm(b.name_fa) === norm(want))
+    if (!hit) {
+      emit({ brandId: CUE_OTHER, brandCustom: want, modelId: null, modelCustom: resolveFrom.model.trim() })
+      return
+    }
+    const mWant = resolveFrom.model.trim()
+    const mHit = mWant ? hit.models.find(m => norm(m.name_en) === norm(mWant) || norm(m.name_fa) === norm(mWant)) : undefined
+    emit({
+      brandId: hit.id,
+      brandCustom: "",
+      modelId: mHit ? mHit.id : (mWant ? CUE_OTHER : null),
+      modelCustom: mHit ? "" : mWant,
+    })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data, resolveFrom])
 
   const brand = useMemo(
     () => (value.brandId ? data?.brands.find(b => b.id === value.brandId) : undefined),

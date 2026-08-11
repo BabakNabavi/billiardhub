@@ -38,6 +38,8 @@ import { compressImage } from '../../../../lib/seller-store'
 import { CATEGORY_OPTIONS, CONDITIONS, normalizeCategory, normalizeCondition } from '../../../../lib/market/categories'
 import { GENERIC_SPECS, CATEGORY_SPECS, HIDDEN_SPEC_KEYS } from '../../../../lib/market/specs'
 import { TYPE_OPTIONS, brandOptionsFor, modelOptionsFor, isTypeDrivenCategory, withOther } from '../../../../lib/market/chain'
+import { cueTypeIdOf } from '../../../../lib/market/cue-rules'
+import CueSelector, { EMPTY_CUE, type CueValue } from '../../../../components/market/CueSelector'
 import {
   GOLD, GOLD_D, TEXT, TEXT_SEC, TEXT_MUT, LQ_BG, LQ_BOR, LQ_SHAD,
   AD_FORM_CSS, inp, toAsciiDigits, fmtPrice, FancySelect, Label, ErrMsg, SectionTitle, SpecField,
@@ -80,6 +82,10 @@ export default function EditProductPage() {
      حذف نمی‌شوند — وگرنه ویرایشِ یک آگهی، چیزی را که فروشنده وارد
      کرده بی‌صدا می‌بلعد. */
   const [legacySpecs, setLegacySpecs] = useState<{ key: string; value: string }[]>([])
+  /* انتخابِ چوب و نامِ رشته‌ایِ آگهیِ موجود، تا انتخابگر بتواند
+     یک‌بار آن را به شناسه نگاشت کند */
+  const [cue, setCue] = useState<CueValue>(EMPTY_CUE)
+  const [legacyCue, setLegacyCue] = useState<{ brand: string; model: string } | undefined>(undefined)
 
   const [existingImages, setExistingImages] = useState<string[]>([])
   const [newImages, setNewImages] = useState<ImgSlot[]>([])
@@ -166,6 +172,8 @@ export default function EditProductPage() {
     setSpecOthers(nextOthers)
     setLegacySpecs(leftovers)
 
+    setLegacyCue({ brand: rawBrand, model: rawModel })
+    setCue(EMPTY_CUE)
     setExistingImages(Array.isArray(p.images) ? p.images.filter(Boolean).map(String) : [])
     setPageLoading(false)
   }, [])
@@ -210,6 +218,7 @@ export default function EditProductPage() {
     setForm(f => ({ ...f, category: cat, type: '', typeOther: '', brand: '', brandOther: '', model: '', modelOther: '' }))
     setErrors(e => { const n = { ...e }; delete n.category; delete n.type; delete n.brand; delete n.model; return n })
     setSpecs({}); setSpecOthers({})
+    setCue(EMPTY_CUE); setLegacyCue(undefined)
   }
   const setType = (v: string) => {
     setForm(f => ({ ...f, type: v, typeOther: '', ...(isTypeDrivenCategory(f.category) ? { brand: '', brandOther: '', model: '', modelOther: '' } : {}) }))
@@ -217,6 +226,16 @@ export default function EditProductPage() {
   }
   const setBrand = (v: string) => {
     setForm(f => ({ ...f, brand: v, model: '', modelOther: '' }))
+    setErrors(e => { const n = { ...e }; delete n.brand; delete n.model; return n })
+  }
+
+  /* چوب از کاتالوگ می‌آید؛ بقیه‌ی دسته‌ها از chain.ts */
+  const cueTypeId = form.category === 'cue' ? cueTypeIdOf(form.type) : ''
+
+  /* رشته برای نمایش، شناسه برای یکپارچگی — همان قاعده‌ی فرمِ ثبت */
+  const onCueChange = (v: CueValue, labels: { brand: string; model: string }) => {
+    setCue(v)
+    setForm(f => ({ ...f, brand: labels.brand, brandOther: '', model: labels.model, modelOther: '' }))
     setErrors(e => { const n = { ...e }; delete n.brand; delete n.model; return n })
   }
 
@@ -304,6 +323,9 @@ export default function EditProductPage() {
             name: composedName,
             category: form.category, type: effType,
             brand: effBrand, model: effModel,
+            cueType: cueTypeId || undefined,
+            brandId: cueTypeId && cue.brandId !== '__other__' ? cue.brandId : null,
+            modelId: cueTypeId && cue.modelId !== '__other__' ? cue.modelId : null,
             description: form.description.trim(), condition: form.condition,
             price: form.negotiable ? 0 : price,
             old: form.negotiable ? 0 : old,
@@ -340,6 +362,9 @@ export default function EditProductPage() {
             name: composedName,
             category: form.category, type: effType,
             brand: effBrand, model: effModel,
+            cueType: cueTypeId || undefined,
+            brandId: cueTypeId && cue.brandId !== '__other__' ? cue.brandId : null,
+            modelId: cueTypeId && cue.modelId !== '__other__' ? cue.modelId : null,
             price: form.negotiable ? 0 : price,
             old: form.negotiable ? 0 : old,
             negotiable: form.negotiable,
@@ -465,6 +490,20 @@ export default function EditProductPage() {
                   <ErrMsg msg={errors.type} />
                 </div>
 
+                {/* ── چوب: انتخابگرِ کاتالوگ ──
+                    همان کامپوننتی که فرمِ ثبت دارد. اگر این‌جا نسخه‌ی
+                    دیگری می‌گذاشتیم، دقیقاً همان دو-فرمِ ناهمگونی
+                    ساخته می‌شد که هفته‌ی پیش یکی‌اش کردیم. */}
+                {cueTypeId ? (
+                  <CueSelector
+                    cueType={cueTypeId}
+                    value={cue}
+                    onChange={onCueChange}
+                    errors={errors}
+                    resolveFrom={legacyCue}
+                  />
+                ) : (
+                <>
                 <div>
                   <Label required>برند</Label>
                   {brandOptions ? (
@@ -503,6 +542,8 @@ export default function EditProductPage() {
                       onChange={e => set('model', e.target.value)} style={inp()} />
                   )}
                 </div>
+                </>
+                )}
 
               </div>
             </div>

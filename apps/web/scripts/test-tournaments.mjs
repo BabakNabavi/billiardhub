@@ -2112,6 +2112,23 @@ console.log('\n― کاتالوگِ چوب ―');
     'کامپوننتِ کلاینت باید اعتبارسنجی را بدونِ کاتالوگ وارد کند');
   t('انتخابگر داده را fetch می‌کند نه import',
     read('components/market/CueSelector.tsx').includes('/api/cue-catalog/'));
+
+  /* هر دو فرم باید همان یک انتخابگر را داشته باشند — وگرنه دوباره
+     همان دو-فرمِ ناهمگون ساخته می‌شود که یک‌بار درستش کردیم. */
+  const newAdSrc = read('app/shop/new/page.tsx');
+  const editAdSrc = read('app/shop/edit/[id]/page.tsx');
+  t('هر دو فرم از همان انتخابگر استفاده می‌کنند',
+    [newAdSrc, editAdSrc].every(f => /<CueSelector/.test(f) && /cueTypeIdOf/.test(f)));
+  t('فقط دسته‌ی چوب از کاتالوگ می‌آید',
+    [newAdSrc, editAdSrc].every(f => /form\.category === 'cue' \? cueTypeIdOf/.test(f)),
+    'بقیه‌ی دسته‌ها باید دست‌نخورده از chain.ts بیایند');
+  t('شناسه کنارِ رشته فرستاده می‌شود',
+    [newAdSrc, editAdSrc].every(f => /brand: effBrand, model: effModel,/.test(f) && /brandId:/.test(f)),
+    'ستون‌های رشته‌ای را کلِ سایت می‌خواند؛ حذفشان همه‌جا را می‌شکند');
+  t('آگهیِ قدیمی از روی نام بازیابی می‌شود',
+    /resolveFrom/.test(read('components/market/CueSelector.tsx'))
+    && /setLegacyCue\(\{ brand: rawBrand, model: rawModel \}\)/.test(editAdSrc),
+    'آگهی‌های موجود فقط نامِ رشته‌ای دارند، نه شناسه');
 }
 
 console.log('\n― CORS ―');
