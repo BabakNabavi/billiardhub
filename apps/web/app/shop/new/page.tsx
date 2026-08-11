@@ -15,6 +15,8 @@ import { CATEGORY_OPTIONS, CONDITIONS, conditionLabel } from '../../../lib/marke
    جزئیاتِ محصول هم بتواند برچسبِ فارسیِ هر کلید را بخواند. */
 import { GENERIC_SPECS, CATEGORY_SPECS, HIDDEN_SPEC_KEYS } from '../../../lib/market/specs'
 import { productTitleParts } from '../../../lib/market/title'
+import { cueTypeIdOf } from '../../../lib/market/cue-rules'
+import CueSelector, { EMPTY_CUE, type CueValue } from '../../../components/market/CueSelector'
 import { TYPE_OPTIONS, brandOptionsFor, modelOptionsFor, isTypeDrivenCategory, withOther } from '../../../lib/market/chain'
 import {
   GOLD, GOLD_D, TEXT, TEXT_SEC, TEXT_MUT, LQ_BG, LQ_BOR, LQ_SHAD, ERR,
@@ -63,6 +65,8 @@ export default function NewProductPage() {
   const [acceptRules, setAcceptRules] = useState(false)
   const [quotaMsg, setQuotaMsg] = useState('')   // سهمیه‌ی آگهی تمام شده   // پذیرش قوانین بیلیارد بازار
   const [quotaNeedsIdentity, setQuotaNeedsIdentity] = useState(false)   // ۴۲۹ به‌خاطر نبود هویت تأییدشده
+  /* انتخابِ چوب — شناسه‌ها؛ رشته‌های نمایشی در همان `form` می‌مانند */
+  const [cue, setCue] = useState<CueValue>(EMPTY_CUE)
   const [specs,     setSpecs]     = useState<Record<string, string>>({})
   const [specOthers, setSpecOthers] = useState<Record<string, string>>({})
   /* هر پیامِ خطا از این‌جا می‌گذرد و وسطِ صفحه نمایش داده می‌شود */
@@ -141,6 +145,23 @@ export default function NewProductPage() {
      چوب: برند بر اساس نوع (اسنوکر/پاکت). بقیه‌ی دسته‌ها: برند ثابت همان دسته. مدل همیشه بر اساس برند. */
   const brandOptions = brandOptionsFor(form.category, form.type)
   const modelOptions = modelOptionsFor(form.category, form.type, form.brand)
+
+  /* ── چوب از کاتالوگ می‌آید ──
+     فقط وقتی دسته «چوب» است و نوعش یکی از چهار نوعِ کاتالوگ.
+     خالی یعنی همان مسیرِ قدیمیِ `chain.ts`. */
+  const cueTypeId = form.category === 'cue' ? cueTypeIdOf(form.type) : ''
+
+  /* ── چرا هم شناسه هم رشته ──
+     ستون‌های `brand` و `model` رشته‌اند و کلِ سایت از همان‌ها
+     می‌خواند: کارتِ بازار، صفحه‌ی جزئیات، آگهی‌های مرتبط، و
+     `title.ts` که نامِ کارت را می‌سازد. پس رشته سرِ جایش می‌ماند و
+     شناسه **کنارش** ذخیره می‌شود — شناسه برای یکپارچگی و فیلتر،
+     رشته برای نمایش. این‌طور هیچ مصرف‌کننده‌ای نمی‌شکند. */
+  const onCueChange = (v: CueValue, labels: { brand: string; model: string }) => {
+    setCue(v)
+    setForm(f => ({ ...f, brand: labels.brand, brandOther: '', model: labels.model, modelOther: '' }))
+    setErrors(e => { const n = { ...e }; delete n.brand; delete n.model; return n })
+  }
   /* مقدار مؤثر: اگر «سایر» انتخاب شده، متن دستی جای آن می‌نشیند */
   const effBrand = form.brand === 'سایر' ? form.brandOther.trim() : form.brand.trim()
   const effModel = form.model === 'سایر' ? form.modelOther.trim() : form.model.trim()
@@ -155,10 +176,13 @@ export default function NewProductPage() {
     setErrors(e => { const n = { ...e }; delete n.category; delete n.type; delete n.brand; delete n.model; return n })
     setSpecs({})
     setSpecOthers({})
+    setCue(EMPTY_CUE)
   }
   /* تغییر نوع ⇒ در دسته‌های نوع‌محور (چوب/میز/تیپ/گچ) برند/مدل ریست می‌شوند */
   const typeDrivenCat = isTypeDrivenCategory
   const setType = (v: string) => {
+    /* برندها بینِ نوع‌ها مشترک نیستند؛ شناسه‌ی برندِ اسنوکر در پاکت بی‌معناست */
+    setCue(EMPTY_CUE)
     /* عوض‌شدنِ نوع ⇒ توضیحِ «سایر» هم پاک می‌شود، وگرنه متنِ
        نوعِ قبلی روی نوعِ تازه می‌ماند */
     setForm(f => ({ ...f, type: v, typeOther: '', ...(typeDrivenCat(f.category) ? { brand: '', brandOther: '', model: '', modelOther: '' } : {}) }))
@@ -303,6 +327,10 @@ export default function NewProductPage() {
           body: JSON.stringify({
             name: composedName, category: form.category, type: effType,
             brand: effBrand, model: effModel,
+            /* شناسه‌ها کنارِ رشته — رشته برای نمایش، شناسه برای یکپارچگی */
+            cueType: cueTypeId || undefined,
+            brandId: cueTypeId && cue.brandId !== '__other__' ? cue.brandId : undefined,
+            modelId: cueTypeId && cue.modelId !== '__other__' ? cue.modelId : undefined,
             price: form.negotiable ? 0 : rawPrice, old: form.negotiable ? 0 : rawOld,
             negotiable: form.negotiable,
             description: form.description.trim(), condition: form.condition,
@@ -486,7 +514,21 @@ export default function NewProductPage() {
                       <ErrMsg msg={errors.type} />
                     </div>
 
-                    {/* برند — چوب: دراپ‌داون برند بر اساس نوع؛ «سایر» ⇒ فیلد متن. بقیه: متن آزاد */}
+                    {/* ── چوب: انتخابگرِ کاتالوگ ──
+                        دسته‌ی چوب ۱۱۴ برند و ۴۴۷ مدل دارد و از
+                        `data/cue-catalog.json` می‌آید، نه از
+                        `chain.ts`. بقیه‌ی دسته‌ها (میز، تیپ، گچ، …)
+                        دست‌نخورده همان مسیرِ قبلی را دارند. */}
+                    {cueTypeId ? (
+                      <CueSelector
+                        cueType={cueTypeId}
+                        value={cue}
+                        onChange={onCueChange}
+                        errors={errors}
+                      />
+                    ) : (
+                    <>
+                    {/* برند — دراپ‌داون بر اساس نوع؛ «سایر» ⇒ فیلد متن. بقیه: متن آزاد */}
                     <div>
                       <Label required>برند</Label>
                       {brandOptions ? (
@@ -506,14 +548,14 @@ export default function NewProductPage() {
                       <ErrMsg msg={errors.brand} />
                     </div>
 
-                    {/* مدل — چوب: دراپ‌داون مدل بر اساس برند؛ «سایر» ⇒ فیلد متن. بقیه: متن آزاد */}
+                    {/* مدل — دراپ‌داون بر اساس برند؛ «سایر» ⇒ فیلد متن. بقیه: متن آزاد */}
                     <div>
-                      <Label required>مدل</Label>
+                      <Label>مدل</Label>
                       {modelOptions ? (
                         <>
                           <FancySelect value={form.model} onChange={v => set('model', v)}
                             options={withOther(modelOptions).map(o => ({ value: o, label: o }))}
-                            placeholder="انتخاب مدل... (اختیاری)" error={!!errors.model} />
+                            placeholder="انتخاب مدل..." error={!!errors.model} />
                           {form.model === 'سایر' && (
                             <input className="nf" type="text" placeholder="مدل را وارد کنید..." value={form.modelOther}
                               onChange={e => set('modelOther', e.target.value)}
@@ -525,6 +567,8 @@ export default function NewProductPage() {
                       )}
                       <ErrMsg msg={errors.model} />
                     </div>
+                    </>
+                    )}
 
                   </div>
                 </div>

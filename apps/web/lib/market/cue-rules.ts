@@ -57,6 +57,24 @@ export interface CueType {
   brands: CueBrand[]
 }
 
+/* ── پلِ بینِ فرم و کاتالوگ ──
+   فرم «نوع» را به‌صورت رشته‌ی فارسی نگه می‌دارد و همان در ستونِ
+   `type` ذخیره می‌شود؛ نامِ کارتِ بازار هم از «دسته + نوع» ساخته
+   می‌شود. کاتالوگ ولی با شناسه کار می‌کند.
+
+   این نگاشت تنها جایی است که آن دو به هم می‌رسند — و عمداً این‌جا
+   نشسته نه داخلِ کامپوننت، تا اگر روزی برچسبی عوض شد یک‌جا اصلاح
+   شود. */
+export const CUE_TYPE_BY_FA: Record<string, CueTypeId> = {
+  'پاکت بیلیارد': 'pocket_billiard',
+  'اسنوکر': 'snooker',
+  'هی‌بال': 'heyball',
+  'کارامبول': 'carom',
+}
+
+export const cueTypeIdOf = (faLabel: string): CueTypeId | '' =>
+  CUE_TYPE_BY_FA[faLabel] ?? ''
+
 export const isCueTypeId = (v: unknown): v is CueTypeId =>
   typeof v === 'string' && (CUE_TYPE_IDS as readonly string[]).includes(v)
 

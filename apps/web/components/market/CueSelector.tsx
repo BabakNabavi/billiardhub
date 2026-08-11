@@ -76,7 +76,9 @@ export default function CueSelector({
   /** یکی از چهار نوعِ چوب؛ خالی یعنی هنوز انتخاب نشده */
   cueType: string
   value: CueValue
-  onChange: (v: CueValue) => void
+  /* برچسبِ نمایشی همراهِ مقدار برمی‌گردد: والد داده‌ی کاتالوگ را
+     ندارد و نباید برای ساختنِ نامِ برند دوباره fetch کند. */
+  onChange: (v: CueValue, labels: { brand: string; model: string }) => void
   errors?: Record<string, string>
 }) {
   const [data, setData] = useState<Payload | null>(() => cache.get(cueType) ?? null)
@@ -198,7 +200,12 @@ export default function CueSelector({
     ) ?? null
   }, [value.brandCustom, data])
 
-  const set = (patch: Partial<CueValue>) => onChange({ ...value, ...patch })
+  const emit = (next: CueValue) => {
+    const b = next.brandId && next.brandId !== CUE_OTHER
+      ? data?.brands.find(x => x.id === next.brandId) : undefined
+    onChange(next, { brand: cueBrandText(next, b), model: cueModelText(next, b) })
+  }
+  const set = (patch: Partial<CueValue>) => emit({ ...value, ...patch })
 
   const pickBrand = (id: string) =>
     set({ brandId: id, modelId: null, modelCustom: '', brandCustom: id === CUE_OTHER ? value.brandCustom : '' })
