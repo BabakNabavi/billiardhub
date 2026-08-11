@@ -15,8 +15,9 @@ import { CATEGORY_OPTIONS, CONDITIONS, conditionLabel } from '../../../lib/marke
    جزئیاتِ محصول هم بتواند برچسبِ فارسیِ هر کلید را بخواند. */
 import { GENERIC_SPECS, CATEGORY_SPECS, HIDDEN_SPEC_KEYS } from '../../../lib/market/specs'
 import { productTitleParts } from '../../../lib/market/title'
-import { cueTypeIdOf } from '../../../lib/market/cue-rules'
-import CueSelector, { EMPTY_CUE, type CueValue } from '../../../components/market/CueSelector'
+import { typeIdOf, type CatalogId } from '../../../lib/market/catalog-rules'
+import CatalogSelector, { EMPTY_CATALOG_VALUE, type CatalogValue, useCatalogType } from '../../../components/market/CatalogSelector'
+import TableSizeField, { EMPTY_SIZE, type SizeValue } from '../../../components/market/TableSizeField'
 import { TYPE_OPTIONS, brandOptionsFor, modelOptionsFor, isTypeDrivenCategory, withOther } from '../../../lib/market/chain'
 import {
   GOLD, GOLD_D, TEXT, TEXT_SEC, TEXT_MUT, LQ_BG, LQ_BOR, LQ_SHAD, ERR,
@@ -66,7 +67,8 @@ export default function NewProductPage() {
   const [quotaMsg, setQuotaMsg] = useState('')   // سهمیه‌ی آگهی تمام شده   // پذیرش قوانین بیلیارد بازار
   const [quotaNeedsIdentity, setQuotaNeedsIdentity] = useState(false)   // ۴۲۹ به‌خاطر نبود هویت تأییدشده
   /* انتخابِ چوب — شناسه‌ها؛ رشته‌های نمایشی در همان `form` می‌مانند */
-  const [cue, setCue] = useState<CueValue>(EMPTY_CUE)
+  const [cue, setCue] = useState<CatalogValue>(EMPTY_CATALOG_VALUE)
+  const [size, setSize] = useState<SizeValue>(EMPTY_SIZE)
   const [specs,     setSpecs]     = useState<Record<string, string>>({})
   const [specOthers, setSpecOthers] = useState<Record<string, string>>({})
   /* هر پیامِ خطا از این‌جا می‌گذرد و وسطِ صفحه نمایش داده می‌شود */
@@ -146,10 +148,15 @@ export default function NewProductPage() {
   const brandOptions = brandOptionsFor(form.category, form.type)
   const modelOptions = modelOptionsFor(form.category, form.type, form.brand)
 
-  /* ── چوب از کاتالوگ می‌آید ──
-     فقط وقتی دسته «چوب» است و نوعش یکی از چهار نوعِ کاتالوگ.
-     خالی یعنی همان مسیرِ قدیمیِ `chain.ts`. */
-  const cueTypeId = form.category === 'cue' ? cueTypeIdOf(form.type) : ''
+  /* ── چوب و میز از کاتالوگ می‌آیند ──
+     فقط وقتی دسته یکی از این دو است و نوعش در همان کاتالوگ هست.
+     خالی یعنی همان مسیرِ قدیمیِ `chain.ts` — بقیه‌ی دسته‌ها
+     (تیپ، گچ، توپ، …) دست‌نخورده‌اند. */
+  const catCategory: CatalogId | null =
+    form.category === 'cue' || form.category === 'table' ? form.category : null
+  const catTypeId = catCategory ? typeIdOf(catCategory, form.type) : ''
+  /* همان ورودیِ کش‌شده‌ی انتخابگر — درخواستِ تازه‌ای نمی‌زند */
+  const catFreeInput = !!useCatalogType(catCategory ?? 'cue', catCategory ? catTypeId : '').data?.forceFreeInput
 
   /* ── چرا هم شناسه هم رشته ──
      ستون‌های `brand` و `model` رشته‌اند و کلِ سایت از همان‌ها
@@ -157,7 +164,7 @@ export default function NewProductPage() {
      `title.ts` که نامِ کارت را می‌سازد. پس رشته سرِ جایش می‌ماند و
      شناسه **کنارش** ذخیره می‌شود — شناسه برای یکپارچگی و فیلتر،
      رشته برای نمایش. این‌طور هیچ مصرف‌کننده‌ای نمی‌شکند. */
-  const onCueChange = (v: CueValue, labels: { brand: string; model: string }) => {
+  const onCatalogChange = (v: CatalogValue, labels: { brand: string; model: string }) => {
     setCue(v)
     setForm(f => ({ ...f, brand: labels.brand, brandOther: '', model: labels.model, modelOther: '' }))
     setErrors(e => { const n = { ...e }; delete n.brand; delete n.model; return n })
@@ -176,13 +183,13 @@ export default function NewProductPage() {
     setErrors(e => { const n = { ...e }; delete n.category; delete n.type; delete n.brand; delete n.model; return n })
     setSpecs({})
     setSpecOthers({})
-    setCue(EMPTY_CUE)
+    setCue(EMPTY_CATALOG_VALUE); setSize(EMPTY_SIZE)
   }
   /* تغییر نوع ⇒ در دسته‌های نوع‌محور (چوب/میز/تیپ/گچ) برند/مدل ریست می‌شوند */
   const typeDrivenCat = isTypeDrivenCategory
   const setType = (v: string) => {
     /* برندها بینِ نوع‌ها مشترک نیستند؛ شناسه‌ی برندِ اسنوکر در پاکت بی‌معناست */
-    setCue(EMPTY_CUE)
+    setCue(EMPTY_CATALOG_VALUE); setSize(EMPTY_SIZE)
     /* عوض‌شدنِ نوع ⇒ توضیحِ «سایر» هم پاک می‌شود، وگرنه متنِ
        نوعِ قبلی روی نوعِ تازه می‌ماند */
     setForm(f => ({ ...f, type: v, typeOther: '', ...(typeDrivenCat(f.category) ? { brand: '', brandOther: '', model: '', modelOther: '' } : {}) }))
@@ -226,7 +233,11 @@ export default function NewProductPage() {
     if (!form.category)           e.category    = 'دسته‌بندی را انتخاب کنید'
     if (!effType)                 e.type        = form.type === 'سایر'
       ? 'برای «سایر» توضیح بنویسید' : 'نوع را مشخص کنید'
-    if (!effBrand)                e.brand       = 'برند الزامی است'
+    /* ── برندِ اختیاری ──
+       نوعی که `force_free_input` دارد («میز خانگی») اغلب برندِ
+       مشخصی ندارد؛ اجبار یا آگهی را رها می‌کند یا داده‌ی الکی
+       می‌سازد. شرط روی پرچمِ داده است نه شناسه‌ی نوع. */
+    if (!effBrand && !catFreeInput) e.brand = "برند الزامی است"
     /* مدل اختیاری است: خیلی از فروشنده‌ها مدلِ دقیقِ جنسِ دستِ دوم
        را نمی‌دانند و اجبارِ آن یعنی یا آگهی ثبت نمی‌شود یا چیزی
        الکی نوشته می‌شود — که بدتر است. */
@@ -328,9 +339,13 @@ export default function NewProductPage() {
             name: composedName, category: form.category, type: effType,
             brand: effBrand, model: effModel,
             /* شناسه‌ها کنارِ رشته — رشته برای نمایش، شناسه برای یکپارچگی */
-            cueType: cueTypeId || undefined,
-            brandId: cueTypeId && cue.brandId !== '__other__' ? cue.brandId : undefined,
-            modelId: cueTypeId && cue.modelId !== '__other__' ? cue.modelId : undefined,
+            cueType: form.category === 'cue' ? catTypeId || undefined : undefined,
+            tableType: form.category === 'table' ? catTypeId || undefined : undefined,
+            brandId: catTypeId && cue.brandId !== '__other__' ? cue.brandId : undefined,
+            modelId: catTypeId && cue.modelId !== '__other__' ? cue.modelId : undefined,
+            /* سایز فقط برای میز؛ «سایر» شناسه ندارد و متنش می‌رود */
+            tableSizeId: form.category === 'table' && size.sizeId !== '__other__' ? size.sizeId || undefined : undefined,
+            tableSizeCustom: form.category === 'table' && size.sizeCustom.trim() ? size.sizeCustom.trim() : undefined,
             price: form.negotiable ? 0 : rawPrice, old: form.negotiable ? 0 : rawOld,
             negotiable: form.negotiable,
             description: form.description.trim(), condition: form.condition,
@@ -342,6 +357,14 @@ export default function NewProductPage() {
           }),
         })
         const j = await r.json().catch(() => ({}))
+
+        /* ── خطای فیلد از سرور ──
+           سرور برای انتخابِ نامعتبرِ کاتالوگ نقشه‌ی خطا برمی‌گرداند.
+           بدونِ نشاندنش روی فیلد، کاربر فقط یک پیامِ کلی می‌دید و
+           نمی‌فهمید کدام باکس ایراد دارد. */
+        if (j?.errors && typeof j.errors === 'object') {
+          setErrors(e => ({ ...e, ...(j.errors as Record<string, string>) }))
+        }
 
         if (r.status === 429) {
           /* دو حالت متفاوت: سهمیه تمام شده، یا هویت هنوز تأیید نشده */
@@ -519,11 +542,12 @@ export default function NewProductPage() {
                         `data/cue-catalog.json` می‌آید، نه از
                         `chain.ts`. بقیه‌ی دسته‌ها (میز، تیپ، گچ، …)
                         دست‌نخورده همان مسیرِ قبلی را دارند. */}
-                    {cueTypeId ? (
-                      <CueSelector
-                        cueType={cueTypeId}
+                    {catCategory && catTypeId ? (
+                      <CatalogSelector
+                        category={catCategory}
+                        type={catTypeId}
                         value={cue}
-                        onChange={onCueChange}
+                        onChange={onCatalogChange}
                         errors={errors}
                       />
                     ) : (
@@ -601,6 +625,21 @@ export default function NewProductPage() {
                         {/* category-specific specs OR placeholder */}
                         {form.category ? (
                           <div className="spec-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 20 }}>
+                            {/* ── سایزِ میز ──
+                                این‌جاست چون مشخصه‌ی خودِ میز است، ولی فهرستش
+                                به نوعِ میز وابسته است و از کاتالوگ می‌آید — نه
+                                از فهرستِ ثابتِ قبلی که برای هر میزی یکی بود. */}
+                            {form.category === 'table' && catTypeId && (
+                              <TableSizeField
+                                type={catTypeId}
+                                value={size}
+                                onChange={(v, label) => {
+                                  setSize(v)
+                                  setSpecs(s => ({ ...s, size: label }))
+                                }}
+                                error={errors.size}
+                              />
+                            )}
                             {specFields.map(field => {
                               const isParent = specFields.some(f => f.dependsOn === field.key)
                               return (

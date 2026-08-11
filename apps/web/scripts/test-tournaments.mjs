@@ -2124,7 +2124,7 @@ console.log('\n― کاتالوگِ چوب ―');
     const missing = Object.keys(cat.countries).filter(c => !drawn.has(c));
     t('هر کشورِ کاتالوگ پرچمِ SVG دارد', missing.length === 0, missing.join(', '));
     t('پرچم دیگر ایموجی نیست',
-      !/Segoe UI Emoji/.test(read('components/market/CueSelector.tsx')),
+      !/Segoe UI Emoji/.test(read('components/market/CatalogSelector.tsx')),
       'ویندوز گلیفِ regional-indicator ندارد');
 
     t('املاهای جایگزین در کاتالوگ هست',
@@ -2138,14 +2138,14 @@ console.log('\n― کاتالوگِ چوب ―');
     t('alias تکرارِ نامِ خودِ برند نیست', junk.length === 0, junk.slice(0, 3).join(', '));
   }
 
-  const cueLib = read('lib/market/cue-catalog.ts');
-  const cueRules = read('lib/market/cue-rules.ts');
+  const cueLib = read('lib/market/catalog.ts');
+  const cueRules = read('lib/market/catalog-rules.ts');
   t('کاتالوگ فقط سمتِ سرور خوانده می‌شود',
     /from '\.\.\/\.\.\/data\/cue-catalog\.json'/.test(cueLib)
     && !/'use client'/.test(cueLib));
   t('مسیرِ per-type استاتیک است',
-    /export const dynamic = 'force-static'/.test(read('app/api/cue-catalog/[type]/route.ts'))
-    && /generateStaticParams/.test(read('app/api/cue-catalog/[type]/route.ts')),
+    /export const dynamic = 'force-static'/.test(read('app/api/catalog/[category]/[type]/route.ts'))
+    && /generateStaticParams/.test(read('app/api/catalog/[category]/[type]/route.ts')),
     '۹۸ کیلوبایت نباید در باندلِ هر بازدیدکننده بنشیند');
   t('اعتبارسنجی تعلقِ مدل به برند را می‌سنجد',
     /این مدل برای برند انتخاب‌شده نیست/.test(cueRules)
@@ -2154,25 +2154,35 @@ console.log('\n― کاتالوگِ چوب ―');
   t('برندِ دستی و فهرستی با هم پذیرفته نمی‌شوند',
     /نه هر دو/.test(cueRules));
   t('منطقِ خالص از داده جدا است',
-    !strip(cueRules).includes('cue-catalog.json') && cueLib.includes("export * from './cue-rules'"),
+    !strip(cueRules).includes('cue-catalog.json') && !strip(cueRules).includes('table_catalog.json') && cueLib.includes("export * from './catalog-rules'"),
     'کامپوننتِ کلاینت باید اعتبارسنجی را بدونِ کاتالوگ وارد کند');
   t('انتخابگر داده را fetch می‌کند نه import',
-    read('components/market/CueSelector.tsx').includes('/api/cue-catalog/'));
+    read('components/market/CatalogSelector.tsx').includes('/api/catalog/'));
+  /* ── مرزِ سرور و کلاینت ──
+     مهم‌ترین قاعده‌ی این بخش: کامپوننتِ کلاینت نباید کاتالوگ را
+     وارد کند. fetch‌کردن به‌تنهایی اثباتش نیست — می‌شود هم fetch کرد
+     هم import. پس نبودنِ import صریح سنجیده می‌شود. */
+  for (const f of ['components/market/CatalogSelector.tsx', 'components/market/TableSizeField.tsx']) {
+    const src = strip(read(f));
+    t(f.split('/').pop() + ' کاتالوگ را import نمی‌کند',
+      !src.includes("market/catalog'") && !/from '[^']*\.json'/.test(src),
+      'صد کیلوبایت در باندلِ هر بازدیدکننده‌ی فرم می‌نشست');
+  }
 
   /* هر دو فرم باید همان یک انتخابگر را داشته باشند — وگرنه دوباره
      همان دو-فرمِ ناهمگون ساخته می‌شود که یک‌بار درستش کردیم. */
   const newAdSrc = read('app/shop/new/page.tsx');
   const editAdSrc = read('app/shop/edit/[id]/page.tsx');
   t('هر دو فرم از همان انتخابگر استفاده می‌کنند',
-    [newAdSrc, editAdSrc].every(f => /<CueSelector/.test(f) && /cueTypeIdOf/.test(f)));
-  t('فقط دسته‌ی چوب از کاتالوگ می‌آید',
-    [newAdSrc, editAdSrc].every(f => /form\.category === 'cue' \? cueTypeIdOf/.test(f)),
-    'بقیه‌ی دسته‌ها باید دست‌نخورده از chain.ts بیایند');
+    [newAdSrc, editAdSrc].every(f => /<CatalogSelector/.test(f) && /typeIdOf\(catCategory/.test(f)));
+  t('فقط چوب و میز از کاتالوگ می‌آیند',
+    [newAdSrc, editAdSrc].every(f => f.includes("form.category === 'cue' || form.category === 'table' ? form.category : null")),
+    'بقیه‌ی دسته‌ها (تیپ، گچ، توپ، کیس) باید دست‌نخورده از chain.ts بیایند');
   t('شناسه کنارِ رشته فرستاده می‌شود',
     [newAdSrc, editAdSrc].every(f => /brand: effBrand, model: effModel,/.test(f) && /brandId:/.test(f)),
     'ستون‌های رشته‌ای را کلِ سایت می‌خواند؛ حذفشان همه‌جا را می‌شکند');
   t('آگهیِ قدیمی از روی نام بازیابی می‌شود',
-    /resolveFrom/.test(read('components/market/CueSelector.tsx'))
+    /resolveFrom/.test(read('components/market/CatalogSelector.tsx'))
     && /setLegacyCue\(\{ brand: rawBrand, model: rawModel \}\)/.test(editAdSrc),
     'آگهی‌های موجود فقط نامِ رشته‌ای دارند، نه شناسه');
 
@@ -2181,7 +2191,7 @@ console.log('\n― کاتالوگِ چوب ―');
      Peradon). سه جا با نام سروکار دارند: جست‌وجوی فهرست، بازیابیِ
      آگهیِ قدیمی، و هشدارِ برندِ تکراری. اگر هرکدام تطبیقِ خودش را
      داشته باشد، جست‌وجو چیزی را پیدا می‌کند که بازیابی نمی‌شناسد. */
-  const selSrc = strip(read('components/market/CueSelector.tsx'));
+  const selSrc = strip(read('components/market/CatalogSelector.tsx'));
   t('هر دو تابعِ نام aliases را می‌بینند',
     /aliases\?: string\[\]/.test(cueRules)
     && (cueRules.match(/\.\.\.\(b\.aliases \?\? \[\]\)/g) ?? []).length >= 2,
@@ -2204,9 +2214,114 @@ console.log('\n― کاتالوگِ چوب ―');
     /normalizeFa\(q\)/.test(read('components/market/AdFormFields.tsx'))
     && /normalizeFa\(o\.search \?\? o\.label\)/.test(read('components/market/AdFormFields.tsx')),
     'وگرنه «مك درموت» با کیبوردِ عربی هیچ ردیفی برنمی‌گرداند');
-  t('cue-rules نرمال‌ساز را دوباره نمی‌نویسد',
+  t('catalog-rules نرمال‌ساز را دوباره نمی‌نویسد',
     /normalizeBrandKey = normalizeFa/.test(cueRules));
 }
+
+/* ── کاتالوگِ میز ──
+   همان ساختارِ چوب، به‌اضافه‌ی دو چیزی که فقط میز دارد: سایزِ
+   وابسته به نوع، و نوعی که اصلاً فهرستِ برند ندارد. */
+console.log('\n― کاتالوگِ میز ―');
+{
+  const tPath = join(ROOT, 'data/table_catalog.json');
+  t('فایلِ کاتالوگِ میز هست', existsSync(tPath));
+
+  if (existsSync(tPath)) {
+    const rawT = readFileSync(tPath, 'utf8');
+    t('فارسیِ کاتالوگِ میز سالم است', !rawT.includes('\uFFFD'));
+    const tc = JSON.parse(rawT);
+    const tBrands = tc.types.flatMap(x => x.brands);
+
+    t('پنج نوع میز', tc.types.length === 5);
+    t('۵۸ برند و ۱۲۱ مدل',
+      tBrands.length === 58 && tBrands.reduce((n, b) => n + b.models.length, 0) === 121,
+      tBrands.length + ' برند');
+
+    /* پیشوندِ برندها با نوع بخواند — «میز خانگی» برند ندارد و
+       طبیعتاً از این سنجش بیرون می‌ماند. */
+    const P = { pocket_billiard: 'tpkt__', snooker: 'tsnk__', heyball: 'they__', carom: 'tcar__', home_table: 'thome__' };
+    const badP = tc.types.flatMap(x => x.brands.filter(b => !b.id.startsWith(P[x.id])).map(b => b.id));
+    t('پیشوندِ هر برندِ میز با نوعش می‌خواند', badP.length === 0, badP.slice(0, 3).join(', '));
+
+    const tIds = tBrands.map(b => b.id);
+    t('شناسه‌ی برندِ میز یکتاست', new Set(tIds).size === tIds.length);
+
+    /* ── سایز ──
+       هر نوع فهرستِ خودش را دارد. یک فهرستِ مشترک سه چیز را خراب
+       می‌کرد: کارامبول با فوت اندازه نمی‌شود، اسنوکر ۱۲ فوت دارد و
+       پاکت ندارد، و «۸ فوت» در آن دو ابعادِ متفاوت است. */
+    t('هر نوعِ میز سایزِ خودش را دارد',
+      tc.types.every(x => Array.isArray(x.sizes) && x.sizes.length > 0));
+    t('شناسه‌ی سایز درونِ هر نوع یکتاست',
+      tc.types.every(x => new Set(x.sizes.map(s => s.id)).size === x.sizes.length));
+    t('هر نوع دقیقاً یک سایزِ پیش‌فرض دارد',
+      tc.types.every(x => x.sizes.filter(s => s.default).length === 1),
+      'پیش‌فرض همان رایج‌ترین سایزِ آن رشته است');
+
+    /* همین‌جا ثابت می‌شود چرا فهرستِ مشترک غلط بود */
+    const snk8 = tc.types.find(x => x.id === 'snooker').sizes.find(s => s.id === '8ft');
+    const pkt8 = tc.types.find(x => x.id === 'pocket_billiard').sizes.find(s => s.id === '8ft');
+    t('«۸ فوت» در اسنوکر و پاکت یکی نیست',
+      !!snk8 && !!pkt8 && snk8.playing_area_cm !== pkt8.playing_area_cm,
+      'شناسه‌ی سایز بینِ نوع‌ها تکراری است، پس سرور باید تعلقش را بسنجد');
+    t('کارامبول با فوت اندازه نمی‌شود',
+      tc.types.find(x => x.id === 'carom').sizes.every(s => !/فوت/.test(s.label_fa)));
+
+    /* ── نوعِ بدونِ فهرست ── */
+    const home = tc.types.find(x => x.id === 'home_table');
+    t('میز خانگی پرچمِ متنِ آزاد دارد و برندی ندارد',
+      !!home && home.force_free_input === true && home.brands.length === 0);
+  }
+
+  /* ── همگامیِ رونوشتِ سبک با داده ──
+     قواعد نوع‌ها را تکرار می‌کند تا کلاینت برای نگاشتِ برچسبِ فارسی
+     صد کیلوبایت داده نگیرد. اگر نوعی به JSON اضافه شود و آن‌جا نه،
+     انتخابگر بی‌صدا خالی می‌ماند. */
+  const rules = read('lib/market/catalog-rules.ts');
+  for (const [cat, file] of [['cue', 'data/cue-catalog.json'], ['table', 'data/table_catalog.json']]) {
+    if (!existsSync(join(ROOT, file))) continue;
+    const ids = JSON.parse(readFileSync(join(ROOT, file), 'utf8')).types.map(x => x.id);
+    const block = rules.split(cat + ': [')[1] ?? '';
+    const listed = block.slice(0, block.indexOf(']'));
+    t('نوع‌های ' + cat + ' در قواعد با داده می‌خوانند',
+      ids.every(id => listed.includes("'" + id + "'")),
+      ids.filter(id => !listed.includes("'" + id + "'")).join(', '));
+  }
+
+  /* برچسبِ فارسیِ فرم باید به شناسه نگاشت شود، وگرنه انتخابگر
+     هرگز باز نمی‌شود و کسی خبردار نمی‌شود. */
+  const chain = read('lib/market/chain.ts');
+  const formTypes = (chain.match(/table:\s*\[([^\]]*)\]/) ?? [])[1] ?? '';
+  const labels = [...formTypes.matchAll(/'([^']+)'/g)].map(m => m[1]);
+  t('هر نوعِ میزِ فرم در نگاشتِ فارسی هست',
+    labels.length > 0 && labels.every(l => rules.includes("'" + l + "':")),
+    labels.filter(l => !rules.includes("'" + l + "':")).join(', '));
+
+  /* ── سایز از فهرستِ ثابت درآمد ── */
+  const specsSrc = read('lib/market/specs.ts');
+  t('فهرستِ ثابتِ سایز حذف شد',
+    !specsSrc.includes("'۷ فوت','۸ فوت'") && specsSrc.includes("'size']"),
+    'سایز حالا از سایزهای همان نوع می‌آید');
+  t('فیلدِ سایز در کارتِ مشخصات است',
+    ['app/shop/new/page.tsx', 'app/shop/edit/[id]/page.tsx']
+      .every(f => /<TableSizeField/.test(read(f))));
+  t('میز خانگی روی پرچمِ داده کار می‌کند نه شناسه',
+    /forceFreeInput/.test(read('components/market/CatalogSelector.tsx'))
+    && !/home_table/.test(read('components/market/CatalogSelector.tsx')),
+    'هاردکدِ شناسه یعنی نوعِ بعدی دوباره کد می‌خواهد');
+
+  /* ── اعتبارسنجیِ سمتِ سرور ── */
+  const adsRoute = read('app/api/market/ads/route.ts');
+  t('روتِ آگهی انتخابِ کاتالوگ را می‌سنجد',
+    /validateOnServer/.test(adsRoute) && /isCatalogId/.test(adsRoute),
+    'هرکسی می‌تواند مستقیم به این روت POST بزند');
+  t('سنجش پیش از مصرفِ سهمیه است',
+    adsRoute.indexOf('validateOnServer({') < adsRoute.indexOf('consumeAdQuota(actor.id)'),
+    'ورودیِ نامعتبر نباید سهمیه بسوزاند');
+  t('مهاجرتِ ستون‌های کاتالوگ نوشته شده',
+    existsSync(join(ROOT, '../../supabase/migrations/086_products_catalog_ids.sql')));
+}
+
 
 console.log('\n― CORS ―');
 {

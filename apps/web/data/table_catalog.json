@@ -1,0 +1,1616 @@
+{
+  "schema_version": "1.0",
+  "last_updated": "2026-08-11",
+  "category": {
+    "id": "table",
+    "label_fa": "میز"
+  },
+  "notes_fa": "ساختار سه‌سطحی: دسته‌بندی «میز» ← نوع ← برند ← مدل. مشابه cue_catalog.json. گزینه «سایر» توسط فرانت‌اند اضافه می‌شود.",
+  "other_option": {
+    "id": "other",
+    "name_fa": "سایر",
+    "reveals_text_input": true,
+    "max_length": 60
+  },
+  "countries": {
+    "GB": {
+      "fa": "انگلستان",
+      "en": "United Kingdom",
+      "flag": "🇬🇧"
+    },
+    "US": {
+      "fa": "آمریکا",
+      "en": "United States",
+      "flag": "🇺🇸"
+    },
+    "CN": {
+      "fa": "چین",
+      "en": "China",
+      "flag": "🇨🇳"
+    },
+    "BE": {
+      "fa": "بلژیک",
+      "en": "Belgium",
+      "flag": "🇧🇪"
+    },
+    "NL": {
+      "fa": "هلند",
+      "en": "Netherlands",
+      "flag": "🇳🇱"
+    },
+    "FR": {
+      "fa": "فرانسه",
+      "en": "France",
+      "flag": "🇫🇷"
+    },
+    "ES": {
+      "fa": "اسپانیا",
+      "en": "Spain",
+      "flag": "🇪🇸"
+    },
+    "MY": {
+      "fa": "مالزی",
+      "en": "Malaysia",
+      "flag": "🇲🇾"
+    },
+    "IR": {
+      "fa": "ایران",
+      "en": "Iran",
+      "flag": "🇮🇷"
+    }
+  },
+  "tiers": {
+    "tournament": "تورنمنتی / رسمی",
+    "premium": "حرفه‌ای",
+    "mid": "میان‌رده",
+    "budget": "اقتصادی"
+  },
+  "size_note_fa": "سایز میز در بخش «مشخصات فنی» گرفته می‌شود و به نوع میز وابسته است. لیست مجاز هر نوع در فیلد types[].sizes آمده. نام مدل‌ها عمداً بدون سایز است تا تکرار نشود (تنها استثنا Star XW101-12S که ۱۲ فوت جزو کد رسمی محصول است). playing_area_cm ابعاد سطح بازی داخل باند است، نه ابعاد بیرونی میز. دقت: میز اسنوکر ۸ فوت سطح بازی بزرگ‌تری از میز پاکت بیلیارد ۸ فوت دارد، پس این ابعاد بین نوع‌ها قابل تعویض نیستند. توصیه: گزینه «سایر / نامشخص» به انتهای لیست سایز هم اضافه شود.",
+  "types": [
+    {
+      "id": "pocket_billiard",
+      "label_fa": "پاکت بیلیارد",
+      "label_en": "Pocket Billiards / Pool",
+      "brands": [
+        {
+          "id": "tpkt__diamond",
+          "name_en": "Diamond Billiard Products",
+          "name_fa": "دایموند",
+          "country": "US",
+          "tier": "tournament",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "pro-am",
+              "name_en": "Pro-Am",
+              "name_fa": "پرو-اَم"
+            },
+            {
+              "id": "smart-table",
+              "name_en": "Smart Table",
+              "name_fa": "اسمارت تیبل"
+            },
+            {
+              "id": "professional",
+              "name_en": "Professional",
+              "name_fa": "پروفشنال"
+            },
+            {
+              "id": "paragon",
+              "name_en": "Paragon",
+              "name_fa": "پاراگون"
+            },
+            {
+              "id": "oak",
+              "name_en": "Oak / Home Series",
+              "name_fa": "اوک / سری خانگی"
+            }
+          ],
+          "note_fa": "میز رسمی WPA World Championship و Mosconi Cup",
+          "aliases": [
+            "دایموند",
+            "دیاموند",
+            "Diamond"
+          ]
+        },
+        {
+          "id": "tpkt__gabriels",
+          "name_en": "Gabriels",
+          "name_fa": "گابریلز",
+          "country": "BE",
+          "tier": "tournament",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "sentinel",
+              "name_en": "Sentinel",
+              "name_fa": "سنتینل"
+            },
+            {
+              "id": "imperator",
+              "name_en": "Imperator",
+              "name_fa": "امپراتور"
+            }
+          ],
+          "aliases": [
+            "گابریلز",
+            "گابریل",
+            "Gabriels"
+          ]
+        },
+        {
+          "id": "tpkt__predator-t",
+          "name_en": "Predator",
+          "name_fa": "پردیتور",
+          "country": "US",
+          "tier": "tournament",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "apex",
+              "name_en": "Apex",
+              "name_fa": "اِیپکس"
+            },
+            {
+              "id": "elite",
+              "name_en": "Elite",
+              "name_fa": "الیت"
+            }
+          ],
+          "aliases": [
+            "پردیتور",
+            "پریدیتور",
+            "Predator"
+          ]
+        },
+        {
+          "id": "tpkt__rasson",
+          "name_en": "Rasson",
+          "name_fa": "رَسون",
+          "country": "CN",
+          "tier": "tournament",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "victory-iii",
+              "name_en": "Victory III",
+              "name_fa": "ویکتوری III"
+            },
+            {
+              "id": "victory-ii-plus",
+              "name_en": "Victory II Plus",
+              "name_fa": "ویکتوری II پلاس"
+            },
+            {
+              "id": "ox-ii",
+              "name_en": "OX II",
+              "name_fa": "اُکس II"
+            },
+            {
+              "id": "ox",
+              "name_en": "OX",
+              "name_fa": "اُکس"
+            },
+            {
+              "id": "ox-modern",
+              "name_en": "OX Modern",
+              "name_fa": "اُکس مدرن"
+            },
+            {
+              "id": "wolf",
+              "name_en": "Wolf",
+              "name_fa": "ولف"
+            },
+            {
+              "id": "acurra",
+              "name_en": "Acurra",
+              "name_fa": "آکورا"
+            },
+            {
+              "id": "hero",
+              "name_en": "Hero",
+              "name_fa": "هیرو"
+            },
+            {
+              "id": "ironman",
+              "name_en": "Ironman",
+              "name_fa": "آیرون‌من"
+            },
+            {
+              "id": "challenger-plus",
+              "name_en": "Challenger Plus",
+              "name_fa": "چلنجر پلاس"
+            }
+          ],
+          "note_fa": "میز رسمی Matchroom و Mosconi Cup",
+          "aliases": [
+            "رسون",
+            "رَسون",
+            "راسون",
+            "Rasson"
+          ]
+        },
+        {
+          "id": "tpkt__brunswick",
+          "name_en": "Brunswick Billiards",
+          "name_fa": "برانزویک",
+          "country": "US",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "gold-crown-vi",
+              "name_en": "Gold Crown VI",
+              "name_fa": "گلد کراون VI"
+            },
+            {
+              "id": "gold-crown-v",
+              "name_en": "Gold Crown V",
+              "name_fa": "گلد کراون V"
+            },
+            {
+              "id": "gold-crown",
+              "name_en": "Gold Crown (I-IV)",
+              "name_fa": "گلد کراون (I تا IV)"
+            },
+            {
+              "id": "centurion",
+              "name_en": "Centurion",
+              "name_fa": "سنچوریون"
+            },
+            {
+              "id": "metro",
+              "name_en": "Metro",
+              "name_fa": "مترو"
+            },
+            {
+              "id": "allenton",
+              "name_en": "Allenton",
+              "name_fa": "آلنتون"
+            },
+            {
+              "id": "billiards-heritage",
+              "name_en": "Heritage / Antique",
+              "name_fa": "هریتیج / آنتیک"
+            }
+          ],
+          "aliases": [
+            "برانزویک",
+            "برونزویک",
+            "Brunswick"
+          ]
+        },
+        {
+          "id": "tpkt__connelly",
+          "name_en": "Connelly Billiards",
+          "name_fa": "کانلی",
+          "country": "US",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "classic",
+              "name_en": "Classic Series",
+              "name_fa": "سری کلاسیک"
+            },
+            {
+              "id": "custom",
+              "name_en": "Custom",
+              "name_fa": "سفارشی"
+            }
+          ]
+        },
+        {
+          "id": "tpkt__cry-wolf",
+          "name_en": "Cry Wolf",
+          "name_fa": "کرای ولف",
+          "country": "GB",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "tournament-edition",
+              "name_en": "Tournament Edition",
+              "name_fa": "تورنمنت ادیشن"
+            },
+            {
+              "id": "slate-bed",
+              "name_en": "Slate Bed",
+              "name_fa": "اسلیت بد"
+            }
+          ]
+        },
+        {
+          "id": "tpkt__dpt",
+          "name_en": "DPT",
+          "name_fa": "دی‌پی‌تی",
+          "country": "GB",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "omega-pro",
+              "name_en": "Omega Pro",
+              "name_fa": "اُمگا پرو"
+            },
+            {
+              "id": "avant-garde",
+              "name_en": "Avant Garde Dining",
+              "name_fa": "آوانگارد"
+            },
+            {
+              "id": "classic",
+              "name_en": "Classic",
+              "name_fa": "کلاسیک"
+            }
+          ]
+        },
+        {
+          "id": "tpkt__olhausen",
+          "name_en": "Olhausen",
+          "name_fa": "اولهاوزن",
+          "country": "US",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "champion-pro",
+              "name_en": "Champion Pro",
+              "name_fa": "چمپیون پرو"
+            },
+            {
+              "id": "select",
+              "name_en": "Select Series",
+              "name_fa": "سری سلکت"
+            },
+            {
+              "id": "contemporary",
+              "name_en": "Contemporary Series",
+              "name_fa": "سری کانتمپرری"
+            },
+            {
+              "id": "traditional",
+              "name_en": "Traditional Series",
+              "name_fa": "سری سنتی"
+            },
+            {
+              "id": "americana",
+              "name_en": "Americana",
+              "name_fa": "آمریکانا"
+            }
+          ],
+          "aliases": [
+            "اولهاوزن",
+            "الهاوزن",
+            "Olhausen"
+          ]
+        },
+        {
+          "id": "tpkt__riley-t",
+          "name_en": "Riley England",
+          "name_fa": "رایلی انگلند",
+          "country": "GB",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "aristocrat-pool",
+              "name_en": "Aristocrat Pool",
+              "name_fa": "آریستوکرات پاکت بیلیارد"
+            },
+            {
+              "id": "club-pool",
+              "name_en": "Club Pool",
+              "name_fa": "کلاب پاکت بیلیارد"
+            }
+          ],
+          "aliases": [
+            "رایلی",
+            "رایلی انگلند",
+            "Riley"
+          ]
+        },
+        {
+          "id": "tpkt__sam",
+          "name_en": "SAM Leisure",
+          "name_fa": "سم لژر",
+          "country": "ES",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "atlantic",
+              "name_en": "Atlantic Champion",
+              "name_fa": "آتلانتیک چمپیون"
+            },
+            {
+              "id": "k-steel",
+              "name_en": "K-Steel",
+              "name_fa": "کی-استیل"
+            },
+            {
+              "id": "magno",
+              "name_en": "Magno",
+              "name_fa": "مگنو"
+            }
+          ]
+        },
+        {
+          "id": "tpkt__signature",
+          "name_en": "Signature Tables",
+          "name_fa": "سیگنیچر",
+          "country": "GB",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "tournament-pro",
+              "name_en": "Tournament Pro Edition",
+              "name_fa": "تورنمنت پرو"
+            },
+            {
+              "id": "classic",
+              "name_en": "Classic",
+              "name_fa": "کلاسیک"
+            }
+          ]
+        },
+        {
+          "id": "tpkt__star-p",
+          "name_en": "Star / Xingpai",
+          "name_fa": "استار / شینگ‌پای",
+          "country": "CN",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "pool",
+              "name_en": "American Pool Table",
+              "name_fa": "میز پاکت بیلیارد آمریکایی"
+            }
+          ],
+          "aliases": [
+            "استار",
+            "شینگ پای",
+            "Star",
+            "Xingpai"
+          ]
+        },
+        {
+          "id": "tpkt__supreme",
+          "name_en": "Supreme (Heywood)",
+          "name_fa": "سوپریم",
+          "country": "GB",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "winner",
+              "name_en": "Winner",
+              "name_fa": "وینر"
+            },
+            {
+              "id": "winner-coin",
+              "name_en": "Winner Coin-Op",
+              "name_fa": "وینر سکه‌ای"
+            },
+            {
+              "id": "prince",
+              "name_en": "Prince",
+              "name_fa": "پرینس"
+            }
+          ],
+          "note_fa": "پرفروش‌ترین میز پاکت بیلیارد انگلیسی بریتانیا",
+          "aliases": [
+            "سوپریم",
+            "سوپریم پول",
+            "Supreme"
+          ]
+        },
+        {
+          "id": "tpkt__american-heritage",
+          "name_en": "American Heritage",
+          "name_fa": "امریکن هریتیج",
+          "country": "US",
+          "tier": "mid",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "classic",
+              "name_en": "Classic Series",
+              "name_fa": "سری کلاسیک"
+            }
+          ]
+        },
+        {
+          "id": "tpkt__buffalo-t",
+          "name_en": "Buffalo",
+          "name_fa": "بوفالو",
+          "country": "NL",
+          "tier": "mid",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "eliminator",
+              "name_en": "Eliminator",
+              "name_fa": "الیمیناتور"
+            },
+            {
+              "id": "century",
+              "name_en": "Century",
+              "name_fa": "سنچری"
+            },
+            {
+              "id": "pro",
+              "name_en": "Pro",
+              "name_fa": "پرو"
+            }
+          ],
+          "aliases": [
+            "بوفالو",
+            "بوفالو",
+            "Buffalo"
+          ]
+        },
+        {
+          "id": "tpkt__dynamic",
+          "name_en": "Dynamic Billiard",
+          "name_fa": "داینامیک",
+          "country": "NL",
+          "tier": "mid",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "triumph",
+              "name_en": "Triumph",
+              "name_fa": "تریومف"
+            },
+            {
+              "id": "vancouver",
+              "name_en": "Vancouver",
+              "name_fa": "ونکوور"
+            },
+            {
+              "id": "competition",
+              "name_en": "Competition",
+              "name_fa": "کامپتیشن"
+            }
+          ],
+          "aliases": [
+            "داینامیک",
+            "دینامیک",
+            "Dynamic"
+          ]
+        },
+        {
+          "id": "tpkt__fmf",
+          "name_en": "FMF",
+          "name_fa": "اف‌ام‌اف",
+          "country": "GB",
+          "tier": "mid",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "pool",
+              "name_en": "Pool Range",
+              "name_fa": "رده پاکت بیلیارد"
+            }
+          ]
+        },
+        {
+          "id": "tpkt__gatley",
+          "name_en": "Gatley Leisure",
+          "name_fa": "گتلی لژر",
+          "country": "GB",
+          "tier": "mid",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "leyburn",
+              "name_en": "Leyburn",
+              "name_fa": "لیبرن"
+            },
+            {
+              "id": "classic",
+              "name_en": "Classic",
+              "name_fa": "کلاسیک"
+            }
+          ]
+        },
+        {
+          "id": "tpkt__iranian-p",
+          "name_en": "Iranian Made",
+          "name_fa": "ساخت ایران",
+          "country": "IR",
+          "tier": "mid",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "workshop",
+              "name_en": "Workshop / Local Build",
+              "name_fa": "کارگاهی / تولید داخلی"
+            }
+          ],
+          "aliases": [
+            "ایرانی",
+            "داخلی",
+            "تولید داخل"
+          ]
+        },
+        {
+          "id": "tpkt__joy-p",
+          "name_en": "Joy",
+          "name_fa": "جوی",
+          "country": "CN",
+          "tier": "mid",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "pool",
+              "name_en": "Pool Table",
+              "name_fa": "میز پاکت بیلیارد"
+            }
+          ]
+        },
+        {
+          "id": "tpkt__legacy",
+          "name_en": "Legacy Billiards",
+          "name_fa": "لگسی",
+          "country": "US",
+          "tier": "mid",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "classic",
+              "name_en": "Classic Series",
+              "name_fa": "سری کلاسیک"
+            }
+          ]
+        },
+        {
+          "id": "tpkt__presidential",
+          "name_en": "Presidential Billiards",
+          "name_fa": "پرزیدنشال",
+          "country": "US",
+          "tier": "mid",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "classic",
+              "name_en": "Classic Series",
+              "name_fa": "سری کلاسیک"
+            }
+          ]
+        },
+        {
+          "id": "tpkt__imperial",
+          "name_en": "Imperial",
+          "name_fa": "امپریال",
+          "country": "US",
+          "tier": "budget",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "slate",
+              "name_en": "Slate Series",
+              "name_fa": "سری اسلیت"
+            },
+            {
+              "id": "outdoor",
+              "name_en": "Outdoor",
+              "name_fa": "فضای باز"
+            }
+          ]
+        },
+        {
+          "id": "tpkt__mizerak",
+          "name_en": "Mizerak",
+          "name_fa": "مایزراک",
+          "country": "US",
+          "tier": "budget",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "slate",
+              "name_en": "Slate Series",
+              "name_fa": "سری اسلیت"
+            }
+          ]
+        },
+        {
+          "id": "tpkt__unknown-p",
+          "name_en": "Unbranded / Unknown",
+          "name_fa": "بدون برند / نامشخص",
+          "country": null,
+          "tier": "budget",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "unknown",
+              "name_en": "Unknown",
+              "name_fa": "نامشخص"
+            }
+          ]
+        }
+      ],
+      "sizes": [
+        {
+          "id": "9ft",
+          "label_fa": "۹ فوت (استاندارد حرفه‌ای)",
+          "label_en": "9ft Professional",
+          "playing_area_cm": "254×127",
+          "note_fa": "سایز رسمی WPA",
+          "default": true
+        },
+        {
+          "id": "8ft-pro",
+          "label_fa": "۸ فوت پرو",
+          "label_en": "8ft+ Pro",
+          "playing_area_cm": "233×116"
+        },
+        {
+          "id": "8ft",
+          "label_fa": "۸ فوت",
+          "label_en": "8ft",
+          "playing_area_cm": "223×111"
+        },
+        {
+          "id": "7ft",
+          "label_fa": "۷ فوت",
+          "label_en": "7ft / Bar Box",
+          "playing_area_cm": "198×99",
+          "note_fa": "رایج‌ترین سایز پاکت بیلیارد انگلیسی و بار"
+        },
+        {
+          "id": "6ft",
+          "label_fa": "۶ فوت",
+          "label_en": "6ft",
+          "playing_area_cm": "177×88",
+          "note_fa": "رایج در پاکت بیلیارد انگلیسی خانگی"
+        },
+        {
+          "id": "5ft",
+          "label_fa": "۵ فوت",
+          "label_en": "5ft",
+          "playing_area_cm": "152×76",
+          "note_fa": "خانگی / کودک"
+        }
+      ]
+    },
+    {
+      "id": "snooker",
+      "label_fa": "اسنوکر",
+      "label_en": "Snooker",
+      "brands": [
+        {
+          "id": "tsnk__rasson-s",
+          "name_en": "Rasson",
+          "name_fa": "رَسون",
+          "country": "CN",
+          "tier": "tournament",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "magnum-ii",
+              "name_en": "Magnum II",
+              "name_fa": "مگنوم II"
+            },
+            {
+              "id": "magnum",
+              "name_en": "Magnum",
+              "name_fa": "مگنوم"
+            }
+          ],
+          "note_fa": "میز رسمی Champion of Champions",
+          "aliases": [
+            "رسون",
+            "رَسون",
+            "راسون",
+            "Rasson"
+          ]
+        },
+        {
+          "id": "tsnk__riley",
+          "name_en": "Riley England",
+          "name_fa": "رایلی انگلند",
+          "country": "GB",
+          "tier": "tournament",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "aristocrat",
+              "name_en": "Aristocrat",
+              "name_fa": "آریستوکرات"
+            },
+            {
+              "id": "aristocrat-tc",
+              "name_en": "Aristocrat Tournament Champion",
+              "name_fa": "آریستوکرات تورنمنت چمپیون"
+            },
+            {
+              "id": "aristocrat-steel",
+              "name_en": "Aristocrat Steel Block Match",
+              "name_fa": "آریستوکرات استیل‌بلاک"
+            },
+            {
+              "id": "club",
+              "name_en": "Club / Renaissance",
+              "name_fa": "کلاب / رنسانس"
+            },
+            {
+              "id": "diner",
+              "name_en": "Snooker Diner",
+              "name_fa": "میز غذاخوری اسنوکر"
+            }
+          ],
+          "aliases": [
+            "رایلی",
+            "رایلی انگلند",
+            "Riley"
+          ]
+        },
+        {
+          "id": "tsnk__star",
+          "name_en": "Star / Xingpai",
+          "name_fa": "استار / شینگ‌پای",
+          "country": "CN",
+          "tier": "tournament",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "xw101-12s",
+              "name_en": "XW101-12S Tournament 12ft",
+              "name_fa": "XW101-12S تورنمنت ۱۲ فوت"
+            },
+            {
+              "id": "main-tour",
+              "name_en": "Main Tour Professional",
+              "name_fa": "مِین تور حرفه‌ای"
+            },
+            {
+              "id": "club",
+              "name_en": "Club Table",
+              "name_fa": "میز باشگاهی"
+            },
+            {
+              "id": "home",
+              "name_en": "Home / Practice",
+              "name_fa": "خانگی / تمرینی"
+            }
+          ],
+          "note_fa": "میز رسمی تورنمنت‌های رنکینگ WPBSA",
+          "aliases": [
+            "استار",
+            "شینگ پای",
+            "Star",
+            "Xingpai"
+          ]
+        },
+        {
+          "id": "tsnk__burroughes",
+          "name_en": "Burroughes & Watts",
+          "name_fa": "بارِوز اند واتس",
+          "country": "GB",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "record",
+              "name_en": "Record",
+              "name_fa": "رکورد"
+            },
+            {
+              "id": "steel-block",
+              "name_en": "Steel Block",
+              "name_fa": "استیل بلاک"
+            },
+            {
+              "id": "imperial",
+              "name_en": "Imperial",
+              "name_fa": "امپریال"
+            },
+            {
+              "id": "refurbished",
+              "name_en": "Refurbished Antique",
+              "name_fa": "بازسازی‌شده کلاسیک"
+            }
+          ]
+        },
+        {
+          "id": "tsnk__cox-yeman",
+          "name_en": "Cox & Yeman",
+          "name_fa": "کاکس اند یمن",
+          "country": "GB",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "antique",
+              "name_en": "Antique",
+              "name_fa": "آنتیک"
+            }
+          ]
+        },
+        {
+          "id": "tsnk__ej-riley",
+          "name_en": "E.J. Riley (Vintage)",
+          "name_fa": "ای‌جی رایلی (قدیمی)",
+          "country": "GB",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "antique",
+              "name_en": "Antique Full Size",
+              "name_fa": "تمام‌سایز آنتیک"
+            },
+            {
+              "id": "imperial",
+              "name_en": "Imperial",
+              "name_fa": "امپریال"
+            }
+          ]
+        },
+        {
+          "id": "tsnk__hamilton",
+          "name_en": "Hamilton Billiards",
+          "name_fa": "همیلتون",
+          "country": "GB",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "bespoke",
+              "name_en": "Bespoke / Restored",
+              "name_fa": "سفارشی / بازسازی‌شده"
+            }
+          ]
+        },
+        {
+          "id": "tsnk__ormes",
+          "name_en": "Ormes & Sons",
+          "name_fa": "اورمز اند سانز",
+          "country": "GB",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "classic",
+              "name_en": "Classic Full Size",
+              "name_fa": "تمام‌سایز کلاسیک"
+            }
+          ]
+        },
+        {
+          "id": "tsnk__peradon-t",
+          "name_en": "Peradon",
+          "name_fa": "پرادون",
+          "country": "GB",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "full-size",
+              "name_en": "Full Size Slate Bed",
+              "name_fa": "تمام‌سایز اسلیت"
+            },
+            {
+              "id": "club",
+              "name_en": "Club Table",
+              "name_fa": "میز باشگاهی"
+            }
+          ],
+          "aliases": [
+            "پرادون",
+            "پرادن",
+            "Peradon"
+          ]
+        },
+        {
+          "id": "tsnk__thurston",
+          "name_en": "Thurston",
+          "name_fa": "ترستون",
+          "country": "GB",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "championship",
+              "name_en": "Championship",
+              "name_fa": "چمپیون‌شیپ"
+            },
+            {
+              "id": "classic",
+              "name_en": "Classic / Antique",
+              "name_fa": "کلاسیک / آنتیک"
+            }
+          ]
+        },
+        {
+          "id": "tsnk__iranian-s",
+          "name_en": "Iranian Made",
+          "name_fa": "ساخت ایران",
+          "country": "IR",
+          "tier": "mid",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "workshop",
+              "name_en": "Workshop / Local Build",
+              "name_fa": "کارگاهی / تولید داخلی"
+            }
+          ],
+          "aliases": [
+            "ایرانی",
+            "داخلی",
+            "تولید داخل"
+          ]
+        },
+        {
+          "id": "tsnk__joy-s",
+          "name_en": "Joy",
+          "name_fa": "جوی",
+          "country": "CN",
+          "tier": "mid",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "snooker",
+              "name_en": "Snooker Table",
+              "name_fa": "میز اسنوکر"
+            }
+          ]
+        },
+        {
+          "id": "tsnk__sam-s",
+          "name_en": "SAM Leisure",
+          "name_fa": "سم لژر",
+          "country": "ES",
+          "tier": "mid",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "snooker",
+              "name_en": "Snooker Range",
+              "name_fa": "رده اسنوکر"
+            }
+          ]
+        },
+        {
+          "id": "tsnk__wiraka",
+          "name_en": "Wiraka",
+          "name_fa": "ویراکا",
+          "country": "MY",
+          "tier": "mid",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "m1",
+              "name_en": "M1 Tournament",
+              "name_fa": "M1 تورنمنت"
+            },
+            {
+              "id": "club",
+              "name_en": "Club Series",
+              "name_fa": "سری باشگاهی"
+            }
+          ]
+        },
+        {
+          "id": "tsnk__unknown-s",
+          "name_en": "Unbranded / Unknown",
+          "name_fa": "بدون برند / نامشخص",
+          "country": null,
+          "tier": "budget",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "unknown",
+              "name_en": "Unknown",
+              "name_fa": "نامشخص"
+            }
+          ]
+        }
+      ],
+      "sizes": [
+        {
+          "id": "12ft",
+          "label_fa": "۱۲ فوت (تمام‌سایز)",
+          "label_en": "12ft Full Size",
+          "playing_area_cm": "356×178",
+          "note_fa": "سایز رسمی تورنمنت",
+          "default": true
+        },
+        {
+          "id": "10ft",
+          "label_fa": "۱۰ فوت",
+          "label_en": "10ft",
+          "playing_area_cm": "305×152"
+        },
+        {
+          "id": "9ft",
+          "label_fa": "۹ فوت (سه‌چهارم)",
+          "label_en": "9ft / 3-4 size",
+          "playing_area_cm": "274×137"
+        },
+        {
+          "id": "8ft",
+          "label_fa": "۸ فوت",
+          "label_en": "8ft",
+          "playing_area_cm": "233×115"
+        },
+        {
+          "id": "7ft",
+          "label_fa": "۷ فوت",
+          "label_en": "7ft",
+          "playing_area_cm": "206×99"
+        },
+        {
+          "id": "6ft",
+          "label_fa": "۶ فوت",
+          "label_en": "6ft",
+          "playing_area_cm": "175×84",
+          "note_fa": "اغلب میز کودک یا خانگی کوچک"
+        }
+      ]
+    },
+    {
+      "id": "heyball",
+      "label_fa": "هی‌بال",
+      "label_en": "Heyball / Chinese 8-Ball",
+      "brands": [
+        {
+          "id": "they__joy-h",
+          "name_en": "Joy",
+          "name_fa": "جوی",
+          "country": "CN",
+          "tier": "tournament",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "tournament",
+              "name_en": "Tournament Series",
+              "name_fa": "سری تورنمنت"
+            },
+            {
+              "id": "club",
+              "name_en": "Club Series",
+              "name_fa": "سری باشگاهی"
+            }
+          ],
+          "note_fa": "برگزارکننده و اسپانسر اصلی تورنمنت‌های چاینیز ۸-بال"
+        },
+        {
+          "id": "they__rasson-h",
+          "name_en": "Rasson",
+          "name_fa": "رَسون",
+          "country": "CN",
+          "tier": "tournament",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "sword-ii-n8",
+              "name_en": "Sword II (N8)",
+              "name_fa": "سورد II (N8)"
+            },
+            {
+              "id": "sword",
+              "name_en": "Sword",
+              "name_fa": "سورد"
+            }
+          ],
+          "note_fa": "میز استاندارد تور حرفه‌ای هی‌بال",
+          "aliases": [
+            "رسون",
+            "رَسون",
+            "راسون",
+            "Rasson"
+          ]
+        },
+        {
+          "id": "they__star-h",
+          "name_en": "Star / Xingpai",
+          "name_fa": "استار / شینگ‌پای",
+          "country": "CN",
+          "tier": "tournament",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "c8b-tournament",
+              "name_en": "Chinese 8-Ball Tournament",
+              "name_fa": "تورنمنت چاینیز ۸-بال"
+            },
+            {
+              "id": "c8b-club",
+              "name_en": "Chinese 8-Ball Club",
+              "name_fa": "باشگاهی چاینیز ۸-بال"
+            }
+          ],
+          "aliases": [
+            "استار",
+            "شینگ پای",
+            "Star",
+            "Xingpai"
+          ]
+        },
+        {
+          "id": "they__chevillotte",
+          "name_en": "Chevillotte",
+          "name_fa": "شویوت",
+          "country": "FR",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "heyball",
+              "name_en": "Heyball / Chinese Pool",
+              "name_fa": "هی‌بال"
+            }
+          ]
+        },
+        {
+          "id": "they__lp-h",
+          "name_en": "LP",
+          "name_fa": "ال‌پی",
+          "country": "CN",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "heyball",
+              "name_en": "Heyball Table",
+              "name_fa": "میز هی‌بال"
+            }
+          ]
+        },
+        {
+          "id": "they__iranian-h",
+          "name_en": "Iranian Made",
+          "name_fa": "ساخت ایران",
+          "country": "IR",
+          "tier": "mid",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "workshop",
+              "name_en": "Workshop / Local Build",
+              "name_fa": "کارگاهی / تولید داخلی"
+            }
+          ],
+          "aliases": [
+            "ایرانی",
+            "داخلی",
+            "تولید داخل"
+          ]
+        },
+        {
+          "id": "they__konllen-h",
+          "name_en": "Konllen",
+          "name_fa": "کانلن",
+          "country": "CN",
+          "tier": "mid",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "heyball",
+              "name_en": "Heyball Table",
+              "name_fa": "میز هی‌بال"
+            }
+          ],
+          "aliases": [
+            "کانلن",
+            "کنلن",
+            "Konllen"
+          ]
+        },
+        {
+          "id": "they__yalin",
+          "name_en": "Yalin",
+          "name_fa": "یالین",
+          "country": "CN",
+          "tier": "mid",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "heyball",
+              "name_en": "Heyball Table",
+              "name_fa": "میز هی‌بال"
+            }
+          ]
+        },
+        {
+          "id": "they__unknown-h",
+          "name_en": "Unbranded / Unknown",
+          "name_fa": "بدون برند / نامشخص",
+          "country": null,
+          "tier": "budget",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "unknown",
+              "name_en": "Unknown",
+              "name_fa": "نامشخص"
+            }
+          ]
+        }
+      ],
+      "sizes": [
+        {
+          "id": "9ft",
+          "label_fa": "۹ فوت (استاندارد)",
+          "label_en": "9ft Standard",
+          "playing_area_cm": "254×127",
+          "note_fa": "تقریباً همیشه ۹ فوت",
+          "default": true
+        },
+        {
+          "id": "8ft",
+          "label_fa": "۸ فوت",
+          "label_en": "8ft",
+          "playing_area_cm": "223×111"
+        }
+      ]
+    },
+    {
+      "id": "carom",
+      "label_fa": "کارامبول",
+      "label_en": "Carom / 3-Cushion",
+      "brands": [
+        {
+          "id": "tcar__gabriels-c",
+          "name_en": "Gabriels",
+          "name_fa": "گابریلز",
+          "country": "BE",
+          "tier": "tournament",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "sentinel",
+              "name_en": "Sentinel",
+              "name_fa": "سنتینل"
+            },
+            {
+              "id": "imperator",
+              "name_en": "Imperator",
+              "name_fa": "امپراتور"
+            },
+            {
+              "id": "colonial",
+              "name_en": "Colonial",
+              "name_fa": "کلونیال"
+            }
+          ],
+          "note_fa": "میز رسمی تورنمنت‌های سه‌بانده UMB",
+          "aliases": [
+            "گابریلز",
+            "گابریل",
+            "Gabriels"
+          ]
+        },
+        {
+          "id": "tcar__verhoeven",
+          "name_en": "Verhoeven",
+          "name_fa": "ورهوفن",
+          "country": "US",
+          "tier": "tournament",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "professional",
+              "name_en": "Professional",
+              "name_fa": "پروفشنال"
+            },
+            {
+              "id": "gt",
+              "name_en": "GT Series",
+              "name_fa": "سری GT"
+            }
+          ]
+        },
+        {
+          "id": "tcar__chevillotte-c",
+          "name_en": "Chevillotte",
+          "name_fa": "شویوت",
+          "country": "FR",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "excellence",
+              "name_en": "Excellence",
+              "name_fa": "اکسلنس"
+            },
+            {
+              "id": "prestige",
+              "name_en": "Prestige",
+              "name_fa": "پرستیژ"
+            }
+          ]
+        },
+        {
+          "id": "tcar__star-c",
+          "name_en": "Star / Xingpai",
+          "name_fa": "استار / شینگ‌پای",
+          "country": "CN",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "carom",
+              "name_en": "Carom Table",
+              "name_fa": "میز کارامبول"
+            }
+          ],
+          "aliases": [
+            "استار",
+            "شینگ پای",
+            "Star",
+            "Xingpai"
+          ]
+        },
+        {
+          "id": "tcar__buffalo-c",
+          "name_en": "Buffalo",
+          "name_fa": "بوفالو",
+          "country": "NL",
+          "tier": "mid",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "carom",
+              "name_en": "Carom Range",
+              "name_fa": "رده کارامبول"
+            }
+          ],
+          "aliases": [
+            "بوفالو",
+            "بوفالو",
+            "Buffalo"
+          ]
+        },
+        {
+          "id": "tcar__dynamic-c",
+          "name_en": "Dynamic Billiard",
+          "name_fa": "داینامیک",
+          "country": "NL",
+          "tier": "mid",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "carom",
+              "name_en": "Carom Range",
+              "name_fa": "رده کارامبول"
+            }
+          ],
+          "aliases": [
+            "داینامیک",
+            "دینامیک",
+            "Dynamic"
+          ]
+        },
+        {
+          "id": "tcar__iranian-c",
+          "name_en": "Iranian Made",
+          "name_fa": "ساخت ایران",
+          "country": "IR",
+          "tier": "mid",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "workshop",
+              "name_en": "Workshop / Local Build",
+              "name_fa": "کارگاهی / تولید داخلی"
+            }
+          ],
+          "aliases": [
+            "ایرانی",
+            "داخلی",
+            "تولید داخل"
+          ]
+        },
+        {
+          "id": "tcar__unknown-c",
+          "name_en": "Unbranded / Unknown",
+          "name_fa": "بدون برند / نامشخص",
+          "country": null,
+          "tier": "budget",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "unknown",
+              "name_en": "Unknown",
+              "name_fa": "نامشخص"
+            }
+          ]
+        }
+      ],
+      "sizes": [
+        {
+          "id": "284",
+          "label_fa": "۲.۸۴ × ۱.۴۲ متر (مچ)",
+          "label_en": "2.84×1.42m Match",
+          "playing_area_cm": "284×142",
+          "note_fa": "سایز رسمی سه‌بانده UMB",
+          "default": true
+        },
+        {
+          "id": "230",
+          "label_fa": "۲.۳۰ × ۱.۱۵ متر",
+          "label_en": "2.30×1.15m",
+          "playing_area_cm": "230×115",
+          "note_fa": "سایز تمرینی / باشگاهی"
+        },
+        {
+          "id": "210",
+          "label_fa": "۲.۱۰ × ۱.۰۵ متر",
+          "label_en": "2.10×1.05m",
+          "playing_area_cm": "210×105",
+          "note_fa": "خانگی"
+        }
+      ]
+    },
+    {
+      "id": "home_table",
+      "label_fa": "میز خانگی",
+      "label_en": "Home / Recreational Table",
+      "description_fa": "میزهای خانگی، تفریحی، کودک، تاشو، چندکاره و بدون برند مشخص. اکثراً MDF یا اسلیت نازک.",
+      "force_free_input": true,
+      "note_fa": "در این نوع، فیلدهای برند و مدل مستقیماً به input متنی آزاد تبدیل می‌شوند و هیچ لیستی نمایش داده نمی‌شود.",
+      "brands": [],
+      "sizes": [
+        {
+          "id": "9ft",
+          "label_fa": "۹ فوت",
+          "label_en": "9ft",
+          "playing_area_cm": "254×127"
+        },
+        {
+          "id": "8ft",
+          "label_fa": "۸ فوت",
+          "label_en": "8ft",
+          "playing_area_cm": "223×111"
+        },
+        {
+          "id": "7ft",
+          "label_fa": "۷ فوت",
+          "label_en": "7ft",
+          "playing_area_cm": "198×99",
+          "default": true
+        },
+        {
+          "id": "6ft",
+          "label_fa": "۶ فوت",
+          "label_en": "6ft",
+          "playing_area_cm": "177×88"
+        },
+        {
+          "id": "5ft",
+          "label_fa": "۵ فوت",
+          "label_en": "5ft",
+          "playing_area_cm": "152×76"
+        },
+        {
+          "id": "4ft",
+          "label_fa": "۴ فوت و کوچک‌تر",
+          "label_en": "4ft and under",
+          "playing_area_cm": "122×61",
+          "note_fa": "میز کودک / رومیزی"
+        }
+      ]
+    }
+  ],
+  "other_option_size": {
+    "id": "other",
+    "name_fa": "سایر / نامشخص",
+    "reveals_text_input": true,
+    "max_length": 40,
+    "placeholder_fa": "سایز را وارد کنید (مثلاً ۱۱ فوت)"
+  },
+  "ui_rules_fa": [
+    "گزینه «سایر» به انتهای هر سه لیست برند، مدل و سایز اضافه شود.",
+    "انتخاب «سایر» یک input متنی درست زیر همان فیلد باز می‌کند.",
+    "نوع «میز خانگی» فیلد force_free_input=true دارد: با انتخاب آن، برند و مدل بدون هیچ لیستی مستقیماً input متنی می‌شوند.",
+    "سایز در بخش «مشخصات فنی» گرفته می‌شود و لیستش به نوع میز وابسته است."
+  ],
+  "search_note_fa": "فیلد aliases املاهای رایج فارسی و غلط‌های تایپی را دارد. جستجوی برند باید علاوه بر name_en و name_fa روی aliases هم مچ کند."
+}
