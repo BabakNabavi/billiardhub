@@ -2052,6 +2052,56 @@ console.log('\n― آیکون‌های دسته‌بندی ―');
     `${Math.round(total / 1024)}KB`);
 }
 
+/* ── کاتالوگِ چوب ──
+   داده‌ی خودش (۴ نوع، ۱۱۴ برند، ۴۴۷ مدل) و قواعدی که سرور به آن‌ها
+   تکیه می‌کند: پیشوندِ برند با نوع بخواند، شناسه‌ها یکتا باشند، و
+   ۹۸ کیلوبایتِ JSON به باندلِ کلاینت نرود. */
+console.log('\n― کاتالوگِ چوب ―');
+{
+  const cuePath = join(ROOT, 'data/cue-catalog.json');
+  t('فایلِ کاتالوگ هست', existsSync(cuePath));
+
+  if (existsSync(cuePath)) {
+    const rawCue = readFileSync(cuePath, 'utf8');
+    t('فارسیِ کاتالوگ سالم است',
+      !rawCue.includes('�'),
+      'آپلودِ خرابِ انکودینگ یک‌بار همه‌ی نام‌های فارسی را نابود کرده بود');
+
+    const cat = JSON.parse(rawCue);
+    const PREFIX = { pocket_billiard: 'pocket__', snooker: 'snk__', heyball: 'hey__', carom: 'car__' };
+    const brands = cat.types.flatMap(x => x.brands);
+
+    t('هر چهار نوع هست', cat.types.length === 4 && cat.types.every(x => PREFIX[x.id]));
+    t('۱۱۴ برند و ۴۴۷ مدل',
+      brands.length === 114 && brands.reduce((n, b) => n + b.models.length, 0) === 447,
+      `${brands.length} برند`);
+
+    const badPrefix = cat.types.flatMap(x => x.brands.filter(b => !b.id.startsWith(PREFIX[x.id])).map(b => b.id));
+    t('پیشوندِ هر برند با نوعش می‌خواند', badPrefix.length === 0, badPrefix.slice(0, 3).join(', '));
+
+    const ids = brands.map(b => b.id);
+    t('شناسه‌ی برند یکتاست', new Set(ids).size === ids.length);
+    t('هر برند دستِ‌کم یک مدل دارد', brands.every(b => b.models.length > 0));
+    t('کدِ کشورِ هر برند تعریف دارد',
+      brands.every(b => b.country === null || cat.countries[b.country]));
+  }
+
+  const cueLib = read('lib/market/cue-catalog.ts');
+  t('کاتالوگ فقط سمتِ سرور خوانده می‌شود',
+    /from '\.\.\/\.\.\/data\/cue-catalog\.json'/.test(cueLib)
+    && !/'use client'/.test(cueLib));
+  t('مسیرِ per-type استاتیک است',
+    /export const dynamic = 'force-static'/.test(read('app/api/cue-catalog/[type]/route.ts'))
+    && /generateStaticParams/.test(read('app/api/cue-catalog/[type]/route.ts')),
+    '۹۸ کیلوبایت نباید در باندلِ هر بازدیدکننده بنشیند');
+  t('اعتبارسنجی تعلقِ مدل به برند را می‌سنجد',
+    /این مدل برای برند انتخاب‌شده نیست/.test(cueLib)
+    && /این برند برای نوع انتخاب‌شده نیست/.test(cueLib),
+    'اعتماد به فرانت کافی نیست — سرور هم همین تابع را صدا می‌زند');
+  t('برندِ دستی و فهرستی با هم پذیرفته نمی‌شوند',
+    /نه هر دو/.test(cueLib));
+}
+
 console.log('\n― CORS ―');
 {
   t('فایلِ مرده‌ی CORS حذف شد',

@@ -1,0 +1,3555 @@
+{
+  "schema_version": "2.0",
+  "last_updated": "2026-08-11",
+  "category": {
+    "id": "cue",
+    "label_fa": "چوب"
+  },
+  "notes_fa": "ساختار سه‌سطحی مطابق فرم billiardhub: دسته‌بندی «چوب» ← نوع (۴ گزینه) ← برند ← مدل. گزینه «سایر» در انتهای لیست برند و لیست مدل توسط فرانت‌اند اضافه می‌شود.",
+  "other_option": {
+    "id": "other",
+    "name_fa": "سایر",
+    "reveals_text_input": true,
+    "max_length": 60
+  },
+  "types": [
+    {
+      "id": "pocket_billiard",
+      "label_fa": "پاکت بیلیارد",
+      "label_en": "Pocket Billiards / Pool",
+      "brands": [
+        {
+          "id": "pocket__adam",
+          "name_en": "Adam",
+          "name_fa": "آدام",
+          "country": "JP",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "ad-professional",
+              "name_en": "Professional Series",
+              "name_fa": "سری حرفه‌ای"
+            },
+            {
+              "id": "ad-x2",
+              "name_en": "X2 Series",
+              "name_fa": "سری X2"
+            }
+          ]
+        },
+        {
+          "id": "pocket__balabushka",
+          "name_en": "Balabushka",
+          "name_fa": "بالابوشکا",
+          "country": "US",
+          "tier": "elite_custom",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "bl-gb",
+              "name_en": "GB Series",
+              "name_fa": "سری GB"
+            },
+            {
+              "id": "bl-original",
+              "name_en": "Original (vintage)",
+              "name_fa": "اورجینال (کلکسیونی)"
+            }
+          ]
+        },
+        {
+          "id": "pocket__britannia",
+          "name_en": "Britannia Cues",
+          "name_fa": "بریتانیا",
+          "country": "GB",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "brp-handspliced",
+              "name_en": "Hand-Spliced Pool Range",
+              "name_fa": "رده دست‌اسپلایس پول"
+            }
+          ]
+        },
+        {
+          "id": "pocket__cue-craft",
+          "name_en": "Cue Craft",
+          "name_fa": "کیو کرافت",
+          "country": "GB",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "ccp-handmade",
+              "name_en": "Handmade Pool Range",
+              "name_fa": "رده دست‌ساز پول"
+            },
+            {
+              "id": "ccp-machine",
+              "name_en": "Machine Spliced",
+              "name_fa": "ماشین‌اسپلایس"
+            }
+          ]
+        },
+        {
+          "id": "pocket__cuetec",
+          "name_en": "Cuetec",
+          "name_fa": "کیوتک",
+          "country": "CA",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "ct-cynergy",
+              "name_en": "Cynergy",
+              "name_fa": "سینرژی"
+            },
+            {
+              "id": "ct-cynergy-ghost",
+              "name_en": "Cynergy Ghost Edition",
+              "name_fa": "سینرژی گوست"
+            },
+            {
+              "id": "ct-avid",
+              "name_en": "Avid",
+              "name_fa": "اوید"
+            },
+            {
+              "id": "ct-truewood",
+              "name_en": "Truewood",
+              "name_fa": "ترو‌وود"
+            },
+            {
+              "id": "ct-prestige",
+              "name_en": "Prestige",
+              "name_fa": "پرستیژ"
+            },
+            {
+              "id": "ct-r360",
+              "name_en": "R360",
+              "name_fa": "R360"
+            },
+            {
+              "id": "ct-breach",
+              "name_en": "Breach (break)",
+              "name_fa": "بریچ (بریک)",
+              "cue_type": "break"
+            },
+            {
+              "id": "ct-shaft-15k",
+              "name_en": "Cynergy CT-15K Shaft",
+              "name_fa": "شفت CT-15K",
+              "cue_type": "shaft"
+            }
+          ]
+        },
+        {
+          "id": "pocket__gbl",
+          "name_en": "GBL",
+          "name_fa": "جی‌بی‌ال",
+          "country": "GB",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "gp-classic",
+              "name_en": "Classic",
+              "name_fa": "کلاسیک"
+            },
+            {
+              "id": "gp-special",
+              "name_en": "Special",
+              "name_fa": "اسپشیال"
+            },
+            {
+              "id": "gp-vanquish",
+              "name_en": "Vanquish",
+              "name_fa": "ونکوییش"
+            },
+            {
+              "id": "gp-c8b-special",
+              "name_en": "C8B Special",
+              "name_fa": "C8B اسپشیال"
+            },
+            {
+              "id": "gp-c8b-vanquish",
+              "name_en": "C8B Vanquish",
+              "name_fa": "C8B ونکوییش"
+            },
+            {
+              "id": "gp-break",
+              "name_en": "Break Cue",
+              "name_fa": "بریک کیو",
+              "cue_type": "break"
+            }
+          ]
+        },
+        {
+          "id": "pocket__jacoby",
+          "name_en": "Jacoby",
+          "name_fa": "جاکوبی",
+          "country": "US",
+          "tier": "elite_custom",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "jc-custom",
+              "name_en": "Jacoby Custom",
+              "name_fa": "سفارشی جاکوبی"
+            },
+            {
+              "id": "jc-hb",
+              "name_en": "HB Series",
+              "name_fa": "سری HB"
+            },
+            {
+              "id": "jc-edge",
+              "name_en": "Edge Hybrid Shaft",
+              "name_fa": "شفت اج",
+              "cue_type": "shaft"
+            },
+            {
+              "id": "jc-black-carbon",
+              "name_en": "Black Carbon Shaft",
+              "name_fa": "شفت کربن مشکی",
+              "cue_type": "shaft"
+            }
+          ]
+        },
+        {
+          "id": "pocket__joss",
+          "name_en": "Joss",
+          "name_fa": "جاس",
+          "country": "US",
+          "tier": "elite_custom",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "js-custom",
+              "name_en": "Joss Custom",
+              "name_fa": "سفارشی جاس"
+            },
+            {
+              "id": "js-standard",
+              "name_en": "Standard Series",
+              "name_fa": "سری استاندارد"
+            }
+          ]
+        },
+        {
+          "id": "pocket__longoni",
+          "name_en": "Longoni",
+          "name_fa": "لونگونی",
+          "country": "IT",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "lg-the-king",
+              "name_en": "The King / King II",
+              "name_fa": "دِ کینگ / کینگ II"
+            },
+            {
+              "id": "lg-custom-pro",
+              "name_en": "Custom Pro",
+              "name_fa": "کاستوم پرو"
+            },
+            {
+              "id": "lg-hurricane",
+              "name_en": "Hurricane",
+              "name_fa": "هاریکن"
+            },
+            {
+              "id": "lg-shaft-s30",
+              "name_en": "S30 / E71 Shaft",
+              "name_fa": "شفت S30 / E71",
+              "cue_type": "shaft"
+            }
+          ]
+        },
+        {
+          "id": "pocket__maximus",
+          "name_en": "Maximus",
+          "name_fa": "مکسیموس",
+          "country": "TH",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "mxp-classic",
+              "name_en": "Classic Series Pool",
+              "name_fa": "سری کلاسیک پول"
+            },
+            {
+              "id": "mxp-premium",
+              "name_en": "Premium Series Pool",
+              "name_fa": "سری پریمیوم پول"
+            },
+            {
+              "id": "mxp-ultimate",
+              "name_en": "Ultimate Pool",
+              "name_fa": "اولتیمیت پول"
+            }
+          ]
+        },
+        {
+          "id": "pocket__mcdermott",
+          "name_en": "McDermott",
+          "name_fa": "مک‌درموت",
+          "country": "US",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "md-lucky",
+              "name_en": "Lucky Series (L)",
+              "name_fa": "سری لاکی (L)"
+            },
+            {
+              "id": "md-star",
+              "name_en": "Star Series (S)",
+              "name_fa": "سری استار (S)"
+            },
+            {
+              "id": "md-g-series",
+              "name_en": "G-Series (G2xx / G4xx / G5xx)",
+              "name_fa": "سری G"
+            },
+            {
+              "id": "md-gs-series",
+              "name_en": "GS-Series",
+              "name_fa": "سری GS"
+            },
+            {
+              "id": "md-h-series",
+              "name_en": "H-Series",
+              "name_fa": "سری H"
+            },
+            {
+              "id": "md-stinger",
+              "name_en": "Stinger (break/jump)",
+              "name_fa": "استینگر",
+              "cue_type": "jump_break"
+            },
+            {
+              "id": "md-shaft-gcore",
+              "name_en": "G-Core Shaft",
+              "name_fa": "شفت جی‌کور",
+              "cue_type": "shaft"
+            },
+            {
+              "id": "md-shaft-defy",
+              "name_en": "Defy Carbon Shaft",
+              "name_fa": "شفت کربن دیفای",
+              "cue_type": "shaft"
+            },
+            {
+              "id": "md-shaft-i",
+              "name_en": "i-Shaft",
+              "name_fa": "آی-شفت",
+              "cue_type": "shaft"
+            }
+          ]
+        },
+        {
+          "id": "pocket__meucci",
+          "name_en": "Meucci",
+          "name_fa": "موچی",
+          "country": "US",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "mu-originals",
+              "name_en": "Originals",
+              "name_fa": "اوریجینالز"
+            },
+            {
+              "id": "mu-pro",
+              "name_en": "Pro Series",
+              "name_fa": "سری پرو"
+            },
+            {
+              "id": "mu-21st",
+              "name_en": "21st Century",
+              "name_fa": "قرن ۲۱"
+            },
+            {
+              "id": "mu-black",
+              "name_en": "Black Series",
+              "name_fa": "بلک سری"
+            },
+            {
+              "id": "mu-carbon-pro",
+              "name_en": "Carbon Pro",
+              "name_fa": "کربن پرو"
+            }
+          ]
+        },
+        {
+          "id": "pocket__mezz",
+          "name_en": "Mezz",
+          "name_fa": "مِز",
+          "country": "JP",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "mz-ec7",
+              "name_en": "EC7 Series",
+              "name_fa": "سری EC7"
+            },
+            {
+              "id": "mz-ec9",
+              "name_en": "EC9 Series",
+              "name_fa": "سری EC9"
+            },
+            {
+              "id": "mz-axi",
+              "name_en": "AXI Series",
+              "name_fa": "سری AXI"
+            },
+            {
+              "id": "mz-wd",
+              "name_en": "WD Series",
+              "name_fa": "سری WD"
+            },
+            {
+              "id": "mz-power-break",
+              "name_en": "Power Break (break)",
+              "name_fa": "پاور بریک",
+              "cue_type": "break"
+            },
+            {
+              "id": "mz-exceed",
+              "name_en": "Exceed",
+              "name_fa": "اکسید"
+            },
+            {
+              "id": "mz-custom",
+              "name_en": "Mezz Custom",
+              "name_fa": "سفارشی مِز"
+            },
+            {
+              "id": "mz-shaft-wx700",
+              "name_en": "WX700 Shaft",
+              "name_fa": "شفت WX700",
+              "cue_type": "shaft"
+            },
+            {
+              "id": "mz-shaft-wxsigma",
+              "name_en": "WX-Sigma Shaft",
+              "name_fa": "شفت WX-Sigma",
+              "cue_type": "shaft"
+            },
+            {
+              "id": "mz-shaft-ignite",
+              "name_en": "Ignite Carbon Shaft",
+              "name_fa": "شفت کربن ایگنایت",
+              "cue_type": "shaft"
+            }
+          ]
+        },
+        {
+          "id": "pocket__molinari",
+          "name_en": "Molinari",
+          "name_fa": "مولیناری",
+          "country": "NL",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "ml-carom",
+              "name_en": "Carom Series",
+              "name_fa": "سری کاروم"
+            },
+            {
+              "id": "ml-pool",
+              "name_en": "Pool Series",
+              "name_fa": "سری پول"
+            }
+          ]
+        },
+        {
+          "id": "pocket__pechauer",
+          "name_en": "Pechauer",
+          "name_fa": "پکاور",
+          "country": "US",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "pe-jp",
+              "name_en": "JP Series",
+              "name_fa": "سری JP"
+            },
+            {
+              "id": "pe-pro",
+              "name_en": "Pro Series",
+              "name_fa": "سری پرو"
+            },
+            {
+              "id": "pe-rogue",
+              "name_en": "Rogue",
+              "name_fa": "روگ"
+            },
+            {
+              "id": "pe-naked",
+              "name_en": "Naked",
+              "name_fa": "نیکد"
+            },
+            {
+              "id": "pe-se",
+              "name_en": "SE Series",
+              "name_fa": "سری SE"
+            }
+          ]
+        },
+        {
+          "id": "pocket__peradon",
+          "name_en": "Peradon",
+          "name_fa": "پرادون",
+          "country": "GB",
+          "tier": "premium",
+          "allow_free_model": false,
+          "models": [
+            {
+              "id": "pdp-zenith",
+              "name_en": "Zenith",
+              "name_fa": "زنیت"
+            },
+            {
+              "id": "pdp-vector",
+              "name_en": "Vector",
+              "name_fa": "وکتور"
+            },
+            {
+              "id": "pdp-break",
+              "name_en": "Break Cue",
+              "name_fa": "بریک کیو",
+              "cue_type": "break"
+            },
+            {
+              "id": "pdp-thunder",
+              "name_en": "Thunder",
+              "name_fa": "تاندر"
+            },
+            {
+              "id": "pdp-flare",
+              "name_en": "Flare",
+              "name_fa": "فلر"
+            },
+            {
+              "id": "pdp-warrior",
+              "name_en": "Warrior",
+              "name_fa": "واریور"
+            },
+            {
+              "id": "pdp-quasar",
+              "name_en": "Quasar",
+              "name_fa": "کوازار"
+            },
+            {
+              "id": "pdp-raptor",
+              "name_en": "Raptor",
+              "name_fa": "رپتور"
+            },
+            {
+              "id": "pdp-python",
+              "name_en": "Python",
+              "name_fa": "پایتون"
+            },
+            {
+              "id": "pdp-pulsar",
+              "name_en": "Pulsar",
+              "name_fa": "پالسار"
+            },
+            {
+              "id": "pdp-luna",
+              "name_en": "Luna",
+              "name_fa": "لونا"
+            },
+            {
+              "id": "pdp-zodiac",
+              "name_en": "Zodiac",
+              "name_fa": "زودیاک"
+            },
+            {
+              "id": "pdp-kestrel",
+              "name_en": "Kestrel",
+              "name_fa": "کستل"
+            },
+            {
+              "id": "pdp-cue-wizard",
+              "name_en": "Cue Wizard (bespoke)",
+              "name_fa": "کیو ویزارد (سفارشی)"
+            }
+          ]
+        },
+        {
+          "id": "pocket__predator",
+          "name_en": "Predator",
+          "name_fa": "پردیتور",
+          "country": "US",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "pd-aspire",
+              "name_en": "Aspire",
+              "name_fa": "اسپایر"
+            },
+            {
+              "id": "pd-ikon",
+              "name_en": "Ikon Series",
+              "name_fa": "سری آیکون"
+            },
+            {
+              "id": "pd-ikon2",
+              "name_en": "Ikon2",
+              "name_fa": "آیکون ۲"
+            },
+            {
+              "id": "pd-ikon3",
+              "name_en": "Ikon3",
+              "name_fa": "آیکون ۳"
+            },
+            {
+              "id": "pd-ikon4",
+              "name_en": "Ikon4",
+              "name_fa": "آیکون ۴"
+            },
+            {
+              "id": "pd-sport",
+              "name_en": "Sport Series",
+              "name_fa": "سری اسپرت"
+            },
+            {
+              "id": "pd-sp2",
+              "name_en": "SP2 REVO",
+              "name_fa": "SP2 REVO"
+            },
+            {
+              "id": "pd-p3",
+              "name_en": "P3 Series",
+              "name_fa": "سری P3"
+            },
+            {
+              "id": "pd-9k",
+              "name_en": "9K Series",
+              "name_fa": "سری 9K"
+            },
+            {
+              "id": "pd-10k",
+              "name_en": "10K Series",
+              "name_fa": "سری 10K"
+            },
+            {
+              "id": "pd-blak",
+              "name_en": "BLAK Series",
+              "name_fa": "سری بلک"
+            },
+            {
+              "id": "pd-blak5",
+              "name_en": "BLAK 5",
+              "name_fa": "بلک ۵"
+            },
+            {
+              "id": "pd-throne",
+              "name_en": "Throne Series",
+              "name_fa": "سری ترون"
+            },
+            {
+              "id": "pd-panthera",
+              "name_en": "Panthera",
+              "name_fa": "پانترا"
+            },
+            {
+              "id": "pd-roadline",
+              "name_en": "Roadline",
+              "name_fa": "رودلاین"
+            },
+            {
+              "id": "pd-sneaky-pete",
+              "name_en": "Sneaky Pete Classics",
+              "name_fa": "اسنیکی پیت کلاسیک"
+            },
+            {
+              "id": "pd-truesplice",
+              "name_en": "TrueSplice / Limited TrueSplice-16",
+              "name_fa": "تروواسپلایس"
+            },
+            {
+              "id": "pd-k-series",
+              "name_en": "K Series Classics",
+              "name_fa": "سری K کلاسیک"
+            },
+            {
+              "id": "pd-ember",
+              "name_en": "Ember",
+              "name_fa": "امبر"
+            },
+            {
+              "id": "pd-valour",
+              "name_en": "Valour",
+              "name_fa": "والور"
+            },
+            {
+              "id": "pd-limited",
+              "name_en": "Limited / Special Edition",
+              "name_fa": "لیمیتد / اسپشیال ادیشن"
+            },
+            {
+              "id": "pd-bk-rush",
+              "name_en": "BK Rush (break)",
+              "name_fa": "بی‌کی راش (بریک)",
+              "cue_type": "break"
+            },
+            {
+              "id": "pd-bk4",
+              "name_en": "BK4 (break)",
+              "name_fa": "BK4 (بریک)",
+              "cue_type": "break"
+            },
+            {
+              "id": "pd-tempest",
+              "name_en": "Tempest BK Rush+ (jump/break)",
+              "name_fa": "تمپست (جامپ/بریک)",
+              "cue_type": "jump_break"
+            },
+            {
+              "id": "pd-air-rush",
+              "name_en": "Air Rush (jump)",
+              "name_fa": "ایر راش (جامپ)",
+              "cue_type": "jump"
+            },
+            {
+              "id": "pd-shaft-revo",
+              "name_en": "REVO Shaft (11.8 / 12.4 / 12.9)",
+              "name_fa": "شفت REVO",
+              "cue_type": "shaft"
+            },
+            {
+              "id": "pd-shaft-314",
+              "name_en": "314-3 Shaft",
+              "name_fa": "شفت 314-3",
+              "cue_type": "shaft"
+            },
+            {
+              "id": "pd-shaft-z3",
+              "name_en": "Z-3 Shaft",
+              "name_fa": "شفت Z-3",
+              "cue_type": "shaft"
+            },
+            {
+              "id": "pd-shaft-vantage",
+              "name_en": "Vantage Shaft",
+              "name_fa": "شفت ونتیج",
+              "cue_type": "shaft"
+            }
+          ]
+        },
+        {
+          "id": "pocket__schon",
+          "name_en": "Schon",
+          "name_fa": "شون",
+          "country": "US",
+          "tier": "elite_custom",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "sc-stl",
+              "name_en": "STL Series",
+              "name_fa": "سری STL"
+            },
+            {
+              "id": "sc-ltd",
+              "name_en": "LTD Series",
+              "name_fa": "سری LTD"
+            },
+            {
+              "id": "sc-r-series",
+              "name_en": "R Series",
+              "name_fa": "سری R"
+            },
+            {
+              "id": "sc-custom",
+              "name_en": "Schon Custom",
+              "name_fa": "سفارشی شون"
+            }
+          ]
+        },
+        {
+          "id": "pocket__tiger",
+          "name_en": "Tiger",
+          "name_fa": "تایگر",
+          "country": "US",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "tg-custom",
+              "name_en": "Tiger Custom",
+              "name_fa": "سفارشی تایگر"
+            },
+            {
+              "id": "tg-x-shaft",
+              "name_en": "X-Series Shaft",
+              "name_fa": "شفت سری X",
+              "cue_type": "shaft"
+            }
+          ]
+        },
+        {
+          "id": "pocket__ton-praram",
+          "name_en": "Ton Praram III",
+          "name_fa": "تون پرارام III",
+          "country": "TH",
+          "tier": "elite_custom",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "tpp-series1",
+              "name_en": "Series 1 (Pool Spec)",
+              "name_fa": "سری ۱ (اسپک پول)"
+            },
+            {
+              "id": "tpp-series2",
+              "name_en": "Series 2 Pro (Pool Spec)",
+              "name_fa": "سری ۲ پرو (اسپک پول)"
+            },
+            {
+              "id": "tpp-beyond",
+              "name_en": "Beyond (Pool Spec)",
+              "name_fa": "بیاند (اسپک پول)"
+            }
+          ]
+        },
+        {
+          "id": "pocket__action",
+          "name_en": "Action",
+          "name_fa": "اکشن",
+          "country": "US",
+          "tier": "budget",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "ac-standard",
+              "name_en": "Standard Series",
+              "name_fa": "سری استاندارد"
+            }
+          ]
+        },
+        {
+          "id": "pocket__buffalo",
+          "name_en": "Buffalo",
+          "name_fa": "بوفالو",
+          "country": "NL",
+          "tier": "budget",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "bf-premium",
+              "name_en": "Premium",
+              "name_fa": "پریمیوم"
+            },
+            {
+              "id": "bf-century",
+              "name_en": "Century",
+              "name_fa": "سنچری"
+            },
+            {
+              "id": "bf-dominus",
+              "name_en": "Dominus",
+              "name_fa": "دومینوس"
+            }
+          ]
+        },
+        {
+          "id": "pocket__dufferin",
+          "name_en": "Dufferin",
+          "name_fa": "دافرین",
+          "country": "CA",
+          "tier": "budget",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "dfp-barrett",
+              "name_en": "Barrett Series",
+              "name_fa": "سری بارت"
+            }
+          ]
+        },
+        {
+          "id": "pocket__elite-cues",
+          "name_en": "Elite",
+          "name_fa": "الیت",
+          "country": "US",
+          "tier": "budget",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "el-standard",
+              "name_en": "Standard Series",
+              "name_fa": "سری استاندارد"
+            }
+          ]
+        },
+        {
+          "id": "pocket__fury",
+          "name_en": "Fury",
+          "name_fa": "فیوری",
+          "country": "CN",
+          "tier": "budget",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "fy-dl",
+              "name_en": "DL Series",
+              "name_fa": "سری DL"
+            },
+            {
+              "id": "fy-standard",
+              "name_en": "Standard Series",
+              "name_fa": "سری استاندارد"
+            }
+          ]
+        },
+        {
+          "id": "pocket__joy",
+          "name_en": "Joy",
+          "name_fa": "جوی",
+          "country": "CN",
+          "tier": "mid",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "jp-c8b",
+              "name_en": "Chinese 8 Ball Series",
+              "name_fa": "سری چاینیز ۸-بال"
+            },
+            {
+              "id": "jp-pool",
+              "name_en": "Pool Series",
+              "name_fa": "سری پول"
+            }
+          ]
+        },
+        {
+          "id": "pocket__katana",
+          "name_en": "Katana",
+          "name_fa": "کاتانا",
+          "country": "US",
+          "tier": "budget",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "kt-standard",
+              "name_en": "Standard Series",
+              "name_fa": "سری استاندارد"
+            }
+          ]
+        },
+        {
+          "id": "pocket__konllen",
+          "name_en": "Konllen",
+          "name_fa": "کانلن",
+          "country": "CN",
+          "tier": "mid",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "kn-signature",
+              "name_en": "Signature Series",
+              "name_fa": "سری امضا"
+            },
+            {
+              "id": "kn-carbon",
+              "name_en": "Carbon Fiber Cue",
+              "name_fa": "چوب کربن‌فایبر"
+            },
+            {
+              "id": "kn-carbon-shaft",
+              "name_en": "Carbon Shaft",
+              "name_fa": "شفت کربن",
+              "cue_type": "shaft"
+            },
+            {
+              "id": "kn-jump-break",
+              "name_en": "Jump / Break Cue",
+              "name_fa": "چوب جامپ / بریک",
+              "cue_type": "jump_break"
+            }
+          ]
+        },
+        {
+          "id": "pocket__lucasi",
+          "name_en": "Lucasi",
+          "name_fa": "لوکاسی",
+          "country": "CN",
+          "tier": "mid",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "lc-hybrid",
+              "name_en": "Lucasi Hybrid",
+              "name_fa": "لوکاسی هیبرید"
+            },
+            {
+              "id": "lc-custom",
+              "name_en": "Lucasi Custom",
+              "name_fa": "سفارشی لوکاسی"
+            },
+            {
+              "id": "lc-lh",
+              "name_en": "LH Series",
+              "name_fa": "سری LH"
+            },
+            {
+              "id": "lc-lz",
+              "name_en": "LZ Series",
+              "name_fa": "سری LZ"
+            }
+          ]
+        },
+        {
+          "id": "pocket__macmorran",
+          "name_en": "MacMorran",
+          "name_fa": "مک‌موران",
+          "country": "GB",
+          "tier": "mid",
+          "allow_free_model": false,
+          "models": [
+            {
+              "id": "mm-maverick",
+              "name_en": "Maverick",
+              "name_fa": "ماوریک"
+            },
+            {
+              "id": "mm-mustang",
+              "name_en": "Mustang",
+              "name_fa": "موستانگ"
+            },
+            {
+              "id": "mm-california",
+              "name_en": "California",
+              "name_fa": "کالیفرنیا"
+            },
+            {
+              "id": "mm-manhattan",
+              "name_en": "Manhattan",
+              "name_fa": "منهتن"
+            },
+            {
+              "id": "mm-lincoln",
+              "name_en": "Lincoln",
+              "name_fa": "لینکلن"
+            }
+          ]
+        },
+        {
+          "id": "pocket__outlaw",
+          "name_en": "Outlaw",
+          "name_fa": "اوت‌لا",
+          "country": "US",
+          "tier": "budget",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "ol-standard",
+              "name_en": "Standard Series",
+              "name_fa": "سری استاندارد"
+            }
+          ]
+        },
+        {
+          "id": "pocket__peri",
+          "name_en": "PERI",
+          "name_fa": "پری",
+          "country": "CN",
+          "tier": "mid",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "pi-bullet8",
+              "name_en": "Bullet 8",
+              "name_fa": "بولت ۸"
+            },
+            {
+              "id": "pi-bullet10",
+              "name_en": "Bullet 10",
+              "name_fa": "بولت ۱۰"
+            },
+            {
+              "id": "pi-sy04",
+              "name_en": "SY04",
+              "name_fa": "SY04"
+            },
+            {
+              "id": "pi-p8",
+              "name_en": "P8 Low Deflection",
+              "name_fa": "P8 کم‌انحراف"
+            },
+            {
+              "id": "pi-carbon",
+              "name_en": "Carbon Shaft Series",
+              "name_fa": "سری شفت کربن",
+              "cue_type": "shaft"
+            }
+          ]
+        },
+        {
+          "id": "pocket__players",
+          "name_en": "Players",
+          "name_fa": "پلیرز",
+          "country": "US",
+          "tier": "budget",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "pl-c-series",
+              "name_en": "C Series",
+              "name_fa": "سری C"
+            },
+            {
+              "id": "pl-g-series",
+              "name_en": "G Series",
+              "name_fa": "سری G"
+            },
+            {
+              "id": "pl-d-series",
+              "name_en": "D Series",
+              "name_fa": "سری D"
+            }
+          ]
+        },
+        {
+          "id": "pocket__poison",
+          "name_en": "Poison",
+          "name_fa": "پویزن (زیرمجموعه پردیتور)",
+          "country": "US",
+          "tier": "mid",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "po-vx",
+              "name_en": "VX Series",
+              "name_fa": "سری VX"
+            },
+            {
+              "id": "po-cyanide",
+              "name_en": "Cyanide",
+              "name_fa": "سایانید"
+            },
+            {
+              "id": "po-maelith",
+              "name_en": "Maelith",
+              "name_fa": "میلیث"
+            },
+            {
+              "id": "po-candy",
+              "name_en": "Candy",
+              "name_fa": "کندی"
+            },
+            {
+              "id": "po-arsenic",
+              "name_en": "Arsenic",
+              "name_fa": "آرسنیک"
+            },
+            {
+              "id": "po-venom",
+              "name_en": "Venom (break/jump)",
+              "name_fa": "ونوم",
+              "cue_type": "jump_break"
+            }
+          ]
+        },
+        {
+          "id": "pocket__powerglide",
+          "name_en": "Powerglide",
+          "name_fa": "پاورگلاید",
+          "country": "GB",
+          "tier": "budget",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "pgp-classic",
+              "name_en": "Classic",
+              "name_fa": "کلاسیک"
+            },
+            {
+              "id": "pgp-tournament",
+              "name_en": "Tournament",
+              "name_fa": "تورنمنت"
+            }
+          ]
+        },
+        {
+          "id": "pocket__purex",
+          "name_en": "PureX",
+          "name_fa": "پیورایکس",
+          "country": "US",
+          "tier": "budget",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "px-hxt",
+              "name_en": "HXT Series",
+              "name_fa": "سری HXT"
+            },
+            {
+              "id": "px-classic",
+              "name_en": "Classic",
+              "name_fa": "کلاسیک"
+            }
+          ]
+        },
+        {
+          "id": "pocket__riley-bce",
+          "name_en": "Riley / BCE",
+          "name_fa": "رایلی / بی‌سی‌ای",
+          "country": "GB",
+          "tier": "mid",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "rbp-england",
+              "name_en": "Riley England Pool",
+              "name_fa": "رایلی انگلند پول"
+            },
+            {
+              "id": "rbp-sapele",
+              "name_en": "Sapele Series",
+              "name_fa": "سری ساپل"
+            },
+            {
+              "id": "rbp-black-series",
+              "name_en": "BCE Black Series",
+              "name_fa": "بلک سری BCE"
+            },
+            {
+              "id": "rbp-grand-master",
+              "name_en": "Grand Master",
+              "name_fa": "گرند مستر"
+            }
+          ]
+        },
+        {
+          "id": "pocket__scorpion",
+          "name_en": "Scorpion",
+          "name_fa": "اسکورپیون",
+          "country": "US",
+          "tier": "budget",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "sp-standard",
+              "name_en": "Standard Series",
+              "name_fa": "سری استاندارد"
+            }
+          ]
+        },
+        {
+          "id": "pocket__no-brand",
+          "name_en": "Unbranded / Unknown",
+          "name_fa": "بدون برند / نامشخص",
+          "country": null,
+          "tier": "budget",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "nbp-unknown",
+              "name_en": "Unknown",
+              "name_fa": "نامشخص"
+            },
+            {
+              "id": "nbp-handmade-local",
+              "name_en": "Local Handmade",
+              "name_fa": "دست‌ساز داخلی"
+            }
+          ]
+        },
+        {
+          "id": "pocket__viking",
+          "name_en": "Viking",
+          "name_fa": "وایکینگ",
+          "country": "US",
+          "tier": "mid",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "vk-custom",
+              "name_en": "Viking Custom",
+              "name_fa": "سفارشی وایکینگ"
+            },
+            {
+              "id": "vk-a-series",
+              "name_en": "A Series",
+              "name_fa": "سری A"
+            },
+            {
+              "id": "vk-b-series",
+              "name_en": "B Series",
+              "name_fa": "سری B"
+            },
+            {
+              "id": "vk-valhalla",
+              "name_en": "Valhalla (by Viking)",
+              "name_fa": "والهالا"
+            }
+          ]
+        },
+        {
+          "id": "pocket__voodoo",
+          "name_en": "Voodoo",
+          "name_fa": "وودو",
+          "country": "US",
+          "tier": "budget",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "vd-standard",
+              "name_en": "Standard Series",
+              "name_fa": "سری استاندارد"
+            }
+          ]
+        },
+        {
+          "id": "pocket__iranian-handmade",
+          "name_en": "Iranian Handmade",
+          "name_fa": "دست‌ساز ایرانی",
+          "country": "IR",
+          "tier": "mid",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "ir-custom",
+              "name_en": "Custom / Workshop",
+              "name_fa": "سفارشی / کارگاهی"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "snooker",
+      "label_fa": "اسنوکر",
+      "label_en": "Snooker",
+      "brands": [
+        {
+          "id": "snk__britannia",
+          "name_en": "Britannia Cues",
+          "name_fa": "بریتانیا",
+          "country": "GB",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "br-handmade",
+              "name_en": "Hand-Spliced Range",
+              "name_fa": "رده دست‌اسپلایس"
+            }
+          ]
+        },
+        {
+          "id": "snk__craftsman-cues",
+          "name_en": "Craftsman Cues",
+          "name_fa": "کرفتزمن کیوز",
+          "country": "GB",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "cr-handmade",
+              "name_en": "Handmade Range",
+              "name_fa": "رده دست‌ساز"
+            },
+            {
+              "id": "cr-bespoke",
+              "name_en": "Bespoke",
+              "name_fa": "سفارشی"
+            }
+          ]
+        },
+        {
+          "id": "snk__crispian-jones",
+          "name_en": "Crispian Jones",
+          "name_fa": "کریسپین جونز",
+          "country": "GB",
+          "tier": "elite_handmade",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "cj-bespoke",
+              "name_en": "Bespoke Handmade",
+              "name_fa": "دست‌ساز سفارشی"
+            }
+          ]
+        },
+        {
+          "id": "snk__cue-craft",
+          "name_en": "Cue Craft",
+          "name_fa": "کیو کرافت",
+          "country": "GB",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "cc-tr1",
+              "name_en": "Triumph TR1",
+              "name_fa": "تریومف TR1"
+            },
+            {
+              "id": "cc-tr2",
+              "name_en": "Triumph TR2",
+              "name_fa": "تریومف TR2"
+            },
+            {
+              "id": "cc-tr3",
+              "name_en": "Triumph TR3",
+              "name_fa": "تریومف TR3"
+            },
+            {
+              "id": "cc-tr4",
+              "name_en": "Triumph TR4",
+              "name_fa": "تریومف TR4"
+            },
+            {
+              "id": "cc-tr5",
+              "name_en": "Triumph TR5",
+              "name_fa": "تریومف TR5"
+            },
+            {
+              "id": "cc-tr6",
+              "name_en": "Triumph TR6",
+              "name_fa": "تریومف TR6"
+            },
+            {
+              "id": "cc-tr7",
+              "name_en": "Triumph TR7",
+              "name_fa": "تریومف TR7"
+            },
+            {
+              "id": "cc-handmade-1pc",
+              "name_en": "Handmade One Piece",
+              "name_fa": "دست‌ساز یک‌تکه"
+            },
+            {
+              "id": "cc-handmade-2pc",
+              "name_en": "Handmade Two Piece",
+              "name_fa": "دست‌ساز دوتکه"
+            },
+            {
+              "id": "cc-handmade-34",
+              "name_en": "Handmade 3/4 Jointed",
+              "name_fa": "دست‌ساز ۳/۴"
+            },
+            {
+              "id": "cc-machine-spliced",
+              "name_en": "Machine Spliced",
+              "name_fa": "ماشین‌اسپلایس"
+            }
+          ]
+        },
+        {
+          "id": "snk__eagle-cues",
+          "name_en": "Eagle Cues Thailand",
+          "name_fa": "ایگل کیوز تایلند",
+          "country": "TH",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "eg-stock",
+              "name_en": "Stock Model",
+              "name_fa": "مدل استاندارد"
+            },
+            {
+              "id": "eg-custom",
+              "name_en": "Custom Build",
+              "name_fa": "سفارشی"
+            }
+          ]
+        },
+        {
+          "id": "snk__exquisite",
+          "name_en": "Exquisite Cues",
+          "name_fa": "اکسکوییزیت",
+          "country": "GB",
+          "tier": "elite_handmade",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "ex-numbered",
+              "name_en": "Numbered Bespoke",
+              "name_fa": "سفارشی شماره‌دار"
+            }
+          ]
+        },
+        {
+          "id": "snk__gbl",
+          "name_en": "GBL",
+          "name_fa": "جی‌بی‌ال",
+          "country": "GB",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "gbl-break",
+              "name_en": "Break Cue",
+              "name_fa": "بریک کیو"
+            },
+            {
+              "id": "gbl-classic",
+              "name_en": "Classic",
+              "name_fa": "کلاسیک"
+            },
+            {
+              "id": "gbl-special",
+              "name_en": "Special",
+              "name_fa": "اسپشیال"
+            },
+            {
+              "id": "gbl-special-fs",
+              "name_en": "Special FS",
+              "name_fa": "اسپشیال FS"
+            },
+            {
+              "id": "gbl-special-xs",
+              "name_en": "Special XS",
+              "name_fa": "اسپشیال XS"
+            },
+            {
+              "id": "gbl-vanquish",
+              "name_en": "Vanquish",
+              "name_fa": "ونکوییش"
+            },
+            {
+              "id": "gbl-vanquish-fs",
+              "name_en": "Vanquish FS",
+              "name_fa": "ونکوییش FS"
+            },
+            {
+              "id": "gbl-vanquish-xs",
+              "name_en": "Vanquish XS",
+              "name_fa": "ونکوییش XS"
+            },
+            {
+              "id": "gbl-valkyrie",
+              "name_en": "Valkyrie",
+              "name_fa": "والکری"
+            },
+            {
+              "id": "gbl-limited-fs",
+              "name_en": "Limited Edition FS",
+              "name_fa": "لیمیتد ادیشن FS"
+            }
+          ]
+        },
+        {
+          "id": "snk__hunt-osborne",
+          "name_en": "Hunt & Osborne / Robert Osborne",
+          "name_fa": "هانت و آزبورن",
+          "country": "GB",
+          "tier": "elite_handmade",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "ho-red",
+              "name_en": "Red Plate",
+              "name_fa": "پلاک قرمز"
+            },
+            {
+              "id": "ho-green",
+              "name_en": "Green Plate",
+              "name_fa": "پلاک سبز"
+            },
+            {
+              "id": "ho-black",
+              "name_en": "Black Plate",
+              "name_fa": "پلاک مشکی"
+            },
+            {
+              "id": "ho-bespoke",
+              "name_en": "Bespoke",
+              "name_fa": "سفارشی"
+            }
+          ]
+        },
+        {
+          "id": "snk__jason-owen",
+          "name_en": "Jason Owen",
+          "name_fa": "جیسون اوون",
+          "country": "GB",
+          "tier": "elite_handmade",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "jo-bespoke",
+              "name_en": "Bespoke Handmade",
+              "name_fa": "دست‌ساز سفارشی"
+            }
+          ]
+        },
+        {
+          "id": "snk__john-parris",
+          "name_en": "John Parris",
+          "name_fa": "جان پاریس",
+          "country": "GB",
+          "tier": "elite_handmade",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "jp-classic",
+              "name_en": "Classic",
+              "name_fa": "کلاسیک",
+              "group": "Parris Collection"
+            },
+            {
+              "id": "jp-ambassador",
+              "name_en": "Ambassador",
+              "name_fa": "آمباسادور",
+              "group": "Parris Collection"
+            },
+            {
+              "id": "jp-elite",
+              "name_en": "Elite",
+              "name_fa": "الیت",
+              "group": "Parris Collection"
+            },
+            {
+              "id": "jp-superior",
+              "name_en": "Superior",
+              "name_fa": "سوپریور",
+              "group": "Parris Collection"
+            },
+            {
+              "id": "jp-exclusive",
+              "name_en": "Exclusive",
+              "name_fa": "اکسکلوسیو",
+              "group": "Parris Collection"
+            },
+            {
+              "id": "jp-unique",
+              "name_en": "Unique",
+              "name_fa": "یونیک",
+              "group": "Parris Collection"
+            },
+            {
+              "id": "jp-special",
+              "name_en": "Special",
+              "name_fa": "اسپشیال",
+              "group": "Custom / Cue Builder"
+            },
+            {
+              "id": "jp-paragon",
+              "name_en": "Paragon",
+              "name_fa": "پاراگون",
+              "group": "Custom / Cue Builder"
+            },
+            {
+              "id": "jp-ultimate",
+              "name_en": "Ultimate",
+              "name_fa": "اولتیمیت",
+              "group": "Custom / Cue Builder"
+            },
+            {
+              "id": "jp-limited-edition",
+              "name_en": "Limited Edition",
+              "name_fa": "لیمیتد ادیشن"
+            },
+            {
+              "id": "jp-american-pool",
+              "name_en": "American Pool",
+              "name_fa": "امریکن پول"
+            },
+            {
+              "id": "jp-master",
+              "name_en": "Master (discontinued)",
+              "name_fa": "مستر (منسوخ)",
+              "discontinued": true
+            },
+            {
+              "id": "jp-hand-spliced",
+              "name_en": "Hand Spliced (vintage)",
+              "name_fa": "هند اسپلایس (قدیمی)",
+              "discontinued": true
+            }
+          ]
+        },
+        {
+          "id": "snk__maximus",
+          "name_en": "Maximus",
+          "name_fa": "مکسیموس",
+          "country": "TH",
+          "tier": "premium",
+          "allow_free_model": false,
+          "models": [
+            {
+              "id": "mx-immortal",
+              "name_en": "Immortal",
+              "name_fa": "ایمورتال",
+              "group": "Classic Series"
+            },
+            {
+              "id": "mx-legend",
+              "name_en": "Legend",
+              "name_fa": "لجند",
+              "group": "Classic Series"
+            },
+            {
+              "id": "mx-heritage",
+              "name_en": "Heritage",
+              "name_fa": "هریتیج",
+              "group": "Classic Series"
+            },
+            {
+              "id": "mx-precious",
+              "name_en": "Precious",
+              "name_fa": "پرشس",
+              "group": "Classic Series"
+            },
+            {
+              "id": "mx-premium",
+              "name_en": "Premium",
+              "name_fa": "پریمیوم",
+              "group": "Premium Series"
+            },
+            {
+              "id": "mx-legend-plus",
+              "name_en": "Legend Plus",
+              "name_fa": "لجند پلاس",
+              "group": "Premium Series"
+            },
+            {
+              "id": "mx-honor",
+              "name_en": "Honor",
+              "name_fa": "آنر",
+              "group": "Premium Series"
+            },
+            {
+              "id": "mx-prime",
+              "name_en": "Prime",
+              "name_fa": "پرایم",
+              "group": "Premium Series"
+            },
+            {
+              "id": "mx-ultimate",
+              "name_en": "Ultimate (numbered bespoke)",
+              "name_fa": "اولتیمیت (سفارشی شماره‌دار)",
+              "group": "Ultimate"
+            }
+          ]
+        },
+        {
+          "id": "snk__mike-wooldridge",
+          "name_en": "Mike Wooldridge",
+          "name_fa": "مایک وولدریج",
+          "country": "GB",
+          "tier": "elite_handmade",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "mw-legend",
+              "name_en": "Legend",
+              "name_fa": "لجند"
+            },
+            {
+              "id": "mw-vintage",
+              "name_en": "Vintage",
+              "name_fa": "وینتیج"
+            },
+            {
+              "id": "mw-tiger",
+              "name_en": "Tiger",
+              "name_fa": "تایگر"
+            },
+            {
+              "id": "mw-shark",
+              "name_en": "Shark",
+              "name_fa": "شارک"
+            },
+            {
+              "id": "mw-vcm",
+              "name_en": "Virtual Cue Maker (bespoke)",
+              "name_fa": "سفارشی VCM"
+            }
+          ]
+        },
+        {
+          "id": "snk__omin",
+          "name_en": "O'Min",
+          "name_fa": "اومین",
+          "country": "TH",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "om-classic",
+              "name_en": "Classic",
+              "name_fa": "کلاسیک"
+            },
+            {
+              "id": "om-perfect",
+              "name_en": "Perfect",
+              "name_fa": "پرفکت"
+            },
+            {
+              "id": "om-victory",
+              "name_en": "Victory",
+              "name_fa": "ویکتوری"
+            },
+            {
+              "id": "om-champion",
+              "name_en": "Champion",
+              "name_fa": "چمپیون"
+            },
+            {
+              "id": "om-master",
+              "name_en": "Master",
+              "name_fa": "مستر"
+            },
+            {
+              "id": "om-enlighten",
+              "name_en": "Enlighten",
+              "name_fa": "اِنلایتن"
+            },
+            {
+              "id": "om-climax",
+              "name_en": "Climax",
+              "name_fa": "کلایمکس"
+            },
+            {
+              "id": "om-imagine",
+              "name_en": "Imagine",
+              "name_fa": "ایمجین"
+            },
+            {
+              "id": "om-union",
+              "name_en": "Union",
+              "name_fa": "یونیون"
+            },
+            {
+              "id": "om-147",
+              "name_en": "147",
+              "name_fa": "۱۴۷"
+            },
+            {
+              "id": "om-cobra",
+              "name_en": "Cobra",
+              "name_fa": "کبرا"
+            },
+            {
+              "id": "om-hunter-1",
+              "name_en": "Hunter I",
+              "name_fa": "هانتر I",
+              "group": "Hunter (Signature)"
+            },
+            {
+              "id": "om-hunter-2",
+              "name_en": "Hunter II",
+              "name_fa": "هانتر II",
+              "group": "Hunter (Signature)"
+            },
+            {
+              "id": "om-hunter-3",
+              "name_en": "Hunter III",
+              "name_fa": "هانتر III",
+              "group": "Hunter (Signature)"
+            },
+            {
+              "id": "om-hunter-4",
+              "name_en": "Hunter IV",
+              "name_fa": "هانتر IV",
+              "group": "Hunter (Signature)"
+            },
+            {
+              "id": "om-hunter-5",
+              "name_en": "Hunter V",
+              "name_fa": "هانتر V",
+              "group": "Hunter (Signature)"
+            },
+            {
+              "id": "om-ultimate",
+              "name_en": "Ultimate",
+              "name_fa": "اولتیمیت"
+            }
+          ]
+        },
+        {
+          "id": "snk__peradon",
+          "name_en": "Peradon",
+          "name_fa": "پرادون",
+          "country": "GB",
+          "tier": "premium",
+          "allow_free_model": false,
+          "models": [
+            {
+              "id": "pd-merit",
+              "name_en": "Merit",
+              "name_fa": "مریت",
+              "group": "Clubroom"
+            },
+            {
+              "id": "pd-house-cue",
+              "name_en": "House Cue",
+              "name_fa": "هاوس کیو",
+              "group": "Clubroom"
+            },
+            {
+              "id": "pd-club-cue",
+              "name_en": "Club Cue",
+              "name_fa": "کلاب کیو",
+              "group": "Clubroom"
+            },
+            {
+              "id": "pd-rack-cue",
+              "name_en": "Rack Cue",
+              "name_fa": "رک کیو",
+              "group": "Clubroom"
+            },
+            {
+              "id": "pd-classic",
+              "name_en": "Classic",
+              "name_fa": "کلاسیک"
+            },
+            {
+              "id": "pd-derby",
+              "name_en": "Derby",
+              "name_fa": "دربی"
+            },
+            {
+              "id": "pd-lazer",
+              "name_en": "Lazer",
+              "name_fa": "لیزر"
+            },
+            {
+              "id": "pd-crown",
+              "name_en": "Crown",
+              "name_fa": "کراون"
+            },
+            {
+              "id": "pd-eden",
+              "name_en": "Eden",
+              "name_fa": "ادن"
+            },
+            {
+              "id": "pd-ascot",
+              "name_en": "Ascot",
+              "name_fa": "اسکات"
+            },
+            {
+              "id": "pd-edwardian",
+              "name_en": "Edwardian",
+              "name_fa": "ادواردین"
+            },
+            {
+              "id": "pd-excel-60",
+              "name_en": "Excel-60",
+              "name_fa": "اکسل-۶۰"
+            },
+            {
+              "id": "pd-century",
+              "name_en": "Century",
+              "name_fa": "سنچری"
+            },
+            {
+              "id": "pd-carlisle",
+              "name_en": "Carlisle",
+              "name_fa": "کارلایل"
+            },
+            {
+              "id": "pd-chester",
+              "name_en": "Chester",
+              "name_fa": "چستر"
+            },
+            {
+              "id": "pd-chiltern",
+              "name_en": "Chiltern",
+              "name_fa": "چیلترن"
+            },
+            {
+              "id": "pd-clifton",
+              "name_en": "Clifton",
+              "name_fa": "کلیفتون"
+            },
+            {
+              "id": "pd-guildford",
+              "name_en": "Guildford",
+              "name_fa": "گیلدفورد"
+            },
+            {
+              "id": "pd-harlow",
+              "name_en": "Harlow",
+              "name_fa": "هارلو"
+            },
+            {
+              "id": "pd-knight",
+              "name_en": "Knight",
+              "name_fa": "نایت"
+            },
+            {
+              "id": "pd-merlin",
+              "name_en": "Merlin",
+              "name_fa": "مرلین"
+            },
+            {
+              "id": "pd-newbury",
+              "name_en": "Newbury",
+              "name_fa": "نیوبری"
+            },
+            {
+              "id": "pd-salisbury",
+              "name_en": "Salisbury",
+              "name_fa": "سالزبری"
+            },
+            {
+              "id": "pd-sheffield",
+              "name_en": "Sheffield",
+              "name_fa": "شفیلد"
+            },
+            {
+              "id": "pd-winchester",
+              "name_en": "Winchester",
+              "name_fa": "وینچستر"
+            },
+            {
+              "id": "pd-winsford",
+              "name_en": "Winsford",
+              "name_fa": "وینزفورد"
+            },
+            {
+              "id": "pd-royal",
+              "name_en": "Royal",
+              "name_fa": "رویال"
+            },
+            {
+              "id": "pd-joe-davis",
+              "name_en": "Joe Davis",
+              "name_fa": "جو دیویس"
+            },
+            {
+              "id": "pd-joe-davis-600",
+              "name_en": "Joe Davis 600",
+              "name_fa": "جو دیویس ۶۰۰"
+            },
+            {
+              "id": "pd-walter-lindrum",
+              "name_en": "Walter Lindrum Champion",
+              "name_fa": "والتر لیندرام چمپیون"
+            },
+            {
+              "id": "pd-pro-cue",
+              "name_en": "Pro-Cue",
+              "name_fa": "پرو کیو"
+            },
+            {
+              "id": "pd-king",
+              "name_en": "King",
+              "name_fa": "کینگ"
+            },
+            {
+              "id": "pd-york",
+              "name_en": "York",
+              "name_fa": "یورک"
+            },
+            {
+              "id": "pd-cue-wizard",
+              "name_en": "Cue Wizard (bespoke)",
+              "name_fa": "کیو ویزارد (سفارشی)"
+            }
+          ]
+        },
+        {
+          "id": "snk__phoenix-cue",
+          "name_en": "Phoenix Cues Thailand",
+          "name_fa": "فینیکس تایلند",
+          "country": "TH",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "px-master",
+              "name_en": "Master",
+              "name_fa": "مستر"
+            },
+            {
+              "id": "px-pro",
+              "name_en": "Pro",
+              "name_fa": "پرو"
+            },
+            {
+              "id": "px-custom",
+              "name_en": "Custom / Bespoke",
+              "name_fa": "سفارشی"
+            }
+          ]
+        },
+        {
+          "id": "snk__stamford",
+          "name_en": "Stamford Cuemakers",
+          "name_fa": "استمفورد",
+          "country": "GB",
+          "tier": "elite_handmade",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "st-bespoke",
+              "name_en": "Bespoke Handmade",
+              "name_fa": "دست‌ساز سفارشی"
+            }
+          ]
+        },
+        {
+          "id": "snk__thurston",
+          "name_en": "Thurston",
+          "name_fa": "ترستون",
+          "country": "GB",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "th-classic",
+              "name_en": "Classic / Heritage",
+              "name_fa": "کلاسیک / هریتیج"
+            }
+          ]
+        },
+        {
+          "id": "snk__ton-praram",
+          "name_en": "Ton Praram III",
+          "name_fa": "تون پرارام III",
+          "country": "TH",
+          "tier": "elite_handmade",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "tp-begin",
+              "name_en": "Begin",
+              "name_fa": "بیگین"
+            },
+            {
+              "id": "tp-series1",
+              "name_en": "Series 1 (Classic Shaft)",
+              "name_fa": "سری ۱"
+            },
+            {
+              "id": "tp-series1-fs",
+              "name_en": "Series 1 FS",
+              "name_fa": "سری ۱ FS"
+            },
+            {
+              "id": "tp-series2-pro",
+              "name_en": "Series 2 Pro (Premium Shaft)",
+              "name_fa": "سری ۲ پرو"
+            },
+            {
+              "id": "tp-series2-fs",
+              "name_en": "Series 2 Pro FS",
+              "name_fa": "سری ۲ پرو FS"
+            },
+            {
+              "id": "tp-beyond",
+              "name_en": "Beyond (Ultimate Grade)",
+              "name_fa": "بیاند"
+            },
+            {
+              "id": "tp-beyond-fs",
+              "name_en": "Beyond FS",
+              "name_fa": "بیاند FS"
+            },
+            {
+              "id": "tp-limited",
+              "name_en": "Limited Edition",
+              "name_fa": "لیمیتد ادیشن"
+            },
+            {
+              "id": "tp-pro-shaft",
+              "name_en": "Pro Shaft",
+              "name_fa": "پرو شفت"
+            },
+            {
+              "id": "tp-phantom",
+              "name_en": "Phantom FS Pro Shaft",
+              "name_fa": "فانتوم FS پرو"
+            },
+            {
+              "id": "tp-black-phantom",
+              "name_en": "Black Phantom FS Pro Shaft",
+              "name_fa": "بلک فانتوم FS پرو"
+            },
+            {
+              "id": "tp-black-bone",
+              "name_en": "Black Bone (discontinued)",
+              "name_fa": "بلک بون (منسوخ)",
+              "discontinued": true
+            }
+          ]
+        },
+        {
+          "id": "snk__tony-glover",
+          "name_en": "Tony Glover",
+          "name_fa": "تونی گلاور",
+          "country": "GB",
+          "tier": "elite_handmade",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "tg-bespoke",
+              "name_en": "Bespoke Handmade",
+              "name_fa": "دست‌ساز سفارشی"
+            }
+          ]
+        },
+        {
+          "id": "snk__trevor-white",
+          "name_en": "Trevor White",
+          "name_fa": "ترور وایت",
+          "country": "GB",
+          "tier": "elite_handmade",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "tw-bespoke",
+              "name_en": "Bespoke Handmade",
+              "name_fa": "دست‌ساز سفارشی"
+            },
+            {
+              "id": "tw-1pc",
+              "name_en": "One Piece",
+              "name_fa": "یک‌تکه"
+            },
+            {
+              "id": "tw-2pc",
+              "name_en": "Two Piece",
+              "name_fa": "دوتکه"
+            },
+            {
+              "id": "tw-34",
+              "name_en": "3/4 Jointed",
+              "name_fa": "۳/۴ مفصلی"
+            }
+          ]
+        },
+        {
+          "id": "snk__bce",
+          "name_en": "BCE",
+          "name_fa": "بی‌سی‌ای",
+          "country": "GB",
+          "tier": "mid",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "bce-black-series",
+              "name_en": "Black Series (Mark Selby)",
+              "name_fa": "بلک سری (مارک سلبی)"
+            },
+            {
+              "id": "bce-grand-master",
+              "name_en": "Grand Master",
+              "name_fa": "گرند مستر"
+            },
+            {
+              "id": "bce-protege",
+              "name_en": "Protégé",
+              "name_fa": "پروتژه"
+            },
+            {
+              "id": "bce-heritage",
+              "name_en": "Heritage",
+              "name_fa": "هریتیج"
+            },
+            {
+              "id": "bce-mark-selby",
+              "name_en": "Mark Selby Signature",
+              "name_fa": "امضای مارک سلبی"
+            }
+          ]
+        },
+        {
+          "id": "snk__cannon",
+          "name_en": "Cannon",
+          "name_fa": "کانن (زیرمجموعه پرادون)",
+          "country": "GB",
+          "tier": "budget",
+          "allow_free_model": false,
+          "models": [
+            {
+              "id": "cn-bora",
+              "name_en": "Bora",
+              "name_fa": "بورا"
+            },
+            {
+              "id": "cn-chinook",
+              "name_en": "Chinook",
+              "name_fa": "چینوک"
+            },
+            {
+              "id": "cn-orion",
+              "name_en": "Orion",
+              "name_fa": "اوریون"
+            },
+            {
+              "id": "cn-titan",
+              "name_en": "Titan",
+              "name_fa": "تایتان"
+            },
+            {
+              "id": "cn-krypto",
+              "name_en": "Krypto",
+              "name_fa": "کریپتو"
+            },
+            {
+              "id": "cn-buster",
+              "name_en": "Buster",
+              "name_fa": "باستر"
+            },
+            {
+              "id": "cn-sirocco",
+              "name_en": "Sirocco",
+              "name_fa": "سیروکو"
+            },
+            {
+              "id": "cn-cobra",
+              "name_en": "Cobra",
+              "name_fa": "کبرا"
+            },
+            {
+              "id": "cn-electro",
+              "name_en": "Electro",
+              "name_fa": "الکترو"
+            },
+            {
+              "id": "cn-viper",
+              "name_en": "Viper",
+              "name_fa": "وایپر"
+            },
+            {
+              "id": "cn-scorpion",
+              "name_en": "Scorpion",
+              "name_fa": "اسکورپیون"
+            },
+            {
+              "id": "cn-manta",
+              "name_en": "Manta",
+              "name_fa": "مانتا"
+            },
+            {
+              "id": "cn-cougar",
+              "name_en": "Cougar",
+              "name_fa": "کوگار"
+            },
+            {
+              "id": "cn-mistral",
+              "name_en": "Mistral",
+              "name_fa": "میسترال"
+            },
+            {
+              "id": "cn-levante",
+              "name_en": "Levante",
+              "name_fa": "لوانته"
+            },
+            {
+              "id": "cn-sirius",
+              "name_en": "Sirius",
+              "name_fa": "سیریوس"
+            },
+            {
+              "id": "cn-spectre",
+              "name_en": "Spectre",
+              "name_fa": "اسپکتر"
+            },
+            {
+              "id": "cn-loki",
+              "name_en": "Loki",
+              "name_fa": "لوکی"
+            },
+            {
+              "id": "cn-tornado",
+              "name_en": "Tornado",
+              "name_fa": "تورنادو"
+            },
+            {
+              "id": "cn-cub",
+              "name_en": "Cub (junior)",
+              "name_fa": "کاب (نوجوان)"
+            }
+          ]
+        },
+        {
+          "id": "snk__cuppa",
+          "name_en": "Cuppa",
+          "name_fa": "کوپا",
+          "country": "CN",
+          "tier": "budget",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "cp-standard",
+              "name_en": "Standard Series",
+              "name_fa": "سری استاندارد"
+            }
+          ]
+        },
+        {
+          "id": "snk__dufferin",
+          "name_en": "Dufferin",
+          "name_fa": "دافرین",
+          "country": "CA",
+          "tier": "budget",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "df-medusa",
+              "name_en": "Medusa (snooker)",
+              "name_fa": "مدوسا"
+            }
+          ]
+        },
+        {
+          "id": "snk__fury",
+          "name_en": "Fury",
+          "name_fa": "فیوری",
+          "country": "CN",
+          "tier": "budget",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "fu-standard",
+              "name_en": "Standard Series",
+              "name_fa": "سری استاندارد"
+            }
+          ]
+        },
+        {
+          "id": "snk__kong-cues",
+          "name_en": "Kong Cues",
+          "name_fa": "کونگ کیوز",
+          "country": "TH",
+          "tier": "mid",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "kg-standard",
+              "name_en": "Standard / OEM",
+              "name_fa": "استاندارد / OEM"
+            }
+          ]
+        },
+        {
+          "id": "snk__konllen",
+          "name_en": "Konllen",
+          "name_fa": "کانلن",
+          "country": "CN",
+          "tier": "mid",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "kl-ql",
+              "name_en": "KL-QL",
+              "name_fa": "KL-QL"
+            },
+            {
+              "id": "kl-zq",
+              "name_en": "KL-ZQ",
+              "name_fa": "KL-ZQ"
+            },
+            {
+              "id": "kl-carbon-snooker",
+              "name_en": "Carbon Fiber Snooker Cue",
+              "name_fa": "چوب اسنوکر کربن‌فایبر"
+            },
+            {
+              "id": "kl-signature",
+              "name_en": "Signature Series",
+              "name_fa": "سری امضا"
+            },
+            {
+              "id": "kl-carbon-shaft",
+              "name_en": "Carbon Shaft",
+              "name_fa": "شفت کربن"
+            }
+          ]
+        },
+        {
+          "id": "snk__lp-cues",
+          "name_en": "LP",
+          "name_fa": "ال‌پی",
+          "country": "CN",
+          "tier": "mid",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "lp-standard",
+              "name_en": "Standard Series",
+              "name_fa": "سری استاندارد"
+            }
+          ]
+        },
+        {
+          "id": "snk__master-cue",
+          "name_en": "Master Cue Thailand",
+          "name_fa": "مسترکیو تایلند",
+          "country": "TH",
+          "tier": "mid",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "mc-tournament",
+              "name_en": "Tournament",
+              "name_fa": "تورنمنت"
+            },
+            {
+              "id": "mc-tudor",
+              "name_en": "Tudor",
+              "name_fa": "تئودور"
+            },
+            {
+              "id": "mc-probutt",
+              "name_en": "Probutt",
+              "name_fa": "پرو بات"
+            },
+            {
+              "id": "mc-master-pro",
+              "name_en": "Master Pro",
+              "name_fa": "مستر پرو"
+            },
+            {
+              "id": "mc-superb",
+              "name_en": "Superb (hand-spliced)",
+              "name_fa": "سوپرب (دست‌اسپلایس)"
+            }
+          ]
+        },
+        {
+          "id": "snk__nachan",
+          "name_en": "Nachan",
+          "name_fa": "ناچان",
+          "country": "TH",
+          "tier": "budget",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "nc-standard",
+              "name_en": "Standard",
+              "name_fa": "استاندارد"
+            }
+          ]
+        },
+        {
+          "id": "snk__peri",
+          "name_en": "PERI",
+          "name_fa": "پری",
+          "country": "CN",
+          "tier": "mid",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "pr-bullet-8",
+              "name_en": "Bullet 8",
+              "name_fa": "بولت ۸"
+            },
+            {
+              "id": "pr-bullet-10",
+              "name_en": "Bullet 10",
+              "name_fa": "بولت ۱۰"
+            },
+            {
+              "id": "pr-sy04",
+              "name_en": "SY04",
+              "name_fa": "SY04"
+            },
+            {
+              "id": "pr-p8",
+              "name_en": "P8 Low Deflection",
+              "name_fa": "P8 کم‌انحراف"
+            },
+            {
+              "id": "pr-carbon",
+              "name_en": "Carbon Shaft Series",
+              "name_fa": "سری شفت کربن"
+            }
+          ]
+        },
+        {
+          "id": "snk__powerglide",
+          "name_en": "Powerglide",
+          "name_fa": "پاورگلاید",
+          "country": "GB",
+          "tier": "budget",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "pg-classic",
+              "name_en": "Classic",
+              "name_fa": "کلاسیک"
+            },
+            {
+              "id": "pg-champion",
+              "name_en": "Champion",
+              "name_fa": "چمپیون"
+            },
+            {
+              "id": "pg-tournament",
+              "name_en": "Tournament",
+              "name_fa": "تورنمنت"
+            }
+          ]
+        },
+        {
+          "id": "snk__riley",
+          "name_en": "Riley",
+          "name_fa": "رایلی",
+          "country": "GB",
+          "tier": "mid",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "rl-ros",
+              "name_en": "ROS Series (Ronnie O'Sullivan)",
+              "name_fa": "سری ROS (رونی اوسالیوان)"
+            },
+            {
+              "id": "rl-ros7",
+              "name_en": "ROS7",
+              "name_fa": "ROS7"
+            },
+            {
+              "id": "rl-ros-ebony",
+              "name_en": "ROS Ebony Range",
+              "name_fa": "ROS رده آبنوس"
+            },
+            {
+              "id": "rl-elegance",
+              "name_en": "Elegance",
+              "name_fa": "الگانس"
+            },
+            {
+              "id": "rl-england",
+              "name_en": "Riley England",
+              "name_fa": "رایلی انگلند"
+            },
+            {
+              "id": "rl-sapele",
+              "name_en": "Sapele Series",
+              "name_fa": "سری ساپل"
+            },
+            {
+              "id": "rl-burlington",
+              "name_en": "Burlington",
+              "name_fa": "برلینگتون"
+            },
+            {
+              "id": "rl-club",
+              "name_en": "Club / House Cue",
+              "name_fa": "کلاب / هاوس"
+            }
+          ]
+        },
+        {
+          "id": "snk__tom-cues",
+          "name_en": "Tom Snooker Cues",
+          "name_fa": "تام کیوز",
+          "country": "TH",
+          "tier": "mid",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "tm-standard",
+              "name_en": "Standard / Custom",
+              "name_fa": "استاندارد / سفارشی"
+            }
+          ]
+        },
+        {
+          "id": "snk__no-brand",
+          "name_en": "Unbranded / Unknown",
+          "name_fa": "بدون برند / نامشخص",
+          "country": null,
+          "tier": "budget",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "nb-unknown",
+              "name_en": "Unknown",
+              "name_fa": "نامشخص"
+            },
+            {
+              "id": "nb-handmade-local",
+              "name_en": "Local Handmade",
+              "name_fa": "دست‌ساز داخلی"
+            }
+          ]
+        },
+        {
+          "id": "snk__vr-cues",
+          "name_en": "VR Cues",
+          "name_fa": "وی‌آر کیوز",
+          "country": "TH",
+          "tier": "mid",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "vr-standard",
+              "name_en": "Standard",
+              "name_fa": "استاندارد"
+            },
+            {
+              "id": "vr-ultimate",
+              "name_en": "Ultimate",
+              "name_fa": "اولتیمیت"
+            }
+          ]
+        },
+        {
+          "id": "snk__xingpai",
+          "name_en": "Xingpai / STAR",
+          "name_fa": "شینگ‌پای / استار",
+          "country": "CN",
+          "tier": "mid",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "xp-snooker",
+              "name_en": "Snooker Series",
+              "name_fa": "سری اسنوکر"
+            }
+          ]
+        },
+        {
+          "id": "snk__yfen",
+          "name_en": "YFEN",
+          "name_fa": "وای‌فن",
+          "country": "CN",
+          "tier": "budget",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "yf-carbon",
+              "name_en": "Carbon Fiber Series",
+              "name_fa": "سری کربن‌فایبر"
+            }
+          ]
+        },
+        {
+          "id": "snk__iranian-handmade",
+          "name_en": "Iranian Handmade",
+          "name_fa": "دست‌ساز ایرانی",
+          "country": "IR",
+          "tier": "mid",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "ir-custom",
+              "name_en": "Custom / Workshop",
+              "name_fa": "سفارشی / کارگاهی"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "heyball",
+      "label_fa": "هی‌بال",
+      "label_en": "Heyball / Chinese 8-Ball",
+      "brands": [
+        {
+          "id": "hey__gbl",
+          "name_en": "GBL",
+          "name_fa": "جی‌بی‌ال",
+          "country": "GB",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "gp-classic",
+              "name_en": "Classic",
+              "name_fa": "کلاسیک"
+            },
+            {
+              "id": "gp-special",
+              "name_en": "Special",
+              "name_fa": "اسپشیال"
+            },
+            {
+              "id": "gp-vanquish",
+              "name_en": "Vanquish",
+              "name_fa": "ونکوییش"
+            },
+            {
+              "id": "gp-c8b-special",
+              "name_en": "C8B Special",
+              "name_fa": "C8B اسپشیال"
+            },
+            {
+              "id": "gp-c8b-vanquish",
+              "name_en": "C8B Vanquish",
+              "name_fa": "C8B ونکوییش"
+            },
+            {
+              "id": "gp-break",
+              "name_en": "Break Cue",
+              "name_fa": "بریک کیو",
+              "cue_type": "break"
+            }
+          ]
+        },
+        {
+          "id": "hey__maximus",
+          "name_en": "Maximus",
+          "name_fa": "مکسیموس",
+          "country": "TH",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "maximus-c8b",
+              "name_en": "Chinese 8 Ball",
+              "name_fa": "چاینیز ۸-بال"
+            }
+          ]
+        },
+        {
+          "id": "hey__predator",
+          "name_en": "Predator",
+          "name_fa": "پردیتور",
+          "country": "US",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "predator-revo",
+              "name_en": "REVO Heyball Setup",
+              "name_fa": "ست هی‌بال REVO"
+            }
+          ]
+        },
+        {
+          "id": "hey__ton-praram",
+          "name_en": "Ton Praram III",
+          "name_fa": "تون پرارام III",
+          "country": "TH",
+          "tier": "elite_custom",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "ton-praram-c8b",
+              "name_en": "Chinese 8 Ball Spec",
+              "name_fa": "اسپک چاینیز ۸-بال"
+            }
+          ]
+        },
+        {
+          "id": "hey__bear",
+          "name_en": "Bear",
+          "name_fa": "بییر",
+          "country": "CN",
+          "tier": "mid",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "bear-standard",
+              "name_en": "Standard Series",
+              "name_fa": "سری استاندارد"
+            }
+          ]
+        },
+        {
+          "id": "hey__cuppa",
+          "name_en": "Cuppa",
+          "name_fa": "کوپا",
+          "country": "CN",
+          "tier": "budget",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "cuppa-standard",
+              "name_en": "Standard Series",
+              "name_fa": "سری استاندارد"
+            }
+          ]
+        },
+        {
+          "id": "hey__fury",
+          "name_en": "Fury",
+          "name_fa": "فیوری",
+          "country": "CN",
+          "tier": "budget",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "fury-c8b",
+              "name_en": "Heyball Series",
+              "name_fa": "سری هی‌بال"
+            }
+          ]
+        },
+        {
+          "id": "hey__joy",
+          "name_en": "Joy",
+          "name_fa": "جوی",
+          "country": "CN",
+          "tier": "mid",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "jp-c8b",
+              "name_en": "Chinese 8 Ball Series",
+              "name_fa": "سری چاینیز ۸-بال"
+            },
+            {
+              "id": "jp-pool",
+              "name_en": "Pool Series",
+              "name_fa": "سری پول"
+            }
+          ]
+        },
+        {
+          "id": "hey__konllen",
+          "name_en": "Konllen",
+          "name_fa": "کانلن",
+          "country": "CN",
+          "tier": "mid",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "kn-signature",
+              "name_en": "Signature Series",
+              "name_fa": "سری امضا"
+            },
+            {
+              "id": "kn-carbon",
+              "name_en": "Carbon Fiber Cue",
+              "name_fa": "چوب کربن‌فایبر"
+            },
+            {
+              "id": "kn-carbon-shaft",
+              "name_en": "Carbon Shaft",
+              "name_fa": "شفت کربن",
+              "cue_type": "shaft"
+            },
+            {
+              "id": "kn-jump-break",
+              "name_en": "Jump / Break Cue",
+              "name_fa": "چوب جامپ / بریک",
+              "cue_type": "jump_break"
+            }
+          ]
+        },
+        {
+          "id": "hey__lp",
+          "name_en": "LP",
+          "name_fa": "ال‌پی",
+          "country": "CN",
+          "tier": "mid",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "lpp-standard",
+              "name_en": "Standard Series",
+              "name_fa": "سری استاندارد"
+            }
+          ]
+        },
+        {
+          "id": "hey__peri",
+          "name_en": "PERI",
+          "name_fa": "پری",
+          "country": "CN",
+          "tier": "mid",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "pi-bullet8",
+              "name_en": "Bullet 8",
+              "name_fa": "بولت ۸"
+            },
+            {
+              "id": "pi-bullet10",
+              "name_en": "Bullet 10",
+              "name_fa": "بولت ۱۰"
+            },
+            {
+              "id": "pi-sy04",
+              "name_en": "SY04",
+              "name_fa": "SY04"
+            },
+            {
+              "id": "pi-p8",
+              "name_en": "P8 Low Deflection",
+              "name_fa": "P8 کم‌انحراف"
+            },
+            {
+              "id": "pi-carbon",
+              "name_en": "Carbon Shaft Series",
+              "name_fa": "سری شفت کربن",
+              "cue_type": "shaft"
+            }
+          ]
+        },
+        {
+          "id": "hey__premium-cues",
+          "name_en": "Premium Cues",
+          "name_fa": "پریمیوم کیوز",
+          "country": "GB",
+          "tier": "mid",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "premium-cues-c8b",
+              "name_en": "Chinese 8 Ball Handmade",
+              "name_fa": "دست‌ساز چاینیز ۸-بال"
+            }
+          ]
+        },
+        {
+          "id": "hey__no-brand",
+          "name_en": "Unbranded / Unknown",
+          "name_fa": "بدون برند / نامشخص",
+          "country": null,
+          "tier": "budget",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "nbp-unknown",
+              "name_en": "Unknown",
+              "name_fa": "نامشخص"
+            },
+            {
+              "id": "nbp-handmade-local",
+              "name_en": "Local Handmade",
+              "name_fa": "دست‌ساز داخلی"
+            }
+          ]
+        },
+        {
+          "id": "hey__weichster",
+          "name_en": "Weichster",
+          "name_fa": "وایکستر",
+          "country": "CN",
+          "tier": "budget",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "weichster-standard",
+              "name_en": "Standard Series",
+              "name_fa": "سری استاندارد"
+            }
+          ]
+        },
+        {
+          "id": "hey__woods",
+          "name_en": "Woods Cues",
+          "name_fa": "وودز کیوز",
+          "country": "CN",
+          "tier": "mid",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "woods-ash-34",
+              "name_en": "3/4 Ash",
+              "name_fa": "۳/۴ زبان‌گنجشک"
+            },
+            {
+              "id": "woods-carbon-34",
+              "name_en": "3/4 Carbon Shaft",
+              "name_fa": "۳/۴ شفت کربن"
+            },
+            {
+              "id": "woods-1pc-ash",
+              "name_en": "1 Piece Ash Inlay",
+              "name_fa": "یک‌تکه اینلی"
+            }
+          ]
+        },
+        {
+          "id": "hey__xingpai",
+          "name_en": "Xingpai / STAR",
+          "name_fa": "شینگ‌پای / استار",
+          "country": "CN",
+          "tier": "mid",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "xingpai-c8b",
+              "name_en": "Chinese 8 Ball Series",
+              "name_fa": "سری چاینیز ۸-بال"
+            }
+          ]
+        },
+        {
+          "id": "hey__iranian-handmade",
+          "name_en": "Iranian Handmade",
+          "name_fa": "دست‌ساز ایرانی",
+          "country": "IR",
+          "tier": "mid",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "ir-custom",
+              "name_en": "Custom / Workshop",
+              "name_fa": "سفارشی / کارگاهی"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "carom",
+      "label_fa": "کارامبول",
+      "label_en": "Carom / 3-Cushion",
+      "brands": [
+        {
+          "id": "car__adam",
+          "name_en": "Adam",
+          "name_fa": "آدام",
+          "country": "JP",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "ad-professional",
+              "name_en": "Professional Series",
+              "name_fa": "سری حرفه‌ای"
+            },
+            {
+              "id": "ad-x2",
+              "name_en": "X2 Series",
+              "name_fa": "سری X2"
+            },
+            {
+              "id": "ad-musashi",
+              "name_en": "Musashi (ACSS shaft)",
+              "name_fa": "موساشی"
+            }
+          ]
+        },
+        {
+          "id": "car__ceulemans",
+          "name_en": "Ceulemans",
+          "name_fa": "سولمانس",
+          "country": "BE",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "ceulemans-pro",
+              "name_en": "Professional Series",
+              "name_fa": "سری حرفه‌ای"
+            },
+            {
+              "id": "ceulemans-classic",
+              "name_en": "Classic",
+              "name_fa": "کلاسیک"
+            }
+          ]
+        },
+        {
+          "id": "car__dieckman",
+          "name_en": "Dieckman",
+          "name_fa": "دیکمن",
+          "country": "DE",
+          "tier": "elite_custom",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "dieckman-custom",
+              "name_en": "Custom Wood Joint",
+              "name_fa": "سفارشی جوینت چوبی"
+            }
+          ]
+        },
+        {
+          "id": "car__hanbat",
+          "name_en": "Hanbat",
+          "name_fa": "هانبات",
+          "country": "KR",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "hanbat-pro",
+              "name_en": "Pro Series",
+              "name_fa": "سری پرو"
+            },
+            {
+              "id": "hanbat-custom",
+              "name_en": "Custom",
+              "name_fa": "سفارشی"
+            }
+          ]
+        },
+        {
+          "id": "car__kilby",
+          "name_en": "Kilby",
+          "name_fa": "کیلبی",
+          "country": "US",
+          "tier": "elite_custom",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "kilby-custom",
+              "name_en": "Custom Wood Joint",
+              "name_fa": "سفارشی جوینت چوبی"
+            }
+          ]
+        },
+        {
+          "id": "car__layani",
+          "name_en": "Layani",
+          "name_fa": "لایانی",
+          "country": "FR",
+          "tier": "elite_custom",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "layani-caudron",
+              "name_en": "Caudron Signature",
+              "name_fa": "امضای کادرون"
+            },
+            {
+              "id": "layani-custom",
+              "name_en": "Custom",
+              "name_fa": "سفارشی"
+            }
+          ]
+        },
+        {
+          "id": "car__longoni",
+          "name_en": "Longoni",
+          "name_fa": "لونگونی",
+          "country": "IT",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "lg-the-king",
+              "name_en": "The King / King II",
+              "name_fa": "دِ کینگ / کینگ II"
+            },
+            {
+              "id": "lg-custom-pro",
+              "name_en": "Custom Pro",
+              "name_fa": "کاستوم پرو"
+            },
+            {
+              "id": "lg-hurricane",
+              "name_en": "Hurricane",
+              "name_fa": "هاریکن"
+            },
+            {
+              "id": "lg-shaft-s30",
+              "name_en": "S30 / E71 Shaft",
+              "name_fa": "شفت S30 / E71",
+              "cue_type": "shaft"
+            },
+            {
+              "id": "lg-suprema",
+              "name_en": "Suprema",
+              "name_fa": "سوپرما"
+            },
+            {
+              "id": "lg-ferrara",
+              "name_en": "Ferrara",
+              "name_fa": "فرارا"
+            },
+            {
+              "id": "lg-luna-nera",
+              "name_en": "Luna Nera",
+              "name_fa": "لونا نرا"
+            },
+            {
+              "id": "lg-shaft-s2",
+              "name_en": "S2 Shaft",
+              "name_fa": "شفت S2"
+            },
+            {
+              "id": "lg-shaft-pro2",
+              "name_en": "Pro2+ Shaft",
+              "name_fa": "شفت Pro2+"
+            }
+          ]
+        },
+        {
+          "id": "car__mezz",
+          "name_en": "Mezz",
+          "name_fa": "مِز",
+          "country": "JP",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "mz-ec7",
+              "name_en": "EC7 Series",
+              "name_fa": "سری EC7"
+            },
+            {
+              "id": "mz-ec9",
+              "name_en": "EC9 Series",
+              "name_fa": "سری EC9"
+            },
+            {
+              "id": "mz-axi",
+              "name_en": "AXI Series",
+              "name_fa": "سری AXI"
+            },
+            {
+              "id": "mz-wd",
+              "name_en": "WD Series",
+              "name_fa": "سری WD"
+            },
+            {
+              "id": "mz-power-break",
+              "name_en": "Power Break (break)",
+              "name_fa": "پاور بریک",
+              "cue_type": "break"
+            },
+            {
+              "id": "mz-exceed",
+              "name_en": "Exceed",
+              "name_fa": "اکسید"
+            },
+            {
+              "id": "mz-custom",
+              "name_en": "Mezz Custom",
+              "name_fa": "سفارشی مِز"
+            },
+            {
+              "id": "mz-shaft-wx700",
+              "name_en": "WX700 Shaft",
+              "name_fa": "شفت WX700",
+              "cue_type": "shaft"
+            },
+            {
+              "id": "mz-shaft-wxsigma",
+              "name_en": "WX-Sigma Shaft",
+              "name_fa": "شفت WX-Sigma",
+              "cue_type": "shaft"
+            },
+            {
+              "id": "mz-shaft-ignite",
+              "name_en": "Ignite Carbon Shaft",
+              "name_fa": "شفت کربن ایگنایت",
+              "cue_type": "shaft"
+            }
+          ]
+        },
+        {
+          "id": "car__molinari",
+          "name_en": "Molinari",
+          "name_fa": "مولیناری",
+          "country": "NL",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "ml-carom",
+              "name_en": "Carom Series",
+              "name_fa": "سری کاروم"
+            },
+            {
+              "id": "ml-pool",
+              "name_en": "Pool Series",
+              "name_fa": "سری پول"
+            }
+          ]
+        },
+        {
+          "id": "car__schuler",
+          "name_en": "Ray Schuler",
+          "name_fa": "ری شولر",
+          "country": "US",
+          "tier": "elite_custom",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "schuler-custom",
+              "name_en": "Schuler Custom",
+              "name_fa": "سفارشی شولر"
+            },
+            {
+              "id": "schuler-constant",
+              "name_en": "Constant Shaft",
+              "name_fa": "شفت کانستنت"
+            }
+          ]
+        },
+        {
+          "id": "car__sanglee",
+          "name_en": "Sang Lee",
+          "name_fa": "سنگ لی",
+          "country": "US",
+          "tier": "elite_custom",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "sanglee-butterfly",
+              "name_en": "Butterfly",
+              "name_fa": "باترفلای"
+            }
+          ]
+        },
+        {
+          "id": "car__artemis",
+          "name_en": "Artemis",
+          "name_fa": "آرتمیس",
+          "country": "NL",
+          "tier": "mid",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "artemis-standard",
+              "name_en": "Standard",
+              "name_fa": "استاندارد"
+            }
+          ]
+        },
+        {
+          "id": "car__buffalo",
+          "name_en": "Buffalo",
+          "name_fa": "بوفالو",
+          "country": "NL",
+          "tier": "budget",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "bf-premium",
+              "name_en": "Premium",
+              "name_fa": "پریمیوم"
+            },
+            {
+              "id": "bf-century",
+              "name_en": "Century",
+              "name_fa": "سنچری"
+            },
+            {
+              "id": "bf-dominus",
+              "name_en": "Dominus",
+              "name_fa": "دومینوس"
+            }
+          ]
+        },
+        {
+          "id": "car__maxton",
+          "name_en": "Maxton",
+          "name_fa": "مکستون",
+          "country": "DE",
+          "tier": "mid",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "maxton-standard",
+              "name_en": "Standard",
+              "name_fa": "استاندارد"
+            }
+          ]
+        },
+        {
+          "id": "car__no-brand",
+          "name_en": "Unbranded / Unknown",
+          "name_fa": "بدون برند / نامشخص",
+          "country": null,
+          "tier": "budget",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "nbp-unknown",
+              "name_en": "Unknown",
+              "name_fa": "نامشخص"
+            },
+            {
+              "id": "nbp-handmade-local",
+              "name_en": "Local Handmade",
+              "name_fa": "دست‌ساز داخلی"
+            }
+          ]
+        },
+        {
+          "id": "car__iranian-handmade",
+          "name_en": "Iranian Handmade",
+          "name_fa": "دست‌ساز ایرانی",
+          "country": "IR",
+          "tier": "mid",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "ir-custom",
+              "name_en": "Custom / Workshop",
+              "name_fa": "سفارشی / کارگاهی"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "countries": {
+    "GB": {
+      "fa": "انگلستان",
+      "en": "United Kingdom",
+      "flag": "🇬🇧"
+    },
+    "US": {
+      "fa": "آمریکا",
+      "en": "United States",
+      "flag": "🇺🇸"
+    },
+    "TH": {
+      "fa": "تایلند",
+      "en": "Thailand",
+      "flag": "🇹🇭"
+    },
+    "CN": {
+      "fa": "چین",
+      "en": "China",
+      "flag": "🇨🇳"
+    },
+    "JP": {
+      "fa": "ژاپن",
+      "en": "Japan",
+      "flag": "🇯🇵"
+    },
+    "NL": {
+      "fa": "هلند",
+      "en": "Netherlands",
+      "flag": "🇳🇱"
+    },
+    "IT": {
+      "fa": "ایتالیا",
+      "en": "Italy",
+      "flag": "🇮🇹"
+    },
+    "CA": {
+      "fa": "کانادا",
+      "en": "Canada",
+      "flag": "🇨🇦"
+    },
+    "DE": {
+      "fa": "آلمان",
+      "en": "Germany",
+      "flag": "🇩🇪"
+    },
+    "BE": {
+      "fa": "بلژیک",
+      "en": "Belgium",
+      "flag": "🇧🇪"
+    },
+    "KR": {
+      "fa": "کره جنوبی",
+      "en": "South Korea",
+      "flag": "🇰🇷"
+    },
+    "FR": {
+      "fa": "فرانسه",
+      "en": "France",
+      "flag": "🇫🇷"
+    },
+    "IR": {
+      "fa": "ایران",
+      "en": "Iran",
+      "flag": "🇮🇷"
+    }
+  },
+  "country_note_fa": "country = کشور مبدأ/هویت برند، نه لزوماً محل ساخت فیزیکی. مثال: Lucasi برند آمریکایی است ولی در چین تولید می‌شود؛ برخی برندهای انگلیسی شفت را از تایلند می‌گیرند. برای برندهای بدون کشور (Unbranded) مقدار null است و باید آیکون خنثی نمایش داده شود."
+}
