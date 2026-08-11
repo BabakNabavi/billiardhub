@@ -1984,7 +1984,13 @@ console.log('\n― مرزِ سرور و کلاینت ―');
       : resolveImport(f, m[1])))
     .filter(Boolean);
 
-  const TARGET = join(ROOT, 'lib', 'supabase-config.ts');
+  /* هر ماژولی که داده یا رازِ سنگین را ایستا وارد می‌کند و نباید
+     از سمتِ کلاینت دیده شود. سه بار همین تله زد: thumbUrl،
+     supabase-config، و کاتالوگِ ۹۸ کیلوبایتیِ چوب. */
+  const SERVER_ONLY = [
+    join(ROOT, 'lib', 'supabase-config.ts'),
+    join(ROOT, 'lib', 'market', 'cue-catalog.ts'),
+  ];
   const clientRoots = files.filter(f => /^\s*['"]use client['"]/.test(src.get(f) ?? ''));
 
   /* BFS از هر ریشه‌ی کلاینت تا رسیدن به هدف */
@@ -1996,14 +2002,14 @@ console.log('\n― مرزِ سرور و کلاینت ―');
       const [cur, path] = queue.shift();
       for (const next of importsOf(cur)) {
         if (seen.has(next)) continue;
-        if (next === TARGET) { offenders.push(path.concat(next).map(p => relative(ROOT, p)).join(' → ')); queue.length = 0; break; }
+        if (SERVER_ONLY.includes(next)) { offenders.push(path.concat(next).map(p => relative(ROOT, p)).join(' → ')); queue.length = 0; break; }
         seen.add(next);
         queue.push([next, path.concat(next)]);
       }
     }
   }
 
-  t('lib/supabase-config از هیچ کامپوننتِ کلاینتی وارد نمی‌شود',
+  t('ماژول‌های فقط-سرور از کلاینت وارد نمی‌شوند',
     offenders.length === 0,
     offenders[0] ?? '');
   t('thumbUrl ماژولِ مستقلِ خودش را دارد',
@@ -2087,6 +2093,7 @@ console.log('\n― کاتالوگِ چوب ―');
   }
 
   const cueLib = read('lib/market/cue-catalog.ts');
+  const cueRules = read('lib/market/cue-rules.ts');
   t('کاتالوگ فقط سمتِ سرور خوانده می‌شود',
     /from '\.\.\/\.\.\/data\/cue-catalog\.json'/.test(cueLib)
     && !/'use client'/.test(cueLib));
@@ -2095,11 +2102,16 @@ console.log('\n― کاتالوگِ چوب ―');
     && /generateStaticParams/.test(read('app/api/cue-catalog/[type]/route.ts')),
     '۹۸ کیلوبایت نباید در باندلِ هر بازدیدکننده بنشیند');
   t('اعتبارسنجی تعلقِ مدل به برند را می‌سنجد',
-    /این مدل برای برند انتخاب‌شده نیست/.test(cueLib)
-    && /این برند برای نوع انتخاب‌شده نیست/.test(cueLib),
+    /این مدل برای برند انتخاب‌شده نیست/.test(cueRules)
+    && /این برند برای نوع انتخاب‌شده نیست/.test(cueRules),
     'اعتماد به فرانت کافی نیست — سرور هم همین تابع را صدا می‌زند');
   t('برندِ دستی و فهرستی با هم پذیرفته نمی‌شوند',
-    /نه هر دو/.test(cueLib));
+    /نه هر دو/.test(cueRules));
+  t('منطقِ خالص از داده جدا است',
+    !strip(cueRules).includes('cue-catalog.json') && cueLib.includes("export * from './cue-rules'"),
+    'کامپوننتِ کلاینت باید اعتبارسنجی را بدونِ کاتالوگ وارد کند');
+  t('انتخابگر داده را fetch می‌کند نه import',
+    read('components/market/CueSelector.tsx').includes('/api/cue-catalog/'));
 }
 
 console.log('\n― CORS ―');

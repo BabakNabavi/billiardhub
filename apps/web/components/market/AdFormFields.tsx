@@ -70,10 +70,25 @@ export function fmtPrice(v: string) {
 
 /* ── دراپ‌داون حرفه‌ای — پنل با Portal روی document.body و position:fixed رندر می‌شود
    تا از overflow:hidden و stacking-context کارت‌ها فرار کند و زیر المان بعدی نرود. ── */
+export interface FancyOption {
+  value: string
+  label: string
+  /** متنی که جست‌وجو رویش انجام می‌شود؛ نبودنش یعنی خودِ `label` */
+  search?: string
+  /** رندرِ سفارشیِ ردیف و حالتِ بسته — پرچم، زیرنویس، شمارش */
+  node?: React.ReactNode
+  /** سرتیترِ غیرقابلِ کلیک که پیش از این گزینه می‌آید */
+  group?: string
+}
+
 export function FancySelect({ value, onChange, options, placeholder = 'انتخاب...', disabled, error }: {
   value: string
   onChange: (v: string) => void
-  options: { value: string; label: string }[]
+  /* `search` و `node` و `group` اختیاری‌اند و همه‌ی فراخوان‌های قبلی
+     دست‌نخورده کار می‌کنند. `search` وقتی لازم است که کاربر با چیزی
+     جز برچسب هم بگردد (نامِ فارسی، نامِ کشور)، و `node` وقتی که ردیف
+     بیش از یک رشته باشد. */
+  options: FancyOption[]
   placeholder?: string
   disabled?: boolean
   error?: boolean
@@ -128,7 +143,10 @@ export function FancySelect({ value, onChange, options, placeholder = 'انتخ�
   }, [open])
 
   const cur = options.find(o => o.value === value)
-  const list = searchable && q.trim() ? options.filter(o => o.label.toLowerCase().includes(q.trim().toLowerCase())) : options
+  const needle = q.trim().toLowerCase()
+  const list = searchable && needle
+    ? options.filter(o => (o.search ?? o.label).toLowerCase().includes(needle))
+    : options
 
   return (
     <>
@@ -142,7 +160,7 @@ export function FancySelect({ value, onChange, options, placeholder = 'انتخ�
           fontFamily: 'Vazirmatn,Tahoma,sans-serif', cursor: disabled ? 'not-allowed' : 'pointer',
           boxShadow: open ? '0 0 0 3px rgba(199,166,106,0.14)' : 'none', transition: 'border-color .18s, box-shadow .18s',
         }}>
-        <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontSize: cur ? undefined : 12.6 }}>{cur ? cur.label : placeholder}</span>
+        <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontSize: cur ? undefined : 12.6 }}>{cur ? (cur.node ?? cur.label) : placeholder}</span>
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={GOLD} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, transition: 'transform .2s', transform: open ? 'rotate(180deg)' : 'none' }}><polyline points="6 9 12 15 18 9"/></svg>
       </button>
 
@@ -165,10 +183,20 @@ export function FancySelect({ value, onChange, options, placeholder = 'انتخ�
           <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', WebkitOverflowScrolling: 'touch', overscrollBehavior: 'contain', padding: 6 }}>
             {list.length === 0 ? (
               <div style={{ padding: '18px 10px', textAlign: 'center', fontSize: 13, color: TEXT_MUT }}>موردی یافت نشد</div>
-            ) : list.map(o => {
+            ) : list.map((o, i) => {
               const s = o.value === value
+              /* سرتیترِ گروه فقط وقتی می‌آید که با ردیفِ قبلی فرق کند —
+                 و هنگام جست‌وجو هم درست کار می‌کند، چون روی همان
+                 فهرستِ فیلترشده حساب می‌شود. */
+              const head = o.group && o.group !== list[i - 1]?.group ? o.group : null
               return (
-                <button key={o.value} type="button" onClick={() => { onChange(o.value); setOpen(false); setQ('') }}
+                <div key={o.value}>
+                {head && (
+                  <div style={{ padding: '9px 12px 5px', fontSize: 11, fontWeight: 700, color: GOLD_D, background: 'rgba(199,166,106,0.07)', letterSpacing: '.02em' }}>
+                    {head}
+                  </div>
+                )}
+                <button type="button" onClick={() => { onChange(o.value); setOpen(false); setQ('') }}
                   style={{
                     display: 'flex', width: '100%', alignItems: 'center', justifyContent: 'space-between', gap: 8,
                     padding: '10px 12px', border: 'none', borderRadius: 9, cursor: 'pointer', textAlign: 'right',
@@ -177,9 +205,10 @@ export function FancySelect({ value, onChange, options, placeholder = 'انتخ�
                   }}
                   onMouseEnter={e => { if (!s) e.currentTarget.style.background = 'rgba(28,28,26,0.04)' }}
                   onMouseLeave={e => { if (!s) e.currentTarget.style.background = 'transparent' }}>
-                  <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{o.label}</span>
+                  <span style={{ flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{o.node ?? o.label}</span>
                   {s && <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={GOLD_D} strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>}
                 </button>
+                </div>
               )
             })}
           </div>
