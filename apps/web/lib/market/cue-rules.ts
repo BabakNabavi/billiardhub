@@ -15,6 +15,8 @@
    دوباره export می‌کند تا سمتِ سرور یک ورودیِ واحد بماند.
    ═══════════════════════════════════════════════════════════════ */
 
+import { normalizeFa } from '../text-fa'
+
 export const CUE_TYPE_IDS = ['pocket_billiard', 'snooker', 'heyball', 'carom'] as const
 export type CueTypeId = typeof CUE_TYPE_IDS[number]
 
@@ -45,6 +47,9 @@ export interface CueBrand {
   country: string | null
   tier: string
   allow_free_model: boolean
+  /** املاهای رایجِ فارسی و غلط‌های تایپی — فروشنده «پرادن» می‌نویسد و
+   *  باید Peradon را پیدا کند. اختیاری: کاتالوگِ بدونِ آن هم کار می‌کند. */
+  aliases?: string[]
   models: CueModel[]
 }
 
@@ -162,6 +167,28 @@ export function validateCueSelection(
       modelCustom: modelCustom || null,
     },
   }
+}
+
+/* ── تطبیقِ نامِ برند ──
+   یک تابع برای هر دو کاربرد: جست‌وجوی زنده در فهرست، و بازیابیِ
+   آگهیِ قدیمی که فقط رشته دارد. اگر دو پیاده‌سازی می‌داشتیم، جست‌وجو
+   چیزی را پیدا می‌کرد که بازیابی نمی‌شناخت.
+
+   نرمال‌سازی در `lib/text-fa.ts` است چون فیلترِ دراپ‌داون در
+   `AdFormFields` هم باید همان را بزند — وگرنه چیزی که جست‌وجو پیدا
+   می‌کند با چیزی که این‌جا تطبیق می‌خورد یکی نمی‌ماند. */
+export const normalizeBrandKey = normalizeFa
+
+/** همه‌ی نام‌هایی که یک برند با آن‌ها شناخته می‌شود */
+export const brandSearchTerms = (b: CueBrand, countryFa?: string): string[] =>
+  [b.name_en, b.name_fa, ...(b.aliases ?? []), countryFa ?? ''].filter(Boolean)
+
+/** آیا این متن به همین برند اشاره دارد؟ نام، نامِ فارسی، یا هر alias */
+export function brandMatchesName(b: CueBrand, raw: string): boolean {
+  const k = normalizeBrandKey(raw)
+  if (!k) return false
+  return [b.name_en, b.name_fa, ...(b.aliases ?? [])]
+    .some(n => normalizeBrandKey(n) === k)
 }
 
 /* ── فهرستِ مرتب‌شده‌ی مدل‌ها ──

@@ -32,7 +32,9 @@ import {
 import {
   MAX_CUSTOM_LEN, validateCueSelection,
   type CueBrand, type CueCountry, type CueSelection,
+  brandSearchTerms, brandMatchesName, normalizeBrandKey,
 } from '../../lib/market/cue-rules'
+import CountryFlag from '../CountryFlag'
 
 export const CUE_OTHER = '__other__'
 
@@ -42,23 +44,12 @@ interface Payload { brands: CueBrand[]; countries: Record<string, CueCountry> }
 const cache = new Map<string, Payload>()
 
 /* ── پرچم ──
-   بدونِ کتابخانه‌ی تازه. روی iOS و اندرویدِ امروزی — که مخاطبِ اصلیِ
-   این سایت‌اند — ایموجی درست رندر می‌شود؛ روی ویندوز حروف نشان
-   می‌دهد و برای همان `title` و `aria-label` فارسی گذاشته شده. عرضِ
-   ثابت دارد تا نامِ برندها در ستون هم‌تراز بمانند. */
+   ایموجی بود و روی ویندوز به «GB» تبدیل می‌شد؛ حالا SVG است.
+   دلیلِ کامل در خودِ `CountryFlag`. عرضِ ثابت دارد تا نامِ برندها
+   در ستون هم‌تراز بمانند. */
 function Flag({ code, countries }: { code: string | null; countries: Record<string, CueCountry> }) {
   const c = code ? countries[code] : undefined
-  return (
-    <span
-      title={c?.fa ?? 'کشور نامشخص'}
-      aria-label={c?.fa ?? 'کشور نامشخص'}
-      style={{
-        width: 22, flexShrink: 0, display: 'inline-block', textAlign: 'center',
-        fontFamily: '"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif',
-        fontSize: 15, lineHeight: '22px',
-      }}
-    >{c?.flag ?? '—'}</span>
-  )
+  return <CountryFlag code={code} label={c?.fa ?? 'کشور نامشخص'} />
 }
 
 export interface CueValue {
@@ -124,14 +115,15 @@ export default function CueSelector({
     const want = resolveFrom.brand.trim()
     if (!want) return
     resolved.current = true
-    const norm = (x: string) => x.toLowerCase().replace(/s+/g, "")
-    const hit = data.brands.find(b => norm(b.name_en) === norm(want) || norm(b.name_fa) === norm(want))
+    /* تطبیق از تابعِ مشترکِ cue-rules می‌آید — همان که جست‌وجو
+       هم از آن استفاده می‌کند، پس aliases هر دو جا کار می‌کند. */
+    const hit = data.brands.find(b => brandMatchesName(b, want))
     if (!hit) {
       emit({ brandId: CUE_OTHER, brandCustom: want, modelId: null, modelCustom: resolveFrom.model.trim() })
       return
     }
     const mWant = resolveFrom.model.trim()
-    const mHit = mWant ? hit.models.find(m => norm(m.name_en) === norm(mWant) || norm(m.name_fa) === norm(mWant)) : undefined
+    const mHit = mWant ? hit.models.find(m => normalizeBrandKey(m.name_en) === normalizeBrandKey(mWant) || normalizeBrandKey(m.name_fa) === normalizeBrandKey(mWant)) : undefined
     emit({
       brandId: hit.id,
       brandCustom: "",
@@ -155,7 +147,7 @@ export default function CueSelector({
       label: b.name_en,
       /* جست‌وجو روی انگلیسی، فارسی و نامِ کشور — کاربر ممکن است
          «پرادون» یا «Peradon» یا «انگلستان» تایپ کند */
-      search: [b.name_en, b.name_fa, b.country ? data.countries[b.country]?.fa : ''].join(' '),
+      search: brandSearchTerms(b, b.country ? data.countries[b.country]?.fa : '').join(' '),
       node: (
         <span style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
           <Flag code={b.country} countries={data.countries} />
@@ -173,7 +165,7 @@ export default function CueSelector({
       search: 'سایر other',
       node: (
         <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <span style={{ width: 22, textAlign: 'center', color: GOLD, fontSize: 16 }}>+</span>
+          <span style={{ width: 21, textAlign: 'center', color: GOLD, fontSize: 16 }}>+</span>
           <span style={{ color: GOLD_D, fontWeight: 700 }}>سایر</span>
           <span style={{ fontSize: 12, color: TEXT_MUT }}>برند در فهرست نیست</span>
         </span>
@@ -211,7 +203,7 @@ export default function CueSelector({
       search: 'سایر other',
       node: (
         <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <span style={{ width: 22, textAlign: 'center', color: GOLD, fontSize: 16 }}>+</span>
+          <span style={{ width: 21, textAlign: 'center', color: GOLD, fontSize: 16 }}>+</span>
           <span style={{ color: GOLD_D, fontWeight: 700 }}>سایر</span>
           <span style={{ fontSize: 12, color: TEXT_MUT }}>مدل در فهرست نیست</span>
         </span>
@@ -224,12 +216,8 @@ export default function CueSelector({
      اگر متنِ دستی با نامِ یک برندِ موجود یکی درآمد، پیش از ساختنِ
      رکوردِ تکراری به کاربر بگو. مقایسه بدونِ فاصله و حساسیتِ حروف. */
   const dupBrand = useMemo(() => {
-    const k = value.brandCustom.trim().toLowerCase().replace(/\s+/g, '')
-    if (!k || !data) return null
-    return data.brands.find(
-      b => b.name_en.toLowerCase().replace(/\s+/g, '') === k
-        || b.name_fa.replace(/\s+/g, '') === value.brandCustom.trim().replace(/\s+/g, ''),
-    ) ?? null
+    if (!data || !value.brandCustom.trim()) return null
+    return data.brands.find(b => brandMatchesName(b, value.brandCustom)) ?? null
   }, [value.brandCustom, data])
 
   const emit = (next: CueValue) => {

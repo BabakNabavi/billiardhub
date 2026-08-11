@@ -2090,6 +2090,52 @@ console.log('\n― کاتالوگِ چوب ―');
     t('هر برند دستِ‌کم یک مدل دارد', brands.every(b => b.models.length > 0));
     t('کدِ کشورِ هر برند تعریف دارد',
       brands.every(b => b.country === null || cat.countries[b.country]));
+
+    /* ── تداخلِ نام درونِ یک نوع ──
+       `brandMatchesName` اولین تطابق را برمی‌گرداند. اگر دو برندِ
+       *همان نوع* یک alias مشترک داشته باشند، آگهیِ قدیمی به برندِ
+       اشتباه وصل می‌شود و کسی خبردار نمی‌شود. تداخلِ بینِ دو نوع
+       ایرادی ندارد — انتخابگر هر بار فقط یک نوع را لود می‌کند. */
+    /* ⚠️ رونوشتِ ساده‌شده‌ی `normalizeFa` — اگر قاعده‌ای آن‌جا اضافه
+       شد، این‌جا هم باید اضافه شود وگرنه این تست دیگر رفتارِ واقعی
+       را نمی‌سنجد. عمداً import نمی‌شود: این اسکریپت بازرسیِ ایستا
+       است و چیزی از اپ اجرا نمی‌کند. */
+    const nrm = s => s.toLowerCase()
+      .replace(/[\u200B-\u200F]/g, '').replace(/[\u064B-\u0652\u0670]/g, '')
+      .replace(/\s+/g, '').replace(/ي/g, 'ی').replace(/ك/g, 'ک')
+      .replace(/[أإآٱ]/g, 'ا').replace(/[ةۀ]/g, 'ه');
+    const clashes = [];
+    for (const ty of cat.types) {
+      const seen = new Map();
+      for (const b of ty.brands) {
+        for (const nm of new Set([b.name_en, b.name_fa, ...(b.aliases ?? [])].map(nrm))) {
+          if (seen.has(nm) && seen.get(nm) !== b.id) clashes.push(`${ty.id}:${nm}`);
+          else seen.set(nm, b.id);
+        }
+      }
+    }
+    t('نامِ برند درونِ هر نوع یکتاست', clashes.length === 0, clashes.slice(0, 3).join(', '));
+    /* ── پرچم ──
+       ایموجیِ پرچم روی ویندوز رندر نمی‌شود و به «GB» تبدیل می‌شود،
+       پس SVG جایگزینش شد. اگر روزی برندی از کشورِ تازه‌ای اضافه شود
+       و شکلش نباشد، به‌جای پرچم یک جعبه‌ی خاکستری می‌نشیند — بی‌سروصدا. */
+    const flagSrc = read('components/CountryFlag.tsx');
+    const drawn = new Set([...flagSrc.matchAll(/^ {2}([A-Z]{2}):/gm)].map(m => m[1]));
+    const missing = Object.keys(cat.countries).filter(c => !drawn.has(c));
+    t('هر کشورِ کاتالوگ پرچمِ SVG دارد', missing.length === 0, missing.join(', '));
+    t('پرچم دیگر ایموجی نیست',
+      !/Segoe UI Emoji/.test(read('components/market/CueSelector.tsx')),
+      'ویندوز گلیفِ regional-indicator ندارد');
+
+    t('املاهای جایگزین در کاتالوگ هست',
+      brands.filter(b => (b.aliases ?? []).length).length >= 30,
+      'بدونشان «پرادن» به Peradon نمی‌رسد — ولی نبودشان خطا نیست');
+    /* aliasی که عینِ نامِ خودِ برند است هیچ‌چیزِ تازه‌ای پیدا نمی‌کند
+       و فقط حجمِ پاسخِ API را بالا می‌برد — ۹۳ موردش حذف شد. */
+    const junk = brands.flatMap(b => (b.aliases ?? [])
+      .filter(a => [b.name_en, b.name_fa].some(n => nrm(n) === nrm(a)) )
+      .map(a => `${b.id}:${a}`));
+    t('alias تکرارِ نامِ خودِ برند نیست', junk.length === 0, junk.slice(0, 3).join(', '));
   }
 
   const cueLib = read('lib/market/cue-catalog.ts');
@@ -2129,6 +2175,37 @@ console.log('\n― کاتالوگِ چوب ―');
     /resolveFrom/.test(read('components/market/CueSelector.tsx'))
     && /setLegacyCue\(\{ brand: rawBrand, model: rawModel \}\)/.test(editAdSrc),
     'آگهی‌های موجود فقط نامِ رشته‌ای دارند، نه شناسه');
+
+  /* ── املاهای جایگزین ──
+     کاتالوگ می‌تواند برای هر برند `aliases` داشته باشد («پرادن» ⟵
+     Peradon). سه جا با نام سروکار دارند: جست‌وجوی فهرست، بازیابیِ
+     آگهیِ قدیمی، و هشدارِ برندِ تکراری. اگر هرکدام تطبیقِ خودش را
+     داشته باشد، جست‌وجو چیزی را پیدا می‌کند که بازیابی نمی‌شناسد. */
+  const selSrc = strip(read('components/market/CueSelector.tsx'));
+  t('هر دو تابعِ نام aliases را می‌بینند',
+    /aliases\?: string\[\]/.test(cueRules)
+    && (cueRules.match(/\.\.\.\(b\.aliases \?\? \[\]\)/g) ?? []).length >= 2,
+    'brandSearchTerms و brandMatchesName هر دو — یکی کافی نیست');
+  t('انتخابگر از همان تطبیقِ مشترک استفاده می‌کند',
+    ['brandSearchTerms(', 'brandMatchesName('].every(s => selSrc.includes(s))
+    /* `\\?s` عمدی است: نسخه‌ی باگ‌دار `/s+/g` بود، بدونِ بک‌اسلش —
+       الگویی که فقط `\\s+` را بگیرد همان باگ را رد می‌کند. */
+    && !/\.toLowerCase\(\)\.replace\(\/\\?s\+\/g/.test(selSrc),
+    'نرمال‌سازیِ درجا یک‌بار حرفِ s را به‌جای فاصله حذف می‌کرد');
+
+  /* ── نرمال‌ساز، یک نسخه برای همه ──
+     فیلترِ دراپ‌داون هم باید همان را بزند، وگرنه جست‌وجو چیزی را
+     پیدا می‌کند که تطبیق نمی‌شناسد — و برعکس. */
+  const faSrc = read('lib/text-fa.ts');
+  t('نرمال‌ساز شکل‌های واقعیِ ورودیِ فارسی را پوشش می‌دهد',
+    [/\/ي\/g/, /\/ك\/g/, /\[أإآٱ\]/, /\[ةۀ\]/, /HARAKAT/, /INVISIBLE/, /۰-۹/].every(r => r.test(faSrc)),
+    'کیبوردِ عربیِ موبایل، اعرابِ داده، نیم‌فاصله و ارقامِ فارسی');
+  t('فیلترِ دراپ‌داون خامِ includes نمی‌زند',
+    /normalizeFa\(q\)/.test(read('components/market/AdFormFields.tsx'))
+    && /normalizeFa\(o\.search \?\? o\.label\)/.test(read('components/market/AdFormFields.tsx')),
+    'وگرنه «مك درموت» با کیبوردِ عربی هیچ ردیفی برنمی‌گرداند');
+  t('cue-rules نرمال‌ساز را دوباره نمی‌نویسد',
+    /normalizeBrandKey = normalizeFa/.test(cueRules));
 }
 
 console.log('\n― CORS ―');

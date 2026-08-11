@@ -12,6 +12,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import type { SpecFieldDef } from '../../lib/market/specs'
+import { normalizeFa } from '../../lib/text-fa'
 
 export const GOLD     = '#C7A66A'
 export const GOLD_D   = '#9A6E38'
@@ -143,9 +144,12 @@ export function FancySelect({ value, onChange, options, placeholder = 'انتخ�
   }, [open])
 
   const cur = options.find(o => o.value === value)
-  const needle = q.trim().toLowerCase()
+  /* جست‌وجو روی متنِ نرمال‌شده: «مك درموت» با کیبوردِ عربی، و
+     «مک‌درموت» با نیم‌فاصله، باید همان «McDermott» را پیدا کنند.
+     چون فاصله‌ها حذف می‌شوند، «cue craft» هم «CueCraft» را می‌گیرد. */
+  const needle = normalizeFa(q)
   const list = searchable && needle
-    ? options.filter(o => (o.search ?? o.label).toLowerCase().includes(needle))
+    ? options.filter(o => normalizeFa(o.search ?? o.label).includes(needle))
     : options
 
   return (
