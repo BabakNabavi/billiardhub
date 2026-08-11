@@ -1,14 +1,21 @@
 'use client'
 
 /* ═══════════════════════════════════════════════════════════════
-   انتخابگرِ چوب — نوع ← برند ← مدل.
+   انتخابگرِ کاتالوگ — نوع ← برند ← مدل. برای چوب و میز، یکی.
    ───────────────────────────────────────────────────────────────
    ── چرا داده را fetch می‌کند و import نمی‌کند ──
-   کاتالوگ ۹۸ کیلوبایت است. اگر این کامپوننت واردش کند، همان حجم در
-   باندلِ هر بازدیدکننده‌ی فرم می‌نشیند. به‌جایش برندهای **همان نوعی
-   که کاربر انتخاب کرده** از `/api/cue-catalog/[type]` می‌آید:
-   بینِ ۶ تا ۲۲ کیلوبایت، استاتیک، با کشِ یک‌ساله. یعنی کسی که
-   «میز» ثبت می‌کند اصلاً چیزی دانلود نمی‌کند.
+   دو کاتالوگ روی هم بیش از صد کیلوبایت‌اند. اگر این کامپوننت واردشان
+   کند، همان حجم در باندلِ هر بازدیدکننده‌ی فرم می‌نشیند. به‌جایش
+   برندهای **همان نوعی که کاربر انتخاب کرده** از
+   `/api/catalog/[category]/[type]` می‌آید: بینِ ۶ تا ۲۲ کیلوبایت،
+   استاتیک، با کشِ یک‌ساله. کسی که «تیپ» ثبت می‌کند چیزی دانلود
+   نمی‌کند.
+
+   ── چرا یک کامپوننت برای هر دو ──
+   ساختارِ دو کاتالوگ یکی است. نسخه‌ی دومی که فقط `cue` را به
+   `table` عوض می‌کرد، همان الگوی «دو سیستم برای یک چیز» می‌شد که
+   در این پروژه بارها باگ ساخته: دو فرمِ آگهی، سه سازنده‌ی کارت، دو
+   منبعِ فروشگاه. پس دسته یک prop است.
 
    ── وابستگیِ آبشاری ──
    عوض‌شدنِ نوع ⇒ برند و مدل پاک می‌شوند. این اختیاری نیست: برندها
@@ -19,6 +26,11 @@
    ته هر دو فهرست. در سطحِ برند، انتخابش فیلدِ مدل را هم به متنِ آزاد
    تبدیل می‌کند — چون وقتی برند در فهرست نیست، مدلش هم قطعاً نیست.
 
+   ── نوعِ بدونِ فهرست ──
+   «میز خانگی» `force_free_input` دارد: هیچ دراپ‌داونی نمی‌آید و هر
+   دو فیلد متنِ آزادند. منطق روی همان پرچمِ داده نوشته شده، نه روی
+   شناسه‌ی نوع.
+
    ظاهر عمداً از `AdFormFields` می‌آید و چیزی از نو ساخته نشده.
    ═══════════════════════════════════════════════════════════════ */
 
@@ -27,91 +39,135 @@ import {
   FancySelect, Label, ErrMsg, inp, GOLD, GOLD_D, TEXT_MUT, TEXT_SEC,
   type FancyOption,
 } from './AdFormFields'
-/* از `cue-rules` وارد می‌شود نه `cue-catalog`: دومی JSONِ ۹۸
-   کیلوبایتی را ایستا می‌آورد و این کامپوننت کلاینت است. */
+/* از `catalog-rules` وارد می‌شود نه `catalog`: دومی هر دو JSON را
+   ایستا می‌آورد و این کامپوننت کلاینت است. */
 import {
-  MAX_CUSTOM_LEN, validateCueSelection,
-  type CueBrand, type CueCountry, type CueSelection,
-} from '../../lib/market/cue-rules'
+  MAX_CUSTOM_LEN, validateSelection,
+  type CatalogBrand, type CatalogCountry, type CatalogId,
+  type CatalogSelection, type CatalogSize,
+  brandSearchTerms, brandMatchesName, normalizeBrandKey,
+} from '../../lib/market/catalog-rules'
+import CountryFlag from '../CountryFlag'
 
 export const CUE_OTHER = '__other__'
 
-interface Payload { brands: CueBrand[]; countries: Record<string, CueCountry> }
-
-/* کشِ درون‌حافظه‌ای: برگشتن به نوعی که قبلاً دیده شده درخواست نمی‌زند */
-const cache = new Map<string, Payload>()
-
-/* ── پرچم ──
-   بدونِ کتابخانه‌ی تازه. روی iOS و اندرویدِ امروزی — که مخاطبِ اصلیِ
-   این سایت‌اند — ایموجی درست رندر می‌شود؛ روی ویندوز حروف نشان
-   می‌دهد و برای همان `title` و `aria-label` فارسی گذاشته شده. عرضِ
-   ثابت دارد تا نامِ برندها در ستون هم‌تراز بمانند. */
-function Flag({ code, countries }: { code: string | null; countries: Record<string, CueCountry> }) {
-  const c = code ? countries[code] : undefined
-  return (
-    <span
-      title={c?.fa ?? 'کشور نامشخص'}
-      aria-label={c?.fa ?? 'کشور نامشخص'}
-      style={{
-        width: 22, flexShrink: 0, display: 'inline-block', textAlign: 'center',
-        fontFamily: '"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif',
-        fontSize: 15, lineHeight: '22px',
-      }}
-    >{c?.flag ?? '—'}</span>
-  )
+export interface CatalogPayload {
+  category: CatalogId
+  type: string
+  label_fa: string
+  brands: CatalogBrand[]
+  sizes: CatalogSize[]
+  forceFreeInput: boolean
+  countries: Record<string, CatalogCountry>
 }
 
-export interface CueValue {
+/* کشِ درون‌حافظه‌ای: برگشتن به نوعی که قبلاً دیده شده درخواست نمی‌زند.
+   کلید شاملِ دسته است، وگرنه «اسنوکرِ چوب» و «اسنوکرِ میز» — که هر دو
+   `snooker` نام دارند — روی هم می‌افتادند. */
+const cache = new Map<string, CatalogPayload>()
+
+export interface CatalogFetchState {
+  data: CatalogPayload | null
+  loading: boolean
+  failed: boolean
+}
+/* ── یک درخواست، دو مصرف‌کننده ──
+   فیلدِ سایز در کارتِ «مشخصات فنی» است و این انتخابگر در کارتِ برند،
+   ولی هر دو همین payload را می‌خواهند. کشِ ماژول به‌تنهایی کافی نبود:
+   هر دو در یک commit سوار می‌شوند و چون کش فقط **پس از** رسیدنِ پاسخ
+   پر می‌شود، هر دو کش را خالی می‌دیدند و دو درخواستِ هم‌زمان می‌زدند.
+   پس وعده‌ی در جریان هم نگه داشته می‌شود.
+
+   ── چرا خروجی با نوع سنجیده می‌شود ──
+   با عوض‌شدنِ نوع، یک رندر پیش از اجرای effect اتفاق می‌افتد و در آن
+   رندر `data` هنوز payloadِ **نوعِ قبلی** است. مصرف‌کننده در همان
+   لحظه فهرستِ برندِ نوعِ قبلی را زنده نشان می‌دهد و فیلدِ سایز
+   پیش‌فرضِ نوعِ قبلی را می‌نشاند — و سرور بعداً همان را رد می‌کند.
+   payload خودش دسته و نوعش را دارد، پس همین‌جا تطبیق داده می‌شود. */
+const inflight = new Map<string, Promise<CatalogPayload>>()
+
+function loadCatalog(category: CatalogId, type: string): Promise<CatalogPayload> {
+  const key = `${category}/${type}`
+  const running = inflight.get(key)
+  if (running) return running
+  const p = (async () => {
+    const r = await fetch(`/api/catalog/${category}/${type}`)
+    if (!r.ok) throw new Error(String(r.status))
+    const j = (await r.json()) as CatalogPayload
+    cache.set(key, j)
+    return j
+  })().finally(() => { inflight.delete(key) })
+  inflight.set(key, p)
+  return p
+}
+
+export function useCatalogType(category: CatalogId, type: string): CatalogFetchState {
+  const key = `${category}/${type}`
+  const [data, setData] = useState<CatalogPayload | null>(() => cache.get(key) ?? null)
+  const [loading, setLoading] = useState(false)
+  const [failed, setFailed] = useState(false)
+  const reqId = useRef(0)
+
+  useEffect(() => {
+    /* هر اجرا پاسخ‌های در راه را باطل می‌کند — از جمله وقتی نوعِ تازه
+       در کش هست و اصلاً درخواستی زده نمی‌شود. بدونِ این، پاسخِ کهنه
+       روی داده‌ی درست می‌نشست. */
+    const id = ++reqId.current
+    if (!type) { setData(null); setLoading(false); setFailed(false); return }
+
+    const hit = cache.get(key)
+    if (hit) { setData(hit); setLoading(false); setFailed(false); return }
+
+    setLoading(true); setFailed(false)
+    void loadCatalog(category, type)
+      .then(j => { if (id === reqId.current) { setData(j); setFailed(false) } })
+      .catch(() => { if (id === reqId.current) { setData(null); setFailed(true) } })
+      .finally(() => { if (id === reqId.current) setLoading(false) })
+  }, [key, category, type])
+
+  /* داده‌ی نوعِ قبلی هرگز به مصرف‌کننده نمی‌رسد */
+  const fresh = data && data.category === category && data.type === type ? data : null
+  return { data: fresh, loading: loading || (!fresh && !failed && !!type), failed }
+}
+
+/* ── پرچم ──
+   ایموجی بود و روی ویندوز به «GB» تبدیل می‌شد؛ حالا SVG است.
+   دلیلِ کامل در خودِ `CountryFlag`. عرضِ ثابت دارد تا نامِ برندها
+   در ستون هم‌تراز بمانند. */
+function Flag({ code, countries }: { code: string | null; countries: Record<string, CatalogCountry> }) {
+  const c = code ? countries[code] : undefined
+  return <CountryFlag code={code} label={c?.fa ?? 'کشور نامشخص'} />
+}
+
+export interface CatalogValue {
   brandId: string | null
   brandCustom: string
   modelId: string | null
   modelCustom: string
 }
 
-export const EMPTY_CUE: CueValue = { brandId: null, brandCustom: '', modelId: null, modelCustom: '' }
+export const EMPTY_CATALOG_VALUE: CatalogValue =
+  { brandId: null, brandCustom: '', modelId: null, modelCustom: '' }
 
-export default function CueSelector({
-  cueType, value, onChange, errors = {}, resolveFrom,
+export default function CatalogSelector({
+  category, type, value, onChange, errors = {}, resolveFrom,
 }: {
-  /** یکی از چهار نوعِ چوب؛ خالی یعنی هنوز انتخاب نشده */
-  cueType: string
-  value: CueValue
+  /** `cue` یا `table` — کدام کاتالوگ */
+  category: CatalogId
+  /** شناسه‌ی نوع در همان کاتالوگ؛ خالی یعنی هنوز انتخاب نشده */
+  type: string
+  value: CatalogValue
   /* برچسبِ نمایشی همراهِ مقدار برمی‌گردد: والد داده‌ی کاتالوگ را
      ندارد و نباید برای ساختنِ نامِ برند دوباره fetch کند. */
-  onChange: (v: CueValue, labels: { brand: string; model: string }) => void
+  onChange: (v: CatalogValue, labels: { brand: string; model: string }) => void
   errors?: Record<string, string>
   /* آگهیِ موجود فقط نامِ رشته‌ای دارد، نه شناسه. یک‌بار پس از
      آمدنِ داده تلاش می‌کنیم نام را به برندِ کاتالوگ نگاشت کنیم؛ اگر
      نشد، همان نام در «سایر» می‌نشیند تا چیزی گم نشود. */
   resolveFrom?: { brand: string; model: string }
 }) {
-  const [data, setData] = useState<Payload | null>(() => cache.get(cueType) ?? null)
-  const [loading, setLoading] = useState(false)
-  const [failed, setFailed] = useState(false)
-  const reqId = useRef(0)
-
-  useEffect(() => {
-    if (!cueType) { setData(null); setFailed(false); return }
-    const hit = cache.get(cueType)
-    if (hit) { setData(hit); setFailed(false); return }
-
-    const id = ++reqId.current
-    setLoading(true); setFailed(false)
-    void (async () => {
-      try {
-        const r = await fetch(`/api/cue-catalog/${cueType}`)
-        if (!r.ok) throw new Error(String(r.status))
-        const j = (await r.json()) as Payload
-        cache.set(cueType, j)
-        /* پاسخِ کهنه نباید روی نوعِ تازه بنشیند */
-        if (id === reqId.current) setData(j)
-      } catch {
-        if (id === reqId.current) { setData(null); setFailed(true) }
-      } finally {
-        if (id === reqId.current) setLoading(false)
-      }
-    })()
-  }, [cueType])
+  const { data, loading, failed } = useCatalogType(category, type)
+  const freeInput = !!data?.forceFreeInput
 
   /* ── بازیابیِ آگهیِ قدیمی ──
      فقط یک‌بار و فقط وقتی هنوز چیزی انتخاب نشده. تطبیق بدونِ
@@ -124,14 +180,15 @@ export default function CueSelector({
     const want = resolveFrom.brand.trim()
     if (!want) return
     resolved.current = true
-    const norm = (x: string) => x.toLowerCase().replace(/s+/g, "")
-    const hit = data.brands.find(b => norm(b.name_en) === norm(want) || norm(b.name_fa) === norm(want))
+    /* تطبیق از تابعِ مشترکِ catalog-rules می‌آید — همان که جست‌وجو
+       هم از آن استفاده می‌کند، پس aliases هر دو جا کار می‌کند. */
+    const hit = data.brands.find(b => brandMatchesName(b, want))
     if (!hit) {
       emit({ brandId: CUE_OTHER, brandCustom: want, modelId: null, modelCustom: resolveFrom.model.trim() })
       return
     }
     const mWant = resolveFrom.model.trim()
-    const mHit = mWant ? hit.models.find(m => norm(m.name_en) === norm(mWant) || norm(m.name_fa) === norm(mWant)) : undefined
+    const mHit = mWant ? hit.models.find(m => normalizeBrandKey(m.name_en) === normalizeBrandKey(mWant) || normalizeBrandKey(m.name_fa) === normalizeBrandKey(mWant)) : undefined
     emit({
       brandId: hit.id,
       brandCustom: "",
@@ -155,7 +212,7 @@ export default function CueSelector({
       label: b.name_en,
       /* جست‌وجو روی انگلیسی، فارسی و نامِ کشور — کاربر ممکن است
          «پرادون» یا «Peradon» یا «انگلستان» تایپ کند */
-      search: [b.name_en, b.name_fa, b.country ? data.countries[b.country]?.fa : ''].join(' '),
+      search: brandSearchTerms(b, b.country ? data.countries[b.country]?.fa : '').join(' '),
       node: (
         <span style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
           <Flag code={b.country} countries={data.countries} />
@@ -173,7 +230,7 @@ export default function CueSelector({
       search: 'سایر other',
       node: (
         <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <span style={{ width: 22, textAlign: 'center', color: GOLD, fontSize: 16 }}>+</span>
+          <span style={{ width: 21, textAlign: 'center', color: GOLD, fontSize: 16 }}>+</span>
           <span style={{ color: GOLD_D, fontWeight: 700 }}>سایر</span>
           <span style={{ fontSize: 12, color: TEXT_MUT }}>برند در فهرست نیست</span>
         </span>
@@ -211,7 +268,7 @@ export default function CueSelector({
       search: 'سایر other',
       node: (
         <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <span style={{ width: 22, textAlign: 'center', color: GOLD, fontSize: 16 }}>+</span>
+          <span style={{ width: 21, textAlign: 'center', color: GOLD, fontSize: 16 }}>+</span>
           <span style={{ color: GOLD_D, fontWeight: 700 }}>سایر</span>
           <span style={{ fontSize: 12, color: TEXT_MUT }}>مدل در فهرست نیست</span>
         </span>
@@ -224,23 +281,49 @@ export default function CueSelector({
      اگر متنِ دستی با نامِ یک برندِ موجود یکی درآمد، پیش از ساختنِ
      رکوردِ تکراری به کاربر بگو. مقایسه بدونِ فاصله و حساسیتِ حروف. */
   const dupBrand = useMemo(() => {
-    const k = value.brandCustom.trim().toLowerCase().replace(/\s+/g, '')
-    if (!k || !data) return null
-    return data.brands.find(
-      b => b.name_en.toLowerCase().replace(/\s+/g, '') === k
-        || b.name_fa.replace(/\s+/g, '') === value.brandCustom.trim().replace(/\s+/g, ''),
-    ) ?? null
+    if (!data || !value.brandCustom.trim()) return null
+    return data.brands.find(b => brandMatchesName(b, value.brandCustom)) ?? null
   }, [value.brandCustom, data])
 
-  const emit = (next: CueValue) => {
+  const emit = (next: CatalogValue) => {
     const b = next.brandId && next.brandId !== CUE_OTHER
       ? data?.brands.find(x => x.id === next.brandId) : undefined
-    onChange(next, { brand: cueBrandText(next, b), model: cueModelText(next, b) })
+    onChange(next, { brand: brandText(next, b), model: modelText(next, b) })
   }
-  const set = (patch: Partial<CueValue>) => emit({ ...value, ...patch })
+  const set = (patch: Partial<CatalogValue>) => emit({ ...value, ...patch })
 
   const pickBrand = (id: string) =>
     set({ brandId: id, modelId: null, modelCustom: '', brandCustom: id === CUE_OTHER ? value.brandCustom : '' })
+
+  /* ── نوعِ بدونِ فهرست ──
+     «میز خانگی» برند و مدلِ مشخصی ندارد؛ اجبار به انتخاب از فهرست
+     یا آگهی را رها می‌کند یا داده‌ی الکی می‌سازد. پس هر دو فیلد متنِ
+     آزادند و هیچ‌کدام ستاره ندارد. شرط روی پرچمِ داده است نه روی
+     شناسه‌ی نوع، تا نوعِ بعدی فقط با عوض‌شدنِ داده همین شود. */
+  if (freeInput) {
+    return (
+      <>
+        <div>
+          <Label>برند</Label>
+          <input className="nf" type="text" maxLength={MAX_CUSTOM_LEN}
+            value={value.brandCustom}
+            onChange={e => set({ brandId: null, modelId: null, brandCustom: e.target.value })}
+            placeholder="نام برند (اگر می‌دانید)"
+            style={inp(errors.brand)} />
+          <ErrMsg msg={errors.brand} />
+        </div>
+        <div>
+          <Label>مدل</Label>
+          <input className="nf" type="text" maxLength={MAX_CUSTOM_LEN}
+            value={value.modelCustom}
+            onChange={e => set({ modelId: null, modelCustom: e.target.value })}
+            placeholder="نام یا توضیح مدل (اختیاری)"
+            style={inp(errors.model)} />
+          <ErrMsg msg={errors.model} />
+        </div>
+      </>
+    )
+  }
 
   return (
     <>
@@ -250,10 +333,10 @@ export default function CueSelector({
           value={value.brandId ?? ''}
           onChange={pickBrand}
           options={brandOptions}
-          disabled={!cueType || !data}
+          disabled={!type || !data}
           error={!!errors.brand}
           placeholder={
-            !cueType ? 'ابتدا نوع را انتخاب کنید'
+            !type ? 'ابتدا نوع را انتخاب کنید'
               : loading ? 'در حال بارگذاری برندها...'
                 : failed ? 'فهرست برندها نیامد — دوباره تلاش کنید'
                   : 'انتخاب برند...'
@@ -315,8 +398,8 @@ export default function CueSelector({
           <div style={{ display: 'flex', alignItems: 'center', gap: 7, fontSize: 14, fontWeight: 700 }}>
             {brand && data && <Flag code={brand.country} countries={data.countries} />}
             <span style={{ color: TEXT_SEC }}>
-              {cueBrandText(value, brand)}
-              {cueModelText(value, brand) ? ` · ${cueModelText(value, brand)}` : ''}
+              {brandText(value, brand)}
+              {modelText(value, brand) ? ` · ${modelText(value, brand)}` : ''}
             </span>
           </div>
         </div>
@@ -327,26 +410,30 @@ export default function CueSelector({
 
 /* ── برچسبِ نمایشی ──
    مقدارِ دستی بر شناسه مقدم است: وقتی کاربر خودش نوشته یعنی فهرست
-   جوابش نداده. همین قاعده در `lib/market/cue-catalog.ts` هم هست تا
+   جوابش نداده. همین قاعده در `lib/market/catalog.ts` هم هست تا
    سرور و کارتِ آگهی همان را بسازند. */
-export function cueBrandText(v: CueValue, brand?: CueBrand): string {
+export function brandText(v: CatalogValue, brand?: CatalogBrand): string {
   if (v.brandId === CUE_OTHER || !v.brandId) return v.brandCustom.trim()
   return brand?.name_en ?? ''
 }
 
-export function cueModelText(v: CueValue, brand?: CueBrand): string {
+export function modelText(v: CatalogValue, brand?: CatalogBrand): string {
   if (v.brandId === CUE_OTHER || v.modelId === CUE_OTHER || !v.modelId) return v.modelCustom.trim()
   return brand?.models.find(m => m.id === v.modelId)?.name_en ?? ''
 }
 
 /** همان اعتبارسنجیِ سرور، با برندهای همین نوع — کاتالوگ وارد نمی‌شود */
-export function checkCue(cueType: string, v: CueValue, brands: CueBrand[]) {
-  const sel: CueSelection = {
-    cueType,
+export function checkCatalog(
+  category: CatalogId, type: string, v: CatalogValue,
+  brands: CatalogBrand[], opts: { forceFreeInput?: boolean } = {},
+) {
+  const sel: CatalogSelection = {
+    category,
+    type,
     brandId: v.brandId === CUE_OTHER ? null : v.brandId,
     brandCustom: v.brandId === CUE_OTHER ? v.brandCustom : null,
     modelId: v.modelId === CUE_OTHER ? null : v.modelId,
     modelCustom: v.modelId === CUE_OTHER || v.brandId === CUE_OTHER ? v.modelCustom : null,
   }
-  return validateCueSelection(sel, id => brands.find(b => b.id === id))
+  return validateSelection(sel, id => brands.find(b => b.id === id), opts)
 }

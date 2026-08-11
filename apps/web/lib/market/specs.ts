@@ -47,7 +47,14 @@ export const CATEGORY_SPECS: Record<string, SpecFieldDef[]> = {
   ],
   table: [
     { key: 'tableType',      label: 'نوع',          type: 'dropdown', options: ['پاکت بیلیارد','اسنوکر','هی‌بال','کارامبول','خانگی'] },
-    { key: 'size',           label: 'اندازه',       type: 'dropdown', options: ['۷ فوت','۸ فوت','۹ فوت','۱۰ فوت','۱۲ فوت'] },
+    /* ── سایز ──
+       فرم این را از `TableSizeField` می‌گیرد، نه از این فهرست:
+       سایزها به نوعِ میز وابسته‌اند و فهرستِ مشترک سه چیز را خراب
+       می‌کرد — کارامبول با فوت اندازه نمی‌شود، اسنوکر ۱۲ فوت دارد
+       و پاکت ندارد، و «۸ فوت» در آن دو ابعادِ متفاوت است.
+       تعریف این‌جا می‌ماند چون صفحه‌ی جزئیات برچسبش را از همین‌جا
+       می‌خواند؛ کلیدش در HIDDEN_SPEC_KEYS است تا فرم رندرش نکند. */
+    { key: 'size',           label: 'اندازه',       type: 'dropdown', options: [] },
     { key: 'bodyMaterial',   label: 'جنس بدنه',     type: 'dropdown', options: ['اسلیت','MDF','چوب ماسیو','سایر'] },
     { key: 'slateThickness', label: 'ضخامت سنگ',   type: 'number',   unit: 'میلیمتر', placeholder: '45' },
     { key: 'clothType',      label: 'نوع پارچه',    type: 'dropdown', options: ['وُرستد','پشم','نایلون','سایر'] },
@@ -91,7 +98,7 @@ export const CATEGORY_SPECS: Record<string, SpecFieldDef[]> = {
 /* فیلدهایی که به بالای فرم (دسته/نوع/برند/مدل) منتقل شده‌اند و نباید در «مشخصات فنی» تکرار شوند */
 export const HIDDEN_SPEC_KEYS: Record<string, string[]> = {
   cue:        ['cueType', 'brand'],
-  table:      ['tableType', 'brand', 'model'],
+  table:      ['tableType', 'brand', 'model', 'size'],
   ball:       ['setType', 'brand'],
   tip:        ['tipType', 'brand', 'model'],
   chalk:      ['brand'],

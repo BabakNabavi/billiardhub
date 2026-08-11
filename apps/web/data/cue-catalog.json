@@ -69,7 +69,7 @@
             {
               "id": "brp-handspliced",
               "name_en": "Hand-Spliced Pool Range",
-              "name_fa": "رده دست‌اسپلایس پول"
+              "name_fa": "رده دست‌اسپلایس پاکت بیلیارد"
             }
           ]
         },
@@ -84,7 +84,7 @@
             {
               "id": "ccp-handmade",
               "name_en": "Handmade Pool Range",
-              "name_fa": "رده دست‌ساز پول"
+              "name_fa": "رده دست‌ساز پاکت بیلیارد"
             },
             {
               "id": "ccp-machine",
@@ -184,6 +184,9 @@
               "name_fa": "بریک کیو",
               "cue_type": "break"
             }
+          ],
+          "aliases": [
+            "Green Baize"
           ]
         },
         {
@@ -267,6 +270,9 @@
               "name_fa": "شفت S30 / E71",
               "cue_type": "shaft"
             }
+          ],
+          "aliases": [
+            "لانگونی"
           ]
         },
         {
@@ -280,18 +286,21 @@
             {
               "id": "mxp-classic",
               "name_en": "Classic Series Pool",
-              "name_fa": "سری کلاسیک پول"
+              "name_fa": "سری کلاسیک پاکت بیلیارد"
             },
             {
               "id": "mxp-premium",
               "name_en": "Premium Series Pool",
-              "name_fa": "سری پریمیوم پول"
+              "name_fa": "سری پریمیوم پاکت بیلیارد"
             },
             {
               "id": "mxp-ultimate",
               "name_en": "Ultimate Pool",
-              "name_fa": "اولتیمیت پول"
+              "name_fa": "اولتیمیت پاکت بیلیارد"
             }
+          ],
+          "aliases": [
+            "ماکسیموس"
           ]
         },
         {
@@ -386,6 +395,9 @@
               "name_en": "Carbon Pro",
               "name_fa": "کربن پرو"
             }
+          ],
+          "aliases": [
+            "میوچی"
           ]
         },
         {
@@ -450,6 +462,9 @@
               "name_fa": "شفت کربن ایگنایت",
               "cue_type": "shaft"
             }
+          ],
+          "aliases": [
+            "میز کیو"
           ]
         },
         {
@@ -468,7 +483,7 @@
             {
               "id": "ml-pool",
               "name_en": "Pool Series",
-              "name_fa": "سری پول"
+              "name_fa": "سری پاکت بیلیارد"
             }
           ]
         },
@@ -586,6 +601,9 @@
               "name_en": "Cue Wizard (bespoke)",
               "name_fa": "کیو ویزارد (سفارشی)"
             }
+          ],
+          "aliases": [
+            "پرادن"
           ]
         },
         {
@@ -749,6 +767,9 @@
               "name_fa": "شفت ونتیج",
               "cue_type": "shaft"
             }
+          ],
+          "aliases": [
+            "پریدیتور"
           ]
         },
         {
@@ -813,18 +834,23 @@
             {
               "id": "tpp-series1",
               "name_en": "Series 1 (Pool Spec)",
-              "name_fa": "سری ۱ (اسپک پول)"
+              "name_fa": "سری ۱ (اسپک پاکت بیلیارد)"
             },
             {
               "id": "tpp-series2",
               "name_en": "Series 2 Pro (Pool Spec)",
-              "name_fa": "سری ۲ پرو (اسپک پول)"
+              "name_fa": "سری ۲ پرو (اسپک پاکت بیلیارد)"
             },
             {
               "id": "tpp-beyond",
               "name_en": "Beyond (Pool Spec)",
-              "name_fa": "بیاند (اسپک پول)"
+              "name_fa": "بیاند (اسپک پاکت بیلیارد)"
             }
+          ],
+          "aliases": [
+            "تون پرارام",
+            "تن پرارام",
+            "Ton Praram"
           ]
         },
         {
@@ -933,7 +959,7 @@
             {
               "id": "jp-pool",
               "name_en": "Pool Series",
-              "name_fa": "سری پول"
+              "name_fa": "سری پاکت بیلیارد"
             }
           ]
         },
@@ -982,6 +1008,9 @@
               "name_fa": "چوب جامپ / بریک",
               "cue_type": "jump_break"
             }
+          ],
+          "aliases": [
+            "کنلن"
           ]
         },
         {
@@ -1217,7 +1246,7 @@
             {
               "id": "rbp-england",
               "name_en": "Riley England Pool",
-              "name_fa": "رایلی انگلند پول"
+              "name_fa": "رایلی انگلند پاکت بیلیارد"
             },
             {
               "id": "rbp-sapele",
@@ -1234,6 +1263,11 @@
               "name_en": "Grand Master",
               "name_fa": "گرند مستر"
             }
+          ],
+          "aliases": [
+            "رایلی",
+            "رایلی انگلند",
+            "Riley"
           ]
         },
         {
@@ -1329,6 +1363,11 @@
               "name_en": "Custom / Workshop",
               "name_fa": "سفارشی / کارگاهی"
             }
+          ],
+          "aliases": [
+            "ایرانی",
+            "دست‌ساز",
+            "داخلی"
           ]
         }
       ]
@@ -1546,6 +1585,9 @@
               "name_en": "Limited Edition FS",
               "name_fa": "لیمیتد ادیشن FS"
             }
+          ],
+          "aliases": [
+            "Green Baize"
           ]
         },
         {
@@ -1663,7 +1705,7 @@
             {
               "id": "jp-american-pool",
               "name_en": "American Pool",
-              "name_fa": "امریکن پول"
+              "name_fa": "امریکن پاکت بیلیارد"
             },
             {
               "id": "jp-master",
@@ -1677,6 +1719,10 @@
               "name_fa": "هند اسپلایس (قدیمی)",
               "discontinued": true
             }
+          ],
+          "aliases": [
+            "پاریس",
+            "Parris"
           ]
         },
         {
@@ -1741,6 +1787,9 @@
               "name_fa": "اولتیمیت (سفارشی شماره‌دار)",
               "group": "Ultimate"
             }
+          ],
+          "aliases": [
+            "ماکسیموس"
           ]
         },
         {
@@ -1776,6 +1825,9 @@
               "name_en": "Virtual Cue Maker (bespoke)",
               "name_fa": "سفارشی VCM"
             }
+          ],
+          "aliases": [
+            "وولدریج"
           ]
         },
         {
@@ -1876,6 +1928,9 @@
               "name_en": "Ultimate",
               "name_fa": "اولتیمیت"
             }
+          ],
+          "aliases": [
+            "Omin"
           ]
         },
         {
@@ -2060,6 +2115,9 @@
               "name_en": "Cue Wizard (bespoke)",
               "name_fa": "کیو ویزارد (سفارشی)"
             }
+          ],
+          "aliases": [
+            "پرادن"
           ]
         },
         {
@@ -2085,6 +2143,12 @@
               "name_en": "Custom / Bespoke",
               "name_fa": "سفارشی"
             }
+          ],
+          "aliases": [
+            "فینیکس",
+            "فونیکس",
+            "ققنوس",
+            "Phoenix"
           ]
         },
         {
@@ -2186,6 +2250,11 @@
               "name_fa": "بلک بون (منسوخ)",
               "discontinued": true
             }
+          ],
+          "aliases": [
+            "تون پرارام",
+            "تن پرارام",
+            "Ton Praram"
           ]
         },
         {
@@ -2231,6 +2300,9 @@
               "name_en": "3/4 Jointed",
               "name_fa": "۳/۴ مفصلی"
             }
+          ],
+          "aliases": [
+            "تروور وایت"
           ]
         },
         {
@@ -2471,6 +2543,9 @@
               "name_en": "Carbon Shaft",
               "name_fa": "شفت کربن"
             }
+          ],
+          "aliases": [
+            "کنلن"
           ]
         },
         {
@@ -2521,6 +2596,10 @@
               "name_en": "Superb (hand-spliced)",
               "name_fa": "سوپرب (دست‌اسپلایس)"
             }
+          ],
+          "aliases": [
+            "مسترکیو",
+            "Master Cue"
           ]
         },
         {
@@ -2646,6 +2725,9 @@
               "name_en": "Club / House Cue",
               "name_fa": "کلاب / هاوس"
             }
+          ],
+          "aliases": [
+            "رایلی انگلند"
           ]
         },
         {
@@ -2716,6 +2798,12 @@
               "name_en": "Snooker Series",
               "name_fa": "سری اسنوکر"
             }
+          ],
+          "aliases": [
+            "شینگ پای",
+            "استار",
+            "Xingpai",
+            "Star"
           ]
         },
         {
@@ -2746,6 +2834,11 @@
               "name_en": "Custom / Workshop",
               "name_fa": "سفارشی / کارگاهی"
             }
+          ],
+          "aliases": [
+            "ایرانی",
+            "دست‌ساز",
+            "داخلی"
           ]
         }
       ]
@@ -2794,6 +2887,9 @@
               "name_fa": "بریک کیو",
               "cue_type": "break"
             }
+          ],
+          "aliases": [
+            "Green Baize"
           ]
         },
         {
@@ -2809,6 +2905,9 @@
               "name_en": "Chinese 8 Ball",
               "name_fa": "چاینیز ۸-بال"
             }
+          ],
+          "aliases": [
+            "ماکسیموس"
           ]
         },
         {
@@ -2824,6 +2923,9 @@
               "name_en": "REVO Heyball Setup",
               "name_fa": "ست هی‌بال REVO"
             }
+          ],
+          "aliases": [
+            "پریدیتور"
           ]
         },
         {
@@ -2839,6 +2941,11 @@
               "name_en": "Chinese 8 Ball Spec",
               "name_fa": "اسپک چاینیز ۸-بال"
             }
+          ],
+          "aliases": [
+            "تون پرارام",
+            "تن پرارام",
+            "Ton Praram"
           ]
         },
         {
@@ -2902,7 +3009,7 @@
             {
               "id": "jp-pool",
               "name_en": "Pool Series",
-              "name_fa": "سری پول"
+              "name_fa": "سری پاکت بیلیارد"
             }
           ]
         },
@@ -2936,6 +3043,9 @@
               "name_fa": "چوب جامپ / بریک",
               "cue_type": "jump_break"
             }
+          ],
+          "aliases": [
+            "کنلن"
           ]
         },
         {
@@ -3077,6 +3187,12 @@
               "name_en": "Chinese 8 Ball Series",
               "name_fa": "سری چاینیز ۸-بال"
             }
+          ],
+          "aliases": [
+            "شینگ پای",
+            "استار",
+            "Xingpai",
+            "Star"
           ]
         },
         {
@@ -3092,6 +3208,11 @@
               "name_en": "Custom / Workshop",
               "name_fa": "سفارشی / کارگاهی"
             }
+          ],
+          "aliases": [
+            "ایرانی",
+            "دست‌ساز",
+            "داخلی"
           ]
         }
       ]
@@ -3270,6 +3391,9 @@
               "name_en": "Pro2+ Shaft",
               "name_fa": "شفت Pro2+"
             }
+          ],
+          "aliases": [
+            "لانگونی"
           ]
         },
         {
@@ -3334,6 +3458,9 @@
               "name_fa": "شفت کربن ایگنایت",
               "cue_type": "shaft"
             }
+          ],
+          "aliases": [
+            "میز کیو"
           ]
         },
         {
@@ -3352,7 +3479,7 @@
             {
               "id": "ml-pool",
               "name_en": "Pool Series",
-              "name_fa": "سری پول"
+              "name_fa": "سری پاکت بیلیارد"
             }
           ]
         },
@@ -3479,6 +3606,11 @@
               "name_en": "Custom / Workshop",
               "name_fa": "سفارشی / کارگاهی"
             }
+          ],
+          "aliases": [
+            "ایرانی",
+            "دست‌ساز",
+            "داخلی"
           ]
         }
       ]
@@ -3551,5 +3683,6 @@
       "flag": "🇮🇷"
     }
   },
-  "country_note_fa": "country = کشور مبدأ/هویت برند، نه لزوماً محل ساخت فیزیکی. مثال: Lucasi برند آمریکایی است ولی در چین تولید می‌شود؛ برخی برندهای انگلیسی شفت را از تایلند می‌گیرند. برای برندهای بدون کشور (Unbranded) مقدار null است و باید آیکون خنثی نمایش داده شود."
+  "country_note_fa": "country = کشور مبدأ/هویت برند، نه لزوماً محل ساخت فیزیکی. مثال: Lucasi برند آمریکایی است ولی در چین تولید می‌شود؛ برخی برندهای انگلیسی شفت را از تایلند می‌گیرند. برای برندهای بدون کشور (Unbranded) مقدار null است و باید آیکون خنثی نمایش داده شود.",
+  "search_note_fa": "فیلد aliases املاهای رایج فارسی و غلط‌های تایپی را دارد. جستجوی برند باید علاوه بر name_en و name_fa روی aliases هم مچ کند."
 }

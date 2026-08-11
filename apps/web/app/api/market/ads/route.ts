@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { sb, actorFromRequest } from '@/lib/finance/db';
 import { consumeAdQuota, releaseConsumption, attachConsumptionRef } from '@/lib/ads/quota';
 import { normalizeCategory, normalizeCondition } from '@/lib/market/categories';
+import { isCatalogId, validateOnServer } from '../../../../lib/market/catalog'
 import { normalizeAdImages } from '@/lib/market/images';
 import { getSetting } from '@/lib/ads/quota';
 
@@ -131,6 +132,37 @@ export async function POST(req: NextRequest) {
      مرتب‌سازیِ «گران‌ترین» را برای همه خراب می‌کند. */
   if (price > 100_000_000_000) {
     return NextResponse.json({ message: 'مبلغ واردشده معتبر نیست' }, { status: 400 });
+  }
+
+  /* ── اعتبارسنجیِ کاتالوگ (چوب و میز) ──
+     شناسه‌ها از فرم می‌آیند ولی فرم قابلِ اعتماد نیست: هرکسی می‌تواند
+     مستقیم به این روت POST بزند. سه چیزی که فقط سرور می‌تواند بسنجد:
+
+       · برندِ اسنوکر در پاکت بی‌معناست — پیشوندِ شناسه باید با نوع بخواند.
+       · شناسه‌ی سایز بینِ نوع‌ها **تکراری** است (`9ft` هم در اسنوکر
+         هست هم در پاکت)، پس بدونِ سنجش، سایزِ نوعِ دیگر پذیرفته می‌شود.
+       · «میز خانگی» فهرست ندارد؛ هر شناسه‌ای برایش جعلی است.
+
+     پیش از مصرفِ سهمیه انجام می‌شود تا ورودیِ نامعتبر سهمیه نسوزاند. */
+  const catType = str(category === 'cue' ? b?.cueType : b?.tableType, 40);
+  if (isCatalogId(category) && catType) {
+    const brandId = str(b?.brandId, 80) || null;
+    const check = validateOnServer({
+      category,
+      type: catType,
+      brandId,
+      /* برندِ دستی همان رشته‌ی `brand` است؛ قاعده «یکی از این دو» را
+         فقط وقتی می‌سنجیم که واقعاً هر دو شکل در دست باشد. */
+      brandCustom: brandId ? null : str(b?.brand, 80) || null,
+      modelId: str(b?.modelId, 80) || null,
+      modelCustom: null,
+      sizeId: str(b?.tableSizeId, 40) || null,
+      sizeCustom: str(b?.tableSizeCustom, 40) || null,
+    });
+    if (!check.ok) {
+      const first = Object.values(check.errors)[0] ?? 'اطلاعات محصول معتبر نیست';
+      return NextResponse.json({ message: first, errors: check.errors }, { status: 400 });
+    }
   }
 
   /* سهمیه — فاز ۳: بررسی و مصرف در یک قدم اتمیک، پیش از درج آگهی.

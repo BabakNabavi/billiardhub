@@ -38,8 +38,9 @@ import { compressImage } from '../../../../lib/seller-store'
 import { CATEGORY_OPTIONS, CONDITIONS, normalizeCategory, normalizeCondition } from '../../../../lib/market/categories'
 import { GENERIC_SPECS, CATEGORY_SPECS, HIDDEN_SPEC_KEYS } from '../../../../lib/market/specs'
 import { TYPE_OPTIONS, brandOptionsFor, modelOptionsFor, isTypeDrivenCategory, withOther } from '../../../../lib/market/chain'
-import { cueTypeIdOf } from '../../../../lib/market/cue-rules'
-import CueSelector, { EMPTY_CUE, type CueValue } from '../../../../components/market/CueSelector'
+import { typeIdOf, type CatalogId } from '../../../../lib/market/catalog-rules'
+import CatalogSelector, { EMPTY_CATALOG_VALUE, type CatalogValue, useCatalogType } from '../../../../components/market/CatalogSelector'
+import TableSizeField, { EMPTY_SIZE, type SizeValue } from '../../../../components/market/TableSizeField'
 import {
   GOLD, GOLD_D, TEXT, TEXT_SEC, TEXT_MUT, LQ_BG, LQ_BOR, LQ_SHAD,
   AD_FORM_CSS, inp, toAsciiDigits, fmtPrice, FancySelect, Label, ErrMsg, SectionTitle, SpecField,
@@ -84,7 +85,8 @@ export default function EditProductPage() {
   const [legacySpecs, setLegacySpecs] = useState<{ key: string; value: string }[]>([])
   /* انتخابِ چوب و نامِ رشته‌ایِ آگهیِ موجود، تا انتخابگر بتواند
      یک‌بار آن را به شناسه نگاشت کند */
-  const [cue, setCue] = useState<CueValue>(EMPTY_CUE)
+  const [cue, setCue] = useState<CatalogValue>(EMPTY_CATALOG_VALUE)
+  const [size, setSize] = useState<SizeValue>(EMPTY_SIZE)
   const [legacyCue, setLegacyCue] = useState<{ brand: string; model: string } | undefined>(undefined)
 
   const [existingImages, setExistingImages] = useState<string[]>([])
@@ -173,7 +175,14 @@ export default function EditProductPage() {
     setLegacySpecs(leftovers)
 
     setLegacyCue({ brand: rawBrand, model: rawModel })
-    setCue(EMPTY_CUE)
+    setCue(EMPTY_CATALOG_VALUE)
+    /* ── سایزِ آگهیِ موجود ──
+       فقط برچسبِ فارسی در `specs.size` ذخیره شده، نه شناسه. آن را
+       در «سایر» می‌گذاریم تا چیزی گم نشود؛ اگر با یکی از سایزهای
+       فهرست بخواند، خودِ `TableSizeField` آن را نمی‌شناسد ولی متن
+       دست‌نخورده می‌ماند و فروشنده می‌تواند از فهرست عوضش کند. */
+    const rawSize = String(nextSpecs.size ?? '').trim()
+    setSize(rawSize ? { sizeId: '__other__', sizeCustom: rawSize } : EMPTY_SIZE)
     setExistingImages(Array.isArray(p.images) ? p.images.filter(Boolean).map(String) : [])
     setPageLoading(false)
   }, [])
@@ -218,11 +227,14 @@ export default function EditProductPage() {
     setForm(f => ({ ...f, category: cat, type: '', typeOther: '', brand: '', brandOther: '', model: '', modelOther: '' }))
     setErrors(e => { const n = { ...e }; delete n.category; delete n.type; delete n.brand; delete n.model; return n })
     setSpecs({}); setSpecOthers({})
-    setCue(EMPTY_CUE); setLegacyCue(undefined)
+    setCue(EMPTY_CATALOG_VALUE); setSize(EMPTY_SIZE); setLegacyCue(undefined)
   }
   const setType = (v: string) => {
     setForm(f => ({ ...f, type: v, typeOther: '', ...(isTypeDrivenCategory(f.category) ? { brand: '', brandOther: '', model: '', modelOther: '' } : {}) }))
     setErrors(e => { const n = { ...e }; delete n.type; if (isTypeDrivenCategory(form.category)) { delete n.brand; delete n.model } return n })
+    /* برندها بینِ نوع‌ها مشترک نیستند و سایزها هم — شناسه‌ی نوعِ
+       قبلی روی نوعِ تازه بی‌معناست و سرور ردش می‌کند. */
+    setCue(EMPTY_CATALOG_VALUE); setSize(EMPTY_SIZE)
   }
   const setBrand = (v: string) => {
     setForm(f => ({ ...f, brand: v, model: '', modelOther: '' }))
@@ -230,10 +242,14 @@ export default function EditProductPage() {
   }
 
   /* چوب از کاتالوگ می‌آید؛ بقیه‌ی دسته‌ها از chain.ts */
-  const cueTypeId = form.category === 'cue' ? cueTypeIdOf(form.type) : ''
+  const catCategory: CatalogId | null =
+    form.category === 'cue' || form.category === 'table' ? form.category : null
+  const catTypeId = catCategory ? typeIdOf(catCategory, form.type) : ''
+  /* همان ورودیِ کش‌شده‌ی انتخابگر — درخواستِ تازه‌ای نمی‌زند */
+  const catFreeInput = !!useCatalogType(catCategory ?? 'cue', catCategory ? catTypeId : '').data?.forceFreeInput
 
   /* رشته برای نمایش، شناسه برای یکپارچگی — همان قاعده‌ی فرمِ ثبت */
-  const onCueChange = (v: CueValue, labels: { brand: string; model: string }) => {
+  const onCatalogChange = (v: CatalogValue, labels: { brand: string; model: string }) => {
     setCue(v)
     setForm(f => ({ ...f, brand: labels.brand, brandOther: '', model: labels.model, modelOther: '' }))
     setErrors(e => { const n = { ...e }; delete n.brand; delete n.model; return n })
@@ -270,7 +286,11 @@ export default function EditProductPage() {
     const e: Record<string, string> = {}
     if (!form.category) e.category = 'دسته‌بندی را انتخاب کنید'
     if (!effType) e.type = form.type === 'سایر' ? 'برای «سایر» توضیح بنویسید' : 'نوع را مشخص کنید'
-    if (!effBrand) e.brand = 'برند الزامی است'
+    /* ── برندِ اختیاری ──
+       نوعی که `force_free_input` دارد («میز خانگی») اغلب برندِ
+       مشخصی ندارد؛ اجبار یا آگهی را رها می‌کند یا داده‌ی الکی
+       می‌سازد. شرط روی پرچمِ داده است نه شناسه‌ی نوع. */
+    if (!effBrand && !catFreeInput) e.brand = "برند الزامی است"
     if (!form.negotiable && !form.price) e.price = 'قیمت را وارد کنید یا «توافقی» را بزنید'
     if (!form.negotiable && form.price && form.oldPrice) {
       const p = Number(toAsciiDigits(form.price).replace(/\D/g, ''))
@@ -323,9 +343,12 @@ export default function EditProductPage() {
             name: composedName,
             category: form.category, type: effType,
             brand: effBrand, model: effModel,
-            cueType: cueTypeId || undefined,
-            brandId: cueTypeId && cue.brandId !== '__other__' ? cue.brandId : null,
-            modelId: cueTypeId && cue.modelId !== '__other__' ? cue.modelId : null,
+            cueType: form.category === 'cue' ? catTypeId || undefined : undefined,
+            tableType: form.category === 'table' ? catTypeId || undefined : undefined,
+            brandId: catTypeId && cue.brandId !== '__other__' ? cue.brandId : null,
+            modelId: catTypeId && cue.modelId !== '__other__' ? cue.modelId : null,
+            tableSizeId: form.category === 'table' && size.sizeId !== '__other__' ? size.sizeId || null : null,
+            tableSizeCustom: form.category === 'table' && size.sizeCustom.trim() ? size.sizeCustom.trim() : null,
             description: form.description.trim(), condition: form.condition,
             price: form.negotiable ? 0 : price,
             old: form.negotiable ? 0 : old,
@@ -362,9 +385,12 @@ export default function EditProductPage() {
             name: composedName,
             category: form.category, type: effType,
             brand: effBrand, model: effModel,
-            cueType: cueTypeId || undefined,
-            brandId: cueTypeId && cue.brandId !== '__other__' ? cue.brandId : null,
-            modelId: cueTypeId && cue.modelId !== '__other__' ? cue.modelId : null,
+            cueType: form.category === 'cue' ? catTypeId || undefined : undefined,
+            tableType: form.category === 'table' ? catTypeId || undefined : undefined,
+            brandId: catTypeId && cue.brandId !== '__other__' ? cue.brandId : null,
+            modelId: catTypeId && cue.modelId !== '__other__' ? cue.modelId : null,
+            tableSizeId: form.category === 'table' && size.sizeId !== '__other__' ? size.sizeId || null : null,
+            tableSizeCustom: form.category === 'table' && size.sizeCustom.trim() ? size.sizeCustom.trim() : null,
             price: form.negotiable ? 0 : price,
             old: form.negotiable ? 0 : old,
             negotiable: form.negotiable,
@@ -376,6 +402,14 @@ export default function EditProductPage() {
         })
         if (!r.ok) {
           const j = await r.json().catch(() => ({}))
+
+        /* ── خطای فیلد از سرور ──
+           سرور برای انتخابِ نامعتبرِ کاتالوگ نقشه‌ی خطا برمی‌گرداند.
+           بدونِ نشاندنش روی فیلد، کاربر فقط یک پیامِ کلی می‌دید و
+           نمی‌فهمید کدام باکس ایراد دارد. */
+        if (j?.errors && typeof j.errors === 'object') {
+          setErrors(e => ({ ...e, ...(j.errors as Record<string, string>) }))
+        }
           setAlert({ title: 'ویرایش انجام نشد', lines: [j?.message || 'ویرایش آگهی روی سرور انجام نشد'] })
           setSubmitting(false); return
         }
@@ -494,11 +528,12 @@ export default function EditProductPage() {
                     همان کامپوننتی که فرمِ ثبت دارد. اگر این‌جا نسخه‌ی
                     دیگری می‌گذاشتیم، دقیقاً همان دو-فرمِ ناهمگونی
                     ساخته می‌شد که هفته‌ی پیش یکی‌اش کردیم. */}
-                {cueTypeId ? (
-                  <CueSelector
-                    cueType={cueTypeId}
+                {catCategory && catTypeId ? (
+                  <CatalogSelector
+                    category={catCategory}
+                    type={catTypeId}
                     value={cue}
-                    onChange={onCueChange}
+                    onChange={onCatalogChange}
                     errors={errors}
                     resolveFrom={legacyCue}
                   />
@@ -568,6 +603,21 @@ export default function EditProductPage() {
 
                 {form.category ? (
                   <div className="spec-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 20 }}>
+                    {/* سایزِ میز — وابسته به نوع، از کاتالوگ؛ نه فهرستِ ثابتِ قبلی */}
+                    {form.category === 'table' && catTypeId && (
+                      <TableSizeField
+                        /* آگهیِ موجود: اگر فروشنده سایز نداده، نباید
+                           با بازکردنِ فرم عددی جعلی برایش ثبت شود */
+                        autoDefault={false}
+                        type={catTypeId}
+                        value={size}
+                        onChange={(v, label) => {
+                          setSize(v)
+                          setSpecs(s => ({ ...s, size: label }))
+                        }}
+                        error={errors.size}
+                      />
+                    )}
                     {specFields.map(field => {
                       const isParent = specFields.some(f => f.dependsOn === field.key)
                       return (
