@@ -346,6 +346,30 @@
           ]
         },
         {
+          "id": "tpkt__joy-pkt",
+          "name_en": "Joy",
+          "name_fa": "جوی",
+          "country": "CN",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "tournament",
+              "name_en": "Tournament Series",
+              "name_fa": "سری تورنمنت"
+            },
+            {
+              "id": "club",
+              "name_en": "Club Series",
+              "name_fa": "سری باشگاهی"
+            }
+          ],
+          "aliases": [
+            "جوی",
+            "Joy"
+          ]
+        },
+        {
           "id": "tpkt__olhausen",
           "name_en": "Olhausen",
           "name_fa": "اولهاوزن",
@@ -436,6 +460,43 @@
           ]
         },
         {
+          "id": "tpkt__shender-pkt",
+          "name_en": "Shender",
+          "name_fa": "شندر",
+          "country": "CN",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "american-style",
+              "name_en": "American Style Series",
+              "name_fa": "سری آمریکایی"
+            },
+            {
+              "id": "black8",
+              "name_en": "Black 8 Marble Slate",
+              "name_fa": "بلک ۸ اسلیت مرمری"
+            },
+            {
+              "id": "carving",
+              "name_en": "Carving Series",
+              "name_fa": "سری کنده‌کاری"
+            },
+            {
+              "id": "children",
+              "name_en": "Children's Table",
+              "name_fa": "میز کودک"
+            }
+          ],
+          "aliases": [
+            "شندر",
+            "شیندر",
+            "شندار",
+            "Shender",
+            "Xingjue"
+          ]
+        },
+        {
           "id": "tpkt__signature",
           "name_en": "Signature Tables",
           "name_fa": "سیگنیچر",
@@ -505,6 +566,37 @@
             "سوپریم",
             "سوپریم پول",
             "Supreme"
+          ]
+        },
+        {
+          "id": "tpkt__wiraka-pkt",
+          "name_en": "Wiraka",
+          "name_fa": "ویراکا",
+          "country": "SG",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "american",
+              "name_en": "American Pool Table",
+              "name_fa": "میز آمریکایی"
+            },
+            {
+              "id": "english",
+              "name_en": "English Pool Table",
+              "name_fa": "میز انگلیسی"
+            },
+            {
+              "id": "coin-slot",
+              "name_en": "Coin Slot Pool",
+              "name_fa": "میز سکه‌ای"
+            }
+          ],
+          "aliases": [
+            "ویراکا",
+            "ویراکه",
+            "ویراکا",
+            "Wiraka"
           ]
         },
         {
@@ -683,6 +775,24 @@
           ]
         },
         {
+          "id": "tpkt__xingjue-pkt",
+          "name_en": "Xingjue",
+          "name_fa": "شینگ‌جو",
+          "country": "CN",
+          "tier": "mid",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "standard",
+              "name_en": "Standard Series",
+              "name_fa": "سری استاندارد"
+            }
+          ],
+          "aliases": [
+            "Xingjue"
+          ]
+        },
+        {
           "id": "tpkt__imperial",
           "name_en": "Imperial",
           "name_fa": "امپریال",
@@ -783,6 +893,38 @@
       "label_en": "Snooker",
       "brands": [
         {
+          "id": "tsnk__joy-snk",
+          "name_en": "Joy",
+          "name_fa": "جوی",
+          "country": "CN",
+          "tier": "tournament",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "q8-snooker",
+              "name_en": "Q8 Snooker",
+              "name_fa": "Q8 اسنوکر",
+              "note_fa": "باند فولادی با لاستیک Northern انگلیس"
+            },
+            {
+              "id": "tournament",
+              "name_en": "Tournament Series",
+              "name_fa": "سری تورنمنت"
+            },
+            {
+              "id": "club",
+              "name_en": "Club Series",
+              "name_fa": "سری باشگاهی"
+            }
+          ],
+          "note_fa": "رقیب اصلی استار در چین؛ حامی تورنمنت‌های WPA",
+          "aliases": [
+            "جوی",
+            "جوی بیلیارد",
+            "Joy"
+          ]
+        },
+        {
           "id": "tsnk__rasson-s",
           "name_en": "Rasson",
           "name_fa": "رَسون",
@@ -818,35 +960,131 @@
           "allow_free_model": true,
           "models": [
             {
+              "id": "aristocrat-tc",
+              "name_en": "Aristocrat Tournament Champion",
+              "name_fa": "آریستوکرات تورنمنت چمپیون",
+              "note_fa": "صدر رده"
+            },
+            {
+              "id": "aristocrat-steel",
+              "name_en": "Aristocrat Steel Block Match",
+              "name_fa": "آریستوکرات استیل‌بلاک مچ"
+            },
+            {
               "id": "aristocrat",
               "name_en": "Aristocrat",
               "name_fa": "آریستوکرات"
             },
             {
-              "id": "aristocrat-tc",
-              "name_en": "Aristocrat Tournament Champion",
-              "name_fa": "آریستوکرات تورنمنت چمپیون"
-            },
-            {
-              "id": "aristocrat-steel",
-              "name_en": "Aristocrat Steel Block Match",
-              "name_fa": "آریستوکرات استیل‌بلاک"
+              "id": "renaissance",
+              "name_en": "Renaissance",
+              "name_fa": "رنسانس"
             },
             {
               "id": "club",
-              "name_en": "Club / Renaissance",
-              "name_fa": "کلاب / رنسانس"
+              "name_en": "Club",
+              "name_fa": "کلاب"
             },
             {
               "id": "diner",
               "name_en": "Snooker Diner",
-              "name_fa": "میز غذاخوری اسنوکر"
+              "name_fa": "اسنوکر داینر",
+              "note_fa": "قابل تبدیل به میز غذاخوری"
+            },
+            {
+              "id": "winchester",
+              "name_en": "Winchester",
+              "name_fa": "وینچستر"
+            },
+            {
+              "id": "regent",
+              "name_en": "Regent",
+              "name_fa": "ریجنت"
             }
           ],
           "aliases": [
             "رایلی",
             "رایلی انگلند",
             "Riley"
+          ]
+        },
+        {
+          "id": "tsnk__shender",
+          "name_en": "Shender",
+          "name_fa": "شندر",
+          "country": "CN",
+          "tier": "tournament",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "prince-gold",
+              "name_en": "Prince Gold",
+              "name_fa": "پرینس گلد",
+              "note_fa": "میز رسمی IBSF، ACBS، EBSA و مسابقات جهانی"
+            },
+            {
+              "id": "prince-grey",
+              "name_en": "Prince Grey",
+              "name_fa": "پرینس گری"
+            },
+            {
+              "id": "prince-grey-2",
+              "name_en": "Prince Grey II",
+              "name_fa": "پرینس گری II"
+            },
+            {
+              "id": "prince",
+              "name_en": "Prince",
+              "name_fa": "پرینس"
+            },
+            {
+              "id": "yunchuan",
+              "name_en": "Yunchuan",
+              "name_fa": "یون‌چوان"
+            },
+            {
+              "id": "kairui",
+              "name_en": "Kairui",
+              "name_fa": "کای‌روی"
+            },
+            {
+              "id": "cresta",
+              "name_en": "Cresta",
+              "name_fa": "کرستا"
+            },
+            {
+              "id": "chevalier",
+              "name_en": "Chevalier",
+              "name_fa": "شوالیه"
+            },
+            {
+              "id": "warrior",
+              "name_en": "Warrior",
+              "name_fa": "واریور"
+            },
+            {
+              "id": "m8",
+              "name_en": "M8",
+              "name_fa": "M8"
+            },
+            {
+              "id": "wise",
+              "name_en": "Wise",
+              "name_fa": "وایز"
+            },
+            {
+              "id": "glory",
+              "name_en": "Glory",
+              "name_fa": "گلوری"
+            }
+          ],
+          "note_fa": "شنژن/فوشان چین. بیش از ۷۰٪ تولیدش صادر می‌شود؛ سهم بالایی از بازار میان‌رده و بالای بریتانیا و آمریکا دارد",
+          "aliases": [
+            "شندر",
+            "شیندر",
+            "شندار",
+            "Shender",
+            "Xingjue"
           ]
         },
         {
@@ -859,31 +1097,135 @@
           "models": [
             {
               "id": "xw101-12s",
-              "name_en": "XW101-12S Tournament 12ft",
-              "name_fa": "XW101-12S تورنمنت ۱۲ فوت"
+              "name_en": "XW101-12S",
+              "name_fa": "XW101-12S",
+              "note_fa": "میز رسمی مسابقات جهانی و تلویزیونی؛ گران‌ترین مدل"
             },
             {
-              "id": "main-tour",
-              "name_en": "Main Tour Professional",
-              "name_fa": "مِین تور حرفه‌ای"
+              "id": "xw101-sig",
+              "name_en": "XW101-12S Signature",
+              "name_fa": "XW101-12S امضا",
+              "note_fa": "نسخه ویژه امضادار"
             },
             {
-              "id": "club",
-              "name_en": "Club Table",
-              "name_fa": "میز باشگاهی"
+              "id": "xw106-12s",
+              "name_en": "XW106-12S",
+              "name_fa": "XW106-12S",
+              "note_fa": "پرفروش‌ترین مدل باشگاهی؛ بهترین نسبت قیمت به کیفیت"
             },
             {
-              "id": "home",
-              "name_en": "Home / Practice",
-              "name_fa": "خانگی / تمرینی"
+              "id": "xw107-10s",
+              "name_en": "XW107-10S",
+              "name_fa": "XW107-10S",
+              "note_fa": "۱۰ فوت"
+            },
+            {
+              "id": "s105-12s",
+              "name_en": "S105-12S",
+              "name_fa": "S105-12S",
+              "note_fa": "سری جدید"
+            },
+            {
+              "id": "s106-12s",
+              "name_en": "S106-12S",
+              "name_fa": "S106-12S",
+              "note_fa": "سری جدید"
+            },
+            {
+              "id": "knight",
+              "name_en": "Knight",
+              "name_fa": "نایت",
+              "note_fa": "۱۲ فوت با باند استیل‌بلاک و پاکت حرفه‌ای"
+            },
+            {
+              "id": "queen",
+              "name_en": "Queen",
+              "name_fa": "کوئین",
+              "note_fa": "میز رسمی بازی‌های آسیای جنوب شرقی"
+            },
+            {
+              "id": "match-block",
+              "name_en": "Championship Match Block",
+              "name_fa": "چمپیون‌شیپ مچ‌بلاک",
+              "note_fa": "صدر رده؛ چوب سخت ۱۰۰٪"
+            },
+            {
+              "id": "mini-folding",
+              "name_en": "Mini / Folding",
+              "name_fa": "مینی / تاشو",
+              "note_fa": "MDF، خانگی"
             }
           ],
-          "note_fa": "میز رسمی تورنمنت‌های رنکینگ WPBSA",
+          "note_fa": "بزرگ‌ترین سازنده چین از ۱۹۸۷؛ تأمین‌کننده رسمی WPBSA. کد مدل‌ها با XW شروع می‌شود",
           "aliases": [
             "استار",
             "شینگ پای",
+            "شینگ‌پای",
+            "سینگ پای",
             "Star",
-            "Xingpai"
+            "Xingpai",
+            "Xing Pai",
+            "XW"
+          ]
+        },
+        {
+          "id": "tsnk__wiraka",
+          "name_en": "Wiraka",
+          "name_fa": "ویراکا",
+          "country": "SG",
+          "tier": "tournament",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "m1-tournament",
+              "name_en": "M1 Tournament Steelblock",
+              "name_fa": "M1 تورنمنت استیل‌بلاک",
+              "note_fa": "میز رسمی IBSF، ACBS، بازی‌های آسیایی و SEA Games"
+            },
+            {
+              "id": "m1-classic",
+              "name_en": "Classic M1 Tournament",
+              "name_fa": "کلاسیک M1 تورنمنت"
+            },
+            {
+              "id": "jewel",
+              "name_en": "Jewel",
+              "name_fa": "جول"
+            },
+            {
+              "id": "armour-rocky",
+              "name_en": "Armour Rocky",
+              "name_fa": "آرمور راکی"
+            },
+            {
+              "id": "w1980",
+              "name_en": "Wiraka 1980",
+              "name_fa": "ویراکا ۱۹۸۰",
+              "note_fa": "مدل یادبود تأسیس"
+            },
+            {
+              "id": "basic",
+              "name_en": "Basic",
+              "name_fa": "بیسیک",
+              "note_fa": "رده اقتصادی"
+            },
+            {
+              "id": "classic",
+              "name_en": "Classic",
+              "name_fa": "کلاسیک"
+            },
+            {
+              "id": "ethnic",
+              "name_en": "Ethnic",
+              "name_fa": "اتنیک"
+            }
+          ],
+          "note_fa": "تأسیس ۱۹۸۰ سنگاپور، کارخانه در فوشان چین (Riley Wiraka). قوی‌ترین برند آسیای جنوب شرقی و هند",
+          "aliases": [
+            "ویراکا",
+            "ویراکه",
+            "ویراکا",
+            "Wiraka"
           ]
         },
         {
@@ -910,10 +1252,22 @@
               "name_fa": "امپریال"
             },
             {
-              "id": "refurbished",
-              "name_en": "Refurbished Antique",
-              "name_fa": "بازسازی‌شده کلاسیک"
+              "id": "regency",
+              "name_en": "Regency",
+              "name_fa": "ریجنسی"
+            },
+            {
+              "id": "antique",
+              "name_en": "Antique / Restored",
+              "name_fa": "آنتیک / بازسازی‌شده",
+              "note_fa": "میزهای ۱۰۰ ساله؛ ارزش کلکسیونی"
             }
+          ],
+          "aliases": [
+            "بارووز",
+            "باروز و واتس",
+            "Burroughes",
+            "Burroughes & Watts"
           ]
         },
         {
@@ -1007,6 +1361,25 @@
           ]
         },
         {
+          "id": "tsnk__sam-snk",
+          "name_en": "SAM Leisure",
+          "name_fa": "سم لژر",
+          "country": "ES",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "snooker-pro",
+              "name_en": "Snooker Professional",
+              "name_fa": "اسنوکر حرفه‌ای"
+            }
+          ],
+          "aliases": [
+            "سم",
+            "SAM"
+          ]
+        },
+        {
           "id": "tsnk__thurston",
           "name_en": "Thurston",
           "name_fa": "ترستون",
@@ -1024,6 +1397,53 @@
               "name_en": "Classic / Antique",
               "name_fa": "کلاسیک / آنتیک"
             }
+          ]
+        },
+        {
+          "id": "tsnk__xingjue",
+          "name_en": "Xingjue",
+          "name_fa": "شینگ‌جو",
+          "country": "CN",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "xj-12ft-t10",
+              "name_en": "XJ-12FT-T10",
+              "name_fa": "XJ-12FT-T10",
+              "note_fa": "اسلیت ۴۵ میلی‌متر، پارچه ۶۸۱۱، لاستیک Northern"
+            },
+            {
+              "id": "xj-custom",
+              "name_en": "Custom Series",
+              "name_fa": "سری سفارشی"
+            }
+          ],
+          "note_fa": "گوانگژو/شنژن؛ سازنده OEM برای چند برند دیگر",
+          "aliases": [
+            "شینگ جو",
+            "Xingjue",
+            "Xinjue"
+          ]
+        },
+        {
+          "id": "tsnk__gongfu",
+          "name_en": "Gongfu / Kungfu",
+          "name_fa": "گونگ‌فو",
+          "country": "CN",
+          "tier": "mid",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "standard",
+              "name_en": "Standard Series",
+              "name_fa": "سری استاندارد"
+            }
+          ],
+          "aliases": [
+            "گونگ فو",
+            "Gongfu",
+            "Kungfu"
           ]
         },
         {
@@ -1047,6 +1467,24 @@
           ]
         },
         {
+          "id": "tsnk__jianying",
+          "name_en": "Jianying",
+          "name_fa": "جیان‌یینگ",
+          "country": "CN",
+          "tier": "mid",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "standard",
+              "name_en": "Standard Series",
+              "name_fa": "سری استاندارد"
+            }
+          ],
+          "aliases": [
+            "Jianying"
+          ]
+        },
+        {
           "id": "tsnk__joy-s",
           "name_en": "Joy",
           "name_fa": "جوی",
@@ -1062,6 +1500,25 @@
           ]
         },
         {
+          "id": "tsnk__master-snk",
+          "name_en": "Master Billiards",
+          "name_fa": "مستر",
+          "country": "GB",
+          "tier": "mid",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "club",
+              "name_en": "Club Table",
+              "name_fa": "میز باشگاهی"
+            }
+          ],
+          "aliases": [
+            "مستر",
+            "Master"
+          ]
+        },
+        {
           "id": "tsnk__sam-s",
           "name_en": "SAM Leisure",
           "name_fa": "سم لژر",
@@ -1073,26 +1530,6 @@
               "id": "snooker",
               "name_en": "Snooker Range",
               "name_fa": "رده اسنوکر"
-            }
-          ]
-        },
-        {
-          "id": "tsnk__wiraka",
-          "name_en": "Wiraka",
-          "name_fa": "ویراکا",
-          "country": "MY",
-          "tier": "mid",
-          "allow_free_model": true,
-          "models": [
-            {
-              "id": "m1",
-              "name_en": "M1 Tournament",
-              "name_fa": "M1 تورنمنت"
-            },
-            {
-              "id": "club",
-              "name_en": "Club Series",
-              "name_fa": "سری باشگاهی"
             }
           ]
         },
@@ -1208,6 +1645,69 @@
           ]
         },
         {
+          "id": "they__shender-hey",
+          "name_en": "Shender",
+          "name_fa": "شندر",
+          "country": "CN",
+          "tier": "tournament",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "prince-grey-cn",
+              "name_en": "Prince Grey (Chinese Style)",
+              "name_fa": "پرینس گری چینی"
+            },
+            {
+              "id": "yunbo",
+              "name_en": "Yunbo",
+              "name_fa": "یون‌بو"
+            },
+            {
+              "id": "yunchuan-cn",
+              "name_en": "Yunchuan",
+              "name_fa": "یون‌چوان"
+            },
+            {
+              "id": "cresta-cn",
+              "name_en": "Cresta",
+              "name_fa": "کرستا"
+            },
+            {
+              "id": "chevalier-cn",
+              "name_en": "Chevalier",
+              "name_fa": "شوالیه"
+            },
+            {
+              "id": "warrior-cn",
+              "name_en": "Warrior",
+              "name_fa": "واریور"
+            },
+            {
+              "id": "kasen",
+              "name_en": "Kasen",
+              "name_fa": "کاسن"
+            },
+            {
+              "id": "kairui-cn",
+              "name_en": "Kairui",
+              "name_fa": "کای‌روی"
+            },
+            {
+              "id": "m8-cn",
+              "name_en": "M8",
+              "name_fa": "M8"
+            }
+          ],
+          "note_fa": "سری «چاینیز استایل» شندر مخصوص هی‌بال",
+          "aliases": [
+            "شندر",
+            "شیندر",
+            "شندار",
+            "Shender",
+            "Xingjue"
+          ]
+        },
+        {
           "id": "they__star-h",
           "name_en": "Star / Xingpai",
           "name_fa": "استار / شینگ‌پای",
@@ -1264,6 +1764,27 @@
           ]
         },
         {
+          "id": "they__wiraka-hey",
+          "name_en": "Wiraka",
+          "name_fa": "ویراکا",
+          "country": "SG",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "chinese-pool",
+              "name_en": "Chinese Pool Table",
+              "name_fa": "میز چاینیز پول"
+            }
+          ],
+          "aliases": [
+            "ویراکا",
+            "ویراکه",
+            "ویراکا",
+            "Wiraka"
+          ]
+        },
+        {
           "id": "they__iranian-h",
           "name_en": "Iranian Made",
           "name_fa": "ساخت ایران",
@@ -1301,6 +1822,24 @@
             "کانلن",
             "کنلن",
             "Konllen"
+          ]
+        },
+        {
+          "id": "they__xingjue-hey",
+          "name_en": "Xingjue",
+          "name_fa": "شینگ‌جو",
+          "country": "CN",
+          "tier": "mid",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "standard",
+              "name_en": "Standard Series",
+              "name_fa": "سری استاندارد"
+            }
+          ],
+          "aliases": [
+            "Xingjue"
           ]
         },
         {
@@ -1449,6 +1988,27 @@
           ]
         },
         {
+          "id": "tcar__wiraka-car",
+          "name_en": "Wiraka",
+          "name_fa": "ویراکا",
+          "country": "SG",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "carom",
+              "name_en": "Carom Table",
+              "name_fa": "میز کارامبول"
+            }
+          ],
+          "aliases": [
+            "ویراکا",
+            "ویراکه",
+            "ویراکا",
+            "Wiraka"
+          ]
+        },
+        {
           "id": "tcar__buffalo-c",
           "name_en": "Buffalo",
           "name_fa": "بوفالو",
@@ -1506,6 +2066,28 @@
             "ایرانی",
             "داخلی",
             "تولید داخل"
+          ]
+        },
+        {
+          "id": "tcar__shender-car",
+          "name_en": "Shender",
+          "name_fa": "شندر",
+          "country": "CN",
+          "tier": "mid",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "carom",
+              "name_en": "Carom Series",
+              "name_fa": "سری کارامبول"
+            }
+          ],
+          "aliases": [
+            "شندر",
+            "شیندر",
+            "شندار",
+            "Shender",
+            "Xingjue"
           ]
         },
         {
@@ -1612,5 +2194,7 @@
     "نوع «میز خانگی» فیلد force_free_input=true دارد: با انتخاب آن، برند و مدل بدون هیچ لیستی مستقیماً input متنی می‌شوند.",
     "سایز در بخش «مشخصات فنی» گرفته می‌شود و لیستش به نوع میز وابسته است."
   ],
-  "search_note_fa": "فیلد aliases املاهای رایج فارسی و غلط‌های تایپی را دارد. جستجوی برند باید علاوه بر name_en و name_fa روی aliases هم مچ کند."
+  "search_note_fa": "فیلد aliases املاهای رایج فارسی و غلط‌های تایپی را دارد. جستجوی برند باید علاوه بر name_en و name_fa روی aliases هم مچ کند.",
+  "russian_note_fa": "چند سازنده (Shender، Wiraka، Star) میز پیرامید روسی هم می‌سازند. اگر در بازار ایران تقاضا دارد، می‌توان نوع ششمی به نام «پیرامید روسی» اضافه کرد.",
+  "research_note_fa": "این نسخه با مراجعه مستقیم به سایت سازنده‌ها ساخته شده: shender.com، wiraka.com، xingpaibilliard.com و starbilliards. کدهای مدل استار (XW101، XW106، XW119) کدهای رسمی کارخانه‌اند و در بازار با همین کد شناخته می‌شوند."
 }

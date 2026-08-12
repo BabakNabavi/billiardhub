@@ -21,7 +21,7 @@
 
 import { normalizeFa } from '../text-fa'
 
-export const CATALOG_IDS = ['cue', 'table'] as const
+export const CATALOG_IDS = ['cue', 'table', 'cloth'] as const
 export type CatalogId = typeof CATALOG_IDS[number]
 
 export const isCatalogId = (v: unknown): v is CatalogId =>
@@ -37,6 +37,11 @@ export const isCatalogId = (v: unknown): v is CatalogId =>
 export const TYPE_IDS: Record<CatalogId, readonly string[]> = {
   cue: ['pocket_billiard', 'snooker', 'heyball', 'carom'],
   table: ['pocket_billiard', 'snooker', 'heyball', 'carom', 'home_table'],
+  /* ── پارچه ──
+     نوعش همان نوعِ **میز** است، نه یک بُعدِ تازه: پارچه‌ی اسنوکر
+     با پارچه‌ی پاکت فرق دارد و فهرست‌هایشان قاطی نمی‌شود.
+     «میز خانگی» پارچه‌ی اختصاصی ندارد، پس این‌جا نیست. */
+  cloth: ['pocket_billiard', 'snooker', 'heyball', 'carom'],
 }
 
 /** پیشوندِ شناسه‌ی برند — سرور با همین تعلقِ برند به نوع را می‌سنجد */
@@ -47,6 +52,11 @@ export const TYPE_PREFIX: Record<CatalogId, Record<string, string>> = {
   table: {
     pocket_billiard: 'tpkt__', snooker: 'tsnk__', heyball: 'they__',
     carom: 'tcar__', home_table: 'thome__',
+  },
+  /* شناسه‌ی برندِ پارچه با نامِ خودِ نوع پیشوند خورده */
+  cloth: {
+    pocket_billiard: 'pocket_billiard__', snooker: 'snooker__',
+    heyball: 'heyball__', carom: 'carom__',
   },
 }
 
@@ -75,6 +85,12 @@ export const TYPE_BY_FA: Record<CatalogId, Record<string, string>> = {
        هر دو نگاشت می‌شوند وگرنه آگهی‌های موجود از فهرست می‌افتند. */
     'خانگی': 'home_table',
   },
+  cloth: {
+    'پاکت بیلیارد': 'pocket_billiard',
+    'اسنوکر': 'snooker',
+    'هی‌بال': 'heyball',
+    'کارامبول': 'carom',
+  },
 }
 
 export const typeIdOf = (category: CatalogId, faLabel: string): string =>
@@ -94,6 +110,12 @@ export interface CatalogModel {
   /** منسوخ — ته فهرست می‌رود ولی حذف نمی‌شود؛ بازارِ دستِ‌دوم است */
   discontinued?: boolean
   cue_type?: string
+  /* ── فقط پارچه ──
+     با انتخابِ مدل، «نوع پارچه» و «وزن پارچه» خودکار پر می‌شوند
+     ولی قفل نمی‌شوند — فروشنده می‌تواند عوضشان کند. */
+  type?: string
+  weight_oz?: string
+  note_fa?: string
 }
 
 export interface CatalogBrand {

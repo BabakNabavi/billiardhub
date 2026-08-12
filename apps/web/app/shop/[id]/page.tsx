@@ -8,7 +8,10 @@ import { CAT_LABELS, type ShopProduct } from '../products'
 import ReportButton from '../../../components/ReportButton'
 import { productTitleParts, productTitle } from '../../../lib/market/title'
 import ImageLightbox from '../../../components/market/ImageLightbox'
+import { specDisplayRows } from '../../../lib/market/spec-rules'
 import { specRows } from '../../../lib/market/specs'
+import { useCatalogType } from '../../../components/market/CatalogSelector'
+import { useSpecFields } from '../../../components/market/SpecFields'
 import { CONDITIONS, normalizeCondition } from '../../../lib/market/categories'
 import { fetchProfile } from '../../../lib/profiles/client'
 
@@ -177,10 +180,40 @@ export default function ProductDetailPage() {
   /* برچسبِ فارسیِ هر کلید از همان تعریفی می‌آید که فرمِ ثبت با آن
      ساخته می‌شود (`lib/market/specs.ts`)، پس هیچ‌وقت از هم دور
      نمی‌افتند. */
-  const specs = useMemo(
+  /* ── مقدارها شناسه‌اند، نه برچسب ──
+     تعریفِ فیلدها از همان مسیرِ استاتیکی می‌آید که فرم استفاده
+     می‌کند، پس برچسب‌ها هرگز از فرم دور نمی‌افتند. آگهیِ قدیمی که
+     برچسبِ فارسی ذخیره کرده همان‌طور نشان داده می‌شود. */
+  const { fields: specDefs } = useSpecFields(String(product?.cat ?? ''))
+  /* اندازه و پارچه از کاتالوگِ میز/پارچه می‌آیند، نه از تعریفِ
+     مشخصات — پس همان‌ها را هم می‌گیریم تا برچسب حل شود. */
+  const tableTypeId = String(rawAd?.tableType ?? '')
+  const tableCat = useCatalogType('table', tableTypeId)
+  const clothCat = useCatalogType('cloth', tableTypeId)
+  /* ── دسته‌هایی که هنوز کاتالوگ ندارند ──
+     توپ، تیپ، گچ و کیس تعریفشان فقط در `specs.ts` است. بدونِ این
+     بازگشت، آگهی‌های موجودشان کلیدِ خام نشان می‌دادند: «diameter:
+     57.2» به‌جای «قطر». */
+  const legacyRows = useMemo(
     () => specRows(product?.cat, rawAd?.specs),
     [product?.cat, rawAd],
   )
+  const specs = useMemo(
+    () => specDisplayRows(specDefs, rawAd?.specs, (fid, v) => {
+      if (fid === 'size') return tableCat.data?.sizes.find(s => s.id === v)?.label_fa
+      if (fid === 'cloth_brand') return clothCat.data?.brands.find(b => b.id === v)?.name_en
+      if (fid === 'cloth_model') {
+        for (const b of clothCat.data?.brands ?? []) {
+          const m = b.models.find(x => x.id === v)
+          if (m) return m.name_en
+        }
+      }
+      return undefined
+    }),
+    [specDefs, rawAd, tableCat.data, clothCat.data],
+  )
+  /* دسته‌ای که کاتالوگِ تازه ندارد، از تعریفِ قدیمی برچسب می‌گیرد */
+  const specRows_ = specDefs.length ? specs : legacyRows
   const negotiable = rawAd?.negotiable === true
   const sold = String(rawAd?.status ?? '') === 'sold'
 
@@ -446,17 +479,17 @@ export default function ProductDetailPage() {
                 کاتالوگ‌های حرفه‌ای دیده می‌شود — به‌جای ردیف‌های
                 راه‌راه. چشم بدونِ مکث از نامِ مشخصه به مقدارش می‌رسد،
                 حتی وقتی طولِ نام‌ها یکی نیست. */}
-            {specs.length > 0 && (
+            {specRows_.length > 0 && (
               <div style={{ ...glassPanel, borderRadius: 20, padding: '18px 18px 8px', marginBottom: 20 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 9, marginBottom: 14 }}>
                   <span style={{ width: 3, height: 18, borderRadius: 2, background: `linear-gradient(180deg,${GOLD},${GOLDD})` }} />
                   <h2 style={{ fontSize: 14.5, fontWeight: 800, color: TEXT, margin: 0 }}>مشخصات فنی</h2>
                   <span style={{ fontSize: 11, fontWeight: 700, color: GOLDD, background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.30)', borderRadius: 999, padding: '2px 9px' }}>
-                    {specs.length.toLocaleString('fa-IR')} مورد
+                    {specRows_.length.toLocaleString('fa-IR')} مورد
                   </span>
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(240px,1fr))', columnGap: 26 }}>
-                  {specs.map(s => (
+                  {specRows_.map(s => (
                     <div key={s.key} style={{ display: 'flex', alignItems: 'baseline', gap: 8, padding: '9px 0', borderBottom: '1px solid rgba(28,28,26,0.06)' }}>
                       <span style={{ fontSize: 12.5, color: TSEC, whiteSpace: 'nowrap', flexShrink: 0 }}>{s.label}</span>
                       <span aria-hidden style={{ flex: 1, minWidth: 12, alignSelf: 'center', height: 1, borderBottom: '1.5px dotted rgba(28,28,26,0.20)' }} />

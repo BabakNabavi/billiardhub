@@ -20,6 +20,7 @@
 
 import cueRaw from '../../data/cue-catalog.json'
 import tableRaw from '../../data/table_catalog.json'
+import clothRaw from '../../data/cloth_catalog.json'
 import {
   validateSelection,
   type CatalogBrand, type CatalogCountry, type CatalogId, type CatalogModel,
@@ -36,9 +37,27 @@ interface CatalogFile {
 const FILES: Record<CatalogId, CatalogFile> = {
   cue: cueRaw as unknown as CatalogFile,
   table: tableRaw as unknown as CatalogFile,
+  cloth: clothRaw as unknown as CatalogFile,
 }
 
-export const countriesOf = (category: CatalogId) => FILES[category].countries
+/* ── کشورها از هر سه کاتالوگ ادغام می‌شوند ──
+   هر فایل فهرستِ خودش را دارد و گاهی یکی عقب می‌ماند: کاتالوگِ تازه‌ی
+   میز برندِ سنگاپوری آورد ولی `SG` را در `countries` تعریف نکرده بود —
+   نتیجه‌اش جعبه‌ی خاکستری به‌جای پرچم و نامِ «کشور نامشخص» بود.
+
+   ادغام یعنی تعریفِ هر فایل، کمبودِ فایلِ دیگر را پر می‌کند. تعریفِ
+   خودِ همان دسته اولویت دارد، چون ممکن است نامِ فارسی‌اش دقیق‌تر باشد.
+
+   ⚠️ این جایگزینِ درست‌بودنِ داده نیست — تستِ «هر کشورِ هر سه کاتالوگ
+   پرچمِ SVG دارد» همچنان کمبودِ **شکل** را می‌گیرد. */
+const ALL_COUNTRIES: Record<string, CatalogCountry> = {
+  ...(cueRaw as unknown as CatalogFile).countries,
+  ...(clothRaw as unknown as CatalogFile).countries,
+  ...(tableRaw as unknown as CatalogFile).countries,
+}
+
+export const countriesOf = (category: CatalogId) =>
+  ({ ...ALL_COUNTRIES, ...FILES[category].countries })
 
 /** فقط شناسه و برچسب — سبک، برای پاس‌دادن از Server Component */
 export const typeOptions = (category: CatalogId) =>

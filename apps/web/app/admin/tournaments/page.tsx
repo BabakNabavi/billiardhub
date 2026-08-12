@@ -205,7 +205,7 @@ export default function AdminTournaments() {
           <Field label="رشته">
             <select value={nf.discipline} onChange={e => setNf(p => ({ ...p, discipline: e.target.value }))} style={inp}>
               <option value="snooker">اسنوکر</option>
-              <option value="pool">پول ۸ و ۹</option>
+              <option value="pool">پاکت بیلیارد ۸ و ۹</option>
               <option value="carom">کاروم</option>
               <option value="billiard">بیلیارد</option>
             </select>

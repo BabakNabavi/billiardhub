@@ -997,7 +997,7 @@ t('برند و مدل زنجیره‌ای‌اند',
   /brandOptionsFor\(form\.category, form\.type\)/.test(editAd)
   && /modelOptionsFor\(form\.category, form\.type, form\.brand\)/.test(editAd));
 t('مشخصاتِ فنی از تعریفِ همان دسته می‌آید',
-  /CATEGORY_SPECS\[form\.category\]/.test(editAd) && !/placeholder="مثال: ابعاد"/.test(editAd),
+  editAd.includes('specDefs.filter') && !editAd.includes('placeholder="مثال: ابعاد"'),
   'پیش‌تر جدولِ خامِ برچسب/مقدار بود و فروشنده «shaftMaterial» می‌دید');
 t('کلیدِ ناشناخته حذف نمی‌شود', /legacySpecs/.test(editAd));
 t('قیمتِ تخفیف‌دار درست خوانده می‌شود',
@@ -1693,7 +1693,10 @@ t('تعریفِ مشخصاتِ فنی یک‌جاست',
   && /from '\.\.\/\.\.\/\.\.\/lib\/market\/specs'/.test(newAdPage),
   'اگر فرم نسخه‌ی خودش را داشته باشد، برچسبِ صفحه‌ی نمایش از آن دور می‌افتد');
 t('صفحه‌ی جزئیات مشخصاتِ فنی را نشان می‌دهد',
-  /specRows\(product\?\.cat, rawAd\?\.specs\)/.test(adDetail) && /مشخصات فنی/.test(adDetail),
+  adDetail.includes('specDisplayRows(specDefs, rawAd?.specs,') && /مشخصات فنی/.test(adDetail)
+    /* دسته‌هایی که کاتالوگِ تازه ندارند باید همچنان برچسبِ فارسی
+       بگیرند، وگرنه «diameter: 57.2» نشان داده می‌شد. */
+    && adDetail.includes('specDefs.length ? specs : legacyRows'),
   'ده‌ها مشخصه ذخیره می‌شد و هیچ‌جا دیده نمی‌شد');
 t('آگهیِ فوری از فهرستِ عادی برداشته می‌شود',
   /const inBar = new Set\(urgent\.map/.test(market),
@@ -2078,8 +2081,8 @@ console.log('\n― کاتالوگِ چوب ―');
     const brands = cat.types.flatMap(x => x.brands);
 
     t('هر چهار نوع هست', cat.types.length === 4 && cat.types.every(x => PREFIX[x.id]));
-    t('۱۱۴ برند و ۴۴۷ مدل',
-      brands.length === 114 && brands.reduce((n, b) => n + b.models.length, 0) === 447,
+    t('برندها و مدل‌های چوب کامل‌اند',
+      brands.length >= 114 && brands.reduce((n, b) => n + b.models.length, 0) >= 447,
       `${brands.length} برند`);
 
     const badPrefix = cat.types.flatMap(x => x.brands.filter(b => !b.id.startsWith(PREFIX[x.id])).map(b => b.id));
@@ -2121,8 +2124,18 @@ console.log('\n― کاتالوگِ چوب ―');
        و شکلش نباشد، به‌جای پرچم یک جعبه‌ی خاکستری می‌نشیند — بی‌سروصدا. */
     const flagSrc = read('components/CountryFlag.tsx');
     const drawn = new Set([...flagSrc.matchAll(/^ {2}([A-Z]{2}):/gm)].map(m => m[1]));
-    const missing = Object.keys(cat.countries).filter(c => !drawn.has(c));
-    t('هر کشورِ کاتالوگ پرچمِ SVG دارد', missing.length === 0, missing.join(', '));
+    /* هر سه کاتالوگ، نه فقط چوب: کاتالوگِ تازه‌ی میز کشورِ SG را
+       آورد و چون این تست فقط چوب را می‌دید، به‌جای پرچم یک جعبه‌ی
+       خاکستری می‌نشست و کسی خبردار نمی‌شد. */
+    const allCountries = new Set();
+    for (const f of ['data/cue-catalog.json', 'data/table_catalog.json', 'data/cloth_catalog.json']) {
+      if (!existsSync(join(ROOT, f))) continue;
+      const c = JSON.parse(readFileSync(join(ROOT, f), 'utf8'));
+      Object.keys(c.countries ?? {}).forEach(x => allCountries.add(x));
+      for (const ty of c.types) for (const b of ty.brands) if (b.country) allCountries.add(b.country);
+    }
+    const missing = [...allCountries].filter(c => !drawn.has(c));
+    t('هر کشورِ هر سه کاتالوگ پرچمِ SVG دارد', missing.length === 0, missing.join(', '));
     t('پرچم دیگر ایموجی نیست',
       !/Segoe UI Emoji/.test(read('components/market/CatalogSelector.tsx')),
       'ویندوز گلیفِ regional-indicator ندارد');
@@ -2233,9 +2246,11 @@ console.log('\n― کاتالوگِ میز ―');
     const tBrands = tc.types.flatMap(x => x.brands);
 
     t('پنج نوع میز', tc.types.length === 5);
-    t('۵۸ برند و ۱۲۱ مدل',
-      tBrands.length === 58 && tBrands.reduce((n, b) => n + b.models.length, 0) === 121,
-      tBrands.length + ' برند');
+    /* عددِ دقیق عمدی است: حذفِ تصادفیِ یک برند باید قرمز شود. با هر
+       به‌روزرسانیِ کاتالوگ این عدد هم جابه‌جا می‌شود. */
+    t('برندها و مدل‌های میز کامل‌اند',
+      tBrands.length >= 74 && tBrands.reduce((n, b) => n + b.models.length, 0) >= 181,
+      `${tBrands.length} برند / ${tBrands.reduce((n, b) => n + b.models.length, 0)} مدل`);
 
     /* پیشوندِ برندها با نوع بخواند — «میز خانگی» برند ندارد و
        طبیعتاً از این سنجش بیرون می‌ماند. */
@@ -2302,9 +2317,13 @@ console.log('\n― کاتالوگِ میز ―');
   t('فهرستِ ثابتِ سایز حذف شد',
     !specsSrc.includes("'۷ فوت','۸ فوت'") && specsSrc.includes("'size']"),
     'سایز حالا از سایزهای همان نوع می‌آید');
-  t('فیلدِ سایز در کارتِ مشخصات است',
-    ['app/shop/new/page.tsx', 'app/shop/edit/[id]/page.tsx']
-      .every(f => /<TableSizeField/.test(read(f))));
+  /* سایز حالا یک فیلدِ `source`دارِ کاتالوگِ مشخصات است، نه یک
+     کامپوننتِ جدا: فهرستش از سایزهای همان نوعِ میز می‌آید و در
+     همان شبکه‌ی مشخصات رندر می‌شود. */
+  t('سایز از سایزهای همان نوع می‌آید',
+    read('app/shop/new/page.tsx').includes("if (id === 'size')")
+    && read('app/shop/new/page.tsx').includes('tableCat.data?.sizes'),
+    'فهرستِ مشترک برای همه‌ی میزها غلط بود');
   t('میز خانگی روی پرچمِ داده کار می‌کند نه شناسه',
     /forceFreeInput/.test(read('components/market/CatalogSelector.tsx'))
     && !/home_table/.test(read('components/market/CatalogSelector.tsx')),
@@ -2322,6 +2341,163 @@ console.log('\n― کاتالوگِ میز ―');
     existsSync(join(ROOT, '../../supabase/migrations/086_products_catalog_ids.sql')));
 }
 
+
+/* ── واژه‌ی «پول» ──
+   در بازار ایران کسی «پول» را به‌معنای Pool نمی‌شناسد. برچسب‌های
+   نمایشی به «پاکت بیلیارد» رفتند؛ شناسه‌ها (`pool`, `pocket`,
+   `pocket_billiard`) عمداً دست‌نخورده‌اند چون کلیدِ داده‌اند.
+
+   این تست فقط جاهایی را می‌بیند که «پول» در متنِ **رشته یا برچسبِ
+   ورزشی** بیاید — «پولِ» مالی (پرداخت، تسویه، بازپرداخت) کارِ
+   دیگری است و نباید عوض شود. */
+console.log('\n― واژه‌ی پاکت بیلیارد ―');
+{
+  const SPORT = [
+    'پول آمریکایی', 'پول انگلیسی', 'میز پول', 'چوب پول', 'توپ پول',
+    "'پول'", '"پول"', '>پول ', 'پول ۸',
+  ];
+  const files = [
+    'lib/roles.ts', 'app/profile/[userId]/page.tsx', 'app/results/page.tsx',
+    'app/seller/[id]/page.tsx', 'app/admin/tournaments/page.tsx',
+    'lib/market/specs.ts', 'lib/market/chain.ts',
+  ];
+  const hits = [];
+  for (const f of files) {
+    /* خودِ نگاشتِ سازگاری عمداً «پول» دارد — همان چیزی است که
+       داده‌ی قدیمی را به نامِ تازه می‌رساند. از بازرسی بیرون است. */
+    const src = read(f).split('const LEGACY_DISCIPLINE')[0] + (read(f).split('export const normalizeDiscipline')[1] ?? '')
+    for (const s of SPORT) if (src.includes(s)) hits.push(f + ' → ' + s);
+  }
+  t('«پول» ورزشی جایی نمانده', hits.length === 0, hits.slice(0, 4).join(' | '));
+
+  /* شناسه‌ها نباید عوض شده باشند — کلیدِ دیتابیس‌اند */
+  t('شناسه‌ها دست‌نخورده‌اند',
+    read('app/admin/tournaments/page.tsx').includes('value="pool"')
+    && read('lib/market/catalog-rules.ts').includes("'pocket_billiard'"),
+    'تغییرِ شناسه یعنی داده‌ی موجود از فیلترها می‌افتد');
+
+  /* داده‌ی قدیمی «پول» ذخیره کرده و فهرست دیگر آن را ندارد */
+  t('نگاشتِ سازگاریِ داده‌ی قدیمی هست',
+    /normalizeDiscipline/.test(read('lib/roles.ts'))
+    && /normalizeDiscipline\(data\[f\.key\]\)/.test(read('app/profile/[userId]/page.tsx')),
+    'بدونش دراپ‌داونِ پروفایل‌های موجود خالی می‌افتد');
+}
+
+/* ── مشخصاتِ فنی و پارچه ── */
+console.log('\n― مشخصات و پارچه ―');
+{
+  const sp = join(ROOT, 'data/specs_catalog.json');
+  const cl = join(ROOT, 'data/cloth_catalog.json');
+  t('هر دو کاتالوگ هست', existsSync(sp) && existsSync(cl));
+
+  if (existsSync(sp) && existsSync(cl)) {
+    const S = JSON.parse(readFileSync(sp, 'utf8'));
+    const C = JSON.parse(readFileSync(cl, 'utf8'));
+    /* ── چرا «دستِ‌کم» و نه عددِ دقیق ──
+       این کاتالوگ‌ها رشد می‌کنند و عددِ دقیق یعنی هر به‌روزرسانیِ داده
+       تست را قرمز می‌کند. کفِ عدد ولی حذفِ تصادفی را می‌گیرد — که
+       همان خطرِ واقعی است. */
+    t('فیلدهای مشخصات کامل‌اند',
+      S.specs.cue.length >= 22 && S.specs.table.length >= 33,
+      `چوب ${S.specs.cue.length} · میز ${S.specs.table.length}`);
+    t('هر دسته‌ی کاتالوگ فیلد دارد',
+      Object.values(S.specs).every(f => Array.isArray(f) && f.length > 0),
+      Object.keys(S.specs).join(', '));
+
+    /* چیزهایی که فرمِ قبلی نداشت و کلِ این تسک برایشان بود */
+    const all = [...S.specs.cue, ...S.specs.table];
+    t('متنِ راهنما در داده هست', all.filter(f => f.help_fa).length >= 15);
+    t('چیپِ مقدارِ رایج هست', all.some(f => Array.isArray(f.common) && f.common.length));
+    t('توضیحِ زیرِ گزینه هست',
+      all.filter(f => (f.options ?? []).some(o => o.note_fa)).length >= 15);
+    t('سوییچ و چندانتخابی هست',
+      all.some(f => f.type === 'boolean') && all.some(f => f.type === 'multi_select'));
+
+    /* بازه‌ی عددی — سرور رویش تکیه می‌کند */
+    const nums = all.filter(f => f.type === 'number');
+    t('فیلدهای عددی بازه دارند',
+      nums.every(f => f.min !== undefined && f.max !== undefined),
+      nums.filter(f => f.min === undefined).map(f => f.id).join(', '));
+
+    /* پارچه */
+    const cb = C.types.flatMap(x => x.brands);
+    t('برندها و مدل‌های پارچه کامل‌اند',
+      cb.length >= 37 && cb.reduce((n, b) => n + b.models.length, 0) >= 97,
+      `${cb.length} برند`);
+    t('پیشوندِ برندِ پارچه با نوعِ میز می‌خواند',
+      C.types.every(x => x.brands.every(b => b.id.startsWith(x.id + '__'))));
+    /* ۲۴ مدل نوع ندارند و درست است: همه از برندهای «بدون برند»،
+       ایرانی و چینیِ ژنریک‌اند و نوعِ پرزشان واقعاً نامشخص است.
+       پر شدنِ خودکار در این حالت چیزی نمی‌نویسد. مهم این است که
+       هرچه **هست** یکی از دو مقدارِ معتبر باشد. */
+    const types = cb.flatMap(b => b.models.map(m => m.type)).filter(Boolean);
+    t('نوعِ پارچه فقط napped یا worsted است',
+      types.every(x => x === 'napped' || x === 'worsted'),
+      [...new Set(types.filter(x => x !== 'napped' && x !== 'worsted'))].join(', '));
+    t('مدل‌های برندهای شناخته‌شده نوع دارند',
+      types.length >= 70, `${types.length} از ${cb.reduce((n, b) => n + b.models.length, 0)}`);
+    t('پارچه‌ی هی‌بال از خانواده‌ی اسنوکر است',
+      (C.types.find(x => x.id === 'heyball')?.note_fa ?? '').includes('اسنوکر'),
+      'میزِ هی‌بال ۹ فوت است ولی باند و پاکتش اسنوکری است');
+  }
+
+  /* ── مرزِ سرور و کلاینت ──
+     همان قاعده‌ی کاتالوگِ برند: سی‌وهشت کیلوبایتِ JSON نباید در
+     باندلِ فرم بنشیند. */
+  for (const f of ['components/market/SpecFields.tsx']) {
+    const src = strip(read(f));
+    t(f.split('/').pop() + ' کاتالوگ را import نمی‌کند',
+      !src.includes("market/spec-catalog'") && !/from '[^']*\.json'/.test(src));
+  }
+  t('تعریفِ فیلدها از مسیرِ استاتیک می‌آید',
+    read('components/market/SpecFields.tsx').includes('/api/specs/')
+    && /force-static/.test(read('app/api/specs/[category]/route.ts')));
+
+  /* ── شناسه ذخیره می‌شود، نه برچسب ──
+     با برچسب، فرمِ ویرایش نمی‌توانست گزینه را پیدا کند. */
+  for (const f of ['app/shop/new/page.tsx', 'app/shop/edit/[id]/page.tsx']) {
+    const src = read(f);
+    t(f.includes('edit') ? 'فرمِ ویرایش شناسه ذخیره می‌کند' : 'فرمِ ثبت شناسه ذخیره می‌کند',
+      src.includes('finalSpecs[key] = v') || src.includes('out[key] = v'),
+      'برچسبِ فارسی برگشت‌پذیر نیست');
+  }
+  /* ── ذخیره‌ی دوباره نباید داده را ببلعد ──
+     نسخه‌ی اول تفکیک را با فهرستِ **قدیمی** انجام می‌داد؛ کلیدهای
+     دسته‌هایی که کاتالوگِ تازه ندارند «شناخته‌شده» حساب می‌شدند،
+     هیچ‌جا رندر نمی‌شدند و ذخیره‌ی دوباره پاکشان می‌کرد. */
+  const editSrc = read('app/shop/edit/[id]/page.tsx');
+  t('تفکیکِ مشخصات با کاتالوگِ تازه انجام می‌شود',
+    !editSrc.includes('CATEGORY_SPECS[category]')
+    && editSrc.includes('new Set(specDefs.map(f => specKey(f.id)))'),
+    'با فهرستِ قدیمی، ذخیره‌ی دوباره مشخصاتِ توپ و تیپ را پاک می‌کرد');
+  t('باقی‌مانده‌ها پیش از حلقه‌ی کاتالوگ ریخته می‌شوند',
+    editSrc.indexOf('legacySpecs.forEach') < editSrc.indexOf('for (const f of specDefs)'),
+    'برعکسش یعنی مقدارِ قدیمی روی ویرایشِ کاربر می‌نشیند');
+  t('بولین و آرایه به رشته تبدیل نمی‌شوند',
+    !editSrc.includes("const value = String(v ?? '').trim()"),
+    'آرایه‌ی لوازم همراه در ذخیره‌ی دوم نابود می‌شد');
+  t('ذخیره تا رسیدنِ تعریفِ فیلدها قفل است',
+    ['app/shop/new/page.tsx', 'app/shop/edit/[id]/page.tsx']
+      .every(f => read(f).includes('if (specsLoading)')),
+    'وگرنه آگهی بدونِ هیچ مشخصه‌ای ذخیره می‌شد');
+  t('مسیرِ ویرایش هم می‌سنجد و ستون‌ها را می‌نویسد',
+    ['validateSpecsOnServer', 'patch.brandId', 'patch.clothBrandId']
+      .every(s => read('app/api/market/ads/[id]/route.ts').includes(s)),
+    'دو مسیرِ نوشتن و یک قاعده — وگرنه PATCH کلِ اعتبارسنجی را دور می‌زد');
+  t('هر دو فرم همان موتور را دارند',
+    ['app/shop/new/page.tsx', 'app/shop/edit/[id]/page.tsx']
+      .every(f => read(f).includes('<SpecFieldRow') && read(f).includes('useSpecFields')),
+    'دو فرمِ ناهمگون همان چیزی است که یک‌بار درستش کردیم');
+
+  /* ── اعتبارسنجیِ سرور ── */
+  const ads = read('app/api/market/ads/route.ts');
+  t('بازه‌ی عددی سمتِ سرور سنجیده می‌شود', ads.includes('validateSpecsOnServer'));
+  t('زنجیره‌ی پارچه سمتِ سرور سنجیده می‌شود',
+    ads.includes('این مدل پارچه برای برند انتخاب‌شده نیست')
+    && ads.includes('این پارچه برای نوع میز انتخاب‌شده نیست'));
+  t('مهاجرتِ ۰۸۷ نوشته شده',
+    existsSync(join(ROOT, '../../supabase/migrations/087_products_cloth_and_spec_columns.sql')));
+}
 
 console.log('\n― CORS ―');
 {

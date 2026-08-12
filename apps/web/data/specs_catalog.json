@@ -1,0 +1,1988 @@
+{
+  "schema_version": "1.0",
+  "last_updated": "2026-08-11",
+  "notes_fa": "مشخصات فنی برای دسته‌بندی‌های چوب و میز. هر فیلد allow_other دارد که یعنی گزینه «سایر» با فیلد متنی به انتهای لیست اضافه شود. همه فیلدها اختیاری‌اند به‌جز وضعیت کالا. help_fa را به صورت متن راهنمای کوچک زیر فیلد نشان بده تا فروشنده بداند چه چیزی می‌پرسیم.",
+  "condition_options": [
+    {
+      "id": "new",
+      "label_fa": "نو / آکبند",
+      "label_en": "New"
+    },
+    {
+      "id": "like-new",
+      "label_fa": "در حد نو",
+      "label_en": "Like New"
+    },
+    {
+      "id": "used-excellent",
+      "label_fa": "کارکرده - عالی",
+      "label_en": "Used - Excellent"
+    },
+    {
+      "id": "used-good",
+      "label_fa": "کارکرده - خوب",
+      "label_en": "Used - Good"
+    },
+    {
+      "id": "used-fair",
+      "label_fa": "کارکرده - متوسط",
+      "label_en": "Used - Fair"
+    },
+    {
+      "id": "needs-repair",
+      "label_fa": "نیازمند تعمیر",
+      "label_en": "Needs Repair"
+    },
+    {
+      "id": "refurbished",
+      "label_fa": "بازسازی‌شده",
+      "label_en": "Refurbished",
+      "note_fa": "رایج در میزهای آنتیک"
+    }
+  ],
+  "specs": {
+    "cue": [
+      {
+        "id": "length_cm",
+        "label_fa": "طول (سانتی‌متر)",
+        "type": "number",
+        "required": false,
+        "placeholder": "147",
+        "min": 90,
+        "max": 160,
+        "help_fa": "اسنوکر: ۱۴۵ تا ۱۴۸ (۵۷ تا ۵۸ اینچ) — پاکت بیلیارد: ۱۴۷ (۵۸ اینچ)",
+        "common": [
+          140,
+          145,
+          147,
+          148,
+          150
+        ]
+      },
+      {
+        "id": "weight_oz",
+        "label_fa": "وزن (اونس)",
+        "type": "number",
+        "required": false,
+        "placeholder": "19",
+        "min": 12,
+        "max": 25,
+        "step": 0.1,
+        "help_fa": "اسنوکر: ۱۶ تا ۱۹ — پاکت بیلیارد آمریکایی: ۱۸ تا ۲۱ — هی‌بال: ۱۸ تا ۲۰"
+      },
+      {
+        "id": "tip_diameter",
+        "label_fa": "قطر تیپ (میلی‌متر)",
+        "type": "number",
+        "required": false,
+        "placeholder": "9.5",
+        "min": 7,
+        "max": 15,
+        "step": 0.1,
+        "help_fa": "اسنوکر: ۸.۵ تا ۱۰ — پاکت بیلیارد انگلیسی: ۸ تا ۹ — پاکت بیلیارد آمریکایی: ۱۱.۸ تا ۱۳ — هی‌بال: ۱۰.۵ تا ۱۱.۵"
+      },
+      {
+        "id": "butt_diameter",
+        "label_fa": "قطر بات (میلی‌متر)",
+        "type": "number",
+        "required": false,
+        "placeholder": "30",
+        "min": 25,
+        "max": 35,
+        "step": 0.1
+      },
+      {
+        "id": "balance_point",
+        "label_fa": "نقطه تعادل (اینچ از بات)",
+        "type": "number",
+        "required": false,
+        "placeholder": "17",
+        "min": 12,
+        "max": 22,
+        "step": 0.5,
+        "help_fa": "معمولاً ۱۶ تا ۱۸ اینچ. عدد بالاتر یعنی چوب جلوسنگین‌تر."
+      },
+      {
+        "id": "shaft_material",
+        "label_fa": "جنس شفت",
+        "type": "select",
+        "required": false,
+        "allow_other": true,
+        "help_fa": "زبان‌گنجشک انعطاف و رگه‌های دیدنی — افرا سفت‌تر و صاف‌تر — کربن کمترین انحراف.",
+        "options": [
+          {
+            "id": "ash",
+            "label_fa": "زبان‌گنجشک (Ash)",
+            "label_en": "Ash",
+            "note_fa": "سنتی و رایج‌ترین در اسنوکر"
+          },
+          {
+            "id": "maple",
+            "label_fa": "افرا (Maple)",
+            "label_en": "Maple",
+            "note_fa": "استاندارد پاکت بیلیارد آمریکایی، سفت‌تر"
+          },
+          {
+            "id": "hard-rock-maple",
+            "label_fa": "افرا سخت آمریکای شمالی",
+            "label_en": "Hard Rock Maple"
+          },
+          {
+            "id": "carbon",
+            "label_fa": "کربن فایبر",
+            "label_en": "Carbon Fiber",
+            "note_fa": "کم‌انحراف، مدرن"
+          },
+          {
+            "id": "fiberglass",
+            "label_fa": "فایبرگلاس",
+            "label_en": "Fiberglass"
+          },
+          {
+            "id": "laminated",
+            "label_fa": "لمینت (چندلایه)",
+            "label_en": "Laminated",
+            "note_fa": "مثل G-Core مک‌درموت"
+          }
+        ]
+      },
+      {
+        "id": "shaft_grade",
+        "label_fa": "گرید شفت",
+        "type": "select",
+        "required": false,
+        "allow_other": true,
+        "help_fa": "مهم‌ترین عامل قیمت در چوب‌های دست‌ساز. سه فاکتور: استحکام، چگالی، فلکس.",
+        "options": [
+          {
+            "id": "standard",
+            "label_fa": "استاندارد / کلاسیک",
+            "label_en": "Standard / Classic"
+          },
+          {
+            "id": "premium",
+            "label_fa": "پریمیوم",
+            "label_en": "Premium"
+          },
+          {
+            "id": "ultimate",
+            "label_fa": "اولتیمیت",
+            "label_en": "Ultimate"
+          },
+          {
+            "id": "pro",
+            "label_fa": "پرو شفت",
+            "label_en": "Pro Shaft"
+          },
+          {
+            "id": "full-shaft",
+            "label_fa": "شفت یکسره (FS)",
+            "label_en": "Full Shaft",
+            "note_fa": "بدون اتصال و امتداد"
+          }
+        ]
+      },
+      {
+        "id": "butt_material",
+        "label_fa": "جنس بات",
+        "type": "select",
+        "required": false,
+        "allow_other": true,
+        "options": [
+          {
+            "id": "ebony",
+            "label_fa": "آبنوس (Ebony)",
+            "label_en": "Ebony",
+            "note_fa": "رایج‌ترین، مشکی"
+          },
+          {
+            "id": "rosewood",
+            "label_fa": "رزوود",
+            "label_en": "Rosewood"
+          },
+          {
+            "id": "cocobolo",
+            "label_fa": "کوکوبولو",
+            "label_en": "Cocobolo"
+          },
+          {
+            "id": "snakewood",
+            "label_fa": "اسنیک‌وود",
+            "label_en": "Snakewood"
+          },
+          {
+            "id": "thuya-burr",
+            "label_fa": "توئیا بور",
+            "label_en": "Thuya Burr"
+          },
+          {
+            "id": "olivewood",
+            "label_fa": "زیتون",
+            "label_en": "Olivewood"
+          },
+          {
+            "id": "kingwood",
+            "label_fa": "کینگ‌وود",
+            "label_en": "Kingwood"
+          },
+          {
+            "id": "tulipwood",
+            "label_fa": "تولیپ‌وود",
+            "label_en": "Tulipwood"
+          },
+          {
+            "id": "amboyna",
+            "label_fa": "آمبوینا",
+            "label_en": "Amboyna"
+          },
+          {
+            "id": "ebonised",
+            "label_fa": "چوب مشکی‌شده",
+            "label_en": "Ebonised Black Wood",
+            "note_fa": "در Riley/BCE"
+          },
+          {
+            "id": "exotic-mixed",
+            "label_fa": "ترکیب چوب‌های اگزوتیک",
+            "label_en": "Mixed Exotic"
+          },
+          {
+            "id": "linen-wrap",
+            "label_fa": "با روکش کتان",
+            "label_en": "Irish Linen Wrap"
+          },
+          {
+            "id": "leather-wrap",
+            "label_fa": "با روکش چرم",
+            "label_en": "Leather Wrap"
+          }
+        ]
+      },
+      {
+        "id": "splice_type",
+        "label_fa": "نوع اسپلایس",
+        "type": "select",
+        "required": false,
+        "allow_other": true,
+        "help_fa": "دست‌اسپلایس نوک‌های گرد دارد، ماشین‌اسپلایس نوک تیز.",
+        "options": [
+          {
+            "id": "hand-spliced",
+            "label_fa": "دست‌اسپلایس",
+            "label_en": "Hand Spliced",
+            "note_fa": "نشانه چوب باکیفیت"
+          },
+          {
+            "id": "machine-spliced",
+            "label_fa": "ماشین‌اسپلایس",
+            "label_en": "Machine Spliced"
+          },
+          {
+            "id": "plain",
+            "label_fa": "بدون اسپلایس (ساده)",
+            "label_en": "Plain"
+          },
+          {
+            "id": "4-splice",
+            "label_fa": "۴ اسپلایس",
+            "label_en": "4 Splice"
+          },
+          {
+            "id": "8-splice",
+            "label_fa": "۸ اسپلایس",
+            "label_en": "8 Splice"
+          },
+          {
+            "id": "12-splice",
+            "label_fa": "۱۲ اسپلایس",
+            "label_en": "12 Splice"
+          },
+          {
+            "id": "16-splice",
+            "label_fa": "۱۶ اسپلایس",
+            "label_en": "16 Splice"
+          }
+        ]
+      },
+      {
+        "id": "ferrule",
+        "label_fa": "جنس فرول",
+        "type": "select",
+        "required": false,
+        "allow_other": true,
+        "help_fa": "برنجی سنتی و سنگین‌تر — تیتانیوم سبک‌تر و سخت‌تر.",
+        "options": [
+          {
+            "id": "brass",
+            "label_fa": "برنج",
+            "label_en": "Brass",
+            "note_fa": "سنتی و رایج"
+          },
+          {
+            "id": "titanium",
+            "label_fa": "تیتانیوم",
+            "label_en": "Titanium",
+            "note_fa": "سبک‌تر، انحراف کمتر"
+          },
+          {
+            "id": "stainless",
+            "label_fa": "استیل ضدزنگ",
+            "label_en": "Stainless Steel"
+          },
+          {
+            "id": "phenolic",
+            "label_fa": "فنولیک",
+            "label_en": "Phenolic"
+          },
+          {
+            "id": "juma",
+            "label_fa": "JUMA",
+            "label_en": "JUMA"
+          },
+          {
+            "id": "carbon-ferrule",
+            "label_fa": "کربن",
+            "label_en": "Carbon Fiber"
+          },
+          {
+            "id": "plastic",
+            "label_fa": "پلاستیک",
+            "label_en": "Plastic"
+          }
+        ]
+      },
+      {
+        "id": "tip_brand",
+        "label_fa": "برند تیپ",
+        "type": "select",
+        "required": false,
+        "allow_other": true,
+        "options": [
+          {
+            "id": "elkmaster",
+            "label_fa": "Elkmaster",
+            "label_en": "Elkmaster",
+            "note_fa": "نرم، رایج‌ترین در اسنوکر"
+          },
+          {
+            "id": "kamui",
+            "label_fa": "Kamui",
+            "label_en": "Kamui",
+            "note_fa": "ژاپنی، لایه‌لایه، حرفه‌ای"
+          },
+          {
+            "id": "blue-diamond",
+            "label_fa": "Blue Diamond",
+            "label_en": "Blue Diamond"
+          },
+          {
+            "id": "tiger",
+            "label_fa": "Tiger (Everest / Onyx / Sniper / Emerald)",
+            "label_en": "Tiger"
+          },
+          {
+            "id": "talisman",
+            "label_fa": "Talisman",
+            "label_en": "Talisman"
+          },
+          {
+            "id": "moori",
+            "label_fa": "Moori",
+            "label_en": "Moori"
+          },
+          {
+            "id": "zan",
+            "label_fa": "Zan",
+            "label_en": "Zan"
+          },
+          {
+            "id": "predator-victory",
+            "label_fa": "Predator Victory",
+            "label_en": "Predator Victory",
+            "note_fa": "استاندارد شفت REVO"
+          },
+          {
+            "id": "navigator",
+            "label_fa": "Navigator",
+            "label_en": "Navigator"
+          },
+          {
+            "id": "g2",
+            "label_fa": "G2",
+            "label_en": "G2"
+          },
+          {
+            "id": "taom",
+            "label_fa": "Taom",
+            "label_en": "Taom"
+          },
+          {
+            "id": "prospin",
+            "label_fa": "ProSpin",
+            "label_en": "ProSpin"
+          },
+          {
+            "id": "le-pro",
+            "label_fa": "Le Pro",
+            "label_en": "Le Pro"
+          },
+          {
+            "id": "triangle",
+            "label_fa": "Triangle",
+            "label_en": "Triangle"
+          },
+          {
+            "id": "aramith-tip",
+            "label_fa": "Aramith",
+            "label_en": "Aramith"
+          }
+        ]
+      },
+      {
+        "id": "tip_hardness",
+        "label_fa": "سختی تیپ",
+        "type": "select",
+        "required": false,
+        "options": [
+          {
+            "id": "super-soft",
+            "label_fa": "خیلی نرم",
+            "label_en": "Super Soft"
+          },
+          {
+            "id": "soft",
+            "label_fa": "نرم",
+            "label_en": "Soft",
+            "note_fa": "چسبندگی بیشتر، اسپین بالاتر"
+          },
+          {
+            "id": "medium",
+            "label_fa": "متوسط",
+            "label_en": "Medium",
+            "note_fa": "انتخاب اکثر حرفه‌ای‌ها"
+          },
+          {
+            "id": "hard",
+            "label_fa": "سخت",
+            "label_en": "Hard",
+            "note_fa": "دوام بیشتر، مناسب بریک"
+          }
+        ]
+      },
+      {
+        "id": "tip_construction",
+        "label_fa": "ساختار تیپ",
+        "type": "select",
+        "required": false,
+        "options": [
+          {
+            "id": "single-layer",
+            "label_fa": "تک‌لایه",
+            "label_en": "Single Layer"
+          },
+          {
+            "id": "layered",
+            "label_fa": "لایه‌لایه (لمینت)",
+            "label_en": "Layered / Laminated"
+          },
+          {
+            "id": "phenolic-tip",
+            "label_fa": "فنولیک",
+            "label_en": "Phenolic",
+            "note_fa": "مخصوص بریک و جامپ"
+          }
+        ]
+      },
+      {
+        "id": "pieces",
+        "label_fa": "تعداد تکه",
+        "type": "select",
+        "required": false,
+        "allow_other": true,
+        "options": [
+          {
+            "id": "1pc",
+            "label_fa": "یک‌تکه",
+            "label_en": "1 Piece",
+            "note_fa": "بدون اتصال، انتقال حس بهتر"
+          },
+          {
+            "id": "2pc",
+            "label_fa": "دوتکه (اتصال وسط)",
+            "label_en": "2 Piece / Centre Joint"
+          },
+          {
+            "id": "3-4",
+            "label_fa": "سه‌چهارم (۳/۴)",
+            "label_en": "3/4 Jointed",
+            "note_fa": "رایج‌ترین در اسنوکر حرفه‌ای"
+          },
+          {
+            "id": "3pc",
+            "label_fa": "سه‌تکه",
+            "label_en": "3 Piece"
+          },
+          {
+            "id": "4-5",
+            "label_fa": "چهارپنجم",
+            "label_en": "4/5 Jointed"
+          }
+        ]
+      },
+      {
+        "id": "joint_position",
+        "label_fa": "محل اتصال",
+        "type": "select",
+        "required": false,
+        "allow_other": true,
+        "options": [
+          {
+            "id": "12in",
+            "label_fa": "۱۲ اینچ از بات",
+            "label_en": "12 inch"
+          },
+          {
+            "id": "16in",
+            "label_fa": "۱۶ اینچ از بات",
+            "label_en": "16 inch",
+            "note_fa": "رایج‌ترین در ۳/۴"
+          },
+          {
+            "id": "18in",
+            "label_fa": "۱۸ اینچ از بات",
+            "label_en": "18 inch"
+          },
+          {
+            "id": "centre",
+            "label_fa": "وسط چوب",
+            "label_en": "Centre"
+          }
+        ]
+      },
+      {
+        "id": "joint_material",
+        "label_fa": "جنس اتصال",
+        "type": "select",
+        "required": false,
+        "allow_other": true,
+        "options": [
+          {
+            "id": "brass-joint",
+            "label_fa": "برنج",
+            "label_en": "Brass"
+          },
+          {
+            "id": "stainless-joint",
+            "label_fa": "استیل ضدزنگ",
+            "label_en": "Stainless Steel"
+          },
+          {
+            "id": "titanium-joint",
+            "label_fa": "تیتانیوم",
+            "label_en": "Titanium"
+          },
+          {
+            "id": "uni-loc",
+            "label_fa": "Uni-Loc",
+            "label_en": "Uni-Loc",
+            "note_fa": "سیستم پردیتور"
+          },
+          {
+            "id": "radial",
+            "label_fa": "Radial Pin",
+            "label_en": "Radial"
+          },
+          {
+            "id": "3-8-10",
+            "label_fa": "3/8-10 Pin",
+            "label_en": "3/8-10"
+          },
+          {
+            "id": "wood-joint",
+            "label_fa": "چوب به چوب",
+            "label_en": "Wood-to-Wood",
+            "note_fa": "در کارامبول"
+          },
+          {
+            "id": "sd-joint",
+            "label_fa": "SD Joint",
+            "label_en": "SD Joint",
+            "note_fa": "استاندارد Ton Praram"
+          },
+          {
+            "id": "quick-release",
+            "label_fa": "اتصال سریع",
+            "label_en": "Quick Release"
+          }
+        ]
+      },
+      {
+        "id": "has_extension",
+        "label_fa": "همراه با اکستنشن",
+        "type": "boolean",
+        "required": false
+      },
+      {
+        "id": "has_mini_butt",
+        "label_fa": "همراه با مینی‌بات",
+        "type": "boolean",
+        "required": false
+      },
+      {
+        "id": "has_case",
+        "label_fa": "همراه با کیف",
+        "type": "boolean",
+        "required": false
+      },
+      {
+        "id": "has_butt_joint",
+        "label_fa": "دارای اتصال انتهای بات",
+        "type": "boolean",
+        "required": false,
+        "help_fa": "برای نصب اکستنشن"
+      },
+      {
+        "id": "finish",
+        "label_fa": "نوع فینیش",
+        "type": "select",
+        "required": false,
+        "allow_other": true,
+        "options": [
+          {
+            "id": "oiled",
+            "label_fa": "روغن‌خورده",
+            "label_en": "Oiled",
+            "note_fa": "حس طبیعی چوب، رایج در دست‌سازها"
+          },
+          {
+            "id": "waxed",
+            "label_fa": "واکس‌خورده",
+            "label_en": "Waxed"
+          },
+          {
+            "id": "lacquered",
+            "label_fa": "لاک‌خورده",
+            "label_en": "Lacquered"
+          },
+          {
+            "id": "matte",
+            "label_fa": "مات",
+            "label_en": "Matte"
+          },
+          {
+            "id": "gloss",
+            "label_fa": "براق",
+            "label_en": "Gloss"
+          }
+        ]
+      },
+      {
+        "id": "serial_number",
+        "label_fa": "شماره سریال / پلاک",
+        "type": "text",
+        "required": false,
+        "max_length": 40,
+        "help_fa": "در چوب‌های دست‌ساز نخبه (مثل John Parris Ultimate) شماره روی پلاک حک شده و برای اصالت مهم است."
+      }
+    ],
+    "table": [
+      {
+        "id": "size",
+        "label_fa": "اندازه",
+        "type": "select",
+        "required": false,
+        "allow_other": true,
+        "source": "types[].sizes",
+        "depends_on": "table_type",
+        "help_fa": "از روی نوع میز، فقط سایزهای واقعی همان رشته نمایش داده می‌شود."
+      },
+      {
+        "id": "overall_dimensions",
+        "label_fa": "ابعاد بیرونی (سانتی‌متر)",
+        "type": "text",
+        "required": false,
+        "max_length": 40,
+        "placeholder": "مثال: ۳۸۳ × ۲۰۵",
+        "help_fa": "طول × عرض کل میز با باند. برای بررسی جا شدن در اتاق مهم است."
+      },
+      {
+        "id": "height_cm",
+        "label_fa": "ارتفاع (سانتی‌متر)",
+        "type": "number",
+        "required": false,
+        "placeholder": "85",
+        "min": 60,
+        "max": 100,
+        "help_fa": "استاندارد ۸۴ تا ۸۶ سانتی‌متر از کف تا لبه باند",
+        "common": [
+          80,
+          84,
+          85,
+          86,
+          90
+        ]
+      },
+      {
+        "id": "weight_kg",
+        "label_fa": "وزن تقریبی (کیلوگرم)",
+        "type": "number",
+        "required": false,
+        "placeholder": "1200",
+        "min": 50,
+        "max": 2500,
+        "help_fa": "میز ۱۲ فوت حرفه‌ای حدود ۱۰۰۰ تا ۱۳۰۰ کیلو. برای هزینه حمل و بررسی تحمل کف ساختمان مهم است.",
+        "common": [
+          150,
+          300,
+          500,
+          800,
+          1000,
+          1200
+        ]
+      },
+      {
+        "id": "bed_material",
+        "label_fa": "جنس سطح بازی",
+        "type": "select",
+        "required": false,
+        "allow_other": true,
+        "help_fa": "مهم‌ترین عامل قیمت میز. اسلیت استاندارد حرفه‌ای است.",
+        "options": [
+          {
+            "id": "slate-italian",
+            "label_fa": "اسلیت ایتالیایی",
+            "label_en": "Italian Slate",
+            "note_fa": "ریزدانه و یکنواخت؛ گران‌ترین و باکیفیت‌ترین"
+          },
+          {
+            "id": "slate-brazilian",
+            "label_fa": "اسلیت برزیلی",
+            "label_en": "Brazilian Slate",
+            "note_fa": "چگال و مقاوم؛ رده حرفه‌ای"
+          },
+          {
+            "id": "slate-welsh",
+            "label_fa": "اسلیت ولزی",
+            "label_en": "Welsh Slate",
+            "note_fa": "میزهای آنتیک انگلیسی؛ بسیار سنگین و سفت"
+          },
+          {
+            "id": "slate-chinese",
+            "label_fa": "اسلیت چینی",
+            "label_en": "Chinese Slate",
+            "note_fa": "روشن‌تر و نرم‌تر؛ معمولاً ۴۵ تا ۵۰ میلی‌متر"
+          },
+          {
+            "id": "slate-indian",
+            "label_fa": "اسلیت هندی (کاداپا)",
+            "label_en": "Indian Kadapa Slate",
+            "note_fa": "رایج در میزهای ساخت هند"
+          },
+          {
+            "id": "slate-unknown",
+            "label_fa": "اسلیت (مبدأ نامشخص)",
+            "label_en": "Slate"
+          },
+          {
+            "id": "slatron",
+            "label_fa": "اسلاترون / سنگ مصنوعی",
+            "label_en": "Slatron"
+          },
+          {
+            "id": "marble",
+            "label_fa": "سنگ مرمر",
+            "label_en": "Marble",
+            "note_fa": "در بعضی میزهای لوکس چینی"
+          },
+          {
+            "id": "mdf-bed",
+            "label_fa": "ام‌دی‌اف",
+            "label_en": "MDF",
+            "note_fa": "میزهای خانگی و اقتصادی"
+          },
+          {
+            "id": "particle",
+            "label_fa": "نئوپان / تخته فشرده",
+            "label_en": "Particle Board"
+          }
+        ]
+      },
+      {
+        "id": "slate_thickness",
+        "label_fa": "ضخامت سنگ (میلی‌متر)",
+        "type": "number",
+        "required": false,
+        "placeholder": "45",
+        "min": 10,
+        "max": 80,
+        "help_fa": "اسنوکر حرفه‌ای ۴۵ تا ۵۰ — پاکت بیلیارد ۲۵ تا ۳۰ — خانگی زیر ۲۰",
+        "common": [
+          19,
+          25,
+          30,
+          38,
+          44,
+          45,
+          50
+        ]
+      },
+      {
+        "id": "slate_pieces",
+        "label_fa": "تعداد تکه سنگ",
+        "type": "select",
+        "required": false,
+        "allow_other": true,
+        "help_fa": "روی هزینه حمل و نصب اثر مستقیم دارد.",
+        "options": [
+          {
+            "id": "1",
+            "label_fa": "یک‌تکه",
+            "label_en": "1 piece",
+            "note_fa": "میزهای کوچک؛ حمل سخت‌تر"
+          },
+          {
+            "id": "3",
+            "label_fa": "سه‌تکه",
+            "label_en": "3 piece",
+            "note_fa": "پاکت بیلیارد و هی‌بال"
+          },
+          {
+            "id": "5",
+            "label_fa": "پنج‌تکه",
+            "label_en": "5 piece",
+            "note_fa": "اسنوکر ۱۲ فوت"
+          }
+        ]
+      },
+      {
+        "id": "slate_frame",
+        "label_fa": "قاب زیر سنگ",
+        "type": "select",
+        "required": false,
+        "allow_other": true,
+        "options": [
+          {
+            "id": "wood-backed",
+            "label_fa": "چوب چسبانده‌شده",
+            "label_en": "Wood Backed",
+            "note_fa": "استاندارد؛ برای پرچ‌کاری و تراز"
+          },
+          {
+            "id": "no-backing",
+            "label_fa": "بدون قاب چوبی",
+            "label_en": "Unbacked"
+          },
+          {
+            "id": "steel-frame",
+            "label_fa": "قاب فولادی",
+            "label_en": "Steel Frame"
+          }
+        ]
+      },
+      {
+        "id": "frame_material",
+        "label_fa": "جنس بدنه و پایه",
+        "type": "select",
+        "required": false,
+        "allow_other": true,
+        "help_fa": "بدنه سنگین از چوب سخت، لرزش را می‌گیرد و تراز را حفظ می‌کند.",
+        "options": [
+          {
+            "id": "solid-hardwood",
+            "label_fa": "چوب سخت یکپارچه",
+            "label_en": "Solid Hardwood",
+            "note_fa": "بهترین حالت"
+          },
+          {
+            "id": "mahogany",
+            "label_fa": "ماهگونی",
+            "label_en": "Mahogany",
+            "note_fa": "کلاسیک انگلیسی"
+          },
+          {
+            "id": "oak",
+            "label_fa": "بلوط",
+            "label_en": "Oak"
+          },
+          {
+            "id": "walnut",
+            "label_fa": "گردو",
+            "label_en": "Walnut"
+          },
+          {
+            "id": "beech",
+            "label_fa": "راش",
+            "label_en": "Beech"
+          },
+          {
+            "id": "ash-frame",
+            "label_fa": "زبان‌گنجشک",
+            "label_en": "Ash"
+          },
+          {
+            "id": "teak",
+            "label_fa": "ساج",
+            "label_en": "Teak"
+          },
+          {
+            "id": "lauan",
+            "label_fa": "چوب لائان",
+            "label_en": "Lauan",
+            "note_fa": "رایج در میزهای Star چینی"
+          },
+          {
+            "id": "pine",
+            "label_fa": "کاج",
+            "label_en": "Pine"
+          },
+          {
+            "id": "honne",
+            "label_fa": "هونه",
+            "label_en": "Honne",
+            "note_fa": "میزهای هندی"
+          },
+          {
+            "id": "padauk",
+            "label_fa": "پادوک",
+            "label_en": "Padauk"
+          },
+          {
+            "id": "african-hardwood",
+            "label_fa": "چوب سخت آفریقایی",
+            "label_en": "African Solid Wood",
+            "note_fa": "در Rasson"
+          },
+          {
+            "id": "plywood",
+            "label_fa": "تخته چندلا",
+            "label_en": "Plywood"
+          },
+          {
+            "id": "mdf",
+            "label_fa": "ام‌دی‌اف",
+            "label_en": "MDF",
+            "note_fa": "خانگی و اقتصادی"
+          },
+          {
+            "id": "aluminium",
+            "label_fa": "آلومینیوم / آلیاژ",
+            "label_en": "Aluminium"
+          },
+          {
+            "id": "steel",
+            "label_fa": "فولاد",
+            "label_en": "Steel",
+            "note_fa": "در میزهای مدرن و سکه‌ای"
+          }
+        ]
+      },
+      {
+        "id": "rail_top",
+        "label_fa": "روکش روی باند",
+        "type": "select",
+        "required": false,
+        "allow_other": true,
+        "help_fa": "روکش ضدآتش و ضدخش روی لبه باند؛ در برابر سیگار و خط‌افتادگی مقاوم است.",
+        "options": [
+          {
+            "id": "fireproof-laminate",
+            "label_fa": "لمینت ضدآتش (Wilsonart و مشابه)",
+            "label_en": "Fireproof Laminate",
+            "note_fa": "استاندارد میزهای باشگاهی"
+          },
+          {
+            "id": "wood-veneer",
+            "label_fa": "روکش چوب طبیعی",
+            "label_en": "Wood Veneer"
+          },
+          {
+            "id": "solid-wood-rail",
+            "label_fa": "چوب یکپارچه",
+            "label_en": "Solid Wood"
+          },
+          {
+            "id": "laminated",
+            "label_fa": "لمینت معمولی",
+            "label_en": "Laminated"
+          },
+          {
+            "id": "painted",
+            "label_fa": "رنگ‌شده",
+            "label_en": "Painted"
+          }
+        ]
+      },
+      {
+        "id": "finish_color",
+        "label_fa": "رنگ و فینیش بدنه",
+        "type": "select",
+        "required": false,
+        "allow_other": true,
+        "options": [
+          {
+            "id": "mahogany-c",
+            "label_fa": "ماهگونی",
+            "label_en": "Mahogany"
+          },
+          {
+            "id": "brown",
+            "label_fa": "قهوه‌ای",
+            "label_en": "Brown"
+          },
+          {
+            "id": "black",
+            "label_fa": "مشکی",
+            "label_en": "Black"
+          },
+          {
+            "id": "black-gold",
+            "label_fa": "مشکی و طلایی",
+            "label_en": "Black & Gold"
+          },
+          {
+            "id": "brown-gold",
+            "label_fa": "قهوه‌ای و طلایی",
+            "label_en": "Brown & Gold"
+          },
+          {
+            "id": "champagne",
+            "label_fa": "شامپاینی",
+            "label_en": "Champagne"
+          },
+          {
+            "id": "gold",
+            "label_fa": "طلایی",
+            "label_en": "Gold"
+          },
+          {
+            "id": "grey",
+            "label_fa": "خاکستری",
+            "label_en": "Grey"
+          },
+          {
+            "id": "white",
+            "label_fa": "سفید",
+            "label_en": "White"
+          },
+          {
+            "id": "natural",
+            "label_fa": "چوب طبیعی",
+            "label_en": "Natural Wood"
+          },
+          {
+            "id": "custom-color",
+            "label_fa": "سفارشی",
+            "label_en": "Custom"
+          }
+        ]
+      },
+      {
+        "id": "cloth_brand",
+        "label_fa": "برند پارچه",
+        "type": "select",
+        "required": false,
+        "allow_other": true,
+        "source": "cloth_catalog.types[].brands",
+        "depends_on": "table_type",
+        "help_fa": "برند را انتخاب کنید تا مدل‌های همان برند نمایش داده شود."
+      },
+      {
+        "id": "cloth_model",
+        "label_fa": "مدل پارچه",
+        "type": "select",
+        "required": false,
+        "allow_other": true,
+        "source": "cloth_catalog.brands[].models",
+        "depends_on": "cloth_brand",
+        "help_fa": "مثال: استراچان ۶۸۱۱ تورنمنت ۳۰ اونس"
+      },
+      {
+        "id": "cloth_type",
+        "label_fa": "نوع پارچه",
+        "type": "select",
+        "required": false,
+        "allow_other": true,
+        "auto_from": "cloth_model.type",
+        "help_fa": "با انتخاب مدل پارچه خودکار پر می‌شود؛ قابل تغییر است.",
+        "options": [
+          {
+            "id": "napped",
+            "label_fa": "پرزدار / جهت‌دار",
+            "label_en": "Napped",
+            "note_fa": "اصطکاک بیشتر، توپ کندتر؛ استاندارد اسنوکر"
+          },
+          {
+            "id": "worsted",
+            "label_fa": "بدون پرز / فاستونی",
+            "label_en": "Worsted",
+            "note_fa": "صاف و سریع؛ استاندارد پاکت بیلیارد آمریکایی و کارامبول"
+          }
+        ]
+      },
+      {
+        "id": "cloth_color",
+        "label_fa": "رنگ پارچه",
+        "type": "select",
+        "required": false,
+        "allow_other": true,
+        "options": [
+          {
+            "id": "english-green",
+            "label_fa": "سبز انگلیسی",
+            "label_en": "English Green"
+          },
+          {
+            "id": "tournament-green",
+            "label_fa": "سبز تورنمنت",
+            "label_en": "Tournament Green"
+          },
+          {
+            "id": "blue",
+            "label_fa": "آبی",
+            "label_en": "Blue"
+          },
+          {
+            "id": "tournament-blue",
+            "label_fa": "آبی تورنمنت",
+            "label_en": "Tournament Blue"
+          },
+          {
+            "id": "powder-blue",
+            "label_fa": "آبی روشن",
+            "label_en": "Powder Blue"
+          },
+          {
+            "id": "red",
+            "label_fa": "قرمز",
+            "label_en": "Red"
+          },
+          {
+            "id": "burgundy",
+            "label_fa": "زرشکی",
+            "label_en": "Burgundy"
+          },
+          {
+            "id": "black",
+            "label_fa": "مشکی",
+            "label_en": "Black"
+          },
+          {
+            "id": "grey",
+            "label_fa": "خاکستری",
+            "label_en": "Grey"
+          },
+          {
+            "id": "gold",
+            "label_fa": "طلایی / شتری",
+            "label_en": "Gold / Camel"
+          },
+          {
+            "id": "purple",
+            "label_fa": "بنفش",
+            "label_en": "Purple"
+          },
+          {
+            "id": "orange",
+            "label_fa": "نارنجی",
+            "label_en": "Orange"
+          },
+          {
+            "id": "wine",
+            "label_fa": "شرابی",
+            "label_en": "Wine"
+          }
+        ]
+      },
+      {
+        "id": "cloth_condition",
+        "label_fa": "وضعیت پارچه",
+        "type": "select",
+        "required": false,
+        "help_fa": "در خرید میز دست‌دوم، تعویض پارچه هزینه‌ی قابل‌توجهی است.",
+        "options": [
+          {
+            "id": "new-cloth",
+            "label_fa": "نو / تازه تعویض‌شده",
+            "label_en": "New"
+          },
+          {
+            "id": "good-cloth",
+            "label_fa": "سالم",
+            "label_en": "Good"
+          },
+          {
+            "id": "worn",
+            "label_fa": "کارکرده، نیاز به تعویض ندارد",
+            "label_en": "Worn but usable"
+          },
+          {
+            "id": "needs-replace",
+            "label_fa": "نیازمند تعویض",
+            "label_en": "Needs Replacement"
+          }
+        ]
+      },
+      {
+        "id": "cushion_type",
+        "label_fa": "نوع باند",
+        "type": "select",
+        "required": false,
+        "allow_other": true,
+        "help_fa": "استیل‌بلاک صفحه فولادی بین چوب و لاستیک دارد؛ برگشت توپ سریع‌تر و یکنواخت‌تر.",
+        "options": [
+          {
+            "id": "steel-block-l",
+            "label_fa": "استیل بلاک نوع L",
+            "label_en": "Steel Block L",
+            "note_fa": "مشخصات رسمی World Snooker Tour"
+          },
+          {
+            "id": "steel-block-i",
+            "label_fa": "استیل بلاک نوع I",
+            "label_en": "Steel Block I",
+            "note_fa": "در میزهای هی‌بال Joy"
+          },
+          {
+            "id": "steel-block",
+            "label_fa": "استیل بلاک (نوع نامشخص)",
+            "label_en": "Steel Block"
+          },
+          {
+            "id": "wooden",
+            "label_fa": "باند چوبی سنتی",
+            "label_en": "Wooden Rail",
+            "note_fa": "لاستیک مستقیم روی چوب"
+          },
+          {
+            "id": "laminate-cushion",
+            "label_fa": "لمینت رزینی",
+            "label_en": "Resin-Bonded Laminate"
+          },
+          {
+            "id": "slate-block",
+            "label_fa": "بلوک سنگی (آدامانت)",
+            "label_en": "Slate Block",
+            "note_fa": "سیستم قدیمی Thurston"
+          }
+        ]
+      },
+      {
+        "id": "cushion_rubber",
+        "label_fa": "لاستیک باند",
+        "type": "select",
+        "required": false,
+        "allow_other": true,
+        "help_fa": "پروفیل L برای اسنوکر، K66 استاندارد پاکت بیلیارد، K55 برانزویک و کارامبول.",
+        "options": [
+          {
+            "id": "northern",
+            "label_fa": "Northern Rubber (انگلیس)",
+            "label_en": "Northern Rubber",
+            "note_fa": "رایج‌ترین در میزهای حرفه‌ای اسنوکر و هی‌بال"
+          },
+          {
+            "id": "l-shape",
+            "label_fa": "پروفیل L",
+            "label_en": "L-Shape"
+          },
+          {
+            "id": "k66",
+            "label_fa": "پروفیل K66",
+            "label_en": "K66"
+          },
+          {
+            "id": "k55",
+            "label_fa": "پروفیل K55",
+            "label_en": "K55"
+          },
+          {
+            "id": "u23",
+            "label_fa": "پروفیل U23",
+            "label_en": "U23"
+          },
+          {
+            "id": "artemis",
+            "label_fa": "Artemis",
+            "label_en": "Artemis"
+          },
+          {
+            "id": "klematch",
+            "label_fa": "Klematch P59",
+            "label_en": "Klematch P59",
+            "note_fa": "در Rasson Victory"
+          },
+          {
+            "id": "rasson-max",
+            "label_fa": "Rasson MAX",
+            "label_en": "Rasson MAX"
+          },
+          {
+            "id": "accu-fast",
+            "label_fa": "Accu-Fast",
+            "label_en": "Accu-Fast",
+            "note_fa": "Olhausen"
+          },
+          {
+            "id": "vulcanized",
+            "label_fa": "لاستیک ولکانیزه معمولی",
+            "label_en": "Vulcanized Rubber"
+          },
+          {
+            "id": "synthetic-rubber",
+            "label_fa": "لاستیک مصنوعی",
+            "label_en": "Synthetic"
+          }
+        ]
+      },
+      {
+        "id": "cushion_finish",
+        "label_fa": "فینیش باند",
+        "type": "select",
+        "required": false,
+        "allow_other": true,
+        "options": [
+          {
+            "id": "laminated-c",
+            "label_fa": "لمینت‌شده (ضدخش و ضدسوختگی)",
+            "label_en": "Laminated"
+          },
+          {
+            "id": "varnished",
+            "label_fa": "لاک‌خورده",
+            "label_en": "Varnished"
+          },
+          {
+            "id": "plain-c",
+            "label_fa": "ساده",
+            "label_en": "Plain"
+          }
+        ]
+      },
+      {
+        "id": "pocket_size_mm",
+        "label_fa": "دهانه پاکت (میلی‌متر)",
+        "type": "number",
+        "required": false,
+        "placeholder": "85",
+        "min": 60,
+        "max": 140,
+        "help_fa": "اسنوکر حرفه‌ای ۸۵ میلی‌متر — هی‌بال ۸۵ — پاکت بیلیارد آمریکایی ۱۱۰ تا ۱۲۷. هرچه تنگ‌تر، سخت‌تر و حرفه‌ای‌تر.",
+        "common": [
+          82,
+          85,
+          89,
+          105,
+          110,
+          114,
+          127
+        ]
+      },
+      {
+        "id": "pocket_cut",
+        "label_fa": "برش پاکت",
+        "type": "select",
+        "required": false,
+        "allow_other": true,
+        "help_fa": "برش تورنمنتی تنگ‌تر است و دقت بیشتری می‌طلبد.",
+        "options": [
+          {
+            "id": "tournament-cut",
+            "label_fa": "برش تورنمنتی",
+            "label_en": "Tournament Cutting",
+            "note_fa": "استاندارد بین‌المللی مسابقات"
+          },
+          {
+            "id": "pro-cut",
+            "label_fa": "برش حرفه‌ای",
+            "label_en": "Pro Cut"
+          },
+          {
+            "id": "club-cut",
+            "label_fa": "برش باشگاهی",
+            "label_en": "Club Cutting",
+            "note_fa": "کمی بازتر"
+          },
+          {
+            "id": "standard-cut",
+            "label_fa": "برش استاندارد",
+            "label_en": "Standard"
+          },
+          {
+            "id": "home-cut",
+            "label_fa": "برش خانگی (باز)",
+            "label_en": "Home / Loose"
+          }
+        ]
+      },
+      {
+        "id": "pocket_type",
+        "label_fa": "نوع پاکت",
+        "type": "select",
+        "required": false,
+        "allow_other": true,
+        "options": [
+          {
+            "id": "leather-net",
+            "label_fa": "چرم طبیعی با تور",
+            "label_en": "Genuine Leather & Net",
+            "note_fa": "استاندارد اسنوکر"
+          },
+          {
+            "id": "cowhide",
+            "label_fa": "چرم گاوی",
+            "label_en": "Cowhide Leather"
+          },
+          {
+            "id": "synthetic-leather",
+            "label_fa": "چرم مصنوعی",
+            "label_en": "Synthetic Leather"
+          },
+          {
+            "id": "tpr",
+            "label_fa": "TPR / پلاستیک ترموپلاستیک",
+            "label_en": "TPR",
+            "note_fa": "بی‌صدا و ضدخش؛ در Rasson"
+          },
+          {
+            "id": "copper-skeleton",
+            "label_fa": "با اسکلت مسی",
+            "label_en": "Copper Skeleton",
+            "note_fa": "ضدضربه؛ در Joy هی‌بال"
+          },
+          {
+            "id": "drop-pocket",
+            "label_fa": "پاکت افتادنی",
+            "label_en": "Drop Pocket"
+          },
+          {
+            "id": "ball-return",
+            "label_fa": "سیستم برگشت توپ",
+            "label_en": "Ball Return",
+            "note_fa": "باشگاهی و سکه‌ای"
+          },
+          {
+            "id": "gully",
+            "label_fa": "گالی (جمع‌کننده کناری)",
+            "label_en": "Gully System"
+          }
+        ]
+      },
+      {
+        "id": "leveling_system",
+        "label_fa": "سیستم تراز",
+        "type": "select",
+        "required": false,
+        "allow_other": true,
+        "help_fa": "در میز دست‌دوم مهم است؛ بدون سیستم تراز، نصب مجدد سخت می‌شود.",
+        "options": [
+          {
+            "id": "micro-adjust",
+            "label_fa": "پیچ تراز میکرومتری",
+            "label_en": "Micro-adjustable Bolts"
+          },
+          {
+            "id": "sls-lls",
+            "label_fa": "SLS / LLS",
+            "label_en": "Slate & Leg Leveling System",
+            "note_fa": "سیستم Rasson"
+          },
+          {
+            "id": "leg-leveller",
+            "label_fa": "تراز پایه",
+            "label_en": "Leg Leveller"
+          },
+          {
+            "id": "standard-lev",
+            "label_fa": "تراز معمولی",
+            "label_en": "Standard"
+          },
+          {
+            "id": "none-lev",
+            "label_fa": "ندارد",
+            "label_en": "None"
+          }
+        ]
+      },
+      {
+        "id": "has_heating",
+        "label_fa": "گرمکن زیر میز",
+        "type": "boolean",
+        "required": false,
+        "help_fa": "رطوبت پارچه را ثابت نگه می‌دارد و سرعت میز را یکنواخت می‌کند؛ در میزهای تورنمنتی اسنوکر رایج است"
+      },
+      {
+        "id": "has_coin",
+        "label_fa": "سکه‌ای / کوین‌آپ",
+        "type": "boolean",
+        "required": false
+      },
+      {
+        "id": "is_dining",
+        "label_fa": "قابل تبدیل به میز غذاخوری",
+        "type": "boolean",
+        "required": false
+      },
+      {
+        "id": "has_lighting",
+        "label_fa": "همراه با چراغ بالای میز",
+        "type": "boolean",
+        "required": false
+      },
+      {
+        "id": "has_scoreboard",
+        "label_fa": "همراه با تابلو امتیاز",
+        "type": "boolean",
+        "required": false
+      },
+      {
+        "id": "is_foldable",
+        "label_fa": "تاشو / قابل جمع‌شدن",
+        "type": "boolean",
+        "required": false
+      },
+      {
+        "id": "accessories_included",
+        "label_fa": "لوازم همراه",
+        "type": "multi_select",
+        "required": false,
+        "help_fa": "در بازار دست‌دوم، لوازم همراه بخش قابل‌توجهی از ارزش را می‌سازد.",
+        "options": [
+          {
+            "id": "balls",
+            "label_fa": "ست توپ",
+            "label_en": "Balls"
+          },
+          {
+            "id": "cues",
+            "label_fa": "چوب",
+            "label_en": "Cues"
+          },
+          {
+            "id": "rest",
+            "label_fa": "رست / اسپایدر",
+            "label_en": "Rests"
+          },
+          {
+            "id": "triangle",
+            "label_fa": "مثلث / رک",
+            "label_en": "Triangle & Rack"
+          },
+          {
+            "id": "scoreboard",
+            "label_fa": "تابلو امتیاز",
+            "label_en": "Scoreboard"
+          },
+          {
+            "id": "cover",
+            "label_fa": "روکش میز",
+            "label_en": "Cover"
+          },
+          {
+            "id": "brush",
+            "label_fa": "برس و لوازم نگهداری",
+            "label_en": "Brush & Care Kit"
+          },
+          {
+            "id": "light",
+            "label_fa": "چراغ",
+            "label_en": "Light"
+          },
+          {
+            "id": "iron",
+            "label_fa": "اتوی میز",
+            "label_en": "Table Iron"
+          },
+          {
+            "id": "cue-rack",
+            "label_fa": "جاچوبی",
+            "label_en": "Cue Rack"
+          },
+          {
+            "id": "chalk",
+            "label_fa": "گچ",
+            "label_en": "Chalk"
+          },
+          {
+            "id": "ball-tray",
+            "label_fa": "سینی توپ",
+            "label_en": "Ball Tray"
+          },
+          {
+            "id": "bench",
+            "label_fa": "نیمکت",
+            "label_en": "Bench"
+          },
+          {
+            "id": "extension",
+            "label_fa": "اکستنشن",
+            "label_en": "Extension"
+          }
+        ]
+      },
+      {
+        "id": "manufacture_year",
+        "label_fa": "سال ساخت",
+        "type": "number",
+        "required": false,
+        "placeholder": "2020",
+        "min": 1850,
+        "max": 2026,
+        "help_fa": "برای میزهای آنتیک و بازسازی‌شده مهم است"
+      },
+      {
+        "id": "warranty",
+        "label_fa": "گارانتی باقیمانده",
+        "type": "select",
+        "required": false,
+        "allow_other": true,
+        "options": [
+          {
+            "id": "none-w",
+            "label_fa": "ندارد",
+            "label_en": "None"
+          },
+          {
+            "id": "under-1",
+            "label_fa": "کمتر از ۱ سال",
+            "label_en": "<1 year"
+          },
+          {
+            "id": "1-3",
+            "label_fa": "۱ تا ۳ سال",
+            "label_en": "1-3 years"
+          },
+          {
+            "id": "3-5",
+            "label_fa": "۳ تا ۵ سال",
+            "label_en": "3-5 years"
+          },
+          {
+            "id": "over-5",
+            "label_fa": "بیش از ۵ سال",
+            "label_en": "5+ years"
+          }
+        ]
+      },
+      {
+        "id": "installation_status",
+        "label_fa": "وضعیت نصب",
+        "type": "select",
+        "required": false,
+        "allow_other": true,
+        "help_fa": "میز نصب‌شده باید باز و حمل شود؛ روی قیمت و زمان تحویل اثر دارد.",
+        "options": [
+          {
+            "id": "installed",
+            "label_fa": "نصب‌شده و در حال استفاده",
+            "label_en": "Installed"
+          },
+          {
+            "id": "disassembled",
+            "label_fa": "باز شده و بسته‌بندی‌شده",
+            "label_en": "Disassembled"
+          },
+          {
+            "id": "new-boxed",
+            "label_fa": "نو، در جعبه",
+            "label_en": "New in Box"
+          },
+          {
+            "id": "needs-transport",
+            "label_fa": "نیازمند باز کردن و حمل",
+            "label_en": "Needs Dismantling"
+          }
+        ]
+      }
+    ],
+    "ball": [
+      {
+        "id": "diameter_mm",
+        "label_fa": "قطر (میلی‌متر)",
+        "type": "select",
+        "required": false,
+        "allow_other": true,
+        "source": "types[].sizes",
+        "depends_on": "ball_type",
+        "help_fa": "اسنوکر ۵۲.۵ — پاکت بیلیارد آمریکایی و هی‌بال ۵۷.۱۵ — پاکت بیلیارد انگلیسی ۵۰.۸ — کارامبول ۶۱.۵"
+      },
+      {
+        "id": "set_type",
+        "label_fa": "نوع ست",
+        "type": "select",
+        "required": false,
+        "allow_other": true,
+        "source": "types[].set_types",
+        "depends_on": "ball_type",
+        "help_fa": "در بازار دست‌دوم فروش ناقص (فقط قرمزها، فقط رنگی‌ها، تک توپ) رایج است."
+      },
+      {
+        "id": "material",
+        "label_fa": "جنس",
+        "type": "select",
+        "required": false,
+        "allow_other": true,
+        "auto_from": "model.material",
+        "help_fa": "فنولیک استاندارد حرفه‌ای است و تا ۵ برابر پلی‌استر عمر می‌کند.",
+        "options": [
+          {
+            "id": "phenolic",
+            "label_fa": "رزین فنولیک",
+            "label_en": "Phenolic Resin",
+            "note_fa": "استاندارد حرفه‌ای؛ حدود ۵ برابر سخت‌تر و بادوام‌تر از پلی‌استر"
+          },
+          {
+            "id": "duramith",
+            "label_fa": "دیورامیت (فنولیک نسل ۴)",
+            "label_en": "Duramith",
+            "note_fa": "فرمول پیشرفته آرامیت؛ تا ۵۰٪ عمر بیشتر و سایش کمتر پارچه"
+          },
+          {
+            "id": "crystalate",
+            "label_fa": "کریستالیت",
+            "label_en": "Crystalate",
+            "note_fa": "رنگ‌های اشباع‌تر و ظاهر لعابی"
+          },
+          {
+            "id": "polyester",
+            "label_fa": "پلی‌استر",
+            "label_en": "Polyester",
+            "note_fa": "ارزان؛ ظرف چند ماه خط می‌افتد و گرد بودنش را از دست می‌دهد"
+          },
+          {
+            "id": "polymer",
+            "label_fa": "پلیمر / رزین معمولی",
+            "label_en": "Polymer Resin"
+          },
+          {
+            "id": "resin-unknown",
+            "label_fa": "رزین نامشخص",
+            "label_en": "Unknown Resin"
+          }
+        ]
+      },
+      {
+        "id": "ball_count",
+        "label_fa": "تعداد توپ",
+        "type": "number",
+        "required": false,
+        "placeholder": "22",
+        "min": 1,
+        "max": 30,
+        "help_fa": "ست کامل اسنوکر ۲۲ عدد — پاکت بیلیارد ۱۶ عدد — کارامبول ۳ عدد",
+        "common": [
+          1,
+          3,
+          4,
+          7,
+          10,
+          16,
+          17,
+          22
+        ]
+      },
+      {
+        "id": "weight_g",
+        "label_fa": "وزن هر توپ (گرم)",
+        "type": "number",
+        "required": false,
+        "placeholder": "170",
+        "min": 90,
+        "max": 260,
+        "step": 1,
+        "help_fa": "پاکت بیلیارد آمریکایی حدود ۱۶۵ تا ۱۷۰ — اسنوکر حدود ۱۴۰ — کارامبول حدود ۲۱۰",
+        "common": [
+          140,
+          155,
+          170,
+          210
+        ]
+      },
+      {
+        "id": "weight_tolerance",
+        "label_fa": "تلورانس وزن",
+        "type": "select",
+        "required": false,
+        "allow_other": true,
+        "help_fa": "اختلاف وزن مجاز بین توپ‌های یک ست. هرچه کمتر، حرفه‌ای‌تر.",
+        "options": [
+          {
+            "id": "1g",
+            "label_fa": "حداکثر ۱ گرم",
+            "label_en": "≤1g",
+            "note_fa": "ست‌های رسمی تورنمنت (مثل Aramith Super Pro 1G)"
+          },
+          {
+            "id": "3g",
+            "label_fa": "حداکثر ۳ گرم",
+            "label_en": "≤3g",
+            "note_fa": "استاندارد رسمی ست‌های معمولی"
+          },
+          {
+            "id": "unknown-tol",
+            "label_fa": "نامشخص",
+            "label_en": "Unknown"
+          }
+        ]
+      },
+      {
+        "id": "cue_ball_type",
+        "label_fa": "نوع کیوبال همراه",
+        "type": "select",
+        "required": false,
+        "allow_other": true,
+        "help_fa": "مهم است چون کیوبال میزهای سکه‌ای اغلب اندازه یا وزن متفاوتی دارد.",
+        "options": [
+          {
+            "id": "measles",
+            "label_fa": "میزلز / پرو کاپ (۶ نقطه قرمز)",
+            "label_en": "Measles / Pro Cup",
+            "note_fa": "استاندارد تورنمنت؛ هم‌وزن توپ‌های رنگی"
+          },
+          {
+            "id": "red-logo",
+            "label_fa": "لوگوی قرمز آرامیت",
+            "label_en": "Red Logo"
+          },
+          {
+            "id": "red-triangle",
+            "label_fa": "مثلث قرمز",
+            "label_en": "Red Triangle"
+          },
+          {
+            "id": "blue-circle",
+            "label_fa": "دایره آبی (سنتنیال)",
+            "label_en": "Blue Circle"
+          },
+          {
+            "id": "red-circle",
+            "label_fa": "دایره قرمز",
+            "label_en": "Red Circle",
+            "note_fa": "سبک‌تر از استاندارد؛ سریع‌تر"
+          },
+          {
+            "id": "red-dot",
+            "label_fa": "نقطه قرمز",
+            "label_en": "Red Dot",
+            "note_fa": "سنگین؛ میزهای سکه‌ای قدیمی"
+          },
+          {
+            "id": "blue-dot",
+            "label_fa": "نقطه آبی",
+            "label_en": "Blue Dot"
+          },
+          {
+            "id": "plain",
+            "label_fa": "سفید ساده",
+            "label_en": "Plain White"
+          },
+          {
+            "id": "magnetic",
+            "label_fa": "مغناطیسی",
+            "label_en": "Magnetic",
+            "note_fa": "میزهای سکه‌ای با جداسازی مغناطیسی"
+          },
+          {
+            "id": "oversized-cb",
+            "label_fa": "اورسایز",
+            "label_en": "Oversized",
+            "note_fa": "میزهای سکه‌ای با جداسازی بر اساس اندازه"
+          },
+          {
+            "id": "smaller-cb",
+            "label_fa": "کوچک‌تر از توپ‌های رنگی",
+            "label_en": "Smaller",
+            "note_fa": "۴۸ میلی‌متر در میزهای انگلیسی سکه‌ای"
+          },
+          {
+            "id": "training",
+            "label_fa": "توپ تمرینی (خط‌دار)",
+            "label_en": "Training Ball"
+          },
+          {
+            "id": "none-cb",
+            "label_fa": "بدون کیوبال",
+            "label_en": "None"
+          }
+        ]
+      },
+      {
+        "id": "ball_color",
+        "label_fa": "رنگ / شماره توپ",
+        "type": "text",
+        "required": false,
+        "max_length": 40,
+        "depends_on_type": [
+          "single",
+          "cue_ball"
+        ],
+        "help_fa": "فقط برای فروش تکی — مثلاً «توپ صورتی اسنوکر» یا «شماره ۸»",
+        "placeholder": "مثال: صورتی / شماره ۸"
+      },
+      {
+        "id": "numbering",
+        "label_fa": "نوع شماره‌گذاری",
+        "type": "select",
+        "required": false,
+        "allow_other": true,
+        "options": [
+          {
+            "id": "numbered-solid-stripe",
+            "label_fa": "شماره‌دار — ساده و خط‌دار",
+            "label_en": "Numbered Solids & Stripes",
+            "note_fa": "استاندارد پاکت بیلیارد آمریکایی"
+          },
+          {
+            "id": "red-yellow",
+            "label_fa": "قرمز و زرد (بدون شماره)",
+            "label_en": "Red & Yellow",
+            "note_fa": "استاندارد پاکت بیلیارد انگلیسی"
+          },
+          {
+            "id": "blue-yellow",
+            "label_fa": "آبی و زرد",
+            "label_en": "Blue & Yellow"
+          },
+          {
+            "id": "snooker-colors",
+            "label_fa": "رنگ‌های اسنوکر",
+            "label_en": "Snooker Colours",
+            "note_fa": "۱۵ قرمز + زرد، سبز، قهوه‌ای، آبی، صورتی، مشکی"
+          },
+          {
+            "id": "carom-3",
+            "label_fa": "کارامبول (دو سفید، یک قرمز)",
+            "label_en": "Carom 3-Ball"
+          },
+          {
+            "id": "no-number",
+            "label_fa": "بدون شماره",
+            "label_en": "Unnumbered"
+          }
+        ]
+      },
+      {
+        "id": "has_case",
+        "label_fa": "همراه با جعبه یا کیف",
+        "type": "boolean",
+        "required": false,
+        "help_fa": "ست‌های حرفه‌ای اغلب با جعبه چوبی یا کیف آلومینیومی می‌آیند"
+      },
+      {
+        "id": "has_triangle",
+        "label_fa": "همراه با مثلث / رک",
+        "type": "boolean",
+        "required": false
+      },
+      {
+        "id": "is_complete_set",
+        "label_fa": "ست کامل است",
+        "type": "boolean",
+        "required": false,
+        "help_fa": "اگر توپی کم دارد، خاموش بگذارید و در توضیحات ذکر کنید"
+      }
+    ]
+  },
+  "cloth_note_fa": "فیلدهای cloth_brand و cloth_model از cloth_catalog.json خوانده می‌شوند و آبشاری‌اند: با انتخاب برند، فقط مدل‌های همان برند نمایش داده می‌شود. فیلد cloth_type (پرزدار/بدون‌پرز) از روی مدل انتخابی خودکار پر می‌شود ولی کاربر می‌تواند تغییرش دهد.",
+  "ball_note_fa": "مشخصات فنی توپ. فیلدهای diameter_mm و set_type از types[].sizes و types[].set_types کاتالوگ توپ خوانده می‌شوند و به نوع توپ وابسته‌اند. فیلد ball_color فقط برای نوع «تکی» و «کیوبال» نمایش داده شود (depends_on_type). فیلد material از روی مدل انتخابی پیش‌پر شود ولی قابل تغییر بماند.",
+  "table_note_fa": "مشخصات فنی میز، بازنویسی‌شده بر اساس صفحات محصول واقعی سازنده‌ها (Wiraka M1، Star XW119، Joy Q8، Xingjue XJ-12FT-T10). فیلدهای size و cloth_brand وابسته به نوع میز هستند و از types[].sizes و cloth_catalog خوانده می‌شوند."
+}

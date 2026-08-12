@@ -37,6 +37,26 @@ export interface ProfileField {
   required: boolean
 }
 
+/* ── واژه‌ی «پول» ──
+   در بازار ایران کسی «پول» را به‌معنای Pool نمی‌شناسد؛ همه «پاکت
+   بیلیارد» می‌گویند. برچسبِ فهرست عوض شد، ولی `specialty` مقدارش
+   **همان رشته‌ی فارسی** است — یعنی پروفایل‌هایی که قبلاً «پول» ذخیره
+   کرده‌اند مقداری دارند که دیگر در فهرست نیست و دراپ‌داونشان خالی
+   می‌افتد.
+
+   پس موقعِ خواندن نگاشت می‌شود. نوشتن همیشه با نامِ تازه انجام
+   می‌شود، و این نگاشت فقط برای داده‌ی قدیمی است. */
+const LEGACY_DISCIPLINE: Record<string, string> = {
+  'پول': 'پاکت بیلیارد',
+  'پول آمریکایی': 'پاکت بیلیارد آمریکایی',
+  'پول انگلیسی': 'پاکت بیلیارد انگلیسی',
+}
+
+export const normalizeDiscipline = (v: unknown): string => {
+  const s = String(v ?? '').trim()
+  return LEGACY_DISCIPLINE[s] ?? s
+}
+
 export const ROLES: RoleMeta[] = [
   {
     value: 'user', label: 'کاربر عادی', icon: 'ti-user', color: '#94a3b8',
@@ -53,7 +73,7 @@ export const ROLES: RoleMeta[] = [
     docHint: '',
     profileFields: [
       { key: 'displayName', label: 'نام کامل', type: 'text', placeholder: 'نام و نام‌خانوادگی', required: true },
-      { key: 'specialty', label: 'تخصص', type: 'select', placeholder: '', options: ['اسنوکر', 'پول', 'کارامبول', 'هندیکپ'], required: true },
+      { key: 'specialty', label: 'تخصص', type: 'select', placeholder: '', options: ['اسنوکر', 'پاکت بیلیارد', 'کارامبول', 'هندیکپ'], required: true },
       { key: 'nationalRank', label: 'رتبه ملی', type: 'number', placeholder: 'مثلاً ۱۲', required: false },
       { key: 'yearsActive', label: 'سال‌های فعالیت', type: 'number', placeholder: 'مثلاً ۸', required: false },
       { key: 'club', label: 'باشگاه فعلی', type: 'text', placeholder: 'نام باشگاه', required: false },
@@ -67,7 +87,7 @@ export const ROLES: RoleMeta[] = [
     docHint: 'آخرین مدرک مربیگری — برای تیک آبی',
     profileFields: [
       { key: 'displayName', label: 'نام کامل', type: 'text', placeholder: 'نام و نام‌خانوادگی', required: true },
-      { key: 'specialty', label: 'رشته تدریس', type: 'select', placeholder: '', options: ['اسنوکر', 'پول', 'کارامبول', 'همه رشته‌ها'], required: true },
+      { key: 'specialty', label: 'رشته تدریس', type: 'select', placeholder: '', options: ['اسنوکر', 'پاکت بیلیارد', 'کارامبول', 'همه رشته‌ها'], required: true },
       { key: 'licenseLevel', label: 'درجه مربیگری', type: 'select', placeholder: '', options: ['درجه ۳', 'درجه ۲', 'درجه ۱', 'ملی'], required: false },
       { key: 'experience', label: 'سابقه تدریس (سال)', type: 'number', placeholder: 'مثلاً ۵', required: true },
       { key: 'location', label: 'شهر فعالیت', type: 'text', placeholder: 'تهران، اصفهان...', required: true },
@@ -82,7 +102,7 @@ export const ROLES: RoleMeta[] = [
     profileFields: [
       { key: 'displayName', label: 'نام کامل', type: 'text', placeholder: 'نام و نام‌خانوادگی', required: true },
       { key: 'licenseLevel', label: 'درجه داوری', type: 'select', placeholder: '', options: ['درجه ۳', 'درجه ۲', 'درجه ۱', 'بین‌المللی'], required: true },
-      { key: 'specialty', label: 'رشته داوری', type: 'select', placeholder: '', options: ['اسنوکر', 'پول', 'کارامبول', 'همه رشته‌ها'], required: true },
+      { key: 'specialty', label: 'رشته داوری', type: 'select', placeholder: '', options: ['اسنوکر', 'پاکت بیلیارد', 'کارامبول', 'همه رشته‌ها'], required: true },
       { key: 'location', label: 'شهر', type: 'text', placeholder: 'محل اقامت', required: true },
       { key: 'matchCount', label: 'تعداد مسابقات داوری‌شده', type: 'number', placeholder: 'مثلاً ۴۰', required: false },
       { key: 'bio', label: 'سوابق داوری', type: 'textarea', placeholder: 'مسابقات مهم، لیگ‌ها...', required: false },

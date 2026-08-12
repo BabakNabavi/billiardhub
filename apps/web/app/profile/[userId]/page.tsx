@@ -1,6 +1,7 @@
 ﻿'use client'
 
 import { useState, useEffect, Suspense } from 'react'
+import { normalizeDiscipline } from '../../../lib/roles'
 import ProvinceCitySelect from '../../../components/ProvinceCitySelect'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { csrfToken, apiFetch } from '../../../lib/http'
@@ -71,7 +72,7 @@ const ROLES: RoleMeta[] = [
     description: 'رنکینگ ملی بیلیارد',
     profileFields: [
       { key: 'displayName', label: 'نام کامل', type: 'text', placeholder: 'نام و نام‌خانوادگی', required: true },
-      { key: 'specialty', label: 'تخصص', type: 'select', placeholder: '', options: ['اسنوکر', 'پول', 'کارامبول', 'هندیکپ'], required: true },
+      { key: 'specialty', label: 'تخصص', type: 'select', placeholder: '', options: ['اسنوکر', 'پاکت بیلیارد', 'کارامبول', 'هندیکپ'], required: true },
       { key: 'nationalRank', label: 'رتبه ملی', type: 'number', placeholder: 'مثلاً ۱۲', required: false },
       { key: 'yearsActive', label: 'سال‌های فعالیت', type: 'number', placeholder: 'مثلاً ۸', required: false },
       { key: 'club', label: 'باشگاه فعلی', type: 'text', placeholder: 'نام باشگاه', required: false },
@@ -84,7 +85,7 @@ const ROLES: RoleMeta[] = [
     description: 'تدریس و آموزش بیلیارد',
     profileFields: [
       { key: 'displayName', label: 'نام کامل', type: 'text', placeholder: 'نام و نام‌خانوادگی', required: true },
-      { key: 'specialty', label: 'رشته تدریس', type: 'select', placeholder: '', options: ['اسنوکر', 'پول', 'کارامبول', 'همه رشته‌ها'], required: true },
+      { key: 'specialty', label: 'رشته تدریس', type: 'select', placeholder: '', options: ['اسنوکر', 'پاکت بیلیارد', 'کارامبول', 'همه رشته‌ها'], required: true },
       { key: 'licenseLevel', label: 'درجه مربیگری', type: 'select', placeholder: '', options: ['درجه ۳', 'درجه ۲', 'درجه ۱', 'ملی'], required: false },
       { key: 'experience', label: 'سابقه تدریس (سال)', type: 'number', placeholder: 'مثلاً ۵', required: true },
       { key: 'location', label: 'شهر فعالیت', type: 'text', placeholder: 'تهران، اصفهان...', required: true },
@@ -98,7 +99,7 @@ const ROLES: RoleMeta[] = [
     profileFields: [
       { key: 'displayName', label: 'نام کامل', type: 'text', placeholder: 'نام و نام‌خانوادگی', required: true },
       { key: 'licenseLevel', label: 'درجه داوری', type: 'select', placeholder: '', options: ['درجه ۳', 'درجه ۲', 'درجه ۱', 'بین‌المللی'], required: true },
-      { key: 'specialty', label: 'رشته داوری', type: 'select', placeholder: '', options: ['اسنوکر', 'پول', 'کارامبول', 'همه رشته‌ها'], required: true },
+      { key: 'specialty', label: 'رشته داوری', type: 'select', placeholder: '', options: ['اسنوکر', 'پاکت بیلیارد', 'کارامبول', 'همه رشته‌ها'], required: true },
       { key: 'location', label: 'شهر', type: 'text', placeholder: 'محل اقامت', required: true },
       { key: 'matchCount', label: 'تعداد مسابقات داوری‌شده', type: 'number', placeholder: 'مثلاً ۴۰', required: false },
       { key: 'bio', label: 'سوابق داوری', type: 'textarea', placeholder: 'مسابقات مهم، لیگ‌ها...', required: false },
@@ -274,7 +275,9 @@ function RoleForm({ role, onSaved }: { role: RoleMeta; onSaved: () => void }) {
           <Field
             key={f.key}
             field={f}
-            value={data[f.key] ?? ''}
+            /* داده‌ی قدیمی «پول» ذخیره کرده و فهرست حالا «پاکت
+               بیلیارد» دارد؛ بدونِ نگاشت، دراپ‌داون خالی می‌افتد. */
+            value={f.key === 'specialty' ? normalizeDiscipline(data[f.key]) : (data[f.key] ?? '')}
             onChange={v => setData(d => ({ ...d, [f.key]: v }))}
           />
         )

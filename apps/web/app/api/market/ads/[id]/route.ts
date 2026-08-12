@@ -3,6 +3,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { sb, rpc, actorFromRequest, isAdmin, clientIp } from '@/lib/finance/db';
 import { viewerHash } from '@/lib/ads/preroll';
 import { normalizeCategory, normalizeCondition } from '@/lib/market/categories';
+import { validateOnServer, getBrand, TYPE_PREFIX } from '@/lib/market/catalog'
+import { hasSpecCatalog, validateSpecsOnServer } from '@/lib/market/spec-catalog'
 import { normalizeAdImages } from '@/lib/market/images';
 
 /* یک آگهی بیلیارد بازار — خواندن، ویرایش و حذف.
@@ -101,6 +103,68 @@ export async function PATCH(req: NextRequest, ctx: { params: Promise<{ id: strin
   if (b?.sellerPhone !== undefined) patch.sellerPhone = str(b?.sellerPhone, 20);
   if (b?.sellerWhatsapp !== undefined) patch.sellerWhatsapp = str(b?.sellerWhatsapp, 20);
   if (b?.specs !== undefined) patch.specs = b?.specs && typeof b.specs === 'object' ? b.specs : null;
+
+  /* ── همان قاعده‌های مسیرِ ثبت ──
+     تا امروز ویرایش نه ستون‌های کاتالوگ را می‌پذیرفت نه مشخصات را
+     می‌سنجید. یعنی ستون‌های ایندکس‌دار با محتوای `specs` از هم دور
+     می‌افتادند و کلِ اعتبارسنجیِ POST با یک PATCH دور زده می‌شد.
+     قاعده‌ای که در یکی از دو مسیرِ نوشتن باشد و در دیگری نه، باگِ
+     فرداست — این پروژه چند بار همین را دیده. */
+  const cat = normalizeCategory(str(b?.category, 60));
+  if (hasSpecCatalog(cat) && b?.specs && typeof b.specs === 'object') {
+    const sv = validateSpecsOnServer(cat, b.specs as Record<string, unknown>);
+    if (!sv.ok) {
+      const first = Object.values(sv.errors)[0] ?? 'مشخصات فنی معتبر نیست';
+      return NextResponse.json({ message: first, errors: sv.errors }, { status: 400 });
+    }
+  }
+
+  const catType = str(cat === 'cue' ? b?.cueType : b?.tableType, 40);
+  if ((cat === 'cue' || cat === 'table') && catType) {
+    const brandId = str(b?.brandId, 80) || null;
+    const check = validateOnServer({
+      category: cat,
+      type: catType,
+      brandId,
+      brandCustom: brandId ? null : str(b?.brand, 80) || null,
+      modelId: str(b?.modelId, 80) || null,
+      modelCustom: null,
+      sizeId: str(b?.tableSizeId, 40) || null,
+      sizeCustom: str(b?.tableSizeCustom, 40) || null,
+    });
+    if (!check.ok) {
+      const first = Object.values(check.errors)[0] ?? 'اطلاعات محصول معتبر نیست';
+      return NextResponse.json({ message: first, errors: check.errors }, { status: 400 });
+    }
+    const val = check.value;
+    patch.cueType = cat === 'cue' ? val.type : null;
+    patch.tableType = cat === 'table' ? val.type : null;
+    patch.brandId = val.brandId;
+    patch.modelId = val.modelId;
+    patch.tableSizeId = cat === 'table' ? val.sizeId ?? null : null;
+    patch.tableSizeCustom = cat === 'table' ? val.sizeCustom ?? null : null;
+
+    if (cat === 'table') {
+      const cbId = str(b?.clothBrandId, 80) || null;
+      const cmId = str(b?.clothModelId, 80) || null;
+      if (cbId) {
+        const cb = getBrand('cloth', cbId);
+        const prefix = TYPE_PREFIX.cloth[catType];
+        if (!cb || !prefix || !cbId.startsWith(prefix)) {
+          return NextResponse.json({ message: 'این پارچه برای نوع میز انتخاب‌شده نیست', errors: { clothBrand: 'این پارچه برای نوع میز انتخاب‌شده نیست' } }, { status: 400 });
+        }
+        if (cmId && !cb.models.some(m => m.id === cmId)) {
+          return NextResponse.json({ message: 'این مدل پارچه برای برند انتخاب‌شده نیست', errors: { clothModel: 'این مدل پارچه برای برند انتخاب‌شده نیست' } }, { status: 400 });
+        }
+      } else if (cmId) {
+        return NextResponse.json({ message: 'ابتدا برند پارچه را انتخاب کنید', errors: { clothModel: 'ابتدا برند پارچه را انتخاب کنید' } }, { status: 400 });
+      }
+      patch.clothBrandId = cbId;
+      patch.clothBrandCustom = cbId ? null : str(b?.clothBrandCustom, 60) || null;
+      patch.clothModelId = cbId ? cmId : null;
+      patch.clothModelCustom = cmId ? null : str(b?.clothModelCustom, 60) || null;
+    }
+  }
   /* همان قاعده‌ی مسیرِ ثبت: base64 به Storage می‌رود و نشانی ذخیره
      می‌شود. قاعده‌ای که در یکی از دو مسیرِ نوشتن باشد و در دیگری نه،
      یعنی ویرایشِ آگهی همان متنِ چندمگابایتی را برمی‌گرداند. */
