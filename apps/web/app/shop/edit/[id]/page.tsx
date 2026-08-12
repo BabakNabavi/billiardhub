@@ -682,7 +682,7 @@ export default function EditProductPage() {
           <div style={{ position: 'absolute', top: -120, right: -80, width: 500, height: 500, background: 'radial-gradient(circle,rgba(199,166,106,0.08) 0%,transparent 65%)', filter: 'blur(70px)' }} />
         </div>
 
-        <div style={{ position: 'relative', zIndex: 1, maxWidth: 860, margin: '0 auto', padding: 'clamp(18px,3vw,32px) clamp(14px,3vw,28px) 80px' }}>
+        <div style={{ position: 'relative', zIndex: 1, maxWidth: 1180, margin: '0 auto', padding: 'clamp(18px,3vw,32px) clamp(14px,3vw,28px) 80px' }}>
 
           {/* ── راهِ برگشت ── */}
           <div style={{ marginTop: -6, marginBottom: 20 }}>
@@ -699,13 +699,13 @@ export default function EditProductPage() {
             <h1 style={{ fontSize: 'clamp(19px,2.6vw,26px)', fontWeight: 900, color: TEXT, margin: 0, letterSpacing: '-0.02em' }}>ویرایش آگهی</h1>
           </div>
 
-          <form onSubmit={handleSubmit} noValidate style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <form onSubmit={handleSubmit} noValidate className="ad-cols" style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
 
             {/* ── دسته / نوع / برند / مدل ── */}
-            <div style={{ ...card, animation: 'fadeUp 0.44s ease both' }}>
+            <div className="span-cols" style={{ ...card, animation: 'fadeUp 0.44s ease both' }}>
               <div style={gloss} />
               <SectionTitle>اطلاعات محصول</SectionTitle>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 16, position: 'relative', zIndex: 1 }}>
+              <div className="info-grid" style={{ display: 'flex', flexDirection: 'column', gap: 16, position: 'relative', zIndex: 1 }}>
 
                 <div>
                   <Label required>دسته‌بندی</Label>
@@ -803,7 +803,7 @@ export default function EditProductPage() {
             </div>
 
             {/* ── مشخصات فنی + وضعیت + توضیحات ── */}
-            <div key={form.category || 'no-cat'} style={{ ...card, animation: 'fadeIn 0.35s ease both' }}>
+            <div key={form.category || 'no-cat'} className="span-cols" style={{ ...card, animation: 'fadeIn 0.35s ease both' }}>
               <div style={gloss} />
               <div style={{ position: 'relative', zIndex: 1 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 18 }}>

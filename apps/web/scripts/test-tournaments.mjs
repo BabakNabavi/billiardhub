@@ -1082,6 +1082,23 @@ t('برند و مدل به هر سه کارت می‌رسند',
    «Century G۱» نشان می‌داد. کلاسِ `bh-latin` استثنای خودِ همان
    کامپوننت است. */
 /* ── بسته‌ی گزارشِ کاربر ── */
+/* ── چیدمانِ دسکتاپ ──
+   سه تلاشِ قبلی JSX را جابه‌جا کرد و تودرتویی را بی‌صدا شکست — نه
+   tsc دید نه تست، چون JSX متوازن مانده بود. این‌بار DOM دست‌نخورده
+   است و کلِ کار یک قاعده‌ی CSS است. */
+t('فرمِ آگهی روی دسکتاپ دوستونه است',
+  read('components/market/AdFormFields.tsx').includes('column-count: 2')
+  && read('components/market/AdFormFields.tsx').includes('break-inside: avoid')
+  && ['app/shop/new/page.tsx', 'app/shop/edit/[id]/page.tsx']
+    .every(f => read(f).includes('ad-cols') && read(f).includes('span-cols')),
+  'یک ستون، صفحه را ۵۴۰۰ پیکسل دراز می‌کرد');
+t('کارتِ مشخصات تمام‌عرض و سه‌ستونه می‌شود',
+  read('components/market/AdFormFields.tsx').includes('.ad-cols > .span-cols { column-span: all; }')
+  && read('components/market/AdFormFields.tsx').includes('.span-cols .spec-grid'),
+  'در ستونِ ۵۵۰ پیکسلی ۲۹۷۸ پیکسل بود و هیچ تعادلی ممکن نمی‌شد');
+t('موبایل همان یک ستون می‌ماند',
+  read('components/market/AdFormFields.tsx').includes('@media(min-width:900px)'),
+  'قاعده فقط بالای ۹۰۰ پیکسل فعال است');
 t('نوعِ دسته‌های لوازم از فیلدِ مشخصاتِ خودشان می‌آید',
   read('lib/market/spec-rules.ts').includes('export const formTypeFieldOf')
   && ['app/shop/new/page.tsx', 'app/shop/edit/[id]/page.tsx'].every(f =>
@@ -2758,10 +2775,14 @@ console.log('\n― گچ ―');
      آن: موقعِ جابه‌جاییِ کارت‌ها، `</div>`ی ستونِ راست جا افتاد و
      ستونِ چپ داخلش تو در تو شد — شبکه یک فرزند داشت و کلِ فرم در
      نیمه‌ی راست جا می‌گرفت. این تست همان را می‌گیرد. */
-  t('فرم یک ستونِ وسط‌چین است',
-    src.includes('maxWidth: 820')
-    && read('components/market/AdFormFields.tsx').includes('.two-col { grid-template-columns: 1fr !important; }'),
-    'با دو ستونِ نامتوازن، ردیفِ پایانی با هیچ‌کدام هم‌عرض نبود');
+  /* ── چیدمان ──
+     یک ستونِ ۸۲۰ پیکسلی بود؛ حالا دو ستونِ متعادل با نوارهای
+     تمام‌عرض برای کارتِ مشخصات و ردیفِ پایانی. ظرف ۱۱۸۰ شد. */
+  t('فرم روی دسکتاپ دو ستونِ متعادل دارد و ردیفِ پایانی تمام‌عرض است',
+    src.includes('maxWidth: 1180')
+    && src.includes('className="span-all"')
+    && read('components/market/AdFormFields.tsx').includes('.ad-cols > .span-all { column-span: all; }'),
+    'ردیفِ پایانی باید با کلِ فرم هم‌عرض باشد، نه با یک ستون');
 }
 
 /* ── تیپ: کاتالوگِ پنجم ── */

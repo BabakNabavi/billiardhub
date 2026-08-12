@@ -641,7 +641,7 @@ export default function NewProductPage() {
           <div style={{ position: 'absolute', bottom: -100, left: -60, width: 400, height: 400, background: 'radial-gradient(circle,rgba(199,166,106,0.05) 0%,transparent 65%)', filter: 'blur(60px)' }} />
         </div>
 
-        <div style={{ position: 'relative', zIndex: 1, maxWidth: 820, margin: '0 auto', padding: 'clamp(20px,3vw,36px) clamp(16px,3vw,32px) 80px' }}>
+        <div style={{ position: 'relative', zIndex: 1, maxWidth: 1180, margin: '0 auto', padding: 'clamp(20px,3vw,36px) clamp(16px,3vw,32px) 80px' }}>
 
           {/* ── Top nav ──
               فلش به راست است، نه چپ: در RTL «برگشت» یعنی حرکت به راست. */}
@@ -687,14 +687,15 @@ export default function NewProductPage() {
               {/* ═══════════════════════════════════════════════════
                   RIGHT COLUMN — product info
               ═══════════════════════════════════════════════════ */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+              {/* روی دسکتاپ دوستونه می‌شود — قاعده‌اش در AD_FORM_CSS */}
+              <div className="ad-cols" style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
 
                 {/* card: basic info */}
-                <div style={{ background: LQ_BG, backdropFilter: 'blur(40px) saturate(220%)', WebkitBackdropFilter: 'blur(40px) saturate(220%)', border: LQ_BOR, borderRadius: 20, boxShadow: LQ_SHAD, padding: '24px', position: 'relative', overflow: 'hidden', animation: 'fadeUp 0.46s ease both' }}>
+                <div className="span-cols" style={{ background: LQ_BG, backdropFilter: 'blur(40px) saturate(220%)', WebkitBackdropFilter: 'blur(40px) saturate(220%)', border: LQ_BOR, borderRadius: 20, boxShadow: LQ_SHAD, padding: '24px', position: 'relative', overflow: 'hidden', animation: 'fadeUp 0.46s ease both' }}>
                   <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '46%', background: 'linear-gradient(180deg,rgba(255,255,255,0.55) 0%,transparent 100%)', pointerEvents: 'none' }} />
                   <SectionTitle>اطلاعات محصول</SectionTitle>
 
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 16, position: 'relative', zIndex: 1 }}>
+                  <div className="info-grid" style={{ display: 'flex', flexDirection: 'column', gap: 16, position: 'relative', zIndex: 1 }}>
 
                     {/* دسته‌بندی */}
                     <div>
@@ -846,7 +847,7 @@ export default function NewProductPage() {
                   const { main: mainSpecs, toggles: toggleSpecs } = splitFields(shown)
                   const specProgress = countFilled(shown, specs)
                   return (
-                    <div key={form.category || 'no-cat'} style={{ background: LQ_BG, backdropFilter: 'blur(40px) saturate(220%)', WebkitBackdropFilter: 'blur(40px) saturate(220%)', border: LQ_BOR, borderRadius: 20, boxShadow: LQ_SHAD, padding: '24px', position: 'relative', overflow: 'hidden', animation: 'fadeIn 0.35s ease both' }}>
+                    <div key={form.category || 'no-cat'} className="span-cols" style={{ background: LQ_BG, backdropFilter: 'blur(40px) saturate(220%)', WebkitBackdropFilter: 'blur(40px) saturate(220%)', border: LQ_BOR, borderRadius: 20, boxShadow: LQ_SHAD, padding: '24px', position: 'relative', overflow: 'hidden', animation: 'fadeIn 0.35s ease both' }}>
                       <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '46%', background: 'linear-gradient(180deg,rgba(255,255,255,0.55) 0%,transparent 100%)', pointerEvents: 'none' }} />
                       <div style={{ position: 'relative', zIndex: 1 }}>
 
@@ -1203,7 +1204,7 @@ export default function NewProductPage() {
                 نه نوارِ بالای فرم — روی موبایل آن نوار هرگز دیده نمی‌شد. */}
 
             {/* ── پذیرش قوانین بازار ── */}
-            <div style={{ background: LQ_BG, backdropFilter: 'blur(40px)', WebkitBackdropFilter: 'blur(40px)', border: errors.acceptRules ? '1.5px solid rgba(200,60,60,0.42)' : LQ_BOR, borderRadius: 20, boxShadow: LQ_SHAD, padding: '16px 22px', marginBottom: 14, transition: 'border-color .2s' }}>
+            <div className="span-all" style={{ background: LQ_BG, backdropFilter: 'blur(40px)', WebkitBackdropFilter: 'blur(40px)', border: errors.acceptRules ? '1.5px solid rgba(200,60,60,0.42)' : LQ_BOR, borderRadius: 20, boxShadow: LQ_SHAD, padding: '16px 22px', marginBottom: 14, transition: 'border-color .2s' }}>
               <label style={{ display: 'flex', alignItems: 'flex-start', gap: 10, cursor: 'pointer' }}>
                 <input type="checkbox" checked={acceptRules}
                   onChange={e => { setAcceptRules(e.target.checked); if (e.target.checked) setErrors(p => { const n = { ...p }; delete n.acceptRules; return n }) }}
@@ -1225,7 +1226,7 @@ export default function NewProductPage() {
                 دو دکمه هم‌اندازه در یک سطر (هرکدام `flex:1`). راهنمای
                 «* فیلدهای الزامی» برداشته شد: فیلدهای نیازمند، خودشان
                 ستاره دارند و پیامِ خطا حالا وسطِ صفحه می‌آید. */}
-            <div style={{ background: LQ_BG, backdropFilter: 'blur(40px)', WebkitBackdropFilter: 'blur(40px)', border: LQ_BOR, borderRadius: 20, boxShadow: LQ_SHAD, padding: '14px 16px', display: 'flex', gap: 10, alignItems: 'stretch', animation: 'fadeUp 0.6s ease both', position: 'relative', overflow: 'hidden' }}>
+            <div className="span-all" style={{ background: LQ_BG, backdropFilter: 'blur(40px)', WebkitBackdropFilter: 'blur(40px)', border: LQ_BOR, borderRadius: 20, boxShadow: LQ_SHAD, padding: '14px 16px', display: 'flex', gap: 10, alignItems: 'stretch', animation: 'fadeUp 0.6s ease both', position: 'relative', overflow: 'hidden' }}>
               <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '46%', background: 'linear-gradient(180deg,rgba(255,255,255,0.55) 0%,transparent 100%)', pointerEvents: 'none' }} />
 
               <button type="submit" disabled={submitting} style={{ flex: 1, minWidth: 0, padding: '12px 10px', borderRadius: 13, border: `1.5px solid ${GOLD}`, cursor: submitting ? 'not-allowed' : 'pointer', background: 'rgba(199,166,106,0.14)', backdropFilter: 'blur(24px) saturate(180%)', WebkitBackdropFilter: 'blur(24px) saturate(180%)', color: GOLD_D, fontSize: 14, fontWeight: 800, fontFamily: 'Vazirmatn,Tahoma,sans-serif', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, boxShadow: '0 5px 18px rgba(199,166,106,0.20), inset 0 1px 0 rgba(255,255,255,0.55)', transition: 'opacity 0.2s, transform 0.15s, box-shadow 0.2s', opacity: submitting ? 0.65 : 1, position: 'relative', zIndex: 1 }}
