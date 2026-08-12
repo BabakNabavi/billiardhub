@@ -102,6 +102,47 @@ const FLAGS: Record<string, Shape> = {
     ))}
   </>,
 
+  /* اسپانیا — سه نوار، میانی دو برابر. نشانِ روی نوارِ میانی در این
+     ابعاد یک لکه می‌شود، پس نیامده. */
+  ES: <>
+    <rect width="24" height="16" fill="#AA151B" />
+    <rect y="4" width="24" height="8" fill="#F1BF00" />
+  </>,
+
+  /* تایوان */
+  TW: <>
+    <rect width="24" height="16" fill="#FE0000" />
+    <rect width="12" height="8" fill="#000095" />
+    <circle cx="6" cy="4" r="2.35" fill="#fff" />
+    {Array.from({ length: 12 }, (_, i) => (
+      <rect key={i} x="5.75" y="1.2" width="0.5" height="1.5" fill="#fff"
+        transform={`rotate(${i * 30} 6 4)`} />
+    ))}
+    <circle cx="6" cy="4" r="1.7" fill="#000095" />
+    <circle cx="6" cy="4" r="1.45" fill="#fff" />
+  </>,
+
+  /* مالزی — چهارده نوار و هلالِ ماه با ستاره‌ی چهارده‌پر (ساده‌شده) */
+  MY: <>
+    {Array.from({ length: 14 }, (_, i) => (
+      <rect key={i} y={i * 1.143} width="24" height="1.143" fill={i % 2 ? '#fff' : '#CC0001'} />
+    ))}
+    <rect width="13.5" height="9.14" fill="#010066" />
+    <path d="M6.9,2.2 a2.6,2.6 0 1,0 0,4.8 a3.1,3.1 0 1,1 0,-4.8 z" fill="#FFCC00" />
+    <polygon points={star(9.6, 4.6, 1.9)} fill="#FFCC00" />
+  </>,
+
+  /* سنگاپور — با کاتالوگِ تازه‌ی میز آمد (Wiraka از مالزی به
+     سنگاپور منتقل شد). هلالِ ماه و پنج ستاره. */
+  SG: <>
+    <rect width="24" height="16" fill="#fff" />
+    <rect width="24" height="8" fill="#ED2939" />
+    <path d="M7.6,4 a2.9,2.9 0 1,0 0,4.4 a3.4,3.4 0 1,1 0,-4.4 z" fill="#fff" />
+    {([[8.9, 2.5], [10.4, 3.6], [9.9, 5.4], [7.9, 5.4], [7.4, 3.6]] as [number, number][]).map(([x, y]) => (
+      <polygon key={`${x}-${y}`} points={star(x, y, 0.85)} fill="#fff" />
+    ))}
+  </>,
+
   IR: <>
     {['#239F40', '#fff', '#DA0000'].map((c, i) => <rect key={i} y={i * 5.334} width="24" height="5.334" fill={c} />)}
     {/* نشان — سایه‌نمای لاله‌ای‌شکل: شمشیرِ میانی و دو جفت هلال.

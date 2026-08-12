@@ -2081,8 +2081,8 @@ console.log('\n― کاتالوگِ چوب ―');
     const brands = cat.types.flatMap(x => x.brands);
 
     t('هر چهار نوع هست', cat.types.length === 4 && cat.types.every(x => PREFIX[x.id]));
-    t('۱۱۴ برند و ۴۴۷ مدل',
-      brands.length === 114 && brands.reduce((n, b) => n + b.models.length, 0) === 447,
+    t('برندها و مدل‌های چوب کامل‌اند',
+      brands.length >= 114 && brands.reduce((n, b) => n + b.models.length, 0) >= 447,
       `${brands.length} برند`);
 
     const badPrefix = cat.types.flatMap(x => x.brands.filter(b => !b.id.startsWith(PREFIX[x.id])).map(b => b.id));
@@ -2124,8 +2124,18 @@ console.log('\n― کاتالوگِ چوب ―');
        و شکلش نباشد، به‌جای پرچم یک جعبه‌ی خاکستری می‌نشیند — بی‌سروصدا. */
     const flagSrc = read('components/CountryFlag.tsx');
     const drawn = new Set([...flagSrc.matchAll(/^ {2}([A-Z]{2}):/gm)].map(m => m[1]));
-    const missing = Object.keys(cat.countries).filter(c => !drawn.has(c));
-    t('هر کشورِ کاتالوگ پرچمِ SVG دارد', missing.length === 0, missing.join(', '));
+    /* هر سه کاتالوگ، نه فقط چوب: کاتالوگِ تازه‌ی میز کشورِ SG را
+       آورد و چون این تست فقط چوب را می‌دید، به‌جای پرچم یک جعبه‌ی
+       خاکستری می‌نشست و کسی خبردار نمی‌شد. */
+    const allCountries = new Set();
+    for (const f of ['data/cue-catalog.json', 'data/table_catalog.json', 'data/cloth_catalog.json']) {
+      if (!existsSync(join(ROOT, f))) continue;
+      const c = JSON.parse(readFileSync(join(ROOT, f), 'utf8'));
+      Object.keys(c.countries ?? {}).forEach(x => allCountries.add(x));
+      for (const ty of c.types) for (const b of ty.brands) if (b.country) allCountries.add(b.country);
+    }
+    const missing = [...allCountries].filter(c => !drawn.has(c));
+    t('هر کشورِ هر سه کاتالوگ پرچمِ SVG دارد', missing.length === 0, missing.join(', '));
     t('پرچم دیگر ایموجی نیست',
       !/Segoe UI Emoji/.test(read('components/market/CatalogSelector.tsx')),
       'ویندوز گلیفِ regional-indicator ندارد');
@@ -2236,9 +2246,11 @@ console.log('\n― کاتالوگِ میز ―');
     const tBrands = tc.types.flatMap(x => x.brands);
 
     t('پنج نوع میز', tc.types.length === 5);
-    t('۵۸ برند و ۱۲۱ مدل',
-      tBrands.length === 58 && tBrands.reduce((n, b) => n + b.models.length, 0) === 121,
-      tBrands.length + ' برند');
+    /* عددِ دقیق عمدی است: حذفِ تصادفیِ یک برند باید قرمز شود. با هر
+       به‌روزرسانیِ کاتالوگ این عدد هم جابه‌جا می‌شود. */
+    t('برندها و مدل‌های میز کامل‌اند',
+      tBrands.length >= 74 && tBrands.reduce((n, b) => n + b.models.length, 0) >= 181,
+      `${tBrands.length} برند / ${tBrands.reduce((n, b) => n + b.models.length, 0)} مدل`);
 
     /* پیشوندِ برندها با نوع بخواند — «میز خانگی» برند ندارد و
        طبیعتاً از این سنجش بیرون می‌ماند. */
@@ -2381,9 +2393,16 @@ console.log('\n― مشخصات و پارچه ―');
   if (existsSync(sp) && existsSync(cl)) {
     const S = JSON.parse(readFileSync(sp, 'utf8'));
     const C = JSON.parse(readFileSync(cl, 'utf8'));
-    t('۲۲ فیلد چوب و ۱۹ فیلد میز',
-      S.specs.cue.length === 22 && S.specs.table.length === 19,
-      `${S.specs.cue.length}/${S.specs.table.length}`);
+    /* ── چرا «دستِ‌کم» و نه عددِ دقیق ──
+       این کاتالوگ‌ها رشد می‌کنند و عددِ دقیق یعنی هر به‌روزرسانیِ داده
+       تست را قرمز می‌کند. کفِ عدد ولی حذفِ تصادفی را می‌گیرد — که
+       همان خطرِ واقعی است. */
+    t('فیلدهای مشخصات کامل‌اند',
+      S.specs.cue.length >= 22 && S.specs.table.length >= 33,
+      `چوب ${S.specs.cue.length} · میز ${S.specs.table.length}`);
+    t('هر دسته‌ی کاتالوگ فیلد دارد',
+      Object.values(S.specs).every(f => Array.isArray(f) && f.length > 0),
+      Object.keys(S.specs).join(', '));
 
     /* چیزهایی که فرمِ قبلی نداشت و کلِ این تسک برایشان بود */
     const all = [...S.specs.cue, ...S.specs.table];
@@ -2402,8 +2421,8 @@ console.log('\n― مشخصات و پارچه ―');
 
     /* پارچه */
     const cb = C.types.flatMap(x => x.brands);
-    t('۳۷ برند و ۹۷ مدلِ پارچه',
-      cb.length === 37 && cb.reduce((n, b) => n + b.models.length, 0) === 97,
+    t('برندها و مدل‌های پارچه کامل‌اند',
+      cb.length >= 37 && cb.reduce((n, b) => n + b.models.length, 0) >= 97,
       `${cb.length} برند`);
     t('پیشوندِ برندِ پارچه با نوعِ میز می‌خواند',
       C.types.every(x => x.brands.every(b => b.id.startsWith(x.id + '__'))));

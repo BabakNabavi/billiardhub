@@ -82,7 +82,7 @@ export interface FancyOption {
   group?: string
 }
 
-export function FancySelect({ value, onChange, options, placeholder = 'انتخاب...', disabled, error }: {
+export function FancySelect({ value, onChange, options, placeholder = 'انتخاب...', searchPlaceholder, disabled, error }: {
   value: string
   onChange: (v: string) => void
   /* `search` و `node` و `group` اختیاری‌اند و همه‌ی فراخوان‌های قبلی
@@ -91,6 +91,8 @@ export function FancySelect({ value, onChange, options, placeholder = 'انتخ�
      بیش از یک رشته باشد. */
   options: FancyOption[]
   placeholder?: string
+  /** متنِ جست‌وجوی داخلِ فهرست — پیش‌فرض «جستجو...» */
+  searchPlaceholder?: string
   disabled?: boolean
   error?: boolean
 }) {
@@ -180,7 +182,7 @@ export function FancySelect({ value, onChange, options, placeholder = 'انتخ�
               {/* روی موبایل فوکوسِ خودکار کیبورد را بالا می‌آورد و همان
                   پنلی را که تازه جا شده بود دوباره از صفحه بیرون می‌اندازد */}
               <input autoFocus={typeof window !== 'undefined' && window.innerWidth > 820}
-                value={q} onChange={e => setQ(e.target.value)} placeholder="جستجو..." dir="rtl"
+                value={q} onChange={e => setQ(e.target.value)} placeholder={searchPlaceholder ?? 'جستجو...'} dir="rtl"
                 style={{ width: '100%', boxSizing: 'border-box', padding: '8px 11px', borderRadius: 9, fontSize: 13, border: '1.5px solid rgba(28,28,26,0.12)', background: '#FAFAFA', color: TEXT, outline: 'none', fontFamily: 'Vazirmatn,Tahoma,sans-serif' }} />
             </div>
           )}

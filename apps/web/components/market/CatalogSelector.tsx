@@ -219,7 +219,7 @@ export default function CatalogSelector({
           <span style={{ fontWeight: 600 }}>{b.name_en}</span>
           <span style={{ fontSize: 12, color: TEXT_MUT }}>{b.name_fa}</span>
           <span style={{ marginInlineStart: 'auto', fontSize: 11, color: TEXT_MUT, flexShrink: 0 }}>
-            {b.models.length.toLocaleString('fa-IR')} مدل
+            {b.models.length}
           </span>
         </span>
       ),
@@ -335,6 +335,7 @@ export default function CatalogSelector({
           options={brandOptions}
           disabled={!type || !data}
           error={!!errors.brand}
+          searchPlaceholder="جستجوی برند یا کشور..."
           placeholder={
             !type ? 'ابتدا نوع را انتخاب کنید'
               : loading ? 'در حال بارگذاری برندها...'
