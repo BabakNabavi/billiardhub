@@ -2302,9 +2302,13 @@ console.log('\n― کاتالوگِ میز ―');
   t('فهرستِ ثابتِ سایز حذف شد',
     !specsSrc.includes("'۷ فوت','۸ فوت'") && specsSrc.includes("'size']"),
     'سایز حالا از سایزهای همان نوع می‌آید');
-  t('فیلدِ سایز در کارتِ مشخصات است',
-    ['app/shop/new/page.tsx', 'app/shop/edit/[id]/page.tsx']
-      .every(f => /<TableSizeField/.test(read(f))));
+  /* سایز حالا یک فیلدِ `source`دارِ کاتالوگِ مشخصات است، نه یک
+     کامپوننتِ جدا: فهرستش از سایزهای همان نوعِ میز می‌آید و در
+     همان شبکه‌ی مشخصات رندر می‌شود. */
+  t('سایز از سایزهای همان نوع می‌آید',
+    read('app/shop/new/page.tsx').includes("if (id === 'size')")
+    && read('app/shop/new/page.tsx').includes('tableCat.data?.sizes'),
+    'فهرستِ مشترک برای همه‌ی میزها غلط بود');
   t('میز خانگی روی پرچمِ داده کار می‌کند نه شناسه',
     /forceFreeInput/.test(read('components/market/CatalogSelector.tsx'))
     && !/home_table/.test(read('components/market/CatalogSelector.tsx')),

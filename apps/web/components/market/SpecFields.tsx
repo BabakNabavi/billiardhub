@@ -19,11 +19,54 @@
    ظاهر از `AdFormFields` می‌آید — همان ورودی، همان طلایی، همان
    شعاعِ گوشه. چیزی از نو ساخته نشده.
    ═══════════════════════════════════════════════════════════════ */
+import { useEffect, useRef, useState } from 'react'
 
 import { FancySelect, Label, ErrMsg, inp, GOLD, GOLD_D, TEXT_MUT, TEXT_SEC, type FancyOption } from './AdFormFields'
 import { specKey, type SpecField } from '../../lib/market/spec-rules'
 
 export const SPEC_OTHER = '__other__'
+
+/* ── فیلدهای دسته ──
+   `specs_catalog.json` سی‌وهشت کیلوبایت است و فرم فیلدهای **یک**
+   دسته را می‌خواهد، نه همه را. پس مثل کاتالوگِ برند از مسیرِ
+   استاتیک می‌آید و در باندلِ کلاینت نمی‌نشیند. */
+const specCache = new Map<string, SpecField[]>()
+const specInflight = new Map<string, Promise<SpecField[]>>()
+
+export function useSpecFields(category: string): { fields: SpecField[]; loading: boolean } {
+  const [fields, setFields] = useState<SpecField[]>(() => specCache.get(category) ?? [])
+  const [loading, setLoading] = useState(false)
+  const reqId = useRef(0)
+
+  useEffect(() => {
+    const id = ++reqId.current
+    if (!category) { setFields([]); setLoading(false); return }
+    const hit = specCache.get(category)
+    if (hit) { setFields(hit); setLoading(false); return }
+
+    setLoading(true)
+    let p = specInflight.get(category)
+    if (!p) {
+      p = (async () => {
+        const r = await fetch(`/api/specs/${category}`)
+        if (!r.ok) throw new Error(String(r.status))
+        const j = (await r.json()) as { fields: SpecField[] }
+        specCache.set(category, j.fields)
+        return j.fields
+      })().finally(() => { specInflight.delete(category) })
+      specInflight.set(category, p)
+    }
+    void p
+      .then(f => { if (id === reqId.current) setFields(f) })
+      /* دسته‌ای که تعریفِ اختصاصی ندارد ۴۰۴ می‌دهد — خطا نیست،
+         یعنی فقط فیلدهای عمومی دارد. */
+      .catch(() => { if (id === reqId.current) setFields([]) })
+      .finally(() => { if (id === reqId.current) setLoading(false) })
+  }, [category])
+
+  /* فیلدهای دسته‌ی قبلی نباید یک رندر روی دسته‌ی تازه بمانند */
+  return { fields: specCache.get(category) === fields ? fields : (specCache.get(category) ?? fields), loading }
+}
 
 const FA_DIGITS = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹']
 const toFa = (n: number | string) =>

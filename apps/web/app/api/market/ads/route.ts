@@ -144,6 +144,7 @@ export async function POST(req: NextRequest) {
        · «میز خانگی» فهرست ندارد؛ هر شناسه‌ای برایش جعلی است.
 
      پیش از مصرفِ سهمیه انجام می‌شود تا ورودیِ نامعتبر سهمیه نسوزاند. */
+  let catalogCols: Record<string, string | null> = {};
   const catType = str(category === 'cue' ? b?.cueType : b?.tableType, 40);
   if (isCatalogId(category) && catType) {
     const brandId = str(b?.brandId, 80) || null;
@@ -163,6 +164,15 @@ export async function POST(req: NextRequest) {
       const first = Object.values(check.errors)[0] ?? 'اطلاعات محصول معتبر نیست';
       return NextResponse.json({ message: first, errors: check.errors }, { status: 400 });
     }
+    const val = check.value;
+    catalogCols = {
+      cueType: category === 'cue' ? val.type : null,
+      tableType: category === 'table' ? val.type : null,
+      brandId: val.brandId,
+      modelId: val.modelId,
+      tableSizeId: category === 'table' ? val.sizeId ?? null : null,
+      tableSizeCustom: category === 'table' ? val.sizeCustom ?? null : null,
+    };
   }
 
   /* سهمیه — فاز ۳: بررسی و مصرف در یک قدم اتمیک، پیش از درج آگهی.
@@ -256,6 +266,14 @@ export async function POST(req: NextRequest) {
     brand: str(b?.brand, 80),
     model: str(b?.model, 80),
     type: str(b?.type, 80),
+    /* ── شناسه‌های کاتالوگ (مهاجرت ۰۸۶) ──
+       رشته‌های `brand`/`model` بالا سرِ جایشان می‌مانند — کلِ سایت
+       از همان‌ها می‌خواند. این‌ها کنارشان می‌نشینند: شناسه برای
+       یکپارچگی و فیلتر، رشته برای نمایش.
+
+       مقدارها همان‌هایی‌اند که چند خط بالاتر `validateOnServer`
+       پاک و تأیید کرده؛ ورودیِ خام این‌جا نمی‌آید. */
+    ...catalogCols,
     specs: b?.specs && typeof b.specs === 'object' ? b.specs : null,
     section: str(b?.section, 20) || 'newest',
     sellerName: str(b?.sellerName ?? b?.shopName, 120),

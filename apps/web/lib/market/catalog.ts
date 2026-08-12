@@ -20,6 +20,7 @@
 
 import cueRaw from '../../data/cue-catalog.json'
 import tableRaw from '../../data/table_catalog.json'
+import clothRaw from '../../data/cloth_catalog.json'
 import {
   validateSelection,
   type CatalogBrand, type CatalogCountry, type CatalogId, type CatalogModel,
@@ -36,6 +37,7 @@ interface CatalogFile {
 const FILES: Record<CatalogId, CatalogFile> = {
   cue: cueRaw as unknown as CatalogFile,
   table: tableRaw as unknown as CatalogFile,
+  cloth: clothRaw as unknown as CatalogFile,
 }
 
 export const countriesOf = (category: CatalogId) => FILES[category].countries
