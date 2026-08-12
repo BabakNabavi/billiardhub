@@ -2676,6 +2676,69 @@ console.log('\n― گچ ―');
     'با دو ستونِ نامتوازن، ردیفِ پایانی با هیچ‌کدام هم‌عرض نبود');
 }
 
+/* ── تیپ: کاتالوگِ پنجم ── */
+console.log('\n― تیپ ―');
+{
+  const tp = join(ROOT, 'data/tip_catalog.json');
+  t('کاتالوگِ تیپ هست', existsSync(tp));
+  if (existsSync(tp)) {
+    const T = JSON.parse(readFileSync(tp, 'utf8'));
+    const tb = T.types.flatMap(x => x.brands);
+    t('سه نوع، ۵۵ برند، ۱۴۶ مدل',
+      T.types.length === 3 && tb.length >= 55 && tb.reduce((n, b) => n + b.models.length, 0) >= 146,
+      `${T.types.length}/${tb.length}`);
+    t('هر نوعِ تیپ سایز و پیش‌فرض دارد',
+      T.types.every(x => (x.sizes ?? []).length > 0 && x.sizes.filter(s => s.default).length === 1));
+    /* دلیلِ واقعیِ تفکیک */
+    const snkC = T.types.find(x => x.id === 'snooker').brands.flatMap(b => b.models).map(m => m.construction);
+    const pktC = T.types.find(x => x.id === 'pocket_billiard').brands.flatMap(b => b.models).map(m => m.construction);
+    const share = a => a.filter(x => x === 'layered').length / a.length;
+    t('اسنوکر بیشتر تک‌لایه و پاکت بیشتر لایه‌لایه است',
+      share(snkC) < share(pktC),
+      `اسنوکر ${Math.round(share(snkC) * 100)}٪ · پاکت ${Math.round(share(pktC) * 100)}٪`);
+  }
+
+  /* ── تداخلِ پیشوند ──
+     پیشوندِ تیپ عیناً همان پیشوندِ میز است (`tsnk__`). چون هر جست‌وجو
+     دسته را می‌گیرد و `category` هم ذخیره می‌شود، امروز ابهامی نیست —
+     ولی اگر روزی دو کاتالوگ یک شناسه‌ی برند داشته باشند، فیلترِ
+     `brandId` هر دو را برمی‌گرداند. این تست همان را می‌گیرد. */
+  const owner = new Map(); const clash = [];
+  for (const [cat, f] of [['cue', 'cue-catalog.json'], ['table', 'table_catalog.json'],
+    ['cloth', 'cloth_catalog.json'], ['chalk', 'chalk_catalog.json'], ['tip', 'tip_catalog.json']]) {
+    if (!existsSync(join(ROOT, 'data/' + f))) continue;
+    const j = JSON.parse(readFileSync(join(ROOT, 'data/' + f), 'utf8'));
+    for (const ty of j.types) for (const b of ty.brands) {
+      if (owner.has(b.id) && owner.get(b.id) !== cat) clash.push(`${b.id} [${owner.get(b.id)}↔${cat}]`);
+      else owner.set(b.id, cat);
+    }
+  }
+  t('شناسه‌ی برند بینِ کاتالوگ‌ها مشترک نیست', clash.length === 0, clash.slice(0, 3).join(', '));
+
+  /* ── دو مکانیزمِ تازه ── */
+  const rules = read('lib/market/spec-rules.ts');
+  t('نمایشِ شرطی پیاده شده',
+    rules.includes('depends_on_construction') && rules.includes('isFieldHidden'),
+    '«تعداد لایه» فقط برای تیپِ لایه‌لایه معنا دارد');
+  t('والدِ بولین پنهان می‌کند و والدِ فهرستی فقط قفل',
+    rules.includes("parent?.type !== 'boolean'"),
+    'نگهدارنده باید پنهان شود ولی مدلِ پارچه فقط غیرفعال');
+  t('مشخصات از مدلِ کاتالوگ پر می‌شود',
+    rules.includes('fillFromModel') && rules.includes('MODEL_PROPS')
+    && ['app/shop/new/page.tsx', 'app/shop/edit/[id]/page.tsx']
+      .every(f => read(f).includes('fillFromModel(specDefs')),
+    'سختی و ساختار و Shore D روی مدل‌اند، نه در فرم');
+  t('مدلِ بدونِ مقدار، مقدارِ قبلی را پاک می‌کند',
+    rules.includes('MODEL_PROPS.includes(f.id)'),
+    'با in روی شیء، عددِ مدلِ قبلی روی مدلِ تازه می‌ماند');
+  t('فیلدِ پنهان در شمارشِ پیشرفت نمی‌آید',
+    ['app/shop/new/page.tsx', 'app/shop/edit/[id]/page.tsx']
+      .every(f => read(f).includes('countFilled(shown, specs)')));
+  t('تیپ از کاتالوگ می‌آید',
+    ['app/shop/new/page.tsx', 'app/shop/edit/[id]/page.tsx']
+      .every(f => read(f).includes("form.category === 'tip'")));
+}
+
 console.log('\n― CORS ―');
 {
   t('فایلِ مرده‌ی CORS حذف شد',

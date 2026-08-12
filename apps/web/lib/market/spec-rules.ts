@@ -48,6 +48,10 @@ export interface SpecField {
   depends_on?: string
   /** با انتخابِ فیلدِ دیگری خودکار پر می‌شود — ولی قفل نمی‌شود */
   auto_from?: string
+  /* ── نمایشِ شرطی بر اساسِ ساختار ──
+     «تعداد لایه» فقط برای تیپِ لایه‌لایه معنا دارد. داده خودش
+     می‌گوید با کدام مقدارهای `construction` دیده شود. */
+  depends_on_construction?: string[]
 }
 
 export interface SpecCatalogShape {
@@ -213,9 +217,62 @@ export function specDisplayRows(
 export const isFormLevelField = (id: string): boolean =>
   id.endsWith('_type') || id === 'brand' || id === 'model'
 
+/* ── پر شدنِ خودکار از مدلِ کاتالوگ ──
+   برند و مدل بالای فرم‌اند، نه فیلدِ مشخصات؛ پس `applySpecChange`
+   هرگز برایشان صدا زده نمی‌شود. ولی مدلِ تیپ سختی و ساختار و
+   Shore D را با خودش دارد و داده می‌گوید از همان‌جا پر شوند.
+
+   دو راه پذیرفته می‌شود: `auto_from: model.<prop>` که صریح است، و
+   هم‌نامیِ ساده — اگر شناسه‌ی فیلد دقیقاً یکی از ویژگی‌های مدل
+   باشد. دومی برای `shore_d` لازم شد که در JSON اعلام نشده.
+
+   هیچ‌کدام قفل نمی‌کنند: فروشنده می‌تواند عوضشان کند. */
+/* ── ویژگی‌هایی که مدل‌های کاتالوگ حمل می‌کنند ──
+   صریح‌اند و نه از روی کلیدهای خودِ شیء: مدلِ تازه‌ای که `shore_d`
+   ندارد باید مقدارِ مدلِ قبلی را **پاک** کند، نه اینکه دست‌نخورده
+   بگذاردش. با `in` روی شیء، کلیدِ نبوده یعنی «رد شو» و عددِ مدلِ
+   قبلی روی مدلِ تازه می‌ماند. */
+const MODEL_PROPS = ['hardness', 'construction', 'shore_d', 'type', 'weight_oz']
+
+export function fillFromModel(
+  fields: SpecField[], values: Record<string, unknown>,
+  model: Record<string, unknown> | undefined,
+): Record<string, unknown> {
+  const next = { ...values }
+  for (const f of fields) {
+    let v: unknown
+    if (f.auto_from?.startsWith('model.')) v = model?.[f.auto_from.slice(6)]
+    else if (MODEL_PROPS.includes(f.id)) v = model?.[f.id]
+    else continue
+    /* مدلِ تازه بدونِ مقدار ⇒ مقدارِ مدلِ قبلی باید پاک شود */
+    next[specKey(f.id)] = v === undefined || v === null ? '' : v
+  }
+  return next
+}
+
 /** فیلدهایی که به این فیلد وابسته‌اند — با عوض‌شدنش پاک می‌شوند */
 export const dependentsOf = (fields: SpecField[], id: string): SpecField[] =>
   fields.filter(f => f.depends_on === id)
+
+/* ── پنهان در برابر غیرفعال ──
+   وقتی والد یک **سوییچ** است، فیلدِ فرزند تا روشن‌نشدنش اصلاً
+   معنا ندارد («نوع نگهدارنده» وقتی نگهدارنده‌ای نیست) — پس پنهان
+   می‌شود. وقتی والد یک **فهرست** است، فیلد باید دیده شود تا کاربر
+   بداند قدمِ بعدی چیست — پس فقط غیرفعال می‌شود.
+
+   `depends_on_construction` هم همین است، با فهرستِ مقدارهای مجاز. */
+export function isFieldHidden(
+  field: SpecField, values: Record<string, unknown>, fields: SpecField[],
+): boolean {
+  if (field.depends_on_construction) {
+    const c = String(values[specKey('construction')] ?? '')
+    return !field.depends_on_construction.includes(c)
+  }
+  if (!field.depends_on || isFormLevelField(field.depends_on)) return false
+  const parent = fields.find(f => f.id === field.depends_on)
+  if (parent?.type !== 'boolean') return false
+  return values[specKey(field.depends_on)] !== true
+}
 
 /** تا وقتی والدش خالی است، فهرستِ این فیلد بی‌معناست */
 export function isFieldLocked(

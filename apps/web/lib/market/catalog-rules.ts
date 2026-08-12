@@ -21,7 +21,7 @@
 
 import { normalizeFa } from '../text-fa'
 
-export const CATALOG_IDS = ['cue', 'table', 'cloth', 'chalk'] as const
+export const CATALOG_IDS = ['cue', 'table', 'cloth', 'chalk', 'tip'] as const
 export type CatalogId = typeof CATALOG_IDS[number]
 
 export const isCatalogId = (v: unknown): v is CatalogId =>
@@ -48,6 +48,11 @@ export const TYPE_IDS: Record<CatalogId, readonly string[]> = {
      مدل‌های پیشنهادی‌شان فرق می‌کند — پس فهرست‌ها جدا می‌مانند.
      هی‌بال گچِ اختصاصی ندارد. */
   chalk: ['snooker', 'pocket_billiard', 'carom'],
+  /* ── تیپ ──
+     اسنوکر ۸.۵ تا ۱۱ میلی‌متر و اغلب تک‌لایه‌ی پرس‌شده؛ پاکتِ
+     آمریکایی ۱۱.۷۵ تا ۱۴ و اغلب لایه‌لایه. سایز و مدل هیچ‌کدام
+     بینِ دو رشته مشترک نیستند. */
+  tip: ['snooker', 'pocket_billiard', 'carom'],
 }
 
 /** پیشوندِ شناسه‌ی برند — سرور با همین تعلقِ برند به نوع را می‌سنجد */
@@ -66,6 +71,13 @@ export const TYPE_PREFIX: Record<CatalogId, Record<string, string>> = {
   },
   chalk: {
     snooker: 'csnk__', pocket_billiard: 'cpkt__', carom: 'ccar__',
+  },
+  /* ⚠️ پیشوندِ تیپ عیناً همان پیشوندِ میز است (`tsnk__`, `tpkt__`,
+     `tcar__`). خطرناک نیست چون هر جست‌وجو دسته را می‌گیرد و
+     `category` هم کنارِ شناسه ذخیره می‌شود — ولی تستی هست که
+     می‌سنجد هیچ شناسه‌ی برندی بینِ دو کاتالوگ مشترک نشود. */
+  tip: {
+    snooker: 'tsnk__', pocket_billiard: 'tpkt__', carom: 'tcar__',
   },
 }
 
@@ -105,6 +117,11 @@ export const TYPE_BY_FA: Record<CatalogId, Record<string, string>> = {
     'پاکت بیلیارد': 'pocket_billiard',
     'کارامبول': 'carom',
   },
+  tip: {
+    'اسنوکر': 'snooker',
+    'پاکت بیلیارد': 'pocket_billiard',
+    'کارامبول': 'carom',
+  },
 }
 
 export const typeIdOf = (category: CatalogId, faLabel: string): string =>
@@ -129,6 +146,10 @@ export interface CatalogModel {
      ولی قفل نمی‌شوند — فروشنده می‌تواند عوضشان کند. */
   type?: string
   weight_oz?: string
+  /* ── فقط تیپ ── سختی، ساختار و Shore D از مدل به مشخصات می‌روند */
+  hardness?: string
+  construction?: string
+  shore_d?: number | string
   note_fa?: string
 }
 

@@ -41,7 +41,7 @@ import { TYPE_OPTIONS, brandOptionsFor, modelOptionsFor, isTypeDrivenCategory, w
 import { typeIdOf, type CatalogId } from '../../../../lib/market/catalog-rules'
 import CatalogSelector, { EMPTY_CATALOG_VALUE, type CatalogValue, useCatalogType } from '../../../../components/market/CatalogSelector'
 import { SpecFieldRow, SpecProgress, useSpecFields, specKey } from '../../../../components/market/SpecFields'
-import { splitFields, countFilled, applySpecChange, isFieldLocked, fromLegacyDefs, type SpecField, type LegacySpecDef } from '../../../../lib/market/spec-rules'
+import { splitFields, countFilled, applySpecChange, isFieldLocked, isFieldHidden, fillFromModel, fromLegacyDefs, type SpecField, type LegacySpecDef } from '../../../../lib/market/spec-rules'
 import { brandSearchTerms } from '../../../../lib/market/catalog-rules'
 import CountryFlag from '../../../../components/CountryFlag'
 import {
@@ -241,7 +241,8 @@ export default function EditProductPage() {
 
   /* چوب از کاتالوگ می‌آید؛ بقیه‌ی دسته‌ها از chain.ts */
   const catCategory: CatalogId | null =
-    form.category === 'cue' || form.category === 'table' || form.category === 'cloth' || form.category === 'chalk'
+    form.category === 'cue' || form.category === 'table' || form.category === 'cloth'
+      || form.category === 'chalk' || form.category === 'tip'
       ? form.category : null
   const catTypeId = catCategory ? typeIdOf(catCategory, form.type) : ''
   /* همان ورودیِ کش‌شده‌ی انتخابگر — درخواستِ تازه‌ای نمی‌زند */
@@ -293,9 +294,27 @@ export default function EditProductPage() {
   }, [rawSpecs, specDefs])
   const cloth = useCatalogType('cloth', form.category === 'table' ? catTypeId : '')
   const tableCat = useCatalogType('table', form.category === 'table' ? catTypeId : '')
+  const tipCat = useCatalogType('tip', form.category === 'tip' ? catTypeId : '')
+  /* payloadِ همان دسته‌ای که الان فعال است — برای پر شدنِ خودکار */
+  const activeCat = useCatalogType(catCategory ?? 'cue', catCategory ? catTypeId : '')
+  const catData = activeCat.data
   const clothBrandId = String(specs.clothBrand ?? '')
 
   const sourceOptionsFor = (id: string): FancyOption[] | undefined => {
+    /* قطرِ تیپ هم `source: types[].sizes` دارد — همان مکانیزمِ
+       سایزِ میز، فقط از کاتالوگِ تیپ. */
+    if (id === 'diameter' && form.category === 'tip') {
+      return (tipCat.data?.sizes ?? []).map(s => ({
+        value: s.id, label: s.label_fa,
+        search: `${s.label_fa} ${s.label_en ?? ''}`,
+        node: (
+          <span style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
+            <span style={{ fontWeight: 600 }}>{s.label_fa}</span>
+            {s.note_fa && <span style={{ fontSize: 11.5, color: TEXT_MUT }}>{s.note_fa}</span>}
+          </span>
+        ),
+      }))
+    }
     if (id === 'size') {
       return (tableCat.data?.sizes ?? []).map(s => ({
         value: s.id, label: s.label_fa,
@@ -354,6 +373,14 @@ export default function EditProductPage() {
 
   /* رشته برای نمایش، شناسه برای یکپارچگی — همان قاعده‌ی فرمِ ثبت */
   const onCatalogChange = (v: CatalogValue, labels: { brand: string; model: string }) => {
+    /* ── مدلِ کاتالوگ، مشخصات را پر می‌کند ──
+       مدلِ تیپ سختی و ساختار و Shore D را با خودش دارد. برند و
+       مدل بالای فرم‌اند و هرگز از مسیرِ `onSpecChange` نمی‌گذرند،
+       پس این‌جا انجام می‌شود. قفل نمی‌شوند. */
+    const picked = v.modelId && v.modelId !== '__other__'
+      ? catData?.brands.find(b => b.id === v.brandId)?.models.find(m => m.id === v.modelId)
+      : undefined
+    setSpecs(prev => fillFromModel(specDefs, prev, picked as Record<string, unknown> | undefined))
     setCue(v)
     setForm(f => ({ ...f, brand: labels.brand, brandOther: '', model: labels.model, modelOther: '' }))
     setErrors(e => { const n = { ...e }; delete n.brand; delete n.model; return n })
@@ -590,8 +617,13 @@ export default function EditProductPage() {
 
   const HIDE_SPEC = new Set(['brand', 'model', 'cue_type', 'table_type', 'condition'])
   const usableSpecs = specDefs.filter(f => !HIDE_SPEC.has(f.id))
-  const { main: mainSpecs, toggles: toggleSpecs } = splitFields(usableSpecs)
-  const specProgress = countFilled(usableSpecs, specs)
+                  /* فیلدی که شرطش برقرار نیست اصلاً رندر نمی‌شود —
+                     «تعداد لایه» برای تیپِ تک‌لایه و «نوع نگهدارنده»
+                     وقتی نگهدارنده‌ای نیست. از شمارشِ پیشرفت هم بیرون
+                     است، وگرنه هدفی شمرده می‌شد که دیده نمی‌شود. */
+                  const shown = usableSpecs.filter(f => !isFieldHidden(f, specs, usableSpecs))
+                  const { main: mainSpecs, toggles: toggleSpecs } = splitFields(shown)
+  const specProgress = countFilled(shown, specs)
 
   const card: React.CSSProperties = {
     background: LQ_BG, backdropFilter: 'blur(40px) saturate(220%)', WebkitBackdropFilter: 'blur(40px) saturate(220%)',

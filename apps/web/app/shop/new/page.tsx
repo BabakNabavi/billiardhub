@@ -18,7 +18,7 @@ import { productTitleParts } from '../../../lib/market/title'
 import { typeIdOf, type CatalogId } from '../../../lib/market/catalog-rules'
 import CatalogSelector, { EMPTY_CATALOG_VALUE, type CatalogValue, useCatalogType, useCatalogTypes } from '../../../components/market/CatalogSelector'
 import { SpecFieldRow, SpecProgress, useSpecFields, specKey } from '../../../components/market/SpecFields'
-import { splitFields, countFilled, applySpecChange, isFieldLocked, fromLegacyDefs, type SpecField, type LegacySpecDef } from '../../../lib/market/spec-rules'
+import { splitFields, countFilled, applySpecChange, isFieldLocked, isFieldHidden, fillFromModel, fromLegacyDefs, type SpecField, type LegacySpecDef } from '../../../lib/market/spec-rules'
 import { brandSearchTerms } from '../../../lib/market/catalog-rules'
 import CountryFlag from '../../../components/CountryFlag'
 import { TYPE_OPTIONS, brandOptionsFor, modelOptionsFor, isTypeDrivenCategory, withOther } from '../../../lib/market/chain'
@@ -155,7 +155,8 @@ export default function NewProductPage() {
      خالی یعنی همان مسیرِ قدیمیِ `chain.ts` — بقیه‌ی دسته‌ها
      (تیپ، گچ، توپ، …) دست‌نخورده‌اند. */
   const catCategory: CatalogId | null =
-    form.category === 'cue' || form.category === 'table' || form.category === 'cloth' || form.category === 'chalk'
+    form.category === 'cue' || form.category === 'table' || form.category === 'cloth'
+      || form.category === 'chalk' || form.category === 'tip'
       ? form.category : null
   const catTypeId = catCategory ? typeIdOf(catCategory, form.type) : ''
   const catTypeRows = useCatalogTypes(catCategory)
@@ -174,6 +175,10 @@ export default function NewProductPage() {
   /* پارچه: فهرستش به نوعِ **میز** وابسته است، پس همان شناسه‌ی نوع */
   const cloth = useCatalogType('cloth', form.category === 'table' ? catTypeId : '')
   const tableCat = useCatalogType('table', form.category === 'table' ? catTypeId : '')
+  const tipCat = useCatalogType('tip', form.category === 'tip' ? catTypeId : '')
+  /* payloadِ همان دسته‌ای که الان فعال است — برای پر شدنِ خودکار */
+  const activeCat = useCatalogType(catCategory ?? 'cue', catCategory ? catTypeId : '')
+  const catData = activeCat.data
 
   /* ── فهرستِ فیلدهای `source`دار ──
      اندازه از کاتالوگِ میز می‌آید و برند/مدلِ پارچه از کاتالوگِ
@@ -181,6 +186,20 @@ export default function NewProductPage() {
      نامِ منبعشان آن‌جاست. */
   const clothBrandId = String(specs.clothBrand ?? '')
   const sourceOptionsFor = (id: string): FancyOption[] | undefined => {
+    /* قطرِ تیپ هم `source: types[].sizes` دارد — همان مکانیزمِ
+       سایزِ میز، فقط از کاتالوگِ تیپ. */
+    if (id === 'diameter' && form.category === 'tip') {
+      return (tipCat.data?.sizes ?? []).map(s => ({
+        value: s.id, label: s.label_fa,
+        search: `${s.label_fa} ${s.label_en ?? ''}`,
+        node: (
+          <span style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
+            <span style={{ fontWeight: 600 }}>{s.label_fa}</span>
+            {s.note_fa && <span style={{ fontSize: 11.5, color: TEXT_MUT }}>{s.note_fa}</span>}
+          </span>
+        ),
+      }))
+    }
     if (id === 'size') {
       return (tableCat.data?.sizes ?? []).map(s => ({
         value: s.id, label: s.label_fa,
@@ -249,6 +268,14 @@ export default function NewProductPage() {
      شناسه **کنارش** ذخیره می‌شود — شناسه برای یکپارچگی و فیلتر،
      رشته برای نمایش. این‌طور هیچ مصرف‌کننده‌ای نمی‌شکند. */
   const onCatalogChange = (v: CatalogValue, labels: { brand: string; model: string }) => {
+    /* ── مدلِ کاتالوگ، مشخصات را پر می‌کند ──
+       مدلِ تیپ سختی و ساختار و Shore D را با خودش دارد. برند و
+       مدل بالای فرم‌اند و هرگز از مسیرِ `onSpecChange` نمی‌گذرند،
+       پس این‌جا انجام می‌شود. قفل نمی‌شوند. */
+    const picked = v.modelId && v.modelId !== '__other__'
+      ? catData?.brands.find(b => b.id === v.brandId)?.models.find(m => m.id === v.modelId)
+      : undefined
+    setSpecs(prev => fillFromModel(specDefs, prev, picked as Record<string, unknown> | undefined))
     setCue(v)
     setForm(f => ({ ...f, brand: labels.brand, brandOther: '', model: labels.model, modelOther: '' }))
     setErrors(e => { const n = { ...e }; delete n.brand; delete n.model; return n })
@@ -768,8 +795,13 @@ export default function NewProductPage() {
                      آمده‌اند و این‌جا تکرار نمی‌شوند. */
                   const HIDE = new Set(['brand', 'model', 'cue_type', 'table_type', 'condition'])
                   const usable = specDefs.filter(f => !HIDE.has(f.id))
-                  const { main: mainSpecs, toggles: toggleSpecs } = splitFields(usable)
-                  const specProgress = countFilled(usable, specs)
+                  /* فیلدی که شرطش برقرار نیست اصلاً رندر نمی‌شود —
+                     «تعداد لایه» برای تیپِ تک‌لایه و «نوع نگهدارنده»
+                     وقتی نگهدارنده‌ای نیست. از شمارشِ پیشرفت هم بیرون
+                     است، وگرنه هدفی شمرده می‌شد که دیده نمی‌شود. */
+                  const shown = usable.filter(f => !isFieldHidden(f, specs, usable))
+                  const { main: mainSpecs, toggles: toggleSpecs } = splitFields(shown)
+                  const specProgress = countFilled(shown, specs)
                   return (
                     <div key={form.category || 'no-cat'} style={{ background: LQ_BG, backdropFilter: 'blur(40px) saturate(220%)', WebkitBackdropFilter: 'blur(40px) saturate(220%)', border: LQ_BOR, borderRadius: 20, boxShadow: LQ_SHAD, padding: '24px', position: 'relative', overflow: 'hidden', animation: 'fadeIn 0.35s ease both' }}>
                       <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '46%', background: 'linear-gradient(180deg,rgba(255,255,255,0.55) 0%,transparent 100%)', pointerEvents: 'none' }} />

@@ -1,0 +1,3575 @@
+{
+  "schema_version": "1.0",
+  "last_updated": "2026-08-11",
+  "notes_fa": "کاتالوگ یکپارچه لوازم جانبی. هر دسته ساختار مستقل خودش را دارد: has_brands مشخص می‌کند آیا لیست برند دارد یا نه، و specs فیلدهای مشخصات فنی همان دسته است. گزینه «سایر» در انتهای لیست برند، مدل و همه select ها اضافه می‌شود.",
+  "structure_note_fa": "برخلاف چوب و میز که سه‌سطحی‌اند (نوع ← برند ← مدل)، اینجا هر دسته مستقیماً برند ← مدل دارد و «نوع» همان دسته است. دسته «سایر» force_free_input دارد و بدون لیست است. دسته «پارچه» کاتالوگ اختصاصی خودش را دارد (cloth_catalog.json) و اینجا فقط فیلدهای مشخصات فنی‌اش آمده.",
+  "other_option": {
+    "id": "other",
+    "name_fa": "سایر",
+    "reveals_text_input": true,
+    "max_length": 60
+  },
+  "search_note_fa": "فیلد aliases املاهای رایج فارسی را دارد؛ جستجو باید روی name_en و name_fa و aliases مچ کند.",
+  "countries": {
+    "US": {
+      "fa": "آمریکا",
+      "flag": "🇺🇸"
+    },
+    "GB": {
+      "fa": "انگلستان",
+      "flag": "🇬🇧"
+    },
+    "JP": {
+      "fa": "ژاپن",
+      "flag": "🇯🇵"
+    },
+    "BE": {
+      "fa": "بلژیک",
+      "flag": "🇧🇪"
+    },
+    "NL": {
+      "fa": "هلند",
+      "flag": "🇳🇱"
+    },
+    "CN": {
+      "fa": "چین",
+      "flag": "🇨🇳"
+    },
+    "TH": {
+      "fa": "تایلند",
+      "flag": "🇹🇭"
+    },
+    "CA": {
+      "fa": "کانادا",
+      "flag": "🇨🇦"
+    },
+    "FI": {
+      "fa": "فنلاند",
+      "flag": "🇫🇮"
+    },
+    "TW": {
+      "fa": "تایوان",
+      "flag": "🇹🇼"
+    },
+    "AR": {
+      "fa": "آرژانتین",
+      "flag": "🇦🇷"
+    },
+    "IR": {
+      "fa": "ایران",
+      "flag": "🇮🇷"
+    }
+  },
+  "tiers": {
+    "tournament": "تورنمنتی / حرفه‌ای",
+    "premium": "رده بالا",
+    "mid": "میان‌رده",
+    "budget": "اقتصادی"
+  },
+  "categories": [
+    {
+      "id": "cue_case",
+      "label_fa": "کیس چوب",
+      "label_en": "Cue Case",
+      "icon": "🧰",
+      "has_brands": true,
+      "note_fa": "کیس چوب برند و مدل جدی دارد. ظرفیت با فرمت «بات × شفت» بیان می‌شود؛ مثلاً ۲×۴ یعنی دو بات و چهار شفت.",
+      "brands": [
+        {
+          "id": "case__instroke",
+          "name_en": "Instroke",
+          "name_fa": "این‌استروک",
+          "country": "US",
+          "tier": "tournament",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "leather",
+              "name_en": "Leather Series",
+              "name_fa": "سری چرمی",
+              "note_fa": "استاندارد کیس چرمی حرفه‌ای"
+            },
+            {
+              "id": "tooled",
+              "name_en": "Hand Tooled Leather",
+              "name_fa": "چرم دست‌دوز"
+            },
+            {
+              "id": "cowboy",
+              "name_en": "Cowboy Series",
+              "name_fa": "سری کابوی",
+              "note_fa": "سافت‌کیس محبوب"
+            },
+            {
+              "id": "buffalo",
+              "name_en": "Buffalo Leather",
+              "name_fa": "چرم بوفالو"
+            },
+            {
+              "id": "exotic",
+              "name_en": "Exotic / Snakeskin",
+              "name_fa": "اگزوتیک / پوست مار"
+            },
+            {
+              "id": "d-series",
+              "name_en": "D-Series",
+              "name_fa": "سری D"
+            }
+          ],
+          "note_fa": "استاندارد کیس چرمی پریمیوم؛ چرم دست‌دوز، پوست مار و طرح سفارشی",
+          "aliases": [
+            "این استروک",
+            "اینستروک",
+            "Instroke",
+            "InStroke"
+          ]
+        },
+        {
+          "id": "case__jflowers",
+          "name_en": "J. Flowers",
+          "name_fa": "جی فلاورز",
+          "country": "US",
+          "tier": "tournament",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "jf-std",
+              "name_en": "J Flowers Case",
+              "name_fa": "کیس جی فلاورز"
+            }
+          ],
+          "aliases": [
+            "جی فلاورز",
+            "J Flowers"
+          ]
+        },
+        {
+          "id": "case__jb",
+          "name_en": "JB Cases",
+          "name_fa": "جی‌بی",
+          "country": "US",
+          "tier": "tournament",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "rugged",
+              "name_en": "JB Rugged",
+              "name_fa": "جی‌بی راگد",
+              "note_fa": "بسیار بادوام"
+            },
+            {
+              "id": "custom-jb",
+              "name_en": "JB Custom",
+              "name_fa": "سفارشی"
+            }
+          ],
+          "aliases": [
+            "جی بی",
+            "JB"
+          ]
+        },
+        {
+          "id": "case__john-parris-case",
+          "name_en": "John Parris",
+          "name_fa": "جان پاریس",
+          "country": "GB",
+          "tier": "tournament",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "jp-leather",
+              "name_en": "Handmade Leather Case",
+              "name_fa": "کیس چرمی دست‌دوز"
+            }
+          ],
+          "aliases": [
+            "جان پاریس",
+            "Parris"
+          ]
+        },
+        {
+          "id": "case__mezz-case",
+          "name_en": "Mezz",
+          "name_fa": "مِز",
+          "country": "JP",
+          "tier": "tournament",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "mz-standard",
+              "name_en": "Mezz Case",
+              "name_fa": "کیس مِز"
+            },
+            {
+              "id": "mz-soft",
+              "name_en": "Soft Case",
+              "name_fa": "سافت کیس"
+            }
+          ],
+          "aliases": [
+            "مز",
+            "Mezz"
+          ]
+        },
+        {
+          "id": "case__molinari-case",
+          "name_en": "Molinari",
+          "name_fa": "مولیناری",
+          "country": "NL",
+          "tier": "tournament",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "retro",
+              "name_en": "Retro Series",
+              "name_fa": "سری رترو"
+            },
+            {
+              "id": "flat",
+              "name_en": "Flat Case",
+              "name_fa": "کیس تخت"
+            },
+            {
+              "id": "deluxe",
+              "name_en": "Deluxe",
+              "name_fa": "دلوکس"
+            },
+            {
+              "id": "bags",
+              "name_en": "Molinari Bag",
+              "name_fa": "کیف مولیناری"
+            }
+          ],
+          "aliases": [
+            "مولیناری",
+            "Molinari"
+          ]
+        },
+        {
+          "id": "case__predator-case",
+          "name_en": "Predator",
+          "name_fa": "پردیتور",
+          "country": "US",
+          "tier": "tournament",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "roadline",
+              "name_en": "Roadline",
+              "name_fa": "رودلاین"
+            },
+            {
+              "id": "urbain",
+              "name_en": "Urbain",
+              "name_fa": "اوربین"
+            },
+            {
+              "id": "sport",
+              "name_en": "Sport Series",
+              "name_fa": "سری اسپرت"
+            },
+            {
+              "id": "metro",
+              "name_en": "Metro",
+              "name_fa": "مترو"
+            },
+            {
+              "id": "original",
+              "name_en": "Original Case",
+              "name_fa": "اورجینال"
+            },
+            {
+              "id": "travel",
+              "name_en": "Travel Case",
+              "name_fa": "کیس سفر"
+            }
+          ],
+          "note_fa": "نایلون بالستیک و چرم طبیعی، داخل پددار با آستین محافظ",
+          "aliases": [
+            "پردیتور",
+            "Predator"
+          ]
+        },
+        {
+          "id": "case__cue-craft-case",
+          "name_en": "Cue Craft",
+          "name_fa": "کیو کرافت",
+          "country": "GB",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "cc-leather",
+              "name_en": "Leather Case",
+              "name_fa": "کیس چرمی"
+            },
+            {
+              "id": "cc-alu",
+              "name_en": "Aluminium Case",
+              "name_fa": "کیس آلومینیومی"
+            },
+            {
+              "id": "cc-soft",
+              "name_en": "Soft Case",
+              "name_fa": "سافت کیس"
+            }
+          ],
+          "aliases": [
+            "کیو کرافت",
+            "Cue Craft"
+          ]
+        },
+        {
+          "id": "case__cuetec-case",
+          "name_en": "Cuetec",
+          "name_fa": "کیوتک",
+          "country": "CA",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "ct-hard",
+              "name_en": "Hard Case",
+              "name_fa": "هارد کیس"
+            },
+            {
+              "id": "ct-soft",
+              "name_en": "Soft Case",
+              "name_fa": "سافت کیس"
+            }
+          ],
+          "aliases": [
+            "کیوتک",
+            "Cuetec"
+          ]
+        },
+        {
+          "id": "case__gbl-case",
+          "name_en": "GBL",
+          "name_fa": "جی‌بی‌ال",
+          "country": "GB",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "gbl-leather",
+              "name_en": "Leather Case",
+              "name_fa": "کیس چرمی"
+            },
+            {
+              "id": "gbl-hard",
+              "name_en": "Hard Case",
+              "name_fa": "هارد کیس"
+            }
+          ],
+          "aliases": [
+            "جی بی ال",
+            "GBL"
+          ]
+        },
+        {
+          "id": "case__maximus-case",
+          "name_en": "Maximus",
+          "name_fa": "مکسیموس",
+          "country": "TH",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "mx-std",
+              "name_en": "Maximus Case",
+              "name_fa": "کیس مکسیموس"
+            }
+          ],
+          "aliases": [
+            "مکسیموس",
+            "Maximus"
+          ]
+        },
+        {
+          "id": "case__mcdermott-case",
+          "name_en": "McDermott",
+          "name_fa": "مک‌درموت",
+          "country": "US",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "mcd-hard",
+              "name_en": "Hard Case",
+              "name_fa": "هارد کیس"
+            },
+            {
+              "id": "mcd-soft",
+              "name_en": "Soft Case",
+              "name_fa": "سافت کیس"
+            }
+          ],
+          "aliases": [
+            "مک درموت",
+            "McDermott"
+          ]
+        },
+        {
+          "id": "case__omin-case",
+          "name_en": "O'Min",
+          "name_fa": "اومین",
+          "country": "TH",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "om-std",
+              "name_en": "O'Min Case",
+              "name_fa": "کیس اومین"
+            }
+          ],
+          "aliases": [
+            "اومین",
+            "O'Min"
+          ]
+        },
+        {
+          "id": "case__peradon-case",
+          "name_en": "Peradon",
+          "name_fa": "پرادون",
+          "country": "GB",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "leather-snk",
+              "name_en": "Leather Snooker Case",
+              "name_fa": "کیس چرمی اسنوکر"
+            },
+            {
+              "id": "aluminium",
+              "name_en": "Aluminium Case",
+              "name_fa": "کیس آلومینیومی"
+            },
+            {
+              "id": "halo",
+              "name_en": "Halo Case",
+              "name_fa": "هالو"
+            },
+            {
+              "id": "soft-pd",
+              "name_en": "Soft Case",
+              "name_fa": "سافت کیس"
+            }
+          ],
+          "note_fa": "کیس اسنوکر بریتانیایی؛ طول بلندتر برای چوب ۵۷ تا ۵۸ اینچ",
+          "aliases": [
+            "پرادون",
+            "Peradon"
+          ]
+        },
+        {
+          "id": "case__porper",
+          "name_en": "Porper",
+          "name_fa": "پورپر",
+          "country": "US",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "pp-std",
+              "name_en": "Porper Case",
+              "name_fa": "کیس پورپر"
+            }
+          ],
+          "aliases": [
+            "پورپر",
+            "Porper"
+          ]
+        },
+        {
+          "id": "case__qks",
+          "name_en": "QK-S",
+          "name_fa": "کیو‌کی‌اس",
+          "country": "US",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "qks-std",
+              "name_en": "QK-S Case",
+              "name_fa": "کیس QK-S"
+            }
+          ],
+          "aliases": [
+            "QK-S",
+            "QKS"
+          ]
+        },
+        {
+          "id": "case__tango",
+          "name_en": "Tango",
+          "name_fa": "تانگو",
+          "country": "AR",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "tg-std",
+              "name_en": "Tango Case",
+              "name_fa": "کیس تانگو"
+            }
+          ],
+          "aliases": [
+            "تانگو",
+            "Tango"
+          ]
+        },
+        {
+          "id": "case__ton-praram-case",
+          "name_en": "Ton Praram",
+          "name_fa": "تون پرارام",
+          "country": "TH",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "tp-std",
+              "name_en": "Ton Praram Case",
+              "name_fa": "کیس تون پرارام"
+            }
+          ],
+          "aliases": [
+            "تون پرارام",
+            "Ton Praram"
+          ]
+        },
+        {
+          "id": "case__action-case",
+          "name_en": "Action",
+          "name_fa": "اکشن",
+          "country": "US",
+          "tier": "mid",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "ac-backpack",
+              "name_en": "Backpack Case",
+              "name_fa": "کیس کوله‌پشتی"
+            },
+            {
+              "id": "ac-hard",
+              "name_en": "Hard Case",
+              "name_fa": "هارد کیس"
+            },
+            {
+              "id": "ac-soft",
+              "name_en": "Soft Case",
+              "name_fa": "سافت کیس"
+            }
+          ],
+          "note_fa": "کیس کوله‌پشتی اقتصادی با تنوع رنگ بالا",
+          "aliases": [
+            "اکشن",
+            "Action"
+          ]
+        },
+        {
+          "id": "case__athena-case",
+          "name_en": "Athena",
+          "name_fa": "آتنا",
+          "country": "US",
+          "tier": "mid",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "at-std",
+              "name_en": "Athena Case",
+              "name_fa": "کیس آتنا"
+            }
+          ],
+          "aliases": [
+            "آتنا",
+            "Athena"
+          ]
+        },
+        {
+          "id": "case__ebm",
+          "name_en": "Eight Ball Mafia",
+          "name_fa": "ایت بال مافیا",
+          "country": "US",
+          "tier": "mid",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "ebm-std",
+              "name_en": "EBM Case",
+              "name_fa": "کیس EBM"
+            }
+          ],
+          "aliases": [
+            "EBM"
+          ]
+        },
+        {
+          "id": "case__elite-case",
+          "name_en": "Elite",
+          "name_fa": "الیت",
+          "country": "US",
+          "tier": "mid",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "el-std",
+              "name_en": "Elite Case",
+              "name_fa": "کیس الیت"
+            }
+          ],
+          "aliases": [
+            "الیت",
+            "Elite"
+          ]
+        },
+        {
+          "id": "case__fury-case",
+          "name_en": "Fury",
+          "name_fa": "فیوری",
+          "country": "CN",
+          "tier": "mid",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "fy-std",
+              "name_en": "Fury Case",
+              "name_fa": "کیس فیوری"
+            }
+          ],
+          "aliases": [
+            "فیوری",
+            "Fury"
+          ]
+        },
+        {
+          "id": "case__iranian-case",
+          "name_en": "Iranian / Local",
+          "name_fa": "ایرانی / داخلی",
+          "country": "IR",
+          "tier": "mid",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "ir-std",
+              "name_en": "Local Made",
+              "name_fa": "ساخت داخل"
+            }
+          ],
+          "aliases": [
+            "ایرانی",
+            "داخلی"
+          ]
+        },
+        {
+          "id": "case__katana-case",
+          "name_en": "Katana",
+          "name_fa": "کاتانا",
+          "country": "US",
+          "tier": "mid",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "kt-std",
+              "name_en": "Katana Case",
+              "name_fa": "کیس کاتانا"
+            }
+          ],
+          "aliases": [
+            "کاتانا",
+            "Katana"
+          ]
+        },
+        {
+          "id": "case__konllen-case",
+          "name_en": "Konllen",
+          "name_fa": "کانلن",
+          "country": "CN",
+          "tier": "mid",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "kn-std",
+              "name_en": "Konllen Case",
+              "name_fa": "کیس کانلن"
+            }
+          ],
+          "aliases": [
+            "کانلن",
+            "Konllen"
+          ]
+        },
+        {
+          "id": "case__lizard",
+          "name_en": "Lizard",
+          "name_fa": "لیزارد",
+          "country": "US",
+          "tier": "mid",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "lz-std",
+              "name_en": "Lizard Case",
+              "name_fa": "کیس لیزارد"
+            }
+          ],
+          "aliases": [
+            "لیزارد",
+            "Lizard"
+          ]
+        },
+        {
+          "id": "case__lucasi-case",
+          "name_en": "Lucasi",
+          "name_fa": "لوکاسی",
+          "country": "CN",
+          "tier": "mid",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "lc-std",
+              "name_en": "Lucasi Case",
+              "name_fa": "کیس لوکاسی"
+            }
+          ],
+          "aliases": [
+            "لوکاسی",
+            "Lucasi"
+          ]
+        },
+        {
+          "id": "case__outlaw-case",
+          "name_en": "Outlaw",
+          "name_fa": "اوت‌لا",
+          "country": "US",
+          "tier": "mid",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "ol-std",
+              "name_en": "Outlaw Case",
+              "name_fa": "کیس اوت‌لا"
+            }
+          ],
+          "aliases": [
+            "اوت لا",
+            "Outlaw"
+          ]
+        },
+        {
+          "id": "case__riley-case",
+          "name_en": "Riley / BCE",
+          "name_fa": "رایلی / بی‌سی‌ای",
+          "country": "GB",
+          "tier": "mid",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "rl-alu",
+              "name_en": "Aluminium Case",
+              "name_fa": "کیس آلومینیومی"
+            },
+            {
+              "id": "rl-soft",
+              "name_en": "Soft Case",
+              "name_fa": "سافت کیس"
+            }
+          ],
+          "aliases": [
+            "رایلی",
+            "Riley",
+            "BCE"
+          ]
+        },
+        {
+          "id": "case__scorpion-case",
+          "name_en": "Scorpion",
+          "name_fa": "اسکورپیون",
+          "country": "US",
+          "tier": "mid",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "sc-std",
+              "name_en": "Scorpion Case",
+              "name_fa": "کیس اسکورپیون"
+            }
+          ],
+          "aliases": [
+            "اسکورپیون",
+            "Scorpion"
+          ]
+        },
+        {
+          "id": "case__voodoo-case",
+          "name_en": "Voodoo",
+          "name_fa": "وودو",
+          "country": "US",
+          "tier": "mid",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "vd-std",
+              "name_en": "Voodoo Case",
+              "name_fa": "کیس وودو"
+            }
+          ],
+          "aliases": [
+            "وودو",
+            "Voodoo"
+          ]
+        },
+        {
+          "id": "case__chinese-case",
+          "name_en": "Chinese Unbranded",
+          "name_fa": "چینی بدون برند",
+          "country": "CN",
+          "tier": "budget",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "cn-std",
+              "name_en": "Generic Case",
+              "name_fa": "کیس معمولی"
+            }
+          ],
+          "aliases": [
+            "چینی"
+          ]
+        },
+        {
+          "id": "case__unknown-case",
+          "name_en": "Unknown / Unbranded",
+          "name_fa": "نامشخص / بدون برند",
+          "country": null,
+          "tier": "budget",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "uk-std",
+              "name_en": "Unknown",
+              "name_fa": "نامشخص"
+            }
+          ],
+          "aliases": [
+            "نامشخص"
+          ]
+        }
+      ],
+      "specs": [
+        {
+          "id": "case_type",
+          "label_fa": "نوع کیس",
+          "type": "select",
+          "allow_other": true,
+          "help_fa": "هارد کیس محافظت حداکثری و سافت کیس سبک و راحت.",
+          "options": [
+            {
+              "id": "hard",
+              "label_fa": "هارد کیس",
+              "label_en": "Hard Case",
+              "note_fa": "بدنه سفت؛ محافظت حداکثری، مناسب سفر و تورنمنت"
+            },
+            {
+              "id": "soft",
+              "label_fa": "سافت کیس",
+              "label_en": "Soft Case",
+              "note_fa": "سبک و راحت برای حمل روزمره"
+            },
+            {
+              "id": "tube",
+              "label_fa": "تیوب کیس (لوله‌ای)",
+              "label_en": "Tube Case",
+              "note_fa": "لوله‌ای، ساده و جمع‌وجور"
+            },
+            {
+              "id": "backpack",
+              "label_fa": "کوله‌پشتی",
+              "label_en": "Backpack Case"
+            },
+            {
+              "id": "box",
+              "label_fa": "باکس کیس",
+              "label_en": "Box Case"
+            },
+            {
+              "id": "hybrid",
+              "label_fa": "ترکیبی",
+              "label_en": "Hybrid"
+            }
+          ],
+          "required": false
+        },
+        {
+          "id": "capacity",
+          "label_fa": "ظرفیت (بات × شفت)",
+          "type": "select",
+          "allow_other": true,
+          "help_fa": "۱×۱ یعنی یک بات و یک شفت (یک چوب). ۲×۴ برای چوب بازی و چوب بریک محبوب‌ترین است.",
+          "options": [
+            {
+              "id": "1x1",
+              "label_fa": "۱×۱",
+              "label_en": "1x1"
+            },
+            {
+              "id": "1x2",
+              "label_fa": "۱×۲",
+              "label_en": "1x2"
+            },
+            {
+              "id": "2x2",
+              "label_fa": "۲×۲",
+              "label_en": "2x2"
+            },
+            {
+              "id": "2x3",
+              "label_fa": "۲×۳",
+              "label_en": "2x3"
+            },
+            {
+              "id": "2x4",
+              "label_fa": "۲×۴",
+              "label_en": "2x4",
+              "note_fa": "محبوب‌ترین برای بازیکن لیگ"
+            },
+            {
+              "id": "3x4",
+              "label_fa": "۳×۴",
+              "label_en": "3x4"
+            },
+            {
+              "id": "3x5",
+              "label_fa": "۳×۵",
+              "label_en": "3x5",
+              "note_fa": "تورنمنتی"
+            },
+            {
+              "id": "3x6",
+              "label_fa": "۳×۶",
+              "label_en": "3x6"
+            },
+            {
+              "id": "4x8",
+              "label_fa": "۴×۸",
+              "label_en": "4x8",
+              "note_fa": "حداکثر ظرفیت"
+            }
+          ],
+          "required": false
+        },
+        {
+          "id": "case_material",
+          "label_fa": "جنس",
+          "type": "select",
+          "allow_other": true,
+          "options": [
+            {
+              "id": "genuine-leather",
+              "label_fa": "چرم طبیعی",
+              "label_en": "Genuine Leather"
+            },
+            {
+              "id": "tooled-leather",
+              "label_fa": "چرم دست‌دوز",
+              "label_en": "Tooled Leather"
+            },
+            {
+              "id": "synthetic-leather",
+              "label_fa": "چرم مصنوعی",
+              "label_en": "Synthetic Leather"
+            },
+            {
+              "id": "ballistic-nylon",
+              "label_fa": "نایلون بالستیک",
+              "label_en": "Ballistic Nylon"
+            },
+            {
+              "id": "nylon",
+              "label_fa": "نایلون معمولی",
+              "label_en": "Nylon"
+            },
+            {
+              "id": "aluminium-case",
+              "label_fa": "آلومینیوم",
+              "label_en": "Aluminium"
+            },
+            {
+              "id": "abs",
+              "label_fa": "پلاستیک ABS",
+              "label_en": "ABS"
+            },
+            {
+              "id": "wood-case",
+              "label_fa": "چوب",
+              "label_en": "Wood"
+            },
+            {
+              "id": "canvas",
+              "label_fa": "کتان / بوم",
+              "label_en": "Canvas"
+            },
+            {
+              "id": "exotic-skin",
+              "label_fa": "پوست اگزوتیک",
+              "label_en": "Exotic Skin"
+            }
+          ],
+          "required": false
+        },
+        {
+          "id": "case_length_cm",
+          "label_fa": "طول داخلی (سانتی‌متر)",
+          "type": "number",
+          "placeholder": "85",
+          "help_fa": "مهم: چوب اسنوکر ۱۴۵ تا ۱۴۸ سانتی‌متر است و کیس‌های پاکت بیلیارد اغلب برایش کوتاه‌اند.",
+          "common": [
+            75,
+            80,
+            85,
+            90,
+            150
+          ],
+          "required": false
+        },
+        {
+          "id": "case_color",
+          "label_fa": "رنگ",
+          "type": "select",
+          "allow_other": true,
+          "options": [
+            {
+              "id": "black",
+              "label_fa": "مشکی"
+            },
+            {
+              "id": "brown",
+              "label_fa": "قهوه‌ای"
+            },
+            {
+              "id": "tan",
+              "label_fa": "بژ / عسلی"
+            },
+            {
+              "id": "blue",
+              "label_fa": "آبی"
+            },
+            {
+              "id": "red",
+              "label_fa": "قرمز"
+            },
+            {
+              "id": "green",
+              "label_fa": "سبز"
+            },
+            {
+              "id": "grey",
+              "label_fa": "خاکستری"
+            },
+            {
+              "id": "white",
+              "label_fa": "سفید"
+            },
+            {
+              "id": "multicolor",
+              "label_fa": "چندرنگ"
+            }
+          ],
+          "required": false
+        },
+        {
+          "id": "has_shoulder_strap",
+          "label_fa": "بند دوشی",
+          "type": "boolean",
+          "required": false
+        },
+        {
+          "id": "has_pockets",
+          "label_fa": "جیب لوازم جانبی",
+          "type": "boolean",
+          "required": false
+        },
+        {
+          "id": "has_lock",
+          "label_fa": "قفل",
+          "type": "boolean",
+          "required": false
+        },
+        {
+          "id": "fits_snooker",
+          "label_fa": "مناسب چوب اسنوکر (۵۷ تا ۵۸ اینچ)",
+          "type": "boolean",
+          "help_fa": "چوب اسنوکر بلندتر از چوب پاکت بیلیارد است؛ همه کیس‌ها جا نمی‌دهند",
+          "required": false
+        }
+      ]
+    },
+    {
+      "id": "extension",
+      "label_fa": "اکستنشن",
+      "label_en": "Cue Extension",
+      "icon": "🪄",
+      "has_brands": true,
+      "note_fa": "اکستنشن به انتهای بات وصل می‌شود و طول چوب را زیاد می‌کند. سازگاری با نوع اتصال چوب حیاتی است.",
+      "brands": [
+        {
+          "id": "ext__john-parris-ext",
+          "name_en": "John Parris",
+          "name_fa": "جان پاریس",
+          "country": "GB",
+          "tier": "tournament",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "jp-telescopic",
+              "name_en": "Telescopic Extension",
+              "name_fa": "اکستنشن تلسکوپی"
+            },
+            {
+              "id": "jp-screw",
+              "name_en": "Screw-in Extension",
+              "name_fa": "اکستنشن پیچی"
+            },
+            {
+              "id": "jp-mini-butt",
+              "name_en": "Mini Butt",
+              "name_fa": "مینی بات"
+            }
+          ],
+          "aliases": [
+            "جان پاریس",
+            "Parris"
+          ]
+        },
+        {
+          "id": "ext__mike-wooldridge-ext",
+          "name_en": "Mike Wooldridge",
+          "name_fa": "مایک وولدریج",
+          "country": "GB",
+          "tier": "tournament",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "mw-ext",
+              "name_en": "MW Extension",
+              "name_fa": "اکستنشن MW"
+            }
+          ],
+          "aliases": [
+            "وولدریج",
+            "MW"
+          ]
+        },
+        {
+          "id": "ext__predator-ext",
+          "name_en": "Predator",
+          "name_fa": "پردیتور",
+          "country": "US",
+          "tier": "tournament",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "pd-ext",
+              "name_en": "Predator Extension",
+              "name_fa": "اکستنشن پردیتور"
+            }
+          ],
+          "aliases": [
+            "پردیتور",
+            "Predator"
+          ]
+        },
+        {
+          "id": "ext__cue-craft-ext",
+          "name_en": "Cue Craft",
+          "name_fa": "کیو کرافت",
+          "country": "GB",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "cc-telescopic",
+              "name_en": "Telescopic Extension",
+              "name_fa": "تلسکوپی"
+            },
+            {
+              "id": "cc-magnetic",
+              "name_en": "Magnetic Extension",
+              "name_fa": "مغناطیسی"
+            }
+          ],
+          "aliases": [
+            "کیو کرافت",
+            "Cue Craft"
+          ]
+        },
+        {
+          "id": "ext__gbl-ext",
+          "name_en": "GBL",
+          "name_fa": "جی‌بی‌ال",
+          "country": "GB",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "gbl-ext",
+              "name_en": "GBL Extension",
+              "name_fa": "اکستنشن GBL"
+            }
+          ],
+          "aliases": [
+            "GBL"
+          ]
+        },
+        {
+          "id": "ext__maximus-ext",
+          "name_en": "Maximus",
+          "name_fa": "مکسیموس",
+          "country": "TH",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "mx-ext",
+              "name_en": "Maximus Extension",
+              "name_fa": "اکستنشن مکسیموس"
+            }
+          ],
+          "aliases": [
+            "مکسیموس",
+            "Maximus"
+          ]
+        },
+        {
+          "id": "ext__mezz-ext",
+          "name_en": "Mezz",
+          "name_fa": "مِز",
+          "country": "JP",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "mz-ext",
+              "name_en": "Mezz Extension",
+              "name_fa": "اکستنشن مِز"
+            }
+          ],
+          "aliases": [
+            "مز",
+            "Mezz"
+          ]
+        },
+        {
+          "id": "ext__omin-ext",
+          "name_en": "O'Min",
+          "name_fa": "اومین",
+          "country": "TH",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "om-ext",
+              "name_en": "O'Min Extension",
+              "name_fa": "اکستنشن اومین"
+            }
+          ],
+          "aliases": [
+            "اومین",
+            "O'Min"
+          ]
+        },
+        {
+          "id": "ext__peradon-ext",
+          "name_en": "Peradon",
+          "name_fa": "پرادون",
+          "country": "GB",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "pd-telescopic",
+              "name_en": "Telescopic",
+              "name_fa": "تلسکوپی"
+            },
+            {
+              "id": "pd-screw",
+              "name_en": "Screw-in",
+              "name_fa": "پیچی"
+            }
+          ],
+          "aliases": [
+            "پرادون",
+            "Peradon"
+          ]
+        },
+        {
+          "id": "ext__ton-praram-ext",
+          "name_en": "Ton Praram",
+          "name_fa": "تون پرارام",
+          "country": "TH",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "tp-ext",
+              "name_en": "Ton Praram Extension",
+              "name_fa": "اکستنشن"
+            }
+          ],
+          "aliases": [
+            "تون پرارام"
+          ]
+        },
+        {
+          "id": "ext__riley-ext",
+          "name_en": "Riley / BCE",
+          "name_fa": "رایلی / بی‌سی‌ای",
+          "country": "GB",
+          "tier": "mid",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "rl-ext",
+              "name_en": "Riley Extension",
+              "name_fa": "اکستنشن رایلی"
+            }
+          ],
+          "aliases": [
+            "رایلی",
+            "Riley"
+          ]
+        },
+        {
+          "id": "ext__chinese-ext",
+          "name_en": "Chinese Unbranded",
+          "name_fa": "چینی بدون برند",
+          "country": "CN",
+          "tier": "budget",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "cn-ext",
+              "name_en": "Generic Extension",
+              "name_fa": "اکستنشن معمولی"
+            }
+          ],
+          "aliases": [
+            "چینی"
+          ]
+        },
+        {
+          "id": "ext__unknown-ext",
+          "name_en": "Unknown / Unbranded",
+          "name_fa": "نامشخص / بدون برند",
+          "country": null,
+          "tier": "budget",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "uk-ext",
+              "name_en": "Unknown",
+              "name_fa": "نامشخص"
+            }
+          ],
+          "aliases": [
+            "نامشخص"
+          ]
+        }
+      ],
+      "specs": [
+        {
+          "id": "ext_type",
+          "label_fa": "نوع اکستنشن",
+          "type": "select",
+          "allow_other": true,
+          "options": [
+            {
+              "id": "telescopic",
+              "label_fa": "تلسکوپی",
+              "label_en": "Telescopic",
+              "note_fa": "طول قابل تنظیم"
+            },
+            {
+              "id": "screw-in",
+              "label_fa": "پیچی",
+              "label_en": "Screw-in"
+            },
+            {
+              "id": "magnetic",
+              "label_fa": "مغناطیسی",
+              "label_en": "Magnetic"
+            },
+            {
+              "id": "slip-on",
+              "label_fa": "روکشی (اسلیپ‌آن)",
+              "label_en": "Slip-on",
+              "note_fa": "روی بات می‌لغزد، نیاز به رزوه ندارد"
+            },
+            {
+              "id": "mini-butt",
+              "label_fa": "مینی بات",
+              "label_en": "Mini Butt",
+              "note_fa": "بات کوتاه جایگزین"
+            }
+          ],
+          "required": false
+        },
+        {
+          "id": "ext_length_cm",
+          "label_fa": "طول (سانتی‌متر)",
+          "type": "number",
+          "placeholder": "25",
+          "help_fa": "اکستنشن کوتاه ۱۵ تا ۳۰ و بلند تا ۹۰ سانتی‌متر",
+          "common": [
+            15,
+            20,
+            25,
+            30,
+            45,
+            60,
+            90
+          ],
+          "required": false
+        },
+        {
+          "id": "ext_joint",
+          "label_fa": "نوع اتصال",
+          "type": "select",
+          "allow_other": true,
+          "help_fa": "باید با رزوه انتهای بات چوب شما بخواند.",
+          "options": [
+            {
+              "id": "brass-thread",
+              "label_fa": "رزوه برنجی",
+              "label_en": "Brass Thread"
+            },
+            {
+              "id": "steel-thread",
+              "label_fa": "رزوه فولادی",
+              "label_en": "Steel Thread"
+            },
+            {
+              "id": "uni-loc-ext",
+              "label_fa": "Uni-Loc",
+              "label_en": "Uni-Loc"
+            },
+            {
+              "id": "3-8-10-ext",
+              "label_fa": "3/8-10",
+              "label_en": "3/8-10"
+            },
+            {
+              "id": "magnetic-joint",
+              "label_fa": "مغناطیسی",
+              "label_en": "Magnetic"
+            },
+            {
+              "id": "universal",
+              "label_fa": "یونیورسال",
+              "label_en": "Universal"
+            }
+          ],
+          "required": false
+        },
+        {
+          "id": "ext_weight_g",
+          "label_fa": "وزن (گرم)",
+          "type": "number",
+          "placeholder": "60",
+          "required": false
+        },
+        {
+          "id": "ext_material",
+          "label_fa": "جنس",
+          "type": "select",
+          "allow_other": true,
+          "options": [
+            {
+              "id": "wood-ext",
+              "label_fa": "چوب",
+              "label_en": "Wood"
+            },
+            {
+              "id": "ebony-ext",
+              "label_fa": "آبنوس",
+              "label_en": "Ebony"
+            },
+            {
+              "id": "aluminium-ext",
+              "label_fa": "آلومینیوم",
+              "label_en": "Aluminium"
+            },
+            {
+              "id": "carbon-ext",
+              "label_fa": "کربن",
+              "label_en": "Carbon Fiber"
+            },
+            {
+              "id": "brass-ext",
+              "label_fa": "برنج",
+              "label_en": "Brass"
+            },
+            {
+              "id": "plastic-ext",
+              "label_fa": "پلاستیک",
+              "label_en": "Plastic"
+            }
+          ],
+          "required": false
+        }
+      ]
+    },
+    {
+      "id": "ball_bag",
+      "label_fa": "کیف توپ",
+      "label_en": "Ball Bag / Case",
+      "icon": "👜",
+      "has_brands": true,
+      "brands": [
+        {
+          "id": "ballbag__aramith-bag",
+          "name_en": "Aramith",
+          "name_fa": "آرامیت",
+          "country": "BE",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "ar-box",
+              "name_en": "Aramith Box Case",
+              "name_fa": "جعبه آرامیت"
+            },
+            {
+              "id": "ar-bag",
+              "name_en": "Ball Bag",
+              "name_fa": "کیف توپ"
+            }
+          ],
+          "aliases": [
+            "آرامیت",
+            "Aramith"
+          ]
+        },
+        {
+          "id": "ballbag__dynaspheres-bag",
+          "name_en": "Dynaspheres",
+          "name_fa": "داینااسفیر",
+          "country": "TW",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "dy-case",
+              "name_en": "Ball Case",
+              "name_fa": "جعبه توپ"
+            }
+          ],
+          "aliases": [
+            "داینااسفیر"
+          ]
+        },
+        {
+          "id": "ballbag__peradon-bag",
+          "name_en": "Peradon",
+          "name_fa": "پرادون",
+          "country": "GB",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "pd-leather-bag",
+              "name_en": "Leather Ball Bag",
+              "name_fa": "کیف چرمی توپ"
+            },
+            {
+              "id": "pd-case-22",
+              "name_en": "22-Ball Case",
+              "name_fa": "جعبه ۲۲ توپ"
+            }
+          ],
+          "aliases": [
+            "پرادون",
+            "Peradon"
+          ]
+        },
+        {
+          "id": "ballbag__predator-bag",
+          "name_en": "Predator",
+          "name_fa": "پردیتور",
+          "country": "US",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "pd-bag",
+              "name_en": "Ball Bag",
+              "name_fa": "کیف توپ"
+            }
+          ],
+          "aliases": [
+            "پردیتور",
+            "Predator"
+          ]
+        },
+        {
+          "id": "ballbag__cue-craft-bag",
+          "name_en": "Cue Craft",
+          "name_fa": "کیو کرافت",
+          "country": "GB",
+          "tier": "mid",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "cc-bag",
+              "name_en": "Ball Bag",
+              "name_fa": "کیف توپ"
+            }
+          ],
+          "aliases": [
+            "کیو کرافت"
+          ]
+        },
+        {
+          "id": "ballbag__iranian-bag",
+          "name_en": "Iranian / Local",
+          "name_fa": "ایرانی / داخلی",
+          "country": "IR",
+          "tier": "mid",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "ir-bag",
+              "name_en": "Local Made",
+              "name_fa": "ساخت داخل"
+            }
+          ],
+          "aliases": [
+            "ایرانی"
+          ]
+        },
+        {
+          "id": "ballbag__chinese-bag",
+          "name_en": "Chinese Unbranded",
+          "name_fa": "چینی بدون برند",
+          "country": "CN",
+          "tier": "budget",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "cn-bag",
+              "name_en": "Generic Bag",
+              "name_fa": "کیف معمولی"
+            }
+          ],
+          "aliases": [
+            "چینی"
+          ]
+        },
+        {
+          "id": "ballbag__unknown-bag",
+          "name_en": "Unknown / Unbranded",
+          "name_fa": "نامشخص / بدون برند",
+          "country": null,
+          "tier": "budget",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "uk-bag",
+              "name_en": "Unknown",
+              "name_fa": "نامشخص"
+            }
+          ],
+          "aliases": [
+            "نامشخص"
+          ]
+        }
+      ],
+      "specs": [
+        {
+          "id": "bag_capacity",
+          "label_fa": "ظرفیت",
+          "type": "select",
+          "allow_other": true,
+          "options": [
+            {
+              "id": "22",
+              "label_fa": "۲۲ توپ (اسنوکر کامل)",
+              "label_en": "22 Balls"
+            },
+            {
+              "id": "17",
+              "label_fa": "۱۷ توپ"
+            },
+            {
+              "id": "16",
+              "label_fa": "۱۶ توپ (پاکت بیلیارد کامل)",
+              "label_en": "16 Balls"
+            },
+            {
+              "id": "6",
+              "label_fa": "۶ توپ"
+            },
+            {
+              "id": "3",
+              "label_fa": "۳ توپ (کارامبول)",
+              "label_en": "3 Balls"
+            },
+            {
+              "id": "1",
+              "label_fa": "تک توپ"
+            }
+          ],
+          "required": false
+        },
+        {
+          "id": "bag_type",
+          "label_fa": "نوع",
+          "type": "select",
+          "allow_other": true,
+          "options": [
+            {
+              "id": "hard-box",
+              "label_fa": "جعبه سفت",
+              "label_en": "Hard Box"
+            },
+            {
+              "id": "soft-bag",
+              "label_fa": "کیف نرم",
+              "label_en": "Soft Bag"
+            },
+            {
+              "id": "wooden-box",
+              "label_fa": "جعبه چوبی",
+              "label_en": "Wooden Box"
+            },
+            {
+              "id": "tray",
+              "label_fa": "سینی",
+              "label_en": "Tray"
+            },
+            {
+              "id": "pouch",
+              "label_fa": "کیسه",
+              "label_en": "Pouch"
+            }
+          ],
+          "required": false
+        },
+        {
+          "id": "bag_material",
+          "label_fa": "جنس",
+          "type": "select",
+          "allow_other": true,
+          "options": [
+            {
+              "id": "leather-bag",
+              "label_fa": "چرم",
+              "label_en": "Leather"
+            },
+            {
+              "id": "synthetic-bag",
+              "label_fa": "چرم مصنوعی",
+              "label_en": "Synthetic"
+            },
+            {
+              "id": "nylon-bag",
+              "label_fa": "نایلون",
+              "label_en": "Nylon"
+            },
+            {
+              "id": "wood-bag",
+              "label_fa": "چوب",
+              "label_en": "Wood"
+            },
+            {
+              "id": "aluminium-bag",
+              "label_fa": "آلومینیوم",
+              "label_en": "Aluminium"
+            },
+            {
+              "id": "plastic-bag",
+              "label_fa": "پلاستیک",
+              "label_en": "Plastic"
+            }
+          ],
+          "required": false
+        },
+        {
+          "id": "has_dividers",
+          "label_fa": "جداکننده داخلی",
+          "type": "boolean",
+          "required": false
+        }
+      ]
+    },
+    {
+      "id": "rest",
+      "label_fa": "رست",
+      "label_en": "Rest / Bridge",
+      "icon": "🎯",
+      "has_brands": true,
+      "note_fa": "رست برای ضرباتی که دست به توپ نمی‌رسد. اسپایدر و هوک ارتفاع بیشتری دارند.",
+      "brands": [
+        {
+          "id": "rest__cue-craft-rest",
+          "name_en": "Cue Craft",
+          "name_fa": "کیو کرافت",
+          "country": "GB",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "cc-cross",
+              "name_en": "Cross Rest",
+              "name_fa": "رست ضربدری"
+            },
+            {
+              "id": "cc-spider",
+              "name_en": "Spider",
+              "name_fa": "اسپایدر"
+            },
+            {
+              "id": "cc-hook",
+              "name_en": "Hook Rest",
+              "name_fa": "هوک"
+            }
+          ],
+          "aliases": [
+            "کیو کرافت",
+            "Cue Craft"
+          ]
+        },
+        {
+          "id": "rest__peradon-rest",
+          "name_en": "Peradon",
+          "name_fa": "پرادون",
+          "country": "GB",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "pd-cross",
+              "name_en": "Cross Rest",
+              "name_fa": "رست ضربدری"
+            },
+            {
+              "id": "pd-spider",
+              "name_en": "Spider Rest",
+              "name_fa": "اسپایدر"
+            },
+            {
+              "id": "pd-hook",
+              "name_en": "Hook Rest",
+              "name_fa": "هوک رست"
+            },
+            {
+              "id": "pd-swan",
+              "name_en": "Swan Neck",
+              "name_fa": "سوان نک (گردن قو)"
+            },
+            {
+              "id": "pd-extending",
+              "name_en": "Extending Rest",
+              "name_fa": "رست کشویی"
+            }
+          ],
+          "aliases": [
+            "پرادون",
+            "Peradon"
+          ]
+        },
+        {
+          "id": "rest__predator-rest",
+          "name_en": "Predator",
+          "name_fa": "پردیتور",
+          "country": "US",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "pd-bridge",
+              "name_en": "Bridge Head",
+              "name_fa": "بریج هد"
+            }
+          ],
+          "aliases": [
+            "پردیتور"
+          ]
+        },
+        {
+          "id": "rest__iranian-rest",
+          "name_en": "Iranian / Local",
+          "name_fa": "ایرانی / داخلی",
+          "country": "IR",
+          "tier": "mid",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "ir-rest",
+              "name_en": "Local Made",
+              "name_fa": "ساخت داخل"
+            }
+          ],
+          "aliases": [
+            "ایرانی"
+          ]
+        },
+        {
+          "id": "rest__riley-rest",
+          "name_en": "Riley / BCE",
+          "name_fa": "رایلی / بی‌سی‌ای",
+          "country": "GB",
+          "tier": "mid",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "rl-cross",
+              "name_en": "Cross Rest",
+              "name_fa": "رست ضربدری"
+            },
+            {
+              "id": "rl-spider",
+              "name_en": "Spider",
+              "name_fa": "اسپایدر"
+            }
+          ],
+          "aliases": [
+            "رایلی",
+            "Riley"
+          ]
+        },
+        {
+          "id": "rest__star-rest",
+          "name_en": "Star / Xingpai",
+          "name_fa": "استار / شینگ‌پای",
+          "country": "CN",
+          "tier": "mid",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "xp-rest",
+              "name_en": "Rest Set",
+              "name_fa": "ست رست"
+            }
+          ],
+          "aliases": [
+            "استار",
+            "Star"
+          ]
+        },
+        {
+          "id": "rest__chinese-rest",
+          "name_en": "Chinese Unbranded",
+          "name_fa": "چینی بدون برند",
+          "country": "CN",
+          "tier": "budget",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "cn-rest",
+              "name_en": "Generic Rest",
+              "name_fa": "رست معمولی"
+            }
+          ],
+          "aliases": [
+            "چینی"
+          ]
+        },
+        {
+          "id": "rest__unknown-rest",
+          "name_en": "Unknown / Unbranded",
+          "name_fa": "نامشخص / بدون برند",
+          "country": null,
+          "tier": "budget",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "uk-rest",
+              "name_en": "Unknown",
+              "name_fa": "نامشخص"
+            }
+          ],
+          "aliases": [
+            "نامشخص"
+          ]
+        }
+      ],
+      "specs": [
+        {
+          "id": "rest_type",
+          "label_fa": "نوع رست",
+          "type": "select",
+          "allow_other": true,
+          "options": [
+            {
+              "id": "cross",
+              "label_fa": "رست ضربدری (X)",
+              "label_en": "Cross Rest",
+              "note_fa": "معمول‌ترین"
+            },
+            {
+              "id": "spider",
+              "label_fa": "اسپایدر",
+              "label_en": "Spider",
+              "note_fa": "ارتفاع بلند برای رد شدن از روی توپ"
+            },
+            {
+              "id": "hook",
+              "label_fa": "هوک رست",
+              "label_en": "Hook Rest",
+              "note_fa": "برای زوایای دشوار"
+            },
+            {
+              "id": "swan",
+              "label_fa": "سوان نک (گردن قو)",
+              "label_en": "Swan Neck"
+            },
+            {
+              "id": "extended-spider",
+              "label_fa": "اسپایدر بلند",
+              "label_en": "Extended Spider"
+            },
+            {
+              "id": "bridge-head",
+              "label_fa": "بریج هد (سر رست)",
+              "label_en": "Bridge Head",
+              "note_fa": "فقط سر رست، بدون دسته"
+            },
+            {
+              "id": "rake",
+              "label_fa": "ریک بریج",
+              "label_en": "Rake Bridge",
+              "note_fa": "پاکت بیلیارد آمریکایی"
+            },
+            {
+              "id": "set",
+              "label_fa": "ست کامل رست",
+              "label_en": "Full Set"
+            }
+          ],
+          "required": false
+        },
+        {
+          "id": "rest_head_material",
+          "label_fa": "جنس سر رست",
+          "type": "select",
+          "allow_other": true,
+          "options": [
+            {
+              "id": "brass-rest",
+              "label_fa": "برنج",
+              "label_en": "Brass"
+            },
+            {
+              "id": "aluminium-rest",
+              "label_fa": "آلومینیوم",
+              "label_en": "Aluminium"
+            },
+            {
+              "id": "steel-rest",
+              "label_fa": "فولاد",
+              "label_en": "Steel"
+            },
+            {
+              "id": "plastic-rest",
+              "label_fa": "پلاستیک",
+              "label_en": "Plastic"
+            },
+            {
+              "id": "nylon-rest",
+              "label_fa": "نایلون",
+              "label_en": "Nylon"
+            },
+            {
+              "id": "wood-rest",
+              "label_fa": "چوب",
+              "label_en": "Wood"
+            }
+          ],
+          "required": false
+        },
+        {
+          "id": "has_handle",
+          "label_fa": "همراه با دسته",
+          "type": "boolean",
+          "help_fa": "بعضی رست‌ها فقط سر هستند و دسته جدا فروخته می‌شود",
+          "required": false
+        },
+        {
+          "id": "rest_count",
+          "label_fa": "تعداد",
+          "type": "number",
+          "placeholder": "1",
+          "common": [
+            1,
+            2,
+            3,
+            4
+          ],
+          "required": false
+        }
+      ]
+    },
+    {
+      "id": "cloth",
+      "label_fa": "پارچه",
+      "label_en": "Cloth",
+      "icon": "🧵",
+      "has_brands": true,
+      "external_catalog": "cloth_catalog.json",
+      "note_fa": "پارچه کاتالوگ اختصاصی خودش را دارد (cloth_catalog.json) با ساختار نوع میز ← برند ← مدل. اینجا تکرار نشده.",
+      "brands": [],
+      "specs": [
+        {
+          "id": "cloth_size",
+          "label_fa": "اندازه پارچه",
+          "type": "select",
+          "allow_other": true,
+          "options": [
+            {
+              "id": "12ft-cl",
+              "label_fa": "برای میز ۱۲ فوت"
+            },
+            {
+              "id": "10ft-cl",
+              "label_fa": "برای میز ۱۰ فوت"
+            },
+            {
+              "id": "9ft-cl",
+              "label_fa": "برای میز ۹ فوت"
+            },
+            {
+              "id": "8ft-cl",
+              "label_fa": "برای میز ۸ فوت"
+            },
+            {
+              "id": "7ft-cl",
+              "label_fa": "برای میز ۷ فوت"
+            },
+            {
+              "id": "6ft-cl",
+              "label_fa": "برای میز ۶ فوت"
+            },
+            {
+              "id": "bed-only",
+              "label_fa": "فقط سطح میز (بدون باند)",
+              "label_en": "Bed Only"
+            },
+            {
+              "id": "cushion-only",
+              "label_fa": "فقط باند",
+              "label_en": "Cushion Only"
+            },
+            {
+              "id": "bed-cushion",
+              "label_fa": "سطح + باند",
+              "label_en": "Bed & Cushion"
+            },
+            {
+              "id": "roll",
+              "label_fa": "رول / متری",
+              "label_en": "By the Roll"
+            }
+          ],
+          "required": false
+        },
+        {
+          "id": "cloth_length_m",
+          "label_fa": "طول (متر)",
+          "type": "number",
+          "placeholder": "3.8",
+          "required": false
+        },
+        {
+          "id": "cloth_is_cut",
+          "label_fa": "پیش‌برش‌خورده",
+          "type": "boolean",
+          "help_fa": "برش‌خورده برای سایز مشخص میز",
+          "required": false
+        }
+      ]
+    },
+    {
+      "id": "oil",
+      "label_fa": "روغن و مواد نگهداری",
+      "label_en": "Oil & Care Products",
+      "icon": "🧴",
+      "has_brands": true,
+      "brands": [
+        {
+          "id": "oil__aramith-care",
+          "name_en": "Aramith",
+          "name_fa": "آرامیت",
+          "country": "BE",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "ar-ball-cleaner",
+              "name_en": "Ball Cleaner & Restorer",
+              "name_fa": "تمیزکننده توپ"
+            },
+            {
+              "id": "ar-ball-polish",
+              "name_en": "Ball Polish",
+              "name_fa": "پولیش توپ"
+            }
+          ],
+          "note_fa": "محلول مخصوص احیای براقی توپ‌های فنولیک",
+          "aliases": [
+            "آرامیت",
+            "Aramith"
+          ]
+        },
+        {
+          "id": "oil__cue-craft-oil",
+          "name_en": "Cue Craft",
+          "name_fa": "کیو کرافت",
+          "country": "GB",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "cc-oil",
+              "name_en": "Cue Oil",
+              "name_fa": "روغن چوب"
+            },
+            {
+              "id": "cc-wax",
+              "name_en": "Cue Wax",
+              "name_fa": "واکس چوب"
+            },
+            {
+              "id": "cc-cleaner",
+              "name_en": "Cue Cleaner",
+              "name_fa": "تمیزکننده"
+            }
+          ],
+          "aliases": [
+            "کیو کرافت",
+            "Cue Craft"
+          ]
+        },
+        {
+          "id": "oil__kamui-oil",
+          "name_en": "Kamui",
+          "name_fa": "کامویی",
+          "country": "JP",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "km-clean",
+              "name_en": "Cue Cleaner",
+              "name_fa": "تمیزکننده چوب"
+            },
+            {
+              "id": "km-burnish",
+              "name_en": "Burnisher",
+              "name_fa": "براق‌کننده"
+            }
+          ],
+          "aliases": [
+            "کامویی",
+            "Kamui"
+          ]
+        },
+        {
+          "id": "oil__mezz-oil",
+          "name_en": "Mezz",
+          "name_fa": "مِز",
+          "country": "JP",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "mz-clean",
+              "name_en": "Shaft Cleaner",
+              "name_fa": "تمیزکننده شفت"
+            }
+          ],
+          "aliases": [
+            "مز",
+            "Mezz"
+          ]
+        },
+        {
+          "id": "oil__molinari-oil",
+          "name_en": "Molinari",
+          "name_fa": "مولیناری",
+          "country": "NL",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "ml-clean",
+              "name_en": "Cue Cleaner",
+              "name_fa": "تمیزکننده چوب"
+            }
+          ],
+          "aliases": [
+            "مولیناری"
+          ]
+        },
+        {
+          "id": "oil__peradon-oil",
+          "name_en": "Peradon",
+          "name_fa": "پرادون",
+          "country": "GB",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "pd-oil",
+              "name_en": "Cue Oil",
+              "name_fa": "روغن چوب"
+            },
+            {
+              "id": "pd-wax",
+              "name_en": "Wax",
+              "name_fa": "واکس"
+            }
+          ],
+          "aliases": [
+            "پرادون",
+            "Peradon"
+          ]
+        },
+        {
+          "id": "oil__predator-oil",
+          "name_en": "Predator",
+          "name_fa": "پردیتور",
+          "country": "US",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "pd-q-wiz",
+              "name_en": "Q-Wiz Shaft Conditioner",
+              "name_fa": "کیو‌ویز"
+            },
+            {
+              "id": "pd-clean",
+              "name_en": "Shaft Cleaner",
+              "name_fa": "تمیزکننده شفت"
+            }
+          ],
+          "aliases": [
+            "پردیتور",
+            "Predator"
+          ]
+        },
+        {
+          "id": "oil__chinese-oil",
+          "name_en": "Chinese Unbranded",
+          "name_fa": "چینی بدون برند",
+          "country": "CN",
+          "tier": "budget",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "cn-oil",
+              "name_en": "Generic Oil",
+              "name_fa": "روغن معمولی"
+            }
+          ],
+          "aliases": [
+            "چینی"
+          ]
+        },
+        {
+          "id": "oil__unknown-oil",
+          "name_en": "Unknown / Unbranded",
+          "name_fa": "نامشخص / بدون برند",
+          "country": null,
+          "tier": "budget",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "uk-oil",
+              "name_en": "Unknown",
+              "name_fa": "نامشخص"
+            }
+          ],
+          "aliases": [
+            "نامشخص"
+          ]
+        }
+      ],
+      "specs": [
+        {
+          "id": "oil_type",
+          "label_fa": "نوع محصول",
+          "type": "select",
+          "allow_other": true,
+          "options": [
+            {
+              "id": "cue-oil",
+              "label_fa": "روغن چوب",
+              "label_en": "Cue Oil"
+            },
+            {
+              "id": "cue-wax",
+              "label_fa": "واکس چوب",
+              "label_en": "Cue Wax"
+            },
+            {
+              "id": "shaft-cleaner",
+              "label_fa": "تمیزکننده شفت",
+              "label_en": "Shaft Cleaner"
+            },
+            {
+              "id": "shaft-conditioner",
+              "label_fa": "کاندیشنر شفت",
+              "label_en": "Shaft Conditioner"
+            },
+            {
+              "id": "ball-cleaner",
+              "label_fa": "تمیزکننده توپ",
+              "label_en": "Ball Cleaner"
+            },
+            {
+              "id": "ball-polish",
+              "label_fa": "پولیش توپ",
+              "label_en": "Ball Polish"
+            },
+            {
+              "id": "cloth-cleaner",
+              "label_fa": "تمیزکننده پارچه",
+              "label_en": "Cloth Cleaner"
+            },
+            {
+              "id": "burnisher",
+              "label_fa": "براق‌کننده",
+              "label_en": "Burnisher"
+            },
+            {
+              "id": "care-kit",
+              "label_fa": "کیت کامل نگهداری",
+              "label_en": "Care Kit"
+            }
+          ],
+          "required": false
+        },
+        {
+          "id": "oil_volume_ml",
+          "label_fa": "حجم (میلی‌لیتر)",
+          "type": "number",
+          "placeholder": "250",
+          "common": [
+            50,
+            100,
+            150,
+            250,
+            500,
+            1000
+          ],
+          "required": false
+        },
+        {
+          "id": "oil_form",
+          "label_fa": "فرم",
+          "type": "select",
+          "allow_other": true,
+          "options": [
+            {
+              "id": "liquid",
+              "label_fa": "مایع",
+              "label_en": "Liquid"
+            },
+            {
+              "id": "spray",
+              "label_fa": "اسپری",
+              "label_en": "Spray"
+            },
+            {
+              "id": "cream",
+              "label_fa": "کرم",
+              "label_en": "Cream"
+            },
+            {
+              "id": "wipes",
+              "label_fa": "دستمال مرطوب",
+              "label_en": "Wipes"
+            },
+            {
+              "id": "paste",
+              "label_fa": "خمیر",
+              "label_en": "Paste"
+            }
+          ],
+          "required": false
+        },
+        {
+          "id": "oil_sealed",
+          "label_fa": "پلمب / استفاده‌نشده",
+          "type": "boolean",
+          "required": false
+        }
+      ]
+    },
+    {
+      "id": "towel",
+      "label_fa": "حوله",
+      "label_en": "Towel",
+      "icon": "🧻",
+      "has_brands": true,
+      "brands": [
+        {
+          "id": "twl__kamui-twl",
+          "name_en": "Kamui",
+          "name_fa": "کامویی",
+          "country": "JP",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "km-towel",
+              "name_en": "Cue Towel",
+              "name_fa": "حوله چوب"
+            }
+          ],
+          "aliases": [
+            "کامویی"
+          ]
+        },
+        {
+          "id": "twl__mezz-twl",
+          "name_en": "Mezz",
+          "name_fa": "مِز",
+          "country": "JP",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "mz-towel",
+              "name_en": "Towel",
+              "name_fa": "حوله"
+            }
+          ],
+          "aliases": [
+            "مز"
+          ]
+        },
+        {
+          "id": "twl__molinari-twl",
+          "name_en": "Molinari",
+          "name_fa": "مولیناری",
+          "country": "NL",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "ml-towel",
+              "name_en": "Towel",
+              "name_fa": "حوله"
+            }
+          ],
+          "aliases": [
+            "مولیناری"
+          ]
+        },
+        {
+          "id": "twl__predator-twl",
+          "name_en": "Predator",
+          "name_fa": "پردیتور",
+          "country": "US",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "pd-towel",
+              "name_en": "Cue Towel",
+              "name_fa": "حوله چوب"
+            }
+          ],
+          "aliases": [
+            "پردیتور"
+          ]
+        },
+        {
+          "id": "twl__cue-craft-twl",
+          "name_en": "Cue Craft",
+          "name_fa": "کیو کرافت",
+          "country": "GB",
+          "tier": "mid",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "cc-towel",
+              "name_en": "Cue Towel",
+              "name_fa": "حوله چوب"
+            }
+          ],
+          "aliases": [
+            "کیو کرافت"
+          ]
+        },
+        {
+          "id": "twl__generic-twl",
+          "name_en": "Generic / Unbranded",
+          "name_fa": "معمولی / بدون برند",
+          "country": null,
+          "tier": "budget",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "microfiber",
+              "name_en": "Microfiber Towel",
+              "name_fa": "حوله میکروفایبر"
+            },
+            {
+              "id": "cotton",
+              "name_en": "Cotton Towel",
+              "name_fa": "حوله نخی"
+            }
+          ],
+          "aliases": [
+            "معمولی"
+          ]
+        }
+      ],
+      "specs": [
+        {
+          "id": "towel_material",
+          "label_fa": "جنس",
+          "type": "select",
+          "allow_other": true,
+          "options": [
+            {
+              "id": "microfiber",
+              "label_fa": "میکروفایبر",
+              "label_en": "Microfiber"
+            },
+            {
+              "id": "cotton",
+              "label_fa": "نخ / پنبه",
+              "label_en": "Cotton"
+            },
+            {
+              "id": "suede",
+              "label_fa": "جیر",
+              "label_en": "Suede"
+            },
+            {
+              "id": "synthetic-twl",
+              "label_fa": "مصنوعی",
+              "label_en": "Synthetic"
+            }
+          ],
+          "required": false
+        },
+        {
+          "id": "towel_use",
+          "label_fa": "کاربرد",
+          "type": "select",
+          "allow_other": true,
+          "options": [
+            {
+              "id": "shaft",
+              "label_fa": "تمیز کردن شفت",
+              "label_en": "Shaft Cleaning"
+            },
+            {
+              "id": "hand",
+              "label_fa": "خشک کردن دست",
+              "label_en": "Hand Drying"
+            },
+            {
+              "id": "ball-twl",
+              "label_fa": "تمیز کردن توپ",
+              "label_en": "Ball Cleaning"
+            },
+            {
+              "id": "table-twl",
+              "label_fa": "تمیز کردن میز",
+              "label_en": "Table Cleaning"
+            },
+            {
+              "id": "multi",
+              "label_fa": "چندمنظوره",
+              "label_en": "Multi-purpose"
+            }
+          ],
+          "required": false
+        },
+        {
+          "id": "towel_size",
+          "label_fa": "ابعاد (سانتی‌متر)",
+          "type": "text",
+          "placeholder": "۳۰ × ۳۰",
+          "required": false
+        }
+      ]
+    },
+    {
+      "id": "apparel",
+      "label_fa": "پوشاک",
+      "label_en": "Apparel",
+      "icon": "👔",
+      "has_brands": true,
+      "brands": [
+        {
+          "id": "apr__kamui-apr",
+          "name_en": "Kamui",
+          "name_fa": "کامویی",
+          "country": "JP",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "km-glove",
+              "name_en": "Kamui Glove",
+              "name_fa": "دستکش کامویی",
+              "note_fa": "محبوب‌ترین دستکش بازار"
+            }
+          ],
+          "aliases": [
+            "کامویی"
+          ]
+        },
+        {
+          "id": "apr__mezz-apr",
+          "name_en": "Mezz",
+          "name_fa": "مِز",
+          "country": "JP",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "mz-glove",
+              "name_en": "Mezz Glove",
+              "name_fa": "دستکش مِز"
+            }
+          ],
+          "aliases": [
+            "مز"
+          ]
+        },
+        {
+          "id": "apr__molinari-apr",
+          "name_en": "Molinari",
+          "name_fa": "مولیناری",
+          "country": "NL",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "ml-shirt",
+              "name_en": "Molinari Jersey",
+              "name_fa": "پیراهن مولیناری"
+            },
+            {
+              "id": "ml-glove",
+              "name_en": "Glove",
+              "name_fa": "دستکش"
+            }
+          ],
+          "aliases": [
+            "مولیناری"
+          ]
+        },
+        {
+          "id": "apr__predator-apr",
+          "name_en": "Predator",
+          "name_fa": "پردیتور",
+          "country": "US",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "pd-shirt",
+              "name_en": "Jersey / Shirt",
+              "name_fa": "پیراهن"
+            },
+            {
+              "id": "pd-glove",
+              "name_en": "Glove",
+              "name_fa": "دستکش"
+            }
+          ],
+          "aliases": [
+            "پردیتور"
+          ]
+        },
+        {
+          "id": "apr__taom-apr",
+          "name_en": "Taom",
+          "name_fa": "تائوم",
+          "country": "FI",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "tm-glove",
+              "name_en": "Taom Glove",
+              "name_fa": "دستکش تائوم"
+            }
+          ],
+          "aliases": [
+            "تائوم"
+          ]
+        },
+        {
+          "id": "apr__action-apr",
+          "name_en": "Action",
+          "name_fa": "اکشن",
+          "country": "US",
+          "tier": "mid",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "ac-glove",
+              "name_en": "Action Glove",
+              "name_fa": "دستکش اکشن"
+            }
+          ],
+          "aliases": [
+            "اکشن"
+          ]
+        },
+        {
+          "id": "apr__cuetec-apr",
+          "name_en": "Cuetec",
+          "name_fa": "کیوتک",
+          "country": "CA",
+          "tier": "mid",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "ct-glove",
+              "name_en": "Cuetec Glove",
+              "name_fa": "دستکش کیوتک"
+            }
+          ],
+          "aliases": [
+            "کیوتک"
+          ]
+        },
+        {
+          "id": "apr__rhino-apr",
+          "name_en": "Rhino",
+          "name_fa": "راینو",
+          "country": "US",
+          "tier": "mid",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "rh-glove",
+              "name_en": "Rhino Glove",
+              "name_fa": "دستکش راینو"
+            }
+          ],
+          "aliases": [
+            "راینو"
+          ]
+        },
+        {
+          "id": "apr__vapor-apr",
+          "name_en": "Vapor",
+          "name_fa": "ویپور",
+          "country": "US",
+          "tier": "mid",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "vp-glove",
+              "name_en": "Vapor Glove",
+              "name_fa": "دستکش ویپور"
+            }
+          ],
+          "aliases": [
+            "ویپور"
+          ]
+        },
+        {
+          "id": "apr__chinese-apr",
+          "name_en": "Chinese Unbranded",
+          "name_fa": "چینی بدون برند",
+          "country": "CN",
+          "tier": "budget",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "cn-glove",
+              "name_en": "Generic Glove",
+              "name_fa": "دستکش معمولی"
+            }
+          ],
+          "aliases": [
+            "چینی"
+          ]
+        },
+        {
+          "id": "apr__unknown-apr",
+          "name_en": "Unknown / Unbranded",
+          "name_fa": "نامشخص / بدون برند",
+          "country": null,
+          "tier": "budget",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "uk-apr",
+              "name_en": "Unknown",
+              "name_fa": "نامشخص"
+            }
+          ],
+          "aliases": [
+            "نامشخص"
+          ]
+        }
+      ],
+      "specs": [
+        {
+          "id": "apparel_type",
+          "label_fa": "نوع پوشاک",
+          "type": "select",
+          "allow_other": true,
+          "options": [
+            {
+              "id": "glove",
+              "label_fa": "دستکش",
+              "label_en": "Glove",
+              "note_fa": "رایج‌ترین؛ برای لغزش روان چوب"
+            },
+            {
+              "id": "shirt",
+              "label_fa": "پیراهن / جرسی",
+              "label_en": "Shirt / Jersey"
+            },
+            {
+              "id": "waistcoat",
+              "label_fa": "جلیقه",
+              "label_en": "Waistcoat",
+              "note_fa": "لباس رسمی اسنوکر"
+            },
+            {
+              "id": "bow-tie",
+              "label_fa": "پاپیون",
+              "label_en": "Bow Tie"
+            },
+            {
+              "id": "shoes",
+              "label_fa": "کفش",
+              "label_en": "Shoes"
+            },
+            {
+              "id": "trousers",
+              "label_fa": "شلوار",
+              "label_en": "Trousers"
+            },
+            {
+              "id": "jacket",
+              "label_fa": "کت / ژاکت",
+              "label_en": "Jacket"
+            },
+            {
+              "id": "cap",
+              "label_fa": "کلاه",
+              "label_en": "Cap"
+            }
+          ],
+          "required": false
+        },
+        {
+          "id": "apparel_size",
+          "label_fa": "سایز",
+          "type": "select",
+          "allow_other": true,
+          "options": [
+            {
+              "id": "xs",
+              "label_fa": "XS"
+            },
+            {
+              "id": "s",
+              "label_fa": "S"
+            },
+            {
+              "id": "m",
+              "label_fa": "M"
+            },
+            {
+              "id": "l",
+              "label_fa": "L"
+            },
+            {
+              "id": "xl",
+              "label_fa": "XL"
+            },
+            {
+              "id": "xxl",
+              "label_fa": "XXL"
+            },
+            {
+              "id": "xxxl",
+              "label_fa": "XXXL"
+            },
+            {
+              "id": "free",
+              "label_fa": "فری سایز"
+            }
+          ],
+          "required": false
+        },
+        {
+          "id": "glove_hand",
+          "label_fa": "دست",
+          "type": "select",
+          "allow_other": true,
+          "depends_on_type": [
+            "glove"
+          ],
+          "options": [
+            {
+              "id": "left",
+              "label_fa": "چپ (برای راست‌دست)",
+              "label_en": "Left",
+              "note_fa": "بازیکن راست‌دست دستکش را دست چپ می‌کند"
+            },
+            {
+              "id": "right",
+              "label_fa": "راست (برای چپ‌دست)",
+              "label_en": "Right"
+            },
+            {
+              "id": "both",
+              "label_fa": "هر دو",
+              "label_en": "Both"
+            }
+          ],
+          "required": false
+        },
+        {
+          "id": "apparel_color",
+          "label_fa": "رنگ",
+          "type": "select",
+          "allow_other": true,
+          "options": [
+            {
+              "id": "black",
+              "label_fa": "مشکی"
+            },
+            {
+              "id": "white",
+              "label_fa": "سفید"
+            },
+            {
+              "id": "blue",
+              "label_fa": "آبی"
+            },
+            {
+              "id": "red",
+              "label_fa": "قرمز"
+            },
+            {
+              "id": "grey",
+              "label_fa": "خاکستری"
+            },
+            {
+              "id": "multicolor",
+              "label_fa": "چندرنگ"
+            }
+          ],
+          "required": false
+        }
+      ]
+    },
+    {
+      "id": "accessory",
+      "label_fa": "اکسسوری",
+      "label_en": "Accessories",
+      "icon": "🧩",
+      "has_brands": true,
+      "note_fa": "لوازم متفرقه. اگر آیتمی دسته اختصاصی دارد (کیس، رست، گچ...) در همان دسته ثبت شود.",
+      "brands": [
+        {
+          "id": "acc__aramith-acc",
+          "name_en": "Aramith",
+          "name_fa": "آرامیت",
+          "country": "BE",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "ar-rack",
+              "name_en": "Ball Rack",
+              "name_fa": "رک توپ"
+            }
+          ],
+          "aliases": [
+            "آرامیت"
+          ]
+        },
+        {
+          "id": "acc__cue-craft-acc",
+          "name_en": "Cue Craft",
+          "name_fa": "کیو کرافت",
+          "country": "GB",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "cc-tip-tool",
+              "name_en": "Tip Tool",
+              "name_fa": "ابزار تیپ"
+            },
+            {
+              "id": "cc-clamp",
+              "name_en": "Tip Clamp",
+              "name_fa": "گیره تیپ"
+            },
+            {
+              "id": "cc-scorer",
+              "name_en": "Scoreboard",
+              "name_fa": "تابلو امتیاز"
+            }
+          ],
+          "aliases": [
+            "کیو کرافت"
+          ]
+        },
+        {
+          "id": "acc__kamui-acc",
+          "name_en": "Kamui",
+          "name_fa": "کامویی",
+          "country": "JP",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "km-tip-tool",
+              "name_en": "Tip Pick / Scuffer",
+              "name_fa": "ابزار تیپ"
+            },
+            {
+              "id": "km-chalk-holder",
+              "name_en": "Chalk Holder",
+              "name_fa": "نگهدارنده گچ"
+            }
+          ],
+          "aliases": [
+            "کامویی"
+          ]
+        },
+        {
+          "id": "acc__peradon-acc",
+          "name_en": "Peradon",
+          "name_fa": "پرادون",
+          "country": "GB",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "pd-triangle",
+              "name_en": "Triangle",
+              "name_fa": "مثلث"
+            },
+            {
+              "id": "pd-scoreboard",
+              "name_en": "Scoreboard",
+              "name_fa": "تابلو امتیاز"
+            },
+            {
+              "id": "pd-brush",
+              "name_en": "Table Brush",
+              "name_fa": "برس میز"
+            },
+            {
+              "id": "pd-iron",
+              "name_en": "Table Iron",
+              "name_fa": "اتوی میز"
+            }
+          ],
+          "aliases": [
+            "پرادون"
+          ]
+        },
+        {
+          "id": "acc__porper-acc",
+          "name_en": "Porper",
+          "name_fa": "پورپر",
+          "country": "US",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "pp-tool",
+              "name_en": "Cue Machine / Tools",
+              "name_fa": "ابزار چوب"
+            }
+          ],
+          "aliases": [
+            "پورپر"
+          ]
+        },
+        {
+          "id": "acc__predator-acc",
+          "name_en": "Predator",
+          "name_fa": "پردیتور",
+          "country": "US",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "pd-tip-tool",
+              "name_en": "Tip Tool",
+              "name_fa": "ابزار تیپ"
+            },
+            {
+              "id": "pd-jp",
+              "name_en": "Joint Protector",
+              "name_fa": "محافظ اتصال"
+            },
+            {
+              "id": "pd-rack",
+              "name_en": "Ball Rack",
+              "name_fa": "رک توپ"
+            }
+          ],
+          "aliases": [
+            "پردیتور"
+          ]
+        },
+        {
+          "id": "acc__taom-acc",
+          "name_en": "Taom",
+          "name_fa": "تائوم",
+          "country": "FI",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "tm-holder",
+              "name_en": "Chalk Holder",
+              "name_fa": "نگهدارنده گچ"
+            }
+          ],
+          "aliases": [
+            "تائوم"
+          ]
+        },
+        {
+          "id": "acc__tiger-acc",
+          "name_en": "Tiger",
+          "name_fa": "تایگر",
+          "country": "JP",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "tg-tool",
+              "name_en": "Tip Tool",
+              "name_fa": "ابزار تیپ"
+            }
+          ],
+          "aliases": [
+            "تایگر"
+          ]
+        },
+        {
+          "id": "acc__iranian-acc",
+          "name_en": "Iranian / Local",
+          "name_fa": "ایرانی / داخلی",
+          "country": "IR",
+          "tier": "mid",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "ir-acc",
+              "name_en": "Local Made",
+              "name_fa": "ساخت داخل"
+            }
+          ],
+          "aliases": [
+            "ایرانی"
+          ]
+        },
+        {
+          "id": "acc__star-acc",
+          "name_en": "Star / Xingpai",
+          "name_fa": "استار / شینگ‌پای",
+          "country": "CN",
+          "tier": "mid",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "xp-acc",
+              "name_en": "Accessory",
+              "name_fa": "اکسسوری"
+            }
+          ],
+          "aliases": [
+            "استار"
+          ]
+        },
+        {
+          "id": "acc__chinese-acc",
+          "name_en": "Chinese Unbranded",
+          "name_fa": "چینی بدون برند",
+          "country": "CN",
+          "tier": "budget",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "cn-acc",
+              "name_en": "Generic",
+              "name_fa": "معمولی"
+            }
+          ],
+          "aliases": [
+            "چینی"
+          ]
+        },
+        {
+          "id": "acc__unknown-acc",
+          "name_en": "Unknown / Unbranded",
+          "name_fa": "نامشخص / بدون برند",
+          "country": null,
+          "tier": "budget",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "uk-acc",
+              "name_en": "Unknown",
+              "name_fa": "نامشخص"
+            }
+          ],
+          "aliases": [
+            "نامشخص"
+          ]
+        }
+      ],
+      "specs": [
+        {
+          "id": "accessory_type",
+          "label_fa": "نوع اکسسوری",
+          "type": "select",
+          "allow_other": true,
+          "help_fa": "اگر آیتم شما دسته اختصاصی دارد (کیس، رست، گچ، تیپ)، آنجا ثبت کنید.",
+          "options": [
+            {
+              "id": "triangle",
+              "label_fa": "مثلث / رک",
+              "label_en": "Triangle / Rack"
+            },
+            {
+              "id": "scoreboard",
+              "label_fa": "تابلو امتیاز",
+              "label_en": "Scoreboard"
+            },
+            {
+              "id": "table-brush",
+              "label_fa": "برس میز",
+              "label_en": "Table Brush"
+            },
+            {
+              "id": "table-iron",
+              "label_fa": "اتوی میز",
+              "label_en": "Table Iron"
+            },
+            {
+              "id": "table-cover",
+              "label_fa": "روکش میز",
+              "label_en": "Table Cover"
+            },
+            {
+              "id": "light",
+              "label_fa": "چراغ بالای میز",
+              "label_en": "Table Light"
+            },
+            {
+              "id": "cue-rack",
+              "label_fa": "جاچوبی",
+              "label_en": "Cue Rack"
+            },
+            {
+              "id": "tip-tool",
+              "label_fa": "ابزار تیپ (اسکافر / پیک / شیپر)",
+              "label_en": "Tip Tool"
+            },
+            {
+              "id": "tip-clamp",
+              "label_fa": "گیره تیپ",
+              "label_en": "Tip Clamp"
+            },
+            {
+              "id": "joint-protector",
+              "label_fa": "محافظ اتصال",
+              "label_en": "Joint Protector"
+            },
+            {
+              "id": "chalk-holder",
+              "label_fa": "نگهدارنده گچ",
+              "label_en": "Chalk Holder"
+            },
+            {
+              "id": "ferrule",
+              "label_fa": "فرول",
+              "label_en": "Ferrule"
+            },
+            {
+              "id": "shaft",
+              "label_fa": "شفت جداگانه",
+              "label_en": "Shaft"
+            },
+            {
+              "id": "weight-bolt",
+              "label_fa": "پیچ وزن",
+              "label_en": "Weight Bolt"
+            },
+            {
+              "id": "bridge-head-acc",
+              "label_fa": "سر رست",
+              "label_en": "Bridge Head"
+            },
+            {
+              "id": "ball-tray",
+              "label_fa": "سینی توپ",
+              "label_en": "Ball Tray"
+            },
+            {
+              "id": "marker",
+              "label_fa": "مارکر / نشانگر",
+              "label_en": "Marker"
+            },
+            {
+              "id": "level",
+              "label_fa": "تراز",
+              "label_en": "Spirit Level"
+            },
+            {
+              "id": "repair-kit",
+              "label_fa": "کیت تعمیر",
+              "label_en": "Repair Kit"
+            },
+            {
+              "id": "scorer",
+              "label_fa": "شمارنده امتیاز دستی",
+              "label_en": "Manual Scorer"
+            },
+            {
+              "id": "net-pocket",
+              "label_fa": "تور پاکت",
+              "label_en": "Pocket Net"
+            },
+            {
+              "id": "rubber-cushion",
+              "label_fa": "لاستیک باند",
+              "label_en": "Cushion Rubber"
+            }
+          ],
+          "required": false
+        },
+        {
+          "id": "accessory_quantity",
+          "label_fa": "تعداد",
+          "type": "number",
+          "placeholder": "1",
+          "common": [
+            1,
+            2,
+            3,
+            4,
+            6,
+            12
+          ],
+          "required": false
+        },
+        {
+          "id": "accessory_material",
+          "label_fa": "جنس",
+          "type": "select",
+          "allow_other": true,
+          "options": [
+            {
+              "id": "wood-acc",
+              "label_fa": "چوب",
+              "label_en": "Wood"
+            },
+            {
+              "id": "plastic-acc",
+              "label_fa": "پلاستیک",
+              "label_en": "Plastic"
+            },
+            {
+              "id": "metal-acc",
+              "label_fa": "فلز",
+              "label_en": "Metal"
+            },
+            {
+              "id": "leather-acc",
+              "label_fa": "چرم",
+              "label_en": "Leather"
+            },
+            {
+              "id": "brass-acc",
+              "label_fa": "برنج",
+              "label_en": "Brass"
+            },
+            {
+              "id": "aluminium-acc",
+              "label_fa": "آلومینیوم",
+              "label_en": "Aluminium"
+            },
+            {
+              "id": "carbon-acc",
+              "label_fa": "کربن",
+              "label_en": "Carbon"
+            },
+            {
+              "id": "fabric-acc",
+              "label_fa": "پارچه",
+              "label_en": "Fabric"
+            }
+          ],
+          "required": false
+        }
+      ]
+    },
+    {
+      "id": "other",
+      "label_fa": "سایر",
+      "label_en": "Other",
+      "icon": "📦",
+      "has_brands": false,
+      "force_free_input": true,
+      "note_fa": "هر چیزی که در دسته‌های بالا نمی‌گنجد. برند و مدل به صورت متن آزاد وارد می‌شود.",
+      "brands": [],
+      "specs": [
+        {
+          "id": "other_item_name",
+          "label_fa": "نام کالا",
+          "type": "text",
+          "max_length": 80,
+          "required": true,
+          "help_fa": "نام کالا را دقیق بنویسید تا در جستجو پیدا شود"
+        },
+        {
+          "id": "other_brand",
+          "label_fa": "برند",
+          "type": "text",
+          "max_length": 60,
+          "required": false
+        },
+        {
+          "id": "other_model",
+          "label_fa": "مدل",
+          "type": "text",
+          "max_length": 60,
+          "required": false
+        },
+        {
+          "id": "other_quantity",
+          "label_fa": "تعداد",
+          "type": "number",
+          "placeholder": "1",
+          "required": false
+        }
+      ]
+    }
+  ]
+}

@@ -182,7 +182,7 @@ export async function POST(req: NextRequest) {
   const catType = str(category === 'cue' ? b?.cueType : category === 'table' ? b?.tableType : b?.catalogType, 40);
   /* `cloth` هم یک شناسه‌ی کاتالوگ است ولی دسته‌ی محصولِ مستقلی هم
      هست؛ بدونِ این گیت، POST با category=cloth وارد این شاخه می‌شد. */
-  if ((category === 'cue' || category === 'table' || category === 'cloth' || category === 'chalk') && catType) {
+  if ((category === 'cue' || category === 'table' || category === 'cloth' || category === 'chalk' || category === 'tip') && catType) {
     const brandId = str(b?.brandId, 80) || null;
     const check = validateOnServer({
       category,

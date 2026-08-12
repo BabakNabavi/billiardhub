@@ -133,7 +133,7 @@ export async function PATCH(req: NextRequest, ctx: { params: Promise<{ id: strin
   }
 
   const catType = str(cat === 'cue' ? b?.cueType : cat === 'table' ? b?.tableType : b?.catalogType, 40);
-  if ((cat === 'cue' || cat === 'table' || cat === 'cloth' || cat === 'chalk') && catType) {
+  if ((cat === 'cue' || cat === 'table' || cat === 'cloth' || cat === 'chalk' || cat === 'tip') && catType) {
     const brandId = str(b?.brandId, 80) || null;
     const check = validateOnServer({
       category: cat,
