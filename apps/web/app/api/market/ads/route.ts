@@ -148,6 +148,25 @@ export async function POST(req: NextRequest) {
   let catalogCols: Record<string, string | null> = {};
   let clothCols: Record<string, string | null> = {};
 
+  /* ── ستون‌های ایندکس‌دار ──
+     این پنج مشخصه در `specs` (JSONB) هم هستند، ولی رویشان فیلتر
+     خواهیم داشت («همه‌ی میزهای اسلیت ایتالیایی»، «چوب‌های کربن»)
+     و فیلترِ JSONB نه ایندکس می‌گیرد نه در PostgREST خوانا می‌ماند.
+
+     مهاجرتِ ۰۸۷ ستون‌هایشان را ساخت ولی هیچ‌چیز نمی‌نوشتشان —
+     ایندکسی که پر نشود فقط هزینه‌ی نوشتن دارد. مقدار از همان
+     `specs`ی می‌آید که چند خط بالاتر اعتبارسنجی شده. */
+  const specIn = (b?.specs && typeof b.specs === 'object' ? b.specs : {}) as Record<string, unknown>;
+  const pick = (k: string) => {
+    const v = specIn[k];
+    return typeof v === 'string' && v.trim() && v !== '__other__' ? v.trim().slice(0, 60) : null;
+  };
+  const indexedCols = {
+    bedMaterial: pick('bedMaterial'),
+    shaftMaterial: pick('shaftMaterial'),
+    cuePieces: pick('pieces'),
+  };
+
   /* ── بازه‌های عددیِ مشخصات ──
      `min`/`max` در `specs_catalog.json` تعریف شده‌اند نه در کد، تا
      اصلاحشان دیپلوی نخواهد. فرم همان‌ها را می‌سنجد؛ این‌جا دوباره
@@ -320,6 +339,7 @@ export async function POST(req: NextRequest) {
        پاک و تأیید کرده؛ ورودیِ خام این‌جا نمی‌آید. */
     ...catalogCols,
     ...clothCols,
+    ...indexedCols,
     specs: b?.specs && typeof b.specs === 'object' ? b.specs : null,
     section: str(b?.section, 20) || 'newest',
     sellerName: str(b?.sellerName ?? b?.shopName, 120),

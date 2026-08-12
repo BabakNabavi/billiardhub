@@ -98,7 +98,7 @@ function CommonChips({
       {values.map(v => {
         const on = String(v) === current.trim()
         return (
-          <button key={v} type="button" onClick={() => onPick(String(v))}
+          <button key={v} type="button" className="fchip" onClick={() => onPick(String(v))}
             style={{
               padding: '4px 11px', borderRadius: 8, cursor: 'pointer', fontSize: 12,
               fontFamily: 'Vazirmatn,Tahoma,sans-serif',
@@ -121,7 +121,7 @@ function Toggle({
   label, help, on, onChange,
 }: { label: string; help?: string; on: boolean; onChange: (v: boolean) => void }) {
   return (
-    <button type="button" role="switch" aria-checked={on} onClick={() => onChange(!on)}
+    <button type="button" role="switch" className="fchip" aria-checked={on} onClick={() => onChange(!on)}
       style={{
         display: 'flex', alignItems: 'center', gap: 11, width: '100%', textAlign: 'start',
         padding: '11px 13px', borderRadius: 12, cursor: 'pointer',
@@ -159,7 +159,7 @@ function MultiChips({
       {(field.options ?? []).map(o => {
         const on = value.includes(o.id)
         return (
-          <button key={o.id} type="button" aria-pressed={on}
+          <button key={o.id} type="button" className="fchip" aria-pressed={on}
             onClick={() => onChange(on ? value.filter(x => x !== o.id) : [...value, o.id])}
             style={{
               padding: '7px 13px', borderRadius: 10, cursor: 'pointer', fontSize: 12.5,
@@ -193,6 +193,8 @@ export function SpecFieldRow({
   field, value, otherValue = '', onChange, onOtherChange, error, sourceOptions, disabled,
 }: SpecFieldProps) {
   const str = value === undefined || value === null ? '' : String(value)
+  /* برچسب باید به خودِ ورودی گره بخورد، وگرنه صفحه‌خوان نامش را نمی‌گوید */
+  const fieldId = `spec-${field.id}`
 
   if (field.type === 'boolean') {
     return (
@@ -204,7 +206,7 @@ export function SpecFieldRow({
   if (field.type === 'multi_select') {
     return (
       <div>
-        <Label>{field.label_fa}</Label>
+        <Label htmlFor={fieldId}>{field.label_fa}</Label>
         <Help text={field.help_fa} />
         <MultiChips field={field} value={Array.isArray(value) ? value as string[] : []} onChange={onChange} />
         <ErrMsg msg={error} />
@@ -242,7 +244,7 @@ export function SpecFieldRow({
 
     return (
       <div>
-        <Label required={field.required}>{field.label_fa}</Label>
+        <Label required={field.required} htmlFor={fieldId}>{field.label_fa}</Label>
         <Help text={field.help_fa} />
         <FancySelect value={str} onChange={onChange} options={opts}
           error={!!error} disabled={disabled}
@@ -261,9 +263,9 @@ export function SpecFieldRow({
   /* عدد و متن */
   return (
     <div>
-      <Label required={field.required}>{field.label_fa}</Label>
+      <Label required={field.required} htmlFor={fieldId}>{field.label_fa}</Label>
       <Help text={field.help_fa} />
-      <input className="nf"
+      <input className="nf" id={fieldId}
         type={field.type === 'number' ? 'text' : 'text'}
         inputMode={field.type === 'number' ? 'decimal' : undefined}
         /* عدد در فیلدِ عددی لاتین می‌ماند، حتی در متنِ فارسی */

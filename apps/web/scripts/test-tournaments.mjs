@@ -2497,6 +2497,56 @@ console.log('\n― مشخصات و پارچه ―');
     && ads.includes('این پارچه برای نوع میز انتخاب‌شده نیست'));
   t('مهاجرتِ ۰۸۷ نوشته شده',
     existsSync(join(ROOT, '../../supabase/migrations/087_products_cloth_and_spec_columns.sql')));
+
+  /* ── وابستگیِ فیلدها از داده می‌آید، نه از کد ──
+     JSON خودش می‌گوید `cloth_model` به `cloth_brand` وابسته است. اگر
+     کد این را نخواند، دراپ‌داونِ مدل پیش از انتخابِ برند باز می‌شود و
+     خالی است. */
+  const rulesSrc = read('lib/market/spec-rules.ts');
+  t('آبشارِ مشخصات داده‌محور است',
+    ['depends_on', 'auto_from', 'applySpecChange', 'isFieldLocked'].every(s => rulesSrc.includes(s))
+    && ['app/shop/new/page.tsx', 'app/shop/edit/[id]/page.tsx']
+      .every(f => read(f).includes('applySpecChange(specDefs') && read(f).includes('isFieldLocked(field')),
+    'هاردکد یعنی وابستگیِ بعدی دوباره کد می‌خواهد');
+  t('هر وابستگیِ داده در فرم قابلِ اجراست',
+    (() => {
+      const S = JSON.parse(readFileSync(join(ROOT, 'data/specs_catalog.json'), 'utf8'));
+      const all = Object.values(S.specs).flat();
+      /* ارجاع به فیلدهای سطحِ فرم مجاز است — همان‌هایی که بالای فرم
+         گرفته می‌شوند و در کارتِ مشخصات نیستند. */
+      const ids = new Set(all.map(f => f.id).concat(
+        [...JSON.parse('["table_type","cue_type","ball_type","brand","model"]')]));
+      return all.every(f => !f.depends_on || ids.has(f.depends_on))
+        && all.every(f => !f.auto_from || ids.has(f.auto_from.split('.')[0]));
+    })(),
+    'ارجاع به فیلدی که وجود ندارد، بی‌صدا هیچ‌کاری نمی‌کند');
+
+  /* ── ستونِ ایندکس‌دارِ پرنشده ──
+     مهاجرتِ ۰۸۷ سه ستون ساخت. ایندکسی که هیچ‌وقت پر نشود فقط
+     هزینه‌ی نوشتن دارد و فیلترِ آینده رویش کار نمی‌کند. */
+  for (const f of ['app/api/market/ads/route.ts', 'app/api/market/ads/[id]/route.ts']) {
+    const src = read(f);
+    t((f.includes('[id]') ? 'ویرایش' : 'ثبت') + ' ستون‌های ایندکس‌دار را می‌نویسد',
+      ['bedMaterial', 'shaftMaterial', 'cuePieces'].every(c => src.includes(c)),
+      'مهاجرت ساختشان ولی چیزی پرشان نمی‌کرد');
+  }
+
+  /* ── کشِ تعریفِ فیلدها ──
+     بازه‌های عددی در JSON‌اند تا اصلاحشان دیپلوی نخواهد؛ کشِ یک‌ساله
+     همان را باطل می‌کرد — سرور بازه‌ی تازه را می‌سنجد و مرورگر قدیمی. */
+  t('کشِ مسیرِ مشخصات immutable نیست',
+    !strip(read('app/api/specs/[category]/route.ts')).includes('immutable'),
+    'وگرنه اصلاحِ بازه تا یک سال به کاربر نمی‌رسد');
+
+  /* ── دسترس‌پذیری ── */
+  t('چیپ و تاگل حلقه‌ی focus دارند',
+    read('components/market/AdFormFields.tsx').includes('.fchip:focus-visible')
+    && (read('components/market/SpecFields.tsx').match(/className="fchip"/g) ?? []).length >= 3,
+    'با ریستِ outline، پیمایشِ کیبورد نامرئی می‌شود');
+  t('برچسبِ فیلد به ورودی گره خورده',
+    read('components/market/SpecFields.tsx').includes('htmlFor={fieldId}')
+    && read('components/market/SpecFields.tsx').includes('id={fieldId}'),
+    'بدونش صفحه‌خوان نامِ فیلد را نمی‌گوید');
 }
 
 console.log('\n― CORS ―');

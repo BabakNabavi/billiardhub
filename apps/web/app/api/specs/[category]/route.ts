@@ -21,6 +21,12 @@ export async function GET(
   }
   return NextResponse.json(
     { category, fields, conditions: CONDITION_OPTIONS },
-    { headers: { 'Cache-Control': 'public, max-age=31536000, immutable' } },
+ /* ── چرا کشِ یک‌ساله نه ──
+          دلیلِ گذاشتنِ `min`/`max` در JSON این بود که اصلاحشان دیپلوی
+          نخواهد. با کشِ immutable، سرور بازه‌ی تازه را اعمال می‌کند و
+          مرورگرِ کاربر تا یک سال بازه‌ی قدیمی را می‌سنجد — نتیجه‌اش یک
+          ۴۰۰ی بی‌توضیح. یک ساعت کش با بازاعتبارسنجیِ پس‌زمینه، هم
+          هزینه‌ی شبکه را صفر نگه می‌دارد هم این تله را می‌بندد. */
+       { headers: { 'Cache-Control': 'public, max-age=3600, stale-while-revalidate=86400' } },
   )
 }

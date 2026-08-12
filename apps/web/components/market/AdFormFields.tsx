@@ -32,6 +32,13 @@ export const AD_FORM_CSS = `
   @keyframes popIn { from{opacity:0;transform:scale(0.94)} to{opacity:1;transform:scale(1)} }
   * { box-sizing: border-box; }
   .nf:focus { border-color: ${GOLD} !important; box-shadow: 0 0 0 3px rgba(199,166,106,0.14) !important; }
+  /* ── حلقه‌ی focus روی دکمه‌های شبیهِ فیلد ──
+     چیپ‌های مقدار، تاگلِ بله/خیر و چیپ‌های چندانتخابی همه دکمه‌اند
+     و مرورگر حلقه‌ی پیش‌فرض را با outline:none  ریست از دست داده
+     بود. بدونِ این، پیمایش با کیبورد نامرئی است. */
+  .fchip:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(199,166,106,0.30); border-color: ${GOLD} !important; }
+  .fchip:hover:not(:disabled) { border-color: rgba(199,166,106,0.45); }
+  .fchip:disabled { opacity: .5; cursor: not-allowed; }
   /* راهنمای داخلِ فیلد ریزتر و کم‌رنگ‌تر از متنِ واقعی است، تا با
      چیزی که کاربر نوشته اشتباه گرفته نشود */
   .nf::placeholder { color: rgba(28,28,26,0.22); font-size: 12.6px; }
@@ -226,9 +233,9 @@ export function FancySelect({ value, onChange, options, placeholder = 'انتخ�
 }
 
 /* optional دیگر برچسب «(اختیاری)» نمی‌گذارد — کلمه‌ی «اختیاری» از کل فرم حذف شد */
-export function Label({ children, required }: { children: React.ReactNode; required?: boolean; optional?: boolean }) {
+export function Label({ children, required, htmlFor }: { children: React.ReactNode; required?: boolean; optional?: boolean; htmlFor?: string }) {
   return (
-    <label style={{ display: 'block', fontSize: 13, fontWeight: 700, color: TEXT, marginBottom: 7 }}>
+    <label htmlFor={htmlFor} style={{ display: 'block', fontSize: 13, fontWeight: 700, color: TEXT, marginBottom: 7 }}>
       {children}
       {required && <span style={{ color: ERR, marginRight: 3 }}>*</span>}
     </label>

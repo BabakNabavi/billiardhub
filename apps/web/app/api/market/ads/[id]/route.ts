@@ -104,6 +104,19 @@ export async function PATCH(req: NextRequest, ctx: { params: Promise<{ id: strin
   if (b?.sellerWhatsapp !== undefined) patch.sellerWhatsapp = str(b?.sellerWhatsapp, 20);
   if (b?.specs !== undefined) patch.specs = b?.specs && typeof b.specs === 'object' ? b.specs : null;
 
+  /* همان ستون‌های ایندکس‌دارِ مسیرِ ثبت — وگرنه ویرایش، ستون و
+     `specs` را از هم دور می‌اندازد. */
+  if (b?.specs && typeof b.specs === 'object') {
+    const sIn = b.specs as Record<string, unknown>;
+    const pk = (k: string) => {
+      const v = sIn[k];
+      return typeof v === 'string' && v.trim() && v !== '__other__' ? v.trim().slice(0, 60) : null;
+    };
+    patch.bedMaterial = pk('bedMaterial');
+    patch.shaftMaterial = pk('shaftMaterial');
+    patch.cuePieces = pk('pieces');
+  }
+
   /* ── همان قاعده‌های مسیرِ ثبت ──
      تا امروز ویرایش نه ستون‌های کاتالوگ را می‌پذیرفت نه مشخصات را
      می‌سنجید. یعنی ستون‌های ایندکس‌دار با محتوای `specs` از هم دور

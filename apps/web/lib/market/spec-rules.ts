@@ -187,3 +187,78 @@ export function specDisplayRows(
   const order = new Map(fields.map((f, i) => [specKey(f.id), i]))
   return rows.sort((a, b) => (order.get(a.key) ?? 999) - (order.get(b.key) ?? 999))
 }
+
+/* ── وابستگیِ فیلدها ──
+   داده خودش می‌گوید کدام فیلد به کدام وابسته است:
+
+     size        ← table_type      فهرستش از کاتالوگِ میز می‌آید
+     cloth_brand ← table_type      پارچه‌ی اسنوکر با پاکت فرق دارد
+     cloth_model ← cloth_brand     مدل زیرِ برند تعریف شده
+     cloth_type  ← cloth_model.type   خودکار پر می‌شود، ولی قفل نه
+
+   پیش‌تر این‌ها در خودِ فرم هاردکد بودند. حالا از `depends_on` و
+   `auto_from` خوانده می‌شوند، تا اضافه‌شدنِ وابستگیِ بعدی فقط داده
+   بخواهد نه کد. */
+
+/* شناسه‌هایی که فیلدِ مشخصات نیستند و بالای فرم گرفته می‌شوند */
+export const FORM_LEVEL_FIELDS = new Set([
+  'table_type', 'cue_type', 'ball_type', 'brand', 'model',
+])
+
+/** فیلدهایی که به این فیلد وابسته‌اند — با عوض‌شدنش پاک می‌شوند */
+export const dependentsOf = (fields: SpecField[], id: string): SpecField[] =>
+  fields.filter(f => f.depends_on === id)
+
+/** تا وقتی والدش خالی است، فهرستِ این فیلد بی‌معناست */
+export function isFieldLocked(
+  field: SpecField, values: Record<string, unknown>, typeChosen: boolean,
+): boolean {
+  /*
+      «نوع» و «برند» و «مدل» بالای فرم‌اند، نه در کارتِ مشخصات. داده
+      با نامِ خودشان به آن‌ها ارجاع می‌دهد: `table_type` برای میز،
+      `ball_type` برای توپ، `cue_type` برای چوب. هر سه یک چیزند —
+      همان انتخابِ نوعِ بالای فرم. */
+  if (field.depends_on && FORM_LEVEL_FIELDS.has(field.depends_on)) return !typeChosen
+  if (field.depends_on) {
+    const v = values[specKey(field.depends_on)]
+    return v === undefined || v === null || String(v).trim() === ''
+  }
+  /* فیلدِ `source`دارِ بدونِ وابستگیِ صریح هم به نوع نیاز دارد */
+  return !!field.source && !typeChosen
+}
+
+/**
+ * تغییرِ یک فیلد، با آبشارِ داده‌محور:
+ *  · وابسته‌ها پاک می‌شوند (و وابسته‌های آن‌ها، به‌صورت بازگشتی).
+ *  · هر فیلدی که `auto_from: <fieldId>.<prop>` دارد از مقدارِ تازه
+ *    پر می‌شود — ولی قفل نمی‌شود؛ فروشنده می‌تواند عوضش کند.
+ */
+export function applySpecChange(
+  fields: SpecField[],
+  field: SpecField,
+  value: unknown,
+  values: Record<string, unknown>,
+  /** ویژگی‌های شیءِ انتخاب‌شده — مثلاً `{ type: 'napped', weight_oz: '30' }` */
+  picked?: Record<string, string | undefined>,
+): Record<string, unknown> {
+  const next: Record<string, unknown> = { ...values, [specKey(field.id)]: value }
+
+  const clearDeps = (id: string) => {
+    for (const d of dependentsOf(fields, id)) {
+      next[specKey(d.id)] = ''
+      clearDeps(d.id)
+    }
+  }
+  clearDeps(field.id)
+
+  if (picked) {
+    for (const f of fields) {
+      if (!f.auto_from) continue
+      const [srcId, prop] = f.auto_from.split('.')
+      if (srcId !== field.id || !prop) continue
+      const v = picked[prop]
+      if (v) next[specKey(f.id)] = v
+    }
+  }
+  return next
+}

@@ -18,7 +18,7 @@ import { productTitleParts } from '../../../lib/market/title'
 import { typeIdOf, type CatalogId } from '../../../lib/market/catalog-rules'
 import CatalogSelector, { EMPTY_CATALOG_VALUE, type CatalogValue, useCatalogType } from '../../../components/market/CatalogSelector'
 import { SpecFieldRow, SpecProgress, useSpecFields, specKey } from '../../../components/market/SpecFields'
-import { splitFields, countFilled, type SpecField } from '../../../lib/market/spec-rules'
+import { splitFields, countFilled, applySpecChange, isFieldLocked, type SpecField } from '../../../lib/market/spec-rules'
 import { brandSearchTerms } from '../../../lib/market/catalog-rules'
 import CountryFlag from '../../../components/CountryFlag'
 import { TYPE_OPTIONS, brandOptionsFor, modelOptionsFor, isTypeDrivenCategory, withOther } from '../../../lib/market/chain'
@@ -214,20 +214,19 @@ export default function NewProductPage() {
      دو وابستگیِ آبشاری این‌جاست: عوض‌شدنِ برندِ پارچه مدل را پاک
      می‌کند، و انتخابِ مدل «نوع پارچه» و «وزن» را خودکار پر می‌کند
      ولی قفلشان نمی‌کند — فروشنده می‌تواند اصلاحشان کند. */
+  /* آبشار از خودِ داده می‌آید: `depends_on` وابسته‌ها را پاک
+     می‌کند و `auto_from` مقدارِ خودکار را می‌نشاند. پیش‌تر هر دو
+     این‌جا هاردکد بودند و اضافه‌شدنِ وابستگیِ بعدی کد می‌خواست. */
   const onSpecChange = (field: SpecField, v: unknown) => {
-    const key = specKey(field.id)
-    setSpecs(s => {
-      const next: Record<string, unknown> = { ...s, [key]: v }
-      if (field.id === 'cloth_brand') { next.clothModel = ''; next.clothType = ''; next.clothWeight = '' }
-      if (field.id === 'cloth_model') {
-        const br = cloth.data?.brands.find(b => b.id === String(s.clothBrand ?? ''))
-        const m = br?.models.find(x => x.id === v)
-        if (m?.type) next.clothType = m.type
-        if (m?.weight_oz) next.clothWeight = m.weight_oz
-      }
-      return next
-    })
-    setErrors(e => { const n = { ...e }; delete n[key]; return n })
+    /* ویژگی‌های مدلِ پارچه — منبعِ پر شدنِ خودکارِ نوع و وزن */
+    let picked: Record<string, string | undefined> | undefined
+    if (field.id === 'cloth_model') {
+      const br = cloth.data?.brands.find(b => b.id === clothBrandId)
+      const m = br?.models.find(x => x.id === v)
+      if (m) picked = { type: m.type, weight_oz: m.weight_oz }
+    }
+    setSpecs(prev => applySpecChange(specDefs, field, v, prev, picked))
+    setErrors(er => { const n = { ...er }; delete n[specKey(field.id)]; return n })
   }
   const catFreeInput = !!useCatalogType(catCategory ?? 'cue', catCategory ? catTypeId : '').data?.forceFreeInput
 
@@ -757,7 +756,7 @@ export default function NewProductPage() {
                                 otherValue={specOthers[specKey(field.id)] ?? ''}
                                 error={errors[specKey(field.id)]}
                                 sourceOptions={sourceOptionsFor(field.id)}
-                                disabled={!!field.source && !catTypeId}
+                                disabled={isFieldLocked(field, specs, !!catTypeId)}
                                 onChange={v => onSpecChange(field, v)}
                                 onOtherChange={v => setSpecOthers(s => ({ ...s, [specKey(field.id)]: v }))}
                               />
