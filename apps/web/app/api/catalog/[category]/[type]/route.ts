@@ -48,6 +48,8 @@ export async function GET(
       label_fa: t.label_fa,
       brands: t.brands,
       sizes: t.sizes ?? [],
+      /* «نوع ست» فقط توپ دارد و مثلِ سایز به نوع وابسته است */
+      setTypes: t.set_types ?? [],
       forceFreeInput: !!t.force_free_input,
       countries: countriesOf(category),
     },

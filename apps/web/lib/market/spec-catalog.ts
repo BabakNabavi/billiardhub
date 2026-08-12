@@ -11,9 +11,9 @@
    ═══════════════════════════════════════════════════════════════ */
 
 import raw from '../../data/specs_catalog.json'
-import { ACCESSORY_TYPE_OF, isAccessoryCategory } from './catalog-rules'
-import { accessorySpecs } from './catalog'
-import { validateSpecs, type SpecCatalogShape, type SpecField, type SpecOption } from './spec-rules'
+import { ACCESSORY_TYPE_OF, isAccessoryCategory, isCatalogId, type CatalogSize } from './catalog-rules'
+import { accessorySpecs, getType } from './catalog'
+import { specKey, validateSpecs, type SpecCatalogShape, type SpecField, type SpecOption } from './spec-rules'
 
 export * from './spec-rules'
 
@@ -60,6 +60,41 @@ export function getSpecFields(category: string): SpecField[] {
 export const CONDITION_OPTIONS: SpecOption[] = catalog.condition_options
 
 /** همان اعتبارسنجی، با تعریفِ کاملِ دسته — نسخه‌ای که سرور صدا می‌زند */
-export function validateSpecsOnServer(category: string, values: Record<string, unknown>) {
-  return validateSpecs(getSpecFields(category), values)
+/* ── فهرست‌هایی که داده‌شان در `specs_catalog.json` نیست ──
+   قطرِ توپ و «نوع ست» و اندازه‌ی میز، گزینه‌هایشان از کاتالوگِ
+   برند می‌آید و به نوعِ انتخاب‌شده وابسته است. `validateSpecs`
+   عمداً ردشان می‌کند چون داده را ندارد — این‌جا که کاتالوگ در
+   دست است، سنجیده می‌شوند.
+
+   بدونِ این، آگهیِ توپِ اسنوکر می‌توانست قطرِ کارامبول بگیرد؛
+   فرم اجازه نمی‌داد ولی فرم قابلِ اعتماد نیست. */
+const SOURCE_LISTS: Record<string, 'sizes' | 'set_types'> = {
+  'types[].sizes': 'sizes',
+  'types[].set_types': 'set_types',
+}
+
+export function validateSpecsOnServer(
+  category: string, values: Record<string, unknown>,
+  /** نوعِ انتخاب‌شده — بدونش فهرست‌های `source`دار سنجیده نمی‌شوند */
+  typeId?: string,
+) {
+  const fields = getSpecFields(category)
+  const base = validateSpecs(fields, values)
+  if (!typeId || !isCatalogId(category)) return base
+  const t = getType(category, typeId)
+  if (!t) return base
+
+  const errors = { ...base.errors }
+  for (const f of fields) {
+    const which = f.source ? SOURCE_LISTS[f.source] : undefined
+    if (!which) continue
+    const key = specKey(f.id)
+    const v = values[key]
+    if (v === undefined || v === null || String(v).trim() === '') continue
+    /* «سایر» متنِ آزاد است و در کلیدِ جداگانه می‌نشیند */
+    if (v === '__other__') { if (!f.allow_other) errors[key] = 'گزینه‌ی نامعتبر'; continue }
+    const list: CatalogSize[] = (t[which] ?? [])
+    if (!list.some(o => o.id === v)) errors[key] = `${f.label_fa} برای نوع انتخاب‌شده نیست`
+  }
+  return { ok: Object.keys(errors).length === 0, errors }
 }

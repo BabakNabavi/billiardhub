@@ -254,6 +254,33 @@ export function fillFromModel(
   return next
 }
 
+/* ── عوض‌شدنِ نوعِ محصول ──
+   فهرست‌هایی مثلِ اندازه‌ی میز و قطرِ توپ و نوعِ ست، گزینه‌هایشان
+   از **همان نوع** می‌آید. با عوض‌شدنِ نوع، مقدارِ قبلی نه در فهرستِ
+   تازه هست و نه در فرم دیده می‌شود — ولی در `specs` می‌ماند و
+   سرور آگهی را با ۴۰۰ رد می‌کند.
+
+   پیش‌تر فهرستِ کلیدهای پاک‌شدنی دستی نوشته شده بود و فقط میز را
+   می‌شناخت؛ با اضافه‌شدنِ تیپ و توپ، همان باگ برگشت. حالا از خودِ
+   تعریفِ فیلدها مشتق می‌شود: هرچه به `<دسته>_type` وابسته است،
+   به‌علاوه‌ی وابسته‌های آن‌ها، به‌علاوه‌ی فیلدهایی که از مدلِ
+   کاتالوگ پر می‌شوند (مدل هم با نوع عوض می‌شود). */
+export function typeDependentKeys(fields: SpecField[], category: string): string[] {
+  const out = new Set<string>()
+  const walk = (id: string) => {
+    for (const d of dependentsOf(fields, id)) {
+      if (out.has(specKey(d.id))) continue
+      out.add(specKey(d.id))
+      walk(d.id)
+    }
+  }
+  walk(`${category}_type`)
+  for (const f of fields) if (f.auto_from?.startsWith('model.')) out.add(specKey(f.id))
+  /* `cloth_type` از `cloth_model.type` پر می‌شود، نه از `model.` */
+  for (const f of fields) { const src = f.auto_from?.split('.')[0]; if (src && out.has(specKey(src))) out.add(specKey(f.id)) }
+  return [...out]
+}
+
 /** فیلدهایی که به این فیلد وابسته‌اند — با عوض‌شدنش پاک می‌شوند */
 export const dependentsOf = (fields: SpecField[], id: string): SpecField[] =>
   fields.filter(f => f.depends_on === id)
@@ -267,12 +294,29 @@ export const dependentsOf = (fields: SpecField[], id: string): SpecField[] =>
    `depends_on_construction` هم همین است، با فهرستِ مقدارهای مجاز. */
 export function isFieldHidden(
   field: SpecField, values: Record<string, unknown>, fields: SpecField[],
+  /** شناسه‌ی نوعِ محصول که بالای فرم انتخاب شده — برای `depends_on_type` */
+  formType?: string,
 ): boolean {
   if (field.depends_on_type) {
-    /* فیلدِ والد تنها فیلدی است که شناسه‌اش به `_type` ختم می‌شود */
-    const parent = fields.find(f => f.id.endsWith('_type') && f.id !== field.id)
-    const v = parent ? String(values[specKey(parent.id)] ?? '') : ''
-    return !field.depends_on_type.includes(v)
+    /* ── دو معنیِ «نوع» ──
+       در پوشاک، والد یک فیلدِ مشخصات است (`apparel_type`: دستکش یا
+       تیشرت). در توپ، والد **نوعِ خودِ محصول** است که بالای فرم
+       انتخاب می‌شود (`single`, `cue_ball`).
+
+       تشخیص از روی گزینه‌ها انجام می‌شود نه نامِ فیلد: والدِ درست
+       آن است که مقدارهای موردِ انتظار در فهرستِ خودش باشد. صرفِ
+       پسوندِ `_type` کافی نبود — `set_type`ِ توپ همان پسوند را دارد
+       و شناسه‌ی `single` هم در گزینه‌هایش هست (فروشِ تک‌توپ)، پس
+       اشتباهاً والد گرفته می‌شد و «رنگ توپ» به نوعِ ستِ اسنوکر
+       گره می‌خورد. فیلدِ `source`دار هم کنار گذاشته می‌شود: گزینه‌اش
+       در کاتالوگِ برند است و اگر روزی این‌جا نوشته شود، همین تشخیص
+       بی‌صدا برمی‌گردد به همان اشتباه. */
+    const parent = fields.find(f =>
+      f.id !== field.id && f.id.endsWith('_type') && !f.source
+      && (f.options ?? []).some(o => field.depends_on_type!.includes(o.id)))
+    if (parent) return !field.depends_on_type.includes(String(values[specKey(parent.id)] ?? ''))
+    /* والدِ مشخصاتی ندارد ⟵ به نوعِ بالای فرم نگاه می‌کند */
+    return !formType || !field.depends_on_type.includes(formType)
   }
   if (field.depends_on_construction) {
     const c = String(values[specKey('construction')] ?? '')

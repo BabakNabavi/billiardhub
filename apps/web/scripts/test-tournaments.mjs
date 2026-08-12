@@ -2188,9 +2188,14 @@ console.log('\n― کاتالوگِ چوب ―');
   const editAdSrc = read('app/shop/edit/[id]/page.tsx');
   t('هر دو فرم از همان انتخابگر استفاده می‌کنند',
     [newAdSrc, editAdSrc].every(f => /<CatalogSelector/.test(f) && /typeIdOf\(catCategory/.test(f)));
-  t('چوب و میز و پارچه از کاتالوگ می‌آیند',
-    [newAdSrc, editAdSrc].every(f => f.includes("form.category === 'cue' || form.category === 'table' || form.category === 'cloth'")),
-    'بقیه (تیپ، گچ، توپ، کیس) از chain.ts می‌آیند');
+  /* ── چه دسته‌هایی کاتالوگ دارند ──
+     پیش‌تر این شرط در هر فرم دستی نوشته شده بود و اضافه‌شدنِ هر
+     کاتالوگ یعنی سه جا ویرایش — «توپ» یکی‌شان را جا انداخت. حالا
+     از خودِ `CATALOG_IDS` مشتق می‌شود، پس تست هم همان را می‌سنجد. */
+  t('دسته‌های کاتالوگ‌دار از یک منبع مشتق می‌شوند',
+    [newAdSrc, editAdSrc].every(f => f.includes('isProductCatalog(form.category)'))
+    && read('lib/market/catalog-rules.ts').includes('export const isProductCatalog'),
+    'بقیه (کیس و …) از chain.ts می‌آیند');
   t('شناسه کنارِ رشته فرستاده می‌شود',
     [newAdSrc, editAdSrc].every(f => /brand: effBrand, model: effModel,/.test(f) && /brandId:/.test(f)),
     'ستون‌های رشته‌ای را کلِ سایت می‌خواند؛ حذفشان همه‌جا را می‌شکند');
@@ -2576,8 +2581,10 @@ console.log('\n― مشخصات و پارچه ―');
       /cloth:\s*\['اسنوکر'/.test(read('lib/market/chain.ts')),
       'بدونش دراپ‌داونِ نوع خالی می‌آمد');
     t('پارچه از کاتالوگِ برند می‌خواند',
-      ['app/shop/new/page.tsx', 'app/shop/edit/[id]/page.tsx']
-        .every(f => read(f).includes("form.category === 'cloth'")),
+      read('lib/market/catalog-rules.ts').includes("'cloth'")
+      && read('lib/market/catalog.ts').includes('cloth_catalog.json')
+      && ['app/shop/new/page.tsx', 'app/shop/edit/[id]/page.tsx']
+        .every(f => read(f).includes("useCatalogType('cloth'")),
       'برندِ پارچه در chain.ts هاردکد بود، نه از کاتالوگ');
     t('مشخصاتِ پارچه از تعریفِ میز مشتق می‌شود',
       read('lib/market/spec-catalog.ts').includes('CLOTH_FROM_TABLE')
@@ -2629,8 +2636,9 @@ console.log('\n― گچ ―');
     labels.join(', '));
   t('گچ در نگاشتِ فارسی هست', /chalk: \{[\s\S]*?'کارامبول': 'carom'/.test(rules));
   t('گچ از کاتالوگ می‌آید',
-    ['app/shop/new/page.tsx', 'app/shop/edit/[id]/page.tsx']
-      .every(f => read(f).includes("form.category === 'chalk'")));
+    read('lib/market/catalog.ts').includes('chalk_catalog.json')
+    && read('lib/market/catalog-rules.ts').includes("chalk: ['snooker'"),
+    'دسته‌اش از isProductCatalog می‌گذرد، نه از فهرستِ دستی');
 }
 
 /* ── ظاهرِ ردیفِ دراپ‌داون ── */
@@ -2705,7 +2713,8 @@ console.log('\n― تیپ ―');
      `brandId` هر دو را برمی‌گرداند. این تست همان را می‌گیرد. */
   const owner = new Map(); const clash = [];
   for (const [cat, f] of [['cue', 'cue-catalog.json'], ['table', 'table_catalog.json'],
-    ['cloth', 'cloth_catalog.json'], ['chalk', 'chalk_catalog.json'], ['tip', 'tip_catalog.json']]) {
+    ['cloth', 'cloth_catalog.json'], ['chalk', 'chalk_catalog.json'], ['tip', 'tip_catalog.json'],
+    ['ball', 'ball_catalog.json']]) {
     if (!existsSync(join(ROOT, 'data/' + f))) continue;
     const j = JSON.parse(readFileSync(join(ROOT, 'data/' + f), 'utf8'));
     for (const ty of j.types) for (const b of ty.brands) {
@@ -2737,6 +2746,102 @@ console.log('\n― تیپ ―');
   t('تیپ از کاتالوگ می‌آید',
     ['app/shop/new/page.tsx', 'app/shop/edit/[id]/page.tsx']
       .every(f => read(f).includes("form.category === 'tip'")));
+}
+
+/* ── توپ: کاتالوگِ ششم ── */
+console.log('\n― توپ ―');
+{
+  const bp = join(ROOT, 'data/ball_catalog.json');
+  t('کاتالوگِ توپ هست', existsSync(bp));
+  if (existsSync(bp)) {
+    const B = JSON.parse(readFileSync(bp, 'utf8'));
+    const bb = B.types.flatMap(x => x.brands);
+    t('۵ نوع، ۵۸ برند، ۱۱۹ مدل',
+      B.types.length === 5 && bb.length >= 58
+      && bb.reduce((n, b) => n + b.models.length, 0) >= 119,
+      `${B.types.length}/${bb.length}`);
+    t('هر نوع سایز و نوعِ ست دارد',
+      B.types.every(x => (x.sizes ?? []).length > 0 && (x.set_types ?? []).length > 0),
+      'هر دو فهرست به نوع وابسته‌اند و از همان payload می‌آیند');
+    const PB = { snooker: 'bsnk__', pocket_billiard: 'bpkt__', carom: 'bcar__',
+      cue_ball: 'bcue__', single: 'bsng__' };
+    t('پیشوندِ برندِ توپ با نوع می‌خواند',
+      B.types.every(x => x.brands.every(b => b.id.startsWith(PB[x.id]))));
+    /* ── چرا شناسه‌ی قطر بینِ نوع‌ها تکرار می‌شود ──
+       ۵۰.۸ هم قطرِ پاکتِ انگلیسی است هم اسنوکرِ کوچک. تکراربودنش
+       اشکال نیست چون فهرست همیشه از **نوعِ انتخاب‌شده** می‌آید؛ این
+       تست فقط ثبت می‌کند که عمدی است. */
+    const dia = new Set(B.types.flatMap(x => x.sizes.map(sz => sz.id)));
+    t('شناسه‌ی قطر بینِ نوع‌ها مشترک است و باید با نوع خوانده شود',
+      dia.size < B.types.reduce((n, x) => n + x.sizes.length, 0));
+  }
+
+  const rules = read('lib/market/catalog-rules.ts');
+  t('توپ در فهرستِ کاتالوگ‌هاست',
+    rules.includes("'ball'") && rules.includes('bsng__'));
+  t('«نوع ست» از مسیرِ API می‌آید',
+    read('app/api/catalog/[category]/[type]/route.ts').includes('setTypes')
+    && read('components/market/CatalogSelector.tsx').includes('setTypes: CatalogSize[]'),
+    'همان یک درخواست، دو مصرف‌کننده');
+  t('قطر و نوعِ ست در فرم به کاتالوگ وصل‌اند',
+    ['app/shop/new/page.tsx', 'app/shop/edit/[id]/page.tsx']
+      .every(f => read(f).includes("id === 'diameter_mm' || id === 'set_type'")));
+
+  /* ── تله‌ی «نوع» ──
+     `depends_on_type`ِ «رنگ توپ» به نوعِ **بالای فرم** اشاره دارد
+     (`single`/`cue_ball`)، ولی `set_type`ِ توپ هم پسوندِ `_type` دارد
+     و شناسه‌ی `single` در گزینه‌هایش هست. اگر والد را از روی نام
+     پیدا کنیم، «رنگ توپ» به نوعِ ست گره می‌خورد. */
+  const sr = read('lib/market/spec-rules.ts');
+  t('والدِ depends_on_type از روی گزینه‌ها پیدا می‌شود نه نامِ فیلد',
+    sr.includes('(f.options ?? []).some(o =>') && sr.includes('formType'),
+    'set_typeِ توپ همان پسوند را دارد');
+  t('نوعِ بالای فرم به منطقِ پنهان‌سازی می‌رسد',
+    ['app/shop/new/page.tsx', 'app/shop/edit/[id]/page.tsx']
+      .every(f => /isFieldHidden\(f, specs, \w+, catTypeId\)/.test(read(f))));
+
+  /* ── گاردهای سرور ── */
+  const ads = read('app/api/market/ads/route.ts');
+  t('دروازه‌ی اعتبارسنجی از خودِ فهرستِ کاتالوگ مشتق می‌شود',
+    ads.includes('isProductCatalog(category)') && !ads.includes("category === 'chalk'"),
+    'فهرستِ دستی، «توپ» را جا انداخته بود');
+  /* ── هر دو مسیرِ نوشتن ──
+     ثبت و ویرایش هر دو باید همان قاعده را داشته باشند؛ فهرستِ دستیِ
+     مسیرِ ویرایش «توپ» را نداشت و کلِ اعتبارسنجی با یک PATCH دور
+     می‌خورد. */
+  const adsOne = read('app/api/market/ads/[id]/route.ts');
+  t('مسیرِ ویرایش همان دروازه و همان گاردِ نوع را دارد',
+    adsOne.includes('isProductCatalog(cat)')
+    && adsOne.includes('validateSpecsOnServer(cat, b.specs as Record<string, unknown>, catType'),
+    'قاعده‌ای که در یکی از دو مسیر باشد و در دیگری نه، باگِ فرداست');
+  t('عوض‌شدنِ نوع، فهرست‌های وابسته را داده‌محور پاک می‌کند',
+    sr.includes('export function typeDependentKeys')
+    && ['app/shop/new/page.tsx', 'app/shop/edit/[id]/page.tsx']
+      .every(f => read(f).includes('typeDependentKeys(specDefs, form.category)')
+        && !read(f).includes("'clothBrand', 'clothModel', 'clothType'")),
+    'فهرستِ دستی فقط میز را می‌شناخت و تیپ و توپ ۴۰۰ می‌گرفتند');
+  t('فیلدِ پنهان ذخیره نمی‌شود',
+    ['app/shop/new/page.tsx', 'app/shop/edit/[id]/page.tsx']
+      .every(f => read(f).includes('if (isFieldHidden(f, specs, specDefs, catTypeId)) continue')),
+    'رنگِ توپ نباید روی ستِ اسنوکر بماند');
+  t('برچسبِ فهرست‌های source‌دار در صفحه‌ی آگهی حل می‌شود',
+    read('app/shop/[id]/page.tsx').includes("src === 'types[].set_types'"),
+    'وگرنه «نوع ست: full-22» نشان داده می‌شد');
+  t('نامِ قدیمیِ «پول» هنوز به نوع نگاشت می‌شود',
+    rules.includes("'پول': 'pocket_billiard'"),
+    'ستونِ type در ردیف‌های موجود متنِ قدیمی را دارد');
+  t('سازنده‌ی گزینه‌ی سایز یکی است',
+    read('components/market/SpecFields.tsx').includes('export function sizeOptions')
+    && ['app/shop/new/page.tsx', 'app/shop/edit/[id]/page.tsx']
+      .every(f => read(f).includes('sizeOptions(tipCat.data?.sizes)')),
+    'سه نسخه‌ی یکسان در هر فرم بود');
+  t('فهرست‌های source‌دار روی سرور با نوع سنجیده می‌شوند',
+    read('lib/market/spec-catalog.ts').includes('SOURCE_LISTS')
+    && ads.includes('validateSpecsOnServer(category, b.specs as Record<string, unknown>, catType'),
+    'وگرنه آگهیِ اسنوکر می‌توانست قطرِ کارامبول بگیرد');
+  t('جنسِ توپ از برند و مدل مشتق می‌شود',
+    rules.includes('ballMaterial') && read('lib/market/catalog.ts').includes('ballMaterial(b.name_en'),
+    'فایل ستونِ material ندارد ولی فرم دارد');
 }
 
 /* ── لوازم جانبی: ده دسته زیرِ یک کاتالوگ ── */

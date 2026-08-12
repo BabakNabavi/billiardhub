@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { sb, rpc, actorFromRequest, isAdmin, clientIp } from '@/lib/finance/db';
 import { viewerHash } from '@/lib/ads/preroll';
 import { normalizeCategory, normalizeCondition } from '@/lib/market/categories';
-import { validateOnServer, getBrand, TYPE_PREFIX, isAccessoryCategory, ACCESSORY_TYPE_OF, type CatalogId } from '@/lib/market/catalog'
+import { validateOnServer, getBrand, TYPE_PREFIX, isAccessoryCategory, isProductCatalog, ACCESSORY_TYPE_OF, type CatalogId } from '@/lib/market/catalog'
 import { hasSpecCatalog, validateSpecsOnServer } from '@/lib/market/spec-catalog'
 import { normalizeAdImages } from '@/lib/market/images';
 
@@ -124,16 +124,16 @@ export async function PATCH(req: NextRequest, ctx: { params: Promise<{ id: strin
      قاعده‌ای که در یکی از دو مسیرِ نوشتن باشد و در دیگری نه، باگِ
      فرداست — این پروژه چند بار همین را دیده. */
   const cat = normalizeCategory(str(b?.category, 60));
+  const catType = str(cat === 'cue' ? b?.cueType : cat === 'table' ? b?.tableType : b?.catalogType, 40);
   if (hasSpecCatalog(cat) && b?.specs && typeof b.specs === 'object') {
-    const sv = validateSpecsOnServer(cat, b.specs as Record<string, unknown>);
+    const sv = validateSpecsOnServer(cat, b.specs as Record<string, unknown>, catType || undefined);
     if (!sv.ok) {
       const first = Object.values(sv.errors)[0] ?? 'مشخصات فنی معتبر نیست';
       return NextResponse.json({ message: first, errors: sv.errors }, { status: 400 });
     }
   }
 
-  const catType = str(cat === 'cue' ? b?.cueType : cat === 'table' ? b?.tableType : b?.catalogType, 40);
-  if ((cat === 'cue' || cat === 'table' || cat === 'cloth' || cat === 'chalk' || cat === 'tip' || isAccessoryCategory(cat)) && catType) {
+  if ((isProductCatalog(cat) || isAccessoryCategory(cat)) && catType) {
     const brandId = str(b?.brandId, 80) || null;
     const check = validateOnServer({
       /* دسته‌های لوازم زیرِ یک کاتالوگِ مشترک‌اند */

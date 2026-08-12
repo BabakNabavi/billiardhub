@@ -15,10 +15,10 @@ import { CATEGORY_OPTIONS, CONDITIONS, conditionLabel } from '../../../lib/marke
    جزئیاتِ محصول هم بتواند برچسبِ فارسیِ هر کلید را بخواند. */
 import { GENERIC_SPECS, CATEGORY_SPECS, HIDDEN_SPEC_KEYS } from '../../../lib/market/specs'
 import { productTitleParts } from '../../../lib/market/title'
-import { typeIdOf, isAccessoryCategory, ACCESSORY_TYPE_OF, type CatalogId } from '../../../lib/market/catalog-rules'
+import { typeIdOf, isAccessoryCategory, isProductCatalog, ACCESSORY_TYPE_OF, type CatalogId } from '../../../lib/market/catalog-rules'
 import CatalogSelector, { EMPTY_CATALOG_VALUE, type CatalogValue, useCatalogType, useCatalogTypes } from '../../../components/market/CatalogSelector'
-import { SpecFieldRow, SpecProgress, useSpecFields, specKey } from '../../../components/market/SpecFields'
-import { splitFields, countFilled, applySpecChange, isFieldLocked, isFieldHidden, fillFromModel, fromLegacyDefs, type SpecField, type LegacySpecDef } from '../../../lib/market/spec-rules'
+import { sizeOptions, SpecFieldRow, SpecProgress, useSpecFields, specKey } from '../../../components/market/SpecFields'
+import { splitFields, countFilled, applySpecChange, isFieldLocked, isFieldHidden, typeDependentKeys, fillFromModel, fromLegacyDefs, type SpecField, type LegacySpecDef } from '../../../lib/market/spec-rules'
 import { brandSearchTerms } from '../../../lib/market/catalog-rules'
 import CountryFlag from '../../../components/CountryFlag'
 import { TYPE_OPTIONS, brandOptionsFor, modelOptionsFor, isTypeDrivenCategory, withOther } from '../../../lib/market/chain'
@@ -158,8 +158,7 @@ export default function NewProductPage() {
      پنج دسته کاتالوگِ خودشان را دارند و ده دسته‌ی لوازم زیرِ یک
      کاتالوگِ مشترک‌اند که نوعش همان دسته است. */
   const catCategory: CatalogId | null =
-    form.category === 'cue' || form.category === 'table' || form.category === 'cloth'
-      || form.category === 'chalk' || form.category === 'tip' ? form.category
+    isProductCatalog(form.category) ? form.category
       : isAccessoryCategory(form.category) ? 'accessories' : null
   /* پارچه دو جا هست: کاتالوگِ خودش (برند/مدل) و دسته‌ی لوازم
      (مشخصات). برندش از کاتالوگِ پارچه می‌آید، نه از لوازم. */
@@ -196,28 +195,16 @@ export default function NewProductPage() {
     /* قطرِ تیپ هم `source: types[].sizes` دارد — همان مکانیزمِ
        سایزِ میز، فقط از کاتالوگِ تیپ. */
     if (id === 'diameter' && form.category === 'tip') {
-      return (tipCat.data?.sizes ?? []).map(s => ({
-        value: s.id, label: s.label_fa,
-        search: `${s.label_fa} ${s.label_en ?? ''}`,
-        node: (
-          <span style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
-            <span style={{ fontWeight: 600 }}>{s.label_fa}</span>
-            {s.note_fa && <span style={{ fontSize: 11.5, color: TEXT_MUT }}>{s.note_fa}</span>}
-          </span>
-        ),
-      }))
+      return sizeOptions(tipCat.data?.sizes)
+    }
+    /* ── توپ ──
+       قطر و «نوع ست» هر دو به نوعِ توپ وابسته‌اند و از همان
+       payloadِ فعال می‌آیند؛ منبعشان در JSON نوشته شده. */
+    if (form.category === 'ball' && (id === 'diameter_mm' || id === 'set_type')) {
+      return sizeOptions(id === 'diameter_mm' ? catData?.sizes : catData?.setTypes)
     }
     if (id === 'size') {
-      return (tableCat.data?.sizes ?? []).map(s => ({
-        value: s.id, label: s.label_fa,
-        search: `${s.label_fa} ${s.label_en ?? ''} ${s.playing_area_cm ?? ''}`,
-        node: (
-          <span style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
-            <span style={{ fontWeight: 600 }}>{s.label_fa}</span>
-            {s.playing_area_cm && <span dir="ltr" style={{ fontSize: 12, color: TEXT_MUT }}>{s.playing_area_cm} cm</span>}
-          </span>
-        ),
-      }))
+      return sizeOptions(tableCat.data?.sizes)
     }
     if (id === 'cloth_brand') {
       return (cloth.data?.brands ?? []).map(b => ({
@@ -306,17 +293,18 @@ export default function NewProductPage() {
   /* تغییر نوع ⇒ در دسته‌های نوع‌محور (چوب/میز/تیپ/گچ) برند/مدل ریست می‌شوند */
   const typeDrivenCat = isTypeDrivenCategory
   const setType = (v: string) => {
-    /* ── سایز و پارچه به نوعِ میز وابسته‌اند ──
-       بدونِ پاک‌شدن، `12ft` روی پاکت و برندِ پارچه‌ی اسنوکر روی
-       کارامبول می‌ماند — دراپ‌داون خالی نشان می‌دهد و سرور ۴۰۰. */
+    /* ── فهرست‌های وابسته به نوع پاک می‌شوند ──
+       بدونِ پاک‌شدن، `12ft` روی پاکت و قطرِ اسنوکر روی کارامبول
+       می‌ماند — دراپ‌داون خالی نشان می‌دهد و سرور ۴۰۰. فهرست از
+       خودِ تعریفِ فیلدها می‌آید، نه دستی. */
     setSpecs(s => {
       const n = { ...s }
-      for (const k of ['size', 'clothBrand', 'clothModel', 'clothType', 'clothWeight']) delete n[k]
+      for (const k of typeDependentKeys(specDefs, form.category)) delete n[k]
       return n
     })
     setSpecOthers(s => {
       const n = { ...s }
-      for (const k of ['size', 'clothBrand', 'clothModel']) delete n[k]
+      for (const k of typeDependentKeys(specDefs, form.category)) delete n[k]
       return n
     })
     /* برندها بینِ نوع‌ها مشترک نیستند؛ شناسه‌ی برندِ اسنوکر در پاکت بی‌معناست */
@@ -435,6 +423,11 @@ export default function NewProductPage() {
        آگهی‌های قدیمی که برچسب دارند دست‌نخورده نمایش می‌یابند. */
     const finalSpecs: Record<string, unknown> = { نوع: effType, مدل: effModel }
     for (const f of specDefs) {
+      /* ── فیلدی که دیده نمی‌شود ذخیره هم نمی‌شود ──
+         «رنگ توپ» را با نوعِ «تکی» پر کن و بعد نوع را به اسنوکر
+         عوض کن: فیلد از فرم می‌رود ولی مقدارش می‌ماند و در صفحه‌ی
+         جزئیات ظاهر می‌شود. */
+      if (isFieldHidden(f, specs, specDefs, catTypeId)) continue
       const key = specKey(f.id)
       const v = specs[key]
       if (v === undefined || v === null || v === '') continue
@@ -806,7 +799,7 @@ export default function NewProductPage() {
                      «تعداد لایه» برای تیپِ تک‌لایه و «نوع نگهدارنده»
                      وقتی نگهدارنده‌ای نیست. از شمارشِ پیشرفت هم بیرون
                      است، وگرنه هدفی شمرده می‌شد که دیده نمی‌شود. */
-                  const shown = usable.filter(f => !isFieldHidden(f, specs, usable))
+                  const shown = usable.filter(f => !isFieldHidden(f, specs, usable, catTypeId))
                   const { main: mainSpecs, toggles: toggleSpecs } = splitFields(shown)
                   const specProgress = countFilled(shown, specs)
                   return (

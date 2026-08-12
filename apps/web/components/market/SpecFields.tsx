@@ -23,8 +23,32 @@ import { useEffect, useRef, useState } from 'react'
 
 import { FancySelect, Label, ErrMsg, inp, GOLD, GOLD_D, TEXT_MUT, TEXT_SEC, type FancyOption } from './AdFormFields'
 import { specKey, type SpecField } from '../../lib/market/spec-rules'
+import type { CatalogSize } from '../../lib/market/catalog-rules'
 
 export const SPEC_OTHER = '__other__'
+
+/* ── گزینه‌های فهرستِ وابسته به نوع ──
+   اندازه‌ی میز، قطرِ تیپ، و قطر و «نوع ست»ِ توپ هر چهار یک شکل‌اند:
+   برچسبِ فارسی و یک یادداشتِ کم‌رنگ کنارش. سه بار در هر فرم تکرار
+   شده بود؛ اضافه‌شدنِ هر کاتالوگ یک نسخه‌ی دیگر می‌ساخت.
+
+   `playing_area_cm` فقط میز دارد و لاتین است، پس `dir="ltr"`. */
+export function sizeOptions(rows: CatalogSize[] | undefined): FancyOption[] {
+  return (rows ?? []).map(s => ({
+    value: s.id,
+    label: s.label_fa,
+    search: `${s.label_fa} ${s.label_en ?? ''} ${s.playing_area_cm ?? ''}`,
+    node: (
+      <span style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
+        <span style={{ fontWeight: 600 }}>{s.label_fa}</span>
+        {s.playing_area_cm && (
+          <span dir="ltr" style={{ fontSize: 12, color: TEXT_MUT }}>{s.playing_area_cm} cm</span>
+        )}
+        {s.note_fa && <span style={{ fontSize: 11.5, color: TEXT_MUT }}>{s.note_fa}</span>}
+      </span>
+    ),
+  }))
+}
 
 /* ── فیلدهای دسته ──
    `specs_catalog.json` سی‌وهشت کیلوبایت است و فرم فیلدهای **یک**

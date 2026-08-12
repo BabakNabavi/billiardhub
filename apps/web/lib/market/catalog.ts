@@ -24,7 +24,9 @@ import clothRaw from '../../data/cloth_catalog.json'
 import chalkRaw from '../../data/chalk_catalog.json'
 import tipRaw from '../../data/tip_catalog.json'
 import accRaw from '../../data/accessories_catalog.json'
+import ballRaw from '../../data/ball_catalog.json'
 import {
+  ballMaterial,
   validateSelection,
   type CatalogBrand, type CatalogCountry, type CatalogId, type CatalogModel,
   type CatalogSelection, type CatalogSize, type CatalogType, type CatalogValidation,
@@ -76,12 +78,32 @@ export const accessoryIcon = (typeId: string) =>
   (accRaw as unknown as { categories: AccessoryCategory[] }).categories
     .find(c => c.id === typeId)?.icon ?? ''
 
+/* ── توپ: جنس، مشتق‌شده ──
+   فایل این ستون را ندارد ولی فرم دارد. یک بار همین‌جا حساب
+   می‌شود تا از راهِ payload به `fillFromModel` برسد و مثلِ هر
+   مقدارِ دیگرِ مدل، پیش‌فرضِ قابلِ تغییرِ فروشنده باشد. */
+const ballSrc = ballRaw as unknown as CatalogFile
+const ballFile: CatalogFile = {
+  countries: ballSrc.countries,
+  types: ballSrc.types.map(t => ({
+    ...t,
+    brands: t.brands.map(b => ({
+      ...b,
+      models: b.models.map(m => {
+        const material = ballMaterial(b.name_en, m.name_en)
+        return material ? { ...m, material } : m
+      }),
+    })),
+  })),
+}
+
 const FILES: Record<CatalogId, CatalogFile> = {
   cue: cueRaw as unknown as CatalogFile,
   table: tableRaw as unknown as CatalogFile,
   cloth: clothRaw as unknown as CatalogFile,
   chalk: chalkRaw as unknown as CatalogFile,
   tip: tipRaw as unknown as CatalogFile,
+  ball: ballFile,
   accessories: accFile,
 }
 
@@ -101,6 +123,7 @@ const ALL_COUNTRIES: Record<string, CatalogCountry> = {
   ...(chalkRaw as unknown as CatalogFile).countries,
   ...(tipRaw as unknown as CatalogFile).countries,
   ...accFile.countries,
+  ...ballFile.countries,
   ...(tableRaw as unknown as CatalogFile).countries,
 }
 

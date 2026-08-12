@@ -57,6 +57,7 @@ export interface CatalogPayload {
   label_fa: string
   brands: CatalogBrand[]
   sizes: CatalogSize[]
+  setTypes: CatalogSize[]
   forceFreeInput: boolean
   countries: Record<string, CatalogCountry>
 }

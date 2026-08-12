@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { sb, actorFromRequest } from '@/lib/finance/db';
 import { consumeAdQuota, releaseConsumption, attachConsumptionRef } from '@/lib/ads/quota';
 import { normalizeCategory, normalizeCondition } from '@/lib/market/categories';
-import { isCatalogId, validateOnServer, getBrand, TYPE_PREFIX, isAccessoryCategory, ACCESSORY_TYPE_OF, type CatalogId } from '../../../../lib/market/catalog'
+import { isCatalogId, validateOnServer, getBrand, TYPE_PREFIX, isAccessoryCategory, isProductCatalog, ACCESSORY_TYPE_OF, type CatalogId } from '../../../../lib/market/catalog'
 import { hasSpecCatalog, validateSpecsOnServer } from '../../../../lib/market/spec-catalog'
 import { normalizeAdImages } from '@/lib/market/images';
 import { getSetting } from '@/lib/ads/quota';
@@ -171,18 +171,18 @@ export async function POST(req: NextRequest) {
      `min`/`max` در `specs_catalog.json` تعریف شده‌اند نه در کد، تا
      اصلاحشان دیپلوی نخواهد. فرم همان‌ها را می‌سنجد؛ این‌جا دوباره
      سنجیده می‌شوند چون فرم قابلِ اعتماد نیست. */
+  /* پارچه هم نوع دارد و همان رشته‌ی میز است */
+  const catType = str(category === 'cue' ? b?.cueType : category === 'table' ? b?.tableType : b?.catalogType, 40);
   if (hasSpecCatalog(category) && b?.specs && typeof b.specs === 'object') {
-    const sv = validateSpecsOnServer(category, b.specs as Record<string, unknown>);
+    const sv = validateSpecsOnServer(category, b.specs as Record<string, unknown>, catType || undefined);
     if (!sv.ok) {
       const first = Object.values(sv.errors)[0] ?? 'مشخصات فنی معتبر نیست';
       return NextResponse.json({ message: first, errors: sv.errors }, { status: 400 });
     }
   }
-  /* پارچه هم نوع دارد و همان رشته‌ی میز است */
-  const catType = str(category === 'cue' ? b?.cueType : category === 'table' ? b?.tableType : b?.catalogType, 40);
   /* `cloth` هم یک شناسه‌ی کاتالوگ است ولی دسته‌ی محصولِ مستقلی هم
      هست؛ بدونِ این گیت، POST با category=cloth وارد این شاخه می‌شد. */
-  if ((category === 'cue' || category === 'table' || category === 'cloth' || category === 'chalk' || category === 'tip' || isAccessoryCategory(category)) && catType) {
+  if ((isProductCatalog(category) || isAccessoryCategory(category)) && catType) {
     const brandId = str(b?.brandId, 80) || null;
     const check = validateOnServer({
       /* دسته‌های لوازم زیرِ یک کاتالوگِ مشترک‌اند */

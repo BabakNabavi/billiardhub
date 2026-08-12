@@ -21,7 +21,7 @@
 
 import { normalizeFa } from '../text-fa'
 
-export const CATALOG_IDS = ['cue', 'table', 'cloth', 'chalk', 'tip', 'accessories'] as const
+export const CATALOG_IDS = ['cue', 'table', 'cloth', 'chalk', 'tip', 'ball', 'accessories'] as const
 export type CatalogId = typeof CATALOG_IDS[number]
 
 export const isCatalogId = (v: unknown): v is CatalogId =>
@@ -53,6 +53,11 @@ export const TYPE_IDS: Record<CatalogId, readonly string[]> = {
      آمریکایی ۱۱.۷۵ تا ۱۴ و اغلب لایه‌لایه. سایز و مدل هیچ‌کدام
      بینِ دو رشته مشترک نیستند. */
   tip: ['snooker', 'pocket_billiard', 'carom'],
+  /* ── توپ ──
+     «کیوبال» و «تکی» محصولِ مستقل‌اند نه بخشی از ست، پس نوعِ
+     خودشان را دارند. «هی‌بال» عمداً نیست: از همان توپِ ۵۷.۱۵
+     میلی‌متریِ پاکت استفاده می‌کند و ستِ اختصاصی ندارد. */
+  ball: ['snooker', 'pocket_billiard', 'carom', 'cue_ball', 'single'],
   /* ── لوازم جانبی ──
      این‌جا سطحِ «نوع» وجود ندارد: خودِ دسته‌ی محصول همان نوع است.
      انتخابگر این را بدونِ تغییر می‌پذیرد چون هیچ‌وقت نمی‌داند
@@ -100,6 +105,10 @@ export const TYPE_PREFIX: Record<CatalogId, Record<string, string>> = {
   tip: {
     snooker: 'tsnk__', pocket_billiard: 'tpkt__', carom: 'tcar__',
   },
+  ball: {
+    snooker: 'bsnk__', pocket_billiard: 'bpkt__', carom: 'bcar__',
+    cue_ball: 'bcue__', single: 'bsng__',
+  },
   accessories: {
     cue_case: 'case__', extension: 'ext__', ball_bag: 'ballbag__',
     rest: 'rest__', oil: 'oil__', towel: 'twl__', apparel: 'apr__',
@@ -119,12 +128,18 @@ export const TYPE_PREFIX: Record<CatalogId, Record<string, string>> = {
 export const TYPE_BY_FA: Record<CatalogId, Record<string, string>> = {
   cue: {
     'پاکت بیلیارد': 'pocket_billiard',
+    /* نامِ نمایشی از «پول» به «پاکت بیلیارد» عوض شد ولی ستونِ
+       `type` در ردیف‌های موجود همان متنِ قدیمی را دارد */
+    'پول': 'pocket_billiard',
     'اسنوکر': 'snooker',
     'هی‌بال': 'heyball',
     'کارامبول': 'carom',
   },
   table: {
     'پاکت بیلیارد': 'pocket_billiard',
+    /* نامِ نمایشی از «پول» به «پاکت بیلیارد» عوض شد ولی ستونِ
+       `type` در ردیف‌های موجود همان متنِ قدیمی را دارد */
+    'پول': 'pocket_billiard',
     'اسنوکر': 'snooker',
     'هی‌بال': 'heyball',
     'کارامبول': 'carom',
@@ -135,6 +150,9 @@ export const TYPE_BY_FA: Record<CatalogId, Record<string, string>> = {
   },
   cloth: {
     'پاکت بیلیارد': 'pocket_billiard',
+    /* نامِ نمایشی از «پول» به «پاکت بیلیارد» عوض شد ولی ستونِ
+       `type` در ردیف‌های موجود همان متنِ قدیمی را دارد */
+    'پول': 'pocket_billiard',
     'اسنوکر': 'snooker',
     'هی‌بال': 'heyball',
     'کارامبول': 'carom',
@@ -142,12 +160,28 @@ export const TYPE_BY_FA: Record<CatalogId, Record<string, string>> = {
   chalk: {
     'اسنوکر': 'snooker',
     'پاکت بیلیارد': 'pocket_billiard',
+    /* نامِ نمایشی از «پول» به «پاکت بیلیارد» عوض شد ولی ستونِ
+       `type` در ردیف‌های موجود همان متنِ قدیمی را دارد */
+    'پول': 'pocket_billiard',
     'کارامبول': 'carom',
   },
   tip: {
     'اسنوکر': 'snooker',
     'پاکت بیلیارد': 'pocket_billiard',
+    /* نامِ نمایشی از «پول» به «پاکت بیلیارد» عوض شد ولی ستونِ
+       `type` در ردیف‌های موجود همان متنِ قدیمی را دارد */
+    'پول': 'pocket_billiard',
     'کارامبول': 'carom',
+  },
+  ball: {
+    'اسنوکر': 'snooker',
+    'پاکت بیلیارد': 'pocket_billiard',
+    /* نامِ نمایشی از «پول» به «پاکت بیلیارد» عوض شد ولی ستونِ
+       `type` در ردیف‌های موجود همان متنِ قدیمی را دارد */
+    'پول': 'pocket_billiard',
+    'کارامبول': 'carom',
+    'کیوبال': 'cue_ball',
+    'تکی': 'single',
   },
   /* لوازم برچسبِ فارسیِ «نوع» ندارد — نوعش از خودِ دسته می‌آید
      (`ACCESSORY_TYPE_OF`). خالی می‌ماند تا شکلِ تایپ کامل باشد. */
@@ -166,6 +200,8 @@ export interface CatalogModel {
   id: string
   name_en: string
   name_fa: string
+  /** جنسِ توپ — در فایل نیست، از `ballMaterial` مشتق می‌شود */
+  material?: string
   /** سرتیترِ گروه در فهرست (مثلاً «Hunter (Signature)») */
   group?: string
   /** منسوخ — ته فهرست می‌رود ولی حذف نمی‌شود؛ بازارِ دستِ‌دوم است */
@@ -221,6 +257,11 @@ export interface CatalogType {
   label_en?: string
   brands: CatalogBrand[]
   sizes?: CatalogSize[]
+  /* ── فقط توپ ──
+     «نوع ست» هم مثلِ سایز به نوع وابسته است: اسنوکر ست ۲۲ و ۱۷
+     تایی دارد، پاکت ندارد. فروشِ ناقص در بازارِ دستِ‌دوم رایج است
+     و بدونِ این فیلد، «فقط رنگی‌ها» از «ست کامل» جدا نمی‌شود. */
+  set_types?: CatalogSize[]
   /* ── بدونِ فهرستِ برند ──
      «میز خانگی» آرایه‌ی `brands` خالی دارد و این پرچم را روشن.
      منطق روی همین پرچم نوشته شده، نه روی `id === 'home_table'`، تا
@@ -415,3 +456,38 @@ export function sizeLabel(
   if (!sel.sizeId) return ''
   return sizes?.find(s => s.id === sel.sizeId)?.label_fa ?? ''
 }
+
+/* ── جنسِ توپ از روی برند و مدل ──
+   کاتالوگِ توپ فیلدِ `material` ندارد ولی فرم چنین فیلدی دارد و
+   خالی‌ماندنش برای مدل‌هایی که جنسشان قطعی است، از فروشنده کاری
+   می‌خواهد که داده خودش می‌داند. پس همین‌جا مشتق می‌شود و مثلِ
+   بقیه‌ی مقدارهای مدل، پیش‌فرضِ **قابلِ تغییر** است.
+
+   فقط جایی حکم داده می‌شود که مطمئن باشد؛ برندهای بی‌نام و
+   چینی خالی می‌مانند تا فروشنده خودش بگوید. */
+export function ballMaterial(brandName: string, modelName: string): string | undefined {
+  const b = brandName.toLowerCase(), m = modelName.toLowerCase()
+  if (m.includes('crystalate') || b === 'crystalate') return 'crystalate'
+  /* سری Tournament آرامیت روی فرمولِ نسلِ چهارم (دیورامیت) است */
+  if (b.includes('aramith') && (m.includes('duramith') || m.startsWith('tournament'))) return 'duramith'
+  if (PHENOLIC_BRANDS.has(b)) return 'phenolic'
+  return undefined
+}
+
+/* تطبیقِ دقیقِ `name_en` — برندِ تازه‌ای که «Aramith (Saluc)»
+   نوشته شود بی‌صدا خالی می‌ماند، که از حدسِ غلط بهتر است. */
+const PHENOLIC_BRANDS = new Set([
+  'aramith', 'super aramith', 'dynaspheres', 'cyclop', 'predator',
+  'brunswick', 'molinari', 'longoni', 'elephant balls', 'peradon',
+])
+
+/* ── دسته‌ی محصولی که کاتالوگِ خودش را دارد ──
+   `accessories` جدا می‌ماند: شناسه‌ی کاتالوگ هست ولی دسته‌ی
+   محصول نیست — ده دسته‌ی محصول زیرش می‌نشینند و هرکدام یک
+   «نوع»اند. برای آن‌ها `isAccessoryCategory` هست.
+
+   این شرط پیش‌تر در سه فایل دستی نوشته شده بود و اضافه‌شدنِ
+   «توپ» یکی‌شان را جا انداخت — سرور برند و مدلِ توپ را اصلاً
+   اعتبارسنجی نمی‌کرد. حالا از خودِ فهرست مشتق می‌شود. */
+export const isProductCatalog = (c: string): c is Exclude<CatalogId, 'accessories'> =>
+  isCatalogId(c) && c !== 'accessories'

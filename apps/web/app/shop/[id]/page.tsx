@@ -11,6 +11,7 @@ import ImageLightbox from '../../../components/market/ImageLightbox'
 import { specDisplayRows } from '../../../lib/market/spec-rules'
 import { specRows } from '../../../lib/market/specs'
 import { useCatalogType } from '../../../components/market/CatalogSelector'
+import { typeIdOf, isAccessoryCategory, isProductCatalog, ACCESSORY_TYPE_OF, type CatalogId } from '../../../lib/market/catalog-rules'
 import { useSpecFields } from '../../../components/market/SpecFields'
 import { CONDITIONS, normalizeCondition } from '../../../lib/market/categories'
 import { fetchProfile } from '../../../lib/profiles/client'
@@ -188,8 +189,22 @@ export default function ProductDetailPage() {
   /* اندازه و پارچه از کاتالوگِ میز/پارچه می‌آیند، نه از تعریفِ
      مشخصات — پس همان‌ها را هم می‌گیریم تا برچسب حل شود. */
   const tableTypeId = String(rawAd?.tableType ?? '')
-  const tableCat = useCatalogType('table', tableTypeId)
   const clothCat = useCatalogType('cloth', tableTypeId)
+  /* ── فهرست‌های وابسته به نوع، هر دسته‌ای که باشد ──
+     اندازه‌ی میز و قطرِ تیپ و قطر و نوعِ ستِ توپ، همه شناسه ذخیره
+     می‌شوند و برچسبشان در کاتالوگِ **همان دسته** است. پیش‌تر فقط
+     میز حل می‌شد و بقیه شناسه‌ی لاتین نشان می‌دادند: «نوع ست:
+     full-22». حالا از روی `source` حل می‌شود، نه نامِ فیلد. */
+  const adCatId: CatalogId | null =
+    isProductCatalog(String(product?.cat ?? '')) ? (product!.cat as CatalogId)
+      : isAccessoryCategory(String(product?.cat ?? '')) ? 'accessories' : null
+  /* چوب و میز شناسه‌ی نوع را در ستونِ خودشان دارند و همان مقدم
+     است؛ بقیه فقط برچسبِ فارسی دارند و از نگاشت می‌آیند. */
+  const storedTypeId = String(rawAd?.tableType ?? rawAd?.cueType ?? '')
+  const adTypeId = adCatId === 'accessories'
+    ? ACCESSORY_TYPE_OF[String(product?.cat ?? '')] ?? ''
+    : storedTypeId || (adCatId ? typeIdOf(adCatId, String(rawAd?.type ?? '')) : '')
+  const ownCat = useCatalogType(adCatId ?? 'cue', adCatId ? adTypeId : '')
   /* ── دسته‌هایی که هنوز کاتالوگ ندارند ──
      توپ، تیپ، گچ و کیس تعریفشان فقط در `specs.ts` است. بدونِ این
      بازگشت، آگهی‌های موجودشان کلیدِ خام نشان می‌دادند: «diameter:
@@ -200,7 +215,9 @@ export default function ProductDetailPage() {
   )
   const specs = useMemo(
     () => specDisplayRows(specDefs, rawAd?.specs, (fid, v) => {
-      if (fid === 'size') return tableCat.data?.sizes.find(s => s.id === v)?.label_fa
+      const src = specDefs.find(f => f.id === fid)?.source
+      if (src === 'types[].sizes') return ownCat.data?.sizes.find(s => s.id === v)?.label_fa
+      if (src === 'types[].set_types') return ownCat.data?.setTypes.find(s => s.id === v)?.label_fa
       if (fid === 'cloth_brand') return clothCat.data?.brands.find(b => b.id === v)?.name_en
       if (fid === 'cloth_model') {
         for (const b of clothCat.data?.brands ?? []) {
@@ -210,7 +227,7 @@ export default function ProductDetailPage() {
       }
       return undefined
     }),
-    [specDefs, rawAd, tableCat.data, clothCat.data],
+    [specDefs, rawAd, ownCat.data, clothCat.data],
   )
   /* دسته‌ای که کاتالوگِ تازه ندارد، از تعریفِ قدیمی برچسب می‌گیرد */
   const specRows_ = specDefs.length ? specs : legacyRows
