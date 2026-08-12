@@ -1,0 +1,2108 @@
+{
+  "schema_version": "1.0",
+  "last_updated": "2026-08-11",
+  "category": {
+    "id": "tip",
+    "label_fa": "تیپ (نوک چوب)"
+  },
+  "notes_fa": "ساختار سه‌سطحی: دسته‌بندی «تیپ» ← نوع ← برند ← مدل. گزینه «سایر» توسط فرانت‌اند اضافه می‌شود.",
+  "important_fa": "تیپ اسنوکر و پاکت بیلیارد متفاوت‌اند. تیپ اسنوکر ۸.۵ تا ۱۱ میلی‌متر و معمولاً تک‌لایه پرس‌شده (الک مستر، بلو دایموند) برای کنترل ظریف. تیپ پاکت بیلیارد آمریکایی ۱۱.۷۵ تا ۱۴ میلی‌متر و اغلب لایه‌لایه (کامویی، تایگر، موری) برای توپ سنگین‌تر و ضربات قدرتی. چند برند در هر دو حضور دارند ولی سایز و مدل‌هایشان فرق می‌کند.",
+  "other_option": {
+    "id": "other",
+    "name_fa": "سایر",
+    "reveals_text_input": true,
+    "max_length": 60
+  },
+  "search_note_fa": "فیلد aliases املاهای رایج فارسی را دارد؛ جستجو باید روی name_en و name_fa و aliases مچ کند.",
+  "countries": {
+    "US": {
+      "fa": "آمریکا",
+      "flag": "🇺🇸"
+    },
+    "JP": {
+      "fa": "ژاپن",
+      "flag": "🇯🇵"
+    },
+    "GB": {
+      "fa": "انگلستان",
+      "flag": "🇬🇧"
+    },
+    "KR": {
+      "fa": "کره جنوبی",
+      "flag": "🇰🇷"
+    },
+    "FI": {
+      "fa": "فنلاند",
+      "flag": "🇫🇮"
+    },
+    "CN": {
+      "fa": "چین",
+      "flag": "🇨🇳"
+    },
+    "NL": {
+      "fa": "هلند",
+      "flag": "🇳🇱"
+    },
+    "IT": {
+      "fa": "ایتالیا",
+      "flag": "🇮🇹"
+    },
+    "TH": {
+      "fa": "تایلند",
+      "flag": "🇹🇭"
+    }
+  },
+  "tiers": {
+    "tournament": "تورنمنتی / حرفه‌ای",
+    "premium": "رده بالا",
+    "mid": "میان‌رده",
+    "budget": "اقتصادی"
+  },
+  "hardness_levels": [
+    {
+      "id": "super_soft",
+      "label_fa": "فوق نرم",
+      "label_en": "Super Soft",
+      "shore_d": "~60-64",
+      "note_fa": "حداکثر چسبندگی و پیچ؛ سریع‌تر قارچی می‌شود"
+    },
+    {
+      "id": "soft",
+      "label_fa": "نرم",
+      "label_en": "Soft",
+      "shore_d": "~62-70",
+      "note_fa": "چسبندگی و حس بالا، نگهداری بیشتر"
+    },
+    {
+      "id": "medium",
+      "label_fa": "متوسط",
+      "label_en": "Medium",
+      "shore_d": "~70-78",
+      "note_fa": "انتخاب اکثر حرفه‌ای‌ها؛ تعادل کنترل و دوام"
+    },
+    {
+      "id": "hard",
+      "label_fa": "سخت",
+      "label_en": "Hard",
+      "shore_d": "~78-86",
+      "note_fa": "دوام بالا، پیچ کمتر، مناسب بریک"
+    },
+    {
+      "id": "extra_hard",
+      "label_fa": "فوق سخت",
+      "label_en": "Extra Hard",
+      "shore_d": "~86+",
+      "note_fa": "مخصوص بریک و جامپ"
+    }
+  ],
+  "construction_types": [
+    {
+      "id": "pressed",
+      "label_fa": "تک‌لایه پرس‌شده",
+      "label_en": "Single-Layer Pressed",
+      "note_fa": "چرم یک‌تکه فشرده. سنتی، ارزان، گچ‌گیر خوب، ولی نیاز به شکل‌دهی مرتب و قارچی‌شدن سریع‌تر. مثال: Elk Master، Blue Diamond، Le Pro"
+    },
+    {
+      "id": "layered",
+      "label_fa": "لایه‌لایه (لمینت)",
+      "label_en": "Multi-Layer Laminated",
+      "note_fa": "چند لایه چرم نازک پرس و چسبانده‌شده. یکنواخت‌تر، بادوام‌تر، شکل را بهتر نگه می‌دارد، گران‌تر. مثال: Kamui، Tiger، Moori، ADR147"
+    },
+    {
+      "id": "phenolic",
+      "label_fa": "فنولیک / مصنوعی",
+      "label_en": "Phenolic / Synthetic",
+      "note_fa": "پلیمر فنولیک یا کربن. فوق‌سخت، سال‌ها دوام، بدون نگهداری، ولی حس کمتر. مخصوص بریک و جامپ"
+    },
+    {
+      "id": "milk_fiber",
+      "label_fa": "فیبر شیری",
+      "label_en": "Milk Fiber",
+      "note_fa": "الیاف پروتئین شیر (کازئین) فشرده. بسیار چگال و یکنواخت با کنترل پیچ برتر"
+    },
+    {
+      "id": "screw_on",
+      "label_fa": "پیچی",
+      "label_en": "Screw-on",
+      "note_fa": "بدون چسب نصب می‌شود؛ چوب‌های باشگاهی و اقتصادی"
+    }
+  ],
+  "hardness_note_fa": "عدد shore_d روی مقیاس دیورومتر Shore D است. برای مقایسه: الک مستر اصلی ۶۵، کامویی بلک نرم ۶۲، کامویی بلک متوسط ۷۲.۵، تریانگل ۷۳.۵، له‌پرو ۷۴.۵، موری متوسط ۷۵، بلک دایموند ۸۱، سامسارا جامپ ۸۶.",
+  "types": [
+    {
+      "id": "snooker",
+      "label_fa": "اسنوکر",
+      "label_en": "Snooker",
+      "brands": [
+        {
+          "id": "tsnk__adr147",
+          "name_en": "ADR147",
+          "name_fa": "ای‌دی‌آر ۱۴۷",
+          "country": "GB",
+          "tier": "tournament",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "adr-black-ss",
+              "name_en": "ADR147 Black Super Soft",
+              "name_fa": "ADR مشکی سوپر سافت",
+              "hardness": "super_soft",
+              "construction": "layered"
+            },
+            {
+              "id": "adr-black-s",
+              "name_en": "ADR147 Black Soft",
+              "name_fa": "ADR مشکی نرم",
+              "hardness": "soft",
+              "construction": "layered"
+            },
+            {
+              "id": "adr-black-m",
+              "name_en": "ADR147 Black Medium",
+              "name_fa": "ADR مشکی متوسط",
+              "hardness": "medium",
+              "construction": "layered"
+            },
+            {
+              "id": "adr-black-h",
+              "name_en": "ADR147 Black Hard",
+              "name_fa": "ADR مشکی سخت",
+              "hardness": "hard",
+              "construction": "layered"
+            },
+            {
+              "id": "adr-black-xxh",
+              "name_en": "ADR147 Black XX Hard",
+              "name_fa": "ADR مشکی XX سخت",
+              "hardness": "extra_hard",
+              "construction": "layered",
+              "note_fa": "برای چوب بریک"
+            },
+            {
+              "id": "adr-green",
+              "name_en": "ADR147 Green",
+              "name_fa": "ADR سبز",
+              "construction": "layered"
+            },
+            {
+              "id": "adr-blue",
+              "name_en": "ADR147 Blue",
+              "name_fa": "ADR آبی",
+              "construction": "layered"
+            },
+            {
+              "id": "adr-red",
+              "name_en": "ADR147 Red",
+              "name_fa": "ADR قرمز",
+              "construction": "layered"
+            },
+            {
+              "id": "adr-calfskin",
+              "name_en": "ADR147 Calfskin",
+              "name_fa": "ADR پوست گوساله",
+              "construction": "pressed",
+              "note_fa": "سخت‌تر از حد انتظار؛ برش دشوار"
+            }
+          ],
+          "note_fa": "اسکاتلند، ساخت اندرو رمزی. اولین تیپ لایه‌لایه مخصوص اسنوکر و پول انگلیسی؛ حاصل ۷ سال تحقیق. گچ را مثل تیپ پرسی نگه می‌دارد ولی قارچی نمی‌شود. سایز ۱۱ میلی‌متر",
+          "aliases": [
+            "ADR",
+            "ای دی آر",
+            "ADR147"
+          ]
+        },
+        {
+          "id": "tsnk__century",
+          "name_en": "Century",
+          "name_fa": "سنچری",
+          "country": "GB",
+          "tier": "tournament",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "c-g1",
+              "name_en": "Century G1",
+              "name_fa": "سنچری G1",
+              "hardness": "soft",
+              "construction": "layered"
+            },
+            {
+              "id": "c-g2",
+              "name_en": "Century G2",
+              "name_fa": "سنچری G2",
+              "hardness": "medium",
+              "construction": "layered"
+            },
+            {
+              "id": "c-g3",
+              "name_en": "Century G3",
+              "name_fa": "سنچری G3",
+              "hardness": "medium",
+              "construction": "layered",
+              "note_fa": "پرطرفدارترین گرید سنچری"
+            },
+            {
+              "id": "c-g4",
+              "name_en": "Century G4",
+              "name_fa": "سنچری G4",
+              "hardness": "hard",
+              "construction": "layered"
+            },
+            {
+              "id": "c-g5",
+              "name_en": "Century G5",
+              "name_fa": "سنچری G5",
+              "hardness": "hard",
+              "construction": "layered"
+            },
+            {
+              "id": "c-pro",
+              "name_en": "Century Pro",
+              "name_fa": "سنچری پرو",
+              "construction": "layered"
+            }
+          ],
+          "note_fa": "بریتانیا. چهارتایی فروخته می‌شود و نیازی به فشرده‌سازی ندارد. عمدتاً ۱۰ میلی‌متر",
+          "aliases": [
+            "سنچری",
+            "سنتری",
+            "Century"
+          ]
+        },
+        {
+          "id": "tsnk__g2-tip",
+          "name_en": "G2",
+          "name_fa": "جی‌۲",
+          "country": "JP",
+          "tier": "tournament",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "g2-s",
+              "name_en": "G2 Soft",
+              "name_fa": "G2 نرم",
+              "hardness": "soft",
+              "construction": "layered"
+            },
+            {
+              "id": "g2-m",
+              "name_en": "G2 Medium",
+              "name_fa": "G2 متوسط",
+              "hardness": "medium",
+              "construction": "layered"
+            },
+            {
+              "id": "g2-h",
+              "name_en": "G2 Hard",
+              "name_fa": "G2 سخت",
+              "hardness": "hard",
+              "construction": "layered"
+            }
+          ],
+          "aliases": [
+            "G2",
+            "جی ۲"
+          ]
+        },
+        {
+          "id": "tsnk__kamui",
+          "name_en": "Kamui",
+          "name_fa": "کامویی",
+          "country": "JP",
+          "tier": "tournament",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "kb-ss",
+              "name_en": "Kamui Black Super Soft",
+              "name_fa": "کامویی بلک سوپر سافت",
+              "hardness": "super_soft",
+              "construction": "layered"
+            },
+            {
+              "id": "kb-s",
+              "name_en": "Kamui Black Soft",
+              "name_fa": "کامویی بلک نرم",
+              "hardness": "soft",
+              "construction": "layered",
+              "shore_d": "62.0"
+            },
+            {
+              "id": "kb-m",
+              "name_en": "Kamui Black Medium",
+              "name_fa": "کامویی بلک متوسط",
+              "hardness": "medium",
+              "construction": "layered",
+              "note_fa": "انتخاب اکثر حرفه‌ای‌ها",
+              "shore_d": "72.5"
+            },
+            {
+              "id": "kb-h",
+              "name_en": "Kamui Black Hard",
+              "name_fa": "کامویی بلک سخت",
+              "hardness": "hard",
+              "construction": "layered",
+              "shore_d": "73.5"
+            },
+            {
+              "id": "kbr-s",
+              "name_en": "Kamui Brown Soft",
+              "name_fa": "کامویی براون نرم",
+              "hardness": "soft",
+              "construction": "layered",
+              "shore_d": "62.5"
+            },
+            {
+              "id": "kbr-m",
+              "name_en": "Kamui Brown Medium",
+              "name_fa": "کامویی براون متوسط",
+              "hardness": "medium",
+              "construction": "layered",
+              "shore_d": "71.0"
+            },
+            {
+              "id": "kbr-h",
+              "name_en": "Kamui Brown Hard",
+              "name_fa": "کامویی براون سخت",
+              "hardness": "hard",
+              "construction": "layered",
+              "shore_d": "73.5"
+            },
+            {
+              "id": "kc-s",
+              "name_en": "Kamui Clear Soft",
+              "name_fa": "کامویی کلیر نرم",
+              "hardness": "soft",
+              "construction": "layered",
+              "note_fa": "لایه‌های شفاف؛ همان عملکرد بلک"
+            },
+            {
+              "id": "kc-m",
+              "name_en": "Kamui Clear Medium",
+              "name_fa": "کامویی کلیر متوسط",
+              "hardness": "medium",
+              "construction": "layered"
+            },
+            {
+              "id": "kc-h",
+              "name_en": "Kamui Clear Hard",
+              "name_fa": "کامویی کلیر سخت",
+              "hardness": "hard",
+              "construction": "layered"
+            },
+            {
+              "id": "k-original",
+              "name_en": "Kamui Original",
+              "name_fa": "کامویی اورجینال",
+              "hardness": "soft",
+              "construction": "layered",
+              "note_fa": "۱۴ لایه؛ نرم‌تر از خط بلک، چسبندگی حداکثری"
+            }
+          ],
+          "note_fa": "ژاپن، پوست خوک ژاپنی، ۱۰ لایه. چرم باکیفیت‌تر یعنی نگهداری کمتر و قارچی‌شدن کمتر. گران و تکی فروخته می‌شود",
+          "aliases": [
+            "کامویی",
+            "کامو",
+            "کاموی",
+            "Kamui"
+          ]
+        },
+        {
+          "id": "tsnk__mike-wooldridge",
+          "name_en": "Mike Wooldridge",
+          "name_fa": "مایک وولدریج",
+          "country": "GB",
+          "tier": "tournament",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "mw-supertip",
+              "name_en": "MW SuperTip",
+              "name_fa": "سوپرتیپ MW",
+              "hardness": "medium",
+              "construction": "pressed",
+              "note_fa": "تک‌لایه برتر؛ از پیش فشرده‌شده پس از شات اول حس خوب می‌دهد"
+            },
+            {
+              "id": "mw-pressed",
+              "name_en": "MW Pressed Tip",
+              "name_fa": "تیپ پرسی MW",
+              "hardness": "soft",
+              "construction": "pressed",
+              "note_fa": "دقیقاً مثل یک الک مستر خوب"
+            }
+          ],
+          "note_fa": "ساخت دست بریتانیا. هر پک از نظر سایز و چگالی مچ‌شده؛ بدون گچ عرضه می‌شود برای نصب تمیز",
+          "aliases": [
+            "وولدریج",
+            "ام دبلیو",
+            "MW",
+            "Wooldridge"
+          ]
+        },
+        {
+          "id": "tsnk__talisman",
+          "name_en": "Talisman",
+          "name_fa": "تالیسمان",
+          "country": "KR",
+          "tier": "tournament",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "tal-pro-ss",
+              "name_en": "Talisman Pro Super Soft",
+              "name_fa": "تالیسمان پرو سوپر سافت",
+              "hardness": "super_soft",
+              "construction": "layered"
+            },
+            {
+              "id": "tal-pro-s",
+              "name_en": "Talisman Pro Soft",
+              "name_fa": "تالیسمان پرو نرم",
+              "hardness": "soft",
+              "construction": "layered"
+            },
+            {
+              "id": "tal-pro-m",
+              "name_en": "Talisman Pro Medium",
+              "name_fa": "تالیسمان پرو متوسط",
+              "hardness": "medium",
+              "construction": "layered",
+              "note_fa": "محبوب‌ترین گرید؛ اول کمتر گچ نگه می‌دارد ولی بعد از چند روز خوب می‌شود",
+              "shore_d": "70.5"
+            },
+            {
+              "id": "tal-pro-h",
+              "name_en": "Talisman Pro Hard",
+              "name_fa": "تالیسمان پرو سخت",
+              "hardness": "hard",
+              "construction": "layered"
+            },
+            {
+              "id": "tal-wb",
+              "name_en": "Talisman WB (Water Buffalo)",
+              "name_fa": "تالیسمان WB",
+              "construction": "layered"
+            }
+          ],
+          "note_fa": "لایه‌لایه کره‌ای. کلاً سخت‌تر از بقیه است، پس نرم و متوسطش برای اکثر بازیکنان کافی است. نیاز به جااندازی کم",
+          "aliases": [
+            "تالیسمان",
+            "طلسمان",
+            "Talisman"
+          ]
+        },
+        {
+          "id": "tsnk__taom",
+          "name_en": "Taom",
+          "name_fa": "تائوم",
+          "country": "FI",
+          "tier": "tournament",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "taom-pro",
+              "name_en": "Taom Pro Tip",
+              "name_fa": "تائوم پرو",
+              "hardness": "medium",
+              "construction": "layered"
+            },
+            {
+              "id": "taom-v10-tip",
+              "name_en": "Taom V10 Tip",
+              "name_fa": "تائوم V10",
+              "construction": "layered"
+            }
+          ],
+          "aliases": [
+            "تائوم",
+            "تاوم",
+            "تام",
+            "Taom"
+          ]
+        },
+        {
+          "id": "tsnk__zan",
+          "name_en": "Zan",
+          "name_fa": "زان",
+          "country": "KR",
+          "tier": "tournament",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "zan-ss",
+              "name_en": "Zan Super Soft",
+              "name_fa": "زان سوپر سافت",
+              "hardness": "super_soft",
+              "construction": "layered"
+            },
+            {
+              "id": "zan-s",
+              "name_en": "Zan Soft",
+              "name_fa": "زان نرم",
+              "hardness": "soft",
+              "construction": "layered"
+            },
+            {
+              "id": "zan-m",
+              "name_en": "Zan Medium",
+              "name_fa": "زان متوسط",
+              "hardness": "medium",
+              "construction": "layered"
+            },
+            {
+              "id": "zan-h",
+              "name_en": "Zan Hard",
+              "name_fa": "زان سخت",
+              "hardness": "hard",
+              "construction": "layered"
+            },
+            {
+              "id": "zan-premium",
+              "name_en": "Zan Premium",
+              "name_fa": "زان پریمیوم",
+              "construction": "layered"
+            }
+          ],
+          "aliases": [
+            "زان",
+            "Zan"
+          ]
+        },
+        {
+          "id": "tsnk__ap-exotic",
+          "name_en": "AP Exotic",
+          "name_fa": "ای‌پی اگزوتیک",
+          "country": "GB",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "ap-std",
+              "name_en": "AP Exotic Tip",
+              "name_fa": "ای‌پی اگزوتیک",
+              "construction": "layered"
+            }
+          ],
+          "aliases": [
+            "AP Exotic"
+          ]
+        },
+        {
+          "id": "tsnk__blue-diamond",
+          "name_en": "Blue Diamond",
+          "name_fa": "بلو دایموند",
+          "country": "GB",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "bd-std",
+              "name_en": "Blue Diamond",
+              "name_fa": "بلو دایموند",
+              "construction": "pressed",
+              "note_fa": "نرم‌تر و اسفنجی‌تر از الک مستر؛ رقیب سنتی آن"
+            },
+            {
+              "id": "bd-plus",
+              "name_en": "Blue Diamond Plus",
+              "name_fa": "بلو دایموند پلاس",
+              "construction": "pressed"
+            }
+          ],
+          "note_fa": "تیپ پرس‌شده کلاسیک بریتانیایی. حس نرم‌تری از الک مستر می‌دهد",
+          "aliases": [
+            "بلو دایموند",
+            "الماس آبی",
+            "Blue Diamond"
+          ]
+        },
+        {
+          "id": "tsnk__buffalo",
+          "name_en": "Buffalo",
+          "name_fa": "بوفالو",
+          "country": "NL",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "buf-diamond-plus",
+              "name_en": "Buffalo Diamond Plus",
+              "name_fa": "بوفالو دایموند پلاس",
+              "construction": "pressed",
+              "note_fa": "دقیقاً مشابه یک بلو دایموند خوب؛ شکلش را خوب نگه می‌دارد"
+            },
+            {
+              "id": "buf-pro",
+              "name_en": "Buffalo Pro",
+              "name_fa": "بوفالو پرو",
+              "construction": "pressed"
+            }
+          ],
+          "aliases": [
+            "بوفالو",
+            "Buffalo"
+          ]
+        },
+        {
+          "id": "tsnk__elkmaster",
+          "name_en": "Elk Master",
+          "name_fa": "الک مستر",
+          "country": "US",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "elk-std",
+              "name_en": "Elk Master (Standard)",
+              "name_fa": "الک مستر استاندارد",
+              "hardness": "soft",
+              "construction": "pressed",
+              "note_fa": "پرمصرف‌ترین تیپ اسنوکر جهان؛ رونی اوسالیوان هم از همین استفاده می‌کند",
+              "shore_d": "65"
+            },
+            {
+              "id": "elk-pro",
+              "name_en": "Elk Master Pro",
+              "name_fa": "الک مستر پرو",
+              "hardness": "medium",
+              "construction": "pressed",
+              "note_fa": "دست‌چین‌شده و پرس‌شده از همان بچ استاندارد؛ یکنواخت‌تر"
+            },
+            {
+              "id": "elk-break",
+              "name_en": "Elk Master Break",
+              "name_fa": "الک مستر بریک",
+              "hardness": "hard",
+              "construction": "pressed",
+              "note_fa": "نسخه سخت برای بریک"
+            }
+          ],
+          "note_fa": "چرم تک‌لایه پرس‌شده. ارزان و قابل‌شکل‌دهی، ولی نیاز به نگهداری مرتب دارد و زودتر قارچی می‌شود",
+          "aliases": [
+            "الک مستر",
+            "الکمستر",
+            "الک",
+            "Elk Master",
+            "Elkmaster",
+            "Elk"
+          ]
+        },
+        {
+          "id": "tsnk__highland-pro",
+          "name_en": "Highland Pro",
+          "name_fa": "هایلند پرو",
+          "country": "GB",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "hp-std",
+              "name_en": "Highland Pro",
+              "name_fa": "هایلند پرو",
+              "construction": "layered"
+            }
+          ],
+          "aliases": [
+            "هایلند",
+            "Highland"
+          ]
+        },
+        {
+          "id": "tsnk__omin-tip",
+          "name_en": "O'Min",
+          "name_fa": "اومین",
+          "country": "TH",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "om-tip",
+              "name_en": "O'Min Cue Tip",
+              "name_fa": "تیپ اومین",
+              "construction": "pressed"
+            }
+          ],
+          "aliases": [
+            "اومین",
+            "O'Min"
+          ]
+        },
+        {
+          "id": "tsnk__pro-granite",
+          "name_en": "Pro Granite",
+          "name_fa": "پرو گرانیت",
+          "country": "GB",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "pg-std",
+              "name_en": "Pro Granite",
+              "name_fa": "پرو گرانیت",
+              "hardness": "hard",
+              "construction": "pressed",
+              "note_fa": "سخت؛ اگر الک مستر برایت سخت است سراغش نرو"
+            }
+          ],
+          "aliases": [
+            "پرو گرانیت",
+            "Pro Granite"
+          ]
+        },
+        {
+          "id": "tsnk__pro-spin",
+          "name_en": "ProSpin",
+          "name_fa": "پرو اسپین",
+          "country": "TH",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "ps-std",
+              "name_en": "ProSpin Tip",
+              "name_fa": "پرو اسپین",
+              "construction": "layered",
+              "note_fa": "تیپ استاندارد چوب‌های Phoenix تایلند"
+            }
+          ],
+          "aliases": [
+            "پرو اسپین",
+            "ProSpin"
+          ]
+        },
+        {
+          "id": "tsnk__triple-crown",
+          "name_en": "Triple Crown",
+          "name_fa": "تریپل کراون",
+          "country": "GB",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "tc-std",
+              "name_en": "Triple Crown Tip",
+              "name_fa": "تریپل کراون",
+              "construction": "layered"
+            }
+          ],
+          "aliases": [
+            "تریپل کراون",
+            "Triple Crown"
+          ]
+        },
+        {
+          "id": "tsnk__blue-velvet",
+          "name_en": "Blue Velvet",
+          "name_fa": "بلو ولوت",
+          "country": "GB",
+          "tier": "mid",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "bv-std",
+              "name_en": "Blue Velvet",
+              "name_fa": "بلو ولوت",
+              "construction": "pressed"
+            }
+          ],
+          "aliases": [
+            "بلو ولوت",
+            "Blue Velvet"
+          ]
+        },
+        {
+          "id": "tsnk__lp-tip",
+          "name_en": "LP",
+          "name_fa": "ال‌پی",
+          "country": "CN",
+          "tier": "mid",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "lp-pro",
+              "name_en": "LP Professional",
+              "name_fa": "ال‌پی حرفه‌ای",
+              "construction": "pressed"
+            }
+          ],
+          "aliases": [
+            "ال پی",
+            "LP"
+          ]
+        },
+        {
+          "id": "tsnk__chinese-tip-s",
+          "name_en": "Chinese Unbranded",
+          "name_fa": "چینی بدون برند",
+          "country": "CN",
+          "tier": "budget",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "cn-pressed",
+              "name_en": "Pressed Copy",
+              "name_fa": "کپی پرسی",
+              "construction": "pressed"
+            },
+            {
+              "id": "cn-layered",
+              "name_en": "Layered Copy",
+              "name_fa": "کپی لایه‌لایه",
+              "construction": "layered"
+            }
+          ],
+          "aliases": [
+            "چینی"
+          ]
+        },
+        {
+          "id": "tsnk__meilin",
+          "name_en": "Meilin",
+          "name_fa": "می‌لین",
+          "country": "CN",
+          "tier": "budget",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "ml-std",
+              "name_en": "Meilin Tip",
+              "name_fa": "تیپ می‌لین",
+              "construction": "pressed"
+            }
+          ],
+          "aliases": [
+            "می لین",
+            "Meilin"
+          ]
+        },
+        {
+          "id": "tsnk__screw-on",
+          "name_en": "Screw-on Tips",
+          "name_fa": "تیپ پیچی",
+          "country": null,
+          "tier": "budget",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "screw-std",
+              "name_en": "Screw-on Tip",
+              "name_fa": "تیپ پیچی",
+              "construction": "screw_on",
+              "note_fa": "بدون چسب نصب می‌شود؛ مخصوص چوب‌های باشگاهی و ارزان"
+            }
+          ],
+          "aliases": [
+            "پیچی",
+            "Screw on"
+          ]
+        },
+        {
+          "id": "tsnk__unknown-tip-s",
+          "name_en": "Unknown / Unbranded",
+          "name_fa": "نامشخص / بدون برند",
+          "country": null,
+          "tier": "budget",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "uk-s",
+              "name_en": "Unknown",
+              "name_fa": "نامشخص"
+            }
+          ],
+          "aliases": [
+            "نامشخص"
+          ]
+        }
+      ],
+      "sizes": [
+        {
+          "id": "8.5",
+          "label_fa": "۸.۵ میلی‌متر",
+          "label_en": "8.5mm"
+        },
+        {
+          "id": "9",
+          "label_fa": "۹ میلی‌متر",
+          "label_en": "9mm"
+        },
+        {
+          "id": "9.5",
+          "label_fa": "۹.۵ میلی‌متر",
+          "label_en": "9.5mm",
+          "default": true
+        },
+        {
+          "id": "10",
+          "label_fa": "۱۰ میلی‌متر",
+          "label_en": "10mm",
+          "note_fa": "رایج‌ترین سایز تیپ اسنوکر"
+        },
+        {
+          "id": "10.5",
+          "label_fa": "۱۰.۵ میلی‌متر",
+          "label_en": "10.5mm"
+        },
+        {
+          "id": "11",
+          "label_fa": "۱۱ میلی‌متر",
+          "label_en": "11mm"
+        }
+      ],
+      "note_fa": "تیپ اسنوکر معمولاً ۹ تا ۱۰ میلی‌متر و سخت‌تر از تیپ پاکت بیلیارد است، برای لمس ظریف و کنترل دقیق."
+    },
+    {
+      "id": "pocket_billiard",
+      "label_fa": "پاکت بیلیارد",
+      "label_en": "Pocket Billiards",
+      "brands": [
+        {
+          "id": "tpkt__g2-p",
+          "name_en": "G2",
+          "name_fa": "جی‌۲",
+          "country": "JP",
+          "tier": "tournament",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "g2-s",
+              "name_en": "G2 Soft",
+              "name_fa": "G2 نرم",
+              "hardness": "soft",
+              "construction": "layered"
+            },
+            {
+              "id": "g2-m",
+              "name_en": "G2 Medium",
+              "name_fa": "G2 متوسط",
+              "hardness": "medium",
+              "construction": "layered"
+            },
+            {
+              "id": "g2-h",
+              "name_en": "G2 Hard",
+              "name_fa": "G2 سخت",
+              "hardness": "hard",
+              "construction": "layered"
+            }
+          ],
+          "aliases": [
+            "G2"
+          ]
+        },
+        {
+          "id": "tpkt__kamui",
+          "name_en": "Kamui",
+          "name_fa": "کامویی",
+          "country": "JP",
+          "tier": "tournament",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "kb-ss",
+              "name_en": "Kamui Black Super Soft",
+              "name_fa": "کامویی بلک سوپر سافت",
+              "hardness": "super_soft",
+              "construction": "layered"
+            },
+            {
+              "id": "kb-s",
+              "name_en": "Kamui Black Soft",
+              "name_fa": "کامویی بلک نرم",
+              "hardness": "soft",
+              "construction": "layered",
+              "note_fa": "چسبندگی حداکثری برای پیچ",
+              "shore_d": "62.0"
+            },
+            {
+              "id": "kb-m",
+              "name_en": "Kamui Black Medium",
+              "name_fa": "کامویی بلک متوسط",
+              "hardness": "medium",
+              "construction": "layered",
+              "note_fa": "توصیه حرفه‌ای‌ها",
+              "shore_d": "72.5"
+            },
+            {
+              "id": "kb-h",
+              "name_en": "Kamui Black Hard",
+              "name_fa": "کامویی بلک سخت",
+              "hardness": "hard",
+              "construction": "layered",
+              "shore_d": "73.5"
+            },
+            {
+              "id": "kc-s",
+              "name_en": "Kamui Clear Soft",
+              "name_fa": "کامویی کلیر نرم",
+              "hardness": "soft",
+              "construction": "layered"
+            },
+            {
+              "id": "kc-m",
+              "name_en": "Kamui Clear Medium",
+              "name_fa": "کامویی کلیر متوسط",
+              "hardness": "medium",
+              "construction": "layered"
+            },
+            {
+              "id": "kc-h",
+              "name_en": "Kamui Clear Hard",
+              "name_fa": "کامویی کلیر سخت",
+              "hardness": "hard",
+              "construction": "layered"
+            },
+            {
+              "id": "kbr-s",
+              "name_en": "Kamui Brown Soft",
+              "name_fa": "کامویی براون نرم",
+              "hardness": "soft",
+              "construction": "layered",
+              "shore_d": "62.5"
+            },
+            {
+              "id": "kbr-m",
+              "name_en": "Kamui Brown Medium",
+              "name_fa": "کامویی براون متوسط",
+              "hardness": "medium",
+              "construction": "layered",
+              "shore_d": "71.0"
+            },
+            {
+              "id": "kbr-h",
+              "name_en": "Kamui Brown Hard",
+              "name_fa": "کامویی براون سخت",
+              "hardness": "hard",
+              "construction": "layered",
+              "shore_d": "73.5"
+            },
+            {
+              "id": "k-original",
+              "name_en": "Kamui Original",
+              "name_fa": "کامویی اورجینال",
+              "hardness": "soft",
+              "construction": "layered",
+              "note_fa": "۱۴ لایه؛ حداکثر چسبندگی، محبوب بازیکنان پیچ‌کار"
+            }
+          ],
+          "note_fa": "ژاپن، ۱۰ لایه پوست خوک. صدر بازار؛ نیاز به دوره جااندازی ۵۰ تا ۱۰۰ ضربه دارد",
+          "aliases": [
+            "کامویی",
+            "کامو",
+            "کاموی",
+            "Kamui"
+          ]
+        },
+        {
+          "id": "tpkt__moori",
+          "name_en": "Moori",
+          "name_fa": "موری",
+          "country": "JP",
+          "tier": "tournament",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "mo-xs",
+              "name_en": "Moori X-Soft",
+              "name_fa": "موری فوق‌نرم",
+              "hardness": "super_soft",
+              "construction": "layered",
+              "note_fa": "حداکثر چسبندگی"
+            },
+            {
+              "id": "mo-s",
+              "name_en": "Moori Soft",
+              "name_fa": "موری نرم",
+              "hardness": "soft",
+              "construction": "layered",
+              "shore_d": "71.0"
+            },
+            {
+              "id": "mo-m",
+              "name_en": "Moori Medium",
+              "name_fa": "موری متوسط",
+              "hardness": "medium",
+              "construction": "layered",
+              "note_fa": "محبوب‌ترین گرید",
+              "shore_d": "75.0"
+            },
+            {
+              "id": "mo-h",
+              "name_en": "Moori Hard",
+              "name_fa": "موری سخت",
+              "hardness": "hard",
+              "construction": "layered",
+              "shore_d": "77.0"
+            },
+            {
+              "id": "mo-m3",
+              "name_en": "Moori III (M III)",
+              "name_fa": "موری III",
+              "hardness": "medium",
+              "construction": "layered",
+              "shore_d": "75.0"
+            }
+          ],
+          "note_fa": "ژاپن. دهه‌هاست مورد اعتماد حرفه‌ای‌ها؛ حس و فیدبک عالی ولی مستعد قارچی‌شدن",
+          "aliases": [
+            "موری",
+            "مووری",
+            "Moori",
+            "Morri"
+          ]
+        },
+        {
+          "id": "tpkt__navigator-tip",
+          "name_en": "Navigator",
+          "name_fa": "ناویگیتور",
+          "country": "JP",
+          "tier": "tournament",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "nav-alpha",
+              "name_en": "Navigator Alpha",
+              "name_fa": "ناویگیتور آلفا",
+              "construction": "layered"
+            },
+            {
+              "id": "nav-beta",
+              "name_en": "Navigator Beta",
+              "name_fa": "ناویگیتور بتا",
+              "construction": "layered"
+            },
+            {
+              "id": "nav-white",
+              "name_en": "Navigator White Diamond",
+              "name_fa": "ناویگیتور وایت دایموند",
+              "construction": "layered"
+            },
+            {
+              "id": "nav-black",
+              "name_en": "Navigator Black",
+              "name_fa": "ناویگیتور مشکی",
+              "construction": "layered"
+            }
+          ],
+          "aliases": [
+            "ناویگیتور",
+            "Navigator"
+          ]
+        },
+        {
+          "id": "tpkt__predator-tip",
+          "name_en": "Predator",
+          "name_fa": "پردیتور",
+          "country": "US",
+          "tier": "tournament",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "pv-ss",
+              "name_en": "Victory Super Soft",
+              "name_fa": "ویکتوری سوپر سافت",
+              "hardness": "super_soft",
+              "construction": "layered"
+            },
+            {
+              "id": "pv-s",
+              "name_en": "Victory Soft",
+              "name_fa": "ویکتوری نرم",
+              "hardness": "soft",
+              "construction": "layered"
+            },
+            {
+              "id": "pv-m",
+              "name_en": "Victory Medium",
+              "name_fa": "ویکتوری متوسط",
+              "hardness": "medium",
+              "construction": "layered",
+              "note_fa": "تیپ استاندارد شفت REVO"
+            },
+            {
+              "id": "pv-h",
+              "name_en": "Victory Hard",
+              "name_fa": "ویکتوری سخت",
+              "hardness": "hard",
+              "construction": "layered"
+            },
+            {
+              "id": "p-arcadia",
+              "name_en": "Arcadia Tip",
+              "name_fa": "آرکادیا",
+              "construction": "layered"
+            },
+            {
+              "id": "p-break",
+              "name_en": "Predator Break Tip",
+              "name_fa": "تیپ بریک پردیتور",
+              "hardness": "extra_hard",
+              "construction": "phenolic"
+            }
+          ],
+          "aliases": [
+            "پردیتور",
+            "Predator",
+            "Victory"
+          ]
+        },
+        {
+          "id": "tpkt__samsara",
+          "name_en": "Samsara",
+          "name_fa": "سامسارا",
+          "country": "US",
+          "tier": "tournament",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "sam-play",
+              "name_en": "Samsara Playing Tip",
+              "name_fa": "سامسارا بازی",
+              "construction": "layered"
+            },
+            {
+              "id": "sam-break",
+              "name_en": "Samsara Break",
+              "name_fa": "سامسارا بریک",
+              "hardness": "extra_hard",
+              "construction": "phenolic"
+            },
+            {
+              "id": "sam-jump",
+              "name_en": "Samsara Jump",
+              "name_fa": "سامسارا جامپ",
+              "hardness": "extra_hard",
+              "construction": "phenolic",
+              "note_fa": "سخت‌ترین تیپ بازار",
+              "shore_d": "86.0"
+            }
+          ],
+          "note_fa": "پلیمر فنولیک. تیپ مصنوعی فوق‌سخت، سال‌ها دوام و بدون نگهداری",
+          "aliases": [
+            "سامسارا",
+            "Samsara"
+          ]
+        },
+        {
+          "id": "tpkt__talisman-p",
+          "name_en": "Talisman",
+          "name_fa": "تالیسمان",
+          "country": "KR",
+          "tier": "tournament",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "tal-pro-s",
+              "name_en": "Talisman Pro Soft",
+              "name_fa": "تالیسمان پرو نرم",
+              "hardness": "soft",
+              "construction": "layered"
+            },
+            {
+              "id": "tal-pro-m",
+              "name_en": "Talisman Pro Medium",
+              "name_fa": "تالیسمان پرو متوسط",
+              "hardness": "medium",
+              "construction": "layered",
+              "shore_d": "70.5"
+            },
+            {
+              "id": "tal-pro-h",
+              "name_en": "Talisman Pro Hard",
+              "name_fa": "تالیسمان پرو سخت",
+              "hardness": "hard",
+              "construction": "layered"
+            },
+            {
+              "id": "tal-wb",
+              "name_en": "Talisman WB USA",
+              "name_fa": "تالیسمان WB",
+              "construction": "layered",
+              "shore_d": "77.0"
+            }
+          ],
+          "aliases": [
+            "تالیسمان",
+            "Talisman"
+          ]
+        },
+        {
+          "id": "tpkt__taom-p",
+          "name_en": "Taom",
+          "name_fa": "تائوم",
+          "country": "FI",
+          "tier": "tournament",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "taom-pro",
+              "name_en": "Taom Pro Tip",
+              "name_fa": "تائوم پرو",
+              "hardness": "medium",
+              "construction": "layered"
+            },
+            {
+              "id": "taom-v10",
+              "name_en": "Taom V10 Tip",
+              "name_fa": "تائوم V10",
+              "construction": "layered"
+            }
+          ],
+          "aliases": [
+            "تائوم",
+            "تاوم",
+            "تام",
+            "Taom"
+          ]
+        },
+        {
+          "id": "tpkt__tiger",
+          "name_en": "Tiger",
+          "name_fa": "تایگر",
+          "country": "JP",
+          "tier": "tournament",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "tg-everest",
+              "name_en": "Tiger Everest",
+              "name_fa": "تایگر اورست",
+              "hardness": "medium",
+              "construction": "layered",
+              "note_fa": "پرفروش‌ترین مدل تایگر"
+            },
+            {
+              "id": "tg-onyx",
+              "name_en": "Tiger Onyx",
+              "name_fa": "تایگر اونیکس",
+              "hardness": "medium",
+              "construction": "layered",
+              "note_fa": "+۱۰ لایه، هم‌رده کامویی"
+            },
+            {
+              "id": "tg-emerald",
+              "name_en": "Tiger Emerald",
+              "name_fa": "تایگر امرالد",
+              "hardness": "medium",
+              "construction": "layered",
+              "note_fa": "۹ لایه؛ بهترین نسبت قیمت به کیفیت"
+            },
+            {
+              "id": "tg-sniper",
+              "name_en": "Tiger Sniper",
+              "name_fa": "تایگر اسنایپر",
+              "hardness": "hard",
+              "construction": "layered",
+              "note_fa": "۱۲ لایه فوق‌سخت؛ مخصوص چوب بریک، سال‌ها دوام",
+              "shore_d": "67.0"
+            },
+            {
+              "id": "tg-icebreaker",
+              "name_en": "Tiger IceBreaker",
+              "name_fa": "تایگر آیس‌بریکر",
+              "hardness": "extra_hard",
+              "construction": "phenolic",
+              "note_fa": "مخصوص بریک و جامپ"
+            },
+            {
+              "id": "tg-jump",
+              "name_en": "Tiger Jump Tip",
+              "name_fa": "تایگر جامپ",
+              "hardness": "extra_hard",
+              "construction": "phenolic"
+            }
+          ],
+          "note_fa": "ژاپن. لایه‌لایه با کیفیت بالا و قیمت پایین‌تر از کامویی",
+          "aliases": [
+            "تایگر",
+            "ببر",
+            "Tiger"
+          ]
+        },
+        {
+          "id": "tpkt__zan-p",
+          "name_en": "Zan",
+          "name_fa": "زان",
+          "country": "KR",
+          "tier": "tournament",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "zan-ss",
+              "name_en": "Zan Super Soft",
+              "name_fa": "زان سوپر سافت",
+              "hardness": "super_soft",
+              "construction": "layered"
+            },
+            {
+              "id": "zan-s",
+              "name_en": "Zan Soft",
+              "name_fa": "زان نرم",
+              "hardness": "soft",
+              "construction": "layered"
+            },
+            {
+              "id": "zan-m",
+              "name_en": "Zan Medium",
+              "name_fa": "زان متوسط",
+              "hardness": "medium",
+              "construction": "layered"
+            },
+            {
+              "id": "zan-h",
+              "name_en": "Zan Hard",
+              "name_fa": "زان سخت",
+              "hardness": "hard",
+              "construction": "layered"
+            },
+            {
+              "id": "zan-premium",
+              "name_en": "Zan Premium",
+              "name_fa": "زان پریمیوم",
+              "construction": "layered"
+            },
+            {
+              "id": "zan-grand",
+              "name_en": "Zan Grand",
+              "name_fa": "زان گرند",
+              "construction": "layered"
+            }
+          ],
+          "aliases": [
+            "زان",
+            "Zan"
+          ]
+        },
+        {
+          "id": "tpkt__black-diamond",
+          "name_en": "Black Diamond",
+          "name_fa": "بلک دایموند",
+          "country": "US",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "bld-std",
+              "name_en": "Black Diamond",
+              "name_fa": "بلک دایموند",
+              "hardness": "extra_hard",
+              "construction": "pressed",
+              "note_fa": "بسیار سخت؛ مناسب بریک",
+              "shore_d": "81.0"
+            }
+          ],
+          "aliases": [
+            "بلک دایموند",
+            "Black Diamond"
+          ]
+        },
+        {
+          "id": "tpkt__dural",
+          "name_en": "Dural",
+          "name_fa": "دورال",
+          "country": "US",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "dural-std",
+              "name_en": "Dural Tip",
+              "name_fa": "تیپ دورال",
+              "construction": "phenolic"
+            }
+          ],
+          "aliases": [
+            "دورال",
+            "Dural"
+          ]
+        },
+        {
+          "id": "tpkt__elkmaster-p",
+          "name_en": "Elk Master",
+          "name_fa": "الک مستر",
+          "country": "US",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "elk-s",
+              "name_en": "Elk Master Soft",
+              "name_fa": "الک مستر نرم",
+              "hardness": "soft",
+              "construction": "pressed",
+              "shore_d": "65"
+            },
+            {
+              "id": "elk-m",
+              "name_en": "Elk Master Medium",
+              "name_fa": "الک مستر متوسط",
+              "hardness": "medium",
+              "construction": "pressed",
+              "note_fa": "توصیه برای مبتدی"
+            },
+            {
+              "id": "elk-break",
+              "name_en": "Elk Master Break",
+              "name_fa": "الک مستر بریک",
+              "hardness": "hard",
+              "construction": "pressed"
+            }
+          ],
+          "aliases": [
+            "الک مستر",
+            "الکمستر",
+            "الک",
+            "Elk Master",
+            "Elkmaster",
+            "Elk"
+          ]
+        },
+        {
+          "id": "tpkt__how",
+          "name_en": "HOW",
+          "name_fa": "هاو",
+          "country": "CN",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "how-std",
+              "name_en": "HOW Cue Tip",
+              "name_fa": "تیپ HOW",
+              "construction": "layered"
+            }
+          ],
+          "aliases": [
+            "HOW"
+          ]
+        },
+        {
+          "id": "tpkt__le-pro",
+          "name_en": "Le Pro",
+          "name_fa": "له پرو",
+          "country": "US",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "lp-std",
+              "name_en": "Le Pro",
+              "name_fa": "له پرو",
+              "hardness": "medium",
+              "construction": "pressed",
+              "note_fa": "کیفیت بالاتر از الک مستر؛ رده میانی",
+              "shore_d": "74.5"
+            }
+          ],
+          "aliases": [
+            "له پرو",
+            "لی پرو",
+            "Le Pro"
+          ]
+        },
+        {
+          "id": "tpkt__milk-dud",
+          "name_en": "Milk Dud",
+          "name_fa": "میلک داد",
+          "country": "US",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "md-blue",
+              "name_en": "Blue Milk Dud",
+              "name_fa": "میلک داد آبی",
+              "construction": "milk_fiber",
+              "note_fa": "الیاف پروتئین شیر؛ چگالی بالا و چسبندگی عالی",
+              "shore_d": "73.5"
+            },
+            {
+              "id": "md-tiger",
+              "name_en": "Tiger Milk Dud",
+              "name_fa": "تایگر میلک داد",
+              "construction": "milk_fiber"
+            }
+          ],
+          "note_fa": "فیبر شیری فشرده. چگال و یکنواخت با کنترل پیچ برتر",
+          "aliases": [
+            "میلک داد",
+            "Milk Dud"
+          ]
+        },
+        {
+          "id": "tpkt__superpro",
+          "name_en": "SuperPro",
+          "name_fa": "سوپر پرو",
+          "country": "US",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "sp-std",
+              "name_en": "SuperPro",
+              "name_fa": "سوپر پرو",
+              "hardness": "extra_hard",
+              "construction": "pressed",
+              "shore_d": "81.0"
+            }
+          ],
+          "aliases": [
+            "سوپر پرو",
+            "SuperPro"
+          ]
+        },
+        {
+          "id": "tpkt__triangle-tip",
+          "name_en": "Triangle",
+          "name_fa": "تریانگل",
+          "country": "US",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "tr-std",
+              "name_en": "Triangle Tip",
+              "name_fa": "تریانگل",
+              "hardness": "medium",
+              "construction": "pressed",
+              "shore_d": "73.5"
+            }
+          ],
+          "note_fa": "ساخت Tweeten آمریکا. ارزان و همه‌جا در دسترس، ولی یکنواختی کمتر",
+          "aliases": [
+            "تریانگل",
+            "مثلث",
+            "Triangle"
+          ]
+        },
+        {
+          "id": "tpkt__black-king",
+          "name_en": "Black King",
+          "name_fa": "بلک کینگ",
+          "country": "CN",
+          "tier": "mid",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "bk-s",
+              "name_en": "Black King Soft",
+              "name_fa": "بلک کینگ نرم",
+              "hardness": "soft",
+              "construction": "layered",
+              "shore_d": "65.5"
+            },
+            {
+              "id": "bk-m",
+              "name_en": "Black King Medium",
+              "name_fa": "بلک کینگ متوسط",
+              "hardness": "medium",
+              "construction": "layered",
+              "shore_d": "67.5"
+            },
+            {
+              "id": "bk-h",
+              "name_en": "Black King Hard",
+              "name_fa": "بلک کینگ سخت",
+              "hardness": "hard",
+              "construction": "layered",
+              "shore_d": "70.5"
+            }
+          ],
+          "aliases": [
+            "بلک کینگ",
+            "Black King"
+          ]
+        },
+        {
+          "id": "tpkt__blue-knight",
+          "name_en": "Blue Knight",
+          "name_fa": "بلو نایت",
+          "country": "US",
+          "tier": "mid",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "bk-std",
+              "name_en": "Blue Knight",
+              "name_fa": "بلو نایت",
+              "construction": "pressed"
+            }
+          ],
+          "aliases": [
+            "بلو نایت",
+            "Blue Knight"
+          ]
+        },
+        {
+          "id": "tpkt__nili",
+          "name_en": "Nili",
+          "name_fa": "نیلی",
+          "country": "CN",
+          "tier": "mid",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "nili-std",
+              "name_en": "Nili Tip",
+              "name_fa": "تیپ نیلی",
+              "construction": "layered"
+            }
+          ],
+          "aliases": [
+            "نیلی",
+            "Nili"
+          ]
+        },
+        {
+          "id": "tpkt__phenolic-generic",
+          "name_en": "Phenolic (Generic)",
+          "name_fa": "فنولیک عمومی",
+          "country": null,
+          "tier": "mid",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "ph-break",
+              "name_en": "Phenolic Break Tip",
+              "name_fa": "تیپ بریک فنولیک",
+              "hardness": "extra_hard",
+              "construction": "phenolic",
+              "note_fa": "سخت‌ترین حالت ممکن؛ تقریباً نشکن"
+            },
+            {
+              "id": "ph-jump",
+              "name_en": "Phenolic Jump Tip",
+              "name_fa": "تیپ جامپ فنولیک",
+              "hardness": "extra_hard",
+              "construction": "phenolic"
+            }
+          ],
+          "aliases": [
+            "فنولیک",
+            "Phenolic"
+          ]
+        },
+        {
+          "id": "tpkt__chinese-tip-p",
+          "name_en": "Chinese Unbranded",
+          "name_fa": "چینی بدون برند",
+          "country": "CN",
+          "tier": "budget",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "cn-pressed",
+              "name_en": "Pressed Copy",
+              "name_fa": "کپی پرسی",
+              "construction": "pressed"
+            },
+            {
+              "id": "cn-layered",
+              "name_en": "Layered Copy",
+              "name_fa": "کپی لایه‌لایه",
+              "construction": "layered"
+            }
+          ],
+          "aliases": [
+            "چینی"
+          ]
+        },
+        {
+          "id": "tpkt__unknown-tip-p",
+          "name_en": "Unknown / Unbranded",
+          "name_fa": "نامشخص / بدون برند",
+          "country": null,
+          "tier": "budget",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "uk-p",
+              "name_en": "Unknown",
+              "name_fa": "نامشخص"
+            }
+          ],
+          "aliases": [
+            "نامشخص"
+          ]
+        }
+      ],
+      "sizes": [
+        {
+          "id": "8.5-p",
+          "label_fa": "۸.۵ میلی‌متر",
+          "label_en": "8.5mm",
+          "note_fa": "پاکت بیلیارد انگلیسی"
+        },
+        {
+          "id": "9-p",
+          "label_fa": "۹ میلی‌متر",
+          "label_en": "9mm",
+          "note_fa": "پاکت بیلیارد انگلیسی"
+        },
+        {
+          "id": "10-p",
+          "label_fa": "۱۰ میلی‌متر",
+          "label_en": "10mm"
+        },
+        {
+          "id": "11.75",
+          "label_fa": "۱۱.۷۵ میلی‌متر",
+          "label_en": "11.75mm"
+        },
+        {
+          "id": "12",
+          "label_fa": "۱۲ میلی‌متر",
+          "label_en": "12mm"
+        },
+        {
+          "id": "12.5",
+          "label_fa": "۱۲.۵ میلی‌متر",
+          "label_en": "12.5mm"
+        },
+        {
+          "id": "12.75",
+          "label_fa": "۱۲.۷۵ میلی‌متر",
+          "label_en": "12.75mm",
+          "note_fa": "در حال محبوب شدن"
+        },
+        {
+          "id": "13",
+          "label_fa": "۱۳ میلی‌متر",
+          "label_en": "13mm",
+          "default": true,
+          "note_fa": "استاندارد پاکت بیلیارد آمریکایی"
+        },
+        {
+          "id": "14",
+          "label_fa": "۱۴ میلی‌متر",
+          "label_en": "14mm"
+        }
+      ],
+      "note_fa": "تیپ پاکت بیلیارد آمریکایی معمولاً ۱۳ میلی‌متر است. تیپ بزرگ‌تر بخشنده‌تر و برای بریک بهتر، تیپ کوچک‌تر دقیق‌تر."
+    },
+    {
+      "id": "carom",
+      "label_fa": "کارامبول",
+      "label_en": "Carom",
+      "brands": [
+        {
+          "id": "tcar__kamui-c",
+          "name_en": "Kamui",
+          "name_fa": "کامویی",
+          "country": "JP",
+          "tier": "tournament",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "kb-m",
+              "name_en": "Kamui Black Medium",
+              "name_fa": "کامویی بلک متوسط",
+              "hardness": "medium",
+              "construction": "layered"
+            },
+            {
+              "id": "kb-h",
+              "name_en": "Kamui Black Hard",
+              "name_fa": "کامویی بلک سخت",
+              "hardness": "hard",
+              "construction": "layered"
+            }
+          ],
+          "aliases": [
+            "کامویی",
+            "کامو",
+            "کاموی",
+            "Kamui"
+          ]
+        },
+        {
+          "id": "tcar__longoni-tip",
+          "name_en": "Longoni",
+          "name_fa": "لونگونی",
+          "country": "IT",
+          "tier": "tournament",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "lg-3c",
+              "name_en": "Longoni 3C Tip",
+              "name_fa": "لونگونی سه‌بانده",
+              "construction": "layered"
+            },
+            {
+              "id": "lg-black",
+              "name_en": "Longoni Black",
+              "name_fa": "لونگونی مشکی",
+              "construction": "layered"
+            }
+          ],
+          "aliases": [
+            "لونگونی",
+            "Longoni"
+          ]
+        },
+        {
+          "id": "tcar__navigator-c",
+          "name_en": "Navigator",
+          "name_fa": "ناویگیتور",
+          "country": "JP",
+          "tier": "tournament",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "nav-carom",
+              "name_en": "Navigator Carom",
+              "name_fa": "ناویگیتور کارامبول",
+              "construction": "layered"
+            }
+          ],
+          "aliases": [
+            "ناویگیتور",
+            "Navigator"
+          ]
+        },
+        {
+          "id": "tcar__taom-c",
+          "name_en": "Taom",
+          "name_fa": "تائوم",
+          "country": "FI",
+          "tier": "tournament",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "taom-pro",
+              "name_en": "Taom Pro Tip",
+              "name_fa": "تائوم پرو",
+              "construction": "layered"
+            }
+          ],
+          "aliases": [
+            "تائوم",
+            "تاوم",
+            "تام",
+            "Taom"
+          ]
+        },
+        {
+          "id": "tcar__molinari-tip",
+          "name_en": "Molinari",
+          "name_fa": "مولیناری",
+          "country": "NL",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "ml-tip",
+              "name_en": "Molinari Tip",
+              "name_fa": "تیپ مولیناری",
+              "construction": "layered"
+            }
+          ],
+          "aliases": [
+            "مولیناری",
+            "Molinari"
+          ]
+        },
+        {
+          "id": "tcar__moori-c",
+          "name_en": "Moori",
+          "name_fa": "موری",
+          "country": "JP",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "mo-m",
+              "name_en": "Moori Medium",
+              "name_fa": "موری متوسط",
+              "hardness": "medium",
+              "construction": "layered"
+            },
+            {
+              "id": "mo-h",
+              "name_en": "Moori Hard",
+              "name_fa": "موری سخت",
+              "hardness": "hard",
+              "construction": "layered"
+            }
+          ],
+          "aliases": [
+            "موری",
+            "Moori"
+          ]
+        },
+        {
+          "id": "tcar__zan-c",
+          "name_en": "Zan",
+          "name_fa": "زان",
+          "country": "KR",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "zan-m",
+              "name_en": "Zan Medium",
+              "name_fa": "زان متوسط",
+              "hardness": "medium",
+              "construction": "layered"
+            },
+            {
+              "id": "zan-h",
+              "name_en": "Zan Hard",
+              "name_fa": "زان سخت",
+              "hardness": "hard",
+              "construction": "layered"
+            }
+          ],
+          "aliases": [
+            "زان",
+            "Zan"
+          ]
+        },
+        {
+          "id": "tcar__unknown-tip-c",
+          "name_en": "Unknown / Unbranded",
+          "name_fa": "نامشخص / بدون برند",
+          "country": null,
+          "tier": "budget",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "uk-c",
+              "name_en": "Unknown",
+              "name_fa": "نامشخص"
+            }
+          ],
+          "aliases": [
+            "نامشخص"
+          ]
+        }
+      ],
+      "sizes": [
+        {
+          "id": "11-c",
+          "label_fa": "۱۱ میلی‌متر",
+          "label_en": "11mm"
+        },
+        {
+          "id": "11.5-c",
+          "label_fa": "۱۱.۵ میلی‌متر",
+          "label_en": "11.5mm"
+        },
+        {
+          "id": "12-c",
+          "label_fa": "۱۲ میلی‌متر",
+          "label_en": "12mm",
+          "default": true
+        },
+        {
+          "id": "12.5-c",
+          "label_fa": "۱۲.۵ میلی‌متر",
+          "label_en": "12.5mm"
+        }
+      ],
+      "note_fa": "در کارامبول به‌خاطر برخورد مکرر با باند، تیپ سخت‌تر و بادوام‌تر ترجیح داده می‌شود."
+    }
+  ]
+}

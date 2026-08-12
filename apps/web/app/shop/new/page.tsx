@@ -581,7 +581,7 @@ export default function NewProductPage() {
           <div style={{ position: 'absolute', bottom: -100, left: -60, width: 400, height: 400, background: 'radial-gradient(circle,rgba(199,166,106,0.05) 0%,transparent 65%)', filter: 'blur(60px)' }} />
         </div>
 
-        <div style={{ position: 'relative', zIndex: 1, maxWidth: 1100, margin: '0 auto', padding: 'clamp(20px,3vw,36px) clamp(16px,3vw,32px) 80px' }}>
+        <div style={{ position: 'relative', zIndex: 1, maxWidth: 820, margin: '0 auto', padding: 'clamp(20px,3vw,36px) clamp(16px,3vw,32px) 80px' }}>
 
           {/* ── Top nav ──
               فلش به راست است، نه چپ: در RTL «برگشت» یعنی حرکت به راست. */}

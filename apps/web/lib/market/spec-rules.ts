@@ -201,9 +201,17 @@ export function specDisplayRows(
    بخواهد نه کد. */
 
 /* شناسه‌هایی که فیلدِ مشخصات نیستند و بالای فرم گرفته می‌شوند */
-export const FORM_LEVEL_FIELDS = new Set([
-  'table_type', 'cue_type', 'ball_type', 'brand', 'model',
-])
+/* ── فیلدهای سطحِ فرم ──
+   «نوع» و «برند» و «مدل» بالای فرم گرفته می‌شوند، نه در کارتِ
+   مشخصات. داده با نامِ خودشان به آن‌ها ارجاع می‌دهد و هر دسته
+   پسوندِ خودش را دارد: `table_type`، `ball_type`، `tip_type`، …
+   پس قاعده عمومی است، نه فهرستِ ثابت — وگرنه دسته‌ی بعدی دوباره
+   یک ارجاعِ معلق می‌سازد که بی‌صدا هیچ‌کاری نمی‌کند.
+
+   (تستی هست که ارجاعِ معلق را می‌گیرد؛ همین قاعده را با آن هم‌راه
+    نگه دار.) */
+export const isFormLevelField = (id: string): boolean =>
+  id.endsWith('_type') || id === 'brand' || id === 'model'
 
 /** فیلدهایی که به این فیلد وابسته‌اند — با عوض‌شدنش پاک می‌شوند */
 export const dependentsOf = (fields: SpecField[], id: string): SpecField[] =>
@@ -218,7 +226,7 @@ export function isFieldLocked(
       با نامِ خودشان به آن‌ها ارجاع می‌دهد: `table_type` برای میز،
       `ball_type` برای توپ، `cue_type` برای چوب. هر سه یک چیزند —
       همان انتخابِ نوعِ بالای فرم. */
-  if (field.depends_on && FORM_LEVEL_FIELDS.has(field.depends_on)) return !typeChosen
+  if (field.depends_on && isFormLevelField(field.depends_on)) return !typeChosen
   if (field.depends_on) {
     const v = values[specKey(field.depends_on)]
     return v === undefined || v === null || String(v).trim() === ''

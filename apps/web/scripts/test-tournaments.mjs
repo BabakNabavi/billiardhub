@@ -2514,10 +2514,12 @@ console.log('\n― مشخصات و پارچه ―');
       const all = Object.values(S.specs).flat();
       /* ارجاع به فیلدهای سطحِ فرم مجاز است — همان‌هایی که بالای فرم
          گرفته می‌شوند و در کارتِ مشخصات نیستند. */
-      const ids = new Set(all.map(f => f.id).concat(
-        [...JSON.parse('["table_type","cue_type","ball_type","brand","model"]')]));
-      return all.every(f => !f.depends_on || ids.has(f.depends_on))
-        && all.every(f => !f.auto_from || ids.has(f.auto_from.split('.')[0]));
+      /* همان قاعده‌ی `isFormLevelField`: هر شناسه‌ای که به `_type`
+         ختم شود یا برند/مدل باشد، بالای فرم گرفته می‌شود. */
+      const formLevel = id => id.endsWith('_type') || id === 'brand' || id === 'model';
+      const ids = new Set(all.map(f => f.id));
+      return all.every(f => !f.depends_on || ids.has(f.depends_on) || formLevel(f.depends_on))
+        && all.every(f => !f.auto_from || ids.has(f.auto_from.split('.')[0]) || formLevel(f.auto_from.split('.')[0]));
     })(),
     'ارجاع به فیلدی که وجود ندارد، بی‌صدا هیچ‌کاری نمی‌کند');
 
@@ -2663,9 +2665,15 @@ console.log('\n― گچ ―');
 {
   const src = read('app/shop/new/page.tsx');
   const left = src.indexOf('LEFT COLUMN');
-  t('تصاویر و قیمت در ستونِ چپ‌اند',
-    left > 0 && src.indexOf('card: images', left) > left && src.indexOf('card: pricing', left) > left,
-    'ستونِ راست با ۳۳ فیلد بلند بود و چپ از وسط به پایین خالی می‌ماند');
+  /* ── چرا تک‌ستونه ──
+     دو ستونی که ارتفاعشان یکی نباشد بدتر از یک ستون است. بدتر از
+     آن: موقعِ جابه‌جاییِ کارت‌ها، `</div>`ی ستونِ راست جا افتاد و
+     ستونِ چپ داخلش تو در تو شد — شبکه یک فرزند داشت و کلِ فرم در
+     نیمه‌ی راست جا می‌گرفت. این تست همان را می‌گیرد. */
+  t('فرم یک ستونِ وسط‌چین است',
+    src.includes('maxWidth: 820')
+    && read('components/market/AdFormFields.tsx').includes('.two-col { grid-template-columns: 1fr !important; }'),
+    'با دو ستونِ نامتوازن، ردیفِ پایانی با هیچ‌کدام هم‌عرض نبود');
 }
 
 console.log('\n― CORS ―');

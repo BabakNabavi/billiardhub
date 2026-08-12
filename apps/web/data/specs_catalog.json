@@ -1987,46 +1987,55 @@
         "label_fa": "رنگ گچ",
         "type": "select",
         "required": false,
-        "help_fa": "رنگ باید با پارچه میز بخواند تا اثر گچ روی پارچه کمتر دیده شود.",
         "allow_other": true,
+        "help_fa": "رنگ باید با پارچه میز بخواند تا اثر گچ روی پارچه کمتر دیده شود.",
         "options": [
           {
             "id": "green",
             "label_fa": "سبز",
+            "label_en": "Green",
             "note_fa": "استاندارد اسنوکر"
           },
           {
             "id": "blue",
             "label_fa": "آبی",
+            "label_en": "Blue",
             "note_fa": "استاندارد پاکت بیلیارد و کارامبول"
           },
           {
             "id": "red",
-            "label_fa": "قرمز"
+            "label_fa": "قرمز",
+            "label_en": "Red"
           },
           {
             "id": "black",
-            "label_fa": "مشکی"
+            "label_fa": "مشکی",
+            "label_en": "Black"
           },
           {
             "id": "white",
-            "label_fa": "سفید"
+            "label_fa": "سفید",
+            "label_en": "White"
           },
           {
             "id": "gold",
-            "label_fa": "طلایی"
+            "label_fa": "طلایی",
+            "label_en": "Gold"
           },
           {
             "id": "purple",
-            "label_fa": "بنفش"
+            "label_fa": "بنفش",
+            "label_en": "Purple"
           },
           {
             "id": "grey",
-            "label_fa": "خاکستری"
+            "label_fa": "خاکستری",
+            "label_en": "Grey"
           },
           {
             "id": "brown",
-            "label_fa": "قهوه‌ای"
+            "label_fa": "قهوه‌ای",
+            "label_en": "Brown"
           }
         ]
       },
@@ -2040,15 +2049,18 @@
           {
             "id": "soft-ch",
             "label_fa": "نرم",
+            "label_en": "Soft",
             "note_fa": "چسبندگی بالا؛ مناسب پیچ زیاد"
           },
           {
             "id": "medium-ch",
-            "label_fa": "متوسط"
+            "label_fa": "متوسط",
+            "label_en": "Medium"
           },
           {
             "id": "hard-ch",
             "label_fa": "سخت",
+            "label_en": "Hard",
             "note_fa": "دوام بیشتر و گرد کمتر"
           }
         ]
@@ -2058,8 +2070,10 @@
         "label_fa": "تعداد",
         "type": "number",
         "required": false,
-        "help_fa": "تکی یا بسته‌ای. جعبه‌های استاندارد معمولاً ۱۲ یا ۱۴۴ عددی‌اند.",
         "placeholder": "1",
+        "min": 1,
+        "max": 200,
+        "help_fa": "تکی یا بسته‌ای. جعبه‌های استاندارد معمولاً ۱۲ یا ۱۴۴ عددی‌اند.",
         "common": [
           1,
           2,
@@ -2079,27 +2093,33 @@
         "options": [
           {
             "id": "single",
-            "label_fa": "تکی"
+            "label_fa": "تکی",
+            "label_en": "Single Cube"
           },
           {
             "id": "pack-2",
-            "label_fa": "بسته ۲ تایی"
+            "label_fa": "بسته ۲ تایی",
+            "label_en": "2-Pack"
           },
           {
             "id": "pack-3",
-            "label_fa": "بسته ۳ تایی"
+            "label_fa": "بسته ۳ تایی",
+            "label_en": "3-Pack"
           },
           {
             "id": "box-12",
-            "label_fa": "جعبه ۱۲ عددی"
+            "label_fa": "جعبه ۱۲ عددی",
+            "label_en": "Box of 12"
           },
           {
             "id": "box-144",
-            "label_fa": "کارتن ۱۴۴ عددی (گروس)"
+            "label_fa": "کارتن ۱۴۴ عددی (گروس)",
+            "label_en": "Gross / 144"
           },
           {
             "id": "with-holder",
-            "label_fa": "همراه با نگهدارنده"
+            "label_fa": "همراه با نگهدارنده",
+            "label_en": "With Holder"
           }
         ]
       },
@@ -2120,23 +2140,28 @@
         "options": [
           {
             "id": "magnetic",
-            "label_fa": "مغناطیسی"
+            "label_fa": "مغناطیسی",
+            "label_en": "Magnetic"
           },
           {
             "id": "pouch",
-            "label_fa": "کیسه چرمی"
+            "label_fa": "کیسه چرمی",
+            "label_en": "Leather Pouch"
           },
           {
             "id": "clip",
-            "label_fa": "گیره‌ای"
+            "label_fa": "گیره‌ای",
+            "label_en": "Clip-on"
           },
           {
             "id": "cup",
-            "label_fa": "کاسه‌ای رومیزی"
+            "label_fa": "کاسه‌ای رومیزی",
+            "label_en": "Table Cup"
           },
           {
             "id": "cone-holder",
-            "label_fa": "نگهدارنده گچ مخروطی"
+            "label_fa": "نگهدارنده گچ مخروطی",
+            "label_en": "Cone Chalk Holder"
           }
         ]
       },
@@ -2149,16 +2174,19 @@
         "options": [
           {
             "id": "cube",
-            "label_fa": "مکعبی (استاندارد)"
+            "label_fa": "مکعبی (استاندارد)",
+            "label_en": "Cube"
           },
           {
             "id": "cone",
             "label_fa": "مخروطی (گچ دست)",
+            "label_en": "Cone / Hand Chalk",
             "note_fa": "برای دست، نه تیپ"
           },
           {
             "id": "powder",
             "label_fa": "پودری",
+            "label_en": "Powder",
             "note_fa": "پودر دست برای روان شدن چوب"
           }
         ]
@@ -2174,20 +2202,336 @@
         "label_fa": "اصالت",
         "type": "select",
         "required": false,
-        "help_fa": "کپی Taom و Kamui در بازار زیاد است. برخی برندها QR کد یا شماره سریال دارند.",
         "allow_other": true,
+        "help_fa": "کپی Taom و Kamui در بازار زیاد است. برخی برندها QR کد یا شماره سریال دارند.",
         "options": [
           {
             "id": "original",
-            "label_fa": "اصل / اورجینال"
+            "label_fa": "اصل / اورجینال",
+            "label_en": "Original"
           },
           {
             "id": "with-qr",
-            "label_fa": "دارای QR کد یا شماره سریال"
+            "label_fa": "دارای QR کد یا شماره سریال",
+            "label_en": "With QR / Serial"
           },
           {
             "id": "unknown-auth",
-            "label_fa": "نامشخص"
+            "label_fa": "نامشخص",
+            "label_en": "Unknown"
+          }
+        ]
+      }
+    ],
+    "tip": [
+      {
+        "id": "diameter",
+        "label_fa": "قطر (میلی‌متر)",
+        "type": "select",
+        "required": false,
+        "allow_other": true,
+        "source": "types[].sizes",
+        "depends_on": "tip_type",
+        "help_fa": "اسنوکر ۹ تا ۱۰ — پاکت بیلیارد انگلیسی ۸.۵ تا ۹ — پاکت بیلیارد آمریکایی ۱۲.۵ تا ۱۳ — کارامبول ۱۱ تا ۱۲"
+      },
+      {
+        "id": "hardness",
+        "label_fa": "سختی",
+        "type": "select",
+        "required": false,
+        "allow_other": true,
+        "auto_from": "model.hardness",
+        "help_fa": "از روی مدل انتخابی پر می‌شود؛ قابل تغییر است.",
+        "options": [
+          {
+            "id": "super_soft",
+            "label_fa": "فوق نرم",
+            "label_en": "Super Soft",
+            "note_fa": "حداکثر چسبندگی و پیچ؛ سریع‌تر قارچی می‌شود"
+          },
+          {
+            "id": "soft",
+            "label_fa": "نرم",
+            "label_en": "Soft",
+            "note_fa": "چسبندگی و حس بالا، نیاز به نگهداری بیشتر"
+          },
+          {
+            "id": "medium",
+            "label_fa": "متوسط",
+            "label_en": "Medium",
+            "note_fa": "انتخاب اکثر حرفه‌ای‌ها؛ تعادل کنترل و دوام"
+          },
+          {
+            "id": "hard",
+            "label_fa": "سخت",
+            "label_en": "Hard",
+            "note_fa": "دوام بالا، پیچ کمتر، دقت بیشتر در ضربات مستقیم"
+          },
+          {
+            "id": "extra_hard",
+            "label_fa": "فوق سخت",
+            "label_en": "Extra Hard",
+            "note_fa": "مخصوص چوب بریک و جامپ"
+          }
+        ]
+      },
+      {
+        "id": "construction",
+        "label_fa": "ساختار",
+        "type": "select",
+        "required": false,
+        "allow_other": true,
+        "auto_from": "model.construction",
+        "help_fa": "تک‌لایه سنتی و ارزان — لایه‌لایه یکنواخت‌تر و بادوام‌تر — فنولیک فوق‌سخت برای بریک.",
+        "options": [
+          {
+            "id": "pressed",
+            "label_fa": "تک‌لایه پرس‌شده",
+            "label_en": "Single-Layer Pressed",
+            "note_fa": "چرم یک‌تکه؛ گچ‌گیر خوب ولی نیاز به شکل‌دهی مرتب"
+          },
+          {
+            "id": "layered",
+            "label_fa": "لایه‌لایه (لمینت)",
+            "label_en": "Multi-Layer",
+            "note_fa": "چند لایه چرم؛ شکل را بهتر نگه می‌دارد، قارچی نمی‌شود"
+          },
+          {
+            "id": "phenolic",
+            "label_fa": "فنولیک / مصنوعی",
+            "label_en": "Phenolic / Synthetic",
+            "note_fa": "فوق‌سخت، سال‌ها دوام، حس کمتر"
+          },
+          {
+            "id": "milk_fiber",
+            "label_fa": "فیبر شیری",
+            "label_en": "Milk Fiber",
+            "note_fa": "الیاف پروتئین شیر؛ چگال با کنترل پیچ برتر"
+          },
+          {
+            "id": "screw_on",
+            "label_fa": "پیچی",
+            "label_en": "Screw-on",
+            "note_fa": "بدون چسب؛ چوب‌های باشگاهی"
+          }
+        ]
+      },
+      {
+        "id": "layer_count",
+        "label_fa": "تعداد لایه",
+        "type": "number",
+        "required": false,
+        "placeholder": "10",
+        "min": 1,
+        "max": 20,
+        "depends_on_construction": [
+          "layered"
+        ],
+        "help_fa": "فقط برای تیپ‌های لایه‌لایه. کامویی ۱۰ لایه، کامویی اورجینال ۱۴، تایگر امرالد ۹، تایگر اسنایپر ۱۲.",
+        "common": [
+          6,
+          8,
+          9,
+          10,
+          12,
+          14
+        ]
+      },
+      {
+        "id": "quantity",
+        "label_fa": "تعداد",
+        "type": "number",
+        "required": false,
+        "placeholder": "1",
+        "min": 1,
+        "max": 200,
+        "help_fa": "تیپ‌های حرفه‌ای تکی و تیپ‌های اقتصادی بسته‌ای فروخته می‌شوند.",
+        "common": [
+          1,
+          2,
+          4,
+          5,
+          10,
+          20,
+          50,
+          100
+        ]
+      },
+      {
+        "id": "packaging",
+        "label_fa": "نوع بسته‌بندی",
+        "type": "select",
+        "required": false,
+        "allow_other": true,
+        "options": [
+          {
+            "id": "single",
+            "label_fa": "تکی",
+            "label_en": "Single Tip",
+            "note_fa": "تیپ‌های گران مثل کامویی معمولاً تکی"
+          },
+          {
+            "id": "pack-4",
+            "label_fa": "بسته ۴ تایی",
+            "label_en": "Pack of 4",
+            "note_fa": "سنچری"
+          },
+          {
+            "id": "pack-5",
+            "label_fa": "بسته ۵ تایی",
+            "label_en": "Pack of 5"
+          },
+          {
+            "id": "pack-10",
+            "label_fa": "بسته ۱۰ تایی",
+            "label_en": "Pack of 10",
+            "note_fa": "الک مستر"
+          },
+          {
+            "id": "pack-20",
+            "label_fa": "بسته ۲۰ تایی",
+            "label_en": "Pack of 20"
+          },
+          {
+            "id": "pack-50",
+            "label_fa": "بسته ۵۰ تایی",
+            "label_en": "Pack of 50"
+          },
+          {
+            "id": "box-100",
+            "label_fa": "جعبه ۱۰۰ تایی",
+            "label_en": "Box of 100"
+          }
+        ]
+      },
+      {
+        "id": "tip_use",
+        "label_fa": "کاربرد",
+        "type": "select",
+        "required": false,
+        "allow_other": true,
+        "help_fa": "تیپ بریک باید سخت باشد؛ استفاده از تیپ نرم بازی برای بریک آن را سریع خراب می‌کند.",
+        "options": [
+          {
+            "id": "playing",
+            "label_fa": "چوب بازی",
+            "label_en": "Playing Cue"
+          },
+          {
+            "id": "break",
+            "label_fa": "چوب بریک",
+            "label_en": "Break Cue",
+            "note_fa": "تیپ سخت یا فنولیک"
+          },
+          {
+            "id": "jump",
+            "label_fa": "چوب جامپ",
+            "label_en": "Jump Cue"
+          },
+          {
+            "id": "break-jump",
+            "label_fa": "بریک و جامپ",
+            "label_en": "Break & Jump"
+          }
+        ]
+      },
+      {
+        "id": "color",
+        "label_fa": "رنگ تیپ",
+        "type": "select",
+        "required": false,
+        "allow_other": true,
+        "options": [
+          {
+            "id": "brown",
+            "label_fa": "قهوه‌ای",
+            "label_en": "Brown",
+            "note_fa": "رایج‌ترین رنگ چرم"
+          },
+          {
+            "id": "black",
+            "label_fa": "مشکی",
+            "label_en": "Black"
+          },
+          {
+            "id": "blue",
+            "label_fa": "آبی",
+            "label_en": "Blue"
+          },
+          {
+            "id": "green",
+            "label_fa": "سبز",
+            "label_en": "Green"
+          },
+          {
+            "id": "red",
+            "label_fa": "قرمز",
+            "label_en": "Red"
+          },
+          {
+            "id": "clear",
+            "label_fa": "شفاف / کهربایی",
+            "label_en": "Clear",
+            "note_fa": "کامویی کلیر"
+          },
+          {
+            "id": "white",
+            "label_fa": "سفید",
+            "label_en": "White"
+          },
+          {
+            "id": "grey",
+            "label_fa": "خاکستری",
+            "label_en": "Grey"
+          }
+        ]
+      },
+      {
+        "id": "shore_d",
+        "label_fa": "سختی Shore D",
+        "type": "number",
+        "required": false,
+        "placeholder": "72",
+        "min": 50,
+        "max": 100,
+        "step": 0.5,
+        "help_fa": "عدد دیورومتر. الک مستر ۶۵ — کامویی متوسط ۷۲.۵ — تریانگل ۷۳.۵ — موری متوسط ۷۵ — سامسارا جامپ ۸۶"
+      },
+      {
+        "id": "is_installed",
+        "label_fa": "نصب‌شده روی چوب",
+        "type": "boolean",
+        "required": false,
+        "help_fa": "اگر تیپ روی چوب نصب شده و همراه چوب فروخته می‌شود"
+      },
+      {
+        "id": "is_sealed",
+        "label_fa": "پلمب / استفاده‌نشده",
+        "type": "boolean",
+        "required": false
+      },
+      {
+        "id": "authenticity",
+        "label_fa": "اصالت",
+        "type": "select",
+        "required": false,
+        "allow_other": true,
+        "help_fa": "کپی کامویی و تایگر در بازار زیاد است.",
+        "options": [
+          {
+            "id": "original",
+            "label_fa": "اصل / اورجینال",
+            "label_en": "Original"
+          },
+          {
+            "id": "with-serial",
+            "label_fa": "دارای هولوگرام یا شماره سریال",
+            "label_en": "With Hologram / Serial"
+          },
+          {
+            "id": "unknown-auth",
+            "label_fa": "نامشخص",
+            "label_en": "Unknown"
           }
         ]
       }
@@ -2195,5 +2539,7 @@
   },
   "cloth_note_fa": "فیلدهای cloth_brand و cloth_model از cloth_catalog.json خوانده می‌شوند و آبشاری‌اند: با انتخاب برند، فقط مدل‌های همان برند نمایش داده می‌شود. فیلد cloth_type (پرزدار/بدون‌پرز) از روی مدل انتخابی خودکار پر می‌شود ولی کاربر می‌تواند تغییرش دهد.",
   "ball_note_fa": "مشخصات فنی توپ. فیلدهای diameter_mm و set_type از types[].sizes و types[].set_types کاتالوگ توپ خوانده می‌شوند و به نوع توپ وابسته‌اند. فیلد ball_color فقط برای نوع «تکی» و «کیوبال» نمایش داده شود (depends_on_type). فیلد material از روی مدل انتخابی پیش‌پر شود ولی قابل تغییر بماند.",
-  "table_note_fa": "مشخصات فنی میز، بازنویسی‌شده بر اساس صفحات محصول واقعی سازنده‌ها (Wiraka M1، Star XW119، Joy Q8، Xingjue XJ-12FT-T10). فیلدهای size و cloth_brand وابسته به نوع میز هستند و از types[].sizes و cloth_catalog خوانده می‌شوند."
+  "table_note_fa": "مشخصات فنی میز، بازنویسی‌شده بر اساس صفحات محصول واقعی سازنده‌ها (Wiraka M1، Star XW119، Joy Q8، Xingjue XJ-12FT-T10). فیلدهای size و cloth_brand وابسته به نوع میز هستند و از types[].sizes و cloth_catalog خوانده می‌شوند.",
+  "chalk_note_fa": "مشخصات فنی گچ. فیلد holder_type فقط وقتی has_holder روشن است نمایش داده شود. رنگ گچ مهم است چون باید با پارچه میز بخواند.",
+  "tip_note_fa": "مشخصات فنی تیپ. فیلد diameter از types[].sizes کاتالوگ تیپ خوانده می‌شود و به نوع وابسته است. hardness و construction از روی مدل انتخابی پیش‌پر می‌شوند. layer_count فقط وقتی construction برابر layered است نمایش داده شود."
 }
