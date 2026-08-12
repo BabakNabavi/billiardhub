@@ -32,7 +32,13 @@ export interface EntitySnapshot {
   ref: string
   title: string
   image: string
+  /** برند (یا شهر/تخصص، بسته به نوع) */
   subtitle: string
+  /* ── چرا مدل جداست ──
+     `productTitleParts` هر تکه را جدا با عنوان می‌سنجد تا تکرار را
+     حذف کند؛ با یک رشته‌ی چسبیده («Predator Revo») عنوانی که
+     «Predator» دارد دیگر آن را نمی‌گیرد. */
+  model?: string
   href: string
   price?: number
   oldPrice?: number

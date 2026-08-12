@@ -34,6 +34,9 @@ export interface RealProduct {
   id: string
   name: string
   sub: string
+  /* مدل جدا از برند می‌ماند تا `productTitleParts` بتواند تکرار با
+     عنوان را تکه‌به‌تکه حذف کند */
+  model?: string
   img: string
   brand: string
   price: number

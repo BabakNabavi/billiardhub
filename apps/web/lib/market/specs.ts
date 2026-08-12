@@ -53,7 +53,8 @@ export const CATEGORY_SPECS: Record<string, SpecFieldDef[]> = {
        می‌کرد — کارامبول با فوت اندازه نمی‌شود، اسنوکر ۱۲ فوت دارد
        و پاکت ندارد، و «۸ فوت» در آن دو ابعادِ متفاوت است.
        تعریف این‌جا می‌ماند چون صفحه‌ی جزئیات برچسبش را از همین‌جا
-       می‌خواند؛ کلیدش در HIDDEN_SPEC_KEYS است تا فرم رندرش نکند. */
+       می‌خواند. فرم امروز از `specs_catalog.json` می‌آید و این تعریف
+       فقط پلِ آگهی‌های قدیمی است. */
     { key: 'size',           label: 'اندازه',       type: 'dropdown', options: [] },
     { key: 'bodyMaterial',   label: 'جنس بدنه',     type: 'dropdown', options: ['اسلیت','MDF','چوب ماسیو','سایر'] },
     { key: 'slateThickness', label: 'ضخامت سنگ',   type: 'number',   unit: 'میلیمتر', placeholder: '45' },
@@ -95,46 +96,30 @@ export const CATEGORY_SPECS: Record<string, SpecFieldDef[]> = {
   ],
 }
 
-/* فیلدهایی که به بالای فرم (دسته/نوع/برند/مدل) منتقل شده‌اند و نباید در «مشخصات فنی» تکرار شوند */
-export const HIDDEN_SPEC_KEYS: Record<string, string[]> = {
-  cue:        ['cueType', 'brand'],
-  table:      ['tableType', 'brand', 'model', 'size'],
-  ball:       ['setType', 'brand'],
-  tip:        ['tipType', 'brand', 'model'],
-  chalk:      ['brand'],
-  'case-bag': ['caseType', 'brand'],
+/* ── برچسبِ کلیدهای نسل‌قبل ──
+   آگهی‌های موجود کلیدهایی دارند که در `specs_catalog.json` امروز
+   نیستند: `bodyMaterial` جای `frame_material` را داشت. صفحه‌ی
+   آگهی کلیدِ ناشناخته را با نامِ خودش نشان می‌داد و خریدار
+   «bodyMaterial : اسلیت» می‌دید.
+
+   تعریفِ قدیمی همین‌جاست و برچسبِ فارسی‌اش را دارد؛ فقط باید
+   خوانده شود. واحد هم اگر داشت کنارش می‌آید، مثلِ خودِ فرم. */
+export function legacyLabelOf(category: string | null | undefined, key: string): string | undefined {
+  const defs = [...(CATEGORY_SPECS[String(category ?? '')] ?? []), ...GENERIC_SPECS]
+  const d = defs.find(x => x.key === key)
+  if (!d) return undefined
+  return d.unit ? `${d.label} (${d.unit})` : d.label
 }
 
-/* ── از مقدارهای ذخیره‌شده به ردیف‌های برچسب‌دار ──
-   `specs` در دیتابیس فقط `{ کلید: مقدار }` است. این تابع برچسبِ
-   فارسی و واحد را کنارش می‌گذارد و ترتیبِ خودِ فرم را نگه می‌دارد،
-   تا صفحه‌ی جزئیات همان چیزی را نشان دهد که فروشنده پر کرده — با
-   همان نام‌ها و همان ترتیب.
-
-   کلیدی که در تعریفِ دسته نباشد (داده‌ی قدیمی یا دسته‌ی عوض‌شده)
-   حذف نمی‌شود؛ با خودِ کلید نشان داده می‌شود، چون نشان‌ندادنش یعنی
-   گم‌شدنِ چیزی که فروشنده وارد کرده. */
-export interface SpecRow { key: string; label: string; value: string }
-
-export function specRows(category: string | null | undefined, specs: unknown): SpecRow[] {
-  if (!specs || typeof specs !== 'object' || Array.isArray(specs)) return []
-  const raw = specs as Record<string, unknown>
-  const defs = [...(CATEGORY_SPECS[String(category ?? '')] ?? GENERIC_SPECS)]
-  const order = new Map(defs.map((d, i) => [d.key, i]))
-  const labelOf = new Map(defs.map(d => [d.key, d.label]))
-  const unitOf = new Map(defs.map(d => [d.key, d.unit]))
-
-  const rows: SpecRow[] = []
-  for (const [key, v] of Object.entries(raw)) {
-    /* «سایر» در فرم یک فیلدِ متنیِ جفت باز می‌کند که با پسوندِ
-       `_other` ذخیره می‌شود. مقدارِ واقعی همان است، پس جایگزینِ
-       کلیدِ اصلی می‌شود نه ردیفی جدا. */
-    if (key.endsWith('_other')) continue
-    const other = String(raw[`${key}_other`] ?? '').trim()
-    const value = (other || String(v ?? '')).trim()
-    if (!value || value === 'سایر') continue
-    const unit = unitOf.get(key)
-    rows.push({ key, label: labelOf.get(key) ?? key, value: unit ? `${value} ${unit}` : value })
-  }
-  return rows.sort((a, b) => (order.get(a.key) ?? 999) - (order.get(b.key) ?? 999))
+/* ── کلیدهای شناخته‌شده‌ی نسل‌قبل ──
+   فهرستِ مجازِ مسیرِ ثبت نمی‌تواند فقط تعریفِ امروز باشد: مهاجرتِ
+   آگهی‌های `localStorage` همان `specs`ِ قدیمی را POST می‌کند، و
+   وقتی `/api/specs/[category]` از دسترس خارج شود فرم هم به همین
+   تعریفِ قدیمی برمی‌گردد. هر دو مسیر آگهیِ سالم می‌سازند و نباید
+   ۴۰۰ بگیرند. */
+export function legacySpecKeys(category: string | null | undefined): string[] {
+  const defs = [...(CATEGORY_SPECS[String(category ?? '')] ?? []), ...GENERIC_SPECS]
+  const out = defs.flatMap(d => [d.key, `${d.key}_other`])
+  /* برند و نوع پیش‌تر داخلِ `specs` هم می‌نشستند */
+  return [...out, 'brand', 'model', 'type', 'cueType', 'tableType', 'ballType', 'tipType', 'caseType']
 }

@@ -6,6 +6,7 @@ import { normalizeCategory, normalizeCondition } from '@/lib/market/categories';
 import { validateOnServer, getBrand, TYPE_PREFIX, isAccessoryCategory, isProductCatalog, ACCESSORY_TYPE_OF, type CatalogId } from '@/lib/market/catalog'
 import { hasSpecCatalog, validateSpecsOnServer } from '@/lib/market/spec-catalog'
 import { normalizeAdImages } from '@/lib/market/images';
+import { normalizePhoneFa } from '@/lib/text-fa';
 
 /* یک آگهی بیلیارد بازار — خواندن، ویرایش و حذف.
    ویرایش و حذف فقط برای صاحب آگهی یا ادمین. */
@@ -100,7 +101,8 @@ export async function PATCH(req: NextRequest, ctx: { params: Promise<{ id: strin
   if (b?.model !== undefined) patch.model = str(b?.model, 80);
   if (b?.type !== undefined) patch.type = str(b?.type, 80);
   if (b?.sellerName !== undefined) patch.sellerName = str(b?.sellerName, 120);
-  if (b?.sellerPhone !== undefined) patch.sellerPhone = str(b?.sellerPhone, 20);
+  if (b?.sellerPhone !== undefined) /* همان یک شکلِ مسیرِ ثبت — وگرنه ویرایش شکلِ دوم را برمی‌گرداند */
+    patch.sellerPhone = normalizePhoneFa(b?.sellerPhone) || str(b?.sellerPhone, 20);
   if (b?.sellerWhatsapp !== undefined) patch.sellerWhatsapp = str(b?.sellerWhatsapp, 20);
   if (b?.specs !== undefined) patch.specs = b?.specs && typeof b.specs === 'object' ? b.specs : null;
 
@@ -137,7 +139,14 @@ export async function PATCH(req: NextRequest, ctx: { params: Promise<{ id: strin
     const brandId = str(b?.brandId, 80) || null;
     const check = validateOnServer({
       /* دسته‌های لوازم زیرِ یک کاتالوگِ مشترک‌اند */
-      category: (isAccessoryCategory(cat) ? 'accessories' : cat) as CatalogId,
+      /* ── ترتیبِ این شرط مهم است ──
+         «پارچه» هم شناسه‌ی کاتالوگِ خودش را دارد و هم یکی از ده
+         دسته‌ی لوازم است. تا امروز `isAccessoryCategory` اول سنجیده
+         می‌شد، پس آگهیِ پارچه با `category='accessories'` اعتبارسنجی
+         می‌شد و نوعِ «snooker» در فهرستِ نوع‌های لوازم نبود — نتیجه‌اش
+         «نوع را انتخاب کنید» روی فرمی که نوع را انتخاب کرده بود.
+         کاتالوگِ اختصاصی مقدم است، مثلِ خودِ فرم. */
+      category: (isProductCatalog(cat) ? cat : 'accessories') as CatalogId,
       type: catType,
       brandId,
       brandCustom: brandId ? null : str(b?.brand, 80) || null,

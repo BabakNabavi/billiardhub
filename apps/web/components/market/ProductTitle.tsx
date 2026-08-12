@@ -1,4 +1,5 @@
 import { productTitleParts, type ProductTitleFields } from '../../lib/market/title'
+import { keepLatinProps } from '../../lib/text-fa'
 
 /* ─────────────────────────────────────────────────────────────
    عنوانِ محصول — یک کامپوننت برای همه‌ی کارت‌ها.
@@ -30,14 +31,23 @@ export interface ProductTitleProps {
   tailClassName?: string
 }
 
+
 export default function ProductTitle({
   p, className, headClassName, tailClassName,
 }: ProductTitleProps) {
   const { head, tail } = productTitleParts(p)
   return (
     <span className={className}>
-      <span className={headClassName}>{head}</span>
-      {tail && <span className={tailClassName}>{tail}</span>}
+      {/* ── ارقامِ داخلِ نامِ لاتین ──
+          `PersianDigits` هر رقمِ رندرشده را فارسی می‌کند و «Century G1»
+          را «Century G۱» نشان می‌داد. `keepLatinProps` تصمیم می‌گیرد
+          کدام استثنا لازم است — و برای متنِ ترکیبی فونت را عوض
+          نمی‌کند. سرِ عنوان هم شامل است: «G1 تورنومنت» که فروشنده
+          نوشته، «۱G تورنومنت» رندر می‌شد. */}
+      <span {...keepLatinProps(head, headClassName)}>{head}</span>
+      {tail && (
+        <span {...keepLatinProps(tail, tailClassName)}>{tail}</span>
+      )}
     </span>
   )
 }

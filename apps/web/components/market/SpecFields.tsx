@@ -105,10 +105,17 @@ const toFa = (n: number | string) =>
 /* ── راهنما ──
    ۱۱.۵ پیکسل و خاکستری: باید خوانده شود ولی برچسب را زیر سایه
    نبرد. زیرِ برچسب می‌نشیند و بالای خودِ ورودی. */
-function Help({ text }: { text?: string }) {
+/* ── چرا راهنما زیرِ ورودی است، نه بالایش ──
+   فیلدها در شبکه‌ی دوستونی می‌نشینند. وقتی راهنما بالای ورودی بود،
+   خانه‌ای که راهنما داشت ورودی‌اش چند پیکسل پایین‌تر می‌افتاد و
+   دو ورودیِ کنارِ هم هم‌تراز نبودند — «جنس بات» کنارِ «گرید شفت».
+   با رفتنِ راهنما به زیر، فاصله‌ی بالای هر ورودی همیشه یکی است
+   (فقط ارتفاعِ برچسب) و کلِ شبکه هم‌تراز می‌ماند. پیامِ خطا هم از
+   قبل همین‌جا بود. */
+function Help({ text, id }: { text?: string; id?: string }) {
   if (!text) return null
   return (
-    <p style={{ margin: '0 0 6px', fontSize: 11.5, lineHeight: 1.7, color: TEXT_MUT }}>{text}</p>
+    <p id={id} style={{ margin: '6px 0 0', fontSize: 11.5, lineHeight: 1.7, color: TEXT_MUT }}>{text}</p>
   )
 }
 
@@ -219,6 +226,9 @@ export function SpecFieldRow({
   const str = value === undefined || value === null ? '' : String(value)
   /* برچسب باید به خودِ ورودی گره بخورد، وگرنه صفحه‌خوان نامش را نمی‌گوید */
   const fieldId = `spec-${field.id}`
+  /* راهنما زیرِ ورودی رفت؛ بدونِ این پیوند، صفحه‌خوان اصلاً
+     نمی‌خواندش — کاربرِ بینا آن را می‌بیند و او نه. */
+  const helpId = field.help_fa ? `${fieldId}-help` : undefined
 
   if (field.type === 'boolean') {
     return (
@@ -230,9 +240,13 @@ export function SpecFieldRow({
   if (field.type === 'multi_select') {
     return (
       <div>
-        <Label htmlFor={fieldId}>{field.label_fa}</Label>
-        <Help text={field.help_fa} />
-        <MultiChips field={field} value={Array.isArray(value) ? value as string[] : []} onChange={onChange} />
+        {/* گروهِ چیپ‌ها ورودیِ واحدی ندارد که برچسب به آن بچسبد،
+            پس خودِ گروه نام و راهنما را می‌گیرد. */}
+        <Label id={`${fieldId}-label`}>{field.label_fa}</Label>
+        <div role="group" aria-labelledby={`${fieldId}-label`} aria-describedby={helpId}>
+          <MultiChips field={field} value={Array.isArray(value) ? value as string[] : []} onChange={onChange} />
+        </div>
+        <Help text={field.help_fa} id={helpId} />
         <ErrMsg msg={error} />
       </div>
     )
@@ -269,8 +283,7 @@ export function SpecFieldRow({
     return (
       <div>
         <Label required={field.required} htmlFor={fieldId}>{field.label_fa}</Label>
-        <Help text={field.help_fa} />
-        <FancySelect value={str} onChange={onChange} options={opts}
+        <FancySelect id={fieldId} value={str} onChange={onChange} options={opts} describedBy={helpId}
           error={!!error} disabled={disabled}
           placeholder={disabled ? 'ابتدا فیلد قبلی را کامل کنید' : 'انتخاب کنید...'} />
         {str === SPEC_OTHER && (
@@ -279,6 +292,7 @@ export function SpecFieldRow({
             placeholder={`${field.label_fa} را وارد کنید`}
             style={{ ...inp(error), marginTop: 8, background: 'rgba(199,166,106,0.05)', borderColor: 'rgba(199,166,106,0.30)' }} />
         )}
+        <Help text={field.help_fa} id={helpId} />
         <ErrMsg msg={error} />
       </div>
     )
@@ -288,7 +302,6 @@ export function SpecFieldRow({
   return (
     <div>
       <Label required={field.required} htmlFor={fieldId}>{field.label_fa}</Label>
-      <Help text={field.help_fa} />
       <input className="nf" id={fieldId}
         type={field.type === 'number' ? 'text' : 'text'}
         inputMode={field.type === 'number' ? 'decimal' : undefined}
@@ -296,12 +309,14 @@ export function SpecFieldRow({
         dir={field.type === 'number' ? 'ltr' : undefined}
         maxLength={field.max_length ?? undefined}
         value={str}
+        aria-describedby={helpId}
         onChange={e => onChange(e.target.value)}
         placeholder={field.placeholder ?? ''}
         style={{ ...inp(error), ...(field.type === 'number' ? { textAlign: 'start' as const } : null) }} />
       {field.type === 'number' && field.common?.length ? (
         <CommonChips values={field.common} current={str} onPick={onChange} />
       ) : null}
+      <Help text={field.help_fa} id={helpId} />
       <ErrMsg msg={error} />
     </div>
   )

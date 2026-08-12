@@ -46,7 +46,7 @@ export async function loadHomeFeatured(): Promise<HomeFeatured> {
       .select('id,name,city,images,hasActiveStory,snookerTables,pocketTables,highballTables,vipSnookerTables,vipPocketTables')
       .eq('isActive', true).order('createdAt', { ascending: false }).limit(FEATURED_CLUBS_MAX),
     sb.from('products')
-      .select('id,title,brand,category,images,price,negotiable,discountPrice,discountPercent')
+      .select('id,title,brand,model,category,images,price,negotiable,discountPrice,discountPercent,city,condition')
       .eq('status', 'active').order('createdAt', { ascending: false }).limit(FEATURED_PRODUCTS_MAX),
   ])
 
@@ -61,7 +61,8 @@ export async function loadHomeFeatured(): Promise<HomeFeatured> {
     vipSnookerTables?: number | null; vipPocketTables?: number | null
   }
   type P = {
-    id: string; title: string; brand?: string | null; category?: string | null
+    id: string; title: string; brand?: string | null; model?: string | null
+    category?: string | null
     images?: string[] | null; price?: number | null; negotiable?: boolean | null
     discountPrice?: number | null; discountPercent?: number | null
     city?: string | null; condition?: string | null
@@ -91,7 +92,12 @@ export async function loadHomeFeatured(): Promise<HomeFeatured> {
   const products: RealProduct[] = rows<P>(productsRes).map(p => ({
     id: p.id,
     name: modernizeType(p.title ?? ''),
-    sub: p.brand || p.category || 'بیلیارد بازار',
+    /* برند **و مدل** — و بدونِ جانشینِ ساختگی. این سومین نویسنده‌ی
+       همین کارت است (کنارِ `ads/free` و `ads/resolve`) و تنها
+       نویسنده‌ی مسیرِ SSR؛ جا انداختنش یعنی اولین رندر برند-تنها
+       بود و بعد از hydration عوض می‌شد. */
+    sub: p.brand ?? '',
+    model: p.model ?? '',
     img: p.images?.[0] || PRODUCT_IMG,
     brand: (p.brand || 'BILLIARD').toUpperCase(),
     city: p.city ?? '', condition: p.condition ?? 'new',

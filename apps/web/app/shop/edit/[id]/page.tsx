@@ -36,12 +36,12 @@ import ProvinceCitySelect from '../../../../components/ProvinceCitySelect'
 import { provinceOfCity } from '../../../../lib/iran-geo'
 import { compressImage } from '../../../../lib/seller-store'
 import { CATEGORY_OPTIONS, CONDITIONS, normalizeCategory, normalizeCondition } from '../../../../lib/market/categories'
-import { GENERIC_SPECS, CATEGORY_SPECS, HIDDEN_SPEC_KEYS } from '../../../../lib/market/specs'
+import { GENERIC_SPECS, CATEGORY_SPECS } from '../../../../lib/market/specs'
 import { TYPE_OPTIONS, brandOptionsFor, modelOptionsFor, isTypeDrivenCategory, withOther } from '../../../../lib/market/chain'
 import { typeIdOf, isAccessoryCategory, isProductCatalog, ACCESSORY_TYPE_OF, type CatalogId } from '../../../../lib/market/catalog-rules'
 import CatalogSelector, { EMPTY_CATALOG_VALUE, type CatalogValue, useCatalogType } from '../../../../components/market/CatalogSelector'
 import { sizeOptions, SpecFieldRow, SpecProgress, useSpecFields, specKey } from '../../../../components/market/SpecFields'
-import { splitFields, countFilled, applySpecChange, isFieldLocked, isFieldHidden, typeDependentKeys, fillFromModel, fromLegacyDefs, type SpecField, type LegacySpecDef } from '../../../../lib/market/spec-rules'
+import { formTypeFieldOf, optionIdOf, splitFields, countFilled, applySpecChange, isFieldLocked, isFieldHidden, typeDependentKeys, fillFromModel, fromLegacyDefs, type SpecField, type LegacySpecDef } from '../../../../lib/market/spec-rules'
 import { brandSearchTerms } from '../../../../lib/market/catalog-rules'
 import CountryFlag from '../../../../components/CountryFlag'
 import {
@@ -222,6 +222,10 @@ export default function EditProductPage() {
     setSpecs(s => {
       const n = { ...s }
       for (const k of typeDependentKeys(specDefs, form.category)) delete n[k]
+      /* ── نوعی که خودش یک فیلدِ مشخصات است ──
+         بالای فرم برچسبِ فارسی انتخاب می‌شود ولی ذخیره‌شدنی شناسه
+         است؛ وگرنه صفحه‌ی آگهی و فیلترها مقدار را پیدا نمی‌کنند. */
+      if (specTypeField) n[specKey(specTypeField.id)] = optionIdOf(specTypeField, v)
       return n
     })
     setSpecOthers(s => {
@@ -244,6 +248,13 @@ export default function EditProductPage() {
   /* ── کدام دسته‌ها کاتالوگ دارند ──
      پنج دسته کاتالوگِ خودشان را دارند و ده دسته‌ی لوازم زیرِ یک
      کاتالوگِ مشترک‌اند که نوعش همان دسته است. */
+  /* سوییچِ «پلمب / استفاده‌نشده» — وضعیتِ کالا را قطعی می‌کند */
+  const sealed = specs.isSealed === true
+  /* ── یک مقدار، نه دو ──
+     نمایشِ «نو» بدونِ عوض‌شدنِ خودِ مقدار یعنی فروشنده «نو» می‌دید و
+     سرور «کارکرده» ذخیره می‌کرد. همه‌ی مصرف‌کننده‌ها — دراپ‌داون،
+     پیش‌نمایش و بدنه‌ی درخواست — از همین یکی می‌خوانند. */
+  const effCondition = sealed ? 'new' : form.condition
   const catCategory: CatalogId | null =
     isProductCatalog(form.category) ? form.category
       : isAccessoryCategory(form.category) ? 'accessories' : null
@@ -265,6 +276,27 @@ export default function EditProductPage() {
       : fromLegacyDefs((CATEGORY_SPECS[form.category] ?? GENERIC_SPECS) as LegacySpecDef[])),
     [catalogSpecs, form.category],
   )
+  /* ── «نوع»ی که در مشخصات تعریف شده ──
+     اکستنشن و رست و روغن و اکسسوری در `TYPE_OPTIONS` نیستند و
+     دراپ‌داونِ «نوع»شان خالی می‌آمد، در حالی که همان پرسش پایین‌تر
+     وسطِ مشخصات بود. آن فیلد بالا می‌آید و از مشخصات برداشته
+     می‌شود. */
+  /* ── یک پرسشِ «نوع»، نه دو ──
+     `cue-case` و `ball-bag` هم `TYPE_OPTIONS` دارند و هم فیلدِ
+     `case_type`/`bag_type` در مشخصات — یعنی یک سؤال با دو فهرستِ
+     متفاوت و دو مقدارِ ذخیره‌شده. فیلد همیشه پیدا می‌شود تا از
+     کارتِ مشخصات برداشته شود؛ ولی فهرستِ بالای فرم فقط وقتی از آن
+     می‌آید که `TYPE_OPTIONS` چیزی نداشته باشد — وگرنه آگهی‌های
+     موجود که برچسبِ قدیمی را ذخیره کرده‌اند از فهرست می‌افتادند. */
+  const specTypeField = formTypeFieldOf(specDefs)
+  /* «سایر» همیشه ته فهرست است — پیش‌تر فقط شاخه‌ی
+     `TYPE_OPTIONS` آن را با `withOther` می‌گرفت. */
+  const typeChoices: string[] | undefined = TYPE_OPTIONS[form.category]
+    ? withOther(TYPE_OPTIONS[form.category]!)
+    : (specTypeField
+      ? [...(specTypeField.options ?? []).map(o => o.label_fa),
+        ...(specTypeField.allow_other ? ['سایر'] : [])]
+      : undefined)
 
   /* ── تفکیکِ مقدارِ خام، وقتی تعریفِ فیلدها رسید ──
      هرچه در کاتالوگ نیست دست‌نخورده در `legacySpecs` می‌ماند و
@@ -514,7 +546,7 @@ export default function EditProductPage() {
             clothBrandCustom: form.category === 'table' && specs.clothBrand === '__other__' ? (specOthers.clothBrand ?? '').trim() || null : null,
             clothModelId: form.category === 'table' && specs.clothModel && specs.clothModel !== '__other__' ? String(specs.clothModel) : null,
             clothModelCustom: form.category === 'table' && specs.clothModel === '__other__' ? (specOthers.clothModel ?? '').trim() || null : null,
-            description: form.description.trim(), condition: form.condition,
+            description: form.description.trim(), condition: effCondition,
             price: form.negotiable ? 0 : price,
             old: form.negotiable ? 0 : old,
             disc: !form.negotiable && old > price ? Math.round((1 - price / old) * 100) : 0,
@@ -552,6 +584,11 @@ export default function EditProductPage() {
             brand: effBrand, model: effModel,
             cueType: form.category === 'cue' ? catTypeId || undefined : undefined,
             tableType: form.category === 'table' ? catTypeId || undefined : undefined,
+            /* بقیه‌ی کاتالوگ‌ها ستونِ خودشان را ندارند و نوع را از همین
+               فیلد می‌گیرند. نبودنش یعنی سرور نوع را نمی‌داند و فیلدهای
+               وابسته به نوع را اشتباه می‌سنجد — آگهیِ توپ ویرایش‌ناپذیر
+               می‌شد. */
+            catalogType: catTypeId || undefined,
             brandId: catTypeId && cue.brandId !== '__other__' ? cue.brandId : null,
             modelId: catTypeId && cue.modelId !== '__other__' ? cue.modelId : null,
             tableSizeId: form.category === 'table' && specs.size && specs.size !== '__other__' ? String(specs.size) : null,
@@ -559,7 +596,7 @@ export default function EditProductPage() {
             price: form.negotiable ? 0 : price,
             old: form.negotiable ? 0 : old,
             negotiable: form.negotiable,
-            description: form.description.trim(), condition: form.condition,
+            description: form.description.trim(), condition: effCondition,
             specs: buildSpecs(),
             images: [...existingImages, ...uploaded],
             province: form.province, city: form.city,
@@ -616,12 +653,14 @@ export default function EditProductPage() {
   )
 
   const HIDE_SPEC = new Set(['brand', 'model', 'cue_type', 'table_type', 'condition'])
-  const usableSpecs = specDefs.filter(f => !HIDE_SPEC.has(f.id))
+  /* فیلدی که بالای فرم پرسیده شد این‌جا تکرار نمی‌شود */
+  const usableSpecs = specDefs.filter(f => !HIDE_SPEC.has(f.id) && f.id !== specTypeField?.id)
                   /* فیلدی که شرطش برقرار نیست اصلاً رندر نمی‌شود —
                      «تعداد لایه» برای تیپِ تک‌لایه و «نوع نگهدارنده»
                      وقتی نگهدارنده‌ای نیست. از شمارشِ پیشرفت هم بیرون
                      است، وگرنه هدفی شمرده می‌شد که دیده نمی‌شود. */
-                  const shown = usableSpecs.filter(f => !isFieldHidden(f, specs, usableSpecs, catTypeId))
+                  /* وابستگی از `specDefs` — دلیلش در فرمِ ثبت */
+                  const shown = usableSpecs.filter(f => !isFieldHidden(f, specs, specDefs, catTypeId))
                   const { main: mainSpecs, toggles: toggleSpecs } = splitFields(shown)
   const specProgress = countFilled(shown, specs)
 
@@ -687,9 +726,9 @@ export default function EditProductPage() {
 
                 <div>
                   <Label required>نوع</Label>
-                  {form.category && TYPE_OPTIONS[form.category] ? (
+                  {form.category && typeChoices ? (
                     <FancySelect value={form.type} onChange={setType}
-                      options={withOther(TYPE_OPTIONS[form.category]!).map(o => ({ value: o, label: o }))}
+                      options={typeChoices.map(o => ({ value: o, label: o }))}
                       placeholder="انتخاب نوع..." error={!!errors.type} />
                   ) : (
                     <input className="nf" type="text" placeholder="مثال: اسنوکر" value={form.type}
@@ -863,7 +902,12 @@ export default function EditProductPage() {
 
                 <div style={{ marginBottom: 16 }}>
                   <Label required>وضعیت کالا</Label>
-                  <FancySelect value={form.condition} onChange={v => set('condition', v)}
+                  {/* ── پلمب ⇒ وضعیت قطعی است ──
+                      کالای پلمب و استفاده‌نشده به تعریف «نو» است؛ پرسیدنِ دوباره‌اش
+                      یعنی فروشنده می‌تواند «کارکرده»ی پلمب‌شده ثبت کند. با روشن‌شدنِ
+                      آن سوییچ، این فیلد روی «نو» می‌نشیند و غیرفعال می‌شود. */}
+                  <FancySelect value={effCondition}
+                    onChange={v => set('condition', v)} disabled={sealed}
                     options={CONDITIONS.map(c => ({ value: c.id, label: c.label }))} />
                 </div>
 

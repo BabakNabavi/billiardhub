@@ -324,6 +324,16 @@ export function validateSelection(
   const sizeCustom = clean(input.sizeCustom, MAX_SIZE_LEN)
   const free = !!opts.forceFreeInput
 
+  /* ── بریدنِ بی‌صدا، خطا نیست ──
+     `clean` مقدارِ بلند را به سقف می‌بُرد و آگهی پذیرفته می‌شد؛
+     فروشنده هرگز نمی‌فهمید نامِ برندش نصفه ذخیره شده. فرم خودش
+     `maxLength` دارد، پس رسیدنِ مقدارِ بلندتر یعنی درخواست از
+     جایی جز فرم آمده و باید رد شود. */
+  const tooLong = (v: string | null | undefined, max: number) => (v ?? '').trim().length > max
+  if (tooLong(input.brandCustom, MAX_CUSTOM_LEN)) errors.brand = `نام برند حداکثر ${MAX_CUSTOM_LEN} نویسه`
+  if (tooLong(input.modelCustom, MAX_CUSTOM_LEN)) errors.model = `نام مدل حداکثر ${MAX_CUSTOM_LEN} نویسه`
+  if (tooLong(input.sizeCustom, MAX_SIZE_LEN)) errors.size = `اندازه حداکثر ${MAX_SIZE_LEN} نویسه`
+
   if (!isTypeId(input.category, input.type)) {
     errors.type = 'نوع را انتخاب کنید'
   }

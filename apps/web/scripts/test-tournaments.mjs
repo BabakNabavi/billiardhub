@@ -1059,11 +1059,79 @@ t('شهر و وضعیت به کارتِ صفحه‌ی اصلی می‌رسند',
   /city: string\r?\n  condition: string/.test(read('lib/home-types.ts'))
   && /city: p\.city \?\? '', condition: p\.condition \?\? 'new'/.test(homeCl),
   'مسیرِ اسنپ‌شاتِ جایگاه هم باید همین‌ها را حمل کند');
-t('اسنپ‌شاتِ جایگاه وضعیتِ کالا را حمل می‌کند',
-  /images,brand,city,condition,status/.test(read('lib/ads/resolve.ts'))
-  && /images,brand,city,condition,status/.test(read('lib/ads/free.ts'))
+t('اسنپ‌شاتِ جایگاه وضعیتِ کالا و مدل را حمل می‌کند',
+  /images,brand,model,city,condition,status/.test(read('lib/ads/resolve.ts'))
+  && /images,brand,model,city,condition,status/.test(read('lib/ads/free.ts'))
   && /city: e\.city \?\? '', condition: e\.condition \?\? 'new'/.test(homeCl),
   'کارت‌های سکشنِ بازار از اسنپ‌شات می‌آیند، نه از ردیفِ خامِ محصول');
+/* ── برند و مدل، در هر سه کارت ──
+   یک محصول در سه صفحه دیده می‌شود و مدل در دو تای‌شان می‌افتاد:
+   اسنپ‌شاتِ صفحه‌ی اصلی فقط `brand` را می‌آورد و تایپِ کارتِ فروشگاه
+   ستونِ `model` را نداشت. */
+t('برند و مدل به هر سه کارت می‌رسند',
+  /* برند و مدل **جدا** می‌مانند: `productTitleParts` تکرار را
+     تکه‌به‌تکه با عنوان می‌سنجد و رشته‌ی چسبیده آن را کور می‌کند. */
+  read('lib/ads/resolve.ts').includes('model: s(r.model),')
+  && read('lib/ads/free.ts').includes('model: s(r.model),')
+  && read('app/HomeClient.tsx').includes('brand: p.sub, model: p.model')
+  && read('app/shop/products.ts').includes('model: s(r.model)')
+  && read('app/sellers/[id]/FlatShop.tsx').includes('model: sp.model'),
+  'کارتِ فروشگاه و صفحه‌ی اصلی مدل را نشان نمی‌دادند');
+/* ── ارقامِ نامِ لاتین ──
+   `PersianDigits` هر رقمِ رندرشده را فارسی می‌کند و «Century G1» را
+   «Century G۱» نشان می‌داد. کلاسِ `bh-latin` استثنای خودِ همان
+   کامپوننت است. */
+/* ── بسته‌ی گزارشِ کاربر ── */
+t('نوعِ دسته‌های لوازم از فیلدِ مشخصاتِ خودشان می‌آید',
+  read('lib/market/spec-rules.ts').includes('export const formTypeFieldOf')
+  && ['app/shop/new/page.tsx', 'app/shop/edit/[id]/page.tsx'].every(f =>
+    read(f).includes('const specTypeField') && read(f).includes('typeChoices')
+    && read(f).includes("f.id !== specTypeField?.id")),
+  'اکستنشن و رست و روغن و اکسسوری دراپ‌داونِ خالی داشتند');
+t('کاتالوگِ اختصاصی بر لوازم مقدم است',
+  read('app/api/market/ads/route.ts').includes("isProductCatalog(category) ? category : 'accessories'")
+  && read('app/api/market/ads/[id]/route.ts').includes("isProductCatalog(cat) ? cat : 'accessories'"),
+  'آگهیِ پارچه «نوع را انتخاب کنید» می‌گرفت چون با accessories سنجیده می‌شد');
+t('پلمب وضعیتِ کالا را قطعی می‌کند',
+  ['app/shop/new/page.tsx', 'app/shop/edit/[id]/page.tsx'].every(f =>
+    read(f).includes('const sealed = specs.isSealed === true')
+    && read(f).includes("const effCondition = sealed ? 'new' : form.condition")
+    && read(f).includes('condition: effCondition,')),
+  'کالای پلمب‌شده نمی‌تواند «کارکرده» باشد');
+t('شماره‌ی موبایل با ارقامِ فارسی و جداکننده پذیرفته می‌شود',
+  /* یک نرمال‌ساز در `text-fa` و هر دو مرز از آن می‌خوانند */
+  read('lib/text-fa.ts').includes('export function normalizePhoneFa')
+  && read('components/market/AdFormFields.tsx').includes('normalizePhoneFa as normalizePhone')
+  && read('app/api/market/ads/route.ts').includes('normalizePhoneFa(b?.sellerPhone)')
+  && read('app/api/market/ads/[id]/route.ts').includes('normalizePhoneFa(b?.sellerPhone)')
+  && read('app/shop/new/page.tsx').includes('isValidPhone(form.sellerPhone)'),
+  'کیبوردِ فارسی ارقامِ فارسی می‌دهد و الگوی لاتین ردش می‌کرد');
+t('راهنمای کیس که کاربر خواست، حذف شد',
+  !readFileSync(join(ROOT, 'data/accessories_catalog.json'), 'utf8').includes('همه کیس‌ها جا نمی‌دهند'));
+t('کارتِ سکشنِ بازار ۵٪ بزرگ‌تر شد',
+  homeCl.includes('width: 150, height: 288'),
+  '۱۴۳×۲۷۴ بود');
+t('ارقامِ داخلِ نامِ لاتین فارسی نمی‌شوند',
+  read('lib/text-fa.ts').includes('export function keepLatinProps')
+  && read('components/market/ProductTitle.tsx').includes('keepLatinProps(head, headClassName)')
+  && read('components/market/ProductTitle.tsx').includes('keepLatinProps(tail, tailClassName)')
+  && read('app/shop/[id]/page.tsx').includes('keepLatinProps(s.value)')
+  /* کلاسِ خودِ عنصر باید ادغام شود نه بازنویسی — وگرنه خطِ برند
+     `mk-t`/`bz-t`/`pc-t` و فاصله‌اش را از دست می‌دهد. */
+  && read('components/market/ProductTitle.tsx').includes('keepLatinProps(tail, tailClassName)'),
+  '«Taom V۱۰» و «6811 Tournament 30oz» خراب می‌شدند');
+/* ── چرا دو استثنا و نه یکی ──
+   `bh-latin` فونت را هم Arial می‌کند؛ روی «آبنوس (Ebony)» یعنی یک
+   ردیفِ Arial وسطِ جدولِ فارسی. متنِ ترکیبی `data-no-fa` می‌گیرد. */
+t('متنِ ترکیبی فونتش عوض نمی‌شود',
+  read('lib/text-fa.ts').includes("'data-no-fa': ''")
+  && /u0600-/.test(read('lib/text-fa.ts')),
+  'کلاسِ bh-latin در layout فونت را به Arial می‌برد');
+t('برند و مدل به خطِ بالای‌شان نچسبیده‌اند',
+  read('app/shop/page.tsx').includes('.mk-t { display: block; margin-top: 3px;')
+  && homeCl.includes('.bz-t { display:block; margin-top:3px;')
+  && read('app/sellers/[id]/FlatShop.tsx').includes('.pc-t { display: block; margin-top: 3px;'),
+  'خطِ دوم بی‌فاصله زیرِ عنوان بود');
 
 /* ── نوارِ فوری: حرکتِ خودکار برداشته شد ──
    چهار پیاده‌سازیِ مختلف با اسکرولِ بومی جنگیدند. علتِ مشترک: نوشتنِ
@@ -1696,7 +1764,10 @@ t('صفحه‌ی جزئیات مشخصاتِ فنی را نشان می‌دهد'
   adDetail.includes('specDisplayRows(specDefs, rawAd?.specs,') && /مشخصات فنی/.test(adDetail)
     /* دسته‌هایی که کاتالوگِ تازه ندارند باید همچنان برچسبِ فارسی
        بگیرند، وگرنه «diameter: 57.2» نشان داده می‌شد. */
-    && adDetail.includes('specDefs.length ? specs : legacyRows'),
+    /* یک سازنده‌ی ردیف برای همه‌ی دسته‌ها؛ کلیدِ ناشناخته برچسبش را
+       از `legacyLabelOf` می‌گیرد نه از یک مسیرِ دومِ موازی. */
+    && adDetail.includes('legacyLabelOf(product?.cat, k)')
+    && !adDetail.includes('specDefs.length ? specs : legacyRows'),
   'ده‌ها مشخصه ذخیره می‌شد و هیچ‌جا دیده نمی‌شد');
 t('آگهیِ فوری از فهرستِ عادی برداشته می‌شود',
   /const inBar = new Set\(urgent\.map/.test(market),
@@ -2320,7 +2391,9 @@ console.log('\n― کاتالوگِ میز ―');
   /* ── سایز از فهرستِ ثابت درآمد ── */
   const specsSrc = read('lib/market/specs.ts');
   t('فهرستِ ثابتِ سایز حذف شد',
-    !specsSrc.includes("'۷ فوت','۸ فوت'") && specsSrc.includes("'size']"),
+    !specsSrc.includes("'۷ فوت','۸ فوت'")
+    && JSON.parse(readFileSync(join(ROOT, 'data/specs_catalog.json'), 'utf8'))
+      .specs.table.find(f => f.id === 'size')?.source === 'types[].sizes',
     'سایز حالا از سایزهای همان نوع می‌آید');
   /* سایز حالا یک فیلدِ `source`دارِ کاتالوگِ مشخصات است، نه یک
      کامپوننتِ جدا: فهرستش از سایزهای همان نوعِ میز می‌آید و در
@@ -2586,11 +2659,18 @@ console.log('\n― مشخصات و پارچه ―');
       && ['app/shop/new/page.tsx', 'app/shop/edit/[id]/page.tsx']
         .every(f => read(f).includes("useCatalogType('cloth'")),
       'برندِ پارچه در chain.ts هاردکد بود، نه از کاتالوگ');
-    t('مشخصاتِ پارچه از تعریفِ میز مشتق می‌شود',
-      read('lib/market/spec-catalog.ts').includes('CLOTH_FROM_TABLE')
-      && ['cloth_type', 'cloth_color', 'cloth_condition']
-        .every(id => S.specs.table.some(f => f.id === id)),
-      'فهرستِ جدا یعنی گزینه‌ی رنگ دو جا و ناهمگام');
+    /* ── پارچه ──
+   تعریفش از کاتالوگِ لوازم می‌آید (`accessories_catalog.json`)، نه از
+   مشتق‌کردنِ فیلدهای میز. شاخه‌ی `CLOTH_FROM_TABLE` هرگز اجرا نمی‌شد
+   چون `isAccessoryCategory('cloth')` زودتر برمی‌گرداند — همان تله‌ی
+   ترتیبی که در روت‌ها هم بود. */
+t('مشخصاتِ پارچه سه فیلد دارد و از یک منبع می‌آید',
+  (() => {
+    const A = JSON.parse(readFileSync(join(ROOT, 'data/accessories_catalog.json'), 'utf8'));
+    const c = A.categories.find(x => x.id === 'cloth');
+    return (c?.specs ?? []).length === 3;
+  })() && !read('lib/market/spec-catalog.ts').includes('CLOTH_FROM_TABLE'),
+  'شاخه‌ی مرده حذف شد تا رفتارِ ناموجود را وعده ندهد');
   }
 }
 
@@ -2906,6 +2986,69 @@ console.log('\n― لوازم جانبی ―');
   t('روتِ ثبت لوازم را می‌سنجد',
     ['app/api/market/ads/route.ts', 'app/api/market/ads/[id]/route.ts']
       .every(f => read(f).includes('isAccessoryCategory')));
+}
+
+/* ── تستِ یکپارچگی: از فرم تا صفحه‌ی آگهی ── */
+console.log('\n― یکپارچگیِ نمایش ―');
+{
+  const sr = read('lib/market/spec-rules.ts');
+  const sc = read('lib/market/spec-catalog.ts');
+  const detail = read('app/shop/[id]/page.tsx');
+  const list = read('app/shop/page.tsx');
+
+  t('ممیزیِ پوششِ فیلدها در ریپو هست',
+    existsSync(join(ROOT, 'scripts/audit-spec-coverage.mjs')),
+    'سه فهرست را کنارِ هم می‌گذارد — برای دسته‌های آینده');
+  t('مقدارهای عددی در جدول فارسی می‌شوند',
+    sr.includes('export function faDigits') && sr.includes('faDigits(text)'),
+    '«۱۸.۵» نه «18.5»');
+  t('نامِ لاتین و فیلدِ کد دست نمی‌خورند',
+    sr.includes('/[A-Za-z]/.test(text)') && sr.includes('CODE_FIELDS'),
+    'شماره‌ی سریال کد است و «6811 Tournament» نامِ مدل');
+  t('«نوع» و «مدل» در جدول تکرار نمی‌شوند',
+    sr.includes('TITLE_KEYS.has(k)'), 'هر دو در عنوانِ آگهی هستند');
+  t('شناسه‌ی «سایر» خام نمایش داده نمی‌شود',
+    sr.includes('text === OTHER_ID'), 'خریدار «__other__» می‌دید');
+  t('۳۳ مشخصه‌ی میز گروه‌بندی می‌شود',
+    sr.includes('FIELD_GROUPS') && sr.includes('export function groupedRows')
+    && detail.includes('groupedRows(specRows_)'));
+  t('دسته‌ی کم‌ردیف تخت می‌ماند',
+    sr.includes('rows.length < GROUP_MIN_ROWS'),
+    'زیرعنوان روی نُه ردیف فقط شلوغی است');
+  t('پرچمِ کشورِ برند در صفحه‌ی آگهی هست',
+    detail.includes('CountryFlag') && detail.includes('brandCountry'));
+  t('مقدارِ بلند می‌شکند، برچسب نه',
+    !detail.includes("fontWeight: 700, color: TEXT, whiteSpace: 'nowrap'"),
+    'nowrap مقدار را از ستونِ ۲۴۰ پیکسلی بیرون می‌زد');
+  t('جستجوی بازار همان نرمال‌سازیِ دراپ‌داون را دارد',
+    list.includes('import { normalizeFa }') && list.includes('normalizeFa(`${l.name}'),
+    '«predator» و کافِ عربی هیچ نتیجه‌ای نمی‌دادند');
+  t('ستونِ specs سقفِ تعداد و حجم دارد',
+    sc.includes('MAX_SPEC_KEYS') && sc.includes('MAX_SPEC_VALUE_LEN'));
+  t('کلیدِ ناشناخته فقط در مسیرِ ثبت رد می‌شود',
+    sc.includes('strict = false')
+    && read('app/api/market/ads/route.ts').includes('catType || undefined, true)')
+    && !read('app/api/market/ads/[id]/route.ts').includes('catType || undefined, true)'),
+    'ویرایشِ آگهیِ قدیمی نباید بشکند');
+  t('فیلدِ پنهان روی سرور هم مقدار نمی‌گیرد',
+    sc.includes('isFieldHidden(f, values, fields, typeId)'));
+  t('نامِ دستیِ بلندتر از سقف رد می‌شود نه بریده',
+    read('lib/market/catalog-rules.ts').includes('const tooLong ='));
+  t('کلیدِ نسل‌قبل برچسبِ فارسی می‌گیرد',
+    read('lib/market/specs.ts').includes('export function legacyLabelOf')
+    && detail.includes('legacyLabelOf(product?.cat, k)')
+    && sr.includes('fallbackLabel?.(k)'),
+    'آگهیِ موجود «bodyMaterial : اسلیت» نشان می‌داد');
+  t('کدِ مرده‌ی HIDDEN_SPEC_KEYS حذف شد',
+    !read('lib/market/specs.ts').includes('HIDDEN_SPEC_KEYS'));
+  t('alias «پریس» اضافه شد',
+    JSON.parse(readFileSync(join(ROOT, 'data/cue-catalog.json'), 'utf8'))
+      .types.flatMap(x => x.brands).some(x => (x.aliases ?? []).includes('پریس')));
+  t('هر کشورِ برندِ میز در countries خودش تعریف شده',
+    (() => {
+      const J = JSON.parse(readFileSync(join(ROOT, 'data/table_catalog.json'), 'utf8'));
+      return J.types.flatMap(x => x.brands).every(x => !x.country || !!J.countries[x.country]);
+    })(), 'SG جا افتاده بود و ادغام پوشانده بودش');
 }
 
 console.log('\n― CORS ―');

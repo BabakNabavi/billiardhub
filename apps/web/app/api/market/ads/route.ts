@@ -6,6 +6,7 @@ import { normalizeCategory, normalizeCondition } from '@/lib/market/categories';
 import { isCatalogId, validateOnServer, getBrand, TYPE_PREFIX, isAccessoryCategory, isProductCatalog, ACCESSORY_TYPE_OF, type CatalogId } from '../../../../lib/market/catalog'
 import { hasSpecCatalog, validateSpecsOnServer } from '../../../../lib/market/spec-catalog'
 import { normalizeAdImages } from '@/lib/market/images';
+import { normalizePhoneFa } from '@/lib/text-fa';
 import { getSetting } from '@/lib/ads/quota';
 
 /* آگهی‌های بیلیارد بازار — روی سرور، نه در مرورگر کاربر.
@@ -174,7 +175,7 @@ export async function POST(req: NextRequest) {
   /* پارچه هم نوع دارد و همان رشته‌ی میز است */
   const catType = str(category === 'cue' ? b?.cueType : category === 'table' ? b?.tableType : b?.catalogType, 40);
   if (hasSpecCatalog(category) && b?.specs && typeof b.specs === 'object') {
-    const sv = validateSpecsOnServer(category, b.specs as Record<string, unknown>, catType || undefined);
+    const sv = validateSpecsOnServer(category, b.specs as Record<string, unknown>, catType || undefined, true);
     if (!sv.ok) {
       const first = Object.values(sv.errors)[0] ?? 'مشخصات فنی معتبر نیست';
       return NextResponse.json({ message: first, errors: sv.errors }, { status: 400 });
@@ -186,7 +187,14 @@ export async function POST(req: NextRequest) {
     const brandId = str(b?.brandId, 80) || null;
     const check = validateOnServer({
       /* دسته‌های لوازم زیرِ یک کاتالوگِ مشترک‌اند */
-      category: (isAccessoryCategory(category) ? 'accessories' : category) as CatalogId,
+      /* ── ترتیبِ این شرط مهم است ──
+         «پارچه» هم شناسه‌ی کاتالوگِ خودش را دارد و هم یکی از ده
+         دسته‌ی لوازم است. تا امروز `isAccessoryCategory` اول سنجیده
+         می‌شد، پس آگهیِ پارچه با `category='accessories'` اعتبارسنجی
+         می‌شد و نوعِ «snooker» در فهرستِ نوع‌های لوازم نبود — نتیجه‌اش
+         «نوع را انتخاب کنید» روی فرمی که نوع را انتخاب کرده بود.
+         کاتالوگِ اختصاصی مقدم است، مثلِ خودِ فرم. */
+      category: (isProductCatalog(category) ? category : 'accessories') as CatalogId,
       type: catType,
       brandId,
       /* برندِ دستی همان رشته‌ی `brand` است؛ قاعده «یکی از این دو» را
@@ -345,7 +353,8 @@ export async function POST(req: NextRequest) {
     specs: b?.specs && typeof b.specs === 'object' ? b.specs : null,
     section: str(b?.section, 20) || 'newest',
     sellerName: str(b?.sellerName ?? b?.shopName, 120),
-    sellerPhone: str(b?.sellerPhone, 20),
+    /* یک شکلِ واحد، هر جور که تایپ شده باشد */
+    sellerPhone: normalizePhoneFa(b?.sellerPhone) || str(b?.sellerPhone, 20),
     sellerWhatsapp: str(b?.sellerWhatsapp, 20),
     address: str(b?.address, 300),
     storeSlug,

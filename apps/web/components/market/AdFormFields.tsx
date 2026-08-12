@@ -84,6 +84,11 @@ export function toAsciiDigits(s: string) {
           .replace(/[٠-٩]/g, c => String(c.charCodeAt(0) - 0x0660))
 }
 
+/* ── یک نرمال‌ساز، نه دو ──
+   الگوریتم در `lib/text-fa` است چون سرور هم همان را لازم دارد؛ دو
+   نسخه یعنی همان دو شکلِ ذخیره‌شده‌ای که این کار برای حذفش بود. */
+export { normalizePhoneFa as normalizePhone, isIranMobile as isValidPhone } from '../../lib/text-fa'
+
 export function fmtPrice(v: string) {
   const n = toAsciiDigits(v).replace(/\D/g, '')
   return n ? Number(n).toLocaleString('fa-IR') : ''
@@ -102,7 +107,9 @@ export interface FancyOption {
   group?: string
 }
 
-export function FancySelect({ value, onChange, options, placeholder = 'انتخاب...', searchPlaceholder, disabled, error }: {
+export function FancySelect({ id, value, onChange, options, placeholder = 'انتخاب...', searchPlaceholder, disabled, error, describedBy }: {
+  /** شناسه‌ی دکمه — تا `<label htmlFor>` واقعاً به چیزی برسد */
+  id?: string
   value: string
   onChange: (v: string) => void
   /* `search` و `node` و `group` اختیاری‌اند و همه‌ی فراخوان‌های قبلی
@@ -115,6 +122,8 @@ export function FancySelect({ value, onChange, options, placeholder = 'انتخ�
   searchPlaceholder?: string
   disabled?: boolean
   error?: boolean
+  /** شناسه‌ی متنِ راهنما — صفحه‌خوان باید آن را هم بخواند */
+  describedBy?: string
 }) {
   const [open, setOpen] = useState(false)
   const [q, setQ] = useState('')
@@ -176,7 +185,7 @@ export function FancySelect({ value, onChange, options, placeholder = 'انتخ�
 
   return (
     <>
-      <button ref={btnRef} type="button" disabled={disabled} onClick={toggle}
+      <button ref={btnRef} id={id} type="button" disabled={disabled} onClick={toggle} aria-describedby={describedBy}
         style={{
           width: '100%', boxSizing: 'border-box', display: 'flex', alignItems: 'center', gap: 8,
           padding: '12px 14px', borderRadius: 11, fontSize: 14.5, textAlign: 'right',
@@ -251,9 +260,9 @@ export function FancySelect({ value, onChange, options, placeholder = 'انتخ�
 }
 
 /* optional دیگر برچسب «(اختیاری)» نمی‌گذارد — کلمه‌ی «اختیاری» از کل فرم حذف شد */
-export function Label({ children, required, htmlFor }: { children: React.ReactNode; required?: boolean; optional?: boolean; htmlFor?: string }) {
+export function Label({ children, required, htmlFor, id }: { children: React.ReactNode; required?: boolean; optional?: boolean; htmlFor?: string; id?: string }) {
   return (
-    <label htmlFor={htmlFor} style={{ display: 'block', fontSize: 13, fontWeight: 700, color: TEXT, marginBottom: 7 }}>
+    <label id={id} htmlFor={htmlFor} style={{ display: 'block', fontSize: 13, fontWeight: 700, color: TEXT, marginBottom: 7 }}>
       {children}
       {required && <span style={{ color: ERR, marginRight: 3 }}>*</span>}
     </label>

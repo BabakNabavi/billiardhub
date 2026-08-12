@@ -18,7 +18,7 @@ const n = (v: unknown, d = 0) => { const x = Number(v); return Number.isFinite(x
 /** تازه‌ترین محصولات فعال بازار */
 async function freeProducts(limit: number): Promise<EntitySnapshot[]> {
   const { data, error } = await sb().from('products')
-    .select('id,title,price,negotiable,"discountPrice","discountPercent",images,brand,city,condition,status,"createdAt"')
+    .select('id,title,price,negotiable,"discountPrice","discountPercent",images,brand,model,city,condition,status,"createdAt"')
     .eq('status', 'active')
     .order('createdAt', { ascending: false })
     /* شکست تساوی: داده‌ی seed همه یک زمان ثبت دارند و بدون این کلید،
@@ -39,7 +39,13 @@ async function freeProducts(limit: number): Promise<EntitySnapshot[]> {
       entityType: 'product' as const, ref: s(r.id),
       title: s(r.title, 'محصول'),
       image: imgs[0] || '/images/shop/cue_billiard_2.webp',
+      /* ── برند **و مدل** ──
+         کارتِ سکشنِ «بیلیارد بازار» از همین اسنپ‌شات ساخته می‌شود و تا
+         امروز فقط برند را حمل می‌کرد؛ «Hunter III» هیچ‌جای صفحه‌ی اصلی
+         دیده نمی‌شد. `productTitleParts` تکرار با عنوان را خودش حذف
+         می‌کند، پس هر دو خام می‌روند. */
       subtitle: s(r.brand),
+      model: s(r.model),
       href: `/shop/${s(r.id)}`,
       price,
       oldPrice: listed,

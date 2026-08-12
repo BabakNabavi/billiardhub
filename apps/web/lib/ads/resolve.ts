@@ -18,6 +18,8 @@ export interface EntitySnapshot {
   title: string
   image: string
   subtitle: string          // برند / شهر / تخصص — بسته به نوع
+  /** مدلِ محصول — جدا از برند، برای حذفِ تکرار با عنوان */
+  model?: string
   href: string
   price?: number            // فقط محصول — قیمتِ پرداختی
   oldPrice?: number         // قیمتِ خط‌خورده
@@ -44,7 +46,7 @@ async function resolveProducts(rawRefs: string[]): Promise<Map<string, EntitySna
   const refs = rawRefs.filter(x => UUID.test(x))
   if (!refs.length) return out
   const { data } = await sb().from('products')
-    .select('id,title,price,negotiable,"discountPrice","discountPercent",images,brand,city,condition,status')
+    .select('id,title,price,negotiable,"discountPrice","discountPercent",images,brand,model,city,condition,status')
     .in('id', refs)
   for (const r of (data as Record<string, unknown>[] ?? [])) {
     if (s(r.status) !== 'active') continue
@@ -62,7 +64,13 @@ async function resolveProducts(rawRefs: string[]): Promise<Map<string, EntitySna
       entityType: 'product', ref: s(r.id),
       title: s(r.title, 'محصول'),
       image: imgs[0] || '/images/shop/cue_billiard_2.webp',
+      /* ── برند **و مدل** ──
+         کارتِ سکشنِ «بیلیارد بازار» از همین اسنپ‌شات ساخته می‌شود و تا
+         امروز فقط برند را حمل می‌کرد؛ «Hunter III» هیچ‌جای صفحه‌ی اصلی
+         دیده نمی‌شد. `productTitleParts` تکرار با عنوان را خودش حذف
+         می‌کند، پس هر دو خام می‌روند. */
       subtitle: s(r.brand),
+      model: s(r.model),
       href: `/shop/${s(r.id)}`,
       price,
       oldPrice: listed,

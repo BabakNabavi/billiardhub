@@ -151,7 +151,79 @@ export function validateSpecs(
    ولی آگهی‌های موجود برچسبِ فارسی دارند. پس هر مقدار اول به‌عنوان
    شناسه جست‌وجو می‌شود و اگر پیدا نشد، همان‌طور که هست نشان داده
    می‌شود — هیچ داده‌ای گم نمی‌شود. */
-export interface SpecDisplayRow { key: string; label: string; value: string }
+export interface SpecDisplayRow { key: string; label: string; value: string; group?: string }
+
+/* ── ارقامِ فارسی در متنِ فارسی ──
+   جدولِ مشخصات متنِ فارسی است، پس «۱۸.۵» درست است نه «18.5». تا
+   امروز نیمی از ردیف‌ها فارسی بودند (چون برچسبِ گزینه از اول فارسی
+   نوشته شده) و نیمی لاتین — و همان ناهماهنگی از هر دو حالت بدتر
+   بود.
+
+   ── چه چیزی لاتین می‌ماند ──
+   فیلدِ `text` دست نمی‌خورد: شماره‌ی سریال یک **کد** است نه عدد،
+   و «Ø 6811 Tournament 30oz» نامِ مدل است. هر مقداری هم که حرفِ
+   لاتین داشته باشد نامِ لاتین است، نه عدد. */
+const FA_DIGITS = '۰۱۲۳۴۵۶۷۸۹'
+export function faDigits(text: string): string {
+  return text.replace(/[0-9]/g, d => FA_DIGITS[+d] ?? d)
+}
+
+/* ── کلیدهایی که در جدول تکرارند ──
+   فرم «نوع» و «مدل» را داخلِ `specs` هم می‌نویسد چون فرمِ ویرایش
+   وقتی ستونِ `model` خالی است از همان‌جا بازیابی می‌کند. ولی هر دو
+   در **عنوانِ** آگهی هستند، پس ردیف‌شدنشان تکرارِ چیزی است که
+   خریدار همان بالا خوانده. حذف از نوشتن ممکن نبود (آن بازیابی
+   می‌شکست)، پس این‌جا از نمایش کنار گذاشته می‌شوند. */
+const TITLE_KEYS = new Set(['نوع', 'مدل', 'برند', 'دسته'])
+
+/* ── فیلدهایی که عددشان «کد» است، نه عدد ──
+   شماره‌ی سریال یک شناسه است و باید همان‌طور که روی چوب حک شده
+   خوانده شود. بقیه‌ی فیلدهای متنی (ابعاد، رنگ توپ) عددِ واقعی
+   دارند و جای فارسی‌شدن‌شان است. */
+const CODE_FIELDS = new Set(['serial_number', 'other_model', 'other_brand'])
+
+/* ── گروه‌بندیِ ردیف‌ها ──
+   میز ۳۳ مشخصه دارد و یک فهرستِ تختِ ۳۳ ردیفی خوانده نمی‌شود.
+   گروه‌ها از خودِ شناسه‌ی فیلدها می‌آیند، پس اضافه‌شدنِ `cushion_*`
+   تازه خودبه‌خود زیرِ «باند» می‌نشیند و کد دست نمی‌خورد.
+
+   ── چرا فقط میز ──
+   بقیه‌ی دسته‌ها بینِ ۳ تا ۲۲ ردیف دارند و زیرعنوان روی نُه ردیف
+   فقط شلوغی است. صفحه‌ی آگهی وقتی گروه‌بندی می‌کند که ارزشش را
+   داشته باشد؛ آستانه‌اش `GROUP_MIN_ROWS` است. */
+export const GROUP_MIN_ROWS = 16
+
+const FIELD_GROUPS: ReadonlyArray<readonly [string, readonly string[]]> = [
+  ['ابعاد', ['size', 'overall_dimensions', 'height_cm', 'weight_kg']],
+  ['سنگ و سطح بازی', ['bed_material', 'slate_thickness', 'slate_pieces', 'slate_frame']],
+  ['بدنه', ['frame_material', 'rail_top', 'finish_color']],
+  ['پارچه', ['cloth_brand', 'cloth_model', 'cloth_type', 'cloth_color', 'cloth_condition']],
+  ['باند', ['cushion_type', 'cushion_rubber', 'cushion_finish']],
+  ['پاکت', ['pocket_size_mm', 'pocket_cut', 'pocket_type']],
+  ['امکانات', ['leveling_system', 'has_heating', 'has_coin', 'is_dining', 'has_lighting', 'has_scoreboard', 'is_foldable', 'accessories_included']],
+  ['سابقه', ['manufacture_year', 'warranty', 'installation_status']],
+]
+
+function groupOf(f: SpecField | undefined): string | undefined {
+  if (!f) return undefined
+  for (const [name, ids] of FIELD_GROUPS) if (ids.includes(f.id)) return name
+  return undefined
+}
+
+/** ردیف‌ها را به ترتیبِ گروه‌ها می‌چیند؛ بی‌گروه‌ها ته فهرست */
+export function groupedRows(rows: SpecDisplayRow[]): Array<{ title?: string; rows: SpecDisplayRow[] }> {
+  if (rows.length < GROUP_MIN_ROWS || !rows.some(r => r.group)) return [{ rows }]
+  const out: Array<{ title?: string; rows: SpecDisplayRow[] }> = []
+  for (const [name] of FIELD_GROUPS) {
+    const g = rows.filter(r => r.group === name)
+    if (g.length) out.push({ title: name, rows: g })
+  }
+  const rest = rows.filter(r => !r.group)
+  if (rest.length) out.push({ title: 'سایر', rows: rest })
+  return out
+}
+
+const OTHER_ID = '__other__'
 
 export function specDisplayRows(
   fields: SpecField[], specs: unknown,
@@ -160,6 +232,10 @@ export function specDisplayRows(
      در کاتالوگِ میز و پارچه است. بدونِ این نگاشت، صفحه‌ی جزئیات
      «۱۲ft» و «snooker__strachan» نشان می‌داد. */
   resolve?: (fieldId: string, value: string) => string | undefined,
+  /* ── کلیدی که در تعریفِ امروز نیست ──
+     آگهیِ قدیمی `bodyMaterial` دارد و تعریفِ تازه `frame_material`.
+     بدونِ این، خریدار خودِ کلیدِ انگلیسی را می‌دید. */
+  fallbackLabel?: (key: string) => string | undefined,
 ): SpecDisplayRow[] {
   if (!specs || typeof specs !== 'object' || Array.isArray(specs)) return []
   const raw = specs as Record<string, unknown>
@@ -184,10 +260,19 @@ export function specDisplayRows(
     /* «سایر» متنش را در کلیدِ جفتِ `_other` می‌گذارد */
     if (k.endsWith('_other')) continue
     const f = byKey.get(k)
+    if (TITLE_KEYS.has(k)) continue
     const other = String(raw[`${k}_other`] ?? '').trim()
     const text = other || label(f, v)
-    if (!text || text === 'سایر') continue
-    rows.push({ key: k, label: f?.label_fa ?? k, value: text })
+    /* «سایر» بی‌متن هیچ اطلاعاتی ندارد — نه برچسبش و نه شناسه‌اش.
+       شناسه پیش‌تر فیلتر نمی‌شد و خریدار «__other__» می‌دید. */
+    if (!text || text === 'سایر' || text === OTHER_ID) continue
+    /* ── چه چیزی لاتین می‌ماند ──
+       فقط نامِ لاتین (که رقمش بخشی از نام است) و فیلدهایی که
+       **کد**اند نه عدد. متنِ آزادِ «سایر» هم فارسی می‌شود: «چدنِ
+       20 میلی» در جدولِ فارسی باید «۲۰» باشد. */
+    const latin = /[A-Za-z]/.test(text)
+    const value = latin || (f && CODE_FIELDS.has(f.id)) ? text : faDigits(text)
+    rows.push({ key: k, label: f?.label_fa ?? fallbackLabel?.(k) ?? k, value, group: groupOf(f) })
   }
 
   /* ترتیبِ کاتالوگ، نه ترتیبِ کلیدهای JSON — وگرنه هر آگهی چیدمانِ
@@ -281,6 +366,25 @@ export function typeDependentKeys(fields: SpecField[], category: string): string
   return [...out]
 }
 
+/* ── «نوع»ی که در مشخصات تعریف شده ──
+   ده دسته‌ی لوازم «نوع» ندارند؛ زیرمجموعه‌شان یک **فیلدِ مشخصات**
+   است: `ext_type` برای اکستنشن، `rest_type` برای رست، `oil_type`
+   برای روغن، `accessory_type` با ۲۲ گزینه برای اکسسوری.
+
+   نتیجه‌اش این بود که دراپ‌داونِ «نوع» در کارتِ اطلاعاتِ محصول
+   خالی می‌آمد و همان پرسش پایین‌تر، وسطِ مشخصات، تکرار می‌شد.
+   حالا همان فیلد بالای فرم پرسیده می‌شود و از مشخصات برداشته
+   می‌شود — یک پرسش، یک جا.
+
+   فیلدِ `source`دار رد می‌شود: `set_type`ِ توپ هم پسوندِ `_type`
+   دارد ولی گزینه‌هایش در کاتالوگِ برند است، نه این‌جا. */
+export const formTypeFieldOf = (fields: SpecField[]): SpecField | undefined =>
+  fields.find(f => f.id.endsWith('_type') && !f.source && (f.options ?? []).length > 0)
+
+/** برچسبِ گزینه ⟵ شناسه — برای ذخیره‌ی همان فیلد از بالای فرم */
+export const optionIdOf = (field: SpecField | undefined, label: string): string =>
+  (field?.options ?? []).find(o => o.label_fa === label)?.id ?? ''
+
 /** فیلدهایی که به این فیلد وابسته‌اند — با عوض‌شدنش پاک می‌شوند */
 export const dependentsOf = (fields: SpecField[], id: string): SpecField[] =>
   fields.filter(f => f.depends_on === id)
@@ -315,8 +419,12 @@ export function isFieldHidden(
       f.id !== field.id && f.id.endsWith('_type') && !f.source
       && (f.options ?? []).some(o => field.depends_on_type!.includes(o.id)))
     if (parent) return !field.depends_on_type.includes(String(values[specKey(parent.id)] ?? ''))
-    /* والدِ مشخصاتی ندارد ⟵ به نوعِ بالای فرم نگاه می‌کند */
-    return !formType || !field.depends_on_type.includes(formType)
+    /* ── والدِ مشخصاتی ندارد ⟵ نوعِ بالای فرم ──
+       اگر نوع در دست نباشد «پنهان» نتیجه‌ی درستی نیست: فرم فیلد را
+       نشان می‌دهد و گاردِ سرور مقدارش را رد می‌کند. ندانستن یعنی
+       قضاوت نکن. */
+    if (!formType) return false
+    return !field.depends_on_type.includes(formType)
   }
   if (field.depends_on_construction) {
     const c = String(values[specKey('construction')] ?? '')

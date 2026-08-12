@@ -8,8 +8,10 @@ import { CAT_LABELS, type ShopProduct } from '../products'
 import ReportButton from '../../../components/ReportButton'
 import { productTitleParts, productTitle } from '../../../lib/market/title'
 import ImageLightbox from '../../../components/market/ImageLightbox'
-import { specDisplayRows } from '../../../lib/market/spec-rules'
-import { specRows } from '../../../lib/market/specs'
+import { specDisplayRows, groupedRows } from '../../../lib/market/spec-rules'
+import CountryFlag from '../../../components/CountryFlag'
+import { keepLatinProps } from '../../../lib/text-fa'
+import { legacyLabelOf } from '../../../lib/market/specs'
 import { useCatalogType } from '../../../components/market/CatalogSelector'
 import { typeIdOf, isAccessoryCategory, isProductCatalog, ACCESSORY_TYPE_OF, type CatalogId } from '../../../lib/market/catalog-rules'
 import { useSpecFields } from '../../../components/market/SpecFields'
@@ -118,7 +120,10 @@ function normalizeUserProduct(up: Record<string, unknown>): Detail {
     name:           str(up.name) || str(up.title, 'محصول'),
     desc:           str(up.description),
     brand:          str(up.brand),
-    model:          str(up.model),
+    /* مدل ممکن است فقط داخلِ `specs` باشد — همان بازیابی‌ای که فرمِ
+       ویرایش دارد. حالا که ردیفِ «مدل» از جدولِ مشخصات برداشته شده،
+       بدونِ این بازیابی از کلِ صفحه غایب می‌شد. */
+    model:          str(up.model) || str((up.specs as Record<string, unknown> | null | undefined)?.['مدل']),
     price,
     /* آگهیِ قدیمیِ محلی `old` دارد؛ ردیفِ سرور قیمتِ فهرست را در
        `price` نگه می‌دارد. */
@@ -205,14 +210,11 @@ export default function ProductDetailPage() {
     ? ACCESSORY_TYPE_OF[String(product?.cat ?? '')] ?? ''
     : storedTypeId || (adCatId ? typeIdOf(adCatId, String(rawAd?.type ?? '')) : '')
   const ownCat = useCatalogType(adCatId ?? 'cue', adCatId ? adTypeId : '')
-  /* ── دسته‌هایی که هنوز کاتالوگ ندارند ──
-     توپ، تیپ، گچ و کیس تعریفشان فقط در `specs.ts` است. بدونِ این
-     بازگشت، آگهی‌های موجودشان کلیدِ خام نشان می‌دادند: «diameter:
-     57.2» به‌جای «قطر». */
-  const legacyRows = useMemo(
-    () => specRows(product?.cat, rawAd?.specs),
-    [product?.cat, rawAd],
-  )
+  /* کشور از شناسه‌ی برندِ ذخیره‌شده پیدا می‌شود؛ برندِ دستی کشوری
+     ندارد و پرچمی هم نشان داده نمی‌شود. */
+  const brandRow = ownCat.data?.brands.find(b => b.id === String(rawAd?.brandId ?? ''))
+  const brandCountry = brandRow?.country ?? null
+  const brandCountryFa = brandCountry ? ownCat.data?.countries[brandCountry]?.fa ?? 'کشور نامشخص' : ''
   const specs = useMemo(
     () => specDisplayRows(specDefs, rawAd?.specs, (fid, v) => {
       const src = specDefs.find(f => f.id === fid)?.source
@@ -226,11 +228,16 @@ export default function ProductDetailPage() {
         }
       }
       return undefined
-    }),
-    [specDefs, rawAd, ownCat.data, clothCat.data],
+    }, k => legacyLabelOf(product?.cat, k)),
+    [specDefs, rawAd, ownCat.data, clothCat.data, product?.cat],
   )
   /* دسته‌ای که کاتالوگِ تازه ندارد، از تعریفِ قدیمی برچسب می‌گیرد */
-  const specRows_ = specDefs.length ? specs : legacyRows
+  /* ── یک سازنده‌ی ردیف، نه دو ──
+     پیش‌تر دسته‌ی بی‌تعریف به `specRows` می‌افتاد که «نوع» و «مدل» را
+     نشان می‌داد، ارقام را فارسی نمی‌کرد و «__other__» خام می‌گذاشت —
+     دو صفحه‌ی جزئیات با دو رفتار. حالا `specDisplayRows` همیشه
+     می‌سازد و برچسبِ کلیدِ ناشناخته از `legacyLabelOf` می‌آید. */
+  const specRows_ = specs
   const negotiable = rawAd?.negotiable === true
   const sold = String(rawAd?.status ?? '') === 'sold'
 
@@ -435,7 +442,13 @@ export default function ProductDetailPage() {
                   marginTop: 8, paddingTop: 10, borderTop: '1px dashed rgba(28,28,26,0.12)',
                   display: 'flex', alignItems: 'baseline', gap: 9, flexWrap: 'wrap',
                 }}>
-                  <span style={{ fontSize: 'clamp(16px,2vw,21px)', fontWeight: 800, color: TEXT, letterSpacing: '-0.01em' }}>
+                  {/* ── پرچمِ کشورِ سازنده ──
+                      در فرم کنارِ هر برند پرچم بود و این‌جا نبود؛ برای
+                      خریدارِ چوب، انگلیسی‌بودن یا چینی‌بودنِ برند یکی از
+                      اولین چیزهایی است که می‌سنجد. */}
+                  {brandCountry && <CountryFlag code={brandCountry} label={brandCountryFa} />}
+                  <span {...keepLatinProps(titleTail)}
+                    style={{ fontSize: 'clamp(16px,2vw,21px)', fontWeight: 800, color: TEXT, letterSpacing: '-0.01em' }}>
                     {titleTail}
                   </span>
                 </div>
@@ -505,15 +518,35 @@ export default function ProductDetailPage() {
                     {specRows_.length.toLocaleString('fa-IR')} مورد
                   </span>
                 </div>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(240px,1fr))', columnGap: 26 }}>
-                  {specRows_.map(s => (
-                    <div key={s.key} style={{ display: 'flex', alignItems: 'baseline', gap: 8, padding: '9px 0', borderBottom: '1px solid rgba(28,28,26,0.06)' }}>
-                      <span style={{ fontSize: 12.5, color: TSEC, whiteSpace: 'nowrap', flexShrink: 0 }}>{s.label}</span>
-                      <span aria-hidden style={{ flex: 1, minWidth: 12, alignSelf: 'center', height: 1, borderBottom: '1.5px dotted rgba(28,28,26,0.20)' }} />
-                      <span style={{ fontSize: 13, fontWeight: 700, color: TEXT, whiteSpace: 'nowrap', flexShrink: 0 }}>{s.value}</span>
+                {/* ── زیرعنوان‌ها ──
+                    میز ۳۳ مشخصه دارد و فهرستِ تخت خوانده نمی‌شود.
+                    گروه‌ها از خودِ شناسه‌ی فیلدها می‌آیند و دسته‌های
+                    کم‌ردیف (زیرِ ۱۶) همان فهرستِ سابق را می‌گیرند. */}
+                {groupedRows(specRows_).map(g => (
+                  <div key={g.title ?? '_'}>
+                    {g.title && (
+                      <h3 style={{
+                        fontSize: 11.5, fontWeight: 800, color: GOLDD, margin: '14px 0 2px',
+                        letterSpacing: '0.02em',
+                      }}>{g.title}</h3>
+                    )}
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(240px,1fr))', columnGap: 26 }}>
+                      {g.rows.map(s => (
+                        <div key={s.key} style={{ display: 'flex', alignItems: 'baseline', gap: 8, padding: '9px 0', borderBottom: '1px solid rgba(28,28,26,0.06)' }}>
+                          <span style={{ fontSize: 12.5, color: TSEC, whiteSpace: 'nowrap', flexShrink: 0 }}>{s.label}</span>
+                          <span aria-hidden style={{ flex: 1, minWidth: 12, alignSelf: 'center', height: 1, borderBottom: '1.5px dotted rgba(28,28,26,0.20)' }} />
+                          {/* ── مقدار می‌شکند، برچسب نه ──
+                              «لمینت ضدآتش (Wilsonart و مشابه)» با nowrap از
+                              ستونِ ۲۴۰ پیکسلی سرریز می‌کرد. */}
+                          {/* مقدارِ لاتین ارقامش لاتین می‌ماند: «6811 Tournament
+                              30oz» نامِ مدل است، نه عدد. */}
+                          <span {...keepLatinProps(s.value)}
+                            style={{ fontSize: 13, fontWeight: 700, color: TEXT, textAlign: 'end', minWidth: 0 }}>{s.value}</span>
+                        </div>
+                      ))}
                     </div>
-                  ))}
-                </div>
+                  </div>
+                ))}
               </div>
             )}
 

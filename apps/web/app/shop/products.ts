@@ -19,6 +19,9 @@ export interface ShopProduct {
   name: string
   desc: string
   brand: string
+  /* برند و مدل با هم عنوانِ کارت را می‌سازند؛ نبودنِ مدل یعنی
+     «Hunter III» در کارتِ فروشگاه دیده نمی‌شد. */
+  model: string
   price: number
   old: number
   disc: number
@@ -70,6 +73,7 @@ export function toShopProduct(r: Record<string, unknown>): ShopProduct {
     name: s(r.title, 'محصول'),
     desc: s(r.description),
     brand: s(r.brand),
+    model: s(r.model),
     price: hasDisc ? off : listed,
     old: hasDisc ? listed : listed,
     disc: hasDisc ? pct : 0,

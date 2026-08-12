@@ -43,7 +43,7 @@ type CatKey = typeof BAZAAR_CATS[number]['id']
 const CAT_LABEL = Object.fromEntries(BAZAAR_CATS.map(c => [c.id, c.label])) as Record<CatKey, string>
 
 interface Product {
-  id: string; name: string; cat: CatKey; brand: string
+  id: string; name: string; cat: CatKey; brand: string; model: string
   price: number; old?: number; disc: number; rating: number; reviews: number; sales: number
   /* شهر، وضعیت و توافقی‌بودن — همان چیزهایی که کارتِ فهرستِ
      بازار نشان می‌دهد و این‌جا اصلاً به کارت نمی‌رسیدند */
@@ -81,6 +81,7 @@ function productsForSeller(rows: ShopProduct[]): Product[] {
     name: sp.name,
     cat: sp.cat as CatKey,
     brand: sp.brand,
+    model: sp.model,
     price: sp.price,
     old: sp.old > 0 ? sp.old : undefined,
     disc: sp.disc,
@@ -465,7 +466,7 @@ export default function FlatShop() {
         /* نام محصول — حداکثر دو خط، مثل sec1 */
         .pc-h { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
           overflow: hidden; font-weight: 800; }
-        .pc-t { display: block; font-size: 11.5px; font-weight: 400; color: #8A8474;
+        .pc-t { display: block; margin-top: 3px; font-size: 11.5px; font-weight: 400; color: #8A8474;
           white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .pc-name-sec1 {
           display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;

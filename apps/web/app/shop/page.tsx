@@ -35,6 +35,7 @@ import ProductTitle from '../../components/market/ProductTitle'
 import { CardMeta, CardPrice } from '../../components/market/CardFacts'
 /* همان موتورِ کاروسل‌های صفحه‌ی اصلی: درگِ روان + حرکتِ خودکار */
 import { useHorizontalScroll } from '../../lib/useHorizontalScroll'
+import { normalizeFa } from '../../lib/text-fa'
 
 const GOLD   = '#C7A66A'
 /* عمرِ نشانِ «جدید» — دو روز بود و بیش‌ازحد سخاوتمند: در بازارِ کم‌حجم
@@ -427,7 +428,12 @@ export default function MarketNewPage() {
      پس هر آگهیِ فوری در طولِ روز چند ساعت جلوی نوار است. */
   const matched = useMemo(() => {
     const lo = parsePrice(minP), hi = parsePrice(maxP)
-    const term = q.trim()
+    /* ── جستجو با همان نرمال‌سازیِ دراپ‌داون ──
+       تا امروز `includes` خام بود: «predator» با حرفِ کوچک و
+       «استراكان» با کافِ عربی هیچ نتیجه‌ای نمی‌داد، در حالی که
+       فهرستِ برند در فرم همان‌ها را پیدا می‌کرد. یک ماچرِ مشترک
+       برای هر دو. */
+    const term = normalizeFa(q)
     let out = listings.filter(l => {
       if (cat && l.cat !== cat) return false
       if (cities.length > 0 && !cities.includes(l.city)) return false
@@ -443,7 +449,7 @@ export default function MarketNewPage() {
       }
       /* مدل هم جستجو می‌شود: کسی که «classic» را می‌نویسد دنبالِ مدل
          است، و پیش‌تر همان جستجو هیچ نتیجه‌ای نمی‌داد. */
-      if (term && !(`${l.name} ${l.brand} ${l.model}`.includes(term))) return false
+      if (term && !normalizeFa(`${l.name} ${l.brand} ${l.model} ${l.sub}`).includes(term)) return false
       if (showSaved && !savedKeys.has(l.key)) return false
       return true
     })
@@ -681,7 +687,7 @@ export default function MarketNewPage() {
            دوباره ناپدید می‌شدند. هر خط کلامپِ خودش را دارد. */
         .mk-h { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
           overflow: hidden; font-size: 13px; font-weight: 800; }
-        .mk-t { display: block; font-size: 11.5px; font-weight: 400; color: ${MUT};
+        .mk-t { display: block; margin-top: 3px; font-size: 11.5px; font-weight: 400; color: ${MUT};
           white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .mk-meta { display: flex; align-items: center; gap: 4px; font-size: 10px; color: ${MUT}; }
         .mk-cond { margin-inline-start: auto; background: #F4F3F1; border-radius: 999px; padding: 1.5px 7px; font-weight: 700; }
@@ -787,7 +793,7 @@ export default function MarketNewPage() {
         .mk-row .ttl { font-size: 13px; font-weight: 700; color: ${TEXT}; line-height: 1.6; }
         /* ردیفِ موبایل کمی درشت‌تر از کارت است، پس هر دو خط یک پله بالاتر */
         .mk-row .ttl .mk-h { font-size: 13.5px; font-weight: 800; }
-        .mk-row .ttl .mk-t { font-size: 12px; font-weight: 400; color: ${MUT}; }
+        .mk-row .ttl .mk-t { margin-top: 3px; font-size: 12px; font-weight: 400; color: ${MUT}; }
         .mk-row .cnd { font-size: 10.5px; color: ${MUT}; }
         .mk-row .prc { font-size: 13.5px; font-weight: 900; color: ${TEXT}; font-variant-numeric: tabular-nums; }
         .mk-row .prc i { font-style: normal; font-size: 10px; font-weight: 600; color: ${MUT}; }

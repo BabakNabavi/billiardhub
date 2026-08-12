@@ -305,7 +305,8 @@ interface ApiClub {
   vipSnookerTables?: number; vipPocketTables?: number
 }
 interface ApiProduct {
-  id: string; title: string; brand?: string | null; category?: string | null
+  id: string; title: string; brand?: string | null; model?: string | null
+  category?: string | null
   images?: string[]; price?: number; negotiable?: boolean
   discountPrice?: number | null; discountPercent?: number | null
   city?: string | null; condition?: string | null
@@ -548,7 +549,7 @@ const BAZAAR_CSS = `
   .bz-name { font-size:12.5px; color:#1C1B17; line-height:1.5; display:block; overflow:hidden; }
   .bz-h { display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;
     overflow:hidden; font-weight:800; }
-  .bz-t { display:block; font-size:11px; font-weight:400; color:#6E695C;
+  .bz-t { display:block; margin-top:3px; font-size:11px; font-weight:400; color:#6E695C;
     white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .bz-row { margin-top:auto; display:flex; align-items:center; gap:5px; }
   .bz-pct { background:#b400ae; color:#fff; font-size:12px; font-weight:800;
@@ -572,7 +573,7 @@ function BazaarCard({ p, className, style }: { p: RealProduct; className?: strin
       <div className="bz-body">
         {/* همان کامپوننتی که کارتِ فروشگاه و فهرستِ بازار هم از آن
             استفاده می‌کنند — تا یک محصول در سه صفحه یک‌شکل باشد. */}
-        <ProductTitle p={{ name: p.name, brand: p.sub }}
+        <ProductTitle p={{ name: p.name, brand: p.sub, model: p.model }}
           className="bz-name" headClassName="bz-h" tailClassName="bz-t" />
         {/* شهر و وضعیت — این نوار فقط در فهرستِ بازار بود و همان آگهی
             روی صفحه‌ی اصلی بدونِ آن نشان داده می‌شد */}
@@ -891,7 +892,15 @@ export default function HomeClient({ initialPlacements, initialFeatured, service
       })));
 
       setRealProducts(pr.slice(0, 14).map(p => ({
-        id: p.id, name: modernizeType(p.title), sub: p.brand || p.category || 'بیلیارد بازار',
+        /* ── برند **و مدل** ──
+           این‌جا فقط `brand` پاس داده می‌شد و مدل می‌افتاد؛ وقتی برند
+           هم خالی بود، دسته یا رشته‌ی ثابتِ «بیلیارد بازار» جایش
+           می‌نشست — یعنی همان چیزی که در سرِ عنوان هم بود.
+           `productTitleParts` خودش تکرار را حذف می‌کند، پس هر دو
+           ستون خام می‌روند و هیچ جانشینِ ساختگی لازم نیست. */
+        id: p.id, name: modernizeType(p.title),
+        sub: p.brand ?? '',
+        model: p.model ?? '',
         img: thumbUrl(p.images?.[0], PROD_W) || IMG.cue,
         brand: (p.brand || 'BILLIARD').toUpperCase(),
         price: p.price ?? 0, sale: p.discountPrice ?? p.price ?? 0,
@@ -931,7 +940,11 @@ export default function HomeClient({ initialPlacements, initialFeatured, service
     const snaps = uniqByRef((featProducts ?? []).map(c => c.entity).filter((e): e is EntitySnapshot => !!e));
     if (!snaps.length) return demoOk(prodSlot) ? realProducts : [];
     return snaps.map(e => ({
-      id: e.ref, name: modernizeType(e.title), sub: e.subtitle || 'بیلیارد بازار', img: thumbUrl(e.image, PROD_W),
+      /* ── جانشینِ ساختگی برداشته شد ──
+         «بیلیارد بازار» به‌جای برند، خطِ دومِ کارت را با چیزی پر
+         می‌کرد که هیچ اطلاعاتی نداشت؛ خالی‌بودنش راست‌تر است. */
+      id: e.ref, name: modernizeType(e.title), sub: e.subtitle, model: e.model ?? '',
+      img: thumbUrl(e.image, PROD_W),
       brand: (e.subtitle || 'BILLIARD').toUpperCase(),
       price: e.oldPrice ?? e.price ?? 0, sale: e.price ?? 0, pct: e.discountPercent ?? 0,
       /* ── چرا این خط سه بار اشتباه بود ──
@@ -2081,8 +2094,9 @@ useEffect(() => {
               onMouseEnter={() => { mktPausedRef.current = true; }}
               onMouseLeave={() => { mktPausedRef.current = false; }}
             >
+              {/* ابعاد ۵٪ بزرگ‌تر از قبل — ۱۴۳×۲۷۴ بود */}
               {MKT_LOOP.map((p, i) => (
-                <BazaarCard key={`${p.id}-${i}`} p={p} style={{ width: 143, height: 274 }} />
+                <BazaarCard key={`${p.id}-${i}`} p={p} style={{ width: 150, height: 288 }} />
               ))}
             </div>
           )}
@@ -2090,7 +2104,7 @@ useEffect(() => {
           {(!mktMounted || isMobile) && (
             <div ref={mktSliderRef} className="mkt-mobile-slider">
               {HOME_PRODUCTS.map((p) => (
-                <BazaarCard key={p.id} p={p} className="mkt-mob-card" style={{ width: '37.8vw', minWidth: 139, scrollSnapAlign: 'center', height: 'clamp(219px,64vw,296px)' }} />
+                <BazaarCard key={p.id} p={p} className="mkt-mob-card" style={{ width: '39.7vw', minWidth: 146, scrollSnapAlign: 'center', height: 'clamp(230px,67.2vw,311px)' }} />
               ))}
             </div>
           )}
