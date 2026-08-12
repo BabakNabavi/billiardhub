@@ -21,7 +21,7 @@
 
 import { normalizeFa } from '../text-fa'
 
-export const CATALOG_IDS = ['cue', 'table', 'cloth'] as const
+export const CATALOG_IDS = ['cue', 'table', 'cloth', 'chalk'] as const
 export type CatalogId = typeof CATALOG_IDS[number]
 
 export const isCatalogId = (v: unknown): v is CatalogId =>
@@ -42,6 +42,12 @@ export const TYPE_IDS: Record<CatalogId, readonly string[]> = {
      با پارچه‌ی پاکت فرق دارد و فهرست‌هایشان قاطی نمی‌شود.
      «میز خانگی» پارچه‌ی اختصاصی ندارد، پس این‌جا نیست. */
   cloth: ['pocket_billiard', 'snooker', 'heyball', 'carom'],
+  /* ── گچ ──
+     گچِ اسنوکر و پاکت واقعاً فرق دارند: سبز در برابر آبی، و برای
+     تیپِ نازک در برابر تیپِ پهن. چند برند در هر دو هستند ولی
+     مدل‌های پیشنهادی‌شان فرق می‌کند — پس فهرست‌ها جدا می‌مانند.
+     هی‌بال گچِ اختصاصی ندارد. */
+  chalk: ['snooker', 'pocket_billiard', 'carom'],
 }
 
 /** پیشوندِ شناسه‌ی برند — سرور با همین تعلقِ برند به نوع را می‌سنجد */
@@ -57,6 +63,9 @@ export const TYPE_PREFIX: Record<CatalogId, Record<string, string>> = {
   cloth: {
     pocket_billiard: 'pocket_billiard__', snooker: 'snooker__',
     heyball: 'heyball__', carom: 'carom__',
+  },
+  chalk: {
+    snooker: 'csnk__', pocket_billiard: 'cpkt__', carom: 'ccar__',
   },
 }
 
@@ -89,6 +98,11 @@ export const TYPE_BY_FA: Record<CatalogId, Record<string, string>> = {
     'پاکت بیلیارد': 'pocket_billiard',
     'اسنوکر': 'snooker',
     'هی‌بال': 'heyball',
+    'کارامبول': 'carom',
+  },
+  chalk: {
+    'اسنوکر': 'snooker',
+    'پاکت بیلیارد': 'pocket_billiard',
     'کارامبول': 'carom',
   },
 }

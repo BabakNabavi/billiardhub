@@ -1980,6 +1980,217 @@
         "required": false,
         "help_fa": "اگر توپی کم دارد، خاموش بگذارید و در توضیحات ذکر کنید"
       }
+    ],
+    "chalk": [
+      {
+        "id": "color",
+        "label_fa": "رنگ گچ",
+        "type": "select",
+        "required": false,
+        "help_fa": "رنگ باید با پارچه میز بخواند تا اثر گچ روی پارچه کمتر دیده شود.",
+        "allow_other": true,
+        "options": [
+          {
+            "id": "green",
+            "label_fa": "سبز",
+            "note_fa": "استاندارد اسنوکر"
+          },
+          {
+            "id": "blue",
+            "label_fa": "آبی",
+            "note_fa": "استاندارد پاکت بیلیارد و کارامبول"
+          },
+          {
+            "id": "red",
+            "label_fa": "قرمز"
+          },
+          {
+            "id": "black",
+            "label_fa": "مشکی"
+          },
+          {
+            "id": "white",
+            "label_fa": "سفید"
+          },
+          {
+            "id": "gold",
+            "label_fa": "طلایی"
+          },
+          {
+            "id": "purple",
+            "label_fa": "بنفش"
+          },
+          {
+            "id": "grey",
+            "label_fa": "خاکستری"
+          },
+          {
+            "id": "brown",
+            "label_fa": "قهوه‌ای"
+          }
+        ]
+      },
+      {
+        "id": "hardness",
+        "label_fa": "سختی",
+        "type": "select",
+        "required": false,
+        "help_fa": "نرم چسبندگی بیشتر و مصرف سریع‌تر — سخت دوام بیشتر و گرد کمتر.",
+        "options": [
+          {
+            "id": "soft-ch",
+            "label_fa": "نرم",
+            "note_fa": "چسبندگی بالا؛ مناسب پیچ زیاد"
+          },
+          {
+            "id": "medium-ch",
+            "label_fa": "متوسط"
+          },
+          {
+            "id": "hard-ch",
+            "label_fa": "سخت",
+            "note_fa": "دوام بیشتر و گرد کمتر"
+          }
+        ]
+      },
+      {
+        "id": "quantity",
+        "label_fa": "تعداد",
+        "type": "number",
+        "required": false,
+        "help_fa": "تکی یا بسته‌ای. جعبه‌های استاندارد معمولاً ۱۲ یا ۱۴۴ عددی‌اند.",
+        "placeholder": "1",
+        "common": [
+          1,
+          2,
+          3,
+          6,
+          12,
+          24,
+          144
+        ]
+      },
+      {
+        "id": "packaging",
+        "label_fa": "نوع بسته‌بندی",
+        "type": "select",
+        "required": false,
+        "allow_other": true,
+        "options": [
+          {
+            "id": "single",
+            "label_fa": "تکی"
+          },
+          {
+            "id": "pack-2",
+            "label_fa": "بسته ۲ تایی"
+          },
+          {
+            "id": "pack-3",
+            "label_fa": "بسته ۳ تایی"
+          },
+          {
+            "id": "box-12",
+            "label_fa": "جعبه ۱۲ عددی"
+          },
+          {
+            "id": "box-144",
+            "label_fa": "کارتن ۱۴۴ عددی (گروس)"
+          },
+          {
+            "id": "with-holder",
+            "label_fa": "همراه با نگهدارنده"
+          }
+        ]
+      },
+      {
+        "id": "has_holder",
+        "label_fa": "همراه با نگهدارنده گچ",
+        "type": "boolean",
+        "required": false,
+        "help_fa": "نگهدارنده مغناطیسی یا کیسه‌ای که به شلوار یا میز وصل می‌شود"
+      },
+      {
+        "id": "holder_type",
+        "label_fa": "نوع نگهدارنده",
+        "type": "select",
+        "required": false,
+        "allow_other": true,
+        "depends_on": "has_holder",
+        "options": [
+          {
+            "id": "magnetic",
+            "label_fa": "مغناطیسی"
+          },
+          {
+            "id": "pouch",
+            "label_fa": "کیسه چرمی"
+          },
+          {
+            "id": "clip",
+            "label_fa": "گیره‌ای"
+          },
+          {
+            "id": "cup",
+            "label_fa": "کاسه‌ای رومیزی"
+          },
+          {
+            "id": "cone-holder",
+            "label_fa": "نگهدارنده گچ مخروطی"
+          }
+        ]
+      },
+      {
+        "id": "chalk_form",
+        "label_fa": "شکل گچ",
+        "type": "select",
+        "required": false,
+        "allow_other": true,
+        "options": [
+          {
+            "id": "cube",
+            "label_fa": "مکعبی (استاندارد)"
+          },
+          {
+            "id": "cone",
+            "label_fa": "مخروطی (گچ دست)",
+            "note_fa": "برای دست، نه تیپ"
+          },
+          {
+            "id": "powder",
+            "label_fa": "پودری",
+            "note_fa": "پودر دست برای روان شدن چوب"
+          }
+        ]
+      },
+      {
+        "id": "is_sealed",
+        "label_fa": "پلمب / استفاده‌نشده",
+        "type": "boolean",
+        "required": false
+      },
+      {
+        "id": "authenticity",
+        "label_fa": "اصالت",
+        "type": "select",
+        "required": false,
+        "help_fa": "کپی Taom و Kamui در بازار زیاد است. برخی برندها QR کد یا شماره سریال دارند.",
+        "allow_other": true,
+        "options": [
+          {
+            "id": "original",
+            "label_fa": "اصل / اورجینال"
+          },
+          {
+            "id": "with-qr",
+            "label_fa": "دارای QR کد یا شماره سریال"
+          },
+          {
+            "id": "unknown-auth",
+            "label_fa": "نامشخص"
+          }
+        ]
+      }
     ]
   },
   "cloth_note_fa": "فیلدهای cloth_brand و cloth_model از cloth_catalog.json خوانده می‌شوند و آبشاری‌اند: با انتخاب برند، فقط مدل‌های همان برند نمایش داده می‌شود. فیلد cloth_type (پرزدار/بدون‌پرز) از روی مدل انتخابی خودکار پر می‌شود ولی کاربر می‌تواند تغییرش دهد.",

@@ -198,7 +198,7 @@ export default function Footer() {
             {/* Logo + wordmark */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '14px' }}>
               <img
-                src="/images/Logo/bh-mark-256-v4.webp"
+                src="/images/Logo/bh-mark-256-v5.webp"
                 alt="بیلیارد هاب"
                 style={{ width: '40px', height: '40px', objectFit: 'contain', flexShrink: 0, borderRadius: '10px' }}
               />

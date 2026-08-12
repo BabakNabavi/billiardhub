@@ -2585,6 +2585,89 @@ console.log('\n― مشخصات و پارچه ―');
   }
 }
 
+/* ── گچ: کاتالوگِ چهارم ── */
+console.log('\n― گچ ―');
+{
+  const cp = join(ROOT, 'data/chalk_catalog.json');
+  t('کاتالوگِ گچ هست', existsSync(cp));
+  if (existsSync(cp)) {
+    const C = JSON.parse(readFileSync(cp, 'utf8'));
+    const cb = C.types.flatMap(x => x.brands);
+    t('سه نوع، ۳۹ برند، ۶۰ مدل',
+      C.types.length === 3 && cb.length >= 39 && cb.reduce((n, b) => n + b.models.length, 0) >= 60,
+      `${C.types.length}/${cb.length}`);
+    const P = { snooker: 'csnk__', pocket_billiard: 'cpkt__', carom: 'ccar__' };
+    t('پیشوندِ برندِ گچ با نوعش می‌خواند',
+      C.types.every(x => x.brands.every(b => b.id.startsWith(P[x.id]))));
+    /* همان دلیلی که تفکیک را واقعی می‌کند */
+    const snk = C.types.find(x => x.id === 'snooker');
+    const pkt = C.types.find(x => x.id === 'pocket_billiard');
+    const taomS = snk.brands.find(b => b.id.endsWith('taom'))?.models.map(m => m.id) ?? [];
+    const taomP = pkt.brands.find(b => b.id.endsWith('taom'))?.models.map(m => m.id) ?? [];
+    t('مدل‌های یک برند بینِ دو نوع فرق دارند',
+      taomS.length > 0 && taomP.length > 0 && taomS[0] !== taomP[0],
+      'اگر فهرست‌ها قاطی شوند، Pyro به اسنوکر و V10 به پاکت پیشنهاد می‌شود');
+  }
+
+  /* نُه فیلدِ مشخصات، با نمایشِ شرطیِ نگهدارنده */
+  const S = JSON.parse(readFileSync(join(ROOT, 'data/specs_catalog.json'), 'utf8'));
+  t('نُه فیلدِ مشخصاتِ گچ',
+    (S.specs.chalk ?? []).length === 9, String((S.specs.chalk ?? []).length));
+  t('نوعِ نگهدارنده به سوییچش وابسته است',
+    (S.specs.chalk ?? []).find(f => f.id === 'holder_type')?.depends_on === 'has_holder',
+    'وگرنه فیلدی می‌آید که کاربر نگهدارنده‌ای ندارد');
+
+  /* نوعِ فرم و کاتالوگ باید بخوانند */
+  const rules = read('lib/market/catalog-rules.ts');
+  const chainSrc = read('lib/market/chain.ts');
+  const formChalk = (chainSrc.match(/chalk:\s*\[([^\]]*)\]/) ?? [])[1] ?? '';
+  const labels = [...formChalk.matchAll(/'([^']+)'/g)].map(m => m[1]);
+  t('هر نوعِ گچِ کاتالوگ در فهرستِ فرم هست',
+    ['اسنوکر', 'پاکت بیلیارد', 'کارامبول'].every(l => labels.includes(l)),
+    labels.join(', '));
+  t('گچ در نگاشتِ فارسی هست', /chalk: \{[\s\S]*?'کارامبول': 'carom'/.test(rules));
+  t('گچ از کاتالوگ می‌آید',
+    ['app/shop/new/page.tsx', 'app/shop/edit/[id]/page.tsx']
+      .every(f => read(f).includes("form.category === 'chalk'")));
+}
+
+/* ── ظاهرِ ردیفِ دراپ‌داون ── */
+{
+  const af = read('components/market/AdFormFields.tsx');
+  t('هر گزینه خطِ جداکننده دارد',
+    af.includes("borderBottom: i === list.length - 1 ? 'none'"),
+    'در فهرستِ صدتایی، نامِ فارسی و شمارشِ ردیفِ بعدی قاطی می‌شد');
+  t('دسته‌بندی و نوع همان چیدمان را دارند',
+    ['app/shop/new/page.tsx', 'app/shop/edit/[id]/page.tsx']
+      .every(f => /options=\{CATEGOR(IES|Y_OPTIONS)\.map\(c => \(\{/.test(read(f)) && read(f).includes('src={c.img}')),
+    'سه دراپ‌داونِ بالای فرم باید یک شکل باشند');
+  t('شمارشِ برند کنارِ نوع می‌آید',
+    read('app/shop/new/page.tsx').includes('row.brandCount')
+    && /force-static/.test(read('app/api/catalog/[category]/route.ts')));
+}
+
+/* ── آیکونِ iOS ── */
+{
+  t('نشانیِ آیکون عوض شد',
+    read('app/layout.tsx').includes('bh-apple-180-v5.png')
+    && !read('public/manifest.json').includes('-v4'),
+    'iOS آیکونِ نصب‌شده را به‌روز نمی‌کند؛ فقط نشانیِ تازه جواب می‌دهد');
+  for (const f of ['bh-apple-180-v5.png', 'bh-icon-192-v5.png', 'bh-icon-512-v5.png']) {
+    t('فایلِ ' + f + ' هست', existsSync(join(ROOT, 'public/images/Logo/' + f)));
+  }
+  t('فایل‌های v4 برداشته شدند',
+    !existsSync(join(ROOT, 'public/images/Logo/bh-apple-180-v4.png')));
+}
+
+/* ── چیدمانِ دسکتاپ ── */
+{
+  const src = read('app/shop/new/page.tsx');
+  const left = src.indexOf('LEFT COLUMN');
+  t('تصاویر و قیمت در ستونِ چپ‌اند',
+    left > 0 && src.indexOf('card: images', left) > left && src.indexOf('card: pricing', left) > left,
+    'ستونِ راست با ۳۳ فیلد بلند بود و چپ از وسط به پایین خالی می‌ماند');
+}
+
 console.log('\n― CORS ―');
 {
   t('فایلِ مرده‌ی CORS حذف شد',

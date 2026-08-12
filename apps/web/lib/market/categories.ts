@@ -81,7 +81,9 @@ export function categoryLabel(id?: string | null): string {
 }
 
 /** شکلِ ساده برای فرم‌ها و کشوها — بدونِ آیکون */
-export const CATEGORY_OPTIONS = MARKET_CATEGORIES.map(c => ({ id: c.id, label: c.label }))
+/* تصویر هم می‌آید: ردیفِ دراپ‌داونِ دسته‌بندی همان چیدمانِ ردیفِ
+   برند را دارد — تصویر، نام. */
+export const CATEGORY_OPTIONS = MARKET_CATEGORIES.map(c => ({ id: c.id, label: c.label, img: c.img }))
 
 /* ── وضعیتِ کالا ──────────────────────────────────────────────────
    این هم سه‌جا تکرار شده بود. «نیازمند تعمیر» اضافه شد: بازارِ

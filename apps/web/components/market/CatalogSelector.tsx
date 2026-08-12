@@ -130,6 +130,36 @@ export function useCatalogType(category: CatalogId, type: string): CatalogFetchS
   return { data: fresh, loading: loading || (!fresh && !failed && !!type), failed }
 }
 
+/* ── شمارشِ برندِ هر نوع ──
+   برای دراپ‌داونِ «نوع»، تا همان چیدمانِ ردیفِ برند را داشته باشد:
+   نام و بعد عدد. چند صد بایت است و ایستا. */
+export interface CatalogTypeRow { id: string; label_fa: string; brandCount: number }
+
+const typeCache = new Map<string, CatalogTypeRow[]>()
+
+export function useCatalogTypes(category: CatalogId | null): CatalogTypeRow[] {
+  const [rows, setRows] = useState<CatalogTypeRow[]>(
+    () => (category ? typeCache.get(category) ?? [] : []),
+  )
+  useEffect(() => {
+    if (!category) { setRows([]); return }
+    const hit = typeCache.get(category)
+    if (hit) { setRows(hit); return }
+    let alive = true
+    void (async () => {
+      try {
+        const r = await fetch(`/api/catalog/${category}`)
+        if (!r.ok) throw new Error(String(r.status))
+        const j = (await r.json()) as { types: CatalogTypeRow[] }
+        typeCache.set(category, j.types)
+        if (alive) setRows(j.types)
+      } catch { if (alive) setRows([]) }
+    })()
+    return () => { alive = false }
+  }, [category])
+  return category && typeCache.get(category) === rows ? rows : (category ? typeCache.get(category) ?? rows : [])
+}
+
 /* ── پرچم ──
    ایموجی بود و روی ویندوز به «GB» تبدیل می‌شد؛ حالا SVG است.
    دلیلِ کامل در خودِ `CountryFlag`. عرضِ ثابت دارد تا نامِ برندها

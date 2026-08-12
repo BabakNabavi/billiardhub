@@ -128,24 +128,24 @@ const full = await trimmed(SRC)
    کاشیِ سفید، چون در قابِ گردِ سایه‌دارِ نوارِ بالا می‌نشیند.
    حاشیه از خودِ فایل می‌آید، نه از این‌جا. */
 const m256 = await square(256, WHITE)
-put(`${DIR}/bh-mark-256-v4.png`, await sharp(m256).png({ quality: 92 }).toBuffer())
-put(`${DIR}/bh-mark-256-v4.webp`, await sharp(m256).webp({ quality: 92 }).toBuffer())
+put(`${DIR}/bh-mark-256-v5.png`, await sharp(m256).png({ quality: 92 }).toBuffer())
+put(`${DIR}/bh-mark-256-v5.webp`, await sharp(m256).webp({ quality: 92 }).toBuffer())
 
 /* ── فاوآیکون ── */
 for (const s of [16, 32, 96]) {
-  put(`${DIR}/bh-favicon-${s}-v4.png`, await sharp(await square(s, WHITE)).png().toBuffer())
+  put(`${DIR}/bh-favicon-${s}-v5.png`, await sharp(await square(s, WHITE)).png().toBuffer())
 }
 
 /* ── آیکونِ اپ ── اپل و اندروید شفاف را سیاه پر می‌کنند، پس سفید */
-put(`${DIR}/bh-apple-180-v4.png`, await sharp(await square(180, WHITE)).png().toBuffer())
-put(`${DIR}/bh-icon-192-v4.png`, await sharp(await square(192, WHITE)).png().toBuffer())
+put(`${DIR}/bh-apple-180-v5.png`, await sharp(await square(180, WHITE)).png().toBuffer())
+put(`${DIR}/bh-icon-192-v5.png`, await sharp(await square(192, WHITE)).png().toBuffer())
 /* ۵۱۲ به‌عنوان maskable هم استفاده می‌شود و اندروید تا ۲۰٪ از هر طرف
    را می‌بُرد. حاشیه‌ی خودِ فایل همان نقش را بازی می‌کند، پس چیزی
    اضافه نمی‌شود — افزودنِ حاشیه‌ی دوم لوگو را بی‌دلیل ریز می‌کرد. */
-put(`${DIR}/bh-icon-512-v4.png`, await sharp(await square(512, WHITE)).png().toBuffer())
+put(`${DIR}/bh-icon-512-v5.png`, await sharp(await square(512, WHITE)).png().toBuffer())
 
 /* ── لوگوی سربرگ ── تنها فایلِ شفاف: روی کارتِ سرمه‌ای می‌نشیند */
-put(`${DIR}/bh-header-v4.png`, await sharp(full).resize({ height: 200, fit: 'inside' }).png().toBuffer())
+put(`${DIR}/bh-header-v5.png`, await sharp(full).resize({ height: 200, fit: 'inside' }).png().toBuffer())
 
 /* ── تصویرِ اشتراک‌گذاری ── ۱۲۰۰×۶۳۰، استانداردِ شبکه‌های اجتماعی.
    این‌جا از نسخه‌ی بریده استفاده می‌شود چون بومِ ۱۲۰۰×۶۳۰ خودش فضای
@@ -153,7 +153,7 @@ put(`${DIR}/bh-header-v4.png`, await sharp(full).resize({ height: 200, fit: 'ins
    لوگو وسطِ یک تصویرِ بزرگ ریز می‌افتاد. */
 const ogInner = await sharp(full).resize({ height: 400, fit: 'inside' }).toBuffer()
 const ogMeta = await sharp(ogInner).metadata()
-put(`${DIR}/bh-og-v4.png`, await sharp({
+put(`${DIR}/bh-og-v5.png`, await sharp({
   create: { width: 1200, height: 630, channels: 4, background: { r: 255, g: 255, b: 255, alpha: 1 } },
 }).composite([{
   input: ogInner,
@@ -177,12 +177,12 @@ put('app/favicon.ico', buildIco(ico))
    بزرگ‌تر درمی‌آمدند و آیکونِ اپل شفاف می‌ماند. هیچ‌کدام تا وقتی
    دستی اندازه نگرفتم پیدا نشد. حالا خودِ اسکریپت می‌سنجد. */
 const EXPECT = {
-  'bh-mark-256-v4.png': [256, false], 'bh-mark-256-v4.webp': [256, false],
-  'bh-favicon-16-v4.png': [16, false], 'bh-favicon-32-v4.png': [32, false],
-  'bh-favicon-96-v4.png': [96, false], 'bh-apple-180-v4.png': [180, false],
-  'bh-icon-192-v4.png': [192, false], 'bh-icon-512-v4.png': [512, false],
+  'bh-mark-256-v5.png': [256, false], 'bh-mark-256-v5.webp': [256, false],
+  'bh-favicon-16-v5.png': [16, false], 'bh-favicon-32-v5.png': [32, false],
+  'bh-favicon-96-v5.png': [96, false], 'bh-apple-180-v5.png': [180, false],
+  'bh-icon-192-v5.png': [192, false], 'bh-icon-512-v5.png': [512, false],
   /* تنها فایلی که باید شفاف باشد — روی کارتِ تیره می‌نشیند */
-  'bh-header-v4.png': [null, true],
+  'bh-header-v5.png': [null, true],
 }
 
 console.log('\n  ساخته شد:\n')

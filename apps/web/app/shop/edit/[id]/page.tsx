@@ -241,7 +241,7 @@ export default function EditProductPage() {
 
   /* چوب از کاتالوگ می‌آید؛ بقیه‌ی دسته‌ها از chain.ts */
   const catCategory: CatalogId | null =
-    form.category === 'cue' || form.category === 'table' || form.category === 'cloth'
+    form.category === 'cue' || form.category === 'table' || form.category === 'cloth' || form.category === 'chalk'
       ? form.category : null
   const catTypeId = catCategory ? typeIdOf(catCategory, form.type) : ''
   /* همان ورودیِ کش‌شده‌ی انتخابگر — درخواستِ تازه‌ای نمی‌زند */
@@ -639,7 +639,16 @@ export default function EditProductPage() {
                 <div>
                   <Label required>دسته‌بندی</Label>
                   <FancySelect value={form.category} onChange={handleCategoryChange}
-                    options={CATEGORY_OPTIONS.map(c => ({ value: c.id, label: c.label }))}
+                    options={CATEGORY_OPTIONS.map(c => ({
+                      value: c.id, label: c.label, search: c.label,
+                      node: (
+                        <span style={{ display: 'flex', alignItems: 'center', gap: 9, minWidth: 0 }}>
+                          <img src={c.img} alt="" width={22} height={22} loading="lazy" decoding="async"
+                            style={{ borderRadius: 5, flexShrink: 0, objectFit: 'contain' }} />
+                          <span style={{ fontWeight: 600 }}>{c.label}</span>
+                        </span>
+                      ),
+                    }))}
                     placeholder="انتخاب دسته‌بندی..." error={!!errors.category} />
                   <ErrMsg msg={errors.category} />
                 </div>

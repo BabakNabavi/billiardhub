@@ -21,6 +21,7 @@
 import cueRaw from '../../data/cue-catalog.json'
 import tableRaw from '../../data/table_catalog.json'
 import clothRaw from '../../data/cloth_catalog.json'
+import chalkRaw from '../../data/chalk_catalog.json'
 import {
   validateSelection,
   type CatalogBrand, type CatalogCountry, type CatalogId, type CatalogModel,
@@ -38,6 +39,7 @@ const FILES: Record<CatalogId, CatalogFile> = {
   cue: cueRaw as unknown as CatalogFile,
   table: tableRaw as unknown as CatalogFile,
   cloth: clothRaw as unknown as CatalogFile,
+  chalk: chalkRaw as unknown as CatalogFile,
 }
 
 /* ── کشورها از هر سه کاتالوگ ادغام می‌شوند ──
@@ -53,6 +55,7 @@ const FILES: Record<CatalogId, CatalogFile> = {
 const ALL_COUNTRIES: Record<string, CatalogCountry> = {
   ...(cueRaw as unknown as CatalogFile).countries,
   ...(clothRaw as unknown as CatalogFile).countries,
+  ...(chalkRaw as unknown as CatalogFile).countries,
   ...(tableRaw as unknown as CatalogFile).countries,
 }
 

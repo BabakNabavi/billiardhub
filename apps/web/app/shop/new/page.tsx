@@ -16,7 +16,7 @@ import { CATEGORY_OPTIONS, CONDITIONS, conditionLabel } from '../../../lib/marke
 import { GENERIC_SPECS, CATEGORY_SPECS, HIDDEN_SPEC_KEYS } from '../../../lib/market/specs'
 import { productTitleParts } from '../../../lib/market/title'
 import { typeIdOf, type CatalogId } from '../../../lib/market/catalog-rules'
-import CatalogSelector, { EMPTY_CATALOG_VALUE, type CatalogValue, useCatalogType } from '../../../components/market/CatalogSelector'
+import CatalogSelector, { EMPTY_CATALOG_VALUE, type CatalogValue, useCatalogType, useCatalogTypes } from '../../../components/market/CatalogSelector'
 import { SpecFieldRow, SpecProgress, useSpecFields, specKey } from '../../../components/market/SpecFields'
 import { splitFields, countFilled, applySpecChange, isFieldLocked, fromLegacyDefs, type SpecField, type LegacySpecDef } from '../../../lib/market/spec-rules'
 import { brandSearchTerms } from '../../../lib/market/catalog-rules'
@@ -155,9 +155,10 @@ export default function NewProductPage() {
      خالی یعنی همان مسیرِ قدیمیِ `chain.ts` — بقیه‌ی دسته‌ها
      (تیپ، گچ، توپ، …) دست‌نخورده‌اند. */
   const catCategory: CatalogId | null =
-    form.category === 'cue' || form.category === 'table' || form.category === 'cloth'
+    form.category === 'cue' || form.category === 'table' || form.category === 'cloth' || form.category === 'chalk'
       ? form.category : null
   const catTypeId = catCategory ? typeIdOf(catCategory, form.type) : ''
+  const catTypeRows = useCatalogTypes(catCategory)
   /* همان ورودیِ کش‌شده‌ی انتخابگر — درخواستِ تازه‌ای نمی‌زند */
   const { fields: catalogSpecs, loading: specsLoading } = useSpecFields(form.category)
   /* ── دسته‌هایی که هنوز در کاتالوگ نیستند ──
@@ -639,7 +640,19 @@ export default function NewProductPage() {
                     <div>
                       <Label required>دسته‌بندی</Label>
                       <FancySelect value={form.category} onChange={handleCategoryChange}
-                        options={CATEGORIES.map(c => ({ value: c.id, label: c.label }))}
+                        /* همان چیدمانِ ردیفِ برند: تصویر، نام، و
+                           در «نوع» شمارش. تا هر سه دراپ‌داونِ بالای
+                           فرم یک شکل داشته باشند. */
+                        options={CATEGORIES.map(c => ({
+                          value: c.id, label: c.label, search: c.label,
+                          node: (
+                            <span style={{ display: 'flex', alignItems: 'center', gap: 9, minWidth: 0 }}>
+                              <img src={c.img} alt="" width={22} height={22} loading="lazy" decoding="async"
+                                style={{ borderRadius: 5, flexShrink: 0, objectFit: 'contain' }} />
+                              <span style={{ fontWeight: 600 }}>{c.label}</span>
+                            </span>
+                          ),
+                        }))}
                         placeholder="انتخاب دسته‌بندی..." error={!!errors.category} />
                       <ErrMsg msg={errors.category} />
                     </div>
@@ -649,7 +662,25 @@ export default function NewProductPage() {
                       <Label required>نوع</Label>
                       {form.category && TYPE_OPTIONS[form.category] ? (
                         <FancySelect value={form.type} onChange={setType}
-                          options={TYPE_OPTIONS[form.category]!.map(o => ({ value: o, label: o }))}
+                          options={TYPE_OPTIONS[form.category]!.map(o => {
+                            /* شمارش فقط برای دسته‌هایی که کاتالوگ دارند */
+                            const row = catCategory
+                              ? catTypeRows.find(r => r.id === typeIdOf(catCategory, o))
+                              : undefined
+                            return {
+                              value: o, label: o, search: o,
+                              node: (
+                                <span style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
+                                  <span style={{ fontWeight: 600 }}>{o}</span>
+                                  {!!row?.brandCount && (
+                                    <span style={{ marginInlineStart: 'auto', fontSize: 11, color: TEXT_MUT, flexShrink: 0 }}>
+                                      {row.brandCount}
+                                    </span>
+                                  )}
+                                </span>
+                              ),
+                            }
+                          })}
                           placeholder="انتخاب نوع..." error={!!errors.type} />
                       ) : (
                         <input className="nf" type="text" placeholder="مثال: اسنوکر" value={form.type} onChange={e => set('type', e.target.value)} style={inp(errors.type)} />
@@ -832,6 +863,18 @@ export default function NewProductPage() {
                   )
                 })()}
 
+
+              {/* ═══════════════════════════════════════════════════
+                  LEFT COLUMN — seller info
+              ═══════════════════════════════════════════════════ */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                {/* ── چرا تصاویر و قیمت این‌جا هستند ──
+                   ستونِ راست (اطلاعات پایه + مشخصات فنی) با ۳۳ فیلد
+                   خیلی بلند شده بود و ستونِ چپ فقط دو کارتِ کوتاه
+                   داشت: نیمه‌ی چپِ صفحه از وسط به پایین خالی می‌ماند
+                   و صفحه بی‌دلیل دراز می‌شد. این دو کارت این‌طرف
+                   می‌آیند تا دو ستون تا پایین هم‌ارتفاع بمانند.
+                   روی موبایل شبکه تک‌ستونه می‌شود و ترتیب همان است. */}
                 {/* card: images */}
                 <div style={{ background: LQ_BG, backdropFilter: 'blur(40px) saturate(220%)', WebkitBackdropFilter: 'blur(40px) saturate(220%)', border: LQ_BOR, borderRadius: 20, boxShadow: LQ_SHAD, padding: '24px', position: 'relative', overflow: 'hidden', animation: 'fadeUp 0.5s ease both' }}>
                   <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '46%', background: 'linear-gradient(180deg,rgba(255,255,255,0.55) 0%,transparent 100%)', pointerEvents: 'none' }} />
@@ -934,11 +977,6 @@ export default function NewProductPage() {
                   </div>
                 </div>
               </div>
-
-              {/* ═══════════════════════════════════════════════════
-                  LEFT COLUMN — seller info
-              ═══════════════════════════════════════════════════ */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
 
                 {/* ── چرا این کارت گاهی نیست ──
                     نام فروشگاه، نام مالک، استان/شهر و آدرس همگی از

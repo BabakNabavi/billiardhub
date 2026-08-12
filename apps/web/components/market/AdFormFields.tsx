@@ -212,7 +212,12 @@ export function FancySelect({ value, onChange, options, placeholder = 'انتخ�
                 <button type="button" onClick={() => { onChange(o.value); setOpen(false); setQ('') }}
                   style={{
                     display: 'flex', width: '100%', alignItems: 'center', justifyContent: 'space-between', gap: 8,
-                    padding: '10px 12px', border: 'none', borderRadius: 9, cursor: 'pointer', textAlign: 'right',
+                    padding: '11px 12px', border: 'none', borderRadius: 9, cursor: 'pointer', textAlign: 'right',
+                    /* ── خطِ جداکننده زیرِ هر گزینه ──
+                       فهرستِ برند تا صد ردیف می‌شود و بدونِ خط، نامِ
+                       فارسی و شمارشِ ردیفِ بعدی با هم قاطی می‌شدند.
+                       آخرین ردیف خط نمی‌گیرد تا کفِ پنجره تمیز بماند. */
+                    borderBottom: i === list.length - 1 ? 'none' : '1px solid rgba(28,28,26,0.07)',
                     fontFamily: 'Vazirmatn,Tahoma,sans-serif', fontSize: 14,
                     background: s ? 'rgba(199,166,106,0.14)' : 'transparent', color: s ? GOLD_D : TEXT, fontWeight: s ? 800 : 500,
                   }}
