@@ -102,6 +102,14 @@ const FLAGS: Record<string, Shape> = {
     ))}
   </>,
 
+  /* آرژانتین — با کاتالوگِ لوازم آمد. خورشیدِ میانی در این ابعاد
+     یک لکه می‌شود، پس فقط دایره‌ی طلایی. */
+  AR: <>
+    <rect width="24" height="16" fill="#74ACDF" />
+    <rect y="5.33" width="24" height="5.33" fill="#fff" />
+    <circle cx="12" cy="8" r="1.8" fill="#F6B40E" />
+  </>,
+
   /* فنلاند — صلیبِ نوردیک. با کاتالوگِ گچ آمد (Taom فنلاندی است). */
   FI: <>
     <rect width="24" height="16" fill="#fff" />

@@ -11,6 +11,8 @@
    ═══════════════════════════════════════════════════════════════ */
 
 import raw from '../../data/specs_catalog.json'
+import { ACCESSORY_TYPE_OF, isAccessoryCategory } from './catalog-rules'
+import { accessorySpecs } from './catalog'
 import { validateSpecs, type SpecCatalogShape, type SpecField, type SpecOption } from './spec-rules'
 
 export * from './spec-rules'
@@ -18,7 +20,7 @@ export * from './spec-rules'
 const catalog = raw as unknown as SpecCatalogShape
 
 /** دسته‌هایی که تعریفِ مشخصاتِ اختصاصی دارند */
-export const SPEC_CATEGORIES = [...Object.keys(catalog.specs), 'cloth']
+export const SPEC_CATEGORIES = [...new Set([...Object.keys(catalog.specs), ...Object.keys(ACCESSORY_TYPE_OF)])]
 
 export const hasSpecCatalog = (category: string): boolean =>
   Object.prototype.hasOwnProperty.call(catalog.specs, category)
@@ -39,6 +41,13 @@ const CLOTH_FROM_TABLE = ['cloth_type', 'cloth_color', 'cloth_condition']
 export function getSpecFields(category: string): SpecField[] {
   const own = catalog.specs[category]
   if (own) return own
+  /* ── لوازم جانبی ──
+     فیلدهایشان داخلِ خودِ `accessories_catalog.json` است، نه در
+     `specs_catalog.json`: هر دسته کاملاً فرق دارد (کیسِ چوب ۹ فیلد،
+     حوله ۳) و یک فهرستِ مشترک بی‌معنا بود. */
+  if (isAccessoryCategory(category)) {
+    return accessorySpecs(ACCESSORY_TYPE_OF[category]!) as unknown as SpecField[]
+  }
   if (category === 'cloth') {
     const t = catalog.specs.table ?? []
     return CLOTH_FROM_TABLE

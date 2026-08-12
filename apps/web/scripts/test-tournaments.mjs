@@ -2739,6 +2739,70 @@ console.log('\n― تیپ ―');
       .every(f => read(f).includes("form.category === 'tip'")));
 }
 
+/* ── لوازم جانبی: ده دسته زیرِ یک کاتالوگ ── */
+console.log('\n― لوازم جانبی ―');
+{
+  const ap = join(ROOT, 'data/accessories_catalog.json');
+  t('کاتالوگِ لوازم هست', existsSync(ap));
+  if (existsSync(ap)) {
+    const A = JSON.parse(readFileSync(ap, 'utf8'));
+    const br = A.categories.flatMap(c => c.brands ?? []);
+    t('۱۰ دسته، ۱۰۱ برند، ۱۵۷ مدل',
+      A.categories.length === 10 && br.length >= 101
+      && br.reduce((n, b) => n + (b.models ?? []).length, 0) >= 157,
+      `${A.categories.length}/${br.length}`);
+    t('هر دسته مشخصاتِ خودش را دارد',
+      A.categories.every(c => (c.specs ?? []).length > 0),
+      'کیسِ چوب ۹ فیلد و حوله ۳ — فهرستِ مشترک بی‌معنا بود');
+    t('هر دسته ایموجی دارد', A.categories.every(c => !!c.icon));
+
+    /* پیشوندِ برند با دسته بخواند */
+    const P = { cue_case: 'case__', extension: 'ext__', ball_bag: 'ballbag__', rest: 'rest__',
+      oil: 'oil__', towel: 'twl__', apparel: 'apr__', accessory: 'acc__' };
+    const bad = A.categories.flatMap(c => (c.brands ?? [])
+      .filter(b => P[c.id] && !b.id.startsWith(P[c.id])).map(b => b.id));
+    t('پیشوندِ هر برند با دسته‌اش می‌خواند', bad.length === 0, bad.slice(0, 3).join(', '));
+
+    /* سه دسته‌ی با رفتارِ خاص */
+    const cloth = A.categories.find(c => c.id === 'cloth');
+    t('پارچه برندش از کاتالوگِ پارچه می‌آید',
+      cloth.external_catalog === 'cloth_catalog.json' && (cloth.brands ?? []).length === 0
+      && (cloth.specs ?? []).length > 0,
+      'فقط مشخصاتش این‌جاست');
+    const other = A.categories.find(c => c.id === 'other');
+    t('«سایر» متنِ آزاد است و نامِ کالا اجباری',
+      other.force_free_input === true
+      && other.specs.some(f => f.id === 'other_item_name' && f.required),
+      'همان منطقِ «میز خانگی»');
+    t('اکسسوری فیلدِ نوع با ۲۲ گزینه دارد',
+      (A.categories.find(c => c.id === 'accessory').specs
+        .find(f => f.id === 'accessory_type')?.options ?? []).length >= 22);
+    t('کیسِ چوب سازگاری با اسنوکر را می‌پرسد',
+      A.categories.find(c => c.id === 'cue_case').specs.some(f => f.id === 'fits_snooker'),
+      'چوبِ اسنوکر بلندتر است و خیلی از کیس‌های آمریکایی برایش کوتاه‌اند');
+  }
+
+  /* ── ساختارِ دوسطحی، بدونِ تغییرِ کامپوننت ── */
+  const rules = read('lib/market/catalog-rules.ts');
+  t('دسته‌ی سایت به نوعِ کاتالوگ نگاشت می‌شود',
+    rules.includes('ACCESSORY_TYPE_OF') && rules.includes("clothing: 'apparel'"),
+    'شناسه‌های سایت خط‌تیره دارند و بعضی نامشان فرق می‌کند');
+  t('هر دسته‌ی لوازمِ سایت نگاشت دارد',
+    ['cue-case', 'extension', 'ball-bag', 'rest', 'cloth', 'oil', 'towel', 'clothing', 'accessory', 'other']
+      .every(c => rules.includes(`'${c}'`) || rules.includes(`${c}:`)));
+  t('انتخابگر برای لوازم تغییری نخواست',
+    !read('components/market/CatalogSelector.tsx').includes('accessor'),
+    'دسته در همان شکافی می‌نشیند که برای بقیه «نوع» بود');
+  t('مشخصاتِ لوازم از خودِ کاتالوگ می‌آید',
+    read('lib/market/spec-catalog.ts').includes('accessorySpecs('));
+  t('نمایشِ شرطیِ دستکش پیاده شده',
+    read('lib/market/spec-rules.ts').includes('depends_on_type'),
+    'بازیکنِ راست‌دست دستکش را دستِ چپ می‌کند — فیلد فقط برای دستکش');
+  t('روتِ ثبت لوازم را می‌سنجد',
+    ['app/api/market/ads/route.ts', 'app/api/market/ads/[id]/route.ts']
+      .every(f => read(f).includes('isAccessoryCategory')));
+}
+
 console.log('\n― CORS ―');
 {
   t('فایلِ مرده‌ی CORS حذف شد',

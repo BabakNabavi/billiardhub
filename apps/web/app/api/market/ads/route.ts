@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { sb, actorFromRequest } from '@/lib/finance/db';
 import { consumeAdQuota, releaseConsumption, attachConsumptionRef } from '@/lib/ads/quota';
 import { normalizeCategory, normalizeCondition } from '@/lib/market/categories';
-import { isCatalogId, validateOnServer, getBrand, TYPE_PREFIX } from '../../../../lib/market/catalog'
+import { isCatalogId, validateOnServer, getBrand, TYPE_PREFIX, isAccessoryCategory, ACCESSORY_TYPE_OF, type CatalogId } from '../../../../lib/market/catalog'
 import { hasSpecCatalog, validateSpecsOnServer } from '../../../../lib/market/spec-catalog'
 import { normalizeAdImages } from '@/lib/market/images';
 import { getSetting } from '@/lib/ads/quota';
@@ -182,10 +182,11 @@ export async function POST(req: NextRequest) {
   const catType = str(category === 'cue' ? b?.cueType : category === 'table' ? b?.tableType : b?.catalogType, 40);
   /* `cloth` هم یک شناسه‌ی کاتالوگ است ولی دسته‌ی محصولِ مستقلی هم
      هست؛ بدونِ این گیت، POST با category=cloth وارد این شاخه می‌شد. */
-  if ((category === 'cue' || category === 'table' || category === 'cloth' || category === 'chalk' || category === 'tip') && catType) {
+  if ((category === 'cue' || category === 'table' || category === 'cloth' || category === 'chalk' || category === 'tip' || isAccessoryCategory(category)) && catType) {
     const brandId = str(b?.brandId, 80) || null;
     const check = validateOnServer({
-      category,
+      /* دسته‌های لوازم زیرِ یک کاتالوگِ مشترک‌اند */
+      category: (isAccessoryCategory(category) ? 'accessories' : category) as CatalogId,
       type: catType,
       brandId,
       /* برندِ دستی همان رشته‌ی `brand` است؛ قاعده «یکی از این دو» را

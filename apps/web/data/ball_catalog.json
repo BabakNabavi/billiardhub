@@ -1,0 +1,1950 @@
+{
+  "schema_version": "1.0",
+  "last_updated": "2026-08-11",
+  "category": {
+    "id": "ball",
+    "label_fa": "توپ"
+  },
+  "notes_fa": "ساختار سه‌سطحی مثل چوب و میز: دسته‌بندی «توپ» ← نوع ← برند ← مدل. گزینه «سایر» در انتهای لیست برند و مدل توسط فرانت‌اند اضافه می‌شود.",
+  "important_fa": "قطر توپ تعیین‌کننده‌ی اصلی سازگاری است: اسنوکر ۵۲.۵، پاکت بیلیارد آمریکایی و هی‌بال ۵۷.۱۵، پاکت بیلیارد انگلیسی ۵۰.۸، کارامبول ۶۱.۵ میلی‌متر. هی‌بال از همان توپ استاندارد ۵۷ میلی‌متری پاکت بیلیارد استفاده می‌کند و ست اختصاصی ندارد.",
+  "other_option": {
+    "id": "other",
+    "name_fa": "سایر",
+    "reveals_text_input": true,
+    "max_length": 60
+  },
+  "search_note_fa": "فیلد aliases املاهای رایج فارسی را دارد؛ جستجو باید روی name_en و name_fa و aliases مچ کند.",
+  "countries": {
+    "BE": {
+      "fa": "بلژیک",
+      "flag": "🇧🇪"
+    },
+    "TW": {
+      "fa": "تایوان",
+      "flag": "🇹🇼"
+    },
+    "CN": {
+      "fa": "چین",
+      "flag": "🇨🇳"
+    },
+    "US": {
+      "fa": "آمریکا",
+      "flag": "🇺🇸"
+    },
+    "GB": {
+      "fa": "انگلستان",
+      "flag": "🇬🇧"
+    },
+    "NL": {
+      "fa": "هلند",
+      "flag": "🇳🇱"
+    },
+    "IT": {
+      "fa": "ایتالیا",
+      "flag": "🇮🇹"
+    }
+  },
+  "tiers": {
+    "tournament": "تورنمنتی / رسمی",
+    "premium": "حرفه‌ای",
+    "mid": "میان‌رده",
+    "budget": "اقتصادی"
+  },
+  "materials": [
+    {
+      "id": "phenolic",
+      "label_fa": "رزین فنولیک",
+      "label_en": "Phenolic Resin",
+      "note_fa": "استاندارد حرفه‌ای؛ حدود ۵ برابر سخت‌تر و بادوام‌تر از پلی‌استر"
+    },
+    {
+      "id": "duramith",
+      "label_fa": "دیورامیت (فنولیک نسل ۴)",
+      "label_en": "Duramith",
+      "note_fa": "فرمول پیشرفته آرامیت؛ تا ۵۰٪ عمر بیشتر و سایش کمتر پارچه"
+    },
+    {
+      "id": "crystalate",
+      "label_fa": "کریستالیت",
+      "label_en": "Crystalate",
+      "note_fa": "رنگ‌های اشباع‌تر و ظاهر لعابی"
+    },
+    {
+      "id": "polyester",
+      "label_fa": "پلی‌استر",
+      "label_en": "Polyester",
+      "note_fa": "ارزان؛ ظرف چند ماه خط می‌افتد"
+    },
+    {
+      "id": "polymer",
+      "label_fa": "پلیمر / رزین معمولی",
+      "label_en": "Polymer Resin"
+    },
+    {
+      "id": "unknown",
+      "label_fa": "نامشخص",
+      "label_en": "Unknown"
+    }
+  ],
+  "types": [
+    {
+      "id": "snooker",
+      "label_fa": "اسنوکر",
+      "label_en": "Snooker",
+      "brands": [
+        {
+          "id": "bsnk__aramith",
+          "name_en": "Aramith",
+          "name_fa": "آرامیت",
+          "country": "BE",
+          "tier": "tournament",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "ar-tc-1g",
+              "name_en": "Tournament Champion Super Pro 1G",
+              "name_fa": "تورنمنت چمپیون سوپر پرو ۱G",
+              "note_fa": "ست رسمی WSA؛ اختلاف وزن حداکثر ۱ گرم به‌جای ۳ گرم استاندارد",
+              "tier": "tournament"
+            },
+            {
+              "id": "ar-tc-tv",
+              "name_en": "Tournament Champion TV",
+              "name_fa": "تورنمنت چمپیون تی‌وی",
+              "note_fa": "نسخه پخش تلویزیونی با رنگ‌های پرکنتراست",
+              "tier": "tournament"
+            },
+            {
+              "id": "ar-tc",
+              "name_en": "Tournament Champion",
+              "name_fa": "تورنمنت چمپیون",
+              "note_fa": "پرفروش‌ترین ست حرفه‌ای اسنوکر",
+              "tier": "tournament"
+            },
+            {
+              "id": "ar-super-crystalate",
+              "name_en": "Super Crystalate",
+              "name_fa": "سوپر کریستالیت",
+              "note_fa": "رنگ‌های بسیار اشباع و ظاهر لعابی",
+              "tier": "premium"
+            },
+            {
+              "id": "ar-premier-snk",
+              "name_en": "Premier Snooker",
+              "name_fa": "پریمیر اسنوکر",
+              "note_fa": "رده باشگاهی و خانگی",
+              "tier": "premium"
+            },
+            {
+              "id": "ar-snooker-std",
+              "name_en": "Aramith Snooker Standard",
+              "name_fa": "آرامیت استاندارد",
+              "note_fa": "رده اقتصادی",
+              "tier": "mid"
+            }
+          ],
+          "note_fa": "بلژیکی (شرکت Saluc). بیش از ۴۰ سال تأمین‌کننده رسمی توپ اتحادیه جهانی اسنوکر",
+          "aliases": [
+            "آرامیت",
+            "آرامیث",
+            "ارامیت",
+            "آرامیس",
+            "Aramith",
+            "Saluc"
+          ]
+        },
+        {
+          "id": "bsnk__crystalate",
+          "name_en": "Crystalate",
+          "name_fa": "کریستالیت",
+          "country": "GB",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "cr-classic",
+              "name_en": "Classic Crystalate",
+              "name_fa": "کریستالیت کلاسیک",
+              "note_fa": "ست‌های قدیمی و کلکسیونی",
+              "tier": "premium"
+            }
+          ],
+          "aliases": [
+            "کریستالیت",
+            "کریستالات",
+            "Crystalate"
+          ]
+        },
+        {
+          "id": "bsnk__dynaspheres",
+          "name_en": "Dynaspheres",
+          "name_fa": "داینااسفیر",
+          "country": "TW",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "dy-snk",
+              "name_en": "Snooker Set",
+              "name_fa": "ست اسنوکر",
+              "tier": "premium"
+            }
+          ],
+          "note_fa": "تایوانی، رقیب نوظهور آرامیت با قیمت کمتر",
+          "aliases": [
+            "داینااسفیر",
+            "دایناسفیر",
+            "داینا اسفیر",
+            "Dynaspheres",
+            "Dynasphere"
+          ]
+        },
+        {
+          "id": "bsnk__super-aramith",
+          "name_en": "Super Aramith",
+          "name_fa": "سوپر آرامیت",
+          "country": "BE",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "sa-pro-snk",
+              "name_en": "Super Aramith Pro",
+              "name_fa": "سوپر آرامیت پرو",
+              "tier": "premium"
+            }
+          ],
+          "aliases": [
+            "آرامیت",
+            "آرامیث",
+            "ارامیت",
+            "آرامیس",
+            "Aramith",
+            "Saluc"
+          ]
+        },
+        {
+          "id": "bsnk__peradon-ball",
+          "name_en": "Peradon",
+          "name_fa": "پرادون",
+          "country": "GB",
+          "tier": "mid",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "pr-snk",
+              "name_en": "Snooker Ball Set",
+              "name_fa": "ست توپ اسنوکر",
+              "tier": "mid"
+            }
+          ],
+          "aliases": [
+            "پرادون",
+            "پرادن",
+            "Peradon"
+          ]
+        },
+        {
+          "id": "bsnk__riley-ball",
+          "name_en": "Riley",
+          "name_fa": "رایلی",
+          "country": "GB",
+          "tier": "mid",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "rl-snk",
+              "name_en": "Snooker Ball Set",
+              "name_fa": "ست توپ اسنوکر",
+              "tier": "mid"
+            }
+          ],
+          "aliases": [
+            "رایلی",
+            "Riley"
+          ]
+        },
+        {
+          "id": "bsnk__xingpai-ball",
+          "name_en": "Xingpai / STAR",
+          "name_fa": "شینگ‌پای / استار",
+          "country": "CN",
+          "tier": "mid",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "xp-snk",
+              "name_en": "Snooker Ball Set",
+              "name_fa": "ست توپ اسنوکر",
+              "tier": "mid"
+            }
+          ],
+          "aliases": [
+            "شینگ پای",
+            "شینگ‌پای",
+            "استار",
+            "Xingpai",
+            "Star"
+          ]
+        },
+        {
+          "id": "bsnk__chinese-snk",
+          "name_en": "Chinese Unbranded",
+          "name_fa": "چینی بدون برند",
+          "country": "CN",
+          "tier": "budget",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "cn-phenolic",
+              "name_en": "Phenolic Copy",
+              "name_fa": "کپی فنولیک",
+              "note_fa": "کپی‌های آرامیت در بازار زیاد است",
+              "tier": "budget"
+            },
+            {
+              "id": "cn-polyester",
+              "name_en": "Polyester",
+              "name_fa": "پلی‌استر",
+              "note_fa": "ارزان، دوام کم",
+              "tier": "budget"
+            }
+          ],
+          "aliases": [
+            "چینی",
+            "بدون برند"
+          ]
+        },
+        {
+          "id": "bsnk__unknown-snk",
+          "name_en": "Unknown / Unbranded",
+          "name_fa": "نامشخص / بدون برند",
+          "country": null,
+          "tier": "budget",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "uk-snk",
+              "name_en": "Unknown",
+              "name_fa": "نامشخص",
+              "tier": "budget"
+            }
+          ],
+          "aliases": [
+            "نامشخص",
+            "بدون برند"
+          ]
+        }
+      ],
+      "sizes": [
+        {
+          "id": "52.5",
+          "label_fa": "۵۲.۵ میلی‌متر (۲ و ۱/۱۶ اینچ)",
+          "label_en": "52.5mm",
+          "default": true,
+          "note_fa": "استاندارد رسمی اسنوکر"
+        },
+        {
+          "id": "52.4",
+          "label_fa": "۵۲.۴ میلی‌متر",
+          "label_en": "52.4mm"
+        },
+        {
+          "id": "50.8",
+          "label_fa": "۵۰.۸ میلی‌متر (۲ اینچ)",
+          "label_en": "50.8mm",
+          "note_fa": "میزهای کوچک خانگی"
+        },
+        {
+          "id": "47.6",
+          "label_fa": "۴۷.۶ میلی‌متر",
+          "label_en": "47.6mm",
+          "note_fa": "میز کوچک / تمرینی"
+        }
+      ],
+      "set_types": [
+        {
+          "id": "full-22",
+          "label_fa": "ست کامل ۲۲ توپ",
+          "note_fa": "۱۵ قرمز + ۶ رنگ + سفید"
+        },
+        {
+          "id": "full-17",
+          "label_fa": "ست ۱۷ توپ",
+          "note_fa": "۱۰ قرمز + ۶ رنگ + سفید — میزهای کوچک"
+        },
+        {
+          "id": "colors-only",
+          "label_fa": "فقط توپ‌های رنگی"
+        },
+        {
+          "id": "reds-only",
+          "label_fa": "فقط توپ‌های قرمز"
+        },
+        {
+          "id": "cue-ball",
+          "label_fa": "فقط توپ سفید"
+        },
+        {
+          "id": "single",
+          "label_fa": "تک توپ"
+        }
+      ],
+      "note_fa": "قطر استاندارد ۵۲.۵ میلی‌متر. ست کامل ۲۲ توپ است."
+    },
+    {
+      "id": "pocket_billiard",
+      "label_fa": "پاکت بیلیارد",
+      "label_en": "Pocket Billiards",
+      "brands": [
+        {
+          "id": "bpkt__aramith",
+          "name_en": "Aramith",
+          "name_fa": "آرامیت",
+          "country": "BE",
+          "tier": "tournament",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "ar-tpc-tv",
+              "name_en": "Tournament Pro Cup TV",
+              "name_fa": "تورنمنت پرو کاپ تی‌وی",
+              "note_fa": "صدر رده؛ توپ سفید نقطه‌دار قرمز، استاندارد پخش تلویزیونی و Matchroom",
+              "tier": "tournament"
+            },
+            {
+              "id": "ar-tpc",
+              "name_en": "Tournament Pro Cup",
+              "name_fa": "تورنمنت پرو کاپ",
+              "tier": "tournament"
+            },
+            {
+              "id": "ar-tournament",
+              "name_en": "Tournament (Duramith)",
+              "name_fa": "تورنمنت (دیورامیت)",
+              "note_fa": "نسل چهارم رزین فنولیک؛ عمر تا ۴۰ سال",
+              "tier": "tournament"
+            },
+            {
+              "id": "ar-sp-prestige",
+              "name_en": "Super Pro Prestige",
+              "name_fa": "سوپر پرو پرستیژ",
+              "tier": "premium"
+            },
+            {
+              "id": "ar-sp-tv",
+              "name_en": "Super Pro TV",
+              "name_fa": "سوپر پرو تی‌وی",
+              "tier": "premium"
+            },
+            {
+              "id": "ar-super-pro",
+              "name_en": "Super Pro",
+              "name_fa": "سوپر پرو",
+              "note_fa": "محبوب‌ترین ست لیگ‌های حرفه‌ای",
+              "tier": "premium"
+            },
+            {
+              "id": "ar-premium",
+              "name_en": "Premium",
+              "name_fa": "پریمیوم",
+              "note_fa": "تطابق رنگ دقیق‌تر از پریمیر",
+              "tier": "premium"
+            },
+            {
+              "id": "ar-premier",
+              "name_en": "Premier",
+              "name_fa": "پریمیر",
+              "note_fa": "ارزان‌ترین ست با رزین فنولیک کامل؛ رده خانگی",
+              "tier": "mid"
+            },
+            {
+              "id": "ar-belgian-crown",
+              "name_en": "Belgian Crown",
+              "name_fa": "بلژین کراون",
+              "tier": "mid"
+            },
+            {
+              "id": "ar-crown-standard",
+              "name_en": "Crown Standard",
+              "name_fa": "کراون استاندارد",
+              "note_fa": "ورودی فنولیک",
+              "tier": "mid"
+            },
+            {
+              "id": "ar-continental",
+              "name_en": "Continental",
+              "name_fa": "کانتیننتال",
+              "note_fa": "اقتصادی‌ترین رده آرامیت",
+              "tier": "mid"
+            },
+            {
+              "id": "ar-black",
+              "name_en": "Aramith Black",
+              "name_fa": "آرامیت بلک",
+              "note_fa": "ست تزئینی مشکی",
+              "tier": "premium"
+            },
+            {
+              "id": "ar-stone",
+              "name_en": "Stone Collection",
+              "name_fa": "کالکشن استون",
+              "note_fa": "طرح سنگ، تزئینی",
+              "tier": "premium"
+            },
+            {
+              "id": "ar-glow",
+              "name_en": "Glow in the Dark (BBNEO)",
+              "name_fa": "شب‌تاب",
+              "note_fa": "تزئینی",
+              "tier": "mid"
+            },
+            {
+              "id": "ar-premier-ry",
+              "name_en": "Premier Red & Yellow 2″",
+              "name_fa": "پریمیر قرمز و زرد ۲ اینچ",
+              "note_fa": "«جعبه سبز»؛ استاندارد میزهای انگلیسی و باشگاهی",
+              "tier": "premium"
+            },
+            {
+              "id": "ar-super-pro-ry",
+              "name_en": "Super Aramith Pro Red & Yellow",
+              "name_fa": "سوپر آرامیت پرو قرمز و زرد",
+              "note_fa": "از ۲۰۱۱ جایگزین پریمیر در تورنمنت‌های بریتانیا",
+              "tier": "tournament"
+            },
+            {
+              "id": "ar-league-ry",
+              "name_en": "League Red & Yellow",
+              "name_fa": "لیگ قرمز و زرد",
+              "note_fa": "توپ سفید کوچک‌تر ۴۸ میلی‌متر برای میزهای سکه‌ای",
+              "tier": "mid"
+            },
+            {
+              "id": "ar-casino",
+              "name_en": "Premier Casino",
+              "name_fa": "پریمیر کازینو",
+              "tier": "premium"
+            },
+            {
+              "id": "ar-blue-yellow",
+              "name_en": "Pro Cup Blue & Yellow",
+              "name_fa": "پرو کاپ آبی و زرد",
+              "tier": "premium"
+            }
+          ],
+          "note_fa": "بلژیکی. تنها سازنده‌ای که از رزین فنولیک خالص استفاده می‌کند؛ عمر تا ۵ برابر پلی‌استر",
+          "aliases": [
+            "آرامیت",
+            "آرامیث",
+            "ارامیت",
+            "آرامیس",
+            "Aramith",
+            "Saluc"
+          ]
+        },
+        {
+          "id": "bpkt__brunswick-ball",
+          "name_en": "Brunswick",
+          "name_fa": "برانزویک",
+          "country": "US",
+          "tier": "tournament",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "br-centennial",
+              "name_en": "Centennial",
+              "name_fa": "سنتنیال",
+              "note_fa": "ساخت Saluc (همان کارخانه آرامیت)؛ ست کلاسیک آمریکایی",
+              "tier": "tournament"
+            },
+            {
+              "id": "br-glacier",
+              "name_en": "Glacier",
+              "name_fa": "گلیشر",
+              "tier": "premium"
+            }
+          ],
+          "aliases": [
+            "برانزویک",
+            "برونزویک",
+            "Brunswick"
+          ]
+        },
+        {
+          "id": "bpkt__cyclop",
+          "name_en": "Cyclop",
+          "name_fa": "سایکلوپ",
+          "country": "CN",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "cy-zeus",
+              "name_en": "Zeus",
+              "name_fa": "زئوس",
+              "tier": "premium"
+            },
+            {
+              "id": "cy-hyperion",
+              "name_en": "Hyperion",
+              "name_fa": "هایپریون",
+              "tier": "premium"
+            },
+            {
+              "id": "cy-athena",
+              "name_en": "Athena",
+              "name_fa": "آتنا",
+              "tier": "premium"
+            },
+            {
+              "id": "cy-skittles",
+              "name_en": "Skittles",
+              "name_fa": "اسکیتلز",
+              "note_fa": "رنگ‌های متمایز، محبوب بین حرفه‌ای‌ها",
+              "tier": "premium"
+            },
+            {
+              "id": "cy-tournament",
+              "name_en": "Tournament Set",
+              "name_fa": "ست تورنمنت",
+              "tier": "premium"
+            }
+          ],
+          "note_fa": "از همان جنس داینااسفیر؛ رنگ‌بندی متمایز",
+          "aliases": [
+            "سایکلوپ",
+            "سیکلوپ",
+            "Cyclop",
+            "Cyclops"
+          ]
+        },
+        {
+          "id": "bpkt__dynaspheres",
+          "name_en": "Dynaspheres",
+          "name_fa": "داینااسفیر",
+          "country": "TW",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "dy-platinum",
+              "name_en": "Platinum",
+              "name_fa": "پلاتینیوم",
+              "note_fa": "صدر رده",
+              "tier": "premium"
+            },
+            {
+              "id": "dy-gold",
+              "name_en": "Gold",
+              "name_fa": "گلد",
+              "tier": "premium"
+            },
+            {
+              "id": "dy-silver",
+              "name_en": "Silver",
+              "name_fa": "سیلور",
+              "tier": "premium"
+            },
+            {
+              "id": "dy-bronze",
+              "name_en": "Bronze",
+              "name_fa": "برنز",
+              "note_fa": "بهترین نسبت قیمت به کیفیت",
+              "tier": "mid"
+            },
+            {
+              "id": "dy-tungsten",
+              "name_en": "Tungsten",
+              "name_fa": "تنگستن",
+              "note_fa": "اقتصادی، رنگ‌های روشن",
+              "tier": "mid"
+            },
+            {
+              "id": "dy-palladium",
+              "name_en": "Palladium",
+              "name_fa": "پالادیوم",
+              "tier": "premium"
+            },
+            {
+              "id": "dy-rhodium",
+              "name_en": "Rhodium",
+              "name_fa": "رودیوم",
+              "tier": "premium"
+            },
+            {
+              "id": "dy-titanium",
+              "name_en": "Titanium",
+              "name_fa": "تیتانیوم",
+              "tier": "mid"
+            },
+            {
+              "id": "dy-chromium",
+              "name_en": "Chromium",
+              "name_fa": "کرومیوم",
+              "tier": "mid"
+            },
+            {
+              "id": "dy-vanadium",
+              "name_en": "Vanadium",
+              "name_fa": "وانادیوم",
+              "tier": "mid"
+            }
+          ],
+          "note_fa": "تایوانی. همه ست‌ها از یک رزین ساخته می‌شوند؛ اختلاف قیمت بابت کار طراحی و اینلی است",
+          "aliases": [
+            "داینااسفیر",
+            "دایناسفیر",
+            "Dynaspheres",
+            "Dynasphere"
+          ]
+        },
+        {
+          "id": "bpkt__elephant",
+          "name_en": "Elephant Balls",
+          "name_fa": "الفانت",
+          "country": "US",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "el-beautiful",
+              "name_en": "Elephant Beautiful Balls",
+              "name_fa": "بیوتیفول بالز",
+              "tier": "premium"
+            },
+            {
+              "id": "el-practice",
+              "name_en": "Practice Ball",
+              "name_fa": "توپ تمرینی",
+              "tier": "mid"
+            }
+          ],
+          "aliases": [
+            "الفانت",
+            "فیل",
+            "Elephant"
+          ]
+        },
+        {
+          "id": "bpkt__predator-ball",
+          "name_en": "Predator",
+          "name_fa": "پردیتور",
+          "country": "US",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "pd-arcos-ii",
+              "name_en": "Arcos II",
+              "name_fa": "آرکوس II",
+              "tier": "premium"
+            },
+            {
+              "id": "pd-arcos",
+              "name_en": "Arcos",
+              "name_fa": "آرکوس",
+              "tier": "premium"
+            }
+          ],
+          "aliases": [
+            "پردیتور",
+            "پریدیتور",
+            "Predator"
+          ]
+        },
+        {
+          "id": "bpkt__super-aramith",
+          "name_en": "Super Aramith",
+          "name_fa": "سوپر آرامیت",
+          "country": "BE",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "sa-pro",
+              "name_en": "Super Aramith Pro",
+              "name_fa": "سوپر آرامیت پرو",
+              "tier": "premium"
+            },
+            {
+              "id": "sa-prestige",
+              "name_en": "Super Aramith Prestige",
+              "name_fa": "سوپر آرامیت پرستیژ",
+              "tier": "premium"
+            }
+          ],
+          "aliases": [
+            "آرامیت",
+            "آرامیث",
+            "ارامیت",
+            "آرامیس",
+            "Aramith",
+            "Saluc"
+          ]
+        },
+        {
+          "id": "bpkt__gbl-ball",
+          "name_en": "GBL",
+          "name_fa": "جی‌بی‌ال",
+          "country": "GB",
+          "tier": "mid",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "gb-pool",
+              "name_en": "Pool Ball Set",
+              "name_fa": "ست توپ پاکت بیلیارد",
+              "tier": "mid"
+            }
+          ],
+          "aliases": [
+            "جی بی ال",
+            "GBL"
+          ]
+        },
+        {
+          "id": "bpkt__joy-ball",
+          "name_en": "Joy",
+          "name_fa": "جوی",
+          "country": "CN",
+          "tier": "mid",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "jy-pool",
+              "name_en": "Pool Ball Set",
+              "name_fa": "ست توپ",
+              "tier": "mid"
+            }
+          ],
+          "aliases": [
+            "جوی",
+            "Joy"
+          ]
+        },
+        {
+          "id": "bpkt__peradon-ball",
+          "name_en": "Peradon",
+          "name_fa": "پرادون",
+          "country": "GB",
+          "tier": "mid",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "pr-pool",
+              "name_en": "Pool Ball Set",
+              "name_fa": "ست توپ",
+              "tier": "mid"
+            }
+          ],
+          "aliases": [
+            "پرادون",
+            "Peradon"
+          ]
+        },
+        {
+          "id": "bpkt__xingpai-ball",
+          "name_en": "Xingpai / STAR",
+          "name_fa": "شینگ‌پای / استار",
+          "country": "CN",
+          "tier": "mid",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "xp-pool",
+              "name_en": "Pool Ball Set",
+              "name_fa": "ست توپ",
+              "tier": "mid"
+            }
+          ],
+          "aliases": [
+            "شینگ پای",
+            "استار",
+            "Xingpai",
+            "Star"
+          ]
+        },
+        {
+          "id": "bpkt__chinese-pkt",
+          "name_en": "Chinese Unbranded",
+          "name_fa": "چینی بدون برند",
+          "country": "CN",
+          "tier": "budget",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "cn-phenolic",
+              "name_en": "Phenolic Copy",
+              "name_fa": "کپی فنولیک",
+              "tier": "budget"
+            },
+            {
+              "id": "cn-polyester",
+              "name_en": "Polyester",
+              "name_fa": "پلی‌استر",
+              "note_fa": "ارزان، دوام کم",
+              "tier": "budget"
+            }
+          ],
+          "aliases": [
+            "چینی",
+            "بدون برند"
+          ]
+        },
+        {
+          "id": "bpkt__unknown-pkt",
+          "name_en": "Unknown / Unbranded",
+          "name_fa": "نامشخص / بدون برند",
+          "country": null,
+          "tier": "budget",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "uk-pkt",
+              "name_en": "Unknown",
+              "name_fa": "نامشخص",
+              "tier": "budget"
+            }
+          ],
+          "aliases": [
+            "نامشخص",
+            "بدون برند"
+          ]
+        }
+      ],
+      "sizes": [
+        {
+          "id": "57.15",
+          "label_fa": "۵۷.۱۵ میلی‌متر (۲ و ۱/۴ اینچ)",
+          "label_en": "57.15mm",
+          "default": true,
+          "note_fa": "استاندارد پاکت بیلیارد آمریکایی"
+        },
+        {
+          "id": "50.8",
+          "label_fa": "۵۰.۸ میلی‌متر (۲ اینچ)",
+          "label_en": "50.8mm",
+          "note_fa": "پاکت بیلیارد انگلیسی / بلک‌بال"
+        },
+        {
+          "id": "50.8-48",
+          "label_fa": "۵۰.۸ با سفید ۴۸ میلی‌متر",
+          "label_en": "50.8mm + 48mm cue ball",
+          "note_fa": "میزهای سکه‌ای با برگشت توپ"
+        },
+        {
+          "id": "54",
+          "label_fa": "۵۴ میلی‌متر",
+          "label_en": "54mm"
+        }
+      ],
+      "set_types": [
+        {
+          "id": "full-16",
+          "label_fa": "ست کامل ۱۶ توپ",
+          "note_fa": "۷ ساده + ۷ خط‌دار + ۸ + سفید"
+        },
+        {
+          "id": "full-ry",
+          "label_fa": "ست قرمز و زرد",
+          "note_fa": "۷ قرمز + ۷ زرد + مشکی + سفید"
+        },
+        {
+          "id": "9ball",
+          "label_fa": "ست ۹-بال (۱ تا ۹)"
+        },
+        {
+          "id": "cue-ball",
+          "label_fa": "فقط توپ سفید"
+        },
+        {
+          "id": "single",
+          "label_fa": "تک توپ"
+        }
+      ],
+      "note_fa": "دو استاندارد دارد: آمریکایی ۵۷.۱۵ میلی‌متر با توپ شماره‌دار، و انگلیسی ۵۰.۸ میلی‌متر با توپ قرمز و زرد."
+    },
+    {
+      "id": "carom",
+      "label_fa": "کارامبول",
+      "label_en": "Carom",
+      "brands": [
+        {
+          "id": "bcar__super-aramith",
+          "name_en": "Super Aramith",
+          "name_fa": "سوپر آرامیت",
+          "country": "BE",
+          "tier": "tournament",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "sa-prestige",
+              "name_en": "Pro-Cup Prestige",
+              "name_fa": "پرو کاپ پرستیژ",
+              "note_fa": "صدر رده کارامبول",
+              "tier": "tournament"
+            },
+            {
+              "id": "sa-challenge",
+              "name_en": "Pro-Cup Challenge",
+              "name_fa": "پرو کاپ چلنج",
+              "tier": "tournament"
+            },
+            {
+              "id": "sa-champion-pba",
+              "name_en": "Pro-Cup Champion PBA",
+              "name_fa": "پرو کاپ چمپیون PBA",
+              "note_fa": "ست رسمی لیگ PBA کره",
+              "tier": "tournament"
+            },
+            {
+              "id": "sa-pro-cup",
+              "name_en": "Pro-Cup",
+              "name_fa": "پرو کاپ",
+              "tier": "premium"
+            },
+            {
+              "id": "sa-tournament",
+              "name_en": "Tournament",
+              "name_fa": "تورنمنت",
+              "tier": "premium"
+            }
+          ],
+          "note_fa": "قطر ۶۱.۵ میلی‌متر؛ استاندارد جهانی سه‌بانده",
+          "aliases": [
+            "آرامیت",
+            "آرامیث",
+            "ارامیت",
+            "آرامیس",
+            "Aramith",
+            "Saluc"
+          ]
+        },
+        {
+          "id": "bcar__aramith",
+          "name_en": "Aramith",
+          "name_fa": "آرامیت",
+          "country": "BE",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "ar-carom-std",
+              "name_en": "Carom Standard",
+              "name_fa": "کارامبول استاندارد",
+              "tier": "premium"
+            },
+            {
+              "id": "ar-premier-carom",
+              "name_en": "Premier Carom",
+              "name_fa": "پریمیر کارامبول",
+              "tier": "mid"
+            }
+          ],
+          "aliases": [
+            "آرامیت",
+            "آرامیث",
+            "ارامیت",
+            "آرامیس",
+            "Aramith",
+            "Saluc"
+          ]
+        },
+        {
+          "id": "bcar__dynaspheres",
+          "name_en": "Dynaspheres",
+          "name_fa": "داینااسفیر",
+          "country": "TW",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "dy-carom",
+              "name_en": "Carom Set",
+              "name_fa": "ست کارامبول",
+              "tier": "premium"
+            }
+          ],
+          "aliases": [
+            "داینااسفیر",
+            "Dynaspheres"
+          ]
+        },
+        {
+          "id": "bcar__longoni-ball",
+          "name_en": "Longoni",
+          "name_fa": "لونگونی",
+          "country": "IT",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "lg-carom",
+              "name_en": "Carom Ball Set",
+              "name_fa": "ست توپ کارامبول",
+              "tier": "premium"
+            }
+          ],
+          "aliases": [
+            "لونگونی",
+            "Longoni"
+          ]
+        },
+        {
+          "id": "bcar__molinari-ball",
+          "name_en": "Molinari",
+          "name_fa": "مولیناری",
+          "country": "NL",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "ml-carom",
+              "name_en": "Carom Ball Set",
+              "name_fa": "ست توپ کارامبول",
+              "tier": "premium"
+            }
+          ],
+          "aliases": [
+            "مولیناری",
+            "Molinari"
+          ]
+        },
+        {
+          "id": "bcar__chinese-car",
+          "name_en": "Chinese Unbranded",
+          "name_fa": "چینی بدون برند",
+          "country": "CN",
+          "tier": "budget",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "cn-carom",
+              "name_en": "Generic Set",
+              "name_fa": "ست معمولی",
+              "tier": "budget"
+            }
+          ],
+          "aliases": [
+            "چینی"
+          ]
+        },
+        {
+          "id": "bcar__unknown-car",
+          "name_en": "Unknown / Unbranded",
+          "name_fa": "نامشخص / بدون برند",
+          "country": null,
+          "tier": "budget",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "uk-car",
+              "name_en": "Unknown",
+              "name_fa": "نامشخص",
+              "tier": "budget"
+            }
+          ],
+          "aliases": [
+            "نامشخص"
+          ]
+        }
+      ],
+      "sizes": [
+        {
+          "id": "61.5",
+          "label_fa": "۶۱.۵ میلی‌متر",
+          "label_en": "61.5mm",
+          "default": true,
+          "note_fa": "استاندارد سه‌بانده"
+        },
+        {
+          "id": "61",
+          "label_fa": "۶۱ میلی‌متر",
+          "label_en": "61mm"
+        }
+      ],
+      "set_types": [
+        {
+          "id": "3ball",
+          "label_fa": "ست ۳ توپ",
+          "note_fa": "دو سفید + یک قرمز"
+        },
+        {
+          "id": "4ball",
+          "label_fa": "ست ۴ توپ"
+        },
+        {
+          "id": "single",
+          "label_fa": "تک توپ"
+        }
+      ],
+      "note_fa": "قطر ۶۱.۵ میلی‌متر، بزرگ‌ترین توپ بیلیارد. ست ۳ توپی."
+    },
+    {
+      "id": "cue_ball",
+      "label_fa": "کیوبال",
+      "label_en": "Cue Ball",
+      "note_fa": "توپ سفید به‌تنهایی. قطرش باید با ست میز بخواند؛ کیوبال میزهای سکه‌ای اغلب کوچک‌تر یا سنگین‌تر از توپ‌های رنگی است.",
+      "brands": [
+        {
+          "id": "bcue__aramith",
+          "name_en": "Aramith",
+          "name_fa": "آرامیت",
+          "country": "BE",
+          "tier": "tournament",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "cb-pro-cup",
+              "name_en": "Pro Cup «Measles» (۶ نقطه قرمز)",
+              "name_fa": "پرو کاپ «میزلز»",
+              "note_fa": "استاندارد تورنمنت و پخش تلویزیونی. هم‌وزن توپ‌های عادی (~۱۶۹ گرم). تقلبی‌ها معمولاً ۸ نقطه دارند به‌جای ۶",
+              "tier": "tournament"
+            },
+            {
+              "id": "cb-red-logo",
+              "name_en": "Super Aramith Pro (لوگوی قرمز)",
+              "name_fa": "سوپر آرامیت پرو",
+              "note_fa": "هم‌وزن و هم‌جنس پرو کاپ",
+              "tier": "premium"
+            },
+            {
+              "id": "cb-red-triangle",
+              "name_en": "Red Triangle (مثلث قرمز)",
+              "name_fa": "مثلث قرمز",
+              "tier": "premium"
+            },
+            {
+              "id": "cb-plain",
+              "name_en": "Plain White (ساده)",
+              "name_fa": "سفید ساده",
+              "note_fa": "بدون علامت",
+              "tier": "premium"
+            },
+            {
+              "id": "cb-snooker",
+              "name_en": "Snooker Cue Ball ۵۲.۵",
+              "name_fa": "کیوبال اسنوکر",
+              "note_fa": "قطر ۵۲.۵ میلی‌متر",
+              "tier": "premium"
+            },
+            {
+              "id": "cb-english-48",
+              "name_en": "English 1⅞″ (۴۸ میلی‌متر)",
+              "name_fa": "انگلیسی ۴۸ میلی‌متر",
+              "note_fa": "کوچک‌تر از توپ‌های رنگی؛ مخصوص میزهای سکه‌ای با برگشت توپ",
+              "tier": "premium"
+            },
+            {
+              "id": "cb-english-50",
+              "name_en": "English 2″ (۵۰.۸ میلی‌متر)",
+              "name_fa": "انگلیسی ۵۰.۸ میلی‌متر",
+              "note_fa": "هم‌اندازه توپ‌های رنگی",
+              "tier": "premium"
+            },
+            {
+              "id": "cb-magnetic",
+              "name_en": "Magnetic Cue Ball",
+              "name_fa": "کیوبال مغناطیسی",
+              "note_fa": "برای میزهای سکه‌ای با سیستم جداسازی مغناطیسی",
+              "tier": "mid"
+            },
+            {
+              "id": "cb-jimmy-rempe",
+              "name_en": "Jimmy Rempe Training Ball",
+              "name_fa": "توپ تمرینی جیمی رمپه",
+              "note_fa": "با خطوط راهنمای نقطه ضربه",
+              "tier": "premium"
+            },
+            {
+              "id": "cb-carom",
+              "name_en": "Carom Cue Ball ۶۱.۵",
+              "name_fa": "کیوبال کارامبول",
+              "note_fa": "قطر ۶۱.۵ میلی‌متر",
+              "tier": "premium"
+            }
+          ],
+          "note_fa": "سازنده استاندارد کیوبال حرفه‌ای",
+          "aliases": [
+            "آرامیت",
+            "آرامیث",
+            "ارامیت",
+            "Aramith",
+            "Saluc"
+          ]
+        },
+        {
+          "id": "bcue__brunswick",
+          "name_en": "Brunswick",
+          "name_fa": "برانزویک",
+          "country": "US",
+          "tier": "tournament",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "cb-blue-circle",
+              "name_en": "Blue Circle (دایره آبی)",
+              "name_fa": "دایره آبی",
+              "note_fa": "کیوبال ست سنتنیال؛ هم‌وزن توپ‌های عادی، از محبوب‌ترین‌ها",
+              "tier": "tournament"
+            }
+          ],
+          "aliases": [
+            "برانزویک",
+            "Brunswick"
+          ]
+        },
+        {
+          "id": "bcue__cyclop",
+          "name_en": "Cyclop",
+          "name_fa": "سایکلوپ",
+          "country": "CN",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "cb-cy",
+              "name_en": "Replacement Cue Ball",
+              "name_fa": "کیوبال جایگزین",
+              "tier": "premium"
+            }
+          ],
+          "aliases": [
+            "سایکلوپ",
+            "Cyclop"
+          ]
+        },
+        {
+          "id": "bcue__dynaspheres",
+          "name_en": "Dynaspheres",
+          "name_fa": "داینااسفیر",
+          "country": "TW",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "cb-dy",
+              "name_en": "Replacement Cue Ball",
+              "name_fa": "کیوبال جایگزین",
+              "tier": "premium"
+            }
+          ],
+          "aliases": [
+            "داینااسفیر",
+            "Dynaspheres"
+          ]
+        },
+        {
+          "id": "bcue__predator",
+          "name_en": "Predator",
+          "name_fa": "پردیتور",
+          "country": "US",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "cb-arcos",
+              "name_en": "Arcos Cue Ball",
+              "name_fa": "کیوبال آرکوس",
+              "tier": "premium"
+            }
+          ],
+          "aliases": [
+            "پردیتور",
+            "Predator"
+          ]
+        },
+        {
+          "id": "bcue__generic-marked",
+          "name_en": "Marked Cue Balls",
+          "name_fa": "کیوبال‌های علامت‌دار",
+          "country": null,
+          "tier": "mid",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "cb-red-circle",
+              "name_en": "Red Circle (دایره قرمز)",
+              "name_fa": "دایره قرمز",
+              "note_fa": "سبک‌تر از استاندارد (~۱۵۷ گرم)؛ سریع‌تر و پیچ‌پذیرتر",
+              "tier": "mid"
+            },
+            {
+              "id": "cb-blue-dot",
+              "name_en": "Blue Dot (نقطه آبی)",
+              "name_fa": "نقطه آبی",
+              "note_fa": "کمی سبک‌تر از توپ‌های رنگی؛ نسخه قدیمی",
+              "tier": "mid"
+            },
+            {
+              "id": "cb-red-dot",
+              "name_en": "Red Dot (نقطه قرمز)",
+              "name_fa": "نقطه قرمز",
+              "note_fa": "سنگین (~۱۹۱ گرم)؛ مخصوص میزهای سکه‌ای قدیمی Dynamo",
+              "tier": "mid"
+            },
+            {
+              "id": "cb-oversized",
+              "name_en": "Oversized (بزرگ‌تر از استاندارد)",
+              "name_fa": "اورسایز",
+              "note_fa": "برای میزهای سکه‌ای با جداسازی بر اساس اندازه",
+              "tier": "mid"
+            },
+            {
+              "id": "cb-metal-flake",
+              "name_en": "Metal Flake / Mud Ball",
+              "name_fa": "دانه‌فلزی",
+              "note_fa": "ذرات فلزی داخل توپ؛ سبک‌تر",
+              "tier": "budget"
+            }
+          ],
+          "note_fa": "کیوبال‌های عمومی که چند سازنده تولید می‌کنند"
+        },
+        {
+          "id": "bcue__chinese",
+          "name_en": "Chinese Unbranded",
+          "name_fa": "چینی بدون برند",
+          "country": "CN",
+          "tier": "budget",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "cb-cn-measles",
+              "name_en": "Measles Copy",
+              "name_fa": "کپی میزلز",
+              "note_fa": "معمولاً ۸ نقطه به‌جای ۶ نقطه اصل",
+              "tier": "budget"
+            },
+            {
+              "id": "cb-cn-plain",
+              "name_en": "Plain / Generic",
+              "name_fa": "ساده / معمولی",
+              "tier": "budget"
+            }
+          ],
+          "aliases": [
+            "چینی"
+          ]
+        },
+        {
+          "id": "bcue__unknown",
+          "name_en": "Unknown / Unbranded",
+          "name_fa": "نامشخص / بدون برند",
+          "country": null,
+          "tier": "budget",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "cb-uk",
+              "name_en": "Unknown",
+              "name_fa": "نامشخص",
+              "tier": "budget"
+            }
+          ],
+          "aliases": [
+            "نامشخص"
+          ]
+        }
+      ],
+      "sizes": [
+        {
+          "id": "57.15",
+          "label_fa": "۵۷.۱۵ میلی‌متر (پاکت بیلیارد آمریکایی)",
+          "label_en": "57.15mm",
+          "default": true
+        },
+        {
+          "id": "52.5",
+          "label_fa": "۵۲.۵ میلی‌متر (اسنوکر)",
+          "label_en": "52.5mm"
+        },
+        {
+          "id": "50.8",
+          "label_fa": "۵۰.۸ میلی‌متر (پاکت بیلیارد انگلیسی)",
+          "label_en": "50.8mm"
+        },
+        {
+          "id": "48",
+          "label_fa": "۴۸ میلی‌متر (۱⅞ اینچ — میز سکه‌ای)",
+          "label_en": "48mm"
+        },
+        {
+          "id": "61.5",
+          "label_fa": "۶۱.۵ میلی‌متر (کارامبول)",
+          "label_en": "61.5mm"
+        },
+        {
+          "id": "oversized",
+          "label_fa": "اورسایز (بزرگ‌تر از استاندارد)",
+          "label_en": "Oversized"
+        }
+      ],
+      "set_types": [
+        {
+          "id": "cue-ball",
+          "label_fa": "تک کیوبال"
+        }
+      ]
+    },
+    {
+      "id": "single",
+      "label_fa": "تکی",
+      "label_en": "Single Ball",
+      "note_fa": "تک توپ جایگزین — برای وقتی یک توپ گم یا شکسته شده. رنگ و شماره را در فیلد مربوطه مشخص کنید.",
+      "brands": [
+        {
+          "id": "bsng__aramith",
+          "name_en": "Aramith",
+          "name_fa": "آرامیت",
+          "country": "BE",
+          "tier": "tournament",
+          "allow_free_model": true,
+          "note_fa": "بلژیکی (شرکت Saluc). بیش از ۴۰ سال تأمین‌کننده رسمی توپ اتحادیه جهانی اسنوکر",
+          "aliases": [
+            "آرامیت",
+            "آرامیث",
+            "ارامیت",
+            "آرامیس",
+            "Aramith",
+            "Saluc"
+          ],
+          "models": [
+            {
+              "id": "sng-aramith",
+              "name_en": "Single Ball",
+              "name_fa": "تک توپ"
+            }
+          ]
+        },
+        {
+          "id": "bsng__brunswick-ball",
+          "name_en": "Brunswick",
+          "name_fa": "برانزویک",
+          "country": "US",
+          "tier": "tournament",
+          "allow_free_model": true,
+          "aliases": [
+            "برانزویک",
+            "برونزویک",
+            "Brunswick"
+          ],
+          "models": [
+            {
+              "id": "sng-brunswick-ball",
+              "name_en": "Single Ball",
+              "name_fa": "تک توپ"
+            }
+          ]
+        },
+        {
+          "id": "bsng__crystalate",
+          "name_en": "Crystalate",
+          "name_fa": "کریستالیت",
+          "country": "GB",
+          "tier": "premium",
+          "allow_free_model": true,
+          "aliases": [
+            "کریستالیت",
+            "کریستالات",
+            "Crystalate"
+          ],
+          "models": [
+            {
+              "id": "sng-crystalate",
+              "name_en": "Single Ball",
+              "name_fa": "تک توپ"
+            }
+          ]
+        },
+        {
+          "id": "bsng__cyclop",
+          "name_en": "Cyclop",
+          "name_fa": "سایکلوپ",
+          "country": "CN",
+          "tier": "premium",
+          "allow_free_model": true,
+          "note_fa": "از همان جنس داینااسفیر؛ رنگ‌بندی متمایز",
+          "aliases": [
+            "سایکلوپ",
+            "سیکلوپ",
+            "Cyclop",
+            "Cyclops"
+          ],
+          "models": [
+            {
+              "id": "sng-cyclop",
+              "name_en": "Single Ball",
+              "name_fa": "تک توپ"
+            }
+          ]
+        },
+        {
+          "id": "bsng__dynaspheres",
+          "name_en": "Dynaspheres",
+          "name_fa": "داینااسفیر",
+          "country": "TW",
+          "tier": "premium",
+          "allow_free_model": true,
+          "note_fa": "تایوانی، رقیب نوظهور آرامیت با قیمت کمتر",
+          "aliases": [
+            "داینااسفیر",
+            "دایناسفیر",
+            "داینا اسفیر",
+            "Dynaspheres",
+            "Dynasphere"
+          ],
+          "models": [
+            {
+              "id": "sng-dynaspheres",
+              "name_en": "Single Ball",
+              "name_fa": "تک توپ"
+            }
+          ]
+        },
+        {
+          "id": "bsng__elephant",
+          "name_en": "Elephant Balls",
+          "name_fa": "الفانت",
+          "country": "US",
+          "tier": "premium",
+          "allow_free_model": true,
+          "aliases": [
+            "الفانت",
+            "فیل",
+            "Elephant"
+          ],
+          "models": [
+            {
+              "id": "sng-elephant",
+              "name_en": "Single Ball",
+              "name_fa": "تک توپ"
+            }
+          ]
+        },
+        {
+          "id": "bsng__longoni-ball",
+          "name_en": "Longoni",
+          "name_fa": "لونگونی",
+          "country": "IT",
+          "tier": "premium",
+          "allow_free_model": true,
+          "aliases": [
+            "لونگونی",
+            "Longoni"
+          ],
+          "models": [
+            {
+              "id": "sng-longoni-ball",
+              "name_en": "Single Ball",
+              "name_fa": "تک توپ"
+            }
+          ]
+        },
+        {
+          "id": "bsng__molinari-ball",
+          "name_en": "Molinari",
+          "name_fa": "مولیناری",
+          "country": "NL",
+          "tier": "premium",
+          "allow_free_model": true,
+          "aliases": [
+            "مولیناری",
+            "Molinari"
+          ],
+          "models": [
+            {
+              "id": "sng-molinari-ball",
+              "name_en": "Single Ball",
+              "name_fa": "تک توپ"
+            }
+          ]
+        },
+        {
+          "id": "bsng__predator-ball",
+          "name_en": "Predator",
+          "name_fa": "پردیتور",
+          "country": "US",
+          "tier": "premium",
+          "allow_free_model": true,
+          "aliases": [
+            "پردیتور",
+            "پریدیتور",
+            "Predator"
+          ],
+          "models": [
+            {
+              "id": "sng-predator-ball",
+              "name_en": "Single Ball",
+              "name_fa": "تک توپ"
+            }
+          ]
+        },
+        {
+          "id": "bsng__super-aramith",
+          "name_en": "Super Aramith",
+          "name_fa": "سوپر آرامیت",
+          "country": "BE",
+          "tier": "premium",
+          "allow_free_model": true,
+          "aliases": [
+            "آرامیت",
+            "آرامیث",
+            "ارامیت",
+            "آرامیس",
+            "Aramith",
+            "Saluc"
+          ],
+          "models": [
+            {
+              "id": "sng-super-aramith",
+              "name_en": "Single Ball",
+              "name_fa": "تک توپ"
+            }
+          ]
+        },
+        {
+          "id": "bsng__gbl-ball",
+          "name_en": "GBL",
+          "name_fa": "جی‌بی‌ال",
+          "country": "GB",
+          "tier": "mid",
+          "allow_free_model": true,
+          "aliases": [
+            "جی بی ال",
+            "GBL"
+          ],
+          "models": [
+            {
+              "id": "sng-gbl-ball",
+              "name_en": "Single Ball",
+              "name_fa": "تک توپ"
+            }
+          ]
+        },
+        {
+          "id": "bsng__joy-ball",
+          "name_en": "Joy",
+          "name_fa": "جوی",
+          "country": "CN",
+          "tier": "mid",
+          "allow_free_model": true,
+          "aliases": [
+            "جوی",
+            "Joy"
+          ],
+          "models": [
+            {
+              "id": "sng-joy-ball",
+              "name_en": "Single Ball",
+              "name_fa": "تک توپ"
+            }
+          ]
+        },
+        {
+          "id": "bsng__peradon-ball",
+          "name_en": "Peradon",
+          "name_fa": "پرادون",
+          "country": "GB",
+          "tier": "mid",
+          "allow_free_model": true,
+          "aliases": [
+            "پرادون",
+            "پرادن",
+            "Peradon"
+          ],
+          "models": [
+            {
+              "id": "sng-peradon-ball",
+              "name_en": "Single Ball",
+              "name_fa": "تک توپ"
+            }
+          ]
+        },
+        {
+          "id": "bsng__riley-ball",
+          "name_en": "Riley",
+          "name_fa": "رایلی",
+          "country": "GB",
+          "tier": "mid",
+          "allow_free_model": true,
+          "aliases": [
+            "رایلی",
+            "Riley"
+          ],
+          "models": [
+            {
+              "id": "sng-riley-ball",
+              "name_en": "Single Ball",
+              "name_fa": "تک توپ"
+            }
+          ]
+        },
+        {
+          "id": "bsng__xingpai-ball",
+          "name_en": "Xingpai / STAR",
+          "name_fa": "شینگ‌پای / استار",
+          "country": "CN",
+          "tier": "mid",
+          "allow_free_model": true,
+          "aliases": [
+            "شینگ پای",
+            "شینگ‌پای",
+            "استار",
+            "Xingpai",
+            "Star"
+          ],
+          "models": [
+            {
+              "id": "sng-xingpai-ball",
+              "name_en": "Single Ball",
+              "name_fa": "تک توپ"
+            }
+          ]
+        },
+        {
+          "id": "bsng__chinese-snk",
+          "name_en": "Chinese Unbranded",
+          "name_fa": "چینی بدون برند",
+          "country": "CN",
+          "tier": "budget",
+          "allow_free_model": true,
+          "aliases": [
+            "چینی",
+            "بدون برند"
+          ],
+          "models": [
+            {
+              "id": "sng-chinese-snk",
+              "name_en": "Single Ball",
+              "name_fa": "تک توپ"
+            }
+          ]
+        },
+        {
+          "id": "bsng__chinese-pkt",
+          "name_en": "Chinese Unbranded",
+          "name_fa": "چینی بدون برند",
+          "country": "CN",
+          "tier": "budget",
+          "allow_free_model": true,
+          "aliases": [
+            "چینی",
+            "بدون برند"
+          ],
+          "models": [
+            {
+              "id": "sng-chinese-pkt",
+              "name_en": "Single Ball",
+              "name_fa": "تک توپ"
+            }
+          ]
+        },
+        {
+          "id": "bsng__chinese-car",
+          "name_en": "Chinese Unbranded",
+          "name_fa": "چینی بدون برند",
+          "country": "CN",
+          "tier": "budget",
+          "allow_free_model": true,
+          "aliases": [
+            "چینی"
+          ],
+          "models": [
+            {
+              "id": "sng-chinese-car",
+              "name_en": "Single Ball",
+              "name_fa": "تک توپ"
+            }
+          ]
+        },
+        {
+          "id": "bsng__unknown-snk",
+          "name_en": "Unknown / Unbranded",
+          "name_fa": "نامشخص / بدون برند",
+          "country": null,
+          "tier": "budget",
+          "allow_free_model": true,
+          "aliases": [
+            "نامشخص",
+            "بدون برند"
+          ],
+          "models": [
+            {
+              "id": "sng-unknown-snk",
+              "name_en": "Single Ball",
+              "name_fa": "تک توپ"
+            }
+          ]
+        },
+        {
+          "id": "bsng__unknown-pkt",
+          "name_en": "Unknown / Unbranded",
+          "name_fa": "نامشخص / بدون برند",
+          "country": null,
+          "tier": "budget",
+          "allow_free_model": true,
+          "aliases": [
+            "نامشخص",
+            "بدون برند"
+          ],
+          "models": [
+            {
+              "id": "sng-unknown-pkt",
+              "name_en": "Single Ball",
+              "name_fa": "تک توپ"
+            }
+          ]
+        },
+        {
+          "id": "bsng__unknown-car",
+          "name_en": "Unknown / Unbranded",
+          "name_fa": "نامشخص / بدون برند",
+          "country": null,
+          "tier": "budget",
+          "allow_free_model": true,
+          "aliases": [
+            "نامشخص"
+          ],
+          "models": [
+            {
+              "id": "sng-unknown-car",
+              "name_en": "Single Ball",
+              "name_fa": "تک توپ"
+            }
+          ]
+        }
+      ],
+      "sizes": [
+        {
+          "id": "52.5",
+          "label_fa": "۵۲.۵ میلی‌متر (اسنوکر)",
+          "label_en": "52.5mm"
+        },
+        {
+          "id": "57.15",
+          "label_fa": "۵۷.۱۵ میلی‌متر (پاکت بیلیارد)",
+          "label_en": "57.15mm",
+          "default": true
+        },
+        {
+          "id": "50.8",
+          "label_fa": "۵۰.۸ میلی‌متر (پاکت بیلیارد انگلیسی)",
+          "label_en": "50.8mm"
+        },
+        {
+          "id": "61.5",
+          "label_fa": "۶۱.۵ میلی‌متر (کارامبول)",
+          "label_en": "61.5mm"
+        }
+      ],
+      "set_types": [
+        {
+          "id": "single",
+          "label_fa": "تک توپ"
+        }
+      ]
+    }
+  ],
+  "heyball_note_fa": "نوع «هی‌بال» در دسته توپ عمداً وجود ندارد: هی‌بال از همان توپ ۵۷.۱۵ میلی‌متری پاکت بیلیارد استفاده می‌کند و ست اختصاصی ندارد. اگر خواستی برای کاربر واضح‌تر شود، می‌توانی زیر گزینه «پاکت بیلیارد» بنویسی «شامل هی‌بال» یا در جستجو «هی‌بال» را به پاکت بیلیارد نگاشت کنی."
+}

@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { sb, rpc, actorFromRequest, isAdmin, clientIp } from '@/lib/finance/db';
 import { viewerHash } from '@/lib/ads/preroll';
 import { normalizeCategory, normalizeCondition } from '@/lib/market/categories';
-import { validateOnServer, getBrand, TYPE_PREFIX } from '@/lib/market/catalog'
+import { validateOnServer, getBrand, TYPE_PREFIX, isAccessoryCategory, ACCESSORY_TYPE_OF, type CatalogId } from '@/lib/market/catalog'
 import { hasSpecCatalog, validateSpecsOnServer } from '@/lib/market/spec-catalog'
 import { normalizeAdImages } from '@/lib/market/images';
 
@@ -133,10 +133,11 @@ export async function PATCH(req: NextRequest, ctx: { params: Promise<{ id: strin
   }
 
   const catType = str(cat === 'cue' ? b?.cueType : cat === 'table' ? b?.tableType : b?.catalogType, 40);
-  if ((cat === 'cue' || cat === 'table' || cat === 'cloth' || cat === 'chalk' || cat === 'tip') && catType) {
+  if ((cat === 'cue' || cat === 'table' || cat === 'cloth' || cat === 'chalk' || cat === 'tip' || isAccessoryCategory(cat)) && catType) {
     const brandId = str(b?.brandId, 80) || null;
     const check = validateOnServer({
-      category: cat,
+      /* دسته‌های لوازم زیرِ یک کاتالوگِ مشترک‌اند */
+      category: (isAccessoryCategory(cat) ? 'accessories' : cat) as CatalogId,
       type: catType,
       brandId,
       brandCustom: brandId ? null : str(b?.brand, 80) || null,

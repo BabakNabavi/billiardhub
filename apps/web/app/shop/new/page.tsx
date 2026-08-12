@@ -15,7 +15,7 @@ import { CATEGORY_OPTIONS, CONDITIONS, conditionLabel } from '../../../lib/marke
    جزئیاتِ محصول هم بتواند برچسبِ فارسیِ هر کلید را بخواند. */
 import { GENERIC_SPECS, CATEGORY_SPECS, HIDDEN_SPEC_KEYS } from '../../../lib/market/specs'
 import { productTitleParts } from '../../../lib/market/title'
-import { typeIdOf, type CatalogId } from '../../../lib/market/catalog-rules'
+import { typeIdOf, isAccessoryCategory, ACCESSORY_TYPE_OF, type CatalogId } from '../../../lib/market/catalog-rules'
 import CatalogSelector, { EMPTY_CATALOG_VALUE, type CatalogValue, useCatalogType, useCatalogTypes } from '../../../components/market/CatalogSelector'
 import { SpecFieldRow, SpecProgress, useSpecFields, specKey } from '../../../components/market/SpecFields'
 import { splitFields, countFilled, applySpecChange, isFieldLocked, isFieldHidden, fillFromModel, fromLegacyDefs, type SpecField, type LegacySpecDef } from '../../../lib/market/spec-rules'
@@ -154,11 +154,18 @@ export default function NewProductPage() {
      فقط وقتی دسته یکی از این دو است و نوعش در همان کاتالوگ هست.
      خالی یعنی همان مسیرِ قدیمیِ `chain.ts` — بقیه‌ی دسته‌ها
      (تیپ، گچ، توپ، …) دست‌نخورده‌اند. */
+  /* ── کدام دسته‌ها کاتالوگ دارند ──
+     پنج دسته کاتالوگِ خودشان را دارند و ده دسته‌ی لوازم زیرِ یک
+     کاتالوگِ مشترک‌اند که نوعش همان دسته است. */
   const catCategory: CatalogId | null =
     form.category === 'cue' || form.category === 'table' || form.category === 'cloth'
-      || form.category === 'chalk' || form.category === 'tip'
-      ? form.category : null
-  const catTypeId = catCategory ? typeIdOf(catCategory, form.type) : ''
+      || form.category === 'chalk' || form.category === 'tip' ? form.category
+      : isAccessoryCategory(form.category) ? 'accessories' : null
+  /* پارچه دو جا هست: کاتالوگِ خودش (برند/مدل) و دسته‌ی لوازم
+     (مشخصات). برندش از کاتالوگِ پارچه می‌آید، نه از لوازم. */
+  const catTypeId = catCategory === 'accessories'
+    ? ACCESSORY_TYPE_OF[form.category] ?? ''
+    : catCategory ? typeIdOf(catCategory, form.type) : ''
   const catTypeRows = useCatalogTypes(catCategory)
   /* همان ورودیِ کش‌شده‌ی انتخابگر — درخواستِ تازه‌ای نمی‌زند */
   const { fields: catalogSpecs, loading: specsLoading } = useSpecFields(form.category)

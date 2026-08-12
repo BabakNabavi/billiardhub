@@ -23,6 +23,7 @@ import tableRaw from '../../data/table_catalog.json'
 import clothRaw from '../../data/cloth_catalog.json'
 import chalkRaw from '../../data/chalk_catalog.json'
 import tipRaw from '../../data/tip_catalog.json'
+import accRaw from '../../data/accessories_catalog.json'
 import {
   validateSelection,
   type CatalogBrand, type CatalogCountry, type CatalogId, type CatalogModel,
@@ -31,10 +32,49 @@ import {
 
 export * from './catalog-rules'
 
+interface AccessoryCategory {
+  id: string
+  label_fa: string
+  icon?: string
+  has_brands?: boolean
+  force_free_input?: boolean
+  external_catalog?: string
+  brands?: CatalogBrand[]
+  specs?: SpecFieldLike[]
+}
+
+/* شکلِ فیلدِ مشخصات این‌جا تکرار نمی‌شود — از `spec-rules` می‌آید */
+type SpecFieldLike = Record<string, unknown>
+
 interface CatalogFile {
   types: CatalogType[]
   countries: Record<string, CatalogCountry>
 }
+
+/* ── لوازم جانبی، هم‌شکلِ بقیه ──
+   فایلش `categories[]` دارد نه `types[]`، و `specs` را داخلِ خودِ
+   دسته نگه می‌دارد. به‌جای اینکه هر مصرف‌کننده این تفاوت را بداند،
+   همین‌جا به همان شکلِ همیشگی درمی‌آید — پس انتخابگر و مسیرِ API و
+   اعتبارسنجی هیچ‌کدام تغییری نمی‌خواهند. */
+const accFile: CatalogFile = {
+  countries: (accRaw as unknown as { countries: Record<string, CatalogCountry> }).countries,
+  types: (accRaw as unknown as { categories: AccessoryCategory[] }).categories.map(c => ({
+    id: c.id,
+    label_fa: c.label_fa,
+    brands: c.brands ?? [],
+    force_free_input: c.force_free_input || c.has_brands === false,
+  })),
+}
+
+/** فیلدهای مشخصات، از داخلِ خودِ دسته‌ی لوازم */
+export const accessorySpecs = (typeId: string) =>
+  (accRaw as unknown as { categories: AccessoryCategory[] }).categories
+    .find(c => c.id === typeId)?.specs ?? []
+
+/** ایموجیِ دسته — روی ردیفِ دراپ‌داون می‌نشیند */
+export const accessoryIcon = (typeId: string) =>
+  (accRaw as unknown as { categories: AccessoryCategory[] }).categories
+    .find(c => c.id === typeId)?.icon ?? ''
 
 const FILES: Record<CatalogId, CatalogFile> = {
   cue: cueRaw as unknown as CatalogFile,
@@ -42,6 +82,7 @@ const FILES: Record<CatalogId, CatalogFile> = {
   cloth: clothRaw as unknown as CatalogFile,
   chalk: chalkRaw as unknown as CatalogFile,
   tip: tipRaw as unknown as CatalogFile,
+  accessories: accFile,
 }
 
 /* ── کشورها از هر سه کاتالوگ ادغام می‌شوند ──
@@ -59,6 +100,7 @@ const ALL_COUNTRIES: Record<string, CatalogCountry> = {
   ...(clothRaw as unknown as CatalogFile).countries,
   ...(chalkRaw as unknown as CatalogFile).countries,
   ...(tipRaw as unknown as CatalogFile).countries,
+  ...accFile.countries,
   ...(tableRaw as unknown as CatalogFile).countries,
 }
 

@@ -21,7 +21,7 @@
 
 import { normalizeFa } from '../text-fa'
 
-export const CATALOG_IDS = ['cue', 'table', 'cloth', 'chalk', 'tip'] as const
+export const CATALOG_IDS = ['cue', 'table', 'cloth', 'chalk', 'tip', 'accessories'] as const
 export type CatalogId = typeof CATALOG_IDS[number]
 
 export const isCatalogId = (v: unknown): v is CatalogId =>
@@ -53,7 +53,28 @@ export const TYPE_IDS: Record<CatalogId, readonly string[]> = {
      آمریکایی ۱۱.۷۵ تا ۱۴ و اغلب لایه‌لایه. سایز و مدل هیچ‌کدام
      بینِ دو رشته مشترک نیستند. */
   tip: ['snooker', 'pocket_billiard', 'carom'],
+  /* ── لوازم جانبی ──
+     این‌جا سطحِ «نوع» وجود ندارد: خودِ دسته‌ی محصول همان نوع است.
+     انتخابگر این را بدونِ تغییر می‌پذیرد چون هیچ‌وقت نمی‌داند
+     «نوع» یعنی چه — دو رشته می‌گیرد و از مسیرِ کاتالوگ می‌خواند.
+     پس دسته‌ی سایت در همان شکافی می‌نشیند که برای بقیه «نوع» بود. */
+  accessories: ['cue_case', 'extension', 'ball_bag', 'rest', 'cloth',
+    'oil', 'towel', 'apparel', 'accessory', 'other'],
 }
+
+/* ── دسته‌ی سایت ⟵ نوعِ کاتالوگِ لوازم ──
+   شناسه‌های سایت خط‌تیره دارند و بعضی نامشان فرق می‌کند
+   (`clothing` در برابر `apparel`). این نگاشت تنها جایی است که آن
+   دو به هم می‌رسند. */
+export const ACCESSORY_TYPE_OF: Record<string, string> = {
+  'cue-case': 'cue_case', extension: 'extension', 'ball-bag': 'ball_bag',
+  rest: 'rest', cloth: 'cloth', oil: 'oil', towel: 'towel',
+  clothing: 'apparel', accessory: 'accessory', other: 'other',
+}
+
+/** آیا این دسته‌ی سایت از کاتالوگِ لوازم می‌آید؟ */
+export const isAccessoryCategory = (c: string): boolean =>
+  Object.prototype.hasOwnProperty.call(ACCESSORY_TYPE_OF, c)
 
 /** پیشوندِ شناسه‌ی برند — سرور با همین تعلقِ برند به نوع را می‌سنجد */
 export const TYPE_PREFIX: Record<CatalogId, Record<string, string>> = {
@@ -78,6 +99,12 @@ export const TYPE_PREFIX: Record<CatalogId, Record<string, string>> = {
      می‌سنجد هیچ شناسه‌ی برندی بینِ دو کاتالوگ مشترک نشود. */
   tip: {
     snooker: 'tsnk__', pocket_billiard: 'tpkt__', carom: 'tcar__',
+  },
+  accessories: {
+    cue_case: 'case__', extension: 'ext__', ball_bag: 'ballbag__',
+    rest: 'rest__', oil: 'oil__', towel: 'twl__', apparel: 'apr__',
+    accessory: 'acc__',
+    /* «پارچه» برندش از کاتالوگِ پارچه می‌آید و «سایر» برند ندارد */
   },
 }
 
@@ -122,6 +149,9 @@ export const TYPE_BY_FA: Record<CatalogId, Record<string, string>> = {
     'پاکت بیلیارد': 'pocket_billiard',
     'کارامبول': 'carom',
   },
+  /* لوازم برچسبِ فارسیِ «نوع» ندارد — نوعش از خودِ دسته می‌آید
+     (`ACCESSORY_TYPE_OF`). خالی می‌ماند تا شکلِ تایپ کامل باشد. */
+  accessories: {},
 }
 
 export const typeIdOf = (category: CatalogId, faLabel: string): string =>

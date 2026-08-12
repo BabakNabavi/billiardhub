@@ -52,6 +52,10 @@ export interface SpecField {
      «تعداد لایه» فقط برای تیپِ لایه‌لایه معنا دارد. داده خودش
      می‌گوید با کدام مقدارهای `construction` دیده شود. */
   depends_on_construction?: string[]
+  /* ── همان الگو، روی فیلدِ «نوع»ِ خودِ دسته ──
+     «دستِ دستکش» فقط وقتی معنا دارد که نوعِ پوشاک دستکش باشد.
+     نامِ فیلدِ والد با پسوندِ `_type` در همان دسته پیدا می‌شود. */
+  depends_on_type?: string[]
 }
 
 export interface SpecCatalogShape {
@@ -264,6 +268,12 @@ export const dependentsOf = (fields: SpecField[], id: string): SpecField[] =>
 export function isFieldHidden(
   field: SpecField, values: Record<string, unknown>, fields: SpecField[],
 ): boolean {
+  if (field.depends_on_type) {
+    /* فیلدِ والد تنها فیلدی است که شناسه‌اش به `_type` ختم می‌شود */
+    const parent = fields.find(f => f.id.endsWith('_type') && f.id !== field.id)
+    const v = parent ? String(values[specKey(parent.id)] ?? '') : ''
+    return !field.depends_on_type.includes(v)
+  }
   if (field.depends_on_construction) {
     const c = String(values[specKey('construction')] ?? '')
     return !field.depends_on_construction.includes(c)
