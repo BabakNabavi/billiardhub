@@ -2323,6 +2323,47 @@ console.log('\n― کاتالوگِ میز ―');
 }
 
 
+/* ── واژه‌ی «پول» ──
+   در بازار ایران کسی «پول» را به‌معنای Pool نمی‌شناسد. برچسب‌های
+   نمایشی به «پاکت بیلیارد» رفتند؛ شناسه‌ها (`pool`, `pocket`,
+   `pocket_billiard`) عمداً دست‌نخورده‌اند چون کلیدِ داده‌اند.
+
+   این تست فقط جاهایی را می‌بیند که «پول» در متنِ **رشته یا برچسبِ
+   ورزشی** بیاید — «پولِ» مالی (پرداخت، تسویه، بازپرداخت) کارِ
+   دیگری است و نباید عوض شود. */
+console.log('\n― واژه‌ی پاکت بیلیارد ―');
+{
+  const SPORT = [
+    'پول آمریکایی', 'پول انگلیسی', 'میز پول', 'چوب پول', 'توپ پول',
+    "'پول'", '"پول"', '>پول ', 'پول ۸',
+  ];
+  const files = [
+    'lib/roles.ts', 'app/profile/[userId]/page.tsx', 'app/results/page.tsx',
+    'app/seller/[id]/page.tsx', 'app/admin/tournaments/page.tsx',
+    'lib/market/specs.ts', 'lib/market/chain.ts',
+  ];
+  const hits = [];
+  for (const f of files) {
+    /* خودِ نگاشتِ سازگاری عمداً «پول» دارد — همان چیزی است که
+       داده‌ی قدیمی را به نامِ تازه می‌رساند. از بازرسی بیرون است. */
+    const src = read(f).split('const LEGACY_DISCIPLINE')[0] + (read(f).split('export const normalizeDiscipline')[1] ?? '')
+    for (const s of SPORT) if (src.includes(s)) hits.push(f + ' → ' + s);
+  }
+  t('«پول» ورزشی جایی نمانده', hits.length === 0, hits.slice(0, 4).join(' | '));
+
+  /* شناسه‌ها نباید عوض شده باشند — کلیدِ دیتابیس‌اند */
+  t('شناسه‌ها دست‌نخورده‌اند',
+    read('app/admin/tournaments/page.tsx').includes('value="pool"')
+    && read('lib/market/catalog-rules.ts').includes("'pocket_billiard'"),
+    'تغییرِ شناسه یعنی داده‌ی موجود از فیلترها می‌افتد');
+
+  /* داده‌ی قدیمی «پول» ذخیره کرده و فهرست دیگر آن را ندارد */
+  t('نگاشتِ سازگاریِ داده‌ی قدیمی هست',
+    /normalizeDiscipline/.test(read('lib/roles.ts'))
+    && /normalizeDiscipline\(data\[f\.key\]\)/.test(read('app/profile/[userId]/page.tsx')),
+    'بدونش دراپ‌داونِ پروفایل‌های موجود خالی می‌افتد');
+}
+
 console.log('\n― CORS ―');
 {
   t('فایلِ مرده‌ی CORS حذف شد',

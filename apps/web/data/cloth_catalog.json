@@ -1,0 +1,1528 @@
+{
+  "schema_version": "2.0",
+  "last_updated": "2026-08-11",
+  "field": "cloth",
+  "label_fa": "پارچه میز",
+  "notes_fa": "لیست پارچه به نوع میز وابسته است: types[نوع].brands ← brands[].models. با تغییر نوع میز، برند و مدل پارچه ریست شوند.",
+  "important_fa": "پارچه با «برند + مدل» شناخته می‌شود، نه فقط برند. زیر یک برند مدل‌های کاملاً متفاوت هست: Strachan 6811 پرزدار سنگین اسنوکر، 777 سبک‌تر و سریع‌تر، 861 بدون پرز مخصوص پاکت بیلیارد.",
+  "heyball_note_fa": "هی‌بال پارچه‌ی خانواده‌ی اسنوکر می‌خورد، نه پاکت بیلیارد آمریکایی. به همین دلیل لیست هی‌بال تقریباً همان لیست اسنوکر است، به‌علاوه‌ی چند مدل اختصاصی چاینیز پول. میز هی‌بال ۹ فوتی است ولی باند استیل‌بلاک و پاکت گرد اسنوکری دارد.",
+  "other_option": {
+    "id": "other",
+    "name_fa": "سایر",
+    "reveals_text_input": true,
+    "max_length": 60
+  },
+  "countries": {
+    "GB": {
+      "fa": "انگلستان",
+      "flag": "🇬🇧"
+    },
+    "BE": {
+      "fa": "بلژیک",
+      "flag": "🇧🇪"
+    },
+    "CN": {
+      "fa": "چین",
+      "flag": "🇨🇳"
+    },
+    "US": {
+      "fa": "آمریکا",
+      "flag": "🇺🇸"
+    },
+    "ES": {
+      "fa": "اسپانیا",
+      "flag": "🇪🇸"
+    },
+    "SG": {
+      "fa": "سنگاپور",
+      "flag": "🇸🇬"
+    },
+    "TW": {
+      "fa": "تایوان",
+      "flag": "🇹🇼"
+    },
+    "IR": {
+      "fa": "ایران",
+      "flag": "🇮🇷"
+    }
+  },
+  "cloth_types": [
+    {
+      "id": "napped",
+      "label_fa": "پرزدار / جهت‌دار",
+      "label_en": "Napped",
+      "note_fa": "سطح کرک‌دار، اصطکاک بیشتر، توپ کندتر. استاندارد اسنوکر و پاکت بیلیارد انگلیسی. جهت پرز به سمت انتهای میز است."
+    },
+    {
+      "id": "worsted",
+      "label_fa": "بدون پرز / فاستونی",
+      "label_en": "Worsted",
+      "note_fa": "سطح صاف و بدون جهت، توپ سریع‌تر و یکنواخت. استاندارد پاکت بیلیارد آمریکایی و کارامبول."
+    }
+  ],
+  "types": [
+    {
+      "id": "snooker",
+      "label_fa": "اسنوکر",
+      "label_en": "Snooker",
+      "note_fa": "استاندارد: پارچه پشمی پرزدار (napped). جهت پرز از سر میز به سمت انتهای میز است و روی مسیر توپ اثر می‌گذارد.",
+      "brands": [
+        {
+          "id": "snooker__strachan",
+          "name_en": "Strachan",
+          "name_fa": "استراچان",
+          "country": "GB",
+          "tier": "tournament",
+          "allow_free_model": true,
+          "note_fa": "انگلیسی، از پشم مرینوس. رایج‌ترین پارچه اسنوکر جهان",
+          "models": [
+            {
+              "id": "st-6811-t30",
+              "name_en": "6811 Tournament 30oz",
+              "name_fa": "۶۸۱۱ تورنمنت ۳۰ اونس",
+              "type": "napped",
+              "use": [
+                "snooker"
+              ],
+              "note_fa": "پرفروش‌ترین پارچه اسنوکر دنیا",
+              "weight_oz": "30"
+            },
+            {
+              "id": "st-6811-t32",
+              "name_en": "6811 Tournament 32oz",
+              "name_fa": "۶۸۱۱ تورنمنت ۳۲ اونس",
+              "type": "napped",
+              "use": [
+                "snooker"
+              ],
+              "note_fa": "نسخه سنگین‌تر، دوام بیشتر",
+              "weight_oz": "32"
+            },
+            {
+              "id": "st-6811-t29",
+              "name_en": "6811 Tournament 29oz",
+              "name_fa": "۶۸۱۱ تورنمنت ۲۹ اونس",
+              "type": "napped",
+              "use": [
+                "snooker",
+                "pocket_billiard"
+              ],
+              "weight_oz": "29"
+            },
+            {
+              "id": "st-6811-club",
+              "name_en": "6811 Club",
+              "name_fa": "۶۸۱۱ کلاب",
+              "type": "napped",
+              "use": [
+                "snooker"
+              ],
+              "note_fa": "رده باشگاهی، اقتصادی‌تر"
+            },
+            {
+              "id": "st-6811-newclub",
+              "name_en": "6811 New Club",
+              "name_fa": "۶۸۱۱ نیوکلاب",
+              "type": "napped",
+              "use": [
+                "snooker"
+              ]
+            },
+            {
+              "id": "st-777",
+              "name_en": "777 West of England",
+              "name_fa": "۷۷۷ وست آو انگلند",
+              "type": "napped",
+              "use": [
+                "snooker",
+                "pocket_billiard"
+              ],
+              "note_fa": "سبک‌تر و سریع‌تر از ۶۸۱۱، پرز ظریف‌تر",
+              "weight_oz": "28"
+            },
+            {
+              "id": "st-no10",
+              "name_en": "No.10 Championship",
+              "name_fa": "نامبر ۱۰ چمپیون‌شیپ",
+              "type": "napped",
+              "use": [
+                "snooker"
+              ],
+              "note_fa": "رده حرفه‌ای، بسیار سریع"
+            },
+            {
+              "id": "st-superfine",
+              "name_en": "Superfine",
+              "name_fa": "سوپرفاین",
+              "type": "napped",
+              "use": [
+                "snooker",
+                "pocket_billiard"
+              ],
+              "note_fa": "با فناوری Antikick، پارچه رسمی IBSF"
+            }
+          ],
+          "aliases": [
+            "استراچان",
+            "استراکان",
+            "استرچان",
+            "استرکان",
+            "استرن",
+            "Strachan"
+          ]
+        },
+        {
+          "id": "snooker__hainsworth",
+          "name_en": "Hainsworth",
+          "name_fa": "هینزورث",
+          "country": "GB",
+          "tier": "tournament",
+          "allow_free_model": true,
+          "note_fa": "انگلیسی، از ۱۷۸۳",
+          "models": [
+            {
+              "id": "hw-precision",
+              "name_en": "Precision",
+              "name_fa": "پرسیژن",
+              "type": "napped",
+              "use": [
+                "snooker",
+                "pocket_billiard"
+              ],
+              "note_fa": "سریع‌ترین پارچه پرزدار دنیا؛ نیازی به گرمکن زیر میز ندارد"
+            },
+            {
+              "id": "hw-match",
+              "name_en": "Match",
+              "name_fa": "مچ",
+              "type": "napped",
+              "use": [
+                "snooker",
+                "pocket_billiard"
+              ],
+              "note_fa": "رده تورنمنتی"
+            },
+            {
+              "id": "hw-smart",
+              "name_en": "Smart",
+              "name_fa": "اسمارت",
+              "type": "napped",
+              "use": [
+                "snooker",
+                "pocket_billiard"
+              ],
+              "note_fa": "۲۳ رنگ، بیشترین تنوع رنگ بازار"
+            },
+            {
+              "id": "hw-cushion",
+              "name_en": "Cushion Cloth",
+              "name_fa": "پارچه باند",
+              "type": "napped"
+            }
+          ],
+          "aliases": [
+            "هینزورث",
+            "هینسورث",
+            "هنزورث",
+            "هاینزورث",
+            "Hainsworth"
+          ]
+        },
+        {
+          "id": "snooker__pns",
+          "name_en": "PNS",
+          "name_fa": "پی‌ان‌اس",
+          "country": "CN",
+          "tier": "premium",
+          "allow_free_model": true,
+          "note_fa": "چینی، تأسیس ۱۹۹۵. جایگزین اقتصادی محبوب استراکان در بازار آسیا",
+          "models": [
+            {
+              "id": "pns-s147",
+              "name_en": "S147",
+              "name_fa": "اس ۱۴۷",
+              "type": "napped",
+              "use": [
+                "snooker"
+              ],
+              "note_fa": "پارچه رسمی بازی‌های مشترک‌المنافع ۲۰۲۵"
+            },
+            {
+              "id": "pns-990",
+              "name_en": "990",
+              "name_fa": "۹۹۰",
+              "type": "napped",
+              "use": [
+                "snooker"
+              ],
+              "note_fa": "بالاترین رده"
+            },
+            {
+              "id": "pns-720",
+              "name_en": "720",
+              "name_fa": "۷۲۰",
+              "type": "napped",
+              "use": [
+                "snooker"
+              ]
+            },
+            {
+              "id": "pns-6688",
+              "name_en": "6688",
+              "name_fa": "۶۶۸۸",
+              "type": "napped",
+              "use": [
+                "snooker",
+                "heyball"
+              ],
+              "note_fa": "رایج در میزهای ۹ فوت و هی‌بال"
+            },
+            {
+              "id": "pns-888",
+              "name_en": "888",
+              "name_fa": "۸۸۸",
+              "type": "napped",
+              "use": [
+                "snooker"
+              ],
+              "note_fa": "رده اقتصادی پرفروش"
+            }
+          ],
+          "aliases": [
+            "پی ان اس",
+            "پی‌ان‌اس",
+            "پی.ان.اس",
+            "PNS",
+            "P.N.S"
+          ]
+        },
+        {
+          "id": "snooker__liberwin",
+          "name_en": "Liberwin",
+          "name_fa": "لیبروین",
+          "country": "CN",
+          "tier": "premium",
+          "allow_free_model": true,
+          "note_fa": "چینی. سفیران برند: رونی اوسالیوان، دینگ جون‌هوی، جاد ترامپ",
+          "models": [
+            {
+              "id": "lw-68566",
+              "name_en": "68566",
+              "name_fa": "۶۸۵۶۶",
+              "type": "napped",
+              "use": [
+                "snooker"
+              ]
+            },
+            {
+              "id": "lw-68522",
+              "name_en": "68522",
+              "name_fa": "۶۸۵۲۲",
+              "type": "napped",
+              "use": [
+                "snooker",
+                "pocket_billiard"
+              ]
+            },
+            {
+              "id": "lw-68577",
+              "name_en": "68577",
+              "name_fa": "۶۸۵۷۷",
+              "type": "napped",
+              "use": [
+                "snooker"
+              ]
+            },
+            {
+              "id": "lw-drl",
+              "name_en": "DRL / Pingwen",
+              "name_fa": "دی‌آر‌ال",
+              "type": "napped",
+              "use": [
+                "snooker"
+              ]
+            },
+            {
+              "id": "lw-zhengfeng",
+              "name_en": "Zhengfeng (6811 style)",
+              "name_fa": "ژنگ‌فنگ",
+              "type": "napped",
+              "use": [
+                "snooker"
+              ],
+              "note_fa": "شبیه‌سازی ۶۸۱۱"
+            }
+          ],
+          "aliases": [
+            "لیبروین",
+            "لیبرواین",
+            "لیبر وین",
+            "Liberwin"
+          ]
+        },
+        {
+          "id": "snooker__wiraka",
+          "name_en": "Wiraka",
+          "name_fa": "ویراکا",
+          "country": "SG",
+          "tier": "premium",
+          "allow_free_model": true,
+          "note_fa": "سنگاپور/مالزی، از ۱۹۸۰. رایج در آسیا",
+          "models": [
+            {
+              "id": "wk-777",
+              "name_en": "777",
+              "name_fa": "۷۷۷",
+              "type": "napped",
+              "use": [
+                "snooker"
+              ]
+            },
+            {
+              "id": "wk-6811",
+              "name_en": "6811",
+              "name_fa": "۶۸۱۱",
+              "type": "napped",
+              "use": [
+                "snooker"
+              ]
+            },
+            {
+              "id": "wk-6565",
+              "name_en": "6565",
+              "name_fa": "۶۵۶۵",
+              "type": "napped",
+              "use": [
+                "snooker"
+              ]
+            },
+            {
+              "id": "wk-m1",
+              "name_en": "M1 Tournament",
+              "name_fa": "ام‌۱ تورنمنت",
+              "type": "napped",
+              "use": [
+                "snooker"
+              ]
+            }
+          ],
+          "aliases": [
+            "ویراکا",
+            "ویراکه",
+            "Wiraka"
+          ]
+        },
+        {
+          "id": "snooker__konllen-cloth",
+          "name_en": "Konllen",
+          "name_fa": "کانلن",
+          "country": "CN",
+          "tier": "mid",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "kn-wool",
+              "name_en": "Wool Felt Pre-cut",
+              "name_fa": "نمد پشمی پیش‌بریده",
+              "type": "napped",
+              "use": [
+                "snooker",
+                "heyball"
+              ]
+            }
+          ],
+          "aliases": [
+            "کانلن",
+            "کنلن",
+            "Konllen"
+          ]
+        },
+        {
+          "id": "snooker__iranian-cloth",
+          "name_en": "Iranian / Local",
+          "name_fa": "ایرانی / داخلی",
+          "country": "IR",
+          "tier": "mid",
+          "allow_free_model": true,
+          "note_fa": "در بازار ایران بسیار رایج است",
+          "models": [
+            {
+              "id": "ir-standard",
+              "name_en": "Local Standard",
+              "name_fa": "استاندارد داخلی"
+            },
+            {
+              "id": "ir-unknown",
+              "name_en": "Unknown Local",
+              "name_fa": "داخلی نامشخص"
+            }
+          ],
+          "aliases": [
+            "ایرانی",
+            "داخلی",
+            "تولید داخل"
+          ]
+        },
+        {
+          "id": "snooker__chinese-generic",
+          "name_en": "Chinese Unbranded",
+          "name_fa": "چینی بدون برند",
+          "country": "CN",
+          "tier": "budget",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "cn-6811-copy",
+              "name_en": "6811 Copy",
+              "name_fa": "کپی ۶۸۱۱",
+              "note_fa": "کپی‌های ۶۸۱۱ در بازار زیاد است؛ املای STRCAHAN به‌جای STRACHAN نشانه تقلبی بودن است"
+            },
+            {
+              "id": "cn-777-copy",
+              "name_en": "777 Copy",
+              "name_fa": "کپی ۷۷۷"
+            },
+            {
+              "id": "cn-generic",
+              "name_en": "Generic Wool/Nylon",
+              "name_fa": "پشم-نایلون معمولی"
+            }
+          ],
+          "aliases": [
+            "چینی",
+            "بدون برند چینی"
+          ]
+        },
+        {
+          "id": "snooker__unknown-cloth",
+          "name_en": "Unknown / Unbranded",
+          "name_fa": "نامشخص / بدون برند",
+          "country": null,
+          "tier": "budget",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "uk-unknown",
+              "name_en": "Unknown",
+              "name_fa": "نامشخص"
+            }
+          ],
+          "aliases": [
+            "نامشخص",
+            "بدون برند"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pocket_billiard",
+      "label_fa": "پاکت بیلیارد",
+      "label_en": "Pocket Billiards",
+      "note_fa": "دو حالت دارد: میز آمریکایی معمولاً پارچه بدون پرز (worsted) و سریع — میز انگلیسی معمولاً پرزدار و کندتر.",
+      "brands": [
+        {
+          "id": "pocket_billiard__strachan",
+          "name_en": "Strachan",
+          "name_fa": "استراچان",
+          "country": "GB",
+          "tier": "tournament",
+          "allow_free_model": true,
+          "note_fa": "انگلیسی، از پشم مرینوس. رایج‌ترین پارچه اسنوکر جهان",
+          "models": [
+            {
+              "id": "st-6811-t29",
+              "name_en": "6811 Tournament 29oz",
+              "name_fa": "۶۸۱۱ تورنمنت ۲۹ اونس",
+              "type": "napped",
+              "use": [
+                "snooker",
+                "pocket_billiard"
+              ],
+              "weight_oz": "29"
+            },
+            {
+              "id": "st-6811-pool",
+              "name_en": "6811 Pool",
+              "name_fa": "۶۸۱۱ پاکت بیلیارد",
+              "type": "napped",
+              "use": [
+                "pocket_billiard"
+              ],
+              "note_fa": "مقاوم‌تر از ۷۷۷، مناسب باشگاه"
+            },
+            {
+              "id": "st-777",
+              "name_en": "777 West of England",
+              "name_fa": "۷۷۷ وست آو انگلند",
+              "type": "napped",
+              "use": [
+                "snooker",
+                "pocket_billiard"
+              ],
+              "note_fa": "سبک‌تر و سریع‌تر از ۶۸۱۱، پرز ظریف‌تر",
+              "weight_oz": "28"
+            },
+            {
+              "id": "st-superfine",
+              "name_en": "Superfine",
+              "name_fa": "سوپرفاین",
+              "type": "napped",
+              "use": [
+                "snooker",
+                "pocket_billiard"
+              ],
+              "note_fa": "با فناوری Antikick، پارچه رسمی IBSF"
+            },
+            {
+              "id": "st-861",
+              "name_en": "861",
+              "name_fa": "۸۶۱",
+              "type": "worsted",
+              "use": [
+                "pocket_billiard"
+              ],
+              "note_fa": "بدون پرز، پارچه رسمی IPA؛ همان Simonis 861"
+            },
+            {
+              "id": "st-superpro",
+              "name_en": "SuperPro",
+              "name_fa": "سوپرپرو",
+              "type": "worsted",
+              "use": [
+                "pocket_billiard"
+              ],
+              "note_fa": "با SpillGuard، ۱۰ رنگ"
+            }
+          ],
+          "aliases": [
+            "استراچان",
+            "استراکان",
+            "استرچان",
+            "استرکان",
+            "استرن",
+            "Strachan"
+          ]
+        },
+        {
+          "id": "pocket_billiard__hainsworth",
+          "name_en": "Hainsworth",
+          "name_fa": "هینزورث",
+          "country": "GB",
+          "tier": "tournament",
+          "allow_free_model": true,
+          "note_fa": "انگلیسی، از ۱۷۸۳",
+          "models": [
+            {
+              "id": "hw-precision",
+              "name_en": "Precision",
+              "name_fa": "پرسیژن",
+              "type": "napped",
+              "use": [
+                "snooker",
+                "pocket_billiard"
+              ],
+              "note_fa": "سریع‌ترین پارچه پرزدار دنیا؛ نیازی به گرمکن زیر میز ندارد"
+            },
+            {
+              "id": "hw-match",
+              "name_en": "Match",
+              "name_fa": "مچ",
+              "type": "napped",
+              "use": [
+                "snooker",
+                "pocket_billiard"
+              ],
+              "note_fa": "رده تورنمنتی"
+            },
+            {
+              "id": "hw-smart",
+              "name_en": "Smart",
+              "name_fa": "اسمارت",
+              "type": "napped",
+              "use": [
+                "snooker",
+                "pocket_billiard"
+              ],
+              "note_fa": "۲۳ رنگ، بیشترین تنوع رنگ بازار"
+            },
+            {
+              "id": "hw-club",
+              "name_en": "Club",
+              "name_fa": "کلاب",
+              "type": "napped",
+              "use": [
+                "pocket_billiard"
+              ],
+              "note_fa": "رده اقتصادی همه‌کاره"
+            },
+            {
+              "id": "hw-elite-pro",
+              "name_en": "Elite Pro",
+              "name_fa": "الیت پرو",
+              "type": "worsted",
+              "use": [
+                "pocket_billiard"
+              ],
+              "note_fa": "بدون پرز، انتخاب اول پاکت بیلیارد آمریکایی، +۲۰ رنگ"
+            },
+            {
+              "id": "hw-cushion",
+              "name_en": "Cushion Cloth",
+              "name_fa": "پارچه باند",
+              "type": "napped"
+            }
+          ],
+          "aliases": [
+            "هینزورث",
+            "هینسورث",
+            "هنزورث",
+            "هاینزورث",
+            "Hainsworth"
+          ]
+        },
+        {
+          "id": "pocket_billiard__simonis",
+          "name_en": "Iwan Simonis",
+          "name_fa": "سیمونیس",
+          "country": "BE",
+          "tier": "tournament",
+          "allow_free_model": true,
+          "note_fa": "بلژیکی، از ۱۶۸۰. تنها کارخانه‌ای که فقط پارچه بیلیارد می‌بافد",
+          "models": [
+            {
+              "id": "si-860",
+              "name_en": "860",
+              "name_fa": "۸۶۰",
+              "type": "worsted",
+              "use": [
+                "pocket_billiard"
+              ],
+              "note_fa": "استاندارد جهانی پول، ۹۰٪ پشم / ۱۰٪ نایلون",
+              "weight_oz": "12"
+            },
+            {
+              "id": "si-760",
+              "name_en": "760",
+              "name_fa": "۷۶۰",
+              "type": "worsted",
+              "use": [
+                "pocket_billiard"
+              ],
+              "note_fa": "۱۰ تا ۱۵٪ سریع‌تر از ۸۶۰"
+            },
+            {
+              "id": "si-920",
+              "name_en": "920",
+              "name_fa": "۹۲۰",
+              "type": "worsted",
+              "use": [
+                "pocket_billiard"
+              ]
+            },
+            {
+              "id": "si-861",
+              "name_en": "861",
+              "name_fa": "۸۶۱",
+              "type": "worsted",
+              "use": [
+                "pocket_billiard"
+              ],
+              "note_fa": "همان Strachan 861"
+            }
+          ],
+          "aliases": [
+            "سیمونیس",
+            "سایمونیس",
+            "ایوان سیمونیس",
+            "Simonis",
+            "Iwan Simonis"
+          ]
+        },
+        {
+          "id": "pocket_billiard__pns",
+          "name_en": "PNS",
+          "name_fa": "پی‌ان‌اس",
+          "country": "CN",
+          "tier": "premium",
+          "allow_free_model": true,
+          "note_fa": "چینی، تأسیس ۱۹۹۵. جایگزین اقتصادی محبوب استراکان در بازار آسیا",
+          "models": [
+            {
+              "id": "pns-760",
+              "name_en": "760",
+              "name_fa": "۷۶۰",
+              "type": "worsted",
+              "use": [
+                "pocket_billiard"
+              ]
+            },
+            {
+              "id": "pns-900",
+              "name_en": "900",
+              "name_fa": "۹۰۰",
+              "type": "worsted",
+              "use": [
+                "pocket_billiard"
+              ]
+            },
+            {
+              "id": "pns-988",
+              "name_en": "988",
+              "name_fa": "۹۸۸",
+              "type": "worsted",
+              "use": [
+                "pocket_billiard"
+              ]
+            }
+          ],
+          "aliases": [
+            "پی ان اس",
+            "پی‌ان‌اس",
+            "پی.ان.اس",
+            "PNS",
+            "P.N.S"
+          ]
+        },
+        {
+          "id": "pocket_billiard__liberwin",
+          "name_en": "Liberwin",
+          "name_fa": "لیبروین",
+          "country": "CN",
+          "tier": "premium",
+          "allow_free_model": true,
+          "note_fa": "چینی. سفیران برند: رونی اوسالیوان، دینگ جون‌هوی، جاد ترامپ",
+          "models": [
+            {
+              "id": "lw-68522",
+              "name_en": "68522",
+              "name_fa": "۶۸۵۲۲",
+              "type": "napped",
+              "use": [
+                "snooker",
+                "pocket_billiard"
+              ]
+            },
+            {
+              "id": "lw-900",
+              "name_en": "900",
+              "name_fa": "۹۰۰",
+              "type": "worsted",
+              "use": [
+                "pocket_billiard"
+              ]
+            }
+          ],
+          "aliases": [
+            "لیبروین",
+            "لیبرواین",
+            "لیبر وین",
+            "Liberwin"
+          ]
+        },
+        {
+          "id": "pocket_billiard__andy",
+          "name_en": "Andy Cloth",
+          "name_fa": "اندی",
+          "country": "TW",
+          "tier": "premium",
+          "allow_free_model": true,
+          "note_fa": "تایوانی، رایج در بازار آسیا",
+          "models": [
+            {
+              "id": "an-988",
+              "name_en": "Andy 988",
+              "name_fa": "اندی ۹۸۸",
+              "type": "worsted",
+              "use": [
+                "pocket_billiard"
+              ]
+            },
+            {
+              "id": "an-standard",
+              "name_en": "Andy Standard",
+              "name_fa": "اندی استاندارد",
+              "type": "worsted",
+              "use": [
+                "pocket_billiard"
+              ]
+            }
+          ],
+          "aliases": [
+            "اندی",
+            "آندی",
+            "Andy"
+          ]
+        },
+        {
+          "id": "pocket_billiard__championship",
+          "name_en": "Championship Billiard Fabrics",
+          "name_fa": "چمپیون‌شیپ",
+          "country": "US",
+          "tier": "premium",
+          "allow_free_model": true,
+          "note_fa": "آمریکایی",
+          "models": [
+            {
+              "id": "ch-tour",
+              "name_en": "Tour Edition",
+              "name_fa": "تور ادیشن",
+              "type": "worsted",
+              "use": [
+                "pocket_billiard"
+              ],
+              "note_fa": "رقیب سیمونیس با قیمت کمتر"
+            },
+            {
+              "id": "ch-saturn",
+              "name_en": "Saturn II",
+              "name_fa": "ساترن II",
+              "type": "napped",
+              "use": [
+                "pocket_billiard"
+              ],
+              "note_fa": "پرفروش‌ترین پارچه پرزدار آمریکا"
+            },
+            {
+              "id": "ch-invitational",
+              "name_en": "Invitational",
+              "name_fa": "اینویتیشنال",
+              "type": "napped",
+              "use": [
+                "pocket_billiard"
+              ]
+            },
+            {
+              "id": "ch-mercury",
+              "name_en": "Mercury Ultra",
+              "name_fa": "مرکوری اولترا",
+              "type": "worsted",
+              "use": [
+                "pocket_billiard"
+              ]
+            }
+          ],
+          "aliases": [
+            "چمپیون‌شیپ",
+            "چمپیونشیپ",
+            "چمپیون شیپ",
+            "Championship"
+          ]
+        },
+        {
+          "id": "pocket_billiard__gorina",
+          "name_en": "Gorina",
+          "name_fa": "گورینا",
+          "country": "ES",
+          "tier": "premium",
+          "allow_free_model": true,
+          "note_fa": "اسپانیایی، رایج در کارامبول",
+          "models": [
+            {
+              "id": "go-granito",
+              "name_en": "Granito",
+              "name_fa": "گرانیتو",
+              "type": "worsted",
+              "use": [
+                "pocket_billiard",
+                "carom"
+              ]
+            },
+            {
+              "id": "go-basalt",
+              "name_en": "Basalt",
+              "name_fa": "بازالت",
+              "type": "worsted",
+              "use": [
+                "pocket_billiard"
+              ]
+            }
+          ],
+          "aliases": [
+            "گورینا",
+            "قورینا",
+            "Gorina"
+          ]
+        },
+        {
+          "id": "pocket_billiard__aramith-cloth",
+          "name_en": "Aramith",
+          "name_fa": "آرامیت",
+          "country": "BE",
+          "tier": "mid",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "ar-tournament",
+              "name_en": "Tournament Cloth",
+              "name_fa": "پارچه تورنمنت",
+              "type": "worsted",
+              "use": [
+                "pocket_billiard"
+              ]
+            }
+          ],
+          "aliases": [
+            "آرامیت",
+            "آرامیث",
+            "اramith",
+            "Aramith"
+          ]
+        },
+        {
+          "id": "pocket_billiard__cpba",
+          "name_en": "CPBA",
+          "name_fa": "سی‌پی‌بی‌ای",
+          "country": "CN",
+          "tier": "mid",
+          "allow_free_model": true,
+          "note_fa": "چینی، رایج در چاینیز ۸-بال",
+          "models": [
+            {
+              "id": "cp-mg700",
+              "name_en": "MG-700 Series",
+              "name_fa": "سری MG-700",
+              "type": "worsted",
+              "use": [
+                "pocket_billiard",
+                "heyball"
+              ]
+            }
+          ],
+          "aliases": [
+            "سی پی بی ای",
+            "CPBA"
+          ]
+        },
+        {
+          "id": "pocket_billiard__mangorun",
+          "name_en": "MangoRun",
+          "name_fa": "منگورون",
+          "country": "CN",
+          "tier": "budget",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "mr-standard",
+              "name_en": "Standard",
+              "name_fa": "استاندارد",
+              "type": "worsted",
+              "use": [
+                "pocket_billiard"
+              ]
+            }
+          ],
+          "aliases": [
+            "منگورون",
+            "مانگورون",
+            "MangoRun"
+          ]
+        },
+        {
+          "id": "pocket_billiard__iranian-cloth",
+          "name_en": "Iranian / Local",
+          "name_fa": "ایرانی / داخلی",
+          "country": "IR",
+          "tier": "mid",
+          "allow_free_model": true,
+          "note_fa": "در بازار ایران بسیار رایج است",
+          "models": [
+            {
+              "id": "ir-standard",
+              "name_en": "Local Standard",
+              "name_fa": "استاندارد داخلی"
+            },
+            {
+              "id": "ir-unknown",
+              "name_en": "Unknown Local",
+              "name_fa": "داخلی نامشخص"
+            }
+          ],
+          "aliases": [
+            "ایرانی",
+            "داخلی",
+            "تولید داخل"
+          ]
+        },
+        {
+          "id": "pocket_billiard__chinese-generic",
+          "name_en": "Chinese Unbranded",
+          "name_fa": "چینی بدون برند",
+          "country": "CN",
+          "tier": "budget",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "cn-6811-copy",
+              "name_en": "6811 Copy",
+              "name_fa": "کپی ۶۸۱۱",
+              "note_fa": "کپی‌های ۶۸۱۱ در بازار زیاد است؛ املای STRCAHAN به‌جای STRACHAN نشانه تقلبی بودن است"
+            },
+            {
+              "id": "cn-777-copy",
+              "name_en": "777 Copy",
+              "name_fa": "کپی ۷۷۷"
+            },
+            {
+              "id": "cn-generic",
+              "name_en": "Generic Wool/Nylon",
+              "name_fa": "پشم-نایلون معمولی"
+            }
+          ],
+          "aliases": [
+            "چینی",
+            "بدون برند چینی"
+          ]
+        },
+        {
+          "id": "pocket_billiard__unknown-cloth",
+          "name_en": "Unknown / Unbranded",
+          "name_fa": "نامشخص / بدون برند",
+          "country": null,
+          "tier": "budget",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "uk-unknown",
+              "name_en": "Unknown",
+              "name_fa": "نامشخص"
+            }
+          ],
+          "aliases": [
+            "نامشخص",
+            "بدون برند"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "heyball",
+      "label_fa": "هی‌بال",
+      "label_en": "Heyball",
+      "note_fa": "پارچه از خانواده‌ی اسنوکر است، نه پاکت بیلیارد آمریکایی. هم پرزدار و هم بدون‌پرز استفاده می‌شود؛ بستگی به تورنمنت دارد.",
+      "brands": [
+        {
+          "id": "heyball__hainsworth",
+          "name_en": "Hainsworth",
+          "name_fa": "هینزورث",
+          "country": "GB",
+          "tier": "tournament",
+          "allow_free_model": true,
+          "note_fa": "انگلیسی، از ۱۷۸۳",
+          "models": [
+            {
+              "id": "hw-chinese",
+              "name_en": "Chinese Pool Cloth",
+              "name_fa": "پارچه چاینیز پاکت بیلیارد",
+              "type": "worsted",
+              "use": [
+                "heyball"
+              ],
+              "note_fa": "مخصوص هی‌بال"
+            },
+            {
+              "id": "hw-cushion",
+              "name_en": "Cushion Cloth",
+              "name_fa": "پارچه باند",
+              "type": "napped"
+            },
+            {
+              "id": "hw-chinese-pro",
+              "name_en": "Chinese Pool Pro",
+              "name_fa": "چاینیز پول پرو",
+              "type": "worsted",
+              "use": [
+                "heyball"
+              ],
+              "note_fa": "نسخه سریع مخصوص هی‌بال"
+            }
+          ],
+          "aliases": [
+            "هینزورث",
+            "هینسورث",
+            "هنزورث",
+            "هاینزورث",
+            "Hainsworth"
+          ]
+        },
+        {
+          "id": "heyball__pns",
+          "name_en": "PNS",
+          "name_fa": "پی‌ان‌اس",
+          "country": "CN",
+          "tier": "premium",
+          "allow_free_model": true,
+          "note_fa": "چینی، تأسیس ۱۹۹۵. جایگزین اقتصادی محبوب استراکان در بازار آسیا",
+          "models": [
+            {
+              "id": "pns-6688",
+              "name_en": "6688",
+              "name_fa": "۶۶۸۸",
+              "type": "napped",
+              "use": [
+                "snooker",
+                "heyball"
+              ],
+              "note_fa": "رایج در میزهای ۹ فوت و هی‌بال"
+            }
+          ],
+          "aliases": [
+            "پی ان اس",
+            "پی‌ان‌اس",
+            "پی.ان.اس",
+            "PNS",
+            "P.N.S"
+          ]
+        },
+        {
+          "id": "heyball__liberwin",
+          "name_en": "Liberwin",
+          "name_fa": "لیبروین",
+          "country": "CN",
+          "tier": "premium",
+          "allow_free_model": true,
+          "note_fa": "چینی. سفیران برند: رونی اوسالیوان، دینگ جون‌هوی، جاد ترامپ",
+          "models": [
+            {
+              "id": "lw-heyball",
+              "name_en": "Heyball Series",
+              "name_fa": "سری هی‌بال",
+              "type": "napped",
+              "use": [
+                "heyball"
+              ]
+            }
+          ],
+          "aliases": [
+            "لیبروین",
+            "لیبرواین",
+            "لیبر وین",
+            "Liberwin"
+          ]
+        },
+        {
+          "id": "heyball__cpba",
+          "name_en": "CPBA",
+          "name_fa": "سی‌پی‌بی‌ای",
+          "country": "CN",
+          "tier": "mid",
+          "allow_free_model": true,
+          "note_fa": "چینی، رایج در چاینیز ۸-بال",
+          "models": [
+            {
+              "id": "cp-mg700",
+              "name_en": "MG-700 Series",
+              "name_fa": "سری MG-700",
+              "type": "worsted",
+              "use": [
+                "pocket_billiard",
+                "heyball"
+              ]
+            },
+            {
+              "id": "cp-competition",
+              "name_en": "Competition Series",
+              "name_fa": "سری کامپتیشن",
+              "type": "worsted",
+              "use": [
+                "heyball"
+              ]
+            },
+            {
+              "id": "cp-heyball",
+              "name_en": "Heyball Tournament",
+              "name_fa": "تورنمنت هی‌بال",
+              "type": "worsted",
+              "use": [
+                "heyball"
+              ]
+            }
+          ],
+          "aliases": [
+            "سی پی بی ای",
+            "CPBA"
+          ]
+        },
+        {
+          "id": "heyball__konllen-cloth",
+          "name_en": "Konllen",
+          "name_fa": "کانلن",
+          "country": "CN",
+          "tier": "mid",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "kn-wool",
+              "name_en": "Wool Felt Pre-cut",
+              "name_fa": "نمد پشمی پیش‌بریده",
+              "type": "napped",
+              "use": [
+                "snooker",
+                "heyball"
+              ]
+            }
+          ],
+          "aliases": [
+            "کانلن",
+            "کنلن",
+            "Konllen"
+          ]
+        },
+        {
+          "id": "heyball__iranian-cloth",
+          "name_en": "Iranian / Local",
+          "name_fa": "ایرانی / داخلی",
+          "country": "IR",
+          "tier": "mid",
+          "allow_free_model": true,
+          "note_fa": "در بازار ایران بسیار رایج است",
+          "models": [
+            {
+              "id": "ir-standard",
+              "name_en": "Local Standard",
+              "name_fa": "استاندارد داخلی"
+            },
+            {
+              "id": "ir-unknown",
+              "name_en": "Unknown Local",
+              "name_fa": "داخلی نامشخص"
+            }
+          ],
+          "aliases": [
+            "ایرانی",
+            "داخلی",
+            "تولید داخل"
+          ]
+        },
+        {
+          "id": "heyball__chinese-generic",
+          "name_en": "Chinese Unbranded",
+          "name_fa": "چینی بدون برند",
+          "country": "CN",
+          "tier": "budget",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "cn-6811-copy",
+              "name_en": "6811 Copy",
+              "name_fa": "کپی ۶۸۱۱",
+              "note_fa": "کپی‌های ۶۸۱۱ در بازار زیاد است؛ املای STRCAHAN به‌جای STRACHAN نشانه تقلبی بودن است"
+            },
+            {
+              "id": "cn-777-copy",
+              "name_en": "777 Copy",
+              "name_fa": "کپی ۷۷۷"
+            },
+            {
+              "id": "cn-generic",
+              "name_en": "Generic Wool/Nylon",
+              "name_fa": "پشم-نایلون معمولی"
+            }
+          ],
+          "aliases": [
+            "چینی",
+            "بدون برند چینی"
+          ]
+        },
+        {
+          "id": "heyball__unknown-cloth",
+          "name_en": "Unknown / Unbranded",
+          "name_fa": "نامشخص / بدون برند",
+          "country": null,
+          "tier": "budget",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "uk-unknown",
+              "name_en": "Unknown",
+              "name_fa": "نامشخص"
+            }
+          ],
+          "aliases": [
+            "نامشخص",
+            "بدون برند"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "carom",
+      "label_fa": "کارامبول",
+      "label_en": "Carom",
+      "note_fa": "پارچه بدون پرز و بسیار سریع، مخصوص برخوردهای مکرر با باند.",
+      "brands": [
+        {
+          "id": "carom__hainsworth",
+          "name_en": "Hainsworth",
+          "name_fa": "هینزورث",
+          "country": "GB",
+          "tier": "tournament",
+          "allow_free_model": true,
+          "note_fa": "انگلیسی، از ۱۷۸۳",
+          "models": [
+            {
+              "id": "hw-cushion",
+              "name_en": "Cushion Cloth",
+              "name_fa": "پارچه باند",
+              "type": "napped"
+            }
+          ],
+          "aliases": [
+            "هینزورث",
+            "هینسورث",
+            "هنزورث",
+            "هاینزورث",
+            "Hainsworth"
+          ]
+        },
+        {
+          "id": "carom__simonis",
+          "name_en": "Iwan Simonis",
+          "name_fa": "سیمونیس",
+          "country": "BE",
+          "tier": "tournament",
+          "allow_free_model": true,
+          "note_fa": "بلژیکی، از ۱۶۸۰. تنها کارخانه‌ای که فقط پارچه بیلیارد می‌بافد",
+          "models": [
+            {
+              "id": "si-300",
+              "name_en": "300 Rapide",
+              "name_fa": "۳۰۰ راپید",
+              "type": "worsted",
+              "use": [
+                "carom"
+              ],
+              "note_fa": "مخصوص کارامبول"
+            },
+            {
+              "id": "si-30",
+              "name_en": "30 / Carom",
+              "name_fa": "۳۰ کارامبول",
+              "type": "worsted",
+              "use": [
+                "carom"
+              ]
+            }
+          ],
+          "aliases": [
+            "سیمونیس",
+            "سایمونیس",
+            "ایوان سیمونیس",
+            "Simonis",
+            "Iwan Simonis"
+          ]
+        },
+        {
+          "id": "carom__gorina",
+          "name_en": "Gorina",
+          "name_fa": "گورینا",
+          "country": "ES",
+          "tier": "premium",
+          "allow_free_model": true,
+          "note_fa": "اسپانیایی، رایج در کارامبول",
+          "models": [
+            {
+              "id": "go-granito",
+              "name_en": "Granito",
+              "name_fa": "گرانیتو",
+              "type": "worsted",
+              "use": [
+                "pocket_billiard",
+                "carom"
+              ]
+            },
+            {
+              "id": "go-tournament",
+              "name_en": "Tournament 2000",
+              "name_fa": "تورنمنت ۲۰۰۰",
+              "type": "worsted",
+              "use": [
+                "carom"
+              ]
+            }
+          ],
+          "aliases": [
+            "گورینا",
+            "قورینا",
+            "Gorina"
+          ]
+        },
+        {
+          "id": "carom__iranian-cloth",
+          "name_en": "Iranian / Local",
+          "name_fa": "ایرانی / داخلی",
+          "country": "IR",
+          "tier": "mid",
+          "allow_free_model": true,
+          "note_fa": "در بازار ایران بسیار رایج است",
+          "models": [
+            {
+              "id": "ir-standard",
+              "name_en": "Local Standard",
+              "name_fa": "استاندارد داخلی"
+            },
+            {
+              "id": "ir-unknown",
+              "name_en": "Unknown Local",
+              "name_fa": "داخلی نامشخص"
+            }
+          ],
+          "aliases": [
+            "ایرانی",
+            "داخلی",
+            "تولید داخل"
+          ]
+        },
+        {
+          "id": "carom__chinese-generic",
+          "name_en": "Chinese Unbranded",
+          "name_fa": "چینی بدون برند",
+          "country": "CN",
+          "tier": "budget",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "cn-6811-copy",
+              "name_en": "6811 Copy",
+              "name_fa": "کپی ۶۸۱۱",
+              "note_fa": "کپی‌های ۶۸۱۱ در بازار زیاد است؛ املای STRCAHAN به‌جای STRACHAN نشانه تقلبی بودن است"
+            },
+            {
+              "id": "cn-777-copy",
+              "name_en": "777 Copy",
+              "name_fa": "کپی ۷۷۷"
+            },
+            {
+              "id": "cn-generic",
+              "name_en": "Generic Wool/Nylon",
+              "name_fa": "پشم-نایلون معمولی"
+            }
+          ],
+          "aliases": [
+            "چینی",
+            "بدون برند چینی"
+          ]
+        },
+        {
+          "id": "carom__unknown-cloth",
+          "name_en": "Unknown / Unbranded",
+          "name_fa": "نامشخص / بدون برند",
+          "country": null,
+          "tier": "budget",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "uk-unknown",
+              "name_en": "Unknown",
+              "name_fa": "نامشخص"
+            }
+          ],
+          "aliases": [
+            "نامشخص",
+            "بدون برند"
+          ]
+        }
+      ]
+    }
+  ],
+  "search_note_fa": "فیلد aliases املاهای رایج و غلط‌های تایپی هر برند را دارد. جستجو باید علاوه بر name_en و name_fa، روی aliases هم مچ کند. مثال: کاربری که «استراکان» یا «استرچان» تایپ می‌کند باید Strachan را ببیند."
+}

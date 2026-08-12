@@ -29,14 +29,14 @@ const RESULTS = [
   },
   {
     id: '3', date: '۸ خرداد ۱۴۰۴', tournament: 'جام رمضان — فینال',
-    discipline: 'پول آمریکایی', round: 'فینال',
+    discipline: 'پاکت بیلیارد آمریکایی', round: 'فینال',
     matches: [
       { player1: 'کامران صادقی', score1: 9, player2: 'سامان قادری', score2: 6, winner: 1, frames: 15, duration: '۱:۵۰', highBreak: 0 },
     ],
   },
 ];
 
-const DISCIPLINES = ['همه', 'اسنوکر', 'پول آمریکایی', 'کارامبول'];
+const DISCIPLINES = ['همه', 'اسنوکر', 'پاکت بیلیارد آمریکایی', 'کارامبول'];
 
 export default function ResultsPage() {
   const [disc, setDisc] = useState('همه');
