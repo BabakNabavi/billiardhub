@@ -262,3 +262,47 @@ export function applySpecChange(
   }
   return next
 }
+
+/* ── پلِ تعریفِ قدیمی ──
+   `specs_catalog.json` فعلاً فقط چوب، میز و توپ را دارد. ولی تیپ، گچ
+   و کیس هم در `specs.ts` تعریفِ دستیِ خودشان را داشتند و فرم نشانشان
+   می‌داد.
+
+   وقتی موتور به کاتالوگ منتقل شد، این سه دسته بی‌فیلد ماندند — فرمشان
+   فقط «وضعیت کالا» داشت. تستِ ایستا نگرفتش چون هیچ ادعایی درباره‌ی
+   دسته‌های بیرونِ کاتالوگ نداشتیم.
+
+   پس تعریفِ قدیمی به شکلِ تازه ترجمه می‌شود. کلیدِ ذخیره عوض نمی‌شود
+   (`shaftMaterial` همان می‌ماند)، پس آگهی‌های موجود دست‌نخورده‌اند.
+   با اضافه‌شدنِ هر دسته به JSON، این پل خودبه‌خود کنار می‌رود. */
+export interface LegacySpecDef {
+  key: string
+  label: string
+  type: 'dropdown' | 'number' | 'text'
+  options?: string[]
+  unit?: string
+  placeholder?: string
+  dependsOn?: string
+  optionsByDependency?: Record<string, string[]>
+}
+
+export function fromLegacyDefs(defs: LegacySpecDef[]): SpecField[] {
+  return defs.map(d => {
+    const opts = d.options ?? []
+    /* «سایر» در تعریفِ قدیمی یک گزینه‌ی معمولی بود؛ در شکلِ تازه یک
+       پرچم است که فیلدِ متنی را باز می‌کند. */
+    const hasOther = opts.includes('سایر')
+    const field: SpecField = {
+      id: d.key,
+      label_fa: d.unit ? `${d.label} (${d.unit})` : d.label,
+      type: d.type === 'dropdown' ? 'select' : d.type,
+      placeholder: d.placeholder,
+      allow_other: hasOther || undefined,
+      depends_on: d.dependsOn,
+    }
+    if (d.type === 'dropdown') {
+      field.options = opts.filter(o => o !== 'سایر').map(o => ({ id: o, label_fa: o }))
+    }
+    return field
+  })
+}

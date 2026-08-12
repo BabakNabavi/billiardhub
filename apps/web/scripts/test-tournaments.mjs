@@ -2188,9 +2188,9 @@ console.log('\n― کاتالوگِ چوب ―');
   const editAdSrc = read('app/shop/edit/[id]/page.tsx');
   t('هر دو فرم از همان انتخابگر استفاده می‌کنند',
     [newAdSrc, editAdSrc].every(f => /<CatalogSelector/.test(f) && /typeIdOf\(catCategory/.test(f)));
-  t('فقط چوب و میز از کاتالوگ می‌آیند',
-    [newAdSrc, editAdSrc].every(f => f.includes("form.category === 'cue' || form.category === 'table' ? form.category : null")),
-    'بقیه‌ی دسته‌ها (تیپ، گچ، توپ، کیس) باید دست‌نخورده از chain.ts بیایند');
+  t('چوب و میز و پارچه از کاتالوگ می‌آیند',
+    [newAdSrc, editAdSrc].every(f => f.includes("form.category === 'cue' || form.category === 'table' || form.category === 'cloth'")),
+    'بقیه (تیپ، گچ، توپ، کیس) از chain.ts می‌آیند');
   t('شناسه کنارِ رشته فرستاده می‌شود',
     [newAdSrc, editAdSrc].every(f => /brand: effBrand, model: effModel,/.test(f) && /brandId:/.test(f)),
     'ستون‌های رشته‌ای را کلِ سایت می‌خواند؛ حذفشان همه‌جا را می‌شکند');
@@ -2547,6 +2547,42 @@ console.log('\n― مشخصات و پارچه ―');
     read('components/market/SpecFields.tsx').includes('htmlFor={fieldId}')
     && read('components/market/SpecFields.tsx').includes('id={fieldId}'),
     'بدونش صفحه‌خوان نامِ فیلد را نمی‌گوید');
+
+  /* ── هیچ دسته‌ای نباید بی‌فیلد بماند ──
+     انتقالِ موتور به کاتالوگ، تیپ و گچ و کیس را بی‌صدا بی‌فیلد کرد:
+     `specs_catalog.json` فقط سه دسته داشت و بقیه به آرایه‌ی خالی
+     می‌افتادند. تستِ ایستا نگرفتش چون هیچ ادعایی درباره‌ی دسته‌های
+     بیرونِ کاتالوگ نداشتیم. حالا داریم. */
+  {
+    const S = JSON.parse(readFileSync(join(ROOT, 'data/specs_catalog.json'), 'utf8'));
+    const specsSrc = read('lib/market/specs.ts');
+    const legacy = new Set([...specsSrc.matchAll(/^  '?([a-z-]+)'?:\s*\[/gm)].map(m => m[1]));
+    const inCatalog = new Set(Object.keys(S.specs));
+    /* دسته‌هایی که پیش‌تر فیلد داشتند و باید همچنان داشته باشند */
+    const hadFields = [...legacy].filter(c => !['cue', 'table', 'ball'].includes(c));
+    t('دسته‌های بیرونِ کاتالوگ پلِ تعریفِ قدیمی دارند',
+      hadFields.every(c => legacy.has(c))
+      && ['app/shop/new/page.tsx', 'app/shop/edit/[id]/page.tsx']
+        .every(f => read(f).includes('fromLegacyDefs(')),
+      hadFields.join(', '));
+    t('پلِ قدیمی کلیدِ ذخیره را عوض نمی‌کند',
+      read('lib/market/spec-rules.ts').includes('id: d.key'),
+      'اگر کلید عوض شود، مشخصاتِ آگهی‌های موجود گم می‌شوند');
+
+    /* پارچه: نوع از chain، برند/مدل از کاتالوگ، مشخصات از میز */
+    t('دسته‌ی پارچه نوع دارد',
+      /cloth:\s*\['اسنوکر'/.test(read('lib/market/chain.ts')),
+      'بدونش دراپ‌داونِ نوع خالی می‌آمد');
+    t('پارچه از کاتالوگِ برند می‌خواند',
+      ['app/shop/new/page.tsx', 'app/shop/edit/[id]/page.tsx']
+        .every(f => read(f).includes("form.category === 'cloth'")),
+      'برندِ پارچه در chain.ts هاردکد بود، نه از کاتالوگ');
+    t('مشخصاتِ پارچه از تعریفِ میز مشتق می‌شود',
+      read('lib/market/spec-catalog.ts').includes('CLOTH_FROM_TABLE')
+      && ['cloth_type', 'cloth_color', 'cloth_condition']
+        .every(id => S.specs.table.some(f => f.id === id)),
+      'فهرستِ جدا یعنی گزینه‌ی رنگ دو جا و ناهمگام');
+  }
 }
 
 console.log('\n― CORS ―');

@@ -1,0 +1,1091 @@
+{
+  "schema_version": "1.0",
+  "last_updated": "2026-08-11",
+  "category": {
+    "id": "chalk",
+    "label_fa": "گچ"
+  },
+  "notes_fa": "ساختار سه‌سطحی: دسته‌بندی «گچ» ← نوع ← برند ← مدل. گزینه «سایر» توسط فرانت‌اند اضافه می‌شود.",
+  "important_fa": "گچ اسنوکر و پاکت بیلیارد واقعاً متفاوت‌اند. گچ اسنوکر معمولاً سبز است تا با پارچه بخواند و برای تیپ نازک‌تر (۸.۵ تا ۱۰ میلی‌متر) و ضربات ظریف‌تر طراحی شده. گچ پاکت بیلیارد معمولاً آبی است، برای تیپ پهن‌تر (۱۲ تا ۱۳ میلی‌متر) و ضربات قدرتی و پیچ زیاد. چند برند (Taom، Kamui، Master، Triangle) در هر دو حضور دارند ولی مدل‌های پیشنهادی‌شان فرق می‌کند.",
+  "other_option": {
+    "id": "other",
+    "name_fa": "سایر",
+    "reveals_text_input": true,
+    "max_length": 60
+  },
+  "search_note_fa": "فیلد aliases املاهای رایج فارسی را دارد؛ جستجو باید روی name_en و name_fa و aliases مچ کند.",
+  "countries": {
+    "FI": {
+      "fa": "فنلاند",
+      "flag": "🇫🇮"
+    },
+    "US": {
+      "fa": "آمریکا",
+      "flag": "🇺🇸"
+    },
+    "JP": {
+      "fa": "ژاپن",
+      "flag": "🇯🇵"
+    },
+    "GB": {
+      "fa": "انگلستان",
+      "flag": "🇬🇧"
+    },
+    "CN": {
+      "fa": "چین",
+      "flag": "🇨🇳"
+    },
+    "IT": {
+      "fa": "ایتالیا",
+      "flag": "🇮🇹"
+    },
+    "NL": {
+      "fa": "هلند",
+      "flag": "🇳🇱"
+    },
+    "TH": {
+      "fa": "تایلند",
+      "flag": "🇹🇭"
+    },
+    "SG": {
+      "fa": "سنگاپور",
+      "flag": "🇸🇬"
+    }
+  },
+  "tiers": {
+    "tournament": "تورنمنتی / حرفه‌ای",
+    "premium": "رده بالا",
+    "mid": "میان‌رده",
+    "budget": "اقتصادی"
+  },
+  "types": [
+    {
+      "id": "snooker",
+      "label_fa": "اسنوکر",
+      "label_en": "Snooker",
+      "brands": [
+        {
+          "id": "csnk__kamui",
+          "name_en": "Kamui",
+          "name_fa": "کامویی",
+          "country": "JP",
+          "tier": "tournament",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "kamui-098",
+              "name_en": "Kamui 0.98",
+              "name_fa": "کامویی ۰.۹۸",
+              "note_fa": "نسل اول؛ چسبندگی بسیار بالا",
+              "colors": "آبی",
+              "tier": "tournament"
+            },
+            {
+              "id": "kamui-roku",
+              "name_en": "Kamui Roku",
+              "name_fa": "کامویی روکو",
+              "note_fa": "نسل جدید؛ اثر کمتری روی توپ سفید می‌گذارد",
+              "colors": "آبی / قرمز / سبز",
+              "tier": "tournament"
+            },
+            {
+              "id": "kamui-beta",
+              "name_en": "Kamui Beta",
+              "name_fa": "کامویی بتا",
+              "colors": "آبی",
+              "tier": "premium"
+            }
+          ],
+          "note_fa": "ژاپن. یکی از سه گچ برتر از نظر عدم چسبیدن به توپ سفید",
+          "aliases": [
+            "کامویی",
+            "کامو",
+            "کامویی",
+            "Kamui"
+          ]
+        },
+        {
+          "id": "csnk__taom",
+          "name_en": "Taom",
+          "name_fa": "تائوم",
+          "country": "FI",
+          "tier": "tournament",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "v10-green",
+              "name_en": "V10 Green",
+              "name_fa": "V10 سبز",
+              "note_fa": "پرچم‌دار رده اسنوکر؛ تمیزترین گچ بازار",
+              "colors": "سبز",
+              "tier": "tournament"
+            },
+            {
+              "id": "v10-blue",
+              "name_en": "V10 Blue",
+              "name_fa": "V10 آبی",
+              "note_fa": "برای میزهای پارچه آبی",
+              "colors": "آبی",
+              "tier": "tournament"
+            },
+            {
+              "id": "pyro",
+              "name_en": "Pyro",
+              "name_fa": "پایرو",
+              "note_fa": "چسبندگی تهاجمی‌تر؛ اسنوکر و پاکت بیلیارد",
+              "colors": "آبی",
+              "tier": "tournament"
+            },
+            {
+              "id": "v2-soft",
+              "name_en": "2.0 Soft",
+              "name_fa": "۲.۰ نرم",
+              "note_fa": "حس نرم‌تر روی تیپ",
+              "colors": "سبز / آبی",
+              "tier": "premium"
+            },
+            {
+              "id": "v2-hard",
+              "name_en": "2.0 Hard",
+              "name_fa": "۲.۰ سخت",
+              "note_fa": "بلوک سفت‌تر و بادوام‌تر",
+              "colors": "سبز / آبی",
+              "tier": "premium"
+            },
+            {
+              "id": "gold",
+              "name_en": "Gold",
+              "name_fa": "گلد",
+              "note_fa": "رده ویژه و لوکس",
+              "colors": "طلایی",
+              "tier": "premium"
+            },
+            {
+              "id": "original",
+              "name_en": "Original / V1",
+              "name_fa": "اورجینال",
+              "note_fa": "نسل اول",
+              "tier": "premium"
+            }
+          ],
+          "note_fa": "فنلاند، ساخت دست. تنها گچی که تقریباً هیچ اثری روی توپ سفید نمی‌گذارد؛ کیک و میس‌کیو را کم می‌کند",
+          "aliases": [
+            "تائوم",
+            "تاوم",
+            "تام",
+            "Taom"
+          ]
+        },
+        {
+          "id": "csnk__adr147",
+          "name_en": "ADR147",
+          "name_fa": "ای‌دی‌آر ۱۴۷",
+          "country": "GB",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "adr-chalk",
+              "name_en": "ADR147 Chalk",
+              "name_fa": "گچ ADR147",
+              "colors": "سبز",
+              "tier": "premium"
+            }
+          ],
+          "aliases": [
+            "ADR147"
+          ]
+        },
+        {
+          "id": "csnk__blue-diamond",
+          "name_en": "Blue Diamond",
+          "name_fa": "بلو دایموند",
+          "country": "GB",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "bd-std",
+              "name_en": "Blue Diamond",
+              "name_fa": "بلو دایموند",
+              "note_fa": "چسبندگی بالا و گرد کم",
+              "colors": "آبی",
+              "tier": "premium"
+            }
+          ],
+          "note_fa": "استاندارد بین‌المللی؛ فشردگی خوب و گرد کم",
+          "aliases": [
+            "بلو دایموند",
+            "الماس آبی",
+            "Blue Diamond"
+          ]
+        },
+        {
+          "id": "csnk__g2",
+          "name_en": "G2",
+          "name_fa": "جی‌۲",
+          "country": "JP",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "g2-s",
+              "name_en": "G2-S",
+              "name_fa": "G2-S",
+              "note_fa": "تمیز و یکنواخت روی تیپ",
+              "colors": "آبی / سبز",
+              "tier": "premium"
+            },
+            {
+              "id": "g2-f",
+              "name_en": "G2-F",
+              "name_fa": "G2-F",
+              "note_fa": "چسبندگی بیشتر با اثر کمتر",
+              "colors": "آبی / سبز",
+              "tier": "premium"
+            }
+          ],
+          "note_fa": "ژاپن. هر بسته QR کد و شماره سریال اصالت دارد",
+          "aliases": [
+            "G2",
+            "جی ۲"
+          ]
+        },
+        {
+          "id": "csnk__green-diamond",
+          "name_en": "Green Diamond",
+          "name_fa": "گرین دایموند",
+          "country": "GB",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "gd-std",
+              "name_en": "Green Diamond",
+              "name_fa": "گرین دایموند",
+              "note_fa": "نسخه سبز مخصوص اسنوکر",
+              "colors": "سبز",
+              "tier": "premium"
+            }
+          ],
+          "note_fa": "نسخه اسنوکری Blue Diamond",
+          "aliases": [
+            "گرین دایموند",
+            "الماس سبز",
+            "Green Diamond"
+          ]
+        },
+        {
+          "id": "csnk__nir",
+          "name_en": "NIR",
+          "name_fa": "ان‌آی‌آر",
+          "country": "GB",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "nir-chalk",
+              "name_en": "NIR Chalk",
+              "name_fa": "گچ NIR",
+              "colors": "سبز / آبی",
+              "tier": "premium"
+            }
+          ],
+          "aliases": [
+            "NIR"
+          ]
+        },
+        {
+          "id": "csnk__pro-spin",
+          "name_en": "ProSpin",
+          "name_fa": "پرو اسپین",
+          "country": "TH",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "ps-chalk",
+              "name_en": "ProSpin Chalk",
+              "name_fa": "گچ پرو اسپین",
+              "colors": "سبز",
+              "tier": "premium"
+            }
+          ],
+          "aliases": [
+            "پرو اسپین",
+            "ProSpin"
+          ]
+        },
+        {
+          "id": "csnk__triangle",
+          "name_en": "Triangle",
+          "name_fa": "تریانگل",
+          "country": "US",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "triangle-std",
+              "name_en": "Triangle Chalk",
+              "name_fa": "تریانگل استاندارد",
+              "note_fa": "کلاسیک و ارزان؛ بسته‌بندی زرد",
+              "colors": "سبز / آبی / قرمز / مشکی",
+              "tier": "mid"
+            },
+            {
+              "id": "triangle-pro",
+              "name_en": "Triangle Pro Chalk",
+              "name_fa": "تریانگل پرو",
+              "note_fa": "جان هیگینز در قهرمانی جهان ۲۰۱۸ استفاده کرد",
+              "colors": "سبز / آبی",
+              "tier": "premium"
+            }
+          ],
+          "note_fa": "ساخت Tweeten Fibre آمریکا (سازنده Master هم هست). دهه‌هاست استاندارد اسنوکر بریتانیاست",
+          "aliases": [
+            "تریانگل",
+            "مثلث",
+            "Triangle"
+          ]
+        },
+        {
+          "id": "csnk__master",
+          "name_en": "Master",
+          "name_fa": "مستر",
+          "country": "US",
+          "tier": "mid",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "master-std",
+              "name_en": "Master Chalk",
+              "name_fa": "مستر استاندارد",
+              "note_fa": "ارزان‌ترین گزینه قابل‌اعتماد؛ رایج‌ترین در باشگاه‌ها",
+              "colors": "سبز / آبی / قرمز / مشکی / سفید",
+              "tier": "mid"
+            }
+          ],
+          "note_fa": "ساخت Tweeten Fibre. سال‌هاست پرمصرف‌ترین گچ دنیاست",
+          "aliases": [
+            "مستر",
+            "Master"
+          ]
+        },
+        {
+          "id": "csnk__wiraka-chalk",
+          "name_en": "Wiraka",
+          "name_fa": "ویراکا",
+          "country": "SG",
+          "tier": "mid",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "wk-premium-green",
+              "name_en": "Premium Green",
+              "name_fa": "پریمیوم سبز",
+              "note_fa": "همراه میزهای Wiraka عرضه می‌شود",
+              "colors": "سبز",
+              "tier": "mid"
+            }
+          ],
+          "aliases": [
+            "ویراکا",
+            "Wiraka"
+          ]
+        },
+        {
+          "id": "csnk__chinese-chalk-s",
+          "name_en": "Chinese Unbranded",
+          "name_fa": "چینی بدون برند",
+          "country": "CN",
+          "tier": "budget",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "cn-copy",
+              "name_en": "Copy / Generic",
+              "name_fa": "کپی / معمولی",
+              "note_fa": "کپی‌های Taom و Triangle در بازار زیاد است",
+              "tier": "budget"
+            }
+          ],
+          "aliases": [
+            "چینی"
+          ]
+        },
+        {
+          "id": "csnk__unknown-chalk-s",
+          "name_en": "Unknown / Unbranded",
+          "name_fa": "نامشخص / بدون برند",
+          "country": null,
+          "tier": "budget",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "uk-s",
+              "name_en": "Unknown",
+              "name_fa": "نامشخص",
+              "tier": "budget"
+            }
+          ],
+          "aliases": [
+            "نامشخص"
+          ]
+        }
+      ],
+      "note_fa": "گچ اسنوکر معمولاً سبز است و برای تیپ نازک و ضربات ظریف طراحی شده."
+    },
+    {
+      "id": "pocket_billiard",
+      "label_fa": "پاکت بیلیارد",
+      "label_en": "Pocket Billiards",
+      "brands": [
+        {
+          "id": "cpkt__kamui",
+          "name_en": "Kamui",
+          "name_fa": "کامویی",
+          "country": "JP",
+          "tier": "tournament",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "roku",
+              "name_en": "Kamui Roku",
+              "name_fa": "کامویی روکو",
+              "note_fa": "انتخاب حرفه‌ای‌هایی مثل میکا ایمونن",
+              "colors": "آبی / قرمز / سبز",
+              "tier": "tournament"
+            },
+            {
+              "id": "098",
+              "name_en": "Kamui 0.98",
+              "name_fa": "کامویی ۰.۹۸",
+              "note_fa": "چسبندگی بسیار بالا؛ نیاز به تکنیک زدن متفاوت",
+              "colors": "آبی",
+              "tier": "tournament"
+            },
+            {
+              "id": "beta",
+              "name_en": "Kamui Beta",
+              "name_fa": "کامویی بتا",
+              "colors": "آبی",
+              "tier": "premium"
+            }
+          ],
+          "aliases": [
+            "کامویی",
+            "کامو",
+            "کامویی",
+            "Kamui"
+          ]
+        },
+        {
+          "id": "cpkt__predator",
+          "name_en": "Predator",
+          "name_fa": "پردیتور",
+          "country": "US",
+          "tier": "tournament",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "pure",
+              "name_en": "Predator Pure",
+              "name_fa": "پردیتور پیور",
+              "note_fa": "جزو سه گچ برتر از نظر عدم چسبیدن به توپ سفید",
+              "colors": "آبی",
+              "tier": "tournament"
+            },
+            {
+              "id": "1080",
+              "name_en": "Predator 1080",
+              "name_fa": "پردیتور ۱۰۸۰",
+              "colors": "آبی / سبز / قرمز",
+              "tier": "premium"
+            },
+            {
+              "id": "arcos-chalk",
+              "name_en": "Arcos Chalk",
+              "name_fa": "گچ آرکوس",
+              "colors": "آبی",
+              "tier": "premium"
+            }
+          ],
+          "aliases": [
+            "پردیتور",
+            "Predator"
+          ]
+        },
+        {
+          "id": "cpkt__taom",
+          "name_en": "Taom",
+          "name_fa": "تائوم",
+          "country": "FI",
+          "tier": "tournament",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "pyro",
+              "name_en": "Pyro",
+              "name_fa": "پایرو",
+              "note_fa": "بهترین گزینه Taom برای پاکت بیلیارد",
+              "colors": "آبی",
+              "tier": "tournament"
+            },
+            {
+              "id": "v10-blue",
+              "name_en": "V10 Blue",
+              "name_fa": "V10 آبی",
+              "colors": "آبی",
+              "tier": "tournament"
+            },
+            {
+              "id": "v10-green",
+              "name_en": "V10 Green",
+              "name_fa": "V10 سبز",
+              "colors": "سبز",
+              "tier": "tournament"
+            },
+            {
+              "id": "v2-soft",
+              "name_en": "2.0 Soft",
+              "name_fa": "۲.۰ نرم",
+              "colors": "آبی / سبز",
+              "tier": "premium"
+            },
+            {
+              "id": "v2-hard",
+              "name_en": "2.0 Hard",
+              "name_fa": "۲.۰ سخت",
+              "colors": "آبی / سبز",
+              "tier": "premium"
+            }
+          ],
+          "note_fa": "در پاکت بیلیارد که پیچ و ضربه‌های قدرتی بیشتر است، چسبندگی و یکنواختی اهمیت بیشتری دارد",
+          "aliases": [
+            "تائوم",
+            "تاوم",
+            "تام",
+            "Taom"
+          ]
+        },
+        {
+          "id": "cpkt__balabushka-chalk",
+          "name_en": "Balabushka",
+          "name_fa": "بالابوشکا",
+          "country": "US",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "bal-std",
+              "name_en": "Balabushka Chalk",
+              "name_fa": "گچ بالابوشکا",
+              "colors": "آبی",
+              "tier": "premium"
+            }
+          ],
+          "aliases": [
+            "بالابوشکا",
+            "Balabushka"
+          ]
+        },
+        {
+          "id": "cpkt__blue-diamond",
+          "name_en": "Blue Diamond",
+          "name_fa": "بلو دایموند",
+          "country": "GB",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "bd-std",
+              "name_en": "Blue Diamond",
+              "name_fa": "بلو دایموند",
+              "note_fa": "استاندارد بین‌المللی؛ فشردگی خوب و گرد کم",
+              "colors": "آبی",
+              "tier": "premium"
+            }
+          ],
+          "aliases": [
+            "بلو دایموند",
+            "Blue Diamond"
+          ]
+        },
+        {
+          "id": "cpkt__g2",
+          "name_en": "G2",
+          "name_fa": "جی‌۲",
+          "country": "JP",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "g2-s",
+              "name_en": "G2-S",
+              "name_fa": "G2-S",
+              "note_fa": "تمیزی و یکنواختی",
+              "colors": "آبی / سبز",
+              "tier": "premium"
+            },
+            {
+              "id": "g2-f",
+              "name_en": "G2-F",
+              "name_fa": "G2-F",
+              "note_fa": "چسبندگی بیشتر",
+              "colors": "آبی / سبز",
+              "tier": "premium"
+            }
+          ],
+          "aliases": [
+            "G2"
+          ]
+        },
+        {
+          "id": "cpkt__great-white",
+          "name_en": "Great White",
+          "name_fa": "گریت وایت",
+          "country": "US",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "gw-mako",
+              "name_en": "Great White (Mako Blue)",
+              "name_fa": "گریت وایت",
+              "colors": "آبی",
+              "tier": "premium"
+            }
+          ],
+          "aliases": [
+            "گریت وایت",
+            "Great White"
+          ]
+        },
+        {
+          "id": "cpkt__magic",
+          "name_en": "Magic Chalk",
+          "name_fa": "مجیک",
+          "country": "US",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "magic-std",
+              "name_en": "Magic Chalk",
+              "name_fa": "گچ مجیک",
+              "note_fa": "چسبندگی بسیار بالا",
+              "colors": "آبی",
+              "tier": "premium"
+            }
+          ],
+          "aliases": [
+            "مجیک",
+            "Magic"
+          ]
+        },
+        {
+          "id": "cpkt__mezz-chalk",
+          "name_en": "Mezz",
+          "name_fa": "مِز",
+          "country": "JP",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "smart",
+              "name_en": "Mezz Smart Chalk",
+              "name_fa": "اسمارت چاک",
+              "colors": "آبی",
+              "tier": "premium"
+            }
+          ],
+          "aliases": [
+            "مز",
+            "Mezz"
+          ]
+        },
+        {
+          "id": "cpkt__navigator",
+          "name_en": "Navigator",
+          "name_fa": "ناویگیتور",
+          "country": "JP",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "nav-std",
+              "name_en": "Navigator Chalk",
+              "name_fa": "گچ ناویگیتور",
+              "colors": "آبی",
+              "tier": "premium"
+            }
+          ],
+          "aliases": [
+            "ناویگیتور",
+            "Navigator"
+          ]
+        },
+        {
+          "id": "cpkt__ob",
+          "name_en": "OB Chalk",
+          "name_fa": "او‌بی",
+          "country": "US",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "ob-std",
+              "name_en": "OB Chalk",
+              "name_fa": "گچ OB",
+              "colors": "آبی",
+              "tier": "premium"
+            }
+          ],
+          "aliases": [
+            "OB"
+          ]
+        },
+        {
+          "id": "cpkt__turning-point",
+          "name_en": "Turning Point (TP)",
+          "name_fa": "ترنینگ پوینت",
+          "country": "US",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "tp-std",
+              "name_en": "TP Chalk",
+              "name_fa": "گچ TP",
+              "colors": "آبی",
+              "tier": "premium"
+            }
+          ],
+          "aliases": [
+            "TP",
+            "Turning Point"
+          ]
+        },
+        {
+          "id": "cpkt__cpba-chalk",
+          "name_en": "CPBA",
+          "name_fa": "سی‌پی‌بی‌ای",
+          "country": "CN",
+          "tier": "mid",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "cpba-std",
+              "name_en": "CPBA Chalk",
+              "name_fa": "گچ CPBA",
+              "note_fa": "رایج در چاینیز ۸-بال",
+              "tier": "mid"
+            }
+          ],
+          "aliases": [
+            "CPBA"
+          ]
+        },
+        {
+          "id": "cpkt__championship-chalk",
+          "name_en": "Championship",
+          "name_fa": "چمپیون‌شیپ",
+          "country": "US",
+          "tier": "mid",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "ch-std",
+              "name_en": "Championship Chalk",
+              "name_fa": "گچ چمپیون‌شیپ",
+              "colors": "آبی / سبز",
+              "tier": "mid"
+            }
+          ],
+          "aliases": [
+            "چمپیون شیپ",
+            "Championship"
+          ]
+        },
+        {
+          "id": "cpkt__lava",
+          "name_en": "Lava",
+          "name_fa": "لاوا",
+          "country": "US",
+          "tier": "mid",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "lava-std",
+              "name_en": "Lava Chalk",
+              "name_fa": "گچ لاوا",
+              "note_fa": "ساخت Tweeten؛ رده بالاتر از Master",
+              "colors": "آبی / سبز",
+              "tier": "mid"
+            }
+          ],
+          "aliases": [
+            "لاوا",
+            "Lava"
+          ]
+        },
+        {
+          "id": "cpkt__master",
+          "name_en": "Master",
+          "name_fa": "مستر",
+          "country": "US",
+          "tier": "mid",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "master-std",
+              "name_en": "Master Chalk",
+              "name_fa": "مستر استاندارد",
+              "note_fa": "ارزان‌ترین و رایج‌ترین؛ حدود ۶۰ ساعت دوام",
+              "colors": "آبی / سبز / قرمز / مشکی / سفید / بنفش",
+              "tier": "mid"
+            }
+          ],
+          "aliases": [
+            "مستر",
+            "Master"
+          ]
+        },
+        {
+          "id": "cpkt__silver-cup",
+          "name_en": "Silver Cup",
+          "name_fa": "سیلور کاپ",
+          "country": "US",
+          "tier": "mid",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "sc-std",
+              "name_en": "Silver Cup Chalk",
+              "name_fa": "سیلور کاپ",
+              "note_fa": "تنوع رنگ بالا برای تطبیق با پارچه",
+              "colors": "۱۵ رنگ",
+              "tier": "mid"
+            }
+          ],
+          "aliases": [
+            "سیلور کاپ",
+            "Silver Cup"
+          ]
+        },
+        {
+          "id": "cpkt__triangle",
+          "name_en": "Triangle",
+          "name_fa": "تریانگل",
+          "country": "US",
+          "tier": "mid",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "triangle-std",
+              "name_en": "Triangle Chalk",
+              "name_fa": "تریانگل",
+              "note_fa": "کلاسیک و ارزان",
+              "colors": "آبی / سبز / قرمز",
+              "tier": "mid"
+            },
+            {
+              "id": "triangle-pro",
+              "name_en": "Triangle Pro",
+              "name_fa": "تریانگل پرو",
+              "colors": "آبی / سبز",
+              "tier": "premium"
+            }
+          ],
+          "aliases": [
+            "تریانگل",
+            "Triangle"
+          ]
+        },
+        {
+          "id": "cpkt__chinese-chalk-p",
+          "name_en": "Chinese Unbranded",
+          "name_fa": "چینی بدون برند",
+          "country": "CN",
+          "tier": "budget",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "cn-copy",
+              "name_en": "Copy / Generic",
+              "name_fa": "کپی / معمولی",
+              "tier": "budget"
+            }
+          ],
+          "aliases": [
+            "چینی"
+          ]
+        },
+        {
+          "id": "cpkt__unknown-chalk-p",
+          "name_en": "Unknown / Unbranded",
+          "name_fa": "نامشخص / بدون برند",
+          "country": null,
+          "tier": "budget",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "uk-p",
+              "name_en": "Unknown",
+              "name_fa": "نامشخص",
+              "tier": "budget"
+            }
+          ],
+          "aliases": [
+            "نامشخص"
+          ]
+        }
+      ],
+      "note_fa": "گچ پاکت بیلیارد معمولاً آبی است و برای تیپ پهن‌تر و ضربات قدرتی و پیچ زیاد ساخته می‌شود."
+    },
+    {
+      "id": "carom",
+      "label_fa": "کارامبول",
+      "label_en": "Carom",
+      "brands": [
+        {
+          "id": "ccar__taom",
+          "name_en": "Taom",
+          "name_fa": "تائوم",
+          "country": "FI",
+          "tier": "tournament",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "pyro",
+              "name_en": "Pyro",
+              "name_fa": "پایرو",
+              "note_fa": "انتخاب اول بازیکنان سه‌بانده",
+              "colors": "آبی",
+              "tier": "tournament"
+            },
+            {
+              "id": "v10-green",
+              "name_en": "V10 Green",
+              "name_fa": "V10 سبز",
+              "colors": "سبز",
+              "tier": "tournament"
+            }
+          ],
+          "aliases": [
+            "تائوم",
+            "تاوم",
+            "تام",
+            "Taom"
+          ]
+        },
+        {
+          "id": "ccar__kamui",
+          "name_en": "Kamui",
+          "name_fa": "کامویی",
+          "country": "JP",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "roku",
+              "name_en": "Kamui Roku",
+              "name_fa": "کامویی روکو",
+              "colors": "آبی",
+              "tier": "premium"
+            }
+          ],
+          "aliases": [
+            "کامویی",
+            "کامو",
+            "کامویی",
+            "Kamui"
+          ]
+        },
+        {
+          "id": "ccar__longoni-chalk",
+          "name_en": "Longoni",
+          "name_fa": "لونگونی",
+          "country": "IT",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "lg-chalk",
+              "name_en": "Longoni Chalk",
+              "name_fa": "گچ لونگونی",
+              "colors": "آبی",
+              "tier": "premium"
+            }
+          ],
+          "aliases": [
+            "لونگونی",
+            "Longoni"
+          ]
+        },
+        {
+          "id": "ccar__molinari-chalk",
+          "name_en": "Molinari",
+          "name_fa": "مولیناری",
+          "country": "NL",
+          "tier": "premium",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "ml-chalk",
+              "name_en": "Molinari Chalk",
+              "name_fa": "گچ مولیناری",
+              "colors": "آبی",
+              "tier": "premium"
+            }
+          ],
+          "aliases": [
+            "مولیناری",
+            "Molinari"
+          ]
+        },
+        {
+          "id": "ccar__master-c",
+          "name_en": "Master",
+          "name_fa": "مستر",
+          "country": "US",
+          "tier": "mid",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "master-std",
+              "name_en": "Master Chalk",
+              "name_fa": "مستر",
+              "colors": "آبی / سبز",
+              "tier": "mid"
+            }
+          ],
+          "aliases": [
+            "مستر",
+            "Master"
+          ]
+        },
+        {
+          "id": "ccar__unknown-chalk-c",
+          "name_en": "Unknown / Unbranded",
+          "name_fa": "نامشخص / بدون برند",
+          "country": null,
+          "tier": "budget",
+          "allow_free_model": true,
+          "models": [
+            {
+              "id": "uk-c",
+              "name_en": "Unknown",
+              "name_fa": "نامشخص",
+              "tier": "budget"
+            }
+          ],
+          "aliases": [
+            "نامشخص"
+          ]
+        }
+      ],
+      "note_fa": "در کارامبول به‌خاطر برخورد مکرر با باند، چسبندگی و دوام گچ اهمیت ویژه دارد."
+    }
+  ]
+}

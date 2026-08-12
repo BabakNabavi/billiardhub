@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useCallback, useEffect } from 'react'
+import { useMemo, useState, useRef, useCallback, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { ChevronRight } from 'lucide-react'
@@ -18,7 +18,7 @@ import { productTitleParts } from '../../../lib/market/title'
 import { typeIdOf, type CatalogId } from '../../../lib/market/catalog-rules'
 import CatalogSelector, { EMPTY_CATALOG_VALUE, type CatalogValue, useCatalogType } from '../../../components/market/CatalogSelector'
 import { SpecFieldRow, SpecProgress, useSpecFields, specKey } from '../../../components/market/SpecFields'
-import { splitFields, countFilled, applySpecChange, isFieldLocked, type SpecField } from '../../../lib/market/spec-rules'
+import { splitFields, countFilled, applySpecChange, isFieldLocked, fromLegacyDefs, type SpecField, type LegacySpecDef } from '../../../lib/market/spec-rules'
 import { brandSearchTerms } from '../../../lib/market/catalog-rules'
 import CountryFlag from '../../../components/CountryFlag'
 import { TYPE_OPTIONS, brandOptionsFor, modelOptionsFor, isTypeDrivenCategory, withOther } from '../../../lib/market/chain'
@@ -155,10 +155,21 @@ export default function NewProductPage() {
      خالی یعنی همان مسیرِ قدیمیِ `chain.ts` — بقیه‌ی دسته‌ها
      (تیپ، گچ، توپ، …) دست‌نخورده‌اند. */
   const catCategory: CatalogId | null =
-    form.category === 'cue' || form.category === 'table' ? form.category : null
+    form.category === 'cue' || form.category === 'table' || form.category === 'cloth'
+      ? form.category : null
   const catTypeId = catCategory ? typeIdOf(catCategory, form.type) : ''
   /* همان ورودیِ کش‌شده‌ی انتخابگر — درخواستِ تازه‌ای نمی‌زند */
-  const { fields: specDefs, loading: specsLoading } = useSpecFields(form.category)
+  const { fields: catalogSpecs, loading: specsLoading } = useSpecFields(form.category)
+  /* ── دسته‌هایی که هنوز در کاتالوگ نیستند ──
+     تیپ، گچ و کیس تعریفِ دستیِ خودشان را در `specs.ts` دارند. بدونِ
+     این پل، فرمشان فقط «وضعیت کالا» نشان می‌داد — همان چیزی که
+     انتقال به کاتالوگ بی‌صدا شکسته بود. */
+  const specDefs = useMemo(
+    () => (catalogSpecs.length
+      ? catalogSpecs
+      : fromLegacyDefs((CATEGORY_SPECS[form.category] ?? GENERIC_SPECS) as LegacySpecDef[])),
+    [catalogSpecs, form.category],
+  )
   /* پارچه: فهرستش به نوعِ **میز** وابسته است، پس همان شناسه‌ی نوع */
   const cloth = useCatalogType('cloth', form.category === 'table' ? catTypeId : '')
   const tableCat = useCatalogType('table', form.category === 'table' ? catTypeId : '')
@@ -451,6 +462,9 @@ export default function NewProductPage() {
             /* شناسه‌ها کنارِ رشته — رشته برای نمایش، شناسه برای یکپارچگی */
             cueType: form.category === 'cue' ? catTypeId || undefined : undefined,
             tableType: form.category === 'table' ? catTypeId || undefined : undefined,
+            /* پارچه ستونِ نوع ندارد؛ این فقط برای اعتبارسنجیِ سرور
+               است تا بداند برند به کدام رشته تعلق دارد. */
+            catalogType: catTypeId || undefined,
             brandId: catTypeId && cue.brandId !== '__other__' ? cue.brandId : undefined,
             modelId: catTypeId && cue.modelId !== '__other__' ? cue.modelId : undefined,
             /* سایز فقط برای میز؛ «سایر» شناسه ندارد و متنش می‌رود */

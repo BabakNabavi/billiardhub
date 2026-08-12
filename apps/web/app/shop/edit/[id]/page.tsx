@@ -25,7 +25,7 @@
    `lib/market/specs`) — پس هر تغییری در یکی، در دیگری هم هست.
    ═══════════════════════════════════════════════════════════════ */
 
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useMemo, useState, useEffect, useRef, useCallback } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import Link from 'next/link'
 import { ChevronRight } from 'lucide-react'
@@ -41,7 +41,7 @@ import { TYPE_OPTIONS, brandOptionsFor, modelOptionsFor, isTypeDrivenCategory, w
 import { typeIdOf, type CatalogId } from '../../../../lib/market/catalog-rules'
 import CatalogSelector, { EMPTY_CATALOG_VALUE, type CatalogValue, useCatalogType } from '../../../../components/market/CatalogSelector'
 import { SpecFieldRow, SpecProgress, useSpecFields, specKey } from '../../../../components/market/SpecFields'
-import { splitFields, countFilled, applySpecChange, isFieldLocked, type SpecField } from '../../../../lib/market/spec-rules'
+import { splitFields, countFilled, applySpecChange, isFieldLocked, fromLegacyDefs, type SpecField, type LegacySpecDef } from '../../../../lib/market/spec-rules'
 import { brandSearchTerms } from '../../../../lib/market/catalog-rules'
 import CountryFlag from '../../../../components/CountryFlag'
 import {
@@ -241,11 +241,22 @@ export default function EditProductPage() {
 
   /* چوب از کاتالوگ می‌آید؛ بقیه‌ی دسته‌ها از chain.ts */
   const catCategory: CatalogId | null =
-    form.category === 'cue' || form.category === 'table' ? form.category : null
+    form.category === 'cue' || form.category === 'table' || form.category === 'cloth'
+      ? form.category : null
   const catTypeId = catCategory ? typeIdOf(catCategory, form.type) : ''
   /* همان ورودیِ کش‌شده‌ی انتخابگر — درخواستِ تازه‌ای نمی‌زند */
   const catFreeInput = !!useCatalogType(catCategory ?? 'cue', catCategory ? catTypeId : '').data?.forceFreeInput
-  const { fields: specDefs, loading: specsLoading } = useSpecFields(form.category)
+  const { fields: catalogSpecs, loading: specsLoading } = useSpecFields(form.category)
+  /* ── دسته‌هایی که هنوز در کاتالوگ نیستند ──
+     تیپ، گچ و کیس تعریفِ دستیِ خودشان را در `specs.ts` دارند. بدونِ
+     این پل، فرمشان فقط «وضعیت کالا» نشان می‌داد — همان چیزی که
+     انتقال به کاتالوگ بی‌صدا شکسته بود. */
+  const specDefs = useMemo(
+    () => (catalogSpecs.length
+      ? catalogSpecs
+      : fromLegacyDefs((CATEGORY_SPECS[form.category] ?? GENERIC_SPECS) as LegacySpecDef[])),
+    [catalogSpecs, form.category],
+  )
 
   /* ── تفکیکِ مقدارِ خام، وقتی تعریفِ فیلدها رسید ──
      هرچه در کاتالوگ نیست دست‌نخورده در `legacySpecs` می‌ماند و
@@ -464,6 +475,9 @@ export default function EditProductPage() {
             brand: effBrand, model: effModel,
             cueType: form.category === 'cue' ? catTypeId || undefined : undefined,
             tableType: form.category === 'table' ? catTypeId || undefined : undefined,
+            /* پارچه ستونِ نوع ندارد؛ این فقط برای اعتبارسنجیِ سرور
+               است تا بداند برند به کدام رشته تعلق دارد. */
+            catalogType: catTypeId || null,
             brandId: catTypeId && cue.brandId !== '__other__' ? cue.brandId : null,
             modelId: catTypeId && cue.modelId !== '__other__' ? cue.modelId : null,
             tableSizeId: form.category === 'table' && specs.size && specs.size !== '__other__' ? String(specs.size) : null,

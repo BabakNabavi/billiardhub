@@ -178,10 +178,11 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ message: first, errors: sv.errors }, { status: 400 });
     }
   }
-  const catType = str(category === 'cue' ? b?.cueType : b?.tableType, 40);
+  /* پارچه هم نوع دارد و همان رشته‌ی میز است */
+  const catType = str(category === 'cue' ? b?.cueType : category === 'table' ? b?.tableType : b?.catalogType, 40);
   /* `cloth` هم یک شناسه‌ی کاتالوگ است ولی دسته‌ی محصولِ مستقلی هم
      هست؛ بدونِ این گیت، POST با category=cloth وارد این شاخه می‌شد. */
-  if ((category === 'cue' || category === 'table') && catType) {
+  if ((category === 'cue' || category === 'table' || category === 'cloth') && catType) {
     const brandId = str(b?.brandId, 80) || null;
     const check = validateOnServer({
       category,
