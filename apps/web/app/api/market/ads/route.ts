@@ -3,7 +3,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { sb, actorFromRequest } from '@/lib/finance/db';
 import { consumeAdQuota, releaseConsumption, attachConsumptionRef } from '@/lib/ads/quota';
 import { normalizeCategory, normalizeCondition } from '@/lib/market/categories';
-import { isCatalogId, validateOnServer } from '../../../../lib/market/catalog'
+import { isCatalogId, validateOnServer, getBrand, TYPE_PREFIX } from '../../../../lib/market/catalog'
+import { hasSpecCatalog, validateSpecsOnServer } from '../../../../lib/market/spec-catalog'
 import { normalizeAdImages } from '@/lib/market/images';
 import { getSetting } from '@/lib/ads/quota';
 
@@ -145,8 +146,23 @@ export async function POST(req: NextRequest) {
 
      پیش از مصرفِ سهمیه انجام می‌شود تا ورودیِ نامعتبر سهمیه نسوزاند. */
   let catalogCols: Record<string, string | null> = {};
+  let clothCols: Record<string, string | null> = {};
+
+  /* ── بازه‌های عددیِ مشخصات ──
+     `min`/`max` در `specs_catalog.json` تعریف شده‌اند نه در کد، تا
+     اصلاحشان دیپلوی نخواهد. فرم همان‌ها را می‌سنجد؛ این‌جا دوباره
+     سنجیده می‌شوند چون فرم قابلِ اعتماد نیست. */
+  if (hasSpecCatalog(category) && b?.specs && typeof b.specs === 'object') {
+    const sv = validateSpecsOnServer(category, b.specs as Record<string, unknown>);
+    if (!sv.ok) {
+      const first = Object.values(sv.errors)[0] ?? 'مشخصات فنی معتبر نیست';
+      return NextResponse.json({ message: first, errors: sv.errors }, { status: 400 });
+    }
+  }
   const catType = str(category === 'cue' ? b?.cueType : b?.tableType, 40);
-  if (isCatalogId(category) && catType) {
+  /* `cloth` هم یک شناسه‌ی کاتالوگ است ولی دسته‌ی محصولِ مستقلی هم
+     هست؛ بدونِ این گیت، POST با category=cloth وارد این شاخه می‌شد. */
+  if ((category === 'cue' || category === 'table') && catType) {
     const brandId = str(b?.brandId, 80) || null;
     const check = validateOnServer({
       category,
@@ -173,6 +189,35 @@ export async function POST(req: NextRequest) {
       tableSizeId: category === 'table' ? val.sizeId ?? null : null,
       tableSizeCustom: category === 'table' ? val.sizeCustom ?? null : null,
     };
+
+    /* ── پارچه ──
+       زنجیره‌ی خودش را دارد: مدل باید متعلق به همان برند باشد و
+       برند باید در کاتالوگِ **همان نوعِ میز** وجود داشته باشد.
+       فرم این را رعایت می‌کند ولی هرکسی می‌تواند مستقیم POST بزند. */
+    if (category === 'table') {
+      const cbId = str(b?.clothBrandId, 80) || null;
+      const cmId = str(b?.clothModelId, 80) || null;
+      const cbCustom = str(b?.clothBrandCustom, 60) || null;
+      if (cbId) {
+        const cb = getBrand('cloth', cbId);
+        if (!cb) return NextResponse.json({ message: 'برند پارچه در فهرست نیست', errors: { clothBrand: 'برند پارچه در فهرست نیست' } }, { status: 400 });
+        const prefix = TYPE_PREFIX.cloth[catType];
+        if (prefix && !cbId.startsWith(prefix)) {
+          return NextResponse.json({ message: 'این پارچه برای نوع میز انتخاب‌شده نیست', errors: { clothBrand: 'این پارچه برای نوع میز انتخاب‌شده نیست' } }, { status: 400 });
+        }
+        if (cmId && !cb.models.some(m => m.id === cmId)) {
+          return NextResponse.json({ message: 'این مدل پارچه برای برند انتخاب‌شده نیست', errors: { clothModel: 'این مدل پارچه برای برند انتخاب‌شده نیست' } }, { status: 400 });
+        }
+      } else if (cmId) {
+        return NextResponse.json({ message: 'ابتدا برند پارچه را انتخاب کنید', errors: { clothModel: 'ابتدا برند پارچه را انتخاب کنید' } }, { status: 400 });
+      }
+      clothCols = {
+        clothBrandId: cbId,
+        clothBrandCustom: cbId ? null : cbCustom,
+        clothModelId: cbId ? cmId : null,
+        clothModelCustom: cmId ? null : str(b?.clothModelCustom, 60) || null,
+      };
+    }
   }
 
   /* سهمیه — فاز ۳: بررسی و مصرف در یک قدم اتمیک، پیش از درج آگهی.
@@ -274,6 +319,7 @@ export async function POST(req: NextRequest) {
        مقدارها همان‌هایی‌اند که چند خط بالاتر `validateOnServer`
        پاک و تأیید کرده؛ ورودیِ خام این‌جا نمی‌آید. */
     ...catalogCols,
+    ...clothCols,
     specs: b?.specs && typeof b.specs === 'object' ? b.specs : null,
     section: str(b?.section, 20) || 'newest',
     sellerName: str(b?.sellerName ?? b?.shopName, 120),

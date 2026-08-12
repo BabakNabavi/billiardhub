@@ -82,7 +82,7 @@ export function countFilled(
   let filled = 0
   for (const f of fields) {
     const v = values[specKey(f.id)]
-    if (Array.isArray(v) ? v.length > 0 : v !== undefined && v !== null && String(v).trim() !== '') filled++
+    if (Array.isArray(v) ? v.length > 0 : v !== undefined && v !== null && v !== false && String(v).trim() !== '') filled++
   }
   return { filled, total: fields.length }
 }
@@ -133,4 +133,57 @@ export function validateSpecs(
     }
   }
   return { ok: Object.keys(errors).length === 0, errors }
+}
+
+/* ── ردیف‌های نمایشِ مشخصات ──
+   از امروز مقدارها **شناسه** ذخیره می‌شوند نه برچسب: بدونِ شناسه،
+   فرمِ ویرایش نمی‌تواند گزینه را از روی متنِ فارسی پیدا کند و
+   فیلترکردن هم ممکن نیست.
+
+   ولی آگهی‌های موجود برچسبِ فارسی دارند. پس هر مقدار اول به‌عنوان
+   شناسه جست‌وجو می‌شود و اگر پیدا نشد، همان‌طور که هست نشان داده
+   می‌شود — هیچ داده‌ای گم نمی‌شود. */
+export interface SpecDisplayRow { key: string; label: string; value: string }
+
+export function specDisplayRows(
+  fields: SpecField[], specs: unknown,
+  /* ── فیلدهای `source`دار ──
+     اندازه و برند/مدلِ پارچه گزینه‌ای در این فایل ندارند؛ فهرستشان
+     در کاتالوگِ میز و پارچه است. بدونِ این نگاشت، صفحه‌ی جزئیات
+     «۱۲ft» و «snooker__strachan» نشان می‌داد. */
+  resolve?: (fieldId: string, value: string) => string | undefined,
+): SpecDisplayRow[] {
+  if (!specs || typeof specs !== 'object' || Array.isArray(specs)) return []
+  const raw = specs as Record<string, unknown>
+  const byKey = new Map(fields.map(f => [specKey(f.id), f]))
+  const rows: SpecDisplayRow[] = []
+
+  const label = (f: SpecField | undefined, v: unknown): string => {
+    if (!f) return String(v ?? '').trim()
+    if (f.type === 'boolean') return v === true ? 'دارد' : ''
+    if (f.type === 'multi_select') {
+      const arr = Array.isArray(v) ? v : []
+      return arr.map(x => f.options?.find(o => o.id === x)?.label_fa ?? String(x)).join('، ')
+    }
+    const s = String(v ?? '').trim()
+    if (!s) return ''
+    const viaSource = f.source ? resolve?.(f.id, s) : undefined
+    if (viaSource) return viaSource
+    return f.options?.find(o => o.id === s)?.label_fa ?? s
+  }
+
+  for (const [k, v] of Object.entries(raw)) {
+    /* «سایر» متنش را در کلیدِ جفتِ `_other` می‌گذارد */
+    if (k.endsWith('_other')) continue
+    const f = byKey.get(k)
+    const other = String(raw[`${k}_other`] ?? '').trim()
+    const text = other || label(f, v)
+    if (!text || text === 'سایر') continue
+    rows.push({ key: k, label: f?.label_fa ?? k, value: text })
+  }
+
+  /* ترتیبِ کاتالوگ، نه ترتیبِ کلیدهای JSON — وگرنه هر آگهی چیدمانِ
+     متفاوتی می‌گرفت. */
+  const order = new Map(fields.map((f, i) => [specKey(f.id), i]))
+  return rows.sort((a, b) => (order.get(a.key) ?? 999) - (order.get(b.key) ?? 999))
 }

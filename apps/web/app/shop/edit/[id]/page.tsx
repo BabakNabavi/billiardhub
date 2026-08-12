@@ -40,10 +40,13 @@ import { GENERIC_SPECS, CATEGORY_SPECS, HIDDEN_SPEC_KEYS } from '../../../../lib
 import { TYPE_OPTIONS, brandOptionsFor, modelOptionsFor, isTypeDrivenCategory, withOther } from '../../../../lib/market/chain'
 import { typeIdOf, type CatalogId } from '../../../../lib/market/catalog-rules'
 import CatalogSelector, { EMPTY_CATALOG_VALUE, type CatalogValue, useCatalogType } from '../../../../components/market/CatalogSelector'
-import TableSizeField, { EMPTY_SIZE, type SizeValue } from '../../../../components/market/TableSizeField'
+import { SpecFieldRow, SpecProgress, useSpecFields, specKey } from '../../../../components/market/SpecFields'
+import { splitFields, countFilled, type SpecField } from '../../../../lib/market/spec-rules'
+import { brandSearchTerms } from '../../../../lib/market/catalog-rules'
+import CountryFlag from '../../../../components/CountryFlag'
 import {
   GOLD, GOLD_D, TEXT, TEXT_SEC, TEXT_MUT, LQ_BG, LQ_BOR, LQ_SHAD,
-  AD_FORM_CSS, inp, toAsciiDigits, fmtPrice, FancySelect, Label, ErrMsg, SectionTitle, SpecField,
+  AD_FORM_CSS, inp, type FancyOption, toAsciiDigits, fmtPrice, FancySelect, Label, ErrMsg, SectionTitle, 
   AlertDialog,
 } from '../../../../components/market/AdFormFields'
 
@@ -77,16 +80,16 @@ export default function EditProductPage() {
     description: '', condition: 'new',
     province: '', city: '',
   })
-  const [specs, setSpecs] = useState<Record<string, string>>({})
+  const [specs, setSpecs] = useState<Record<string, unknown>>({})
+  const [rawSpecs, setRawSpecs] = useState<Record<string, unknown>>({})
   const [specOthers, setSpecOthers] = useState<Record<string, string>>({})
   /* کلیدهایی که در تعریفِ دسته نیستند (داده‌ی قدیمی یا دسته‌ی عوض‌شده).
      حذف نمی‌شوند — وگرنه ویرایشِ یک آگهی، چیزی را که فروشنده وارد
      کرده بی‌صدا می‌بلعد. */
-  const [legacySpecs, setLegacySpecs] = useState<{ key: string; value: string }[]>([])
+  const [legacySpecs, setLegacySpecs] = useState<{ key: string; value: unknown }[]>([])
   /* انتخابِ چوب و نامِ رشته‌ایِ آگهیِ موجود، تا انتخابگر بتواند
      یک‌بار آن را به شناسه نگاشت کند */
   const [cue, setCue] = useState<CatalogValue>(EMPTY_CATALOG_VALUE)
-  const [size, setSize] = useState<SizeValue>(EMPTY_SIZE)
   const [legacyCue, setLegacyCue] = useState<{ brand: string; model: string } | undefined>(undefined)
 
   const [existingImages, setExistingImages] = useState<string[]>([])
@@ -149,40 +152,22 @@ export default function EditProductPage() {
       city: String(p.city ?? p.sellerCity ?? ''),
     })
 
-    // ── مشخصاتِ فنی ──
+    /* ── مشخصاتِ فنی ──
+       تعریفِ فیلدها با fetch می‌آید و ممکن است هنوز نرسیده باشد، پس
+       این‌جا فقط مقدارِ **خام** نگه داشته می‌شود و تفکیکِ
+       «شناخته‌شده / باقی‌مانده» در یک effect انجام می‌شود که به
+       `specDefs` وابسته است.
+
+       ⚠️ نسخه‌ی قبلی این‌جا با فهرستِ قدیمیِ `CATEGORY_SPECS` تفکیک
+       می‌کرد. نتیجه‌اش این بود که کلیدهای دسته‌هایی که کاتالوگِ تازه
+       ندارند (توپ، تیپ، گچ) «شناخته‌شده» حساب می‌شدند، هیچ‌جا رندر
+       نمی‌شدند، در `legacySpecs` هم نبودند — و ذخیره‌ی دوباره
+       **پاکشان می‌کرد**. */
     const raw = (p.specs && typeof p.specs === 'object' && !Array.isArray(p.specs))
       ? (p.specs as Record<string, unknown>) : {}
-    const defs = CATEGORY_SPECS[category] ?? GENERIC_SPECS
-    const known = new Set(defs.map(d => d.key))
-    const nextSpecs: Record<string, string> = {}
-    const nextOthers: Record<string, string> = {}
-    const leftovers: { key: string; value: string }[] = []
-    for (const [k, v] of Object.entries(raw)) {
-      const value = String(v ?? '').trim()
-      if (!value) continue
-      if (TOP_LEVEL_SPEC_KEYS.includes(k)) continue      // نوع/مدل بالای فرم‌اند
-      if (!known.has(k)) { leftovers.push({ key: k, value }); continue }
-      /* فرمِ ثبت مقدارِ «سایر» را به شکلِ «سایر: متن» ذخیره می‌کند */
-      if (value.startsWith('سایر:')) {
-        nextSpecs[k] = 'سایر'
-        nextOthers[k] = value.slice('سایر:'.length).trim()
-      } else {
-        nextSpecs[k] = value
-      }
-    }
-    setSpecs(nextSpecs)
-    setSpecOthers(nextOthers)
-    setLegacySpecs(leftovers)
+    setRawSpecs(raw)
 
     setLegacyCue({ brand: rawBrand, model: rawModel })
-    setCue(EMPTY_CATALOG_VALUE)
-    /* ── سایزِ آگهیِ موجود ──
-       فقط برچسبِ فارسی در `specs.size` ذخیره شده، نه شناسه. آن را
-       در «سایر» می‌گذاریم تا چیزی گم نشود؛ اگر با یکی از سایزهای
-       فهرست بخواند، خودِ `TableSizeField` آن را نمی‌شناسد ولی متن
-       دست‌نخورده می‌ماند و فروشنده می‌تواند از فهرست عوضش کند. */
-    const rawSize = String(nextSpecs.size ?? '').trim()
-    setSize(rawSize ? { sizeId: '__other__', sizeCustom: rawSize } : EMPTY_SIZE)
     setExistingImages(Array.isArray(p.images) ? p.images.filter(Boolean).map(String) : [])
     setPageLoading(false)
   }, [])
@@ -227,14 +212,27 @@ export default function EditProductPage() {
     setForm(f => ({ ...f, category: cat, type: '', typeOther: '', brand: '', brandOther: '', model: '', modelOther: '' }))
     setErrors(e => { const n = { ...e }; delete n.category; delete n.type; delete n.brand; delete n.model; return n })
     setSpecs({}); setSpecOthers({})
-    setCue(EMPTY_CATALOG_VALUE); setSize(EMPTY_SIZE); setLegacyCue(undefined)
+    setCue(EMPTY_CATALOG_VALUE); setLegacyCue(undefined)
   }
   const setType = (v: string) => {
+    /* ── سایز و پارچه به نوعِ میز وابسته‌اند ──
+       بدونِ پاک‌شدن، `12ft` روی پاکت و برندِ پارچه‌ی اسنوکر روی
+       کارامبول می‌ماند — دراپ‌داون خالی نشان می‌دهد و سرور ۴۰۰. */
+    setSpecs(s => {
+      const n = { ...s }
+      for (const k of ['size', 'clothBrand', 'clothModel', 'clothType', 'clothWeight']) delete n[k]
+      return n
+    })
+    setSpecOthers(s => {
+      const n = { ...s }
+      for (const k of ['size', 'clothBrand', 'clothModel']) delete n[k]
+      return n
+    })
     setForm(f => ({ ...f, type: v, typeOther: '', ...(isTypeDrivenCategory(f.category) ? { brand: '', brandOther: '', model: '', modelOther: '' } : {}) }))
     setErrors(e => { const n = { ...e }; delete n.type; if (isTypeDrivenCategory(form.category)) { delete n.brand; delete n.model } return n })
     /* برندها بینِ نوع‌ها مشترک نیستند و سایزها هم — شناسه‌ی نوعِ
        قبلی روی نوعِ تازه بی‌معناست و سرور ردش می‌کند. */
-    setCue(EMPTY_CATALOG_VALUE); setSize(EMPTY_SIZE)
+    setCue(EMPTY_CATALOG_VALUE)
   }
   const setBrand = (v: string) => {
     setForm(f => ({ ...f, brand: v, model: '', modelOther: '' }))
@@ -247,6 +245,102 @@ export default function EditProductPage() {
   const catTypeId = catCategory ? typeIdOf(catCategory, form.type) : ''
   /* همان ورودیِ کش‌شده‌ی انتخابگر — درخواستِ تازه‌ای نمی‌زند */
   const catFreeInput = !!useCatalogType(catCategory ?? 'cue', catCategory ? catTypeId : '').data?.forceFreeInput
+  const { fields: specDefs, loading: specsLoading } = useSpecFields(form.category)
+
+  /* ── تفکیکِ مقدارِ خام، وقتی تعریفِ فیلدها رسید ──
+     هرچه در کاتالوگ نیست دست‌نخورده در `legacySpecs` می‌ماند و
+     موقعِ ذخیره عیناً برمی‌گردد — بولین و آرایه هم به رشته تبدیل
+     نمی‌شوند، وگرنه `['balls','cues']` می‌شد «balls,cues» و
+     دفعه‌ی بعد دیگر آرایه نبود. */
+  useEffect(() => {
+    const known = new Set(specDefs.map(f => specKey(f.id)))
+    const nextSpecs: Record<string, unknown> = {}
+    const nextOthers: Record<string, string> = {}
+    const leftovers: { key: string; value: unknown }[] = []
+    for (const [k, v] of Object.entries(rawSpecs)) {
+      if (v === undefined || v === null || v === '') continue
+      if (TOP_LEVEL_SPEC_KEYS.includes(k)) continue
+      /* کلیدِ جفتِ «سایر» را کنارِ کلیدِ اصلی برمی‌داریم. اگر کلیدِ
+         اصلی در کاتالوگ نباشد، این هم باید باقی‌مانده بماند وگرنه
+         متنی که فروشنده نوشته بی‌صدا پاک می‌شود. */
+      if (k.endsWith('_other')) {
+        const base = k.slice(0, -'_other'.length)
+        if (!known.has(base)) leftovers.push({ key: k, value: v })
+        continue
+      }
+      if (!known.has(k)) { leftovers.push({ key: k, value: v }); continue }
+      const other = rawSpecs[`${k}_other`]
+      if (other) { nextSpecs[k] = '__other__'; nextOthers[k] = String(other).trim(); continue }
+      /* آگهیِ قدیمی «سایر: متن» ذخیره می‌کرد */
+      const s = typeof v === 'string' ? v : ''
+      if (s.startsWith('سایر:')) { nextSpecs[k] = '__other__'; nextOthers[k] = s.slice('سایر:'.length).trim(); continue }
+      nextSpecs[k] = v
+    }
+    setSpecs(nextSpecs)
+    setSpecOthers(nextOthers)
+    setLegacySpecs(leftovers)
+  }, [rawSpecs, specDefs])
+  const cloth = useCatalogType('cloth', form.category === 'table' ? catTypeId : '')
+  const tableCat = useCatalogType('table', form.category === 'table' ? catTypeId : '')
+  const clothBrandId = String(specs.clothBrand ?? '')
+
+  const sourceOptionsFor = (id: string): FancyOption[] | undefined => {
+    if (id === 'size') {
+      return (tableCat.data?.sizes ?? []).map(s => ({
+        value: s.id, label: s.label_fa,
+        search: `${s.label_fa} ${s.label_en ?? ''} ${s.playing_area_cm ?? ''}`,
+        node: (
+          <span style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
+            <span style={{ fontWeight: 600 }}>{s.label_fa}</span>
+            {s.playing_area_cm && <span dir="ltr" style={{ fontSize: 12, color: TEXT_MUT }}>{s.playing_area_cm} cm</span>}
+          </span>
+        ),
+      }))
+    }
+    if (id === 'cloth_brand') {
+      return (cloth.data?.brands ?? []).map(b => ({
+        value: b.id, label: b.name_en,
+        search: brandSearchTerms(b, b.country ? cloth.data?.countries[b.country]?.fa : '').join(' '),
+        node: (
+          <span style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
+            <CountryFlag code={b.country} label={b.country ? cloth.data?.countries[b.country]?.fa ?? '' : 'نامشخص'} />
+            <span style={{ fontWeight: 600 }}>{b.name_en}</span>
+            <span style={{ fontSize: 12, color: TEXT_MUT }}>{b.name_fa}</span>
+          </span>
+        ),
+      }))
+    }
+    if (id === 'cloth_model') {
+      const br = cloth.data?.brands.find(b => b.id === clothBrandId)
+      return (br?.models ?? []).map(m => ({
+        value: m.id, label: m.name_en,
+        search: `${m.name_en} ${m.name_fa}`,
+        node: (
+          <span style={{ display: 'flex', flexDirection: 'column', gap: 2, minWidth: 0 }}>
+            <span style={{ fontWeight: 600 }}>{m.name_en}</span>
+            {m.note_fa && <span style={{ fontSize: 11.5, color: TEXT_MUT }}>{m.note_fa}</span>}
+          </span>
+        ),
+      }))
+    }
+    return undefined
+  }
+
+  const onSpecChange = (field: SpecField, v: unknown) => {
+    const key = specKey(field.id)
+    setSpecs(s => {
+      const next: Record<string, unknown> = { ...s, [key]: v }
+      if (field.id === 'cloth_brand') { next.clothModel = ''; next.clothType = ''; next.clothWeight = '' }
+      if (field.id === 'cloth_model') {
+        const br = cloth.data?.brands.find(b => b.id === String(s.clothBrand ?? ''))
+        const m = br?.models.find(x => x.id === v)
+        if (m?.type) next.clothType = m.type
+        if (m?.weight_oz) next.clothWeight = m.weight_oz
+      }
+      return next
+    })
+    setErrors(e => { const n = { ...e }; delete n[key]; return n })
+  }
 
   /* رشته برای نمایش، شناسه برای یکپارچگی — همان قاعده‌ی فرمِ ثبت */
   const onCatalogChange = (v: CatalogValue, labels: { brand: string; model: string }) => {
@@ -303,17 +397,43 @@ export default function EditProductPage() {
   }
 
   // ── ذخیره ─────────────────────────────────────────────────────
+  /* ── ساختِ مقدارِ ستونِ specs ──
+     شناسه ذخیره می‌شود نه برچسب: بدونش فرمِ ویرایش نمی‌تواند گزینه
+     را از روی متنِ فارسی پیدا کند. `legacySpecs` کلیدهایی‌اند که در
+     کاتالوگ نیستند و دست‌نخورده منتقل می‌شوند تا چیزی گم نشود. */
   const buildSpecs = () => {
-    const out: Record<string, string> = { نوع: effType, مدل: effModel }
-    Object.entries(specs).forEach(([k, v]) => {
-      if (v === 'سایر' && specOthers[k]) out[k] = `سایر: ${specOthers[k]}`
-      else if (v) out[k] = v
+    const out: Record<string, unknown> = { نوع: effType, مدل: effModel }
+    /* باقی‌مانده‌ها **اول** ریخته می‌شوند تا حلقه‌ی کاتالوگ رویشان
+       بنویسد؛ برعکسش یعنی مقدارِ قدیمی روی چیزی که کاربر همین حالا
+       عوض کرده می‌نشیند. */
+    legacySpecs.forEach(({ key, value }) => {
+      if (typeof value === 'string' ? value.trim() : value !== undefined && value !== null) out[key] = value
     })
-    legacySpecs.forEach(({ key, value }) => { if (value.trim()) out[key] = value.trim() })
+    for (const f of specDefs) {
+      const key = specKey(f.id)
+      const v = specs[key]
+      if (v === undefined || v === null || v === '') continue
+      if (f.type === 'boolean') { if (v === true) out[key] = true; continue }
+      if (f.type === 'multi_select') { const arr = Array.isArray(v) ? v : []; if (arr.length) out[key] = arr; continue }
+      if (v === '__other__') {
+        const other = specOthers[key]?.trim()
+        if (other) { out[key] = '__other__'; out[`${key}_other`] = other }
+        continue
+      }
+      out[key] = v
+    }
     return out
   }
 
   const handleSubmit = (ev: React.FormEvent) => {
+    ev.preventDefault()
+    /* ── تعریفِ فیلدها هنوز نرسیده ──
+       بدونِ آن، حلقه‌ی سریال‌سازی روی آرایه‌ی خالی می‌چرخد و آگهی
+       بدونِ هیچ مشخصه‌ای ذخیره می‌شود. روی موبایلِ کند نادر نیست. */
+    if (specsLoading) {
+      setAlert({ title: 'لحظه‌ای صبر کنید', lines: ['فهرست مشخصات فنی هنوز بارگذاری نشده است.'] })
+      return
+    }
     ev.preventDefault()
     const errs = validate()
     if (Object.keys(errs).length > 0) {
@@ -347,8 +467,13 @@ export default function EditProductPage() {
             tableType: form.category === 'table' ? catTypeId || undefined : undefined,
             brandId: catTypeId && cue.brandId !== '__other__' ? cue.brandId : null,
             modelId: catTypeId && cue.modelId !== '__other__' ? cue.modelId : null,
-            tableSizeId: form.category === 'table' && size.sizeId !== '__other__' ? size.sizeId || null : null,
-            tableSizeCustom: form.category === 'table' && size.sizeCustom.trim() ? size.sizeCustom.trim() : null,
+            tableSizeId: form.category === 'table' && specs.size && specs.size !== '__other__' ? String(specs.size) : null,
+            tableSizeCustom: form.category === 'table' && specs.size === '__other__' ? (specOthers.size ?? '').trim() || null : null,
+            /* پارچه: شناسه کنارِ رشته، مثل برندِ خودِ محصول */
+            clothBrandId: form.category === 'table' && specs.clothBrand && specs.clothBrand !== '__other__' ? String(specs.clothBrand) : null,
+            clothBrandCustom: form.category === 'table' && specs.clothBrand === '__other__' ? (specOthers.clothBrand ?? '').trim() || null : null,
+            clothModelId: form.category === 'table' && specs.clothModel && specs.clothModel !== '__other__' ? String(specs.clothModel) : null,
+            clothModelCustom: form.category === 'table' && specs.clothModel === '__other__' ? (specOthers.clothModel ?? '').trim() || null : null,
             description: form.description.trim(), condition: form.condition,
             price: form.negotiable ? 0 : price,
             old: form.negotiable ? 0 : old,
@@ -389,8 +514,8 @@ export default function EditProductPage() {
             tableType: form.category === 'table' ? catTypeId || undefined : undefined,
             brandId: catTypeId && cue.brandId !== '__other__' ? cue.brandId : null,
             modelId: catTypeId && cue.modelId !== '__other__' ? cue.modelId : null,
-            tableSizeId: form.category === 'table' && size.sizeId !== '__other__' ? size.sizeId || null : null,
-            tableSizeCustom: form.category === 'table' && size.sizeCustom.trim() ? size.sizeCustom.trim() : null,
+            tableSizeId: form.category === 'table' && specs.size && specs.size !== '__other__' ? String(specs.size) : null,
+            tableSizeCustom: form.category === 'table' && specs.size === '__other__' ? (specOthers.size ?? '').trim() || null : null,
             price: form.negotiable ? 0 : price,
             old: form.negotiable ? 0 : old,
             negotiable: form.negotiable,
@@ -450,9 +575,10 @@ export default function EditProductPage() {
     </div>
   )
 
-  const currentDefs = form.category ? (CATEGORY_SPECS[form.category] ?? GENERIC_SPECS) : []
-  const hidden = HIDDEN_SPEC_KEYS[form.category] ?? ['brand']
-  const specFields = currentDefs.filter(f => f.key !== 'condition' && !hidden.includes(f.key))
+  const HIDE_SPEC = new Set(['brand', 'model', 'cue_type', 'table_type', 'condition'])
+  const usableSpecs = specDefs.filter(f => !HIDE_SPEC.has(f.id))
+  const { main: mainSpecs, toggles: toggleSpecs } = splitFields(usableSpecs)
+  const specProgress = countFilled(usableSpecs, specs)
 
   const card: React.CSSProperties = {
     background: LQ_BG, backdropFilter: 'blur(40px) saturate(220%)', WebkitBackdropFilter: 'blur(40px) saturate(220%)',
@@ -603,44 +729,44 @@ export default function EditProductPage() {
 
                 {form.category ? (
                   <div className="spec-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 20 }}>
-                    {/* سایزِ میز — وابسته به نوع، از کاتالوگ؛ نه فهرستِ ثابتِ قبلی */}
-                    {form.category === 'table' && catTypeId && (
-                      <TableSizeField
-                        /* آگهیِ موجود: اگر فروشنده سایز نداده، نباید
-                           با بازکردنِ فرم عددی جعلی برایش ثبت شود */
-                        autoDefault={false}
-                        type={catTypeId}
-                        value={size}
-                        onChange={(v, label) => {
-                          setSize(v)
-                          setSpecs(s => ({ ...s, size: label }))
-                        }}
-                        error={errors.size}
+                    {mainSpecs.map(field => (
+                      <SpecFieldRow
+                        key={`${form.category}-${field.id}`}
+                        field={field}
+                        value={specs[specKey(field.id)]}
+                        otherValue={specOthers[specKey(field.id)] ?? ''}
+                        error={errors[specKey(field.id)]}
+                        sourceOptions={sourceOptionsFor(field.id)}
+                        disabled={!!field.source && !catTypeId}
+                        onChange={v => onSpecChange(field, v)}
+                        onOtherChange={v => setSpecOthers(s => ({ ...s, [specKey(field.id)]: v }))}
                       />
-                    )}
-                    {specFields.map(field => {
-                      const isParent = specFields.some(f => f.dependsOn === field.key)
-                      return (
-                        <SpecField
-                          key={`${form.category}-${field.key}`}
-                          field={field}
-                          value={specs[field.key] ?? ''}
-                          otherValue={specOthers[field.key] ?? ''}
-                          dependencyValue={field.dependsOn ? specs[field.dependsOn] ?? '' : undefined}
-                          onChange={v => setSpecs(s => {
-                            const next = { ...s, [field.key]: v }
-                            if (isParent) specFields.filter(f => f.dependsOn === field.key).forEach(f => { next[f.key] = '' })
-                            return next
-                          })}
-                          onOtherChange={v => setSpecOthers(s => ({ ...s, [field.key]: v }))}
-                        />
-                      )
-                    })}
+                    ))}
                   </div>
                 ) : (
                   <div style={{ padding: '11px 14px', background: 'rgba(199,166,106,0.07)', border: '1px solid rgba(199,166,106,0.20)', borderRadius: 10, marginBottom: 18 }}>
                     <p style={{ fontSize: 13, color: TEXT_MUT, margin: 0 }}>⬆ ابتدا دسته‌بندی را انتخاب کنید تا مشخصات فنی نمایش یابد</p>
                   </div>
+                )}
+
+                {toggleSpecs.length > 0 && (
+                  <>
+                    <div style={{ height: 1, background: 'rgba(28,28,26,0.08)', margin: '4px 0 14px' }} />
+                    <div style={{ display: 'grid', gap: 8, marginBottom: 18 }}>
+                      {toggleSpecs.map(field => (
+                        <SpecFieldRow
+                          key={`${form.category}-${field.id}`}
+                          field={field}
+                          value={specs[specKey(field.id)] === true}
+                          onChange={v => onSpecChange(field, v)}
+                        />
+                      ))}
+                    </div>
+                  </>
+                )}
+
+                {specDefs.length > 0 && (
+                  <SpecProgress filled={specProgress.filled} total={specProgress.total} />
                 )}
 
                 {/* ── مشخصاتی که در تعریفِ این دسته نیستند ──
@@ -651,17 +777,30 @@ export default function EditProductPage() {
                   <div style={{ marginBottom: 20 }}>
                     <Label>مشخصات ثبت‌شده‌ی دیگر</Label>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                      {legacySpecs.map((row, i) => (
+                      {legacySpecs.map((row, i) => {
+                        /* بولین و آرایه در فیلدِ متنی ویرایش‌پذیر
+                           نیستند: تبدیلشان به رشته داده را نابود
+                           می‌کند. فقط نشان داده می‌شوند و می‌شود
+                           حذفشان کرد. */
+                        const editable = typeof row.value === 'string' || typeof row.value === 'number'
+                        return (
                         <div key={`${row.key}-${i}`} style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
                           <span style={{ minWidth: 120, fontSize: 12.5, color: TEXT_SEC, fontWeight: 700 }}>{row.key}</span>
-                          <input className="nf" type="text" value={row.value}
-                            onChange={e => setLegacySpecs(list => list.map((x, j) => j === i ? { ...x, value: e.target.value } : x))}
-                            style={{ ...inp(), flex: 1 }} />
+                          {editable ? (
+                            <input className="nf" type="text" value={String(row.value)}
+                              onChange={e => setLegacySpecs(list => list.map((x, j) => j === i ? { ...x, value: e.target.value } : x))}
+                              style={{ ...inp(), flex: 1 }} />
+                          ) : (
+                            <span style={{ flex: 1, fontSize: 12.5, color: TEXT_MUT }}>
+                              {Array.isArray(row.value) ? row.value.join('، ') : String(row.value)}
+                            </span>
+                          )}
                           <button type="button" onClick={() => setLegacySpecs(list => list.filter((_, j) => j !== i))}
-                            title="حذف این مشخصه"
+                            title="حذف این مشخصه" aria-label={`حذف ${row.key}`}
                             style={{ border: 'none', background: 'transparent', color: TEXT_MUT, cursor: 'pointer', fontSize: 18, lineHeight: 1, padding: '0 4px' }}>×</button>
                         </div>
-                      ))}
+                        )
+                      })}
                     </div>
                   </div>
                 )}

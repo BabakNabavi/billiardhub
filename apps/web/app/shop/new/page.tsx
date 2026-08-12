@@ -158,7 +158,7 @@ export default function NewProductPage() {
     form.category === 'cue' || form.category === 'table' ? form.category : null
   const catTypeId = catCategory ? typeIdOf(catCategory, form.type) : ''
   /* همان ورودیِ کش‌شده‌ی انتخابگر — درخواستِ تازه‌ای نمی‌زند */
-  const { fields: specDefs } = useSpecFields(form.category)
+  const { fields: specDefs, loading: specsLoading } = useSpecFields(form.category)
   /* پارچه: فهرستش به نوعِ **میز** وابسته است، پس همان شناسه‌ی نوع */
   const cloth = useCatalogType('cloth', form.category === 'table' ? catTypeId : '')
   const tableCat = useCatalogType('table', form.category === 'table' ? catTypeId : '')
@@ -218,7 +218,7 @@ export default function NewProductPage() {
     const key = specKey(field.id)
     setSpecs(s => {
       const next: Record<string, unknown> = { ...s, [key]: v }
-      if (field.id === 'cloth_brand') { next.clothModel = ''; }
+      if (field.id === 'cloth_brand') { next.clothModel = ''; next.clothType = ''; next.clothWeight = '' }
       if (field.id === 'cloth_model') {
         const br = cloth.data?.brands.find(b => b.id === String(s.clothBrand ?? ''))
         const m = br?.models.find(x => x.id === v)
@@ -261,6 +261,19 @@ export default function NewProductPage() {
   /* تغییر نوع ⇒ در دسته‌های نوع‌محور (چوب/میز/تیپ/گچ) برند/مدل ریست می‌شوند */
   const typeDrivenCat = isTypeDrivenCategory
   const setType = (v: string) => {
+    /* ── سایز و پارچه به نوعِ میز وابسته‌اند ──
+       بدونِ پاک‌شدن، `12ft` روی پاکت و برندِ پارچه‌ی اسنوکر روی
+       کارامبول می‌ماند — دراپ‌داون خالی نشان می‌دهد و سرور ۴۰۰. */
+    setSpecs(s => {
+      const n = { ...s }
+      for (const k of ['size', 'clothBrand', 'clothModel', 'clothType', 'clothWeight']) delete n[k]
+      return n
+    })
+    setSpecOthers(s => {
+      const n = { ...s }
+      for (const k of ['size', 'clothBrand', 'clothModel']) delete n[k]
+      return n
+    })
     /* برندها بینِ نوع‌ها مشترک نیستند؛ شناسه‌ی برندِ اسنوکر در پاکت بی‌معناست */
     setCue(EMPTY_CATALOG_VALUE)
     /* عوض‌شدنِ نوع ⇒ توضیحِ «سایر» هم پاک می‌شود، وگرنه متنِ
@@ -339,6 +352,14 @@ export default function NewProductPage() {
   /* ثبت: اول اعتبارسنجی، بعد مودال انتخاب سکشن؛ کاربر سکشن را می‌زند و finalize ذخیره می‌کند */
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
+    /* ── تعریفِ فیلدها هنوز نرسیده ──
+       بدونِ آن، حلقه‌ی سریال‌سازی روی آرایه‌ی خالی می‌چرخد و آگهی
+       بدونِ هیچ مشخصه‌ای ذخیره می‌شود. روی موبایلِ کند نادر نیست. */
+    if (specsLoading) {
+      showAlert('لحظه‌ای صبر کنید', ['فهرست مشخصات فنی هنوز بارگذاری نشده است.'], 'warn')
+      return
+    }
+    e.preventDefault()
     const errs = validate()
     if (Object.keys(errs).length > 0) {
       setErrors(errs)
@@ -362,32 +383,28 @@ export default function NewProductPage() {
     const rawPrice = Number(toAsciiDigits(form.price).replace(/\D/g, ''))
     const rawOld   = form.oldPrice ? Number(toAsciiDigits(form.oldPrice).replace(/\D/g, '')) : rawPrice
     const disc     = rawOld > rawPrice ? Math.round((1 - rawPrice / rawOld) * 100) : 0
-
     /* ── سریال‌سازیِ مشخصات ──
-       ستونِ `specs` رشته‌به‌رشته است و صفحه‌ی جزئیات همان را نشان
-       می‌دهد. حالا بولین و چندانتخابی هم داریم، پس هرکدام به متنِ
-       فارسیِ خواندنی تبدیل می‌شوند نه `true` و `["balls"]`. */
-    const labelOfOption = (fid: string, oid: string) =>
-      specDefs.find(f => f.id === fid)?.options?.find(o => o.id === oid)?.label_fa ?? oid
-    const finalSpecs: Record<string, string> = { نوع: effType, مدل: effModel }
+       **شناسه** ذخیره می‌شود، نه برچسبِ فارسی. با برچسب، فرمِ
+       ویرایش نمی‌توانست گزینه را پیدا کند و فیلترکردن هم ممکن
+       نبود. صفحه‌ی جزئیات با `specDisplayRows` ترجمه‌اش می‌کند و
+       آگهی‌های قدیمی که برچسب دارند دست‌نخورده نمایش می‌یابند. */
+    const finalSpecs: Record<string, unknown> = { نوع: effType, مدل: effModel }
     for (const f of specDefs) {
       const key = specKey(f.id)
       const v = specs[key]
       if (v === undefined || v === null || v === '') continue
-      if (f.type === 'boolean') { if (v === true) finalSpecs[key] = 'دارد'; continue }
+      if (f.type === 'boolean') { if (v === true) finalSpecs[key] = true; continue }
       if (f.type === 'multi_select') {
         const arr = Array.isArray(v) ? v : []
-        if (arr.length) finalSpecs[key] = arr.map(x => labelOfOption(f.id, String(x))).join('، ')
+        if (arr.length) finalSpecs[key] = arr
         continue
       }
       if (v === '__other__') {
         const other = specOthers[key]?.trim()
-        if (other) finalSpecs[key] = other
+        if (other) { finalSpecs[key] = '__other__'; finalSpecs[`${key}_other`] = other }
         continue
       }
-      /* شناسه‌ی گزینه ذخیره نمی‌شود؛ برچسبِ فارسی ذخیره می‌شود تا
-         صفحه‌ی جزئیات بدونِ نگاشت بتواند نشانش دهد. */
-      finalSpecs[key] = f.options ? labelOfOption(f.id, String(v)) : String(v)
+      finalSpecs[key] = v
     }
 
     /* ── نامِ آگهی: دسته‌بندی و بعد نوع ──
@@ -442,6 +459,11 @@ export default function NewProductPage() {
                ذخیره‌شده در specs است و «سایر» شناسه ندارد. */
             tableSizeId: form.category === 'table' && specs.size && specs.size !== '__other__' ? String(specs.size) : undefined,
             tableSizeCustom: form.category === 'table' && specs.size === '__other__' ? (specOthers.size ?? '').trim() || undefined : undefined,
+            /* پارچه: شناسه کنارِ رشته، مثل برندِ خودِ محصول */
+            clothBrandId: form.category === 'table' && specs.clothBrand && specs.clothBrand !== '__other__' ? String(specs.clothBrand) : undefined,
+            clothBrandCustom: form.category === 'table' && specs.clothBrand === '__other__' ? (specOthers.clothBrand ?? '').trim() || undefined : undefined,
+            clothModelId: form.category === 'table' && specs.clothModel && specs.clothModel !== '__other__' ? String(specs.clothModel) : undefined,
+            clothModelCustom: form.category === 'table' && specs.clothModel === '__other__' ? (specOthers.clothModel ?? '').trim() || undefined : undefined,
             price: form.negotiable ? 0 : rawPrice, old: form.negotiable ? 0 : rawOld,
             negotiable: form.negotiable,
             description: form.description.trim(), condition: form.condition,

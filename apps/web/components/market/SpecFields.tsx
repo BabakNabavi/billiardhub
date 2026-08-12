@@ -33,16 +33,19 @@ export const SPEC_OTHER = '__other__'
 const specCache = new Map<string, SpecField[]>()
 const specInflight = new Map<string, Promise<SpecField[]>>()
 
-export function useSpecFields(category: string): { fields: SpecField[]; loading: boolean } {
+export function useSpecFields(category: string): { fields: SpecField[]; loading: boolean; failed: boolean } {
   const [fields, setFields] = useState<SpecField[]>(() => specCache.get(category) ?? [])
   const [loading, setLoading] = useState(false)
+  const [failed, setFailed] = useState(false)
+  /* دسته‌ای که مقدارِ فعلیِ state به آن تعلق دارد */
+  const ownerRef = useRef(category)
   const reqId = useRef(0)
 
   useEffect(() => {
     const id = ++reqId.current
-    if (!category) { setFields([]); setLoading(false); return }
+    if (!category) { ownerRef.current = ''; setFields([]); setLoading(false); setFailed(false); return }
     const hit = specCache.get(category)
-    if (hit) { setFields(hit); setLoading(false); return }
+    if (hit) { ownerRef.current = category; setFields(hit); setLoading(false); setFailed(false); return }
 
     setLoading(true)
     let p = specInflight.get(category)
@@ -57,15 +60,18 @@ export function useSpecFields(category: string): { fields: SpecField[]; loading:
       specInflight.set(category, p)
     }
     void p
-      .then(f => { if (id === reqId.current) setFields(f) })
-      /* دسته‌ای که تعریفِ اختصاصی ندارد ۴۰۴ می‌دهد — خطا نیست،
-         یعنی فقط فیلدهای عمومی دارد. */
-      .catch(() => { if (id === reqId.current) setFields([]) })
+      .then(f => { if (id === reqId.current) { ownerRef.current = category; setFields(f); setFailed(false) } })
+      /* ۴۰۴ یعنی دسته کاتالوگ ندارد — خطا نیست. بقیه خطاست. */
+      .catch(() => { if (id === reqId.current) { ownerRef.current = category; setFields([]); setFailed(true) } })
       .finally(() => { if (id === reqId.current) setLoading(false) })
   }, [category])
 
-  /* فیلدهای دسته‌ی قبلی نباید یک رندر روی دسته‌ی تازه بمانند */
-  return { fields: specCache.get(category) === fields ? fields : (specCache.get(category) ?? fields), loading }
+  /* ── هیچ‌وقت فیلدهای دسته‌ی قبلی ──
+     تا وقتی پاسخِ دسته‌ی تازه نرسیده، خروجی خالی است و `loading`
+     روشن. فرم روی همین `loading` دکمه‌ی ذخیره را قفل می‌کند —
+     وگرنه آگهی بدونِ هیچ مشخصه‌ای ذخیره می‌شد. */
+  const fresh = ownerRef.current === category ? fields : (specCache.get(category) ?? [])
+  return { fields: fresh, loading: loading || (!!category && !specCache.has(category) && !failed), failed }
 }
 
 const FA_DIGITS = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹']
