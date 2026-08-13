@@ -88,7 +88,7 @@ export const CATEGORY_SPECS: Record<string, SpecFieldDef[]> = {
     { key: 'color',        label: 'رنگ',           type: 'dropdown', options: ['آبی','سبز','سایر'] },
   ],
   'case-bag': [
-    { key: 'caseType',  label: 'نوع',     type: 'dropdown', options: ['کیس سخت','کیس نرم','کیف','کوله‌پشتی'] },
+    { key: 'caseType',  label: 'نوع',     type: 'dropdown', options: ['هارد کیس','سافت کیس','کیف','کوله‌پشتی'] },
     { key: 'capacity',  label: 'ظرفیت',  type: 'dropdown', options: ['۱×۱','۲×۲','۲×۴','۳×۵','۴×۸'] },
     { key: 'material',  label: 'جنس',    type: 'dropdown', options: ['چرم طبیعی','چرم مصنوعی','نایلون','سایر'] },
     { key: 'brand',     label: 'برند',   type: 'text',     placeholder: 'نام برند' },

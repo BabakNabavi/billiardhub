@@ -14,7 +14,7 @@ import { CATEGORY_OPTIONS, CONDITIONS, conditionLabel } from '../../../lib/marke
 /* تعریفِ مشخصاتِ فنی از این‌جا رفت به `lib/market/specs.ts` تا صفحه‌ی
    جزئیاتِ محصول هم بتواند برچسبِ فارسیِ هر کلید را بخواند. */
 import { GENERIC_SPECS, CATEGORY_SPECS } from '../../../lib/market/specs'
-import { productTitleParts } from '../../../lib/market/title'
+import { modernizeType, productTitleParts } from '../../../lib/market/title'
 import { typeIdOf, isAccessoryCategory, isProductCatalog, ACCESSORY_TYPE_OF, type CatalogId } from '../../../lib/market/catalog-rules'
 import CatalogSelector, { EMPTY_CATALOG_VALUE, type CatalogValue, useCatalogType, useCatalogTypes } from '../../../components/market/CatalogSelector'
 import { sizeOptions, SpecFieldRow, SpecProgress, useSpecFields, specKey } from '../../../components/market/SpecFields'
@@ -483,7 +483,9 @@ export default function NewProductPage() {
        Champion» نشان می‌داد و خریدار نمی‌فهمید اصلاً توپ است یا
        چوب. دسته و نوع همان چیزی است که چشم دنبالش می‌گردد؛ برند و
        مدل داخلِ مشخصات هستند. */
-    const composedName = [catLabel, effType].filter(Boolean).join(' ')
+    /* «اکسسوری جاسوییچی» ⟵ «جاسوییچی». دلیلش در `SHELF_WORDS` در
+       `lib/market/title.ts`؛ همان‌جا آگهی‌های موجود هم درست می‌شوند. */
+    const composedName = modernizeType([catLabel, effType].filter(Boolean).join(' '))
       || [effBrand, effModel].filter(Boolean).join(' ') || 'محصول'
 
     /* آگهی روی سرور ثبت می‌شود تا بقیه هم ببینندش. پیش‌تر فقط در

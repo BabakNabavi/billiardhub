@@ -976,7 +976,7 @@ t('مدل دیگر الزامی نیست', !/e\.model\s+= 'مدل الزامی �
 t('پنجره‌ی «محصول کجا نمایش داده شود» برداشته شد',
   !/محصول کجا نمایش داده شود/.test(newAdS) && !/setShowSection/.test(newAd));
 t('نامِ آگهی از دسته و نوع ساخته می‌شود',
-  /const composedName = \[catLabel, effType\]/.test(newAd),
+  /const composedName = modernizeType\(\[catLabel, effType\]/.test(newAd),
   'برند و مدل نمی‌گویند اصلاً توپ است یا چوب');
 t('دسته‌ی توپ فهرستِ رشته‌محور دارد',
   chainSrc.includes(`'اسنوکر', 'پاکت بیلیارد', 'کارامبول', 'کیوبال', 'تکی', 'سایر'`),
@@ -3009,6 +3009,21 @@ console.log('\n― لوازم جانبی ―');
       .every(f => read(f).includes('isAccessoryCategory')));
 }
 
+/* ── نامِ نمایشیِ دسته‌ها ── */
+{
+  const title = read('lib/market/title.ts');
+  /* هر دو در لایه‌ی نمایش‌اند، نه مهاجرتِ دیتابیس: آگهی‌های موجود
+     رشته‌ی قدیمی را در ستونِ `title` دارند و باید درست دیده شوند. */
+  t('«اکسسوری» از سرِ عنوانِ کارت برداشته می‌شود',
+    title.includes('SHELF_WORDS') && title.includes("'اکسسوری'")
+    && read('app/shop/new/page.tsx').includes('modernizeType([catLabel, effType]'),
+    'نامِ قفسه است نه کالا — «اکسسوری جاسوییچی» یک واژه‌ی اضافه داشت');
+  t('کیسِ سخت و نرم به هارد و سافت تغییر کردند',
+    title.includes("'کیس سخت': 'هارد کیس'") && title.includes("'کیس نرم': 'سافت کیس'")
+    && read('lib/market/chain.ts').includes("'هارد کیس', 'سافت کیس'")
+    && !read('lib/market/specs.ts').includes("'کیس سخت'"),
+    'هم فهرستِ فرم و هم آگهی‌های موجود');
+}
 /* ── نگهداری و رسانه ── */
 console.log('\n― زیرساختِ رسانه ―');
 {
