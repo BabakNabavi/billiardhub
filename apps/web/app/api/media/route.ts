@@ -1,5 +1,6 @@
 export const dynamic = 'force-dynamic'
 import { NextRequest, NextResponse } from 'next/server'
+import { isMediaKey } from '../../../lib/media/keys'
 import { CORS } from '@/lib/social-server'
 import { actorOf, UNAUTHENTICATED, FORBIDDEN } from '@/lib/auth/ownership'
 import { hitRateLimit, tooMany } from '@/lib/auth/rate-limit'
@@ -160,7 +161,13 @@ export async function DELETE(req: NextRequest) {
 
 async function removeFiles(keys: (string | null | undefined)[]) {
   const paths = [...new Set(
-    keys.filter((k): k is string => typeof k === 'string' && k.startsWith('social/media/')),
+    /* ── چرا دو پیشوند ──
+       آپلودهای تازه زیرِ `media/` می‌روند و قدیمی‌ها زیرِ
+       `social/media/`. با فقط یکی، فایلِ ویدیوی حذف‌شده برای همیشه
+       روی دیسک می‌ماند — دقیقاً همان چیزی که کلِ این کار برای
+       جلوگیری از آن است. */
+    keys.filter((k): k is string =>
+      typeof k === 'string' && (isMediaKey(k) || k.startsWith('social/media/'))),
   )]
   if (!paths.length) return
   try { await getSupabaseServer().storage.from('club-media').remove(paths) }

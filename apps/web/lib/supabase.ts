@@ -35,7 +35,18 @@ const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? '';
 const DIRECT_THRESHOLD = 3 * 1024 * 1024;
 
 /** آپلودِ مستقیم: سرور مجوز می‌دهد، بایت‌ها مستقیم به Storage می‌روند. */
-async function uploadDirect(file: File, path: string): Promise<string | null> {
+/* ── چرا سه حالت و نه دو ──
+   `null` یعنی «مسیرِ مستقیم نشد، مسیرِ قدیمی را امتحان کن». ولی وقتی
+   **سرور** فایل را رد کرده (بزرگ‌تر از سقف، نوعِ غیرمجاز، بی‌اجازه)،
+   امتحانِ دوباره از راهِ `/api/upload` یعنی همان بایت‌ها این‌بار از
+   RAMِ سرورِ سایت رد شوند تا همان‌جا هم رد شوند — بدترین هر دو دنیا.
+   پس ردِ سیاستی جدا برمی‌گردد و بازگشتی ندارد. */
+type DirectResult =
+  | { ok: true; url: string }
+  | { ok: false; rejected: true; message: string }
+  | { ok: false; rejected: false }
+
+async function uploadDirect(file: File, path: string): Promise<DirectResult> {
   const { apiFetch } = await import('./http');
 
   const s = await apiFetch('/api/upload/sign', {
@@ -46,7 +57,11 @@ async function uploadDirect(file: File, path: string): Promise<string | null> {
   const sign = await s.json().catch(() => ({} as Record<string, string>));
   if (!s.ok || !sign.token || !sign.path) {
     console.error('Upload sign rejected:', sign.message ?? s.status);
-    return null;
+    /* ۴۰۱ و ۴۲۹ گذرا هستند؛ بقیه تصمیمِ سیاستیِ سرورند */
+    const policy = s.status === 413 || s.status === 415 || s.status === 403 || s.status === 400;
+    return policy
+      ? { ok: false, rejected: true, message: String(sign.message ?? 'فایل پذیرفته نشد') }
+      : { ok: false, rejected: false };
   }
 
   /* کتابخانه فقط همین‌جا لازم است — بیرونِ باندلِ صفحه می‌ماند */
@@ -58,7 +73,7 @@ async function uploadDirect(file: File, path: string): Promise<string | null> {
     .uploadToSignedUrl(String(sign.path), String(sign.token), file);
   if (error) {
     console.error('Direct upload failed:', error.message);
-    return null;
+    return { ok: false, rejected: false };
   }
 
   /* تأییدِ سرور: امضای بایتیِ فایل سنجیده می‌شود و اگر جعلی باشد همان
@@ -71,9 +86,10 @@ async function uploadDirect(file: File, path: string): Promise<string | null> {
   const done = await c.json().catch(() => ({} as Record<string, string>));
   if (!c.ok) {
     console.error('Upload rejected after check:', done.message ?? c.status);
-    return null;
+    /* بایت‌ها رفته‌اند و سرور ردشان کرده — تکرار از مسیرِ دیگر بی‌فایده است */
+    return { ok: false, rejected: true, message: String(done.message ?? 'فایل پذیرفته نشد') };
   }
-  return done.url ?? null;
+  return done.url ? { ok: true, url: done.url } : { ok: false, rejected: false };
 }
 
 export const uploadFile = async (
@@ -85,9 +101,24 @@ export const uploadFile = async (
     /* فایلِ بزرگ از مسیرِ مستقیم؛ کوچک از همان مسیرِ قدیمی که سال‌ها
        کار کرده. اگر مسیرِ مستقیم به هر دلیلی نشد، به مسیرِ قدیمی
        برمی‌گردیم — بدترین حالتش همان رفتارِ امروز است. */
-    if (file.size > DIRECT_THRESHOLD) {
-      const viaDirect = await uploadDirect(file, path);
-      if (viaDirect) return viaDirect;
+    /* ── ویدیو همیشه مستقیم ──
+       آستانه‌ی حجمی برای عکس نوشته شده. یک ویدیوی ۲ مگابایتی هم اگر
+       از مسیرِ سرور برود، کلِ بایت‌هایش در RAMِ همان پروسه‌ای می‌نشیند
+       که سایت را سرو می‌کند — و رسانه قرار است بزرگ‌تر هم بشود.
+       نوعِ فایل این‌جا فقط یک راهنماست؛ تصمیمِ واقعی روی بایت‌ها در
+       سرور گرفته می‌شود. */
+    if (file.size > DIRECT_THRESHOLD || file.type.startsWith('video/')) {
+      /* خطای پرتاب‌شده هم نباید مسیرِ قدیمی را بی‌صدا از دست بدهد:
+         `createClient` بدونِ کلید پرتاب می‌کند و آفلاین‌بودن هم. */
+      let d: DirectResult
+      try {
+        d = await uploadDirect(file, path)
+      } catch (e) {
+        console.error('Direct upload threw:', e)
+        d = { ok: false, rejected: false }
+      }
+      if (d.ok) return d.url
+      if (d.rejected) return null
     }
 
     const body = new FormData();

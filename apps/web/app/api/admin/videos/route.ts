@@ -1,5 +1,6 @@
 export const dynamic = 'force-dynamic'
 import { NextRequest, NextResponse } from 'next/server'
+import { isMediaKey } from '../../../../lib/media/keys'
 import { actorFromRequest, audit, clientIp } from '@/lib/finance/db'
 import { can } from '@/lib/admin/permissions'
 import { getSupabaseServer } from '@/lib/supabase-server'
@@ -170,7 +171,8 @@ export async function DELETE(req: NextRequest) {
   /* فایل‌ها هم می‌روند — وگرنه انبارِ فایلِ مرده دوباره پر می‌شود.
      کلید ترجیح دارد بر تجزیه‌ی نشانی. */
   const paths = [v.storage_key ?? keyFromUrl(v.src), v.thumb_key ?? keyFromUrl(v.thumb)]
-    .filter((p): p is string => !!p && p.startsWith('social/media/'))
+    /* هر دو نسل: `media/` تازه و `social/media/` قدیمی */
+    .filter((p): p is string => !!p && (isMediaKey(p) || p.startsWith('social/media/')))
   if (paths.length) { try { await sb.storage.from('club-media').remove(paths) } catch { /* بی‌اهمیت */ } }
 
   void audit({

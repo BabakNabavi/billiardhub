@@ -62,7 +62,10 @@ const tables = (await c.query(`
 const referenced = new Set()
 /* هم نشانیِ کاملِ عمومی، هم مسیرِ خام (بعضی ستون‌ها فقط مسیر دارند) */
 const URL_RE = /\/storage\/v1\/object\/(?:public|sign|authenticated)\/[a-z0-9-]+\/([^"'\s?)\\]+)/gi
-const BARE_RE = /(?:^|["'\s,:[])((?:clubs|products|profiles|sellers|social|documents)\/[A-Za-z0-9_./-]{4,})/g
+/* `media` هم اضافه شد: کلیدهای تازه‌ی Billiard Media بی‌نشانیِ مطلق
+   در `storage_key` می‌نشینند و بدونِ این، «بی‌ارجاع» شمرده می‌شدند —
+   همان دسته اشتباهی که سرِ این اسکریپت دو ویدیوی واقعی را برد. */
+const BARE_RE = /(?:^|["'\s,:[])((?:clubs|products|profiles|sellers|social|documents|media)\/[A-Za-z0-9_./-]{4,})/g
 
 for (const t of tables) {
   let rows

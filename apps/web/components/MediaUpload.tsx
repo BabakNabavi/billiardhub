@@ -4,6 +4,7 @@
    مدت ویدیو و تامبنیل خودکار از فریم گرفته می‌شوند؛ آپلود روی Supabase Storage. */
 
 import { useEffect, useRef, useState } from 'react'
+import { mediaUploadPath } from '../lib/media/keys'
 import { createPortal } from 'react-dom'
 import { X, UploadCloud, Film, Image as ImageIcon, Check, Loader2, Tv } from 'lucide-react'
 import { useAuthStore } from '../store/auth.store'
@@ -15,7 +16,28 @@ import SelectField from './ui/SelectField'
 
 const INK = '#1C1B17', SEC = '#5B564B', MUT = '#8A8474', LINE = '#EAE5DA'
 const GOLD = '#C7A66A', GOLD_D = '#9A6E38'
-const MAX_MB = 200
+/* ── چرا ۲۵ و نه ۲۰۰ ──
+   سقفِ واقعی `MAX_VIDEO` در `lib/upload/policy.ts` است و سطلِ
+   `club-media` هم روی همان ۲۵ مگابایت بسته شده. عددِ ۲۰۰ فقط روی این
+   صفحه نوشته بود و کاربر بعد از انتخابِ فایلِ ۱۰۰ مگابایتی خطا
+   می‌گرفت. بالا بردنِ سقف یعنی اول سطل و کانتینر و nginx باید عوض
+   شوند، نه این عدد. */
+const MAX_MB = 25
+
+/* ── چرا randomUUID مستقیم صدا زده نمی‌شود ──
+   فقط در secure context و روی موتورهای تازه هست؛ وب‌ویوهای قدیمیِ
+   اندروید و مرورگرهای داخلِ اپ — بخشِ واقعی از مخاطبِ این سایت —
+   ندارندش. خطایش هم داخلِ catch گم می‌شد و کاربر پیامِ «اتصال را
+   بررسی کنید» می‌گرفت و دنبالِ اینترنتش می‌گشت. */
+function newId(): string {
+  if (typeof crypto?.randomUUID === 'function') return crypto.randomUUID()
+  const b = new Uint8Array(16)
+  crypto.getRandomValues(b)
+  b[6] = (b[6]! & 0x0f) | 0x40
+  b[8] = (b[8]! & 0x3f) | 0x80
+  const h = [...b].map(x => x.toString(16).padStart(2, '0')).join('')
+  return `${h.slice(0, 8)}-${h.slice(8, 12)}-${h.slice(12, 16)}-${h.slice(16, 20)}-${h.slice(20)}`
+}
 
 const fmtDur = (sec: number) => {
   if (!isFinite(sec) || sec <= 0) return '۰۰:۰۰'
@@ -133,13 +155,16 @@ export default function MediaUpload({ open, onClose, onUploaded }: { open: boole
     if (!title.trim()) { setErr('عنوان ویدیو را بنویسید'); return }
     setBusy(true)
     try {
-      const id = `uv-${Date.now()}-${Math.floor(Math.random() * 1e4)}`
-      const ext = (file.name.match(/\.[^.]+$/)?.[0] || '.mp4').toLowerCase()
+      /* ── چرا UUID و نه مهرِ زمانی ──
+         `uv-1786547589258-4213` قابلِ حدس است: کسی که یک نشانی دارد
+         می‌تواند نشانی‌های همسایه را بسازد. پسوند هم این‌جا ساخته
+         نمی‌شود — سرور از روی بایت‌های واقعی می‌گذاردش. */
+      const id = newId()
       setPhase('در حال آپلود ویدیو…')
-      const src = await uploadFile('club-media', file, `social/media/vid/${id}${ext}`)
+      const src = await uploadFile('club-media', file, mediaUploadPath('videos', id))
       if (!src) throw new Error('upload-video')
       let thumb = ''
-      if (thumbFile) { setPhase('در حال آپلود تصویر…'); thumb = (await uploadFile('club-media', thumbFile, `social/media/thumb/${id}.jpg`)) || '' }
+      if (thumbFile) { setPhase('در حال آپلود تصویر…'); thumb = (await uploadFile('club-media', thumbFile, mediaUploadPath('thumbnails', id))) || '' }
       setPhase('در حال انتشار…')
       const res = await postUserVideo({
         title: title.trim(), category,

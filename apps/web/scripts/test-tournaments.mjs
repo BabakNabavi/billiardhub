@@ -3009,6 +3009,54 @@ console.log('\n― لوازم جانبی ―');
       .every(f => read(f).includes('isAccessoryCategory')));
 }
 
+/* ── نگهداری و رسانه ── */
+console.log('\n― زیرساختِ رسانه ―');
+{
+  const keys = read('lib/media/keys.ts');
+  t('کلیدِ رسانه UUID و سال/ماه دارد',
+    keys.includes('export function mediaUploadPath') && keys.includes('MEDIA_ROOT'),
+    'مهرِ زمانی قابلِ حدس بود و نامِ فایلِ کاربر را حمل می‌کرد');
+  t('مسیرِ آپلود بی‌پسوند می‌رود',
+    !/return `\$\{MEDIA_ROOT\}\/\$\{kind\}\/\$\{y\}\/\$\{m\}\/\$\{uuid\}\./.test(keys)
+    && keys.includes('پسوند را همان‌جایی'),
+    'safeSeg نقطه را به _ تبدیل می‌کند و uuid_mp4.mp4 درمی‌آید');
+  t('پیشوندِ رسانه در قواعدِ آپلود مجاز است',
+    read('lib/upload/policy.ts').includes("'media/videos/'")
+    && read('lib/upload/policy.ts').includes("'media/thumbnails/'"));
+  t('آپلودِ ویدیو از همان کلید استفاده می‌کند',
+    read('components/MediaUpload.tsx').includes("mediaUploadPath('videos', id)")
+    && read('components/MediaUpload.tsx').includes('crypto.randomUUID()')
+    && !read('components/MediaUpload.tsx').includes('social/media/vid/'),
+    'نامِ قدیمی uv-<timestamp>-<rand> قابلِ حدس بود');
+  t('ویدیو همیشه از مسیرِ مستقیم می‌رود',
+    read('lib/supabase.ts').includes("file.type.startsWith('video/')"),
+    'وگرنه بایت‌هایش در RAMِ سرورِ سایت می‌نشیند');
+
+  /* ── اسکریپت‌های سرور ──
+     تا دیروز در هیچ ریپویی نبودند: با از دست رفتنِ سرور یا لپ‌تاپ،
+     خودِ سازوکارِ پشتیبان هم می‌رفت. */
+  t('اسکریپت‌های عملیاتی در ریپو هستند',
+    ['ops/backup.sh', 'ops/disk-guard.sh', 'ops/pull-from-server.sh', 'ops/README.md']
+      .every(f => existsSync(join(ROOT, '../..', f))));
+  t('پشتیبانِ فایل‌ها افزایشی است، نه tarِ کامل',
+    (() => {
+      const b = readFileSync(join(ROOT, '../../ops/backup.sh'), 'utf8');
+      return b.includes('rsync -a --delete') && b.includes('--link-dest')
+        && !b.includes('tar -czf "$D/storage-files.tgz"');
+    })(),
+    'با ۱۰۰ گیگ ویدیو، tarِ شبانه سرور را زمین می‌زد');
+  t('پشتیبان checksum دارد و خرابیِ خاموش را می‌گیرد',
+    (() => {
+      const b = readFileSync(join(ROOT, '../../ops/backup.sh'), 'utf8');
+      return b.includes('sha256sum') && b.includes('VERIFY_BYTES');
+    })());
+  t('نگهبانِ دیسک سه آستانه دارد',
+    (() => {
+      const g = readFileSync(join(ROOT, '../../ops/disk-guard.sh'), 'utf8');
+      return g.includes('WARN=70') && g.includes('HIGH=85') && g.includes('CRIT=95');
+    })(),
+    'پر شدنِ دیسک Postgres را هم می‌خواباند');
+}
 /* ── تستِ یکپارچگی: از فرم تا صفحه‌ی آگهی ── */
 console.log('\n― یکپارچگیِ نمایش ―');
 {
