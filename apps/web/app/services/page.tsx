@@ -23,7 +23,7 @@ const TEXT   = '#1C1B17'
 const SEC    = '#5B564B'
 const MUT    = '#8A8474'
 const LINE   = '#E7E2D6'
-const BG     = '#F7F7F5'
+/* رنگِ پایه‌ی صفحه از کلاسِ مشترکِ lq-stage می‌آید */
 
 /* ── کارت متخصص — هویت مونوگرامی، بدون آمار ── */
 function TechCard({ t, i }: { t: Technician; i: number }) {
@@ -123,7 +123,7 @@ export default function ServicesPage() {
   const clearFilters = () => { setCity('all'); setService('all') }
 
   return (
-    <div dir="rtl" style={{ minHeight: '100vh', background: BG, color: TEXT, fontFamily: 'Vazirmatn,Tahoma,sans-serif' }}>
+    <div className="lq-stage" dir="rtl" style={{ minHeight: '100vh', color: TEXT, fontFamily: 'Vazirmatn,Tahoma,sans-serif' }}>
       <style>{`
         @keyframes svFadeUp { from { opacity:0; transform: translateY(14px); } to { opacity:1; transform:none; } }
         @keyframes svScaleX { from { opacity:0; transform: scaleX(0); } to { opacity:1; transform: scaleX(1); } }

@@ -51,7 +51,7 @@ export default function CartPage() {
         @media(max-width:900px){ .cart-layout { grid-template-columns: 1fr !important; } }
       `}</style>
 
-      <div style={{ minHeight: '100vh', background: '#F7F7F5', fontFamily: 'Vazirmatn,Tahoma,sans-serif', direction: 'rtl', color: '#111111' }}>
+      <div className="lq-stage" style={{ minHeight: '100vh', fontFamily: 'Vazirmatn,Tahoma,sans-serif', direction: 'rtl', color: '#111111' }}>
         {/* ambient orb */}
         <div style={{ position: 'fixed', top: -100, right: -80, width: 500, height: 500, background: 'radial-gradient(circle,rgba(199,166,106,0.06)0%,transparent 65%)', filter: 'blur(60px)', pointerEvents: 'none', zIndex: 0 }} />
 

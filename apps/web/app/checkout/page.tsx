@@ -104,7 +104,7 @@ export default function CheckoutPage() {
   })
 
   if (orderPlaced) return (
-    <>      <div style={{ minHeight: '100vh', background: '#F7F7F5', fontFamily: 'Vazirmatn,Tahoma,sans-serif', direction: 'rtl', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+    <>      <div className="lq-stage" style={{ minHeight: '100vh', fontFamily: 'Vazirmatn,Tahoma,sans-serif', direction: 'rtl', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
         <div style={{ textAlign: 'center', maxWidth: 440 }}>
           <div style={{ width: 90, height: 90, borderRadius: '50%', background: 'rgba(199,166,106,0.10)', border: '2px solid rgba(199,166,106,0.40)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 28px', boxShadow: '0 0 40px rgba(199,166,106,0.20)' }}>
             <Ti name="check" size={44} color={'#C7A66A'} />
@@ -131,7 +131,7 @@ export default function CheckoutPage() {
   )
 
   if (items.length === 0) return (
-    <>      <div style={{ minHeight: '100vh', background: '#F7F7F5', fontFamily: 'Vazirmatn,Tahoma,sans-serif', direction: 'rtl', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+    <>      <div className="lq-stage" style={{ minHeight: '100vh', fontFamily: 'Vazirmatn,Tahoma,sans-serif', direction: 'rtl', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <div style={{ textAlign: 'center' }}>
           <Ti name="shopping-cart-off" size={66} color={'rgba(0,0,0,0.35)'} style={{ display: 'block', marginBottom: 16 }} />
           <p style={{ fontSize: 18, color: 'rgba(0,0,0,0.45)', marginBottom: 20 }}>سبد خرید خالی است</p>
@@ -152,7 +152,7 @@ export default function CheckoutPage() {
         @media(max-width:900px){ .checkout-grid { grid-template-columns: 1fr !important; } }
       `}</style>
 
-      <div style={{ minHeight: '100vh', background: '#F7F7F5', fontFamily: 'Vazirmatn,Tahoma,sans-serif', direction: 'rtl', color: '#111111' }}>
+      <div className="lq-stage" style={{ minHeight: '100vh', fontFamily: 'Vazirmatn,Tahoma,sans-serif', direction: 'rtl', color: '#111111' }}>
         <div style={{ position: 'fixed', top: -100, right: -80, width: 500, height: 500, background: 'radial-gradient(circle,rgba(199,166,106,0.06)0%,transparent 65%)', filter: 'blur(60px)', pointerEvents: 'none', zIndex: 0 }} />
 
         <div style={{ position: 'relative', zIndex: 1, maxWidth: 1100, margin: '0 auto', padding: '32px 20px 80px' }}>

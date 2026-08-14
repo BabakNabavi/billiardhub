@@ -45,7 +45,7 @@ export default function ResultsPage() {
   const filtered = RESULTS.filter(r => disc === 'همه' || r.discipline === disc);
 
   return (
-    <div style={{ minHeight: '100vh', background: '#F7F7F5', color: '#111111', fontFamily: 'Vazirmatn, sans-serif' }} dir="rtl">
+    <div className="lq-stage" style={{ minHeight: '100vh', color: '#111111', fontFamily: 'Vazirmatn, sans-serif' }} dir="rtl">
 
       {/* Hero */}
       <div style={{ background: 'linear-gradient(180deg,#111111 0%,#1a1a1a 100%)', position: 'relative', overflow: 'hidden', padding: 'clamp(40px,5vw,64px) 16px clamp(32px,4vw,48px)', textAlign: 'center' }}>
@@ -99,7 +99,7 @@ export default function ResultsPage() {
             {expanded[round.id] && (
               <div style={{ padding: '0 16px 16px', borderTop: '1px solid rgba(0,0,0,0.06)', display: 'flex', flexDirection: 'column', gap: 10, paddingTop: 12 }}>
                 {round.matches.map((m, i) => (
-                  <div key={i} style={{ borderRadius: 16, padding: 16, background: '#F7F7F5', border: '1px solid rgba(0,0,0,0.06)' }}>
+                  <div key={i} className="lq-pcard" style={{ borderRadius: 16, padding: 16 }}>
 
                     {/* Score row */}
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', gap: 8, marginBottom: 12 }}>

@@ -46,7 +46,7 @@ export default function LivePage() {
         @keyframes lvspin { to { transform: rotate(360deg) } }
       `}</style>
 
-      <div style={{ minHeight: '100vh', background: '#F7F7F5', color: '#111111', fontFamily: 'Vazirmatn, sans-serif', direction: 'rtl' }}>
+      <div className="lq-stage" style={{ minHeight: '100vh', color: '#111111', fontFamily: 'Vazirmatn, sans-serif', direction: 'rtl' }}>
 
         {/* Hero */}
         <div style={{ position: 'relative', overflow: 'hidden', padding: 'clamp(40px,5vw,64px) 16px clamp(32px,4vw,48px)', textAlign: 'center', background: 'linear-gradient(180deg,#111111 0%,#1a1a1a 100%)', borderBottom: '1px solid rgba(239,68,68,0.15)' }}>

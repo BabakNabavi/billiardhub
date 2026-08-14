@@ -3346,6 +3346,64 @@ console.log('\n― نشستِ کهنه، صفحه‌ی سفید ―');
     'وگرنه یک خطای گذرا پنجره‌ی مشترکِ چهاردقیقه‌ای را می‌سوزاند');
 }
 
+console.log('\n― سالِ مدرک وسطِ برچسب نیفتد ―');
+{
+  /* برچسبِ درجه حرفِ لاتین دارد («A آسیایی») و سال ارقامِ فارسی. در بندِ
+     راست‌به‌چپ الگوریتمِ دوجهته این دو را قاطی می‌کرد. اندازه‌گیریِ واقعی
+     در کروم: بدونِ ایزوله «A» در x=318 و «آسیایی» در x=263 می‌نشست —
+     یعنی برچسب وارونه می‌شد؛ با ایزوله ترتیب درست است. */
+  for (const f of ['lib/coach-store.ts', 'lib/referee-store.ts']) {
+    const src = read(f);
+    t(`ایزوله‌ی دوجهته در ${f.split('/')[1]}`,
+      src.includes('\\u2068${g.label}\\u2069') && src.includes('\\u2068${g.year}\\u2069'),
+      'FSI/PDI داخلِ خودِ رشته، تا هرجا رندر شد درست بماند');
+  }
+  /* ⚠️ آن نویسه‌ها نامرئی‌اند ولی کاراکترند: هرکس این متن را *می‌سنجد*
+     باید اول پاکشان کند. پنلِ ادمین کلیدِ درجه را با `startsWith` از
+     روی همین خط پیدا می‌کند و بدونِ پاک‌کردن هرگز جور نمی‌شد — کلاسِ
+     لاتینِ عنوان‌های انگلیسی بی‌صدا از دست می‌رفت. */
+  t('پاک‌کننده‌ی دوجهته در ابزارِ متن هست',
+    read('lib/text-fa.ts').includes('export const stripBidi'));
+  t('جست‌وجوی کلیدِ درجه از آن رد می‌شود',
+    read('app/admin/referees/page.tsx').includes('stripBidi(line).startsWith'),
+    'وگرنه کلاسِ لاتینِ عنوان‌های انگلیسی از دست می‌رود');
+}
+
+console.log('\n― ردیفِ رزرو در فایلِ مشترک ―');
+{
+  /* این قاعده در `<style>` صفحه‌ی داشبورد بود ولی کامپوننتش در /booking
+     هم رندر می‌شود — آن‌جا کاملاً بی‌قاب دیده می‌شد. */
+  /* خودِ قاعده سنجیده می‌شود، نه صرفِ وجودِ نام: بلوکِ
+     `prefers-reduced-motion` هم یک `.booking-row {` دارد و ادعای
+     نام‌محور با حذفِ قاعده‌ی اصلی هم سبز می‌ماند. */
+  const bookingRule = read('app/globals.css').split('.booking-row {')[1]?.split('}')[0] ?? '';
+  t('booking-row در globals است',
+    bookingRule.includes('background:') && bookingRule.includes('border-radius:'));
+  t('نسخه‌ی محلیِ داشبورد حذف شد',
+    !read('app/dashboard/page.tsx').includes('.booking-row {'),
+    'دو تعریف یعنی یکی‌شان روزی عقب می‌ماند');
+}
+
+console.log('\n― صحنه روی همه‌ی صفحه‌های اصلی ―');
+{
+  const pages = [
+    'app/booking/page.tsx', 'app/booking/[clubId]/page.tsx',
+    'app/coaches/page.tsx', 'app/referees/page.tsx', 'app/players/page.tsx',
+    'app/news/page.tsx', 'app/tournaments/page.tsx', 'app/services/page.tsx',
+    'app/manufacturers/page.tsx', 'app/advertise/page.tsx', 'app/cart/page.tsx',
+    'app/checkout/page.tsx', 'app/live/page.tsx', 'app/plans/page.tsx',
+    'app/ranking/page.tsx', 'app/results/page.tsx', 'app/story-plans/page.tsx',
+  ];
+  const missing = [];
+  /* دنبالِ خودِ className می‌گردیم نه نامِ کلاس: هفت فایل کامنتی دارند
+     که واژه‌ی lq-stage در آن آمده و ادعای نام‌محور با حذفِ className هم
+     سبز می‌ماند. */
+  for (const p of pages) if (!read(p).includes('className="lq-stage"') && !read(p).includes("className={'lq-stage'") && !/className="[^"]*lq-stage/.test(read(p))) missing.push(p);
+  t('همه‌ی صفحه‌های اصلی صحنه دارند', missing.length === 0,
+    missing.length ? 'بدونِ صحنه: ' + missing.join(' · ') : '');
+}
+
+
 console.log('\n― یک سطح برای کارتِ محصول ―');
 {
   /* یک محصول در سه صفحه دیده می‌شود و تا امروز سه کارتِ متفاوت بود:

@@ -11,7 +11,8 @@ import { fetchProfiles } from '../../lib/profiles/client'
 const GOLD     = '#C7A66A'
 const GOLD_D   = '#9A6E38'
 const GOLD_G   = 'linear-gradient(135deg,#7A4F10 0%,#C7A66A 50%,#8A6020 100%)'
-const BG       = '#F7F7F5'
+/* هم‌رنگِ پایه‌ی صحنه — وگرنه نوارِ چسبان وصله می‌شود */
+const BG       = '#F4F2EE'
 const TEXT     = '#1C1C1A'
 const TEXT_SEC = 'rgba(28,28,26,0.52)'
 const TEXT_MUT = 'rgba(28,28,26,0.32)'
@@ -468,7 +469,7 @@ export default function ManufacturersPage() {
         }
       `}</style>
 
-      <div style={{ background: '#F7F7F5', minHeight: '100vh', direction: 'rtl', fontFamily: 'Vazirmatn,Tahoma,sans-serif', color: TEXT }}>
+      <div className="lq-stage" style={{ minHeight: '100vh', direction: 'rtl', fontFamily: 'Vazirmatn,Tahoma,sans-serif', color: TEXT }}>
 
         {/* ─────── HERO — coaches-style animated (light) ─────── */}
         <section style={{ position: 'relative', minHeight: 'clamp(150px,20vw,210px)', overflow: 'hidden', display: 'flex', alignItems: 'center' }}>

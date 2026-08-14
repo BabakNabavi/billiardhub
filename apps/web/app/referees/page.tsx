@@ -10,7 +10,7 @@ const GOLD    = '#C7A66A'
 const GOLD_D  = '#9A6E38'
 
 /* page colors (light theme) */
-const BG      = '#F6F4F0'
+/* رنگِ پایه‌ی صفحه از کلاسِ مشترکِ lq-stage می‌آید */
 const TEXT    = '#111110'
 const TEXT_S  = 'rgba(17,17,16,0.52)'
 const TEXT_M  = 'rgba(17,17,16,0.28)'
@@ -389,7 +389,7 @@ export default function RefereesPage() {
 
       `}</style>
 
-      <div style={{ direction:'rtl', fontFamily:"'Vazirmatn',Tahoma,sans-serif", background:BG, minHeight:'100vh', color:TEXT }}>
+      <div className="lq-stage" style={{ direction:'rtl', fontFamily:"'Vazirmatn',Tahoma,sans-serif", minHeight:'100vh', color:TEXT }}>
 
         {/* ══════════════ HERO — poster slider ══════════════ */}
         <RefereeHeroSlider />

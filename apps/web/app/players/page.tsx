@@ -24,7 +24,7 @@ const TEXT   = '#1C1B17'
 const SEC    = '#5B564B'
 const MUT    = '#8A8474'
 const LINE   = '#E7E2D6'
-const BG     = '#F7F7F5'
+/* رنگِ پایه‌ی صفحه از کلاسِ مشترکِ lq-stage می‌آید */
 
 type Seg = 'all' | 'snooker' | 'pool' | 'national' | 'ranked' | 'women' | 'youth'
 const SEGMENTS: [Seg, string][] = [
@@ -128,7 +128,7 @@ export default function PlayersPage() {
   const gridItems  = isBrowsing ? filtered.filter(p => !featured.some(f => f.id === p.id)) : filtered
 
   return (
-    <div dir="rtl" style={{ minHeight: '100vh', background: BG, color: TEXT, fontFamily: 'Vazirmatn,Tahoma,sans-serif' }}>
+    <div className="lq-stage" dir="rtl" style={{ minHeight: '100vh', color: TEXT, fontFamily: 'Vazirmatn,Tahoma,sans-serif' }}>
       <style>{`
         @keyframes plFadeUp { from { opacity:0; transform: translateY(16px); } to { opacity:1; transform:none; } }
         @keyframes plReveal { from { clip-path: inset(0 0 100% 0); transform: translateY(10px); opacity: 0; }

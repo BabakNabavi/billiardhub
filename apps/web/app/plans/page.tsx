@@ -18,7 +18,7 @@ const GOLD_D = '#9A6E38'
 
 export default function PlansPage() {
   return (
-    <div dir="rtl" style={{ minHeight: '100vh', background: '#F7F5F0', color: INK, fontFamily: 'Vazirmatn,Tahoma,sans-serif' }}>
+    <div className="lq-stage" dir="rtl" style={{ minHeight: '100vh', color: INK, fontFamily: 'Vazirmatn,Tahoma,sans-serif' }}>
       <div style={{ maxWidth: 1060, margin: '0 auto', padding: '34px clamp(16px,3vw,28px) 80px' }}>
 
         <div style={{ textAlign: 'center', marginBottom: 26 }}>

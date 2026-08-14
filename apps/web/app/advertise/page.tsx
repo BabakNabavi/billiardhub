@@ -177,7 +177,7 @@ export default function AdvertisePage() {
 
   if (done) {
     return (
-      <div dir="rtl" style={{ minHeight: '70vh', background: '#F7F5F0', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20, fontFamily: 'Vazirmatn,Tahoma,sans-serif' }}>
+      <div dir="rtl" className="lq-stage" style={{ minHeight: '70vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20, fontFamily: 'Vazirmatn,Tahoma,sans-serif' }}>
         <div style={{ ...CARD, maxWidth: 440, textAlign: 'center', padding: '38px 30px' }}>
           <Check size={38} style={{ color: FELT, marginBottom: 12 }} />
           <h1 style={{ fontSize: 19, fontWeight: 900, color: INK, margin: '0 0 10px' }}>درخواستتان ثبت شد</h1>
@@ -195,7 +195,7 @@ export default function AdvertisePage() {
   }
 
   return (
-    <div dir="rtl" style={{ minHeight: '100vh', background: '#F7F5F0', color: INK, fontFamily: 'Vazirmatn,Tahoma,sans-serif' }}>
+    <div className="lq-stage" dir="rtl" style={{ minHeight: '100vh', color: INK, fontFamily: 'Vazirmatn,Tahoma,sans-serif' }}>
       <div style={{ maxWidth: 760, margin: '0 auto', padding: '34px clamp(16px,3vw,28px) 80px' }}>
 
         <div style={{ textAlign: 'center', marginBottom: 26 }}>
