@@ -179,7 +179,16 @@ export default function NewsPage() {
 
   const pickCat = (k: 'all' | NewsCategoryKey) => { setCat(k); setShown(PAGE_STEP) }
 
-  const todayFa = new Date().toLocaleDateString('fa-IR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
+  /* ── چرا تاریخ فقط بعد از mount ──
+     `new Date()` روی سرور و دوباره روی مرورگر اجرا می‌شد. منطقه‌ی
+     زمانیِ سرور با کاربر یکی نیست (و رندر می‌تواند از نیمه‌شب هم رد
+     شود)، پس دو رشته‌ی متفاوت درمی‌آمد و React با خطای hydration
+     (#۴۱۸) کلِ درخت را دوباره می‌ساخت. رشته‌ی خالی در HTMLِ سرور
+     یعنی هر دو طرف یکی‌اند و تاریخ بلافاصله بعد از mount می‌آید. */
+  const [todayFa, setTodayFa] = useState('')
+  useEffect(() => {
+    setTodayFa(new Date().toLocaleDateString('fa-IR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }))
+  }, [])
 
   return (
     <div className="lq-stage" dir="rtl" style={{ minHeight: '100vh', color: TEXT, fontFamily: 'Vazirmatn,Tahoma,sans-serif' }}>
