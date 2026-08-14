@@ -408,7 +408,7 @@ export default function ClubProfilePage() {
       <div className="lq-stage" style={{ minHeight: '100vh', direction: 'rtl', fontFamily: 'Vazirmatn, sans-serif', paddingBottom: 90 }}>
 
         {/* ══ HERO ══ */}
-        <div className="lq-sheen" style={{ position: 'relative', height: 'min(clamp(320px,44vw,510px),65vh)', overflow: 'hidden', background: '#0A0806' }}>
+        <div className="lq-enter-sheen" style={{ position: 'relative', height: 'min(clamp(320px,44vw,510px),65vh)', overflow: 'hidden', background: '#0A0806' }}>
           {images.map((img, i) => (
             <img loading="lazy" decoding="async" key={i} src={img} alt=""
               onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}

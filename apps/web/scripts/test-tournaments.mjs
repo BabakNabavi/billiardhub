@@ -3346,6 +3346,53 @@ console.log('\n― نشستِ کهنه، صفحه‌ی سفید ―');
     'وگرنه یک خطای گذرا پنجره‌ی مشترکِ چهاردقیقه‌ای را می‌سوزاند');
 }
 
+console.log('\n― یک سطح برای کارتِ محصول ―');
+{
+  /* یک محصول در سه صفحه دیده می‌شود و تا امروز سه کارتِ متفاوت بود:
+     `.mk-card` در بازار، `.bz-card` در صفحه‌ی اصلی، و `.prod-card-sec1`
+     در فروشگاه — هر کدام با پس‌زمینه و حاشیه و hoverِ خودش. */
+  const css = read('app/globals.css');
+  t('کلاسِ سطحِ کارت در فایلِ مشترک است', css.includes('.lq-pcard {'));
+  t('لبه‌ی کارت مرکبی است نه سفید',
+    /\.lq-pcard \{[\s\S]{0,400}border: 1px solid rgba\(28,28,26/.test(css),
+    'لبه‌ی سفید روی زمینه‌ی روشنِ بازار کاملاً محو می‌شد');
+
+  const users = [
+    ['app/shop/page.tsx', 'mk-card lq-pcard'],
+    ['app/shop/page.tsx', 'mk-row lq-pcard'],
+    ['app/HomeClient.tsx', 'bz-card lq-pcard'],
+    ['app/sellers/[id]/FlatShop.tsx', 'prod-card-sec1 lq-pcard'],
+    ['app/shop/[id]/page.tsx', 'pd-card lq-pcard'],
+  ];
+  for (const [p, cls] of users) {
+    t(`«${cls.split(' ')[0]}» سطحِ مشترک را گرفته`, read(p).includes(cls));
+  }
+  /* هیچ‌کدام نباید پس‌زمینه/حاشیه‌ی خودش را دوباره تعریف کند، وگرنه
+     ترتیبِ سند برنده می‌شود و سطحِ مشترک بی‌اثر می‌ماند. */
+  t('کارتِ بازار پس‌زمینه‌ی محلی ندارد',
+    !/\.mk-card \{[^}]*background:/.test(read('app/shop/page.tsx')));
+  t('کارتِ صفحه‌ی اصلی پس‌زمینه‌ی محلی ندارد',
+    !/\.bz-card \{[^}]*background:/.test(read('app/HomeClient.tsx')));
+
+  /* صحنه‌ی رنگی روی صفحه‌های فهرست و جزئیات */
+  for (const p of ['app/shop/page.tsx', 'app/sellers/page.tsx', 'app/clubs/page.tsx', 'app/shop/[id]/page.tsx']) {
+    /* مسیرِ کامل در برچسب: `app/shop/page.tsx` و `app/shop/[id]/page.tsx`
+       هر دو با تکه‌ی دوم «shop» می‌شدند و دو تست هم‌نام چاپ می‌کردند. */
+    t(`صحنه در ${p}`, read(p).includes('className="lq-stage"'));
+  }
+  /* صفحه‌ی فروشگاه صحنه‌ی خودش را دارد (`shop-shell`) و نباید دو تا شود */
+  t('فروشگاه صحنه‌ی دوم نگرفته',
+    !read('app/sellers/[id]/FlatShop.tsx').includes('lq-stage')
+    && read('app/sellers/[id]/FlatShop.tsx').includes('.shop-shell'),
+    'دو لایه‌ی گرادیانِ ثابت روی هم، هم زشت است هم گران');
+
+  /* نامِ برقِ ورودی نباید با کلاسِ هم‌نامِ صفحه‌ی جزئیات قاطی شود */
+  t('برقِ ورودی نامِ جدا دارد',
+    css.includes('.lq-enter-sheen') && !css.includes('.lq-sheen {'),
+    'صفحه‌ی جزئیاتِ محصول از قبل `lq-sheen` دارد و آن برقِ هاور است');
+}
+
+
 console.log('\n― صفحه‌ی باشگاه روی همان لایه‌ی مربی ―');
 {
   /* «دقیقاً مثلِ صفحه‌ی مربی» — پس همان کلاس‌های مشترک، نه یک نسخه‌ی

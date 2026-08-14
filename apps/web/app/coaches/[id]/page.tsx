@@ -421,10 +421,10 @@ export default function CoachProfilePage() {
 
             {/* Profile card */}
             <div className="pcard pcard-profile lqg lq-rise" style={{ '--lq-i': 0, overflow:'hidden' } as React.CSSProperties}>
-              {/* Cover — default coach poster. `lq-sheen` یک برقِ عبوریِ
+              {/* Cover — default coach poster. «lq-enter-sheen» یک برقِ عبوریِ
                   یک‌باره موقعِ ورود می‌اندازد؛ همان حرکتی که سطحِ شیشه‌ای را
                   «مادی» نشان می‌دهد بدونِ اینکه چیزی مدام تکان بخورد. */}
-              <div className="lq-sheen" style={{ position:'relative', height:'clamp(120px,20vw,200px)', overflow:'hidden', background:'linear-gradient(115deg,#0c1424 0%,#17253f 55%,#1e2f4d 100%)' }}>
+              <div className="lq-enter-sheen" style={{ position:'relative', height:'clamp(120px,20vw,200px)', overflow:'hidden', background:'linear-gradient(115deg,#0c1424 0%,#17253f 55%,#1e2f4d 100%)' }}>
                 {coach.coverImage && <img loading="lazy" decoding="async" src={coach.coverImage} alt="" style={{ position:'absolute', inset:0, width:'100%', height:'100%', objectFit:'cover' }}/>}
                 {coach.coverImage && <div style={{ position:'absolute', inset:0, background:'linear-gradient(115deg,rgba(12,20,36,0.58),rgba(30,47,77,0.40))' }}/>}
                 {/* دکمه‌ی نامرئیِ روی کاور. لوگوی گوشه بعد از این می‌آید،
