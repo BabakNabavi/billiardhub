@@ -79,7 +79,7 @@ export default function ResultsPage() {
       {/* Results list */}
       <div style={{ maxWidth: 680, margin: '0 auto', padding: '24px 16px', display: 'flex', flexDirection: 'column', gap: 12 }}>
         {filtered.map(round => (
-          <div key={round.id} style={{ background: '#FFFFFF', borderRadius: 20, border: '1px solid rgba(0,0,0,0.07)', boxShadow: '0 1px 3px rgba(0,0,0,0.05)', overflow: 'hidden' }}>
+          <div key={round.id} style={{ background: 'rgba(255,255,255,0.78)', borderRadius: 20, border: '1px solid rgba(0,0,0,0.07)', boxShadow: '0 1px 3px rgba(0,0,0,0.05)', overflow: 'hidden' }}>
 
             {/* Round header */}
             <button style={{ width: '100%', padding: '16px 20px', display: 'flex', alignItems: 'center', gap: 12, textAlign: 'right', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}

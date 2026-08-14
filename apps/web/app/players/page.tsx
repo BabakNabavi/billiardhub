@@ -205,7 +205,7 @@ export default function PlayersPage() {
 
         /* ═══ سگمنت‌ها ═══ */
         .pl-segs { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; padding: 4px;
-          background: #fff; border: 1px solid ${LINE}; border-radius: 14px; }
+          background: rgba(255,255,255,0.78); border: 1px solid ${LINE}; border-radius: 14px; }
         .pl-segs::-webkit-scrollbar { display: none; }
         .pl-seg { flex-shrink: 0; border: none; cursor: pointer; font-family: inherit;
           font-size: 12.5px; font-weight: 700; color: ${SEC}; background: transparent;
@@ -261,7 +261,7 @@ export default function PlayersPage() {
               value={query}
               onChange={e => setQuery(e.target.value)}
               placeholder="جستجوی نام، شهر یا رشته…"
-              style={{ width: '100%', boxSizing: 'border-box', padding: '11px 40px 11px 14px', borderRadius: 12, fontSize: 13, background: '#fff', border: `1px solid ${LINE}`, color: TEXT, fontFamily: 'inherit', transition: 'border-color .2s, box-shadow .2s' }}
+              style={{ width: '100%', boxSizing: 'border-box', padding: '11px 40px 11px 14px', borderRadius: 12, fontSize: 13, background: '#FAFAF7', border: `1px solid ${LINE}`, color: TEXT, fontFamily: 'inherit', transition: 'border-color .2s, box-shadow .2s' }}
             />
             <Search size={15} style={{ position: 'absolute', right: 13, top: '50%', transform: 'translateY(-50%)', color: GOLD_D, pointerEvents: 'none' }} />
           </div>
@@ -300,7 +300,7 @@ export default function PlayersPage() {
           </div>
 
           {gridItems.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '64px 20px', background: '#fff', border: `1px solid ${LINE}`, borderRadius: 18 }}>
+            <div style={{ textAlign: 'center', padding: '64px 20px', background: 'rgba(255,255,255,0.78)', border: `1px solid ${LINE}`, borderRadius: 18 }}>
               <Search size={36} style={{ color: MUT, opacity: 0.45, marginBottom: 12 }} />
               <p style={{ fontSize: 15, fontWeight: 800, margin: '0 0 6px' }}>بازیکنی پیدا نشد</p>
               <p style={{ fontSize: 12.5, color: MUT, margin: '0 0 18px' }}>عبارت دیگری جستجو کنید یا فیلتر را تغییر دهید.</p>

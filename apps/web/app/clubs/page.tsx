@@ -691,7 +691,7 @@ export default function ClubsPage() {
                 </button>
 
                 {filterOpen && (
-                  <div style={{ position: 'absolute', top: 'calc(100% + 10px)', right: 0, width: 300, background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.08)', borderRadius: 18, padding: 18, zIndex: 9999, boxShadow: '0 20px 60px rgba(0,0,0,0.14)', backdropFilter: 'blur(20px)', animation: 'fadeUp 0.2s ease both' }}>
+                  <div style={{ position: 'absolute', top: 'calc(100% + 10px)', right: 0, width: 300, background: 'rgba(255,255,255,0.78)', border: '1px solid rgba(0,0,0,0.08)', borderRadius: 18, padding: 18, zIndex: 9999, boxShadow: '0 20px 60px rgba(0,0,0,0.14)', backdropFilter: 'blur(20px)', animation: 'fadeUp 0.2s ease both' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
                       <span style={{ fontSize: 16, fontWeight: 800, color: '#111111' }}>فیلترها</span>
                       <div style={{ display: 'flex', gap: 8 }}>
@@ -747,7 +747,7 @@ export default function ClubsPage() {
                   <ChevronDown size={11} style={{ transition: 'transform 0.3s', transform: sortOpen ? 'rotate(180deg)' : 'none', color: 'rgba(0,0,0,0.35)' }} />
                 </button>
                 {sortOpen && (
-                  <div style={{ position: 'absolute', top: 'calc(100% + 10px)', right: 0, minWidth: 170, background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.08)', borderRadius: 14, padding: 6, zIndex: 9999, boxShadow: '0 20px 60px rgba(0,0,0,0.12)', backdropFilter: 'blur(20px)', animation: 'fadeUp 0.2s ease both' }}>
+                  <div style={{ position: 'absolute', top: 'calc(100% + 10px)', right: 0, minWidth: 170, background: 'rgba(255,255,255,0.78)', border: '1px solid rgba(0,0,0,0.08)', borderRadius: 14, padding: 6, zIndex: 9999, boxShadow: '0 20px 60px rgba(0,0,0,0.12)', backdropFilter: 'blur(20px)', animation: 'fadeUp 0.2s ease both' }}>
                     {availSorts.map(opt => (
                       <button key={opt.value} className="dd-item" onClick={() => { setSortBy(opt.value); setSortOpen(false); }}
                         style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 10, padding: '9px 12px', borderRadius: 9, border: 'none', background: sortBy === opt.value ? 'rgba(199,166,106,0.10)' : 'transparent', color: sortBy === opt.value ? '#A07840' : 'rgba(0,0,0,0.65)', fontSize: 15, fontWeight: sortBy === opt.value ? 700 : 500, cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.15s', textAlign: 'right' }}>

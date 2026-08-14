@@ -97,7 +97,7 @@ export default function StoryPlansPage() {
         {/* وضعیت فعلی خود کاربر */}
         {mine && (
           <div style={{
-            background: '#fff', border: `1px solid ${LINE}`, borderRadius: 16, padding: '15px 18px',
+            background: 'rgba(255,255,255,0.78)', border: `1px solid ${LINE}`, borderRadius: 16, padding: '15px 18px',
             marginBottom: 18, display: 'flex', gap: 14, flexWrap: 'wrap', alignItems: 'center',
           }}>
             <Sparkles size={18} style={{ color: GOLD_D }} />
@@ -152,7 +152,7 @@ export default function StoryPlansPage() {
           </div>
         ) : plans.length === 0 ? (
           <div style={{
-            background: '#fff', border: `1px solid ${LINE}`, borderRadius: 18, padding: '40px 26px', textAlign: 'center',
+            background: 'rgba(255,255,255,0.78)', border: `1px solid ${LINE}`, borderRadius: 18, padding: '40px 26px', textAlign: 'center',
           }}>
             <Package size={28} style={{ color: MUT, opacity: 0.6, marginBottom: 10 }} />
             <p style={{ fontSize: 14.5, fontWeight: 800, margin: '0 0 8px' }}>هنوز بسته‌ای برای فروش تعریف نشده است</p>
@@ -171,7 +171,7 @@ export default function StoryPlansPage() {
           <div style={{ display: 'grid', gap: 16, gridTemplateColumns: 'repeat(auto-fit,minmax(258px,1fr))' }}>
             {plans.map(p => (
               <article key={p.id} style={{
-                position: 'relative', background: '#fff', borderRadius: 18, padding: '22px 20px 20px',
+                position: 'relative', background: 'rgba(255,255,255,0.78)', borderRadius: 18, padding: '22px 20px 20px',
                 border: `1px solid ${p.badge ? 'rgba(199,166,106,0.42)' : LINE}`,
                 boxShadow: p.badge ? '0 10px 30px rgba(199,166,106,0.14)' : '0 2px 10px rgba(28,27,23,0.05)',
                 display: 'flex', flexDirection: 'column',
@@ -223,7 +223,7 @@ export default function StoryPlansPage() {
 
         {/* درخواست تبلیغ — همان‌جا که کاربر دنبال دیده‌شدن است */}
         <div style={{
-          marginTop: 28, background: '#fff', border: `1px solid ${LINE}`, borderRadius: 18, padding: '20px 22px',
+          marginTop: 28, background: 'rgba(255,255,255,0.78)', border: `1px solid ${LINE}`, borderRadius: 18, padding: '20px 22px',
           display: 'flex', gap: 16, flexWrap: 'wrap', alignItems: 'center',
         }}>
           <Megaphone size={20} style={{ color: GOLD_D }} />

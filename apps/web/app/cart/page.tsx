@@ -113,7 +113,7 @@ export default function CartPage() {
                     <div
                       key={item.id}
                       className={`cart-item${isRemoving ? ' removing' : ''}`}
-                      style={{ animationDelay: `${idx * 0.05}s`, background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 20, overflow: 'hidden', display: 'flex', gap: 0 }}
+                      style={{ animationDelay: `${idx * 0.05}s`, background: 'rgba(255,255,255,0.78)', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 20, overflow: 'hidden', display: 'flex', gap: 0 }}
                     >
                       {/* Image */}
                       <Link href={`/shop/${item.id}`} style={{ flexShrink: 0, width: 130, position: 'relative', display: 'block', overflow: 'hidden' }}>
@@ -198,7 +198,7 @@ export default function CartPage() {
 
               {/* ── Order Summary ── */}
               <div style={{ position: 'sticky', top: 80, height: 'fit-content' }}>
-                <div style={{ background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 24, overflow: 'hidden' }}>
+                <div style={{ background: 'rgba(255,255,255,0.78)', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 24, overflow: 'hidden' }}>
                   {/* top neon line */}
                   <div style={{ height: 1, background: 'linear-gradient(90deg,transparent,rgba(199,166,106,0.50),transparent)' }} />
 
@@ -292,7 +292,7 @@ export default function CartPage() {
                 </div>
 
                 {/* Continue shopping */}
-                <Link href="/shop" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, marginTop: 12, padding: '12px', borderRadius: 12, background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)', color: 'rgba(0,0,0,0.45)', textDecoration: 'none', fontSize: 15, transition: 'all 0.2s' }}
+                <Link href="/shop" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, marginTop: 12, padding: '12px', borderRadius: 12, background: 'rgba(255,255,255,0.78)', border: '1px solid rgba(0,0,0,0.07)', color: 'rgba(0,0,0,0.45)', textDecoration: 'none', fontSize: 15, transition: 'all 0.2s' }}
                   onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = '#111111'; (e.currentTarget as HTMLElement).style.borderColor = 'rgba(0,0,0,0.09)' }}
                   onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = 'rgba(0,0,0,0.45)'; (e.currentTarget as HTMLElement).style.borderColor = 'rgba(0,0,0,0.05)' }}>
                   <Ti name="arrow-right" size={16} />

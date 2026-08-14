@@ -158,7 +158,7 @@ export default function ServicesPage() {
         .sv-wrap { max-width: 1180px; margin: 0 auto; padding: 0 clamp(16px,3vw,28px); }
 
         /* کارت */
-        .sv-card { display: flex; flex-direction: column; background: #fff; border: 1px solid ${LINE};
+        .sv-card { display: flex; flex-direction: column; background: rgba(255,255,255,0.78); border: 1px solid ${LINE};
           border-radius: 18px; overflow: hidden; text-decoration: none; color: inherit;
           box-shadow: 0 2px 12px rgba(28,27,23,0.05);
           transition: transform .3s cubic-bezier(.22,1,.36,1), box-shadow .3s, border-color .3s;
@@ -254,7 +254,7 @@ export default function ServicesPage() {
                 value={query}
                 onChange={e => setQuery(e.target.value)}
                 placeholder="جستجوی متخصص، تخصص یا باشگاه…"
-                style={{ width: '100%', boxSizing: 'border-box', padding: '10px 40px 10px 14px', borderRadius: 12, fontSize: 13, background: '#fff', border: `1px solid ${LINE}`, color: TEXT, fontFamily: 'inherit', transition: 'border-color .2s, box-shadow .2s' }}
+                style={{ width: '100%', boxSizing: 'border-box', padding: '10px 40px 10px 14px', borderRadius: 12, fontSize: 13, background: '#FAFAF7', border: `1px solid ${LINE}`, color: TEXT, fontFamily: 'inherit', transition: 'border-color .2s, box-shadow .2s' }}
               />
               <Search size={15} style={{ position: 'absolute', right: 13, top: '50%', transform: 'translateY(-50%)', color: GOLD_D, pointerEvents: 'none' }} />
             </div>
@@ -264,13 +264,13 @@ export default function ServicesPage() {
               <button
                 onClick={() => setCityOpen(o => !o)}
                 onBlur={() => window.setTimeout(() => setCityOpen(false), 140)}
-                style={{ display: 'inline-flex', alignItems: 'center', gap: 7, padding: '10px 13px', borderRadius: 12, cursor: 'pointer', fontFamily: 'inherit', fontSize: 12.5, fontWeight: 700, background: '#fff', border: `1px solid ${cityOpen ? 'rgba(199,166,106,0.55)' : LINE}`, color: SEC, transition: 'border-color .2s' }}>
+                style={{ display: 'inline-flex', alignItems: 'center', gap: 7, padding: '10px 13px', borderRadius: 12, cursor: 'pointer', fontFamily: 'inherit', fontSize: 12.5, fontWeight: 700, background: 'rgba(255,255,255,0.78)', border: `1px solid ${cityOpen ? 'rgba(199,166,106,0.55)' : LINE}`, color: SEC, transition: 'border-color .2s' }}>
                 <MapPin size={13} style={{ color: '#14532D' }} />
                 {city === 'all' ? 'همه شهرها' : city}
                 <ChevronDown size={13} style={{ transition: 'transform .2s', transform: cityOpen ? 'rotate(180deg)' : 'none', color: GOLD_D }} />
               </button>
               {cityOpen && (
-                <div style={{ position: 'absolute', insetInlineEnd: 0, top: 'calc(100% + 6px)', minWidth: 160, background: '#fff', border: `1px solid ${LINE}`, borderRadius: 12, overflow: 'hidden', boxShadow: '0 14px 34px rgba(28,27,23,0.14)', zIndex: 50 }}>
+                <div style={{ position: 'absolute', insetInlineEnd: 0, top: 'calc(100% + 6px)', minWidth: 160, background: 'rgba(255,255,255,0.78)', border: `1px solid ${LINE}`, borderRadius: 12, overflow: 'hidden', boxShadow: '0 14px 34px rgba(28,27,23,0.14)', zIndex: 50 }}>
                   {(['all', ...cities] as string[]).map(c => (
                     <button key={c} onMouseDown={() => { setCity(c); setCityOpen(false) }}
                       style={{ display: 'flex', width: '100%', padding: '10px 14px', border: 'none', cursor: 'pointer', fontFamily: 'inherit', fontSize: 12.5, textAlign: 'right', background: city === c ? 'rgba(199,166,106,0.12)' : 'transparent', color: city === c ? GOLD_D : SEC, fontWeight: city === c ? 800 : 500 }}>
@@ -318,7 +318,7 @@ export default function ServicesPage() {
         </div>
 
         {filtered.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '64px 20px', background: '#fff', border: `1px solid ${LINE}`, borderRadius: 18 }}>
+          <div style={{ textAlign: 'center', padding: '64px 20px', background: 'rgba(255,255,255,0.78)', border: `1px solid ${LINE}`, borderRadius: 18 }}>
             <Wrench size={36} style={{ color: MUT, opacity: 0.45, marginBottom: 12 }} />
             <p style={{ fontSize: 15, fontWeight: 800, margin: '0 0 6px' }}>متخصصی پیدا نشد</p>
             <p style={{ fontSize: 12.5, color: MUT, margin: '0 0 18px' }}>عبارت دیگری جستجو کنید یا فیلترها را تغییر دهید.</p>
@@ -341,7 +341,7 @@ export default function ServicesPage() {
             <div style={{ width: 42, height: 4.5, borderRadius: 3, background: 'rgba(28,27,23,0.16)', margin: '4px auto 14px' }} />
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
               <h3 style={{ fontSize: 15, fontWeight: 900, margin: 0 }}>فیلتر متخصصان</h3>
-              <button onClick={() => setSheet(false)} style={{ width: 32, height: 32, borderRadius: 10, border: `1px solid ${LINE}`, background: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: SEC }}>
+              <button onClick={() => setSheet(false)} style={{ width: 32, height: 32, borderRadius: 10, border: `1px solid ${LINE}`, background: 'rgba(255,255,255,0.78)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: SEC }}>
                 <X size={15} />
               </button>
             </div>
@@ -369,7 +369,7 @@ export default function ServicesPage() {
               </button>
               {activeFilters > 0 && (
                 <button onClick={clearFilters}
-                  style={{ padding: '13px 18px', borderRadius: 12, cursor: 'pointer', fontFamily: 'inherit', fontSize: 13, fontWeight: 700, background: '#fff', border: `1px solid ${LINE}`, color: SEC }}>
+                  style={{ padding: '13px 18px', borderRadius: 12, cursor: 'pointer', fontFamily: 'inherit', fontSize: 13, fontWeight: 700, background: 'rgba(255,255,255,0.78)', border: `1px solid ${LINE}`, color: SEC }}>
                   حذف فیلترها
                 </button>
               )}

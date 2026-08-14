@@ -265,14 +265,14 @@ export default function TournamentsPage() {
         @keyframes tnBlink { 0%,100% { opacity: 1; } 50% { opacity: .2; } }
 
         /* سوییچ نمایش: گرید / لیست */
-        .tn-view { display: flex; gap: 4px; padding: 4px; background: #fff; border: 1px solid ${LINE}; border-radius: 12px; flex-shrink: 0; }
+        .tn-view { display: flex; gap: 4px; padding: 4px; background: rgba(255,255,255,0.78); border: 1px solid ${LINE}; border-radius: 12px; flex-shrink: 0; }
         .tn-view button { width: 34px; height: 34px; border-radius: 9px; border: none; background: transparent;
           color: ${SEC}; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .2s; }
         .tn-view button.on { background: rgba(199,166,106,0.14); color: ${GOLD_D}; box-shadow: inset 0 0 0 1px rgba(199,166,106,0.36); }
 
         /* حالت لیست */
         .tn-list { display: flex; flex-direction: column; gap: 10px; }
-        .tn-lrow { display: flex; align-items: center; gap: 12px; background: #fff; border: 1px solid ${LINE};
+        .tn-lrow { display: flex; align-items: center; gap: 12px; background: rgba(255,255,255,0.78); border: 1px solid ${LINE};
           border-radius: 14px; padding: 10px 14px; text-decoration: none; color: inherit;
           transition: transform .25s cubic-bezier(.22,1,.36,1), box-shadow .25s, border-color .25s;
           animation: tnFadeUp .45s ease both; }
@@ -282,7 +282,7 @@ export default function TournamentsPage() {
 
         /* ═══ نوار ابزار ═══ */
         .tn-tabs { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; padding: 4px;
-          background: #fff; border: 1px solid ${LINE}; border-radius: 14px; }
+          background: rgba(255,255,255,0.78); border: 1px solid ${LINE}; border-radius: 14px; }
         .tn-tabs::-webkit-scrollbar { display: none; }
         .tn-tab { flex-shrink: 0; display: inline-flex; align-items: center; gap: 7px; border: none; cursor: pointer;
           font-family: inherit; font-size: 12.5px; font-weight: 700; color: ${SEC}; background: transparent;
@@ -313,7 +313,7 @@ export default function TournamentsPage() {
         }
 
         /* ═══ کارت ═══ */
-        .tn-card { display: flex; flex-direction: column; background: #fff; border: 1px solid ${LINE};
+        .tn-card { display: flex; flex-direction: column; background: rgba(255,255,255,0.78); border: 1px solid ${LINE};
           border-radius: 18px; overflow: hidden; text-decoration: none; color: inherit; height: 100%;
           box-shadow: 0 2px 12px rgba(28,27,23,0.05);
           transition: transform .3s cubic-bezier(.22,1,.36,1), box-shadow .3s, border-color .3s;
@@ -416,7 +416,7 @@ export default function TournamentsPage() {
                 value={search}
                 onChange={e => setSearch(e.target.value)}
                 placeholder="جستجو در مسابقات…"
-                style={{ width: '100%', boxSizing: 'border-box', padding: '11px 40px 11px 14px', borderRadius: 12, fontSize: 13, background: '#fff', border: `1px solid ${LINE}`, color: TEXT, fontFamily: 'inherit', transition: 'border-color .2s, box-shadow .2s' }}
+                style={{ width: '100%', boxSizing: 'border-box', padding: '11px 40px 11px 14px', borderRadius: 12, fontSize: 13, background: '#FAFAF7', border: `1px solid ${LINE}`, color: TEXT, fontFamily: 'inherit', transition: 'border-color .2s, box-shadow .2s' }}
               />
               <Search size={15} style={{ position: 'absolute', right: 13, top: '50%', transform: 'translateY(-50%)', color: GOLD_D, pointerEvents: 'none' }} />
             </div>
@@ -485,7 +485,7 @@ export default function TournamentsPage() {
           </div>
 
           {gridItems.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '70px 20px', background: '#fff', border: `1px solid ${LINE}`, borderRadius: 18 }}>
+            <div style={{ textAlign: 'center', padding: '70px 20px', background: 'rgba(255,255,255,0.78)', border: `1px solid ${LINE}`, borderRadius: 18 }}>
               <Trophy size={38} style={{ color: MUT, opacity: 0.4, marginBottom: 12 }} />
               <p style={{ fontSize: 15, fontWeight: 800, margin: '0 0 6px' }}>مسابقه‌ای یافت نشد</p>
               <p style={{ fontSize: 12.5, color: MUT, margin: '0 0 18px' }}>عبارت دیگری جستجو کنید یا وضعیت را تغییر دهید.</p>

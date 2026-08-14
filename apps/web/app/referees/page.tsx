@@ -257,7 +257,7 @@ function RefereeCard({ referee, view, idx, onStory }: { referee: Referee; view: 
     return (
       <article className="ccard-list" style={{
         display:'flex', alignItems:'center', gap:14, padding:'11px 13px',
-        borderRadius:12, background:'#FFFFFF', border:'1px solid rgba(0,0,0,0.08)',
+        borderRadius:12, background: 'rgba(255,255,255,0.78)', border:'1px solid rgba(0,0,0,0.08)',
         boxShadow:'0 1px 3px rgba(0,0,0,0.05)',
         animation:`fadeUp .34s ${(idx * 0.04).toFixed(2)}s ease both`,
       }}>
@@ -283,7 +283,7 @@ function RefereeCard({ referee, view, idx, onStory }: { referee: Referee; view: 
 
   return (
     <article className="ccard" style={{
-      borderRadius:12, overflow:'hidden', background:'#FFFFFF',
+      borderRadius:12, overflow:'hidden', background: 'rgba(255,255,255,0.78)',
       border:'1px solid rgba(0,0,0,0.08)',
       boxShadow:'0 1px 3px rgba(0,0,0,0.06), 0 8px 22px rgba(0,0,0,0.04)',
       animation:`fadeUp .38s ${(idx * 0.05).toFixed(2)}s ease both`,

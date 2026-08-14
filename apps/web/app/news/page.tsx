@@ -245,7 +245,7 @@ export default function NewsPage() {
         .nw-chip.on { background: rgba(199,166,106,0.12); border-color: rgba(199,166,106,0.38); color: ${GOLD_D}; }
 
         /* ── کارت خبر ── */
-        .nw-card { display: flex; flex-direction: column; background: #fff; border: 1px solid ${LINE};
+        .nw-card { display: flex; flex-direction: column; background: rgba(255,255,255,0.78); border: 1px solid ${LINE};
           border-radius: 16px; overflow: hidden; text-decoration: none; color: inherit;
           box-shadow: 0 2px 10px rgba(28,27,23,0.05);
           transition: transform .28s cubic-bezier(.22,1,.36,1), box-shadow .28s, border-color .28s;
@@ -319,7 +319,7 @@ export default function NewsPage() {
         /* ردیف گزارش‌های ویژه (افقی) */
         .nw-srow { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
         .nw-h-item { display: flex; gap: 12px; align-items: stretch; text-decoration: none; color: inherit;
-          background: #fff; border: 1px solid ${LINE}; border-radius: 14px; padding: 10px; overflow: hidden;
+          background: rgba(255,255,255,0.78); border: 1px solid ${LINE}; border-radius: 14px; padding: 10px; overflow: hidden;
           transition: transform .28s cubic-bezier(.22,1,.36,1), box-shadow .28s, border-color .28s; animation: nwFadeUp .5s ease both; }
         .nw-h-item:hover { transform: translateY(-3px); box-shadow: 0 14px 30px rgba(28,27,23,0.10); border-color: rgba(199,166,106,0.35); }
         .nw-h-item .tn { width: 116px; flex-shrink: 0; aspect-ratio: 4/3; border-radius: 10px; overflow: hidden; background: #EDEAE2; }
@@ -436,7 +436,7 @@ export default function NewsPage() {
                 value={query}
                 onChange={e => { setQuery(e.target.value); setShown(PAGE_STEP) }}
                 placeholder="جستجو در اخبار، عنوان یا برچسب…"
-                style={{ width: '100%', boxSizing: 'border-box', padding: '10px 40px 10px 14px', borderRadius: 12, fontSize: 13, background: '#fff', border: `1px solid ${LINE}`, color: TEXT, fontFamily: 'inherit', transition: 'border-color .2s, box-shadow .2s' }}
+                style={{ width: '100%', boxSizing: 'border-box', padding: '10px 40px 10px 14px', borderRadius: 12, fontSize: 13, background: '#FAFAF7', border: `1px solid ${LINE}`, color: TEXT, fontFamily: 'inherit', transition: 'border-color .2s, box-shadow .2s' }}
               />
               <Search size={15} style={{ position: 'absolute', right: 13, top: '50%', transform: 'translateY(-50%)', color: GOLD_D, pointerEvents: 'none' }} />
             </div>
@@ -445,13 +445,13 @@ export default function NewsPage() {
               <button
                 onClick={() => setSortOpen(o => !o)}
                 onBlur={() => window.setTimeout(() => setSortOpen(false), 140)}
-                style={{ display: 'inline-flex', alignItems: 'center', gap: 7, padding: '10px 13px', borderRadius: 12, cursor: 'pointer', fontFamily: 'inherit', fontSize: 12.5, fontWeight: 700, background: '#fff', border: `1px solid ${sortOpen ? 'rgba(199,166,106,0.55)' : LINE}`, color: SEC, transition: 'border-color .2s' }}>
+                style={{ display: 'inline-flex', alignItems: 'center', gap: 7, padding: '10px 13px', borderRadius: 12, cursor: 'pointer', fontFamily: 'inherit', fontSize: 12.5, fontWeight: 700, background: 'rgba(255,255,255,0.78)', border: `1px solid ${sortOpen ? 'rgba(199,166,106,0.55)' : LINE}`, color: SEC, transition: 'border-color .2s' }}>
                 <span className="nw-hide-mob" style={{ color: MUT, fontWeight: 500 }}>مرتب‌سازی:</span>
                 {sort === 'newest' ? 'جدیدترین' : 'پربازدیدترین'}
                 <ChevronDown size={13} style={{ transition: 'transform .2s', transform: sortOpen ? 'rotate(180deg)' : 'none', color: GOLD_D }} />
               </button>
               {sortOpen && (
-                <div style={{ position: 'absolute', insetInlineEnd: 0, top: 'calc(100% + 6px)', minWidth: 150, background: '#fff', border: `1px solid ${LINE}`, borderRadius: 12, overflow: 'hidden', boxShadow: '0 14px 34px rgba(28,27,23,0.14)', zIndex: 50 }}>
+                <div style={{ position: 'absolute', insetInlineEnd: 0, top: 'calc(100% + 6px)', minWidth: 150, background: 'rgba(255,255,255,0.78)', border: `1px solid ${LINE}`, borderRadius: 12, overflow: 'hidden', boxShadow: '0 14px 34px rgba(28,27,23,0.14)', zIndex: 50 }}>
                   {([['newest', 'جدیدترین'], ['views', 'پربازدیدترین']] as [SortKey, string][]).map(([k, l]) => (
                     <button key={k} onMouseDown={() => { setSort(k); setSortOpen(false) }}
                       style={{ display: 'flex', width: '100%', padding: '10px 14px', border: 'none', cursor: 'pointer', fontFamily: 'inherit', fontSize: 12.5, textAlign: 'right', background: sort === k ? 'rgba(199,166,106,0.12)' : 'transparent', color: sort === k ? GOLD_D : SEC, fontWeight: sort === k ? 800 : 500 }}>
@@ -584,7 +584,7 @@ export default function NewsPage() {
           </div>
 
           {gridBase.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '64px 20px', background: '#fff', border: `1px solid ${LINE}`, borderRadius: 16 }}>
+            <div style={{ textAlign: 'center', padding: '64px 20px', background: 'rgba(255,255,255,0.78)', border: `1px solid ${LINE}`, borderRadius: 16 }}>
               <Search size={38} style={{ color: MUT, opacity: 0.5, marginBottom: 12 }} />
               <p style={{ fontSize: 15, fontWeight: 800, margin: '0 0 6px' }}>خبری پیدا نشد</p>
               <p style={{ fontSize: 12.5, color: MUT, margin: '0 0 18px' }}>عبارت دیگری جستجو کنید یا فیلتر دسته‌بندی را تغییر دهید.</p>

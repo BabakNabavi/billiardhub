@@ -146,7 +146,7 @@ export default function RankingsPage() {
 
         /* سگمنت‌ها */
         .rk-segwrap { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; padding: 4px;
-          background: #fff; border: 1px solid ${LINE}; border-radius: 14px; }
+          background: rgba(255,255,255,0.78); border: 1px solid ${LINE}; border-radius: 14px; }
         .rk-segwrap::-webkit-scrollbar { display: none; }
         .rk-seg { flex-shrink: 0; display: inline-flex; align-items: center; gap: 6px; border: none; cursor: pointer;
           font-family: inherit; font-size: 12.5px; font-weight: 700; color: ${SEC}; background: transparent;
@@ -158,7 +158,7 @@ export default function RankingsPage() {
         .rk-chips { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; padding: 2px; }
         .rk-chips::-webkit-scrollbar { display: none; }
         .rk-chip { flex-shrink: 0; cursor: pointer; font-family: inherit; font-size: 12.5px; font-weight: 700;
-          padding: 8px 15px; border-radius: 10px; background: #fff; border: 1px solid ${LINE}; color: ${SEC};
+          padding: 8px 15px; border-radius: 10px; background: rgba(255,255,255,0.78); border: 1px solid ${LINE}; color: ${SEC};
           transition: all .2s ease; }
         .rk-chip:hover { border-color: rgba(199,166,106,0.45); transform: translateY(-1px); }
         .rk-chip.on { background: rgba(199,166,106,0.12); border-color: rgba(199,166,106,0.38); color: ${GOLD_D}; }
@@ -170,7 +170,7 @@ export default function RankingsPage() {
           transition: transform .28s cubic-bezier(.22,1,.36,1), filter .28s; }
         .rk-rowwrap:hover { transform: translateY(-3px); filter: drop-shadow(0 12px 20px rgba(28,27,23,0.13)); }
         .rk-row { position: relative; display: flex; align-items: center; gap: 14px;
-          background: #fff; border: 1px solid ${LINE}; border-radius: 16px 16px 16px 0; overflow: hidden;
+          background: rgba(255,255,255,0.78); border: 1px solid ${LINE}; border-radius: 16px 16px 16px 0; overflow: hidden;
           padding: 0 0 0 18px; min-height: 74px; text-decoration: none; color: inherit;
           clip-path: polygon(0 0, 100% 0, 100% 100%, 26px 100%, 0 calc(100% - 14px)); }
         /* مربع رتبه — لیکویید گلس کریستالی (iOS): هایلایت شیشه‌ای + عدد نورانی */
@@ -270,7 +270,7 @@ export default function RankingsPage() {
           players.length === 0 ? (
             /* «در حال بارگذاری» با «اعلام نشده» یکی نیست — پیش‌تر هر دو
                حالت یک متن می‌دیدند و لحظه‌ی اول به‌غلط «اعلام نشده» بود. */
-            <div style={{ textAlign: 'center', padding: '70px 20px', background: '#fff', border: `1px solid ${LINE}`, borderRadius: 18 }}>
+            <div style={{ textAlign: 'center', padding: '70px 20px', background: 'rgba(255,255,255,0.78)', border: `1px solid ${LINE}`, borderRadius: 18 }}>
               <Trophy size={38} style={{ color: MUT, opacity: 0.4, marginBottom: 12 }} />
               <p style={{ fontSize: 15.5, fontWeight: 800, margin: 0 }}>
                 {loaded ? 'رنکینگ این دسته هنوز اعلام نشده' : 'در حال دریافت رنکینگ…'}
@@ -325,7 +325,7 @@ export default function RankingsPage() {
               </section>
 
               {/* پانوشت — همان متن قبلی */}
-              <div style={{ marginTop: 22, display: 'flex', alignItems: 'center', gap: 10, background: '#fff', border: `1px solid ${LINE}`, borderRadius: 14, padding: '13px 16px' }}>
+              <div style={{ marginTop: 22, display: 'flex', alignItems: 'center', gap: 10, background: 'rgba(255,255,255,0.78)', border: `1px solid ${LINE}`, borderRadius: 14, padding: '13px 16px' }}>
                 <span style={{ width: 6, height: 6, borderRadius: '50%', background: GOLD, flexShrink: 0 }} />
                 <span style={{ fontSize: 12.5, color: SEC }}>
                   رنکینگ رسمی فدراسیون بیلیارد، بولینگ و بولس جمهوری اسلامی ایران — به‌روز شده
@@ -335,7 +335,7 @@ export default function RankingsPage() {
           )
         ) : (
           /* هی‌بال — به زودی (همان رفتار قبلی) */
-          <div style={{ textAlign: 'center', padding: '76px 20px', background: '#fff', border: `1px solid ${LINE}`, borderRadius: 20 }}>
+          <div style={{ textAlign: 'center', padding: '76px 20px', background: 'rgba(255,255,255,0.78)', border: `1px solid ${LINE}`, borderRadius: 20 }}>
             <span style={{ display: 'inline-flex', width: 62, height: 62, borderRadius: 18, background: 'rgba(199,166,106,0.10)', border: '1px solid rgba(199,166,106,0.3)', alignItems: 'center', justifyContent: 'center', color: GOLD_D, marginBottom: 16 }}>
               <Trophy size={26} />
             </span>

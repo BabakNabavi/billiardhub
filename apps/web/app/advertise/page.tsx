@@ -33,7 +33,7 @@ type Tab = typeof TABS[number]['id']
 const INK = '#1C1B17', SEC = '#5B564B', MUT = '#8A8474', LINE = '#E7E2D6'
 const GOLD = '#C7A66A', GOLD_D = '#9A6E38', FELT = '#0E7A38'
 
-const CARD: React.CSSProperties = { background: '#fff', border: `1px solid ${LINE}`, borderRadius: 18, padding: 22 }
+const CARD: React.CSSProperties = { background: 'rgba(255,255,255,0.78)', border: `1px solid ${LINE}`, borderRadius: 18, padding: 22 }
 const INPUT: React.CSSProperties = {
   width: '100%', border: `1px solid ${LINE}`, borderRadius: 11, padding: '11px 14px',
   fontSize: 13.5, fontFamily: 'inherit', color: INK, background: '#FAFAF7', outline: 'none',

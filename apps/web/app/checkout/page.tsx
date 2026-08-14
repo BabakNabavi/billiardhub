@@ -174,7 +174,7 @@ export default function CheckoutPage() {
           <div className="checkout-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 360px', gap: 28 }}>
 
             {/* ── Left: Form ── */}
-            <div style={{ background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 24, overflow: 'hidden' }}>
+            <div style={{ background: 'rgba(255,255,255,0.78)', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 24, overflow: 'hidden' }}>
               <div style={{ height: 1, background: 'linear-gradient(90deg,transparent,rgba(199,166,106,0.50),transparent)' }} />
               <div style={{ padding: '28px' }}>
 
@@ -288,7 +288,7 @@ export default function CheckoutPage() {
                     )}
 
                     <div style={{ display: 'flex', gap: 10, marginTop: 24 }}>
-                      <button onClick={() => setStep('address')} style={{ padding: '14px 20px', borderRadius: 14, border: '1px solid rgba(0,0,0,0.06)', background: '#FFFFFF', color: 'rgba(0,0,0,0.50)', fontSize: 16, fontFamily: 'inherit', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <button onClick={() => setStep('address')} style={{ padding: '14px 20px', borderRadius: 14, border: '1px solid rgba(0,0,0,0.06)', background: 'rgba(255,255,255,0.78)', color: 'rgba(0,0,0,0.50)', fontSize: 16, fontFamily: 'inherit', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
                         <Ti name="arrow-right" size={17} /> برگشت
                       </button>
                       <button
@@ -358,7 +358,7 @@ export default function CheckoutPage() {
                     </div>
 
                     <div style={{ display: 'flex', gap: 10 }}>
-                      <button onClick={() => setStep('payment')} style={{ padding: '14px 20px', borderRadius: 14, border: '1px solid rgba(0,0,0,0.06)', background: '#FFFFFF', color: 'rgba(0,0,0,0.50)', fontSize: 16, fontFamily: 'inherit', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <button onClick={() => setStep('payment')} style={{ padding: '14px 20px', borderRadius: 14, border: '1px solid rgba(0,0,0,0.06)', background: 'rgba(255,255,255,0.78)', color: 'rgba(0,0,0,0.50)', fontSize: 16, fontFamily: 'inherit', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
                         <Ti name="arrow-right" size={17} /> برگشت
                       </button>
                       <button
@@ -376,7 +376,7 @@ export default function CheckoutPage() {
 
             {/* ── Right: Order Summary ── */}
             <div style={{ height: 'fit-content', position: 'sticky', top: 80 }}>
-              <div style={{ background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 24, overflow: 'hidden' }}>
+              <div style={{ background: 'rgba(255,255,255,0.78)', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 24, overflow: 'hidden' }}>
                 <div style={{ height: 1, background: 'linear-gradient(90deg,transparent,rgba(199,166,106,0.50),transparent)' }} />
                 <div style={{ padding: '20px' }}>
                   <h3 style={{ fontSize: 16, fontWeight: 800, color: '#111111', margin: '0 0 16px', display: 'flex', alignItems: 'center', gap: 8 }}>

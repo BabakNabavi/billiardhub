@@ -42,7 +42,7 @@ export default function PlansPage() {
 
         {/* بنر تبلیغاتی چیز دیگری است — کاربر نباید بسته بخرد به امیدِ بنر */}
         <div style={{
-          marginTop: 28, background: '#fff', border: `1px solid ${LINE}`, borderRadius: 18, padding: '20px 22px',
+          marginTop: 28, background: 'rgba(255,255,255,0.78)', border: `1px solid ${LINE}`, borderRadius: 18, padding: '20px 22px',
           display: 'flex', gap: 16, flexWrap: 'wrap', alignItems: 'center',
         }}>
           <Megaphone size={20} style={{ color: GOLD_D }} />

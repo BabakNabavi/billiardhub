@@ -73,7 +73,7 @@ export default function LivePage() {
               <Loader2 size={26} style={{ animation: 'lvspin 1s linear infinite' }} />
             </div>
           ) : liveNow.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '56px 24px', background: '#fff', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 20 }}>
+            <div style={{ textAlign: 'center', padding: '56px 24px', background: 'rgba(255,255,255,0.78)', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 20 }}>
               <span style={{ display: 'inline-flex', width: 62, height: 62, borderRadius: 20, background: 'rgba(239,68,68,0.08)', color: '#ef4444', alignItems: 'center', justifyContent: 'center', marginBottom: 14 }}>
                 <Radio size={28} />
               </span>
@@ -95,7 +95,7 @@ export default function LivePage() {
                   className="bp-live-card"
                   onClick={() => router.push(`/live/${s.id}`)}
                   onKeyDown={e => e.key === 'Enter' && router.push(`/live/${s.id}`)}
-                  style={{ borderRadius: 20, overflow: 'hidden', background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)', cursor: 'pointer', outline: 'none', boxShadow: '0 1px 4px rgba(0,0,0,0.05)' }}
+                  style={{ borderRadius: 20, overflow: 'hidden', background: 'rgba(255,255,255,0.78)', border: '1px solid rgba(0,0,0,0.07)', cursor: 'pointer', outline: 'none', boxShadow: '0 1px 4px rgba(0,0,0,0.05)' }}
                 >
                   <div style={{ height: 3, background: 'linear-gradient(90deg,#ef4444,#f59e0b)' }} />
                   <div style={{ padding: 18 }}>

@@ -188,7 +188,7 @@ function MfrCard({ mfr, view }: { mfr: MockManufacturer; view: 'grid' | 'list' }
   const router = useRouter()
 
   const shell: React.CSSProperties = {
-    background: '#fff', borderRadius: 14, overflow: 'hidden',
+    background: 'rgba(255,255,255,0.78)', borderRadius: 14, overflow: 'hidden',
     border: `1.5px solid ${hov ? 'rgba(199,166,106,0.5)' : 'rgba(28,28,26,0.09)'}`,
     boxShadow: hov ? '0 18px 46px rgba(28,28,26,0.13), 0 4px 14px rgba(199,166,106,0.12)' : '0 2px 12px rgba(28,28,26,0.06)',
     transform: hov ? 'translateY(-5px)' : 'none',
