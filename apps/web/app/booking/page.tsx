@@ -14,8 +14,8 @@ const INK = '#1C1B17', MUT = '#8A8474', LINE = '#E7E2D6', GOLD_D = '#9A6E38'
 export default function MyBookingsPage() {
   return (
     <AuthGuard>
-      <div dir="rtl" style={{
-        minHeight: 'calc(100vh - 72px)', background: '#F7F5F0',
+      <div dir="rtl" className="lq-stage" style={{
+        minHeight: 'calc(100vh - 72px)',
         padding: 'clamp(20px,4vw,40px) clamp(16px,4vw,32px) 60px',
         fontFamily: 'var(--font-base)',
       }}>

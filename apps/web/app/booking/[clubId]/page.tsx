@@ -391,7 +391,7 @@ function BookingContent() {
 
   /* ── Loading ── */
   if(loading) return (
-    <div style={{minHeight:'80vh',background:'#F7F7F5',display:'flex',alignItems:'center',justifyContent:'center',flexDirection:'column',gap:'16px'}}>
+    <div className="lq-stage" style={{minHeight:'80vh',display:'flex',alignItems:'center',justifyContent:'center',flexDirection:'column',gap:'16px'}}>
       <div style={{width:'40px',height:'40px',border:'2px solid rgba(199,166,106,0.1)',borderTop:'2px solid #C7A66A',borderRadius:'50%',animation:'spin 0.8s linear infinite'}}/>
       <style>{`@keyframes spin{to{transform:rotate(360deg);}}`}</style>
     </div>
@@ -399,7 +399,7 @@ function BookingContent() {
 
   /* ── انتقال به درگاه پرداخت ── */
   if(redirecting) return (
-    <div style={{minHeight:'100vh',background:'#F7F7F5',direction:'rtl',fontFamily:'var(--font-base)',display:'flex',alignItems:'center',justifyContent:'center',padding:24}}>
+    <div className="lq-stage" style={{minHeight:'100vh',direction:'rtl',fontFamily:'var(--font-base)',display:'flex',alignItems:'center',justifyContent:'center',padding:24}}>
       <div style={{textAlign:'center'}}>
         <div style={{width:52,height:52,border:'2px solid rgba(199,166,106,0.16)',borderTop:'2px solid #C7A66A',borderRadius:'50%',margin:'0 auto 18px',animation:'spin 0.85s linear infinite'}}/>
         <div style={{fontSize:16,fontWeight:800,color:'#111111',marginBottom:6}}>در حال انتقال به درگاه پرداخت…</div>
@@ -416,7 +416,7 @@ function BookingContent() {
      کاربر باید بتواند تاریخِ دیگری انتخاب کند. تا امروز هر سه حالت
      به همین صفحه می‌رسیدند و کاربر اصلاً نمی‌توانست رزرو کند. */
   if (closure.always) return (
-    <div style={{minHeight:'100vh',background:'#F7F7F5',direction:'rtl',fontFamily:'Vazirmatn,Tahoma,sans-serif',display:'flex',alignItems:'center',justifyContent:'center',padding:20}}>
+    <div className="lq-stage" style={{minHeight:'100vh',direction:'rtl',fontFamily:'Vazirmatn,Tahoma,sans-serif',display:'flex',alignItems:'center',justifyContent:'center',padding:20}}>
       <div style={{maxWidth:420,textAlign:'center',background:'#fff',borderRadius:22,border:'1px solid rgba(0,0,0,0.07)',boxShadow:'0 12px 40px rgba(0,0,0,0.06)',padding:'36px 28px'}}>
         <div style={{width:66,height:66,borderRadius:'50%',background:'rgba(220,38,38,0.10)',display:'flex',alignItems:'center',justifyContent:'center',margin:'0 auto 18px'}}>
           <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#DC2626" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
@@ -457,10 +457,10 @@ function BookingContent() {
         @media(max-width:380px){ .slot-grid{grid-template-columns:repeat(3,1fr)!important;} }
       `}</style>
 
-      <div style={{minHeight:'100vh',background:'#F7F7F5',paddingBottom:'80px'}}>
+      <div className="lq-stage" style={{minHeight:'100vh',paddingBottom:'80px'}}>
 
         {/* #18: Sticky header — back button with LQ style */}
-        <div style={{background:'rgba(247,247,245,0.96)',borderBottom:'1px solid rgba(0,0,0,0.06)',padding:'0 clamp(16px,4vw,40px)',position:'sticky',top:'62px',zIndex:90,backdropFilter:'blur(24px)'}}>
+        <div style={{background:'rgba(250,249,246,0.70)',borderBottom:'1px solid rgba(0,0,0,0.06)',padding:'0 clamp(16px,4vw,40px)',position:'sticky',top:'62px',zIndex:90,backdropFilter:'blur(24px)'}}>
           <div style={{maxWidth:'720px',margin:'0 auto',height:'54px',display:'flex',alignItems:'center',gap:'14px'}}>
             <Link href={`/clubs/${clubId}`} style={{display:'flex',alignItems:'center',gap:'6px',color:'#C7A66A',fontSize: '14px',textDecoration:'none',background:'rgba(199,166,106,0.10)',border:'1px solid rgba(199,166,106,0.28)',borderRadius:'20px',padding:'7px 16px',flexShrink:0,fontWeight:800}}>
               <ChevronRight size={13}/> برگشت به باشگاه

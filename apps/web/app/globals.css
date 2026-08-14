@@ -1231,6 +1231,8 @@ select:disabled { opacity: 0.55; cursor: not-allowed; }
      نمی‌شد. به‌جایش لایه‌ها با z-index صریحِ ۰ و ۱ مرتب می‌شوند. */
 .lq-stage {
   position: relative;
+  /* نوارهای چسبانِ صفحه‌ها همین رنگ را لازم دارند تا وصله نشوند */
+  --lq-stage-base: #F4F2EE;
 }
 /* لکه‌های رنگیِ پشتِ شیشه — ثابت، بدونِ تعامل */
 .lq-stage::before {
@@ -1465,8 +1467,35 @@ select:disabled { opacity: 0.55; cursor: not-allowed; }
   .lq-pcard:active { transform: scale(.985); }
 }
 
+/* ── ردیفِ رزرو ──
+   ⚠️ این قاعده تا امروز داخلِ `<style>`ِ صفحه‌ی `/dashboard` بود، ولی
+   کامپوننتی که ازش استفاده می‌کند (`components/booking/MyBookings`) در
+   `/booking` هم رندر می‌شود — جایی که آن استایل اصلاً وجود ندارد. یعنی
+   «رزروهای من» آن‌جا کاملاً بی‌قاب و بی‌فاصله دیده می‌شد.
+
+   حالا کنارِ بقیه‌ی سطح‌های مشترک است و هر دو صفحه یک شکل دارند. */
+.booking-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  /* ⚠️ مات، نه شیشه‌ای. هر دو ظرفِ این ردیف (کارتِ داشبورد و کارتِ
+     صفحه‌ی رزرو) سفیدِ تخت‌اند؛ سفیدِ ۷۲٪ روی سفید یعنی هیچ — نه مرزی
+     می‌ماند نه درخششی. شیشه جایی معنا دارد که پشتش رنگ باشد. */
+  background: #F7F7F5;
+  border: 1px solid rgba(28,28,26,0.08);
+  border-radius: 14px;
+  transition: background .25s, border-color .25s, box-shadow .25s;
+}
+.booking-row:hover {
+  background: #F3F2EF;
+  border-color: rgba(199,166,106,0.34);
+  box-shadow: 0 6px 18px -10px rgba(17,17,16,0.20);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .lq-rise, .lq-enter-sheen::after, .lq-halo { animation: none !important; }
+  .booking-row { transition: none !important; }
   .lqg-hover, .lq-tile, .lq-seg > button, .lq-pcard { transition: none !important; }
   .lqg-hover:hover, .lq-tile:hover, .lq-pcard:hover { transform: none !important; }
 }

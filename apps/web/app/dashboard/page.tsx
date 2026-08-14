@@ -322,15 +322,8 @@ export default function DashboardPage() {
           border-color: rgba(199,166,106,0.30);
         }
 
-        .booking-row {
-          display: flex; align-items: center; gap: 14px;
-          padding: 14px 16px;
-          background: #F7F7F5;
-          border: 1px solid rgba(0,0,0,0.06);
-          border-radius: 14px;
-          transition: all 0.25s;
-        }
-        .booking-row:hover { background: #F3F2EF; border-color: rgba(0,0,0,0.09); }
+        /* .booking-row به globals.css رفت: همین کامپوننت در /booking هم
+           رندر می‌شود و آن‌جا این استایل وجود نداشت. */
 
         .match-pill {
           display: flex; align-items: center; gap: 12px;

@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useRef, useEffect } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+
 import { listApprovedSellers, type SellerProfile } from '../../lib/seller-store'
 import { fetchProfiles } from '../../lib/profiles/client'
 import type { MockSeller } from '../../lib/sellers-data'
@@ -239,7 +239,6 @@ const PhoneIcon =<svg width="16" height="16" viewBox="0 0 24 24" fill="none" str
 // ── Seller Card — grid + list, modern gold theme ──────────────
 function SellerCard({ seller, view }: { seller: typeof SELLERS[0]; view: 'grid' | 'list' }) {
   const [hov, setHov] = useState(false)
-  const router = useRouter()
 
   /* جنسِ سطح از کلاسِ مشترکِ lq-pcard می‌آید؛ این‌جا فقط لبه‌ی
      طلاییِ hover می‌ماند که نشانه‌ی همین فهرست است. */
@@ -273,7 +272,7 @@ function SellerCard({ seller, view }: { seller: typeof SELLERS[0]; view: 'grid' 
     </div>
   )
   const viewBtn = (
-    <Link href={`/sellers/${seller.id}`} onClick={e => e.stopPropagation()} style={{
+    <Link href={`/sellers/${seller.id}`} style={{
       padding: '10px 18px', borderRadius: 10, textAlign: 'center', textDecoration: 'none',
       background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.34)', color: GOLD_D,
       fontSize: 13, fontWeight: 700, whiteSpace: 'nowrap',
@@ -282,7 +281,7 @@ function SellerCard({ seller, view }: { seller: typeof SELLERS[0]; view: 'grid' 
     </Link>
   )
   const callBtn = (
-    <a href={`tel:${seller.phone}`} onClick={e => e.stopPropagation()} style={{
+    <a href={`tel:${seller.phone}`} style={{
       padding: '10px 14px', borderRadius: 12, textDecoration: 'none',
       border: '1px solid rgba(28,28,26,0.12)', color: TEXT, background: 'rgba(28,28,26,0.04)',
       display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
@@ -292,8 +291,17 @@ function SellerCard({ seller, view }: { seller: typeof SELLERS[0]; view: 'grid' 
   /* ── LIST VIEW ── */
   if (view === 'list') {
     return (
-      <div onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)} onClick={() => router.push(`/sellers/${seller.id}`)}
-        className="sel-list-card lq-pcard" style={{ ...shell, display: 'flex', alignItems: 'stretch', minHeight: 158 }}>
+      /* ── چرا روکشِ لینک و نه onClick روی کارت ──
+         `<div onClick>` نه با کیبورد باز می‌شود، نه حلقه‌ی فوکوس دارد،
+         نه «باز کردن در تبِ جدید» — و قاعده‌ی دسترس‌پذیریِ پروژه هم
+         ممنوعش می‌کند. لینکِ دورِ کلِ کارت هم نمی‌شود، چون داخلش دکمه‌ی
+         تماس و «مشاهده فروشگاه» هستند و `<a>` تودرتو نامعتبر است.
+
+         پس نامِ فروشگاه لینک می‌شود و `::after`ش کلِ کارت را می‌پوشاند:
+         یک لینکِ واقعی با نامِ درست برای صفحه‌خوان، کلیک روی هرجای
+         کارت، و دکمه‌های داخلی که با z-index رویش می‌مانند. */
+      <div onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)}
+        className="sel-list-card sel-card lq-pcard" style={{ ...shell, display: 'flex', alignItems: 'stretch', minHeight: 158 }}>
         {/* image */}
         <div className="sel-list-img" style={{ position: 'relative', width: 176, flexShrink: 0, overflow: 'hidden' }}>
           <img loading="lazy" decoding="async" src={seller.bannerImage} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.5s', transform: hov ? 'scale(1.05)' : 'scale(1)' }} />
@@ -308,7 +316,9 @@ function SellerCard({ seller, view }: { seller: typeof SELLERS[0]; view: 'grid' 
         {/* info */}
         <div className="sel-list-body" style={{ flex: 1, minWidth: 0, padding: '16px 18px', display: 'flex', flexDirection: 'column', gap: 10 }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
-            <h3 style={{ fontSize: 16, fontWeight: 800, color: TEXT, margin: 0 }}>{seller.name}</h3>
+            <h3 style={{ fontSize: 16, fontWeight: 800, color: TEXT, margin: 0 }}>
+              <Link href={`/sellers/${seller.id}`} className="sel-card-link">{seller.name}</Link>
+            </h3>
           </div>
           {/* ارتفاع ثابت برای توضیح و برندها ⇒ همه‌ی ردیف‌ها هم‌اندازه */}
           <p className="sel-list-desc" style={{ fontSize: 12.5, color: TEXT_SEC, margin: 0, lineHeight: 1.6, height: 40, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{seller.description}</p>
@@ -325,8 +335,9 @@ function SellerCard({ seller, view }: { seller: typeof SELLERS[0]; view: 'grid' 
 
   /* ── GRID VIEW ── */
   return (
-    <div onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)} onClick={() => router.push(`/sellers/${seller.id}`)}
-      className="lq-pcard" style={{ ...shell, display: 'flex', flexDirection: 'column', height: '100%' }}>
+    /* روکشِ لینک — دلیلش کنارِ نمای فهرستی */
+    <div onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)}
+      className="sel-card lq-pcard" style={{ ...shell, display: 'flex', flexDirection: 'column', height: '100%' }}>
       {/* banner (ارتفاع +۱۰٪ ⇒ کل کارت بلندتر) */}
       <div style={{ height: 154, position: 'relative', overflow: 'hidden', flexShrink: 0 }}>
         <img loading="lazy" decoding="async" src={seller.bannerImage} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.5s', transform: hov ? 'scale(1.05)' : 'scale(1)' }} />
@@ -346,13 +357,18 @@ function SellerCard({ seller, view }: { seller: typeof SELLERS[0]; view: 'grid' 
       {/* body — flex تا کارت پر شود و دکمه‌ها ته کارت بچسبند ⇒ همه‌ی کارت‌ها یک‌اندازه */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: '0 18px 18px' }}>
         {/* logo fully visible (no badge overlap on image) */}
-        <div style={{ marginTop: -32, marginBottom: 12, position: 'relative', zIndex: 2 }}>
+        {/* بدونِ z-index: لوگو تعاملی نیست و اگر بالای روکش بنشیند،
+            کلیک روی همان ناحیه هیچ‌کاری نمی‌کند. ترتیبِ DOM برای
+            دیده‌شدنش روی بنر کافی است. */}
+        <div style={{ marginTop: -32, marginBottom: 12, position: 'relative' }}>
           <SellerLogo name={seller.name} size={62} />
         </div>
 
         {/* name */}
         <div style={{ margin: '0 0 5px' }}>
-          <h3 style={{ fontSize: 16, fontWeight: 800, color: TEXT, margin: 0, lineHeight: 1.35 }}>{seller.name}</h3>
+          <h3 style={{ fontSize: 16, fontWeight: 800, color: TEXT, margin: 0, lineHeight: 1.35 }}>
+            <Link href={`/sellers/${seller.id}`} className="sel-card-link">{seller.name}</Link>
+          </h3>
         </div>
 
         {/* توضیحات — همیشه فضای ۲ خط را می‌گیرد تا ارتفاع کارت‌ها یکسان بماند */}
@@ -364,7 +380,7 @@ function SellerCard({ seller, view }: { seller: typeof SELLERS[0]; view: 'grid' 
         {/* action buttons — به ته کارت چسبیده */}
         <div style={{ marginTop: 'auto', display: 'flex', gap: 8, borderTop: '1px solid rgba(28,28,26,0.06)', paddingTop: 14 }}>
           <div style={{ flex: 1 }}>
-            <Link href={`/sellers/${seller.id}`} onClick={e => e.stopPropagation()} style={{
+            <Link href={`/sellers/${seller.id}`} style={{
               display: 'block', padding: '10px 0', borderRadius: 10, textAlign: 'center', textDecoration: 'none',
               background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.34)', color: GOLD_D,
               fontSize: 13, fontWeight: 700,
@@ -502,6 +518,26 @@ export default function SellersPage() {
   return (
     <>
       <style>{`
+        /* ── روکشِ لینکِ کارتِ فروشگاه ──
+           لینک روی نامِ فروشگاه است و شبه‌عنصرش کلِ کارت را می‌پوشاند:
+           کلیک روی هرجای کارت، ولی برای صفحه‌خوان یک لینکِ واقعی با
+           نامِ همان فروشگاه. دکمه‌های داخلی (تماس، مشاهده فروشگاه) با
+           z-index بالاتر رویش می‌مانند تا کارِ خودشان را بکنند.
+           (بک‌تیک در این کامنت ممنوع — داخلِ template literal است) */
+        .sel-card { position: relative; }
+        .sel-card-link { color: inherit; text-decoration: none; }
+        .sel-card-link::after { content: ''; position: absolute; inset: 0; z-index: 1; }
+        /* ⚠️ حلقه روی خودِ روکش کشیده می‌شود، نه با ':has' روی کارت.
+           آن نسخه روی موتوری که ':has' ندارد هیچ نشانه‌ی فوکوسی نمی‌داد
+           — و این خرابی بی‌صداست، چون فقط با کیبورد دیده می‌شود. */
+        .sel-card-link:focus-visible { outline: none; }
+        .sel-card-link:focus-visible::after {
+          outline: 2px solid #9A6E38; outline-offset: -3px; border-radius: 14px;
+        }
+        /* هرچه خودش تعاملی است باید بالای روکش بماند */
+        .sel-card a:not(.sel-card-link),
+        .sel-card button { position: relative; z-index: 2; }
+
         @keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:none} }
         @keyframes softBlink { 0%,100%{opacity:1} 50%{opacity:0.5} }
         @keyframes spin { to { transform: rotate(360deg); } }
