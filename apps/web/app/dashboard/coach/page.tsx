@@ -132,6 +132,9 @@ const FIELD_LABELS: Record<string, string> = {
 }
 
 const lbl:  React.CSSProperties = { display: 'block', fontSize: 12.5, fontWeight: 700, color: TEXT_S, marginBottom: 6 }
+/* راهنمای ریزِ زیرِ فیلد — بر خلافِ placeholder با تایپ‌کردن ناپدید نمی‌شود */
+const hint: React.CSSProperties = { fontSize: 11.5, color: TEXT_M, marginTop: 5, lineHeight: 1.7 }
+
 /* ── برچسبِ فیلدِ لاتین ──
    خودِ ورودی `dir="ltr"` و چپ‌چین است ولی برچسبش مثلِ بقیه‌ی صفحه
    راست‌چین می‌ماند: «First name (English)» آن‌طرفِ کادر می‌افتد و چشم
@@ -524,8 +527,8 @@ function safeRemote(raw: unknown): Partial<FormState> {
                   ? 'نام و نام خانوادگی از اطلاعات حساب کاربری شما گرفته شده و قابل تغییر نیست.'
                   : 'حساب شما نام ثبت‌شده ندارد؛ همین‌جا وارد کنید.'}
               </div>
-              <div><label style={lblLtr}>Last name (English){star}</label><input data-field="lastNameEn" style={{ ...(errors.lastNameEn ? inpErr : inp), direction: 'ltr', textAlign: 'left' }} value={form.lastNameEn} onChange={e => set('lastNameEn', e.target.value)} placeholder="Rezaei" />{err('lastNameEn')}</div>
-              <div><label style={lblLtr}>First name (English){star}</label><input data-field="firstNameEn" style={{ ...(errors.firstNameEn ? inpErr : inp), direction: 'ltr', textAlign: 'left' }} value={form.firstNameEn} onChange={e => set('firstNameEn', e.target.value)} placeholder="Ahmad" />{err('firstNameEn')}</div>
+              <div><label style={lblLtr}>Last name (English){star}</label><input data-field="lastNameEn" style={{ ...(errors.lastNameEn ? inpErr : inp), direction: 'ltr', textAlign: 'left' }} value={form.lastNameEn} onChange={e => set('lastNameEn', e.target.value)} />{err('lastNameEn')}</div>
+              <div><label style={lblLtr}>First name (English){star}</label><input data-field="firstNameEn" style={{ ...(errors.firstNameEn ? inpErr : inp), direction: 'ltr', textAlign: 'left' }} value={form.firstNameEn} onChange={e => set('firstNameEn', e.target.value)} />{err('firstNameEn')}</div>
                             {/* نشانیِ اختصاصیِ سایت — همان چیزی که پنلِ باشگاه از اول داشت */}
               <div style={{ gridColumn: '1 / -1' }}>
                 <div data-field="slug"> {/* نشانیِ اختصاصی */}
@@ -626,19 +629,32 @@ function safeRemote(raw: unknown): Partial<FormState> {
                 const on = gradeSelected(g.key)
                 const yr = form.grades.find(x => x.key === g.key)?.year ?? ''
                 return (
-                  <div key={g.key} style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', padding: '9px 12px', borderRadius: 10, border: on ? '1px solid rgba(199,166,106,0.40)' : '1px solid rgba(17,17,16,0.10)', background: on ? 'rgba(199,166,106,0.07)' : '#fff' }}>
-                    <button type="button" onClick={() => toggleGrade(idx)} style={{ display: 'flex', alignItems: 'center', gap: 9, background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit', flex: 1, textAlign: 'right', minWidth: 0 }}>
+                  /* ── سال زیرِ نامِ درجه می‌نشیند، نه کنارش ──
+                     قبلاً هر دو در یک ردیفِ افقی بودند: نامِ درجه با
+                     `flex:1` و دراپ‌داونِ سال با عرضِ ثابتِ ۱۵۰. روی
+                     عرضِ موبایل چیزی حدود نصفِ ردیف را همان دراپ‌داون
+                     می‌گرفت و فهرستِ درجه‌ها این شکلی خوانده می‌شد:
+                     «توجیهی — سال دریافت». یعنی فیلدِ سال وسطِ فهرستِ
+                     درجه‌ها می‌افتاد.
+
+                     حالا ردیفِ بالا فقط انتخابِ درجه است و سال، وقتی
+                     درجه‌ای تیک خورد، زیرش با برچسبِ خودش باز می‌شود. */
+                  <div key={g.key} style={{ padding: '9px 12px', borderRadius: 10, border: on ? '1px solid rgba(199,166,106,0.40)' : '1px solid rgba(17,17,16,0.10)', background: on ? 'rgba(199,166,106,0.07)' : '#fff' }}>
+                    <button type="button" onClick={() => toggleGrade(idx)} style={{ display: 'flex', alignItems: 'center', gap: 9, background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit', width: '100%', textAlign: 'start', padding: 0 }}>
                       <span style={{ width: 19, height: 19, borderRadius: 6, flexShrink: 0, border: on ? 'none' : '1.5px solid rgba(17,17,16,0.22)', background: on ? GOLD : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                         {on && <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>}
                       </span>
                       <span dir="auto" className={g.label.startsWith('WPBSA') ? 'bh-latin' : undefined} style={{ fontSize: 13.5, fontWeight: on ? 700 : 500, color: on ? TEXT : TEXT_S, unicodeBidi: 'isolate' }}>{g.label}</span>
                     </button>
                     {on && (
-                      <div style={{ width: 150, flexShrink: 0 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 8, paddingInlineStart: 28 }}>
+                        <span style={{ fontSize: 12, color: TEXT_S, flexShrink: 0 }}>سال دریافت</span>
+                        <div style={{ maxWidth: 130, flex: 1 }}>
                         <Select
-                          compact value={yr} ariaLabel="سال دریافت" placeholder="سال دریافت"
+                            compact value={yr} ariaLabel={`سال دریافت ${g.label}`} placeholder="انتخاب"
                           options={YEARS.map(y => ({ value: String(y), label: faNum(y) }))}
                           onChange={v => setGradeYear(g.key, v)} />
+                      </div>
                       </div>
                     )}
                   </div>
@@ -694,8 +710,21 @@ function safeRemote(raw: unknown): Partial<FormState> {
             {sectionTitle('راه‌های ارتباطی', 5)}
             <p style={{ fontSize: 12.5, color: TEXT_M, marginBottom: 14 }}>هر کدام را که پر کنید، آیکونش در بخش «راه‌های ارتباطی» پروفایل نمایش داده می‌شود.</p>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2,1fr)', gap: 14 }}>
-              <div><label style={lbl}>شماره تماس</label><input style={{ ...inp, direction: 'ltr', textAlign: 'left' }} value={form.phone} onChange={e => set('phone', e.target.value)} placeholder="09121234567" /></div>
-              <div><label style={lbl}>واتساپ</label><input style={{ ...inp, direction: 'ltr', textAlign: 'left' }} value={form.whatsapp} onChange={e => set('whatsapp', e.target.value)} placeholder="989121234567" /></div>
+              {/* ── چرا این دو راهنما ──
+                  دو فیلد دو قالبِ متفاوت می‌خواهند و از روی برچسبشان
+                  معلوم نیست: تماس با صفرِ اول، واتساپ با کدِ کشور و
+                  بدونِ صفر. تنها نشانه، `placeholder` بود که با اولین
+                  کاراکترِ تایپ‌شده ناپدید می‌شود. */}
+              <div>
+                <label style={lbl}>شماره تماس</label>
+                <input style={{ ...inp, direction: 'ltr', textAlign: 'left' }} inputMode="tel" value={form.phone} onChange={e => set('phone', e.target.value)} placeholder="09121234567" />
+                <div style={hint}>با صفرِ اول و بدون فاصله — <span className="bh-latin" dir="ltr">09121234567</span></div>
+              </div>
+              <div>
+                <label style={lbl}>واتساپ</label>
+                <input style={{ ...inp, direction: 'ltr', textAlign: 'left' }} inputMode="tel" value={form.whatsapp} onChange={e => set('whatsapp', e.target.value)} placeholder="989121234567" />
+                <div style={hint}>با کد کشور و بدون صفر و بدون + — <span className="bh-latin" dir="ltr">989121234567</span></div>
+              </div>
               <div><label style={lbl}>اینستاگرام</label><input style={{ ...inp, direction: 'ltr', textAlign: 'left' }} value={form.instagram} onChange={e => set('instagram', e.target.value)} placeholder="coach.username" /></div>
               <div><label style={lbl}>تلگرام</label><input style={{ ...inp, direction: 'ltr', textAlign: 'left' }} value={form.telegram} onChange={e => set('telegram', e.target.value)} placeholder="coach_username" /></div>
             </div>
