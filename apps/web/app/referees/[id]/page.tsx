@@ -6,6 +6,7 @@ import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import ClubStoryModal from '@/components/ClubStoryModal'
 import { useProfileImageViewer } from '@/components/ProfileImageViewer'
+import { useTabKeys } from '@/hooks/use-tab-keys'
 import {
   getRefereeProfile, badgeFromGrades, certificationLines, disciplineLabel, GRADES,
   type RefereeProfile,
@@ -298,19 +299,9 @@ export default function RefereeProfilePage() {
   const grade = GRADE_DOTS[referee.badge]
   const socialBtn: React.CSSProperties = { width:44, height:44, borderRadius:11, display:'flex', alignItems:'center', justifyContent:'center', background:'rgba(26,25,23,0.06)', border:'1px solid rgba(26,25,23,0.10)', color:'rgba(26,25,23,0.5)', textDecoration:'none', flexShrink:0, cursor:'pointer' }
 
-  /* ── کلیدهای جهت روی نوارِ تب ──
-     در چیدمانِ راست‌به‌چپ، «چپ» تبِ بعدی است — همان چیزی که چشم
-     می‌بیند، نه ترتیبِ منطقیِ آرایه. */
   const TABS = ['photos', 'videos', 'albums'] as const
-  const onTabKey = (e: React.KeyboardEvent) => {
-    const d = e.key === 'ArrowLeft' ? 1 : e.key === 'ArrowRight' ? -1 : 0
-    if (!d) return
-    e.preventDefault()
-    const i = TABS.indexOf(tab)
-    const next = TABS[(i + d + TABS.length) % TABS.length]!
-    setTab(next)
-    document.getElementById(`gtab-${next}`)?.focus()
-  }
+  const onTabKey = useTabKeys(TABS, tab, setTab, 'gtab-')
+
   const createAlbum = () => {
     if (!newAlbumName.trim()) return
     setAlbums(prev => [...prev, { id:`a${Date.now()}`, name:newAlbumName.trim(), imageIds:[] }])
