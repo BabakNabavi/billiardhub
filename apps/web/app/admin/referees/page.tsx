@@ -1,5 +1,6 @@
 'use client'
 import { useState, useEffect } from 'react'
+import { stripBidi } from '../../../lib/text-fa'
 import Link from 'next/link'
 import { useAuthStore } from '../../../store/auth.store'
 import {
@@ -31,7 +32,9 @@ const btn = (bg: string, color: string, border: string): React.CSSProperties => 
 })
 
 /* key lookup: certificationLines() returns "label — year"; find the grade key by label for the bh-latin class */
-const gradeKeyByLabel = (line: string) => GRADES.find(g => line.startsWith(g.label))?.key ?? ''
+/* ⚠️ متن با نویسه‌ی نامرئیِ دوجهته شروع می‌شود، پس بدونِ پاک‌کردنِ آن
+   'startsWith' هیچ‌وقت جور نمی‌شود و کلاسِ لاتین از دست می‌رود. */
+const gradeKeyByLabel = (line: string) => GRADES.find(g => stripBidi(line).startsWith(g.label))?.key ?? ''
 
 export default function AdminRefereesPage() {
   const { user, _hydrated } = useAuthStore()

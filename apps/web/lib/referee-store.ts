@@ -137,7 +137,17 @@ export function badgeFromGrades(grades: RefereeGrade[]): { label: string; dots: 
 export function certificationLines(grades: RefereeGrade[]): string[] {
   return [...grades]
     .sort((a, b) => GRADES.findIndex(x => x.key === b.key) - GRADES.findIndex(x => x.key === a.key))
-    .map(g => (g.year ? `${g.label} — ${g.year}` : g.label))
+    /* ── چرا جداکننده‌های دوجهته ──
+       برچسبِ درجه می‌تواند حرفِ لاتین داشته باشد («A آسیایی») و سال با
+       ارقامِ فارسی نوشته می‌شود. در بندِ راست‌به‌چپ، الگوریتمِ دوجهته این
+       دو را با هم قاطی می‌کرد و سال وسطِ خودِ برچسب می‌افتاد — کاربر
+       «۱۴۰۳» را بینِ «آسیایی» و «A» می‌دید.
+
+       U+2068/U+2069 (FSI/PDI) هر تکه را جدا می‌کنند: هیچ‌کدام روی
+       ترتیبِ دیگری اثر نمی‌گذارد و خط‌تیره سرِ جایش بینشان می‌ماند.
+       داخلِ خودِ رشته گذاشته شده‌اند تا هرجا این متن رندر شود درست
+       بماند، نه فقط جایی که کامپوننت یادش باشد «isolate» بدهد. */
+    .map(g => (g.year ? `\u2068${g.label}\u2069 — \u2068${g.year}\u2069` : g.label))
 }
 
 export function disciplineLabel(key: string): string {
