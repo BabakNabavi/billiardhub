@@ -533,11 +533,12 @@ function ClubCard({ club, h = '360px', featured = false }: { club: RealClub; h?:
    کلاس یک‌بار در CSS می‌آید و بی‌نهایت بار استفاده می‌شود؛ مرورگر هم
    می‌تواند کشش کند. فقط چیزی که واقعاً از داده می‌آید اینلاین ماند. */
 const BAZAAR_CSS = `
-  .bz-card { text-decoration:none; background:#fff; border-radius:10px;
-    border:1.5px solid rgba(28,28,26,0.18); overflow:hidden;
+  /* جنسِ سطح از .lq-pcard (globals.css) — همان کارتی که بازار و
+     صفحه‌ی فروشگاه نشان می‌دهند. این‌جا فقط چیدمان می‌ماند. */
+  .bz-card { text-decoration:none; overflow:hidden;
     display:flex; flex-direction:column; flex-shrink:0; }
-  .bz-img { width:100%; flex:0 0 60%; position:relative; background:#F4F3F1;
-    overflow:hidden; border-bottom:1.5px solid rgba(28,28,26,0.18); }
+  .bz-img { width:100%; flex:0 0 60%; position:relative; background:rgba(244,243,241,0.85);
+    overflow:hidden; border-bottom:1px solid rgba(28,28,26,0.08); }
   .bz-img img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
   .bz-body { padding:9px 8px 8px; flex:1; display:flex; flex-direction:column;
     gap:4px; overflow:hidden; }
@@ -565,7 +566,7 @@ const BAZAAR_CSS = `
 
 function BazaarCard({ p, className, style }: { p: RealProduct; className?: string; style?: React.CSSProperties }) {
   return (
-    <Link prefetch={false} href={`/shop/${p.id}`} className={`prod-hover bz-card${className ? ` ${className}` : ''}`} style={style}>
+    <Link prefetch={false} href={`/shop/${p.id}`} className={`bz-card lq-pcard${className ? ` ${className}` : ''}`} style={style}>
       <div className="bz-img">
         <img loading="lazy" decoding="async" src={p.img} alt={p.name}
           onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />

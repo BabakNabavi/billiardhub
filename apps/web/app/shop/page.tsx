@@ -203,7 +203,7 @@ function MarketCard({ l, i, saved, onSave }: { l: Listing; i: number; saved: boo
   /* گزارشِ تخلف و alt تصویر عنوانِ کامل را می‌خواهند، نه فقط تکه‌ی اول */
   const full = fullTitle(l)
   return (
-    <Link href={`/shop/${l.id}`} className="mk-card" style={{ animationDelay: `${Math.min(i, 12) * 40}ms`, position: 'relative' }}>
+    <Link href={`/shop/${l.id}`} className="mk-card lq-pcard" style={{ animationDelay: `${Math.min(i, 12) * 40}ms`, position: 'relative' }}>
       <button type="button" className={`mk-bk${saved ? ' on' : ''}`} aria-label="نشان کردن"
         onClick={e => { e.preventDefault(); e.stopPropagation(); onSave() }}>
         <Bookmark size={16} />
@@ -237,7 +237,7 @@ function MarketCard({ l, i, saved, onSave }: { l: Listing; i: number; saved: boo
 function MarketRow({ l, i, saved, onSave }: { l: Listing; i: number; saved: boolean; onSave: () => void }) {
   const full = fullTitle(l)
   return (
-    <Link href={`/shop/${l.id}`} className="mk-row" style={{ animationDelay: `${Math.min(i, 10) * 35}ms` }}>
+    <Link href={`/shop/${l.id}`} className="mk-row lq-pcard" style={{ animationDelay: `${Math.min(i, 10) * 35}ms` }}>
       <div className="info">
         <ProductTitle p={{ name: l.name, brand: l.sub }} className="ttl" headClassName="mk-h" tailClassName="mk-t" />
         <span className="cnd">{conditionLabel(l.condition)}</span>
@@ -614,7 +614,9 @@ export default function MarketNewPage() {
   )
 
   return (
-    <div dir="rtl" style={{ background: '#F7F5F0', minHeight: '100vh', color: TEXT, fontFamily: 'Vazirmatn,Tahoma,sans-serif' }}>
+    /* رنگِ پایه داخلِ `.lq-stage` است؛ پس‌زمینه‌ی ماتِ خودِ عنصر
+       لکه‌های پشتِ شیشه را می‌پوشاند. */
+    <div dir="rtl" className="lq-stage" style={{ minHeight: '100vh', color: TEXT, fontFamily: 'Vazirmatn,Tahoma,sans-serif' }}>
       <style>{`
         @keyframes mkUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
         @keyframes mkSheet { from { transform: translateY(100%); } to { transform: none; } }
@@ -633,12 +635,14 @@ export default function MarketNewPage() {
         @media (prefers-reduced-motion: reduce) { .mk-roll { animation: none; } }
 
         /* ── کارت — همان فرمت عمودی کارت‌های /shop ── */
-        .mk-card { display: flex; flex-direction: column; background: #fff; border: 1.5px solid rgba(28,28,26,0.18);
-          border-radius: 10px; overflow: hidden; text-decoration: none; color: inherit;
-          transition: transform .22s cubic-bezier(.22,1,.36,1), box-shadow .22s;
+        /* جنسِ سطح از کلاسِ «lq-pcard» می‌آید (globals.css) تا همین
+           محصول در صفحه‌ی اصلی و صفحه‌ی فروشگاه هم یک‌شکل باشد؛ این‌جا
+           فقط چیدمان می‌ماند.
+           (بک‌تیک در این کامنت ممنوع — داخلِ template literal است) */
+        .mk-card { display: flex; flex-direction: column; overflow: hidden;
+          text-decoration: none; color: inherit;
           animation: mkUp .5s cubic-bezier(.22,1,.36,1) both; }
-        .mk-card:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(28,28,26,0.12); }
-        .mk-img { position: relative; aspect-ratio: 1 / 0.86; background: #F4F3F1; border-bottom: 1.5px solid rgba(28,28,26,0.18); overflow: hidden; }
+        .mk-img { position: relative; aspect-ratio: 1 / 0.86; background: rgba(244,243,241,0.85); border-bottom: 1px solid rgba(28,28,26,0.08); overflow: hidden; }
         .mk-img img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
           transition: transform .6s cubic-bezier(.22,1,.36,1); }
         .mk-card:hover .mk-img img { transform: scale(1.045); }
@@ -785,7 +789,7 @@ export default function MarketNewPage() {
 
         /* ── ردیف افقی موبایل (به سبک دیوار، با هویت بازار) ── */
         .mk-rows { display: none; flex-direction: column; gap: 10px; }
-        .mk-row { display: flex; gap: 12px; background: #fff; border: 1px solid ${LINE}; border-radius: 14px;
+        .mk-row { display: flex; gap: 12px;
           padding: 11px; text-decoration: none; color: inherit; position: relative;
           animation: mkUp .45s cubic-bezier(.22,1,.36,1) both; }
         .mk-row:active { transform: scale(0.99); }
@@ -799,7 +803,7 @@ export default function MarketNewPage() {
         .mk-row .prc i { font-style: normal; font-size: 10px; font-weight: 600; color: ${MUT}; }
         .mk-row .cty { font-size: 10.5px; color: ${MUT}; display: flex; align-items: center; gap: 4px; margin-top: auto; }
         .mk-row .pic { width: 108px; height: 108px; border-radius: 11px; overflow: hidden; flex-shrink: 0;
-          background: #F4F3F1; border: 1px solid ${LINE}; position: relative; }
+          background: rgba(244,243,241,0.85); border: 1px solid rgba(28,28,26,0.08); position: relative; }
         .mk-row .pic img { width: 100%; height: 100%; object-fit: cover; }
         .mk-row .pctn { background: #b400ae; color: #fff; font-size: 10px; font-weight: 800;
           border-radius: 999px; padding: 2px 7px 1px; line-height: 1.4; flex-shrink: 0; }
@@ -835,7 +839,7 @@ export default function MarketNewPage() {
 
         /* ── نوار قوانین بازار (انتهای لیست) ── */
         .mk-rules { display: flex; align-items: center; gap: 12px; margin-top: 26px; padding: 14px 16px;
-          background: #fff; border: 1px solid ${LINE}; border-radius: 16px; text-decoration: none;
+          border-radius: 16px; text-decoration: none;
           transition: border-color .25s, box-shadow .25s, transform .25s cubic-bezier(.22,1,.36,1); }
         .mk-rules:hover { border-color: rgba(199,166,106,0.42); transform: translateY(-1px);
           box-shadow: 0 10px 26px rgba(28,27,23,0.07); }
@@ -859,7 +863,7 @@ export default function MarketNewPage() {
         .mk-sidebar { min-width: 0; }
         .mk-sidebar-inner { position: fixed; top: 106px; width: 272px;
           right: calc(max((100% - 1300px) / 2, 0px) + clamp(16px, 3vw, 32px));
-          background: #fff; border: 1px solid ${LINE}; border-radius: 16px;
+          border-radius: 16px;
           padding: 6px 16px 10px; max-height: calc(100vh - 126px); overflow-y: auto;
           scrollbar-width: thin; overscroll-behavior: contain; box-sizing: border-box; }
         /* دسکتاپ: لیست آگهی‌ها در ناحیه‌ی خودش اسکرول می‌شود (اپ‌شل) —
@@ -998,7 +1002,7 @@ export default function MarketNewPage() {
 
         <div className="mk-layout">
           {/* ── سایدبار دسکتاپ ── */}
-          <aside className="mk-sidebar"><div className="mk-sidebar-inner">{FilterBody}</div></aside>
+          <aside className="mk-sidebar"><div className="mk-sidebar-inner lqg">{FilterBody}</div></aside>
 
           {/* ── محتوای اصلی ── */}
           <section ref={gridRef} className="mk-listcol">

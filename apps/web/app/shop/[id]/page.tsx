@@ -19,7 +19,7 @@ import { CONDITIONS, normalizeCondition } from '../../../lib/market/categories'
 import { fetchProfile } from '../../../lib/profiles/client'
 
 /* ─── tokens (تم بازار: طلایی/برنزی روی کاغذ روشن) ─── */
-const BG    = '#F7F6F4'
+/* رنگِ پایه‌ی صفحه حالا داخلِ کلاسِ مشترکِ lq-stage است */
 const GOLD  = '#C7A66A'
 const GOLDD = '#9A6E38'
 const TEXT  = '#1C1C1A'
@@ -289,13 +289,13 @@ export default function ProductDetailPage() {
   if (!product) {
     if (!checked) {
       return (
-        <div style={{ minHeight: '100vh', background: BG, direction: 'rtl', fontFamily: 'Vazirmatn,Tahoma,sans-serif', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div className="lq-stage" style={{ minHeight: '100vh', direction: 'rtl', fontFamily: 'Vazirmatn,Tahoma,sans-serif', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <p style={{ fontSize: 14, fontWeight: 600, color: TSEC }}>در حال بارگذاری…</p>
         </div>
       )
     }
     return (
-      <div style={{ minHeight: '100vh', background: BG, direction: 'rtl', fontFamily: 'Vazirmatn,Tahoma,sans-serif', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div className="lq-stage" style={{ minHeight: '100vh', direction: 'rtl', fontFamily: 'Vazirmatn,Tahoma,sans-serif', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <div style={{ textAlign: 'center' }}>
           <p style={{ fontSize: 16, fontWeight: 700, color: TEXT, marginBottom: 14 }}>محصول پیدا نشد</p>
           <Link href="/shop" style={{ color: GOLDD, fontWeight: 700, fontSize: 14, textDecoration: 'none' }}>← بازگشت به بیلیارد بازار</Link>
@@ -322,7 +322,9 @@ export default function ProductDetailPage() {
   const waLink = `https://wa.me/${product.sellerWhatsapp}?text=${encodeURIComponent(`سلام، درباره «${fullName}» در بیلیارد بازار سوال داشتم`)}`
 
   return (
-    <div style={{ minHeight: '100vh', background: BG, direction: 'rtl', fontFamily: 'Vazirmatn,Tahoma,sans-serif', color: TEXT }}>
+    /* رنگِ پایه داخلِ lq-stage است؛ پس‌زمینه‌ی ماتِ خودِ عنصر لکه‌های
+       پشتِ شیشه را می‌پوشاند. */
+    <div className="lq-stage" style={{ minHeight: '100vh', direction: 'rtl', fontFamily: 'Vazirmatn,Tahoma,sans-serif', color: TEXT }}>
       <style>{`
         .lq-lift{transition:all .3s cubic-bezier(0.22,1,0.36,1);}
         .lq-lift:hover{transform:translateY(-2px);}
@@ -692,8 +694,8 @@ export default function ProductDetailPage() {
               {related.map(p => {
                 const rp = productTitleParts({ name: p.title, brand: p.brand, model: p.model })
                 return (
-                <Link key={p.id} href={`/shop/${p.id}`} className="pd-card" style={{ textDecoration: 'none', background: '#fff', borderRadius: 14, border: `1.5px solid ${HAIR}`, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-                  <div style={{ width: '100%', paddingTop: '100%', position: 'relative', background: '#F4F3F1', borderBottom: `1.5px solid ${HAIR}` }}>
+                <Link key={p.id} href={`/shop/${p.id}`} className="pd-card lq-pcard" style={{ textDecoration: 'none', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+                  <div style={{ width: '100%', paddingTop: '100%', position: 'relative', background: 'rgba(244,243,241,0.85)', borderBottom: '1px solid rgba(28,28,26,0.08)' }}>
                     {p.image && (
                       <img loading="lazy" decoding="async" src={p.image} alt={p.title} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
                     )}

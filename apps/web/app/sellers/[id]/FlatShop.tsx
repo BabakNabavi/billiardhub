@@ -448,10 +448,9 @@ export default function FlatShop() {
         /* کارت محصول — هم‌فرم کارت sec1 در صفحه‌ی بیلیارد بازار.
            عرض را گرید تعیین می‌کند (برخلاف sec1 که کاروسل با عرض ثابت است)، ولی نسبت،
            سهم عکس، گردی، بوردر و فونت‌ها عیناً همان‌اند. */
+        /* جنسِ سطح از .lq-pcard در globals.css می‌آید — همان کارتی که
+           بازار و صفحه‌ی اصلی هم نشان می‌دهند. این‌جا فقط نسبت و چیدمان. */
         .prod-card-sec1 {
-          background: linear-gradient(158deg, rgba(255,255,255,0.94), rgba(250,248,243,0.86));
-          backdrop-filter: blur(10px);
-          -webkit-backdrop-filter: blur(10px);
           /* ۱.۷۵ = ۱.۹۴۴ منهای ۱۰٪ */
           aspect-ratio: 1 / 1.75;
           /* کوچک‌شدن حالا کارِ خودِ گرید است (شش ستون در دسکتاپ)، پس
@@ -459,11 +458,7 @@ export default function FlatShop() {
              بصری را زیاد می‌کرد.
              (بک‌تیک در این کامنت ممنوع — داخلِ template literal است) */
           width: 100%;
-          border-radius: 10px;
-          border: 1.5px solid rgba(28,28,26,0.18);
-          transition: transform .22s cubic-bezier(0.22,1,0.36,1), box-shadow .22s;
         }
-        .prod-card-sec1:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(28,28,26,0.12); }
         .pc-body-sec1 { padding: 21px 10px 12px; }
         /* نام محصول — حداکثر دو خط، مثل sec1 */
         .pc-h { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
@@ -798,9 +793,9 @@ export default function FlatShop() {
                 <article
                   key={p.id}
                   onClick={() => router.push(`/shop/${p.id}`)}
-                  className="prod-card-sec1 group flex cursor-pointer flex-col overflow-hidden bg-white"
+                  className="prod-card-sec1 lq-pcard group flex cursor-pointer flex-col overflow-hidden"
                 >
-                  <div className="relative shrink-0 basis-[60%] overflow-hidden border-b-[1.5px] border-[rgba(28,28,26,0.18)] bg-[#F4F3F1]">
+                  <div className="relative shrink-0 basis-[60%] overflow-hidden border-b border-[rgba(28,28,26,0.08)] bg-[rgba(244,243,241,0.85)]">
                     <img src={p.img} alt={p.name} loading="lazy" className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.05]"/>
                     {/* قلب — خطی تا وقتی انتخاب نشده، توپر بعد از انتخاب (قبلاً همیشه توپر بود و
                         فقط رنگ عوض می‌شد). شیشه‌ی مات + فشار کوچک هنگام کلیک. */}
