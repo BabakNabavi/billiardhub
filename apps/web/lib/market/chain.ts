@@ -323,7 +323,19 @@ const TYPE_MODELS: Record<string, Record<string, Record<string, string[]>>> = { 
    که انتخابِ «کیس چوب» در فرم، نه فهرستِ نوع می‌آورد و نه فهرستِ
    برند — هر دو به متنِ آزاد می‌افتادند. */
 for (const alias of ['cue-case', 'ball-bag']) {
-  TYPE_OPTIONS[alias]  ??= TYPE_OPTIONS['case-bag']!
+  /* ── چرا `TYPE_OPTIONS` این‌جا نیست ──
+     فهرستِ نوعِ این دو از کاتالوگِ لوازم می‌آید: `case_type` شش گزینه
+     دارد و `bag_type` پنج.
+
+     فهرستِ چهارتاییِ مشترکِ `case-bag` با برچسب‌های کاتالوگ یکی نبود
+     و خرابی‌اش بی‌صدا بود: فرم برچسبِ انتخاب‌شده را به شناسه ترجمه
+     می‌کند و برای برچسبِ بی‌تطبیق رشته‌ی خالی می‌گذارد. هیچ‌کدام از
+     «هارد کیس/سافت کیس/کیف/کوله‌پشتی» در `bag_type` نیست، پس هر
+     آگهیِ کیفِ توپ با `bagType: ''` ذخیره می‌شد.
+
+     برند و مدل این‌جا می‌مانند: کاتالوگِ لوازم برایشان فهرست دارد و
+     فرم از `CatalogSelector` می‌گیردشان، ولی هیدریتِ فرمِ ویرایش
+     هنوز از این نگاشت می‌خواند. */
   CAT_BRANDS[alias]    ??= CAT_BRANDS['case-bag']!
   CAT_MODELS[alias]    ??= CAT_MODELS['case-bag']!
 }
@@ -333,6 +345,17 @@ export const isTypeDrivenCategory = (category: string): boolean => !!TYPE_BRANDS
 
 /** «سایر» را یک‌بار ته لیست تضمین می‌کند (چه در داده باشد چه نباشد) */
 export const withOther = (arr: string[]): string[] => (arr.includes('سایر') ? arr : [...arr, 'سایر'])
+
+/* ── مقدارِ ذخیره‌شده‌ای که در فهرست نیست ──
+   `FancySelect` مقدارِ بی‌تطبیق را نشان نمی‌دهد؛ placeholder چاپ
+   می‌کند. مقدار از دست نمی‌رود (فرم همان رشته را می‌فرستد)، ولی
+   فروشنده یک فیلدِ اجباریِ ظاهراً خالی می‌بیند و نمی‌فهمد چه
+   انتخاب شده. پس مقدارِ فعلی همیشه سرِ فهرست می‌ماند.
+
+   لازم می‌شود هر بار که فهرستی عوض شود — مثلِ همین تغییرِ نامِ
+   کیس — و همین حالا دو آگهیِ واقعی به آن وابسته‌اند. */
+export const withCurrent = (list: string[] | undefined, current: string): string[] | undefined =>
+  list && current && !list.includes(current) ? [current, ...list] : list
 
 /** فهرستِ برند برای (دسته، نوع) — `null` یعنی متنِ آزاد */
 export function brandOptionsFor(category: string, type: string): string[] | null {

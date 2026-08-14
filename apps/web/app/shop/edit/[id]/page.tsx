@@ -37,7 +37,8 @@ import { provinceOfCity } from '../../../../lib/iran-geo'
 import { compressImage } from '../../../../lib/seller-store'
 import { CATEGORY_OPTIONS, CONDITIONS, normalizeCategory, normalizeCondition } from '../../../../lib/market/categories'
 import { GENERIC_SPECS, CATEGORY_SPECS } from '../../../../lib/market/specs'
-import { TYPE_OPTIONS, brandOptionsFor, modelOptionsFor, isTypeDrivenCategory, withOther } from '../../../../lib/market/chain'
+import { withCurrent, TYPE_OPTIONS, brandOptionsFor, modelOptionsFor, isTypeDrivenCategory, withOther } from '../../../../lib/market/chain'
+import { modernizeType } from '../../../../lib/market/title'
 import { typeIdOf, isAccessoryCategory, isProductCatalog, ACCESSORY_TYPE_OF, type CatalogId } from '../../../../lib/market/catalog-rules'
 import CatalogSelector, { EMPTY_CATALOG_VALUE, type CatalogValue, useCatalogType } from '../../../../components/market/CatalogSelector'
 import { sizeOptions, SpecFieldRow, SpecProgress, useSpecFields, specKey } from '../../../../components/market/SpecFields'
@@ -100,7 +101,10 @@ export default function EditProductPage() {
   // ── هیدراته‌کردنِ فرم از یک رکورد ────────────────────────────
   const hydrate = useCallback((p: Record<string, any>, opts: { local: boolean }) => {
     const category = normalizeCategory(p.category)
-    const type = String(p.type ?? p.specs?.['نوع'] ?? '').trim()
+    /* نوعِ ذخیره‌شده از همان نگاشتِ نمایش می‌گذرد: «کیس سخت» دقیقاً
+       همان «هارد کیس»ِ کاتالوگ است، پس روی گزینه‌ی واقعی می‌نشیند و
+       ذخیره‌ی بعدی شناسه‌اش را هم می‌نویسد — نه دو ردیفِ هم‌معنا. */
+    const type = modernizeType(String(p.type ?? p.specs?.['نوع'] ?? '').trim())
 
     /* برند/مدل/نوع: اگر مقدارِ ذخیره‌شده در فهرستِ دراپ‌داون نباشد،
        «سایر» انتخاب می‌شود و خودِ متن در فیلدِ کناری می‌نشیند —
@@ -276,27 +280,30 @@ export default function EditProductPage() {
       : fromLegacyDefs((CATEGORY_SPECS[form.category] ?? GENERIC_SPECS) as LegacySpecDef[])),
     [catalogSpecs, form.category],
   )
-  /* ── «نوع»ی که در مشخصات تعریف شده ──
-     اکستنشن و رست و روغن و اکسسوری در `TYPE_OPTIONS` نیستند و
-     دراپ‌داونِ «نوع»شان خالی می‌آمد، در حالی که همان پرسش پایین‌تر
-     وسطِ مشخصات بود. آن فیلد بالا می‌آید و از مشخصات برداشته
-     می‌شود. */
-  /* ── یک پرسشِ «نوع»، نه دو ──
-     `cue-case` و `ball-bag` هم `TYPE_OPTIONS` دارند و هم فیلدِ
-     `case_type`/`bag_type` در مشخصات — یعنی یک سؤال با دو فهرستِ
-     متفاوت و دو مقدارِ ذخیره‌شده. فیلد همیشه پیدا می‌شود تا از
-     کارتِ مشخصات برداشته شود؛ ولی فهرستِ بالای فرم فقط وقتی از آن
-     می‌آید که `TYPE_OPTIONS` چیزی نداشته باشد — وگرنه آگهی‌های
-     موجود که برچسبِ قدیمی را ذخیره کرده‌اند از فهرست می‌افتادند. */
+  /* ── «نوع» از کجا می‌آید ──
+     شش دسته‌ی کاتالوگ‌دار فهرستشان در `TYPE_OPTIONS` است. ده دسته‌ی
+     لوازم ندارند؛ زیرمجموعه‌شان یک **فیلدِ مشخصات** است:
+     `case_type` (۶ گزینه)، `bag_type` (۵)، `ext_type`، `rest_type`،
+     `oil_type`، `accessory_type` (۲۲).
+
+     ── چرا کیس و کیف هم از این‌جا می‌آیند ──
+     تا دیروز `TYPE_OPTIONS` یک فهرستِ چهارتاییِ مشترک برایشان داشت
+     که با برچسب‌های کاتالوگ یکی نبود. نتیجه‌اش بی‌صدا بود:
+     `optionIdOf` برای برچسبِ بی‌تطبیق رشته‌ی خالی برمی‌گرداند، پس
+     هر آگهیِ کیفِ توپ با `bagType: ''` ذخیره می‌شد — هیچ‌کدام از
+     «هارد کیس/سافت کیس/کیف/کوله‌پشتی» در `bag_type` نبود.
+
+     فیلد همیشه پیدا می‌شود تا از کارتِ مشخصات برداشته شود؛ فهرست
+     فقط وقتی از آن می‌آید که `TYPE_OPTIONS` چیزی نداشته باشد. */
   const specTypeField = formTypeFieldOf(specDefs)
-  /* «سایر» همیشه ته فهرست است — پیش‌تر فقط شاخه‌ی
-     `TYPE_OPTIONS` آن را با `withOther` می‌گرفت. */
   const typeChoices: string[] | undefined = TYPE_OPTIONS[form.category]
     ? withOther(TYPE_OPTIONS[form.category]!)
     : (specTypeField
       ? [...(specTypeField.options ?? []).map(o => o.label_fa),
         ...(specTypeField.allow_other ? ['سایر'] : [])]
       : undefined)
+  /* مقدارِ فعلی همیشه در فهرست می‌ماند — دلیلش در `withCurrent` */
+  const typeOptions = withCurrent(typeChoices, form.type)
 
   /* ── تفکیکِ مقدارِ خام، وقتی تعریفِ فیلدها رسید ──
      هرچه در کاتالوگ نیست دست‌نخورده در `legacySpecs` می‌ماند و
@@ -518,7 +525,10 @@ export default function EditProductPage() {
     /* نامِ آگهی دقیقاً مثلِ فرمِ ثبت ساخته می‌شود — «دسته + نوع».
        اگر این‌جا فرقی داشت، ویرایشِ ساده‌ی یک آگهی، عنوانِ کارتش را
        در بازار عوض می‌کرد. */
-    const composedName = [catLabel, effType].filter(Boolean).join(' ')
+    /* همان تابعی که فرمِ ثبت استفاده می‌کند — بدونش، ذخیره‌ی دوباره‌ی
+       یک آگهیِ قدیمی «اکسسوری …» و «کیس سخت» را برمی‌گرداند روی
+       عنوانی که تازه تمیز شده بود. */
+    const composedName = modernizeType([catLabel, effType].filter(Boolean).join(' '))
       || [effBrand, effModel].filter(Boolean).join(' ') || 'محصول'
 
     void (async () => {
@@ -726,10 +736,16 @@ export default function EditProductPage() {
 
                 <div>
                   <Label required>نوع</Label>
-                  {form.category && typeChoices ? (
+                  {/* ── چرا `specsLoading` هم شرط است ──
+                          فهرستِ نوعِ دسته‌های لوازم از `/api/specs` می‌آید. تا
+                          نرسیدنش `typeOptions` تهی است و این فیلد به متنِ آزاد
+                          می‌افتاد — یعنی کاربرِ تندنویس می‌توانست نوعی بنویسد که
+                          در هیچ فهرستی نیست و شناسه‌اش خالی ذخیره شود. */}
+                      {form.category && (typeOptions || specsLoading) ? (
                     <FancySelect value={form.type} onChange={setType}
-                      options={typeChoices.map(o => ({ value: o, label: o }))}
-                      placeholder="انتخاب نوع..." error={!!errors.type} />
+                      options={(typeOptions ?? []).map(o => ({ value: o, label: o }))}
+                      disabled={!typeOptions}
+                          placeholder={typeOptions ? 'انتخاب نوع...' : 'در حال بارگذاری…'} error={!!errors.type} />
                   ) : (
                     <input className="nf" type="text" placeholder="مثال: اسنوکر" value={form.type}
                       onChange={e => set('type', e.target.value)} style={inp(errors.type)} />

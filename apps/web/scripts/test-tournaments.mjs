@@ -1005,7 +1005,7 @@ t('قیمتِ تخفیف‌دار درست خوانده می‌شود',
   && !/price \/ \(1 - disc \/ 100\)/.test(editAd),
   'ستونِ price قیمتِ خط‌خورده است؛ فرمولِ قبلی عددی نجومی می‌ساخت');
 t('نامِ آگهی با همان قاعده‌ی ثبت بازسازی می‌شود',
-  /const composedName = \[catLabel, effType\]/.test(editAd));
+  /const composedName = modernizeType\(\[catLabel, effType\]/.test(editAd));
 t('دکمه‌ی بازگشت دارد', /بازگشت به آگهی‌های من/.test(editAd));
 t('هر دو فرم یک اجزای مشترک دارند',
   /AdFormFields/.test(editAd) && /AdFormFields/.test(newAd)
@@ -3018,6 +3018,32 @@ console.log('\n― لوازم جانبی ―');
     title.includes('SHELF_WORDS') && title.includes("'اکسسوری'")
     && read('app/shop/new/page.tsx').includes('modernizeType([catLabel, effType]'),
     'نامِ قفسه است نه کالا — «اکسسوری جاسوییچی» یک واژه‌ی اضافه داشت');
+  /* ── فهرستِ نوعِ کیس و کیف از کاتالوگ می‌آید ──
+     `case_type` شش گزینه دارد و `bag_type` پنج؛ فهرستِ چهارتاییِ
+     `case-bag` هم کوتاه‌تر بود و هم پرسش را دو بار می‌کرد. */
+  t('کیس چوب و کیف توپ نوعشان را از کاتالوگ می‌گیرند',
+    (() => {
+      const ch = strip(read('lib/market/chain.ts'));
+      const at = ch.indexOf("for (const alias of ['cue-case', 'ball-bag'])");
+      if (at < 0) return false;   // سرِ حلقه عوض شده — تست باید بشکند، نه ساکت بماند
+      return !ch.slice(at, ch.indexOf('}', at)).includes('TYPE_OPTIONS[alias]');
+    })(),
+    'فهرستِ مشترک با برچسبِ کاتالوگ یکی نبود و شناسه خالی ذخیره می‌شد');
+  t('مقدارِ خارج از فهرست در فرم گم نمی‌شود',
+    read('lib/market/chain.ts').includes('export const withCurrent')
+    && ['app/shop/new/page.tsx', 'app/shop/edit/[id]/page.tsx']
+      .every(f => read(f).includes('withCurrent(typeChoices, form.type)')),
+    'FancySelect مقدارِ بی‌تطبیق را placeholder نشان می‌دهد — فیلدِ اجباری خالی به‌نظر می‌رسد');
+  /* ── پنجره‌ی بارگذاری ──
+     فهرستِ نوعِ لوازم از `/api/specs` می‌آید؛ تا نرسیدنش این فیلد به
+     متنِ آزاد می‌افتاد و هر چه نوشته می‌شد شناسه‌اش خالی ذخیره می‌شد. */
+  t('«نوع» در حالِ بارگذاری متنِ آزاد نمی‌شود',
+    ['app/shop/new/page.tsx', 'app/shop/edit/[id]/page.tsx']
+      .every(f => read(f).includes('(typeOptions || specsLoading)')
+        && read(f).includes('disabled={!typeOptions}')));
+  t('نامِ آگهی در ویرایش هم از همان تابع می‌گذرد',
+    read('app/shop/edit/[id]/page.tsx').includes('modernizeType([catLabel, effType]'),
+    'وگرنه ذخیره‌ی دوباره «اکسسوری …» را برمی‌گرداند');
   t('کیسِ سخت و نرم به هارد و سافت تغییر کردند',
     title.includes("'کیس سخت': 'هارد کیس'") && title.includes("'کیس نرم': 'سافت کیس'")
     && read('lib/market/chain.ts').includes("'هارد کیس', 'سافت کیس'")

@@ -21,7 +21,7 @@ import { sizeOptions, SpecFieldRow, SpecProgress, useSpecFields, specKey } from 
 import { formTypeFieldOf, optionIdOf, splitFields, countFilled, applySpecChange, isFieldLocked, isFieldHidden, typeDependentKeys, fillFromModel, fromLegacyDefs, type SpecField, type LegacySpecDef } from '../../../lib/market/spec-rules'
 import { brandSearchTerms } from '../../../lib/market/catalog-rules'
 import CountryFlag from '../../../components/CountryFlag'
-import { TYPE_OPTIONS, brandOptionsFor, modelOptionsFor, isTypeDrivenCategory, withOther } from '../../../lib/market/chain'
+import { withCurrent, TYPE_OPTIONS, brandOptionsFor, modelOptionsFor, isTypeDrivenCategory, withOther } from '../../../lib/market/chain'
 import { normalizePhone, isValidPhone,
   GOLD, GOLD_D, TEXT, TEXT_SEC, TEXT_MUT, LQ_BG, LQ_BOR, LQ_SHAD, ERR,
   AD_FORM_CSS, inp, type FancyOption, toAsciiDigits, fmtPrice, FancySelect, Label, ErrMsg, SectionTitle,
@@ -185,27 +185,30 @@ export default function NewProductPage() {
      سرور «کارکرده» ذخیره می‌کرد. همه‌ی مصرف‌کننده‌ها — دراپ‌داون،
      پیش‌نمایش و بدنه‌ی درخواست — از همین یکی می‌خوانند. */
   const effCondition = sealed ? 'new' : form.condition
-  /* ── «نوع»ی که در مشخصات تعریف شده ──
-     اکستنشن و رست و روغن و اکسسوری در `TYPE_OPTIONS` نیستند و
-     دراپ‌داونِ «نوع»شان خالی می‌آمد، در حالی که همان پرسش پایین‌تر
-     وسطِ مشخصات بود. آن فیلد بالا می‌آید و از مشخصات برداشته
-     می‌شود. */
-  /* ── یک پرسشِ «نوع»، نه دو ──
-     `cue-case` و `ball-bag` هم `TYPE_OPTIONS` دارند و هم فیلدِ
-     `case_type`/`bag_type` در مشخصات — یعنی یک سؤال با دو فهرستِ
-     متفاوت و دو مقدارِ ذخیره‌شده. فیلد همیشه پیدا می‌شود تا از
-     کارتِ مشخصات برداشته شود؛ ولی فهرستِ بالای فرم فقط وقتی از آن
-     می‌آید که `TYPE_OPTIONS` چیزی نداشته باشد — وگرنه آگهی‌های
-     موجود که برچسبِ قدیمی را ذخیره کرده‌اند از فهرست می‌افتادند. */
+  /* ── «نوع» از کجا می‌آید ──
+     شش دسته‌ی کاتالوگ‌دار فهرستشان در `TYPE_OPTIONS` است. ده دسته‌ی
+     لوازم ندارند؛ زیرمجموعه‌شان یک **فیلدِ مشخصات** است:
+     `case_type` (۶ گزینه)، `bag_type` (۵)، `ext_type`، `rest_type`،
+     `oil_type`، `accessory_type` (۲۲).
+
+     ── چرا کیس و کیف هم از این‌جا می‌آیند ──
+     تا دیروز `TYPE_OPTIONS` یک فهرستِ چهارتاییِ مشترک برایشان داشت
+     که با برچسب‌های کاتالوگ یکی نبود. نتیجه‌اش بی‌صدا بود:
+     `optionIdOf` برای برچسبِ بی‌تطبیق رشته‌ی خالی برمی‌گرداند، پس
+     هر آگهیِ کیفِ توپ با `bagType: ''` ذخیره می‌شد — هیچ‌کدام از
+     «هارد کیس/سافت کیس/کیف/کوله‌پشتی» در `bag_type` نبود.
+
+     فیلد همیشه پیدا می‌شود تا از کارتِ مشخصات برداشته شود؛ فهرست
+     فقط وقتی از آن می‌آید که `TYPE_OPTIONS` چیزی نداشته باشد. */
   const specTypeField = formTypeFieldOf(specDefs)
-  /* «سایر» همیشه ته فهرست است — پیش‌تر فقط شاخه‌ی
-     `TYPE_OPTIONS` آن را با `withOther` می‌گرفت. */
   const typeChoices: string[] | undefined = TYPE_OPTIONS[form.category]
     ? withOther(TYPE_OPTIONS[form.category]!)
     : (specTypeField
       ? [...(specTypeField.options ?? []).map(o => o.label_fa),
         ...(specTypeField.allow_other ? ['سایر'] : [])]
       : undefined)
+  /* مقدارِ فعلی همیشه در فهرست می‌ماند — دلیلش در `withCurrent` */
+  const typeOptions = withCurrent(typeChoices, form.type)
   /* پارچه: فهرستش به نوعِ **میز** وابسته است، پس همان شناسه‌ی نوع */
   const cloth = useCatalogType('cloth', form.category === 'table' ? catTypeId : '')
   const tableCat = useCatalogType('table', form.category === 'table' ? catTypeId : '')
@@ -723,9 +726,14 @@ export default function NewProductPage() {
                     {/* نوع — دراپ‌داون اگر دسته لیست نوع دارد، وگرنه متن */}
                     <div>
                       <Label required>نوع</Label>
-                      {form.category && typeChoices ? (
+                      {/* ── چرا `specsLoading` هم شرط است ──
+                          فهرستِ نوعِ دسته‌های لوازم از `/api/specs` می‌آید. تا
+                          نرسیدنش `typeOptions` تهی است و این فیلد به متنِ آزاد
+                          می‌افتاد — یعنی کاربرِ تندنویس می‌توانست نوعی بنویسد که
+                          در هیچ فهرستی نیست و شناسه‌اش خالی ذخیره شود. */}
+                      {form.category && (typeOptions || specsLoading) ? (
                         <FancySelect value={form.type} onChange={setType}
-                          options={typeChoices.map(o => {
+                          options={(typeOptions ?? []).map(o => {
                             /* شمارش فقط برای دسته‌هایی که کاتالوگ دارند */
                             const row = catCategory
                               ? catTypeRows.find(r => r.id === typeIdOf(catCategory, o))
@@ -744,7 +752,8 @@ export default function NewProductPage() {
                               ),
                             }
                           })}
-                          placeholder="انتخاب نوع..." error={!!errors.type} />
+                          disabled={!typeOptions}
+                          placeholder={typeOptions ? 'انتخاب نوع...' : 'در حال بارگذاری…'} error={!!errors.type} />
                       ) : (
                         <input className="nf" type="text" placeholder="مثال: اسنوکر" value={form.type} onChange={e => set('type', e.target.value)} style={inp(errors.type)} />
                       )}
