@@ -32,6 +32,47 @@ const MIN_GAP_MS = 4 * 60 * 1000          // برای جلوگیری از تمد
    صفحه بی‌نهایت بار بارگذاری شود. */
 const RELOAD_GUARD = 'bh_identity_reload'
 
+/* ── تمدید: یک درخواست در هر لحظه، مشترک بینِ همه‌ی مسیرها ──
+   دو جا تمدید می‌خواهند: زمان‌سنجِ دوره‌ای، و مسیرِ ۴۰۱ پایین.
+
+   ⚠️ نسخه‌ی اولِ این کار، مسیرِ ۴۰۱ را هم پشتِ همان فاصله‌ی چهار
+   دقیقه‌ایِ زمان‌سنج گذاشت. نتیجه‌اش یک وارونگیِ کامل بود: زمان‌سنج در
+   همان لحظه‌ی بارگذاری مهر را می‌زند (اثرِ دومِ همین کامپوننت، پیش از
+   رسیدنِ پاسخِ پروفایل)، پس وقتی ۴۰۱ می‌رسید فاصله همیشه کمتر از
+   چهار دقیقه بود، تمدید *رد می‌شد* و کد مستقیم به `logout` می‌رسید —
+   یعنی دقیقاً کاربرِ سالمی که فقط کوکیِ ۱۵ دقیقه‌ایش منقضی شده بود
+   بیرون انداخته می‌شد.
+
+   حالا فاصله فقط زمان‌سنج را عقب نگه می‌دارد. هم‌زمانی را `inflight`
+   حل می‌کند: هر کس دیرتر برسد، همان درخواستِ در جریان را می‌گیرد و
+   دو تمدیدِ موازی رخ نمی‌دهد.
+
+   مهرِ زمانی هم فقط روی *موفقیت* نوشته می‌شود؛ وگرنه یک خطای گذرا در
+   یک تب، پنجره‌ی مشترک را می‌سوزاند و تبِ بعدی بی‌دلیل رد می‌شود. */
+let lastRefreshAt = 0
+let inflight: Promise<{ ok: boolean; status: number }> | null = null
+
+const readLastRefresh = (): number => {
+  try { return Number(localStorage.getItem(LAST_REFRESH_KEY)) || 0 } catch { return lastRefreshAt }
+}
+const writeLastRefresh = (t: number) => {
+  lastRefreshAt = t
+  try { localStorage.setItem(LAST_REFRESH_KEY, String(t)) } catch { /* ignore */ }
+}
+
+/** `status: 0` یعنی درخواست اصلاً نرسید (آفلاین) — نه ردِ سرور. */
+function refreshSession(): Promise<{ ok: boolean; status: number }> {
+  if (inflight) return inflight
+  inflight = fetch('/api/auth/refresh', { method: 'POST', credentials: 'include' })
+    .then(r => {
+      if (r.ok) writeLastRefresh(Date.now())
+      return { ok: r.ok, status: r.status }
+    })
+    .catch(() => ({ ok: false, status: 0 }))
+    .finally(() => { inflight = null })
+  return inflight
+}
+
 const readRaw = () => { try { return localStorage.getItem('auth-storage') } catch { return null } }
 const legacyToken = (): string | null => {
   try { return JSON.parse(readRaw() || '{}')?.state?.token || null } catch { return null }
@@ -95,13 +136,53 @@ export default function SessionBridge() {
 
     const sync = async () => {
       try {
-        const r = await fetch('/api/users/profile', { credentials: 'include', cache: 'no-store' })
+        let r = await fetch('/api/users/profile', { credentials: 'include', cache: 'no-store' })
         if (stopped) return
 
-        /* ── نشست تمام شده ولی صفحه هنوز کاربر را نشان می‌دهد ──
-           روی رایانه‌ی مشترک یعنی محتوای حسابِ قبلی روی صفحه مانده. */
+        /* ── ۴۰۱ همیشه یعنی «بیرون» نیست ──
+           کوکیِ دسترسی فقط ۱۵ دقیقه عمر دارد و رفرش‌توکن جدا و
+           بلندعمرتر است. کاربری که تبش را نیم‌ساعت باز گذاشته این‌جا
+           ۴۰۱ می‌گیرد در حالی که نشستش کاملاً سالم است — همان حالتی که
+           میدل‌ور هم عمداً ردش می‌کند. پس پیش از هر قضاوتی تمدید. */
         if (r.status === 401) {
-          if (useAuthStore.getState().user) reloadForIdentityChange()
+          /* توکنِ قدیمیِ هدرمحور رفرش‌کوکی ندارد؛ درخواستِ تمدیدش فقط
+             ۴۰۱ می‌گیرد و کوکی‌ها را پاک می‌کند. پیش از تمدید کنار
+             گذاشته می‌شود، نه بعدش. */
+          if (legacyToken()) return
+
+          /* اگر همین چند لحظه پیش تمدیدِ موفقی انجام شده، دوباره
+             تمدید نمی‌کنیم — همان پاسخِ کهنه را دور می‌ریزیم و فقط
+             دوباره می‌پرسیم. */
+          const justRenewed = Date.now() - lastRefreshAt < 30_000
+          const res = justRenewed ? { ok: true, status: 200 } : await refreshSession()
+          if (stopped) return
+
+          if (res.ok) {
+            r = await fetch('/api/users/profile', { credentials: 'include', cache: 'no-store' })
+            if (stopped) return
+          } else if (res.status !== 401) {
+            /* ۵۰۳ («انبارِ نشست در دسترس نیست») یا خطای شبکه. سرور
+               نگفته نشست باطل است، پس ما هم قضاوت نمی‌کنیم — همان
+               قاعده‌ای که مسیرِ تمدیدِ دوره‌ای رعایت می‌کند. */
+            return
+          }
+        }
+
+        /* ── نشست واقعاً تمام شده ──
+           تا امروز این‌جا فقط یک `reload` بود و کاربرِ کهنه در
+           localStorage دست‌نخورده می‌ماند. نتیجه‌اش بن‌بست بود:
+           میدل‌ور کوکیِ معتبر نمی‌دید و به `/login` می‌فرستاد، صفحه‌ی
+           ورود هم چون `user` را می‌دید `null` رندر می‌کرد و دوباره به
+           داشبورد برمی‌گرداند. کاربر روی هر لینکِ محافظت‌شده صفحه‌ی
+           سفیدِ بی‌واکنش می‌گرفت — و چون کاربرِ کهنه پاک نمی‌شد، با
+           رفرش هم درست نمی‌شد؛ فقط پاک‌کردنِ دستیِ حافظه‌ی سایت.
+
+           پاک‌کردنِ کاربر همان کاری را هم می‌کند که `reload` برایش
+           بود (محتوای حسابِ قبلی روی رایانه‌ی مشترک نمی‌ماند)، ولی
+           بن‌بست نمی‌سازد: نگهبان‌ها کاربرِ خالی را می‌بینند و صفحه‌ی
+           ورودِ واقعی می‌آید. */
+        if (r.status === 401) {
+          if (useAuthStore.getState().user) logout()
           return
         }
         if (!r.ok) return
@@ -178,7 +259,6 @@ export default function SessionBridge() {
   useEffect(() => {
     if (!hydrated) return
     let stopped = false
-    let last = 0
 
     /* ── مهاجرت ── */
     const adopt = async () => {
@@ -212,39 +292,29 @@ export default function SessionBridge() {
       } catch { /* شبکه قطع بود؛ دفعه‌ی بعد */ }
     }
 
-    /* ── تمدید ──
+    /* ── تمدیدِ دوره‌ای ──
 
-       مهر زمانی در localStorage است، نه فقط در متغیر محلی. رفرش‌توکن با
-       هر استفاده می‌چرخد، پس اگر دو تب هم‌زمان تمدید کنند، تب دوم توکنِ
-       دیگر بی‌اعتبار را می‌فرستد و سرور آن را «سرقت» می‌بیند.
+       مهر زمانی در localStorage است، نه فقط در متغیر محلی: دو تبِ باز
+       نباید هرکدام جداگانه تمدید کنند. متغیر محلی فقط داخل یک تب کار
+       می‌کرد و همین باعث می‌شد کاربری که دو تب باز دارد از حساب خودش
+       بیرون بیفتد.
 
-       متغیر محلی فقط داخل یک تب کار می‌کند و همین باعث می‌شد کاربری که
-       دو تب باز دارد از حساب خودش بیرون بیفتد. localStorage بین تب‌ها
-       مشترک است و همان یک محافظ را سراسری می‌کند. (سمت سرور هم پنجره‌ی
-       مهلت گذاشته شد تا اگر باز هم مسابقه‌ای رخ داد، نشست باطل نشود.) */
-    const readLast = (): number => {
-      try { return Number(localStorage.getItem(LAST_REFRESH_KEY)) || 0 } catch { return last }
-    }
-    const writeLast = (t: number) => {
-      last = t
-      try { localStorage.setItem(LAST_REFRESH_KEY, String(t)) } catch { /* ignore */ }
-    }
-
+       این فاصله فقط *این* مسیر را عقب نگه می‌دارد. بازیابیِ ۴۰۱ بالا
+       عمداً از آن رد نمی‌شود؛ آن‌جا هم‌زمانی با `inflight` حل شده. */
     const refresh = async () => {
       if (stopped || !user) return
-      if (Date.now() - Math.max(last, readLast()) < MIN_GAP_MS) return
-      writeLast(Date.now())
-      try {
-        const r = await fetch('/api/auth/refresh', { method: 'POST', credentials: 'include' })
-        if (stopped || r.ok || r.status === 503) return
-        if (r.status === 401) {
-          /* اگر هنوز توکن قدیمی داریم، هدر کار می‌کند و نباید کاربر را
-             بیرون بیندازیم. در غیر این صورت نشست واقعاً تمام شده است. */
-          if (legacyToken()) return
-          logout()
-          try { localStorage.removeItem(DONE_KEY) } catch { /* ignore */ }
-        }
-      } catch { /* بی‌صدا */ }
+      if (Date.now() - Math.max(lastRefreshAt, readLastRefresh()) < MIN_GAP_MS) return
+      const { ok, status } = await refreshSession()
+      /* `status: 0` یعنی شبکه نبود و ۵۰۳ یعنی انبارِ نشست موقتاً بالا
+         نیست — هیچ‌کدام «نشست باطل است» نیستند. */
+      if (stopped || ok || status === 503 || status === 0) return
+      if (status === 401) {
+        /* اگر هنوز توکن قدیمی داریم، هدر کار می‌کند و نباید کاربر را
+           بیرون بیندازیم. در غیر این صورت نشست واقعاً تمام شده است. */
+        if (legacyToken()) return
+        logout()
+        try { localStorage.removeItem(DONE_KEY) } catch { /* ignore */ }
+      }
     }
 
     const onVisible = () => { if (document.visibilityState === 'visible') refresh() }
