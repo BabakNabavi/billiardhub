@@ -1200,3 +1200,193 @@ select:disabled { opacity: 0.55; cursor: not-allowed; }
 @media (max-width: 560px) {
   .bh-bank-grid { grid-template-columns: 1fr; gap: 12px; }
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   لایه‌ی لیکویید — سطحِ شیشه‌ایِ صفحه‌های پروفایل
+
+   ── چرا کنارِ `.glass-*` و نه به‌جایش ──
+   آن‌ها برای نوار و اورلی ساخته شده‌اند: شیشه‌ی مات روی محتوای
+   متحرک. این‌جا کارتِ ایستا داریم که باید *جنس* داشته باشد — لبه‌ی
+   نورگرفته، اشباعِ بیشتر از پس‌زمینه، و سایه‌ای که کارت را از زمین
+   جدا کند. همان تفاوتی که در iOS بین «مواد» و «پس‌زمینه‌ی تار» است.
+
+   ── شیشه بدونِ چیزی پشتش، خاکستری است ──
+   `backdrop-filter` وقتی معنا دارد که زیرش رنگ باشد. `.lq-stage`
+   همان زمینه را می‌سازد: چند لکه‌ی رنگیِ ثابت و تار. بدونِ آن،
+   هرچقدر هم blur بدهیم، نتیجه یک کارتِ سفیدِ ساده است.
+
+   ── هر افکت `prefers-reduced-motion` را رعایت می‌کند ──
+   مخاطبِ اصلی موبایلِ ایرانی با CPU ضعیف است؛ کاربری که انیمیشن را
+   خاموش کرده باید صفحه‌ی ساکن ببیند، نه نسخه‌ی کندشده.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ⚠️ این عنصر نه `background` می‌گیرد و نه `isolation`.
+   · `background`: لکه‌ها در `::before` می‌نشینند؛ پس‌زمینه‌ی ماتِ خودِ
+     عنصر رویشان کشیده می‌شود و نتیجه دوباره خاکستریِ صاف است. رنگِ پایه
+     آخرین لایه‌ی همان گرادیان است.
+   · `isolation: isolate`: کانتکستِ چیدمانِ تازه می‌سازد و هر اورلیِ
+     تمام‌صفحه‌ی *داخلِ* صفحه را داخلِ همان کانتکست حبس می‌کند. یک‌بار
+     همین باعث شد نوارِ بالای سایت (`fixed`, z-index 200) روی لایت‌باکسِ
+     گالری با z-index 9999 بنشیند — چون آن ۹۹۹۹ دیگر با ۲۰۰ مقایسه
+     نمی‌شد. به‌جایش لایه‌ها با z-index صریحِ ۰ و ۱ مرتب می‌شوند. */
+.lq-stage {
+  position: relative;
+}
+/* لکه‌های رنگیِ پشتِ شیشه — ثابت، بدونِ تعامل */
+.lq-stage::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(38rem 30rem at 78% -6%,  rgba(199,166,106,0.34), transparent 62%),
+    radial-gradient(32rem 26rem at 6%  22%,  rgba(122,160,196,0.26), transparent 64%),
+    radial-gradient(34rem 30rem at 92% 78%,  rgba(154,110,56,0.22),  transparent 66%),
+    radial-gradient(30rem 24rem at 22% 104%, rgba(34,197,94,0.15),   transparent 62%),
+    linear-gradient(#F4F2EE, #F4F2EE);
+  /* بدونِ `filter: blur` — گرادیان‌های شعاعی از قبل نرم‌اند و تارکردنِ یک
+     لایه‌ی هم‌اندازه‌ی صفحه روی CPUهای ضعیف هر فریم هزینه دارد. */
+}
+/* محتوا روی لکه‌ها. بدونِ این، `::before` رویشان می‌افتد. */
+.lq-stage > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* کارتِ شیشه‌ای */
+.lqg {
+  position: relative;
+  border-radius: 18px;
+  background: rgba(255,255,255,0.68);
+  border: 1px solid rgba(255,255,255,0.72);
+  backdrop-filter: blur(26px) saturate(1.85);
+  -webkit-backdrop-filter: blur(26px) saturate(1.85);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.92),
+    inset 0 -1px 0 rgba(17,17,16,0.04),
+    0 1px 2px rgba(17,17,16,0.05),
+    0 12px 34px -14px rgba(17,17,16,0.22);
+}
+/* لبه‌ی نورگرفته‌ی بالا — همان خطِ باریکی که شیشه را «ضخیم» نشان می‌دهد */
+.lqg::before {
+  content: '';
+  position: absolute;
+  inset-inline: 14%;
+  top: 0;
+  height: 1px;
+  border-radius: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.95), transparent);
+  pointer-events: none;
+}
+.lqg-hover {
+  transition: transform .34s cubic-bezier(.22,1,.36,1), box-shadow .34s cubic-bezier(.22,1,.36,1);
+}
+.lqg-hover:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.95),
+    0 2px 4px rgba(17,17,16,0.05),
+    0 22px 46px -16px rgba(17,17,16,0.26);
+}
+
+/* ورودِ پلکانی — تأخیر را خودِ عنصر با --lq-i می‌دهد */
+@keyframes lqRise {
+  from { opacity: 0; transform: translateY(14px) scale(.985); }
+  to   { opacity: 1; transform: none; }
+}
+.lq-rise {
+  animation: lqRise .62s cubic-bezier(.22,1,.36,1) both;
+  animation-delay: calc(var(--lq-i, 0) * 70ms);
+}
+
+/* برقِ عبوری — یک‌بار، موقعِ ورود */
+@keyframes lqSheen {
+  from { transform: translateX(-130%) skewX(-18deg); }
+  to   { transform: translateX(230%)  skewX(-18deg); }
+}
+.lq-sheen { position: relative; overflow: hidden; }
+.lq-sheen::after {
+  content: '';
+  position: absolute;
+  top: 0; bottom: 0;
+  width: 42%;
+  pointer-events: none;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.42), transparent);
+  animation: lqSheen 1.5s cubic-bezier(.4,0,.2,1) .35s both;
+}
+
+/* نبضِ آرامِ حلقه‌ی آواتار */
+@keyframes lqHalo {
+  0%,100% { opacity: .55; transform: scale(1); }
+  50%     { opacity: .9;  transform: scale(1.045); }
+}
+.lq-halo { animation: lqHalo 4.6s ease-in-out infinite; }
+
+/* کاشیِ گالری — بزرگ‌نماییِ ملایم با لبه‌ی طلایی */
+.lq-tile {
+  overflow: hidden;
+  border-radius: 12px;
+  cursor: zoom-in;
+  position: relative;
+  transition: transform .3s cubic-bezier(.22,1,.36,1), box-shadow .3s;
+}
+.lq-tile:hover {
+  transform: scale(1.045);
+  box-shadow: 0 10px 26px -8px rgba(17,17,16,0.34);
+  z-index: 1;
+}
+.lq-tile::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.30);
+  transition: box-shadow .3s;
+}
+.lq-tile:hover::after { box-shadow: inset 0 0 0 1.5px rgba(199,166,106,0.85); }
+
+/* کنترلِ بخش‌بندی‌شده‌ی تب‌ها — هر تب دقیقاً هم‌اندازه */
+.lq-seg {
+  display: inline-flex;
+  gap: 3px;
+  padding: 3px;
+  border-radius: 13px;
+  background: rgba(17,17,16,0.045);
+  border: 1px solid rgba(17,17,16,0.07);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+.lq-seg > button {
+  min-width: 84px;
+  padding: 7px 12px;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  color: rgba(17,17,16,0.52);
+  font-family: inherit;
+  font-size: 12.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background .26s cubic-bezier(.22,1,.36,1), color .2s, box-shadow .26s, transform .18s;
+}
+.lq-seg > button:hover { color: rgba(17,17,16,0.78); }
+/* حلقه‌ی فوکوس جدا از حالتِ انتخاب است و با خاموش‌بودنِ انیمیشن هم می‌ماند */
+.lq-seg > button:focus-visible {
+  outline: 2px solid #9A6E38;
+  outline-offset: 2px;
+}
+.lq-seg > button[aria-selected='true'] {
+  color: #9A6E38;
+  font-weight: 800;
+  background: rgba(255,255,255,0.94);
+  box-shadow: 0 1px 2px rgba(17,17,16,0.08), 0 4px 12px -4px rgba(154,110,56,0.30);
+}
+.lq-seg > button:active { transform: scale(.97); }
+
+@media (prefers-reduced-motion: reduce) {
+  .lq-rise, .lq-sheen::after, .lq-halo { animation: none !important; }
+  .lqg-hover, .lq-tile, .lq-seg > button { transition: none !important; }
+  .lqg-hover:hover, .lq-tile:hover { transform: none !important; }
+}

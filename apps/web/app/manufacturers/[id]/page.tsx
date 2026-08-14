@@ -1,5 +1,6 @@
 'use client'
 import { useState, useMemo, useRef, useEffect } from 'react'
+import { useProfileImageViewer } from '@/components/ProfileImageViewer'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { toFa, faNum, MONO, Icon, LQ, LQ_NEUTRAL, LQ_FELT_ON } from '../../sellers/[id]/shared'
@@ -184,6 +185,7 @@ export default function ManufacturerPage() {
   const mfrId = (Array.isArray(params?.id) ? params.id[0] : params?.id) || DEFAULT_ID
   /* اول داده‌ی ایستا؛ اگر نبود، پروفایل ثبت‌نامی (پنل ⇒ localStorage) */
   const [storedMfr, setStoredMfr] = useState<ReturnType<typeof profileToManufacturer> | null>(null)
+  const { open: openImage, viewer: imageViewer } = useProfileImageViewer()
   useEffect(() => {
     if (getManufacturer(mfrId)) return
     const p = getManufacturerProfile(mfrId)
@@ -274,6 +276,12 @@ export default function ManufacturerPage() {
               ? <ImageSlider images={[mfr.bannerImage]} />
               : <PosterSlider variants={[0, 1, 2]} title={mfr.name} />}
             <div className="pointer-events-none absolute inset-0" style={{ background: 'linear-gradient(180deg,rgba(0,0,0,0.04) 0%,rgba(0,0,0,0.32) 100%)' }} />
+            {/* فقط بنرِ واقعی؛ پوسترِ پیش‌فرض تصویرِ کارخانه نیست و
+                بزرگ‌کردنش چیزی به کاربر نمی‌دهد. */}
+            {mfr.bannerImage && (
+              <button type="button" onClick={() => openImage(mfr.bannerImage ?? '', { title: 'بنر', alt: mfr.name })}
+                aria-label="بزرگ‌نمایی بنر" className="absolute inset-0 cursor-zoom-in" />
+            )}
           </div>
 
           <div className="relative px-4 pb-5 sm:px-6 sm:pb-6">
@@ -549,6 +557,8 @@ export default function ManufacturerPage() {
           </div>
         </div>
       </footer>
+
+      {imageViewer}
     </div>
   )
 }

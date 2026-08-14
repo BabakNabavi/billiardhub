@@ -15,6 +15,7 @@ import {
 } from '../../../lib/mock-tournaments';
 import { fetchTournaments } from '../../../lib/tournaments/client';
 import ClubStoryModal from '../../../components/ClubStoryModal';
+import { useProfileImageViewer } from '@/components/ProfileImageViewer'
 import ClubReviews from '../../../components/club/ClubReviews';
 import ClubLogo from '../../../components/club/ClubLogo'
 import FavoriteButton from '../../../components/FavoriteButton';
@@ -124,6 +125,7 @@ export default function ClubProfilePage() {
      localStorage قاطی نشوند. `null` یعنی هنوز از سرور نیامده. */
   const [liveStats, setLiveStats]     = useState<{ members: number; tournaments: number } | null>(null);
   const [storyViewer, setStoryViewer] = useState(false);
+  const { open: openImage, viewer: imageViewer } = useProfileImageViewer()
 
   const isAdmin = false;
 
@@ -407,6 +409,13 @@ export default function ClubProfilePage() {
           <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom,rgba(4,2,8,0.72) 0%,transparent 28%,transparent 42%,rgba(4,2,8,0.98) 100%)', pointerEvents: 'none' }} />
           <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse 70% 60% at 18% 60%,rgba(199,166,106,0.07) 0%,transparent 100%)', pointerEvents: 'none' }} />
 
+          {/* بزرگ‌نماییِ تصویرِ هیرو. نقطه‌ها، دکمه‌ی بازگشت و کارتِ نام
+              بعد از این می‌آیند و رویش می‌نشینند، پس کلیکشان دزدیده
+              نمی‌شود. */}
+          <button type="button" onClick={() => openImage(images, { index: slide, title: 'تصاویر باشگاه', alt: club.name })}
+            aria-label="بزرگ‌نمایی تصویر باشگاه"
+            style={{ position: 'absolute', inset: 0, background: 'none', border: 'none', padding: 0, cursor: 'zoom-in' }} />
+
           {images.length > 1 && (
             <div style={{ position: 'absolute', top: 14, left: '50%', transform: 'translateX(-50%)', display: 'flex', gap: 6, zIndex: 10 }}>
               {images.map((_, i) => (
@@ -436,11 +445,15 @@ export default function ClubProfilePage() {
               <div style={{ position: 'relative', flexShrink: 0 }}>
                 {hasStory && <div style={{ position: 'absolute', inset: -4, borderRadius: '50%', zIndex: 0, background: 'linear-gradient(45deg,#feda75,#fa7e1e,#d62976,#962fbf,#4f5bd5)' }} />}
                 {hasStory && <div style={{ position: 'absolute', inset: -1, borderRadius: '50%', zIndex: 1, border: '3px solid rgba(10,8,6,0.92)' }} />}
-                <div onClick={() => { if (hasStory) setStoryViewer(true); }} style={{ position: 'relative', zIndex: 2, width: 62, height: 62, borderRadius: '50%', background: club.logo ? 'transparent' : 'rgba(199,166,106,0.18)', border: hasStory ? 'none' : '2px solid rgba(199,166,106,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 26, fontWeight: 900, color: '#C7A66A', backdropFilter: 'blur(20px)', overflow: 'hidden', cursor: hasStory ? 'pointer' : 'default' }}>
+                {/* دکمه، نه div: هم قاعده‌ی دسترس‌پذیریِ پروژه، هم اینکه
+                    حالا با کیبورد هم باز می‌شود. */}
+                <button type="button" onClick={() => { if (hasStory) { setStoryViewer(true); return } openImage(club.logo ?? '', { title: 'لوگوی باشگاه', alt: club.name }) }}
+                  aria-label={hasStory ? 'مشاهده استوری باشگاه' : 'بزرگ‌نمایی لوگوی باشگاه'} disabled={!hasStory && !club.logo}
+                  style={{ position: 'relative', zIndex: 2, width: 62, height: 62, padding: 0, borderRadius: '50%', background: club.logo ? 'transparent' : 'rgba(199,166,106,0.18)', border: hasStory ? 'none' : '2px solid rgba(199,166,106,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 26, fontWeight: 900, color: '#C7A66A', fontFamily: 'inherit', backdropFilter: 'blur(20px)', overflow: 'hidden', cursor: (hasStory || club.logo) ? 'pointer' : 'default' }}>
                   {/* لوگوی آپلودشده، وگرنه نشانِ پیش‌فرضِ باشگاه —
                       پیش‌تر فقط حرفِ اولِ نام نوشته می‌شد. */}
                   <ClubLogo src={club.logo} name={club.name} size={62} tone="dark" />
-                </div>
+                </button>
                 {isAdmin && <button style={{ position: 'absolute', bottom: -2, left: -2, zIndex: 3, width: 22, height: 22, borderRadius: '50%', background: '#C7A66A', border: '2px solid #0A0806', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', padding: 0 }}><Camera size={10} color="#0A0806" /></button>}
                 {isAdmin && !hasStory && <button style={{ position: 'absolute', top: -2, left: -2, zIndex: 3, width: 22, height: 22, borderRadius: '50%', background: '#ef4444', border: '2px solid #0A0806', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', padding: 0 }}><Plus size={10} color="#fff" /></button>}
               </div>
@@ -1264,6 +1277,8 @@ export default function ClubProfilePage() {
           </Link>
         </div>
       </footer>
+
+      {imageViewer}
 
       {storyViewer && club.storyMediaUrl && (
         <ClubStoryModal

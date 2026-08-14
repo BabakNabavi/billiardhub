@@ -5,6 +5,7 @@ import { fetchProfile } from '../../../lib/profiles/client'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import ClubStoryModal from '@/components/ClubStoryModal'
+import { useProfileImageViewer } from '@/components/ProfileImageViewer'
 import { getCoachProfile, badgeFromGrades, certificationLines, disciplineLabel, type CoachProfile } from '@/lib/coach-store'
 
 /* ─── Tokens (same as listing) ─── */
@@ -14,9 +15,9 @@ const GOLD_G = 'linear-gradient(135deg,#7A4F10 0%,#C7A66A 50%,#8A6020 100%)'
 const TEXT   = '#111110'
 const TEXT_S = 'rgba(17,17,16,0.52)'
 const TEXT_M = 'rgba(17,17,16,0.28)'
-const CARD   = 'rgba(255,255,255,0.90)'
+/* `CARD` و `CSHA` حذف شدند: پس‌زمینه و سایه‌ی کارت‌ها حالا از کلاسِ
+   مشترکِ `.lqg` می‌آید، نه از توکنِ محلیِ این فایل. */
 const CBOR   = '1px solid rgba(17,17,16,0.07)'
-const CSHA   = '0 2px 20px rgba(17,17,16,0.06)'
 
 const SPECS: Record<string,{label:string;color:string}> = {
   snooker:  {label:'اسنوکر',       color:'#22C55E'},  // سبز درخشان
@@ -327,6 +328,7 @@ export default function CoachProfilePage() {
   const coach = localP ? mapLocalToFull(localP) : mock
 
   const [openStory,     setOpenStory]     = useState(false)
+  const { open: openImage, viewer: imageViewer } = useProfileImageViewer()
   const [copied,        setCopied]        = useState(false)
   const [tab,           setTab]           = useState<'photos'|'videos'|'albums'>('photos')
   const [albums,        setAlbums]        = useState<Album[]>([])
@@ -339,6 +341,19 @@ export default function CoachProfilePage() {
   const grade = localP ? (localBadge ? { dots: localBadge.dots, color: GOLD_D } : undefined) : GRADE_DOTS[coach.badge]
   const socialBtn: React.CSSProperties = { width:44, height:44, borderRadius:11, display:'flex', alignItems:'center', justifyContent:'center', background:'rgba(26,25,23,0.06)', border:'1px solid rgba(26,25,23,0.10)', color:'rgba(26,25,23,0.5)', textDecoration:'none', flexShrink:0, cursor:'pointer' }
 
+  /* ── کلیدهای جهت روی نوارِ تب ──
+     در چیدمانِ راست‌به‌چپ، «چپ» تبِ بعدی است — همان چیزی که چشم
+     می‌بیند، نه ترتیبِ منطقیِ آرایه. */
+  const TABS = ['photos', 'videos', 'albums'] as const
+  const onTabKey = (e: React.KeyboardEvent) => {
+    const d = e.key === 'ArrowLeft' ? 1 : e.key === 'ArrowRight' ? -1 : 0
+    if (!d) return
+    e.preventDefault()
+    const i = TABS.indexOf(tab)
+    const next = TABS[(i + d + TABS.length) % TABS.length]!
+    setTab(next)
+    document.getElementById(`gtab-${next}`)?.focus()
+  }
   const createAlbum = () => {
     if (!newAlbumName.trim()) return
     setAlbums(prev => [...prev, { id:`a${Date.now()}`, name:newAlbumName.trim(), imageIds:[] }])
@@ -366,12 +381,19 @@ export default function CoachProfilePage() {
         .gtab{transition:all .18s;cursor:pointer;}
         .gtab:hover{opacity:.85;}
         @media(max-width:740px){.pcols{grid-template-columns:1fr!important;}}
+        /* روی موبایل ستونِ نام زیرِ آواتار می‌رود — کنارِ هم جا نمی‌شود */
+        @media(max-width:520px){
+          .lq-ident{flex-wrap:wrap;align-items:flex-start;}
+          .lq-ident>div{flex-basis:100%;padding-top:10px;}
+        }
         .pcard{min-width:0;}
-        /* mobile gallery grids: photos 4/row, videos 2/row, albums 3/row */
+        /* روی موبایل هم هر سه تب یک شبکه دارند: پنج ستونِ مربع.
+           پیش‌تر تصویر ۷۱ و آلبوم ۹۶ پیکسل بود — دو اندازه در یک گالری. */
         @media(max-width:600px){
-          .gphotos{grid-template-columns:repeat(4,1fr)!important;}
+          .gphotos,.galbums{grid-template-columns:repeat(5,1fr)!important;gap:7px!important;}
           .gvideos{grid-template-columns:repeat(2,1fr)!important;}
-          .galbums{grid-template-columns:repeat(3,1fr)!important;}
+          .lq-seg>button{min-width:0;flex:1;padding:7px 6px;}
+          .lq-seg{display:flex;width:100%;}
         }
         /* mobile: single column; interleave main + sidebar cards in the requested order */
         @media(max-width:900px){
@@ -386,7 +408,9 @@ export default function CoachProfilePage() {
         }
       `}</style>
 
-      <div style={{ direction:'rtl', fontFamily:"'Vazirmatn',Tahoma,sans-serif", background:'#F1EFEC', minHeight:'100vh', color:TEXT }}>
+      {/*  لکه‌های رنگیِ ثابتِ پشتِ شیشه را می‌سازد — بدونِ
+          آن، هر کارتِ شیشه‌ای فقط یک کارتِ سفید است. */}
+      <div className="lq-stage" style={{ direction:'rtl', fontFamily:"'Vazirmatn',Tahoma,sans-serif", minHeight:'100vh', color:TEXT }}>
 
         {/* ── Back ── */}
         <div style={{ maxWidth:1128, margin:'0 auto', padding:'18px clamp(12px,3vw,24px) 0' }}>
@@ -405,11 +429,16 @@ export default function CoachProfilePage() {
           <div className="ln-main" style={{ minWidth:0, display:'flex', flexDirection:'column', gap:16 }}>
 
             {/* Profile card */}
-            <div className="pcard pcard-profile" style={{ background:'#fff', border:'1px solid rgba(0,0,0,0.10)', borderRadius:12, overflow:'hidden', boxShadow:'0 1px 3px rgba(0,0,0,0.06)', animation:'fadeUp .4s ease both' }}>
-              {/* Cover — default coach poster */}
-              <div style={{ position:'relative', height:'clamp(120px,20vw,200px)', overflow:'hidden', background:'linear-gradient(115deg,#0c1424 0%,#17253f 55%,#1e2f4d 100%)' }}>
+            <div className="pcard pcard-profile lqg lq-rise" style={{ '--lq-i': 0, overflow:'hidden' } as React.CSSProperties}>
+              {/* Cover — default coach poster. `lq-sheen` یک برقِ عبوریِ
+                  یک‌باره موقعِ ورود می‌اندازد؛ همان حرکتی که سطحِ شیشه‌ای را
+                  «مادی» نشان می‌دهد بدونِ اینکه چیزی مدام تکان بخورد. */}
+              <div className="lq-sheen" style={{ position:'relative', height:'clamp(120px,20vw,200px)', overflow:'hidden', background:'linear-gradient(115deg,#0c1424 0%,#17253f 55%,#1e2f4d 100%)' }}>
                 {coach.coverImage && <img loading="lazy" decoding="async" src={coach.coverImage} alt="" style={{ position:'absolute', inset:0, width:'100%', height:'100%', objectFit:'cover' }}/>}
                 {coach.coverImage && <div style={{ position:'absolute', inset:0, background:'linear-gradient(115deg,rgba(12,20,36,0.58),rgba(30,47,77,0.40))' }}/>}
+                {/* دکمه‌ی نامرئیِ روی کاور. لوگوی گوشه بعد از این می‌آید،
+                    پس رویش می‌ماند و کلیکش را این نمی‌دزدد. */}
+                {coach.coverImage && <button type="button" onClick={() => openImage(coach.coverImage ?? '', { title: 'تصویر کاور' })} aria-label="بزرگ‌نمایی تصویر کاور" style={{ position:'absolute', inset:0, background:'none', border:'none', padding:0, cursor:'zoom-in' }}/>}
                 <div style={{ position:'absolute', inset:0, backgroundImage:'radial-gradient(circle, rgba(255,255,255,0.045) 1px, transparent 1px)', backgroundSize:'16px 16px' }}/>
                 <div style={{ position:'absolute', left:'-6%', top:'-40%', width:'46%', height:'180%', background:'radial-gradient(ellipse, rgba(199,166,106,0.18) 0%, transparent 66%)', filter:'blur(18px)', pointerEvents:'none' }}/>
                 <div style={{ position:'absolute', top:'-20%', bottom:'-20%', left:'54%', width:'1.5px', background:'linear-gradient(180deg,transparent,rgba(199,166,106,0.45),transparent)', transform:'rotate(-10deg)', pointerEvents:'none' }}/>
@@ -423,13 +452,23 @@ export default function CoachProfilePage() {
               </div>
               {/* Body */}
               <div style={{ padding:'0 24px 20px', position:'relative', zIndex:2 }}>
-                {/* avatar + edit */}
-                <div style={{ display:'flex', justifyContent:'flex-start', alignItems:'flex-end', marginTop:'clamp(-64px,-9vw,-72px)' }}>
-                  <button onClick={() => coach.hasStory && setOpenStory(true)} aria-label="عکس پروفایل" style={{ background:'none', border:'none', padding:0, cursor: coach.hasStory ? 'pointer' : 'default', borderRadius:'50%', width:'clamp(104px,14vw,148px)', aspectRatio:'1 / 1', flexShrink:0 }}>
-                    <div style={{ width:'100%', height:'100%', borderRadius:'50%', boxSizing:'border-box',
-                      background: coach.hasStory ? 'linear-gradient(45deg,#feda75,#fa7e1e,#d62976,#962fbf,#4f5bd5)' : '#fff',
-                      padding: coach.hasStory ? 4 : 0,
-                      boxShadow: coach.hasStory ? '0 0 16px rgba(214,41,118,0.40), 0 2px 8px rgba(0,0,0,0.14)' : '0 2px 8px rgba(0,0,0,0.14)' }}>
+                {/* ── چرا آواتار و نام در یک ردیف ──
+                    قبلاً نام *زیرِ* آواتار می‌نشست و چون آواتار سمتِ راست
+                    است، کلِ نیمه‌ی چپِ کارت — تقریباً نیمی از عرضِ صفحه —
+                    سفیدِ خالی می‌ماند. حالا نام و مشخصات کنارش می‌آیند و
+                    همان فضا کار می‌کند. بالاکشیدن روی خودِ آواتار است تا
+                    فقط او داخلِ کاور برود و متن زیرِ لبه‌ی کاور بماند. */}
+                <div className="lq-ident" style={{ display:'flex', alignItems:'flex-start', gap:18 }}>
+                  <button onClick={() => { if (coach.hasStory) { setOpenStory(true); return } openImage(coach.photo ?? '', { alt: coach.name, title: 'عکس پروفایل' }) }} aria-label={coach.hasStory ? 'دیدن استوری' : 'بزرگ‌نمایی عکس پروفایل'} disabled={!coach.hasStory && !coach.photo} style={{ position:'relative', background:'none', border:'none', padding:0, cursor: (coach.hasStory || coach.photo) ? 'pointer' : 'default', borderRadius:'50%', width:'clamp(104px,14vw,148px)', aspectRatio:'1 / 1', flexShrink:0, marginTop:'clamp(-64px,-9vw,-72px)' }}>
+                    {/* هاله‌ی طلاییِ نبض‌دار — فقط وقتی استوری نیست، وگرنه با
+                        حلقه‌ی رنگیِ استوری دو نشانه‌ی رقیب روی هم می‌نشیند. */}
+                    {!coach.hasStory && (
+                      <span aria-hidden className="lq-halo" style={{ position:'absolute', inset:-7, borderRadius:'50%', background:'radial-gradient(circle, rgba(199,166,106,0.42) 0%, rgba(199,166,106,0) 70%)', pointerEvents:'none' }}/>
+                    )}
+                    <div style={{ position:'relative', width:'100%', height:'100%', borderRadius:'50%', boxSizing:'border-box',
+                      background: coach.hasStory ? 'linear-gradient(45deg,#feda75,#fa7e1e,#d62976,#962fbf,#4f5bd5)' : 'linear-gradient(150deg,#FFFDF8,#EBDFC6)',
+                      padding: coach.hasStory ? 4 : 2.5,
+                      boxShadow: coach.hasStory ? '0 0 16px rgba(214,41,118,0.40), 0 2px 8px rgba(0,0,0,0.14)' : '0 10px 26px -8px rgba(154,110,56,0.45), 0 2px 8px rgba(0,0,0,0.12)' }}>
                       <div style={{ width:'100%', height:'100%', borderRadius:'50%', border:'3px solid #fff', overflow:'hidden', background:'#E7ECF1', display:'flex', alignItems:'flex-end', justifyContent:'center' }}>
                         {coach.photo ? (
                           <img loading="lazy" decoding="async" src={coach.photo} alt={coach.name} style={{ width:'100%', height:'100%', objectFit:'cover' }}/>
@@ -442,10 +481,9 @@ export default function CoachProfilePage() {
                       </div>
                     </div>
                   </button>
-                </div>
 
                 {/* name + affiliation */}
-                <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', gap:20, marginTop:10, flexWrap:'wrap' }}>
+                <div style={{ flex:1, minWidth:220, paddingTop:14 }}>
                   <div style={{ minWidth:0 }}>
                     <div style={{ display:'flex', alignItems:'center', gap:7, flexWrap:'wrap' }}>
                       <h1 style={{ fontSize:'clamp(21px,2.6vw,26px)', fontWeight:700, color:'#1c1c1c', lineHeight:1.2 }}>{coach.name}</h1>
@@ -486,13 +524,14 @@ export default function CoachProfilePage() {
                     </div>
                   </div>
                 </div>
+                </div>
 
               </div>
             </div>
 
 
           {/* About — explore-card style */}
-          <div className="pcard pcard-about" style={{ background:'rgba(252,251,249,0.92)', backdropFilter:'blur(24px) saturate(1.6)', WebkitBackdropFilter:'blur(24px) saturate(1.6)', border:'1px solid rgba(28,28,26,0.08)', borderRadius:16, padding:'24px 26px', boxShadow:'0 8px 30px rgba(28,28,26,0.08), inset 0 1px 0 rgba(255,255,255,0.9)', position:'relative', overflow:'hidden', animation:'fadeUp .45s .08s ease both' }}>
+          <div className="pcard pcard-about lqg lqg-hover lq-rise" style={{ '--lq-i': 1, padding:'24px 26px', overflow:'hidden' } as React.CSSProperties}>
             <div style={{ position:'absolute', top:0, left:0, right:0, height:'1px', background:'linear-gradient(90deg,transparent,rgba(184,147,58,0.55),transparent)' }}/>
             <h2 style={{ fontSize:15, fontWeight:800, color:'#1c1c1c', marginBottom:14, display:'flex', alignItems:'center', gap:9 }}>
               <span style={{ width:3, height:16, borderRadius:2, background:'linear-gradient(180deg,#C7A66A,#8A6020)', flexShrink:0 }}/>
@@ -502,7 +541,7 @@ export default function CoachProfilePage() {
           </div>
 
           {/* ── Gallery ── */}
-          <div className="pcard pcard-gallery" style={{ marginTop:20, background:CARD, border:CBOR, borderRadius:18, padding:26, boxShadow:CSHA, animation:'fadeUp .45s .18s ease both' }}>
+          <div className="pcard pcard-gallery lqg lq-rise" style={{ '--lq-i': 2, marginTop:20, padding:26 } as React.CSSProperties}>
 
             {/* Header + tabs */}
             <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:18, flexWrap:'wrap', gap:12 }}>
@@ -510,50 +549,64 @@ export default function CoachProfilePage() {
                 <span style={{ width:3, height:17, background:GOLD_G, borderRadius:2, display:'inline-block', flexShrink:0 }}/>
                 گالری
               </h2>
-              <div style={{ display:'flex', gap:6 }}>
+              {/* ── چرا کنترلِ بخش‌بندی‌شده ──
+                  سه دکمه‌ی جدا با متنِ کوتاه‌وبلند، سه عرضِ متفاوت می‌ساختند
+                  (۶۵ و ۷۳ و ۶۸ پیکسل روی همان صفحه) و انتخابِ فعال فقط با
+                  رنگِ حاشیه معلوم بود. عرضِ کمینه‌ی مشترک هر سه را یکی می‌کند
+                  و کپسولِ سفید، فعال را از دور نشان می‌دهد. */}
+              {/* کلیدهای جهت بینِ تب‌ها — بدونِ این،  وعده‌ای
+                  می‌دهد که صفحه‌خوان انتظارش را دارد و برآورده نمی‌شود. */}
+              <div className="lq-seg" role="tablist" aria-label="بخش‌های گالری" onKeyDown={onTabKey}>
                 {([['photos','تصاویر'],['videos','ویدیوها'],['albums','آلبوم‌ها']] as [string,string][]).map(([k,l]) => (
-                  <button key={k} className="gtab" onClick={() => setTab(k as typeof tab)} style={{
-                    padding:'6px 15px', borderRadius:10, cursor:'pointer',
-                    border:`1px solid ${tab===k ? 'rgba(199,166,106,0.40)' : 'rgba(17,17,16,0.12)'}`,
-                    background: tab===k ? 'rgba(199,166,106,0.12)' : 'transparent',
-                    color: tab===k ? '#9A6E38' : TEXT_S,
-                    fontSize:12, fontWeight: tab===k ? 800 : 600,
-                    fontFamily:"'Vazirmatn',Tahoma,sans-serif",
-                  }}>{l}</button>
+                  <button key={k} type="button" role="tab" aria-selected={tab===k}
+                    id={`gtab-${k}`} aria-controls={`gpanel-${k}`} tabIndex={tab===k ? 0 : -1}
+                    onClick={() => setTab(k as typeof tab)}>{l}</button>
                 ))}
               </div>
             </div>
 
             {/* Photos */}
             {tab === 'photos' && (
-              <div className="gphotos" style={{ display:'grid', gridTemplateColumns:'repeat(5,1fr)', gap:10 }}>
+              /* ── چرا شش ستون ──
+                 با پنج ستون هر کاشی روی دسکتاپ ۱۲۸ پیکسل بود؛ اندازه‌گیری
+                 روی همین صفحه. شش ستون آن را به ~۱۰۰ می‌رساند — همان
+                 «۲۰٪ کوچک‌تر». عددها ثابت‌اند نه `auto-fill`، چون کاشیِ
+                 مربع باید در هر سه تب دقیقاً یک اندازه بماند. */
+              <div className="gphotos" id="gpanel-photos" role="tabpanel" aria-labelledby="gtab-photos" style={{ display:'grid', gridTemplateColumns:'repeat(6,1fr)', gap:10 }}>
                 {coach.gallery.map(g => (
-                  <div key={g.id} className="gcard" onClick={() => setLightbox(g)} style={{ aspectRatio:'1', background:'rgba(17,17,16,0.05)' }}>
+                  <button key={g.id} type="button" className="lq-tile" onClick={() => setLightbox(g)} aria-label={g.caption || 'بزرگ‌نمایی تصویر'} style={{ aspectRatio:'1', background:'rgba(17,17,16,0.05)', border:'none', padding:0 }}>
                     <img loading="lazy" decoding="async" src={g.url} alt={g.caption} style={{ width:'100%', height:'100%', objectFit:'cover', display:'block' }} />
-                  </div>
+                  </button>
                 ))}
               </div>
             )}
 
             {/* Videos */}
             {tab === 'videos' && (
-              <div className="gvideos" style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:10 }}>
+              /* ویدیو ۱۶:۹ است و نمی‌تواند هم‌اندازه‌ی کاشیِ مربع شود؛
+                 ولی ریتمِ ستون‌ها با بقیه هم‌خوان می‌شود. */
+              <div className="gvideos" id="gpanel-videos" role="tabpanel" aria-labelledby="gtab-videos" style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:10 }}>
                 {coach.videos.map(v => <ProfileVideoCard key={v.id} v={v} />)}
               </div>
             )}
 
             {/* Albums */}
             {tab === 'albums' && (
-              <div className="galbums" style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(170px,1fr))', gap:12 }}>
+              /* ── چرا از `minmax(170px)` به شش ستون ──
+                 آن مقدار روی دسکتاپ کاشیِ ۲۱۹ پیکسلی می‌ساخت، یعنی ۷۱٪
+                 بزرگ‌تر از کاشیِ تصویر در تبِ کناری — و چون «آلبوم جدید»
+                 معمولاً تنها کاشیِ این تب است، همان یک مربعِ بزرگ کلِ
+                 ردیف را می‌گرفت. حالا هر سه تب یک شبکه دارند. */
+              <div className="galbums" id="gpanel-albums" role="tabpanel" aria-labelledby="gtab-albums" style={{ display:'grid', gridTemplateColumns:'repeat(6,1fr)', gap:10 }}>
 
                 {/* Create new album */}
-                <button onClick={() => setShowNewAlbum(true)} style={{ aspectRatio:'1', borderRadius:14, border:'1.5px dashed rgba(199,166,106,0.45)', background:'rgba(199,166,106,0.06)', cursor:'pointer', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', gap:9, fontFamily:"'Vazirmatn',Tahoma,sans-serif" }}>
-                  <div style={{ width:42, height:42, borderRadius:'50%', background:'rgba(199,166,106,0.14)', display:'flex', alignItems:'center', justifyContent:'center' }}>
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={GOLD} strokeWidth="2.2">
+                <button onClick={() => setShowNewAlbum(true)} style={{ aspectRatio:'1', borderRadius:12, border:'1.5px dashed rgba(199,166,106,0.45)', background:'rgba(199,166,106,0.06)', cursor:'pointer', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', gap:6, fontFamily:"'Vazirmatn',Tahoma,sans-serif" }}>
+                  <div style={{ width:30, height:30, borderRadius:'50%', background:'rgba(199,166,106,0.14)', display:'flex', alignItems:'center', justifyContent:'center' }}>
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={GOLD} strokeWidth="2.2">
                       <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
                     </svg>
                   </div>
-                  <span style={{ fontSize:12, fontWeight:700, color:GOLD_D }}>آلبوم جدید</span>
+                  <span style={{ fontSize:11, fontWeight:700, color:GOLD_D }}>آلبوم جدید</span>
                 </button>
 
                 {/* Albums list */}
@@ -563,7 +616,7 @@ export default function CoachProfilePage() {
                   return (
                     <div key={album.id} style={{ display:'flex', flexDirection:'column', gap:8 }}>
                       <button onClick={() => setExpandedAlbum(isExp ? null : album.id)}
-                        style={{ width:'100%', aspectRatio:'1', borderRadius:14, overflow:'hidden', position:'relative', cursor:'pointer', border:CBOR, background:'rgba(17,17,16,0.05)' }}>
+                        style={{ width:'100%', aspectRatio:'1', borderRadius:12, overflow:'hidden', position:'relative', cursor:'pointer', border:CBOR, background:'rgba(17,17,16,0.05)' }}>
                         {preview && (
                           <img loading="lazy" decoding="async" src={preview.url} alt={album.name} style={{ width:'100%', height:'100%', objectFit:'cover', display:'block' }} />
                         )}
@@ -582,7 +635,11 @@ export default function CoachProfilePage() {
                         <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:5 }}>
                           {album.imageIds.map(imgId => {
                             const g = coach.gallery.find(x => x.id === imgId)
-                            return g ? <img loading="lazy" decoding="async" key={imgId} src={g.url} alt={g.caption} onClick={() => setLightbox(g)} style={{ width:'100%', aspectRatio:'1', objectFit:'cover', borderRadius:7, display:'block', cursor:'pointer' }} /> : null
+                            return g ? (
+                              <button key={imgId} type="button" className="lq-tile" onClick={() => setLightbox(g)} aria-label={g.caption || 'بزرگ‌نمایی تصویر'} style={{ borderRadius:7, border:'none', padding:0, background:'none' }}>
+                                <img loading="lazy" decoding="async" src={g.url} alt={g.caption} style={{ width:'100%', aspectRatio:'1', objectFit:'cover', display:'block' }} />
+                              </button>
+                            ) : null
                           })}
                         </div>
                       )}
@@ -602,7 +659,7 @@ export default function CoachProfilePage() {
           <aside className="ln-side" style={{ display:'flex', flexDirection:'column', gap:16, animation:'fadeUp .45s .12s ease both' }}>
 
             {/* Public profile & URL */}
-            <div className="pcard pcard-public" style={{ background:'#fff', border:'1px solid rgba(0,0,0,0.10)', borderRadius:12, padding:'16px 18px', boxShadow:'0 1px 3px rgba(0,0,0,0.06)' }}>
+            <div className="pcard pcard-public lqg lqg-hover lq-rise" style={{ '--lq-i': 3, padding: '16px 18px' } as React.CSSProperties}>
               <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
                 <h3 style={{ fontSize:16, fontWeight:700, color:'#1c1c1c' }}>پروفایل عمومی و نشانی</h3>
                 <button aria-label="کپی نشانی" onClick={() => { const u = `https://www.billiardhub.net/coaches/${coach.id}`; if (navigator.clipboard?.writeText) { navigator.clipboard.writeText(u).then(() => { setCopied(true); setTimeout(() => setCopied(false), 1600) }).catch(() => {}) } }} style={{ background:'transparent', border:'none', cursor:'pointer', color: copied ? '#057642' : 'rgba(0,0,0,0.55)', display:'flex', alignItems:'center', gap:4, padding:4, fontSize:12, fontWeight:700, fontFamily:'inherit' }}>
@@ -617,7 +674,7 @@ export default function CoachProfilePage() {
             </div>
 
             {/* درجه مربیگری */}
-            <div className="pcard pcard-grade" style={{ background:'#fff', border:'1px solid rgba(0,0,0,0.10)', borderRadius:12, padding:'16px 18px', boxShadow:'0 1px 3px rgba(0,0,0,0.06)' }}>
+            <div className="pcard pcard-grade lqg lqg-hover lq-rise" style={{ '--lq-i': 4, padding: '16px 18px' } as React.CSSProperties}>
               <h3 style={{ fontSize:16, fontWeight:700, color:'#1c1c1c', marginBottom:14 }}>درجه مربیگری</h3>
               <div style={{ display:'flex', alignItems:'center', gap:12, marginBottom:16, flexWrap:'wrap' }}>
                 <span dir="auto" style={{ background:`${coach.badgeColor}15`, border:`1.5px solid ${coach.badgeColor}48`, color:coach.badgeColor, borderRadius:100, fontSize:13, fontWeight:800, padding:'6px 16px', unicodeBidi:'isolate' }}>{coach.badge}</span>
@@ -638,7 +695,7 @@ export default function CoachProfilePage() {
             </div>
 
             {/* راه‌های ارتباطی */}
-            <div className="pcard pcard-contact" style={{ background:'#fff', border:'1px solid rgba(0,0,0,0.10)', borderRadius:12, padding:'16px 18px', boxShadow:'0 1px 3px rgba(0,0,0,0.06)' }}>
+            <div className="pcard pcard-contact lqg lqg-hover lq-rise" style={{ '--lq-i': 5, padding: '16px 18px' } as React.CSSProperties}>
               <h3 style={{ fontSize:16, fontWeight:700, color:'#1c1c1c', marginBottom:14 }}>راه‌های ارتباطی</h3>
               <div style={{ display:'flex', gap:8, flexWrap:'wrap' }}>
                 <a href={`tel:${coach.phone}`} className="social-icn" aria-label="تماس" style={socialBtn}>
@@ -712,6 +769,9 @@ export default function CoachProfilePage() {
             onClose={() => setOpenStory(false)}
           />
         )}
+
+        {/* نمای تمام‌صفحه‌ی عکس پروفایل و کاور */}
+        {imageViewer}
 
       </div>
     </>

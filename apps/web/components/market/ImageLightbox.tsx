@@ -33,11 +33,13 @@ const MUT = 'rgba(28,28,26,0.45)'
 const toFa = (v: string | number) => String(v).replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[+d] ?? d)
 
 export default function ImageLightbox({
-  images, index, alt = '', onIndex, onClose,
+  images, index, alt = '', title = 'تصاویر', onIndex, onClose,
 }: {
   images: string[]
   index: number
   alt?: string
+  /** سربرگِ نما — پروفایل‌ها «عکس پروفایل» یا «کاور» می‌خواهند، نه «تصاویر محصول» */
+  title?: string
   onIndex: (i: number) => void
   onClose: () => void
 }) {
@@ -117,7 +119,7 @@ export default function ImageLightbox({
 
   return createPortal(
     <div
-      role="dialog" aria-modal="true" aria-label="تصاویر محصول"
+      role="dialog" aria-modal="true" aria-label={title}
       style={{
         position: 'fixed', inset: 0, zIndex: 200, background: '#fff',
         direction: 'rtl', fontFamily: 'Vazirmatn,Tahoma,sans-serif',
@@ -139,7 +141,7 @@ export default function ImageLightbox({
           }}>
           <X size={24} strokeWidth={2.2} />
         </button>
-        <span style={{ fontSize: 15, fontWeight: 800, color: INK }}>تصاویر</span>
+        <span style={{ fontSize: 15, fontWeight: 800, color: INK }}>{title}</span>
       </div>
 
       {/* تصویر */}

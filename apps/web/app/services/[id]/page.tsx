@@ -8,6 +8,7 @@
    ───────────────────────────────────────────────────────────── */
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useProfileImageViewer } from '@/components/ProfileImageViewer'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { createPortal } from 'react-dom'
@@ -50,6 +51,7 @@ export default function TechnicianProfilePage() {
   /* پروفایل‌های ثبت‌نامی (پنل ⇒ localStorage) بعد از mount خوانده می‌شوند */
   const [stored, setStored]   = useState<Technician | null>(null)
   const [checked, setChecked] = useState(false)
+  const { open: openImage, viewer: imageViewer } = useProfileImageViewer()
   useEffect(() => {
     if (!staticTech) {
       const p = getTechnicianProfile(id)
@@ -181,7 +183,13 @@ export default function TechnicianProfilePage() {
                 <span style={{ position: 'absolute', inset: -9, borderRadius: '50%', border: '1px solid rgba(199,166,106,0.55)' }} />
                 <span style={{ position: 'absolute', inset: -3, borderRadius: '50%', border: '1px dashed rgba(199,166,106,0.35)' }} />
                 {tech.photo
-                  ? <img loading="lazy" decoding="async" src={tech.photo} alt={tech.name} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
+                  ? (
+                    <button type="button" onClick={() => openImage(tech.photo ?? '', { title: 'عکس پروفایل', alt: tech.name })}
+                      aria-label="بزرگ‌نمایی عکس پروفایل"
+                      style={{ width: '100%', height: '100%', padding: 0, border: 'none', background: 'none', borderRadius: '50%', cursor: 'zoom-in' }}>
+                      <img loading="lazy" decoding="async" src={tech.photo} alt={tech.name} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%', display: 'block' }} />
+                    </button>
+                  )
                   : tech.name.slice(0, 1)}
               </span>
               <div style={{ marginTop: 16, fontSize: 10, fontWeight: 800, letterSpacing: '0.22em', color: 'rgba(154,110,56,0.65)' }}>BILLIARD HUB</div>
@@ -305,6 +313,7 @@ export default function TechnicianProfilePage() {
       </div>
 
       {/* ═══ لایت‌باکس فول‌اسکرین ═══ */}
+      {imageViewer}
       {lightbox !== null && photos[lightbox] && typeof document !== 'undefined' && createPortal(
         <div onClick={closeLb} style={{ position: 'fixed', inset: 0, zIndex: 200, background: 'rgba(12,11,9,0.94)', display: 'flex', alignItems: 'center', justifyContent: 'center', animation: 'tpFade .18s ease both' }}>
           {/* نوار بالا */}

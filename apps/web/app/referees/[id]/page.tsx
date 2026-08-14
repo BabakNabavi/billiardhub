@@ -5,6 +5,7 @@ import { fetchProfile } from '../../../lib/profiles/client'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import ClubStoryModal from '@/components/ClubStoryModal'
+import { useProfileImageViewer } from '@/components/ProfileImageViewer'
 import {
   getRefereeProfile, badgeFromGrades, certificationLines, disciplineLabel, GRADES,
   type RefereeProfile,
@@ -284,6 +285,7 @@ export default function RefereeProfilePage() {
   const referee = localP ? mapLocalToFull(localP) : (D.find(r => r.id === id) ?? D[0]!)
 
   const [openStory,     setOpenStory]     = useState(false)
+  const { open: openImage, viewer: imageViewer } = useProfileImageViewer()
   const [copied,        setCopied]        = useState(false)
   const [tab,           setTab]           = useState<'photos'|'videos'|'albums'>('photos')
   const [albums,        setAlbums]        = useState<Album[]>([])
@@ -296,6 +298,19 @@ export default function RefereeProfilePage() {
   const grade = GRADE_DOTS[referee.badge]
   const socialBtn: React.CSSProperties = { width:44, height:44, borderRadius:11, display:'flex', alignItems:'center', justifyContent:'center', background:'rgba(26,25,23,0.06)', border:'1px solid rgba(26,25,23,0.10)', color:'rgba(26,25,23,0.5)', textDecoration:'none', flexShrink:0, cursor:'pointer' }
 
+  /* ── کلیدهای جهت روی نوارِ تب ──
+     در چیدمانِ راست‌به‌چپ، «چپ» تبِ بعدی است — همان چیزی که چشم
+     می‌بیند، نه ترتیبِ منطقیِ آرایه. */
+  const TABS = ['photos', 'videos', 'albums'] as const
+  const onTabKey = (e: React.KeyboardEvent) => {
+    const d = e.key === 'ArrowLeft' ? 1 : e.key === 'ArrowRight' ? -1 : 0
+    if (!d) return
+    e.preventDefault()
+    const i = TABS.indexOf(tab)
+    const next = TABS[(i + d + TABS.length) % TABS.length]!
+    setTab(next)
+    document.getElementById(`gtab-${next}`)?.focus()
+  }
   const createAlbum = () => {
     if (!newAlbumName.trim()) return
     setAlbums(prev => [...prev, { id:`a${Date.now()}`, name:newAlbumName.trim(), imageIds:[] }])
@@ -322,9 +337,10 @@ export default function RefereeProfilePage() {
         .pcard{min-width:0;}
         /* mobile gallery grids: photos 4/row, videos 2/row, albums 3/row */
         @media(max-width:600px){
-          .gphotos{grid-template-columns:repeat(4,1fr)!important;}
+          .gphotos,.galbums{grid-template-columns:repeat(5,1fr)!important;gap:7px!important;}
           .gvideos{grid-template-columns:repeat(2,1fr)!important;}
-          .galbums{grid-template-columns:repeat(3,1fr)!important;}
+          .lq-seg{display:flex;width:100%;}
+          .lq-seg>button{min-width:0;flex:1;padding:7px 6px;}
         }
         /* mobile: single column; interleave main + sidebar cards in the requested order */
         @media(max-width:900px){
@@ -365,6 +381,8 @@ export default function RefereeProfilePage() {
                   <>
                     <img loading="lazy" decoding="async" src={referee.coverImage} alt="" style={{ position:'absolute', inset:0, width:'100%', height:'100%', objectFit:'cover' }}/>
                     <div style={{ position:'absolute', inset:0, background:'linear-gradient(90deg, rgba(6,12,22,0.62) 0%, rgba(6,12,22,0.18) 55%, rgba(6,12,22,0.05) 100%)' }}/>
+                    {/* دکمه‌ی نامرئیِ روی کاور — دلیلش در صفحه‌ی مربی */}
+                    <button type="button" onClick={() => openImage(referee.coverImage ?? '', { title: 'تصویر کاور' })} aria-label="بزرگ‌نمایی تصویر کاور" style={{ position:'absolute', inset:0, background:'none', border:'none', padding:0, cursor:'zoom-in' }}/>
                   </>
                 ) : (
                   <>
@@ -385,7 +403,7 @@ export default function RefereeProfilePage() {
               <div style={{ padding:'0 24px 20px', position:'relative', zIndex:2 }}>
                 {/* avatar */}
                 <div style={{ display:'flex', justifyContent:'flex-start', alignItems:'flex-end', marginTop:'clamp(-64px,-9vw,-72px)' }}>
-                  <button onClick={() => referee.hasStory && setOpenStory(true)} aria-label="عکس پروفایل" style={{ background:'none', border:'none', padding:0, cursor: referee.hasStory ? 'pointer' : 'default', borderRadius:'50%', width:'clamp(104px,14vw,148px)', aspectRatio:'1 / 1', flexShrink:0 }}>
+                  <button onClick={() => { if (referee.hasStory) { setOpenStory(true); return } openImage(referee.photo ?? '', { alt: referee.name, title: 'عکس پروفایل' }) }} aria-label={referee.hasStory ? 'دیدن استوری' : 'بزرگ‌نمایی عکس پروفایل'} disabled={!referee.hasStory && !referee.photo} style={{ background:'none', border:'none', padding:0, cursor: (referee.hasStory || referee.photo) ? 'pointer' : 'default', borderRadius:'50%', width:'clamp(104px,14vw,148px)', aspectRatio:'1 / 1', flexShrink:0 }}>
                     <div style={{ width:'100%', height:'100%', borderRadius:'50%', boxSizing:'border-box',
                       background: referee.hasStory ? 'linear-gradient(45deg,#feda75,#fa7e1e,#d62976,#962fbf,#4f5bd5)' : '#fff',
                       padding: referee.hasStory ? 4 : 0,
@@ -449,50 +467,49 @@ export default function RefereeProfilePage() {
                 <span style={{ width:3, height:17, background:GOLD_G, borderRadius:2, display:'inline-block', flexShrink:0 }}/>
                 گالری
               </h2>
-              <div style={{ display:'flex', gap:6 }}>
+              {/* کنترلِ بخش‌بندی‌شده — هر سه تب هم‌اندازه. دلیلش کنارِ
+                  همین بلوک در صفحه‌ی مربی. */}
+              {/* کلیدهای جهت بینِ تب‌ها — بدونِ این،  وعده‌ای
+                  می‌دهد که صفحه‌خوان انتظارش را دارد و برآورده نمی‌شود. */}
+              <div className="lq-seg" role="tablist" aria-label="بخش‌های گالری" onKeyDown={onTabKey}>
                 {([['photos','تصاویر'],['videos','ویدیوها'],['albums','آلبوم‌ها']] as [string,string][]).map(([k,l]) => (
-                  <button key={k} className="gtab" onClick={() => setTab(k as typeof tab)} style={{
-                    padding:'6px 15px', borderRadius:10, cursor:'pointer',
-                    border:`1px solid ${tab===k ? 'rgba(199,166,106,0.40)' : 'rgba(17,17,16,0.12)'}`,
-                    background: tab===k ? 'rgba(199,166,106,0.12)' : 'transparent',
-                    color: tab===k ? '#9A6E38' : TEXT_S,
-                    fontSize:12, fontWeight: tab===k ? 800 : 600,
-                    fontFamily:"'Vazirmatn',Tahoma,sans-serif",
-                  }}>{l}</button>
+                  <button key={k} type="button" role="tab" aria-selected={tab===k}
+                    id={`gtab-${k}`} aria-controls={`gpanel-${k}`} tabIndex={tab===k ? 0 : -1}
+                    onClick={() => setTab(k as typeof tab)}>{l}</button>
                 ))}
               </div>
             </div>
 
             {/* Photos */}
             {tab === 'photos' && (
-              <div className="gphotos" style={{ display:'grid', gridTemplateColumns:'repeat(5,1fr)', gap:10 }}>
+              <div className="gphotos" id="gpanel-photos" role="tabpanel" aria-labelledby="gtab-photos" style={{ display:'grid', gridTemplateColumns:'repeat(6,1fr)', gap:10 }}>
                 {referee.gallery.map(g => (
-                  <div key={g.id} className="gcard" onClick={() => setLightbox(g)} style={{ aspectRatio:'1', background:'rgba(17,17,16,0.05)' }}>
+                  <button key={g.id} type="button" className="lq-tile" onClick={() => setLightbox(g)} aria-label={g.caption || 'بزرگ‌نمایی تصویر'} style={{ aspectRatio:'1', background:'rgba(17,17,16,0.05)', border:'none', padding:0 }}>
                     <img loading="lazy" decoding="async" src={g.url} alt={g.caption} style={{ width:'100%', height:'100%', objectFit:'cover', display:'block' }} />
-                  </div>
+                  </button>
                 ))}
               </div>
             )}
 
             {/* Videos */}
             {tab === 'videos' && (
-              <div className="gvideos" style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:10 }}>
+              <div className="gvideos" id="gpanel-videos" role="tabpanel" aria-labelledby="gtab-videos" style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:10 }}>
                 {referee.videos.map(v => <ProfileVideoCard key={v.id} v={v} />)}
               </div>
             )}
 
             {/* Albums */}
             {tab === 'albums' && (
-              <div className="galbums" style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(170px,1fr))', gap:12 }}>
+              <div className="galbums" id="gpanel-albums" role="tabpanel" aria-labelledby="gtab-albums" style={{ display:'grid', gridTemplateColumns:'repeat(6,1fr)', gap:10 }}>
 
                 {/* Create new album */}
-                <button onClick={() => setShowNewAlbum(true)} style={{ aspectRatio:'1', borderRadius:14, border:'1.5px dashed rgba(199,166,106,0.45)', background:'rgba(199,166,106,0.06)', cursor:'pointer', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', gap:9, fontFamily:"'Vazirmatn',Tahoma,sans-serif" }}>
-                  <div style={{ width:42, height:42, borderRadius:'50%', background:'rgba(199,166,106,0.14)', display:'flex', alignItems:'center', justifyContent:'center' }}>
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={GOLD} strokeWidth="2.2">
+                <button onClick={() => setShowNewAlbum(true)} style={{ aspectRatio:'1', borderRadius:12, border:'1.5px dashed rgba(199,166,106,0.45)', background:'rgba(199,166,106,0.06)', cursor:'pointer', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', gap:6, fontFamily:"'Vazirmatn',Tahoma,sans-serif" }}>
+                  <div style={{ width:30, height:30, borderRadius:'50%', background:'rgba(199,166,106,0.14)', display:'flex', alignItems:'center', justifyContent:'center' }}>
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={GOLD} strokeWidth="2.2">
                       <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
                     </svg>
                   </div>
-                  <span style={{ fontSize:12, fontWeight:700, color:GOLD_D }}>آلبوم جدید</span>
+                  <span style={{ fontSize:11, fontWeight:700, color:GOLD_D }}>آلبوم جدید</span>
                 </button>
 
                 {/* Albums list */}
@@ -521,7 +538,11 @@ export default function RefereeProfilePage() {
                         <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:5 }}>
                           {album.imageIds.map(imgId => {
                             const g = referee.gallery.find(x => x.id === imgId)
-                            return g ? <img loading="lazy" decoding="async" key={imgId} src={g.url} alt={g.caption} onClick={() => setLightbox(g)} style={{ width:'100%', aspectRatio:'1', objectFit:'cover', borderRadius:7, display:'block', cursor:'pointer' }} /> : null
+                            return g ? (
+                              <button key={imgId} type="button" className="lq-tile" onClick={() => setLightbox(g)} aria-label={g.caption || 'بزرگ‌نمایی تصویر'} style={{ borderRadius:7, border:'none', padding:0, background:'none' }}>
+                                <img loading="lazy" decoding="async" src={g.url} alt={g.caption} style={{ width:'100%', aspectRatio:'1', objectFit:'cover', display:'block' }} />
+                              </button>
+                            ) : null
                           })}
                         </div>
                       )}
@@ -651,6 +672,9 @@ export default function RefereeProfilePage() {
             onClose={() => setOpenStory(false)}
           />
         )}
+
+        {/* نمای تمام‌صفحه‌ی عکس پروفایل و کاور */}
+        {imageViewer}
 
       </div>
     </>

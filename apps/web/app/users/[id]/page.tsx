@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useProfileImageViewer } from '@/components/ProfileImageViewer';
 import { useParams } from 'next/navigation';
 import api from '../../../lib/api';
 
@@ -61,6 +62,7 @@ export default function UserProfilePage() {
   const id = params.id as string;
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
+  const { open: openImage, viewer: imageViewer } = useProfileImageViewer();
 
   /* پیش‌تر `/user/public/:id` صدا زده می‌شد — مسیرِ بک‌اندِ NestJS که
      حذف شده و ۴۰۴ می‌داد. این صفحه از دکمه‌ی چشمِ فهرستِ کاربرانِ
@@ -85,7 +87,10 @@ export default function UserProfilePage() {
         <div className="flex items-start gap-6">
           <div className="w-24 h-24 bg-green-700 rounded-full flex items-center justify-center text-white text-3xl font-bold flex-shrink-0">
             {profile.avatar ? (
-              <img loading="lazy" decoding="async" src={profile.avatar} alt="" className="w-full h-full rounded-full object-cover" />
+              <button type="button" onClick={() => openImage(profile.avatar ?? '', { title: 'عکس پروفایل' })}
+                aria-label="بزرگ‌نمایی عکس پروفایل" className="w-full h-full cursor-zoom-in">
+                <img loading="lazy" decoding="async" src={profile.avatar} alt="" className="w-full h-full rounded-full object-cover" />
+              </button>
             ) : profile.firstName?.[0]}
           </div>
           <div className="flex-1">
@@ -350,6 +355,8 @@ export default function UserProfilePage() {
           </div>
         </div>
       )}
+
+      {imageViewer}
 
     </div>
   );

@@ -5,6 +5,7 @@ import { useRouter, useParams } from 'next/navigation'
 import { toFa, faNum, MONO, toggleSet, Icon, LQ, LQ_NEUTRAL, LQ_FELT_ON } from './shared'
 import { fetchProductsBySeller, type ShopProduct } from '../../shop/products'
 import ClubStoryModal from '../../../components/ClubStoryModal'
+import { useProfileImageViewer } from '@/components/ProfileImageViewer'
 import { getSellerProfile, type SellerProfile } from '../../../lib/seller-store'
 import { fetchProfile } from '../../../lib/profiles/client'
 import { telPrefix, provinceOfCity } from '../../../lib/iran-geo'
@@ -379,6 +380,7 @@ export default function FlatShop() {
   /* wishlist + story */
   const [wish, setWish] = useState<Set<string>>(new Set())
   const [storyOpen, setStoryOpen] = useState(false)
+  const { open: openImage, viewer: imageViewer } = useProfileImageViewer()
   const [urlCopied, setUrlCopied] = useState(false)
   const catStripRef = useRef<HTMLDivElement>(null)
   useHorizontalScroll(catStripRef)
@@ -631,6 +633,13 @@ export default function FlatShop() {
               ? <ImageSlider images={store.banners} />
               : <PosterSlider variants={[0, 1, 2]} title={store.title} />}
             <div className="pointer-events-none absolute inset-0" style={{ background: 'linear-gradient(180deg,rgba(0,0,0,0.04) 0%,rgba(0,0,0,0.32) 100%)' }} />
+            {/* بزرگ‌نماییِ بنر. فقط وقتی بنرِ واقعی هست — پوسترِ پیش‌فرض
+                تصویرِ فروشگاه نیست و بازکردنش چیزی به کاربر نمی‌دهد.
+                نقطه‌های اسلایدر بعد از این می‌آیند و رویش می‌مانند. */}
+            {store.banners.length > 0 && (
+              <button type="button" onClick={() => openImage(store.banners, { title: 'بنر فروشگاه', alt: store.title })}
+                aria-label="بزرگ‌نمایی بنر فروشگاه" className="absolute inset-0 cursor-zoom-in" />
+            )}
           </div>
 
           {/* کارت فروشگاه — لوگو نیمی روی بنر، بقیه زیر هم */}
@@ -639,9 +648,9 @@ export default function FlatShop() {
             {/* حلقه‌ی رنگی و کلیک فقط وقتی استوریِ واقعی هست؛ وگرنه
                 لوگوی ساده — بدونِ وعده‌ی چیزی که وجود ندارد. */}
             <button
-              type="button" onClick={() => { if (hasStory) setStoryOpen(true) }}
-              aria-label={hasStory ? 'مشاهده استوری فروشگاه' : store.brand}
-              disabled={!hasStory}
+              type="button" onClick={() => { if (hasStory) { setStoryOpen(true); return } openImage(store.logo ?? '', { title: 'لوگوی فروشگاه', alt: store.title }) }}
+              aria-label={hasStory ? 'مشاهده استوری فروشگاه' : 'بزرگ‌نمایی لوگوی فروشگاه'}
+              disabled={!hasStory && !store.logo}
               className={`-mt-12 block shrink-0 rounded-full p-[3px] transition-transform duration-200 sm:-mt-14${hasStory ? ' hover:scale-105 active:scale-95' : ''}`}
               style={hasStory
                 ? { background: 'linear-gradient(135deg,#feda75,#fa7e1e,#d62976,#962fbf,#4f5bd5)', boxShadow: '0 6px 18px rgba(214,41,118,0.30)', width: 'fit-content' }
@@ -974,6 +983,7 @@ export default function FlatShop() {
       </footer>
 
       {/* ═══ استوری فروشگاه (مثل صفحه‌ی باشگاه) ═══ */}
+      {imageViewer}
       {storyOpen && hasStory && (
         <ClubStoryModal
           club={{ name: store.brand, storyMediaUrl: store.storyImage, storyText: store.storyText, badge: 'فروشگاه' }}
