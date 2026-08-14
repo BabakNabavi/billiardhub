@@ -144,13 +144,25 @@ export async function PATCH(req: NextRequest) {
       return NextResponse.json({ message: 'اعمال نقش انجام نشد' }, { status: 500 });
     }
 
-    /* ── تیکِ آبی ──
-       جدا از تأیید است. تأیید یعنی «نقش را دارد و پروفایلش منتشر
-       می‌شود»؛ تیک یعنی «مدرکش را دیدم و درست بود».
+    /* ── تأییدِ نقش، انتشارِ پروفایل نیست ──
+       تا امروز همین‌جا `profiles.status = 'approved'` هم زده می‌شد.
+       نتیجه‌اش این بود که پروفایلِ تازه‌ساخته — که عمداً `pending`
+       درج می‌شود — با تأییدِ *نقش* بی‌درنگ روی سایتِ عمومی می‌نشست و
+       صفِ `/admin/coaches` هرگز به آن نمی‌رسید. یک‌بار پروفایلِ مربی
+       ده دقیقه بعد از ساخته‌شدن، بدونِ اینکه کسی محتوایش را دیده
+       باشد، منتشر شد.
 
-       تیک روی *پروفایل* می‌نشیند نه روی کاربر، چون همان‌جاست که
-       صفحه‌های عمومی می‌خوانندش. باشگاه‌دار پروفایل ندارد، پس تیکش
-       روی خودِ باشگاه (`verificationStatus`) می‌رود.
+       این دو، دو تصمیمِ جدا هستند:
+       • تأییدِ نقش  ⟵ «حق دارد پروفایلِ مربی بسازد»  (این مسیر)
+       • تأییدِ پروفایل ⟵ «محتوایش را دیدم، منتشر شود»  (/admin/coaches)
+
+       باشگاه استثناست: صفِ جداگانه‌ی پروفایل ندارد و `/admin/clubs`
+       خودش همین `verificationStatus` است، پس فعال‌سازی‌اش می‌ماند.
+
+       ── تیکِ آبی ──
+       تیک یعنی «مدرکش را دیدم و درست بود» و هنوز این‌جا داده می‌شود،
+       ولی دیگر انتشار را با خودش نمی‌آورد. روی *پروفایل* می‌نشیند نه
+       روی کاربر، چون همان‌جاست که صفحه‌های عمومی می‌خوانندش.
 
        بدونِ مدرک تیک داده نمی‌شود — حتی اگر ادمین اشتباهاً بزند. */
     if (withTick) {
@@ -163,26 +175,31 @@ export async function PATCH(req: NextRequest) {
           { message: 'برای تیک آبی باید مدرک بارگذاری شده باشد' }, { status: 400 });
       }
 
+      /* ── چرا نتیجه لاگ می‌شود ──
+         این نوشتن‌ها تا امروز بی‌بررسی رها می‌شدند: اگر شکست می‌خوردند،
+         پاسخ همچنان `ok` بود و ادمین فکر می‌کرد تیک داده شده. نقش
+         بالاتر از این‌جا داده شده و برنمی‌گردد، پس شکست را ۵۰۰ نمی‌کنیم
+         — ولی ساکت هم نمی‌ماند. */
       if (rr.role === 'club_owner') {
-        await sb().from('clubs')
+        const { error } = await sb().from('clubs')
           .update({ verificationStatus: 'verified', isActive: true })
           .eq('ownerId', rr.user_id).eq('verificationStatus', 'pending');
+        if (error) console.error('[admin/roles] tick club', error.message);
       } else {
-        await sb().from('profiles')
-          .update({ verified: true, status: 'approved' })
+        /* فقط تیک. `status` دست‌نخورده می‌ماند تا صفِ پروفایل تصمیم
+           بگیرد — حتی اگر مدرک درست بوده باشد، محتوای پروفایل هنوز
+           دیده نشده است. */
+        const { error } = await sb().from('profiles')
+          .update({ verified: true })
           .eq('owner_id', rr.user_id).eq('kind', rr.role);
+        if (error) console.error('[admin/roles] tick profile', error.message);
       }
-    } else {
-      /* تأیید بدونِ تیک: پروفایل منتشر می‌شود ولی نشانِ تأیید نمی‌گیرد */
-      if (rr.role === 'club_owner') {
-        await sb().from('clubs')
-          .update({ verificationStatus: 'approved', isActive: true })
-          .eq('ownerId', rr.user_id).eq('verificationStatus', 'pending');
-      } else {
-        await sb().from('profiles')
-          .update({ status: 'approved' })
-          .eq('owner_id', rr.user_id).eq('kind', rr.role);
-      }
+    } else if (rr.role === 'club_owner') {
+      /* باشگاه صفِ پروفایلِ جدا ندارد؛ همین‌جا فعال می‌شود */
+      const { error } = await sb().from('clubs')
+        .update({ verificationStatus: 'approved', isActive: true })
+        .eq('ownerId', rr.user_id).eq('verificationStatus', 'pending');
+      if (error) console.error('[admin/roles] activate club', error.message);
     }
   }
 
