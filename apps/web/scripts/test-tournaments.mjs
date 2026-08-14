@@ -3116,6 +3116,18 @@ console.log('\n― پروفایلِ مربی و داور ―');
   t('باکسِ استوری در فرمِ ثبت نیست',
     forms.every(f => !read(f).includes('استوری‌های شما') && !read(f).includes('publishStory')),
     'استوری مستقل از ثبتِ پروفایل منتشر می‌شود');
+  /* ── قفلِ نامک ──
+     «اولین مقدارِ ناخالی» در فرمِ تازه یعنی اولین کاراکترِ تایپ‌شده:
+     فیلد بعد از یک حرف قفل می‌شد و ثبت با «۲ تا ۶۰ کاراکتر» رد. */
+  t('نامک با تایپ قفل نمی‌شود، فقط با بارگذاری',
+    read('components/ProfileSlugField.tsx').includes('const typed = useRef(false)')
+    && read('components/ProfileSlugField.tsx').includes('typed.current = true')
+    && !read('components/ProfileSlugField.tsx').includes('firstSaved'),
+    'تا وقتی ذخیره نشده باید قابلِ ویرایش بماند');
+  t('برچسبِ فیلدهای لاتین چپ‌چین است',
+    forms.every(f => read(f).includes('const lblLtr')
+      && read(f).includes('<label style={lblLtr}>First name (English)')),
+    'ورودی چپ‌چین بود و برچسبش راست‌چین');
   t('نشانیِ اختصاصی یک بار پرسیده می‌شود',
     forms.every(f => (read(f).match(/<SiteAddressField/g) ?? []).length === 0
       && read(f).includes('<ProfileSlugField')),

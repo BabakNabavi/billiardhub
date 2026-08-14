@@ -132,6 +132,12 @@ const FIELD_LABELS: Record<string, string> = {
 }
 
 const lbl:  React.CSSProperties = { display: 'block', fontSize: 12.5, fontWeight: 700, color: TEXT_S, marginBottom: 6 }
+/* ── برچسبِ فیلدِ لاتین ──
+   خودِ ورودی `dir="ltr"` و چپ‌چین است ولی برچسبش مثلِ بقیه‌ی صفحه
+   راست‌چین می‌ماند: «First name (English)» آن‌طرفِ کادر می‌افتد و چشم
+   برای هر فیلد دو بار جهت عوض می‌کند. برچسب هم چپ می‌رود تا بالای
+   شروعِ همان متنی بنشیند که توصیفش می‌کند. */
+const lblLtr: React.CSSProperties = { ...lbl, textAlign: 'left', direction: 'ltr' }
 const lqBtn: React.CSSProperties = { display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 7, background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.34)', color: GOLD_D, borderRadius: 10, fontWeight: 700, fontSize: 14, padding: '11px 22px', cursor: 'pointer', fontFamily: 'inherit', textDecoration: 'none' }
 const sectionTitle = (t: string, n: number) => (
   <h2 style={{ fontSize: 15, fontWeight: 800, color: TEXT, marginBottom: 16, display: 'flex', alignItems: 'center', gap: 9 }}>
@@ -509,8 +515,8 @@ function safeRemote(raw: unknown): Partial<FormState> {
                   ? 'نام و نام خانوادگی از اطلاعات حساب کاربری شما گرفته شده و قابل تغییر نیست.'
                   : 'حساب شما نام ثبت‌شده ندارد؛ همین‌جا وارد کنید.'}
               </div>
-              <div><label style={lbl}>Last name (English){star}</label><input data-field="lastNameEn" style={{ ...(errors.lastNameEn ? inpErr : inp), direction: 'ltr', textAlign: 'left' }} value={form.lastNameEn} onChange={e => set('lastNameEn', e.target.value)} placeholder="Talebi" />{err('lastNameEn')}</div>
-              <div><label style={lbl}>First name (English){star}</label><input data-field="firstNameEn" style={{ ...(errors.firstNameEn ? inpErr : inp), direction: 'ltr', textAlign: 'left' }} value={form.firstNameEn} onChange={e => set('firstNameEn', e.target.value)} placeholder="Kaveh" />{err('firstNameEn')}</div>
+              <div><label style={lblLtr}>Last name (English){star}</label><input data-field="lastNameEn" style={{ ...(errors.lastNameEn ? inpErr : inp), direction: 'ltr', textAlign: 'left' }} value={form.lastNameEn} onChange={e => set('lastNameEn', e.target.value)} placeholder="Talebi" />{err('lastNameEn')}</div>
+              <div><label style={lblLtr}>First name (English){star}</label><input data-field="firstNameEn" style={{ ...(errors.firstNameEn ? inpErr : inp), direction: 'ltr', textAlign: 'left' }} value={form.firstNameEn} onChange={e => set('firstNameEn', e.target.value)} placeholder="Kaveh" />{err('firstNameEn')}</div>
                             {/* نشانیِ اختصاصیِ سایت — همان چیزی که پنلِ باشگاه از اول داشت */}
               <div style={{ gridColumn: '1 / -1' }}>
                 <div data-field="slug"> {/* نشانیِ اختصاصی */}

@@ -40,11 +40,13 @@ export interface ProfileSlugFieldProps {
   label?: string
   /** نامکِ ثبت‌شده دیگر عوض نمی‌شود */
   locked?: boolean
+  /** نامکی که از سرور یا حافظه بارگذاری شده — تنها چیزی که قفل می‌کند */
+  savedSlug?: string
   onStatusChange?: (s: SlugStatus) => void
 }
 
 export default function ProfileSlugField({
-  kind, value, onChange, suggestFrom, excludeId, onStatusChange, label, locked,
+  kind, value, onChange, suggestFrom, excludeId, onStatusChange, label, locked, savedSlug,
 }: ProfileSlugFieldProps) {
   /* ── قفلِ خودکار پس از ثبت ──
      نشانی یک‌بار انتخاب می‌شود و بعد دائمی است. تشخیصش این‌جا انجام
@@ -57,14 +59,27 @@ export default function ProfileSlugField({
      می‌کردند و ویترینِ فروشگاه یک‌شبه خالی شد. سرور مهاجرت را هم
      انجام می‌دهد، ولی بهترین حالت این است که اصلاً عوض نشود —
      لینک‌های منتشرشده در گوگل و پیام‌ها نمی‌شکنند. */
-  const firstSaved = useRef<string | null>(null)
-  if (firstSaved.current === null && value) firstSaved.current = value
-  const isLocked = locked ?? !!firstSaved.current
+  /* ── چه چیزی قفل می‌کند، و چه چیزی نه ──
+     نسخه‌ی قبلی «اولین مقدارِ ناخالی» را ذخیره‌شده فرض می‌کرد. برای
+     پروفایلِ موجود درست بود، ولی در فرمِ تازه آن مقدار **اولین
+     کاراکتری** بود که کاربر تایپ می‌کرد: فیلد بعد از یک حرف قفل
+     می‌شد و ثبت با «۲ تا ۶۰ کاراکتر» رد می‌شد.
+
+     تفاوت در منشأ است، نه در خالی‌بودن: مقداری که با بارگذاری آمده
+     قفل می‌کند، مقداری که تایپ شده نه. تا وقتی کاربر ذخیره نکرده،
+     نامکش قابلِ ویرایش می‌ماند.
+
+     `savedSlug` برای والدی است که خودش می‌داند چه چیزی ذخیره شده و
+     می‌خواهد صریح بگوید. */
+  const typed = useRef(false)
+  const loaded = useRef<string | null>(null)
+  if (loaded.current === null && value && !typed.current) loaded.current = value
+  const isLocked = locked ?? !!(savedSlug?.trim() || (loaded.current && !typed.current))
 
   return (
     <SiteAddressField
-      value={value}
-      onChange={onChange}
+      value={value}
+      onChange={v => { typed.current = true; onChange(v) }}
       basePath={BASE_PATH[kind]}
       {...(suggestFrom ? { suggestFrom } : {})}
       {...(onStatusChange ? { onStatusChange } : {})}
