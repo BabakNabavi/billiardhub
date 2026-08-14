@@ -205,12 +205,12 @@ function ClubCard({ club, view, idx = 0, tournaments = [] }: { club: Club; view:
     <Link href={`/clubs/${club.slug || club.id}`} style={{ textDecoration: 'none', display: 'block' }}>
       <div
         onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)}
+        /* همان سطحِ کارتِ گرید — دو ماده‌ی متفاوت در دو نمای یک فهرست
+           یعنی سوییچِ نما ظاهرِ صفحه را عوض می‌کند. */
+        className="lq-pcard"
         style={{
-          display: 'flex', alignItems: 'stretch',
-          background: hov ? '#FFFFFF' : 'rgba(255,255,255,0.92)',
-          border: `1px solid ${hov ? 'rgba(199,166,106,0.28)' : 'rgba(0,0,0,0.06)'}`,
-          borderRadius: '16px', overflow: 'hidden', transition: 'all 0.3s',
-          boxShadow: hov ? '0 8px 28px rgba(0,0,0,0.10)' : '0 2px 8px rgba(0,0,0,0.05)',
+          display: 'flex', alignItems: 'stretch', overflow: 'hidden',
+          borderColor: hov ? 'rgba(199,166,106,0.50)' : undefined,
         }}
       >
         {/* thumbnail */}
@@ -285,14 +285,14 @@ function ClubCard({ club, view, idx = 0, tournaments = [] }: { club: Club; view:
     <Link href={`/clubs/${club.slug || club.id}`} style={{ textDecoration: 'none', display: 'block', height: '100%' }}>
       <div
         onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)}
+        /* سطح از lq-pcard؛ فقط حلقه‌ی طلاییِ hover این‌جا می‌ماند */
+        className="lq-pcard"
         style={{
-          background: '#FFFFFF',
-          border: hov ? '1.5px solid rgba(199,166,106,0.42)' : '1px solid rgba(0,0,0,0.06)',
-          borderRadius: 20, overflow: 'hidden',
-          transition: 'all 350ms cubic-bezier(0.25,0.46,0.45,0.94)',
-          boxShadow: hov
-            ? '0 0 0 3px rgba(199,166,106,0.10), 0 12px 40px rgba(199,166,106,0.14), 0 4px 16px rgba(0,0,0,0.07)'
-            : '0 2px 10px rgba(0,0,0,0.05)',
+          overflow: 'hidden',
+          borderColor: hov ? 'rgba(199,166,106,0.50)' : undefined,
+          /* درخششِ لبه‌ی شیشه باید بماند، وگرنه کارت دقیقاً موقعِ hover
+             جنسش را از دست می‌دهد. */
+          boxShadow: hov ? 'inset 0 1px 0 rgba(255,255,255,0.95), 0 0 0 3px rgba(199,166,106,0.10), 0 20px 44px -18px rgba(199,166,106,0.30)' : undefined,
           height: '100%', display: 'flex', flexDirection: 'column',
         }}
       >
@@ -652,7 +652,8 @@ export default function ClubsPage() {
         }
       `}</style>
 
-      <div style={{ minHeight: '100vh', background: '#F7F7F5', paddingBottom: 80, direction: 'rtl' }}>
+      {/* رنگِ پایه داخلِ lq-stage است */}
+      <div className="lq-stage" style={{ minHeight: '100vh', paddingBottom: 80, direction: 'rtl' }}>
 
         {/* ══ HERO SLIDER ══ */}
         <div style={{ position: 'relative', overflow: 'hidden' }}>
@@ -660,12 +661,15 @@ export default function ClubsPage() {
         </div>
 
         {/* ══ STICKY TOOLBAR ══ */}
-        <div style={{ background: 'rgba(247,247,245,0.97)', borderBottom: '1px solid rgba(0,0,0,0.06)', padding: '10px clamp(16px,4vw,40px)', position: 'sticky', top: 62, zIndex: 90, backdropFilter: 'blur(24px)' }}>
+        {/* نوارِ چسبان نیمه‌شفاف می‌ماند تا لکه‌های پشتِ شیشه از زیرش
+            دیده شوند؛ نسخه‌ی قبلی تقریباً مات بود و یک نوارِ سفید وسطِ
+            صفحه می‌کشید. */}
+        <div style={{ background: 'rgba(250,249,246,0.62)', borderBottom: '1px solid rgba(28,28,26,0.07)', padding: '10px clamp(16px,4vw,40px)', position: 'sticky', top: 62, zIndex: 90, backdropFilter: 'blur(24px) saturate(1.6)', WebkitBackdropFilter: 'blur(24px) saturate(1.6)' }}>
           <div style={{ maxWidth: 1280, margin: '0 auto' }}>
             <div className="toolbar-row" style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
 
               {/* Search */}
-              <div className="toolbar-search" style={{ display: 'flex', alignItems: 'center', gap: 8, background: '#FFFFFF', border: `1.5px solid ${searchFocus ? 'rgba(199,166,106,0.45)' : 'rgba(0,0,0,0.10)'}`, borderRadius: 12, padding: '0 14px', height: 44, flex: 1, minWidth: 160, maxWidth: 300, transition: 'all 0.3s', boxShadow: searchFocus ? '0 0 0 3px rgba(199,166,106,0.10)' : 'none' }}>
+              <div className="toolbar-search" style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'rgba(255,255,255,0.72)', border: `1px solid ${searchFocus ? 'rgba(199,166,106,0.45)' : 'rgba(28,28,26,0.10)'}`, borderRadius: 12, padding: '0 14px', height: 44, flex: 1, minWidth: 160, maxWidth: 300, transition: 'all 0.3s', boxShadow: searchFocus ? '0 0 0 3px rgba(199,166,106,0.10)' : 'none' }}>
                 <Search size={14} color="rgba(0,0,0,0.30)" />
                 <input className="srch-inp" type="text" value={search} onChange={e => setSearch(e.target.value)} onFocus={() => setSearchFocus(true)} onBlur={() => setSearchFocus(false)} placeholder="جستجو..." />
                 {search && <button onClick={() => setSearch('')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(0,0,0,0.35)', padding: 0, display: 'flex', flexShrink: 0 }}><X size={13} /></button>}

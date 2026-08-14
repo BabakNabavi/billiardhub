@@ -10,7 +10,7 @@ import type { MockSeller } from '../../lib/sellers-data'
 const GOLD     = '#C7A66A'
 const GOLD_D   = '#9A6E38'
 const GOLD_G   = 'linear-gradient(135deg,#7A4F10 0%,#C7A66A 50%,#8A6020 100%)'
-const BG       = '#F7F7F5'
+/* رنگِ پایه‌ی صفحه حالا داخلِ کلاسِ مشترکِ lq-stage است */
 const TEXT     = '#1C1C1A'
 const TEXT_SEC = 'rgba(28,28,26,0.52)'
 const TEXT_MUT = 'rgba(28,28,26,0.32)'
@@ -241,12 +241,11 @@ function SellerCard({ seller, view }: { seller: typeof SELLERS[0]; view: 'grid' 
   const [hov, setHov] = useState(false)
   const router = useRouter()
 
+  /* جنسِ سطح از کلاسِ مشترکِ lq-pcard می‌آید؛ این‌جا فقط لبه‌ی
+     طلاییِ hover می‌ماند که نشانه‌ی همین فهرست است. */
   const shell: React.CSSProperties = {
-    background: '#fff', borderRadius: 14, overflow: 'hidden',
-    border: `1.5px solid ${hov ? 'rgba(199,166,106,0.5)' : 'rgba(28,28,26,0.09)'}`,
-    boxShadow: hov ? '0 18px 46px rgba(28,28,26,0.13), 0 4px 14px rgba(199,166,106,0.12)' : '0 2px 12px rgba(28,28,26,0.06)',
-    transform: hov ? 'translateY(-5px)' : 'none',
-    transition: 'all 0.28s cubic-bezier(0.22,1,0.36,1)', cursor: 'pointer',
+    overflow: 'hidden', cursor: 'pointer',
+    borderColor: hov ? 'rgba(199,166,106,0.55)' : undefined,
   }
 
   const metaRow = (
@@ -294,7 +293,7 @@ function SellerCard({ seller, view }: { seller: typeof SELLERS[0]; view: 'grid' 
   if (view === 'list') {
     return (
       <div onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)} onClick={() => router.push(`/sellers/${seller.id}`)}
-        className="sel-list-card" style={{ ...shell, display: 'flex', alignItems: 'stretch', minHeight: 158 }}>
+        className="sel-list-card lq-pcard" style={{ ...shell, display: 'flex', alignItems: 'stretch', minHeight: 158 }}>
         {/* image */}
         <div className="sel-list-img" style={{ position: 'relative', width: 176, flexShrink: 0, overflow: 'hidden' }}>
           <img loading="lazy" decoding="async" src={seller.bannerImage} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.5s', transform: hov ? 'scale(1.05)' : 'scale(1)' }} />
@@ -327,7 +326,7 @@ function SellerCard({ seller, view }: { seller: typeof SELLERS[0]; view: 'grid' 
   /* ── GRID VIEW ── */
   return (
     <div onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)} onClick={() => router.push(`/sellers/${seller.id}`)}
-      style={{ ...shell, display: 'flex', flexDirection: 'column', height: '100%' }}>
+      className="lq-pcard" style={{ ...shell, display: 'flex', flexDirection: 'column', height: '100%' }}>
       {/* banner (ارتفاع +۱۰٪ ⇒ کل کارت بلندتر) */}
       <div style={{ height: 154, position: 'relative', overflow: 'hidden', flexShrink: 0 }}>
         <img loading="lazy" decoding="async" src={seller.bannerImage} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.5s', transform: hov ? 'scale(1.05)' : 'scale(1)' }} />
@@ -555,7 +554,9 @@ export default function SellersPage() {
         }
       `}</style>
 
-      <div style={{ background: '#F7F7F5', minHeight: '100vh', direction: 'rtl', fontFamily: 'Vazirmatn,Tahoma,sans-serif', color: TEXT }}>
+      {/* رنگِ پایه داخلِ lq-stage است؛ پس‌زمینه‌ی ماتِ خودِ عنصر
+          لکه‌های پشتِ شیشه را می‌پوشاند. */}
+      <div className="lq-stage" style={{ minHeight: '100vh', direction: 'rtl', fontFamily: 'Vazirmatn,Tahoma,sans-serif', color: TEXT }}>
 
         {/* ─────── HERO — coaches-style animated (light) ─────── */}
         <section style={{ position: 'relative', minHeight: 'clamp(150px,20vw,210px)', overflow: 'hidden', display: 'flex', alignItems: 'center' }}>
@@ -587,7 +588,7 @@ export default function SellersPage() {
           <div style={{ position: 'absolute', top: '56%', left: 0, width: '40%', height: '1px', background: 'linear-gradient(to right,transparent,rgba(154,110,56,0.28),transparent)', transform: 'rotate(-3deg)', animation: 'streakB 16s 5s ease-in-out infinite', pointerEvents: 'none' }} />
 
           {/* bottom fade */}
-          <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 60, background: `linear-gradient(to top, ${BG}, transparent)`, pointerEvents: 'none' }} />
+          <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 60, background: 'linear-gradient(to top, rgba(244,242,238,0.92), transparent)', pointerEvents: 'none' }} />
 
           {/* content */}
           <div style={{ position: 'relative', zIndex: 5, maxWidth: 1160, width: '100%', margin: '0 auto', padding: '0 clamp(20px,4vw,40px)' }}>
@@ -617,7 +618,7 @@ export default function SellersPage() {
         <div style={{ maxWidth: 1160, margin: '0 auto', padding: '0 clamp(16px,3vw,32px) 64px' }}>
 
           {/* ─── STICKY: search + filter, stacked under the navbar ─── */}
-          <div style={{ position: 'sticky', top: 72, zIndex: 50, background: BG, paddingTop: 14, paddingBottom: 12, marginBottom: 12, display: 'flex', flexDirection: 'column', gap: 10 }}>
+          <div style={{ position: 'sticky', top: 72, zIndex: 50, background: 'rgba(250,249,246,0.72)', backdropFilter: 'blur(24px) saturate(1.6)', WebkitBackdropFilter: 'blur(24px) saturate(1.6)', paddingTop: 14, paddingBottom: 12, marginBottom: 12, display: 'flex', flexDirection: 'column', gap: 10 }}>
 
             {/* search box */}
             <div style={{ position: 'relative' }}>
