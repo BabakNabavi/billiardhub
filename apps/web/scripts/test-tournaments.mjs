@@ -3269,5 +3269,63 @@ console.log('\n― CORS ―');
     'با حذفِ مقدارِ پیش‌فرض، کلونِ تازه بدونِ راهنما بالا نمی‌آید');
 }
 
+console.log('\n― دروازه‌ی انتشارِ پروفایل ―');
+{
+  /* پروفایلِ تازه `pending` درج می‌شود و فقط صفِ /admin/coaches باید
+     منتشرش کند. یک‌بار تأییدِ *نقش* هم همان کار را می‌کرد و پروفایلی که
+     هیچ‌کس محتوایش را ندیده بود ده دقیقه بعد از ساخته‌شدن روی سایت رفت. */
+  const roles = read('app/api/admin/roles/route.ts');
+  t('تأییدِ نقش، پروفایل را منتشر نمی‌کند',
+    roles.includes("from('profiles')") && !/from\('profiles'\)[\s\S]{0,160}status:\s*'approved'/.test(roles),
+    'تأییدِ نقش یعنی «حق دارد پروفایل بسازد»، نه «محتوایش تأیید شد»');
+  t('تیکِ آبی هنوز از همین مسیر داده می‌شود',
+    /from\('profiles'\)[\s\S]{0,120}verified:\s*true/.test(roles),
+    'تیک و انتشار دو تصمیم‌اند؛ فقط دومی جابه‌جا شد');
+
+  const server = read('lib/profiles/server.ts');
+  t('پروفایلِ تازه هنوز pending درج می‌شود',
+    /row\.status === undefined\) row\.status = 'pending'/.test(server),
+    'پیش‌فرضِ ستون در دیتابیس approved است — این خط خنثی‌اش می‌کند');
+}
+
+console.log('\n― استوری فقط با انتشارِ صریح ―');
+{
+  /* `storyImage` یک فیلد در فرمِ ثبتِ فروشگاه است. تا امروز اگر فروشگاه
+     استوریِ واقعی نداشت، همان عکس با حلقه‌ی استوری روی صفحه‌ی اصلی
+     می‌نشست — بدونِ انقضا و بدونِ اینکه کسی «انتشار» زده باشد. */
+  const stories = read('components/Stories.tsx');
+  t('عکسِ فرمِ فروشگاه خودکار استوری نمی‌شود',
+    !stories.includes('store-story-') && !/:\s*s\.storyImage\s*$/m.test(stories),
+    'فیلدِ داخلِ فرم انتشار نیست');
+  t('استوریِ منتشرشده هنوز نمایش داده می‌شود',
+    stories.includes('sellerResults') && stories.includes('st.expiresAt'),
+    'فقط فالبک برداشته شد، نه خودِ مسیر');
+}
+
+console.log('\n― نمای تمام‌صفحه‌ی عکس پروفایل ―');
+{
+  /* یک نمای مشترک برای همه‌ی نقش‌ها. چهار صفحه از قبل نسخه‌ی ناقصِ
+     خودشان را داشتند؛ این پنجمی ساخته نشد. */
+  t('هوکِ مشترک هست', existsSync(join(ROOT, 'components/ProfileImageViewer.tsx')));
+  const pages = [
+    'app/coaches/[id]/page.tsx',
+    'app/referees/[id]/page.tsx',
+    'app/clubs/[id]/page.tsx',
+    'app/sellers/[id]/FlatShop.tsx',
+    'app/services/[id]/page.tsx',
+    'app/manufacturers/[id]/page.tsx',
+    'app/users/[id]/page.tsx',
+  ];
+  for (const p of pages) {
+    const src = read(p);
+    t(`نما در ${p.split('/').slice(1, 2)} وصل است`,
+      src.includes('useProfileImageViewer') && src.includes('{imageViewer}') && src.includes('openImage('),
+      'هوک، رندرِ نما و دستِ‌کم یک نقطه‌ی بازکردن — هر سه لازم است');
+  }
+  t('لایه‌ی شیشه‌ای در فایلِ مشترک است، نه در صفحه',
+    read('app/globals.css').includes('.lqg {') && read('app/globals.css').includes('.lq-seg'),
+    'قاعده‌ی پروژه: افکتِ شیشه‌ای یک کلاسِ مشترک دارد');
+}
+
 console.log(`\n${fail === 0 ? '✅' : '❌'}  ${pass} قبول · ${fail} رد\n`);
 process.exit(fail === 0 ? 0 : 1);
