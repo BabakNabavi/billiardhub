@@ -1237,7 +1237,7 @@ select:disabled { opacity: 0.55; cursor: not-allowed; }
   content: '';
   position: fixed;
   inset: 0;
-  z-index: 0;
+  z-index: -1;
   pointer-events: none;
   background:
     radial-gradient(38rem 30rem at 78% -6%,  rgba(199,166,106,0.34), transparent 62%),
@@ -1248,11 +1248,16 @@ select:disabled { opacity: 0.55; cursor: not-allowed; }
   /* بدونِ `filter: blur` — گرادیان‌های شعاعی از قبل نرم‌اند و تارکردنِ یک
      لایه‌ی هم‌اندازه‌ی صفحه روی CPUهای ضعیف هر فریم هزینه دارد. */
 }
-/* محتوا روی لکه‌ها. بدونِ این، `::before` رویشان می‌افتد. */
-.lq-stage > * {
-  position: relative;
-  z-index: 1;
-}
+/* ── چرا z-index منفی و نه بالابردنِ فرزندان ──
+   نسخه‌ی اول به هر فرزندِ مستقیم `position:relative; z-index:1`
+   می‌داد. کار می‌کرد ولی شکننده بود: نوارهای `sticky` و `fixed`
+   همین صفحه‌ها فرزندِ مستقیم‌اند و آن قاعده `position`شان را
+   بازنویسی می‌کرد — فقط به‌خاطرِ ترتیبِ سند برنده نمی‌شد. کافی بود
+   یک روز این استایل‌ها جای دیگری بروند تا نوارِ چسبان بشکند.
+
+   لایه‌ی پس‌زمینه خودش می‌رود پشت. `.lq-stage` نه پس‌زمینه دارد و
+   نه `isolation`، پس کانتکستِ تازه‌ای ساخته نمی‌شود و لایه پشتِ
+   محتوا ولی جلوی زمینه‌ی صفحه می‌نشیند. */
 
 /* کارتِ شیشه‌ای */
 .lqg {
@@ -1300,13 +1305,16 @@ select:disabled { opacity: 0.55; cursor: not-allowed; }
   animation-delay: calc(var(--lq-i, 0) * 70ms);
 }
 
-/* برقِ عبوری — یک‌بار، موقعِ ورود */
+/* برقِ عبوری — یک‌بار، موقعِ ورود.
+   ⚠️ نامش عمداً `lq-enter-sheen` است نه `lq-sheen`: صفحه‌ی جزئیاتِ
+   محصول از قبل کلاسی به همان نامِ کوتاه دارد که برقِ *هاور* است، و
+   دو تعریفِ هم‌نام روی هم می‌افتادند. */
 @keyframes lqSheen {
   from { transform: translateX(-130%) skewX(-18deg); }
   to   { transform: translateX(230%)  skewX(-18deg); }
 }
-.lq-sheen { position: relative; overflow: hidden; }
-.lq-sheen::after {
+.lq-enter-sheen { position: relative; overflow: hidden; }
+.lq-enter-sheen::after {
   content: '';
   position: absolute;
   top: 0; bottom: 0;
@@ -1405,8 +1413,60 @@ select:disabled { opacity: 0.55; cursor: not-allowed; }
   .lq-seg-fill { display: grid; }
 }
 
+/* ── سطحِ کارتِ محصول ──
+   یک محصول در سه صفحه دیده می‌شود: بازار، فروشگاه، و صفحه‌ی اصلی. هر
+   سه چیدمانِ خودشان را دارند (نسبتِ تصویر، اندازه‌ی شبکه، ردیفِ افقیِ
+   موبایل) ولی *جنسِ سطح* باید یکی باشد؛ وگرنه همان محصول در سه جا سه
+   کارتِ متفاوت دیده می‌شود.
+
+   این کلاس فقط جنس را می‌دهد — نه اندازه، نه چیدمان. هر صفحه همان
+   قواعدِ خودش را نگه می‌دارد. */
+/* ⚠️ حاشیه رنگِ *مرکب* است نه سفید.
+   نسخه‌ی اول لبه‌ی سفیدِ شیشه‌ای داشت — روی کارتِ بزرگِ پروفایل خوب بود
+   ولی در بازار که ده‌ها کارتِ کوچک کنارِ هم روی زمینه‌ی روشن می‌نشینند،
+   لبه کاملاً محو می‌شد و شبکه‌ی محصولات مرزِ کارت‌ها را از دست می‌داد.
+   درخششِ سفید به `inset` منتقل شد تا هم جنسِ شیشه بماند و هم لبه دیده
+   شود. */
+/* ⚠️ عمداً `backdrop-filter` ندارد.
+   نسخه‌ی اول داشت و روی کاغذ درست بود، ولی صفحه‌ی بازار حدودِ چهل
+   کارت را هم‌زمان نشان می‌دهد و فهرست هم داخلِ یک ناحیه‌ی اسکرولِ
+   جداست: یعنی چهل بک‌دراپِ تارشده که هر فریمِ اسکرول دوباره محاسبه
+   می‌شوند. کاروسلِ صفحه‌ی اصلی از این هم بدتر است — هر فریم روی
+   همان کارت‌ها `transform` و `filter` می‌نویسد. مخاطبِ این سایت
+   گوشیِ ضعیف است.
+
+   و از نظرِ ظاهری چیزی از دست نمی‌رود: زیرِ کارتِ ۱۵۰ پیکسلی،
+   پس‌زمینه تقریباً یک‌رنگِ صاف است و تارکردنش دیده نمی‌شود. آنچه
+   «شیشه» را می‌سازد نیمه‌شفافی و درخششِ لبه است، نه blur. blur را
+   `.lqg` دارد که سطحِ بزرگ است و پس‌زمینه‌اش واقعاً تغییر می‌کند. */
+.lq-pcard {
+  background: rgba(255,255,255,0.78);
+  border: 1px solid rgba(28,28,26,0.14);
+  border-radius: 14px;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.95),
+    0 1px 2px rgba(17,17,16,0.04),
+    0 10px 24px -12px rgba(17,17,16,0.20);
+  transition: transform .26s cubic-bezier(.22,1,.36,1), box-shadow .26s cubic-bezier(.22,1,.36,1),
+    border-color .26s ease;
+}
+.lq-pcard:hover {
+  transform: translateY(-4px);
+  border-color: rgba(199,166,106,0.42);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.95),
+    0 2px 4px rgba(17,17,16,0.05),
+    0 20px 40px -16px rgba(17,17,16,0.26);
+}
+/* روی لمس، «بالا پریدن» معنا ندارد و فقط باعث می‌شود کارت زیرِ انگشت
+   بلغزد؛ فشردنِ کوتاه بازخوردِ درست‌تری است. */
+@media (hover: none) {
+  .lq-pcard:hover { transform: none; }
+  .lq-pcard:active { transform: scale(.985); }
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .lq-rise, .lq-sheen::after, .lq-halo { animation: none !important; }
-  .lqg-hover, .lq-tile, .lq-seg > button { transition: none !important; }
-  .lqg-hover:hover, .lq-tile:hover { transform: none !important; }
+  .lq-rise, .lq-enter-sheen::after, .lq-halo { animation: none !important; }
+  .lqg-hover, .lq-tile, .lq-seg > button, .lq-pcard { transition: none !important; }
+  .lqg-hover:hover, .lq-tile:hover, .lq-pcard:hover { transform: none !important; }
 }
