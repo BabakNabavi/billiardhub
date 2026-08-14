@@ -58,6 +58,15 @@ const bgGradients: Record<string,string> = {
   manufacturer: 'linear-gradient(160deg,#04140d 0%,#06281c 50%,#047857 100%)',
   technician:   'linear-gradient(160deg,#0a0a1a 0%,#141433 50%,#3730a3 100%)',
 };
+/* شکلِ ردیفی که مسیرِ استوریِ فروشگاه برمی‌گرداند */
+interface SellerStory {
+  id: string;
+  text?: string;
+  expiresAt: string;
+  mediaUrl: string;
+  mediaType?: 'image' | 'video';
+}
+
 const STORY_DURATION = 15000;
 
 function relativeTime(expiresAt: string): string {
@@ -628,11 +637,14 @@ export default function Stories() {
            (`/api/sellers/<user.id>/stories`). با نامک، پاسخ همیشه
            خالی برمی‌گشت.
 
-           فروشگاهی که تک‌عکسِ `storyImage` دارد اصلاً پرسیده نمی‌شود
-           — همان یکی کافی است و یک درخواستِ شبکه کمتر می‌شود. */
+           ⚠️ یک زمانی این‌جا شرطِ `!s.storyImage` هم بود: فروشگاهی که
+           عکسِ داخلِ فرم داشت اصلاً پرسیده نمی‌شد، چون آن عکس به‌عنوان
+           استوری نشان داده می‌شد. حالا که آن فالبک برداشته شده، همان
+           شرط یعنی فروشگاهی که عکسِ فرم دارد استوریِ *واقعی*‌اش هم
+           هرگز به نوار نمی‌رسد — دقیقاً برعکسِ چیزی که می‌خواستیم. */
         Promise.all(
           sellers.map((s: any) =>
-            (s.ownerId && !s.storyImage)
+            s.ownerId
               ? fetch(`/api/sellers/${s.ownerId}/stories`)
                   .then(r => r.json())
                   .then((stories: any[]) => ({ s, stories: Array.isArray(stories) ? stories : [] }))
@@ -662,29 +674,25 @@ export default function Stories() {
           })),
         }));
 
-      /* ── دو شکلِ استوریِ فروشگاه ──
-         ۱) فهرستِ چنداستوریِ پنلِ فروشگاه (`/api/sellers/<ownerId>/stories`)
-         ۲) تک‌عکسِ «استوری» داخلِ خودِ پروفایل (`storyImage`) که در
-            فرمِ ثبتِ فروشگاه گرفته می‌شود.
+      /* ── فقط استوریِ *منتشرشده* ──
+         یک زمانی این‌جا فالبکی بود که اگر فروشگاه استوریِ واقعی نداشت،
+         فیلدِ `storyImage` فرمِ ثبتِ فروشگاه را به‌جایش نشان می‌داد.
+         نتیجه‌اش این بود که صاحبِ فروشگاه بدونِ اینکه هیچ‌وقت دکمه‌ی
+         «انتشار استوری» را زده باشد، عکسش روی صفحه‌ی اصلی با حلقه‌ی
+         استوری ظاهر می‌شد — و چون فیلدِ فرم است، نه ۲۴ ساعته منقضی
+         می‌شد و نه راهی برای برداشتنش بود جز پاک‌کردنِ خودِ فیلد.
 
-         تا امروز هیچ‌کدام به نوار نمی‌رسید: اولی چون فهرستِ فروشگاه‌ها
-         از منبعِ خالی می‌آمد، و دومی چون اصلاً کسی سراغش نمی‌رفت. اگر
-         فروشگاهی هر دو را داشته باشد، فهرست مقدم است و تک‌عکس فقط
-         وقتی می‌آید که فهرست خالی باشد — وگرنه یک محتوا دو بار
-         نشان داده می‌شود. */
+         یک عکسِ داخلِ فرم، انتشار نیست. حالا فقط چیزی می‌آید که از
+         مسیرِ استوری منتشر شده باشد و تاریخِ انقضا دارد. */
       const sellerGroups: StoryGroup[] = sellerResults
         .map(({ s, stories }): StoryGroup | null => {
-          const items: StoryItem[] = stories.length
-            ? stories.map((st: any) => ({
-                id: st.id,
-                caption: st.text || undefined,
-                createdAt: relativeTime(st.expiresAt),
-                mediaUrl: st.mediaUrl,
-                mediaType: st.mediaType || 'image',
-              }))
-            : s.storyImage
-              ? [{ id: `store-story-${s.id}`, caption: s.storyText || undefined, createdAt: 'به‌تازگی', mediaUrl: s.storyImage, mediaType: 'image' }]
-              : [];
+          const items: StoryItem[] = (stories as SellerStory[]).map(st => ({
+            id: st.id,
+            caption: st.text || undefined,
+            createdAt: relativeTime(st.expiresAt),
+            mediaUrl: st.mediaUrl,
+            mediaType: st.mediaType || 'image',
+          }));
           if (!items.length) return null;
           const shopName = s.sellerProfile?.storeName || `${s.firstName || ''} ${s.lastName || ''}`.trim() || 'فروشگاه';
           return {
