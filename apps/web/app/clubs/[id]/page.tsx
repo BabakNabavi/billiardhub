@@ -16,6 +16,7 @@ import {
 import { fetchTournaments } from '../../../lib/tournaments/client';
 import ClubStoryModal from '../../../components/ClubStoryModal';
 import { useProfileImageViewer } from '@/components/ProfileImageViewer'
+import { useTabKeys } from '@/hooks/use-tab-keys'
 import ClubReviews from '../../../components/club/ClubReviews';
 import ClubLogo from '../../../components/club/ClubLogo'
 import FavoriteButton from '../../../components/FavoriteButton';
@@ -115,6 +116,20 @@ export default function ClubProfilePage() {
   const [slide, setSlide]             = useState(0);
   const [distance, setDistance]       = useState<string | null>('۲.۳ کیلومتر');
   const [tab, setTab]                 = useState<'info' | 'tournaments' | 'gallery' | 'schedule'>('info');
+
+  /* ── فهرست بیرون از JSX ──
+     هم نوارِ تب و هم هندلرِ کلیدهای جهت به همین ترتیب نیاز دارند؛ دو
+     نسخه یعنی یک روز یکی‌شان عوض می‌شود و ناوبریِ کیبورد از جای
+     اشتباه رد می‌شود. */
+  const CLUB_TABS = [
+    { key: 'info',        label: 'اطلاعات' },
+    { key: 'gallery',     label: 'گالری' },
+    { key: 'tournaments', label: 'مسابقات' },
+    { key: 'schedule',    label: 'ساعت کاری' },
+  ] as const;
+  const onTabKey = useTabKeys(CLUB_TABS.map(x => x.key), tab, setTab, 'ctab-');
+
+
   const [activeCoach, setActiveCoach] = useState<number | null>(null);
   const [coaches, setCoaches]         = useState<CoachEntry[]>([]);
   const [clubAlbums, setClubAlbums]   = useState<ClubAlbum[]>([]);
@@ -321,23 +336,14 @@ export default function ClubProfilePage() {
            خطِ جداکننده فقط روی تب‌های دوم به بعد گذاشته می‌شود،
            وگرنه حاشیه‌ی دو تبِ همسایه کنارِ هم می‌نشیند و جداکننده
            دو برابر ضخیم دیده می‌شود. */
-        .tab-bar { display:inline-flex;border-radius:12px;overflow:hidden;
-                   border:1px solid rgba(0,0,0,0.09);background:#FAFAFA }
-        .tab-btn { position:relative;padding:13px 26px;font-size:13.5px;font-weight:600;
-                   border:none;cursor:pointer;font-family:inherit;white-space:nowrap;flex-shrink:0;
-                   background:transparent;color:rgba(0,0,0,0.55);transition:color .2s,background .2s }
-        .tab-btn + .tab-btn { border-right:1px solid rgba(0,0,0,0.09) }
-        .tab-btn::before { content:'';position:absolute;top:0;left:0;right:0;height:2.5px;
-                           background:#7C5CFC;opacity:0;transition:opacity .22s }
-        .tab-btn.active { background:#FFFFFF;color:#7C5CFC;font-weight:700 }
-        .tab-btn.active::before { opacity:1 }
-        .tab-btn:not(.active):hover { color:#7C5CFC;background:rgba(124,92,252,0.05) }
-        @media(max-width:600px){
-          .tab-bar { display:flex;width:100% }
-          .tab-btn { flex:1;padding:12px 8px;font-size:12.5px }
-        }
+        /* نوارِ تب همان کنترلِ بخش‌بندی‌شده‌ی مشترک است (globals.css).
+           نسخه‌ی محلی چهار عرضِ متفاوت می‌ساخت و رنگِ تأکیدش بنفش بود،
+           در حالی که تأکیدِ این صفحه طلایی است. */
 
-        .coach-card { padding:16px;background:#FFFFFF;border:1px solid rgba(0,0,0,0.07);border-radius:16px;transition:all 0.3s;cursor:pointer }
+
+        /* این سطح کنارِ کارت‌های شیشه‌ای می‌نشیند؛ سفیدِ تخت وسطشان مثلِ
+           وصله دیده می‌شد. */
+        .coach-card { padding:16px;background:rgba(255,255,255,0.62);border:1px solid rgba(255,255,255,0.70);backdrop-filter:blur(14px) saturate(1.5);-webkit-backdrop-filter:blur(14px) saturate(1.5);border-radius:16px;transition:all 0.3s;cursor:pointer }
         .coach-card:hover { background:rgba(199,166,106,0.03);border-color:rgba(199,166,106,0.28);transform:translateY(-3px) }
 
         /* minmax(0,…) نه 1fr: کمینه‌ی «auto» یعنی ستون زیرِ عرضِ محتوا
@@ -381,11 +387,11 @@ export default function ClubProfilePage() {
         @media(min-width:960px){ .book-fixed{display:none} }
         .book-btn-desktop:hover { background:rgba(199,166,106,0.20) !important; }
 
-        .table-card { background:#FFFFFF;border-radius:18px;padding:18px 20px;transition:all 0.3s;cursor:pointer }
+        .table-card { background:rgba(255,255,255,0.62);border:1px solid rgba(255,255,255,0.70);backdrop-filter:blur(14px) saturate(1.5);-webkit-backdrop-filter:blur(14px) saturate(1.5);border-radius:18px;padding:18px 20px;transition:all 0.3s;cursor:pointer }
         .table-card:hover { transform:translateY(-3px); }
         .table-card.vip { background:linear-gradient(135deg,rgba(199,166,106,0.06) 0%,rgba(199,166,106,0.02) 100%); }
 
-        .tourn-card { background:#FFFFFF;border:1px solid rgba(0,0,0,0.07);border-radius:16px;padding:18px;transition:all 0.3s }
+        .tourn-card { background:rgba(255,255,255,0.62);border:1px solid rgba(255,255,255,0.70);backdrop-filter:blur(14px) saturate(1.5);-webkit-backdrop-filter:blur(14px) saturate(1.5);border-radius:16px;padding:18px;transition:all 0.3s }
         .tourn-card:hover { transform:translateY(-2px); }
 
         .hero-top-btn { top: 32px }
@@ -397,10 +403,12 @@ export default function ClubProfilePage() {
         .hero-top-btn > span:last-child { font-size: 12.5px !important; }
       `}</style>
 
-      <div style={{ minHeight: '100vh', background: '#F7F7F5', direction: 'rtl', fontFamily: 'Vazirmatn, sans-serif', paddingBottom: 90 }}>
+      {/* همان لایه‌ی لیکوییدِ صفحه‌ی مربی. رنگِ پایه داخلِ `.lq-stage` است؛
+          پس‌زمینه‌ی ماتِ خودِ عنصر لکه‌ها را می‌پوشاند. */}
+      <div className="lq-stage" style={{ minHeight: '100vh', direction: 'rtl', fontFamily: 'Vazirmatn, sans-serif', paddingBottom: 90 }}>
 
         {/* ══ HERO ══ */}
-        <div style={{ position: 'relative', height: 'min(clamp(320px,44vw,510px),65vh)', overflow: 'hidden', background: '#0A0806' }}>
+        <div className="lq-sheen" style={{ position: 'relative', height: 'min(clamp(320px,44vw,510px),65vh)', overflow: 'hidden', background: '#0A0806' }}>
           {images.map((img, i) => (
             <img loading="lazy" decoding="async" key={i} src={img} alt=""
               onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
@@ -499,29 +507,24 @@ export default function ClubProfilePage() {
 
           {/* #8: tab bar — centered on mobile, 'مسابقات' replaces 'میز و قیمت' */}
           <div style={{ display: 'flex', marginBottom: 24, justifyContent: 'center' }}>
-            <div className="tab-bar">
-              {([
-                { key: 'info',        label: 'اطلاعات' },
-                { key: 'gallery',     label: 'گالری' },
-                { key: 'tournaments', label: 'مسابقات' },
-                { key: 'schedule',    label: 'ساعت کاری' },
-              ] as const).map(t => (
-                <button key={t.key} className={`tab-btn ${tab === t.key ? 'active' : ''}`} onClick={() => setTab(t.key)}>
-                  {t.label}
-                </button>
+            <div className="lq-seg lq-seg-fill" role="tablist" aria-label="بخش‌های باشگاه" onKeyDown={onTabKey}>
+              {CLUB_TABS.map(t => (
+                <button key={t.key} type="button" role="tab" aria-selected={tab === t.key}
+                  id={`ctab-${t.key}`} aria-controls={`cpanel-${t.key}`} tabIndex={tab === t.key ? 0 : -1}
+                  onClick={() => setTab(t.key)}>{t.label}</button>
               ))}
             </div>
           </div>
 
           {/* ── INFO TAB ── */}
           {tab === 'info' && (
-            <div className="info-grid" style={{ animation: 'fadeUp 0.4s ease both' }}>
+            <div className="info-grid" id="cpanel-info" role="tabpanel" aria-labelledby="ctab-info" style={{ animation: 'fadeUp 0.4s ease both' }}>
 
               {/* Main column */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
 
                 {/* About */}
-                <div style={{ background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 18, padding: 'clamp(16px,3vw,24px)' }}>
+                <div className="lqg lqg-hover" style={{ padding: 'clamp(16px,3vw,24px)' }}>
                   <h2 style={{ fontSize: 17, fontWeight: 800, color: '#111111', margin: '0 0 12px', display: 'flex', alignItems: 'center', gap: 10 }}>
                     <span style={{ width: 3, height: 16, background: 'linear-gradient(135deg,#C7A66A,#A07840)', borderRadius: 2, display: 'inline-block', flexShrink: 0 }} />
                     درباره باشگاه
@@ -538,7 +541,7 @@ export default function ClubProfilePage() {
 
 
                 {/* Amenities */}
-                <div style={{ background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 18, padding: 'clamp(16px,3vw,24px)' }}>
+                <div className="lqg lqg-hover" style={{ padding: 'clamp(16px,3vw,24px)' }}>
                   <h2 style={{ fontSize: 17, fontWeight: 800, color: '#111111', margin: '0 0 14px', display: 'flex', alignItems: 'center', gap: 10 }}>
                     <span style={{ width: 3, height: 16, background: 'linear-gradient(180deg,#06b6d4,#a78bfa)', borderRadius: 2, display: 'inline-block', flexShrink: 0 }} />
                     امکانات
@@ -602,7 +605,7 @@ export default function ClubProfilePage() {
                 </div>
 
                 {/* ── #7: Coaches — clickable, popup on click/touch ── */}
-                <div style={{ background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 18, padding: 'clamp(16px,3vw,24px)' }}>
+                <div className="lqg lqg-hover" style={{ padding: 'clamp(16px,3vw,24px)' }}>
                   <h2 style={{ fontSize: 17, fontWeight: 800, color: '#111111', margin: '0 0 14px', display: 'flex', alignItems: 'center', gap: 10 }}>
                     <span style={{ width: 3, height: 16, background: 'linear-gradient(180deg,#a78bfa,#C7A66A)', borderRadius: 2, display: 'inline-block', flexShrink: 0 }} />
                     مربیان باشگاه
@@ -636,7 +639,7 @@ export default function ClubProfilePage() {
 
                 {/* mobile-only: contact + stats after coaches */}
                 <div className="mobile-only">
-                  <div style={{ background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 18, padding: 18 }}>
+                  <div className="lqg lqg-hover" style={{ padding: 18 }}>
                     <div style={{ fontSize: 15, fontWeight: 700, color: '#111111', marginBottom: 14, display: 'flex', alignItems: 'center', gap: 8 }}>
                       <span style={{ width: 3, height: 14, background: 'linear-gradient(180deg,#06b6d4,transparent)', borderRadius: 2, display: 'inline-block' }} />
                       اطلاعات تماس
@@ -671,7 +674,7 @@ export default function ClubProfilePage() {
                       )}
                     </div>
                   </div>
-                  <div style={{ background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 18, padding: 18 }}>
+                  <div className="lqg lqg-hover" style={{ padding: 18 }}>
                     <div style={{ fontSize: 15, fontWeight: 700, color: '#111111', marginBottom: 14, display: 'flex', alignItems: 'center', gap: 8 }}>
                       <span style={{ width: 3, height: 14, background: 'linear-gradient(180deg,#a78bfa,transparent)', borderRadius: 2, display: 'inline-block' }} />
                       آمار باشگاه
@@ -691,7 +694,7 @@ export default function ClubProfilePage() {
                 </div>
 
                 {/* Location map — last */}
-                <div style={{ background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 18, overflow: 'hidden' }}>
+                <div className="lqg" style={{ overflow: 'hidden' }}>
                   <div style={{ padding: '16px 18px 0' }}>
                     <h2 style={{ fontSize: 17, fontWeight: 800, color: '#111111', margin: '0 0 12px', display: 'flex', alignItems: 'center', gap: 10 }}>
                       <span style={{ width: 3, height: 16, background: 'linear-gradient(180deg,#ef4444,#f59e0b)', borderRadius: 2, display: 'inline-block', flexShrink: 0 }} />
@@ -721,7 +724,7 @@ export default function ClubProfilePage() {
                 {/* امتیاز و نظرها — آخرین کارت، پس از موقعیت مکانی.
                     پیش‌تر اولین چیزی بود که کاربر می‌دید، در حالی که
                     اول باید بداند باشگاه چیست و کجاست و بعد نظرها. */}
-                <div style={{ background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 18, padding: 'clamp(16px,3vw,24px)' }}>
+                <div className="lqg lqg-hover" style={{ padding: 'clamp(16px,3vw,24px)' }}>
                   <ClubReviews clubId={id} />
                 </div>
               </div>
@@ -771,7 +774,7 @@ export default function ClubProfilePage() {
                   </button>
                 </div>
 
-                <div style={{ background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 18, padding: 18 }}>
+                <div className="lqg lqg-hover" style={{ padding: 18 }}>
                   <div style={{ fontSize: 15, fontWeight: 700, color: '#111111', marginBottom: 14, display: 'flex', alignItems: 'center', gap: 8 }}>
                     <span style={{ width: 3, height: 14, background: 'linear-gradient(180deg,#06b6d4,transparent)', borderRadius: 2, display: 'inline-block' }} />
                     اطلاعات تماس
@@ -807,7 +810,7 @@ export default function ClubProfilePage() {
                   </div>
                 </div>
 
-                <div style={{ background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 18, padding: 18 }}>
+                <div className="lqg lqg-hover" style={{ padding: 18 }}>
                   <div style={{ fontSize: 15, fontWeight: 700, color: '#111111', marginBottom: 14, display: 'flex', alignItems: 'center', gap: 8 }}>
                     <span style={{ width: 3, height: 14, background: 'linear-gradient(180deg,#a78bfa,transparent)', borderRadius: 2, display: 'inline-block' }} />
                     آمار باشگاه
@@ -834,12 +837,12 @@ export default function ClubProfilePage() {
                نمونه فیلتر می‌شد و باشگاه‌های واقعی همیشه فهرست خالی
                می‌دیدند، مگر نامشان اتفاقاً با یکی از نمونه‌ها یکی بود. */
             if (clubTournaments === null) return (
-              <div style={{ textAlign: 'center', padding: '60px 20px', color: 'rgba(0,0,0,0.35)' }}>
+              <div id="cpanel-tournaments" role="tabpanel" aria-labelledby="ctab-tournaments" style={{ textAlign: 'center', padding: '60px 20px', color: 'rgba(0,0,0,0.35)' }}>
                 در حال دریافت مسابقات…
               </div>
             );
             if (clubTournaments.length === 0) return (
-              <div style={{ animation: 'fadeUp 0.4s ease both', textAlign: 'center', padding: '54px 20px', background: '#fff', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 20 }}>
+              <div id="cpanel-tournaments" role="tabpanel" aria-labelledby="ctab-tournaments" className="lqg" style={{ animation: 'fadeUp 0.4s ease both', textAlign: 'center', padding: '54px 20px' }}>
                 <Trophy size={32} style={{ color: 'rgba(0,0,0,0.18)', marginBottom: 12 }} />
                 <p style={{ fontSize: 16, fontWeight: 800, color: '#111', margin: '0 0 6px' }}>هنوز مسابقه‌ای برگزار نشده</p>
                 <p style={{ fontSize: 13.5, color: 'rgba(0,0,0,0.42)', margin: '0 0 18px', lineHeight: 2 }}>
@@ -851,7 +854,7 @@ export default function ClubProfilePage() {
               </div>
             );
             return (
-            <div style={{ animation: 'fadeUp 0.4s ease both' }}>
+            <div id="cpanel-tournaments" role="tabpanel" aria-labelledby="ctab-tournaments" style={{ animation: 'fadeUp 0.4s ease both' }}>
               {/* Stats row */}
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 12, marginBottom: 24 }}>
                 {[
@@ -859,7 +862,7 @@ export default function ClubProfilePage() {
                   { icon: <Users size={20} style={{ color: '#06b6d4' }} />,   v: toFa(clubTournaments.reduce((s,t) => s + t.registeredCount, 0)), l: 'شرکت‌کننده کل',  c: '#06b6d4', rgb: '6,182,212'   },
                   { icon: <Medal size={20} style={{ color: '#f59e0b' }} />,   v: toFa(clubTournaments.filter(t => t.status === 'finished').length), l: 'مسابقه پایان یافته', c: '#f59e0b', rgb: '245,158,11'  },
                 ].map((x, i) => (
-                  <div key={i} style={{ background: '#FFFFFF', border: `1px solid rgba(${x.rgb},0.14)`, borderRadius: 16, padding: '16px 12px', textAlign: 'center' }}>
+                  <div key={i} className="lqg lqg-hover" style={{ border: `1px solid rgba(${x.rgb},0.22)`, padding: '16px 12px', textAlign: 'center' }}>
                     <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 8 }}>{x.icon}</div>
                     <div style={{ fontSize: 24, fontWeight: 900, color: x.c, marginBottom: 4 }}>{x.v}</div>
                     <div style={{ fontSize: 12, color: 'rgba(0,0,0,0.40)', fontWeight: 600 }}>{x.l}</div>
@@ -929,7 +932,7 @@ export default function ClubProfilePage() {
 
           {/* ── GALLERY TAB ── */}
           {tab === 'gallery' && (
-            <div style={{ animation: 'fadeUp 0.4s ease both', display: 'flex', flexDirection: 'column', gap: 28 }}>
+            <div id="cpanel-gallery" role="tabpanel" aria-labelledby="ctab-gallery" style={{ animation: 'fadeUp 0.4s ease both', display: 'flex', flexDirection: 'column', gap: 28 }}>
 
               {/* ── Tournament albums ── */}
               {tournAlbums.length > 0 && (
@@ -944,7 +947,7 @@ export default function ClubProfilePage() {
                       const cover = album.items.find(i => i.type === 'image')?.dataUrl ?? '/images/clubs/club6.jpeg';
                       const createdDate = album.createdAt ? new Date(album.createdAt).toLocaleDateString('fa-IR') : '';
                       return (
-                        <div key={album.tournamentId} style={{ background: '#fff', border: '1px solid rgba(199,166,106,0.22)', borderRadius: 20, overflow: 'hidden', boxShadow: '0 2px 12px rgba(0,0,0,0.05)' }}>
+                        <div key={album.tournamentId} className="lqg" style={{ overflow: 'hidden' }}>
                           {/* Album header */}
                           <div onClick={() => setOpenAlbumId(isOpen ? null : album.tournamentId)}
                             style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '14px 18px', cursor: 'pointer' }}>
@@ -1156,8 +1159,8 @@ export default function ClubProfilePage() {
 
           {/* ── SCHEDULE TAB ── */}
           {tab === 'schedule' && (
-            <div style={{ animation: 'fadeUp 0.4s ease both', maxWidth: 400, margin: '0 auto' }}>
-              <div style={{ background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 16, padding: '14px 16px' }}>
+            <div id="cpanel-schedule" role="tabpanel" aria-labelledby="ctab-schedule" style={{ animation: 'fadeUp 0.4s ease both', maxWidth: 400, margin: '0 auto' }}>
+              <div className="lqg" style={{ padding: '14px 16px' }}>
                 <div style={{ fontSize: 15, fontWeight: 800, color: '#111111', marginBottom: 10, display: 'flex', alignItems: 'center', gap: 8 }}>
                   <span style={{ width: 3, height: 14, background: 'linear-gradient(135deg,#C7A66A,#A07840)', borderRadius: 2, display: 'inline-block' }} />
                   ساعات کاری هفتگی
@@ -1265,7 +1268,10 @@ export default function ClubProfilePage() {
           صفحه نباید بی‌پایان بماند. این نوار همان کاری را می‌کند که
           فوترِ فروشگاه می‌کند: کپی‌رایتِ خودِ باشگاه، و نشانِ پلتفرمی
           که میزبانش است. */}
-      <footer style={{ padding: '0 clamp(16px,4vw,32px) 28px' }}>
+      {/* ⚠️ این فوتر خواهرِ لایه‌ی لیکویید است، نه فرزندش. لکه‌های
+          رنگیِ پشتِ شیشه با position:fixed کشیده می‌شوند و هر خواهرِ
+          بدونِ z-index زیرشان می‌رود — فوتر نامرئی می‌شد. */}
+      <footer style={{ position: 'relative', zIndex: 1, padding: '0 clamp(16px,4vw,32px) 28px' }}>
         <div style={{
           maxWidth: 1240, margin: '0 auto', borderTop: '1px solid #E8E3D6',
           paddingTop: 16, display: 'flex', flexWrap: 'wrap', alignItems: 'center',

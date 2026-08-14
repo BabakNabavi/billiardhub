@@ -1385,6 +1385,26 @@ select:disabled { opacity: 0.55; cursor: not-allowed; }
 }
 .lq-seg > button:active { transform: scale(.97); }
 
+/* ── چهار تب که یکی‌شان بلند است ──
+   `min-width` فقط کفِ عرض را یکی می‌کند؛ برچسبی مثل «ساعت کاری» از
+   آن رد می‌شود و دوباره چهار عرضِ متفاوت می‌سازد. این حالت ستون‌ها را
+   عیناً مساوی می‌کند و کفِ عرض را کنار می‌گذارد. */
+.lq-seg-fill {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+}
+.lq-seg-fill > button { min-width: 0; }
+
+/* روی موبایل نوار تمامِ عرض را می‌گیرد و تب‌ها با هم تقسیمش می‌کنند.
+   این قاعده در سه صفحه‌ی نقش تکرار شده بود، آن هم داخلِ `<style>`ِ
+   خودِ صفحه — که فقط به‌خاطرِ ترتیبِ سند بر globals برنده می‌شد. */
+@media (max-width: 600px) {
+  .lq-seg { display: flex; width: 100%; }
+  .lq-seg > button { min-width: 0; flex: 1; padding: 7px 6px; }
+  .lq-seg-fill { display: grid; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .lq-rise, .lq-sheen::after, .lq-halo { animation: none !important; }
   .lqg-hover, .lq-tile, .lq-seg > button { transition: none !important; }
