@@ -140,6 +140,16 @@ export async function resolvePath(rawPath: string, actorId: string): Promise<Pat
       return { ok: false, status: 403, message: 'مسیر فایل تبلیغ باید زیر شناسه‌ی خودتان باشد' }
     }
     ownerChecked = true
+  } else if (cleaned.startsWith('profiles/videos/')) {
+    /* `profiles/videos/<شناسه‌ی خودِ کاربر>/…` — همان قاعده‌ی `ads/`.
+       بدونِ این، هر کاربرِ واردشده می‌توانست زیرِ پوشه‌ی دیگری بنویسد.
+       امروز `upsert` خاموش است و نامِ فایل تصادفی، پس بی‌خطر بود؛ ولی
+       تکیه بر «تصادفی‌بودنِ نام» یک محافظ نیست. */
+    const owner = cleaned.split('/')[2] ?? ''
+    if (owner !== safeSeg(actorId)) {
+      return { ok: false, status: 403, message: 'مسیر ویدیو باید زیر شناسه‌ی خودتان باشد' }
+    }
+    ownerChecked = true
   } else if (cleaned.startsWith('documents/roles/')) {
     /* مدرکِ درخواستِ نقش. مسیر باید زیرِ شناسه‌ی خودِ کاربر باشد —
        وگرنه می‌شد مدرکِ دیگری را بازنویسی کرد. */

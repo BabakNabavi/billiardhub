@@ -1,5 +1,10 @@
 'use client'
 import { useState, useEffect, useRef } from 'react'
+import { provinceOfCity } from '../../../lib/iran-geo'
+import AuthGuard from '../../../components/AuthGuard'
+import { uploadFile } from '../../../lib/supabase'
+import { videoMeta, formatDuration } from '../../../lib/video-thumb'
+import { AlertDialog } from '../../../components/market/AdFormFields'
 import Select from '../../../components/ui/Select'
 
 /* ارقام فارسی — همه‌ی عددهای این پنل فارسی دیده می‌شوند */
@@ -12,14 +17,10 @@ import { fetchMyProfile, saveProfileRemote } from '../../../lib/profiles/client'
 import ProvinceCitySelect from '../../../components/ProvinceCitySelect'
 import ProfileSlugField from '../../../components/ProfileSlugField'
 import ClubPicker from '../../../components/ClubPicker'
-import SiteAddressField from '../../../components/SiteAddressField'
 import {
   GRADES, DISCIPLINES, getCoachProfiles, saveCoachProfile, findCoachByOwner, findUnclaimedCoach,
   type CoachProfile, type CoachGrade, type CoachMedia, type CoachVideo,
 } from '../../../lib/coach-store'
-import {
-  STORY_ROLES, addStoredStory, getOwnerStories, removeStoredStory, type StoredStory,
-} from '../../../lib/story-store'
 import VerificationPrompt from '../../../components/VerificationPrompt'
 
 /* ─── Tokens ─── */
@@ -99,7 +100,37 @@ type FormState = typeof emptyForm
 /* small style helpers */
 const card: React.CSSProperties = { background: '#fff', border: CBOR, borderRadius: 16, padding: '22px 24px', boxShadow: '0 2px 16px rgba(17,17,16,0.05)' }
 const inp:  React.CSSProperties = { width: '100%', padding: '10px 13px', border: '1px solid rgba(17,17,16,0.14)', borderRadius: 10, fontSize: 14, fontFamily: 'inherit', background: '#fff', color: TEXT, outline: 'none' }
+/* ── چرا فیلدِ ناقص حاشیه‌ی قرمز می‌گیرد ──
+   تا امروز فقط یک متنِ ریزِ قرمز زیرِ فیلد می‌آمد و یک نوار بالای
+   صفحه. کاربری که ته فرمِ بلند دکمه را می‌زند، نه نوار را می‌بیند
+   و نه آن متن را — پیام می‌گوید «فیلدهای الزامی را کامل کنید» و
+   او دنبالِ فیلدی می‌گردد که پیدا نمی‌شود.
+
+   خودِ کادر باید قرمز شود؛ همان چیزی که چشم از دور می‌بیند. */
+/* همان سقفی که سرور اعمال می‌کند (`MAX_VIDEO` در lib/upload/policy).
+   آن فایل کلاینت‌امن نیست، پس عدد این‌جا تکرار شده — و اگر روزی
+   عوض شد، هر دو باید با هم عوض شوند. */
+const MAX_VIDEO_MB = 25
+
+const inpErr: React.CSSProperties = {
+  ...inp, borderColor: 'rgba(239,68,68,0.75)', background: 'rgba(239,68,68,0.035)',
+}
+
 const inpRO: React.CSSProperties = { ...inp, background: 'rgba(17,17,16,0.045)', color: 'rgba(17,17,16,0.60)', cursor: 'not-allowed' }
+/* نامِ فارسیِ هر فیلد — پیامِ خطا باید بگوید کدام‌یک، نه «یکی از».
+   کلیدها همان‌هایی‌اند که `validate` می‌سازد. */
+const FIELD_LABELS: Record<string, string> = {
+  firstNameFa: 'نام (فارسی)',
+  lastNameFa: 'نام خانوادگی (فارسی)',
+  firstNameEn: 'نام (انگلیسی)',
+  lastNameEn: 'نام خانوادگی (انگلیسی)',
+  province: 'استان',
+  city: 'شهر',
+  slug: 'آدرس اختصاصی سایت',
+  disciplines: 'رشته‌های تخصصی',
+  fullBio: 'معرفی کامل',
+}
+
 const lbl:  React.CSSProperties = { display: 'block', fontSize: 12.5, fontWeight: 700, color: TEXT_S, marginBottom: 6 }
 const lqBtn: React.CSSProperties = { display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 7, background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.34)', color: GOLD_D, borderRadius: 10, fontWeight: 700, fontSize: 14, padding: '11px 22px', cursor: 'pointer', fontFamily: 'inherit', textDecoration: 'none' }
 const sectionTitle = (t: string, n: number) => (
@@ -109,21 +140,21 @@ const sectionTitle = (t: string, n: number) => (
   </h2>
 )
 
-export default function CoachDashboardPage() {
+function CoachDashboardInner() {
   const { user, _hydrated } = useAuthStore()
   const [form, setForm]       = useState<FormState>(emptyForm)
   const [errors, setErrors]   = useState<Record<string, string>>({})
-  const [topError, setTopErr] = useState('')
+  /* پیامِ خطا وسطِ صفحه می‌آید، نه نواری بالای فرمِ بلند که
+     کاربرِ ته صفحه هرگز نمی‌بیندش. */
+  /* عنوان هم در حالت می‌نشیند: همین پنجره برای «فرم کامل نیست»،
+     «آپلود نشد» و «ذخیره روی سرور انجام نشد» استفاده می‌شود و یک
+     عنوانِ ثابت روی هر سه، دو تای آخر را دروغ می‌کرد. */
+  const [alert, setAlert] = useState<{ title: string; lines: string[] } | null>(null)
   const [warnOpen, setWarn]   = useState(false)
   const [submitted, setSubmitted] = useState(false)
   const galleryInput = useRef<HTMLInputElement>(null)
   const videoInput   = useRef<HTMLInputElement>(null)
 
-  /* Stories — published independently of the profile; feed the home stories bar */
-  const [storyList, setStoryList]   = useState<StoredStory[]>([])
-  const [storyDraft, setStoryDraft] = useState<{ url: string; caption: string } | null>(null)
-  const [storyBusy, setStoryBusy]   = useState(false)
-  const storyInput = useRef<HTMLInputElement>(null)
 
   /* prefill from the logged-in user; load existing submission if any.
      مالکیت بر اساس user.id است، نه شماره‌ی موبایل اختیاری — وگرنه پروفایلی که با
@@ -146,7 +177,7 @@ export default function CoachDashboardPage() {
         photo: mine.photo, coverImage: mine.coverImage, certificate: mine.certificate,
       })
     } else if (user) {
-      setForm(f => ({ ...f, firstNameFa: user.firstName || '', lastNameFa: user.lastName || '', city: user.city || '', phone: user.phone || '' }))
+      setForm(f => ({ ...f, firstNameFa: user.firstName || '', lastNameFa: user.lastName || '', city: user.city || '', province: provinceOfCity(user.city || ''), phone: user.phone || '' }))
     }
 
     /* نسخه‌ی سرور مقدم است. اگر کاربر پروفایل محلی قدیمی داشت و روی
@@ -158,21 +189,75 @@ export default function CoachDashboardPage() {
           { number: '', url: mine.certificate?.url ?? '' })
         return
       }
-      setForm(f => ({ ...f, ...(remote.data as Partial<FormState>), slug: remote.slug }))
+      /* ── چرا نامِ حساب دوباره نوشته می‌شود ──
+         داده‌ی سرور روی مقدارهای پیش‌پرشده می‌نشیند. پروفایلی که با
+         نامِ خالی ذخیره شده، دقیقاً همان بن‌بستی را برمی‌گرداند که این
+         تغییر برای بستنش بود: فیلدِ قفل‌شده‌ی خالیِ اجباری. تا وقتی
+         حساب نام دارد، همان مرجع است. */
+      /* ── چرا داده‌ی سرور مستقیم spread نمی‌شود ──
+         مسیرِ ذخیره فقط `typeof === object` را می‌سنجد، پس ردیفی با
+         `fullBio: null` ممکن است. `validate` بلافاصله `.trim()` روی
+         همان می‌زند و کلِ صفحه به error boundary می‌رود. فقط
+         رشته‌ها و آرایه‌های واقعی پذیرفته می‌شوند؛ بقیه نادیده. */
+      setForm(f => ({
+        ...f,
+        ...safeRemote(remote.data),
+        ...(user?.firstName ? { firstNameFa: user.firstName } : {}),
+        ...(user?.lastName ? { lastNameFa: user.lastName } : {}),
+        slug: remote.slug,
+      }))
     })()
   }, [_hydrated, user])
 
-  /* owner key must match the one the home stories bar groups by (Stories.tsx) */
-  const ownerKey = user?.phone || user?.id || user?.firstName || 'coach'
-  const coachRole = STORY_ROLES.coach!
-  useEffect(() => { if (_hydrated) setStoryList(getOwnerStories(ownerKey)) }, [_hydrated, ownerKey])
 
-  const set = <K extends keyof FormState>(k: K, v: FormState[K]) => setForm(f => ({ ...f, [k]: v }))
+  /* قفل فقط وقتی که حساب واقعاً نام دارد — وگرنه کاربر راهی برای
+     پرکردنِ یک فیلدِ اجباری نمی‌داشت. */
+  /* هر کدام جدا: حسابی که فقط نام دارد نباید اجازه‌ی بازنویسیِ همان
+     نام را بدهد، ولی نامِ خانوادگیِ نداشته‌اش باید قابلِ تایپ باشد. */
+  /* `trim` لازم است: نامِ فقط-فاصله قفل می‌کرد ولی از اعتبارسنجی
+     رد نمی‌شد — همان بن‌بستِ فیلدِ اجباریِ غیرقابلِ تایپ. */
+  const firstLocked = !!user?.firstName?.trim()
+  const lastLocked = !!user?.lastName?.trim()
+  /* ── چرا خطا همین‌جا پاک می‌شود ──
+     `errors` فقط موقعِ ارسال ساخته می‌شد، پس کادرِ قرمز بعد از اصلاحِ
+     فیلد قرمز می‌ماند تا ارسالِ بعدی — کاربر فکر می‌کرد هنوز ایراد
+     دارد. */
+/* فقط کلیدهایی که خودِ فرم دارد، و فقط با نوعِ درست. هرچه غیرِ این
+   باشد نادیده گرفته می‌شود — مقدارِ پیش‌فرضِ فرم سرِ جایش می‌ماند. */
+function safeRemote(raw: unknown): Partial<FormState> {
+  if (!raw || typeof raw !== 'object') return {}
+  const src = raw as Record<string, unknown>
+  const out: Record<string, unknown> = {}
+  for (const [k, v] of Object.entries(src)) {
+    if (typeof v === 'string' || typeof v === 'number' || typeof v === 'boolean') out[k] = v
+    else if (Array.isArray(v)) out[k] = v
+    else if (v && typeof v === 'object') out[k] = v
+    /* null و undefined عمداً رد می‌شوند */
+  }
+  return out as Partial<FormState>
+}
+
+  /* ── چرا جدا از `set` هم لازم است ──
+     `ProvinceCitySelect` و `ProfileSlugField` و چیپ‌های رشته مستقیم
+     `setForm` صدا می‌زنند، پس کادرِ قرمزشان تا ارسالِ بعدی می‌ماند.
+     این تابع همان پاک‌سازی را جدا در دسترس می‌گذارد. */
+  const clearErr = (...keys: string[]) =>
+    setErrors(prev => {
+      if (!keys.some(k => prev[k])) return prev
+      const n = { ...prev }
+      for (const k of keys) n[k] = ''
+      return n
+    })
+
+  const set = <K extends keyof FormState>(k: K, v: FormState[K]) => {
+    setForm(f => ({ ...f, [k]: v }))
+    clearErr(k as string)
+  }
 
   const curJYear = (() => { try { return parseInt(new Intl.DateTimeFormat('en-US-u-ca-persian', { year: 'numeric' }).format(new Date()), 10) || 1405 } catch { return 1405 } })()
   const YEARS = Array.from({ length: 61 }, (_, i) => curJYear - i)
 
-  const toggleDiscipline = (k: string) =>
+  const toggleDiscipline = (k: string) =>
     setForm(f => ({ ...f, disciplines: f.disciplines.includes(k) ? f.disciplines.filter(x => x !== k) : [...f.disciplines, k] }))
 
   const gradeSelected = (k: string) => form.grades.some(g => g.key === k)
@@ -211,9 +296,38 @@ export default function CoachDashboardPage() {
     setForm(f => ({ ...f, gallery: f.gallery.map(g => (g.id === id ? { ...g, caption } : g)) }))
   const removeGallery = (id: string) => setForm(f => ({ ...f, gallery: f.gallery.filter(g => g.id !== id) }))
 
+  /* ── چرا این‌جا آپلودِ واقعی است ──
+     تا امروز این دکمه `accept="image/*"` داشت و فقط یک عکس را به‌عنوان
+     «بندانگشتی» می‌گرفت؛ ویدیویی در کار نبود و دکمه‌ی پخش روی صفحه‌ی
+     عمومی هیچ کاری نمی‌کرد.
+
+     حالا خودِ فایل بالا می‌رود (سرور نوعش را از بایت‌ها می‌سنجد و سقفِ
+     حجم را اعمال می‌کند) و بندانگشتی از یک فریمِ همان ویدیو ساخته
+     می‌شود — نه چیزی که کاربر جدا انتخاب کند. */
+  const [videoBusy, setVideoBusy] = useState(false)
   const addVideo = async (file?: File) => {
-    const thumb = file ? await compressImage(file, 720, 0.72) : ''
-    setForm(f => ({ ...f, videos: [...f.videos, { id: rid(), thumbnail: thumb, title: '', duration: '' }] }))
+    if (!file) return
+    /* سقف را همین‌جا می‌سنجیم: `uploadFile` برای هر شکستی `null`
+       می‌دهد و نمی‌شود فهمید حجم بود یا شبکه. */
+    if (file.size > MAX_VIDEO_MB * 1024 * 1024) {
+      setAlert({ title: 'ویدیو بزرگ است', lines: [`حجم ویدیو نباید بیش از ${MAX_VIDEO_MB} مگابایت باشد.`] })
+      return
+    }
+    setVideoBusy(true)
+    try {
+      const meta = await videoMeta(file)
+      const id = rid()
+      const url = await uploadFile('club-media', file, `profiles/videos/${user?.id ?? "anon"}/${id}`)
+      if (!url) { setAlert({ title: 'ویدیو بالا نرفت', lines: ['دوباره تلاش کنید؛ اگر باز هم نشد، فرمت یا حجم فایل را بررسی کنید.'] }); return }
+      /* بندانگشتی اختیاری است: نبودنش ویدیو را بی‌فایده نمی‌کند */
+      const thumb = meta.thumb
+        ? (await uploadFile('club-media', meta.thumb, `profiles/videos/${user?.id ?? "anon"}/${id}-thumb`)) ?? ''
+        : ''
+      setForm(f => ({
+        ...f,
+        videos: [...f.videos, { id, url, thumbnail: thumb, title: '', duration: formatDuration(meta.durationSec) }],
+      }))
+    } finally { setVideoBusy(false) }
   }
   const setVideo = (id: string, patch: Partial<CoachVideo>) =>
     setForm(f => ({ ...f, videos: f.videos.map(v => (v.id === id ? { ...v, ...patch } : v)) }))
@@ -225,33 +339,6 @@ export default function CoachDashboardPage() {
     set('certificate', { name: file.name, url })
   }
 
-  /* ── Stories: publish immediately (independent of the profile form) ── */
-  const pickStoryImage = async (file?: File) => {
-    if (!file) return
-    setStoryBusy(true)
-    try {
-      const url = await compressImage(file, 1080, 0.72)
-      setStoryDraft(d => ({ url, caption: d?.caption ?? '' }))
-    } finally { setStoryBusy(false) }
-  }
-  const publishStory = () => {
-    if (!storyDraft?.url || storyList.length >= 10) return
-    const name = `${form.firstNameFa || user?.firstName || ''} ${form.lastNameFa || user?.lastName || ''}`.trim() || 'مربی'
-    addStoredStory({
-      id: `st-${Date.now()}-${rid()}`,
-      ownerKey,
-      userName: name,
-      roleKey: 'coach', roleLabel: coachRole.label, roleColor: coachRole.color,
-      avatar: (form.firstNameFa || user?.firstName || 'م').charAt(0) || 'م',
-      logoUrl: form.photo || user?.avatar || undefined,
-      mediaUrl: storyDraft.url,
-      caption: storyDraft.caption.trim(),
-      createdAt: Date.now(),
-    })
-    setStoryDraft(null)
-    setStoryList(getOwnerStories(ownerKey))
-  }
-  const deleteStory = (id: string) => { removeStoredStory(id); setStoryList(getOwnerStories(ownerKey)) }
 
   /* ── validation ── */
   const validate = (): boolean => {
@@ -268,8 +355,33 @@ export default function CoachDashboardPage() {
     if (form.disciplines.length === 0) e.disciplines = 'حداقل یک رشته را انتخاب کنید'
     if (!form.fullBio.trim())     e.fullBio     = 'الزامی'
     setErrors(e)
-    if (Object.keys(e).length) { setTopErr('لطفاً فیلدهای الزامی مشخص‌شده را تکمیل کنید.'); return false }
-    setTopErr('')
+    const keys = Object.keys(e)
+    if (keys.length) {
+      /* ── چرا نامِ فیلدها در پیام می‌آید ──
+         «فیلدهای الزامی را تکمیل کنید» به کاربر نمی‌گوید کدام‌یک، و او
+         در فرمی با بیست فیلد دنبالش می‌گردد. حالا فهرست می‌آید، خودِ
+         کادرها قرمز می‌شوند، و صفحه روی اولینشان می‌ایستد. */
+      /* پیامِ خودِ فیلد هم می‌آید وقتی چیزی بیش از «الزامی» دارد —
+         «این نشانی قبلاً استفاده شده» را نباید به «آدرس اختصاصی»
+         تقلیل داد. */
+      setAlert({
+        title: 'فرم کامل نیست',
+        lines: keys.map(k => {
+          const name = FIELD_LABELS[k] ?? k
+          return e[k] && e[k] !== 'الزامی' ? `${name} — ${e[k]}` : name
+        }),
+      })
+      requestAnimationFrame(() => {
+        /* `city` مقصدِ خودش را ندارد و زیرِ همان بلوکِ استان است — بدونِ
+           این، رایج‌ترین حالتِ ناقص (استان پر، شهر خالی) هیچ‌جا نمی‌رفت. */
+        const el = document.querySelector<HTMLElement>(
+          `[data-field="${keys[0]}"],[data-field-alt="${keys[0]}"]`)
+        el?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+        el?.focus?.()
+      })
+      return false
+    }
+    setAlert(null)
     return true
   }
 
@@ -301,7 +413,7 @@ export default function CoachDashboardPage() {
     const res = await saveProfileRemote('coach', profile.slug, profile as unknown as Record<string, unknown>,
       { number: '', url: profile.certificate?.url ?? '' })
     if (!res.ok) {
-      setTopErr(res.message ?? 'ذخیره روی سرور انجام نشد')
+      setAlert({ title: 'ذخیره نشد', lines: [res.message ?? 'ذخیره روی سرور انجام نشد'] })
       if (typeof window !== 'undefined') window.scrollTo({ top: 0, behavior: 'smooth' })
       return
     }
@@ -366,113 +478,73 @@ export default function CoachDashboardPage() {
           <p style={{ fontSize: 13.5, color: TEXT_S, marginTop: 6 }}>اطلاعات زیر را تکمیل کنید تا صفحه‌ی پروفایل مربی شما ساخته شود.</p>
         </div>
 
-        {topError && (
-          <div style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.25)', color: '#b91c1c', borderRadius: 12, padding: '11px 16px', fontSize: 13, fontWeight: 600, marginBottom: 18 }}>
-            {topError}
-          </div>
-        )}
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
 
           {/* وضعیت تأیید — هویت، مدارک و ایمیل */}
           <VerificationBadges />
 
-          {/* Stories — publishes to the home stories bar immediately, independent of the profile form */}
-          <div style={card}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
-              <h2 style={{ fontSize: 15, fontWeight: 800, color: TEXT, display: 'flex', alignItems: 'center', gap: 9, margin: 0 }}>
-                <span style={{ width: 24, height: 24, borderRadius: 8, background: 'rgba(199,166,106,0.14)', color: GOLD_D, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="5" /><circle cx="12" cy="12" r="3.4" /><circle cx="17.5" cy="6.5" r="1.2" fill="currentColor" stroke="none" /></svg>
-                </span>
-                استوری‌های شما <span style={{ color: TEXT_M, fontWeight: 700, fontSize: 13 }}>({storyList.length}/۱۰)</span>
-              </h2>
-              {storyList.length < 10 && !storyDraft && (
-                <label style={{ ...lqBtn, fontSize: 13, padding: '9px 16px', opacity: storyBusy ? 0.55 : 1 }}>
-                  {storyBusy ? 'در حال آماده‌سازی…' : '+ استوری جدید'}
-                  <input ref={storyInput} type="file" accept="image/*" hidden disabled={storyBusy}
-                    onChange={e => { void pickStoryImage(e.target.files?.[0]); e.target.value = '' }} />
-                </label>
-              )}
-            </div>
-            <p style={{ fontSize: 12.5, color: TEXT_M, lineHeight: 1.9, margin: '10px 0 14px' }}>
-              استوری بلافاصله منتشر می‌شود و به‌مدت ۲۴ ساعت در نوار استوری صفحه‌ی اول سایت نمایش داده می‌شود — مستقل از ثبت پروفایل.
-            </p>
-
-            {storyDraft && (
-              <div style={{ border: CBOR, borderRadius: 12, padding: 12, marginBottom: 14, display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-                <div style={{ width: 108, height: 168, borderRadius: 10, overflow: 'hidden', background: '#000', flexShrink: 0 }}>
-                  <img loading="lazy" decoding="async" src={storyDraft.url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                </div>
-                <div style={{ flex: 1, minWidth: 200, display: 'flex', flexDirection: 'column', gap: 10 }}>
-                  <textarea value={storyDraft.caption} onChange={e => setStoryDraft(d => (d ? { ...d, caption: e.target.value } : d))}
-                    placeholder="کپشن استوری (اختیاری)…" rows={3} style={{ ...inp, resize: 'vertical', lineHeight: 1.8 }} />
-                  <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-                    <button type="button" onClick={publishStory} style={{ ...lqBtn, fontSize: 13.5, padding: '10px 22px' }}>انتشار استوری</button>
-                    <button type="button" onClick={() => setStoryDraft(null)} style={{ ...lqBtn, background: 'transparent', border: '1px solid rgba(17,17,16,0.14)', color: TEXT_S, fontSize: 13.5, padding: '10px 20px' }}>انصراف</button>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {storyList.length > 0 ? (
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(96px,1fr))', gap: 10 }}>
-                {storyList.map(s => (
-                  <div key={s.id} style={{ position: 'relative', aspectRatio: '9/16', borderRadius: 10, overflow: 'hidden', border: CBOR, background: 'rgba(17,17,16,0.04)' }}>
-                    <img loading="lazy" decoding="async" src={s.mediaUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                    {s.caption && (
-                      <div style={{ position: 'absolute', left: 0, right: 0, bottom: 0, padding: '12px 7px 6px', background: 'linear-gradient(to top,rgba(0,0,0,0.72),transparent)', color: '#fff', fontSize: 10.5, lineHeight: 1.5, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{s.caption}</div>
-                    )}
-                    <button type="button" onClick={() => deleteStory(s.id)} aria-label="حذف استوری" style={{ position: 'absolute', top: 5, left: 5, width: 22, height: 22, borderRadius: '50%', background: 'rgba(0,0,0,0.6)', border: 'none', color: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
-                    </button>
-                  </div>
-                ))}
-              </div>
-            ) : !storyDraft ? (
-              <div style={{ border: '1.5px dashed rgba(199,166,106,0.4)', borderRadius: 12, padding: '22px 16px', textAlign: 'center', fontSize: 12.5, color: TEXT_M }}>
-                هنوز استوری‌ای منتشر نکرده‌اید — از دکمه‌ی «استوری جدید» یک استوری بگذارید.
-              </div>
-            ) : null}
-          </div>
+          {/* ── باکسِ استوری این‌جا نیست ──
+              استوری بلافاصله منتشر می‌شود و ربطی به ثبتِ پروفایل ندارد؛
+              وسطِ فرمِ ثبت فقط حواس را پرت می‌کرد و کاربر فکر می‌کرد
+              بخشی از تکمیلِ پروفایل است. جایش پنلِ خودِ کاربر است، نه
+              فرمِ ثبت. */}
 
           {/* 1 — Basic info */}
           <div style={card}>
             {sectionTitle('اطلاعات پایه', 1)}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2,1fr)', gap: 14 }}>
-              <div><label style={lbl}>نام</label><input style={inpRO} value={form.firstNameFa} onChange={e => set('firstNameFa', e.target.value)} disabled placeholder="—" />{err('firstNameFa')}</div>
-              <div><label style={lbl}>نام خانوادگی</label><input style={inpRO} value={form.lastNameFa} onChange={e => set('lastNameFa', e.target.value)} disabled placeholder="—" />{err('lastNameFa')}</div>
-              <div style={{ gridColumn: '1 / -1', fontSize: 11.5, color: TEXT_M, marginTop: -6 }}>نام و نام خانوادگی از اطلاعات حساب کاربری شما گرفته شده و قابل تغییر نیست.</div>
-              <div><label style={lbl}>Last name (English){star}</label><input style={{ ...inp, direction: 'ltr', textAlign: 'left' }} value={form.lastNameEn} onChange={e => set('lastNameEn', e.target.value)} placeholder="Rezaei" />{err('lastNameEn')}</div>
-              <div><label style={lbl}>First name (English){star}</label><input style={{ ...inp, direction: 'ltr', textAlign: 'left' }} value={form.firstNameEn} onChange={e => set('firstNameEn', e.target.value)} placeholder="Ahmad" />{err('firstNameEn')}</div>
+              {/* ── چرا این دو فیلد گاهی قفل نیستند ──
+                  نام از حسابِ کاربری می‌آمد، قفل بود و ستاره هم نداشت —
+                  ولی `validate` اجباری‌اش می‌دانست. حسابی که نامِ فارسی
+                  نداشت، فرمی می‌ساخت که **هرگز ثبت نمی‌شد**: کاربر همه‌ی
+                  فیلدهای ستاره‌دار را پر می‌کرد، پیامِ «فیلدهای الزامی را
+                  کامل کنید» می‌گرفت، و فیلدِ مقصر نه ستاره داشت نه قابلِ
+                  تایپ بود.
+
+                  حالا قفل فقط وقتی است که واقعاً مقداری از حساب آمده. */}
+              <div><label style={lbl}>نام{firstLocked ? null : star}</label><input
+                style={firstLocked ? inpRO : (errors.firstNameFa ? inpErr : inp)}
+                value={form.firstNameFa} onChange={e => set('firstNameFa', e.target.value)}
+                disabled={firstLocked} placeholder={firstLocked ? '—' : 'مثال: احمد'}
+                data-field="firstNameFa" />{err('firstNameFa')}</div>
+              <div><label style={lbl}>نام خانوادگی{lastLocked ? null : star}</label><input
+                style={lastLocked ? inpRO : (errors.lastNameFa ? inpErr : inp)}
+                value={form.lastNameFa} onChange={e => set('lastNameFa', e.target.value)}
+                disabled={lastLocked} placeholder={lastLocked ? '—' : 'مثال: رضایی'}
+                data-field="lastNameFa" />{err('lastNameFa')}</div>
+              <div style={{ gridColumn: '1 / -1', fontSize: 11.5, color: TEXT_M, marginTop: -6 }}>
+                {firstLocked && lastLocked
+                  ? 'نام و نام خانوادگی از اطلاعات حساب کاربری شما گرفته شده و قابل تغییر نیست.'
+                  : 'حساب شما نام ثبت‌شده ندارد؛ همین‌جا وارد کنید.'}
+              </div>
+              <div><label style={lbl}>Last name (English){star}</label><input data-field="lastNameEn" style={{ ...(errors.lastNameEn ? inpErr : inp), direction: 'ltr', textAlign: 'left' }} value={form.lastNameEn} onChange={e => set('lastNameEn', e.target.value)} placeholder="Rezaei" />{err('lastNameEn')}</div>
+              <div><label style={lbl}>First name (English){star}</label><input data-field="firstNameEn" style={{ ...(errors.firstNameEn ? inpErr : inp), direction: 'ltr', textAlign: 'left' }} value={form.firstNameEn} onChange={e => set('firstNameEn', e.target.value)} placeholder="Ahmad" />{err('firstNameEn')}</div>
                             {/* نشانیِ اختصاصیِ سایت — همان چیزی که پنلِ باشگاه از اول داشت */}
               <div style={{ gridColumn: '1 / -1' }}>
+                <div data-field="slug"> {/* نشانیِ اختصاصی */}
                 <ProfileSlugField
                   kind="coach" value={form.slug}
-                  onChange={v => setForm(f => ({ ...f, slug: v }))}
+                  onChange={v => { setForm(f => ({ ...f, slug: v })); clearErr('slug') }}
                   suggestFrom={`${form.firstNameEn || form.firstNameFa} ${form.lastNameEn || form.lastNameFa}`}
                 />
+                </div>
               </div>
 <div style={{ gridColumn: '1 / -1' }}>
+                <div data-field="province" data-field-alt="city"> {/* استان و شهر */}
                 <ProvinceCitySelect
                   value={{ province: form.province, city: form.city }}
-                  onChange={v => setForm(f => ({ ...f, province: v.province, city: v.city }))}
+                  onChange={v => { setForm(f => ({ ...f, province: v.province, city: v.city })); clearErr('province', 'city') }}
                   required cityError={errors.city} provinceError={errors.province}
                 />
+                </div>
               </div>
               <div style={{ gridColumn: '1 / -1' }}>
                 <ClubPicker />
               </div>
-              <div style={{ gridColumn: '1 / -1' }}>
-                <SiteAddressField
-                  value={form.slug} onChange={v => set('slug', v)}
-                  basePath="coaches" required
-                  suggestFrom={`${form.firstNameEn} ${form.lastNameEn}`.trim()}
-                  error={errors.slug}
-                />
-              </div>
             </div>
 
-            <div style={{ marginTop: 16 }}>
+            <div data-field="disciplines" style={{ marginTop: 16 }}>
               <label style={lbl}>رشته‌های تخصصی (می‌توانید چند مورد انتخاب کنید){star}</label>
               <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                 {DISCIPLINES.map(d => {
@@ -532,7 +604,7 @@ export default function CoachDashboardPage() {
             </div>
             <div>
               <label style={lbl}>معرفی کامل{star}</label>
-              <textarea style={{ ...inp, minHeight: 120, resize: 'vertical', lineHeight: 1.9 }} value={form.fullBio} onChange={e => set('fullBio', e.target.value)} placeholder="درباره‌ی سوابق، روش تدریس و تخصص خود بنویسید..." />
+              <textarea data-field="fullBio" style={{ ...(errors.fullBio ? inpErr : inp), minHeight: 120, resize: 'vertical', lineHeight: 1.9 }} value={form.fullBio} onChange={e => set('fullBio', e.target.value)} placeholder="درباره‌ی سوابق، روش تدریس و تخصص خود بنویسید..." />
               {err('fullBio')}
             </div>
           </div>
@@ -606,8 +678,8 @@ export default function CoachDashboardPage() {
                   </button>
                 </div>
               ))}
-              <button type="button" onClick={() => videoInput.current?.click()} style={{ ...lqBtn, background: 'transparent', border: '1px dashed rgba(199,166,106,0.45)', alignSelf: 'flex-start', fontSize: 13, padding: '9px 16px' }}>+ افزودن ویدیو (با تصویر بندانگشتی)</button>
-              <input ref={videoInput} type="file" accept="image/*" hidden onChange={e => { addVideo(e.target.files?.[0]); e.target.value = '' }} />
+              <button type="button" onClick={() => videoInput.current?.click()} disabled={videoBusy} style={{ ...lqBtn, background: 'transparent', border: '1px dashed rgba(199,166,106,0.45)', alignSelf: 'flex-start', fontSize: 13, padding: '9px 16px' }}>{videoBusy ? 'در حال آپلود…' : '+ افزودن ویدیو'}</button>
+              <input ref={videoInput} type="file" accept="video/mp4,video/quicktime,video/webm" hidden onChange={e => { void addVideo(e.target.files?.[0]); e.target.value = '' }} />
             </div>
           </div>
 
@@ -664,6 +736,25 @@ export default function CoachDashboardPage() {
           </div>
         </div>
       )}
+      {/* پنجره‌ی خطا وسطِ صفحه — همان کامپوننتی که فرمِ آگهی هم دارد */}
+      <AlertDialog
+        open={!!alert}
+        title={alert?.title ?? ''}
+        lines={alert?.lines ?? []}
+        onClose={() => setAlert(null)}
+      />
     </div>
+  )
+}
+
+/* ── چرا گارد ──
+   بدونِ آن، کاربرِ واردنشده کلِ فرم را پر می‌کرد و بعد آپلود و ذخیره
+   با ۴۰۱ برمی‌گشت — و پیامِ «ویدیو بالا نرفت» او را دنبالِ فایل و
+   اینترنت می‌فرستاد، نه دکمه‌ی ورود. پنلِ داور از اول این را داشت. */
+export default function CoachDashboardPage() {
+  return (
+    <AuthGuard>
+      <CoachDashboardInner />
+    </AuthGuard>
   )
 }

@@ -87,14 +87,6 @@ export default function VerificationPrompt({
       </span>
       <span style={{ minWidth: 0, fontSize: compact ? 12 : 12.5, color: 'rgba(0,0,0,0.62)' }}>
         <b style={{ color: required ? '#B23B2E' : GOLD_D, fontWeight: 800 }}>{verificationText(role)}</b>
-        {!required && (
-          <>
-            {' '}
-            <span style={{ color: 'rgba(0,0,0,0.45)' }}>
-              آپلود مدرک اختیاری است و نبود آن مانع ثبت پروفایل شما نمی‌شود.
-            </span>
-          </>
-        )}
       </span>
     </div>
   )

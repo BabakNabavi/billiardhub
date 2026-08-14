@@ -7,7 +7,10 @@ import { provinceOfCity } from './iran-geo'
 
 export interface CoachGrade  { key: string; label: string; year: string }
 export interface CoachMedia  { id: string; url: string; caption: string }
-export interface CoachVideo  { id: string; thumbnail: string; title: string; duration: string }
+/* `url` نشانیِ خودِ فایل در Storage است، نه محتوا: پروفایل در
+   localStorage هم می‌نشیند و ویدیوی درون‌خطی آن را می‌ترکاند.
+   خالی‌بودنش یعنی ردیفِ قدیمی که فقط بندانگشتی داشت. */
+export interface CoachVideo  { id: string; url?: string; thumbnail: string; title: string; duration: string }
 
 export interface CoachProfile {
   slug: string

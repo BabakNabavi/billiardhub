@@ -1731,17 +1731,17 @@
           "options": [
             {
               "id": "hard-box",
-              "label_fa": "جعبه سفت",
+              "label_fa": "هارد باکس",
               "label_en": "Hard Box"
             },
             {
               "id": "soft-bag",
-              "label_fa": "کیف نرم",
+              "label_fa": "سافت باکس",
               "label_en": "Soft Bag"
             },
             {
               "id": "wooden-box",
-              "label_fa": "جعبه چوبی",
+              "label_fa": "باکس چوبی",
               "label_en": "Wooden Box"
             },
             {

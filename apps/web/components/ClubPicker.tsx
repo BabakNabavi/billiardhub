@@ -50,7 +50,7 @@ const norm = (s: string) =>
 
 export default function ClubPicker({
   value: valueProp, onChange, label = 'باشگاهی که در آن فعالیت می‌کنید',
-  hint = 'فقط باشگاه‌های ثبت‌شده در سایت — با انتخاب شما، یک عضو به آن باشگاه افزوده می‌شود',
+  hint = 'فقط باشگاه‌های ثبت‌شده در سایت',
   autoSave = true,
 }: Props) {
   /* حالتِ خودگردان: وقتی صفحه‌ای `value` نمی‌دهد، همین‌جا نگه داشته

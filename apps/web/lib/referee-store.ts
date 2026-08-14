@@ -9,7 +9,8 @@ import { provinceOfCity } from './iran-geo'
 
 export interface RefereeGrade  { key: string; label: string; year: string }
 export interface RefereeMedia  { id: string; url: string; caption: string }
-export interface RefereeVideo  { id: string; thumbnail: string; title: string; duration: string }
+/* `url` نشانیِ خودِ فایل است، نه محتوا — دلیلش در `coach-store` */
+export interface RefereeVideo  { id: string; url?: string; thumbnail: string; title: string; duration: string }
 
 export interface RefereeProfile {
   slug: string

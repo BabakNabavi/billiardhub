@@ -3050,6 +3050,92 @@ console.log('\n― لوازم جانبی ―');
     && !read('lib/market/specs.ts').includes("'کیس سخت'"),
     'هم فهرستِ فرم و هم آگهی‌های موجود');
 }
+/* ── فرمِ پروفایلِ نقش‌ها ── */
+console.log('\n― پروفایلِ مربی و داور ―');
+{
+  const forms = ['app/dashboard/coach/page.tsx', 'app/referees/dashboard/page.tsx'];
+
+  /* ── چرا فرم گاهی ثبت‌نشدنی بود ──
+     «نام» از حساب می‌آمد، قفل بود و ستاره نداشت — ولی اجباری بود.
+     حسابِ بی‌نام یعنی فرمی که هر چه کاربر پر کند باز هم رد می‌شود، و
+     فیلدِ مقصر نه دیده می‌شد نه قابلِ تایپ بود. */
+  t('نامِ قفل‌شده فقط وقتی قفل است که حساب واقعاً نام دارد',
+    forms.every(f => read(f).includes('const firstLocked = !!user?.firstName')
+      && read(f).includes('const lastLocked = !!user?.lastName')
+      && read(f).includes('disabled={firstLocked}')
+      /* داده‌ی سرور نباید نامِ حساب را با رشته‌ی خالی بپوشاند */
+      && read(f).includes('...(user?.firstName ? { firstNameFa: user.firstName } : {}),')),
+    'وگرنه یک فیلدِ اجباریِ پرنشدنی، فرم را برای همیشه می‌بندد');
+  t('خطا در پنجره‌ی وسطِ صفحه می‌آید، نه نوارِ بالای فرم',
+    forms.every(f => read(f).includes('<AlertDialog') && !read(f).includes('{topError && (')),
+    'کاربرِ ته فرمِ بلند نوار را نمی‌دید');
+  t('پیام نامِ فیلدهای ناقص را می‌گوید',
+    forms.every(f => read(f).includes('FIELD_LABELS[k] ?? k')),
+    '«فیلدهای الزامی را کامل کنید» نمی‌گوید کدام‌یک');
+  t('کادرِ فیلدِ ناقص قرمز می‌شود',
+    forms.every(f => read(f).includes('const inpErr') && read(f).includes('? inpErr : inp')),
+    'متنِ ریزِ زیرِ فیلد از دور دیده نمی‌شود');
+  t('صفحه روی اولین ایراد می‌ایستد و همه‌ی کلیدها مقصد دارند',
+    forms.every(f => {
+      const src = read(f);
+      if (!src.includes("scrollIntoView({ behavior: 'smooth', block: 'center' })")) return false;
+      const keys = [...new Set([...src.matchAll(/e\.([a-zA-Z]+)\s*=/g)].map(m => m[1]).filter(k => k !== 'trim'))];
+      /* همان دو صفتی که خودِ کد جست‌وجو می‌کند — نه بیشتر، وگرنه تست
+         سبز می‌ماند در حالی که پرش جایی نمی‌رود. */
+      const targets = [...src.matchAll(/data-field(?:-alt)?="(\w+)"/g)].map(m => m[1]);
+      if (!src.includes('[data-field-alt="${keys[0]}"]')) return false;
+      return keys.every(k => targets.includes(k));
+    }),
+    'پرش به فیلدی که مقصد ندارد یعنی هیچ اتفاقی نمی‌افتد');
+
+  /* ── داده‌ی سرور بدونِ اعتماد ──
+     مسیرِ ذخیره فقط `typeof === object` را می‌سنجد؛ ردیفی با
+     `fullBio: null` کلِ صفحه را با TypeError پایین می‌آورد. */
+  t('داده‌ی پروفایلِ سرور پیش از نشستن در فرم غربال می‌شود',
+    forms.every(f => read(f).includes('function safeRemote')
+      && read(f).includes('...safeRemote(remote.data),')
+      && !read(f).includes('...(remote.data as Partial<FormState>)')));
+  t('خطای فیلدهای غیرِ ورودی هم با اصلاح پاک می‌شود',
+    forms.every(f => read(f).includes('const clearErr =')
+      && read(f).includes("clearErr('province', 'city')")
+      && read(f).includes("clearErr('slug')")),
+    'استان و نشانی مستقیم setForm می‌زنند و قرمز می‌ماندند');
+  t('نامِ فقط-فاصله قفل نمی‌کند',
+    forms.every(f => read(f).includes('!!user?.firstName?.trim()')),
+    'قفل با مقدارِ فاصله‌دار، همان بن‌بستِ فیلدِ پرنشدنی را می‌سازد');
+  t('هر دو داشبورد پشتِ گاردِ ورود هستند',
+    forms.every(f => read(f).includes('<AuthGuard>')),
+    'کاربرِ واردنشده کلِ فرم را پر می‌کرد و بعد ۴۰۱ می‌گرفت');
+  t('مسیرِ ویدیوی پروفایل مالکیت را می‌سنجد',
+    read('lib/upload/policy.ts').includes("cleaned.startsWith('profiles/videos/')"),
+    'تکیه بر تصادفی‌بودنِ نامِ فایل، محافظ نیست');
+  t('صفحه‌ی عمومی پروفایل را از سرور هم می‌خواند',
+    ['app/coaches/[id]/page.tsx', 'app/referees/[id]/page.tsx']
+      .every(f => read(f).includes('fetchProfile<')),
+    'وگرنه پروفایل فقط در مرورگرِ خودِ صاحبش دیده می‌شد');
+  t('باکسِ استوری در فرمِ ثبت نیست',
+    forms.every(f => !read(f).includes('استوری‌های شما') && !read(f).includes('publishStory')),
+    'استوری مستقل از ثبتِ پروفایل منتشر می‌شود');
+  t('نشانیِ اختصاصی یک بار پرسیده می‌شود',
+    forms.every(f => (read(f).match(/<SiteAddressField/g) ?? []).length === 0
+      && read(f).includes('<ProfileSlugField')),
+    'دو کامپوننت روی یک مقدار می‌نوشتند');
+  t('دکمه‌ی افزودن ویدیو واقعاً ویدیو می‌گیرد',
+    forms.every(f => read(f).includes('accept="video/mp4,video/quicktime,video/webm"'))
+    && existsSync(join(ROOT, 'lib/video-thumb.ts'))
+    && read('lib/coach-store.ts').includes('url?: string'),
+    'تا امروز accept روی image/* بود و هیچ ویدیویی ذخیره نمی‌شد');
+  t('هر دو صفحه‌ی عمومی ویدیو را پخش می‌کنند',
+    existsSync(join(ROOT, 'components/ProfileVideoCard.tsx'))
+    && ['app/coaches/[id]/page.tsx', 'app/referees/[id]/page.tsx']
+      .every(f => read(f).includes('<ProfileVideoCard key={v.id} v={v} />')
+        && read(f).includes('url: v.url')),
+    'دکمه‌ی پخش تزئینی بود و صفحه‌ی داور اصلاً به‌روز نشده بود');
+  t('سه عبارتِ اضافه حذف شدند',
+    !read('components/ClubPicker.tsx').includes('یک عضو به آن باشگاه افزوده می‌شود')
+    && !read('components/VerificationPrompt.tsx').includes('مانع ثبت پروفایل شما نمی‌شود')
+    && forms.every(f => !read(f).includes('(با تصویر بندانگشتی)')));
+}
 /* ── نگهداری و رسانه ── */
 console.log('\n― زیرساختِ رسانه ―');
 {

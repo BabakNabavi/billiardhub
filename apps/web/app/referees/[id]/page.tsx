@@ -1,5 +1,7 @@
 'use client'
 import { useState, useEffect } from 'react'
+import ProfileVideoCard from '../../../components/ProfileVideoCard'
+import { fetchProfile } from '../../../lib/profiles/client'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import ClubStoryModal from '@/components/ClubStoryModal'
@@ -43,7 +45,8 @@ const img = (i:number) => IMGS[i%IMGS.length]??IMGS[0]!
 
 /* ─── Types ─── */
 interface GImg  { id:string; url:string; caption:string }
-interface VItem { id:string; thumbnail:string; title:string; duration:string }
+/* `url` از پروفایلِ واقعی می‌آید؛ نمونه‌های نمایشی ندارندش */
+interface VItem { id:string; url?:string; thumbnail:string; title:string; duration:string }
 interface Album { id:string; name:string; imageIds:string[] }
 
 interface RefereeFull {
@@ -77,7 +80,7 @@ function mapLocalToFull(p: RefereeProfile): RefereeFull {
     phone: p.phone, whatsapp: p.whatsapp,
     instagram: p.instagram || undefined, telegram: p.telegram || undefined,
     gallery: p.gallery.map(g => ({ id: g.id, url: g.url, caption: g.caption })),
-    videos: p.videos.map(v => ({ id: v.id, thumbnail: v.thumbnail, title: v.title, duration: v.duration })),
+    videos: p.videos.map(v => ({ id: v.id, url: v.url, thumbnail: v.thumbnail, title: v.title, duration: v.duration })),
     photo: p.photo || undefined,
     coverImage: p.coverImage || undefined,
   }
@@ -265,7 +268,19 @@ const D: RefereeFull[] = [
 export default function RefereeProfilePage() {
   const { id } = useParams<{id:string}>()
   const [localP, setLocalP] = useState<RefereeProfile | null>(null)
-  useEffect(() => { if (id) setLocalP(getRefereeProfile(id)) }, [id])
+  /* ── چرا سرور هم خوانده می‌شود ──
+     این صفحه فقط `localStorage` را می‌دید، یعنی پروفایل تنها در مرورگرِ
+     خودِ صاحبش دیده می‌شد و بقیه داده‌ی نمونه می‌گرفتند. حافظه‌ی محلی
+     اول می‌آید چون فوری است؛ پاسخِ سرور رویش می‌نشیند. */
+  useEffect(() => {
+    if (!id) return
+    setLocalP(getRefereeProfile(id))
+    let alive = true
+    void fetchProfile<RefereeProfile>('referee', id).then(r => {
+      if (alive && r?.data) setLocalP({ ...(r.data as RefereeProfile), slug: r.slug })
+    })
+    return () => { alive = false }
+  }, [id])
   const referee = localP ? mapLocalToFull(localP) : (D.find(r => r.id === id) ?? D[0]!)
 
   const [openStory,     setOpenStory]     = useState(false)
@@ -462,20 +477,7 @@ export default function RefereeProfilePage() {
             {/* Videos */}
             {tab === 'videos' && (
               <div className="gvideos" style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:10 }}>
-                {referee.videos.map(v => (
-                  <div key={v.id} className="gcard" style={{ aspectRatio:'16/9', background:'rgba(17,17,16,0.05)', position:'relative' }}>
-                    <img loading="lazy" decoding="async" src={v.thumbnail} alt={v.title} style={{ width:'100%', height:'100%', objectFit:'cover', display:'block' }} />
-                    <div style={{ position:'absolute', inset:0, background:'linear-gradient(to top, rgba(0,0,0,0.62) 0%, rgba(0,0,0,0) 55%)', borderRadius:'inherit' }} />
-                    {/* Play */}
-                    <div style={{ position:'absolute', top:'50%', left:'50%', transform:'translate(-50%,-58%)', width:38, height:38, borderRadius:'50%', background:'rgba(255,255,255,0.22)', backdropFilter:'blur(4px)', display:'flex', alignItems:'center', justifyContent:'center' }}>
-                      <svg width="13" height="13" viewBox="0 0 24 24" fill="#fff"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                    </div>
-                    <div style={{ position:'absolute', bottom:10, right:10, left:10, color:'#fff' }}>
-                      <div style={{ fontSize:12, fontWeight:700, lineHeight:1.4 }}>{v.title}</div>
-                      <div style={{ fontSize:11, color:'rgba(255,255,255,0.60)', marginTop:2 }}>{v.duration}</div>
-                    </div>
-                  </div>
-                ))}
+                {referee.videos.map(v => <ProfileVideoCard key={v.id} v={v} />)}
               </div>
             )}
 

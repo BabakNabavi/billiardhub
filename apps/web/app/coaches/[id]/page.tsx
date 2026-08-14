@@ -1,5 +1,7 @@
 'use client'
 import { useState, useEffect } from 'react'
+import ProfileVideoCard from '../../../components/ProfileVideoCard'
+import { fetchProfile } from '../../../lib/profiles/client'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import ClubStoryModal from '@/components/ClubStoryModal'
@@ -41,7 +43,9 @@ const img = (i:number) => IMGS[i%IMGS.length]??IMGS[0]!
 
 /* ─── Types ─── */
 interface GImg  { id:string; url:string; caption:string }
-interface VItem { id:string; thumbnail:string; title:string; duration:string }
+/* `url` از پروفایلِ واقعی می‌آید؛ نمونه‌های نمایشی ندارندش و همان
+   کارتِ بی‌پخش را نشان می‌دهند. */
+interface VItem { id:string; url?:string; thumbnail:string; title:string; duration:string }
 interface Album { id:string; name:string; imageIds:string[] }
 
 interface CoachFull {
@@ -291,7 +295,7 @@ function mapLocalToFull(p: CoachProfile): CoachFull {
     instagram: p.instagram || undefined,
     telegram: p.telegram || undefined,
     gallery: p.gallery.map(g => ({ id: g.id, url: g.url, caption: g.caption })),
-    videos: p.videos.map(v => ({ id: v.id, thumbnail: v.thumbnail, title: v.title, duration: v.duration })),
+    videos: p.videos.map(v => ({ id: v.id, url: v.url, thumbnail: v.thumbnail, title: v.title, duration: v.duration })),
   }
 }
 
@@ -303,7 +307,23 @@ export default function CoachProfilePage() {
 
   const [localP, setLocalP]   = useState<CoachProfile | null>(null)
   const [checked, setChecked] = useState(false)
-  useEffect(() => { setLocalP(id ? getCoachProfile(id) : null); setChecked(true) }, [id])
+  /* ── چرا سرور هم خوانده می‌شود ──
+     این صفحه فقط `localStorage` را می‌دید، یعنی پروفایل — عکس، معرفی،
+     ویدیو — تنها در مرورگرِ خودِ صاحبش دیده می‌شد و بقیه‌ی بازدیدکنندگان
+     داده‌ی نمونه می‌گرفتند. فهرستِ مربیان از اول از سرور می‌خواند؛ فقط
+     همین صفحه جا مانده بود.
+
+     حافظه‌ی محلی اول می‌آید چون فوری است و صاحبِ پروفایل باید تغییرش را
+     بلافاصله ببیند؛ پاسخِ سرور رویش می‌نشیند. */
+  useEffect(() => {
+    if (!id) { setChecked(true); return }
+    setLocalP(getCoachProfile(id))
+    let alive = true
+    void fetchProfile<CoachProfile>('coach', id).then(r => {
+      if (alive && r?.data) setLocalP({ ...(r.data as CoachProfile), slug: r.slug })
+    }).finally(() => { if (alive) setChecked(true) })
+    return () => { alive = false }
+  }, [id])
   const coach = localP ? mapLocalToFull(localP) : mock
 
   const [openStory,     setOpenStory]     = useState(false)
@@ -518,20 +538,7 @@ export default function CoachProfilePage() {
             {/* Videos */}
             {tab === 'videos' && (
               <div className="gvideos" style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:10 }}>
-                {coach.videos.map(v => (
-                  <div key={v.id} className="gcard" style={{ aspectRatio:'16/9', background:'rgba(17,17,16,0.05)', position:'relative' }}>
-                    <img loading="lazy" decoding="async" src={v.thumbnail} alt={v.title} style={{ width:'100%', height:'100%', objectFit:'cover', display:'block' }} />
-                    <div style={{ position:'absolute', inset:0, background:'linear-gradient(to top, rgba(0,0,0,0.62) 0%, rgba(0,0,0,0) 55%)', borderRadius:'inherit' }} />
-                    {/* Play */}
-                    <div style={{ position:'absolute', top:'50%', left:'50%', transform:'translate(-50%,-58%)', width:38, height:38, borderRadius:'50%', background:'rgba(255,255,255,0.22)', backdropFilter:'blur(4px)', display:'flex', alignItems:'center', justifyContent:'center' }}>
-                      <svg width="13" height="13" viewBox="0 0 24 24" fill="#fff"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                    </div>
-                    <div style={{ position:'absolute', bottom:10, right:10, left:10, color:'#fff' }}>
-                      <div style={{ fontSize:12, fontWeight:700, lineHeight:1.4 }}>{v.title}</div>
-                      <div style={{ fontSize:11, color:'rgba(255,255,255,0.60)', marginTop:2 }}>{v.duration}</div>
-                    </div>
-                  </div>
-                ))}
+                {coach.videos.map(v => <ProfileVideoCard key={v.id} v={v} />)}
               </div>
             )}
 
