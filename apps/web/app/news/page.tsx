@@ -353,7 +353,7 @@ export default function NewsPage() {
 
         .nw-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
 
-        .nw-search:focus { border-color: rgba(199,166,106,0.6) !important; box-shadow: 0 0 0 3px rgba(199,166,106,0.13) !important; outline: none; }
+        /* حالتِ فوکوس از کلاسِ مشترکِ lq-field می‌آید */
         .nw-chips-row { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; padding: 2px; }
         .nw-chips-row::-webkit-scrollbar { display: none; }
 
@@ -441,20 +441,20 @@ export default function NewsPage() {
             {/* جستجو */}
             <div style={{ position: 'relative', flex: 1, minWidth: 0 }}>
               <input
-                className="nw-search"
+                className="input input-sm input-icon-end"
                 value={query}
                 onChange={e => { setQuery(e.target.value); setShown(PAGE_STEP) }}
                 placeholder="جستجو در اخبار، عنوان یا برچسب…"
-                style={{ width: '100%', boxSizing: 'border-box', padding: '10px 40px 10px 14px', borderRadius: 12, fontSize: 13, background: '#FAFAF7', border: `1px solid ${LINE}`, color: TEXT, fontFamily: 'inherit', transition: 'border-color .2s, box-shadow .2s' }}
+                
               />
-              <Search size={15} style={{ position: 'absolute', right: 13, top: '50%', transform: 'translateY(-50%)', color: GOLD_D, pointerEvents: 'none' }} />
+              <Search size={15} style={{ position: 'absolute', insetInlineEnd: 13, top: '50%', transform: 'translateY(-50%)', color: GOLD_D, pointerEvents: 'none' }} />
             </div>
             {/* مرتب‌سازی */}
             <div ref={sortRef} style={{ position: 'relative', flexShrink: 0 }}>
               <button
                 onClick={() => setSortOpen(o => !o)}
                 onBlur={() => window.setTimeout(() => setSortOpen(false), 140)}
-                style={{ display: 'inline-flex', alignItems: 'center', gap: 7, padding: '10px 13px', borderRadius: 12, cursor: 'pointer', fontFamily: 'inherit', fontSize: 12.5, fontWeight: 700, background: 'rgba(255,255,255,0.78)', border: `1px solid ${sortOpen ? 'rgba(199,166,106,0.55)' : LINE}`, color: SEC, transition: 'border-color .2s' }}>
+                className={`btn btn-glass btn-sm${sortOpen ? ' is-open' : ''}`} type="button" aria-haspopup="listbox" aria-expanded={sortOpen}>
                 <span className="nw-hide-mob" style={{ color: MUT, fontWeight: 500 }}>مرتب‌سازی:</span>
                 {sort === 'newest' ? 'جدیدترین' : 'پربازدیدترین'}
                 <ChevronDown size={13} style={{ transition: 'transform .2s', transform: sortOpen ? 'rotate(180deg)' : 'none', color: GOLD_D }} />

@@ -214,7 +214,7 @@ export default function PlayersPage() {
         .pl-seg.on { background: linear-gradient(135deg, rgba(199,166,106,0.16), rgba(199,166,106,0.10));
           color: ${GOLD_D}; box-shadow: inset 0 0 0 1px rgba(199,166,106,0.36); }
 
-        .pl-search:focus { border-color: rgba(199,166,106,0.6) !important; box-shadow: 0 0 0 3px rgba(199,166,106,0.13) !important; outline: none; }
+        /* حالتِ فوکوس از کلاسِ مشترکِ lq-field می‌آید */
 
         /* ═══ هیروی سینمایی ═══ */
         .pl-hero { position: relative; overflow: hidden; background: #0D0C0A; color: #fff; }
@@ -257,13 +257,13 @@ export default function PlayersPage() {
           </div>
           <div style={{ position: 'relative', flex: '1 1 220px', minWidth: 200 }}>
             <input
-              className="pl-search"
+              className="input input-sm input-icon-end"
               value={query}
               onChange={e => setQuery(e.target.value)}
               placeholder="جستجوی نام، شهر یا رشته…"
-              style={{ width: '100%', boxSizing: 'border-box', padding: '11px 40px 11px 14px', borderRadius: 12, fontSize: 13, background: '#FAFAF7', border: `1px solid ${LINE}`, color: TEXT, fontFamily: 'inherit', transition: 'border-color .2s, box-shadow .2s' }}
+              
             />
-            <Search size={15} style={{ position: 'absolute', right: 13, top: '50%', transform: 'translateY(-50%)', color: GOLD_D, pointerEvents: 'none' }} />
+            <Search size={15} style={{ position: 'absolute', insetInlineEnd: 13, top: '50%', transform: 'translateY(-50%)', color: GOLD_D, pointerEvents: 'none' }} />
           </div>
         </div>
       </div>

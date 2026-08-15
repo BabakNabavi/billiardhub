@@ -290,7 +290,7 @@ export default function TournamentsPage() {
         .tn-tab:hover { color: ${GOLD_D}; }
         .tn-tab.on { background: linear-gradient(135deg, rgba(199,166,106,0.16), rgba(199,166,106,0.10));
           color: ${GOLD_D}; box-shadow: inset 0 0 0 1px rgba(199,166,106,0.36); }
-        .tn-search:focus { border-color: rgba(199,166,106,0.6) !important; box-shadow: 0 0 0 3px rgba(199,166,106,0.13) !important; outline: none; }
+        /* حالتِ فوکوس از کلاسِ مشترکِ lq-field می‌آید */
 
         /* ═══ بیلبورد رویداد اصلی ═══ */
         .tn-main { position: relative; display: grid; grid-template-columns: minmax(0,1.15fr) minmax(0,1fr);
@@ -412,13 +412,13 @@ export default function TournamentsPage() {
           <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
             <div className="tn-sbox" style={{ position: 'relative', flex: 1, minWidth: 0 }}>
               <input
-                className="tn-search"
+                className="input input-sm input-icon-end"
                 value={search}
                 onChange={e => setSearch(e.target.value)}
                 placeholder="جستجو در مسابقات…"
-                style={{ width: '100%', boxSizing: 'border-box', padding: '11px 40px 11px 14px', borderRadius: 12, fontSize: 13, background: '#FAFAF7', border: `1px solid ${LINE}`, color: TEXT, fontFamily: 'inherit', transition: 'border-color .2s, box-shadow .2s' }}
+                
               />
-              <Search size={15} style={{ position: 'absolute', right: 13, top: '50%', transform: 'translateY(-50%)', color: GOLD_D, pointerEvents: 'none' }} />
+              <Search size={15} style={{ position: 'absolute', insetInlineEnd: 13, top: '50%', transform: 'translateY(-50%)', color: GOLD_D, pointerEvents: 'none' }} />
             </div>
             <div className="tn-view" role="group" aria-label="حالت نمایش">
               <button className={view === 'grid' ? 'on' : ''} onClick={() => setView('grid')} aria-label="نمایش کارتی"><LayoutGrid size={16} /></button>

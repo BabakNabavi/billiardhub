@@ -204,7 +204,7 @@ export default function ServicesPage() {
         .sv-chip.on { background: rgba(199,166,106,0.12); border-color: rgba(199,166,106,0.38); color: ${GOLD_D}; }
         .sv-chips-row { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; padding: 2px; }
         .sv-chips-row::-webkit-scrollbar { display: none; }
-        .sv-search:focus { border-color: rgba(199,166,106,0.6) !important; box-shadow: 0 0 0 3px rgba(199,166,106,0.13) !important; outline: none; }
+        /* حالتِ فوکوس از کلاسِ مشترکِ lq-field می‌آید */
 
         .sv-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
         .sv-mobile-only { display: none; }
@@ -250,13 +250,13 @@ export default function ServicesPage() {
           <div style={{ display: 'flex', gap: 10 }}>
             <div style={{ position: 'relative', flex: 1, minWidth: 0 }}>
               <input
-                className="sv-search"
+                className="input input-sm input-icon-end"
                 value={query}
                 onChange={e => setQuery(e.target.value)}
                 placeholder="جستجوی متخصص، تخصص یا باشگاه…"
-                style={{ width: '100%', boxSizing: 'border-box', padding: '10px 40px 10px 14px', borderRadius: 12, fontSize: 13, background: '#FAFAF7', border: `1px solid ${LINE}`, color: TEXT, fontFamily: 'inherit', transition: 'border-color .2s, box-shadow .2s' }}
+                
               />
-              <Search size={15} style={{ position: 'absolute', right: 13, top: '50%', transform: 'translateY(-50%)', color: GOLD_D, pointerEvents: 'none' }} />
+              <Search size={15} style={{ position: 'absolute', insetInlineEnd: 13, top: '50%', transform: 'translateY(-50%)', color: GOLD_D, pointerEvents: 'none' }} />
             </div>
 
             {/* شهر — دسکتاپ */}
@@ -264,7 +264,7 @@ export default function ServicesPage() {
               <button
                 onClick={() => setCityOpen(o => !o)}
                 onBlur={() => window.setTimeout(() => setCityOpen(false), 140)}
-                style={{ display: 'inline-flex', alignItems: 'center', gap: 7, padding: '10px 13px', borderRadius: 12, cursor: 'pointer', fontFamily: 'inherit', fontSize: 12.5, fontWeight: 700, background: 'rgba(255,255,255,0.78)', border: `1px solid ${cityOpen ? 'rgba(199,166,106,0.55)' : LINE}`, color: SEC, transition: 'border-color .2s' }}>
+                className={`btn btn-glass btn-sm${cityOpen ? ' is-open' : ''}`} type="button" aria-haspopup="listbox" aria-expanded={cityOpen}>
                 <MapPin size={13} style={{ color: '#14532D' }} />
                 {city === 'all' ? 'همه شهرها' : city}
                 <ChevronDown size={13} style={{ transition: 'transform .2s', transform: cityOpen ? 'rotate(180deg)' : 'none', color: GOLD_D }} />

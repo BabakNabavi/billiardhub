@@ -3404,6 +3404,42 @@ console.log('\n― صحنه روی همه‌ی صفحه‌های اصلی ―');
 }
 
 
+console.log('\n― دکمه و فیلد روی سیستمِ موجود ―');
+{
+  /* ⚠️ یک‌بار این‌جا یک سیستمِ دومِ دکمه/فیلد ساخته شد در حالی که
+     `.btn`/`.input` از قبل بودند و ده‌ها فایل از آن‌ها استفاده
+     می‌کردند. پس گرفته شد و حالت‌های گمشده به همان سیستمِ موجود
+     اضافه شد. این تست جلوی برگشتنش را می‌گیرد. */
+  const css = read('app/globals.css');
+  /* دنبالِ *قاعده* می‌گردیم نه هر ذکری: کامنتِ بالای همین بخش در
+     globals عمداً نامشان را دارد تا تاریخچه گم نشود. */
+  t('سیستمِ دومِ دکمه/فیلد ساخته نشده',
+    !/^\.lq-btn/m.test(css) && !/^\.lq-field/m.test(css),
+    'قاعده‌ی ۲ پروژه: قبل از نوشتن بگرد؛ دوباره‌کاری باگ است');
+
+  /* چهار حالت، روی همان سیستمِ موجود */
+  t('دکمه: focus-visible', css.includes('.btn:focus-visible'));
+  t('دکمه: غیرفعال', css.includes('.btn:disabled'));
+  t('دکمه: در حالِ کار', css.includes("[data-busy='true']::after"));
+  t('فیلد: focus-visible', css.includes('.input:focus-visible'));
+  t('فیلد: غیرفعال', css.includes('.input:disabled'));
+  /* با آکولاد: '.input-sm' زیررشته‌ی '.input-smx' هم هست */
+  t('نسخه‌ی فشرده‌ی فیلد', css.includes('.input-sm {'));
+  t('پدینگِ آیکون منطقی است', css.includes('padding-inline-end'),
+    'راست/چپِ فیزیکی در چیدمانِ راست‌به‌چپ ممنوع است');
+
+  const pages = ['app/tournaments/page.tsx', 'app/news/page.tsx', 'app/players/page.tsx', 'app/services/page.tsx'];
+  for (const p of pages) {
+    t(`فیلدِ مشترک در ${p.split('/')[1]}`, /className="input input-sm/.test(read(p)));
+  }
+  t('قاعده‌ی فوکوسِ محلی حذف شد',
+    pages.every(p => !/-search:focus \{/.test(read(p))),
+    'نسخه‌ی محلی !important داشت و کلاسِ مشترک را بی‌اثر می‌کرد');
+  t('حالتِ باز کلاس است نه رنگِ درون‌خطی',
+    css.includes('.btn.is-open') && !read('app/news/page.tsx').includes('borderColor: sortOpen'),
+    'مقدارِ درون‌خطی بر :hover برنده می‌شود و حاشیه‌ی هاور را می‌کشد');
+}
+
 console.log('\n― یک سطح برای کارتِ محصول ―');
 {
   /* یک محصول در سه صفحه دیده می‌شود و تا امروز سه کارتِ متفاوت بود:
