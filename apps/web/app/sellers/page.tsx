@@ -662,7 +662,7 @@ export default function SellersPage() {
                 <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
               </svg>
               <input
-                className="input input-icon-start-lg" type="search" aria-label="جستجوی فروشگاه"
+                className="input input-glass input-icon-start-lg" type="search" aria-label="جستجوی فروشگاه"
                 placeholder="جستجوی فروشنده، شهر یا برند..."
                 value={search} onChange={e => setSearch(e.target.value)}
               />

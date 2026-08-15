@@ -3425,6 +3425,17 @@ console.log('\n― دکمه و فیلد روی سیستمِ موجود ―');
   t('فیلد: غیرفعال', css.includes('.input:disabled'));
   /* با آکولاد: '.input-sm' زیررشته‌ی '.input-smx' هم هست */
   t('نسخه‌ی فشرده‌ی فیلد', css.includes('.input-sm {'));
+  /* iOS 26: خودِ کنترل شیشه است، نه اینکه روی شیشه بنشیند. سه جزء
+     لازم است — اشباع، تارکردنِ پس‌زمینه، و درخششِ لبه. نبودِ حتی یکی
+     نتیجه را به «سفیدِ رنگ‌پریده» برمی‌گرداند. */
+  const glass = css.split('.input-glass {')[1]?.split('}')[0] ?? '';
+  t('واریانتِ شیشه‌ایِ فیلد کامل است',
+    /(^|[^-])backdrop-filter:/m.test(glass) && glass.includes('saturate')
+    && glass.includes('inset 0 1.5px 0'),
+    'بدونِ blur و درخششِ لبه فقط رنگ‌پریده می‌شود');
+  t('شیشه هندسه را دست نمی‌زند',
+    !glass.includes('border-radius') && !/border:/.test(glass),
+    'وگرنه اندازه‌ی فشرده‌ی .input-sm بی‌اثر می‌شود');
   /* ⚠️ سمتِ *شروع*، نه پایان: در چیدمانِ راست‌به‌چپ آیکونِ جست‌وجو
      سمتِ راست می‌نشیند و 'inline-end' یعنی چپ. یک‌بار اشتباه گرفته شد و
      متن از زیرِ آیکون رد می‌شد. */
@@ -3435,7 +3446,7 @@ console.log('\n― دکمه و فیلد روی سیستمِ موجود ―');
 
   const pages = ['app/tournaments/page.tsx', 'app/news/page.tsx', 'app/players/page.tsx', 'app/services/page.tsx'];
   for (const p of pages) {
-    t(`فیلدِ مشترک در ${p.split('/')[1]}`, /className="input input-sm/.test(read(p)));
+    t(`فیلدِ مشترک در ${p.split('/')[1]}`, /className="input input-glass input-sm/.test(read(p)));
   }
   /* ── چرا این ادعا روی TSX است و نه CSS ──
      باگِ واقعی این‌جا بود، نه در استایل‌شیت: آیکون با
@@ -3444,7 +3455,7 @@ console.log('\n― دکمه و فیلد روی سیستمِ موجود ―');
   const heroPages = ['app/sellers/page.tsx', 'app/manufacturers/page.tsx'];
   for (const p of heroPages) {
     t(`فیلدِ هیرو در ${p.split('/')[1]}`,
-      /className="input input-icon-start-lg/.test(read(p)));
+      /className="input input-glass input-icon-start-lg/.test(read(p)));
   }
   for (const p of [...pages, ...heroPages]) {
     const src = read(p);

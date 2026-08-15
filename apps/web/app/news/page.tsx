@@ -441,7 +441,7 @@ export default function NewsPage() {
             {/* جستجو */}
             <div style={{ position: 'relative', flex: 1, minWidth: 0 }}>
               <input
-                className="input input-sm input-icon-start" type="search" aria-label="جستجو در اخبار"
+                className="input input-glass input-sm input-icon-start" type="search" aria-label="جستجو در اخبار"
                 value={query}
                 onChange={e => { setQuery(e.target.value); setShown(PAGE_STEP) }}
                 placeholder="جستجو در اخبار، عنوان یا برچسب…"

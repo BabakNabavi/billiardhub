@@ -412,7 +412,7 @@ export default function TournamentsPage() {
           <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
             <div className="tn-sbox" style={{ position: 'relative', flex: 1, minWidth: 0 }}>
               <input
-                className="input input-sm input-icon-start" type="search" aria-label="جستجو در مسابقات"
+                className="input input-glass input-sm input-icon-start" type="search" aria-label="جستجو در مسابقات"
                 value={search}
                 onChange={e => setSearch(e.target.value)}
                 placeholder="جستجو در مسابقات…"

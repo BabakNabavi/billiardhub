@@ -257,7 +257,7 @@ export default function PlayersPage() {
           </div>
           <div style={{ position: 'relative', flex: '1 1 220px', minWidth: 200 }}>
             <input
-              className="input input-sm input-icon-start" type="search" aria-label="جستجو در بازیکنان"
+              className="input input-glass input-sm input-icon-start" type="search" aria-label="جستجو در بازیکنان"
               value={query}
               onChange={e => setQuery(e.target.value)}
               placeholder="جستجوی نام، شهر یا رشته…"
