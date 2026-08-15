@@ -4,7 +4,6 @@ import ProfileVideoCard from '../../../components/ProfileVideoCard'
 import { fetchProfile } from '../../../lib/profiles/client'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
-import ClubStoryModal from '@/components/ClubStoryModal'
 import { useProfileImageViewer } from '@/components/ProfileImageViewer'
 import { useTabKeys } from '@/hooks/use-tab-keys'
 import {
@@ -270,22 +269,24 @@ const D: RefereeFull[] = [
 export default function RefereeProfilePage() {
   const { id } = useParams<{id:string}>()
   const [localP, setLocalP] = useState<RefereeProfile | null>(null)
+  /* تا وقتی پاسخِ سرور نیامده «پیدا نشد» نشان نمی‌دهیم — وگرنه هر
+     پروفایلِ واقعی یک لحظه «این داور پیدا نشد» می‌شود و بعد می‌پرد. */
+  const [checked, setChecked] = useState(false)
   /* ── چرا سرور هم خوانده می‌شود ──
      این صفحه فقط `localStorage` را می‌دید، یعنی پروفایل تنها در مرورگرِ
      خودِ صاحبش دیده می‌شد و بقیه داده‌ی نمونه می‌گرفتند. حافظه‌ی محلی
      اول می‌آید چون فوری است؛ پاسخِ سرور رویش می‌نشیند. */
   useEffect(() => {
-    if (!id) return
+    if (!id) { setChecked(true); return }
     setLocalP(getRefereeProfile(id))
     let alive = true
     void fetchProfile<RefereeProfile>('referee', id).then(r => {
       if (alive && r?.data) setLocalP({ ...(r.data as RefereeProfile), slug: r.slug })
-    })
+    }).finally(() => { if (alive) setChecked(true) })
     return () => { alive = false }
   }, [id])
-  const referee = localP ? mapLocalToFull(localP) : (D.find(r => r.id === id) ?? D[0]!)
-
-  const [openStory,     setOpenStory]     = useState(false)
+  /* ⚠️ بدونِ فالبک — دلیلش در صفحه‌ی مربی */
+  const referee = localP ? mapLocalToFull(localP) : (D.find(r => r.id === id) ?? null)
   const { open: openImage, viewer: imageViewer } = useProfileImageViewer()
   const [copied,        setCopied]        = useState(false)
   const [tab,           setTab]           = useState<'photos'|'videos'|'albums'>('photos')
@@ -295,8 +296,8 @@ export default function RefereeProfilePage() {
   const [expandedAlbum, setExpandedAlbum] = useState<string|null>(null)
   const [lightbox,      setLightbox]      = useState<GImg|null>(null)
 
-  const spec  = SPECS[referee.specialty as keyof typeof SPECS]
-  const grade = GRADE_DOTS[referee.badge]
+  const spec  = referee ? SPECS[referee.specialty as keyof typeof SPECS] : undefined
+  const grade = referee ? GRADE_DOTS[referee.badge] : undefined
   const socialBtn: React.CSSProperties = { width:44, height:44, borderRadius:11, display:'flex', alignItems:'center', justifyContent:'center', background:'rgba(26,25,23,0.06)', border:'1px solid rgba(26,25,23,0.10)', color:'rgba(26,25,23,0.5)', textDecoration:'none', flexShrink:0, cursor:'pointer' }
 
   const TABS = ['photos', 'videos', 'albums'] as const
@@ -307,6 +308,24 @@ export default function RefereeProfilePage() {
     setAlbums(prev => [...prev, { id:`a${Date.now()}`, name:newAlbumName.trim(), imageIds:[] }])
     setNewAlbumName('')
     setShowNewAlbum(false)
+  }
+
+  if (!D.some(r => r.id === id) && !checked) {
+    return <div style={{ direction:'rtl', fontFamily:"'Vazirmatn',Tahoma,sans-serif", background:'#F1EFEC', minHeight:'100vh' }} />
+  }
+
+  if (!referee) {
+    return (
+      <div className="lq-stage" style={{ direction:'rtl', fontFamily:"'Vazirmatn',Tahoma,sans-serif", minHeight:'100vh', display:'flex', alignItems:'center', justifyContent:'center', padding:24 }}>
+        <div className="lqg" style={{ padding:'34px 30px', textAlign:'center', maxWidth:420 }}>
+          <h1 style={{ fontSize:18, fontWeight:800, color:TEXT, marginBottom:8 }}>این داور پیدا نشد</h1>
+          <p style={{ fontSize:13.5, color:TEXT_S, lineHeight:2, marginBottom:18 }}>
+            ممکن است نشانی اشتباه باشد یا پروفایل هنوز تأیید نشده باشد.
+          </p>
+          <Link href="/referees" className="btn btn-glass btn-sm">بازگشت به داوران</Link>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -394,11 +413,11 @@ export default function RefereeProfilePage() {
               <div style={{ padding:'0 24px 20px', position:'relative', zIndex:2 }}>
                 {/* avatar */}
                 <div style={{ display:'flex', justifyContent:'flex-start', alignItems:'flex-end', marginTop:'clamp(-64px,-9vw,-72px)' }}>
-                  <button onClick={() => { if (referee.hasStory) { setOpenStory(true); return } openImage(referee.photo ?? '', { alt: referee.name, title: 'عکس پروفایل' }) }} aria-label={referee.hasStory ? 'دیدن استوری' : 'بزرگ‌نمایی عکس پروفایل'} disabled={!referee.hasStory && !referee.photo} style={{ background:'none', border:'none', padding:0, cursor: (referee.hasStory || referee.photo) ? 'pointer' : 'default', borderRadius:'50%', width:'clamp(104px,14vw,148px)', aspectRatio:'1 / 1', flexShrink:0 }}>
+                  <button onClick={() => { openImage(referee.photo ?? '', { alt: referee.name, title: 'عکس پروفایل' }) }} aria-label="بزرگ‌نمایی عکس پروفایل" disabled={!referee.photo} style={{ background:'none', border:'none', padding:0, cursor: referee.photo ? 'pointer' : 'default', borderRadius:'50%', width:'clamp(104px,14vw,148px)', aspectRatio:'1 / 1', flexShrink:0 }}>
                     <div style={{ width:'100%', height:'100%', borderRadius:'50%', boxSizing:'border-box',
-                      background: referee.hasStory ? 'linear-gradient(45deg,#feda75,#fa7e1e,#d62976,#962fbf,#4f5bd5)' : '#fff',
-                      padding: referee.hasStory ? 4 : 0,
-                      boxShadow: referee.hasStory ? '0 0 16px rgba(214,41,118,0.40), 0 2px 8px rgba(0,0,0,0.14)' : '0 2px 8px rgba(0,0,0,0.14)' }}>
+                      background: '#fff',
+                      padding: 0,
+                      boxShadow: '0 2px 8px rgba(0,0,0,0.14)' }}>
                       <div style={{ width:'100%', height:'100%', borderRadius:'50%', border:'3px solid #fff', overflow:'hidden', background:'#E7ECF1', display:'flex', alignItems:'flex-end', justifyContent:'center' }}>
                         {referee.photo ? (
                           <img loading="lazy" decoding="async" src={referee.photo} alt={referee.name} style={{ width:'100%', height:'100%', objectFit:'cover' }}/>
@@ -656,13 +675,6 @@ export default function RefereeProfilePage() {
           </div>
         )}
 
-        {/* ── Story Modal ── */}
-        {openStory && referee.hasStory && (
-          <ClubStoryModal
-            club={{ name:referee.name, storyMediaUrl:referee.storyImage, storyType:'image', badge:'داور' }}
-            onClose={() => setOpenStory(false)}
-          />
-        )}
 
         {/* نمای تمام‌صفحه‌ی عکس پروفایل و کاور */}
         {imageViewer}

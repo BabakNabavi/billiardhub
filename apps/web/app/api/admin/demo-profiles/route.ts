@@ -89,7 +89,9 @@ function withDefaults(kind: ProfileKind, d: Record<string, unknown>): Record<str
         ...common, title: s(d.title, name),
         desc: intro, contactPhone: s(d.contactPhone) || s(d.phone),
         phones: arr(d.phones), brands: arr(d.brands),
-        storyImage: s(d.storyImage) || photo,
+        /* ⚠️ `storyImage: … || photo` این‌جا بود و همان باگ را می‌ساخت:
+           عکسِ پروفایلِ نمونه خودبه‌خود «استوری» می‌شد. استوری فقط از
+           `/api/sellers/<ownerId>/stories` می‌آید و انقضا دارد. */
       }
 
     case 'manufacturer':

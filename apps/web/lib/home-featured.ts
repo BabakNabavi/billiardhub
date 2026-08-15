@@ -43,7 +43,11 @@ export async function loadHomeFeatured(): Promise<HomeFeatured> {
 
   const [clubsRes, productsRes] = await Promise.allSettled([
     sb.from('clubs')
-      .select('id,name,city,images,hasActiveStory,snookerTables,pocketTables,highballTables,vipSnookerTables,vipPocketTables')
+      /* ⚠️ `hasActiveStory` ستون است ولی هیچ‌کس نمی‌نویسدش — همیشه
+         NULL. یعنی حلقه‌ی استوری روی کارتِ باشگاهِ صفحه‌ی اصلی هرگز
+         روشن نمی‌شد. مثل `app/api/clubs/route.ts` از تاریخِ انقضا
+         مشتق می‌شود تا با گذشتنِ ۲۴ ساعت خودش خاموش شود. */
+      .select('id,name,city,images,storyExpiresAt,snookerTables,pocketTables,highballTables,vipSnookerTables,vipPocketTables')
       .eq('isActive', true).order('createdAt', { ascending: false }).limit(FEATURED_CLUBS_MAX),
     sb.from('products')
       .select('id,title,brand,model,category,images,price,negotiable,discountPrice,discountPercent,city,condition')
@@ -56,7 +60,7 @@ export async function loadHomeFeatured(): Promise<HomeFeatured> {
     r.status === 'fulfilled' && Array.isArray(r.value?.data) ? (r.value.data as T[]) : []
 
   type C = {
-    id: string; name: string; city?: string | null; images?: string[] | null; hasActiveStory?: boolean | null
+    id: string; name: string; city?: string | null; images?: string[] | null; storyExpiresAt?: string | null
     snookerTables?: number | null; pocketTables?: number | null; highballTables?: number | null
     vipSnookerTables?: number | null; vipPocketTables?: number | null
   }
@@ -86,7 +90,8 @@ export async function loadHomeFeatured(): Promise<HomeFeatured> {
     rating: 0, reviews: 0, type: 'اسنوکر',
     img: c.images?.[0] || CLUB_IMG[i % CLUB_IMG.length]!,
     img2: c.images?.[1] || CLUB_IMG[(i + 1) % CLUB_IMG.length]!,
-    price: 0, badge: null, tags: [], hasStory: !!c.hasActiveStory,
+    price: 0, badge: null, tags: [],
+    hasStory: !!c.storyExpiresAt && new Date(c.storyExpiresAt).getTime() > Date.now(),
   }))
 
   const products: RealProduct[] = rows<P>(productsRes).map(p => ({

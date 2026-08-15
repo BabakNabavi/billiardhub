@@ -1,7 +1,6 @@
 'use client'
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
-import ClubStoryModal from '@/components/ClubStoryModal'
 import { listRefereeProfiles, badgeFromGrades, type RefereeProfile } from '../../lib/referee-store'
 import { fetchProfiles } from '../../lib/profiles/client'
 
@@ -21,18 +20,10 @@ const SPECS: Record<string, { label: string; color: string; glow: string }> = {
   highball: { label: 'هی‌بال',       color: '#C2410C', glow: 'rgba(194,65,12,0.30)'  },
 }
 
-const IMGS: string[] = [
-  '/images/shop/snooker-table.webp',
-  '/images/shop/cue_billiard_2.webp',
-  '/images/shop/Ball-1.webp',
-  '/images/shop/pool_chalk_1.jpg',
-]
-const img = (i: number) => IMGS[i % IMGS.length] ?? IMGS[0]!
-
 interface Referee {
   id: string; name: string; specialty: string; city: string
   experience: number; grade: string; gradeColor: string
-  hasStory: boolean; storyImage: string; bio: string; photo: string
+  bio: string; photo: string
   verified?: boolean
 }
 
@@ -61,8 +52,6 @@ function mapProfileToListReferee(p: RefereeProfile): Referee {
     experience: firstYear ? Math.max(0, CUR_JYEAR - firstYear) : 0,
     grade: b?.label ?? 'داور',
     gradeColor: b?.color ?? GOLD_D,
-    hasStory: false,
-    storyImage: '',
     bio: p.shortBio || p.fullBio || '',
     photo: p.photo || '',
     verified: p.verified,
@@ -224,15 +213,17 @@ function RefereeHeroSlider() {
   )
 }
 
-/* ── Avatar with story ring (Instagram gradient, like home) ── */
-function RefereeAvatar({ referee, onStory, size }: { referee: Referee; onStory: () => void; size: string }) {
+/* ── آواتار با حلقه‌ی طلایی ──
+   پیش‌تر این‌جا حلقه‌ی رنگیِ استوری بود که رسانه‌اش عکسِ پروفایلِ خودِ
+   داور می‌شد: «استوری»ای که کسی منتشرش نکرده بود و هرگز هم منقضی
+   نمی‌شد. برای داور اصلاً سیستمِ استوری وجود ندارد. */
+function RefereeAvatar({ referee, size }: { referee: Referee; size: string }) {
   return (
-    <button type="button" aria-label="مشاهده استوری"
-      onClick={e => { e.preventDefault(); e.stopPropagation(); onStory() }}
+    <div
       className="cavatar"
-      style={{ width:size, aspectRatio:'1 / 1', borderRadius:'50%', padding:'3px', cursor:'pointer', border:'none', flexShrink:0,
-        background:'linear-gradient(45deg,#feda75,#fa7e1e,#d62976,#962fbf,#4f5bd5)',
-        boxShadow:'0 4px 16px rgba(0,0,0,0.18), 0 0 14px rgba(214,41,118,0.32)', display:'flex' }}>
+      style={{ width:size, aspectRatio:'1 / 1', borderRadius:'50%', padding:'3px', flexShrink:0,
+        background:'linear-gradient(150deg,#FFFDF8,#EBDFC6)',
+        boxShadow:'0 4px 16px rgba(0,0,0,0.12)', display:'flex' }}>
       <div style={{ width:'100%', height:'100%', borderRadius:'50%', overflow:'hidden',
         border:'2.5px solid #FFFFFF', background:'#E7ECF1',
         display:'flex', alignItems:'flex-end', justifyContent:'center' }}>
@@ -245,12 +236,12 @@ function RefereeAvatar({ referee, onStory, size }: { referee: Referee; onStory: 
           </svg>
         )}
       </div>
-    </button>
+    </div>
   )
 }
 
 /* ── Referee card — grid + list ── */
-function RefereeCard({ referee, view, idx, onStory }: { referee: Referee; view: 'grid' | 'list'; idx: number; onStory: () => void }) {
+function RefereeCard({ referee, view, idx }: { referee: Referee; view: 'grid' | 'list'; idx: number }) {
   const sp = SPECS[referee.specialty]
 
   if (view === 'list') {
@@ -262,7 +253,7 @@ function RefereeCard({ referee, view, idx, onStory }: { referee: Referee; view: 
         animation:`fadeUp .34s ${(idx * 0.04).toFixed(2)}s ease both`,
       }}>
         <div style={{ position:'relative', zIndex:2 }}>
-          <RefereeAvatar referee={referee} onStory={onStory} size="58px"/>
+          <RefereeAvatar referee={referee} size="58px"/>
         </div>
         <div style={{ flex:1, minWidth:0 }}>
           <h3 style={{ fontSize:15, fontWeight:800, color:TEXT, lineHeight:1.2, letterSpacing:'-0.02em', marginBottom:2, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{referee.name}{referee.verified && <VerifiedBadge size={14} />}</h3>
@@ -299,7 +290,7 @@ function RefereeCard({ referee, view, idx, onStory }: { referee: Referee; view: 
       </div>
       {/* avatar */}
       <div style={{ display:'flex', justifyContent:'center', marginTop:'-31%', position:'relative', zIndex:2 }}>
-        <RefereeAvatar referee={referee} onStory={onStory} size="58%"/>
+        <RefereeAvatar referee={referee} size="58%"/>
       </div>
       {/* body */}
       <div style={{ padding:'12px 14px 18px', flex:1, display:'flex', flexDirection:'column', alignItems:'center', textAlign:'center' }}>
@@ -324,7 +315,6 @@ export default function RefereesPage() {
   const [filter,    setFilter]    = useState('all')
   const [search,    setSearch]    = useState('')
   const [view,      setView]      = useState<'grid' | 'list'>('grid')
-  const [openStory, setOpenStory] = useState<Referee | null>(null)
   const [localRefs, setLocalRefs] = useState<Referee[]>([])
 
   /* همان ایرادِ صفحه‌ی مربیان: این فهرست فقط از localStorage می‌آمد،
@@ -488,13 +478,13 @@ export default function RefereesPage() {
             view === 'list' ? (
               <div className="coach-list-grid">
                 {referees.map((referee, idx) => (
-                  <RefereeCard key={referee.id} referee={referee} view="list" idx={idx} onStory={() => setOpenStory(referee)} />
+                  <RefereeCard key={referee.id} referee={referee} view="list" idx={idx} />
                 ))}
               </div>
             ) : (
               <div className="g5" style={{ display:'grid', gridTemplateColumns:'repeat(5,1fr)', gap:12 }}>
                 {referees.map((referee, idx) => (
-                  <RefereeCard key={referee.id} referee={referee} view="grid" idx={idx} onStory={() => setOpenStory(referee)} />
+                  <RefereeCard key={referee.id} referee={referee} view="grid" idx={idx} />
                 ))}
               </div>
             )
@@ -507,12 +497,14 @@ export default function RefereesPage() {
 
       </div>
 
-      {openStory && (
-        <ClubStoryModal
-          club={{ name:openStory.name, logo:openStory.photo, storyMediaUrl:openStory.storyImage || img(parseInt(openStory.id, 10) || 0), storyText:openStory.bio, badge:'داور' }}
-          onClose={() => setOpenStory(null)}
-        />
-      )}
+      {/* ── مودالِ استوری این‌جا نیست ──
+          رسانه‌اش `storyImage` بود که برابرِ *عکسِ پروفایل* پر می‌شد،
+          و اگر خالی بود یک عکسِ کاتالوگِ ساختگی جایش می‌نشست. یعنی
+          سایت از طرفِ مربی چیزی نشان می‌داد که او نگذاشته بود، و
+          چون فیلدِ پروفایل بود هرگز منقضی نمی‌شد.
+
+          مربی و داور هنوز سیستمِ استوریِ واقعی ندارند؛ تا آن روز
+          حلقه و مودالی هم نباید باشد. */}
     </>
   )
 }

@@ -7,7 +7,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { Camera, X } from 'lucide-react'
 import { useAuthStore } from '../../../store/auth.store'
 import StoryManager from '../../../components/seller/StoryManager'
 import {
@@ -69,7 +68,6 @@ export default function SellerDashboard() {
   const [slugStatus, setSlugStatus] = useState<SlugStatus>('idle')
 
   const logoRef   = useRef<HTMLInputElement>(null)
-  const storyRef  = useRef<HTMLInputElement>(null)
   const certRef   = useRef<HTMLInputElement>(null)
   const bannerRef = useRef<HTMLInputElement>(null)
   const aboutRef  = useRef<HTMLInputElement>(null)
@@ -475,59 +473,16 @@ export default function SellerDashboard() {
             </div>
           </section>
 
-          {/* ═══ استوری ═══ */}
-          <section className={CARD}>
-            <h2 className="mb-1 text-[14.5px] font-bold">استوری فروشگاه</h2>
-            <p className="mb-4 text-[12px] text-[#8A8474]">
-              با کلیک روی لوگوی فروشگاه باز می‌شود، و پس از ذخیره تا ۲۴ ساعت در نوار استوری‌های صفحه‌ی اول سایت هم دیده می‌شود.
-            </p>
-            <div className="flex flex-wrap items-start gap-4">
-              {/* ── «آپلود» داخلِ خودِ کادر ──
-                  پیش‌تر دکمه‌ها زیرِ کادر بودند و ردیفشان کادر را بالا
-                  می‌کشید و کنارِ متنِ استوری ناهم‌تراز می‌شد. حالا کلِ
-                  کادر خودش دکمه‌ی آپلود است — الگوی رایجِ همین کار — و
-                  «حذف» یک دایره‌ی کوچک روی گوشه‌ی عکس. */}
-              {/* ── هم‌ترازی با کادرِ متن ──
-                  ستونِ متن یک برچسب بالای خودش دارد و این ستون نداشت،
-                  پس کادرِ عکس یک ردیف بالاتر می‌نشست و دو ستون
-                  ناهم‌تراز به‌نظر می‌رسیدند. برچسبِ خودش را گرفت. */}
-              <div className="shrink-0">
-                <label className={LABEL}>عکس استوری</label>
-                <div className="relative h-[104px] w-[74px]">
-                  <button type="button" onClick={() => storyRef.current?.click()} disabled={busy}
-                    aria-label={form.storyImage ? 'تغییر عکس استوری' : 'آپلود عکس استوری'}
-                    className="group relative block h-full w-full overflow-hidden rounded-xl border border-dashed border-[rgba(199,166,106,0.55)] bg-[#F7F5F0] transition hover:border-[#C7A66A] disabled:opacity-45">
-                    {form.storyImage && (
-                      <img loading="lazy" decoding="async" src={form.storyImage} alt="" className="absolute inset-0 h-full w-full object-cover"/>
-                    )}
-                    <span
-                      className={`absolute inset-0 flex flex-col items-center justify-center gap-1 text-[11.5px] font-bold transition ${
-                        form.storyImage
-                          ? 'bg-[rgba(20,18,14,0.42)] text-white opacity-0 group-hover:opacity-100'
-                          : 'text-[#9A6E38]'
-                      }`}>
-                      <Camera size={17} />
-                      {form.storyImage ? 'تغییر' : 'آپلود'}
-                    </span>
-                  </button>
-                  {form.storyImage && (
-                    <button type="button" onClick={() => set('storyImage', '')} aria-label="حذف عکس استوری"
-                      className="absolute -left-1.5 -top-1.5 flex h-6 w-6 items-center justify-center rounded-full border border-[#E7E2D6] bg-white text-[#5B564B] shadow-sm transition hover:text-[#B23B2E]">
-                      <X size={13} />
-                    </button>
-                  )}
-                </div>
-                <input ref={storyRef} type="file" accept="image/*" className="hidden"
-                  onChange={e => pickImage(e, url => set('storyImage', url))}/>
-              </div>
-              <div className="min-w-[200px] flex-1">
-                <label className={LABEL} htmlFor="f-story">متن استوری</label>
-                <textarea id="f-story" rows={4} className={`${INPUT} resize-y leading-relaxed`} value={form.storyText}
-                  onChange={e => set('storyText', e.target.value)}
-                  placeholder="جدیدترین کالکشن چوب‌های کربنی رسید — همین حالا ببینید!"/>
-              </div>
-            </div>
-          </section>
+          {/* ── چرا «عکس/متن استوری» این‌جا نیست ──
+              این دو فیلد یک استوریِ *دائمی* می‌ساختند: پرکردنشان
+              بی‌درنگ حلقه‌ی استوری روی صفحه‌ی فروشگاه می‌گذاشت،
+              هیچ «انتشار»ی لازم نداشت، و چون فیلدِ پروفایل بودند
+              هرگز منقضی نمی‌شدند — روزها می‌ماندند. متنِ خودِ همین
+              بخش هم ادعا می‌کرد «تا ۲۴ ساعت در نوار»، که هیچ‌وقت
+              درست نبود.
+
+              استوریِ واقعی همان جعبه‌ی پایین است: انقضای ۲۴ساعته
+              دارد و سرور خودش منقضی‌ها را پاک می‌کند. */}
 
           {/* ═══ استوری‌های ۲۴ ساعته ═══
               این جعبه پیش‌تر در «فروشگاه من» (فهرستِ آگهی‌ها) بود —

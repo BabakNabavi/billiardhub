@@ -321,7 +321,12 @@ export default function GalleryTab({ club, onLogoChange }: {
         throw new Error(j?.message || 'ثبت استوری روی سرور انجام نشد');
       }
 
-      setStoryList(prev => [...prev, newStory]);
+      /* رکوردی که *سرور* نوشت را نگه می‌داریم، نه پیش‌نویسِ محلی را:
+         شناسه و انقضا آن‌جا ساخته می‌شوند و حذفِ بعدی با همان شناسه
+         انجام می‌شود. */
+      const saved = (await r.json().catch(() => null)) as ClubStory | null;
+      if (!saved?.id) throw new Error("پاسخِ سرور خوانده نشد");
+      setStoryList(prev => [...prev, saved]);
       setStoryDraft(null);
       setStoryTextColor('#ffffff');
       setStoryTextSize(15);

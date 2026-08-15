@@ -2,6 +2,8 @@ export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseServer } from '@/lib/supabase-server';
 import { actorOf, ownsClub, UNAUTHENTICATED, FORBIDDEN } from '@/lib/auth/ownership';
+import { normalizeStory } from '@/lib/story-input';
+import { storyIndex, StoryIndexError, type StoredStory } from '@/lib/story-index';
 
 const CORS = {
   'Vary': 'Origin',
@@ -9,61 +11,20 @@ const CORS = {
   'Access-Control-Allow-Headers': 'Content-Type, Authorization',
 };
 
-const BUCKET = 'club-media';
-const indexPath = (id: string) => `clubs/${id}/stories/index.json`;
+/* فهرست در `lib/story-index` است — همان پیاده‌سازی که مسیرِ فروشگاه
+   هم می‌خواند. آن‌جا خطای نوشتن و خطای خواندن جدی گرفته می‌شوند:
+   نوشتنِ ناموفق دیگر ۲۰۱ نمی‌دهد، و خطای خواندن با «فهرست خالی» یکی
+   گرفته نمی‌شود (که یک‌بار می‌توانست ده استوریِ زنده را پاک کند). */
+const idx = (id: string) => storyIndex('club-media', 'clubs', id);
 
-async function readIndex(id: string): Promise<any[]> {
-  const { data, error } = await getSupabaseServer()
-    .storage.from(BUCKET).download(indexPath(id));
-  if (error || !data) return [];
-  try { return JSON.parse(await data.text()); } catch { return []; }
-}
+const isActive = (s: StoredStory, now: number) =>
+  !!s.expiresAt && new Date(String(s.expiresAt)).getTime() > now;
 
-async function writeIndex(id: string, stories: any[]): Promise<void> {
-  const content = JSON.stringify(stories);
-  const buf = Buffer.from(content, 'utf8');
-  await getSupabaseServer()
-    .storage.from(BUCKET)
-    .upload(indexPath(id), buf, {
-      upsert: true,
-      contentType: 'application/json',
-    });
-}
-
-/* ── نشتِ فضای ذخیره‌سازی ────────────────────────────────────────────
-   استوری ۲۴ ساعت عمر دارد و بعد از فهرست بیرون می‌رود. ولی تا امروز
-   **فقط از فهرست** بیرون می‌رفت: خودِ فایلِ عکس یا ویدیو تا ابد در
-   `club-media` می‌ماند — نامرئی، بی‌استفاده، و پولش پرداخت‌شده.
-
-   اندازه‌اش را می‌شود حساب کرد: صد باشگاه، روزی دو استوریِ دومگابایتی،
-   می‌شود روزی ۴۰۰ مگابایت — سالی حدودِ ۱۴۶ گیگابایت زباله. این دقیقاً
-   همان چیزی است که فضای ذخیره‌سازی را بی‌دلیل به ترابایت می‌رساند.
-
-   نشانیِ عمومیِ Supabase قالبِ ثابتی دارد و مسیرِ داخلِ باکت بعد از
-   نامِ باکت می‌آید؛ از همان استخراج می‌شود. اگر نشانی از جای دیگری
-   بود (داده‌ی قدیمی یا میزبانِ دیگر) رد می‌شود، چون پاک‌کردنِ کورکورانه
-   بدتر از نگه‌داشتن است. */
-function storagePathOf(url: unknown): string | null {
-  const s = String(url ?? '');
-  const m = s.match(new RegExp(`/${BUCKET}/(.+)$`));
-  if (!m?.[1]) return null;
-  const path = decodeURIComponent(m[1].split('?')[0] ?? '');
-  /* فایلِ فهرست هرگز نباید پاک شود */
-  if (!path || path.endsWith('/index.json')) return null;
-  return path;
-}
-
-/** فایل‌های استوری‌هایی که دیگر در فهرست نیستند را پاک می‌کند */
-async function purgeMedia(gone: any[]): Promise<void> {
-  const paths = gone.map(s => storagePathOf(s?.mediaUrl)).filter((p): p is string => !!p);
-  if (!paths.length) return;
-  try {
-    await getSupabaseServer().storage.from(BUCKET).remove(paths);
-  } catch (e) {
-    /* پاک‌نشدن نباید مسیر را بشکند — بدترین حالتش همان نشتِ قبلی است */
-    console.error('[clubs/:id/stories] پاک‌کردنِ فایل انجام نشد:', e);
-  }
-}
+const failed = (e: unknown, fallback: string) =>
+  NextResponse.json(
+    { message: e instanceof StoryIndexError ? e.message : fallback },
+    { status: 500, headers: CORS },
+  );
 
 /* ── چرا رکوردِ باشگاه هم به‌روز می‌شود ─────────────────────────────────
    خودِ استوری‌ها در همین فایلِ ذخیره‌سازی می‌مانند، ولی صفحه‌ی اول و
@@ -100,9 +61,11 @@ export async function OPTIONS() {
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const all = await readIndex(id);
-  const now = new Date();
-  const active = all.filter((s: any) => new Date(s.expiresAt) > now);
+  const store = idx(id);
+  let all: StoredStory[];
+  try { all = await store.read(); } catch { return NextResponse.json([], { headers: CORS }); }
+  const now = Date.now();
+  const active = all.filter(s => isActive(s, now));
 
   /* `?sync=1` — تعمیرِ رکورد از روی فایل. فقط پنلِ باشگاه‌دار آن را
      می‌فرستد؛ نوارِ استوریِ صفحه‌ی اول نه، وگرنه هر بارگذاریِ صفحه‌ی
@@ -112,9 +75,11 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
      نجات می‌دهد: کافی است باشگاه‌دار یک‌بار تبِ گالری را باز کند. */
   const wantsSync = req.nextUrl.searchParams.get('sync') === '1';
   if (active.length !== all.length) {
-    writeIndex(id, active).catch(() => { });
-    /* منقضی‌شده‌ها فقط از فهرست بیرون نروند — فایلشان هم برود */
-    void purgeMedia(all.filter((s: any) => new Date(s.expiresAt) <= now));
+    /* منقضی‌شده‌ها فقط از فهرست بیرون نروند — فایلشان هم برود.
+       پاک‌سازی *بعد از* نوشتنِ موفق، وگرنه فایلی می‌رود که هنوز در
+       فهرست است. */
+    const gone = all.filter(s => !isActive(s, now));
+    void store.write(active).then(() => store.purge(gone)).catch(() => { });
   }
   if (wantsSync || active.length !== all.length) {
     void syncClubRow(id, active);
@@ -137,15 +102,25 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   const denied = await guardOwner(req, id);
   if (denied) return denied;
 
-  const story = await req.json();
-  const current = await readIndex(id);
-  const now = new Date();
-  const active = current.filter((s: any) => new Date(s.expiresAt) > now);
-  if (active.length >= 10)
-    return NextResponse.json({ message: 'حداکثر ۱۰ استوری مجاز است' }, { status: 400, headers: CORS });
-  const updated = [...active, story];
-  await writeIndex(id, updated);
-  await syncClubRow(id, updated);
+  /* همان قاعده‌ی فروشگاه: انقضا از سرور، نه از بدنه‌ی درخواست.
+     این‌جا مهم‌تر هم هست چون `syncClubRow` همان تاریخ را داخلِ ستونِ
+     `storyExpiresAt` می‌نویسد و حلقه‌ی کارتِ باشگاه از آن می‌آید. */
+  const story = normalizeStory(await req.json().catch(() => null));
+  if (!story) return NextResponse.json({ message: 'رسانه‌ی استوری معتبر نیست' }, { status: 400, headers: CORS });
+
+  const store = idx(id);
+  try {
+    const current = await store.read();
+    const now = Date.now();
+    const active = current.filter(s => isActive(s, now));
+    if (active.length >= 10)
+      return NextResponse.json({ message: 'حداکثر ۱۰ استوری مجاز است' }, { status: 400, headers: CORS });
+    const updated = [...active, story];
+    await store.write(updated);
+    await syncClubRow(id, updated);
+  } catch (e) {
+    return failed(e, 'ذخیره‌ی استوری انجام نشد');
+  }
   return NextResponse.json(story, { status: 201, headers: CORS });
 }
 
@@ -155,15 +130,25 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
   if (denied) return denied;
 
   const storyId = req.nextUrl.searchParams.get('storyId');
-  const current = await readIndex(id);
-  const now = new Date();
-  const updated = current.filter(
-    (s: any) => s.id !== storyId && new Date(s.expiresAt) > now
-  );
-  await writeIndex(id, updated);
-  await syncClubRow(id, updated);
-  /* هرچه از فهرست افتاد — چه حذفِ دستی چه انقضا — فایلش هم می‌رود */
-  const keep = new Set(updated.map((s: any) => s?.id));
-  void purgeMedia(current.filter((s: any) => !keep.has(s?.id)));
+  if (!storyId) return NextResponse.json({ message: 'شناسه‌ی استوری لازم است' }, { status: 400, headers: CORS });
+
+  const store = idx(id);
+  try {
+    const current = await store.read();
+    const now = Date.now();
+    /* «پیدا نشد» یعنی ۴۰۴، نه ok — وگرنه پنل حذفِ محلی را نگه می‌دارد
+       و استوری با رفرشِ بعدی برمی‌گردد. */
+    if (!current.some(s => s.id === storyId))
+      return NextResponse.json({ message: 'استوری پیدا نشد' }, { status: 404, headers: CORS });
+
+    const updated = current.filter(s => s.id !== storyId && isActive(s, now));
+    await store.write(updated);
+    await syncClubRow(id, updated);
+    /* هرچه از فهرست افتاد — چه حذفِ دستی چه انقضا — فایلش هم می‌رود */
+    const keep = new Set(updated.map(s => s?.id));
+    void store.purge(current.filter(s => !keep.has(s?.id)));
+  } catch (e) {
+    return failed(e, 'حذفِ استوری انجام نشد');
+  }
   return NextResponse.json({ ok: true }, { headers: CORS });
 }

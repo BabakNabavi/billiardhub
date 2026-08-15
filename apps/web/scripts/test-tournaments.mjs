@@ -1925,8 +1925,12 @@ t('نشانِ سبزِ فروشگاه فقط برای فروشگاهِ تأیی�
 t('باکسِ قیمت زیرِ مشخصاتِ فنی است',
   detailPg.indexOf('مشخصات فنی') < detailPg.indexOf('با فروشنده تماس بگیرید'),
   'قیمت پیش از مشخصات می‌آمد و خریدار اول عدد را می‌دید نه کالا را');
-t('«آپلود» داخلِ کادرِ عکسِ استوری است',
-  /aria-label=\{form\.storyImage \? 'تغییر عکس استوری'/.test(sellerPanel));
+/* ── چرا این ادعا وارونه شد ──
+   کادرِ «عکس استوری» عمداً حذف شد: آن دو فیلد یک استوریِ دائمیِ
+   بی‌انقضا می‌ساختند. استوریِ واقعیِ ۲۴ساعته همان `StoryManager` است
+   که همان‌جا رندر می‌شود. */
+t('کادرِ عکسِ استوریِ جعلی برداشته شد',
+  !/aria-label=\{form\.storyImage/.test(sellerPanel));
 t('فیلدِ شماره‌ی جواز برداشته شد',
   !/شماره‌ی جواز کسب/.test(sellerPanel),
   'شماره روی خودِ برگه هست؛ تایپِ دوباره فقط جای غلطِ تایپی می‌ساخت');
@@ -2019,9 +2023,15 @@ t('استوریِ فروشگاه با شناسه‌ی مالک پرسیده می
 t('نوارِ استوری دیگر از لوکال‌استوریج فروشگاه نمی‌خواند',
   !/listSellerProfiles/.test(storiesBar.replace(/\/\*[\s\S]*?\*\//g, '')),
   'استوری فقط روی مرورگرِ خودِ فروشنده دیده می‌شد');
-t('تک‌عکسِ استوریِ پروفایل هم به نوار می‌رسد',
-  /s\.storyImage/.test(storiesBar),
-  'فرمِ ثبتِ فروشگاه یک «عکس استوری» می‌گیرد که هیچ‌جا دیده نمی‌شد');
+/* ⚠️ این ادعا وارونه شد — و درسش را ثبت می‌کنم.
+   نسخه‌ی قبلی می‌گفت «تک‌عکسِ استوریِ پروفایل هم به نوار می‌رسد» و
+   همان رفتار بعداً معلوم شد خودش باگ است: فیلدِ فرم انقضا ندارد.
+   بدتر اینکه بعد از حذفِ آن رفتار، تست همچنان سبز ماند — چون رشته‌ی
+   `s.storyImage` داخلِ یک *کامنت* باقی مانده بود. کامنت‌ها حذف
+   می‌شوند تا این‌بار واقعاً کد سنجیده شود. */
+t('تک‌عکسِ پروفایل به نوارِ استوری نمی‌رسد',
+  !/s\.storyImage/.test(storiesBar.replace(/\/\*[\s\S]*?\*\//g, '')),
+  'فیلدِ فرم استوری نیست: نه انتشار دارد نه انقضا');
 
 /* ── پیکربندیِ Supabase نباید به مرورگر برسد ──
    `lib/supabase-config.ts` هنگام بارگذاری متغیرِ محیطی را می‌سنجد و
@@ -3286,6 +3296,190 @@ console.log('\n― دروازه‌ی انتشارِ پروفایل ―');
   t('پروفایلِ تازه هنوز pending درج می‌شود',
     /row\.status === undefined\) row\.status = 'pending'/.test(server),
     'پیش‌فرضِ ستون در دیتابیس approved است — این خط خنثی‌اش می‌کند');
+}
+
+console.log('\n― استوری: یک منبع، با انقضا ―');
+{
+  /* سه علامتی که کاربر گزارش کرد، همه یک ریشه داشتند: فیلدهای
+     «عکس/متن استوری» در فرمِ ثبتِ فروشگاه یک استوریِ *دائمی*
+     می‌ساختند — بدونِ انتشار، بدونِ انقضا. سیستمِ واقعی (همان که
+     برای باشگاه و ادمین کار می‌کرد) `expiresAt` دارد و سرور
+     منقضی‌ها را خودش پاک می‌کند. */
+
+  const shop = read('app/sellers/[id]/FlatShop.tsx');
+  t('حلقه‌ی استوریِ فروشگاه از مسیرِ واقعی می‌آید',
+    /* خودِ فراخوانی سنجیده می‌شود نه رشته‌ی `/stories` — که کامنتِ
+       بالای همان بلوک هم داردش. */
+    /fetch\(`\/api\/sellers\/\$\{owner\}\/stories`/.test(shop)
+    && shop.includes('const hasStory = !storiesLoading && liveStories.length > 0'),
+    'فیلدِ فرم انقضا ندارد و روزها می‌ماند');
+
+  /* دکمه نباید وسطِ دریافت معنی‌اش عوض شود: تا پاسخ نیامده،
+     «بزرگ‌نماییِ لوگو» است نه «مشاهده‌ی استوری». */
+  t('حلقه‌ی فروشگاه تا آمدنِ پاسخ خاموش است',
+    /const \[storiesLoading, setStoriesLoading\] = useState\(true\)/.test(shop)
+    && /\.finally\([\s\S]{0,80}?setStoriesLoading\(false\)/.test(shop));
+
+  /* مسیر تا ۱۰ استوری می‌دهد؛ پیش‌تر فقط اولی پخش می‌شد */
+  t('هر ۱۰ استوریِ فروشگاه پخش می‌شود',
+    /liveStories\[storyIdx\]/.test(shop)
+    && /count=\{liveStories\.length\}/.test(shop)
+    && /setStoryIdx\(storyIdx \+ 1\)/.test(shop),
+    'مودال با تمام‌شدنِ تایمر بسته می‌شد و بقیه دیده نمی‌شدند');
+
+  /* بستنِ دستی نباید «بعدی» بشود */
+  const csm = read('components/ClubStoryModal.tsx');
+  t('فقط پایانِ تایمر استوریِ بعدی را می‌آورد',
+    csm.includes('else (onNext ?? onClose)();')
+    /* ضربدر، پس‌زمینه و Esc همگی onClose صدا می‌زنند */
+    && csm.includes('onClick={onClose}')
+    && /if \(e\.key === 'Escape'\) \{ onClose\(\); return; \}/.test(csm),
+    'ضربدر و پس‌زمینه و Esc باید ببندند، نه جلو ببرند');
+
+  /* دو استوری با یک فایلِ یکسان: بدونِ index در وابستگی‌ها پخش می‌ایستد */
+  t('تایمرِ استوری به شماره‌ی استوری وابسته است',
+    /\}, \[index, club\.storyMediaUrl\]\);/.test(csm),
+    'نشانیِ یکسان یعنی افکت دوباره اجرا نمی‌شود و نوار پر می‌ماند');
+
+  /* نوارِ بخش‌بخش در RTL باید از راست شروع شود */
+  t('نوارِ پیشرفتِ استوری جهتِ صفحه را می‌پذیرد',
+    !/direction: 'ltr'/.test(csm) && csm.includes('insetInline: 14'),
+    'با direction:ltr اولین استوری ته صفحه می‌افتاد');
+
+  t('استوریِ چندتایی راهِ رد کردن دارد',
+    csm.includes('aria-label="استوری بعدی"') && csm.includes('aria-label="استوری قبلی"'),
+    'ده استوریِ دوازده‌ثانیه‌ای یعنی دو دقیقه پخشِ بی‌گریز');
+
+  t('دکمه‌ی بستنِ استوری نامِ دسترس‌پذیر دارد',
+    csm.includes('aria-label="بستن استوری"'));
+  t('فیلدِ استوریِ پروفایل دیگر خوانده نمی‌شود',
+    !shop.includes('store.storyImage') && !shop.includes('store.storyText'));
+
+  const form = read('app/dashboard/seller/page.tsx');
+  t('فرمِ ثبتِ فروشگاه فیلدِ استوریِ جعلی ندارد',
+    /* هر شکلی از برگشتن، نه فقط همان یک املا */
+    !/\bstoryImage\b/.test(form) && !/\bstoryText\b/.test(form),
+    'پرکردنشان بی‌درنگ حلقه‌ی استوریِ بی‌انقضا می‌ساخت');
+  t('مدیریتِ استوریِ واقعی سرِ جایش است', form.includes('<StoryManager'));
+
+  /* ── استوریِ شبح در فهرستِ مربیان و داوران ──
+     `storyImage: p.photo` یعنی عکسِ پروفایل رسانه‌ی استوری می‌شد و
+     آواتار حلقه را بی‌قیدوشرط می‌کشید. هر مربی یک «استوری» داشت که
+     خودش نگذاشته بود و هرگز منقضی نمی‌شد. */
+  for (const p of ['app/coaches/page.tsx', 'app/referees/page.tsx']) {
+    const src = read(p);
+    t(`حلقه‌ی استوریِ شبح در ${p.split('/')[1]} نیست`,
+      !src.includes('ClubStoryModal') && !/aria-label="مشاهده استوری"/.test(src)
+      /* برگرداندنِ گرادیان بدونِ مودال هم باید قرمز کند */
+      && !/feda75/.test(src),
+      'برای مربی و داور اصلاً سیستمِ استوریِ واقعی وجود ندارد');
+  }
+  /* نامکِ ناشناخته نباید پروفایلِ نمونه را نشان دهد */
+  for (const p of ['app/coaches/[id]/page.tsx', 'app/referees/[id]/page.tsx']) {
+    t(`فالبکِ نمونه در ${p.split('/')[1]} برداشته شد`,
+      /* کامنت‌ها کنار می‌روند وگرنه توضیحِ خودِ اصلاح، ادعا را سبز می‌کند */
+      !stripComments(read(p)).includes('?? D[0]!'),
+      'رکوردِ نمونه استوری و مدرکِ کسِ دیگری دارد');
+  }
+
+  /* هر سه مسیرِ استوری باید منقضی کنند */
+  t('استوریِ عمومی منقضی می‌شود',
+    /now - s\.createdAt < DAY/.test(read('app/api/social/stories/route.ts')));
+  /* فقط هندلرِ GET سنجیده می‌شود — همان که نمایش به آن بند است.
+     ادعای فایل‌محور با سه occurrence، شکستنِ یکی‌شان را ساکت رد می‌کرد. */
+  const sellerStories = read('app/api/sellers/[id]/stories/route.ts');
+  const getFn = sellerStories.split('export async function GET')[1]?.split(String.fromCharCode(10) + 'export ')[0] ?? '';
+  t('استوریِ فروشگاه در خواندن منقضی می‌شود',
+    /* هم فیلترِ داخلِ GET، هم تعریفِ خودِ isActive — وگرنه یکی از دو
+       نیمه می‌تواند بشکند و ادعا سبز بماند. */
+    getFn.includes('all.filter(s => isActive(s, now))')
+    && /!!s\.expiresAt && new Date\(String\(s\.expiresAt\)\)\.getTime\(\) > now/.test(sellerStories));
+
+  /* ── ریشه‌ی واقعیِ «استوری چند روز مانده» ──
+     بدنه‌ی درخواست همان‌طور که می‌آمد نوشته می‌شد، یعنی `expiresAt`
+     را کلاینت تعیین می‌کرد. یک ساعتِ جلو یا یک POST دستی با تاریخِ
+     ۲۰۹۹ استوریِ همیشگی می‌ساخت و GET هم هیچ‌وقت حذفش نمی‌کرد. */
+  for (const p of ['app/api/sellers/[id]/stories/route.ts', 'app/api/clubs/[id]/stories/route.ts']) {
+    const src = read(p);
+    const post = src.split('export async function POST')[1]?.split(String.fromCharCode(10) + 'export ')[0] ?? '';
+    t(`انقضای استوری در ${p.includes('sellers') ? 'فروشگاه' : 'باشگاه'} روی سرور ساخته می‌شود`,
+      post.includes('normalizeStory(await req.json()')
+      && !/const story = await req\.json\(\);/.test(post),
+      'وگرنه مرورگر می‌تواند استوریِ بی‌انقضا بنویسد');
+  }
+  const storyInput = read('lib/story-input.ts');
+  t('تاریخ‌های استوری از بدنه‌ی درخواست خوانده نمی‌شوند',
+    /expiresAt: new Date\(now \+ STORY_TTL_MS\)\.toISOString\(\)/.test(storyInput)
+    && /createdAt: new Date\(now\)\.toISOString\(\)/.test(storyInput)
+    && !/expiresAt: (?:b|raw)\./.test(storyInput));
+
+  /* پرچمِ صفحه‌ی اصلی هم باید مشتق باشد، نه ستونی که کسی نمی‌نویسد */
+  t('حلقه‌ی باشگاهِ صفحه‌ی اصلی از تاریخِ انقضا می‌آید',
+    /hasStory: !!c\.storyExpiresAt && new Date\(c\.storyExpiresAt\)\.getTime\(\) > Date\.now\(\)/
+      .test(read('lib/home-featured.ts')),
+    'ستونِ hasActiveStory را هیچ‌کس نمی‌نویسد — همیشه خاموش بود');
+
+  /* پاسخِ سرور باید خوانده شود: ۴۰۳ و ۴۰۰ بی‌صدا رد می‌شدند */
+  t('پنلِ استوریِ فروشگاه پاسخِ سرور را می‌خواند',
+    /if \(!r\.ok\)/.test(read('components/seller/StoryManager.tsx')),
+    'موفقیت نشان می‌داد در حالی که سرور چیزی ننوشته بود');
+
+  /* ── درستیِ فهرستِ استوری ──
+     دو نسخه‌ی جدا از خواندن/نوشتنِ فهرست بود و هر دو خطا را می‌بلعیدند:
+     نوشتنِ ناموفق ۲۰۱ می‌داد، و خطای خواندن «فهرست خالی» حساب می‌شد
+     که یعنی یک خطای گذرا می‌توانست ده استوریِ زنده را پاک کند. */
+  const storyIdxSrc = read('lib/story-index.ts');
+  /* ⚠️ نسخه‌ی اول این ادعا توخالی بود: الگو روی *کلِ فایل* اجرا می‌شد و
+     `throw` داخلِ تابعِ خواندن را می‌گرفت، پس با برداشتنِ throwِ نوشتن
+     هم سبز می‌ماند. حالا فقط تنه‌ی خودِ `write` سنجیده می‌شود. */
+  const writeFn = storyIdxSrc.split('async write(')[1]?.split('async purge(')[0] ?? '';
+  t('خطای نوشتنِ فهرستِ استوری بلعیده نمی‌شود',
+    /throw new StoryIndexError\('ذخیره‌ی استوری انجام نشد'\)/.test(writeFn));
+  t('خطای خواندن با فهرستِ خالی یکی گرفته نمی‌شود',
+    storyIdxSrc.includes('if (isMissing(error)) return []')
+    && /throw new StoryIndexError\('خواندنِ فهرستِ استوری انجام نشد'\)/.test(storyIdxSrc),
+    'یک خطای گذرا می‌توانست ده استوریِ زنده را بسوزاند');
+
+  for (const p of ['app/api/sellers/[id]/stories/route.ts', 'app/api/clubs/[id]/stories/route.ts']) {
+    const src = read(p);
+    const who = p.includes('sellers') ? 'فروشگاه' : 'باشگاه';
+    t(`مسیرِ استوریِ ${who} از فهرستِ مشترک می‌خواند`,
+      src.includes("from '@/lib/story-index'") && !/async function (readIndex|writeIndex)/.test(src),
+      'نسخه‌ی محلی همان رفتارِ خطاخورِ قبلی را برمی‌گرداند');
+    t(`شکستِ ذخیره در ${who} به کلاینت گفته می‌شود`,
+      /return failed\(e, 'ذخیره‌ی استوری انجام نشد'\)/.test(src));
+    t(`حذفِ استوریِ ناموجود در ${who} ۴۰۴ می‌دهد`,
+      /status: 404/.test(src) && /شناسه‌ی استوری لازم است/.test(src),
+      'ok گفتن یعنی استوری با رفرشِ بعدی برمی‌گردد');
+    t(`فایلِ استوریِ رفته در ${who} پاک می‌شود`,
+      /\.purge\(/.test(src),
+      'وگرنه رسانه تا ابد در فضای ذخیره‌سازی می‌ماند');
+  }
+
+  /* رسانه‌ی استوری روی صفحه‌ی اولِ همه رندر می‌شود */
+  t('رسانه‌ی استوری فقط از میزبانِ خودمان پذیرفته می‌شود',
+    storyInput.includes("if (s.startsWith('//')) return ''")
+    && /hosts\.includes\(u\.host\)/.test(storyInput),
+    'وگرنه پیکسلِ ردیاب یا عوض‌کردنِ عکس بعد از انتشار ممکن است');
+
+  /* پنل نباید شناسه‌ی محلی نگه دارد — حذف بی‌صدا کار نمی‌کند */
+  for (const p of ['components/seller/StoryManager.tsx', 'components/dashboard/club/GalleryTab.tsx']) {
+    t(`رکوردِ سرور در ${p.split('/').pop()} جایگزینِ پیش‌نویس می‌شود`,
+      /if \(!saved\?\.id\) throw new Error/.test(read(p)),
+      'شناسه‌ی محلی با شناسه‌ی ذخیره‌شده فرق می‌کرد');
+  }
+
+  /* حلقه‌ی کارتِ باشگاه روی hasActiveStory && storyMediaUrl است */
+  t('ستون‌های استوری در فهرستِ عمومیِ باشگاه انتخاب می‌شوند',
+    /'storyExpiresAt', 'storyMediaUrl', 'storyType', 'storyText'/.test(read('app/api/clubs/route.ts')),
+    'بدونِ رسانه، حلقه‌ی استوری روی /clubs هرگز رندر نمی‌شد');
+
+  /* پروفایلِ واقعی نباید یک لحظه «پیدا نشد» شود */
+  for (const p of ['app/coaches/[id]/page.tsx', 'app/referees/[id]/page.tsx']) {
+    t(`گاردِ بارگذاری در ${p.split('/')[1]} پیش از «پیدا نشد» است`,
+      /&& !checked\) \{/.test(read(p)),
+      'وگرنه هر پروفایلِ واقعی اول «پیدا نشد» نشان می‌داد');
+  }
 }
 
 console.log('\n― استوری فقط با انتشارِ صریح ―');

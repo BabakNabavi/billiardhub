@@ -5,6 +5,8 @@ import { useRouter, useParams } from 'next/navigation'
 import { toFa, faNum, MONO, toggleSet, Icon, LQ, LQ_NEUTRAL, LQ_FELT_ON } from './shared'
 import { fetchProductsBySeller, type ShopProduct } from '../../shop/products'
 import ClubStoryModal from '../../../components/ClubStoryModal'
+/* همان تایپی که پنلِ فروشگاه می‌نویسد — نسخه‌ی محلیِ سوم نمی‌سازیم */
+import type { SellerStory } from '../../../components/seller/StoryManager'
 import { useProfileImageViewer } from '@/components/ProfileImageViewer'
 import { getSellerProfile, type SellerProfile } from '../../../lib/seller-store'
 import { fetchProfile } from '../../../lib/profiles/client'
@@ -71,8 +73,7 @@ const STORE = {
   address: 'تهران، خیابان ولیعصر، بالاتر از پارک ملت، پلاک ۴۵',
   hours: 'شنبه تا پنج‌شنبه، ۹ تا ۲۰',
   shipping: 'تحویل حضوری هم در فروشگاه امکان‌پذیر است',
-  storyImage: '/images/shop/Pro_table.webp',
-  storyText: 'جدیدترین کالکشن چوب‌های کربنی Predator رسید — همین حالا ببینید!',
+
 }
 
 /* محصولات یک فروشنده (به شکل کارت) — بر اساس id همان فروشگاه */
@@ -301,7 +302,10 @@ export default function FlatShop() {
     setMissing(false)
     /* منبع حقیقت سرور است — فروشگاه کاربران دیگر فقط از این‌جا می‌آید */
     void fetchProfile<SellerProfile>('seller', sellerId).then(p => {
-      if (p) setProfile({ ...p.data, slug: p.slug, verified: p.verified } as SellerProfile)
+      /* `ownerId` ستونِ واقعیِ ردیف است و باید صریح منتقل شود؛ وگرنه
+         مسیرِ استوری روی ردیف‌هایی که آن را داخلِ data ندارند خالی
+         می‌ماند و همان ناهماهنگیِ قبلی برعکس تکرار می‌شود. */
+      if (p) setProfile({ ...p.data, slug: p.slug, ownerId: p.ownerId, verified: p.verified } as SellerProfile)
       else if (!getSellerProfile(sellerId) && !getMockSeller(sellerId)) setMissing(true)
     })
   }, [sellerId])
@@ -359,8 +363,8 @@ export default function FlatShop() {
          استوری می‌گرفت و با زدنش یک استوریِ ساختگی باز می‌شد
          («کالکشن چوب‌های کربنی Predator»). یعنی سایت از طرفِ
          فروشنده چیزی تبلیغ می‌کرد که او نگذاشته بود. */
-      storyImage:   profile.storyImage ?? '',
-      storyText:    profile.storyText ?? '',
+      /* فیلدهای «عکس/متن استوری» پروفایل دیگر خوانده نمی‌شوند: استوری
+         از مسیرِ واقعیِ ۲۴ساعته می‌آید، نه از فیلدِ فرم. */
       phones:       phones.length ? phones : STORE.phones,
     }
   }, [profile, sellerId])
@@ -384,8 +388,36 @@ export default function FlatShop() {
   const [urlCopied, setUrlCopied] = useState(false)
   const catStripRef = useRef<HTMLDivElement>(null)
   useHorizontalScroll(catStripRef)
-  /* استوریِ واقعی = فروشنده تصویری گذاشته باشد */
-  const hasStory = !!String(store.storyImage ?? '').trim()
+  /* ── استوری فقط از سیستمِ واقعیِ ۲۴ساعته ──
+     تا امروز حلقه‌ی استوری از فیلدِ `storyImage` فرمِ ثبتِ فروشگاه
+     ساخته می‌شد. آن فیلد پروفایل است نه استوری: انقضا ندارد، هیچ
+     «انتشار»ی لازم ندارد، و همان لحظه‌ای که فروشنده عکسی در فرم
+     می‌گذاشت روی صفحه‌اش حلقه‌ی استوری ظاهر می‌شد و *روزها* می‌ماند.
+
+     نوارِ استوریِ صفحه‌ی اصلی قبلاً از این فالبک جدا شده بود، ولی
+     این صفحه نه — پس کاربر می‌دید نوار خالی است ولی کارتِ فروشگاه
+     حلقه دارد.
+
+     مسیرِ `/api/sellers/<ownerId>/stories` همان مدلِ باشگاه است و
+     خودش منقضی‌ها را حذف می‌کند. */
+  const [liveStories, setLiveStories] = useState<SellerStory[]>([])
+  /* تا وقتی پاسخ نیامده، دکمه نه حلقه دارد نه ادعای استوری —
+     وگرنه معنی‌اش وسطِ کار عوض می‌شود. */
+  const [storiesLoading, setStoriesLoading] = useState(true)
+  const [storyIdx, setStoryIdx] = useState(0)
+  useEffect(() => {
+    const owner = profile?.ownerId
+    if (!owner) { setLiveStories([]); setStoriesLoading(false); return }
+    setStoriesLoading(true)
+    let alive = true
+    void fetch(`/api/sellers/${owner}/stories`, { cache: 'no-store' })
+      .then(r => (r.ok ? r.json() : []))
+      .then(rows => { if (alive) setLiveStories(Array.isArray(rows) ? rows : []) })
+      .catch(() => { if (alive) setLiveStories([]) })
+      .finally(() => { if (alive) setStoriesLoading(false) })
+    return () => { alive = false }
+  }, [profile?.ownerId])
+  const hasStory = !storiesLoading && liveStories.length > 0
   const router = useRouter()
 
   const catCounts = useMemo(() => {
@@ -643,7 +675,7 @@ export default function FlatShop() {
             {/* حلقه‌ی رنگی و کلیک فقط وقتی استوریِ واقعی هست؛ وگرنه
                 لوگوی ساده — بدونِ وعده‌ی چیزی که وجود ندارد. */}
             <button
-              type="button" onClick={() => { if (hasStory) { setStoryOpen(true); return } openImage(store.logo ?? '', { title: 'لوگوی فروشگاه', alt: store.title }) }}
+              type="button" onClick={() => { if (hasStory) { setStoryIdx(0); setStoryOpen(true); return } openImage(store.logo ?? '', { title: 'لوگوی فروشگاه', alt: store.title }) }}
               aria-label={hasStory ? 'مشاهده استوری فروشگاه' : 'بزرگ‌نمایی لوگوی فروشگاه'}
               disabled={!hasStory && !store.logo}
               className={`-mt-12 block shrink-0 rounded-full p-[3px] transition-transform duration-200 sm:-mt-14${hasStory ? ' hover:scale-105 active:scale-95' : ''}`}
@@ -979,9 +1011,23 @@ export default function FlatShop() {
 
       {/* ═══ استوری فروشگاه (مثل صفحه‌ی باشگاه) ═══ */}
       {imageViewer}
-      {storyOpen && hasStory && (
+      {storyOpen && hasStory && liveStories[storyIdx] && (
         <ClubStoryModal
-          club={{ name: store.brand, storyMediaUrl: store.storyImage, storyText: store.storyText, badge: 'فروشگاه' }}
+          club={{
+            name: store.brand,
+            logo: store.logo || undefined,
+            storyMediaUrl: liveStories[storyIdx]!.mediaUrl,
+            storyType: liveStories[storyIdx]!.mediaType ?? 'image',
+            storyText: liveStories[storyIdx]!.text,
+            badge: 'فروشگاه',
+          }}
+          index={storyIdx}
+          count={liveStories.length}
+          onNext={() => {
+            if (storyIdx + 1 < liveStories.length) { setStoryIdx(storyIdx + 1); return }
+            setStoryOpen(false)
+          }}
+          onPrev={() => setStoryIdx(i => Math.max(0, i - 1))}
           onClose={() => setStoryOpen(false)}
         />
       )}

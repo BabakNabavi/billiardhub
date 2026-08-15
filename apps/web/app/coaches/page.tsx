@@ -1,7 +1,6 @@
 'use client'
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
-import ClubStoryModal from '@/components/ClubStoryModal'
 import { listCoachProfiles, type CoachProfile } from '@/lib/coach-store'
 import { fetchProfiles } from '@/lib/profiles/client'
 
@@ -22,18 +21,10 @@ const SPECS: Record<string, { label: string; color: string; glow: string }> = {
   carom:    { label: 'کارامبول',     color: '#15803D', glow: 'rgba(21,128,61,0.30)'  },
 }
 
-const IMGS: string[] = [
-  '/images/shop/snooker-table.webp',
-  '/images/shop/cue_billiard_2.webp',
-  '/images/shop/Ball-1.webp',
-  '/images/shop/pool_chalk_1.jpg',
-]
-const img = (i: number) => IMGS[i % IMGS.length] ?? IMGS[0]!
-
 interface Coach {
   id: string; name: string; specialty: string; city: string
   experience: number; rating: number; students: number; medals: number
-  sessionPrice: number; hasStory: boolean; storyImage: string; bio: string; photo: string; verified?: boolean; disciplines?: string[]
+  sessionPrice: number; bio: string; photo: string; verified?: boolean; disciplines?: string[]
 }
 
 /* ⚠️ عمداً خالی — پیش از رونمایی پاک شد.
@@ -192,15 +183,17 @@ function CoachHeroSlider() {
   )
 }
 
-/* ── Avatar with story ring (Instagram gradient, like home) ── */
-function CoachAvatar({ coach, onStory, size }: { coach: Coach; onStory: () => void; size: string }) {
+/* ── آواتار با حلقه‌ی طلایی ──
+   پیش‌تر این‌جا حلقه‌ی رنگیِ استوری بود که رسانه‌اش عکسِ پروفایلِ خودِ
+   مربی می‌شد: «استوری»ای که کسی منتشرش نکرده بود و هرگز هم منقضی
+   نمی‌شد. برای مربی اصلاً سیستمِ استوری وجود ندارد. */
+function CoachAvatar({ coach, size }: { coach: Coach; size: string }) {
   return (
-    <button type="button" aria-label="مشاهده استوری"
-      onClick={e => { e.preventDefault(); e.stopPropagation(); onStory() }}
+    <div
       className="cavatar"
-      style={{ width:size, aspectRatio:'1 / 1', borderRadius:'50%', padding:'3px', cursor:'pointer', border:'none', flexShrink:0,
-        background:'linear-gradient(45deg,#feda75,#fa7e1e,#d62976,#962fbf,#4f5bd5)',
-        boxShadow:'0 4px 16px rgba(0,0,0,0.18), 0 0 14px rgba(214,41,118,0.32)', display:'flex' }}>
+      style={{ width:size, aspectRatio:'1 / 1', borderRadius:'50%', padding:'3px', flexShrink:0,
+        background:'linear-gradient(150deg,#FFFDF8,#EBDFC6)',
+        boxShadow:'0 4px 16px rgba(0,0,0,0.12)', display:'flex' }}>
       <div style={{ width:'100%', height:'100%', borderRadius:'50%', overflow:'hidden',
         border:'2.5px solid #FFFFFF', background:'#E7ECF1',
         display:'flex', alignItems:'flex-end', justifyContent:'center' }}>
@@ -213,12 +206,12 @@ function CoachAvatar({ coach, onStory, size }: { coach: Coach; onStory: () => vo
           </svg>
         )}
       </div>
-    </button>
+    </div>
   )
 }
 
 /* ── Coach card — grid + list ── */
-function CoachCard({ coach, view, idx, onStory }: { coach: Coach; view: 'grid' | 'list'; idx: number; onStory: () => void }) {
+function CoachCard({ coach, view, idx }: { coach: Coach; view: 'grid' | 'list'; idx: number }) {
   const sp = SPECS[coach.specialty]
 
   if (view === 'list') {
@@ -230,7 +223,7 @@ function CoachCard({ coach, view, idx, onStory }: { coach: Coach; view: 'grid' |
         animation:`fadeUp .34s ${(idx * 0.04).toFixed(2)}s ease both`,
       }}>
         <div style={{ position:'relative', zIndex:2 }}>
-          <CoachAvatar coach={coach} onStory={onStory} size="58px"/>
+          <CoachAvatar coach={coach} size="58px"/>
         </div>
         <div style={{ flex:1, minWidth:0 }}>
           <div style={{ display:'flex', alignItems:'center', gap:5, marginBottom:2, minWidth:0 }}>
@@ -270,7 +263,7 @@ function CoachCard({ coach, view, idx, onStory }: { coach: Coach; view: 'grid' |
       </div>
       {/* avatar */}
       <div style={{ display:'flex', justifyContent:'center', marginTop:'-31%', position:'relative', zIndex:2 }}>
-        <CoachAvatar coach={coach} onStory={onStory} size="58%"/>
+        <CoachAvatar coach={coach} size="58%"/>
       </div>
       {/* body */}
       <div style={{ padding:'12px 14px 18px', flex:1, display:'flex', flexDirection:'column', alignItems:'center', textAlign:'center' }}>
@@ -301,7 +294,6 @@ function mapProfileToListCoach(p: CoachProfile): Coach {
     specialty: p.disciplines[0] ?? 'snooker',
     city: p.city,
     experience: 0, rating: 0, students: 0, medals: 0, sessionPrice: 0,
-    hasStory: false, storyImage: p.photo,
     bio: p.shortBio, photo: p.photo, verified: p.verified, disciplines: p.disciplines,
   }
 }
@@ -311,7 +303,6 @@ export default function CoachesPage() {
   const [filter,    setFilter]    = useState('all')
   const [search,    setSearch]    = useState('')
   const [view,      setView]      = useState<'grid' | 'list'>('grid')
-  const [openStory, setOpenStory] = useState<Coach | null>(null)
   const [localCoaches, setLocalCoaches] = useState<Coach[]>([])
 
   /* ── چرا این‌جا هم از سرور خوانده می‌شود ──
@@ -545,13 +536,13 @@ export default function CoachesPage() {
             view === 'list' ? (
               <div className="coach-list-grid">
                 {coaches.map((coach, idx) => (
-                  <CoachCard key={coach.id} coach={coach} view="list" idx={idx} onStory={() => setOpenStory(coach)} />
+                  <CoachCard key={coach.id} coach={coach} view="list" idx={idx} />
                 ))}
               </div>
             ) : (
               <div className="g5" style={{ display:'grid', gridTemplateColumns:'repeat(5,1fr)', gap:12 }}>
                 {coaches.map((coach, idx) => (
-                  <CoachCard key={coach.id} coach={coach} view="grid" idx={idx} onStory={() => setOpenStory(coach)} />
+                  <CoachCard key={coach.id} coach={coach} view="grid" idx={idx} />
                 ))}
               </div>
             )
@@ -609,12 +600,14 @@ export default function CoachesPage() {
 
       </div>
 
-      {openStory && (
-        <ClubStoryModal
-          club={{ name:openStory.name, logo:openStory.photo, storyMediaUrl:openStory.storyImage || img(parseInt(openStory.id, 10) || 0), storyText:openStory.bio, badge:'مربی' }}
-          onClose={() => setOpenStory(null)}
-        />
-      )}
+      {/* ── مودالِ استوری این‌جا نیست ──
+          رسانه‌اش `storyImage` بود که برابرِ *عکسِ پروفایل* پر می‌شد،
+          و اگر خالی بود یک عکسِ کاتالوگِ ساختگی جایش می‌نشست. یعنی
+          سایت از طرفِ مربی چیزی نشان می‌داد که او نگذاشته بود، و
+          چون فیلدِ پروفایل بود هرگز منقضی نمی‌شد.
+
+          مربی و داور هنوز سیستمِ استوریِ واقعی ندارند؛ تا آن روز
+          حلقه و مودالی هم نباید باشد. */}
     </>
   )
 }

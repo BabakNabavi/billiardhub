@@ -4,7 +4,6 @@ import ProfileVideoCard from '../../../components/ProfileVideoCard'
 import { fetchProfile } from '../../../lib/profiles/client'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
-import ClubStoryModal from '@/components/ClubStoryModal'
 import { useProfileImageViewer } from '@/components/ProfileImageViewer'
 import { useTabKeys } from '@/hooks/use-tab-keys'
 import { getCoachProfile, badgeFromGrades, certificationLines, disciplineLabel, type CoachProfile } from '@/lib/coach-store'
@@ -304,7 +303,10 @@ function mapLocalToFull(p: CoachProfile): CoachFull {
 /* ─── Page ─── */
 export default function CoachProfilePage() {
   const { id } = useParams<{id:string}>()
-  const mock = D.find(c => c.id === id) ?? D[0]!
+  /* ⚠️ بدونِ فالبک. پیش‌تر `?? D[0]!` بود، یعنی هر نامکِ ناشناخته
+     پروفایلِ نمونه‌ی شماره‌یک را نشان می‌داد — با استوری و مدرک و
+     شاگردانی که مالِ کسِ دیگری بود. */
+  const mock = D.find(c => c.id === id) ?? null
   const isMockId = D.some(c => c.id === id)
 
   const [localP, setLocalP]   = useState<CoachProfile | null>(null)
@@ -327,8 +329,6 @@ export default function CoachProfilePage() {
     return () => { alive = false }
   }, [id])
   const coach = localP ? mapLocalToFull(localP) : mock
-
-  const [openStory,     setOpenStory]     = useState(false)
   const { open: openImage, viewer: imageViewer } = useProfileImageViewer()
   const [copied,        setCopied]        = useState(false)
   const [tab,           setTab]           = useState<'photos'|'videos'|'albums'>('photos')
@@ -339,7 +339,7 @@ export default function CoachProfilePage() {
   const [lightbox,      setLightbox]      = useState<GImg|null>(null)
 
   const localBadge = localP ? badgeFromGrades(localP.grades) : null
-  const grade = localP ? (localBadge ? { dots: localBadge.dots, color: GOLD_D } : undefined) : GRADE_DOTS[coach.badge]
+  const grade = localP ? (localBadge ? { dots: localBadge.dots, color: GOLD_D } : undefined) : (coach ? GRADE_DOTS[coach.badge] : undefined)
   const socialBtn: React.CSSProperties = { width:44, height:44, borderRadius:11, display:'flex', alignItems:'center', justifyContent:'center', background:'rgba(26,25,23,0.06)', border:'1px solid rgba(26,25,23,0.10)', color:'rgba(26,25,23,0.5)', textDecoration:'none', flexShrink:0, cursor:'pointer' }
 
   const TABS = ['photos', 'videos', 'albums'] as const
@@ -354,6 +354,20 @@ export default function CoachProfilePage() {
 
   if (!isMockId && !checked) {
     return <div style={{ direction:'rtl', fontFamily:"'Vazirmatn',Tahoma,sans-serif", background:'#F1EFEC', minHeight:'100vh' }} />
+  }
+
+  if (!coach) {
+    return (
+      <div className="lq-stage" style={{ direction:'rtl', fontFamily:"'Vazirmatn',Tahoma,sans-serif", minHeight:'100vh', display:'flex', alignItems:'center', justifyContent:'center', padding:24 }}>
+        <div className="lqg" style={{ padding:'34px 30px', textAlign:'center', maxWidth:420 }}>
+          <h1 style={{ fontSize:18, fontWeight:800, color:TEXT, marginBottom:8 }}>این مربی پیدا نشد</h1>
+          <p style={{ fontSize:13.5, color:TEXT_S, lineHeight:2, marginBottom:18 }}>
+            ممکن است نشانی اشتباه باشد یا پروفایل هنوز تأیید نشده باشد.
+          </p>
+          <Link href="/coaches" className="btn btn-glass btn-sm">بازگشت به مربیان</Link>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -450,16 +464,13 @@ export default function CoachProfilePage() {
                     همان فضا کار می‌کند. بالاکشیدن روی خودِ آواتار است تا
                     فقط او داخلِ کاور برود و متن زیرِ لبه‌ی کاور بماند. */}
                 <div className="lq-ident" style={{ display:'flex', alignItems:'flex-start', gap:18 }}>
-                  <button onClick={() => { if (coach.hasStory) { setOpenStory(true); return } openImage(coach.photo ?? '', { alt: coach.name, title: 'عکس پروفایل' }) }} aria-label={coach.hasStory ? 'دیدن استوری' : 'بزرگ‌نمایی عکس پروفایل'} disabled={!coach.hasStory && !coach.photo} style={{ position:'relative', background:'none', border:'none', padding:0, cursor: (coach.hasStory || coach.photo) ? 'pointer' : 'default', borderRadius:'50%', width:'clamp(104px,14vw,148px)', aspectRatio:'1 / 1', flexShrink:0, marginTop:'clamp(-64px,-9vw,-72px)' }}>
-                    {/* هاله‌ی طلاییِ نبض‌دار — فقط وقتی استوری نیست، وگرنه با
-                        حلقه‌ی رنگیِ استوری دو نشانه‌ی رقیب روی هم می‌نشیند. */}
-                    {!coach.hasStory && (
-                      <span aria-hidden className="lq-halo" style={{ position:'absolute', inset:-7, borderRadius:'50%', background:'radial-gradient(circle, rgba(199,166,106,0.42) 0%, rgba(199,166,106,0) 70%)', pointerEvents:'none' }}/>
-                    )}
+                  <button onClick={() => { openImage(coach.photo ?? '', { alt: coach.name, title: 'عکس پروفایل' }) }} aria-label="بزرگ‌نمایی عکس پروفایل" disabled={!coach.photo} style={{ position:'relative', background:'none', border:'none', padding:0, cursor: coach.photo ? 'pointer' : 'default', borderRadius:'50%', width:'clamp(104px,14vw,148px)', aspectRatio:'1 / 1', flexShrink:0, marginTop:'clamp(-64px,-9vw,-72px)' }}>
+                    {/* هاله‌ی طلاییِ نبض‌دار دورِ آواتار */}
+                    <span aria-hidden className="lq-halo" style={{ position:'absolute', inset:-7, borderRadius:'50%', background:'radial-gradient(circle, rgba(199,166,106,0.42) 0%, rgba(199,166,106,0) 70%)', pointerEvents:'none' }}/>
                     <div style={{ position:'relative', width:'100%', height:'100%', borderRadius:'50%', boxSizing:'border-box',
-                      background: coach.hasStory ? 'linear-gradient(45deg,#feda75,#fa7e1e,#d62976,#962fbf,#4f5bd5)' : 'linear-gradient(150deg,#FFFDF8,#EBDFC6)',
-                      padding: coach.hasStory ? 4 : 2.5,
-                      boxShadow: coach.hasStory ? '0 0 16px rgba(214,41,118,0.40), 0 2px 8px rgba(0,0,0,0.14)' : '0 10px 26px -8px rgba(154,110,56,0.45), 0 2px 8px rgba(0,0,0,0.12)' }}>
+                      background: 'linear-gradient(150deg,#FFFDF8,#EBDFC6)',
+                      padding: 2.5,
+                      boxShadow: '0 10px 26px -8px rgba(154,110,56,0.45), 0 2px 8px rgba(0,0,0,0.12)' }}>
                       <div style={{ width:'100%', height:'100%', borderRadius:'50%', border:'3px solid #fff', overflow:'hidden', background:'#E7ECF1', display:'flex', alignItems:'flex-end', justifyContent:'center' }}>
                         {coach.photo ? (
                           <img loading="lazy" decoding="async" src={coach.photo} alt={coach.name} style={{ width:'100%', height:'100%', objectFit:'cover' }}/>
@@ -753,13 +764,6 @@ export default function CoachProfilePage() {
           </div>
         )}
 
-        {/* ── Story Modal ── */}
-        {openStory && coach.hasStory && (
-          <ClubStoryModal
-            club={{ name:coach.name, storyMediaUrl:coach.storyImage, storyType:'image', badge:'مربی' }}
-            onClose={() => setOpenStory(false)}
-          />
-        )}
 
         {/* نمای تمام‌صفحه‌ی عکس پروفایل و کاور */}
         {imageViewer}

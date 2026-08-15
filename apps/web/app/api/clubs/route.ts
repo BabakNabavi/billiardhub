@@ -64,7 +64,13 @@ export async function GET(req: NextRequest) {
       'id', 'slug', 'name', 'city', 'province', 'address', 'logo', 'images',
       'snookerTables', 'pocketTables', 'highballTables', 'vipSnookerTables', 'vipPocketTables',
       'playstations', 'hasCafe', 'hasParking', 'hasWifi', 'hasProfessionalCoach',
-      'verificationStatus', 'storyExpiresAt', 'hasActiveStory', 'isActive', 'createdAt',
+      /* ⚠️ `hasActiveStory` ستونی است که هیچ‌کس نمی‌نویسدش و دو خط
+         پایین‌تر از روی `storyExpiresAt` بازنویسی می‌شود — انتخابش
+         بی‌فایده بود. در عوض سه ستونِ خودِ استوری لازم‌اند: کارتِ
+         باشگاه حلقه را روی `hasActiveStory && storyMediaUrl` می‌کشد،
+         و چون رسانه انتخاب نمی‌شد حلقه هرگز رندر نمی‌شد. */
+      'verificationStatus', 'storyExpiresAt', 'storyMediaUrl', 'storyType', 'storyText',
+      'isActive', 'createdAt',
     ].join(',');
 
     let q = getSupabaseServer().from('clubs').select(isAdminReq ? '*' : PUBLIC_COLUMNS);

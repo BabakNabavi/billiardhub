@@ -76,12 +76,24 @@ export default function StoryManager({ ownerId }: { ownerId: string }) {
         createdAt: new Date().toISOString(),
         expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
       };
-      await apiFetch(`/api/sellers/${ownerId}/stories`, {
+      const r = await apiFetch(`/api/sellers/${ownerId}/stories`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(story),
       });
-      setStories(prev => [...prev, story]);
+      /* پاسخ خوانده می‌شود: پیش‌تر ۴۰۳ (مالک نیست) و ۴۰۰ (سقفِ ۱۰ تا)
+         بی‌صدا رد می‌شد و پنل موفقیت نشان می‌داد در حالی که سرور چیزی
+         ننوشته بود. رکوردِ برگشتی هم همان است که ذخیره شده — شناسه و
+         انقضایش را سرور ساخته. */
+      if (!r.ok) {
+        const j = (await r.json().catch(() => null)) as { message?: string } | null;
+        throw new Error(j?.message || 'ثبت استوری روی سرور انجام نشد');
+      }
+      /* فقط رکوردِ سرور. فالبک به پیش‌نویسِ محلی یعنی شناسه‌ی محلی با
+         شناسه‌ی ذخیره‌شده فرق می‌کند و دکمه‌ی حذف بی‌صدا کار نمی‌کند. */
+      const saved = (await r.json().catch(() => null)) as SellerStory | null;
+      if (!saved?.id) throw new Error("پاسخِ سرور خوانده نشد");
+      setStories(prev => [...prev, saved]);
       URL.revokeObjectURL(storyDraft.previewUrl);
       setStoryDraft(null);
     } catch {
