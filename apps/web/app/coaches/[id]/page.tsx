@@ -429,20 +429,33 @@ export default function CoachProfilePage() {
           <div className="ln-main" style={{ minWidth:0, display:'flex', flexDirection:'column', gap:16 }}>
 
             {/* Profile card */}
-            <div className="pcard pcard-profile lqg lq-rise" style={{ '--lq-i': 0, overflow:'hidden' } as React.CSSProperties}>
+            <div className="pcard pcard-profile lqg lq-rise" style={{ '--lq-i': 0, overflow:'hidden',
+              /* قطرِ آواتار این‌جا تعریف می‌شود چون هم کاور برای بریدنِ
+                 گودی لازمش دارد هم خودِ آواتار. */
+              '--av':'clamp(112px,15vw,152px)' } as React.CSSProperties}>
               {/* Cover — default coach poster. «lq-enter-sheen» یک برقِ عبوریِ
                   یک‌باره موقعِ ورود می‌اندازد؛ همان حرکتی که سطحِ شیشه‌ای را
                   «مادی» نشان می‌دهد بدونِ اینکه چیزی مدام تکان بخورد. */}
               <div className="lq-enter-sheen" style={{ position:'relative', height:'clamp(190px,30vw,260px)', overflow:'hidden', background:'linear-gradient(115deg,#0c1424 0%,#17253f 55%,#1e2f4d 100%)',
                 /* کمانِ بیضی: کناره‌ها بالا، مرکز به عمقِ --dip */
                 borderBottomLeftRadius:'50% var(--dip)', borderBottomRightRadius:'50% var(--dip)',
-                '--dip':'clamp(42px,12vw,74px)' } as React.CSSProperties}>
-                {coach.coverImage && <img loading="lazy" decoding="async" src={coach.coverImage} alt="" style={{ position:'absolute', inset:0, width:'100%', height:'100%', objectFit:'cover' }}/>}
+                '--dip':'clamp(42px,12vw,74px)',
+                /* گودیِ دایره‌ای دورِ عکس: هم‌مرکزِ آواتار، کمی بزرگ‌تر از
+                   آن، تا حلقه‌ی سفیدِ یک‌دست بماند. `-webkit-` برای
+                   سافاری لازم است — مخاطبِ اصلی آیفون است. */
+                '--cut':'calc(var(--av) / 2 + clamp(7px,1.8vw,12px))',
+                WebkitMaskImage:'radial-gradient(circle var(--cut) at 50% 100%, rgba(0,0,0,0) 96%, #000 100%)', maskImage:'radial-gradient(circle var(--cut) at 50% 100%, rgba(0,0,0,0) 96%, #000 100%)',
+                WebkitMaskRepeat:'no-repeat', maskRepeat:'no-repeat' } as React.CSSProperties}>
+                {coach.coverImage && <img loading="eager" fetchPriority="high" decoding="async" src={coach.coverImage} alt="" style={{ position:'absolute', inset:0, width:'100%', height:'100%', objectFit:'cover' }}/>}
                 {coach.coverImage && <div style={{ position:'absolute', inset:0, background:'linear-gradient(115deg,rgba(12,20,36,0.58),rgba(30,47,77,0.40))' }}/>}
                 {/* دکمه‌ی نامرئیِ روی کاور. لوگوی گوشه بعد از این می‌آید،
                     پس رویش می‌ماند و کلیکش را این نمی‌دزدد. */}
                 {coach.coverImage && <button type="button" onClick={() => openImage(coach.coverImage ?? '', { title: 'تصویر کاور' })} aria-label="بزرگ‌نمایی تصویر کاور" style={{ position:'absolute', inset:0, background:'none', border:'none', padding:0, cursor:'zoom-in' }}/>}
-                <div style={{ position:'absolute', inset:0, backgroundImage:'radial-gradient(circle, rgba(255,255,255,0.045) 1px, transparent 1px)', backgroundSize:'16px 16px' }}/>
+                {/* وسط‌چینی با insetInline:0 + marginInline:auto — نه
+                    insetInlineStart:'50%' با translateX که در RTL جای
+                    اشتباه می‌نشیند (translate فیزیکی است، inset منطقی). */}
+                <span aria-hidden style={{ position:'absolute', insetInline:0, marginInline:'auto', bottom:0, width:'calc(var(--cut) * 2)', height:'var(--cut)', borderRadius:'var(--cut) var(--cut) 0 0', cursor:'default' }}/>
+                <div style={{ position:'absolute', inset:0, backgroundImage:'radial-gradient(circle, rgba(255,255,255,0.045) 1px, transparent 1px)', backgroundSize:'16px 16px', pointerEvents:'none' }}/>
                 <div style={{ position:'absolute', left:'-6%', top:'-40%', width:'46%', height:'180%', background:'radial-gradient(ellipse, rgba(199,166,106,0.18) 0%, transparent 66%)', filter:'blur(18px)', pointerEvents:'none' }}/>
                 <div style={{ position:'absolute', top:'-20%', bottom:'-20%', left:'54%', width:'1.5px', background:'linear-gradient(180deg,transparent,rgba(199,166,106,0.45),transparent)', transform:'rotate(-10deg)', pointerEvents:'none' }}/>
                 <div style={{ position:'absolute', top:'50%', insetInlineEnd:'clamp(20px,4vw,40px)', transform:'translateY(-50%)', display:'flex', flexDirection:'column', gap:'10px' }}>
@@ -462,10 +475,9 @@ export default function CoachProfilePage() {
                     عوض شود. */}
                 <div className="lq-ident" style={{ display:'flex', flexDirection:'column', alignItems:'center', textAlign:'center' }}>
                   <button onClick={() => { openImage(coach.photo ?? '', { alt: coach.name, title: 'عکس پروفایل' }) }} aria-label="بزرگ‌نمایی عکس پروفایل" disabled={!coach.photo} style={{ position:'relative', background:'none', border:'none', padding:0, cursor: coach.photo ? 'pointer' : 'default', borderRadius:'50%', aspectRatio:'1 / 1', flexShrink:0,
-                    /* قطر یک‌جا تعریف می‌شود و بالاکشیدن *نصفِ همان* است،
+                    /* بالاکشیدن *نصفِ قطر* است (قطر روی کارت تعریف شده)،
                        تا مرکزِ آواتار دقیقاً روی پایین‌ترین نقطه‌ی کمان
                        بنشیند و با تغییرِ اندازه از آن جدا نیفتد. */
-                    '--av':'clamp(112px,15vw,152px)',
                     width:'var(--av)', marginTop:'calc(var(--av) / -2)' } as React.CSSProperties}>
                     {/* هاله‌ی طلاییِ نبض‌دار دورِ آواتار */}
                     <span aria-hidden className="lq-halo" style={{ position:'absolute', inset:-7, borderRadius:'50%', background:'radial-gradient(circle, rgba(199,166,106,0.42) 0%, rgba(199,166,106,0) 70%)', pointerEvents:'none' }}/>
