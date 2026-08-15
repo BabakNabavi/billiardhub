@@ -125,6 +125,20 @@ export default function ImageLightbox({
         direction: 'rtl', fontFamily: 'Vazirmatn,Tahoma,sans-serif',
         display: 'flex', flexDirection: 'column',
         animation: 'bhLbIn .18s ease both',
+        /* ── ناحیه‌ی امنِ iOS ──
+           در حالتِ نصب‌شده (add to home screen) نوارِ مرورگر نیست و
+           بالاترین ~۴۷px مالِ ساعت و باتری است. این پوشش تمام‌صفحه
+           است و سربرگش دقیقاً همان‌جا می‌نشست، پس ضربدر زیرِ نمادهای
+           سیستم می‌رفت. در مرورگرِ عادی این مقدار صفر است و چیزی
+           تغییر نمی‌کند — برای همین در تستِ سافاریِ معمولی دیده
+           نمی‌شد. پایین هم نوارِ حرکتِ خانه را رد می‌کند. */
+        paddingTop: 'env(safe-area-inset-top)',
+        paddingBottom: 'env(safe-area-inset-bottom)',
+        /* ناچ در لنداسکیپ روی یک سمتِ فیزیکی است، نه سمتِ متن —
+           این تنها جایی است که چپ/راست به‌جای start/end درست است. */
+        paddingLeft: 'env(safe-area-inset-left)',
+        paddingRight: 'env(safe-area-inset-right)',
+        boxSizing: 'border-box',
       }}>
 
       {/* سربرگ — ضربدر یک گوشه، عنوان گوشه‌ی دیگر */}

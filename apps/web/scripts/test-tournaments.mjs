@@ -3474,6 +3474,19 @@ console.log('\n― استوری: یک منبع، با انقضا ―');
     /'storyExpiresAt', 'storyMediaUrl', 'storyType', 'storyText'/.test(read('app/api/clubs/route.ts')),
     'بدونِ رسانه، حلقه‌ی استوری روی /clubs هرگز رندر نمی‌شد');
 
+  /* ── ناحیه‌ی امنِ iOS در پوشش‌های تمام‌صفحه ──
+     در حالتِ نصب‌شده نوارِ مرورگر نیست و بالاترین ~۴۷px مالِ ساعت و
+     باتری است. پوششی که سربرگش آن‌جا بنشیند، ضربدرش زیرِ نمادهای
+     سیستم می‌رود. در سافاریِ عادی مقدار صفر است و باگ دیده نمی‌شود. */
+  t('نمایِ تمام‌صفحه‌ی تصویر ناحیه‌ی امن را رعایت می‌کند',
+    read('components/market/ImageLightbox.tsx').includes("paddingTop: 'env(safe-area-inset-top)'"),
+    'ضربدرِ نمای تصویر روی آیفونِ نصب‌شده زیرِ ساعت می‌رفت');
+  for (const p of ['components/MediaUpload.tsx', 'components/IdentityVerify.tsx']) {
+    t(`ورقِ ${p.split('/').pop()} ناحیه‌ی امن را با calc جمع می‌زند`,
+      /paddingTop: 'calc\(clamp\([^']*env\(safe-area-inset-top\)\)'/.test(read(p)),
+      'paddingِ اینلاین بر کلاسِ safe-top مقدم است و بی‌صدا بی‌اثرش می‌کند');
+  }
+
   /* پروفایلِ واقعی نباید یک لحظه «پیدا نشد» شود */
   for (const p of ['app/coaches/[id]/page.tsx', 'app/referees/[id]/page.tsx']) {
     t(`گاردِ بارگذاری در ${p.split('/')[1]} پیش از «پیدا نشد» است`,

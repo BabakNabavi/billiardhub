@@ -202,7 +202,7 @@ export default function MediaUpload({ open, onClose, onUploaded }: { open: boole
 
   return createPortal(
     <div onClick={() => !busy && onClose()}
-      style={{ position: 'fixed', inset: 0, zIndex: 3000, background: 'rgba(20,18,14,0.5)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: 'clamp(16px,5vh,60px) 16px', overflowY: 'auto', fontFamily: 'Vazirmatn,Tahoma,sans-serif' }} dir="rtl">
+      style={{ position: 'fixed', inset: 0, zIndex: 3000, background: 'rgba(20,18,14,0.5)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: 'clamp(16px,5vh,60px) 16px', paddingTop: 'calc(clamp(16px,5vh,60px) + env(safe-area-inset-top))', paddingBottom: 'calc(clamp(16px,5vh,60px) + env(safe-area-inset-bottom))', overflowY: 'auto', fontFamily: 'Vazirmatn,Tahoma,sans-serif' }} dir="rtl">
       <div onClick={e => e.stopPropagation()}
         style={{ width: '100%', maxWidth: 560, background: '#fff', borderRadius: 22, border: `1px solid ${LINE}`, boxShadow: '0 40px 90px rgba(20,18,14,0.32)', overflow: 'hidden' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '16px 20px', borderBottom: `1px solid ${LINE}` }}>
