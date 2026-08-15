@@ -386,11 +386,6 @@ export default function CoachProfilePage() {
         .gtab{transition:all .18s;cursor:pointer;}
         .gtab:hover{opacity:.85;}
         @media(max-width:740px){.pcols{grid-template-columns:1fr!important;}}
-        /* روی موبایل ستونِ نام زیرِ آواتار می‌رود — کنارِ هم جا نمی‌شود */
-        @media(max-width:520px){
-          .lq-ident{flex-wrap:wrap;align-items:flex-start;}
-          .lq-ident>div{flex-basis:100%;padding-top:10px;}
-        }
         .pcard{min-width:0;}
         /* روی موبایل هم هر سه تب یک شبکه دارند: پنج ستونِ مربع.
            پیش‌تر تصویر ۷۱ و آلبوم ۹۶ پیکسل بود — دو اندازه در یک گالری. */
@@ -438,7 +433,10 @@ export default function CoachProfilePage() {
               {/* Cover — default coach poster. «lq-enter-sheen» یک برقِ عبوریِ
                   یک‌باره موقعِ ورود می‌اندازد؛ همان حرکتی که سطحِ شیشه‌ای را
                   «مادی» نشان می‌دهد بدونِ اینکه چیزی مدام تکان بخورد. */}
-              <div className="lq-enter-sheen" style={{ position:'relative', height:'clamp(120px,20vw,200px)', overflow:'hidden', background:'linear-gradient(115deg,#0c1424 0%,#17253f 55%,#1e2f4d 100%)' }}>
+              <div className="lq-enter-sheen" style={{ position:'relative', height:'clamp(190px,30vw,260px)', overflow:'hidden', background:'linear-gradient(115deg,#0c1424 0%,#17253f 55%,#1e2f4d 100%)',
+                /* کمانِ بیضی: کناره‌ها بالا، مرکز به عمقِ --dip */
+                borderBottomLeftRadius:'50% var(--dip)', borderBottomRightRadius:'50% var(--dip)',
+                '--dip':'clamp(42px,12vw,74px)' } as React.CSSProperties}>
                 {coach.coverImage && <img loading="lazy" decoding="async" src={coach.coverImage} alt="" style={{ position:'absolute', inset:0, width:'100%', height:'100%', objectFit:'cover' }}/>}
                 {coach.coverImage && <div style={{ position:'absolute', inset:0, background:'linear-gradient(115deg,rgba(12,20,36,0.58),rgba(30,47,77,0.40))' }}/>}
                 {/* دکمه‌ی نامرئیِ روی کاور. لوگوی گوشه بعد از این می‌آید،
@@ -457,21 +455,25 @@ export default function CoachProfilePage() {
               </div>
               {/* Body */}
               <div style={{ padding:'0 24px 20px', position:'relative', zIndex:2 }}>
-                {/* ── چرا آواتار و نام در یک ردیف ──
-                    قبلاً نام *زیرِ* آواتار می‌نشست و چون آواتار سمتِ راست
-                    است، کلِ نیمه‌ی چپِ کارت — تقریباً نیمی از عرضِ صفحه —
-                    سفیدِ خالی می‌ماند. حالا نام و مشخصات کنارش می‌آیند و
-                    همان فضا کار می‌کند. بالاکشیدن روی خودِ آواتار است تا
-                    فقط او داخلِ کاور برود و متن زیرِ لبه‌ی کاور بماند. */}
-                <div className="lq-ident" style={{ display:'flex', alignItems:'flex-start', gap:18 }}>
-                  <button onClick={() => { openImage(coach.photo ?? '', { alt: coach.name, title: 'عکس پروفایل' }) }} aria-label="بزرگ‌نمایی عکس پروفایل" disabled={!coach.photo} style={{ position:'relative', background:'none', border:'none', padding:0, cursor: coach.photo ? 'pointer' : 'default', borderRadius:'50%', width:'clamp(104px,14vw,148px)', aspectRatio:'1 / 1', flexShrink:0, marginTop:'clamp(-64px,-9vw,-72px)' }}>
+                {/* ── چیدمانِ سر صفحه ──
+                    آواتار وسط، روی گودیِ کمانِ کاور؛ نام و مشخصات زیرش.
+                    `lq-ident` قاعده‌ی CSS ندارد و فقط دستگیره‌ی تستِ
+                    ایستاست — حذفش تست را قرمز می‌کند بدونِ اینکه ظاهر
+                    عوض شود. */}
+                <div className="lq-ident" style={{ display:'flex', flexDirection:'column', alignItems:'center', textAlign:'center' }}>
+                  <button onClick={() => { openImage(coach.photo ?? '', { alt: coach.name, title: 'عکس پروفایل' }) }} aria-label="بزرگ‌نمایی عکس پروفایل" disabled={!coach.photo} style={{ position:'relative', background:'none', border:'none', padding:0, cursor: coach.photo ? 'pointer' : 'default', borderRadius:'50%', aspectRatio:'1 / 1', flexShrink:0,
+                    /* قطر یک‌جا تعریف می‌شود و بالاکشیدن *نصفِ همان* است،
+                       تا مرکزِ آواتار دقیقاً روی پایین‌ترین نقطه‌ی کمان
+                       بنشیند و با تغییرِ اندازه از آن جدا نیفتد. */
+                    '--av':'clamp(112px,15vw,152px)',
+                    width:'var(--av)', marginTop:'calc(var(--av) / -2)' } as React.CSSProperties}>
                     {/* هاله‌ی طلاییِ نبض‌دار دورِ آواتار */}
                     <span aria-hidden className="lq-halo" style={{ position:'absolute', inset:-7, borderRadius:'50%', background:'radial-gradient(circle, rgba(199,166,106,0.42) 0%, rgba(199,166,106,0) 70%)', pointerEvents:'none' }}/>
                     <div style={{ position:'relative', width:'100%', height:'100%', borderRadius:'50%', boxSizing:'border-box',
                       background: 'linear-gradient(150deg,#FFFDF8,#EBDFC6)',
                       padding: 2.5,
                       boxShadow: '0 10px 26px -8px rgba(154,110,56,0.45), 0 2px 8px rgba(0,0,0,0.12)' }}>
-                      <div style={{ width:'100%', height:'100%', borderRadius:'50%', border:'3px solid #fff', overflow:'hidden', background:'#E7ECF1', display:'flex', alignItems:'flex-end', justifyContent:'center' }}>
+                      <div style={{ width:'100%', height:'100%', borderRadius:'50%', border:'5px solid #fff', overflow:'hidden', background:'#E7ECF1', display:'flex', alignItems:'flex-end', justifyContent:'center' }}>
                         {coach.photo ? (
                           <img loading="lazy" decoding="async" src={coach.photo} alt={coach.name} style={{ width:'100%', height:'100%', objectFit:'cover' }}/>
                         ) : (
@@ -485,9 +487,9 @@ export default function CoachProfilePage() {
                   </button>
 
                 {/* name + affiliation */}
-                <div style={{ flex:1, minWidth:220, paddingTop:14 }}>
+                <div style={{ width:'100%', paddingTop:12 }}>
                   <div style={{ minWidth:0 }}>
-                    <div style={{ display:'flex', alignItems:'center', gap:7, flexWrap:'wrap' }}>
+                    <div style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:7, flexWrap:'wrap' }}>
                       <h1 style={{ fontSize:'clamp(21px,2.6vw,26px)', fontWeight:700, color:'#1c1c1c', lineHeight:1.2 }}>{coach.name}</h1>
                       {coach.verified && (
                         <svg width="20" height="20" viewBox="0 0 40 40" aria-label="تأیید شده" style={{ flexShrink:0 }}>
@@ -497,7 +499,7 @@ export default function CoachProfilePage() {
                       )}
                     </div>
                     {/* رشته‌های تخصصی — بدون قاب، رنگی، با برچسب «مربی :» */}
-                    <div style={{ display:'flex', alignItems:'center', gap:7, flexWrap:'wrap', marginTop:7, fontSize:14, fontWeight:800 }}>
+                    <div style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:7, flexWrap:'wrap', marginTop:7, fontSize:14, fontWeight:800 }}>
                       <span style={{ color:'rgba(0,0,0,0.45)', fontWeight:700 }}>مربی :</span>
                       {(localP ? localP.disciplines : (coach.specialty ? [coach.specialty] : [])).map((dk, i) => {
                         const s = SPECS[dk as keyof typeof SPECS]
@@ -512,7 +514,7 @@ export default function CoachProfilePage() {
                     {/* درجه مربیگری — با برچسب، طلایی؛ زیرش سال اولین مدرک */}
                     {coach.badge && (
                       <div style={{ marginTop:7 }}>
-                        <div style={{ display:'flex', alignItems:'center', gap:6, flexWrap:'wrap' }}>
+                        <div style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:6, flexWrap:'wrap' }}>
                           <span style={{ fontSize:13.5, fontWeight:700, color:'rgba(0,0,0,0.45)' }}>درجه مربیگری :</span>
                           <span dir="auto" style={{ fontSize:13.5, fontWeight:800, color:GOLD_D, unicodeBidi:'isolate' }}>{coach.badge}</span>
                         </div>
@@ -521,7 +523,10 @@ export default function CoachProfilePage() {
                         )}
                       </div>
                     )}
-                    <div style={{ fontSize:13, color:'rgba(0,0,0,0.55)', marginTop:6 }}>
+                    <div style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:6, fontSize:13, color:'rgba(0,0,0,0.55)', marginTop:8 }}>
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style={{ flexShrink:0, opacity:.75 }}>
+                        <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/>
+                      </svg>
                       {coach.city}، ایران
                     </div>
                   </div>
