@@ -18,8 +18,8 @@ import { apiFetch } from '../../lib/http'
 import { toFaDigits, faBirthDate } from '../../lib/jalali'
 import { rejectLabel } from '../../lib/moderation/reasons'
 
-const INK = '#1C1B17', SEC = '#5B564B', MUT = '#8A8474', LINE = '#EAE5DA'
-const GOLD_D = '#9A6E38', FELT = '#0E7A38', RED = '#B23B2E'
+const INK = '#1C1B17', SEC = '#5B564B', MUT = '#6F6A5C', LINE = '#EAE5DA'
+const GOLD_D = '#8F6531', FELT = '#0E7A38', RED = '#B23B2E'
 
 export type ReviewType = 'profile' | 'club' | 'role'
 

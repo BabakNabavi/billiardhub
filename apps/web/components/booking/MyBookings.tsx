@@ -11,7 +11,7 @@ import CancellationPolicy from './CancellationPolicy'
 import { apiFetch } from '../../lib/http'
 
 const INK = '#111111', SEC = '#5B564B', MUT = 'rgba(0,0,0,0.42)', LINE = '#EAE5DA'
-const GOLD = '#C7A66A', GOLD_D = '#9A6E38', FELT = '#0E7A38', RED = '#B23B2E'
+const GOLD = '#C7A66A', GOLD_D = '#8F6531', FELT = '#0E7A38', RED = '#B23B2E'
 const fa = faNum
 
 interface RefundPreview { refundPercent: number; refundAmount: number; label: string; hoursBefore: number }

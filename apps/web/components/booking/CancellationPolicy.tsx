@@ -7,7 +7,7 @@
 import { CANCELLATION_POLICY, CANCELLATION_TITLE, BOOKING_TITLE, BOOKING_RULES } from '../../lib/finance/cancellation'
 import { toFaDigits } from '../../lib/jalali'
 
-const GOLD_D = '#9A6E38', FELT = '#0E7A38', RED = '#B23B2E', MUT = 'rgba(0,0,0,0.42)'
+const GOLD_D = '#8F6531', FELT = '#0E7A38', RED = '#B23B2E', MUT = 'rgba(0,0,0,0.42)'
 
 const tone = (pct: number) => (pct === 100 ? FELT : pct === 0 ? RED : GOLD_D)
 const bg = (pct: number) =>

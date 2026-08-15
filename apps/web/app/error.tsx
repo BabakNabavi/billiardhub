@@ -7,7 +7,7 @@
 import { useEffect } from 'react'
 
 const LINE = '#E7E2D6'
-const GOLD_D = '#9A6E38'
+const GOLD_D = '#8F6531'
 
 export default function Error({ error, reset }: {
   error: Error & { digest?: string }
@@ -29,7 +29,7 @@ export default function Error({ error, reset }: {
         <h1 style={{ fontSize: 19, fontWeight: 900, color: '#1C1B17', margin: '0 0 8px' }}>
           مشکلی پیش آمد
         </h1>
-        <p style={{ fontSize: 13, color: '#8A8474', margin: '0 0 24px', lineHeight: 2 }}>
+        <p style={{ fontSize: 13, color: '#6F6A5C', margin: '0 0 24px', lineHeight: 2 }}>
           این بخش موقتاً بالا نیامد. یک‌بار دیگر تلاش کنید؛ اگر باز هم تکرار شد
           کمی بعد سر بزنید.
         </p>

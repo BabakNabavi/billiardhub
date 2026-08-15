@@ -23,7 +23,7 @@ export default function FeatureDisabled({
         width: 62, height: 62, borderRadius: 20, display: 'inline-flex',
         alignItems: 'center', justifyContent: 'center',
         background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.32)',
-        color: '#9A6E38',
+        color: '#8F6531',
       }}>
         <Clock size={26} />
       </span>

@@ -12,8 +12,8 @@ import { Flag, Loader2, AlertCircle, ExternalLink, CheckCircle2, XCircle, Eye, R
 import { faDateTime, toFaDigits } from '../../../lib/jalali'
 import { apiFetch } from '../../../lib/http'
 
-const INK = '#1C1B17', SEC = '#5B564B', MUT = '#8A8474', LINE = '#EAE5DA'
-const GOLD_D = '#9A6E38', FELT = '#0E7A38', RED = '#B23B2E'
+const INK = '#1C1B17', SEC = '#5B564B', MUT = '#6F6A5C', LINE = '#EAE5DA'
+const GOLD_D = '#8F6531', FELT = '#0E7A38', RED = '#B23B2E'
 
 interface R {
   id: string; target_type: string; target_id: string; target_title?: string | null; target_url?: string | null

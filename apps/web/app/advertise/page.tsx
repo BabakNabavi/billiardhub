@@ -30,8 +30,8 @@ const TABS = [
 ]
 type Tab = typeof TABS[number]['id']
 
-const INK = '#1C1B17', SEC = '#5B564B', MUT = '#8A8474', LINE = '#E7E2D6'
-const GOLD = '#C7A66A', GOLD_D = '#9A6E38', FELT = '#0E7A38'
+const INK = '#1C1B17', SEC = '#5B564B', MUT = '#6F6A5C', LINE = '#E7E2D6'
+const GOLD = '#C7A66A', GOLD_D = '#8F6531', FELT = '#0E7A38'
 
 const CARD: React.CSSProperties = { background: 'rgba(255,255,255,0.78)', border: `1px solid ${LINE}`, borderRadius: 18, padding: 22 }
 const INPUT: React.CSSProperties = {
@@ -219,7 +219,7 @@ export default function AdvertisePage() {
             <Link href="/advertise/dashboard" style={{
               display: 'inline-flex', alignItems: 'center', gap: 6, marginTop: 16,
               background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.34)',
-              color: '#9A6E38', borderRadius: 10, padding: '9px 16px',
+              color: '#8F6531', borderRadius: 10, padding: '9px 16px',
               fontSize: 13, fontWeight: 800, textDecoration: 'none',
             }}>
               تبلیغات من <ArrowLeft size={14} />
@@ -398,9 +398,9 @@ export default function AdvertisePage() {
                           }}>
                             <div style={{ fontSize: 11.5, fontWeight: 800, color: '#5B564B' }}>
                               {toFa(String(t.durationDays))} روزه
-                              {t.badge ? <span style={{ color: '#9A6E38' }}> · {t.badge}</span> : ''}
+                              {t.badge ? <span style={{ color: '#8F6531' }}> · {t.badge}</span> : ''}
                             </div>
-                            <div style={{ fontSize: 13.5, fontWeight: 900, color: '#9A6E38', marginTop: 3, fontVariantNumeric: 'tabular-nums' }}>
+                            <div style={{ fontSize: 13.5, fontWeight: 900, color: '#8F6531', marginTop: 3, fontVariantNumeric: 'tabular-nums' }}>
                               {toFa(t.price.toLocaleString('en-US'))} تومان
                             </div>
                           </div>

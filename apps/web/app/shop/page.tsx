@@ -46,10 +46,10 @@ const NEW_BADGE_MS = 24 * 60 * 60 * 1000
    می‌شود و جایگاهی که فروشنده پولش را داده بی‌ارزش می‌شود. */
 const URGENT_MAX = 12
 
-const GOLD_D = '#9A6E38'
+const GOLD_D = '#8F6531'
 const TEXT   = '#1C1B17'
 const SEC    = '#5B564B'
-const MUT    = '#8A8474'
+const MUT    = '#6F6A5C'
 const LINE   = '#E7E2D6'
 
 const toFa = (v: string | number) => String(v).replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[+d] ?? d)
@@ -1032,7 +1032,7 @@ export default function MarketNewPage() {
                 {chips.map(c => (
                   <span key={c.label} className="mk-chip">
                     {c.label}
-                    <button type="button" onClick={c.clear}><X size={11} /></button>
+                    <button type="button" aria-label={`برداشتن فیلترِ ${c.label}`} onClick={c.clear}><X size={11} /></button>
                   </span>
                 ))}
                 <button type="button" onClick={clearAll}

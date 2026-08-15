@@ -64,10 +64,10 @@ function isValidNationalId(v: string): boolean {
 }
 
 const GOLD   = '#C7A66A';
-const GOLD_D = '#9A6E38';
+const GOLD_D = '#8F6531';
 const TEXT   = '#1C1B17';
 const SEC    = '#5B564B';
-const MUT    = '#8A8474';
+const MUT    = '#6F6A5C';
 const LINE   = '#E7E2D6';
 
 export default function RegisterPage() {
@@ -323,7 +323,8 @@ export default function RegisterPage() {
           maxLength={opts.maxLength}
         />
         {opts.reveal && (
-          <button type="button" onClick={opts.reveal.toggle} tabIndex={-1}
+          <button type="button" onClick={opts.reveal.toggle}
+              aria-label="نمایش رمز" aria-pressed={opts.reveal.shown}
             style={{ padding: '0 12px 0 14px', background: 'none', border: 'none', cursor: 'pointer', color: MUT, display: 'flex', alignItems: 'center', flexShrink: 0 }}>
             {opts.reveal.shown ? <EyeOff size={15} /> : <Eye size={15} />}
           </button>

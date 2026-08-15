@@ -30,8 +30,8 @@ import {
   faDigits, type Bracket, type Match, type PoolPlayer,
 } from '../../lib/tournaments/bracket-client'
 
-const GOLD = '#C7A66A', GOLD_D = '#9A6E38', INK = '#1C1B17'
-const MUT = '#8A8474', LINE = '#EAE5DA'
+const GOLD = '#C7A66A', GOLD_D = '#8F6531', INK = '#1C1B17'
+const MUT = '#6F6A5C', LINE = '#EAE5DA'
 
 /** یک جایگاه: کدام بازی، کدام طرف */
 interface SlotRef { matchId: string; slot: 1 | 2 }

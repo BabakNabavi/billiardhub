@@ -67,7 +67,7 @@ export default function TournamentPoster({ clubId, discipline, value, onChange }
     <div style={{ minWidth: 0 }}>
       <label style={{
         display: 'block', fontSize: 12.5, fontWeight: 700,
-        color: '#8A8474', marginBottom: 6,
+        color: '#6F6A5C', marginBottom: 6,
       }}>پوستر مسابقه</label>
 
       <div style={{
@@ -77,7 +77,7 @@ export default function TournamentPoster({ clubId, discipline, value, onChange }
         background: '#0D1512',
       }}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={shown} alt="پوستر مسابقه"
+        <img src={shown} alt="پوستر مسابقه" loading="lazy" decoding="async"
           style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
 
         {isDefault && (

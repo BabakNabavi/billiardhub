@@ -12,8 +12,8 @@ import { apiFetch } from '../lib/http'
    انتخاب کند که `POST /api/reports` ردش می‌کند. */
 import { REPORT_REASONS as REASONS } from '../lib/moderation/reasons'
 
-const INK = '#1C1B17', SEC = '#5B564B', MUT = '#8A8474', LINE = '#EAE5DA'
-const GOLD_D = '#9A6E38', FELT = '#0E7A38', RED = '#B23B2E'
+const INK = '#1C1B17', SEC = '#5B564B', MUT = '#6F6A5C', LINE = '#EAE5DA'
+const GOLD_D = '#8F6531', FELT = '#0E7A38', RED = '#B23B2E'
 
 
 interface Props {
@@ -86,7 +86,9 @@ export default function ReportButton({
       {variant === 'icon' && (
         <button type="button" onClick={openModal} aria-label="گزارش تخلف" title="گزارش تخلف"
           className={className}
-          style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, display: 'flex', color: MUT, ...style }}>
+          /* هدفِ لمس: آیکونِ ۱۵ با padding 4 می‌شد ۲۳×۲۳ — یک پیکسل زیرِ
+             حدِ ۲۴×۲۴ی WCAG 2.2 AA. با ۵ می‌شود ۲۵. */
+          style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 5, display: 'flex', color: MUT, ...style }}>
           <Flag size={15} />
         </button>
       )}

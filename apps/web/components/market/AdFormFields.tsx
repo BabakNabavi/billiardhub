@@ -15,7 +15,7 @@ import type { SpecFieldDef } from '../../lib/market/specs'
 import { normalizeFa } from '../../lib/text-fa'
 
 export const GOLD     = '#C7A66A'
-export const GOLD_D   = '#9A6E38'
+export const GOLD_D   = '#8F6531'
 export const TEXT     = '#1C1C1A'
 export const TEXT_SEC = 'rgba(28,28,26,0.52)'
 export const TEXT_MUT = 'rgba(28,28,26,0.30)'

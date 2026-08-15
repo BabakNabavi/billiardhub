@@ -13,8 +13,8 @@ import { useEffect, useState } from 'react'
 import { Loader2, Phone, ShieldCheck, X } from 'lucide-react'
 import { apiFetch } from '../../lib/http'
 
-const INK = '#1C1B17', SEC = '#5B564B', MUT = '#8A8474', LINE = '#E7E2D6'
-const GOLD_D = '#9A6E38', FELT = '#0E7A38', RED = '#B23B2E'
+const INK = '#1C1B17', SEC = '#5B564B', MUT = '#6F6A5C', LINE = '#E7E2D6'
+const GOLD_D = '#8F6531', FELT = '#0E7A38', RED = '#B23B2E'
 
 const toFa = (v: string) => v.replace(/[0-9]/g, d => '۰۱۲۳۴۵۶۷۸۹'[+d] ?? d)
 const toEn = (v: string) => v.replace(/[۰-۹]/g, d => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(d))).replace(/[^0-9]/g, '')

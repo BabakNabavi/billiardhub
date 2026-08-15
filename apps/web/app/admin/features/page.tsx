@@ -16,7 +16,7 @@ import { toast } from '../../../components/ui/Toast'
    کاربر غیرادمین هم به این آدرس برسد، درخواستش با ۴۰۳ برمی‌گردد.
    ───────────────────────────────────────────────────────────── */
 
-const GOLD_D = '#9A6E38'
+const GOLD_D = '#8F6531'
 const FELT = '#0E7A38'
 const LINE = 'rgba(0,0,0,0.08)'
 const SEC = '#5B5B5B'

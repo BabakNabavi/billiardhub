@@ -32,8 +32,8 @@ import {
 } from '../../../../lib/tournaments/bracket-client';
 import { apiFetch } from '../../../../lib/http';
 
-const GOLD = '#C7A66A', GOLD_D = '#9A6E38', INK = '#1C1B17';
-const MUT = '#8A8474', LINE = '#EAE5DA', FELT = '#0E7A38', RED = '#B23B2E';
+const GOLD = '#C7A66A', GOLD_D = '#8F6531', INK = '#1C1B17';
+const MUT = '#6F6A5C', LINE = '#EAE5DA', FELT = '#0E7A38', RED = '#B23B2E';
 const GROUND = '#FAF8F3';
 
 /* «چیدن» و «براکت» تازه‌اند: چیدنِ دستی تا امروز اصلاً نبود، و

@@ -607,7 +607,7 @@ export default function NewProductPage() {
         <div style={{ display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap' }}>
           <Link href="/dashboard/shop" style={{
             padding: '11px 20px', borderRadius: 12, fontSize: 13.5, fontWeight: 700,
-            textDecoration: 'none', color: '#9A6E38',
+            textDecoration: 'none', color: '#8F6531',
             background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.34)',
           }}>آگهی‌های من</Link>
           <Link href="/shop" style={{
@@ -1032,9 +1032,9 @@ export default function NewProductPage() {
                       <label style={{ display: 'flex', alignItems: 'center', gap: 9, cursor: 'pointer' }}>
                         <input type="checkbox" checked={form.negotiable}
                           onChange={e => set('negotiable', e.target.checked)}
-                          style={{ width: 17, height: 17, accentColor: '#9A6E38' }} />
+                          style={{ width: 17, height: 17, accentColor: '#8F6531' }} />
                         <span style={{ fontSize: 13.5, fontWeight: 700, color: '#1C1B17' }}>قیمت توافقی است</span>
-                        <span style={{ fontSize: 11.5, color: '#8A8474' }}>— روی آگهی «توافقی» نوشته می‌شود</span>
+                        <span style={{ fontSize: 11.5, color: '#6F6A5C' }}>— روی آگهی «توافقی» نوشته می‌شود</span>
                       </label>
 
                       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, opacity: form.negotiable ? 0.45 : 1 }}>

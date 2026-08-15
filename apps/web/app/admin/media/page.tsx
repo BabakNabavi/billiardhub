@@ -25,8 +25,8 @@ import {
   CheckCircle2, XCircle, ExternalLink,
 } from 'lucide-react';
 
-const GOLD_D = '#9A6E38';
-const TEXT = '#1C1B17', SEC = '#5B564B', MUT = '#8A8474', LINE = '#E7E2D6';
+const GOLD_D = '#8F6531';
+const TEXT = '#1C1B17', SEC = '#5B564B', MUT = '#6F6A5C', LINE = '#E7E2D6';
 const RED = '#B23B2E', FELT = '#0E7A38';
 
 type Status = 'draft' | 'pending' | 'published' | 'rejected' | 'hidden';

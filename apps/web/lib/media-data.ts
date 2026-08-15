@@ -18,7 +18,7 @@ export const MEDIA_CATEGORIES = [
   { key: 'gear',              label: 'معرفی تجهیزات',         dot: '#A07840' },
   { key: 'technical-services',label: 'خدمات فنی',             dot: '#7C2D12' },
   { key: 'clubs-events',      label: 'باشگاه‌ها و رویدادها',  dot: '#0E7A38' },
-  { key: 'other',             label: 'سایر',                  dot: '#8A8474' },
+  { key: 'other',             label: 'سایر',                  dot: '#6F6A5C' },
 ] as const
 
 export type MediaCategoryKey = typeof MEDIA_CATEGORIES[number]['key']

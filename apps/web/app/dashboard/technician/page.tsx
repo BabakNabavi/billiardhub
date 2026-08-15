@@ -25,14 +25,14 @@ import { fetchMyProfile, saveProfileRemote } from '../../../lib/profiles/client'
 import VerificationBadges from '../../../components/VerificationBadges'
 import { Plus, Trash2, Images, Wrench, ArrowLeft, Check } from 'lucide-react'
 
-const GOLD_D = '#9A6E38'
+const GOLD_D = '#8F6531'
 const TEXT   = '#1C1B17'
 const SEC    = '#5B564B'
-const MUT    = '#8A8474'
+const MUT    = '#6F6A5C'
 const LINE   = '#E7E2D6'
 
 const CARD   = 'rounded-2xl border border-[#E7E2D6] bg-white p-5 shadow-[0_2px_10px_rgba(28,27,23,0.05)]'
-const LQ_BTN = 'inline-flex items-center gap-2 rounded-[10px] border border-[rgba(199,166,106,0.34)] bg-[rgba(199,166,106,0.12)] px-4 py-2.5 text-[13px] font-bold text-[#9A6E38] transition hover:-translate-y-0.5'
+const LQ_BTN = 'inline-flex items-center gap-2 rounded-[10px] border border-[rgba(199,166,106,0.34)] bg-[rgba(199,166,106,0.12)] px-4 py-2.5 text-[13px] font-bold text-[#8F6531] transition hover:-translate-y-0.5'
 const INPUT  = 'w-full rounded-xl border border-[#E7E2D6] bg-[#FAFAF7] px-3.5 py-2.5 text-[13.5px] text-[#1C1B17] outline-none transition focus:border-[#C7A66A] placeholder:text-[11.5px] placeholder:text-[#A69F8E]'
 const rid = () => Math.random().toString(36).slice(2, 9)
 
@@ -169,7 +169,7 @@ export default function TechnicianDashboard() {
     return (
       <div dir="rtl" className="flex min-h-screen items-center justify-center bg-[#F7F5F0] p-6 text-center font-[Vazirmatn,Tahoma,sans-serif]">
         <div className={`${CARD} max-w-[420px]`}>
-          <Wrench size={26} className="mx-auto mb-3 text-[#8A8474]" />
+          <Wrench size={26} className="mx-auto mb-3 text-[#6F6A5C]" />
           <h1 className="text-[16px] font-bold">این صفحه مخصوص متخصصان خدمات فنی است</h1>
           <p className="mt-2 text-[13px] leading-relaxed text-[#5B564B]">برای ساختن پروفایل، اول باید نقش «خدمات فنی» را بگیرید.</p>
           <Link href="/profile/role" className={`${LQ_BTN} mt-4`}>انتخاب نقش</Link>
@@ -186,7 +186,7 @@ export default function TechnicianDashboard() {
         <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
           <div>
             <h1 className="text-[19px] font-bold">پنل متخصص خدمات فنی</h1>
-            <p className="mt-1 text-[12.5px] text-[#8A8474]">هرچه این‌جا وارد کنید، همان در دایرکتوری و پروفایل عمومی شما دیده می‌شود.</p>
+            <p className="mt-1 text-[12.5px] text-[#6F6A5C]">هرچه این‌جا وارد کنید، همان در دایرکتوری و پروفایل عمومی شما دیده می‌شود.</p>
           </div>
           <Link href={`/services/${form.slug}`} className={LQ_BTN}>
             <ArrowLeft size={14} /> مشاهده‌ی پروفایل
@@ -208,7 +208,7 @@ export default function TechnicianDashboard() {
               <div className="relative h-[84px] w-[84px] shrink-0 overflow-hidden rounded-full border-2 border-[rgba(199,166,106,0.45)] bg-gradient-to-bl from-[#FFFDF9] to-[#F5EFE4] shadow-[0_8px_22px_rgba(154,110,56,0.16)]">
                 {form.photo
                   ? <img loading="lazy" decoding="async" src={form.photo} alt="" className="h-full w-full object-cover" />
-                  : <span className="flex h-full w-full items-center justify-center text-[30px] font-black text-[#9A6E38]">{(form.name || 'م').slice(0, 1)}</span>}
+                  : <span className="flex h-full w-full items-center justify-center text-[30px] font-black text-[#8F6531]">{(form.name || 'م').slice(0, 1)}</span>}
               </div>
               <div className="flex flex-col gap-2">
                 <input ref={photoRef} type="file" accept="image/*" className="hidden"
@@ -264,7 +264,7 @@ export default function TechnicianDashboard() {
                 <div className="flex gap-2">
                   <input className={INPUT} value={covInput} onChange={e => setCovInput(e.target.value)}
                     onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addCoverage() } }} placeholder="نام شهر + Enter" />
-                  <button type="button" onClick={addCoverage} className={LQ_BTN}><Plus size={14} /></button>
+                  <button type="button" aria-label="افزودن محدوده" onClick={addCoverage} className={LQ_BTN}><Plus size={14} /></button>
                 </div>
                 {form.coverage.length > 0 && (
                   <div className="mt-2 flex flex-wrap gap-1.5">
@@ -296,7 +296,7 @@ export default function TechnicianDashboard() {
                 const on = form.services.includes(s)
                 return (
                   <button key={s} type="button" onClick={() => toggleService(s)}
-                    className={`inline-flex items-center gap-1.5 rounded-[10px] border px-3.5 py-2 text-[12.5px] font-bold transition ${on ? 'border-[rgba(199,166,106,0.4)] bg-[rgba(199,166,106,0.13)] text-[#9A6E38]' : 'border-[#E7E2D6] bg-white text-[#5B564B] hover:border-[rgba(199,166,106,0.4)]'}`}>
+                    className={`inline-flex items-center gap-1.5 rounded-[10px] border px-3.5 py-2 text-[12.5px] font-bold transition ${on ? 'border-[rgba(199,166,106,0.4)] bg-[rgba(199,166,106,0.13)] text-[#8F6531]' : 'border-[#E7E2D6] bg-white text-[#5B564B] hover:border-[rgba(199,166,106,0.4)]'}`}>
                     {on && <Check size={13} />}{s}
                   </button>
                 )
@@ -322,7 +322,7 @@ export default function TechnicianDashboard() {
           {/* ═══ پروژه‌ها ═══ */}
           <section className={CARD}>
             <h2 className="mb-1 text-[14.5px] font-bold">پروژه‌ها و کارهای انجام‌شده</h2>
-            <p className="mb-4 text-[12px] text-[#8A8474]">به‌شکل پرتفولیو در پروفایل شما نمایش داده می‌شود.</p>
+            <p className="mb-4 text-[12px] text-[#6F6A5C]">به‌شکل پرتفولیو در پروفایل شما نمایش داده می‌شود.</p>
 
             {form.projects.length > 0 && (
               <div className="mb-4 space-y-2">
@@ -331,7 +331,7 @@ export default function TechnicianDashboard() {
                     <img loading="lazy" decoding="async" src={p.image} alt="" className="h-12 w-16 rounded-lg border border-[#E7E2D6] object-cover" />
                     <div className="min-w-0 flex-1">
                       <div className="truncate text-[13px] font-bold">{p.title}</div>
-                      <div className="text-[11px] text-[#8A8474]">{p.service} · {p.city}{p.club ? ` — ${p.club}` : ''}</div>
+                      <div className="text-[11px] text-[#6F6A5C]">{p.service} · {p.city}{p.club ? ` — ${p.club}` : ''}</div>
                     </div>
                     <button type="button" onClick={() => set('projects', form.projects.filter(x => x.id !== p.id))}
                       className="rounded-lg p-2 text-[#B23B2E] transition hover:bg-[rgba(178,59,46,0.08)]"><Trash2 size={15} /></button>
@@ -361,14 +361,14 @@ export default function TechnicianDashboard() {
           {/* ═══ گالری / آلبوم‌ها ═══ */}
           <section className={CARD}>
             <h2 className="mb-1 text-[14.5px] font-bold">گالری تصاویر — آلبوم‌ها</h2>
-            <p className="mb-4 text-[12px] text-[#8A8474]">آلبوم بسازید (مثلاً «پروژه‌های کرمان») و عکس‌های هر آلبوم را اضافه کنید.</p>
+            <p className="mb-4 text-[12px] text-[#6F6A5C]">آلبوم بسازید (مثلاً «پروژه‌های کرمان») و عکس‌های هر آلبوم را اضافه کنید.</p>
 
             {form.albums.map(a => (
               <div key={a.id} className="mb-3 rounded-xl border border-[#EFEBE1] bg-[#FAFAF7] p-3">
                 <div className="mb-2 flex items-center justify-between gap-2">
                   <div>
                     <div className="text-[13px] font-bold">{a.title}</div>
-                    {a.desc && <div className="text-[11px] text-[#8A8474]">{a.desc}</div>}
+                    {a.desc && <div className="text-[11px] text-[#6F6A5C]">{a.desc}</div>}
                   </div>
                   <div className="flex items-center gap-2">
                     <input ref={el => { albImgRefs.current[a.id] = el }} type="file" accept="image/*" multiple className="hidden"

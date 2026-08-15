@@ -24,8 +24,8 @@ import {
 } from 'lucide-react'
 import { mediaCategoryOf, compactViews, faNum, type MediaVideo } from '../../../lib/media-data'
 
-const INK = '#1C1B17', SEC = '#5B564B', MUT = '#8A8474', LINE = '#EAE5DA'
-const GOLD = '#C7A66A', GOLD_D = '#9A6E38', GROUND = '#FAF8F3'
+const INK = '#1C1B17', SEC = '#5B564B', MUT = '#6F6A5C', LINE = '#EAE5DA'
+const GOLD = '#C7A66A', GOLD_D = '#8F6531', GROUND = '#FAF8F3'
 
 export default function WatchClient({ video, related }: { video: MediaVideo; related: MediaVideo[] }) {
   /* ── تبلیغِ پیش‌پخش ──

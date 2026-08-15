@@ -10,8 +10,8 @@ import { faDateLong, faTimeRange, faNum } from '../../../lib/jalali'
 import CancellationPolicy from '../../../components/booking/CancellationPolicy'
 import { apiFetch } from '../../../lib/http'
 
-const INK = '#1C1B17', SEC = '#5B564B', MUT = '#8A8474', LINE = '#EAE5DA'
-const GOLD_D = '#9A6E38', FELT = '#0E7A38'
+const INK = '#1C1B17', SEC = '#5B564B', MUT = '#6F6A5C', LINE = '#EAE5DA'
+const GOLD_D = '#8F6531', FELT = '#0E7A38'
 const fa = faNum
 
 interface B {

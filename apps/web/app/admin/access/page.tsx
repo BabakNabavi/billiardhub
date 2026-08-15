@@ -9,8 +9,8 @@ import { apiFetch } from '../../../lib/http'
 import PermissionsDialog, { type PermGroup } from '../../../components/admin/PermissionsDialog'
 import { ShieldCheck, Loader2, Search, UserPlus, UserMinus, AlertCircle, SlidersHorizontal, Crown } from 'lucide-react'
 
-const INK = '#1C1B17', SEC = '#5B564B', MUT = '#8A8474', LINE = '#EAE5DA'
-const GOLD_D = '#9A6E38', FELT = '#0E7A38'
+const INK = '#1C1B17', SEC = '#5B564B', MUT = '#6F6A5C', LINE = '#EAE5DA'
+const GOLD_D = '#8F6531', FELT = '#0E7A38'
 const faNum = (s: unknown) => String(s ?? '').replace(/[0-9]/g, d => '۰۱۲۳۴۵۶۷۸۹'[Number(d)]!)
 
 interface U {

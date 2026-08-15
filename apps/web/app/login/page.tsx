@@ -19,10 +19,10 @@ import { passwordHint, capsFrom } from '../../lib/auth/password-hints';
 const toFa = (v: string) => v.replace(/[0-9]/g, d => '۰۱۲۳۴۵۶۷۸۹'[+d] ?? d);
 
 const GOLD   = '#C7A66A';
-const GOLD_D = '#9A6E38';
+const GOLD_D = '#8F6531';
 const TEXT   = '#1C1B17';
 const SEC    = '#5B564B';
-const MUT    = '#8A8474';
+const MUT    = '#6F6A5C';
 const LINE   = '#E7E2D6';
 
 export default function LoginPage() {
@@ -270,7 +270,7 @@ export default function LoginPage() {
               background: hint.persian ? 'rgba(178,59,46,0.07)' : 'rgba(199,166,106,0.10)',
               border: `1px solid ${hint.persian ? 'rgba(178,59,46,0.28)' : 'rgba(199,166,106,0.32)'}`,
               fontSize: 12, fontWeight: 700,
-              color: hint.persian ? '#B23B2E' : '#9A6E38',
+              color: hint.persian ? '#B23B2E' : '#8F6531',
             }}>
               <AlertCircle size={14} style={{ flexShrink: 0, marginTop: 2 }} />
               <span>{hint.message}</span>

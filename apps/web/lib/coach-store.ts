@@ -52,7 +52,7 @@ export const GRADES: { key: string; label: string; dots: number }[] = [
 
 export const DISCIPLINES: { key: string; label: string; color: string }[] = [
   { key: 'snooker',  label: 'اسنوکر',       color: '#7C3AED' },
-  { key: 'pocket',   label: 'پاکت بیلیارد', color: '#9A6E38' },
+  { key: 'pocket',   label: 'پاکت بیلیارد', color: '#8F6531' },
   { key: 'highball', label: 'هی‌بال',       color: '#C2410C' },
 ]
 

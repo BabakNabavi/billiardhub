@@ -18,7 +18,7 @@ import { apiFetch } from '../../lib/http';
 import { uploadFile } from '../../lib/supabase';
 import { notify } from '../../lib/ui/dialogs';
 
-const LQ = 'bg-[rgba(199,166,106,0.12)] border border-[rgba(199,166,106,0.34)] text-[#9A6E38] rounded-[10px] transition-all duration-200 hover:-translate-y-0.5 hover:bg-[rgba(199,166,106,0.18)]';
+const LQ = 'bg-[rgba(199,166,106,0.12)] border border-[rgba(199,166,106,0.34)] text-[#8F6531] rounded-[10px] transition-all duration-200 hover:-translate-y-0.5 hover:bg-[rgba(199,166,106,0.18)]';
 const LQ_NEUTRAL = 'bg-[rgba(28,28,26,0.04)] border border-[rgba(28,28,26,0.1)] text-[#5B564B] rounded-[10px] transition-all duration-200 hover:-translate-y-0.5';
 
 export interface SellerStory {
@@ -193,7 +193,7 @@ export default function StoryManager({ ownerId }: { ownerId: string }) {
                       <button key={s.value} type="button" onClick={() => setStoryDraft(d => d ? { ...d, textSize: s.value } : d)}
                         className={`w-8 h-8 rounded-lg text-xs font-bold transition-all ${
                           storyDraft.textSize === s.value
-                            ? 'bg-[rgba(199,166,106,0.18)] border border-[rgba(199,166,106,0.44)] text-[#9A6E38]'
+                            ? 'bg-[rgba(199,166,106,0.18)] border border-[rgba(199,166,106,0.44)] text-[#8F6531]'
                             : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                         }`}>
                         {s.label}

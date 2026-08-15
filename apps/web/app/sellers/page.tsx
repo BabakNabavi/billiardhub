@@ -8,7 +8,7 @@ import { fetchProfiles } from '../../lib/profiles/client'
 import type { MockSeller } from '../../lib/sellers-data'
 
 const GOLD     = '#C7A66A'
-const GOLD_D   = '#9A6E38'
+const GOLD_D   = '#8F6531'
 const GOLD_G   = 'linear-gradient(135deg,#7A4F10 0%,#C7A66A 50%,#8A6020 100%)'
 /* رنگِ پایه‌ی صفحه حالا داخلِ کلاسِ مشترکِ lq-stage است */
 const TEXT     = '#1C1C1A'
@@ -532,7 +532,7 @@ export default function SellersPage() {
            — و این خرابی بی‌صداست، چون فقط با کیبورد دیده می‌شود. */
         .sel-card-link:focus-visible { outline: none; }
         .sel-card-link:focus-visible::after {
-          outline: 2px solid #9A6E38; outline-offset: -3px; border-radius: 14px;
+          outline: 2px solid #8F6531; outline-offset: -3px; border-radius: 14px;
         }
         /* هرچه خودش تعاملی است باید بالای روکش بماند */
         .sel-card a:not(.sel-card-link),

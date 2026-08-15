@@ -25,7 +25,7 @@ import VerificationPrompt from '../../../components/VerificationPrompt'
 
 /* ─── Tokens ─── */
 const GOLD   = '#C7A66A'
-const GOLD_D = '#9A6E38'
+const GOLD_D = '#8F6531'
 const BG     = '#F6F4F0'
 const TEXT   = '#111110'
 const TEXT_S = 'rgba(17,17,16,0.52)'

@@ -144,12 +144,12 @@ function CategoryDropdown({
           open ? 'border-[#14532D] shadow-[0_0_0_3px_rgba(20,83,45,0.10)]' : 'border-[#E7E2D6] hover:border-[#14532D]/45'
         }`}
       >
-        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[rgba(199,166,106,0.14)] text-[#9A6E38]">{Icon.funnel}</span>
+        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[rgba(199,166,106,0.14)] text-[#8F6531]">{Icon.funnel}</span>
         <span className="flex-1">
-          <span className="block text-[10.5px] text-[#8A8474]">دسته‌بندی</span>
+          <span className="block text-[10.5px] text-[#6F6A5C]">دسته‌بندی</span>
           <span className="block text-[14px] font-bold text-[#1C1B17]">{label}</span>
         </span>
-        <span className={`text-[#8A8474] transition-transform duration-200 ${open ? 'rotate-180' : ''}`}>{Icon.chevron}</span>
+        <span className={`text-[#6F6A5C] transition-transform duration-200 ${open ? 'rotate-180' : ''}`}>{Icon.chevron}</span>
       </button>
 
       <div
@@ -260,7 +260,7 @@ export default function ManufacturerPage() {
       `}</style>
 
       {/* ── breadcrumb ── */}
-      <div className="mx-auto max-w-[1240px] px-4 pt-4 text-[12.5px] text-[#8A8474] sm:px-6">
+      <div className="mx-auto max-w-[1240px] px-4 pt-4 text-[12.5px] text-[#6F6A5C] sm:px-6">
         <Link href="/" className="transition-colors hover:text-[#14532D]">خانه</Link>
         <span className="mx-1.5">/</span>
         <Link href="/manufacturers" className="transition-colors hover:text-[#14532D]">تولیدکنندگان</Link>
@@ -288,7 +288,7 @@ export default function ManufacturerPage() {
             {/* لوگوی کارخانه — نیمی روی بنر */}
             <div
               className="-mt-12 block shrink-0 rounded-full p-[3px] sm:-mt-14"
-              style={{ background: 'linear-gradient(135deg,#C7A66A,#9A6E38)', boxShadow: '0 6px 18px rgba(199,166,106,0.45)', width: 'fit-content' }}
+              style={{ background: 'linear-gradient(135deg,#C7A66A,#8F6531)', boxShadow: '0 6px 18px rgba(199,166,106,0.45)', width: 'fit-content' }}
             >
               <span className="flex h-[80px] w-[80px] items-center justify-center overflow-hidden rounded-full border-[3px] border-white bg-gradient-to-bl from-[#14532D] to-[#1E6B3C] text-white sm:h-[94px] sm:w-[94px]">
                 {FactoryIcon}
@@ -298,20 +298,20 @@ export default function ManufacturerPage() {
             <div className="mt-3 flex flex-wrap items-center gap-2">
               <h2 className="text-[17px] font-bold sm:text-[19px]">{mfr.name}</h2>
               {mfr.elite && (
-                <span className="inline-flex items-center gap-1 rounded-full border border-[rgba(199,166,106,0.4)] bg-[rgba(199,166,106,0.14)] px-2.5 py-0.5 text-[11px] font-bold text-[#9A6E38]">
+                <span className="inline-flex items-center gap-1 rounded-full border border-[rgba(199,166,106,0.4)] bg-[rgba(199,166,106,0.14)] px-2.5 py-0.5 text-[11px] font-bold text-[#8F6531]">
                   <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
                   تولیدکننده‌ی رسمی
                 </span>
               )}
             </div>
             <div className="mt-1.5 flex flex-wrap items-center justify-between gap-2">
-              <div className="flex items-center gap-1.5 text-[12.5px] text-[#8A8474]">
+              <div className="flex items-center gap-1.5 text-[12.5px] text-[#6F6A5C]">
                 <span className="text-[#14532D]">{Icon.pin}</span>{[province, mfr.city].filter(Boolean).join('، ')}
               </div>
               {phoneDig && (
                 <a
                   href={`tel:${phoneHref}`}
-                  className={`inline-flex items-center gap-1.5 rounded-[10px] border border-[rgba(199,166,106,0.34)] bg-[rgba(199,166,106,0.12)] px-3.5 py-2 text-[13px] font-bold text-[#9A6E38] transition hover:-translate-y-0.5 ${MONO}`}
+                  className={`inline-flex items-center gap-1.5 rounded-[10px] border border-[rgba(199,166,106,0.34)] bg-[rgba(199,166,106,0.12)] px-3.5 py-2 text-[13px] font-bold text-[#8F6531] transition hover:-translate-y-0.5 ${MONO}`}
                 >
                   <span>{Icon.phone}</span>{toFa(phoneText)}
                 </a>
@@ -322,7 +322,7 @@ export default function ManufacturerPage() {
             {/* تخصص‌ها */}
             {mfr.specialties.length > 0 && (
               <div className="mt-2.5 flex flex-wrap items-center gap-2">
-                <span className="text-[11.5px] text-[#8A8474]">تخصص:</span>
+                <span className="text-[11.5px] text-[#6F6A5C]">تخصص:</span>
                 {mfr.specialties.map((s, i) => (
                   <span key={i} className="rounded-full border border-[#E7E2D6] bg-[#FAFAF7] px-2.5 py-1 text-[11.5px] font-semibold text-[#5B564B]">{s}</span>
                 ))}
@@ -338,9 +338,9 @@ export default function ManufacturerPage() {
             value={query}
             onChange={e => { setQuery(e.target.value); setPage(1) }}
             placeholder="جستجو در محصولات این تولیدکننده..."
-            className="w-full rounded-[10px] border border-[#E7E2D6] bg-white px-4 py-2.5 pl-11 text-[13.5px] text-[#1C1B17] placeholder:text-[#8A8474] focus:border-[#14532D] focus:outline-none"
+            className="w-full rounded-[10px] border border-[#E7E2D6] bg-white px-4 py-2.5 pl-11 text-[13.5px] text-[#1C1B17] placeholder:text-[#6F6A5C] focus:border-[#14532D] focus:outline-none"
           />
-          <span className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-[#8A8474]">{Icon.search}</span>
+          <span className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-[#6F6A5C]">{Icon.search}</span>
         </div>
       </div>
 
@@ -349,7 +349,7 @@ export default function ManufacturerPage() {
         <div className="mb-5 flex flex-wrap items-end justify-between gap-4">
           <div>
             <h1 className="text-xl font-bold sm:text-2xl">محصولات تولیدکننده</h1>
-            <span className="text-[12.5px] text-[#8A8474]">{faNum(visible.length)} محصول</span>
+            <span className="text-[12.5px] text-[#6F6A5C]">{faNum(visible.length)} محصول</span>
           </div>
           <CategoryDropdown value={cat} onChange={setCat} cats={cats} />
         </div>
@@ -369,18 +369,18 @@ export default function ManufacturerPage() {
               </div>
 
               <div className="flex flex-1 flex-col gap-1 p-[13px]">
-                <span className="text-[11px] font-bold text-[#9A6E38]">{p.category}</span>
+                <span className="text-[11px] font-bold text-[#8F6531]">{p.category}</span>
                 <span className="pc-name-sec1 text-[13.5px] font-semibold leading-[1.5] text-[#1C1C1A]">{p.name}</span>
-                {p.specs[0] && <span className="mt-auto truncate text-[11.5px] text-[#8A8474]">{p.specs[0]}</span>}
+                {p.specs[0] && <span className="mt-auto truncate text-[11.5px] text-[#6F6A5C]">{p.specs[0]}</span>}
               </div>
             </article>
           ))}
         </div>
 
         {visible.length === 0 && (
-          <div className="rounded-2xl border border-[#E7E2D6] bg-white px-6 py-14 text-center text-[13.5px] text-[#8A8474]">
+          <div className="rounded-2xl border border-[#E7E2D6] bg-white px-6 py-14 text-center text-[13.5px] text-[#6F6A5C]">
             محصولی در این دسته‌بندی پیدا نشد.
-            {cat !== 'all' && <button onClick={() => setCat('all')} className="mr-2 font-bold text-[#9A6E38] transition hover:opacity-70">نمایش همه محصولات</button>}
+            {cat !== 'all' && <button onClick={() => setCat('all')} className="mr-2 font-bold text-[#8F6531] transition hover:opacity-70">نمایش همه محصولات</button>}
           </div>
         )}
 
@@ -434,15 +434,15 @@ export default function ManufacturerPage() {
               ].map(s => (
                 <div key={s.label} className="rounded-xl border border-[#EFEBE1] bg-[#FAFAF7] px-3 py-2.5 text-center">
                   <div className={`text-[15px] font-bold text-[#1C1B17] ${MONO}`}>{toFa(s.value)}</div>
-                  <div className="mt-0.5 text-[11px] text-[#8A8474]">{s.label}</div>
+                  <div className="mt-0.5 text-[11px] text-[#6F6A5C]">{s.label}</div>
                 </div>
               ))}
             </div>
 
             {/* ظرفیت تولید */}
             <div className="mt-4 flex items-center gap-2 rounded-xl border border-[rgba(199,166,106,0.28)] bg-[rgba(199,166,106,0.08)] px-4 py-2.5 text-[12.5px] text-[#5B564B]">
-              <span className="text-[#9A6E38]">{Icon.truck}</span>
-              <span><span className="font-bold text-[#9A6E38]">ظرفیت تولید:</span> {mfr.productionCapability}</span>
+              <span className="text-[#8F6531]">{Icon.truck}</span>
+              <span><span className="font-bold text-[#8F6531]">ظرفیت تولید:</span> {mfr.productionCapability}</span>
             </div>
 
             {/* گواهینامه‌ها */}
@@ -506,11 +506,11 @@ export default function ManufacturerPage() {
                 </li>
                 <li className="flex items-center gap-2.5 pt-1.5 sm:pt-3">
                   <a href={`https://wa.me/${mfr.whatsapp}`} target="_blank" rel="noopener noreferrer" aria-label="واتساپ"
-                    className="flex h-10 w-10 items-center justify-center rounded-[11px] border border-[#E7E2D6] bg-[rgba(26,25,23,0.05)] text-[#8A8474] transition-all duration-200 hover:-translate-y-0.5 hover:border-[#C7A66A]/45 hover:bg-[#C7A66A]/[0.12] hover:text-[#C7A66A]">
+                    className="flex h-10 w-10 items-center justify-center rounded-[11px] border border-[#E7E2D6] bg-[rgba(26,25,23,0.05)] text-[#6F6A5C] transition-all duration-200 hover:-translate-y-0.5 hover:border-[#C7A66A]/45 hover:bg-[#C7A66A]/[0.12] hover:text-[#C7A66A]">
                     {Icon.wa}
                   </a>
                   <a href={`https://instagram.com/${mfr.instagram}`} target="_blank" rel="noopener noreferrer" aria-label="اینستاگرام"
-                    className="flex h-10 w-10 items-center justify-center rounded-[11px] border border-[#E7E2D6] bg-[rgba(26,25,23,0.05)] text-[#8A8474] transition-all duration-200 hover:-translate-y-0.5 hover:border-[#C7A66A]/45 hover:bg-[#C7A66A]/[0.12] hover:text-[#C7A66A]">
+                    className="flex h-10 w-10 items-center justify-center rounded-[11px] border border-[#E7E2D6] bg-[rgba(26,25,23,0.05)] text-[#6F6A5C] transition-all duration-200 hover:-translate-y-0.5 hover:border-[#C7A66A]/45 hover:bg-[#C7A66A]/[0.12] hover:text-[#C7A66A]">
                     {Icon.insta}
                   </a>
                 </li>
@@ -539,7 +539,7 @@ export default function ManufacturerPage() {
                 <span className="absolute left-1/2 top-1/2 flex h-9 w-9 -translate-x-1/2 -translate-y-[70%] items-center justify-center rounded-full bg-[#14532D] text-white shadow-md transition-transform group-hover:scale-110">
                   {Icon.pin}
                 </span>
-                <span className="absolute bottom-2 right-2 rounded-[10px] border border-[rgba(199,166,106,0.34)] bg-[rgba(199,166,106,0.12)] px-2.5 py-1 text-[11px] font-bold text-[#9A6E38] shadow-sm transition hover:-translate-y-0.5">
+                <span className="absolute bottom-2 right-2 rounded-[10px] border border-[rgba(199,166,106,0.34)] bg-[rgba(199,166,106,0.12)] px-2.5 py-1 text-[11px] font-bold text-[#8F6531] shadow-sm transition hover:-translate-y-0.5">
                   مشاهده روی نقشه
                 </span>
               </a>
@@ -547,7 +547,7 @@ export default function ManufacturerPage() {
           </div>
 
           <div className="border-t border-[#E8E3D6] px-6 py-4 sm:px-8">
-            <div className="flex flex-wrap items-center justify-between gap-2 text-[11.5px] text-[#8A8474]">
+            <div className="flex flex-wrap items-center justify-between gap-2 text-[11.5px] text-[#6F6A5C]">
               <span>© {toFa(1405)} {mfr.name} — تمام حقوق محفوظ است</span>
               {/* نشانِ پلتفرم — فروشگاه فوترِ خودش را دارد، ولی
                   بازدیدکننده باید بداند این صفحه کجا میزبانی می‌شود. */}

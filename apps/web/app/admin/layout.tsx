@@ -90,12 +90,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         .admin-scope input,
         .admin-scope textarea { max-width: 100%; }
 
-        .admin-back-btn:hover { border-color: rgba(199,166,106,0.55) !important; color: #9A6E38 !important; }
+        .admin-back-btn:hover { border-color: rgba(199,166,106,0.55) !important; color: #8F6531 !important; }
 
         .admin-scope select {
           appearance: none; -webkit-appearance: none; -moz-appearance: none;
           background-color: #fff;
-          background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%239A6E38' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+          background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%238F6531' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
           background-repeat: no-repeat;
           background-position: left 12px center;
           background-size: 14px;

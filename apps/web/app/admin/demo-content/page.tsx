@@ -23,8 +23,8 @@ import ScrollList from '../../../components/ui/ScrollList'
 import ProvinceCitySelect from '../../../components/ProvinceCitySelect'
 import { Trash2, Plus, Loader2, Users, ExternalLink } from 'lucide-react'
 
-const INK = '#1C1B17', SEC = '#5B564B', MUT = '#8A8474', LINE = '#EAE5DA'
-const GOLD_D = '#9A6E38', RED = '#B23B2E'
+const INK = '#1C1B17', SEC = '#5B564B', MUT = '#6F6A5C', LINE = '#EAE5DA'
+const GOLD_D = '#8F6531', RED = '#B23B2E'
 
 type Kind = 'coach' | 'referee' | 'seller' | 'manufacturer' | 'technician' | 'player' | 'club'
 
@@ -364,7 +364,7 @@ export default function DemoContentPage() {
           <label style={label}>عکس</label>
           <input type="file" accept="image/*" onChange={e => onPhoto(e.target.files?.[0])}
             style={{ fontSize: 12, color: SEC, fontFamily: 'inherit' }} />
-          {photo && <img src={photo} alt="" style={{ marginTop: 8, width: 74, height: 74, objectFit: 'cover', borderRadius: 10, border: `1px solid ${LINE}` }} />}
+          {photo && <img src={photo} alt="" loading="lazy" decoding="async" style={{ marginTop: 8, width: 74, height: 74, objectFit: 'cover', borderRadius: 10, border: `1px solid ${LINE}` }} />}
           <div style={{ fontSize: 10.5, color: MUT, marginTop: 5 }}>
             از عکسِ چهره‌ی اشخاصِ واقعی استفاده نکن — عکسِ میز، باشگاه یا تصویرِ بدونِ چهره امن است.
           </div>
@@ -409,7 +409,7 @@ export default function DemoContentPage() {
               borderTop: i ? `1px solid ${LINE}` : 'none', background: '#fff',
             }}>
               {r.data.photo ? (
-                <img src={String(r.data.photo)} alt="" style={{ width: 38, height: 38, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
+                <img src={String(r.data.photo)} alt="" loading="lazy" decoding="async" style={{ width: 38, height: 38, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
               ) : (
                 <div style={{ width: 38, height: 38, borderRadius: '50%', background: '#F3F0E9', flexShrink: 0 }} />
               )}

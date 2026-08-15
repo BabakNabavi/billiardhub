@@ -13,10 +13,10 @@ import Link from 'next/link'
 import { ArrowLeft, ChevronDown } from 'lucide-react'
 
 const GOLD   = '#C7A66A'
-const GOLD_D = '#9A6E38'
+const GOLD_D = '#8F6531'
 const TEXT   = '#1C1B17'
 const SEC    = '#5B564B'
-const MUT    = '#8A8474'
+const MUT    = '#6F6A5C'
 const LINE   = '#E7E2D6'
 
 /* رنگ‌های توپ‌های اسنوکر — فقط اکسنت */

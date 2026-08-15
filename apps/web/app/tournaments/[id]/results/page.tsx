@@ -20,8 +20,8 @@ import {
   type Bracket, type Match,
 } from '../../../../lib/tournaments/bracket-client';
 
-const GOLD_D = '#9A6E38', INK = '#1C1B17';
-const MUT = '#8A8474', LINE = '#EAE5DA', FELT = '#0E7A38';
+const GOLD_D = '#8F6531', INK = '#1C1B17';
+const MUT = '#6F6A5C', LINE = '#EAE5DA', FELT = '#0E7A38';
 
 export default function ResultsPage() {
   const params = useParams();

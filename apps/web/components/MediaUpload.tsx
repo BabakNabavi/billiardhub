@@ -14,8 +14,8 @@ import { MEDIA_CATEGORIES, faDigits, type MediaVideo } from '../lib/media-data'
 import { publicDisplayName } from '../lib/public-name'
 import SelectField from './ui/SelectField'
 
-const INK = '#1C1B17', SEC = '#5B564B', MUT = '#8A8474', LINE = '#EAE5DA'
-const GOLD = '#C7A66A', GOLD_D = '#9A6E38'
+const INK = '#1C1B17', SEC = '#5B564B', MUT = '#6F6A5C', LINE = '#EAE5DA'
+const GOLD = '#C7A66A', GOLD_D = '#8F6531'
 /* ── چرا ۲۵ و نه ۲۰۰ ──
    سقفِ واقعی `MAX_VIDEO` در `lib/upload/policy.ts` است و سطلِ
    `club-media` هم روی همان ۲۵ مگابایت بسته شده. عددِ ۲۰۰ فقط روی این

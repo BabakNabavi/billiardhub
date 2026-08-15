@@ -2047,7 +2047,7 @@ export default function ClubDashboardPage() {
           fontSize: 12.5, fontWeight: 600,
           background: selectedClub.verificationStatus === 'rejected' ? 'rgba(178,59,46,0.06)' : 'rgba(199,166,106,0.09)',
           border: `1px solid ${selectedClub.verificationStatus === 'rejected' ? 'rgba(178,59,46,0.26)' : 'rgba(199,166,106,0.32)'}`,
-          color: selectedClub.verificationStatus === 'rejected' ? '#B23B2E' : '#9A6E38',
+          color: selectedClub.verificationStatus === 'rejected' ? '#B23B2E' : '#8F6531',
         }}>
           {selectedClub.verificationStatus === 'rejected' ? (
             <>
@@ -2420,7 +2420,7 @@ export default function ClubDashboardPage() {
                     </button>
                     {hasGeo && (
                       <a href={`https://maps.google.com/?q=${geo!.lat},${geo!.lon}`} target="_blank" rel="noopener noreferrer"
-                        style={{ fontSize: 12, fontWeight: 700, color: '#9A6E38', textDecoration: 'none' }}>
+                        style={{ fontSize: 12, fontWeight: 700, color: '#8F6531', textDecoration: 'none' }}>
                         دیدن روی نقشه ↗
                       </a>
                     )}
@@ -3297,7 +3297,7 @@ export default function ClubDashboardPage() {
                     fontFamily: 'var(--font-base)',
                     border: `1px solid ${on ? 'rgba(220,38,38,0.55)' : 'rgba(199,166,106,0.34)'}`,
                     background: on ? 'rgba(220,38,38,0.14)' : 'rgba(199,166,106,0.12)',
-                    color: on ? '#B91C1C' : '#9A6E38',
+                    color: on ? '#B91C1C' : '#8F6531',
                     opacity: off ? 0.42 : 1,
                   }}>{on ? '● ' : ''}بستن برای {lbl}</button>
                 );
@@ -3342,7 +3342,7 @@ export default function ClubDashboardPage() {
                     padding: '9px 18px', borderRadius: 10, fontSize: 13, fontWeight: 800,
                     cursor: 'pointer', fontFamily: 'var(--font-base)',
                     border: '1px solid rgba(199,166,106,0.34)', background: 'rgba(199,166,106,0.12)',
-                    color: '#9A6E38', opacity: notifyBusy ? 0.6 : 1,
+                    color: '#8F6531', opacity: notifyBusy ? 0.6 : 1,
                   }}>ذخیره</button>
                 {notifyMsg && (
                   <span style={{ fontSize: 12, fontWeight: 700, color: notifyMsg.ok ? '#0E7A38' : '#B23B2E' }}>
@@ -3695,7 +3695,7 @@ export default function ClubDashboardPage() {
                             fontFamily: 'var(--font-base)',
                             border: `1px solid ${on ? 'rgba(199,166,106,0.55)' : 'rgba(0,0,0,0.12)'}`,
                             background: on ? 'rgba(199,166,106,0.12)' : '#fff',
-                            color: on ? '#9A6E38' : '#6B7280',
+                            color: on ? '#8F6531' : '#6B7280',
                           }}>{l}</button>
                       );
                     })}

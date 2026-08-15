@@ -21,8 +21,8 @@ import {
 } from '../../../../lib/tournaments/bracket-client';
 import BracketTree from '../../../../components/tournaments/BracketTree';
 
-const GOLD_D = '#9A6E38', INK = '#1C1B17';
-const MUT = '#8A8474', LINE = '#EAE5DA', RED = '#B23B2E';
+const GOLD_D = '#8F6531', INK = '#1C1B17';
+const MUT = '#6F6A5C', LINE = '#EAE5DA', RED = '#B23B2E';
 
 export default function BracketPage() {
   const params = useParams();

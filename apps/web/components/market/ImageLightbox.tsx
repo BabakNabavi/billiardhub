@@ -25,7 +25,7 @@ import { createPortal } from 'react-dom'
 import { X, ChevronLeft, ChevronRight } from 'lucide-react'
 
 const GOLD = '#C7A66A'
-const GOLD_D = '#9A6E38'
+const GOLD_D = '#8F6531'
 const INK = '#1C1C1A'
 const HAIR = 'rgba(28,28,26,0.10)'
 const MUT = 'rgba(28,28,26,0.45)'
@@ -166,7 +166,10 @@ export default function ImageLightbox({
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           padding: 'clamp(10px,3vw,28px)', touchAction: 'pan-y',
         }}>
+        {/* تصویرِ همین لحظه‌ی نمای باز‌شده — تنبل‌کردنش یعنی کاربر
+            چند صدم ثانیه به قابِ خالی نگاه کند */}
         <img
+          loading="eager" decoding="async"
           key={images[at]} src={images[at]} alt={alt}
           style={{
             maxWidth: '100%', maxHeight: '100%', objectFit: 'contain',
@@ -208,7 +211,7 @@ export default function ImageLightbox({
                   opacity: i === at ? 1 : 0.62,
                   transition: 'opacity .2s, border-color .2s',
                 }}>
-                <img src={src} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                <img src={src} alt="" loading="lazy" decoding="async" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
               </button>
             ))}
           </div>

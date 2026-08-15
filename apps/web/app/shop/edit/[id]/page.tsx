@@ -1007,7 +1007,7 @@ export default function EditProductPage() {
                     <input type="checkbox" checked={form.negotiable} onChange={e => set('negotiable', e.target.checked)}
                       style={{ width: 17, height: 17, accentColor: GOLD_D }} />
                     <span style={{ fontSize: 13.5, fontWeight: 700, color: '#1C1B17' }}>قیمت توافقی است</span>
-                    <span style={{ fontSize: 11.5, color: '#8A8474' }}>— روی آگهی «توافقی» نوشته می‌شود</span>
+                    <span style={{ fontSize: 11.5, color: '#6F6A5C' }}>— روی آگهی «توافقی» نوشته می‌شود</span>
                   </label>
 
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, opacity: form.negotiable ? 0.45 : 1 }}>

@@ -162,9 +162,9 @@ function JalaliCalendar({ jYear, jMonth, selectedDay, todayJY, todayJM, todayJD,
   return (
     <div>
       <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:'14px'}}>
-        <button onClick={onPrev} style={{width:'32px',height:'32px',borderRadius:'9px',background:'rgba(0,0,0,0.04)',border:'1px solid rgba(0,0,0,0.06)',cursor:'pointer',color:'rgba(0,0,0,0.45)',display:'flex',alignItems:'center',justifyContent:'center'}}><ChevronRight size={15}/></button>
+        <button type="button" aria-label="ماه قبل" onClick={onPrev} style={{width:'32px',height:'32px',borderRadius:'9px',background:'rgba(0,0,0,0.04)',border:'1px solid rgba(0,0,0,0.06)',cursor:'pointer',color:'rgba(0,0,0,0.45)',display:'flex',alignItems:'center',justifyContent:'center'}}><ChevronRight size={15}/></button>
         <span style={{fontSize: '17px',fontWeight:800,color:'#111111'}}>{jMonths[jMonth-1]} {toFa(jYear)}</span>
-        <button onClick={nextBlocked?undefined:onNext} disabled={nextBlocked} style={{width:'32px',height:'32px',borderRadius:'9px',background:'rgba(0,0,0,0.04)',border:'1px solid rgba(0,0,0,0.06)',cursor:nextBlocked?'not-allowed':'pointer',color:nextBlocked?'rgba(0,0,0,0.15)':'rgba(0,0,0,0.45)',display:'flex',alignItems:'center',justifyContent:'center',opacity:nextBlocked?.35:1}}><ChevronLeft size={15}/></button>
+        <button type="button" aria-label="ماه بعد" onClick={nextBlocked?undefined:onNext} disabled={nextBlocked} style={{width:'32px',height:'32px',borderRadius:'9px',background:'rgba(0,0,0,0.04)',border:'1px solid rgba(0,0,0,0.06)',cursor:nextBlocked?'not-allowed':'pointer',color:nextBlocked?'rgba(0,0,0,0.15)':'rgba(0,0,0,0.45)',display:'flex',alignItems:'center',justifyContent:'center',opacity:nextBlocked?.35:1}}><ChevronLeft size={15}/></button>
       </div>
       <div style={{display:'grid',gridTemplateColumns:'repeat(7,1fr)',gap:'3px',marginBottom:'6px'}}>
         {jDayNames.map(d=><div key={d} style={{textAlign:'center',fontSize: '12px',color:'rgba(0,0,0,0.35)',fontWeight:700,padding:'4px 0'}}>{d}</div>)}
@@ -427,7 +427,7 @@ function BookingContent() {
         <p style={{fontSize:14,color:'rgba(0,0,0,0.55)',lineHeight:1.8,margin:'0 0 22px'}}>
           {club?.name ?? 'این باشگاه'} رزرو اینترنتی را تا اطلاع بعدی غیرفعال کرده است. برای رزرو، مستقیم با باشگاه تماس بگیرید.
         </p>
-        <Link href={`/clubs/${clubId}`} style={{display:'inline-flex',alignItems:'center',gap:6,color:'#9A6E38',fontSize:14,fontWeight:800,textDecoration:'none',background:'rgba(199,166,106,0.12)',border:'1px solid rgba(199,166,106,0.34)',borderRadius:12,padding:'11px 20px'}}>
+        <Link href={`/clubs/${clubId}`} style={{display:'inline-flex',alignItems:'center',gap:6,color:'#8F6531',fontSize:14,fontWeight:800,textDecoration:'none',background:'rgba(199,166,106,0.12)',border:'1px solid rgba(199,166,106,0.34)',borderRadius:12,padding:'11px 20px'}}>
           بازگشت به صفحه‌ی باشگاه
         </Link>
       </div>
@@ -510,7 +510,7 @@ function BookingContent() {
                   این باشگاه میزهایش را در سیستم ثبت نکرده است. برای هماهنگی، مستقیم با باشگاه تماس بگیرید.
                 </div>
                 {club?.phone && (
-                  <a href={`tel:${club.phone}`} style={{display:'inline-flex',marginTop:14,padding:'10px 22px',borderRadius:12,textDecoration:'none',fontSize:13.5,fontWeight:800,background:'rgba(199,166,106,0.14)',border:'1px solid rgba(199,166,106,0.4)',color:'#9A6E38'}}>
+                  <a href={`tel:${club.phone}`} style={{display:'inline-flex',marginTop:14,padding:'10px 22px',borderRadius:12,textDecoration:'none',fontSize:13.5,fontWeight:800,background:'rgba(199,166,106,0.14)',border:'1px solid rgba(199,166,106,0.4)',color:'#8F6531'}}>
                     تماس با باشگاه
                   </a>
                 )}
@@ -524,7 +524,7 @@ function BookingContent() {
                 <div key={type} style={{display:'flex',flexDirection:'column',gap:'8px'}}>
                   <div style={{
                     display:'flex',alignItems:'center',gap:8,margin:'6px 2px 0',
-                    fontSize:12.5,fontWeight:800,color:TYPE_COLOR[type]??'#9A6E38',
+                    fontSize:12.5,fontWeight:800,color:TYPE_COLOR[type]??'#8F6531',
                   }}>
                     <span style={{width:6,height:6,borderRadius:3,background:TYPE_COLOR[type]??'#C7A66A',flexShrink:0}}/>
                     {TYPE_LABEL[type]??type}
@@ -767,7 +767,7 @@ function BookingContent() {
                     style={{width:17,height:17,marginTop:2,accentColor:'#C7A66A',cursor:'pointer',flexShrink:0}}/>
                   <span style={{fontSize:12.5,lineHeight:2,color:'rgba(0,0,0,0.62)'}}>
                     با ثبت رزرو،{' '}
-                    <Link href="/terms#cancellation" target="_blank" style={{color:'#9A6E38',fontWeight:800,textDecoration:'none'}}>
+                    <Link href="/terms#cancellation" target="_blank" style={{color:'#8F6531',fontWeight:800,textDecoration:'none'}}>
                       قوانین رزرو و شرایط لغو و بازگشت وجه
                     </Link>
                     {' '}را مطالعه و می‌پذیرم.

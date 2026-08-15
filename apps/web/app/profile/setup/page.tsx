@@ -139,7 +139,7 @@ function ProfileSetupInner() {
                     <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                       <span style={{ fontSize: 14.5, fontWeight: 800, color: '#111111' }}>{m.label}</span>
                       {primary === r && (
-                        <span style={{ fontSize: 10.5, fontWeight: 700, color: '#9A6E38', background: 'rgba(199,166,106,0.14)', border: '1px solid rgba(199,166,106,0.32)', borderRadius: 8, padding: '1px 6px' }}>نقش اصلی</span>
+                        <span style={{ fontSize: 10.5, fontWeight: 700, color: '#8F6531', background: 'rgba(199,166,106,0.14)', border: '1px solid rgba(199,166,106,0.32)', borderRadius: 8, padding: '1px 6px' }}>نقش اصلی</span>
                       )}
                     </div>
                     <div style={{ fontSize: 12, color: 'rgba(0,0,0,0.45)', marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{m.description}</div>

@@ -17,8 +17,8 @@ import Link from 'next/link';
 import { LifeBuoy, Loader2, MessageSquare, Plus } from 'lucide-react';
 import { apiFetch } from '../../lib/http';
 
-const GOLD = '#C7A66A', GOLD_D = '#9A6E38';
-const INK = '#1C1B17', SEC = '#5B564B', MUT = '#8A8474';
+const GOLD = '#C7A66A', GOLD_D = '#8F6531';
+const INK = '#1C1B17', SEC = '#5B564B', MUT = '#6F6A5C';
 
 interface Ticket {
   id: string; subject: string; message: string; status: string;

@@ -294,7 +294,7 @@ export default function AdminClubsPage() {
               <X size={16} style={{ color: '#dc2626' }} />
               <span style={{ fontSize: 15, fontWeight: 900, color: '#1C1B17' }}>رد ثبت باشگاه</span>
             </div>
-            <p style={{ fontSize: 12, color: '#8A8474', lineHeight: 1.95, margin: '0 0 14px' }}>
+            <p style={{ fontSize: 12, color: '#6F6A5C', lineHeight: 1.95, margin: '0 0 14px' }}>
               علت برای مالک باشگاه پیامک می‌شود تا بداند چه را اصلاح کند.
             </p>
 

@@ -16,7 +16,7 @@ import { createPortal } from 'react-dom'
 import { CalendarDays, Check, ChevronDown, X } from 'lucide-react'
 import { J_MONTHS, toJalali, jalaliToGregorian, toFaDigits } from '../../lib/jalali'
 
-const GOLD = '#C7A66A', GOLD_D = '#9A6E38', INK = '#1C1B17', MUT = '#8A8474', LINE = '#E7E2D6'
+const GOLD = '#C7A66A', GOLD_D = '#8F6531', INK = '#1C1B17', MUT = '#6F6A5C', LINE = '#E7E2D6'
 const WD = ['ش', 'ی', 'د', 'س', 'چ', 'پ', 'ج']
 
 const PANEL_W = 320

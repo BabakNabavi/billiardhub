@@ -347,7 +347,7 @@ export default function Navbar() {
             {/* سایه‌ی خیلی نرم + بول ظریف (هایلایت بالا، تیرگی پایین) */}
             <div style={{ position: 'relative', width: '40px', height: '40px', borderRadius: '12px', overflow: 'hidden', flexShrink: 0,
               boxShadow: '0 1px 2px rgba(28,27,23,0.12), 0 4px 9px rgba(184,147,58,0.13)' }}>
-                <img src="/images/Logo/bh-mark-256-v5.webp" alt="بیلیارد هاب" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                <img loading="eager" decoding="async" src="/images/Logo/bh-mark-256-v5.webp" alt="بیلیارد هاب" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                 <span aria-hidden style={{ position: 'absolute', inset: 0, borderRadius: '12px', pointerEvents: 'none',
                   boxShadow: 'inset 0 1px 1px rgba(255,255,255,0.26), inset 0 -1px 2px rgba(60,40,10,0.18)' }} />
               </div>
@@ -443,7 +443,7 @@ export default function Navbar() {
                       <div style={{ fontSize: '12px', fontWeight: 700, color: 'rgba(28,28,26,0.7)' }}>اولین پلتفرم تخصصی بیلیارد ایران</div>
                       <div style={{ fontSize: '11px', color: 'rgba(28,28,26,0.36)', marginTop: '2px' }}>اتصال بی واسطه و خانه‌ی دیجیتال جامعه‌ی بیلیارد کشور</div>
                     </div>
-                    <Link prefetch={false} href="/register" onClick={() => setExploreOpen(false)} style={{ fontSize: '13px', color: '#9A6E38', fontWeight: 700, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '5px', background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.34)', borderRadius: '10px', padding: '7px 16px', whiteSpace: 'nowrap', transition: 'transform .25s cubic-bezier(.22,1,.36,1), background .2s' }}
+                    <Link prefetch={false} href="/register" onClick={() => setExploreOpen(false)} style={{ fontSize: '13px', color: '#8F6531', fontWeight: 700, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '5px', background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.34)', borderRadius: '10px', padding: '7px 16px', whiteSpace: 'nowrap', transition: 'transform .25s cubic-bezier(.22,1,.36,1), background .2s' }}
                       onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.background = 'rgba(199,166,106,0.18)'; }}
                       onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.background = 'rgba(199,166,106,0.12)'; }}>
                       ثبت‌نام رایگان <ArrowLeft size={10} />
@@ -491,7 +491,7 @@ export default function Navbar() {
                   <div style={{ position: 'absolute', top: 'calc(100% + 10px)', left: 0, width: '320px', maxWidth: '92vw', background: 'rgba(252,251,249,0.98)', border: '1px solid rgba(28,28,26,0.08)', borderRadius: '18px', boxShadow: '0 24px 60px rgba(28,28,26,0.16)', backdropFilter: 'blur(30px)', zIndex: 320, overflow: 'hidden', animation: 'fadeDown 0.2s ease both' }}>
                     <div style={{ padding: '14px 18px 10px', borderBottom: '1px solid rgba(28,28,26,0.06)', display: 'flex', alignItems: 'center', gap: 8 }}>
                       <span style={{ fontSize: 14, fontWeight: 900, color: TEXT }}>اعلان‌ها</span>
-                      <Link prefetch={false} href="/direct" onClick={() => setNotifOpen(false)} style={{ marginInlineStart: 'auto', fontSize: 11.5, fontWeight: 700, color: '#9A6E38', textDecoration: 'none' }}>دایرکت</Link>
+                      <Link prefetch={false} href="/direct" onClick={() => setNotifOpen(false)} style={{ marginInlineStart: 'auto', fontSize: 11.5, fontWeight: 700, color: '#8F6531', textDecoration: 'none' }}>دایرکت</Link>
                     </div>
                     <div style={{ maxHeight: '340px', overflowY: 'auto' }}>
                       {notifs.length === 0 ? (
@@ -682,7 +682,7 @@ export default function Navbar() {
           <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '12px 20px' }}>
             {/* لوگو دقیقاً وسط ردیف می‌نشیند؛ دکمه‌ی بستن با position
                 مطلق کنار می‌ایستد تا عرضش مرکز را جابه‌جا نکند. */}
-            <img src="/images/Logo/bh-header-v5.png" alt="بیلیارد هاب" style={{ height: '38px', width: 'auto' }} />
+            <img loading="eager" decoding="async" src="/images/Logo/bh-header-v5.png" alt="بیلیارد هاب" style={{ height: '38px', width: 'auto' }} />
             <button onClick={() => setMobileOpen(false)} aria-label="بستن منو"
               style={{ position: 'absolute', insetInlineStart: '20px', top: '50%', transform: 'translateY(-50%)', background: 'rgba(28,28,26,0.05)', border: '1px solid rgba(28,28,26,0.1)', borderRadius: '12px', cursor: 'pointer', color: 'rgba(28,28,26,0.5)', padding: '8px', display: 'flex' }}>
               <X size={20} />

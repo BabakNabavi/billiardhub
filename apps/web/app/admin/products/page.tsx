@@ -405,7 +405,7 @@ export default function AdminProductsPage() {
             <h3 style={{ fontSize: 17, fontWeight: 900, color: '#1C1B17', margin: '0 0 6px' }}>
               رد کردن آگهی
             </h3>
-            <p style={{ fontSize: 12.5, color: '#8A8474', margin: '0 0 16px', lineHeight: 1.95 }}>
+            <p style={{ fontSize: 12.5, color: '#6F6A5C', margin: '0 0 16px', lineHeight: 1.95 }}>
               دلیل را بنویسید — همین متن به فروشنده نشان داده می‌شود. رد کردنِ بی‌دلیل
               یعنی همان آگهی دوباره فرستاده می‌شود و وقتِ هر دو طرف تلف می‌شود.
             </p>

@@ -24,7 +24,7 @@ import VerificationBadges from '../../../components/VerificationBadges'
 import { Plus, Trash2, Images, Factory, ArrowLeft } from 'lucide-react'
 
 const CARD   = 'rounded-2xl border border-[#E7E2D6] bg-white p-5 shadow-[0_2px_10px_rgba(28,27,23,0.05)]'
-const LQ_BTN = 'inline-flex items-center gap-2 rounded-[10px] border border-[rgba(199,166,106,0.34)] bg-[rgba(199,166,106,0.12)] px-4 py-2.5 text-[13px] font-bold text-[#9A6E38] transition hover:-translate-y-0.5'
+const LQ_BTN = 'inline-flex items-center gap-2 rounded-[10px] border border-[rgba(199,166,106,0.34)] bg-[rgba(199,166,106,0.12)] px-4 py-2.5 text-[13px] font-bold text-[#8F6531] transition hover:-translate-y-0.5'
 const INPUT  = 'w-full rounded-xl border border-[#E7E2D6] bg-[#FAFAF7] px-3.5 py-2.5 text-[13.5px] text-[#1C1B17] outline-none transition focus:border-[#C7A66A] placeholder:text-[11.5px] placeholder:text-[#A69F8E]'
 const LABEL  = 'mb-1.5 block text-[12.5px] font-bold text-[#5B564B]'
 const rid = () => Math.random().toString(36).slice(2, 9)
@@ -161,7 +161,7 @@ export default function ManufacturerDashboard() {
     return (
       <div dir="rtl" className="flex min-h-screen items-center justify-center bg-[#F7F5F0] p-6 text-center font-[Vazirmatn,Tahoma,sans-serif]">
         <div className={`${CARD} max-w-[420px]`}>
-          <Factory size={26} className="mx-auto mb-3 text-[#8A8474]" />
+          <Factory size={26} className="mx-auto mb-3 text-[#6F6A5C]" />
           <h1 className="text-[16px] font-bold">این صفحه مخصوص تولیدکنندگان است</h1>
           <p className="mt-2 text-[13px] leading-relaxed text-[#5B564B]">برای ساختن پروفایل، اول باید نقش «تولیدکننده» را بگیرید.</p>
           <Link href="/profile/role" className={`${LQ_BTN} mt-4`}>انتخاب نقش</Link>
@@ -177,7 +177,7 @@ export default function ManufacturerDashboard() {
         <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
           <div>
             <h1 className="text-[19px] font-bold">پنل تولیدکننده</h1>
-            <p className="mt-1 text-[12.5px] text-[#8A8474]">هرچه این‌جا وارد کنید، همان در بخش «تولیدکنندگان» سایت دیده می‌شود.</p>
+            <p className="mt-1 text-[12.5px] text-[#6F6A5C]">هرچه این‌جا وارد کنید، همان در بخش «تولیدکنندگان» سایت دیده می‌شود.</p>
           </div>
           <Link href={`/manufacturers/${form.slug}`} className={LQ_BTN}>
             <ArrowLeft size={14} /> مشاهده‌ی پروفایل
@@ -243,7 +243,7 @@ export default function ManufacturerDashboard() {
                 <div className="flex gap-2">
                   <input className={INPUT} value={specInput} onChange={e => setSpecInput(e.target.value)}
                     onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addSpec() } }} placeholder="مثال: میز اسنوکر + Enter" />
-                  <button type="button" onClick={addSpec} className={LQ_BTN}><Plus size={14} /></button>
+                  <button type="button" aria-label="افزودن مشخصه" onClick={addSpec} className={LQ_BTN}><Plus size={14} /></button>
                 </div>
                 {form.specialties.length > 0 && (
                   <div className="mt-2 flex flex-wrap gap-1.5">
@@ -290,14 +290,14 @@ export default function ManufacturerDashboard() {
           {/* ═══ گواهینامه‌ها و استانداردها ═══ */}
           <section className={CARD}>
             <h2 className="mb-1 text-[14.5px] font-bold">گواهینامه‌ها و استانداردها</h2>
-            <p className="mb-4 text-[12px] text-[#8A8474]">در صفحه‌ی تولیدکننده نمایش داده می‌شوند.</p>
+            <p className="mb-4 text-[12px] text-[#6F6A5C]">در صفحه‌ی تولیدکننده نمایش داده می‌شوند.</p>
             {form.certificates.length > 0 && (
               <div className="mb-4 space-y-2">
                 {form.certificates.map((c, i) => (
                   <div key={i} className="flex items-center gap-3 rounded-xl border border-[#EFEBE1] bg-[#FAFAF7] px-3 py-2.5">
                     <span className="flex-1 text-[13px] font-bold">{c.title}</span>
-                    <span className="text-[11.5px] text-[#8A8474]">{c.issuer}</span>
-                    <span className="text-[11.5px] text-[#8A8474]">{c.year}</span>
+                    <span className="text-[11.5px] text-[#6F6A5C]">{c.issuer}</span>
+                    <span className="text-[11.5px] text-[#6F6A5C]">{c.year}</span>
                     <button type="button" onClick={() => set('certificates', form.certificates.filter((_, x) => x !== i))}
                       className="rounded-lg p-1.5 text-[#B23B2E] transition hover:bg-[rgba(178,59,46,0.08)]"><Trash2 size={14} /></button>
                   </div>
@@ -322,7 +322,7 @@ export default function ManufacturerDashboard() {
           {/* ═══ پروانه‌ی تولید / جواز کسب ═══ */}
           <section className={CARD}>
             <h2 className="mb-1 text-[14.5px] font-bold">پروانه‌ی تولید / جواز کسب</h2>
-            <p className="mb-4 text-[12px] text-[#8A8474]">
+            <p className="mb-4 text-[12px] text-[#6F6A5C]">
               برای گرفتن تیک تأیید لازم است. ادمین شماره را با فایل آپلودشده تطبیق می‌دهد.
             </p>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -384,7 +384,7 @@ export default function ManufacturerDashboard() {
           {/* ═══ محصولات ═══ */}
           <section className={CARD}>
             <h2 className="mb-1 text-[14.5px] font-bold">محصولات</h2>
-            <p className="mb-4 text-[12px] text-[#8A8474]">در صفحه‌ی تولیدکننده به‌صورت گالری محصولات نمایش داده می‌شود.</p>
+            <p className="mb-4 text-[12px] text-[#6F6A5C]">در صفحه‌ی تولیدکننده به‌صورت گالری محصولات نمایش داده می‌شود.</p>
 
             {form.products.length > 0 && (
               <div className="mb-4 space-y-2">
@@ -393,7 +393,7 @@ export default function ManufacturerDashboard() {
                     <img loading="lazy" decoding="async" src={p.image} alt="" className="h-12 w-16 rounded-lg border border-[#E7E2D6] object-cover" />
                     <div className="min-w-0 flex-1">
                       <div className="truncate text-[13px] font-bold">{p.name}</div>
-                      <div className="text-[11px] text-[#8A8474]">{p.category}</div>
+                      <div className="text-[11px] text-[#6F6A5C]">{p.category}</div>
                     </div>
                     <button type="button" onClick={() => set('products', form.products.filter(x => x.id !== p.id))}
                       className="rounded-lg p-2 text-[#B23B2E] transition hover:bg-[rgba(178,59,46,0.08)]"><Trash2 size={15} /></button>

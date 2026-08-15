@@ -25,7 +25,7 @@ function CountField({ label, value, onChange }: {
 }) {
   return (
     <div>
-      <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#8A8474', marginBottom: 5 }}>{label}</label>
+      <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#6F6A5C', marginBottom: 5 }}>{label}</label>
       <input
         type="text" inputMode="numeric"
         value={value ? String(value).replace(/[0-9]/g, d => '۰۱۲۳۴۵۶۷۸۹'[+d]!) : ''}
@@ -234,8 +234,8 @@ export default function NewClubPage() {
   const lockedStyle: React.CSSProperties = { ...inputStyle, background: '#F1EFE9', color: '#5B564B', cursor: 'not-allowed' };
   const sectionStyle: React.CSSProperties = { background: '#fff', border: '1px solid #E7E2D6', borderRadius: '16px', padding: '24px', marginBottom: '20px' };
   const labelCls = 'block text-xs font-medium mb-1';
-  const labelStyle: React.CSSProperties = { color: '#8A8474', fontWeight: 700 };
-  const headingStyle: React.CSSProperties = { fontSize: '17px', fontWeight: 800, color: '#9A6E38', marginBottom: '16px' };
+  const labelStyle: React.CSSProperties = { color: '#6F6A5C', fontWeight: 700 };
+  const headingStyle: React.CSSProperties = { fontSize: '17px', fontWeight: 800, color: '#8F6531', marginBottom: '16px' };
 
   return (
     <>
@@ -244,7 +244,7 @@ export default function NewClubPage() {
         .dark-input:focus { border-color: rgba(199,166,106,0.55) !important; box-shadow: 0 0 0 3px rgba(199,166,106,0.10); }
         .dark-file::file-selector-button {
           background: rgba(199,166,106,0.12); border: 1px solid rgba(199,166,106,0.25);
-          color: #9A6E38; border-radius: 8px; padding: 4px 12px; font-size: 12px;
+          color: #8F6531; border-radius: 8px; padding: 4px 12px; font-size: 12px;
           cursor: pointer; margin-left: 8px; font-family: inherit;
         }
         @keyframes ncFade { from { opacity: 0 } to { opacity: 1 } }
@@ -319,7 +319,7 @@ export default function NewClubPage() {
                     className={inputCls} style={{ ...lockedStyle, paddingInlineEnd: 34 }} />
                   <Lock size={13} style={{ position: 'absolute', insetInlineEnd: 11, top: '50%', transform: 'translateY(-50%)', color: '#B7B0A0' }} />
                 </div>
-                <p style={{ fontSize: 11, color: '#8A8474', marginTop: 4 }}>از اطلاعات هویتی حساب شما خوانده می‌شود</p>
+                <p style={{ fontSize: 11, color: '#6F6A5C', marginTop: 4 }}>از اطلاعات هویتی حساب شما خوانده می‌شود</p>
               </div>
             </div>
             <div className="mb-4">
@@ -379,7 +379,7 @@ export default function NewClubPage() {
                 style={{
                   display: 'inline-flex', alignItems: 'center', gap: 6,
                   background: 'rgba(199,166,106,0.10)', border: '1px solid rgba(199,166,106,0.32)',
-                  color: '#9A6E38', padding: '9px 18px', borderRadius: '10px',
+                  color: '#8F6531', padding: '9px 18px', borderRadius: '10px',
                   fontSize: '14px', fontWeight: 700,
                   cursor: locationLoading ? 'not-allowed' : 'pointer',
                   fontFamily: 'inherit', opacity: locationLoading ? 0.5 : 1,
@@ -413,7 +413,7 @@ export default function NewClubPage() {
                 )}
                 <div style={{ minWidth: 0 }}>
                   <div style={{ fontSize: 13, fontWeight: 700, color: '#1C1B17', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{licenseFile.name}</div>
-                  <div style={{ fontSize: 12, color: '#8A8474' }}>پس از ثبت، مدرک بررسی می‌شود و نتیجه اعلام خواهد شد</div>
+                  <div style={{ fontSize: 12, color: '#6F6A5C' }}>پس از ثبت، مدرک بررسی می‌شود و نتیجه اعلام خواهد شد</div>
                 </div>
                 <button type="button" onClick={() => { setLicenseFile(null); setLicensePreview(null); }}
                   style={{
@@ -486,7 +486,7 @@ export default function NewClubPage() {
           {/* عکس‌ها */}
           <div style={sectionStyle}>
             <h2 style={headingStyle}>عکس‌های باشگاه</h2>
-            <p style={{ fontSize: '13px', color: '#8A8474', marginBottom: '12px' }}>حداکثر ۱۰ عکس — فرمت JPG یا PNG</p>
+            <p style={{ fontSize: '13px', color: '#6F6A5C', marginBottom: '12px' }}>حداکثر ۱۰ عکس — فرمت JPG یا PNG</p>
             <input type="file" accept="image/*" multiple onChange={handleImageSelect}
               className="dark-file w-full text-sm" style={{ color: 'rgba(0,0,0,0.45)' }} />
             {imagePreviews.length > 0 && (
@@ -512,7 +512,7 @@ export default function NewClubPage() {
           {/* ویدیو */}
           <div style={sectionStyle}>
             <h2 style={headingStyle}>ویدیوی باشگاه</h2>
-            <p style={{ fontSize: '13px', color: '#8A8474', marginBottom: '12px' }}>یک ویدیوی معرفی — حداکثر ۲۵ مگابایت</p>
+            <p style={{ fontSize: '13px', color: '#6F6A5C', marginBottom: '12px' }}>یک ویدیوی معرفی — حداکثر ۲۵ مگابایت</p>
             <input type="file" accept="video/mp4,video/*" onChange={e => setVideoFile(e.target.files?.[0] ?? null)}
               className="dark-file w-full text-sm" style={{ color: 'rgba(0,0,0,0.45)' }} />
             {videoFile && <p style={{ fontSize: '13px', color: '#0E7A38', marginTop: '8px' }}>{videoFile.name} انتخاب شد</p>}
@@ -527,14 +527,14 @@ export default function NewClubPage() {
             </p>
             <BankCardVerify value={bank} onChange={setBank} />
             {!bank && (
-              <p style={{ fontSize: 12, color: '#8A8474', marginTop: 10 }}>
+              <p style={{ fontSize: 12, color: '#6F6A5C', marginTop: 10 }}>
                 می‌توانید اطلاعات بانکی را بعداً از داشبورد باشگاه تکمیل کنید.
               </p>
             )}
           </div>
 
           {uploadProgress && (
-            <div style={{ background: 'rgba(199,166,106,0.08)', border: '1px solid rgba(199,166,106,0.25)', color: '#9A6E38', padding: '12px 16px', borderRadius: '12px', marginBottom: '20px', fontSize: '14px', textAlign: 'center' }}>
+            <div style={{ background: 'rgba(199,166,106,0.08)', border: '1px solid rgba(199,166,106,0.25)', color: '#8F6531', padding: '12px 16px', borderRadius: '12px', marginBottom: '20px', fontSize: '14px', textAlign: 'center' }}>
               {uploadProgress}
             </div>
           )}
@@ -547,7 +547,7 @@ export default function NewClubPage() {
               fontFamily: 'inherit', transition: 'all 0.25s',
               display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 9,
               background: loading ? 'rgba(199,166,106,0.25)' : 'linear-gradient(135deg,#E8CE96,#C7A66A 55%,#A8853F)',
-              color: loading ? '#8A8474' : '#241B08',
+              color: loading ? '#6F6A5C' : '#241B08',
               boxShadow: loading ? 'none' : '0 12px 30px rgba(199,166,106,0.32)',
             }}>
             {loading && <Loader2 size={17} className="animate-spin" />}

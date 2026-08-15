@@ -1389,7 +1389,7 @@ useEffect(() => {
         /* «مشاهده همه» — دکمه به طرح LQ (تینت طلایی برند) */
         .see-all-lq {
           display:inline-flex; align-items:center; gap:6px;
-          background:rgba(199,166,106,0.12); color:#9A6E38;
+          background:rgba(199,166,106,0.12); color:#8F6531;
           border:1px solid rgba(199,166,106,0.34); border-radius:10px;
           padding:9px 16px; font-size:13px; font-weight:700; text-decoration:none;
           transition:background .2s ease, transform .25s cubic-bezier(.22,1,.36,1), box-shadow .25s;
@@ -1600,7 +1600,7 @@ useEffect(() => {
           background:rgba(255,255,255,0.92); border:1px solid rgba(28,27,23,0.10);
           color:#5B564B; box-shadow:0 4px 16px rgba(28,27,23,0.12);
           transition:transform .2s, color .2s; }
-        .clubs-nav:hover { transform:translateY(-50%) scale(1.06); color:#9A6E38; }
+        .clubs-nav:hover { transform:translateY(-50%) scale(1.06); color:#8F6531; }
         .mkt-mobile-slider { display:none; gap:10px; overflow-x:auto; scrollbar-width:none; padding:2px 18px 16px; scroll-snap-type:x proximity; }
         .mkt-mobile-slider::-webkit-scrollbar { display:none; }
         .mkt-split::-webkit-scrollbar { display:none; }

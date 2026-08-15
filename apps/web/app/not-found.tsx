@@ -9,7 +9,7 @@ export const metadata: Metadata = {
   robots: { index: false, follow: true },
 }
 
-const GOLD_D = '#9A6E38'
+const GOLD_D = '#8F6531'
 const LINE = '#E7E2D6'
 
 export default function NotFound() {
@@ -31,7 +31,7 @@ export default function NotFound() {
         <h1 style={{ fontSize: 19, fontWeight: 900, color: '#1C1B17', margin: '0 0 8px' }}>
           این صفحه پیدا نشد
         </h1>
-        <p style={{ fontSize: 13, color: '#8A8474', margin: '0 0 24px', lineHeight: 2 }}>
+        <p style={{ fontSize: 13, color: '#6F6A5C', margin: '0 0 24px', lineHeight: 2 }}>
           ممکن است نشانی را اشتباه وارد کرده باشید یا این صفحه برداشته شده باشد.
         </p>
         <div style={{ display: 'flex', gap: 9, flexWrap: 'wrap', justifyContent: 'center' }}>

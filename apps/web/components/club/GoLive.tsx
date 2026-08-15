@@ -9,8 +9,8 @@ import { startBroadcast, type Broadcaster } from '../../lib/live/webrtc'
 import { startLive, beatLive, stopLive, type LiveSession } from '../../lib/live/client'
 import SelectField from '../ui/SelectField'
 
-const INK = '#1C1B17', SEC = '#5B564B', MUT = '#8A8474', LINE = '#EAE5DA'
-const GOLD = '#C7A66A', GOLD_D = '#9A6E38', RED = '#ef4444', FELT = '#0E7A38', GROUND = '#FAF8F3'
+const INK = '#1C1B17', SEC = '#5B564B', MUT = '#6F6A5C', LINE = '#EAE5DA'
+const GOLD = '#C7A66A', GOLD_D = '#8F6531', RED = '#ef4444', FELT = '#0E7A38', GROUND = '#FAF8F3'
 const fa = (n: number) => Number(n || 0).toLocaleString('fa-IR')
 
 const DISCIPLINES = [

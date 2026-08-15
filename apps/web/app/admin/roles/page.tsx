@@ -99,7 +99,7 @@ function RequestRow({ req, onAction }: {
                 fontFamily: 'inherit', cursor: 'pointer',
                 border: `1px solid ${showDetails ? 'rgba(199,166,106,0.4)' : 'rgba(0,0,0,0.1)'}`,
                 background: showDetails ? 'rgba(199,166,106,0.12)' : 'transparent',
-                color: showDetails ? '#9A6E38' : 'rgba(0,0,0,0.5)',
+                color: showDetails ? '#8F6531' : 'rgba(0,0,0,0.5)',
               }}>
               {showDetails ? 'بستن' : 'جزئیات'}
             </button>
@@ -112,7 +112,7 @@ function RequestRow({ req, onAction }: {
                 fontSize: 12.5, fontWeight: 700, fontFamily: 'inherit',
                 cursor: busy ? 'not-allowed' : 'pointer',
                 background: busy ? 'rgba(0,0,0,0.05)' : 'rgba(199,166,106,0.12)',
-                color: busy ? 'rgba(0,0,0,0.3)' : '#9A6E38',
+                color: busy ? 'rgba(0,0,0,0.3)' : '#8F6531',
               }}>
               تأیید
             </button>

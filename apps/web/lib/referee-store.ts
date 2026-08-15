@@ -42,7 +42,7 @@ export const GRADES: { key: string; label: string; dots: number; color: string; 
   { key: 'd3',            label: 'درجه ۳',                             dots: 1, color: '#16A34A' },
   { key: 'd2',            label: 'درجه ۲',                             dots: 2, color: '#16A34A' },
   { key: 'd1',            label: 'درجه ۱',                             dots: 3, color: '#C2410C' },
-  { key: 'national',      label: 'داور ملی',                           dots: 3, color: '#9A6E38' },
+  { key: 'national',      label: 'داور ملی',                           dots: 3, color: '#8F6531' },
   { key: 'acbsSilver',    label: 'ACBS Silver Referee',                dots: 4, color: '#94A3B8', latin: true },
   { key: 'acbsGold',      label: 'ACBS Gold Referee',                  dots: 4, color: '#C7A66A', latin: true },
   { key: 'international', label: 'International Referee (WPBSA/IBSF)',  dots: 5, color: '#7C3AED', latin: true },
@@ -50,7 +50,7 @@ export const GRADES: { key: string; label: string; dots: number; color: string; 
 
 export const DISCIPLINES: { key: string; label: string; color: string }[] = [
   { key: 'snooker',  label: 'اسنوکر',       color: '#7C3AED' },
-  { key: 'pocket',   label: 'پاکت بیلیارد', color: '#9A6E38' },
+  { key: 'pocket',   label: 'پاکت بیلیارد', color: '#8F6531' },
   { key: 'highball', label: 'هی‌بال',       color: '#C2410C' },
 ]
 

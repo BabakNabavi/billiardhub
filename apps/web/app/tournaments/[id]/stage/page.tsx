@@ -32,7 +32,7 @@ import BracketTree from '../../../../components/tournaments/BracketTree';
    زمینه‌ی تیره را برای «نسوختنِ پروژکتور» گذاشته بودم. روی
    نمایشگرهای امروزیِ سالن نتیجه‌اش برعکس بود: جدولِ تیره در نورِ
    سالن کم‌کنتراست دیده می‌شد و با بقیه‌ی سایت هم یکی نبود. */
-const GOLD_D = '#9A6E38', INK = '#1C1B17', MUT = '#8A8474', BG = '#F7F6F2';
+const GOLD_D = '#8F6531', INK = '#1C1B17', MUT = '#6F6A5C', BG = '#F7F6F2';
 
 export default function StagePage() {
   const params = useParams();

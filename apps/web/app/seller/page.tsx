@@ -32,7 +32,7 @@ import {
    نبودنشان صادقانه‌تر از نشان‌دادن عدد ساختگی است.
    ───────────────────────────────────────────────────────────── */
 
-const GOLD_D = '#9A6E38';
+const GOLD_D = '#8F6531';
 const LINE = 'rgba(0,0,0,0.07)';
 const SEC = 'rgba(0,0,0,0.45)';
 
@@ -237,7 +237,7 @@ function SellerContent() {
                     }}>
                       {img
                         /* eslint-disable-next-line @next/next/no-img-element */
-                        ? <img src={img} alt="" width={52} height={52} style={{ objectFit: 'cover', width: '100%', height: '100%' }} />
+                        ? <img src={img} alt="" loading="lazy" decoding="async" width={52} height={52} style={{ objectFit: 'cover', width: '100%', height: '100%' }} />
                         : <Package size={20} style={{ color: 'rgba(0,0,0,0.22)' }} />}
                     </div>
 

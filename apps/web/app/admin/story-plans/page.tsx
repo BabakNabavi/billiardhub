@@ -20,8 +20,8 @@ import { apiFetch } from '../../../lib/http'
 import { toFaDigits } from '../../../lib/jalali'
 import Select from '../../../components/ui/Select'
 
-const INK = '#1C1B17', SEC = '#5B564B', MUT = '#8A8474', LINE = '#EAE5DA'
-const GOLD = '#C7A66A', GOLD_D = '#9A6E38', FELT = '#0E7A38', RED = '#B23B2E'
+const INK = '#1C1B17', SEC = '#5B564B', MUT = '#6F6A5C', LINE = '#EAE5DA'
+const GOLD = '#C7A66A', GOLD_D = '#8F6531', FELT = '#0E7A38', RED = '#B23B2E'
 
 const CARD: React.CSSProperties = {
   background: '#fff', border: `1px solid ${LINE}`, borderRadius: 18,

@@ -12,8 +12,8 @@ import { Play, ArrowLeft, ChevronLeft, BellPlus, BellRing, Clapperboard, Loader2
 import { MEDIA_VIDEOS, channelsFrom, compactViews, faDigits, mediaCategoryOf, type MediaVideo } from '../../../../lib/media-data'
 import { fetchVideos } from '../../../../lib/media-user'
 
-const INK = '#1C1B17', SEC = '#5B564B', MUT = '#8A8474', LINE = '#EAE5DA'
-const GOLD = '#C7A66A', GOLD_D = '#9A6E38', GROUND = '#FAF8F3'
+const INK = '#1C1B17', SEC = '#5B564B', MUT = '#6F6A5C', LINE = '#EAE5DA'
+const GOLD = '#C7A66A', GOLD_D = '#8F6531', GROUND = '#FAF8F3'
 
 export default function ChannelPage() {
   const params = useParams()

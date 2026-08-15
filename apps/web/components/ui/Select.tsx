@@ -11,7 +11,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { Check, ChevronDown } from 'lucide-react'
 
-const INK = '#1C1B17', MUT = '#8A8474', LINE = '#E7E2D6', GOLD_D = '#9A6E38'
+const INK = '#1C1B17', MUT = '#6F6A5C', LINE = '#E7E2D6', GOLD_D = '#8F6531'
 const LIST_H = 240
 
 export interface SelectOption<T extends string | number = string> {

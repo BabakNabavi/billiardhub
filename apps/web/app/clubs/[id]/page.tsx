@@ -1083,7 +1083,7 @@ export default function ClubProfilePage() {
                           transition: 'background .15s, border-color .15s',
                         }}>
                         <span style={{ fontSize: 17 }}>🖼</span>
-                        <span style={{ fontSize: 10, fontWeight: 800, lineHeight: 1.3, color: pickedAlbum === null ? '#9A6E38' : '#4B5563' }}>همه تصاویر</span>
+                        <span style={{ fontSize: 10, fontWeight: 800, lineHeight: 1.3, color: pickedAlbum === null ? '#8F6531' : '#4B5563' }}>همه تصاویر</span>
                         <span style={{ fontSize: 8.5, fontWeight: 600, color: 'rgba(0,0,0,0.38)' }}>
                           {toFa(clubAlbums.reduce((n, a) => n + a.items.length, 0))} عکس
                         </span>
@@ -1275,7 +1275,7 @@ export default function ClubProfilePage() {
         <div style={{
           maxWidth: 1240, margin: '0 auto', borderTop: '1px solid #E8E3D6',
           paddingTop: 16, display: 'flex', flexWrap: 'wrap', alignItems: 'center',
-          justifyContent: 'space-between', gap: 8, fontSize: 11.5, color: '#8A8474',
+          justifyContent: 'space-between', gap: 8, fontSize: 11.5, color: '#6F6A5C',
         }}>
           <span>© ۱۴۰۵ {club.name} — تمام حقوق محفوظ است</span>
           <Link href="/" style={{ color: 'inherit', textDecoration: 'none' }}>

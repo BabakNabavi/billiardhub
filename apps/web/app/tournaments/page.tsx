@@ -22,10 +22,10 @@ import {
 import { fetchTournaments } from '../../lib/tournaments/client'
 
 const GOLD   = '#C7A66A'
-const GOLD_D = '#9A6E38'
+const GOLD_D = '#8F6531'
 const TEXT   = '#1C1B17'
 const SEC    = '#5B564B'
-const MUT    = '#8A8474'
+const MUT    = '#6F6A5C'
 const LINE   = '#E7E2D6'
 /* رنگِ پایه‌ی صفحه از کلاسِ مشترکِ lq-stage می‌آید */
 
@@ -59,7 +59,7 @@ function StatusChipLQ({ t }: { t: Tournament }) {
   return (
     <span style={{
       display: 'inline-flex', alignItems: 'center', gap: 6, flexShrink: 0,
-      fontSize: 11.5, fontWeight: 800, color: '#9A6E38',
+      fontSize: 11.5, fontWeight: 800, color: '#8F6531',
       background: 'rgba(199,166,106,0.12)',
       border: '1px solid rgba(199,166,106,0.34)',
       borderRadius: 10, padding: '6px 12px', whiteSpace: 'nowrap',
@@ -128,7 +128,7 @@ function TournamentCard({ t, i }: { t: Tournament; i: number }) {
         {t.status === 'upcoming' && t.regOpenDate && (
           <div style={{
             display: 'flex', alignItems: 'center', gap: 7, fontSize: 12,
-            fontWeight: 700, color: '#9A6E38',
+            fontWeight: 700, color: '#8F6531',
             background: 'rgba(199,166,106,0.10)', border: '1px solid rgba(199,166,106,0.26)',
             borderRadius: 9, padding: '6px 10px',
           }}>

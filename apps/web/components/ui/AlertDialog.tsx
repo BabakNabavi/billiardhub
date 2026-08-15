@@ -17,7 +17,7 @@ import { createPortal } from 'react-dom'
 import { AlertCircle, CheckCircle2, X } from 'lucide-react'
 
 const INK = '#1C1B17', SEC = '#5B564B', LINE = '#EAE5DA'
-const RED = '#B23B2E', FELT = '#0E7A38', GOLD_D = '#9A6E38'
+const RED = '#B23B2E', FELT = '#0E7A38', GOLD_D = '#8F6531'
 
 export default function AlertDialog({
   open, onClose, title, message, tone = 'error', actionLabel, onAction,

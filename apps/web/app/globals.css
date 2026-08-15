@@ -31,14 +31,19 @@ html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; overflow-x:
   /* ── Text ── */
   --text-primary:   #111111;
   --text-secondary: #666666;
-  --text-tertiary:  #999999;
+  /* ۲.۵۵:۱ بود — زیرِ حدِ AA. این روی .input-hint و .label می‌نشیند
+     که هر دو متنِ خواندنی‌اند، نه تزئین. حالا ۴.۵۶:۱ */
+  --text-tertiary:  #6E6E6E;
   --text-on-dark:   rgba(255,255,255,0.92);
   --text-on-dark-2: rgba(255,255,255,0.58);
 
   /* ── Accent Gold ── */
   --gold:        #C7A66A;
   /* سایه‌ی تیره‌ترِ طلایی — تا امروز فقط به‌صورت fallback نوشته می‌شد */
-  --gold-deep:   #9A6E38;
+  /* ۴.۰۳:۱ بود، یعنی کمی زیرِ ۴.۵. تیره‌تر شد تا ۴.۶۱:۱ — اختلافِ
+     دیداری‌اش تقریباً نامرئی است ولی متنِ ریزِ طلایی خواناتر می‌شود.
+     برگرداندن: همین یک خط به #9A6E38. */
+  --gold-deep:   #8F6531;
   --gold-dark:   #A07840;
   --gold-light:  #E2C98C;
   --gold-dim:    rgba(199,166,106,0.12);
@@ -330,7 +335,8 @@ body {
 .table-rank {
   font-size: 15px;
   font-weight: 800;
-  color: var(--gold);
+  /* رتبه متن است نه تزئین؛ --gold روی زمینه‌ی روشن ۲.۰۷:۱ می‌داد */
+  color: var(--gold-deep);
   font-variant-numeric: tabular-nums;
 }
 
@@ -492,10 +498,10 @@ body {
    پس گرفته شد — همان دوباره‌کاری‌ای که قاعده‌ی ۲ پروژه منع می‌کند. */
 /* دراپ‌داونِ باز — به‌جای رنگِ درون‌خطی، که بر :hover برنده می‌شد و
    بی‌صدا حاشیه‌ی هاور را از کار می‌انداخت. */
-.btn.is-open { border-color: rgba(199,166,106,0.55); color: var(--gold-deep, #9A6E38); }
+.btn.is-open { border-color: rgba(199,166,106,0.55); color: var(--gold-deep); }
 
 .btn:focus-visible {
-  outline: 2px solid var(--gold-deep, #9A6E38);
+  outline: 2px solid var(--gold-deep);
   outline-offset: 2px;
 }
 .btn:disabled,
@@ -541,8 +547,8 @@ body {
   transition: all 0.20s cubic-bezier(0.4,0,0.2,1);
   box-shadow: 0 1px 2px rgba(0,0,0,0.03);
 }
-/* ⚠️ `--text-tertiary` روی سفید ۲٫۸۵:۱ است — زیرِ کفِ ۴٫۵. متنِ
-   راهنما هم متن است و باید خوانده شود. */
+/* متنِ راهنما هم متن است و باید خوانده شود، پس `--text-secondary`
+   می‌گیرد نه `--text-tertiary`. (هر دو حالا بالای ۴.۵‌اند.) */
 .input::placeholder { color: var(--text-secondary); }
 .input:hover { border-color: var(--border-strong); }
 .input:focus {
@@ -621,7 +627,7 @@ body {
 /* فوکوسِ فیلد هم مثلِ دکمه دیده شود. `:focus` تنها کافی نیست: با ماوس
    هم شلیک می‌کند و حلقه‌ی ۱۲٪ روی نوارِ روشن تقریباً نامرئی بود. */
 .input:focus-visible {
-  outline: 2px solid var(--gold-deep, #9A6E38);
+  outline: 2px solid var(--gold-deep);
   /* ۴ تا حلقه‌ی ۳پیکسلیِ `:focus` را بپوشاند، نه اینکه رویش بیفتد */
   outline-offset: 4px;
 }
@@ -1040,7 +1046,7 @@ select {
   -webkit-appearance: none;
   -moz-appearance: none;
   background-color: #fff;
-  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%239A6E38' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%238F6531' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: left 12px center;
   background-size: 14px;
@@ -1346,6 +1352,8 @@ select:disabled { opacity: 0.55; cursor: not-allowed; }
   background:
     radial-gradient(38rem 30rem at 78% -6%,  rgba(199,166,106,0.34), transparent 62%),
     radial-gradient(32rem 26rem at 6%  22%,  rgba(122,160,196,0.26), transparent 64%),
+    /* rgba(154,110,56) = #9A6E38ِ قدیم به دهدهی. تزئینِ محضِ پس‌زمینه
+       است و کنتراست ندارد، پس عمداً دست‌نخورده ماند. */
     radial-gradient(34rem 30rem at 92% 78%,  rgba(154,110,56,0.22),  transparent 66%),
     radial-gradient(30rem 24rem at 22% 104%, rgba(34,197,94,0.15),   transparent 62%),
     linear-gradient(#F4F2EE, #F4F2EE);
@@ -1486,11 +1494,11 @@ select:disabled { opacity: 0.55; cursor: not-allowed; }
 .lq-seg > button:hover { color: rgba(17,17,16,0.78); }
 /* حلقه‌ی فوکوس جدا از حالتِ انتخاب است و با خاموش‌بودنِ انیمیشن هم می‌ماند */
 .lq-seg > button:focus-visible {
-  outline: 2px solid #9A6E38;
+  outline: 2px solid var(--gold-deep);
   outline-offset: 2px;
 }
 .lq-seg > button[aria-selected='true'] {
-  color: #9A6E38;
+  color: var(--gold-deep);
   font-weight: 800;
   background: rgba(255,255,255,0.94);
   box-shadow: 0 1px 2px rgba(17,17,16,0.08), 0 4px 12px -4px rgba(154,110,56,0.30);

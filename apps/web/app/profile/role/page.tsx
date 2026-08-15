@@ -564,7 +564,7 @@ export default function RolePage() {
                 if (uniq.length < 2) return null
                 return (
                   <div style={{ background: '#fff', border: '1px solid rgba(199,166,106,0.34)', borderRadius: 16, padding: '14px 16px', marginBottom: 16, boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
-                    <div style={{ fontSize: 12.5, fontWeight: 800, color: '#9A6E38', marginBottom: 4 }}>نقش اصلی شما</div>
+                    <div style={{ fontSize: 12.5, fontWeight: 800, color: '#8F6531', marginBottom: 4 }}>نقش اصلی شما</div>
                     <p style={{ fontSize: 12, color: 'rgba(0,0,0,0.45)', margin: '0 0 10px', lineHeight: 1.9 }}>
                       آگهی و استوری شما با نشانِ همین نقش منتشر می‌شود.
                     </p>
@@ -591,7 +591,7 @@ export default function RolePage() {
                               fontFamily: 'inherit', cursor: on ? 'default' : 'pointer',
                               border: `1px solid ${on ? 'rgba(199,166,106,0.5)' : 'rgba(0,0,0,0.12)'}`,
                               background: on ? 'rgba(199,166,106,0.14)' : '#fff',
-                              color: on ? '#9A6E38' : 'rgba(0,0,0,0.5)',
+                              color: on ? '#8F6531' : 'rgba(0,0,0,0.5)',
                               opacity: primaryBusy ? 0.6 : 1,
                             }}>
                             {on && '✓ '}{ROLE_MAP[r as RoleValue]?.label ?? r}
@@ -616,7 +616,7 @@ export default function RolePage() {
                   <div style={{ fontSize: 12.5, fontWeight: 800, color: 'rgba(0,0,0,0.55)', marginBottom: 10 }}>نقش‌های فعال شما</div>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
                     {activeRoles.map(r => (
-                      <span key={r} style={{ display: 'inline-flex', alignItems: 'center', gap: 7, fontSize: 12.5, fontWeight: 700, color: '#9A6E38', background: 'rgba(199,166,106,0.10)', border: '1px solid rgba(199,166,106,0.3)', borderRadius: 999, padding: '6px 8px 6px 6px' }}>
+                      <span key={r} style={{ display: 'inline-flex', alignItems: 'center', gap: 7, fontSize: 12.5, fontWeight: 700, color: '#8F6531', background: 'rgba(199,166,106,0.10)', border: '1px solid rgba(199,166,106,0.3)', borderRadius: 999, padding: '6px 8px 6px 6px' }}>
                         {ROLE_MAP[r as RoleValue]?.label ?? r}
                         {r === user?.primaryRole && (
                           <span style={{ fontSize: 10, fontWeight: 800, color: '#7A5626', background: 'rgba(199,166,106,0.22)', borderRadius: 999, padding: '2px 7px' }}>اصلی</span>
@@ -774,7 +774,7 @@ export default function RolePage() {
                     width: '100%', padding: '14px', borderRadius: 12,
                     border: `1px solid ${queued.size === 0 ? 'transparent' : 'rgba(199,166,106,0.34)'}`,
                     background: queued.size === 0 ? 'rgba(0,0,0,0.04)' : 'rgba(199,166,106,0.12)',
-                    color: queued.size === 0 ? 'rgba(0,0,0,0.35)' : '#9A6E38',
+                    color: queued.size === 0 ? 'rgba(0,0,0,0.35)' : '#8F6531',
                     fontSize: 16, fontWeight: 700, fontFamily: 'inherit',
                     cursor: queued.size === 0 ? 'not-allowed' : 'pointer',
                     transition: 'transform 0.2s ease, background 0.2s ease, color 0.2s ease, border-color 0.2s ease',

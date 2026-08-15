@@ -38,7 +38,7 @@ let styleInjected = false
 const CSS = `
 .pcs-wrap {
   direction: rtl; font-family: inherit;
-  --pcs-gold: #C7A66A; --pcs-gold-d: #9A6E38;
+  --pcs-gold: #C7A66A; --pcs-gold-d: #8F6531;
   --pcs-text: #1C1B17; --pcs-mut: #A69F8E; --pcs-sub: #5B564B;
   --pcs-border: #E7E2D6; --pcs-field: #FAFAF7; --pcs-panel: #fff;
   --pcs-opt-hover: rgba(199,166,106,0.12);
@@ -84,7 +84,7 @@ const CSS = `
   background: var(--pcs-panel); border: 1px solid var(--pcs-border); border-radius: 12px; overflow: hidden;
   box-shadow: var(--pcs-shadow); animation: pcsIn .14s ease both;
   direction: rtl; font-family: inherit;
-  --pcs-gold: #C7A66A; --pcs-gold-d: #9A6E38;
+  --pcs-gold: #C7A66A; --pcs-gold-d: #8F6531;
   --pcs-text: #1C1B17; --pcs-mut: #A69F8E; --pcs-sub: #5B564B;
   --pcs-border: #E7E2D6; --pcs-field: #FAFAF7; --pcs-panel: #fff;
   --pcs-opt-hover: rgba(199,166,106,0.12);

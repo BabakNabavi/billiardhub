@@ -14,7 +14,7 @@ import BoostDialog from '../../../components/market/BoostDialog';
 import { productTitleParts } from '../../../lib/market/title';
 
 /* طرح LQ (تینت طلایی) — همه‌ی دکمه‌های این صفحه از این استفاده می‌کنند */
-const LQ = 'bg-[rgba(199,166,106,0.12)] border border-[rgba(199,166,106,0.34)] text-[#9A6E38] rounded-[10px] transition-all duration-200 hover:-translate-y-0.5 hover:bg-[rgba(199,166,106,0.18)]';
+const LQ = 'bg-[rgba(199,166,106,0.12)] border border-[rgba(199,166,106,0.34)] text-[#8F6531] rounded-[10px] transition-all duration-200 hover:-translate-y-0.5 hover:bg-[rgba(199,166,106,0.18)]';
 const LQ_NEUTRAL = 'bg-[rgba(28,28,26,0.04)] border border-[rgba(28,28,26,0.1)] text-[#5B564B] rounded-[10px] transition-all duration-200 hover:-translate-y-0.5';
 
 /* محصول ثبت‌شده در localStorage → شکل Product این صفحه */
@@ -252,11 +252,11 @@ export default function MyShopPage() {
           ].map(tab => (
             <button key={tab.id} onClick={() => setActiveTab(tab.id)}
               className={`flex items-center justify-center gap-1.5 px-1 py-3 text-[11.5px] sm:text-sm font-bold border-b-2 transition-colors ${
-                activeTab === tab.id ? 'border-[#C7A66A] text-[#9A6E38]' : 'border-transparent text-gray-500 hover:text-gray-700'
+                activeTab === tab.id ? 'border-[#C7A66A] text-[#8F6531]' : 'border-transparent text-gray-500 hover:text-gray-700'
               }`}>
               <span className="truncate">{tab.label}</span>
               {tab.count > 0 && (
-                <span className={`text-[10px] px-1.5 py-0.5 rounded-full flex-shrink-0 ${activeTab === tab.id ? 'bg-[rgba(199,166,106,0.16)] text-[#9A6E38]' : 'bg-gray-100 text-gray-500'}`}>
+                <span className={`text-[10px] px-1.5 py-0.5 rounded-full flex-shrink-0 ${activeTab === tab.id ? 'bg-[rgba(199,166,106,0.16)] text-[#8F6531]' : 'bg-gray-100 text-gray-500'}`}>
                   {tab.count.toLocaleString('fa-IR')}
                 </span>
               )}

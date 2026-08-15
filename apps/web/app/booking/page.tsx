@@ -9,7 +9,7 @@ import { CalendarDays, Plus } from 'lucide-react'
 import AuthGuard from '../../components/AuthGuard'
 import MyBookings from '../../components/booking/MyBookings'
 
-const INK = '#1C1B17', MUT = '#8A8474', LINE = '#E7E2D6', GOLD_D = '#9A6E38'
+const INK = '#1C1B17', MUT = '#6F6A5C', LINE = '#E7E2D6', GOLD_D = '#8F6531'
 
 export default function MyBookingsPage() {
   return (

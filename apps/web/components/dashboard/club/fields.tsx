@@ -147,7 +147,7 @@ export function TimeField({ label, value, onChange, ariaLabel }: {
     <div style={{ minWidth: 0 }}>
       <label style={{
         display: 'block', fontSize: 12.5, fontWeight: 700,
-        color: '#8A8474', marginBottom: 6,
+        color: '#6F6A5C', marginBottom: 6,
       }}>{label}</label>
       <FaTimeSelect value={value} onChange={onChange} ariaLabel={ariaLabel ?? label} />
     </div>

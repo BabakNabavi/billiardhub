@@ -21,7 +21,7 @@ import { fetchProfile } from '../../../lib/profiles/client'
 /* ─── tokens (تم بازار: طلایی/برنزی روی کاغذ روشن) ─── */
 /* رنگِ پایه‌ی صفحه حالا داخلِ کلاسِ مشترکِ lq-stage است */
 const GOLD  = '#C7A66A'
-const GOLDD = '#9A6E38'
+const GOLDD = '#8F6531'
 const TEXT  = '#1C1C1A'
 const TSEC  = 'rgba(28,28,26,0.56)'
 const TMUT  = 'rgba(28,28,26,0.34)'

@@ -35,9 +35,9 @@ const readAsDataUrl = (file: File): Promise<string> =>
 /* ── توکن‌های ظاهری، هم‌راستا با بقیه‌ی داشبوردها ── */
 const CARD  = 'rounded-2xl border border-[#E7E2D6] bg-white p-5 sm:p-6'
 const LABEL = 'mb-1.5 block text-[12.5px] font-semibold text-[#5B564B]'
-const HINT  = 'mt-1 text-[11.5px] text-[#8A8474]'
+const HINT  = 'mt-1 text-[11.5px] text-[#6F6A5C]'
 const INPUT = 'w-full rounded-[10px] border border-[#E7E2D6] bg-[#FAFAF7] px-3.5 py-2.5 text-[13.5px] text-[#1C1B17] placeholder:text-[#A69F8E] focus:border-[#14532D] focus:outline-none'
-const LQ_BTN = 'inline-flex items-center justify-center gap-2 rounded-[10px] border border-[rgba(199,166,106,0.34)] bg-[rgba(199,166,106,0.12)] px-4 py-2.5 text-[13px] font-bold text-[#9A6E38] transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:translate-y-0'
+const LQ_BTN = 'inline-flex items-center justify-center gap-2 rounded-[10px] border border-[rgba(199,166,106,0.34)] bg-[rgba(199,166,106,0.12)] px-4 py-2.5 text-[13px] font-bold text-[#8F6531] transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:translate-y-0'
 
 const Icon = {
   upload: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5-5 5 5"/><path d="M12 5v12"/></svg>,
@@ -235,7 +235,7 @@ export default function SellerDashboard() {
     return (
       <div dir="rtl" className="flex min-h-screen items-center justify-center bg-[#F7F5F0] p-6 text-center">
         <div className={`${CARD} max-w-[420px]`}>
-          <div className="mx-auto mb-3 w-fit text-[#8A8474]">{Icon.store}</div>
+          <div className="mx-auto mb-3 w-fit text-[#6F6A5C]">{Icon.store}</div>
           <h1 className="text-[16px] font-bold">این صفحه مخصوص فروشندگان است</h1>
           <p className="mt-2 text-[13px] leading-relaxed text-[#5B564B]">
             برای ساختن فروشگاه، اول باید نقش «فروشنده» را بگیرید.
@@ -254,7 +254,7 @@ export default function SellerDashboard() {
         <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
           <div>
             <h1 className="text-[19px] font-bold">پنل فروشگاه</h1>
-            <p className="mt-1 text-[12.5px] text-[#8A8474]">
+            <p className="mt-1 text-[12.5px] text-[#6F6A5C]">
               هرچه اینجا وارد کنید، همان روی صفحه‌ی فروشگاه شما دیده می‌شود.
             </p>
           </div>
@@ -351,7 +351,7 @@ export default function SellerDashboard() {
             <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
               <div>
                 <h2 className="text-[14.5px] font-bold">بنر هدر فروشگاه</h2>
-                <p className="mt-1 text-[12px] text-[#8A8474]">
+                <p className="mt-1 text-[12px] text-[#6F6A5C]">
                   {form.banners.length ? `${toFa(form.banners.length)} از ۳ عکس` : 'حداکثر ۳ عکس (اسلایدی)؛ اگر خالی باشد بنر پیش‌فرض نمایش داده می‌شود'}
                 </p>
               </div>
@@ -362,7 +362,7 @@ export default function SellerDashboard() {
             </div>
             {form.banners.length === 0 ? (
               <button type="button" onClick={() => bannerRef.current?.click()}
-                className="flex w-full flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-[#E7E2D6] py-9 text-[#8A8474] transition-colors hover:border-[#14532D]/40 hover:text-[#14532D]">
+                className="flex w-full flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-[#E7E2D6] py-9 text-[#6F6A5C] transition-colors hover:border-[#14532D]/40 hover:text-[#14532D]">
                 {Icon.upload}<span className="text-[12.5px]">عکس پس‌زمینه‌ی هدر فروشگاه را اضافه کنید</span>
               </button>
             ) : (
@@ -413,7 +413,7 @@ export default function SellerDashboard() {
           {/* ═══ راه‌های ارتباطی ═══ */}
           <section className={CARD}>
             <h2 className="mb-1 text-[14.5px] font-bold">راه‌های ارتباطی</h2>
-            <p className="mb-4 text-[12px] text-[#8A8474]">این‌ها در فوتر فروشگاه دیده می‌شوند.</p>
+            <p className="mb-4 text-[12px] text-[#6F6A5C]">این‌ها در فوتر فروشگاه دیده می‌شوند.</p>
 
             <div className="mb-4">
               <span className={LABEL}>تلفن‌های فروشگاه</span>
@@ -438,7 +438,7 @@ export default function SellerDashboard() {
               </div>
               {form.phones.length < 4 && (
                 <button type="button" onClick={() => set('phones', [...form.phones, ''])}
-                  className="mt-2 inline-flex items-center gap-1.5 text-[12.5px] font-bold text-[#9A6E38] transition hover:opacity-70">
+                  className="mt-2 inline-flex items-center gap-1.5 text-[12.5px] font-bold text-[#8F6531] transition hover:opacity-70">
                   {Icon.plus} افزودن تلفن
                 </button>
               )}
@@ -495,7 +495,7 @@ export default function SellerDashboard() {
             <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
               <div>
                 <h2 className="text-[14.5px] font-bold">عکس‌های «درباره ما»</h2>
-                <p className="mt-1 text-[12px] text-[#8A8474]">
+                <p className="mt-1 text-[12px] text-[#6F6A5C]">
                   {form.aboutImages.length > 0
                     ? `${toFa(form.aboutImages.length)} از ۳ عکس`
                     : 'حداکثر ۳ عکس (اسلایدی) — کنار متن «درباره ما» پایین صفحه نمایش داده می‌شوند'}
@@ -510,7 +510,7 @@ export default function SellerDashboard() {
 
             {form.aboutImages.length === 0 ? (
               <button type="button" onClick={() => aboutRef.current?.click()}
-                className="flex w-full flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-[#E7E2D6] py-10 text-[#8A8474] transition-colors hover:border-[#14532D]/40 hover:text-[#14532D]">
+                className="flex w-full flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-[#E7E2D6] py-10 text-[#6F6A5C] transition-colors hover:border-[#14532D]/40 hover:text-[#14532D]">
                 {Icon.upload}
                 <span className="text-[12.5px]">هنوز عکسی اضافه نشده</span>
               </button>
@@ -535,7 +535,7 @@ export default function SellerDashboard() {
             <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
               <div>
                 <h2 className="text-[14.5px] font-bold">گالری تصاویر فروشگاه</h2>
-                <p className="mt-1 text-[12px] text-[#8A8474]">
+                <p className="mt-1 text-[12px] text-[#6F6A5C]">
                   {form.gallery.length > 0
                     ? `${toFa(form.gallery.length)} از ۱۲ عکس`
                     : 'حداکثر ۱۲ عکس — در بخش گالری صفحه‌ی فروشگاه نمایش داده می‌شوند'}
@@ -550,7 +550,7 @@ export default function SellerDashboard() {
 
             {form.gallery.length === 0 ? (
               <button type="button" onClick={() => galleryRef.current?.click()}
-                className="flex w-full flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-[#E7E2D6] py-10 text-[#8A8474] transition-colors hover:border-[#14532D]/40 hover:text-[#14532D]">
+                className="flex w-full flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-[#E7E2D6] py-10 text-[#6F6A5C] transition-colors hover:border-[#14532D]/40 hover:text-[#14532D]">
                 {Icon.upload}
                 <span className="text-[12.5px]">هنوز عکسی اضافه نشده</span>
               </button>
@@ -595,12 +595,12 @@ export default function SellerDashboard() {
               <div className="flex flex-wrap items-center gap-3 rounded-xl border border-[#E7E2D6] bg-[#FAFAF7] p-3">
                 {form.certificate.url.startsWith('data:image')
                   ? <img loading="lazy" decoding="async" src={form.certificate.url} alt="" className="h-16 w-16 shrink-0 rounded-lg border border-[#E7E2D6] object-cover"/>
-                  : <span className="flex h-16 w-16 shrink-0 items-center justify-center rounded-lg border border-[#E7E2D6] bg-white text-[#9A6E38]">{Icon.doc}</span>}
+                  : <span className="flex h-16 w-16 shrink-0 items-center justify-center rounded-lg border border-[#E7E2D6] bg-white text-[#8F6531]">{Icon.doc}</span>}
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-1.5 text-[13px] font-semibold text-[#14532D]">
                     <span className="text-[#057642]">{Icon.check}</span> جواز کسب آپلود شد
                   </div>
-                  <div className="mt-0.5 truncate text-[11.5px] text-[#8A8474]" dir="ltr">{form.certificate.name}</div>
+                  <div className="mt-0.5 truncate text-[11.5px] text-[#6F6A5C]" dir="ltr">{form.certificate.name}</div>
                 </div>
                 <div className="flex gap-2">
                   <button type="button" onClick={() => certRef.current?.click()} disabled={busy} className={LQ_BTN}>تغییر فایل</button>
@@ -610,7 +610,7 @@ export default function SellerDashboard() {
               </div>
             ) : (
               <button type="button" onClick={() => certRef.current?.click()} disabled={busy}
-                className="flex w-full flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-[#E7E2D6] py-10 text-[#8A8474] transition-colors hover:border-[#14532D]/40 hover:text-[#14532D]">
+                className="flex w-full flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-[#E7E2D6] py-10 text-[#6F6A5C] transition-colors hover:border-[#14532D]/40 hover:text-[#14532D]">
                 {Icon.upload}
                 <span className="text-[12.5px]">جواز کسب را آپلود کنید (عکس یا PDF)</span>
               </button>
@@ -625,7 +625,7 @@ export default function SellerDashboard() {
               {saved && !err && <p className="me-auto text-[12.5px] font-semibold text-[#14532D]">ذخیره و منتشر شد ✓ — در صفحه‌ی «فروشگاه‌ها» نمایش داده می‌شود</p>}
               {/* دکمه به طرح LQ (طلایی) */}
               <button type="submit" disabled={busy}
-                className="inline-flex items-center gap-2 rounded-[10px] border border-[rgba(199,166,106,0.34)] bg-[rgba(199,166,106,0.12)] px-6 py-2.5 text-[13.5px] font-bold text-[#9A6E38] transition hover:-translate-y-0.5 hover:bg-[rgba(199,166,106,0.18)] disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:translate-y-0">
+                className="inline-flex items-center gap-2 rounded-[10px] border border-[rgba(199,166,106,0.34)] bg-[rgba(199,166,106,0.12)] px-6 py-2.5 text-[13.5px] font-bold text-[#8F6531] transition hover:-translate-y-0.5 hover:bg-[rgba(199,166,106,0.18)] disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:translate-y-0">
                 ذخیره‌ی تغییرات
               </button>
             </div>
@@ -655,7 +655,7 @@ export default function SellerDashboard() {
         )}
 
         <button onClick={() => router.push('/dashboard')}
-          className="mt-6 text-[12.5px] text-[#8A8474] transition hover:text-[#14532D]">
+          className="mt-6 text-[12.5px] text-[#6F6A5C] transition hover:text-[#14532D]">
           ← بازگشت به داشبورد
         </button>
       </div>

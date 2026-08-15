@@ -29,7 +29,7 @@ export function verificationText(role: VerifiableRole): string {
     : `برای درخواست تیک تأیید و افزایش اعتبار پروفایل، لطفاً ${DOC_LABEL[role]} را آپلود نمایید.`
 }
 
-const GOLD_D = '#9A6E38', FELT = '#0E7A38', LINE = '#EAE5DA'
+const GOLD_D = '#8F6531', FELT = '#0E7A38', LINE = '#EAE5DA'
 
 export default function VerificationPrompt({
   role, done = false, verified = false, compact = false, style,

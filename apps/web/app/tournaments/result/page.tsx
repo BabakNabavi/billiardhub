@@ -30,9 +30,9 @@ import { CheckCircle2, XCircle, Clock, Loader2 } from 'lucide-react';
 import { apiFetch } from '../../../lib/http';
 
 const GOLD = '#C7A66A';
-const GOLD_D = '#9A6E38';
+const GOLD_D = '#8F6531';
 const INK = '#1C1B17';
-const MUT = '#8A8474';
+const MUT = '#6F6A5C';
 
 type Tone = 'ok' | 'warn' | 'bad';
 

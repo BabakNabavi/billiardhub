@@ -10,7 +10,7 @@ import { getCoachProfile, badgeFromGrades, certificationLines, disciplineLabel, 
 
 /* ─── Tokens (same as listing) ─── */
 const GOLD   = '#C7A66A'
-const GOLD_D = '#9A6E38'
+const GOLD_D = '#8F6531'
 const GOLD_G = 'linear-gradient(135deg,#7A4F10 0%,#C7A66A 50%,#8A6020 100%)'
 const TEXT   = '#111110'
 const TEXT_S = 'rgba(17,17,16,0.52)'
@@ -280,7 +280,7 @@ function mapLocalToFull(p: CoachProfile): CoachFull {
     specialty: p.disciplines[0] ?? 'snooker',
     city: p.city,
     badge: b?.label ?? '',
-    badgeColor: '#9A6E38',
+    badgeColor: '#8F6531',
     verified: p.verified,
     hasStory: false,
     storyImage: '',
@@ -419,7 +419,7 @@ export default function CoachProfilePage() {
 
         {/* ── Back ── */}
         <div style={{ maxWidth:1128, margin:'0 auto', padding:'18px clamp(12px,3vw,24px) 0' }}>
-          <Link href="/coaches" className="goldbtn" style={{ display:'inline-flex', alignItems:'center', gap:6, background:'rgba(199,166,106,0.12)', border:'1px solid rgba(199,166,106,0.34)', color:'#9A6E38', borderRadius:10, textDecoration:'none', fontSize:13, fontWeight:700, padding:'7px 14px' }}>
+          <Link href="/coaches" className="goldbtn" style={{ display:'inline-flex', alignItems:'center', gap:6, background:'rgba(199,166,106,0.12)', border:'1px solid rgba(199,166,106,0.34)', color:'#8F6531', borderRadius:10, textDecoration:'none', fontSize:13, fontWeight:700, padding:'7px 14px' }}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
               <polyline points="15 18 9 12 15 6"/>
             </svg>
@@ -504,7 +504,7 @@ export default function CoachProfilePage() {
                         return (
                           <span key={dk} style={{ display:'inline-flex', alignItems:'center', gap:7 }}>
                             {i > 0 && <span style={{ color:'rgba(0,0,0,0.22)', fontWeight:400 }}>·</span>}
-                            <span style={{ color: s?.color ?? '#9A6E38' }}>{s?.label ?? 'بیلیارد'}</span>
+                            <span style={{ color: s?.color ?? '#8F6531' }}>{s?.label ?? 'بیلیارد'}</span>
                           </span>
                         )
                       })}
@@ -737,11 +737,11 @@ export default function CoachProfilePage() {
               />
               <div style={{ display:'flex', gap:10, marginTop:18, justifyContent:'flex-end' }}>
                 <button onClick={() => setShowNewAlbum(false)} className="goldbtn"
-                  style={{ display:'inline-flex', alignItems:'center', gap:7, background:'rgba(199,166,106,0.12)', border:'1px solid rgba(199,166,106,0.34)', borderRadius:10, padding:'9px 20px', color:'#9A6E38', fontWeight:700, fontSize:13, cursor:'pointer', fontFamily:"'Vazirmatn',Tahoma,sans-serif", textDecoration:'none', whiteSpace:'nowrap' as const }}>
+                  style={{ display:'inline-flex', alignItems:'center', gap:7, background:'rgba(199,166,106,0.12)', border:'1px solid rgba(199,166,106,0.34)', borderRadius:10, padding:'9px 20px', color:'#8F6531', fontWeight:700, fontSize:13, cursor:'pointer', fontFamily:"'Vazirmatn',Tahoma,sans-serif", textDecoration:'none', whiteSpace:'nowrap' as const }}>
                   انصراف
                 </button>
                 <button onClick={createAlbum} className="goldbtn"
-                  style={{ display:'inline-flex', alignItems:'center', gap:7, background:'rgba(199,166,106,0.12)', border:'1px solid rgba(199,166,106,0.34)', borderRadius:10, padding:'9px 20px', color:'#9A6E38', fontWeight:700, fontSize:13, cursor:'pointer', fontFamily:"'Vazirmatn',Tahoma,sans-serif", textDecoration:'none', whiteSpace:'nowrap' as const }}>
+                  style={{ display:'inline-flex', alignItems:'center', gap:7, background:'rgba(199,166,106,0.12)', border:'1px solid rgba(199,166,106,0.34)', borderRadius:10, padding:'9px 20px', color:'#8F6531', fontWeight:700, fontSize:13, cursor:'pointer', fontFamily:"'Vazirmatn',Tahoma,sans-serif", textDecoration:'none', whiteSpace:'nowrap' as const }}>
                   ایجاد آلبوم
                 </button>
               </div>

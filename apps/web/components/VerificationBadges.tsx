@@ -15,8 +15,8 @@ import { useCallback, useEffect, useState } from 'react'
 import { BadgeCheck, Check, Clock, Loader2, Mail, ShieldCheck, X } from 'lucide-react'
 import { apiFetch } from '../lib/http'
 
-const INK = '#1C1B17', SEC = '#5B564B', MUT = '#8A8474', LINE = '#E7E2D6'
-const GOLD_D = '#9A6E38', FELT = '#0E7A38', RED = '#B23B2E'
+const INK = '#1C1B17', SEC = '#5B564B', MUT = '#6F6A5C', LINE = '#E7E2D6'
+const GOLD_D = '#8F6531', FELT = '#0E7A38', RED = '#B23B2E'
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}$/
 

@@ -281,12 +281,12 @@ export default function RegisterPage() {
       alignItems: 'center', justifyContent: 'center', gap: 14, padding: 20, textAlign: 'center',
       fontFamily: 'Vazirmatn, Tahoma, sans-serif' }}>
       <div style={{ fontSize: 19, fontWeight: 900, color: '#1C1B17' }}>این مسابقه پیدا نشد</div>
-      <p style={{ fontSize: 13.5, color: '#8A8474', margin: 0, lineHeight: 2 }}>
+      <p style={{ fontSize: 13.5, color: '#6F6A5C', margin: 0, lineHeight: 2 }}>
         ممکن است برگزار شده باشد یا برگزارکننده آن را برداشته باشد.
       </p>
       <Link href="/tournaments" style={{ padding: '11px 22px', borderRadius: 12, textDecoration: 'none',
         fontSize: 13.5, fontWeight: 800, background: 'rgba(199,166,106,0.12)',
-        border: '1px solid rgba(199,166,106,0.34)', color: '#9A6E38' }}>
+        border: '1px solid rgba(199,166,106,0.34)', color: '#8F6531' }}>
         همه‌ی مسابقات
       </Link>
     </div>
@@ -582,7 +582,7 @@ export default function RegisterPage() {
             borderRadius: 16, padding: '18px', marginBottom: 16,
             display: 'flex', alignItems: 'flex-start', gap: 12,
           }}>
-            <AlertCircle size={18} color="#9A6E38" style={{ flexShrink: 0, marginTop: 2 }} />
+            <AlertCircle size={18} color="#8F6531" style={{ flexShrink: 0, marginTop: 2 }} />
             <div>
               <div style={{ fontSize: 15, fontWeight: 800, color: '#111', marginBottom: 4 }}>
                 فعلاً امکان پرداخت آنلاین نیست
@@ -730,7 +730,7 @@ export default function RegisterPage() {
                   )}
                   <button onClick={joinWaitlist} disabled={wlBusy} style={{
                     padding: '11px 28px', borderRadius: 12,
-                    background: 'rgba(199,166,106,0.14)', color: '#9A6E38',
+                    background: 'rgba(199,166,106,0.14)', color: '#8F6531',
                     border: '1px solid rgba(199,166,106,0.42)',
                     fontSize: 15, fontWeight: 800, cursor: wlBusy ? 'wait' : 'pointer', fontFamily: 'inherit',
                   }}>

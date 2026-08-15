@@ -65,7 +65,7 @@ export default function FaTimeSelect({
         options={HOURS.map(x => ({ value: x, label: toFa(x) }))}
         onChange={v => onChange(`${v}:${m}`)}
       />
-      <span style={{ color: '#8A8474', fontWeight: 800, flexShrink: 0 }}>:</span>
+      <span style={{ color: '#6F6A5C', fontWeight: 800, flexShrink: 0 }}>:</span>
       <Select
         value={m} compact={compact} disabled={disabled} style={box} noChevron center
         ariaLabel={ariaLabel ? `دقیقه‌ی ${ariaLabel}` : 'دقیقه'}

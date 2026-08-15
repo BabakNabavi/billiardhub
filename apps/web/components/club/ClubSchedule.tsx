@@ -23,8 +23,8 @@ import { CalendarDays, Loader2, Users, Clock, Phone, AlertCircle, Wallet } from 
 import { apiFetch } from '../../lib/http'
 import { toFaDigits, faDate } from '../../lib/jalali'
 
-const INK = '#1C1B17', SEC = '#5B564B', MUT = '#8A8474', LINE = '#EAE5DA'
-const GOLD_D = '#9A6E38', FELT = '#0E7A38'
+const INK = '#1C1B17', SEC = '#5B564B', MUT = '#6F6A5C', LINE = '#EAE5DA'
+const GOLD_D = '#8F6531', FELT = '#0E7A38'
 
 const fa = (n: unknown) => toFaDigits(Math.round(Number(n) || 0).toLocaleString('en-US'))
 const hh = (h: number | null) => (h === null ? '—' : toFaDigits(String(h).padStart(2, '0')) + ':۰۰')

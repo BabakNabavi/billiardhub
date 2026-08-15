@@ -9,8 +9,8 @@ import Link from 'next/link'
 import { ChevronLeft, ListOrdered, ChevronDown, FileText, ShieldCheck, ArrowUp, Check } from 'lucide-react'
 import type { LegalDocument } from '../../lib/legal-content'
 
-const INK = '#1C1B17', SEC = '#5B564B', MUT = '#8A8474', LINE = '#EAE5DA'
-const GOLD = '#C7A66A', GOLD_D = '#9A6E38', GROUND = '#FAF8F3', FELT = '#0E7A38'
+const INK = '#1C1B17', SEC = '#5B564B', MUT = '#6F6A5C', LINE = '#EAE5DA'
+const GOLD = '#C7A66A', GOLD_D = '#8F6531', GROUND = '#FAF8F3', FELT = '#0E7A38'
 const faNum = (n: number) => n.toLocaleString('fa-IR')
 
 export default function LegalDoc({ doc, icon = 'terms' }: { doc: LegalDocument; icon?: 'terms' | 'privacy' }) {

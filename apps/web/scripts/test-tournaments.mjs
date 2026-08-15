@@ -655,7 +655,9 @@ t('در حالتِ فهرست فلشِ انتهای ردیف برداشته شد
   !/<ChevronLeft size=\{16\}/.test(listPage));
 t('نشانِ وضعیت در فهرست طرحِ LQ دارد',
   /function StatusChipLQ/.test(listPage)
-  && /color: '#9A6E38'[\s\S]{0,140}rgba\(199,166,106,0\.34\)/.test(listPage));
+  /* رنگ از #9A6E38 به #8F6531 تیره شد چون قبلی ۴.۰۳:۱ می‌داد،
+     زیرِ حدِ ۴.۵. طرح همان است، فقط عددِ رنگ. */
+  && /color: '#8F6531'[\s\S]{0,140}rgba\(199,166,106,0\.34\)/.test(listPage));
 t('نشانِ وضعیت آخرِ ردیف است (سمتِ چپ در RTL)',
   listPage.indexOf('lr-fee') < listPage.indexOf('<StatusChipLQ'));
 t('عبارتِ «رویدادهای رسمی» اصلاح شد',
@@ -3473,6 +3475,86 @@ console.log('\n― استوری: یک منبع، با انقضا ―');
   t('ستون‌های استوری در فهرستِ عمومیِ باشگاه انتخاب می‌شوند',
     /'storyExpiresAt', 'storyMediaUrl', 'storyType', 'storyText'/.test(read('app/api/clubs/route.ts')),
     'بدونِ رسانه، حلقه‌ی استوری روی /clubs هرگز رندر نمی‌شد');
+
+  /* ── کفِ کنتراست ──
+     این‌ها با فرمولِ WCAG روی زمینه‌ی واقعیِ صحنه حساب می‌شوند، نه با
+     چشم. چهار رنگ زیرِ حد بودند و تیره شدند؛ این ادعا نمی‌گذارد
+     کسی دوباره روشنشان کند.
+     حدِ AA: ۴.۵ برای متنِ عادی. */
+  {
+    const hex = h => h.replace('#', '').match(/../g).map(x => parseInt(x, 16));
+    const lum = ([r, g, b]) => {
+      const f2 = c => { c /= 255; return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4; };
+      return 0.2126 * f2(r) + 0.7152 * f2(g) + 0.0722 * f2(b);
+    };
+    const ratio = (a, b) => {
+      const [x, y] = [lum(hex(a)), lum(hex(b))].sort((m, n) => n - m);
+      return (x + 0.05) / (y + 0.05);
+    };
+    const STAGE = '#F4F2EE';
+    const SLASH = '/';
+    const OLD_MUT = '#' + '8A8474';
+    const css = read('app/globals.css');
+    const tok = n => css.match(new RegExp(`--${n}:\\s*(#[0-9A-Fa-f]{6})`))?.[1] ?? null;
+
+    for (const name of ['text-secondary', 'text-tertiary', 'gold-deep']) {
+      const v = tok(name);
+      const r = v ? ratio(v, STAGE) : 0;
+      t(`کنتراستِ --${name} از ۴.۵ کم‌تر نیست`, r >= 4.5,
+        v ? `${v} روی ${STAGE} می‌شود ${r.toFixed(2)}:1` : `توکنِ --${name} پیدا نشد`);
+    }
+
+    /* رتبه‌ی جدول متن است، پس نباید رنگِ تزئینیِ --gold را بگیرد */
+    t('رتبه‌ی جدول رنگِ متنِ خوانا دارد',
+      /\.table-rank \{[\s\S]*?color: var\(--gold-deep\)/.test(css),
+      '--gold روی زمینه‌ی روشن ۲.۰۷:۱ است');
+
+    /* خاکستریِ کم‌رنگِ صفحه‌ها — ۳.۳۳:۱ بود، در ۱۰۴ فایل */
+    const glob = (d, out = []) => {
+      for (const e of readdirSync(join(ROOT, d), { withFileTypes: true })) {
+        const p = d + SLASH + e.name;
+        if (e.isDirectory()) { if (!/node_modules|[.]next/.test(e.name)) glob(p, out); continue; }
+        /* ⚠️ css هم — نسخه‌ی اول فقط tsx می‌گشت و globals.css را نمی‌دید،
+           پس روی کدی که هنوز رنگِ قدیم داشت سبز می‌ماند. */
+        if (/[.](tsx?|css)$/.test(e.name) && read(p).toUpperCase().includes(OLD_MUT)) out.push(p);
+      }
+      return out;
+    };
+    const stale = [...glob('app'), ...glob('components'), ...glob('lib')];
+    t('خاکستریِ متنِ کم‌رنگ به کدِ روشنِ قبلی برنگشته', stale.length === 0,
+      stale.length + ' فایل هنوز رنگِ ۳.۳۳:۱ دارد');
+
+    /* طلاییِ اینلاین هم باید با توکن یکی بماند — وگرنه سایت دو تُنه
+       می‌شود: کلاس‌ها تیره، استایلِ اینلاین روشن. */
+    const OLD_GOLD = '#' + '9A6E38';
+    const goldStale = [];
+    const glob2 = (d) => {
+      for (const e of readdirSync(join(ROOT, d), { withFileTypes: true })) {
+        const p = d + SLASH + e.name;
+        if (e.isDirectory()) { if (!/node_modules|[.]next/.test(e.name)) glob2(p); continue; }
+        if (/[.](tsx?|css)$/.test(e.name) && stripComments(read(p)).toUpperCase().includes(OLD_GOLD)) goldStale.push(p);
+      }
+    };
+    glob2('app'); glob2('components'); glob2('lib');
+    t('طلاییِ اینلاین با توکنِ تیره‌شده یکی است', goldStale.length === 0,
+      goldStale.length + ' فایل هنوز #9A6E38 دارد (۴.۰۳:۱)');
+  }
+
+  /* هدفِ لمس — حدِ WCAG 2.2 AA برابرِ ۲۴×۲۴ پیکسلِ CSS است.
+     دکمه‌ی گزارش ۲۳×۲۳ بود: یک پیکسل کم. */
+  t('دکمه‌ی گزارشِ فشرده به حدِ ۲۴ پیکسل می‌رسد',
+    /* هر دو نیمه: با آیکونِ کوچک‌تر هم هدف کوچک می‌شود، پس تنها
+       سنجیدنِ padding کافی نیست. */
+    /padding: 5, display: 'flex', color: MUT/.test(read('components/ReportButton.tsx'))
+    && read('components/ReportButton.tsx').includes('<Flag size={15} />'),
+    'آیکونِ ۱۵ با padding 4 می‌شود ۲۳');
+
+  t('دکمه‌ی نمایشِ رمز با کیبورد در دسترس است',
+    !/onClick={opts.reveal.toggle} tabIndex={-1}/.test(read('app/register/page.tsx')),
+    'نامِ دسترس‌پذیر روی عنصری که فوکوس نمی‌گیرد بی‌فایده است');
+  t('نامِ هر تراشه‌ی فیلتر یکتاست',
+    /aria-label=\{`برداشتن فیلترِ \$\{c\.label\}`\}/.test(read('app/shop/page.tsx')),
+    'پنج دکمه با یک نام برای صفحه‌خوان از هم جدا نمی‌شوند');
 
   /* ── ناحیه‌ی امنِ iOS در پوشش‌های تمام‌صفحه ──
      در حالتِ نصب‌شده نوارِ مرورگر نیست و بالاترین ~۴۷px مالِ ساعت و

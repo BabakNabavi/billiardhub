@@ -178,7 +178,7 @@ export default function AdminEventsPage() {
           هرگز نمی‌فهمد چرا در سایت پیدا نمی‌شود — همان الگویی که در
           رنکینگ و اخبار اتفاق افتاد. */}
       <div className="mb-5 rounded-xl border px-4 py-3 text-sm font-bold leading-7"
-        style={{ background: 'rgba(199,166,106,0.10)', borderColor: 'rgba(199,166,106,0.34)', color: '#9A6E38' }}>
+        style={{ background: 'rgba(199,166,106,0.10)', borderColor: 'rgba(199,166,106,0.34)', color: '#8F6531' }}>
         رویدادهایی که این‌جا می‌سازید فعلاً در سایت نمایش داده نمی‌شوند —
         نشانی <span className="bh-latin">/events</span> به صفحه‌ی «مسابقات»
         هدایت می‌شود. برای مسابقه‌ای که باید عمومی دیده شود، از

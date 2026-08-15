@@ -14,8 +14,8 @@ import { apiFetch } from '../../lib/http'
 import { toFaDigits, faDate } from '../../lib/jalali'
 import { useAuthStore } from '../../store/auth.store'
 
-const INK = '#1C1B17', SEC = '#5B564B', MUT = '#8A8474', LINE = '#E7E2D6'
-const GOLD = '#C7A66A', GOLD_D = '#9A6E38', FELT = '#0E7A38'
+const INK = '#1C1B17', SEC = '#5B564B', MUT = '#6F6A5C', LINE = '#E7E2D6'
+const GOLD = '#C7A66A', GOLD_D = '#8F6531', FELT = '#0E7A38'
 
 type Period = 'day' | 'week' | 'month'
 const PERIOD_FA: Record<Period, string> = { day: 'روز', week: 'هفته', month: 'ماه' }

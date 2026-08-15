@@ -18,8 +18,8 @@ import { Loader2, Lock, Eye, EyeOff, Check, X, AlertCircle } from 'lucide-react'
 import { apiFetch } from '../../lib/http'
 import { passwordHint, capsFrom } from '../../lib/auth/password-hints'
 
-const INK = '#1C1B17', SEC = '#5B564B', MUT = '#8A8474', LINE = '#E7E2D6'
-const GOLD_D = '#9A6E38', FELT = '#0E7A38', RED = '#B23B2E'
+const INK = '#1C1B17', SEC = '#5B564B', MUT = '#6F6A5C', LINE = '#E7E2D6'
+const GOLD_D = '#8F6531', FELT = '#0E7A38', RED = '#B23B2E'
 
 /* همان قواعدی که سرور در lib/auth/password.ts اعمال می‌کند */
 const RULES: { label: string; ok: (p: string) => boolean }[] = [
@@ -225,7 +225,7 @@ export default function ChangePassword({ onChanged }: { onChanged?: () => void }
             background: hint.persian ? 'rgba(178,59,46,0.07)' : 'rgba(199,166,106,0.10)',
             border: `1px solid ${hint.persian ? 'rgba(178,59,46,0.28)' : 'rgba(199,166,106,0.32)'}`,
             fontSize: 12, fontWeight: 700,
-            color: hint.persian ? '#B23B2E' : '#9A6E38',
+            color: hint.persian ? '#B23B2E' : '#8F6531',
           }}>
             <AlertCircle size={14} style={{ flexShrink: 0, marginTop: 2 }} />
             <span>{hint.message}</span>

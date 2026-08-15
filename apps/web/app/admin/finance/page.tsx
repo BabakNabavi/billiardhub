@@ -13,8 +13,8 @@ import {
   ArrowDownToLine, CheckCircle2, AlertCircle, X,
 } from 'lucide-react'
 
-const INK = '#1C1B17', SEC = '#5B564B', MUT = '#8A8474', LINE = '#EAE5DA'
-const GOLD = '#C7A66A', GOLD_D = '#9A6E38', FELT = '#0E7A38', GROUND = '#FAF8F3'
+const INK = '#1C1B17', SEC = '#5B564B', MUT = '#6F6A5C', LINE = '#EAE5DA'
+const GOLD = '#C7A66A', GOLD_D = '#8F6531', FELT = '#0E7A38', GROUND = '#FAF8F3'
 const fa = (n: unknown) => Math.round(Number(n) || 0).toLocaleString('fa-IR')
 const faDate = (iso?: unknown) => { try { return new Intl.DateTimeFormat('fa-IR', { day: 'numeric', month: 'long' }).format(new Date(String(iso))) } catch { return '—' } }
 
@@ -305,7 +305,7 @@ function RefModal({ amount, onClose, onSubmit }: { amount: number; onClose: () =
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
           <CreditCard size={18} style={{ color: GOLD_D }} />
           <span style={{ fontSize: 15, fontWeight: 900, color: INK, flex: 1 }}>ثبت واریز</span>
-          <button onClick={onClose} style={{ background: '#F4F3F1', border: `1px solid ${LINE}`, borderRadius: 9, padding: 6, cursor: 'pointer', color: SEC, display: 'flex' }}><X size={15} /></button>
+          <button type="button" aria-label="بستن" onClick={onClose} style={{ background: '#F4F3F1', border: `1px solid ${LINE}`, borderRadius: 9, padding: 6, cursor: 'pointer', color: SEC, display: 'flex' }}><X size={15} /></button>
         </div>
         <p style={{ fontSize: 13, color: SEC, margin: '0 0 14px', lineHeight: 1.9 }}>
           مبلغ <b style={{ color: INK }}>{fa(amount)} تومان</b> واریز شد؟ شماره‌ی پیگیری بانکی را وارد کنید.

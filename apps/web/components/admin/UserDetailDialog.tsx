@@ -15,8 +15,8 @@ import { apiFetch } from '../../lib/http'
 import { faDate } from '../../lib/jalali'
 import { X, Loader2, BadgeCheck, ShieldAlert, Copy, Check, Pencil } from 'lucide-react'
 
-const INK = '#1C1B17', SEC = '#5B564B', MUT = '#8A8474', LINE = '#EAE5DA'
-const GOLD_D = '#9A6E38', FELT = '#0E7A38', RED = '#B23B2E'
+const INK = '#1C1B17', SEC = '#5B564B', MUT = '#6F6A5C', LINE = '#EAE5DA'
+const GOLD_D = '#8F6531', FELT = '#0E7A38', RED = '#B23B2E'
 
 type Row = Record<string, unknown>
 
@@ -233,7 +233,7 @@ export default function UserDetailDialog({ userId, onClose }: { userId: string; 
             background: 'linear-gradient(135deg,#C7A66A,#8A6020)',
           }}>
             {g('avatar')
-              ? <img src={String(g('avatar'))} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              ? <img src={String(g('avatar'))} alt="" loading="lazy" decoding="async" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               : name.slice(0, 1)}
           </span>
           <div style={{ flex: 1, minWidth: 0 }}>

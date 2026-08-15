@@ -19,7 +19,7 @@ import { useEffect, useRef, useState } from 'react';
 import { persianToSlug, isValidSlug } from '@/lib/slug';
 
 const GOLD = '#C7A66A';
-const GOLD_D = '#9A6E38';
+const GOLD_D = '#8F6531';
 const OK = '#0E7A38';
 const BAD = '#B23B2E';
 
@@ -114,7 +114,7 @@ export default function SiteAddressField({
           آگهی‌های همان فروشگاه — که نامکِ قدیمی را در خودشان دارند —
           یتیم شدند و ویترین یک‌شبه خالی شد. */}
       {locked && (
-        <p style={{ fontSize: 11.5, color: '#9A6E38', background: 'rgba(199,166,106,0.10)', border: '1px solid rgba(199,166,106,0.26)', borderRadius: 9, padding: '7px 10px', margin: 0, lineHeight: 1.9 }}>
+        <p style={{ fontSize: 11.5, color: '#8F6531', background: 'rgba(199,166,106,0.10)', border: '1px solid rgba(199,166,106,0.26)', borderRadius: 9, padding: '7px 10px', margin: 0, lineHeight: 1.9 }}>
           این نشانی ثبت شده و دیگر قابلِ تغییر نیست — نشانیِ اینترنتیِ دائمیِ شماست.
         </p>
       )}

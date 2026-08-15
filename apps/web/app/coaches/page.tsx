@@ -6,7 +6,7 @@ import { fetchProfiles } from '@/lib/profiles/client'
 
 /* ─── Tokens ─── */
 const GOLD    = '#C7A66A'
-const GOLD_D  = '#9A6E38'
+const GOLD_D  = '#8F6531'
 
 /* page colors (light theme) */
 /* رنگِ پایه‌ی صفحه از کلاسِ مشترکِ lq-stage می‌آید */
@@ -238,7 +238,7 @@ function CoachCard({ coach, view, idx }: { coach: Coach; view: 'grid' | 'list'; 
         </div>
         <Link href={`/coaches/${coach.id}`} className="btnConnect" aria-label="مشاهده پروفایل" style={{
           flexShrink:0, textDecoration:'none', display:'flex', alignItems:'center', justifyContent:'center',
-          width:40, height:40, border:'1px solid rgba(199,166,106,0.34)', borderRadius:10, color:'#9A6E38', background:'rgba(199,166,106,0.12)' }}>
+          width:40, height:40, border:'1px solid rgba(199,166,106,0.34)', borderRadius:10, color:'#8F6531', background:'rgba(199,166,106,0.12)' }}>
           <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="15 18 9 12 15 6"/></svg>
         </Link>
       </article>
@@ -277,7 +277,7 @@ function CoachCard({ coach, view, idx }: { coach: Coach; view: 'grid' | 'list'; 
           <span style={{ fontSize:11.5, color:TEXT_S }}>{coach.city}</span>
         </div>
         <div style={{ flex:1 }}/>
-        <Link href={`/coaches/${coach.id}`} className="btnConnect" style={{ alignSelf:'stretch', textDecoration:'none', display:'flex', alignItems:'center', justifyContent:'center', gap:7, padding:'9px 12px', border:'1px solid rgba(199,166,106,0.34)', borderRadius:10, fontSize:13, fontWeight:700, color:'#9A6E38', background:'rgba(199,166,106,0.12)' }}>
+        <Link href={`/coaches/${coach.id}`} className="btnConnect" style={{ alignSelf:'stretch', textDecoration:'none', display:'flex', alignItems:'center', justifyContent:'center', gap:7, padding:'9px 12px', border:'1px solid rgba(199,166,106,0.34)', borderRadius:10, fontSize:13, fontWeight:700, color:'#8F6531', background:'rgba(199,166,106,0.12)' }}>
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
           مشاهده پروفایل
         </Link>
@@ -467,7 +467,7 @@ export default function CoachesPage() {
                   fontWeight: active ? 800 : 600,
                   border: active ? '1px solid rgba(199,166,106,0.40)' : '1px solid rgba(17,17,16,0.10)',
                   background: active ? 'rgba(199,166,106,0.12)' : 'rgba(255,255,255,0.78)',
-                  color: active ? '#9A6E38' : TEXT_S,
+                  color: active ? '#8F6531' : TEXT_S,
                   boxShadow: active ? '0 4px 12px rgba(199,166,106,0.16)' : 'inset 0 1px 0 rgba(255,255,255,0.9)',
                   backdropFilter:'blur(16px)', WebkitBackdropFilter:'blur(16px)',
                 }}
@@ -509,7 +509,7 @@ export default function CoachesPage() {
                       width:38, height:38, borderRadius:10, cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0,
                       border: on ? '1px solid rgba(199,166,106,0.40)' : '1px solid rgba(17,17,16,0.10)',
                       background: on ? 'rgba(199,166,106,0.12)' : 'rgba(255,255,255,0.78)',
-                      color: on ? '#9A6E38' : TEXT_S,
+                      color: on ? '#8F6531' : TEXT_S,
                       boxShadow: on ? '0 4px 12px rgba(199,166,106,0.16)' : 'inset 0 1px 0 rgba(255,255,255,0.9)',
                     }}>{icon}</button>
                   )

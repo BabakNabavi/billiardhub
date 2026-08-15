@@ -9,7 +9,7 @@ import type { ManufacturerProfile } from '../../lib/manufacturer-store'
 import { fetchProfiles } from '../../lib/profiles/client'
 
 const GOLD     = '#C7A66A'
-const GOLD_D   = '#9A6E38'
+const GOLD_D   = '#8F6531'
 const GOLD_G   = 'linear-gradient(135deg,#7A4F10 0%,#C7A66A 50%,#8A6020 100%)'
 /* هم‌رنگِ پایه‌ی صحنه — وگرنه نوارِ چسبان وصله می‌شود */
 const BG       = '#F4F2EE'

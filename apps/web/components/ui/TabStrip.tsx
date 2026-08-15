@@ -20,7 +20,7 @@
 
 import DragScroll from './DragScroll'
 
-const GOLD_D = '#9A6E38', MUT = '#6B7280', LINE = '#F0EDE8'
+const GOLD_D = '#8F6531', MUT = '#6B7280', LINE = '#F0EDE8'
 
 export interface TabItem {
   key: string

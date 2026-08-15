@@ -258,7 +258,7 @@ function DatePicker({ value, onChange, label, required }: {
           }}>
             {/* Month navigation */}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
-              <button onClick={prevM} style={{
+              <button type="button" aria-label="ماه قبل" onClick={prevM} style={{
                 width: 34, height: 34, borderRadius: 10, border: '1px solid rgba(0,0,0,0.08)',
                 background: 'rgba(0,0,0,0.03)', cursor: 'pointer', display: 'flex',
                 alignItems: 'center', justifyContent: 'center', color: 'rgba(0,0,0,0.45)',
@@ -268,7 +268,7 @@ function DatePicker({ value, onChange, label, required }: {
               <span style={{ fontSize: 17, fontWeight: 800, color: '#111' }}>
                 {MONTHS[viewM - 1]} {toFa(viewY)}
               </span>
-              <button onClick={nextM} style={{
+              <button type="button" aria-label="ماه بعد" onClick={nextM} style={{
                 width: 34, height: 34, borderRadius: 10, border: '1px solid rgba(0,0,0,0.08)',
                 background: 'rgba(0,0,0,0.03)', cursor: 'pointer', display: 'flex',
                 alignItems: 'center', justifyContent: 'center', color: 'rgba(0,0,0,0.45)',

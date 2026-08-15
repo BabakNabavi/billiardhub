@@ -22,8 +22,8 @@ import { ShieldCheck, Loader2, AlertCircle, CreditCard } from 'lucide-react'
 import { apiFetch } from '../../lib/http'
 import { useAuthStore } from '../../store/auth.store'
 
-const INK = '#1C1B17', MUT = '#8A8474', LINE = '#E7E2D6'
-const GOLD_D = '#9A6E38', FELT = '#0E7A38', RED = '#B23B2E'
+const INK = '#1C1B17', MUT = '#6F6A5C', LINE = '#E7E2D6'
+const GOLD_D = '#8F6531', FELT = '#0E7A38', RED = '#B23B2E'
 
 export interface BankResult {
   card: string

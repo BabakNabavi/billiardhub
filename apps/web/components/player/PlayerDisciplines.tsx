@@ -15,7 +15,7 @@ import {
 } from '../../lib/player-categories'
 
 const CHIP = 'rounded-[10px] border px-3 py-2.5 text-[12.5px] font-bold transition'
-const ON   = 'border-[rgba(199,166,106,0.4)] bg-[rgba(199,166,106,0.13)] text-[#9A6E38]'
+const ON   = 'border-[rgba(199,166,106,0.4)] bg-[rgba(199,166,106,0.13)] text-[#8F6531]'
 const OFF  = 'border-[#E7E2D6] bg-white text-[#5B564B]'
 const LABEL = 'mb-1.5 block text-[12.5px] font-bold text-[#5B564B]'
 
@@ -82,7 +82,7 @@ export default function PlayerDisciplines({
 
       {entries.length > 0 && (
         <div className="flex flex-col gap-3">
-          <p className="text-[12px] text-[#8A8474]">
+          <p className="text-[12px] text-[#6F6A5C]">
             برای هر رشته، رده‌ی سنی و دسته را مشخص کنید — همان دسته‌بندی‌های بخش رنکینگ.
           </p>
           {entries.map(e => (

@@ -24,8 +24,8 @@ import { Loader2, Upload, Check, ShoppingCart, AlertCircle, Film, Image as Image
 import Select from '../ui/Select'
 import { apiFetch } from '../../lib/http'
 
-const INK = '#1C1B17', SEC = '#5B564B', MUT = '#8A8474', LINE = '#E7E2D6'
-const GOLD_D = '#9A6E38', FELT = '#0E7A38', RED = '#B23B2E'
+const INK = '#1C1B17', SEC = '#5B564B', MUT = '#6F6A5C', LINE = '#E7E2D6'
+const GOLD_D = '#8F6531', FELT = '#0E7A38', RED = '#B23B2E'
 
 const CARD: React.CSSProperties = { background: '#fff', border: `1px solid ${LINE}`, borderRadius: 18, padding: 22 }
 const INPUT: React.CSSProperties = {

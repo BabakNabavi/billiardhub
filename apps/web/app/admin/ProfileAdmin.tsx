@@ -13,10 +13,10 @@ import { useAuthStore } from '../../store/auth.store';
 import { ArrowLeft, Eye, Trash2, ShieldCheck, ShieldOff, Inbox, FileSearch } from 'lucide-react';
 import ReviewDetails from '../../components/admin/ReviewDetails';
 
-const GOLD_D = '#9A6E38';
+const GOLD_D = '#8F6531';
 const TEXT   = '#1C1B17';
 const SEC    = '#5B564B';
-const MUT    = '#8A8474';
+const MUT    = '#6F6A5C';
 const LINE   = '#E7E2D6';
 
 export interface AdminRow {

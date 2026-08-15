@@ -28,8 +28,8 @@ import {
 /* پهنای ثابتِ ستونِ برک: سرستون و خودِ فیلد هر دو از همین می‌گیرند،
    وگرنه عنوان دقیقاً بالای کادر نمی‌نشیند. */
 const BRK_W = 66;
-const GOLD_D = '#9A6E38', INK = '#1C1B17';
-const MUT = '#8A8474', LINE = '#EAE5DA', BG = '#F7F6F2';
+const GOLD_D = '#8F6531', INK = '#1C1B17';
+const MUT = '#6F6A5C', LINE = '#EAE5DA', BG = '#F7F6F2';
 
 export default function LiveControlPage() {
   const params = useParams();

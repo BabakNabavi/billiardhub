@@ -118,7 +118,7 @@ export default function AdminRankingsPage() {
           که هیچ ربطی به این صفحه به نظر نمی‌رسید. */}
       {onServer === false && (
         <div className="mb-5 rounded-xl border px-4 py-3 text-sm font-bold leading-7"
-          style={{ background: 'rgba(199,166,106,0.10)', borderColor: 'rgba(199,166,106,0.34)', color: '#9A6E38' }}>
+          style={{ background: 'rgba(199,166,106,0.10)', borderColor: 'rgba(199,166,106,0.34)', color: '#8F6531' }}>
           این جدول هنوز روی سرور ذخیره نشده و فقط روی همین مرورگر است —
           پس در صفحه‌ی رنکینگِ سایت چیزی دیده نمی‌شود.
           برای انتشار، یک‌بار دکمه‌ی «ذخیره» را بزنید.

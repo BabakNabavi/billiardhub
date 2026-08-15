@@ -246,12 +246,12 @@ function CategoryDropdown({
           open ? 'border-[#14532D] shadow-[0_0_0_3px_rgba(20,83,45,0.10)]' : 'border-[#E7E2D6] hover:border-[#14532D]/45'
         }`}
       >
-        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[rgba(199,166,106,0.14)] text-[#9A6E38]">{Icon.funnel}</span>
+        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[rgba(199,166,106,0.14)] text-[#8F6531]">{Icon.funnel}</span>
         <span className="flex-1">
-          <span className="block text-[10.5px] text-[#8A8474]">دسته‌بندی</span>
+          <span className="block text-[10.5px] text-[#6F6A5C]">دسته‌بندی</span>
           <span className="block text-[14px] font-bold text-[#1C1B17]">{label}</span>
         </span>
-        <span className={`text-[#8A8474] transition-transform duration-200 ${open ? 'rotate-180' : ''}`}>{Icon.chevron}</span>
+        <span className={`text-[#6F6A5C] transition-transform duration-200 ${open ? 'rotate-180' : ''}`}>{Icon.chevron}</span>
       </button>
 
       <div
@@ -271,7 +271,7 @@ function CategoryDropdown({
               }${it.key === 'all' ? ' border-b border-[#EFEBE1] mb-1 rounded-b-none' : ''}`}
             >
               <span className="flex-1">{it.label}</span>
-              <span className={`text-[11.5px] ${MONO} ${selected ? 'text-[#14532D]' : 'text-[#9A6E38]'}`}>{faNum(it.count)}</span>
+              <span className={`text-[11.5px] ${MONO} ${selected ? 'text-[#14532D]' : 'text-[#8F6531]'}`}>{faNum(it.count)}</span>
               {selected && <span className="text-[#14532D]">{Icon.check}</span>}
             </button>
           )
@@ -457,15 +457,15 @@ export default function FlatShop() {
     return (
       <div dir="rtl" className="shop-shell flex min-h-screen items-center justify-center px-4 font-[Vazirmatn,Tahoma,sans-serif] text-[#1C1B17]">
         <div className="w-full max-w-[420px] rounded-2xl border border-[#E7E2D6] bg-white px-6 py-12 text-center">
-          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-[rgba(199,166,106,0.12)] text-[#9A6E38]">
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-[rgba(199,166,106,0.12)] text-[#8F6531]">
             {Icon.storefront}
           </div>
           <h1 className="text-[17px] font-bold">این فروشگاه پیدا نشد</h1>
-          <p className="mt-2 text-[13px] leading-[2] text-[#8A8474]">
+          <p className="mt-2 text-[13px] leading-[2] text-[#6F6A5C]">
             نشانی <span dir="ltr" className={MONO}>/sellers/{sellerId}</span> به فروشگاهی وصل نیست.
             ممکن است نشانی اشتباه تایپ شده باشد.
           </p>
-          <Link href="/sellers" className="mt-5 inline-flex items-center justify-center rounded-[10px] border border-[rgba(199,166,106,0.34)] bg-[rgba(199,166,106,0.12)] px-4 py-2.5 text-[13px] font-bold text-[#9A6E38] transition hover:-translate-y-0.5">
+          <Link href="/sellers" className="mt-5 inline-flex items-center justify-center rounded-[10px] border border-[rgba(199,166,106,0.34)] bg-[rgba(199,166,106,0.12)] px-4 py-2.5 text-[13px] font-bold text-[#8F6531] transition hover:-translate-y-0.5">
             فهرست فروشگاه‌ها
           </Link>
         </div>
@@ -495,7 +495,7 @@ export default function FlatShop() {
         /* نام محصول — حداکثر دو خط، مثل sec1 */
         .pc-h { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
           overflow: hidden; font-weight: 800; }
-        .pc-t { display: block; margin-top: 3px; font-size: 11.5px; font-weight: 400; color: #8A8474;
+        .pc-t { display: block; margin-top: 3px; font-size: 11.5px; font-weight: 400; color: #6F6A5C;
           white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .pc-name-sec1 {
           display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
@@ -585,11 +585,11 @@ export default function FlatShop() {
           border: 1px solid rgba(28,27,23,0.07);
         }
         .scat-ic img { width: 30px; height: 30px; object-fit: contain; }
-        .scat-all { color: #9A6E38; background: radial-gradient(circle at 34% 28%, #FFF6E4, #F3E6CB); }
+        .scat-all { color: #8F6531; background: radial-gradient(circle at 34% 28%, #FFF6E4, #F3E6CB); }
         .scat-lb { font-size: 11px; font-weight: 700; color: #3E3A32; white-space: nowrap; }
         .scat.on .scat-lb { color: #7A5626; }
         .scat-ct { font-size: 10px; font-weight: 700; color: #A69F8E; font-variant-numeric: tabular-nums; }
-        .scat.on .scat-ct { color: #9A6E38; }
+        .scat.on .scat-ct { color: #8F6531; }
         @media (prefers-reduced-motion: reduce) { .scat { transition: none } .scat:hover { transform: none } }
 
         /* ── نشانِ برندِ نمایندگی ──
@@ -643,7 +643,7 @@ export default function FlatShop() {
       `}</style>
 
       {/* ── breadcrumb ── */}
-      <div className="mx-auto max-w-[1240px] px-4 pt-4 text-[12.5px] text-[#8A8474] sm:px-6">
+      <div className="mx-auto max-w-[1240px] px-4 pt-4 text-[12.5px] text-[#6F6A5C] sm:px-6">
         <Link href="/" className="transition-colors hover:text-[#14532D]">خانه</Link>
         <span className="mx-1.5">/</span>
         <Link href="/sellers" className="transition-colors hover:text-[#14532D]">فروشگاه‌ها</Link>
@@ -693,13 +693,13 @@ export default function FlatShop() {
             {/* نام، شهر (با دکمه‌ی تلفن روبه‌رویش سمت چپ)، توضیحات — زیر هم */}
             <h2 className="mt-3 text-[17px] font-bold text-[#1C1B17] sm:text-[19px]">{store.title}</h2>
             <div className="mt-1.5 flex flex-wrap items-center justify-between gap-2">
-              <div className="flex items-center gap-1.5 text-[12.5px] text-[#8A8474]">
+              <div className="flex items-center gap-1.5 text-[12.5px] text-[#6F6A5C]">
                 <span className="text-[#14532D]">{Icon.pin}</span>{[store.province, store.city].filter(Boolean).join('، ')}
               </div>
               {phoneDig && (
                 <a
                   href={`tel:${phoneHref}`}
-                  className={`inline-flex items-center gap-1.5 rounded-[10px] border border-[rgba(199,166,106,0.34)] bg-[rgba(199,166,106,0.12)] px-3.5 py-2 text-[13px] font-bold text-[#9A6E38] transition hover:-translate-y-0.5 ${MONO}`}
+                  className={`inline-flex items-center gap-1.5 rounded-[10px] border border-[rgba(199,166,106,0.34)] bg-[rgba(199,166,106,0.12)] px-3.5 py-2 text-[13px] font-bold text-[#8F6531] transition hover:-translate-y-0.5 ${MONO}`}
                 >
                   <span>{Icon.phone}</span>{toFa(phoneText)}
                 </a>
@@ -730,7 +730,7 @@ export default function FlatShop() {
                 )
               }}
               title="کپیِ نشانیِ فروشگاه"
-              className="mt-2.5 inline-flex max-w-full items-center gap-1.5 rounded-[10px] border border-[rgba(199,166,106,0.34)] bg-[rgba(199,166,106,0.12)] px-3 py-1.5 text-[12px] font-bold text-[#9A6E38] transition hover:-translate-y-0.5"
+              className="mt-2.5 inline-flex max-w-full items-center gap-1.5 rounded-[10px] border border-[rgba(199,166,106,0.34)] bg-[rgba(199,166,106,0.12)] px-3 py-1.5 text-[12px] font-bold text-[#8F6531] transition hover:-translate-y-0.5"
             >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
                 <circle cx="12" cy="12" r="10" /><path d="M2 12h20" />
@@ -760,9 +760,9 @@ export default function FlatShop() {
             value={query}
             onChange={e => { setQuery(e.target.value); setPage(1) }}
             placeholder="جستجو در محصولات این فروشگاه..."
-            className="w-full rounded-[10px] border border-[#E7E2D6] bg-white px-4 py-2.5 pl-11 text-[13.5px] text-[#1C1B17] placeholder:text-[#8A8474] focus:border-[#14532D] focus:outline-none"
+            className="w-full rounded-[10px] border border-[#E7E2D6] bg-white px-4 py-2.5 pl-11 text-[13.5px] text-[#1C1B17] placeholder:text-[#6F6A5C] focus:border-[#14532D] focus:outline-none"
           />
-          <span className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-[#8A8474]">{Icon.search}</span>
+          <span className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-[#6F6A5C]">{Icon.search}</span>
         </div>
 
         {/* ── نوارِ دسته‌بندی ──
@@ -805,7 +805,7 @@ export default function FlatShop() {
               <span className="h-5 w-[3px] rounded bg-gradient-to-b from-[#C7A66A] to-[#8A6020]" />
               <h1 className="text-xl font-bold text-[#1C1B17] sm:text-2xl">محصولات فروشگاه</h1>
             </div>
-            <span className="mr-[11px] text-[12.5px] text-[#8A8474]">
+            <span className="mr-[11px] text-[12.5px] text-[#6F6A5C]">
               {faNum(visible.length)} محصول{cat !== 'all' ? ` در «${CAT_LABEL[cat]}»` : ''}
             </span>
           </div>
@@ -867,9 +867,9 @@ export default function FlatShop() {
           </div>
 
         {visible.length === 0 && (
-          <div className="shop-head rounded-[22px] px-6 py-14 text-center text-[13.5px] text-[#8A8474]">
+          <div className="shop-head rounded-[22px] px-6 py-14 text-center text-[13.5px] text-[#6F6A5C]">
             محصولی در این دسته‌بندی پیدا نشد.
-            {cat !== 'all' && <button onClick={() => setCat('all')} className="mr-2 font-bold text-[#9A6E38] transition hover:opacity-70">نمایش همه محصولات</button>}
+            {cat !== 'all' && <button onClick={() => setCat('all')} className="mr-2 font-bold text-[#8F6531] transition hover:opacity-70">نمایش همه محصولات</button>}
           </div>
         )}
 
@@ -925,7 +925,7 @@ export default function FlatShop() {
 
             {/* دسته‌بندی‌ها — روی موبایل حذف */}
             <div className="hidden sm:block">
-              <h4 className="mb-2 text-[10.5px] font-bold tracking-[0.08em] text-[#9A6E38] sm:mb-4">دسته‌بندی‌ها</h4>
+              <h4 className="mb-2 text-[10.5px] font-bold tracking-[0.08em] text-[#8F6531] sm:mb-4">دسته‌بندی‌ها</h4>
               <ul className="grid grid-cols-2 gap-x-4 gap-y-3 text-[13px] text-[#5B564B]">
                 {BAZAAR_CATS.slice(0, 8).map(c => (
                   <li key={c.id}>
@@ -942,7 +942,7 @@ export default function FlatShop() {
 
             {/* راه‌های ارتباطی */}
             <div>
-              <h4 className="mb-2 text-[10.5px] font-bold tracking-[0.08em] text-[#9A6E38] sm:mb-4">راه‌های ارتباطی</h4>
+              <h4 className="mb-2 text-[10.5px] font-bold tracking-[0.08em] text-[#8F6531] sm:mb-4">راه‌های ارتباطی</h4>
               <ul className="space-y-1.5 text-[13px] text-[#5B564B] sm:space-y-3">
                 <li className="flex flex-wrap items-center gap-x-5 gap-y-1.5">
                   {store.phones.map(ph => (
@@ -957,11 +957,11 @@ export default function FlatShop() {
                 {/* آیکون‌های شبکه اجتماعی — مثل فوتر اصلی سایت (مربع گرد خنثی، هاور طلایی) */}
                 <li className="flex items-center gap-2.5 pt-1.5 sm:pt-3">
                   <a href={`https://wa.me/${store.whatsapp}`} target="_blank" rel="noopener noreferrer" aria-label="واتساپ"
-                    className="flex h-10 w-10 items-center justify-center rounded-[11px] border border-[#E7E2D6] bg-[rgba(26,25,23,0.05)] text-[#8A8474] transition-all duration-200 hover:-translate-y-0.5 hover:border-[#C7A66A]/45 hover:bg-[#C7A66A]/[0.12] hover:text-[#C7A66A]">
+                    className="flex h-10 w-10 items-center justify-center rounded-[11px] border border-[#E7E2D6] bg-[rgba(26,25,23,0.05)] text-[#6F6A5C] transition-all duration-200 hover:-translate-y-0.5 hover:border-[#C7A66A]/45 hover:bg-[#C7A66A]/[0.12] hover:text-[#C7A66A]">
                     {Icon.wa}
                   </a>
                   <a href={`https://instagram.com/${store.instagram}`} target="_blank" rel="noopener noreferrer" aria-label="اینستاگرام"
-                    className="flex h-10 w-10 items-center justify-center rounded-[11px] border border-[#E7E2D6] bg-[rgba(26,25,23,0.05)] text-[#8A8474] transition-all duration-200 hover:-translate-y-0.5 hover:border-[#C7A66A]/45 hover:bg-[#C7A66A]/[0.12] hover:text-[#C7A66A]">
+                    className="flex h-10 w-10 items-center justify-center rounded-[11px] border border-[#E7E2D6] bg-[rgba(26,25,23,0.05)] text-[#6F6A5C] transition-all duration-200 hover:-translate-y-0.5 hover:border-[#C7A66A]/45 hover:bg-[#C7A66A]/[0.12] hover:text-[#C7A66A]">
                     {Icon.insta}
                   </a>
                 </li>
@@ -970,7 +970,7 @@ export default function FlatShop() {
 
             {/* موقعیت فروشگاه */}
             <div>
-              <h4 className="mb-2 text-[10.5px] font-bold tracking-[0.08em] text-[#9A6E38] sm:mb-4">موقعیت فروشگاه</h4>
+              <h4 className="mb-2 text-[10.5px] font-bold tracking-[0.08em] text-[#8F6531] sm:mb-4">موقعیت فروشگاه</h4>
               <p className="mb-1.5 flex items-start gap-2 text-[13px] leading-relaxed text-[#5B564B] sm:mb-3">
                 <span className="mt-0.5 shrink-0 text-[#14532D]">{Icon.pin}</span>
                 {store.address}
@@ -990,7 +990,7 @@ export default function FlatShop() {
                 <span className="absolute left-1/2 top-1/2 flex h-9 w-9 -translate-x-1/2 -translate-y-[70%] items-center justify-center rounded-full bg-[#14532D] text-white shadow-md transition-transform group-hover:scale-110">
                   {Icon.pin}
                 </span>
-                <span className="absolute bottom-2 right-2 rounded-[10px] border border-[rgba(199,166,106,0.34)] bg-[rgba(199,166,106,0.12)] px-2.5 py-1 text-[11px] font-bold text-[#9A6E38] shadow-sm transition hover:-translate-y-0.5">
+                <span className="absolute bottom-2 right-2 rounded-[10px] border border-[rgba(199,166,106,0.34)] bg-[rgba(199,166,106,0.12)] px-2.5 py-1 text-[11px] font-bold text-[#8F6531] shadow-sm transition hover:-translate-y-0.5">
                   مشاهده روی نقشه
                 </span>
               </a>
@@ -999,7 +999,7 @@ export default function FlatShop() {
 
           {/* نوار پایین */}
           <div className="border-t border-[#E8E3D6] px-6 py-4 sm:px-8">
-            <div className="flex flex-wrap items-center justify-between gap-2 text-[11.5px] text-[#8A8474]">
+            <div className="flex flex-wrap items-center justify-between gap-2 text-[11.5px] text-[#6F6A5C]">
               <span>© {toFa(1405)} {store.title} — تمام حقوق محفوظ است</span>
               {/* نشانِ پلتفرم — فروشگاه فوترِ خودش را دارد، ولی
                   بازدیدکننده باید بداند این صفحه کجا میزبانی می‌شود. */}

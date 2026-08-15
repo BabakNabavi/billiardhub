@@ -731,7 +731,7 @@ export default function ProfileMePage() {
                 animation: 'popIn .2s cubic-bezier(0.2,0.9,0.3,1) both',
               }}>
               {profile?.avatar && (
-                <img src={profile.avatar} alt="" style={{
+                <img src={profile.avatar} alt="" loading="lazy" decoding="async" style={{
                   width: 84, height: 84, borderRadius: '50%', objectFit: 'cover',
                   margin: '0 auto 14px', display: 'block',
                   border: '3px solid rgba(0,0,0,0.06)', filter: 'grayscale(0.35)',

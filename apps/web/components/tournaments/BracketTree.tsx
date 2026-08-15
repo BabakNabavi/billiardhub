@@ -29,8 +29,8 @@ import { useEffect, useRef, useState } from 'react'
 import { Radio, Trophy } from 'lucide-react'
 import { faDigits, slotLabel, isBye, type Bracket, type Match } from '../../lib/tournaments/bracket-client'
 
-const GOLD = '#C7A66A', GOLD_D = '#9A6E38', INK = '#1C1B17'
-const MUT = '#8A8474', LINE = '#EAE5DA', FELT = '#0E7A38', RED = '#B23B2E'
+const GOLD = '#C7A66A', GOLD_D = '#8F6531', INK = '#1C1B17'
+const MUT = '#6F6A5C', LINE = '#EAE5DA', FELT = '#0E7A38', RED = '#B23B2E'
 
 export interface BracketTreeProps {
   bracket: Bracket
