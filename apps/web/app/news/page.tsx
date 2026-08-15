@@ -441,13 +441,13 @@ export default function NewsPage() {
             {/* جستجو */}
             <div style={{ position: 'relative', flex: 1, minWidth: 0 }}>
               <input
-                className="input input-sm input-icon-end"
+                className="input input-sm input-icon-start" type="search" aria-label="جستجو در اخبار"
                 value={query}
                 onChange={e => { setQuery(e.target.value); setShown(PAGE_STEP) }}
                 placeholder="جستجو در اخبار، عنوان یا برچسب…"
                 
               />
-              <Search size={15} style={{ position: 'absolute', insetInlineEnd: 13, top: '50%', transform: 'translateY(-50%)', color: GOLD_D, pointerEvents: 'none' }} />
+              <Search size={15} style={{ position: 'absolute', insetInlineStart: 13, top: '50%', transform: 'translateY(-50%)', color: GOLD_D, pointerEvents: 'none' }} />
             </div>
             {/* مرتب‌سازی */}
             <div ref={sortRef} style={{ position: 'relative', flexShrink: 0 }}>

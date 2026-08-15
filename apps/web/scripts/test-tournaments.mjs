@@ -3425,13 +3425,47 @@ console.log('\n― دکمه و فیلد روی سیستمِ موجود ―');
   t('فیلد: غیرفعال', css.includes('.input:disabled'));
   /* با آکولاد: '.input-sm' زیررشته‌ی '.input-smx' هم هست */
   t('نسخه‌ی فشرده‌ی فیلد', css.includes('.input-sm {'));
-  t('پدینگِ آیکون منطقی است', css.includes('padding-inline-end'),
+  /* ⚠️ سمتِ *شروع*، نه پایان: در چیدمانِ راست‌به‌چپ آیکونِ جست‌وجو
+     سمتِ راست می‌نشیند و 'inline-end' یعنی چپ. یک‌بار اشتباه گرفته شد و
+     متن از زیرِ آیکون رد می‌شد. */
+  t('پدینگِ آیکون منطقی و در سمتِ درست است',
+    /\.input-icon-start(-lg)?\s*\{\s*padding-inline-start:/.test(css)
+    && !css.includes('.input-icon-end'),
     'راست/چپِ فیزیکی در چیدمانِ راست‌به‌چپ ممنوع است');
 
   const pages = ['app/tournaments/page.tsx', 'app/news/page.tsx', 'app/players/page.tsx', 'app/services/page.tsx'];
   for (const p of pages) {
     t(`فیلدِ مشترک در ${p.split('/')[1]}`, /className="input input-sm/.test(read(p)));
   }
+  /* ── چرا این ادعا روی TSX است و نه CSS ──
+     باگِ واقعی این‌جا بود، نه در استایل‌شیت: آیکون با
+     `insetInlineEnd` نوشته شده بود که در راست‌به‌چپ یعنی چپ، و متن
+     از زیرش رد می‌شد. گاردِ CSS-only آن را نمی‌دید. */
+  const heroPages = ['app/sellers/page.tsx', 'app/manufacturers/page.tsx'];
+  for (const p of heroPages) {
+    t(`فیلدِ هیرو در ${p.split('/')[1]}`,
+      /className="input input-icon-start-lg/.test(read(p)));
+  }
+  for (const p of [...pages, ...heroPages]) {
+    const src = read(p);
+    /* ⚠️ دو تلاشِ قبلی خطا داشتند و روی فایلِ *سالم* قرمز شدند:
+       برش‌زدنِ اولین `<svg>` گرافیکِ تزئینیِ هیرو را می‌گرفت، و جست‌وجوی
+       سراسریِ `right:` به لکه‌های پس‌زمینه می‌خورد که فیزیکی‌بودنشان
+       اشکالی ندارد.
+
+       پنجره باید *هر دو طرفِ* فیلد را بگیرد: در صفحه‌های هیرو آیکون
+       پیش از `<input>` می‌آید و در نوارهای ابزار بعد از آن. نسخه‌ی
+       یک‌طرفه روی چهار صفحه‌ی سالم قرمز شد. */
+    const at = src.indexOf('input-icon-start');
+    const win = at > 0 ? src.slice(Math.max(0, at - 700), at + 700) : '';
+    t(`آیکونِ جست‌وجو در ${p.split('/')[1]} سمتِ شروع است`,
+      win.includes('insetInlineStart') && !/\b(right|left):\s*\d/.test(win),
+      'در راست‌به‌چپ آیکون سمتِ راست می‌نشیند؛ inline-end یعنی چپ');
+  }
+  t('هر فیلد برچسبِ دسترس‌پذیری دارد',
+    [...pages, ...heroPages].every(p => /aria-label="جستجو/.test(read(p))),
+    'قاعده‌ی پروژه: هر input یک برچسب');
+
   t('قاعده‌ی فوکوسِ محلی حذف شد',
     pages.every(p => !/-search:focus \{/.test(read(p))),
     'نسخه‌ی محلی !important داشت و کلاسِ مشترک را بی‌اثر می‌کرد');

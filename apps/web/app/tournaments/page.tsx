@@ -412,13 +412,13 @@ export default function TournamentsPage() {
           <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
             <div className="tn-sbox" style={{ position: 'relative', flex: 1, minWidth: 0 }}>
               <input
-                className="input input-sm input-icon-end"
+                className="input input-sm input-icon-start" type="search" aria-label="جستجو در مسابقات"
                 value={search}
                 onChange={e => setSearch(e.target.value)}
                 placeholder="جستجو در مسابقات…"
                 
               />
-              <Search size={15} style={{ position: 'absolute', insetInlineEnd: 13, top: '50%', transform: 'translateY(-50%)', color: GOLD_D, pointerEvents: 'none' }} />
+              <Search size={15} style={{ position: 'absolute', insetInlineStart: 13, top: '50%', transform: 'translateY(-50%)', color: GOLD_D, pointerEvents: 'none' }} />
             </div>
             <div className="tn-view" role="group" aria-label="حالت نمایش">
               <button className={view === 'grid' ? 'on' : ''} onClick={() => setView('grid')} aria-label="نمایش کارتی"><LayoutGrid size={16} /></button>

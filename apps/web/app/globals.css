@@ -37,6 +37,8 @@ html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; overflow-x:
 
   /* ── Accent Gold ── */
   --gold:        #C7A66A;
+  /* سایه‌ی تیره‌ترِ طلایی — تا امروز فقط به‌صورت fallback نوشته می‌شد */
+  --gold-deep:   #9A6E38;
   --gold-dark:   #A07840;
   --gold-light:  #E2C98C;
   --gold-dim:    rgba(199,166,106,0.12);
@@ -539,7 +541,9 @@ body {
   transition: all 0.20s cubic-bezier(0.4,0,0.2,1);
   box-shadow: 0 1px 2px rgba(0,0,0,0.03);
 }
-.input::placeholder { color: var(--text-tertiary); }
+/* ⚠️ `--text-tertiary` روی سفید ۲٫۸۵:۱ است — زیرِ کفِ ۴٫۵. متنِ
+   راهنما هم متن است و باید خوانده شود. */
+.input::placeholder { color: var(--text-secondary); }
 .input:hover { border-color: var(--border-strong); }
 .input:focus {
   border-color: var(--gold);
@@ -571,14 +575,20 @@ body {
   border-width: 1px;
   border-radius: 12px;
 }
-/* آیکونِ جست‌وجو در انتهای فیلد می‌نشیند؛ جای منطقی، نه چپ و راست */
-.input-icon-end { padding-inline-end: 40px; }
+/* ── جای آیکونِ جست‌وجو ──
+   سمتِ *شروع* می‌نشیند، که در این سایتِ راست‌به‌چپ یعنی راست. یک‌بار
+   `inline-end` گرفته شد و چون در RTL یعنی چپ، متن از زیرِ آیکون رد
+   می‌شد. جای منطقی درست است — ولی باید سمتِ درستش را انتخاب کرد. */
+.input-icon-start { padding-inline-start: 40px; }
+/* فیلدهای هیرو آیکونِ بزرگ‌تری دارند */
+.input-icon-start-lg { padding-inline-start: 48px; }
 
 /* فوکوسِ فیلد هم مثلِ دکمه دیده شود. `:focus` تنها کافی نیست: با ماوس
    هم شلیک می‌کند و حلقه‌ی ۱۲٪ روی نوارِ روشن تقریباً نامرئی بود. */
 .input:focus-visible {
   outline: 2px solid var(--gold-deep, #9A6E38);
-  outline-offset: 2px;
+  /* ۴ تا حلقه‌ی ۳پیکسلیِ `:focus` را بپوشاند، نه اینکه رویش بیفتد */
+  outline-offset: 4px;
 }
 
 /* ══════════════════════════════════════════

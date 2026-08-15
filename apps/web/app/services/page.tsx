@@ -250,13 +250,13 @@ export default function ServicesPage() {
           <div style={{ display: 'flex', gap: 10 }}>
             <div style={{ position: 'relative', flex: 1, minWidth: 0 }}>
               <input
-                className="input input-sm input-icon-end"
+                className="input input-sm input-icon-start" type="search" aria-label="جستجو در خدمات"
                 value={query}
                 onChange={e => setQuery(e.target.value)}
                 placeholder="جستجوی متخصص، تخصص یا باشگاه…"
                 
               />
-              <Search size={15} style={{ position: 'absolute', insetInlineEnd: 13, top: '50%', transform: 'translateY(-50%)', color: GOLD_D, pointerEvents: 'none' }} />
+              <Search size={15} style={{ position: 'absolute', insetInlineStart: 13, top: '50%', transform: 'translateY(-50%)', color: GOLD_D, pointerEvents: 'none' }} />
             </div>
 
             {/* شهر — دسکتاپ */}

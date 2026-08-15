@@ -556,7 +556,7 @@ export default function SellersPage() {
         .sel-list { display: flex; flex-direction: column; gap: 14px; }
         .s-chip { transition: all 0.18s; }
         .s-chip:hover { opacity: 0.85; }
-        .search-inp:focus { border-color: rgba(199,166,106,0.7) !important; box-shadow: 0 0 0 3px rgba(199,166,106,0.14) !important; outline: none; }
+        /* حالتِ فوکوس از سیستمِ مشترکِ .input می‌آید */
         @media(max-width:640px){
           /* لیست موبایل: افقی و جمع‌وجور مثل باشگاه‌ها (نه ستونی) */
           .sel-list-img { width: clamp(96px,28vw,128px) !important; }
@@ -658,17 +658,13 @@ export default function SellersPage() {
 
             {/* search box */}
             <div style={{ position: 'relative' }}>
-              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke={GOLD_D} strokeWidth="2.2" style={{ position: 'absolute', right: 16, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', zIndex: 2 }}>
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke={GOLD_D} strokeWidth="2.2" style={{ position: 'absolute', insetInlineStart: 16, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', zIndex: 2 }}>
                 <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
               </svg>
               <input
-                className="search-inp" type="text" placeholder="جستجوی فروشنده، شهر یا برند..."
+                className="input input-icon-start-lg" type="search" aria-label="جستجوی فروشگاه"
+                placeholder="جستجوی فروشنده، شهر یا برند..."
                 value={search} onChange={e => setSearch(e.target.value)}
-                style={{ width: '100%', padding: '13px 48px 13px 16px', borderRadius: 14, fontSize: 14.5,
-                  background: 'rgba(255,255,255,0.86)', border: '1.5px solid rgba(28,28,26,0.1)',
-                  backdropFilter: 'blur(18px) saturate(190%)', WebkitBackdropFilter: 'blur(18px) saturate(190%)',
-                  boxShadow: 'inset 0 1.5px 0 rgba(255,255,255,0.95), 0 6px 20px rgba(28,28,26,0.07)',
-                  color: TEXT, fontFamily: 'Vazirmatn,Tahoma,sans-serif', transition: 'border-color 0.2s, box-shadow 0.2s', direction: 'rtl' }}
               />
             </div>
 
