@@ -29,19 +29,22 @@ const CBOR   = '1px solid rgba(17,17,16,0.07)'
    در برابر ۱۰۰) پس دو دایره همدیگر را قطع کردند و به‌جای انتقالِ
    نرم دو برآمدگیِ قارچی درآمد.
 
-   هندسه در viewBox 282.843×120 با R = ۱۰۰ واحد و f = 0.5R:
-     X = √(R² + 2Rf) = R√2 = 141.4214  ⇒ جعبه = 2X × 1.2R
-     مرکزِ دایره (141.4214, 120) · مرکزِ کمان‌ها (0, 70) و (282.843, 70)
-     فاصله‌ی مرکزها = √(141.4214² + 50²) = 150 = R + f ✓
-     نقطه‌ی مماس = (0,70) + 50·(0.942809, 0.333333) = (47.1405, 86.6667) */
+   هندسه در viewBox 346.41×120 با R = ۱۰۰ واحد و f = R:
+     X = √(R² + 2Rf) = R√3 = 173.205  ⇒ جعبه = 2X × 1.2R
+     مرکزِ دایره (173.205, 120) · مرکزِ کمان‌ها (0, 20) و (346.41, 20)
+     فاصله‌ی مرکزها = √(173.205² + 100²) = 200 = R + f ✓
+     نقطه‌ی مماس = (0,20) + 100·(0.866025, 0.5) = (86.6025, 70)
+
+     f = R (نه 0.5R): انحنا از 1.73R از مرکز شروع می‌شود به‌جای 1.41R —
+     عقب‌تر و نرم‌تر، تا لبه «بریده با قیچی» به نظر نیاید. */
 const NOTCH_PATH =
-  'M0,0 H282.843 V120 H0 Z'
-  + 'M0,120 A50,50 0 0 0 47.1405,86.6667'
-  + ' A100,100 0 0 1 235.7025,86.6667'
-  + ' A50,50 0 0 0 282.843,120 Z'
+  'M0,0 H346.41 V120 H0 Z'
+  + 'M0,120 A100,100 0 0 0 86.6025,70'
+  + ' A100,100 0 0 1 259.8075,70'
+  + ' A100,100 0 0 0 346.41,120 Z'
 
 const NOTCH_SVG =
-  `url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 282.843 120' preserveAspectRatio='none'><path fill='%23000' fill-rule='evenodd' d='${NOTCH_PATH}'/></svg>")`
+  `url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 346.41 120' preserveAspectRatio='none'><path fill='%23000' fill-rule='evenodd' d='${NOTCH_PATH}'/></svg>")`
 
 /* چهار لایه‌ی ماسک با ترکیبِ *پیش‌فرض* (اجتماع): جعبه‌ی گودی، نوارِ
    بالا، و دو نوارِ کناری. عمداً `mask-composite` استفاده نشد چون
@@ -477,8 +480,8 @@ export default function CoachProfilePage() {
                 /* شعاعِ گودی از قطرِ آواتار مشتق می‌شود تا هم‌مرکز بماند؛
                    جعبه‌ی ماسک ۲:۱ است، مثلِ viewBox. شرحِ هندسه بالای
                    فایل، کنارِ NOTCH_PATH. */
-                '--cut':'calc(var(--av) / 2 + clamp(7px,1.8vw,12px))',
-                '--boxW':'calc(var(--cut) * 2.82843)', '--boxH':'calc(var(--cut) * 1.2)',
+                '--cut':'calc(var(--av) / 2 + clamp(10px,2.4vw,16px))',
+                '--boxW':'calc(var(--cut) * 3.4641)', '--boxH':'calc(var(--cut) * 1.2)',
                 WebkitMaskImage:NOTCH_MASK.image, maskImage:NOTCH_MASK.image,
                 WebkitMaskSize:NOTCH_MASK.size, maskSize:NOTCH_MASK.size,
                 WebkitMaskPosition:NOTCH_MASK.position, maskPosition:NOTCH_MASK.position,

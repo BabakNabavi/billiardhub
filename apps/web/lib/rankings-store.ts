@@ -12,6 +12,9 @@ export interface RankingPlayer {
   points: number
   previousRank?: number
   userId?: string
+  /* عکسِ بازیکن — از پنلِ ادمین آپلود می‌شود. نبودش یعنی آیکونِ
+     پیش‌فرض، نه حرفِ اولِ نام. */
+  avatar?: string
 }
 
 export type RankingsStructure = Record<string, Record<string, Record<string, RankingPlayer[]>>>

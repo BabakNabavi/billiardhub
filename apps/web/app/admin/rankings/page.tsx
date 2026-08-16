@@ -3,13 +3,61 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '../../../store/auth.store';
-import { Trophy, Save } from 'lucide-react';
+import { Trophy, Save, Camera, Loader2, X } from 'lucide-react';
+import { uploadFile } from '../../../lib/supabase';
+import { notify } from '../../../lib/ui/dialogs';
 import {
   buildEmptyRankings, getStoredRankings, saveRankings, categorySize,
   type RankingPlayer, type RankingsStructure,
 } from '../../../lib/rankings-store';
 import { apiFetch } from '../../../lib/http';
 
+
+/* یک سلولِ کوچک: نشان‌دادن، آپلود، و برداشتن.
+   آپلود از همان `uploadFile` پروژه می‌رود تا مسیر و باکت یکی بماند. */
+function AvatarCell({ value, name, onChange }: { value?: string; name: string; onChange: (url: string) => void }) {
+  const [busy, setBusy] = useState(false)
+
+  const pick = async (file: File | undefined) => {
+    if (!file) return
+    if (!file.type.startsWith('image/')) { notify('فقط فایلِ تصویری پذیرفته می‌شود.'); return }
+    if (file.size > 8 * 1024 * 1024) { notify('حجم عکس نباید بیشتر از ۸ مگابایت باشد.'); return }
+    setBusy(true)
+    try {
+      /* نامِ فایل تصادفی است، نه نامِ کاربر: مسیر عمومی می‌شود و
+         `upsert` روشن است، پس دو ادمین با یک نامِ فایل همدیگر را
+         بازنویسی می‌کردند. */
+      const ext = (file.name.match(/\.[a-z0-9]+$/i)?.[0] ?? '.jpg').toLowerCase()
+      const url = await uploadFile('club-media', file, `rankings/${crypto.randomUUID()}${ext}`)
+      /* شکستِ آپلود باید دیده شود، نه اینکه بی‌صدا هیچ‌چیز عوض نشود */
+      if (!url) { notify("آپلود عکس انجام نشد — دوباره تلاش کنید."); return }
+      onChange(url)
+    } finally { setBusy(false) }
+  }
+
+  return (
+    <div className="relative">
+      <label className="w-8 h-8 rounded-full overflow-hidden border border-gray-200 bg-gray-50 cursor-pointer
+        hover:border-green-500 focus-within:ring-2 focus-within:ring-green-500 flex items-center justify-center">
+        <span className="sr-only">{`آپلود عکس ${name || "بازیکن"}`}</span>
+        <input type="file" accept="image/*" className="sr-only" disabled={busy}
+          onChange={e => { void pick(e.target.files?.[0]); e.target.value = "" }} />
+        {busy
+          ? <Loader2 size={14} className="animate-spin text-gray-400" />
+          : value
+            ? <img src={value} alt="" className="w-full h-full object-cover" />
+            : <Camera size={14} className="text-gray-400" />}
+      </label>
+      {value && !busy && (
+        <button type="button" aria-label="برداشتن عکس" onClick={() => onChange("")}
+          className="absolute -top-1 -end-1 w-6 h-6 rounded-full bg-white border border-gray-300
+            flex items-center justify-center text-gray-500 hover:text-red-600 hover:border-red-300">
+          <X size={12} />
+        </button>
+      )}
+    </div>
+  )
+}
 export default function AdminRankingsPage() {
   const router = useRouter();
   const { user, _hydrated, authChecked } = useAuthStore();
@@ -195,7 +243,8 @@ export default function AdminRankingsPage() {
           {/* هدر — فقط دسکتاپ */}
           <div className="hidden sm:grid grid-cols-12 px-4 py-2 bg-gray-50 text-xs text-gray-500 font-medium border-b">
             <div className="col-span-1 text-center">رتبه</div>
-            <div className="col-span-4">نام و نام خانوادگی</div>
+            <div className="col-span-1 text-center">عکس</div>
+            <div className="col-span-3">نام و نام خانوادگی</div>
             <div className="col-span-3">شهر</div>
             <div className="col-span-3">امتیاز</div>
             <div className="col-span-1">رتبه قبل</div>
@@ -214,7 +263,16 @@ export default function AdminRankingsPage() {
                     {toFa(index + 1)}
                   </span>
                 </div>
-                <div className="col-span-5 sm:col-span-4">
+                {/* عکسِ بازیکن — همان چیزی که در /ranking به‌جای آیکونِ
+                    پیش‌فرض می‌نشیند */}
+                <div className="col-span-1 flex justify-center">
+                  <AvatarCell
+                    value={player.avatar}
+                    name={player.name}
+                    onChange={url => updatePlayer(index, 'avatar', url)}
+                  />
+                </div>
+                <div className="col-span-4 sm:col-span-3">
                   <input
                     type="text"
                     value={player.name}

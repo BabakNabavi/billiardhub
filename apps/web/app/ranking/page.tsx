@@ -83,13 +83,12 @@ function TrendChip({ diff, onDark = false }: { diff: number; onDark?: boolean })
   return <Minus size={12} style={{ color: onDark ? 'rgba(255,255,255,0.3)' : 'rgba(28,27,23,0.22)' }} />
 }
 
-/* پرتره: عکس واقعی اگر بود (ساختار آماده)، وگرنه مونوگرام */
+/* پرتره: عکسِ آپلودشده‌ی بازیکن، وگرنه آیکونِ آدمک */
 function Portrait({ p, size, onDark = false }: { p: RankingPlayer; size: number; onDark?: boolean }) {
   return (
     <span style={{
       position: 'relative', width: size, height: size, borderRadius: '50%', flexShrink: 0,
       display: 'inline-flex', alignItems: 'center', justifyContent: 'center', overflow: 'visible',
-      fontSize: size * 0.38, fontWeight: 900,
       color: onDark ? '#F3E7CF' : GOLD_D,
       background: onDark ? 'rgba(255,255,255,0.08)' : 'linear-gradient(160deg,#FFFDF9,#F5EFE4)',
       boxShadow: onDark ? 'inset 0 1px 0 rgba(255,255,255,0.14)' : '0 6px 16px rgba(154,110,56,0.14), inset 0 1px 0 #fff',
@@ -97,7 +96,16 @@ function Portrait({ p, size, onDark = false }: { p: RankingPlayer; size: number;
       <span style={{ position: 'absolute', inset: -5, borderRadius: '50%', border: `1px solid ${onDark ? 'rgba(255,255,255,0.28)' : 'rgba(199,166,106,0.5)'}` }} />
       {p.avatar
         ? <img loading="lazy" decoding="async" src={p.avatar} alt={p.name} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
-        : p.name?.[0]}
+        : (
+          /* آیکونِ آدمک — حرفِ اولِ نام نه: در فارسی خیلی از نام‌ها با
+             یک حرف شروع می‌شوند و مونوگرام هیچ‌چیز نمی‌گوید. */
+          <svg viewBox="0 0 24 24" width="58%" height="58%" fill="none" aria-hidden="true"
+            stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"
+            style={{ display: 'block', opacity: .78 }}>
+            <circle cx="12" cy="8.2" r="3.9" />
+            <path d="M4.6 20.2c0-3.9 3.3-6.3 7.4-6.3s7.4 2.4 7.4 6.3" />
+          </svg>
+        )}
     </span>
   )
 }
@@ -135,7 +143,6 @@ export default function RankingsPage() {
     <div className="lq-stage" dir="rtl" style={{ minHeight: '100vh', color: TEXT, fontFamily: 'Vazirmatn,Tahoma,sans-serif' }}>
       <style>{`
         @keyframes rkFadeUp { from { opacity:0; transform: translateY(16px); } to { opacity:1; transform:none; } }
-        @keyframes rkScaleX { from { opacity:0; transform: scaleX(0); } to { opacity:1; transform: scaleX(1); } }
         .rk-wrap { max-width: 1080px; margin: 0 auto; padding: 0 clamp(16px,3vw,28px); }
 
         /* هدر رسمی تیره */
@@ -157,6 +164,14 @@ export default function RankingsPage() {
         .rk-seg:disabled { cursor: not-allowed; opacity: .5; }
         .rk-chips { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; padding: 2px; }
         .rk-chips::-webkit-scrollbar { display: none; }
+        /* ⚠️ نشان فقط در عرضِ بزرگ مطلق می‌شود. زیرِ ۹۰۰، پهنای عنوان
+           تا بالای صفحه می‌رسد و نشان رویش می‌افتاد — در شش عرض سنجیده
+           شد: در ۳۷۵، ۳۹۰ و ۷۶۸ برخورد داشت. */
+        .rk-badge { margin-bottom: 14px; }
+        @media (min-width: 900.02px) {
+          .rk-badge { position: absolute; top: clamp(14px,2.4vw,22px);
+            inset-inline-end: clamp(16px,3vw,28px); margin-bottom: 0; }
+        }
         .rk-chip { flex-shrink: 0; cursor: pointer; font-family: inherit; font-size: 12.5px; font-weight: 700;
           padding: 8px 15px; border-radius: 10px; background: rgba(255,255,255,0.78); border: 1px solid ${LINE}; color: ${SEC};
           transition: all .2s ease; }
@@ -174,7 +189,7 @@ export default function RankingsPage() {
           padding: 0 0 0 18px; min-height: 74px; text-decoration: none; color: inherit;
           clip-path: polygon(0 0, 100% 0, 100% 100%, 26px 100%, 0 calc(100% - 14px)); }
         /* مربع رتبه — لیکویید گلس کریستالی (iOS): هایلایت شیشه‌ای + عدد نورانی */
-        .rk-row .chip { align-self: stretch; width: 56px; flex-shrink: 0; position: relative;
+        .rk-row .chip { align-self: stretch; width: 42px; flex-shrink: 0; position: relative;
           display: flex; align-items: center; justify-content: center; gap: 1px; direction: ltr;
           color: #fff; font-weight: 900; font-size: 16.5px; font-variant-numeric: tabular-nums;
           background-image:
@@ -183,20 +198,42 @@ export default function RankingsPage() {
           box-shadow: inset 0 1px 0 rgba(255,255,255,0.5), inset 1px 0 0 rgba(255,255,255,0.16),
             inset 0 -2px 5px rgba(0,0,0,0.2);
           text-shadow: 0 1px 4px rgba(0,0,0,0.3), 0 0 12px rgba(255,255,255,0.5); }
-        .rk-row .chip i { font-style: normal; font-size: 0.7em; font-weight: 800; opacity: .85; }
         /* بلوک نام عرض ثابت دارد تا ستون شهرها در همه‌ی ردیف‌ها دقیقاً هم‌راستا بماند */
-        .rk-name { flex: 0 0 clamp(130px, 20vw, 210px); min-width: 0; padding: 11px 0; }
+        .rk-name { flex: 0 0 clamp(130px, 20vw, 210px); min-width: 0; padding: 11px 0;
+          /* تشدیدِ «لله» لیگاتورِ فونت است نه داده. rlig عمداً روشن
+             می‌ماند: لیگاتورِ *لازم* است و بدونش «لا» در نام‌هایی مثل
+             غلامرضا و جلالی می‌شکند — در مرورگر سنجیده شد. */
+          font-feature-settings: 'liga' 0, 'clig' 0, 'dlig' 0; }
         .rk-city { flex-shrink: 0; margin-inline-start: clamp(18px, 3vw, 34px);
           font-size: 12px; color: ${MUT}; white-space: nowrap; }
         /* ترک گرید نباید با min-content ردیف‌ها بازتر از کانتینر شود */
         .rk-rowwrap { min-width: 0; }
+        /* دو بازیکن در هر سطر: رتبه‌ی ۱ راست، ۲ چپ، ۳ زیرِ ۱ … */
+        .rk-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+        @media (max-width: 900px) { .rk-grid { grid-template-columns: minmax(0, 1fr); } }
+        /* دو بازیکن در هر سطر یعنی هر کارت نصفِ عرض است — بلوکِ نام و
+           فاصله‌ی شهر باید جمع شوند وگرنه تبِ امتیاز از لبه بیرون می‌زند
+           و کارت می‌بُردش. */
+        @media (min-width: 900.02px) {
+          .rk-name { flex: 0 1 clamp(112px, 12vw, 152px); min-width: 0; }
+          .rk-city { flex: 0 1 auto; min-width: 0; max-width: 84px;
+            margin-inline-start: clamp(10px, 1.4vw, 18px);
+            overflow: hidden; text-overflow: ellipsis; }
+        }
         @media (max-width: 640px) {
           /* جای تب امتیاز در لبه‌ی چپ رزرو می‌شود — چیپ صعود/نزول چسبیده به تب */
           .rk-row { gap: 8px; padding-left: 70px; min-height: 64px; }
-          .rk-row .chip { width: 44px; font-size: 14px; }
+          .rk-row .chip { width: 32px; font-size: 13px; }
           .rk-name { flex-basis: 86px; }
-          .rk-city { margin-inline-start: 8px; font-size: 10.5px; max-width: 60px;
-            overflow: hidden; text-overflow: ellipsis; }
+          /* شهر از کنارِ نام می‌رود کنارِ برچسبِ صعود/نزول — سمتِ
+             راستِ آن، با فاصله. جابه‌جایی با order است تا ترتیبِ
+             DOM (و خوانشِ صفحه‌خوان) دست‌نخورده بماند. */
+          .rk-row { display: flex; }
+          .rk-name { order: 1 }
+          .rk-row .rk-spacer { order: 2 }
+          .rk-city { order: 3; margin-inline-start: 0; margin-inline-end: 8px;
+            font-size: 10.5px; max-width: 66px; overflow: hidden; text-overflow: ellipsis; }
+          .rk-row .rk-trend { order: 4 }
           /* امتیاز = تب چسبیده به لبه‌ی چپ کارت — ضلع چپش دیده نمی‌شود،
              فقط گوشه‌های راست گرد است */
           .rk-row .rk-pts { position: absolute; left: 0; top: 50%; transform: translateY(-50%);
@@ -213,15 +250,15 @@ export default function RankingsPage() {
         <div style={{ position: 'absolute', top: '-20%', bottom: '-20%', left: '32%', width: 1, background: 'linear-gradient(180deg,transparent,rgba(199,166,106,0.45),transparent)', transform: 'rotate(14deg)' }} />
         <div className="rk-hero-word">RANKINGS</div>
         <div className="rk-wrap" style={{ position: 'relative', padding: 'clamp(32px,5vw,58px) clamp(16px,3vw,28px) clamp(26px,4vw,44px)' }}>
-          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, fontSize: 9.5, fontWeight: 800, letterSpacing: '0.26em', color: GOLD, border: '1px solid rgba(199,166,106,0.4)', background: 'rgba(199,166,106,0.10)', borderRadius: 999, padding: '5px 14px', marginBottom: 14 }}>
-            <Trophy size={11} /> OFFICIAL RANKINGS
+          {/* بالا و سمتِ چپ — `insetInlineEnd` در راست‌به‌چپ یعنی چپ */}
+          <span className="rk-badge" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, fontSize: 8.55, fontWeight: 800, letterSpacing: '0.26em', color: GOLD, border: '1px solid rgba(199,166,106,0.4)', background: 'rgba(199,166,106,0.10)', borderRadius: 999, padding: '5px 14px' }}>
+            <Trophy size={10} /> <span dir="ltr">OFFICIAL RANKINGS</span>
           </span>
           <h1 style={{ fontSize: 'clamp(26px,4.4vw,46px)', fontWeight: 900, margin: 0, lineHeight: 1.25, letterSpacing: '-0.02em' }}>
             رنکینگ <span style={{ background: `linear-gradient(135deg,#E8CE96,${GOLD} 50%,#8A6020)`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>بازیکنان</span>
           </h1>
-          <div style={{ width: 66, height: 3, borderRadius: 2, marginTop: 12, background: `linear-gradient(90deg,${GOLD},#8A6020)`, transformOrigin: 'right', animation: 'rkScaleX .55s .25s ease both' }} />
-          <p style={{ margin: '12px 0 0', fontSize: 'clamp(12px,1.4vw,14px)', color: 'rgba(255,255,255,0.6)', lineHeight: 1.9 }}>
-            جدول امتیازات رسمی فدراسیون بیلیارد ایران
+          <p style={{ margin: '14px 0 0', fontSize: 'clamp(12px,1.4vw,14px)', color: 'rgba(255,255,255,0.6)', lineHeight: 1.9 }}>
+            جدول امتیازات رسمی فدراسیون بولینگ و بیلیارد جمهوری اسلامی ایران
           </p>
         </div>
       </header>
@@ -291,7 +328,7 @@ export default function RankingsPage() {
               </div>
 
               {/* ═══ جدول کامل — مربع رنگی رتبه با عدد سفید ═══ */}
-              <section style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr)', gap: 10 }}>
+              <section className="rk-grid">
                 {players.map((p, i) => {
                   const diff = p.previousRank ? p.previousRank - p.rank : 0
                   const parts = p.name.trim().split(/\s+/)
@@ -300,7 +337,7 @@ export default function RankingsPage() {
                   return (
                     <div key={p.rank} className="rk-rowwrap" style={{ animationDelay: `${Math.min(i, 10) * 45}ms` }}>
                       <Link href={p.userId ? `/players/${p.userId}` : '#'} className="rk-row">
-                        <span className="chip" style={{ backgroundColor: rankColor(p.rank) }}><i>#</i>{faDigits(p.rank)}</span>
+                        <span className="chip" style={{ backgroundColor: rankColor(p.rank) }}>{faDigits(p.rank)}</span>
                         <Portrait p={p} size={46} />
                         <div className="rk-name">
                           {lastName ? (
@@ -313,8 +350,8 @@ export default function RankingsPage() {
                           )}
                         </div>
                         <span className="rk-city">{p.city || '—'}</span>
-                        <span style={{ flex: 1 }} aria-hidden />
-                        <TrendChip diff={diff} />
+                        <span className="rk-spacer" style={{ flex: 1 }} aria-hidden />
+                        <span className="rk-trend" style={{ display: 'inline-flex', flexShrink: 0 }}><TrendChip diff={diff} /></span>
                         <span className="rk-pts" style={{ fontSize: 14, fontWeight: 900, color: GOLD_D, fontVariantNumeric: 'tabular-nums', background: 'rgba(199,166,106,0.09)', border: '1px solid rgba(199,166,106,0.24)', borderRadius: 10, padding: '5px 13px', whiteSpace: 'nowrap', marginLeft: 4, flexShrink: 0 }}>
                           {p.points.toLocaleString('fa-IR')}
                         </span>
@@ -328,7 +365,7 @@ export default function RankingsPage() {
               <div style={{ marginTop: 22, display: 'flex', alignItems: 'center', gap: 10, background: 'rgba(255,255,255,0.78)', border: `1px solid ${LINE}`, borderRadius: 14, padding: '13px 16px' }}>
                 <span style={{ width: 6, height: 6, borderRadius: '50%', background: GOLD, flexShrink: 0 }} />
                 <span style={{ fontSize: 12.5, color: SEC }}>
-                  رنکینگ رسمی فدراسیون بیلیارد، بولینگ و بولس جمهوری اسلامی ایران — به‌روز شده
+                  رنکینگ رسمی فدراسیون بولینگ و بیلیارد جمهوری اسلامی ایران — به‌روز شده
                 </span>
               </div>
             </>

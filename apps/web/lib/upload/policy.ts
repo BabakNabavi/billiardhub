@@ -33,6 +33,9 @@ export const ALLOWED_PREFIXES = [
      (پایین بررسی می‌شود) تا کسی نتواند فایلِ تبلیغِ دیگری را بازنویسی
      کند — تبلیغی که پول برایش داده شده. */
   'ads/',
+  /* عکسِ بازیکنِ جدولِ رنکینگ. جدول ملی است و فقط ادمین واردش
+     می‌کند، پس مالکیتش هم ادمین‌بودن است — پایین بررسی می‌شود. */
+  'rankings/',
   /* مدارک — جواز کسب و مانند آن. برخلاف بقیه به باکتِ **خصوصی** می‌رود
      و لینک عمومی ندارد: جواز کسب نام، کد ملی و نشانیِ صاحب باشگاه را
      روی خود دارد و نباید با داشتنِ آدرس برای همه باز شود. */
@@ -119,6 +122,18 @@ export async function resolvePath(rawPath: string, actorId: string): Promise<Pat
   }
 
   let ownerChecked = false
+
+  /* ⚠️ این شاخه باید *پیش از* بررسیِ باشگاه بیاید. `clubInPath` لنگر
+     ندارد، پس `rankings/clubs/<شناسه‌ی باشگاهِ خودم>/x.jpg` به آن‌جا
+     می‌افتاد و مالکیتِ یک باشگاه، گاردِ «فقط ادمین» را دور می‌زد.
+     لنگرزدنِ خودِ regex چاره نیست: `documents/clubs/<id>/…` به
+     بی‌لنگر بودنش تکیه دارد. */
+  if (cleaned.startsWith('rankings/')) {
+    if (!(await isAdminUser(actorId))) {
+      return { ok: false, status: 403, message: 'فقط ادمین می‌تواند عکسِ رنکینگ بگذارد' }
+    }
+    return { ok: true, path: cleaned, bucket: bucketFor(cleaned), ownerChecked: true }
+  }
 
   const clubInPath = cleaned.match(/(?:^|\/)clubs\/([0-9a-f_]{8}[0-9a-f_-]{20,})/i)?.[1]
   if (clubInPath) {
