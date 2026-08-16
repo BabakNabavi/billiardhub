@@ -59,6 +59,7 @@ const LINE   = '#E7E2D6'
 /* رنگِ پایه‌ی صفحه از کلاسِ مشترکِ lq-stage می‌آید */
 
 import { breakAllahLigature } from '../../lib/fa-ligature'
+import { splitFaName } from '../../lib/fa-name'
 
 const faDigits = (v: string | number) => String(v).replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[+d] ?? d)
 
@@ -216,14 +217,30 @@ export default function RankingsPage() {
             inset 0 -2px 5px rgba(0,0,0,0.2);
           text-shadow: 0 1px 4px rgba(0,0,0,0.3), 0 0 12px rgba(255,255,255,0.5); }
         /* بلوک نام عرض ثابت دارد تا ستون شهرها در همه‌ی ردیف‌ها دقیقاً هم‌راستا بماند */
-        /* ⚠️ نام عرضِ ثابت ندارد و کوتاه نمی‌شود: فامیلِ بلند باید
-           کامل دیده شود، حتی به قیمتِ محو شدنِ شهر. شهر همه‌ی فشار را
-           جذب می‌کند (flex-shrink بزرگ) و در تنگنا به هیچ می‌رسد. */
-        .rk-name { flex: 0 1 auto; min-width: 0; padding: 11px 0;
+        /* ── ترتیب و اولویتِ جمع‌شدن، یک‌جا برای همه‌ی عرض‌ها ──
+           پیش‌تر این قواعد در دو مدیاکوئریِ ≤۶۴۰ و ≥۹۰۰ تکرار شده
+           بودند و بازه‌ی ۶۴۰ تا ۹۰۰ چیدمانِ قدیمی را نگه می‌داشت.
+
+           ⚠️ order روی همه‌ی فرزندها لازم است: پیش‌فرضِ ۰ یعنی هر
+           چیزی که ترتیب نگرفته، *جلوتر* از همه می‌افتد. یک بار امتیاز
+           بی‌ترتیب ماند و در دسکتاپ پیش از نام رندر شد.
+
+           نام با ضریبِ ۹۹۹ اول جمع می‌شود (تا کفِ ۷۲ و بعد سه‌نقطه)،
+           شهر فقط در تنگنای واقعی. هیچ‌کدام flex-shrink صفر نیستند
+           وگرنه ردیف زیرِ overflow:hidden بریده می‌شود. */
+        .rk-row .chip { order: 0 }
+        .rk-row .rk-portrait { order: 0 }
+        .rk-name { order: 1 }
+        .rk-row .rk-spacer { order: 2 }
+        .rk-city { order: 3 }
+        .rk-row .rk-trend { order: 4 }
+        .rk-row .rk-pts { order: 5 }
+        .rk-name { flex: 0 999 auto; min-width: 72px; padding: 11px 0;
           /* تشدیدِ «لله» با ZWJ حل شد نه با font-feature-settings —
              شرحش در lib/fa-ligature. خاموش‌کردنِ ویژگی یا بی‌اثر بود یا
              «لا» را به خطر می‌انداخت. */ }
-        .rk-city { flex: 0 999 auto; min-width: 0; margin-inline-start: clamp(8px, 1.6vw, 18px);
+        .rk-city { flex: 0 1 auto; min-width: 0; max-width: none;
+          margin-inline-start: 0; margin-inline-end: clamp(10px, 1.4vw, 18px);
           font-size: 12px; color: ${MUT}; white-space: nowrap;
           overflow: hidden; text-overflow: ellipsis; }
         /* ترک گرید نباید با min-content ردیف‌ها بازتر از کانتینر شود */
@@ -235,23 +252,15 @@ export default function RankingsPage() {
            فاصله‌ی شهر باید جمع شوند وگرنه تبِ امتیاز از لبه بیرون می‌زند
            و کارت می‌بُردش. */
         @media (min-width: 900.02px) {
-          /* شهر کمی به راست: فاصله‌ی سمتِ آغاز کم‌تر */
-          .rk-city { max-width: 84px; margin-inline-start: clamp(4px, 0.7vw, 9px); }
+
         }
         @media (max-width: 640px) {
           /* جای تب امتیاز در لبه‌ی چپ رزرو می‌شود — چیپ صعود/نزول چسبیده به تب */
           .rk-row { gap: 8px; padding-left: 70px; min-height: 64px; }
           .rk-row .chip { width: 32px; font-size: 13px; }
 
-          /* شهر از کنارِ نام می‌رود کنارِ برچسبِ صعود/نزول — سمتِ
-             راستِ آن، با فاصله. جابه‌جایی با order است تا ترتیبِ
-             DOM (و خوانشِ صفحه‌خوان) دست‌نخورده بماند. */
-          .rk-row { display: flex; }
-          .rk-name { order: 1 }
-          .rk-row .rk-spacer { order: 2 }
-          .rk-city { order: 3; margin-inline-start: 0; margin-inline-end: 8px;
-            font-size: 10.5px; max-width: 66px; overflow: hidden; text-overflow: ellipsis; }
-          .rk-row .rk-trend { order: 4 }
+          /* فقط اندازه — ترتیب در قاعده‌ی پایه است */
+          .rk-city { margin-inline-end: 8px; font-size: 10.5px; max-width: 66px; }
           /* امتیاز = تب چسبیده به لبه‌ی چپ کارت — ضلع چپش دیده نمی‌شود،
              فقط گوشه‌های راست گرد است */
           .rk-row .rk-pts { position: absolute; left: 0; top: 50%; transform: translateY(-50%);
@@ -363,16 +372,16 @@ export default function RankingsPage() {
               <section className="rk-grid">
                 {players.map((p, i) => {
                   const diff = p.previousRank ? p.previousRank - p.rank : 0
-                  /* فیلدهای صریحِ ادمین مقدم‌اند؛ نبودشان یعنی همان
-                     حدسِ قدیمی (کلمه‌ی اول = نام). */
-                  const parts = p.name.trim().split(/\s+/)
-                  const firstName = breakAllahLigature(p.firstName?.trim() || parts[0] || '')
-                  const lastName = breakAllahLigature(p.lastName?.trim() || parts.slice(1).join(' '))
+                  /* فیلدهای صریحِ ادمین مقدم‌اند؛ نبودشان یعنی قاعده‌ی
+                     `lib/fa-name` (پیشوندِ احترام + پسوندِ بسته). */
+                  const guess = splitFaName(p.name)
+                  const firstName = breakAllahLigature(p.firstName?.trim() || guess.firstName)
+                  const lastName = breakAllahLigature(p.lastName?.trim() || guess.lastName)
                   return (
                     <div key={p.rank} className="rk-rowwrap" style={{ animationDelay: `${Math.min(i, 10) * 45}ms` }}>
                       <Link href={p.userId ? `/players/${p.userId}` : '#'} className="rk-row">
                         <span className="chip" style={{ backgroundColor: rankColor(p.rank) }}>{faDigits(p.rank)}</span>
-                        <Portrait p={p} size={46} />
+                        <span className="rk-portrait" style={{ display: 'inline-flex', flexShrink: 0 }}><Portrait p={p} size={46} /></span>
                         <div className="rk-name">
                           {lastName ? (
                             <>

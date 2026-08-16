@@ -6,6 +6,7 @@
    ───────────────────────────────────────────────────────────── */
 
 import { provinceOfCity } from './iran-geo'
+import { splitFaName } from './fa-name'
 
 export interface RankingPlayer {
   rank: number
@@ -79,14 +80,17 @@ export function buildEmptyRankings(): RankingsStructure {
    تایپ می‌شد `name` را با همان یک حرف بازنویسی می‌کرد؛ فامیل از تنها
    فیلدی که ذخیره می‌شود پاک می‌شد.
 
-   حدسِ اولیه: کلمه‌ی اول = نام. برای «سید شهاب الدین ابوذریان» غلط
-   است، ولی حالا ادمین می‌تواند تصحیحش کند — پیش‌تر اصلاً نمی‌شد. */
+   حدسِ اولیه از lib/fa-name می‌آید: پیشوندهای احترام به نام
+   می‌چسبند و پسوندهای بسته کلمه‌ی قبل را ادامه می‌دهند. هرجا غلط
+   درآمد، ادمین دو فیلدِ صریح دارد. */
 function backfill(p: RankingPlayer): RankingPlayer {
   const out = { ...p }
   if (out.firstName === undefined && out.lastName === undefined && out.name?.trim()) {
-    const parts = out.name.trim().split(/\s+/)
-    out.firstName = parts[0] ?? ''
-    out.lastName = parts.slice(1).join(' ')
+    /* قاعده‌ی جداسازی در `lib/fa-name` — «کلمه‌ی اول = نام» برای
+       «سید شهاب الدین ابوذریان» غلط بود. */
+    const sp = splitFaName(out.name)
+    out.firstName = sp.firstName
+    out.lastName = sp.lastName
   }
   if (!out.province && out.city) out.province = provinceOfCity(out.city)
   return out

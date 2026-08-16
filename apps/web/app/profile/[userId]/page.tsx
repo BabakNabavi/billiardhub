@@ -86,7 +86,9 @@ const ROLES: RoleMeta[] = [
     profileFields: [
       { key: 'displayName', label: 'نام کامل', type: 'text', placeholder: 'نام و نام‌خانوادگی', required: true },
       { key: 'specialty', label: 'رشته تدریس', type: 'select', placeholder: '', options: ['اسنوکر', 'پاکت بیلیارد', 'کارامبول', 'همه رشته‌ها'], required: true },
-      { key: 'licenseLevel', label: 'درجه مربیگری', type: 'select', placeholder: '', options: ['درجه ۳', 'درجه ۲', 'درجه ۱', 'ملی'], required: false },
+      /* «ملی» برداشته شد: در فهرستِ رسمیِ درجه‌ها چنین درجه‌ای نیست.
+         مقدارِ ذخیره‌شده‌ی قدیمی پایین‌تر گزینه‌ی خودش را می‌گیرد. */
+      { key: 'licenseLevel', label: 'درجه مربیگری', type: 'select', placeholder: '', options: ['درجه ۳', 'درجه ۲', 'درجه ۱'], required: false },
       { key: 'experience', label: 'سابقه تدریس (سال)', type: 'number', placeholder: 'مثلاً ۵', required: true },
       { key: 'location', label: 'شهر فعالیت', type: 'text', placeholder: 'تهران، اصفهان...', required: true },
       { key: 'sessionPrice', label: 'هزینه هر جلسه (تومان)', type: 'number', placeholder: 'مثلاً ۵۰۰۰۰۰', required: false },
@@ -193,6 +195,11 @@ function Field({
           style={{ ...base, appearance: 'none' as any }}
         >
           <option value="">انتخاب کنید...</option>
+          {/* ⚠️ مقدارِ ذخیره‌شده‌ای که دیگر در فهرست نیست (مثلاً «ملی»ِ
+              قدیمی) گزینه‌ی خودش را می‌گیرد؛ وگرنه select خالی می‌افتد،
+              در شمارشِ «تکمیل‌شده» می‌آید، و ذخیره‌ی بعدی بی‌صدا همان
+              مقدار را دوباره می‌نویسد. */}
+          {value && !field.options?.includes(value) && <option value={value}>{value}</option>}
           {field.options?.map(o => <option key={o} value={o}>{o}</option>)}
         </select>
       ) : (
