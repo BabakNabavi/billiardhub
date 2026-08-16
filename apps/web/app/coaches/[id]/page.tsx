@@ -436,10 +436,10 @@ export default function CoachProfilePage() {
               {/* Cover — default coach poster. «lq-enter-sheen» یک برقِ عبوریِ
                   یک‌باره موقعِ ورود می‌اندازد؛ همان حرکتی که سطحِ شیشه‌ای را
                   «مادی» نشان می‌دهد بدونِ اینکه چیزی مدام تکان بخورد. */}
-              <div className="lq-enter-sheen" style={{ position:'relative', height:'clamp(190px,30vw,260px)', overflow:'hidden', background:'linear-gradient(115deg,#0c1424 0%,#17253f 55%,#1e2f4d 100%)',
+              <div className="lq-enter-sheen" style={{ position:'relative', height:'var(--coverH)', '--coverH':'clamp(190px,30vw,260px)', overflow:'hidden', background:'linear-gradient(115deg,#0c1424 0%,#17253f 55%,#1e2f4d 100%)',
                 /* کمانِ بیضی: کناره‌ها بالا، مرکز به عمقِ --dip */
                 borderBottomLeftRadius:'50% var(--dip)', borderBottomRightRadius:'50% var(--dip)',
-                '--dip':'clamp(42px,12vw,74px)',
+                '--dip':'min(clamp(70px,22vw,120px), calc(var(--coverH) * 0.45))',
                 /* گودیِ دایره‌ای دورِ عکس: هم‌مرکزِ آواتار، کمی بزرگ‌تر از
                    آن، تا حلقه‌ی سفیدِ یک‌دست بماند. `-webkit-` برای
                    سافاری لازم است — مخاطبِ اصلی آیفون است. */
@@ -525,22 +525,24 @@ export default function CoachProfilePage() {
                     </div>
                     {/* درجه مربیگری — با برچسب، طلایی؛ زیرش سال اولین مدرک */}
                     {coach.badge && (
-                      <div style={{ marginTop:7 }}>
+                      <div style={{ marginTop:12 }}>
                         <div style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:6, flexWrap:'wrap' }}>
                           <span style={{ fontSize:13.5, fontWeight:700, color:'rgba(0,0,0,0.45)' }}>درجه مربیگری :</span>
                           <span dir="auto" style={{ fontSize:13.5, fontWeight:800, color:GOLD_D, unicodeBidi:'isolate' }}>{coach.badge}</span>
                         </div>
                         {localP && localP.grades[0]?.year && (
-                          <div style={{ fontSize:12, color:'rgba(0,0,0,0.45)', marginTop:2 }}>از سال {localP.grades[0].year}</div>
+                          <div style={{ fontSize:12, color:'rgba(0,0,0,0.45)', marginTop:8 }}>از سال {localP.grades[0].year}</div>
                         )}
                       </div>
                     )}
-                    <div style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:6, fontSize:13, color:'rgba(0,0,0,0.55)', marginTop:8 }}>
+                    {coach.city && (
+                    <div style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:6, fontSize:13, color:'rgba(0,0,0,0.55)', marginTop:12 }}>
                       <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style={{ flexShrink:0, opacity:.75 }}>
                         <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/>
                       </svg>
-                      {coach.city}، ایران
+                      {coach.city}
                     </div>
+                    )}
                   </div>
                 </div>
                 </div>
