@@ -480,7 +480,11 @@ export default function CoachProfilePage() {
                 /* شعاعِ گودی از قطرِ آواتار مشتق می‌شود تا هم‌مرکز بماند؛
                    جعبه‌ی ماسک ۲:۱ است، مثلِ viewBox. شرحِ هندسه بالای
                    فایل، کنارِ NOTCH_PATH. */
-                '--cut':'calc(var(--av) / 2 + clamp(10px,2.4vw,16px))',
+                /* ⚠️ فاصله فقط ۳ پیکسل. با ۱۰ تا ۱۶ پیکسل یک گودالِ سفیدِ پهن
+                   دورِ عکس می‌افتاد که «بریده با قیچی» به نظر می‌رسید. در
+                   نمونه، کاور تا خودِ حلقه‌ی سفیدِ آواتار می‌آید. صفر نشد
+                   تا گِردکردنِ زیرپیکسلی تیغه‌ای از کاور روی حلقه نیندازد. */
+                '--cut':'calc(var(--av) / 2 + 3px)',
                 '--boxW':'calc(var(--cut) * 3.4641)', '--boxH':'calc(var(--cut) * 1.2)',
                 WebkitMaskImage:NOTCH_MASK.image, maskImage:NOTCH_MASK.image,
                 WebkitMaskSize:NOTCH_MASK.size, maskSize:NOTCH_MASK.size,

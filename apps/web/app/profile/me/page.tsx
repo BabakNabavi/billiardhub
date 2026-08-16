@@ -13,6 +13,9 @@ import ChangePassword from '../../../components/auth/ChangePassword'
 import Select from '../../../components/ui/Select'
 import Avatar from '../../../components/ui/Avatar'
 import { uploadFile } from '../../../lib/supabase'
+/* نسخه‌ی محلیِ این تابع برداشته شد: پنلِ رنکینگ هم لازمش داشت و
+   کپی‌کردنش یعنی دو عددِ کیفیت که روزی از هم جدا می‌افتند. */
+import { compressAvatar } from '../../../lib/images/compress-avatar'
 import { bankOfIban, bankOfCard, prettyIban } from '../../../lib/bank'
 import {
   ArrowRight, Camera, Loader2, ShieldCheck, CreditCard, Save,
@@ -247,27 +250,6 @@ export default function ProfileMePage() {
 
   /* برش مربعی + فشرده‌سازی سمت کلاینت. خروجی یک File است تا مستقیم
      آپلود شود؛ dataURL دیگر ذخیره نمی‌شود (پایین‌تر توضیح داده شده). */
-  const compressAvatar = (file: File): Promise<File> =>
-    new Promise((resolve, reject) => {
-      const img = new Image()
-      const url = URL.createObjectURL(file)
-      img.onload = () => {
-        URL.revokeObjectURL(url)
-        const size = 420
-        const c = document.createElement('canvas')
-        const s = Math.min(img.width, img.height)
-        c.width = size; c.height = size
-        const ctx = c.getContext('2d')
-        if (!ctx) { reject(new Error('canvas')); return }
-        ctx.drawImage(img, (img.width - s) / 2, (img.height - s) / 2, s, s, 0, 0, size, size)
-        c.toBlob(
-          b => b ? resolve(new File([b], 'avatar.jpg', { type: 'image/jpeg' })) : reject(new Error('blob')),
-          'image/jpeg', 0.82,
-        )
-      }
-      img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('image')) }
-      img.src = url
-    })
 
   /* ─────────────────────────────────────────────────────────────
      عکس پروفایل — چرا این تابع کاملاً بازنویسی شد.

@@ -5,7 +5,9 @@ import { useRouter } from 'next/navigation';
 import { useAuthStore } from '../../../store/auth.store';
 import { Trophy, Save, Camera, Loader2, X } from 'lucide-react';
 import { uploadFile } from '../../../lib/supabase';
+import { compressAvatar } from '../../../lib/images/compress-avatar';
 import { notify } from '../../../lib/ui/dialogs';
+import ProvinceCitySelect from '../../../components/ProvinceCitySelect';
 import {
   buildEmptyRankings, getStoredRankings, saveRankings, categorySize,
   type RankingPlayer, type RankingsStructure,
@@ -27,11 +29,20 @@ function AvatarCell({ value, name, onChange }: { value?: string; name: string; o
       /* نامِ فایل تصادفی است، نه نامِ کاربر: مسیر عمومی می‌شود و
          `upsert` روشن است، پس دو ادمین با یک نامِ فایل همدیگر را
          بازنویسی می‌کردند. */
-      const ext = (file.name.match(/\.[a-z0-9]+$/i)?.[0] ?? '.jpg').toLowerCase()
-      const url = await uploadFile('club-media', file, `rankings/${crypto.randomUUID()}${ext}`)
+      /* فشرده‌سازی پیش از آپلود: این عکس در فهرستی تا ۱۲۸ ردیفی و در
+         اندازه‌ی ۴۶ پیکسل دیده می‌شود. فرستادنِ فایلِ خامِ دوربین هم
+         پهنای‌باندِ کاربرِ ایرانی را می‌سوزاند هم فضا را. خروجی همیشه
+         JPEG است، پس پسوند هم ثابت. */
+      const squared = await compressAvatar(file, 'player.jpg')
+      const url = await uploadFile('club-media', squared, `rankings/${crypto.randomUUID()}.jpg`)
       /* شکستِ آپلود باید دیده شود، نه اینکه بی‌صدا هیچ‌چیز عوض نشود */
       if (!url) { notify("آپلود عکس انجام نشد — دوباره تلاش کنید."); return }
       onChange(url)
+    } catch {
+      /* `compressAvatar` روی فایلی که مرورگر نمی‌تواند رمزگشایی کند
+         (HEIC بیرونِ سافاری، فایلِ خراب) پرتاب می‌کند. بدونِ این، فقط
+         چرخنده می‌ایستاد و هیچ پیامی نمی‌آمد. */
+      notify('خواندنِ این عکس ممکن نشد — فرمتِ دیگری امتحان کنید.')
     } finally { setBusy(false) }
   }
 
@@ -107,6 +118,32 @@ export default function AdminRankingsPage() {
       [field]: value,
     };
     setRankings(newRankings);
+  };
+
+  /* ⚠️ فیلدهای مرتبط با هم نوشته می‌شوند، نه با چند بار صدا زدنِ
+     `updatePlayer`: هرکدام از همان `rankings` کپی می‌گیرند، پس آخری
+     نوشته‌ی قبلی‌ها را دور می‌ریخت. */
+  const updateName = (index: number, first?: string, last?: string) => {
+    const next = JSON.parse(JSON.stringify(rankings)) as RankingsStructure;
+    const cur = next[sport]![gender]![category]![index]!;
+    const firstName = first ?? cur.firstName ?? '';
+    const lastName = last ?? cur.lastName ?? '';
+    next[sport]![gender]![category]![index] = {
+      ...cur, firstName, lastName,
+      /* بدونِ فالبک: با `|| cur.name` پاک‌کردنِ هر دو فیلد نامِ قدیمی
+         را نگه می‌داشت و ردیف روی سایت می‌ماند بدونِ راهی برای حذفش. */
+      name: [firstName, lastName].filter(Boolean).join(' ').trim(),
+    };
+    setRankings(next);
+  };
+
+  const updateCity = (index: number, province: string, city: string) => {
+    const next = JSON.parse(JSON.stringify(rankings)) as RankingsStructure;
+    next[sport]![gender]![category]![index] = {
+      ...next[sport]![gender]![category]![index]!,
+      province, city,
+    };
+    setRankings(next);
   };
 
   /* ذخیره‌ی واقعی — همین داده در /ranking سایت نمایش داده می‌شود.
@@ -244,9 +281,10 @@ export default function AdminRankingsPage() {
           <div className="hidden sm:grid grid-cols-12 px-4 py-2 bg-gray-50 text-xs text-gray-500 font-medium border-b">
             <div className="col-span-1 text-center">رتبه</div>
             <div className="col-span-1 text-center">عکس</div>
-            <div className="col-span-3">نام و نام خانوادگی</div>
-            <div className="col-span-3">شهر</div>
-            <div className="col-span-3">امتیاز</div>
+            <div className="col-span-2">نام</div>
+            <div className="col-span-2">نام خانوادگی</div>
+            <div className="col-span-2">استان و شهر</div>
+            <div className="col-span-2">امتیاز</div>
             <div className="col-span-1">رتبه قبل</div>
           </div>
 
@@ -272,25 +310,49 @@ export default function AdminRankingsPage() {
                     onChange={url => updatePlayer(index, 'avatar', url)}
                   />
                 </div>
-                <div className="col-span-4 sm:col-span-3">
+                {/* ⚠️ دو فیلدِ جدا. تا وقتی یکی بود، صفحه‌ی رنکینگ باید
+                    حدس می‌زد مرزِ نام و فامیل کجاست — و هر حدسی یکی از
+                    «علی لله گانی» یا «سید شهاب الدین ابوذریان» را خراب
+                    می‌کرد. `name` هم به‌روز می‌ماند چون بقیه‌ی سایت
+                    همان را می‌خواند. */}
+                <div className="col-span-2 sm:col-span-2 sm:pe-1">
                   <input
                     type="text"
-                    value={player.name}
-                    onChange={e => updatePlayer(index, 'name', e.target.value)}
+                    value={player.firstName ?? ''}
+                    onChange={e => updateName(index, e.target.value, undefined)}
                     className="w-full border border-gray-200 rounded-lg px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
-                    placeholder="نام بازیکن"
+                    placeholder="نام"
+                    aria-label={`نامِ بازیکنِ رتبه ${index + 1}`}
                   />
                 </div>
-                <div className="col-span-3 sm:col-span-3 sm:px-2">
+                <div className="col-span-2 sm:col-span-2 sm:pe-1">
                   <input
                     type="text"
-                    value={player.city}
-                    onChange={e => updatePlayer(index, 'city', e.target.value)}
+                    value={player.lastName ?? ''}
+                    onChange={e => updateName(index, undefined, e.target.value)}
                     className="w-full border border-gray-200 rounded-lg px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
-                    placeholder="شهر"
+                    placeholder="نام خانوادگی"
+                    aria-label={`نامِ خانوادگیِ بازیکنِ رتبه ${index + 1}`}
                   />
                 </div>
-                <div className="col-span-2 sm:col-span-3 sm:px-2">
+                {/* قاعده‌ی ثابتِ پروژه: شهر همیشه از ProvinceCitySelect.
+                    ورودیِ متنیِ آزاد این‌جا مستقیم روی جدولِ عمومی
+                    می‌نشست، پس یک غلطِ تایپی همان‌جا منتشر می‌شد.
+                    استانِ ردیف‌های قدیمی از خودِ شهر بک‌فیل می‌شود. */}
+                <div className="col-span-6 sm:col-span-2 sm:px-1">
+                  <ProvinceCitySelect
+                    size="sm"
+                    layout="stack"
+                    provinceLabel="استان"
+                    cityLabel="شهر"
+                    /* استان در `mergeIntoEmpty` یک‌بار بک‌فیل شده؛
+                       محاسبه‌ی این‌جا روی ۱۲۸ ردیف در هر کلید فشرده
+                       تکرار می‌شد. */
+                    value={{ province: player.province ?? '', city: player.city || '' }}
+                    onChange={v => updateCity(index, v.province, v.city)}
+                  />
+                </div>
+                <div className="col-span-3 sm:col-span-3 sm:px-1">
                   <input
                     type="number"
                     value={player.points || ''}

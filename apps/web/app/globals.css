@@ -1492,12 +1492,19 @@ select:disabled { opacity: 0.55; cursor: not-allowed; }
   transition: background .26s cubic-bezier(.22,1,.36,1), color .2s, box-shadow .26s, transform .18s;
 }
 .lq-seg > button:hover { color: rgba(17,17,16,0.78); }
+/* aria-disabled به‌جای disabled: دکمه در ترتیبِ Tab می‌ماند و
+   صفحه‌خوان به آن می‌رسد، ولی ظاهر و اشاره‌گرش خاموش است. */
+.lq-seg > button[aria-disabled="true"] { opacity: .5; cursor: not-allowed; }
+.lq-seg > button[aria-disabled="true"]:hover { color: rgba(17,17,16,0.52); }
 /* حلقه‌ی فوکوس جدا از حالتِ انتخاب است و با خاموش‌بودنِ انیمیشن هم می‌ماند */
 .lq-seg > button:focus-visible {
   outline: 2px solid var(--gold-deep);
   outline-offset: 2px;
 }
-.lq-seg > button[aria-selected='true'] {
+/* دو حالتِ انتخاب: `aria-selected` برای تبِ واقعی (که پنل دارد) و
+   `aria-pressed` برای دکمه‌های فیلتر. جدولِ رنکینگ دومی است. */
+.lq-seg > button[aria-selected='true'],
+.lq-seg > button[aria-pressed='true'] {
   color: var(--gold-deep);
   font-weight: 800;
   background: rgba(255,255,255,0.94);

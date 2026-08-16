@@ -5,10 +5,22 @@
    ظرفیت‌ها: اسنوکر دسته برتر ۳۲، دسته یک ۱۲۸؛ پاکت ۳۲.
    ───────────────────────────────────────────────────────────── */
 
+import { provinceOfCity } from './iran-geo'
+
 export interface RankingPlayer {
   rank: number
   name: string
   city: string
+  /* استان کنارِ شهر نگه داشته می‌شود (قاعده‌ی ProvinceCitySelect).
+     برای ردیف‌های قدیمیِ فقط‌شهر با provinceOfCity بک‌فیل می‌شود. */
+  province?: string
+  /* ── چرا نام و نام‌خانوادگی جدا ──
+     از یک رشته نمی‌شود فهمید مرز کجاست: در «علی لله گانی» فامیل دو
+     کلمه است و در «سید شهاب الدین ابوذریان» نام سه کلمه. هر حدسی
+     یکی از این دو را خراب می‌کند، پس ادمین صریح واردشان می‌کند.
+     خالی‌بودنشان یعنی همان حدسِ قدیمی (کلمه‌ی اول = نام). */
+  firstName?: string
+  lastName?: string
   points: number
   previousRank?: number
   userId?: string
@@ -59,6 +71,27 @@ export function buildEmptyRankings(): RankingsStructure {
 }
 
 /* ساختار ذخیره‌شده را روی ساختار خالی سوار می‌کند تا اندازه‌ها همیشه درست باشند */
+/* ⚠️ ردیف‌های قدیمی فقط `name` و `city` دارند. این‌جا — تنها جایی که
+   هم پنلِ ادمین و هم صفحه‌ی رنکینگ از آن رد می‌شوند — نام و استان
+   یک‌بار مشتق می‌شوند.
+
+   بدونِ این، دو ورودیِ تازه‌ی ادمین خالی می‌آمدند و اولین حرفی که
+   تایپ می‌شد `name` را با همان یک حرف بازنویسی می‌کرد؛ فامیل از تنها
+   فیلدی که ذخیره می‌شود پاک می‌شد.
+
+   حدسِ اولیه: کلمه‌ی اول = نام. برای «سید شهاب الدین ابوذریان» غلط
+   است، ولی حالا ادمین می‌تواند تصحیحش کند — پیش‌تر اصلاً نمی‌شد. */
+function backfill(p: RankingPlayer): RankingPlayer {
+  const out = { ...p }
+  if (out.firstName === undefined && out.lastName === undefined && out.name?.trim()) {
+    const parts = out.name.trim().split(/\s+/)
+    out.firstName = parts[0] ?? ''
+    out.lastName = parts.slice(1).join(' ')
+  }
+  if (!out.province && out.city) out.province = provinceOfCity(out.city)
+  return out
+}
+
 export function mergeIntoEmpty(raw: RankingsStructure | null | undefined): RankingsStructure {
   const base = buildEmptyRankings()
   try {
@@ -74,7 +107,7 @@ export function mergeIntoEmpty(raw: RankingsStructure | null | undefined): Ranki
             const rows = cats[cat]!
             for (let i = 0; i < size; i++) {
               const s = stored[i]
-              if (s) rows[i] = { ...rows[i]!, ...s, rank: i + 1 }
+              if (s) rows[i] = backfill({ ...rows[i]!, ...s, rank: i + 1 })
             }
           }
         }
