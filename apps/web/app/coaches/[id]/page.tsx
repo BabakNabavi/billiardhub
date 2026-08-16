@@ -19,6 +19,38 @@ const TEXT_M = 'rgba(17,17,16,0.28)'
    مشترکِ `.lqg` می‌آید، نه از توکنِ محلیِ این فایل. */
 const CBOR   = '1px solid rgba(17,17,16,0.07)'
 
+/* ── گودیِ بالای عکسِ پروفایل ──
+   خطِ صافِ پایینِ کاور نباید با گوشه‌ی تیز به دایره برسد. یک دایره‌ی
+   تنها لبه‌ی افقی را با مماسِ *عمودی* می‌بُرد، یعنی گوشه‌ی ۹۰ درجه.
+   این‌جا دو کمانِ کوچکِ مماس (fillet) خط را نرم وارد دایره می‌کنند.
+
+   ⚠️ مماسِ خارجی ایجاب می‌کند فاصله‌ی مرکزها *دقیقاً* R+f باشد.
+   نسخه‌ی اول مرکزِ کمانِ کوچک را روی لبه‌ی جعبه گذاشت (فاصله ۱۰۵.۴
+   در برابر ۱۰۰) پس دو دایره همدیگر را قطع کردند و به‌جای انتقالِ
+   نرم دو برآمدگیِ قارچی درآمد.
+
+   هندسه در viewBox 282.843×120 با R = ۱۰۰ واحد و f = 0.5R:
+     X = √(R² + 2Rf) = R√2 = 141.4214  ⇒ جعبه = 2X × 1.2R
+     مرکزِ دایره (141.4214, 120) · مرکزِ کمان‌ها (0, 70) و (282.843, 70)
+     فاصله‌ی مرکزها = √(141.4214² + 50²) = 150 = R + f ✓
+     نقطه‌ی مماس = (0,70) + 50·(0.942809, 0.333333) = (47.1405, 86.6667) */
+const NOTCH_PATH =
+  'M0,0 H282.843 V120 H0 Z'
+  + 'M0,120 A50,50 0 0 0 47.1405,86.6667'
+  + ' A100,100 0 0 1 235.7025,86.6667'
+  + ' A50,50 0 0 0 282.843,120 Z'
+
+const NOTCH_SVG =
+  `url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 282.843 120' preserveAspectRatio='none'><path fill='%23000' fill-rule='evenodd' d='${NOTCH_PATH}'/></svg>")`
+
+/* چهار لایه‌ی ماسک با ترکیبِ *پیش‌فرض* (اجتماع): جعبه‌ی گودی، نوارِ
+   بالا، و دو نوارِ کناری. عمداً `mask-composite` استفاده نشد چون
+   کلیدواژه‌اش در وبکیتِ قدیمی فرق دارد و مخاطبِ اصلی سافاریِ آیفون است. */
+const NOTCH_MASK = {
+  image: `${NOTCH_SVG}, linear-gradient(#000,#000), linear-gradient(#000,#000), linear-gradient(#000,#000)`,
+  size: 'var(--boxW) var(--boxH), 100% calc(100% - var(--boxH)), calc(50% - var(--boxW) / 2) var(--boxH), calc(50% - var(--boxW) / 2) var(--boxH)',
+  position: 'bottom center, top left, bottom left, bottom right',
+} as const
 const SPECS: Record<string,{label:string;color:string}> = {
   snooker:  {label:'اسنوکر',       color:'#22C55E'},  // سبز درخشان
   pocket:   {label:'پاکت بیلیارد', color:'#3B82F6'},  // آبی درخشان
@@ -442,11 +474,14 @@ export default function CoachProfilePage() {
                    می‌برد — درست وارونه‌ی چیزی که باید. تنها انحنا همان
                    گودیِ دایره‌ایِ زیر است: عکسِ پروفایل از پایین داخلِ
                    کاور می‌آید و جای خودش را می‌بُرد. */
-                /* گودیِ دایره‌ای دورِ عکس: هم‌مرکزِ آواتار، کمی بزرگ‌تر از
-                   آن، تا حلقه‌ی سفیدِ یک‌دست بماند. `-webkit-` برای
-                   سافاری لازم است — مخاطبِ اصلی آیفون است. */
+                /* شعاعِ گودی از قطرِ آواتار مشتق می‌شود تا هم‌مرکز بماند؛
+                   جعبه‌ی ماسک ۲:۱ است، مثلِ viewBox. شرحِ هندسه بالای
+                   فایل، کنارِ NOTCH_PATH. */
                 '--cut':'calc(var(--av) / 2 + clamp(7px,1.8vw,12px))',
-                WebkitMaskImage:'radial-gradient(circle var(--cut) at 50% 100%, rgba(0,0,0,0) 96%, #000 100%)', maskImage:'radial-gradient(circle var(--cut) at 50% 100%, rgba(0,0,0,0) 96%, #000 100%)',
+                '--boxW':'calc(var(--cut) * 2.82843)', '--boxH':'calc(var(--cut) * 1.2)',
+                WebkitMaskImage:NOTCH_MASK.image, maskImage:NOTCH_MASK.image,
+                WebkitMaskSize:NOTCH_MASK.size, maskSize:NOTCH_MASK.size,
+                WebkitMaskPosition:NOTCH_MASK.position, maskPosition:NOTCH_MASK.position,
                 WebkitMaskRepeat:'no-repeat', maskRepeat:'no-repeat' } as React.CSSProperties}>
                 {coach.coverImage && <img loading="eager" fetchPriority="high" decoding="async" src={coach.coverImage} alt="" style={{ position:'absolute', inset:0, width:'100%', height:'100%', objectFit:'cover' }}/>}
                 {coach.coverImage && <div style={{ position:'absolute', inset:0, background:'linear-gradient(115deg,rgba(12,20,36,0.58),rgba(30,47,77,0.40))' }}/>}
