@@ -3613,10 +3613,13 @@ console.log('\n― استوری: یک منبع، با انقضا ―');
       && (hero.match(/[Mm]askSize:NOTCH_MASK\.size/g) ?? []).length === 2
       && (hero.match(/[Mm]askPosition:NOTCH_MASK\.position/g) ?? []).length === 2
       && !hero.includes('mask-composite') && !hero.includes('MaskComposite')
-      /* دو نوارِ کناری باید دقیقاً بقیه‌ی عرض را پر کنند:
-         boxW + 2·(50% − boxW/2) = 100%. این عبارت بی‌صدا می‌شکند. */
-      && hero.includes("calc(50% - var(--boxW) / 2) var(--boxH)")
-      && hero.includes("100% calc(100% - var(--boxH))"),
+      /* ⚠️ لایه‌ها باید ۱ پیکسل روی هم بیفتند، نه پهلوبه‌پهلو:
+         وبکیتِ قدیمی لایه‌ها را source-over ترکیب می‌کند نه add، و
+         مرزِ پهلوبه‌پهلو یک خطِ نیمه‌شفاف می‌سازد که فقط روی آیفون
+         دیده می‌شود. */
+      && hero.includes("const OVERLAP = '1px'")
+      && hero.includes('calc(50% - var(--boxW) / 2 + ${OVERLAP}) var(--boxH)')
+      && hero.includes('100% calc(100% - var(--boxH) + ${OVERLAP})'),
       'کلیدواژه‌ی mask-composite در وبکیتِ قدیمی فرق دارد');
 
     /* سپرِ کلیک باید *همان* مسیر را بگیرد، نه شکلِ تقریبی */

@@ -65,9 +65,22 @@ const NOTCH_SVG =
 /* چهار لایه‌ی ماسک با ترکیبِ *پیش‌فرض* (اجتماع): جعبه‌ی گودی، نوارِ
    بالا، و دو نوارِ کناری. عمداً `mask-composite` استفاده نشد چون
    کلیدواژه‌اش در وبکیتِ قدیمی فرق دارد و مخاطبِ اصلی سافاریِ آیفون است. */
+/* ⚠️ لایه‌ها ۱ پیکسل *روی هم* می‌افتند، نه پهلوبه‌پهلو.
+   با ترکیبِ add (کروم و سافاریِ ۱۵.۴ به بعد) لبه‌های نرم‌شده جمع
+   می‌شوند و آلفا به ۱ می‌رسد. ولی وبکیتِ قدیمی پیش‌فرضش source-over
+   است: همان دو لبه به ۰.۷۸ می‌رسند، یعنی یک خطِ نازکِ نیمه‌شفاف روی
+   مرزِ لایه‌ها که فقط روی آیفون دیده می‌شود، نه در کروم.
+   همپوشانی این حالت را از اساس حذف می‌کند. هزینه‌اش ۱ پیکسل از نوکِ
+   قله است؛ فاصله تا لوگو ۵.۶ پیکسل بود. */
+const OVERLAP = '1px'
 const NOTCH_MASK = {
   image: `${NOTCH_SVG}, linear-gradient(#000,#000), linear-gradient(#000,#000), linear-gradient(#000,#000)`,
-  size: 'var(--boxW) var(--boxH), 100% calc(100% - var(--boxH)), calc(50% - var(--boxW) / 2) var(--boxH), calc(50% - var(--boxW) / 2) var(--boxH)',
+  size: [
+    'var(--boxW) var(--boxH)',
+    `100% calc(100% - var(--boxH) + ${OVERLAP})`,
+    `calc(50% - var(--boxW) / 2 + ${OVERLAP}) var(--boxH)`,
+    `calc(50% - var(--boxW) / 2 + ${OVERLAP}) var(--boxH)`,
+  ].join(', '),
   position: 'bottom center, top left, bottom left, bottom right',
 } as const
 const SPECS: Record<string,{label:string;color:string}> = {
