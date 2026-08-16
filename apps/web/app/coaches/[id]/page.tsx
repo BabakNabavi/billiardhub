@@ -19,32 +19,47 @@ const TEXT_M = 'rgba(17,17,16,0.28)'
    مشترکِ `.lqg` می‌آید، نه از توکنِ محلیِ این فایل. */
 const CBOR   = '1px solid rgba(17,17,16,0.07)'
 
-/* ── گودیِ بالای عکسِ پروفایل ──
-   خطِ صافِ پایینِ کاور نباید با گوشه‌ی تیز به دایره برسد. یک دایره‌ی
-   تنها لبه‌ی افقی را با مماسِ *عمودی* می‌بُرد، یعنی گوشه‌ی ۹۰ درجه.
-   این‌جا دو کمانِ کوچکِ مماس (fillet) خط را نرم وارد دایره می‌کنند.
+/* ── مرزِ کاور و ناحیه‌ی سفید: موجِ مقعرِ بِزیه ──
 
-   ⚠️ مماسِ خارجی ایجاب می‌کند فاصله‌ی مرکزها *دقیقاً* R+f باشد.
-   نسخه‌ی اول مرکزِ کمانِ کوچک را روی لبه‌ی جعبه گذاشت (فاصله ۱۰۵.۴
-   در برابر ۱۰۰) پس دو دایره همدیگر را قطع کردند و به‌جای انتقالِ
-   نرم دو برآمدگیِ قارچی درآمد.
+   ⚠️ نسخه‌های قبلی این مرز را با *دایره* می‌ساختند (اول یک دایره‌ی
+   خشک، بعد دایره + دو کمانِ مماس). حتی وقتی مماس‌ها پیوسته شدند،
+   بخشِ میانی یک قوسِ دایره‌ای با انحنای ثابت بود و چشم آن را
+   «بریدگی» می‌دید نه «موج». حالا مرز یک منحنیِ واقعی است:
 
-   هندسه در viewBox 346.41×120 با R = ۱۰۰ واحد و f = R:
-     X = √(R² + 2Rf) = R√3 = 173.205  ⇒ جعبه = 2X × 1.2R
-     مرکزِ دایره (173.205, 120) · مرکزِ کمان‌ها (0, 20) و (346.41, 20)
-     فاصله‌ی مرکزها = √(173.205² + 100²) = 200 = R + f ✓
-     نقطه‌ی مماس = (0,20) + 100·(0.866025, 0.5) = (86.6025, 70)
+     u = (x − S)/S ∈ [−1, 1]
+     y(x) = D · ( 1 − (1 − u²)³ )
 
-     f = R (نه 0.5R): انحنا از 1.73R از مرکز شروع می‌شود به‌جای 1.41R —
-     عقب‌تر و نرم‌تر، تا لبه «بریده با قیچی» به نظر نیاید. */
+   ⚠️ این خاصیت‌ها مالِ خودِ *تابع*‌اند، نه دقیقاً مالِ مسیرِ مکعبی:
+   در دو سرِ تابع y′=0 و y″=0 (پس اتصال به خطِ صاف حتی در انحنا هم
+   پیوسته است)، و انحنای قله با S² = 6·D·R برابرِ ۱/R می‌شود. تقریبِ
+   بِزیه این‌ها را کامل بازتولید نمی‌کند — انحنای قله حدودِ ۵٪ تندتر
+   درمی‌آید و در دو سر یک پرشِ ناچیز می‌ماند (شعاعِ ~۵۲۲ واحد). هیچ‌کدام
+   به چشم نمی‌آید؛ نوشتنشان این‌جا برای این است که کسی بعداً روی
+   «G2 بودن» حساب باز نکند.
+
+   D = 1.03·R (سه درصد فاصله‌ی سفید) و S = √(6·D·R) = 2.486·R،
+   پس جعبه همیشه 4.972R × 1.03R است — نسبتش ثابت، پس شکل با هر
+   اندازه‌ای یکی می‌ماند و در viewBox کش نمی‌آید.
+
+   نقاطِ کنترل با تبدیلِ Hermite→Bézier از مشتقِ *واقعیِ* تابع
+   ساخته شده‌اند. مولد: `scripts/gen-notch-wave.mjs` — عددها دستی
+   نیستند و با اجرای دوباره‌ی همان اسکریپت بازتولید می‌شوند.
+   بیشترین خطای منحنی نسبت به تابع ۰.۲۱۴ واحد است (۰.۲۱٪ عمق). */
+const NOTCH_WAVE =
+  'M0,103 C20.716,103 41.433,101.768 62.149,94.375'
+  + ' C82.865,86.982 103.582,74.031 124.298,59.547'
+  + ' C145.014,45.063 165.731,29.447 186.447,18.131'
+  + ' C207.163,6.815 227.88,0 248.596,0'
+  + ' C269.312,0 290.029,6.815 310.745,18.131'
+  + ' C331.461,29.447 352.178,45.063 372.894,59.547'
+  + ' C393.61,74.031 414.327,86.982 435.043,94.375'
+  + ' C455.759,101.768 476.476,103 497.192,103 Z'
+
+/* ماسک: مستطیلِ کامل منهای همان موج (evenodd) */
 const NOTCH_PATH =
-  'M0,0 H346.41 V120 H0 Z'
-  + 'M0,120 A100,100 0 0 0 86.6025,70'
-  + ' A100,100 0 0 1 259.8075,70'
-  + ' A100,100 0 0 0 346.41,120 Z'
-
+  'M0,0 H497.192 V103 H0 Z' + NOTCH_WAVE
 const NOTCH_SVG =
-  `url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 346.41 120' preserveAspectRatio='none'><path fill='%23000' fill-rule='evenodd' d='${NOTCH_PATH}'/></svg>")`
+  `url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 497.192 103' preserveAspectRatio='none'><path fill='%23000' fill-rule='evenodd' d='${NOTCH_PATH}'/></svg>")`
 
 /* چهار لایه‌ی ماسک با ترکیبِ *پیش‌فرض* (اجتماع): جعبه‌ی گودی، نوارِ
    بالا، و دو نوارِ کناری. عمداً `mask-composite` استفاده نشد چون
@@ -477,15 +492,29 @@ export default function CoachProfilePage() {
                    می‌برد — درست وارونه‌ی چیزی که باید. تنها انحنا همان
                    گودیِ دایره‌ایِ زیر است: عکسِ پروفایل از پایین داخلِ
                    کاور می‌آید و جای خودش را می‌بُرد. */
-                /* شعاعِ گودی از قطرِ آواتار مشتق می‌شود تا هم‌مرکز بماند؛
-                   جعبه‌ی ماسک ۲:۱ است، مثلِ viewBox. شرحِ هندسه بالای
-                   فایل، کنارِ NOTCH_PATH. */
-                /* ⚠️ فاصله فقط ۳ پیکسل. با ۱۰ تا ۱۶ پیکسل یک گودالِ سفیدِ پهن
-                   دورِ عکس می‌افتاد که «بریده با قیچی» به نظر می‌رسید. در
-                   نمونه، کاور تا خودِ حلقه‌ی سفیدِ آواتار می‌آید. صفر نشد
-                   تا گِردکردنِ زیرپیکسلی تیغه‌ای از کاور روی حلقه نیندازد. */
-                '--cut':'calc(var(--av) / 2 + 3px)',
-                '--boxW':'calc(var(--cut) * 3.4641)', '--boxH':'calc(var(--cut) * 1.2)',
+                /* ابعادِ موج از قطرِ آواتار مشتق می‌شوند تا هم‌مرکز و
+                   هم‌مقیاس بمانند. نسبتِ جعبه ۴.۸۲۷ است، همان نسبتِ
+                   viewBox. شرحِ هندسه بالای فایل، کنارِ NOTCH_WAVE. */
+                /* هر دو بُعد از شعاعِ آواتار مشتق می‌شوند و نسبتشان
+                   برابرِ نسبتِ viewBox است (4.972 : 1.03)، پس منحنی
+                   در هیچ اندازه‌ای کش نمی‌آید. */
+                /* `--notch-r` نه `--r`: متغیرِ ارث‌بر با نامِ عام روی یک
+                   کارت، دیر یا زود با چیزِ دیگری برخورد می‌کند.
+                   `min(100%,…)` چون زیرِ حدودِ ۳۰۴ پیکسل عرضِ جعبه از
+                   خودِ کاور بیشتر می‌شد و دو سرِ موج بریده می‌شدند.
+                   بلندی از عرض مشتق می‌شود تا نسبت (4.827) در آن حالت
+                   هم نشکند. */
+                /* ⚠️ سقف با واحدِ viewport، نه درصد: درصد در بُعدِ دومِ
+                   mask-size یعنی درصدِ *ارتفاع*، پس min(100%,…) نسبت
+                   را از ۴.۸۳ به ۷.۰۷ می‌برد و موج را کش می‌داد
+                   (اندازه‌گیری شد).
+                   کارت روی موبایل تقریباً 100vw − 26px است؛ زیرِ حدودِ
+                   ۳۰۴ پیکسل همین سقف جلوی بیرون‌زدنِ دو سرِ موج را
+                   می‌گیرد. چون *شعاع* سقف می‌خورد نه یکی از دو بُعد،
+                   نسبت در همه حال دست‌نخورده می‌ماند. */
+                '--notch-r':'min(calc(var(--av) / 2), calc((100vw - 26px) / 4.972))',
+                '--boxW':'calc(var(--notch-r) * 4.972)',
+                '--boxH':'calc(var(--notch-r) * 1.03)',
                 WebkitMaskImage:NOTCH_MASK.image, maskImage:NOTCH_MASK.image,
                 WebkitMaskSize:NOTCH_MASK.size, maskSize:NOTCH_MASK.size,
                 WebkitMaskPosition:NOTCH_MASK.position, maskPosition:NOTCH_MASK.position,
@@ -495,10 +524,26 @@ export default function CoachProfilePage() {
                 {/* دکمه‌ی نامرئیِ روی کاور. لوگوی گوشه بعد از این می‌آید،
                     پس رویش می‌ماند و کلیکش را این نمی‌دزدد. */}
                 {coach.coverImage && <button type="button" onClick={() => openImage(coach.coverImage ?? '', { title: 'تصویر کاور' })} aria-label="بزرگ‌نمایی تصویر کاور" style={{ position:'absolute', inset:0, background:'none', border:'none', padding:0, cursor:'zoom-in' }}/>}
-                {/* وسط‌چینی با insetInline:0 + marginInline:auto — نه
+                {/* ⚠️ سپرِ کلیک. ماسک برخلافِ clip-path جلوی کلیک را
+                    نمی‌گیرد، پس ناحیه‌ی گودی — که دیگر دیده نمی‌شود —
+                    هنوز دکمه‌ی کاور را زیرِ خودش داشت. این SVG *دقیقاً*
+                    همان مسیرِ موج را می‌گیرد (نه یک مستطیلِ گرد) تا فقط
+                    همان‌جا را بپوشاند و لبه‌های دیدنیِ کاور کلیک‌پذیر
+                    بمانند. بعد از دکمه می‌آید، پس در ترتیبِ رسم بالاتر است.
+                    وسط‌چینی با insetInline:0 + marginInline:auto — نه
                     insetInlineStart:'50%' با translateX که در RTL جای
                     اشتباه می‌نشیند (translate فیزیکی است، inset منطقی). */}
-                <span aria-hidden style={{ position:'absolute', insetInline:0, marginInline:'auto', bottom:0, width:'calc(var(--cut) * 2)', height:'var(--cut)', borderRadius:'var(--cut) var(--cut) 0 0', cursor:'default' }}/>
+                <svg aria-hidden viewBox='0 0 497.192 103' preserveAspectRatio='none'
+                  /* ⚠️ `pointerEvents:'none'` روی خودِ svg لازم است: جعبه‌ی
+                     آن مستطیل است و بالای موج — همان‌جا که کاور دیده
+                     می‌شود — روی دکمه می‌افتاد و کلیکش را می‌بلعید
+                     (اندازه‌گیری: حدودِ ۵۴٪ سطحِ جعبه). فقط خودِ مسیر
+                     کلیک می‌گیرد. */
+                  style={{ position:'absolute', insetInline:0, marginInline:'auto', bottom:0,
+                    width:'var(--boxW)', height:'var(--boxH)', cursor:'default', display:'block',
+                    pointerEvents:'none' }}>
+                  <path d={NOTCH_WAVE} fill='transparent' style={{ pointerEvents:'all', cursor:'default' }} />
+                </svg>
                 <div style={{ position:'absolute', inset:0, backgroundImage:'radial-gradient(circle, rgba(255,255,255,0.045) 1px, transparent 1px)', backgroundSize:'16px 16px', pointerEvents:'none' }}/>
                 <div style={{ position:'absolute', left:'-6%', top:'-40%', width:'46%', height:'180%', background:'radial-gradient(ellipse, rgba(199,166,106,0.18) 0%, transparent 66%)', filter:'blur(18px)', pointerEvents:'none' }}/>
                 <div style={{ position:'absolute', top:'-20%', bottom:'-20%', left:'54%', width:'1.5px', background:'linear-gradient(180deg,transparent,rgba(199,166,106,0.45),transparent)', transform:'rotate(-10deg)', pointerEvents:'none' }}/>
@@ -520,8 +565,9 @@ export default function CoachProfilePage() {
                 <div className="lq-ident" style={{ display:'flex', flexDirection:'column', alignItems:'center', textAlign:'center' }}>
                   <button onClick={() => { openImage(coach.photo ?? '', { alt: coach.name, title: 'عکس پروفایل' }) }} aria-label="بزرگ‌نمایی عکس پروفایل" disabled={!coach.photo} style={{ position:'relative', background:'none', border:'none', padding:0, cursor: coach.photo ? 'pointer' : 'default', borderRadius:'50%', aspectRatio:'1 / 1', flexShrink:0,
                     /* بالاکشیدن *نصفِ قطر* است (قطر روی کارت تعریف شده)،
-                       تا مرکزِ آواتار دقیقاً روی پایین‌ترین نقطه‌ی کمان
-                       بنشیند و با تغییرِ اندازه از آن جدا نیفتد. */
+                       تا مرکزِ آواتار روی لبه‌ی صافِ کاور بنشیند: نیمی
+                       داخلِ تصویر، نیمی داخلِ سفید. قله‌ی موج ۳٪ شعاع
+                       بالاتر از تارکِ آواتار است — ۱.۷ پیکسل روی موبایل. */
                     width:'var(--av)', marginTop:'calc(var(--av) / -2)' } as React.CSSProperties}>
                     {/* هاله‌ی طلاییِ نبض‌دار دورِ آواتار */}
                     <span aria-hidden className="lq-halo" style={{ position:'absolute', inset:-7, borderRadius:'50%', background:'radial-gradient(circle, rgba(199,166,106,0.42) 0%, rgba(199,166,106,0) 70%)', pointerEvents:'none' }}/>
