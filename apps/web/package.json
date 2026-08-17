@@ -63,7 +63,8 @@
     "test:responsive": "node scripts/test-responsive.mjs",
     "test:social:audit": "node scripts/test-social.mjs",
     "test:ui-actions": "node scripts/test-ui-actions.mjs",
-    "audit:admin-ui": "node scripts/audit-admin-ui.mjs"
+    "audit:admin-ui": "node scripts/audit-admin-ui.mjs",
+    "test:verified:ui": "node scripts/test-verified-badge.mjs"
   },
   "dependencies": {
     "@fontsource/vazirmatn": "^5.2.8",

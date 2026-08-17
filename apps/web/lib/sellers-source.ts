@@ -47,6 +47,8 @@ export interface PublicStore {
   /** استوریِ تک‌عکسیِ پنلِ فروشگاه (جدا از فهرستِ چنداستوریِ Storage) */
   storyImage: string
   storyText: string
+  /** تیکِ آبی — ستونِ `profiles.verified` */
+  verified: boolean
 }
 
 const s = (v: unknown) => String(v ?? '').trim()
@@ -56,7 +58,7 @@ export async function listPublicStores(limit = 24): Promise<PublicStore[]> {
 
   const { data, error } = await sb
     .from('profiles')
-    .select('slug,owner_id,data')
+    .select('slug,owner_id,data,verified')
     .eq('kind', 'seller')
     .eq('status', 'approved')
     .order('updated_at', { ascending: false })
@@ -64,7 +66,7 @@ export async function listPublicStores(limit = 24): Promise<PublicStore[]> {
 
   if (error || !Array.isArray(data)) return []
 
-  type Row = { slug: string; owner_id: string; data: Record<string, unknown> | null }
+  type Row = { slug: string; owner_id: string; data: Record<string, unknown> | null; verified?: boolean | null }
   const rows = data as Row[]
 
   /* نام و عکسِ مالک در یک درخواست، نه یکی به‌ازای هر فروشگاه */
@@ -94,6 +96,7 @@ export async function listPublicStores(limit = 24): Promise<PublicStore[]> {
       },
       storyImage: s(d.storyImage),
       storyText: s(d.storyText),
+      verified: r.verified === true,
     }
   })
 }

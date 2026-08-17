@@ -2,6 +2,7 @@ export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { actorFromRequest, isAdmin, audit } from '@/lib/finance/db';
 import { PROFILE_KINDS, listProfiles, reviewProfile, type ProfileKind } from '@/lib/profiles/server';
+import { can } from '@/lib/admin/permissions';
 
 /* بررسی پروفایل‌ها توسط ادمین — تأیید/رد، تیک آبی و تأیید جواز کسب */
 
@@ -33,7 +34,18 @@ export async function PATCH(req: NextRequest) {
 
   const patch: Parameters<typeof reviewProfile>[1] = {};
   if (['approved', 'pending', 'rejected'].includes(String(b?.status))) patch.status = b.status;
-  if (typeof b?.verified === 'boolean') patch.verified = b.verified;
+  /* ── تیکِ آبی مجوزِ خودش را دارد ──
+     بقیه‌ی این مسیر (تأیید/رد/جواز) کارِ همان ادمینی است که صفحه‌ی
+     نقش را دارد، ولی اعطای تیک تصمیمِ جداگانه‌ای است و در
+     `PERMISSION_GROUPS` کلیدِ خودش را دارد. بدونِ این بررسی، ادمینی
+     که عمداً کلیدِ `verified` را ندارد می‌توانست با یک درخواستِ
+     مستقیم تیک بدهد. */
+  if (typeof b?.verified === 'boolean') {
+    if (!(await can(actor.id, 'verified'))) {
+      return NextResponse.json({ message: 'اجازه‌ی اعطای تیک آبی را ندارید' }, { status: 403 });
+    }
+    patch.verified = b.verified;
+  }
   if (typeof b?.licenseVerified === 'boolean') patch.licenseVerified = b.licenseVerified;
   if (b?.licenseNote !== undefined) patch.licenseNote = String(b.licenseNote ?? '').slice(0, 500);
 

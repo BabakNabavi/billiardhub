@@ -57,6 +57,8 @@ export interface Technician {
   albums: TechAlbum[]
   phone: string
   whatsapp: string
+  /** تیکِ آبی — ستونِ `profiles.verified`، فقط ادمین می‌دهد */
+  verified?: boolean
 }
 
 /* ⚠️ عمداً خالی — پیش از رونمایی پاک شد.

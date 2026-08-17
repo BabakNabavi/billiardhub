@@ -77,7 +77,17 @@ export async function loadProfileRows(kind: ProfileKind): Promise<AdminRow[]> {
        چه ثبت کرده. `slug` این‌جا خودش شناسه است، ولی صریح بودنش
        بهتر از تکیه بر آن قرارداد است. */
     profileId: p.id,
+    verified: p.verified === true,
   }))
+}
+
+/** اعطا یا پس‌گرفتنِ تیکِ آبی — جدا از انتشار */
+export async function setProfileVerified(id: string, next: boolean): Promise<void> {
+  await apiFetch('/api/admin/profiles', {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ id, verified: next }),
+  })
 }
 
 /** انتشار ↔ تعلیق */
@@ -100,7 +110,13 @@ export async function fetchAdminProfiles<T>(kind: ProfileKind): Promise<T[]> {
     const j = await r.json().catch(() => null) as { profiles?: Record<string, ApiProfile[]> } | null
     const list = j?.profiles?.[kind] ?? []
     /* `slug` و `status` از ستون‌های خود ردیف می‌آیند، نه از data */
-    return list.map(p => ({ ...(p.data ?? {}), slug: p.slug, status: p.status, id: p.id })) as T[]
+    /* `verified` هم ستونِ ردیف است. بدونِ این، صفحه‌های ادمینِ
+       مربی/داور/فروشگاه تیک را از داخلِ jsonb می‌خواندند — جایی که
+       فرمِ خودِ کاربر می‌نویسد و ادمین نه. */
+    return list.map(p => ({
+      ...(p.data ?? {}), slug: p.slug, status: p.status, id: p.id,
+      verified: p.verified === true,
+    })) as T[]
   } catch { return [] }
 }
 
@@ -146,5 +162,6 @@ export function profileAdminSource(kind: ProfileKind) {
       const row = cache.find(r => r.slug === id)
       if (row?.status === 'approved') await toggleProfile(id, 'approved')
     },
+    setVerified: setProfileVerified,
   }
 }

@@ -19,6 +19,7 @@ import { useProfileImageViewer } from '@/components/ProfileImageViewer'
 import { useTabKeys } from '@/hooks/use-tab-keys'
 import ClubReviews from '../../../components/club/ClubReviews';
 import ClubLogo from '../../../components/club/ClubLogo'
+import VerifiedBadge from '../../../components/VerifiedBadge'
 import FavoriteButton from '../../../components/FavoriteButton';
 
 interface Club {
@@ -469,9 +470,7 @@ export default function ClubProfilePage() {
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
                   <h1 style={{ fontSize: 'clamp(22px, 5.5vw, 55px)', fontWeight: 900, color: '#fff', margin: 0, letterSpacing: '-0.03em', lineHeight: 1.05 }}>{club.name}</h1>
                   {club.verificationStatus === 'verified' && (
-                    <div title="باشگاه تأیید شده" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 28, height: 28, borderRadius: '50%', background: 'linear-gradient(135deg,#1d9bf0,#0d6efd)', boxShadow: '0 2px 8px rgba(29,155,240,0.5)', flexShrink: 0 }}>
-                      <Check size={15} color="#fff" strokeWidth={3} />
-                    </div>
+                    <VerifiedBadge size={28} title="باشگاه تأیید شده" style={{ marginInlineStart: 0 }} />
                   )}
                 </div>
                 {club.managerName && (

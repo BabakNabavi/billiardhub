@@ -27,6 +27,14 @@ export type PlacementKey =
   | 'equipment_ads_left'
   | 'homepage_bottom_banner'
 
+/* ⚠️ دوقلوی این تایپ در `lib/ads/resolve.ts` است و هر فیلدِ تازه باید
+   به هر دو اضافه شود (`verified` تازه‌ترینش بود).
+
+   عمداً یکی نشده‌اند: `resolve.ts` از `sb()` استفاده می‌کند و
+   server-only است؛ re-export کردنش از این‌جا آن ماژول را به گرافِ
+   کلاینت می‌کشد — همان یالِ شکننده‌ای که یک‌بار صفحه‌ی اصلی را ۵۰۰
+   کرد (توضیحش در `lib/home-types.ts`). اگر روزی یکی‌شان کردی، جای
+   درستش یک فایلِ سومِ بی‌طرفِ فقط-تایپ است. */
 export interface EntitySnapshot {
   entityType: 'product' | 'club' | 'seller'
   ref: string
@@ -49,6 +57,8 @@ export interface EntitySnapshot {
   condition?: string
   city?: string
   badge?: string | null
+  /** تیکِ آبی — کارتِ تبلیغاتی همان تیکِ کارتِ عادی را نشان می‌دهد */
+  verified?: boolean
   /** آمار واقعی موجودیت (مثلاً تعداد میز باشگاه)؛ نبودنش = نداریم */
   stats?: { tables?: number; snooker?: number; pocket?: number; highball?: number }
 }

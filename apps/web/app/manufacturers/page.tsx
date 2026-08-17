@@ -7,6 +7,7 @@ import { MANUFACTURERS, type MockManufacturer } from '../../lib/manufacturers-da
 import { listApprovedManufacturers, profileToManufacturer } from '../../lib/manufacturer-store'
 import type { ManufacturerProfile } from '../../lib/manufacturer-store'
 import { fetchProfiles } from '../../lib/profiles/client'
+import VerifiedBadge from '../../components/VerifiedBadge'
 
 const GOLD     = '#C7A66A'
 const GOLD_D   = '#8F6531'
@@ -253,7 +254,7 @@ function MfrCard({ mfr, view }: { mfr: MockManufacturer; view: 'grid' | 'list' }
         </div>
         <div className="sel-list-body" style={{ flex: 1, minWidth: 0, padding: '16px 18px', display: 'flex', flexDirection: 'column', gap: 10 }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
-            <h3 style={{ fontSize: 16, fontWeight: 800, color: TEXT, margin: 0 }}>{mfr.name}</h3>
+            <h3 style={{ fontSize: 16, fontWeight: 800, color: TEXT, margin: 0 }}>{mfr.name}{mfr.verified && <VerifiedBadge size={15} title="تولیدکننده‌ی تأیید شده" />}</h3>
           </div>
           <p className="sel-list-desc" style={{ fontSize: 12.5, color: TEXT_SEC, margin: 0, lineHeight: 1.6, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{mfr.description}</p>
           <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>{metaRow}</div>
@@ -293,7 +294,7 @@ function MfrCard({ mfr, view }: { mfr: MockManufacturer; view: 'grid' | 'list' }
         </div>
 
         <div style={{ margin: '0 0 5px' }}>
-          <h3 style={{ fontSize: 16, fontWeight: 800, color: TEXT, margin: 0, lineHeight: 1.35 }}>{mfr.name}</h3>
+          <h3 style={{ fontSize: 16, fontWeight: 800, color: TEXT, margin: 0, lineHeight: 1.35 }}>{mfr.name}{mfr.verified && <VerifiedBadge size={15} title="تولیدکننده‌ی تأیید شده" />}</h3>
         </div>
 
         <p style={{ fontSize: 12.5, color: TEXT_SEC, margin: '0 0 12px', lineHeight: 1.6, minHeight: 40, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{mfr.description}</p>
@@ -407,7 +408,9 @@ export default function ManufacturersPage() {
   useEffect(() => {
     void fetchProfiles<ManufacturerProfile>('manufacturer').then(rows => {
       setRemoteMfrs(rows.filter(r => r.status === 'approved')
-        .map(r => ({ ...r.data, slug: r.slug } as ManufacturerProfile)))
+        /* `verified` ستونِ جدولِ `profiles` است، نه داخلِ jsonb —
+           بدونِ این، تیکِ ادمین به کارت نمی‌رسید. */
+        .map(r => ({ ...r.data, slug: r.slug, verified: r.verified } as ManufacturerProfile)))
     })
   }, [])
 

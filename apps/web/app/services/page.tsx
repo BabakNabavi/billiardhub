@@ -16,6 +16,7 @@ import {
 } from '../../lib/technicians-data'
 import { listApprovedTechnicians, profileToTechnician, type TechnicianProfile } from '../../lib/technician-store'
 import { fetchProfiles } from '../../lib/profiles/client'
+import VerifiedBadge from '../../components/VerifiedBadge'
 
 const GOLD   = '#C7A66A'
 const GOLD_D = '#8F6531'
@@ -54,7 +55,7 @@ function TechCard({ t, i }: { t: Technician; i: number }) {
       </div>
 
       <div style={{ padding: '16px 18px 15px', display: 'flex', flexDirection: 'column', gap: 4, flex: 1 }}>
-        <h3 style={{ fontSize: 15.5, fontWeight: 900, margin: 0, color: TEXT, letterSpacing: '-0.01em' }}>{t.name}</h3>
+        <h3 style={{ fontSize: 15.5, fontWeight: 900, margin: 0, color: TEXT, letterSpacing: '-0.01em' }}>{t.name}{t.verified && <VerifiedBadge size={14} title="متخصص تأیید شده" />}</h3>
         <span style={{ fontSize: 12, fontWeight: 700, color: GOLD_D }}>{t.title}</span>
         <div style={{ height: 1, background: '#F0EDE5', margin: '9px 0' }} />
         <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: SEC }}>
@@ -91,7 +92,7 @@ export default function ServicesPage() {
     void fetchProfiles<TechnicianProfile>('technician').then(rows => {
       const remote = rows
         .filter(r => r.status === 'approved')
-        .map(r => profileToTechnician({ ...r.data, slug: r.slug } as TechnicianProfile))
+        .map(r => profileToTechnician({ ...r.data, slug: r.slug, verified: r.verified } as TechnicianProfile))
       if (remote.length) setRegistered(remote)
     }).catch(() => { /* شبکه قطع بود ⇒ فهرستِ محلی می‌ماند */ })
   }, [])

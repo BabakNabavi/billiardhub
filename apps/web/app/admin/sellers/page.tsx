@@ -10,6 +10,7 @@ import { useAuthStore } from '../../../store/auth.store'
 import { listSellerProfiles, updateSellerProfile, type SellerProfile } from '../../../lib/seller-store'
 import { fetchAdminProfiles, patchAdminProfile } from '../../../lib/admin/profile-rows'
 import ScrollList from '../../../components/ui/ScrollList'
+import VerifiedBadge from '../../../components/VerifiedBadge'
 
 const ADMIN_PHONE = '09121327283'
 
@@ -108,7 +109,7 @@ export default function AdminSellersPage() {
                       <div style={{ display: 'flex', alignItems: 'center', gap: 7, flexWrap: 'wrap' }}>
                         <span style={{ fontSize: 15.5, fontWeight: 800 }}>{s.title || '(بدون نام)'}</span>
                         {s.verified && (
-                          <svg width="16" height="16" viewBox="0 0 40 40" aria-label="تیک آبی"><path fill="#0095F6" d="M19.998 3.094L14.638 0l-2.972 5.15H5.432v6.354L0 14.64 3.094 20 0 25.359l5.432 3.137v5.905h5.975L14.638 40l5.36-3.094L25.358 40l3.232-5.6h6.162v-6.01L40 25.359 36.905 20 40 14.641l-5.248-3.03v-6.46h-6.419L25.358 0l-5.36 3.094z" /><path fill="#fff" d="M18.09 24.79l-4.28-4.28 1.53-1.53 2.75 2.75 6.57-6.57 1.53 1.53z" /></svg>
+                          <VerifiedBadge size={16} title="تیک آبی" style={{ marginInlineStart: 0 }} />
                         )}
                       </div>
                       <div style={{ fontSize: 12, color: TEXT_S, marginTop: 3 }}>
@@ -169,7 +170,7 @@ export default function AdminSellersPage() {
                       disabled={!hasCert}
                       title={hasCert ? '' : 'ابتدا فروشنده باید جواز کسب آپلود کند'}
                       style={{ ...btn('rgba(0,149,246,0.10)', '#0095F6', '1px solid rgba(0,149,246,0.28)'), opacity: hasCert ? 1 : 0.45, cursor: hasCert ? 'pointer' : 'not-allowed' }}>
-                      <svg width="14" height="14" viewBox="0 0 40 40"><path fill="#0095F6" d="M19.998 3.094L14.638 0l-2.972 5.15H5.432v6.354L0 14.64 3.094 20 0 25.359l5.432 3.137v5.905h5.975L14.638 40l5.36-3.094L25.358 40l3.232-5.6h6.162v-6.01L40 25.359 36.905 20 40 14.641l-5.248-3.03v-6.46h-6.419L25.358 0l-5.36 3.094z" /><path fill="#fff" d="M18.09 24.79l-4.28-4.28 1.53-1.53 2.75 2.75 6.57-6.57 1.53 1.53z" /></svg>
+                      <VerifiedBadge size={14} title="" style={{ marginInlineStart: 0 }} />
                       اعطای تیک آبی تایید
                     </button>
                     <button onClick={() => act(s.slug, { status: 'rejected' })} style={{ ...btn('transparent', '#b91c1c', '1px solid rgba(239,68,68,0.24)'), marginInlineStart: 'auto' }}>

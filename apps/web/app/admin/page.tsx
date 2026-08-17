@@ -17,6 +17,7 @@ import {
   CheckCircle, TrendingUp, Building2, Star, Megaphone, Scale, Store,
   Clapperboard, Factory, Wrench, ShieldCheck, Wallet,
   CalendarDays, Flag, Package, LifeBuoy, UserPlus, Tag, MessageSquare, Percent,
+  BadgeCheck,
 } from 'lucide-react';
 
 const GOLD   = '#C7A66A';
@@ -55,6 +56,10 @@ const QUEUE_OF: Record<string, string> = {
 
      صفِ واقعیِ درخواستِ نقش '/admin/roles' است. */
   '/admin/roles':         'pendingRoles',
+  /* صفِ تیکِ آبی — مدرکی آپلود شده و تیکی داده نشده. هم‌پوشانی با
+     صفِ نقش‌ها عمدی است: یک مدرک هم روی میزِ آن نقش است و هم روی
+     میزِ تیک، و هرکدام تصمیمِ جداگانه‌ای می‌خواهند. */
+  '/admin/verified':      'awaitingBadge',
 };
 
 /* پروفایل‌های در انتظار به تفکیکِ نوع — از pendingByKind */
@@ -87,6 +92,7 @@ const SECTIONS: AdminSection[] = [
          خودِ صفحه‌ی /admin/roles فعلاً می‌ماند (برای دیدنِ سابقه)، ولی
          از پنل لینک نمی‌شود. */
       { title: 'احراز هویت', desc: 'بررسی درخواست‌های تأیید هویت کاربران', icon: <ShieldCheck size={20} />, link: '/admin/verifications' },
+      { title: 'تیک آبی', desc: 'اعطا و پس‌گرفتن تیک تأیید — باشگاه، مربی، داور، بازیکن، متخصص فنی، فروشگاه و تولیدکننده', icon: <BadgeCheck size={20} />, link: '/admin/verified' },
       { title: 'تیکت‌های پشتیبانی', desc: 'پیام‌های تماس با ما و درخواست تغییر کد پستی و اطلاعات بانکی', icon: <LifeBuoy size={20} />, link: '/admin/support' },
       { title: 'دسترسی ادمین', desc: 'دادن یا برداشتن دسترسی ادمین به کاربران', icon: <Crown size={20} />, link: '/admin/access' },
     ],

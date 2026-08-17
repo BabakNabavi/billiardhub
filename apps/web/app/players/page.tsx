@@ -17,6 +17,7 @@ import {
 } from '../../lib/players-data'
 import { listApprovedPlayers, profileToPlayer, type PlayerProfile } from '../../lib/player-store'
 import { fetchProfiles } from '../../lib/profiles/client'
+import VerifiedBadge from '../../components/VerifiedBadge'
 
 const GOLD   = '#C7A66A'
 const GOLD_D = '#8F6531'
@@ -65,7 +66,7 @@ function PlayerCard({ p, i, size = 'std' }: { p: Player; i: number; size?: 'std'
 
       {/* هویت — پایین کارت */}
       <div className="pl-body">
-        <div className="pl-name">{p.name}</div>
+        <div className="pl-name">{p.name}{p.verified && <VerifiedBadge size={14} title="بازیکن تأیید شده" />}</div>
         <div className="pl-name-en">{p.nameEn}</div>
         <div className="pl-meta">
           <MapPin size={11} />
@@ -97,7 +98,7 @@ export default function PlayersPage() {
     void fetchProfiles<PlayerProfile>('player').then(rows => {
       const remote = rows
         .filter(r => r.status === 'approved')
-        .map(r => profileToPlayer({ ...r.data, slug: r.slug } as PlayerProfile))
+        .map(r => profileToPlayer({ ...r.data, slug: r.slug, verified: r.verified } as PlayerProfile))
       if (remote.length) setRegistered(remote)
     }).catch(() => { /* شبکه قطع بود ⇒ فهرستِ محلی می‌ماند */ })
   }, [])

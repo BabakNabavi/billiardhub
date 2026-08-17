@@ -1512,6 +1512,51 @@ select:disabled { opacity: 0.55; cursor: not-allowed; }
 }
 .lq-seg > button:active { transform: scale(.97); }
 
+/* ── دکمه‌ی کنشِ ردیفِ پنل ──
+   ردیف‌های پنل ادمین دکمه‌هایشان را اینلاین استایل می‌دادند و هیچ‌کدام
+   hover و focus-visible نداشتند — یعنی دو تا از چهار حالتِ اجباری
+   غایب بود. رنگ از خودِ دکمه می‌آید (`currentColor`)، پس یک کلاس برای
+   هر رنگی کافی است. */
+.lq-act {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border-radius: 10px;
+  font-family: inherit;
+  font-weight: 800;
+  cursor: pointer;
+  transition: filter .18s, box-shadow .2s, transform .16s;
+}
+.lq-act:hover:not(:disabled) { filter: brightness(0.94); }
+.lq-act:active:not(:disabled) { transform: scale(.97); }
+.lq-act:focus-visible {
+  outline: 2px solid var(--gold-deep);
+  outline-offset: 2px;
+}
+.lq-act:disabled { cursor: not-allowed; filter: none; }
+
+/* دکمه/لینکِ فقط‌آیکون در همان ردیف‌ها */
+.lq-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  /* WCAG 2.2 — هدفِ لمس دستِ‌کم ۲۴×۲۴ */
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  border: 1px solid #E7E2D6;
+  background: #FAFAF7;
+  color: #5B564B;
+  cursor: pointer;
+  transition: border-color .18s, color .18s, background .18s;
+}
+.lq-icon-btn:hover { border-color: rgba(199,166,106,0.45); color: var(--gold-deep); }
+.lq-icon-btn:focus-visible {
+  outline: 2px solid var(--gold-deep);
+  outline-offset: 2px;
+}
+
 /* ── چهار تب که یکی‌شان بلند است ──
    `min-width` فقط کفِ عرض را یکی می‌کند؛ برچسبی مثل «ساعت کاری» از
    آن رد می‌شود و دوباره چهار عرضِ متفاوت می‌سازد. این حالت ستون‌ها را

@@ -44,6 +44,7 @@ import { modernizeType } from '../lib/market/title';
 import ProductTitle from '../components/market/ProductTitle';
 import { CardMeta, CardPrice } from '../components/market/CardFacts';
 import { thumbUrl } from '../lib/media/thumb';
+import VerifiedBadge from '../components/VerifiedBadge';
 
 /* ── عرضِ واقعیِ کادرها ──
    عددها از اندازه‌ی نمایشِ همین کارت‌ها می‌آیند و دو برابر شده‌اند
@@ -301,6 +302,7 @@ import type { RealClub, RealProduct, RealStore } from '../lib/home-types';
 /* پاسخ خام APIها */
 interface ApiClub {
   id: string; name: string; city?: string; images?: string[]; hasActiveStory?: boolean
+  isVerified?: boolean
   snookerTables?: number; pocketTables?: number; highballTables?: number
   vipSnookerTables?: number; vipPocketTables?: number
 }
@@ -314,6 +316,7 @@ interface ApiProduct {
 interface ApiStore {
   id: string; firstName?: string; lastName?: string; avatar?: string
   sellerProfile?: { storeName?: string; city?: string; logo?: string; specialty?: string } | null
+  verified?: boolean
 }
 
 /* وقتی باشگاه واقعی عکس ندارد — تصویر عمومی بیلیارد، نه عکس باشگاه
@@ -426,7 +429,9 @@ function ClubCard({ club, h = '360px', featured = false }: { club: RealClub; h?:
             flexDirection: 'column', justifyContent: 'flex-start',
             overflow: 'hidden', gap: '3px',
           }}>
-            <div style={{ fontSize: featured ? '17px' : '14px', fontWeight: 800, color: '#1a1a1a', letterSpacing: '-0.02em', lineHeight: 1.2 }}>{club.name}</div>
+            <div style={{ fontSize: featured ? '17px' : '14px', fontWeight: 800, color: '#1a1a1a', letterSpacing: '-0.02em', lineHeight: 1.2 }}>
+              {club.name}{club.verified && <VerifiedBadge size={featured ? 15 : 13} title="باشگاه تأیید شده" />}
+            </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '3px' }}>
               <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'rgba(0,0,0,0.40)', fontSize: '12px' }}>
                 <MapPin size={10} style={{ color: GOLD }} />{club.city}{club.dist ? `، ${club.dist}` : ''}
@@ -487,6 +492,7 @@ function ClubCard({ club, h = '360px', featured = false }: { club: RealClub; h?:
             <div style={{ fontSize: '16.5px', fontWeight: 800, color: '#1a1a1a',
               letterSpacing: '-0.02em', textAlign: 'center', lineHeight: 1.2 }}>
               {club.name.replace(/^باشگاه\s+/, '')}
+              {club.verified && <VerifiedBadge size={14} title="باشگاه تأیید شده" />}
             </div>
             {/* تعداد میزها به‌جای امتیاز — فقط وقتی باشگاه اعلامش کرده */}
             {club.tables > 0 && (
@@ -646,7 +652,9 @@ function SellerCard({ s }: { s: RealStore }) {
       </div>
       {/* Info */}
       <div style={{ padding: '14px 14px 16px', textAlign: 'center' }}>
-        <div style={{ fontSize: '14px', fontWeight: 800, color: TEXT, lineHeight: 1.3 }}>{s.name}</div>
+        <div style={{ fontSize: '14px', fontWeight: 800, color: TEXT, lineHeight: 1.3 }}>
+          {s.name}{s.verified && <VerifiedBadge size={13} title="فروشگاه تأیید شده" />}
+        </div>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '3px', marginTop: '3px', fontSize: '11px', color: TEXT_M }}>
           <MapPin size={9} style={{ color: GOLD }} />{s.city}
         </div>
@@ -890,6 +898,7 @@ export default function HomeClient({ initialPlacements, initialFeatured, service
         img2: thumbUrl(c.images?.[1], CLUB_W) || CLUB_IMG_FALLBACK[(i + 1) % CLUB_IMG_FALLBACK.length]!,
         price: 0, badge: null as string | null, tags: [] as string[],
         hasStory: !!c.hasActiveStory,
+        verified: !!c.isVerified,
       })));
 
       setRealProducts(pr.slice(0, 14).map(p => ({
@@ -919,6 +928,7 @@ export default function HomeClient({ initialPlacements, initialFeatured, service
         return {
           id: s.id,
           name: sp.storeName || person || 'فروشگاه',
+          verified: s.verified === true,
           city: sp.city ?? '',
           specialty: sp.specialty || 'تجهیزات بیلیارد',
           rating: 0, reviews: 0,
@@ -973,6 +983,7 @@ export default function HomeClient({ initialPlacements, initialFeatured, service
         : {}),
       rating: 0, reviews: 0, type: 'اسنوکر', img: thumbUrl(e.image, CLUB_W), img2: thumbUrl(e.image, CLUB_W),
       price: 0, badge: e.badge ?? null as string | null, tags: [] as string[], hasStory: false,
+      verified: e.verified === true,
     }));
   }, [featClubs, clubSlot.mode, clubSlot.status, realClubs]);
 
@@ -983,6 +994,7 @@ export default function HomeClient({ initialPlacements, initialFeatured, service
        نظر، امتیاز صفر می‌ماند و کارت اصلاً نشانش نمی‌دهد */
     return snaps.map(e => ({
       id: e.ref, name: e.title, city: e.city || '',
+      verified: e.verified === true,
       specialty: 'تجهیزات بیلیارد', rating: 0, reviews: 0, img: thumbUrl(e.image, LOGO_W), badge: e.badge ?? null,
     }));
   }, [featStores, storeSlot.mode, storeSlot.status, realStores]);

@@ -7,6 +7,7 @@ import { toFa, faNum, MONO, Icon, LQ, LQ_NEUTRAL, LQ_FELT_ON } from '../../selle
 import { getManufacturerProfile, profileToManufacturer } from '../../../lib/manufacturer-store'
 import type { ManufacturerProfile } from '../../../lib/manufacturer-store'
 import { fetchProfile } from '../../../lib/profiles/client'
+import VerifiedBadge from '../../../components/VerifiedBadge'
 import { telPrefix, provinceOfCity } from '../../../lib/iran-geo'
 import { getManufacturer, MANUFACTURERS, type MfrProduct } from '../../../lib/manufacturers-data'
 
@@ -192,7 +193,7 @@ export default function ManufacturerPage() {
     setStoredMfr(p ? profileToManufacturer(p) : null)
     /* تولیدکننده‌ی ثبت‌نامی کاربران دیگر فقط روی سرور است */
     void fetchProfile<ManufacturerProfile>('manufacturer', mfrId).then(r => {
-      if (r) setStoredMfr(profileToManufacturer({ ...r.data, slug: r.slug } as ManufacturerProfile))
+      if (r) setStoredMfr(profileToManufacturer({ ...r.data, slug: r.slug, verified: r.verified } as ManufacturerProfile))
     })
   }, [mfrId])
   const mfr = getManufacturer(mfrId) ?? storedMfr ?? MANUFACTURERS[0]!
@@ -296,7 +297,7 @@ export default function ManufacturerPage() {
             </div>
 
             <div className="mt-3 flex flex-wrap items-center gap-2">
-              <h2 className="text-[17px] font-bold sm:text-[19px]">{mfr.name}</h2>
+              <h2 className="text-[17px] font-bold sm:text-[19px]">{mfr.name}{mfr.verified && <VerifiedBadge size={16} title="تولیدکننده‌ی تأیید شده" />}</h2>
               {mfr.elite && (
                 <span className="inline-flex items-center gap-1 rounded-full border border-[rgba(199,166,106,0.4)] bg-[rgba(199,166,106,0.14)] px-2.5 py-0.5 text-[11px] font-bold text-[#8F6531]">
                   <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>

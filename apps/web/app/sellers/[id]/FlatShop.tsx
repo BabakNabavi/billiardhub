@@ -10,6 +10,7 @@ import type { SellerStory } from '../../../components/seller/StoryManager'
 import { useProfileImageViewer } from '@/components/ProfileImageViewer'
 import { getSellerProfile, type SellerProfile } from '../../../lib/seller-store'
 import { fetchProfile } from '../../../lib/profiles/client'
+import VerifiedBadge from '../../../components/VerifiedBadge'
 import { telPrefix, provinceOfCity } from '../../../lib/iran-geo'
 import { getMockSeller } from '../../../lib/sellers-data'
 import { MARKET_CATEGORIES } from '../../../lib/market/categories'
@@ -68,7 +69,11 @@ const STORE = {
   banners: [] as string[],
   brands: [] as string[],
   aboutImages: [] as string[],
-  verified: true, rating: 4.8, reviews: 312, memberSince: 1402,
+  /* ⚠️ `false` عمدی است. تا امروز `true` بود و چون `store` با
+     `...STORE` ساخته می‌شود، **هر** فروشگاهی تیکِ آبی می‌گرفت —
+     حتی آن‌که ادمین تأییدش نکرده بود. تیک از `profile.verified`
+     می‌آید و بس. */
+  verified: false, rating: 4.8, reviews: 312, memberSince: 1402,
   whatsapp: '989121234567', phones: ['021-88221100', '0912-123-4567'], instagram: 'procue.ir',
   address: 'تهران، خیابان ولیعصر، بالاتر از پارک ملت، پلاک ۴۵',
   hours: 'شنبه تا پنج‌شنبه، ۹ تا ۲۰',
@@ -348,6 +353,7 @@ export default function FlatShop() {
       banners:      profile.banners?.length ? profile.banners : STORE.banners,
       brands:       profile.brands?.length ? profile.brands : STORE.brands,
       aboutImages:  profile.aboutImages?.length ? profile.aboutImages : STORE.aboutImages,
+      verified:     profile.verified === true,
       title:        pick(profile.title, STORE.title),
       brand:        pick(profile.brand, STORE.brand),
       province:     pick(profile.province, STORE.province),
@@ -691,7 +697,7 @@ export default function FlatShop() {
             </button>
 
             {/* نام، شهر (با دکمه‌ی تلفن روبه‌رویش سمت چپ)، توضیحات — زیر هم */}
-            <h2 className="mt-3 text-[17px] font-bold text-[#1C1B17] sm:text-[19px]">{store.title}</h2>
+            <h2 className="mt-3 text-[17px] font-bold text-[#1C1B17] sm:text-[19px]">{store.title}{store.verified && <VerifiedBadge size={16} title="فروشگاه تأیید شده" />}</h2>
             <div className="mt-1.5 flex flex-wrap items-center justify-between gap-2">
               <div className="flex items-center gap-1.5 text-[12.5px] text-[#6F6A5C]">
                 <span className="text-[#14532D]">{Icon.pin}</span>{[store.province, store.city].filter(Boolean).join('، ')}

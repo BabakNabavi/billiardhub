@@ -18,6 +18,7 @@ export default function AdminManufacturersPage() {
       load={src.load}
       toggle={src.toggle}
       remove={src.remove}
+      setVerified={src.setVerified}
     />
   );
 }

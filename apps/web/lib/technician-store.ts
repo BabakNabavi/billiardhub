@@ -26,6 +26,9 @@ export interface TechnicianProfile {
   phone: string
   whatsapp: string
   status: 'approved' | 'rejected'
+  /* ستونِ جدولِ `profiles` است نه بخشی از jsonb — `fetchProfiles`
+     کنارِ `data` می‌گذاردش. */
+  verified?: boolean
   updatedAt: string
 }
 
@@ -114,6 +117,7 @@ export function profileToTechnician(p: TechnicianProfile): Technician {
     albums: p.albums,
     phone: p.phone,
     whatsapp: p.whatsapp || p.phone.replace(/^0/, '98'),
+    verified: p.verified === true,
   }
 }
 

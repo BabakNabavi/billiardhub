@@ -6,9 +6,10 @@ import api from '../../lib/api';
 import ClubStoryModal from '../../components/ClubStoryModal';
 import FavoriteButton from '../../components/FavoriteButton';
 import ClubLogo from '../../components/club/ClubLogo';
+import VerifiedBadge from '../../components/VerifiedBadge';
 import {
   Search, MapPin, Star, Wifi, Car, Coffee, Trophy,
-  X, SlidersHorizontal, Users, Check, Navigation,
+  X, SlidersHorizontal, Users, Navigation,
   ChevronDown, Grid3X3, AlignJustify, Gamepad2,
 } from 'lucide-react';
 import { type Club } from '../../lib/clubs-data';
@@ -217,11 +218,8 @@ function ClubCard({ club, view, idx = 0, tournaments = [] }: { club: Club; view:
         <div style={{ width: 'clamp(70px,18vw,140px)', flexShrink: 0, position: 'relative', overflow: 'hidden' }}>
           <img loading="lazy" decoding="async" src={img} alt={club.name} style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.75)' }}
             onError={e => { const el = e.target as HTMLImageElement; el.onerror = null; el.src = poolImg; }} />
-          {club.isVerified && (
-            <div title="باشگاه تأیید شده" style={{ position: 'absolute', top: 8, right: 8, width: 24, height: 24, borderRadius: '50%', background: 'linear-gradient(135deg,#1d9bf0,#0d6efd)', boxShadow: '0 2px 8px rgba(29,155,240,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <Check size={12} color="#fff" strokeWidth={3} />
-            </div>
-          )}
+          {/* تیکِ تأیید این‌جا نیست — کنارِ نام است. روی گوشه‌ی عکس،
+              معلوم نبود به چه چیزی تعلق دارد. */}
           {/* open badge روی تصویر — same pill style as table type badges */}
           <div style={{ position: 'absolute', bottom: 8, left: 8, fontSize: 10, fontWeight: 700, color: club.isOpen ? '#30C55A' : '#ef4444', background: club.isOpen ? 'rgba(48,197,90,0.10)' : 'rgba(239,68,68,0.10)', border: `1px solid ${club.isOpen ? 'rgba(48,197,90,0.22)' : 'rgba(239,68,68,0.22)'}`, borderRadius: 20, padding: '2px 7px' }}>
             {club.isOpen ? 'باز' : 'بسته'}
@@ -242,7 +240,12 @@ function ClubCard({ club, view, idx = 0, tournaments = [] }: { club: Club; view:
         {/* content */}
         <div style={{ flex: 1, padding: '14px 16px', minWidth: 0, display: 'flex', flexDirection: 'column', gap: 6 }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
-            <h3 style={{ fontSize: 16, fontWeight: 800, color: '#111111', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{club.name}</h3>
+            {/* تیک بیرونِ h3 است: نامِ بلند با ellipsis بریده می‌شود و
+                تیکِ داخلِ h3 هم با آن حذف می‌شد. */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 4, minWidth: 0 }}>
+              <h3 style={{ fontSize: 16, fontWeight: 800, color: '#111111', margin: 0, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{club.name}</h3>
+              {club.isVerified && <VerifiedBadge size={15} title="باشگاه تأیید شده" style={{ marginInlineStart: 0 }} />}
+            </div>
             {club.rating && (
               <div style={{ display: 'flex', alignItems: 'center', gap: 3, flexShrink: 0, background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.2)', borderRadius: 20, padding: '3px 8px' }}>
                 <Star size={10} style={{ color: '#f59e0b', fill: '#f59e0b' }} />
@@ -303,16 +306,9 @@ function ClubCard({ club, view, idx = 0, tournaments = [] }: { club: Club; view:
             onError={e => { const el = e.target as HTMLImageElement; el.onerror = null; el.src = poolImg; }} />
           <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, transparent 40%, rgba(6,13,10,0.88) 100%)' }} />
 
-          {/* top badges */}
-          <div style={{ position: 'absolute', top: 10, right: 10, display: 'flex', gap: 5, flexWrap: 'wrap' }}>
-            {club.isVerified && (
-              <div title="باشگاه تأیید شده" style={{ width: 26, height: 26, borderRadius: '50%', background: 'linear-gradient(135deg,#1d9bf0,#0d6efd)', boxShadow: '0 2px 10px rgba(29,155,240,0.55)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                <Check size={13} color="#fff" strokeWidth={3} />
-              </div>
-            )}
-          </div>
-          {/* علاقه‌مندی — سمت چپ تا با تیک تأیید تداخل نکند.
-              خودش کلیک را متوقف می‌کند وگرنه کارت باز می‌شود. */}
+          {/* تیکِ تأیید کنارِ نام است، نه روی عکس. */}
+          {/* علاقه‌مندی — خودش کلیک را متوقف می‌کند وگرنه کارت باز
+              می‌شود. */}
           <div style={{ position: 'absolute', top: 10, left: 10 }}>
             <FavoriteButton type="club" id={club.id} size={15} />
           </div>
@@ -361,7 +357,11 @@ function ClubCard({ club, view, idx = 0, tournaments = [] }: { club: Club; view:
         {/* body */}
         <div style={{ padding: '14px 14px 0', flex: 1, display: 'flex', flexDirection: 'column', gap: 8 }}>
           <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8 }}>
-            <h3 style={{ fontSize: 16, fontWeight: 800, color: '#111111', margin: 0, lineHeight: 1.25 }}>{club.name}</h3>
+            {/* این عنوان می‌پیچد، پس تیک داخلِ h3 می‌آید تا دنبالِ
+                آخرین کلمه بماند و تنها به خطِ بعد نیفتد. */}
+            <h3 style={{ fontSize: 16, fontWeight: 800, color: '#111111', margin: 0, lineHeight: 1.25 }}>
+              {club.name}{club.isVerified && <VerifiedBadge size={15} title="باشگاه تأیید شده" />}
+            </h3>
             {club.rating && (
               <div style={{ display: 'flex', alignItems: 'center', gap: 2, flexShrink: 0 }}>
                 <Star size={10} style={{ color: '#f59e0b', fill: '#f59e0b' }} />

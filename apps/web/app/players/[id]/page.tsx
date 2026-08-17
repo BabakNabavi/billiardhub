@@ -17,7 +17,9 @@ import {
   Trophy, Images, Building2, Newspaper, Clapperboard,
 } from 'lucide-react'
 import { getPlayer, DISCIPLINE_LABEL, TONES, faDigits, type Player } from '../../../lib/players-data'
-import { getPlayerProfile, profileToPlayer } from '../../../lib/player-store'
+import { getPlayerProfile, profileToPlayer, type PlayerProfile } from '../../../lib/player-store'
+import { fetchProfile } from '../../../lib/profiles/client'
+import VerifiedBadge from '../../../components/VerifiedBadge'
 import { entryLabel } from '../../../lib/player-categories'
 import { NEWS_ARTICLES } from '../../../lib/news-data'
 import { MEDIA_VIDEOS } from '../../../lib/media-data'
@@ -49,12 +51,31 @@ export default function PlayerProfilePage() {
   /* پروفایل‌های ثبت‌نامی (پنل بازیکن ⇒ localStorage) بعد از mount خوانده می‌شوند */
   const [stored, setStored]   = useState<Player | null>(null)
   const [checked, setChecked] = useState(false)
+  /* ── چرا سرور هم خوانده می‌شود ──
+     پیش‌تر فقط `localStorage` خوانده می‌شد، یعنی پروفایلِ یک بازیکن
+     تنها روی دستگاهِ خودش دیده می‌شد. تیکِ آبی هم ستونِ جدولِ
+     `profiles` است و اصلاً در localStorage نیست. کشِ محلی مقدارِ
+     اولیه می‌ماند تا صفحه در نبودِ شبکه خالی نشود. */
   useEffect(() => {
-    if (!staticPlayer) {
-      const p = getPlayerProfile(id)
-      setStored(p ? profileToPlayer(p) : null)
-    }
-    setChecked(true)
+    if (staticPlayer) { setChecked(true); return }
+
+    /* بازنشانی: بدونِ این، رفتن از /players/ali به /players/reza
+       پروفایلِ علی را — با تیکِ علی — زیرِ نشانیِ رضا نگه می‌داشت، و
+       اگر رضا وجود نداشت «بازیکن پیدا نشد» هرگز نشان داده نمی‌شد. */
+    setChecked(false)
+    const local = getPlayerProfile(id)
+    setStored(local ? profileToPlayer(local) : null)
+
+    let alive = true
+    void fetchProfile<PlayerProfile>('player', id)
+      .then(p => {
+        if (!alive || !p || p.status !== 'approved') return
+        setStored(profileToPlayer({ ...p.data, slug: p.slug, verified: p.verified } as PlayerProfile))
+      })
+      .catch(() => { /* شبکه قطع بود ⇒ کشِ محلی می‌ماند */ })
+      .finally(() => { if (alive) setChecked(true) })
+
+    return () => { alive = false }
   }, [id, staticPlayer])
 
   const player = staticPlayer ?? stored
@@ -213,7 +234,7 @@ export default function PlayerProfilePage() {
                 {player.youth && <span className="pa-chip">رده‌ی جوانان</span>}
               </div>
               <h1 style={{ fontSize: 'clamp(30px,5.4vw,58px)', fontWeight: 900, margin: 0, lineHeight: 1.25, letterSpacing: '-0.02em' }}>
-                {player.name}
+                {player.name}{player.verified && <VerifiedBadge size={24} title="بازیکن تأیید شده" />}
               </h1>
               <div style={{ fontSize: 'clamp(10px,1.2vw,12px)', fontWeight: 700, letterSpacing: '0.4em', color: 'rgba(255,255,255,0.5)', marginTop: 8, direction: 'ltr', textAlign: 'right' }}>
                 {player.nameEn}

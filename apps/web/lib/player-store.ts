@@ -40,6 +40,8 @@ export interface PlayerProfile {
   tags: string[]
 
   status: 'approved' | 'rejected'
+  /* ستونِ جدولِ `profiles` است نه داخلِ jsonb */
+  verified?: boolean
   updatedAt: string
 }
 
@@ -139,6 +141,7 @@ export function profileToPlayer(p: PlayerProfile): Player {
     tournaments: p.tournaments,
     albums: p.albums,
     tags: p.tags,
+    verified: p.verified === true,
   }
 }
 

@@ -97,6 +97,7 @@ async function freeClubs(limit: number): Promise<EntitySnapshot[]> {
       href: `/clubs/${s(r.id)}`,
       city: s(r.city),
       badge: s(r.verificationStatus) === 'verified' ? 'تأیید شده' : null,
+      verified: s(r.verificationStatus) === 'verified',
       ...(tables > 0 ? { stats: { tables, snooker, pocket, highball } } : {}),
     }
   })
@@ -126,6 +127,7 @@ async function freeSellers(limit: number): Promise<EntitySnapshot[]> {
       href: `/sellers/${s(r.slug)}`,
       city: s(d.city),
       badge: r.verified ? 'تأیید شده' : null,
+      verified: r.verified === true,
     }
   })
 }

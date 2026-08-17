@@ -1,6 +1,7 @@
 'use client'
 import { useState, useEffect } from 'react'
 import ProfileVideoCard from '../../../components/ProfileVideoCard'
+import VerifiedBadge from '../../../components/VerifiedBadge'
 import { fetchProfile } from '../../../lib/profiles/client'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
@@ -281,7 +282,7 @@ export default function RefereeProfilePage() {
     setLocalP(getRefereeProfile(id))
     let alive = true
     void fetchProfile<RefereeProfile>('referee', id).then(r => {
-      if (alive && r?.data) setLocalP({ ...(r.data as RefereeProfile), slug: r.slug })
+      if (alive && r?.data) setLocalP({ ...(r.data as RefereeProfile), slug: r.slug, verified: r.verified })
     }).finally(() => { if (alive) setChecked(true) })
     return () => { alive = false }
   }, [id])
@@ -437,12 +438,7 @@ export default function RefereeProfilePage() {
                   <div style={{ minWidth:0 }}>
                     <div style={{ display:'flex', alignItems:'center', gap:7, flexWrap:'wrap' }}>
                       <h1 style={{ fontSize:'clamp(21px,2.6vw,26px)', fontWeight:700, color:'#1c1c1c', lineHeight:1.2 }}>{referee.name}</h1>
-                      {referee.verified && (
-                        <svg width="20" height="20" viewBox="0 0 40 40" aria-label="تأیید شده" style={{ flexShrink:0 }}>
-                          <path fill="#0095F6" d="M19.998 3.094L14.638 0l-2.972 5.15H5.432v6.354L0 14.64 3.094 20 0 25.359l5.432 3.137v5.905h5.975L14.638 40l5.36-3.094L25.358 40l3.232-5.6h6.162v-6.01L40 25.359 36.905 20 40 14.641l-5.248-3.03v-6.46h-6.419L25.358 0l-5.36 3.094z"/>
-                          <path fill="#fff" d="M18.09 24.79l-4.28-4.28 1.53-1.53 2.75 2.75 6.57-6.57 1.53 1.53z"/>
-                        </svg>
-                      )}
+                      {referee.verified && <VerifiedBadge size={20} title="داور تأیید شده" style={{ marginInlineStart: 0 }} />}
                     </div>
                     <div style={{ fontSize:15, color:'rgba(0,0,0,0.9)', marginTop:4 }}>داور {referee.specialtyLabel ?? spec?.label ?? 'بیلیارد'}</div>
                     {referee.badge && (

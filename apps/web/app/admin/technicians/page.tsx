@@ -19,6 +19,7 @@ export default function AdminTechniciansPage() {
       load={src.load}
       toggle={src.toggle}
       remove={src.remove}
+      setVerified={src.setVerified}
     />
   );
 }

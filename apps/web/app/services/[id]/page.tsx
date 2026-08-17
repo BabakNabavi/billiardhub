@@ -13,11 +13,13 @@ import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { createPortal } from 'react-dom'
 import {
-  MapPin, ChevronLeft, ChevronRight, ArrowLeft, Wrench, Check,
+  MapPin, ChevronLeft, ChevronRight, ArrowLeft, Wrench,
   Phone, X, ZoomIn, ZoomOut, Images,
 } from 'lucide-react'
 import { getTechnician, faDigits } from '../../../lib/technicians-data'
-import { getTechnicianProfile, profileToTechnician } from '../../../lib/technician-store'
+import { getTechnicianProfile, profileToTechnician, type TechnicianProfile } from '../../../lib/technician-store'
+import { fetchProfile } from '../../../lib/profiles/client'
+import VerifiedBadge from '../../../components/VerifiedBadge'
 import type { Technician } from '../../../lib/technicians-data'
 
 const GOLD   = '#C7A66A'
@@ -52,12 +54,31 @@ export default function TechnicianProfilePage() {
   const [stored, setStored]   = useState<Technician | null>(null)
   const [checked, setChecked] = useState(false)
   const { open: openImage, viewer: imageViewer } = useProfileImageViewer()
+  /* ── چرا سرور هم خوانده می‌شود ──
+     تا امروز این صفحه فقط `localStorage` را می‌خواند، یعنی پروفایلِ
+     یک متخصص را تنها روی دستگاهِ خودش می‌شد دید. تیکِ آبی هم ستونِ
+     جدولِ `profiles` است و اصلاً در localStorage نیست، پس هرگز
+     نمایش داده نمی‌شد. کشِ محلی به‌عنوان مقدارِ اولیه می‌ماند تا
+     صفحه در نبودِ شبکه خالی نشود. */
   useEffect(() => {
-    if (!staticTech) {
-      const p = getTechnicianProfile(id)
-      setStored(p ? profileToTechnician(p) : null)
-    }
-    setChecked(true)
+    if (staticTech) { setChecked(true); return }
+
+    /* بازنشانی — همان دلیلِ صفحه‌ی بازیکن: پروفایلِ قبلی نباید زیرِ
+       نشانیِ تازه بماند. */
+    setChecked(false)
+    const local = getTechnicianProfile(id)
+    setStored(local ? profileToTechnician(local) : null)
+
+    let alive = true
+    void fetchProfile<TechnicianProfile>('technician', id)
+      .then(p => {
+        if (!alive || !p || p.status !== 'approved') return
+        setStored(profileToTechnician({ ...p.data, slug: p.slug, verified: p.verified } as TechnicianProfile))
+      })
+      .catch(() => { /* شبکه قطع بود ⇒ کشِ محلی می‌ماند */ })
+      .finally(() => { if (alive) setChecked(true) })
+
+    return () => { alive = false }
   }, [id, staticTech])
 
   const tech = staticTech ?? stored
@@ -202,7 +223,7 @@ export default function TechnicianProfilePage() {
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: 7, fontSize: 9.5, fontWeight: 800, letterSpacing: '0.2em', color: GOLD_D, background: 'rgba(199,166,106,0.10)', border: '1px solid rgba(199,166,106,0.28)', borderRadius: 999, padding: '4px 12px', marginBottom: 12 }}>
               <Wrench size={11} /> TECHNICAL SPECIALIST
             </span>
-            <h1 style={{ fontSize: 'clamp(24px,3.6vw,38px)', fontWeight: 900, margin: '0 0 6px', lineHeight: 1.35, letterSpacing: '-0.02em' }}>{tech.name}</h1>
+            <h1 style={{ fontSize: 'clamp(24px,3.6vw,38px)', fontWeight: 900, margin: '0 0 6px', lineHeight: 1.35, letterSpacing: '-0.02em' }}>{tech.name}{tech.verified && <VerifiedBadge size={22} title="متخصص تأیید شده" />}</h1>
             <div style={{ fontSize: 'clamp(13.5px,1.7vw,16px)', fontWeight: 800, color: GOLD_D, marginBottom: 10 }}>{tech.title}</div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: SEC, marginBottom: 14 }}>
               <MapPin size={14} style={{ color: '#14532D' }} />

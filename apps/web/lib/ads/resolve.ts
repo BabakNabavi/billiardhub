@@ -31,6 +31,10 @@ export interface EntitySnapshot {
   condition?: string
   city?: string
   badge?: string | null
+  /** تیکِ آبی. کارتِ تبلیغاتی هم باید همان تیکی را نشان دهد که کارتِ
+   *  عادی نشان می‌دهد — وگرنه باشگاهِ تأییدشده با تبلیغ‌شدن تیکش را
+   *  از دست می‌داد. */
+  verified?: boolean
   /** آمار واقعی موجودیت — نبودنش یعنی «نداریم»، نه صفر */
   stats?: { tables?: number; snooker?: number; pocket?: number; highball?: number }
 }
@@ -88,7 +92,7 @@ async function resolveClubs(rawRefs: string[]): Promise<Map<string, EntitySnapsh
   const refs = rawRefs.filter(x => UUID.test(x))
   if (!refs.length) return out
   const { data } = await sb().from('clubs')
-    .select('id,name,city,images,logo,"isActive"')
+    .select('id,name,city,images,logo,"isActive","verificationStatus"')
     .in('id', refs)
   for (const r of (data as Record<string, unknown>[] ?? [])) {
     if (r.isActive === false) continue
@@ -101,6 +105,7 @@ async function resolveClubs(rawRefs: string[]): Promise<Map<string, EntitySnapsh
       subtitle: s(r.city),
       href: `/clubs/${s(r.id)}`,
       city: s(r.city),
+      verified: s(r.verificationStatus) === 'verified',
     })
   }
   return out
@@ -127,6 +132,7 @@ async function resolveSellers(refs: string[]): Promise<Map<string, EntitySnapsho
       href: `/sellers/${s(r.slug)}`,
       city: s(d.city),
       badge: r.verified ? 'تأیید شده' : null,
+      verified: r.verified === true,
     })
   }
   return out

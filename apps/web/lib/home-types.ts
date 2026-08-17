@@ -28,6 +28,9 @@ export interface RealClub {
   badge: string | null
   tags: string[]
   hasStory: boolean
+  /** تیکِ آبی — `verificationStatus === 'verified'`. «منتشر بدونِ
+   *  تیک» (`approved`) هم در فهرست هست ولی تیک نمی‌گیرد. */
+  verified: boolean
 }
 
 export interface RealProduct {
@@ -54,6 +57,8 @@ export interface RealProduct {
 export interface RealStore {
   id: string
   name: string
+  /** تیکِ آبی — `profiles.verified` */
+  verified: boolean
   city: string
   specialty: string
   rating: number

@@ -4,6 +4,7 @@ import { getSupabaseServer } from '@/lib/supabase-server';
 import { sessionFromRequest } from '@/lib/auth/session';
 import { notifyClubApproved, notifyClubRejected } from '@/lib/notify';
 import { audit, clientIp } from '@/lib/finance/db';
+import { can } from '@/lib/admin/permissions';
 import { isUUID, isValidSlug } from '@/lib/slug';
 
 const CORS = {
@@ -142,13 +143,40 @@ export async function PUT(
       { message: 'وضعیت تأیید نامعتبر است' }, { status: 400, headers: CORS });
   }
 
+  /* ادمینِ محدود باید کلیدِ `clubs` را داشته باشد — تا امروز هر ادمینی
+     می‌توانست وضعیتِ هر باشگاهی را عوض کند. */
+  if (decision && !(await can(userId, 'clubs'))) {
+    return NextResponse.json(
+      { message: 'دسترسی مجاز نیست' }, { status: 403, headers: CORS });
+  }
+
+  /* ── وضعیتِ فعلی، پیش از تصمیم ──
+     لازم است چون «تأییدِ تازه» با «جابه‌جایی بینِ دو حالتِ منتشرشده»
+     فرق دارد و اثرهای جانبی فقط مالِ اولی‌اند. */
+  let prevStatus = '';
+  if (decision) {
+    try {
+      const { data: prev } = await getSupabaseServer()
+        .from('clubs').select('"verificationStatus"').eq('id', id).maybeSingle();
+      prevStatus = String((prev as { verificationStatus?: string } | null)?.verificationStatus ?? '');
+    } catch { prevStatus = ''; }
+  }
+  const wasPublished = prevStatus === 'verified' || prevStatus === 'approved';
+
   if (decision) {
     /* هر دو «تأیید» باشگاه را منتشر می‌کنند؛ تفاوتشان فقط تیکِ آبی است.
        `approved` یعنی کارت در فهرست دیده شود ولی چون مدرکی بررسی
        نشده، نشانِ تأیید نگیرد. */
     if (decision === 'verified' || decision === 'approved') {
-      body.isActive = true;
-      body.rejectionReason = null;      // رد قبلی دیگر معتبر نیست
+      /* ── چرا شرطی ──
+         جابه‌جایی بینِ `verified` و `approved` فقط تیک را عوض می‌کند.
+         بی‌قیدْ `isActive = true` گذاشتن یعنی برداشتنِ تیک از باشگاهی
+         که ادمین قبلاً غیرفعالش کرده بود، بی‌صدا دوباره منتشرش
+         می‌کرد. */
+      if (!wasPublished) {
+        body.isActive = true;
+        body.rejectionReason = null;    // رد قبلی دیگر معتبر نیست
+      }
     } else if (decision === 'rejected') {
       body.isActive = false;
       /* علت رد اجباری است: بدون آن مالک فقط می‌بیند «رد شد» و
@@ -160,8 +188,14 @@ export async function PUT(
       }
       body.rejectionReason = reason.slice(0, 500);
     }
-    body.reviewedAt = new Date().toISOString();
-    body.reviewedBy = userId;
+    /* «چه کسی و کِی بررسی کرد» مالِ خودِ بررسی است. عوض‌کردنِ تیکِ
+       باشگاهی که قبلاً بررسی شده، بررسیِ تازه نیست و نباید ردِ آن
+       بررسی را پاک کند. */
+    const badgeOnly = wasPublished && (decision === 'verified' || decision === 'approved');
+    if (!badgeOnly) {
+      body.reviewedAt = new Date().toISOString();
+      body.reviewedBy = userId;
+    }
   }
 
   /* ارسال دوباره پس از اصلاح: مالک که باشگاه ردشده را ویرایش می‌کند،
@@ -248,11 +282,24 @@ export async function PUT(
 
   /* اعلان و رد ممیزی — بی‌صدا، چون شکست پیامک نباید تصمیم ادمین را
      برگرداند. تا امروز هیچ‌کدام از این دو وجود نداشت. */
-  if (decision === 'verified') {
+  /* ── چرا `!wasPublished` ──
+     «باشگاه شما تأیید شد» فقط یک‌بار معنا دارد. بدونِ این شرط، هر
+     اعطای تیک به باشگاهی که ماه‌ها پیش منتشر شده بود دوباره همان
+     پیامک را می‌فرستاد. */
+  if (decision === 'verified' && !wasPublished) {
     void notifyClubApproved(id).catch(() => { /* بی‌صدا */ });
     void audit({
       actorId: userId, actorRole: 'admin', action: 'CLUB_APPROVED',
       entityType: 'club', entityId: id, ip: clientIp(req) ?? undefined,
+    });
+  } else if (wasPublished && (decision === 'verified' || decision === 'approved')
+             && decision !== prevStatus) {
+    /* فقط تیک عوض شد — نه انتشار، نه پیامک. ولی همچنان یک تصمیمِ
+       ادمین است و باید ردش بماند. */
+    void audit({
+      actorId: userId, actorRole: 'admin', action: 'CLUB_BADGE_CHANGED',
+      entityType: 'club', entityId: id,
+      newValue: { from: prevStatus, to: decision }, ip: clientIp(req) ?? undefined,
     });
   } else if (decision === 'rejected') {
     void notifyClubRejected(id, String(body.rejectionReason ?? '')).catch(() => { /* بی‌صدا */ });

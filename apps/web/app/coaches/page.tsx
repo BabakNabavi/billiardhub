@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { listCoachProfiles, type CoachProfile } from '@/lib/coach-store'
 import { fetchProfiles } from '@/lib/profiles/client'
+import VerifiedBadge from '@/components/VerifiedBadge'
 
 /* ─── Tokens ─── */
 const GOLD    = '#C7A66A'
@@ -228,7 +229,7 @@ function CoachCard({ coach, view, idx }: { coach: Coach; view: 'grid' | 'list'; 
         <div style={{ flex:1, minWidth:0 }}>
           <div style={{ display:'flex', alignItems:'center', gap:5, marginBottom:2, minWidth:0 }}>
             <h3 style={{ fontSize:15, fontWeight:800, color:TEXT, lineHeight:1.2, letterSpacing:'-0.02em', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{coach.name}</h3>
-            {coach.verified && <svg width="14" height="14" viewBox="0 0 40 40" aria-label="تأیید شده" style={{ flexShrink:0 }}><path fill="#0095F6" d="M19.998 3.094L14.638 0l-2.972 5.15H5.432v6.354L0 14.64 3.094 20 0 25.359l5.432 3.137v5.905h5.975L14.638 40l5.36-3.094L25.358 40l3.232-5.6h6.162v-6.01L40 25.359 36.905 20 40 14.641l-5.248-3.03v-6.46h-6.419L25.358 0l-5.36 3.094z"/><path fill="#fff" d="M18.09 24.79l-4.28-4.28 1.53-1.53 2.75 2.75 6.57-6.57 1.53 1.53z"/></svg>}
+            {coach.verified && <VerifiedBadge size={14} title="مربی تأیید شده" style={{ marginInlineStart: 0 }} />}
           </div>
           <p style={{ fontSize:12, color:TEXT_S, marginBottom:5 }}>مربی {coach.disciplines && coach.disciplines.length ? coach.disciplines.map(d => SPECS[d]?.label ?? d).join(' · ') : (sp?.label ?? 'بیلیارد')}</p>
           <div style={{ display:'flex', alignItems:'center', gap:5, color:TEXT_M }}>
@@ -269,7 +270,7 @@ function CoachCard({ coach, view, idx }: { coach: Coach; view: 'grid' | 'list'; 
       <div style={{ padding:'12px 14px 18px', flex:1, display:'flex', flexDirection:'column', alignItems:'center', textAlign:'center' }}>
         <div style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:5, marginBottom:4 }}>
           <h3 style={{ fontSize:16, fontWeight:800, color:TEXT, lineHeight:1.2, letterSpacing:'-0.02em' }}>{coach.name}</h3>
-          {coach.verified && <svg width="15" height="15" viewBox="0 0 40 40" aria-label="تأیید شده" style={{ flexShrink:0 }}><path fill="#0095F6" d="M19.998 3.094L14.638 0l-2.972 5.15H5.432v6.354L0 14.64 3.094 20 0 25.359l5.432 3.137v5.905h5.975L14.638 40l5.36-3.094L25.358 40l3.232-5.6h6.162v-6.01L40 25.359 36.905 20 40 14.641l-5.248-3.03v-6.46h-6.419L25.358 0l-5.36 3.094z"/><path fill="#fff" d="M18.09 24.79l-4.28-4.28 1.53-1.53 2.75 2.75 6.57-6.57 1.53 1.53z"/></svg>}
+          {coach.verified && <VerifiedBadge size={15} title="مربی تأیید شده" style={{ marginInlineStart: 0 }} />}
         </div>
         <p style={{ fontSize:12.5, color:TEXT_S, lineHeight:1.35, marginBottom:9, minHeight:'2.7em', display:'-webkit-box', WebkitLineClamp:2, WebkitBoxOrient:'vertical', overflow:'hidden' }}>مربی {coach.disciplines && coach.disciplines.length ? coach.disciplines.map(d => SPECS[d]?.label ?? d).join(' · ') : (sp?.label ?? 'بیلیارد')}</p>
         <div style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:5, marginBottom:13, color:TEXT_M }}>

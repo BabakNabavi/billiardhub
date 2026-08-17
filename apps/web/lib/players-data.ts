@@ -41,6 +41,8 @@ export interface Player {
   featured?: boolean         // ستاره‌ی ویژه (Elite)
   club?: { name: string; href?: string }
   /** رنگ دوتون کارت — از پالت محدود برند */
+  /** تیکِ آبی — ستونِ `profiles.verified`، فقط ادمین می‌دهد */
+  verified?: boolean
   tone: 'felt' | 'night' | 'bronze'
   /** تصویر بافت/صحنه برای پس‌زمینه‌ی دوتون (نه پرتره) */
   scene: string

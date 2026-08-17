@@ -38,6 +38,10 @@ export interface ManufacturerProfile {
   products: MfrProduct[]
 
   status: 'approved' | 'rejected'
+  /* تیکِ آبی — فقط ادمین می‌دهد و روی ستونِ `profiles.verified`
+     می‌نشیند، نه داخلِ jsonb. این‌جا اختیاری است چون پروفایلِ
+     ذخیره‌شده‌ی محلی آن را ندارد؛ `fetchProfiles` کنارش می‌گذارد. */
+  verified?: boolean
   updatedAt: string
 }
 
@@ -117,7 +121,9 @@ export function profileToManufacturer(p: ManufacturerProfile): MockManufacturer 
     id: p.slug,
     name: p.name || 'تولیدکننده',
     city: p.city || '—',
-    verified: false,
+    /* پیش‌تر این‌جا `false` هاردکد بود: تیکی که ادمین می‌داد هرگز روی
+       کارتِ /manufacturers دیده نمی‌شد. */
+    verified: p.verified === true,
     elite: false,
     since: p.sinceYear ? `از ${p.sinceYear}` : '—',
     sinceYear: Number.isNaN(yearNum) ? 1400 : yearNum,

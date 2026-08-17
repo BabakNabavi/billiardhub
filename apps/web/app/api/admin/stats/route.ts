@@ -117,13 +117,57 @@ export async function GET(req: NextRequest) {
     PROFILE_KINDS.map((k, i) => [k, kindCounts[i] ?? 0]),
   ) as Record<typeof PROFILE_KINDS[number], number>;
 
+  /* ── صفِ تیکِ آبی ──
+     همان تعریفی که صفحه‌ی `/admin/verified` دارد: منتشر شده، تیک
+     ندارد، ولی مدرکی آپلود کرده که بشود درباره‌اش تصمیم گرفت.
+     باشگاه و شش نقشِ دیگر با هم، چون آن صفحه هم هر هفت را یک‌جا
+     نشان می‌دهد.
+
+     این عدد با `pendingByKind` هم‌پوشانی دارد و عمدی است: یک مدرکِ
+     بی‌تیک هم روی میزِ همان نقش است و هم روی میزِ تیک. */
+  const awaitingBadge = await (async () => {
+    try {
+      const [profiles, clubs] = await Promise.all([
+        /* ── چرا ردیف و نه شمارشِ سبک ──
+           مدرک دو جا می‌نشیند: ستونِ `license_url` (جواز کسب) و
+           `data.certificate.url` (گواهیِ مربی و داور). دومی داخلِ
+           jsonb است و با `.not(...)` قابلِ شمارش نیست، پس ردیف‌ها
+           خوانده و همان‌جا فیلتر می‌شوند — همان شرطی که صفحه‌ی
+           /admin/verified دارد، وگرنه عددِ کارت و تبِ صفحه با هم
+           نمی‌خواندند.
+           `verified` می‌تواند NULL باشد، پس `is not true` نه
+           `eq(false)`. */
+        sb().from('profiles').select('verified,license_url,data').eq('status', 'approved'),
+        /* باشگاه فقط وقتی «در انتظارِ تیک» است که منتشر شده باشد؛
+           باشگاهِ ردشده یا بررسی‌نشده صفِ دیگری دارد. */
+        sb().from('clubs').select('id', { count: 'exact', head: true })
+          .eq('verificationStatus', 'approved')
+          .not('licenseDocumentUrl', 'is', null).neq('licenseDocumentUrl', ''),
+      ]);
+
+      type Row = { verified?: boolean | null; license_url?: string | null; data?: Record<string, unknown> | null };
+      const rows = (profiles.data ?? []) as Row[];
+      const hasDoc = (r: Row) => {
+        if (String(r.license_url ?? '').trim()) return true;
+        const cert = (r.data ?? {})['certificate'] as { url?: string } | null | undefined;
+        return !!String(cert?.url ?? '').trim();
+      };
+      const p = rows.filter(r => r.verified !== true && hasDoc(r)).length;
+      return p + (clubs.count ?? 0);
+    } catch { return 0; }
+  })();
+
   return NextResponse.json(
     {
       users, products, clubs, news, bookings,
       pendingClubs, pendingRoles, pendingProfiles, openReports, openTickets,
       pendingProducts, pendingAdRequests, pendingSettlements, pendingRefunds,
       pendingByKind,
-      /* مجموعِ کارهای روی میز — برای نشانِ کلی */
+      awaitingBadge,
+      /* مجموعِ کارهای روی میز — برای نشانِ کلی.
+         `awaitingBadge` عمداً این‌جا جمع نمی‌شود: با
+         `pendingProfiles` و `pendingClubs` هم‌پوشانی دارد و دوباره
+         شمردنش عددِ کل را متورم می‌کند. */
       pendingTotal: pendingClubs + pendingRoles + pendingProfiles + openReports
         + openTickets + pendingProducts + pendingAdRequests + pendingSettlements + pendingRefunds,
     },

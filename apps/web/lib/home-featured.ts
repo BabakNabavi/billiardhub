@@ -47,7 +47,7 @@ export async function loadHomeFeatured(): Promise<HomeFeatured> {
          NULL. یعنی حلقه‌ی استوری روی کارتِ باشگاهِ صفحه‌ی اصلی هرگز
          روشن نمی‌شد. مثل `app/api/clubs/route.ts` از تاریخِ انقضا
          مشتق می‌شود تا با گذشتنِ ۲۴ ساعت خودش خاموش شود. */
-      .select('id,name,city,images,storyExpiresAt,snookerTables,pocketTables,highballTables,vipSnookerTables,vipPocketTables')
+      .select('id,name,city,images,storyExpiresAt,"verificationStatus",snookerTables,pocketTables,highballTables,vipSnookerTables,vipPocketTables')
       .eq('isActive', true).order('createdAt', { ascending: false }).limit(FEATURED_CLUBS_MAX),
     sb.from('products')
       .select('id,title,brand,model,category,images,price,negotiable,discountPrice,discountPercent,city,condition')
@@ -61,6 +61,7 @@ export async function loadHomeFeatured(): Promise<HomeFeatured> {
 
   type C = {
     id: string; name: string; city?: string | null; images?: string[] | null; storyExpiresAt?: string | null
+    verificationStatus?: string | null
     snookerTables?: number | null; pocketTables?: number | null; highballTables?: number | null
     vipSnookerTables?: number | null; vipPocketTables?: number | null
   }
@@ -92,6 +93,7 @@ export async function loadHomeFeatured(): Promise<HomeFeatured> {
     img2: c.images?.[1] || CLUB_IMG[(i + 1) % CLUB_IMG.length]!,
     price: 0, badge: null, tags: [],
     hasStory: !!c.storyExpiresAt && new Date(c.storyExpiresAt).getTime() > Date.now(),
+    verified: c.verificationStatus === 'verified',
   }))
 
   const products: RealProduct[] = rows<P>(productsRes).map(p => ({
@@ -124,6 +126,7 @@ export async function loadHomeFeatured(): Promise<HomeFeatured> {
       /* خالی یعنی «لوگو ندارد» ⇒ کارت پوسترِ پیش‌فرض می‌سازد */
       img: p.logo || s.avatar || '',
       badge: null,
+      verified: s.verified === true,
     }
   })
 

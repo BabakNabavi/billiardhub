@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { listRefereeProfiles, badgeFromGrades, type RefereeProfile } from '../../lib/referee-store'
 import { fetchProfiles } from '../../lib/profiles/client'
+import VerifiedBadge from '../../components/VerifiedBadge'
 
 /* ─── Tokens ─── */
 const GOLD    = '#C7A66A'
@@ -56,16 +57,6 @@ function mapProfileToListReferee(p: RefereeProfile): Referee {
     photo: p.photo || '',
     verified: p.verified,
   }
-}
-
-/* Instagram-style verified badge (shown next to verified referees) */
-function VerifiedBadge({ size = 15 }: { size?: number }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 40 40" aria-label="تأیید شده" style={{ flexShrink: 0, marginInlineStart: 4, verticalAlign: '-2px', display: 'inline-block' }}>
-      <path fill="#0095F6" d="M19.998 3.094L14.638 0l-2.972 5.15H5.432v6.354L0 14.64 3.094 20 0 25.359l5.432 3.137v5.905h5.975L14.638 40l5.36-3.094L25.358 40l3.232-5.6h6.162v-6.01L40 25.359 36.905 20 40 14.641l-5.248-3.03v-6.46h-6.419L25.358 0l-5.36 3.094z" />
-      <path fill="#fff" d="M18.09 24.79l-4.28-4.28 1.53-1.53 2.75 2.75 6.57-6.57 1.53 1.53z" />
-    </svg>
-  )
 }
 
 /* ════════ HERO POSTERS — dark, billiard themed (slider) ════════ */

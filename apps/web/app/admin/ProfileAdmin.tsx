@@ -12,6 +12,7 @@ import Link from 'next/link';
 import { useAuthStore } from '../../store/auth.store';
 import { ArrowLeft, Eye, Trash2, ShieldCheck, ShieldOff, Inbox, FileSearch } from 'lucide-react';
 import ReviewDetails from '../../components/admin/ReviewDetails';
+import VerifiedBadge from '../../components/VerifiedBadge';
 
 const GOLD_D = '#8F6531';
 const TEXT   = '#1C1B17';
@@ -29,10 +30,13 @@ export interface AdminRow {
      اختیاری است تا صفحه‌هایی که هنوز آن را نمی‌دهند نشکنند؛ بدونش
      فقط دکمه‌ی «جزئیات» دیده نمی‌شود. */
   profileId?: string;
+  /* تیکِ آبی. جدا از `status` است: «منتشر شده» یعنی در سایت دیده
+     می‌شود، «تیک‌دار» یعنی مدرکش تأیید شده. */
+  verified?: boolean;
 }
 
 export default function ProfileAdmin({
-  title, en, desc, panelHint, load, toggle, remove,
+  title, en, desc, panelHint, load, toggle, remove, setVerified,
 }: {
   title: string;
   en: string;
@@ -43,6 +47,9 @@ export default function ProfileAdmin({
   load: () => AdminRow[] | Promise<AdminRow[]>;
   toggle: (slug: string) => void | Promise<void>;
   remove: (slug: string) => void | Promise<void>;
+  /* نبودنش یعنی این صفحه کارِ تیک را انجام نمی‌دهد و دکمه‌اش هم
+     نباید دیده شود. */
+  setVerified?: (slug: string, next: boolean) => void | Promise<void>;
 }) {
   const router = useRouter();
   const { user, _hydrated, authChecked } = useAuthStore();
@@ -104,7 +111,9 @@ export default function ProfileAdmin({
                   {r.title.slice(0, 1)}
                 </span>
                 <div style={{ minWidth: 0, flex: 1 }}>
-                  <div style={{ fontSize: 13.5, fontWeight: 900, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.title}</div>
+                  <div style={{ fontSize: 13.5, fontWeight: 900, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {r.title}{r.verified && <VerifiedBadge size={14} title="تیک آبی دارد" />}
+                  </div>
                   <div style={{ fontSize: 11.5, color: MUT, marginTop: 3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.subtitle}</div>
                 </div>
                 <span style={{ fontSize: 11, fontWeight: 800, borderRadius: 999, padding: '4px 12px', flexShrink: 0,
@@ -132,6 +141,31 @@ export default function ProfileAdmin({
                       <FileSearch size={14} />{open === r.slug ? 'بستن' : 'جزئیات'}
                     </button>
                   ) : null}
+                  {/* ── تیکِ آبی ──
+                      تا امروز این سه صفحه (بازیکن، متخصص، تولیدکننده)
+                      هیچ راهی برای دادنِ تیک نداشتند؛ API از قبل
+                      `verified` را می‌پذیرفت ولی هیچ دکمه‌ای صدایش
+                      نمی‌زد. صفِ کاملِ هر هفت نقش در /admin/verified است. */}
+                  {setVerified && (
+                    <button onClick={async () => {
+                      const next = !r.verified;
+                      await setVerified(r.slug, next); await refresh();
+                      flash(next ? 'تیک آبی داده شد' : 'تیک آبی برداشته شد');
+                    }}
+                      title={r.verified ? 'برداشتن تیک آبی' : 'اعطای تیک آبی'}
+                      aria-label={`${r.verified ? 'برداشتن تیک آبی از' : 'اعطای تیک آبی به'} ${r.title}`}
+                      style={{
+                        width: 34, height: 34, borderRadius: 10, cursor: 'pointer',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        border: `1px solid ${r.verified ? 'rgba(178,59,46,0.24)' : 'rgba(0,149,246,0.30)'}`,
+                        background: r.verified ? 'rgba(178,59,46,0.06)' : 'rgba(0,149,246,0.10)',
+                        color: r.verified ? '#B23B2E' : '#0095F6',
+                      }}>
+                      {r.verified
+                        ? <ShieldOff size={15} />
+                        : <VerifiedBadge size={15} title="" style={{ marginInlineStart: 0 }} />}
+                    </button>
+                  )}
                   <button onClick={async () => { await toggle(r.slug); await refresh(); flash(r.status === 'approved' ? 'پروفایل معلق شد' : 'پروفایل منتشر شد'); }}
                     title={r.status === 'approved' ? 'تعلیق' : 'انتشار'}
                     style={{ width: 34, height: 34, borderRadius: 10, border: `1px solid ${LINE}`, background: '#FAFAF7', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: r.status === 'approved' ? '#B23B2E' : '#0E7A38' }}>
