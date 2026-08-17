@@ -3930,6 +3930,30 @@ console.log('\n― استوری: یک منبع، با انقضا ―');
       'سالِ فارسی NaN می‌شد و «از سال» یا غلط می‌آمد یا اصلاً نمی‌آمد');
   }
 
+  /* ── خطای شبکه ≠ «پیدا نشد» ──
+     `fetchProfile` با یک `null` هم «نیست» و هم «نرسید» را برمی‌گرداند.
+     روی موبایلِ ایرانی که درخواست تایم‌اوت می‌شود، هر پنج صفحه‌ی
+     عمومی به کاربر می‌گفتند این آدم وجود ندارد. هر صفحه‌ای که
+     «پیدا نشد» رندر می‌کند باید نتیجه‌ی سه‌حالتی بخواند. */
+  for (const p of [
+    'app/coaches/[id]/page.tsx', 'app/referees/[id]/page.tsx',
+    'app/players/[id]/page.tsx', 'app/services/[id]/page.tsx',
+    'app/manufacturers/[id]/page.tsx',
+  ]) {
+    /* ⚠️ فقط وجودِ توکن‌ها کافی نیست: `netFail` می‌تواند تعریف شود و
+       هرگز رندر نشود. متنِ واقعی هم خواسته می‌شود — یا در خودِ صفحه،
+       یا در `ProfileMissing` که صفحه صدایش می‌زند. */
+    const own = strip(read(p));
+    const src = own + (own.includes('ProfileMissing') ? '\n' + strip(read('components/profile/ProfileMissing.tsx')) : '');
+    t(`${p.split('/')[1]} خطای شبکه را از «پیدا نشد» جدا می‌کند`,
+      own.includes('fetchProfileResult<')
+      && /state === 'error'/.test(own)
+      && own.includes('setNetFail(true)')
+      && src.includes('بارگذاری نشد')
+      && src.includes('تلاش دوباره'),
+      'قطعیِ اینترنت پیامِ «این پروفایل وجود ندارد» می‌گرفت');
+  }
+
   /* گرادیانِ فیزیکی در RTL از سرِ اشتباه محو می‌شود */
   t('خطِ کنارِ عنوان‌ها گرادیانِ منطقی دارد',
     !/linear-gradient\(90deg/.test(read('components/coach/coach-profile.css')),

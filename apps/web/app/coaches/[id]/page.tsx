@@ -125,10 +125,15 @@ export default function CoachProfilePage() {
           <p>{netFail
             ? 'ارتباط با سرور برقرار نشد. اتصال اینترنت را بررسی کنید و دوباره تلاش کنید.'
             : 'ممکن است نشانی اشتباه باشد یا پروفایل هنوز تأیید نشده باشد.'}</p>
-          {netFail
-            ? <button type="button" className="btn btn-glass btn-sm"
+          {/* راهِ بازگشت در حالتِ خطا هم می‌ماند — شاید شبکه برنگردد.
+              `min-height` صریح چون `btn-sm` حدودِ ۳۶px است. */}
+          <div style={{ display: 'flex', gap: 8, justifyContent: 'center', flexWrap: 'wrap' }}>
+            {netFail && (
+              <button type="button" className="btn btn-glass btn-sm" style={{ minHeight: 44 }}
                 onClick={() => { setChecked(false); setReloadKey(k => k + 1) }}>تلاش دوباره</button>
-            : <Link href="/coaches" className="btn btn-glass btn-sm">بازگشت به مربیان</Link>}
+            )}
+            <Link href="/coaches" className="btn btn-glass btn-sm" style={{ minHeight: 44 }}>بازگشت به مربیان</Link>
+          </div>
         </div>
       </div>
     )

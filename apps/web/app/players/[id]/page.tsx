@@ -9,6 +9,7 @@
    ───────────────────────────────────────────────────────────── */
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { ProfileMissing, ProfileLoading } from '@/components/profile/ProfileMissing'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { createPortal } from 'react-dom'
@@ -18,7 +19,7 @@ import {
 } from 'lucide-react'
 import { getPlayer, DISCIPLINE_LABEL, TONES, faDigits, type Player } from '../../../lib/players-data'
 import { getPlayerProfile, profileToPlayer, type PlayerProfile } from '../../../lib/player-store'
-import { fetchProfile } from '../../../lib/profiles/client'
+import { fetchProfileResult } from '../../../lib/profiles/client'
 import VerifiedBadge from '../../../components/VerifiedBadge'
 import PendingNotice from '../../../components/profile/PendingNotice'
 import { entryLabel } from '../../../lib/player-categories'
@@ -57,12 +58,18 @@ export default function PlayerProfilePage() {
      باید بداند دیگران نمی‌بینندش، وگرنه لینک را جایی می‌فرستد
      که همه «پیدا نشد» می‌گیرند. */
   const [pending, setPending] = useState(false)
+  /* شبکه شکست، نه اینکه پروفایل نباشد */
+  const [netFail, setNetFail] = useState(false)
+  const [reloadKey, setReloadKey] = useState(0)
   /* ── چرا سرور هم خوانده می‌شود ──
      پیش‌تر فقط `localStorage` خوانده می‌شد، یعنی پروفایلِ یک بازیکن
      تنها روی دستگاهِ خودش دیده می‌شد. تیکِ آبی هم ستونِ جدولِ
      `profiles` است و اصلاً در localStorage نیست. کشِ محلی مقدارِ
      اولیه می‌ماند تا صفحه در نبودِ شبکه خالی نشود. */
   useEffect(() => {
+    /* پیش از خروجِ زودهنگام: وگرنه `netFail`ِ نامکِ قبلی روی
+       پروفایلِ ایستا کهنه می‌ماند. */
+    setNetFail(false)
     if (staticPlayer) { setChecked(true); return }
 
     /* بازنشانی: بدونِ این، رفتن از /players/ali به /players/reza
@@ -73,21 +80,34 @@ export default function PlayerProfilePage() {
     setStored(local ? profileToPlayer(local) : null)
 
     let alive = true
-    void fetchProfile<PlayerProfile>('player', id)
-      .then(p => {
+    void (async () => {
+      try {
+        const r = await fetchProfileResult<PlayerProfile>('player', id)
+        if (!alive) return
         /* شرطِ `status === 'approved'` این‌جا اشتباه بود: سرور
            پروفایلِ تأییدنشده را فقط به صاحبش و ادمین می‌دهد، پس هر
            چیزی که رسید حق دیدنش را دارد. با آن شرط، بازیکن
            پیش‌نمایشِ پروفایلِ خودش را «پیدا نشد» می‌دید. */
-        if (!alive || !p) return
-        setPending(p.status !== 'approved')
-        setStored(profileToPlayer({ ...p.data, slug: p.slug, verified: p.verified } as PlayerProfile))
-      })
-      .catch(() => { /* شبکه قطع بود ⇒ کشِ محلی می‌ماند */ })
-      .finally(() => { if (alive) setChecked(true) })
+        if (r.state === 'found') {
+          const p = r.profile
+          setPending(p.status !== 'approved')
+          setStored(profileToPlayer({ ...p.data, slug: p.slug, verified: p.verified } as PlayerProfile))
+        } else if (r.state === 'error') {
+          /* کشِ محلی می‌ماند؛ فقط اگر چیزی هم در کش نبود، پیامِ
+             خطای شبکه نشان داده می‌شود نه «پیدا نشد». */
+          setNetFail(true)
+        }
+      } catch {
+        /* `fetchProfileResult` خودش خطا را می‌گیرد؛ تورِ ایمنی است
+           تا استثنای غیرمنتظره صفحه را به «پیدا نشد» نیندازد. */
+        if (alive) setNetFail(true)
+      } finally {
+        if (alive) setChecked(true)
+      }
+    })()
 
     return () => { alive = false }
-  }, [id, staticPlayer])
+  }, [id, staticPlayer, reloadKey])
 
   const player = staticPlayer ?? stored
 
@@ -126,25 +146,21 @@ export default function PlayerProfilePage() {
     return MEDIA_VIDEOS.filter(v => v.tags.some(t => player.tags.includes(t)) || v.category === 'interviews').slice(0, 3)
   }, [player])
 
+  /* یونیونِ تفکیک‌شده‌ی  یا هر دو را می‌خواهد یا
+     هیچ‌کدام را — پس یک‌جا ساخته و پخش می‌شود. */
+  const retryProps = netFail
+    ? { netFail: true as const, onRetry: () => { setChecked(false); setReloadKey(k => k + 1) } }
+    : {}
   if (!player) {
-    if (!checked) {
-      return (
-        <div dir="rtl" style={{ minHeight: '60vh', background: BG, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Vazirmatn,Tahoma,sans-serif' }}>
-          <p style={{ fontSize: 14, fontWeight: 600, color: MUT }}>در حال بارگذاری…</p>
-        </div>
-      )
-    }
+    if (!checked) return <ProfileLoading />
     return (
-      <div dir="rtl" style={{ minHeight: '70vh', background: BG, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Vazirmatn,Tahoma,sans-serif', padding: 20 }}>
-        <div style={{ textAlign: 'center', background: '#fff', border: `1px solid ${LINE}`, borderRadius: 18, padding: '40px 34px', maxWidth: 380 }}>
-          <Trophy size={34} style={{ color: MUT, opacity: 0.5, marginBottom: 10 }} />
-          <p style={{ fontSize: 17, fontWeight: 900, color: TEXT, margin: '0 0 8px' }}>بازیکن پیدا نشد</p>
-          <p style={{ fontSize: 13, color: MUT, margin: '0 0 20px', lineHeight: 1.8 }}>ممکن است این پروفایل حذف شده یا نشانی تغییر کرده باشد.</p>
-          <Link href="/players" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '10px 20px', borderRadius: 10, textDecoration: 'none', fontSize: 13, fontWeight: 800, background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.34)', color: GOLD_D }}>
-            بازگشت به بازیکنان <ArrowLeft size={14} />
-          </Link>
-        </div>
-      </div>
+      <ProfileMissing
+        icon={<Trophy size={34} />}
+        title="بازیکن پیدا نشد"
+        message="ممکن است این پروفایل حذف شده یا نشانی تغییر کرده باشد."
+        backHref="/players" backLabel="بازگشت به بازیکنان"
+        {...retryProps}
+      />
     )
   }
 

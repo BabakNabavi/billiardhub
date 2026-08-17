@@ -1672,3 +1672,26 @@ select:disabled { opacity: 0.55; cursor: not-allowed; }
    شاخه‌ی «فقط بندانگشتی»ِ ProfileVideoCard است که یک div بدونِ
    onClick می‌سازد؛ وعده‌ی کلیک روی چیزی که کلیک نمی‌شود، دروغ است. */
 .gcard { overflow: hidden; border-radius: 10px; }
+
+/* ── CTAِ طلاییِ کارت‌های خالی/خطا ──
+   کلِ استایل این‌جاست، نه نصفش. نسخه‌ی اول رنگ و ابعاد را اینلاین
+   می‌گذاشت و فقط hover را به کلاس می‌داد، پس کلاس مجبور بود با
+   !important برنده شود — و مالکیتِ استایل بینِ دو جا تقسیم می‌شد. */
+.lq-cta {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  /* ۴۴ پیکسل — کفِ اندازه‌ی هدفِ لمسی */
+  min-height: 44px; padding-inline: 20px; border-radius: 10px;
+  font-family: inherit; font-size: 13px; font-weight: 800;
+  text-decoration: none; cursor: pointer;
+  color: var(--gold-deep, #8F6531);
+  background: rgba(199, 166, 106, 0.12);
+  border: 1px solid rgba(199, 166, 106, 0.34);
+  transition: background .2s, border-color .2s, transform .2s cubic-bezier(.22, 1, .36, 1);
+}
+.lq-cta:hover { background: rgba(199, 166, 106, 0.20); border-color: rgba(199, 166, 106, 0.48); transform: translateY(-2px); }
+.lq-cta:active { transform: translateY(0); }
+.lq-cta:focus-visible { outline: 2px solid var(--gold-deep, #8F6531); outline-offset: 3px; }
+@media (prefers-reduced-motion: reduce) {
+  .lq-cta { transition: none; }
+  .lq-cta:hover { transform: none; }
+}

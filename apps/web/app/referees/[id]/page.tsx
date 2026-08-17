@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react'
 import ProfileVideoCard from '../../../components/ProfileVideoCard'
 import VerifiedBadge from '../../../components/VerifiedBadge'
 import { NotchCover, NotchAvatar, NOTCH_CARD_VARS } from '../../../components/profile/NotchHero'
-import { fetchProfile } from '../../../lib/profiles/client'
+import { fetchProfileResult } from '../../../lib/profiles/client'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import { useProfileImageViewer } from '@/components/ProfileImageViewer'
@@ -274,19 +274,34 @@ export default function RefereeProfilePage() {
   /* تا وقتی پاسخِ سرور نیامده «پیدا نشد» نشان نمی‌دهیم — وگرنه هر
      پروفایلِ واقعی یک لحظه «این داور پیدا نشد» می‌شود و بعد می‌پرد. */
   const [checked, setChecked] = useState(false)
+  /* شبکه شکست، نه اینکه پروفایل نباشد */
+  const [netFail, setNetFail] = useState(false)
+  const [reloadKey, setReloadKey] = useState(0)
   /* ── چرا سرور هم خوانده می‌شود ──
      این صفحه فقط `localStorage` را می‌دید، یعنی پروفایل تنها در مرورگرِ
      خودِ صاحبش دیده می‌شد و بقیه داده‌ی نمونه می‌گرفتند. حافظه‌ی محلی
      اول می‌آید چون فوری است؛ پاسخِ سرور رویش می‌نشیند. */
   useEffect(() => {
+    setNetFail(false)
     if (!id) { setChecked(true); return }
     setLocalP(getRefereeProfile(id))
     let alive = true
-    void fetchProfile<RefereeProfile>('referee', id).then(r => {
-      if (alive && r?.data) setLocalP({ ...(r.data as RefereeProfile), slug: r.slug, verified: r.verified })
-    }).finally(() => { if (alive) setChecked(true) })
+    void (async () => {
+      try {
+        const r = await fetchProfileResult<RefereeProfile>('referee', id)
+        if (!alive) return
+        if (r.state === 'found') setLocalP({ ...(r.profile.data as RefereeProfile), slug: r.profile.slug, verified: r.profile.verified })
+        else if (r.state === 'error') setNetFail(true)
+      } catch {
+        /* `fetchProfileResult` خودش خطا را می‌گیرد؛ تورِ ایمنی است
+           تا استثنای غیرمنتظره صفحه را به «پیدا نشد» نیندازد. */
+        if (alive) setNetFail(true)
+      } finally {
+        if (alive) setChecked(true)
+      }
+    })()
     return () => { alive = false }
-  }, [id])
+  }, [id, reloadKey])
   /* ⚠️ بدونِ فالبک — دلیلش در صفحه‌ی مربی */
   const referee = localP ? mapLocalToFull(localP) : (D.find(r => r.id === id) ?? null)
   const { open: openImage, viewer: imageViewer } = useProfileImageViewer()
@@ -312,19 +327,45 @@ export default function RefereeProfilePage() {
     setShowNewAlbum(false)
   }
 
+  /* ⚠️ این‌جا یک `div`ِ کاملاً خالی بود. تا وقتی فقط اولین رنگ‌آمیزی
+     بود کسی نمی‌دیدش، ولی «تلاش دوباره» همین حالت را دوباره احضار
+     می‌کند: کاربر دکمه را می‌زد و تا پایانِ تایم‌اوت یک صفحه‌ی سفیدِ
+     بی‌پیام می‌دید. */
   if (!D.some(r => r.id === id) && !checked) {
-    return <div style={{ direction:'rtl', fontFamily:"'Vazirmatn',Tahoma,sans-serif", background:'#F1EFEC', minHeight:'100vh' }} />
+    return (
+      <div className="lq-stage" role="status" aria-busy="true"
+        style={{ direction:'rtl', fontFamily:"'Vazirmatn',Tahoma,sans-serif", minHeight:'100vh',
+          display:'flex', alignItems:'center', justifyContent:'center' }}>
+        <p style={{ fontSize:14, fontWeight:600, color:TEXT_S }}>در حال بارگذاری…</p>
+      </div>
+    )
   }
 
   if (!referee) {
     return (
       <div className="lq-stage" style={{ direction:'rtl', fontFamily:"'Vazirmatn',Tahoma,sans-serif", minHeight:'100vh', display:'flex', alignItems:'center', justifyContent:'center', padding:24 }}>
+        {/* ظاهرِ شیشه‌ای این‌جا می‌ماند (جفتِ صفحه‌ی مربی است، نه
+            کارتِ سفیدِ بازیکن/تولیدکننده) — فقط شاخه‌ی خطای شبکه
+            اضافه شد: پیش‌تر قطعیِ اینترنت «این داور پیدا نشد» می‌شد. */}
         <div className="lqg" style={{ padding:'34px 30px', textAlign:'center', maxWidth:420 }}>
-          <h1 style={{ fontSize:18, fontWeight:800, color:TEXT, marginBottom:8 }}>این داور پیدا نشد</h1>
+          <h1 style={{ fontSize:18, fontWeight:800, color:TEXT, marginBottom:8 }}>
+            {netFail ? 'بارگذاری نشد' : 'این داور پیدا نشد'}
+          </h1>
           <p style={{ fontSize:13.5, color:TEXT_S, lineHeight:2, marginBottom:18 }}>
-            ممکن است نشانی اشتباه باشد یا پروفایل هنوز تأیید نشده باشد.
+            {netFail
+              ? 'ارتباط با سرور برقرار نشد. اتصال اینترنت را بررسی کنید و دوباره تلاش کنید.'
+              : 'ممکن است نشانی اشتباه باشد یا پروفایل هنوز تأیید نشده باشد.'}
           </p>
-          <Link href="/referees" className="btn btn-glass btn-sm">بازگشت به داوران</Link>
+          {/* راهِ بازگشت در حالتِ خطا هم می‌ماند — شاید شبکه برنگردد.
+              `min-height` صریح چون `btn-sm` حدودِ ۳۶px است و زیرِ کفِ
+              ۴۴ پیکسلیِ هدفِ لمسی می‌افتد. */}
+          <div style={{ display:'flex', gap:8, justifyContent:'center', flexWrap:'wrap' }}>
+            {netFail && (
+              <button type="button" className="btn btn-glass btn-sm" style={{ minHeight:44 }}
+                onClick={() => { setChecked(false); setReloadKey(k => k + 1) }}>تلاش دوباره</button>
+            )}
+            <Link href="/referees" className="btn btn-glass btn-sm" style={{ minHeight:44 }}>بازگشت به داوران</Link>
+          </div>
         </div>
       </div>
     )

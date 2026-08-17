@@ -8,17 +8,18 @@
    ───────────────────────────────────────────────────────────── */
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { ProfileMissing, ProfileLoading } from '@/components/profile/ProfileMissing'
 import { useProfileImageViewer } from '@/components/ProfileImageViewer'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { createPortal } from 'react-dom'
 import {
-  MapPin, ChevronLeft, ChevronRight, ArrowLeft, Wrench,
+  MapPin, ChevronLeft, ChevronRight, Wrench,
   Phone, X, ZoomIn, ZoomOut, Images,
 } from 'lucide-react'
 import { getTechnician, faDigits } from '../../../lib/technicians-data'
 import { getTechnicianProfile, profileToTechnician, type TechnicianProfile } from '../../../lib/technician-store'
-import { fetchProfile } from '../../../lib/profiles/client'
+import { fetchProfileResult } from '../../../lib/profiles/client'
 import VerifiedBadge from '../../../components/VerifiedBadge'
 import PendingNotice from '../../../components/profile/PendingNotice'
 import type { Technician } from '../../../lib/technicians-data'
@@ -59,6 +60,9 @@ export default function TechnicianProfilePage() {
      باید بداند دیگران نمی‌بینندش، وگرنه لینک را جایی می‌فرستد
      که همه «پیدا نشد» می‌گیرند. */
   const [pending, setPending] = useState(false)
+  /* شبکه شکست، نه اینکه پروفایل نباشد */
+  const [netFail, setNetFail] = useState(false)
+  const [reloadKey, setReloadKey] = useState(0)
   const { open: openImage, viewer: imageViewer } = useProfileImageViewer()
   /* ── چرا سرور هم خوانده می‌شود ──
      تا امروز این صفحه فقط `localStorage` را می‌خواند، یعنی پروفایلِ
@@ -67,6 +71,8 @@ export default function TechnicianProfilePage() {
      نمایش داده نمی‌شد. کشِ محلی به‌عنوان مقدارِ اولیه می‌ماند تا
      صفحه در نبودِ شبکه خالی نشود. */
   useEffect(() => {
+    /* پیش از خروجِ زودهنگام: وگرنه `netFail`ِ نامکِ قبلی کهنه می‌ماند. */
+    setNetFail(false)
     if (staticTech) { setChecked(true); return }
 
     /* بازنشانی — همان دلیلِ صفحه‌ی بازیکن: پروفایلِ قبلی نباید زیرِ
@@ -76,19 +82,30 @@ export default function TechnicianProfilePage() {
     setStored(local ? profileToTechnician(local) : null)
 
     let alive = true
-    void fetchProfile<TechnicianProfile>('technician', id)
-      .then(p => {
+    void (async () => {
+      try {
+        const r = await fetchProfileResult<TechnicianProfile>('technician', id)
+        if (!alive) return
         /* همان دلیلِ صفحه‌ی بازیکن: قضاوتِ دوباره‌ی کلاینت،
            پیش‌نمایشِ صاحبِ پروفایل را حذف می‌کرد. */
-        if (!alive || !p) return
-        setPending(p.status !== 'approved')
-        setStored(profileToTechnician({ ...p.data, slug: p.slug, verified: p.verified } as TechnicianProfile))
-      })
-      .catch(() => { /* شبکه قطع بود ⇒ کشِ محلی می‌ماند */ })
-      .finally(() => { if (alive) setChecked(true) })
+        if (r.state === 'found') {
+          const p = r.profile
+          setPending(p.status !== 'approved')
+          setStored(profileToTechnician({ ...p.data, slug: p.slug, verified: p.verified } as TechnicianProfile))
+        } else if (r.state === 'error') {
+          setNetFail(true)
+        }
+      } catch {
+        /* `fetchProfileResult` خودش خطا را می‌گیرد؛ تورِ ایمنی است
+           تا استثنای غیرمنتظره صفحه را به «پیدا نشد» نیندازد. */
+        if (alive) setNetFail(true)
+      } finally {
+        if (alive) setChecked(true)
+      }
+    })()
 
     return () => { alive = false }
-  }, [id, staticTech])
+  }, [id, staticTech, reloadKey])
 
   const tech = staticTech ?? stored
 
@@ -119,25 +136,21 @@ export default function TechnicianProfilePage() {
     return () => { document.body.style.overflow = ''; window.removeEventListener('keydown', onKey) }
   }, [lightbox, closeLb, stepLb])
 
+  /* یونیونِ تفکیک‌شده‌ی  یا هر دو را می‌خواهد یا
+     هیچ‌کدام را — پس یک‌جا ساخته و پخش می‌شود. */
+  const retryProps = netFail
+    ? { netFail: true as const, onRetry: () => { setChecked(false); setReloadKey(k => k + 1) } }
+    : {}
   if (!tech) {
-    if (!checked) {
-      return (
-        <div dir="rtl" style={{ minHeight: '60vh', background: BG, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Vazirmatn,Tahoma,sans-serif' }}>
-          <p style={{ fontSize: 14, fontWeight: 600, color: MUT }}>در حال بارگذاری…</p>
-        </div>
-      )
-    }
+    if (!checked) return <ProfileLoading />
     return (
-      <div dir="rtl" style={{ minHeight: '70vh', background: BG, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Vazirmatn,Tahoma,sans-serif', padding: 20 }}>
-        <div style={{ textAlign: 'center', background: '#fff', border: `1px solid ${LINE}`, borderRadius: 18, padding: '40px 34px', maxWidth: 380 }}>
-          <Wrench size={34} style={{ color: MUT, opacity: 0.5, marginBottom: 10 }} />
-          <p style={{ fontSize: 17, fontWeight: 900, color: TEXT, margin: '0 0 8px' }}>متخصص پیدا نشد</p>
-          <p style={{ fontSize: 13, color: MUT, margin: '0 0 20px', lineHeight: 1.8 }}>ممکن است این پروفایل حذف شده یا نشانی تغییر کرده باشد.</p>
-          <Link href="/services" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '10px 20px', borderRadius: 10, textDecoration: 'none', fontSize: 13, fontWeight: 800, background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.34)', color: GOLD_D }}>
-            بازگشت به خدمات فنی <ArrowLeft size={14} />
-          </Link>
-        </div>
-      </div>
+      <ProfileMissing
+        icon={<Wrench size={34} />}
+        title="متخصص پیدا نشد"
+        message="ممکن است این پروفایل حذف شده یا نشانی تغییر کرده باشد."
+        backHref="/services" backLabel="بازگشت به خدمات فنی"
+        {...retryProps}
+      />
     )
   }
 
