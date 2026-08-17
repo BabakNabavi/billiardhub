@@ -12,6 +12,7 @@ import Select from '../../../components/ui/Select'
 import Link from 'next/link'
 import { useAuthStore } from '../../../store/auth.store'
 import ProvinceCitySelect from '../../../components/ProvinceCitySelect'
+import CoverageCitySelect from '../../../components/CoverageCitySelect'
 import ProfileSlugField from '../../../components/ProfileSlugField'
 import ClubPicker from '../../../components/ClubPicker'
 import { compressImage } from '../../../lib/seller-store'
@@ -21,15 +22,10 @@ import {
   saveTechnicianProfile, type TechnicianProfile,
   // (منبع حقیقت از این پس سرور است؛ این‌ها فقط کش محلی‌اند)
 } from '../../../lib/technician-store'
-import { fetchMyProfile, saveProfileRemote } from '../../../lib/profiles/client'
+import { fetchMyProfileResult, saveProfileRemote } from '../../../lib/profiles/client'
 import VerificationBadges from '../../../components/VerificationBadges'
 import { Plus, Trash2, Images, Wrench, ArrowLeft, Check } from 'lucide-react'
 
-const GOLD_D = '#8F6531'
-const TEXT   = '#1C1B17'
-const SEC    = '#5B564B'
-const MUT    = '#6F6A5C'
-const LINE   = '#E7E2D6'
 
 const CARD   = 'rounded-2xl border border-[#E7E2D6] bg-white p-5 shadow-[0_2px_10px_rgba(28,27,23,0.05)]'
 const LQ_BTN = 'inline-flex items-center gap-2 rounded-[10px] border border-[rgba(199,166,106,0.34)] bg-[rgba(199,166,106,0.12)] px-4 py-2.5 text-[13px] font-bold text-[#8F6531] transition hover:-translate-y-0.5'
@@ -41,8 +37,10 @@ export default function TechnicianDashboard() {
 
   const [form, setForm]     = useState<TechnicianProfile>(() => emptyTechnicianProfile('draft'))
   const [aboutText, setAboutText] = useState('')
-  const [covInput, setCovInput]   = useState('')
   const [loaded, setLoaded] = useState(false)
+  /* نامکی که واقعاً روی سرور ثبت شده. تا وقتی خالی است فیلدِ نشانی
+     باز می‌ماند؛ نامکِ خودکارِ فرم نباید قفلش کند. */
+  const [savedSlug, setSavedSlug] = useState<string | null>(null)
   const [saved, setSaved]   = useState(false)
   const [err, setErr]       = useState('')
   const [busy, setBusy]     = useState(false)
@@ -69,11 +67,24 @@ export default function TechnicianDashboard() {
 
       /* نسخه‌ی سرور مقدم است؛ پروفایل محلی قدیمی یک‌بار بالا می‌رود */
       void (async () => {
-        const remote = await fetchMyProfile<TechnicianProfile>('technician')
+        const res = await fetchMyProfileResult<TechnicianProfile>('technician')
+      /* خطا ⇒ نمی‌دانیم چیزی ثبت شده یا نه؛ نشانی قفل می‌ماند. */
+      if (res.state === 'error') return
+      const remote = res.state === 'found' ? res.profile : null
         if (!remote) {
-          if (mine) await saveProfileRemote('technician', mine.slug, mine as unknown as Record<string, unknown>)
+          if (mine) {
+            const up = await saveProfileRemote('technician', mine.slug, mine as unknown as Record<string, unknown>)
+            /* فقط نوشتنِ تأییدشده قفل می‌کند. */
+            if (up.ok && up.profile?.slug) setSavedSlug(up.profile.slug)
+            else { setSavedSlug(''); setErr(up.message ?? 'نشانیِ ثبت‌شده خوانده نشد — دوباره تلاش کنید') }
+          } else {
+            /* کاربرِ کاملاً تازه: نه ردیفِ سرور، نه کشِ محلی.
+               صریح باز می‌شود تا نامکش را خودش انتخاب کند. */
+            setSavedSlug('')
+          }
           return
         }
+        setSavedSlug(remote.slug)
         const merged = { ...base, ...remote.data, slug: remote.slug }
         setForm(merged)
         setAboutText((merged.about ?? []).join('\n\n'))
@@ -88,12 +99,6 @@ export default function TechnicianDashboard() {
 
   const toggleService = (s: TechService) =>
     set('services', form.services.includes(s) ? form.services.filter(x => x !== s) : [...form.services, s])
-
-  const addCoverage = () => {
-    const v = covInput.trim()
-    if (!v || form.coverage.includes(v)) { setCovInput(''); return }
-    set('coverage', [...form.coverage, v]); setCovInput('')
-  }
 
   /* ── پروژه‌ها ── */
   const pickPrjImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -154,9 +159,13 @@ export default function TechnicianDashboard() {
     /* منبع حقیقت سرور است؛ localStorage فقط کش همین مرورگر می‌ماند.
        تا پیش از این فقط localStorage نوشته می‌شد و پنل ادمین پروفایل را
        اصلاً نمی‌دید. */
+    if (savedSlug === null) { setErr('نشانیِ اختصاصی هنوز خوانده نشده — چند لحظه صبر کنید یا صفحه را تازه کنید'); return }
     const res = await saveProfileRemote('technician', profile.slug, profile as unknown as Record<string, unknown>)
     if (!res.ok) { setErr(res.message ?? 'ذخیره روی سرور انجام نشد'); return }
 
+    /* از این لحظه نشانی منتشر شده و قفل می‌شود: هر تغییرِ بعدی
+       لینک‌های منتشرشده را می‌شکند. */
+    if (res.profile?.slug) setSavedSlug(res.profile.slug)
     const saved = (res.profile?.data as typeof profile | undefined) ?? profile
     try { saveTechnicianProfile({ ...profile, ...saved }) } catch { /* کش مرورگر پر است */ }
     setForm(f => ({ ...f, ...saved }))
@@ -240,7 +249,7 @@ export default function TechnicianDashboard() {
                             {/* نشانیِ اختصاصیِ سایت — همان چیزی که پنلِ باشگاه از اول داشت */}
               <div className="sm:col-span-2">
                 <ProfileSlugField
-                  kind="technician" value={form.slug}
+                  kind="technician" value={form.slug} savedSlug={savedSlug}
                   onChange={v => setForm(f => ({ ...f, slug: v }))}
                   suggestFrom={form.name}
                 />
@@ -260,22 +269,9 @@ export default function TechnicianDashboard() {
                 <ClubPicker label="باشگاه / مجموعه‌ی همکار" />
               </div>
               <div>
-                <label className="mb-1.5 block text-[12.5px] font-bold text-[#5B564B]">شهرهای تحت پوشش</label>
-                <div className="flex gap-2">
-                  <input className={INPUT} value={covInput} onChange={e => setCovInput(e.target.value)}
-                    onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addCoverage() } }} placeholder="نام شهر + Enter" />
-                  <button type="button" aria-label="افزودن محدوده" onClick={addCoverage} className={LQ_BTN}><Plus size={14} /></button>
-                </div>
-                {form.coverage.length > 0 && (
-                  <div className="mt-2 flex flex-wrap gap-1.5">
-                    {form.coverage.map(c => (
-                      <span key={c} className="inline-flex items-center gap-1 rounded-full border border-[#E7E2D6] bg-[#FAFAF7] px-2.5 py-1 text-[11.5px] font-semibold text-[#5B564B]">
-                        {c}
-                        <button type="button" onClick={() => set('coverage', form.coverage.filter(x => x !== c))} className="text-[#B23B2E]">×</button>
-                      </span>
-                    ))}
-                  </div>
-                )}
+                <CoverageCitySelect
+                  value={form.coverage}
+                  onChange={v => set('coverage', v)} />
               </div>
               <div className="sm:col-span-2">
                 <label className="mb-1.5 block text-[12.5px] font-bold text-[#5B564B]">معرفی یک‌خطی *</label>

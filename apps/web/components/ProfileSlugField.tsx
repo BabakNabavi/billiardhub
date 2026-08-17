@@ -1,6 +1,5 @@
 'use client'
 
-import { useRef } from 'react'
 import SiteAddressField, { type SlugStatus } from './SiteAddressField'
 import type { ProfileKind } from '../lib/profiles/client'
 
@@ -40,8 +39,15 @@ export interface ProfileSlugFieldProps {
   label?: string
   /** نامکِ ثبت‌شده دیگر عوض نمی‌شود */
   locked?: boolean
-  /** نامکی که از سرور یا حافظه بارگذاری شده — تنها چیزی که قفل می‌کند */
-  savedSlug?: string
+  /** نامکِ ثبت‌شده روی سرور — تنها چیزی که قفل می‌کند.
+   *
+   *  سه معنا دارد و هر سه لازم‌اند:
+   *    رشته‌ی ناخالی → ثبت شده، قفل
+   *    `''`          → سرور قطعاً گفت چیزی ثبت نشده، باز
+   *    `null`/نبودن  → هنوز نمی‌دانیم (در حالِ خواندن یا خطای شبکه)،
+   *                    قفل — چون بازکردن در ابهام یعنی نشانیِ
+   *                    منتشرشده می‌تواند عوض شود. */
+  savedSlug?: string | null
   onStatusChange?: (s: SlugStatus) => void
 }
 
@@ -59,32 +65,39 @@ export default function ProfileSlugField({
      می‌کردند و ویترینِ فروشگاه یک‌شبه خالی شد. سرور مهاجرت را هم
      انجام می‌دهد، ولی بهترین حالت این است که اصلاً عوض نشود —
      لینک‌های منتشرشده در گوگل و پیام‌ها نمی‌شکنند. */
-  /* ── چه چیزی قفل می‌کند، و چه چیزی نه ──
-     نسخه‌ی قبلی «اولین مقدارِ ناخالی» را ذخیره‌شده فرض می‌کرد. برای
-     پروفایلِ موجود درست بود، ولی در فرمِ تازه آن مقدار **اولین
-     کاراکتری** بود که کاربر تایپ می‌کرد: فیلد بعد از یک حرف قفل
-     می‌شد و ثبت با «۲ تا ۶۰ کاراکتر» رد می‌شد.
+  /* ── چرا حدس‌زدن کنار گذاشته شد ──
+     نسخه‌ی قبلی «اولین مقدارِ ناخالی که تایپ نشده» را نامکِ ذخیره‌شده
+     فرض می‌کرد. ولی پنل‌ها فرم را با یک نامکِ **خودکار** می‌سازند
+     (`newPlayerSlug()` چیزی مثل `p-mswkgwx3` می‌دهد)، پس آن مقدار از
+     همان لحظه‌ی mount حاضر است و فیلد قفل به‌دنیا می‌آمد: کاربر
+     نشانیِ نامفهومی می‌دید که نمی‌شد عوضش کرد.
 
-     تفاوت در منشأ است، نه در خالی‌بودن: مقداری که با بارگذاری آمده
-     قفل می‌کند، مقداری که تایپ شده نه. تا وقتی کاربر ذخیره نکرده،
-     نامکش قابلِ ویرایش می‌ماند.
+     حدس‌زدن از روی «خالی‌بودن» ذاتاً نمی‌تواند نامکِ ذخیره‌شده را از
+     نامکِ پیش‌فرض تشخیص دهد — هر دو در اولین رندر حاضرند. تنها کسی
+     که می‌داند پروفایل ذخیره شده یا نه، خودِ پنل است، پس باید
+     صریح بگوید. */
+  /* ── سه حالت، نه دو ──
+     «نامعلوم» را نمی‌شود قفل نامید. اگر بنامیم، کاربرِ تازه‌ای که
+     درخواستش تایم‌اوت شده فیلدی می‌بیند که می‌گوید «ثبت شده و قابلِ
+     تغییر نیست» — ادعایی که دروغ است — و چون ذخیره همچنان کار
+     می‌کند، نامکِ خودکار واقعاً نشانیِ دائمی‌اش می‌شود. همان دامی که
+     می‌خواستیم ببندیم، از سرِ دیگر باز می‌ماند.
 
-     `savedSlug` برای والدی است که خودش می‌داند چه چیزی ذخیره شده و
-     می‌خواهد صریح بگوید. */
-  const typed = useRef(false)
-  const loaded = useRef<string | null>(null)
-  if (loaded.current === null && value && !typed.current) loaded.current = value
-  const isLocked = locked ?? !!(savedSlug?.trim() || (loaded.current && !typed.current))
+     پس: نامعلوم ⇒ `loading` (غیرفعال، بدونِ ادعا، و پنل جلوی ذخیره
+     را می‌گیرد). فقط نامکِ واقعاً ثبت‌شده قفل می‌کند. */
+  const unknown = locked === undefined && savedSlug == null
+  const isLocked = locked ?? (savedSlug != null && savedSlug.trim() !== '')
 
   return (
     <SiteAddressField
-      value={value}
-      onChange={v => { typed.current = true; onChange(v) }}
+      value={value}
+      onChange={onChange}
       basePath={BASE_PATH[kind]}
       {...(suggestFrom ? { suggestFrom } : {})}
       {...(onStatusChange ? { onStatusChange } : {})}
       {...(label ? { label } : {})}
       locked={isLocked}
+      loading={unknown}
       checkUrl={s =>
         `/api/profiles/${kind}/slug-check?slug=${encodeURIComponent(s)}${
           excludeId ? `&excludeId=${encodeURIComponent(excludeId)}` : ''

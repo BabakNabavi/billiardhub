@@ -8,8 +8,9 @@ import { getManufacturerProfile, profileToManufacturer } from '../../../lib/manu
 import type { ManufacturerProfile } from '../../../lib/manufacturer-store'
 import { fetchProfile } from '../../../lib/profiles/client'
 import VerifiedBadge from '../../../components/VerifiedBadge'
+import { Factory } from 'lucide-react'
 import { telPrefix, provinceOfCity } from '../../../lib/iran-geo'
-import { getManufacturer, MANUFACTURERS, type MfrProduct } from '../../../lib/manufacturers-data'
+import { getManufacturer, type MfrProduct } from '../../../lib/manufacturers-data'
 
 const DEFAULT_ID = '1'
 
@@ -187,27 +188,51 @@ export default function ManufacturerPage() {
   /* اول داده‌ی ایستا؛ اگر نبود، پروفایل ثبت‌نامی (پنل ⇒ localStorage) */
   const [storedMfr, setStoredMfr] = useState<ReturnType<typeof profileToManufacturer> | null>(null)
   const { open: openImage, viewer: imageViewer } = useProfileImageViewer()
+  /* `checked` لازم است تا «پیدا نشد» پیش از رسیدنِ پاسخِ سرور نشان
+     داده نشود — وگرنه هر بار یک لحظه صفحه‌ی خطا می‌پرید بالا. */
+  const [checked, setChecked] = useState(false)
   useEffect(() => {
-    if (getManufacturer(mfrId)) return
+    if (getManufacturer(mfrId)) { setChecked(true); return }
+
+    setChecked(false)
     const p = getManufacturerProfile(mfrId)
     setStoredMfr(p ? profileToManufacturer(p) : null)
-    /* تولیدکننده‌ی ثبت‌نامی کاربران دیگر فقط روی سرور است */
-    void fetchProfile<ManufacturerProfile>('manufacturer', mfrId).then(r => {
-      if (r) setStoredMfr(profileToManufacturer({ ...r.data, slug: r.slug, verified: r.verified } as ManufacturerProfile))
-    })
-  }, [mfrId])
-  const mfr = getManufacturer(mfrId) ?? storedMfr ?? MANUFACTURERS[0]!
 
-  const province = provinceOfCity(mfr.city)
+    let alive = true
+    /* تولیدکننده‌ی ثبت‌نامی کاربران دیگر فقط روی سرور است */
+    void fetchProfile<ManufacturerProfile>('manufacturer', mfrId)
+      .then(r => {
+        if (!alive || !r) return
+        setStoredMfr(profileToManufacturer({ ...r.data, slug: r.slug, verified: r.verified } as ManufacturerProfile))
+      })
+      .catch(() => { /* شبکه قطع بود ⇒ کشِ محلی می‌ماند */ })
+      .finally(() => { if (alive) setChecked(true) })
+
+    return () => { alive = false }
+  }, [mfrId])
+
+  /* ── چرا `MANUFACTURERS[0]!` حذف شد ──
+     آن آرایه‌ی نمایشی پیش از رونمایی خالی شد، پس این فالبک از آن روز
+     `undefined` برمی‌گرداند و علامتِ `!` فقط تایپ‌چکر را ساکت می‌کرد.
+     نتیجه: هر نشانیِ تولیدکننده‌ای که وجود نداشت، سرِ `mfr.city`
+     می‌ترکید و کاربر صفحه‌ی «مشکلی پیش آمد» می‌دید — از جمله
+     تولیدکننده‌ای که تازه ثبت‌نام کرده و هنوز ذخیره نشده بود. */
+  const mfr = getManufacturer(mfrId) ?? storedMfr
+
+  const province = provinceOfCity(mfr?.city ?? '')
 
   /* شماره‌ی تماس (شماره‌ها خودشان کد شهر دارند) */
   const areaCode  = telPrefix(province)
-  const phoneDig  = mfr.phone.replace(/\D/g, '')
+  /* `mfr` تا پیش از گاردِ پایین می‌تواند تهی باشد؛ این مقادیر فقط
+     پس از آن گارد رندر می‌شوند، ولی محاسبه‌شان باید بی‌خطر بماند. */
+  const phoneDig  = (mfr?.phone ?? '').replace(/\D/g, '')
   const withCode  = !!areaCode && !!phoneDig && !phoneDig.startsWith('0')
-  const phoneText = withCode ? `${areaCode}-${phoneDig}` : mfr.phone
+  const phoneText = withCode ? `${areaCode}-${phoneDig}` : (mfr?.phone ?? '')
   const phoneHref = withCode ? `${areaCode}${phoneDig}` : phoneDig
 
-  const PRODUCTS = mfr.products
+  /* آرایه‌ی تازه در هر رندر، وابستگیِ دو useMemo پایین را همیشه
+     تغییریافته نشان می‌داد و فیلترها بی‌دلیل دوباره اجرا می‌شدند. */
+  const PRODUCTS = useMemo(() => mfr?.products ?? [], [mfr])
 
   const [cat, setCat]     = useState<string>('all')
   const [page, setPage]   = useState(1)
@@ -243,6 +268,31 @@ export default function ManufacturerPage() {
   const goToPage = (n: number) => {
     setPage(n)
     requestAnimationFrame(() => gridRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }))
+  }
+
+  /* ── جایگاهِ این گارد اتفاقی نیست ──
+     پس از **همه‌ی** هوک‌ها می‌آید. اگر بالاتر باشد، در رندری که
+     پروفایل نیامده تعدادِ هوک‌ها کمتر می‌شود و React با «تغییرِ
+     ترتیبِ هوک‌ها» می‌شکند. */
+  if (!mfr) {
+    return (
+      <div dir="rtl" style={{ minHeight: '70vh', background: '#F7F7F5', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Vazirmatn,Tahoma,sans-serif', padding: 20 }}>
+        {!checked ? (
+          <p style={{ fontSize: 14, fontWeight: 600, color: '#6F6A5C' }}>در حال بارگذاری…</p>
+        ) : (
+          <div style={{ textAlign: 'center', background: '#fff', border: '1px solid #E7E2D6', borderRadius: 18, padding: '40px 34px', maxWidth: 380 }}>
+            <Factory size={34} color="#6F6A5C" style={{ opacity: 0.5, marginBottom: 10 }} />
+            <p style={{ fontSize: 17, fontWeight: 900, color: '#1C1B17', margin: '0 0 8px' }}>تولیدکننده پیدا نشد</p>
+            <p style={{ fontSize: 13, color: '#6F6A5C', margin: '0 0 20px', lineHeight: 1.8 }}>
+              ممکن است این پروفایل هنوز ذخیره نشده، حذف شده، یا نشانی تغییر کرده باشد.
+            </p>
+            <Link href="/manufacturers" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '10px 20px', borderRadius: 10, textDecoration: 'none', fontSize: 13, fontWeight: 800, background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.34)', color: '#8F6531' }}>
+              بازگشت به تولیدکنندگان
+            </Link>
+          </div>
+        )}
+      </div>
+    )
   }
 
   return (

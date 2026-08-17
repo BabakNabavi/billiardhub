@@ -5,7 +5,7 @@
    تک‌تک فیلدهایی که در صفحه‌ی نمایش پروفایل بازیکن دیده می‌شوند
    این‌جا از کاربر گرفته می‌شود: هویت، رشته، رنکینگ، پرچم‌ها،
    باشگاه، تم کارت، تصویر پس‌زمینه، معرفی/بیوگرافی، شروع فعالیت،
-   افتخارات (تایم‌لاین)، مسابقات، آلبوم‌ها و برچسب‌ها.
+   افتخارات (تایم‌لاین)، آلبوم‌ها و برچسب‌ها.
    ───────────────────────────────────────────────────────────── */
 
 import { useEffect, useRef, useState } from 'react'
@@ -18,12 +18,12 @@ import ClubPicker from '../../../components/ClubPicker'
 import { provinceOfCity } from '../../../lib/iran-geo'
 import { fetchClubOptions, type ClubOption } from '../../../lib/clubs-data'
 import { compressImage } from '../../../lib/seller-store'
-import { TONES, type PlayerHighlight, type PlayerTournament, type PlayerAlbum } from '../../../lib/players-data'
+import { TONES, type PlayerHighlight, type PlayerAlbum } from '../../../lib/players-data'
 import {
   emptyPlayerProfile, findPlayerByOwner, newPlayerSlug, savePlayerProfile,
   type PlayerProfile,
 } from '../../../lib/player-store'
-import { fetchMyProfile, saveProfileRemote } from '../../../lib/profiles/client'
+import { fetchMyProfileResult, saveProfileRemote } from '../../../lib/profiles/client'
 import PlayerDisciplines from '../../../components/player/PlayerDisciplines'
 import VerificationBadges from '../../../components/VerificationBadges'
 import { Plus, Trash2, Images, Trophy, ArrowLeft, Check } from 'lucide-react'
@@ -45,6 +45,9 @@ export default function PlayerDashboard() {
   const [bioText, setBioText] = useState('')
   const [tagInput, setTagInput] = useState('')
   const [loaded, setLoaded] = useState(false)
+  /* نامکی که واقعاً روی سرور ثبت شده. تا وقتی خالی است فیلدِ نشانی
+     باز می‌ماند؛ نامکِ خودکارِ فرم نباید قفلش کند. */
+  const [savedSlug, setSavedSlug] = useState<string | null>(null)
   const [saved, setSaved]   = useState(false)
   const [err, setErr]       = useState('')
   const [busy, setBusy]     = useState(false)
@@ -54,7 +57,6 @@ export default function PlayerDashboard() {
 
   /* فرم‌های افزودنی */
   const [hl, setHl]   = useState({ year: '', title: '' })
-  const [tr, setTr]   = useState({ name: '', year: '', result: '' })
   const [albTitle, setAlbTitle] = useState('')
   const [clubOptions, setClubOptions] = useState<ClubOption[]>([])
   useEffect(() => { fetchClubOptions().then(setClubOptions) }, [])
@@ -72,11 +74,25 @@ export default function PlayerDashboard() {
 
       /* نسخه‌ی سرور مقدم است؛ پروفایل محلی قدیمی یک‌بار بالا می‌رود */
       void (async () => {
-        const remote = await fetchMyProfile<PlayerProfile>('player')
+        const res = await fetchMyProfileResult<PlayerProfile>('player')
+        /* خطا ⇒ نمی‌دانیم چیزی ثبت شده یا نه؛ نشانی قفل می‌ماند. */
+        if (res.state === 'error') return
+        const remote = res.state === 'found' ? res.profile : null
         if (!remote) {
-          if (mine) await saveProfileRemote('player', mine.slug, mine as unknown as Record<string, unknown>)
+          if (mine) {
+            const up = await saveProfileRemote('player', mine.slug, mine as unknown as Record<string, unknown>)
+            /* فقط نوشتنِ تأییدشده قفل می‌کند؛ وگرنه فیلد باز می‌ماند
+               تا کاربر بتواند نامکِ تکراری را اصلاح کند. */
+            if (up.ok && up.profile?.slug) setSavedSlug(up.profile.slug)
+            else { setSavedSlug(''); setErr(up.message ?? 'نشانیِ ثبت‌شده خوانده نشد — دوباره تلاش کنید') }
+          } else {
+            /* کاربرِ کاملاً تازه: نه ردیفِ سرور، نه کشِ محلی.
+               صریح باز می‌شود تا نامکش را خودش انتخاب کند. */
+            setSavedSlug('')
+          }
           return
         }
+        setSavedSlug(remote.slug)
         const merged = { ...base, ...remote.data, slug: remote.slug }
         setForm(merged)
         setBioText((merged.bio ?? []).join('\n\n'))
@@ -107,12 +123,6 @@ export default function PlayerDashboard() {
     if (!hl.year.trim() || !hl.title.trim()) { setErr('سال و عنوان افتخار لازم است.'); return }
     const item: PlayerHighlight = { year: hl.year.trim(), title: hl.title.trim() }
     set('highlights', [...form.highlights, item]); setHl({ year: '', title: '' })
-  }
-
-  const addTournament = () => {
-    if (!tr.name.trim() || !tr.year.trim() || !tr.result.trim()) { setErr('نام، سال و نتیجه‌ی مسابقه لازم است.'); return }
-    const item: PlayerTournament = { name: tr.name.trim(), year: tr.year.trim(), result: tr.result.trim() }
-    set('tournaments', [...form.tournaments, item]); setTr({ name: '', year: '', result: '' })
   }
 
   const addAlbum = () => {
@@ -150,9 +160,13 @@ export default function PlayerDashboard() {
     /* منبع حقیقت سرور است؛ localStorage فقط کش همین مرورگر می‌ماند.
        تا پیش از این فقط localStorage نوشته می‌شد و پنل ادمین پروفایل را
        اصلاً نمی‌دید. */
+    if (savedSlug === null) { setErr('نشانیِ اختصاصی هنوز خوانده نشده — چند لحظه صبر کنید یا صفحه را تازه کنید'); return }
     const res = await saveProfileRemote('player', profile.slug, profile as unknown as Record<string, unknown>)
     if (!res.ok) { setErr(res.message ?? 'ذخیره روی سرور انجام نشد'); return }
 
+    /* از این لحظه نشانی منتشر شده و قفل می‌شود: هر تغییرِ بعدی
+       لینک‌های منتشرشده را می‌شکند. */
+    if (res.profile?.slug) setSavedSlug(res.profile.slug)
     const saved = (res.profile?.data as typeof profile | undefined) ?? profile
     try { savePlayerProfile({ ...profile, ...saved }) } catch { /* کش مرورگر پر است */ }
     setForm(f => ({ ...f, ...saved }))
@@ -222,7 +236,7 @@ export default function PlayerDashboard() {
                             {/* نشانیِ اختصاصیِ سایت — همان چیزی که پنلِ باشگاه از اول داشت */}
               <div className="sm:col-span-2">
                 <ProfileSlugField
-                  kind="player" value={form.slug}
+                  kind="player" value={form.slug} savedSlug={savedSlug}
                   onChange={v => setForm(f => ({ ...f, slug: v }))}
                   suggestFrom={form.name}
                 />
@@ -241,10 +255,10 @@ export default function PlayerDashboard() {
                 <label className={LABEL}>کشور</label>
                 <input className={INPUT} value={form.country} onChange={e => set('country', e.target.value)} placeholder="ایران" />
               </div>
-              <div>
-                <label className={LABEL}>رتبه‌ی رنکینگ ملی <span className="font-normal text-[#A69F8E]">— خالی یعنی بدون رنکینگ</span></label>
-                <input className={INPUT} dir="ltr" style={{ textAlign: 'right' }} value={form.ranking} onChange={e => set('ranking', e.target.value)} placeholder="مثال: 3" />
-              </div>
+              {/* ── رتبه‌ی رنکینگ ملی این‌جا نیست ──
+                  رنکینگ را فدراسیون تعیین می‌کند و ادمین در
+                  /admin/rankings واردش می‌کند. فیلدِ آزاد یعنی هر
+                  بازیکنی می‌توانست خودش را «رتبه‌ی ۱» معرفی کند. */}
               <div>
                 <label className={LABEL}>باشگاه محل تمرین</label>
                 {/* فقط باشگاه‌های ثبت‌شده (همان لیست صفحه‌ی /clubs) */}
@@ -261,17 +275,10 @@ export default function PlayerDashboard() {
                 <label className={LABEL}>شروع فعالیت</label>
                 <input className={INPUT} value={form.careerStart} onChange={e => set('careerStart', e.target.value)} placeholder="مثال: ۱۳۹۴" />
               </div>
-              <div className="flex flex-wrap items-center gap-2 sm:col-span-2">
-                {([['national', 'ملی‌پوش هستم'], ['youth', 'رده‌ی جوانان']] as const).map(([k, l]) => {
-                  const on = form[k]
-                  return (
-                    <button key={k} type="button" onClick={() => set(k, !on)}
-                      className={`inline-flex items-center gap-1.5 rounded-[10px] border px-3.5 py-2 text-[12.5px] font-bold transition ${on ? 'border-[rgba(199,166,106,0.4)] bg-[rgba(199,166,106,0.13)] text-[#8F6531]' : 'border-[#E7E2D6] bg-white text-[#5B564B]'}`}>
-                      {on && <Check size={13} />}{l}
-                    </button>
-                  )
-                })}
-              </div>
+              {/* «ملی‌پوش هستم» و «رده‌ی جوانان» برداشته شدند — هر دو
+                  ادعای خوداظهار بودند و هیچ‌کس راستی‌آزمایی‌شان
+                  نمی‌کرد. رشته و دسته‌ی بازیکن همان بالا انتخاب
+                  می‌شود و همان معیارِ واقعی است. */}
             </div>
           </section>
 
@@ -363,29 +370,9 @@ export default function PlayerDashboard() {
             </div>
           </section>
 
-          {/* ═══ مسابقات ═══ */}
-          <section className={CARD}>
-            <h2 className="mb-4 text-[14.5px] font-bold">مسابقات و حضورها</h2>
-            {form.tournaments.length > 0 && (
-              <div className="mb-4 space-y-2">
-                {form.tournaments.map((t, i) => (
-                  <div key={i} className="flex items-center gap-3 rounded-xl border border-[#EFEBE1] bg-[#FAFAF7] px-3 py-2.5">
-                    <span className="flex-1 text-[13px] font-bold">{t.name}</span>
-                    <span className="text-[12px] text-[#6F6A5C]">{t.year}</span>
-                    <span className="rounded-full border border-[rgba(199,166,106,0.26)] bg-[rgba(199,166,106,0.1)] px-2.5 py-0.5 text-[11.5px] font-bold text-[#8F6531]">{t.result}</span>
-                    <button type="button" onClick={() => set('tournaments', form.tournaments.filter((_, x) => x !== i))}
-                      className="rounded-lg p-1.5 text-[#B23B2E] transition hover:bg-[rgba(178,59,46,0.08)]"><Trash2 size={14} /></button>
-                  </div>
-                ))}
-              </div>
-            )}
-            <div className="flex flex-col gap-2 rounded-xl border border-dashed border-[#D8D2C4] p-4 sm:flex-row">
-              <input className={INPUT} value={tr.name} onChange={e => setTr(t => ({ ...t, name: e.target.value }))} placeholder="نام مسابقه — مثال: تهران مسترز" />
-              <input className={`${INPUT} sm:w-28`} value={tr.year} onChange={e => setTr(t => ({ ...t, year: e.target.value }))} placeholder="سال" />
-              <input className={`${INPUT} sm:w-40`} value={tr.result} onChange={e => setTr(t => ({ ...t, result: e.target.value }))} placeholder="نتیجه — قهرمان" />
-              <button type="button" onClick={addTournament} className={`${LQ_BTN} shrink-0`}><Plus size={14} /> افزودن</button>
-            </div>
-          </section>
+          {/* بخشِ «مسابقات و حضورها» برداشته شد — صفحه‌ی عمومی
+              دیگر نشانش نمی‌دهد، پس فرمی که خروجی‌اش دیده نمی‌شود
+              فقط وقتِ کاربر را می‌گرفت. */}
 
           {/* ═══ گالری ═══ */}
           <section className={CARD}>

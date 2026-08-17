@@ -20,6 +20,7 @@ import { getPlayer, DISCIPLINE_LABEL, TONES, faDigits, type Player } from '../..
 import { getPlayerProfile, profileToPlayer, type PlayerProfile } from '../../../lib/player-store'
 import { fetchProfile } from '../../../lib/profiles/client'
 import VerifiedBadge from '../../../components/VerifiedBadge'
+import PendingNotice from '../../../components/profile/PendingNotice'
 import { entryLabel } from '../../../lib/player-categories'
 import { NEWS_ARTICLES } from '../../../lib/news-data'
 import { MEDIA_VIDEOS } from '../../../lib/media-data'
@@ -51,6 +52,11 @@ export default function PlayerProfilePage() {
   /* پروفایل‌های ثبت‌نامی (پنل بازیکن ⇒ localStorage) بعد از mount خوانده می‌شوند */
   const [stored, setStored]   = useState<Player | null>(null)
   const [checked, setChecked] = useState(false)
+  /* وضعیتِ پروفایلِ سرور. سرور نسخه‌ی تأییدنشده را فقط به صاحبش
+     و ادمین می‌دهد، پس اگر رسید یعنی حقِ دیدنش را داریم — ولی
+     باید بداند دیگران نمی‌بینندش، وگرنه لینک را جایی می‌فرستد
+     که همه «پیدا نشد» می‌گیرند. */
+  const [pending, setPending] = useState(false)
   /* ── چرا سرور هم خوانده می‌شود ──
      پیش‌تر فقط `localStorage` خوانده می‌شد، یعنی پروفایلِ یک بازیکن
      تنها روی دستگاهِ خودش دیده می‌شد. تیکِ آبی هم ستونِ جدولِ
@@ -69,7 +75,12 @@ export default function PlayerProfilePage() {
     let alive = true
     void fetchProfile<PlayerProfile>('player', id)
       .then(p => {
-        if (!alive || !p || p.status !== 'approved') return
+        /* شرطِ `status === 'approved'` این‌جا اشتباه بود: سرور
+           پروفایلِ تأییدنشده را فقط به صاحبش و ادمین می‌دهد، پس هر
+           چیزی که رسید حق دیدنش را دارد. با آن شرط، بازیکن
+           پیش‌نمایشِ پروفایلِ خودش را «پیدا نشد» می‌دید. */
+        if (!alive || !p) return
+        setPending(p.status !== 'approved')
         setStored(profileToPlayer({ ...p.data, slug: p.slug, verified: p.verified } as PlayerProfile))
       })
       .catch(() => { /* شبکه قطع بود ⇒ کشِ محلی می‌ماند */ })
@@ -144,6 +155,7 @@ export default function PlayerProfilePage() {
 
   return (
     <div dir="rtl" style={{ minHeight: '100vh', background: BG, color: TEXT, fontFamily: 'Vazirmatn,Tahoma,sans-serif' }}>
+      {pending && <PendingNotice what="پروفایلِ شما" />}
       <style>{`
         @keyframes paFadeUp { from { opacity:0; transform: translateY(16px); } to { opacity:1; transform:none; } }
         @keyframes paFade   { from { opacity:0; } to { opacity:1; } }
@@ -228,10 +240,9 @@ export default function PlayerProfilePage() {
             <div style={{ minWidth: 0, animation: 'paFadeUp .5s ease both' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 14 }}>
                 <span className="pa-chip" style={{ letterSpacing: '0.26em', fontSize: 9.5 }}>{d.en}</span>
-                {player.national && (
-                  <span className="pa-chip" style={{ background: `linear-gradient(135deg, ${GOLD}, #A8853F)`, color: '#241B08', border: 'none', fontWeight: 800 }}>تیم ملی ایران</span>
-                )}
-                {player.youth && <span className="pa-chip">رده‌ی جوانان</span>}
+                {/* «تیم ملی ایران» و «رده‌ی جوانان» حذف شدند — هر دو
+                    ادعای خوداظهار بودند و کسی راستی‌آزمایی‌شان نمی‌کرد،
+                    پس فیلدشان هم از پنل برداشته شد. */}
               </div>
               <h1 style={{ fontSize: 'clamp(30px,5.4vw,58px)', fontWeight: 900, margin: 0, lineHeight: 1.25, letterSpacing: '-0.02em' }}>
                 {player.name}{player.verified && <VerifiedBadge size={24} title="بازیکن تأیید شده" />}
@@ -253,13 +264,9 @@ export default function PlayerProfilePage() {
               </div>
             </div>
 
-            {/* رنکینگ — گرافیک مونومنتال */}
-            {player.ranking != null && (
-              <div style={{ textAlign: 'center', animation: 'paFadeUp .55s .1s ease both' }}>
-                <div className="pa-rank-big">#{faDigits(String(player.ranking).padStart(2, '0'))}</div>
-                <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: '0.3em', color: 'rgba(255,255,255,0.55)', marginTop: 8 }}>رنکینگ ملی</div>
-              </div>
-            )}
+            {/* رنکینگِ ملی این‌جا نیست: عددش را خودِ بازیکن در فرم
+                وارد می‌کرد. رنکینگِ رسمی در /ranking است و ادمین
+                از روی جدولِ فدراسیون واردش می‌کند. */}
           </div>
         </div>
       </header>
@@ -287,7 +294,6 @@ export default function PlayerProfilePage() {
               ['شهر', `${player.city}، ${player.country}`],
               ['شروع فعالیت', player.careerStart],
               ...(player.club ? [['باشگاه', player.club.name] as [string, string]] : []),
-              ['وضعیت', player.national ? 'ملی‌پوش' : player.youth ? 'رده‌ی جوانان' : 'حرفه‌ای'],
             ].map(([k, v]) => (
               <div key={k} style={{ display: 'flex', justifyContent: 'space-between', gap: 12, padding: '11px 0', borderBottom: '1px dashed #EFEBE1', fontSize: 13 }}>
                 <span style={{ color: MUT, flexShrink: 0 }}>{k}</span>
@@ -315,22 +321,7 @@ export default function PlayerProfilePage() {
           </section>
         )}
 
-        {/* ═══ مسابقات و حضورها ═══ */}
-        {player.tournaments.length > 0 && (
-          <section style={{ marginBottom: 'clamp(30px,4.4vw,48px)' }}>
-            <SectionHead title="مسابقات و حضورها" en="TOURNAMENTS" />
-            <div style={{ display: 'grid', gap: 10 }}>
-              {player.tournaments.map((tr, i) => (
-                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 14, background: '#fff', border: `1px solid ${LINE}`, borderRadius: 14, padding: '14px 18px', animation: `paFadeUp .5s ${i * 60}ms ease both` }}>
-                  <Trophy size={16} style={{ color: GOLD_D, flexShrink: 0 }} />
-                  <span style={{ fontSize: 13.5, fontWeight: 800, flex: 1 }}>{tr.name}</span>
-                  <span style={{ fontSize: 12, color: MUT, fontVariantNumeric: 'tabular-nums' }}>{tr.year}</span>
-                  <span style={{ fontSize: 11.5, fontWeight: 800, color: GOLD_D, background: 'rgba(199,166,106,0.10)', border: '1px solid rgba(199,166,106,0.26)', borderRadius: 999, padding: '4px 12px' }}>{tr.result}</span>
-                </div>
-              ))}
-            </div>
-          </section>
-        )}
+        {/* بخشِ «مسابقات و حضورها» برداشته شد. */}
 
         {/* ═══ باشگاه ═══ */}
         {player.club && (

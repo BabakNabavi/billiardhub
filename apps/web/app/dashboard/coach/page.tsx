@@ -13,7 +13,7 @@ import VerificationBadges from '../../../components/VerificationBadges'
 import Link from 'next/link'
 import { useAuthStore } from '../../../store/auth.store'
 import { isValidSlug } from '../../../lib/slug'
-import { fetchMyProfile, saveProfileRemote } from '../../../lib/profiles/client'
+import { fetchMyProfileResult, saveProfileRemote } from '../../../lib/profiles/client'
 import ProvinceCitySelect from '../../../components/ProvinceCitySelect'
 import ProfileSlugField from '../../../components/ProfileSlugField'
 import ClubPicker from '../../../components/ClubPicker'
@@ -159,6 +159,9 @@ function CoachDashboardInner() {
      «آپلود نشد» و «ذخیره روی سرور انجام نشد» استفاده می‌شود و یک
      عنوانِ ثابت روی هر سه، دو تای آخر را دروغ می‌کرد. */
   const [alert, setAlert] = useState<{ title: string; lines: string[] } | null>(null)
+  /* نامکی که واقعاً روی سرور ثبت شده. تا وقتی خالی است فیلدِ نشانی
+     باز می‌ماند؛ نامکِ خودکارِ فرم نباید قفلش کند. */
+  const [savedSlug, setSavedSlug] = useState<string | null>(null)
   const [warnOpen, setWarn]   = useState(false)
   const [submitted, setSubmitted] = useState(false)
   const galleryInput = useRef<HTMLInputElement>(null)
@@ -192,12 +195,26 @@ function CoachDashboardInner() {
     /* نسخه‌ی سرور مقدم است. اگر کاربر پروفایل محلی قدیمی داشت و روی
        سرور نبود، همان‌جا بالا فرستاده می‌شود تا داده‌ی موجود از دست نرود. */
     void (async () => {
-      const remote = await fetchMyProfile<Record<string, unknown>>('coach')
+      const res = await fetchMyProfileResult<Record<string, unknown>>('coach')
+      /* خطا ⇒ نمی‌دانیم چیزی ثبت شده یا نه؛ نشانی قفل می‌ماند. */
+      if (res.state === 'error') return
+      const remote = res.state === 'found' ? res.profile : null
       if (!remote) {
-        if (mine) await saveProfileRemote('coach', mine.slug, mine as unknown as Record<string, unknown>,
-          { number: '', url: mine.certificate?.url ?? '' })
+        if (mine) {
+          const up = await saveProfileRemote('coach', mine.slug, mine as unknown as Record<string, unknown>,
+            { number: '', url: mine.certificate?.url ?? '' })
+          /* فقط نوشتنِ تأییدشده قفل می‌کند؛ با ۴۰۹ چیزی نوشته نشده و
+             فیلد باید باز بماند تا نامکِ تکراری قابلِ اصلاح باشد. */
+          if (up.ok && up.profile?.slug) setSavedSlug(up.profile.slug)
+          else setSavedSlug('')
+        } else {
+          /* کاربرِ کاملاً تازه: نه ردیفِ سرور، نه کشِ محلی.
+             صریح باز می‌شود تا نامکش را خودش انتخاب کند. */
+          setSavedSlug('')
+        }
         return
       }
+      setSavedSlug(remote.slug)
       /* ── چرا نامِ حساب دوباره نوشته می‌شود ──
          داده‌ی سرور روی مقدارهای پیش‌پرشده می‌نشیند. پروفایلی که با
          نامِ خالی ذخیره شده، دقیقاً همان بن‌بستی را برمی‌گرداند که این
@@ -266,7 +283,7 @@ function safeRemote(raw: unknown): Partial<FormState> {
   const curJYear = (() => { try { return parseInt(new Intl.DateTimeFormat('en-US-u-ca-persian', { year: 'numeric' }).format(new Date()), 10) || 1405 } catch { return 1405 } })()
   const YEARS = Array.from({ length: 61 }, (_, i) => curJYear - i)
 
-  const toggleDiscipline = (k: string) =>
+  const toggleDiscipline = (k: string) =>
     setForm(f => ({ ...f, disciplines: f.disciplines.includes(k) ? f.disciplines.filter(x => x !== k) : [...f.disciplines, k] }))
 
   const gradeSelected = (k: string) => form.grades.some(g => g.key === k)
@@ -419,6 +436,7 @@ function safeRemote(raw: unknown): Partial<FormState> {
     /* منبع حقیقت سرور است؛ localStorage فقط کش همین مرورگر می‌ماند.
        تا پیش از این فقط localStorage نوشته می‌شد، یعنی پروفایل هیچ‌وقت
        به دیتابیس نمی‌رسید و پنل ادمین آن را نمی‌دید. */
+    if (savedSlug === null) { setAlert({ title: 'یک لحظه', lines: ['نشانیِ اختصاصی هنوز خوانده نشده — چند لحظه صبر کنید یا صفحه را تازه کنید'] }); return }
     const res = await saveProfileRemote('coach', profile.slug, profile as unknown as Record<string, unknown>,
       { number: '', url: profile.certificate?.url ?? '' })
     if (!res.ok) {
@@ -426,6 +444,10 @@ function safeRemote(raw: unknown): Partial<FormState> {
       if (typeof window !== 'undefined') window.scrollTo({ top: 0, behavior: 'smooth' })
       return
     }
+
+    /* از این لحظه نشانی منتشر شده و قفل می‌شود: هر تغییرِ بعدی
+       لینک‌های منتشرشده و ارجاع‌های ذخیره‌شده را می‌شکند. */
+    if (res.profile?.slug) setSavedSlug(res.profile.slug)
 
     /* عکس‌ها روی سرور به نشانی Storage تبدیل شده‌اند */
     const saved = (res.profile?.data as typeof profile | undefined) ?? profile
@@ -533,7 +555,7 @@ function safeRemote(raw: unknown): Partial<FormState> {
               <div style={{ gridColumn: '1 / -1' }}>
                 <div data-field="slug"> {/* نشانیِ اختصاصی */}
                 <ProfileSlugField
-                  kind="coach" value={form.slug}
+                  kind="coach" value={form.slug} savedSlug={savedSlug}
                   onChange={v => { setForm(f => ({ ...f, slug: v })); clearErr('slug') }}
                   suggestFrom={`${form.firstNameEn || form.firstNameFa} ${form.lastNameEn || form.lastNameFa}`}
                 />

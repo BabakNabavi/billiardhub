@@ -27,15 +27,15 @@ const MUT    = '#6F6A5C'
 const LINE   = '#E7E2D6'
 /* رنگِ پایه‌ی صفحه از کلاسِ مشترکِ lq-stage می‌آید */
 
-type Seg = 'all' | 'snooker' | 'pool' | 'national' | 'ranked' | 'women' | 'youth'
+/* «ملی‌پوشان»، «رنکینگ» و «جوانان» حذف شدند: هر سه به فیلدهای
+   خوداظهارِ حذف‌شده تکیه داشتند، پس از این پس هیچ بازیکنی با آن‌ها
+   جور در نمی‌آمد و هر سه تب برای همیشه خالی می‌ماندند. */
+type Seg = 'all' | 'snooker' | 'pool' | 'women'
 const SEGMENTS: [Seg, string][] = [
   ['all', 'همه'],
   ['snooker', 'اسنوکر'],
   ['pool', 'پاکت بیلیارد'],
-  ['national', 'ملی‌پوشان'],
-  ['ranked', 'رنکینگ'],
   ['women', 'بانوان'],
-  ['youth', 'جوانان'],
 ]
 
 /* ── کارت پرتره‌ی سینمایی — تایپوگرافی + رنکینگ مونومنتال روی دوتون ── */
@@ -51,17 +51,12 @@ function PlayerCard({ p, i, size = 'std' }: { p: Player; i: number; size?: 'std'
       {/* قاب داخلی مویی */}
       <div className="pl-frame" />
 
-      {/* رنکینگ — عنصر گرافیکی بزرگ */}
-      {p.ranking != null && (
-        <div className="pl-rank" aria-hidden>
-          <span className="pl-rank-hash">#</span>{faDigits(String(p.ranking).padStart(2, '0'))}
-        </div>
-      )}
+      {/* رنکینگ روی کارت نیست: عددش را خودِ بازیکن وارد می‌کرد.
+          رنکینگِ رسمی صفحه‌ی /ranking را دارد. */}
 
       {/* برچسب‌های بالای کارت */}
       <div className="pl-top">
         <span className="pl-dis">{d.en}</span>
-        {p.national && <span className="pl-nat">تیم ملی</span>}
       </div>
 
       {/* هویت — پایین کارت */}
@@ -115,17 +110,16 @@ export default function PlayersPage() {
       const plays = (d: string) => p.discipline === d || (p.disciplines ?? []).some(e => e.discipline === d)
       if (seg === 'snooker' && !plays('snooker')) return false
       if (seg === 'pool' && !plays('pool')) return false
-      if (seg === 'national' && !p.national) return false
-      if (seg === 'ranked' && p.ranking == null) return false
       if (seg === 'women' && p.gender !== 'f') return false
-      if (seg === 'youth' && !p.youth) return false
       if (q && !p.name.includes(q) && !p.nameEn.toLowerCase().includes(q.toLowerCase()) && !p.city.includes(q) && !p.country.includes(q) && !DISCIPLINE_LABEL[p.discipline].fa.includes(q)) return false
       return true
-    }).sort((a, b) => (a.ranking ?? 99) - (b.ranking ?? 99))
+      /* مرتب‌سازی بر اساسِ رنکینگ برداشته شد: آن فیلد را هیچ مسیری
+         دیگر پر نمی‌کند، پس همه ۹۹ می‌شدند و ترتیب تصادفی بود. */
+    })
   }, [ALL, seg, query])
 
   const isBrowsing = seg === 'all' && !query.trim()
-  const featured   = PLAYERS.filter(p => p.featured).sort((a, b) => (a.ranking ?? 99) - (b.ranking ?? 99)).slice(0, 3)
+  const featured   = PLAYERS.filter(p => p.featured).slice(0, 3)
   const gridItems  = isBrowsing ? filtered.filter(p => !featured.some(f => f.id === p.id)) : filtered
 
   return (
@@ -235,15 +229,30 @@ export default function PlayersPage() {
         <div style={{ position: 'absolute', top: '-20%', bottom: '-20%', left: '38%', width: 1, background: 'linear-gradient(180deg,transparent,rgba(199,166,106,0.5),transparent)', transform: 'rotate(14deg)' }} />
         <div className="pl-hero-word">PLAYERS</div>
         <div className="plx-wrap" style={{ position: 'relative', padding: 'clamp(40px,6vw,76px) clamp(16px,3vw,28px) clamp(34px,5vw,60px)' }}>
-          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, fontSize: 9.5, fontWeight: 800, letterSpacing: '0.26em', color: GOLD, border: '1px solid rgba(199,166,106,0.4)', background: 'rgba(199,166,106,0.10)', borderRadius: 999, padding: '5px 14px', marginBottom: 16 }}>
-            BILLIARD HUB · ELITE
+          {/* گوشه‌ی بالا-چپِ تصویر، بیرون از جریانِ متن.
+              `insetInlineEnd` در RTL همان سمتِ چپِ فیزیکی است. */}
+          <span style={{
+            position: 'absolute', top: 'clamp(14px,2vw,22px)', insetInlineEnd: 'clamp(16px,3vw,28px)',
+            display: 'inline-flex', alignItems: 'center', gap: 8,
+            fontSize: 8.5, fontWeight: 800, letterSpacing: '0.26em', color: GOLD,
+            border: '1px solid rgba(199,166,106,0.4)', background: 'rgba(199,166,106,0.10)',
+            borderRadius: 999, padding: '4px 11px',
+          }}>
+            {/* پوسته در RTL می‌ماند و فقط متن ltr می‌شود: با `direction`
+                روی خودِ عنصرِ abspos، مرورگرها سرِ اینکه `insetInlineEnd`
+                نسبت به کدام جهت حل شود اختلاف دارند و برچسب می‌تواند
+                سرِ راست بنشیند. */}
+            <span dir="ltr">BILLIARD HUB · ELITE</span>
           </span>
           <h1 style={{ fontSize: 'clamp(30px,5vw,56px)', fontWeight: 900, margin: 0, lineHeight: 1.2, letterSpacing: '-0.02em' }}>
             ستارگان <span style={{ background: `linear-gradient(135deg,#E8CE96,${GOLD} 50%,#8A6020)`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>بیلیارد</span> ایران
           </h1>
           <div style={{ width: 70, height: 3, borderRadius: 2, marginTop: 14, background: `linear-gradient(90deg,${GOLD},#8A6020)`, transformOrigin: 'right', animation: 'plScaleX .55s .3s ease both' }} />
           <p style={{ margin: '14px 0 0', fontSize: 'clamp(12.5px,1.5vw,14.5px)', color: 'rgba(255,255,255,0.62)', maxWidth: 520, lineHeight: 2, animation: 'plFadeUp .5s .35s ease both' }}>
-            چهره‌های شاخص، ملی‌پوشان و بازیکنان رنکینگ اسنوکر و پاکت بیلیارد — حرفه‌ای‌های میز را این‌جا بشناسید.
+            {/* «ملی‌پوشان» و «رنکینگ» از متن رفتند چون هر دو فیلدِ
+                خوداظهار بودند و حذف شدند؛ متنی که به چیزی اشاره کند
+                که صفحه دیگر ندارد، وعده‌ی توخالی است. */}
+            چهره‌های شاخصِ اسنوکر و پاکت بیلیارد — حرفه‌ای‌های میز را این‌جا بشناسید.
           </p>
         </div>
       </header>

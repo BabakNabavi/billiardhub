@@ -13,7 +13,7 @@ import {
   type SellerProfile,
   emptySellerProfile, findSellerByOwner, findUnclaimedSeller, newSellerSlug, saveSellerProfile, compressImage,
 } from '../../../lib/seller-store'
-import { fetchMyProfile, saveProfileRemote } from '../../../lib/profiles/client'
+import { fetchMyProfileResult, saveProfileRemote } from '../../../lib/profiles/client'
 import ProvinceCitySelect from '../../../components/ProvinceCitySelect'
 import ClubPicker from '../../../components/ClubPicker'
 import ProfileSlugField from '../../../components/ProfileSlugField'
@@ -58,6 +58,9 @@ export default function SellerDashboard() {
 
   const [form, setForm]   = useState<SellerProfile>(() => emptySellerProfile(DEFAULT_SLUG))
   const [loaded, setLoaded] = useState(false)
+  /* نامکی که واقعاً روی سرور ثبت شده. تا وقتی خالی است فیلدِ نشانی
+     باز می‌ماند؛ نامکِ خودکارِ فرم نباید قفلش کند. */
+  const [savedSlug, setSavedSlug] = useState<string | null>(null)
   const [saved, setSaved]   = useState(false)
   const [err, setErr]       = useState('')
   const [busy, setBusy]     = useState(false)
@@ -104,13 +107,27 @@ export default function SellerDashboard() {
     setLoaded(true)
 
     void (async () => {
-      const remote = await fetchMyProfile<SellerProfile>('seller')
+      const res = await fetchMyProfileResult<SellerProfile>('seller')
+      /* خطا ⇒ نمی‌دانیم چیزی ثبت شده یا نه؛ نشانی قفل می‌ماند. */
+      if (res.state === 'error') return
+      const remote = res.state === 'found' ? res.profile : null
       if (!remote) {
         /* هنوز روی سرور نیست — پروفایل موجود مرورگر یک‌بار منتقل می‌شود */
-        if (mine) await saveProfileRemote('seller', mine.slug, mine as unknown as Record<string, unknown>,
-          { number: mine.licenseNumber, url: mine.certificate?.url ?? '' })
+        if (mine) {
+          const up = await saveProfileRemote('seller', mine.slug, mine as unknown as Record<string, unknown>,
+            { number: mine.licenseNumber, url: mine.certificate?.url ?? '' })
+          /* فقط نوشتنِ تأییدشده قفل می‌کند؛ با ۴۰۹ چیزی نوشته نشده و
+             فیلد باید باز بماند تا نامکِ تکراری قابلِ اصلاح باشد. */
+          if (up.ok && up.profile?.slug) setSavedSlug(up.profile.slug)
+          else { setSavedSlug(''); setErr(up.message ?? 'نشانیِ ثبت‌شده خوانده نشد — دوباره تلاش کنید') }
+        } else {
+          /* کاربرِ کاملاً تازه: نه ردیفِ سرور، نه کشِ محلی.
+             صریح باز می‌شود تا نامکش را خودش انتخاب کند. */
+          setSavedSlug('')
+        }
         return
       }
+      setSavedSlug(remote.slug)
       const merged: SellerProfile = {
         ...local, ...remote.data,
         slug: remote.slug, ownerId: remote.ownerId,
@@ -201,9 +218,14 @@ export default function SellerDashboard() {
     }
 
     /* منبع حقیقت سرور است؛ localStorage فقط کش همین مرورگر می‌ماند */
+    if (savedSlug === null) { setErr('نشانیِ اختصاصی هنوز خوانده نشده — چند لحظه صبر کنید یا صفحه را تازه کنید'); return }
     const res = await saveProfileRemote('seller', next.slug, next as unknown as Record<string, unknown>,
       { number: next.licenseNumber, url: next.certificate?.url ?? '' })
     if (!res.ok) { setErr(res.message ?? 'ذخیره روی سرور انجام نشد'); return }
+
+    /* از این لحظه نشانی منتشر شده و قفل می‌شود: هر تغییرِ بعدی
+       لینک‌های منتشرشده و `products."storeSlug"` را می‌شکند. */
+    if (res.profile?.slug) setSavedSlug(res.profile.slug)
 
     /* عکس‌ها روی سرور به نشانی Storage تبدیل شده‌اند — همان را کش کن */
     const saved = (res.profile?.data as SellerProfile | undefined) ?? next
@@ -313,7 +335,7 @@ export default function SellerDashboard() {
               {/* نشانیِ اختصاصی — همان چیزی که باشگاه از اول داشت */}
               <div className="sm:col-span-2">
                 <ProfileSlugField
-                  kind="seller" value={form.slug} label="آدرس اختصاصی سایت فروشگاه شما"
+                  kind="seller" value={form.slug} label="آدرس اختصاصی سایت فروشگاه شما" savedSlug={savedSlug}
                   onChange={v => set('slug', v)}
                   suggestFrom={form.title}
                   onStatusChange={setSlugStatus}

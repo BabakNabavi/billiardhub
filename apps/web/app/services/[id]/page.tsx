@@ -20,6 +20,7 @@ import { getTechnician, faDigits } from '../../../lib/technicians-data'
 import { getTechnicianProfile, profileToTechnician, type TechnicianProfile } from '../../../lib/technician-store'
 import { fetchProfile } from '../../../lib/profiles/client'
 import VerifiedBadge from '../../../components/VerifiedBadge'
+import PendingNotice from '../../../components/profile/PendingNotice'
 import type { Technician } from '../../../lib/technicians-data'
 
 const GOLD   = '#C7A66A'
@@ -53,6 +54,11 @@ export default function TechnicianProfilePage() {
   /* پروفایل‌های ثبت‌نامی (پنل ⇒ localStorage) بعد از mount خوانده می‌شوند */
   const [stored, setStored]   = useState<Technician | null>(null)
   const [checked, setChecked] = useState(false)
+  /* وضعیتِ پروفایلِ سرور. سرور نسخه‌ی تأییدنشده را فقط به صاحبش
+     و ادمین می‌دهد، پس اگر رسید یعنی حقِ دیدنش را داریم — ولی
+     باید بداند دیگران نمی‌بینندش، وگرنه لینک را جایی می‌فرستد
+     که همه «پیدا نشد» می‌گیرند. */
+  const [pending, setPending] = useState(false)
   const { open: openImage, viewer: imageViewer } = useProfileImageViewer()
   /* ── چرا سرور هم خوانده می‌شود ──
      تا امروز این صفحه فقط `localStorage` را می‌خواند، یعنی پروفایلِ
@@ -72,7 +78,10 @@ export default function TechnicianProfilePage() {
     let alive = true
     void fetchProfile<TechnicianProfile>('technician', id)
       .then(p => {
-        if (!alive || !p || p.status !== 'approved') return
+        /* همان دلیلِ صفحه‌ی بازیکن: قضاوتِ دوباره‌ی کلاینت،
+           پیش‌نمایشِ صاحبِ پروفایل را حذف می‌کرد. */
+        if (!alive || !p) return
+        setPending(p.status !== 'approved')
         setStored(profileToTechnician({ ...p.data, slug: p.slug, verified: p.verified } as TechnicianProfile))
       })
       .catch(() => { /* شبکه قطع بود ⇒ کشِ محلی می‌ماند */ })
@@ -134,6 +143,7 @@ export default function TechnicianProfilePage() {
 
   return (
     <div dir="rtl" style={{ minHeight: '100vh', background: BG, color: TEXT, fontFamily: 'Vazirmatn,Tahoma,sans-serif' }}>
+      {pending && <PendingNotice what="پروفایلِ شما" />}
       <style>{`
         @keyframes tpFadeUp { from { opacity:0; transform: translateY(14px); } to { opacity:1; transform:none; } }
         @keyframes tpFade   { from { opacity:0; } to { opacity:1; } }

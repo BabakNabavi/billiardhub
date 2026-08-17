@@ -118,7 +118,7 @@ export function newPlayerSlug(): string {
 
 /* پروفایل ذخیره‌شده → شکل Player تا صفحات /players مستقیم رندرش کنند */
 export function profileToPlayer(p: PlayerProfile): Player {
-  const rank = parseInt(p.ranking.replace(/[۰-۹]/g, d => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(d))), 10)
+  const rank = parseInt(String(p.ranking ?? '').replace(/[۰-۹]/g, d => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(d))), 10)
   return {
     id: p.slug,
     name: p.name || 'بازیکن',

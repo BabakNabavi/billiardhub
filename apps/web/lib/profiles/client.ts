@@ -33,17 +33,45 @@ async function json<T>(r: Response): Promise<T | null> {
   try { return await r.json() as T } catch { return null }
 }
 
-/** پروفایل خود کاربر (نیازمند نشست) */
-export async function fetchMyProfile<T>(kind: ProfileKind): Promise<RemoteProfile<T> | null> {
+/* ── چرا سه حالت، نه دو ──
+   `null` سه چیزِ متفاوت را یکی می‌کرد: «پروفایلی نیست»، «۴۰۱» و
+   «شبکه قطع بود». پنل‌ها همه‌شان را «هنوز چیزی ثبت نشده» می‌خواندند
+   و فیلدِ نشانی را باز می‌کردند. روی موبایلِ ایرانی که درخواست
+   تایم‌اوت می‌شود، یعنی فروشنده‌ی موجود می‌توانست نشانیِ منتشرشده‌اش
+   را عوض کند و `saveProfile` — که «یکی به‌ازای هر مالک» است — همان
+   ردیفِ زنده را تغییرِ نام می‌داد.
+
+   قفل باید در ابهام **بسته** بماند، نه باز. */
+export type MyProfileResult<T> =
+  | { state: 'found'; profile: RemoteProfile<T> }
+  | { state: 'none' }
+  | { state: 'error' }
+
+export async function fetchMyProfileResult<T>(kind: ProfileKind): Promise<MyProfileResult<T>> {
   const r = await apiFetch(`/api/profiles/${kind}?mine=1`).catch(() => null)
-  if (!r) return null
+  if (!r) return { state: 'error' }
+  if (!r.ok) return { state: 'error' }
   const j = await json<{ profile: RemoteProfile<T> | null }>(r)
-  return j?.profile ?? null
+  if (!j) return { state: 'error' }
+  return j.profile ? { state: 'found', profile: j.profile } : { state: 'none' }
 }
 
-/** یک پروفایل عمومی با نامک */
+/** پروفایل خود کاربر (نیازمند نشست).
+ *  برای تصمیم‌های حساس `fetchMyProfileResult` را صدا بزن — این یکی
+ *  «نبود» و «خطا» را از هم جدا نمی‌کند. */
+export async function fetchMyProfile<T>(kind: ProfileKind): Promise<RemoteProfile<T> | null> {
+  const r = await fetchMyProfileResult<T>(kind)
+  return r.state === 'found' ? r.profile : null
+}
+
+/** یک پروفایل عمومی با نامک.
+ *
+ *  با `apiFetch` صدا زده می‌شود نه `fetch` خام: سرور پروفایلِ
+ *  تأییدنشده را **به صاحبش و ادمین** نشان می‌دهد، و این تصمیم به
+ *  نشست وابسته است. بدونِ فرستادنِ نشست، صاحبِ پروفایل هم مهمان
+ *  دیده می‌شود و پیش‌نمایشِ کارِ خودش ۴۰۴ می‌گیرد. */
 export async function fetchProfile<T>(kind: ProfileKind, slug: string): Promise<RemoteProfile<T> | null> {
-  const r = await fetch(`/api/profiles/${kind}?slug=${encodeURIComponent(slug)}`, { cache: 'no-store' }).catch(() => null)
+  const r = await apiFetch(`/api/profiles/${kind}?slug=${encodeURIComponent(slug)}`, { cache: 'no-store' }).catch(() => null)
   if (!r) return null
   const j = await json<{ profile: RemoteProfile<T> | null }>(r)
   return j?.profile ?? null

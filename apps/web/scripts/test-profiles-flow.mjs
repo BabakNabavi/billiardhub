@@ -9,6 +9,28 @@ const B=process.env.BH_BASE ?? 'http://localhost:3000'
 const rest=async(p,i)=>{const r=await fetch(U+'/rest/v1/'+p,{...(i??{}),headers:{apikey:K,Authorization:'Bearer '+K,'Content-Type':'application/json',Prefer:'return=representation',...(i?.headers??{})}});const t=await r.text();return{s:r.status,b:t?JSON.parse(t):null}}
 const me=(await rest('users?select=id,phone,"primaryRole","secondaryRoles"&phone=eq.09001327283')).b[0]
 if(!me||me.primaryRole==='admin'){console.log('✗ حسابِ آزمایشی نامناسب');process.exit(1)}
+
+/* ── گاردِ داده‌ی واقعی — این تست یک‌بار داده خورد ──
+   `saveProfile` قاعده‌ی «یک پروفایل به‌ازای هر مالک» دارد: اگر مالک
+   از قبل پروفایلی از همان نوع داشته باشد، ردیفِ موجود **به‌روزرسانی**
+   می‌شود و نامکش هم به نامکِ تازه تغییر می‌کند. پس POSTِ
+   `zz-coach-audit` با حسابی که مربیِ واقعی دارد، آن مربی را به
+   `zz-coach-audit` تغییرِ نام می‌دهد و داده‌اش را بازنویسی می‌کند — و
+   مرحله‌ی پاک‌سازی که «فقط fixtureهای خودش» را حذف می‌کند، در واقع
+   پروفایلِ واقعی را پاک می‌کند.
+
+   دقیقاً همین اتفاق افتاد و سه پروفایلِ واقعی از بین رفت. بلندگفتنِ
+   «اجرا نمی‌کنم» بی‌نهایت بهتر از پاک‌کردنِ بی‌صداست. */
+const owned=(await rest('profiles?select=kind,slug&owner_id=eq.'+me.id)).b??[]
+const real=owned.filter(p=>!String(p.slug).startsWith('zz-'))
+if(real.length){
+  console.log('\n✗ اجرا نشد — حسابِ آزمایشی ('+me.phone+') پروفایلِ واقعی دارد:')
+  for(const p of real) console.log('    '+p.kind+' → '+p.slug)
+  console.log('\n  این تست با POST روی همان مالک، این ردیف‌ها را بازنویسی و بعد حذف می‌کند.')
+  console.log('  یا این پروفایل‌ها را به حسابِ دیگری ببرید، یا شماره‌ی حسابِ آزمایشیِ')
+  console.log('  این اسکریپت را به یک حسابِ خالی تغییر دهید.\n')
+  process.exit(1)
+}
 const ORIG={primaryRole:me.primaryRole,secondaryRoles:me.secondaryRoles}
 const slugs=[]
 const cleanup=async()=>{for(const s of slugs){try{await rest('profiles?slug=eq.'+s,{method:'DELETE'})}catch{}}

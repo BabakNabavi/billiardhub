@@ -19,7 +19,7 @@ import {
   emptyManufacturerProfile, findManufacturerByOwner, newManufacturerSlug,
   saveManufacturerProfile, type ManufacturerProfile,
 } from '../../../lib/manufacturer-store'
-import { fetchMyProfile, saveProfileRemote } from '../../../lib/profiles/client'
+import { fetchMyProfileResult, saveProfileRemote } from '../../../lib/profiles/client'
 import VerificationBadges from '../../../components/VerificationBadges'
 import { Plus, Trash2, Images, Factory, ArrowLeft } from 'lucide-react'
 
@@ -35,6 +35,9 @@ export default function ManufacturerDashboard() {
   const [form, setForm]     = useState<ManufacturerProfile>(() => emptyManufacturerProfile('draft'))
   const [specInput, setSpecInput] = useState('')
   const [loaded, setLoaded] = useState(false)
+  /* نامکی که واقعاً روی سرور ثبت شده. تا وقتی خالی است فیلدِ نشانی
+     باز می‌ماند؛ نامکِ خودکارِ فرم نباید قفلش کند. */
+  const [savedSlug, setSavedSlug] = useState<string | null>(null)
   const [saved, setSaved]   = useState(false)
   const [err, setErr]       = useState('')
   const [busy, setBusy]     = useState(false)
@@ -58,12 +61,26 @@ export default function ManufacturerDashboard() {
     setLoaded(true)
 
     void (async () => {
-      const remote = await fetchMyProfile<ManufacturerProfile>('manufacturer')
+      const res = await fetchMyProfileResult<ManufacturerProfile>('manufacturer')
+      /* خطا ⇒ نمی‌دانیم چیزی ثبت شده یا نه؛ نشانی قفل می‌ماند. */
+      if (res.state === 'error') return
+      const remote = res.state === 'found' ? res.profile : null
       if (!remote) {
-        if (mine) await saveProfileRemote('manufacturer', mine.slug, mine as unknown as Record<string, unknown>,
-          { number: mine.licenseNumber, url: mine.licenseFile?.url ?? '' })
+        if (mine) {
+          const up = await saveProfileRemote('manufacturer', mine.slug, mine as unknown as Record<string, unknown>,
+            { number: mine.licenseNumber, url: mine.licenseFile?.url ?? '' })
+          /* فقط نوشتنِ تأییدشده قفل می‌کند؛ با ۴۰۹ چیزی نوشته نشده و
+             فیلد باید باز بماند تا نامکِ تکراری قابلِ اصلاح باشد. */
+          if (up.ok && up.profile?.slug) setSavedSlug(up.profile.slug)
+          else { setSavedSlug(''); setErr(up.message ?? 'نشانیِ ثبت‌شده خوانده نشد — دوباره تلاش کنید') }
+        } else {
+          /* کاربرِ کاملاً تازه: نه ردیفِ سرور، نه کشِ محلی.
+             صریح باز می‌شود تا نامکش را خودش انتخاب کند. */
+          setSavedSlug('')
+        }
         return
       }
+      setSavedSlug(remote.slug)
       const merged: ManufacturerProfile = {
         ...local, ...remote.data,
         slug: remote.slug, ownerId: remote.ownerId,
@@ -144,10 +161,14 @@ export default function ManufacturerDashboard() {
     setBusy(true)
     void (async () => {
       /* منبع حقیقت سرور است؛ localStorage فقط کش همین مرورگر می‌ماند */
+      if (savedSlug === null) { setErr('نشانیِ اختصاصی هنوز خوانده نشده — چند لحظه صبر کنید یا صفحه را تازه کنید'); setBusy(false); return }
       const res = await saveProfileRemote('manufacturer', next.slug, next as unknown as Record<string, unknown>,
         { number: next.licenseNumber, url: next.licenseFile?.url ?? '' })
       if (!res.ok) { setErr(res.message ?? 'ذخیره روی سرور انجام نشد'); setBusy(false); return }
       /* عکس‌ها روی سرور به نشانی Storage تبدیل شده‌اند */
+      if (res.profile?.slug) setSavedSlug(res.profile.slug)
+    /* از این لحظه نشانی منتشر شده و قفل می‌شود: هر تغییرِ بعدی
+       لینک‌های منتشرشده را می‌شکند. */
       const saved = (res.profile?.data as ManufacturerProfile | undefined) ?? next
       try { saveManufacturerProfile({ ...next, ...saved }) } catch { /* کش پر است */ }
       setForm(f => ({ ...f, ...saved }))
@@ -223,7 +244,7 @@ export default function ManufacturerDashboard() {
                             {/* نشانیِ اختصاصیِ سایت — همان چیزی که پنلِ باشگاه از اول داشت */}
               <div className="sm:col-span-2">
                 <ProfileSlugField
-                  kind="manufacturer" value={form.slug}
+                  kind="manufacturer" value={form.slug} savedSlug={savedSlug}
                   onChange={v => setForm(f => ({ ...f, slug: v }))}
                   suggestFrom={form.name}
                 />

@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react'
 import ProfileVideoCard from '../../../components/ProfileVideoCard'
 import VerifiedBadge from '../../../components/VerifiedBadge'
+import { NotchCover, NotchAvatar, NOTCH_CARD_VARS } from '../../../components/profile/NotchHero'
 import { fetchProfile } from '../../../lib/profiles/client'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
@@ -366,7 +367,10 @@ export default function RefereeProfilePage() {
         }
       `}</style>
 
-      <div style={{ direction:'rtl', fontFamily:"'Vazirmatn',Tahoma,sans-serif", background:'#F1EFEC', minHeight:'100vh', color:TEXT }}>
+      {/* لکه‌های رنگیِ ثابتِ پشتِ شیشه را می‌سازد — بدونِ آن، کارتِ
+          `lqg` فقط یک کارتِ سفید است. همان صحنه‌ای که صفحه‌ی مربی
+          دارد؛ این‌جا `background:'#F1EFEC'` تخت بود. */}
+      <div className="lq-stage" style={{ direction:'rtl', fontFamily:"'Vazirmatn',Tahoma,sans-serif", minHeight:'100vh', color:TEXT }}>
 
         {/* ── Back ── */}
         <div style={{ maxWidth:1128, margin:'0 auto', padding:'18px clamp(12px,3vw,24px) 0' }}>
@@ -385,58 +389,28 @@ export default function RefereeProfilePage() {
           <div className="ln-main" style={{ minWidth:0, display:'flex', flexDirection:'column', gap:16 }}>
 
             {/* Profile card */}
-            <div className="pcard pcard-profile" style={{ background:'#fff', border:'1px solid rgba(0,0,0,0.10)', borderRadius:12, overflow:'hidden', boxShadow:'0 1px 3px rgba(0,0,0,0.06)', animation:'fadeUp .4s ease both' }}>
-              {/* Cover — default referee poster */}
-              <div style={{ position:'relative', height:'clamp(120px,20vw,200px)', overflow:'hidden', background:'linear-gradient(115deg,#0c1424 0%,#17253f 55%,#1e2f4d 100%)' }}>
-                {referee.coverImage ? (
-                  <>
-                    <img loading="lazy" decoding="async" src={referee.coverImage} alt="" style={{ position:'absolute', inset:0, width:'100%', height:'100%', objectFit:'cover' }}/>
-                    <div style={{ position:'absolute', inset:0, background:'linear-gradient(90deg, rgba(6,12,22,0.62) 0%, rgba(6,12,22,0.18) 55%, rgba(6,12,22,0.05) 100%)' }}/>
-                    {/* دکمه‌ی نامرئیِ روی کاور — دلیلش در صفحه‌ی مربی */}
-                    <button type="button" onClick={() => openImage(referee.coverImage ?? '', { title: 'تصویر کاور' })} aria-label="بزرگ‌نمایی تصویر کاور" style={{ position:'absolute', inset:0, background:'none', border:'none', padding:0, cursor:'zoom-in' }}/>
-                  </>
-                ) : (
-                  <>
-                    <div style={{ position:'absolute', inset:0, backgroundImage:'radial-gradient(circle, rgba(255,255,255,0.045) 1px, transparent 1px)', backgroundSize:'16px 16px' }}/>
-                    <div style={{ position:'absolute', left:'-6%', top:'-40%', width:'46%', height:'180%', background:'radial-gradient(ellipse, rgba(199,166,106,0.18) 0%, transparent 66%)', filter:'blur(18px)', pointerEvents:'none' }}/>
-                    <div style={{ position:'absolute', top:'-20%', bottom:'-20%', left:'54%', width:'1.5px', background:'linear-gradient(180deg,transparent,rgba(199,166,106,0.45),transparent)', transform:'rotate(-10deg)', pointerEvents:'none' }}/>
-                  </>
-                )}
-                <div style={{ position:'absolute', top:'50%', insetInlineEnd:'clamp(20px,4vw,40px)', transform:'translateY(-50%)', display:'flex', flexDirection:'column', gap:'10px' }}>
-                  <img loading="lazy" decoding="async" src="/images/Logo/bh-header-v5.png" alt="بیلیارد هاب" style={{ height:'clamp(26px,4vw,40px)', width:'auto' }}/>
-                  <div style={{ display:'flex', alignItems:'center', gap:'8px' }}>
-                    <span style={{ width:'22px', height:'1.5px', background:'linear-gradient(90deg,#C7A66A,transparent)', display:'inline-block' }}/>
-                    <span style={{ fontSize:'clamp(9px,1.4vw,12px)', fontWeight:800, letterSpacing:'0.3em', color:'rgba(199,166,106,0.9)' }}>PROFESSIONAL REFEREE</span>
-                  </div>
-                </div>
-              </div>
+            <div className="pcard pcard-profile lqg lq-rise" style={{ '--lq-i': 0, overflow:'hidden',
+              /* قطرِ آواتار این‌جا تعریف می‌شود چون هم کاور برای بریدنِ
+                 گودی لازمش دارد هم خودِ آواتار. */
+              ...NOTCH_CARD_VARS } as React.CSSProperties}>
+              <NotchCover label="PROFESSIONAL REFEREE" coverImage={referee.coverImage}
+                onCoverClick={() => openImage(referee.coverImage ?? '', { title: 'تصویر کاور' })} />
               {/* Body */}
               <div style={{ padding:'0 24px 20px', position:'relative', zIndex:2 }}>
-                {/* avatar */}
-                <div style={{ display:'flex', justifyContent:'flex-start', alignItems:'flex-end', marginTop:'clamp(-64px,-9vw,-72px)' }}>
-                  <button onClick={() => { openImage(referee.photo ?? '', { alt: referee.name, title: 'عکس پروفایل' }) }} aria-label="بزرگ‌نمایی عکس پروفایل" disabled={!referee.photo} style={{ background:'none', border:'none', padding:0, cursor: referee.photo ? 'pointer' : 'default', borderRadius:'50%', width:'clamp(104px,14vw,148px)', aspectRatio:'1 / 1', flexShrink:0 }}>
-                    <div style={{ width:'100%', height:'100%', borderRadius:'50%', boxSizing:'border-box',
-                      background: '#fff',
-                      padding: 0,
-                      boxShadow: '0 2px 8px rgba(0,0,0,0.14)' }}>
-                      <div style={{ width:'100%', height:'100%', borderRadius:'50%', border:'3px solid #fff', overflow:'hidden', background:'#E7ECF1', display:'flex', alignItems:'flex-end', justifyContent:'center' }}>
-                        {referee.photo ? (
-                          <img loading="lazy" decoding="async" src={referee.photo} alt={referee.name} style={{ width:'100%', height:'100%', objectFit:'cover' }}/>
-                        ) : (
-                          <svg viewBox="0 0 100 100" width="100%" height="100%" style={{ display:'block' }} aria-hidden="true">
-                            <circle cx="50" cy="37" r="19" fill="#93A3B8"/>
-                            <path d="M15 100 C15 74 31 65 50 65 C69 65 85 74 85 100 Z" fill="#A9B8CC"/>
-                          </svg>
-                        )}
-                      </div>
-                    </div>
-                  </button>
-                </div>
+                {/* ── چیدمانِ سر صفحه ──
+                    آواتار وسط، روی گودیِ موجِ کاور؛ نام و مشخصات زیرش.
+                    پیش‌تر آواتار چپ‌چین بود و با `marginTop:'clamp(-64px,-9vw,-72px)'`
+                    بالا کشیده می‌شد — عددی که مستقل از قطرِ آواتار بود، پس
+                    در هر عرضی جای دیگری می‌نشست. حالا از --av مشتق می‌شود.
+                    `lq-ident` قاعده‌ی CSS ندارد و فقط دستگیره‌ی تستِ ایستاست. */}
+                <div className="lq-ident" style={{ display:'flex', flexDirection:'column', alignItems:'center', textAlign:'center' }}>
+                  <NotchAvatar photo={referee.photo} name={referee.name}
+                    onClick={() => openImage(referee.photo ?? '', { alt: referee.name, title: 'عکس پروفایل' })} />
 
                 {/* name + affiliation */}
-                <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', gap:20, marginTop:10, flexWrap:'wrap' }}>
+                <div style={{ width:'100%', paddingTop:12 }}>
                   <div style={{ minWidth:0 }}>
-                    <div style={{ display:'flex', alignItems:'center', gap:7, flexWrap:'wrap' }}>
+                    <div style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:7, flexWrap:'wrap' }}>
                       <h1 style={{ fontSize:'clamp(21px,2.6vw,26px)', fontWeight:700, color:'#1c1c1c', lineHeight:1.2 }}>{referee.name}</h1>
                       {referee.verified && <VerifiedBadge size={20} title="داور تأیید شده" style={{ marginInlineStart: 0 }} />}
                     </div>
@@ -448,6 +422,7 @@ export default function RefereeProfilePage() {
                       {referee.city}، ایران
                     </div>
                   </div>
+                </div>
                 </div>
 
               </div>

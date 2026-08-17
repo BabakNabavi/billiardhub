@@ -3129,13 +3129,72 @@ console.log('\n― پروفایلِ مربی و داور ―');
     forms.every(f => !read(f).includes('استوری‌های شما') && !read(f).includes('publishStory')),
     'استوری مستقل از ثبتِ پروفایل منتشر می‌شود');
   /* ── قفلِ نامک ──
-     «اولین مقدارِ ناخالی» در فرمِ تازه یعنی اولین کاراکترِ تایپ‌شده:
-     فیلد بعد از یک حرف قفل می‌شد و ثبت با «۲ تا ۶۰ کاراکتر» رد. */
-  t('نامک با تایپ قفل نمی‌شود، فقط با بارگذاری',
-    read('components/ProfileSlugField.tsx').includes('const typed = useRef(false)')
-    && read('components/ProfileSlugField.tsx').includes('typed.current = true')
-    && !read('components/ProfileSlugField.tsx').includes('firstSaved'),
-    'تا وقتی ذخیره نشده باید قابلِ ویرایش بماند');
+     دو نسخه‌ی قبلی هر دو حدس می‌زدند و هر دو غلط بودند: اولی «اولین
+     مقدارِ ناخالی» را ذخیره‌شده می‌گرفت (یعنی اولین کاراکترِ
+     تایپ‌شده) و دومی «مقداری که بدونِ تایپ رسیده» — که در فرمِ تازه
+     همان نامکِ **خودکارِ** `newPlayerSlug()` است. نتیجه‌ی دومی این
+     بود که فیلد از لحظه‌ی mount قفل به‌دنیا می‌آمد.
+
+     هیچ حدسی نمی‌تواند نامکِ ذخیره‌شده را از نامکِ پیش‌فرض تشخیص
+     دهد — هر دو در اولین رندر حاضرند. تنها پنل می‌داند، پس باید
+     صریح بگوید. */
+  {
+    const slugField = read('components/ProfileSlugField.tsx');
+    t('قفلِ نامک حدس نمی‌زند',
+      !slugField.includes('typed.current') && !slugField.includes('loaded.current')
+      && slugField.includes('locked ?? ('),
+      'حدس از روی «خالی‌بودن» فیلد را از همان mount قفل می‌کرد');
+
+    /* هر پنلی که فیلد را دارد باید بگوید چه نامکی واقعاً ثبت شده،
+       وگرنه نشانیِ منتشرشده‌ی آن نقش برای همیشه قابلِ تغییر می‌ماند. */
+    const panels = [
+      'app/dashboard/coach/page.tsx', 'app/dashboard/seller/page.tsx',
+      'app/dashboard/player/page.tsx', 'app/dashboard/technician/page.tsx',
+      'app/dashboard/manufacturer/page.tsx', 'app/referees/dashboard/page.tsx',
+    ];
+    const missing = panels.filter(p =>
+      read(p).includes('<ProfileSlugField') && !read(p).includes('savedSlug={savedSlug}'));
+    t('هر پنل نامکِ ثبت‌شده‌اش را صریح می‌دهد', missing.length === 0, missing.join(', '));
+
+    /* ── و پس از ذخیره هم قفل می‌کند ──
+       نسخه‌ی اولِ همین گارد فقط شاخه‌ی بارگذاری را می‌سنجید، پس سه
+       پنلی که بعد از ذخیره `setSavedSlug` نمی‌زدند سبز می‌شدند —
+       یعنی تست دقیقاً همان باگ را تأیید می‌کرد. کاربرِ تازه در همان
+       نشست می‌توانست نشانیِ منتشرشده را دوباره عوض کند. */
+    const noLockOnSave = panels.filter(p =>
+      read(p).includes('<ProfileSlugField')
+      && !/res\.profile\?\.slug\)\s*setSavedSlug\(res\.profile\.slug\)/.test(read(p)));
+    t('هر پنل پس از ذخیره هم نامک را قفل می‌کند', noLockOnSave.length === 0, noLockOnSave.join(', '));
+
+    /* نشانیِ قفل‌شده نباید بررسیِ یکتایی بخورد: خودِ ردیفِ کاربر پیدا
+       می‌شود، `taken` می‌گیرد، و پنلِ فروشگاه ذخیره را رد می‌کند. */
+    t('نشانیِ قفل‌شده بررسیِ تکراری‌بودن نمی‌شود',
+      /if \(locked \|\| loading\) \{ setStatus\('idle'\); return; \}/.test(read('components/SiteAddressField.tsx')),
+      'فروشنده‌ی موجود دیگر نمی‌توانست ذخیره کند');
+
+    /* ── سه حالت، نه دو ──
+       «نامعلوم» نه قفل است نه باز. اگر قفلش بنامیم، کاربرِ تازه‌ای که
+       درخواستش تایم‌اوت شده فیلدی می‌بیند که ادعا می‌کند «ثبت شده»،
+       و چون ذخیره کار می‌کند نامکِ خودکار برایش دائمی می‌شود. */
+    t('حالتِ نامعلومِ نامک از قفل جداست',
+      slugField.includes('const unknown = locked === undefined && savedSlug == null')
+      && slugField.includes('loading={unknown}')
+      && read('components/SiteAddressField.tsx').includes('if (locked || loading)')
+      && read('lib/profiles/client.ts').includes("state: 'error'"),
+      'نامعلوم را قفل نامیدن، همان دام را از سرِ دیگر باز می‌کند');
+
+    /* هر چهار مسیرِ ماشینِ حالت باید در هر شش پنل باشد، وگرنه یکی از
+       آن‌ها یا برای همیشه قفل می‌ماند یا برای همیشه باز. */
+    const incomplete = panels.filter(p => {
+      const src = read(p);
+      if (!src.includes('<ProfileSlugField')) return false;
+      return !(src.includes("setSavedSlug('')")                    // تازه / شکستِ مهاجرت
+        && src.includes('up.ok && up.profile?.slug')               // مهاجرتِ موفق
+        && src.includes('setSavedSlug(remote.slug)')               // پروفایلِ سرور
+        && src.includes('savedSlug === null'));                    // گاردِ ذخیره
+    });
+    t('هر پنل هر چهار مسیرِ نامک را دارد', incomplete.length === 0, incomplete.join(', '));
+  }
   t('برچسبِ فیلدهای لاتین چپ‌چین است',
     forms.every(f => read(f).includes('const lblLtr')
       && read(f).includes('<label style={lblLtr}>First name (English)')),
@@ -3562,7 +3621,16 @@ console.log('\n― استوری: یک منبع، با انقضا ―');
   {
     /* `strip` لازم است: کامنتی که می‌گوید «کمان چطور کار می‌کند»
        نباید خودش ادعا را سبز کند. */
-    const hero = strip(read('app/coaches/[id]/page.tsx'));
+    /* ── چرا دو فایل با هم ──
+       هندسه‌ی موج از صفحه‌ی مربی به `components/profile/NotchHero.tsx`
+       منتقل شد تا صفحه‌ی داور هم همان را بگیرد. این گاردها شکلِ موج
+       را می‌سنجند نه محلِ سکونتش، پس هر دو فایل کنارِ هم خوانده
+       می‌شوند و انتقالِ سالم قرمزشان نمی‌کند. */
+    /* فاصله‌ی بعد از «:» یکسان می‌شود. این ادعاها شکلِ هندسه را
+       می‌سنجند نه سلیقه‌ی فرمت‌کننده را؛ بدونِ این، هر بار که prettier
+       فایل را لمس کند شش گارد بی‌دلیل قرمز می‌شوند. */
+    const hero = (strip(read('components/profile/NotchHero.tsx'))
+      + '\n' + strip(read('app/coaches/[id]/page.tsx'))).replace(/:[ \t]+/g, ':');
     /* ⚠️ این ادعا وارونه شد — و درسش را ثبت می‌کنم.
        نسخه‌ی قبلی می‌گفت «کاور لبه‌ی کمانیِ بیضی دارد»، و آن کمان دو
        گوشه‌ی کناری را بالا می‌بُرد. نمونه‌ی کاربر برعکس است: لبه صاف
@@ -3595,7 +3663,10 @@ console.log('\n― استوری: یک منبع، با انقضا ―');
     /* نسبتِ جعبه باید با viewBox یکی باشد وگرنه منحنی کش می‌آید.
        5.138 / 1.1 = 4.671 = 513.809 / 110 */
     t('جعبه‌ی ماسک هم‌نسبتِ viewBox است',
-      read('app/coaches/[id]/page.tsx').includes("viewBox='0 0 513.809 110'")
+      /* ⚠️ از متنِ **خام** خوانده می‌شود نه `hero`: داخلِ data URI
+         رشته‌ی `//www.w3.org` هست و `strip` آن را کامنتِ خطی می‌بیند و
+         تا آخرِ خط — از جمله همین viewBox — را می‌خورد. */
+      read('components/profile/NotchHero.tsx').includes("viewBox='0 0 513.809 110'")
       && hero.includes("'--boxW':'calc(var(--notch-r) * 5.138)'")
       /* بلندی از عرض مشتق می‌شود، نه از شعاع: وگرنه در حالتی که
          `min` عرض را می‌بُرد، نسبت می‌شکست و موج کج می‌شد. */
@@ -3631,7 +3702,7 @@ console.log('\n― استوری: یک منبع، با انقضا ―');
          بدونِ `none` روی ریشه، حدودِ ۵۴٪ سطحِ جعبه کلیکِ دکمه‌ی کاور
          را می‌بلعید. */
       (() => {
-        const i0 = hero.indexOf("<svg aria-hidden viewBox='0 0 513");
+        const i0 = hero.search(/<svg aria-hidden viewBox=['"]0 0 513/);
         const svg = i0 < 0 ? '' : hero.slice(i0, hero.indexOf('</svg>', i0));
         return svg.includes("pointerEvents:'none'")
           && svg.includes('<path d={NOTCH_WAVE}')
@@ -3639,7 +3710,10 @@ console.log('\n― استوری: یک منبع، با انقضا ―');
       })(),
       'ماسک جلوی کلیک را نمی‌گیرد؛ ناحیه‌ی نامرئی باید پوشانده شود');
     t('قطرِ آواتار یک‌جا روی کارت تعریف شده',
-      /pcard-profile[\s\S]{0,220}?'--av':'clamp\(/.test(hero),
+      /* از `NOTCH_CARD_VARS` می‌آید و کارت spreadش می‌کند — یک تعریف،
+         دو مصرف‌کننده: کاور برای بریدنِ گودی، و خودِ آواتار. */
+      hero.includes("'--av':'clamp(")
+      && /pcard-profile[\s\S]{0,320}?\.\.\.NOTCH_CARD_VARS/.test(hero),
       'متغیر پایین می‌آید نه پهلو — کاور و آواتار هر دو باید ببینندش');
     t('آواتارِ مربی وسط‌چین و روی گودیِ کمان است',
       /className="lq-ident"[^>]*flexDirection:'column'[^>]*alignItems:'center'/.test(hero)

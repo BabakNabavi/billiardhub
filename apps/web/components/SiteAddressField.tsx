@@ -42,6 +42,11 @@ export interface SiteAddressFieldProps {
   onStatusChange?: (s: SlugStatus) => void;
   /** پس از ثبتِ اولیه دیگر قابلِ تغییر نیست — نشانیِ منتشرشده باید بماند */
   locked?: boolean;
+  /** هنوز معلوم نیست نامکی ثبت شده یا نه (در حالِ خواندن، یا خطای
+   *  شبکه). فیلد غیرفعال است ولی **ادعای «ثبت شده» نمی‌کند** — آن
+   *  ادعا برای کاربرِ تازه دروغ است و او را وامی‌دارد نامکِ خودکار را
+   *  بپذیرد. */
+  loading?: boolean;
   required?: boolean;
   label?: string;
   error?: string;
@@ -49,7 +54,7 @@ export interface SiteAddressFieldProps {
 
 export default function SiteAddressField({
   value, onChange, basePath, suggestFrom, checkUrl, onStatusChange,
-  locked = false, required = false, label = 'آدرس اختصاصی سایت شما', error,
+  locked = false, loading = false, required = false, label = 'آدرس اختصاصی سایت شما', error,
 }: SiteAddressFieldProps) {
   const [status, setStatus] = useState<SlugStatus>('idle');
   const [copied, setCopied] = useState(false);
@@ -76,6 +81,14 @@ export default function SiteAddressField({
   /* ── بررسیِ در دسترس بودن ──
      با تأخیر، وگرنه هر حرفی که تایپ می‌شود یک درخواست می‌فرستد. */
   useEffect(() => {
+    /* ── نشانیِ قفل‌شده بررسی نمی‌شود ──
+       نامکِ ثبت‌شده در جدول هست، پس `slug-check` خودِ همان ردیف را
+       پیدا می‌کند و `available:false` می‌دهد ⇒ وضعیت `taken`.
+       پنلِ فروشگاه ذخیره را به همین وضعیت گره زده بود، یعنی فروشنده‌ی
+       موجود شماره‌ی تلفنش را عوض می‌کرد و ذخیره **برای همیشه** با
+       «این نشانی قبلاً گرفته شده» رد می‌شد — درباره‌ی فیلدی که اصلاً
+       قابلِ تایپ نبود. */
+    if (locked || loading) { setStatus('idle'); return; }
     if (!value) { setStatus('idle'); return; }
     if (!isValidSlug(value)) { setStatus('invalid'); return; }
     if (!checkRef.current) { setStatus('ok'); return; }
@@ -93,7 +106,7 @@ export default function SiteAddressField({
       }
     }, 450);
     return () => { alive = false; clearTimeout(t); };
-  }, [value]);
+  }, [value, locked, loading]);
 
   const borderColor =
     status === 'ok' ? 'rgba(14,122,56,0.45)'
@@ -113,12 +126,17 @@ export default function SiteAddressField({
           عوض‌شدنش یعنی هر لینکِ قبلی می‌شکند. یک‌بار هم که عوض شد،
           آگهی‌های همان فروشگاه — که نامکِ قدیمی را در خودشان دارند —
           یتیم شدند و ویترین یک‌شبه خالی شد. */}
-      {locked && (
+      {loading && (
+        <p style={{ fontSize: 11.5, color: 'rgba(0,0,0,0.42)', margin: 0, lineHeight: 1.9 }}>
+          در حال خواندنِ نشانیِ ثبت‌شده…
+        </p>
+      )}
+      {!loading && locked && (
         <p style={{ fontSize: 11.5, color: '#8F6531', background: 'rgba(199,166,106,0.10)', border: '1px solid rgba(199,166,106,0.26)', borderRadius: 9, padding: '7px 10px', margin: 0, lineHeight: 1.9 }}>
           این نشانی ثبت شده و دیگر قابلِ تغییر نیست — نشانیِ اینترنتیِ دائمیِ شماست.
         </p>
       )}
-      {!locked && (
+      {!loading && !locked && (
         <p style={{ fontSize: 11.5, color: 'rgba(0,0,0,0.50)', margin: 0, lineHeight: 1.9 }}>
           در انتخابِ نام دقت کنید: پس از ذخیره <b style={{ color: '#B23B2E' }}>غیرقابلِ تغییر</b> است و نشانیِ اینترنتیِ دائمیِ شما می‌شود.
         </p>
@@ -127,7 +145,8 @@ export default function SiteAddressField({
       <div style={{ display: 'flex', gap: 6, alignItems: 'stretch' }}>
         <input
           type="text"
-          readOnly={locked}
+          readOnly={locked || loading}
+          disabled={loading}
           value={value}
           dir="ltr"
           lang="en"
@@ -144,10 +163,10 @@ export default function SiteAddressField({
             fontSize: 14, background: '#FAFAFA', color: '#1A1A18', outline: 'none',
             direction: 'ltr', textAlign: 'left',
             fontFamily: '"Courier New", Courier, monospace',
-            ...(locked ? { background: '#F1EFEA', color: 'rgba(0,0,0,0.55)', cursor: 'not-allowed' } : {}),
+            ...(locked || loading ? { background: '#F1EFEA', color: 'rgba(0,0,0,0.55)', cursor: 'not-allowed' } : {}),
           }}
         />
-        {!locked && suggestion && suggestion !== value && (
+        {!locked && !loading && suggestion && suggestion !== value && (
           <button
             type="button"
             onClick={() => onChange(suggestion)}
