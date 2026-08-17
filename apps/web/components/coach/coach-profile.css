@@ -1,0 +1,333 @@
+/* ─────────────────────────────────────────────────────────────
+   پروفایل مربی — لایه‌ی ظاهری.
+
+   در فایلِ خودش است نه داخلِ <style> صفحه: صفحه‌ی داور قرار است همین
+   را بگیرد، و استایلِ داخلِ JSX یعنی نسخه‌ی دوم و از آن‌جا به بعد دو
+   طرحِ کمی‌متفاوت.
+
+   همه‌ی رنگ‌ها از توکن‌های `globals.css` می‌آیند. فونت هم همان
+   IRANSansX پروژه است — نُه وزن دارد و برای تضادِ تایپوگرافیک کافی
+   است؛ فونتِ تازه اضافه نشده.
+   ───────────────────────────────────────────────────────────── */
+
+.ch-wrap { max-width: 1160px; margin: 0 auto; padding-inline: clamp(16px, 3vw, 32px); }
+
+/* ═══ هیرو ═══ */
+.ch-hero {
+  position: relative;
+  isolation: isolate;
+  background: var(--bg-dark, #111111);
+  color: var(--text-on-dark, rgba(255, 255, 255, 0.92));
+  overflow: hidden;
+}
+.ch-hero-img {
+  position: absolute; inset: 0; z-index: -3;
+  background-size: cover; background-position: center;
+  /* عکسِ کاور پس‌زمینه است نه سوژه: اشباعِ کم و تیرگی، متن را خوانا
+     نگه می‌دارد بدونِ اینکه عکس حذف شود. */
+  filter: grayscale(0.45) brightness(0.42) contrast(1.05);
+  transform: scale(1.04);
+}
+.ch-hero-scrim {
+  position: absolute; inset: 0; z-index: -2;
+  background:
+    linear-gradient(to top, var(--bg-dark, #111) 4%, rgba(17, 17, 17, 0.72) 44%, rgba(17, 17, 17, 0.34) 100%),
+    radial-gradient(70% 90% at 78% 12%, rgba(199, 166, 106, 0.20), transparent 62%);
+}
+/* نامِ لاتینِ توخالی — عمقِ بصری بدونِ افزودنِ محتوا */
+.ch-hero-ghost {
+  position: absolute; z-index: -1;
+  bottom: -6px; inset-inline-start: -8px;
+  font-size: clamp(64px, 13vw, 168px); font-weight: 900; line-height: 1;
+  letter-spacing: 0.01em; white-space: nowrap; direction: ltr;
+  color: transparent; -webkit-text-stroke: 1px rgba(255, 255, 255, 0.07);
+  user-select: none; pointer-events: none;
+}
+
+.ch-hero-body {
+  position: relative;
+  min-height: clamp(300px, 44vh, 440px);
+  display: flex; flex-direction: column;
+  padding-block: clamp(16px, 2.4vw, 26px) clamp(26px, 4vw, 48px);
+}
+/* شناسه ته هیرو می‌نشیند و بردکرامب بالا — فضای میانی همان چیزی
+   است که به عکسِ کاور اجازه‌ی دیده‌شدن می‌دهد. */
+.ch-hero-body > .ch-hero-row { margin-top: auto; }
+
+/* `flex-wrap` لازم است: در ۳۷۵px نامِ بلند به خطِ بعد می‌رفت ولی
+   جداکننده‌ها روی خطِ اول جا می‌ماندند. */
+.ch-crumb { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; row-gap: 4px; font-size: 12px; margin-bottom: clamp(24px, 5vw, 56px); }
+.ch-crumb a { color: rgba(255, 255, 255, 0.58); text-decoration: none; transition: color .18s; }
+.ch-crumb a:hover { color: var(--gold, #C7A66A); }
+.ch-crumb a:focus-visible { outline: 2px solid var(--gold, #C7A66A); outline-offset: 3px; border-radius: 3px; }
+.ch-crumb span { color: rgba(255, 255, 255, 0.36); }
+.ch-crumb [aria-current] { color: rgba(255, 255, 255, 0.82); font-weight: 700; }
+
+.ch-hero-row { display: flex; align-items: flex-end; gap: clamp(16px, 2.6vw, 28px); flex-wrap: wrap; }
+
+.ch-avatar {
+  width: clamp(84px, 13vw, 132px); aspect-ratio: 1; flex-shrink: 0;
+  border-radius: 50%; overflow: hidden;
+  background: rgba(255, 255, 255, 0.06);
+  border: 2px solid rgba(199, 166, 106, 0.55);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
+  display: flex; align-items: center; justify-content: center;
+  font-size: clamp(30px, 5vw, 46px); font-weight: 900; color: var(--gold, #C7A66A);
+}
+.ch-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+/* آواتار وقتی عکسِ واقعی دارد دکمه می‌شود — پس باید هر چهار حالتش
+   را داشته باشد. globals.css قاعده‌ی سراسریِ «button { cursor: pointer }»
+   ندارد، پس این‌جا صریح نوشته می‌شود. */
+button.ch-avatar { padding: 0; cursor: pointer; transition: border-color .22s, box-shadow .22s; }
+button.ch-avatar:hover { border-color: var(--gold, #C7A66A); box-shadow: 0 14px 46px rgba(0, 0, 0, 0.55); }
+button.ch-avatar:focus-visible { outline: 2px solid var(--gold, #C7A66A); outline-offset: 4px; }
+@media (prefers-reduced-motion: reduce) { button.ch-avatar { transition: none; } }
+
+.ch-hero-id { flex: 1; min-width: 0; }
+
+/* تنها اندازه‌ی «ریز» صفحه — برچسبِ لاتینِ بالای نام.
+   ⚠️ `direction: ltr` این‌جا نیست: روی یک بلوک، `text-align: start`
+   را چپ می‌کند و برچسب از نام جدا می‌افتاد و آن‌سرِ هیرو می‌نشست.
+   متن تماماً حروفِ بزرگِ اَسکی است، پس جهت اثرِ دیداری ندارد. */
+/* ⚠️ ۹.۵px بود. روی گوشیِ میان‌ردهٔ ایرانی زیرِ کفِ خوانایی است و
+   letter-spacingِ زیاد بدترش می‌کرد. ۱۱px کمینه‌ی قابلِ دفاع است. */
+.ch-eyebrow {
+  font-size: 11px; font-weight: 800; letter-spacing: 0.24em;
+  color: var(--gold, #C7A66A); margin: 0 0 8px;
+}
+.ch-name {
+  font-size: clamp(28px, 5.6vw, 58px); font-weight: 900; line-height: 1.1;
+  letter-spacing: -0.02em; margin: 0; color: #fff;
+}
+
+.ch-chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 12px 0 0; padding: 0; list-style: none; }
+/* چیپِ رشته خنثی است — تنها تأکیدِ رنگیِ هیرو، طلاییِ چیپِ درجه است.
+   ۰.۵۵ آلفا روی این پس‌زمینه‌ی تیره کنتراستِ کافی نمی‌داد؛ متن
+   کدر شده بود. */
+.ch-chip {
+  --c: #fff;
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 12px; font-weight: 700; color: var(--c);
+  border: 1px solid color-mix(in srgb, var(--c) 26%, transparent);
+  background: color-mix(in srgb, var(--c) 10%, transparent);
+  border-radius: 999px; padding: 4px 12px;
+}
+.ch-chip-grade { --c: var(--gold, #C7A66A); font-weight: 800; }
+/* جداسازیِ دوجهته: برچسبِ درجه می‌تواند حرفِ لاتین داشته باشد
+   («آسیایی B») و در بندِ راست‌به‌چپ جابه‌جا می‌شود. */
+.ch-iso { unicode-bidi: isolate; }
+.ch-dots { display: inline-flex; gap: 3px; }
+.ch-dots i { width: 5px; height: 5px; border-radius: 50%; background: rgba(199, 166, 106, 0.28); }
+.ch-dots i[data-on] { background: var(--gold, #C7A66A); }
+
+.ch-meta {
+  display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+  margin: 12px 0 0; font-size: 13px; color: rgba(255, 255, 255, 0.62);
+}
+.ch-meta svg { color: var(--gold, #C7A66A); flex-shrink: 0; }
+.ch-sep { width: 3px; height: 3px; border-radius: 50%; background: rgba(255, 255, 255, 0.32); }
+
+.ch-cta { display: flex; gap: 8px; flex-wrap: wrap; }
+.ch-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+  /* ۴۴ پیکسل — کفِ اندازه‌ی هدفِ لمسی */
+  min-height: 44px; padding-inline: 18px; border-radius: 12px;
+  font-family: inherit; font-size: 13px; font-weight: 800;
+  text-decoration: none; cursor: pointer;
+  transition: transform .22s cubic-bezier(.22, 1, .36, 1), background .22s, border-color .22s;
+}
+.ch-btn:hover { transform: translateY(-2px); }
+.ch-btn:active { transform: translateY(0); }
+.ch-btn:focus-visible { outline: 2px solid var(--gold, #C7A66A); outline-offset: 3px; }
+.ch-btn-gold { background: var(--gold, #C7A66A); color: #1A1408; border: 1px solid var(--gold, #C7A66A); }
+.ch-btn-gold:hover { background: var(--gold-light, #E2C98C); }
+.ch-btn-ghost {
+  background: rgba(255, 255, 255, 0.08); color: rgba(255, 255, 255, 0.88);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+.ch-btn-ghost:hover { background: rgba(255, 255, 255, 0.14); border-color: rgba(255, 255, 255, 0.30); }
+
+@media (max-width: 640px) {
+  .ch-hero-row { align-items: flex-start; flex-direction: column; }
+  .ch-cta { width: 100%; }
+  .ch-cta .ch-btn { flex: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ch-btn, .ch-crumb a { transition: none; }
+  .ch-btn:hover { transform: none; }
+}
+
+/* ── اسکلتِ بارگذاری ──
+   جای یک `div`ِ خالی. سه شکلِ اصلیِ صفحه — نوارِ هیرو، خطوطِ متن،
+   کارتِ کناری — را با همان ابعاد نگه می‌دارد تا وقتی داده رسید
+   چیزی نپرد (CLS). */
+.ch-skel { min-height: 100vh; background: var(--bg-primary, #F7F7F5); }
+.ch-skel-hero { min-height: clamp(300px, 44vh, 440px); background: #16161A; }
+.ch-skel-line, .ch-skel-card { border-radius: 8px; background: rgba(17, 17, 16, 0.07); animation: ch-pulse 1.4s ease-in-out infinite; }
+.ch-skel-line { height: 14px; margin-bottom: 12px; }
+.ch-skel-sm { width: 32%; }
+.ch-skel-md { width: 64%; }
+.ch-skel-card { height: 220px; border-radius: 16px; }
+@keyframes ch-pulse { 0%, 100% { opacity: 1 } 50% { opacity: .45 } }
+@media (prefers-reduced-motion: reduce) {
+  .ch-skel-line, .ch-skel-card { animation: none; }
+}
+.ch-notfound { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px; }
+.ch-notfound-card { padding: 34px 30px; text-align: center; max-width: 420px; }
+.ch-notfound-card h1 { font-size: 18px; font-weight: 800; margin: 0 0 8px; color: var(--text-primary, #111); }
+.ch-notfound-card p { font-size: 13px; line-height: 2; color: var(--text-secondary, #666); margin: 0 0 18px; }
+
+/* ═══ بدنه ═══ */
+.ch-body { background: var(--bg-primary, #F7F7F5); padding-block: clamp(28px, 5vw, 56px) clamp(48px, 8vw, 96px); }
+.ch-cols { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: clamp(20px, 3vw, 40px); align-items: start; }
+@media (max-width: 940px) { .ch-cols { grid-template-columns: 1fr; } }
+
+.ch-col { display: flex; flex-direction: column; gap: clamp(24px, 4vw, 40px); min-width: 0; }
+main.ch-col > section { max-width: 760px; }
+/* ستونِ کناری روی دسکتاپ همراهِ اسکرول می‌ماند — تماس و مدارک
+   نباید با پایین‌رفتن از دست بروند. */
+@media (min-width: 941px) { .ch-rail { position: sticky; top: 84px; } }
+
+.ch-sec-head { display: flex; align-items: baseline; gap: 12px; margin-bottom: 16px; }
+.ch-sec-head h2 { font-size: 19px; font-weight: 900; color: var(--text-primary, #111); margin: 0; letter-spacing: -0.01em; }
+/* ⚠️ #999 روی زمینه‌ی روشن تضادِ ۲.۶۶ می‌داد — زیرِ کفِ ۴.۵. با
+   #6E6E6E می‌شود ۵.۱ و همان حسِ «کم‌رنگ» را می‌دهد. */
+.ch-sec-head .en { font-size: 11px; font-weight: 800; letter-spacing: 0.22em; color: var(--text-tertiary, #6E6E6E); direction: ltr; }
+/* ⚠️ `90deg` فیزیکی است و در RTL خط از سرِ اشتباه محو می‌شد: طلایی
+   ته صفحه می‌ماند و کنارِ عنوان — جایی که باید به آن وصل شود —
+   شفاف بود. `to left` منطقی است و در هر دو جهت درست می‌نشیند. */
+.ch-sec-head .rule { flex: 1; height: 1px; background: linear-gradient(to left, rgba(199,166,106,0.42), transparent); }
+
+.ch-card { background: var(--bg-surface, #fff); border: 1px solid #E7E2D6; border-radius: 18px; padding: clamp(18px, 2.6vw, 26px); }
+.ch-empty { font-size: 13px; color: var(--text-tertiary, #6E6E6E); line-height: 2; margin: 0; }
+
+/* معرفی — متنِ خوانا، نه متنِ فشرده */
+.ch-prose { font-size: 15px; line-height: 2.1; color: #33312D; margin: 0; }
+.ch-prose + .ch-prose { margin-top: 14px; }
+
+/* ═══ خطِ زمانِ درجه ═══ */
+.ch-tl { list-style: none; margin: 0; padding: 0; position: relative; }
+.ch-tl::before {
+  content: ''; position: absolute; inset-block: 6px; inset-inline-start: 5px; width: 1px;
+  background: linear-gradient(180deg, var(--gold, #C7A66A), rgba(199,166,106,0.16));
+}
+.ch-tl-item {
+  position: relative; padding-inline-start: 24px; padding-block: 8px;
+  display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap;
+}
+.ch-tl-dot {
+  position: absolute; inset-inline-start: 0; top: 15px;
+  width: 11px; height: 11px; border-radius: 50%;
+  background: var(--bg-surface, #fff); border: 2px solid rgba(199,166,106,0.42);
+}
+.ch-tl-item[data-now] .ch-tl-dot { border-color: var(--gold, #C7A66A); background: var(--gold, #C7A66A); box-shadow: 0 0 0 4px rgba(199,166,106,0.16); }
+.ch-tl-year { font-size: 12px; font-weight: 800; color: var(--gold-deep, #8F6531); font-variant-numeric: tabular-nums; min-width: 42px; }
+.ch-tl-label { font-size: 14px; font-weight: 700; color: var(--text-primary, #111); }
+.ch-tl-badge {
+  font-size: 11px; font-weight: 800; color: var(--gold-deep, #8F6531);
+  background: var(--gold-dim, rgba(199,166,106,0.12)); border: 1px solid var(--gold-border, rgba(199,166,106,0.24));
+  border-radius: 999px; padding: 2px 9px;
+}
+
+/* ═══ نشانیِ عمومی ═══ */
+.ch-url { display: flex; align-items: center; gap: 8px; }
+.ch-url code {
+  flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  font-family: ui-monospace, "Courier New", monospace; font-size: 12px;
+  color: var(--text-secondary, #666); background: #FAFAF7;
+  border: 1px solid #E7E2D6; border-radius: 9px; padding: 9px 11px;
+}
+.ch-url-copy {
+  display: inline-flex; align-items: center; gap: 5px; flex-shrink: 0;
+  min-height: 40px; padding-inline: 12px; border-radius: 9px; cursor: pointer;
+  font-family: inherit; font-size: 13px; font-weight: 800;
+  color: var(--gold-deep, #8F6531);
+  background: var(--gold-dim, rgba(199,166,106,0.12));
+  border: 1px solid var(--gold-border, rgba(199,166,106,0.24));
+  transition: background .2s, border-color .2s;
+}
+.ch-url-copy:hover { background: rgba(199,166,106,0.20); border-color: rgba(199,166,106,0.45); }
+.ch-url-copy:focus-visible { outline: 2px solid var(--gold-deep, #8F6531); outline-offset: 2px; }
+
+/* ═══ راه‌های ارتباطی ═══ */
+.ch-links { display: flex; gap: 8px; flex-wrap: wrap; }
+.ch-link {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 44px; height: 44px; border-radius: 12px;
+  border: 1px solid #E7E2D6; background: #FAFAF7; color: var(--text-secondary, #666);
+  text-decoration: none; transition: color .2s, border-color .2s, background .2s, transform .2s;
+}
+.ch-link:hover { color: var(--gold-deep, #8F6531); border-color: rgba(199,166,106,0.45); background: var(--gold-dim, rgba(199,166,106,0.12)); transform: translateY(-2px); }
+.ch-link:focus-visible { outline: 2px solid var(--gold-deep, #8F6531); outline-offset: 2px; }
+
+@media (prefers-reduced-motion: reduce) { .ch-link { transition: none; } .ch-link:hover { transform: none; } }
+
+/* ═══ گالری ═══ */
+.ch-gal-tabs { margin-bottom: 16px; }
+.ch-gal-n {
+  margin-inline-start: 6px; font-size: 11px; font-weight: 800;
+  color: var(--gold-deep, #8F6531); background: var(--gold-dim, rgba(199,166,106,0.12));
+  border-radius: 999px; padding: 1px 6px; font-variant-numeric: tabular-nums;
+}
+
+/* اولین تصویر دو برابر — شبکه‌ی یکنواختِ تمبرها «آرشیو» به نظر
+   می‌رسید نه «کار». با سه عکس یا کمتر، همه هم‌اندازه می‌مانند تا
+   شبکه لنگ نزند. */
+/* ستون‌ها با تعدادِ واقعیِ عکس تنظیم می‌شود: با دو عکس، شبکه‌ی
+   چهارستونی دو خانه‌ی خالی می‌گذاشت و نیمِ ردیف سفید می‌ماند. */
+.ch-gal-grid {
+  display: grid; gap: 10px; justify-content: start;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 232px));
+}
+.ch-gal-cell {
+  position: relative; padding: 0; border: none; cursor: pointer;
+  aspect-ratio: 1; border-radius: 14px; overflow: hidden;
+  background: #EDE9E0;
+  transition: transform .3s cubic-bezier(.22,1,.36,1), box-shadow .3s;
+}
+/* تصویرِ نخست فقط وقتی بزرگ می‌شود که عکسِ کافی برای پرکردنِ
+   اطرافش باشد؛ وگرنه ردیف لنگ می‌ماند. */
+/* ── چرا مرزِ `data-few` چهار است، نه سه ──
+   خانه‌ی سرآمد ۲×۲ جا می‌گیرد، پس چهار عکس روی‌هم ۷ خانه می‌خواهد؛
+   در شبکه‌ی چهارستونی می‌شود دو ردیف با یک حفره‌ی خالی ته ردیفِ دوم.
+   از پنج عکس به بالا ردیف پر می‌شود. `data-few` را `CoachGallery`
+   می‌گذارد. */
+.ch-gal-grid:not([data-few]) .ch-gal-cell[data-lead] { grid-column: span 2; grid-row: span 2; }
+.ch-gal-cell img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .5s cubic-bezier(.22,1,.36,1); }
+.ch-gal-cell:hover { box-shadow: 0 14px 34px rgba(28,27,23,0.18); }
+.ch-gal-cell:hover img { transform: scale(1.06); }
+.ch-gal-cell:focus-visible { outline: 2px solid var(--gold-deep, #8F6531); outline-offset: 3px; }
+.ch-gal-cap {
+  position: absolute; inset-inline: 0; bottom: 0; padding: 20px 12px 10px;
+  font-size: 11px; font-weight: 700; color: #fff; text-align: start;
+  background: linear-gradient(to top, rgba(0,0,0,0.72), transparent);
+  opacity: 0; transition: opacity .25s;
+}
+.ch-gal-cell:hover .ch-gal-cap, .ch-gal-cell:focus-visible .ch-gal-cap { opacity: 1; }
+
+.ch-vid-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+
+.ch-gal-empty {
+  display: flex; flex-direction: column; align-items: center; gap: 10px;
+  padding: 44px 20px; text-align: center;
+  border: 1px dashed #D8D2C4; border-radius: 18px; background: #FBFAF7;
+}
+.ch-gal-empty svg { color: var(--ink-3, #999); opacity: 0.6; }
+.ch-gal-empty p { margin: 0; font-size: 13px; color: var(--text-tertiary, #6E6E6E); }
+
+@media (max-width: 700px) {
+  .ch-gal-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .ch-vid-grid { grid-template-columns: 1fr; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ch-gal-cell, .ch-gal-cell img, .ch-gal-cap { transition: none; }
+  .ch-gal-cell:hover img { transform: none; }
+}
+
+/* پیامِ وضعیتِ کپی.
+   ⚠️ اول «empty:‌ display:none» نوشته شده بود و همان چیزی را که قرار
+   بود درست کند خنثی می‌کرد: ناحیه‌ی aria-live که در لحظه‌ی تغییرِ
+   محتوا پنهان باشد، مطمئن اعلام نمی‌شود. عنصر می‌ماند و فقط
+   ارتفاعِ یک خط رزرو می‌شود تا چیزی هم جابه‌جا نشود. */
+.ch-sr-live { margin: 8px 0 0; font-size: 11px; line-height: 1.5; min-height: 1.5em; color: var(--text-tertiary, #6E6E6E); }

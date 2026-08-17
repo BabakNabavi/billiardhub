@@ -1661,3 +1661,14 @@ select:disabled { opacity: 0.55; cursor: not-allowed; }
   .lqg-hover, .lq-tile, .lq-seg > button, .lq-pcard { transition: none !important; }
   .lqg-hover:hover, .lq-tile:hover, .lq-pcard:hover { transform: none !important; }
 }
+
+/* ── کارتِ رسانه‌ی پروفایل ──
+   `ProfileVideoCard` وقتی فقط بندانگشتی دارد (ردیفِ قدیمی، بدونِ
+   فایلِ ویدیو) این کلاس را می‌گیرد. تعریفش تا امروز فقط داخلِ
+   استایلِ درون‌خطیِ صفحه‌ی داور بود، پس همان کارت در صفحه‌ی مربی
+   بی‌گوشه و بی‌هاور رندر می‌شد — یک کامپوننتِ مشترک که ظاهرش به
+   میزبانش بند بود. */
+/* ⚠️ «cursor: pointer» و بالاآمدنِ هاور برداشته شد. تنها مصرف‌کننده
+   شاخه‌ی «فقط بندانگشتی»ِ ProfileVideoCard است که یک div بدونِ
+   onClick می‌سازد؛ وعده‌ی کلیک روی چیزی که کلیک نمی‌شود، دروغ است. */
+.gcard { overflow: hidden; border-radius: 10px; }

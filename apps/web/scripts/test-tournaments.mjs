@@ -3121,9 +3121,12 @@ console.log('\n― پروفایلِ مربی و داور ―');
   t('مسیرِ ویدیوی پروفایل مالکیت را می‌سنجد',
     read('lib/upload/policy.ts').includes("cleaned.startsWith('profiles/videos/')"),
     'تکیه بر تصادفی‌بودنِ نامِ فایل، محافظ نیست');
+  /* هر دو شکل قبول است: `fetchProfile` و `fetchProfileResult`. دومی
+     «نبود» را از «خطای شبکه» جدا می‌کند و صفحه‌ی مربی به آن مهاجرت
+     کرد؛ ادعا «از سرور می‌خواند» است، نه «کدام تابع». */
   t('صفحه‌ی عمومی پروفایل را از سرور هم می‌خواند',
     ['app/coaches/[id]/page.tsx', 'app/referees/[id]/page.tsx']
-      .every(f => read(f).includes('fetchProfile<')),
+      .every(f => /fetchProfile(Result)?</.test(read(f))),
     'وگرنه پروفایل فقط در مرورگرِ خودِ صاحبش دیده می‌شد');
   t('باکسِ استوری در فرمِ ثبت نیست',
     forms.every(f => !read(f).includes('استوری‌های شما') && !read(f).includes('publishStory')),
@@ -3209,10 +3212,19 @@ console.log('\n― پروفایلِ مربی و داور ―');
     && read('lib/coach-store.ts').includes('url?: string'),
     'تا امروز accept روی image/* بود و هیچ ویدیویی ذخیره نمی‌شد');
   t('هر دو صفحه‌ی عمومی ویدیو را پخش می‌کنند',
+    /* دو نیمه سنجیده می‌شود: نگاشتِ داده (`url: v.url` — بدونش کارت
+       نشانیِ ویدیو را نمی‌گیرد و دکمه تزئینی می‌شود) و خودِ رندر.
+       در صفحه‌ی مربی این دو در یک فایل نیستند: بازطراحی، گالری را به
+       `components/coach/CoachGallery.tsx` برد. پس هر صفحه بسته‌ی
+       خودش را دارد؛ ادعا رفتار را می‌سنجد نه اینکه کدام فایل. */
     existsSync(join(ROOT, 'components/ProfileVideoCard.tsx'))
-    && ['app/coaches/[id]/page.tsx', 'app/referees/[id]/page.tsx']
-      .every(f => read(f).includes('<ProfileVideoCard key={v.id} v={v} />')
-        && read(f).includes('url: v.url')),
+    && [
+      ['app/coaches/[id]/page.tsx', 'components/coach/CoachGallery.tsx'],
+      ['app/referees/[id]/page.tsx'],
+    ].every(files => {
+      const src = files.map(f => read(f)).join('\n');
+      return src.includes('<ProfileVideoCard key={v.id} v={v} />') && src.includes('url: v.url');
+    }),
     'دکمه‌ی پخش تزئینی بود و صفحه‌ی داور اصلاً به‌روز نشده بود');
   t('سه عبارتِ اضافه حذف شدند',
     !read('components/ClubPicker.tsx').includes('یک عضو به آن باشگاه افزوده می‌شود')
@@ -3629,8 +3641,13 @@ console.log('\n― استوری: یک منبع، با انقضا ―');
     /* فاصله‌ی بعد از «:» یکسان می‌شود. این ادعاها شکلِ هندسه را
        می‌سنجند نه سلیقه‌ی فرمت‌کننده را؛ بدونِ این، هر بار که prettier
        فایل را لمس کند شش گارد بی‌دلیل قرمز می‌شوند. */
+    /* ⚠️ مصرف‌کننده عوض شد. صفحه‌ی مربی بازطراحی شد و هیروی خودش را
+       گرفت (`components/coach/CoachHero.tsx`)، پس دیگر `NotchHero` را
+       صدا نمی‌زند. تنها مصرف‌کننده‌ی باقی‌مانده صفحه‌ی داور است و
+       بسته همان را می‌خواند. اگر روزی داور هم مهاجرت کرد، این گاردها
+       بی‌مصرف‌اند و باید حذف شوند نه اینکه به فایلِ سومی وصل شوند. */
     const hero = (strip(read('components/profile/NotchHero.tsx'))
-      + '\n' + strip(read('app/coaches/[id]/page.tsx'))).replace(/:[ \t]+/g, ':');
+      + '\n' + strip(read('app/referees/[id]/page.tsx'))).replace(/:[ \t]+/g, ':');
     /* ⚠️ این ادعا وارونه شد — و درسش را ثبت می‌کنم.
        نسخه‌ی قبلی می‌گفت «کاور لبه‌ی کمانیِ بیضی دارد»، و آن کمان دو
        گوشه‌ی کناری را بالا می‌بُرد. نمونه‌ی کاربر برعکس است: لبه صاف
@@ -3868,10 +3885,61 @@ console.log('\n― استوری: یک منبع، با انقضا ―');
 
   /* پروفایلِ واقعی نباید یک لحظه «پیدا نشد» شود */
   for (const p of ['app/coaches/[id]/page.tsx', 'app/referees/[id]/page.tsx']) {
+    /* ⚠️ نسخه‌ی قبلی `&& !checked) {` می‌خواست، یعنی آکولاد را اجباری
+       می‌کرد. بازطراحیِ مربی همان گارد را با بدنه‌ی تک‌خطی نوشت
+       (یک `return`ِ تک‌خطی) و ادعا بی‌آنکه رفتاری
+       خراب شده باشد قرمز شد. حالا خودِ ترتیب سنجیده می‌شود: گاردِ
+       بارگذاری باید وجود داشته باشد، بی‌درنگ چیزی برگرداند، و *پیش
+       از* بلوکِ «پیدا نشد» بیاید — همان چیزی که اهمیت دارد. */
     t(`گاردِ بارگذاری در ${p.split('/')[1]} پیش از «پیدا نشد» است`,
-      /&& !checked\) \{/.test(read(p)),
+      (() => {
+        /* توضیح‌ها برداشته می‌شوند: هر دو صفحه *درباره‌ی* همین ترتیب
+           کامنت دارند، و در صفحه‌ی داور آن کامنت بالاتر از خودِ گارد
+           است — با متنِ خام، «پیدا نشد» زودتر از گارد پیدا می‌شد و
+           ادعا وارونه قرمز می‌ماند. */
+        const src = strip(read(p));
+        /* شرط ممکن است تک‌عبارتی باشد (`if (!checked)`) یا ترکیبی
+           (`if (!D.some(…) && !checked)`) — هر دو قبول است؛ چیزی که
+           سنجیده می‌شود وجود و ترتیبِ گارد است. */
+        /* `[^)]*` جواب نمی‌داد: شرطِ صفحه‌ی داور خودش پرانتزِ تودرتو
+           دارد (`!D.some(r => r.id === id) && !checked`). */
+        const load = src.search(/if \([\s\S]{0,90}?!checked\)\s*(\{|return)/);
+        const miss = src.search(/پیدا نشد/);
+        return load >= 0 && miss >= 0 && load < miss;
+      })(),
       'وگرنه هر پروفایلِ واقعی اول «پیدا نشد» نشان می‌داد');
   }
+
+  /* ── دو عددِ متناقض روی یک صفحه ──
+     چیپِ هیرو از `badgeFromGrades` می‌آید که بر اساسِ اندیسِ `GRADES`
+     می‌سنجد. اگر تایم‌لاین با سال مرتب شود، ردیفِ نشان‌دارِ «بالاترین
+     درجه» می‌تواند درجه‌ی دیگری باشد. هر دو باید از یک ترتیب بیایند. */
+  {
+    const coach = strip(read('app/coaches/[id]/page.tsx'));
+    t('تایم‌لاینِ مربی بر اساسِ رتبه مرتب می‌شود، نه سال',
+      /\.sort\(\(a, b\) => GRADES\.findIndex/.test(coach)
+      && !/sort\([^)]*Number\(b\.year\)/.test(coach),
+      'مرتب‌سازی با سال، نشانِ «بالاترین درجه» را به ردیفِ اشتباه می‌داد');
+
+    /* `Number('۱۳۹۸')` برابرِ NaN است — این‌جا اندازه گرفته شد، حدس
+       نیست. بدونِ نرمال‌سازی، سالِ فارسی کلِ محاسبه را می‌سوزاند.
+       هلپرِ مشترک خواسته می‌شود نه رجکسِ دست‌ساز: نسخه‌ی دست‌ساز فقط
+       ارقامِ فارسی را می‌گرفت و عربی‌ها (٠-٩) را جا می‌گذاشت. */
+    t('«از سال» ارقامِ فارسی را نرمال می‌کند',
+      coach.includes('normalizeDigits(String(g.year))') && coach.includes('Math.min('),
+      'سالِ فارسی NaN می‌شد و «از سال» یا غلط می‌آمد یا اصلاً نمی‌آمد');
+  }
+
+  /* گرادیانِ فیزیکی در RTL از سرِ اشتباه محو می‌شود */
+  t('خطِ کنارِ عنوان‌ها گرادیانِ منطقی دارد',
+    !/linear-gradient\(90deg/.test(read('components/coach/coach-profile.css')),
+    '90deg فیزیکی است؛ در RTL طلایی آن‌سرِ خط می‌افتد نه کنارِ عنوان');
+
+  /* کامپوننتِ مشترک نباید ظاهرش را از میزبان قرض بگیرد */
+  t('کلاسِ .gcard در فایلِ سراسری است، نه استایلِ درون‌خطیِ یک صفحه',
+    read('app/globals.css').includes('.gcard {')
+    && !read('app/referees/[id]/page.tsx').includes('.gcard{'),
+    'ProfileVideoCard در صفحه‌ی مربی بی‌گوشه رندر می‌شد چون تعریف فقط مالِ داور بود');
 }
 
 console.log('\n― استوری فقط با انتشارِ صریح ―');
@@ -4143,8 +4211,18 @@ console.log('\n― صفحه‌ی باشگاه روی همان لایه‌ی مر
   t('منطقِ کلیدهای تب یک نسخه دارد',
     existsSync(join(ROOT, 'hooks/use-tab-keys.ts'))
     && read('hooks/use-tab-keys.ts').includes('ArrowLeft')
-    && ['app/coaches/[id]/page.tsx', 'app/referees/[id]/page.tsx', 'app/clubs/[id]/page.tsx']
-      .every(p => read(p).includes('useTabKeys(') && !read(p).includes("e.key === 'ArrowLeft'")),
+    /* تبِ مربی بعدِ بازطراحی داخلِ `CoachGallery` است، نه صفحه. بسته‌ی
+       هر صفحه خوانده می‌شود تا ادعا سرِ جای رفتار بماند. نیمه‌ی منفی
+       روی *همه‌ی* فایل‌های بسته لازم است: کافی است یک نفر دوباره
+       دست‌سازش کند تا هماهنگی از دست برود. */
+    && [
+      ['app/coaches/[id]/page.tsx', 'components/coach/CoachGallery.tsx'],
+      ['app/referees/[id]/page.tsx'],
+      ['app/clubs/[id]/page.tsx'],
+    ].every(files => {
+      const src = files.map(p => read(p)).join('\n');
+      return src.includes('useTabKeys(') && !src.includes("e.key === 'ArrowLeft'");
+    }),
     'سه نسخه‌ی جدا یعنی یکی‌شان روزی جا می‌ماند');
   t('حالتِ هم‌عرض در فایلِ مشترک است',
     read('app/globals.css').includes('.lq-seg-fill'),

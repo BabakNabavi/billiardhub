@@ -71,10 +71,23 @@ export async function fetchMyProfile<T>(kind: ProfileKind): Promise<RemoteProfil
  *  نشست وابسته است. بدونِ فرستادنِ نشست، صاحبِ پروفایل هم مهمان
  *  دیده می‌شود و پیش‌نمایشِ کارِ خودش ۴۰۴ می‌گیرد. */
 export async function fetchProfile<T>(kind: ProfileKind, slug: string): Promise<RemoteProfile<T> | null> {
+  const r = await fetchProfileResult<T>(kind, slug)
+  return r.state === 'found' ? r.profile : null
+}
+
+/** همان، ولی «نبود» و «خطا» را از هم جدا می‌کند.
+ *
+ *  صفحه‌ی عمومی به این تفاوت نیاز دارد: با `null`ِ یکسان، قطعیِ
+ *  شبکه همان «این مربی پیدا نشد» را نشان می‌داد — پیامی که می‌گوید
+ *  آدم وجود ندارد، درحالی‌که فقط درخواست نرسیده بود. */
+export async function fetchProfileResult<T>(kind: ProfileKind, slug: string): Promise<MyProfileResult<T>> {
   const r = await apiFetch(`/api/profiles/${kind}?slug=${encodeURIComponent(slug)}`, { cache: 'no-store' }).catch(() => null)
-  if (!r) return null
+  if (!r) return { state: 'error' }
+  /* ۴۰۴ یعنی واقعاً نیست؛ بقیه‌ی کدهای ناموفق خطای سرورند. */
+  if (!r.ok) return r.status === 404 ? { state: 'none' } : { state: 'error' }
   const j = await json<{ profile: RemoteProfile<T> | null }>(r)
-  return j?.profile ?? null
+  if (!j) return { state: 'error' }
+  return j.profile ? { state: 'found', profile: j.profile } : { state: 'none' }
 }
 
 /** همه‌ی پروفایل‌های تأییدشده‌ی یک نوع */

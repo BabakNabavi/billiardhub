@@ -341,8 +341,6 @@ export default function RefereeProfilePage() {
         .goldbtn:hover{transform:translateY(-2px);}
         .social-icn{transition:all .25s ease;}
         .social-icn:hover{background:rgba(199,166,106,0.12)!important;border-color:rgba(199,166,106,0.38)!important;color:#C7A66A!important;transform:translateY(-2px);box-shadow:0 4px 14px rgba(199,166,106,0.18);}
-        .gcard{overflow:hidden;border-radius:10px;transition:transform .3s,box-shadow .3s;cursor:pointer;}
-        .gcard:hover{transform:scale(1.03);box-shadow:0 6px 20px rgba(0,0,0,0.12);}
         .gtab{transition:all .18s;cursor:pointer;}
         .gtab:hover{opacity:.85;}
         @media(max-width:740px){.pcols{grid-template-columns:1fr!important;}}
