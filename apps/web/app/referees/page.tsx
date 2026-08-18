@@ -118,7 +118,10 @@ function refereeMotif(motif: string) {
     <svg width={s} viewBox="0 0 100 100" fill="none" aria-hidden>
       <circle cx="50" cy="50" r="38" stroke={GOLD} strokeWidth="1.8" opacity="0.85" fill="rgba(0,0,0,0.18)"/>
       <circle cx="50" cy="50" r="16" fill={GOLD} opacity="0.9"/>
-      <text x="50" y="51" textAnchor="middle" dominantBaseline="central" fontSize="19" fontWeight="800" fill="#1c0e13">8</text>
+      {/* ⚠️ `data-no-fa` لازم است: `PersianDigits` هر رقمِ رندرشده را
+          فارسی می‌کند و شماره‌ی توپِ بیلیارد «۸» می‌شد. شماره‌ی توپ
+          یک نشانه است نه عدد در متنِ فارسی. */}
+      <text x="50" y="51" data-no-fa textAnchor="middle" dominantBaseline="central" fontSize="19" fontWeight="800" fill="#1c0e13">8</text>
       <ellipse cx="38" cy="36" rx="7" ry="4" fill={GOLD} opacity="0.22" transform="rotate(-30 38 36)"/>
     </svg>
   )

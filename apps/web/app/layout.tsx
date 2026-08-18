@@ -145,6 +145,16 @@ export default function RootLayout({
           * { font-family: var(--font-base) !important; box-sizing:border-box; }
           input, select, textarea, button { font-family: var(--font-base) !important; }
           .bh-latin, .bh-latin * { font-family: Arial, Tahoma, sans-serif !important; }
+          /* ── وردمارکِ متنیِ «BILLIARD HUB» ──
+             قاعده‌ی ستاره‌دارِ بالا با !important حتی استایلِ اینلاین
+             را هم می‌بلعد، پس استثنا باید همین‌جا باشد — درست مثل
+             خطِ bh-latin.
+             هشدار: Copperplate Gothic Light فونتِ سیستمیِ مک و ویندوز
+             است و روی اندروید وجود ندارد؛ فایلی هم اضافه نشده. فالبک
+             عمدی است: یک سریفِ هندسی با همان حسِ حروفِ بزرگ. */
+          .bh-wordmark, .bh-wordmark * {
+            font-family: 'Copperplate Gothic Light','Copperplate Gothic','Copperplate','Optima','Palatino Linotype',Georgia,serif !important;
+          }
           body { margin: 0; padding: 0; direction: rtl; }
           @media (max-width: 900px) {
             input, textarea, select { font-size: 16px !important; }

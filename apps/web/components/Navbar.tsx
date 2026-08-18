@@ -674,15 +674,28 @@ export default function Navbar() {
           paddingTop: 'env(safe-area-inset-top)',
           animation: 'slideUp 0.32s cubic-bezier(0.22,1,0.36,1) both',
         }}>
-          {/* Header row — لوگو و دکمه‌ی بستن روبه‌روی هم، در یک ردیف.
+          {/* Header row — وردمارکِ متنی و دکمه‌ی بستن، در یک ردیف. */}
+          <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '14px 20px' }}>
+            {/* ── چرا متن، نه تصویرِ لوگو ──
+                لوگوی تصویری این‌جا برداشته شد و جایش وردمارکِ متنی
+                نشست. متن سفید است و کشوی منو هم سفید، پس هر دو واژه
+                سایه‌ی خودشان را دارند تا خوانده شوند: «BILLIARD» یک
+                سایه‌ی مشکیِ خیلی کم، و «HUB» سایه‌ی طلایی.
 
-              نوشته‌ی فارسی «بیلیارد هاب» حذف شد: خود لوگو همان را
-              نوشته دارد و تکرارش فقط ارتفاع می‌گرفت. با چیدمان ردیفی،
-              لوگو و ضربدر هر دو بالا آمدند و هم‌تراز شدند. */}
-          <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '12px 20px' }}>
-            {/* لوگو دقیقاً وسط ردیف می‌نشیند؛ دکمه‌ی بستن با position
-                مطلق کنار می‌ایستد تا عرضش مرکز را جابه‌جا نکند. */}
-            <img loading="eager" decoding="async" src="/images/Logo/bh-header-v5.png" alt="بیلیارد هاب" style={{ height: '38px', width: 'auto' }} />
+                ⚠️ Copperplate Gothic Light فونتِ سیستمیِ مک و ویندوز
+                است و روی اندروید — یعنی بیشترِ کاربرانِ ما — وجود
+                ندارد. فایلی هم برایش اضافه نشده (قاعده‌ی پروژه:
+                فونتِ تازه بدونِ پرسیدن نه). پس زنجیره‌ی فالبک
+                عمدی است: روی دستگاهی که این فونت را ندارد یک سریفِ
+                هندسی با همان حسِ حروفِ بزرگ می‌نشیند. */}
+            <span aria-label="بیلیارد هاب" className="bh-wordmark" style={{
+              fontSize: '21px', fontWeight: 400, letterSpacing: '0.14em',
+              color: '#FFFFFF', direction: 'ltr', whiteSpace: 'nowrap', userSelect: 'none',
+            }}>
+              <span style={{ textShadow: '0 1px 2px rgba(0,0,0,0.38), 0 0 1px rgba(0,0,0,0.55)' }}>BILLIARD</span>
+              {' '}
+              <span style={{ textShadow: '0 1px 2px rgba(184,147,58,0.85), 0 0 6px rgba(184,147,58,0.55)' }}>HUB</span>
+            </span>
             <button onClick={() => setMobileOpen(false)} aria-label="بستن منو"
               style={{ position: 'absolute', insetInlineStart: '20px', top: '50%', transform: 'translateY(-50%)', background: 'rgba(28,28,26,0.05)', border: '1px solid rgba(28,28,26,0.1)', borderRadius: '12px', cursor: 'pointer', color: 'rgba(28,28,26,0.5)', padding: '8px', display: 'flex' }}>
               <X size={20} />
