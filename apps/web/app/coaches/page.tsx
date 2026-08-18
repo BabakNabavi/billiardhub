@@ -433,9 +433,13 @@ export default function CoachesPage() {
            صفحه‌ی ۳۲۰ این گروه ۳۳۲ پیکسل می‌شد و کلِ صفحه به پهلو کشیده
            می‌شد. سقفِ صریح و اجازه‌ی شکستن، هر دو لازم است.
            (این بلوک داخلِ یک template literal است — بک‌تیک ممنوع.) */
+        /* ⚠️ اینجا flex-basis:100% بود، یعنی گروهِ سرچ روی موبایل یک
+           خطِ کاملِ اضافه می‌گرفت. صفحه‌ی داوران همین را نداشت و
+           جمع‌وجورتر بود. حالا در همان ردیف می‌ماند و فقط اگر جا کم
+           آمد می‌شکند. */
         @media(max-width:640px){
-          .coach-search-group{flex-basis:100%;margin-inline-start:0!important;
-            max-width:100%;flex-wrap:wrap;min-width:0;}
+          .coach-search-group{margin-inline-start:auto!important;
+            max-width:100%;min-width:0;}
           .coach-search-group>*{min-width:0;}
         }
         /* list view: 2 cards per row on desktop, 1 on mobile */
@@ -459,31 +463,21 @@ export default function CoachesPage() {
         }}>
           <div style={{ maxWidth:1280, margin:'0 auto', padding:'10px clamp(24px,6vw,80px)',
             display:'flex', alignItems:'center', gap:8, flexWrap:'wrap' }}>
-            {/* category pills — first */}
-            {([
-              { k:'all',      l:'همه مربیان' },
-              { k:'snooker',  l:'اسنوکر' },
-              { k:'pocket',   l:'پاکت بیلیارد' },
-              { k:'highball', l:'هی‌بال' },
-            ] as { k:string; l:string }[]).map(({ k, l }) => {
-              const active = filter === k
-              return (
-                <button key={k} className="fpill" onClick={() => setFilter(k)} style={{
-                  padding:'8px 16px', borderRadius:11, cursor:'pointer',
-                  fontFamily:"'Vazirmatn',Tahoma,sans-serif", fontSize:13,
-                  fontWeight: active ? 800 : 600,
-                  border: active ? '1px solid rgba(199,166,106,0.40)' : '1px solid rgba(17,17,16,0.10)',
-                  background: active ? 'rgba(199,166,106,0.12)' : 'rgba(255,255,255,0.78)',
-                  color: active ? '#8F6531' : TEXT_S,
-                  boxShadow: active ? '0 4px 12px rgba(199,166,106,0.16)' : 'inset 0 1px 0 rgba(255,255,255,0.9)',
-                  backdropFilter:'blur(16px)', WebkitBackdropFilter:'blur(16px)',
-                }}
-                onMouseEnter={e => { if (!active) { const el = e.currentTarget; el.style.background = 'rgba(199,166,106,0.12)'; el.style.borderColor = 'rgba(199,166,106,0.38)'; el.style.color = GOLD_D; el.style.boxShadow = '0 4px 14px rgba(199,166,106,0.18)'; } }}
-                onMouseLeave={e => { if (!active) { const el = e.currentTarget; el.style.background = 'rgba(255,255,255,0.78)'; el.style.borderColor = 'rgba(17,17,16,0.10)'; el.style.color = TEXT_S; el.style.boxShadow = 'inset 0 1px 0 rgba(255,255,255,0.9)'; } }}>
-                  {l}
-                </button>
-              )
-            })}
+            {/* ── فیلترها: همان کنترلِ بخش‌بندیِ گالریِ صفحه‌ی پروفایل ──
+                پیش‌تر چهار قرصِ جدا بودند با استایلِ اینلاین و دو
+                هندلرِ hover دستی. `lq-seg` از قبل در globals.css هست،
+                هر چهار حالت را دارد و شکلش با تبِ گالری یکی است. */}
+            <div className="lq-seg" role="tablist" aria-label="فیلتر رشته">
+              {([
+                { k:'all',      l:'همه مربیان' },
+                { k:'snooker',  l:'اسنوکر' },
+                { k:'pocket',   l:'پاکت بیلیارد' },
+                { k:'highball', l:'هی‌بال' },
+              ] as { k:string; l:string }[]).map(({ k, l }) => (
+                <button key={k} type="button" role="tab" aria-selected={filter === k}
+                  onClick={() => setFilter(k)}>{l}</button>
+              ))}
+            </div>
 
             {/* search + toggles — own row under the pills on mobile, right-aligned */}
             <div className="coach-search-group" style={{ marginInlineStart:'auto', display:'flex', alignItems:'center', gap:8 }}>

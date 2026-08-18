@@ -1,5 +1,3 @@
-'use client'
-
 /* ─────────────────────────────────────────────────────────────
    هیروی پروفایلِ نقش‌های حرفه‌ای — تیره، سینمایی، ادیتوریال.
 
@@ -22,8 +20,10 @@
    آدم» به «نوارِ دکمه» تبدیل می‌کرد.
    ───────────────────────────────────────────────────────────── */
 
+'use client'
+import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
-import { MapPin } from 'lucide-react'
+import { MapPin, Check, Link2 as LinkIcon } from 'lucide-react'
 import VerifiedBadge from '../VerifiedBadge'
 import CoverPoster from './CoverPoster'
 import RoleGlyph, { type RoleGlyphKind } from './RoleGlyph'
@@ -50,13 +50,28 @@ export interface ProfileHeroProps {
   /** مسیرِ بردکرامب: [نشانی، برچسب] */
   backHref: string
   backLabel: string
+  /** آدرسِ اختصاصی — روی هیرو هم دیده و کپی می‌شود */
+  publicUrl: string
 }
 
 export default function ProfileHero({
   name, nameLatin, city, sinceYear, photo, cover, verified,
   grade, disciplines, onOpenPhoto,
-  role, backHref, backLabel,
+  role, backHref, backLabel, publicUrl,
 }: ProfileHeroProps) {
+  /* ── آدرسِ اختصاصی روی هیرو ──
+     همان چیزی که در ستونِ کناری هست، این‌بار جایی که بازدیدکننده
+     اول نگاه می‌کند. کپی همان‌جا انجام می‌شود تا کسی مجبور نباشد
+     تا پایینِ صفحه اسکرول کند. */
+  const [copied, setCopied] = useState(false)
+  const tRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  useEffect(() => () => { if (tRef.current) clearTimeout(tRef.current) }, [])
+  const copy = async () => {
+    try { await navigator.clipboard.writeText(`https://${publicUrl}`) } catch { /* اجازه نبود */ }
+    setCopied(true)
+    if (tRef.current) clearTimeout(tRef.current)
+    tRef.current = setTimeout(() => setCopied(false), 1800)
+  }
   /* نبودِ عکس دیگر یک حرفِ تنها نیست */
   const avatar = photo
     ? <img src={photo} alt={`عکس ${name}`} loading="eager" decoding="async" />
@@ -141,6 +156,13 @@ export default function ProfileHero({
               <MapPin size={13} aria-hidden />{city || '—'}
               {sinceYear && <><span className="ch-sep" aria-hidden />از سال {toFaDigits(sinceYear)}</>}
             </p>
+
+            <button type="button" onClick={copy} className="ch-addr"
+              aria-label={copied ? 'آدرس اختصاصی کپی شد' : 'کپی آدرس اختصاصی'}>
+              {copied ? <Check size={13} aria-hidden /> : <LinkIcon size={13} aria-hidden />}
+              <code dir="ltr">{publicUrl}</code>
+              <span className="ch-addr-act">{copied ? 'کپی شد' : 'کپی'}</span>
+            </button>
           </div>
 
         </div>

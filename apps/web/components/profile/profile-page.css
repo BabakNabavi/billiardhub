@@ -29,7 +29,10 @@
   background-size: cover; background-position: center;
   /* عکسِ کاور پس‌زمینه است نه سوژه: اشباعِ کم و تیرگی، متن را خوانا
      نگه می‌دارد بدونِ اینکه عکس حذف شود. */
-  filter: grayscale(0.45) brightness(0.42) contrast(1.05);
+  /* ⚠️ تیرگی ۲۰٪ کم شد (brightness .42 ⟵ .53) و خاکستری‌سازی هم
+     سبک‌تر: کاورِ کاربر زیرِ فیلترِ قبلی تقریباً ناپدید می‌شد. متن
+     همچنان روی لایه‌ی تیره‌کننده‌ی جدا می‌نشیند، پس خوانا می‌ماند. */
+  filter: grayscale(0.32) brightness(0.53) contrast(1.04);
   transform: scale(1.04);
 }
 .ch-hero-scrim {
@@ -78,7 +81,7 @@
 .ch-hero-row { display: flex; align-items: flex-end; gap: clamp(16px, 2.6vw, 28px); flex-wrap: wrap; }
 
 .ch-avatar {
-  width: clamp(84px, 13vw, 132px); aspect-ratio: 1; flex-shrink: 0;
+  width: clamp(96px, 15vw, 156px); aspect-ratio: 1; flex-shrink: 0;
   border-radius: 50%; overflow: hidden;
   background: rgba(255, 255, 255, 0.06);
   border: 2px solid rgba(199, 166, 106, 0.55);
@@ -333,6 +336,27 @@ main.ch-col > section { max-width: 760px; }
    ارتفاعِ یک خط رزرو می‌شود تا چیزی هم جابه‌جا نشود. */
 .ch-sr-live { margin: 8px 0 0; font-size: 11px; line-height: 1.5; min-height: 1.5em; color: var(--text-tertiary, #6E6E6E); }
 
-/* توضیحِ زیرِ «آدرس اختصاصی» — بدونِ آن، یک نشانیِ لخت روی کارت
-   می‌نشست و معلوم نبود به چه درد می‌خورد. */
-.ch-url-hint { margin: 0 0 10px; font-size: 11px; line-height: 1.7; color: var(--text-tertiary, #6E6E6E); }
+
+/* ── آدرسِ اختصاصی روی هیرو ──
+   همان نشانیِ ستونِ کناری، این‌بار جایی که بازدیدکننده اول نگاه
+   می‌کند. دکمه است چون کپی می‌کند، پس هر چهار حالت را دارد. */
+.ch-addr {
+  display: inline-flex; align-items: center; gap: 7px;
+  margin-top: 12px; min-height: 34px; padding: 0 12px;
+  border-radius: 999px; cursor: pointer;
+  font-family: inherit; font-size: 12px; font-weight: 700;
+  color: rgba(255, 255, 255, 0.82);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  transition: background .2s, border-color .2s;
+  max-width: 100%;
+}
+.ch-addr code {
+  direction: ltr; font-family: inherit; font-size: 12px;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0;
+}
+.ch-addr-act { color: var(--gold, #C7A66A); font-weight: 800; flex-shrink: 0; }
+.ch-addr svg { color: var(--gold, #C7A66A); flex-shrink: 0; }
+.ch-addr:hover { background: rgba(255, 255, 255, 0.14); border-color: rgba(255, 255, 255, 0.32); }
+.ch-addr:focus-visible { outline: 2px solid var(--gold, #C7A66A); outline-offset: 3px; }
+@media (prefers-reduced-motion: reduce) { .ch-addr { transition: none; } }

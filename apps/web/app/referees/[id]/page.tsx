@@ -218,6 +218,7 @@ export default function RefereeProfilePage() {
         disciplines={disciplines}
         onOpenPhoto={u => openImage(u, { title: referee.name, alt: `عکس ${referee.name}` })}
         role="referee" backHref="/referees" backLabel="داوران"
+        publicUrl={publicUrl}
       />
 
       <div className="ch-body">
@@ -294,7 +295,6 @@ export default function RefereeProfilePage() {
                 <span className="en">MY LINK</span>
                 <span className="rule" aria-hidden />
               </div>
-              <p className="ch-url-hint">نشانی صفحه‌ی شخصی شما در بیلیارد هاب — برای معرفی خودتان همین را بفرستید.</p>
               <div className="ch-url">
                 <code id="ch-url-code" dir="ltr">{publicUrl}</code>
                 <button type="button" onClick={copyUrl} className="ch-url-copy"

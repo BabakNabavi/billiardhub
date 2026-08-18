@@ -256,7 +256,10 @@ function RefereeCard({ referee, view, idx }: { referee: Referee; view: 'grid' | 
           <RefereeAvatar referee={referee} size="58px"/>
         </div>
         <div style={{ flex:1, minWidth:0 }}>
-          <h3 style={{ fontSize:15, fontWeight:800, color:TEXT, lineHeight:1.2, letterSpacing:'-0.02em', marginBottom:2, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{referee.name}{referee.verified && <VerifiedBadge style={{ verticalAlign: '-0.18em' }} />}</h3>
+          <div style={{ display:'flex', alignItems:'center', gap:5, marginBottom:2, minWidth:0 }}>
+            <h3 style={{ fontSize:15, fontWeight:800, color:TEXT, lineHeight:1.2, letterSpacing:'-0.02em', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{referee.name}</h3>
+            {referee.verified && <VerifiedBadge style={{ marginInlineStart: 0 }} />}
+          </div>
           <p style={{ fontSize:12, color:TEXT_S, marginBottom:5 }}>داور {sp?.label ?? 'بیلیارد'}</p>
           <div style={{ display:'flex', alignItems:'center', gap:5, color:TEXT_M }}>
             <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
@@ -294,8 +297,16 @@ function RefereeCard({ referee, view, idx }: { referee: Referee; view: 'grid' | 
       </div>
       {/* body */}
       <div style={{ padding:'12px 14px 18px', flex:1, display:'flex', flexDirection:'column', alignItems:'center', textAlign:'center' }}>
-        <h3 style={{ fontSize:16, fontWeight:800, color:TEXT, lineHeight:1.2, letterSpacing:'-0.02em', marginBottom:4 }}>{referee.name}{referee.verified && <VerifiedBadge />}</h3>
-        <p style={{ fontSize:12.5, color:TEXT_S, lineHeight:1.35, marginBottom:9, minHeight:'2.7em', display:'-webkit-box', WebkitLineClamp:2, WebkitBoxOrient:'vertical', overflow:'hidden' }}>داور {sp?.label ?? 'بیلیارد'}</p>
+        {/* ⚠️ تیک پیش‌تر درونِ خودِ h3 و inline بود؛ `verticalAlign` آن
+            را نسبت به خطِ متن جابه‌جا می‌کرد و کنارِ نام بالا می‌نشست.
+            حالا هر دو آیتمِ یک ردیفِ flex با `alignItems:center`اند —
+            همان الگویی که کارتِ مربی دارد و درست کار می‌کند. */}
+        <div style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:5, marginBottom:4, maxWidth:'100%' }}>
+          <h3 style={{ fontSize:16, fontWeight:800, color:TEXT, lineHeight:1.2, letterSpacing:'-0.02em', minWidth:0, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{referee.name}</h3>
+          {referee.verified && <VerifiedBadge style={{ marginInlineStart: 0 }} />}
+        </div>
+        {/* `-webkit-box` ارث‌بریِ text-align را قابلِ اتکا نمی‌گذارد؛ صریح نوشته می‌شود */}
+        <p style={{ fontSize:12.5, color:TEXT_S, lineHeight:1.35, marginBottom:9, minHeight:'2.7em', textAlign:'center', display:'-webkit-box', WebkitLineClamp:2, WebkitBoxOrient:'vertical', overflow:'hidden' }}>داور {sp?.label ?? 'بیلیارد'}</p>
         <div style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:5, marginBottom:13, color:TEXT_M }}>
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
           <span style={{ fontSize:11.5, color:TEXT_S }}>{referee.city}</span>
@@ -394,31 +405,21 @@ export default function RefereesPage() {
         }}>
           <div style={{ maxWidth:1280, margin:'0 auto', padding:'10px clamp(24px,6vw,80px)',
             display:'flex', alignItems:'center', gap:8, flexWrap:'wrap' }}>
-            {/* category pills — first */}
-            {([
-              { k:'all',      l:'همه داوران' },
-              { k:'snooker',  l:'اسنوکر' },
-              { k:'pocket',   l:'پاکت بیلیارد' },
-              { k:'highball', l:'هی‌بال' },
-            ] as { k:string; l:string }[]).map(({ k, l }) => {
-              const active = filter === k
-              return (
-                <button key={k} className="fpill" onClick={() => setFilter(k)} style={{
-                  padding:'8px 16px', borderRadius:11, cursor:'pointer',
-                  fontFamily:"'Vazirmatn',Tahoma,sans-serif", fontSize:13,
-                  fontWeight: active ? 800 : 600,
-                  border: active ? '1px solid rgba(199,166,106,0.40)' : '1px solid rgba(17,17,16,0.10)',
-                  background: active ? 'rgba(199,166,106,0.12)' : 'rgba(255,255,255,0.78)',
-                  color: active ? '#8F6531' : TEXT_S,
-                  boxShadow: active ? '0 4px 12px rgba(199,166,106,0.16)' : 'inset 0 1px 0 rgba(255,255,255,0.9)',
-                  backdropFilter:'blur(16px)', WebkitBackdropFilter:'blur(16px)',
-                }}
-                onMouseEnter={e => { if (!active) { const el = e.currentTarget; el.style.background = 'rgba(199,166,106,0.12)'; el.style.borderColor = 'rgba(199,166,106,0.38)'; el.style.color = GOLD_D; el.style.boxShadow = '0 4px 14px rgba(199,166,106,0.18)'; } }}
-                onMouseLeave={e => { if (!active) { const el = e.currentTarget; el.style.background = 'rgba(255,255,255,0.78)'; el.style.borderColor = 'rgba(17,17,16,0.10)'; el.style.color = TEXT_S; el.style.boxShadow = 'inset 0 1px 0 rgba(255,255,255,0.9)'; } }}>
-                  {l}
-                </button>
-              )
-            })}
+            {/* ── فیلترها: همان کنترلِ بخش‌بندیِ گالریِ صفحه‌ی پروفایل ──
+                پیش‌تر چهار قرصِ جدا بودند با استایلِ اینلاین و دو
+                هندلرِ hover دستی. `lq-seg` از قبل در globals.css هست،
+                هر چهار حالت را دارد و شکلش با تبِ گالری یکی است. */}
+            <div className="lq-seg" role="tablist" aria-label="فیلتر رشته">
+              {([
+                { k:'all',      l:'همه داوران' },
+                { k:'snooker',  l:'اسنوکر' },
+                { k:'pocket',   l:'پاکت بیلیارد' },
+                { k:'highball', l:'هی‌بال' },
+              ] as { k:string; l:string }[]).map(({ k, l }) => (
+                <button key={k} type="button" role="tab" aria-selected={filter === k}
+                  onClick={() => setFilter(k)}>{l}</button>
+              ))}
+            </div>
 
             {/* search + toggles — own row under the pills on mobile, right-aligned */}
             <div className="coach-search-group" style={{ marginInlineStart:'auto', display:'flex', alignItems:'center', gap:8 }}>

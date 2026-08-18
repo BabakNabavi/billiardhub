@@ -224,6 +224,7 @@ export default function CoachProfilePage() {
         disciplines={disciplines}
         onOpenPhoto={u => openImage(u, { title: coach.name, alt: `عکس ${coach.name}` })}
         role="coach" backHref="/coaches" backLabel="مربیان"
+        publicUrl={publicUrl}
       />
 
       <div className="ch-body">
@@ -300,7 +301,6 @@ export default function CoachProfilePage() {
                 <span className="en">MY LINK</span>
                 <span className="rule" aria-hidden />
               </div>
-              <p className="ch-url-hint">نشانی صفحه‌ی شخصی شما در بیلیارد هاب — برای معرفی خودتان همین را بفرستید.</p>
               <div className="ch-url">
                 <code id="ch-url-code" dir="ltr">{publicUrl}</code>
                 <button type="button" onClick={copyUrl} className="ch-url-copy"
