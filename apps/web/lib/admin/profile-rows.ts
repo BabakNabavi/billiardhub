@@ -81,22 +81,38 @@ export async function loadProfileRows(kind: ProfileKind): Promise<AdminRow[]> {
   }))
 }
 
+/* ── چرا این‌ها نتیجه برمی‌گردانند ──
+   ⚠️ هر سه تابع قبلاً `void` بودند و `patchAdminProfile` هر خطایی را
+   با یک `catch {}` خالی می‌بلعید. ادمین دکمه‌ی «تیک آبی» را می‌زد،
+   سرور ۴۰۳ می‌داد (کلیدِ دسترسیِ `verified` را نداشت) و صفحه *هیچ*
+   نمی‌گفت — بدتر: کشِ محلی خوش‌بینانه به‌روز می‌شد و ردیف عوض‌شده
+   به‌نظر می‌رسید تا اولین بازخوانی. «می‌زنم ولی کار نمی‌کند» دقیقاً
+   همین بود. حالا شکست دیده می‌شود. */
+export interface AdminActionResult { ok: boolean; message?: string }
+
+async function patchProfile(body: Record<string, unknown>): Promise<AdminActionResult> {
+  try {
+    const r = await apiFetch('/api/admin/profiles', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    })
+    if (r.ok) return { ok: true }
+    const j = await r.json().catch(() => null) as { message?: string } | null
+    return { ok: false, message: j?.message ?? `خطای سرور (${r.status})` }
+  } catch {
+    return { ok: false, message: 'ارتباط با سرور برقرار نشد' }
+  }
+}
+
 /** اعطا یا پس‌گرفتنِ تیکِ آبی — جدا از انتشار */
-export async function setProfileVerified(id: string, next: boolean): Promise<void> {
-  await apiFetch('/api/admin/profiles', {
-    method: 'PATCH',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ id, verified: next }),
-  })
+export async function setProfileVerified(id: string, next: boolean): Promise<AdminActionResult> {
+  return patchProfile({ id, verified: next })
 }
 
 /** انتشار ↔ تعلیق */
-export async function toggleProfile(id: string, current: 'approved' | 'rejected'): Promise<void> {
-  await apiFetch('/api/admin/profiles', {
-    method: 'PATCH',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ id, status: current === 'approved' ? 'rejected' : 'approved' }),
-  })
+export async function toggleProfile(id: string, current: 'approved' | 'rejected'): Promise<AdminActionResult> {
+  return patchProfile({ id, status: current === 'approved' ? 'rejected' : 'approved' })
 }
 
 /* ── برای صفحه‌های ادمینی که ظاهر اختصاصی خودشان را دارند ──
@@ -121,27 +137,25 @@ export async function fetchAdminProfiles<T>(kind: ProfileKind): Promise<T[]> {
 }
 
 /** تغییر وضعیت/تأیید یک پروفایل با نامک */
-export async function patchAdminProfile(slug: string, patch: Record<string, unknown>): Promise<void> {
+export async function patchAdminProfile(slug: string, patch: Record<string, unknown>): Promise<AdminActionResult> {
+  let hit: ApiProfile | undefined
   try {
     /* PATCH با شناسه کار می‌کند، پس اول شناسه‌ی همین نامک را پیدا می‌کنیم */
     const r = await apiFetch('/api/admin/profiles', { cache: 'no-store' })
-    if (!r.ok) return
+    if (!r.ok) return { ok: false, message: r.status === 403 ? 'دسترسی مجاز نیست' : 'فهرست پروفایل‌ها خوانده نشد' }
     const j = await r.json().catch(() => null) as { profiles?: Record<string, ApiProfile[]> } | null
-    const all = Object.values(j?.profiles ?? {}).flat()
-    const hit = all.find(p => p.slug === slug)
-    if (!hit) return
+    hit = Object.values(j?.profiles ?? {}).flat().find(p => p.slug === slug)
+  } catch {
+    return { ok: false, message: 'ارتباط با سرور برقرار نشد' }
+  }
+  if (!hit) return { ok: false, message: 'این پروفایل روی سرور پیدا نشد' }
 
-    const body: Record<string, unknown> = { id: hit.id }
-    if (typeof patch.status === 'string') body.status = patch.status
-    if (typeof patch.verified === 'boolean') body.verified = patch.verified
-    if (!body.status && !('verified' in body)) return
+  const body: Record<string, unknown> = { id: hit.id }
+  if (typeof patch.status === 'string') body.status = patch.status
+  if (typeof patch.verified === 'boolean') body.verified = patch.verified
+  if (!('status' in body) && !('verified' in body)) return { ok: false, message: 'چیزی برای تغییر نبود' }
 
-    await apiFetch('/api/admin/profiles', {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
-    })
-  } catch { /* بی‌صدا — کش محلی هم‌چنان به‌روز می‌شود */ }
+  return patchProfile(body)
 }
 
 /* ساختن سه تابع مورد نیاز ProfileAdmin برای یک نقش.

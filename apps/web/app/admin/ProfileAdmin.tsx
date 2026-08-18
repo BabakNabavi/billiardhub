@@ -35,6 +35,9 @@ export interface AdminRow {
   verified?: boolean;
 }
 
+/* هر سه کنش می‌توانند هیچ برنگردانند (رفتارِ قدیمی) یا نتیجه بدهند */
+type ActionResult = void | { ok: boolean; message?: string };
+
 export default function ProfileAdmin({
   title, en, desc, panelHint, load, toggle, remove, setVerified,
 }: {
@@ -45,12 +48,25 @@ export default function ProfileAdmin({
   /* از فاز ۹ این سه می‌توانند Promise برگردانند: منبع داده از
      localStorage به دیتابیس منتقل شد و خواندن/نوشتن شبکه‌ای است. */
   load: () => AdminRow[] | Promise<AdminRow[]>;
-  toggle: (slug: string) => void | Promise<void>;
-  remove: (slug: string) => void | Promise<void>;
+  /* نتیجه اختیاری است تا صفحه‌های قدیمی نشکنند؛ اگر برگردد و
+     ok:false باشد، پیامِ سرور به‌جای «انجام شد» نشان داده می‌شود. */
+  toggle: (slug: string) => ActionResult | Promise<ActionResult>;
+  remove: (slug: string) => ActionResult | Promise<ActionResult>;
   /* نبودنش یعنی این صفحه کارِ تیک را انجام نمی‌دهد و دکمه‌اش هم
      نباید دیده شود. */
-  setVerified?: (slug: string, next: boolean) => void | Promise<void>;
+  setVerified?: (slug: string, next: boolean) => ActionResult | Promise<ActionResult>;
 }) {
+  /* ── چرا دکمه‌ها متن دارند ──
+     ⚠️ هر چهار دکمه فقط آیکون بودند: سپر، سپرِ خط‌خورده، چشم، سطلِ
+     زباله. حتی ادمینِ همین سایت نمی‌دانست کدام «انتشار» است و کدام
+     «تیک آبی» — و اشتباهش برگشت‌پذیر نبود. متن کنارِ آیکون می‌آید. */
+  const actBtn = (extra: React.CSSProperties = {}): React.CSSProperties => ({
+    display: 'inline-flex', alignItems: 'center', gap: 6,
+    minHeight: 34, padding: '0 10px', borderRadius: 10,
+    border: `1px solid ${LINE}`, background: '#FAFAF7', cursor: 'pointer',
+    fontFamily: 'inherit', fontSize: 12, fontWeight: 800, whiteSpace: 'nowrap',
+    textDecoration: 'none', ...extra,
+  });
   const router = useRouter();
   const { user, _hydrated, authChecked } = useAuthStore();
   const [rows, setRows] = useState<AdminRow[]>([]);
@@ -72,6 +88,16 @@ export default function ProfileAdmin({
   if (!user || user.primaryRole !== 'admin') return null;
 
   const flash = (m: string) => { setToast(m); setTimeout(() => setToast(''), 2200); };
+
+  /* ── چرا نتیجه سنجیده می‌شود ──
+     ⚠️ پیش‌تر هر کنش بی‌قیدوشرط «انجام شد» می‌گفت. اگر سرور ۴۰۳
+     می‌داد (مثلاً ادمین کلیدِ «تیک آبی» را نداشت) پیامِ موفقیت
+     می‌آمد و هیچ‌چیز عوض نشده بود. «می‌زنم ولی کار نمی‌کند» همین بود. */
+  const run = async (action: () => ActionResult | Promise<ActionResult>, okMsg: string) => {
+    const res = await action();
+    await refresh();
+    if (res && res.ok === false) flash(res.message ?? 'انجام نشد'); else flash(okMsg);
+  };
 
   return (
     <div dir="rtl" style={{ minHeight: '70vh', background: '#F7F5F0', fontFamily: 'Vazirmatn,Tahoma,sans-serif', color: TEXT, paddingBottom: 64 }}>
@@ -147,38 +173,34 @@ export default function ProfileAdmin({
                       `verified` را می‌پذیرفت ولی هیچ دکمه‌ای صدایش
                       نمی‌زد. صفِ کاملِ هر هفت نقش در /admin/verified است. */}
                   {setVerified && (
-                    <button onClick={async () => {
+                    <button onClick={() => {
                       const next = !r.verified;
-                      await setVerified(r.slug, next); await refresh();
-                      flash(next ? 'تیک آبی داده شد' : 'تیک آبی برداشته شد');
+                      void run(() => setVerified(r.slug, next), next ? 'تیک آبی داده شد' : 'تیک آبی برداشته شد');
                     }}
                       title={r.verified ? 'برداشتن تیک آبی' : 'اعطای تیک آبی'}
                       aria-label={`${r.verified ? 'برداشتن تیک آبی از' : 'اعطای تیک آبی به'} ${r.title}`}
-                      style={{
-                        width: 34, height: 34, borderRadius: 10, cursor: 'pointer',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      style={actBtn({
                         border: `1px solid ${r.verified ? 'rgba(178,59,46,0.24)' : 'rgba(0,149,246,0.30)'}`,
                         background: r.verified ? 'rgba(178,59,46,0.06)' : 'rgba(0,149,246,0.10)',
                         color: r.verified ? '#B23B2E' : '#0095F6',
-                      }}>
+                      })}>
                       {r.verified
-                        ? <ShieldOff size={15} />
-                        : <VerifiedBadge size={15} title="" style={{ marginInlineStart: 0 }} />}
+                        ? <ShieldOff size={14} />
+                        : <VerifiedBadge size={14} title="" style={{ marginInlineStart: 0 }} />}
+                      {r.verified ? 'برداشتن تیک آبی' : 'اعطای تیک آبی'}
                     </button>
                   )}
-                  <button onClick={async () => { await toggle(r.slug); await refresh(); flash(r.status === 'approved' ? 'پروفایل معلق شد' : 'پروفایل منتشر شد'); }}
-                    title={r.status === 'approved' ? 'تعلیق' : 'انتشار'}
-                    style={{ width: 34, height: 34, borderRadius: 10, border: `1px solid ${LINE}`, background: '#FAFAF7', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: r.status === 'approved' ? '#B23B2E' : '#0E7A38' }}>
-                    {r.status === 'approved' ? <ShieldOff size={15} /> : <ShieldCheck size={15} />}
+                  <button onClick={() => void run(() => toggle(r.slug), r.status === 'approved' ? 'پروفایل معلق شد' : 'پروفایل منتشر شد')}
+                    style={actBtn({ color: r.status === 'approved' ? '#B23B2E' : '#0E7A38' })}>
+                    {r.status === 'approved' ? <ShieldOff size={14} /> : <ShieldCheck size={14} />}
+                    {r.status === 'approved' ? 'تعلیق انتشار' : 'تأیید و انتشار'}
                   </button>
-                  <Link href={r.href} title="مشاهده صفحه"
-                    style={{ width: 34, height: 34, borderRadius: 10, border: `1px solid ${LINE}`, background: '#FAFAF7', display: 'flex', alignItems: 'center', justifyContent: 'center', color: SEC }}>
-                    <Eye size={15} />
+                  <Link href={r.href} style={actBtn({ color: SEC })}>
+                    <Eye size={14} />مشاهده صفحه
                   </Link>
-                  <button onClick={async () => { await remove(r.slug); await refresh(); flash('پروفایل حذف شد'); }}
-                    title="حذف"
-                    style={{ width: 34, height: 34, borderRadius: 10, border: `1px solid ${LINE}`, background: '#FAFAF7', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#B23B2E' }}>
-                    <Trash2 size={15} />
+                  <button onClick={() => void run(() => remove(r.slug), 'پروفایل معلق شد')}
+                    style={actBtn({ color: '#B23B2E' })}>
+                    <Trash2 size={14} />تعلیق
                   </button>
                 </div>
               </div>

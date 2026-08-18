@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useAuthStore } from '../../../store/auth.store'
 import {
-  listCoachProfiles, updateCoachProfile, badgeFromGrades, disciplineLabel,
+   updateCoachProfile, badgeFromGrades, disciplineLabel,
   certificationLines, type CoachProfile,
 } from '../../../lib/coach-store'
 import { fetchAdminProfiles, patchAdminProfile } from '../../../lib/admin/profile-rows'
@@ -36,6 +36,7 @@ export default function AdminCoachesPage() {
   const [list, setList]         = useState<CoachProfile[]>([])
   const [expanded, setExpanded] = useState<string | null>(null)
   const [tick, setTick]         = useState(0)
+  const [err,  setErr]          = useState('')
 
   /* منبع: جدول `profiles` روی سرور — نه localStorage. تا امروز این
      فهرست از مرورگر خود ادمین خوانده می‌شد، پس پروفایلی که مربی روی
@@ -44,14 +45,25 @@ export default function AdminCoachesPage() {
     void (async () => {
       const rows = await fetchAdminProfiles<CoachProfile>('coach')
       /* اگر سرور در دسترس نبود، کش محلی بهتر از فهرست خالی است */
-      setList(rows.length ? rows : listCoachProfiles())
+      /* ⚠️ اینجا فالبکِ localStorage بود: اگر سرور فهرستِ خالی
+         برمی‌گرداند — یا درخواست ۴۰۳/قطع می‌شد — ادمین کشِ مرورگرِ
+         *خودش* را می‌دید. آن کش وضعیتِ لحظه‌ی ثبت را دارد
+         (pending, verified=false)، پس پروفایلِ تأییدشده «در انتظار»
+         نشان داده می‌شد و تأییدِ دوباره هیچ اثری نداشت.
+         فهرستِ خالیِ سرور یعنی خالی. */
+      setList(rows)
     })()
   }, [tick])
 
   const isAdmin = !!user && (user.phone === ADMIN_PHONE || user.primaryRole === 'admin')
+  /* ⚠️ کشِ محلی فقط *بعد از* موفقیتِ سرور به‌روز می‌شود.
+     پیش‌تر بی‌قیدوشرط نوشته می‌شد: سرور ۴۰۳ می‌داد، ردیف روی صفحه
+     عوض‌شده به‌نظر می‌رسید و با اولین بازخوانی برمی‌گشت. */
   const act = async (slug: string, patch: Partial<CoachProfile>) => {
-    await patchAdminProfile(slug, patch as Record<string, unknown>)
-    updateCoachProfile(slug, patch)   // کش محلی هم هم‌گام بماند
+    const res = await patchAdminProfile(slug, patch as Record<string, unknown>)
+    if (!res.ok) { setErr(res.message ?? 'انجام نشد'); return }
+    setErr('')
+    updateCoachProfile(slug, patch)
     setTick(t => t + 1)
   }
 
@@ -88,6 +100,14 @@ export default function AdminCoachesPage() {
             <span style={{ ...btn('rgba(5,118,66,0.08)', '#057642', '1px solid rgba(5,118,66,0.20)'), cursor: 'default' }}>کل: {list.length}</span>
           </div>
         </div>
+
+        {/* شکستِ سرور باید دیده شود، وگرنه ادمین دکمه را می‌زند و
+            فکر می‌کند انجام شد. */}
+        {err && (
+          <div role="alert" style={{ margin: '0 0 14px', padding: '10px 14px', borderRadius: 12,
+            background: 'rgba(220,38,38,0.06)', border: '1px solid rgba(220,38,38,0.28)',
+            color: '#991B1B', fontSize: 12.5, fontWeight: 800 }}>{err}</div>
+        )}
 
         {list.length === 0 ? (
           <div style={{ ...card, padding: '48px 24px', textAlign: 'center', color: TEXT_M, fontSize: 14 }}>هنوز درخواستی ثبت نشده است.</div>

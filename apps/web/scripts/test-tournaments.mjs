@@ -3900,6 +3900,50 @@ console.log('\n― استوری: یک منبع، با انقضا ―');
       'ابعادِ قبلی گالری را از «نمونه‌کار» به «دیوارِ عکس» تبدیل می‌کرد');
   }
 
+  /* ── وضعیت و تیک: یک منبعِ حقیقت ──
+     روی سرورِ زنده این دیده شد و ریشه‌ی چند باگِ گزارش‌شده بود:
+
+       ستون   status=approved   verified=true
+       jsonb  status=pending    verified=false
+
+     فرمِ کاربر این دو را داخلِ `data` می‌فرستاد و `reviewProfile`
+     فقط ستون‌ها را می‌نوشت، پس هر ذخیره‌ی کاربر نسخه‌ی jsonb را به
+     pending برمی‌گرداند و هر صفحه‌ای که آن را می‌خواند پروفایلِ
+     تأییدشده را «در انتظار» نشان می‌داد. */
+  {
+    const srv = strip(read('lib/profiles/server.ts'));
+    t('ذخیره‌ی کاربر وضعیت و تیک را داخلِ jsonb نمی‌نویسد',
+      srv.includes('const { status: _ignoredStatus, verified: _ignoredVerified, ...clean } = offloaded'),
+      'دو نسخه از یک حقیقت که هیچ‌وقت آشتی نمی‌کنند');
+
+    /* پنلِ ادمین نباید به کشِ مرورگرِ خودش برگردد */
+    for (const p of ['app/admin/coaches/page.tsx', 'app/admin/referees/page.tsx', 'app/admin/sellers/page.tsx']) {
+      t(`${p.split('/')[2]} فقط از سرور می‌خواند`,
+        !strip(read(p)).includes('setList(rows.length ? rows : '),
+        'فهرستِ خالیِ سرور یعنی خالی — نه اینکه کشِ همان مرورگر نشان داده شود');
+    }
+
+    /* شکستِ سرور باید دیده شود */
+    const rows = strip(read('lib/admin/profile-rows.ts'));
+    t('کنش‌های ادمین نتیجه برمی‌گردانند، نه void',
+      rows.includes('Promise<AdminActionResult>')
+      && !rows.includes('بی‌صدا — کش محلی'),
+      'خطای ۴۰۳ بی‌صدا بلعیده می‌شد و ادمین پیامِ موفقیت می‌دید');
+
+    /* دکمه‌ها باید اسم داشته باشند، نه فقط آیکون */
+    const pa = read('app/admin/ProfileAdmin.tsx');
+    /* ⚠️ جست‌وجوی ساده‌ی متن کافی نبود: «اعطای تیک آبی» داخلِ
+       aria-label هم هست، پس برداشتنِ برچسبِ دیدنی گارد را قرمز
+       نمی‌کرد. حالا خودِ گرهِ متنیِ JSX سنجیده می‌شود. */
+    t('دکمه‌های پنلِ نقش برچسبِ متنی دارند',
+      [
+        "{r.status === 'approved' ? 'تعلیق انتشار' : 'تأیید و انتشار'}",
+        "{r.verified ? 'برداشتن تیک آبی' : 'اعطای تیک آبی'}",
+        '<Eye size={14} />مشاهده صفحه',
+      ].every(l => pa.includes(l)),
+      'چهار دکمه فقط آیکون بودند و ادمین نمی‌دانست کدام کدام است');
+  }
+
   t('خطِ کنارِ عنوان‌ها گرادیانِ منطقی دارد',
     !/linear-gradient\(90deg/.test(read('components/profile/profile-page.css')),
     '90deg فیزیکی است؛ در RTL طلایی آن‌سرِ خط می‌افتد نه کنارِ عنوان');

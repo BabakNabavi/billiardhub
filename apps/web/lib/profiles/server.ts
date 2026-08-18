@@ -186,7 +186,26 @@ export async function saveProfile(input: SaveInput): Promise<ProfileRow> {
   const wanted = String(input.slug ?? '').trim().toLowerCase()
   const slug = wanted && wanted !== existing?.slug ? wanted : (existing?.slug ?? input.slug)
 
-  const clean = await offloadImages(input.data, `profiles/${input.kind}/${input.ownerId}`) as Record<string, unknown>
+  const offloaded = await offloadImages(input.data, `profiles/${input.kind}/${input.ownerId}`) as Record<string, unknown>
+
+  /* ── فیلدهای ادمین از jsonb بیرون کشیده می‌شوند ──
+     ⚠️ این ریشه‌ی یک دسته باگ بود. فرمِ کاربر «status: pending» و
+     «verified: false» را داخلِ data می‌فرستاد، و reviewProfile — که
+     تأیید و تیکِ ادمین را می‌نویسد — فقط *ستون‌ها* را عوض می‌کند.
+     پس دو نسخه از یک حقیقت می‌ماند که هیچ‌وقت آشتی نمی‌کردند. روی
+     سرورِ زنده این دیده شد:
+
+       ستون   status=approved   verified=true
+       jsonb  status=pending    verified=false
+
+     هر صفحه‌ای که اشتباهاً jsonb را می‌خواند پروفایلِ تأییدشده را
+     «در انتظار» نشان می‌داد؛ و هر بار که کاربر پروفایلش را ذخیره
+     می‌کرد، نسخه‌ی jsonb دوباره pending می‌شد.
+
+     تصمیمِ ادمین مالِ ستون است و بس. کاربر نباید بتواند وضعیت یا
+     تیکِ خودش را بنویسد — حتی تصادفی. */
+  const { status: _ignoredStatus, verified: _ignoredVerified, ...clean } = offloaded
+  void _ignoredStatus; void _ignoredVerified
 
   const row: Record<string, unknown> = {
     kind: input.kind,

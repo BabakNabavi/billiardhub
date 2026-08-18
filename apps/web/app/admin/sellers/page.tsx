@@ -7,7 +7,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useAuthStore } from '../../../store/auth.store'
-import { listSellerProfiles, updateSellerProfile, type SellerProfile } from '../../../lib/seller-store'
+import {  updateSellerProfile, type SellerProfile } from '../../../lib/seller-store'
 import { fetchAdminProfiles, patchAdminProfile } from '../../../lib/admin/profile-rows'
 import ScrollList from '../../../components/ui/ScrollList'
 import VerifiedBadge from '../../../components/VerifiedBadge'
@@ -44,7 +44,13 @@ export default function AdminSellersPage() {
   useEffect(() => {
     void (async () => {
       const rows = await fetchAdminProfiles<SellerProfile>('seller')
-      setList(rows.length ? rows : listSellerProfiles())
+      /* ⚠️ اینجا فالبکِ localStorage بود: اگر سرور فهرستِ خالی
+         برمی‌گرداند — یا درخواست ۴۰۳/قطع می‌شد — ادمین کشِ مرورگرِ
+         *خودش* را می‌دید. آن کش وضعیتِ لحظه‌ی ثبت را دارد
+         (pending, verified=false)، پس پروفایلِ تأییدشده «در انتظار»
+         نشان داده می‌شد و تأییدِ دوباره هیچ اثری نداشت.
+         فهرستِ خالیِ سرور یعنی خالی. */
+      setList(rows)
     })()
   }, [tick])
 
