@@ -92,6 +92,17 @@ export default function ProfileGallery({
     </button>
   )
 
+  /* ── «+» یک خانه است، نه دکمه‌ای بیرونِ باکس ──
+     هم‌اندازه‌ی بقیه‌ی خانه‌ها و همیشه اولِ شبکه. برچسبِ متنی ندارد
+     چون تبِ فعال خودش می‌گوید چه چیزی اضافه می‌شود؛ نامِ دسترس‌پذیر
+     را `aria-label` می‌دهد. */
+  const addTile = (label: string, onClick: () => void, cls = 'ch-gal-cell') => (
+    <button type="button" className={`${cls} ch-add-tile`} onClick={onClick}
+      disabled={busy} aria-label={label} title={label}>
+      {busy ? <Loader2 size={22} className="ch-spin" aria-hidden /> : <Plus size={26} aria-hidden />}
+    </button>
+  )
+
   const empty = (icon: React.ReactNode, text: string) => (
     <div className="ch-gal-empty">{icon}<p>{text}</p></div>
   )
@@ -106,7 +117,6 @@ export default function ProfileGallery({
         <span className="rule" aria-hidden />
       </div>
 
-      <div className="ch-gal-bar">
       <div className="lq-seg ch-gal-tabs" role="tablist" aria-label="بخش‌های گالری" onKeyDown={onTabKey}>
         {([['photos', 'تصاویر', images.length], ['videos', 'ویدیوها', videos.length], ['albums', 'آلبوم‌ها', albums.length]] as const).map(([k, label, n]) => (
           <button key={k} type="button" role="tab" id={`chtab-${k}`}
@@ -117,41 +127,38 @@ export default function ProfileGallery({
         ))}
       </div>
 
-      {/* ── «+» فقط برای صاحبِ پروفایل ──
-          هر تب کارِ خودش را اضافه می‌کند: عکس، ویدیو، یا آلبومِ تازه. */}
+      {/* ورودیِ فایل بیرون از شبکه می‌ماند — پنهان است و جا نمی‌گیرد */}
       {canEdit && (
-        <>
-          <input ref={fileRef} type="file" accept="image/*" multiple hidden
-            onChange={e => { if (e.target.files?.length) void onAddImages?.(e.target.files); e.target.value = '' }} />
-          <button type="button" className="ch-gal-add" disabled={busy}
-            onClick={() => {
-              if (tab === 'photos') fileRef.current?.click()
-              else if (tab === 'videos') void onAddVideo?.()
-              else void onNewAlbum?.()
-            }}>
-            {busy ? <Loader2 size={15} className="ch-spin" aria-hidden /> : <Plus size={15} aria-hidden />}
-            {tab === 'photos' ? 'افزودن تصویر' : tab === 'videos' ? 'افزودن ویدیو' : 'آلبوم تازه'}
-          </button>
-        </>
+        <input ref={fileRef} type="file" accept="image/*" multiple hidden
+          onChange={e => { if (e.target.files?.length) void onAddImages?.(e.target.files); e.target.value = '' }} />
       )}
-      </div>
 
       {/* هر سه پنل همیشه در DOM‌اند و غیرفعال `hidden` می‌گیرد:
           `aria-controls` نباید به شناسه‌ای اشاره کند که وجود ندارد. */}
       <div id="chpanel-photos" role="tabpanel" aria-labelledby="chtab-photos" hidden={tab !== 'photos'}>
-        {images.length === 0
+        {images.length === 0 && !canEdit
           ? empty(<Images size={30} aria-hidden />, 'هنوز تصویری اضافه نشده است.')
-          : <div className="ch-gal-grid">{images.map((g, i) => cell(g, images, i))}</div>}
+          : (
+            <div className="ch-gal-grid">
+              {canEdit && addTile('افزودن تصویر', () => fileRef.current?.click())}
+              {images.map((g, i) => cell(g, images, i))}
+            </div>
+          )}
       </div>
 
       <div id="chpanel-videos" role="tabpanel" aria-labelledby="chtab-videos" hidden={tab !== 'videos'}>
-        {videos.length === 0
+        {videos.length === 0 && !canEdit
           ? empty(<Clapperboard size={30} aria-hidden />, 'هنوز ویدیویی اضافه نشده است.')
-          : <div className="ch-vid-grid">{videos.map(v => <ProfileVideoCard key={v.id} v={v} />)}</div>}
+          : (
+            <div className="ch-vid-grid">
+              {canEdit && addTile('افزودن ویدیو', () => void onAddVideo?.(), 'ch-vid-add')}
+              {videos.map(v => <ProfileVideoCard key={v.id} v={v} />)}
+            </div>
+          )}
       </div>
 
       <div id="chpanel-albums" role="tabpanel" aria-labelledby="chtab-albums" hidden={tab !== 'albums'}>
-        {albums.length === 0 ? (
+        {albums.length === 0 && !canEdit ? (
           empty(<FolderOpen size={30} aria-hidden />, 'هنوز آلبومی ساخته نشده است.')
         ) : current ? (
           <>
@@ -172,6 +179,7 @@ export default function ProfileGallery({
           </>
         ) : (
           <div className="ch-alb-grid">
+            {canEdit && addTile('آلبوم تازه', () => void onNewAlbum?.(), 'ch-alb')}
             {albums.map(a => {
               const cover = a.images[0]?.url ?? a.videos[0]?.thumbnail
               const n = a.images.length + a.videos.length

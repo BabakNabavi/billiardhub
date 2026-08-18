@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState , useRef } from 'react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import api from '../../../lib/api';
@@ -19,6 +19,7 @@ import { useProfileImageViewer } from '@/components/ProfileImageViewer'
 import { useTabKeys } from '@/hooks/use-tab-keys'
 import ClubReviews from '../../../components/club/ClubReviews';
 import ClubLogo from '../../../components/club/ClubLogo'
+import { apiFetch } from '../../../lib/http'
 import VerifiedBadge from '../../../components/VerifiedBadge'
 import FavoriteButton from '../../../components/FavoriteButton';
 
@@ -26,6 +27,8 @@ interface Club {
   id: string; name: string; managerName: string; description: string;
   address: string; city: string; province?: string; country: string;
   latitude: number; longitude: number; phone: string; website: string; slug?: string;
+  /* مالکِ باشگاه — برای نشان‌دادنِ دکمه‌های ویرایش روی صفحه‌ی عمومی */
+  ownerId?: string;
   snookerTables: number; pocketTables: number; highballTables: number;
   vipSnookerTables: number; vipPocketTables: number; airHockeyTables: number;
   dartBoards: number; playstations: number;
@@ -144,6 +147,13 @@ export default function ClubProfilePage() {
   const [coachSlugs, setCoachSlugs]   = useState<Record<string, string>>({});
   const [slugCopied, setSlugCopied]   = useState(false);
   const [clubAlbums, setClubAlbums]   = useState<ClubAlbum[]>([]);
+  /* ── ویرایشِ درجا برای مالکِ باشگاه ──
+     باشگاه در جدولِ `clubs` است نه `profiles`، پس `useOwnerEdit`
+     این‌جا جواب نمی‌دهد و همان کار با API خودِ باشگاه انجام می‌شود.
+     ستونِ `albums` از قبل در allowlistِ PUT هست. */
+  const [albumBusy, setAlbumBusy]     = useState(false);
+  const [albumErr, setAlbumErr]       = useState('');
+  const clubFileRef                   = useRef<HTMLInputElement>(null);
   /* آلبومِ انتخاب‌شده در تبِ گالری — `null` یعنی «همه تصاویر» */
   const [pickedAlbum, setPickedAlbum] = useState<string | null>(null);
   const [clubStats, setClubStats]     = useState<ClubStats>(DEFAULT_STATS);
@@ -321,6 +331,37 @@ export default function ClubProfilePage() {
   const popupCoach = activeCoach !== null ? (coaches[activeCoach] ?? null) : null;
   /* نامکِ ذخیره‌شده اولویت دارد؛ وگرنه از نگاشتِ فهرستِ عمومی */
   const popupCoachSlug = popupCoach ? (popupCoach.slug || coachSlugs[popupCoach.id] || '') : '';
+
+  /* مالک از ستونِ `ownerId` سرور می‌آید — فقط برای نشان‌دادنِ دکمه؛
+     اجازه‌ی واقعی را همان مسیرِ PUT می‌سنجد. */
+  const isClubOwner = !!user?.id && !!club.ownerId && user.id === club.ownerId;
+
+  const saveAlbums = async (next: ClubAlbum[]) => {
+    setAlbumBusy(true); setAlbumErr('');
+    const before = clubAlbums;
+    setClubAlbums(next);
+    try {
+      const r = await apiFetch(`/api/clubs/${club.id}`, {
+        method: 'PUT', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ albums: next }),
+      });
+      if (!r.ok) { setClubAlbums(before); setAlbumErr('ذخیره روی سرور انجام نشد'); }
+    } catch {
+      setClubAlbums(before); setAlbumErr('ارتباط با سرور برقرار نشد');
+    } finally { setAlbumBusy(false); }
+  };
+
+  const addClubPhotos = async (files: FileList) => {
+    const items = await Promise.all([...files].map(async fl => ({
+      id: Math.random().toString(36).slice(2, 9),
+      dataUrl: await compressImage(fl),
+      name: fl.name, caption: '',
+    })));
+    const next = clubAlbums.length
+      ? clubAlbums.map((a, i) => (i === 0 ? { ...a, items: [...a.items, ...items] } : a))
+      : [{ id: `a${Date.now()}`, name: 'گالری', createdAt: new Date().toISOString(), items }];
+    await saveAlbums(next);
+  };
 
   const copySlugUrl = async () => {
     try { await navigator.clipboard.writeText(`https://billiardhub.net/clubs/${club.slug}`) } catch { /* اجازه نبود */ }
@@ -1180,12 +1221,26 @@ export default function ClubProfilePage() {
                           در نوارِ بالا همان کار را می‌کند و دو راه برای یک
                           کار فقط شلوغی است. */}
                     </div>
-                    {items.length === 0 ? (
+                    {items.length === 0 && !isClubOwner ? (
                       <div style={{ fontSize: 13, color: 'rgba(0,0,0,0.35)', padding: '8px 4px' }}>
                         این آلبوم هنوز عکسی ندارد.
                       </div>
                     ) : (
                       <div className="gallery-grid">
+                        {/* «+» هم‌اندازه‌ی عکس‌ها و همیشه اولِ شبکه —
+                            فقط برای مالکِ باشگاه */}
+                        {isClubOwner && (
+                          <>
+                            <input ref={clubFileRef} type="file" accept="image/*" multiple hidden
+                              onChange={e => { if (e.target.files?.length) void addClubPhotos(e.target.files); e.target.value = ''; }} />
+                            <button type="button" className="ch-add-tile" disabled={albumBusy}
+                              onClick={() => clubFileRef.current?.click()}
+                              aria-label="افزودن تصویر" title="افزودن تصویر"
+                              style={{ borderRadius: 14 }}>
+                              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                            </button>
+                          </>
+                        )}
                         {items.map((item, i) => (
                           <div key={item.id || i} style={{ aspectRatio: '1', borderRadius: 14, overflow: 'hidden', boxShadow: '0 2px 10px rgba(0,0,0,0.08)' }}>
                             <img loading="lazy" decoding="async" src={item.dataUrl} alt={item.name} style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.82) saturate(0.78)' }} />
@@ -1193,6 +1248,7 @@ export default function ClubProfilePage() {
                         ))}
                       </div>
                     )}
+                    {albumErr && <p role="alert" style={{ fontSize: 12, color: '#b91c1c', marginTop: 8 }}>{albumErr}</p>}
                   </div>
                 );
               })()}

@@ -344,7 +344,11 @@ export default function TechnicianProfilePage() {
         )}
 
         {/* ═══ گالری تصاویر (آلبوم‌دار) ═══ */}
-        {tech.albums.length > 0 && album && (
+        {/* ⚠️ شرط `albums.length > 0` تنها یعنی صاحبِ پروفایلی که هنوز
+            هیچ آلبومی ندارد، اصلاً بخشِ گالری را نمی‌بیند — پس هیچ‌وقت
+            نمی‌تواند اولین عکس را اضافه کند. برای مالک همیشه رندر
+            می‌شود. */}
+        {(tech.albums.length > 0 || edit.isOwner) && (
           <section style={{ marginBottom: 'clamp(28px,4vw,44px)' }}>
             <SectionHead title="گالری تصاویر" />
             {/* انتخاب آلبوم */}
@@ -357,14 +361,13 @@ export default function TechnicianProfilePage() {
                   <span style={{ fontSize: 10.5, color: MUT }}>{faDigits(a.photos.length)}</span>
                 </button>
               ))}
+              {/* ورودیِ فایل پنهان است؛ خودِ «+» یک خانه در شبکه‌ی
+                  عکس‌هاست، نه دکمه‌ای بیرونِ آن. فقط «آلبوم تازه»
+                  این‌جا می‌ماند چون به شبکه‌ی عکس ربطی ندارد. */}
               {edit.isOwner && (
                 <>
                   <input ref={fileRef} type="file" accept="image/*" multiple hidden
                     onChange={e => { if (e.target.files?.length) void addPhotos(e.target.files); e.target.value = '' }} />
-                  <button type="button" disabled={edit.saving} onClick={() => fileRef.current?.click()}
-                    style={{ display: 'inline-flex', alignItems: 'center', gap: 6, minHeight: 38, padding: '0 14px', borderRadius: 10, cursor: 'pointer', fontFamily: 'inherit', fontSize: 12.5, fontWeight: 800, background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.34)', color: GOLD_D }}>
-                    <Plus size={14} />افزودن تصویر
-                  </button>
                   <button type="button" disabled={edit.saving} onClick={() => void addAlbum()}
                     style={{ display: 'inline-flex', alignItems: 'center', gap: 6, minHeight: 38, padding: '0 14px', borderRadius: 10, cursor: 'pointer', fontFamily: 'inherit', fontSize: 12.5, fontWeight: 800, background: '#fff', border: `1px solid ${LINE}`, color: SEC }}>
                     <Plus size={14} />آلبوم تازه
@@ -373,12 +376,21 @@ export default function TechnicianProfilePage() {
               )}
             </div>
             {edit.error && <p role="alert" style={{ fontSize: 12, color: '#b91c1c', margin: '0 0 10px' }}>{edit.error}</p>}
-            <p style={{ fontSize: 12.5, color: MUT, margin: '0 0 14px', lineHeight: 1.8 }}>{album.desc}</p>
+            <p style={{ fontSize: 12.5, color: MUT, margin: '0 0 14px', lineHeight: 1.8 }}>{album?.desc}</p>
             {/* Masonry */}
             <div className="tp-gal">
+              {/* «+» هم‌اندازه‌ی عکس‌ها و همیشه اولِ شبکه */}
+              {edit.isOwner && (
+                <button type="button" className="ch-add-tile" disabled={edit.saving}
+                  onClick={() => fileRef.current?.click()}
+                  aria-label="افزودن تصویر" title="افزودن تصویر"
+                  style={{ aspectRatio: '1', borderRadius: 10, minHeight: 96 }}>
+                  <Plus size={26} />
+                </button>
+              )}
               {photos.map((src, i) => (
-                <button key={`${album.id}-${i}`} onClick={() => setLightbox(i)} aria-label={`تصویر ${faDigits(i + 1)}`}>
-                  <img src={src} alt={`${album.title} — ${faDigits(i + 1)}`} loading="lazy" />
+                <button key={`${album?.id ?? "a"}-${i}`} onClick={() => setLightbox(i)} aria-label={`تصویر ${faDigits(i + 1)}`}>
+                  <img src={src} alt={`${album?.title ?? ""} — ${faDigits(i + 1)}`} loading="lazy" />
                 </button>
               ))}
             </div>

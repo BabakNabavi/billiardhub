@@ -10,6 +10,9 @@ import type { SellerStory } from '../../../components/seller/StoryManager'
 import { useProfileImageViewer } from '@/components/ProfileImageViewer'
 import { getSellerProfile, type SellerProfile } from '../../../lib/seller-store'
 import { fetchProfile } from '../../../lib/profiles/client'
+import { useOwnerEdit } from '../../../lib/profiles/use-owner-edit'
+import { compressImage } from '../../../lib/seller-store'
+import { ask } from '../../../lib/ui/dialogs'
 import VerifiedBadge from '../../../components/VerifiedBadge'
 import { telPrefix, provinceOfCity } from '../../../lib/iran-geo'
 import { getMockSeller } from '../../../lib/sellers-data'
@@ -296,6 +299,26 @@ export default function FlatShop() {
   /* پروفایل ذخیره‌شده‌ی همین فروشگاه (از /dashboard/seller).
      بعد از mount خوانده می‌شود تا SSR و کلاینت یکی باشند. */
   const [profile, setProfile] = useState<SellerProfile | null>(null)
+  const galleryRef = useRef<HTMLInputElement>(null)
+
+  /* ── ویرایشِ درجا ──
+     ⚠️ پیش از هر `return`ِ شرطیِ این کامپوننت — قاعده‌ی هوک‌ها.
+     `ownerId` از قبل داخلِ `profile` نشانده می‌شود (خطِ بالاتر). */
+  /* عکس‌های گالری از پروفایلِ واقعی */
+  const shots = profile?.gallery ?? []
+  const edit = useOwnerEdit<SellerProfile>('seller', sellerId, profile, profile?.ownerId ?? null, setProfile)
+
+  const addShots = async (files: FileList) => {
+    const items = await Promise.all([...files].map(async fl => ({
+      id: Math.random().toString(36).slice(2, 9),
+      url: await compressImage(fl, 1000, 0.68),
+    })))
+    await edit.apply(d => ({ ...d, gallery: [...(d.gallery ?? []), ...items] }))
+  }
+  const deleteShot = async (i: number) => {
+    if (!(await ask('این تصویر حذف شود؟', { body: 'این کار برگشت‌پذیر نیست.', confirmLabel: 'حذف' }))) return
+    await edit.apply(d => ({ ...d, gallery: (d.gallery ?? []).filter((_, k) => k !== i) }))
+  }
   /* ── نامکی که وجود ندارد ──
      تا امروز اگر نشانی به فروشگاهی می‌رفت که نبود، صفحه داده‌ی
      نمونه‌ی قدیمی را نشان می‌داد — «فروشگاه تجهیزات بیلیارد بابی» با
@@ -911,6 +934,49 @@ export default function FlatShop() {
           نامِ فروشگاه در هدر، این‌جا، و در فوتر. یک متن سه بار یعنی
           صفحه پُر به‌نظر می‌رسد ولی چیزی به خواننده اضافه نمی‌کند.
           جای اصلی‌اش هدر است، همان‌جا که چشم اول می‌رود. */}
+
+      {/* ═══ گالری فروشگاه ═══
+          ⚠️ `gallery` از قبل در `SellerProfile` بود و پنلِ فروشنده
+          هم پرش می‌کرد، ولی هیچ‌جای صفحه‌ی عمومی رندر نمی‌شد — یعنی
+          هر عکسی که فروشنده آپلود کرده بود نامرئی می‌ماند. */}
+      {(shots.length > 0 || edit.isOwner) && (
+        <section className="px-4 pb-6 sm:px-6">
+          <div className="mx-auto max-w-6xl">
+            <div className="mb-3 flex flex-wrap items-center gap-3">
+              <h2 className="text-xl font-bold text-[#1C1B17] sm:text-2xl">گالری فروشگاه</h2>
+              {/* ورودیِ فایل پنهان — خودِ «+» یک خانه در شبکه است */}
+              {edit.isOwner && (
+                <input ref={galleryRef} type="file" accept="image/*" multiple hidden
+                  onChange={e => { if (e.target.files?.length) void addShots(e.target.files); e.target.value = '' }} />
+              )}
+            </div>
+            {edit.error && <p role="alert" style={{ fontSize: 12, color: '#b91c1c', marginBottom: 10 }}>{edit.error}</p>}
+            {shots.length === 0 && !edit.isOwner ? (
+              <p style={{ fontSize: 13, color: '#6E6E6E' }}>هنوز تصویری اضافه نشده است.</p>
+            ) : (
+              <div style={{ display: 'grid', gap: 10, gridTemplateColumns: 'repeat(auto-fill,minmax(88px,116px))', justifyContent: 'start' }}>
+                {/* «+» هم‌اندازه‌ی عکس‌ها و همیشه اولِ شبکه */}
+                {edit.isOwner && (
+                  <button type="button" className="ch-gal-cell ch-add-tile" disabled={edit.saving}
+                    onClick={() => galleryRef.current?.click()}
+                    aria-label="افزودن تصویر" title="افزودن تصویر">
+                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                  </button>
+                )}
+                {shots.map((sh, i) => (
+                  <button key={sh.id} type="button" className="ch-gal-cell"
+                    onClick={() => openImage(shots.map(x => x.url), {
+                      index: i, title: 'گالری فروشگاه', alt: store.title,
+                      ...(edit.isOwner ? { onDelete: deleteShot } : {}),
+                    })}>
+                    <img src={sh.url} alt="" loading="lazy" decoding="async" />
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </section>
+      )}
 
       {/* ═══ FOOTER — کارت اختصاصی فروشگاه (سبک sellers/2) ═══ */}
       <footer className="px-4 pb-8 pt-2 sm:px-6">

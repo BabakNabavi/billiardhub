@@ -35,6 +35,11 @@ export interface ManufacturerProfile {
   address: string
   hours: string
   bannerImage: string
+  /* ── گالریِ تصاویر ──
+     تا امروز تولیدکننده فقط یک بنر داشت و هیچ جایی برای نشان‌دادنِ
+     کارگاه، خطِ تولید یا نمونه‌کار نبود. کلیدِ اختیاری است تا
+     ردیف‌های موجود بدونِ مهاجرت کار کنند. */
+  gallery?: { id: string; url: string }[]
   products: MfrProduct[]
 
   status: 'approved' | 'rejected'
@@ -132,6 +137,7 @@ export function profileToManufacturer(p: ManufacturerProfile): MockManufacturer 
     responseTime: 'چند ساعت',
     phone: p.phone,
     bannerImage: p.bannerImage || '/images/shop/Pro_table.webp',
+    gallery: p.gallery ?? [],
     description: p.description,
     tagline: p.tagline || p.description,
     about: p.about || p.description,

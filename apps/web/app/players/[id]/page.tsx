@@ -407,7 +407,11 @@ export default function PlayerProfilePage() {
         )}
 
         {/* ═══ گالری ═══ */}
-        {player.albums.length > 0 && album && (
+        {/* ⚠️ شرط `albums.length > 0` تنها یعنی صاحبِ پروفایلی که هنوز
+            هیچ آلبومی ندارد، اصلاً بخشِ گالری را نمی‌بیند — پس هیچ‌وقت
+            نمی‌تواند اولین عکس را اضافه کند. برای مالک همیشه رندر
+            می‌شود. */}
+        {(player.albums.length > 0 || edit.isOwner) && (
           <section style={{ marginBottom: 'clamp(30px,4.4vw,48px)' }}>
             <SectionHead title="گالری" en="GALLERY" />
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 14 }}>
@@ -420,14 +424,13 @@ export default function PlayerProfilePage() {
                 </button>
               ))}
               {/* «+» فقط برای صاحبِ پروفایل — بدونِ رفتن به داشبورد */}
+              {/* ورودیِ فایل پنهان است؛ خودِ «+» یک خانه در شبکه‌ی
+                  عکس‌هاست، نه دکمه‌ای بیرونِ آن. فقط «آلبوم تازه»
+                  این‌جا می‌ماند چون به شبکه‌ی عکس ربطی ندارد. */}
               {edit.isOwner && (
                 <>
                   <input ref={fileRef} type="file" accept="image/*" multiple hidden
                     onChange={e => { if (e.target.files?.length) void addPhotos(e.target.files); e.target.value = '' }} />
-                  <button type="button" disabled={edit.saving} onClick={() => fileRef.current?.click()}
-                    style={{ display: 'inline-flex', alignItems: 'center', gap: 6, minHeight: 38, padding: '0 14px', borderRadius: 10, cursor: 'pointer', fontFamily: 'inherit', fontSize: 12.5, fontWeight: 800, background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.34)', color: GOLD_D }}>
-                    <Plus size={14} />افزودن تصویر
-                  </button>
                   <button type="button" disabled={edit.saving} onClick={() => void addAlbum()}
                     style={{ display: 'inline-flex', alignItems: 'center', gap: 6, minHeight: 38, padding: '0 14px', borderRadius: 10, cursor: 'pointer', fontFamily: 'inherit', fontSize: 12.5, fontWeight: 800, background: '#fff', border: `1px solid ${LINE}`, color: SEC }}>
                     <Plus size={14} />آلبوم تازه
@@ -437,9 +440,18 @@ export default function PlayerProfilePage() {
             </div>
             {edit.error && <p role="alert" style={{ fontSize: 12, color: '#b91c1c', marginBottom: 10 }}>{edit.error}</p>}
             <div className="pa-gal">
+              {/* «+» هم‌اندازه‌ی عکس‌ها و همیشه اولِ شبکه */}
+              {edit.isOwner && (
+                <button type="button" className="ch-add-tile" disabled={edit.saving}
+                  onClick={() => fileRef.current?.click()}
+                  aria-label="افزودن تصویر" title="افزودن تصویر"
+                  style={{ aspectRatio: '1', borderRadius: 10, minHeight: 96 }}>
+                  <Plus size={26} />
+                </button>
+              )}
               {photos.map((src, i) => (
-                <button key={`${album.id}-${i}`} onClick={() => setLightbox(i)} aria-label={`تصویر ${faDigits(i + 1)}`}>
-                  <img src={src} alt={`${album.title} — ${faDigits(i + 1)}`} loading="lazy" />
+                <button key={`${album?.id ?? "a"}-${i}`} onClick={() => setLightbox(i)} aria-label={`تصویر ${faDigits(i + 1)}`}>
+                  <img src={src} alt={`${album?.title ?? ""} — ${faDigits(i + 1)}`} loading="lazy" />
                 </button>
               ))}
             </div>

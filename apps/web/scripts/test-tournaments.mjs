@@ -3915,7 +3915,7 @@ console.log('\n― استوری: یک منبع، با انقضا ―');
        تله‌ای که یک‌بار با //www.w3.org داخلِ SVG هم خوردیم. */
     const gal = read('components/profile/ProfileGallery.tsx');
     t('دکمه‌ی افزودن فقط برای مالک رندر می‌شود',
-      gal.includes('{canEdit && (') && gal.includes('className="ch-gal-add"'),
+      gal.includes('{canEdit && addTile(') && gal.includes('ch-add-tile'),
       'دکمه‌ی غیرفعال هم یعنی بازدیدکننده چیزی می‌بیند که کارش نیست');
 
     t('نمای تمام‌صفحه دکمه‌ی حذفِ اختیاری دارد',
@@ -3965,6 +3965,43 @@ console.log('\n― استوری: یک منبع، با انقضا ―');
         src.includes('useOwnerEdit') && src.includes('setOwnerId(r.profile.ownerId)')
         && src.includes('canEdit={edit.isOwner}'),
         'بدونِ این، صاحبِ پروفایل باز هم باید به داشبورد برود');
+    }
+  }
+
+  /* ── «+» یک خانه است، نه دکمه‌ای بیرونِ باکس ──
+     نسخه‌ی اول یک دکمه‌ی متنی کنارِ تب‌ها بود؛ از قابِ گالری بیرون
+     می‌زد و ربطش به شبکه معلوم نبود. حالا خانه‌ای هم‌اندازه‌ی عکس و
+     همیشه اولِ شبکه است. */
+  {
+    for (const [p, tag] of [
+      ['components/profile/ProfileGallery.tsx', 'مربی/داور'],
+      ['app/players/[id]/page.tsx', 'بازیکن'],
+      ['app/services/[id]/page.tsx', 'خدمات فنی'],
+      ['app/sellers/[id]/FlatShop.tsx', 'فروشگاه'],
+      ['app/manufacturers/[id]/page.tsx', 'تولیدکننده'],
+      ['app/clubs/[id]/page.tsx', 'باشگاه'],
+    ]) {
+      const src = read(p);
+      t(`«+» در ${tag} خانه‌ی شبکه است`,
+        src.includes('ch-add-tile') && !src.includes('ch-gal-add'),
+        'دکمه‌ی متنیِ بیرونِ شبکه، همان چیزی بود که کاربر رد کرد');
+    }
+
+    t('اندازه‌ی خانه‌ی «+» به کلاسِ صفحه‌ی پروفایل بند نیست',
+      read('app/globals.css').includes('aspect-ratio: 1; border-radius: 10px; overflow: hidden;'),
+      'در صفحه‌ی فروشگاه — که آن استایل را ایمپورت نمی‌کند — خانه نوارِ باریک شد');
+
+    /* باشگاه جدولِ دیگری دارد و مسیرِ ذخیره‌اش فرق می‌کند */
+    const cl = strip(read('app/clubs/[id]/page.tsx'));
+    t('ویرایشِ آلبومِ باشگاه از API خودِ باشگاه می‌رود',
+      cl.includes('isClubOwner') && cl.includes("body: JSON.stringify({ albums: next })"),
+      'باشگاه در جدولِ clubs است، نه profiles — useOwnerEdit این‌جا جواب نمی‌دهد');
+
+    /* گالری برای مالک حتی وقتی خالی است باید دیده شود */
+    for (const [p, tag] of [['app/players/[id]/page.tsx', 'بازیکن'], ['app/services/[id]/page.tsx', 'خدمات فنی']]) {
+      t(`گالریِ ${tag} برای مالکِ بی‌آلبوم هم رندر می‌شود`,
+        read(p).includes('|| edit.isOwner) && ('),
+        'وگرنه صاحبِ پروفایل هیچ‌وقت نمی‌تواند اولین عکس را اضافه کند');
     }
   }
 

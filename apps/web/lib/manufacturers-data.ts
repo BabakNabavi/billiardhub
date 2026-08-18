@@ -15,6 +15,8 @@ export interface MfrProduct {
 }
 
 export interface MockManufacturer {
+  /* گالریِ تصاویر — اختیاری تا نمونه‌های قدیمی نشکنند */
+  gallery?: { id: string; url: string }[]
   id: string
   name: string
   city: string

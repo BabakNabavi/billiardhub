@@ -8,6 +8,9 @@ import { toFa, faNum, MONO, Icon, LQ, LQ_NEUTRAL, LQ_FELT_ON } from '../../selle
 import { getManufacturerProfile, profileToManufacturer } from '../../../lib/manufacturer-store'
 import type { ManufacturerProfile } from '../../../lib/manufacturer-store'
 import { fetchProfileResult } from '../../../lib/profiles/client'
+import { useOwnerEdit } from '../../../lib/profiles/use-owner-edit'
+import { compressImage } from '../../../lib/seller-store'
+import { ask } from '../../../lib/ui/dialogs'
 import VerifiedBadge from '../../../components/VerifiedBadge'
 import { Factory } from 'lucide-react'
 import { telPrefix, provinceOfCity } from '../../../lib/iran-geo'
@@ -188,7 +191,27 @@ export default function ManufacturerPage() {
   const mfrId = (Array.isArray(params?.id) ? params.id[0] : params?.id) || DEFAULT_ID
   /* اول داده‌ی ایستا؛ اگر نبود، پروفایل ثبت‌نامی (پنل ⇒ localStorage) */
   const [storedMfr, setStoredMfr] = useState<ReturnType<typeof profileToManufacturer> | null>(null)
+  /* نمای نگاشت‌شده برای ذخیره کافی نیست — پروفایلِ خام هم می‌ماند */
+  const [rawP, setRawP]           = useState<ManufacturerProfile | null>(null)
+  const [ownerId, setOwnerId]     = useState<string | null>(null)
+  const galleryRef                = useRef<HTMLInputElement>(null)
   const { open: openImage, viewer: imageViewer } = useProfileImageViewer()
+
+  /* ⚠️ پیش از هر `return`ِ شرطی — قاعده‌ی هوک‌ها */
+  const edit = useOwnerEdit<ManufacturerProfile>('manufacturer', mfrId, rawP, ownerId, raw => {
+    setRawP(raw); setStoredMfr(profileToManufacturer(raw))
+  })
+  const addShots = async (files: FileList) => {
+    const items = await Promise.all([...files].map(async fl => ({
+      id: Math.random().toString(36).slice(2, 9),
+      url: await compressImage(fl, 1000, 0.68),
+    })))
+    await edit.apply(d => ({ ...d, gallery: [...(d.gallery ?? []), ...items] }))
+  }
+  const deleteShot = async (i: number) => {
+    if (!(await ask('این تصویر حذف شود؟', { body: 'این کار برگشت‌پذیر نیست.', confirmLabel: 'حذف' }))) return
+    await edit.apply(d => ({ ...d, gallery: (d.gallery ?? []).filter((_, k) => k !== i) }))
+  }
   /* `checked` لازم است تا «پیدا نشد» پیش از رسیدنِ پاسخِ سرور نشان
      داده نشود — وگرنه هر بار یک لحظه صفحه‌ی خطا می‌پرید بالا. */
   const [checked, setChecked] = useState(false)
@@ -211,7 +234,9 @@ export default function ManufacturerPage() {
         if (!alive) return
         if (r.state === 'found') {
           const m = r.profile
-          setStoredMfr(profileToManufacturer({ ...m.data, slug: m.slug, verified: m.verified } as ManufacturerProfile))
+          const raw = { ...m.data, slug: m.slug, verified: m.verified } as ManufacturerProfile
+          setRawP(raw); setOwnerId(m.ownerId)
+          setStoredMfr(profileToManufacturer(raw))
         } else if (r.state === 'error') {
           setNetFail(true)
         }
@@ -528,6 +553,41 @@ export default function ManufacturerPage() {
           </div>
         </div>
       </div>
+
+      {/* ═══ گالری تولیدکننده ═══
+          تا امروز تولیدکننده فقط یک بنر داشت و جایی برای نشان‌دادنِ
+          کارگاه یا خطِ تولید نبود. */}
+      {((mfr.gallery?.length ?? 0) > 0 || edit.isOwner) && (
+        <section className="px-4 pb-6 sm:px-6">
+          <div className="mx-auto max-w-[1240px]">
+            <h2 className="mb-3 text-xl font-bold sm:text-2xl">گالری</h2>
+            {edit.error && <p role="alert" style={{ fontSize: 12, color: '#b91c1c', marginBottom: 10 }}>{edit.error}</p>}
+            {edit.isOwner && (
+              <input ref={galleryRef} type="file" accept="image/*" multiple hidden
+                onChange={e => { if (e.target.files?.length) void addShots(e.target.files); e.target.value = '' }} />
+            )}
+            <div style={{ display: 'grid', gap: 10, gridTemplateColumns: 'repeat(auto-fill,minmax(88px,116px))', justifyContent: 'start' }}>
+              {edit.isOwner && (
+                <button type="button" className="ch-add-tile" disabled={edit.saving}
+                  onClick={() => galleryRef.current?.click()}
+                  aria-label="افزودن تصویر" title="افزودن تصویر">
+                  <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                </button>
+              )}
+              {(mfr.gallery ?? []).map((sh, i) => (
+                <button key={sh.id} type="button"
+                  style={{ aspectRatio: '1', borderRadius: 10, overflow: 'hidden', border: 'none', padding: 0, cursor: 'pointer', background: '#EDE9E0' }}
+                  onClick={() => openImage((mfr.gallery ?? []).map(x => x.url), {
+                    index: i, title: 'گالری', alt: mfr.name,
+                    ...(edit.isOwner ? { onDelete: deleteShot } : {}),
+                  })}>
+                  <img src={sh.url} alt="" loading="lazy" decoding="async" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                </button>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* ═══ FOOTER — کارت اختصاصی تولیدکننده ═══ */}
       <footer className="px-4 pb-8 pt-2 sm:px-6">

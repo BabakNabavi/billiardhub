@@ -429,21 +429,7 @@ main.ch-col > section { max-width: 760px; }
 @media (max-width: 700px) { .ch-alb-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; } }
 @media (prefers-reduced-motion: reduce) { .ch-alb { transition: none; } .ch-alb:hover { transform: none; } }
 
-/* ── نوارِ گالری: تب‌ها + دکمه‌ی افزودنِ صاحبِ پروفایل ── */
-.ch-gal-bar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
-.ch-gal-bar .ch-gal-tabs { margin-bottom: 0; }
-.ch-gal-add {
-  display: inline-flex; align-items: center; gap: 6px;
-  min-height: 38px; padding: 0 14px; border-radius: 10px; cursor: pointer;
-  font-family: inherit; font-size: 12.5px; font-weight: 800;
-  color: var(--gold-deep, #8F6531);
-  background: var(--gold-dim, rgba(199,166,106,0.12));
-  border: 1px solid rgba(199, 166, 106, 0.34);
-  transition: background .2s, border-color .2s;
-}
-.ch-gal-add:hover:not(:disabled) { background: rgba(199, 166, 106, 0.20); border-color: rgba(199, 166, 106, 0.48); }
-.ch-gal-add:focus-visible { outline: 2px solid var(--gold-deep, #8F6531); outline-offset: 2px; }
-.ch-gal-add:disabled { opacity: .55; cursor: progress; }
-.ch-spin { animation: ch-rot .9s linear infinite; }
-@keyframes ch-rot { to { transform: rotate(360deg) } }
-@media (prefers-reduced-motion: reduce) { .ch-spin { animation: none; } .ch-gal-add { transition: none; } }
+
+
+/* خانه‌ی «+» به globals.css منتقل شد: چهار صفحه‌ی نقش از آن
+   استفاده می‌کنند و سه‌تاشان این فایل را ایمپورت نمی‌کنند. */

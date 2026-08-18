@@ -1702,3 +1702,38 @@ select:disabled { opacity: 0.55; cursor: not-allowed; }
    برمی‌گردد. `visibility` به‌جای `display:none` تا فوکوس‌پذیر بماند. */
 .hero-dots { opacity: 0; pointer-events: none; transition: opacity .2s; }
 .hero-dots:focus-within { opacity: 1; pointer-events: auto; }
+
+/* ── خانه‌ی «+» ──
+   ⚠️ اول یک دکمه‌ی متنی کنارِ تب‌ها بود. کاربر گفت باید خودش یک خانه
+   باشد، هم‌اندازه‌ی عکس‌ها و همیشه اولِ شبکه — و درست هم هست: آن
+   دکمه از قابِ گالری بیرون می‌زد و ربطش به شبکه معلوم نبود.
+   برچسبِ متنی لازم ندارد چون تبِ فعال می‌گوید چه چیزی اضافه می‌شود؛
+   نامِ دسترس‌پذیر با aria-label می‌آید. */
+.ch-add-tile {
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; padding: 0;
+  /* ⚠️ ابعاد را خودش می‌دهد. یک‌بار به کلاسِ خانه‌ی گالری تکیه کرد و
+     در صفحه‌ی فروشگاه — که آن فایلِ استایل را ایمپورت نمی‌کند —
+     خانه ۱۱۶×۲۸ شد، یعنی یک نوارِ باریک به‌جای مربع. */
+  aspect-ratio: 1; border-radius: 10px; overflow: hidden;
+  color: var(--gold-deep, #8F6531);
+  background: var(--gold-dim, rgba(199, 166, 106, 0.10));
+  border: 1.5px dashed rgba(199, 166, 106, 0.5);
+  transition: background .2s, border-color .2s, color .2s;
+}
+.ch-add-tile:hover:not(:disabled) {
+  background: rgba(199, 166, 106, 0.18);
+  border-color: rgba(199, 166, 106, 0.75);
+}
+.ch-add-tile:focus-visible { outline: 2px solid var(--gold-deep, #8F6531); outline-offset: 3px; }
+.ch-add-tile:disabled { cursor: progress; opacity: .6; }
+/* خانه‌ی ویدیو نسبتِ ۱۶:۹ دارد، مثل کارت‌های کنارش */
+.ch-vid-add { aspect-ratio: 16 / 9; border-radius: 10px; }
+/* در شبکه‌ی آلبوم، خانه‌ی افزودن ارتفاعِ کارتِ آلبوم را می‌گیرد */
+.ch-alb.ch-add-tile { min-height: 132px; }
+.ch-spin { animation: ch-rot .9s linear infinite; }
+@keyframes ch-rot { to { transform: rotate(360deg) } }
+@media (prefers-reduced-motion: reduce) {
+  .ch-spin { animation: none; }
+  .ch-add-tile { transition: none; }
+}
