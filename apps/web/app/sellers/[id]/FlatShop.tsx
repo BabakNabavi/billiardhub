@@ -123,7 +123,7 @@ function ImageSlider({ images }: { images: string[] }) {
         />
       ))}
       {shots.length > 1 && (
-        <div style={{ position: 'absolute', bottom: 10, insetInline: 0, zIndex: 2, display: 'flex', justifyContent: 'center', gap: 6 }}>
+        <div className="hero-dots" style={{ position: 'absolute', bottom: 10, insetInline: 0, zIndex: 2, display: 'flex', justifyContent: 'center', gap: 6 }}>
           {shots.map((_, k) => (
             <button key={k} type="button" aria-label={`تصویر ${k + 1}`} onClick={() => setI(k)}
               style={{ width: k === active ? 18 : 6, height: 6, borderRadius: 3, border: 'none', cursor: 'pointer',

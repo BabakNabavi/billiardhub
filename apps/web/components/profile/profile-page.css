@@ -24,16 +24,27 @@
   color: var(--text-on-dark, rgba(255, 255, 255, 0.92));
   overflow: hidden;
 }
+/* ── چرا دو لایه ──
+   ⚠️ `background-size: cover` عکس را می‌بُرد و روی دسکتاپِ پهن فقط
+   نوارِ میانیِ آن دیده می‌شد — کاربر گفت «نصفه». `contain` تنهایی هم
+   دو نوارِ خالی کنارش می‌گذارد. پس دو لایه: یکی `cover`ِ تارشده که
+   قاب را پر می‌کند، و رویش `contain` که *کلِ* عکس را نشان می‌دهد. */
 .ch-hero-img {
   position: absolute; inset: 0; z-index: 0;
-  background-size: cover; background-position: center;
+  background-size: contain; background-position: center; background-repeat: no-repeat;
   /* عکسِ کاور پس‌زمینه است نه سوژه: اشباعِ کم و تیرگی، متن را خوانا
      نگه می‌دارد بدونِ اینکه عکس حذف شود. */
   /* ⚠️ تیرگی ۲۰٪ کم شد (brightness .42 ⟵ .53) و خاکستری‌سازی هم
      سبک‌تر: کاورِ کاربر زیرِ فیلترِ قبلی تقریباً ناپدید می‌شد. متن
      همچنان روی لایه‌ی تیره‌کننده‌ی جدا می‌نشیند، پس خوانا می‌ماند. */
   filter: grayscale(0.32) brightness(0.53) contrast(1.04);
-  transform: scale(1.04);
+}
+/* لایه‌ی پرکننده: همان عکس، تار و بزرگ‌شده، پشتِ لایه‌ی اصلی */
+.ch-hero-fill {
+  position: absolute; inset: 0; z-index: -1;
+  background-size: cover; background-position: center;
+  filter: grayscale(0.4) brightness(0.34) blur(26px);
+  transform: scale(1.12);
 }
 .ch-hero-scrim {
   position: absolute; inset: 0; z-index: 1;
@@ -81,7 +92,9 @@
 .ch-hero-row { display: flex; align-items: flex-end; gap: clamp(16px, 2.6vw, 28px); flex-wrap: wrap; }
 
 .ch-avatar {
-  width: clamp(96px, 15vw, 156px); aspect-ratio: 1; flex-shrink: 0;
+  /* ⚠️ کفِ موبایل ۱۰٪ بزرگ‌تر شد (۹۶ ⟵ ۱۰۶). این اندازه مرجعِ
+     آواتارِ *همه‌ی* نقش‌هاست — باشگاه هم همین را می‌گیرد. */
+  width: clamp(106px, 15vw, 156px); aspect-ratio: 1; flex-shrink: 0;
   border-radius: 50%; overflow: hidden;
   background: rgba(255, 255, 255, 0.06);
   border: 2px solid rgba(199, 166, 106, 0.55);

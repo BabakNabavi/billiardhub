@@ -433,15 +433,13 @@ export default function CoachesPage() {
            صفحه‌ی ۳۲۰ این گروه ۳۳۲ پیکسل می‌شد و کلِ صفحه به پهلو کشیده
            می‌شد. سقفِ صریح و اجازه‌ی شکستن، هر دو لازم است.
            (این بلوک داخلِ یک template literal است — بک‌تیک ممنوع.) */
-        /* ⚠️ اینجا flex-basis:100% بود، یعنی گروهِ سرچ روی موبایل یک
-           خطِ کاملِ اضافه می‌گرفت. صفحه‌ی داوران همین را نداشت و
-           جمع‌وجورتر بود. حالا در همان ردیف می‌ماند و فقط اگر جا کم
-           آمد می‌شکند. */
-        @media(max-width:640px){
-          .coach-search-group{margin-inline-start:auto!important;
-            max-width:100%;min-width:0;}
-          .coach-search-group>*{min-width:0;}
-        }
+        /* ⚠️ این قاعده دو بار عوض شد. یک‌بار margin-inline-start:auto
+           شد تا «خطِ اضافه» نگیرد، ولی نتیجه‌اش این بود که گروهِ سرچ
+           به لبه‌ی مقابل چسبید و دیگر با تبِ بالای خودش هم‌تراز نبود.
+           صفحه‌ی داوران از اول درست بود: یک ردیفِ کامل که از همان
+           لبه‌ای شروع می‌شود که تب‌ها شروع می‌شوند. حالا هر دو صفحه
+           عیناً یک قاعده دارند. */
+        @media(max-width:640px){.coach-search-group{flex-basis:100%;margin-inline-start:0!important;}}
         /* list view: 2 cards per row on desktop, 1 on mobile */
         .coach-list-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
         @media(max-width:700px){.coach-list-grid{grid-template-columns:1fr;}}

@@ -17,7 +17,9 @@ export default function ClubLogo({ src, name, size = 62, rounded = '50%', tone =
   /** نشانیِ لوگوی آپلودشده؛ اگر نبود نشانِ پیش‌فرض می‌آید */
   src?: string | null
   name?: string
-  size?: number
+  /* عدد یا هر مقدارِ CSS — هیروی باشگاه از clamp استفاده می‌کند تا
+     با آواتارِ بقیه‌ی نقش‌ها یک اندازه بماند. */
+  size?: number | string
   /** شعاعِ گوشه — دایره برای آواتار، مقدارِ دیگر برای کارت */
   rounded?: string | number
   /** روی پس‌زمینه‌ی تیره یا روشن می‌نشیند */

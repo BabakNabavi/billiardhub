@@ -6,7 +6,7 @@ import { useParams, useRouter } from 'next/navigation';
 import api from '../../../lib/api';
 import { useAuthStore } from '../../../store/auth.store';
 import {
-  MapPin, Phone, Globe, Clock, Star, Navigation,
+  MapPin, Phone, Globe, Clock, Star, Navigation, Copy,
   ChevronLeft, ChevronRight, Calendar, Check,
   Camera, Plus, Trophy, Users, Medal,
 } from 'lucide-react';
@@ -59,7 +59,12 @@ const sampleClub: Club = {
   hasActiveStory: false,
 };
 
-interface CoachEntry { id: string; name: string; title: string; exp: string; rating: string; bio: string; }
+/* `slug` نشانیِ عمومیِ مربی است. ⚠️ تا امروز فقط `id` (شناسه‌ی ردیفِ
+   پروفایل) ذخیره می‌شد و صفحه‌ی باشگاه با همان به /coaches/<id>
+   می‌رفت — که هیچ‌وقت وجود نداشت و «این مربی پیدا نشد» می‌داد.
+   برای ردیف‌های قدیمی که `slug` ندارند، از فهرستِ عمومی نگاشتِ
+   id→slug ساخته می‌شود. */
+interface CoachEntry { id: string; slug?: string; name: string; title: string; exp: string; rating: string; bio: string; }
 interface ClubAlbumItem { id: string; dataUrl: string; name: string; caption: string; }
 interface ClubAlbum { id: string; name: string; createdAt: string; items: ClubAlbumItem[]; }
 interface ClubStats { members: string; tournaments: string; yearsActive: string; dailyCapacity: string; }
@@ -133,6 +138,11 @@ export default function ClubProfilePage() {
 
   const [activeCoach, setActiveCoach] = useState<number | null>(null);
   const [coaches, setCoaches]         = useState<CoachEntry[]>([]);
+  /* نگاشتِ شناسه‌ی پروفایل ⟵ نامک، برای ردیف‌های قدیمیِ مربی که
+     فقط `id` دارند. بدونِ آن، دکمه‌ی «مشاهده صفحه مربی» به نشانیِ
+     ناموجود می‌رفت. */
+  const [coachSlugs, setCoachSlugs]   = useState<Record<string, string>>({});
+  const [slugCopied, setSlugCopied]   = useState(false);
   const [clubAlbums, setClubAlbums]   = useState<ClubAlbum[]>([]);
   /* آلبومِ انتخاب‌شده در تبِ گالری — `null` یعنی «همه تصاویر» */
   const [pickedAlbum, setPickedAlbum] = useState<string | null>(null);
@@ -184,7 +194,25 @@ export default function ClubProfilePage() {
      باشگاه‌دار همه‌چیز را می‌دید و مطمئن بود منتشر شده، ولی هیچ
      بازدیدکننده‌ای هرگز نه مربی‌ای می‌دید نه آلبومی. */
   useEffect(() => {
-    if (Array.isArray(club.coaches)) setCoaches(club.coaches as CoachEntry[]);
+    if (Array.isArray(club.coaches)) {
+      const list = club.coaches as CoachEntry[];
+      setCoaches(list);
+      /* ── نامکِ مربی برای ردیف‌های قدیمی ──
+         ردیف‌هایی که پیش از این تغییر ذخیره شده‌اند فقط `id` دارند.
+         فهرستِ عمومیِ مربیان هم `id` دارد هم `slug`، پس نگاشت از
+         همان‌جا ساخته می‌شود و دکمه‌ی «مشاهده صفحه مربی» درست می‌رود. */
+      if (list.some(c => !c.slug)) {
+        void (async () => {
+          try {
+            const r = await fetch('/api/profiles/coach', { cache: 'no-store' });
+            const j = await r.json().catch(() => null) as { profiles?: { id?: string; slug?: string }[] } | null;
+            const map: Record<string, string> = {};
+            for (const p of j?.profiles ?? []) if (p.id && p.slug) map[p.id] = p.slug;
+            setCoachSlugs(map);
+          } catch { /* شبکه — دکمه غیرفعال می‌ماند، نه اینکه به ۴۰۴ برود */ }
+        })();
+      }
+    }
     if (Array.isArray(club.albums)) setClubAlbums(club.albums as ClubAlbum[]);
     if (club.clubStats && typeof club.clubStats === 'object') {
       setClubStats(p => ({ ...p, ...(club.clubStats as Partial<ClubStats>) }));
@@ -291,6 +319,13 @@ export default function ClubProfilePage() {
     user ? router.push(`/booking/${club.id}`) : router.push('/login');
   };
   const popupCoach = activeCoach !== null ? (coaches[activeCoach] ?? null) : null;
+  /* نامکِ ذخیره‌شده اولویت دارد؛ وگرنه از نگاشتِ فهرستِ عمومی */
+  const popupCoachSlug = popupCoach ? (popupCoach.slug || coachSlugs[popupCoach.id] || '') : '';
+
+  const copySlugUrl = async () => {
+    try { await navigator.clipboard.writeText(`https://billiardhub.net/clubs/${club.slug}`) } catch { /* اجازه نبود */ }
+    setSlugCopied(true); setTimeout(() => setSlugCopied(false), 1800);
+  };
 
   /* صفر یک عددِ درست است، نه «خالی»: باشگاهِ تازه باید ۰ عضو نشان بدهد
      نه جای خالی. پس برخلاف دو ردیفِ بعدی این‌جا `|| null` نداریم. */
@@ -426,7 +461,7 @@ export default function ClubProfilePage() {
             style={{ position: 'absolute', inset: 0, background: 'none', border: 'none', padding: 0, cursor: 'zoom-in' }} />
 
           {images.length > 1 && (
-            <div style={{ position: 'absolute', top: 14, left: '50%', transform: 'translateX(-50%)', display: 'flex', gap: 6, zIndex: 10 }}>
+            <div className="hero-dots" style={{ position: 'absolute', top: 14, left: '50%', transform: 'translateX(-50%)', display: 'flex', gap: 6, zIndex: 10 }}>
               {images.map((_, i) => (
                 <button key={i} onClick={() => setSlide(i)} style={{ width: i === slide ? 22 : 6, height: 6, borderRadius: 3, background: i === slide ? '#C7A66A' : 'rgba(255,255,255,0.3)', border: 'none', cursor: 'pointer', padding: 0, transition: 'all 0.4s ease', boxShadow: i === slide ? '0 0 8px rgba(199,166,106,0.6)' : 'none' }} />
               ))}
@@ -446,10 +481,6 @@ export default function ClubProfilePage() {
 
 
           <div style={{ position: 'absolute', bottom: 'clamp(28px,5%,48px)', left: 0, right: 0, zIndex: 10, padding: 'clamp(12px,2vw,24px) clamp(16px,4vw,40px) 0' }}>
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(199,166,106,0.10)', border: '1px solid rgba(199,166,106,0.25)', borderRadius: 100, padding: '2px 10px', marginBottom: 10 }}>
-              <span style={{ width: 4, height: 4, borderRadius: '50%', background: '#C7A66A', display: 'inline-block', animation: 'pulse 2s ease-in-out infinite' }} />
-              <span style={{ fontSize: 10, color: '#C7A66A', fontWeight: 700, letterSpacing: '0.15em' }}>BILLIARD CLUB</span>
-            </div>
             <div style={{ display: 'flex', alignItems: 'flex-end', gap: 14, marginBottom: 10 }}>
               <div style={{ position: 'relative', flexShrink: 0 }}>
                 {hasStory && <div style={{ position: 'absolute', inset: -4, borderRadius: '50%', zIndex: 0, background: 'linear-gradient(45deg,#feda75,#fa7e1e,#d62976,#962fbf,#4f5bd5)' }} />}
@@ -458,10 +489,13 @@ export default function ClubProfilePage() {
                     حالا با کیبورد هم باز می‌شود. */}
                 <button type="button" onClick={() => { if (hasStory) { setStoryViewer(true); return } openImage(club.logo ?? '', { title: 'لوگوی باشگاه', alt: club.name }) }}
                   aria-label={hasStory ? 'مشاهده استوری باشگاه' : 'بزرگ‌نمایی لوگوی باشگاه'} disabled={!hasStory && !club.logo}
-                  style={{ position: 'relative', zIndex: 2, width: 62, height: 62, padding: 0, borderRadius: '50%', background: club.logo ? 'transparent' : 'rgba(199,166,106,0.18)', border: hasStory ? 'none' : '2px solid rgba(199,166,106,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 26, fontWeight: 900, color: '#C7A66A', fontFamily: 'inherit', backdropFilter: 'blur(20px)', overflow: 'hidden', cursor: (hasStory || club.logo) ? 'pointer' : 'default' }}>
+                  /* اندازه با آواتارِ بقیه‌ی نقش‌ها یکی است — همان
+                     clamp(106px,15vw,156px) که در profile-page.css
+                     برای هیروی مربی و داور تعریف شده. */
+                  style={{ position: 'relative', zIndex: 2, width: 'clamp(106px,15vw,156px)', height: 'clamp(106px,15vw,156px)', padding: 0, borderRadius: '50%', background: club.logo ? 'transparent' : 'rgba(199,166,106,0.18)', border: hasStory ? 'none' : '2px solid rgba(199,166,106,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 26, fontWeight: 900, color: '#C7A66A', fontFamily: 'inherit', backdropFilter: 'blur(20px)', overflow: 'hidden', cursor: (hasStory || club.logo) ? 'pointer' : 'default' }}>
                   {/* لوگوی آپلودشده، وگرنه نشانِ پیش‌فرضِ باشگاه —
                       پیش‌تر فقط حرفِ اولِ نام نوشته می‌شد. */}
-                  <ClubLogo src={club.logo} name={club.name} size={62} tone="dark" />
+                  <ClubLogo src={club.logo} name={club.name} size="100%" tone="dark" />
                 </button>
                 {isAdmin && <button style={{ position: 'absolute', bottom: -2, left: -2, zIndex: 3, width: 22, height: 22, borderRadius: '50%', background: '#C7A66A', border: '2px solid #0A0806', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', padding: 0 }}><Camera size={10} color="#0A0806" /></button>}
                 {isAdmin && !hasStory && <button style={{ position: 'absolute', top: -2, left: -2, zIndex: 3, width: 22, height: 22, borderRadius: '50%', background: '#ef4444', border: '2px solid #0A0806', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', padding: 0 }}><Plus size={10} color="#fff" /></button>}
@@ -493,10 +527,9 @@ export default function ClubProfilePage() {
                   <Navigation size={11} /> {distance}
                 </div>
               )}
-              <div style={{ display: 'flex', gap: 2, alignItems: 'center', background: 'rgba(255,255,255,0.08)', borderRadius: 20, padding: '5px 12px' }}>
-                {[1,2,3,4,5].map(s => <Star key={s} size={11} style={{ color: s <= 4 ? '#f59e0b' : 'rgba(255,255,255,0.2)', fill: s <= 4 ? '#f59e0b' : 'transparent' }} />)}
-                <span style={{ fontSize: 14, color: 'rgba(255,255,255,0.7)', marginRight: 4 }}>۴.۸</span>
-              </div>
+              {/* ⚠️ ستاره‌های هدر حذف شد. عددِ «۴.۸» ثابت و ساختگی بود —
+                  هیچ نظری پشتش نبود. امتیازِ واقعی کارتِ خودش را پایینِ
+                  صفحه دارد و از نظرهای ثبت‌شده می‌آید. */}
             </div>
           </div>
         </div>
@@ -661,13 +694,23 @@ export default function ClubProfilePage() {
                         </div>
                       )}
                       {club.slug && (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 13 }}>
-                          <Globe size={14} style={{ color: '#8b5cf6', flexShrink: 0 }} />
-                          <div>
+                        /* ⚠️ `alignItems:center` آیکون را وسطِ *کلِ* بلوکِ
+                           دوخطی می‌نشاند، نه کنارِ عنوان. `flex-start`
+                           با کمی فاصله‌ی بالا، هم‌ترازش می‌کند. */
+                        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, fontSize: 13 }}>
+                          <Globe size={14} style={{ color: '#8b5cf6', flexShrink: 0, marginTop: 3 }} />
+                          <div style={{ minWidth: 0 }}>
                             <div style={{ fontSize: 11, color: 'rgba(0,0,0,0.35)', marginBottom: 1 }}>آدرس اختصاصی باشگاه</div>
-                            <a href={`/clubs/${club.slug}`} style={{ color: '#8b5cf6', textDecoration: 'none', direction: 'ltr', display: 'inline-block', fontWeight: 600 }}>
-                              billiardhub.net/clubs/{club.slug}
-                            </a>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 6, minWidth: 0 }}>
+                              <a href={`/clubs/${club.slug}`} style={{ color: '#8b5cf6', textDecoration: 'none', direction: 'ltr', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', minWidth: 0 }}>
+                                billiardhub.net/clubs/{club.slug}
+                              </a>
+                              <button type="button" onClick={copySlugUrl}
+                                aria-label={slugCopied ? 'نشانی کپی شد' : 'کپی نشانی باشگاه'}
+                                style={{ flexShrink: 0, width: 28, height: 28, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', borderRadius: 8, cursor: 'pointer', border: '1px solid rgba(139,92,246,0.28)', background: 'rgba(139,92,246,0.08)', color: '#8b5cf6', padding: 0 }}>
+                                {slugCopied ? <Check size={13} /> : <Copy size={13} />}
+                              </button>
+                            </div>
                           </div>
                         </div>
                       )}
@@ -1253,7 +1296,9 @@ export default function ClubProfilePage() {
 
             {/* CTA — navigate to coach page on second tap/click */}
             <button
-              onClick={() => { setActiveCoach(null); router.push(`/coaches/${popupCoach.id}`); }}
+              onClick={() => { if (!popupCoachSlug) return; setActiveCoach(null); router.push(`/coaches/${popupCoachSlug}`); }}
+              disabled={!popupCoachSlug}
+              title={popupCoachSlug ? undefined : 'این مربی هنوز نشانیِ عمومی ندارد'}
               style={{ width: '100%', padding: '13px', background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.35)', borderRadius: 18, color: '#C7A66A', fontSize: 16, fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
               مشاهده صفحه مربی <ChevronLeft size={15} />
             </button>

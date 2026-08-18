@@ -84,7 +84,7 @@ export default function BannerSlider({ slides }: { slides: readonly BannerSlide[
           </div>
         ))}
         {/* Dots */}
-        <div style={{ position: 'absolute', bottom: '18px', left: '50%', transform: 'translateX(-50%)', display: 'flex', gap: '6px' }}>
+        <div className="hero-dots" style={{ position: 'absolute', bottom: '18px', left: '50%', transform: 'translateX(-50%)', display: 'flex', gap: '6px' }}>
           {/* نقطه‌ی ۷پیکسلی هم بی‌نام بود هم برای انگشت خیلی کوچک.
               حالا دکمه ۲۴px هدف لمسی دارد و نقطه فقط نشانه‌ی درونش است. */}
           {BANNER_SLIDES.map((_, i) => (

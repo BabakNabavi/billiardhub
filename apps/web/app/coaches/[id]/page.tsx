@@ -132,7 +132,10 @@ export default function CoachProfilePage() {
               <button type="button" className="btn btn-glass btn-sm" style={{ minHeight: 44 }}
                 onClick={() => { setChecked(false); setReloadKey(k => k + 1) }}>تلاش دوباره</button>
             )}
-            <Link href="/coaches" className="btn btn-glass btn-sm" style={{ minHeight: 44 }}>بازگشت به مربیان</Link>
+            {/* «رفتن» نه «بازگشت»: بازدیدکننده ممکن است از صفحه‌ی
+                باشگاه آمده باشد، نه از فهرستِ مربیان. */}
+            <Link href="/coaches" className="btn btn-glass btn-sm" style={{ minHeight: 44 }}>رفتن به مربیان</Link>
+            <Link href="/clubs" className="btn btn-glass btn-sm" style={{ minHeight: 44 }}>بازگشت به باشگاه</Link>
           </div>
         </div>
       </div>

@@ -88,7 +88,10 @@ export default function ProfileHero({
       {/* کاورِ واقعی اگر هست، وگرنه پوسترِ ساخته‌شده — نه عکسِ قرضیِ
           یک میزِ اسنوکرِ اتفاقی که روی پروفایلِ همه می‌نشست. */}
       {cover
-        ? <div className="ch-hero-img" style={{ backgroundImage: `url(${cover})` }} />
+        ? <>
+            <div className="ch-hero-fill" style={{ backgroundImage: `url(${cover})` }} />
+            <div className="ch-hero-img" style={{ backgroundImage: `url(${cover})` }} />
+          </>
         : <CoverPoster tone={role} />}
       <div className="ch-hero-scrim" data-poster={cover ? undefined : '1'} />
       {nameLatin && <div className="ch-hero-ghost" aria-hidden>{nameLatin}</div>}
@@ -161,7 +164,6 @@ export default function ProfileHero({
               aria-label={copied ? 'آدرس اختصاصی کپی شد' : 'کپی آدرس اختصاصی'}>
               {copied ? <Check size={13} aria-hidden /> : <LinkIcon size={13} aria-hidden />}
               <code dir="ltr">{publicUrl}</code>
-              <span className="ch-addr-act">{copied ? 'کپی شد' : 'کپی'}</span>
             </button>
           </div>
 

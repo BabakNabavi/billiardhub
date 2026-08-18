@@ -21,11 +21,21 @@ import { publicDisplayName } from '@/lib/public-name';
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 /** آیا این کاربر واقعاً در این باشگاه رزرو قطعی داشته؟ */
-async function hasStayed(userId: string, clubId: string): Promise<boolean> {
-  const { count } = await sb().from('bookings')
-    .select('id', { count: 'exact', head: true })
-    .eq('userId', userId).eq('clubId', clubId).eq('status', 'confirmed');
-  return (count ?? 0) > 0;
+/* ── چه کسی حق نظر دادن دارد ──
+   سیاست: یا از طریقِ سایت میزی در همان باشگاه رزرو کرده باشد — در
+   *هر زمانی*، پس هیچ فیلترِ تاریخی این‌جا نیست — یا عضوِ همان باشگاه
+   باشد.
+
+   ⚠️ نیمه‌ی دومش تا امروز نبود: فقط رزرو سنجیده می‌شد، پس عضوی که
+   هیچ‌وقت از سایت رزرو نکرده بود نمی‌توانست نظر بدهد. */
+async function canReviewClub(userId: string, clubId: string): Promise<boolean> {
+  const [booked, member] = await Promise.all([
+    sb().from('bookings').select('id', { count: 'exact', head: true })
+      .eq('userId', userId).eq('clubId', clubId).eq('status', 'confirmed'),
+    sb().from('club_members').select('id', { count: 'exact', head: true })
+      .eq('user_id', userId).eq('club_id', clubId),
+  ]);
+  return (booked.count ?? 0) > 0 || (member.count ?? 0) > 0;
 }
 
 /* GET — نظرهای عمومی یک باشگاه */
@@ -80,7 +90,7 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string 
       breakdown,
     },
     /* آیا کاربر فعلی می‌تواند نظر بدهد — تا UI دکمه‌ی بی‌فایده نشان ندهد */
-    canReview: actor ? (mine ? false : await hasStayed(actor.id, id)) : false,
+    canReview: actor ? (mine ? false : await canReviewClub(actor.id, id)) : false,
     myReview: mine ? { id: mine.id, rating: mine.rating, comment: mine.comment } : null,
   }, { headers: { 'Cache-Control': 'no-store' } });
 }
@@ -103,9 +113,9 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string
   }
 
   /* لایه‌ی ۲ */
-  if (!(await hasStayed(actor.id, id))) {
+  if (!(await canReviewClub(actor.id, id))) {
     return NextResponse.json({
-      message: 'برای ثبت نظر باید حداقل یک رزرو قطعی در این باشگاه داشته باشید',
+      message: 'برای ثبت نظر باید در این باشگاه میزی رزرو کرده باشید یا عضو آن باشید',
       code: 'no_booking',
     }, { status: 403 });
   }
