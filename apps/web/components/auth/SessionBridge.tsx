@@ -21,10 +21,9 @@
 
 import { useEffect } from 'react'
 import { useAuthStore } from '../../store/auth.store'
+import { refreshSession, readLastRefresh } from '../../lib/auth/refresh-client'
 
 const DONE_KEY = 'bh_session_migrated'
-/* مهر زمانی آخرین تمدید — مشترک بین همه‌ی تب‌ها */
-const LAST_REFRESH_KEY = 'bh_last_refresh'
 const REFRESH_EVERY_MS = 12 * 60 * 1000   // کوکی ۱۵ دقیقه‌ای، با حاشیه‌ی امن
 const MIN_GAP_MS = 4 * 60 * 1000          // برای جلوگیری از تمدید پشت‌هم
 
@@ -33,7 +32,10 @@ const MIN_GAP_MS = 4 * 60 * 1000          // برای جلوگیری از تمد
 const RELOAD_GUARD = 'bh_identity_reload'
 
 /* ── تمدید: یک درخواست در هر لحظه، مشترک بینِ همه‌ی مسیرها ──
-   دو جا تمدید می‌خواهند: زمان‌سنجِ دوره‌ای، و مسیرِ ۴۰۱ پایین.
+   دو جا تمدید می‌خواستند: زمان‌سنجِ دوره‌ای و مسیرِ ۴۰۱ پایین — و از
+   وقتی `apiFetch` هم روی ۴۰۱ تمدید می‌کند، سه‌جا. حالا هر سه از یک
+   تابعِ مشترک می‌گذرند تا دو تمدیدِ موازی رخ ندهد؛ چرایی‌اش در
+   `lib/auth/refresh-client.ts` نوشته شده.
 
    ⚠️ نسخه‌ی اولِ این کار، مسیرِ ۴۰۱ را هم پشتِ همان فاصله‌ی چهار
    دقیقه‌ایِ زمان‌سنج گذاشت. نتیجه‌اش یک وارونگیِ کامل بود: زمان‌سنج در
@@ -43,35 +45,7 @@ const RELOAD_GUARD = 'bh_identity_reload'
    یعنی دقیقاً کاربرِ سالمی که فقط کوکیِ ۱۵ دقیقه‌ایش منقضی شده بود
    بیرون انداخته می‌شد.
 
-   حالا فاصله فقط زمان‌سنج را عقب نگه می‌دارد. هم‌زمانی را `inflight`
-   حل می‌کند: هر کس دیرتر برسد، همان درخواستِ در جریان را می‌گیرد و
-   دو تمدیدِ موازی رخ نمی‌دهد.
-
-   مهرِ زمانی هم فقط روی *موفقیت* نوشته می‌شود؛ وگرنه یک خطای گذرا در
-   یک تب، پنجره‌ی مشترک را می‌سوزاند و تبِ بعدی بی‌دلیل رد می‌شود. */
-let lastRefreshAt = 0
-let inflight: Promise<{ ok: boolean; status: number }> | null = null
-
-const readLastRefresh = (): number => {
-  try { return Number(localStorage.getItem(LAST_REFRESH_KEY)) || 0 } catch { return lastRefreshAt }
-}
-const writeLastRefresh = (t: number) => {
-  lastRefreshAt = t
-  try { localStorage.setItem(LAST_REFRESH_KEY, String(t)) } catch { /* ignore */ }
-}
-
-/** `status: 0` یعنی درخواست اصلاً نرسید (آفلاین) — نه ردِ سرور. */
-function refreshSession(): Promise<{ ok: boolean; status: number }> {
-  if (inflight) return inflight
-  inflight = fetch('/api/auth/refresh', { method: 'POST', credentials: 'include' })
-    .then(r => {
-      if (r.ok) writeLastRefresh(Date.now())
-      return { ok: r.ok, status: r.status }
-    })
-    .catch(() => ({ ok: false, status: 0 }))
-    .finally(() => { inflight = null })
-  return inflight
-}
+   حالا فاصله فقط زمان‌سنج را عقب نگه می‌دارد. */
 
 const readRaw = () => { try { return localStorage.getItem('auth-storage') } catch { return null } }
 const legacyToken = (): string | null => {
@@ -153,7 +127,7 @@ export default function SessionBridge() {
           /* اگر همین چند لحظه پیش تمدیدِ موفقی انجام شده، دوباره
              تمدید نمی‌کنیم — همان پاسخِ کهنه را دور می‌ریزیم و فقط
              دوباره می‌پرسیم. */
-          const justRenewed = Date.now() - lastRefreshAt < 30_000
+          const justRenewed = Date.now() - readLastRefresh() < 30_000
           const res = justRenewed ? { ok: true, status: 200 } : await refreshSession()
           if (stopped) return
 
@@ -303,7 +277,7 @@ export default function SessionBridge() {
        عمداً از آن رد نمی‌شود؛ آن‌جا هم‌زمانی با `inflight` حل شده. */
     const refresh = async () => {
       if (stopped || !user) return
-      if (Date.now() - Math.max(lastRefreshAt, readLastRefresh()) < MIN_GAP_MS) return
+      if (Date.now() - readLastRefresh() < MIN_GAP_MS) return
       const { ok, status } = await refreshSession()
       /* `status: 0` یعنی شبکه نبود و ۵۰۳ یعنی انبارِ نشست موقتاً بالا
          نیست — هیچ‌کدام «نشست باطل است» نیستند. */

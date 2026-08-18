@@ -3983,9 +3983,38 @@ console.log('\n― استوری: یک منبع، با انقضا ―');
       && route.includes('{ profile: p, isMine }'),
       'تشخیصِ سمتِ مرورگر بی‌صدا شکست می‌خورد و دکمه‌ها هرگز نمی‌آمدند');
 
-    t('هوک پرچمِ سرور را بر مقایسه‌ی مرورگر مقدم می‌کند',
-      read('lib/profiles/use-owner-edit.ts').includes('serverSaysMine ??'),
-      'وگرنه همان مسیرِ ناموفقِ قبلی می‌ماند');
+    /* ⚠️ این ادعا وارونه شد و درسش را ثبت می‌کنم. اول `??` می‌خواست
+       («سرور مقدم است»). ولی این مسیرِ GET عمومی است و با توکنِ منقضی
+       ۴۰۱ نمی‌دهد — بی‌صدا «مهمان» می‌شود و `isMine:false` می‌دهد؛ آن
+       `false` با `??` قطعی می‌شد و مقایسه‌ی محلی را هم خفه می‌کرد.
+       دو نشانه باید با «یا» جمع شوند. */
+    t('هر یک از دو نشانه‌ی مالکیت کافی است',
+      /* strip لازم است: خودِ کامنتِ توضیح، الگوی قدیمی را نقل
+         می‌کند و بدونِ پاک‌کردنِ کامنت‌ها ادعا همیشه قرمز می‌ماند. */
+      strip(read('lib/profiles/use-owner-edit.ts')).includes('serverSaysMine === true ||')
+      && !strip(read('lib/profiles/use-owner-edit.ts')).includes('serverSaysMine ??'),
+      'با ?? یک false از سرورِ بی‌نشست، دکمه‌ها را برای همیشه خاموش می‌کند');
+
+    /* توکنِ ۱۵ دقیقه‌ای بدونِ تازه‌سازی یعنی ذخیره‌ی بی‌صدا شکست بخورد.
+       ادعا روی *رفتار* است نه روی متنِ دقیقِ خط: نسخه‌ی اول کلِ
+       `if (r.status !== 401 || skipRetry) return r` را می‌خواست و با
+       یک قالب‌بندیِ دوباره قرمز می‌شد. */
+    t('apiFetch روی ۴۰۱ یک‌بار نشست را تازه می‌کند',
+      strip(read('lib/http.ts')).includes('refreshSession()')
+      && strip(read('lib/http.ts')).includes('status !== 401'),
+      'کاربری که بیست دقیقه در صفحه مانده، ذخیره‌اش بی‌دلیل رد می‌شد');
+
+    /* ── تازه‌سازی فقط از یک نقطه ──
+       دو نگهبانِ `inflight` جدا یعنی دو تمدیدِ موازی؛ اگر آن لحظه با
+       چرخشِ رفرش‌توکن یکی شود، دو hash نوشته و یکی از دو کوکی «استفاده‌ی
+       دوباره» تشخیص داده می‌شود و نشستِ سالم باطل. */
+    {
+      const offenders = [...walk('app'), ...walk('components'), ...walk('lib')].filter(p =>
+        p !== 'lib/auth/refresh-client.ts' && strip(read(p)).includes("'/api/auth/refresh'"));
+      t('تمدیدِ نشست فقط از refresh-client می‌گذرد',
+        offenders.length === 0,
+        'تمدیدِ موازی می‌تواند نشستِ سالم را باطل کند: ' + offenders.join('، '));
+    }
 
     for (const [p, tag] of [
       ['app/coaches/[id]/page.tsx', 'مربی'], ['app/referees/[id]/page.tsx', 'داور'],
@@ -4309,11 +4338,15 @@ console.log('\n― نشستِ کهنه، صفحه‌ی سفید ―');
   t('خطای گذرای تمدید به خروج ترجمه نمی‌شود',
     terminal401Guard(sync),
     '۵۰۳ یعنی انبارِ نشست بالا نیست، نه اینکه نشست باطل است');
+  /* این دو ادعا قبلاً به `SessionBridge` نگاه می‌کردند. خودِ تمدید از
+     آن‌جا به `lib/auth/refresh-client.ts` منتقل شد تا `apiFetch` هم
+     همان یک نگهبان را داشته باشد؛ پس محلِ نگاه هم جابه‌جا می‌شود. */
+  const rc = read('lib/auth/refresh-client.ts');
   t('تمدید یک درخواستِ مشترک دارد',
-    sb.includes('let inflight') && sb.includes('function refreshSession'),
+    rc.includes('let inflight') && rc.includes('function refreshSession'),
     'دو تمدیدِ موازی را سرور «سرقتِ توکن» می‌بیند');
   t('مهرِ زمانی فقط روی موفقیت نوشته می‌شود',
-    /if \(r\.ok\) writeLastRefresh/.test(sb) && (sb.match(/writeLastRefresh\(Date/g) ?? []).length === 1,
+    /if \(r\.ok\) writeLastRefresh/.test(rc) && (rc.match(/writeLastRefresh\(Date/g) ?? []).length === 1,
     'وگرنه یک خطای گذرا پنجره‌ی مشترکِ چهاردقیقه‌ای را می‌سوزاند');
 }
 

@@ -54,10 +54,16 @@ export function useOwnerEdit<T>(
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
 
-  /* ⚠️ تکیه بر مقایسه‌ی مرورگر تنها کافی نبود: کاربر لاگین بود و
-     دکمه‌ها را نمی‌دید. پرچمِ سرور از کوکیِ نشست می‌آید و اولویت
-     دارد؛ مقایسه‌ی محلی فقط تا رسیدنِ آن کار می‌کند. */
-  const isOwner = serverSaysMine ?? (!!user?.id && !!ownerId && user.id === ownerId)
+  /* ── دو نشانه، با «یا» نه «??» ──
+     ⚠️ نسخه‌ی قبلی `serverSaysMine ?? clientCheck` بود و این خودش یک
+     باگ ساخت: توکنِ دسترسی ۱۵ دقیقه عمر دارد و این مسیرِ GET عمومی
+     است، پس با توکنِ منقضی ۴۰۱ نمی‌دهد — فقط بی‌صدا «مهمان» حساب
+     می‌شود و `isMine:false` برمی‌گرداند. آن `false` با `??` قطعی
+     می‌شد و مقایسه‌ی محلی را هم خفه می‌کرد.
+
+     حالا هر کدام کافی است. اجازه‌ی واقعی همچنان روی سرور سنجیده
+     می‌شود، پس نشان‌دادنِ خوش‌بینانه‌ی دکمه چیزی را باز نمی‌کند. */
+  const isOwner = serverSaysMine === true || (!!user?.id && !!ownerId && user.id === ownerId)
 
   const apply = useCallback(async (mutate: (draft: T) => T) => {
     if (!profile || !isOwner || saving) return false
@@ -66,6 +72,17 @@ export function useOwnerEdit<T>(
     try {
       const res = await saveProfileRemote(kind, slug, next as unknown as Record<string, unknown>)
       if (!res.ok) { setError(res.message ?? 'ذخیره روی سرور انجام نشد'); return false }
+
+      /* ── ردیفِ برگشتی باید همین پروفایل باشد ──
+         نشانه‌ی مرورگر خوش‌بینانه است: اگر کوکیِ نشست و کاربرِ ذخیره‌شده
+         یکی نباشند، دکمه دیده می‌شود ولی سرور ردیفِ *مالکِ کوکی* را
+         برمی‌دارد (`saveProfile` یکی‌به‌ازای‌هر‌مالک است). آن‌وقت نوشتنِ
+         پاسخ روی این صفحه یعنی نمایشِ پروفایلِ یک حسابِ دیگر. */
+      if (res.profile && ownerId && res.profile.ownerId !== ownerId) {
+        setError('نشست شما با این حساب یکی نیست؛ یک‌بار خارج و دوباره وارد شوید')
+        return false
+      }
+
       /* پاسخِ سرور نشانیِ Storage را جای data:URL گذاشته — همان را
          می‌نشانیم، وگرنه صفحه تا بازخوانیِ بعدی base64 نگه می‌دارد. */
       onSaved((res.profile?.data as T) ?? next)
@@ -76,7 +93,7 @@ export function useOwnerEdit<T>(
     } finally {
       setSaving(false)
     }
-  }, [profile, isOwner, saving, kind, slug, onSaved])
+  }, [profile, isOwner, saving, kind, slug, onSaved, ownerId])
 
   return { isOwner, saving, error, apply }
 }

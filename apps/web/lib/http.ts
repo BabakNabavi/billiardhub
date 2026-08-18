@@ -12,6 +12,7 @@
    دسترس جاوااسکریپت نیست.
    ───────────────────────────────────────────────────────────── */
 
+import { refreshSession } from './auth/refresh-client'
 import { CSRF_COOKIE, CSRF_HEADER } from './auth/constants'
 
 const SAFE = new Set(['GET', 'HEAD', 'OPTIONS'])
@@ -36,7 +37,39 @@ export async function apiFetch(input: string, init: RequestInit = {}): Promise<R
     if (t) headers.set(CSRF_HEADER, t)
   }
 
-  return fetch(input, { ...init, method, headers, credentials: 'include' })
+  const send = () => fetch(input, { ...init, method, headers, credentials: 'include' })
+  const r = await send()
+
+  /* ── ۴۰۱ ⟵ یک‌بار تازه‌سازی و تلاشِ دوباره ──
+     ⚠️ توکنِ دسترسی ۱۵ دقیقه عمر دارد. تا امروز هیچ‌جا روی ۴۰۱
+     تازه‌سازی نمی‌شد، پس کاربری که بیست دقیقه در صفحه مانده بود
+     ذخیره‌اش «انجام نشد» می‌گرفت — درحالی‌که فقط توکن کهنه بود و
+     توکنِ تازه‌سازی هنوز معتبر. `SessionBridge` هم فقط در بارگذاری
+     و بازگشت به تب کار می‌کند، نه سرِ درخواست.
+
+     دقیقاً یک تلاشِ دوباره: `send()` حداکثر دو بار صدا زده می‌شود و
+     خودِ تازه‌سازی از این مسیر نمی‌گذرد، پس حلقه ممکن نیست. */
+  if (r.status !== 401) return r
+
+  /* مهمان اصلاً نشستی ندارد که تازه شود. بدونِ این، هر پولِ دوره‌ای
+     (پیام‌ها، نشان‌ها) سه درخواست می‌شود به‌جای یکی. کوکیِ CSRF فقط
+     همراهِ نشست وجود دارد، پس نشانه‌ی خوبی است. */
+  if (!csrfToken()) return r
+
+  /* بدنه‌ی جریانی یک‌بارمصرف است؛ تلاشِ دوم روی آن استثنا می‌دهد و
+     پاسخِ ۴۰۱ را به یک promiseِ ردشده تبدیل می‌کند. */
+  if (typeof ReadableStream !== 'undefined' && init.body instanceof ReadableStream) return r
+
+  const rf = await refreshSession()
+  if (!rf.ok) return r
+
+  /* در چرخشِ دوازده‌ساعته کوکیِ CSRF هم از نو صادر می‌شود (نه در هر
+     تازه‌سازی)، پس هدر دوباره از کوکی خوانده می‌شود. */
+  if (!SAFE.has(method)) {
+    const t2 = csrfToken()
+    if (t2) headers.set(CSRF_HEADER, t2)
+  }
+  return send()
 }
 
 /** میان‌بُر برای JSON */
