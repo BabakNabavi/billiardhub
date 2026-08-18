@@ -22,7 +22,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { X, ChevronLeft, ChevronRight } from 'lucide-react'
+import { X, ChevronLeft, ChevronRight, Trash2 } from 'lucide-react'
 
 const GOLD = '#C7A66A'
 const GOLD_D = '#8F6531'
@@ -33,7 +33,7 @@ const MUT = 'rgba(28,28,26,0.45)'
 const toFa = (v: string | number) => String(v).replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[+d] ?? d)
 
 export default function ImageLightbox({
-  images, index, alt = '', title = 'تصاویر', onIndex, onClose,
+  images, index, alt = '', title = 'تصاویر', onIndex, onClose, onDelete,
 }: {
   images: string[]
   index: number
@@ -42,6 +42,10 @@ export default function ImageLightbox({
   title?: string
   onIndex: (i: number) => void
   onClose: () => void
+  /* ── حذف از داخلِ نما ──
+     فقط وقتی داده می‌شود که بیننده صاحبِ همان رسانه باشد. نبودنش
+     یعنی دکمه اصلاً رندر نشود — نه اینکه غیرفعال دیده شود. */
+  onDelete?: (index: number) => void | Promise<void>
 }) {
   const [mounted, setMounted] = useState(false)
   useEffect(() => { setMounted(true) }, [])
@@ -156,6 +160,24 @@ export default function ImageLightbox({
           <X size={24} strokeWidth={2.2} />
         </button>
         <span style={{ fontSize: 15, fontWeight: 800, color: INK }}>{title}</span>
+
+        {/* ── حذف از داخلِ نما ──
+            در RTL «گوشه‌ی سمت راست» انتهای همین ردیف است، روبه‌روی
+            دکمه‌ی بستن. فقط وقتی رندر می‌شود که `onDelete` داده شده
+            باشد — یعنی بیننده صاحبِ همین رسانه است.
+            تأییدِ حذف را خودِ صداکننده می‌گیرد (با پنجره‌ی سایت،
+            نه confirm بومی). */}
+        {onDelete ? (
+          <button type="button" aria-label="حذف این مورد"
+            onClick={() => void onDelete(at)}
+            style={{
+              width: 40, height: 40, borderRadius: 12, border: 'none',
+              background: 'transparent', color: '#dc2626', cursor: 'pointer',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}>
+            <Trash2 size={20} strokeWidth={2.2} />
+          </button>
+        ) : <span style={{ width: 40 }} aria-hidden />}
       </div>
 
       {/* تصویر */}

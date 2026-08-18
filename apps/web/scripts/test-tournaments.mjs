@@ -3900,6 +3900,54 @@ console.log('\n― استوری: یک منبع، با انقضا ―');
       'ابعادِ قبلی گالری را از «نمونه‌کار» به «دیوارِ عکس» تبدیل می‌کرد');
   }
 
+  /* ── ویرایشِ درجا روی صفحه‌ی عمومی ──
+     صاحبِ پروفایل بدونِ رفتن به داشبورد عکس/ویدیو/آلبوم اضافه و حذف
+     می‌کند. مهم‌ترین ادعا این است که «فقط خودش» ببیند. */
+  {
+    const hook = strip(read('lib/profiles/use-owner-edit.ts'));
+    t('مالکیت از ستونِ سرور سنجیده می‌شود، نه از داده‌ی فرم',
+      hook.includes('user.id === ownerId'),
+      'اگر از داخلِ jsonb خوانده شود، هرکسی می‌تواند خودش را مالک جا بزند');
+
+    /* ⚠️ بدونِ `strip`. آن فایل `accept="image/*"` دارد و `/*` داخلِ
+       رشته برای stripper شروعِ کامنتِ بلوکی است — بقیه‌ی فایل را
+       می‌بلعد و هر ادعایی بعد از آن نقطه بی‌صدا رد می‌شود. همان
+       تله‌ای که یک‌بار با //www.w3.org داخلِ SVG هم خوردیم. */
+    const gal = read('components/profile/ProfileGallery.tsx');
+    t('دکمه‌ی افزودن فقط برای مالک رندر می‌شود',
+      gal.includes('{canEdit && (') && gal.includes('className="ch-gal-add"'),
+      'دکمه‌ی غیرفعال هم یعنی بازدیدکننده چیزی می‌بیند که کارش نیست');
+
+    t('نمای تمام‌صفحه دکمه‌ی حذفِ اختیاری دارد',
+      strip(read('components/market/ImageLightbox.tsx')).includes('onDelete?:'),
+      'حذف باید همان‌جا که تصویر بزرگ شده ممکن باشد');
+
+    for (const [p, tag] of [['app/coaches/[id]/page.tsx', 'مربی'], ['app/referees/[id]/page.tsx', 'داور']]) {
+      const src = strip(read(p));
+
+      /* ── قاعده‌ی هوک‌ها ──
+         ⚠️ `useOwnerEdit` یک‌بار *بعد از* گاردهای `return` نوشته شد.
+         tsc ساکت ماند و بیلد سبز بود، ولی صفحه در مرورگر با
+         React #310 سفید می‌شد — برای همه، نه فقط مالک. تنها چیزی که
+         گرفتش، باز کردنِ صفحه بود. این ادعا همان ترتیب را می‌سنجد. */
+      t(`هوکِ ویرایش در ${tag} پیش از هر return است`,
+        (() => {
+          const h = src.indexOf('useOwnerEdit<');
+          /* indexOf نه رجکس: الگو از چند لایه‌ی escape رد می‌شود و
+             
+ سرِ راه به خطِ واقعی تبدیل می‌شد. */
+          const r = src.indexOf('  if (!checked)');
+          return h >= 0 && r >= 0 && h < r;
+        })(),
+        'هوک بعد از return شرطی یعنی صفحه‌ی سفید با React #310');
+
+      t(`صفحه‌ی ${tag} ویرایشِ درجا دارد`,
+        src.includes('useOwnerEdit') && src.includes('setOwnerId(r.profile.ownerId)')
+        && src.includes('canEdit={edit.isOwner}'),
+        'بدونِ این، صاحبِ پروفایل باز هم باید به داشبورد برود');
+    }
+  }
+
   /* ── نظرِ باشگاه: رزرو یا عضویت ── */
   {
     const rv = strip(read('app/api/clubs/[id]/reviews/route.ts'));

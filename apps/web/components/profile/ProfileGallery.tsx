@@ -18,7 +18,7 @@
    ───────────────────────────────────────────────────────────── */
 
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
-import { Images, Clapperboard, FolderOpen, ArrowRight } from 'lucide-react'
+import { Images, Clapperboard, FolderOpen, ArrowRight, Plus, Loader2 } from 'lucide-react'
 import ProfileVideoCard from '../ProfileVideoCard'
 import { useTabKeys } from '@/hooks/use-tab-keys'
 import { toFaDigits } from '@/lib/jalali'
@@ -31,11 +31,21 @@ type Tab = typeof TABS[number]
 
 export default function ProfileGallery({
   images, videos, onOpenImage,
+  canEdit = false, busy = false, onAddImages, onAddVideo, onNewAlbum,
 }: {
   images: GalleryImage[]
   videos: GalleryVideo[]
   /** کلِ فهرست + اندیس، تا داخلِ نما بشود بعدی/قبلی رفت */
   onOpenImage: (urls: string[], index: number, meta: { title: string; alt: string }) => void
+  /* ── ویرایشِ درجا ──
+     فقط صاحبِ پروفایل این‌ها را می‌گیرد؛ نبودنشان یعنی دکمه‌ی «+»
+     اصلاً رندر نشود. با این‌ها لازم نیست برای یک عکس تا داشبورد
+     برود و برگردد. */
+  canEdit?: boolean
+  busy?: boolean
+  onAddImages?: (files: FileList) => void | Promise<void>
+  onAddVideo?: () => void | Promise<void>
+  onNewAlbum?: () => void | Promise<void>
 }) {
   /* ── آلبوم‌ها از خودِ رسانه‌ها ساخته می‌شوند ── */
   const albums = useMemo(() => {
@@ -59,6 +69,7 @@ export default function ProfileGallery({
      و بازدیدکننده پنلِ خالی می‌بیند درحالی‌که مربی فقط ویدیو دارد.
      `picked` نگه می‌دارد که کاربر خودش تبی انتخاب کرده یا نه — بعد از
      انتخابِ او دیگر چیزی زیرِ دستش عوض نمی‌شود. */
+  const fileRef = useRef<HTMLInputElement>(null)
   const picked = useRef(false)
   const choose = useCallback((k: Tab) => { picked.current = true; setOpenAlbum(null); setTab(k) }, [])
 
@@ -95,6 +106,7 @@ export default function ProfileGallery({
         <span className="rule" aria-hidden />
       </div>
 
+      <div className="ch-gal-bar">
       <div className="lq-seg ch-gal-tabs" role="tablist" aria-label="بخش‌های گالری" onKeyDown={onTabKey}>
         {([['photos', 'تصاویر', images.length], ['videos', 'ویدیوها', videos.length], ['albums', 'آلبوم‌ها', albums.length]] as const).map(([k, label, n]) => (
           <button key={k} type="button" role="tab" id={`chtab-${k}`}
@@ -103,6 +115,25 @@ export default function ProfileGallery({
             {label}{n > 0 && <span className="ch-gal-n">{toFaDigits(n)}</span>}
           </button>
         ))}
+      </div>
+
+      {/* ── «+» فقط برای صاحبِ پروفایل ──
+          هر تب کارِ خودش را اضافه می‌کند: عکس، ویدیو، یا آلبومِ تازه. */}
+      {canEdit && (
+        <>
+          <input ref={fileRef} type="file" accept="image/*" multiple hidden
+            onChange={e => { if (e.target.files?.length) void onAddImages?.(e.target.files); e.target.value = '' }} />
+          <button type="button" className="ch-gal-add" disabled={busy}
+            onClick={() => {
+              if (tab === 'photos') fileRef.current?.click()
+              else if (tab === 'videos') void onAddVideo?.()
+              else void onNewAlbum?.()
+            }}>
+            {busy ? <Loader2 size={15} className="ch-spin" aria-hidden /> : <Plus size={15} aria-hidden />}
+            {tab === 'photos' ? 'افزودن تصویر' : tab === 'videos' ? 'افزودن ویدیو' : 'آلبوم تازه'}
+          </button>
+        </>
+      )}
       </div>
 
       {/* هر سه پنل همیشه در DOM‌اند و غیرفعال `hidden` می‌گیرد:

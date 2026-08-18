@@ -19,6 +19,13 @@ import ProfileGallery from '../../../components/profile/ProfileGallery'
 import GradeTimeline from '../../../components/profile/GradeTimeline'
 import '../../../components/profile/profile-page.css'
 import { fetchProfileResult } from '../../../lib/profiles/client'
+import { useOwnerEdit } from '../../../lib/profiles/use-owner-edit'
+import { compressImage } from '../../../lib/seller-store'
+/* ⚠️ prompt/confirm بومی در این پروژه ممنوع است (گاردِ ایستا دارد):
+   جریان را قفل می‌کنند، استایلِ سایت را نمی‌گیرند و روی وب‌ویوِ
+   اپ رفتارشان یکسان نیست. `askText`/`ask` همان کار را با پنجره‌ی
+   خودِ سایت می‌کنند. */
+import { askText, ask } from '../../../lib/ui/dialogs'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import { useProfileImageViewer } from '@/components/ProfileImageViewer'
@@ -75,6 +82,9 @@ export default function RefereeProfilePage() {
   /* شبکه شکست، نه اینکه پروفایل نباشد — بدونِ این، قطعیِ اینترنت
      پیامِ «این داور وجود ندارد» می‌گرفت. */
   const [netFail, setNetFail] = useState(false)
+  /* مالکِ ردیف — از ستونِ سرور، نه از داده‌ی داخلِ فرم. فقط برای
+     نشان‌دادنِ دکمه‌های ویرایش؛ اجازه‌ی واقعی روی سرور سنجیده می‌شود. */
+  const [ownerId, setOwnerId] = useState<string | null>(null)
   const [reloadKey, setReloadKey] = useState(0)
   const [copyState, setCopyState] = useState<'idle' | 'ok' | 'manual'>('idle')
   const flashT = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -93,7 +103,10 @@ export default function RefereeProfilePage() {
       try {
         const r = await fetchProfileResult<RefereeProfile>('referee', id)
         if (!alive) return
-        if (r.state === 'found') setLocalP({ ...(r.profile.data as RefereeProfile), slug: r.profile.slug, verified: r.profile.verified })
+        if (r.state === 'found') {
+          setLocalP({ ...(r.profile.data as RefereeProfile), slug: r.profile.slug, verified: r.profile.verified })
+          setOwnerId(r.profile.ownerId)
+        }
         else if (r.state === 'error') setNetFail(true)
       } catch {
         /* `fetchProfileResult` خودش خطا را می‌گیرد؛ تورِ ایمنی است
@@ -108,6 +121,17 @@ export default function RefereeProfilePage() {
 
   const referee = localP ? mapLocalToView(localP) : null
   const { open: openImage, viewer: imageViewer } = useProfileImageViewer()
+
+  /* ── ویرایشِ درجا ──
+     ⚠️ این فراخوانی *باید* پیش از هر `return`ِ شرطی باشد. یک‌بار
+     پایین‌تر — بعد از گاردِ اسکلت و گاردِ «پیدا نشد» — نوشته شد و
+     صفحه با React #310 («تعدادِ هوک‌ها عوض شد») سفید می‌شد؛ برای
+     همه، نه فقط مالک.
+
+     صاحبِ پروفایل بدونِ رفتن به داشبورد عکس/ویدیو/آلبوم اضافه و حذف
+     می‌کند. `apply` کلِ پروفایل را با یک فیلدِ عوض‌شده ذخیره می‌کند و
+     نشانیِ Storage را که سرور برمی‌گرداند می‌نشاند. */
+  const edit = useOwnerEdit<RefereeProfile>('referee', id, localP, ownerId, setLocalP)
 
   if (!checked) {
     return (
@@ -204,6 +228,41 @@ export default function RefereeProfilePage() {
 
   const latin = localP ? `${localP.firstNameEn} ${localP.lastNameEn}`.trim().toUpperCase() : ''
 
+  const addImages = async (files: FileList) => {
+    const items = await Promise.all([...files].map(async fl => ({
+      id: `m${Date.now()}${Math.random().toString(36).slice(2, 7)}`,
+      url: await compressImage(fl, 1000, 0.68),
+      caption: '',
+    })))
+    await edit.apply(d => ({ ...d, gallery: [...d.gallery, ...items] }))
+  }
+  const addVideo = async () => {
+    const url = (await askText('افزودن ویدیو', { placeholder: 'نشانی آپارات یا یوتیوب' }))?.trim()
+    if (!url) return
+    const title = (await askText('عنوان ویدیو', { placeholder: 'مثلاً: تمرین ضربه' }))?.trim() || 'ویدیو'
+    await edit.apply(d => ({
+      ...d,
+      videos: [...d.videos, { id: `v${Date.now()}`, url, thumbnail: '', title, duration: '' }],
+    }))
+  }
+  const newAlbum = async () => {
+    const name = (await askText('آلبوم تازه', { placeholder: 'مثلاً: شاگرد علی رضایی' }))?.trim()
+    if (!name) return
+    /* آلبوم تا وقتی رسانه‌ای نداشته باشد وجود ندارد — پس آخرین عکسِ
+       بدونِ آلبوم به آن داده می‌شود و کاربر بقیه را از پنل یا با
+       همین فیلد جابه‌جا می‌کند. */
+    await edit.apply(d => {
+      const i = [...d.gallery].reverse().findIndex(g => !(g.album ?? '').trim())
+      if (i < 0) return d
+      const at = d.gallery.length - 1 - i
+      return { ...d, gallery: d.gallery.map((g, k) => (k === at ? { ...g, album: name } : g)) }
+    })
+  }
+  const deleteImage = async (i: number) => {
+    if (!(await ask('این تصویر حذف شود؟', { body: 'این کار برگشت‌پذیر نیست.', confirmLabel: 'حذف' }))) return
+    await edit.apply(d => ({ ...d, gallery: d.gallery.filter((_, k) => k !== i) }))
+  }
+
   return (
     <div className="ch-page">
       <ProfileHero
@@ -248,8 +307,14 @@ export default function RefereeProfilePage() {
             <ProfileGallery
               images={referee.gallery}
               videos={referee.videos}
-              onOpenImage={(urls, index, meta) => openImage(urls, { index, ...meta })}
+              onOpenImage={(urls, index, meta) => openImage(urls, {
+                index, ...meta,
+                ...(edit.isOwner ? { onDelete: deleteImage } : {}),
+              })}
+              canEdit={edit.isOwner} busy={edit.saving}
+              onAddImages={addImages} onAddVideo={addVideo} onNewAlbum={newAlbum}
             />
+            {edit.error && <p className="ch-empty" role="alert">{edit.error}</p>}
           </main>
 
           <aside className="ch-col ch-rail" aria-label="اطلاعات داور">

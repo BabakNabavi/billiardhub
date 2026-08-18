@@ -29,13 +29,14 @@ interface ViewerState {
   index: number
   alt: string
   title: string
+  onDelete?: (i: number) => void | Promise<void>
 }
 
 export function useProfileImageViewer() {
   const [state, setState] = useState<ViewerState | null>(null)
 
   const open = useCallback(
-    (images: string | string[], opts?: { index?: number; alt?: string; title?: string }) => {
+    (images: string | string[], opts?: { index?: number; alt?: string; title?: string; onDelete?: (i: number) => void | Promise<void> }) => {
       const list = (Array.isArray(images) ? images : [images]).filter(Boolean)
       if (!list.length) return
       setState({
@@ -43,6 +44,8 @@ export function useProfileImageViewer() {
         index: Math.min(Math.max(opts?.index ?? 0, 0), list.length - 1),
         alt: opts?.alt ?? '',
         title: opts?.title ?? 'تصاویر',
+        /* حذف فقط وقتی داده می‌شود که بیننده صاحبِ همین رسانه باشد */
+        onDelete: opts?.onDelete,
       })
     },
     [],
@@ -56,6 +59,7 @@ export function useProfileImageViewer() {
       title={state.title}
       onIndex={i => setState(s => (s ? { ...s, index: i } : s))}
       onClose={() => setState(null)}
+      {...(state.onDelete ? { onDelete: async (i: number) => { await state.onDelete!(i); setState(null) } } : {})}
     />
   ) : null
 
