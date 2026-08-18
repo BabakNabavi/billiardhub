@@ -3922,6 +3922,26 @@ console.log('\n― استوری: یک منبع، با انقضا ―');
       strip(read('components/market/ImageLightbox.tsx')).includes('onDelete?:'),
       'حذف باید همان‌جا که تصویر بزرگ شده ممکن باشد');
 
+    /* بازیکن و خدمات فنی نمای مشترک ندارند و گالریِ اختصاصیِ خودشان
+       را دارند، پس جدا سنجیده می‌شوند. */
+    for (const [p, tag] of [['app/players/[id]/page.tsx', 'بازیکن'], ['app/services/[id]/page.tsx', 'خدمات فنی']]) {
+      const src = strip(read(p));
+      t(`${tag} ویرایشِ درجا دارد`,
+        src.includes('useOwnerEdit') && src.includes('setOwnerId(p.ownerId)')
+        && src.includes('edit.isOwner'),
+        'صاحبِ پروفایل باز هم باید به داشبورد برود');
+      t(`هوکِ ویرایش در ${tag} پیش از هر return است`,
+        (() => {
+          const h = src.indexOf('useOwnerEdit<');
+          const r = src.indexOf('  if (!checked)');
+          return h >= 0 && r >= 0 && h < r;
+        })(),
+        'هوک بعد از return شرطی یعنی صفحه‌ی سفید با React #310');
+      t(`پروفایلِ خامِ ${tag} برای ویرایش نگه داشته می‌شود`,
+        src.includes('setRawP('),
+        'نمای نگاشت‌شده برای ذخیره کافی نیست و داده را ناقص بازنویسی می‌کند');
+    }
+
     for (const [p, tag] of [['app/coaches/[id]/page.tsx', 'مربی'], ['app/referees/[id]/page.tsx', 'داور']]) {
       const src = strip(read(p));
 

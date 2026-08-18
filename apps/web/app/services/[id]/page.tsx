@@ -7,7 +7,7 @@
    بدون آمار/امتیاز. داده از lib/technicians-data.
    ───────────────────────────────────────────────────────────── */
 
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { ProfileMissing, ProfileLoading } from '@/components/profile/ProfileMissing'
 import { useProfileImageViewer } from '@/components/ProfileImageViewer'
 import Link from 'next/link'
@@ -15,9 +15,12 @@ import { useParams } from 'next/navigation'
 import { createPortal } from 'react-dom'
 import {
   MapPin, ChevronLeft, ChevronRight, Wrench,
-  Phone, X, ZoomIn, ZoomOut, Images,
+  Phone, X, ZoomIn, ZoomOut, Images, Plus, Trash2,
 } from 'lucide-react'
 import { getTechnician, faDigits } from '../../../lib/technicians-data'
+import { useOwnerEdit } from '../../../lib/profiles/use-owner-edit'
+import { compressImage } from '../../../lib/seller-store'
+import { askText, ask } from '../../../lib/ui/dialogs'
 import { getTechnicianProfile, profileToTechnician, type TechnicianProfile } from '../../../lib/technician-store'
 import { fetchProfileResult } from '../../../lib/profiles/client'
 import VerifiedBadge from '../../../components/VerifiedBadge'
@@ -60,6 +63,9 @@ export default function TechnicianProfilePage() {
      باید بداند دیگران نمی‌بینندش، وگرنه لینک را جایی می‌فرستد
      که همه «پیدا نشد» می‌گیرند. */
   const [pending, setPending] = useState(false)
+  /* نمای نگاشت‌شده برای ویرایش کافی نیست — پروفایلِ خام هم می‌ماند */
+  const [rawP, setRawP]       = useState<TechnicianProfile | null>(null)
+  const [ownerId, setOwnerId] = useState<string | null>(null)
   /* شبکه شکست، نه اینکه پروفایل نباشد */
   const [netFail, setNetFail] = useState(false)
   const [reloadKey, setReloadKey] = useState(0)
@@ -91,7 +97,9 @@ export default function TechnicianProfilePage() {
         if (r.state === 'found') {
           const p = r.profile
           setPending(p.status !== 'approved')
-          setStored(profileToTechnician({ ...p.data, slug: p.slug, verified: p.verified } as TechnicianProfile))
+          const raw = { ...p.data, slug: p.slug, verified: p.verified } as TechnicianProfile
+          setRawP(raw); setOwnerId(p.ownerId)
+          setStored(profileToTechnician(raw))
         } else if (r.state === 'error') {
           setNetFail(true)
         }
@@ -108,6 +116,40 @@ export default function TechnicianProfilePage() {
   }, [id, staticTech, reloadKey])
 
   const tech = staticTech ?? stored
+
+  /* ⚠️ پیش از هر `return`ِ شرطی — وگرنه React #310 و صفحه‌ی سفید */
+  const edit = useOwnerEdit<TechnicianProfile>('technician', id, rawP, ownerId, raw => {
+    setRawP(raw); setStored(profileToTechnician(raw))
+  })
+  const fileRef = useRef<HTMLInputElement>(null)
+
+  /* آلبومِ متخصص `{id,title,desc,photos}` است */
+  const addPhotos = async (files: FileList) => {
+    const urls = await Promise.all([...files].map(fl => compressImage(fl, 1000, 0.68)))
+    await edit.apply(d => {
+      const albums = [...(d.albums ?? [])]
+      if (!albums.length) albums.push({ id: `a${Date.now()}`, title: 'گالری', desc: '', photos: [] })
+      const at = Math.min(albumIdx, albums.length - 1)
+      albums[at] = { ...albums[at]!, photos: [...albums[at]!.photos, ...urls] }
+      return { ...d, albums }
+    })
+  }
+  const addAlbum = async () => {
+    const title = (await askText('آلبوم تازه', { placeholder: 'مثلاً: تعمیر میز باشگاه' }))?.trim()
+    if (!title) return
+    await edit.apply(d => ({ ...d, albums: [...(d.albums ?? []), { id: `a${Date.now()}`, title, desc: '', photos: [] }] }))
+  }
+  const deletePhoto = async (i: number) => {
+    if (!(await ask('این تصویر حذف شود؟', { body: 'این کار برگشت‌پذیر نیست.', confirmLabel: 'حذف' }))) return
+    await edit.apply(d => {
+      const albums = [...(d.albums ?? [])]
+      const at = Math.min(albumIdx, albums.length - 1)
+      if (!albums[at]) return d
+      albums[at] = { ...albums[at]!, photos: albums[at]!.photos.filter((_, k) => k !== i) }
+      return { ...d, albums }
+    })
+    closeLb()
+  }
 
   /* گالری: آلبوم فعال + لایت‌باکس */
   const [albumIdx, setAlbumIdx] = useState(0)
@@ -315,7 +357,22 @@ export default function TechnicianProfilePage() {
                   <span style={{ fontSize: 10.5, color: MUT }}>{faDigits(a.photos.length)}</span>
                 </button>
               ))}
+              {edit.isOwner && (
+                <>
+                  <input ref={fileRef} type="file" accept="image/*" multiple hidden
+                    onChange={e => { if (e.target.files?.length) void addPhotos(e.target.files); e.target.value = '' }} />
+                  <button type="button" disabled={edit.saving} onClick={() => fileRef.current?.click()}
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: 6, minHeight: 38, padding: '0 14px', borderRadius: 10, cursor: 'pointer', fontFamily: 'inherit', fontSize: 12.5, fontWeight: 800, background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.34)', color: GOLD_D }}>
+                    <Plus size={14} />افزودن تصویر
+                  </button>
+                  <button type="button" disabled={edit.saving} onClick={() => void addAlbum()}
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: 6, minHeight: 38, padding: '0 14px', borderRadius: 10, cursor: 'pointer', fontFamily: 'inherit', fontSize: 12.5, fontWeight: 800, background: '#fff', border: `1px solid ${LINE}`, color: SEC }}>
+                    <Plus size={14} />آلبوم تازه
+                  </button>
+                </>
+              )}
             </div>
+            {edit.error && <p role="alert" style={{ fontSize: 12, color: '#b91c1c', margin: '0 0 10px' }}>{edit.error}</p>}
             <p style={{ fontSize: 12.5, color: MUT, margin: '0 0 14px', lineHeight: 1.8 }}>{album.desc}</p>
             {/* Masonry */}
             <div className="tp-gal">
@@ -370,6 +427,12 @@ export default function TechnicianProfilePage() {
                 style={{ width: 38, height: 38, borderRadius: 10, border: '1px solid rgba(255,255,255,0.25)', background: 'rgba(255,255,255,0.08)', color: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 {zoomed ? <ZoomOut size={16} /> : <ZoomIn size={16} />}
               </button>
+              {edit.isOwner && (
+                <button onClick={() => void deletePhoto(lightbox)} aria-label="حذف این مورد" disabled={edit.saving}
+                  style={{ width: 38, height: 38, borderRadius: 10, border: '1px solid rgba(220,38,38,0.35)', background: 'rgba(220,38,38,0.12)', color: '#fca5a5', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Trash2 size={16} />
+                </button>
+              )}
               <button onClick={closeLb} aria-label="بستن"
                 style={{ width: 38, height: 38, borderRadius: 10, border: '1px solid rgba(255,255,255,0.25)', background: 'rgba(255,255,255,0.08)', color: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <X size={17} />

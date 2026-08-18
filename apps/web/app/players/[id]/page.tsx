@@ -8,7 +8,7 @@
    آلبوم‌دار + لایت‌باکس → پیوند با اخبار و بیلیارد مدیا.
    ───────────────────────────────────────────────────────────── */
 
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { ProfileMissing, ProfileLoading } from '@/components/profile/ProfileMissing'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
@@ -16,9 +16,13 @@ import { createPortal } from 'react-dom'
 import {
   MapPin, ChevronLeft, ChevronRight, ArrowLeft, X, ZoomIn, ZoomOut,
   Trophy, Images, Building2, Newspaper, Clapperboard,
+  Plus, Trash2,
 } from 'lucide-react'
 import { getPlayer, DISCIPLINE_LABEL, TONES, faDigits, type Player } from '../../../lib/players-data'
 import { getPlayerProfile, profileToPlayer, type PlayerProfile } from '../../../lib/player-store'
+import { useOwnerEdit } from '../../../lib/profiles/use-owner-edit'
+import { compressImage } from '../../../lib/seller-store'
+import { askText, ask } from '../../../lib/ui/dialogs'
 import { fetchProfileResult } from '../../../lib/profiles/client'
 import VerifiedBadge from '../../../components/VerifiedBadge'
 import PendingNotice from '../../../components/profile/PendingNotice'
@@ -58,6 +62,12 @@ export default function PlayerProfilePage() {
      باید بداند دیگران نمی‌بینندش، وگرنه لینک را جایی می‌فرستد
      که همه «پیدا نشد» می‌گیرند. */
   const [pending, setPending] = useState(false)
+  /* ── چرا پروفایلِ خام هم نگه داشته می‌شود ──
+     `stored` نمای *نگاشت‌شده* است (`Player`)، و ذخیره باید همان
+     شکلی برگردد که پنل می‌نویسد (`PlayerProfile`). بدونِ نگه‌داشتنِ
+     خام، ویرایشِ درجا داده را بازنویسیِ ناقص می‌کرد. */
+  const [rawP, setRawP]       = useState<PlayerProfile | null>(null)
+  const [ownerId, setOwnerId] = useState<string | null>(null)
   /* شبکه شکست، نه اینکه پروفایل نباشد */
   const [netFail, setNetFail] = useState(false)
   const [reloadKey, setReloadKey] = useState(0)
@@ -91,7 +101,9 @@ export default function PlayerProfilePage() {
         if (r.state === 'found') {
           const p = r.profile
           setPending(p.status !== 'approved')
-          setStored(profileToPlayer({ ...p.data, slug: p.slug, verified: p.verified } as PlayerProfile))
+          const raw = { ...p.data, slug: p.slug, verified: p.verified } as PlayerProfile
+          setRawP(raw); setOwnerId(p.ownerId)
+          setStored(profileToPlayer(raw))
         } else if (r.state === 'error') {
           /* کشِ محلی می‌ماند؛ فقط اگر چیزی هم در کش نبود، پیامِ
              خطای شبکه نشان داده می‌شود نه «پیدا نشد». */
@@ -110,6 +122,42 @@ export default function PlayerProfilePage() {
   }, [id, staticPlayer, reloadKey])
 
   const player = staticPlayer ?? stored
+
+  /* ⚠️ پیش از هر `return`ِ شرطی. یک‌بار در صفحه‌ی مربی پایین‌تر
+     نوشته شد و صفحه با React #310 سفید شد. */
+  const edit = useOwnerEdit<PlayerProfile>('player', id, rawP, ownerId, raw => {
+    setRawP(raw); setStored(profileToPlayer(raw))
+  })
+  const fileRef = useRef<HTMLInputElement>(null)
+
+  /* آلبومِ بازیکن `{id,title,photos:string[]}` است — عکس مستقیم داخلِ
+     همان آلبومِ فعال می‌نشیند. */
+  const addPhotos = async (files: FileList) => {
+    const urls = await Promise.all([...files].map(fl => compressImage(fl, 1000, 0.68)))
+    await edit.apply(d => {
+      const albums = [...(d.albums ?? [])]
+      if (!albums.length) albums.push({ id: `a${Date.now()}`, title: 'گالری', photos: [] })
+      const at = Math.min(albumIdx, albums.length - 1)
+      albums[at] = { ...albums[at]!, photos: [...albums[at]!.photos, ...urls] }
+      return { ...d, albums }
+    })
+  }
+  const addAlbum = async () => {
+    const title = (await askText('آلبوم تازه', { placeholder: 'مثلاً: مسابقات کشوری' }))?.trim()
+    if (!title) return
+    await edit.apply(d => ({ ...d, albums: [...(d.albums ?? []), { id: `a${Date.now()}`, title, photos: [] }] }))
+  }
+  const deletePhoto = async (i: number) => {
+    if (!(await ask('این تصویر حذف شود؟', { body: 'این کار برگشت‌پذیر نیست.', confirmLabel: 'حذف' }))) return
+    await edit.apply(d => {
+      const albums = [...(d.albums ?? [])]
+      const at = Math.min(albumIdx, albums.length - 1)
+      if (!albums[at]) return d
+      albums[at] = { ...albums[at]!, photos: albums[at]!.photos.filter((_, k) => k !== i) }
+      return { ...d, albums }
+    })
+    closeLb()
+  }
 
   const [albumIdx, setAlbumIdx] = useState(0)
   const [lightbox, setLightbox] = useState<number | null>(null)
@@ -371,7 +419,23 @@ export default function PlayerProfilePage() {
                   <span style={{ fontSize: 10.5, color: MUT }}>{faDigits(a.photos.length)}</span>
                 </button>
               ))}
+              {/* «+» فقط برای صاحبِ پروفایل — بدونِ رفتن به داشبورد */}
+              {edit.isOwner && (
+                <>
+                  <input ref={fileRef} type="file" accept="image/*" multiple hidden
+                    onChange={e => { if (e.target.files?.length) void addPhotos(e.target.files); e.target.value = '' }} />
+                  <button type="button" disabled={edit.saving} onClick={() => fileRef.current?.click()}
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: 6, minHeight: 38, padding: '0 14px', borderRadius: 10, cursor: 'pointer', fontFamily: 'inherit', fontSize: 12.5, fontWeight: 800, background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.34)', color: GOLD_D }}>
+                    <Plus size={14} />افزودن تصویر
+                  </button>
+                  <button type="button" disabled={edit.saving} onClick={() => void addAlbum()}
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: 6, minHeight: 38, padding: '0 14px', borderRadius: 10, cursor: 'pointer', fontFamily: 'inherit', fontSize: 12.5, fontWeight: 800, background: '#fff', border: `1px solid ${LINE}`, color: SEC }}>
+                    <Plus size={14} />آلبوم تازه
+                  </button>
+                </>
+              )}
             </div>
+            {edit.error && <p role="alert" style={{ fontSize: 12, color: '#b91c1c', marginBottom: 10 }}>{edit.error}</p>}
             <div className="pa-gal">
               {photos.map((src, i) => (
                 <button key={`${album.id}-${i}`} onClick={() => setLightbox(i)} aria-label={`تصویر ${faDigits(i + 1)}`}>
@@ -436,6 +500,13 @@ export default function PlayerProfilePage() {
                 style={{ width: 38, height: 38, borderRadius: 10, border: '1px solid rgba(255,255,255,0.25)', background: 'rgba(255,255,255,0.08)', color: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 {zoomed ? <ZoomOut size={16} /> : <ZoomIn size={16} />}
               </button>
+              {/* حذف از داخلِ نما — فقط برای صاحبِ پروفایل */}
+              {edit.isOwner && (
+                <button onClick={() => void deletePhoto(lightbox)} aria-label="حذف این مورد" disabled={edit.saving}
+                  style={{ width: 38, height: 38, borderRadius: 10, border: '1px solid rgba(220,38,38,0.35)', background: 'rgba(220,38,38,0.12)', color: '#fca5a5', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Trash2 size={16} />
+                </button>
+              )}
               <button onClick={closeLb} aria-label="بستن"
                 style={{ width: 38, height: 38, borderRadius: 10, border: '1px solid rgba(255,255,255,0.25)', background: 'rgba(255,255,255,0.08)', color: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <X size={17} />
