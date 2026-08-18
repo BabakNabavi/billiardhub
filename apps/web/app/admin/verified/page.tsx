@@ -246,7 +246,7 @@ export default function AdminVerifiedPage() {
           <div>
             <span style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.24em', color: MUT }}>VERIFIED BADGE</span>
             <h1 style={{ fontSize: 'clamp(18px,2.4vw,22px)', fontWeight: 900, margin: '4px 0 0', display: 'flex', alignItems: 'center', gap: 6 }}>
-              تیک آبی <VerifiedBadge size={19} title="" style={{ marginInlineStart: 0 }} />
+              تیک آبی <VerifiedBadge title="" style={{ marginInlineStart: 0 }} />
             </h1>
             <p style={{ fontSize: 12.5, color: MUT, margin: '6px 0 0', lineHeight: 1.9, maxWidth: 560 }}>
               اعطا و پس‌گرفتنِ تیک برای هر هفت نقش. تیک یعنی «مدرکش دیده و تأیید شده»؛

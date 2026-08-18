@@ -194,7 +194,13 @@ function RefereeHeroSlider() {
           </div>
         </div>
 
-        <div style={{ position:'absolute', bottom:14, left:'clamp(24px,6vw,80px)', zIndex:6, display:'flex', gap:7 }}>
+        {/* ── نشانگرِ اسلاید دیده نمی‌شود ──
+            آن دایره‌های ریزِ گوشه‌ی تصویر روی هدر شلوغی می‌کردند و
+            هیچ‌کس رویشان کلیک نمی‌کرد؛ اسلایدر خودش می‌چرخد. حذفِ
+            کاملشان ولی کاربرِ کیبورد و صفحه‌خوان را از تغییرِ اسلاید
+            محروم می‌کرد، پس فقط از دید پنهان شده‌اند و با فوکوس
+            دوباره ظاهر می‌شوند. */}
+        <div className="hero-dots" style={{ position:'absolute', bottom:14, left:'clamp(24px,6vw,80px)', zIndex:6, display:'flex', gap:7 }}>
           {REFEREE_SLIDES.map((_, i) => (
             <button key={i} onClick={() => advance(i)} aria-label={`اسلاید ${i+1}`} style={{ width: i===active?24:7, height:7, borderRadius:4, border:'none', cursor:'pointer', padding:0, background: i===active?'#C7A66A':'rgba(255,255,255,0.32)', transition:'all 0.4s cubic-bezier(0.22,1,0.36,1)' }}/>
           ))}
@@ -247,7 +253,7 @@ function RefereeCard({ referee, view, idx }: { referee: Referee; view: 'grid' | 
           <RefereeAvatar referee={referee} size="58px"/>
         </div>
         <div style={{ flex:1, minWidth:0 }}>
-          <h3 style={{ fontSize:15, fontWeight:800, color:TEXT, lineHeight:1.2, letterSpacing:'-0.02em', marginBottom:2, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{referee.name}{referee.verified && <VerifiedBadge size={14} />}</h3>
+          <h3 style={{ fontSize:15, fontWeight:800, color:TEXT, lineHeight:1.2, letterSpacing:'-0.02em', marginBottom:2, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{referee.name}{referee.verified && <VerifiedBadge style={{ verticalAlign: '-0.18em' }} />}</h3>
           <p style={{ fontSize:12, color:TEXT_S, marginBottom:5 }}>داور {sp?.label ?? 'بیلیارد'}</p>
           <div style={{ display:'flex', alignItems:'center', gap:5, color:TEXT_M }}>
             <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
@@ -285,7 +291,7 @@ function RefereeCard({ referee, view, idx }: { referee: Referee; view: 'grid' | 
       </div>
       {/* body */}
       <div style={{ padding:'12px 14px 18px', flex:1, display:'flex', flexDirection:'column', alignItems:'center', textAlign:'center' }}>
-        <h3 style={{ fontSize:16, fontWeight:800, color:TEXT, lineHeight:1.2, letterSpacing:'-0.02em', marginBottom:4 }}>{referee.name}{referee.verified && <VerifiedBadge size={15} />}</h3>
+        <h3 style={{ fontSize:16, fontWeight:800, color:TEXT, lineHeight:1.2, letterSpacing:'-0.02em', marginBottom:4 }}>{referee.name}{referee.verified && <VerifiedBadge />}</h3>
         <p style={{ fontSize:12.5, color:TEXT_S, lineHeight:1.35, marginBottom:9, minHeight:'2.7em', display:'-webkit-box', WebkitLineClamp:2, WebkitBoxOrient:'vertical', overflow:'hidden' }}>داور {sp?.label ?? 'بیلیارد'}</p>
         <div style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:5, marginBottom:13, color:TEXT_M }}>
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>

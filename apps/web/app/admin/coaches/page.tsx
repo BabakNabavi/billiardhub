@@ -128,7 +128,7 @@ export default function AdminCoachesPage() {
                     <div style={{ flex: 1, minWidth: 160 }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 7, flexWrap: 'wrap' }}>
                         <span style={{ fontSize: 15.5, fontWeight: 800 }}>{c.firstNameFa} {c.lastNameFa}</span>
-                        {c.verified && <VerifiedBadge size={16} title="تیک آبی" style={{ marginInlineStart: 0 }} />}
+                        {c.verified && <VerifiedBadge title="تیک آبی" style={{ marginInlineStart: 0 }} />}
                         {c.freeCoach && c.status === 'approved' && !c.verified && (
                           <span style={{ fontSize: 10.5, fontWeight: 700, color: TEXT_S, background: 'rgba(17,17,16,0.05)', border: CBOR, borderRadius: 20, padding: '2px 8px' }}>مربی آزاد</span>
                         )}
@@ -192,7 +192,7 @@ export default function AdminCoachesPage() {
                       disabled={!hasCert}
                       title={hasCert ? '' : 'ابتدا مربی باید مدرک آپلود کند'}
                       style={{ ...btn('rgba(0,149,246,0.10)', '#0095F6', '1px solid rgba(0,149,246,0.28)'), opacity: hasCert ? 1 : 0.45, cursor: hasCert ? 'pointer' : 'not-allowed' }}>
-                      <VerifiedBadge size={14} title="" style={{ marginInlineStart: 0 }} />
+                      <VerifiedBadge title="" style={{ marginInlineStart: 0 }} />
                       اعطای تیک آبی تایید
                     </button>
                     <button onClick={() => act(c.slug, { status: 'approved', verified: false, freeCoach: true })} style={btn('rgba(17,17,16,0.04)', TEXT_S, CBOR)}>

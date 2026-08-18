@@ -138,7 +138,7 @@ export default function ProfileAdmin({
                 </span>
                 <div style={{ minWidth: 0, flex: 1 }}>
                   <div style={{ fontSize: 13.5, fontWeight: 900, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                    {r.title}{r.verified && <VerifiedBadge size={14} title="تیک آبی دارد" />}
+                    {r.title}{r.verified && <VerifiedBadge title="تیک آبی دارد" />}
                   </div>
                   <div style={{ fontSize: 11.5, color: MUT, marginTop: 3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.subtitle}</div>
                 </div>
@@ -186,7 +186,7 @@ export default function ProfileAdmin({
                       })}>
                       {r.verified
                         ? <ShieldOff size={14} />
-                        : <VerifiedBadge size={14} title="" style={{ marginInlineStart: 0 }} />}
+                        : <VerifiedBadge title="" style={{ marginInlineStart: 0 }} />}
                       {r.verified ? 'برداشتن تیک آبی' : 'اعطای تیک آبی'}
                     </button>
                   )}

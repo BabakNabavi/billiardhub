@@ -15,10 +15,15 @@
 
    برچسبِ «PROFESSIONAL COACH» هم برداشته شد: عنوانِ ثابتی که برای
    همه یکی بود و چیزی درباره‌ی این آدم نمی‌گفت.
+
+   ── چرا دکمه‌های تماس این‌جا نیستند ──
+   تماس و واتساپ از هیرو برداشته شدند. راه‌های ارتباطی جای خودشان را
+   در ستونِ کناری دارند و تکرارشان روی کاور، هیرو را از «معرفیِ یک
+   آدم» به «نوارِ دکمه» تبدیل می‌کرد.
    ───────────────────────────────────────────────────────────── */
 
 import Link from 'next/link'
-import { MapPin, Phone } from 'lucide-react'
+import { MapPin } from 'lucide-react'
 import VerifiedBadge from '../VerifiedBadge'
 import CoverPoster from './CoverPoster'
 import RoleGlyph, { type RoleGlyphKind } from './RoleGlyph'
@@ -38,8 +43,6 @@ export interface ProfileHeroProps {
   grade?: { label: string; dots: number }
   /** چیپِ رشته‌ها. خنثی است: تنها تأکیدِ رنگیِ هیرو، طلاییِ درجه است. */
   disciplines: { label: string }[]
-  phone?: string
-  whatsapp?: string
   /** بزرگ‌نماییِ عکسِ پروفایل — نبودنش یعنی آواتار کلیک‌شدنی نباشد */
   onOpenPhoto?: (url: string) => void
   /** نقشِ صاحبِ پروفایل: نشانِ جای‌گزینِ آواتار و رنگِ پوستر */
@@ -51,7 +54,7 @@ export interface ProfileHeroProps {
 
 export default function ProfileHero({
   name, nameLatin, city, sinceYear, photo, cover, verified,
-  grade, disciplines, phone, whatsapp, onOpenPhoto,
+  grade, disciplines, onOpenPhoto,
   role, backHref, backLabel,
 }: ProfileHeroProps) {
   /* نبودِ عکس دیگر یک حرفِ تنها نیست */
@@ -107,9 +110,8 @@ export default function ProfileHero({
                 {tail}
                 {verified && (
                   <VerifiedBadge
-                    size={22}
                     title={`${role === 'coach' ? 'مربی' : 'داور'} تأیید شده`}
-                    style={{ width: '0.42em', height: '0.42em', marginInlineStart: '0.14em', verticalAlign: '-0.04em' }}
+                    style={{ width: '0.56em', height: '0.56em', marginInlineStart: '0.16em', verticalAlign: '-0.06em' }}
                   />
                 )}
               </span>
@@ -141,24 +143,6 @@ export default function ProfileHero({
             </p>
           </div>
 
-          {(phone || whatsapp) && (
-            <div className="ch-cta">
-              {phone && (
-                <a href={`tel:${phone}`} className="ch-btn ch-btn-gold">
-                  <Phone size={15} aria-hidden />تماس
-                </a>
-              )}
-              {whatsapp && (
-                <a href={`https://wa.me/${whatsapp}`} target="_blank" rel="noopener noreferrer"
-                  className="ch-btn ch-btn-ghost">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-                    <path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.77.46 3.45 1.28 4.9L2 22l5.32-1.39a9.9 9.9 0 004.72 1.2h.01c5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.13-2.9-7A9.82 9.82 0 0012.04 2z" />
-                  </svg>
-                  واتساپ
-                </a>
-              )}
-            </div>
-          )}
         </div>
       </div>
     </header>

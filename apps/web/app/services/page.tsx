@@ -55,7 +55,7 @@ function TechCard({ t, i }: { t: Technician; i: number }) {
       </div>
 
       <div style={{ padding: '16px 18px 15px', display: 'flex', flexDirection: 'column', gap: 4, flex: 1 }}>
-        <h3 style={{ fontSize: 15.5, fontWeight: 900, margin: 0, color: TEXT, letterSpacing: '-0.01em' }}>{t.name}{t.verified && <VerifiedBadge size={14} title="متخصص تأیید شده" />}</h3>
+        <h3 style={{ fontSize: 15.5, fontWeight: 900, margin: 0, color: TEXT, letterSpacing: '-0.01em' }}>{t.name}{t.verified && <VerifiedBadge title="متخصص تأیید شده" />}</h3>
         <span style={{ fontSize: 12, fontWeight: 700, color: GOLD_D }}>{t.title}</span>
         <div style={{ height: 1, background: '#F0EDE5', margin: '9px 0' }} />
         <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: SEC }}>

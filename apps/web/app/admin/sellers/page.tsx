@@ -115,7 +115,7 @@ export default function AdminSellersPage() {
                       <div style={{ display: 'flex', alignItems: 'center', gap: 7, flexWrap: 'wrap' }}>
                         <span style={{ fontSize: 15.5, fontWeight: 800 }}>{s.title || '(بدون نام)'}</span>
                         {s.verified && (
-                          <VerifiedBadge size={16} title="تیک آبی" style={{ marginInlineStart: 0 }} />
+                          <VerifiedBadge title="تیک آبی" style={{ marginInlineStart: 0 }} />
                         )}
                       </div>
                       <div style={{ fontSize: 12, color: TEXT_S, marginTop: 3 }}>
@@ -176,7 +176,7 @@ export default function AdminSellersPage() {
                       disabled={!hasCert}
                       title={hasCert ? '' : 'ابتدا فروشنده باید جواز کسب آپلود کند'}
                       style={{ ...btn('rgba(0,149,246,0.10)', '#0095F6', '1px solid rgba(0,149,246,0.28)'), opacity: hasCert ? 1 : 0.45, cursor: hasCert ? 'pointer' : 'not-allowed' }}>
-                      <VerifiedBadge size={14} title="" style={{ marginInlineStart: 0 }} />
+                      <VerifiedBadge title="" style={{ marginInlineStart: 0 }} />
                       اعطای تیک آبی تایید
                     </button>
                     <button onClick={() => act(s.slug, { status: 'rejected' })} style={{ ...btn('transparent', '#b91c1c', '1px solid rgba(239,68,68,0.24)'), marginInlineStart: 'auto' }}>

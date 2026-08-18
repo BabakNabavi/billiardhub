@@ -319,7 +319,7 @@ function SellerCard({ seller, view }: { seller: typeof SELLERS[0]; view: 'grid' 
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
             <h3 style={{ fontSize: 16, fontWeight: 800, color: TEXT, margin: 0 }}>
               <Link href={`/sellers/${seller.id}`} className="sel-card-link">{seller.name}</Link>
-              {seller.verified && <VerifiedBadge size={15} title="فروشگاه تأیید شده" />}
+              {seller.verified && <VerifiedBadge title="فروشگاه تأیید شده" />}
             </h3>
           </div>
           {/* ارتفاع ثابت برای توضیح و برندها ⇒ همه‌ی ردیف‌ها هم‌اندازه */}
@@ -370,7 +370,7 @@ function SellerCard({ seller, view }: { seller: typeof SELLERS[0]; view: 'grid' 
         <div style={{ margin: '0 0 5px' }}>
           <h3 style={{ fontSize: 16, fontWeight: 800, color: TEXT, margin: 0, lineHeight: 1.35 }}>
             <Link href={`/sellers/${seller.id}`} className="sel-card-link">{seller.name}</Link>
-            {seller.verified && <VerifiedBadge size={15} title="فروشگاه تأیید شده" />}
+            {seller.verified && <VerifiedBadge title="فروشگاه تأیید شده" />}
           </h3>
         </div>
 

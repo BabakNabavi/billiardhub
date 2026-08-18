@@ -470,7 +470,7 @@ export default function ClubProfilePage() {
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
                   <h1 style={{ fontSize: 'clamp(22px, 5.5vw, 55px)', fontWeight: 900, color: '#fff', margin: 0, letterSpacing: '-0.03em', lineHeight: 1.05 }}>{club.name}</h1>
                   {club.verificationStatus === 'verified' && (
-                    <VerifiedBadge size={28} title="باشگاه تأیید شده" style={{ marginInlineStart: 0 }} />
+                    <VerifiedBadge title="باشگاه تأیید شده" style={{ marginInlineStart: 0 }} />
                   )}
                 </div>
                 {club.managerName && (

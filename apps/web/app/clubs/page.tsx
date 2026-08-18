@@ -244,7 +244,7 @@ function ClubCard({ club, view, idx = 0, tournaments = [] }: { club: Club; view:
                 تیکِ داخلِ h3 هم با آن حذف می‌شد. */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 4, minWidth: 0 }}>
               <h3 style={{ fontSize: 16, fontWeight: 800, color: '#111111', margin: 0, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{club.name}</h3>
-              {club.isVerified && <VerifiedBadge size={15} title="باشگاه تأیید شده" style={{ marginInlineStart: 0 }} />}
+              {club.isVerified && <VerifiedBadge title="باشگاه تأیید شده" style={{ marginInlineStart: 0 }} />}
             </div>
             {club.rating && (
               <div style={{ display: 'flex', alignItems: 'center', gap: 3, flexShrink: 0, background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.2)', borderRadius: 20, padding: '3px 8px' }}>
@@ -360,7 +360,7 @@ function ClubCard({ club, view, idx = 0, tournaments = [] }: { club: Club; view:
             {/* این عنوان می‌پیچد، پس تیک داخلِ h3 می‌آید تا دنبالِ
                 آخرین کلمه بماند و تنها به خطِ بعد نیفتد. */}
             <h3 style={{ fontSize: 16, fontWeight: 800, color: '#111111', margin: 0, lineHeight: 1.25 }}>
-              {club.name}{club.isVerified && <VerifiedBadge size={15} title="باشگاه تأیید شده" />}
+              {club.name}{club.isVerified && <VerifiedBadge title="باشگاه تأیید شده" />}
             </h3>
             {club.rating && (
               <div style={{ display: 'flex', alignItems: 'center', gap: 2, flexShrink: 0 }}>

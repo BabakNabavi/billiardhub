@@ -174,7 +174,13 @@ function CoachHeroSlider() {
           </div>
         </div>
 
-        <div style={{ position:'absolute', bottom:14, left:'clamp(24px,6vw,80px)', zIndex:6, display:'flex', gap:7 }}>
+        {/* ── نشانگرِ اسلاید دیده نمی‌شود ──
+            آن دایره‌های ریزِ گوشه‌ی تصویر روی هدر شلوغی می‌کردند و
+            هیچ‌کس رویشان کلیک نمی‌کرد؛ اسلایدر خودش می‌چرخد. حذفِ
+            کاملشان ولی کاربرِ کیبورد و صفحه‌خوان را از تغییرِ اسلاید
+            محروم می‌کرد، پس فقط از دید پنهان شده‌اند و با فوکوس
+            دوباره ظاهر می‌شوند. */}
+        <div className="hero-dots" style={{ position:'absolute', bottom:14, left:'clamp(24px,6vw,80px)', zIndex:6, display:'flex', gap:7 }}>
           {COACH_SLIDES.map((_, i) => (
             <button key={i} onClick={() => advance(i)} aria-label={`اسلاید ${i+1}`} style={{ width: i===active?24:7, height:7, borderRadius:4, border:'none', cursor:'pointer', padding:0, background: i===active?'#C7A66A':'rgba(255,255,255,0.32)', transition:'all 0.4s cubic-bezier(0.22,1,0.36,1)' }}/>
           ))}
@@ -229,7 +235,7 @@ function CoachCard({ coach, view, idx }: { coach: Coach; view: 'grid' | 'list'; 
         <div style={{ flex:1, minWidth:0 }}>
           <div style={{ display:'flex', alignItems:'center', gap:5, marginBottom:2, minWidth:0 }}>
             <h3 style={{ fontSize:15, fontWeight:800, color:TEXT, lineHeight:1.2, letterSpacing:'-0.02em', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{coach.name}</h3>
-            {coach.verified && <VerifiedBadge size={14} title="مربی تأیید شده" style={{ marginInlineStart: 0 }} />}
+            {coach.verified && <VerifiedBadge title="مربی تأیید شده" style={{ marginInlineStart: 0 }} />}
           </div>
           <p style={{ fontSize:12, color:TEXT_S, marginBottom:5 }}>مربی {coach.disciplines && coach.disciplines.length ? coach.disciplines.map(d => SPECS[d]?.label ?? d).join(' · ') : (sp?.label ?? 'بیلیارد')}</p>
           <div style={{ display:'flex', alignItems:'center', gap:5, color:TEXT_M }}>
@@ -270,7 +276,7 @@ function CoachCard({ coach, view, idx }: { coach: Coach; view: 'grid' | 'list'; 
       <div style={{ padding:'12px 14px 18px', flex:1, display:'flex', flexDirection:'column', alignItems:'center', textAlign:'center' }}>
         <div style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:5, marginBottom:4 }}>
           <h3 style={{ fontSize:16, fontWeight:800, color:TEXT, lineHeight:1.2, letterSpacing:'-0.02em' }}>{coach.name}</h3>
-          {coach.verified && <VerifiedBadge size={15} title="مربی تأیید شده" style={{ marginInlineStart: 0 }} />}
+          {coach.verified && <VerifiedBadge title="مربی تأیید شده" style={{ marginInlineStart: 0 }} />}
         </div>
         <p style={{ fontSize:12.5, color:TEXT_S, lineHeight:1.35, marginBottom:9, minHeight:'2.7em', display:'-webkit-box', WebkitLineClamp:2, WebkitBoxOrient:'vertical', overflow:'hidden' }}>مربی {coach.disciplines && coach.disciplines.length ? coach.disciplines.map(d => SPECS[d]?.label ?? d).join(' · ') : (sp?.label ?? 'بیلیارد')}</p>
         <div style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:5, marginBottom:13, color:TEXT_M }}>

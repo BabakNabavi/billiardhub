@@ -47,7 +47,7 @@ export default function VerifiedRow({ row, busy, onToggle }: {
 
       <div style={{ minWidth: 0, flex: 1 }}>
         <div style={{ fontSize: 13.5, fontWeight: 900, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-          {row.name}{row.verified && <VerifiedBadge size={14} title="تیک آبی دارد" />}
+          {row.name}{row.verified && <VerifiedBadge title="تیک آبی دارد" />}
         </div>
         <div style={{ fontSize: 11.5, color: MUT, marginTop: 3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
           {row.sub}
@@ -109,7 +109,7 @@ export default function VerifiedRow({ row, busy, onToggle }: {
             }}>
             {busy
               ? <Loader2 size={13} className="animate-spin" />
-              : <VerifiedBadge size={14} title="" style={{ marginInlineStart: 0 }} />}
+              : <VerifiedBadge title="" style={{ marginInlineStart: 0 }} />}
             اعطای تیک
           </button>
         )}

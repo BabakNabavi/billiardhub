@@ -332,3 +332,7 @@ main.ch-col > section { max-width: 760px; }
    محتوا پنهان باشد، مطمئن اعلام نمی‌شود. عنصر می‌ماند و فقط
    ارتفاعِ یک خط رزرو می‌شود تا چیزی هم جابه‌جا نشود. */
 .ch-sr-live { margin: 8px 0 0; font-size: 11px; line-height: 1.5; min-height: 1.5em; color: var(--text-tertiary, #6E6E6E); }
+
+/* توضیحِ زیرِ «آدرس اختصاصی» — بدونِ آن، یک نشانیِ لخت روی کارت
+   می‌نشست و معلوم نبود به چه درد می‌خورد. */
+.ch-url-hint { margin: 0 0 10px; font-size: 11px; line-height: 1.7; color: var(--text-tertiary, #6E6E6E); }

@@ -697,7 +697,7 @@ export default function FlatShop() {
             </button>
 
             {/* نام، شهر (با دکمه‌ی تلفن روبه‌رویش سمت چپ)، توضیحات — زیر هم */}
-            <h2 className="mt-3 text-[17px] font-bold text-[#1C1B17] sm:text-[19px]">{store.title}{store.verified && <VerifiedBadge size={16} title="فروشگاه تأیید شده" />}</h2>
+            <h2 className="mt-3 text-[17px] font-bold text-[#1C1B17] sm:text-[19px]">{store.title}{store.verified && <VerifiedBadge title="فروشگاه تأیید شده" />}</h2>
             <div className="mt-1.5 flex flex-wrap items-center justify-between gap-2">
               <div className="flex items-center gap-1.5 text-[12.5px] text-[#6F6A5C]">
                 <span className="text-[#14532D]">{Icon.pin}</span>{[store.province, store.city].filter(Boolean).join('، ')}

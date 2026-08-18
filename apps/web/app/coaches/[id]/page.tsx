@@ -222,8 +222,6 @@ export default function CoachProfilePage() {
         verified={coach.verified}
         grade={grade}
         disciplines={disciplines}
-        phone={coach.phone}
-        whatsapp={coach.whatsapp}
         onOpenPhoto={u => openImage(u, { title: coach.name, alt: `عکس ${coach.name}` })}
         role="coach" backHref="/coaches" backLabel="مربیان"
       />
@@ -298,9 +296,11 @@ export default function CoachProfilePage() {
 
             <section className="ch-card" aria-labelledby="ch-url-h">
               <div className="ch-sec-head">
-                <h2 id="ch-url-h">نشانی عمومی</h2>
+                <h2 id="ch-url-h">آدرس اختصاصی</h2>
+                <span className="en">MY LINK</span>
                 <span className="rule" aria-hidden />
               </div>
+              <p className="ch-url-hint">نشانی صفحه‌ی شخصی شما در بیلیارد هاب — برای معرفی خودتان همین را بفرستید.</p>
               <div className="ch-url">
                 <code id="ch-url-code" dir="ltr">{publicUrl}</code>
                 <button type="button" onClick={copyUrl} className="ch-url-copy"

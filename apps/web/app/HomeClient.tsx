@@ -430,7 +430,7 @@ function ClubCard({ club, h = '360px', featured = false }: { club: RealClub; h?:
             overflow: 'hidden', gap: '3px',
           }}>
             <div style={{ fontSize: featured ? '17px' : '14px', fontWeight: 800, color: '#1a1a1a', letterSpacing: '-0.02em', lineHeight: 1.2 }}>
-              {club.name}{club.verified && <VerifiedBadge size={featured ? 15 : 13} title="باشگاه تأیید شده" />}
+              {club.name}{club.verified && <VerifiedBadge title="باشگاه تأیید شده" />}
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '3px' }}>
               <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'rgba(0,0,0,0.40)', fontSize: '12px' }}>
@@ -492,7 +492,7 @@ function ClubCard({ club, h = '360px', featured = false }: { club: RealClub; h?:
             <div style={{ fontSize: '16.5px', fontWeight: 800, color: '#1a1a1a',
               letterSpacing: '-0.02em', textAlign: 'center', lineHeight: 1.2 }}>
               {club.name.replace(/^باشگاه\s+/, '')}
-              {club.verified && <VerifiedBadge size={14} title="باشگاه تأیید شده" />}
+              {club.verified && <VerifiedBadge title="باشگاه تأیید شده" />}
             </div>
             {/* تعداد میزها به‌جای امتیاز — فقط وقتی باشگاه اعلامش کرده */}
             {club.tables > 0 && (
@@ -653,7 +653,7 @@ function SellerCard({ s }: { s: RealStore }) {
       {/* Info */}
       <div style={{ padding: '14px 14px 16px', textAlign: 'center' }}>
         <div style={{ fontSize: '14px', fontWeight: 800, color: TEXT, lineHeight: 1.3 }}>
-          {s.name}{s.verified && <VerifiedBadge size={13} title="فروشگاه تأیید شده" />}
+          {s.name}{s.verified && <VerifiedBadge title="فروشگاه تأیید شده" />}
         </div>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '3px', marginTop: '3px', fontSize: '11px', color: TEXT_M }}>
           <MapPin size={9} style={{ color: GOLD }} />{s.city}

@@ -261,7 +261,7 @@ export default function PlayerProfilePage() {
                     پس فیلدشان هم از پنل برداشته شد. */}
               </div>
               <h1 style={{ fontSize: 'clamp(30px,5.4vw,58px)', fontWeight: 900, margin: 0, lineHeight: 1.25, letterSpacing: '-0.02em' }}>
-                {player.name}{player.verified && <VerifiedBadge size={24} title="بازیکن تأیید شده" />}
+                {player.name}{player.verified && <VerifiedBadge title="بازیکن تأیید شده" />}
               </h1>
               <div style={{ fontSize: 'clamp(10px,1.2vw,12px)', fontWeight: 700, letterSpacing: '0.4em', color: 'rgba(255,255,255,0.5)', marginTop: 8, direction: 'ltr', textAlign: 'right' }}>
                 {player.nameEn}

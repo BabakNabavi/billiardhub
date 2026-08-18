@@ -1695,3 +1695,10 @@ select:disabled { opacity: 0.55; cursor: not-allowed; }
   .lq-cta { transition: none; }
   .lq-cta:hover { transform: none; }
 }
+
+/* ── نشانگرِ اسلایدِ هدرِ فهرست‌ها ──
+   دیده نمی‌شود (روی تصویر شلوغی می‌کرد و اسلایدر خودکار است) ولی
+   حذف نشده: کاربرِ کیبورد باید بتواند اسلاید عوض کند، پس با فوکوس
+   برمی‌گردد. `visibility` به‌جای `display:none` تا فوکوس‌پذیر بماند. */
+.hero-dots { opacity: 0; pointer-events: none; transition: opacity .2s; }
+.hero-dots:focus-within { opacity: 1; pointer-events: auto; }

@@ -61,7 +61,7 @@ function PlayerCard({ p, i, size = 'std' }: { p: Player; i: number; size?: 'std'
 
       {/* هویت — پایین کارت */}
       <div className="pl-body">
-        <div className="pl-name">{p.name}{p.verified && <VerifiedBadge size={14} title="بازیکن تأیید شده" />}</div>
+        <div className="pl-name">{p.name}{p.verified && <VerifiedBadge title="بازیکن تأیید شده" />}</div>
         <div className="pl-name-en">{p.nameEn}</div>
         <div className="pl-meta">
           <MapPin size={11} />
