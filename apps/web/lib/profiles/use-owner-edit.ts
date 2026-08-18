@@ -22,9 +22,10 @@
    برای این کار، سطحِ حمله‌ی تازه‌ای باز می‌کرد.
    ───────────────────────────────────────────────────────────── */
 
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { saveProfileRemote, type ProfileKind } from './client'
 import { useAuthStore } from '../../store/auth.store'
+import { apiFetch, csrfToken } from '../http'
 
 export interface OwnerEdit<T> {
   /** دکمه‌های ویرایش فقط وقتی دیده می‌شوند که این درست باشد */
@@ -40,6 +41,18 @@ export interface OwnerEdit<T> {
 /* قیدِ `Record<string, unknown>` برداشته شد: تایپ‌های پروفایل
    اینترفیس‌اند و ایندکس‌سیگنچر ندارند. تبدیل در همان یک نقطه‌ی
    ارسال انجام می‌شود. */
+type MyRow = { slug?: string; ownerId?: string } | null
+
+/* ── یک پرسش به‌ازای هر نقش در هر تب ──
+   پاسخِ «ردیفِ من از این نوع» تا وقتی نشست عوض نشده ثابت است، ولی
+   بدونِ کش هر بار که کاربرِ واردشده پروفایلِ *کسِ دیگری* را باز کند
+   یک درخواستِ تازه می‌رفت. مخاطبِ این سایت موبایلِ ایرانی است؛ یک
+   درخواستِ اضافه در هر صفحه بی‌هزینه نیست.
+
+   کلید مقدارِ کوکیِ CSRF را هم دارد: با ورود یا خروج آن عوض می‌شود،
+   پس کشِ حسابِ قبلی خودبه‌خود بی‌اعتبار می‌شود. */
+const myRowCache = new Map<string, MyRow>()
+
 export function useOwnerEdit<T>(
   kind: ProfileKind,
   slug: string,
@@ -63,7 +76,93 @@ export function useOwnerEdit<T>(
 
      حالا هر کدام کافی است. اجازه‌ی واقعی همچنان روی سرور سنجیده
      می‌شود، پس نشان‌دادنِ خوش‌بینانه‌ی دکمه چیزی را باز نمی‌کند. */
-  const isOwner = serverSaysMine === true || (!!user?.id && !!ownerId && user.id === ownerId)
+  const localSaysMine = !!user?.id && !!ownerId && user.id === ownerId
+
+  /* ── نشانه‌ی سوم: پرسشِ مستقیم از سرور ──
+     دو نشانه‌ی بالا هر دو می‌توانند دروغِ *منفی* بگویند و دقیقاً همین
+     شد: روی موبایل دکمه‌ها می‌آمدند و روی دسکتاپ نه، با یک حساب.
+
+     • پرچمِ سرور روی این GETِ عمومی با توکنِ منقضی `false` می‌شود؛
+       این مسیر ۴۰۱ نمی‌دهد، پس بی‌صدا «مهمان» حساب می‌شوی. تبِ
+       دسکتاپ که ساعت‌ها باز مانده دقیقاً همین حالت است.
+     • مقایسه‌ی مرورگر به شناسه‌ی ذخیره‌شده در localStorage تکیه دارد
+       که می‌تواند کهنه یا از حسابِ دیگری باشد.
+
+     `?mine=1` مسیرِ محافظت‌شده است: با ۴۰۱ خودِ `apiFetch` نشست را
+     تازه می‌کند و دوباره می‌پرسد. پس این پاسخ قطعی است. */
+  const probeKey = `${kind}|${slug}|${ownerId ?? ''}`
+  /* مقدارِ کوکیِ نشست هم بخشی از کلید است: با ورود، خروج، یا چرخشِ
+     دوازده‌ساعته عوض می‌شود و پاسخِ نشستِ قبلی باید کنار برود. فقط
+     در وابستگی‌ها استفاده می‌شود، نه در رندر — پس ناهماهنگیِ SSR
+     نمی‌سازد. */
+  const sessKey = typeof document === 'undefined' ? '' : (csrfToken() ?? '')
+
+  /* ⚠️ نتیجه با کلیدش نگه داشته می‌شود، نه لخت. مسیرِ App Router
+     همین یک نمونه‌ی کامپوننت را بینِ `/coaches/ali` و `/coaches/reza`
+     نگه می‌دارد؛ با یک بولینِ ساده، «مالِ من است» به صفحه‌ی نفرِ بعدی
+     نشت می‌کرد و «مالِ من نیست» روی صفحه‌ی خودم قفل می‌شد. */
+  const [probe, setProbe] = useState<{ key: string; mine: boolean } | null>(null)
+  /* یک تلاشِ دوباره برای قطعیِ گذرا. بدونِ این شمارنده، آزادکردنِ
+     `asked` هیچ رندری نمی‌سازد و افکت دیگر اجرا نمی‌شود — یعنی
+     «قابلِ تلاشِ دوباره» فقط روی کاغذ بود. */
+  const [retry, setRetry] = useState(0)
+  const asked = useRef<string | null>(null)
+
+  useEffect(() => {
+    if (serverSaysMine === true || localSaysMine) return
+    /* گاردِ «آیا اصلاً نشستی هست» از کوکیِ CSRF خوانده می‌شود، نه از
+       استورِ zustand: همان استور می‌تواند پاک یا کهنه باشد — و در
+       دستگاهی که این باگ را نشان می‌داد دقیقاً همان مشکوک است. */
+    if (!ownerId || !csrfToken()) return
+    /* یک پرسش به‌ازای هر کلید. `ref` است نه state، تا دو رندرِ پشتِ هم
+       (و اجرای دوباره‌ی افکت در حالتِ سخت‌گیر) دو درخواست نسازند. */
+    if (asked.current === `${probeKey}|${sessKey}`) return
+
+    /* کلیدِ کش هنگامِ *نوشتن* دوباره خوانده می‌شود: `apiFetch` ممکن
+       است وسطِ کار نشست را تازه کند و کوکی عوض شود. */
+    const cacheKeyNow = () => `${kind}|${csrfToken() ?? ''}`
+    const matches = (row: MyRow) => !!row && row.slug === slug && row.ownerId === ownerId
+    const cached = cacheKeyNow()
+    if (myRowCache.has(cached)) {
+      asked.current = `${probeKey}|${sessKey}`
+      setProbe({ key: probeKey, mine: matches(myRowCache.get(cached) ?? null) })
+      return
+    }
+    asked.current = `${probeKey}|${sessKey}`
+
+    const ac = new AbortController()
+    let settled = false
+    void (async () => {
+      const r = await apiFetch(`/api/profiles/${kind}?mine=1`, { cache: 'no-store', signal: ac.signal }).catch(() => null)
+      if (ac.signal.aborted) return
+      /* شبکه نرسید: این «مالِ تو نیست» نیست. کلید آزاد می‌شود تا
+         تلاشِ بعدی ممکن باشد، وگرنه یک قطعیِ گذرا دکمه‌ها را تا
+         بارگذاریِ کامل پنهان می‌کرد. */
+      /* شبکه نرسید: این «مالِ تو نیست» نیست. یک‌بار دوباره تلاش
+         می‌شود؛ بیشتر نه، وگرنه مرورگرِ آفلاین حلقه می‌زند. */
+      if (!r) { asked.current = null; if (retry < 1) setRetry(n => n + 1); return }
+      /* ۴۰۱ هم کش می‌شود: نشستِ باطل با هر بازدید دو درخواست
+         می‌ساخت (یکی خودش، یکی تلاشِ تمدید). با ورودِ دوباره کوکیِ
+         CSRF عوض می‌شود و کلید هم عوض. */
+      if (!r.ok) { settled = true; myRowCache.set(cacheKeyNow(), null); setProbe({ key: probeKey, mine: false }); return }
+      const j = await r.json().catch(() => null) as { profile?: MyRow } | null
+      if (ac.signal.aborted) return
+      settled = true
+      myRowCache.set(cacheKeyNow(), j?.profile ?? null)
+      /* هر دو باید بخوانند. با «یا»، صفحه‌ای که از حافظه‌ی محلی رندر
+         شده و نامکش کهنه است می‌توانست ذخیره را روی ردیفِ زنده
+         بنشاند و نامش را عقب برگرداند. */
+      setProbe({ key: probeKey, mine: matches(j?.profile ?? null) })
+    })()
+    return () => {
+      ac.abort()
+      if (!settled && asked.current === `${probeKey}|${sessKey}`) asked.current = null
+    }
+  }, [serverSaysMine, localSaysMine, ownerId, probeKey, sessKey, kind, slug, retry])
+
+  const probeSaysMine = probe?.key === probeKey ? probe.mine : null
+
+  const isOwner = serverSaysMine === true || localSaysMine || probeSaysMine === true
 
   const apply = useCallback(async (mutate: (draft: T) => T) => {
     if (!profile || !isOwner || saving) return false
