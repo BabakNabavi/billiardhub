@@ -1,286 +1,89 @@
 'use client'
-import { useState, useEffect } from 'react'
-import ProfileVideoCard from '../../../components/ProfileVideoCard'
-import VerifiedBadge from '../../../components/VerifiedBadge'
-import { NotchCover, NotchAvatar, NOTCH_CARD_VARS } from '../../../components/profile/NotchHero'
+
+/* ─────────────────────────────────────────────────────────────
+   پروفایل عمومی داور — همان طرحِ صفحه‌ی مربی.
+
+   ── چه چیزی رفت ──
+   ۱۰ داورِ ساختگی روی /referees/1..10 عمومی بودند: نام، مدرک و
+   شماره‌ی تلفنِ قابلِ شماره‌گیریِ آدم‌هایی که وجود ندارند. فهرستِ
+   /referees خالی است و هیچ لینکی به آن‌ها نمی‌داد، ولی نشانی‌ها
+   زنده بودند. همان کاری که با صفحه‌ی مربی شد.
+
+   هیرو، گالری و خطِ زمان از `components/profile/*` می‌آیند — یک
+   طرح، دو مصرف‌کننده.
+   ───────────────────────────────────────────────────────────── */
+
+import { useState, useEffect, useRef } from 'react'
+import ProfileHero from '../../../components/profile/ProfileHero'
+import ProfileGallery from '../../../components/profile/ProfileGallery'
+import GradeTimeline from '../../../components/profile/GradeTimeline'
+import '../../../components/profile/profile-page.css'
 import { fetchProfileResult } from '../../../lib/profiles/client'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import { useProfileImageViewer } from '@/components/ProfileImageViewer'
-import { useTabKeys } from '@/hooks/use-tab-keys'
+import { normalizeDigits } from '@/lib/text-fa'
+import { Phone, Send, Copy, Check } from 'lucide-react'
 import {
-  getRefereeProfile, badgeFromGrades, certificationLines, disciplineLabel, GRADES,
+  getRefereeProfile, badgeFromGrades, disciplineLabel, GRADES,
   type RefereeProfile,
 } from '../../../lib/referee-store'
 
-/* ─── Tokens (same as listing) ─── */
-const GOLD   = '#C7A66A'
-const GOLD_D = '#8F6531'
-const GOLD_G = 'linear-gradient(135deg,#7A4F10 0%,#C7A66A 50%,#8A6020 100%)'
-const TEXT   = '#111110'
-const TEXT_S = 'rgba(17,17,16,0.52)'
-const TEXT_M = 'rgba(17,17,16,0.28)'
-const CARD   = 'rgba(255,255,255,0.90)'
-const CBOR   = '1px solid rgba(17,17,16,0.07)'
-const CSHA   = '0 2px 20px rgba(17,17,16,0.06)'
-
-const SPECS: Record<string,{label:string;color:string}> = {
-  snooker:  {label:'اسنوکر',       color:'#7C3AED'},
-  pocket:   {label:'پاکت بیلیارد', color:GOLD_D},
-  highball: {label:'هی‌بال',       color:'#C2410C'},
-}
-
-const GRADE_DOTS: Record<string,{dots:number;color:string}> = {
-  'داور بین‌المللی': {dots:5, color:'#7C3AED'},
-  'داور ملی':        {dots:4, color:GOLD_D},
-  'داور درجه A':     {dots:3, color:'#C2410C'},
-  'داور درجه B':     {dots:2, color:'#16A34A'},
-  'داور درجه C':     {dots:1, color:TEXT_S},
-}
-
-const IMGS = [
-  '/images/shop/snooker-table.webp',
-  '/images/shop/cue_billiard_2.webp',
-  '/images/shop/Ball-1.webp',
-  '/images/shop/pool_chalk_1.jpg',
-]
-const img = (i:number) => IMGS[i%IMGS.length]??IMGS[0]!
-
-/* ─── Types ─── */
+/* ─── انواع ─── */
 interface GImg  { id:string; url:string; caption:string }
-/* `url` از پروفایلِ واقعی می‌آید؛ نمونه‌های نمایشی ندارندش */
+/* `url` نشانیِ فایل است؛ ردیفِ قدیمی فقط بندانگشتی دارد و کارتِ
+   بی‌پخش رندر می‌شود. */
 interface VItem { id:string; url?:string; thumbnail:string; title:string; duration:string }
-interface Album { id:string; name:string; imageIds:string[] }
 
-interface RefereeFull {
-  id:string; name:string; specialty:string; city:string
-  badge:string; badgeColor:string; badgeLatin?:boolean; verified:boolean
-  hasStory:boolean; storyImage:string
+/* دقیقاً همان چیزی که پنلِ داور ذخیره می‌کند، نه یک ابرمجموعه.
+   فیلدهای مرده‌ی نسخه‌ی قبلی (افتخارات، استوری، رنگِ نشان) با
+   حذفِ داده‌ی نمایشی رفتند. */
+interface RefereeView {
+  id:string; name:string; city:string; verified:boolean
+  photo?:string; coverImage?:string
   bio:string; fullBio:string
-  certifications:string[]; achievements:string[]; specialties:string[]
+  disciplines:string[]
   phone:string; whatsapp:string; instagram?:string; telegram?:string
   gallery:GImg[]; videos:VItem[]
-  photo?:string; coverImage?:string; specialtyLabel?:string
 }
 
-/* Map a saved referee profile (localStorage) → the profile-page shape. */
-function mapLocalToFull(p: RefereeProfile): RefereeFull {
-  const b = badgeFromGrades(p.grades)
-  const bLatin = !!GRADES.find(g => g.label === b?.label)?.latin
+function mapLocalToView(p: RefereeProfile): RefereeView {
   return {
     id: p.slug,
     name: `${p.firstNameFa} ${p.lastNameFa}`.trim(),
-    specialty: p.disciplines[0] ?? 'snooker',
-    specialtyLabel: p.disciplines.map(disciplineLabel).join(' · ') || undefined,
     city: p.city,
-    badge: b?.label ?? '', badgeColor: b?.color ?? GOLD_D, badgeLatin: bLatin,
     verified: p.verified,
-    hasStory: false, storyImage: '',
-    bio: p.shortBio, fullBio: p.fullBio,
-    certifications: certificationLines(p.grades),
-    achievements: [],
-    specialties: p.disciplines.map(disciplineLabel),
-    phone: p.phone, whatsapp: p.whatsapp,
-    instagram: p.instagram || undefined, telegram: p.telegram || undefined,
-    gallery: p.gallery.map(g => ({ id: g.id, url: g.url, caption: g.caption })),
-    videos: p.videos.map(v => ({ id: v.id, url: v.url, thumbnail: v.thumbnail, title: v.title, duration: v.duration })),
     photo: p.photo || undefined,
     coverImage: p.coverImage || undefined,
+    bio: p.shortBio,
+    fullBio: p.fullBio,
+    disciplines: p.disciplines,
+    phone: p.phone,
+    whatsapp: p.whatsapp,
+    instagram: p.instagram || undefined,
+    telegram: p.telegram || undefined,
+    gallery: p.gallery.map(g => ({ id: g.id, url: g.url, caption: g.caption })),
+    videos: p.videos.map(v => ({ id: v.id, url: v.url, thumbnail: v.thumbnail, title: v.title, duration: v.duration })),
   }
 }
-
-/* ─── Data ─── */
-const D: RefereeFull[] = [
-  {
-    id:'1', name:'کاوه طالبی', specialty:'snooker', city:'تهران',
-    badge:'داور بین‌المللی', badgeColor:'#7C3AED', verified:true,
-    hasStory:true, storyImage:img(0),
-    bio:'داور بین‌المللی WPBSA با ۲۰ سال سابقه در رویدادهای جهانی اسنوکر.',
-    fullBio:'کاوه طالبی با بیش از ۲۰ سال سابقه در داوری اسنوکر، یکی از معدود داوران بین‌المللی ایرانی است که مدرک رسمی WPBSA دارد. وی تاکنون در ۴۵ مسابقه بین‌المللی داوری کرده و به‌عنوان داور ارشد در قهرمانی آسیا و چندین رویداد جهانی حضور داشته است. کاوه به‌عنوان مرجع قوانین اسنوکر در فدراسیون بیلیارد ایران شناخته می‌شود.',
-    certifications:['مدرک بین‌المللی WPBSA','گواهی داور ارشد ACBS','عضو کمیته داوران فدراسیون'],
-    achievements:['داور انتخابی قهرمانی آسیا ۱۴۰۲','داور رویداد جهانی اسنوکر ۲۰۲۳','داور ارشد ۵ دوره لیگ برتر ایران'],
-    specialties:['اسنوکر','پاکت بیلیارد'],
-    phone:'09121234567', whatsapp:'989121234567', instagram:'kaveh_referee',
-    gallery:[
-      {id:'g1',url:img(0),caption:'مسابقات قهرمانی آسیا'},
-      {id:'g2',url:img(1),caption:'داوری لیگ برتر'},
-      {id:'g3',url:img(2),caption:'تمرین داوران'},
-      {id:'g4',url:img(3),caption:'مراسم اهدای جوایز'},
-      {id:'g5',url:img(0),caption:'فینال قهرمانی'},
-      {id:'g6',url:img(1),caption:'جلسه داوران'},
-    ],
-    videos:[
-      {id:'v1',thumbnail:img(0),title:'قوانین رسمی اسنوکر WPBSA',duration:'۱۴:۲۰'},
-      {id:'v2',thumbnail:img(1),title:'مدیریت فریم و امتیازدهی',duration:'۹:۳۰'},
-      {id:'v3',thumbnail:img(2),title:'داوری فاول‌های رایج',duration:'۱۱:۱۵'},
-    ],
-  },
-  {
-    id:'2', name:'نیلوفر حسینی', specialty:'pocket', city:'مشهد',
-    badge:'داور ملی', badgeColor:GOLD_D, verified:true,
-    hasStory:true, storyImage:img(1),
-    bio:'داور ملی پاکت بیلیارد — پیشگام داوری بانوان در ایران.',
-    fullBio:'نیلوفر حسینی با ۱۲ سال سابقه، از پیشگامان داوری بانوان در پاکت بیلیارد ایران است. وی تاکنون در ۹۵ مسابقه ملی داوری کرده و عضو فعال کمیته بانوان فدراسیون است. نیلوفر در توسعه استانداردهای داوری برای مسابقات بانوان نقش مهمی ایفا کرده است.',
-    certifications:['مدرک داور ملی فدراسیون','گواهی داوری پاکت بیلیارد درجه A','عضو کمیته بانوان فدراسیون'],
-    achievements:['داور انتخابی مسابقات ملی بانوان ۱۴۰۲','داور ارشد لیگ برتر بانوان ۳ دوره'],
-    specialties:['پاکت بیلیارد','اسنوکر'],
-    phone:'09131234567', whatsapp:'989131234567', instagram:'nilufar.ref',
-    gallery:[
-      {id:'g1',url:img(1),caption:'مسابقات ملی بانوان'},
-      {id:'g2',url:img(2),caption:'لیگ برتر'},
-      {id:'g3',url:img(0),caption:'کلاس داوری'},
-      {id:'g4',url:img(3),caption:'اهدای مدال بانوان'},
-      {id:'g5',url:img(1),caption:'رویداد ملی مشهد'},
-      {id:'g6',url:img(2),caption:'داوری فینال'},
-    ],
-    videos:[
-      {id:'v1',thumbnail:img(1),title:'قوانین رسمی پاکت بیلیارد',duration:'۱۰:۴۵'},
-      {id:'v2',thumbnail:img(2),title:'داوری مسابقات بانوان',duration:'۸:۲۰'},
-    ],
-  },
-  {
-    id:'3', name:'رامین فرهادی', specialty:'highball', city:'اصفهان',
-    badge:'داور ملی', badgeColor:GOLD_D, verified:true,
-    hasStory:false, storyImage:'',
-    bio:'متخصص هی‌بال — عضو کمیته داوران فدراسیون.',
-    fullBio:'رامین فرهادی با تخصص در هی‌بال، عضو فعال کمیته داوران فدراسیون بیلیارد و اسنوکر ایران است. وی در ۶۰+ مسابقه استانی و ملی داوری کرده و به‌عنوان مربی دوره‌های داوری نیز فعالیت دارد.',
-    certifications:['مدرک داور ملی هی‌بال','گواهی مربیگری داوری'],
-    achievements:['داور ارشد مسابقات ملی هی‌بال ۱۴۰۱','مدرس دوره آموزش داوری استان اصفهان'],
-    specialties:['هی‌بال','پاکت بیلیارد'],
-    phone:'09141234567', whatsapp:'989141234567', telegram:'ramin_ref',
-    gallery:[
-      {id:'g1',url:img(2),caption:'مسابقات ملی هی‌بال'},
-      {id:'g2',url:img(3),caption:'دوره آموزشی داوری'},
-      {id:'g3',url:img(0),caption:'جلسه استانی اصفهان'},
-      {id:'g4',url:img(1),caption:'قضاوت فینال'},
-    ],
-    videos:[
-      {id:'v1',thumbnail:img(2),title:'قوانین رسمی هی‌بال',duration:'۹:۱۰'},
-      {id:'v2',thumbnail:img(3),title:'نکات کلیدی داوری هی‌بال',duration:'۷:۵۰'},
-    ],
-  },
-  {
-    id:'4', name:'سحر محمدی', specialty:'pocket', city:'تهران',
-    badge:'داور درجه A', badgeColor:'#C2410C', verified:true,
-    hasStory:true, storyImage:img(3),
-    bio:'داور جوان پاکت بیلیارد — قضاوت ۳۰+ مسابقه استانی و کشوری.',
-    fullBio:'سحر محمدی یکی از داوران جوان و باانرژی پاکت بیلیارد است که در ۵ سال اخیر با سرعت زیادی پیشرفت کرده. وی در ۳۰ مسابقه استانی و ۱۲ مسابقه ملی داوری کرده و هدفش رسیدن به مدرک بین‌المللی تا ۳ سال آینده است.',
-    certifications:['گواهی داور درجه A فدراسیون','دوره تخصصی قوانین BCA'],
-    achievements:['داور برگزیده استان تهران ۱۴۰۱','داور مسابقات دانشجویی کشور'],
-    specialties:['پاکت بیلیارد'],
-    phone:'09151234567', whatsapp:'989151234567', instagram:'sahar_ref',
-    gallery:[
-      {id:'g1',url:img(3),caption:'مسابقات دانشجویی'},
-      {id:'g2',url:img(1),caption:'داوری استانی'},
-      {id:'g3',url:img(0),caption:'رویداد کشوری'},
-      {id:'g4',url:img(2),caption:'آموزش داوری'},
-      {id:'g5',url:img(3),caption:'مسابقات بانوان'},
-    ],
-    videos:[
-      {id:'v1',thumbnail:img(3),title:'اصول داوری پاکت بیلیارد',duration:'۶:۴۰'},
-    ],
-  },
-  {
-    id:'5', name:'حامد موسوی', specialty:'snooker', city:'تبریز',
-    badge:'داور بین‌المللی', badgeColor:'#7C3AED', verified:true,
-    hasStory:true, storyImage:img(0),
-    bio:'داور ارشد IBSF — نماینده ایران در قهرمانی آسیا ۱۴۰۲.',
-    fullBio:'حامد موسوی از داوران برجسته اسنوکر ایران است که با مدرک بین‌المللی IBSF، در رویدادهای آسیایی و بین‌المللی متعددی شرکت داشته. وی با ۱۵ سال تجربه، داور ارشد لیگ برتر ایران و عضو پانل داوران کنفدراسیون ACBS است.',
-    certifications:['مدرک بین‌المللی IBSF','مدرک داور ارشد ACBS','عضو پانل داوران آسیا'],
-    achievements:['داور قهرمانی آسیا ۱۴۰۲','داور جام ACBS ۲۰۲۲','داور ارشد ۶ دوره لیگ برتر'],
-    specialties:['اسنوکر'],
-    phone:'09161234567', whatsapp:'989161234567', telegram:'hamed_referee',
-    gallery:[
-      {id:'g1',url:img(0),caption:'قهرمانی آسیا ۱۴۰۲'},
-      {id:'g2',url:img(1),caption:'لیگ برتر اسنوکر'},
-      {id:'g3',url:img(2),caption:'جام ACBS'},
-      {id:'g4',url:img(3),caption:'تمرین و آماده‌سازی'},
-      {id:'g5',url:img(0),caption:'پانل داوران بین‌الملل'},
-      {id:'g6',url:img(1),caption:'فینال جام آسیا'},
-    ],
-    videos:[
-      {id:'v1',thumbnail:img(0),title:'قوانین بین‌المللی IBSF',duration:'۱۵:۰۰'},
-      {id:'v2',thumbnail:img(1),title:'مدیریت مسابقات آسیایی',duration:'۱۲:۳۰'},
-    ],
-  },
-  {
-    id:'6', name:'علی رضایی', specialty:'highball', city:'شیراز',
-    badge:'داور ملی', badgeColor:GOLD_D, verified:false,
-    hasStory:false, storyImage:'',
-    bio:'داور هی‌بال — قضاوت لیگ برتر هی‌بال و مسابقات جوانان.',
-    fullBio:'علی رضایی در ۷ سال فعالیت در داوری هی‌بال، تجربه قضاوت در مسابقات مختلف استانی و ملی را کسب کرده. وی به‌ویژه در داوری مسابقات نوجوانان و جوانان تجربه خوبی دارد.',
-    certifications:['مدرک داور ملی هی‌بال','گواهی داوری فدراسیون'],
-    achievements:['داور لیگ برتر هی‌بال ۱۴۰۱','داور مسابقات جوانان کشوری'],
-    specialties:['هی‌بال'],
-    phone:'09171234567', whatsapp:'989171234567',
-    gallery:[
-      {id:'g1',url:img(1),caption:'مسابقات جوانان'},
-      {id:'g2',url:img(2),caption:'لیگ برتر هی‌بال'},
-      {id:'g3',url:img(3),caption:'داوری فینال'},
-      {id:'g4',url:img(0),caption:'جلسه داوران شیراز'},
-    ],
-    videos:[
-      {id:'v1',thumbnail:img(1),title:'داوری مسابقات جوانان',duration:'۸:۰۰'},
-    ],
-  },
-  {
-    id:'7', name:'مینا صالحی', specialty:'pocket', city:'کرج',
-    badge:'داور درجه B', badgeColor:'#16A34A', verified:false,
-    hasStory:false, storyImage:'',
-    bio:'داور درجه B پاکت بیلیارد — فعال در مسابقات استانی.',
-    fullBio:'مینا صالحی داور درجه B پاکت بیلیارد است که در ۳ سال گذشته تجربه خوبی در مسابقات استانی البرز و تهران کسب کرده. وی برای ارتقاء به درجه A در حال تکمیل دوره‌های آموزشی است.',
-    certifications:['گواهی داور درجه B فدراسیون'],
-    achievements:['داور برگزیده مسابقات استانی البرز ۱۴۰۱'],
-    specialties:['پاکت بیلیارد'],
-    phone:'09181234567', whatsapp:'989181234567',
-    gallery:[
-      {id:'g1',url:img(2),caption:'مسابقات استانی البرز'},
-      {id:'g2',url:img(3),caption:'آموزش داوری درجه B'},
-      {id:'g3',url:img(1),caption:'رویداد پاکت بیلیارد'},
-    ],
-    videos:[
-      {id:'v1',thumbnail:img(2),title:'مقدمات داوری پاکت',duration:'۷:۱۵'},
-    ],
-  },
-  {
-    id:'8', name:'کیان نوری', specialty:'snooker', city:'تهران',
-    badge:'داور ملی', badgeColor:GOLD_D, verified:true,
-    hasStory:true, storyImage:img(3),
-    bio:'داور ملی اسنوکر — عضو هیئت داوران کنفدراسیون ACBS.',
-    fullBio:'کیان نوری با ۱۰ سال سابقه داوری اسنوکر، عضو هیئت داوران کنفدراسیون ACBS است. وی در مسابقات ملی و منطقه‌ای متعددی داوری کرده و به‌عنوان مشاور قوانین برای باشگاه‌های تهران فعال است.',
-    certifications:['مدرک داور ملی اسنوکر','عضو هیئت داوران ACBS','گواهی مربیگری داوری'],
-    achievements:['داور ارشد مسابقات ملی اسنوکر ۱۴۰۲','داور منطقه‌ای ACBS ۲۰۲۲'],
-    specialties:['اسنوکر','پاکت بیلیارد'],
-    phone:'09191234567', whatsapp:'989191234567', instagram:'kian_referee',
-    gallery:[
-      {id:'g1',url:img(3),caption:'مسابقات ملی اسنوکر'},
-      {id:'g2',url:img(0),caption:'رویداد ACBS'},
-      {id:'g3',url:img(1),caption:'لیگ برتر'},
-      {id:'g4',url:img(2),caption:'داوری فینال ملی'},
-      {id:'g5',url:img(3),caption:'پانل مشاوران قوانین'},
-      {id:'g6',url:img(0),caption:'کنفرانس داوران آسیا'},
-    ],
-    videos:[
-      {id:'v1',thumbnail:img(3),title:'قوانین اسنوکر ACBS',duration:'۱۳:۱۰'},
-      {id:'v2',thumbnail:img(0),title:'مشاوره قوانین باشگاه',duration:'۹:۴۵'},
-    ],
-  },
-]
 
 /* ─── Page ─── */
 export default function RefereeProfilePage() {
   const { id } = useParams<{id:string}>()
-  const [localP, setLocalP] = useState<RefereeProfile | null>(null)
-  /* تا وقتی پاسخِ سرور نیامده «پیدا نشد» نشان نمی‌دهیم — وگرنه هر
-     پروفایلِ واقعی یک لحظه «این داور پیدا نشد» می‌شود و بعد می‌پرد. */
+  const [localP, setLocalP]   = useState<RefereeProfile | null>(null)
   const [checked, setChecked] = useState(false)
-  /* شبکه شکست، نه اینکه پروفایل نباشد */
+  /* شبکه شکست، نه اینکه پروفایل نباشد — بدونِ این، قطعیِ اینترنت
+     پیامِ «این داور وجود ندارد» می‌گرفت. */
   const [netFail, setNetFail] = useState(false)
   const [reloadKey, setReloadKey] = useState(0)
+  const [copyState, setCopyState] = useState<'idle' | 'ok' | 'manual'>('idle')
+  const flashT = useRef<ReturnType<typeof setTimeout> | null>(null)
+  useEffect(() => () => { if (flashT.current) clearTimeout(flashT.current) }, [])
+
   /* ── چرا سرور هم خوانده می‌شود ──
-     این صفحه فقط `localStorage` را می‌دید، یعنی پروفایل تنها در مرورگرِ
-     خودِ صاحبش دیده می‌شد و بقیه داده‌ی نمونه می‌گرفتند. حافظه‌ی محلی
-     اول می‌آید چون فوری است؛ پاسخِ سرور رویش می‌نشیند. */
+     این صفحه فقط `localStorage` را می‌دید، یعنی پروفایل تنها در
+     مرورگرِ خودِ صاحبش دیده می‌شد. حافظه‌ی محلی اول می‌آید چون فوری
+     است؛ پاسخِ سرور رویش می‌نشیند. */
   useEffect(() => {
     setNetFail(false)
     if (!id) { setChecked(true); return }
@@ -302,394 +105,215 @@ export default function RefereeProfilePage() {
     })()
     return () => { alive = false }
   }, [id, reloadKey])
-  /* ⚠️ بدونِ فالبک — دلیلش در صفحه‌ی مربی */
-  const referee = localP ? mapLocalToFull(localP) : (D.find(r => r.id === id) ?? null)
+
+  const referee = localP ? mapLocalToView(localP) : null
   const { open: openImage, viewer: imageViewer } = useProfileImageViewer()
-  const [copied,        setCopied]        = useState(false)
-  const [tab,           setTab]           = useState<'photos'|'videos'|'albums'>('photos')
-  const [albums,        setAlbums]        = useState<Album[]>([])
-  const [showNewAlbum,  setShowNewAlbum]  = useState(false)
-  const [newAlbumName,  setNewAlbumName]  = useState('')
-  const [expandedAlbum, setExpandedAlbum] = useState<string|null>(null)
-  const [lightbox,      setLightbox]      = useState<GImg|null>(null)
 
-  const spec  = referee ? SPECS[referee.specialty as keyof typeof SPECS] : undefined
-  const grade = referee ? GRADE_DOTS[referee.badge] : undefined
-  const socialBtn: React.CSSProperties = { width:44, height:44, borderRadius:11, display:'flex', alignItems:'center', justifyContent:'center', background:'rgba(26,25,23,0.06)', border:'1px solid rgba(26,25,23,0.10)', color:'rgba(26,25,23,0.5)', textDecoration:'none', flexShrink:0, cursor:'pointer' }
-
-  const TABS = ['photos', 'videos', 'albums'] as const
-  const onTabKey = useTabKeys(TABS, tab, setTab, 'gtab-')
-
-  const createAlbum = () => {
-    if (!newAlbumName.trim()) return
-    setAlbums(prev => [...prev, { id:`a${Date.now()}`, name:newAlbumName.trim(), imageIds:[] }])
-    setNewAlbumName('')
-    setShowNewAlbum(false)
-  }
-
-  /* ⚠️ این‌جا یک `div`ِ کاملاً خالی بود. تا وقتی فقط اولین رنگ‌آمیزی
-     بود کسی نمی‌دیدش، ولی «تلاش دوباره» همین حالت را دوباره احضار
-     می‌کند: کاربر دکمه را می‌زد و تا پایانِ تایم‌اوت یک صفحه‌ی سفیدِ
-     بی‌پیام می‌دید. */
-  if (!D.some(r => r.id === id) && !checked) {
+  if (!checked) {
     return (
-      <div className="lq-stage" role="status" aria-busy="true"
-        style={{ direction:'rtl', fontFamily:"'Vazirmatn',Tahoma,sans-serif", minHeight:'100vh',
-          display:'flex', alignItems:'center', justifyContent:'center' }}>
-        <p style={{ fontSize:14, fontWeight:600, color:TEXT_S }}>در حال بارگذاری…</p>
+      <div className="ch-page ch-skel" role="status" aria-busy="true" aria-label="در حال بارگذاری پروفایل داور">
+        <div className="ch-skel-hero" />
+        <div className="ch-body"><div className="ch-wrap ch-cols">
+          <div className="ch-col">
+            <div className="ch-skel-line ch-skel-sm" />
+            <div className="ch-skel-line" /><div className="ch-skel-line" />
+            <div className="ch-skel-line ch-skel-md" />
+          </div>
+          <div className="ch-col ch-rail"><div className="ch-skel-card" /></div>
+        </div></div>
       </div>
     )
   }
 
   if (!referee) {
     return (
-      <div className="lq-stage" style={{ direction:'rtl', fontFamily:"'Vazirmatn',Tahoma,sans-serif", minHeight:'100vh', display:'flex', alignItems:'center', justifyContent:'center', padding:24 }}>
-        {/* ظاهرِ شیشه‌ای این‌جا می‌ماند (جفتِ صفحه‌ی مربی است، نه
-            کارتِ سفیدِ بازیکن/تولیدکننده) — فقط شاخه‌ی خطای شبکه
-            اضافه شد: پیش‌تر قطعیِ اینترنت «این داور پیدا نشد» می‌شد. */}
-        <div className="lqg" style={{ padding:'34px 30px', textAlign:'center', maxWidth:420 }}>
-          <h1 style={{ fontSize:18, fontWeight:800, color:TEXT, marginBottom:8 }}>
-            {netFail ? 'بارگذاری نشد' : 'این داور پیدا نشد'}
-          </h1>
-          <p style={{ fontSize:13.5, color:TEXT_S, lineHeight:2, marginBottom:18 }}>
-            {netFail
-              ? 'ارتباط با سرور برقرار نشد. اتصال اینترنت را بررسی کنید و دوباره تلاش کنید.'
-              : 'ممکن است نشانی اشتباه باشد یا پروفایل هنوز تأیید نشده باشد.'}
-          </p>
-          {/* راهِ بازگشت در حالتِ خطا هم می‌ماند — شاید شبکه برنگردد.
-              `min-height` صریح چون `btn-sm` حدودِ ۳۶px است و زیرِ کفِ
-              ۴۴ پیکسلیِ هدفِ لمسی می‌افتد. */}
-          <div style={{ display:'flex', gap:8, justifyContent:'center', flexWrap:'wrap' }}>
+      <div className="lq-stage ch-notfound">
+        <div className="lqg ch-notfound-card">
+          <h1>{netFail ? 'بارگذاری نشد' : 'این داور پیدا نشد'}</h1>
+          <p>{netFail
+            ? 'ارتباط با سرور برقرار نشد. اتصال اینترنت را بررسی کنید و دوباره تلاش کنید.'
+            : 'ممکن است نشانی اشتباه باشد یا پروفایل هنوز تأیید نشده باشد.'}</p>
+          {/* راهِ بازگشت در حالتِ خطا هم می‌ماند — شاید شبکه برنگردد. */}
+          <div style={{ display: 'flex', gap: 8, justifyContent: 'center', flexWrap: 'wrap' }}>
             {netFail && (
-              <button type="button" className="btn btn-glass btn-sm" style={{ minHeight:44 }}
+              <button type="button" className="btn btn-glass btn-sm" style={{ minHeight: 44 }}
                 onClick={() => { setChecked(false); setReloadKey(k => k + 1) }}>تلاش دوباره</button>
             )}
-            <Link href="/referees" className="btn btn-glass btn-sm" style={{ minHeight:44 }}>بازگشت به داوران</Link>
+            <Link href="/referees" className="btn btn-glass btn-sm" style={{ minHeight: 44 }}>بازگشت به داوران</Link>
           </div>
         </div>
       </div>
     )
   }
 
+  /* ── داده‌ی مشتق ──
+     همه از فیلدهای واقعی می‌آید؛ هیچ عددِ ساختگی ساخته نمی‌شود. */
+  const badge = localP ? badgeFromGrades(localP.grades) : null
+  const grade = badge ? { label: badge.label, dots: badge.dots } : undefined
+  const disciplines = referee.disciplines.map(k => ({ label: disciplineLabel(k) }))
+
+  /* بر اساسِ رتبه مرتب می‌شود نه سال — همان دلیلِ صفحه‌ی مربی:
+     چیپِ هیرو از `badgeFromGrades` می‌آید که رتبه‌ای است، و اگر
+     خطِ زمان با سال مرتب شود نشانِ «بالاترین درجه» به ردیفِ اشتباه
+     می‌چسبد. */
+  const timeline = localP
+    ? [...localP.grades]
+        .sort((a, b) => GRADES.findIndex(x => x.key === b.key) - GRADES.findIndex(x => x.key === a.key))
+        .map(g => ({ label: g.label, year: g.year }))
+    : []
+
+  /* «از سال» = کوچک‌ترین سالِ واقعی. ارقامِ فارسی و عربی نرمال
+     می‌شوند وگرنه `Number('۱۳۹۸')` برابرِ NaN است. */
+  const sinceYear = (() => {
+    const years = (localP?.grades ?? [])
+      .map(g => Number(normalizeDigits(String(g.year))))
+      .filter(n => Number.isFinite(n) && n > 0)
+    return years.length ? String(Math.min(...years)) : ''
+  })()
+
+  const paragraphs = (referee.fullBio || referee.bio || '').split(/\n{2,}/).map(s => s.trim()).filter(Boolean)
+  const publicUrl = `www.billiardhub.net/referees/${referee.id}`
+
+  /* `navigator.clipboard` روی http و سافاریِ قدیمی نیست؛ در آن حالت
+     نشانی انتخاب می‌شود تا کاربر دستی بردارد. */
+  const selectUrl = () => {
+    const el = document.getElementById('ch-url-code')
+    if (!el || typeof window.getSelection !== 'function') return
+    const r = document.createRange()
+    r.selectNodeContents(el)
+    const sel = window.getSelection()
+    sel?.removeAllRanges()
+    sel?.addRange(r)
+  }
+
+  const flash = (s: 'ok' | 'manual') => {
+    setCopyState(s)
+    if (flashT.current) clearTimeout(flashT.current)
+    flashT.current = setTimeout(() => setCopyState('idle'), 2200)
+  }
+
+  const copyUrl = async () => {
+    if (!navigator.clipboard?.writeText) { selectUrl(); flash('manual'); return }
+    try {
+      await navigator.clipboard.writeText(`https://${publicUrl}`)
+      flash('ok')
+    } catch {
+      selectUrl(); flash('manual')
+    }
+  }
+
+  const latin = localP ? `${localP.firstNameEn} ${localP.lastNameEn}`.trim().toUpperCase() : ''
+
   return (
-    <>
-      <style>{`
-        *{box-sizing:border-box;margin:0;padding:0;}
-        @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
-        .lq1{transition:filter .18s,transform .14s;}
-        .lq1:hover{filter:brightness(1.08);transform:translateY(-1px);}
-        .goldbtn{transition:all .3s cubic-bezier(0.22,1,0.36,1);}
-        .goldbtn:hover{transform:translateY(-2px);}
-        .social-icn{transition:all .25s ease;}
-        .social-icn:hover{background:rgba(199,166,106,0.12)!important;border-color:rgba(199,166,106,0.38)!important;color:#C7A66A!important;transform:translateY(-2px);box-shadow:0 4px 14px rgba(199,166,106,0.18);}
-        .gtab{transition:all .18s;cursor:pointer;}
-        .gtab:hover{opacity:.85;}
-        @media(max-width:740px){.pcols{grid-template-columns:1fr!important;}}
-        .pcard{min-width:0;}
-        /* mobile gallery grids: photos 4/row, videos 2/row, albums 3/row */
-        @media(max-width:600px){
-          .gphotos,.galbums{grid-template-columns:repeat(5,1fr)!important;gap:7px!important;}
-          .gvideos{grid-template-columns:repeat(2,1fr)!important;}
-          .lq-seg{display:flex;width:100%;}
-          .lq-seg>button{min-width:0;flex:1;padding:7px 6px;}
-        }
-        /* mobile: single column; interleave main + sidebar cards in the requested order */
-        @media(max-width:900px){
-          .ln-cols{grid-template-columns:1fr!important;}
-          .ln-main,.ln-side{display:contents!important;}
-          .pcard-profile{order:1;}
-          .pcard-about{order:2;}
-          .pcard-grade{order:3;}
-          .pcard-public{order:4;}
-          .pcard-contact{order:5;}
-          .pcard-gallery{order:6;}
-        }
-      `}</style>
+    <div className="ch-page">
+      <ProfileHero
+        name={referee.name}
+        nameLatin={latin || undefined}
+        city={referee.city}
+        sinceYear={sinceYear || undefined}
+        photo={referee.photo}
+        cover={referee.coverImage}
+        verified={referee.verified}
+        grade={grade}
+        disciplines={disciplines}
+        phone={referee.phone}
+        whatsapp={referee.whatsapp}
+        onOpenPhoto={u => openImage(u, { title: referee.name, alt: `عکس ${referee.name}` })}
+        role="referee" backHref="/referees" backLabel="داوران"
+      />
 
-      {/* لکه‌های رنگیِ ثابتِ پشتِ شیشه را می‌سازد — بدونِ آن، کارتِ
-          `lqg` فقط یک کارتِ سفید است. همان صحنه‌ای که صفحه‌ی مربی
-          دارد؛ این‌جا `background:'#F1EFEC'` تخت بود. */}
-      <div className="lq-stage" style={{ direction:'rtl', fontFamily:"'Vazirmatn',Tahoma,sans-serif", minHeight:'100vh', color:TEXT }}>
+      <div className="ch-body">
+        <div className="ch-wrap ch-cols">
 
-        {/* ── Back ── */}
-        <div style={{ maxWidth:1128, margin:'0 auto', padding:'18px clamp(12px,3vw,24px) 0' }}>
-          <Link href="/referees" className="goldbtn" style={{ display:'inline-flex', alignItems:'center', gap:6, background:'rgba(199,166,106,0.12)', border:'1px solid rgba(199,166,106,0.34)', color:'#8F6531', borderRadius:10, textDecoration:'none', fontSize:13, fontWeight:700, padding:'7px 14px' }}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-              <polyline points="15 18 9 12 15 6"/>
-            </svg>
-            بازگشت به داوران
-          </Link>
-        </div>
+          <main className="ch-col">
+            <section aria-labelledby="ch-about-h">
+              <div className="ch-sec-head">
+                <h2 id="ch-about-h">معرفی</h2>
+                <span className="en">ABOUT</span>
+                <span className="rule" aria-hidden />
+              </div>
+              {paragraphs.length === 0
+                ? <p className="ch-empty">این داور هنوز معرفی‌ای ننوشته است.</p>
+                : paragraphs.map((t, i) => <p key={i} className="ch-prose">{t}</p>)}
+            </section>
 
-        {/* ── LinkedIn-style layout ── */}
-        <div className="ln-cols" style={{ maxWidth:1128, margin:'0 auto', padding:'16px clamp(12px,3vw,24px) 64px', display:'grid', gridTemplateColumns:'1fr 320px', gap:24, alignItems:'start' }}>
+            <section aria-labelledby="ch-path-h">
+              <div className="ch-sec-head">
+                <h2 id="ch-path-h">مسیر داوری</h2>
+                <span className="en">CAREER</span>
+                <span className="rule" aria-hidden />
+              </div>
+              <GradeTimeline items={timeline} />
+            </section>
 
-          {/* ═══ MAIN COLUMN ═══ */}
-          <div className="ln-main" style={{ minWidth:0, display:'flex', flexDirection:'column', gap:16 }}>
+            <ProfileGallery
+              images={referee.gallery}
+              videos={referee.videos}
+              onOpenImage={(urls, index, meta) => openImage(urls, { index, ...meta })}
+            />
+          </main>
 
-            {/* Profile card */}
-            <div className="pcard pcard-profile lqg lq-rise" style={{ '--lq-i': 0, overflow:'hidden',
-              /* قطرِ آواتار این‌جا تعریف می‌شود چون هم کاور برای بریدنِ
-                 گودی لازمش دارد هم خودِ آواتار. */
-              ...NOTCH_CARD_VARS } as React.CSSProperties}>
-              <NotchCover label="PROFESSIONAL REFEREE" coverImage={referee.coverImage}
-                onCoverClick={() => openImage(referee.coverImage ?? '', { title: 'تصویر کاور' })} />
-              {/* Body */}
-              <div style={{ padding:'0 24px 20px', position:'relative', zIndex:2 }}>
-                {/* ── چیدمانِ سر صفحه ──
-                    آواتار وسط، روی گودیِ موجِ کاور؛ نام و مشخصات زیرش.
-                    پیش‌تر آواتار چپ‌چین بود و با `marginTop:'clamp(-64px,-9vw,-72px)'`
-                    بالا کشیده می‌شد — عددی که مستقل از قطرِ آواتار بود، پس
-                    در هر عرضی جای دیگری می‌نشست. حالا از --av مشتق می‌شود.
-                    `lq-ident` قاعده‌ی CSS ندارد و فقط دستگیره‌ی تستِ ایستاست. */}
-                <div className="lq-ident" style={{ display:'flex', flexDirection:'column', alignItems:'center', textAlign:'center' }}>
-                  <NotchAvatar photo={referee.photo} name={referee.name}
-                    onClick={() => openImage(referee.photo ?? '', { alt: referee.name, title: 'عکس پروفایل' })} />
-
-                {/* name + affiliation */}
-                <div style={{ width:'100%', paddingTop:12 }}>
-                  <div style={{ minWidth:0 }}>
-                    <div style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:7, flexWrap:'wrap' }}>
-                      <h1 style={{ fontSize:'clamp(21px,2.6vw,26px)', fontWeight:700, color:'#1c1c1c', lineHeight:1.2 }}>{referee.name}</h1>
-                      {referee.verified && <VerifiedBadge size={20} title="داور تأیید شده" style={{ marginInlineStart: 0 }} />}
-                    </div>
-                    <div style={{ fontSize:15, color:'rgba(0,0,0,0.9)', marginTop:4 }}>داور {referee.specialtyLabel ?? spec?.label ?? 'بیلیارد'}</div>
-                    {referee.badge && (
-                      <div dir="auto" className={referee.badgeLatin ? 'bh-latin' : undefined} style={{ fontSize:13.5, color:'#0a66c2', fontWeight:600, marginTop:3, unicodeBidi:'isolate' }}>{referee.badge}</div>
-                    )}
-                    <div style={{ fontSize:13, color:'rgba(0,0,0,0.55)', marginTop:6 }}>
-                      {referee.city}، ایران
-                    </div>
-                  </div>
+          <aside className="ch-col ch-rail" aria-label="اطلاعات داور">
+            {(referee.phone || referee.whatsapp || referee.instagram || referee.telegram) && (
+              <section className="ch-card" aria-labelledby="ch-contact-h">
+                <div className="ch-sec-head">
+                  <h2 id="ch-contact-h">راه‌های ارتباطی</h2>
+                  <span className="rule" aria-hidden />
                 </div>
-                </div>
-
-              </div>
-            </div>
-
-
-          {/* About — explore-card style */}
-          <div className="pcard pcard-about" style={{ background:'rgba(252,251,249,0.92)', backdropFilter:'blur(24px) saturate(1.6)', WebkitBackdropFilter:'blur(24px) saturate(1.6)', border:'1px solid rgba(28,28,26,0.08)', borderRadius:16, padding:'24px 26px', boxShadow:'0 8px 30px rgba(28,28,26,0.08), inset 0 1px 0 rgba(255,255,255,0.9)', position:'relative', overflow:'hidden', animation:'fadeUp .45s .08s ease both' }}>
-            <div style={{ position:'absolute', top:0, left:0, right:0, height:'1px', background:'linear-gradient(90deg,transparent,rgba(184,147,58,0.55),transparent)' }}/>
-            <h2 style={{ fontSize:15, fontWeight:800, color:'#1c1c1c', marginBottom:14, display:'flex', alignItems:'center', gap:9 }}>
-              <span style={{ width:3, height:16, borderRadius:2, background:'linear-gradient(180deg,#C7A66A,#8A6020)', flexShrink:0 }}/>
-              معرفی داور
-            </h2>
-            <p style={{ fontSize:14, color:'rgba(28,28,26,0.68)', lineHeight:2.1, textAlign:'justify' }}>{referee.fullBio}</p>
-          </div>
-
-          {/* ── Gallery ── */}
-          <div className="pcard pcard-gallery" style={{ marginTop:20, background:CARD, border:CBOR, borderRadius:18, padding:26, boxShadow:CSHA, animation:'fadeUp .45s .18s ease both' }}>
-
-            {/* Header + tabs */}
-            <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:18, flexWrap:'wrap', gap:12 }}>
-              <h2 style={{ fontSize:14, fontWeight:800, color:TEXT, display:'flex', alignItems:'center', gap:9 }}>
-                <span style={{ width:3, height:17, background:GOLD_G, borderRadius:2, display:'inline-block', flexShrink:0 }}/>
-                گالری
-              </h2>
-              {/* کنترلِ بخش‌بندی‌شده — هر سه تب هم‌اندازه. دلیلش کنارِ
-                  همین بلوک در صفحه‌ی مربی. */}
-              {/* کلیدهای جهت بینِ تب‌ها — بدونِ این،  وعده‌ای
-                  می‌دهد که صفحه‌خوان انتظارش را دارد و برآورده نمی‌شود. */}
-              <div className="lq-seg" role="tablist" aria-label="بخش‌های گالری" onKeyDown={onTabKey}>
-                {([['photos','تصاویر'],['videos','ویدیوها'],['albums','آلبوم‌ها']] as [string,string][]).map(([k,l]) => (
-                  <button key={k} type="button" role="tab" aria-selected={tab===k}
-                    id={`gtab-${k}`} aria-controls={`gpanel-${k}`} tabIndex={tab===k ? 0 : -1}
-                    onClick={() => setTab(k as typeof tab)}>{l}</button>
-                ))}
-              </div>
-            </div>
-
-            {/* Photos */}
-            {tab === 'photos' && (
-              <div className="gphotos" id="gpanel-photos" role="tabpanel" aria-labelledby="gtab-photos" style={{ display:'grid', gridTemplateColumns:'repeat(6,1fr)', gap:10 }}>
-                {referee.gallery.map(g => (
-                  <button key={g.id} type="button" className="lq-tile" onClick={() => setLightbox(g)} aria-label={g.caption || 'بزرگ‌نمایی تصویر'} style={{ aspectRatio:'1', background:'rgba(17,17,16,0.05)', border:'none', padding:0 }}>
-                    <img loading="lazy" decoding="async" src={g.url} alt={g.caption} style={{ width:'100%', height:'100%', objectFit:'cover', display:'block' }} />
-                  </button>
-                ))}
-              </div>
-            )}
-
-            {/* Videos */}
-            {tab === 'videos' && (
-              <div className="gvideos" id="gpanel-videos" role="tabpanel" aria-labelledby="gtab-videos" style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:10 }}>
-                {referee.videos.map(v => <ProfileVideoCard key={v.id} v={v} />)}
-              </div>
-            )}
-
-            {/* Albums */}
-            {tab === 'albums' && (
-              <div className="galbums" id="gpanel-albums" role="tabpanel" aria-labelledby="gtab-albums" style={{ display:'grid', gridTemplateColumns:'repeat(6,1fr)', gap:10 }}>
-
-                {/* Create new album */}
-                <button onClick={() => setShowNewAlbum(true)} style={{ aspectRatio:'1', borderRadius:12, border:'1.5px dashed rgba(199,166,106,0.45)', background:'rgba(199,166,106,0.06)', cursor:'pointer', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', gap:6, fontFamily:"'Vazirmatn',Tahoma,sans-serif" }}>
-                  <div style={{ width:30, height:30, borderRadius:'50%', background:'rgba(199,166,106,0.14)', display:'flex', alignItems:'center', justifyContent:'center' }}>
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={GOLD} strokeWidth="2.2">
-                      <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
-                    </svg>
-                  </div>
-                  <span style={{ fontSize:11, fontWeight:700, color:GOLD_D }}>آلبوم جدید</span>
-                </button>
-
-                {/* Albums list */}
-                {albums.map(album => {
-                  const preview = referee.gallery.find(g => album.imageIds.includes(g.id))
-                  const isExp   = expandedAlbum === album.id
-                  return (
-                    <div key={album.id} style={{ display:'flex', flexDirection:'column', gap:8 }}>
-                      <button onClick={() => setExpandedAlbum(isExp ? null : album.id)}
-                        style={{ width:'100%', aspectRatio:'1', borderRadius:14, overflow:'hidden', position:'relative', cursor:'pointer', border:CBOR, background:'rgba(17,17,16,0.05)' }}>
-                        {preview && (
-                          <img loading="lazy" decoding="async" src={preview.url} alt={album.name} style={{ width:'100%', height:'100%', objectFit:'cover', display:'block' }} />
-                        )}
-                        <div style={{ position:'absolute', inset:0, background:'linear-gradient(to top,rgba(0,0,0,0.62) 0%,transparent 55%)' }} />
-                        <div style={{ position:'absolute', bottom:10, right:10, left:10, color:'#fff', fontWeight:700, fontSize:12, display:'flex', justifyContent:'space-between', alignItems:'flex-end' }}>
-                          <span>{album.name}</span>
-                          <span style={{ color:'rgba(255,255,255,0.55)', fontSize:11 }}>{album.imageIds.length} عکس</span>
-                        </div>
-                        <div style={{ position:'absolute', top:8, left:8, background:isExp?TEXT:'transparent', border:`1px solid ${isExp?'transparent':'rgba(255,255,255,0.3)'}`, borderRadius:6, width:20, height:20, display:'flex', alignItems:'center', justifyContent:'center', transition:'all .2s' }}>
-                          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5">
-                            {isExp ? <polyline points="18 15 12 9 6 15"/> : <polyline points="6 9 12 15 18 9"/>}
-                          </svg>
-                        </div>
-                      </button>
-                      {isExp && album.imageIds.length > 0 && (
-                        <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:5 }}>
-                          {album.imageIds.map(imgId => {
-                            const g = referee.gallery.find(x => x.id === imgId)
-                            return g ? (
-                              <button key={imgId} type="button" className="lq-tile" onClick={() => setLightbox(g)} aria-label={g.caption || 'بزرگ‌نمایی تصویر'} style={{ borderRadius:7, border:'none', padding:0, background:'none' }}>
-                                <img loading="lazy" decoding="async" src={g.url} alt={g.caption} style={{ width:'100%', aspectRatio:'1', objectFit:'cover', display:'block' }} />
-                              </button>
-                            ) : null
-                          })}
-                        </div>
-                      )}
-                      {isExp && album.imageIds.length === 0 && (
-                        <p style={{ fontSize:12, color:TEXT_M, textAlign:'center', padding:'8px 0' }}>هنوز عکسی اضافه نشده</p>
-                      )}
-                    </div>
-                  )
-                })}
-              </div>
-            )}
-          </div>
-
-          </div>
-
-          {/* ═══ SIDEBAR ═══ */}
-          <aside className="ln-side" style={{ display:'flex', flexDirection:'column', gap:16, animation:'fadeUp .45s .12s ease both' }}>
-
-            {/* Public profile & URL */}
-            <div className="pcard pcard-public" style={{ background:'#fff', border:'1px solid rgba(0,0,0,0.10)', borderRadius:12, padding:'16px 18px', boxShadow:'0 1px 3px rgba(0,0,0,0.06)' }}>
-              <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
-                <h3 style={{ fontSize:16, fontWeight:700, color:'#1c1c1c' }}>پروفایل عمومی و نشانی</h3>
-                <button aria-label="کپی نشانی" onClick={() => { const u = `https://www.billiardhub.net/referees/${referee.id}`; if (navigator.clipboard?.writeText) { navigator.clipboard.writeText(u).then(() => { setCopied(true); setTimeout(() => setCopied(false), 1600) }).catch(() => {}) } }} style={{ background:'transparent', border:'none', cursor:'pointer', color: copied ? '#057642' : 'rgba(0,0,0,0.55)', display:'flex', alignItems:'center', gap:4, padding:4, fontSize:12, fontWeight:700, fontFamily:'inherit' }}>
-                  {copied ? (
-                    <><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>کپی شد</>
-                  ) : (
-                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                <div className="ch-links">
+                  {referee.phone && (
+                    <a href={`tel:${referee.phone}`} className="ch-link" aria-label="تماس تلفنی">
+                      <Phone size={17} aria-hidden />
+                    </a>
                   )}
+                  {referee.whatsapp && (
+                    <a href={`https://wa.me/${referee.whatsapp}`} target="_blank" rel="noopener noreferrer"
+                      className="ch-link" aria-label="واتساپ">
+                      <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+                        <path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.77.46 3.45 1.28 4.9L2 22l5.32-1.39a9.9 9.9 0 004.72 1.2h.01c5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.13-2.9-7A9.82 9.82 0 0012.04 2z" />
+                      </svg>
+                    </a>
+                  )}
+                  {referee.instagram && (
+                    <a href={`https://instagram.com/${referee.instagram}`} target="_blank" rel="noopener noreferrer"
+                      className="ch-link" aria-label="اینستاگرام">
+                      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" aria-hidden><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor"/></svg>
+                    </a>
+                  )}
+                  {referee.telegram && (
+                    <a href={`https://t.me/${referee.telegram}`} target="_blank" rel="noopener noreferrer"
+                      className="ch-link" aria-label="تلگرام">
+                      <Send size={17} aria-hidden />
+                    </a>
+                  )}
+                </div>
+              </section>
+            )}
+
+            <section className="ch-card" aria-labelledby="ch-url-h">
+              <div className="ch-sec-head">
+                <h2 id="ch-url-h">نشانی عمومی</h2>
+                <span className="rule" aria-hidden />
+              </div>
+              <div className="ch-url">
+                <code id="ch-url-code" dir="ltr">{publicUrl}</code>
+                <button type="button" onClick={copyUrl} className="ch-url-copy"
+                  aria-label={copyState === 'ok' ? 'نشانی کپی شد' : 'کپی نشانی عمومی'}>
+                  {copyState === 'ok' ? <Check size={15} aria-hidden /> : <Copy size={15} aria-hidden />}
+                  {copyState === 'ok' ? 'کپی شد' : copyState === 'manual' ? 'دستی کپی کنید' : 'کپی'}
                 </button>
               </div>
-              <div style={{ marginTop:8, fontSize:13, color:'rgba(0,0,0,0.62)', direction:'ltr', textAlign:'right' }}>www.billiardhub.net/referees/{referee.id}</div>
-            </div>
-
-            {/* درجه داوری */}
-            <div className="pcard pcard-grade" style={{ background:'#fff', border:'1px solid rgba(0,0,0,0.10)', borderRadius:12, padding:'16px 18px', boxShadow:'0 1px 3px rgba(0,0,0,0.06)' }}>
-              <h3 style={{ fontSize:16, fontWeight:700, color:'#1c1c1c', marginBottom:14 }}>درجه داوری</h3>
-              <div style={{ display:'flex', alignItems:'center', gap:12, marginBottom:16, flexWrap:'wrap' }}>
-                <span dir="auto" className={referee.badgeLatin ? 'bh-latin' : undefined} style={{ background:`${referee.badgeColor}15`, border:`1.5px solid ${referee.badgeColor}48`, color:referee.badgeColor, borderRadius:100, fontSize:13, fontWeight:800, padding:'6px 16px', unicodeBidi:'isolate' }}>{referee.badge}</span>
-                {grade && (
-                  <div style={{ display:'flex', gap:5 }}>
-                    {[1,2,3,4,5].map(d => (<div key={d} style={{ width:9, height:9, borderRadius:'50%', background: d<=grade.dots ? grade.color : 'rgba(17,17,16,0.12)' }} />))}
-                  </div>
-                )}
-              </div>
-              <div style={{ display:'flex', flexDirection:'column', gap:9 }}>
-                {referee.certifications.map((c,i) => (
-                  <div key={i} style={{ display:'flex', alignItems:'flex-start', gap:8 }}>
-                    <span style={{ color:GOLD, marginTop:2, flexShrink:0, fontSize:10 }}>✦</span>
-                    <span dir="auto" style={{ fontSize:12.5, color:TEXT_S, lineHeight:1.65, unicodeBidi:'isolate' }}>{c}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* راه‌های ارتباطی */}
-            <div className="pcard pcard-contact" style={{ background:'#fff', border:'1px solid rgba(0,0,0,0.10)', borderRadius:12, padding:'16px 18px', boxShadow:'0 1px 3px rgba(0,0,0,0.06)' }}>
-              <h3 style={{ fontSize:16, fontWeight:700, color:'#1c1c1c', marginBottom:14 }}>راه‌های ارتباطی</h3>
-              <div style={{ display:'flex', gap:8, flexWrap:'wrap' }}>
-                <a href={`tel:${referee.phone}`} className="social-icn" aria-label="تماس" style={socialBtn}>
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 1.18h3a2 2 0 0 1 2 1.72 12.05 12.05 0 0 0 .64 2.57 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.05 12.05 0 0 0 2.57.64A2 2 0 0 1 22 16.92z"/></svg>
-                </a>
-                <a href={`https://wa.me/${referee.whatsapp}`} target="_blank" rel="noopener noreferrer" className="social-icn" aria-label="واتساپ" style={socialBtn}>
-                  <svg width="19" height="19" viewBox="0 0 24 24" fill="currentColor"><path d="M17.5 14.38c-.3-.15-1.75-.86-2.02-.96-.27-.1-.47-.15-.66.15-.2.3-.76.96-.93 1.16-.17.2-.34.22-.63.07-.3-.15-1.26-.46-2.4-1.48-.89-.79-1.49-1.77-1.66-2.06-.17-.3-.02-.46.13-.6.13-.13.3-.34.44-.51.15-.17.2-.3.3-.5.1-.2.05-.37-.03-.52-.07-.15-.66-1.6-.9-2.18-.24-.57-.48-.5-.66-.5l-.56-.01c-.2 0-.52.07-.79.37-.27.3-1.04 1.01-1.04 2.47s1.07 2.87 1.22 3.07c.15.2 2.1 3.2 5.08 4.49.71.31 1.26.49 1.69.62.71.23 1.36.2 1.87.12.57-.09 1.75-.72 2-1.41.25-.69.25-1.28.17-1.41-.07-.13-.27-.2-.56-.35zM12.05 21.5a9.5 9.5 0 0 1-4.85-1.33l-.35-.2-3.6.94.96-3.51-.23-.36a9.5 9.5 0 1 1 8.07 4.46zM12.05 2C6.5 2 2 6.5 2 12.04c0 1.77.46 3.5 1.35 5.03L2 22l5.05-1.32a10.02 10.02 0 0 0 5 1.28c5.54 0 10.05-4.5 10.05-10.04C22.1 6.5 17.6 2 12.05 2z"/></svg>
-                </a>
-                {referee.instagram && (
-                  <a href={`https://instagram.com/${referee.instagram}`} target="_blank" rel="noopener noreferrer" className="social-icn" aria-label="اینستاگرام" style={socialBtn}>
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><circle cx="12" cy="12" r="4.5"/><circle cx="17.5" cy="6.5" r="0.5" fill="currentColor" stroke="none"/></svg>
-                  </a>
-                )}
-                {referee.telegram && (
-                  <a href={`https://t.me/${referee.telegram}`} target="_blank" rel="noopener noreferrer" className="social-icn" aria-label="تلگرام" style={socialBtn}>
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M22 2L11 13" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/><path d="M22 2L15 22L11 13L2 9L22 2Z" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                  </a>
-                )}
-              </div>
-            </div>
-
+              <p aria-live="polite" className="ch-sr-live">
+                {copyState === 'ok' ? 'نشانی در کلیپ‌بورد کپی شد.'
+                  : copyState === 'manual' ? 'مرورگر اجازه‌ی کپی نداد؛ نشانی انتخاب شد — با Ctrl+C بردارید.' : ''}
+              </p>
+            </section>
           </aside>
+
         </div>
-
-        {/* ── Create Album Modal ── */}
-        {showNewAlbum && (
-          <div onClick={() => setShowNewAlbum(false)} style={{ position:'fixed', inset:0, zIndex:9998, background:'rgba(0,0,0,0.38)', backdropFilter:'blur(12px)', display:'flex', alignItems:'center', justifyContent:'center' }}>
-            <div onClick={e => e.stopPropagation()} style={{ background:'#fff', borderRadius:22, padding:30, width:'min(380px,90vw)', boxShadow:'0 28px 70px rgba(0,0,0,0.18)', direction:'rtl', fontFamily:"'Vazirmatn',Tahoma,sans-serif" }}>
-              <h3 style={{ fontSize:16, fontWeight:800, color:TEXT, marginBottom:18 }}>آلبوم جدید</h3>
-              <input
-                autoFocus
-                value={newAlbumName}
-                onChange={e => setNewAlbumName(e.target.value)}
-                onKeyDown={e => e.key==='Enter' && createAlbum()}
-                placeholder="نام آلبوم..."
-                style={{ width:'100%', padding:'11px 15px', border:'1px solid rgba(17,17,16,0.14)', borderRadius:11, fontSize:14, fontFamily:"'Vazirmatn',Tahoma,sans-serif", color:TEXT, outline:'none', background:'rgba(17,17,16,0.02)' }}
-              />
-              <div style={{ display:'flex', gap:10, marginTop:18, justifyContent:'flex-end' }}>
-                <button onClick={() => setShowNewAlbum(false)} className="goldbtn"
-                  style={{ display:'inline-flex', alignItems:'center', gap:7, background:'rgba(199,166,106,0.12)', border:'1px solid rgba(199,166,106,0.34)', borderRadius:10, padding:'9px 20px', color:'#8F6531', fontWeight:700, fontSize:13, cursor:'pointer', fontFamily:"'Vazirmatn',Tahoma,sans-serif", textDecoration:'none', whiteSpace:'nowrap' as const }}>
-                  انصراف
-                </button>
-                <button onClick={createAlbum} className="goldbtn"
-                  style={{ display:'inline-flex', alignItems:'center', gap:7, background:'rgba(199,166,106,0.12)', border:'1px solid rgba(199,166,106,0.34)', borderRadius:10, padding:'9px 20px', color:'#8F6531', fontWeight:700, fontSize:13, cursor:'pointer', fontFamily:"'Vazirmatn',Tahoma,sans-serif", textDecoration:'none', whiteSpace:'nowrap' as const }}>
-                  ایجاد آلبوم
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* ── Image Lightbox ── */}
-        {lightbox && (
-          <div onClick={() => setLightbox(null)} style={{ position:'fixed', inset:0, zIndex:9999, background:'rgba(0,0,0,0.90)', backdropFilter:'blur(10px)', WebkitBackdropFilter:'blur(10px)', display:'flex', alignItems:'center', justifyContent:'center', padding:'clamp(16px,4vw,48px)', direction:'rtl', animation:'fadeUp .2s ease both' }}>
-            <button aria-label="بستن" onClick={() => setLightbox(null)} style={{ position:'absolute', top:16, insetInlineStart:16, width:42, height:42, borderRadius:'50%', background:'rgba(255,255,255,0.12)', border:'1px solid rgba(255,255,255,0.28)', color:'#fff', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', backdropFilter:'blur(6px)' }}>
-              <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-            </button>
-            <div onClick={e => e.stopPropagation()} style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:14, maxWidth:'min(940px,94vw)', maxHeight:'90vh' }}>
-              <img loading="lazy" decoding="async" src={lightbox.url} alt={lightbox.caption} style={{ maxWidth:'100%', maxHeight:'82vh', objectFit:'contain', borderRadius:14, boxShadow:'0 24px 70px rgba(0,0,0,0.55)' }} />
-              {lightbox.caption && (
-                <div style={{ color:'rgba(255,255,255,0.86)', fontSize:14, fontWeight:600, textAlign:'center', maxWidth:640 }}>{lightbox.caption}</div>
-              )}
-            </div>
-          </div>
-        )}
-
-
-        {/* نمای تمام‌صفحه‌ی عکس پروفایل و کاور */}
-        {imageViewer}
-
       </div>
-    </>
+
+      {imageViewer}
+    </div>
   )
 }

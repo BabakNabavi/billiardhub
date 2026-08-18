@@ -1,9 +1,9 @@
 'use client'
 import { useState, useEffect, useRef } from 'react'
-import CoachHero from '../../../components/coach/CoachHero'
-import CoachGallery from '../../../components/coach/CoachGallery'
-import GradeTimeline from '../../../components/coach/GradeTimeline'
-import '../../../components/coach/coach-profile.css'
+import ProfileHero from '../../../components/profile/ProfileHero'
+import ProfileGallery from '../../../components/profile/ProfileGallery'
+import GradeTimeline from '../../../components/profile/GradeTimeline'
+import '../../../components/profile/profile-page.css'
 import { fetchProfileResult } from '../../../lib/profiles/client'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
@@ -36,8 +36,8 @@ function mapLocalToView(p: CoachProfile): CoachView {
     name: `${p.firstNameFa} ${p.lastNameFa}`.trim(),
     city: p.city,
     verified: p.verified,
-    photo: p.photo,
-    coverImage: p.coverImage,
+    photo: p.photo || undefined,
+    coverImage: p.coverImage || undefined,
     bio: p.shortBio,
     fullBio: p.fullBio,
     disciplines: p.disciplines,
@@ -212,7 +212,7 @@ export default function CoachProfilePage() {
 
   return (
     <div className="ch-page">
-      <CoachHero
+      <ProfileHero
         name={coach.name}
         nameLatin={latin || undefined}
         city={coach.city}
@@ -225,6 +225,7 @@ export default function CoachProfilePage() {
         phone={coach.phone}
         whatsapp={coach.whatsapp}
         onOpenPhoto={u => openImage(u, { title: coach.name, alt: `عکس ${coach.name}` })}
+        role="coach" backHref="/coaches" backLabel="مربیان"
       />
 
       <div className="ch-body">
@@ -251,7 +252,7 @@ export default function CoachProfilePage() {
               <GradeTimeline items={timeline} freeCoach={localP?.freeCoach ?? false} />
             </section>
 
-            <CoachGallery
+            <ProfileGallery
               images={coach.gallery}
               videos={coach.videos}
               onOpenImage={(urls, index, meta) => openImage(urls, { index, ...meta })}

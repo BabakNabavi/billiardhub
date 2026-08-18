@@ -1,5 +1,5 @@
 /* ─────────────────────────────────────────────────────────────
-   پروفایل مربی — لایه‌ی ظاهری.
+   پروفایلِ نقش‌های حرفه‌ای (مربی و داور) — لایه‌ی ظاهری.
 
    در فایلِ خودش است نه داخلِ <style> صفحه: صفحه‌ی داور قرار است همین
    را بگیرد، و استایلِ داخلِ JSX یعنی نسخه‌ی دوم و از آن‌جا به بعد دو
@@ -13,6 +13,10 @@
 .ch-wrap { max-width: 1160px; margin: 0 auto; padding-inline: clamp(16px, 3vw, 32px); }
 
 /* ═══ هیرو ═══ */
+/* ⚠️ لایه‌ها z-indexِ مثبت دارند، نه منفی. با اعدادِ منفی همه‌چیز به
+   «isolation: isolate» بند بود: برداشتنِ آن یک خط، هر سه لایه را
+   پشتِ پس‌زمینه‌ی خودِ هیرو می‌فرستاد و کلِ هیرو یک مستطیلِ سیاه
+   می‌شد. حالا ترتیب مستقل از آن است. */
 .ch-hero {
   position: relative;
   isolation: isolate;
@@ -21,7 +25,7 @@
   overflow: hidden;
 }
 .ch-hero-img {
-  position: absolute; inset: 0; z-index: -3;
+  position: absolute; inset: 0; z-index: 0;
   background-size: cover; background-position: center;
   /* عکسِ کاور پس‌زمینه است نه سوژه: اشباعِ کم و تیرگی، متن را خوانا
      نگه می‌دارد بدونِ اینکه عکس حذف شود. */
@@ -29,14 +33,22 @@
   transform: scale(1.04);
 }
 .ch-hero-scrim {
-  position: absolute; inset: 0; z-index: -2;
+  position: absolute; inset: 0; z-index: 1;
   background:
     linear-gradient(to top, var(--bg-dark, #111) 4%, rgba(17, 17, 17, 0.72) 44%, rgba(17, 17, 17, 0.34) 100%),
     radial-gradient(70% 90% at 78% 12%, rgba(199, 166, 106, 0.20), transparent 62%);
 }
+/* پوسترِ پیش‌فرض از قبل تیره و کنترل‌شده است؛ لایه‌ی کاملِ عکس
+   رویش گرافیک را می‌بلعید و فقط یک مستطیلِ سیاه می‌ماند. این نسخه
+   تنها آن‌قدر تیره می‌کند که متن خوانا بماند. */
+.ch-hero-scrim[data-poster] {
+  /* تا ۰.۲۶ ادامه می‌یابد نه `transparent`: بردکرامب دقیقاً روی همین
+     لبه می‌نشیند و روی نمدِ روشنِ پوستر کنتراستش می‌افتاد. */
+  background: linear-gradient(to top, var(--bg-dark, #111) 2%, rgba(17, 17, 17, 0.46) 40%, rgba(17, 17, 17, 0.26) 100%);
+}
 /* نامِ لاتینِ توخالی — عمقِ بصری بدونِ افزودنِ محتوا */
 .ch-hero-ghost {
-  position: absolute; z-index: -1;
+  position: absolute; z-index: 2;
   bottom: -6px; inset-inline-start: -8px;
   font-size: clamp(64px, 13vw, 168px); font-weight: 900; line-height: 1;
   letter-spacing: 0.01em; white-space: nowrap; direction: ltr;
@@ -45,7 +57,7 @@
 }
 
 .ch-hero-body {
-  position: relative;
+  position: relative; z-index: 3;
   min-height: clamp(300px, 44vh, 440px);
   display: flex; flex-direction: column;
   padding-block: clamp(16px, 2.4vw, 26px) clamp(26px, 4vw, 48px);
@@ -72,8 +84,15 @@
   border: 2px solid rgba(199, 166, 106, 0.55);
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
   display: flex; align-items: center; justify-content: center;
-  font-size: clamp(30px, 5vw, 46px); font-weight: 900; color: var(--gold, #C7A66A);
+  color: var(--gold, #C7A66A);
 }
+/* آواتارِ بی‌عکس نشانِ نقش می‌گیرد، نه حرفِ اولِ نام. پس‌زمینه‌اش
+   کمی روشن‌تر است تا «جای خالی» به‌نظر نرسد. */
+.ch-avatar[data-glyph] {
+  background: linear-gradient(150deg, rgba(199,166,106,0.16), rgba(255,255,255,0.04));
+  color: var(--gold, #C7A66A);
+}
+.ch-avatar[data-glyph] svg { width: 46%; height: 46%; }
 .ch-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
 /* آواتار وقتی عکسِ واقعی دارد دکمه می‌شود — پس باید هر چهار حالتش
    را داشته باشد. globals.css قاعده‌ی سراسریِ «button { cursor: pointer }»
@@ -85,20 +104,14 @@ button.ch-avatar:focus-visible { outline: 2px solid var(--gold, #C7A66A); outlin
 
 .ch-hero-id { flex: 1; min-width: 0; }
 
-/* تنها اندازه‌ی «ریز» صفحه — برچسبِ لاتینِ بالای نام.
-   ⚠️ `direction: ltr` این‌جا نیست: روی یک بلوک، `text-align: start`
-   را چپ می‌کند و برچسب از نام جدا می‌افتاد و آن‌سرِ هیرو می‌نشست.
-   متن تماماً حروفِ بزرگِ اَسکی است، پس جهت اثرِ دیداری ندارد. */
-/* ⚠️ ۹.۵px بود. روی گوشیِ میان‌ردهٔ ایرانی زیرِ کفِ خوانایی است و
-   letter-spacingِ زیاد بدترش می‌کرد. ۱۱px کمینه‌ی قابلِ دفاع است. */
-.ch-eyebrow {
-  font-size: 11px; font-weight: 800; letter-spacing: 0.24em;
-  color: var(--gold, #C7A66A); margin: 0 0 8px;
-}
 .ch-name {
   font-size: clamp(28px, 5.6vw, 58px); font-weight: 900; line-height: 1.1;
   letter-spacing: -0.02em; margin: 0; color: #fff;
 }
+/* فقط واژه‌ی آخرِ نام به تیک می‌چسبد — نه کلِ نام. اندازه و فاصله‌ی
+   خودِ تیک اینلاین در ProfileHero داده می‌شود، چون VerifiedBadge
+   استایلِ اینلاین می‌گذارد و کلاس در برابرش بی‌اثر است. */
+.ch-name-tail { white-space: nowrap; }
 
 .ch-chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 12px 0 0; padding: 0; list-style: none; }
 /* چیپِ رشته خنثی است — تنها تأکیدِ رنگیِ هیرو، طلاییِ چیپِ درجه است.
@@ -271,42 +284,30 @@ main.ch-col > section { max-width: 760px; }
   border-radius: 999px; padding: 1px 6px; font-variant-numeric: tabular-nums;
 }
 
-/* اولین تصویر دو برابر — شبکه‌ی یکنواختِ تمبرها «آرشیو» به نظر
-   می‌رسید نه «کار». با سه عکس یا کمتر، همه هم‌اندازه می‌مانند تا
-   شبکه لنگ نزند. */
-/* ستون‌ها با تعدادِ واقعیِ عکس تنظیم می‌شود: با دو عکس، شبکه‌ی
-   چهارستونی دو خانه‌ی خالی می‌گذاشت و نیمِ ردیف سفید می‌ماند. */
+/* ⚠️ «تصویرِ نخست دو برابر» برداشته شد. با خانه‌ی ۲۳۲ پیکسلی منطق
+   داشت؛ با خانه‌ی ۱۱۶ چیزی به چشم اضافه نمی‌کرد و چون خانه‌ی ۲×۲ در
+   شبکه‌ی auto-fill جا را ناهموار می‌کند، ته ردیف حفره می‌ماند.
+   شبکه‌ی یکنواخت این‌جا هم تمیزتر است هم قابلِ پیش‌بینی. */
 .ch-gal-grid {
   display: grid; gap: 10px; justify-content: start;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 232px));
+  grid-template-columns: repeat(auto-fill, minmax(88px, 116px));
 }
 .ch-gal-cell {
   position: relative; padding: 0; border: none; cursor: pointer;
-  aspect-ratio: 1; border-radius: 14px; overflow: hidden;
+  aspect-ratio: 1; border-radius: 10px; overflow: hidden;
   background: #EDE9E0;
   transition: transform .3s cubic-bezier(.22,1,.36,1), box-shadow .3s;
 }
-/* تصویرِ نخست فقط وقتی بزرگ می‌شود که عکسِ کافی برای پرکردنِ
-   اطرافش باشد؛ وگرنه ردیف لنگ می‌ماند. */
-/* ── چرا مرزِ `data-few` چهار است، نه سه ──
-   خانه‌ی سرآمد ۲×۲ جا می‌گیرد، پس چهار عکس روی‌هم ۷ خانه می‌خواهد؛
-   در شبکه‌ی چهارستونی می‌شود دو ردیف با یک حفره‌ی خالی ته ردیفِ دوم.
-   از پنج عکس به بالا ردیف پر می‌شود. `data-few` را `CoachGallery`
-   می‌گذارد. */
-.ch-gal-grid:not([data-few]) .ch-gal-cell[data-lead] { grid-column: span 2; grid-row: span 2; }
 .ch-gal-cell img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .5s cubic-bezier(.22,1,.36,1); }
 .ch-gal-cell:hover { box-shadow: 0 14px 34px rgba(28,27,23,0.18); }
 .ch-gal-cell:hover img { transform: scale(1.06); }
 .ch-gal-cell:focus-visible { outline: 2px solid var(--gold-deep, #8F6531); outline-offset: 3px; }
-.ch-gal-cap {
-  position: absolute; inset-inline: 0; bottom: 0; padding: 20px 12px 10px;
-  font-size: 11px; font-weight: 700; color: #fff; text-align: start;
-  background: linear-gradient(to top, rgba(0,0,0,0.72), transparent);
-  opacity: 0; transition: opacity .25s;
-}
-.ch-gal-cell:hover .ch-gal-cap, .ch-gal-cell:focus-visible .ch-gal-cap { opacity: 1; }
+/* ⚠️ با خانه‌ی ۱۱۶ پیکسلی، نوارِ عنوان روی هاور نصفِ تصویر را
+   می‌پوشاند و متنش زیرِ کفِ خوانایی می‌رفت. عنوان از بین نرفته —
+   `alt` تصویر و عنوانِ داخلِ نمای تمام‌صفحه همان را دارند. */
+.ch-gal-cap { display: none; }
 
-.ch-vid-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.ch-vid-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 172px)); gap: 10px; justify-content: start; }
 
 .ch-gal-empty {
   display: flex; flex-direction: column; align-items: center; gap: 10px;
@@ -317,11 +318,11 @@ main.ch-col > section { max-width: 760px; }
 .ch-gal-empty p { margin: 0; font-size: 13px; color: var(--text-tertiary, #6E6E6E); }
 
 @media (max-width: 700px) {
-  .ch-gal-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
-  .ch-vid-grid { grid-template-columns: 1fr; }
+  .ch-gal-grid { grid-template-columns: repeat(4, 1fr); gap: 6px; }
+  .ch-vid-grid { grid-template-columns: repeat(2, 1fr); }
 }
 @media (prefers-reduced-motion: reduce) {
-  .ch-gal-cell, .ch-gal-cell img, .ch-gal-cap { transition: none; }
+  .ch-gal-cell, .ch-gal-cell img { transition: none; }
   .ch-gal-cell:hover img { transform: none; }
 }
 

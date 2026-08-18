@@ -1,12 +1,12 @@
 'use client'
 
 /* ─────────────────────────────────────────────────────────────
-   گالریِ پروفایل مربی — شبکه‌ی ادیتوریال، نه بندانگشتی.
+   گالریِ پروفایل (مربی و داور) — شبکه‌ی ادیتوریال، نه بندانگشتی.
 
    ── چه چیزی عوض شد ──
    نسخه‌ی قبلی شش ستونِ مربعِ ۷۱ پیکسلی بود؛ با دو عکس، دو تمبرِ کوچک
-   کنارِ یک کارتِ خالی دیده می‌شد. حالا اولین تصویر بزرگ‌تر است و
-   شبکه با تعدادِ واقعیِ عکس‌ها تنظیم می‌شود.
+   کنارِ یک کارتِ خالی دیده می‌شد. حالا شبکه یکنواخت است و خانه‌ها
+   کوچک — «نمونه‌کار»، نه دیوارِ عکس.
 
    ── تبِ «آلبوم‌ها» برداشته شد ──
    وضعیتش فقط در همین صفحه زندگی می‌کرد (`useState`) و هیچ مسیرِ
@@ -26,7 +26,7 @@ export interface GalleryVideo { id: string; url?: string; thumbnail: string; tit
 const TABS = ['photos', 'videos'] as const
 type Tab = typeof TABS[number]
 
-export default function CoachGallery({
+export default function ProfileGallery({
   images, videos, onOpenImage,
 }: {
   images: GalleryImage[]
@@ -82,12 +82,13 @@ export default function CoachGallery({
             <p>هنوز تصویری اضافه نشده است.</p>
           </div>
         ) : (
-          <div className="ch-gal-grid" data-few={images.length <= 4 ? '1' : undefined}>
+          <div className="ch-gal-grid">
             {images.map((g, i) => (
-              <button key={g.id} type="button" className="ch-gal-cell" data-lead={i === 0 ? '1' : undefined}
+              <button key={g.id} type="button" className="ch-gal-cell"
                 onClick={() => onOpenImage(images.map(x => x.url), i, { title: g.caption || 'تصویر', alt: g.caption || 'تصویر گالری' })}>
+                {/* عنوان جای دیگری است: `alt` و عنوانِ نمای تمام‌صفحه.
+                    نوارِ روی خانه‌ی ۱۱۶ پیکسلی نصفِ تصویر را می‌پوشاند. */}
                 <img src={g.url} alt={g.caption || 'تصویر گالری'} loading="lazy" decoding="async" />
-                {g.caption && <span className="ch-gal-cap">{g.caption}</span>}
               </button>
             ))}
           </div>

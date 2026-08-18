@@ -1,7 +1,7 @@
 'use client'
 
 /* ─────────────────────────────────────────────────────────────
-   مسیرِ مربیگری — درجه‌ها روی یک خطِ زمان.
+   مسیرِ حرفه‌ای — درجه‌ها روی یک خطِ زمان (مربی و داور).
 
    داده از قبل تاریخ‌دار بود (`CoachGrade { key, label, year }`) ولی
    به‌شکلِ شش خطِ بولت در یک کارتِ کناری نمایش داده می‌شد. همان داده
@@ -12,6 +12,7 @@
    ───────────────────────────────────────────────────────────── */
 
 import { toFaDigits } from '@/lib/jalali'
+import { keepLatinProps } from '@/lib/text-fa'
 
 export interface GradeItem { label: string; year: string }
 
@@ -36,7 +37,7 @@ export default function GradeTimeline({ items, freeCoach = false }: { items: Gra
           <span className="ch-tl-year" dir="auto">{g.year ? toFaDigits(g.year) : ''}</span>
           {/* برچسب می‌تواند حرفِ لاتین داشته باشد؛ جدا نگه داشته
               می‌شود تا سال وسطش نیفتد. */}
-          <span className="ch-tl-label ch-iso" dir="auto">{g.label}</span>
+          <span dir="auto" {...keepLatinProps(g.label, 'ch-tl-label ch-iso')}>{g.label}</span>
           {i === 0 && <span className="ch-tl-badge">بالاترین درجه</span>}
         </li>
       ))}

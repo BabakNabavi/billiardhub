@@ -1,0 +1,76 @@
+/* پوسترِ پیش‌فرضِ کاور — همراهِ CoverPoster.tsx.
+   هر انیمیشن فقط transform/opacity است تا روی CPUِ ضعیف
+   کامپوزیت شود و لِی‌اوت را دوباره حساب نکند. */
+
+/* z-index مثلِ کاورِ عکسی (۰) است تا لایه‌ی تیره‌کننده و نامِ
+   توخالیِ هیرو رویش بنشینند. بدونِ این، پوستر روی هر دو سوار
+   می‌شد و متن روی زمینه‌ی روشن بی‌کنتراست می‌ماند. */
+.cp { position: absolute; inset: 0; z-index: 0; overflow: hidden; background: #071310; }
+.cp[data-tone='referee'] { background: #070C16; }
+
+/* نمدِ میز — سبزِ اسنوکر برای مربی، آبیِ سرد برای داور */
+.cp-felt {
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(90% 130% at 24% 118%, rgba(31, 92, 66, 0.95), transparent 64%),
+    radial-gradient(70% 95% at 82% -12%, rgba(199, 166, 106, 0.30), transparent 60%),
+    linear-gradient(158deg, #1B4632 0%, #0F2A20 46%, #071310 100%);
+}
+.cp[data-tone='referee'] .cp-felt {
+  background:
+    radial-gradient(90% 130% at 24% 118%, rgba(38, 66, 112, 0.95), transparent 64%),
+    radial-gradient(70% 95% at 82% -12%, rgba(143, 166, 199, 0.26), transparent 60%),
+    linear-gradient(158deg, #1B3054 0%, #101C36 46%, #070C16 100%);
+}
+
+/* بافتِ ریزِ پارچه — یک الگوی تکرارشونده، بدونِ فایل */
+/* کاشیِ ۴ پیکسلی به‌جای گرادیانِ تکرارشونده‌ی تمام‌صفحه: همان بافت،
+   با یک رَسترِ کوچک که مرورگر تکرارش می‌کند. */
+.cp-weave {
+  position: absolute; inset: 0; opacity: 0.6;
+  background-image:
+    linear-gradient(45deg, rgba(255, 255, 255, 0.04) 25%, transparent 25%, transparent 75%, rgba(0, 0, 0, 0.07) 75%);
+  background-size: 4px 4px;
+}
+
+/* نورِ سقفیِ بالای میز */
+.cp-spot {
+  position: absolute; inset-inline-end: 26%; top: -58%;
+  width: 66%; aspect-ratio: 1;
+  background: radial-gradient(circle, rgba(255, 244, 214, 0.28) 0%, rgba(255, 244, 214, 0.06) 42%, transparent 64%);
+  animation: cp-breathe 7s ease-in-out infinite;
+}
+
+/* ⚠️ اول تمامِ عرضِ هیرو را با preserveAspectRatio="slice" می‌گرفت؛
+   روی هیروی پهن توپ‌ها غول‌آسا می‌شدند و پشتِ نام می‌افتادند. حالا
+   جعبه‌ی خودش را دارد و در ناحیه‌ی خالیِ کنارِ نام می‌نشیند. */
+.cp-balls {
+  position: absolute; inset-inline-end: 7%; top: 22%;
+  width: clamp(170px, 30vw, 340px); aspect-ratio: 2 / 1;
+}
+/* ⚠️ این‌جا drop-shadow بود. transformِ فرزندان داخلِ یک عنصرِ
+   فیلتردار جدا کامپوزیت نمی‌شود: هر فریم فیلتر را باطل می‌کرد و
+   یک ناحیه‌ی ۳۴۰×۱۷۰ با بلورِ ۱۸ پیکسلی از نو رَستر می‌شد — دقیقاً
+   همان چیزی که روی CPUِ ضعیف نباید بیفتد. سایه حالا ثابت و داخلِ
+   خودِ SVG است. */
+.cp-line { opacity: 0.9; }
+
+/* توپ‌ها با سرعت‌های متفاوت شناورند — موازی نبودنشان است که
+   حرکت را «زنده» می‌کند نه «چرخ‌دنده‌ای». */
+.cp-ball { transform-box: fill-box; transform-origin: center; }
+.cp-b1 { animation: cp-float 9s  ease-in-out infinite; }
+.cp-b2 { animation: cp-float 11s ease-in-out infinite -2.5s; }
+.cp-b3 { animation: cp-float 13s ease-in-out infinite -5s; }
+
+@keyframes cp-float {
+  0%, 100% { transform: translate3d(0, 0, 0) }
+  50%      { transform: translate3d(-7px, -9px, 0) }
+}
+@keyframes cp-breathe {
+  0%, 100% { opacity: 0.72 }
+  50%      { opacity: 1 }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cp-spot, .cp-ball { animation: none; }
+}
