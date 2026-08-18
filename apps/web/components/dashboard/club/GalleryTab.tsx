@@ -592,7 +592,7 @@ export default function GalleryTab({ club, onLogoChange }: {
             <input
               value={newAlbumName}
               onChange={e => setNewAlbumName(e.target.value)}
-              placeholder="نام آلبوم مثلاً: مسابقات کشوری ۱۴۰۵"
+              placeholder="نام آلبوم"
               onKeyDown={e => { if (e.key === 'Enter') createAlbum(); }}
               style={{
                 flex: 1, border: '1px solid #E5E7EB', borderRadius: 10, padding: '10px 14px',

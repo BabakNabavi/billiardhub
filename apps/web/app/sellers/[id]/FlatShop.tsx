@@ -9,7 +9,7 @@ import ClubStoryModal from '../../../components/ClubStoryModal'
 import type { SellerStory } from '../../../components/seller/StoryManager'
 import { useProfileImageViewer } from '@/components/ProfileImageViewer'
 import { getSellerProfile, type SellerProfile } from '../../../lib/seller-store'
-import { fetchProfile } from '../../../lib/profiles/client'
+import { fetchProfileResult } from '../../../lib/profiles/client'
 import { useOwnerEdit } from '../../../lib/profiles/use-owner-edit'
 import { compressImage } from '../../../lib/seller-store'
 import { ask } from '../../../lib/ui/dialogs'
@@ -300,13 +300,14 @@ export default function FlatShop() {
      بعد از mount خوانده می‌شود تا SSR و کلاینت یکی باشند. */
   const [profile, setProfile] = useState<SellerProfile | null>(null)
   const galleryRef = useRef<HTMLInputElement>(null)
+  const [mine, setMine] = useState<boolean | undefined>(undefined)
 
   /* ── ویرایشِ درجا ──
      ⚠️ پیش از هر `return`ِ شرطیِ این کامپوننت — قاعده‌ی هوک‌ها.
      `ownerId` از قبل داخلِ `profile` نشانده می‌شود (خطِ بالاتر). */
   /* عکس‌های گالری از پروفایلِ واقعی */
   const shots = profile?.gallery ?? []
-  const edit = useOwnerEdit<SellerProfile>('seller', sellerId, profile, profile?.ownerId ?? null, setProfile)
+  const edit = useOwnerEdit<SellerProfile>('seller', sellerId, profile, profile?.ownerId ?? null, setProfile, mine)
 
   const addShots = async (files: FileList) => {
     const items = await Promise.all([...files].map(async fl => ({
@@ -329,7 +330,10 @@ export default function FlatShop() {
     setProfile(getSellerProfile(sellerId))
     setMissing(false)
     /* منبع حقیقت سرور است — فروشگاه کاربران دیگر فقط از این‌جا می‌آید */
-    void fetchProfile<SellerProfile>('seller', sellerId).then(p => {
+    void fetchProfileResult<SellerProfile>('seller', sellerId).then(r => {
+      const p = r.state === 'found' ? r.profile : null
+      /* پرچمِ قطعیِ سرور — مقایسه‌ی مرورگر بی‌صدا شکست می‌خورد */
+      if (r.state === 'found') setMine(r.isMine === true)
       /* `ownerId` ستونِ واقعیِ ردیف است و باید صریح منتقل شود؛ وگرنه
          مسیرِ استوری روی ردیف‌هایی که آن را داخلِ data ندارند خالی
          می‌ماند و همان ناهماهنگیِ قبلی برعکس تکرار می‌شود. */

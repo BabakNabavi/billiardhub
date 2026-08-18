@@ -66,6 +66,8 @@ export default function TechnicianProfilePage() {
   /* نمای نگاشت‌شده برای ویرایش کافی نیست — پروفایلِ خام هم می‌ماند */
   const [rawP, setRawP]       = useState<TechnicianProfile | null>(null)
   const [ownerId, setOwnerId] = useState<string | null>(null)
+  /* پرچمِ قطعیِ سرور — مقایسه‌ی مرورگر بی‌صدا شکست می‌خورد */
+  const [mine, setMine] = useState<boolean | undefined>(undefined)
   /* شبکه شکست، نه اینکه پروفایل نباشد */
   const [netFail, setNetFail] = useState(false)
   const [reloadKey, setReloadKey] = useState(0)
@@ -99,6 +101,7 @@ export default function TechnicianProfilePage() {
           setPending(p.status !== 'approved')
           const raw = { ...p.data, slug: p.slug, verified: p.verified } as TechnicianProfile
           setRawP(raw); setOwnerId(p.ownerId)
+          setMine(r.isMine === true)
           setStored(profileToTechnician(raw))
         } else if (r.state === 'error') {
           setNetFail(true)
@@ -120,7 +123,7 @@ export default function TechnicianProfilePage() {
   /* ⚠️ پیش از هر `return`ِ شرطی — وگرنه React #310 و صفحه‌ی سفید */
   const edit = useOwnerEdit<TechnicianProfile>('technician', id, rawP, ownerId, raw => {
     setRawP(raw); setStored(profileToTechnician(raw))
-  })
+  }, mine)
   const fileRef = useRef<HTMLInputElement>(null)
 
   /* آلبومِ متخصص `{id,title,desc,photos}` است */
@@ -135,7 +138,7 @@ export default function TechnicianProfilePage() {
     })
   }
   const addAlbum = async () => {
-    const title = (await askText('آلبوم تازه', { placeholder: 'مثلاً: تعمیر میز باشگاه' }))?.trim()
+    const title = (await askText('آلبوم تازه', { placeholder: 'نام آلبوم' }))?.trim()
     if (!title) return
     await edit.apply(d => ({ ...d, albums: [...(d.albums ?? []), { id: `a${Date.now()}`, title, desc: '', photos: [] }] }))
   }

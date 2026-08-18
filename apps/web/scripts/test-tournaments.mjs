@@ -3223,7 +3223,10 @@ console.log('\n― پروفایلِ مربی و داور ―');
       ['app/referees/[id]/page.tsx', 'components/profile/ProfileGallery.tsx'],
     ].every(files => {
       const src = files.map(f => read(f)).join('\n');
-      return src.includes('<ProfileVideoCard key={v.id} v={v} />') && src.includes('url: v.url');
+      /* ⚠️ الگو `key={v.id}` را نمی‌خواهد: با مربع‌شدنِ خانه‌های ویدیو،
+         `key` روی پوسته رفت و کارت خودش فقط `v` می‌گیرد. چیزی که
+         اهمیت دارد رندرشدنِ کارت و رسیدنِ `url` است، نه محلِ کلید. */
+      return src.includes('<ProfileVideoCard v={v} />') && src.includes('url: v.url');
     }),
     'دکمه‌ی پخش تزئینی بود و صفحه‌ی داور اصلاً به‌روز نشده بود');
   t('سه عبارتِ اضافه حذف شدند',
@@ -3965,6 +3968,58 @@ console.log('\n― استوری: یک منبع، با انقضا ―');
         src.includes('useOwnerEdit') && src.includes('setOwnerId(r.profile.ownerId)')
         && src.includes('canEdit={edit.isOwner}'),
         'بدونِ این، صاحبِ پروفایل باز هم باید به داشبورد برود');
+    }
+  }
+
+  /* ── مالکیت را سرور می‌گوید، نه مرورگر ──
+     ⚠️ نسخه‌ی اول فقط `user.id === ownerId` را در مرورگر می‌سنجید.
+     کاربرِ لاگین‌کرده دکمه‌ها را نمی‌دید و هیچ خطایی هم نبود. حالا
+     `GET ?slug=` پرچمِ `isMine` را از کوکیِ نشست می‌دهد و همان
+     اولویت دارد. */
+  {
+    const route = strip(read('app/api/profiles/[kind]/route.ts'));
+    t('سرور می‌گوید بیننده مالکِ پروفایل هست یا نه',
+      route.includes('const isMine = !!actor && actor.id === p.ownerId')
+      && route.includes('{ profile: p, isMine }'),
+      'تشخیصِ سمتِ مرورگر بی‌صدا شکست می‌خورد و دکمه‌ها هرگز نمی‌آمدند');
+
+    t('هوک پرچمِ سرور را بر مقایسه‌ی مرورگر مقدم می‌کند',
+      read('lib/profiles/use-owner-edit.ts').includes('serverSaysMine ??'),
+      'وگرنه همان مسیرِ ناموفقِ قبلی می‌ماند');
+
+    for (const [p, tag] of [
+      ['app/coaches/[id]/page.tsx', 'مربی'], ['app/referees/[id]/page.tsx', 'داور'],
+      ['app/players/[id]/page.tsx', 'بازیکن'], ['app/services/[id]/page.tsx', 'خدمات فنی'],
+      ['app/manufacturers/[id]/page.tsx', 'تولیدکننده'], ['app/sellers/[id]/FlatShop.tsx', 'فروشگاه'],
+    ]) {
+      t(`${tag} پرچمِ سرور را به هوک می‌دهد`,
+        /* includes نه رجکس — چهارمین بار در همین نشست که الگو از
+           لایه‌های escape رد می‌شود و بک‌اسلش‌ها گم می‌شوند. */
+        read(p).includes('setMine(r.isMine === true)') && read(p).includes(', mine)'),
+        'بدونِ آن، صاحبِ پروفایل دکمه‌های ویرایش را نمی‌بیند');
+    }
+
+    /* ویدیو فایل است، نه نشانیِ آپارات */
+    const gal = read('components/profile/ProfileGallery.tsx');
+    t('افزودنِ ویدیو فایل می‌گیرد، نه نشانی',
+      gal.includes('accept="video/*"') && !gal.includes('onAddVideo?:'),
+      'پرسیدنِ نشانیِ آپارات/یوتیوب کارِ این دکمه نبود');
+
+    /* هر سه تب یک شبکه، پس یک اندازه */
+    t('هر سه تب از یک شبکه استفاده می‌کنند',
+      (gal.match(/className="ch-gal-grid"/g) ?? []).length >= 3
+      && !gal.includes('ch-vid-grid') && !gal.includes('ch-alb-grid'),
+      'شبکه‌های جدا یعنی خانه‌ها سه اندازه‌ی متفاوت می‌گیرند');
+
+    /* متنِ نمونه‌ی آلبوم در هیچ نقشی نماند */
+    for (const p of [
+      'app/coaches/[id]/page.tsx', 'app/referees/[id]/page.tsx',
+      'app/players/[id]/page.tsx', 'app/services/[id]/page.tsx',
+      'components/dashboard/club/GalleryTab.tsx', 'app/dashboard/technician/page.tsx',
+    ]) {
+      t(`نمونه‌ی نامِ آلبوم در ${p.split('/').slice(-2)[0]} نمانده`,
+        !read(p).split(/\r?\n/).some(l => l.includes('آلبوم') && l.includes('مثلاً')),
+        'جای placeholder فقط «نام آلبوم» می‌نشیند');
     }
   }
 

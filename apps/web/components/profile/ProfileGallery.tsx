@@ -31,7 +31,7 @@ type Tab = typeof TABS[number]
 
 export default function ProfileGallery({
   images, videos, onOpenImage,
-  canEdit = false, busy = false, onAddImages, onAddVideo, onNewAlbum,
+  canEdit = false, busy = false, onAddImages, onAddVideos, onNewAlbum,
 }: {
   images: GalleryImage[]
   videos: GalleryVideo[]
@@ -44,7 +44,8 @@ export default function ProfileGallery({
   canEdit?: boolean
   busy?: boolean
   onAddImages?: (files: FileList) => void | Promise<void>
-  onAddVideo?: () => void | Promise<void>
+  /* ویدیو هم مثل عکس از گالریِ خودِ کاربر انتخاب می‌شود */
+  onAddVideos?: (files: FileList) => void | Promise<void>
   onNewAlbum?: () => void | Promise<void>
 }) {
   /* ── آلبوم‌ها از خودِ رسانه‌ها ساخته می‌شوند ── */
@@ -70,6 +71,7 @@ export default function ProfileGallery({
      `picked` نگه می‌دارد که کاربر خودش تبی انتخاب کرده یا نه — بعد از
      انتخابِ او دیگر چیزی زیرِ دستش عوض نمی‌شود. */
   const fileRef = useRef<HTMLInputElement>(null)
+  const vidRef = useRef<HTMLInputElement>(null)
   const picked = useRef(false)
   const choose = useCallback((k: Tab) => { picked.current = true; setOpenAlbum(null); setTab(k) }, [])
 
@@ -127,10 +129,16 @@ export default function ProfileGallery({
         ))}
       </div>
 
-      {/* ورودیِ فایل بیرون از شبکه می‌ماند — پنهان است و جا نمی‌گیرد */}
+      {/* ورودی‌های فایل بیرون از شبکه می‌مانند — پنهان‌اند و جا نمی‌گیرند */}
       {canEdit && (
-        <input ref={fileRef} type="file" accept="image/*" multiple hidden
-          onChange={e => { if (e.target.files?.length) void onAddImages?.(e.target.files); e.target.value = '' }} />
+        <>
+          <input ref={fileRef} type="file" accept="image/*" multiple hidden
+            onChange={e => { if (e.target.files?.length) void onAddImages?.(e.target.files); e.target.value = '' }} />
+          {/* ⚠️ ویدیو هم فایل است، نه نشانیِ آپارات/یوتیوب. نسخه‌ی اول
+              نشانی می‌پرسید که اصلاً کارِ این دکمه نبود. */}
+          <input ref={vidRef} type="file" accept="video/*" hidden
+            onChange={e => { if (e.target.files?.length) void onAddVideos?.(e.target.files); e.target.value = '' }} />
+        </>
       )}
 
       {/* هر سه پنل همیشه در DOM‌اند و غیرفعال `hidden` می‌گیرد:
@@ -149,10 +157,13 @@ export default function ProfileGallery({
       <div id="chpanel-videos" role="tabpanel" aria-labelledby="chtab-videos" hidden={tab !== 'videos'}>
         {videos.length === 0 && !canEdit
           ? empty(<Clapperboard size={30} aria-hidden />, 'هنوز ویدیویی اضافه نشده است.')
+          /* ⚠️ شبکه‌ی ویدیو ستون‌های خودش را داشت و خانه‌ها اندازه‌ی
+             دیگری می‌گرفتند. کاربر خواست هر سه تب یک اندازه باشند —
+             همان اندازه‌ی تبِ تصاویر. پس همان شبکه استفاده می‌شود. */
           : (
-            <div className="ch-vid-grid">
-              {canEdit && addTile('افزودن ویدیو', () => void onAddVideo?.(), 'ch-vid-add')}
-              {videos.map(v => <ProfileVideoCard key={v.id} v={v} />)}
+            <div className="ch-gal-grid">
+              {canEdit && addTile('افزودن ویدیو', () => vidRef.current?.click())}
+              {videos.map(v => <div key={v.id} className="ch-vid-sq"><ProfileVideoCard v={v} /></div>)}
             </div>
           )}
       </div>
@@ -171,15 +182,16 @@ export default function ProfileGallery({
             {current.images.length > 0 && (
               <div className="ch-gal-grid">{current.images.map((g, i) => cell(g, current.images, i))}</div>
             )}
+            {/* داخلِ آلبوم هم همان شبکه‌ی مربع — یک اندازه در همه‌جا */}
             {current.videos.length > 0 && (
-              <div className="ch-vid-grid" style={{ marginTop: current.images.length ? 12 : 0 }}>
-                {current.videos.map(v => <ProfileVideoCard key={v.id} v={v} />)}
+              <div className="ch-gal-grid" style={{ marginTop: current.images.length ? 12 : 0 }}>
+                {current.videos.map(v => <div key={v.id} className="ch-vid-sq"><ProfileVideoCard v={v} /></div>)}
               </div>
             )}
           </>
         ) : (
-          <div className="ch-alb-grid">
-            {canEdit && addTile('آلبوم تازه', () => void onNewAlbum?.(), 'ch-alb')}
+          <div className="ch-gal-grid">
+            {canEdit && addTile('آلبوم تازه', () => void onNewAlbum?.())}
             {albums.map(a => {
               const cover = a.images[0]?.url ?? a.videos[0]?.thumbnail
               const n = a.images.length + a.videos.length

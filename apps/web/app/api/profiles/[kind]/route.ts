@@ -33,13 +33,21 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ kind: strin
   if (slug) {
     const p = await getProfileBySlug(kind, slug);
     if (!p) return NextResponse.json({ message: 'پیدا نشد' }, { status: 404 });
+    const actor = actorFromRequest(req);
     /* پروفایل تأییدنشده را فقط صاحبش و ادمین می‌بینند */
     if (p.status !== 'approved') {
-      const actor = actorFromRequest(req);
       const allowed = !!actor && (actor.id === p.ownerId || (await isAdmin(actor.id)));
       if (!allowed) return NextResponse.json({ message: 'پیدا نشد' }, { status: 404 });
     }
-    return NextResponse.json({ profile: p }, { headers: { 'Cache-Control': 'no-store' } });
+    /* ── چرا سرور «مالک بودن» را می‌گوید ──
+       صفحه‌ی عمومی دکمه‌های ویرایش را بر اساسِ مقایسه‌ی
+       `user.id === ownerId` در مرورگر نشان می‌داد. آن مقایسه به
+       هیدریتِ استورِ لاگین و شکلِ کاربرِ ذخیره‌شده بند است و بی‌صدا
+       شکست می‌خورد — کاربر لاگین بود و دکمه‌ها را نمی‌دید.
+       این پرچم از خودِ کوکیِ نشست می‌آید: یک منبع، همان منبعی که
+       مسیرِ ذخیره هم با آن تصمیم می‌گیرد. */
+    const isMine = !!actor && actor.id === p.ownerId;
+    return NextResponse.json({ profile: p, isMine }, { headers: { 'Cache-Control': 'no-store' } });
   }
 
   /* ── فهرستِ کامل برای پنل‌ها ──

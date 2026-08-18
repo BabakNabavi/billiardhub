@@ -194,13 +194,15 @@ export default function ManufacturerPage() {
   /* نمای نگاشت‌شده برای ذخیره کافی نیست — پروفایلِ خام هم می‌ماند */
   const [rawP, setRawP]           = useState<ManufacturerProfile | null>(null)
   const [ownerId, setOwnerId]     = useState<string | null>(null)
+  /* پرچمِ قطعیِ سرور — مقایسه‌ی مرورگر بی‌صدا شکست می‌خورد */
+  const [mine, setMine]           = useState<boolean | undefined>(undefined)
   const galleryRef                = useRef<HTMLInputElement>(null)
   const { open: openImage, viewer: imageViewer } = useProfileImageViewer()
 
   /* ⚠️ پیش از هر `return`ِ شرطی — قاعده‌ی هوک‌ها */
   const edit = useOwnerEdit<ManufacturerProfile>('manufacturer', mfrId, rawP, ownerId, raw => {
     setRawP(raw); setStoredMfr(profileToManufacturer(raw))
-  })
+  }, mine)
   const addShots = async (files: FileList) => {
     const items = await Promise.all([...files].map(async fl => ({
       id: Math.random().toString(36).slice(2, 9),
@@ -236,6 +238,7 @@ export default function ManufacturerPage() {
           const m = r.profile
           const raw = { ...m.data, slug: m.slug, verified: m.verified } as ManufacturerProfile
           setRawP(raw); setOwnerId(m.ownerId)
+          setMine(r.isMine === true)
           setStoredMfr(profileToManufacturer(raw))
         } else if (r.state === 'error') {
           setNetFail(true)

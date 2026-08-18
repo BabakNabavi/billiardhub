@@ -68,6 +68,8 @@ export default function PlayerProfilePage() {
      خام، ویرایشِ درجا داده را بازنویسیِ ناقص می‌کرد. */
   const [rawP, setRawP]       = useState<PlayerProfile | null>(null)
   const [ownerId, setOwnerId] = useState<string | null>(null)
+  /* پرچمِ قطعیِ سرور — مقایسه‌ی مرورگر بی‌صدا شکست می‌خورد */
+  const [mine, setMine] = useState<boolean | undefined>(undefined)
   /* شبکه شکست، نه اینکه پروفایل نباشد */
   const [netFail, setNetFail] = useState(false)
   const [reloadKey, setReloadKey] = useState(0)
@@ -103,6 +105,7 @@ export default function PlayerProfilePage() {
           setPending(p.status !== 'approved')
           const raw = { ...p.data, slug: p.slug, verified: p.verified } as PlayerProfile
           setRawP(raw); setOwnerId(p.ownerId)
+          setMine(r.isMine === true)
           setStored(profileToPlayer(raw))
         } else if (r.state === 'error') {
           /* کشِ محلی می‌ماند؛ فقط اگر چیزی هم در کش نبود، پیامِ
@@ -127,7 +130,7 @@ export default function PlayerProfilePage() {
      نوشته شد و صفحه با React #310 سفید شد. */
   const edit = useOwnerEdit<PlayerProfile>('player', id, rawP, ownerId, raw => {
     setRawP(raw); setStored(profileToPlayer(raw))
-  })
+  }, mine)
   const fileRef = useRef<HTMLInputElement>(null)
 
   /* آلبومِ بازیکن `{id,title,photos:string[]}` است — عکس مستقیم داخلِ
@@ -143,7 +146,7 @@ export default function PlayerProfilePage() {
     })
   }
   const addAlbum = async () => {
-    const title = (await askText('آلبوم تازه', { placeholder: 'مثلاً: مسابقات کشوری' }))?.trim()
+    const title = (await askText('آلبوم تازه', { placeholder: 'نام آلبوم' }))?.trim()
     if (!title) return
     await edit.apply(d => ({ ...d, albums: [...(d.albums ?? []), { id: `a${Date.now()}`, title, photos: [] }] }))
   }

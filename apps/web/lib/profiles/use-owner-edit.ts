@@ -46,12 +46,18 @@ export function useOwnerEdit<T>(
   profile: T | null,
   ownerId: string | null,
   onSaved: (next: T) => void,
+  /* پرچمِ سرور. `undefined` یعنی هنوز نیامده و به مقایسه‌ی مرورگر
+     تکیه می‌شود؛ `true`/`false` قطعی است. */
+  serverSaysMine?: boolean,
 ): OwnerEdit<T> {
   const { user } = useAuthStore()
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
 
-  const isOwner = !!user?.id && !!ownerId && user.id === ownerId
+  /* ⚠️ تکیه بر مقایسه‌ی مرورگر تنها کافی نبود: کاربر لاگین بود و
+     دکمه‌ها را نمی‌دید. پرچمِ سرور از کوکیِ نشست می‌آید و اولویت
+     دارد؛ مقایسه‌ی محلی فقط تا رسیدنِ آن کار می‌کند. */
+  const isOwner = serverSaysMine ?? (!!user?.id && !!ownerId && user.id === ownerId)
 
   const apply = useCallback(async (mutate: (draft: T) => T) => {
     if (!profile || !isOwner || saving) return false

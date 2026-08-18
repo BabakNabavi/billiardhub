@@ -433,3 +433,20 @@ main.ch-col > section { max-width: 760px; }
 
 /* خانه‌ی «+» به globals.css منتقل شد: چهار صفحه‌ی نقش از آن
    استفاده می‌کنند و سه‌تاشان این فایل را ایمپورت نمی‌کنند. */
+
+/* ── همه‌ی خانه‌ها یک اندازه ──
+   ⚠️ سه تب سه شبکه‌ی متفاوت داشتند: عکس ۱۱۶ مربع، ویدیو ۱۷۲ در
+   نسبتِ ۱۶:۹، آلبوم ۲۰۰. کاربر خواست همه — عکس، ویدیو، آلبوم و خودِ
+   خانه‌ی «+» — یک اندازه باشند: همان اندازه‌ی تبِ تصاویر. حالا هر سه
+   از `.ch-gal-grid` استفاده می‌کنند و این‌ها فقط محتوا را در همان
+   قابِ مربع جا می‌دهند. */
+.ch-vid-sq { aspect-ratio: 1; border-radius: 10px; overflow: hidden; position: relative; }
+.ch-vid-sq > * { width: 100%; height: 100%; }
+.ch-vid-sq .gcard { width: 100%; height: 100%; aspect-ratio: auto !important; }
+.ch-vid-sq img { width: 100%; height: 100%; object-fit: cover; }
+
+/* کارتِ آلبوم داخلِ همان شبکه‌ی مربع */
+.ch-gal-grid > .ch-alb { aspect-ratio: 1; gap: 6px; padding: 6px; }
+.ch-gal-grid > .ch-alb .ch-alb-cover { flex: 1; aspect-ratio: auto; }
+.ch-gal-grid > .ch-alb .ch-alb-name { font-size: 11.5px; }
+.ch-gal-grid > .ch-alb .ch-alb-n { font-size: 10px; }

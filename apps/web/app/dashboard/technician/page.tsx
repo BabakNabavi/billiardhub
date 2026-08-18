@@ -357,7 +357,7 @@ export default function TechnicianDashboard() {
           {/* ═══ گالری / آلبوم‌ها ═══ */}
           <section className={CARD}>
             <h2 className="mb-1 text-[14.5px] font-bold">گالری تصاویر — آلبوم‌ها</h2>
-            <p className="mb-4 text-[12px] text-[#6F6A5C]">آلبوم بسازید (مثلاً «پروژه‌های کرمان») و عکس‌های هر آلبوم را اضافه کنید.</p>
+            <p className="mb-4 text-[12px] text-[#6F6A5C]">آلبوم بسازید و عکس‌های هر آلبوم را اضافه کنید.</p>
 
             {form.albums.map(a => (
               <div key={a.id} className="mb-3 rounded-xl border border-[#EFEBE1] bg-[#FAFAF7] p-3">

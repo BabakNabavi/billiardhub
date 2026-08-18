@@ -43,7 +43,9 @@ async function json<T>(r: Response): Promise<T | null> {
 
    قفل باید در ابهام **بسته** بماند، نه باز. */
 export type MyProfileResult<T> =
-  | { state: 'found'; profile: RemoteProfile<T> }
+  /* `isMine` را سرور می‌گوید — نه مقایسه‌ی مرورگر. فقط مسیرِ
+     `?slug=` آن را برمی‌گرداند. */
+  | { state: 'found'; profile: RemoteProfile<T>; isMine?: boolean }
   | { state: 'none' }
   | { state: 'error' }
 
@@ -85,9 +87,9 @@ export async function fetchProfileResult<T>(kind: ProfileKind, slug: string): Pr
   if (!r) return { state: 'error' }
   /* ۴۰۴ یعنی واقعاً نیست؛ بقیه‌ی کدهای ناموفق خطای سرورند. */
   if (!r.ok) return r.status === 404 ? { state: 'none' } : { state: 'error' }
-  const j = await json<{ profile: RemoteProfile<T> | null }>(r)
+  const j = await json<{ profile: RemoteProfile<T> | null; isMine?: boolean }>(r)
   if (!j) return { state: 'error' }
-  return j.profile ? { state: 'found', profile: j.profile } : { state: 'none' }
+  return j.profile ? { state: 'found', profile: j.profile, isMine: j.isMine === true } : { state: 'none' }
 }
 
 /** همه‌ی پروفایل‌های تأییدشده‌ی یک نوع */

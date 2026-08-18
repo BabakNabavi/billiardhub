@@ -7,17 +7,22 @@ import '../../../components/profile/profile-page.css'
 import { fetchProfileResult } from '../../../lib/profiles/client'
 import { useOwnerEdit } from '../../../lib/profiles/use-owner-edit'
 import { compressImage } from '../../../lib/seller-store'
+import { uploadFile } from '../../../lib/supabase'
+import { videoMeta, formatDuration } from '../../../lib/video-thumb'
 /* ⚠️ prompt/confirm بومی در این پروژه ممنوع است (گاردِ ایستا دارد):
    جریان را قفل می‌کنند، استایلِ سایت را نمی‌گیرند و روی وب‌ویوِ
    اپ رفتارشان یکسان نیست. `askText`/`ask` همان کار را با پنجره‌ی
    خودِ سایت می‌کنند. */
-import { askText, ask } from '../../../lib/ui/dialogs'
+import { askText, ask, notify } from '../../../lib/ui/dialogs'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import { useProfileImageViewer } from '@/components/ProfileImageViewer'
 import { normalizeDigits } from '@/lib/text-fa'
 import { Phone, Send, Copy, Check } from 'lucide-react'
 import { getCoachProfile, badgeFromGrades, disciplineLabel, GRADES, type CoachProfile } from '@/lib/coach-store'
+
+/* همان سقفی که پنل اعمال می‌کند */
+const MAX_VIDEO_MB = 25
 
 /* ─── انواع ─── */
 interface GImg  { id:string; url:string; caption:string; album?:string }
@@ -69,6 +74,9 @@ export default function CoachProfilePage() {
   /* مالکِ ردیف — از ستونِ سرور، نه از داده‌ی داخلِ فرم. فقط برای
      نشان‌دادنِ دکمه‌های ویرایش؛ اجازه‌ی واقعی روی سرور سنجیده می‌شود. */
   const [ownerId, setOwnerId] = useState<string | null>(null)
+  /* پرچمِ قطعیِ سرور — مقایسه‌ی مرورگر فقط فالبک است */
+  const [mine, setMine] = useState<boolean | undefined>(undefined)
+  const [vidBusy, setVidBusy] = useState(false)
   const [copyState, setCopyState] = useState<'idle' | 'ok' | 'manual'>('idle')
   const flashT = useRef<ReturnType<typeof setTimeout> | null>(null)
   useEffect(() => () => { if (flashT.current) clearTimeout(flashT.current) }, [])
@@ -90,6 +98,7 @@ export default function CoachProfilePage() {
         if (r.state === 'found') {
           setLocalP({ ...(r.profile.data as CoachProfile), slug: r.profile.slug, verified: r.profile.verified })
           setOwnerId(r.profile.ownerId)
+          setMine(r.isMine === true)
         }
         else if (r.state === 'error') setNetFail(true)
       } catch {
@@ -116,7 +125,7 @@ export default function CoachProfilePage() {
      صاحبِ پروفایل بدونِ رفتن به داشبورد عکس/ویدیو/آلبوم اضافه و حذف
      می‌کند. `apply` کلِ پروفایل را با یک فیلدِ عوض‌شده ذخیره می‌کند و
      نشانیِ Storage را که سرور برمی‌گرداند می‌نشاند. */
-  const edit = useOwnerEdit<CoachProfile>('coach', id, localP, ownerId, setLocalP)
+  const edit = useOwnerEdit<CoachProfile>('coach', id, localP, ownerId, setLocalP, mine)
 
   /* ⚠️ `div` خالی بود. قاعده‌ی پروژه اسکلت می‌خواهد، و روی شبکه‌ی
      کند یک صفحه‌ی تماماً سفید از خرابی قابلِ تشخیص نیست. */
@@ -245,17 +254,34 @@ export default function CoachProfilePage() {
     })))
     await edit.apply(d => ({ ...d, gallery: [...d.gallery, ...items] }))
   }
-  const addVideo = async () => {
-    const url = (await askText('افزودن ویدیو', { placeholder: 'نشانی آپارات یا یوتیوب' }))?.trim()
-    if (!url) return
-    const title = (await askText('عنوان ویدیو', { placeholder: 'مثلاً: تمرین ضربه' }))?.trim() || 'ویدیو'
-    await edit.apply(d => ({
-      ...d,
-      videos: [...d.videos, { id: `v${Date.now()}`, url, thumbnail: '', title, duration: '' }],
-    }))
+  /* ── ویدیو از گالریِ خودِ کاربر ──
+     ⚠️ نسخه‌ی اول نشانیِ آپارات/یوتیوب می‌پرسید — کاربر درست گفت که
+     این اصلاً کارِ این دکمه نیست. حالا مثل عکس فایل انتخاب می‌شود و
+     همان مسیرِ آپلودی می‌رود که پنل استفاده می‌کند
+     (`profiles/videos/<userId>/…` در Storage، نه data:URL داخلِ jsonb
+     که ردیف را می‌ترکاند). */
+  const addVideoFiles = async (files: FileList) => {
+    const file = files[0]
+    if (!file) return
+    if (file.size > MAX_VIDEO_MB * 1024 * 1024) {
+      notify(`حجم ویدیو نباید بیش از ${MAX_VIDEO_MB} مگابایت باشد`); return
+    }
+    setVidBusy(true)
+    try {
+      const meta = await videoMeta(file)
+      const vid = `v${Date.now()}${Math.random().toString(36).slice(2, 6)}`
+      const base = `profiles/videos/${ownerId ?? 'anon'}/${vid}`
+      const url = await uploadFile('club-media', file, base)
+      if (!url) { notify('ویدیو بالا نرفت؛ دوباره تلاش کنید'); return }
+      const thumb = meta.thumb ? (await uploadFile('club-media', meta.thumb, `${base}-thumb`)) ?? '' : ''
+      await edit.apply(d => ({
+        ...d,
+        videos: [...d.videos, { id: vid, url, thumbnail: thumb, title: file.name.replace(/.[^.]+$/, ''), duration: formatDuration(meta.durationSec) }],
+      }))
+    } finally { setVidBusy(false) }
   }
   const newAlbum = async () => {
-    const name = (await askText('آلبوم تازه', { placeholder: 'مثلاً: شاگرد علی رضایی' }))?.trim()
+    const name = (await askText('آلبوم تازه', { placeholder: 'نام آلبوم' }))?.trim()
     if (!name) return
     /* آلبوم تا وقتی رسانه‌ای نداشته باشد وجود ندارد — پس آخرین عکسِ
        بدونِ آلبوم به آن داده می‌شود و کاربر بقیه را از پنل یا با
@@ -320,8 +346,8 @@ export default function CoachProfilePage() {
                 index, ...meta,
                 ...(edit.isOwner ? { onDelete: deleteImage } : {}),
               })}
-              canEdit={edit.isOwner} busy={edit.saving}
-              onAddImages={addImages} onAddVideo={addVideo} onNewAlbum={newAlbum}
+              canEdit={edit.isOwner} busy={edit.saving || vidBusy}
+              onAddImages={addImages} onAddVideos={addVideoFiles} onNewAlbum={newAlbum}
             />
             {edit.error && <p className="ch-empty" role="alert">{edit.error}</p>}
           </main>
