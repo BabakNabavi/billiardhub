@@ -13,6 +13,21 @@ import { getSupabaseServer } from '../supabase-server'
 export type ProfileKind = 'seller' | 'manufacturer' | 'coach' | 'referee' | 'technician' | 'player'
 export const PROFILE_KINDS: ProfileKind[] = ['seller', 'manufacturer', 'coach', 'referee', 'technician', 'player']
 
+/* ── کدام نقش برای انتشار منتظرِ ادمین می‌ماند ──
+   سیاست: داور و بازیکن تا تأییدِ ادمین منتشر نمی‌شوند؛ بقیه همان
+   لحظه‌ی ثبت روی سایت می‌نشینند.
+
+   ⚠️ تا امروز پیش‌فرضِ *ستونِ دیتابیس* روی 'approved' بود و هیچ‌کس
+   این را صریح نمی‌نوشت، یعنی داور و بازیکن هم بی‌هیچ بررسی‌ای
+   منتشر می‌شدند — درست برعکسِ چیزی که باید.
+
+   تیکِ آبی از این جدا است و برای *همه‌ی* نقش‌ها تصمیمِ ادمین می‌ماند
+   (ستونِ `verified`، صفحه‌ی /admin/verified). */
+export const NEEDS_REVIEW_TO_PUBLISH: ProfileKind[] = ['referee', 'player']
+
+export const initialStatus = (kind: ProfileKind): 'pending' | 'approved' =>
+  NEEDS_REVIEW_TO_PUBLISH.includes(kind) ? 'pending' : 'approved'
+
 const BUCKET = 'club-media'
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024
 
@@ -217,6 +232,9 @@ export async function saveProfile(input: SaveInput): Promise<ProfileRow> {
   if (input.licenseNumber !== undefined) row.license_number = input.licenseNumber
   if (input.licenseUrl !== undefined) row.license_url = input.licenseUrl
   if (input.status !== undefined) row.status = input.status
+  /* فقط روی ساختِ اولیه. روی ویرایش دست نمی‌خورد: پروفایلِ تأییدشده
+     نباید با هر ذخیره‌ی کاربر دوباره از سایت برداشته شود. */
+  else if (!existing) row.status = initialStatus(input.kind)
 
   if (existing) {
     const { data, error } = await sb().from('profiles').update(row).eq('id', existing.id).select().single()
