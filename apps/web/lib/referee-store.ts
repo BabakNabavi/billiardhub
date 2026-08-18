@@ -8,9 +8,15 @@
 import { provinceOfCity } from './iran-geo'
 
 export interface RefereeGrade  { key: string; label: string; year: string }
-export interface RefereeMedia  { id: string; url: string; caption: string }
+/* ── آلبوم‌ها ──
+   `album` نامِ آلبوم است، نه شناسه. عمداً آرایه‌ی جدایی از آلبوم‌ها
+   نگه نمی‌داریم: نسخه‌ی قبلیِ این قابلیت یک `albums: {id, imageIds[]}`
+   داشت که فقط در حافظه‌ی مرورگر زندگی می‌کرد و می‌توانست به عکسِ
+   حذف‌شده اشاره کند. با نامِ روی خودِ رسانه، آلبومِ یتیم ممکن نیست و
+   خالی‌شدنِ آلبوم یعنی نبودنش. مهاجرتِ دیتابیس هم لازم ندارد. */
+export interface RefereeMedia  { id: string; url: string; caption: string; album?: string }
 /* `url` نشانیِ خودِ فایل است، نه محتوا — دلیلش در `coach-store` */
-export interface RefereeVideo  { id: string; url?: string; thumbnail: string; title: string; duration: string }
+export interface RefereeVideo  { id: string; url?: string; thumbnail: string; title: string; duration: string; album?: string }
 
 export interface RefereeProfile {
   slug: string

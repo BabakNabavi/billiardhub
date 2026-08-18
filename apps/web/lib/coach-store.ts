@@ -6,11 +6,17 @@
 import { provinceOfCity } from './iran-geo'
 
 export interface CoachGrade  { key: string; label: string; year: string }
-export interface CoachMedia  { id: string; url: string; caption: string }
+/* ── آلبوم‌ها ──
+   `album` نامِ آلبوم است، نه شناسه. عمداً آرایه‌ی جدایی از آلبوم‌ها
+   نگه نمی‌داریم: نسخه‌ی قبلیِ این قابلیت یک `albums: {id, imageIds[]}`
+   داشت که فقط در حافظه‌ی مرورگر زندگی می‌کرد و می‌توانست به عکسِ
+   حذف‌شده اشاره کند. با نامِ روی خودِ رسانه، آلبومِ یتیم ممکن نیست و
+   خالی‌شدنِ آلبوم یعنی نبودنش. مهاجرتِ دیتابیس هم لازم ندارد. */
+export interface CoachMedia  { id: string; url: string; caption: string; album?: string }
 /* `url` نشانیِ خودِ فایل در Storage است، نه محتوا: پروفایل در
    localStorage هم می‌نشیند و ویدیوی درون‌خطی آن را می‌ترکاند.
    خالی‌بودنش یعنی ردیفِ قدیمی که فقط بندانگشتی داشت. */
-export interface CoachVideo  { id: string; url?: string; thumbnail: string; title: string; duration: string }
+export interface CoachVideo  { id: string; url?: string; thumbnail: string; title: string; duration: string; album?: string }
 
 export interface CoachProfile {
   slug: string

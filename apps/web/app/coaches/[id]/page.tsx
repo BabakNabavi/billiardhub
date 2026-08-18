@@ -13,10 +13,10 @@ import { Phone, Send, Copy, Check } from 'lucide-react'
 import { getCoachProfile, badgeFromGrades, disciplineLabel, GRADES, type CoachProfile } from '@/lib/coach-store'
 
 /* ─── انواع ─── */
-interface GImg  { id:string; url:string; caption:string }
+interface GImg  { id:string; url:string; caption:string; album?:string }
 /* `url` نشانیِ فایل است؛ ردیفِ قدیمی فقط بندانگشتی دارد و کارتِ
    بی‌پخش رندر می‌شود. */
-interface VItem { id:string; url?:string; thumbnail:string; title:string; duration:string }
+interface VItem { id:string; url?:string; thumbnail:string; title:string; duration:string; album?:string }
 
 /* شکلی که این صفحه رندر می‌کند — دقیقاً همان چیزی که پنلِ مربی
    ذخیره می‌کند، نه یک ابرمجموعه. فیلدهای مرده‌ی قبلی (امتیاز،
@@ -45,8 +45,8 @@ function mapLocalToView(p: CoachProfile): CoachView {
     whatsapp: p.whatsapp,
     instagram: p.instagram || undefined,
     telegram: p.telegram || undefined,
-    gallery: p.gallery.map(g => ({ id: g.id, url: g.url, caption: g.caption })),
-    videos: p.videos.map(v => ({ id: v.id, url: v.url, thumbnail: v.thumbnail, title: v.title, duration: v.duration })),
+    gallery: p.gallery.map(g => ({ id: g.id, url: g.url, caption: g.caption, album: g.album })),
+    videos: p.videos.map(v => ({ id: v.id, url: v.url, thumbnail: v.thumbnail, title: v.title, duration: v.duration, album: v.album })),
   }
 }
 

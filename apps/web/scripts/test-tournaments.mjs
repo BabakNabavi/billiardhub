@@ -3900,6 +3900,35 @@ console.log('\n― استوری: یک منبع، با انقضا ―');
       'ابعادِ قبلی گالری را از «نمونه‌کار» به «دیوارِ عکس» تبدیل می‌کرد');
   }
 
+  /* ── آلبوم‌ها: نام روی رسانه، نه فهرستِ جدا ──
+     ⚠️ نسخه‌ی اولِ این قابلیت یک آرایه‌ی `albums: {id, imageIds[]}` بود
+     که فقط در `useState` صفحه زندگی می‌کرد — بی‌مسیرِ ذخیره و با
+     امکانِ ارجاع به عکسِ حذف‌شده. حذفش کردم و حالا که برگشته، شکلش
+     فرق دارد: آلبوم فقط یک نام روی خودِ رسانه است. */
+  {
+    const gal = strip(read('components/profile/ProfileGallery.tsx'));
+    t('آلبوم از خودِ رسانه‌ها ساخته می‌شود، نه فهرستِ جدا',
+      gal.includes("const TABS = ['photos', 'videos', 'albums']")
+      && gal.includes("(g.album ?? '').trim()")
+      && !gal.includes('imageIds'),
+      'فهرستِ جدا یعنی آلبومِ یتیم و ارجاع به عکسِ حذف‌شده');
+
+    /* `includes` نه رجکس: الگو از چند لایه‌ی escape رد می‌شد و
+       بک‌اسلش‌ها سرِ راه گم می‌شدند، پس ادعا بی‌آنکه بفهمد قرمز ماند. */
+    for (const [p, M] of [['lib/coach-store.ts', 'CoachMedia'], ['lib/referee-store.ts', 'RefereeMedia']]) {
+      t(`${M} فیلدِ آلبوم دارد`,
+        read(p).includes(`interface ${M}  { id: string; url: string; caption: string; album?: string }`),
+        'بدونِ فیلد روی مدل، پنل جایی برای نوشتنِ نامِ آلبوم ندارد');
+    }
+
+    for (const [p, tag] of [['app/dashboard/coach/page.tsx', 'مربی'], ['app/referees/dashboard/page.tsx', 'داور']]) {
+      t(`پنلِ ${tag} نامِ آلبوم را می‌گیرد`,
+        read(p).includes('const setAlbum = (id: string, album: string) =>')
+        && read(p).includes('list="bh-albums"'),
+        'بدونِ ورودی در پنل، تبِ آلبوم همیشه خالی می‌ماند');
+    }
+  }
+
   /* ── تیکِ آبی یک اندازه دارد ──
      ⚠️ با هشت اندازه‌ی متفاوت رندر می‌شد (۱۳ تا ۲۸) چون هر صفحه عددِ
      خودش را می‌داد. حالا هیچ صداکننده‌ای `size` نمی‌فرستد و همه از

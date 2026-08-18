@@ -360,3 +360,46 @@ main.ch-col > section { max-width: 760px; }
 .ch-addr:hover { background: rgba(255, 255, 255, 0.14); border-color: rgba(255, 255, 255, 0.32); }
 .ch-addr:focus-visible { outline: 2px solid var(--gold, #C7A66A); outline-offset: 3px; }
 @media (prefers-reduced-motion: reduce) { .ch-addr { transition: none; } }
+
+/* ═══ آلبوم‌ها ═══
+   آلبوم یک نامِ روی رسانه است، پس این‌ها فقط نمای گروه‌بندی‌اند و
+   هیچ حالتی برای خودشان ذخیره نمی‌کنند. */
+.ch-alb-grid {
+  display: grid; gap: 10px; justify-content: start;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 200px));
+}
+.ch-alb {
+  display: flex; flex-direction: column; gap: 8px;
+  padding: 8px; border-radius: 12px; cursor: pointer; text-align: start;
+  border: 1px solid #E7E2D6; background: #FBFAF7;
+  font-family: inherit; transition: border-color .2s, box-shadow .2s, transform .2s;
+}
+.ch-alb:hover { border-color: rgba(199, 166, 106, 0.45); box-shadow: 0 10px 26px rgba(28, 27, 23, 0.10); transform: translateY(-2px); }
+.ch-alb:focus-visible { outline: 2px solid var(--gold-deep, #8F6531); outline-offset: 3px; }
+.ch-alb-cover {
+  aspect-ratio: 4 / 3; border-radius: 8px; overflow: hidden; background: #EDE9E0;
+  display: flex; align-items: center; justify-content: center; color: var(--text-tertiary, #6E6E6E);
+}
+.ch-alb-cover img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.ch-alb-meta { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.ch-alb-name {
+  font-size: 13px; font-weight: 800; color: var(--text-primary, #1C1B17);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.ch-alb-n { font-size: 11px; color: var(--text-tertiary, #6E6E6E); }
+
+.ch-alb-head { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; }
+.ch-alb-head h3 { margin: 0; font-size: 15px; font-weight: 800; color: var(--text-primary, #1C1B17); }
+.ch-alb-back {
+  display: inline-flex; align-items: center; gap: 5px;
+  min-height: 34px; padding: 0 12px; border-radius: 10px; cursor: pointer;
+  font-family: inherit; font-size: 12px; font-weight: 800;
+  color: var(--gold-deep, #8F6531);
+  background: var(--gold-dim, rgba(199,166,106,0.12));
+  border: 1px solid rgba(199, 166, 106, 0.34);
+}
+.ch-alb-back:hover { background: rgba(199, 166, 106, 0.20); }
+.ch-alb-back:focus-visible { outline: 2px solid var(--gold-deep, #8F6531); outline-offset: 2px; }
+
+@media (max-width: 700px) { .ch-alb-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; } }
+@media (prefers-reduced-motion: reduce) { .ch-alb { transition: none; } .ch-alb:hover { transform: none; } }

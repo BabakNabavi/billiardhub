@@ -30,10 +30,10 @@ import {
 } from '../../../lib/referee-store'
 
 /* ─── انواع ─── */
-interface GImg  { id:string; url:string; caption:string }
+interface GImg  { id:string; url:string; caption:string; album?:string }
 /* `url` نشانیِ فایل است؛ ردیفِ قدیمی فقط بندانگشتی دارد و کارتِ
    بی‌پخش رندر می‌شود. */
-interface VItem { id:string; url?:string; thumbnail:string; title:string; duration:string }
+interface VItem { id:string; url?:string; thumbnail:string; title:string; duration:string; album?:string }
 
 /* دقیقاً همان چیزی که پنلِ داور ذخیره می‌کند، نه یک ابرمجموعه.
    فیلدهای مرده‌ی نسخه‌ی قبلی (افتخارات، استوری، رنگِ نشان) با
@@ -62,8 +62,8 @@ function mapLocalToView(p: RefereeProfile): RefereeView {
     whatsapp: p.whatsapp,
     instagram: p.instagram || undefined,
     telegram: p.telegram || undefined,
-    gallery: p.gallery.map(g => ({ id: g.id, url: g.url, caption: g.caption })),
-    videos: p.videos.map(v => ({ id: v.id, url: v.url, thumbnail: v.thumbnail, title: v.title, duration: v.duration })),
+    gallery: p.gallery.map(g => ({ id: g.id, url: g.url, caption: g.caption, album: g.album })),
+    videos: p.videos.map(v => ({ id: v.id, url: v.url, thumbnail: v.thumbnail, title: v.title, duration: v.duration, album: v.album })),
   }
 }
 

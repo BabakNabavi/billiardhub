@@ -322,6 +322,21 @@ function safeRemote(raw: unknown): Partial<FormState> {
     setForm(f => ({ ...f, gallery: f.gallery.map(g => (g.id === id ? { ...g, caption } : g)) }))
   const removeGallery = (id: string) => setForm(f => ({ ...f, gallery: f.gallery.filter(g => g.id !== id) }))
 
+  /* ── آلبوم‌ها ──
+     آلبوم فقط یک نام روی خودِ رسانه است — نه فهرستِ جدا با شناسه.
+     پس آلبومِ خالی وجود ندارد و حذفِ یک عکس هیچ‌جا ارجاعِ شکسته
+     نمی‌گذارد. `datalist` نام‌های موجود را پیشنهاد می‌دهد تا کاربر
+     مجبور به تایپِ دوباره — و غلط‌های املاییِ آلبومِ تکراری — نشود. */
+  const setAlbum = (id: string, album: string) =>
+    setForm(f => ({
+      ...f,
+      gallery: f.gallery.map(g => (g.id === id ? { ...g, album } : g)),
+      videos:  f.videos.map(v => (v.id === id ? { ...v, album } : v)),
+    }))
+  const albumNames = Array.from(new Set(
+    [...form.gallery, ...form.videos].map(m => (m.album ?? '').trim()).filter(Boolean),
+  ))
+
   /* ── چرا این‌جا آپلودِ واقعی است ──
      تا امروز این دکمه `accept="image/*"` داشت و فقط یک عکس را به‌عنوان
      «بندانگشتی» می‌گرفت؛ ویدیویی در کار نبود و دکمه‌ی پخش روی صفحه‌ی
@@ -689,6 +704,10 @@ function safeRemote(raw: unknown): Partial<FormState> {
           <div style={card}>
             {sectionTitle('گالری', 4)}
             <label style={lbl}>تصاویر</label>
+            {/* نام‌های آلبومِ موجود — همان‌جا پیشنهاد می‌شوند */}
+            <datalist id="bh-albums">
+              {albumNames.map(n => <option key={n} value={n} />)}
+            </datalist>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(150px,1fr))', gap: 10, marginBottom: 12 }}>
               {form.gallery.map(g => (
                 <div key={g.id} style={{ border: CBOR, borderRadius: 10, overflow: 'hidden', background: 'rgba(17,17,16,0.04)' }}>
@@ -699,6 +718,9 @@ function safeRemote(raw: unknown): Partial<FormState> {
                     </button>
                   </div>
                   <input value={g.caption} onChange={e => setCaption(g.id, e.target.value)} placeholder="کپشن..." style={{ ...inp, border: 'none', borderTop: CBOR, borderRadius: 0, fontSize: 12, padding: '7px 10px' }} />
+                  <input value={g.album ?? ''} onChange={e => setAlbum(g.id, e.target.value)}
+                    list="bh-albums" placeholder="آلبوم (اختیاری)..."
+                    style={{ ...inp, border: 'none', borderTop: CBOR, borderRadius: 0, fontSize: 12, padding: '7px 10px', color: GOLD_D }} />
                 </div>
               ))}
               <button type="button" onClick={() => galleryInput.current?.click()} style={{ aspectRatio: '1', border: '1.5px dashed rgba(199,166,106,0.45)', borderRadius: 10, background: 'rgba(199,166,106,0.05)', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 6, color: GOLD_D, fontFamily: 'inherit', fontSize: 12, fontWeight: 700 }}>
