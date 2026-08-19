@@ -335,7 +335,10 @@ export default function CoachesPage() {
   }, [])
   const q = search.trim()
   const coaches = [...localCoaches, ...COACHES].filter(c =>
-    (filter === 'all' || c.specialty === filter) &&
+    /* همان اشکالِ صفحه‌ی داوران: کارت هر سه رشته را نشان می‌داد
+       ولی فیلتر فقط رشته‌ی اول را می‌سنجید، پس مربیِ سه‌رشته‌ای زیرِ
+       دو تای دیگر پیدا نمی‌شد. */
+    (filter === 'all' || (c.disciplines?.length ? c.disciplines.includes(filter) : c.specialty === filter)) &&
     (q === '' || c.name.includes(q) || c.city.includes(q))
   )
 

@@ -4737,6 +4737,23 @@ console.log('\n― مرزِ ورودیِ پروفایل ―');
     'تودرتوییِ عمیق، فهرستِ بی‌انتها و رشته‌ی غول باید رد شوند');
 }
 
+console.log('\n― رشته‌ها روی کارت و در فیلتر ―');
+{
+  /* ⚠️ کاربر دید: روی کارت «داور اسنوکر» و در صفحه‌ی خودش «اسنوکر،
+     پاکت بیلیارد، هی‌بال». کارت فقط `disciplines[0]` را می‌نوشت. */
+  const ref = strip(read('app/referees/page.tsx'));
+  t('کارتِ داور همه‌ی رشته‌ها را می‌نویسد',
+    ref.includes('const specText = referee.disciplines?.length')
+    && !ref.includes("داور {sp?.label ?? 'بیلیارد'}"),
+    'کارت یک رشته نشان می‌داد و صفحه سه‌تا — همان ناهماهنگی که دیده شد');
+  t('داور: فیلتر روی همه‌ی رشته‌ها کار می‌کند',
+    ref.includes('r.disciplines.includes(filter)'),
+    'داورِ سه‌رشته‌ای فقط زیرِ رشته‌ی اولش پیدا می‌شد');
+  t('مربی: فیلتر روی همه‌ی رشته‌ها کار می‌کند',
+    strip(read('app/coaches/page.tsx')).includes('c.disciplines.includes(filter)'),
+    'همان اشکال در صفحه‌ی مربیان هم بود');
+}
+
 console.log('\n― بستنِ خودکارِ ثبت‌نام ―');
 {
   const srv = strip(read('lib/tournaments/server.ts'));

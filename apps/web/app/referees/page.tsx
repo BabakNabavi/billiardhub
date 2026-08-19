@@ -22,7 +22,11 @@ const SPECS: Record<string, { label: string; color: string; glow: string }> = {
 }
 
 interface Referee {
-  id: string; name: string; specialty: string; city: string
+  /* ⚠️ `specialty` فقط *اولین* رشته است و کارت با همان نوشته می‌شد:
+     داوری که اسنوکر و پاکت و هی‌بال دارد روی کارت «داور اسنوکر»
+     می‌شد و در صفحه‌ی خودش هر سه — کاربر همین ناهماهنگی را دید.
+     فهرستِ کامل کنارش می‌ماند؛ `specialty` برای رنگ و نشان است. */
+  id: string; name: string; specialty: string; disciplines?: string[]; city: string
   experience: number; grade: string; gradeColor: string
   bio: string; photo: string
   verified?: boolean
@@ -49,6 +53,7 @@ function mapProfileToListReferee(p: RefereeProfile): Referee {
     id: p.slug,
     name: `${p.firstNameFa} ${p.lastNameFa}`.trim(),
     specialty: p.disciplines[0] ?? 'snooker',
+    disciplines: p.disciplines,
     city: p.city,
     experience: firstYear ? Math.max(0, CUR_JYEAR - firstYear) : 0,
     grade: b?.label ?? 'داور',
@@ -243,6 +248,10 @@ function RefereeAvatar({ referee, size }: { referee: Referee; size: string }) {
 /* ── Referee card — grid + list ── */
 function RefereeCard({ referee, view, idx }: { referee: Referee; view: 'grid' | 'list'; idx: number }) {
   const sp = SPECS[referee.specialty]
+  /* همان چیزی که صفحه‌ی داور نشان می‌دهد، نه فقط اولینش */
+  const specText = referee.disciplines?.length
+    ? referee.disciplines.map(d => SPECS[d]?.label ?? d).join(' · ')
+    : (sp?.label ?? 'بیلیارد')
 
   if (view === 'list') {
     return (
@@ -260,7 +269,7 @@ function RefereeCard({ referee, view, idx }: { referee: Referee; view: 'grid' | 
             <h3 style={{ fontSize:15, fontWeight:800, color:TEXT, lineHeight:1.2, letterSpacing:'-0.02em', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{referee.name}</h3>
             {referee.verified && <VerifiedBadge style={{ marginInlineStart: 0 }} />}
           </div>
-          <p style={{ fontSize:12, color:TEXT_S, marginBottom:5 }}>داور {sp?.label ?? 'بیلیارد'}</p>
+          <p style={{ fontSize:12, color:TEXT_S, marginBottom:5 }}>داور {specText}</p>
           <div style={{ display:'flex', alignItems:'center', gap:5, color:TEXT_M }}>
             <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
             <span style={{ fontSize:11.5, color:TEXT_S }}>{referee.city}</span>
@@ -306,7 +315,7 @@ function RefereeCard({ referee, view, idx }: { referee: Referee; view: 'grid' | 
           {referee.verified && <VerifiedBadge style={{ marginInlineStart: 0 }} />}
         </div>
         {/* `-webkit-box` ارث‌بریِ text-align را قابلِ اتکا نمی‌گذارد؛ صریح نوشته می‌شود */}
-        <p style={{ fontSize:12.5, color:TEXT_S, lineHeight:1.35, marginBottom:9, minHeight:'2.7em', textAlign:'center', display:'-webkit-box', WebkitLineClamp:2, WebkitBoxOrient:'vertical', overflow:'hidden' }}>داور {sp?.label ?? 'بیلیارد'}</p>
+        <p style={{ fontSize:12.5, color:TEXT_S, lineHeight:1.35, marginBottom:9, minHeight:'2.7em', textAlign:'center', display:'-webkit-box', WebkitLineClamp:2, WebkitBoxOrient:'vertical', overflow:'hidden' }}>داور {specText}</p>
         <div style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:5, marginBottom:13, color:TEXT_M }}>
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
           <span style={{ fontSize:11.5, color:TEXT_S }}>{referee.city}</span>
@@ -342,7 +351,9 @@ export default function RefereesPage() {
   }, [])
   const q = search.trim()
   const referees = [...localRefs, ...REFEREES].filter(r =>
-    (filter === 'all' || r.specialty === filter) &&
+    /* فیلتر هم روی همه‌ی رشته‌ها: با `specialty` تنها، داورِ
+       سه‌رشته‌ای فقط زیرِ رشته‌ی اولش پیدا می‌شد. */
+    (filter === 'all' || (r.disciplines?.length ? r.disciplines.includes(filter) : r.specialty === filter)) &&
     (q === '' || r.name.includes(q) || r.city.includes(q))
   )
 
