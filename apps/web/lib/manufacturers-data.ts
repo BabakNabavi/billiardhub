@@ -16,7 +16,11 @@ export interface MfrProduct {
 
 export interface MockManufacturer {
   /* گالریِ تصاویر — اختیاری تا نمونه‌های قدیمی نشکنند */
-  gallery?: { id: string; url: string }[]
+  /* همان شکلِ رسانه‌ی بقیه‌ی نقش‌ها؛ `caption`/`album` اختیاری‌اند
+     چون ردیف‌های موجود فقط `{id,url}` دارند. */
+  gallery?: { id: string; url: string; caption?: string; album?: string }[]
+  albums?: string[]
+  videos?: { id: string; url?: string; thumbnail: string; title: string; duration: string; album?: string }[]
   id: string
   name: string
   city: string

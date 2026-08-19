@@ -46,4 +46,4 @@ export function cleanAlbums(v: unknown): string[] {
 }
 
 /** نوعِ پروفایل‌هایی که آلبومشان فهرستِ نام است، نه شیء */
-export const NAMED_ALBUM_KINDS = ['coach', 'referee', 'technician', 'player'] as const
+export const NAMED_ALBUM_KINDS = ['coach', 'referee', 'technician', 'player', 'seller', 'manufacturer'] as const

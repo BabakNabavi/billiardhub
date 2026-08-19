@@ -8,6 +8,12 @@ import ClubStoryModal from '../../../components/ClubStoryModal'
 /* همان تایپی که پنلِ فروشگاه می‌نویسد — نسخه‌ی محلیِ سوم نمی‌سازیم */
 import type { SellerStory } from '../../../components/seller/StoryManager'
 import { useProfileImageViewer } from '@/components/ProfileImageViewer'
+import { useProfileVideoViewer } from '@/components/profile/ProfileVideoViewer'
+import ProfileGallery from '@/components/profile/ProfileGallery'
+import { uploadFile } from '@/lib/supabase'
+import { videoMeta, formatDuration } from '@/lib/video-thumb'
+import { notify } from '@/lib/ui/dialogs'
+import '@/components/profile/profile-page.css'
 import { getSellerProfile, type SellerProfile } from '../../../lib/seller-store'
 import { fetchProfileResult } from '../../../lib/profiles/client'
 import { useOwnerEdit } from '../../../lib/profiles/use-owner-edit'
@@ -299,7 +305,6 @@ export default function FlatShop() {
   /* پروفایل ذخیره‌شده‌ی همین فروشگاه (از /dashboard/seller).
      بعد از mount خوانده می‌شود تا SSR و کلاینت یکی باشند. */
   const [profile, setProfile] = useState<SellerProfile | null>(null)
-  const galleryRef = useRef<HTMLInputElement>(null)
   const [mine, setMine] = useState<boolean | undefined>(undefined)
 
   /* ── ویرایشِ درجا ──
@@ -307,19 +312,69 @@ export default function FlatShop() {
      `ownerId` از قبل داخلِ `profile` نشانده می‌شود (خطِ بالاتر). */
   /* عکس‌های گالری از پروفایلِ واقعی */
   const shots = profile?.gallery ?? []
+  const vids = profile?.videos ?? []
   const edit = useOwnerEdit<SellerProfile>('seller', sellerId, profile, profile?.ownerId ?? null, setProfile, mine)
 
-  const addShots = async (files: FileList) => {
-    const items = await Promise.all([...files].map(async fl => ({
-      id: Math.random().toString(36).slice(2, 9),
+  /* ── همان گالریِ مشترکِ بقیه‌ی نقش‌ها ──
+     ⚠️ این‌جا فقط یک شبکه‌ی عکس بود: نه ویدیویی، نه آلبومی، و حذف با
+     *اندیس* انجام می‌شد. حالا همان کامپوننتی رندر می‌شود که مربی،
+     داور، خدماتِ فنی و بازیکن دارند. */
+  const MAX_VIDEO_MB = 25
+  const [vidBusy, setVidBusy] = useState(false)
+
+  const addShots = async (files: File[], album?: string) => {
+    const items = await Promise.all(files.map(async fl => ({
+      id: `m${Date.now()}${Math.random().toString(36).slice(2, 7)}`,
       url: await compressImage(fl, 1000, 0.68),
+      caption: '',
+      ...(album ? { album } : {}),
     })))
     await edit.apply(d => ({ ...d, gallery: [...(d.gallery ?? []), ...items] }))
   }
-  const deleteShot = async (i: number) => {
-    if (!(await ask('این تصویر حذف شود؟', { body: 'این کار برگشت‌پذیر نیست.', confirmLabel: 'حذف' }))) return
-    await edit.apply(d => ({ ...d, gallery: (d.gallery ?? []).filter((_, k) => k !== i) }))
+
+  const addVideoFiles = async (files: File[], album?: string) => {
+    setVidBusy(true)
+    const skipped: string[] = []
+    try {
+      for (const file of files) {
+        if (file.size > MAX_VIDEO_MB * 1024 * 1024) { skipped.push(file.name); continue }
+        const meta = await videoMeta(file)
+        const vid = `v${Date.now()}${Math.random().toString(36).slice(2, 6)}`
+        const base = `profiles/videos/${profile?.ownerId ?? 'anon'}/${vid}`
+        const url = await uploadFile('club-media', file, base)
+        if (!url) { skipped.push(file.name); continue }
+        const thumb = meta.thumb ? (await uploadFile('club-media', meta.thumb, `${base}-thumb`)) ?? '' : ''
+        const ok = await edit.apply(d => ({
+          ...d,
+          videos: [...(d.videos ?? []), { id: vid, url, thumbnail: thumb, title: file.name.replace(/\.[^.]+$/, ''), duration: formatDuration(meta.durationSec), ...(album ? { album } : {}) }],
+        }))
+        if (!ok) break
+      }
+    } finally {
+      setVidBusy(false)
+      if (skipped.length) notify(`این ویدیوها اضافه نشدند (سقف ${MAX_VIDEO_MB} مگابایت): ${skipped.join('، ')}`)
+    }
   }
+
+  const newAlbum = async (name: string) => {
+    const n = name.trim()
+    if (!n) return
+    await edit.apply(d => {
+      const list = d.albums ?? []
+      if (list.some(x => x.trim() === n)) return d
+      return { ...d, albums: [...list, n] }
+    })
+  }
+
+  const deleteShot = async (mid: string) => {
+    if (!(await ask('این تصویر حذف شود؟', { body: 'این کار برگشت‌پذیر نیست.', confirmLabel: 'حذف' }))) return
+    await edit.apply(d => ({ ...d, gallery: (d.gallery ?? []).filter(g => g.id !== mid) }))
+  }
+  const deleteVideo = async (vid: string) => {
+    if (!(await ask('این ویدیو حذف شود؟', { body: 'این کار برگشت‌پذیر نیست.', confirmLabel: 'حذف' }))) return
+    await edit.apply(d => ({ ...d, videos: (d.videos ?? []).filter(v => v.id !== vid) }))
+  }
+
   /* ── نامکی که وجود ندارد ──
      تا امروز اگر نشانی به فروشگاهی می‌رفت که نبود، صفحه داده‌ی
      نمونه‌ی قدیمی را نشان می‌داد — «فروشگاه تجهیزات بیلیارد بابی» با
@@ -418,6 +473,7 @@ export default function FlatShop() {
   const [wish, setWish] = useState<Set<string>>(new Set())
   const [storyOpen, setStoryOpen] = useState(false)
   const { open: openImage, viewer: imageViewer } = useProfileImageViewer()
+  const { open: openVideo, viewer: videoViewer } = useProfileVideoViewer()
   const [urlCopied, setUrlCopied] = useState(false)
   const catStripRef = useRef<HTMLDivElement>(null)
   useHorizontalScroll(catStripRef)
@@ -939,45 +995,23 @@ export default function FlatShop() {
           صفحه پُر به‌نظر می‌رسد ولی چیزی به خواننده اضافه نمی‌کند.
           جای اصلی‌اش هدر است، همان‌جا که چشم اول می‌رود. */}
 
-      {/* ═══ گالری فروشگاه ═══
-          ⚠️ `gallery` از قبل در `SellerProfile` بود و پنلِ فروشنده
-          هم پرش می‌کرد، ولی هیچ‌جای صفحه‌ی عمومی رندر نمی‌شد — یعنی
-          هر عکسی که فروشنده آپلود کرده بود نامرئی می‌ماند. */}
-      {(shots.length > 0 || edit.isOwner) && (
+      {/* ═══ گالری فروشگاه — همان کامپوننتِ مشترک ═══ */}
+      {(shots.length > 0 || vids.length > 0 || edit.isOwner) && (
         <section className="px-4 pb-6 sm:px-6">
           <div className="mx-auto max-w-6xl">
-            <div className="mb-3 flex flex-wrap items-center gap-3">
-              <h2 className="text-xl font-bold text-[#1C1B17] sm:text-2xl">گالری فروشگاه</h2>
-              {/* ورودیِ فایل پنهان — خودِ «+» یک خانه در شبکه است */}
-              {edit.isOwner && (
-                <input ref={galleryRef} type="file" accept="image/*" multiple hidden
-                  onChange={e => { if (e.target.files?.length) void addShots(e.target.files); e.target.value = '' }} />
-              )}
-            </div>
-            {edit.error && <p role="alert" style={{ fontSize: 12, color: '#b91c1c', marginBottom: 10 }}>{edit.error}</p>}
-            {shots.length === 0 && !edit.isOwner ? (
-              <p style={{ fontSize: 13, color: '#6E6E6E' }}>هنوز تصویری اضافه نشده است.</p>
-            ) : (
-              <div style={{ display: 'grid', gap: 10, gridTemplateColumns: 'repeat(auto-fill,minmax(88px,116px))', justifyContent: 'start' }}>
-                {/* «+» هم‌اندازه‌ی عکس‌ها و همیشه اولِ شبکه */}
-                {edit.isOwner && (
-                  <button type="button" className="ch-gal-cell ch-add-tile" disabled={edit.saving}
-                    onClick={() => galleryRef.current?.click()}
-                    aria-label="افزودن تصویر" title="افزودن تصویر">
-                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                  </button>
-                )}
-                {shots.map((sh, i) => (
-                  <button key={sh.id} type="button" className="ch-gal-cell"
-                    onClick={() => openImage(shots.map(x => x.url), {
-                      index: i, title: 'گالری فروشگاه', alt: store.title,
-                      ...(edit.isOwner ? { onDelete: deleteShot } : {}),
-                    })}>
-                    <img src={sh.url} alt="" loading="lazy" decoding="async" />
-                  </button>
-                ))}
-              </div>
-            )}
+            <ProfileGallery
+              images={shots.map(sh => ({ id: sh.id, url: sh.url, caption: sh.caption ?? '', album: sh.album }))}
+              videos={vids}
+              albumNames={profile?.albums ?? []}
+              onOpenImage={(urls, index, meta, ids) => openImage(urls, {
+                index, ...meta,
+                ...(edit.isOwner ? { onDelete: (i: number) => deleteShot(ids[i] ?? '') } : {}),
+              })}
+              onOpenVideo={v => openVideo(v, edit.isOwner ? { onDelete: () => deleteVideo(v.id) } : undefined)}
+              canEdit={edit.isOwner} busy={edit.saving || vidBusy}
+              onAddImages={addShots} onAddVideos={addVideoFiles} onNewAlbum={newAlbum}
+            />
+            {edit.error && <p role="alert" style={{ fontSize: 12, color: '#b91c1c', marginTop: 10 }}>{edit.error}</p>}
           </div>
         </section>
       )}
@@ -1087,6 +1121,7 @@ export default function FlatShop() {
 
       {/* ═══ استوری فروشگاه (مثل صفحه‌ی باشگاه) ═══ */}
       {imageViewer}
+      {videoViewer}
       {storyOpen && hasStory && liveStories[storyIdx] && (
         <ClubStoryModal
           club={{

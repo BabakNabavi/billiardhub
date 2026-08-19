@@ -7,7 +7,10 @@
    ───────────────────────────────────────────────────────────── */
 import { provinceOfCity } from './iran-geo'
 
-export interface SellerShot { id: string; url: string }
+/* همان شکلِ رسانه‌ی بقیه‌ی نقش‌ها. `caption` و `album` اختیاری‌اند
+   چون ردیف‌های موجود فقط `{id,url}` دارند. */
+export interface SellerShot { id: string; url: string; caption?: string; album?: string }
+export interface SellerVideo { id: string; url?: string; thumbnail: string; title: string; duration: string; album?: string }
 
 export type SellerStatus = 'pending' | 'approved' | 'rejected'
 
@@ -51,6 +54,9 @@ export interface SellerProfile {
 
   /* ── گالری تصاویر فروشگاه ── */
   gallery: SellerShot[]
+  /** نامِ آلبوم‌ها — عضویت روی خودِ رسانه است */
+  albums?: string[]
+  videos?: SellerVideo[]
 
   /* ── جواز کسب (اجباری — بدون آن فروشگاه منتشر نمی‌شود) ── */
   certificate: { name: string; url: string } | null
@@ -89,6 +95,8 @@ export function emptySellerProfile(slug: string, ownerPhone = '', ownerId = ''):
     storyText: '',
     aboutImages: [],
     gallery: [],
+    albums: [],
+    videos: [],
     certificate: null,
     licenseNumber: '',
     status: 'pending',

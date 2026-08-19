@@ -39,7 +39,11 @@ export interface ManufacturerProfile {
      تا امروز تولیدکننده فقط یک بنر داشت و هیچ جایی برای نشان‌دادنِ
      کارگاه، خطِ تولید یا نمونه‌کار نبود. کلیدِ اختیاری است تا
      ردیف‌های موجود بدونِ مهاجرت کار کنند. */
-  gallery?: { id: string; url: string }[]
+  /* همان شکلِ رسانه‌ی بقیه‌ی نقش‌ها؛ `caption`/`album` اختیاری‌اند
+     چون ردیف‌های موجود فقط `{id,url}` دارند. */
+  gallery?: { id: string; url: string; caption?: string; album?: string }[]
+  albums?: string[]
+  videos?: { id: string; url?: string; thumbnail: string; title: string; duration: string; album?: string }[]
   products: MfrProduct[]
 
   status: 'approved' | 'rejected'

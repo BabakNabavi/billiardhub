@@ -4011,8 +4011,8 @@ console.log('\n― استوری: یک منبع، با انقضا ―');
       t('نگهبانِ نوع سرِ جایش است',
         srv.includes('NAMED_ALBUM_KINDS.includes(kind'),
         'پاک‌سازیِ نامِ آلبوم روی مدلِ شیئی همه‌چیز را پاک می‌کند');
-      t('هر چهار نقشِ مهاجرت‌کرده از مرزِ نامِ آلبوم رد می‌شوند',
-        ['coach', 'referee', 'technician', 'player']
+      t('هر شش نقشِ مهاجرت‌کرده از مرزِ نامِ آلبوم رد می‌شوند',
+        ['coach', 'referee', 'technician', 'player', 'seller', 'manufacturer']
           .every(k => read('lib/profiles/albums.ts').includes("'" + k + "'"))
         && !read('lib/profiles/albums.ts').includes("'club'"),
         'باشگاه جدولِ جدا دارد و نباید این‌جا باشد');
@@ -4033,9 +4033,21 @@ console.log('\n― استوری: یک منبع، با انقضا ―');
        هر دو را بگیرد؛ تقسیم از روی نوعِ خودِ فایل انجام می‌شود. */
     t('داخلِ آلبوم یک «+» هست که هر دو نوع را می‌گیرد',
       gal.includes('pickBoth(current.name)')
-      && gal.includes('accept="image/*,video/*"')
+      && gal.includes("'image/*,video/*'")
       && !gal.includes('pickImages(current.name)'),
       'دو دکمه‌ی جدا برای عکس و ویدیو، هم شلوغ بود هم لازم نبود');
+    /* نقشی که ویدیو ندارد نباید تبِ خالی و دکمه‌ی بی‌کار ببیند */
+    t('تبِ ویدیو برای نقشِ بی‌ویدیو نمی‌آید',
+      gal.includes('const showVideos = videos.length > 0 || !!onAddVideos'),
+      'تبِ خالی با دکمه‌ای که کاری نمی‌کند، بدتر از نبودنش است');
+  /* باشگاه جدولِ خودش را دارد و مالکیتش هم تا امروز فقط از حافظه‌ی
+     مرورگر خوانده می‌شد — همان چیزی که در پروفایل‌ها باگ شد. */
+  t('پاسخِ باشگاه پرچمِ مالکیت دارد',
+    strip(read('app/api/clubs/[id]/route.ts')).includes('isMine: !!actor &&'),
+    'با حافظه‌ی محلیِ پاک، صاحبِ باشگاه دکمه‌هایش را نمی‌دید');
+  t('صفحه‌ی باشگاه هر دو نشانه را با «یا» جمع می‌کند',
+    strip(read('app/clubs/[id]/page.tsx')).includes('.isMine === true'),
+    'یک نشانه‌ی منفی نباید مالک را مهمان جا بزند');
     t('تقسیمِ فایل‌ها از روی نوعِ فایل است نه پسوند',
       gal.includes("f.type.startsWith('image/')") && gal.includes("f.type.startsWith('video/')"),
       'پسوندِ فایلِ گالریِ گوشی قابلِ اعتماد نیست');
@@ -4238,9 +4250,6 @@ console.log('\n― استوری: یک منبع، با انقضا ―');
   {
     for (const [p, tag] of [
       ['components/profile/ProfileGallery.tsx', 'مربی/داور'],
-      ['app/sellers/[id]/FlatShop.tsx', 'فروشگاه'],
-      ['app/manufacturers/[id]/page.tsx', 'تولیدکننده'],
-      ['app/clubs/[id]/page.tsx', 'باشگاه'],
     ]) {
       const src = read(p);
       t(`«+» در ${tag} خانه‌ی شبکه است`,
@@ -4326,11 +4335,20 @@ console.log('\n― استوری: یک منبع، با انقضا ―');
     /* خدمات فنی دیگر گالریِ خودش را ندارد: همان کامپوننتِ مشترک را
        رندر می‌کند، پس ادعا هم همان را می‌سنجد نه کلاسِ خام. */
     {
-      for (const [p, tag] of [['app/services/[id]/page.tsx', 'خدمات فنی'], ['app/players/[id]/page.tsx', 'بازیکن']]) {
+      for (const [p, tag] of [
+        ['app/services/[id]/page.tsx', 'خدمات فنی'],
+        ['app/players/[id]/page.tsx', 'بازیکن'],
+        ['app/sellers/[id]/FlatShop.tsx', 'فروشگاه'],
+        ['app/manufacturers/[id]/page.tsx', 'تولیدکننده'],
+        ['app/clubs/[id]/page.tsx', 'باشگاه'],
+      ]) {
         const src = strip(read(p));
+        /* باشگاه ستونِ ویدیو ندارد (جدولش جداست)، پس فقط عکس و آلبوم
+           می‌گیرد؛ بقیه هر سه تب را دارند. */
+        const wantsVideo = !p.includes('clubs/');
         t(`${tag} همان گالریِ مشترک را رندر می‌کند`,
-          src.includes('<ProfileGallery') && src.includes('albumNames=') && src.includes('onOpenVideo=')
-          && src.includes('useProfileVideoViewer')
+          src.includes('<ProfileGallery') && src.includes('albumNames=')
+          && (!wantsVideo || (src.includes('onOpenVideo=') && src.includes('useProfileVideoViewer')))
           && !src.includes('createPortal'),
           'دو پیاده‌سازی برای یک گالری، همان دوباره‌کاریِ همیشگی است');
       }

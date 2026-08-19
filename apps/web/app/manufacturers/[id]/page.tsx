@@ -2,6 +2,12 @@
 import { useState, useMemo, useRef, useEffect } from 'react'
 import { ProfileMissing, ProfileLoading } from '@/components/profile/ProfileMissing'
 import { useProfileImageViewer } from '@/components/ProfileImageViewer'
+import { useProfileVideoViewer } from '@/components/profile/ProfileVideoViewer'
+import ProfileGallery from '@/components/profile/ProfileGallery'
+import { uploadFile } from '@/lib/supabase'
+import { videoMeta, formatDuration } from '@/lib/video-thumb'
+import { notify } from '@/lib/ui/dialogs'
+import '@/components/profile/profile-page.css'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { toFa, faNum, MONO, Icon, LQ, LQ_NEUTRAL, LQ_FELT_ON } from '../../sellers/[id]/shared'
@@ -196,24 +202,73 @@ export default function ManufacturerPage() {
   const [ownerId, setOwnerId]     = useState<string | null>(null)
   /* پرچمِ قطعیِ سرور — مقایسه‌ی مرورگر بی‌صدا شکست می‌خورد */
   const [mine, setMine]           = useState<boolean | undefined>(undefined)
-  const galleryRef                = useRef<HTMLInputElement>(null)
   const { open: openImage, viewer: imageViewer } = useProfileImageViewer()
+  const { open: openVideo, viewer: videoViewer } = useProfileVideoViewer()
 
   /* ⚠️ پیش از هر `return`ِ شرطی — قاعده‌ی هوک‌ها */
   const edit = useOwnerEdit<ManufacturerProfile>('manufacturer', mfrId, rawP, ownerId, raw => {
     setRawP(raw); setStoredMfr(profileToManufacturer(raw))
   }, mine)
-  const addShots = async (files: FileList) => {
-    const items = await Promise.all([...files].map(async fl => ({
-      id: Math.random().toString(36).slice(2, 9),
+  /* ── همان گالریِ مشترکِ بقیه‌ی نقش‌ها ──
+     ⚠️ این‌جا فقط یک شبکه‌ی عکس بود: نه ویدیویی، نه آلبومی، و حذف با
+     *اندیس* انجام می‌شد. حالا همان کامپوننتی رندر می‌شود که مربی،
+     داور، خدماتِ فنی و بازیکن دارند. */
+  const MAX_VIDEO_MB = 25
+  const [vidBusy, setVidBusy] = useState(false)
+
+  const addShots = async (files: File[], album?: string) => {
+    const items = await Promise.all(files.map(async fl => ({
+      id: `m${Date.now()}${Math.random().toString(36).slice(2, 7)}`,
       url: await compressImage(fl, 1000, 0.68),
+      caption: '',
+      ...(album ? { album } : {}),
     })))
     await edit.apply(d => ({ ...d, gallery: [...(d.gallery ?? []), ...items] }))
   }
-  const deleteShot = async (i: number) => {
-    if (!(await ask('این تصویر حذف شود؟', { body: 'این کار برگشت‌پذیر نیست.', confirmLabel: 'حذف' }))) return
-    await edit.apply(d => ({ ...d, gallery: (d.gallery ?? []).filter((_, k) => k !== i) }))
+
+  const addVideoFiles = async (files: File[], album?: string) => {
+    setVidBusy(true)
+    const skipped: string[] = []
+    try {
+      for (const file of files) {
+        if (file.size > MAX_VIDEO_MB * 1024 * 1024) { skipped.push(file.name); continue }
+        const meta = await videoMeta(file)
+        const vid = `v${Date.now()}${Math.random().toString(36).slice(2, 6)}`
+        const base = `profiles/videos/${ownerId ?? 'anon'}/${vid}`
+        const url = await uploadFile('club-media', file, base)
+        if (!url) { skipped.push(file.name); continue }
+        const thumb = meta.thumb ? (await uploadFile('club-media', meta.thumb, `${base}-thumb`)) ?? '' : ''
+        const ok = await edit.apply(d => ({
+          ...d,
+          videos: [...(d.videos ?? []), { id: vid, url, thumbnail: thumb, title: file.name.replace(/\.[^.]+$/, ''), duration: formatDuration(meta.durationSec), ...(album ? { album } : {}) }],
+        }))
+        if (!ok) break
+      }
+    } finally {
+      setVidBusy(false)
+      if (skipped.length) notify(`این ویدیوها اضافه نشدند (سقف ${MAX_VIDEO_MB} مگابایت): ${skipped.join('، ')}`)
+    }
   }
+
+  const newAlbum = async (name: string) => {
+    const n = name.trim()
+    if (!n) return
+    await edit.apply(d => {
+      const list = d.albums ?? []
+      if (list.some(x => x.trim() === n)) return d
+      return { ...d, albums: [...list, n] }
+    })
+  }
+
+  const deleteShot = async (mid: string) => {
+    if (!(await ask('این تصویر حذف شود؟', { body: 'این کار برگشت‌پذیر نیست.', confirmLabel: 'حذف' }))) return
+    await edit.apply(d => ({ ...d, gallery: (d.gallery ?? []).filter(g => g.id !== mid) }))
+  }
+  const deleteVideo = async (vid: string) => {
+    if (!(await ask('این ویدیو حذف شود؟', { body: 'این کار برگشت‌پذیر نیست.', confirmLabel: 'حذف' }))) return
+    await edit.apply(d => ({ ...d, videos: (d.videos ?? []).filter(v => v.id !== vid) }))
+  }
+
   /* `checked` لازم است تا «پیدا نشد» پیش از رسیدنِ پاسخِ سرور نشان
      داده نشود — وگرنه هر بار یک لحظه صفحه‌ی خطا می‌پرید بالا. */
   const [checked, setChecked] = useState(false)
@@ -557,37 +612,23 @@ export default function ManufacturerPage() {
         </div>
       </div>
 
-      {/* ═══ گالری تولیدکننده ═══
-          تا امروز تولیدکننده فقط یک بنر داشت و جایی برای نشان‌دادنِ
-          کارگاه یا خطِ تولید نبود. */}
-      {((mfr.gallery?.length ?? 0) > 0 || edit.isOwner) && (
+      {/* ═══ گالری تولیدکننده — همان کامپوننتِ مشترک ═══ */}
+      {((mfr.gallery?.length ?? 0) > 0 || (rawP?.videos?.length ?? 0) > 0 || edit.isOwner) && (
         <section className="px-4 pb-6 sm:px-6">
           <div className="mx-auto max-w-[1240px]">
-            <h2 className="mb-3 text-xl font-bold sm:text-2xl">گالری</h2>
-            {edit.error && <p role="alert" style={{ fontSize: 12, color: '#b91c1c', marginBottom: 10 }}>{edit.error}</p>}
-            {edit.isOwner && (
-              <input ref={galleryRef} type="file" accept="image/*" multiple hidden
-                onChange={e => { if (e.target.files?.length) void addShots(e.target.files); e.target.value = '' }} />
-            )}
-            <div style={{ display: 'grid', gap: 10, gridTemplateColumns: 'repeat(auto-fill,minmax(88px,116px))', justifyContent: 'start' }}>
-              {edit.isOwner && (
-                <button type="button" className="ch-add-tile" disabled={edit.saving}
-                  onClick={() => galleryRef.current?.click()}
-                  aria-label="افزودن تصویر" title="افزودن تصویر">
-                  <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                </button>
-              )}
-              {(mfr.gallery ?? []).map((sh, i) => (
-                <button key={sh.id} type="button"
-                  style={{ aspectRatio: '1', borderRadius: 10, overflow: 'hidden', border: 'none', padding: 0, cursor: 'pointer', background: '#EDE9E0' }}
-                  onClick={() => openImage((mfr.gallery ?? []).map(x => x.url), {
-                    index: i, title: 'گالری', alt: mfr.name,
-                    ...(edit.isOwner ? { onDelete: deleteShot } : {}),
-                  })}>
-                  <img src={sh.url} alt="" loading="lazy" decoding="async" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
-                </button>
-              ))}
-            </div>
+            <ProfileGallery
+              images={(mfr.gallery ?? []).map(sh => ({ id: sh.id, url: sh.url, caption: sh.caption ?? '', album: sh.album }))}
+              videos={rawP?.videos ?? []}
+              albumNames={rawP?.albums ?? []}
+              onOpenImage={(urls, index, meta, ids) => openImage(urls, {
+                index, ...meta,
+                ...(edit.isOwner ? { onDelete: (i: number) => deleteShot(ids[i] ?? '') } : {}),
+              })}
+              onOpenVideo={v => openVideo(v, edit.isOwner ? { onDelete: () => deleteVideo(v.id) } : undefined)}
+              canEdit={edit.isOwner} busy={edit.saving || vidBusy}
+              onAddImages={addShots} onAddVideos={addVideoFiles} onNewAlbum={newAlbum}
+            />
+            {edit.error && <p role="alert" style={{ fontSize: 12, color: '#b91c1c', marginTop: 10 }}>{edit.error}</p>}
           </div>
         </section>
       )}
@@ -689,6 +730,7 @@ export default function ManufacturerPage() {
       </footer>
 
       {imageViewer}
+      {videoViewer}
     </div>
   )
 }

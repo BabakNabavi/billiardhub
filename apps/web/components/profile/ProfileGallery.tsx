@@ -86,6 +86,12 @@ export default function ProfileGallery({
     return [...map.values()]
   }, [images, videos, albumNames])
 
+  /* ── نقشی که هنوز ویدیو ندارد ──
+     باشگاه ستونِ ویدیو ندارد (جدولش جداست و افزودنِ ستون مهاجرت
+     می‌خواهد). تبِ خالی که دکمه‌اش هم کاری نمی‌کند بدتر از نبودنش
+     است، پس وقتی نه ویدیویی هست نه راهی برای افزودنش، تب نمی‌آید. */
+  const showVideos = videos.length > 0 || !!onAddVideos
+
   const [tab, setTab] = useState<Tab>(images.length === 0 && videos.length > 0 ? 'videos' : 'photos')
   const [openAlbum, setOpenAlbum] = useState<string | null>(null)
   /* فشرده‌سازیِ چند عکس روی موبایلِ ضعیف چند ثانیه است و در آن فاصله
@@ -211,7 +217,8 @@ export default function ProfileGallery({
       </div>
 
       <div className="lq-seg ch-gal-tabs" role="tablist" aria-label="بخش‌های گالری" onKeyDown={onTabKey}>
-        {([['photos', 'تصاویر', images.length], ['videos', 'ویدیوها', videos.length], ['albums', 'آلبوم‌ها', albums.length]] as const).map(([k, label, n]) => (
+        {(([['photos', 'تصاویر', images.length], ['videos', 'ویدیوها', videos.length], ['albums', 'آلبوم‌ها', albums.length]] as const)
+          .filter(([k]) => k !== 'videos' || showVideos)).map(([k, label, n]) => (
           <button key={k} type="button" role="tab" id={`chtab-${k}`}
             aria-selected={tab === k} aria-controls={`chpanel-${k}`} tabIndex={tab === k ? 0 : -1}
             onClick={() => choose(k)}>
@@ -233,7 +240,7 @@ export default function ProfileGallery({
               ⚠️ اول دو خانه گذاشته شد (عکس و ویدیو) و کاربر درست گفت
               که جالب نیست. یک ورودی هر دو را می‌گیرد و بر اساسِ نوعِ
               خودِ فایل تقسیم می‌شود. */}
-          <input ref={bothRef} type="file" accept="image/*,video/*" multiple hidden
+          <input ref={bothRef} type="file" accept={onAddVideos ? 'image/*,video/*' : 'image/*'} multiple hidden
             onChange={e => { const f = [...(e.target.files ?? [])]; e.target.value = ''; if (f.length) void addMixed(f, target.current) }} />
         </>
       )}
@@ -245,7 +252,7 @@ export default function ProfileGallery({
           ? empty(<Images size={30} aria-hidden />, 'هنوز تصویری اضافه نشده است.')
           : (
             <div className="ch-gal-grid">
-              {canEdit && addTile('افزودن تصویر', () => pickImages())}
+              {canEdit && onAddImages && addTile('افزودن تصویر', () => pickImages())}
               {images.map((g, i) => cell(g, images, i))}
             </div>
           )}
@@ -259,7 +266,7 @@ export default function ProfileGallery({
              همان اندازه‌ی تبِ تصاویر. پس همان شبکه استفاده می‌شود. */
           : (
             <div className="ch-gal-grid">
-              {canEdit && addTile('افزودن ویدیو', () => pickVideo())}
+              {canEdit && onAddVideos && addTile('افزودن ویدیو', () => pickVideo())}
               {videos.map(v => videoCell(v))}
             </div>
           )}
@@ -280,7 +287,9 @@ export default function ProfileGallery({
                 ⚠️ اول دو خانه بود (یکی عکس، یکی ویدیو). کاربر گفت باید
                 یک «+» باشد که هر دو را بگیرد؛ درست هم هست. */}
             <div className="ch-gal-grid">
-              {canEdit && addTile('افزودن تصویر یا ویدیو به این آلبوم', () => pickBoth(current.name))}
+              {canEdit && (onAddImages || onAddVideos) && addTile(
+                onAddVideos ? 'افزودن تصویر یا ویدیو به این آلبوم' : 'افزودن تصویر به این آلبوم',
+                () => pickBoth(current.name))}
               {current.images.map((g, i) => cell(g, current.images, i))}
               {current.videos.map(v => videoCell(v))}
             </div>

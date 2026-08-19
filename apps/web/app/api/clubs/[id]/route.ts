@@ -33,8 +33,15 @@ export async function GET(
   /* `hasActiveStory` ستون نیست — از تاریخِ انقضا ساخته می‌شود تا هیچ‌وقت
      کهنه نماند. صفحه‌ی باشگاه رینگِ استوری را از همین می‌خواند. */
   const row = data as Record<string, unknown>;
+  /* ── مالکیت را سرور می‌گوید ──
+     ⚠️ صفحه‌ی باشگاه تا امروز فقط `user.id === club.ownerId` را از
+     `localStorage` می‌سنجید. همان چیزی که در پروفایل‌ها باگ شد:
+     حافظه‌ی محلی می‌تواند کهنه یا پاک باشد و آن‌وقت صاحبِ باشگاه
+     دکمه‌هایش را نمی‌بیند. پاسخِ کوکی قطعی است. */
+  const actor = sessionFromRequest(req);
   return NextResponse.json({
     ...row,
+    isMine: !!actor && String(actor.id ?? '') === String(row.ownerId ?? ''),
     isVerified: row.verificationStatus === 'verified',
     hasActiveStory: !!row.storyExpiresAt && new Date(String(row.storyExpiresAt)).getTime() > Date.now(),
   }, { headers: CORS });

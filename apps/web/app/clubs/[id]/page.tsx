@@ -16,10 +16,13 @@ import {
 import { fetchTournaments } from '../../../lib/tournaments/client';
 import ClubStoryModal from '../../../components/ClubStoryModal';
 import { useProfileImageViewer } from '@/components/ProfileImageViewer'
+import ProfileGallery from '@/components/profile/ProfileGallery'
+import '@/components/profile/profile-page.css'
 import { useTabKeys } from '@/hooks/use-tab-keys'
 import ClubReviews from '../../../components/club/ClubReviews';
 import ClubLogo from '../../../components/club/ClubLogo'
 import { apiFetch } from '../../../lib/http'
+import { ask } from '../../../lib/ui/dialogs'
 import VerifiedBadge from '../../../components/VerifiedBadge'
 import FavoriteButton from '../../../components/FavoriteButton';
 
@@ -334,7 +337,12 @@ export default function ClubProfilePage() {
 
   /* مالک از ستونِ `ownerId` سرور می‌آید — فقط برای نشان‌دادنِ دکمه؛
      اجازه‌ی واقعی را همان مسیرِ PUT می‌سنجد. */
-  const isClubOwner = !!user?.id && !!club.ownerId && user.id === club.ownerId;
+  /* ── دو نشانه، با «یا» ──
+     پرچمِ سرور (`isMine`) قطعی است ولی با توکنِ منقضی بی‌صدا `false`
+     می‌شود؛ مقایسه‌ی مرورگر هم به حافظه‌ی محلی تکیه دارد که می‌تواند
+     پاک باشد. هرکدام کافی است — اجازه‌ی واقعی را مسیرِ PUT می‌سنجد. */
+  const isClubOwner = (club as { isMine?: boolean }).isMine === true
+    || (!!user?.id && !!club.ownerId && user.id === club.ownerId);
 
   const saveAlbums = async (next: ClubAlbum[]) => {
     setAlbumBusy(true); setAlbumErr('');
@@ -351,16 +359,40 @@ export default function ClubProfilePage() {
     } finally { setAlbumBusy(false); }
   };
 
-  const addClubPhotos = async (files: FileList) => {
-    const items = await Promise.all([...files].map(async fl => ({
+  /* ── نگاشتِ آلبومِ باشگاه به مدلِ مشترک ──
+     شکلِ ذخیره‌ی باشگاه `{id,name,items:[{id,dataUrl,caption}]}` است و
+     دست‌نخورده می‌ماند؛ این‌جا فقط برای رندر به همان شکلی درمی‌آید که
+     بقیه‌ی نقش‌ها دارند. شناسه‌ی هر عکس «آلبوم/شناسه» است تا حذف
+     بداند از کدام آلبوم بردارد. */
+  const clubGalleryImages = clubAlbums.flatMap(a =>
+    a.items.map(it => ({ id: `${a.id}/${it.id}`, url: it.dataUrl, caption: it.caption ?? '', album: a.name })));
+
+  const addClubPhotos = async (files: File[], album?: string) => {
+    const items = await Promise.all(files.map(async fl => ({
       id: Math.random().toString(36).slice(2, 9),
       dataUrl: await compressImage(fl),
       name: fl.name, caption: '',
     })));
+    const target = album ? clubAlbums.findIndex(a => a.name === album) : 0;
+    const at = target >= 0 ? target : 0;
     const next = clubAlbums.length
-      ? clubAlbums.map((a, i) => (i === 0 ? { ...a, items: [...a.items, ...items] } : a))
+      ? clubAlbums.map((a, i) => (i === at ? { ...a, items: [...a.items, ...items] } : a))
       : [{ id: `a${Date.now()}`, name: 'گالری', createdAt: new Date().toISOString(), items }];
     await saveAlbums(next);
+  };
+
+  const newClubAlbum = async (name: string) => {
+    const n = name.trim();
+    if (!n || clubAlbums.some(a => a.name.trim() === n)) return;
+    await saveAlbums([...clubAlbums, { id: `a${Date.now()}`, name: n, createdAt: new Date().toISOString(), items: [] }]);
+  };
+
+  const deleteClubPhoto = async (key: string) => {
+    const [albumId, itemId] = key.split('/');
+    if (!albumId || !itemId) return;
+    if (!(await ask('این تصویر حذف شود؟', { body: 'این کار برگشت‌پذیر نیست.', confirmLabel: 'حذف' }))) return;
+    await saveAlbums(clubAlbums.map(a =>
+      a.id === albumId ? { ...a, items: a.items.filter(it => it.id !== itemId) } : a));
   };
 
   const copySlugUrl = async () => {
@@ -1137,121 +1169,23 @@ export default function ClubProfilePage() {
               )}
 
               {/* Static albums */}
-              <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
-                  <span style={{ width: 3, height: 16, background: 'linear-gradient(135deg,#C7A66A,#A07840)', borderRadius: 2, display: 'inline-block' }} />
-                  <h3 style={{ fontSize: 17, fontWeight: 800, color: '#111111', margin: 0 }}>آلبوم‌ها</h3>
-                </div>
-                {/* ── انتخابِ آلبوم ──
-                    کارت‌های آلبوم `cursor: pointer` داشتند ولی هیچ
-                    `onClick`ی نداشتند — یعنی شبیهِ دکمه بودند و هیچ کاری
-                    نمی‌کردند، و شبکه‌ی پایین همیشه *همه‌ی* عکس‌های همه‌ی
-                    آلبوم‌ها را می‌ریخت. حالا انتخابِ آلبوم شبکه را فیلتر
-                    می‌کند و «همه تصاویر» به حالتِ کامل برمی‌گردد. */}
-                <div className="album-scroll">
-                  {clubAlbums.length === 0 ? (
-                    <div style={{ fontSize: 13, color: 'rgba(0,0,0,0.35)', padding: '8px 4px' }}>هنوز آلبومی ایجاد نشده</div>
-                  ) : (
-                    <>
-                      {/* ۱۱۰ ⇒ ۷۷ پیکسل (۳۰٪ کوچک‌تر) — متن‌ها هم به همان
-                          نسبت، وگرنه در قابِ کوچک‌تر جا نمی‌شوند. */}
-                      <button type="button"
-                        onClick={() => setPickedAlbum(null)}
-                        style={{
-                          flexShrink: 0, width: 77, height: 77, borderRadius: 11, cursor: 'pointer',
-                          padding: 6, textAlign: 'center', fontFamily: 'inherit',
-                          display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 2,
-                          background: pickedAlbum === null ? 'rgba(199,166,106,0.16)' : 'rgba(0,0,0,0.03)',
-                          border: `2px solid ${pickedAlbum === null ? 'rgba(199,166,106,0.62)' : 'rgba(0,0,0,0.08)'}`,
-                          transition: 'background .15s, border-color .15s',
-                        }}>
-                        <span style={{ fontSize: 17 }}>🖼</span>
-                        <span style={{ fontSize: 10, fontWeight: 800, lineHeight: 1.3, color: pickedAlbum === null ? '#8F6531' : '#4B5563' }}>همه تصاویر</span>
-                        <span style={{ fontSize: 8.5, fontWeight: 600, color: 'rgba(0,0,0,0.38)' }}>
-                          {toFa(clubAlbums.reduce((n, a) => n + a.items.length, 0))} عکس
-                        </span>
-                      </button>
-
-                      {clubAlbums.map(album => {
-                        const cover = album.items[0]?.dataUrl;
-                        const on = pickedAlbum === album.id;
-                        return (
-                          <button key={album.id} type="button"
-                            onClick={() => setPickedAlbum(on ? null : album.id)}
-                            style={{
-                              flexShrink: 0, width: 77, height: 77, padding: 0, cursor: 'pointer',
-                              borderRadius: 11, overflow: 'hidden', position: 'relative', background: 'rgba(199,166,106,0.12)',
-                              border: `2px solid ${on ? 'rgba(199,166,106,0.85)' : 'transparent'}`,
-                              boxShadow: on ? '0 5px 16px rgba(199,166,106,0.38)' : '0 3px 12px rgba(0,0,0,0.12)',
-                              transition: 'border-color .15s, box-shadow .15s',
-                            }}>
-                            {cover
-                              ? <img loading="lazy" decoding="async" src={cover} alt={album.name} style={{ width: '100%', height: '100%', objectFit: 'cover', filter: on ? 'brightness(0.78) saturate(0.95)' : 'brightness(0.62) saturate(0.80)' }} />
-                              : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 21 }}>🖼</div>
-                            }
-                            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom,transparent 35%,rgba(0,0,0,0.82) 100%)' }} />
-                            <div style={{ position: 'absolute', bottom: 0, right: 0, left: 0, padding: 6, textAlign: 'right' }}>
-                              <div style={{ fontSize: 10, fontWeight: 800, color: '#fff', lineHeight: 1.3, marginBottom: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>📁 {album.name}</div>
-                              <div style={{ fontSize: 8.5, color: 'rgba(255,255,255,0.55)', fontWeight: 600 }}>{toFa(album.items.length)} عکس</div>
-                            </div>
-                          </button>
-                        );
-                      })}
-                    </>
-                  )}
-                </div>
-              </div>
-
-              {/* شبکه‌ی تصاویر — آلبومِ انتخاب‌شده، یا همه */}
-              {(() => {
-                const picked = pickedAlbum ? clubAlbums.find(a => a.id === pickedAlbum) ?? null : null;
-                const items = picked ? picked.items : clubAlbums.flatMap(a => a.items);
-                if (!clubAlbums.some(a => a.items.length > 0)) return null;
-                return (
-                  <div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14, flexWrap: 'wrap' }}>
-                      <span style={{ width: 3, height: 16, background: 'linear-gradient(180deg,#06b6d4,#a78bfa)', borderRadius: 2, display: 'inline-block' }} />
-                      <h3 style={{ fontSize: 17, fontWeight: 800, color: '#111111', margin: 0 }}>
-                        {picked ? picked.name : 'همه تصاویر'}
-                      </h3>
-                      <span style={{ fontSize: 12, color: 'rgba(0,0,0,0.38)', fontWeight: 600 }}>
-                        {toFa(items.length)} عکس
-                      </span>
-                      {/* دکمه‌ی «نمایش همه» برداشته شد — کارتِ «همه تصاویر»
-                          در نوارِ بالا همان کار را می‌کند و دو راه برای یک
-                          کار فقط شلوغی است. */}
-                    </div>
-                    {items.length === 0 && !isClubOwner ? (
-                      <div style={{ fontSize: 13, color: 'rgba(0,0,0,0.35)', padding: '8px 4px' }}>
-                        این آلبوم هنوز عکسی ندارد.
-                      </div>
-                    ) : (
-                      <div className="gallery-grid">
-                        {/* «+» هم‌اندازه‌ی عکس‌ها و همیشه اولِ شبکه —
-                            فقط برای مالکِ باشگاه */}
-                        {isClubOwner && (
-                          <>
-                            <input ref={clubFileRef} type="file" accept="image/*" multiple hidden
-                              onChange={e => { if (e.target.files?.length) void addClubPhotos(e.target.files); e.target.value = ''; }} />
-                            <button type="button" className="ch-add-tile" disabled={albumBusy}
-                              onClick={() => clubFileRef.current?.click()}
-                              aria-label="افزودن تصویر" title="افزودن تصویر"
-                              style={{ borderRadius: 14 }}>
-                              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                            </button>
-                          </>
-                        )}
-                        {items.map((item, i) => (
-                          <div key={item.id || i} style={{ aspectRatio: '1', borderRadius: 14, overflow: 'hidden', boxShadow: '0 2px 10px rgba(0,0,0,0.08)' }}>
-                            <img loading="lazy" decoding="async" src={item.dataUrl} alt={item.name} style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.82) saturate(0.78)' }} />
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                    {albumErr && <p role="alert" style={{ fontSize: 12, color: '#b91c1c', marginTop: 8 }}>{albumErr}</p>}
-                  </div>
-                );
-              })()}
+              {/* ── گالری: همان کامپوننتِ مشترکِ بقیه‌ی نقش‌ها ──
+                  ⚠️ این‌جا نوارِ آلبومِ ۷۷ پیکسلی و یک شبکه‌ی جدا بود.
+                  شکلِ ذخیره‌ی باشگاه دست‌نخورده می‌ماند (جدولش جداست و
+                  عوض‌کردنش مهاجرت می‌خواهد)؛ فقط در همین دو خط به مدلِ
+                  مشترک نگاشت می‌شود. */}
+              <ProfileGallery
+                images={clubGalleryImages}
+                videos={[]}
+                albumNames={clubAlbums.map(a => a.name)}
+                onOpenImage={(urls, index, meta, ids) => openImage(urls, {
+                  index, ...meta,
+                  ...(isClubOwner ? { onDelete: (i: number) => deleteClubPhoto(ids[i] ?? '') } : {}),
+                })}
+                canEdit={isClubOwner} busy={albumBusy}
+                onAddImages={addClubPhotos} onNewAlbum={newClubAlbum}
+              />
+              {albumErr && <p role="alert" style={{ fontSize: 12, color: '#b91c1c', marginTop: 8 }}>{albumErr}</p>}
             </div>
           )}
 
