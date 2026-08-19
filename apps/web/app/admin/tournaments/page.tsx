@@ -218,6 +218,7 @@ export default function AdminTournaments() {
               <option value="bo7">Best of ۷</option>
               <option value="bo9">Best of ۹</option>
               <option value="bo11">Best of ۱۱</option>
+              <option value="bo13">Best of ۱۳</option>
             </select>
           </Field>
           <Field label="تاریخ برگزاری (اختیاری)">

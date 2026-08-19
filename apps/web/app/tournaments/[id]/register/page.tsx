@@ -57,6 +57,12 @@ export default function RegisterPage() {
   const userName   = user ? `${user.firstName} ${user.lastName}` : '';
 
   const full = !!t && t.registeredCount >= t.maxPlayers;
+  /* ── ثبت‌نام باز است یا نه ──
+     ⚠️ این صفحه تا امروز فقط «ظرفیت پر» را می‌شناخت. یعنی مسابقه‌ای
+     که مهلتش گذشته بود همین فرم را کامل نشان می‌داد و کاربر تا
+     لحظه‌ی پرداخت جلو می‌رفت و آن‌جا «مهلت ثبت‌نام تمام شده است»
+     می‌گرفت. حالا همان چیزی که سرور می‌داند این‌جا هم دیده می‌شود. */
+  const closed = !!t && t.status !== 'registration_open';
 
   /* ── لیست انتظار ──
      فقط وقتی ظرفیت پر است معنی دارد، پس تا آن موقع درخواستی هم
@@ -693,7 +699,26 @@ export default function RegisterPage() {
           <div style={{ height: 1, background: 'rgba(0,0,0,0.06)', marginBottom: 24 }} />
 
           {/* CTA */}
-          {full ? (
+          {closed ? (
+            <div style={{
+              background: 'rgba(239,68,68,0.05)', border: '1px solid rgba(239,68,68,0.18)',
+              borderRadius: 16, padding: '20px', textAlign: 'center',
+            }}>
+              <div style={{ fontSize: 15, fontWeight: 800, color: '#111', marginBottom: 8, lineHeight: 1.7 }}>
+                مهلت ثبت‌نام این مسابقه تمام شده است
+              </div>
+              <div style={{ fontSize: 12.5, color: '#6B6B6B', lineHeight: 1.9 }}>
+                مهلت تا {t.registrationDeadline || '—'}
+                {t.registrationDeadlineTime ? ` — ساعت ${toFa(t.registrationDeadlineTime)}` : ''} بود.
+              </div>
+              <Link href="/tournaments" style={{
+                display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginTop: 14,
+                height: 42, padding: '0 20px', borderRadius: 11, textDecoration: 'none',
+                fontSize: 13, fontWeight: 800, background: 'rgba(199,166,106,0.12)',
+                border: '1px solid rgba(199,166,106,0.34)', color: '#8F6531',
+              }}>مسابقات دیگر</Link>
+            </div>
+          ) : full ? (
             <div style={{
               background: 'rgba(239,68,68,0.05)', border: '1px solid rgba(239,68,68,0.18)',
               borderRadius: 16, padding: '20px', textAlign: 'center',

@@ -283,7 +283,14 @@ export default function TournamentPublicPage() {
                   }}>
                     <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
                       {!full && t.status === 'registration_open' && <ClipboardList size={16} />}
-                      {full ? 'ظرفیت تکمیل' : t.status === 'upcoming' ? 'ثبت نام هنوز باز نشده' : 'ثبت نام'}
+                      {/* ⚠️ برچسب فقط «پر» و «باز نشده» را می‌شناخت، پس
+                          مسابقه‌ای که مهلتش تمام شده بود دکمه‌ی خاکستریِ
+                          «ثبت نام» نشان می‌داد — کاربر همان را کلیک می‌کرد
+                          و علتش را نمی‌فهمید. */}
+                      {full ? 'ظرفیت تکمیل'
+                        : t.status === 'upcoming' ? 'ثبت نام هنوز باز نشده'
+                        : t.status === 'registration_open' ? 'ثبت نام'
+                        : 'مهلت ثبت‌نام تمام شد'}
                     </span>
                   </button>
                 </Link>

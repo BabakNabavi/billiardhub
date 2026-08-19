@@ -87,12 +87,39 @@ export async function autoOpenDue(): Promise<number> {
   return Number(data) || 0
 }
 
+/* ── بستنِ خودکارِ ثبت‌نام ──
+   ⚠️ این نبود و باگش را کاربر روی سایتِ زنده دید: مسابقه‌ای که مهلتش
+   ۲۴ مرداد ساعت ۲۱ تمام شده بود، ۲۸ مرداد هنوز «در حال ثبت‌نام»
+   نشان داده می‌شد. دکمه‌ی ثبت‌نام کار می‌کرد، فرم پر می‌شد، و تازه
+   لحظه‌ی پرداخت پیام «مهلت ثبت‌نام تمام شده است» می‌آمد.
+
+   یعنی مهلت فقط در *مسیرِ نوشتن* بررسی می‌شد و هیچ‌کس وضعیت را
+   عوض نمی‌کرد: `bh_tournaments_autoopen` باز می‌کرد،
+   `bh_tournaments_autostart` شروع می‌کرد، ولی بستن هیچ‌جا نبود.
+
+   این‌جا به‌جای تابعِ دیتابیس با یک UPDATE انجام می‌شود تا مهاجرتِ
+   تازه لازم نباشد؛ شرط‌ها همان‌هایی است که `autoopen` هم می‌شناسد.
+   `published` هم بسته می‌شود: مسابقه‌ای که مهلتش گذشته دیگر
+   «بزودی» نیست. */
+export async function autoCloseDue(): Promise<number> {
+  const now = new Date().toISOString()
+  const { data, error } = await sb().from('tournaments')
+    .update({ status: 'registration_closed', updated_at: now })
+    .in('status', ['registration_open', 'published'])
+    .not('registration_ends_at', 'is', null)
+    .lte('registration_ends_at', now)
+    .select('id')
+  if (error) { console.error('[tournaments] autoclose:', error.message); return 0 }
+  return (data ?? []).length
+}
+
 /** فهرست عمومی مسابقات — پیش‌نویس و لغوشده دیده نمی‌شوند */
 export async function listPublicTournaments(clubId?: string): Promise<TournamentRow[]> {
   /* ترتیب مهم است: اول ثبت‌نامِ سررسیده باز شود، بعد مسابقه‌ای که
      ساعتِ شروعش رسیده استارت بخورد — وگرنه مسابقه‌ای که هر دو زمانش
      در فاصله‌ی دو بازدید گذشته، یک دور جا می‌ماند. */
   await autoOpenDue()
+  await autoCloseDue()
   await autoStartDue()
   let q = sb().from('tournaments').select('*').in('status', PUBLIC_STATUSES)
   if (clubId) q = q.eq('club_id', clubId)
@@ -107,6 +134,7 @@ export async function listClubTournaments(clubId: string): Promise<TournamentRow
      باشگاه‌دار «بزودی» می‌بیند در حالی که سایت «در حال ثبت‌نام»
      نشان می‌دهد. */
   await autoOpenDue()
+  await autoCloseDue()
   await autoStartDue()
   const { data, error } = await sb().from('tournaments').select('*')
     .eq('club_id', clubId).order('created_at', { ascending: false }).limit(200)
@@ -115,6 +143,9 @@ export async function listClubTournaments(clubId: string): Promise<TournamentRow
 }
 
 export async function getTournament(id: string): Promise<TournamentRow | null> {
+  /* لینکِ مستقیم هم باید وضعیتِ درست را ببیند، نه فقط فهرست: کاربر
+     معمولاً از لینکِ خودِ مسابقه می‌آید، نه از صفحه‌ی فهرست. */
+  await autoCloseDue()
   const { data } = await sb().from('tournaments').select('*').eq('id', id).maybeSingle()
   return (data ?? null) as TournamentRow | null
 }

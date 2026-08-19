@@ -3648,7 +3648,9 @@ export default function ClubDashboardPage() {
                   }))}
                   options={DISCIPLINE_CHOICES.map(d => ({ value: d.key, label: d.label }))} />
                 <SelectField label="ظرفیت (نفر)" value={tForm.maxPlayers} onChange={v => setTForm(p => ({...p, maxPlayers: v}))}
-                  options={['8','16','32','64','128'].map(v => ({ value: v, label: v + ' نفر' }))} />
+                  /* ۲۴ عددِ توانِ دو نیست و جدول با «بای» پر می‌شود؛ خودِ
+                     جدول از قبل بای را می‌شناسد (`p1_bye/p2_bye`). */
+                  options={['8','16','24','32','64','128'].map(v => ({ value: v, label: v + ' نفر' }))} />
                 {/* تاریخ‌ها با تقویم شمسی انتخاب می‌شوند نه تایپ آزاد —
                     تایپ آزاد یعنی هر کسی هر قالبی بنویسد و بعد قابل
                     مرتب‌سازی و مقایسه نباشد.

@@ -103,13 +103,14 @@ const GAME_TYPES = [
   { key: 'snooker' as GameType, label: 'اسنوکر', color: '#C7A66A', rgb: '199,166,106' },
   { key: 'other'   as GameType, label: 'سایر',   color: '#8b5cf6', rgb: '139,92,246'  },
 ];
-const MAX_PLAYERS = [8, 16, 32, 64];
+const MAX_PLAYERS = [8, 16, 24, 32, 64];
 const FORMATS = [
   { key: 'bo3',  label: 'Best of 3',  wins: 2 },
   { key: 'bo5',  label: 'Best of 5',  wins: 3 },
   { key: 'bo7',  label: 'Best of 7',  wins: 4 },
   { key: 'bo9',  label: 'Best of 9',  wins: 5 },
   { key: 'bo11', label: 'Best of 11', wins: 6 },
+  { key: 'bo13', label: 'Best of 13', wins: 7 },
 ];
 const STEPS = ['اطلاعات پایه', 'تنظیمات', 'جوایز و قوانین'];
 

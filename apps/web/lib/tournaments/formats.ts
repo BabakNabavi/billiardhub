@@ -91,7 +91,9 @@ export function normalizeDiscipline(raw: string | null | undefined): Discipline 
    ── چرا زمان‌دار از ۶۰ شروع می‌شود ──
    ۳۰ و ۴۵ دقیقه اندازه‌ی یک بازیِ دوستانه است، نه یک دورِ مسابقه. */
 export const RACE_TARGETS = [4, 5, 6, 7, 8, 9, 10, 11, 12] as const
-export const BO_TARGETS    = [3, 5, 7, 9, 11] as const
+/* ۱۳ به درخواستِ باشگاه‌دار اضافه شد: فینالِ اسنوکر معمولاً از
+   یازده فریم بلندتر است. */
+export const BO_TARGETS    = [3, 5, 7, 9, 11, 13] as const
 export const TIME_MINUTES  = [60, 75, 90, 105, 120, 150, 180] as const
 
 export type FormatKind = 'race' | 'bo' | 'time'

@@ -23,7 +23,7 @@ import {
 const GOLD = '#C7A66A', GOLD_D = '#8F6531', INK = '#1C1B17';
 const MUT = '#6F6A5C', LINE = '#EAE5DA', FELT = '#0E7A38', RED = '#B23B2E';
 
-const FORMAT_BEST: Record<string, number> = { bo3: 3, bo5: 5, bo7: 7, bo9: 9, bo11: 11 };
+const FORMAT_BEST: Record<string, number> = { bo3: 3, bo5: 5, bo7: 7, bo9: 9, bo11: 11, bo13: 13 };
 
 export default function LivePage() {
   const params = useParams();
