@@ -75,6 +75,9 @@ const sampleClub: Club = {
    می‌رفت — که هیچ‌وقت وجود نداشت و «این مربی پیدا نشد» می‌داد.
    برای ردیف‌های قدیمی که `slug` ندارند، از فهرستِ عمومی نگاشتِ
    id→slug ساخته می‌شود. */
+/* همان تعریفِ صفحه‌ی مربیان و داوران — سالِ جاریِ شمسی */
+const CUR_JYEAR = (() => { try { return parseInt(new Intl.DateTimeFormat('en-US-u-ca-persian', { year: 'numeric' }).format(new Date()), 10) || 1404 } catch { return 1404 } })();
+
 interface CoachEntry { id: string; slug?: string; name: string; title: string; exp: string; rating: string; bio: string; }
 interface ClubAlbumItem { id: string; dataUrl: string; name: string; caption: string; }
 interface ClubAlbum { id: string; name: string; createdAt: string; items: ClubAlbumItem[]; }
@@ -164,7 +167,7 @@ export default function ClubProfilePage() {
 
      پس وقتی مربی پروفایل دارد، رشته‌هایش از همان‌جا می‌آید و متنِ
      دستیِ باشگاه فقط جای خالی را پر می‌کند. */
-  const [coachInfo, setCoachInfo] = useState<Record<string, { disciplines: string[] }>>({});
+  const [coachInfo, setCoachInfo] = useState<Record<string, { disciplines: string[]; sinceYear: number }>>({});
   const [slugCopied, setSlugCopied]   = useState(false);
   const [clubAlbums, setClubAlbums]   = useState<ClubAlbum[]>([]);
   /* ── ویرایشِ درجا برای مالکِ باشگاه ──
@@ -239,19 +242,27 @@ export default function ClubProfilePage() {
           try {
             const r = await fetch('/api/profiles/coach', { cache: 'no-store' });
             const j = await r.json().catch(() => null) as {
-              profiles?: { id?: string; slug?: string; data?: { disciplines?: unknown } }[]
+              profiles?: { id?: string; slug?: string; data?: { disciplines?: unknown; grades?: unknown } }[]
             } | null;
             const map: Record<string, string> = {};
-            const info: Record<string, { disciplines: string[] }> = {};
+            const info: Record<string, { disciplines: string[]; sinceYear: number }> = {};
             for (const p of j?.profiles ?? []) {
               if (p.id && p.slug) map[p.id] = p.slug;
               const d = Array.isArray(p.data?.disciplines)
                 ? (p.data!.disciplines as unknown[]).filter((x): x is string => typeof x === 'string')
                 : [];
+              /* ── سابقه هم دستی بود ──
+                 ⚠️ فیلدِ «سابقه» را هم باشگاه‌دار تایپ می‌کرد و معمولاً
+                 خالی می‌ماند. صفحه‌ی مربیان از سالِ *اولین مدرک* حسابش
+                 می‌کند؛ همان حساب این‌جا هم انجام می‌شود تا دو عدد
+                 متفاوت برای یک نفر وجود نداشته باشد. */
+              const grades = Array.isArray(p.data?.grades) ? p.data!.grades as { year?: unknown }[] : [];
+              const yr = parseInt(String(grades[0]?.year ?? ''), 10);
               /* با هر دو کلید نگه داشته می‌شود: ردیفِ قدیمی `id` دارد و
                  ردیفِ تازه `slug`. */
-              if (p.id) info[p.id] = { disciplines: d };
-              if (p.slug) info[p.slug] = { disciplines: d };
+              const entry = { disciplines: d, sinceYear: Number.isNaN(yr) ? 0 : yr };
+              if (p.id) info[p.id] = entry;
+              if (p.slug) info[p.slug] = entry;
             }
             setCoachSlugs(map);
             setCoachInfo(info);
@@ -365,9 +376,17 @@ export default function ClubProfilePage() {
     user ? router.push(`/booking/${club.id}`) : router.push('/login');
   };
   /* رشته‌های واقعیِ مربی؛ نبودشان یعنی همان متنِ دستیِ باشگاه */
+  const coachOf = (c: CoachEntry) => coachInfo[c.slug ?? ''] ?? coachInfo[c.id];
   const coachTitle = (c: CoachEntry): string => {
-    const d = (coachInfo[c.slug ?? ''] ?? coachInfo[c.id])?.disciplines ?? [];
+    const d = coachOf(c)?.disciplines ?? [];
     return d.length ? d.map(k => DISCIPLINES.find(x => x.key === k)?.label ?? k).join(' · ') : c.title;
+  };
+  /* سابقه از سالِ اولین مدرک؛ نبودش یعنی همان متنِ دستیِ باشگاه */
+  const coachExp = (c: CoachEntry): string => {
+    const y = coachOf(c)?.sinceYear ?? 0;
+    if (!y) return c.exp;
+    const n = Math.max(0, CUR_JYEAR - y);
+    return n > 0 ? `${toFa(n)} سال سابقه` : 'سالِ اول';
   };
 
   const popupCoach = activeCoach !== null ? (coaches[activeCoach] ?? null) : null;
@@ -813,7 +832,7 @@ export default function ClubProfilePage() {
                           </div>
                           <div style={{ flex: 1, minWidth: 0 }}>
                             <div style={{ fontSize: 16, fontWeight: 800, color: '#111111', marginBottom: 3 }}>{c.name}</div>
-                            <div style={{ fontSize: 13, color: 'rgba(0,0,0,0.42)' }}>{coachTitle(c)}{c.exp ? ` · ${c.exp}` : ''}</div>
+                            <div style={{ fontSize: 13, color: 'rgba(0,0,0,0.42)' }}>{coachTitle(c)}{coachExp(c) ? ` · ${coachExp(c)}` : ''}</div>
                           </div>
                           {c.rating && (
                             <div style={{ display: 'flex', alignItems: 'center', gap: 3, flexShrink: 0 }}>
@@ -1359,7 +1378,7 @@ export default function ClubProfilePage() {
             {/* Info */}
             <div style={{ textAlign: 'center', marginBottom: 18 }}>
               <div style={{ fontSize: 20, fontWeight: 900, color: '#111111', marginBottom: 5 }}>{popupCoach.name}</div>
-              <div style={{ fontSize: 14, color: 'rgba(0,0,0,0.45)', marginBottom: 10 }}>{coachTitle(popupCoach)}{popupCoach.exp ? ` · ${popupCoach.exp} تجربه` : ''}</div>
+              <div style={{ fontSize: 14, color: 'rgba(0,0,0,0.45)', marginBottom: 10 }}>{coachTitle(popupCoach)}{coachExp(popupCoach) ? ` · ${coachExp(popupCoach)}` : ''}</div>
               {popupCoach.rating && (
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, marginBottom: 12 }}>
                   <Star size={13} style={{ color: '#f59e0b', fill: '#f59e0b' }} />
