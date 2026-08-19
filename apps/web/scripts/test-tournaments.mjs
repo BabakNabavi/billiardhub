@@ -4006,15 +4006,16 @@ console.log('\n― استوری: یک منبع، با انقضا ―');
       t('مسیرِ پروفایلِ نمایشی هم از همان مرز رد می‌شود',
         (srv.split('sanitizeProfileData(').length - 1) >= 3,
         'نصفِ مرز، مرز نیست');
-      /* بازیکن هنوز آلبومِ شیئی دارد؛ خدمات فنی مهاجرت کرد و حالا
-         باید *داخلِ* فهرستِ نام‌ها باشد. هر دو سمت سنجیده می‌شود. */
-      t('آلبومِ بازیکن از این پاک‌سازی رد نمی‌شود',
-        srv.includes('NAMED_ALBUM_KINDS.includes(kind')
-        && !read('lib/profiles/albums.ts').includes("'player'"),
-        'آلبومِ بازیکن آرایه‌ای از شیء است و کاملاً پاک می‌شد');
-      t('خدمات فنی هم از مرزِ نامِ آلبوم رد می‌شود',
-        read('lib/profiles/albums.ts').includes("'technician'"),
-        'بعد از مهاجرت، آلبومِ متخصص هم فهرستِ نام است و باید پاک‌سازی شود');
+      /* چهار نقشی که مهاجرت کرده‌اند باید داخلِ فهرست باشند. باشگاه
+         عمداً نیست: جدولِ دیگری دارد و از `saveProfile` رد نمی‌شود. */
+      t('نگهبانِ نوع سرِ جایش است',
+        srv.includes('NAMED_ALBUM_KINDS.includes(kind'),
+        'پاک‌سازیِ نامِ آلبوم روی مدلِ شیئی همه‌چیز را پاک می‌کند');
+      t('هر چهار نقشِ مهاجرت‌کرده از مرزِ نامِ آلبوم رد می‌شوند',
+        ['coach', 'referee', 'technician', 'player']
+          .every(k => read('lib/profiles/albums.ts').includes("'" + k + "'"))
+        && !read('lib/profiles/albums.ts').includes("'club'"),
+        'باشگاه جدولِ جدا دارد و نباید این‌جا باشد');
       t('عضوِ خرابِ گالری حذف می‌شود نه رد',
         srv.includes("typeof m === 'object' && !Array.isArray(m)"),
         'یک null داخلِ gallery همان صفحه‌ی سفید را می‌سازد');
@@ -4237,7 +4238,6 @@ console.log('\n― استوری: یک منبع، با انقضا ―');
   {
     for (const [p, tag] of [
       ['components/profile/ProfileGallery.tsx', 'مربی/داور'],
-      ['app/players/[id]/page.tsx', 'بازیکن'],
       ['app/sellers/[id]/FlatShop.tsx', 'فروشگاه'],
       ['app/manufacturers/[id]/page.tsx', 'تولیدکننده'],
       ['app/clubs/[id]/page.tsx', 'باشگاه'],
@@ -4259,6 +4259,35 @@ console.log('\n― استوری: یک منبع، با انقضا ―');
       strip(read('app/dashboard/technician/page.tsx')).includes("set('gallery', [...form.gallery, ...items])")
       && !strip(read('app/dashboard/technician/page.tsx')).includes('photos: [...a.photos'),
       'با دو مدلِ جدا، عکسِ اضافه‌شده از صفحه‌ی عمومی در پنل دیده نمی‌شد');
+
+    /* بازیکن هم همان مبدل را دارد — سه در، سه بار */
+    {
+      const pd = read('lib/players-data.ts');
+      const raw = pd.slice(pd.indexOf('export function normalizePlayerMedia'));
+      const code = 'function normalizePlayerMedia(d) {' + raw.slice(raw.indexOf('const gallery'))
+        .split('(g): g is PlayerMedia =>').join('(g) =>')
+        .split('(v): v is PlayerVideo =>').join('(v) =>')
+        .split(' as PlayerMedia').join('')
+        .split(' as PlayerVideo').join('')
+        .split(' as unknown[]').join('')
+        .split(' as PlayerAlbumLegacy').join('')
+        .split(': PlayerMedia[]').join('')
+        .split(': PlayerVideo[]').join('')
+        .split(': string[]').join('');
+      const normalize = new Function(code + '; return normalizePlayerMedia')();
+      const out = normalize({ albums: [{ id: 'a', title: 'مسابقات', photos: ['u1', 'u2'] }] });
+      t('آلبومِ قدیمیِ بازیکن با عکس‌هایش منتقل می‌شود',
+        JSON.stringify(out.albums) === JSON.stringify(['مسابقات'])
+        && out.gallery.length === 2 && out.gallery.every(g => g.album === 'مسابقات'),
+        'عکس‌های ردیفِ قدیمی با اولین ذخیره از بین می‌رفتند');
+      t('بازیکن: هر سه مسیرِ خواندن از مبدل رد می‌شوند',
+        strip(read('lib/player-store.ts')).includes('const media = normalizePlayerMedia(p)')
+        && strip(read('app/dashboard/player/page.tsx')).includes('normalizePlayerMedia(remote.data)'),
+        'ردیفِ پیش از مهاجرت یا صفحه را می‌شکند یا با اولین ذخیره خالی می‌شود');
+      t('پنلِ بازیکن همان شکلی را می‌نویسد که می‌خواند',
+        strip(read('app/dashboard/player/page.tsx')).includes("set('gallery', [...form.gallery, ...items])"),
+        'با دو مدلِ جدا، عکسِ اضافه‌شده از صفحه‌ی عمومی در پنل دیده نمی‌شد');
+    }
 
     /* ── مهاجرتِ مدلِ آلبومِ خدمات فنی ──
        ردیفِ قدیمی آلبوم را شیئی نگه می‌داشت. اگر مبدل نباشد، صفحه‌ی
@@ -4297,11 +4326,14 @@ console.log('\n― استوری: یک منبع، با انقضا ―');
     /* خدمات فنی دیگر گالریِ خودش را ندارد: همان کامپوننتِ مشترک را
        رندر می‌کند، پس ادعا هم همان را می‌سنجد نه کلاسِ خام. */
     {
-      const svc = strip(read('app/services/[id]/page.tsx'));
-      t('خدمات فنی همان گالریِ مشترک را رندر می‌کند',
-        svc.includes('<ProfileGallery') && svc.includes('useProfileVideoViewer')
-        && !svc.includes('tp-gal'),
-        'دو پیاده‌سازی برای یک گالری، همان دوباره‌کاریِ همیشگی است');
+      for (const [p, tag] of [['app/services/[id]/page.tsx', 'خدمات فنی'], ['app/players/[id]/page.tsx', 'بازیکن']]) {
+        const src = strip(read(p));
+        t(`${tag} همان گالریِ مشترک را رندر می‌کند`,
+          src.includes('<ProfileGallery') && src.includes('albumNames=') && src.includes('onOpenVideo=')
+          && src.includes('useProfileVideoViewer')
+          && !src.includes('createPortal'),
+          'دو پیاده‌سازی برای یک گالری، همان دوباره‌کاریِ همیشگی است');
+      }
     }
 
     t('اندازه‌ی خانه‌ی «+» به کلاسِ صفحه‌ی پروفایل بند نیست',

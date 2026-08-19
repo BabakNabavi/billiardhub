@@ -18,7 +18,7 @@ import ClubPicker from '../../../components/ClubPicker'
 import { provinceOfCity } from '../../../lib/iran-geo'
 import { fetchClubOptions, type ClubOption } from '../../../lib/clubs-data'
 import { compressImage } from '../../../lib/seller-store'
-import { TONES, type PlayerHighlight, type PlayerAlbum } from '../../../lib/players-data'
+import { TONES, normalizePlayerMedia, type PlayerHighlight } from '../../../lib/players-data'
 import {
   emptyPlayerProfile, findPlayerByOwner, newPlayerSlug, savePlayerProfile,
   type PlayerProfile,
@@ -93,7 +93,10 @@ export default function PlayerDashboard() {
           return
         }
         setSavedSlug(remote.slug)
-        const merged = { ...base, ...remote.data, slug: remote.slug }
+        /* ⚠️ ردیفِ سرور می‌تواند هنوز آلبومِ شیئیِ پیش از مهاجرت داشته
+           باشد؛ بدونِ این تبدیل پنل روی `x.trim` می‌شکند و اولین ذخیره
+           عکس‌های داخلِ آلبوم‌ها را دور می‌ریزد. */
+        const merged = { ...base, ...remote.data, ...normalizePlayerMedia(remote.data), slug: remote.slug }
         setForm(merged)
         setBioText((merged.bio ?? []).join('\n\n'))
       })()
@@ -125,19 +128,35 @@ export default function PlayerDashboard() {
     set('highlights', [...form.highlights, item]); setHl({ year: '', title: '' })
   }
 
+  /* ── آلبوم‌ها ──
+     همان مدلِ بقیه‌ی نقش‌ها: نام‌ها در `albums` و خودِ عکس در
+     `gallery` با برچسبِ نامِ آلبوم. با دو مدلِ جدا، عکسی که از
+     صفحه‌ی عمومی اضافه می‌شد در پنل دیده نمی‌شد. */
   const addAlbum = () => {
-    if (!albTitle.trim()) { setErr('نام آلبوم لازم است.'); return }
-    const a: PlayerAlbum = { id: rid(), title: albTitle.trim(), photos: [] }
-    set('albums', [...form.albums, a]); setAlbTitle('')
+    const n = albTitle.trim()
+    if (!n) { setErr('نام آلبوم لازم است.'); return }
+    if (form.albums.some(x => x.trim() === n)) { setErr('آلبومی با همین نام هست.'); return }
+    set('albums', [...form.albums, n]); setAlbTitle('')
   }
-  const addAlbumPhotos = async (albumId: string, files: FileList | null) => {
+  const addAlbumPhotos = async (album: string, files: FileList | null) => {
     if (!files?.length) return
     setBusy(true)
     try {
-      const urls = await Promise.all(Array.from(files).slice(0, 8).map(f => compressImage(f, 1200, 0.68)))
-      set('albums', form.albums.map(a => a.id === albumId ? { ...a, photos: [...a.photos, ...urls] } : a))
+      const items = await Promise.all(Array.from(files).slice(0, 8).map(async f => ({
+        id: `m${Date.now()}${Math.random().toString(36).slice(2, 7)}`,
+        url: await compressImage(f, 1200, 0.68),
+        caption: '',
+        ...(album ? { album } : {}),
+      })))
+      set('gallery', [...form.gallery, ...items])
     } catch { setErr('آپلود نشد. دوباره تلاش کنید.') }
     finally { setBusy(false) }
+  }
+  const removeGalleryItem = (id: string) => set('gallery', form.gallery.filter(g => g.id !== id))
+  /* حذفِ آلبوم فقط برچسب را برمی‌دارد؛ عکس در گالری می‌ماند */
+  const removeAlbum = (name: string) => {
+    set('albums', form.albums.filter(x => x !== name))
+    set('gallery', form.gallery.map(g => (g.album === name ? { ...g, album: undefined } : g)))
   }
 
   const submit = async (e: React.FormEvent) => {
@@ -378,34 +397,52 @@ export default function PlayerDashboard() {
           <section className={CARD}>
             <h2 className="mb-1 text-[14.5px] font-bold">گالری — آلبوم‌ها</h2>
             <p className="mb-4 text-[12px] text-[#6F6A5C]">مثل «آلبوم مسابقات»، «آلبوم تیم ملی»، «آلبوم تمرینات»…</p>
-            {form.albums.map(a => (
-              <div key={a.id} className="mb-3 rounded-xl border border-[#EFEBE1] bg-[#FAFAF7] p-3">
-                <div className="mb-2 flex items-center justify-between gap-2">
-                  <div className="text-[13px] font-bold">{a.title}</div>
-                  <div className="flex items-center gap-2">
-                    <input ref={el => { albImgRefs.current[a.id] = el }} type="file" accept="image/*" multiple className="hidden"
-                      onChange={e => { addAlbumPhotos(a.id, e.target.files); e.target.value = '' }} />
-                    <button type="button" onClick={() => albImgRefs.current[a.id]?.click()} className={LQ_BTN} disabled={busy}>
-                      <Plus size={13} /> عکس
-                    </button>
-                    <button type="button" onClick={() => set('albums', form.albums.filter(x => x.id !== a.id))}
-                      className="rounded-lg p-2 text-[#B23B2E] transition hover:bg-[rgba(178,59,46,0.08)]"><Trash2 size={15} /></button>
+            {form.albums.map(name => {
+              const photos = form.gallery.filter(g => (g.album ?? '') === name)
+              return (
+                <div key={name} className="mb-3 rounded-xl border border-[#EFEBE1] bg-[#FAFAF7] p-3">
+                  <div className="mb-2 flex items-center justify-between gap-2">
+                    <div className="text-[13px] font-bold">{name}</div>
+                    <div className="flex items-center gap-2">
+                      <input ref={el => { albImgRefs.current[name] = el }} type="file" accept="image/*" multiple className="hidden"
+                        onChange={e => { void addAlbumPhotos(name, e.target.files); e.target.value = '' }} />
+                      <button type="button" onClick={() => albImgRefs.current[name]?.click()} className={LQ_BTN} disabled={busy}>
+                        <Plus size={13} /> عکس
+                      </button>
+                      <button type="button" onClick={() => removeAlbum(name)} aria-label={`حذف آلبوم ${name}`}
+                        className="rounded-lg p-2 text-[#B23B2E] transition hover:bg-[rgba(178,59,46,0.08)]"><Trash2 size={15} /></button>
+                    </div>
                   </div>
+                  {photos.length > 0 ? (
+                    <div className="flex flex-wrap gap-2">
+                      {photos.map(g => (
+                        <span key={g.id} className="relative">
+                          <img loading="lazy" decoding="async" src={g.url} alt="" className="h-16 w-24 rounded-lg border border-[#E7E2D6] object-cover" />
+                          <button type="button" onClick={() => removeGalleryItem(g.id)} aria-label="حذف تصویر"
+                            className="absolute -left-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-[#B23B2E] text-[11px] text-white">×</button>
+                        </span>
+                      ))}
+                    </div>
+                  ) : <p className="text-[11.5px] text-[#A69F8E]">هنوز عکسی ندارد.</p>}
                 </div>
-                {a.photos.length > 0 ? (
-                  <div className="flex flex-wrap gap-2">
-                    {a.photos.map((ph, i) => (
-                      <span key={i} className="relative">
-                        <img loading="lazy" decoding="async" src={ph} alt="" className="h-16 w-24 rounded-lg border border-[#E7E2D6] object-cover" />
-                        <button type="button"
-                          onClick={() => set('albums', form.albums.map(x => x.id === a.id ? { ...x, photos: x.photos.filter((_, pi) => pi !== i) } : x))}
-                          className="absolute -left-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-[#B23B2E] text-[11px] text-white">×</button>
-                      </span>
-                    ))}
-                  </div>
-                ) : <p className="text-[11.5px] text-[#A69F8E]">هنوز عکسی ندارد.</p>}
+              )
+            })}
+
+            {/* عکس‌های بدونِ آلبوم — در صفحه‌ی عمومی تبِ «تصاویر» هستند */}
+            {form.gallery.some(g => !(g.album ?? '').trim()) && (
+              <div className="mb-3 rounded-xl border border-[#EFEBE1] bg-[#FAFAF7] p-3">
+                <div className="mb-2 text-[13px] font-bold">بدون آلبوم</div>
+                <div className="flex flex-wrap gap-2">
+                  {form.gallery.filter(g => !(g.album ?? '').trim()).map(g => (
+                    <span key={g.id} className="relative">
+                      <img loading="lazy" decoding="async" src={g.url} alt="" className="h-16 w-24 rounded-lg border border-[#E7E2D6] object-cover" />
+                      <button type="button" onClick={() => removeGalleryItem(g.id)} aria-label="حذف تصویر"
+                        className="absolute -left-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-[#B23B2E] text-[11px] text-white">×</button>
+                    </span>
+                  ))}
+                </div>
               </div>
-            ))}
+            )}
             <div className="flex flex-col gap-2 rounded-xl border border-dashed border-[#D8D2C4] p-4 sm:flex-row">
               <input className={INPUT} value={albTitle} onChange={e => setAlbTitle(e.target.value)} placeholder="نام آلبوم — مثال: آلبوم مسابقات" />
               <button type="button" onClick={addAlbum} className={`${LQ_BTN} shrink-0`}><Plus size={14} /> ساخت آلبوم</button>

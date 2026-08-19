@@ -5,8 +5,9 @@
    ذخیره = انتشار. تک‌تک فیلدهای صفحه‌ی نمایش پروفایل این‌جا
    گرفته می‌شوند.
    ───────────────────────────────────────────────────────────── */
+import { normalizePlayerMedia } from './players-data'
 import type {
-  Player, Discipline, PlayerHighlight, PlayerTournament, PlayerAlbum,
+  Player, Discipline, PlayerHighlight, PlayerTournament, PlayerMedia, PlayerVideo,
 } from './players-data'
 import { normalizeEntries, type DisciplineEntry } from './player-categories'
 
@@ -36,7 +37,10 @@ export interface PlayerProfile {
   careerStart: string
   highlights: PlayerHighlight[]
   tournaments: PlayerTournament[]
-  albums: PlayerAlbum[]
+  /* همان مدلِ بقیه‌ی نقش‌ها: نامِ آلبوم‌ها این‌جا، عضویت روی رسانه */
+  albums: string[]
+  gallery: PlayerMedia[]
+  videos: PlayerVideo[]
   tags: string[]
 
   status: 'approved' | 'rejected'
@@ -53,7 +57,7 @@ export function emptyPlayerProfile(slug: string, ownerId = '', ownerPhone = ''):
     name: '', nameEn: '', discipline: 'snooker', disciplines: [], province: '', city: '', country: 'ایران',
     ranking: '', national: false, gender: 'm', youth: false, clubName: '',
     tone: 'felt', scene: '', intro: '', bio: [], careerStart: '',
-    highlights: [], tournaments: [], albums: [], tags: [],
+    highlights: [], tournaments: [], albums: [], gallery: [], videos: [], tags: [],
     status: 'approved', updatedAt: '',
   }
 }
@@ -118,6 +122,10 @@ export function newPlayerSlug(): string {
 
 /* پروفایل ذخیره‌شده → شکل Player تا صفحات /players مستقیم رندرش کنند */
 export function profileToPlayer(p: PlayerProfile): Player {
+  /* ⚠️ همان تله‌ی خدماتِ فنی: صفحه‌ی عمومی داده‌ی خامِ سرور را مستقیم
+     به این تابع می‌دهد و ردیفی که کلیدِ `gallery` ندارد `undefined`
+     رد می‌کرد — صفحه به error boundary می‌رفت، با بیلدِ سبز. */
+  const media = normalizePlayerMedia(p)
   const rank = parseInt(String(p.ranking ?? '').replace(/[۰-۹]/g, d => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(d))), 10)
   return {
     id: p.slug,
@@ -139,7 +147,9 @@ export function profileToPlayer(p: PlayerProfile): Player {
     careerStart: p.careerStart || '—',
     highlights: p.highlights,
     tournaments: p.tournaments,
-    albums: p.albums,
+    albums: media.albums,
+    gallery: media.gallery,
+    videos: media.videos,
     tags: p.tags,
     verified: p.verified === true,
   }

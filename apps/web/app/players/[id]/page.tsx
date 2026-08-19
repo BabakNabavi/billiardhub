@@ -8,21 +8,25 @@
    آلبوم‌دار + لایت‌باکس → پیوند با اخبار و بیلیارد مدیا.
    ───────────────────────────────────────────────────────────── */
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { ProfileMissing, ProfileLoading } from '@/components/profile/ProfileMissing'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
-import { createPortal } from 'react-dom'
 import {
-  MapPin, ChevronLeft, ChevronRight, ArrowLeft, X, ZoomIn, ZoomOut,
-  Trophy, Images, Building2, Newspaper, Clapperboard,
-  Plus, Trash2,
+  MapPin, ChevronLeft, ArrowLeft,
+  Trophy, Building2, Newspaper, Clapperboard,
 } from 'lucide-react'
 import { getPlayer, DISCIPLINE_LABEL, TONES, faDigits, type Player } from '../../../lib/players-data'
 import { getPlayerProfile, profileToPlayer, type PlayerProfile } from '../../../lib/player-store'
 import { useOwnerEdit } from '../../../lib/profiles/use-owner-edit'
 import { compressImage } from '../../../lib/seller-store'
-import { askText, ask } from '../../../lib/ui/dialogs'
+import { ask, notify } from '../../../lib/ui/dialogs'
+import { useProfileImageViewer } from '@/components/ProfileImageViewer'
+import { useProfileVideoViewer } from '@/components/profile/ProfileVideoViewer'
+import ProfileGallery from '@/components/profile/ProfileGallery'
+import { uploadFile } from '../../../lib/supabase'
+import { videoMeta, formatDuration } from '../../../lib/video-thumb'
+import '@/components/profile/profile-page.css'
 import { fetchProfileResult } from '../../../lib/profiles/client'
 import VerifiedBadge from '../../../components/VerifiedBadge'
 import PendingNotice from '../../../components/profile/PendingNotice'
@@ -131,61 +135,69 @@ export default function PlayerProfilePage() {
   const edit = useOwnerEdit<PlayerProfile>('player', id, rawP, ownerId, raw => {
     setRawP(raw); setStored(profileToPlayer(raw))
   }, mine)
-  const fileRef = useRef<HTMLInputElement>(null)
 
-  /* آلبومِ بازیکن `{id,title,photos:string[]}` است — عکس مستقیم داخلِ
-     همان آلبومِ فعال می‌نشیند. */
-  const addPhotos = async (files: FileList) => {
-    const urls = await Promise.all([...files].map(fl => compressImage(fl, 1000, 0.68)))
-    await edit.apply(d => {
-      const albums = [...(d.albums ?? [])]
-      if (!albums.length) albums.push({ id: `a${Date.now()}`, title: 'گالری', photos: [] })
-      const at = Math.min(albumIdx, albums.length - 1)
-      albums[at] = { ...albums[at]!, photos: [...albums[at]!.photos, ...urls] }
-      return { ...d, albums }
-    })
-  }
-  const addAlbum = async () => {
-    const title = (await askText('آلبوم تازه', { placeholder: 'نام آلبوم' }))?.trim()
-    if (!title) return
-    await edit.apply(d => ({ ...d, albums: [...(d.albums ?? []), { id: `a${Date.now()}`, title, photos: [] }] }))
-  }
-  const deletePhoto = async (i: number) => {
-    if (!(await ask('این تصویر حذف شود؟', { body: 'این کار برگشت‌پذیر نیست.', confirmLabel: 'حذف' }))) return
-    await edit.apply(d => {
-      const albums = [...(d.albums ?? [])]
-      const at = Math.min(albumIdx, albums.length - 1)
-      if (!albums[at]) return d
-      albums[at] = { ...albums[at]!, photos: albums[at]!.photos.filter((_, k) => k !== i) }
-      return { ...d, albums }
-    })
-    closeLb()
+  const { open: openImage, viewer: imageViewer } = useProfileImageViewer()
+  const { open: openVideo, viewer: videoViewer } = useProfileVideoViewer()
+
+  /* ── همان گالریِ بقیه‌ی نقش‌ها ──
+     ⚠️ این صفحه هم گالریِ خودش را داشت: نوارِ آلبوم، ماسونری و
+     لایت‌باکسِ دست‌ساز. حالا کامپوننتِ مشترک رندر می‌کند و این‌جا فقط
+     «چه چیزی ذخیره شود» می‌ماند. */
+  const MAX_VIDEO_MB = 25
+  const [vidBusy, setVidBusy] = useState(false)
+
+  const addImages = async (files: File[], album?: string) => {
+    const items = await Promise.all(files.map(async fl => ({
+      id: `m${Date.now()}${Math.random().toString(36).slice(2, 7)}`,
+      url: await compressImage(fl, 1000, 0.68),
+      caption: '',
+      ...(album ? { album } : {}),
+    })))
+    await edit.apply(d => ({ ...d, gallery: [...(d.gallery ?? []), ...items] }))
   }
 
-  const [albumIdx, setAlbumIdx] = useState(0)
-  const [lightbox, setLightbox] = useState<number | null>(null)
-  const [zoomed, setZoomed]     = useState(false)
-
-  const album  = player?.albums[Math.min(albumIdx, (player?.albums.length ?? 1) - 1)]
-  const photos = album?.photos ?? []
-
-  const closeLb = useCallback(() => { setLightbox(null); setZoomed(false) }, [])
-  const stepLb  = useCallback((d: number) => {
-    setZoomed(false)
-    setLightbox(i => (i === null ? null : (i + d + photos.length) % photos.length))
-  }, [photos.length])
-
-  useEffect(() => {
-    if (lightbox === null) return
-    document.body.style.overflow = 'hidden'
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') closeLb()
-      if (e.key === 'ArrowLeft') stepLb(1)
-      if (e.key === 'ArrowRight') stepLb(-1)
+  const addVideoFiles = async (files: File[], album?: string) => {
+    setVidBusy(true)
+    const skipped: string[] = []
+    try {
+      for (const file of files) {
+        if (file.size > MAX_VIDEO_MB * 1024 * 1024) { skipped.push(file.name); continue }
+        const meta = await videoMeta(file)
+        const vid = `v${Date.now()}${Math.random().toString(36).slice(2, 6)}`
+        const base = `profiles/videos/${ownerId ?? 'anon'}/${vid}`
+        const url = await uploadFile('club-media', file, base)
+        if (!url) { skipped.push(file.name); continue }
+        const thumb = meta.thumb ? (await uploadFile('club-media', meta.thumb, `${base}-thumb`)) ?? '' : ''
+        const ok = await edit.apply(d => ({
+          ...d,
+          videos: [...(d.videos ?? []), { id: vid, url, thumbnail: thumb, title: file.name.replace(/\.[^.]+$/, ''), duration: formatDuration(meta.durationSec), ...(album ? { album } : {}) }],
+        }))
+        if (!ok) break
+      }
+    } finally {
+      setVidBusy(false)
+      if (skipped.length) notify(`این ویدیوها اضافه نشدند (سقف ${MAX_VIDEO_MB} مگابایت): ${skipped.join('، ')}`)
     }
-    window.addEventListener('keydown', onKey)
-    return () => { document.body.style.overflow = ''; window.removeEventListener('keydown', onKey) }
-  }, [lightbox, closeLb, stepLb])
+  }
+
+  const newAlbum = async (name: string) => {
+    const n = name.trim()
+    if (!n) return
+    await edit.apply(d => {
+      const list = d.albums ?? []
+      if (list.some(x => x.trim() === n)) return d
+      return { ...d, albums: [...list, n] }
+    })
+  }
+
+  const deleteImage = async (mid: string) => {
+    if (!(await ask('این تصویر حذف شود؟', { body: 'این کار برگشت‌پذیر نیست.', confirmLabel: 'حذف' }))) return
+    await edit.apply(d => ({ ...d, gallery: (d.gallery ?? []).filter(g => g.id !== mid) }))
+  }
+  const deleteVideo = async (vid: string) => {
+    if (!(await ask('این ویدیو حذف شود؟', { body: 'این کار برگشت‌پذیر نیست.', confirmLabel: 'حذف' }))) return
+    await edit.apply(d => ({ ...d, videos: (d.videos ?? []).filter(v => v.id !== vid) }))
+  }
 
   /* پیوند با اکوسیستم — اخبار و ویدیوهای مرتبط با برچسب‌های بازیکن */
   const relatedNews = useMemo(() => {
@@ -409,55 +421,22 @@ export default function PlayerProfilePage() {
           </section>
         )}
 
-        {/* ═══ گالری ═══ */}
-        {/* ⚠️ شرط `albums.length > 0` تنها یعنی صاحبِ پروفایلی که هنوز
-            هیچ آلبومی ندارد، اصلاً بخشِ گالری را نمی‌بیند — پس هیچ‌وقت
-            نمی‌تواند اولین عکس را اضافه کند. برای مالک همیشه رندر
-            می‌شود. */}
-        {(player.albums.length > 0 || edit.isOwner) && (
+        {/* ═══ گالری — همان کامپوننتِ بقیه‌ی نقش‌ها ═══ */}
+        {(player.gallery.length > 0 || player.videos.length > 0 || edit.isOwner) && (
           <section style={{ marginBottom: 'clamp(30px,4.4vw,48px)' }}>
-            <SectionHead title="گالری" en="GALLERY" />
-            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 14 }}>
-              {player.albums.map((a, i) => (
-                <button key={a.id} onClick={() => setAlbumIdx(i)}
-                  style={{ display: 'inline-flex', alignItems: 'center', gap: 7, padding: '8px 15px', borderRadius: 10, cursor: 'pointer', fontFamily: 'inherit', fontSize: 12.5, fontWeight: 700, transition: 'all .2s', background: i === albumIdx ? 'rgba(199,166,106,0.12)' : '#fff', border: `1px solid ${i === albumIdx ? 'rgba(199,166,106,0.38)' : LINE}`, color: i === albumIdx ? GOLD_D : SEC }}>
-                  <Images size={13} />
-                  {a.title}
-                  <span style={{ fontSize: 10.5, color: MUT }}>{faDigits(a.photos.length)}</span>
-                </button>
-              ))}
-              {/* «+» فقط برای صاحبِ پروفایل — بدونِ رفتن به داشبورد */}
-              {/* ورودیِ فایل پنهان است؛ خودِ «+» یک خانه در شبکه‌ی
-                  عکس‌هاست، نه دکمه‌ای بیرونِ آن. فقط «آلبوم تازه»
-                  این‌جا می‌ماند چون به شبکه‌ی عکس ربطی ندارد. */}
-              {edit.isOwner && (
-                <>
-                  <input ref={fileRef} type="file" accept="image/*" multiple hidden
-                    onChange={e => { if (e.target.files?.length) void addPhotos(e.target.files); e.target.value = '' }} />
-                  <button type="button" disabled={edit.saving} onClick={() => void addAlbum()}
-                    style={{ display: 'inline-flex', alignItems: 'center', gap: 6, minHeight: 38, padding: '0 14px', borderRadius: 10, cursor: 'pointer', fontFamily: 'inherit', fontSize: 12.5, fontWeight: 800, background: '#fff', border: `1px solid ${LINE}`, color: SEC }}>
-                    <Plus size={14} />آلبوم تازه
-                  </button>
-                </>
-              )}
-            </div>
-            {edit.error && <p role="alert" style={{ fontSize: 12, color: '#b91c1c', marginBottom: 10 }}>{edit.error}</p>}
-            <div className="pa-gal">
-              {/* «+» هم‌اندازه‌ی عکس‌ها و همیشه اولِ شبکه */}
-              {edit.isOwner && (
-                <button type="button" className="ch-add-tile" disabled={edit.saving}
-                  onClick={() => fileRef.current?.click()}
-                  aria-label="افزودن تصویر" title="افزودن تصویر"
-                  style={{ aspectRatio: '1', borderRadius: 10, minHeight: 96 }}>
-                  <Plus size={26} />
-                </button>
-              )}
-              {photos.map((src, i) => (
-                <button key={`${album?.id ?? "a"}-${i}`} onClick={() => setLightbox(i)} aria-label={`تصویر ${faDigits(i + 1)}`}>
-                  <img src={src} alt={`${album?.title ?? ""} — ${faDigits(i + 1)}`} loading="lazy" />
-                </button>
-              ))}
-            </div>
+            <ProfileGallery
+              images={player.gallery}
+              videos={player.videos}
+              albumNames={player.albums}
+              onOpenImage={(urls, index, meta, ids) => openImage(urls, {
+                index, ...meta,
+                ...(edit.isOwner ? { onDelete: (i: number) => deleteImage(ids[i] ?? '') } : {}),
+              })}
+              onOpenVideo={v => openVideo(v, edit.isOwner ? { onDelete: () => deleteVideo(v.id) } : undefined)}
+              canEdit={edit.isOwner} busy={edit.saving || vidBusy}
+              onAddImages={addImages} onAddVideos={addVideoFiles} onNewAlbum={newAlbum}
+            />
+            {edit.error && <p role="alert" style={{ fontSize: 12, color: '#b91c1c', margin: '10px 0 0' }}>{edit.error}</p>}
           </section>
         )}
 
@@ -504,51 +483,8 @@ export default function PlayerProfilePage() {
       </div>
 
       {/* ═══ لایت‌باکس ═══ */}
-      {lightbox !== null && photos[lightbox] && typeof document !== 'undefined' && createPortal(
-        <div onClick={closeLb} style={{ position: 'fixed', inset: 0, zIndex: 200, background: 'rgba(12,11,9,0.94)', display: 'flex', alignItems: 'center', justifyContent: 'center', animation: 'paFade .18s ease both' }}>
-          <div style={{ position: 'absolute', top: 0, insetInline: 0, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 18px', color: '#fff', zIndex: 2 }} onClick={e => e.stopPropagation()}>
-            <span style={{ fontSize: 12.5, fontWeight: 700, color: 'rgba(255,255,255,0.85)' }}>
-              {album?.title} — {faDigits(lightbox + 1)} از {faDigits(photos.length)}
-            </span>
-            <div style={{ display: 'flex', gap: 8 }}>
-              <button onClick={() => setZoomed(z => !z)} aria-label="بزرگ‌نمایی"
-                style={{ width: 38, height: 38, borderRadius: 10, border: '1px solid rgba(255,255,255,0.25)', background: 'rgba(255,255,255,0.08)', color: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                {zoomed ? <ZoomOut size={16} /> : <ZoomIn size={16} />}
-              </button>
-              {/* حذف از داخلِ نما — فقط برای صاحبِ پروفایل */}
-              {edit.isOwner && (
-                <button onClick={() => void deletePhoto(lightbox)} aria-label="حذف این مورد" disabled={edit.saving}
-                  style={{ width: 38, height: 38, borderRadius: 10, border: '1px solid rgba(220,38,38,0.35)', background: 'rgba(220,38,38,0.12)', color: '#fca5a5', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <Trash2 size={16} />
-                </button>
-              )}
-              <button onClick={closeLb} aria-label="بستن"
-                style={{ width: 38, height: 38, borderRadius: 10, border: '1px solid rgba(255,255,255,0.25)', background: 'rgba(255,255,255,0.08)', color: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <X size={17} />
-              </button>
-            </div>
-          </div>
-          <div onClick={e => e.stopPropagation()} style={{ maxWidth: '92vw', maxHeight: '84vh', overflow: zoomed ? 'auto' : 'hidden', borderRadius: 14 }}>
-            <img loading="lazy" decoding="async" 
-              src={photos[lightbox]}
-              alt=""
-              onClick={() => setZoomed(z => !z)}
-              style={{ maxWidth: zoomed ? 'none' : '92vw', maxHeight: zoomed ? 'none' : '84vh', width: zoomed ? '160%' : 'auto', display: 'block', margin: 'auto', cursor: zoomed ? 'zoom-out' : 'zoom-in', borderRadius: 12 }}
-            />
-          </div>
-          {photos.length > 1 && (
-            <>
-              <button className="pa-lb-nav" style={{ insetInlineStart: 14 }} onClick={e => { e.stopPropagation(); stepLb(1) }} aria-label="بعدی">
-                <ChevronLeft size={20} />
-              </button>
-              <button className="pa-lb-nav" style={{ insetInlineEnd: 14 }} onClick={e => { e.stopPropagation(); stepLb(-1) }} aria-label="قبلی">
-                <ChevronRight size={20} />
-              </button>
-            </>
-          )}
-        </div>,
-        document.body,
-      )}
+      {imageViewer}
+      {videoViewer}
     </div>
   )
 }
