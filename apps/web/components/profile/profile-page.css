@@ -519,5 +519,3 @@ main.ch-col > section { max-width: 760px; }
 }
 .ch-gal-cell.ch-add-tile:hover:not(:disabled) { border-color: rgba(199, 166, 106, 0.75); }
 
-/* «+» به‌علاوه‌ی آیکونِ نوعِ رسانه، وقتی دو خانه‌ی افزودن کنارِ هم‌اند */
-.ch-add-duo { display: inline-flex; align-items: center; gap: 3px; }

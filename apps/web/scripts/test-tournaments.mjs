@@ -3935,8 +3935,8 @@ console.log('\n― استوری: یک منبع، با انقضا ―');
         src.includes('albums: [...list, n]') && !src.includes('g.album = name') && !src.includes('{ ...g, album: name }'),
         'آلبومِ تازه نباید عکسِ تبِ تصاویر را بدزدد');
       t(`${tag}: رسانه می‌تواند مستقیم داخلِ آلبوم برود`,
-        src.includes('addImages = async (files: FileList, album?: string)')
-        && src.includes('addVideoFiles = async (files: FileList, album?: string)'),
+        src.includes('addImages = async (files: File[], album?: string)')
+        && src.includes('addVideoFiles = async (files: File[], album?: string)'),
         'داخلِ آلبوم راهی برای افزودن نبود');
       t(`${tag}: ویدیو در نمای تمام‌صفحه باز می‌شود`,
         src.includes('useProfileVideoViewer') && src.includes('onOpenVideo='),
@@ -3978,9 +3978,40 @@ console.log('\n― استوری: یک منبع، با انقضا ―');
         src.includes('albums: [] as string[]') && src.includes('albums: mine.albums ?? []'),
         'ذخیره از پنل، آلبومِ خالی را پاک می‌کرد');
     }
-    t('داخلِ آلبومِ باز هم خانه‌ی افزودن هست',
-      gal.includes('pickImages(current.name)') && gal.includes('pickVideo(current.name)'),
-      'کاربر داخلِ آلبوم هیچ راهی برای گذاشتنِ عکس یا ویدیو نداشت');
+    /* ⚠️ اول دو خانه بود (عکس و ویدیو). کاربر گفت یک «+» باید باشد که
+       هر دو را بگیرد؛ تقسیم از روی نوعِ خودِ فایل انجام می‌شود. */
+    t('داخلِ آلبوم یک «+» هست که هر دو نوع را می‌گیرد',
+      gal.includes('pickBoth(current.name)')
+      && gal.includes('accept="image/*,video/*"')
+      && !gal.includes('pickImages(current.name)'),
+      'دو دکمه‌ی جدا برای عکس و ویدیو، هم شلوغ بود هم لازم نبود');
+    t('تقسیمِ فایل‌ها از روی نوعِ فایل است نه پسوند',
+      gal.includes("f.type.startsWith('image/')") && gal.includes("f.type.startsWith('video/')"),
+      'پسوندِ فایلِ گالریِ گوشی قابلِ اعتماد نیست');
+    /* ── چند ذخیره‌ی پشتِ سرِ هم ──
+       ⚠️ `apply` پروفایلِ لحظه‌ی رندر را می‌بست و مسیرِ ذخیره کلِ
+       `data` را جایگزین می‌کند؛ پس ذخیره‌ی دوم، اولی را پاک می‌کرد
+       (سه ویدیو ⟵ فقط آخری می‌ماند، دو فایل یتیم در Storage). */
+    {
+      const oe = strip(read('lib/profiles/use-owner-edit.ts'));
+      t('ذخیره روی آخرین نسخه می‌نشیند، نه نسخه‌ی لحظه‌ی رندر',
+        oe.includes('latest.current = saved') && oe.includes('const base = latest.current ?? profile'),
+        'ذخیره‌ی دوم، نتیجه‌ی اولی را پاک می‌کرد');
+      t('گاردِ هم‌زمانی ref است نه state',
+        oe.includes('busyRef.current') && !oe.includes('|| saving) return false'),
+        'مقدارِ state در بسته‌ی قدیمی همیشه false بود و گارد کار نمی‌کرد');
+    }
+    for (const p of ['app/referees/[id]/page.tsx', 'app/coaches/[id]/page.tsx']) {
+      const src = strip(read(p));
+      t(p.includes('referees') ? 'داور: آپلودِ ناموفق حلقه را می‌بندد' : 'مربی: آپلودِ ناموفق حلقه را می‌بندد',
+        src.includes('if (!ok) break'),
+        'ادامه‌ی آپلود بعد از شکستِ ذخیره فقط فایلِ یتیم می‌سازد');
+    }
+    t('فایلِ بدونِ نوع هم دسته‌بندی می‌شود',
+      /* دو تور لازم است — یکی برای عکس، یکی برای ویدیو. شمارش،
+         چون کامنتِ همین فایل هم نامِ پسوندها را نقل می‌کند. */
+      gal.split(String.raw`.test(f.name)`).length - 1 >= 2,
+      'انتخاب‌گرِ اندروید type خالی می‌دهد و آن فایل‌ها بی‌صدا می‌افتادند');
     /* قابِ نقطه‌چین یک‌بار بی‌صدا گم شد: `.ch-gal-cell` که `border: none`
        دارد هم‌وزن است و دیرتر بارگذاری می‌شود. */
     {

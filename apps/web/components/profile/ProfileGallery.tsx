@@ -27,10 +27,10 @@
    ───────────────────────────────────────────────────────────── */
 
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
-import { Images, Clapperboard, FolderOpen, ArrowRight, Plus, Play, Loader2, Video } from 'lucide-react'
+import { Images, Clapperboard, FolderOpen, ArrowRight, Plus, Play, Loader2 } from 'lucide-react'
 import { useTabKeys } from '@/hooks/use-tab-keys'
 import { toFaDigits } from '@/lib/jalali'
-import { askText } from '@/lib/ui/dialogs'
+import { askText, notify } from '@/lib/ui/dialogs'
 
 export interface GalleryImage { id: string; url: string; caption: string; album?: string }
 export interface GalleryVideo { id: string; url?: string; thumbnail: string; title: string; duration: string; album?: string }
@@ -61,9 +61,9 @@ export default function ProfileGallery({
   canEdit?: boolean
   busy?: boolean
   /** `album` یعنی رسانه مستقیم داخلِ همان آلبوم بنشیند */
-  onAddImages?: (files: FileList, album?: string) => void | Promise<void>
+  onAddImages?: (files: File[], album?: string) => void | Promise<void>
   /* ویدیو هم مثل عکس از گالریِ خودِ کاربر انتخاب می‌شود */
-  onAddVideos?: (files: FileList, album?: string) => void | Promise<void>
+  onAddVideos?: (files: File[], album?: string) => void | Promise<void>
   onNewAlbum?: (name: string) => void | Promise<void>
 }) {
   /* ── آلبوم‌ها: نام‌های اعلام‌شده + هرچه روی رسانه‌ها هست ──
@@ -85,6 +85,9 @@ export default function ProfileGallery({
 
   const [tab, setTab] = useState<Tab>(images.length === 0 && videos.length > 0 ? 'videos' : 'photos')
   const [openAlbum, setOpenAlbum] = useState<string | null>(null)
+  /* فشرده‌سازیِ چند عکس روی موبایلِ ضعیف چند ثانیه است و در آن فاصله
+     `edit.saving` هنوز روشن نشده — خانه‌ی «+» کلیک‌پذیر می‌ماند. */
+  const [working, setWorking] = useState(false)
 
   /* ── چرا تبِ پیش‌فرض یک‌بار حساب‌شدن کافی نیست ──
      صفحه اول از `localStorage` پر می‌شود و پاسخِ سرور یک تیک بعد
@@ -94,6 +97,7 @@ export default function ProfileGallery({
      انتخابِ او دیگر چیزی زیرِ دستش عوض نمی‌شود. */
   const fileRef = useRef<HTMLInputElement>(null)
   const vidRef = useRef<HTMLInputElement>(null)
+  const bothRef = useRef<HTMLInputElement>(null)
   /* آلبومِ مقصدِ انتخابِ فایلِ در جریان. `ref` است نه state: بینِ
      کلیک و بازگشتِ پنجره‌ی فایل هیچ رندری لازم نیست و state این‌جا
      فقط یک رندرِ اضافه بود. */
@@ -152,13 +156,37 @@ export default function ProfileGallery({
      را `aria-label` می‌دهد. */
   const addTile = (label: string, onClick: () => void, icon?: React.ReactNode, cls = 'ch-gal-cell') => (
     <button type="button" className={`${cls} ch-add-tile`} onClick={onClick}
-      disabled={busy} aria-label={label} title={label}>
-      {busy ? <Loader2 size={22} className="ch-spin" aria-hidden /> : (icon ?? <Plus size={26} aria-hidden />)}
+      disabled={busy || working} aria-label={label} title={label}>
+      {busy || working ? <Loader2 size={22} className="ch-spin" aria-hidden /> : (icon ?? <Plus size={26} aria-hidden />)}
     </button>
   )
 
   const pickImages = (album?: string) => { target.current = album; fileRef.current?.click() }
   const pickVideo = (album?: string) => { target.current = album; vidRef.current?.click() }
+  const pickBoth = (album?: string) => { target.current = album; bothRef.current?.click() }
+
+  /* ── تقسیمِ انتخابِ ترکیبی ──
+     اول `type` که مرورگر می‌دهد؛ ولی بعضی انتخاب‌گرهای اندروید (و
+     فایل‌های .mov/.heic) `type` خالی می‌دهند و آن فایل‌ها بی‌صدا
+     می‌افتادند — پس پسوند تورِ دوم است، نه اول. */
+  const isImg = (f: File) => f.type.startsWith('image/') || /.(jpe?g|png|gif|webp|heic|heif|bmp)$/i.test(f.name)
+  const isVid = (f: File) => f.type.startsWith('video/') || /.(mp4|mov|m4v|webm|mkv|3gp)$/i.test(f.name)
+
+  const addMixed = async (files: File[], album?: string) => {
+    const imgs = files.filter(isImg)
+    const vids = files.filter(f => !isImg(f) && isVid(f))
+    const rest = files.filter(f => !isImg(f) && !isVid(f))
+    setWorking(true)
+    try {
+      if (imgs.length) await onAddImages?.(imgs, album)
+      if (vids.length) await onAddVideos?.(vids, album)
+      if (rest.length) notify(`این فایل‌ها نه عکس بودند نه ویدیو: ${rest.map(f => f.name).join('، ')}`)
+    } catch {
+      /* بدونِ این، یک فایلِ خرابِ عکس همه‌ی ویدیوهای همان انتخاب را
+         هم می‌انداخت و کاربر هیچ پیامی نمی‌دید. */
+      notify('افزودن رسانه انجام نشد؛ دوباره تلاش کنید')
+    } finally { setWorking(false) }
+  }
 
   const askAlbumName = async () => {
     const name = (await askText('آلبوم تازه', { placeholder: 'نام آلبوم' }))?.trim()
@@ -193,11 +221,17 @@ export default function ProfileGallery({
       {canEdit && (
         <>
           <input ref={fileRef} type="file" accept="image/*" multiple hidden
-            onChange={e => { if (e.target.files?.length) void onAddImages?.(e.target.files, target.current); e.target.value = '' }} />
+            onChange={e => { const f = [...(e.target.files ?? [])]; e.target.value = ''; if (f.length) void addMixed(f, target.current) }} />
           {/* ⚠️ ویدیو هم فایل است، نه نشانیِ آپارات/یوتیوب. نسخه‌ی اول
               نشانی می‌پرسید که اصلاً کارِ این دکمه نبود. */}
-          <input ref={vidRef} type="file" accept="video/*" hidden
-            onChange={e => { if (e.target.files?.length) void onAddVideos?.(e.target.files, target.current); e.target.value = '' }} />
+          <input ref={vidRef} type="file" accept="video/*" multiple hidden
+            onChange={e => { const f = [...(e.target.files ?? [])]; e.target.value = ''; if (f.length) void addMixed(f, target.current) }} />
+          {/* ── داخلِ آلبوم یک «+» بس است ──
+              ⚠️ اول دو خانه گذاشته شد (عکس و ویدیو) و کاربر درست گفت
+              که جالب نیست. یک ورودی هر دو را می‌گیرد و بر اساسِ نوعِ
+              خودِ فایل تقسیم می‌شود. */}
+          <input ref={bothRef} type="file" accept="image/*,video/*" multiple hidden
+            onChange={e => { const f = [...(e.target.files ?? [])]; e.target.value = ''; if (f.length) void addMixed(f, target.current) }} />
         </>
       )}
 
@@ -240,15 +274,10 @@ export default function ProfileGallery({
               <h3>{current.name}</h3>
             </div>
             {/* داخلِ آلبوم هم همان شبکه‌ی مربع — یک اندازه در همه‌جا.
-                دو خانه‌ی «+»: عکس و ویدیو، چون هر دو داخلِ آلبوم
-                معنا دارند و آیکونشان می‌گوید کدام است. */}
+                ⚠️ اول دو خانه بود (یکی عکس، یکی ویدیو). کاربر گفت باید
+                یک «+» باشد که هر دو را بگیرد؛ درست هم هست. */}
             <div className="ch-gal-grid">
-              {/* دو خانه‌ی «+» کنارِ هم‌اند، پس هرکدام آیکونِ نوعِ خودش
-                  را هم دارد — وگرنه دو مربعِ یکسان می‌شد. */}
-              {canEdit && addTile('افزودن تصویر به این آلبوم', () => pickImages(current.name),
-                <span className="ch-add-duo" aria-hidden><Plus size={15} /><Images size={20} /></span>)}
-              {canEdit && addTile('افزودن ویدیو به این آلبوم', () => pickVideo(current.name),
-                <span className="ch-add-duo" aria-hidden><Plus size={15} /><Video size={20} /></span>)}
+              {canEdit && addTile('افزودن تصویر یا ویدیو به این آلبوم', () => pickBoth(current.name))}
               {current.images.map((g, i) => cell(g, current.images, i))}
               {current.videos.map(v => videoCell(v))}
             </div>

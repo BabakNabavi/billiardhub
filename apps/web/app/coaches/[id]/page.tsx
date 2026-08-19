@@ -248,8 +248,8 @@ export default function CoachProfilePage() {
 
   const latin = localP ? `${localP.firstNameEn} ${localP.lastNameEn}`.trim().toUpperCase() : ''
 
-  const addImages = async (files: FileList, album?: string) => {
-    const items = await Promise.all([...files].map(async fl => ({
+  const addImages = async (files: File[], album?: string) => {
+    const items = await Promise.all(files.map(async fl => ({
       id: `m${Date.now()}${Math.random().toString(36).slice(2, 7)}`,
       url: await compressImage(fl, 1000, 0.68),
       caption: '',
@@ -264,25 +264,33 @@ export default function CoachProfilePage() {
      همان مسیرِ آپلودی می‌رود که پنل استفاده می‌کند
      (`profiles/videos/<userId>/…` در Storage، نه data:URL داخلِ jsonb
      که ردیف را می‌ترکاند). */
-  const addVideoFiles = async (files: FileList, album?: string) => {
-    const file = files[0]
-    if (!file) return
-    if (file.size > MAX_VIDEO_MB * 1024 * 1024) {
-      notify(`حجم ویدیو نباید بیش از ${MAX_VIDEO_MB} مگابایت باشد`); return
-    }
+  const addVideoFiles = async (files: File[], album?: string) => {
+    /* ورودیِ ترکیبیِ داخلِ آلبوم می‌تواند چند ویدیو بدهد؛ یکی‌یکی و
+       ترتیبی بالا می‌روند تا هر کدام روی نسخه‌ی تازه‌ی پروفایل بنشیند. */
     setVidBusy(true)
+    /* پیام‌ها ته کار یک‌جا داده می‌شوند: `notify` یک نوار است و
+       فراخوانیِ پشتِ هم فقط آخری را نشان می‌دهد. */
+    const skipped: string[] = []
     try {
-      const meta = await videoMeta(file)
-      const vid = `v${Date.now()}${Math.random().toString(36).slice(2, 6)}`
-      const base = `profiles/videos/${ownerId ?? 'anon'}/${vid}`
-      const url = await uploadFile('club-media', file, base)
-      if (!url) { notify('ویدیو بالا نرفت؛ دوباره تلاش کنید'); return }
-      const thumb = meta.thumb ? (await uploadFile('club-media', meta.thumb, `${base}-thumb`)) ?? '' : ''
-      await edit.apply(d => ({
-        ...d,
-        videos: [...d.videos, { id: vid, url, thumbnail: thumb, title: file.name.replace(/.[^.]+$/, ''), duration: formatDuration(meta.durationSec), ...(album ? { album } : {}) }],
-      }))
-    } finally { setVidBusy(false) }
+      for (const file of files) {
+        if (file.size > MAX_VIDEO_MB * 1024 * 1024) { skipped.push(file.name); continue }
+        const meta = await videoMeta(file)
+        const vid = `v${Date.now()}${Math.random().toString(36).slice(2, 6)}`
+        const base = `profiles/videos/${ownerId ?? 'anon'}/${vid}`
+        const url = await uploadFile('club-media', file, base)
+        if (!url) { skipped.push(file.name); continue }
+        const thumb = meta.thumb ? (await uploadFile('club-media', meta.thumb, `${base}-thumb`)) ?? '' : ''
+        const ok = await edit.apply(d => ({
+          ...d,
+          videos: [...d.videos, { id: vid, url, thumbnail: thumb, title: file.name.replace(/.[^.]+$/, ''), duration: formatDuration(meta.durationSec), ...(album ? { album } : {}) }],
+        }))
+        /* ذخیره که شکست خورد، ادامه‌ی آپلود فقط فایلِ یتیم می‌سازد */
+        if (!ok) break
+      }
+    } finally {
+      setVidBusy(false)
+      if (skipped.length) notify(`این ویدیوها اضافه نشدند (سقف ${MAX_VIDEO_MB} مگابایت): ${skipped.join('، ')}`)
+    }
   }
   /* ⚠️ نسخه‌ی قبلی نامِ آلبوم را روی «آخرین عکسِ بدونِ آلبوم»
      می‌نشاند، چون آلبوم فقط از روی رسانه‌ها ساخته می‌شد و آلبومِ خالی

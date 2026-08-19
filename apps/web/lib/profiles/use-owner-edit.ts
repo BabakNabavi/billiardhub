@@ -164,10 +164,28 @@ export function useOwnerEdit<T>(
 
   const isOwner = serverSaysMine === true || localSaysMine || probeSaysMine === true
 
+  /* ── چرا `ref` و نه خودِ prop ──
+     ⚠️ چند ذخیره‌ی پشتِ سرِ هم (مثلاً سه ویدیو در یک انتخاب، یا یک
+     انتخابِ ترکیبیِ عکس+ویدیو) همگی همین یک `apply` را صدا می‌زنند و
+     آن، پروفایلِ لحظه‌ی *رندر* را می‌بندد. مسیرِ ذخیره کلِ `data` را
+     جایگزین می‌کند، پس ذخیره‌ی دوم روی نسخه‌ای می‌نشست که ذخیره‌ی اول
+     را ندیده بود: عکس‌ها بالا می‌رفتند و ذخیره‌ی بعدی پاکشان می‌کرد و
+     فایلشان در Storage یتیم می‌ماند.
+
+     `latest` همیشه آخرین نسخه‌ی تأییدشده را دارد و بلافاصله بعد از هر
+     ذخیره‌ی موفق به‌روز می‌شود — نه یک رندر بعد. `busy` هم به همین
+     دلیل `ref` است: مقدارِ state در بسته‌ی قدیمی همیشه `false` بود و
+     گاردِ هم‌زمانی عملاً کار نمی‌کرد. */
+  const latest = useRef<T | null>(profile)
+  const busyRef = useRef(false)
+  useEffect(() => { latest.current = profile }, [profile])
+
   const apply = useCallback(async (mutate: (draft: T) => T) => {
-    if (!profile || !isOwner || saving) return false
+    const base = latest.current ?? profile
+    if (!base || !isOwner || busyRef.current) return false
+    busyRef.current = true
     setSaving(true); setError('')
-    const next = mutate(profile)
+    const next = mutate(base)
     try {
       const res = await saveProfileRemote(kind, slug, next as unknown as Record<string, unknown>)
       if (!res.ok) { setError(res.message ?? 'ذخیره روی سرور انجام نشد'); return false }
@@ -184,15 +202,18 @@ export function useOwnerEdit<T>(
 
       /* پاسخِ سرور نشانیِ Storage را جای data:URL گذاشته — همان را
          می‌نشانیم، وگرنه صفحه تا بازخوانیِ بعدی base64 نگه می‌دارد. */
-      onSaved((res.profile?.data as T) ?? next)
+      const saved = (res.profile?.data as T) ?? next
+      latest.current = saved
+      onSaved(saved)
       return true
     } catch {
       setError('ارتباط با سرور برقرار نشد')
       return false
     } finally {
+      busyRef.current = false
       setSaving(false)
     }
-  }, [profile, isOwner, saving, kind, slug, onSaved, ownerId])
+  }, [profile, isOwner, kind, slug, onSaved, ownerId])
 
   return { isOwner, saving, error, apply }
 }
