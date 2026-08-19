@@ -16,7 +16,7 @@ import CoverageCitySelect from '../../../components/CoverageCitySelect'
 import ProfileSlugField from '../../../components/ProfileSlugField'
 import ClubPicker from '../../../components/ClubPicker'
 import { compressImage } from '../../../lib/seller-store'
-import { TECH_SERVICES, type TechService, type TechProject, type TechAlbum } from '../../../lib/technicians-data'
+import { TECH_SERVICES, normalizeTechMedia, type TechService, type TechProject } from '../../../lib/technicians-data'
 import {
   emptyTechnicianProfile, findTechnicianByOwner, newTechnicianSlug,
   saveTechnicianProfile, type TechnicianProfile,
@@ -51,7 +51,8 @@ export default function TechnicianDashboard() {
   const photoRef  = useRef<HTMLInputElement>(null)
   /* آلبوم جدید */
   const [albTitle, setAlbTitle] = useState('')
-  const [albDesc, setAlbDesc]   = useState('')
+  /* ورودیِ عکس به‌ازای هر آلبوم — کلید نامِ آلبوم است، چون آلبوم دیگر
+     شناسه ندارد و خودِ نام هویتش است (همان مدلِ مربی و داور). */
   const albImgRefs = useRef<Record<string, HTMLInputElement | null>>({})
 
   const isTechnician = !!user && [user.primaryRole, ...(user.secondaryRoles ?? [])].includes('technician')
@@ -85,7 +86,11 @@ export default function TechnicianDashboard() {
           return
         }
         setSavedSlug(remote.slug)
-        const merged = { ...base, ...remote.data, slug: remote.slug }
+        /* ⚠️ ردیفِ سرور می‌تواند هنوز آلبومِ شیئیِ پیش از مهاجرت داشته
+           باشد. بدونِ این تبدیل، پنل روی `x.trim` می‌شکند و — بدتر —
+           اولین ذخیره همان شکل را با شکلِ تازه جایگزین می‌کرد و
+           عکس‌های داخلِ آلبوم‌ها از بین می‌رفت. */
+        const merged = { ...base, ...remote.data, ...normalizeTechMedia(remote.data), slug: remote.slug }
         setForm(merged)
         setAboutText((merged.about ?? []).join('\n\n'))
       })()
@@ -120,23 +125,38 @@ export default function TechnicianDashboard() {
     setPrj({ title: '', desc: '', city: '', club: '', service: '', image: '' })
   }
 
-  /* ── آلبوم‌ها ── */
+  /* ── آلبوم‌ها ──
+     ⚠️ مدل عوض شد و با آن این بخش هم: آلبوم دیگر شیئی با عکس‌های
+     داخلش نیست. نام‌ها در `albums` و خودِ عکس در `gallery` با برچسبِ
+     نامِ آلبوم می‌نشیند — همان چیزی که صفحه‌ی عمومی رندر می‌کند. با دو
+     مدلِ جدا، عکسی که از صفحه‌ی عمومی اضافه می‌شد در پنل دیده نمی‌شد. */
   const addAlbum = () => {
-    if (!albTitle.trim()) { setErr('نام آلبوم لازم است.'); return }
-    const a: TechAlbum = { id: rid(), title: albTitle.trim(), desc: albDesc.trim(), photos: [] }
-    set('albums', [...form.albums, a]); setAlbTitle(''); setAlbDesc('')
+    const n = albTitle.trim()
+    if (!n) { setErr('نام آلبوم لازم است.'); return }
+    if (form.albums.some(x => x.trim() === n)) { setErr('آلبومی با همین نام هست.'); return }
+    set('albums', [...form.albums, n]); setAlbTitle('')
   }
-  const addAlbumPhotos = async (albumId: string, files: FileList | null) => {
+  const addAlbumPhotos = async (album: string, files: FileList | null) => {
     if (!files?.length) return
     setBusy(true)
     try {
-      const urls = await Promise.all(Array.from(files).slice(0, 8).map(f => compressImage(f, 1200, 0.68)))
-      set('albums', form.albums.map(a => a.id === albumId ? { ...a, photos: [...a.photos, ...urls] } : a))
+      const items = await Promise.all(Array.from(files).slice(0, 8).map(async f => ({
+        id: `m${Date.now()}${Math.random().toString(36).slice(2, 7)}`,
+        url: await compressImage(f, 1200, 0.68),
+        caption: '',
+        ...(album ? { album } : {}),
+      })))
+      set('gallery', [...form.gallery, ...items])
     } catch { setErr('آپلود نشد. دوباره تلاش کنید.') }
     finally { setBusy(false) }
   }
-  const removeAlbumPhoto = (albumId: string, idx: number) =>
-    set('albums', form.albums.map(a => a.id === albumId ? { ...a, photos: a.photos.filter((_, i) => i !== idx) } : a))
+  const removeGalleryItem = (id: string) => set('gallery', form.gallery.filter(g => g.id !== id))
+  /* حذفِ آلبوم فقط برچسب را برمی‌دارد؛ عکس در گالری می‌ماند. پاک‌کردنِ
+     خودکارِ عکس‌ها با یک کلیک، حذفِ برگشت‌ناپذیرِ چند فایل است. */
+  const removeAlbum = (name: string) => {
+    set('albums', form.albums.filter(x => x !== name))
+    set('gallery', form.gallery.map(g => (g.album === name ? { ...g, album: undefined } : g)))
+  }
 
   /* ── ذخیره = انتشار ── */
   const submit = async (e: React.FormEvent) => {
@@ -359,40 +379,55 @@ export default function TechnicianDashboard() {
             <h2 className="mb-1 text-[14.5px] font-bold">گالری تصاویر — آلبوم‌ها</h2>
             <p className="mb-4 text-[12px] text-[#6F6A5C]">آلبوم بسازید و عکس‌های هر آلبوم را اضافه کنید.</p>
 
-            {form.albums.map(a => (
-              <div key={a.id} className="mb-3 rounded-xl border border-[#EFEBE1] bg-[#FAFAF7] p-3">
-                <div className="mb-2 flex items-center justify-between gap-2">
-                  <div>
-                    <div className="text-[13px] font-bold">{a.title}</div>
-                    {a.desc && <div className="text-[11px] text-[#6F6A5C]">{a.desc}</div>}
+            {form.albums.map(name => {
+              const photos = form.gallery.filter(g => (g.album ?? '') === name)
+              return (
+                <div key={name} className="mb-3 rounded-xl border border-[#EFEBE1] bg-[#FAFAF7] p-3">
+                  <div className="mb-2 flex items-center justify-between gap-2">
+                    <div className="text-[13px] font-bold">{name}</div>
+                    <div className="flex items-center gap-2">
+                      <input ref={el => { albImgRefs.current[name] = el }} type="file" accept="image/*" multiple className="hidden"
+                        onChange={e => { void addAlbumPhotos(name, e.target.files); e.target.value = '' }} />
+                      <button type="button" onClick={() => albImgRefs.current[name]?.click()} className={LQ_BTN} disabled={busy}>
+                        <Plus size={13} /> عکس
+                      </button>
+                      <button type="button" onClick={() => removeAlbum(name)} aria-label={`حذف آلبوم ${name}`}
+                        className="rounded-lg p-2 text-[#B23B2E] transition hover:bg-[rgba(178,59,46,0.08)]"><Trash2 size={15} /></button>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <input ref={el => { albImgRefs.current[a.id] = el }} type="file" accept="image/*" multiple className="hidden"
-                      onChange={e => { addAlbumPhotos(a.id, e.target.files); e.target.value = '' }} />
-                    <button type="button" onClick={() => albImgRefs.current[a.id]?.click()} className={LQ_BTN} disabled={busy}>
-                      <Plus size={13} /> عکس
-                    </button>
-                    <button type="button" onClick={() => set('albums', form.albums.filter(x => x.id !== a.id))}
-                      className="rounded-lg p-2 text-[#B23B2E] transition hover:bg-[rgba(178,59,46,0.08)]"><Trash2 size={15} /></button>
-                  </div>
+                  {photos.length > 0 ? (
+                    <div className="flex flex-wrap gap-2">
+                      {photos.map(g => (
+                        <span key={g.id} className="relative">
+                          <img loading="lazy" decoding="async" src={g.url} alt="" className="h-16 w-24 rounded-lg border border-[#E7E2D6] object-cover" />
+                          <button type="button" onClick={() => removeGalleryItem(g.id)} aria-label="حذف تصویر"
+                            className="absolute -left-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-[#B23B2E] text-[11px] text-white">×</button>
+                        </span>
+                      ))}
+                    </div>
+                  ) : <p className="text-[11.5px] text-[#A69F8E]">هنوز عکسی ندارد.</p>}
                 </div>
-                {a.photos.length > 0 ? (
-                  <div className="flex flex-wrap gap-2">
-                    {a.photos.map((ph, i) => (
-                      <span key={i} className="relative">
-                        <img loading="lazy" decoding="async" src={ph} alt="" className="h-16 w-24 rounded-lg border border-[#E7E2D6] object-cover" />
-                        <button type="button" onClick={() => removeAlbumPhoto(a.id, i)}
-                          className="absolute -left-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-[#B23B2E] text-[11px] text-white">×</button>
-                      </span>
-                    ))}
-                  </div>
-                ) : <p className="text-[11.5px] text-[#A69F8E]">هنوز عکسی ندارد.</p>}
+              )
+            })}
+
+            {/* عکس‌های بدونِ آلبوم — در صفحه‌ی عمومی تبِ «تصاویر» هستند */}
+            {form.gallery.some(g => !(g.album ?? '').trim()) && (
+              <div className="mb-3 rounded-xl border border-[#EFEBE1] bg-[#FAFAF7] p-3">
+                <div className="mb-2 text-[13px] font-bold">بدون آلبوم</div>
+                <div className="flex flex-wrap gap-2">
+                  {form.gallery.filter(g => !(g.album ?? '').trim()).map(g => (
+                    <span key={g.id} className="relative">
+                      <img loading="lazy" decoding="async" src={g.url} alt="" className="h-16 w-24 rounded-lg border border-[#E7E2D6] object-cover" />
+                      <button type="button" onClick={() => removeGalleryItem(g.id)} aria-label="حذف تصویر"
+                        className="absolute -left-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-[#B23B2E] text-[11px] text-white">×</button>
+                    </span>
+                  ))}
+                </div>
               </div>
-            ))}
+            )}
 
             <div className="flex flex-col gap-2 rounded-xl border border-dashed border-[#D8D2C4] p-4 sm:flex-row">
               <input className={INPUT} value={albTitle} onChange={e => setAlbTitle(e.target.value)} placeholder="نام آلبوم — مثال: پروژه‌های کرمان" />
-              <input className={INPUT} value={albDesc} onChange={e => setAlbDesc(e.target.value)} placeholder="توضیح کوتاه (اختیاری نمایش داده می‌شود)" />
               <button type="button" onClick={addAlbum} className={`${LQ_BTN} shrink-0`}><Plus size={14} /> ساخت آلبوم</button>
             </div>
           </section>

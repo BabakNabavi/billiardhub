@@ -3987,6 +3987,9 @@ console.log('\n― استوری: یک منبع، با انقضا ―');
       const fnStart = albSrc.indexOf('export function cleanAlbums');
       const fnSrc = albSrc.slice(fnStart, albSrc.indexOf('export', fnStart + 10))
         .replace('export function', 'function')
+        /* حاشیه‌های نوع، از خاص به عام — وگرنه `{ title?: unknown }`
+           نصفه پاک می‌شود و بقیه‌اش سینتکسِ نامعتبر می‌ماند. */
+        .replace(/ as {[^}]*}/g, '')
         .replace(/ALBUM_NAME_MAX/g, '60')
         .replace(/: unknown|: string\[\]|<string>/g, '');
       const cleanAlbums = new Function('return ' + fnSrc)();
@@ -4002,9 +4005,15 @@ console.log('\n― استوری: یک منبع، با انقضا ―');
       t('مسیرِ پروفایلِ نمایشی هم از همان مرز رد می‌شود',
         (srv.split('sanitizeProfileData(').length - 1) >= 3,
         'نصفِ مرز، مرز نیست');
-      t('آلبومِ بازیکن و خدماتِ فنی از این پاک‌سازی رد نمی‌شود',
-        srv.includes('NAMED_ALBUM_KINDS.includes(kind'),
-        'آلبومِ آن دو نقش آرایه‌ای از شیء است و کاملاً پاک می‌شد');
+      /* بازیکن هنوز آلبومِ شیئی دارد؛ خدمات فنی مهاجرت کرد و حالا
+         باید *داخلِ* فهرستِ نام‌ها باشد. هر دو سمت سنجیده می‌شود. */
+      t('آلبومِ بازیکن از این پاک‌سازی رد نمی‌شود',
+        srv.includes('NAMED_ALBUM_KINDS.includes(kind')
+        && !read('lib/profiles/albums.ts').includes("'player'"),
+        'آلبومِ بازیکن آرایه‌ای از شیء است و کاملاً پاک می‌شد');
+      t('خدمات فنی هم از مرزِ نامِ آلبوم رد می‌شود',
+        read('lib/profiles/albums.ts').includes("'technician'"),
+        'بعد از مهاجرت، آلبومِ متخصص هم فهرستِ نام است و باید پاک‌سازی شود');
       t('عضوِ خرابِ گالری حذف می‌شود نه رد',
         srv.includes("typeof m === 'object' && !Array.isArray(m)"),
         'یک null داخلِ gallery همان صفحه‌ی سفید را می‌سازد');
@@ -4228,7 +4237,6 @@ console.log('\n― استوری: یک منبع، با انقضا ―');
     for (const [p, tag] of [
       ['components/profile/ProfileGallery.tsx', 'مربی/داور'],
       ['app/players/[id]/page.tsx', 'بازیکن'],
-      ['app/services/[id]/page.tsx', 'خدمات فنی'],
       ['app/sellers/[id]/FlatShop.tsx', 'فروشگاه'],
       ['app/manufacturers/[id]/page.tsx', 'تولیدکننده'],
       ['app/clubs/[id]/page.tsx', 'باشگاه'],
@@ -4237,6 +4245,62 @@ console.log('\n― استوری: یک منبع، با انقضا ―');
       t(`«+» در ${tag} خانه‌ی شبکه است`,
         src.includes('ch-add-tile') && !src.includes('ch-gal-add'),
         'دکمه‌ی متنیِ بیرونِ شبکه، همان چیزی بود که کاربر رد کرد');
+    }
+
+    /* هر سه دری که به این مدل باز می‌شود باید از مبدل رد شود: نمای
+       عمومی، نگاشتِ کش، و پرکردنِ پنل از ردیفِ سرور. یکی که جا بماند،
+       همان ردیفِ قدیمی جایی می‌شکند یا با اولین ذخیره پاک می‌شود. */
+    t('خدمات فنی: هر سه مسیرِ خواندن از مبدل رد می‌شوند',
+      strip(read('lib/technician-store.ts')).includes('const media = normalizeTechMedia(p)')
+      && strip(read('app/dashboard/technician/page.tsx')).includes('normalizeTechMedia(remote.data)'),
+      'ردیفِ پیش از مهاجرت یا صفحه را می‌شکند یا با اولین ذخیره خالی می‌شود');
+    t('پنلِ خدمات فنی همان شکلی را می‌نویسد که می‌خواند',
+      strip(read('app/dashboard/technician/page.tsx')).includes("set('gallery', [...form.gallery, ...items])")
+      && !strip(read('app/dashboard/technician/page.tsx')).includes('photos: [...a.photos'),
+      'با دو مدلِ جدا، عکسِ اضافه‌شده از صفحه‌ی عمومی در پنل دیده نمی‌شد');
+
+    /* ── مهاجرتِ مدلِ آلبومِ خدمات فنی ──
+       ردیفِ قدیمی آلبوم را شیئی نگه می‌داشت. اگر مبدل نباشد، صفحه‌ی
+       تازه هیچ عکسی نمی‌بیند و بدتر: اولین ذخیره همان شکل را دور
+       می‌ریزد. ادعا رفتاری است، نه رشته‌ای — و بدونِ رجکس، چون
+       گریزها تا رسیدن به این فایل چند لایه رد می‌شوند. */
+    {
+      const td = read('lib/technicians-data.ts');
+      const raw = td.slice(td.indexOf('export function normalizeTechMedia'));
+      /* بدنه از اولین دستورش برداشته می‌شود: امضا چندخطی است و
+         بستنِ آکولادش با indexOf ساده پیدا نمی‌شود. این تابع آخرین
+         چیزِ فایل است، پس تا انتها همان بدنه است. */
+      const code = 'function normalizeTechMedia(d) {' + raw.slice(raw.indexOf('const gallery'))
+        .split('(g): g is TechMedia =>').join('(g) =>')
+        .split('(v): v is TechVideo =>').join('(v) =>')
+        .split(' as TechMedia').join('')
+        .split(' as TechVideo').join('')
+        .split(' as unknown[]').join('')
+        .split(' as TechAlbumLegacy').join('')
+        .split(': TechMedia[]').join('')
+        .split(': TechVideo[]').join('')
+        .split(': string[]').join('');
+      const normalize = new Function(code + '; return normalizeTechMedia')();
+      const out = normalize({ albums: [{ id: 'a', title: 'کارها', photos: ['u1', 'u2'] }] });
+      t('آلبومِ قدیمیِ خدمات فنی با عکس‌هایش منتقل می‌شود',
+        JSON.stringify(out.albums) === JSON.stringify(['کارها'])
+        && out.gallery.length === 2 && out.gallery.every(g => g.album === 'کارها'),
+        'عکس‌های ردیفِ قدیمی با اولین ذخیره از بین می‌رفتند');
+      const keep = normalize({ albums: ['x'], gallery: [{ id: 'g', url: 'u', caption: '' }] });
+      t('مبدل رسانه‌ی موجود را دست‌نخورده می‌گذارد',
+        keep.gallery.length === 1 && keep.albums.includes('x'),
+        'مبدل نباید داده‌ی مدلِ تازه را دوباره بسازد');
+    }
+
+
+    /* خدمات فنی دیگر گالریِ خودش را ندارد: همان کامپوننتِ مشترک را
+       رندر می‌کند، پس ادعا هم همان را می‌سنجد نه کلاسِ خام. */
+    {
+      const svc = strip(read('app/services/[id]/page.tsx'));
+      t('خدمات فنی همان گالریِ مشترک را رندر می‌کند',
+        svc.includes('<ProfileGallery') && svc.includes('useProfileVideoViewer')
+        && !svc.includes('tp-gal'),
+        'دو پیاده‌سازی برای یک گالری، همان دوباره‌کاریِ همیشگی است');
     }
 
     t('اندازه‌ی خانه‌ی «+» به کلاسِ صفحه‌ی پروفایل بند نیست',

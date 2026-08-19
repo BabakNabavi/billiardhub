@@ -12,8 +12,8 @@
    `trim()` می‌زند، پس یک مقدارِ غیرِرشته صفحه‌ی داور/مربی را برای
    *همه‌ی* بازدیدکننده‌ها سفید می‌کرد.
 
-   ⚠️ فقط برای مربی و داور. «آلبوم» در پروفایلِ بازیکن و خدماتِ فنی
-   شکلِ دیگری دارد (`{id, title, photos[]}`) و اگر این تابع رویشان
+   ⚠️ فقط برای نقش‌هایی که آلبومشان «فهرستِ نام» است. آلبومِ بازیکن
+   هنوز شکلِ دیگری دارد (`{id, title, photos[]}`) و اگر این تابع رویشان
    اجرا شود، *همه‌ی آلبوم‌ها و عکس‌هایشان را پاک می‌کند*. نگهبانِ
    نوعِ پروفایل در `saveProfile` است.
    ───────────────────────────────────────────────────────────── */
@@ -23,17 +23,27 @@
    سقف فقط آلبومِ خالی را می‌انداخت و نیمه‌کاره می‌ماند. */
 export const ALBUM_NAME_MAX = 60
 
-/** فقط رشته‌های واقعی، بدونِ تکرار — هرچه غیرِ این باشد می‌افتد. */
+/** رشته‌های واقعی، بدونِ تکرار — و نامِ آلبومِ ردیف‌های قدیمی.
+ *
+ *  ⚠️ «هرچه رشته نیست می‌افتد» برای متخصصِ فنی خطرناک بود: آلبومش
+ *  پیش از مهاجرت یک شیء با عنوان و عکس‌ها بود و انداختنش یعنی نامِ
+ *  آلبوم گم شود. عکس‌ها را مبدلِ سمتِ خواندن نجات می‌دهد
+ *  (normalizeTechMedia)؛ این‌جا هم دستِ‌کم عنوان برداشته می‌شود تا
+ *  ذخیره‌ای که از مسیرِ دیگری بیاید آلبوم را بی‌نام نکند. */
 export function cleanAlbums(v: unknown): string[] {
   if (!Array.isArray(v)) return []
   const seen = new Set<string>()
   for (const x of v) {
-    if (typeof x !== 'string') continue
-    const n = x.trim().slice(0, ALBUM_NAME_MAX)
+    const raw = typeof x === 'string'
+      ? x
+      : (x && typeof x === 'object' && typeof (x as { title?: unknown }).title === 'string'
+        ? (x as { title: string }).title
+        : '')
+    const n = raw.trim().slice(0, ALBUM_NAME_MAX)
     if (n) seen.add(n)
   }
   return [...seen]
 }
 
 /** نوعِ پروفایل‌هایی که آلبومشان فهرستِ نام است، نه شیء */
-export const NAMED_ALBUM_KINDS = ['coach', 'referee'] as const
+export const NAMED_ALBUM_KINDS = ['coach', 'referee', 'technician'] as const

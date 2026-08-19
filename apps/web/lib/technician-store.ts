@@ -5,7 +5,7 @@
    seller/coach/referee. ذخیره = انتشار (approved).
    ───────────────────────────────────────────────────────────── */
 import { provinceOfCity } from './iran-geo'
-import type { Technician, TechProject, TechAlbum, TechService } from './technicians-data'
+import { normalizeTechMedia, type Technician, type TechProject, type TechMedia, type TechVideo, type TechService } from './technicians-data'
 
 export interface TechnicianProfile {
   slug: string
@@ -22,7 +22,10 @@ export interface TechnicianProfile {
   about: string[]
   services: TechService[]
   projects: TechProject[]
-  albums: TechAlbum[]
+  /* همان مدلِ مربی و داور: نامِ آلبوم‌ها این‌جا، عضویت روی رسانه */
+  albums: string[]
+  gallery: TechMedia[]
+  videos: TechVideo[]
   phone: string
   whatsapp: string
   status: 'approved' | 'rejected'
@@ -39,13 +42,16 @@ export function emptyTechnicianProfile(slug: string, ownerId = '', ownerPhone = 
     slug, ownerId, ownerPhone,
     name: '', photo: '', title: '', province: '', city: '', club: '',
     coverage: [], intro: '', about: [], services: [],
-    projects: [], albums: [], phone: '', whatsapp: '',
+    projects: [], albums: [], gallery: [], videos: [], phone: '', whatsapp: '',
     status: 'approved', updatedAt: '',
   }
 }
 
 function normalize(raw: Partial<TechnicianProfile> & { slug: string }): TechnicianProfile {
   const p = { ...emptyTechnicianProfile(raw.slug), ...raw }
+  /* ردیفِ پیش از مهاجرت: آلبومِ شیئی به «نام + رسانه» تبدیل می‌شود.
+     روی خواندن انجام می‌شود تا هیچ عکسی با اولین ذخیره گم نشود. */
+  Object.assign(p, normalizeTechMedia(p))
   if (!p.province && p.city) p.province = provinceOfCity(p.city)
   if (p.ownerId == null) p.ownerId = ''
   return p
@@ -102,6 +108,12 @@ export function newTechnicianSlug(): string {
 
 /* پروفایل ذخیره‌شده → شکل Technician تا صفحات /services بدون تغییر ساختار رندرش کنند */
 export function profileToTechnician(p: TechnicianProfile): Technician {
+  /* ⚠️ اینجا هم نرمال‌سازی لازم است، نه فقط در `normalize`ِ کشِ محلی:
+     صفحه‌ی عمومی داده‌ی خامِ سرور را مستقیم به این تابع می‌دهد و ردیفی
+     که هنوز کلیدِ `gallery` ندارد، `undefined` رد می‌کرد — و صفحه با
+     «Cannot read properties of undefined» به error boundary می‌رفت.
+     بیلد و tsc هر دو سبز بودند؛ فقط بازکردنِ صفحه نشانش داد. */
+  const media = normalizeTechMedia(p)
   return {
     id: p.slug,
     name: p.name || 'متخصص خدمات فنی',
@@ -114,7 +126,9 @@ export function profileToTechnician(p: TechnicianProfile): Technician {
     about: p.about.length ? p.about : [p.intro].filter(Boolean),
     services: p.services,
     projects: p.projects,
-    albums: p.albums,
+    albums: media.albums,
+    gallery: media.gallery,
+    videos: media.videos,
     phone: p.phone,
     whatsapp: p.whatsapp || p.phone.replace(/^0/, '98'),
     verified: p.verified === true,
