@@ -17,6 +17,10 @@ import { fetchTournaments } from '../../../lib/tournaments/client';
 import ClubStoryModal from '../../../components/ClubStoryModal';
 import { useProfileImageViewer } from '@/components/ProfileImageViewer'
 import ProfileGallery from '@/components/profile/ProfileGallery'
+import { useProfileVideoViewer } from '@/components/profile/ProfileVideoViewer'
+import { uploadFile } from '@/lib/supabase'
+import { videoMeta, formatDuration } from '@/lib/video-thumb'
+import { notify } from '@/lib/ui/dialogs'
 import '@/components/profile/profile-page.css'
 import { useTabKeys } from '@/hooks/use-tab-keys'
 import ClubReviews from '../../../components/club/ClubReviews';
@@ -73,6 +77,8 @@ const sampleClub: Club = {
 interface CoachEntry { id: string; slug?: string; name: string; title: string; exp: string; rating: string; bio: string; }
 interface ClubAlbumItem { id: string; dataUrl: string; name: string; caption: string; }
 interface ClubAlbum { id: string; name: string; createdAt: string; items: ClubAlbumItem[]; }
+/* همان شکلِ ویدیوی بقیه‌ی نقش‌ها */
+interface ClubVideo { id: string; url?: string; thumbnail: string; title: string; duration: string; album?: string }
 interface ClubStats { members: string; tournaments: string; yearsActive: string; dailyCapacity: string; }
 
 /* #10: model field = what admin enters when registering tables. #11: isVip → gold color */
@@ -165,6 +171,7 @@ export default function ClubProfilePage() {
   const [liveStats, setLiveStats]     = useState<{ members: number; tournaments: number } | null>(null);
   const [storyViewer, setStoryViewer] = useState(false);
   const { open: openImage, viewer: imageViewer } = useProfileImageViewer()
+  const { open: openVideo, viewer: videoViewer } = useProfileVideoViewer()
 
   const isAdmin = false;
 
@@ -364,6 +371,53 @@ export default function ClubProfilePage() {
      دست‌نخورده می‌ماند؛ این‌جا فقط برای رندر به همان شکلی درمی‌آید که
      بقیه‌ی نقش‌ها دارند. شناسه‌ی هر عکس «آلبوم/شناسه» است تا حذف
      بداند از کدام آلبوم بردارد. */
+  /* ── ویدیوهای گالریِ باشگاه ──
+     ستونِ `galleryVideos` (مهاجرتِ ۰۸۸). ستونِ قدیمیِ `videos` عمداً
+     دست‌نخورده است: آن ویدیوی معرفیِ باشگاه است، نه گالری. */
+  const clubVideos = Array.isArray((club as { galleryVideos?: unknown }).galleryVideos)
+    ? ((club as { galleryVideos?: ClubVideo[] }).galleryVideos ?? [])
+    : [];
+
+  const saveClubVideos = async (next: ClubVideo[]) => {
+    setAlbumBusy(true); setAlbumErr('');
+    try {
+      const r = await apiFetch(`/api/clubs/${club.id}`, {
+        method: 'PUT', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ galleryVideos: next }),
+      });
+      if (!r.ok) { setAlbumErr('ذخیره روی سرور انجام نشد'); return false }
+      /* پاسخِ سرور ردیفِ تازه است؛ همان را می‌نشانیم تا صفحه با
+         دیتابیس یکی بماند. */
+      const j = await r.json().catch(() => null) as Record<string, unknown> | null;
+      if (j) setClub(c => ({ ...c, ...j }) as typeof c);
+      return true
+    } catch {
+      setAlbumErr('ارتباط با سرور برقرار نشد'); return false
+    } finally { setAlbumBusy(false); }
+  };
+
+  const addClubVideos = async (files: File[], album?: string) => {
+    const skipped: string[] = [];
+    let next = clubVideos;
+    for (const file of files) {
+      if (file.size > 25 * 1024 * 1024) { skipped.push(file.name); continue }
+      const meta = await videoMeta(file);
+      const vid = `v${Date.now()}${Math.random().toString(36).slice(2, 6)}`;
+      const base = `clubs/${club.id}/gallery/${vid}`;
+      const url = await uploadFile('club-media', file, base);
+      if (!url) { skipped.push(file.name); continue }
+      const thumb = meta.thumb ? (await uploadFile('club-media', meta.thumb, `${base}-thumb`)) ?? '' : '';
+      next = [...next, { id: vid, url, thumbnail: thumb, title: file.name.replace(/\.[^.]+$/, ''), duration: formatDuration(meta.durationSec), ...(album ? { album } : {}) }];
+      if (!(await saveClubVideos(next))) break
+    }
+    if (skipped.length) notify(`این ویدیوها اضافه نشدند (سقف ۲۵ مگابایت): ${skipped.join('، ')}`);
+  };
+
+  const deleteClubVideo = async (vid: string) => {
+    if (!(await ask('این ویدیو حذف شود؟', { body: 'این کار برگشت‌پذیر نیست.', confirmLabel: 'حذف' }))) return;
+    await saveClubVideos(clubVideos.filter(v => v.id !== vid));
+  };
+
   const clubGalleryImages = clubAlbums.flatMap(a =>
     a.items.map(it => ({ id: `${a.id}/${it.id}`, url: it.dataUrl, caption: it.caption ?? '', album: a.name })));
 
@@ -1176,14 +1230,15 @@ export default function ClubProfilePage() {
                   مشترک نگاشت می‌شود. */}
               <ProfileGallery
                 images={clubGalleryImages}
-                videos={[]}
+                videos={clubVideos}
                 albumNames={clubAlbums.map(a => a.name)}
                 onOpenImage={(urls, index, meta, ids) => openImage(urls, {
                   index, ...meta,
                   ...(isClubOwner ? { onDelete: (i: number) => deleteClubPhoto(ids[i] ?? '') } : {}),
                 })}
+                onOpenVideo={v => openVideo(v, isClubOwner ? { onDelete: () => deleteClubVideo(v.id) } : undefined)}
                 canEdit={isClubOwner} busy={albumBusy}
-                onAddImages={addClubPhotos} onNewAlbum={newClubAlbum}
+                onAddImages={addClubPhotos} onAddVideos={addClubVideos} onNewAlbum={newClubAlbum}
               />
               {albumErr && <p role="alert" style={{ fontSize: 12, color: '#b91c1c', marginTop: 8 }}>{albumErr}</p>}
             </div>
@@ -1319,6 +1374,7 @@ export default function ClubProfilePage() {
       </footer>
 
       {imageViewer}
+      {videoViewer}
 
       {storyViewer && club.storyMediaUrl && (
         <ClubStoryModal

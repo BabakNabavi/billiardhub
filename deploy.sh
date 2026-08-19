@@ -46,7 +46,22 @@ echo "── بسته‌بندی ──"
 tar --exclude-vcs --exclude='node_modules' --exclude='.next' --exclude='backups' \
     --exclude='.turbo' --exclude='*.log' --exclude='.env*' $PUB_EXCLUDE \
     -czf /tmp/bh-deploy.tgz apps packages package.json package-lock.json turbo.json
-echo "   $(du -h /tmp/bh-deploy.tgz | cut -f1)"
+# ── چرا فهرستِ فایل‌ها هم می‌رود ──
+# `tar -xzf` روی پوشه‌ی موجود می‌ریزد و چیزی پاک نمی‌کند. این برای
+# `public` عمدی و لازم است، ولی برای کد یک تله بود: فایلی که در ریپو
+# **حذف** شده بود روی سرور می‌ماند و بیلدِ سرور را می‌شکست، در حالی
+# که بیلدِ محلی سبز بود — یک‌بار همین شد و فایلِ کهنه دستی پاک شد.
+#
+# پس فهرستِ دقیقِ چیزی که فرستاده می‌شود همراهش می‌رود و سمتِ سرور،
+# هر فایلِ کدی که در فهرست نیست کنار گذاشته می‌شود — با استثناهای صریح.
+tar -tzf /tmp/bh-deploy.tgz | grep -v '/$' | sed 's|^\./||' | LC_ALL=C sort > /tmp/bh-manifest.txt
+# ── چرا نگهبانِ انتها ──
+# فهرست هم مثلِ بسته با `cat` روی ssh می‌رود و «نصفه رسیدن» همان‌جا
+# هم ممکن است. چون هر دو سمت `LC_ALL=C sort` شده‌اند، بریدنِ انتها
+# یعنی *دنباله‌ی* فهرست گم شود — و دقیقاً همان فایل‌ها «اضافی» به‌نظر
+# می‌رسند و پاک می‌شوند. یک خطِ نگهبان ته فهرست، این را قطعی می‌کند.
+echo '__EOF__' >> /tmp/bh-manifest.txt
+echo "   $(du -h /tmp/bh-deploy.tgz | cut -f1) · $(($(wc -l < /tmp/bh-manifest.txt) - 1)) فایل"
 
 # ── چرا ssh و نه scp ──
 # ترافیکِ این لپ‌تاپ از VPN رد می‌شود و سرورِ ایرانی از آن مسیر در دسترس
@@ -80,6 +95,10 @@ if [ "$SENT" != "1" ]; then
 fi
 rm -f /tmp/bh-deploy.tgz
 
+# فهرست چند ده کیلوبایت است و از همان مسیرِ ssh می‌رود
+ssh -i "$KEY" -o ServerAliveInterval=15 "$SRV" 'cat > /tmp/bh-manifest.txt' < /tmp/bh-manifest.txt
+rm -f /tmp/bh-manifest.txt
+
 echo "── نصب و بیلد (چند دقیقه) ──"
 ssh -i "$KEY" -o ServerAliveInterval=15 "$SRV" 'bash -s' <<'REMOTE'
 set -e
@@ -95,6 +114,51 @@ cd /opt/billiardhub
 cp apps/web/.env.local /tmp/.env.keep          # env سرور نباید گم شود
 tar -xzf /tmp/bh-deploy.tgz && rm /tmp/bh-deploy.tgz
 mv /tmp/.env.keep apps/web/.env.local && chmod 600 apps/web/.env.local
+
+# ── فایل‌هایی که دیگر در ریپو نیستند ──
+# فقط زیرِ apps/ و packages/، و فقط چیزی که در فهرستِ بسته نیست.
+# استثناها: وابستگی‌ها، خروجیِ بیلد، env، و `public` وقتی همراهِ بسته
+# نرفته (در آن حالت فهرست هم نداردش و بدونِ این استثنا همه‌ی عکس‌های
+# سایت قربانی می‌شدند).
+if [ "$(tail -1 /tmp/bh-manifest.txt 2>/dev/null)" != "__EOF__" ]; then
+  # فهرست ناقص رسیده. پاک‌سازی انجام نمی‌شود — بدترین حالت این است که
+  # فایلِ کهنه بماند (همان وضعِ قبل)، نه اینکه فایلِ سالم برود.
+  echo "⚠ فهرستِ بسته ناقص رسید — پاک‌سازی انجام نشد"
+else
+  # ⚠️ نگهبان باید پیش از مقایسه برداشته شود: `comm` هر دو ورودی را
+  # مرتب می‌خواهد و `__EOF__` ته فایل، ترتیبِ C را می‌شکند — یعنی
+  # مقایسه بی‌سروصدا نتیجه‌ی غلط می‌دهد.
+  grep -v '^__EOF__$' /tmp/bh-manifest.txt > /tmp/bh-manifest.clean
+  PUB_SKIP=""
+  grep -q '^apps/web/public/' /tmp/bh-manifest.clean || PUB_SKIP="-path ./apps/web/public -prune -o"
+  # ⚠️ این فیلترها باید آینه‌ی `--exclude`های همان tar بالا باشند.
+  # `backups/` نمونه‌ی زنده‌اش بود: پشتیبانِ آلبومِ باشگاه‌هاست، در
+  # ریپو نیست، پس «اضافی» به‌نظر می‌رسید و پاک می‌شد.
+  find ./apps ./packages $PUB_SKIP -type f -print \
+    | grep -v '/node_modules/' | grep -v '/\.next' | grep -v '/\.turbo' \
+    | grep -v '/\.env' | grep -v '\.build-sha' \
+    | grep -v '/backups/' | grep -v '\.log$' | grep -v '/\.git' \
+    | sed 's|^\./||' | LC_ALL=C sort > /tmp/bh-have.txt
+  comm -23 /tmp/bh-have.txt /tmp/bh-manifest.clean > /tmp/bh-stale.txt
+  STALE_N=$(wc -l < /tmp/bh-stale.txt)
+  # فیوزِ ایمنی. دلتای واقعی چند فایل است؛ عددِ بزرگ یعنی چیزی در
+  # مقایسه غلط است، نه اینکه واقعاً این‌همه فایل حذف شده. آن‌وقت
+  # دیپلوی باید *بایستد*، نه اینکه با یک هشدارِ کوچک ادامه بدهد و
+  # آخرش «✅ تمام شد» چاپ کند.
+  if [ "$STALE_N" -gt 25 ]; then
+    echo "✗ $STALE_N فایلِ اضافی — بیش از حدِ انتظار. پاک‌سازی و دیپلوی متوقف شد."
+    sed 's/^/   /' /tmp/bh-stale.txt | head -30
+    exit 1
+  elif [ "$STALE_N" -gt 0 ]; then
+    echo "── کنارگذاشتنِ $STALE_N فایلِ حذف‌شده ──"
+    sed 's/^/   /' /tmp/bh-stale.txt
+    # ⚠️ `xargs` بدونِ `-0` روی فاصله می‌شکند و نقل‌قول را تفسیر می‌کند.
+    # همین ریپو `apps/web/Color code.txt` دارد؛ یعنی فرضی نیست.
+    tr '\n' '\0' < /tmp/bh-stale.txt | xargs -0 -r rm -f --
+  fi
+fi
+rm -f /tmp/bh-manifest.txt /tmp/bh-manifest.clean /tmp/bh-have.txt /tmp/bh-stale.txt
+
 npm install --no-audit --no-fund --silent
 cd apps/web
 

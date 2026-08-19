@@ -4043,11 +4043,24 @@ console.log('\n― استوری: یک منبع، با انقضا ―');
   /* باشگاه جدولِ خودش را دارد و مالکیتش هم تا امروز فقط از حافظه‌ی
      مرورگر خوانده می‌شد — همان چیزی که در پروفایل‌ها باگ شد. */
   t('پاسخِ باشگاه پرچمِ مالکیت دارد',
-    strip(read('app/api/clubs/[id]/route.ts')).includes('isMine: !!actor &&'),
+    strip(read('app/api/clubs/[id]/route.ts')).includes('const isMine = !!actor &&'),
     'با حافظه‌ی محلیِ پاک، صاحبِ باشگاه دکمه‌هایش را نمی‌دید');
   t('صفحه‌ی باشگاه هر دو نشانه را با «یا» جمع می‌کند',
     strip(read('app/clubs/[id]/page.tsx')).includes('.isMine === true'),
     'یک نشانه‌ی منفی نباید مالک را مهمان جا بزند');
+  /* باشگاه هم ویدیوی گالری گرفت (مهاجرتِ ۰۸۸). ستونِ قدیمیِ `videos`
+     عمداً دست‌نخورده است: آن ویدیوی معرفیِ باشگاه است، نه گالری. */
+  t('ویدیوی گالریِ باشگاه ستونِ خودش را دارد',
+    existsSync(join(ROOT, '../../supabase/migrations/088_clubs_videos.sql'))
+    && read('../../supabase/migrations/088_clubs_videos.sql').includes('"galleryVideos"'),
+    'بدونِ ستون، هر ذخیره‌ی ویدیو بی‌صدا کنار گذاشته می‌شد');
+  t('مسیرِ PUT ستونِ تازه را می‌پذیرد',
+    strip(read('app/api/clubs/[id]/route.ts')).includes("'galleryVideos'"),
+    'allowlist نداشته باشدش، ذخیره رد می‌شود');
+  t('صفحه‌ی باشگاه ویدیو را از همان ستون می‌خواند',
+    strip(read('app/clubs/[id]/page.tsx')).includes('galleryVideos')
+    && strip(read('app/clubs/[id]/page.tsx')).includes('videos={clubVideos}'),
+    'با ستونِ اشتباه، ویدیوی معرفیِ باشگاه داخلِ گالری می‌افتاد');
     t('تقسیمِ فایل‌ها از روی نوعِ فایل است نه پسوند',
       gal.includes("f.type.startsWith('image/')") && gal.includes("f.type.startsWith('video/')"),
       'پسوندِ فایلِ گالریِ گوشی قابلِ اعتماد نیست');
@@ -4631,6 +4644,97 @@ console.log('\n― نشستِ کهنه، صفحه‌ی سفید ―');
   t('مهرِ زمانی فقط روی موفقیت نوشته می‌شود',
     /if \(r\.ok\) writeLastRefresh/.test(rc) && (rc.match(/writeLastRefresh\(Date/g) ?? []).length === 1,
     'وگرنه یک خطای گذرا پنجره‌ی مشترکِ چهاردقیقه‌ای را می‌سوزاند');
+}
+
+console.log('\n― پاک‌سازیِ فایل‌های حذف‌شده در دیپلوی ―');
+{
+  /* ⚠️ `tar -xzf` روی پوشه‌ی موجود می‌ریزد و چیزی پاک نمی‌کند. فایلی
+     که از ریپو حذف شده بود روی سرور می‌ماند و بیلدِ سرور را می‌شکست
+     در حالی که بیلدِ محلی سبز بود — یک‌بار همین شد. */
+  const dep = read('../../deploy.sh');
+  t('فهرستِ بسته همراهش فرستاده می‌شود',
+    dep.includes('tar -tzf /tmp/bh-deploy.tgz') && dep.includes("'cat > /tmp/bh-manifest.txt'"),
+    'بدونِ فهرست، سرور نمی‌داند چه چیزی دیگر در ریپو نیست');
+  t('فقط زیرِ apps و packages پاک می‌شود',
+    dep.includes('find ./apps ./packages'),
+    'پاک‌سازیِ ریشه یعنی از دست‌دادنِ چیزهایی که فقط روی سرورند');
+  /* ادعا روی *بلوکِ پاک‌سازی* است نه کلِ فایل، و بدونِ بک‌اسلش —
+     گریزها تا رسیدن به این فایل چند لایه رد می‌شوند و یک‌بار همین
+     ادعا را بی‌صدا سبز نگه داشتند. */
+  const blk = dep.slice(dep.indexOf('فایل‌هایی که دیگر در ریپو نیستند'), dep.indexOf('npm install --no-audit'));
+  t('وابستگی، بیلد، env و public استثنا هستند',
+    ['node_modules', 'next', 'turbo', 'env', 'build-sha', 'apps/web/public -prune'].every(x => blk.includes(x)),
+    'یکی از این‌ها پاک شود، سایت می‌خوابد');
+  t('فیوزِ ایمنی روی تعداد هست',
+    dep.includes('"$STALE_N" -gt 25'),
+    'فهرستِ خراب یعنی «همه‌چیز اضافی است» — باید متوقف شود نه اجرا');
+  /* ⚠️ این مسیر کلِ ردیفِ باشگاه را بی‌احراز هویت برمی‌گرداند و روی
+     سرورِ زنده شماره‌ی شبا و کارت را نشان می‌داد — با curl تأیید شد. */
+  t('اطلاعات بانکیِ باشگاه عمومی نیست',
+    strip(read('app/api/clubs/[id]/route.ts')).includes('const PRIVATE = [')
+    && strip(read('app/api/clubs/[id]/route.ts')).includes('if (!isMine && !isAdminReq) for (const k of PRIVATE) delete safe[k]'),
+    'شبا، شماره‌ی کارت و نامِ صاحبِ حساب برای همه خوانده می‌شد');
+  t('بدنه‌ی PUTِ باشگاه هم مرز دارد',
+    strip(read('app/api/clubs/[id]/route.ts')).includes('checkProfileData(body)'),
+    'ستون‌های jsonbِ آزاد همان‌جا هم بی‌سقف بودند');
+  /* هم فهرست، هم استفاده‌اش — با یکی، حذفِ آن یکی بی‌صدا رد می‌شد.
+     (ادعای رفتاری‌اش پایین‌تر است، آن‌جا که تابع ارزیابی می‌شود.) */
+  t('مرز، کلیدهای خطرناک را رد می‌کند',
+    strip(read('lib/profiles/validate.ts')).includes("'__proto__'")
+    && strip(read('lib/profiles/validate.ts')).includes('BAD_KEYS.has(k)'),
+    'کپیِ ساده‌ی شیء آن کلید را بی‌صدا می‌اندازد — داده بی‌خطا گم می‌شود');
+  t('شمارشِ اندازه بر حسبِ بایت است، نه کدواحد',
+    strip(read('lib/profiles/validate.ts')).includes("Buffer.byteLength(v, 'utf8')"),
+    'با شمارشِ خام، سقف برای متنِ فارسی دو برابر می‌شد');
+  /* هم نوشتنش، هم بررسی‌اش. با یکی، حذفِ آن یکی بی‌صدا رد می‌شد. */
+  t('نگهبانِ انتهای فهرستِ دیپلوی هست',
+    (dep.split('__EOF__').length - 1) >= 3
+    && dep.includes('bh-manifest.clean'),
+    'فهرستِ نصفه یعنی دنباله‌اش «اضافی» به‌نظر برسد و پاک شود');
+  t('حذف با xargs -0 انجام می‌شود',
+    dep.includes('xargs -0 -r rm -f --'),
+    'نامِ فایلِ فاصله‌دار (مثلِ Color code.txt) با xargs ساده دو تکه می‌شود');
+  t('استثناها آینه‌ی tar هستند',
+    ['/backups/', 'log$', 'git'].every(x => dep.includes(x)),
+    'پشتیبانِ آلبومِ باشگاه‌ها در ریپو نیست و پاک می‌شد');
+}
+
+console.log('\n― مرزِ ورودیِ پروفایل ―');
+{
+  /* ⚠️ `data` یک jsonbِ آزاد است. بدونِ سقف، یک درخواستِ دستکاری‌شده
+     می‌تواند ده‌ها مگابایت در ردیف بگذارد — و بعد *هر* بازدیدِ آن
+     صفحه‌ی عمومی همان را دانلود کند. */
+  const route = strip(read('app/api/profiles/[kind]/route.ts'));
+  t('بدنه‌ی ذخیره‌ی پروفایل از مرز رد می‌شود',
+    route.includes('checkProfileData(data)') && route.includes("status: 400"),
+    'هر چیزی که کلاینت می‌فرستاد مستقیم داخلِ ردیف می‌نشست');
+  t('آرایه به‌جای شیء پذیرفته نمی‌شود',
+    route.includes('!Array.isArray(b.data)'),
+    'یک آرایه هم `typeof === object` است و از گاردِ قبلی رد می‌شد');
+
+  /* ادعای رفتاری: خودِ تابع اجرا می‌شود */
+  const vsrc = read('lib/profiles/validate.ts');
+  /* از خطِ BAD_KEYS برداشته می‌شود، نه از خودِ تابع: تابع به آن
+     ثابت تکیه دارد و بدونش در ارزیابی می‌ترکد. */
+  const vbody = vsrc.slice(vsrc.indexOf('const BAD_KEYS'))
+    .split('new Set<string>').join('new Set')
+    .split(' as Record<string, unknown>').join('')
+    .split('(v: unknown, depth: number): string | null').join('(v, depth)')
+    .split('export function checkProfileData(data: unknown): string | null').join('function checkProfileData(data)');
+  const check = new Function(
+    'const MAX_BODY_BYTES = 12*1024*1024, MAX_STRING = 3*1024*1024, MAX_DEPTH = 8, MAX_KEYS = 200, MAX_ARRAY = 500;\n'
+    + vbody + '\nreturn checkProfileData')();
+  const deep = n => { const o = {}; let c = o; for (let i = 0; i < n; i++) { c.x = {}; c = c.x } return o };
+  t('مرز، پروفایلِ واقعی را رد نمی‌کند',
+    check({ name: 'بابک', gallery: [{ id: 'g', url: 'https://x/y.jpg', caption: '' }], albums: ['الف'] }) === null
+    && check({ photo: 'data:image/jpeg;base64,' + 'A'.repeat(220 * 1024) }) === null,
+    'سقف نباید ذخیره‌ی معمولیِ چند عکس را بشکند');
+  t('مرز، بدنه‌ی بدخواه را می‌گیرد',
+    check(JSON.parse('{"__proto__":{"x":1}}')) !== null
+    && check(deep(12)) !== null
+    && check({ g: Array.from({ length: 600 }, () => 1) }) !== null
+    && check({ photo: 'x'.repeat(4 * 1024 * 1024) }) !== null,
+    'تودرتوییِ عمیق، فهرستِ بی‌انتها و رشته‌ی غول باید رد شوند');
 }
 
 console.log('\n― بستنِ خودکارِ ثبت‌نام ―');

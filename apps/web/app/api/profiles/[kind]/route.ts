@@ -1,6 +1,7 @@
 export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { sb, actorFromRequest, isAdmin } from '@/lib/finance/db';
+import { checkProfileData } from '@/lib/profiles/validate';
 import {
   PROFILE_KINDS, getProfileByOwner, getProfileBySlug, listProfiles, saveProfile,
   type ProfileKind,
@@ -86,8 +87,18 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ kind: stri
   if (!actor) return NextResponse.json({ message: 'ابتدا وارد شوید' }, { status: 401 });
 
   const b = await req.json().catch(() => ({}));
-  const data = b?.data && typeof b.data === 'object' ? b.data as Record<string, unknown> : null;
+  const data = b?.data && typeof b.data === 'object' && !Array.isArray(b.data)
+    ? b.data as Record<string, unknown> : null;
   if (!data) return NextResponse.json({ message: 'بدنه‌ی پروفایل خالی است' }, { status: 400 });
+
+  /* ── مرزِ اندازه ──
+     `data` یک jsonbِ آزاد است و تا امروز هرچه می‌رسید می‌نشست. شکلش
+     برای هر نقش فرق دارد، پس این‌جا شکل سنجیده نمی‌شود؛ چیزی سنجیده
+     می‌شود که هر شکلی باید رعایتش کند: اندازه، عمق و تعداد.
+     پاک‌سازیِ محتوایی (نامِ آلبوم، رسانه‌ی خراب) سرِ جای خودش در
+     `saveProfile` است. */
+  const bad = checkProfileData(data);
+  if (bad) return NextResponse.json({ message: bad }, { status: 400 });
 
   const slug = str(b?.slug, 80);
   if (!slug) return NextResponse.json({ message: 'نامک پروفایل لازم است' }, { status: 400 });

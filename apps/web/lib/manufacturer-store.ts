@@ -124,8 +124,23 @@ export function newManufacturerSlug(): string {
 }
 
 /* پروفایل ذخیره‌شده → شکل MockManufacturer تا صفحات /manufacturers مستقیم رندرش کنند */
+/* ⚠️ «نبودن» تنها حالتِ خراب نیست: `data` یک jsonbِ آزاد است و
+   صفحه با `as ManufacturerProfile` رویش cast می‌کند، پس `specialties`
+   می‌تواند رشته باشد و بعد `.some(...)` در فهرستِ تولیدکنندگان
+   بترکد. یک گاردِ نوع در همین مرز، همه‌ی مصرف‌کننده‌ها را می‌پوشاند. */
+const arr = <T,>(v: unknown): T[] => (Array.isArray(v) ? v as T[] : [])
+
 export function profileToManufacturer(p: ManufacturerProfile): MockManufacturer {
-  const yearNum = parseInt(p.sinceYear.replace(/[۰-۹]/g, d => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(d))), 10)
+  /* ── چرا همه‌جا گارد ──
+     ⚠️ این تابع `p.sinceYear.replace(...)` را بی‌گارد صدا می‌زد. مسیرِ
+     ذخیره فقط `typeof === object` را می‌سنجد، پس ردیفی بدونِ
+     `sinceYear` (یا با `null`) ممکن است — و آن‌وقت این تابع استثنا
+     می‌داد، صفحه‌ی عمومی داخلِ `catch` می‌افتاد و به بازدیدکننده
+     «ارتباط با سرور برقرار نشد» نشان می‌داد. یعنی یک فیلدِ نبوده،
+     خودش را «قطعیِ اینترنت» جا می‌زد. همان تله برای آرایه‌ها هم بود
+     (`p.products.length`). */
+  const since = String(p.sinceYear ?? '')
+  const yearNum = parseInt(since.replace(/[۰-۹]/g, d => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(d))), 10)
   return {
     id: p.slug,
     name: p.name || 'تولیدکننده',
@@ -134,28 +149,28 @@ export function profileToManufacturer(p: ManufacturerProfile): MockManufacturer 
        کارتِ /manufacturers دیده نمی‌شد. */
     verified: p.verified === true,
     elite: false,
-    since: p.sinceYear ? `از ${p.sinceYear}` : '—',
+    since: since ? `از ${since}` : '—',
     sinceYear: Number.isNaN(yearNum) ? 1400 : yearNum,
-    productCount: p.products.length,
-    specialties: p.specialties,
+    productCount: arr(p.products).length,
+    specialties: arr(p.specialties),
     responseTime: 'چند ساعت',
-    phone: p.phone,
+    phone: p.phone ?? '',
     bannerImage: p.bannerImage || '/images/shop/Pro_table.webp',
-    gallery: p.gallery ?? [],
-    description: p.description,
-    tagline: p.tagline || p.description,
-    about: p.about || p.description,
+    gallery: arr(p.gallery),
+    description: p.description ?? '',
+    tagline: p.tagline || p.description || '',
+    about: p.about || p.description || '',
     employees: p.employees || '—',
     exportCountries: p.exportCountries || '—',
     totalProduced: p.totalProduced || '—',
     productionCapability: p.productionCapability || '—',
-    whatsapp: p.whatsapp || p.phone.replace(/^0/, '98'),
-    instagram: p.instagram,
-    address: p.address,
+    whatsapp: p.whatsapp || String(p.phone ?? '').replace(/^0/, '98'),
+    instagram: p.instagram ?? '',
+    address: p.address ?? '',
     hours: p.hours || '—',
-    website: p.website,
-    products: p.products,
-    certificates: p.certificates,
+    website: p.website ?? '',
+    products: arr(p.products),
+    certificates: arr(p.certificates),
   }
 }
 

@@ -5,6 +5,7 @@ import { sessionFromRequest } from '@/lib/auth/session';
 import { notifyClubApproved, notifyClubRejected } from '@/lib/notify';
 import { audit, clientIp } from '@/lib/finance/db';
 import { can } from '@/lib/admin/permissions';
+import { checkProfileData } from '@/lib/profiles/validate';
 import { isUUID, isValidSlug } from '@/lib/slug';
 
 const CORS = {
@@ -39,9 +40,31 @@ export async function GET(
      حافظه‌ی محلی می‌تواند کهنه یا پاک باشد و آن‌وقت صاحبِ باشگاه
      دکمه‌هایش را نمی‌بیند. پاسخِ کوکی قطعی است. */
   const actor = sessionFromRequest(req);
+  const isMine = !!actor && String(actor.id ?? '') === String(row.ownerId ?? '');
+
+  /* ── ⚠️ نشتِ اطلاعاتِ بانکی ──
+     این مسیر کلِ ردیف را برمی‌گرداند و بدونِ هیچ احراز هویتی خوانده
+     می‌شود. یعنی هرکس با یک درخواستِ ساده شماره‌ی شبا، شماره‌ی کارت و
+     نامِ صاحبِ حساب را می‌دید — روی سرورِ زنده تأیید شد، نه فرضی.
+     (فهرستِ عمومیِ `/api/clubs` از همان اول ستون‌ها را انتخاب می‌کرد؛
+     فقط همین مسیرِ تکی `*` می‌گرفت.)
+
+     پس فیلدهای حساس فقط برای مالک و ادمین می‌مانند. صفحه‌ی عمومی
+     هیچ‌کدامشان را نمی‌خواند. */
+  const PRIVATE = [
+    'iban', 'ibanVerified', 'ibanOwnerName',
+    'bankCard', 'bankCardOwner', 'bankName', 'bankCardVerified', 'bankCardCheckedAt',
+    'bankConfirmedByOwner', 'licenseNumber', 'licenseVerified', 'licenseCheckedAt',
+    'licenseDocumentUrl', 'postalCode', 'postalCodeVerified', 'postalCodeVerifiedAt',
+    'notifyPhone', 'rejectionReason', 'reviewedAt', 'reviewedBy', 'submissionCount',
+  ];
+  const isAdminReq = !!actor && (await can(actor.id, 'clubs.review'));
+  const safe: Record<string, unknown> = { ...row };
+  if (!isMine && !isAdminReq) for (const k of PRIVATE) delete safe[k];
+
   return NextResponse.json({
-    ...row,
-    isMine: !!actor && String(actor.id ?? '') === String(row.ownerId ?? ''),
+    ...safe,
+    isMine,
     isVerified: row.verificationStatus === 'verified',
     hasActiveStory: !!row.storyExpiresAt && new Date(String(row.storyExpiresAt)).getTime() > Date.now(),
   }, { headers: CORS });
@@ -68,7 +91,18 @@ export async function PUT(
     return NextResponse.json({ message: 'شما مجاز به ویرایش این باشگاه نیستید' }, { status: 403, headers: CORS });
   }
 
-  const body = await req.json();
+  const body = await req.json().catch(() => null);
+  if (!body || typeof body !== 'object' || Array.isArray(body)) {
+    return NextResponse.json({ message: 'بدنه‌ی درخواست نامعتبر است' }, { status: 400, headers: CORS });
+  }
+
+  /* ── مرزِ اندازه ──
+     همان مرزی که برای `profiles.data` نوشته شد. این ردیف هم ستون‌های
+     jsonbِ آزاد دارد (`albums` که عکس‌های base64 نگه می‌دارد،
+     `coaches`، `clubStats` و حالا `galleryVideos`) و تا امروز هرچه
+     می‌رسید مستقیم می‌نشست. */
+  const tooBig = checkProfileData(body);
+  if (tooBig) return NextResponse.json({ message: tooBig }, { status: 400, headers: CORS });
 
   /* فیلدهای «اعتماد» فقط سرورساید نوشته می‌شوند: تأیید جواز از مسیر
      استعلام اماکن (verify-license) و تأیید شبا از استعلام بانکی.
@@ -270,6 +304,8 @@ export async function PUT(
     'postalCode', 'addressNote',
     /* مهاجرتِ ۰۶۵ — محتوای نمایشیِ باشگاه */
     'coaches', 'albums', 'clubStats',
+    /* مهاجرتِ ۰۸۸ — ویدیوهای گالری (جدا از `videos`ِ معرفیِ باشگاه) */
+    'galleryVideos',
   ];
   if (error && /does not exist|PGRST204/i.test(`${error.message} ${error.code ?? ''}`)) {
     const dropped = OPTIONAL_COLUMNS.filter(
