@@ -3972,6 +3972,46 @@ console.log('\n― استوری: یک منبع، با انقضا ―');
     t('نامِ آلبوم از jsonb با احتیاط خوانده می‌شود',
       gal.includes("typeof n === 'string'"),
       'یک مقدارِ غیرِرشته صفحه‌ی عمومی را برای همه سفید می‌کرد');
+    /* ── مرزِ اعتماد سرور است، نه مرورگر ──
+       `data` یک jsonbِ آزاد است؛ `albums: "x"` یا آرایه‌ای با مقدارِ
+       غیرِرشته، صفحه‌ی عمومی را برای همه سفید می‌کرد.
+
+       ⚠️ ادعا *رفتاری* است نه رشته‌ای. نسخه‌ی اولِ همین گارد فقط متنِ
+       کد را می‌سنجید و وقتی همان پاک‌سازی روی بازیکن و خدماتِ فنی هم
+       اجرا می‌شد — که آلبومشان آرایه‌ای از *شیء* است و کاملاً پاک
+       می‌شد — سبز می‌ماند. */
+    {
+      /* خودِ تابع اجرا می‌شود، نه متنش: سورس تایپ‌اسکریپت است پس
+         حاشیه‌های نوع برداشته و در یک تابعِ موقت اجرا می‌شود. */
+      const albSrc = read('lib/profiles/albums.ts');
+      const fnStart = albSrc.indexOf('export function cleanAlbums');
+      const fnSrc = albSrc.slice(fnStart, albSrc.indexOf('export', fnStart + 10))
+        .replace('export function', 'function')
+        .replace(/ALBUM_NAME_MAX/g, '60')
+        .replace(/: unknown|: string\[\]|<string>/g, '');
+      const cleanAlbums = new Function('return ' + fnSrc)();
+      t('cleanAlbums فقط نامِ درست را نگه می‌دارد',
+        JSON.stringify(cleanAlbums([1, 'a', null, ' a ', {}, ' b '])) === JSON.stringify(['a', 'b'])
+        && cleanAlbums('x').length === 0 && cleanAlbums(null).length === 0
+        && cleanAlbums(['y'.repeat(200)])[0].length === 60,
+        'ورودیِ خراب باید بیفتد، تکراری یکی شود، و نامِ بلند بریده');
+      const srv = strip(read('lib/profiles/server.ts'));
+      t('نامِ آلبوم‌ها روی سرور پاک‌سازی می‌شود',
+        srv.includes('sanitizeProfileData(input.kind, clean)'),
+        'یک مقدارِ خراب از هر کلاینتی، صفحه‌ی داور/مربی را می‌شکست');
+      t('مسیرِ پروفایلِ نمایشی هم از همان مرز رد می‌شود',
+        (srv.split('sanitizeProfileData(').length - 1) >= 3,
+        'نصفِ مرز، مرز نیست');
+      t('آلبومِ بازیکن و خدماتِ فنی از این پاک‌سازی رد نمی‌شود',
+        srv.includes('NAMED_ALBUM_KINDS.includes(kind'),
+        'آلبومِ آن دو نقش آرایه‌ای از شیء است و کاملاً پاک می‌شد');
+      t('عضوِ خرابِ گالری حذف می‌شود نه رد',
+        srv.includes("typeof m === 'object' && !Array.isArray(m)"),
+        'یک null داخلِ gallery همان صفحه‌ی سفید را می‌سازد');
+      t('گالریِ عمومی به آرایه‌نبودنِ albums هم مقاوم است',
+        gal.includes('Array.isArray(albumNames) ? albumNames : []'),
+        'ردیفِ قدیمیِ خراب با پاک‌سازیِ سرور درست نمی‌شود');
+    }
     for (const p of ['app/dashboard/coach/page.tsx', 'app/referees/dashboard/page.tsx']) {
       const src = strip(read(p));
       t(p.includes('coach') ? 'پنلِ مربی آلبوم‌ها را نگه می‌دارد' : 'پنلِ داور آلبوم‌ها را نگه می‌دارد',

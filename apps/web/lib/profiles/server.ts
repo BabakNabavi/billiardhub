@@ -8,6 +8,7 @@
    به Storage آپلود و با نشانی عمومی‌اش جایگزین می‌شود.
    ───────────────────────────────────────────────────────────── */
 
+import { cleanAlbums, ALBUM_NAME_MAX, NAMED_ALBUM_KINDS } from './albums'
 import { getSupabaseServer } from '../supabase-server'
 
 export type ProfileKind = 'seller' | 'manufacturer' | 'coach' | 'referee' | 'technician' | 'player'
@@ -182,6 +183,34 @@ export interface SaveInput {
   status?: ProfileRow['status']
 }
 
+/* ── مرزِ اعتماد برای `data` ──
+   هر دو مسیرِ نوشتن (ذخیره‌ی کاربر و ساختِ پروفایلِ نمایشی) از این‌جا
+   رد می‌شوند؛ وگرنه نصفِ مرز، مرز نیست. */
+export function sanitizeProfileData(kind: ProfileKind, clean: Record<string, unknown>): void {
+  /* ⚠️ فقط مربی و داور: «آلبوم» در پروفایلِ بازیکن و خدماتِ فنی یک
+     آرایه از *شیء* است (`{id, title, photos[]}`) و `cleanAlbums` —
+     که هر عضوِ غیرِرشته را می‌اندازد — همه‌ی آلبوم‌ها و عکس‌هایشان را
+     نابود می‌کرد. یک ذخیره‌ی معمولیِ داشبورد کافی بود. */
+  if (NAMED_ALBUM_KINDS.includes(kind as (typeof NAMED_ALBUM_KINDS)[number]) && 'albums' in clean) {
+    clean.albums = cleanAlbums(clean.albums)
+  }
+  /* عضوِ خرابِ گالری/ویدیو حذف می‌شود، نه اینکه رد شود: یک `null`
+     داخلِ `gallery` همان صفحه‌ی سفید را می‌سازد که این پاک‌سازی قرار
+     است جلویش را بگیرد. */
+  for (const key of ['gallery', 'videos'] as const) {
+    if (!Array.isArray(clean[key])) continue
+    clean[key] = (clean[key] as unknown[])
+      .filter((m): m is Record<string, unknown> => !!m && typeof m === 'object' && !Array.isArray(m))
+      .map(m => {
+        const item = { ...m }
+        const album = typeof item.album === 'string' ? item.album.trim().slice(0, ALBUM_NAME_MAX) : ''
+        if (album) item.album = album
+        else delete item.album
+        return item
+      })
+  }
+}
+
 export async function saveProfile(input: SaveInput): Promise<ProfileRow> {
   const existing = await getProfileByOwner(input.kind, input.ownerId)
 
@@ -221,6 +250,21 @@ export async function saveProfile(input: SaveInput): Promise<ProfileRow> {
      تیکِ خودش را بنویسد — حتی تصادفی. */
   const { status: _ignoredStatus, verified: _ignoredVerified, ...clean } = offloaded
   void _ignoredStatus; void _ignoredVerified
+
+  /* ── نامِ آلبوم‌ها روی سرور پاک‌سازی می‌شود ──
+     ⚠️ `data` یک jsonbِ آزاد است و هرچه کلاینت بفرستد می‌نشیند. تبِ
+     آلبومِ صفحه‌ی عمومی روی این آرایه `trim()` می‌زند، پس یک مقدارِ
+     غیرِرشته (یا `albums: "x"`) صفحه‌ی داور/مربی را برای *همه‌ی*
+     بازدیدکننده‌ها سفید می‌کرد. مرزِ اعتماد این‌جاست نه در مرورگر.
+
+     همین‌جا برچسبِ آلبومِ روی خودِ رسانه‌ها هم یکدست می‌شود: رشته‌ی
+     خالی یعنی «بی‌آلبوم»، پس اصلاً نوشته نمی‌شود. */
+  /* ⚠️ فقط مربی و داور: «آلبوم» در پروفایلِ بازیکن و خدماتِ فنی یک
+     آرایه از *شیء* است (`{id, title, photos[]}`) و این پاک‌سازی —
+     که هر عضوِ غیرِرشته را می‌اندازد — همه‌ی آلبوم‌ها و عکس‌هایشان را
+     نابود می‌کرد. یک ذخیره‌ی معمولیِ داشبورد کافی بود. */
+  sanitizeProfileData(input.kind, clean)
+
 
   const row: Record<string, unknown> = {
     kind: input.kind,
@@ -328,6 +372,7 @@ export interface DemoInput {
 
 export async function createDemoProfile(input: DemoInput): Promise<ProfileRow> {
   const clean = await offloadImages(input.data, `profiles/demo/${input.kind}`) as Record<string, unknown>
+  sanitizeProfileData(input.kind, clean)
 
   const { data, error } = await sb().from('profiles').insert({
     kind: input.kind,

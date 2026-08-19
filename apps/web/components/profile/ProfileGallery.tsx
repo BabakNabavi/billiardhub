@@ -77,7 +77,10 @@ export default function ProfileGallery({
     }
     /* داده از jsonb می‌آید و اسکیمای سفت‌وسختی ندارد؛ یک مقدارِ
        غیرِرشته صفحه‌ی عمومی را برای همه سفید می‌کرد. */
-    for (const n of albumNames) { if (typeof n === 'string' && n.trim()) put(n) }
+    /* ⚠️ خودِ آرایه هم ممکن است آرایه نباشد: پاک‌سازیِ سرور فقط
+       ذخیره‌های تازه را می‌گیرد و ردیفِ قدیمیِ خراب همچنان خوانده
+       می‌شود. اول شکل، بعد عضوها. */
+    for (const n of (Array.isArray(albumNames) ? albumNames : [])) { if (typeof n === 'string' && n.trim()) put(n) }
     for (const g of images) { const n = (g.album ?? '').trim(); if (n) put(n).images.push(g) }
     for (const v of videos) { const n = (v.album ?? '').trim(); if (n) put(n).videos.push(v) }
     return [...map.values()]
