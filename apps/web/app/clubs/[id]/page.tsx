@@ -27,6 +27,7 @@ import ClubReviews from '../../../components/club/ClubReviews';
 import ClubLogo from '../../../components/club/ClubLogo'
 import { apiFetch } from '../../../lib/http'
 import { ask } from '../../../lib/ui/dialogs'
+import { DISCIPLINES } from '../../../lib/coach-store'
 import VerifiedBadge from '../../../components/VerifiedBadge'
 import FavoriteButton from '../../../components/FavoriteButton';
 
@@ -154,6 +155,16 @@ export default function ClubProfilePage() {
      فقط `id` دارند. بدونِ آن، دکمه‌ی «مشاهده صفحه مربی» به نشانیِ
      ناموجود می‌رفت. */
   const [coachSlugs, setCoachSlugs]   = useState<Record<string, string>>({});
+  /* ── چرا عنوانِ مربی از پروفایلش خوانده می‌شود ──
+     ⚠️ عنوانی که این‌جا نشان داده می‌شد، متنی بود که باشگاه‌دار موقعِ
+     افزودنِ مربی تایپ کرده — و همان لحظه هم منجمد می‌شد. نتیجه‌اش
+     همان ناهماهنگیِ صفحه‌ی داوران بود: کارت «اسنوکر» می‌گفت و صفحه‌ی
+     خودِ مربی «اسنوکر · پاکت بیلیارد · هی‌بال». مربی که رشته‌ای اضافه
+     کند، این‌جا هیچ‌وقت به‌روز نمی‌شد.
+
+     پس وقتی مربی پروفایل دارد، رشته‌هایش از همان‌جا می‌آید و متنِ
+     دستیِ باشگاه فقط جای خالی را پر می‌کند. */
+  const [coachInfo, setCoachInfo] = useState<Record<string, { disciplines: string[] }>>({});
   const [slugCopied, setSlugCopied]   = useState(false);
   const [clubAlbums, setClubAlbums]   = useState<ClubAlbum[]>([]);
   /* ── ویرایشِ درجا برای مالکِ باشگاه ──
@@ -221,15 +232,30 @@ export default function ClubProfilePage() {
          ردیف‌هایی که پیش از این تغییر ذخیره شده‌اند فقط `id` دارند.
          فهرستِ عمومیِ مربیان هم `id` دارد هم `slug`، پس نگاشت از
          همان‌جا ساخته می‌شود و دکمه‌ی «مشاهده صفحه مربی» درست می‌رود. */
-      if (list.some(c => !c.slug)) {
+      /* یک درخواست، دو کار: نامکِ ردیف‌های قدیمی و رشته‌های واقعیِ
+         هر مربی. قبلاً فقط وقتی نامک نبود صدا زده می‌شد. */
+      if (list.length) {
         void (async () => {
           try {
             const r = await fetch('/api/profiles/coach', { cache: 'no-store' });
-            const j = await r.json().catch(() => null) as { profiles?: { id?: string; slug?: string }[] } | null;
+            const j = await r.json().catch(() => null) as {
+              profiles?: { id?: string; slug?: string; data?: { disciplines?: unknown } }[]
+            } | null;
             const map: Record<string, string> = {};
-            for (const p of j?.profiles ?? []) if (p.id && p.slug) map[p.id] = p.slug;
+            const info: Record<string, { disciplines: string[] }> = {};
+            for (const p of j?.profiles ?? []) {
+              if (p.id && p.slug) map[p.id] = p.slug;
+              const d = Array.isArray(p.data?.disciplines)
+                ? (p.data!.disciplines as unknown[]).filter((x): x is string => typeof x === 'string')
+                : [];
+              /* با هر دو کلید نگه داشته می‌شود: ردیفِ قدیمی `id` دارد و
+                 ردیفِ تازه `slug`. */
+              if (p.id) info[p.id] = { disciplines: d };
+              if (p.slug) info[p.slug] = { disciplines: d };
+            }
             setCoachSlugs(map);
-          } catch { /* شبکه — دکمه غیرفعال می‌ماند، نه اینکه به ۴۰۴ برود */ }
+            setCoachInfo(info);
+          } catch { /* شبکه — متنِ دستیِ باشگاه می‌ماند، نه صفحه‌ی خالی */ }
         })();
       }
     }
@@ -338,6 +364,12 @@ export default function ClubProfilePage() {
     if (bookingClosed) return;
     user ? router.push(`/booking/${club.id}`) : router.push('/login');
   };
+  /* رشته‌های واقعیِ مربی؛ نبودشان یعنی همان متنِ دستیِ باشگاه */
+  const coachTitle = (c: CoachEntry): string => {
+    const d = (coachInfo[c.slug ?? ''] ?? coachInfo[c.id])?.disciplines ?? [];
+    return d.length ? d.map(k => DISCIPLINES.find(x => x.key === k)?.label ?? k).join(' · ') : c.title;
+  };
+
   const popupCoach = activeCoach !== null ? (coaches[activeCoach] ?? null) : null;
   /* نامکِ ذخیره‌شده اولویت دارد؛ وگرنه از نگاشتِ فهرستِ عمومی */
   const popupCoachSlug = popupCoach ? (popupCoach.slug || coachSlugs[popupCoach.id] || '') : '';
@@ -781,7 +813,7 @@ export default function ClubProfilePage() {
                           </div>
                           <div style={{ flex: 1, minWidth: 0 }}>
                             <div style={{ fontSize: 16, fontWeight: 800, color: '#111111', marginBottom: 3 }}>{c.name}</div>
-                            <div style={{ fontSize: 13, color: 'rgba(0,0,0,0.42)' }}>{c.title} · {c.exp}</div>
+                            <div style={{ fontSize: 13, color: 'rgba(0,0,0,0.42)' }}>{coachTitle(c)}{c.exp ? ` · ${c.exp}` : ''}</div>
                           </div>
                           {c.rating && (
                             <div style={{ display: 'flex', alignItems: 'center', gap: 3, flexShrink: 0 }}>
@@ -1327,7 +1359,7 @@ export default function ClubProfilePage() {
             {/* Info */}
             <div style={{ textAlign: 'center', marginBottom: 18 }}>
               <div style={{ fontSize: 20, fontWeight: 900, color: '#111111', marginBottom: 5 }}>{popupCoach.name}</div>
-              <div style={{ fontSize: 14, color: 'rgba(0,0,0,0.45)', marginBottom: 10 }}>{popupCoach.title} · {popupCoach.exp} تجربه</div>
+              <div style={{ fontSize: 14, color: 'rgba(0,0,0,0.45)', marginBottom: 10 }}>{coachTitle(popupCoach)}{popupCoach.exp ? ` · ${popupCoach.exp} تجربه` : ''}</div>
               {popupCoach.rating && (
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, marginBottom: 12 }}>
                   <Star size={13} style={{ color: '#f59e0b', fill: '#f59e0b' }} />
