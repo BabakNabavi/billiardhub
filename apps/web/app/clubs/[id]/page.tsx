@@ -167,7 +167,7 @@ export default function ClubProfilePage() {
 
      پس وقتی مربی پروفایل دارد، رشته‌هایش از همان‌جا می‌آید و متنِ
      دستیِ باشگاه فقط جای خالی را پر می‌کند. */
-  const [coachInfo, setCoachInfo] = useState<Record<string, { disciplines: string[]; sinceYear: number }>>({});
+  const [coachInfo, setCoachInfo] = useState<Record<string, { disciplines: string[]; sinceYear: number; ratingAvg: number; ratingCount: number }>>({});
   const [slugCopied, setSlugCopied]   = useState(false);
   const [clubAlbums, setClubAlbums]   = useState<ClubAlbum[]>([]);
   /* ── ویرایشِ درجا برای مالکِ باشگاه ──
@@ -242,10 +242,10 @@ export default function ClubProfilePage() {
           try {
             const r = await fetch('/api/profiles/coach', { cache: 'no-store' });
             const j = await r.json().catch(() => null) as {
-              profiles?: { id?: string; slug?: string; data?: { disciplines?: unknown; grades?: unknown } }[]
+              profiles?: { id?: string; slug?: string; ratingAvg?: unknown; ratingCount?: unknown; data?: { disciplines?: unknown; grades?: unknown } }[]
             } | null;
             const map: Record<string, string> = {};
-            const info: Record<string, { disciplines: string[]; sinceYear: number }> = {};
+            const info: Record<string, { disciplines: string[]; sinceYear: number; ratingAvg: number; ratingCount: number }> = {};
             for (const p of j?.profiles ?? []) {
               if (p.id && p.slug) map[p.id] = p.slug;
               const d = Array.isArray(p.data?.disciplines)
@@ -260,7 +260,15 @@ export default function ClubProfilePage() {
               const yr = parseInt(String(grades[0]?.year ?? ''), 10);
               /* با هر دو کلید نگه داشته می‌شود: ردیفِ قدیمی `id` دارد و
                  ردیفِ تازه `slug`. */
-              const entry = { disciplines: d, sinceYear: Number.isNaN(yr) ? 0 : yr };
+              /* ⚠️ «امتیاز» هم فیلدِ دستیِ باشگاه بود. حالا از ستونِ
+                 تجمیعیِ خودِ پروفایل می‌آید که تریگرِ جدولِ نظرها
+                 نگهش می‌دارد (مهاجرتِ ۰۸۹). */
+              const entry = {
+                disciplines: d,
+                sinceYear: Number.isNaN(yr) ? 0 : yr,
+                ratingAvg: Number(p.ratingAvg ?? 0),
+                ratingCount: Number(p.ratingCount ?? 0),
+              };
               if (p.id) info[p.id] = entry;
               if (p.slug) info[p.slug] = entry;
             }
@@ -380,6 +388,11 @@ export default function ClubProfilePage() {
   const coachTitle = (c: CoachEntry): string => {
     const d = coachOf(c)?.disciplines ?? [];
     return d.length ? d.map(k => DISCIPLINES.find(x => x.key === k)?.label ?? k).join(' · ') : c.title;
+  };
+  /* امتیاز فقط وقتی نظری ثبت شده باشد */
+  const coachRating = (c: CoachEntry): string => {
+    const i = coachOf(c);
+    return i && i.ratingCount > 0 ? toFa(i.ratingAvg.toFixed(1)) : '';
   };
   /* سابقه از سالِ اولین مدرک؛ نبودش یعنی همان متنِ دستیِ باشگاه */
   const coachExp = (c: CoachEntry): string => {
@@ -834,10 +847,12 @@ export default function ClubProfilePage() {
                             <div style={{ fontSize: 16, fontWeight: 800, color: '#111111', marginBottom: 3 }}>{c.name}</div>
                             <div style={{ fontSize: 13, color: 'rgba(0,0,0,0.42)' }}>{coachTitle(c)}{coachExp(c) ? ` · ${coachExp(c)}` : ''}</div>
                           </div>
-                          {c.rating && (
+                          {/* امتیازِ واقعی؛ بدونِ نظر، هیچ عددی نشان
+                              داده نمی‌شود — «۰ از ۵» بدتر از نبودنش است. */}
+                          {coachRating(c) && (
                             <div style={{ display: 'flex', alignItems: 'center', gap: 3, flexShrink: 0 }}>
                               <Star size={11} style={{ color: '#f59e0b', fill: '#f59e0b' }} />
-                              <span style={{ fontSize: 15, fontWeight: 800, color: '#111111' }}>{c.rating}</span>
+                              <span style={{ fontSize: 15, fontWeight: 800, color: '#111111' }}>{coachRating(c)}</span>
                             </div>
                           )}
                           <ChevronLeft size={14} style={{ color: 'rgba(0,0,0,0.25)', flexShrink: 0 }} />
@@ -1379,10 +1394,10 @@ export default function ClubProfilePage() {
             <div style={{ textAlign: 'center', marginBottom: 18 }}>
               <div style={{ fontSize: 20, fontWeight: 900, color: '#111111', marginBottom: 5 }}>{popupCoach.name}</div>
               <div style={{ fontSize: 14, color: 'rgba(0,0,0,0.45)', marginBottom: 10 }}>{coachTitle(popupCoach)}{coachExp(popupCoach) ? ` · ${coachExp(popupCoach)}` : ''}</div>
-              {popupCoach.rating && (
+              {coachRating(popupCoach) && (
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, marginBottom: 12 }}>
                   <Star size={13} style={{ color: '#f59e0b', fill: '#f59e0b' }} />
-                  <span style={{ fontSize: 17, fontWeight: 900, color: '#111111' }}>{popupCoach.rating}</span>
+                  <span style={{ fontSize: 17, fontWeight: 900, color: '#111111' }}>{coachRating(popupCoach)}</span>
                 </div>
               )}
               <div style={{ fontSize: 14, color: 'rgba(0,0,0,0.42)', lineHeight: 1.7, padding: '10px 12px', background: 'rgba(0,0,0,0.03)', borderRadius: 12 }}>

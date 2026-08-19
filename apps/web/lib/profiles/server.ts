@@ -46,6 +46,13 @@ export interface ProfileRow {
   licenseNote: string | null
   createdAt: string
   updatedAt: string
+  /* ⚠️ این دو ستون‌های تجمیعیِ امتیازند (مهاجرتِ ۰۸۹) و تریگر نگهشان
+     می‌دارد. یک‌بار همین‌جا جا افتادند: ستون در دیتابیس بود، صفحه هم
+     می‌خواندش، ولی این نگاشت فقط فیلدهای شناخته‌شده را کپی می‌کرد و
+     امتیاز بی‌صدا حذف می‌شد — کارت هیچ‌وقت عددی نشان نمی‌داد و tsc هم
+     چیزی نمی‌گفت، چون شکل با `as` ادعا می‌شود نه اعتبارسنجی. */
+  ratingAvg: number
+  ratingCount: number
 }
 
 /* ستون‌های دیتابیس snake_case‌اند؛ بقیه‌ی برنامه camelCase */
@@ -56,6 +63,7 @@ type DbRow = {
   license_number: string | null; license_url: string | null
   license_verified: boolean; license_note: string | null
   created_at: string; updated_at: string
+  rating_avg?: number | string | null; rating_count?: number | null
 }
 
 export function toProfile(r: DbRow): ProfileRow {
@@ -66,6 +74,9 @@ export function toProfile(r: DbRow): ProfileRow {
     licenseNumber: r.license_number, licenseUrl: r.license_url,
     licenseVerified: r.license_verified, licenseNote: r.license_note,
     createdAt: r.created_at, updatedAt: r.updated_at,
+    /* numeric در PostgREST رشته می‌آید */
+    ratingAvg: Number(r.rating_avg ?? 0),
+    ratingCount: Number(r.rating_count ?? 0),
   }
 }
 

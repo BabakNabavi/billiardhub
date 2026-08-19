@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef } from 'react'
 import ProfileHero from '../../../components/profile/ProfileHero'
 import ProfileGallery from '../../../components/profile/ProfileGallery'
+import Reviews from '../../../components/reviews/Reviews'
 import GradeTimeline from '../../../components/profile/GradeTimeline'
 import '../../../components/profile/profile-page.css'
 import { fetchProfileResult } from '../../../lib/profiles/client'
@@ -371,6 +372,15 @@ export default function CoachProfilePage() {
               onAddImages={addImages} onAddVideos={addVideoFiles} onNewAlbum={newAlbum}
             />
             {edit.error && <p className="ch-empty" role="alert">{edit.error}</p>}
+
+            {/* ── امتیاز و نظرها ──
+                ⚠️ کارتِ مربی تا امروز عددی به‌نامِ «امتیاز» داشت که
+                خودِ باشگاه‌دار تایپ می‌کرد. حالا داده‌ی واقعی است و
+                همان کامپوننتی رندر می‌شود که باشگاه استفاده می‌کند. */}
+            <section className="ch-card" style={{ marginTop: 16 }}>
+              <Reviews endpoint={`/api/profiles/coach/${encodeURIComponent(id)}/reviews`} subject="این مربی"
+                cannotReviewNote="برای ثبت نظر باید در باشگاهی که این مربی در آن ثبت شده، رزرو قطعی داشته باشید." />
+            </section>
           </main>
 
           <aside className="ch-col ch-rail" aria-label="اطلاعات مربی">

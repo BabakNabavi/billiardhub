@@ -4737,6 +4737,69 @@ console.log('\n― مرزِ ورودیِ پروفایل ―');
     'تودرتوییِ عمیق، فهرستِ بی‌انتها و رشته‌ی غول باید رد شوند');
 }
 
+console.log('\n― امتیازِ واقعیِ مربی ―');
+{
+  /* ⚠️ کارتِ مربی عددی به‌نامِ «امتیاز» داشت که خودِ باشگاه‌دار تایپ
+     می‌کرد. عددی که صاحبِ کسب‌وکار درباره‌ی خودش می‌نویسد امتیاز نیست. */
+  const mig = read('../../supabase/migrations/089_profile_reviews.sql');
+  t('جدولِ نظرِ پروفایل با همان قواعدِ باشگاه ساخته شده',
+    mig.includes('profile_reviews_one_per_user UNIQUE (profile_id, user_id)')
+    && mig.includes('rating BETWEEN 1 AND 5')
+    && mig.includes('is_hidden'),
+    'یک نظر برای هر کاربر، سقفِ ستاره، و پنهان‌کردنِ بدونِ حذفِ امتیاز');
+  t('میانگین را تریگر نگه می‌دارد، نه کدِ اپ',
+    mig.includes('bh_profile_rating_refresh') && mig.includes('is_hidden = false'),
+    'میانگینِ دستی همیشه از واقعیت عقب می‌ماند');
+
+  const api = strip(read('app/api/profiles/[kind]/[slug]/reviews/route.ts'));
+  t('سه لایه‌ی ضدِ تقلب سرِ جایشان‌اند',
+    api.includes('به پروفایل خودتان نمی‌توانید امتیاز بدهید')
+    && api.includes('canReview(actor.id, p.id, slug)')
+    && api.includes("onConflict: 'profile_id,user_id'"),
+    'بدونِ نسبتِ واقعی، هر حسابِ تازه می‌تواند به رقیب یک ستاره بدهد');
+  /* ⚠️ عضویت عمداً کنار گذاشته شد؛ فقط رزروِ پرداخت‌شده. چرایی‌اش
+     در خودِ مسیر نوشته شده و ادعای بعدی هم همان را قفل می‌کند. */
+  t('نسبت با رزروِ قطعی سنجیده می‌شود',
+    api.includes("eq('status', 'confirmed')") && api.includes('clubsOfCoach'),
+    'بدونِ نشانه‌ی پرداخت، هر حسابِ تازه می‌تواند به رقیب یک ستاره بدهد');
+
+  /* یک کامپوننت برای هر دو، نه دو نسخه از یک چیز */
+  t('کامپوننتِ نظرها مشترک است',
+    read('components/club/ClubReviews.tsx').includes("from '../reviews/Reviews'")
+    && strip(read('app/coaches/[id]/page.tsx')).includes('components/reviews/Reviews'),
+    'نسخه‌ی دومِ همان کامپوننت یعنی روزی یکی درست شود و آن یکی نه');
+  t('شکلِ پاسخِ دو مسیر یکی است',
+    api.includes('summary: {') && api.includes('isMine:') && api.includes('edited:'),
+    'شکلِ متفاوت یعنی کامپوننتِ دوم');
+
+  /* کارت دیگر عددِ دستی را نشان نمی‌دهد */
+  const clubSrc = strip(read('app/clubs/[id]/page.tsx'));
+  t('کارتِ باشگاه امتیازِ واقعی را نشان می‌دهد',
+    clubSrc.includes('const coachRating = (c: CoachEntry)')
+    && clubSrc.includes('i.ratingCount > 0')
+    && !clubSrc.includes('{c.rating}'),
+    'عددِ تایپ‌شده‌ی باشگاه‌دار امتیاز نبود');
+  /* ایرادهایی که بازبینی گرفت و اگر برگردند دوباره ساکت‌اند */
+  t('ستون‌های امتیاز از نگاشتِ پروفایل رد می‌شوند',
+    strip(read('lib/profiles/server.ts')).includes('ratingAvg: Number(r.rating_avg ?? 0)'),
+    'ستون در دیتابیس بود ولی نگاشت دورش می‌ریخت — کارت هیچ‌وقت عددی نمی‌دید');
+  t('مسیرِ امتیاز فقط مربی را می‌پذیرد',
+    api.includes("new Set(['coach'])"),
+    'پروفایلِ مربی و داورِ یک نفر یک نامک دارند؛ با فهرستِ باز، امتیاز روی نقشِ دیگر می‌نشست');
+  t('عضویتِ خودسرویس نسبتِ کافی نیست',
+    !api.includes('club_members'),
+    'هر حسابِ تازه می‌تواند عضوِ هر باشگاهی شود — هزینه‌ی نظرِ جعلی صفر می‌شد');
+  t('پروفایلِ تأییدنشده امتیاز نمی‌گیرد',
+    api.includes('publicOrOwn(p,'),
+    'هم وجودش لو می‌رفت هم امتیاز رویش جمع می‌شد');
+  t('ادمین می‌تواند نظرِ توهین‌آمیز را بردارد',
+    api.includes("searchParams.get('reviewId')") && api.includes('isAdmin(actor.id)'),
+    'وگرنه پاک‌کردنِ یک نظر فقط با psql ممکن بود');
+  t('نظرها در خطا «خالی» نشان داده نمی‌شوند',
+    strip(read('components/reviews/Reviews.tsx')).includes("useState<'loading' | 'ready' | 'error'>"),
+    'کارتِ همیشه‌خالی بدترین حالتِ خطاست');
+}
+
 console.log('\n― رشته‌ها روی کارت و در فیلتر ―');
 {
   /* ⚠️ کاربر دید: روی کارت «داور اسنوکر» و در صفحه‌ی خودش «اسنوکر،
