@@ -91,6 +91,9 @@ const emptyForm = {
   slug: '', firstNameFa: '', lastNameFa: '', firstNameEn: '', lastNameEn: '',
   province: '', city: '', disciplines: [] as string[], shortBio: '', fullBio: '',
   grades: [] as RefereeGrade[], gallery: [] as RefereeMedia[], videos: [] as RefereeVideo[],
+  /* نامِ آلبوم‌ها. ⚠️ بدونِ این، پرکردنِ فرم از نسخه‌ی محلی آلبوم‌های
+     خالی را می‌انداخت و ذخیره‌ی بعدی پاکشان می‌کرد. */
+  albums: [] as string[],
   phone: '', whatsapp: '', instagram: '', telegram: '',
   photo: '', coverImage: '', certificate: null as { name: string; url: string } | null,
 }
@@ -182,7 +185,7 @@ function RefereeDashboardInner() {
         slug: mine.slug, firstNameFa: user?.firstName || mine.firstNameFa, lastNameFa: user?.lastName || mine.lastNameFa,
         firstNameEn: mine.firstNameEn, lastNameEn: mine.lastNameEn, province: mine.province, city: mine.city,
         disciplines: mine.disciplines, shortBio: mine.shortBio, fullBio: mine.fullBio,
-        grades: mine.grades, gallery: mine.gallery, videos: mine.videos,
+        grades: mine.grades, gallery: mine.gallery, videos: mine.videos, albums: mine.albums ?? [],
         phone: mine.phone, whatsapp: mine.whatsapp, instagram: mine.instagram, telegram: mine.telegram,
         photo: mine.photo, coverImage: mine.coverImage, certificate: mine.certificate,
       })
@@ -331,7 +334,8 @@ function safeRemote(raw: unknown): Partial<FormState> {
       videos:  f.videos.map(v => (v.id === id ? { ...v, album } : v)),
     }))
   const albumNames = Array.from(new Set(
-    [...form.gallery, ...form.videos].map(m => (m.album ?? '').trim()).filter(Boolean),
+    [...form.albums, ...[...form.gallery, ...form.videos].map(m => m.album ?? '')]
+      .map(n => n.trim()).filter(Boolean),
   ))
 
   /* ── چرا این‌جا آپلودِ واقعی است ──

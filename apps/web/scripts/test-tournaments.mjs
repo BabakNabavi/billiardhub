@@ -3217,8 +3217,12 @@ console.log('\n― پروفایلِ مربی و داور ―');
        در صفحه‌ی مربی این دو در یک فایل نیستند: بازطراحی، گالری را به
        `components/profile/ProfileGallery.tsx` برد. پس هر صفحه بسته‌ی
        خودش را دارد؛ ادعا رفتار را می‌سنجد نه اینکه کدام فایل. */
-    existsSync(join(ROOT, 'components/ProfileVideoCard.tsx'))
-    && [
+    /* ⚠️ این ادعا به `ProfileVideoCard` بند بود. آن کارت حذف شد:
+       داخلِ خانه‌ی ۱۱۶ پیکسلی `<video controls>` می‌گذاشت، پس فیلم در
+       قابِ بندانگشتی پخش می‌شد و نوارِ کنترل نصفِ مربع را می‌گرفت. حالا
+       خانه فقط پوستر است و پخش در نمای تمام‌صفحه انجام می‌شود — پس
+       ادعا هم همان رفتارِ تازه را می‌سنجد. */
+    [
       ['app/coaches/[id]/page.tsx', 'components/profile/ProfileGallery.tsx'],
       ['app/referees/[id]/page.tsx', 'components/profile/ProfileGallery.tsx'],
     ].every(files => {
@@ -3226,7 +3230,7 @@ console.log('\n― پروفایلِ مربی و داور ―');
       /* ⚠️ الگو `key={v.id}` را نمی‌خواهد: با مربع‌شدنِ خانه‌های ویدیو،
          `key` روی پوسته رفت و کارت خودش فقط `v` می‌گیرد. چیزی که
          اهمیت دارد رندرشدنِ کارت و رسیدنِ `url` است، نه محلِ کلید. */
-      return src.includes('<ProfileVideoCard v={v} />') && src.includes('url: v.url');
+      return src.includes('ch-vid-tile') && src.includes('onOpenVideo') && src.includes('url: v.url');
     }),
     'دکمه‌ی پخش تزئینی بود و صفحه‌ی داور اصلاً به‌روز نشده بود');
   t('سه عبارتِ اضافه حذف شدند',
@@ -3920,6 +3924,72 @@ console.log('\n― استوری: یک منبع، با انقضا ―');
     t('دکمه‌ی افزودن فقط برای مالک رندر می‌شود',
       gal.includes('{canEdit && addTile(') && gal.includes('ch-add-tile'),
       'دکمه‌ی غیرفعال هم یعنی بازدیدکننده چیزی می‌بیند که کارش نیست');
+
+    /* ── آلبوم باید بتواند خالی باشد ──
+       ⚠️ نسخه‌ی قبلی آلبوم را فقط از روی `media.album` می‌ساخت، پس
+       «آلبومِ تازه» مجبور بود یکی از عکس‌های موجود را داخلش بیندازد.
+       کاربر دید که عکسِ تبِ تصاویر خودبه‌خود داخلِ آلبومِ خالی رفت. */
+    for (const [p, tag] of [['app/referees/[id]/page.tsx', 'داور'], ['app/coaches/[id]/page.tsx', 'مربی']]) {
+      const src = strip(read(p));
+      t(`${tag}: ساختِ آلبوم عکسِ موجود را برنمی‌دارد`,
+        src.includes('albums: [...list, n]') && !src.includes('g.album = name') && !src.includes('{ ...g, album: name }'),
+        'آلبومِ تازه نباید عکسِ تبِ تصاویر را بدزدد');
+      t(`${tag}: رسانه می‌تواند مستقیم داخلِ آلبوم برود`,
+        src.includes('addImages = async (files: FileList, album?: string)')
+        && src.includes('addVideoFiles = async (files: FileList, album?: string)'),
+        'داخلِ آلبوم راهی برای افزودن نبود');
+      t(`${tag}: ویدیو در نمای تمام‌صفحه باز می‌شود`,
+        src.includes('useProfileVideoViewer') && src.includes('onOpenVideo='),
+        'ویدیو داخلِ خانه‌ی ۱۱۶ پیکسلی پخش می‌شد و نوارِ کنترل نصفِ قاب را می‌گرفت');
+    }
+    /* ⚠️ رشته‌ی تگ در خودِ توضیحاتِ گالری هم نباید بیاید: این فایل
+       به‌خاطرِ accept="image/*" strip نمی‌شود و کامنت را هم می‌بیند. */
+    t('خانه‌ی ویدیو در شبکه تگِ video ندارد',
+      gal.includes('ch-vid-tile') && !gal.includes('<video'),
+      'با پخش‌کننده داخلِ مربع، نصفِ خانه نوارِ کنترل می‌شد');
+    /* ⚠️ حذف از داخلِ آلبوم یک‌بار عکسِ *دیگری* را برد: اندیسِ خانه
+       اندیسِ زیرمجموعه بود و صفحه با آن روی کلِ گالری فیلتر می‌کرد.
+       این ادعا برگشتِ آن را می‌گیرد. */
+    for (const p of ['app/referees/[id]/page.tsx', 'app/coaches/[id]/page.tsx']) {
+      const src = strip(read(p));
+      t(p.includes('referees') ? 'داور: حذفِ عکس با شناسه است' : 'مربی: حذفِ عکس با شناسه است',
+        src.includes('deleteImage = async (id: string)')
+        && src.includes('d.gallery.filter(g => g.id !== id)'),
+        'با اندیس، حذف از داخلِ آلبوم عکسِ دیگری را می‌برد');
+    }
+    t('نمای ویدیو بعد از حذف بسته می‌شود',
+      strip(read('components/profile/ProfileVideoViewer.tsx')).includes('await state.onDelete?.(); close()'),
+      'روکش روی نشانیِ حذف‌شده باز می‌ماند و کلیکِ دوم یک ذخیره‌ی دیگر می‌فرستاد');
+    {
+      const pv = read('components/profile/profile-page.css');
+      const at = pv.indexOf('.pvv-back {');
+      const zAt = pv.indexOf('z-index: ', at);
+      const z = parseInt(pv.slice(zAt + 9, zAt + 13), 10);
+      t('نمای ویدیو بالای نوارِ ناوبری می‌نشیند',
+        at >= 0 && z > 200,
+        'با z-index کمتر، نوارِ ناوبری روی دکمه‌ی بستن می‌نشست');
+    }
+    t('نامِ آلبوم از jsonb با احتیاط خوانده می‌شود',
+      gal.includes("typeof n === 'string'"),
+      'یک مقدارِ غیرِرشته صفحه‌ی عمومی را برای همه سفید می‌کرد');
+    for (const p of ['app/dashboard/coach/page.tsx', 'app/referees/dashboard/page.tsx']) {
+      const src = strip(read(p));
+      t(p.includes('coach') ? 'پنلِ مربی آلبوم‌ها را نگه می‌دارد' : 'پنلِ داور آلبوم‌ها را نگه می‌دارد',
+        src.includes('albums: [] as string[]') && src.includes('albums: mine.albums ?? []'),
+        'ذخیره از پنل، آلبومِ خالی را پاک می‌کرد');
+    }
+    t('داخلِ آلبومِ باز هم خانه‌ی افزودن هست',
+      gal.includes('pickImages(current.name)') && gal.includes('pickVideo(current.name)'),
+      'کاربر داخلِ آلبوم هیچ راهی برای گذاشتنِ عکس یا ویدیو نداشت');
+    /* قابِ نقطه‌چین یک‌بار بی‌صدا گم شد: `.ch-gal-cell` که `border: none`
+       دارد هم‌وزن است و دیرتر بارگذاری می‌شود. */
+    {
+      const pcss = read('components/profile/profile-page.css');
+      const at = pcss.indexOf('.ch-gal-cell.ch-add-tile {');
+      t('قابِ نقطه‌چینِ «+» با وزنِ کافی نوشته شده',
+        at >= 0 && pcss.slice(at, at + 220).includes('dashed'),
+        'با یک کلاس، border: none صفحه‌ی پروفایل برنده می‌شد و قاب دیده نمی‌شد');
+    }
 
     t('نمای تمام‌صفحه دکمه‌ی حذفِ اختیاری دارد',
       strip(read('components/market/ImageLightbox.tsx')).includes('onDelete?:'),

@@ -1727,10 +1727,6 @@ select:disabled { opacity: 0.55; cursor: not-allowed; }
 }
 .ch-add-tile:focus-visible { outline: 2px solid var(--gold-deep, #8F6531); outline-offset: 3px; }
 .ch-add-tile:disabled { cursor: progress; opacity: .6; }
-/* خانه‌ی ویدیو نسبتِ ۱۶:۹ دارد، مثل کارت‌های کنارش */
-.ch-vid-add { aspect-ratio: 16 / 9; border-radius: 10px; }
-/* در شبکه‌ی آلبوم، خانه‌ی افزودن ارتفاعِ کارتِ آلبوم را می‌گیرد */
-.ch-alb.ch-add-tile { min-height: 132px; }
 .ch-spin { animation: ch-rot .9s linear infinite; }
 @keyframes ch-rot { to { transform: rotate(360deg) } }
 @media (prefers-reduced-motion: reduce) {

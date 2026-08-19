@@ -27,10 +27,11 @@ import { videoMeta, formatDuration } from '../../../lib/video-thumb'
    جریان را قفل می‌کنند، استایلِ سایت را نمی‌گیرند و روی وب‌ویوِ
    اپ رفتارشان یکسان نیست. `askText`/`ask` همان کار را با پنجره‌ی
    خودِ سایت می‌کنند. */
-import { askText, ask, notify } from '../../../lib/ui/dialogs'
+import { ask, notify } from '../../../lib/ui/dialogs'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import { useProfileImageViewer } from '@/components/ProfileImageViewer'
+import { useProfileVideoViewer } from '@/components/profile/ProfileVideoViewer'
 import { normalizeDigits } from '@/lib/text-fa'
 import { Phone, Send, Copy, Check } from 'lucide-react'
 import {
@@ -130,6 +131,7 @@ export default function RefereeProfilePage() {
 
   const referee = localP ? mapLocalToView(localP) : null
   const { open: openImage, viewer: imageViewer } = useProfileImageViewer()
+  const { open: openVideo, viewer: videoViewer } = useProfileVideoViewer()
 
   /* ── ویرایشِ درجا ──
      ⚠️ این فراخوانی *باید* پیش از هر `return`ِ شرطی باشد. یک‌بار
@@ -237,11 +239,13 @@ export default function RefereeProfilePage() {
 
   const latin = localP ? `${localP.firstNameEn} ${localP.lastNameEn}`.trim().toUpperCase() : ''
 
-  const addImages = async (files: FileList) => {
+  const addImages = async (files: FileList, album?: string) => {
     const items = await Promise.all([...files].map(async fl => ({
       id: `m${Date.now()}${Math.random().toString(36).slice(2, 7)}`,
       url: await compressImage(fl, 1000, 0.68),
       caption: '',
+      /* از داخلِ آلبوم که اضافه شود، همان‌جا می‌نشیند */
+      ...(album ? { album } : {}),
     })))
     await edit.apply(d => ({ ...d, gallery: [...d.gallery, ...items] }))
   }
@@ -251,7 +255,7 @@ export default function RefereeProfilePage() {
      همان مسیرِ آپلودی می‌رود که پنل استفاده می‌کند
      (`profiles/videos/<userId>/…` در Storage، نه data:URL داخلِ jsonb
      که ردیف را می‌ترکاند). */
-  const addVideoFiles = async (files: FileList) => {
+  const addVideoFiles = async (files: FileList, album?: string) => {
     const file = files[0]
     if (!file) return
     if (file.size > MAX_VIDEO_MB * 1024 * 1024) {
@@ -267,26 +271,33 @@ export default function RefereeProfilePage() {
       const thumb = meta.thumb ? (await uploadFile('club-media', meta.thumb, `${base}-thumb`)) ?? '' : ''
       await edit.apply(d => ({
         ...d,
-        videos: [...d.videos, { id: vid, url, thumbnail: thumb, title: file.name.replace(/.[^.]+$/, ''), duration: formatDuration(meta.durationSec) }],
+        videos: [...d.videos, { id: vid, url, thumbnail: thumb, title: file.name.replace(/.[^.]+$/, ''), duration: formatDuration(meta.durationSec), ...(album ? { album } : {}) }],
       }))
     } finally { setVidBusy(false) }
   }
-  const newAlbum = async () => {
-    const name = (await askText('آلبوم تازه', { placeholder: 'نام آلبوم' }))?.trim()
-    if (!name) return
-    /* آلبوم تا وقتی رسانه‌ای نداشته باشد وجود ندارد — پس آخرین عکسِ
-       بدونِ آلبوم به آن داده می‌شود و کاربر بقیه را از پنل یا با
-       همین فیلد جابه‌جا می‌کند. */
+  /* ⚠️ نسخه‌ی قبلی نامِ آلبوم را روی «آخرین عکسِ بدونِ آلبوم»
+     می‌نشاند، چون آلبوم فقط از روی رسانه‌ها ساخته می‌شد و آلبومِ خالی
+     ممکن نبود. نتیجه‌اش این بود که آلبومِ تازه‌ی خالی، یکی از عکس‌های
+     تبِ تصاویر را با خودش می‌برد. حالا فقط نام اعلام می‌شود. */
+  const newAlbum = async (name: string) => {
+    const n = name.trim()
+    if (!n) return
     await edit.apply(d => {
-      const i = [...d.gallery].reverse().findIndex(g => !(g.album ?? '').trim())
-      if (i < 0) return d
-      const at = d.gallery.length - 1 - i
-      return { ...d, gallery: d.gallery.map((g, k) => (k === at ? { ...g, album: name } : g)) }
+      const list = d.albums ?? []
+      if (list.some(x => x.trim() === n)) return d
+      return { ...d, albums: [...list, n] }
     })
   }
-  const deleteImage = async (i: number) => {
+  const deleteVideo = async (id: string) => {
+    if (!(await ask('این ویدیو حذف شود؟', { body: 'این کار برگشت‌پذیر نیست.', confirmLabel: 'حذف' }))) return
+    await edit.apply(d => ({ ...d, videos: d.videos.filter(v => v.id !== id) }))
+  }
+  /* ⚠️ با شناسه، نه با اندیس: داخلِ آلبوم اندیسِ خانه به زیرمجموعه
+     برمی‌گشت و این فیلتر روی کلِ گالری بود — یعنی حذف از داخلِ آلبوم
+     عکسِ دیگری را می‌برد. */
+  const deleteImage = async (id: string) => {
     if (!(await ask('این تصویر حذف شود؟', { body: 'این کار برگشت‌پذیر نیست.', confirmLabel: 'حذف' }))) return
-    await edit.apply(d => ({ ...d, gallery: d.gallery.filter((_, k) => k !== i) }))
+    await edit.apply(d => ({ ...d, gallery: d.gallery.filter(g => g.id !== id) }))
   }
 
   return (
@@ -333,10 +344,12 @@ export default function RefereeProfilePage() {
             <ProfileGallery
               images={referee.gallery}
               videos={referee.videos}
-              onOpenImage={(urls, index, meta) => openImage(urls, {
+              onOpenImage={(urls, index, meta, ids) => openImage(urls, {
                 index, ...meta,
-                ...(edit.isOwner ? { onDelete: deleteImage } : {}),
+                ...(edit.isOwner ? { onDelete: (i: number) => deleteImage(ids[i] ?? '') } : {}),
               })}
+              onOpenVideo={v => openVideo(v, edit.isOwner ? { onDelete: () => deleteVideo(v.id) } : undefined)}
+              albumNames={localP?.albums ?? []}
               canEdit={edit.isOwner} busy={edit.saving || vidBusy}
               onAddImages={addImages} onAddVideos={addVideoFiles} onNewAlbum={newAlbum}
             />
@@ -405,6 +418,7 @@ export default function RefereeProfilePage() {
       </div>
 
       {imageViewer}
+      {videoViewer}
     </div>
   )
 }
