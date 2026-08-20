@@ -118,7 +118,9 @@ const head = s => console.log(`\n■ ${s}`)
 
   t('موضوعِ تغییر کد پستی اضافه شد', /'درخواست تغییر کد پستی'/.test(page))
   t('موضوعِ ویرایش اطلاعات بانکی اضافه شد', /'درخواست ویرایش اطلاعات بانکی'/.test(page))
-  t('فرم به مسیرِ واقعی پست می‌کند', /fetch\('\/api\/contact'/.test(page))
+  t('فرم به مسیرِ واقعی پست می‌کند', /apiFetch\('\/api\/contact'/.test(page))
+  /* ⚠️ با fetchِ خام درخواست بدونِ هدرِ CSRF می‌رود و سرور ۴۰۳ می‌دهد */
+  t('و از راهِ apiFetch تا هدرِ CSRF بیاید', /import \{ apiFetch \} from/.test(page))
   /* پیش‌تر در شکست، پیام در localStorage می‌ماند و باز هم «ارسال شد»
      نشان داده می‌شد — یعنی تیکت هرگز به کسی نمی‌رسید */
   t('دیگر به localStorage نمی‌ریزد', !/bh_contact_messages/.test(page))
@@ -141,7 +143,11 @@ const head = s => console.log(`\n■ ${s}`)
   const page = code('app/admin/support/page.tsx')
   const home = code('app/admin/page.tsx')
 
-  t('فقط ادمین دسترسی دارد', (api.match(/await isAdmin\(actor\.id\)/g) ?? []).length >= 2)
+  t('هر دو هندلر با کلیدِ support قفل‌اند',
+    (api.match(/await can\(actor\.id, 'support'\)/g) ?? []).length >= 2)
+  /* گاردِ ضدِ پس‌رفت: برگشت به isAdminِ همه‌کاره یعنی ادمینِ محدودِ
+     بی‌ربط هم می‌تواند قفلِ بانکیِ کاربران را باز کند. */
+  t('به isAdminِ همه‌کاره برنگشته', !/await isAdmin\(actor\.id\)/.test(api))
   t('بازکردنِ قفلِ کد پستی', /postalCodeVerified: false/.test(api))
   t('بازکردنِ قفلِ بانکی', /bank_card_verified: false/.test(api))
   t('قفلِ شبای باشگاه هم باز می‌شود', /ibanVerified: false/.test(api))
@@ -203,19 +209,37 @@ const head = s => console.log(`\n■ ${s}`)
 {
   head('دعوتِ مربی — ادغام به‌جای بازنویسی')
   const put = code('app/api/clubs/[id]/route.ts')
-  t('PUT فهرستِ ذخیره‌شده را می‌خواند', /select\('coaches'\)\.eq\('id', id\)/.test(put))
-  t('status از ردیفِ سرور می‌آید', /out\.status = STATUS\.has\(String\(old\.status\)\) \? old\.status : 'accepted'/.test(put))
-  t('decidedAt هم از سرور', /if \('decidedAt' in old\) out\.decidedAt = old\.decidedAt/.test(put))
-  /* ⚠️ مهم‌ترین گارد: ردیفی که در دیتابیس نیست همیشه pending است.
-     بدونش صاحبِ باشگاه با یک PUT می‌تواند مربیِ دعوت‌نپذیرفته را
-     «پذیرفته» اعلام کند و از راهِ آن حقِ امتیازدهی هم بسازد. */
-  t('ردیفِ تازه همیشه pending می‌شود', /\} else \{[\s\S]{0,80}out\.status = 'pending';/.test(put))
-  t('کلیدها سفیدلیست‌اند', /const KEEP = \['id', 'slug', 'name', 'title', 'exp', 'bio'\]/.test(put))
-  t('خطای خواندن ۵۰۰ می‌دهد نه نوشتنِ کور', /if \(curErr && !\/does not exist\|PGRST204\//.test(put))
+  /* PUT دیگر اصلاً این ستون را نمی‌نویسد — یک راهِ نوشتن بیشتر نیست */
+  t('PUT ستونِ مربیان را رد می‌کند', /hasOwnProperty\.call\(body, 'coaches'\)/.test(put))
+  t('و به مسیرِ درست ارجاع می‌دهد', /api\/clubs\/:id\/coaches/.test(put))
+  t('بلوکِ ادغام دیگر لازم نیست', !/merged\.status/.test(put) && !/out\.status = 'pending'/.test(put))
 
   const dash = code('app/dashboard/club/page.tsx')
-  t('پنل پاسخِ سرور را می‌نشاند', /if \(Array\.isArray\(saved\)\) setCoaches\(saved as CoachEntry\[\]\)/.test(dash))
+  t('پنل پاسخِ سرور را می‌نشاند', /Array\.isArray\(saved\)\) setCoaches\(saved as CoachEntry\[\]\)/.test(dash))
+  /* خطای «نسخه‌ات کهنه است» هم فهرستِ درست را برمی‌گرداند */
+  t('و در خطا هم دوباره هم‌گام می‌شود', /res\?\.data\?\.coaches/.test(dash))
+  t('پاسخِ دیررسِ باشگاهِ قبلی ننشیند', /selectedClubRef\.current === cid/.test(dash))
   t('با عوضِ باشگاه فهرست خالی می‌شود', /setCoaches\(\[\]\);[\s\S]{0,60}setCoachesReady\(false\)/.test(dash))
+
+  /* ── مسیرِ تک‌تغییری ──
+     ادغام جلوی بازنویسیِ وضعیت را می‌گیرد ولی حذفِ ردیفِ نادیده را
+     نه: «نبودن در آرایه» از «حذفش کردم» قابلِ تشخیص نیست. پس پنل
+     باید نیت را صریح بفرستد. */
+  const cRoute = code('app/api/clubs/[id]/coaches/route.ts')
+  t('مسیرِ مربیانِ باشگاه هست', /export async function PATCH/.test(cRoute))
+  t('فقط مالک یا ادمین', /!isAdmin && row\.ownerId !== payload\.id/.test(cRoute))
+  /* نامک روی ستونِ uuid یعنی خطای 22P02 و ۵۰۰ به‌جای ۴۰۴ */
+  t('شناسه‌ی غیر-uuid زود رد می‌شود', /if \(!isUUID\(id\)\) return err\(/.test(cRoute))
+  t('نقشِ ادمین از کلیدِ ریزدانه می‌آید', /await can\(payload\.id, 'clubs'\)/.test(cRoute))
+  t('خطاهای کهنگی فهرست را هم می‌دهند', /err\('این مربی در فهرست نیست', 404, list\)/.test(cRoute))
+  t('ممیزی ثبت می‌شود', /CLUB_COACH_ADDED/.test(cRoute) && /CLUB_COACH_REMOVED/.test(cRoute))
+  t('افزودن همیشه pending است', /entry\.status = 'pending';/.test(cRoute))
+  t('status از بدنه خوانده نمی‌شود', !/src\.status/.test(cRoute))
+  t('دعوتِ تکراری ۴۰۹ می‌گیرد', /از قبل در فهرست است', 409/.test(cRoute))
+  t('حذف با شناسه است نه با آرایه', /body\.removeId/.test(cRoute))
+  t('پنل دیگر کلِ آرایه را PUT نمی‌کند', !/\{ coaches: next \}/.test(dash))
+  t('پنل از مسیرِ تک‌تغییری می‌رود', /api\.patch\(/.test(dash) && /mutateCoaches/.test(dash))
+  t('دکمه‌ها حالتِ busy دارند', /disabled=\{coachBusy\}/.test(dash))
   /* مسیرِ خودِ مربی از اول همین گارد را داشت */
   const inv = code('app/api/coach/club-invites/route.ts')
   t('مسیرِ مربی هم کلِ ستون را نمی‌نویسد', /list\.map\(e => \{/.test(inv))
