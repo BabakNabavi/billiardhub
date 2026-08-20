@@ -12,6 +12,7 @@ const faNum = (v: string | number) => String(v).replace(/[0-9]/g, d => '۰۱۲۳
 import VerificationBadges from '../../../components/VerificationBadges'
 import Link from 'next/link'
 import ClubInvites from '../../../components/coach/ClubInvites'
+import SessionInbox from '../../../components/coach/SessionInbox'
 import { useAuthStore } from '../../../store/auth.store'
 import { isValidSlug } from '../../../lib/slug'
 import { fetchMyProfileResult, saveProfileRemote } from '../../../lib/profiles/client'
@@ -163,6 +164,10 @@ function CoachDashboardInner() {
      «آپلود نشد» و «ذخیره روی سرور انجام نشد» استفاده می‌شود و یک
      عنوانِ ثابت روی هر سه، دو تای آخر را دروغ می‌کرد. */
   const [alert, setAlert] = useState<{ title: string; lines: string[] } | null>(null)
+  /* مبلغ و مدتِ جلسه ستونِ ردیف‌اند نه بخشی از فرمِ jsonb — پس حالتِ
+     جدا دارند و کنارِ ذخیره فرستاده می‌شوند. */
+  const [sessionPrice, setSessionPrice] = useState('')
+  const [sessionMin, setSessionMin] = useState('60')
   /* نامکی که واقعاً روی سرور ثبت شده. تا وقتی خالی است فیلدِ نشانی
      باز می‌ماند؛ نامکِ خودکارِ فرم نباید قفلش کند. */
   const [savedSlug, setSavedSlug] = useState<string | null>(null)
@@ -219,6 +224,9 @@ function CoachDashboardInner() {
         return
       }
       setSavedSlug(remote.slug)
+      /* مبلغ و مدتِ جلسه از ستونِ ردیف می‌آیند، نه از jsonb */
+      if (remote.sessionPrice !== undefined) setSessionPrice(String(remote.sessionPrice || ''))
+      if (remote.sessionMin !== undefined) setSessionMin(String(remote.sessionMin || 60))
       /* ── چرا نامِ حساب دوباره نوشته می‌شود ──
          داده‌ی سرور روی مقدارهای پیش‌پرشده می‌نشیند. پروفایلی که با
          نامِ خالی ذخیره شده، دقیقاً همان بن‌بستی را برمی‌گرداند که این
@@ -458,7 +466,8 @@ function safeRemote(raw: unknown): Partial<FormState> {
        به دیتابیس نمی‌رسید و پنل ادمین آن را نمی‌دید. */
     if (savedSlug === null) { setAlert({ title: 'یک لحظه', lines: ['نشانیِ اختصاصی هنوز خوانده نشده — چند لحظه صبر کنید یا صفحه را تازه کنید'] }); return }
     const res = await saveProfileRemote('coach', profile.slug, profile as unknown as Record<string, unknown>,
-      { number: '', url: profile.certificate?.url ?? '' })
+      { number: '', url: profile.certificate?.url ?? '' },
+      { price: Number(sessionPrice) || 0, minutes: Number(sessionMin) || 60 })
     if (!res.ok) {
       setAlert({ title: 'ذخیره نشد', lines: [res.message ?? 'ذخیره روی سرور انجام نشد'] })
       if (typeof window !== 'undefined') window.scrollTo({ top: 0, behavior: 'smooth' })
@@ -541,8 +550,9 @@ function safeRemote(raw: unknown): Partial<FormState> {
               بخشی از تکمیلِ پروفایل است. جایش پنلِ خودِ کاربر است، نه
               فرمِ ثبت. */}
 
-          {/* دعوت‌های باشگاه — بالای فرم، چون تصمیم است نه ویرایش */}
+          {/* دعوت‌ها و جلسه‌ها بالای فرم‌اند: تصمیم‌اند، نه ویرایش */}
           <ClubInvites />
+          <SessionInbox />
 
           {/* 1 — Basic info */}
           <div style={card}>
@@ -757,9 +767,31 @@ function safeRemote(raw: unknown): Partial<FormState> {
             </div>
           </div>
 
+          {/* جلسه‌ی خصوصی — مبلغ و مدت. پرداخت حضوری است و همین‌جا هم
+              نوشته می‌شود تا کسی منتظرِ درگاه نماند. */}
+          <div style={card}>
+            {sectionTitle('جلسه‌ی خصوصی', 5)}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2,1fr)', gap: 14 }}>
+              <div>
+                <label style={lbl}>مبلغ هر جلسه (تومان)</label>
+                <input value={sessionPrice} onChange={e => setSessionPrice(e.target.value.replace(/[^0-9]/g, ''))}
+                  inputMode="numeric" dir="ltr" placeholder="0" style={inp} />
+              </div>
+              <div>
+                <label style={lbl}>مدت جلسه (دقیقه)</label>
+                <input value={sessionMin} onChange={e => setSessionMin(e.target.value.replace(/[^0-9]/g, ''))}
+                  inputMode="numeric" dir="ltr" placeholder="60" style={inp} />
+              </div>
+            </div>
+            <p style={{ fontSize: 12, color: TEXT_S, lineHeight: 1.9, margin: '10px 0 0' }}>
+              شاگرد از صفحه‌ی شما درخواست جلسه می‌فرستد و شما تأیید می‌کنید.
+              پرداخت فعلاً حضوری است. مبلغ صفر یعنی «توافقی».
+            </p>
+          </div>
+
           {/* 5 — Contact */}
           <div style={card}>
-            {sectionTitle('راه‌های ارتباطی', 5)}
+            {sectionTitle('راه‌های ارتباطی', 6)}
             <p style={{ fontSize: 12.5, color: TEXT_M, marginBottom: 14 }}>هر کدام را که پر کنید، آیکونش در بخش «راه‌های ارتباطی» پروفایل نمایش داده می‌شود.</p>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2,1fr)', gap: 14 }}>
               {/* ── چرا این دو راهنما ──
@@ -784,7 +816,7 @@ function safeRemote(raw: unknown): Partial<FormState> {
 
           {/* 6 — Certificate (last) */}
           <div style={card}>
-            {sectionTitle('آپلود آخرین مدرک مربیگری', 6)}
+            {sectionTitle('آپلود آخرین مدرک مربیگری', 7)}
             <VerificationPrompt role="coach" done={!!form.certificate} style={{ marginBottom: 14 }} />
             {form.certificate && (
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, border: '1px solid rgba(5,118,66,0.25)', background: 'rgba(5,118,66,0.06)', borderRadius: 10, padding: '11px 14px', marginBottom: 10 }}>

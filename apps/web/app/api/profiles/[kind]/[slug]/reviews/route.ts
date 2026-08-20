@@ -63,13 +63,30 @@ async function clubsOfCoach(profileId: string, slug: string): Promise<string[]> 
 
 /** آیا این کاربر با این مربی نسبتِ واقعی دارد؟ */
 async function canReview(userId: string, profileId: string, slug: string): Promise<boolean> {
+  /* ── نشانه‌ی درجه‌یک: جلسه‌ی واقعی ──
+     جلسه‌ای که خودِ مربی تأیید کرده و زمانش گذشته. دقیق‌ترین چیزی که
+     سیستم می‌داند.
+
+     ⚠️ چرا «تأییدشده + گذشته» و نه «مربی گفت برگزار شد»: اگر
+     پایانِ جلسه دستِ مربی باشد، جلسه‌ی شاگردِ ناراضی را نیمه‌کاره نگه
+     می‌دارد و امتیازش را می‌بندد. تأیید در ابتدا لازم است و بعدش
+     گذرِ زمان کارِ خودش را می‌کند. */
+  /* ⚠️ «شروع شده» کافی نیست، «تمام شده» لازم است: نظر پیش از پایانِ
+     جلسه معنایی ندارد. سقفِ چهار ساعت هم گذاشته می‌شود تا محاسبه به
+     `duration_min` وابسته نباشد. */
+  const past = await sb().from('coach_sessions').select('id', { count: 'exact', head: true })
+    .eq('coach_id', profileId).eq('user_id', userId).eq('status', 'confirmed')
+    .lt('starts_at', new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString());
+  if (past.error) console.error('[profile_reviews] sessions:', past.error.message);
+  if ((past.count ?? 0) > 0) return true;
+
+  /* ── نشانه‌ی درجه‌دو: رزروِ میز در باشگاهی که مربی *پذیرفته* ──
+     تا وقتی جلسه‌ی مربی تازه است و کسی سابقه‌ای ندارد، این تنها راهِ
+     موجود است. عضویتِ باشگاه عمداً حساب نمی‌شود: خودسرویس است و هر
+     حسابِ تازه می‌تواند عضو شود، پس هزینه‌ی نظرِ جعلی صفر می‌شد.
+     رزرو دستِ‌کم پشتش پرداخت دارد. */
   const clubIds = await clubsOfCoach(profileId, slug);
   if (!clubIds.length) return false;
-  /* ⚠️ عضویتِ باشگاه عمداً حساب نمی‌شود.
-     مسیرِ `/api/clubs/membership` خودسرویس است: هر حسابِ تازه می‌تواند
-     در هر باشگاهی عضو شود، بدونِ تأیید و بدونِ پرداخت. اگر عضویت
-     کافی بود، «هزینه‌ی نظرِ جعلی» صفر می‌ماند — یعنی همان چیزی که این
-     سیستم قرار بود جلویش را بگیرد. رزروِ قطعی پشتش پرداخت دارد. */
   const booked = await sb().from('bookings').select('id', { count: 'exact', head: true })
     .eq('userId', userId).in('clubId', clubIds).eq('status', 'confirmed');
   if (booked.error) { console.error('[profile_reviews] bookings:', booked.error.message); return false }
@@ -174,7 +191,7 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ kind: stri
   /* لایه‌ی ۲ */
   if (!(await canReview(actor.id, p.id, slug))) {
     return NextResponse.json({
-      message: 'برای ثبت نظر باید در باشگاهی که این مربی در آن ثبت شده، رزرو قطعی داشته باشید',
+      message: 'برای ثبت نظر باید جلسه‌ای با این مربی داشته باشید که برگزار شده، یا در باشگاهِ او رزرو قطعی داشته باشید',
       code: 'no_relation',
     }, { status: 403 });
   }

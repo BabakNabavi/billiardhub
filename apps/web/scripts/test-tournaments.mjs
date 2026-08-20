@@ -4738,6 +4738,64 @@ console.log('\n― مرزِ ورودیِ پروفایل ―');
     'تودرتوییِ عمیق، فهرستِ بی‌انتها و رشته‌ی غول باید رد شوند');
 }
 
+console.log('\n― جلسه‌ی مربی ―');
+{
+  const mig = read('../../supabase/migrations/091_coach_sessions.sql');
+  t('جلسه جدولِ خودش را دارد، نه `bookings`',
+    mig.includes('CREATE TABLE IF NOT EXISTS public.coach_sessions')
+    && mig.includes("status IN ('requested','confirmed','rejected','cancelled')"),
+    '`bookings` رزروِ میز است؛ نصفِ ستون‌هایش برای جلسه بی‌معنی است');
+  t('یک درخواستِ باز برای هر ساعت',
+    mig.includes('coach_sessions_slot_uniq'),
+    'کلیکِ دوباره نباید درخواستِ تازه بسازد');
+
+  const api = strip(read('app/api/coach/sessions/route.ts'));
+  t('تأیید و رد فقط با مربی است',
+    api.includes('تأیید یا رد جلسه با مربی است'),
+    'شاگرد نباید بتواند جلسه‌ی خودش را تأییدشده کند — همان چیزی که مبنای امتیاز است');
+  t('مبلغ از دیتابیس برداشته می‌شود نه از بدنه',
+    api.includes('price: coach.session_price'),
+    'همان قاعده‌ی طلاییِ مسابقات: مبلغ هرگز از کلاینت');
+  t('زمانِ گذشته رد می‌شود',
+    api.includes('زمان جلسه باید دستِ‌کم نیم‌ساعت بعد باشد'),
+    'ساعتِ مرورگر دست‌کاری‌شدنی است');
+
+  /* ── قاعده‌ی امتیاز، حالا دقیق ── */
+  const rev = strip(read('app/api/profiles/[kind]/[slug]/reviews/route.ts'));
+  t('امتیاز با جلسه‌ی گذشته‌ی تأییدشده باز می‌شود',
+    rev.includes("eq('status', 'confirmed')") && rev.includes("lt('starts_at'"),
+    'نزدیک‌ترین نشانه به «واقعاً سرِ کلاس رفته»');
+  t('پایانِ جلسه دستِ مربی نیست',
+    !rev.includes("'completed'"),
+    'وگرنه مربی جلسه‌ی شاگردِ ناراضی را نیمه‌کاره نگه می‌دارد و امتیازش را می‌بندد');
+  /* ایرادهایی که بازبینی گرفت — هر کدام یک راهِ دورزدنِ واقعی بود */
+  t('جلسه‌ی شروع‌شده دیگر عوض نمی‌شود',
+    api.includes('زمان این جلسه گذشته و دیگر قابل تغییر نیست'),
+    'تأییدِ گذشته اجازه‌ی امتیاز از هوا می‌ساخت و لغوِ گذشته پس‌اش می‌گرفت');
+  t('پاسخ فقط به درخواستِ باز داده می‌شود',
+    api.includes("s.status !== 'requested'") && api.includes(".in('status', guard)"),
+    'ردیفِ ردشده نباید دوباره تأییدشده شود — و شرط باید داخلِ خودِ UPDATE هم باشد');
+  t('پروفایلِ مربی با چند ردیف قفل نمی‌کند',
+    api.includes("order('created_at', { ascending: true }).limit(1)"),
+    'maybeSingle روی دو ردیف خطا می‌دهد و کاربر بی‌صدا دسترسی‌اش را از دست می‌داد');
+  t('پروفایلِ نمایشی درخواست نمی‌گیرد',
+    api.includes('coach.is_demo'),
+    'کسی نیست که پاسخ بدهد');
+  t('سقفِ درخواستِ بی‌پاسخ هست',
+    api.includes('سه درخواستِ بی‌پاسخ دارید'),
+    'ایندکسِ یکتا فقط ساعتِ تکراری را می‌گرفت، نه ده ساعتِ متفاوت');
+  t('مبلغ و مدتِ جلسه فقط برای مربی نوشته می‌شود',
+    strip(read('app/api/profiles/[kind]/route.ts')).includes("kind === 'coach' ? numOr(b?.sessionPrice)"),
+    'Number(null) صفر است — یک کلاینتِ شلخته مبلغِ مربی را صفر می‌کرد');
+  t('زمانِ قرار با ساعتِ تهران خوانده می‌شود',
+    strip(read('lib/jalali.ts')).includes('export function tehranInstant')
+    && strip(read('components/coach/SessionRequest.tsx')).includes('tehranInstant(when)'),
+    'datetime-local را مرورگر با منطقه‌ی خودش تفسیر می‌کند و قرار جابه‌جا می‌شود');
+  t('ساعتِ نمایش هم تهران است',
+    strip(read('lib/jalali.ts')).includes("timeZone: TEHRAN"),
+    'getHours ساعتِ دستگاهِ بیننده را می‌داد');
+}
+
 console.log('\n― تأییدِ مربی برای فهرستِ باشگاه ―');
 {
   /* ⚠️ فهرستِ مربیانِ باشگاه را فقط باشگاه‌دار می‌نوشت و مربی خبردار

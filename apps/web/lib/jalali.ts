@@ -53,6 +53,9 @@ export function jalaliToGregorian(jy: number, jm: number, jd: number): [number, 
 }
 
 /** «۸ مرداد ۱۴۰۵» از یک تاریخ ISO یا Date */
+/* همه‌ی تاریخ‌ها با ساعتِ تهران خوانده می‌شوند، نه ساعتِ دستگاه */
+const TEHRAN = 'Asia/Tehran'
+
 export function faDate(input: string | Date | null | undefined): string {
   if (!input) return '—'
   const d = input instanceof Date ? input : new Date(/^\d{4}-\d{2}-\d{2}$/.test(input) ? `${input}T00:00:00` : input)
@@ -104,9 +107,23 @@ export function faDateTime(input: string | Date | null | undefined): string {
   if (!input) return '—'
   const d = input instanceof Date ? input : new Date(input)
   if (isNaN(d.getTime())) return '—'
-  const hh = toFaDigits(String(d.getHours()).padStart(2, '0'))
-  const mm = toFaDigits(String(d.getMinutes()).padStart(2, '0'))
-  return `${faDate(d)} — ساعت ${hh}:${mm}`
+  /* ⚠️ `getHours()` ساعتِ *دستگاهِ بیننده* را می‌دهد. برای یک قرارِ
+     مشترک این یعنی مربی و شاگردی که در دو منطقه‌اند دو ساعتِ متفاوت
+     می‌بینند و هر دو هم فکر می‌کنند درست است. مخاطبِ این سایت ایران
+     است، پس ساعت همیشه تهران خوانده می‌شود. */
+  const hm = new Intl.DateTimeFormat('en-US', {
+    timeZone: TEHRAN, hour: '2-digit', minute: '2-digit', hour12: false,
+  }).format(d)
+  return `${faDate(d)} — ساعت ${toFaDigits(hm)}`
+}
+
+/** رشته‌ی `datetime-local` ⟵ لحظه‌ی واقعی، با فرضِ ساعتِ تهران.
+ *
+ *  ⚠️ `new Date('2026-08-20T18:00')` را مرورگر با منطقه‌ی *خودش*
+ *  تفسیر می‌کند. ایران از ۲۰۲۲ ساعتِ تابستانی ندارد، پس `+03:30`
+ *  ثابت است و همین‌جا صریح نوشته می‌شود. */
+export function tehranInstant(local: string): Date {
+  return new Date(`${local.length === 16 ? local + ':00' : local}+03:30`)
 }
 
 /** «۱۸:۰۰ تا ۲۰:۰۰» از رشته‌ی ساعت‌های رزرو ("18,19") */

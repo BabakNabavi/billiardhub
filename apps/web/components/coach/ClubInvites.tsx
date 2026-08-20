@@ -104,13 +104,13 @@ export default function ClubInvites() {
               {i.status !== 'accepted' && (
                 <button type="button" onClick={() => void answer(i.clubId, 'accept')} disabled={busy === i.clubId}
                   style={{ display: 'inline-flex', alignItems: 'center', gap: 5, border: '1px solid rgba(14,122,56,0.3)', background: 'rgba(14,122,56,0.08)', color: GREEN, borderRadius: 9, padding: '7px 13px', fontSize: 12.5, fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit' }}>
-                  {busy === i.clubId ? <Loader2 size={13} /> : <Check size={13} />} می‌پذیرم
+                  {busy === i.clubId ? <Loader2 size={13} className="ch-spin" /> : <Check size={13} />} می‌پذیرم
                 </button>
               )}
               {i.status !== 'rejected' && (
                 <button type="button" onClick={() => void answer(i.clubId, 'reject')} disabled={busy === i.clubId}
                   style={{ display: 'inline-flex', alignItems: 'center', gap: 5, border: '1px solid rgba(178,59,46,0.28)', background: '#fff', color: RED, borderRadius: 9, padding: '7px 13px', fontSize: 12.5, fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit' }}>
-                  {busy === i.clubId ? <Loader2 size={13} /> : <X size={13} />} رد می‌کنم
+                  {busy === i.clubId ? <Loader2 size={13} className="ch-spin" /> : <X size={13} />} رد می‌کنم
                 </button>
               )}
             </span>

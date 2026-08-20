@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from 'react'
 import ProfileHero from '../../../components/profile/ProfileHero'
 import ProfileGallery from '../../../components/profile/ProfileGallery'
 import Reviews from '../../../components/reviews/Reviews'
+import SessionRequest from '../../../components/coach/SessionRequest'
 import GradeTimeline from '../../../components/profile/GradeTimeline'
 import '../../../components/profile/profile-page.css'
 import { fetchProfileResult } from '../../../lib/profiles/client'
@@ -78,6 +79,8 @@ export default function CoachProfilePage() {
   const [ownerId, setOwnerId] = useState<string | null>(null)
   /* پرچمِ قطعیِ سرور — مقایسه‌ی مرورگر فقط فالبک است */
   const [mine, setMine] = useState<boolean | undefined>(undefined)
+  const [sessionPrice, setSessionPrice] = useState(0)
+  const [sessionMin, setSessionMin] = useState(60)
   const [vidBusy, setVidBusy] = useState(false)
   const [copyState, setCopyState] = useState<'idle' | 'ok' | 'manual'>('idle')
   const flashT = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -101,6 +104,10 @@ export default function CoachProfilePage() {
           setLocalP({ ...(r.profile.data as CoachProfile), slug: r.profile.slug, verified: r.profile.verified })
           setOwnerId(r.profile.ownerId)
           setMine(r.isMine === true)
+          /* مبلغ و مدتِ جلسه ستونِ خودِ ردیف‌اند (مهاجرتِ ۰۹۱)، نه
+             داخلِ jsonb — پس از پاسخِ سرور خوانده می‌شوند. */
+          setSessionPrice(Number(r.profile.sessionPrice ?? 0))
+          setSessionMin(Number(r.profile.sessionMin ?? 60))
         }
         else if (r.state === 'error') setNetFail(true)
       } catch {
@@ -384,6 +391,19 @@ export default function CoachProfilePage() {
           </main>
 
           <aside className="ch-col ch-rail" aria-label="اطلاعات مربی">
+            {/* ── درخواستِ جلسه ──
+                برای مالکِ پروفایل معنی ندارد؛ برای بقیه بالای ستونِ
+                کناری می‌نشیند، جایی که چشم اول می‌رود. */}
+            {!edit.isOwner && (
+              <section className="ch-card" aria-labelledby="ch-sess-h">
+                <div className="ch-sec-head">
+                  <h2 id="ch-sess-h">جلسه‌ی خصوصی</h2>
+                  <span className="rule" aria-hidden />
+                </div>
+                <SessionRequest coachSlug={id} price={sessionPrice} minutes={sessionMin} />
+              </section>
+            )}
+
             {(coach.phone || coach.whatsapp || coach.instagram || coach.telegram) && (
               <section className="ch-card" aria-labelledby="ch-contact-h">
                 <div className="ch-sec-head">

@@ -21,6 +21,11 @@ export interface RemoteProfile<T = Record<string, unknown>> {
   data: T
   status: 'approved' | 'pending' | 'rejected'
   verified: boolean
+  /* ستون‌های تجمیعیِ امتیاز و جلسه — از خودِ ردیف، نه jsonb */
+  ratingAvg?: number
+  ratingCount?: number
+  sessionPrice?: number
+  sessionMin?: number
   licenseNumber: string | null
   licenseUrl: string | null
   licenseVerified: boolean
@@ -108,6 +113,9 @@ export async function saveProfileRemote<T extends Record<string, unknown>>(
   slug: string,
   data: T,
   license?: { number?: string; url?: string },
+  /* مبلغ و مدتِ جلسه ستونِ ردیف‌اند نه داخلِ `data`؛ چون مسیرِ
+     درخواستِ جلسه مبلغ را از دیتابیس برمی‌دارد. */
+  session?: { price?: number; minutes?: number },
 ): Promise<SaveResult<T>> {
   try {
     const r = await apiFetch(`/api/profiles/${kind}`, {
@@ -117,6 +125,8 @@ export async function saveProfileRemote<T extends Record<string, unknown>>(
         slug, data,
         ...(license?.number !== undefined ? { licenseNumber: license.number } : {}),
         ...(license?.url !== undefined ? { licenseUrl: license.url } : {}),
+        ...(session?.price !== undefined ? { sessionPrice: session.price } : {}),
+        ...(session?.minutes !== undefined ? { sessionMin: session.minutes } : {}),
       }),
     })
     const j = await r.json().catch(() => ({})) as { profile?: RemoteProfile<T>; message?: string }

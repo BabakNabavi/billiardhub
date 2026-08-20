@@ -53,6 +53,9 @@ export interface ProfileRow {
      چیزی نمی‌گفت، چون شکل با `as` ادعا می‌شود نه اعتبارسنجی. */
   ratingAvg: number
   ratingCount: number
+  /* مبلغ و مدتِ جلسه‌ی خصوصی (مهاجرتِ ۰۹۱) */
+  sessionPrice: number
+  sessionMin: number
 }
 
 /* ستون‌های دیتابیس snake_case‌اند؛ بقیه‌ی برنامه camelCase */
@@ -64,6 +67,7 @@ type DbRow = {
   license_verified: boolean; license_note: string | null
   created_at: string; updated_at: string
   rating_avg?: number | string | null; rating_count?: number | null
+  session_price?: number | null; session_min?: number | null
 }
 
 export function toProfile(r: DbRow): ProfileRow {
@@ -77,6 +81,8 @@ export function toProfile(r: DbRow): ProfileRow {
     /* numeric در PostgREST رشته می‌آید */
     ratingAvg: Number(r.rating_avg ?? 0),
     ratingCount: Number(r.rating_count ?? 0),
+    sessionPrice: Number(r.session_price ?? 0),
+    sessionMin: Number(r.session_min ?? 60),
   }
 }
 
@@ -184,6 +190,8 @@ export async function listProfiles(kind: ProfileKind, opts: { status?: string; l
 /* ── نوشتن ───────────────────────────────────────────────────── */
 
 export interface SaveInput {
+  sessionPrice?: number
+  sessionMin?: number
   kind: ProfileKind
   ownerId: string
   slug: string
@@ -284,6 +292,11 @@ export async function saveProfile(input: SaveInput): Promise<ProfileRow> {
     data: clean,
     updated_at: new Date().toISOString(),
   }
+  /* ── مبلغ و مدتِ جلسه ستون‌اند، نه داخلِ jsonb ──
+     چون مسیرِ درخواستِ جلسه مبلغ را از دیتابیس برمی‌دارد (نه از بدنه‌ی
+     کلاینت)، باید جایی باشد که سرور مطمئن بخواندش. */
+  if (input.sessionPrice !== undefined) row.session_price = Math.max(0, Math.min(500_000_000, Math.round(input.sessionPrice)))
+  if (input.sessionMin !== undefined) row.session_min = Math.max(15, Math.min(480, Math.round(input.sessionMin)))
   if (input.licenseNumber !== undefined) row.license_number = input.licenseNumber
   if (input.licenseUrl !== undefined) row.license_url = input.licenseUrl
   if (input.status !== undefined) row.status = input.status

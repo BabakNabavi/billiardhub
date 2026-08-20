@@ -108,8 +108,17 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ kind: stri
   const licenseUrl = b?.licenseUrl !== undefined ? str(b.licenseUrl, 600) : undefined;
 
   try {
+    /* ⚠️ فقط برای مربی، و فقط وقتی واقعاً عدد آمده باشد.
+       `Number(null)` صفر است و `Number(true)` یک — یعنی یک کلاینتِ
+       شلخته می‌توانست مبلغِ ذخیره‌شده‌ی مربی را با `null` صفر کند، و
+       نقش‌های دیگر هم ستونی را می‌نوشتند که به آن‌ها ربطی ندارد. */
+    const numOr = (v: unknown) => (typeof v === 'number' && Number.isFinite(v) ? v : undefined);
+    const sp = kind === 'coach' ? numOr(b?.sessionPrice) : undefined;
+    const sm = kind === 'coach' ? numOr(b?.sessionMin) : undefined;
     const saved = await saveProfile({
       kind, ownerId: actor.id, slug, data,
+      ...(sp !== undefined ? { sessionPrice: sp } : {}),
+      ...(sm !== undefined ? { sessionMin: sm } : {}),
       ...(licenseNumber !== undefined ? { licenseNumber } : {}),
       ...(licenseUrl !== undefined ? { licenseUrl } : {}),
     });
