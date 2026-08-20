@@ -225,11 +225,19 @@ export default function AdminPage() {
       /* اگر مسیر در دسترس نبود، رفتارِ قبلی: همه‌چیز دیده شود */
       .catch(() => setPerms(['*']));
   }, []);
-  /* لینکِ هر کارت `/admin/<کلید>` است، پس کلید مستقیم از آن درمی‌آید */
+  /* لینکِ هر کارت `/admin/<کلید>` است، پس کلید مستقیم از آن درمی‌آید.
+     استثناها این‌جا نوشته می‌شوند تا کارتی بی‌صدا نامرئی نماند —
+     همان چیزی که برای کمیسیون افتاده بود: APIاش `finance` می‌خواهد
+     ولی کارتش دنبالِ کلیدِ ناموجودِ `commission` می‌گشت. */
+  const LINK_KEY: Record<string, string> = {
+    commission: 'finance',
+    ads: 'advertising', 'ad-slots': 'advertising',
+  };
   const allowed = (link: string) => {
     if (!perms) return false;
     if (perms.includes('*')) return true;
-    return perms.includes(link.replace('/admin/', ''));
+    const seg = link.replace('/admin/', '');
+    return perms.includes(LINK_KEY[seg] ?? seg);
   };
 
   /* شمارش واقعی ردیف‌ها؛ تا رسیدنش «—» نشان داده می‌شود */
@@ -294,9 +302,7 @@ export default function AdminPage() {
             این نوار بالای همه‌چیز است و مجموعِ همه‌ی صف‌ها را می‌گوید،
             پس هیچ درخواستی بی‌آنکه دیده شود روی زمین نمی‌ماند. */}
         {(() => {
-          const total = Number(stats?.pendingTotal ?? 0);
-          if (!total) return null;
-          const rows: { label: string; n: number; link: string }[] = [
+          const all: { label: string; n: number; link: string }[] = [
             { label: 'گزارش تخلف', n: Number(stats?.openReports ?? 0), link: '/admin/reports' },
             { label: 'تیکت پشتیبانی', n: Number(stats?.openTickets ?? 0), link: '/admin/support' },
             { label: 'باشگاه در انتظار', n: Number(stats?.pendingClubs ?? 0), link: '/admin/clubs' },
@@ -306,7 +312,13 @@ export default function AdminPage() {
             { label: 'درخواست تبلیغ', n: Number(stats?.pendingAdRequests ?? 0), link: '/admin/advertising' },
             { label: 'درخواست تسویه', n: Number(stats?.pendingSettlements ?? 0), link: '/admin/finance' },
             { label: 'درخواست بازپرداخت', n: Number(stats?.pendingRefunds ?? 0), link: '/admin/finance' },
-          ].filter(r => r.n > 0);
+          ];
+          /* ⚠️ تنها بلوکِ صفحه که فیلترِ دسترسی نداشت: شمارش و لینکِ
+             صف‌هایی را نشان می‌داد که ادمین رویشان ۴۰۳ می‌گیرد. عدد
+             هم از مجموعِ سرور می‌آمد، پس با ردیف‌های دیده‌شده نمی‌خواند. */
+          const rows = all.filter(r => r.n > 0 && allowed(r.link));
+          const total = rows.reduce((a, r) => a + r.n, 0);
+          if (!total) return null;
           return (
             <div style={{
               display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap',
