@@ -6,7 +6,7 @@
    *پیش از فراخوانِ سرویسِ پولی* اعمال شود، و هیچ راهِ فراری (حذفِ
    کارت، مسیرِ دوم، مسیرِ بی‌شناسه) باز نمانده باشد. */
 
-import { readFileSync } from 'node:fs'
+import { readFileSync, readdirSync } from 'node:fs'
 import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -14,7 +14,10 @@ const here = dirname(fileURLToPath(import.meta.url))
 const read = p => readFileSync(join(here, '..', p), 'utf8')
 /* کامنت‌ها کنار گذاشته می‌شوند: بارها متنی که باید حذف می‌شد در
    توضیحِ همان حذف مانده و سنجش را به‌دروغ قرمز کرده. */
-const code = p => read(p).replace(/\{\/\*[\s\S]*?\*\/\}|\/\*[\s\S]*?\*\//g, '')
+const code = p => read(p)
+  .replace(/\{\/\*[\s\S]*?\*\/\}|\/\*[\s\S]*?\*\//g, '')
+  /* `[^:]` تا `https://` سالم بماند */
+  .replace(/(^|[^:])\/\/[^\n]*/g, '$1')
 
 let pass = 0, fail = 0
 const t = (name, ok, extra = '') => {
@@ -247,6 +250,86 @@ const head = s => console.log(`\n■ ${s}`)
   /* امتیازِ دستی برنگردد */
   t('امتیازِ دستیِ مربی در پنل نیست', !/★ \{c\.rating\}/.test(dash) && !/rating: ''/.test(dash))
   t('به‌جایش وضعیتِ دعوت دیده می‌شود', /در انتظار پذیرش/.test(dash))
+}
+
+/* ── کلیدهای دسترسیِ ادمین باید واقعی باشند ──
+   ⚠️ `can()` مقایسه‌ی دقیق می‌کند و کلیدِ ناموجود بی‌صدا false
+   می‌دهد: مسیر برای همه جز سوپرادمین بسته می‌شود بدونِ هیچ خطا، هیچ
+   لاگ، و هیچ نشانه‌ای. سه مسیر ماه‌ها همین‌طور بسته بودند و چون تنها
+   ادمینِ سایت سوپرادمین است، کسی متوجه نشد.
+
+   این گارد هر `can(x, 'k')` را در کلِ کد با فهرستِ کلیدها
+   می‌سنجد. */
+{
+  head('کلیدهای دسترسیِ ادمین')
+  const perms = code('lib/admin/permissions.ts')
+  /* ⚠️ آیتم‌ها با `}` در همان خط تمام می‌شوند؛ گروه بعدش `items` دارد.
+     الگوی قبلی فقط چون سورس گروه را چندخطی نوشته بود گروه‌ها را
+     نمی‌گرفت — یعنی همان باگی که این شاخه رفعش می‌کند از دیدِ گارد
+     پنهان می‌ماند اگر روزی گروهی یک‌خطی نوشته شود. */
+  const keys = [...perms.matchAll(/\{ key: '([^']+)', label: '[^']*'(?:, hint: '[^']*')? \}/g)].map(m => m[1])
+  /* گروه‌ها هم کلید دارند ولی هرگز داده نمی‌شوند؛ فقط آیتم‌ها معتبرند.
+     نامِ گروه در همان الگو نمی‌آید (بعدش items است، نه label تنها). */
+  t('فهرست کلیدها خوانده شد', keys.length >= 25, String(keys.length))
+  /* نامِ گروه هرگز به کسی داده نمی‌شود؛ اگر در فهرست بیاید، گارد
+     دقیقاً همان اشتباهی را می‌پذیرد که باید بگیرد. */
+  t('نامِ گروه کلید نیست', !keys.includes('content') && !keys.includes('business')
+    && !keys.includes('people') && !keys.includes('money') && !keys.includes('community'),
+    keys.join(','))
+
+  const walk = (dir, out = []) => {
+    for (const d of readdirSync(join(here, '..', dir), { withFileTypes: true })) {
+      if (d.name === 'node_modules' || d.name === '.next') continue
+      const rel = dir + '/' + d.name
+      if (d.isDirectory()) walk(rel, out)
+      else if (/\.(ts|tsx)$/.test(d.name)) out.push(rel)
+    }
+    return out
+  }
+  const bad = [], unparsed = []
+  for (const p of [...walk('app'), ...walk('lib'), ...walk('components'), ...walk('hooks')]) {
+    /* خودِ تعریفِ can() این‌جا نیست که سنجیده شود */
+    if (p === 'lib/admin/permissions.ts') continue
+    const src = code(p)
+    const hits = [...src.matchAll(/\bcan\([^,]+,\s*'([^']+)'\)/g)]
+    for (const m of hits) {
+      /* 'access' عمداً بیرونِ فهرست است — کارِ سوپرادمین. */
+      if (m[1] !== 'access' && !keys.includes(m[1])) bad.push(p + ' ⟵ ' + m[1])
+    }
+    /* ⚠️ الگوی بالا فقط رشته‌ی تک‌کوتیشنِ چسبیده به `)` را می‌گیرد.
+       `can(x, "k")`، بک‌تیک، متغیر، یا فراخوانیِ چندخطی از دستش
+       درمی‌رفت — یعنی کلیدِ نامعتبر بی‌صدا رد می‌شد. پس شمارشِ خامِ
+       `can(` باید با شمارشِ الگو یکی باشد. */
+    const raw = (src.match(/\bcan\(/g) ?? []).length
+    if (raw !== hits.length) unparsed.push(`${p} (${raw} فراخوان، ${hits.length} خوانده‌شده)`)
+  }
+  t('هیچ can() با کلیدِ ناموجود نمانده', bad.length === 0, bad.join(' · '))
+  t('هر can() برای گارد خوانا است', unparsed.length === 0, unparsed.join(' · '))
+
+  /* هر کارتِ صفحه‌ی اولِ پنل باید کلیدی داشته باشد که بشود داد */
+  const home = code('app/admin/page.tsx')
+  const mapped = [...home.matchAll(/^\s*([a-z-]+): '([a-z-]+)',/gm)].map(m => m[1])
+  const links = [...new Set([...home.matchAll(/link: '\/admin\/([a-z0-9-]+)'/g)].map(m => m[1]))]
+  const orphan = links.filter(l => l !== 'access' && !keys.includes(l) && !mapped.includes(l))
+  t('هر کارتِ پنل کلیدِ قابلِ‌دادن دارد', orphan.length === 0, orphan.join(', '))
+
+  /* کلیدهایی که همین دور درست شدند — تا کسی دوباره برشان نگرداند */
+  const club = code('app/api/clubs/[id]/route.ts')
+  t('ستون‌های خصوصیِ باشگاه با کلیدِ clubs باز می‌شوند',
+    /can\(actor\.id, 'clubs'\)/.test(club) && !/clubs\.review/.test(club))
+  t('پنلِ ویدیو کلیدِ media می‌خواهد',
+    /can\(actor\.id, 'media'\)/.test(code('app/api/admin/videos/route.ts')))
+  t('محتوای نمایشی کلیدِ خودش را دارد',
+    /can\(actor\.id, 'demo-content'\)/.test(code('app/api/admin/demo-profiles/route.ts'))
+    && keys.includes('demo-content'))
+  /* گاردِ مسیرِ تکی با یک ?all=true دور می‌خورد اگر فهرست هم همان
+     تفکیک را نداشته باشد — و فهرست بدتر است: همه‌ی باشگاه‌ها یک‌جا. */
+  t('فهرستِ ادمینی هم ستون‌های خصوصی را جدا می‌کند', /canSeePrivate = await can\(actor!\.id, 'clubs'\)/.test(code('app/api/clubs/route.ts')))
+  t('و از همان فهرستِ مشترک می‌خواند', /stripClubPrivate/.test(code('app/api/clubs/route.ts')) && /stripClubPrivate/.test(code('app/api/clubs/[id]/route.ts')))
+  /* خودِ سند از نشانی‌اش حساس‌تر است */
+  t('سندِ مجوز هم پشتِ کلیدِ clubs است', /!\(await can\(actor\.id, 'clubs'\)\)/.test(code('app/api/clubs/[id]/license-doc/route.ts')))
+  /* ویرایش و حذفِ باشگاهِ دیگران هم نباید به ادعای توکن تکیه کند */
+  t('PUT/DELETE نقش را از دیتابیس می‌گیرند', (code('app/api/clubs/[id]/route.ts').match(/const isAdmin = await can\(userId, 'clubs'\)/g) ?? []).length === 2)
 }
 
 console.log(`\n${'─'.repeat(52)}\n  نتیجه: ${pass} موفق، ${fail} ناموفق\n`)
