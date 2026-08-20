@@ -1,5 +1,7 @@
 export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
+import { can } from '@/lib/admin/permissions';
+import { stripClubPrivate } from '@/lib/clubs/private-fields';
 import { getSupabaseServer } from '@/lib/supabase-server';
 import { sessionFromRequest } from '@/lib/auth/session';
 import { cardToIban, matchCard, matchIban } from '@/lib/bank-server';
@@ -32,13 +34,17 @@ export async function GET(req: NextRequest) {
        `isActive=false` است، هیچ‌وقت در صف تأیید ظاهر نمی‌شد و عملاً
        امکان تأییدش وجود نداشت — کل فلوی ثبت → تأیید → انتشار قطع بود. */
     const wantsAll = sp.get('all') === 'true';
-    let isAdminReq = false;
+    let isAdminReq = false, canSeePrivate = false;
     if (wantsAll) {
       const actor = actorFromRequest(req);
       isAdminReq = !!actor && (await isAdmin(actor.id));
       if (!isAdminReq) {
         return NextResponse.json({ message: 'دسترسی مجاز نیست' }, { status: 403, headers: CORS_HEADERS });
       }
+      /* ⚠️ دیدنِ *فهرست* حقِ هر ادمینی است (صفِ تأیید، تیکِ آبی)، ولی
+         شماره‌حساب و مدارک نه. بدونِ این تفکیک، گاردِ مسیرِ تکی با یک
+         `?all=true` دور می‌خورد — و بدتر، همه‌ی باشگاه‌ها یک‌جا. */
+      canSeePrivate = await can(actor!.id, 'clubs');
     }
 
     /* ── چرا فهرستِ عمومی ستون‌هایش را نام می‌برد ──
@@ -138,7 +144,7 @@ export async function GET(req: NextRequest) {
        همان چیزی‌اند که بالا انتخاب شده. */
     const rows = (clubs ?? []) as unknown as Record<string, unknown>[];
     const withBadge = rows.map((c: Record<string, unknown>) => ({
-      ...c,
+      ...(isAdminReq && !canSeePrivate ? stripClubPrivate(c) : c),
       isVerified: c.verificationStatus === 'verified',
       hasActiveStory: !!c.storyExpiresAt && new Date(String(c.storyExpiresAt)).getTime() > now,
     }));

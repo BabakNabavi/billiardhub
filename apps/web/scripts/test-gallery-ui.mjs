@@ -89,7 +89,7 @@ const ui = await page.evaluate(() => {
     albums: txt.includes('آلبوم'),
     background: txt.includes('پس‌زمینه‌ی صفحه‌ی عمومی'),
     fileInputs: document.querySelectorAll('input[type=file]').length,
-    logoMark: !!document.querySelector('[role=img][aria-label], span > img[alt]'),
+    logoMark: !!document.querySelector('[data-club-logo]'),
   }
 })
 

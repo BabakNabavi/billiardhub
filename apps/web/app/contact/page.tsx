@@ -8,7 +8,7 @@
    و تیکتِ واقعی می‌سازد؛ در شکست، خطا نشان می‌دهد نه موفقیتِ دروغین.
    ───────────────────────────────────────────────────────────── */
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
 import { Mail, MapPin, Handshake, Headphones, Check, Copy, Send, ArrowLeft, Megaphone } from 'lucide-react'
 import Link from 'next/link'
 import { apiFetch } from '../../lib/http'
@@ -117,27 +117,28 @@ function FloatField({ label, value, onChange, type = 'text', ltr = false, textar
   textarea?: boolean; error?: string; inputMode?: 'numeric' | 'email'; maxLength?: number
 }) {
   const [focus, setFocus] = useState(false)
+  const fid = useId()
   const up = focus || value.length > 0
   return (
     <div style={{ position: 'relative', paddingTop: 18 }}>
-      <label style={{
+      <label htmlFor={fid} style={{
         position: 'absolute', right: 0, top: up ? 0 : textarea ? 26 : 30,
         fontSize: up ? 10.5 : 14, fontWeight: 700,
         color: error ? '#B23B2E' : up ? (focus ? GOLD_D : MUT) : MUT,
         transition: 'all .28s cubic-bezier(.22,1,.36,1)', pointerEvents: 'none',
       }}>{label}</label>
       {textarea ? (
-        <textarea value={value} onChange={e => onChange(e.target.value)} rows={4}
+        <textarea id={fid} value={value} onChange={e => onChange(e.target.value)} rows={4}
           onFocus={() => setFocus(true)} onBlur={() => setFocus(false)}
-          style={{ width: '100%', boxSizing: 'border-box', background: 'transparent', border: 'none', outline: 'none',
+          style={{ width: '100%', minWidth: 0, boxSizing: 'border-box', background: 'transparent', border: 'none', outline: 'none',
             padding: '10px 0 8px', fontSize: 14.5, color: TEXT, fontFamily: 'inherit', resize: 'vertical', minHeight: 96, lineHeight: 2 }} />
       ) : (
-        <input type={type} value={value} onChange={e => onChange(e.target.value)}
+        <input id={fid} type={type} value={value} onChange={e => onChange(e.target.value)}
           onFocus={() => setFocus(true)} onBlur={() => setFocus(false)}
           inputMode={inputMode === 'numeric' ? 'numeric' : undefined} maxLength={maxLength}
-          style={{ width: '100%', boxSizing: 'border-box', background: 'transparent', border: 'none', outline: 'none',
+          style={{ width: '100%', minWidth: 0, boxSizing: 'border-box', background: 'transparent', border: 'none', outline: 'none',
             padding: '10px 0 8px', fontSize: 14.5, color: TEXT, fontFamily: 'inherit',
-            direction: ltr ? 'ltr' : 'rtl', textAlign: 'right' }} />
+            direction: ltr ? 'ltr' : 'rtl', textAlign: ltr ? 'end' : 'start' }} />
       )}
       <div style={{ position: 'relative', height: 1.5, background: error ? 'rgba(178,59,46,0.4)' : LINE, borderRadius: 2, overflow: 'hidden' }}>
         <span style={{ position: 'absolute', inset: 0, transformOrigin: 'right',
@@ -283,7 +284,11 @@ export default function ContactPage() {
         .ct-submit:disabled { opacity: .65; cursor: not-allowed; }
 
         .ct-grid { display: grid; grid-template-columns: minmax(0,5fr) minmax(0,7fr); }
-        @media (max-width: 860px) { .ct-grid { grid-template-columns: 1fr; } .ct-side { border-inline-start: none !important; border-top: 1px solid ${LINE}; } }
+        @media (max-width: 860px) { .ct-grid { grid-template-columns: minmax(0, 1fr); } .ct-side { border-inline-start: none !important; border-top: 1px solid ${LINE}; } }
+
+        /* نام و ایمیل کنارِ هم فقط وقتی جا هست */
+        .ct-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 22px; }
+        @media (max-width: 560px) { .ct-fields { grid-template-columns: minmax(0, 1fr); } }
         @media (prefers-reduced-motion: reduce) {
           .ct-rev { opacity: 1 !important; transform: none !important; transition: none !important; }
           .ct-hero-in > * { animation: none !important; }
@@ -428,7 +433,7 @@ export default function ContactPage() {
                   <span style={{ fontSize: 9.5, fontWeight: 800, letterSpacing: '0.3em', color: MUT }}>MESSAGE</span>
                   <h2 style={{ fontSize: 'clamp(19px,2.4vw,25px)', fontWeight: 900, margin: '10px 0 18px' }}>پیام بگذارید</h2>
 
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px 22px' }}>
+                  <div className="ct-fields">
                     <div style={{ gridColumn: '1 / -1' }}>
                       <FloatField label="نام و نام خانوادگی" value={form.name} onChange={set('name')} error={errors.name} />
                     </div>

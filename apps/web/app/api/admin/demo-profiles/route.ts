@@ -140,7 +140,7 @@ function withDefaults(kind: ProfileKind, d: Record<string, unknown>): Record<str
 async function guard(req: NextRequest) {
   const actor = actorFromRequest(req)
   if (!actor) return { err: NextResponse.json({ message: 'ابتدا وارد شوید' }, { status: 401 }) }
-  if (!(await can(actor.id, 'content'))) {
+  if (!(await can(actor.id, 'demo-content'))) {
     return { err: NextResponse.json({ message: 'دسترسی مجاز نیست' }, { status: 403 }) }
   }
   return { actor }

@@ -32,7 +32,7 @@ export default function ClubLogo({ src, name, size = 62, rounded = '50%', tone =
 
   if (src) {
     return (
-      <span style={wrap}>
+      <span style={wrap} data-club-logo="img">
         <img src={src} alt={name ?? 'باشگاه'} loading="lazy" decoding="async"
           style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
       </span>
@@ -45,7 +45,7 @@ export default function ClubLogo({ src, name, size = 62, rounded = '50%', tone =
   const bg = tone === 'dark' ? 'rgba(199,166,106,0.16)' : 'rgba(199,166,106,0.14)'
 
   return (
-    <span style={{ ...wrap, background: bg }} aria-label={name ?? 'باشگاه'} role="img">
+    <span style={{ ...wrap, background: bg }} aria-label={name ?? 'باشگاه'} role="img" data-club-logo="mark">
       {/* بدونِ <defs>/gradient: در فهرستِ باشگاه‌ها ده‌ها نسخه از این
           نشان کنارِ هم می‌آید و idهای تکراری در یک صفحه نامعتبرند.
           حجم با دو دایره‌ی هم‌مرکز و یک برقِ گوشه ساخته می‌شود. */}

@@ -1,7 +1,8 @@
 export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
+import { can } from '@/lib/admin/permissions'
 import { getSupabaseServer } from '@/lib/supabase-server';
-import { sb, actorFromRequest, isAdmin } from '@/lib/finance/db';
+import { sb, actorFromRequest } from '@/lib/finance/db';
 import { PRIVATE_BUCKET, isPrivatePath } from '@/lib/social-server';
 
 /* خواندنِ مدرکِ جواز کسب.
@@ -27,7 +28,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
   if (!club) return NextResponse.json({ message: 'باشگاه یافت نشد' }, { status: 404 });
 
   const c = club as { ownerId?: string; licenseDocumentUrl?: string | null };
-  if (c.ownerId !== actor.id && !(await isAdmin(actor.id))) {
+  if (c.ownerId !== actor.id && !(await can(actor.id, 'clubs'))) {
     return NextResponse.json({ message: 'دسترسی مجاز نیست' }, { status: 403 });
   }
 

@@ -71,7 +71,6 @@ t('صفحه‌ی عمومیِ باشگاه هیچ محتوایی را از local
   publicReadsLocal.length === 0, publicReadsLocal.join(', '));
 
 for (const [label, key, writer, src] of [
-  ['مربیان',   'coaches',   /api\.put\([^)]*\{\s*coaches:/s,   panel],
   ['آمار',     'clubStats', /api\.put\([^)]*\{\s*clubStats/s,  panel],
   ['آلبوم‌ها', 'albums',    /api\.put\([^)]*\{\s*albums:/s,    gallery],
 ]) {
@@ -80,6 +79,15 @@ for (const [label, key, writer, src] of [
   t(`صفحه‌ی عمومی ${label} را از رکوردِ باشگاه می‌خواند`,
     new RegExp(`club\\.${key}`).test(publicPage));
 }
+
+/* مربیان از فهرستِ بالا بیرون کشیده شد: دیگر با PUTِ کلِ آرایه ذخیره
+   نمی‌شود. کلِ آرایه یعنی هر ردیفی که پنل ندیده بود بی‌صدا حذف شود،
+   پس جایش یک مسیرِ تک‌تغییری آمد. ادعا همان است — «روی سرور، نه فقط
+   در مرورگرِ باشگاه‌دار» — فقط نویسنده‌اش عوض شده. */
+t('مربیان روی سرور ذخیره می‌شود', /api\.patch\(/.test(panel) && /mutateCoaches/.test(panel));
+t('و از راهِ مسیرِ تک‌تغییری، نه PUTِ کلِ آرایه', !/\{ coaches: next \}/.test(panel));
+t('ستون `coaches` در مهاجرت هست', migrations.includes('coaches'));
+t('صفحه‌ی عمومی مربیان را از رکوردِ باشگاه می‌خواند', /club\.coaches/.test(publicPage));
 
 // ───────────────────────────────────────────────────────────────────────────
 head('۳) عکس هیچ‌وقت base64 داخلِ ستون نمی‌رود');

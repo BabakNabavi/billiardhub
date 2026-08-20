@@ -80,7 +80,9 @@ const CUR_JYEAR = (() => { try { return parseInt(new Intl.DateTimeFormat('en-US-
 
 /* `status` تازه است: افزودنِ مربی حالا یک دعوت است تا خودش بپذیرد.
    نبودش یعنی ردیفِ پیش از این تغییر ⇒ پذیرفته. */
-interface CoachEntry { id: string; slug?: string; name: string; title: string; exp: string; rating: string; bio: string; status?: 'pending' | 'accepted' | 'rejected'; }
+/* ⚠️ `rating` عمداً نیست: امتیاز از `profile_reviews` می‌آید و در
+   `coachInfo` نگه داشته می‌شود، نه در داده‌ی خودِ باشگاه. */
+interface CoachEntry { id: string; slug?: string; name: string; title: string; exp: string; bio: string; status?: 'pending' | 'accepted' | 'rejected'; }
 interface ClubAlbumItem { id: string; dataUrl: string; name: string; caption: string; }
 interface ClubAlbum { id: string; name: string; createdAt: string; items: ClubAlbumItem[]; }
 /* همان شکلِ ویدیوی بقیه‌ی نقش‌ها */
@@ -576,8 +578,9 @@ export default function ClubProfilePage() {
 
         /* این سطح کنارِ کارت‌های شیشه‌ای می‌نشیند؛ سفیدِ تخت وسطشان مثلِ
            وصله دیده می‌شد. */
-        .coach-card { padding:16px;background:rgba(255,255,255,0.62);border:1px solid rgba(255,255,255,0.70);backdrop-filter:blur(14px) saturate(1.5);-webkit-backdrop-filter:blur(14px) saturate(1.5);border-radius:16px;transition:all 0.3s;cursor:pointer }
+        .coach-card { display:block;width:100%;text-align:start;font:inherit;color:inherit;padding:16px;background:rgba(255,255,255,0.62);border:1px solid rgba(255,255,255,0.70);backdrop-filter:blur(14px) saturate(1.5);-webkit-backdrop-filter:blur(14px) saturate(1.5);border-radius:16px;transition:all 0.3s;cursor:pointer }
         .coach-card:hover { background:rgba(199,166,106,0.03);border-color:rgba(199,166,106,0.28);transform:translateY(-3px) }
+        .coach-card:focus-visible { outline:2px solid #C7A66A;outline-offset:3px }
 
         /* minmax(0,…) نه 1fr: کمینه‌ی «auto» یعنی ستون زیرِ عرضِ محتوا
            نمی‌رود، پس یک رشته‌ی بلندِ nowrap کلِ صفحه را پهن می‌کند. */
@@ -843,8 +846,12 @@ export default function ClubProfilePage() {
                     {coaches.length === 0 && (
                       <div style={{ fontSize: 13, color: 'rgba(0,0,0,0.35)', padding: '8px 4px' }}>هنوز مربی‌ای معرفی نشده</div>
                     )}
+                    {/* دکمه است نه div: با کیبورد باز می‌شود و صفحه‌خوان
+                        می‌شناسدش. aria-label عمداً ندارد — محتوای خودش
+                        (نام، رشته، سابقه، امتیاز) نامِ بهتری است. */}
                     {coaches.map((c, i) => (
-                      <div key={c.id || i} className="coach-card" onClick={() => setActiveCoach(i)}>
+                      <button type="button" key={c.id || i} className="coach-card"
+                        onClick={() => setActiveCoach(i)}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
                           <div style={{ width: 44, height: 44, borderRadius: 12, background: 'linear-gradient(135deg,#C7A66A,#A07840)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 19, fontWeight: 900, color: '#fff', flexShrink: 0 }}>
                             {c.name[0]}
@@ -863,7 +870,7 @@ export default function ClubProfilePage() {
                           )}
                           <ChevronLeft size={14} style={{ color: 'rgba(0,0,0,0.25)', flexShrink: 0 }} />
                         </div>
-                      </div>
+                      </button>
                     ))}
                   </div>
                 </div>

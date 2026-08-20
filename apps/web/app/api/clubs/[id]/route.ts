@@ -7,6 +7,7 @@ import { audit, clientIp } from '@/lib/finance/db';
 import { can } from '@/lib/admin/permissions';
 import { checkProfileData } from '@/lib/profiles/validate';
 import { isUUID, isValidSlug } from '@/lib/slug';
+import { stripClubPrivate } from '@/lib/clubs/private-fields';
 
 const CORS = {
   'Vary': 'Origin',
@@ -51,17 +52,10 @@ export async function GET(
 
      پس فیلدهای حساس فقط برای مالک و ادمین می‌مانند. صفحه‌ی عمومی
      هیچ‌کدامشان را نمی‌خواند. */
-  const PRIVATE = [
-    'iban', 'ibanVerified', 'ibanOwnerName',
-    'bankCard', 'bankCardOwner', 'bankName', 'bankCardVerified', 'bankCardCheckedAt',
-    'bankConfirmedByOwner', 'licenseNumber', 'licenseVerified', 'licenseCheckedAt',
-    'licenseDocumentUrl', 'postalCode', 'postalCodeVerified', 'postalCodeVerifiedAt',
-    'notifyPhone', 'rejectionReason', 'reviewedAt', 'reviewedBy', 'submissionCount',
-  ];
-  const isAdminReq = !!actor && (await can(actor.id, 'clubs.review'));
-  const safe: Record<string, unknown> = { ...row };
+  const isAdminReq = !!actor && (await can(actor.id, 'clubs'));
+  let safe: Record<string, unknown> = { ...row };
   if (!isMine && !isAdminReq) {
-    for (const k of PRIVATE) delete safe[k];
+    safe = stripClubPrivate(safe);
     /* ── دعوتِ پذیرفته‌نشده عمومی نیست ──
        افزودنِ مربی حالا دعوت است. تا وقتی مربی نپذیرفته، نه نامش
        باید در صفحه‌ی باشگاه بیاید و نه اینکه «این باشگاه ادعا کرده و
@@ -93,7 +87,10 @@ export async function PUT(
   }
 
   const userId = payload.id;
-  const isAdmin = payload.role === 'admin';
+  /* ⚠️ از دیتابیس، نه از ادعای توکن: ویرایشِ باشگاهِ دیگران یعنی
+     انتشار، تأییدِ مجوز و بازنویسیِ نشانی. ادمینی که دسترسی‌اش
+     برداشته شده تا پایانِ عمرِ توکن هنوز `role:'admin'` دارد. */
+  const isAdmin = await can(userId, 'clubs');
 
   const { data: club } = await getSupabaseServer().from('clubs').select('ownerId').eq('id', id).single();
   if (!club) return NextResponse.json({ message: 'باشگاه یافت نشد' }, { status: 404, headers: CORS });
@@ -195,13 +192,6 @@ export async function PUT(
       { message: 'وضعیت تأیید نامعتبر است' }, { status: 400, headers: CORS });
   }
 
-  /* ادمینِ محدود باید کلیدِ `clubs` را داشته باشد — تا امروز هر ادمینی
-     می‌توانست وضعیتِ هر باشگاهی را عوض کند. */
-  if (decision && !(await can(userId, 'clubs'))) {
-    return NextResponse.json(
-      { message: 'دسترسی مجاز نیست' }, { status: 403, headers: CORS });
-  }
-
   /* ── وضعیتِ فعلی، پیش از تصمیم ──
      لازم است چون «تأییدِ تازه» با «جابه‌جایی بینِ دو حالتِ منتشرشده»
      فرق دارد و اثرهای جانبی فقط مالِ اولی‌اند. */
@@ -214,6 +204,20 @@ export async function PUT(
     } catch { prevStatus = ''; }
   }
   const wasPublished = prevStatus === 'verified' || prevStatus === 'approved';
+
+  /* ادمینِ محدود باید کلیدِ درست را داشته باشد — تا امروز هر ادمینی
+     می‌توانست وضعیتِ هر باشگاهی را عوض کند.
+     ⚠️ فقط «برداشتن/گذاشتنِ تیک روی باشگاهِ *از قبل* منتشرشده» با
+     کلیدِ `verified` هم می‌شود؛ انتشار، رد، و برگرداندن به صف کارِ
+     `clubs` است. */
+  if (decision) {
+    const badge = wasPublished && (decision === 'verified' || decision === 'approved');
+    const allowed = (await can(userId, 'clubs')) || (badge && await can(userId, 'verified'));
+    if (!allowed) {
+      return NextResponse.json(
+        { message: 'دسترسی مجاز نیست' }, { status: 403, headers: CORS });
+    }
+  }
 
   if (decision) {
     /* هر دو «تأیید» باشگاه را منتشر می‌کنند؛ تفاوتشان فقط تیکِ آبی است.
@@ -296,6 +300,17 @@ export async function PUT(
         console.info('[clubs/:id] تأیید حساب باطل شد — تغییر در:', changed.join(','));
       }
     }
+  }
+
+  /* ── فهرستِ مربیان از این‌جا نوشته نمی‌شود ────────────────────────
+     نوشتنِ کلِ ستون یعنی هر ردیفی که فرستنده ندیده بود بی‌صدا حذف
+     شود — و «ندیدم» از «حذفش کردم» قابلِ تشخیص نیست. مسیرِ
+     `PATCH /api/clubs/:id/coaches` نیت را صریح می‌گیرد و همان یک
+     تغییر را می‌زند. */
+  if (Object.prototype.hasOwnProperty.call(body, 'coaches')) {
+    return NextResponse.json(
+      { message: 'فهرستِ مربیان از این مسیر تغییر نمی‌کند؛ از /api/clubs/:id/coaches استفاده کنید' },
+      { status: 400, headers: CORS });
   }
 
   const doUpdate = (payload: Record<string, unknown>) => getSupabaseServer()
@@ -384,7 +399,8 @@ export async function DELETE(
   }
 
   const userId = payload.id;
-  const isAdmin = payload.role === 'admin';
+  /* حذفِ باشگاه بازگشت‌ناپذیر است؛ ادعای توکن برایش کافی نیست. */
+  const isAdmin = await can(userId, 'clubs');
 
   const { data: club } = await getSupabaseServer().from('clubs').select('ownerId').eq('id', id).single();
   if (!club) return NextResponse.json({ message: 'باشگاه یافت نشد' }, { status: 404, headers: CORS });

@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { listRefereeProfiles, badgeFromGrades, type RefereeProfile } from '../../lib/referee-store'
 import { fetchProfiles } from '../../lib/profiles/client'
 import VerifiedBadge from '../../components/VerifiedBadge'
+import RoleAvatar from '../../components/profile/RoleAvatar'
 
 /* ─── Tokens ─── */
 const GOLD    = '#C7A66A'
@@ -223,26 +224,7 @@ function RefereeHeroSlider() {
    داور می‌شد: «استوری»ای که کسی منتشرش نکرده بود و هرگز هم منقضی
    نمی‌شد. برای داور اصلاً سیستمِ استوری وجود ندارد. */
 function RefereeAvatar({ referee, size }: { referee: Referee; size: string }) {
-  return (
-    <div
-      className="cavatar"
-      style={{ width:size, aspectRatio:'1 / 1', borderRadius:'50%', padding:'3px', flexShrink:0,
-        background:'linear-gradient(150deg,#FFFDF8,#EBDFC6)',
-        boxShadow:'0 4px 16px rgba(0,0,0,0.12)', display:'flex' }}>
-      <div style={{ width:'100%', height:'100%', borderRadius:'50%', overflow:'hidden',
-        border:'2.5px solid #FFFFFF', background:'#E7ECF1',
-        display:'flex', alignItems:'flex-end', justifyContent:'center' }}>
-        {referee.photo ? (
-          <img loading="lazy" decoding="async" src={referee.photo} alt={referee.name} style={{ width:'100%', height:'100%', objectFit:'cover' }}/>
-        ) : (
-          <svg viewBox="0 0 100 100" width="100%" height="100%" style={{ display:'block' }} aria-hidden="true">
-            <circle cx="50" cy="37" r="19" fill="#93A3B8"/>
-            <path d="M15 100 C15 74 31 65 50 65 C69 65 85 74 85 100 Z" fill="#A9B8CC"/>
-          </svg>
-        )}
-      </div>
-    </div>
-  )
+  return <RoleAvatar kind="referee" photo={referee.photo} name={referee.name} size={size} />
 }
 
 /* ── Referee card — grid + list ── */
@@ -394,6 +376,10 @@ export default function RefereesPage() {
         @media(max-width:700px) {.g5{grid-template-columns:repeat(2,1fr)!important;}}
         @media(max-width:480px) {.g5{grid-template-columns:repeat(2,1fr)!important;}}
         /* mobile: search + toggles drop to their own row under the pills */
+        /* ⚠️ min-width:0 لازم است: این گروه خودش یک آیتمِ فلکس است و با
+           min-width:auto کفِ min-content می‌گیرد — روی ۳۲۰px ۳۳۲ پیکسل
+           می‌شد و دکمه‌های نما ۳۶ پیکسل بیرونِ قاب می‌افتادند. */
+        .coach-search-group{min-width:0;}
         @media(max-width:640px){.coach-search-group{flex-basis:100%;margin-inline-start:0!important;}}
         /* list view: 2 cards per row on desktop, 1 on mobile */
         .coach-list-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
@@ -443,6 +429,7 @@ export default function RefereesPage() {
                   <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
                 </svg>
                 <input type="text" value={search} onChange={e => setSearch(e.target.value)}
+                  aria-label="جستجوی نام داور یا شهر"
                   placeholder="جستجوی نام داور یا شهر..."
                   style={{ flex:1, minWidth:0, background:'none', border:'none', outline:'none',
                     fontSize:13, color:TEXT, fontFamily:"'Vazirmatn',Tahoma,sans-serif" }}/>

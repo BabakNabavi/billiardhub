@@ -21,6 +21,8 @@ interface ClubRow {
   ownerId: string;
   verificationStatus: string;
   licenseDocumentUrl?: string;
+  /* بدونِ کلیدِ `clubs` نشانی نمی‌آید ولی «هست/نیست» می‌آید */
+  hasLicenseDoc?: boolean;
   createdAt: string;
 }
 
@@ -183,7 +185,7 @@ export default function AdminClubsPage() {
                       ندارند، پس از مسیرِ مجوزدار یک لینکِ امضاشده گرفته
                       می‌شود. رکوردهای قدیمی که URL کامل دارند هم از همان
                       مسیر برمی‌گردند، پس این‌جا یک رفتار بیشتر نیست. */}
-                  {club.licenseDocumentUrl ? (
+                  {club.licenseDocumentUrl || club.hasLicenseDoc ? (
                     <button type="button" onClick={() => void openLicenseDoc(club.id)}
                       style={{ display: 'flex', alignItems: 'center', gap: 5, background: 'rgba(199,166,106,0.10)', border: '1px solid rgba(199,166,106,0.30)', color: GOLD, borderRadius: 10, padding: '6px 14px', fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-base)', flexShrink: 0 }}>
                       <ExternalLink size={12} /> مشاهده مدرک

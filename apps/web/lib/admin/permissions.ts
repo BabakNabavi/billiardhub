@@ -72,14 +72,20 @@ export const PERMISSION_GROUPS: PermissionGroup[] = [
       { key: 'clubs', label: 'تأیید باشگاه‌ها' },
       { key: 'sellers', label: 'تأیید فروشگاه‌ها' },
       { key: 'products', label: 'تأیید محصولات' },
+      { key: 'brands', label: 'برندهای بازار' },
       { key: 'manufacturers', label: 'تولیدکنندگان' },
       { key: 'technicians', label: 'متخصصان فنی' },
+      /* صفحه‌اش `/admin/demo-content` است و از اول لینک داشت، ولی کلیدی
+         نداشت که بشود به کسی داد — گاردش نامِ *گروه* را می‌خواست که
+         هرگز به هیچ‌کس داده نمی‌شود. */
+      { key: 'demo-content', label: 'محتوای نمایشی', hint: 'ساخت و حذفِ پروفایل‌های نمایشی تا وقتی کسب‌وکارهای واقعی بیایند' },
     ],
   },
   {
     key: 'content', label: 'محتوا، رویداد و تبلیغات',
     items: [
       { key: 'news', label: 'اخبار' },
+      { key: 'sms', label: 'پیامک‌های سایت', hint: 'کدِ متنِ الگوها و ارسالِ آزمایشی' },
       { key: 'tournaments', label: 'مسابقات باشگاه‌ها' },
       { key: 'events', label: 'رویدادهای رسمی' },
       { key: 'media', label: 'بیلیارد مدیا' },
@@ -93,6 +99,13 @@ export const PERMISSION_GROUPS: PermissionGroup[] = [
 ]
 
 export const ALL_KEYS: string[] = PERMISSION_GROUPS.flatMap(g => g.items.map(i => i.key))
+
+/* ⚠️ `can()` مقایسه‌ی دقیق می‌کند و کلیدِ ناموجود بی‌صدا false می‌دهد —
+   یعنی مسیر برای همه جز سوپرادمین بسته می‌شود، بدونِ هیچ خطایی.
+   تا امروز سه مسیر همین‌طور بسته بودند (`clubs.review` که اصلاً کلید
+   نبود، و دو بار نامِ *گروهِ* `content`). گاردِ ایستا در
+   `scripts/test-verification-lock.mjs` هر `can(x, 'k')` را با همین
+   فهرست می‌سنجد. */
 
 /* `access` عمداً در فهرستِ بالا نیست: دادنِ دسترسی به دیگران کارِ
    سوپرادمین است و نباید بشود آن را تیک زد. اگر می‌شد، اولین ادمینی

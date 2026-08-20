@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { notify, askText } from '../../../lib/ui/dialogs'
 import Select from '../../../components/ui/Select'
 import VerificationBadges from '../../../components/VerificationBadges'
@@ -95,7 +95,7 @@ type WorkingHours = Record<string, WorkingDay>;
 
 
 interface CoachEntry {
-  id: string; name: string; title: string; exp: string; rating: string; bio: string;
+  id: string; name: string; title: string; exp: string; bio: string;
   /* افزودنِ مربی حالا دعوت است؛ تا نپذیرد در صفحه‌ی عمومی نیست. */
   status?: 'pending' | 'accepted' | 'rejected';
 }
@@ -529,19 +529,52 @@ export default function ClubDashboardPage() {
      می‌خواند — که همیشه خالی است. یعنی این فهرست را هیچ‌کس جز خودِ
      باشگاه‌دار، روی همان مرورگر، نمی‌دید. */
   const [coachesError, setCoachesError] = useState('');
-  const saveCoaches = useCallback(async (next: CoachEntry[]) => {
-    const before = coaches;
-    setCoaches(next);
-    setCoachesError('');
+  /* تا فهرست از سرور نرسیده، «هنوز مربی‌ای اضافه نشده» دروغ است */
+  const [coachesReady, setCoachesReady] = useState(false);
+  /* ── چرا «یک تغییر» و نه «کلِ فهرست» ──
+     پیش‌تر این‌جا کلِ آرایه با `PUT /clubs/:id` می‌رفت. آرایه لحظه‌ی
+     انتخابِ باشگاه خوانده شده بود، پس هر ردیفی که در این فاصله اضافه
+     شده بود — مثلاً مربی‌ای که خودش پذیرفته، یا افزودنی از دستگاهِ
+     دیگر — با اولین ذخیره بی‌صدا حذف می‌شد. حذف را نمی‌شود از «ندیدن»
+     تشخیص داد، پس نیت باید صریح برود.
+
+     پاسخ همان آرایه‌ای است که واقعاً ذخیره شد و مستقیم می‌نشیند؛ حالتِ
+     خوش‌بینانه عمداً نداریم چون پاسخ سریع است و حدسِ اشتباه این‌جا
+     یعنی نشان‌دادنِ وضعیتِ دعوتی که وجود ندارد. */
+  /* شناسه‌ی ردیفی که همین حالا تغییر می‌کند — پرچمِ سراسری همه‌ی
+     دکمه‌ها را با هم خاموش می‌کرد و معلوم نبود کدام ردیف مشغول است. */
+  const [coachBusyId, setCoachBusyId] = useState('');
+  const coachBusy = coachBusyId !== '';
+  /* شناسه‌ی باشگاهِ انتخابی در یک ref — تا پاسخِ دیررسِ باشگاهِ قبلی
+     روی فهرستِ باشگاهِ تازه ننشیند. */
+  const selectedClubRef = useRef<string | null>(null);
+  useEffect(() => { selectedClubRef.current = selectedClub?.id ?? null; }, [selectedClub]);
+  const mutateCoaches = useCallback(async (
+    body: { add: CoachEntry } | { removeId: string },
+    rowId: string,
+  ) => {
     if (!selectedClub) return;
+    /* ⚠️ باشگاه ممکن است وسطِ درخواست عوض شود؛ نشاندنِ پاسخ روی state
+       بدونِ این مقایسه، فهرستِ باشگاهِ قبلی را زیرِ باشگاهِ تازه
+       می‌گذاشت. */
+    const cid = selectedClub.id;
+    setCoachBusyId(rowId);
+    setCoachesError('');
     try {
-      await api.put(`/clubs/${selectedClub.id}`, { coaches: next });
+      const r = await api.patch(`/clubs/${cid}/coaches`, body);
+      const saved = (r.data as { coaches?: unknown } | undefined)?.coaches;
+      if (selectedClubRef.current === cid && Array.isArray(saved)) setCoaches(saved as CoachEntry[]);
       try { localStorage.removeItem(lsKey('coaches')); } catch { /* ignore */ }
-    } catch {
-      setCoaches(before);
-      setCoachesError('ذخیره‌ی مربیان روی سرور انجام نشد؛ دوباره تلاش کنید.');
-    }
-  }, [lsKey, selectedClub, coaches]);
+    } catch (e) {
+      const res = (e as { response?: { data?: { message?: string; coaches?: unknown } } })?.response;
+      /* سرور در خطاهای «نسخه‌ات کهنه است» فهرستِ درست را هم می‌دهد —
+         وگرنه پنل روی ردیفی گیر می‌کرد که دیگر وجود ندارد. */
+      if (selectedClubRef.current === cid && Array.isArray(res?.data?.coaches)) {
+        setCoaches(res.data.coaches as CoachEntry[]);
+      }
+      setCoachesError(res?.data?.message ?? 'ذخیره‌ی مربیان روی سرور انجام نشد؛ دوباره تلاش کنید.');
+    } finally { setCoachBusyId(''); }
+  }, [lsKey, selectedClub]);
 
 
   /* میزها روی سرور ذخیره می‌شوند (نه فقط در مرورگر) تا صفحه‌ی رزرو
@@ -579,6 +612,11 @@ export default function ClubDashboardPage() {
 
   useEffect(() => {
     if (!selectedClub) return;
+    /* ⚠️ پیش از هر فچ: داده‌ی باشگاهِ قبلی باید برود. وگرنه در فاصله‌ی
+       سوییچ تا رسیدنِ پاسخ، یک حذف/افزودن فهرستِ باشگاهِ قبلی را روی
+       باشگاهِ تازه PUT می‌کرد. */
+    setCoaches([]);
+    setCoachesReady(false);
 
     // Fetch full club data to populate all info fields
     api.get(`/clubs/${selectedClub.id}`).then(r => {
@@ -655,6 +693,7 @@ export default function ClubDashboardPage() {
         } catch { setCoaches([]); }
       }
       setCoachesError('');
+      setCoachesReady(true);
 
       const srvStats = (c.clubStats ?? null) as Partial<ClubStats> | null;
       if (srvStats && Object.keys(srvStats).length) {
@@ -666,7 +705,12 @@ export default function ClubDashboardPage() {
         } catch { setClubStats(DEFAULT_STATS); }
       }
       setStatsMsg(null);
-    }).catch(() => {});
+    }).catch(() => {
+      /* ⚠️ بدونِ این، شکستِ فچ فهرستِ مربیان را برای همیشه روی
+         «در حال خواندن…» نگه می‌داشت — نه محتوا، نه خطا. */
+      setCoachesReady(true);
+      setCoachesError('خواندنِ اطلاعات باشگاه انجام نشد؛ صفحه را تازه کنید.');
+    });
 
     /* آمار شمردنی از سرور. شکستش کارت را خالی نمی‌کند — `null` می‌ماند
        و به‌جای عدد، خط تیره نشان داده می‌شود. */
@@ -1726,22 +1770,19 @@ export default function ClubDashboardPage() {
   const selectCoach = (c: ApiCoach) => {
     if (coaches.find(e => e.id === c.id)) return;
     const specialtyMap: Record<string, string> = { snooker: 'اسنوکر', pocket: 'پاکت بیلیارد', highball: 'هی‌بال' };
-    const entry: CoachEntry = {
+    /* ⚠️ `status` عمداً فرستاده نمی‌شود: افزودن «دعوت» است نه «انتشار»،
+       و سرور خودش `pending` می‌گذارد. */
+    void mutateCoaches({ add: {
       id: c.id,
       name: `${c.firstName ?? ''} ${c.lastName ?? ''}`.trim() || 'بدون نام',
       title: specialtyMap[c.coachProfile?.specialty ?? ''] ?? 'مربی بیلیارد',
       exp: c.coachProfile?.experience ? `${c.coachProfile.experience} سال` : '',
-      rating: '',
       bio: c.bio ?? '',
-      /* ⚠️ افزودن دیگر «انتشار» نیست، «دعوت» است: تا خودِ مربی
-         نپذیرد در صفحه‌ی عمومی دیده نمی‌شود. */
-      status: 'pending',
-    };
-    saveCoaches([...coaches, entry]);
+    } }, c.id);
     setShowCoachPicker(false);
   };
 
-  const deleteCoach = (id: string) => saveCoaches(coaches.filter(c => c.id !== id));
+  const deleteCoach = (id: string) => { void mutateCoaches({ removeId: id }, id); };
 
   // ── Early returns ──────────────────────────────────────────────────────────
 
@@ -3926,9 +3967,10 @@ export default function ClubDashboardPage() {
         <div>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
             <h2 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: DARK }}>مربیان باشگاه</h2>
-            <button onClick={openCoachPicker} style={{
+            <button onClick={openCoachPicker} disabled={coachBusy} style={{
               background: GOLD, color: '#fff', border: 'none', borderRadius: 10,
-              padding: '9px 18px', fontSize: 13, fontWeight: 700, cursor: 'pointer', fontFamily: 'var(--font-base)',
+              padding: '9px 18px', fontSize: 13, fontWeight: 700, fontFamily: 'var(--font-base)',
+              cursor: coachBusy ? 'default' : 'pointer', opacity: coachBusy ? 0.6 : 1,
             }}>+ مربی جدید</button>
           </div>
 
@@ -3976,7 +4018,14 @@ export default function ClubDashboardPage() {
                   );
                   return filtered.map(c => {
                     const fullName = `${c.firstName ?? ''} ${c.lastName ?? ''}`.trim() || 'بدون نام';
-                    const alreadyAdded = !!coaches.find(e => e.id === c.id);
+                    const existing = coaches.find(e => e.id === c.id);
+                    const alreadyAdded = !!existing;
+                    /* مربی‌ای که دعوت را رد کرده در فهرست می‌ماند تا
+                       باشگاه‌دار بداند چرا در صفحه‌ی عمومی نیست. کلیکِ
+                       دوباره کاری نمی‌کند — سرور وضعیتِ رد را نگه
+                       می‌دارد — پس به‌جای «افزوده شده» راهِ درست را
+                       می‌گوییم: اول حذف، بعد دعوتِ دوباره. */
+                    const rejected = existing?.status === 'rejected';
                     /* مربیِ تأییدنشده دیده می‌شود ولی افزوده نمی‌شود:
                        صفحه‌ی عمومیِ باشگاه نباید مربی‌ای را نشان دهد که
                        هنوز مدارکش بررسی نشده. */
@@ -4011,7 +4060,9 @@ export default function ClubDashboardPage() {
                         ) : (
                           <span style={{ fontSize: 10, color: '#B45309', background: 'rgba(217,119,6,0.09)', border: '1px solid rgba(217,119,6,0.24)', borderRadius: 20, padding: '2px 7px', flexShrink: 0, whiteSpace: 'nowrap' }}>در انتظار تأیید</span>
                         )}
-                        {alreadyAdded && <span style={{ fontSize: 11, color: '#9CA3AF', flexShrink: 0 }}>افزوده شده</span>}
+                        {rejected
+                          ? <span style={{ fontSize: 11, color: '#B91C1C', flexShrink: 0, whiteSpace: 'nowrap' }}>رد کرده — اول حذفش کن</span>
+                          : alreadyAdded && <span style={{ fontSize: 11, color: '#9CA3AF', flexShrink: 0 }}>افزوده شده</span>}
                       </div>
                     );
                   });
@@ -4020,7 +4071,11 @@ export default function ClubDashboardPage() {
             </div>
           )}
 
-          {coaches.length === 0 ? (
+          {!coachesReady ? (
+            <Card style={{ textAlign: 'center', padding: 48 }}>
+              <p style={{ color: '#9CA3AF', fontSize: 14 }}>در حال خواندن فهرست مربیان…</p>
+            </Card>
+          ) : coaches.length === 0 ? (
             <Card style={{ textAlign: 'center', padding: 48 }}>
               <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 10 }}><GraduationCap size={44} color="#D1D5DB" strokeWidth={1.2} /></div>
               <p style={{ color: '#6B7280', fontSize: 14 }}>هنوز مربی‌ای اضافه نشده</p>
@@ -4045,13 +4100,26 @@ export default function ClubDashboardPage() {
                     {c.bio && <div style={{ fontSize: 12, color: '#9CA3AF', marginTop: 3 }}>{c.bio}</div>}
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
-                    {c.rating && (
-                      <span style={{ fontSize: 14, fontWeight: 800, color: '#f59e0b' }}>★ {c.rating}</span>
+                    {/* پیش‌تر این‌جا ★ عددِ دستی بود. حالا چیزی که واقعاً
+                        باید دیده شود این است: تا مربی نپذیرد، در صفحه‌ی
+                        عمومیِ باشگاه نیست. */}
+                    {c.status === 'pending' && (
+                      <span style={{ fontSize: 11, fontWeight: 700, color: '#92400E', background: '#FEF3C7', border: '1px solid #FDE68A', borderRadius: 999, padding: '3px 10px' }}>
+                        در انتظار پذیرش
+                      </span>
                     )}
-                    <button onClick={() => deleteCoach(c.id)} style={{
-                      background: '#FEE2E2', color: '#991B1B', border: 'none', borderRadius: 8,
-                      padding: '6px 12px', fontSize: 12, cursor: 'pointer', fontFamily: 'var(--font-base)', fontWeight: 600,
-                    }}>حذف</button>
+                    {c.status === 'rejected' && (
+                      <span style={{ fontSize: 11, fontWeight: 700, color: '#991B1B', background: '#FEE2E2', border: '1px solid #FECACA', borderRadius: 999, padding: '3px 10px' }}>
+                        رد شده
+                      </span>
+                    )}
+                    <button onClick={() => deleteCoach(c.id)} disabled={coachBusy}
+                      aria-busy={coachBusyId === c.id} style={{
+                        background: '#FEE2E2', color: '#991B1B', border: 'none', borderRadius: 8,
+                        padding: '6px 12px', fontSize: 12, fontFamily: 'var(--font-base)', fontWeight: 600,
+                        cursor: coachBusy ? 'default' : 'pointer',
+                        opacity: coachBusyId === c.id ? 0.5 : coachBusy ? 0.75 : 1,
+                      }}>حذف</button>
                   </div>
                 </Card>
               ))}
