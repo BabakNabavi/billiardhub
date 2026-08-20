@@ -170,5 +170,60 @@ const head = s => console.log(`\n■ ${s}`)
   t('RLS روشن است', /ENABLE ROW LEVEL SECURITY/.test(m))
 }
 
+/* ── «منتشرشده» در میزِ تیکِ آبی ──
+   تیک فقط به چیزی داده می‌شود که در سایت دیده می‌شود. تعریفِ
+   «دیده می‌شود» یک‌جا در API نوشته شده؛ اگر صفحه‌ی ادمین همان را
+   تکرار نکند، ادمین به باشگاهی تیک می‌دهد که هیچ‌کس نمی‌بیندش. */
+{
+  head('میزِ تیکِ آبی — همانِ شرطِ فهرستِ عمومی')
+  const api = code('app/api/clubs/route.ts')
+  const page = code('app/admin/verified/page.tsx')
+
+  /* شرطِ مرجع: هم isActive، هم یکی از دو وضعیتِ تأیید */
+  t('API هنوز روی isActive فیلتر می‌کند',
+    /\.eq\('isActive', true\)/.test(api) && /verificationStatus'?, \['verified', 'approved'\]/.test(api))
+
+  t('صفحه‌ی ادمین هم isActive را می‌خواند', /isActive !== false/.test(page))
+  t('و هر دو وضعیتِ تأیید را می‌پذیرد',
+    /verificationStatus === 'verified'/.test(page) && /verificationStatus === 'approved'/.test(page))
+
+  /* دکمه‌ی اعطا باید به همین published قفل باشد، نه فقط رنگش */
+  const row = code('components/admin/VerifiedRow.tsx')
+  t('دکمه‌ی اعطا با منتشرنشده قفل است', /const locked = busy \|\| !row\.published/.test(row))
+  t('و نشانِ «منتشر نشده» نشان داده می‌شود', /منتشر نشده/.test(row))
+
+  /* صفِ «در انتظار» نباید ردیفِ منتشرنشده نشان دهد */
+  t('صفِ انتظار فقط منتشرشده‌ها', /r\.published && !r\.verified && r\.hasDoc/.test(page))
+}
+
+/* ── وضعیتِ دعوتِ مربی مالِ سرور است ──
+   پنلِ باشگاه کلِ آرایه‌ی coaches را PUT می‌کند. بدونِ ادغام در سرور،
+   اولین ذخیره‌ی باشگاه‌دار پاسخِ مربی را به pending برمی‌گرداند و مربی
+   از صفحه‌ی عمومی حذف می‌شود. */
+{
+  head('دعوتِ مربی — ادغام به‌جای بازنویسی')
+  const put = code('app/api/clubs/[id]/route.ts')
+  t('PUT فهرستِ ذخیره‌شده را می‌خواند', /select\('coaches'\)\.eq\('id', id\)/.test(put))
+  t('status از ردیفِ سرور می‌آید', /out\.status = STATUS\.has\(String\(old\.status\)\) \? old\.status : 'accepted'/.test(put))
+  t('decidedAt هم از سرور', /if \('decidedAt' in old\) out\.decidedAt = old\.decidedAt/.test(put))
+  /* ⚠️ مهم‌ترین گارد: ردیفی که در دیتابیس نیست همیشه pending است.
+     بدونش صاحبِ باشگاه با یک PUT می‌تواند مربیِ دعوت‌نپذیرفته را
+     «پذیرفته» اعلام کند و از راهِ آن حقِ امتیازدهی هم بسازد. */
+  t('ردیفِ تازه همیشه pending می‌شود', /\} else \{[\s\S]{0,80}out\.status = 'pending';/.test(put))
+  t('کلیدها سفیدلیست‌اند', /const KEEP = \['id', 'slug', 'name', 'title', 'exp', 'bio'\]/.test(put))
+  t('خطای خواندن ۵۰۰ می‌دهد نه نوشتنِ کور', /if \(curErr && !\/does not exist\|PGRST204\//.test(put))
+
+  const dash = code('app/dashboard/club/page.tsx')
+  t('پنل پاسخِ سرور را می‌نشاند', /if \(Array\.isArray\(saved\)\) setCoaches\(saved as CoachEntry\[\]\)/.test(dash))
+  t('با عوضِ باشگاه فهرست خالی می‌شود', /setCoaches\(\[\]\);[\s\S]{0,60}setCoachesReady\(false\)/.test(dash))
+  /* مسیرِ خودِ مربی از اول همین گارد را داشت */
+  const inv = code('app/api/coach/club-invites/route.ts')
+  t('مسیرِ مربی هم کلِ ستون را نمی‌نویسد', /list\.map\(e => \{/.test(inv))
+
+  /* امتیازِ دستی برنگردد */
+  t('امتیازِ دستیِ مربی در پنل نیست', !/★ \{c\.rating\}/.test(dash) && !/rating: ''/.test(dash))
+  t('به‌جایش وضعیتِ دعوت دیده می‌شود', /در انتظار پذیرش/.test(dash))
+}
+
 console.log(`\n${'─'.repeat(52)}\n  نتیجه: ${pass} موفق، ${fail} ناموفق\n`)
 process.exit(fail ? 1 : 0)
