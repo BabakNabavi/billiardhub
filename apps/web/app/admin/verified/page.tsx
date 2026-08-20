@@ -88,6 +88,9 @@ interface ApiClub {
   verificationStatus: string
   licenseDocumentUrl?: string
   isActive?: boolean
+  /* ادمینِ بی‌کلیدِ `clubs` نشانیِ مدرک را نمی‌گیرد؛ سرور به‌جایش
+     همین پرچم را می‌دهد تا نشانِ «مدرک دارد» خاموش نشود. */
+  hasLicenseDoc?: boolean
 }
 
 function profileRow(p: ApiProfile): Row {
@@ -118,7 +121,7 @@ function clubRow(c: ApiClub): Row {
     sub: [c.province, c.city].filter(Boolean).join('، ') || '—',
     href: `/clubs/${c.slug || c.id}`,
     verified: c.verificationStatus === 'verified',
-    hasDoc: !!str(c.licenseDocumentUrl),
+    hasDoc: !!str(c.licenseDocumentUrl) || c.hasLicenseDoc === true,
     /* همان شرطِ فهرستِ عمومی، مو‌به‌مو: هم فعال، هم یکی از دو وضعیتِ
        تأیید. باشگاهِ غیرفعال در سایت نیست، پس تیک هم نباید بگیرد. */
     published: c.isActive !== false
