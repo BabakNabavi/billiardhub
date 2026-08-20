@@ -11,6 +11,7 @@ import Select from '../../../components/ui/Select'
 const faNum = (v: string | number) => String(v).replace(/[0-9]/g, d => '۰۱۲۳۴۵۶۷۸۹'[+d] ?? d)
 import VerificationBadges from '../../../components/VerificationBadges'
 import Link from 'next/link'
+import ClubInvites from '../../../components/coach/ClubInvites'
 import { useAuthStore } from '../../../store/auth.store'
 import { isValidSlug } from '../../../lib/slug'
 import { fetchMyProfileResult, saveProfileRemote } from '../../../lib/profiles/client'
@@ -539,6 +540,9 @@ function safeRemote(raw: unknown): Partial<FormState> {
               وسطِ فرمِ ثبت فقط حواس را پرت می‌کرد و کاربر فکر می‌کرد
               بخشی از تکمیلِ پروفایل است. جایش پنلِ خودِ کاربر است، نه
               فرمِ ثبت. */}
+
+          {/* دعوت‌های باشگاه — بالای فرم، چون تصمیم است نه ویرایش */}
+          <ClubInvites />
 
           {/* 1 — Basic info */}
           <div style={card}>

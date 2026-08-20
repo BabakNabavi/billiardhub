@@ -60,7 +60,18 @@ export async function GET(
   ];
   const isAdminReq = !!actor && (await can(actor.id, 'clubs.review'));
   const safe: Record<string, unknown> = { ...row };
-  if (!isMine && !isAdminReq) for (const k of PRIVATE) delete safe[k];
+  if (!isMine && !isAdminReq) {
+    for (const k of PRIVATE) delete safe[k];
+    /* ── دعوتِ پذیرفته‌نشده عمومی نیست ──
+       افزودنِ مربی حالا دعوت است. تا وقتی مربی نپذیرفته، نه نامش
+       باید در صفحه‌ی باشگاه بیاید و نه اینکه «این باشگاه ادعا کرده و
+       او رد کرده» به بیرون درز کند. صفحه هم همین فیلتر را دارد؛ این
+       تورِ سمتِ سرور است. */
+    if (Array.isArray(safe.coaches)) {
+      safe.coaches = (safe.coaches as { status?: unknown }[])
+        .filter(c => (typeof c?.status === 'string' ? c.status : 'accepted') === 'accepted');
+    }
+  }
 
   return NextResponse.json({
     ...safe,

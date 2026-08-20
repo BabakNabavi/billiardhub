@@ -50,8 +50,13 @@ async function clubsOfCoach(profileId: string, slug: string): Promise<string[]> 
   const rows = (data ?? []) as ClubCoachRow[];
   const out: string[] = [];
   for (const r of rows) {
-    const list = Array.isArray(r.coaches) ? r.coaches as { id?: unknown; slug?: unknown }[] : [];
-    if (list.some(c => c && (String(c.slug ?? '') === slug || String(c.id ?? '') === profileId))) out.push(r.id);
+    const list = Array.isArray(r.coaches) ? r.coaches as { id?: unknown; slug?: unknown; status?: unknown }[] : [];
+    /* ⚠️ فقط دعوتِ پذیرفته‌شده. وگرنه باشگاه‌دار می‌توانست نامِ مربیِ
+       دیگری را اضافه کند و مشتری‌هایش را در دسترسِ امتیازدادن به او
+       بگذارد — همان سوراخی که بازبینی گرفت. نبودِ `status` یعنی
+       ردیفِ قدیمی ⇒ پذیرفته. */
+    const ok = (c: { status?: unknown }) => (typeof c.status === 'string' ? c.status : 'accepted') === 'accepted';
+    if (list.some(c => c && ok(c) && (String(c.slug ?? '') === slug || String(c.id ?? '') === profileId))) out.push(r.id);
   }
   return out;
 }

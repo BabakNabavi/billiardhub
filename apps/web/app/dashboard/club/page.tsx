@@ -96,6 +96,8 @@ type WorkingHours = Record<string, WorkingDay>;
 
 interface CoachEntry {
   id: string; name: string; title: string; exp: string; rating: string; bio: string;
+  /* افزودنِ مربی حالا دعوت است؛ تا نپذیرد در صفحه‌ی عمومی نیست. */
+  status?: 'pending' | 'accepted' | 'rejected';
 }
 interface ApiCoach {
   id: string; firstName: string; lastName: string;
@@ -1731,6 +1733,9 @@ export default function ClubDashboardPage() {
       exp: c.coachProfile?.experience ? `${c.coachProfile.experience} سال` : '',
       rating: '',
       bio: c.bio ?? '',
+      /* ⚠️ افزودن دیگر «انتشار» نیست، «دعوت» است: تا خودِ مربی
+         نپذیرد در صفحه‌ی عمومی دیده نمی‌شود. */
+      status: 'pending',
     };
     saveCoaches([...coaches, entry]);
     setShowCoachPicker(false);

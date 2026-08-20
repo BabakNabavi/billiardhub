@@ -78,7 +78,9 @@ const sampleClub: Club = {
 /* همان تعریفِ صفحه‌ی مربیان و داوران — سالِ جاریِ شمسی */
 const CUR_JYEAR = (() => { try { return parseInt(new Intl.DateTimeFormat('en-US-u-ca-persian', { year: 'numeric' }).format(new Date()), 10) || 1404 } catch { return 1404 } })();
 
-interface CoachEntry { id: string; slug?: string; name: string; title: string; exp: string; rating: string; bio: string; }
+/* `status` تازه است: افزودنِ مربی حالا یک دعوت است تا خودش بپذیرد.
+   نبودش یعنی ردیفِ پیش از این تغییر ⇒ پذیرفته. */
+interface CoachEntry { id: string; slug?: string; name: string; title: string; exp: string; rating: string; bio: string; status?: 'pending' | 'accepted' | 'rejected'; }
 interface ClubAlbumItem { id: string; dataUrl: string; name: string; caption: string; }
 interface ClubAlbum { id: string; name: string; createdAt: string; items: ClubAlbumItem[]; }
 /* همان شکلِ ویدیوی بقیه‌ی نقش‌ها */
@@ -230,7 +232,11 @@ export default function ClubProfilePage() {
   useEffect(() => {
     if (Array.isArray(club.coaches)) {
       const list = club.coaches as CoachEntry[];
-      setCoaches(list);
+      /* ⚠️ فقط مربیانی که دعوت را پذیرفته‌اند دیده می‌شوند. بدونِ این،
+         هر باشگاهی می‌توانست نامِ هر مربی‌ای را کنارِ خودش بگذارد — و
+         از آن‌جا که امتیاز هم از راهِ همان فهرست سنجیده می‌شود، این
+         فقط یک ادعای تبلیغاتی نبود. */
+      setCoaches(list.filter(c => (c.status ?? 'accepted') === 'accepted'));
       /* ── نامکِ مربی برای ردیف‌های قدیمی ──
          ردیف‌هایی که پیش از این تغییر ذخیره شده‌اند فقط `id` دارند.
          فهرستِ عمومیِ مربیان هم `id` دارد هم `slug`، پس نگاشت از

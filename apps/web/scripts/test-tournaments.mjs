@@ -4672,7 +4672,8 @@ console.log('\n― پاک‌سازیِ فایل‌های حذف‌شده در د
      سرورِ زنده شماره‌ی شبا و کارت را نشان می‌داد — با curl تأیید شد. */
   t('اطلاعات بانکیِ باشگاه عمومی نیست',
     strip(read('app/api/clubs/[id]/route.ts')).includes('const PRIVATE = [')
-    && strip(read('app/api/clubs/[id]/route.ts')).includes('if (!isMine && !isAdminReq) for (const k of PRIVATE) delete safe[k]'),
+    && strip(read('app/api/clubs/[id]/route.ts')).includes('for (const k of PRIVATE) delete safe[k]')
+    && strip(read('app/api/clubs/[id]/route.ts')).includes('if (!isMine && !isAdminReq) {'),
     'شبا، شماره‌ی کارت و نامِ صاحبِ حساب برای همه خوانده می‌شد');
   t('بدنه‌ی PUTِ باشگاه هم مرز دارد',
     strip(read('app/api/clubs/[id]/route.ts')).includes('checkProfileData(body)'),
@@ -4735,6 +4736,35 @@ console.log('\n― مرزِ ورودیِ پروفایل ―');
     && check({ g: Array.from({ length: 600 }, () => 1) }) !== null
     && check({ photo: 'x'.repeat(4 * 1024 * 1024) }) !== null,
     'تودرتوییِ عمیق، فهرستِ بی‌انتها و رشته‌ی غول باید رد شوند');
+}
+
+console.log('\n― تأییدِ مربی برای فهرستِ باشگاه ―');
+{
+  /* ⚠️ فهرستِ مربیانِ باشگاه را فقط باشگاه‌دار می‌نوشت و مربی خبردار
+     نمی‌شد. از وقتی امتیازِ مربی از راهِ همان فهرست سنجیده می‌شود،
+     این دیگر فقط ادعای تبلیغاتی نبود — مسیرِ امتیازدادن را هم باز
+     می‌کرد. */
+  const inv = strip(read('app/api/coach/club-invites/route.ts'));
+  t('پاسخِ دعوت فقط از خودِ مربی پذیرفته می‌شود',
+    inv.includes("eq('kind', 'coach').eq('owner_id', userId)") && inv.includes('پروفایل مربی ندارید'),
+    'وگرنه هرکسی می‌توانست دعوتِ مربیِ دیگری را بپذیرد');
+  t('فقط ردیفِ خودِ مربی عوض می‌شود',
+    inv.includes('list.map(e =>') && inv.includes('if (!isMine(e, p.id, p.slug'),
+    'نوشتنِ کلِ ستون یعنی تغییرِ هم‌زمانِ باشگاه‌دار پاک شود');
+
+  t('صفحه‌ی عمومی فقط پذیرفته‌ها را می‌گیرد',
+    strip(read('app/api/clubs/[id]/route.ts')).includes("=== 'accepted'")
+    && strip(read('app/clubs/[id]/page.tsx')).includes("(c.status ?? 'accepted') === 'accepted'"),
+    'هم سرور و هم صفحه — یکی‌شان تنها، تورِ کافی نیست');
+  t('افزودنِ مربی از پنل «دعوت» است نه انتشار',
+    strip(read('app/dashboard/club/page.tsx')).includes("status: 'pending'"),
+    'باشگاه‌دار نباید بتواند نامِ مربی را یک‌طرفه منتشر کند');
+  t('امتیاز فقط از باشگاهی که مربی پذیرفته',
+    strip(read('app/api/profiles/[kind]/[slug]/reviews/route.ts')).includes('ok(c)'),
+    'وگرنه باشگاه‌دار مشتری‌هایش را در دسترسِ امتیازدادن به هر مربی می‌گذاشت');
+  t('ردیفِ قدیمی پذیرفته حساب می‌شود',
+    inv.includes("typeof mine.status === 'string' ? mine.status : 'accepted'"),
+    'وگرنه مربیانی که امروز روی صفحه‌اند یک‌شبه ناپدید می‌شدند');
 }
 
 console.log('\n― امتیازِ واقعیِ مربی ―');
