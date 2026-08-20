@@ -95,7 +95,7 @@ type WorkingHours = Record<string, WorkingDay>;
 
 
 interface CoachEntry {
-  id: string; name: string; title: string; exp: string; rating: string; bio: string;
+  id: string; name: string; title: string; exp: string; bio: string;
   /* افزودنِ مربی حالا دعوت است؛ تا نپذیرد در صفحه‌ی عمومی نیست. */
   status?: 'pending' | 'accepted' | 'rejected';
 }
@@ -529,13 +529,19 @@ export default function ClubDashboardPage() {
      می‌خواند — که همیشه خالی است. یعنی این فهرست را هیچ‌کس جز خودِ
      باشگاه‌دار، روی همان مرورگر، نمی‌دید. */
   const [coachesError, setCoachesError] = useState('');
+  /* تا فهرست از سرور نرسیده، «هنوز مربی‌ای اضافه نشده» دروغ است */
+  const [coachesReady, setCoachesReady] = useState(false);
   const saveCoaches = useCallback(async (next: CoachEntry[]) => {
     const before = coaches;
     setCoaches(next);
     setCoachesError('');
     if (!selectedClub) return;
     try {
-      await api.put(`/clubs/${selectedClub.id}`, { coaches: next });
+      const r = await api.put(`/clubs/${selectedClub.id}`, { coaches: next });
+      /* سرور `status`/`decidedAt` را از نسخه‌ی خودش برمی‌گرداند؛ نسخه‌ی
+         خوش‌بینانه ممکن است پاسخِ تازه‌ی مربی را ندیده باشد. */
+      const saved = (r.data as { coaches?: unknown } | undefined)?.coaches;
+      if (Array.isArray(saved)) setCoaches(saved as CoachEntry[]);
       try { localStorage.removeItem(lsKey('coaches')); } catch { /* ignore */ }
     } catch {
       setCoaches(before);
@@ -579,6 +585,11 @@ export default function ClubDashboardPage() {
 
   useEffect(() => {
     if (!selectedClub) return;
+    /* ⚠️ پیش از هر فچ: داده‌ی باشگاهِ قبلی باید برود. وگرنه در فاصله‌ی
+       سوییچ تا رسیدنِ پاسخ، یک حذف/افزودن فهرستِ باشگاهِ قبلی را روی
+       باشگاهِ تازه PUT می‌کرد. */
+    setCoaches([]);
+    setCoachesReady(false);
 
     // Fetch full club data to populate all info fields
     api.get(`/clubs/${selectedClub.id}`).then(r => {
@@ -655,6 +666,7 @@ export default function ClubDashboardPage() {
         } catch { setCoaches([]); }
       }
       setCoachesError('');
+      setCoachesReady(true);
 
       const srvStats = (c.clubStats ?? null) as Partial<ClubStats> | null;
       if (srvStats && Object.keys(srvStats).length) {
@@ -1731,7 +1743,6 @@ export default function ClubDashboardPage() {
       name: `${c.firstName ?? ''} ${c.lastName ?? ''}`.trim() || 'بدون نام',
       title: specialtyMap[c.coachProfile?.specialty ?? ''] ?? 'مربی بیلیارد',
       exp: c.coachProfile?.experience ? `${c.coachProfile.experience} سال` : '',
-      rating: '',
       bio: c.bio ?? '',
       /* ⚠️ افزودن دیگر «انتشار» نیست، «دعوت» است: تا خودِ مربی
          نپذیرد در صفحه‌ی عمومی دیده نمی‌شود. */
@@ -3976,7 +3987,14 @@ export default function ClubDashboardPage() {
                   );
                   return filtered.map(c => {
                     const fullName = `${c.firstName ?? ''} ${c.lastName ?? ''}`.trim() || 'بدون نام';
-                    const alreadyAdded = !!coaches.find(e => e.id === c.id);
+                    const existing = coaches.find(e => e.id === c.id);
+                    const alreadyAdded = !!existing;
+                    /* مربی‌ای که دعوت را رد کرده در فهرست می‌ماند تا
+                       باشگاه‌دار بداند چرا در صفحه‌ی عمومی نیست. کلیکِ
+                       دوباره کاری نمی‌کند — سرور وضعیتِ رد را نگه
+                       می‌دارد — پس به‌جای «افزوده شده» راهِ درست را
+                       می‌گوییم: اول حذف، بعد دعوتِ دوباره. */
+                    const rejected = existing?.status === 'rejected';
                     /* مربیِ تأییدنشده دیده می‌شود ولی افزوده نمی‌شود:
                        صفحه‌ی عمومیِ باشگاه نباید مربی‌ای را نشان دهد که
                        هنوز مدارکش بررسی نشده. */
@@ -4011,7 +4029,9 @@ export default function ClubDashboardPage() {
                         ) : (
                           <span style={{ fontSize: 10, color: '#B45309', background: 'rgba(217,119,6,0.09)', border: '1px solid rgba(217,119,6,0.24)', borderRadius: 20, padding: '2px 7px', flexShrink: 0, whiteSpace: 'nowrap' }}>در انتظار تأیید</span>
                         )}
-                        {alreadyAdded && <span style={{ fontSize: 11, color: '#9CA3AF', flexShrink: 0 }}>افزوده شده</span>}
+                        {rejected
+                          ? <span style={{ fontSize: 11, color: '#B91C1C', flexShrink: 0, whiteSpace: 'nowrap' }}>رد کرده — اول حذفش کن</span>
+                          : alreadyAdded && <span style={{ fontSize: 11, color: '#9CA3AF', flexShrink: 0 }}>افزوده شده</span>}
                       </div>
                     );
                   });
@@ -4020,7 +4040,11 @@ export default function ClubDashboardPage() {
             </div>
           )}
 
-          {coaches.length === 0 ? (
+          {!coachesReady ? (
+            <Card style={{ textAlign: 'center', padding: 48 }}>
+              <p style={{ color: '#9CA3AF', fontSize: 14 }}>در حال خواندن فهرست مربیان…</p>
+            </Card>
+          ) : coaches.length === 0 ? (
             <Card style={{ textAlign: 'center', padding: 48 }}>
               <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 10 }}><GraduationCap size={44} color="#D1D5DB" strokeWidth={1.2} /></div>
               <p style={{ color: '#6B7280', fontSize: 14 }}>هنوز مربی‌ای اضافه نشده</p>
@@ -4045,8 +4069,18 @@ export default function ClubDashboardPage() {
                     {c.bio && <div style={{ fontSize: 12, color: '#9CA3AF', marginTop: 3 }}>{c.bio}</div>}
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
-                    {c.rating && (
-                      <span style={{ fontSize: 14, fontWeight: 800, color: '#f59e0b' }}>★ {c.rating}</span>
+                    {/* پیش‌تر این‌جا ★ عددِ دستی بود. حالا چیزی که واقعاً
+                        باید دیده شود این است: تا مربی نپذیرد، در صفحه‌ی
+                        عمومیِ باشگاه نیست. */}
+                    {c.status === 'pending' && (
+                      <span style={{ fontSize: 11, fontWeight: 700, color: '#92400E', background: '#FEF3C7', border: '1px solid #FDE68A', borderRadius: 999, padding: '3px 10px' }}>
+                        در انتظار پذیرش
+                      </span>
+                    )}
+                    {c.status === 'rejected' && (
+                      <span style={{ fontSize: 11, fontWeight: 700, color: '#991B1B', background: '#FEE2E2', border: '1px solid #FECACA', borderRadius: 999, padding: '3px 10px' }}>
+                        رد شده
+                      </span>
                     )}
                     <button onClick={() => deleteCoach(c.id)} style={{
                       background: '#FEE2E2', color: '#991B1B', border: 'none', borderRadius: 8,
