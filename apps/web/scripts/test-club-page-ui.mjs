@@ -26,7 +26,10 @@ if (!clubs.length) {
   console.log('\n  ⏭  هیچ باشگاهی برنگشت — رد شد.\n')
   process.exit(0)
 }
-const club = clubs[0]
+const club = clubs.find(c => !c.logo) ?? clubs[0]
+if (club.logo) {
+  console.log('  ⓘ هیچ باشگاهِ بی‌لوگویی نبود — گاردِ نشانِ پیش‌فرض روی این باشگاه توخالی است.')
+}
 
 const browser = await puppeteer.launch({
   executablePath: CHROME, headless: 'new',
@@ -141,19 +144,28 @@ if (!stats) {
 /* ── ۴) نشانِ پیش‌فرضِ باشگاه ── */
 head('نشانِ پیش‌فرضِ باشگاه')
 await open(1280, 1000)
+/* ⚠️ قلاب `data-club-logo` است نه `[role=img][aria-label]`: آن سلکتور
+   سراسری بود و روی باشگاهِ لوگودار — که اصلاً جای‌لوگو ندارد — تیکِ
+   آبی را می‌گرفت؛ تیک `role=img` دارد و `<title>` داخلش متن دارد، پس
+   گارد همیشه قرمز می‌ماند بی‌آنکه چیزی خراب باشد. */
 const mark = await page.evaluate(() => {
-  const el = document.querySelector('[role=img][aria-label]')
-  const img = document.querySelector('span > img[alt]')
-  return { hasSvgMark: !!el?.querySelector('svg'), hasUploaded: !!img }
+  const box = document.querySelector('[data-club-logo]')
+  if (!box) return { found: false }
+  return {
+    found: true,
+    kind: box.getAttribute('data-club-logo'),
+    hasSvgMark: !!box.querySelector('svg'),
+    hasUploaded: !!box.querySelector('img[alt]'),
+    text: box.textContent.trim(),
+  }
 })
+t('جای لوگو در صفحه هست', mark.found, JSON.stringify(mark))
 t('یا لوگوی آپلودشده هست یا نشانِ SVG',
-  mark.hasSvgMark || mark.hasUploaded, JSON.stringify(mark))
+  (mark.kind === 'img' && mark.hasUploaded) || (mark.kind === 'mark' && mark.hasSvgMark),
+  JSON.stringify(mark))
+/* نشانِ پیش‌فرض باید تصویری باشد، نه حرفِ اولِ نام */
 t('حرفِ تنهای نام دیگر جای لوگو نیست',
-  await page.evaluate(() => {
-    const box = document.querySelector('[role=img][aria-label]')
-    if (!box) return true          /* لوگو آپلود شده */
-    return box.textContent.trim() === ''
-  }))
+  mark.found && (mark.kind !== 'mark' || mark.text === ''), JSON.stringify(mark))
 
 await browser.close()
 console.log(`\n  ${fail ? '✗' : '✓'} ${pass} پاس، ${fail} خطا\n`)
