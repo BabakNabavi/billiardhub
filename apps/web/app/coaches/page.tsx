@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { listCoachProfiles, type CoachProfile } from '@/lib/coach-store'
 import { fetchProfiles } from '@/lib/profiles/client'
 import VerifiedBadge from '@/components/VerifiedBadge'
+import RoleAvatar from '@/components/profile/RoleAvatar'
 
 /* ─── Tokens ─── */
 const GOLD    = '#C7A66A'
@@ -24,7 +25,7 @@ const SPECS: Record<string, { label: string; color: string; glow: string }> = {
 
 interface Coach {
   id: string; name: string; specialty: string; city: string
-  experience: number; rating: number; students: number; medals: number
+  experience: number
   sessionPrice: number; bio: string; photo: string; verified?: boolean; disciplines?: string[]
 }
 
@@ -195,26 +196,7 @@ function CoachHeroSlider() {
    مربی می‌شد: «استوری»ای که کسی منتشرش نکرده بود و هرگز هم منقضی
    نمی‌شد. برای مربی اصلاً سیستمِ استوری وجود ندارد. */
 function CoachAvatar({ coach, size }: { coach: Coach; size: string }) {
-  return (
-    <div
-      className="cavatar"
-      style={{ width:size, aspectRatio:'1 / 1', borderRadius:'50%', padding:'3px', flexShrink:0,
-        background:'linear-gradient(150deg,#FFFDF8,#EBDFC6)',
-        boxShadow:'0 4px 16px rgba(0,0,0,0.12)', display:'flex' }}>
-      <div style={{ width:'100%', height:'100%', borderRadius:'50%', overflow:'hidden',
-        border:'2.5px solid #FFFFFF', background:'#E7ECF1',
-        display:'flex', alignItems:'flex-end', justifyContent:'center' }}>
-        {coach.photo ? (
-          <img loading="lazy" decoding="async" src={coach.photo} alt={coach.name} style={{ width:'100%', height:'100%', objectFit:'cover' }}/>
-        ) : (
-          <svg viewBox="0 0 100 100" width="100%" height="100%" style={{ display:'block' }} aria-hidden="true">
-            <circle cx="50" cy="37" r="19" fill="#93A3B8"/>
-            <path d="M15 100 C15 74 31 65 50 65 C69 65 85 74 85 100 Z" fill="#A9B8CC"/>
-          </svg>
-        )}
-      </div>
-    </div>
-  )
+  return <RoleAvatar kind="coach" photo={coach.photo} name={coach.name} size={size} />
 }
 
 /* ── Coach card — grid + list ── */
@@ -300,7 +282,7 @@ function mapProfileToListCoach(p: CoachProfile): Coach {
     name: `${p.firstNameFa} ${p.lastNameFa}`.trim(),
     specialty: p.disciplines[0] ?? 'snooker',
     city: p.city,
-    experience: 0, rating: 0, students: 0, medals: 0, sessionPrice: 0,
+    experience: 0, sessionPrice: 0,
     bio: p.shortBio, photo: p.photo, verified: p.verified, disciplines: p.disciplines,
   }
 }
@@ -442,6 +424,10 @@ export default function CoachesPage() {
            صفحه‌ی داوران از اول درست بود: یک ردیفِ کامل که از همان
            لبه‌ای شروع می‌شود که تب‌ها شروع می‌شوند. حالا هر دو صفحه
            عیناً یک قاعده دارند. */
+        /* ⚠️ min-width:0 لازم است: این گروه خودش یک آیتمِ فلکس است و با
+           min-width:auto کفِ min-content می‌گیرد — روی ۳۲۰px ۳۳۲ پیکسل
+           می‌شد و دکمه‌های نما ۳۶ پیکسل بیرونِ قاب می‌افتادند. */
+        .coach-search-group{min-width:0;}
         @media(max-width:640px){.coach-search-group{flex-basis:100%;margin-inline-start:0!important;}}
         /* list view: 2 cards per row on desktop, 1 on mobile */
         .coach-list-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
@@ -491,6 +477,7 @@ export default function CoachesPage() {
                   <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
                 </svg>
                 <input type="text" value={search} onChange={e => setSearch(e.target.value)}
+                  aria-label="جستجوی نام مربی یا شهر"
                   placeholder="جستجوی نام مربی یا شهر..."
                   style={{ flex:1, minWidth:0, background:'none', border:'none', outline:'none',
                     fontSize:13, color:TEXT, fontFamily:"'Vazirmatn',Tahoma,sans-serif" }}/>
