@@ -119,8 +119,10 @@ function clubRow(c: ApiClub): Row {
     href: `/clubs/${c.slug || c.id}`,
     verified: c.verificationStatus === 'verified',
     hasDoc: !!str(c.licenseDocumentUrl),
-    /* باشگاه با هر دو وضعیتِ «تأیید» در فهرستِ عمومی دیده می‌شود */
-    published: c.verificationStatus === 'verified' || c.verificationStatus === 'approved',
+    /* همان شرطِ فهرستِ عمومی، مو‌به‌مو: هم فعال، هم یکی از دو وضعیتِ
+       تأیید. باشگاهِ غیرفعال در سایت نیست، پس تیک هم نباید بگیرد. */
+    published: c.isActive !== false
+      && (c.verificationStatus === 'verified' || c.verificationStatus === 'approved'),
   }
 }
 
@@ -135,7 +137,7 @@ async function loadRows(): Promise<{ rows: Row[]; partial: boolean }> {
         ? { ok: true, list: await r.json() as { profiles?: Record<string, ApiProfile[]> } }
         : { ok: false, list: null }))
       .catch(() => ({ ok: false, list: null })),
-    fetch('/api/clubs?all=true', { cache: 'no-store' })
+    apiFetch('/api/clubs?all=true', { cache: 'no-store' })
       .then(async r => (r.ok
         ? { ok: true, list: await r.json() as unknown }
         : { ok: false, list: null }))
