@@ -298,64 +298,15 @@ export async function PUT(
     }
   }
 
-  /* ── وضعیتِ دعوتِ مربی، مالِ سرور است نه فرستنده ────────────────
-     پنلِ باشگاه کلِ آرایه‌ی `coaches` را می‌فرستد، پس هر ذخیره می‌تواند
-     پاسخِ مربی را بازنویسی کند. این‌جا وضعیتِ *هر* ردیف از نو تعیین
-     می‌شود، نه فقط ردیف‌هایی که قبلاً بوده‌اند:
-
-       • ردیفی که در دیتابیس هست  ⟵ `status`/`decidedAt`ِ همان‌جا
-       • ردیفِ تازه               ⟵ همیشه `pending`
-
-     ⚠️ شرطِ دوم امنیتی است، نه ظاهری: بدونش صاحبِ باشگاه می‌توانست
-     مستقیماً `status: 'accepted'` بفرستد و مربی‌ای را که هیچ دعوتی
-     نپذیرفته منتشر کند — و از راهِ `clubsOfCoach` حقِ امتیازدهی هم
-     برایش بسازد. همان سوراخی که کلِ جریانِ دعوت برای بستنش ساخته شد.
-
-     ⚠️ ردیفِ قدیمیِ بدونِ `status` یعنی «پذیرفته» (پیش از این جریان
-     ساخته شده)؛ فرستنده نباید بتواند پایین‌ترش بیاورد.
-
-     کلیدها هم سفیدلیست‌اند تا کلیدِ مرده‌ای مثل `rating` — امتیاز حالا
-     از `profile_reviews` می‌آید — از راهِ فرستنده برنگردد. */
-  if (Object.prototype.hasOwnProperty.call(body, 'coaches') && Array.isArray(body.coaches)) {
-    const { data: curC, error: curErr } = await getSupabaseServer()
-      .from('clubs').select('coaches').eq('id', id).maybeSingle();
-
-    /* ستونِ بدونِ مهاجرت را پایین‌تر `OPTIONAL_COLUMNS` می‌بخشد؛ هر
-       خطای دیگری یعنی نمی‌دانیم وضعیتِ فعلی چیست و نوشتنِ آرایه‌ی
-       فرستنده دقیقاً همان چیزی است که این بلوک جلویش را می‌گیرد. */
-    if (curErr && !/does not exist|PGRST204/i.test(`${curErr.message} ${curErr.code ?? ''}`)) {
-      console.error('[clubs/:id] خواندنِ مربیانِ فعلی:', curErr.message);
-      return NextResponse.json({ message: 'به‌روزرسانی باشگاه انجام نشد' }, { status: 500, headers: CORS });
-    }
-
-    const stored = Array.isArray((curC as { coaches?: unknown } | null)?.coaches)
-      ? ((curC as { coaches: Record<string, unknown>[] }).coaches)
-      : [];
-    const byKey = new Map<string, Record<string, unknown>>();
-    for (const e of stored) {
-      if (!e || typeof e !== 'object') continue;
-      if (e.id) byKey.set(String(e.id), e);
-      if (e.slug) byKey.set(`s:${String(e.slug)}`, e);
-    }
-
-    const KEEP = ['id', 'slug', 'name', 'title', 'exp', 'bio'] as const;
-    const STATUS = new Set(['pending', 'accepted', 'rejected']);
-
-    body.coaches = (body.coaches as unknown[]).map(raw => {
-      if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return raw;
-      const e = raw as Record<string, unknown>;
-      const out: Record<string, unknown> = {};
-      for (const k of KEEP) if (k in e) out[k] = e[k];
-
-      const old = byKey.get(String(e.id ?? '')) ?? byKey.get(`s:${String(e.slug ?? '')}`);
-      if (old) {
-        out.status = STATUS.has(String(old.status)) ? old.status : 'accepted';
-        if ('decidedAt' in old) out.decidedAt = old.decidedAt;
-      } else {
-        out.status = 'pending';
-      }
-      return out;
-    });
+  /* ── فهرستِ مربیان از این‌جا نوشته نمی‌شود ────────────────────────
+     نوشتنِ کلِ ستون یعنی هر ردیفی که فرستنده ندیده بود بی‌صدا حذف
+     شود — و «ندیدم» از «حذفش کردم» قابلِ تشخیص نیست. مسیرِ
+     `PATCH /api/clubs/:id/coaches` نیت را صریح می‌گیرد و همان یک
+     تغییر را می‌زند. */
+  if (Object.prototype.hasOwnProperty.call(body, 'coaches')) {
+    return NextResponse.json(
+      { message: 'فهرستِ مربیان از این مسیر تغییر نمی‌کند؛ از /api/clubs/:id/coaches استفاده کنید' },
+      { status: 400, headers: CORS });
   }
 
   const doUpdate = (payload: Record<string, unknown>) => getSupabaseServer()

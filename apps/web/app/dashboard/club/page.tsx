@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { notify, askText } from '../../../lib/ui/dialogs'
 import Select from '../../../components/ui/Select'
 import VerificationBadges from '../../../components/VerificationBadges'
@@ -531,23 +531,50 @@ export default function ClubDashboardPage() {
   const [coachesError, setCoachesError] = useState('');
   /* تا فهرست از سرور نرسیده، «هنوز مربی‌ای اضافه نشده» دروغ است */
   const [coachesReady, setCoachesReady] = useState(false);
-  const saveCoaches = useCallback(async (next: CoachEntry[]) => {
-    const before = coaches;
-    setCoaches(next);
-    setCoachesError('');
+  /* ── چرا «یک تغییر» و نه «کلِ فهرست» ──
+     پیش‌تر این‌جا کلِ آرایه با `PUT /clubs/:id` می‌رفت. آرایه لحظه‌ی
+     انتخابِ باشگاه خوانده شده بود، پس هر ردیفی که در این فاصله اضافه
+     شده بود — مثلاً مربی‌ای که خودش پذیرفته، یا افزودنی از دستگاهِ
+     دیگر — با اولین ذخیره بی‌صدا حذف می‌شد. حذف را نمی‌شود از «ندیدن»
+     تشخیص داد، پس نیت باید صریح برود.
+
+     پاسخ همان آرایه‌ای است که واقعاً ذخیره شد و مستقیم می‌نشیند؛ حالتِ
+     خوش‌بینانه عمداً نداریم چون پاسخ سریع است و حدسِ اشتباه این‌جا
+     یعنی نشان‌دادنِ وضعیتِ دعوتی که وجود ندارد. */
+  /* شناسه‌ی ردیفی که همین حالا تغییر می‌کند — پرچمِ سراسری همه‌ی
+     دکمه‌ها را با هم خاموش می‌کرد و معلوم نبود کدام ردیف مشغول است. */
+  const [coachBusyId, setCoachBusyId] = useState('');
+  const coachBusy = coachBusyId !== '';
+  /* شناسه‌ی باشگاهِ انتخابی در یک ref — تا پاسخِ دیررسِ باشگاهِ قبلی
+     روی فهرستِ باشگاهِ تازه ننشیند. */
+  const selectedClubRef = useRef<string | null>(null);
+  useEffect(() => { selectedClubRef.current = selectedClub?.id ?? null; }, [selectedClub]);
+  const mutateCoaches = useCallback(async (
+    body: { add: CoachEntry } | { removeId: string },
+    rowId: string,
+  ) => {
     if (!selectedClub) return;
+    /* ⚠️ باشگاه ممکن است وسطِ درخواست عوض شود؛ نشاندنِ پاسخ روی state
+       بدونِ این مقایسه، فهرستِ باشگاهِ قبلی را زیرِ باشگاهِ تازه
+       می‌گذاشت. */
+    const cid = selectedClub.id;
+    setCoachBusyId(rowId);
+    setCoachesError('');
     try {
-      const r = await api.put(`/clubs/${selectedClub.id}`, { coaches: next });
-      /* سرور `status`/`decidedAt` را از نسخه‌ی خودش برمی‌گرداند؛ نسخه‌ی
-         خوش‌بینانه ممکن است پاسخِ تازه‌ی مربی را ندیده باشد. */
+      const r = await api.patch(`/clubs/${cid}/coaches`, body);
       const saved = (r.data as { coaches?: unknown } | undefined)?.coaches;
-      if (Array.isArray(saved)) setCoaches(saved as CoachEntry[]);
+      if (selectedClubRef.current === cid && Array.isArray(saved)) setCoaches(saved as CoachEntry[]);
       try { localStorage.removeItem(lsKey('coaches')); } catch { /* ignore */ }
-    } catch {
-      setCoaches(before);
-      setCoachesError('ذخیره‌ی مربیان روی سرور انجام نشد؛ دوباره تلاش کنید.');
-    }
-  }, [lsKey, selectedClub, coaches]);
+    } catch (e) {
+      const res = (e as { response?: { data?: { message?: string; coaches?: unknown } } })?.response;
+      /* سرور در خطاهای «نسخه‌ات کهنه است» فهرستِ درست را هم می‌دهد —
+         وگرنه پنل روی ردیفی گیر می‌کرد که دیگر وجود ندارد. */
+      if (selectedClubRef.current === cid && Array.isArray(res?.data?.coaches)) {
+        setCoaches(res.data.coaches as CoachEntry[]);
+      }
+      setCoachesError(res?.data?.message ?? 'ذخیره‌ی مربیان روی سرور انجام نشد؛ دوباره تلاش کنید.');
+    } finally { setCoachBusyId(''); }
+  }, [lsKey, selectedClub]);
 
 
   /* میزها روی سرور ذخیره می‌شوند (نه فقط در مرورگر) تا صفحه‌ی رزرو
@@ -678,7 +705,12 @@ export default function ClubDashboardPage() {
         } catch { setClubStats(DEFAULT_STATS); }
       }
       setStatsMsg(null);
-    }).catch(() => {});
+    }).catch(() => {
+      /* ⚠️ بدونِ این، شکستِ فچ فهرستِ مربیان را برای همیشه روی
+         «در حال خواندن…» نگه می‌داشت — نه محتوا، نه خطا. */
+      setCoachesReady(true);
+      setCoachesError('خواندنِ اطلاعات باشگاه انجام نشد؛ صفحه را تازه کنید.');
+    });
 
     /* آمار شمردنی از سرور. شکستش کارت را خالی نمی‌کند — `null` می‌ماند
        و به‌جای عدد، خط تیره نشان داده می‌شود. */
@@ -1738,21 +1770,19 @@ export default function ClubDashboardPage() {
   const selectCoach = (c: ApiCoach) => {
     if (coaches.find(e => e.id === c.id)) return;
     const specialtyMap: Record<string, string> = { snooker: 'اسنوکر', pocket: 'پاکت بیلیارد', highball: 'هی‌بال' };
-    const entry: CoachEntry = {
+    /* ⚠️ `status` عمداً فرستاده نمی‌شود: افزودن «دعوت» است نه «انتشار»،
+       و سرور خودش `pending` می‌گذارد. */
+    void mutateCoaches({ add: {
       id: c.id,
       name: `${c.firstName ?? ''} ${c.lastName ?? ''}`.trim() || 'بدون نام',
       title: specialtyMap[c.coachProfile?.specialty ?? ''] ?? 'مربی بیلیارد',
       exp: c.coachProfile?.experience ? `${c.coachProfile.experience} سال` : '',
       bio: c.bio ?? '',
-      /* ⚠️ افزودن دیگر «انتشار» نیست، «دعوت» است: تا خودِ مربی
-         نپذیرد در صفحه‌ی عمومی دیده نمی‌شود. */
-      status: 'pending',
-    };
-    saveCoaches([...coaches, entry]);
+    } }, c.id);
     setShowCoachPicker(false);
   };
 
-  const deleteCoach = (id: string) => saveCoaches(coaches.filter(c => c.id !== id));
+  const deleteCoach = (id: string) => { void mutateCoaches({ removeId: id }, id); };
 
   // ── Early returns ──────────────────────────────────────────────────────────
 
@@ -3937,9 +3967,10 @@ export default function ClubDashboardPage() {
         <div>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
             <h2 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: DARK }}>مربیان باشگاه</h2>
-            <button onClick={openCoachPicker} style={{
+            <button onClick={openCoachPicker} disabled={coachBusy} style={{
               background: GOLD, color: '#fff', border: 'none', borderRadius: 10,
-              padding: '9px 18px', fontSize: 13, fontWeight: 700, cursor: 'pointer', fontFamily: 'var(--font-base)',
+              padding: '9px 18px', fontSize: 13, fontWeight: 700, fontFamily: 'var(--font-base)',
+              cursor: coachBusy ? 'default' : 'pointer', opacity: coachBusy ? 0.6 : 1,
             }}>+ مربی جدید</button>
           </div>
 
@@ -4082,10 +4113,13 @@ export default function ClubDashboardPage() {
                         رد شده
                       </span>
                     )}
-                    <button onClick={() => deleteCoach(c.id)} style={{
-                      background: '#FEE2E2', color: '#991B1B', border: 'none', borderRadius: 8,
-                      padding: '6px 12px', fontSize: 12, cursor: 'pointer', fontFamily: 'var(--font-base)', fontWeight: 600,
-                    }}>حذف</button>
+                    <button onClick={() => deleteCoach(c.id)} disabled={coachBusy}
+                      aria-busy={coachBusyId === c.id} style={{
+                        background: '#FEE2E2', color: '#991B1B', border: 'none', borderRadius: 8,
+                        padding: '6px 12px', fontSize: 12, fontFamily: 'var(--font-base)', fontWeight: 600,
+                        cursor: coachBusy ? 'default' : 'pointer',
+                        opacity: coachBusyId === c.id ? 0.5 : coachBusy ? 0.75 : 1,
+                      }}>حذف</button>
                   </div>
                 </Card>
               ))}
