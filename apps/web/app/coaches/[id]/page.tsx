@@ -1,4 +1,5 @@
 'use client'
+import { useChannelPublish } from '@/components/media/useChannelPublish'
 import { useState, useEffect, useRef } from 'react'
 import ProfileHero from '../../../components/profile/ProfileHero'
 import ProfileGallery from '../../../components/profile/ProfileGallery'
@@ -82,6 +83,8 @@ export default function CoachProfilePage() {
   const [sessionPrice, setSessionPrice] = useState(0)
   const [sessionMin, setSessionMin] = useState(60)
   const [vidBusy, setVidBusy] = useState(false)
+  /* انتشار در بیلیارد مدیا — پنجره فقط وقتی باز می‌شود که کانالِ
+     همین نقش نباشد. آپلودِ گالری هرگز به نتیجه‌اش وابسته نیست. */
   const [copyState, setCopyState] = useState<'idle' | 'ok' | 'manual'>('idle')
   const flashT = useRef<ReturnType<typeof setTimeout> | null>(null)
   useEffect(() => () => { if (flashT.current) clearTimeout(flashT.current) }, [])
@@ -136,6 +139,7 @@ export default function CoachProfilePage() {
      می‌کند. `apply` کلِ پروفایل را با یک فیلدِ عوض‌شده ذخیره می‌کند و
      نشانیِ Storage را که سرور برمی‌گرداند می‌نشاند. */
   const edit = useOwnerEdit<CoachProfile>('coach', id, localP, ownerId, setLocalP, mine)
+  const { gate: channelGate, publish: publishToChannel } = useChannelPublish('coach', ownerId ?? undefined, edit.isOwner, notify)
 
   /* ⚠️ `div` خالی بود. قاعده‌ی پروژه اسکلت می‌خواهد، و روی شبکه‌ی
      کند یک صفحه‌ی تماماً سفید از خرابی قابلِ تشخیص نیست. */
@@ -279,6 +283,7 @@ export default function CoachProfilePage() {
     /* پیام‌ها ته کار یک‌جا داده می‌شوند: `notify` یک نوار است و
        فراخوانیِ پشتِ هم فقط آخری را نشان می‌دهد. */
     const skipped: string[] = []
+    const shipped: { title: string; src: string; thumb?: string; durationSec?: number }[] = []
     try {
       for (const file of files) {
         if (file.size > MAX_VIDEO_MB * 1024 * 1024) { skipped.push(file.name); continue }
@@ -294,9 +299,15 @@ export default function CoachProfilePage() {
         }))
         /* ذخیره که شکست خورد، ادامه‌ی آپلود فقط فایلِ یتیم می‌سازد */
         if (!ok) break
+        /* ⚠️ فقط ویدیویی که *در گالری ذخیره شد* منتشر می‌شود. پیش‌تر
+           این خط بالای `break` بود و ویدیویی که ذخیره‌اش شکست خورده
+           بود هم به مدیا می‌رفت: در بیلیارد مدیا زنده، در پروفایل
+           نبود، و کاربر پیام «ذخیره انجام نشد» دیده بود. */
+        shipped.push({ title: file.name.replace(/\.[^.]+$/, ''), src: url, thumb, durationSec: meta.durationSec })
       }
     } finally {
       setVidBusy(false)
+      if (shipped.length) void publishToChannel(shipped, String(coach?.name ?? ''))
       if (skipped.length) notify(`این ویدیوها اضافه نشدند (سقف ${MAX_VIDEO_MB} مگابایت): ${skipped.join('، ')}`)
     }
   }
@@ -467,6 +478,7 @@ export default function CoachProfilePage() {
 
       {imageViewer}
       {videoViewer}
+      {channelGate}
     </div>
   )
 }

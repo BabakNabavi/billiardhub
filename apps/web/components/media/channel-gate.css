@@ -1,0 +1,129 @@
+/* ─────────────────────────────────────────────────────────────
+   ظاهرِ دروازه‌ی کانال — شیشه‌ی مایع، هم‌خانواده‌ی بقیه‌ی سایت.
+
+   ⚠️ فقط `backdrop-filter` نوشته می‌شود، بدونِ `-webkit-`. نوشتنِ هر
+   دو باعث می‌شود مینیفایرِ بیلد ادغامشان کند و **فقط نسخه‌ی
+   `-webkit-` را نگه دارد** — که کرومِ امروزی پشتیبانی نمی‌کند و
+   شیشه بی‌صدا بی‌اثر می‌شود. پیشوند را autoprefixer اضافه می‌کند.
+   ───────────────────────────────────────────────────────────── */
+
+.cg-back {
+  position: fixed; inset: 0; z-index: 1200;
+  display: grid; place-items: center;
+  padding: clamp(14px, 4vw, 28px);
+  padding-bottom: calc(clamp(14px, 4vw, 28px) + env(safe-area-inset-bottom, 0px));
+  background: rgba(12, 11, 8, .58);
+  backdrop-filter: blur(10px) saturate(1.2);
+  animation: cgIn .22s cubic-bezier(.22, .61, .36, 1);
+  overflow-y: auto;
+}
+@keyframes cgIn { from { opacity: 0 } }
+
+.cg-box {
+  position: relative; width: min(100%, 460px);
+  padding: clamp(22px, 4vw, 30px);
+  border-radius: 20px; text-align: center;
+  color: #16150F;
+  background: linear-gradient(158deg, rgba(255, 255, 255, .96), rgba(255, 255, 255, .88));
+  border: 1px solid rgba(255, 255, 255, .8);
+  box-shadow:
+    0 1px 2px rgba(22, 21, 15, .06),
+    0 30px 70px -20px rgba(22, 21, 15, .5),
+    inset 0 1px 0 rgba(255, 255, 255, .95);
+  animation: cgPop .3s cubic-bezier(.34, 1.4, .48, 1);
+}
+@keyframes cgPop { from { opacity: 0; transform: translateY(14px) scale(.97) } }
+
+.cg-x {
+  position: absolute; inset-inline-end: 12px; inset-block-start: 12px;
+  display: grid; place-items: center; inline-size: 34px; block-size: 34px;
+  border-radius: 50%; border: 1px solid rgba(22, 21, 15, .1);
+  background: rgba(255, 255, 255, .7); color: #55524A; cursor: pointer;
+  transition: background .2s, color .2s;
+}
+.cg-x:hover { background: #fff; color: #16150F; }
+.cg-x:focus-visible { outline: 2px solid #8A6229; outline-offset: 2px; }
+
+.cg-icon {
+  display: inline-grid; place-items: center; inline-size: 46px; block-size: 46px;
+  border-radius: 50%; margin-bottom: 14px; color: #8A6229;
+  background: linear-gradient(160deg, rgba(227, 204, 150, .55), rgba(199, 166, 106, .24));
+  border: 1px solid rgba(199, 166, 106, .45);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .8);
+}
+
+.cg-title { margin: 0; font-size: clamp(17px, 2.2vw, 20px); font-weight: 800; line-height: 1.6; }
+.cg-sub { margin: 9px 0 0; font-size: 13.5px; line-height: 1.95; color: #6B6659; }
+
+/* ── فهرستِ کانال‌ها ── */
+.cg-list { list-style: none; margin: 20px 0 0; padding: 0; display: grid; gap: 9px; text-align: start; }
+.cg-item {
+  position: relative; width: 100%; display: grid;
+  grid-template-columns: 1fr auto; gap: 2px 10px; align-items: center;
+  padding: 13px 15px; border-radius: 13px; cursor: pointer;
+  font-family: inherit; text-align: start;
+  background: rgba(255, 255, 255, .8);
+  border: 1px solid rgba(22, 21, 15, .1);
+  transition: border-color .2s, transform .25s cubic-bezier(.34, 1.4, .48, 1);
+}
+@media (hover: hover) { .cg-item:hover { border-color: rgba(199, 166, 106, .6); transform: translateY(-2px); } }
+.cg-item:focus-visible { outline: 2px solid #8A6229; outline-offset: 2px; }
+.cg-item-n { font-size: 15px; font-weight: 700; }
+.cg-item-h { grid-column: 1; font-size: 12px; color: #8A8474; font-variant-numeric: tabular-nums; }
+.cg-item-r { grid-column: 1; font-size: 11.5px; color: #8A6229; }
+.cg-item-r b { font-weight: 800; }
+.cg-item-i { grid-column: 2; grid-row: 1 / -1; color: #8A6229; opacity: .55; }
+
+.cg-alt {
+  margin-top: 12px; width: 100%;
+  display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+  padding: 12px 16px; border-radius: 999px; cursor: pointer;
+  font-family: inherit; font-size: 13.5px; font-weight: 700; color: #8A6229;
+  background: linear-gradient(160deg, rgba(227, 204, 150, .5), rgba(199, 166, 106, .2));
+  border: 1px solid rgba(199, 166, 106, .45);
+  transition: transform .25s cubic-bezier(.34, 1.4, .48, 1);
+}
+@media (hover: hover) { .cg-alt:hover { transform: translateY(-2px) } }
+.cg-alt:focus-visible { outline: 2px solid #8A6229; outline-offset: 2px; }
+
+/* ── فرمِ ساخت ── */
+.cg-form { margin-top: 18px; text-align: start; }
+.cg-lab { display: block; font-size: 12.5px; font-weight: 700; margin-bottom: 6px; }
+.cg-in {
+  width: 100%; box-sizing: border-box; padding: 11px 13px; margin-bottom: 13px;
+  border-radius: 11px; border: 1px solid rgba(22, 21, 15, .14);
+  background: #fff; font-family: inherit; font-size: 14px; color: #16150F;
+}
+.cg-in:focus-visible { outline: 2px solid #8A6229; outline-offset: 1px; }
+.cg-handle { display: flex; align-items: center; gap: 6px; color: #8A8474; font-weight: 700; }
+.cg-in--h { margin-bottom: 0; }
+.cg-hint { margin: 7px 0 0; font-size: 11.5px; color: #8A8474; }
+.cg-err { margin: 10px 0 0; font-size: 12.5px; font-weight: 700; color: #B23B2E; }
+
+.cg-actions { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 16px; }
+.cg-go {
+  flex: 1; min-width: 180px;
+  display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+  padding: 13px 18px; border-radius: 999px; cursor: pointer;
+  font-family: inherit; font-size: 14px; font-weight: 800; color: #241B08;
+  background: linear-gradient(150deg, #E3CC96, #C7A66A 55%, #A8853F);
+  border: none; box-shadow: 0 10px 24px -8px rgba(138, 98, 41, .6);
+  transition: transform .25s cubic-bezier(.34, 1.4, .48, 1), opacity .2s;
+}
+@media (hover: hover) { .cg-go:not(:disabled):hover { transform: translateY(-2px) } }
+.cg-go:disabled { opacity: .55; cursor: not-allowed; }
+.cg-go:focus-visible { outline: 2px solid #16150F; outline-offset: 2px; }
+
+.cg-back-btn, .cg-skip {
+  padding: 12px 16px; border-radius: 999px; cursor: pointer;
+  font-family: inherit; font-size: 13px; font-weight: 700; color: #6B6659;
+  background: none; border: 1px solid rgba(22, 21, 15, .12);
+}
+.cg-back-btn:focus-visible, .cg-skip:focus-visible { outline: 2px solid #8A6229; outline-offset: 2px; }
+.cg-skip { display: block; width: 100%; margin-top: 16px; border: none; }
+@media (hover: hover) { .cg-skip:hover { color: #16150F } }
+
+@media (prefers-reduced-motion: reduce) {
+  .cg-back, .cg-box { animation: none; }
+  .cg-item, .cg-alt, .cg-go, .cg-x { transition: none; }
+}

@@ -1,4 +1,5 @@
 'use client'
+import { useChannelPublish } from '@/components/media/useChannelPublish'
 import { useState, useMemo, useRef, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter, useParams } from 'next/navigation'
@@ -314,6 +315,7 @@ export default function FlatShop() {
   const shots = profile?.gallery ?? []
   const vids = profile?.videos ?? []
   const edit = useOwnerEdit<SellerProfile>('seller', sellerId, profile, profile?.ownerId ?? null, setProfile, mine)
+  const { gate: channelGate, publish: publishToChannel } = useChannelPublish('seller', profile?.ownerId ?? undefined, edit.isOwner, notify)
 
   /* ── همان گالریِ مشترکِ بقیه‌ی نقش‌ها ──
      ⚠️ این‌جا فقط یک شبکه‌ی عکس بود: نه ویدیویی، نه آلبومی، و حذف با
@@ -321,6 +323,8 @@ export default function FlatShop() {
      داور، خدماتِ فنی و بازیکن دارند. */
   const MAX_VIDEO_MB = 25
   const [vidBusy, setVidBusy] = useState(false)
+  /* انتشار در بیلیارد مدیا — پنجره فقط وقتی باز می‌شود که کانالِ
+     همین نقش نباشد. آپلودِ گالری هرگز به نتیجه‌اش وابسته نیست. */
 
   const addShots = async (files: File[], album?: string) => {
     const items = await Promise.all(files.map(async fl => ({
@@ -335,6 +339,7 @@ export default function FlatShop() {
   const addVideoFiles = async (files: File[], album?: string) => {
     setVidBusy(true)
     const skipped: string[] = []
+    const shipped: { title: string; src: string; thumb?: string; durationSec?: number }[] = []
     try {
       for (const file of files) {
         if (file.size > MAX_VIDEO_MB * 1024 * 1024) { skipped.push(file.name); continue }
@@ -349,9 +354,15 @@ export default function FlatShop() {
           videos: [...(d.videos ?? []), { id: vid, url, thumbnail: thumb, title: file.name.replace(/\.[^.]+$/, ''), duration: formatDuration(meta.durationSec), ...(album ? { album } : {}) }],
         }))
         if (!ok) break
+        /* ⚠️ فقط ویدیویی که *در گالری ذخیره شد* منتشر می‌شود. پیش‌تر
+           این خط بالای `break` بود و ویدیویی که ذخیره‌اش شکست خورده
+           بود هم به مدیا می‌رفت: در بیلیارد مدیا زنده، در پروفایل
+           نبود، و کاربر پیام «ذخیره انجام نشد» دیده بود. */
+        shipped.push({ title: file.name.replace(/\.[^.]+$/, ''), src: url, thumb, durationSec: meta.durationSec })
       }
     } finally {
       setVidBusy(false)
+      if (shipped.length) void publishToChannel(shipped, String(profile?.title ?? ''))
       if (skipped.length) notify(`این ویدیوها اضافه نشدند (سقف ${MAX_VIDEO_MB} مگابایت): ${skipped.join('، ')}`)
     }
   }
@@ -1122,6 +1133,7 @@ export default function FlatShop() {
       {/* ═══ استوری فروشگاه (مثل صفحه‌ی باشگاه) ═══ */}
       {imageViewer}
       {videoViewer}
+      {channelGate}
       {storyOpen && hasStory && liveStories[storyIdx] && (
         <ClubStoryModal
           club={{

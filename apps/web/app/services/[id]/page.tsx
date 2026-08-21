@@ -7,6 +7,7 @@
    بدون آمار/امتیاز. داده از lib/technicians-data.
    ───────────────────────────────────────────────────────────── */
 
+import { useChannelPublish } from '@/components/media/useChannelPublish'
 import { useEffect, useMemo, useState } from 'react'
 import { ProfileMissing, ProfileLoading } from '@/components/profile/ProfileMissing'
 import { useProfileImageViewer } from '@/components/ProfileImageViewer'
@@ -129,6 +130,7 @@ export default function TechnicianProfilePage() {
   const edit = useOwnerEdit<TechnicianProfile>('technician', id, rawP, ownerId, raw => {
     setRawP(raw); setStored(profileToTechnician(raw))
   }, mine)
+  const { gate: channelGate, publish: publishToChannel } = useChannelPublish('technician', ownerId ?? undefined, edit.isOwner, notify)
 
   /* ── همان گالریِ مربی و داور ──
      ⚠️ این صفحه گالریِ خودش را داشت: نوارِ آلبوم، شبکه‌ی ماسونری و یک
@@ -137,6 +139,8 @@ export default function TechnicianProfilePage() {
      رندر می‌کند و این‌جا فقط «چه چیزی ذخیره شود» می‌ماند. */
   const MAX_VIDEO_MB = 25
   const [vidBusy, setVidBusy] = useState(false)
+  /* انتشار در بیلیارد مدیا — پنجره فقط وقتی باز می‌شود که کانالِ
+     همین نقش نباشد. آپلودِ گالری هرگز به نتیجه‌اش وابسته نیست. */
 
   const addImages = async (files: File[], album?: string) => {
     const items = await Promise.all(files.map(async fl => ({
@@ -151,6 +155,7 @@ export default function TechnicianProfilePage() {
   const addVideoFiles = async (files: File[], album?: string) => {
     setVidBusy(true)
     const skipped: string[] = []
+    const shipped: { title: string; src: string; thumb?: string; durationSec?: number }[] = []
     try {
       for (const file of files) {
         if (file.size > MAX_VIDEO_MB * 1024 * 1024) { skipped.push(file.name); continue }
@@ -165,9 +170,15 @@ export default function TechnicianProfilePage() {
           videos: [...(d.videos ?? []), { id: vid, url, thumbnail: thumb, title: file.name.replace(/.[^.]+$/, ''), duration: formatDuration(meta.durationSec), ...(album ? { album } : {}) }],
         }))
         if (!ok) break
+        /* ⚠️ فقط ویدیویی که *در گالری ذخیره شد* منتشر می‌شود. پیش‌تر
+           این خط بالای `break` بود و ویدیویی که ذخیره‌اش شکست خورده
+           بود هم به مدیا می‌رفت: در بیلیارد مدیا زنده، در پروفایل
+           نبود، و کاربر پیام «ذخیره انجام نشد» دیده بود. */
+        shipped.push({ title: file.name.replace(/\.[^.]+$/, ''), src: url, thumb, durationSec: meta.durationSec })
       }
     } finally {
       setVidBusy(false)
+      if (shipped.length) void publishToChannel(shipped, String(tech?.name ?? ''))
       if (skipped.length) notify(`این ویدیوها اضافه نشدند (سقف ${MAX_VIDEO_MB} مگابایت): ${skipped.join('، ')}`)
     }
   }
@@ -397,6 +408,7 @@ export default function TechnicianProfilePage() {
       {imageViewer}
       {imageViewer}
       {videoViewer}
+      {channelGate}
     </div>
   )
 }

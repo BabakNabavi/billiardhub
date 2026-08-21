@@ -8,6 +8,7 @@
    آلبوم‌دار + لایت‌باکس → پیوند با اخبار و بیلیارد مدیا.
    ───────────────────────────────────────────────────────────── */
 
+import { useChannelPublish } from '@/components/media/useChannelPublish'
 import { useEffect, useMemo, useState } from 'react'
 import { ProfileMissing, ProfileLoading } from '@/components/profile/ProfileMissing'
 import Link from 'next/link'
@@ -131,6 +132,7 @@ export default function PlayerProfilePage() {
   const edit = useOwnerEdit<PlayerProfile>('player', id, rawP, ownerId, raw => {
     setRawP(raw); setStored(profileToPlayer(raw))
   }, mine)
+  const { gate: channelGate, publish: publishToChannel } = useChannelPublish('player', ownerId ?? undefined, edit.isOwner, notify)
 
   /* ⚠️ هر دو هوک پیش از returnهای شرطی — قاعده‌ی هوک‌ها. یک‌بار در
      صفحه‌ی مربی زیرِ شرط رفت و صفحه با React #310 سفید شد. */
@@ -147,6 +149,8 @@ export default function PlayerProfilePage() {
      «چه چیزی ذخیره شود» می‌ماند. */
   const MAX_VIDEO_MB = 25
   const [vidBusy, setVidBusy] = useState(false)
+  /* انتشار در بیلیارد مدیا — پنجره فقط وقتی باز می‌شود که کانالِ
+     همین نقش نباشد. آپلودِ گالری هرگز به نتیجه‌اش وابسته نیست. */
 
   const addImages = async (files: File[], album?: string) => {
     const items = await Promise.all(files.map(async fl => ({
@@ -161,6 +165,7 @@ export default function PlayerProfilePage() {
   const addVideoFiles = async (files: File[], album?: string) => {
     setVidBusy(true)
     const skipped: string[] = []
+    const shipped: { title: string; src: string; thumb?: string; durationSec?: number }[] = []
     try {
       for (const file of files) {
         if (file.size > MAX_VIDEO_MB * 1024 * 1024) { skipped.push(file.name); continue }
@@ -175,9 +180,15 @@ export default function PlayerProfilePage() {
           videos: [...(d.videos ?? []), { id: vid, url, thumbnail: thumb, title: file.name.replace(/\.[^.]+$/, ''), duration: formatDuration(meta.durationSec), ...(album ? { album } : {}) }],
         }))
         if (!ok) break
+        /* ⚠️ فقط ویدیویی که *در گالری ذخیره شد* منتشر می‌شود. پیش‌تر
+           این خط بالای `break` بود و ویدیویی که ذخیره‌اش شکست خورده
+           بود هم به مدیا می‌رفت: در بیلیارد مدیا زنده، در پروفایل
+           نبود، و کاربر پیام «ذخیره انجام نشد» دیده بود. */
+        shipped.push({ title: file.name.replace(/\.[^.]+$/, ''), src: url, thumb, durationSec: meta.durationSec })
       }
     } finally {
       setVidBusy(false)
+      if (shipped.length) void publishToChannel(shipped, String(player?.name ?? ''))
       if (skipped.length) notify(`این ویدیوها اضافه نشدند (سقف ${MAX_VIDEO_MB} مگابایت): ${skipped.join('، ')}`)
     }
   }
@@ -593,6 +604,7 @@ export default function PlayerProfilePage() {
 
       {imageViewer}
       {videoViewer}
+      {channelGate}
     </div>
   )
 }

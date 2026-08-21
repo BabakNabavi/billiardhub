@@ -216,3 +216,17 @@ export async function activeCategories(): Promise<Record<string, number>> {
   for (const r of (data ?? []) as { category: string }[]) out[r.category] = (out[r.category] ?? 0) + 1
   return out
 }
+
+/* ─────────────────────────────────────────────────────────────
+   هندل‌های کانالِ خودِ کاربر.
+
+   ⚠️ گاردِ انتشار به این نیاز دارد: `creatorHandle` از بدنه می‌آید و
+   بدونِ بررسی، هر کاربرِ واردشده می‌توانست ویدیو را زیرِ کانالِ
+   دیگری منتشر کند و در فهرستِ آن کانال بنشیند.
+   ───────────────────────────────────────────────────────────── */
+export async function myChannelHandles(actor: { id: string; dmKey?: string }): Promise<string[]> {
+  const { readJson } = await import('../social-server')
+  const list = await readJson<{ ownerKey: string; handle: string }[]>('social/media/channels.json', [])
+  const key = actor.dmKey || actor.id
+  return list.filter(c => c.ownerKey === key).map(c => String(c.handle).toLowerCase())
+}

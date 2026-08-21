@@ -5,7 +5,7 @@ import { CORS } from '@/lib/social-server'
 import { actorOf, UNAUTHENTICATED, FORBIDDEN } from '@/lib/auth/ownership'
 import { hitRateLimit, tooMany } from '@/lib/auth/rate-limit'
 import { getSupabaseServer } from '@/lib/supabase-server'
-import { listPublic, makeSlug, toPublic, type VideoRow } from '@/lib/media/server'
+import { listPublic, makeSlug, toPublic, myChannelHandles, type VideoRow } from '@/lib/media/server'
 import { keyFromUrl } from '@/lib/media/storage'
 
 /* ─────────────────────────────────────────────────────────────
@@ -70,6 +70,18 @@ export async function POST(req: NextRequest) {
     )
   }
 
+  /* ⚠️ `creatorHandle` از بدنه می‌آمد و هیچ‌جا بررسی نمی‌شد: هر
+     کاربرِ واردشده می‌توانست ویدیو را زیرِ کانالِ *هر کسِ دیگری*
+     منتشر کند، و فهرستِ آن کانال همان را نشان می‌داد. */
+  const wantHandle = String(v.creatorHandle ?? '').replace(/[^A-Za-z0-9_.-]/g, '_').slice(0, 60)
+  if (wantHandle && wantHandle !== actor.id) {
+    const mine = await myChannelHandles(actor)
+    if (!mine.includes(wantHandle.toLowerCase())) {
+      return NextResponse.json(
+        { ok: false, message: 'این کانال متعلق به شما نیست' }, { status: 403, headers: CORS })
+    }
+  }
+
   const now = new Date().toISOString()
   const row = {
     slug: makeSlug(title),
@@ -81,7 +93,7 @@ export async function POST(req: NextRequest) {
     tags: Array.isArray(v.tags) ? v.tags.map(String).slice(0, 8) : [],
     owner_id: actor.id,
     creator_name: String(v.creatorName ?? 'کاربر').slice(0, 60),
-    creator_handle: String(v.creatorHandle ?? actor.id).replace(/[^A-Za-z0-9_.-]/g, '_').slice(0, 60),
+    creator_handle: wantHandle || actor.id,
     club_id: v.clubId ? String(v.clubId) : null,
     src,
     thumb: String(v.thumb ?? ''),
