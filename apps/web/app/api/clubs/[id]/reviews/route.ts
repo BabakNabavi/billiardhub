@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { actorOf, UNAUTHENTICATED } from '@/lib/auth/ownership';
 import { sb, isAdmin, audit, clientIp } from '@/lib/finance/db';
 import { publicDisplayName } from '@/lib/public-name';
+import { isValidSlug } from '@/lib/slug';
 
 /* امتیاز و نظر باشگاه.
 
@@ -39,13 +40,25 @@ async function canReviewClub(userId: string, clubId: string): Promise<boolean> {
 }
 
 /* GET — نظرهای عمومی یک باشگاه */
+/* نامک یا شناسه ⟶ شناسه. `null` یعنی چنین باشگاهی نیست.
+
+   ⚠️ صفحه‌ی عمومی با نامک باز می‌شود و همان را به این مسیر می‌دهد؛
+   گاردِ «فقط UUID» یعنی نظراتِ هر باشگاهی روی نشانیِ عادی‌اش ۴۰۰
+   می‌گرفت و بی‌صدا خالی می‌ماند. */
+async function resolveClubId(raw: string): Promise<string | null> {
+  if (UUID.test(raw)) return raw
+  if (!isValidSlug(raw)) return null
+  const { data } = await sb().from('clubs').select('id').eq('slug', raw).maybeSingle()
+  return (data as { id?: string } | null)?.id ?? null
+}
 export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string }> }) {
   const { id } = await ctx.params;
-  if (!UUID.test(id)) return NextResponse.json({ message: 'شناسه معتبر نیست' }, { status: 400 });
+  const clubId = await resolveClubId(id)
+  if (!clubId) return NextResponse.json({ message: 'باشگاه پیدا نشد' }, { status: 404 });
 
   const { data, error } = await sb().from('club_reviews')
     .select('id,user_id,rating,comment,created_at,updated_at')
-    .eq('club_id', id).eq('is_hidden', false)
+    .eq('club_id', clubId).eq('is_hidden', false)
     .order('created_at', { ascending: false }).limit(100);
 
   if (error) return NextResponse.json({ reviews: [], summary: { avg: 0, count: 0, breakdown: {} } });
@@ -98,12 +111,13 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string 
 /* POST { rating, comment } — ثبت یا ویرایش نظر خودم */
 export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string }> }) {
   const { id } = await ctx.params;
-  if (!UUID.test(id)) return NextResponse.json({ message: 'شناسه معتبر نیست' }, { status: 400 });
+  const clubId = await resolveClubId(id)
+  if (!clubId) return NextResponse.json({ message: 'باشگاه پیدا نشد' }, { status: 404 });
 
   const actor = await actorOf(req);
   if (!actor) return NextResponse.json(UNAUTHENTICATED, { status: 401 });
 
-  const { data: club } = await sb().from('clubs').select('id,"ownerId"').eq('id', id).maybeSingle();
+  const { data: club } = await sb().from('clubs').select('id,"ownerId"').eq('id', clubId).maybeSingle();
   const c = club as { id: string; ownerId: string } | null;
   if (!c) return NextResponse.json({ message: 'باشگاه یافت نشد' }, { status: 404 });
 
@@ -113,7 +127,7 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string
   }
 
   /* لایه‌ی ۲ */
-  if (!(await canReviewClub(actor.id, id))) {
+  if (!(await canReviewClub(actor.id, clubId))) {
     return NextResponse.json({
       message: 'برای ثبت نظر باید در این باشگاه میزی رزرو کرده باشید یا عضو آن باشید',
       code: 'no_booking',
@@ -130,7 +144,7 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string
   /* لایه‌ی ۱ — UNIQUE؛ ارسال دوباره یعنی ویرایش، نه نظر جدید */
   const { data, error } = await sb().from('club_reviews')
     .upsert({
-      club_id: id, user_id: actor.id, rating, comment,
+      club_id: clubId, user_id: actor.id, rating, comment,
       updated_at: new Date().toISOString(),
     }, { onConflict: 'club_id,user_id' })
     .select('id').single();
@@ -142,7 +156,7 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string
 
   void audit({
     actorId: actor.id, actorRole: actor.role, action: 'CLUB_REVIEWED',
-    entityType: 'club', entityId: id, newValue: { rating }, ip: clientIp(req) ?? undefined,
+    entityType: 'club', entityId: clubId, newValue: { rating }, ip: clientIp(req) ?? undefined,
   });
 
   return NextResponse.json({ ok: true, id: (data as { id: string }).id }, { status: 201 });
@@ -151,7 +165,8 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string
 /* DELETE — حذف نظر خودم (یا هر نظری، توسط ادمین) */
 export async function DELETE(req: NextRequest, ctx: { params: Promise<{ id: string }> }) {
   const { id } = await ctx.params;
-  if (!UUID.test(id)) return NextResponse.json({ message: 'شناسه معتبر نیست' }, { status: 400 });
+  const clubId = await resolveClubId(id)
+  if (!clubId) return NextResponse.json({ message: 'باشگاه پیدا نشد' }, { status: 404 });
 
   const actor = await actorOf(req);
   if (!actor) return NextResponse.json(UNAUTHENTICATED, { status: 401 });
@@ -159,7 +174,7 @@ export async function DELETE(req: NextRequest, ctx: { params: Promise<{ id: stri
   const target = req.nextUrl.searchParams.get('reviewId');
   const admin = await isAdmin(actor.id);
 
-  let q = sb().from('club_reviews').delete().eq('club_id', id);
+  let q = sb().from('club_reviews').delete().eq('club_id', clubId);
   if (admin && target && UUID.test(target)) q = q.eq('id', target);
   else q = q.eq('user_id', actor.id);      // غیرادمین فقط نظر خودش
 
