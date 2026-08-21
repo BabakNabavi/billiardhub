@@ -33,6 +33,7 @@ import PendingNotice from '../../../components/profile/PendingNotice'
 import { entryLabel } from '../../../lib/player-categories'
 import { NEWS_ARTICLES } from '../../../lib/news-data'
 import { useReveal } from '@/components/player/athlete-motion'
+import HonourMark, { type HonourRank } from '@/components/player/HonourMark'
 import './athlete.css'
 import { MEDIA_VIDEOS } from '../../../lib/media-data'
 
@@ -420,21 +421,25 @@ export default function PlayerProfilePage() {
             {/* `list-style: none` در سافاری معنایِ فهرست را می‌گیرد */}
             <ol className="ath-honours ath-r" role="list">
               {honours.map((h, i) => {
-                /* ⚠️ متنِ آزادِ کاربر است، پس الگو محتاط می‌ماند:
-                   «نائب/نایب قهرمان»، «نقره»، «runner-up». عمداً
-                   «دوم»ِ تنها را نمی‌گیرد — «دومین قهرمانی» یک *برد*
+                /* ⚠️ متنِ آزادِ کاربر است، پس الگو محتاط می‌ماند و
+                   «دوم»ِ تنها را نمی‌گیرد: «دومین قهرمانی» یک *برد*
                    است و نقره‌ای‌کردنش دروغ می‌شود. */
-                const second = /ن[ای]ئ?ب\s*قهرمان|نقره|runner[-\s]?up|silver/i.test(h.title)
+                const rank: HonourRank =
+                  /نا[یئ]ب\s*قهرمان|نقره|runner[-\s]?up|silver/i.test(h.title) ? 2
+                  : /مقام\s*سوم|سوم\s*شد|برنز|bronze|third/i.test(h.title) ? 3
+                  : 1
                 return (
                   <li key={`${h.year}-${h.title}`}
-                    className={`ath-glass ath-hon${second ? ' ath-hon--2' : ''}`}
+                    className={`ath-glass ath-hon` + (rank > 1 ? ` ath-hon--${rank}` : '')}
                     style={{ '--d': `${Math.min(i, 6) * 55}ms` } as React.CSSProperties}>
-                    <span className="ath-hon-y">{faDigits(h.year)}</span>
-                    {/* ⚠️ رنگِ مدال تنها نشانه نباشد — صفحه‌خوان رنگ
-                        نمی‌بیند. */}
-                    {second && <span className="ath-sr">مقام دوم — </span>}
-                    <span className="ath-hon-t">{h.title}</span>
-                    <Trophy size={17} className="ath-hon-i" aria-hidden />
+                    <span className="ath-hon-mark"><HonourMark rank={rank} /></span>
+                    <span className="ath-hon-txt">
+                      {/* ⚠️ شکلِ نشان تنها سیگنال نباشد — صفحه‌خوان
+                          تصویر را نمی‌بیند. */}
+                      {rank > 1 && <span className="ath-sr">{rank === 2 ? 'مقام دوم — ' : 'مقام سوم — '}</span>}
+                      <span className="ath-hon-t">{h.title}</span>
+                      <span className="ath-hon-y">{faDigits(h.year)}</span>
+                    </span>
                   </li>
                 )
               })}
