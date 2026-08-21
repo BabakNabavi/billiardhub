@@ -9,6 +9,7 @@
    صفحه خالی نشود، ولی منبع حقیقت دیگر سرور است.
    ───────────────────────────────────────────────────────────── */
 
+import { withMediaArrays } from './albums'
 import { apiFetch } from '../http'
 
 export type ProfileKind = 'seller' | 'manufacturer' | 'coach' | 'referee' | 'technician' | 'player'
@@ -94,7 +95,15 @@ export async function fetchProfileResult<T>(kind: ProfileKind, slug: string): Pr
   if (!r.ok) return r.status === 404 ? { state: 'none' } : { state: 'error' }
   const j = await json<{ profile: RemoteProfile<T> | null; isMine?: boolean }>(r)
   if (!j) return { state: 'error' }
-  return j.profile ? { state: 'found', profile: j.profile, isMine: j.isMine === true } : { state: 'none' }
+  if (!j.profile) return { state: 'none' }
+  /* ⚠️ تنها دروازه‌ی خواندنِ پروفایل در کلاینت همین است، پس تضمینِ
+     آرایه هم همین‌جا انجام می‌شود — نه در هفت صفحه‌ی جدا که یکی‌شان
+     یادش می‌رود. */
+  return {
+    state: 'found',
+    profile: { ...j.profile, data: withMediaArrays((j.profile.data ?? {}) as Record<string, unknown>) as T },
+    isMine: j.isMine === true,
+  }
 }
 
 /** همه‌ی پروفایل‌های تأییدشده‌ی یک نوع */

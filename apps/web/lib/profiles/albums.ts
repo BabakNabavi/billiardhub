@@ -47,3 +47,27 @@ export function cleanAlbums(v: unknown): string[] {
 
 /** نوعِ پروفایل‌هایی که آلبومشان فهرستِ نام است، نه شیء */
 export const NAMED_ALBUM_KINDS = ['coach', 'referee', 'technician', 'player', 'seller', 'manufacturer'] as const
+
+/* ─────────────────────────────────────────────────────────────
+   تضمینِ آرایه برای رسانه‌ی پروفایل.
+
+   ⚠️ چرا لازم شد: `data` یک jsonbِ آزاد است و صفحه‌های نقش‌ها
+   مستقیم رویش `.map()` می‌زنند (`p.gallery.map(...)`). پروفایلی که
+   هنوز عکس یا ویدیویی نگذاشته اصلاً این کلیدها را ندارد — و آن
+   `map` می‌ترکد و صفحه به حالتِ «پیدا نشد» می‌افتد. یعنی یک پروفایلِ
+   کاملاً سالم برای همه نامرئی می‌شود.
+
+   ممیزیِ سرتاسری نشان داد این حالت واقعی است: پروفایلِ فروشگاه
+   `videos`/`albums` نداشت و متخصصِ فنی `gallery`/`videos`.
+
+   ⚠️ آلبومِ باشگاه شکلِ دیگری دارد و از این مسیر رد نمی‌شود؛ این تابع
+   فقط روی پروفایل‌های جدولِ `profiles` اجرا می‌شود. */
+export function withMediaArrays<T extends Record<string, unknown>>(data: T): T {
+  const arr = (v: unknown) => (Array.isArray(v) ? v : [])
+  return {
+    ...data,
+    gallery: arr(data.gallery),
+    videos: arr(data.videos),
+    albums: cleanAlbums(data.albums),
+  }
+}
