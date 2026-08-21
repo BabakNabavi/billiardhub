@@ -6,6 +6,7 @@
    گرفته می‌شوند.
    ───────────────────────────────────────────────────────────── */
 import { normalizePlayerMedia } from './players-data'
+import { provinceOfCity } from './iran-geo'
 import type {
   Player, Discipline, PlayerHighlight, PlayerTournament, PlayerMedia, PlayerVideo,
 } from './players-data'
@@ -144,6 +145,9 @@ export function profileToPlayer(p: PlayerProfile): Player {
     scene: p.scene || '/images/shop/snooker-table.webp',
     /* ⚠️ ردیفِ پیش از افزودنِ این فیلد null می‌دهد؛ صفحه رویش .length صدا می‌زند */
     intro: p.intro || '',
+    /* استان در فرم گرفته می‌شود ولی تا امروز به نمای صفحه نمی‌رسید؛
+       کارتِ مشخصات به‌جایش «ایران» را زیرِ شهر نشان می‌داد. */
+    province: p.province || provinceOfCity(p.city || '') || '',
     bio: p.bio.length ? p.bio : [p.intro].filter(Boolean),
     careerStart: p.careerStart || '—',
     highlights: p.highlights,

@@ -1,308 +1,323 @@
 /* ─────────────────────────────────────────────────────────────
-   صفحه‌ی بازیکن — دستورِ زبانِ «صفحه‌ی محصول».
+   صفحه‌ی بازیکن — پرونده‌ی ورزشی (Athlete Dossier).
 
-   ── چرا نسخه‌ی قبل کنار گذاشته شد ──
-   نسخه‌ی قبل دانه‌ی فیلم، نامِ توخالیِ لاتین در پس‌زمینه، خطِ مورب،
-   نوارِ روان و سرتیترِ شماره‌دار داشت. هیچ‌کدام به‌تنهایی بد نبودند،
-   ولی با هم «مینیمالِ شلوغ» می‌ساختند: پنج چیز هم‌زمان برای جلبِ
-   توجه، و هیچ‌کدام برنده.
+   ── دو طرحِ کنارگذاشته‌شده و دلیلش ──
+   نسخه‌ی اول ادیتوریالِ سینمایی بود (دانه‌ی فیلم، نوارِ روان، نامِ
+   توخالی). نسخه‌ی دوم «صفحه‌ی محصول» بود: نامِ غول‌پیکر وسطِ سیاهی و
+   SCROLL زیرش. هر دو یک اشکالِ ریشه‌ای داشتند — **طرحِ بی‌محتوا**.
+   صفحه‌ی یک ورزشکارِ حرفه‌ای پوستر نیست، *پرونده* است.
 
-   ── قاعده‌ی این نسخه ──
-   ۱) هر پرده یک ایده. یک تیتر، یک چیزِ دیدنی، و فضای زیاد.
-   ۲) تایپوگرافی کار را می‌کند؛ تزئین حذف است نه کم.
-   ۳) رنگ تقریباً تک‌فام: سفید، خاکستریِ ۰۰۷، مشکی. طلایی به‌ندرت.
-   ۴) جداکننده «فضا» و «تغییرِ زمینه» است، نه خط و کارت و شیشه.
-   ۵) یک حرکت در کلِ صفحه: بالا آمدن + محو شدن. هیچ‌چیز نمی‌چرخد،
-      نمی‌لرزد، و حلقه نمی‌زند.
+   ── از کجا آمد ──
+   ساختارِ سایت‌های رسمیِ اسنوکر (WST) و مرجع‌های ورزشی: نوارِ هویتِ
+   محدود با پرتره، بعد نوارِ «مشخصات» با فیلدهای برچسب‌دار، بعد آمار و
+   جدول‌ها. چگال، ساخت‌یافته، خوانا — نه خالی.
+
+   ── امضای بصری ──
+   ۱) گوشه‌ی پخ (`--cut`) روی هر سطحِ ساخت‌یافته
+   ۲) کارتِ مشخصات که روی درزِ تیره/روشن می‌نشیند
+   ۳) سبزِ ماهوتِ میز به‌عنوان لهجه‌ی دوم کنارِ طلایی
+   ۴) زمینه‌ی کرم، نه سفیدِ خالص
 
    ⚠️ فارسی letter-spacing نمی‌گیرد — حروفِ چسبان از هم می‌پاشند.
-   تراکینگ فقط روی بلوک‌های لاتین (`.ap-eyebrow`, `.ap-lat`).
+   تراکینگ فقط روی بلوک‌های لاتین (`.ath-lat`, `.ath-en`).
    ───────────────────────────────────────────────────────────── */
 
-.ap {
-  --ap-ink:      #1D1D1F;
-  --ap-ink-2:    #55555A;
-  --ap-ink-3:    #6E6E73;   /* ۴٫۹:۱ روی سفید — متنِ زیرِ ۱۸px کف ۴٫۵ می‌خواهد */
-  --paper:    #FFFFFF;
-  --paper-2:  #F5F5F7;
-  --night:    #000000;
-  --on-night:   #F5F5F7;
-  --on-night-2: #98989D;
-  --hair:     rgba(0, 0, 0, 0.08);
-  --hair-n:   rgba(255, 255, 255, 0.10);
-  --gold:     #C7A66A;   /* فقط روی زمینه‌ی تیره */
-  --gold-ink: #8F6531;   /* همتای روی زمینه‌ی روشن — ۵٫۱:۱ */
-  --ease:     cubic-bezier(.28, .11, .32, 1);
+.ath {
+  --ink:    #16150F;
+  --ink-2:  #57544A;
+  --ink-3:  #837D70;   /* ۴٫۶:۱ روی کرم */
+  --paper:  #F6F4EE;
+  --card:   #FFFFFF;
+  --night:  #0B0B09;
+  --gold:   #C7A66A;   /* روی تیره */
+  --gold-d: #8A6229;   /* روی روشن — ۵٫۴:۱ */
+  --felt:   #0F5140;
+  --line:   #E1DCCE;
+  --nline:  rgba(255, 255, 255, .12);
+  --cut:    22px;
+  /* ⚠️ مختصاتِ clip-path فیزیکی است و با dir برنمی‌گردد. چندضلعی
+     این‌جا یک‌بار تعریف می‌شود و پایین‌تر برای RTL آینه می‌شود، وگرنه
+     برش روی گوشه‌ی *ورودِ چشم* می‌افتد نه گوشه‌ی پایان. */
+  --chamfer: polygon(0 0, 100% 0, 100% calc(100% - var(--cut)), calc(100% - var(--cut)) 100%, 0 100%);
+  --ease:   cubic-bezier(.22, .61, .36, 1);
 
   background: var(--paper);
-  color: var(--ap-ink);
+  color: var(--ink);
   overflow-x: clip;
 }
 
-/* ══════════ ساختار ══════════ */
-
-/* پرده = تمام‌عرض، با هوای عمودیِ زیاد. جداکننده همین است. */
-.ap-act { padding-block: clamp(84px, 13vh, 168px); }
-.ap-act--night { background: var(--night); color: var(--on-night); }
-.ap-act--gray  { background: var(--paper-2); }
-.ap-act--tight { padding-block: clamp(56px, 8vh, 104px); }
-/* ⚠️ فاصله را باید از *هر دو* طرف کم کرد. با کم‌کردنِ فقط بالای
-   پرده‌ی دوم، ته‌نشینِ پرده‌ی اول سرِ جایش می‌ماند و ۱۷۵ پیکسل خلأ
-   می‌ساخت. `:has` در مرورگرِ قدیمی بی‌اثر است و فقط به فاصله‌ی
-   سخاوتمندانه‌ی قبلی برمی‌گردد — نه به چیزِ شکسته. */
-.ap-act--night:has(+ .ap-act--night),
-.ap-act--gray:has(+ .ap-act--gray),
-.ap-act:not(.ap-act--night):not(.ap-act--gray):has(+ .ap-act:not(.ap-act--night):not(.ap-act--gray))
-  { padding-bottom: clamp(40px, 6vh, 72px); }
-
-.ap-act--night + .ap-act--night,
-.ap-act--gray  + .ap-act--gray,
-.ap-act:not(.ap-act--night):not(.ap-act--gray) + .ap-act:not(.ap-act--night):not(.ap-act--gray)
-  { padding-top: clamp(40px, 6vh, 72px); }
-
-.ap-in {
-  max-width: 1000px;
-  margin-inline: auto;
-  padding-inline: clamp(22px, 5vw, 40px);
-}
-.ap-in--narrow { max-width: 760px; }
-
-/* ══════════ تایپوگرافی ══════════ */
-
-/* تنها جای تراکینگ: لاتینِ کوچک */
-.ap-eyebrow {
-  display: block;
-  font-size: clamp(10.5px, 1.1vw, 12px); font-weight: 600;
-  letter-spacing: .3em; padding-inline-start: .3em;  /* خنثی‌کردنِ فاصله‌ی دنباله در وسط‌چین */
-  text-transform: uppercase; color: var(--ap-ink-3);
-  margin-bottom: clamp(14px, 2vw, 22px);
-}
-.ap-act--night .ap-eyebrow { color: var(--on-night-2); }
-.ap-lat { font-variant-numeric: tabular-nums; letter-spacing: .06em; }
-
-/* نامِ بازیکن — تنها چیزی که در قابِ اول دیده می‌شود */
-.ap-name {
-  margin: 0; font-weight: 600;
-  font-size: clamp(44px, 10.5vw, 148px);
-  line-height: 1.02;
-  text-wrap: balance;
+.ath-wrap {
+  max-width: 1200px; margin-inline: auto;
+  padding-inline: clamp(18px, 4vw, 34px);
 }
 
-.ap-h {
-  margin: 0; font-weight: 600;
-  font-size: clamp(28px, 5vw, 60px);
-  line-height: 1.2;
-  text-wrap: balance;
-}
+/* ══════════ نوارِ هویت ══════════ */
 
-.ap-lede {
-  margin: clamp(18px, 2.4vw, 28px) 0 0;
-  font-size: clamp(18px, 2.3vw, 27px); font-weight: 400;
-  line-height: 1.72; color: var(--ap-ink-2);
-}
-.ap-act--night .ap-lede { color: var(--on-night-2); }
+.ath-hero { position: relative; background: var(--night); color: #F3F0E7; }
+.ath-hero-art { position: absolute; inset: 0; pointer-events: none; }
 
-.ap-body p {
-  margin: 0 0 1.5em;
-  font-size: clamp(16px, 1.35vw, 18px);
-  line-height: 2.05; color: var(--ap-ink-2);
-}
-.ap-body p:last-child { margin-bottom: 0; }
-
-/* ══════════ پرده‌ی اول ══════════ */
-
-.ap-hero {
+.ath-hero-in {
   position: relative;
-  background: var(--night); color: var(--on-night);
-  min-height: 100svh;
-  display: grid; grid-template-rows: auto 1fr;
-  overflow: hidden;
-  /* نوارِ بالای iOS در حالتِ standalone روی بردکرامب می‌نشست */
-  padding-top: calc(env(safe-area-inset-top, 0px) + clamp(84px, 12vh, 132px));
+  /* ⚠️ در RTL ستونِ اول سمتِ راست می‌نشیند. نام باید از لبه‌ی شروعِ
+     صفحه بیاید و عکس لنگرِ انتها باشد؛ برعکسش نیمِ صفحه را خالی
+     می‌گذاشت. */
+  display: grid; grid-template-columns: 1fr minmax(0, 392px);
+  gap: clamp(22px, 4vw, 46px); align-items: end;
+  /* بالای قاب باید جای هدرِ چسبانِ سایت + نوارِ iOS را باز بگذارد */
+  padding-top: calc(env(safe-area-inset-top, 0px) + clamp(84px, 11vh, 116px));
+  min-height: 392px;
 }
 
-/* صحنه فقط بافتِ کم‌رمق است، نه عکسی که با نام رقابت کند */
-.ap-hero-bg {
-  position: absolute; inset: 0;
-  background-size: cover; background-position: center;
-  opacity: .22; filter: grayscale(1) contrast(1.05);
+/* پرتره از لبه بالا می‌آید و کفِ نوار را می‌بندد */
+.ath-shot {
+  position: relative; align-self: end;
+  height: clamp(250px, 34vw, 372px);
+  /* ⚠️ کارتِ مشخصات ۴۰px بالا می‌آید؛ بدونِ این حاشیه، پایینِ عکس و
+     گوشه‌ی پخش زیرِ کارت گم می‌شد. */
+  margin-bottom: 44px;
+  clip-path: var(--chamfer);
 }
-.ap-hero-veil {
-  position: absolute; inset: 0;
-  background:
-    radial-gradient(120% 80% at 50% 0%, transparent, rgba(0, 0, 0, .55) 62%, #000 100%),
-    linear-gradient(180deg, rgba(0, 0, 0, .35), transparent 30%);
+.ath-shot img {
+  width: 100%; height: 100%; display: block;
+  object-fit: cover; object-position: 50% 18%;
+  filter: grayscale(.12) contrast(1.04);
 }
-
-.ap-hero-top { position: relative; text-align: center; }
-
-.ap-crumb {
-  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
-  font-size: 12.5px; color: var(--on-night-2);
-  margin-bottom: clamp(26px, 4vh, 46px);
-}
-.ap-crumb a { color: inherit; text-decoration: none; transition: color .25s var(--ease); }
-.ap-crumb a:hover { color: var(--on-night); }
-.ap-crumb a:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; border-radius: 3px; }
-
-.ap-tick { display: inline-flex; vertical-align: middle; margin-inline-start: 10px; }
-
-.ap-meta {
-  display: flex; flex-wrap: wrap; align-items: center; justify-content: center;
-  gap: 8px 14px; margin-top: clamp(18px, 2.6vw, 26px);
-  font-size: clamp(13px, 1.4vw, 16px); color: var(--on-night-2);
-}
-.ap-dot { width: 3px; height: 3px; border-radius: 50%; background: currentColor; opacity: .5; }
-
-/* پرتره کفِ قاب را پر می‌کند و در سیاهی حل می‌شود.
-
-   ⚠️ ارتفاع سقف دارد. بدونش عکسِ عمودی (۵۶۰×۱۱۹۹) قاب را به ۱۶۸۹
-   پیکسل می‌کشید — یعنی نامِ بازیکن از صفحه بیرون می‌افتاد و «یک قاب،
-   یک ایده» می‌شکست. `cover` با نقطه‌ی ۲۰٪ از بالا، صورت را در کادر
-   نگه می‌دارد. */
-.ap-shot {
-  position: relative; align-self: end; justify-self: center;
-  width: min(100%, 560px);
-  height: min(52svh, 560px);
-  margin-top: clamp(24px, 4vh, 48px);
-  -webkit-mask-image: linear-gradient(180deg, #000 58%, transparent 100%);
-          mask-image: linear-gradient(180deg, #000 58%, transparent 100%);
-}
-.ap-shot img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: 50% 20%; }
-
-/* بدونِ پرتره، محتوا وسطِ قاب می‌نشیند — نه بالا با نیم صفحه خلأ زیرش.
- ⚠️ ردیفِ 1fr با align-content کاری نمی‌کند: ردیف کلِ فضا را می‌گیرد و
-   «وسط‌چین» بی‌اثر می‌شود. ردیف باید auto باشد. */
-.ap-hero--bare {
-  min-height: 88svh; grid-template-rows: auto; align-content: center;
-  padding-bottom: clamp(72px, 11vh, 132px);
+/* نبودِ عکس هم یک سطحِ طراحی‌شده است، نه جای خالی */
+.ath-shot-x {
+  display: flex; align-items: center; justify-content: center; height: 100%;
+  background: linear-gradient(160deg, #1B1A14, #0B0B09);
+  border: 1px solid var(--nline);
+  font-size: clamp(56px, 9vw, 96px); font-weight: 800; color: rgba(199, 166, 106, .3);
 }
 
-.ap-scroll {
-  position: absolute; inset-inline: 0;
-  bottom: calc(env(safe-area-inset-bottom, 0px) + 22px);
-  display: flex; justify-content: center;
-  font-size: 10px; font-weight: 600; letter-spacing: .34em; padding-inline-start: .34em;
-  color: rgba(255, 255, 255, .34);
+.ath-id { padding-bottom: clamp(58px, 8vw, 78px); min-width: 0; }
+
+.ath-crumb {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 12.5px; color: rgba(255, 255, 255, .5);
+  margin-bottom: clamp(16px, 2.4vw, 26px);
+}
+.ath-crumb a { color: inherit; text-decoration: none; transition: color .2s var(--ease); }
+.ath-crumb a:hover { color: #F3F0E7; }
+.ath-crumb a:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; border-radius: 2px; }
+
+.ath-kicker {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: clamp(11px, 1.15vw, 12.5px); font-weight: 700;
+  color: var(--gold); border: 1px solid rgba(199, 166, 106, .34);
+  border-radius: 2px; padding: 5px 11px;
 }
 
-/* ══════════ اعداد ══════════ */
+.ath-name {
+  margin: clamp(14px, 2vw, 20px) 0 0; font-weight: 800;
+  font-size: clamp(34px, 5.6vw, 66px); line-height: 1.12;
+  display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+}
+.ath-tick { display: inline-flex; flex-shrink: 0; }
 
-.ap-figs {
-  display: grid;
-  gap: clamp(34px, 5vw, 56px) clamp(18px, 3vw, 32px);
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  text-align: center;
+.ath-lat {
+  margin-top: 11px; font-size: clamp(11.5px, 1.2vw, 13px); font-weight: 600;
+  letter-spacing: .16em; color: rgba(255, 255, 255, .58);   /* ۵٫۳:۱ روی نوارِ تیره */
 }
-.ap-fig b {
-  display: block; font-weight: 600; font-variant-numeric: tabular-nums;
-  font-size: clamp(40px, 6.4vw, 84px); line-height: 1; color: var(--ap-ink);
-}
-.ap-fig span {
-  display: block; margin-top: clamp(8px, 1.2vw, 14px);
-  font-size: clamp(12.5px, 1.2vw, 15px); color: var(--ap-ink-3);
-}
-.ap-act--night .ap-fig b { color: var(--on-night); }
-.ap-act--night .ap-fig span { color: var(--on-night-2); }
 
-/* ══════════ فهرست‌ها ══════════ */
+/* ══════════ کارتِ مشخصات ══════════
+   روی درزِ تیره/روشن می‌نشیند — امضای این صفحه. */
 
-/* افتخارات و مسابقات: ردیف، نه کارت. جدایی با فضا و یک موی خط. */
-.ap-rows { margin-top: clamp(38px, 5vw, 66px); }
-.ap-row {
-  display: grid; grid-template-columns: minmax(72px, 8%) 1fr auto;
-  align-items: baseline; gap: clamp(14px, 3vw, 32px);
-  padding-block: clamp(20px, 2.6vw, 30px);
-  border-top: 1px solid var(--hair);
+.ath-vitals-wrap { position: relative; z-index: 3; margin-top: clamp(-40px, -3vw, -30px); }
+/* ⚠️ سایه بیرونِ جعبه کشیده می‌شود و `clip-path` می‌بُردش. پس پوسته
+   سایه را می‌گیرد و برش روی لایه‌ی درونی می‌نشیند. */
+.ath-vitals-shell { box-shadow: 0 18px 44px rgba(22, 21, 15, .10); }
+.ath-vitals {
+  border: 1px solid var(--line);
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(168px, 1fr));
+  gap: 1px; background-color: var(--line);
+  clip-path: var(--chamfer);
+  margin: 0;
 }
-.ap-act--night .ap-row { border-top-color: var(--hair-n); }
-.ap-row:last-child { border-bottom: 1px solid var(--hair); }
-.ap-act--night .ap-row:last-child { border-bottom-color: var(--hair-n); }
+.ath-vit { background: var(--card); padding: clamp(15px, 1.7vw, 19px) clamp(16px, 1.9vw, 22px); }
+.ath-vit dt { font-size: 11px; font-weight: 600; color: var(--ink-3); }
+.ath-vit dd { margin: 8px 0 0; font-size: clamp(16px, 1.6vw, 18px); font-weight: 700; }
+.ath-vit-s { display: block; font-size: 12px; font-weight: 500; color: var(--ink-3); margin-top: 3px; }
 
-.ap-row-y {
-  font-size: clamp(14px, 1.5vw, 17px); font-weight: 500;
-  font-variant-numeric: tabular-nums; color: var(--ap-ink-3);
-}
-.ap-act--night .ap-row-y { color: var(--on-night-2); }
-.ap-row-t {
-  font-size: clamp(17px, 2.1vw, 25px); font-weight: 500; line-height: 1.5; min-width: 0;
-}
-.ap-row-r {
-  font-size: clamp(12.5px, 1.3vw, 15px); font-weight: 500;
-  color: var(--gold-ink); white-space: nowrap;
-}
-.ap-act--night .ap-row-r { color: var(--gold); }
+/* هر عددِ ستونی */
+.ath-num { font-variant-numeric: tabular-nums; }
 
-@media (max-width: 520px) {
-  .ap-row { grid-template-columns: 1fr auto; }
-  .ap-row-y { grid-column: 1 / -1; margin-bottom: -6px; }
+/* ══════════ بخش ══════════ */
+
+.ath-body { padding-bottom: clamp(28px, 4vw, 44px); }
+.ath-sec { padding-top: clamp(38px, 5vw, 58px); }
+.ath-sec--last { padding-bottom: clamp(48px, 6vw, 78px); }
+.ath-sec-h { display: flex; align-items: center; gap: 13px; margin-bottom: clamp(14px, 1.8vw, 20px); }
+.ath-sec-h h2 { margin: 0; font-size: clamp(21px, 2.5vw, 27px); font-weight: 800; }
+.ath-en {
+  font-style: normal; font-size: 10.5px; font-weight: 700;
+  letter-spacing: .24em; color: var(--ink-3); flex-shrink: 0;
 }
+.ath-rule { flex: 1; height: 1px; background: var(--line); }
+
+/* ══════════ آمار ══════════ */
+
+.ath-stats {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 1px; background: var(--line); border: 1px solid var(--line); margin: 0;
+}
+/* ⚠️ در `dl` باید `dt` پیش از `dd` بیاید؛ نمایش برعکس است (عددِ
+   درشت بالا، برچسب پایین) و ترتیبِ بصری را `column-reverse` می‌دهد. */
+.ath-stat {
+  background: var(--card); padding: clamp(16px, 2vw, 22px);
+  display: flex; flex-direction: column-reverse; align-items: flex-start;
+}
+.ath-stat dd {
+  margin: 0; font-size: clamp(30px, 4vw, 42px); font-weight: 800;
+  line-height: 1; font-variant-numeric: tabular-nums;
+}
+.ath-stat dt { font-size: 12px; color: var(--ink-3); margin-top: 9px; }
+.ath-stat--hl dd { color: var(--gold-d); }
+
+/* ══════════ جدول ══════════ */
+
+/* جدولِ باریک روی موبایل نباید بشکند؛ داخلِ قابِ خودش اسکرول می‌شود */
+.ath-tbl { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.ath-tbl:focus-visible { outline: 2px solid var(--gold-d); outline-offset: 3px; }
+/* جدولِ دوستونی در عرضِ کامل، دو سومش خالی می‌ماند */
+.ath-tbl--narrow { max-width: 780px; }
+/* دو ستون در ۳۵۴px جا می‌شود؛ اسکرولِ افقیِ بی‌دلیل لازم نیست */
+.ath-tbl--narrow table { min-width: 0; }
+
+/* متنی که فقط صفحه‌خوان می‌خواند */
+.ath-sr {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
+}
+.ath-tbl table {
+  width: 100%; border-collapse: collapse; min-width: 420px;
+  background: var(--card); border: 1px solid var(--line);
+}
+.ath-tbl th {
+  font-size: 10.5px; font-weight: 700; letter-spacing: .14em; color: var(--ink-3);
+  text-align: start; padding: 11px clamp(13px, 1.7vw, 20px);
+  border-bottom: 1px solid var(--line); background: #FAF8F2; white-space: nowrap;
+}
+.ath-tbl td {
+  padding: clamp(12px, 1.4vw, 14px) clamp(13px, 1.7vw, 20px);
+  border-bottom: 1px solid var(--line);
+  font-size: clamp(14px, 1.4vw, 15.5px); font-weight: 500;
+}
+.ath-tbl tr:last-child td { border-bottom: 0; }
+.ath-tbl td.ath-y {
+  width: 92px; font-variant-numeric: tabular-nums;
+  color: var(--ink-3); font-size: 13px; font-weight: 700; white-space: nowrap;
+}
+/* ستونِ سال روی موبایل نباید عرض بخورد و جدول را به اسکرول ببرد */
+@media (max-width: 520px) { .ath-tbl td.ath-y { width: 62px; } }
+.ath-tbl .ath-res { width: 170px; text-align: end; }
+
+/* رنگِ تأکیدِ صفحه یکی است: طلایی. سبزِ ماهوت فقط بافتِ نوارِ بالاست
+   و روی متن نمی‌آید. */
+.ath-chip {
+  display: inline-block; font-size: 12px; font-weight: 700;
+  padding: 4px 10px; border-radius: 2px; white-space: nowrap;
+  background: rgba(199, 166, 106, .14); color: var(--gold-d); border: 1px solid rgba(199, 166, 106, .38);
+}
+
+/* ══════════ معرفی ══════════ */
+
+.ath-lede {
+  margin: 0 0 clamp(14px, 1.8vw, 20px);
+  font-size: clamp(17px, 1.9vw, 21px); font-weight: 600;
+  line-height: 1.9; max-width: 54ch;
+}
+.ath-bio { column-gap: 42px; font-size: clamp(14.5px, 1.3vw, 15px); line-height: 2.05; color: var(--ink-2); }
+@media (min-width: 860px) { .ath-bio { columns: 2; } }
+.ath-bio p { break-inside: avoid; margin: 0 0 1.1em; }
+.ath-bio p:last-child { margin-bottom: 0; }
 
 /* ══════════ باشگاه ══════════ */
 
-.ap-club {
-  display: flex; align-items: center; gap: clamp(16px, 2.5vw, 26px);
-  margin-top: clamp(30px, 4vw, 46px);
-  padding-block: clamp(22px, 3vw, 32px);
-  border-top: 1px solid var(--hair-n); border-bottom: 1px solid var(--hair-n);
+.ath-club {
+  display: flex; align-items: center; gap: clamp(12px, 1.8vw, 18px);
+  background: var(--card); border: 1px solid var(--line);
+  padding: clamp(15px, 1.9vw, 20px) clamp(16px, 2vw, 22px);
   text-decoration: none; color: inherit;
-  transition: opacity .3s var(--ease);
+  clip-path: var(--chamfer);
+  transition: border-color .2s var(--ease), transform .2s var(--ease);
 }
-.ap-club:hover { opacity: .68; }
-.ap-club:focus-visible { outline: 2px solid var(--gold); outline-offset: 6px; }
-.ap-club-n { font-size: clamp(19px, 2.5vw, 28px); font-weight: 500; }
-.ap-club-s { margin-top: 5px; font-size: 13.5px; color: var(--on-night-2); }
+.ath-club:hover { border-color: rgba(199, 166, 106, .55); transform: translateY(-2px); }
+/* ⚠️ `clip-path` هرچه بیرونِ چندضلعی کشیده شود می‌بُرد — از جمله
+   outline را. حلقه‌ی focus باید *داخلِ* جعبه کشیده شود. */
+.ath-club:focus-visible { outline: none; box-shadow: inset 0 0 0 2px var(--gold-d); }
+.ath-club-i { flex-shrink: 0; color: var(--gold-d); }
+.ath-club-n { display: block; font-size: clamp(15.5px, 1.7vw, 18px); font-weight: 700; }
+.ath-club-s { display: block; margin-top: 4px; font-size: 12.5px; color: var(--ink-3); }
 
 /* گالریِ مشترک تیترِ خودش را دارد؛ این صفحه تیترش را خودش می‌گذارد */
-.ap .ch-sec-head { display: none; }
+.ath .ch-sec-head { display: none; }
 
 /* ══════════ پیوندها ══════════ */
 
-.ap-links {
-  /* ⚠️ گپ باید از بلیدِ منفیِ `.ap-link` (۲×۱۲px) بیشتر باشد، وگرنه
-     ناحیه‌ی کلیکِ دو لینک هم را می‌پوشاند و مقاله‌ی اشتباه باز می‌شود. */
-  display: grid; gap: clamp(28px, 2.4vw, 34px);
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  margin-top: clamp(32px, 4vw, 52px);
-}
-.ap-link {
-  display: flex; align-items: center; gap: 14px;
+.ath-links { display: grid; gap: clamp(12px, 1.6vw, 16px); grid-template-columns: repeat(auto-fit, minmax(272px, 1fr)); }
+.ath-link {
+  display: flex; align-items: center; gap: 13px;
+  background: var(--card); border: 1px solid var(--line); padding: 11px;
   text-decoration: none; color: inherit;
-  padding: 12px; margin: -12px; border-radius: 14px;
-  transition: background .28s var(--ease);
+  transition: border-color .2s var(--ease);
 }
-.ap-link:hover { background: rgba(0, 0, 0, .035); }
-.ap-link:focus-visible { outline: 2px solid var(--gold-ink); outline-offset: 2px; }
-.ap-link img { width: 92px; height: 62px; object-fit: cover; border-radius: 8px; flex-shrink: 0; }
-.ap-link-t {
-  font-size: 15px; font-weight: 500; line-height: 1.6;
+.ath-link:hover { border-color: rgba(199, 166, 106, .55); }
+.ath-link:focus-visible { outline: 2px solid var(--gold-d); outline-offset: 2px; }
+.ath-link img { width: 88px; height: 60px; object-fit: cover; flex-shrink: 0; }
+.ath-link-txt { min-width: 0; }
+.ath-link-t {
+  font-size: 14.5px; font-weight: 600; line-height: 1.6;
   display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
 }
-.ap-link-s {
-  display: flex; align-items: center; gap: 5px;
-  margin-top: 4px; font-size: 12.5px; color: var(--ap-ink-3);
+.ath-link-s { display: flex; align-items: center; gap: 5px; margin-top: 4px; font-size: 12px; color: var(--ink-3); }
+
+.ath-club-txt { flex: 1; min-width: 0; }
+.ath-err { margin: 12px 0 0; font-size: 13px; color: #B23B2E; }
+
+/* پروفایلِ تازه — نه دیوارِ خالی، نه پایانِ ناگهانی */
+.ath-empty {
+  background: var(--card); border: 1px dashed var(--line);
+  padding: clamp(28px, 5vw, 44px); text-align: center; color: var(--ink-3);
 }
-.ap-club-n, .ap-club-s { display: block; }
-.ap-club-i { flex-shrink: 0; opacity: .55; }
-.ap-err { margin: 14px 0 0; font-size: 13px; color: #B23B2E; }
-.ap-h--gap { margin-bottom: clamp(26px, 3.4vw, 44px); }
-.ap-meta--sub { margin-top: 8px; }
-.ap-lede--top { margin-top: 0; }
-.ap-body--top { margin-top: clamp(26px, 3.4vw, 44px); }
-.ap-link-txt { min-width: 0; }
+.ath-empty p { margin: 0; font-size: 15px; }
+.ath-empty-cta {
+  display: inline-flex; margin-top: 16px; padding: 10px 20px;
+  border-radius: 2px; text-decoration: none; font-size: 13.5px; font-weight: 700;
+  color: var(--gold-d); background: rgba(199, 166, 106, .14); border: 1px solid rgba(199, 166, 106, .38);
+}
+.ath-empty-cta:focus-visible { outline: 2px solid var(--gold-d); outline-offset: 2px; }
 
 /* ══════════ حرکت ══════════
-   یک ژست برای کلِ صفحه. `--d` فقط برای پشتِ‌سرِ هم آمدنِ چند ردیف. */
-/* ⚠️ حالتِ پنهان پشتِ `.is-anim` است، نه روی خودِ `.ap-r`. اگر
-   جاوااسکریپت نرسد یا hydration بشکند، کلاس گذاشته نمی‌شود و صفحه
-   کاملِ کامل دیده می‌شود. با `opacity:0`ِ بی‌قید، همان خطا یعنی
-   صفحه‌ای که فقط هیرو دارد و بقیه‌اش سفید است.
-   `will-change` عمداً نیست: `translate3d` خودش لایه می‌سازد و
-   نگه‌داشتنِ ده‌ها لایه‌ی هم‌زمان روی موبایلِ ضعیف گران است. */
-.ap-r { transition: opacity .9s var(--ease), transform .9s var(--ease); transition-delay: var(--d, 0ms); }
-.ap.is-anim .ap-r:not(.is-in) { opacity: 0; transform: translate3d(0, 26px, 0); }
+   ⚠️ حالتِ پنهان پشتِ `.is-anim` است. اگر جاوااسکریپت نرسد یا ناظر
+   بشکند، کلاس گذاشته نمی‌شود و صفحه کامل دیده می‌شود — نه صفحه‌ای که
+   فقط نوارِ بالا دارد. */
+.ath-r { transition: opacity .6s var(--ease), transform .6s var(--ease); }
+.ath.is-anim .ath-r:not(.is-in) { opacity: 0; transform: translate3d(0, 16px, 0); }
 
 @media (prefers-reduced-motion: reduce) {
-  .ap-r { opacity: 1 !important; transform: none !important; transition: none !important; }
-  .ap-club, .ap-link, .ap-crumb a { transition: none !important; }
+  .ath.is-anim .ath-r:not(.is-in) { opacity: 1; transform: none; }
+  .ath-r, .ath-club, .ath-link, .ath-crumb a { transition: none !important; }
+}
+
+/* ══════════ آینه‌ی RTL ══════════
+   مختصاتِ `clip-path` فیزیکی است. برش باید گوشه‌ی *پایان* را ببرد؛
+   در RTL یعنی پایین-چپ. */
+[dir="rtl"] .ath {
+  --chamfer: polygon(100% 0, 0 0, 0 calc(100% - var(--cut)), var(--cut) 100%, 100% 100%);
+}
+
+/* ══════════ موبایل ══════════ */
+
+@media (max-width: 760px) {
+  /* عکس زیرِ نام می‌رود و تمام‌عرض می‌شود */
+  .ath-hero-in { grid-template-columns: 1fr; align-items: start; min-height: 0; gap: 0; }
+  .ath-shot {
+    height: clamp(210px, 52vw, 300px); margin-bottom: 0;
+    margin-inline: calc(clamp(18px, 4vw, 34px) * -1);
+    clip-path: none;
+  }
+  .ath-id { padding-bottom: clamp(20px, 4vw, 28px); }
+  .ath-vitals-wrap { margin-top: 0; }
+  .ath-vitals { clip-path: none; box-shadow: none; border-inline: 0; }
 }

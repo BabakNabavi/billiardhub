@@ -32,11 +32,19 @@ import VerifiedBadge from '../../../components/VerifiedBadge'
 import PendingNotice from '../../../components/profile/PendingNotice'
 import { entryLabel } from '../../../lib/player-categories'
 import { NEWS_ARTICLES } from '../../../lib/news-data'
-import { useReveal, useCountUp } from '@/components/player/athlete-motion'
+import { useReveal } from '@/components/player/athlete-motion'
 import './athlete.css'
 import { MEDIA_VIDEOS } from '../../../lib/media-data'
 
 /* سالِ جاریِ شمسی — همان تعریفِ صفحه‌های دیگر */
+/* «۲۰۲۳» یا «2023» → 2023. سال‌ها دستی وارد می‌شوند و هر دو شکل می‌آیند. */
+const faNum = (v: string) => parseInt(String(v).replace(/[۰-۹]/g, ch => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(ch))), 10) || 0
+
+/* ⚠️ فیلدِ سال آزاد است: یکی «۱۴۰۲» می‌نویسد و دیگری «2023». مقایسه‌ی
+   خامِ این دو یعنی ۲۰۱۹ بالاتر از ۱۴۰۲ بنشیند و «آخرین عنوان» غلط
+   شود. همه به شمسی می‌آیند و بعد مقایسه می‌شوند. */
+const jYear = (v: string) => { const y = faNum(v); return y > 1900 ? y - 621 : y }
+
 const CUR_JYEAR = (() => { try { return parseInt(new Intl.DateTimeFormat('en-US-u-ca-persian', { year: 'numeric' }).format(new Date()), 10) || 1405 } catch { return 1405 } })()
 
 
@@ -242,253 +250,341 @@ export default function PlayerProfilePage() {
      ۲۳۶ پیکسل پشتِ هیرو می‌نشیند و «از سال —» زیرِ نام. */
   const latin = player.nameEn && player.nameEn !== 'PLAYER' ? player.nameEn : ''
   const since = player.careerStart && player.careerStart !== '—' ? player.careerStart : ''
+  /* مونوگرام برای وقتی عکسی نیست — پانلِ تیره خالی نماند */
+  const initials = (latin || player.name).split(/\s+/).filter(Boolean).map(w => w[0]).join('').slice(0, 2).toUpperCase()
 
   /* ── آمار ──
      فقط چیزی که واقعاً در داده هست. «۰ عنوان» بدتر از نبودنِ کارت
      است، پس خانه‌ی خالی اصلاً رندر نمی‌شود. رتبه‌ی رنکینگ هم عمداً
      این‌جا نیست: عددش را خودِ بازیکن وارد می‌کرد. */
   const years = (() => {
-    const y = parseInt(String(since).replace(/[۰-۹]/g, ch => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(ch))), 10)
-    return Number.isFinite(y) && y > 1300 ? Math.max(0, CUR_JYEAR - y) : 0
+    const y = jYear(since)
+    return y > 1300 ? Math.max(0, CUR_JYEAR - y) : 0
   })()
+  /* ── مشخصات ──
+     فقط فیلدی که واقعاً داده دارد. ⚠️ `profileToPlayer` برای شهرِ خالی
+     «—» می‌گذارد نه رشته‌ی خالی، پس بررسیِ falsy کافی نیست و همان
+     خانه‌ی «—»ای رندر می‌شد که این‌جا از آن پرهیز می‌کنیم. */
+  const has = (v?: string) => !!v && v !== '—'
+  const honours = [...player.highlights].sort((a, b) => jYear(b.year) - jYear(a.year))
+  const events  = [...player.tournaments].sort((a, b) => jYear(b.year) - jYear(a.year))
+  const lastHonour = honours[0]
+
+  const vitals: { label: string; value: string; sub?: string }[] = [
+    /* تهران/تهران زیرِ هم بی‌معنی است — استان فقط وقتی می‌آید که
+       با شهر یکی نباشد. */
+    ...(has(player.city)
+      ? [{ label: 'شهر', value: player.city,
+          sub: has(player.province) && player.province !== player.city ? player.province : player.country }]
+      : []),
+    ...(since ? [{ label: 'شروع فعالیت', value: faDigits(since), sub: years ? `${faDigits(years)} سال سابقه` : undefined }] : []),
+    ...(player.club ? [{ label: 'باشگاه', value: player.club.name, sub: 'محل تمرین' }] : []),
+    ...(lastHonour ? [{ label: 'آخرین عنوان', value: lastHonour.title, sub: faDigits(lastHonour.year) }] : []),
+    ...(disciplineLines.length > 1 ? [{ label: 'رشته‌ها', value: disciplineLines.slice(0, 2).join(' · ') }] : []),
+  ]
+
+  const stats: { n: number; label: string; hl?: boolean }[] = [
+    ...(player.highlights.length ? [{ n: player.highlights.length, label: 'عنوان و افتخار', hl: true }] : []),
+    ...(player.tournaments.length ? [{ n: player.tournaments.length, label: 'مسابقه‌ی ثبت‌شده' }] : []),
+    ...(years ? [{ n: years, label: 'سال سابقه' }] : []),
+    ...(disciplineLines.length > 1 ? [{ n: disciplineLines.length, label: 'رشته' }] : []),
+  ]
+
   const hasIntro   = !!player.intro || player.bio.length > 0
   const hasGallery = player.gallery.length > 0 || player.videos.length > 0 || edit.isOwner
   const hasRelated = relatedNews.length > 0 || relatedVids.length > 0
 
-  const stats: { n: number; label: string }[] = [
-    ...(years ? [{ n: years, label: 'سال سابقه' }] : []),
-    ...(player.highlights.length ? [{ n: player.highlights.length, label: 'افتخار ثبت‌شده' }] : []),
-    ...(player.tournaments.length ? [{ n: player.tournaments.length, label: 'مسابقه' }] : []),
-    ...(disciplineLines.length ? [{ n: disciplineLines.length, label: 'رشته' }] : []),
-  ]
-
-  /* ── جمله‌ی معرفی: تیتر یا متن؟ ──
-     جمله‌ی کوتاه در اندازه‌ی تیتر «بیانیه» می‌شود؛ همان جمله اگر بلند
-     باشد در اندازه‌ی تیتر پنج سطر می‌گیرد و از بیانیه به دیوارِ متن
-     تبدیل می‌شود. مرز تجربی است، نه دقیق. */
-  const introIsStatement = !!player.intro && player.intro.length <= 130
+  /* ⚠️ کلیدِ آخرین بخش باید از همان شرط‌هایی بیاید که رندر را تعیین
+     می‌کنند. نسخه‌ی قبل یک زنجیره‌ی جدا داشت و روی پروفایلِ تازه —
+     که هیچ بخشی ندارد — نامِ بخشی را می‌گفت که رندر نمی‌شد؛ نتیجه
+     صفحه‌ای بی‌فاصله‌ی کف. */
+  const shown = [
+    stats.length ? 'career' : '',
+    player.highlights.length ? 'honours' : '',
+    player.tournaments.length ? 'events' : '',
+    hasIntro ? 'intro' : '',
+    player.club ? 'club' : '',
+    hasGallery ? 'gallery' : '',
+    hasRelated ? 'related' : '',
+  ].filter(Boolean)
+  const last = shown[shown.length - 1]
+  const secCls = (k: string) => `ath-sec${last === k ? ' ath-sec--last' : ''}`
 
   return (
-    <div className="ap">
+    <div className="ath">
       {pending && <PendingNotice what="پروفایلِ شما" />}
 
-      {/* ═══════════ ۱ · قاب ═══════════
-          یک ایده: این آدم کیست. نام، و هیچ چیزِ دیگری که با آن رقابت کند. */}
-      <header className={portrait ? "ap-hero" : "ap-hero ap-hero--bare"}>
-        <div className="ap-hero-bg" style={{ backgroundImage: `url("${encodeURI(player.scene)}")` }} aria-hidden />
-        <div className="ap-hero-veil" aria-hidden />
+      {/* ═══════════ نوارِ هویت ═══════════ */}
+      <header className="ath-hero">
+        {/* بافتِ زمینه: شبکه‌ی نازک + حلقه‌های توپ. تزئین نیست — بدونش
+            نوار یک مستطیلِ سیاهِ خالی است. */}
+        <svg className="ath-hero-art" viewBox="0 0 1440 452" preserveAspectRatio="xMidYMid slice"
+          fill="none" aria-hidden focusable="false">
+          <defs>
+            <linearGradient id="ath-felt" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stopColor="#0F5140" stopOpacity=".5" />
+              <stop offset="1" stopColor="#0F5140" stopOpacity="0" />
+            </linearGradient>
+          </defs>
+          <rect width="1440" height="452" fill="url(#ath-felt)" />
+          <g stroke="rgba(255,255,255,0.045)">
+            <line x1="0" y1="113" x2="1440" y2="113" /><line x1="0" y1="226" x2="1440" y2="226" />
+            <line x1="0" y1="339" x2="1440" y2="339" />
+            <line x1="240" y1="0" x2="240" y2="452" /><line x1="480" y1="0" x2="480" y2="452" />
+            <line x1="720" y1="0" x2="720" y2="452" /><line x1="960" y1="0" x2="960" y2="452" />
+            <line x1="1200" y1="0" x2="1200" y2="452" />
+          </g>
+          <circle cx="1265" cy="126" r="118" stroke="rgba(199,166,106,0.13)" />
+          <circle cx="1265" cy="126" r="72" stroke="rgba(199,166,106,0.09)" />
+          <circle cx="1265" cy="126" r="26" fill="rgba(199,166,106,0.10)" />
+        </svg>
 
-        <div className="ap-in ap-hero-top">
-          <nav className="ap-crumb" aria-label="مسیر صفحه">
-            <Link href="/">خانه</Link>
-            <ChevronLeft size={12} aria-hidden />
-            <Link href="/players">بازیکنان</Link>
-          </nav>
+        <div className="ath-wrap ath-hero-in">
+          <div className="ath-id">
+            <nav className="ath-crumb" aria-label="مسیر صفحه">
+              <Link href="/">خانه</Link>
+              <ChevronLeft size={12} aria-hidden />
+              <Link href="/players">بازیکنان</Link>
+            </nav>
 
-          <span className="ap-eyebrow ap-lat">{d.en ?? 'BILLIARDS'}</span>
+            <span className="ath-kicker">{disciplineLines[0] ?? d.fa}</span>
 
-          <h1 className="ap-name">
-            {player.name}
-            {player.verified && (
-              <span className="ap-tick">
-                <VerifiedBadge title="بازیکن تأیید شده"
-                  style={{ inlineSize: '0.3em', blockSize: '0.3em', marginInlineStart: 0 }} />
-              </span>
-            )}
-          </h1>
+            <h1 className="ath-name">
+              {player.name}
+              {player.verified && (
+                <span className="ath-tick">
+                  {/* اندازه با em تا با نامِ کشسان هم‌مقیاس بماند */}
+                  <VerifiedBadge title="بازیکن تأیید شده"
+                    style={{ inlineSize: '0.34em', blockSize: '0.34em', marginInlineStart: 0 }} />
+                </span>
+              )}
+            </h1>
 
-          <div className="ap-meta">
-            <span>{player.city}، {player.country}</span>
-            {latin && <><span className="ap-dot" aria-hidden /><span dir="ltr" className="ap-lat">{latin}</span></>}
-            {since && <><span className="ap-dot" aria-hidden /><span>از سال {faDigits(since)}</span></>}
+            {latin && <div className="ath-lat" dir="ltr">{latin}</div>}
           </div>
 
-          {disciplineLines.length > 0 && (
-            <div className="ap-meta ap-meta--sub">
-              <span>{disciplineLines.join(' · ')}</span>
-            </div>
-          )}
+          <div className="ath-shot">
+            {portrait
+              ? <img src={portrait} alt={`عکس ${player.name}`} decoding="async"
+                  onError={() => setBadPortrait(portraitSrc)} />
+              : <div className="ath-shot-x" aria-hidden>{initials}</div>}
+          </div>
         </div>
-
-        {/* پرتره کفِ قاب را می‌بندد و در سیاهی حل می‌شود. نبودنش با یک
-            خطِ نور پر می‌شود، نه با مونوگرامِ حروف — حرفِ تنها در قابی
-            به این بزرگی «خطا» خوانده می‌شود. */}
-        {/* ⚠️ نبودِ پرتره با هیچ چیزی پر نمی‌شود. جای‌گزینِ تزئینی —
-            حرفِ اولِ نام، خطِ نور — در قابی به این بزرگی «چیزی کم است»
-            می‌گوید؛ سکوت نمی‌گوید. قاب به‌جایش جمع و وسط‌چین می‌شود. */}
-        {portrait && (
-          <div className="ap-shot">
-            <img src={portrait} alt={`پرتره ${player.name}`} decoding="async"
-              onError={() => setBadPortrait(portraitSrc)} />
-          </div>
-        )}
-
-        <div className="ap-scroll" aria-hidden>SCROLL</div>
       </header>
 
-      {/* ═══════════ ۲ · اعداد ═══════════ */}
-      {stats.length > 0 && (
-        <section className="ap-act ap-act--tight" aria-label="آمار">
-          <div className="ap-in">
-            <div className="ap-figs">
-              {stats.map((s, i) => <Figure key={s.label} n={s.n} label={s.label} delay={i * 90} />)}
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* ═══════════ ۳ · معرفی ═══════════ */}
-      {hasIntro && (
-        <section className="ap-act ap-act--gray" aria-label="معرفی">
-          <div className="ap-in ap-in--narrow ap-r">
-            <span className="ap-eyebrow ap-lat">PROFILE</span>
-            {/* جمله‌ی کوتاه خودش تیتر است؛ جمله‌ی بلند تیترِ جدا می‌خواهد
-                تا این پرده تنها پرده‌ی بی‌سرتیترِ صفحه نباشد. */}
-            {introIsStatement
-              ? <h2 className="ap-h">{player.intro}</h2>
-              : <>
-                  <h2 className="ap-h">معرفی</h2>
-                  {player.intro && <p className="ap-lede">{player.intro}</p>}
-                </>}
-            {player.bio.length > 0 && (
-              <div className="ap-body ap-body--top">
-                {player.bio.map((p, i) => <p key={i}>{p}</p>)}
-              </div>
-            )}
-          </div>
-        </section>
-      )}
-
-      {/* ═══════════ ۴ · مسیر قهرمانی ═══════════ */}
-      {player.highlights.length > 0 && (
-        <section className="ap-act ap-act--night" aria-label="مسیر قهرمانی">
-          <div className="ap-in">
-            <div className="ap-r">
-              <span className="ap-eyebrow ap-lat">CAREER</span>
-              <h2 className="ap-h">مسیر قهرمانی</h2>
-            </div>
-            <div className="ap-rows">
-              {player.highlights.map((h, i) => (
-                <div key={i} className="ap-row ap-r" style={{ '--d': `${Math.min(i, 6) * 70}ms` } as React.CSSProperties}>
-                  <div className="ap-row-y">{faDigits(h.year)}</div>
-                  <div className="ap-row-t">{h.title}</div>
+      {/* ═══════════ مشخصات — روی درزِ تیره/روشن ═══════════ */}
+      {vitals.length > 0 && (
+        <div className="ath-wrap ath-vitals-wrap">
+          <div className="ath-vitals-shell">
+            <dl className="ath-vitals">
+              {vitals.map(v => (
+                <div className="ath-vit" key={v.label}>
+                  <dt>{v.label}</dt>
+                  <dd>
+                    {v.value}
+                    {v.sub && <span className="ath-vit-s ath-num">{v.sub}</span>}
+                  </dd>
                 </div>
               ))}
-            </div>
+            </dl>
           </div>
-        </section>
+        </div>
       )}
 
-      {/* ═══════════ ۵ · مسابقات ═══════════ */}
-      {player.tournaments.length > 0 && (
-        <section className="ap-act" aria-label="مسابقات">
-          <div className="ap-in">
-            <div className="ap-r">
-              <span className="ap-eyebrow ap-lat">EVENTS</span>
-              <h2 className="ap-h">مسابقات</h2>
+      <div className="ath-wrap ath-body">
+
+        {/* ═══════════ کارنامه ═══════════ */}
+        {stats.length > 0 && (
+          <section className={secCls('career')} aria-labelledby="ath-h-career">
+            <div className="ath-sec-h ath-r">
+              <h2 id="ath-h-career">کارنامه</h2>
+              <span className="ath-en" aria-hidden>CAREER</span><span className="ath-rule" />
             </div>
-            <div className="ap-rows">
-              {player.tournaments.map((tr, i) => (
-                <div key={i} className="ap-row ap-r" style={{ '--d': `${Math.min(i, 6) * 70}ms` } as React.CSSProperties}>
-                  <div className="ap-row-y">{faDigits(tr.year)}</div>
-                  <div className="ap-row-t">{tr.name}</div>
-                  <div className="ap-row-r">{tr.result || ''}</div>
+            <dl className="ath-stats ath-r">
+              {stats.map(s => (
+                <div className={s.hl ? 'ath-stat ath-stat--hl' : 'ath-stat'} key={s.label}>
+                  <dt>{s.label}</dt>
+                  <dd>{faDigits(s.n)}</dd>
                 </div>
               ))}
+            </dl>
+          </section>
+        )}
+
+        {/* ═══════════ افتخارات ═══════════ */}
+        {honours.length > 0 && (
+          <section className={secCls('honours')} aria-labelledby="ath-h-honours">
+            <div className="ath-sec-h ath-r">
+              <h2 id="ath-h-honours">افتخارات</h2>
+              <span className="ath-en" aria-hidden>HONOURS</span><span className="ath-rule" />
             </div>
-          </div>
-        </section>
-      )}
+            {/* دو ستون در عرضِ کامل، دو سومِ جدول را خالی می‌گذارد */}
+            {/* ⚠️ همین جدول هم روی موبایل افقی اسکرول می‌شود (ستونِ
+                عنوان از ۳۵۴px پهن‌تر می‌شود)، پس ناحیه‌اش باید نام و
+                فوکوس داشته باشد. */}
+            <div className="ath-tbl ath-tbl--narrow ath-r" tabIndex={0} role="region" aria-label="جدول افتخارات">
+              <table>
+                <caption className="ath-sr">فهرست افتخارات، از تازه‌ترین</caption>
+                <thead><tr><th scope="col">سال</th><th scope="col">عنوان</th></tr></thead>
+                <tbody>
+                  {honours.map(h => (
+                    <tr key={`${h.year}-${h.title}`}>
+                      <td className="ath-y">{faDigits(h.year)}</td>
+                      <td>{h.title}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </section>
+        )}
 
-      {/* ═══════════ ۶ · باشگاه ═══════════ */}
-      {player.club && (
-        <section className="ap-act ap-act--night ap-act--tight" aria-label="باشگاه">
-          <div className="ap-in ap-r">
-            <span className="ap-eyebrow ap-lat">CLUB</span>
-            <Link href={player.club.href ?? '/clubs'} className="ap-club">
-              <Building2 size={22} className="ap-club-i" aria-hidden />
-              <span style={{ flex: 1, minWidth: 0 }}>
-                <span className="ap-club-n">{player.club.name}</span>
-                <span className="ap-club-s">باشگاه محل تمرین — {player.city}</span>
-              </span>
-              <ArrowLeft size={17} className="ap-club-i" aria-hidden />
-            </Link>
-          </div>
-        </section>
-      )}
+        {/* ═══════════ مسابقات ═══════════ */}
+        {events.length > 0 && (
+          <section className={secCls('events')} aria-labelledby="ath-h-events">
+            <div className="ath-sec-h ath-r">
+              <h2 id="ath-h-events">مسابقات</h2>
+              <span className="ath-en" aria-hidden>EVENTS</span><span className="ath-rule" />
+            </div>
+            {/* ⚠️ جدول روی موبایل افقی اسکرول می‌شود؛ ناحیه‌ی اسکرول باید
+                نام و فوکوس داشته باشد وگرنه با کیبورد رسیدنی نیست. */}
+            <div className="ath-tbl ath-r" tabIndex={0} role="region" aria-label="جدول مسابقات">
+              <table>
+                <caption className="ath-sr">فهرست مسابقات، از تازه‌ترین</caption>
+                <thead>
+                  <tr>
+                    <th scope="col">سال</th><th scope="col">مسابقه</th>
+                    <th scope="col" className="ath-res">نتیجه</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {events.map(tr => (
+                    <tr key={`${tr.year}-${tr.name}`}>
+                      <td className="ath-y">{faDigits(tr.year)}</td>
+                      <td>{tr.name}</td>
+                      <td className="ath-res">
+                        {tr.result
+                          ? <span className="ath-chip">{tr.result}</span>
+                          : <span className="ath-sr">ثبت نشده</span>}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </section>
+        )}
 
-      {/* ═══════════ ۷ · گالری ═══════════ */}
-      {hasGallery && (
-        <section className="ap-act" aria-label="گالری">
-          <div className="ap-in ap-r">
-            <span className="ap-eyebrow ap-lat">GALLERY</span>
-            <h2 className="ap-h ap-h--gap">تصاویر و ویدیوها</h2>
-            <ProfileGallery
-              images={player.gallery}
-              videos={player.videos}
-              albumNames={player.albums}
-              onOpenImage={(urls, index, meta, ids) => openImage(urls, {
-                index, ...meta,
-                ...(edit.isOwner ? { onDelete: (i: number) => deleteImage(ids[i] ?? '') } : {}),
-              })}
-              onOpenVideo={v => openVideo(v, edit.isOwner ? { onDelete: () => deleteVideo(v.id) } : undefined)}
-              canEdit={edit.isOwner} busy={edit.saving || vidBusy}
-              onAddImages={addImages} onAddVideos={addVideoFiles} onNewAlbum={newAlbum}
-            />
-            {edit.error && <p role="alert" className="ap-err">{edit.error}</p>}
-          </div>
-        </section>
-      )}
+        {/* ═══════════ معرفی ═══════════ */}
+        {hasIntro && (
+          <section className={secCls('intro')} aria-labelledby="ath-h-intro">
+            <div className="ath-sec-h ath-r">
+              <h2 id="ath-h-intro">معرفی</h2>
+              <span className="ath-en" aria-hidden>PROFILE</span><span className="ath-rule" />
+            </div>
+            <div className="ath-r">
+              {player.intro && <p className="ath-lede">{player.intro}</p>}
+              {player.bio.length > 0 && (
+                <div className="ath-bio">{player.bio.map((p, i) => <p key={i}>{p}</p>)}</div>
+              )}
+            </div>
+          </section>
+        )}
 
-      {/* ═══════════ ۸ · در بیلیارد هاب ═══════════ */}
-      {hasRelated && (
-        <section className="ap-act ap-act--gray" aria-label="مطالب مرتبط">
-          <div className="ap-in ap-r">
-            <span className="ap-eyebrow ap-lat">RELATED</span>
-            <h2 className="ap-h">در بیلیارد هاب</h2>
-            <div className="ap-links">
+        {/* ═══════════ باشگاه ═══════════ */}
+        {player.club && (
+          <section className={secCls('club')} aria-labelledby="ath-h-club">
+            <div className="ath-sec-h ath-r">
+              <h2 id="ath-h-club">باشگاه</h2>
+              <span className="ath-en" aria-hidden>CLUB</span><span className="ath-rule" />
+            </div>
+            <div className="ath-r">
+              <Link href={player.club.href ?? '/clubs'} className="ath-club">
+                <Building2 size={22} className="ath-club-i" aria-hidden />
+                <span className="ath-club-txt">
+                  <span className="ath-club-n">{player.club.name}</span>
+                  {has(player.city) && <span className="ath-club-s">محل تمرین — {player.city}</span>}
+                </span>
+                <ArrowLeft size={17} className="ath-club-i" aria-hidden />
+              </Link>
+            </div>
+          </section>
+        )}
+
+        {/* ═══════════ گالری ═══════════ */}
+        {hasGallery && (
+          <section className={secCls('gallery')} aria-labelledby="ath-h-gallery">
+            <div className="ath-sec-h ath-r">
+              <h2 id="ath-h-gallery">تصاویر و ویدیوها</h2>
+              <span className="ath-en" aria-hidden>GALLERY</span><span className="ath-rule" />
+            </div>
+            <div className="ath-r">
+              <ProfileGallery
+                images={player.gallery}
+                videos={player.videos}
+                albumNames={player.albums}
+                onOpenImage={(urls, index, meta, ids) => openImage(urls, {
+                  index, ...meta,
+                  ...(edit.isOwner ? { onDelete: (i: number) => deleteImage(ids[i] ?? '') } : {}),
+                })}
+                onOpenVideo={v => openVideo(v, edit.isOwner ? { onDelete: () => deleteVideo(v.id) } : undefined)}
+                canEdit={edit.isOwner} busy={edit.saving || vidBusy}
+                onAddImages={addImages} onAddVideos={addVideoFiles} onNewAlbum={newAlbum}
+              />
+              {edit.error && <p role="alert" className="ath-err">{edit.error}</p>}
+            </div>
+          </section>
+        )}
+
+        {/* ═══════════ در بیلیارد هاب ═══════════ */}
+        {hasRelated && (
+          <section className={secCls('related')} aria-labelledby="ath-h-related">
+            <div className="ath-sec-h ath-r">
+              <h2 id="ath-h-related">در بیلیارد هاب</h2>
+              <span className="ath-en" aria-hidden>RELATED</span><span className="ath-rule" />
+            </div>
+            <div className="ath-links ath-r">
               {relatedNews.map(a => (
-                <Link key={a.id} href={`/news/${a.id}`} className="ap-link">
+                <Link key={a.id} href={`/news/${a.id}`} className="ath-link">
                   <img src={a.image} alt="" loading="lazy" decoding="async" />
-                  <span className="ap-link-txt">
-                    <span className="ap-link-t">{a.title}</span>
-                    <span className="ap-link-s">
-                      <Newspaper size={12} aria-hidden />{a.date}
-                    </span>
+                  <span className="ath-link-txt">
+                    <span className="ath-link-t">{a.title}</span>
+                    <span className="ath-link-s"><Newspaper size={12} aria-hidden />{a.date}</span>
                   </span>
                 </Link>
               ))}
               {relatedVids.map(v => (
-                <Link key={v.id} href={`/media/${encodeURIComponent(v.id)}`} className="ap-link">
+                <Link key={v.id} href={`/media/${encodeURIComponent(v.id)}`} className="ath-link">
                   <img src={v.thumb} alt="" loading="lazy" decoding="async" />
-                  <span className="ap-link-txt">
-                    <span className="ap-link-t">{v.title}</span>
-                    <span className="ap-link-s">
+                  <span className="ath-link-txt">
+                    <span className="ath-link-t">{v.title}</span>
+                    <span className="ath-link-s">
                       <Clapperboard size={12} aria-hidden /><span dir="ltr">{v.duration}</span>
                     </span>
                   </span>
                 </Link>
               ))}
             </div>
-          </div>
-        </section>
-      )}
+          </section>
+        )}
+
+        {/* ⚠️ پروفایلی که هنوز چیزی ندارد نباید بعد از کارتِ مشخصات
+            ناگهان تمام شود — نه برای بازدیدکننده، نه برای صاحبش که
+            باید بداند قدمِ بعدی چیست. */}
+        {shown.length === 0 && (
+          <section className="ath-sec ath-sec--last">
+            <div className="ath-empty">
+              <p>این پروفایل هنوز تکمیل نشده است.</p>
+              {edit.isOwner && (
+                <Link href="/dashboard/player" className="ath-empty-cta">تکمیل پروفایل</Link>
+              )}
+            </div>
+          </section>
+        )}
+      </div>
 
       {imageViewer}
       {videoViewer}
-    </div>
-  )
-}
-
-/* یک عدد. وقتی به قاب می‌رسد بالا می‌آید و می‌شمارد — همان یک ژستِ
-   صفحه، نه یک جلوه‌ی جدا. */
-function Figure({ n, label, delay }: { n: number; label: string; delay: number }) {
-  const { ref, n: shown } = useCountUp<HTMLDivElement>(n)
-  return (
-    <div className="ap-fig ap-r" ref={ref}
-      style={{ '--d': `${delay}ms` } as React.CSSProperties}>
-      <b>{faDigits(shown)}</b>
-      <span>{label}</span>
     </div>
   )
 }

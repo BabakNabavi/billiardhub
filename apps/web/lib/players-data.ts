@@ -40,6 +40,8 @@ export interface Player {
   /** رشته‌ها با رده‌ی سنی و دسته — پروفایل‌های ساخته‌شده توسط کاربر */
   disciplines?: import('./player-categories').DisciplineEntry[]
   city: string
+  /** استان — از فرمِ ثبت‌نام می‌آید؛ زیرِ شهر در کارتِ مشخصات */
+  province?: string
   country: string
   /** رتبه‌ی رنکینگ ملی — undefined یعنی بدون رنکینگ */
   ranking?: number
