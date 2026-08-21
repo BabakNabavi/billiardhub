@@ -53,6 +53,7 @@ export default function PlayerDashboard() {
   const [busy, setBusy]     = useState(false)
 
   const sceneRef = useRef<HTMLInputElement>(null)
+  const photoRef = useRef<HTMLInputElement>(null)
   const albImgRefs = useRef<Record<string, HTMLInputElement | null>>({})
 
   /* فرم‌های افزودنی */
@@ -106,6 +107,16 @@ export default function PlayerDashboard() {
 
   const set = <K extends keyof PlayerProfile>(k: K, v: PlayerProfile[K]) => {
     setForm(f => ({ ...f, [k]: v })); setSaved(false); setErr('')
+  }
+
+  /* آواتار کوچک نمایش داده می‌شود؛ ۶۰۰px کافی است و بارِ شبکه‌ی
+     کند را چند برابر کم می‌کند. */
+  const pickPhoto = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0]; if (!f) return
+    setBusy(true)
+    try { set('photo', await compressImage(f, 600, 0.72)) }
+    catch { setErr('عکس خوانده نشد.') }
+    finally { setBusy(false); e.target.value = '' }
   }
 
   const pickScene = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -319,7 +330,22 @@ export default function PlayerDashboard() {
                 )
               })}
             </div>
-            <div className="flex items-center gap-3">
+              {/* ⚠️ ردیف حالا چهار دکمه و دو پیش‌نمایش دارد؛ بدونِ
+                  شکستن، روی ۳۷۵px برچسب‌ها له می‌شوند. */}
+            <div className="flex flex-wrap items-center gap-3">
+              <input ref={photoRef} type="file" accept="image/*" className="hidden" onChange={pickPhoto} />
+              <button type="button" onClick={() => photoRef.current?.click()} className={LQ_BTN} disabled={busy}>
+                <Images size={14} /> {form.photo ? 'تغییر عکس پروفایل' : 'آپلود عکس پروفایل'}
+              </button>
+              {form.photo && (
+                <div className="flex items-center gap-3">
+                  <img loading="lazy" decoding="async" src={form.photo} alt="پیش‌نمایش عکس پروفایل"
+                    className="h-14 w-14 rounded-lg border border-[#E7E2D6] object-cover" />
+                  <button type="button" onClick={() => set('photo', '')}
+                    className="text-[11.5px] font-bold text-[#B23B2E]">حذف</button>
+                </div>
+              )}
+
               <input ref={sceneRef} type="file" accept="image/*" className="hidden" onChange={pickScene} />
               <button type="button" onClick={() => sceneRef.current?.click()} className={LQ_BTN} disabled={busy}>
                 <Images size={14} /> {form.scene ? 'تغییر تصویر پس‌زمینه' : 'آپلود تصویر پس‌زمینه'}
@@ -450,8 +476,13 @@ export default function PlayerDashboard() {
           </section>
 
           {/* ═══ ذخیره ═══ */}
-          <div className="flex flex-wrap items-center gap-3">
-            <button type="submit" className={`${LQ_BTN} px-7 py-3 text-[14px]`} disabled={busy}>
+          {/* روی موبایل دکمه یک سطرِ کامل می‌گیرد و وسط‌چین است؛
+              کنارِ متنِ وضعیت فشرده‌شدنش، هم زشت بود هم هدفِ لمس را
+              از ۴۴px کوچک‌تر می‌کرد. */}
+          <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+            <button type="submit"
+              className={`${LQ_BTN} w-full justify-center px-7 py-3 text-[14px] sm:w-auto`}
+              disabled={busy}>
               ذخیره و انتشار پروفایل
             </button>
             {saved && <span className="text-[12.5px] font-bold text-[#0E7A38]">ذخیره و منتشر شد ✓ — در بخش «بازیکنان» نمایش داده می‌شود.</span>}

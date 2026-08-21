@@ -1,22 +1,27 @@
 /* ─────────────────────────────────────────────────────────────
-   صفحه‌ی بازیکن — پرونده‌ی ورزشی (Athlete Dossier).
+   صفحه‌ی بازیکن — پرونده‌ی ورزشی با سطحِ شیشه‌ی مایع.
 
-   ── دو طرحِ کنارگذاشته‌شده و دلیلش ──
-   نسخه‌ی اول ادیتوریالِ سینمایی بود (دانه‌ی فیلم، نوارِ روان، نامِ
-   توخالی). نسخه‌ی دوم «صفحه‌ی محصول» بود: نامِ غول‌پیکر وسطِ سیاهی و
-   SCROLL زیرش. هر دو یک اشکالِ ریشه‌ای داشتند — **طرحِ بی‌محتوا**.
-   صفحه‌ی یک ورزشکارِ حرفه‌ای پوستر نیست، *پرونده* است.
+   ── مسیرِ رسیدن ──
+   سه طرح کنار گذاشته شد: ادیتوریالِ سینمایی، «صفحه‌ی محصول» با نامِ
+   غول‌پیکر، و نسخه‌ی جدولیِ خشک. اولی شلوغ بود، دومی بی‌محتوا، و
+   سومی — به گفته‌ی درستِ کاربر — «مثلِ روزنامه»: ساختار درست بود
+   ولی سطح‌ها هیچ عمق، رنگ، سایه و حرکتی نداشتند.
 
-   ── از کجا آمد ──
-   ساختارِ سایت‌های رسمیِ اسنوکر (WST) و مرجع‌های ورزشی: نوارِ هویتِ
-   محدود با پرتره، بعد نوارِ «مشخصات» با فیلدهای برچسب‌دار، بعد آمار و
-   جدول‌ها. چگال، ساخت‌یافته، خوانا — نه خالی.
+   ── این نسخه ──
+   ساختارِ پرونده می‌ماند (نوارِ هویت ⟵ مشخصات ⟵ آمار ⟵ افتخارات ⟵
+   مسابقات ⟵ معرفی)، ولی هر سطح یک **شیشه‌ی مایع** است:
 
-   ── امضای بصری ──
-   ۱) گوشه‌ی پخ (`--cut`) روی هر سطحِ ساخت‌یافته
-   ۲) کارتِ مشخصات که روی درزِ تیره/روشن می‌نشیند
-   ۳) سبزِ ماهوتِ میز به‌عنوان لهجه‌ی دوم کنارِ طلایی
-   ۴) زمینه‌ی کرم، نه سفیدِ خالص
+   ۱) لایه‌ی نیمه‌شفاف روی چیزی که پشتش هست (`backdrop-filter`)
+   ۲) بازتابِ لبه (`inset 0 1px 0 rgba(255,255,255,…)`) — همان چیزی
+      که شیشه را از «کارتِ سفید» جدا می‌کند
+   ۳) دو سایه: تماسِ نزدیک + هاله‌ی دور
+   ۴) گوشه‌های هم‌مرکز و گرد
+   ۵) تینتِ طلایی که از لبه به داخل می‌آید
+   ۶) حرکت: ورودِ پلکانی، بالا آمدن با فنر، و برقِ عبوری روی hover
+
+   ⚠️ `backdrop-filter` بدونِ چیزی در پشت، دیده نمی‌شود. برای همین
+   عکسِ پس‌زمینه‌ی بازیکن (`scene`) دوباره به نوارِ بالا برگشت و
+   زمینه‌ی صفحه یک هاله‌ی نرم دارد — وگرنه شیشه فقط «سفید» می‌شود.
 
    ⚠️ فارسی letter-spacing نمی‌گیرد — حروفِ چسبان از هم می‌پاشند.
    تراکینگ فقط روی بلوک‌های لاتین (`.ath-lat`, `.ath-en`).
@@ -24,23 +29,28 @@
 
 .ath {
   --ink:    #16150F;
-  --ink-2:  #57544A;
-  --ink-3:  #837D70;   /* ۴٫۶:۱ روی کرم */
-  --paper:  #F6F4EE;
-  --card:   #FFFFFF;
-  --gold:   #C7A66A;   /* روی تیره */
-  --gold-d: #8A6229;   /* روی روشن — ۵٫۴:۱ */
-  --line:   #E1DCCE;
-  --cut:    22px;
-  /* ⚠️ مختصاتِ clip-path فیزیکی است و با dir برنمی‌گردد. چندضلعی
-     این‌جا یک‌بار تعریف می‌شود و پایین‌تر برای RTL آینه می‌شود، وگرنه
-     برش روی گوشه‌ی *ورودِ چشم* می‌افتد نه گوشه‌ی پایان. */
-  --chamfer: polygon(0 0, 100% 0, 100% calc(100% - var(--cut)), calc(100% - var(--cut)) 100%, 0 100%);
+  --ink-2:  #55524A;
+  --ink-3:  #706B5E;   /* ۴٫۷:۱ روی کرم — متنِ زیرِ ۱۸px کف ۴٫۵ می‌خواهد */
+  --paper:  #F4F1E9;
+  --night:  #0B0B09;
+  --gold:   #C7A66A;
+  --gold-d: #8A6229;
+  --gold-l: #E3CC96;
+  --line:   rgba(22, 21, 15, .09);
+  --nline:  rgba(255, 255, 255, .14);
+  --r:      18px;
+  --r-s:    12px;
+  /* فنر — ورود و hover هر دو از همین می‌آیند */
+  --spring: cubic-bezier(.34, 1.4, .48, 1);
   --ease:   cubic-bezier(.22, .61, .36, 1);
 
-  background: var(--paper);
+  position: relative;
   color: var(--ink);
   overflow-x: clip;
+  background:
+    radial-gradient(120% 80% at 82% 0%, rgba(199, 166, 106, .16), transparent 58%),
+    radial-gradient(90% 60% at 8% 22%, rgba(15, 81, 64, .07), transparent 60%),
+    var(--paper);
 }
 
 .ath-wrap {
@@ -48,58 +58,83 @@
   padding-inline: clamp(18px, 4vw, 34px);
 }
 
+/* ══════════ سطحِ شیشه‌ای — پایه‌ی همه‌ی جعبه‌ها ══════════ */
+
+/* ⚠️ `backdrop-filter` فقط روی سطحی می‌ارزد که چیزِ دیداری پشتش
+   باشد. زیرِ بقیه‌ی کارت‌ها همان زمینه‌ی تختِ صفحه است، پس blur
+   دیده نمی‌شود ولی هزینه‌ی GPU را می‌دهد — و این صفحه می‌تواند
+   ۲۰ کارت داشته باشد. تنها کارتی که روی عکسِ نوارِ بالا می‌نشیند
+   `.ath-vitals` است و blur همان‌جا می‌ماند. */
+.ath-glass {
+  position: relative;
+  border-radius: var(--r);
+  background: linear-gradient(158deg, rgba(255, 255, 255, .9), rgba(255, 255, 255, .74));
+  border: 1px solid rgba(255, 255, 255, .7);
+  box-shadow:
+    0 1px 2px rgba(22, 21, 15, .05),          /* تماسِ نزدیک */
+    0 14px 34px -12px rgba(22, 21, 15, .16),  /* هاله */
+    inset 0 1px 0 rgba(255, 255, 255, .9);    /* بازتابِ لبه‌ی بالا */
+}
+/* برقِ مورب — همان چیزی که سطح را «شیشه» می‌کند نه «کاغذ» */
+.ath-glass::before {
+  content: ''; position: absolute; inset: 0; border-radius: inherit;
+  background: linear-gradient(112deg, rgba(255, 255, 255, .5) 0%, transparent 34%, transparent 66%, rgba(199, 166, 106, .12) 100%);
+  pointer-events: none;
+}
+
 /* ══════════ نوارِ هویت ══════════ */
 
-/* ⚠️ این نوار یک‌بار با پرتره‌ی بزرگِ لبه‌به‌لبه ساخته شد و شکست.
-   الگویی که سایت‌های رسمی دارند به عکسِ *بریده‌ی استودیویی* وابسته
-   است؛ کاربرِ ما یا سلفیِ موبایل می‌گذارد یا هیچ. جای‌گزینِ بی‌عکس
-   در ابعادِ ۳۹۲×۳۷۲ یک مستطیلِ سیاه بود که «عکسِ خراب» خوانده
-   می‌شد، با ۶۰۰ پیکسل فضای مُرده تا نام.
+/* ⚠️ `.ath-hero-bg` با `scale(1.06)` بزرگ‌تر از قاب است؛ بدونِ
+   `overflow: clip` سه درصدش زیرِ خطِ طلایی بیرون می‌زد. */
+.ath-hero { position: relative; color: #F5F2E9; isolation: isolate; overflow: clip; }
 
-   قاعده‌ی این نسخه: **نوار باید بدونِ عکس هم درست باشد.** آواتار
-   کوچک و قاب‌دار است (در ۱۳۶px مونوگرام «آواتار» خوانده می‌شود نه
-   «خطا»)، ارتفاعِ نوار از محتوایش می‌آید نه از یک عددِ ثابت، و
-   زمینه یک سطحِ مطمئن است با یک خطِ طلاییِ بسته‌کننده. */
-.ath-hero {
-  position: relative; color: #F3F0E7;
-  background: radial-gradient(125% 150% at 86% 0%, #10241D 0%, #0B120F 48%, #080A09 100%);
-  border-bottom: 2px solid var(--gold);
+/* عکسِ پس‌زمینه‌ی بازیکن — بدونِ آن، شیشه چیزی برای شکستن ندارد */
+.ath-hero-bg {
+  position: absolute; inset: 0; z-index: -2;
+  background-size: cover; background-position: center;
+  transform: scale(1.06);
 }
-.ath-hero-art { position: absolute; inset: 0; pointer-events: none; }
+.ath-hero-veil {
+  position: absolute; inset: 0; z-index: -1;
+  background:
+    linear-gradient(180deg, rgba(6, 10, 9, .74), rgba(6, 10, 9, .82) 62%, rgba(6, 10, 9, .94)),
+    radial-gradient(90% 120% at 84% 0%, rgba(15, 81, 64, .55), transparent 62%);
+}
+/* نوارِ نازکِ طلایی که نوار را می‌بندد */
+.ath-hero::after {
+  content: ''; position: absolute; inset-inline: 0; bottom: 0; height: 2px;
+  background: linear-gradient(90deg, transparent, var(--gold) 22%, var(--gold-l) 50%, var(--gold) 78%, transparent);
+  opacity: .85;
+}
 
 .ath-hero-in {
   position: relative;
-  /* آواتار در ستونِ اول ⇒ سمتِ شروع (راست) و نام کنارش — مثلِ هر
-     کارتِ شناسایی. عکس لنگرِ لبه نیست، همراهِ نام است. */
   display: grid; grid-template-columns: auto minmax(0, 1fr);
   gap: clamp(16px, 2.6vw, 30px); align-items: center;
   padding-top: clamp(20px, 2.6vw, 30px);
   padding-bottom: clamp(24px, 3vw, 34px);
 }
-/* ⚠️ فاصله‌ی اضافه فقط برای عبورِ کارتِ مشخصات است. کارت شرطی است و
-   بدونش این ۷۲ پیکسل همان فضای مُرده‌ای می‌شود که این بازطراحی برای
-   حذفش انجام شد. */
 .ath-hero--card .ath-hero-in { padding-bottom: clamp(52px, 6.5vw, 72px); }
 
+/* آواتار: شیشه‌ی تیره با حلقه‌ی طلایی و هاله */
 .ath-shot {
-  /* برشِ کوچک‌تر: ۲۲px روی کاشیِ ۸۴ پیکسلیِ موبایل بیش از ربعِ ضلع
-     را می‌خورد و گوشه «جویده» دیده می‌شود، نه پخ. */
-  --cut: clamp(11px, 1.4vw, 16px);
   position: relative;
   inline-size: clamp(92px, 12vw, 132px); block-size: clamp(92px, 12vw, 132px);
-  border: 1px solid rgba(199, 166, 106, .38);
-  background: #0F1512;
-  clip-path: var(--chamfer);
+  border-radius: var(--r);
+  overflow: hidden;
+  border: 1px solid rgba(199, 166, 106, .5);
+  background: linear-gradient(155deg, rgba(199, 166, 106, .2), rgba(11, 11, 9, .55));
+  box-shadow:
+    0 10px 30px -8px rgba(0, 0, 0, .7),
+    0 0 0 6px rgba(199, 166, 106, .07),
+    inset 0 1px 0 rgba(255, 255, 255, .25);
 }
-.ath-shot img {
-  width: 100%; height: 100%; display: block;
-  object-fit: cover; object-position: 50% 22%;
-}
-/* مونوگرام در این اندازه «آواتار» است، نه جای خالی */
+.ath-shot img { width: 100%; height: 100%; display: block; object-fit: cover; object-position: 50% 22%; }
 .ath-shot-x {
   display: flex; align-items: center; justify-content: center; height: 100%;
   font-size: clamp(29px, 4vw, 42px); font-weight: 800;
-  color: rgba(199, 166, 106, .62);
+  background: linear-gradient(150deg, var(--gold-l), var(--gold) 55%, var(--gold-d));
+  -webkit-background-clip: text; background-clip: text; color: transparent;
 }
 
 .ath-id { min-width: 0; }
@@ -107,138 +142,215 @@
 .ath-crumb {
   position: relative;
   display: flex; align-items: center; gap: 6px;
-  font-size: 12.5px; color: rgba(255, 255, 255, .55);
+  font-size: 12.5px; color: rgba(255, 255, 255, .62);
   padding-top: clamp(16px, 2.2vw, 26px);
 }
 .ath-crumb a { color: inherit; text-decoration: none; transition: color .2s var(--ease); }
-.ath-crumb a:hover { color: #F3F0E7; }
-.ath-crumb a:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; border-radius: 2px; }
+.ath-crumb a:hover { color: #F5F2E9; }
+.ath-crumb a:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; border-radius: 4px; }
 
+/* چیپِ رشته — شیشه‌ی طلاییِ کوچک */
 .ath-kicker {
   display: inline-flex; align-items: center; gap: 8px;
   font-size: clamp(11px, 1.15vw, 12.5px); font-weight: 700;
-  color: var(--gold); border: 1px solid rgba(199, 166, 106, .34);
-  border-radius: 2px; padding: 5px 11px;
+  color: var(--gold-l);
+  border-radius: 999px; padding: 6px 14px;
+  background: rgba(199, 166, 106, .16);
+  border: 1px solid rgba(199, 166, 106, .4);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .2);
 }
 
 .ath-name {
   margin: clamp(11px, 1.5vw, 15px) 0 0; font-weight: 800;
   font-size: clamp(34px, 5.6vw, 66px); line-height: 1.12;
   display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  /* گرادیانِ خیلی ملایم — نام «فلزی» می‌شود بدونِ اینکه رنگی شود */
+  background: linear-gradient(180deg, #FFFDF7 30%, #E6DFCB);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  text-shadow: 0 8px 30px rgba(0, 0, 0, .35);
 }
 .ath-tick { display: inline-flex; flex-shrink: 0; }
 
 .ath-lat {
   margin-top: 9px; font-size: clamp(11.5px, 1.2vw, 13px); font-weight: 600;
-  letter-spacing: .16em; color: rgba(255, 255, 255, .58);   /* ۶٫۳:۱ روی روشن‌ترین نقطه‌ی نوار */
+  letter-spacing: .16em; color: rgba(255, 255, 255, .6);
 }
 
 /* ══════════ کارتِ مشخصات ══════════
-   روی درزِ تیره/روشن می‌نشیند — امضای این صفحه. */
+   روی درزِ تیره/روشن می‌نشیند — این‌جا شیشه واقعاً کار می‌کند چون
+   نیمی از آن روی عکسِ نوارِ بالاست. */
 
-.ath-vitals-wrap { position: relative; z-index: 3; margin-top: clamp(-40px, -3vw, -30px); }
-/* ⚠️ سایه بیرونِ جعبه کشیده می‌شود و `clip-path` می‌بُردش. پس پوسته
-   سایه را می‌گیرد و برش روی لایه‌ی درونی می‌نشیند. */
-.ath-vitals-shell { box-shadow: 0 18px 44px rgba(22, 21, 15, .10); }
+.ath-vitals-wrap { position: relative; z-index: 3; margin-top: clamp(-46px, -3.4vw, -34px); }
 .ath-vitals {
-  border: 1px solid var(--line);
+  backdrop-filter: blur(22px) saturate(1.6);
+  background: linear-gradient(158deg, rgba(255, 255, 255, .8), rgba(255, 255, 255, .6));
+  margin: 0; overflow: hidden;
   display: grid; grid-template-columns: repeat(auto-fit, minmax(168px, 1fr));
-  gap: 1px; background-color: var(--line);
-  clip-path: var(--chamfer);
-  margin: 0;
 }
-.ath-vit { background: var(--card); padding: clamp(15px, 1.7vw, 19px) clamp(16px, 1.9vw, 22px); }
+.ath-vit {
+  position: relative; z-index: 1;
+  padding: clamp(15px, 1.7vw, 19px) clamp(16px, 1.9vw, 22px);
+  border-inline-start: 1px solid var(--line);
+}
+.ath-vit:first-child { border-inline-start: 0; }
 .ath-vit dt { font-size: 11px; font-weight: 600; color: var(--ink-3); }
-.ath-vit dd { margin: 8px 0 0; font-size: clamp(16px, 1.6vw, 18px); font-weight: 700; }
-.ath-vit-s { display: block; font-size: 12px; font-weight: 500; color: var(--ink-3); margin-top: 3px; }
-
-/* هر عددِ ستونی */
+.ath-vit dd {
+  margin: 8px 0 0; font-size: clamp(16px, 1.6vw, 18px); font-weight: 700;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.ath-vit-s { display: block; font-size: 12px; font-weight: 500; color: var(--ink-3); margin-top: 3px; white-space: normal; }
 .ath-num { font-variant-numeric: tabular-nums; }
 
-/* ══════════ بخش ══════════ */
+/* ══════════ سرتیترِ بخش ══════════ */
 
-.ath-body { padding-bottom: clamp(28px, 4vw, 44px); }
 .ath-sec { padding-top: clamp(38px, 5vw, 58px); }
 .ath-sec--last { padding-bottom: clamp(48px, 6vw, 78px); }
-.ath-sec-h { display: flex; align-items: center; gap: 13px; margin-bottom: clamp(14px, 1.8vw, 20px); }
-.ath-sec-h h2 { margin: 0; font-size: clamp(21px, 2.5vw, 27px); font-weight: 800; }
-.ath-en {
-  font-style: normal; font-size: 10.5px; font-weight: 700;
-  letter-spacing: .24em; color: var(--ink-3); flex-shrink: 0;
+.ath-body { padding-bottom: clamp(28px, 4vw, 44px); }
+
+.ath-sec-h { display: flex; align-items: center; gap: 13px; margin-bottom: clamp(16px, 2vw, 22px); }
+.ath-sec-h h2 {
+  margin: 0; font-size: clamp(21px, 2.5vw, 27px); font-weight: 800;
+  background: linear-gradient(180deg, var(--ink), #3B372E);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
 }
-.ath-rule { flex: 1; height: 1px; background: var(--line); }
+.ath-en {
+  font-size: 10.5px; font-weight: 700; letter-spacing: .24em;
+  color: var(--gold-d); opacity: .75; flex-shrink: 0;
+}
+.ath-rule {
+  flex: 1; height: 1px;
+  background: linear-gradient(90deg, rgba(199, 166, 106, .55), rgba(22, 21, 15, .06));
+}
 
 /* ══════════ آمار ══════════ */
 
 .ath-stats {
-  display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-  gap: 1px; background: var(--line); border: 1px solid var(--line); margin: 0;
+  margin: 0; display: grid; gap: clamp(10px, 1.4vw, 14px);
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
 }
-/* ⚠️ در `dl` باید `dt` پیش از `dd` بیاید؛ نمایش برعکس است (عددِ
-   درشت بالا، برچسب پایین) و ترتیبِ بصری را `column-reverse` می‌دهد. */
 .ath-stat {
-  background: var(--card); padding: clamp(16px, 2vw, 22px);
   display: flex; flex-direction: column-reverse; align-items: flex-start;
+  padding: clamp(17px, 2.1vw, 23px);
+  transition: transform .45s var(--spring), box-shadow .45s var(--ease);
 }
+.ath-stat > * { position: relative; z-index: 1; }
+@media (hover: hover) { .ath-stat:hover {
+  transform: translateY(-4px);
+  box-shadow:
+    0 2px 4px rgba(22, 21, 15, .06),
+    0 22px 46px -14px rgba(22, 21, 15, .24),
+    inset 0 1px 0 rgba(255, 255, 255, .95);
+} }
 .ath-stat dd {
-  margin: 0; font-size: clamp(30px, 4vw, 42px); font-weight: 800;
+  margin: 0; font-size: clamp(32px, 4.2vw, 46px); font-weight: 800;
   line-height: 1; font-variant-numeric: tabular-nums;
+  background: linear-gradient(160deg, #2C2A22, #55524A);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
 }
-.ath-stat dt { font-size: 12px; color: var(--ink-3); margin-top: 9px; }
-.ath-stat--hl dd { color: var(--gold-d); }
+.ath-stat dt { font-size: 12.5px; color: var(--ink-3); margin-top: 10px; font-weight: 600; }
+.ath-stat--hl dd { background: linear-gradient(160deg, var(--gold-d), #B98F45); -webkit-background-clip: text; background-clip: text; }
+.ath-stat--hl { border-color: rgba(199, 166, 106, .5); }
 
-/* ══════════ جدول ══════════ */
+/* ══════════ افتخارات — کارت، نه سطرِ روزنامه ══════════ */
 
-/* جدولِ باریک روی موبایل نباید بشکند؛ داخلِ قابِ خودش اسکرول می‌شود */
-.ath-tbl { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.ath-honours { list-style: none; margin: 0; padding: 0; display: grid; gap: clamp(9px, 1.2vw, 12px); }
+.ath-hon {
+  display: flex; align-items: center; gap: clamp(13px, 1.8vw, 20px);
+  padding: clamp(13px, 1.7vw, 17px) clamp(15px, 1.9vw, 20px);
+  transition: transform .45s var(--spring), box-shadow .45s var(--ease), border-color .3s var(--ease);
+  overflow: hidden;
+}
+.ath-hon > * { position: relative; z-index: 1; }
+@media (hover: hover) { .ath-hon:hover {
+  transform: translateY(-3px);
+  border-color: rgba(199, 166, 106, .55);
+  box-shadow: 0 2px 4px rgba(22, 21, 15, .06), 0 20px 44px -14px rgba(138, 98, 41, .3), inset 0 1px 0 rgba(255, 255, 255, .95);
+} }
+/* برقِ عبوری */
+/* ⚠️ حرکت روی `transform` است نه `inset-inline-start`: دومی چیدمان
+   را هر فریم از نو می‌چیند. */
+.ath-hon::after {
+  content: ''; position: absolute; inset-block: 0; inline-size: 42%; inset-inline-start: -46%;
+  background: linear-gradient(100deg, transparent, rgba(255, 255, 255, .55), transparent);
+  transform: skewX(-14deg); pointer-events: none; z-index: 2;
+}
+@media (hover: hover) {
+  .ath-hon:hover::after { animation: athSweep .85s var(--ease); }
+}
+@keyframes athSweep { to { transform: skewX(-14deg) translateX(-390%); } }
+
+/* مدالِ سال */
+.ath-hon-y {
+  flex-shrink: 0; display: grid; place-items: center;
+  inline-size: clamp(54px, 6.5vw, 66px); block-size: clamp(54px, 6.5vw, 66px);
+  border-radius: 50%;
+  font-size: clamp(13px, 1.5vw, 15px); font-weight: 800; font-variant-numeric: tabular-nums;
+  color: #4A3512;
+  background: conic-gradient(from 210deg, #F0E0B4, #C7A66A 28%, #9A6E38 55%, #E3CC96 78%, #F0E0B4);
+  box-shadow: 0 6px 16px -4px rgba(138, 98, 41, .5), inset 0 1px 0 rgba(255, 255, 255, .7);
+}
+/* رده‌ی دوم رنگِ نقره می‌گیرد — از خودِ عنوان خوانده می‌شود */
+.ath-hon--2 .ath-hon-y {
+  color: #3D3D42;
+  background: conic-gradient(from 210deg, #F2F2F4, #C9CBD1 28%, #8E9096 55%, #E6E7EA 78%, #F2F2F4);
+  box-shadow: 0 6px 16px -4px rgba(90, 92, 98, .42), inset 0 1px 0 rgba(255, 255, 255, .8);
+}
+.ath-hon-t { font-size: clamp(15px, 1.9vw, 19px); font-weight: 700; line-height: 1.55; min-width: 0; }
+/* جام لنگرِ لبه‌ی پایان است؛ چسبیده به عنوان، ردیف را بی‌قرینه
+   می‌کرد و نیمِ چپ خالی می‌ماند. */
+.ath-hon-i { flex-shrink: 0; margin-inline-start: auto; color: var(--gold-d); opacity: .55; }
+
+/* ══════════ مسابقات ══════════ */
+
+.ath-tbl { overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: var(--r); }
 .ath-tbl:focus-visible { outline: 2px solid var(--gold-d); outline-offset: 3px; }
-/* جدولِ دوستونی در عرضِ کامل، دو سومش خالی می‌ماند */
-.ath-tbl--narrow { max-width: 780px; }
-/* دو ستون در ۳۵۴px جا می‌شود؛ اسکرولِ افقیِ بی‌دلیل لازم نیست */
-.ath-tbl--narrow table { min-width: 0; }
+.ath-tbl table { width: 100%; border-collapse: collapse; min-width: 420px; position: relative; z-index: 1; }
+.ath-tbl th {
+  font-size: 10.5px; font-weight: 700; letter-spacing: .14em; color: var(--gold-d);
+  text-align: start; padding: 13px clamp(14px, 1.8vw, 20px);
+  border-bottom: 1px solid rgba(199, 166, 106, .3); white-space: nowrap;
+  background: rgba(199, 166, 106, .1);
+}
+.ath-tbl td {
+  padding: clamp(13px, 1.5vw, 15px) clamp(14px, 1.8vw, 20px);
+  border-bottom: 1px solid var(--line);
+  font-size: clamp(14px, 1.4vw, 15.5px); font-weight: 500;
+}
+.ath-tbl tbody tr { transition: background .25s var(--ease); }
+.ath-tbl tbody tr:hover { background: rgba(199, 166, 106, .08); }
+.ath-tbl tr:last-child td { border-bottom: 0; }
+.ath-tbl td.ath-y {
+  width: 92px; font-variant-numeric: tabular-nums;
+  color: var(--ink-3); font-size: 13px; font-weight: 700; white-space: nowrap;
+}
+@media (max-width: 520px) { .ath-tbl td.ath-y { width: 62px; } }
+.ath-tbl .ath-res { width: 170px; text-align: end; }
+
+.ath-chip {
+  display: inline-block; font-size: 12px; font-weight: 700;
+  padding: 5px 12px; border-radius: 999px; white-space: nowrap;
+  color: var(--gold-d);
+  background: linear-gradient(160deg, rgba(227, 204, 150, .5), rgba(199, 166, 106, .22));
+  border: 1px solid rgba(199, 166, 106, .45);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .7);
+}
 
 /* متنی که فقط صفحه‌خوان می‌خواند */
 .ath-sr {
   position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
   overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
 }
-.ath-tbl table {
-  width: 100%; border-collapse: collapse; min-width: 420px;
-  background: var(--card); border: 1px solid var(--line);
-}
-.ath-tbl th {
-  font-size: 10.5px; font-weight: 700; letter-spacing: .14em; color: var(--ink-3);
-  text-align: start; padding: 11px clamp(13px, 1.7vw, 20px);
-  border-bottom: 1px solid var(--line); background: #FAF8F2; white-space: nowrap;
-}
-.ath-tbl td {
-  padding: clamp(12px, 1.4vw, 14px) clamp(13px, 1.7vw, 20px);
-  border-bottom: 1px solid var(--line);
-  font-size: clamp(14px, 1.4vw, 15.5px); font-weight: 500;
-}
-.ath-tbl tr:last-child td { border-bottom: 0; }
-.ath-tbl td.ath-y {
-  width: 92px; font-variant-numeric: tabular-nums;
-  color: var(--ink-3); font-size: 13px; font-weight: 700; white-space: nowrap;
-}
-/* ستونِ سال روی موبایل نباید عرض بخورد و جدول را به اسکرول ببرد */
-@media (max-width: 520px) { .ath-tbl td.ath-y { width: 62px; } }
-.ath-tbl .ath-res { width: 170px; text-align: end; }
-
-/* رنگِ تأکیدِ صفحه یکی است: طلایی. سبزِ ماهوت فقط بافتِ نوارِ بالاست
-   و روی متن نمی‌آید. */
-.ath-chip {
-  display: inline-block; font-size: 12px; font-weight: 700;
-  padding: 4px 10px; border-radius: 2px; white-space: nowrap;
-  background: rgba(199, 166, 106, .14); color: var(--gold-d); border: 1px solid rgba(199, 166, 106, .38);
-}
 
 /* ══════════ معرفی ══════════ */
 
+.ath-prose { padding: clamp(20px, 2.6vw, 30px) clamp(20px, 2.8vw, 32px); }
+.ath-prose > * { position: relative; z-index: 1; }
 .ath-lede {
   margin: 0 0 clamp(14px, 1.8vw, 20px);
-  font-size: clamp(17px, 1.9vw, 21px); font-weight: 600;
+  font-size: clamp(17px, 1.9vw, 21px); font-weight: 700;
   line-height: 1.9; max-width: 54ch;
+  background: linear-gradient(180deg, var(--ink), #46433A);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
 }
 .ath-bio { column-gap: 42px; font-size: clamp(14.5px, 1.3vw, 15px); line-height: 2.05; color: var(--ink-2); }
 @media (min-width: 860px) { .ath-bio { columns: 2; } }
@@ -249,35 +361,33 @@
 
 .ath-club {
   display: flex; align-items: center; gap: clamp(12px, 1.8vw, 18px);
-  background: var(--card); border: 1px solid var(--line);
-  padding: clamp(15px, 1.9vw, 20px) clamp(16px, 2vw, 22px);
-  text-decoration: none; color: inherit;
-  clip-path: var(--chamfer);
-  transition: border-color .2s var(--ease), transform .2s var(--ease);
+  padding: clamp(16px, 2vw, 21px) clamp(17px, 2.1vw, 23px);
+  text-decoration: none; color: inherit; overflow: hidden;
+  transition: transform .45s var(--spring), box-shadow .45s var(--ease), border-color .3s var(--ease);
 }
-.ath-club:hover { border-color: rgba(199, 166, 106, .55); transform: translateY(-2px); }
-/* ⚠️ `clip-path` هرچه بیرونِ چندضلعی کشیده شود می‌بُرد — از جمله
-   outline را. حلقه‌ی focus باید *داخلِ* جعبه کشیده شود. */
+.ath-club > * { position: relative; z-index: 1; }
+@media (hover: hover) { .ath-club:hover {
+  transform: translateY(-3px); border-color: rgba(199, 166, 106, .55);
+  box-shadow: 0 2px 4px rgba(22, 21, 15, .06), 0 22px 46px -14px rgba(138, 98, 41, .28), inset 0 1px 0 rgba(255, 255, 255, .95);
+} }
 .ath-club:focus-visible { outline: none; box-shadow: inset 0 0 0 2px var(--gold-d); }
 .ath-club-i { flex-shrink: 0; color: var(--gold-d); }
+.ath-club-txt { flex: 1; min-width: 0; }
 .ath-club-n { display: block; font-size: clamp(15.5px, 1.7vw, 18px); font-weight: 700; }
 .ath-club-s { display: block; margin-top: 4px; font-size: 12.5px; color: var(--ink-3); }
-
-/* گالریِ مشترک تیترِ خودش را دارد؛ این صفحه تیترش را خودش می‌گذارد */
-.ath .ch-sec-head { display: none; }
 
 /* ══════════ پیوندها ══════════ */
 
 .ath-links { display: grid; gap: clamp(12px, 1.6vw, 16px); grid-template-columns: repeat(auto-fit, minmax(272px, 1fr)); }
 .ath-link {
-  display: flex; align-items: center; gap: 13px;
-  background: var(--card); border: 1px solid var(--line); padding: 11px;
+  display: flex; align-items: center; gap: 13px; padding: 11px; overflow: hidden;
   text-decoration: none; color: inherit;
-  transition: border-color .2s var(--ease);
+  transition: transform .45s var(--spring), border-color .3s var(--ease);
 }
-.ath-link:hover { border-color: rgba(199, 166, 106, .55); }
-.ath-link:focus-visible { outline: 2px solid var(--gold-d); outline-offset: 2px; }
-.ath-link img { width: 88px; height: 60px; object-fit: cover; flex-shrink: 0; }
+.ath-link > * { position: relative; z-index: 1; }
+@media (hover: hover) { .ath-link:hover { transform: translateY(-3px); border-color: rgba(199, 166, 106, .55); }
+.ath-link:focus-visible { outline: 2px solid var(--gold-d); outline-offset: 2px; } }
+.ath-link img { width: 88px; height: 60px; object-fit: cover; border-radius: var(--r-s); flex-shrink: 0; }
 .ath-link-txt { min-width: 0; }
 .ath-link-t {
   font-size: 14.5px; font-weight: 600; line-height: 1.6;
@@ -285,39 +395,54 @@
 }
 .ath-link-s { display: flex; align-items: center; gap: 5px; margin-top: 4px; font-size: 12px; color: var(--ink-3); }
 
-.ath-club-txt { flex: 1; min-width: 0; }
 .ath-err { margin: 12px 0 0; font-size: 13px; color: #B23B2E; }
 
-/* پروفایلِ تازه — نه دیوارِ خالی، نه پایانِ ناگهانی */
-.ath-empty {
-  background: var(--card); border: 1px dashed var(--line);
-  padding: clamp(28px, 5vw, 44px); text-align: center; color: var(--ink-3);
-}
+/* ══════════ حالتِ خالی ══════════ */
+
+.ath-empty { padding: clamp(28px, 5vw, 44px); text-align: center; color: var(--ink-3); }
+.ath-empty > * { position: relative; z-index: 1; }
 .ath-empty p { margin: 0; font-size: 15px; }
 .ath-empty-cta {
-  display: inline-flex; margin-top: 16px; padding: 10px 20px;
-  border-radius: 2px; text-decoration: none; font-size: 13.5px; font-weight: 700;
-  color: var(--gold-d); background: rgba(199, 166, 106, .14); border: 1px solid rgba(199, 166, 106, .38);
+  display: inline-flex; margin-top: 16px; padding: 11px 22px;
+  border-radius: 999px; text-decoration: none; font-size: 13.5px; font-weight: 700;
+  color: var(--gold-d);
+  background: linear-gradient(160deg, rgba(227, 204, 150, .55), rgba(199, 166, 106, .24));
+  border: 1px solid rgba(199, 166, 106, .45);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .8);
+  transition: transform .35s var(--spring);
 }
-.ath-empty-cta:focus-visible { outline: 2px solid var(--gold-d); outline-offset: 2px; }
+@media (hover: hover) { .ath-empty-cta:hover { transform: translateY(-2px); }
+.ath-empty-cta:focus-visible { outline: 2px solid var(--gold-d); outline-offset: 2px; } }
 
 /* ══════════ حرکت ══════════
    ⚠️ حالتِ پنهان پشتِ `.is-anim` است. اگر جاوااسکریپت نرسد یا ناظر
-   بشکند، کلاس گذاشته نمی‌شود و صفحه کامل دیده می‌شود — نه صفحه‌ای که
-   فقط نوارِ بالا دارد. */
-.ath-r { transition: opacity .6s var(--ease), transform .6s var(--ease); }
-.ath.is-anim .ath-r:not(.is-in) { opacity: 0; transform: translate3d(0, 16px, 0); }
+   بشکند، کلاس گذاشته نمی‌شود و صفحه کامل دیده می‌شود. */
+.ath-r { transition: opacity .7s var(--ease), transform .7s var(--spring); transition-delay: var(--d, 0ms); }
+.ath.is-anim .ath-r:not(.is-in) { opacity: 0; transform: translate3d(0, 22px, 0) scale(.985); }
+
+/* ورودِ نوارِ بالا — بدونِ ناظر، همان لحظه‌ی بارگذاری */
+.ath-hero .ath-kicker { animation: athIn .7s .05s var(--spring) both; }
+.ath-hero .ath-name    { animation: athIn .7s .12s var(--spring) both; }
+.ath-hero .ath-lat     { animation: athIn .7s .2s  var(--spring) both; }
+.ath-shot              { animation: athPop .8s .04s var(--spring) both; }
+@keyframes athIn  { from { opacity: 0; transform: translate3d(0, 16px, 0) } }
+@keyframes athPop { from { opacity: 0; transform: scale(.9) } }
 
 @media (prefers-reduced-motion: reduce) {
   .ath.is-anim .ath-r:not(.is-in) { opacity: 1; transform: none; }
-  .ath-r, .ath-club, .ath-link, .ath-crumb a { transition: none !important; }
+  .ath-r, .ath-club, .ath-link, .ath-crumb a, .ath-stat, .ath-hon, .ath-empty-cta { transition: none !important; }
+  .ath-hero .ath-kicker, .ath-hero .ath-name, .ath-hero .ath-lat, .ath-shot { animation: none !important; }
+  .ath-hon:hover::after { animation: none !important; }
 }
 
-/* ══════════ آینه‌ی RTL ══════════
-   مختصاتِ `clip-path` فیزیکی است. برش باید گوشه‌ی *پایان* را ببرد؛
-   در RTL یعنی پایین-چپ. */
-[dir="rtl"] .ath {
-  --chamfer: polygon(100% 0, 0 0, 0 calc(100% - var(--cut)), var(--cut) 100%, 100% 100%);
+/* ══════════ چاپ ══════════
+   ⚠️ `background-clip: text` روی کاغذ رنگ نمی‌گیرد (مرورگر تصاویرِ
+   زمینه را چاپ نمی‌کند)، پس نام و همه‌ی تیترها سفیدِ خالی می‌شدند. */
+@media print {
+  .ath-name, .ath-shot-x, .ath-sec-h h2, .ath-stat dd, .ath-lede {
+    background: none; color: var(--ink); -webkit-text-fill-color: currentColor;
+  }
+  .ath-name { color: var(--ink); text-shadow: none; }
 }
 
 /* ══════════ موبایل ══════════ */
@@ -326,6 +451,12 @@
   .ath-hero-in { gap: 14px; padding-top: clamp(14px, 3vw, 20px); padding-bottom: clamp(30px, 6vw, 42px); }
   .ath-crumb { padding-top: 14px; }
   .ath-shot { inline-size: 84px; block-size: 84px; }
-  .ath-vitals-wrap { margin-top: 0; }
-  .ath-vitals { clip-path: none; box-shadow: none; border-inline: 0; }
+  .ath-vitals-wrap { margin-top: clamp(-30px, -4vw, -22px); }
+  /* ⚠️ قاعده‌های مرزی زیر دقیقاً دو ستون فرض می‌کنند؛ با `auto-fit`
+     روی ۳۶۰px یک ستون و روی ۷۲۰px چهار ستون می‌شد و خط‌ها غلط
+     می‌افتادند. پس تعداد پین می‌شود. */
+  .ath-vitals { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .ath-vit { border-inline-start: 0; border-top: 1px solid var(--line); }
+  .ath-vit:first-child, .ath-vit:nth-child(2) { border-top: 0; }
+  .ath-vit:nth-child(even) { border-inline-start: 1px solid var(--line); }
 }

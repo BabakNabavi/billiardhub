@@ -54,7 +54,9 @@ export interface Player {
   /** تیکِ آبی — ستونِ `profiles.verified`، فقط ادمین می‌دهد */
   verified?: boolean
   tone: 'felt' | 'night' | 'bronze'
-  /** تصویر بافت/صحنه برای پس‌زمینه‌ی دوتون (نه پرتره) */
+  /** عکسِ پروفایل (آواتار) — نبودنش یعنی اولین عکسِ گالری */
+  photo?: string
+  /** تصویرِ پس‌زمینه‌ی نوارِ بالا (نه پرتره) */
   scene: string
   intro: string
   bio: string[]

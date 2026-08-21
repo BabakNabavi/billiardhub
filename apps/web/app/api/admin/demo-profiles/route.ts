@@ -125,7 +125,11 @@ function withDefaults(kind: ProfileKind, d: Record<string, unknown>): Record<str
         national: d.national === true, youth: d.youth === true,
         gender: d.gender === 'f' ? 'f' : 'm',
         clubName: s(d.clubName), tone: s(d.tone, 'felt'),
-        scene: s(d.scene) || photo,
+        /* ⚠️ پیش‌تر عکسِ پروفایل جای صحنه هم می‌نشست، چون بازیکن
+           فیلدِ عکس نداشت. حالا دارد، و همان عکس دیگر نباید تمام‌عرض
+           پشتِ نوارِ بالا کشیده شود. */
+        photo,
+        scene: s(d.scene),
         bio: arr(d.bio).length ? arr(d.bio) : [intro].filter(Boolean),
         careerStart: s(d.careerStart, '—'),
         highlights: arr(d.highlights), tournaments: arr(d.tournaments),

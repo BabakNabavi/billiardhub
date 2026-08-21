@@ -32,7 +32,11 @@ export interface PlayerProfile {
   youth: boolean
   clubName: string
   tone: Player['tone']
-  scene: string              // تصویر پس‌زمینه‌ی دوتون (آپلودی)
+  /** عکسِ پروفایل (آواتار). ⚠️ بازیکن تنها نقشی بود که این فیلد را
+      نداشت و صفحه ناچار اولین عکسِ گالری را آواتار می‌کرد — یعنی
+      کاربر هیچ راهی برای انتخابش نداشت. */
+  photo: string
+  scene: string              // تصویر پس‌زمینه‌ی نوارِ بالا (آپلودی)
   intro: string
   bio: string[]
   careerStart: string
@@ -57,7 +61,7 @@ export function emptyPlayerProfile(slug: string, ownerId = '', ownerPhone = ''):
     slug, ownerId, ownerPhone,
     name: '', nameEn: '', discipline: 'snooker', disciplines: [], province: '', city: '', country: 'ایران',
     ranking: '', national: false, gender: 'm', youth: false, clubName: '',
-    tone: 'felt', scene: '', intro: '', bio: [], careerStart: '',
+    tone: 'felt', photo: '', scene: '', intro: '', bio: [], careerStart: '',
     highlights: [], tournaments: [], albums: [], gallery: [], videos: [], tags: [],
     status: 'approved', updatedAt: '',
   }
@@ -144,6 +148,7 @@ export function profileToPlayer(p: PlayerProfile): Player {
     tone: p.tone,
     scene: p.scene || '/images/shop/snooker-table.webp',
     /* ⚠️ ردیفِ پیش از افزودنِ این فیلد null می‌دهد؛ صفحه رویش .length صدا می‌زند */
+    photo: p.photo || '',
     intro: p.intro || '',
     /* استان در فرم گرفته می‌شود ولی تا امروز به نمای صفحه نمی‌رسید؛
        کارتِ مشخصات به‌جایش «ایران» را زیرِ شهر نشان می‌داد. */

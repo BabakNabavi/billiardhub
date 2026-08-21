@@ -243,7 +243,10 @@ export default function PlayerProfilePage() {
      مونوگرامِ حروفِ لاتین — جای خالیِ خاکستری صفحه را ارزان می‌کند. */
   /* آدرسِ خراب ذخیره می‌شود نه یک بولین: با عوض‌شدنِ بازیکن یا جایگزینیِ
      عکس، پرچمِ چسبنده مونوگرام را روی عکسِ سالم هم نگه می‌داشت. */
-  const portraitSrc = player.gallery[0]?.url ?? ''
+  /* ⚠️ تا امروز آواتار «اولین عکسِ گالری» بود، یعنی کاربر هیچ راهی
+     برای انتخابش نداشت. حالا فیلدِ خودش را دارد و گالری فقط پشتیبان
+     است (برای پروفایل‌های پیش از این تغییر). */
+  const portraitSrc = player.photo || player.gallery[0]?.url || ''
   const portrait = portraitSrc && portraitSrc !== badPortrait ? portraitSrc : ''
   /* ⚠️ نگاشتِ پروفایل برای نامِ لاتینِ خالی رشته‌ی 'PLAYER' و برای
      سالِ شروع '—' می‌گذارد. اگر همان‌ها را رندر کنیم، «PLAYER» با
@@ -316,24 +319,18 @@ export default function PlayerProfilePage() {
 
       {/* ═══════════ نوارِ هویت ═══════════ */}
       <header className={vitals.length > 0 ? 'ath-hero ath-hero--card' : 'ath-hero'}>
-        {/* بافتِ زمینه: فقط شبکه‌ی نازکِ میز.
-            ⚠️ هر شکلِ بسته‌ای (حلقه، قوس) با کشیده‌شدن بریده می‌شود و
-            به‌جای بافت، «خطا» خوانده می‌شود — یک‌بار همین شد.
-            ⚠️ `vector-effect` ارث نمی‌رسد: روی `g` بی‌اثر است و باید
-            روی تک‌تکِ خط‌ها بنشیند، وگرنه با `preserveAspectRatio="none"`
-            ضخامتِ خط هم کشیده می‌شود و روی موبایل به ۰٫۲۷ پیکسل
-            می‌رسد — یعنی نامرئی. */}
-        <svg className="ath-hero-art" viewBox="0 0 1440 300" preserveAspectRatio="none"
-          fill="none" aria-hidden focusable="false">
-          <g stroke="rgba(255,255,255,0.055)" strokeWidth="1">
-            {[75, 150, 225].map(y => (
-              <line key={`h${y}`} x1="0" y1={y} x2="1440" y2={y} vectorEffect="non-scaling-stroke" />
-            ))}
-            {[240, 480, 720, 960, 1200].map(x => (
-              <line key={`v${x}`} x1={x} y1="0" x2={x} y2="300" vectorEffect="non-scaling-stroke" />
-            ))}
-          </g>
-        </svg>
+        {/* ⚠️ عکسِ پس‌زمینه‌ی بازیکن دوباره برگشت. در نسخه‌ی قبل حذف
+            شده بود — یعنی گزینه‌ی «تصویر پس‌زمینه» در پنل کار می‌کرد
+            ولی هیچ‌جا دیده نمی‌شد. بدونِ آن `backdrop-filter` هم چیزی
+            برای شکستن ندارد و شیشه فقط «سفید» می‌شود. */}
+        {player.scene && (
+          <div className="ath-hero-bg" aria-hidden
+            /* ⚠️ `encodeURI` نشانیِ از قبل انکودشده‌ی استوریج را دوباره
+               انکود می‌کند (`%20` ⟵ `%2520`). چیزی که این‌جا لازم است
+               فرار دادنِ نقل‌قول است، نه انکودِ URI. */
+            style={{ backgroundImage: `url("${player.scene.replace(/["\\]/g, '')}")` }} />
+        )}
+        <div className="ath-hero-veil" aria-hidden />
 
         <nav className="ath-wrap ath-crumb" aria-label="مسیر صفحه">
           <Link href="/">خانه</Link>
@@ -372,8 +369,7 @@ export default function PlayerProfilePage() {
       {/* ═══════════ مشخصات — روی درزِ تیره/روشن ═══════════ */}
       {vitals.length > 0 && (
         <div className="ath-wrap ath-vitals-wrap">
-          <div className="ath-vitals-shell">
-            <dl className="ath-vitals">
+          <dl className="ath-vitals ath-glass">
               {vitals.map(v => (
                 <div className="ath-vit" key={v.label}>
                   <dt>{v.label}</dt>
@@ -383,8 +379,7 @@ export default function PlayerProfilePage() {
                   </dd>
                 </div>
               ))}
-            </dl>
-          </div>
+          </dl>
         </div>
       )}
 
@@ -398,8 +393,10 @@ export default function PlayerProfilePage() {
               <span className="ath-en" aria-hidden>CAREER</span><span className="ath-rule" />
             </div>
             <dl className="ath-stats ath-r">
-              {stats.map(s => (
-                <div className={s.hl ? 'ath-stat ath-stat--hl' : 'ath-stat'} key={s.label}>
+              {stats.map((s, i) => (
+                <div key={s.label}
+                  className={`ath-glass ath-stat${s.hl ? ' ath-stat--hl' : ''}`}
+                  style={{ '--d': `${i * 60}ms` } as React.CSSProperties}>
                   <dt>{s.label}</dt>
                   <dd>{faDigits(s.n)}</dd>
                 </div>
@@ -416,23 +413,32 @@ export default function PlayerProfilePage() {
               <span className="ath-en" aria-hidden>HONOURS</span><span className="ath-rule" />
             </div>
             {/* دو ستون در عرضِ کامل، دو سومِ جدول را خالی می‌گذارد */}
-            {/* ⚠️ همین جدول هم روی موبایل افقی اسکرول می‌شود (ستونِ
-                عنوان از ۳۵۴px پهن‌تر می‌شود)، پس ناحیه‌اش باید نام و
-                فوکوس داشته باشد. */}
-            <div className="ath-tbl ath-tbl--narrow ath-r" tabIndex={0} role="region" aria-label="جدول افتخارات">
-              <table>
-                <caption className="ath-sr">فهرست افتخارات، از تازه‌ترین</caption>
-                <thead><tr><th scope="col">سال</th><th scope="col">عنوان</th></tr></thead>
-                <tbody>
-                  {honours.map(h => (
-                    <tr key={`${h.year}-${h.title}`}>
-                      <td className="ath-y">{faDigits(h.year)}</td>
-                      <td>{h.title}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+            {/* ⚠️ این‌جا جدول بود و کاربر درست گفت «مثلِ روزنامه است».
+                دو ستونِ متن در عرضِ کامل هیچ سلسله‌مراتبی نمی‌سازد.
+                حالا هر افتخار یک کارت است با مدالِ سال؛ رنگِ مدال از
+                خودِ عنوان خوانده می‌شود، اختراع نمی‌شود. */}
+            {/* `list-style: none` در سافاری معنایِ فهرست را می‌گیرد */}
+            <ol className="ath-honours ath-r" role="list">
+              {honours.map((h, i) => {
+                /* ⚠️ متنِ آزادِ کاربر است، پس الگو محتاط می‌ماند:
+                   «نائب/نایب قهرمان»، «نقره»، «runner-up». عمداً
+                   «دوم»ِ تنها را نمی‌گیرد — «دومین قهرمانی» یک *برد*
+                   است و نقره‌ای‌کردنش دروغ می‌شود. */
+                const second = /ن[ای]ئ?ب\s*قهرمان|نقره|runner[-\s]?up|silver/i.test(h.title)
+                return (
+                  <li key={`${h.year}-${h.title}`}
+                    className={`ath-glass ath-hon${second ? ' ath-hon--2' : ''}`}
+                    style={{ '--d': `${Math.min(i, 6) * 55}ms` } as React.CSSProperties}>
+                    <span className="ath-hon-y">{faDigits(h.year)}</span>
+                    {/* ⚠️ رنگِ مدال تنها نشانه نباشد — صفحه‌خوان رنگ
+                        نمی‌بیند. */}
+                    {second && <span className="ath-sr">مقام دوم — </span>}
+                    <span className="ath-hon-t">{h.title}</span>
+                    <Trophy size={17} className="ath-hon-i" aria-hidden />
+                  </li>
+                )
+              })}
+            </ol>
           </section>
         )}
 
@@ -445,7 +451,7 @@ export default function PlayerProfilePage() {
             </div>
             {/* ⚠️ جدول روی موبایل افقی اسکرول می‌شود؛ ناحیه‌ی اسکرول باید
                 نام و فوکوس داشته باشد وگرنه با کیبورد رسیدنی نیست. */}
-            <div className="ath-tbl ath-r" tabIndex={0} role="region" aria-label="جدول مسابقات">
+            <div className="ath-glass ath-tbl ath-r" tabIndex={0} role="region" aria-label="جدول مسابقات">
               <table>
                 <caption className="ath-sr">فهرست مسابقات، از تازه‌ترین</caption>
                 <thead>
@@ -479,7 +485,7 @@ export default function PlayerProfilePage() {
               <h2 id="ath-h-intro">معرفی</h2>
               <span className="ath-en" aria-hidden>PROFILE</span><span className="ath-rule" />
             </div>
-            <div className="ath-r">
+            <div className="ath-glass ath-prose ath-r">
               {player.intro && <p className="ath-lede">{player.intro}</p>}
               {player.bio.length > 0 && (
                 <div className="ath-bio">{player.bio.map((p, i) => <p key={i}>{p}</p>)}</div>
@@ -496,7 +502,7 @@ export default function PlayerProfilePage() {
               <span className="ath-en" aria-hidden>CLUB</span><span className="ath-rule" />
             </div>
             <div className="ath-r">
-              <Link href={player.club.href ?? '/clubs'} className="ath-club">
+              <Link href={player.club.href ?? '/clubs'} className="ath-glass ath-club">
                 <Building2 size={22} className="ath-club-i" aria-hidden />
                 <span className="ath-club-txt">
                   <span className="ath-club-n">{player.club.name}</span>
@@ -542,7 +548,7 @@ export default function PlayerProfilePage() {
             </div>
             <div className="ath-links ath-r">
               {relatedNews.map(a => (
-                <Link key={a.id} href={`/news/${a.id}`} className="ath-link">
+                <Link key={a.id} href={`/news/${a.id}`} className="ath-glass ath-link">
                   <img src={a.image} alt="" loading="lazy" decoding="async" />
                   <span className="ath-link-txt">
                     <span className="ath-link-t">{a.title}</span>
@@ -551,7 +557,7 @@ export default function PlayerProfilePage() {
                 </Link>
               ))}
               {relatedVids.map(v => (
-                <Link key={v.id} href={`/media/${encodeURIComponent(v.id)}`} className="ath-link">
+                <Link key={v.id} href={`/media/${encodeURIComponent(v.id)}`} className="ath-glass ath-link">
                   <img src={v.thumb} alt="" loading="lazy" decoding="async" />
                   <span className="ath-link-txt">
                     <span className="ath-link-t">{v.title}</span>
@@ -570,7 +576,7 @@ export default function PlayerProfilePage() {
             باید بداند قدمِ بعدی چیست. */}
         {shown.length === 0 && (
           <section className="ath-sec ath-sec--last">
-            <div className="ath-empty">
+            <div className="ath-glass ath-empty">
               <p>این پروفایل هنوز تکمیل نشده است.</p>
               {edit.isOwner && (
                 <Link href="/dashboard/player" className="ath-empty-cta">تکمیل پروفایل</Link>

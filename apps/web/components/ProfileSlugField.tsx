@@ -85,8 +85,41 @@ export default function ProfileSlugField({
 
      پس: نامعلوم ⇒ `loading` (غیرفعال، بدونِ ادعا، و پنل جلوی ذخیره
      را می‌گیرد). فقط نامکِ واقعاً ثبت‌شده قفل می‌کند. */
+  /* ── نامکِ خودکار انتخابِ کاربر نیست ──
+     ⚠️ پنل‌ها فرم را با نامکِ ماشینی می‌سازند. با اولین ذخیره،
+     `savedSlug` پر می‌شد و فیلد برای همیشه قفل — یعنی کاربر نشانیِ
+     نامفهومی می‌گرفت که هرگز نمی‌توانست عوضش کند. قفل برای حفاظت از
+     لینکِ *منتشرشده* است، و نشانیِ ماشینی هنوز لینکِ کسی نیست.
+
+     ⚠️⚠️ تشخیص باید **دقیقاً** شکلِ مولد باشد، نه الگویی گشاد.
+     نسخه‌ی اولِ این تابع هر «حرف-هفت‌تا‌دوازده‌نویسه» را خودکار
+     می‌شمرد و نامکِ واقعیِ کاربر مثلِ `a-hosseini` را هم می‌گرفت:
+     قفلِ نشانیِ منتشرشده باز می‌شد و نامکِ آزادشده را هر کسِ دیگری
+     برمی‌داشت.
+
+     مولدها فقط دو شکل می‌سازند:
+       • `p-`/`t-`/`m-` + base36 از Date.now() (همیشه ۸ نویسه)
+       • فروشگاه: یک عددِ صحیح (`newSellerSlug`)
+     مربی و داور اصلاً مولد ندارند؛ نامکشان همیشه دستی است، پس
+     هرگز باز نمی‌شود. */
+  const AUTO_PREFIX: Partial<Record<ProfileKind, string>> = {
+    player: 'p', technician: 't', manufacturer: 'm',
+  }
+  const isAutoSlug = (raw: string) => {
+    const v = raw.trim()
+    if (kind === 'seller') return /^[0-9]+$/.test(v)   // newSellerSlug ⇒ «7»، «8»…
+    const px = AUTO_PREFIX[kind]
+    if (!px) return false
+    if (v.length !== 10 || v[0] !== px || v[1] !== '-') return false
+    const tail = v.slice(2)
+    if (!/^[0-9a-z]{8}$/.test(tail)) return false
+    /* دنباله باید واقعاً یک زمانِ معقول باشد، نه هر هشت نویسه */
+    const t = parseInt(tail, 36)
+    return Number.isFinite(t) && t > Date.UTC(2024, 0, 1) && t < Date.now() + 864e5
+  }
+  const chosen = savedSlug != null && savedSlug.trim() !== '' && !isAutoSlug(savedSlug)
   const unknown = locked === undefined && savedSlug == null
-  const isLocked = locked ?? (savedSlug != null && savedSlug.trim() !== '')
+  const isLocked = locked ?? chosen
 
   return (
     <SiteAddressField
