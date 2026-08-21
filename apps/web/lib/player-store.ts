@@ -142,7 +142,8 @@ export function profileToPlayer(p: PlayerProfile): Player {
     club: p.clubName ? { name: p.clubName } : undefined,
     tone: p.tone,
     scene: p.scene || '/images/shop/snooker-table.webp',
-    intro: p.intro,
+    /* ⚠️ ردیفِ پیش از افزودنِ این فیلد null می‌دهد؛ صفحه رویش .length صدا می‌زند */
+    intro: p.intro || '',
     bio: p.bio.length ? p.bio : [p.intro].filter(Boolean),
     careerStart: p.careerStart || '—',
     highlights: p.highlights,
