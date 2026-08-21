@@ -315,38 +315,42 @@ export default function PlayerProfilePage() {
       {pending && <PendingNotice what="پروفایلِ شما" />}
 
       {/* ═══════════ نوارِ هویت ═══════════ */}
-      <header className="ath-hero">
-        {/* بافتِ زمینه: شبکه‌ی نازک + حلقه‌های توپ. تزئین نیست — بدونش
-            نوار یک مستطیلِ سیاهِ خالی است. */}
-        <svg className="ath-hero-art" viewBox="0 0 1440 452" preserveAspectRatio="xMidYMid slice"
+      <header className={vitals.length > 0 ? 'ath-hero ath-hero--card' : 'ath-hero'}>
+        {/* بافتِ زمینه: فقط شبکه‌ی نازکِ میز.
+            ⚠️ هر شکلِ بسته‌ای (حلقه، قوس) با کشیده‌شدن بریده می‌شود و
+            به‌جای بافت، «خطا» خوانده می‌شود — یک‌بار همین شد.
+            ⚠️ `vector-effect` ارث نمی‌رسد: روی `g` بی‌اثر است و باید
+            روی تک‌تکِ خط‌ها بنشیند، وگرنه با `preserveAspectRatio="none"`
+            ضخامتِ خط هم کشیده می‌شود و روی موبایل به ۰٫۲۷ پیکسل
+            می‌رسد — یعنی نامرئی. */}
+        <svg className="ath-hero-art" viewBox="0 0 1440 300" preserveAspectRatio="none"
           fill="none" aria-hidden focusable="false">
-          <defs>
-            <linearGradient id="ath-felt" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0" stopColor="#0F5140" stopOpacity=".5" />
-              <stop offset="1" stopColor="#0F5140" stopOpacity="0" />
-            </linearGradient>
-          </defs>
-          <rect width="1440" height="452" fill="url(#ath-felt)" />
-          <g stroke="rgba(255,255,255,0.045)">
-            <line x1="0" y1="113" x2="1440" y2="113" /><line x1="0" y1="226" x2="1440" y2="226" />
-            <line x1="0" y1="339" x2="1440" y2="339" />
-            <line x1="240" y1="0" x2="240" y2="452" /><line x1="480" y1="0" x2="480" y2="452" />
-            <line x1="720" y1="0" x2="720" y2="452" /><line x1="960" y1="0" x2="960" y2="452" />
-            <line x1="1200" y1="0" x2="1200" y2="452" />
+          <g stroke="rgba(255,255,255,0.055)" strokeWidth="1">
+            {[75, 150, 225].map(y => (
+              <line key={`h${y}`} x1="0" y1={y} x2="1440" y2={y} vectorEffect="non-scaling-stroke" />
+            ))}
+            {[240, 480, 720, 960, 1200].map(x => (
+              <line key={`v${x}`} x1={x} y1="0" x2={x} y2="300" vectorEffect="non-scaling-stroke" />
+            ))}
           </g>
-          <circle cx="1265" cy="126" r="118" stroke="rgba(199,166,106,0.13)" />
-          <circle cx="1265" cy="126" r="72" stroke="rgba(199,166,106,0.09)" />
-          <circle cx="1265" cy="126" r="26" fill="rgba(199,166,106,0.10)" />
         </svg>
 
-        <div className="ath-wrap ath-hero-in">
-          <div className="ath-id">
-            <nav className="ath-crumb" aria-label="مسیر صفحه">
-              <Link href="/">خانه</Link>
-              <ChevronLeft size={12} aria-hidden />
-              <Link href="/players">بازیکنان</Link>
-            </nav>
+        <nav className="ath-wrap ath-crumb" aria-label="مسیر صفحه">
+          <Link href="/">خانه</Link>
+          <ChevronLeft size={12} aria-hidden />
+          <Link href="/players">بازیکنان</Link>
+        </nav>
 
+        <div className="ath-wrap ath-hero-in">
+          <div className="ath-shot">
+            {portrait
+              ? <img src={portrait} alt={`عکس ${player.name}`} decoding="async"
+                  width={132} height={132} fetchPriority="high"
+                  onError={() => setBadPortrait(portraitSrc)} />
+              : <div className="ath-shot-x" aria-hidden>{initials}</div>}
+          </div>
+
+          <div className="ath-id">
             <span className="ath-kicker">{disciplineLines[0] ?? d.fa}</span>
 
             <h1 className="ath-name">
@@ -361,13 +365,6 @@ export default function PlayerProfilePage() {
             </h1>
 
             {latin && <div className="ath-lat" dir="ltr">{latin}</div>}
-          </div>
-
-          <div className="ath-shot">
-            {portrait
-              ? <img src={portrait} alt={`عکس ${player.name}`} decoding="async"
-                  onError={() => setBadPortrait(portraitSrc)} />
-              : <div className="ath-shot-x" aria-hidden>{initials}</div>}
           </div>
         </div>
       </header>
