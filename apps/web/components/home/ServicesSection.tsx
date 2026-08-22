@@ -75,7 +75,6 @@ export default function ServicesSection() {
       <div style={{ maxWidth: '1340px', margin: '0 auto', position: 'relative', zIndex: 1 }}>
         <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap', marginBottom: 'clamp(20px,2.2vw,30px)' }}>
           <div>
-            <span className="sec-label" style={{ color: '#C7A66A' }}>SERVICES</span>
             <h2 className="sec-title" style={{ color: '#fff', fontSize: 'clamp(20px,2.84vw,37px)' }}>خدمات تخصصی</h2>
             <p style={{ color: 'rgba(255,255,255,0.46)', fontSize: 'clamp(12px,1vw,14px)', margin: 0 }}>
               نصب، تعمیر و نگهداری تجهیزات بیلیارد توسط متخصصان

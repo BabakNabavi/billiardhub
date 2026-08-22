@@ -1,95 +1,101 @@
-﻿'use client';
+'use client'
 
-import { colors, radius, transition } from '../../lib/tokens';
-import { CSSProperties, ReactNode, useState } from 'react';
+/* ─────────────────────────────────────────────────────────────
+   دکمه — پرایمیتیوِ پایه.
 
-type Variant = 'primary' | 'ghost' | 'outline' | 'danger';
-type Size    = 'sm' | 'md' | 'lg';
+   ── چرا از نو نوشته شد ──
+   نسخه‌ی قبلی **صفر مصرف‌کننده** داشت در حالی که ۱۶۳ فایل `<button>`ِ
+   خام می‌نویسند. دلیلش سلیقه نبود، سه چیزِ عینی بود:
+     ۱) واریانتِ `primary` **سبز** بود (`#12d492`)، نه طلاییِ برند.
+     ۲) روی `lib/tokens` سوار بود که زمینه‌هایش تیره است — بازمانده‌ی
+        یک طرحِ رهاشده روی سایتی با تمِ روشن.
+     ۳) `focus-visible`، `loading` و `aria-busy` نداشت، یعنی قاعده‌ی
+        «هر المانِ تعاملی چهار حالت» را رد می‌کرد.
+   یک پرایمیتیوی که با برند نمی‌خواند، استفاده نمی‌شود — و نشد.
 
-interface ButtonProps {
-  children: ReactNode;
-  variant?:  Variant;
-  size?:     Size;
-  onClick?:  () => void;
-  disabled?: boolean;
-  fullWidth?: boolean;
-  icon?:     ReactNode;
-  style?:    CSSProperties;
-  type?:     'button' | 'submit' | 'reset';
+   ── حالا ──
+   روی توکن‌های Tailwind سوار است (که خودشان به `globals.css` اشاره
+   می‌کنند)، پس رنگ فقط یک‌جا عوض می‌شود. چهار حالت دارد و
+   `disabled` را از `loading` جدا نگه می‌دارد: دکمه‌ی در حالِ کار
+   باید *بگوید* در حال کار است، نه فقط خاموش شود.
+   ───────────────────────────────────────────────────────────── */
+
+import { forwardRef, type ButtonHTMLAttributes, type ReactNode } from 'react'
+import { Loader2 } from 'lucide-react'
+
+type Variant = 'primary' | 'secondary' | 'ghost' | 'danger'
+type Size = 'sm' | 'md' | 'lg'
+
+export interface ButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'className'> {
+  variant?: Variant
+  size?: Size
+  /** در حالِ کار — دکمه خاموش می‌شود و چرخنده می‌گیرد */
+  loading?: boolean
+  /** متنی که هنگامِ کار به‌جای فرزندان نشان داده می‌شود */
+  loadingText?: string
+  icon?: ReactNode
+  block?: boolean
+  className?: string
 }
 
-const sizes: Record<Size, CSSProperties> = {
-  sm: { padding: '8px 18px',  fontSize: '14px', borderRadius: radius.md },
-  md: { padding: '12px 26px', fontSize: '16px', borderRadius: radius.md },
-  lg: { padding: '15px 36px', fontSize: '17px', borderRadius: radius.md },
-};
+/* ⚠️ هدفِ لمس ۴۴ پیکسل حتی در اندازه‌ی کوچک: `CLAUDE.md` این را
+   قاعده‌ی سخت گذاشته و مخاطبِ اصلی موبایل است. */
+const SIZE: Record<Size, string> = {
+  sm: 'min-h-11 px-4 text-sub',
+  md: 'min-h-11 px-6 text-body',
+  lg: 'min-h-12 px-8 text-body',
+}
 
-export function Button({
-  children, variant = 'primary', size = 'md',
-  onClick, disabled, fullWidth, icon, style, type = 'button',
-}: ButtonProps) {
-  const [hovered, setHovered] = useState(false);
+const VARIANT: Record<Variant, string> = {
+  /* تنها رنگِ تأکیدِ سایت. سایه آفست و تاری دارد — هاله‌ی بی‌آفست تزئین است. */
+  primary:
+    'bg-gold text-[#241B08] shadow-cta ' +
+    'hover:enabled:-translate-y-px hover:enabled:bg-gold-light active:enabled:translate-y-0',
+  /* تینتِ طلاییِ کم‌رنگ — همان «طرح LQ» که مالک قبلاً تأیید کرده */
+  secondary:
+    'bg-gold/[.12] text-gold-deep border border-gold/[.34] ' +
+    'hover:enabled:-translate-y-px hover:enabled:bg-gold/[.18]',
+  ghost:
+    'text-ink-2 hover:enabled:text-ink hover:enabled:bg-line/[.04]',
+  danger:
+    'bg-[#B23B2E] text-white hover:enabled:-translate-y-px hover:enabled:bg-[#9C3226]',
+}
 
-  const base: CSSProperties = {
-    display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-    gap: '8px', cursor: disabled ? 'not-allowed' : 'pointer',
-    border: 'none', fontFamily: 'inherit', fontWeight: 700,
-    width: fullWidth ? '100%' : undefined,
-    opacity: disabled ? 0.5 : 1,
-    transition: transition.base,
-    position: 'relative', overflow: 'hidden',
-    userSelect: 'none',
-    ...sizes[size],
-  };
-
-  const variants: Record<Variant, CSSProperties> = {
-    primary: {
-      background: hovered
-        ? 'linear-gradient(135deg,#12d492,#059669)'
-        : 'linear-gradient(135deg,#C7A66A,#A07840)',
-      color: '#fff',
-      boxShadow: hovered
-        ? `0 0 0 1px rgba(199,166,106,0.5), 0 12px 40px rgba(199,166,106,0.45), 0 0 60px rgba(199,166,106,0.15)`
-        : `0 0 0 1px rgba(199,166,106,0.25), 0 8px 28px rgba(199,166,106,0.25)`,
-      transform: hovered ? 'translateY(-2px)' : 'translateY(0)',
-    },
-    ghost: {
-      background: hovered ? 'rgba(0,0,0,0.06)' : 'rgba(0,0,0,0.04)',
-      color: colors.text.primary,
-      border: `1px solid ${hovered ? colors.border.strong : 'rgba(0,0,0,0.09)'}`,
-      boxShadow: hovered ? `0 0 24px rgba(199,166,106,0.08)` : 'none',
-    },
-    outline: {
-      background: hovered ? 'rgba(199,166,106,0.08)' : 'transparent',
-      color: colors.accent.green,
-      border: `1px solid ${hovered ? colors.border.strong : colors.border.accent}`,
-    },
-    danger: {
-      background: hovered ? 'rgba(239,68,68,0.15)' : 'rgba(239,68,68,0.08)',
-      color: colors.accent.red,
-      border: `1px solid rgba(239,68,68,${hovered ? 0.4 : 0.2})`,
-    },
-  };
-
+export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
+  { variant = 'primary', size = 'md', loading = false, loadingText,
+    icon, block, className = '', children, disabled, type = 'button', ...rest },
+  ref,
+) {
+  const off = disabled || loading
   return (
     <button
+      ref={ref}
       type={type}
+      /* ⚠️ `disabled` هنگامِ کار، دکمه را از ترتیبِ Tab بیرون می‌اندازد
+         و فوکوس روی `<body>` می‌افتد؛ `aria-busy` روی المانِ غیرفعال هم
+         مطمئن اعلام نمی‌شود. پس فقط `disabled`ِ واقعی خاموش می‌کند. */
       disabled={disabled}
-      onClick={onClick}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      style={{ ...base, ...variants[variant], ...style }}
+      aria-disabled={off || undefined}
+      aria-busy={loading || undefined}
+      onClick={off ? undefined : rest.onClick}
+      className={[
+        'inline-flex items-center justify-center gap-2 rounded-field',
+        'font-extrabold leading-none whitespace-nowrap',
+        'transition-[background-color,transform,box-shadow] duration-base ease-smooth',
+        /* حلقه‌ی فوکوس روی جوهر می‌نشیند تا روی هر چهار واریانت دیده شود */
+        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink focus-visible:ring-offset-2 focus-visible:ring-offset-paper',
+        'disabled:cursor-not-allowed disabled:opacity-55 disabled:shadow-none disabled:translate-y-0',
+        'motion-reduce:transition-none motion-reduce:hover:enabled:translate-y-0',
+        SIZE[size],
+        VARIANT[variant],
+        block ? 'w-full' : '',
+        className,
+      ].join(' ')}
+      {...rest}
     >
-      {/* Shimmer on hover — primary only */}
-      {variant === 'primary' && (
-        <span style={{
-          position: 'absolute', inset: 0, pointerEvents: 'none',
-          background: 'linear-gradient(105deg,transparent 30%,rgba(0,0,0,0.09) 50%,transparent 70%)',
-          opacity: hovered ? 1 : 0, transition: 'opacity 0.3s',
-        }} />
-      )}
-      {icon}
-      {children}
+      {loading
+        ? <><Loader2 size={16} className="animate-spin motion-reduce:animate-none" aria-hidden />{loadingText ?? children}</>
+        : <>{icon}{children}</>}
     </button>
-  );
-}
+  )
+})
