@@ -19,6 +19,16 @@ export interface TechnicianProfile {
   city: string
   club: string
   coverage: string[]
+  /* ── نحوه و زمانِ ارائه‌ی خدمات ──
+     ⚠️ این سه تا در مدل نبودند، پس صفحه‌ی عمومی فقط شهر و شهرهای
+     تحت پوشش را نشان می‌داد. هیچ‌کدام اجباری نیست و هیچ‌کدام مقدارِ
+     پیش‌فرضِ «بله» نمی‌گیرد: چیزی که متخصص نگفته، ساخته نمی‌شود. */
+  /** خدمت در محلِ مشتری (باشگاه/خانه) */
+  onsite: boolean
+  /** پذیرش در کارگاه */
+  workshop: boolean
+  /** ساعتِ کاری — متنِ آزاد، چون هر کارگاه شکلِ خودش را دارد */
+  hours: string
   intro: string
   about: string[]
   services: TechService[]
@@ -42,7 +52,8 @@ export function emptyTechnicianProfile(slug: string, ownerId = '', ownerPhone = 
   return {
     slug, ownerId, ownerPhone,
     name: '', photo: '', title: '', province: '', city: '', club: '',
-    coverage: [], intro: '', about: [], services: [],
+    coverage: [], onsite: false, workshop: false, hours: '',
+    intro: '', about: [], services: [],
     projects: [], albums: [], gallery: [], videos: [], phone: '', whatsapp: '',
     status: 'approved', updatedAt: '',
   }
@@ -122,9 +133,17 @@ export function profileToTechnician(p: TechnicianProfile): Technician {
     title: p.title || 'متخصص خدمات فنی',
     city: p.city || '—',
     club: p.club || undefined,
-    coverage: p.coverage.length ? p.coverage : [p.city].filter(Boolean),
+    /* ⚠️ `?? []` و `?? ''` همان دلیلِ بالا را دارند: ردیفِ خامِ سرور
+       می‌تواند کلید نداشته باشد و `.length` روی `undefined` صفحه را
+       به error boundary می‌برد — با بیلد و tsc کاملاً سبز. */
+    coverage: (p.coverage ?? []).length ? p.coverage : [p.city].filter(Boolean),
+    /* ⚠️ هیچ‌کدام پیش‌فرضِ «بله» ندارند: صفحه‌ی عمومی نباید ادعایی
+       بکند که متخصص نکرده است. */
+    onsite: p.onsite === true,
+    workshop: p.workshop === true,
+    hours: String(p.hours ?? '').trim(),
     intro: p.intro,
-    about: p.about.length ? p.about : [p.intro].filter(Boolean),
+    about: (p.about ?? []).length ? p.about : [p.intro].filter(Boolean),
     /* ⚠️ دایرکتوری و جست‌وجو با *متن* کار می‌کنند. اگر شناسه‌ی خام
        رد شود، اولین ذخیره‌ی پنل باعث می‌شود کارت «cloth» نشان بدهد
        و فیلترِ خدمات هیچ نتیجه‌ای برنگرداند. */
@@ -134,7 +153,7 @@ export function profileToTechnician(p: TechnicianProfile): Technician {
     gallery: media.gallery,
     videos: media.videos,
     phone: p.phone,
-    whatsapp: p.whatsapp || p.phone.replace(/^0/, '98'),
+    whatsapp: p.whatsapp || String(p.phone ?? '').replace(/^0/, '98'),
     verified: p.verified === true,
   }
 }

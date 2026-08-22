@@ -9,6 +9,21 @@ SRV=root@130.185.72.87
 KEY=~/.ssh/billiardhub_parspack
 cd "$(dirname "$0")"
 
+# ── چرا این گزینه‌ها ──
+# لینک از پشتِ VPN می‌رود و دوبار وسطِ همین ارسالِ چندمگابایتی با
+# «Connection closed by ... port 22» افتاد، در حالی که دستورهای کوتاه
+# روی همان کلید کار می‌کردند — یعنی نشست بی‌صدا می‌مُرد، نه اینکه
+# احراز هویت رد شود.
+#   ServerAliveInterval/CountMax : هر ۱۰ ثانیه یک ضربان، تا ۶ بار.
+#     نشست تا یک دقیقه سکوت را تحمل می‌کند به‌جای آنکه بیفتد.
+#   IPQoS=throughput : برچسبِ پیش‌فرضِ ssh برای بارِ حجیم `lowdelay`
+#     است و بعضی مسیرها آن را بد شکل می‌دهند. در ارسالِ دستیِ همان
+#     بسته، این تنها تفاوتی بود که کار را تا آخر رساند.
+#
+# ⚠️ آرایه است نه رشته: رشته‌ی دارای فاصله موقعِ بسط دوباره تکه
+#   می‌شود و مسیرِ کلید را می‌شکند.
+SSH=(ssh -i "$KEY" -o ServerAliveInterval=10 -o ServerAliveCountMax=6 -o IPQoS=throughput)
+
 # ── چرا `public` جدا می‌رود ──
 # بیست مگابایت از بیست‌ودو مگابایتِ بسته، عکس‌های ثابتِ
 # `apps/web/public` است که ماه‌ها دست‌نخورده می‌مانند. لینکِ VPN چند
@@ -33,7 +48,7 @@ PUB_FP="find . -type f -exec sha1sum {} + | sed 's/^\([0-9a-f]*\) \*/\1  /' | LC
 
 echo "── بررسیِ public ──"
 PUB_SHA=$(cd apps/web/public && eval "$PUB_FP")
-REMOTE_PUB=$(ssh -n -i "$KEY" -o ServerAliveInterval=15 "$SRV" 'cat /opt/billiardhub/.public-sha 2>/dev/null || true')
+REMOTE_PUB=$("${SSH[@]}" -n "$SRV" 'cat /opt/billiardhub/.public-sha 2>/dev/null || true')
 if [ "$PUB_SHA" = "$REMOTE_PUB" ]; then
   PUB_EXCLUDE="--exclude=apps/web/public"
   echo "   بدون تغییر — فرستاده نمی‌شود"
@@ -79,8 +94,8 @@ echo "── ارسال ──"
 LOCAL_SZ=$(stat -c%s /tmp/bh-deploy.tgz)
 SENT=0
 for try in 1 2 3; do
-  if ssh -i "$KEY" -o ServerAliveInterval=15 "$SRV" 'cat > /tmp/bh-deploy.tgz' < /tmp/bh-deploy.tgz; then
-    REMOTE_SZ=$(ssh -n -i "$KEY" -o ServerAliveInterval=15 "$SRV" 'stat -c%s /tmp/bh-deploy.tgz 2>/dev/null || echo 0')
+  if "${SSH[@]}" "$SRV" 'cat > /tmp/bh-deploy.tgz' < /tmp/bh-deploy.tgz; then
+    REMOTE_SZ=$("${SSH[@]}" -n "$SRV" 'stat -c%s /tmp/bh-deploy.tgz 2>/dev/null || echo 0')
     if [ "$REMOTE_SZ" = "$LOCAL_SZ" ]; then SENT=1; break; fi
     echo "   ناقص رسید ($REMOTE_SZ از $LOCAL_SZ) — تلاشِ $((try+1))"
   else
@@ -96,11 +111,11 @@ fi
 rm -f /tmp/bh-deploy.tgz
 
 # فهرست چند ده کیلوبایت است و از همان مسیرِ ssh می‌رود
-ssh -i "$KEY" -o ServerAliveInterval=15 "$SRV" 'cat > /tmp/bh-manifest.txt' < /tmp/bh-manifest.txt
+"${SSH[@]}" "$SRV" 'cat > /tmp/bh-manifest.txt' < /tmp/bh-manifest.txt
 rm -f /tmp/bh-manifest.txt
 
 echo "── نصب و بیلد (چند دقیقه) ──"
-ssh -i "$KEY" -o ServerAliveInterval=15 "$SRV" 'bash -s' <<'REMOTE'
+"${SSH[@]}" "$SRV" 'bash -s' <<'REMOTE'
 set -e
 # ── چرا pipefail ──
 # خطِ build از یک لوله به `tail -3` می‌گذرد، و بدونِ این گزینه خروجیِ
@@ -201,5 +216,5 @@ REMOTE
 
 # اثرِ انگشتِ `public` **بعد از** موفقیتِ بیلد ثبت می‌شود. اگر دیپلوی
 # وسطِ کار بشکند، دفعه‌ی بعد دوباره کاملش را می‌فرستد.
-ssh -n -i "$KEY" -o ServerAliveInterval=15 "$SRV" "echo '$PUB_SHA' > /opt/billiardhub/.public-sha"
+"${SSH[@]}" -n "$SRV" "echo '$PUB_SHA' > /opt/billiardhub/.public-sha"
 echo "✅ دیپلوی تمام شد — https://billiardhub.net"

@@ -585,5 +585,88 @@ const head = s => console.log(`\n■ ${s}`)
     && /className="bh-latin"[^>]*>@\{c\.handle\}/.test(step))
 }
 
+/* ── خدماتِ فنی: یک کاتالوگ، دو مصرف‌کننده ── */
+head('خدماتِ متخصص')
+{
+  const cat = code('lib/tech-services.ts')
+  const picker = code('components/tech/ServicePicker.tsx')
+  const shown = code('components/tech/ServiceCatalog.tsx')
+  const panel = code('app/dashboard/technician/page.tsx')
+  const pub = code('app/services/[id]/page.tsx')
+  const store = code('lib/technician-store.ts')
+
+  /* ⚠️ قاعده‌ی اصلی: فهرستِ خدمات فقط یک جا نوشته می‌شود. فهرستِ دوم،
+     حتی اگر امروز درست باشد، فردا از اولی عقب می‌افتد و کسی نمی‌فهمد. */
+  t('فهرستِ خدمات فقط در کاتالوگ است',
+    /TECH_SERVICE_CATEGORIES/.test(picker) && /TECH_SERVICE_CATEGORIES/.test(cat)
+    && !/تعویض فرول/.test(picker) && !/تعویض فرول/.test(shown)
+    && !/تعویض فرول/.test(panel) && !/تعویض فرول/.test(pub))
+  t('هجده خدمت در دو دسته',
+    (cat.match(/^\s+(cue|table)\('/gm) || []).length === 18
+    && /id: 'cue'/.test(cat) && /id: 'table'/.test(cat))
+  /* شناسه ذخیره می‌شود تا اصلاحِ متنِ فارسی انتخابِ کسی را نشکند */
+  t('انتخاب با شناسه ذخیره می‌شود، نه متن',
+    /idsToStored\(/.test(panel) && /storedToIds\(/.test(panel))
+  /* داده‌ی قدیمی حق دارد بماند — ولی حق ندارد ساخته شود */
+  t('مقادیرِ قدیمی نه پاک می‌شوند نه ساخته',
+    /legacy/.test(cat) && /keptLegacy/.test(panel) && /data\.legacy\.length > 0/.test(shown))
+  /* دایرکتوری با متن می‌گردد؛ شناسه‌ی خام آنجا یعنی کارتِ «cloth» */
+  t('دایرکتوری عنوانِ فارسی می‌گیرد', /storedToTitles\(p\.services\)/.test(store))
+  /* همان الگوی چیپی که از کاتالوگ برداشتیم نباید در نمونه‌کار برگردد */
+  t('نمونه‌کار چیپ ندارد',
+    !/borderRadius: 999[^}]*\}\}>\{p\.service\}/.test(pub)
+    && /fontWeight: 700, color: GOLD_D \}\}>\{p\.service\}/.test(pub))
+  t('بخشِ خالی رندر نمی‌شود',
+    /if \(!data\.count\) return null/.test(shown) && /tech\.projects\.length > 0 &&/.test(pub))
+  /* چک‌باکسِ واقعی، نه div کلیک‌دار: کیبورد و صفحه‌خوان مجانی */
+  t('انتخابگر چک‌باکسِ واقعی است',
+    /<input type="checkbox" className="tsp-box"/.test(picker)
+    && /aria-label=\{`\$\{all \? 'برداشتن همه' : 'انتخاب همه'\} — \$\{c\.title\}`\}/.test(picker))
+  /* رنگ تنها نشانه نباشد */
+  t('حالتِ انتخاب نشانِ تیک هم دارد', /<Check size=\{13\} \/>/.test(picker))
+}
+
+/* ── اطلاعاتِ کسب‌وکار: ادعا فقط وقتی گفته شده ── */
+head('اطلاعاتِ کسب‌وکار')
+{
+  const store = code('lib/technician-store.ts')
+  const pub = code('app/services/[id]/page.tsx')
+  const panel = code('app/dashboard/technician/page.tsx')
+  /* ⚠️ پیش‌فرضِ «بله» یعنی صفحه‌ی هر متخصصی ادعا کند در محلِ مشتری
+     خدمت می‌دهد — حرفی که خودش نزده است. */
+  t('در محل/کارگاه پیش‌فرضِ بله ندارند',
+    /onsite: p\.onsite === true/.test(store) && /workshop: p\.workshop === true/.test(store))
+  t('ساعتِ کاری خالی نمایش داده نمی‌شود',
+    /tech\.hours\.trim\(\) &&/.test(pub) && /\(tech\.onsite \|\| tech\.workshop\) &&/.test(pub))
+  t('فرم هر سه فیلد را دارد',
+    /onsite/.test(panel) && /workshop/.test(panel) && /ساعت کاری/.test(panel))
+}
+
+/* ── کارتِ کلیک‌شونده ── */
+head('کارتِ کلیک‌شونده')
+{
+  const card = code('components/ui/Card.tsx')
+  /* دکمه‌ی دربرگیرنده، هر لینک و دکمه‌ی داخلِ کارت را نامعتبر می‌کرد */
+  t('کارت محتوا را داخلِ دکمه نمی‌گذارد',
+    /className="card-hit absolute inset-0/.test(card)
+    && !/<button[\s\S]{0,400}\{children\}[\s\S]{0,40}<\/button>/.test(card))
+  t('کارت ref و بقیه‌ی propها را نگه می‌دارد',
+    (card.match(/ref=\{ref\}/g) || []).length === 2
+    && (card.match(/\{\.\.\.rest\}/g) || []).length === 2)
+}
+
+/* ── deploy.sh ── */
+head('deploy.sh')
+{
+  const dep = read('../../deploy.sh')
+  /* نشستِ بی‌صدا وسطِ ارسالِ چندمگابایتی می‌مُرد */
+  t('ssh ضربانِ نگه‌دارنده دارد',
+    /ServerAliveInterval=10/.test(dep) && /ServerAliveCountMax=6/.test(dep)
+    && /IPQoS=throughput/.test(dep))
+  /* آرایه نه رشته: رشته‌ی دارای فاصله موقعِ بسط دوباره تکه می‌شود */
+  t('گزینه‌ها آرایه‌اند و همه‌جا یکی',
+    /^SSH=\(ssh /m.test(dep) && !/ssh -i "\$KEY"/.test(dep.replace(/^SSH=.*$/m, '')))
+}
+
 console.log(`\n${'─'.repeat(52)}\n  نتیجه: ${pass} موفق، ${fail} ناموفق\n`)
 process.exit(fail ? 1 : 0)
