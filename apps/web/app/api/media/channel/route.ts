@@ -10,6 +10,10 @@ import { redactList } from '@/lib/privacy'
    کانال یک مرحله‌ی صریح است (نام + هندل)، نه چیزی که پنهانی ساخته شود. */
 const INDEX = 'social/media/channels.json'
 
+/* سقفِ کلِ فهرست. رسیدن به آن یعنی باید فهرست از یک فایلِ JSON به
+   جدول منتقل شود — نه اینکه ردیف‌ها بی‌صدا دور ریخته شوند. */
+const MAX_CHANNELS = 2000
+
 /* تایپ و قواعد در `lib/media/channel` است — سه اعلانِ جدا داشتیم و
    از هم جدا افتاده بودند (یکی‌شان `role` نداشت). */
 export type { UserChannel, ChannelRole }
@@ -81,10 +85,22 @@ const BODY = z.object({
   name: z.string().max(200).optional(),
   handle: z.string().max(60).optional(),
   bio: z.string().max(500).optional(),
-  avatar: z.string().max(2048).optional(),
+  /* ⚠️ فقط *نشانی*، نه خودِ عکس. این فایل مشترک است: روی هر انتشارِ
+     ویدیو کامل خوانده می‌شود و در GET عمومی کامل برمی‌گردد — یک
+     data-URLِ ۲۰۰ کیلوبایتی در هر ردیف، فهرست را برای همه سنگین
+     می‌کند. عکس باید اول آپلود شود و نشانی‌اش این‌جا بنشیند. */
+  avatar: z.string().max(2048)
+    .refine(v => !v.trim().toLowerCase().startsWith('data:'), 'عکس را اول آپلود کنید')
+    .optional(),
   role: z.enum(CHANNEL_ROLES).optional(),
   addRole: z.enum(CHANNEL_ROLES).optional(),
 })
+
+/* نامِ فارسیِ میدان‌ها — پیامِ خطا باید به کاربر بگوید کجا را درست کند */
+const FIELD_FA: Record<string, string> = {
+  name: 'نام کانال', handle: 'نشانی کانال', bio: 'درباره‌ی کانال',
+  avatar: 'عکس کانال', role: 'نقش', addRole: 'نقش', id: 'شناسه‌ی کانال',
+}
 
 /* POST { name, handle, id?, bio?, avatar?, role?, addRole? } → ساخت یا ویرایش کانال */
 export async function POST(req: NextRequest) {
@@ -96,9 +112,18 @@ export async function POST(req: NextRequest) {
   /* ورودیِ خارجی در مرز اعتبارسنجی می‌شود، نه با `String()`های
      پراکنده. `.optional()` عمدی است: «نفرستاده» از «خالی فرستاده»
      جدا می‌ماند و پایین‌تر همین تفاوت جلوی پاک‌شدنِ عکس را می‌گیرد. */
-  const b = BODY.safeParse(await req.json().catch(() => ({}))).data
-  /* ⚠️ گارد باید *پیش از* استفاده باشد، نه بعدش. */
-  if (!b) return NextResponse.json({ ok: false, message: 'ورودی معتبر نیست' }, { status: 400, headers: CORS })
+  const parsed = BODY.safeParse(await req.json().catch(() => ({})))
+  /* ⚠️ گارد باید *پیش از* استفاده باشد، نه بعدش. و پیامِ «ورودی معتبر
+     نیست» به تنهایی به کاربر نمی‌گفت کدام میدان مشکل دارد — مثلاً
+     عکسِ data-URLی که از سقف رد شده بود. */
+  if (!parsed.success) {
+    const bad = parsed.error.issues[0]
+    const field = String(bad?.path?.[0] ?? '')
+    return NextResponse.json(
+      { ok: false, message: field ? `مقدارِ «${FIELD_FA[field] ?? field}» پذیرفته نشد` : 'ورودی معتبر نیست' },
+      { status: 400, headers: CORS })
+  }
+  const b = parsed.data
 
   const ownerKey = actor.dmKey || actor.id
   const role = asRole(b.role)
@@ -169,7 +194,7 @@ export async function POST(req: NextRequest) {
        که کاربر کانالی را به نقشِ تازه‌ای وصل می‌کرد عکسِ کانالش
        پاک می‌شد. */
     bio: b.bio !== undefined ? String(b.bio).trim().slice(0, 200) : (existing?.bio ?? ''),
-    avatar: b.avatar !== undefined ? String(b.avatar) : (existing?.avatar ?? ''),
+    avatar: b.avatar !== undefined ? String(b.avatar).trim().slice(0, 2048) : (existing?.avatar ?? ''),
     createdAt: existing?.createdAt ?? Date.now(),
     roles: [...new Set([
       ...(existing?.roles ?? []),
@@ -181,7 +206,27 @@ export async function POST(req: NextRequest) {
   const next = existing
     ? list.map(c => (c === existing ? channel : c))
     : [...list, channel]
-  await writeJson(INDEX, next.slice(-2000))
+
+  /* ⚠️ پیش‌تر این‌جا `next.slice(-2000)` بود: روی *هر* نوشتن، حتی یک
+     ویرایشِ ساده، قدیمی‌ترین ردیف‌ها بی‌صدا پاک می‌شدند. یعنی از
+     کانالِ ۲۰۰۱ به بعد، هر بار که کسی نامِ کانالش را عوض می‌کرد،
+     کانالِ یک کاربرِ دیگر — با همه‌ی ویدیوهایی که به هندلش اشاره
+     دارند — از فهرست می‌افتاد. حذفِ داده‌ی کاربر نباید عارضه‌ی
+     جانبیِ ذخیره باشد. سقف حالا جلوی *ساخت* را می‌گیرد و می‌گوید
+     چرا؛ ویرایش همیشه ممکن است. */
+  if (!existing && next.length > MAX_CHANNELS) {
+    /* ⚠️ این مسیر DELETE ندارد و هیچ‌جای پروژه ردیفی از این فهرست
+       برنمی‌دارد؛ یعنی رسیدن به سقف یک درِ یک‌طرفه است. پس باید
+       *پیش* از رسیدن در لاگِ سرور دیده شود، نه وقتی کاربر گیر کرد. */
+    console.error('[channel] فهرست پر است', next.length)
+    return NextResponse.json(
+      { ok: false, message: 'ظرفیت کانال‌ها پر است؛ لطفاً با پشتیبانی تماس بگیرید' },
+      { status: 507, headers: CORS })
+  }
+  if (!existing && next.length > MAX_CHANNELS * 0.8) {
+    console.warn('[channel] فهرست به ۸۰٪ ظرفیت رسید', next.length, '— وقتِ انتقال به جدول است')
+  }
+  await writeJson(INDEX, next)
 
   return NextResponse.json({ ok: true, channel }, { status: existing ? 200 : 201, headers: CORS })
 }
