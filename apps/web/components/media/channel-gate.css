@@ -127,3 +127,12 @@
   .cg-back, .cg-box { animation: none; }
   .cg-item, .cg-alt, .cg-go, .cg-x { transition: none; }
 }
+
+/* گامِ پایانیِ ساخت — پیش از بازکردنِ انتخابگرِ فایل */
+.cg-done {
+  margin: 0 0 4px;
+  font-size: 13px;
+  line-height: 2;
+  color: #16150f;
+  text-align: center;
+}

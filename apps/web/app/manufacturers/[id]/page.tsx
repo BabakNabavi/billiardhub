@@ -210,7 +210,7 @@ export default function ManufacturerPage() {
   const edit = useOwnerEdit<ManufacturerProfile>('manufacturer', mfrId, rawP, ownerId, raw => {
     setRawP(raw); setStoredMfr(profileToManufacturer(raw))
   }, mine)
-  const { gate: channelGate, publish: publishToChannel } = useChannelPublish('manufacturer', ownerId ?? undefined, edit.isOwner, notify)
+  const { gate: channelGate, ask: askChannel, publish: publishToChannel } = useChannelPublish('manufacturer', ownerId ?? undefined, edit.isOwner, notify)
   /* ── همان گالریِ مشترکِ بقیه‌ی نقش‌ها ──
      ⚠️ این‌جا فقط یک شبکه‌ی عکس بود: نه ویدیویی، نه آلبومی، و حذف با
      *اندیس* انجام می‌شد. حالا همان کامپوننتی رندر می‌شود که مربی،
@@ -637,7 +637,7 @@ export default function ManufacturerPage() {
               })}
               onOpenVideo={v => openVideo(v, edit.isOwner ? { onDelete: () => deleteVideo(v.id) } : undefined)}
               canEdit={edit.isOwner} busy={edit.saving || vidBusy}
-              onAddImages={addShots} onAddVideos={addVideoFiles} onNewAlbum={newAlbum}
+              onAddImages={addShots} onAddVideos={addVideoFiles} beforeAddVideos={() => askChannel(String(rawP?.name ?? ''))} onNewAlbum={newAlbum}
             />
             {edit.error && <p role="alert" style={{ fontSize: 12, color: '#b91c1c', marginTop: 10 }}>{edit.error}</p>}
           </div>

@@ -130,7 +130,7 @@ export default function TechnicianProfilePage() {
   const edit = useOwnerEdit<TechnicianProfile>('technician', id, rawP, ownerId, raw => {
     setRawP(raw); setStored(profileToTechnician(raw))
   }, mine)
-  const { gate: channelGate, publish: publishToChannel } = useChannelPublish('technician', ownerId ?? undefined, edit.isOwner, notify)
+  const { gate: channelGate, ask: askChannel, publish: publishToChannel } = useChannelPublish('technician', ownerId ?? undefined, edit.isOwner, notify)
 
   /* ── همان گالریِ مربی و داور ──
      ⚠️ این صفحه گالریِ خودش را داشت: نوارِ آلبوم، شبکه‌ی ماسونری و یک
@@ -167,7 +167,7 @@ export default function TechnicianProfilePage() {
         const thumb = meta.thumb ? (await uploadFile('club-media', meta.thumb, `${base}-thumb`)) ?? '' : ''
         const ok = await edit.apply(d => ({
           ...d,
-          videos: [...(d.videos ?? []), { id: vid, url, thumbnail: thumb, title: file.name.replace(/.[^.]+$/, ''), duration: formatDuration(meta.durationSec), ...(album ? { album } : {}) }],
+          videos: [...(d.videos ?? []), { id: vid, url, thumbnail: thumb, title: file.name.replace(/\.[^.]+$/, ''), duration: formatDuration(meta.durationSec), ...(album ? { album } : {}) }],
         }))
         if (!ok) break
         /* ⚠️ فقط ویدیویی که *در گالری ذخیره شد* منتشر می‌شود. پیش‌تر
@@ -370,7 +370,7 @@ export default function TechnicianProfilePage() {
               })}
               onOpenVideo={v => openVideo(v, edit.isOwner ? { onDelete: () => deleteVideo(v.id) } : undefined)}
               canEdit={edit.isOwner} busy={edit.saving || vidBusy}
-              onAddImages={addImages} onAddVideos={addVideoFiles} onNewAlbum={newAlbum}
+              onAddImages={addImages} onAddVideos={addVideoFiles} beforeAddVideos={() => askChannel(String(tech?.name ?? ''))} onNewAlbum={newAlbum}
             />
             {edit.error && <p role="alert" style={{ fontSize: 12, color: '#b91c1c', margin: '10px 0 0' }}>{edit.error}</p>}
           </section>

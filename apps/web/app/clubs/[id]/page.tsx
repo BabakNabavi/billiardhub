@@ -454,7 +454,7 @@ export default function ClubProfilePage() {
   /* ── دروازه‌ی کانال ──
      باشگاه هفتمین نقشی بود که به این جریان وصل شد و تا امروز
      ویدیوهایش فقط در گالریِ خودش می‌ماند و به بیلیارد مدیا نمی‌رفت. */
-  const { gate: channelGate, publish: publishToChannel } =
+  const { gate: channelGate, ask: askChannel, publish: publishToChannel } =
     /* ⚠️ `ownerId` گاهی از سرور نمی‌آید ولی `isMine` درست است؛
        آن‌وقت کلیدِ خالی یعنی انتشار بی‌صدا رد می‌شد. کلیدِ نشست
        جایگزینِ درستی است — سرور خودش مالکیت را می‌سنجد. */
@@ -1333,7 +1333,7 @@ export default function ClubProfilePage() {
                 })}
                 onOpenVideo={v => openVideo(v, isClubOwner ? { onDelete: () => deleteClubVideo(v.id) } : undefined)}
                 canEdit={isClubOwner} busy={albumBusy}
-                onAddImages={addClubPhotos} onAddVideos={addClubVideos} onNewAlbum={newClubAlbum}
+                onAddImages={addClubPhotos} onAddVideos={addClubVideos} beforeAddVideos={() => askChannel(String(club?.name ?? ''))} onNewAlbum={newClubAlbum}
               />
               {albumErr && <p role="alert" style={{ fontSize: 12, color: '#b91c1c', marginTop: 8 }}>{albumErr}</p>}
             </div>

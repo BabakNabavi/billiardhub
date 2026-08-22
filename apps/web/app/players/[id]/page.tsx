@@ -132,7 +132,7 @@ export default function PlayerProfilePage() {
   const edit = useOwnerEdit<PlayerProfile>('player', id, rawP, ownerId, raw => {
     setRawP(raw); setStored(profileToPlayer(raw))
   }, mine)
-  const { gate: channelGate, publish: publishToChannel } = useChannelPublish('player', ownerId ?? undefined, edit.isOwner, notify)
+  const { gate: channelGate, ask: askChannel, publish: publishToChannel } = useChannelPublish('player', ownerId ?? undefined, edit.isOwner, notify)
 
   /* ⚠️ هر دو هوک پیش از returnهای شرطی — قاعده‌ی هوک‌ها. یک‌بار در
      صفحه‌ی مربی زیرِ شرط رفت و صفحه با React #310 سفید شد. */
@@ -548,7 +548,7 @@ export default function PlayerProfilePage() {
                 })}
                 onOpenVideo={v => openVideo(v, edit.isOwner ? { onDelete: () => deleteVideo(v.id) } : undefined)}
                 canEdit={edit.isOwner} busy={edit.saving || vidBusy}
-                onAddImages={addImages} onAddVideos={addVideoFiles} onNewAlbum={newAlbum}
+                onAddImages={addImages} onAddVideos={addVideoFiles} beforeAddVideos={() => askChannel(String(player?.name ?? ''))} onNewAlbum={newAlbum}
               />
               {edit.error && <p role="alert" className="ath-err">{edit.error}</p>}
             </div>
