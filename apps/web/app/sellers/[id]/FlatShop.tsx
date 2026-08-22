@@ -315,7 +315,7 @@ export default function FlatShop() {
   const shots = profile?.gallery ?? []
   const vids = profile?.videos ?? []
   const edit = useOwnerEdit<SellerProfile>('seller', sellerId, profile, profile?.ownerId ?? null, setProfile, mine)
-  const { gate: channelGate, publish: publishToChannel } = useChannelPublish('seller', profile?.ownerId ?? undefined, edit.isOwner, notify)
+  const { gate: channelGate, ask: askChannel, publish: publishToChannel } = useChannelPublish('seller', profile?.ownerId ?? undefined, edit.isOwner, notify)
 
   /* ── همان گالریِ مشترکِ بقیه‌ی نقش‌ها ──
      ⚠️ این‌جا فقط یک شبکه‌ی عکس بود: نه ویدیویی، نه آلبومی، و حذف با
@@ -1020,7 +1020,7 @@ export default function FlatShop() {
               })}
               onOpenVideo={v => openVideo(v, edit.isOwner ? { onDelete: () => deleteVideo(v.id) } : undefined)}
               canEdit={edit.isOwner} busy={edit.saving || vidBusy}
-              onAddImages={addShots} onAddVideos={addVideoFiles} onNewAlbum={newAlbum}
+              onAddImages={addShots} onAddVideos={addVideoFiles} beforeAddVideos={() => askChannel(String(profile?.title ?? ''))} onNewAlbum={newAlbum}
             />
             {edit.error && <p role="alert" style={{ fontSize: 12, color: '#b91c1c', marginTop: 10 }}>{edit.error}</p>}
           </div>

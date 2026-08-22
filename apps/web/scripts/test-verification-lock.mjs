@@ -417,6 +417,12 @@ const head = s => console.log(`\n■ ${s}`)
     const src = code(p)
     t('گالریِ ' + role + ' به دروازه وصل است',
       src.includes("useChannelPublish('" + role + "'") && /\{channelGate\}/.test(src))
+    /* ⚠️ پرسیدنِ *بعد از* آپلود یعنی کاربر ۲۵ مگابایت را بالا
+       می‌فرستد و تازه آن‌وقت پنجره می‌آید. باید پیش از انتخابگرِ
+       فایل پرسیده شود. */
+    t('گالریِ ' + role + ' پیش از انتخابِ فایل می‌پرسد',
+      src.includes('beforeAddVideos={() => askChannel(')
+      && src.includes('ask: askChannel'))
   }
 
   /* ⚠️ ویدیویی که در گالری ذخیره نشد نباید در مدیا منتشر شود */
@@ -424,6 +430,50 @@ const head = s => console.log(`\n■ ${s}`)
   t('باشگاه فقط ویدیوی ذخیره‌شده را منتشر می‌کند',
     clubPage.indexOf('saved.push(') > -1
     && clubPage.indexOf('await saveClubVideos(next))) break') < clubPage.indexOf('saved.push('))
+  /* انتخابگرِ ویدیو باید منتظرِ تصمیم بماند، نه اینکه همان لحظه باز شود */
+  const pg = code('components/profile/ProfileGallery.tsx')
+  /* ⚠️ بازکردنِ انتخابگرِ فایل «حرکتِ کاربر» می‌خواهد و سافاری آن را
+     پس از یک درخواستِ شبکه پس می‌گیرد. پس هیچ `await`ی نباید بینِ
+     کلیک و `click()` بنشیند — نه در گالری، نه در هوک. */
+  t('انتخابگرِ ویدیو پیش از باز شدن await نمی‌کند',
+    !/const pickVideo = async/.test(pg) && !/await beforeAddVideos/.test(pg)
+    && /if \(gate === true\) \{ openVideoPicker\(\); return \}/.test(pg))
+  /* ⚠️ «+»ِ آلبوم عکس هم می‌گیرد، پس *پیش* از انتخاب نباید بپرسد —
+     کسی که فقط عکس می‌گذارد نباید سؤالِ کانالِ ویدیو ببیند. دروازه
+     بعد از انتخاب و پیش از آپلود است، جایی که «حرکتِ کاربر» لازم
+     نیست چون فایل‌ها انتخاب شده‌اند. */
+  t('«+»ِ آلبوم فقط وقتی ویدیو هست می‌پرسد',
+    /const pickBoth = \(album\?: string\) => \{ target\.current = album; bothRef\.current\?\.click\(\) \}/.test(pg)
+    && /if \(vids\.length\) \{[\s\S]{0,180}beforeAddVideos\?\.\(\)[\s\S]{0,120}onAddVideos\?\.\(vids/.test(pg))
+  const hook = code('components/media/useChannelPublish.tsx')
+  const cg = code('components/media/ChannelGate.tsx')
+  t('فهرستِ کانال‌ها از پیش خوانده می‌شود',
+    /const cache = useRef/.test(hook) && /useEffect\(\(\) => \{[\s\S]{0,200}loadMyChannels/.test(hook))
+  t('ask همگام تصمیم می‌گیرد', !/const ask = useCallback\(async/.test(hook))
+  /* قولِ باز نباید معلق بماند، وگرنه «+» تا پایانِ عمرِ صفحه مرده است */
+  t('قولِ دروازه در unmount هم حل می‌شود',
+    /useEffect\(\(\) => \(\) => \{ askDone\.current\?\.\(\)/.test(hook))
+  /* یک لمسِ اشتباهی روی بیرونِ پنجره نباید انتشار را خاموش کند */
+  t('«فعلاً نه» از بستن جدا است',
+    /onSkip=\{onSkip\}/.test(hook) && /className="cg-skip" onClick=\{onSkip\}/.test(code('components/media/ChannelGate.tsx')))
+  /* کلیدِ مالک عوض می‌شود؛ کشِ کلیدِ قبلی نباید جواب بدهد */
+  t('کش با عوض‌شدنِ مالک پاک می‌شود',
+    /cache\.current = undefined[\s\S]{0,60}picked\.current = null/.test(hook)
+    && /if \(alive && cache\.current === undefined\)/.test(hook))
+  /* همان ویدیویی که کاربر جوابش را داده نباید دوبار پرسیده شود */
+  t('شکستِ مهرِ نقش همین ویدیو را دوبار نمی‌پرسد',
+    /const session = useRef/.test(hook) && /picked\.current \?\? session\.current/.test(hook))
+  t('کارِ پس‌زمینه گیرنده‌ی خطا دارد',
+    /\}\)\(\)\.catch\(\(\) => notify\?\./.test(hook))
+  t('گامِ پایانی فوکوس و اعلام دارد',
+    /doneRef\.current\?\.focus\(\)/.test(cg) && /className="cg-done" role="status"/.test(cg))
+  /* ⚠️ `/.[^.]+$/` نقطه نیست، «هر نویسه» است: `clip.mp4` در گالری
+     «cli» ذخیره می‌شد ولی با نامِ درست به مدیا می‌رفت. */
+  t('نامِ ویدیو در گالری و مدیا یکی است',
+    !['app/coaches/[id]/page.tsx', 'app/referees/[id]/page.tsx', 'app/services/[id]/page.tsx',
+      'app/players/[id]/page.tsx', 'app/manufacturers/[id]/page.tsx', 'app/sellers/[id]/FlatShop.tsx',
+      'app/clubs/[id]/page.tsx', 'components/profile/ProfileGallery.tsx']
+      .some(p => /replace\(\/\.\[\^\.\]\+\$\//.test(code(p).replace(/\\./g, '\u0000')) ))
 
   /* پنجره‌ی قدیمیِ آپلود دیگر کورکورانه در کانالِ اول منتشر نمی‌کند */
   const up = code('components/MediaUpload.tsx')

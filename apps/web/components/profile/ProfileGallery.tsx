@@ -27,6 +27,7 @@
    ───────────────────────────────────────────────────────────── */
 
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
+import type { AskResult } from '@/components/media/useChannelPublish'
 import { Images, Clapperboard, FolderOpen, ArrowRight, Plus, Play, Loader2 } from 'lucide-react'
 import { useTabKeys } from '@/hooks/use-tab-keys'
 import { toFaDigits } from '@/lib/jalali'
@@ -40,7 +41,7 @@ type Tab = typeof TABS[number]
 
 export default function ProfileGallery({
   images, videos, albumNames = [], onOpenImage, onOpenVideo,
-  canEdit = false, busy = false, onAddImages, onAddVideos, onNewAlbum,
+  canEdit = false, busy = false, onAddImages, onAddVideos, onNewAlbum, beforeAddVideos,
 }: {
   images: GalleryImage[]
   videos: GalleryVideo[]
@@ -64,6 +65,17 @@ export default function ProfileGallery({
   onAddImages?: (files: File[], album?: string) => void | Promise<void>
   /* ویدیو هم مثل عکس از گالریِ خودِ کاربر انتخاب می‌شود */
   onAddVideos?: (files: File[], album?: string) => void | Promise<void>
+  /** ── پیش از بازکردنِ انتخابگرِ ویدیو ──
+   *  صفحه این‌جا می‌پرسد «کانالِ بیلیارد مدیا داری؟».
+   *
+   *  ⚠️ چرا این‌جا و نه بعد از آپلود: نسخه‌ی اول بعد از آپلود
+   *  می‌پرسید، یعنی کاربر ۲۵ مگابایت را روی شبکه‌ی موبایل بالا
+   *  می‌فرستاد و تازه آن‌وقت پنجره می‌آمد.
+   *
+   *  ⚠️ **قرارداد**: `true` یعنی «تصمیم گرفته شد، همین حالا باز کن»
+   *  و باید در همان تیک باز شود. قول فقط وقتی برمی‌گردد که پنجره‌ای
+   *  باز شده باشد و کلیکِ خودِ کاربر داخلِ آن حلش کند. */
+  beforeAddVideos?: () => AskResult
   onNewAlbum?: (name: string) => void | Promise<void>
 }) {
   /* ── آلبوم‌ها: نام‌های اعلام‌شده + هرچه روی رسانه‌ها هست ──
@@ -171,15 +183,39 @@ export default function ProfileGallery({
   )
 
   const pickImages = (album?: string) => { target.current = album; fileRef.current?.click() }
-  const pickVideo = (album?: string) => { target.current = album; vidRef.current?.click() }
+  /* ── چرا این‌قدر دست‌وپاگیر نوشته شده ──
+     بازکردنِ انتخابگرِ فایل «حرکتِ کاربر» می‌خواهد و سافاری آن را
+     فقط در همان تیکِ رویداد (و میکروتسک‌هایش) می‌پذیرد. اگر بینِ
+     کلیک و `click()` یک درخواستِ شبکه بنشیند، بی‌هیچ خطایی هیچ
+     اتفاقی نمی‌افتد — دکمه‌ی «+» روی آیفون مرده می‌شود.
+
+     پس وقتی `beforeAddVideos` همگام `true` می‌دهد، در همین تیک باز
+     می‌کنیم؛ و وقتی قول می‌دهد یعنی پنجره‌ای باز شده و کلیکِ کاربر
+     داخلِ آن پنجره حرکتِ تازه‌ای است.
+
+     ⚠️ خطای دروازه هرگز نباید انتخابگر را ببندد: انتشار در مدیا
+     اختیاری است، افزودن به گالری نه. */
+  const openVideoPicker = () => vidRef.current?.click()
+  const pickVideo = (album?: string) => {
+    target.current = album
+    let gate: AskResult = true
+    try { gate = beforeAddVideos?.() ?? true } catch { gate = true }
+    if (gate === true) { openVideoPicker(); return }
+    gate.then(openVideoPicker, openVideoPicker)
+  }
+  /* ⚠️ این «+» داخلِ آلبوم است و عکس *و* ویدیو می‌گیرد. پس بر خلافِ
+     «+»ِ تبِ ویدیوها، این‌جا پیش از انتخاب نمی‌پرسیم — کسی که فقط
+     می‌خواهد یک عکس به آلبوم اضافه کند نباید سؤالِ کانالِ ویدیو
+     ببیند. دروازه بعد از انتخاب و پیش از آپلود در `addMixed` است،
+     و آن‌جا «حرکتِ کاربر» لازم نیست چون فایل‌ها انتخاب شده‌اند. */
   const pickBoth = (album?: string) => { target.current = album; bothRef.current?.click() }
 
   /* ── تقسیمِ انتخابِ ترکیبی ──
      اول `type` که مرورگر می‌دهد؛ ولی بعضی انتخاب‌گرهای اندروید (و
      فایل‌های .mov/.heic) `type` خالی می‌دهند و آن فایل‌ها بی‌صدا
      می‌افتادند — پس پسوند تورِ دوم است، نه اول. */
-  const isImg = (f: File) => f.type.startsWith('image/') || /.(jpe?g|png|gif|webp|heic|heif|bmp)$/i.test(f.name)
-  const isVid = (f: File) => f.type.startsWith('video/') || /.(mp4|mov|m4v|webm|mkv|3gp)$/i.test(f.name)
+  const isImg = (f: File) => f.type.startsWith('image/') || /\.(jpe?g|png|gif|webp|heic|heif|bmp)$/i.test(f.name)
+  const isVid = (f: File) => f.type.startsWith('video/') || /\.(mp4|mov|m4v|webm|mkv|3gp)$/i.test(f.name)
 
   const addMixed = async (files: File[], album?: string) => {
     const imgs = files.filter(isImg)
@@ -188,7 +224,11 @@ export default function ProfileGallery({
     setWorking(true)
     try {
       if (imgs.length) await onAddImages?.(imgs, album)
-      if (vids.length) await onAddVideos?.(vids, album)
+      if (vids.length) {
+        /* فقط وقتی واقعاً ویدیویی در کار است */
+        try { const g: AskResult | undefined = beforeAddVideos?.(); if (g !== true) await g } catch { /* دروازه اختیاری است */ }
+        await onAddVideos?.(vids, album)
+      }
       if (rest.length) notify(`این فایل‌ها نه عکس بودند نه ویدیو: ${rest.map(f => f.name).join('، ')}`)
     } catch {
       /* بدونِ این، یک فایلِ خرابِ عکس همه‌ی ویدیوهای همان انتخاب را

@@ -139,7 +139,7 @@ export default function CoachProfilePage() {
      می‌کند. `apply` کلِ پروفایل را با یک فیلدِ عوض‌شده ذخیره می‌کند و
      نشانیِ Storage را که سرور برمی‌گرداند می‌نشاند. */
   const edit = useOwnerEdit<CoachProfile>('coach', id, localP, ownerId, setLocalP, mine)
-  const { gate: channelGate, publish: publishToChannel } = useChannelPublish('coach', ownerId ?? undefined, edit.isOwner, notify)
+  const { gate: channelGate, ask: askChannel, publish: publishToChannel } = useChannelPublish('coach', ownerId ?? undefined, edit.isOwner, notify)
 
   /* ⚠️ `div` خالی بود. قاعده‌ی پروژه اسکلت می‌خواهد، و روی شبکه‌ی
      کند یک صفحه‌ی تماماً سفید از خرابی قابلِ تشخیص نیست. */
@@ -295,7 +295,7 @@ export default function CoachProfilePage() {
         const thumb = meta.thumb ? (await uploadFile('club-media', meta.thumb, `${base}-thumb`)) ?? '' : ''
         const ok = await edit.apply(d => ({
           ...d,
-          videos: [...d.videos, { id: vid, url, thumbnail: thumb, title: file.name.replace(/.[^.]+$/, ''), duration: formatDuration(meta.durationSec), ...(album ? { album } : {}) }],
+          videos: [...d.videos, { id: vid, url, thumbnail: thumb, title: file.name.replace(/\.[^.]+$/, ''), duration: formatDuration(meta.durationSec), ...(album ? { album } : {}) }],
         }))
         /* ذخیره که شکست خورد، ادامه‌ی آپلود فقط فایلِ یتیم می‌سازد */
         if (!ok) break
@@ -387,7 +387,7 @@ export default function CoachProfilePage() {
               onOpenVideo={v => openVideo(v, edit.isOwner ? { onDelete: () => deleteVideo(v.id) } : undefined)}
               albumNames={localP?.albums ?? []}
               canEdit={edit.isOwner} busy={edit.saving || vidBusy}
-              onAddImages={addImages} onAddVideos={addVideoFiles} onNewAlbum={newAlbum}
+              onAddImages={addImages} onAddVideos={addVideoFiles} beforeAddVideos={() => askChannel(String(coach?.name ?? ''))} onNewAlbum={newAlbum}
             />
             {edit.error && <p className="ch-empty" role="alert">{edit.error}</p>}
 
