@@ -8,6 +8,9 @@
    ───────────────────────────────────────────────────────────── */
 
 import { useChannelPublish, type PublishVideo } from '@/components/media/useChannelPublish'
+import { toFaDigits } from '@/lib/jalali'
+import { resolveServices } from '@/lib/tech-services'
+import { ServiceCatalog } from '@/components/tech/ServiceCatalog'
 import { useVideoEdit } from '@/components/media/useVideoEdit'
 import { detailTitle, type VideoDetail } from '@/lib/media/video-details'
 import { useEffect, useMemo, useState } from 'react'
@@ -127,6 +130,9 @@ export default function TechnicianProfilePage() {
   }, [id, staticTech, reloadKey])
 
   const tech = staticTech ?? stored
+  /* کاتالوگ یک‌بار حل می‌شود: هم هیرو خلاصه‌اش را می‌خواهد، هم بخشِ
+     خدمات خودش را. `resolveServices` مقادیرِ قدیمی را هم نگه می‌دارد. */
+  const svc = useMemo(() => resolveServices(tech?.services), [tech?.services])
 
   /* ⚠️ پیش از هر `return`ِ شرطی — وگرنه React #310 و صفحه‌ی سفید */
   const edit = useOwnerEdit<TechnicianProfile>('technician', id, rawP, ownerId, raw => {
@@ -263,10 +269,8 @@ export default function TechnicianProfilePage() {
         .tp-hero { display: grid; grid-template-columns: 300px minmax(0,1fr); gap: clamp(20px,3.4vw,40px); align-items: center; }
         @media (max-width: 760px) { .tp-hero { grid-template-columns: 1fr; gap: 18px; } .tp-idcard { max-width: 260px; margin: 0 auto; } }
 
-        .tp-chip { display: inline-flex; align-items: center; gap: 7px; font-size: 12.5px; font-weight: 700;
           color: ${SEC}; background: #fff; border: 1px solid ${LINE}; border-radius: 999px; padding: 7px 14px;
           transition: all .2s; }
-        .tp-chip:hover { border-color: rgba(199,166,106,0.45); color: ${GOLD_D}; transform: translateY(-1px); }
 
         .tp-cta { display: inline-flex; align-items: center; justify-content: center; gap: 7px; height: 42px;
           padding: 0 20px; border-radius: 11px; cursor: pointer; text-decoration: none; font-family: inherit;
@@ -329,9 +333,8 @@ export default function TechnicianProfilePage() {
 
           {/* معرفی */}
           <div>
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 7, fontSize: 9.5, fontWeight: 800, letterSpacing: '0.2em', color: GOLD_D, background: 'rgba(199,166,106,0.10)', border: '1px solid rgba(199,166,106,0.28)', borderRadius: 999, padding: '4px 12px', marginBottom: 12 }}>
-              <Wrench size={11} /> TECHNICAL SPECIALIST
-            </span>
+            {/* کیکرِ «TECHNICAL SPECIALIST» برداشته شد؛ عنوانِ حرفه‌ایِ
+                فارسی دو خط پایین‌تر همان را می‌گوید. */}
             <h1 style={{ fontSize: 'clamp(24px,3.6vw,38px)', fontWeight: 900, margin: '0 0 6px', lineHeight: 1.35, letterSpacing: '-0.02em' }}>{tech.name}{tech.verified && <VerifiedBadge title="متخصص تأیید شده" />}</h1>
             <div style={{ fontSize: 'clamp(13.5px,1.7vw,16px)', fontWeight: 800, color: GOLD_D, marginBottom: 10 }}>{tech.title}</div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: SEC, marginBottom: 14 }}>
@@ -340,9 +343,15 @@ export default function TechnicianProfilePage() {
               {tech.club && <><span style={{ color: MUT }}>·</span><span style={{ color: MUT }}>{tech.club}</span></>}
             </div>
             <p style={{ fontSize: 14, lineHeight: 2, color: SEC, margin: '0 0 16px', maxWidth: 560 }}>{tech.intro}</p>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 20 }}>
-              {tech.services.map(s => <span key={s} className="tp-chip">{s}</span>)}
-            </div>
+            {svc.count > 0 && (
+              /* ⚠️ خلاصه، نه فهرست: نامِ دسته‌ها + شمار. خودِ کاتالوگ
+                 بخشِ مستقلِ خودش را دارد. */
+              <p style={{ fontSize: 13, color: MUT, margin: '0 0 20px' }}>
+                {svc.categories.map(c => c.title).join(' و ')}
+                {svc.categories.length > 0 && ' — '}
+                <span style={{ color: SEC, fontWeight: 700 }}>{toFaDigits(svc.count)} خدمت</span>
+              </p>
+            )}
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
               <a className="tp-cta gold" href={`tel:${tech.phone}`}><Phone size={15} /> ارتباط با این متخصص</a>
               <a className="tp-cta wa" href={`https://wa.me/${tech.whatsapp}`} target="_blank" rel="noopener noreferrer">{WaIcon} واتساپ</a>
@@ -363,6 +372,16 @@ export default function TechnicianProfilePage() {
             </div>
           </div>
         </section>
+
+        {/* ═══ کاتالوگِ خدمات ═══
+            ⚠️ بخشِ خالی رندر نمی‌شود: متخصصی که هنوز خدمتی انتخاب
+            نکرده نباید قابِ خالی ببیند. */}
+        {svc.count > 0 && (
+          <section style={{ marginBottom: 'clamp(28px,4vw,44px)' }}>
+            <SectionHead title="خدمات" />
+            <ServiceCatalog data={svc} />
+          </section>
+        )}
 
         {/* ═══ پروژه‌ها ═══ */}
         {tech.projects.length > 0 && (

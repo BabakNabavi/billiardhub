@@ -8,15 +8,21 @@
    ───────────────────────────────────────────────────────────── */
 
 import { useEffect, useMemo, useState } from 'react'
+import { ALL_TECH_SERVICES } from '@/lib/tech-services'
 import Link from 'next/link'
 import { Search, MapPin, ArrowLeft, SlidersHorizontal, X, Wrench, ChevronDown } from 'lucide-react'
 import {
-  TECHNICIANS, TECH_SERVICES, faDigits,
-  type Technician, type TechService,
+  TECHNICIANS, faDigits,
+  type Technician,
 } from '../../lib/technicians-data'
 import { listApprovedTechnicians, profileToTechnician, type TechnicianProfile } from '../../lib/technician-store'
 import { fetchProfiles } from '../../lib/profiles/client'
 import VerifiedBadge from '../../components/VerifiedBadge'
+
+/* ⚠️ فهرستِ فیلتر از کاتالوگِ واحد می‌آید، نه آرایه‌ی تختِ قدیمی —
+   وگرنه فیلتر عنوان‌هایی نشان می‌دهد که هیچ متخصصی ندارد و
+   عنوان‌های تازه اصلاً در فیلتر نمی‌آیند. */
+const SERVICE_TITLES = ALL_TECH_SERVICES.map(x => x.title)
 
 const GOLD   = '#C7A66A'
 const GOLD_D = '#8F6531'
@@ -75,7 +81,9 @@ function TechCard({ t, i }: { t: Technician; i: number }) {
 export default function ServicesPage() {
   const [query, setQuery]     = useState('')
   const [city, setCity]       = useState<'all' | string>('all')
-  const [service, setService] = useState<'all' | TechService>('all')
+  /* ⚠️ اتحادِ قبلی دیگر قیدی اعمال نمی‌کرد (`TechService` گشاد شد)،
+     پس تضمینی که نمی‌دهد نوشته نمی‌شود. */
+  const [service, setService] = useState<string>('all')
   const [cityOpen, setCityOpen] = useState(false)
   const [sheet, setSheet]     = useState(false)
 
@@ -167,12 +175,14 @@ export default function ServicesPage() {
         .sv-card:hover { transform: translateY(-5px); box-shadow: 0 20px 44px rgba(28,27,23,0.11); border-color: rgba(199,166,106,0.4); }
         .sv-id { position: relative; aspect-ratio: 4/2.9; overflow: hidden;
           background: linear-gradient(170deg, #FBF9F5 0%, #F3EFE7 100%); display: flex; align-items: center; justify-content: center; }
+        /* شبکه‌ی نقطه‌چینِ ۱۷ پیکسلی برداشته شد: بافتِ تزئینی که
+           هیچ چیزی از محصول نمی‌گوید و امضای شناخته‌شده‌ی رابطِ
+           تولیدشده است. دو هاله‌ی ملایم می‌مانند چون به تصویرِ
+           پس‌زمینه عمق می‌دهند. */
         .sv-id-tex { position: absolute; inset: 0;
           background:
             radial-gradient(circle at 78% 18%, rgba(199,166,106,0.16) 0%, transparent 46%),
-            radial-gradient(circle at 16% 88%, rgba(20,83,45,0.07) 0%, transparent 42%),
-            radial-gradient(rgba(28,27,23,0.028) 1px, transparent 1px);
-          background-size: auto, auto, 17px 17px; }
+            radial-gradient(circle at 16% 88%, rgba(20,83,45,0.07) 0%, transparent 42%); }
         .sv-mono { position: relative; width: 92px; height: 92px; border-radius: 50%;
           display: flex; align-items: center; justify-content: center;
           font-size: 37px; font-weight: 900; color: ${GOLD_D};
@@ -295,7 +305,7 @@ export default function ServicesPage() {
           {/* چیپ‌های نوع خدمات — دسکتاپ/تبلت */}
           <div className="sv-chips-row sv-desk-filters">
             <button className={`sv-chip${service === 'all' ? ' on' : ''}`} onClick={() => setService('all')}>همه خدمات</button>
-            {TECH_SERVICES.map(s => (
+            {SERVICE_TITLES.map(s => (
               <button key={s} className={`sv-chip${service === s ? ' on' : ''}`} onClick={() => setService(s)}>{s}</button>
             ))}
           </div>
@@ -358,7 +368,7 @@ export default function ServicesPage() {
             <div style={{ fontSize: 12, fontWeight: 800, color: MUT, margin: '0 0 8px' }}>نوع خدمات</div>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 20 }}>
               <button className={`sv-chip${service === 'all' ? ' on' : ''}`} onClick={() => setService('all')}>همه خدمات</button>
-              {TECH_SERVICES.map(s => (
+              {SERVICE_TITLES.map(s => (
                 <button key={s} className={`sv-chip${service === s ? ' on' : ''}`} onClick={() => setService(s)}>{s}</button>
               ))}
             </div>

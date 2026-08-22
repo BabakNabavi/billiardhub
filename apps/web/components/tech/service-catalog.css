@@ -1,0 +1,95 @@
+/* ─────────────────────────────────────────────────────────────
+   کاتالوگِ خدماتِ فنی.
+
+   ⚠️ قاعده‌ی حاکم بر این فایل: **طولِ متن نباید ریتم را بشکند.**
+   نامِ خدمات از ۹ تا ۲۱ نویسه فرق می‌کند. راهِ حلِ غلط این بود که
+   هر کدام عرضِ خودش را بگیرد (چیپ) — راهِ درست ستونِ ثابت است:
+   متنِ بلند در همان ستون می‌پیچد و ردیف کمی بلندتر می‌شود، ولی
+   شبکه سرِ جایش می‌ماند.
+
+   موبایل تک‌ستونه است. دو ستون از ۶۴۰ پیکسل و سه ستون *فقط* برای
+   دسته‌های پرتعداد در عرضِ خیلی زیاد — چون در فارسی سه ستون یعنی
+   ستونِ باریک و پیچشِ زشت.
+   ───────────────────────────────────────────────────────────── */
+
+.tsc {
+  background: #fff;
+  border: 1px solid var(--border, rgba(0, 0, 0, .06));
+  border-radius: 18px;
+  padding: clamp(16px, 2.4vw, 24px);
+}
+
+.tsc-group + .tsc-group {
+  margin-block-start: clamp(20px, 2.6vw, 28px);
+  padding-block-start: clamp(16px, 2.2vw, 22px);
+  border-block-start: 1px solid #F0EDE5;
+}
+
+.tsc-cat {
+  margin: 0 0 12px;
+  font-size: 14px;
+  font-weight: 800;
+  color: #1C1B17;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+/* نشانِ دسته — یک خطِ کوتاهِ طلایی، نه آیکونِ تزئینی */
+.tsc-cat::before {
+  content: '';
+  inline-size: 3px;
+  block-size: 15px;
+  border-radius: 2px;
+  background: var(--gold, #C7A66A);
+  flex: none;
+}
+
+.tsc-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0;
+}
+
+.tsc-row {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding-block: 11px;
+  /* جداکننده‌ی مویی به‌جای کارت — یک سطح، نه ده تا */
+  border-block-start: 1px solid #F4F1EA;
+}
+.tsc-row:first-child { border-block-start: none; }
+
+.tsc-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: #2B2822;
+  line-height: 1.7;
+}
+
+/* توضیح ثانویه است و نباید با نامِ خدمت رقابت کند */
+.tsc-desc {
+  font-size: 12.5px;
+  line-height: 1.95;
+  color: var(--text-tertiary, #6E6E6E);
+  max-inline-size: 46ch;
+}
+
+@media (min-width: 640px) {
+  .tsc-list {
+    grid-template-columns: 1fr 1fr;
+    column-gap: clamp(20px, 3vw, 36px);
+  }
+  /* ⚠️ در دو ستون، «اولین ردیف» یعنی دو تای اول — نه فقط یکی */
+  .tsc-row:nth-child(2) { border-block-start: none; }
+}
+
+@media (min-width: 1100px) {
+  .tsc { padding: clamp(22px, 2.4vw, 30px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tsc-row { transition: none; }
+}
