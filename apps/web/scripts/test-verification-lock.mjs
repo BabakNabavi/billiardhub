@@ -392,6 +392,16 @@ const head = s => console.log(`\n■ ${s}`)
     /const taken = list\.some\(c => c\.handle === h\)/.test(chRoute))
   t('نام و هندل هم معناشناسیِ PATCH دارند',
     /const name = b\.name !== undefined/.test(chRoute) && /const handle = b\.handle !== undefined/.test(chRoute))
+  /* ⚠️ ذخیره نباید ردیفِ کاربرِ دیگری را دور بیندازد */
+  t('ذخیره فهرست را بی‌صدا نمی‌بُرد',
+    !/slice\(-2000\)/.test(chRoute) && /MAX_CHANNELS/.test(chRoute) && /status: 507/.test(chRoute))
+  t('پیامِ خطای ورودی میدان را نام می‌برد',
+    /FIELD_FA\[field\]/.test(chRoute) && /parsed\.error\.issues\[0\]/.test(chRoute))
+  /* ⚠️ فهرست مشترک است و روی هر انتشار کامل خوانده می‌شود؛ عکس باید
+     نشانی باشد نه خودِ فایل. */
+  t('عکسِ کانال نشانی است نه data-URL',
+    /avatar: z\.string\(\)\.max\(2048\)/.test(chRoute) && /startsWith\('data:'\)/.test(chRoute))
+  t('عکس هنگام ذخیره هم کوتاه می‌شود', /String\(b\.avatar\)\.trim\(\)\.slice\(0, 2048\)/.test(chRoute))
 
   /* هر هفت نقش باید دروازه داشته باشد — «کاربر عادی» عمداً نه */
   const GATED = [
