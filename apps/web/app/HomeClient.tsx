@@ -247,12 +247,10 @@ const FEATURE_CARDS = [
 ];
 
 const TRUST_ITEMS = [
-  /* ⚠️ `clr`/`rgb` برداشته شد: چهار رنگِ تأکیدِ متفاوت روی یک نوار،
-     رنگ را بی‌معنا می‌کرد. حالا همه یک تأکید دارند. */
-  { Icon: Users,       label: 'جامعه فعال',      sub: 'در حال رشد' },
-  { Icon: CheckCircle, label: 'پرداخت امن',       sub: 'سریع و مطمئن' },
-  { Icon: Clock,       label: 'پشتیبانی ۲۴/۷',  sub: 'همیشه در کنار شما' },
-  { Icon: Star,        label: 'تجربه‌ای متفاوت', sub: 'برای عاشقان بیلیارد' },
+  { Icon: Users,       label: 'جامعه فعال',       sub: 'در حال رشد',          clr: '#B97BFF', rgb: '185,123,255' },
+  { Icon: CheckCircle, label: 'پرداخت امن',        sub: 'سریع و مطمئن',        clr: '#4A9EFF', rgb: '74,158,255'  },
+  { Icon: Clock,       label: 'پشتیبانی ۲۴/۷',   sub: 'همیشه در کنار شما',   clr: '#30C55A', rgb: '48,197,90'   },
+  { Icon: Star,        label: 'تجربه‌ای متفاوت',  sub: 'برای عاشقان بیلیارد', clr: '#C7A66A', rgb: '199,166,106' },
 ];
 
 /* ═══════════════════════════════════════════════════════════════
@@ -1482,43 +1480,7 @@ useEffect(() => {
         .news-img:hover img{transform:scale(1.06);}
 
         .dp-tabs { grid-template-columns:repeat(4,1fr)!important; }
-        /* ── نوارِ اعتماد: موبایل‌اول، بدونِ zoom ── */
-        .trust-box { margin-top:28px; width:100%; padding-inline:16px; box-sizing:border-box; display:flex; justify-content:center; }
-        .trust-grid {
-          display:grid; grid-template-columns:1fr 1fr; width:100%; max-width:520px;
-          border-radius:18px; overflow:hidden;
-          background:rgba(10,9,14,.34);
-          /* ⚠️ هر دو لازم است: unprefixed تازه در سافاری ۱۸ آمده و
-             مخاطبِ اصلیِ ما iOS است. (تله‌ی مینیفایر مالِ فایل‌های CSSِ
-             واقعی است؛ این رشته اصلاً از PostCSS رد نمی‌شود.) */
-          -webkit-backdrop-filter:blur(28px) saturate(150%);
-          backdrop-filter:blur(28px) saturate(150%);
-          border:1px solid rgba(255,255,255,.13);
-          box-shadow:0 10px 36px rgba(0,0,0,.3), inset 0 1px 0 rgba(255,255,255,.14);
-        }
-        .trust-cell {
-          display:flex; align-items:center; gap:9px; padding:12px 14px; min-height:56px;
-          /* ⚠️ منطقی، نه جهت‌دار: «border-left» در RTL سمتِ اشتباه می‌نشیند */
-          border-inline-start:1px solid rgba(255,255,255,.09);
-          border-block-start:1px solid rgba(255,255,255,.09);
-        }
-        .trust-cell:nth-child(-n+2) { border-block-start:none; }
-        .trust-cell:nth-child(odd)  { border-inline-start:none; }
-        .trust-ic {
-          display:grid; place-items:center; inline-size:30px; block-size:30px; flex:none;
-          border-radius:50%; color:#E2C98C;
-          background:rgba(199,166,106,.14); border:1px solid rgba(199,166,106,.24);
-        }
-        .trust-txt { display:flex; flex-direction:column; gap:2px; min-width:0; }
-        /* اندازه‌ی واقعی — نه عددی که بعد با zoom نصف شود */
-        .trust-label { font-size:13px; font-weight:700; color:rgba(255,255,255,.94); }
-        .trust-sub   { font-size:11px; font-weight:500; color:rgba(255,255,255,.62); white-space:nowrap; }
-        @media (min-width:900px) {
-          .trust-grid { grid-template-columns:repeat(4,1fr); max-width:none; }
-          .trust-cell { border-block-start:none; }
-          .trust-cell:nth-child(odd) { border-inline-start:1px solid rgba(255,255,255,.09); }
-          .trust-cell:first-child    { border-inline-start:none; }
-        }
+        .trust-strip { display:flex;gap:10px;flex-wrap:wrap;justify-content:center; }
         .hero-arrows { position:absolute;bottom:36px;right:28px;display:flex;gap:6px;z-index:10; }
 
         /* ══ TABLET ≤1100px ══ */
@@ -1555,6 +1517,11 @@ useEffect(() => {
           .hero-eyebrow { display:none !important; }
           .hero-actions { display:none !important; }
           .hero-arrows  { display:none !important; }
+          .trust-strip  { display:flex !important; flex-wrap:nowrap !important; gap:6px !important; }
+          .trust-box    { margin-top:43px !important; width:100% !important; box-sizing:border-box !important; padding:0 16px !important; display:flex !important; justify-content:center !important; overflow:visible !important; }
+          .trust-grid   { zoom:0.43 !important; }
+          .trust-label  { font-size:9.9px !important; }
+          .trust-sub    { font-size:8.1px !important; }
           .feat-slider  { justify-content:flex-start !important; }
           .dp-tabs      { grid-template-columns:repeat(2,1fr) !important; }
           .dp-cta       { width:100% !important; }
@@ -2008,24 +1975,38 @@ useEffect(() => {
           </div>
 
           {/* Trust items — unified box with 4 cells divided by thin lines */}
-          {/* ── نوارِ اعتماد ──
-              ⚠️ نسخه‌ی قبلی چهار ستون را با `zoom: 0.43` در موبایل
-              فشرده می‌کرد. نتیجه‌اش متنی با ارتفاعِ *۵ پیکسل* روی
-              گوشیِ ۳۹۰ پیکسلی بود — اندازه‌گیری‌شده، نه تخمین. کوچک‌کردنِ
-              بلوکِ دسکتاپی طراحیِ موبایل نیست.
-              حالا موبایل دو در دو است با اندازه‌ی واقعیِ متن، و از
-              ۷۰۰ پیکسل به بالا چهارتایی می‌شود. */}
-          <div className="he trust-box">
-            <div className="trust-grid">
+          <div className="he trust-box" style={{ marginTop: '44px' }}>
+            <div className="trust-grid" style={{
+              display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr',
+              zoom: 0.8,
+              background: 'rgba(10,9,14,0.30)',
+              backdropFilter: 'blur(40px) saturate(170%)',
+              WebkitBackdropFilter: 'blur(40px) saturate(170%)',
+              borderRadius: '20px',
+              border: '1px solid rgba(255,255,255,0.12)',
+              boxShadow: '0 10px 36px rgba(0,0,0,0.30), inset 0 1px 0 rgba(255,255,255,0.14)',
+              overflow: 'hidden',
+            }}>
               {TRUST_ITEMS.map((item, i) => (
-                <div key={i} className="trust-cell">
-                  {/* ⚠️ چهار رنگِ تأکیدِ متفاوت (بنفش/آبی/سبز/طلایی) روی یک
-                      نوار، رنگ را بی‌معنا می‌کرد. یک تأکید بیشتر نیست. */}
-                  <span className="trust-ic" aria-hidden><item.Icon size={15} /></span>
-                  <span className="trust-txt">
-                    <span className="trust-label">{item.label}</span>
-                    <span className="trust-sub">{item.sub}</span>
-                  </span>
+                <div key={i} style={{
+                  display: 'flex', flexDirection: 'row', alignItems: 'center',
+                  gap: '9px', padding: '10px 14px',
+                  borderLeft: i < 3 ? '1px solid rgba(255,255,255,0.09)' : 'none',
+                }}>
+                  <div style={{
+                    width: '30px', height: '30px', borderRadius: '50%',
+                    background: `rgba(${item.rgb},0.13)`,
+                    border: `1px solid rgba(${item.rgb},0.22)`,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+                    boxShadow: `0 0 8px rgba(${item.rgb},0.14)`,
+                  }}>
+                    <item.Icon size={14} color={item.clr}
+                      style={{ filter: `drop-shadow(0 0 3px rgba(${item.rgb},0.35))` }} />
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                    <span className="trust-label" style={{ fontSize: '11px', fontWeight: 700, color: 'rgba(255,255,255,0.92)', whiteSpace: 'nowrap' }}>{item.label}</span>
+                    <span className="trust-sub" style={{ fontSize: '9px', color: 'rgba(255,255,255,0.45)', fontWeight: 500, whiteSpace: 'nowrap' }}>{item.sub}</span>
+                  </div>
                 </div>
               ))}
             </div>
