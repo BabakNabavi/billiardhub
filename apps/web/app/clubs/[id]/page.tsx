@@ -22,6 +22,7 @@ import { uploadFile } from '@/lib/supabase'
 import { videoMeta, formatDuration } from '@/lib/video-thumb'
 import { notify } from '@/lib/ui/dialogs'
 import { useChannelPublish, type PublishVideo } from '@/components/media/useChannelPublish'
+import { detailTitle, type VideoDetail } from '@/lib/media/video-details'
 import '@/components/profile/profile-page.css'
 import { useTabKeys } from '@/hooks/use-tab-keys'
 import ClubReviews from '../../../components/club/ClubReviews';
@@ -478,13 +479,14 @@ export default function ClubProfilePage() {
     } finally { setAlbumBusy(false); }
   };
 
-  const addClubVideos = async (files: File[], album?: string) => {
+  /* `details` از فرمِ مشخصات می‌آید (عنوان/دسته/توضیح). */
+  const addClubVideos = async (files: File[], album?: string, details?: VideoDetail[]) => {
     const skipped: string[] = [];
     /* ⚠️ فقط ویدیوهایی که *واقعاً* ذخیره شدند منتشر می‌شوند؛ وگرنه
        شکستِ ذخیره در گالری، ویدیوی یتیم در مدیا می‌ساخت. */
     const saved: PublishVideo[] = [];
     let next = clubVideos;
-    for (const file of files) {
+    for (const [i, file] of files.entries()) {
       if (file.size > 25 * 1024 * 1024) { skipped.push(file.name); continue }
       const meta = await videoMeta(file);
       const vid = `v${Date.now()}${Math.random().toString(36).slice(2, 6)}`;
@@ -492,10 +494,16 @@ export default function ClubProfilePage() {
       const url = await uploadFile('club-media', file, base);
       if (!url) { skipped.push(file.name); continue }
       const thumb = meta.thumb ? (await uploadFile('club-media', meta.thumb, `${base}-thumb`)) ?? '' : '';
-      const title = file.name.replace(/\.[^.]+$/, '');
+      const title = detailTitle(details, i, file);
       next = [...next, { id: vid, url, thumbnail: thumb, title, duration: formatDuration(meta.durationSec), ...(album ? { album } : {}) }];
       if (!(await saveClubVideos(next))) break
-      saved.push({ title, src: url, thumb, durationSec: meta.durationSec, clubId: club.id });
+      /* «فقط در گالری بماند» یک تصمیمِ صریحِ کاربر است */
+      if (details?.[i]?.publish !== false) {
+        saved.push({
+          title, src: url, thumb, durationSec: meta.durationSec, clubId: club.id,
+          category: details?.[i]?.category, description: details?.[i]?.description,
+        });
+      }
     }
     if (skipped.length) notify(`این ویدیوها اضافه نشدند (سقف ۲۵ مگابایت): ${skipped.join('، ')}`);
     if (saved.length) await publishToChannel(saved, club.name);

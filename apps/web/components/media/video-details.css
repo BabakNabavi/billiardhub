@@ -1,0 +1,57 @@
+/* ─────────────────────────────────────────────────────────────
+   فرمِ مشخصاتِ ویدیو — روی همان واژگانِ دروازه‌ی کانال سوار است
+   (`cg-back`, `cg-box`, `cg-in`, `cg-go` …) و فقط چیزهایی را
+   اضافه می‌کند که مخصوصِ این فرم‌اند.
+
+   ⚠️ فقط `backdrop-filter` نوشته می‌شود، بدونِ `-webkit-` — همان
+   تله‌ای که در `channel-gate.css` توضیح داده شده.
+   ───────────────────────────────────────────────────────────── */
+
+/* ⚠️ بالاتر از نوارِ چسبانِ پایینِ صفحه‌ی باشگاه بنشیند */
+.vd-back { z-index: 1300; }
+
+.vd-box { width: min(100%, 520px); text-align: center; }
+
+/* فهرست می‌تواند بلند شود؛ خودش اسکرول می‌گیرد نه کلِ صفحه */
+.vd-list {
+  margin-top: 18px; text-align: start;
+  display: grid; gap: 16px;
+  max-height: min(56vh, 520px); overflow-y: auto;
+  padding-inline-end: 4px;
+}
+
+.vd-item {
+  padding: 14px; border-radius: 14px;
+  background: rgba(255, 255, 255, .7);
+  border: 1px solid rgba(22, 21, 15, .09);
+}
+
+.vd-head {
+  display: flex; align-items: center; gap: 10px; margin-bottom: 12px;
+  min-width: 0;
+}
+.vd-prev {
+  inline-size: 64px; block-size: 44px; flex: none;
+  border-radius: 9px; object-fit: cover; background: #16150F;
+}
+.vd-file {
+  font-size: 11.5px; color: #8A8474;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+
+/* ⚠️ `appearance: none` بدونِ شورون، این *اجباری‌ترین* کنترلِ فرم را
+   از دو فیلدِ متنیِ کنارش غیرقابلِ تشخیص می‌کرد. */
+.vd-selwrap { position: relative; }
+.vd-selwrap::after {
+  content: ''; position: absolute; inset-inline-start: 14px; top: 18px;
+  inline-size: 8px; block-size: 8px; pointer-events: none;
+  border-inline-start: 2px solid #8A8474; border-block-end: 2px solid #8A8474;
+  transform: rotate(-45deg);
+}
+.vd-sel { appearance: none; padding-inline-start: 34px; }
+.vd-area { resize: vertical; line-height: 1.9; }
+
+@media (max-width: 420px) {
+  .vd-list { max-height: 52vh; }
+  .vd-prev { inline-size: 54px; block-size: 38px; }
+}

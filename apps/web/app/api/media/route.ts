@@ -7,6 +7,7 @@ import { hitRateLimit, tooMany } from '@/lib/auth/rate-limit'
 import { getSupabaseServer } from '@/lib/supabase-server'
 import { listPublic, makeSlug, toPublic, myChannelHandles, type VideoRow } from '@/lib/media/server'
 import { keyFromUrl } from '@/lib/media/storage'
+import { MEDIA_CATEGORIES } from '@/lib/media-data'
 import { can } from '@/lib/admin/permissions'
 
 /* ─────────────────────────────────────────────────────────────
@@ -22,6 +23,9 @@ import { can } from '@/lib/admin/permissions'
    `GET` حالا `{ items, nextCursor }` برمی‌گرداند، نه آرایه‌ی خام.
    مصرف‌کننده‌ی قدیمی (`fetchUserVideos`) هم‌زمان به‌روز شد.
    ───────────────────────────────────────────────────────────── */
+
+/* کلیدهای معتبرِ دسته‌بندی — منبعش همان فهرستی است که رابط نشان می‌دهد */
+const CATEGORY_KEYS = new Set<string>(MEDIA_CATEGORIES.map(c => c.key))
 
 export function OPTIONS() { return new NextResponse(null, { status: 204, headers: CORS }) }
 
@@ -114,7 +118,10 @@ export async function POST(req: NextRequest) {
     description: Array.isArray(v.description)
       ? v.description.map(String).join('\n').slice(0, 4000)
       : String(v.description ?? '').slice(0, 4000),
-    category: String(v.category ?? 'other').slice(0, 40),
+    /* ⚠️ تا دیروز کلاینت همیشه ثابتِ `other` می‌فرستاد؛ از حالا کاربر
+       انتخابش می‌کند. کلیدِ ناشناخته خطا نمی‌دهد، فقط ویدیو را در
+       *همه‌ی* فیلترهای `/media` نامرئی می‌کند — بدترین نوعِ شکست. */
+    category: CATEGORY_KEYS.has(String(v.category)) ? String(v.category) : 'other',
     tags: Array.isArray(v.tags) ? v.tags.map(String).slice(0, 8) : [],
     owner_id: actor.id,
     creator_name: String(v.creatorName ?? 'کاربر').slice(0, 60),

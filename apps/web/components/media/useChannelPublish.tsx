@@ -50,6 +50,10 @@ export interface PublishVideo {
   /** فقط باشگاه: بدونِ این، `videos.club_id` تهی می‌ماند و ویدیو در
    *  فیلترِ `GET /api/media?club=` دیده نمی‌شود. */
   clubId?: string
+  /** دسته‌بندیِ انتخابیِ کاربر — محورِ اصلیِ پیداشدن در `/media` */
+  category?: string
+  /** توضیحِ کاربر — در `VideoObject` و نتیجه‌ی گوگل دیده می‌شود */
+  description?: string
 }
 
 /** `true` یعنی تصمیم گرفته شد، همین حالا ادامه بده (بدونِ await). */
@@ -140,7 +144,10 @@ export function useChannelPublish(
           body: JSON.stringify({
             video: {
               title: goodTitle(v.title, owner, i), src: v.src, thumb: v.thumb ?? '',
-              category: 'other', description: '',
+              /* ⚠️ پیش‌تر ثابت `other` و توضیحِ خالی می‌رفت — یعنی هیچ
+                 ویدیویی در دسته‌ی درستش پیدا نمی‌شد و `VideoObject`
+                 توضیح نداشت. حالا از فرمِ مشخصات می‌آید. */
+              category: v.category || 'other', description: v.description ?? '',
               creatorName: c.name, creatorHandle: c.handle,
               ...(v.durationSec ? { durationSec: v.durationSec } : {}),
               ...(v.clubId ? { clubId: v.clubId } : {}),

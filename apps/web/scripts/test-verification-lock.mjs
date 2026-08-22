@@ -444,9 +444,56 @@ const head = s => console.log(`\n■ ${s}`)
      نیست چون فایل‌ها انتخاب شده‌اند. */
   t('«+»ِ آلبوم فقط وقتی ویدیو هست می‌پرسد',
     /const pickBoth = \(album\?: string\) => \{ target\.current = album; bothRef\.current\?\.click\(\) \}/.test(pg)
-    && /if \(vids\.length\) \{[\s\S]{0,180}beforeAddVideos\?\.\(\)[\s\S]{0,120}onAddVideos\?\.\(vids/.test(pg))
+    && /if \(vids\.length\) \{[\s\S]{0,260}beforeAddVideos\?\.\(\)[\s\S]{0,200}onAddVideos\?\.\(vids/.test(pg))
+  /* ⚠️ عنوانِ ویدیو تا دیروز *نامِ فایل* بود و همان به مدیا می‌رفت:
+     «screen record 04-14-2026» برای بیننده بی‌معنا و برای گوگل
+     بی‌ارزش است. حالا کاربر خودش عنوان/دسته/توضیح می‌دهد. */
+  const vd = code('components/media/VideoDetailsDialog.tsx')
+  const vdl = code('lib/media/video-details.ts')
+  t('فرمِ مشخصاتِ ویدیو وجود دارد',
+    /export const weakTitle/.test(vdl) && /export const titleFromFile/.test(vdl)
+    && /VideoDetailsDialog/.test(pg))
+  t('منطقِ عنوان در lib است نه در کامپوننت',
+    !/const MACHINE =/.test(vd) && /'use client'/.test(vd) && !/'use client'/.test(vdl))
+  /* ⚠️ گزاره‌ی رشته‌ای کافی نیست: الگو یک‌بار «screen record 04 14 2026»
+     را رد نمی‌کرد (چون تابعِ نام، خط‌تیره را به فاصله می‌کند) و یک‌بار
+     «ScreenRecording…» را (چون جداکننده اجباری بود و «recording» نبود).
+     پس خودِ رفتار سنجیده می‌شود، نه متنِ رجکس. */
+  {
+    const src = read('lib/media/video-details.ts')
+    const m = src.match(/const MACHINE = (\/.*\/i)/)
+    const RX = m ? eval(m[1]) : null
+    const clean = (n) => n.replace(/\.[^.]+$/, '').replace(/[_-]+/g, ' ').replace(/\s+/g, ' ').trim()
+    const BAD = ['screen record 04-14-2026.mp4', 'ScreenRecording_04-14-2026 03-56-17_1.mov',
+      'IMG_1234.mp4', 'VID_20240101.mp4', 'WhatsApp 2024-01-01.mp4', 'Screenshot 2026-01-01.png']
+    const GOOD = ['آموزش ضربه‌ی کشویی', 'Low Bitrate', 'Screen recording of my best break',
+      'Trick shot 2026 در آرتا کلاب']
+    t('نامِ ماشینی به‌عنوانِ عنوان رد می‌شود',
+      !!RX && BAD.every(n => RX.test(clean(n))), BAD.filter(n => RX && !RX.test(clean(n))).join(' · '))
+    t('عنوانِ واقعی رد نمی‌شود',
+      !!RX && GOOD.every(n => !RX.test(n)), GOOD.filter(n => RX && RX.test(n)).join(' · '))
+  }
+  t('دسته‌بندی اجباری است', /دسته‌بندی را انتخاب کنید/.test(vd))
+  t('گالری پیش از آپلود مشخصات می‌پرسد',
+    /details = await askDetails\(vids, album\)/.test(pg)
+    && /if \(vids\.length && details\) await onAddVideos\?\.\(vids, album, details\)/.test(pg)
+    && pg.indexOf('await askDetails') < pg.indexOf('await onAddImages'))
+  /* عنوانِ گالری و عنوانِ مدیا باید یکی باشد */
+  for (const [p, who] of [['app/clubs/[id]/page.tsx', 'باشگاه'],
+    ['app/coaches/[id]/page.tsx', 'مربی'], ['app/referees/[id]/page.tsx', 'داور'],
+    ['app/players/[id]/page.tsx', 'بازیکن'], ['app/services/[id]/page.tsx', 'متخصص'],
+    ['app/sellers/[id]/FlatShop.tsx', 'فروشگاه'], ['app/manufacturers/[id]/page.tsx', 'تولیدکننده']]) {
+    const src = code(p)
+    t('عنوانِ کاربر در گالریِ ' + who + ' می‌نشیند',
+      !/title: file\.name\.replace/.test(src) && /detailTitle\(details, i, file\)/.test(src))
+    t('«فقط گالری»ِ ' + who + ' در مدیا منتشر نمی‌شود',
+      /details\?\.\[i\]\?\.publish !== false/.test(src))
+  }
   const hook = code('components/media/useChannelPublish.tsx')
   const cg = code('components/media/ChannelGate.tsx')
+  /* دسته و توضیح باید به سرور برسند، نه ثابتِ `other` */
+  t('دسته و توضیح به مدیا می‌روند',
+    /category: v\.category \|\| 'other'/.test(hook) && /description: v\.description \?\? ''/.test(hook))
   t('فهرستِ کانال‌ها از پیش خوانده می‌شود',
     /const cache = useRef/.test(hook) && /useEffect\(\(\) => \{[\s\S]{0,200}loadMyChannels/.test(hook))
   t('ask همگام تصمیم می‌گیرد', !/const ask = useCallback\(async/.test(hook))

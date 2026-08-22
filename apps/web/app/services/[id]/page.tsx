@@ -7,7 +7,8 @@
    بدون آمار/امتیاز. داده از lib/technicians-data.
    ───────────────────────────────────────────────────────────── */
 
-import { useChannelPublish } from '@/components/media/useChannelPublish'
+import { useChannelPublish, type PublishVideo } from '@/components/media/useChannelPublish'
+import { detailTitle, type VideoDetail } from '@/lib/media/video-details'
 import { useEffect, useMemo, useState } from 'react'
 import { ProfileMissing, ProfileLoading } from '@/components/profile/ProfileMissing'
 import { useProfileImageViewer } from '@/components/ProfileImageViewer'
@@ -152,12 +153,14 @@ export default function TechnicianProfilePage() {
     await edit.apply(d => ({ ...d, gallery: [...(d.gallery ?? []), ...items] }))
   }
 
-  const addVideoFiles = async (files: File[], album?: string) => {
+  /* `details` از فرمِ مشخصات می‌آید (عنوان/دسته/توضیح). تا دیروز
+     عنوان نامِ فایل بود و همان به مدیا می‌رفت. */
+  const addVideoFiles = async (files: File[], album?: string, details?: VideoDetail[]) => {
     setVidBusy(true)
     const skipped: string[] = []
-    const shipped: { title: string; src: string; thumb?: string; durationSec?: number }[] = []
+    const shipped: PublishVideo[] = []
     try {
-      for (const file of files) {
+      for (const [i, file] of files.entries()) {
         if (file.size > MAX_VIDEO_MB * 1024 * 1024) { skipped.push(file.name); continue }
         const meta = await videoMeta(file)
         const vid = `v${Date.now()}${Math.random().toString(36).slice(2, 6)}`
@@ -167,18 +170,24 @@ export default function TechnicianProfilePage() {
         const thumb = meta.thumb ? (await uploadFile('club-media', meta.thumb, `${base}-thumb`)) ?? '' : ''
         const ok = await edit.apply(d => ({
           ...d,
-          videos: [...(d.videos ?? []), { id: vid, url, thumbnail: thumb, title: file.name.replace(/\.[^.]+$/, ''), duration: formatDuration(meta.durationSec), ...(album ? { album } : {}) }],
+          videos: [...(d.videos ?? []), { id: vid, url, thumbnail: thumb, title: detailTitle(details, i, file), duration: formatDuration(meta.durationSec), ...(album ? { album } : {}) }],
         }))
         if (!ok) break
         /* ⚠️ فقط ویدیویی که *در گالری ذخیره شد* منتشر می‌شود. پیش‌تر
            این خط بالای `break` بود و ویدیویی که ذخیره‌اش شکست خورده
            بود هم به مدیا می‌رفت: در بیلیارد مدیا زنده، در پروفایل
            نبود، و کاربر پیام «ذخیره انجام نشد» دیده بود. */
-        shipped.push({ title: file.name.replace(/\.[^.]+$/, ''), src: url, thumb, durationSec: meta.durationSec })
+        /* «فقط در گالری بماند» یک تصمیمِ صریحِ کاربر است */
+        if (details?.[i]?.publish !== false) {
+          shipped.push({
+            title: detailTitle(details, i, file), src: url, thumb, durationSec: meta.durationSec,
+            category: details?.[i]?.category, description: details?.[i]?.description,
+          })
+        }
       }
     } finally {
       setVidBusy(false)
-      if (shipped.length) void publishToChannel(shipped, String(tech?.name ?? ''))
+      if (shipped.length) void publishToChannel(shipped, String(tech?.name ?? '')).catch(() => {})
       if (skipped.length) notify(`این ویدیوها اضافه نشدند (سقف ${MAX_VIDEO_MB} مگابایت): ${skipped.join('، ')}`)
     }
   }
