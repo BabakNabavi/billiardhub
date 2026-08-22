@@ -5,6 +5,7 @@
    seller/coach/referee. ذخیره = انتشار (approved).
    ───────────────────────────────────────────────────────────── */
 import { provinceOfCity } from './iran-geo'
+import { storedToTitles } from './tech-services'
 import { normalizeTechMedia, type Technician, type TechProject, type TechMedia, type TechVideo, type TechService } from './technicians-data'
 
 export interface TechnicianProfile {
@@ -124,7 +125,10 @@ export function profileToTechnician(p: TechnicianProfile): Technician {
     coverage: p.coverage.length ? p.coverage : [p.city].filter(Boolean),
     intro: p.intro,
     about: p.about.length ? p.about : [p.intro].filter(Boolean),
-    services: p.services,
+    /* ⚠️ دایرکتوری و جست‌وجو با *متن* کار می‌کنند. اگر شناسه‌ی خام
+       رد شود، اولین ذخیره‌ی پنل باعث می‌شود کارت «cloth» نشان بدهد
+       و فیلترِ خدمات هیچ نتیجه‌ای برنگرداند. */
+    services: storedToTitles(p.services),
     projects: p.projects,
     albums: media.albums,
     gallery: media.gallery,

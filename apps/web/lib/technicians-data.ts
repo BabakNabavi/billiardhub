@@ -5,6 +5,8 @@
    بعداً از پنل خود متخصص پر شوند.
    ───────────────────────────────────────────────────────────── */
 
+/** @deprecated فهرستِ تختِ قدیمی. کاتالوگِ رسمی:
+ *  `TECH_SERVICE_CATEGORIES` در `lib/tech-services`. */
 export const TECH_SERVICES = [
   'تعمیر میز',
   'رگلاژ و تراز میز',
@@ -17,7 +19,12 @@ export const TECH_SERVICES = [
   'خدمات چوب و تجهیزات',
 ] as const
 
-export type TechService = typeof TECH_SERVICES[number]
+/** ⚠️ گشاد شد: کاتالوگِ واقعی حالا در `lib/tech-services` است و
+ *  هجده خدمتِ دسته‌بندی‌شده دارد. این تایپ فقط برای میدانِ
+ *  `TechProject.service` مانده که مقدارهای ثبت‌شده‌ی قدیمی دارد. */
+export type TechService = string
+
+
 
 export interface TechProject {
   id: string

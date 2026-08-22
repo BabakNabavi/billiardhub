@@ -7,7 +7,7 @@
    مالکیت با user.id — همان الگوی پنل فروشگاه/مربی/داور.
    ───────────────────────────────────────────────────────────── */
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useMemo } from 'react'
 import Select from '../../../components/ui/Select'
 import Link from 'next/link'
 import { useAuthStore } from '../../../store/auth.store'
@@ -16,7 +16,9 @@ import CoverageCitySelect from '../../../components/CoverageCitySelect'
 import ProfileSlugField from '../../../components/ProfileSlugField'
 import ClubPicker from '../../../components/ClubPicker'
 import { compressImage } from '../../../lib/seller-store'
-import { TECH_SERVICES, normalizeTechMedia, type TechService, type TechProject } from '../../../lib/technicians-data'
+import { normalizeTechMedia, type TechProject, type TechService } from '../../../lib/technicians-data'
+import { storedToIds, idsToStored, toServiceId, ALL_TECH_SERVICES } from '@/lib/tech-services'
+import { ServicePicker } from '@/components/tech/ServicePicker'
 import {
   emptyTechnicianProfile, findTechnicianByOwner, newTechnicianSlug,
   saveTechnicianProfile, type TechnicianProfile,
@@ -102,8 +104,22 @@ export default function TechnicianDashboard() {
     setForm(f => ({ ...f, [k]: v })); setSaved(false); setErr('')
   }
 
-  const toggleService = (s: TechService) =>
-    set('services', form.services.includes(s) ? form.services.filter(x => x !== s) : [...form.services, s])
+  /* ── انتخابِ خدمات ──
+     ⚠️ از این پس *شناسه* ذخیره می‌شود نه متنِ فارسی، تا اصلاحِ
+     نگارشِ یک عنوان انتخابِ کسی را نشکند. مقادیرِ قدیمی که معادلِ
+     تازه ندارند دست‌نخورده کنارشان می‌مانند — داده‌ی این متخصص
+     است، پاک نمی‌شود. */
+  const pickedIds = useMemo(() => storedToIds(form.services), [form.services])
+  /* ⚠️ `trim` این‌جا هم لازم است: `storedToIds` تریم می‌کند، پس بدونِ
+     آن یک مقدارِ دارای فاصله در *هر دو* سطل می‌افتاد و ذخیره دوبار
+     می‌نوشتش. */
+  const keptLegacy = useMemo(
+    () => [...new Set((form.services ?? [])
+      .map(v => String(v).trim())
+      .filter(v => v && !toServiceId(v)))],
+    [form.services])
+  const onPickServices = (ids: string[]) =>
+    set('services', idsToStored(ids, keptLegacy) as TechnicianProfile['services'])
 
   /* ── پروژه‌ها ── */
   const pickPrjImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -304,20 +320,20 @@ export default function TechnicianDashboard() {
             </div>
           </section>
 
-          {/* ═══ خدمات ═══ */}
+          {/* ═══ خدمات ═══
+              ⚠️ همان کاتالوگی که در پروفایلِ عمومی دیده می‌شود، فقط
+              قابلِ انتخاب. هر دو از `lib/tech-services` می‌خوانند، پس
+              نمی‌توانند از هم جدا بیفتند. */}
           <section className={CARD}>
-            <h2 className="mb-4 text-[14.5px] font-bold">خدمات من *</h2>
-            <div className="flex flex-wrap gap-2">
-              {TECH_SERVICES.map(s => {
-                const on = form.services.includes(s)
-                return (
-                  <button key={s} type="button" onClick={() => toggleService(s)}
-                    className={`inline-flex items-center gap-1.5 rounded-[10px] border px-3.5 py-2 text-[12.5px] font-bold transition ${on ? 'border-[rgba(199,166,106,0.4)] bg-[rgba(199,166,106,0.13)] text-[#8F6531]' : 'border-[#E7E2D6] bg-white text-[#5B564B] hover:border-[rgba(199,166,106,0.4)]'}`}>
-                    {on && <Check size={13} />}{s}
-                  </button>
-                )
-              })}
-            </div>
+            <h2 className="mb-1 text-[14.5px] font-bold">خدمات فنی من *</h2>
+            <p className="mb-4 text-[12.5px] leading-[1.9] text-[#6F6A5C]">
+              فقط چیزهایی را انتخاب کنید که واقعاً انجام می‌دهید؛ همین‌ها در صفحه‌ی
+              عمومی شما دیده می‌شوند.
+            </p>
+            <ServicePicker
+              selected={pickedIds} onChange={onPickServices}
+              legacy={keptLegacy}
+              onLegacyChange={next => set('services', idsToStored(pickedIds, next))} />
           </section>
 
           {/* ═══ تماس ═══ */}
@@ -360,7 +376,8 @@ export default function TechnicianDashboard() {
               <input className={INPUT} value={prj.title} onChange={e => setPrj(p => ({ ...p, title: e.target.value }))} placeholder="عنوان پروژه — مثال: بازسازی میز اسنوکر" />
               <Select
                 value={prj.service} ariaLabel="نوع خدمات" placeholder="نوع خدمات…"
-                options={TECH_SERVICES.map(s => ({ value: s, label: s }))}
+                /* از همان کاتالوگِ واحد، نه فهرستِ دومِ هاردکد */
+                options={ALL_TECH_SERVICES.map(s => ({ value: s.title, label: s.title }))}
                 onChange={v => setPrj(p => ({ ...p, service: v as TechService }))} />
               <input className={INPUT} value={prj.city} onChange={e => setPrj(p => ({ ...p, city: e.target.value }))} placeholder={`شهر (پیش‌فرض: ${form.city || '—'})`} />
               <input className={INPUT} value={prj.club} onChange={e => setPrj(p => ({ ...p, club: e.target.value }))} placeholder="باشگاه / محل انجام (اگر بود)" />
