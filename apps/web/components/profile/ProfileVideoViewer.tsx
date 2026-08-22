@@ -18,23 +18,31 @@
    ───────────────────────────────────────────────────────────── */
 
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { X, Trash2 } from 'lucide-react'
+import { X, Trash2, Pencil } from 'lucide-react'
 
 export interface ViewerVideo { url?: string; thumbnail?: string; title?: string }
 
 export function useProfileVideoViewer() {
-  const [state, setState] = useState<{ v: ViewerVideo; onDelete?: () => void | Promise<void> } | null>(null)
+  const [state, setState] = useState<{
+    v: ViewerVideo
+    onDelete?: () => void | Promise<void>
+    onEdit?: () => void
+  } | null>(null)
   const closeRef = useRef<HTMLButtonElement>(null)
   const boxRef = useRef<HTMLDivElement>(null)
   /* عنصری که پیش از باز شدنِ پنجره فوکوس داشت — باید به آن برگردد */
   const prevFocus = useRef<HTMLElement | null>(null)
 
-  const open = useCallback((v: ViewerVideo, opts?: { onDelete?: () => void | Promise<void> }) => {
+  const open = useCallback((v: ViewerVideo, opts?: {
+    onDelete?: () => void | Promise<void>
+    /** ویرایشِ عنوان/دسته — فقط برای صاحبِ ویدیو */
+    onEdit?: () => void
+  }) => {
     /* ردیفِ قدیمی فقط بندانگشتی دارد و چیزی برای پخش نیست. خانه‌ی
        شبکه هم برای همین‌ها دکمه نمی‌سازد؛ این گارد تورِ دوم است. */
     if (!v.url) return
     prevFocus.current = document.activeElement as HTMLElement | null
-    setState({ v, onDelete: opts?.onDelete })
+    setState({ v, onDelete: opts?.onDelete, onEdit: opts?.onEdit })
   }, [])
 
   const close = useCallback(() => setState(null), [])
@@ -84,6 +92,15 @@ export function useProfileVideoViewer() {
       aria-label={state.v.title ? `ویدیو: ${state.v.title}` : 'ویدیو'}
       onClick={e => { if (e.target === e.currentTarget) close() }}>
       <div className="pvv-bar">
+        {state.onEdit && (
+          /* ⚠️ پنجره بسته می‌شود: فرمِ ویرایش خودش یک پنجره‌ی مودال است
+             و دو مودالِ روی هم، تلّه‌ی فوکوس را می‌شکند. */
+          <button type="button" className="pvv-btn"
+            onClick={() => { const go = state.onEdit; close(); go?.() }}
+            aria-label="ویرایش عنوان و دسته‌بندی">
+            <Pencil size={17} aria-hidden />
+          </button>
+        )}
         {state.onDelete && (
           /* ⚠️ بعد از حذف باید بسته شود: نسخه‌ی اول باز می‌ماند و روی
              نشانیِ حذف‌شده پخش می‌کرد؛ کلیکِ دوم هم یک ذخیره‌ی دیگر

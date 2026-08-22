@@ -76,8 +76,10 @@ export function useChannelPublish(
   ownerKey: string | undefined,
   /** فقط صاحبِ پروفایل حق انتشار دارد */
   isOwner: boolean,
-  /** پیام‌رسانِ خودِ صفحه — شکست نباید بی‌صدا بماند */
-  notify?: (msg: string) => void,
+  /** پیام‌رسانِ خودِ صفحه — شکست نباید بی‌صدا بماند.
+   *  ⚠️ لحنِ پیش‌فرضِ `notify` «خطا» است، پس پیامِ موفقیت باید صریحاً
+   *  `'ok'` بگیرد؛ وگرنه «منتشر شد» قرمز نشان داده می‌شود. */
+  notify?: (msg: string, tone?: 'ok' | 'gold' | 'danger') => void,
 ) {
   const [pending, setPending] = useState<PublishVideo[] | null>(null)
   /* ⚠️ نسخه‌ی اول فقط *بعد از* آپلود می‌پرسید. یعنی کاربر ۲۵ مگابایت
@@ -161,7 +163,7 @@ export function useChannelPublish(
     }
     if (notify) {
       if (errs.length) notify(`انتشار در بیلیارد مدیا انجام نشد: ${[...new Set(errs)].join('، ')} — ویدیو در گالری هست.`)
-      else if (done) notify(`${done === 1 ? 'ویدیو' : `${done} ویدیو`} در کانال «${c.name}» منتشر شد.`)
+      else if (done) notify(`${done === 1 ? 'ویدیو' : `${done} ویدیو`} در کانال «${c.name}» منتشر شد.`, 'ok')
     }
   }, [notify])
 

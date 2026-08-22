@@ -22,6 +22,7 @@ import { uploadFile } from '@/lib/supabase'
 import { videoMeta, formatDuration } from '@/lib/video-thumb'
 import { notify } from '@/lib/ui/dialogs'
 import { useChannelPublish, type PublishVideo } from '@/components/media/useChannelPublish'
+import { useVideoEdit } from '@/components/media/useVideoEdit'
 import { detailTitle, type VideoDetail } from '@/lib/media/video-details'
 import '@/components/profile/profile-page.css'
 import { useTabKeys } from '@/hooks/use-tab-keys'
@@ -509,6 +510,17 @@ export default function ClubProfilePage() {
     if (saved.length) await publishToChannel(saved, club.name);
   };
 
+  /* ── ویرایشِ عنوانِ ویدیو ── (توضیح در بقیه‌ی نقش‌ها) */
+  const { dialog: videoEditDialog, edit: editVideo } = useVideoEdit(
+    async (target, detail) => {
+      /* ⚠️ بدونِ این، نبودِ ردیف هم «موفق» شمرده می‌شد و مدیا عوض
+         می‌شد در حالی که گالری عنوانِ قبلی را نشان می‌دهد. */
+      if (!clubVideos.some(x => x.url === target.url)) return false;
+      return await saveClubVideos(clubVideos.map(x => (x.url === target.url ? { ...x, title: detail.title } : x)));
+    },
+    notify,
+  );
+
   const deleteClubVideo = async (vid: string) => {
     if (!(await ask('این ویدیو حذف شود؟', { body: 'این کار برگشت‌پذیر نیست.', confirmLabel: 'حذف' }))) return;
     await saveClubVideos(clubVideos.filter(v => v.id !== vid));
@@ -1339,7 +1351,7 @@ export default function ClubProfilePage() {
                   index, ...meta,
                   ...(isClubOwner ? { onDelete: (i: number) => deleteClubPhoto(ids[i] ?? '') } : {}),
                 })}
-                onOpenVideo={v => openVideo(v, isClubOwner ? { onDelete: () => deleteClubVideo(v.id) } : undefined)}
+                onOpenVideo={v => openVideo(v, isClubOwner ? { onDelete: () => deleteClubVideo(v.id), onEdit: () => editVideo(v) } : undefined)}
                 canEdit={isClubOwner} busy={albumBusy}
                 onAddImages={addClubPhotos} onAddVideos={addClubVideos} beforeAddVideos={() => askChannel(String(club?.name ?? ''))} onNewAlbum={newClubAlbum}
               />
@@ -1478,7 +1490,8 @@ export default function ClubProfilePage() {
 
       {imageViewer}
       {videoViewer}
-      {channelGate}
+      {channelGate}
+      {videoEditDialog}
 
       {storyViewer && club.storyMediaUrl && (
         <ClubStoryModal

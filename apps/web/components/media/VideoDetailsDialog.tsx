@@ -23,16 +23,28 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { X, Clapperboard, Check } from 'lucide-react'
+import { X, Clapperboard, Check, Loader2 } from 'lucide-react'
 import { MEDIA_CATEGORIES } from '@/lib/media-data'
 import { toFaDigits } from '@/lib/jalali'
 import { titleFromFile, weakTitle, type VideoDetail } from '@/lib/media/video-details'
 import './video-details.css'
 
-function DetailRow({ i, file, preview, value, err, showErr, onChange, inputRef }: {
+/** یک ردیفِ فرم: یا فایلی که تازه انتخاب شده، یا ویدیویی که از قبل
+ *  منتشر شده و فقط مشخصاتش عوض می‌شود. */
+export interface DetailTarget {
+  /** چیزی که زیرِ پیش‌نمایش نوشته می‌شود (نامِ فایل یا عنوانِ فعلی) */
+  name: string
+  /** فقط در حالتِ آپلود — برای ساختنِ پیش‌نمایشِ محلی */
+  file?: File
+  /** فقط در حالتِ ویرایش — بندانگشتیِ ویدیوی منتشرشده */
+  poster?: string
+}
+
+function DetailRow({ i, target, preview, needCat, value, err, showErr, onChange, inputRef }: {
   i: number
-  file: File
+  target: DetailTarget
   preview: string
+  needCat: boolean
   value: VideoDetail
   err: string
   showErr: boolean
@@ -44,8 +56,14 @@ function DetailRow({ i, file, preview, value, err, showErr, onChange, inputRef }
   return (
     <section className="vd-item">
       <div className="vd-head">
-        <video className="vd-prev" src={preview} muted playsInline preload="metadata" aria-hidden />
-        <span className="vd-file bh-latin" dir="ltr" title={file.name}>{file.name}</span>
+        {target.poster
+          ? <img className="vd-prev" src={target.poster} alt="" loading="lazy" decoding="async" />
+          : <video className="vd-prev" src={preview} muted playsInline preload="metadata" aria-hidden />}
+        {/* ⚠️ در ویرایش این‌جا عنوانِ *فارسیِ* فعلی می‌نشیند؛ `dir="ltr"`
+            و فونتِ لاتین همان چیزی است که قاعده‌ی RTL منعش می‌کند. */}
+        {target.file
+          ? <span className="vd-file bh-latin" dir="ltr" title={target.name}>{target.name}</span>
+          : <span className="vd-file" title={target.name}>{target.name}</span>}
       </div>
 
       <label className="cg-lab" htmlFor={`vd-t-${i}`}>عنوان</label>
@@ -57,9 +75,9 @@ function DetailRow({ i, file, preview, value, err, showErr, onChange, inputRef }
       <label className="cg-lab" htmlFor={`vd-c-${i}`}>دسته‌بندی</label>
       <div className="vd-selwrap">
         <select id={`vd-c-${i}`} className="cg-in vd-sel" value={value.category}
-          aria-invalid={showErr && !value.category}
+          aria-invalid={showErr && needCat && !value.category}
           onChange={e => onChange({ category: e.target.value })}>
-          <option value="">انتخاب کنید…</option>
+          <option value="">{needCat ? 'انتخاب کنید…' : 'بدون تغییر'}</option>
           {MEDIA_CATEGORIES.map(c => <option key={c.key} value={c.key}>{c.label}</option>)}
         </select>
       </div>
@@ -74,21 +92,33 @@ function DetailRow({ i, file, preview, value, err, showErr, onChange, inputRef }
   )
 }
 
-export default function VideoDetailsDialog({ files, onDone, onSkip, onClose }: {
-  files: File[]
-  /** کاربر مشخصات را داد — به ترتیبِ همان `files` */
+export default function VideoDetailsDialog({
+  targets, initial, mode = 'create', busy = false, error = '', onDone, onSkip, onClose,
+}: {
+  targets: DetailTarget[]
+  /** ذخیره در جریان است — دکمه باید حالتِ لودینگ داشته باشد */
+  busy?: boolean
+  /** خطای ذخیره — پنجره باز می‌ماند تا نوشته‌ی کاربر از دست نرود */
+  error?: string
+  /** مقدارِ اولیه — در حالتِ ویرایش، مشخصاتِ فعلیِ ویدیو */
+  initial?: VideoDetail[]
+  /** `create` = پیش از آپلود · `edit` = ویدیوی منتشرشده */
+  mode?: 'create' | 'edit'
+  /** کاربر مشخصات را داد — به ترتیبِ همان `targets` */
   onDone: (d: VideoDetail[]) => void
   /** «فقط در گالری بماند» — عنوانِ نوشته‌شده می‌ماند، فقط منتشر نمی‌شود */
-  onSkip: (d: VideoDetail[]) => void
-  /** انصراف از کلِ افزودن */
+  onSkip?: (d: VideoDetail[]) => void
+  /** انصراف */
   onClose: () => void
 }) {
   const [items, setItems] = useState<VideoDetail[]>(() =>
-    files.map(f => ({ title: titleFromFile(f.name), category: '', description: '', publish: true })))
+    targets.map((tg, i) => initial?.[i]
+      ?? { title: titleFromFile(tg.name), category: '', description: '', publish: true }))
   /* ⚠️ عنوانِ پیش‌پُر برای دقیقاً همان فایل‌هایی که هدفِ این قابلیت‌اند
      از اول نامعتبر است. اگر خطا را تا اولین تایپ پنهان کنیم، کاربر یک
      دکمه‌ی طلاییِ مرده می‌بیند بی‌آنکه بداند چرا. */
-  const [touched, setTouched] = useState(() => files.some(f => !!weakTitle(titleFromFile(f.name))))
+  const [touched, setTouched] = useState(() =>
+    targets.some((tg, i) => !!weakTitle(initial?.[i]?.title ?? titleFromFile(tg.name))))
   const [previews, setPreviews] = useState<string[]>([])
   const boxRef = useRef<HTMLDivElement>(null)
   const firstRef = useRef<HTMLInputElement>(null)
@@ -96,10 +126,10 @@ export default function VideoDetailsDialog({ files, onDone, onSkip, onClose }: {
   /* ⚠️ ساختنِ blob در بدنه‌ی رندر عارضه‌ی جانبی است و رندرِ دورریخته
      (StrictMode) نشتی می‌ساخت. در افکت ساخته و همان‌جا آزاد می‌شود. */
   useEffect(() => {
-    const urls = files.map(f => URL.createObjectURL(f))
+    const urls = targets.map(tg => (tg.file ? URL.createObjectURL(tg.file) : ''))
     setPreviews(urls)
-    return () => urls.forEach(URL.revokeObjectURL)
-  }, [files])
+    return () => urls.forEach(u => { if (u) URL.revokeObjectURL(u) })
+  }, [targets])
 
   /* ⚠️ افکتِ فوکوس نباید به *هویتِ* کالبک وابسته باشد. `onClose` در
      والد یک آروی درجاست، پس هر رندرِ والد افکت را از نو می‌دواند و
@@ -134,7 +164,11 @@ export default function VideoDetailsDialog({ files, onDone, onSkip, onClose }: {
     setItems(list => list.map((it, k) => (k === i ? { ...it, ...patch } : it)))
   }, [])
 
-  const errs = items.map(it => weakTitle(it.title) || (it.category ? '' : 'دسته‌بندی را انتخاب کنید'))
+  /* ⚠️ در ویرایش، دسته‌بندیِ فعلی در دسترسِ ما نیست؛ اجباری‌کردنش
+     یعنی کاربر مجبور شود چیزی را که نمی‌بیند دوباره انتخاب کند و هر
+     تغییرِ نام، دسته‌بندیِ درست را بی‌صدا عوض کند. */
+  const needCat = mode === 'create'
+  const errs = items.map(it => weakTitle(it.title) || (!needCat || it.category ? '' : 'دسته‌بندی را انتخاب کنید'))
   const ready = errs.every(e => !e)
 
   /* ⚠️ عنوانِ نوشته‌شده حتی وقتی منتشر نمی‌شود باید بماند. نسخه‌ی اول
@@ -142,7 +176,7 @@ export default function VideoDetailsDialog({ files, onDone, onSkip, onClose }: {
      همان چیزی که این قابلیت برای حذفش آمده. */
   const kept = (publish: boolean) => items.map((it, i) => ({
     ...it, publish,
-    title: it.title.trim() || titleFromFile(files[i]!.name),
+    title: it.title.trim() || titleFromFile(targets[i]!.name),
   }))
 
   if (typeof document === 'undefined') return null
@@ -150,38 +184,48 @@ export default function VideoDetailsDialog({ files, onDone, onSkip, onClose }: {
   return createPortal(
     <div className="cg-back vd-back" role="presentation" onClick={e => { if (e.target === e.currentTarget) onClose() }}>
       <div ref={boxRef} className="cg-box vd-box" role="dialog" aria-modal="true" aria-labelledby="vd-title">
-        <button type="button" className="cg-x" onClick={onClose} aria-label="بستن">
+        <button type="button" className="cg-x" onClick={onClose} disabled={busy} aria-label="بستن">
           <X size={17} />
         </button>
 
         <span className="cg-icon" aria-hidden><Clapperboard size={20} /></span>
         <h2 id="vd-title" className="cg-title">
-          {files.length === 1 ? 'مشخصات ویدیو' : `مشخصات ${toFaDigits(files.length)} ویدیو`}
+          {mode === 'edit' ? 'ویرایش مشخصات ویدیو'
+            : targets.length === 1 ? 'مشخصات ویدیو' : `مشخصات ${toFaDigits(targets.length)} ویدیو`}
         </h2>
         <p className="cg-sub">
-          عنوان همان چیزی است که بیننده و گوگل می‌بینند. نامِ فایل عنوان نیست.
+          {mode === 'edit'
+            ? 'عنوانِ تازه هم در گالری و هم در بیلیارد مدیا می‌نشیند. نشانیِ قبلی هم کار می‌کند.'
+            : 'عنوان همان چیزی است که بیننده و گوگل می‌بینند. نامِ فایل عنوان نیست.'}
         </p>
 
-        <form onSubmit={e => { e.preventDefault(); if (ready) onDone(kept(true)) }}>
+        <form onSubmit={e => { e.preventDefault(); if (ready && !busy) onDone(kept(true)) }}>
           <div className="vd-list">
             {items.map((it, i) => (
-              <DetailRow key={i} i={i} file={files[i]!} preview={previews[i] ?? ''}
+              <DetailRow key={i} i={i} target={targets[i]!} preview={previews[i] ?? ''}
+                needCat={needCat}
                 value={it} err={errs[i] ?? ''} showErr={touched}
                 onChange={patch => set(i, patch)}
                 inputRef={i === 0 ? firstRef : undefined} />
             ))}
           </div>
 
+          {error && <p role="alert" className="cg-err">{error}</p>}
+
           <div className="cg-actions">
-            <button type="submit" className="cg-go" disabled={!ready}>
-              <Check size={15} aria-hidden /> بارگذاری و انتشار
+            <button type="submit" className="cg-go" disabled={!ready || busy}>
+              {busy
+                ? <><Loader2 size={15} className="vd-spin" aria-hidden /> در حال ذخیره…</>
+                : <><Check size={15} aria-hidden /> {mode === 'edit' ? 'ذخیره‌ی تغییرات' : 'بارگذاری و انتشار'}</>}
             </button>
           </div>
         </form>
 
-        <button type="button" className="cg-skip" onClick={() => onSkip(kept(false))}>
-          بدونِ انتشار در مدیا — فقط در گالری بماند
-        </button>
+        {onSkip && (
+          <button type="button" className="cg-skip" onClick={() => onSkip(kept(false))}>
+            بدونِ انتشار در مدیا — فقط در گالری بماند
+          </button>
+        )}
       </div>
     </div>,
     document.body,

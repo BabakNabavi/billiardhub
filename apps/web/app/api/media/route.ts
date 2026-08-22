@@ -7,7 +7,9 @@ import { hitRateLimit, tooMany } from '@/lib/auth/rate-limit'
 import { getSupabaseServer } from '@/lib/supabase-server'
 import { listPublic, makeSlug, toPublic, myChannelHandles, type VideoRow } from '@/lib/media/server'
 import { keyFromUrl } from '@/lib/media/storage'
+import { z } from 'zod'
 import { MEDIA_CATEGORIES } from '@/lib/media-data'
+import { weakTitle } from '@/lib/media/video-details'
 import { can } from '@/lib/admin/permissions'
 
 /* ─────────────────────────────────────────────────────────────
@@ -162,6 +164,110 @@ export async function POST(req: NextRequest) {
 }
 
 /* DELETE ?slug= یا ?id= → حذفِ ویدیوی خودِ کاربر (یا ادمین) */
+const PATCH_BODY = z.object({
+  src: z.string().max(2048).optional(),
+  slug: z.string().max(160).optional(),
+  id: z.string().max(64).optional(),
+  /* اختیاری تا اصلاحِ فقط-دسته هم ممکن باشد */
+  title: z.string().max(300).optional(),
+  category: z.string().max(60).optional(),
+  description: z.string().max(4000).optional(),
+})
+
+/* ── PATCH { src|slug|id, title?, category?, description? } ──
+   ویرایشِ مشخصاتِ ویدیوی *خودِ کاربر*.
+
+   ⚠️ تا امروز فقط مسیرِ ادمین می‌توانست عنوان را عوض کند و هیچ صفحه‌ای
+   از آن استفاده نمی‌کرد — یعنی ویدیویی که یک‌بار با نامِ فایل منتشر
+   شده بود تا ابد همان می‌ماند. عنوان مهم‌ترین سیگنالِ جست‌وجوست؛
+   صاحبِ ویدیو باید بتواند اصلاحش کند.
+
+   ⚠️ `src` هم پذیرفته می‌شود چون گالریِ پروفایل فقط نشانیِ فایل را
+   نگه می‌دارد، نه شناسه‌ی ردیفِ مدیا. */
+export async function PATCH(req: NextRequest) {
+  const actor = await actorOf(req)
+  if (!actor) return NextResponse.json(UNAUTHENTICATED, { status: 401, headers: CORS })
+
+  /* ⚠️ هر تغییرِ عنوان یک ردیفِ تازه در تاریخچه‌ی نشانی می‌نویسد و
+     نشانیِ عمومی را می‌چرخاند؛ بدونِ سقف، هم جدول باد می‌کند هم
+     نشانی‌های `/media/…` بی‌ثبات می‌شوند. */
+  const rl = await hitRateLimit(req, { action: 'video-patch', max: 30, windowSec: 3600 }, actor.id)
+  if (!rl.ok) return tooMany(rl.retryAfterSec)
+
+  const parsed = PATCH_BODY.safeParse(await req.json().catch(() => ({})))
+  if (!parsed.success) {
+    const bad = parsed.error.issues[0]
+    return NextResponse.json(
+      { ok: false, message: `مقدارِ «${String(bad?.path?.[0] ?? 'ورودی')}» پذیرفته نشد` },
+      { status: 400, headers: CORS })
+  }
+  const b = parsed.data
+  const src = (b.src ?? '').trim()
+  const slug = (b.slug ?? '').trim()
+  const id = (b.id ?? '').trim()
+  if (!src && !slug && !id) {
+    return NextResponse.json({ ok: false, message: 'ویدیو مشخص نشده است' }, { status: 400, headers: CORS })
+  }
+
+  /* عنوان اختیاری است تا اصلاحِ فقط-دسته یا فقط-توضیح هم ممکن باشد */
+  const title = b.title !== undefined ? b.title.trim().slice(0, 160) : ''
+  if (title) {
+    /* همان قاعده‌ای که فرمِ آپلود اعمال می‌کند — یک منبع، دو مصرف‌کننده */
+    const weak = weakTitle(title)
+    if (weak) return NextResponse.json({ ok: false, message: weak }, { status: 400, headers: CORS })
+  }
+
+  const sb = getSupabaseServer()
+  let sel = sb.from('videos').select('id,slug,title,owner_id')
+  /* ⚠️ `src` یکتا نیست و POST هر رشته‌ای را می‌پذیرد، پس دو ردیف با یک
+     نشانی ممکن است. `maybeSingle` در آن حالت `null` می‌دهد — یعنی
+     مالکِ واقعی برای همیشه ۴۰۴ می‌گرفت. با محدودکردن به خودِ کاربر،
+     ردیفِ غریبه اصلاً وارد نتیجه نمی‌شود. */
+  sel = id ? sel.eq('id', id) : slug ? sel.eq('slug', slug) : sel.eq('src', src)
+  if (src && !id && !slug && !actor.isAdmin) sel = sel.eq('owner_id', actor.id)
+  const { data, error: findErr } = await sel.maybeSingle()
+  /* ⚠️ خطا را نبلع: «چند ردیف» و «خطای دیتابیس» هر دو این‌جا می‌نشستند
+     و به کاربر «ویدیو پیدا نشد» گفته می‌شد. */
+  if (findErr) {
+    console.error('[media] patch lookup:', findErr.message)
+    return NextResponse.json({ ok: false, message: 'خواندنِ ویدیو انجام نشد' }, { status: 500, headers: CORS })
+  }
+  const prev = data as { id: string; slug: string; title: string; owner_id: string | null } | null
+  /* `code` تا کلاینت «منتشر نشده» را از «خطا» جدا کند */
+  if (!prev) {
+    return NextResponse.json({ ok: false, code: 'no-media-row', message: 'ویدیو پیدا نشد' },
+      { status: 404, headers: CORS })
+  }
+
+  if (prev.owner_id !== actor.id && !actor.isAdmin) {
+    return NextResponse.json(FORBIDDEN, { status: 403, headers: CORS })
+  }
+
+  const patch: Record<string, unknown> = { updated_at: new Date().toISOString() }
+  if (title) patch.title = title
+  if (b.category !== undefined) {
+    patch.category = CATEGORY_KEYS.has(String(b.category)) ? String(b.category) : 'other'
+  }
+  if (b.description !== undefined) patch.description = String(b.description).slice(0, 4000)
+
+  /* عنوان که عوض شود نشانی هم باید عوض شود، وگرنه نشانی با محتوا
+     نمی‌خواند. نشانیِ قبلی در تاریخچه می‌ماند تا ۴۰۴ ندهد. */
+  const renamed = !!title && title !== prev.title
+  if (renamed) patch.slug = makeSlug(title)
+
+  const { data: row, error } = await sb.from('videos').update(patch).eq('id', prev.id).select('*').single()
+  if (error) {
+    console.error('[media] patch:', error.message)
+    return NextResponse.json({ ok: false, message: 'ذخیره‌ی تغییرات انجام نشد' }, { status: 500, headers: CORS })
+  }
+
+  /* ⚠️ *بعد از* موفقیت: نسخه‌ی اول تاریخچه را اول می‌نوشت، پس اگر
+     به‌روزرسانی شکست می‌خورد نشانیِ زنده به‌عنوان «قدیمی» ثبت می‌شد. */
+  if (renamed) await sb.from('video_slug_history').upsert({ slug: prev.slug, video_id: prev.id })
+
+  return NextResponse.json({ ok: true, video: toPublic(row as VideoRow) }, { headers: CORS })
+}
+
 export async function DELETE(req: NextRequest) {
   const actor = await actorOf(req)
   if (!actor) return NextResponse.json(UNAUTHENTICATED, { status: 401, headers: CORS })
