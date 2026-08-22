@@ -109,26 +109,37 @@ export async function deleteUserVideo(slugOrId: string, _user?: string): Promise
   } catch { return false }
 }
 
-/* ── کانال کاربر (برای انتشار ویدیو لازم است، مثل یوتیوب) ── */
-export interface UserChannel { ownerKey: string; name: string; handle: string; bio: string; avatar: string; createdAt: number }
+/* ── کانال کاربر (برای انتشار ویدیو لازم است، مثل یوتیوب) ──
 
-export async function fetchMyChannel(ownerKey: string): Promise<UserChannel | null> {
+   ⚠️ تایپ اینجا کپیِ سومِ `UserChannel` بود و `role`/`roles`/`id`
+   نداشت؛ یعنی هر کدی که از این فایل می‌خواند، کانالِ چندنقشی را
+   بی‌نقش می‌دید. حالا از منبعِ واحد می‌آید. */
+export type { UserChannel } from '@/lib/media/channel'
+import type { UserChannel, ChannelRole } from '@/lib/media/channel'
+
+/* ⚠️ `fetchMyChannel` (تکی) برداشته شد: «اولین کانالِ فهرست» همان
+   چیزی بود که ویدیوی مربی را زیرِ کانالِ فروشگاه می‌برد. هر
+   مصرف‌کننده باید فهرست را بگیرد و انتخاب را به کاربر بدهد. */
+/** همه‌ی کانال‌های کاربر. `null` یعنی نتوانستیم بخوانیم — نه «ندارد». */
+export async function fetchMyChannels(ownerKey: string): Promise<UserChannel[] | null> {
   try {
-    const r = await apiFetch(`/api/media/channel?owner=${encodeURIComponent(ownerKey)}`, { cache: 'no-store' })
+    const r = await apiFetch(`/api/media/channel?all=1&owner=${encodeURIComponent(ownerKey)}`, { cache: 'no-store' })
     if (!r.ok) return null
-    return await r.json()
+    const j = await r.json() as { channels?: UserChannel[] }
+    return Array.isArray(j?.channels) ? j.channels : []
   } catch { return null }
 }
 
-export async function checkHandle(handle: string, ownerKey: string): Promise<boolean> {
-  try {
-    const r = await apiFetch(`/api/media/channel?handle=${encodeURIComponent(handle)}&owner=${encodeURIComponent(ownerKey)}`, { cache: 'no-store' })
-    if (!r.ok) return false
-    return (await r.json())?.available === true
-  } catch { return false }
-}
+/* ⚠️ `checkHandle` برداشته شد: مصرف‌کننده نداشت و مسیرِ POST خودش
+   هندلِ تکراری را با ۴۰۹ و پیامِ فارسی رد می‌کند. یک گاردِ بی‌مصرف
+   یعنی گاردی که هیچ‌وقت با سرور هماهنگ نمی‌ماند. */
 
-export async function saveChannel(c: { ownerKey: string; name: string; handle: string; bio?: string; avatar?: string }): Promise<{ ok?: boolean; channel?: UserChannel; message?: string }> {
+/* `id` را حتماً بفرست وقتی کانالِ موجودی را ویرایش می‌کنی — بدونِ
+   آن، عوض‌کردنِ هندل یک کانالِ *تازه* می‌سازد. */
+/* ⚠️ `ownerKey` عمداً در امضا نیست: سرور مالک را از نشست می‌گیرد و
+   پارامترِ کلاینت را نادیده می‌گیرد. نگه‌داشتنش دعوت به همان اشتباهی
+   بود که کلیدِ نشست برای بستنش آمد. */
+export async function saveChannel(c: { id?: string; name: string; handle: string; bio?: string; avatar?: string; role?: ChannelRole; addRole?: ChannelRole }): Promise<{ ok?: boolean; channel?: UserChannel; message?: string }> {
   try {
     const r = await apiFetch('/api/media/channel', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(c) })
     return await r.json()

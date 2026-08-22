@@ -3,19 +3,20 @@
 /* آپلود ویدیو + ساخت خودکار کانال (مثل یوتیوب) — فقط کاربر لاگین‌کرده.
    مدت ویدیو و تامبنیل خودکار از فریم گرفته می‌شوند؛ آپلود روی Supabase Storage. */
 
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { mediaUploadPath } from '../lib/media/keys'
 import { createPortal } from 'react-dom'
-import { X, UploadCloud, Film, Image as ImageIcon, Check, Loader2, Tv } from 'lucide-react'
+import { X, UploadCloud, Film, Image as ImageIcon, Check, Loader2 } from 'lucide-react'
 import { useAuthStore } from '../store/auth.store'
 import { uploadFile } from '../lib/supabase'
-import { postUserVideo, fetchMyChannel, saveChannel, type UserChannel } from '../lib/media-user'
+import { postUserVideo, fetchMyChannels, saveChannel, type UserChannel } from '../lib/media-user'
 import { MEDIA_CATEGORIES, faDigits, type MediaVideo } from '../lib/media-data'
 import { publicDisplayName } from '../lib/public-name'
 import SelectField from './ui/SelectField'
+import { ChannelCreate, ChannelPicker } from './media/ChannelStep'
+import { INK, SEC, MUT, LINE, GOLD, GOLD_D, Field, inp, SPIN_CSS } from './media/upload-ui'
 
-const INK = '#1C1B17', SEC = '#5B564B', MUT = '#6F6A5C', LINE = '#EAE5DA'
-const GOLD = '#C7A66A', GOLD_D = '#8F6531'
+/* رنگ‌ها و ورودی‌ها با مرحله‌ی کانال مشترک‌اند — یک منبع، نه دو کپی */
 /* ── چرا ۲۵ و نه ۲۰۰ ──
    سقفِ واقعی `MAX_VIDEO` در `lib/upload/policy.ts` است و سطلِ
    `club-media` هم روی همان ۲۵ مگابایت بسته شده. عددِ ۲۰۰ فقط روی این
@@ -75,10 +76,24 @@ export default function MediaUpload({ open, onClose, onUploaded }: { open: boole
   const [phase, setPhase]       = useState('')
   const [err, setErr]           = useState('')
   const vref = useRef<HTMLVideoElement>(null)
+  /* پاسخِ کند از بازکردنِ قبلی نباید روی حالتِ تازه بنشیند */
+  const aliveRef = useRef(true)
 
-  /* کانال — مثل یوتیوب، برای انتشار لازم است و مرحله‌ی صریحی دارد */
+  /* کانال — مثل یوتیوب، برای انتشار لازم است و مرحله‌ی صریحی دارد.
+
+     ⚠️ این پنجره تا امروز فقط *یک* کانال می‌شناخت و کورکورانه در
+     اولینِ فهرست منتشر می‌کرد. از وقتی هر نقش می‌تواند کانالِ خودش
+     را داشته باشد، «اولین» یعنی هر کدام که زودتر ساخته شده — و
+     ویدیوی مربی می‌رفت زیرِ کانالِ فروشگاه. */
+  const [channels, setChannels] = useState<UserChannel[]>([])
   const [channel, setChannel] = useState<UserChannel | null>(null)
+  /** کاربر صریحاً «کانال تازه» زده — با اینکه کانال دارد */
+  const [making, setMaking] = useState(false)
   const [chLoaded, setChLoaded] = useState(false)
+  /* ⚠️ «خطا داریم و فهرست خالی است» کافی نبود: نامِ پیشنهادیِ
+     خواندنِ *قبلی* گارد را خاموش می‌کرد و فرمِ «کانال بساز» به
+     کاربری که کانال داشت نشان داده می‌شد. */
+  const [chFailed, setChFailed] = useState(false)
   const [chName, setChName] = useState('')
   const [chHandle, setChHandle] = useState('')
   const [chBio, setChBio] = useState('')
@@ -86,26 +101,74 @@ export default function MediaUpload({ open, onClose, onUploaded }: { open: boole
   const ownerKey = user ? (user.phone || user.id || user.firstName || 'user') : ''
 
   useEffect(() => () => { if (videoUrl) URL.revokeObjectURL(videoUrl) }, [videoUrl])
+  /* `user` فقط برای نامِ پیشنهادی لازم است. اگر در وابستگی‌ها بماند،
+     هر به‌روزرسانیِ استورِ احراز هویت افکت را دوباره می‌دواند و
+     انتخابِ کاربر را وسطِ آپلود به کانالِ اول برمی‌گرداند. */
+  const userRef = useRef(user)
+  /* نوشتن روی ref در بدنه‌ی رندر عارضه‌ی جانبی است؛ در افکت امن است. */
+  useEffect(() => { userRef.current = user }, [user])
+
+  const loadChannels = useCallback(async () => {
+    if (!ownerKey) return
+    setErr(''); setChLoaded(false); setChFailed(false)
+    const list = await fetchMyChannels(ownerKey)
+    if (!aliveRef.current) return
+    /* `null` یعنی نتوانستیم بخوانیم — نه «ندارد». فرمِ «کانال بساز»
+       در آن حالت دروغ می‌گفت و کاربر کانالِ تکراری می‌ساخت. پس
+       فهرستِ کهنه هم باید برود؛ وگرنه کنارِ پیامِ خطا چیپ‌های
+       دفعه‌ی قبل دیده می‌شوند. */
+    if (list === null) {
+      setChannels([]); setChannel(null); setChLoaded(true); setChFailed(true)
+      setErr('فهرست کانال‌ها خوانده نشد.')
+      return
+    }
+    setChannels(list)
+    /* انتخابِ فعلی اگر هنوز هست بماند — رفرشِ فهرست نباید مقصدِ
+       انتشار را زیرِ دستِ کاربر عوض کند. */
+    setChannel(cur => list.find(c => (c.id ?? c.handle) === (cur?.id ?? cur?.handle)) ?? list[0] ?? null)
+    setChLoaded(true)
+    /* نامِ پیشنهادی همان نامِ عمومی است — حسابِ رسمی نباید نامِ شخص
+       را روی کانالِ ویدیو ببرد. */
+    if (!list.length) { setChName(publicDisplayName(userRef.current, '')); setChHandle('') }
+  }, [ownerKey])
+
   useEffect(() => {
     if (!open || !ownerKey) return
-    setErr(''); setChLoaded(false)
-    fetchMyChannel(ownerKey).then(c => {
-      setChannel(c); setChLoaded(true)
-      /* نام از پروفایل پیشنهاد می‌شود؛ هندل را خود کاربر انتخاب می‌کند */
-      /* نامِ پیشنهادی همان نامِ عمومی است — حسابِ رسمی نباید نامِ شخص
-         را روی کانالِ ویدیو ببرد. */
-      if (!c) { setChName(publicDisplayName(user, '')); setChHandle('') }
-    })
-  }, [open, ownerKey, user])
+    aliveRef.current = true
+    setMaking(false)
+    void loadChannels()
+    return () => { aliveRef.current = false }
+  }, [open, ownerKey, loadChannels])
 
   const createChannel = async () => {
     if (busy) return
     setErr(''); setBusy(true)
-    const r = await saveChannel({ ownerKey, name: chName, handle: chHandle, bio: chBio })
+    const r = await saveChannel({ name: chName, handle: chHandle, bio: chBio })
     setBusy(false)
     if (!r?.ok || !r.channel) { setErr(r?.message || 'ساخت کانال ناموفق بود'); return }
-    setChannel(r.channel)
+    const made = r.channel
+    setChannels(list => [...list.filter(c => (c.id ?? c.handle) !== (made.id ?? made.handle)), made])
+    setChannel(made); setMaking(false)
+    setChName(''); setChHandle(''); setChBio('')
   }
+
+  /* فرمِ ساخت وقتی باز است که کانالی نیست، یا کاربر خودش خواسته */
+  const creating = !channel || making
+
+  /* متادیتای واقعیِ فایل، از خودِ مرورگر.
+
+     تا امروز فقط رشته‌ی «۰۴:۱۳» برای نمایش ساخته می‌شد و ثانیه/ابعاد
+     دور ریخته می‌شد. آن اعداد همان چیزی‌اند که `VideoObject` و نقشه‌ی
+     سایتِ ویدیو لازم دارند — و بدونشان یا آن فیلد نمی‌آید یا باید
+     عددِ ساختگی گذاشت، که به گوگل دروغ می‌گوید.
+
+     همه‌جا NULL می‌ماند اگر مرورگر نتوانست بخواند؛ صفر گذاشته نمی‌شود. */
+  const [meta, setMeta] = useState<{ durationSec?: number; width?: number; height?: number }>({})
+
+  /* ⚠️ هر هوک باید *بالای* بازگشتِ زودهنگام باشد. این یکی پایین بود و
+     فقط چون تنها مصرف‌کننده‌اش پنجره را با `open` ثابتِ true سوار
+     می‌کند نمی‌ترکید؛ اولین کسی که `open={x}` بنویسد «Rendered more
+     hooks than during the previous render» می‌گرفت. */
 
   if (!open) return null
 
@@ -120,15 +183,6 @@ export default function MediaUpload({ open, onClose, onUploaded }: { open: boole
     if (!title) setTitle(f.name.replace(/\.[^.]+$/, '').slice(0, 120))
   }
 
-  /* متادیتای واقعیِ فایل، از خودِ مرورگر.
-
-     تا امروز فقط رشته‌ی «۰۴:۱۳» برای نمایش ساخته می‌شد و ثانیه/ابعاد
-     دور ریخته می‌شد. آن اعداد همان چیزی‌اند که `VideoObject` و نقشه‌ی
-     سایتِ ویدیو لازم دارند — و بدونشان یا آن فیلد نمی‌آید یا باید
-     عددِ ساختگی گذاشت، که به گوگل دروغ می‌گوید.
-
-     همه‌جا NULL می‌ماند اگر مرورگر نتوانست بخواند؛ صفر گذاشته نمی‌شود. */
-  const [meta, setMeta] = useState<{ durationSec?: number; width?: number; height?: number }>({})
   const onMeta = () => {
     const v = vref.current; if (!v) return
     setDuration(fmtDur(v.duration))
@@ -208,59 +262,35 @@ export default function MediaUpload({ open, onClose, onUploaded }: { open: boole
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '16px 20px', borderBottom: `1px solid ${LINE}` }}>
           <span style={{ display: 'inline-flex', width: 34, height: 34, borderRadius: 10, background: 'rgba(199,166,106,0.14)', color: GOLD_D, alignItems: 'center', justifyContent: 'center' }}><UploadCloud size={18} /></span>
           <div style={{ flex: 1 }}>
-            <div style={{ fontSize: 15.5, fontWeight: 900, color: INK }}>{channel ? 'آپلود ویدیو' : 'ساخت کانال'}</div>
+            <div style={{ fontSize: 15.5, fontWeight: 900, color: INK }}>{creating ? 'ساخت کانال' : 'آپلود ویدیو'}</div>
             <div style={{ fontSize: 11.5, color: MUT }}>
-              {channel ? <>انتشار در کانال <b style={{ color: SEC }}>{channel.name}</b></> : 'برای انتشار ویدیو ابتدا کانال خود را بسازید'}
+              {creating
+                ? (channels.length ? 'کانال تازه‌ای برای انتشار بسازید' : 'برای انتشار ویدیو ابتدا کانال خود را بسازید')
+                : <>انتشار در کانال <b style={{ color: SEC }}>{channel?.name}</b></>}
             </div>
           </div>
           <button onClick={() => !busy && onClose()} aria-label="بستن" style={{ background: '#F4F3F1', border: `1px solid ${LINE}`, borderRadius: 10, padding: 8, cursor: 'pointer', color: SEC, display: 'flex' }}><X size={17} /></button>
         </div>
 
         {/* ── مرحله‌ی کانال (اگر هنوز ندارد) ── */}
-        {!channel ? (
-          <div style={{ padding: 20, display: 'flex', flexDirection: 'column', gap: 14 }}>
-            {!chLoaded ? (
-              <div style={{ textAlign: 'center', padding: 30, color: MUT }}><Loader2 size={22} className="bm-spin" /></div>
-            ) : (
-              <>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 12, background: '#FAF8F3', border: `1px solid ${LINE}`, borderRadius: 16, padding: 14 }}>
-                  <span style={{ width: 46, height: 46, borderRadius: 14, flexShrink: 0, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: 19, fontWeight: 900,
-                    color: chName ? '#241B08' : MUT,
-                    background: chName ? 'linear-gradient(135deg,#E8CE96,#8A6020)' : '#EDE9E1' }}>
-                    {chName ? chName.slice(0, 1) : <Tv size={20} />}
-                  </span>
-                  <div style={{ minWidth: 0 }}>
-                    <div style={{ fontSize: 13.5, fontWeight: 800, color: chName ? INK : MUT }}>{chName || 'نام کانال'}</div>
-                    {chHandle && <div style={{ fontSize: 11.5, color: MUT, direction: 'ltr', textAlign: 'right' }}>@{chHandle}</div>}
-                  </div>
-                </div>
-                <Field label="نام کانال">
-                  <input value={chName} onChange={e => { setChName(e.target.value.slice(0, 60)); setErr('') }} placeholder="مثلاً: آکادمی بیلیارد من" style={inp} />
-                </Field>
-                <Field label="هندل کانال (انگلیسی)">
-                  <div style={{ ...inp, display: 'flex', alignItems: 'center', gap: 6, padding: '0 13px' }}>
-                    <span style={{ color: MUT, fontSize: 14 }}>@</span>
-                    <input value={chHandle} onChange={e => { setChHandle(e.target.value.replace(/[^A-Za-z0-9._-]/g, '').toLowerCase().slice(0, 30)); setErr('') }}
-                      placeholder="my.channel"
-                      style={{ flex: 1, minWidth: 0, border: 'none', outline: 'none', background: 'transparent', padding: '10px 0', fontSize: 13.5, fontFamily: 'inherit', color: INK, direction: 'ltr', textAlign: 'left' }} />
-                  </div>
-                </Field>
-                <Field label="درباره‌ی کانال (اختیاری)">
-                  <textarea value={chBio} onChange={e => setChBio(e.target.value.slice(0, 200))} rows={2} placeholder="در چه زمینه‌ای ویدیو منتشر می‌کنید؟" style={{ ...inp, resize: 'vertical', lineHeight: 1.9 }} />
-                </Field>
-                {err && <div style={{ fontSize: 12.5, fontWeight: 700, color: '#B23B2E', background: 'rgba(178,59,46,0.08)', border: '1px solid rgba(178,59,46,0.2)', borderRadius: 10, padding: '9px 12px' }}>{err}</div>}
-                <button onClick={createChannel} disabled={busy}
-                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '13px', borderRadius: 12, border: 'none', cursor: busy ? 'not-allowed' : 'pointer', fontFamily: 'inherit', fontSize: 14, fontWeight: 800, background: GOLD, color: '#241B08' }}>
-                  {busy ? <><Loader2 size={17} className="bm-spin" /> در حال ساخت…</> : <><Tv size={17} /> ساخت کانال و ادامه</>}
-                </button>
-                <p style={{ fontSize: 11, color: MUT, textAlign: 'center', margin: 0, lineHeight: 1.9 }}>
-                  کانال یک‌بار ساخته می‌شود و همه‌ی ویدیوهای بعدی شما زیر همان منتشر می‌شود.
-                </p>
-              </>
-            )}
-            <style>{`@keyframes bmspin { to { transform: rotate(360deg); } } .bm-spin { animation: bmspin 1s linear infinite; }`}</style>
-          </div>
+        {creating ? (
+          <ChannelCreate
+            loaded={chLoaded} failed={chFailed} err={err} hasChannels={channels.length > 0} busy={busy}
+            name={chName} handle={chHandle} bio={chBio}
+            onName={v => { setChName(v); setErr('') }}
+            onHandle={v => { setChHandle(v); setErr('') }}
+            onBio={setChBio}
+            onCreate={() => void createChannel()}
+            onRetry={() => void loadChannels()}
+            onBack={() => { setMaking(false); setErr('') }}
+          />
         ) : (
+        <>
+        <ChannelPicker
+          channels={channels} channel={channel}
+          onPick={setChannel}
+          onNew={() => { setMaking(true); setErr(''); setChName(publicDisplayName(userRef.current, '')); setChHandle('') }}
+        />
         <div style={{ padding: 20, display: 'flex', flexDirection: 'column', gap: 14 }}>
           {/* ویدیو */}
           {!videoUrl ? (
@@ -313,8 +343,9 @@ export default function MediaUpload({ open, onClose, onUploaded }: { open: boole
             style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '13px', borderRadius: 12, border: 'none', cursor: busy || !videoUrl ? 'not-allowed' : 'pointer', fontFamily: 'inherit', fontSize: 14, fontWeight: 800, background: videoUrl ? GOLD : '#EDE9E1', color: videoUrl ? '#241B08' : MUT, transition: 'background .2s' }}>
             {busy ? <><Loader2 size={17} className="bm-spin" /> {phase || 'در حال آپلود…'}</> : <><Check size={17} /> انتشار ویدیو</>}
           </button>
-          <style>{`@keyframes bmspin { to { transform: rotate(360deg); } } .bm-spin { animation: bmspin 1s linear infinite; }`}</style>
+          <style>{SPIN_CSS}</style>
         </div>
+        </>
         )}
       </div>
     </div>,
@@ -322,15 +353,3 @@ export default function MediaUpload({ open, onClose, onUploaded }: { open: boole
   )
 }
 
-const inp: React.CSSProperties = {
-  width: '100%', boxSizing: 'border-box', padding: '10px 13px', borderRadius: 11, border: `1px solid ${LINE}`,
-  background: '#FAF8F3', fontSize: 13.5, fontFamily: 'inherit', color: INK, outline: 'none',
-}
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <label style={{ display: 'block' }}>
-      <span style={{ display: 'block', fontSize: 11.5, fontWeight: 800, color: SEC, marginBottom: 6 }}>{label}</span>
-      {children}
-    </label>
-  )
-}

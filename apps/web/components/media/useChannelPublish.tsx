@@ -24,7 +24,8 @@
    ───────────────────────────────────────────────────────────── */
 
 import { useCallback, useRef, useState } from 'react'
-import ChannelGate, { loadMyChannels, type ChannelRole, type UserChannel } from './ChannelGate'
+import ChannelGate, { loadMyChannels } from './ChannelGate'
+import { servesRole, type ChannelRole, type UserChannel } from '@/lib/media/channel'
 import { apiFetch } from '@/lib/http'
 import './channel-gate.css'
 
@@ -33,11 +34,11 @@ export interface PublishVideo {
   src: string
   thumb?: string
   durationSec?: number
+  /** فقط باشگاه: بدونِ این، `videos.club_id` تهی می‌ماند و ویدیو در
+   *  فیلترِ `GET /api/media?club=` دیده نمی‌شود. */
+  clubId?: string
 }
 
-/** آیا این کانال خانه‌ی این نقش است؟ (`role` میدانِ قدیمی است) */
-const servesRole = (c: UserChannel, role: ChannelRole) =>
-  (c.roles ?? []).includes(role) || c.role === role
 
 /* ⚠️ سرور عنوانی که شکلِ نامِ فایل دارد را رد می‌کند (و حق دارد:
    «IMG_1234» برای بیننده و موتورِ جست‌وجو بی‌ارزش است). پس همان‌جا
@@ -77,6 +78,7 @@ export function useChannelPublish(
               category: 'other', description: '',
               creatorName: c.name, creatorHandle: c.handle,
               ...(v.durationSec ? { durationSec: v.durationSec } : {}),
+              ...(v.clubId ? { clubId: v.clubId } : {}),
             },
           }),
         })
@@ -95,19 +97,30 @@ export function useChannelPublish(
      همین کامپوننت نگهش می‌داشت، پس دفعه‌ی بعد پنجره دوباره باز
      می‌شد — تا ابد، برای کاربری که یک‌بار جواب داده بود. */
   const stampRole = useCallback(async (c: UserChannel) => {
-    if (servesRole(c, role)) return c
+    if (servesRole(c, role)) return { c, ok: true }
+    /* ⚠️ نسخه‌ی اول `r.ok` را نمی‌خواند: ۴۰۴/۴۰۹/۴۰۰ همه بی‌صدا
+       «موفق» شمرده می‌شدند، نقش ذخیره نمی‌شد، و پنجره دفعه‌ی بعد
+       دوباره باز می‌شد — تا ابد. دقیقاً همان چیزی که این تابع
+       قرار بود درستش کند. */
+    const miss = () => { notify?.('کانال به این نقش وصل نشد؛ دفعه‌ی بعد دوباره پرسیده می‌شود.'); return { c, ok: false } }
     try {
+      /* نام و هندل عمداً فرستاده نمی‌شوند: نسخه‌ی کشِ این صفحه ممکن
+         است کهنه باشد و نامی را که در تبِ دیگر عوض شده برگرداند. */
       const r = await apiFetch('/api/media/channel', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: c.name, handle: c.handle, bio: c.bio, addRole: role }),
+        body: JSON.stringify({ id: c.id, addRole: role }),
       })
       const j = await r.json().catch(() => ({})) as { channel?: UserChannel }
-      return j?.channel ?? c
-    } catch { return c }
-  }, [role])
+      if (!r.ok || !j?.channel) return miss()
+      return { c: j.channel, ok: true }
+    } catch { return miss() }
+  }, [role, notify])
 
   const publish = useCallback(async (items: PublishVideo[], suggestName = '') => {
-    if (!items.length || !ownerKey || !isOwner) return
+    if (!items.length || !isOwner) return
+    /* ⚠️ کلیدِ مالک گاهی از سرور نمی‌آید (ستونِ خالی). سکوت یعنی
+       کاربر ویدیو را بالا می‌برد و هرگز نمی‌فهمد در مدیا منتشر نشد. */
+    if (!ownerKey) { notify?.('کانالِ شما شناسایی نشد؛ ویدیو فقط در گالری ماند.'); return }
     setSuggest(suggestName)
     if (picked.current) { await send(picked.current, items, suggestName); return }
 
@@ -132,9 +145,12 @@ export function useChannelPublish(
         onPick={async c => {
           const q = pending
           setPending(null)
-          const stamped = await stampRole(c)
-          picked.current = stamped
-          await send(stamped, q, suggest)
+          const st = await stampRole(c)
+          /* ⚠️ اگر مهرِ نقش نگرفت، انتخاب را *ماندگار* نکن — وگرنه
+             پیامِ «دفعه‌ی بعد دوباره پرسیده می‌شود» دروغ می‌شود و
+             پنجره تا پایانِ نشست دیگر باز نمی‌شود. */
+          if (st.ok) picked.current = st.c
+          await send(st.c, q, suggest)
         }}
         onClose={() => setPending(null)}
       />

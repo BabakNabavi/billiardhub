@@ -21,6 +21,7 @@ import { useProfileVideoViewer } from '@/components/profile/ProfileVideoViewer'
 import { uploadFile } from '@/lib/supabase'
 import { videoMeta, formatDuration } from '@/lib/video-thumb'
 import { notify } from '@/lib/ui/dialogs'
+import { useChannelPublish, type PublishVideo } from '@/components/media/useChannelPublish'
 import '@/components/profile/profile-page.css'
 import { useTabKeys } from '@/hooks/use-tab-keys'
 import ClubReviews from '../../../components/club/ClubReviews';
@@ -450,6 +451,15 @@ export default function ClubProfilePage() {
     ? ((club as { galleryVideos?: ClubVideo[] }).galleryVideos ?? [])
     : [];
 
+  /* ── دروازه‌ی کانال ──
+     باشگاه هفتمین نقشی بود که به این جریان وصل شد و تا امروز
+     ویدیوهایش فقط در گالریِ خودش می‌ماند و به بیلیارد مدیا نمی‌رفت. */
+  const { gate: channelGate, publish: publishToChannel } =
+    /* ⚠️ `ownerId` گاهی از سرور نمی‌آید ولی `isMine` درست است؛
+       آن‌وقت کلیدِ خالی یعنی انتشار بی‌صدا رد می‌شد. کلیدِ نشست
+       جایگزینِ درستی است — سرور خودش مالکیت را می‌سنجد. */
+    useChannelPublish('club', club.ownerId || user?.id || undefined, isClubOwner, notify);
+
   const saveClubVideos = async (next: ClubVideo[]) => {
     setAlbumBusy(true); setAlbumErr('');
     try {
@@ -470,6 +480,9 @@ export default function ClubProfilePage() {
 
   const addClubVideos = async (files: File[], album?: string) => {
     const skipped: string[] = [];
+    /* ⚠️ فقط ویدیوهایی که *واقعاً* ذخیره شدند منتشر می‌شوند؛ وگرنه
+       شکستِ ذخیره در گالری، ویدیوی یتیم در مدیا می‌ساخت. */
+    const saved: PublishVideo[] = [];
     let next = clubVideos;
     for (const file of files) {
       if (file.size > 25 * 1024 * 1024) { skipped.push(file.name); continue }
@@ -479,10 +492,13 @@ export default function ClubProfilePage() {
       const url = await uploadFile('club-media', file, base);
       if (!url) { skipped.push(file.name); continue }
       const thumb = meta.thumb ? (await uploadFile('club-media', meta.thumb, `${base}-thumb`)) ?? '' : '';
-      next = [...next, { id: vid, url, thumbnail: thumb, title: file.name.replace(/\.[^.]+$/, ''), duration: formatDuration(meta.durationSec), ...(album ? { album } : {}) }];
+      const title = file.name.replace(/\.[^.]+$/, '');
+      next = [...next, { id: vid, url, thumbnail: thumb, title, duration: formatDuration(meta.durationSec), ...(album ? { album } : {}) }];
       if (!(await saveClubVideos(next))) break
+      saved.push({ title, src: url, thumb, durationSec: meta.durationSec, clubId: club.id });
     }
     if (skipped.length) notify(`این ویدیوها اضافه نشدند (سقف ۲۵ مگابایت): ${skipped.join('، ')}`);
+    if (saved.length) await publishToChannel(saved, club.name);
   };
 
   const deleteClubVideo = async (vid: string) => {
@@ -1454,6 +1470,7 @@ export default function ClubProfilePage() {
 
       {imageViewer}
       {videoViewer}
+      {channelGate}
 
       {storyViewer && club.storyMediaUrl && (
         <ClubStoryModal
