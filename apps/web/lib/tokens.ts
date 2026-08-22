@@ -1,66 +1,80 @@
-﻿// Design tokens — single source of truth
+/* ─────────────────────────────────────────────────────────────
+   ⚠️ منسوخ — از این فایل چیزی *تازه* نخوان.
 
+   این فایل خودش را «single source of truth» می‌نامید ولی سه چیز در
+   آن دروغ بود:
+
+     ۱) زمینه‌هایش **تیره** بودند (`#020806`, `#060d0a`) — بازمانده‌ی
+        یک طرحِ رهاشده، روی سایتی که تمش روشن است. هر کامپوننتی که
+        از آن‌ها استفاده می‌کرد عملاً نامرئی می‌شد.
+     ۲) `accent.green` در واقع **طلایی** بود (`#C7A66A`). نام دروغ
+        می‌گفت، و بعد `Button` واریانتِ «اصلی»اش را واقعاً سبز کرد.
+     ۳) `cyan`/`violet` هیچ‌جای این برند معنا ندارند.
+
+   منبعِ واقعیِ توکن‌ها `app/globals.css` است (سه‌تاییِ کانال) و
+   دسترسیِ برنامه‌ای به آن از راهِ کلاس‌های Tailwind است:
+   `bg-gold`, `text-ink-2`, `rounded-md`, `shadow-sm`, `duration-base`…
+
+   مقادیرِ زیر فقط برای اینکه چیزی نشکند نگه داشته شده‌اند و حالا به
+   پالتِ واقعی اشاره می‌کنند، نه به طرحِ تیره. هر مصرف‌کننده‌ای که
+   پیدا شد باید به Tailwind منتقل شود و بعد این فایل حذف شود.
+   ───────────────────────────────────────────────────────────── */
+
+/** @deprecated کلاس‌های Tailwind را استفاده کن (`bg-gold`, `text-ink`…) */
 export const colors = {
   bg: {
-    base:    '#020806',
-    surface: '#060d0a',
-    elevated:'#0a1210',
-    card:    'rgba(255,255,255,0.03)',
-    cardHover:'rgba(255,255,255,0.055)',
+    base: 'var(--bg-primary)',
+    surface: 'var(--bg-surface)',
+    elevated: 'var(--bg-secondary)',
+    card: 'var(--bg-surface)',
+    cardHover: 'var(--bg-secondary)',
   },
   accent: {
-    green:  '#C7A66A',
-    dark:   '#A07840',
-    cyan:   '#06b6d4',
-    violet: '#a78bfa',
-    amber:  '#f59e0b',
-    red:    '#ef4444',
+    /* نامِ تاریخی؛ مقدارش همیشه طلایی بوده است */
+    green: 'var(--gold)',
+    dark: 'var(--gold-dark)',
+    deep: 'var(--gold-deep)',
+    /* ⚠️ این سه رنگ در برند وجود ندارند و عمداً به طلایی می‌افتند تا
+       اگر جایی مانده باشد، پالت را نشکند. */
+    cyan: 'var(--gold)',
+    violet: 'var(--gold)',
+    amber: '#F59E0B',
+    red: '#B23B2E',
   },
   text: {
-    primary:   '#111111',
-    secondary: 'rgba(0,0,0,0.50)',
-    muted:     'rgba(0,0,0,0.30)',
-    dark:      'rgba(0,0,0,0.35)',
+    primary: 'var(--text-primary)',
+    secondary: 'var(--text-secondary)',
+    muted: 'var(--text-tertiary)',
+    dark: 'var(--text-tertiary)',
   },
   border: {
-    base:   'rgba(255,255,255,0.07)',
-    accent: 'rgba(199,166,106,0.20)',
-    strong: 'rgba(199,166,106,0.35)',
+    base: 'var(--border)',
+    accent: 'var(--gold-border)',
+    strong: 'var(--border-strong)',
   },
-} as const;
+} as const
 
+/** @deprecated `rounded-xs|sm|md|lg|xl|2xl` */
 export const radius = {
-  sm:   '10px',
-  md:   '14px',
-  lg:   '20px',
-  xl:   '28px',
+  sm: 'var(--r2)',
+  md: 'var(--r3)',
+  lg: 'var(--r4)',
+  xl: 'var(--r5)',
   full: '100px',
-} as const;
+} as const
 
+/** @deprecated `shadow-xs|sm|md|lg|xl` */
 export const shadow = {
-  sm:   '0 2px 12px rgba(0,0,0,0.3)',
-  md:   '0 8px 32px rgba(0,0,0,0.4)',
-  lg:   '0 20px 60px rgba(0,0,0,0.5)',
-  glow: (color: string) => `0 0 24px ${color}30, 0 0 60px ${color}10`,
-  neon: (color: string) => `0 0 0 1px ${color}30, 0 8px 32px ${color}30`,
-} as const;
+  sm: 'var(--shadow-sm)',
+  md: 'var(--shadow-md)',
+  lg: 'var(--shadow-lg)',
+} as const
 
+/** @deprecated `duration-fast|base|slow` + `ease-out|spring` */
 export const transition = {
-  fast:   'all 0.15s ease',
-  base:   'all 0.3s cubic-bezier(0.4,0,0.2,1)',
-  slow:   'all 0.5s cubic-bezier(0.4,0,0.2,1)',
-  spring: 'all 0.5s cubic-bezier(0.22,1,0.36,1)',
-} as const;
-
-export const spacing = {
-  1:  '4px',  2:  '8px',  3: '12px',
-  4: '16px',  5: '20px',  6: '24px',
-  8: '32px', 10: '40px', 12: '48px',
- 16: '64px', 20: '80px', 24: '96px',
-} as const;
-
-export const fontSize = {
-  xs:  '10px', sm: '12px', base: '14px',
-  md:  '16px', lg: '18px', xl:   '22px',
-  '2xl':'28px','3xl':'36px','4xl':'48px',
-} as const;
+  fast: 'all 150ms cubic-bezier(.22,.61,.36,1)',
+  base: 'all 220ms cubic-bezier(.22,.61,.36,1)',
+  slow: 'all 340ms cubic-bezier(.22,.61,.36,1)',
+  /** @deprecated فراجهش برداشته شد؛ همان `slow` را استفاده کن */
+  spring: 'all 340ms cubic-bezier(.22,.61,.36,1)',
+} as const

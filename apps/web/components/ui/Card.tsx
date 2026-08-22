@@ -1,85 +1,74 @@
-﻿'use client';
+'use client'
 
-import { colors, radius, shadow, transition } from '../../lib/tokens';
-import { CSSProperties, ReactNode, useState } from 'react';
+/* ─────────────────────────────────────────────────────────────
+   کارت — ظرفِ پایه.
 
-type CardVariant = 'dark' | 'light' | 'accent';
+   ── چرا از نو نوشته شد ──
+   نسخه‌ی قبلی پیش‌فرضش `variant='dark'` با `blur(24px)` و رنگ‌های
+   تیره بود — روی سایتی که تمش روشن است. بازمانده‌ی یک طرحِ رهاشده،
+   و مثل `Button` صفر مصرف‌کننده داشت.
 
-interface CardProps {
-  children:   ReactNode;
-  variant?:   CardVariant;
-  hoverGlow?: string;
-  style?:     CSSProperties;
-  onClick?:   () => void;
-  noPadding?: boolean;
-  padding?:   string;
+   ── قاعده‌ای که این کامپوننت اعمال می‌کند ──
+   ⚠️ کارت ظرفِ تنبل است. کارتِ داخلِ کارت همیشه اشتباه است، و شبکه‌ای
+   از کارت‌های هم‌اندازه‌ی «آیکون + عنوان + متن» ساختارِ صفحه نیست.
+   پس این کامپوننت عمداً `padding` را محدود می‌کند و هیچ واریانتِ
+   تزئینی ندارد: فقط تفاوتِ *ارتفاع* (سطح در برابر برجسته) و اینکه
+   تعاملی هست یا نه.
+   ───────────────────────────────────────────────────────────── */
+
+import { forwardRef, type HTMLAttributes, type ReactNode } from 'react'
+
+type Elevation = 'flat' | 'raised'
+type Pad = 'none' | 'sm' | 'md' | 'lg'
+
+export interface CardProps extends Omit<HTMLAttributes<HTMLDivElement>, 'className'> {
+  elevation?: Elevation
+  pad?: Pad
+  /** کارتِ کلیک‌شونده — دکمه می‌شود، نه `<div>`ِ کلیک‌دار */
+  onSelect?: () => void
+  /** وقتی کلیک‌شونده است، خواننده‌ی صفحه باید بداند چه چیزی را باز می‌کند */
+  selectLabel?: string
+  children: ReactNode
+  className?: string
 }
 
-export function Card({
-  children, variant = 'dark', hoverGlow = colors.accent.green,
-  style, onClick, noPadding, padding = '20px',
-}: CardProps) {
-  const [hovered, setHovered] = useState(false);
+const PAD: Record<Pad, string> = {
+  none: '',
+  sm: 'p-3',
+  md: 'p-4',
+  lg: 'p-6',
+}
 
-  const dark: CSSProperties = {
-    background:    hovered ? colors.bg.cardHover  : colors.bg.card,
-    border:        `1px solid ${hovered ? `${hoverGlow}35` : colors.border.base}`,
-    borderRadius:  radius.lg,
-    backdropFilter:'blur(24px)',
-    boxShadow:     hovered
-      ? `0 0 0 1px ${hoverGlow}15, 0 24px 64px rgba(0,0,0,0.55), 0 0 48px ${hoverGlow}08`
-      : shadow.md,
-    transform:     hovered ? 'translateY(-7px)' : 'translateY(0)',
-  };
+const ELEV: Record<Elevation, string> = {
+  flat: 'bg-surface border border-line/[.06]',
+  raised: 'bg-surface border border-line/[.06] shadow-e1',
+}
 
-  const light: CSSProperties = {
-    background:    hovered ? 'rgba(255,255,255,0.88)' : 'rgba(255,255,255,0.78)',
-    border:        `1px solid ${hovered ? 'rgba(199,166,106,0.28)' : 'rgba(199,166,106,0.1)'}`,
-    borderRadius:  radius.lg,
-    backdropFilter:'blur(24px)',
-    boxShadow:     hovered
-      ? `0 20px 50px rgba(199,166,106,0.12), inset 0 1px 0 rgba(255,255,255,1)`
-      : `0 4px 20px rgba(199,166,106,0.06), inset 0 1px 0 rgba(255,255,255,0.9)`,
-    transform:     hovered ? 'translateY(-6px)' : 'translateY(0)',
-  };
+export const Card = forwardRef<HTMLDivElement, CardProps>(function Card(
+  { elevation = 'flat', pad = 'md', onSelect, selectLabel, className = '', children, ...rest },
+  ref,
+) {
+  const shell = ['rounded-card', ELEV[elevation], PAD[pad], className].join(' ')
 
-  const accent: CSSProperties = {
-    background:   'rgba(199,166,106,0.06)',
-    border:       `1px solid ${colors.border.accent}`,
-    borderRadius: radius.lg,
-    backdropFilter:'blur(12px)',
-  };
-
-  const variantStyles = { dark, light, accent };
-
-  return (
-    <div
-      onClick={onClick}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      style={{
-        overflow: 'hidden',
-        position: 'relative',
-        transition: transition.slow,
-        cursor: onClick ? 'pointer' : undefined,
-        padding: noPadding ? undefined : padding,
-        ...variantStyles[variant],
-        ...style,
-      }}
-    >
-      {/* Shimmer layer */}
-      {variant === 'dark' && (
-        <div style={{
-          position: 'absolute', inset: 0, zIndex: 0, pointerEvents: 'none',
-          background: hovered
-            ? `linear-gradient(105deg, transparent 20%, ${hoverGlow}05 50%, transparent 80%)`
-            : 'transparent',
-          transition: 'background 0.6s ease',
-        }} />
-      )}
-      <div style={{ position: 'relative', zIndex: 1, height: '100%' }}>
+  if (onSelect) {
+    return (
+      <button
+        type="button"
+        onClick={onSelect}
+        aria-label={selectLabel}
+        className={[
+          shell,
+          'w-full text-start',
+          'transition-[border-color,transform,box-shadow] duration-base ease-smooth',
+          'hover:border-gold/[.45] hover:-translate-y-0.5 hover:shadow-e2',
+          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-deep focus-visible:ring-offset-2 focus-visible:ring-offset-paper',
+          'motion-reduce:transition-none motion-reduce:hover:translate-y-0',
+        ].join(' ')}
+      >
         {children}
-      </div>
-    </div>
-  );
-}
+      </button>
+    )
+  }
+
+  return <div ref={ref} className={shell} {...rest}>{children}</div>
+})

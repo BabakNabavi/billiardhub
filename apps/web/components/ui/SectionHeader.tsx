@@ -1,44 +1,47 @@
-import Link from 'next/link';
-import { ArrowLeft } from 'lucide-react';
-import { colors } from '../../lib/tokens';
-import { CSSProperties } from 'react';
+/* ─────────────────────────────────────────────────────────────
+   سرعنوانِ بخش.
 
-interface SectionHeaderProps {
-  label:      string;
-  title:      string;
-  labelColor?: string;
-  lineColor?:  string;
-  href?:       string;
-  linkLabel?:  string;
-  style?:      CSSProperties;
-}
+   ── سه چیزی که برداشته شد ──
+   ۱) **کیکر** — برچسبِ ریزِ فاصله‌دارِ بالای عنوان. عنوان وزنِ خودش
+      را دارد؛ برچسبِ بالایش فقط ارتفاعِ اسکرول اضافه می‌کند. (روی
+      فارسی `text-transform: uppercase` هم اصلاً کاری نمی‌کرد.)
+   ۲) **خطِ درخشان** — `box-shadow: 0 0 10px` روی یک خطِ ۱ پیکسلی.
+      هاله‌ی بی‌آفست عمق نیست، تزئین است.
+   ۳) **لینکِ نامرئی** — «مشاهده همه» با `rgba(255,255,255,0.3)`
+      نوشته شده بود، یعنی سفیدِ کم‌رنگ روی زمینه‌ی *روشن*. بازمانده‌ی
+      همان طرحِ تیره‌ی رهاشده؛ عملاً دیده نمی‌شد.
+   ───────────────────────────────────────────────────────────── */
 
-export function SectionHeader({
-  label, title,
-  labelColor = colors.accent.green,
-  lineColor  = colors.accent.green,
-  href, linkLabel = 'مشاهده همه',
-  style,
-}: SectionHeaderProps) {
+import Link from 'next/link'
+import { ArrowLeft } from 'lucide-react'
+import type { ReactNode } from 'react'
+
+export function SectionHeader({ title, sub, href, linkLabel = 'مشاهده همه', className = '' }: {
+  title: string
+  /** یک جمله‌ی توضیح — فقط وقتی عنوان به‌تنهایی گویا نیست */
+  sub?: ReactNode
+  href?: string
+  linkLabel?: string
+  className?: string
+}) {
   return (
-    <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-end', marginBottom:'32px', ...style }}>
-      <div>
-        <div style={{ fontSize: '10px', letterSpacing:'0.28em', fontWeight:700, color: labelColor, marginBottom:'10px', textTransform:'uppercase', opacity:0.85 }}>
-          {label}
-        </div>
-        <h2 style={{ fontSize: 'clamp(24px, 3.3vw, 31px)', fontWeight:900, color: colors.text.primary, margin:0, letterSpacing:'-0.025em', lineHeight:1.1 }}>
-          {title}
-        </h2>
-        <div style={{ height:'1px', width:'52px', marginTop:'14px', background:`linear-gradient(90deg,${lineColor},transparent)`, boxShadow:`0 0 10px ${lineColor}80` }} />
+    <div className={['mb-6 flex items-end justify-between gap-4', className].join(' ')}>
+      <div className="min-w-0">
+        <h2 className="text-title m-0 text-ink">{title}</h2>
+        {sub && <p className="text-sub mt-1 max-w-prose text-ink-2">{sub}</p>}
       </div>
 
       {href && (
-        <Link href={href} style={{ display:'flex', alignItems:'center', gap:'6px', fontSize: '14px', color:'rgba(255,255,255,0.3)', textDecoration:'none', fontWeight:500, transition:'color 0.25s' }}
-          onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = labelColor; }}
-          onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.3)'; }}>
-          {linkLabel} <ArrowLeft size={13} />
+        /* ⚠️ در RTL «جلو» سمتِ چپ است، پس `ArrowLeft` جهتِ درست است. */
+        <Link href={href}
+          className="text-sub inline-flex shrink-0 items-center gap-1.5 font-bold text-gold-deep
+                     transition-colors duration-fast ease-smooth hover:text-ink
+                     focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-deep
+                     focus-visible:ring-offset-2 focus-visible:ring-offset-paper rounded-chip">
+          {linkLabel}
+          <ArrowLeft size={14} aria-hidden />
         </Link>
       )}
     </div>
-  );
+  )
 }

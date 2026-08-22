@@ -1,40 +1,48 @@
-﻿import { CSSProperties, ReactNode } from 'react';
-import { colors, radius } from '../../lib/tokens';
+/* ─────────────────────────────────────────────────────────────
+   برچسب — وضعیت، نه تزئین.
 
-type BadgeColor = 'green' | 'cyan' | 'violet' | 'amber' | 'red' | 'white';
+   ── چرا از نو نوشته شد ──
+   نسخه‌ی قبلی رنگ‌ها را با *نامِ رنگ* می‌گرفت (`green`, `cyan`,
+   `violet`, `amber`) و پیش‌فرضش `green` بود که در عمل طلایی رنگ
+   می‌کرد — نام دروغ می‌گفت. `cyan`/`violet` هم هیچ‌جای این برند
+   معنا ندارند. علاوه بر آن یک `blur(10px)` روی برچسبِ ۱۲ پیکسلی
+   داشت و یک هاله‌ی `0 0 8px` بی‌آفست؛ هر دو تزئینِ محض.
 
-interface BadgeProps {
-  children: ReactNode;
-  color?:   BadgeColor;
-  dot?:     boolean;
-  style?:   CSSProperties;
+   ── قاعده ──
+   رنگ از *معنا* می‌آید نه از انتخابِ نویسنده. پنج لحن بیشتر نیست، و
+   هیچ‌کدام تزئینی نیستند: طلایی تأکید است، سبز و قرمز وضعیتِ واقعیِ
+   محصول‌اند (باز/بسته، تأییدشده/ردشده)، کهربایی انتظار، و خنثی
+   فراداده. اگر برچسبی هیچ‌کدام از این‌ها نیست، احتمالاً اصلاً نباید
+   برچسب باشد.
+   ───────────────────────────────────────────────────────────── */
+
+import type { ReactNode } from 'react'
+
+export type BadgeTone = 'accent' | 'positive' | 'warning' | 'critical' | 'neutral'
+
+const TONE: Record<BadgeTone, string> = {
+  accent: 'text-gold-deep bg-gold/[.12] border-gold/[.28]',
+  positive: 'text-[#0E7A38] bg-[#0E7A38]/[.10] border-[#0E7A38]/[.24]',
+  warning: 'text-[#8A5A00] bg-[#F59E0B]/[.12] border-[#F59E0B]/[.30]',
+  critical: 'text-[#B23B2E] bg-[#B23B2E]/[.10] border-[#B23B2E]/[.24]',
+  neutral: 'text-ink-2 bg-line/[.04] border-line/[.10]',
 }
 
-const palette: Record<BadgeColor, { text: string; bg: string; border: string }> = {
-  green:  { text: colors.accent.green,  bg: 'rgba(199,166,106,0.12)',  border: 'rgba(199,166,106,0.28)'  },
-  cyan:   { text: colors.accent.cyan,   bg: 'rgba(6,182,212,0.12)',   border: 'rgba(6,182,212,0.28)'   },
-  violet: { text: colors.accent.violet, bg: 'rgba(167,139,250,0.12)', border: 'rgba(167,139,250,0.28)' },
-  amber:  { text: colors.accent.amber,  bg: 'rgba(245,158,11,0.12)',  border: 'rgba(245,158,11,0.28)'  },
-  red:    { text: colors.accent.red,    bg: 'rgba(239,68,68,0.12)',   border: 'rgba(239,68,68,0.28)'   },
-  white:  { text: 'rgba(255,255,255,0.5)', bg: 'rgba(0,0,0,0.04)', border: 'rgba(0,0,0,0.08)' },
-};
-
-export function Badge({ children, color = 'green', dot, style }: BadgeProps) {
-  const p = palette[color];
+export function Badge({ children, tone = 'neutral', dot, className = '' }: {
+  children: ReactNode
+  tone?: BadgeTone
+  /** نقطه‌ی وضعیت — فقط وقتی برچسب یک حالتِ *زنده* را نشان می‌دهد */
+  dot?: boolean
+  className?: string
+}) {
   return (
-    <span style={{
-      display: 'inline-flex', alignItems: 'center', gap: '6px',
-      padding: '3px 11px', borderRadius: radius.full,
-      fontSize: '12px', fontWeight: 700,
-      color: p.text, background: p.bg,
-      border: `1px solid ${p.border}`,
-      backdropFilter: 'blur(10px)',
-      ...style,
-    }}>
-      {dot && (
-        <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: p.text, boxShadow: `0 0 8px ${p.text}`, flexShrink: 0 }} />
-      )}
+    <span className={[
+      'inline-flex items-center gap-1.5 rounded-full border',
+      'px-2.5 py-1 text-meta font-bold leading-none',
+      TONE[tone], className,
+    ].join(' ')}>
+      {dot && <span className="size-1.5 shrink-0 rounded-full bg-current" aria-hidden />}
       {children}
     </span>
-  );
+  )
 }

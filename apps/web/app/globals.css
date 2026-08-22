@@ -22,43 +22,61 @@ html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; overflow-x:
   /* ── Base font ── */
   --font-base: 'IRANSansX', Tahoma, system-ui, sans-serif;
 
+  /* ── سه‌تاییِ کانال: تنها منبعِ عددِ رنگ ──
+     ⚠️ چرا این شکل: Tailwind برای پیمانه‌ی شفافیت (`bg-gold/12`) به
+     سه‌تاییِ کانال نیاز دارد، نه هگز. ولی صدها جای پروژه از قبل
+     `var(--gold)` می‌نویسند. پس عدد یک‌بار این‌جا کانالی تعریف
+     می‌شود و توکنِ رنگیِ قدیمی از روی همان ساخته می‌شود — هر دو
+     مصرف‌کننده زنده می‌مانند و عدد جای دوم ندارد. */
+  --c-paper:   247 247 245;   /* زمینه‌ی اصلی */
+  --c-mist:    243 242 239;   /* زمینه‌ی دوم */
+  --c-surface: 255 255 255;
+  --c-ink:      17  17  17;   /* جوهر */
+  --c-ink-2:   102 102 102;
+  --c-ink-3:   110 110 110;
+  --c-gold:    199 166 106;
+  --c-gold-deep: 143 101  49;
+  --c-gold-dark: 160 120  64;
+  --c-gold-light: 226 201 140;
+  --c-line:      0   0   0;   /* خطوط: مشکیِ کم‌شفاف */
+
   /* ── Surfaces ── */
-  --bg-primary:    #F7F7F5;
-  --bg-secondary:  #F3F2EF;
-  --bg-surface:    #FFFFFF;
+  --bg-primary:    rgb(var(--c-paper));
+  --bg-secondary:  rgb(var(--c-mist));
+  --bg-surface:    rgb(var(--c-surface));
   --bg-dark:       #111111;
 
   /* ── Text ── */
-  --text-primary:   #111111;
-  --text-secondary: #666666;
+  --text-primary:   rgb(var(--c-ink));
+  --text-secondary: rgb(var(--c-ink-2));
   /* ۲.۵۵:۱ بود — زیرِ حدِ AA. این روی .input-hint و .label می‌نشیند
      که هر دو متنِ خواندنی‌اند، نه تزئین. حالا ۴.۵۶:۱ */
-  --text-tertiary:  #6E6E6E;
+  --text-tertiary:  rgb(var(--c-ink-3));
   --text-on-dark:   rgba(255,255,255,0.92);
   --text-on-dark-2: rgba(255,255,255,0.58);
 
   /* ── Accent Gold ── */
-  --gold:        #C7A66A;
+  --gold:        rgb(var(--c-gold));
   /* سایه‌ی تیره‌ترِ طلایی — تا امروز فقط به‌صورت fallback نوشته می‌شد */
   /* ۴.۰۳:۱ بود، یعنی کمی زیرِ ۴.۵. تیره‌تر شد تا ۴.۶۱:۱ — اختلافِ
      دیداری‌اش تقریباً نامرئی است ولی متنِ ریزِ طلایی خواناتر می‌شود.
      برگرداندن: همین یک خط به #9A6E38. */
-  --gold-deep:   #8F6531;
-  --gold-dark:   #A07840;
-  --gold-light:  #E2C98C;
-  --gold-dim:    rgba(199,166,106,0.12);
-  --gold-border: rgba(199,166,106,0.24);
+  --gold-deep:   rgb(var(--c-gold-deep));
+  --gold-dark:   rgb(var(--c-gold-dark));
+  --gold-light:  rgb(var(--c-gold-light));
+  --gold-dim:    rgb(var(--c-gold) / .12);
+  --gold-border: rgb(var(--c-gold) / .24);
 
   /* Legacy alias (keep backward compat with inline styles already written) */
-  --accent:        #C7A66A;
-  --accent-light:  #E2C98C;
-  --accent-dim:    rgba(199,166,106,0.12);
-  --accent-glow:   rgba(199,166,106,0.22);
+  --accent:        rgb(var(--c-gold));
+  --accent-light:  rgb(var(--c-gold-light));
+  --accent-dim:    rgb(var(--c-gold) / .12);
+  --accent-glow:   rgb(var(--c-gold) / .22);
 
   /* ── Borders ── */
-  --border:        rgba(0,0,0,0.06);
-  --border-medium: rgba(0,0,0,0.10);
-  --border-strong: rgba(0,0,0,0.16);
+  --border:        rgb(var(--c-line) / .06);
+  --border-medium: rgb(var(--c-line) / .10);
+  --border-strong: rgb(var(--c-line) / .16);
 
   /* ── Premium Elevation ── */
   --shadow-xs: 0 1px 2px rgba(0,0,0,0.04);
@@ -83,14 +101,16 @@ html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; overflow-x:
   --tint-education:  rgba(139,92,246,0.05);
 
   /* ── Blur levels ── */
-  --b1: blur(8px);
-  --b2: blur(16px);
-  --b3: blur(28px);
-  --b4: blur(48px);
+  /* طولِ خام تا هم اینجا و هم Tailwind از یک عدد بخوانند */
+  --bl1: 8px;  --bl2: 16px;  --bl3: 28px;  --bl4: 48px;
+  --b1: blur(var(--bl1));
+  --b2: blur(var(--bl2));
+  --b3: blur(var(--bl3));
+  --b4: blur(var(--bl4));
 
   /* ── Ink aliases (backward compat) ── */
-  --ink-1:     #111111;
-  --ink-2:     #666666;
+  --ink-1:     rgb(var(--c-ink));
+  --ink-2:     rgb(var(--c-ink-2));
   --ink-3:     #999999;
   --ink-4:     rgba(0,0,0,0.18);
   --ink-inv:   rgba(255,255,255,0.92);
