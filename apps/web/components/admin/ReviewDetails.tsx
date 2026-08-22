@@ -83,6 +83,8 @@ const LABEL: Record<string, string> = {
   nationalId: 'کد ملی', national_id: 'کد ملی', firstName: 'نام', lastName: 'نام خانوادگی',
   primaryRole: 'نقش اصلی', secondaryRoles: 'نقش‌های دیگر',
   smsOptOut: 'انصراف از پیامک', memberSince: 'عضو از',
+  /* متخصصِ خدماتِ فنی */
+  onsite: 'خدمت در محلِ مشتری', workshop: 'پذیرش در کارگاه', hours: 'ساعت کاری',
 }
 
 /* ── فیلدهایی که مقدارشان نشانیِ فایل است ──

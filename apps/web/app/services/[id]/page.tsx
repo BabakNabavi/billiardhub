@@ -22,8 +22,8 @@ import '@/components/profile/profile-page.css'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import {
-  MapPin, ChevronLeft, ChevronRight, Wrench,
-  Phone,
+  MapPin, ChevronLeft, Wrench,
+  Phone, Clock,
 } from 'lucide-react'
 import { getTechnician } from '../../../lib/technicians-data'
 import { useOwnerEdit } from '../../../lib/profiles/use-owner-edit'
@@ -281,13 +281,16 @@ export default function TechnicianProfilePage() {
         .tp-cta.wa:hover { transform: translateY(-2px); background: rgba(37,211,102,0.16); }
 
         /* پروژه‌ها */
-        .tp-projects { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; }
+        /* ⚠️ نمونه‌کار محتواست، نه بندانگشتی. تصویر نسبتِ ثابت و
+           بلندتری می‌گیرد و در عرضِ زیاد سه‌ستونه نمی‌شود — سه ستون
+           یعنی عکسِ کوچک‌تر، و کوچک‌کردنِ کارِ انجام‌شده خلافِ هدف است. */
+        .tp-projects { display: grid; grid-template-columns: repeat(2, 1fr); gap: clamp(16px, 2.2vw, 24px); }
         @media (max-width: 700px) { .tp-projects { grid-template-columns: 1fr; } }
         .tp-proj { display: flex; flex-direction: column; background: #fff; border: 1px solid ${LINE}; border-radius: 16px;
           overflow: hidden; box-shadow: 0 2px 10px rgba(28,27,23,0.05);
           transition: transform .28s cubic-bezier(.22,1,.36,1), box-shadow .28s, border-color .28s; animation: tpFadeUp .5s ease both; }
         .tp-proj:hover { transform: translateY(-4px); box-shadow: 0 16px 36px rgba(28,27,23,0.11); border-color: rgba(199,166,106,0.35); }
-        .tp-proj .im { aspect-ratio: 16/9.4; overflow: hidden; }
+        .tp-proj .im { aspect-ratio: 4 / 3; overflow: hidden; background: ${BG}; }
         .tp-proj .im img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .6s cubic-bezier(.22,1,.36,1); }
         .tp-proj:hover .im img { transform: scale(1.05); }
 
@@ -366,10 +369,12 @@ export default function TechnicianProfilePage() {
             {tech.about.map((p, i) => (
               <p key={i} style={{ fontSize: 14, lineHeight: 2.2, color: '#2B2822', margin: i === tech.about.length - 1 ? 0 : '0 0 14px' }}>{p}</p>
             ))}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginTop: 16, paddingTop: 14, borderTop: '1px solid #F0EDE5', fontSize: 12.5, color: MUT }}>
-              <span style={{ fontWeight: 800, color: SEC }}>شهرهای تحت پوشش:</span>
-              {tech.coverage.map(c => <span key={c} style={{ background: BG, border: `1px solid ${LINE}`, borderRadius: 999, padding: '4px 12px', fontWeight: 700, color: SEC }}>{c}</span>)}
-            </div>
+            {/* ⚠️ اینجا هم چیپ بود — و درست بالای بخشی که چیپ‌هایش را
+                برداشتیم. نامِ شهر برچسب نیست، بخشی از یک جمله است. */}
+            <p style={{ marginTop: 16, paddingTop: 14, borderTop: '1px solid #F0EDE5', fontSize: 12.5, lineHeight: 2, color: MUT, marginBottom: 0 }}>
+              <span style={{ fontWeight: 800, color: SEC }}>شهرهای تحت پوشش: </span>
+              {tech.coverage.join('، ')}
+            </p>
           </div>
         </section>
 
@@ -386,17 +391,20 @@ export default function TechnicianProfilePage() {
         {/* ═══ پروژه‌ها ═══ */}
         {tech.projects.length > 0 && (
           <section style={{ marginBottom: 'clamp(28px,4vw,44px)' }}>
-            <SectionHead title="پروژه‌ها و کارهای انجام‌شده" />
+            <SectionHead title="نمونه‌کارها" />
             <div className="tp-projects">
               {tech.projects.map((p, i) => (
                 <article key={p.id} className="tp-proj" style={{ animationDelay: `${i * 70}ms` }}>
-                  <div className="im"><img src={p.image} alt={p.title} loading="lazy" /></div>
-                  <div style={{ padding: '15px 17px 16px', display: 'flex', flexDirection: 'column', gap: 6 }}>
-                    <span style={{ alignSelf: 'flex-start', fontSize: 10.5, fontWeight: 800, color: GOLD_D, background: 'rgba(199,166,106,0.10)', border: '1px solid rgba(199,166,106,0.26)', borderRadius: 999, padding: '3px 10px' }}>{p.service}</span>
-                    <h3 style={{ fontSize: 14.5, fontWeight: 900, margin: '2px 0 0' }}>{p.title}</h3>
+                  <div className="im"><img src={p.image} alt={p.title} loading="lazy" decoding="async" /></div>
+                  <div style={{ padding: '16px 18px 18px', display: 'flex', flexDirection: 'column', gap: 6 }}>
+                    {/* ⚠️ چیپِ نوعِ خدمت برداشته شد: همان الگوی برچسبی بود که
+                        از کاتالوگ حذفش کردیم، و نوعِ خدمت را عنوانِ پروژه
+                        خودش می‌گوید. حالا یک خطِ فراداده‌ی آرام. */}
+                    <span style={{ fontSize: 11.5, fontWeight: 700, color: GOLD_D }}>{p.service}</span>
+                    <h3 style={{ fontSize: 15.5, fontWeight: 900, margin: '2px 0 0', lineHeight: 1.6 }}>{p.title}</h3>
                     <p style={{ fontSize: 12.5, lineHeight: 1.9, color: SEC, margin: 0 }}>{p.desc}</p>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11.5, color: MUT, marginTop: 4 }}>
-                      <MapPin size={11} style={{ color: '#14532D' }} />
+                      <MapPin size={11} aria-hidden style={{ flexShrink: 0 }} />
                       {p.city}{p.club ? ` — ${p.club}` : ''}
                     </div>
                   </div>
@@ -434,9 +442,23 @@ export default function TechnicianProfilePage() {
             <span style={{ width: 44, height: 44, borderRadius: 13, background: 'rgba(20,83,45,0.08)', border: '1px solid rgba(20,83,45,0.18)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', color: '#14532D', flexShrink: 0 }}>
               <MapPin size={19} />
             </span>
-            <div>
+            <div style={{ minWidth: 0 }}>
               <div style={{ fontSize: 15, fontWeight: 900 }}>{tech.city}{tech.club ? ` — ${tech.club}` : ''}</div>
               <div style={{ fontSize: 12, color: MUT, marginTop: 3 }}>ارائه‌ی خدمات در {tech.coverage.join('، ')}</div>
+              {/* ⚠️ جدولِ خشک نه — یک خطِ جمله‌وار. و فقط چیزی که متخصص
+                  *گفته*: هیچ‌کدام پیش‌فرضِ «بله» ندارد. */}
+              {(tech.onsite || tech.workshop) && (
+                <div style={{ fontSize: 12.5, color: SEC, marginTop: 7, fontWeight: 700 }}>
+                  {[tech.onsite && 'در محلِ شما', tech.workshop && 'پذیرش در کارگاه']
+                    .filter(Boolean).join(' · ')}
+                </div>
+              )}
+              {tech.hours.trim() && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12.5, color: MUT, marginTop: 6 }}>
+                  <Clock size={13} aria-hidden style={{ flexShrink: 0 }} />
+                  <span>{tech.hours.trim()}</span>
+                </div>
+              )}
             </div>
           </div>
         </section>
@@ -456,7 +478,6 @@ export default function TechnicianProfilePage() {
       </div>
 
       {/* ═══ لایت‌باکس فول‌اسکرین ═══ */}
-      {imageViewer}
       {imageViewer}
       {videoViewer}
       {channelGate}

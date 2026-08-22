@@ -309,6 +309,44 @@ export default function TechnicianDashboard() {
                   value={form.coverage}
                   onChange={v => set('coverage', v)} />
               </div>
+
+              {/* ── نحوه و زمانِ ارائه‌ی خدمات ──
+                  ⚠️ هیچ‌کدام اجباری نیست و هیچ‌کدام پیش‌فرضِ «بله» ندارد:
+                  چیزی که متخصص نگفته، در صفحه‌ی عمومی ساخته نمی‌شود. */}
+              {/* ⚠️ `fieldset`/`legend` نه `div`/`span`: دو چک‌باکس یک
+                  پرسشِ واحدند و صفحه‌خوان باید آن پرسش را پیش از هر
+                  گزینه بخواند. */}
+              <fieldset className="sm:col-span-2">
+                <legend className="mb-2 block text-[12.5px] font-bold text-[#5B564B]">خدمات را چطور ارائه می‌دهید؟</legend>
+                <div className="flex flex-wrap gap-2">
+                  {([['onsite', 'در محلِ شما'], ['workshop', 'پذیرش در کارگاه']] as const).map(([k, label]) => (
+                    /* ⚠️ ورودی `sr-only` است، پس فوکوسِ کیبورد روی چیزی
+                       می‌نشیند که دیده نمی‌شود. حلقه باید روی همین
+                       برچسب بیفتد وگرنه کاربرِ کیبورد گم می‌شود. */
+                    <label key={k}
+                      className={`inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-xl border px-3 text-[13px] font-bold transition has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-gold-deep ${form[k] ? 'border-gold/[.55] bg-gold/[.09] text-[#2B2822]' : 'border-[#E7E2D6] bg-white text-[#5B564B]'}`}>
+                      <input type="checkbox" className="sr-only" checked={form[k]}
+                        onChange={e => set(k, e.target.checked)} />
+                      {/* رنگ تنها نشانه نیست — تیک هم می‌آید */}
+                      <span aria-hidden
+                        className={`grid size-5 place-items-center rounded-md border-2 ${form[k] ? 'border-gold-deep bg-gold-deep text-white' : 'border-[#D9D2C2] bg-white text-transparent'}`}>
+                        <Check size={13} />
+                      </span>
+                      {label}
+                    </label>
+                  ))}
+                </div>
+              </fieldset>
+              <div className="sm:col-span-2">
+                <label className="mb-1.5 block text-[12.5px] font-bold text-[#5B564B]" htmlFor="tech-hours">ساعت کاری</label>
+                <input id="tech-hours" className={INPUT} value={form.hours}
+                  aria-describedby="tech-hours-help"
+                  onChange={e => set('hours', e.target.value)}
+                  placeholder="مثال: شنبه تا چهارشنبه، ۱۰ تا ۲۰ — پنجشنبه تا ۱۴" />
+                <p id="tech-hours-help" className="mt-1.5 text-[11.5px] leading-[1.9] text-[#6F6A5C]">
+                  خالی بگذارید اگر ساعتِ ثابتی ندارید؛ در این حالت اصلاً نمایش داده نمی‌شود.
+                </p>
+              </div>
               <div className="sm:col-span-2">
                 <label className="mb-1.5 block text-[12.5px] font-bold text-[#5B564B]">معرفی یک‌خطی *</label>
                 <input className={INPUT} value={form.intro} onChange={e => set('intro', e.target.value)} placeholder="مثال: پارچه‌کشی مسابقه‌ای و رگلاژ میلی‌متری…" />

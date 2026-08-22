@@ -65,6 +65,12 @@ export interface Technician {
   club?: string
   /** شهرهای تحت پوشش */
   coverage: string[]
+  /** خدمت در محلِ مشتری — فقط اگر متخصص گفته باشد */
+  onsite: boolean
+  /** پذیرش در کارگاه */
+  workshop: boolean
+  /** ساعتِ کاری — متنِ آزاد؛ خالی یعنی نمایش نده */
+  hours: string
   /** معرفی یک‌خطی کارت/هیرو */
   intro: string
   /** پاراگراف‌های «درباره من» */
