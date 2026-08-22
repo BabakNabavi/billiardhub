@@ -332,5 +332,108 @@ const head = s => console.log(`\n■ ${s}`)
   t('PUT/DELETE نقش را از دیتابیس می‌گیرند', (code('app/api/clubs/[id]/route.ts').match(/const isAdmin = await can\(userId, 'clubs'\)/g) ?? []).length === 2)
 }
 
+/* ── کانالِ بیلیارد مدیا: منبعِ واحد، شناسه‌ی تغییرناپذیر، دروازه ── */
+{
+  head('کانال و دروازه‌ی انتشار')
+
+  /* یک تایپ، نه سه. سه اعلانِ جدا داشتیم و یکی‌شان `role` نداشت. */
+  const shared = code('lib/media/channel.ts')
+  t('منبعِ واحدِ کانال وجود دارد',
+    /export interface UserChannel/.test(shared) && /export const CHANNEL_ROLES/.test(shared))
+  t('نقشِ «کاربر عادی» کانال ندارد', !/'user'/.test(shared))
+  for (const p of ['app/api/media/channel/route.ts', 'lib/media-user.ts', 'components/media/ChannelGate.tsx', 'components/media/useChannelPublish.tsx']) {
+    const src = code(p)
+    t(p + ' تایپِ کانال را از نو اعلام نمی‌کند',
+      !/^\s*(export )?interface UserChannel \{/m.test(src) && /lib\/media\/channel/.test(src))
+  }
+
+  /* ⚠️ کلیدِ «مالک + هندل» تغییرِ نام را به ساختِ کانالِ دوم تبدیل
+     می‌کرد و ویدیوهای قدیمی به کانالی رها اشاره می‌کردند. */
+  const chRoute = code('app/api/media/channel/route.ts')
+  /* کلید شناسه است، نه هندل — و ردیفِ قدیمیِ بی‌شناسه هم شناسه‌ی
+     قطعی دارد، وگرنه ویرایشش دوباره کانالِ دوم می‌ساخت. */
+  t('کلیدِ کانال شناسه است نه هندل', /const existing = wantId[\s\S]{0,80}channelKey\(c\) === wantId/.test(chRoute))
+  t('شناسه‌ی ناموجود ۴۰۴ می‌گیرد', /\(wantId \|\| addRole\) && !existing/.test(chRoute) && /status: 404/.test(chRoute))
+  t('هر کانالِ تازه شناسه می‌گیرد', /id: existing \? channelKey\(existing\) : newId\(\)/.test(chRoute))
+  t('شناسه‌ی ردیفِ قدیمی از داده ساخته می‌شود نه تصادفی',
+    /export const legacyId/.test(shared) && !/Math\.random/.test(shared))
+  t('جای‌گذاری روی همان شیء انجام می‌شود', /c === existing \? channel : c/.test(chRoute))
+  /* ⚠️ «کانال تازه» بدونِ شناسه می‌آید؛ اگر مسیر آن را ویرایش بفهمد،
+     بی‌صدا کانالِ قبلی را تغییرِ نام می‌دهد — زیرِ ویدیوهای منتشرشده. */
+  t('بدونِ شناسه و بدونِ addRole ویرایش نمی‌شود',
+    /: addRole$/m.test(chRoute) && /^\s*: undefined$/m.test(chRoute))
+  t('هندلِ تکراری حتی مالِ خودم رد می‌شود',
+    /list\.some\(c => c\.handle === handle && c !== existing\)/.test(chRoute))
+  /* میدانی که فرستاده نشده نباید پاک شود — مهرِ نقش عکس را می‌برد */
+  t('ویرایش میدان‌های نافرستاده را پاک نمی‌کند',
+    /avatar: b\.avatar !== undefined/.test(chRoute) && /bio: b\.bio !== undefined/.test(chRoute))
+  t('ورودی با Zod اعتبارسنجی می‌شود', /BODY\.safeParse/.test(chRoute) && /z\.object\(/.test(chRoute))
+  /* شکستِ مهرِ نقش نباید بی‌صدا بماند، وگرنه پنجره تا ابد باز می‌شود */
+  t('مهرِ نقش پاسخِ سرور را می‌خواند',
+    /if \(!r\.ok \|\| !j\?\.channel\) return miss\(\)/.test(code('components/media/useChannelPublish.tsx')))
+  t('نبودِ کلیدِ مالک هم پیام دارد',
+    /کانالِ شما شناسایی نشد/.test(code('components/media/useChannelPublish.tsx')))
+  const media = code('app/api/media/route.ts')
+  t('انتشار در کانالِ غریبه بسته است', /myChannelHandles/.test(media))
+  /* ⚠️ `clubId` هم از بدنه می‌آید؛ بدونِ گارد هر کسی ویدیویش را زیرِ
+     هر باشگاهی می‌نشاند و در فیلترِ آن باشگاه ظاهر می‌شود. */
+  t('نشاندنِ ویدیو زیرِ باشگاهِ غریبه بسته است',
+    /if \(!owns && !\(await can\(actor\.id, 'clubs'\)\)\)/.test(media) && /این باشگاه متعلق به شما نیست/.test(media)
+    && /club_id: wantClub \|\| null/.test(media))
+  /* ⚠️ شناسه در پاسخِ عمومی برمی‌گردد؛ اگر از `ownerKey` ساخته شود،
+     شماره‌ی موبایل تنها مجهولِ معادله است. */
+  t('شناسه‌ی کانال شماره‌ی موبایل را لو نمی‌دهد',
+    !/ownerKey/.test(shared.slice(shared.indexOf('export const legacyId'))))
+  /* فایلِ کانال‌ها `ownerKey` خام دارد و در باکتِ عمومی بود */
+  t('فهرستِ کانال‌ها در باکتِ خصوصی است',
+    /'social\/media\/channels\.json',/.test(code('lib/social-server.ts')))
+  /* مسیرِ بی‌احراز هویت نباید بگوید «فلان شماره صاحبِ فلان هندل است» */
+  t('بررسیِ هندل اوراکلِ مالکیت نیست',
+    /const taken = list\.some\(c => c\.handle === h\)/.test(chRoute))
+  t('نام و هندل هم معناشناسیِ PATCH دارند',
+    /const name = b\.name !== undefined/.test(chRoute) && /const handle = b\.handle !== undefined/.test(chRoute))
+
+  /* هر هفت نقش باید دروازه داشته باشد — «کاربر عادی» عمداً نه */
+  const GATED = [
+    ['app/clubs/[id]/page.tsx', 'club'],
+    ['app/coaches/[id]/page.tsx', 'coach'],
+    ['app/referees/[id]/page.tsx', 'referee'],
+    ['app/players/[id]/page.tsx', 'player'],
+    ['app/services/[id]/page.tsx', 'technician'],
+    ['app/sellers/[id]/FlatShop.tsx', 'seller'],
+    ['app/manufacturers/[id]/page.tsx', 'manufacturer'],
+  ]
+  for (const [p, role] of GATED) {
+    const src = code(p)
+    t('گالریِ ' + role + ' به دروازه وصل است',
+      src.includes("useChannelPublish('" + role + "'") && /\{channelGate\}/.test(src))
+  }
+
+  /* ⚠️ ویدیویی که در گالری ذخیره نشد نباید در مدیا منتشر شود */
+  const clubPage = code('app/clubs/[id]/page.tsx')
+  t('باشگاه فقط ویدیوی ذخیره‌شده را منتشر می‌کند',
+    clubPage.indexOf('saved.push(') > -1
+    && clubPage.indexOf('await saveClubVideos(next))) break') < clubPage.indexOf('saved.push('))
+
+  /* پنجره‌ی قدیمیِ آپلود دیگر کورکورانه در کانالِ اول منتشر نمی‌کند */
+  const up = code('components/MediaUpload.tsx')
+  const step = code('components/media/ChannelStep.tsx')
+  t('پنجره‌ی آپلود همه‌ی کانال‌ها را می‌خواند',
+    /fetchMyChannels\(/.test(up) && !/fetchMyChannel\(/.test(up))
+  t('پنجره‌ی آپلود انتخابگرِ کانال دارد', /role="radiogroup"/.test(step) && /<ChannelPicker/.test(up))
+  /* رادیوگروپ فقط رادیو می‌پذیرد و باید یک ایستگاهِ Tab باشد */
+  t('دکمه‌ی «کانال تازه» بیرونِ رادیوگروپ است',
+    step.indexOf('</div>') < step.indexOf('کانال تازه'))
+  t('انتخابگر با فلش کار می‌کند', /ArrowRight/.test(step) && /tabIndex=\{on \? 0 : -1\}/.test(step))
+  t('حالتِ «فهرست خوانده نشد» پرچمِ خودش را دارد',
+    /failed=\{chFailed\}/.test(up) && /if \(failed\)/.test(step))
+  t('متنِ «کانال یک‌بار ساخته می‌شود» برداشته شد',
+    !/کانال یک‌بار ساخته می‌شود/.test(up) && !/کانال یک‌بار ساخته می‌شود/.test(step))
+  /* هندل شناسه است، نه عددی که تبدیلِ سراسری باید فارسی‌اش کند */
+  t('هندلِ کانال لاتین می‌ماند',
+    /bh-latin" dir="ltr">@\{c\.handle\}/.test(code('components/media/ChannelGate.tsx'))
+    && /className="bh-latin"[^>]*>@\{c\.handle\}/.test(step))
+}
+
 console.log(`\n${'─'.repeat(52)}\n  نتیجه: ${pass} موفق، ${fail} ناموفق\n`)
 process.exit(fail ? 1 : 0)

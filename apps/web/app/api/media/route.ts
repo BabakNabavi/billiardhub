@@ -7,6 +7,7 @@ import { hitRateLimit, tooMany } from '@/lib/auth/rate-limit'
 import { getSupabaseServer } from '@/lib/supabase-server'
 import { listPublic, makeSlug, toPublic, myChannelHandles, type VideoRow } from '@/lib/media/server'
 import { keyFromUrl } from '@/lib/media/storage'
+import { can } from '@/lib/admin/permissions'
 
 /* ─────────────────────────────────────────────────────────────
    ویدیوهای بیلیارد مدیا.
@@ -82,6 +83,30 @@ export async function POST(req: NextRequest) {
     }
   }
 
+  /* ⚠️ `clubId` هم مثل `creatorHandle` از بدنه می‌آید و تا امروز
+     بررسی نمی‌شد. با وصل‌شدنِ گالریِ باشگاه به این مسیر، یعنی هر
+     کاربرِ واردشده می‌توانست ویدیویش را زیرِ *هر باشگاهی* بنشاند و
+     در فیلترِ `?club=` همان باشگاه ظاهر شود. */
+  const wantClub = String(v.clubId ?? '').trim()
+  if (wantClub) {
+    if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(wantClub)) {
+      return NextResponse.json({ ok: false, message: 'شناسه‌ی باشگاه معتبر نیست' }, { status: 400, headers: CORS })
+    }
+    const { data: club, error: cErr } = await getSupabaseServer()
+      /* ⚠️ ستون `ownerId` است نه `owner_id` — جدولِ `clubs` شترکوهانه
+         نام‌گذاری شده و نامِ اشتباه خطای PostgREST می‌داد، یعنی هر
+         ویدیوی گالریِ باشگاه ۵۰۰ می‌گرفت. */
+      .from('clubs').select('ownerId').eq('id', wantClub).maybeSingle()
+    /* خطای خواندن «مالک نیست» نیست — قضاوت نمی‌کنیم، رد می‌کنیم. */
+    if (cErr) {
+      return NextResponse.json({ ok: false, message: 'بررسی باشگاه انجام نشد' }, { status: 500, headers: CORS })
+    }
+    const owns = (club as { ownerId?: string } | null)?.ownerId === actor.id
+    if (!owns && !(await can(actor.id, 'clubs'))) {
+      return NextResponse.json({ ok: false, message: 'این باشگاه متعلق به شما نیست' }, { status: 403, headers: CORS })
+    }
+  }
+
   const now = new Date().toISOString()
   const row = {
     slug: makeSlug(title),
@@ -94,7 +119,7 @@ export async function POST(req: NextRequest) {
     owner_id: actor.id,
     creator_name: String(v.creatorName ?? 'کاربر').slice(0, 60),
     creator_handle: wantHandle || actor.id,
-    club_id: v.clubId ? String(v.clubId) : null,
+    club_id: wantClub || null,
     src,
     thumb: String(v.thumb ?? ''),
     /* کلیدِ فایل جدا از نشانی ذخیره می‌شود.

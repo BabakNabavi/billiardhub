@@ -1,6 +1,8 @@
 export const dynamic = 'force-dynamic'
 import { NextRequest, NextResponse } from 'next/server'
-import { CORS, readJson, readJsonFresh, writeJson, safeKey } from '@/lib/social-server'
+import { CORS, readJson, readJsonFresh, writeJson } from '@/lib/social-server'
+import { z } from 'zod'
+import { asRole, normHandle, channelKey, CHANNEL_ROLES, type UserChannel, type ChannelRole } from '@/lib/media/channel'
 import { actorOf, UNAUTHENTICATED } from '@/lib/auth/ownership'
 import { redactList } from '@/lib/privacy'
 
@@ -8,34 +10,12 @@ import { redactList } from '@/lib/privacy'
    کانال یک مرحله‌ی صریح است (نام + هندل)، نه چیزی که پنهانی ساخته شود. */
 const INDEX = 'social/media/channels.json'
 
-export interface UserChannel {
-  ownerKey: string
-  name: string
-  handle: string
-  bio: string
-  avatar: string
-  createdAt: number
-  /* ── چرا نقش روی کانال نشست ──
-     ویدیویی که از گالریِ یک نقش بالا می‌رود باید در کانالِ همان نقش
-     دیده شود. بدونِ این فیلد، «کانالِ من» یک چیزِ بی‌صاحب بود و
-     نمی‌شد به کاربر گفت «این کانال را با نقشِ مربی ساختی».
-     ⚠️ کانال‌های پیش از این تغییر `role` ندارند؛ `undefined` یعنی
-     «نامشخص» و در رابط به‌عنوان کانالِ عمومی نشان داده می‌شود، نه
-     کانالِ نقشی. */
-  /** نقش‌هایی که این کانال خانه‌شان است. یک کانال می‌تواند خانه‌ی
-   *  چند نقشِ همان آدم باشد (کاربر در پنجره انتخابش می‌کند). */
-  roles?: ProfileRole[]
-  /** میدانِ قدیمی — فقط برای خواندنِ ردیف‌های پیش از این تغییر */
-  role?: ProfileRole
-}
+/* تایپ و قواعد در `lib/media/channel` است — سه اعلانِ جدا داشتیم و
+   از هم جدا افتاده بودند (یکی‌شان `role` نداشت). */
+export type { UserChannel, ChannelRole }
 
-/** نقش‌هایی که گالری و کانال دارند — «کاربر عادی» عمداً نیست. */
-export const CHANNEL_ROLES = ['club', 'coach', 'referee', 'player', 'technician', 'seller', 'manufacturer'] as const
-export type ProfileRole = (typeof CHANNEL_ROLES)[number]
-const asRole = (v: unknown): ProfileRole | undefined =>
-  (CHANNEL_ROLES as readonly string[]).includes(String(v)) ? (String(v) as ProfileRole) : undefined
-
-const normHandle = (h: string) => String(h || '').trim().replace(/^@+/, '').replace(/[^A-Za-z0-9._-]/g, '').slice(0, 30).toLowerCase()
+/* شناسه‌ی تازه — بدونِ وابستگی به crypto.randomUUID */
+const newId = () => `ch_${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`
 
 export function OPTIONS() { return new NextResponse(null, { status: 204, headers: CORS }) }
 
@@ -48,8 +28,12 @@ export async function GET(req: NextRequest) {
   const handle = req.nextUrl.searchParams.get('handle')
 
   if (handle) {
+    /* ⚠️ پیش‌تر `owner` (کلیدِ خامِ مالک، یعنی شماره) از پارامتر خوانده
+       می‌شد و از فهرست کنار گذاشته می‌شد — یعنی این مسیرِ بی‌احراز
+       هویت تأیید می‌کرد «فلان شماره صاحبِ فلان هندل است». حالا فقط
+       می‌گوید هندل آزاد است یا نه. */
     const h = normHandle(handle)
-    const taken = list.some(c => c.handle === h && (!owner || c.ownerKey !== owner))
+    const taken = list.some(c => c.handle === h)
     return NextResponse.json({ handle: h, available: !taken && h.length >= 3 }, { headers: CORS })
   }
   /* پرس‌وجو با owner فقط برای «کانال خودم» است؛ مالکیت از نشست
@@ -68,13 +52,15 @@ export async function GET(req: NextRequest) {
        پنجره کانالِ کسِ دیگر را نشان می‌داد و روی حسابِ ادمین عمل
        می‌کرد. */
     const key = actor.dmKey || actor.id
-    const mine = list.filter(c => c.ownerKey === key)
+    /* ⚠️ ردیف‌های پیش از این تغییر `id` ندارند. شناسه‌ی قطعی از خودِ
+       داده ساخته می‌شود (نه تصادفی) تا دو تب یک چیز ببینند. */
+    const mine = list.filter(c => c.ownerKey === key).map(c => ({ ...c, id: channelKey(c) }))
     /* ⚠️ سازگاری: مصرف‌کننده‌ی قدیمی یک شیء (یا null) انتظار دارد و
        اگر آرایه بگیرد «کانال دارم» را همیشه درست می‌فهمد ولی
        فیلدهایش را نه. پس شکلِ قدیمی سرِ جایش می‌ماند و فهرست زیرِ
        یک کلیدِ تازه می‌آید. */
-    const one = req.nextUrl.searchParams.get('all') === '1'
-    if (one) return NextResponse.json({ channels: mine }, { headers: CORS })
+    const wantAll = req.nextUrl.searchParams.get('all') === '1'
+    if (wantAll) return NextResponse.json({ channels: mine }, { headers: CORS })
     return NextResponse.json(mine[0] ?? null, { headers: CORS })
   }
 
@@ -86,41 +72,89 @@ export async function GET(req: NextRequest) {
   )
 }
 
-/* POST { ownerKey, name, handle, bio?, avatar? } → ساخت یا ویرایش کانال */
+const BODY = z.object({
+  /* شناسه‌ی کانالِ موجود؛ نبودنش یعنی «بساز» */
+  id: z.string().max(64).optional(),
+  /* ⚠️ اختیاری، چون ویرایش می‌تواند فقط نقش را عوض کند. اگر اجباری
+     بمانند، `stampRole` نسخه‌ی *کشِ کلاینت* را می‌فرستد و نامی که
+     در تبِ دیگری عوض شده بی‌صدا به عقب برمی‌گردد. */
+  name: z.string().max(200).optional(),
+  handle: z.string().max(60).optional(),
+  bio: z.string().max(500).optional(),
+  avatar: z.string().max(2048).optional(),
+  role: z.enum(CHANNEL_ROLES).optional(),
+  addRole: z.enum(CHANNEL_ROLES).optional(),
+})
+
+/* POST { name, handle, id?, bio?, avatar?, role?, addRole? } → ساخت یا ویرایش کانال */
 export async function POST(req: NextRequest) {
   /* مالک کانال از نشست می‌آید: پیش‌تر ownerKey را کلاینت می‌گفت و
      یعنی می‌شد کانال دیگری را ساخت، تصاحب یا بازنویسی کرد. */
   const actor = await actorOf(req)
   if (!actor) return NextResponse.json(UNAUTHENTICATED, { status: 401, headers: CORS })
 
-  const b = await req.json().catch(() => ({}))
+  /* ورودیِ خارجی در مرز اعتبارسنجی می‌شود، نه با `String()`های
+     پراکنده. `.optional()` عمدی است: «نفرستاده» از «خالی فرستاده»
+     جدا می‌ماند و پایین‌تر همین تفاوت جلوی پاک‌شدنِ عکس را می‌گیرد. */
+  const b = BODY.safeParse(await req.json().catch(() => ({}))).data
+  /* ⚠️ گارد باید *پیش از* استفاده باشد، نه بعدش. */
+  if (!b) return NextResponse.json({ ok: false, message: 'ورودی معتبر نیست' }, { status: 400, headers: CORS })
+
   const ownerKey = actor.dmKey || actor.id
-  const name = String(b?.name || '').trim().slice(0, 60)
-  const handle = normHandle(b?.handle)
-  const role = asRole(b?.role)
+  const role = asRole(b.role)
   /* ⚠️ «افزودنِ نقش» جدا از «ساخت» است: کاربر در پنجره کانالی از نقشِ
      دیگر را انتخاب می‌کند و از آن به بعد باید بی‌سؤال منتشر شود.
      بدونِ این، پنجره تا ابد هر بار باز می‌شد. */
-  const addRole = asRole(b?.addRole)
+  const addRole = asRole(b.addRole)
 
   if (!ownerKey) return NextResponse.json({ ok: false, message: 'کاربر نامشخص است' }, { status: 400, headers: CORS })
-  if (name.length < 2) return NextResponse.json({ ok: false, message: 'نام کانال را وارد کنید' }, { status: 400, headers: CORS })
-  if (handle.length < 3) return NextResponse.json({ ok: false, message: 'هندل حداقل ۳ نویسه (انگلیسی/عدد) باشد' }, { status: 400, headers: CORS })
 
   /* ⚠️ این خواندن مبنای نوشتن است. با نسخه‌ی کش‌شده، دو ساختِ
      هم‌زمان (دو تب، دو صفحه‌ی نقش) یکی را پاک می‌کرد — و با مدلِ
      چندکاناله این از‌دست‌رفتن دیگر نامرئی نیست. */
   const list = await readJsonFresh<UserChannel[]>(INDEX, [])
-  if (list.some(c => c.handle === handle && c.ownerKey !== ownerKey)) {
+  const wantHandle = normHandle(b.handle ?? '')
+
+  /* ── سه نیت، سه رفتار ──
+     پیش‌تر کلیدِ یکتا فقط `ownerKey` بود (هر ذخیره کانالِ قبلی را
+     بازنویسی می‌کرد)، بعد «مالک + هندل» شد (تغییرِ نام کانالِ دومی
+     می‌ساخت). هر دو یک ریشه داشتند: مسیر نمی‌دانست کاربر می‌خواهد
+     *بسازد* یا *ویرایش کند*، و از روی داده حدس می‌زد.
+
+     حالا نیت صریح است:
+       `id`      ⇒ ویرایشِ همان کانال (هندل هم می‌تواند عوض شود)
+       `addRole` ⇒ مهرِ نقش روی کانالِ موجود (ردیف‌های بی‌شناسه هم)
+       هیچ‌کدام ⇒ ساخت. و ساخت با هندلِ گرفته‌شده باید رد شود، حتی
+                  اگر آن هندل مالِ کانالِ دیگرِ *خودِ* کاربر باشد —
+                  وگرنه «کانال تازه» بی‌صدا کانالِ قبلی را تغییرِ نام
+                  می‌داد، زیرِ ویدیوهایی که همان‌جا منتشر شده‌اند. */
+  const wantId = String(b.id ?? '').trim()
+  const existing = wantId
+    ? list.find(c => c.ownerKey === ownerKey && channelKey(c) === wantId)
+    : addRole
+      ? list.find(c => c.ownerKey === ownerKey && c.handle === wantHandle)
+      : undefined
+  /* ⚠️ «نیافتم» در هر دو مسیرِ ویرایش باید ۴۰۴ باشد. اگر مسیرِ
+     `addRole` بی‌صدا به «ساخت» بیفتد، کاربری که فقط می‌خواست نقشی
+     را وصل کند صاحبِ کانالِ دومِ ناخواسته می‌شود. */
+  if ((wantId || addRole) && !existing) {
+    return NextResponse.json({ ok: false, message: 'کانال پیدا نشد' }, { status: 404, headers: CORS })
+  }
+
+  /* ── معناشناسیِ PATCH برای نام و هندل هم ──
+     تنها فرستنده‌ی `addRole` کشِ کلاینت است؛ اگر نامِ کهنه‌اش را
+     بنویسیم، تغییرِ نامی که در تبِ دیگر انجام شده برمی‌گردد — روی
+     همان میدانی که ویدیوهای منتشرشده با آن شناخته می‌شوند. */
+  const name = b.name !== undefined ? String(b.name).trim().slice(0, 60) : (existing?.name ?? '')
+  const handle = b.handle !== undefined ? normHandle(b.handle) : (existing?.handle ?? '')
+  if (name.length < 2) return NextResponse.json({ ok: false, message: 'نام کانال را وارد کنید' }, { status: 400, headers: CORS })
+  if (handle.length < 3) return NextResponse.json({ ok: false, message: 'هندل حداقل ۳ نویسه (انگلیسی/عدد) باشد' }, { status: 400, headers: CORS })
+
+  /* هندل در کلِ سایت یکتاست؛ تنها استثنا خودِ همین کانال است. */
+  if (list.some(c => c.handle === handle && c !== existing)) {
     return NextResponse.json({ ok: false, message: 'این هندل قبلاً گرفته شده است' }, { status: 409, headers: CORS })
   }
 
-  /* ── کدام کانال به‌روز می‌شود ──
-     پیش‌تر کلیدِ یکتا فقط `ownerKey` بود، پس هر ذخیره کانالِ قبلیِ
-     همان کاربر را *بازنویسی* می‌کرد و داشتنِ دو کانال ممکن نبود.
-     حالا کلید «مالک + هندل» است: هندلِ موجود ⇒ ویرایش، هندلِ تازه
-     ⇒ کانالِ تازه. */
-  const existing = list.find(c => c.ownerKey === ownerKey && c.handle === handle)
   const mine = list.filter(c => c.ownerKey === ownerKey)
   /* سقفی که جلوی ساختِ انبوه را می‌گیرد؛ هفت نقش داریم. */
   if (!existing && mine.length >= 7) {
@@ -128,9 +162,14 @@ export async function POST(req: NextRequest) {
       { ok: false, message: 'بیشتر از هفت کانال نمی‌شود ساخت' }, { status: 409, headers: CORS })
   }
   const channel: UserChannel = {
+    id: existing ? channelKey(existing) : newId(),
     ownerKey, name, handle,
-    bio: String(b?.bio || '').trim().slice(0, 200),
-    avatar: String(b?.avatar || ''),
+    /* ⚠️ «نفرستادن» یعنی «عوض نکن»، نه «خالی کن». مهرِ نقش فقط
+       `id/name/handle/bio/addRole` می‌فرستد؛ با انتسابِ خام، هر بار
+       که کاربر کانالی را به نقشِ تازه‌ای وصل می‌کرد عکسِ کانالش
+       پاک می‌شد. */
+    bio: b.bio !== undefined ? String(b.bio).trim().slice(0, 200) : (existing?.bio ?? ''),
+    avatar: b.avatar !== undefined ? String(b.avatar) : (existing?.avatar ?? ''),
     createdAt: existing?.createdAt ?? Date.now(),
     roles: [...new Set([
       ...(existing?.roles ?? []),
@@ -140,7 +179,7 @@ export async function POST(req: NextRequest) {
     ])],
   }
   const next = existing
-    ? list.map(c => (c.ownerKey === ownerKey && c.handle === handle ? channel : c))
+    ? list.map(c => (c === existing ? channel : c))
     : [...list, channel]
   await writeJson(INDEX, next.slice(-2000))
 

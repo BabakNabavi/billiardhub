@@ -22,39 +22,14 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { X, Radio, Plus, Check, Loader2 } from 'lucide-react'
 import { apiFetch } from '@/lib/http'
 
-export type ChannelRole =
-  'club' | 'coach' | 'referee' | 'player' | 'technician' | 'seller' | 'manufacturer'
+/* تایپ، اتحادِ نقش‌ها، برچسبِ فارسی و قاعده‌ی هندل — همه از منبعِ واحد.
+   ⚠️ `norm` اینجا کپیِ دستیِ قاعده‌ی سرور بود؛ اگر یکی عوض می‌شد،
+   کاربر هندلی می‌دید که سرور چیزِ دیگری از آن می‌ساخت. */
+import { ROLE_FA, normHandle as norm, servesRole, roleLabels, type ChannelRole, type UserChannel } from '@/lib/media/channel'
 
-export interface UserChannel {
-  ownerKey: string
-  name: string
-  handle: string
-  bio: string
-  avatar: string
-  createdAt: number
-  /** نقش‌هایی که این کانال خانه‌شان است */
-  roles?: ChannelRole[]
-  /** میدانِ قدیمی — ردیف‌های پیش از چندنقشی‌شدن */
-  role?: ChannelRole
-}
-
-export const ROLE_FA: Record<ChannelRole, string> = {
-  club: 'باشگاه', coach: 'مربی', referee: 'داور', player: 'بازیکن',
-  technician: 'متخصص فنی', seller: 'فروشگاه', manufacturer: 'تولیدکننده',
-}
-
-const norm = (h: string) =>
-  String(h || '').trim().replace(/^@+/, '').replace(/[^A-Za-z0-9._-]/g, '').slice(0, 30).toLowerCase()
-
-/** کانال‌های کاربر. `null` یعنی نتوانستیم بخوانیم (نه «ندارد»). */
-export async function loadMyChannels(ownerKey: string): Promise<UserChannel[] | null> {
-  try {
-    const r = await apiFetch(`/api/media/channel?all=1&owner=${encodeURIComponent(ownerKey)}`, { cache: 'no-store' })
-    if (!r.ok) return null
-    const j = await r.json() as { channels?: UserChannel[] }
-    return Array.isArray(j?.channels) ? j.channels : []
-  } catch { return null }
-}
+/* خواندنِ کانال‌ها یک نسخه بیشتر ندارد؛ این‌جا فقط نامِ آشنا را
+   نگه می‌داریم تا مصرف‌کننده‌ها دست نخورند. */
+export { fetchMyChannels as loadMyChannels } from '@/lib/media-user'
 
 export default function ChannelGate({ role, suggestName, channels, onPick, onClose }: {
   role: ChannelRole
@@ -107,8 +82,10 @@ export default function ChannelGate({ role, suggestName, channels, onPick, onClo
     } catch { setErr('ارتباط با سرور برقرار نشد') } finally { setBusy(false) }
   }, [name, handle, role, onPick])
 
-  const sameRole = channels.filter(c => c.role === role)
-  const otherRole = channels.filter(c => c.role !== role)
+  /* ⚠️ فقط `role` را می‌دید؛ کانالِ چندنقشی که این نقش را در
+     `roles` داشت، «نقشِ دیگر» شمرده می‌شد. */
+  const sameRole = channels.filter(c => servesRole(c, role))
+  const otherRole = channels.filter(c => !servesRole(c, role))
 
   return (
     <div className="cg-back" role="presentation" onClick={e => { if (e.target === e.currentTarget) onClose() }}>
@@ -131,13 +108,13 @@ export default function ChannelGate({ role, suggestName, channels, onPick, onClo
           <>
             <ul className="cg-list">
               {[...sameRole, ...otherRole].map((c, i) => (
-                <li key={c.handle}>
+                <li key={c.id ?? c.handle}>
                   <button type="button" className="cg-item" onClick={() => onPick(c)}
                     ref={i === 0 ? (firstRef as React.RefObject<HTMLButtonElement>) : undefined}>
                     <span className="cg-item-n">{c.name}</span>
-                    <span className="cg-item-h" dir="ltr">@{c.handle}</span>
+                    <span className="cg-item-h bh-latin" dir="ltr">@{c.handle}</span>
                     <span className="cg-item-r">
-                      {(c.roles?.length ? c.roles : c.role ? [c.role] : []).map(r => ROLE_FA[r]).join(' · ') || 'بدون نقش'}
+                      {roleLabels(c) || 'بدون نقش'}
                     </span>
                     <Check size={16} className="cg-item-i" aria-hidden />
                   </button>
