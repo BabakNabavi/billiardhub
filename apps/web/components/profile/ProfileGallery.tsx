@@ -28,6 +28,8 @@
 
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import type { AskResult } from '@/components/media/useChannelPublish'
+import VideoDetailsDialog from '@/components/media/VideoDetailsDialog'
+import type { VideoDetail } from '@/lib/media/video-details'
 import { Images, Clapperboard, FolderOpen, ArrowRight, Plus, Play, Loader2 } from 'lucide-react'
 import { useTabKeys } from '@/hooks/use-tab-keys'
 import { toFaDigits } from '@/lib/jalali'
@@ -35,6 +37,9 @@ import { askText, notify } from '@/lib/ui/dialogs'
 
 export interface GalleryImage { id: string; url: string; caption: string; album?: string }
 export interface GalleryVideo { id: string; url?: string; thumbnail: string; title: string; duration: string; album?: string }
+
+/* همان سقفی که صفحه‌های نقش اعمال می‌کنند */
+const MAX_VIDEO_MB = 25
 
 const TABS = ['photos', 'videos', 'albums'] as const
 type Tab = typeof TABS[number]
@@ -63,8 +68,11 @@ export default function ProfileGallery({
   busy?: boolean
   /** `album` یعنی رسانه مستقیم داخلِ همان آلبوم بنشیند */
   onAddImages?: (files: File[], album?: string) => void | Promise<void>
-  /* ویدیو هم مثل عکس از گالریِ خودِ کاربر انتخاب می‌شود */
-  onAddVideos?: (files: File[], album?: string) => void | Promise<void>
+  /* ویدیو هم مثل عکس از گالریِ خودِ کاربر انتخاب می‌شود.
+     ⚠️ `details` عنوان/دسته/توضیحی است که کاربر خودش داده — هم‌ترتیب
+     با `files`. تا دیروز عنوان *نامِ فایل* بود و همان به بیلیارد
+     مدیا می‌رفت؛ «screen record 04-14-2026» برای گوگل بی‌ارزش است. */
+  onAddVideos?: (files: File[], album?: string, details?: VideoDetail[]) => void | Promise<void>
   /** ── پیش از بازکردنِ انتخابگرِ ویدیو ──
    *  صفحه این‌جا می‌پرسد «کانالِ بیلیارد مدیا داری؟».
    *
@@ -109,6 +117,9 @@ export default function ProfileGallery({
   /* فشرده‌سازیِ چند عکس روی موبایلِ ضعیف چند ثانیه است و در آن فاصله
      `edit.saving` هنوز روشن نشده — خانه‌ی «+» کلیک‌پذیر می‌ماند. */
   const [working, setWorking] = useState(false)
+  /* فایل‌های انتخاب‌شده‌ای که منتظرِ مشخصات‌اند */
+  const [detailFor, setDetailFor] = useState<{ files: File[]; album?: string } | null>(null)
+  const detailDone = useRef<((d: VideoDetail[] | null) => void) | null>(null)
 
   /* ── چرا تبِ پیش‌فرض یک‌بار حساب‌شدن کافی نیست ──
      صفحه اول از `localStorage` پر می‌شود و پاسخِ سرور یک تیک بعد
@@ -217,18 +228,58 @@ export default function ProfileGallery({
   const isImg = (f: File) => f.type.startsWith('image/') || /\.(jpe?g|png|gif|webp|heic|heif|bmp)$/i.test(f.name)
   const isVid = (f: File) => f.type.startsWith('video/') || /\.(mp4|mov|m4v|webm|mkv|3gp)$/i.test(f.name)
 
+  /* ── مشخصات، پیش از آپلود ──
+     ⚠️ یوتیوب فایل را همان لحظه بالا می‌فرستد و فرم را حینِ آپلود
+     نشان می‌دهد. این‌جا عمداً برعکس است: مخاطب روی شبکه‌ی موبایلِ
+     ایران است و اگر وسطِ فرم پشیمان شود نباید حجمش رفته باشد.
+     `null` یعنی انصراف از کلِ افزودن. */
+  const askDetails = useCallback((files: File[], album?: string) =>
+    new Promise<VideoDetail[] | null>(resolve => {
+      /* ⚠️ فراخوانِ دوم قولِ اول را یتیم می‌کرد و آن `addMixed` تا ابد
+         پشتِ `await` می‌ماند — یعنی گالری در حالتِ «در حال کار» گیر. */
+      detailDone.current?.(null)
+      detailDone.current = resolve
+      setDetailFor({ files, album })
+    }), [])
+  const closeDetails = useCallback((d: VideoDetail[] | null) => {
+    setDetailFor(null)
+    const done = detailDone.current; detailDone.current = null
+    done?.(d)
+  }, [])
+  const cancelDetails = useCallback(() => closeDetails(null), [closeDetails])
+  /* قولِ باز نباید با unmount معلق بماند */
+  useEffect(() => () => { detailDone.current?.(null); detailDone.current = null }, [])
+
   const addMixed = async (files: File[], album?: string) => {
     const imgs = files.filter(isImg)
-    const vids = files.filter(f => !isImg(f) && isVid(f))
+    const allVids = files.filter(f => !isImg(f) && isVid(f))
     const rest = files.filter(f => !isImg(f) && !isVid(f))
+    /* ⚠️ فایلِ بزرگ‌تر از سقف را صفحه‌ها بی‌صدا کنار می‌گذارند. اگر
+       این‌جا فیلتر نشود، کاربر برایش عنوان و دسته می‌نویسد و بعد
+       هیچ‌وقت آپلود نمی‌شود. */
+    const vids = allVids.filter(f => f.size <= MAX_VIDEO_MB * 1024 * 1024)
+    const heavy = allVids.filter(f => f.size > MAX_VIDEO_MB * 1024 * 1024)
+
+    /* ── ترتیب مهم است ──
+       ۱) اول مشخصات: انصراف باید *پیش از* هر آپلودی باشد، وگرنه
+          «انصراف» عکس‌های همان انتخاب را آپلودشده رها می‌کرد.
+       ۲) بعد دروازه‌ی کانال، و فقط اگر کاربر واقعاً می‌خواهد منتشر
+          کند — کسی که «فقط در گالری» زده نباید مجبور به ساختِ کانال
+          شود. */
+    let details: VideoDetail[] | null = null
+    if (vids.length) {
+      details = await askDetails(vids, album)
+      if (!details) return
+    }
+
     setWorking(true)
     try {
-      if (imgs.length) await onAddImages?.(imgs, album)
-      if (vids.length) {
-        /* فقط وقتی واقعاً ویدیویی در کار است */
+      if (details?.some(d => d.publish)) {
         try { const g: AskResult | undefined = beforeAddVideos?.(); if (g !== true) await g } catch { /* دروازه اختیاری است */ }
-        await onAddVideos?.(vids, album)
       }
+      if (imgs.length) await onAddImages?.(imgs, album)
+      if (vids.length && details) await onAddVideos?.(vids, album, details)
+      if (heavy.length) notify(`این ویدیوها از سقفِ ${toFaDigits(MAX_VIDEO_MB)} مگابایت بزرگ‌ترند: ${heavy.map(f => f.name).join('، ')}`)
       if (rest.length) notify(`این فایل‌ها نه عکس بودند نه ویدیو: ${rest.map(f => f.name).join('، ')}`)
     } catch {
       /* بدونِ این، یک فایلِ خرابِ عکس همه‌ی ویدیوهای همان انتخاب را
@@ -311,6 +362,20 @@ export default function ProfileGallery({
             </div>
           )}
       </div>
+
+      {detailFor && (
+        <VideoDetailsDialog
+          /* ⚠️ کلید از خودِ فایل‌ها: اگر انتخابِ تازه‌ای بنشیند، پنجره
+             باید از نو ساخته شود — وگرنه `items` طولِ قبلی را نگه
+             می‌دارد و اندیس‌ها از فهرست بیرون می‌زنند. */
+          key={detailFor.files.map(f => `${f.name}:${f.size}`).join('|')}
+          files={detailFor.files}
+          onDone={closeDetails}
+          /* عنوانِ نوشته‌شده حفظ می‌شود؛ فقط `publish` خاموش است. */
+          onSkip={closeDetails}
+          onClose={cancelDetails}
+        />
+      )}
 
       <div id="chpanel-albums" role="tabpanel" aria-labelledby="chtab-albums" hidden={tab !== 'albums'}>
         {albums.length === 0 && !canEdit ? (
