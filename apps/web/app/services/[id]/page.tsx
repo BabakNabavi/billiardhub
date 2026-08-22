@@ -8,6 +8,7 @@
    ───────────────────────────────────────────────────────────── */
 
 import { useChannelPublish, type PublishVideo } from '@/components/media/useChannelPublish'
+import { useVideoEdit } from '@/components/media/useVideoEdit'
 import { detailTitle, type VideoDetail } from '@/lib/media/video-details'
 import { useEffect, useMemo, useState } from 'react'
 import { ProfileMissing, ProfileLoading } from '@/components/profile/ProfileMissing'
@@ -206,6 +207,28 @@ export default function TechnicianProfilePage() {
     if (!(await ask('این تصویر حذف شود؟', { body: 'این کار برگشت‌پذیر نیست.', confirmLabel: 'حذف' }))) return
     await edit.apply(d => ({ ...d, gallery: (d.gallery ?? []).filter(g => g.id !== mid) }))
   }
+  /* ── ویرایشِ عنوانِ ویدیو ──
+     عنوان دو نسخه دارد: ردیفِ گالریِ پروفایل و ردیفِ بیلیارد مدیا.
+     هوک دومی را می‌زند، این تابع اولی را. کلید نشانیِ فایل است،
+     چون گالری شناسه‌ی ردیفِ مدیا را ندارد. */
+  const { dialog: videoEditDialog, edit: editVideo } = useVideoEdit(
+    async (target, detail) => {
+      /* ⚠️ `map` بدونِ تطبیق هم «موفق» برمی‌گردد. اگر نشانی جور نشود
+         (کدگذاریِ متفاوت، ردیفِ بی‌url)، هوک «شد» می‌شنید و مدیا را
+         عوض می‌کرد در حالی که گالری عنوانِ قبلی را نشان می‌دهد —
+         یعنی دو عنوان برای یک ویدیو. */
+      let hit = false
+      const ok = await edit.apply(prof => {
+        const list = prof.videos ?? []
+        hit = list.some(x => x.url === target.url)
+        if (!hit) return prof
+        return { ...prof, videos: list.map(x => (x.url === target.url ? { ...x, title: detail.title } : x)) }
+      })
+      return ok && hit
+    },
+    notify,
+  )
+
   const deleteVideo = async (vid: string) => {
     if (!(await ask('این ویدیو حذف شود؟', { body: 'این کار برگشت‌پذیر نیست.', confirmLabel: 'حذف' }))) return
     await edit.apply(d => ({ ...d, videos: (d.videos ?? []).filter(v => v.id !== vid) }))
@@ -377,7 +400,7 @@ export default function TechnicianProfilePage() {
                 index, ...meta,
                 ...(edit.isOwner ? { onDelete: (i: number) => deleteImage(ids[i] ?? '') } : {}),
               })}
-              onOpenVideo={v => openVideo(v, edit.isOwner ? { onDelete: () => deleteVideo(v.id) } : undefined)}
+              onOpenVideo={v => openVideo(v, edit.isOwner ? { onDelete: () => deleteVideo(v.id), onEdit: () => editVideo(v) } : undefined)}
               canEdit={edit.isOwner} busy={edit.saving || vidBusy}
               onAddImages={addImages} onAddVideos={addVideoFiles} beforeAddVideos={() => askChannel(String(tech?.name ?? ''))} onNewAlbum={newAlbum}
             />
@@ -417,7 +440,8 @@ export default function TechnicianProfilePage() {
       {imageViewer}
       {imageViewer}
       {videoViewer}
-      {channelGate}
+      {channelGate}
+      {videoEditDialog}
     </div>
   )
 }

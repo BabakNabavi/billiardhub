@@ -494,6 +494,49 @@ const head = s => console.log(`\n■ ${s}`)
   /* دسته و توضیح باید به سرور برسند، نه ثابتِ `other` */
   t('دسته و توضیح به مدیا می‌روند',
     /category: v\.category \|\| 'other'/.test(hook) && /description: v\.description \?\? ''/.test(hook))
+  /* ⚠️ ویدیویی که یک‌بار با نامِ فایل منتشر شده بود تا ابد همان
+     می‌ماند: مسیرِ ویرایش فقط ادمینی بود و هیچ صفحه‌ای صدایش
+     نمی‌زد. حالا صاحبِ ویدیو خودش می‌تواند عوضش کند. */
+  const ve = code('components/media/useVideoEdit.tsx')
+  t('مسیرِ ویرایشِ ویدیوی خودی وجود دارد',
+    /export async function PATCH/.test(media) && /prev\.owner_id !== actor\.id && !actor\.isAdmin/.test(media))
+  t('ویرایش همان قاعده‌ی عنوان را اعمال می‌کند',
+    /const weak = weakTitle\(title\)/.test(media))
+  /* نشانیِ قبلی نباید ۴۰۴ شود */
+  t('تغییرِ عنوان نشانیِ قدیمی را در تاریخچه نگه می‌دارد',
+    /video_slug_history/.test(media) && /patch\.slug = makeSlug\(title\)/.test(media))
+  /* دو عنوانِ متفاوت برای یک ویدیو بدتر از عنوانِ بد است */
+  t('اگر گالری ذخیره نشد، مدیا هم دست نمی‌خورد',
+    /if \(!\(await saveToGallery\(target, detail\)\)\)/.test(ve))
+  /* ⚠️ `src` یکتا نیست: دو ردیفِ هم‌نشانی `maybeSingle` را `null`
+     می‌کرد و مالکِ واقعی برای همیشه ۴۰۴ می‌گرفت. */
+  t('یافتن با src به خودِ کاربر محدود است',
+    /if \(src && !id && !slug && !actor\.isAdmin\) sel = sel\.eq\('owner_id', actor\.id\)/.test(media))
+  t('خطای خواندن بلعیده نمی‌شود',
+    /error: findErr/.test(media) && /خواندنِ ویدیو انجام نشد/.test(media))
+  /* «منتشر نشده» باید از «خطا» جدا بماند */
+  t('«ردیفِ مدیا نیست» کدِ خودش را دارد',
+    /code: 'no-media-row'/.test(media) && /j\.code === 'no-media-row'/.test(ve))
+  t('ویرایش سقفِ نرخ دارد', /action: 'video-patch'/.test(media))
+  t('ورودیِ ویرایش با Zod سنجیده می‌شود', /PATCH_BODY\.safeParse/.test(media))
+  t('تاریخچه‌ی نشانی بعد از موفقیتِ ذخیره نوشته می‌شود',
+    media.indexOf('.update(patch)') < media.indexOf("if (renamed) await sb.from('video_slug_history')"))
+  t('updated_at ثبت می‌شود', /updated_at: new Date\(\)\.toISOString\(\)/.test(media))
+  /* پنجره تا پایانِ ذخیره باز می‌ماند تا نوشته‌ی کاربر از دست نرود */
+  t('فرمِ ویرایش حالتِ لودینگ و خطا دارد',
+    /busy=\{saving\}/.test(ve) && /error=\{err\}/.test(ve) && /در حال ذخیره…/.test(vd))
+  /* لحنِ پیش‌فرضِ notify «خطا» است */
+  t('پیامِ موفقیت قرمز نشان داده نمی‌شود',
+    /notify\?\.\(msg, tone\)/.test(ve) && /منتشر شد\.\`, 'ok'\)/.test(hook))
+  for (const [p, who] of [['app/clubs/[id]/page.tsx', 'باشگاه'],
+    ['app/coaches/[id]/page.tsx', 'مربی'], ['app/referees/[id]/page.tsx', 'داور'],
+    ['app/players/[id]/page.tsx', 'بازیکن'], ['app/services/[id]/page.tsx', 'متخصص'],
+    ['app/sellers/[id]/FlatShop.tsx', 'فروشگاه'], ['app/manufacturers/[id]/page.tsx', 'تولیدکننده']]) {
+    const src = code(p)
+    t('ویرایشِ عنوان در ' + who + ' هست',
+      /onEdit: \(\) => editVideo\(v\)/.test(src) && /\{videoEditDialog\}/.test(src)
+      && /useVideoEdit\(/.test(src))
+  }
   t('فهرستِ کانال‌ها از پیش خوانده می‌شود',
     /const cache = useRef/.test(hook) && /useEffect\(\(\) => \{[\s\S]{0,200}loadMyChannels/.test(hook))
   t('ask همگام تصمیم می‌گیرد', !/const ask = useCallback\(async/.test(hook))

@@ -28,7 +28,7 @@
 
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import type { AskResult } from '@/components/media/useChannelPublish'
-import VideoDetailsDialog from '@/components/media/VideoDetailsDialog'
+import VideoDetailsDialog, { type DetailTarget } from '@/components/media/VideoDetailsDialog'
 import type { VideoDetail } from '@/lib/media/video-details'
 import { Images, Clapperboard, FolderOpen, ArrowRight, Plus, Play, Loader2 } from 'lucide-react'
 import { useTabKeys } from '@/hooks/use-tab-keys'
@@ -118,7 +118,10 @@ export default function ProfileGallery({
      `edit.saving` هنوز روشن نشده — خانه‌ی «+» کلیک‌پذیر می‌ماند. */
   const [working, setWorking] = useState(false)
   /* فایل‌های انتخاب‌شده‌ای که منتظرِ مشخصات‌اند */
-  const [detailFor, setDetailFor] = useState<{ files: File[]; album?: string } | null>(null)
+  /* ⚠️ `targets` همین‌جا یک‌بار ساخته می‌شود، نه در JSX: آرایه‌ی تازه
+     در هر رندر یعنی افکتِ پیش‌نمایشِ پنجره هر بار blobها را باطل و
+     دوباره می‌سازد. */
+  const [detailFor, setDetailFor] = useState<{ files: File[]; targets: DetailTarget[]; album?: string } | null>(null)
   const detailDone = useRef<((d: VideoDetail[] | null) => void) | null>(null)
 
   /* ── چرا تبِ پیش‌فرض یک‌بار حساب‌شدن کافی نیست ──
@@ -239,7 +242,7 @@ export default function ProfileGallery({
          پشتِ `await` می‌ماند — یعنی گالری در حالتِ «در حال کار» گیر. */
       detailDone.current?.(null)
       detailDone.current = resolve
-      setDetailFor({ files, album })
+      setDetailFor({ files, targets: files.map(f => ({ name: f.name, file: f })), album })
     }), [])
   const closeDetails = useCallback((d: VideoDetail[] | null) => {
     setDetailFor(null)
@@ -369,7 +372,7 @@ export default function ProfileGallery({
              باید از نو ساخته شود — وگرنه `items` طولِ قبلی را نگه
              می‌دارد و اندیس‌ها از فهرست بیرون می‌زنند. */
           key={detailFor.files.map(f => `${f.name}:${f.size}`).join('|')}
-          files={detailFor.files}
+          targets={detailFor.targets}
           onDone={closeDetails}
           /* عنوانِ نوشته‌شده حفظ می‌شود؛ فقط `publish` خاموش است. */
           onSkip={closeDetails}

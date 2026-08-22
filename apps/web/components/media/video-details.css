@@ -55,3 +55,8 @@
   .vd-list { max-height: 52vh; }
   .vd-prev { inline-size: 54px; block-size: 38px; }
 }
+
+/* چرخشِ لودر — همان الگوی بقیه‌ی پنجره‌ها */
+@keyframes vdSpin { to { transform: rotate(360deg) } }
+.vd-spin { animation: vdSpin 1s linear infinite; }
+@media (prefers-reduced-motion: reduce) { .vd-spin { animation: none } }
