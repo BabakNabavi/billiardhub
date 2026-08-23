@@ -612,10 +612,17 @@ head('خدماتِ متخصص')
     /legacy/.test(cat) && /keptLegacy/.test(panel) && /data\.legacy\.length > 0/.test(shown))
   /* دایرکتوری با متن می‌گردد؛ شناسه‌ی خام آنجا یعنی کارتِ «cloth» */
   t('دایرکتوری عنوانِ فارسی می‌گیرد', /storedToTitles\(p\.services\)/.test(store))
-  /* همان الگوی چیپی که از کاتالوگ برداشتیم نباید در نمونه‌کار برگردد */
-  t('نمونه‌کار چیپ ندارد',
-    !/borderRadius: 999[^}]*\}\}>\{p\.service\}/.test(pub)
-    && /fontWeight: 700, color: GOLD_D \}\}>\{p\.service\}/.test(pub))
+    t('چیپ در پروفایل و نمونه‌کار نیست',
+    /* ⚠️ سنجه روی *شکل* است نه یک خطِ خاص: هیچ گردیِ ۹۹۹ در صفحه،
+       CSSِ آن، و کاتالوگ. الگوی چیپ سه بار در همین صفحه برگشته بود
+       (کاتالوگ، نمونه‌کار، و «شهرهای تحت پوشش»). */
+    /* ⚠️ `/999/` خام بیش از حد پهن بود: به `z-index: 999` یا هر
+       شماره‌ای که ۹۹۹ دارد هم می‌خورد. فقط گردیِ کامل سنجیده
+       می‌شود، و وجودِ کلاس — نه شکلِ دقیقِ تگ، که هوکِ prettier
+       می‌تواند عوضش کند. */
+    ![pub, read('app/services/[id]/technician-profile.css'), shown, read('components/tech/service-catalog.css')]
+      .some(x => /border-?[Rr]adius:?\s*'?9{3}/.test(x))
+    && /className="kind"/.test(pub))
   t('بخشِ خالی رندر نمی‌شود',
     /if \(!data\.count\) return null/.test(shown) && /tech\.projects\.length > 0 &&/.test(pub))
   /* چک‌باکسِ واقعی، نه div کلیک‌دار: کیبورد و صفحه‌خوان مجانی */
@@ -636,8 +643,12 @@ head('اطلاعاتِ کسب‌وکار')
      خدمت می‌دهد — حرفی که خودش نزده است. */
   t('در محل/کارگاه پیش‌فرضِ بله ندارند',
     /onsite: p\.onsite === true/.test(store) && /workshop: p\.workshop === true/.test(store))
-  t('ساعتِ کاری خالی نمایش داده نمی‌شود',
-    /tech\.hours\.trim\(\) &&/.test(pub) && /\(tech\.onsite \|\| tech\.workshop\) &&/.test(pub))
+  t('ساعت و نحوه فقط وقتی گفته شده باشند می‌آیند',
+    /* ⚠️ بخشِ بی‌سطر اصلاً رندر نمی‌شود — «قابی که فقط چون داده
+       وجود دارد ساخته می‌شود» همان چیزی است که بازطراحی حذفش کرد. */
+    /\bhours \? \[\['ساعت کاری'/.test(pub) && /const hours = norm\(tech\.hours\)/.test(pub)
+    && /delivery\.length \? \[\['نحوه‌ی ارائه'/.test(pub)
+    && /\{facts\.length > 0 &&/.test(pub))
   t('فرم هر سه فیلد را دارد',
     /onsite/.test(panel) && /workshop/.test(panel) && /ساعت کاری/.test(panel))
 }

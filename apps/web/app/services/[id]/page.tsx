@@ -1,30 +1,43 @@
 'use client'
 
 /* ─────────────────────────────────────────────────────────────
-   پروفایل متخصص خدمات فنی — ادیتوریال، لوکس و شخصی.
-   هیروی معرفی → درباره من → خدمات من → پروژه‌ها (پرتفولیو) →
-   گالری آلبوم‌دار با لایت‌باکس فول‌اسکرین → محل فعالیت → CTA.
-   بدون آمار/امتیاز. داده از lib/technicians-data.
+   پروفایلِ متخصصِ خدماتِ فنی.
+
+   ── ایده‌ی صفحه ──
+   «فهرستِ کارِ یک صنعتگر»، نه یک ردیف در دایرکتوری. سرلوحه‌ی
+   تایپوگرافیک → درباره → کاتالوگِ خدمات (ستونِ فقرات) → نمونه‌کار →
+   گالری → مشخصاتِ کار → بندِ پایانیِ تماس.
+
+   ── قاعده‌ی حاکم بر ساختار ──
+   ⚠️ بخش، به‌خاطرِ *وجودِ داده* ساخته نمی‌شود. هر بخش باید چیزی
+   بگوید که جای دیگری گفته نشده؛ وگرنه اصلاً رندر نمی‌شود. با
+   دادهٔ کمِ امروز صفحه چهار حرکت دارد و همان چهار حرکت هم عمدی به
+   نظر می‌رسد — این معیارِ طراحی است، نه پیامدِ خالی‌بودن.
+
+   سیستمِ بصری در `technician-profile.css` است. داده از
+   `lib/technicians-data` و `lib/technician-store`.
    ───────────────────────────────────────────────────────────── */
 
 import { useChannelPublish, type PublishVideo } from '@/components/media/useChannelPublish'
 import { toFaDigits } from '@/lib/jalali'
+import { norm, keepLongest } from '@/lib/text-dedupe'
 import { resolveServices } from '@/lib/tech-services'
 import { ServiceCatalog } from '@/components/tech/ServiceCatalog'
 import { useVideoEdit } from '@/components/media/useVideoEdit'
 import { detailTitle, type VideoDetail } from '@/lib/media/video-details'
-import { useEffect, useMemo, useState } from 'react'
+import { Fragment, useEffect, useMemo, useState } from 'react'
 import { ProfileMissing, ProfileLoading } from '@/components/profile/ProfileMissing'
 import { useProfileImageViewer } from '@/components/ProfileImageViewer'
 import { useProfileVideoViewer } from '@/components/profile/ProfileVideoViewer'
 import ProfileGallery from '@/components/profile/ProfileGallery'
 import '@/components/profile/profile-page.css'
+import './technician-profile.css'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
-import {
-  MapPin, ChevronLeft, Wrench,
-  Phone, Clock,
-} from 'lucide-react'
+/* ⚠️ آیکونِ تزئینی نداریم: هر آیکونی که این‌جا می‌ماند یا ناوبری
+   است یا کنش. `MapPin` و `Clock` با بازطراحی حذف شدند — شهر و
+   ساعت، *متن*اند و آیکون چیزی به آن‌ها اضافه نمی‌کرد. */
+import { Wrench, Phone } from 'lucide-react'
 import { getTechnician } from '../../../lib/technicians-data'
 import { useOwnerEdit } from '../../../lib/profiles/use-owner-edit'
 import { compressImage } from '../../../lib/seller-store'
@@ -37,28 +50,10 @@ import VerifiedBadge from '../../../components/VerifiedBadge'
 import PendingNotice from '../../../components/profile/PendingNotice'
 import type { Technician } from '../../../lib/technicians-data'
 
-const GOLD   = '#C7A66A'
-const GOLD_D = '#8F6531'
-const TEXT   = '#1C1B17'
-const SEC    = '#5B564B'
-const MUT    = '#6F6A5C'
-const LINE   = '#E7E2D6'
-const BG     = '#F7F7F5'
-
 /* آیکون واتساپ (هم‌خانواده‌ی فوتر فروشگاه) */
 const WaIcon = (
-  <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.77.46 3.45 1.28 4.9L2 22l5.32-1.39a9.9 9.9 0 004.72 1.2h.01c5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.13-2.9-7A9.82 9.82 0 0012.04 2z"/></svg>
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.77.46 3.45 1.28 4.9L2 22l5.32-1.39a9.9 9.9 0 004.72 1.2h.01c5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.13-2.9-7A9.82 9.82 0 0012.04 2z"/></svg>
 )
-
-function SectionHead({ title }: { title: string }) {
-  return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
-      <span style={{ width: 3, height: 17, borderRadius: 2, background: `linear-gradient(180deg,${GOLD},#8A6020)` }} />
-      <h2 style={{ fontSize: 16, fontWeight: 900, margin: 0 }}>{title}</h2>
-      <span style={{ flex: 1, height: 1, background: LINE }} />
-    </div>
-  )
-}
 
 export default function TechnicianProfilePage() {
   const params = useParams()
@@ -258,157 +253,141 @@ export default function TechnicianProfilePage() {
     )
   }
 
+  /* ── چه چیزی گفته می‌شود و کجا ──
+     ⚠️ **یک گذر روی همه‌ی متن‌ها**، نه دو گذرِ جدا. عنوان، معرفی و
+     بندهای «درباره» با هم سنجیده می‌شوند تا قاعده‌ی «بلندتر
+     می‌ماند» در مرزِ بینشان هم برقرار باشد. دو گذرِ جدا این را
+     می‌شکست: با `title=«خدمات فنی»` و
+     `about=[«خدمات فنی بیلیارد و اسنوکر»]` بندِ درباره حذف می‌شد
+     و «و اسنوکر» از صفحه می‌رفت.
+
+     `keepLongest` جایگاه را نگه می‌دارد، پس دو خانه‌ی اول همچنان
+     سرلوحه‌اند و بقیه «درباره». */
+  const slots = keepLongest([tech.title, tech.intro, ...tech.about])
+  const [lede = '', introTxt = ''] = slots.slice(0, 2).filter((x): x is string => !!x)
+  const about = slots.slice(2).filter((x): x is string => !!x)
+
+  /* ── بخشِ «فعالیت» فقط وقتی وجود دارد که چیزی برای گفتن باشد ──
+     شهر از قبل در سرلوحه است. اگر پوشش همان شهر باشد و ساعت و نحوه
+     خالی، این بخش هیچ اطلاعاتِ تازه‌ای ندارد — پس اصلاً ساخته
+     نمی‌شود. بخش‌سازی به‌خاطرِ *وجودِ داده*، همان چیزی است که صفحه را
+     به فهرستِ قاب تبدیل می‌کند. */
+  /* ⚠️ همه‌جا `norm`: مقدارِ فقط‌فاصله در JS صادق است و بدونِ این،
+     یک سطرِ خالی با خطِ زیرش رندر می‌شد.
+     و پوششِ نمایش‌داده‌شده همان چیزی است که فیلتر شده — نه آرایه‌ی
+     خام، وگرنه «، »های سرگردان می‌ماند. */
+  const club = norm(tech.club)
+  const city = norm(tech.city)
+  const hours = norm(tech.hours)
+  const coverage = tech.coverage.map(norm).filter(c => c && c !== city)
+  const delivery = [tech.onsite && 'در محلِ شما', tech.workshop && 'پذیرش در کارگاه']
+    .filter((x): x is string => !!x)
+  const facts: [string, string][] = [
+    ...(club ? [['باشگاه / مجموعه', club] as [string, string]] : []),
+    ...(coverage.length ? [['شهرهای تحت پوشش', coverage.join('، ')] as [string, string]] : []),
+    ...(delivery.length ? [['نحوه‌ی ارائه', delivery.join(' · ')] as [string, string]] : []),
+    ...(hours ? [['ساعت کاری', hours] as [string, string]] : []),
+  ]
+
+  /* ⚠️ ردیفِ بدونِ شماره ممکن است: `profileToTechnician` هرچه بود
+     رد می‌کند. بدونِ گارد، دکمه‌ها `tel:undefined` و `wa.me/`
+     می‌شوند — کنشی که کارِ خودش را نمی‌کند، بدتر از نبودنش است. */
+  const phone = norm(tech.phone)
+  const waHref = norm(tech.whatsapp) ? `https://wa.me/${norm(tech.whatsapp)}` : ''
+
   return (
-    <div dir="rtl" style={{ minHeight: '100vh', background: BG, color: TEXT, fontFamily: 'Vazirmatn,Tahoma,sans-serif' }}>
+    <div className="tpx">
       {pending && <PendingNotice what="پروفایلِ شما" />}
-      <style>{`
-        @keyframes tpFadeUp { from { opacity:0; transform: translateY(14px); } to { opacity:1; transform:none; } }
-        @keyframes tpFade   { from { opacity:0; } to { opacity:1; } }
-        .tp-wrap { max-width: 1120px; margin: 0 auto; padding: 0 clamp(16px,3vw,28px); }
 
-        .tp-hero { display: grid; grid-template-columns: 300px minmax(0,1fr); gap: clamp(20px,3.4vw,40px); align-items: center; }
-        @media (max-width: 760px) { .tp-hero { grid-template-columns: 1fr; gap: 18px; } .tp-idcard { max-width: 260px; margin: 0 auto; } }
-
-          color: ${SEC}; background: #fff; border: 1px solid ${LINE}; border-radius: 999px; padding: 7px 14px;
-          transition: all .2s; }
-
-        .tp-cta { display: inline-flex; align-items: center; justify-content: center; gap: 7px; height: 42px;
-          padding: 0 20px; border-radius: 11px; cursor: pointer; text-decoration: none; font-family: inherit;
-          font-size: 13px; font-weight: 800; transition: all .25s cubic-bezier(.22,1,.36,1); }
-        .tp-cta.gold { background: rgba(199,166,106,0.12); border: 1px solid rgba(199,166,106,0.34); color: ${GOLD_D}; }
-        .tp-cta.gold:hover { transform: translateY(-2px); background: rgba(199,166,106,0.18); box-shadow: 0 8px 20px rgba(199,166,106,0.2); }
-        .tp-cta.wa { background: rgba(37,211,102,0.10); border: 1px solid rgba(37,211,102,0.3); color: #0E7A38; }
-        .tp-cta.wa:hover { transform: translateY(-2px); background: rgba(37,211,102,0.16); }
-
-        /* پروژه‌ها */
-        /* ⚠️ نمونه‌کار محتواست، نه بندانگشتی. تصویر نسبتِ ثابت و
-           بلندتری می‌گیرد و در عرضِ زیاد سه‌ستونه نمی‌شود — سه ستون
-           یعنی عکسِ کوچک‌تر، و کوچک‌کردنِ کارِ انجام‌شده خلافِ هدف است. */
-        .tp-projects { display: grid; grid-template-columns: repeat(2, 1fr); gap: clamp(16px, 2.2vw, 24px); }
-        @media (max-width: 700px) { .tp-projects { grid-template-columns: 1fr; } }
-        .tp-proj { display: flex; flex-direction: column; background: #fff; border: 1px solid ${LINE}; border-radius: 16px;
-          overflow: hidden; box-shadow: 0 2px 10px rgba(28,27,23,0.05);
-          transition: transform .28s cubic-bezier(.22,1,.36,1), box-shadow .28s, border-color .28s; animation: tpFadeUp .5s ease both; }
-        .tp-proj:hover { transform: translateY(-4px); box-shadow: 0 16px 36px rgba(28,27,23,0.11); border-color: rgba(199,166,106,0.35); }
-        .tp-proj .im { aspect-ratio: 4 / 3; overflow: hidden; background: ${BG}; }
-        .tp-proj .im img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .6s cubic-bezier(.22,1,.36,1); }
-        .tp-proj:hover .im img { transform: scale(1.05); }
-
-        /* گالری — Masonry با CSS columns */
-
-      `}</style>
-
-      <div className="tp-wrap" style={{ paddingTop: 18, paddingBottom: 76 }}>
-
-        {/* بردکرامب */}
-        <nav style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: MUT, marginBottom: 20, animation: 'tpFadeUp .4s ease both' }}>
-          <Link href="/" style={{ color: MUT, textDecoration: 'none' }}>خانه</Link>
-          <ChevronLeft size={12} />
-          <Link href="/services" style={{ color: MUT, textDecoration: 'none' }}>خدمات فنی</Link>
-          <ChevronLeft size={12} />
-          <span style={{ color: SEC }}>{tech.name}</span>
+      <div className="tpx-wrap">
+        {/* ⚠️ فهرستِ مرتب، نه چند لینکِ کنارِ هم: صفحه‌خوان باید
+            «۱ از ۳» را بگوید. جداکننده در CSS است، نه در DOM. */}
+        <nav aria-label="مسیر">
+          <ol className="tpx-crumb">
+            <li><Link href="/">خانه</Link></li>
+            <li><Link href="/services">خدمات فنی</Link></li>
+            <li aria-current="page">{tech.name}</li>
+          </ol>
         </nav>
 
-        {/* ═══ هیرو معرفی ═══ */}
-        <header className="tp-hero" style={{ marginBottom: 'clamp(30px,4.4vw,48px)', animation: 'tpFadeUp .5s .05s ease both' }}>
-          {/* کارت هویت */}
-          <div className="tp-idcard" style={{ position: 'relative', aspectRatio: '3/3.4', borderRadius: 22, overflow: 'hidden', border: `1px solid ${LINE}`, boxShadow: '0 14px 38px rgba(154,110,56,0.13)', background: 'linear-gradient(170deg,#FBF9F5 0%,#F1ECE1 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(circle at 76% 16%, rgba(199,166,106,0.20) 0%, transparent 48%), radial-gradient(circle at 18% 90%, rgba(20,83,45,0.08) 0%, transparent 44%), radial-gradient(rgba(28,27,23,0.03) 1px, transparent 1px)', backgroundSize: 'auto, auto, 17px 17px' }} />
-            <div style={{ position: 'absolute', top: '-24%', bottom: '-24%', left: '26%', width: 1, background: 'linear-gradient(180deg,transparent,rgba(199,166,106,0.4),transparent)', transform: 'rotate(14deg)' }} />
-            <div style={{ position: 'relative', textAlign: 'center' }}>
-              <span style={{ position: 'relative', width: 118, height: 118, margin: '0 auto', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 48, fontWeight: 900, color: GOLD_D, background: 'linear-gradient(160deg,#FFFDF9,#F5EFE4)', boxShadow: '0 14px 30px rgba(154,110,56,0.18), inset 0 1px 0 #fff', overflow: 'visible' }}>
-                <span style={{ position: 'absolute', inset: -9, borderRadius: '50%', border: '1px solid rgba(199,166,106,0.55)' }} />
-                <span style={{ position: 'absolute', inset: -3, borderRadius: '50%', border: '1px dashed rgba(199,166,106,0.35)' }} />
-                {tech.photo
-                  ? (
-                    <button type="button" onClick={() => openImage(tech.photo ?? '', { title: 'عکس پروفایل', alt: tech.name })}
-                      aria-label="بزرگ‌نمایی عکس پروفایل"
-                      style={{ width: '100%', height: '100%', padding: 0, border: 'none', background: 'none', borderRadius: '50%', cursor: 'zoom-in' }}>
-                      <img loading="lazy" decoding="async" src={tech.photo} alt={tech.name} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%', display: 'block' }} />
-                    </button>
-                  )
-                  : tech.name.slice(0, 1)}
-              </span>
-              <div style={{ marginTop: 16, fontSize: 10, fontWeight: 800, letterSpacing: '0.22em', color: 'rgba(154,110,56,0.65)' }}>BILLIARD HUB</div>
-              <div style={{ fontSize: 10.5, fontWeight: 700, color: MUT, marginTop: 3 }}>متخصص خدمات فنی</div>
-            </div>
+        {/* ═══ سرلوحه ═══
+            ⚠️ کارتِ هویت نیست. نامِ متخصص بزرگ‌ترین چیزِ صفحه است و
+            بقیه زیرِ آن مرتب می‌شود. عکس — اگر باشد — تصویرِ واقعی
+            در ستونِ مقابل است، نه آواتارِ دایره‌ای؛ و اگر نباشد،
+            هیچ جای‌نگه‌داری ساخته نمی‌شود. */}
+        <header className="tpx-mast">
+          <div>
+            <h1 className="tpx-name">
+              {tech.name}
+              {tech.verified && <span className="vb"><VerifiedBadge title="متخصص تأیید شده" /></span>}
+            </h1>
+            {lede && <p className="tpx-lede">{lede}</p>}
+            {introTxt && <p className="tpx-intro">{introTxt}</p>}
           </div>
 
-          {/* معرفی */}
-          <div>
-            {/* کیکرِ «TECHNICAL SPECIALIST» برداشته شد؛ عنوانِ حرفه‌ایِ
-                فارسی دو خط پایین‌تر همان را می‌گوید. */}
-            <h1 style={{ fontSize: 'clamp(24px,3.6vw,38px)', fontWeight: 900, margin: '0 0 6px', lineHeight: 1.35, letterSpacing: '-0.02em' }}>{tech.name}{tech.verified && <VerifiedBadge title="متخصص تأیید شده" />}</h1>
-            <div style={{ fontSize: 'clamp(13.5px,1.7vw,16px)', fontWeight: 800, color: GOLD_D, marginBottom: 10 }}>{tech.title}</div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: SEC, marginBottom: 14 }}>
-              <MapPin size={14} style={{ color: '#14532D' }} />
-              <span>{tech.city}</span>
-              {tech.club && <><span style={{ color: MUT }}>·</span><span style={{ color: MUT }}>{tech.club}</span></>}
-            </div>
-            <p style={{ fontSize: 14, lineHeight: 2, color: SEC, margin: '0 0 16px', maxWidth: 560 }}>{tech.intro}</p>
-            {svc.count > 0 && (
-              /* ⚠️ خلاصه، نه فهرست: نامِ دسته‌ها + شمار. خودِ کاتالوگ
-                 بخشِ مستقلِ خودش را دارد. */
-              <p style={{ fontSize: 13, color: MUT, margin: '0 0 20px' }}>
-                {svc.categories.map(c => c.title).join(' و ')}
-                {svc.categories.length > 0 && ' — '}
-                <span style={{ color: SEC, fontWeight: 700 }}>{toFaDigits(svc.count)} خدمت</span>
-              </p>
+          {/* ⚠️ ستونِ دوم *همیشه* هست، عکس باشد یا نباشد. با یک ستون،
+              صفحه در ۱۴۴۰ یک نوارِ باریکِ چسبیده به راست می‌شد و نیمِ
+              دیگر خالی — که سفیدیِ عمدی نیست، ترکیب‌بندیِ نامتعادل
+              است. این‌جا خلاصه و کنش می‌نشیند؛ عکس اگر باشد بالایش. */}
+          <div className="aside">
+            {tech.photo && (
+              <button type="button" className="tpx-portrait"
+                onClick={() => openImage(tech.photo ?? '', { title: 'عکس پروفایل', alt: tech.name })}
+                aria-label={`بزرگ‌نمایی عکسِ ${tech.name}`}>
+                <img src={tech.photo} alt={tech.name} loading="eager" decoding="async" />
+              </button>
             )}
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
-              <a className="tp-cta gold" href={`tel:${tech.phone}`}><Phone size={15} /> ارتباط با این متخصص</a>
-              <a className="tp-cta wa" href={`https://wa.me/${tech.whatsapp}`} target="_blank" rel="noopener noreferrer">{WaIcon} واتساپ</a>
+            <p className="tpx-facts">
+              <b>{city}</b>
+              {svc.count > 0 && (
+                <>
+                  <span className="sep" aria-hidden>·</span>
+                  {svc.categories.map(c => c.title).join(' و ')}
+                  {svc.categories.length > 0 && '، '}
+                  <b>{toFaDigits(svc.count)} خدمت</b>
+                </>
+              )}
+            </p>
+            <div className="tpx-acts">
+              {phone && <a className="tpx-btn gold" href={`tel:${phone}`}><Phone size={15} aria-hidden /> ارتباط با این متخصص</a>}
+              {waHref && <a className="tpx-btn wa" href={waHref} target="_blank" rel="noopener noreferrer">{WaIcon} واتساپ</a>}
             </div>
           </div>
         </header>
 
-        {/* ═══ درباره من ═══ */}
-        <section style={{ marginBottom: 'clamp(28px,4vw,44px)', animation: 'tpFadeUp .5s .1s ease both' }}>
-          <SectionHead title="درباره من" />
-          <div style={{ background: '#fff', border: `1px solid ${LINE}`, borderRadius: 18, padding: 'clamp(18px,2.6vw,26px)' }}>
-            {tech.about.map((p, i) => (
-              <p key={i} style={{ fontSize: 14, lineHeight: 2.2, color: '#2B2822', margin: i === tech.about.length - 1 ? 0 : '0 0 14px' }}>{p}</p>
-            ))}
-            {/* ⚠️ اینجا هم چیپ بود — و درست بالای بخشی که چیپ‌هایش را
-                برداشتیم. نامِ شهر برچسب نیست، بخشی از یک جمله است. */}
-            <p style={{ marginTop: 16, paddingTop: 14, borderTop: '1px solid #F0EDE5', fontSize: 12.5, lineHeight: 2, color: MUT, marginBottom: 0 }}>
-              <span style={{ fontWeight: 800, color: SEC }}>شهرهای تحت پوشش: </span>
-              {tech.coverage.join('، ')}
-            </p>
-          </div>
-        </section>
+        {about.length > 0 && (
+          <section className="tpx-sec">
+            <h2>درباره</h2>
+            <div className="tpx-prose">
+              {about.map((p, i) => <p key={i}>{p}</p>)}
+            </div>
+          </section>
+        )}
 
-        {/* ═══ کاتالوگِ خدمات ═══
+        {/* ═══ کاتالوگِ خدمات — ستونِ فقراتِ صفحه ═══
             ⚠️ بخشِ خالی رندر نمی‌شود: متخصصی که هنوز خدمتی انتخاب
             نکرده نباید قابِ خالی ببیند. */}
         {svc.count > 0 && (
-          <section style={{ marginBottom: 'clamp(28px,4vw,44px)' }}>
-            <SectionHead title="خدمات" />
+          <section className="tpx-sec">
+            <h2>خدمات</h2>
             <ServiceCatalog data={svc} />
           </section>
         )}
 
-        {/* ═══ پروژه‌ها ═══ */}
         {tech.projects.length > 0 && (
-          <section style={{ marginBottom: 'clamp(28px,4vw,44px)' }}>
-            <SectionHead title="نمونه‌کارها" />
-            <div className="tp-projects">
-              {tech.projects.map((p, i) => (
-                <article key={p.id} className="tp-proj" style={{ animationDelay: `${i * 70}ms` }}>
+          <section className="tpx-sec">
+            <h2>نمونه‌کارها</h2>
+            <div className="tpx-work">
+              {tech.projects.map(p => (
+                <figure key={p.id}>
                   <div className="im"><img src={p.image} alt={p.title} loading="lazy" decoding="async" /></div>
-                  <div style={{ padding: '16px 18px 18px', display: 'flex', flexDirection: 'column', gap: 6 }}>
-                    {/* ⚠️ چیپِ نوعِ خدمت برداشته شد: همان الگوی برچسبی بود که
-                        از کاتالوگ حذفش کردیم، و نوعِ خدمت را عنوانِ پروژه
-                        خودش می‌گوید. حالا یک خطِ فراداده‌ی آرام. */}
-                    <span style={{ fontSize: 11.5, fontWeight: 700, color: GOLD_D }}>{p.service}</span>
-                    <h3 style={{ fontSize: 15.5, fontWeight: 900, margin: '2px 0 0', lineHeight: 1.6 }}>{p.title}</h3>
-                    <p style={{ fontSize: 12.5, lineHeight: 1.9, color: SEC, margin: 0 }}>{p.desc}</p>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11.5, color: MUT, marginTop: 4 }}>
-                      <MapPin size={11} aria-hidden style={{ flexShrink: 0 }} />
-                      {p.city}{p.club ? ` — ${p.club}` : ''}
-                    </div>
-                  </div>
-                </article>
+                  <figcaption>
+                    <div className="kind">{p.service}</div>
+                    <h3>{p.title}</h3>
+                    <p>{p.desc}</p>
+                    <div className="where">{p.city}{p.club ? ` — ${p.club}` : ''}</div>
+                  </figcaption>
+                </figure>
               ))}
             </div>
           </section>
@@ -416,7 +395,7 @@ export default function TechnicianProfilePage() {
 
         {/* ═══ گالری — همان کامپوننتِ مربی و داور ═══ */}
         {(tech.gallery.length > 0 || tech.videos.length > 0 || edit.isOwner) && (
-          <section style={{ marginBottom: 'clamp(28px,4vw,44px)' }}>
+          <section className="tpx-sec">
             <ProfileGallery
               images={tech.gallery}
               videos={tech.videos}
@@ -431,56 +410,48 @@ export default function TechnicianProfilePage() {
               canEdit={edit.isOwner} busy={edit.saving || vidBusy}
               onAddImages={addImages} onAddVideos={addVideoFiles} beforeAddVideos={() => askChannel(String(tech?.name ?? ''))} onNewAlbum={newAlbum}
             />
-            {edit.error && <p role="alert" style={{ fontSize: 12, color: '#b91c1c', margin: '10px 0 0' }}>{edit.error}</p>}
+            {edit.error && <p role="alert" className="tpx-err">خطا: {edit.error}</p>}
           </section>
         )}
 
-        {/* ═══ محل فعالیت ═══ */}
-        <section style={{ marginBottom: 'clamp(28px,4vw,44px)' }}>
-          <SectionHead title="محل فعالیت" />
-          <div style={{ display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap', background: '#fff', border: `1px solid ${LINE}`, borderRadius: 18, padding: '18px 20px' }}>
-            <span style={{ width: 44, height: 44, borderRadius: 13, background: 'rgba(20,83,45,0.08)', border: '1px solid rgba(20,83,45,0.18)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', color: '#14532D', flexShrink: 0 }}>
-              <MapPin size={19} />
-            </span>
-            <div style={{ minWidth: 0 }}>
-              <div style={{ fontSize: 15, fontWeight: 900 }}>{tech.city}{tech.club ? ` — ${tech.club}` : ''}</div>
-              <div style={{ fontSize: 12, color: MUT, marginTop: 3 }}>ارائه‌ی خدمات در {tech.coverage.join('، ')}</div>
-              {/* ⚠️ جدولِ خشک نه — یک خطِ جمله‌وار. و فقط چیزی که متخصص
-                  *گفته*: هیچ‌کدام پیش‌فرضِ «بله» ندارد. */}
-              {(tech.onsite || tech.workshop) && (
-                <div style={{ fontSize: 12.5, color: SEC, marginTop: 7, fontWeight: 700 }}>
-                  {[tech.onsite && 'در محلِ شما', tech.workshop && 'پذیرش در کارگاه']
-                    .filter(Boolean).join(' · ')}
-                </div>
-              )}
-              {tech.hours.trim() && (
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12.5, color: MUT, marginTop: 6 }}>
-                  <Clock size={13} aria-hidden style={{ flexShrink: 0 }} />
-                  <span>{tech.hours.trim()}</span>
-                </div>
-              )}
-            </div>
-          </div>
-        </section>
-
-        {/* ═══ CTA پایانی ═══ */}
-        <section style={{ position: 'relative', overflow: 'hidden', background: '#fff', border: `1px solid ${LINE}`, borderRadius: 20, padding: 'clamp(24px,3.4vw,36px)', textAlign: 'center', boxShadow: '0 6px 24px rgba(28,27,23,0.06)' }}>
-          <div style={{ position: 'absolute', left: '-6%', top: '-70%', width: 300, height: 300, borderRadius: '50%', background: 'radial-gradient(circle, rgba(199,166,106,0.14) 0%, transparent 66%)', filter: 'blur(40px)', pointerEvents: 'none' }} />
-          <h2 style={{ fontSize: 'clamp(16px,2.2vw,21px)', fontWeight: 900, margin: '0 0 8px' }}>به این خدمات نیاز دارید؟</h2>
-          <p style={{ fontSize: 13, color: SEC, margin: '0 0 18px', lineHeight: 1.9 }}>
-            برای هماهنگی و دریافت مشاوره، مستقیم با {tech.name} در ارتباط باشید.
-          </p>
-          <div style={{ display: 'flex', justifyContent: 'center', flexWrap: 'wrap', gap: 10 }}>
-            <a className="tp-cta gold" href={`tel:${tech.phone}`}><Phone size={15} /> درخواست خدمات</a>
-            <a className="tp-cta wa" href={`https://wa.me/${tech.whatsapp}?text=${encodeURIComponent(`سلام ${tech.name} عزیز، از طریق بیلیارد هاب با شما تماس می‌گیرم.`)}`} target="_blank" rel="noopener noreferrer">{WaIcon} گفت‌وگو در واتساپ</a>
-          </div>
-        </section>
+        {facts.length > 0 && (
+          <section className="tpx-sec">
+            <h2>فعالیت و دسترسی</h2>
+            {/* ⚠️ `dl` نه جدول و نه کاشیِ آیکون‌دار: این‌ها مشخصاتِ
+                کار هستند و رابطه‌ی «عنوان ← مقدار» را خودِ عنصر
+                می‌گوید، بدونِ آیکونی که چیزی به آن اضافه نمی‌کند. */}
+            <dl className="tpx-facts-grid">
+              {facts.map(([k, v]) => (
+                <Fragment key={k}>
+                  <dt>{k}</dt>
+                  <dd>{v}</dd>
+                </Fragment>
+              ))}
+            </dl>
+          </section>
+        )}
       </div>
 
-      {/* ═══ لایت‌باکس فول‌اسکرین ═══ */}
+      {/* ═══ نتیجه‌گیری ═══
+          تنها تغییرِ زمینِ صفحه. بازدیدکننده تا این‌جا فهمیده این
+          آدم کیست و چه می‌کند؛ حالا کارِ صفحه تمام است و فقط یک
+          قدم مانده. وسط‌چین و هاله‌ی محو ندارد. */}
+      <section className="tpx-close">
+        <div className="tpx-wrap inner">
+          <div className="say">
+            <h2>به این خدمات نیاز دارید؟</h2>
+            <p>برای هماهنگی و دریافت مشاوره، مستقیم با {tech.name} در ارتباط باشید.</p>
+          </div>
+          <div className="tpx-acts">
+            {phone && <a className="tpx-btn gold" href={`tel:${phone}`}><Phone size={15} aria-hidden /> درخواست خدمات</a>}
+            {waHref && <a className="tpx-btn wa" href={`${waHref}?text=${encodeURIComponent(`سلام ${tech.name} عزیز، از طریق بیلیارد هاب با شما تماس می‌گیرم.`)}`} target="_blank" rel="noopener noreferrer">{WaIcon} گفت‌وگو در واتساپ</a>}
+          </div>
+        </div>
+      </section>
+
       {imageViewer}
       {videoViewer}
-      {channelGate}
+      {channelGate}
       {videoEditDialog}
     </div>
   )
