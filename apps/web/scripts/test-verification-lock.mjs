@@ -648,7 +648,7 @@ head('اطلاعاتِ کسب‌وکار')
        وجود دارد ساخته می‌شود» همان چیزی است که بازطراحی حذفش کرد. */
     /\bhours \? \[\['ساعت کاری'/.test(pub) && /const hours = norm\(tech\.hours\)/.test(pub)
     && /delivery\.length \? \[\['نحوه‌ی ارائه'/.test(pub)
-    && /\{facts\.length > 0 &&/.test(pub))
+    && /\{\(hasProse \|\| meta\.length > 0\) &&/.test(pub))
   t('فرم هر سه فیلد را دارد',
     /onsite/.test(panel) && /workshop/.test(panel) && /ساعت کاری/.test(panel))
 }

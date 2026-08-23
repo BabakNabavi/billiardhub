@@ -1,76 +1,96 @@
 /* ─────────────────────────────────────────────────────────────
-   انتخابگرِ خدمات.
+   انتخابِ خدمات در فرمِ متخصص.
 
-   ⚠️ `input` پنهان است ولی *حذف نشده*: `opacity:0` + `position:absolute`
-   نگهش می‌دارد تا فوکوسِ کیبورد و صفحه‌خوان کار کنند. `display:none`
-   آن را از درختِ دسترسی بیرون می‌انداخت.
+   ⚠️ همان زبانِ صفحه‌ی عمومی: صفحه‌ی رشته، نشانِ لوز، تُنِ گرم.
+   فرم و پروفایل باید یک محصول به نظر برسند، نه دو نرم‌افزار.
 
-   حلقه‌ی فوکوس روی خودِ ردیف می‌نشیند (`:focus-within`) چون چیزی که
-   کاربر می‌بیند ردیف است، نه چک‌باکسِ نامرئی.
+   ⚠️ دیوارِ چک‌باکس نیست: ورودی واقعی است ولی دیده نمی‌شود؛ چیزی
+   که کاربر می‌بیند و لمس می‌کند یک کاشیِ کامل است با هدفِ لمسِ
+   بزرگ. حالت با *سه* نشانه گفته می‌شود — زمین، مرز، و تیک — تا
+   فقط به رنگ وابسته نباشد.
    ───────────────────────────────────────────────────────────── */
 
-.tsp { display: grid; gap: 24px; }
+.tsp { display: grid; gap: clamp(20px, 3vw, 32px); }
 
+/* ── سرِ دسته ── */
 .tsp-group { border: none; margin: 0; padding: 0; min-inline-size: 0; }
 
+/* عنوانِ دسترس‌پذیر؛ دیده نمی‌شود چون نسخه‌ی دیداری در `.tsp-head` است */
 .tsp-legend {
-  display: flex; align-items: baseline; gap: 9px;
-  padding: 0; margin-block-end: 10px;
+  position: absolute; inline-size: 1px; block-size: 1px;
+  padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%);
+  white-space: nowrap; border: 0;
 }
-.tsp-cat {
-  font-size: 14px; font-weight: 800; color: #1C1B17;
-  display: inline-flex; align-items: center; gap: 9px;
+.tsp-sr {
+  position: absolute; inline-size: 1px; block-size: 1px;
+  padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%);
+  white-space: nowrap; border: 0;
 }
-.tsp-cat::before {
-  content: ''; inline-size: 3px; block-size: 15px;
-  border-radius: 2px; background: var(--gold, #C7A66A);
+
+.tsp-head {
+  display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 12px;
+  padding: 0 0 10px;
+  margin-block-end: 14px;
+  border-block-end: 1px solid #E7E2D6;
 }
-.tsp-count { font-size: 12px; font-weight: 700; color: var(--gold-deep, #8F6531); }
+.tsp-cat { font-size: 1.0625rem; font-weight: 800; color: #1C1B17; }
+.tsp-count { font-size: .78rem; font-weight: 700; color: var(--gold-ink, #7A5427); }
+.tsp-count.is-zero { color: #8A8474; font-weight: 600; }
 
 .tsp-all {
-  display: inline-block; margin-block-end: 10px;
-  background: none; border: none; padding: 6px 0;
-  font-family: inherit; font-size: 12.5px; font-weight: 700;
-  color: var(--text-secondary, #5B564B); cursor: pointer;
+  margin-inline-start: auto;
+  background: none; border: none; padding: 0 4px;
+  font: inherit; font-size: .78rem; font-weight: 700;
+  color: #514C42; cursor: pointer;
   text-decoration: underline; text-underline-offset: 4px;
-  min-block-size: 32px;
-}
-.tsp-all:hover { color: #1C1B17; }
-.tsp-all:focus-visible { outline: 2px solid var(--gold-deep, #8F6531); outline-offset: 2px; border-radius: 4px; }
-
-.tsp-list {
-  list-style: none; margin: 0; padding: 0;
-  display: grid; gap: 8px;
-}
-
-.tsp-row {
-  /* ⚠️ لنگرِ چک‌باکسِ مطلق. بدونِ این، `position:absolute` به بلوکِ
-     دربرگیرنده‌ی اولیه می‌چسبد و Tab می‌تواند صفحه را جای دیگری
-     اسکرول کند. */
-  position: relative;
-  display: flex; align-items: flex-start; gap: 12px;
-  padding: 11px 13px; border-radius: 12px; cursor: pointer;
-  background: #fff; border: 1px solid #E7E2D6;
-  transition: border-color .22s cubic-bezier(.22,.61,.36,1),
-              background-color .22s cubic-bezier(.22,.61,.36,1);
-  /* هدفِ لمسِ ۴۴ پیکسل — مخاطبِ اصلی موبایل است */
+  /* هدفِ لمس ۴۴ پیکسل؛ ارتفاعِ *دیداری* همان یک خط می‌ماند */
   min-block-size: 44px;
 }
-@media (hover: hover) {
-  .tsp-row:hover { border-color: rgba(199, 166, 106, .45); }
-}
-/* ⚠️ `:focus-within` با کلیکِ ماوس هم شلیک می‌شد (کلیک، چک‌باکسِ
-   پنهان را فوکوس می‌کند)، پس حلقه روی هر انتخابِ ماوسی ظاهر می‌شد. */
-.tsp-row:has(.tsp-box:focus-visible) {
-  outline: 2px solid var(--gold-deep, #8F6531);
-  outline-offset: 2px;
-}
-.tsp-row.is-on {
-  border-color: rgba(199, 166, 106, .55);
-  background: rgba(199, 166, 106, .09);
+@media (hover: hover) { .tsp-all:hover { color: #1C1B17; } }
+.tsp-all:focus-visible { outline: 2px solid var(--gold-deep, #8F6531); outline-offset: 2px; border-radius: 4px; }
+
+/* ── شبکه‌ی کاشی ── */
+.tsp-list {
+  list-style: none; margin: 0; padding: 0;
+  display: grid; gap: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 210px), 1fr));
 }
 
-/* پنهان ولی در دسترس */
+.tsp-tile {
+  position: relative;
+  display: grid; grid-template-columns: auto minmax(0, 1fr);
+  gap: 11px; align-items: start;
+  padding: 13px 14px;
+  border-radius: 12px;
+  border: 1px solid #E4DFD2;
+  background: #fff;
+  cursor: pointer;
+  min-block-size: 56px;
+  transition: border-color .2s cubic-bezier(.22, 1, .36, 1),
+              background-color .2s cubic-bezier(.22, 1, .36, 1),
+              box-shadow .2s cubic-bezier(.22, 1, .36, 1);
+}
+@media (hover: hover) {
+  .tsp-tile:hover { border-color: #CFC7B5; }
+}
+/* ⚠️ `:focus-within` با کلیکِ ماوس هم شلیک می‌شد؛ فقط کیبورد */
+.tsp-tile:has(.tsp-box:focus-visible) { outline: 2px solid var(--gold-deep, #8F6531); outline-offset: 2px; }
+/* ⚠️ پس‌افتِ فوکوس: `:has()` در فایرفاکسِ پیش از ۱۲۱ نیست و آن‌جا
+   کاربرِ کیبورد هیچ نشانی نمی‌دید — ورودی به یک پیکسل بریده شده. */
+.tsp-box:focus-visible + .tsp-mark { outline: 2px solid var(--gold-deep, #8F6531); outline-offset: 2px; }
+
+.tsp-tile.is-on {
+  border-color: rgb(var(--c-gold, 199 166 106) / .62);
+  background: rgb(var(--c-gold, 199 166 106) / .10);
+  box-shadow: 0 1px 2px rgb(122 84 39 / .06);
+}
+
+/* دکمه‌ی حذفِ مقدارِ قدیمی — همان کاشی، ولی کنشش یک‌طرفه است */
+.tsp-rm { inline-size: 100%; text-align: start; font: inherit; }
+.tsp-rm .tsp-mark { background: #8A7B62; border-color: #8A7B62; color: #fff; }
+@media (hover: hover) { .tsp-rm:hover .tsp-mark { background: #6E6250; border-color: #6E6250; } }
+
+/* ورودی پنهان ولی در دسترس */
 .tsp-box {
   position: absolute; inline-size: 1px; block-size: 1px;
   padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%);
@@ -78,38 +98,70 @@
 }
 
 .tsp-mark {
-  display: grid; place-items: center; flex: none;
-  inline-size: 19px; block-size: 19px; margin-block-start: 1px;
-  border-radius: 6px; border: 1.5px solid #D9D2C2; background: #fff;
+  display: grid; place-items: center;
+  inline-size: 20px; block-size: 20px; margin-block-start: 1px;
+  /* ⚠️ مرزِ کنترل باید ۳:۱ باشد؛ `#D9D2C2` روی سفید ۱٫۵:۱ بود
+     یعنی چک‌باکسِ خالی عملاً دیده نمی‌شد. */
+  border-radius: 7px; border: 1.5px solid #A9A091; background: #fff;
   color: transparent;
   transition: background-color .18s, border-color .18s, color .18s;
 }
-.tsp-row.is-on .tsp-mark {
-  background: var(--gold-deep, #8F6531);
-  border-color: var(--gold-deep, #8F6531);
-  color: #fff;
+.tsp-tile.is-on .tsp-mark { background: var(--gold-ink, #7A5427); border-color: var(--gold-ink, #7A5427); color: #fff; }
+
+.tsp-txt { display: grid; gap: 3px; min-inline-size: 0; }
+.tsp-name { font-size: .875rem; font-weight: 700; color: #2B2822; line-height: 1.7; }
+.tsp-desc { font-size: .75rem; line-height: 1.9; color: #6F6A5C; }
+
+/* ── خلاصه‌ی زنده ──
+   ⚠️ نه رشته‌ی کاما‌دار و نه فهرستِ عمودیِ بلند: همان شبکه‌ی کشسان،
+   تا طولِ نامِ متفاوت لبه‌ی ژولیده نسازد. */
+.tsp-sum {
+  border-radius: 14px;
+  border: 1px solid #E7E2D6;
+  background: #FBF9F5;
+  padding: clamp(14px, 2vw, 20px);
+}
+.tsp-sum-head {
+  display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 10px;
+  margin-block-end: 12px;
+}
+.tsp-sum-head h4 { font-size: .875rem; font-weight: 800; color: #1C1B17; margin: 0; }
+.tsp-sum-head span { font-size: .78rem; font-weight: 700; color: var(--gold-ink, #7A5427); }
+
+.tsp-sum-cat { font-size: .75rem; font-weight: 700; color: #6F6A5C; margin: 12px 0 6px; }
+.tsp-sum-cat:first-of-type { margin-block-start: 0; }
+.tsp-sum-list {
+  list-style: none; margin: 0; padding: 0;
+  display: grid; gap: 4px 18px;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 170px), 1fr));
+}
+.tsp-sum-list li {
+  display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 8px; align-items: start;
+  font-size: .8125rem; line-height: 1.85; color: #2B2822;
+}
+.tsp-sum-list .d {
+  inline-size: 5px; block-size: 5px; margin-block-start: .7em;
+  rotate: 45deg; background: rgb(var(--c-gold, 199 166 106) / .8);
 }
 
-.tsp-txt { display: flex; flex-direction: column; gap: 2px; min-inline-size: 0; }
-.tsp-name { font-size: 13.5px; font-weight: 700; color: #2B2822; line-height: 1.7; }
-.tsp-desc {
-  font-size: 12px; line-height: 1.9;
-  color: var(--text-tertiary, #6E6E6E); max-inline-size: 44ch;
-}
-
-@media (min-width: 640px) {
-  .tsp-list { grid-template-columns: 1fr 1fr; }
-}
+/* هم متنِ حالتِ خالی، هم توضیحِ گروهِ قدیمی — هر دو «توضیحِ آرام» */
+.tsp-note { font-size: .8125rem; line-height: 1.95; color: #6F6A5C; margin: 0 0 12px; }
+.tsp-sum .tsp-note { margin-block-end: 0; }
 
 @media (prefers-reduced-motion: reduce) {
-  .tsp-row, .tsp-mark { transition: none; }
+  .tsp-tile, .tsp-mark { transition: none; }
 }
 
-/* یادداشتِ گروهِ «سایر خدمات» — چرایی، نه تزئین */
-.tsp-note {
-  margin: 0 0 10px;
-  font-size: 12px;
-  line-height: 1.95;
-  color: var(--text-tertiary, #6E6E6E);
-  max-inline-size: 60ch;
+/* ── کنتراستِ اجباریِ ویندوز ──
+   ⚠️ در این حالت `color` و `background` بازنویسی می‌شوند: تیکِ
+   `color: transparent` روی *همه‌ی* کاشی‌ها ظاهر می‌شد و تفاوتِ
+   انتخاب‌شده/نشده کاملاً از بین می‌رفت. پس نشانِ دست‌ساز کنار
+   می‌رود و خودِ چک‌باکسِ سیستم برمی‌گردد. */
+@media (forced-colors: active) {
+  .tsp-box {
+    position: static; inline-size: auto; block-size: auto;
+    margin: 0; overflow: visible; clip-path: none;
+  }
+  .tsp-tile .tsp-mark { display: none; }
+  .tsp-rm .tsp-mark { display: grid; }
 }

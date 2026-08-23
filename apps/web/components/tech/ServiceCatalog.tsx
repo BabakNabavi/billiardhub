@@ -1,20 +1,16 @@
 /* ─────────────────────────────────────────────────────────────
-   کاتالوگِ خدماتِ متخصص — ستونِ فقراتِ پروفایل.
+   کاتالوگِ خدماتِ متخصص.
 
-   ── مسیری که این کامپوننت طی کرده ──
-   ۱) اول ابرِ چیپ بود: `{services.map(s => <span className="chip">)}`.
-      «تعویض تیپ» (۹ نویسه) کنارِ «تعویض چرم و تور و ریل» (۲۱ نویسه)
-      ردیف را بی‌ریتم می‌کرد، خدماتِ چوب و میز در هم می‌ریختند، و
-      توضیحِ فنی اصلاً جایی نداشت.
-   ۲) بعد فهرستِ ستونیِ داخلِ یک کارتِ سفید شد — بهتر، ولی هنوز یکی
-      از پنج قابِ هم‌اندازه‌ی صفحه، با عنوانِ دسته‌ی ۱۴ پیکسلیِ
-      کم‌رنگ. یعنی مهم‌ترین محتوای صفحه، هم‌وزنِ «محل فعالیت» بود.
-   ۳) حالا: بدونِ ظرف. روی خودِ کاغذ می‌نشیند، عنوانِ دسته اندازه‌ی
-      واقعیِ تیتر دارد، و جداکننده خطِ مویی است. بزرگ‌ترین ساختارِ
-      صفحه، چون بازدیدکننده برای همین آمده.
+   ── مسیری که طی شده ──
+   ۱) ابرِ چیپ — طولِ نامِ متفاوت ردیف را می‌شکست.
+   ۲) فهرستِ خط‌دار با راهنمای نقطه‌چین — ریتم درست شد ولی صفحه
+      روزنامه شد.
+   ۳) حالا: هر دسته یک «صفحه‌ی رشته» با زمینِ خودش، و خدمات داخلش
+      در شبکه‌ی کشسان. یک سطح برای هر دسته — نه یک کارت برای هر
+      خدمت، نه یک خط برای هر ردیف.
 
-   ⚠️ هیچ خدمتی برای پرکردنِ صفحه اضافه نمی‌شود؛ فقط آنچه متخصص
-   انتخاب کرده. `resolveServices` مقادیرِ قدیمی را هم نگه می‌دارد.
+   ⚠️ فقط خدماتی که متخصص انتخاب کرده. دسته‌ی بی‌خدمت اصلاً رندر
+   نمی‌شود؛ `resolveServices` هم مقادیرِ قدیمی را نگه می‌دارد.
    ───────────────────────────────────────────────────────────── */
 
 import type { ReactNode } from 'react'
@@ -22,56 +18,56 @@ import type { ResolvedServices } from '@/lib/tech-services'
 import { toFaDigits } from '@/lib/jalali'
 import './service-catalog.css'
 
-function Group({ id, title, other, count, children }: {
+function Discipline({ id, title, count, other, children }: {
   id: string
   title: string
-  other?: boolean
   count: number
+  other?: boolean
   children: ReactNode
 }) {
   return (
-    <section className={other ? 'tsc-other' : undefined} aria-labelledby={`tsc-${id}`}>
-      <div className="tsc-cat">
+    <section className={`tsc-disc${other ? ' is-other' : ''}`} aria-labelledby={`tsc-${id}`}>
+      <div className="tsc-disc-head">
         <h3 id={`tsc-${id}`}>{title}</h3>
-        {/* شمار در سرِ دسته می‌نشیند نه کنارِ هر نام: یک عدد که
-            وسعتِ کار را می‌گوید، نه هفده برچسبِ تکراری. */}
+        {/* شمار در سرِ دسته می‌نشیند، نه کنارِ هر نام */}
         <span className="tsc-n">{toFaDigits(count)} خدمت</span>
       </div>
-      <ul className="tsc-list">{children}</ul>
+      <ul className="tsc-grid" data-n={count}>{children}</ul>
     </section>
   )
 }
 
 export function ServiceCatalog({ data }: { data: ResolvedServices }) {
-  /* ⚠️ بخشِ خالی رندر نمی‌شود — صفحه‌ی بدونِ خدمات نباید قابِ خالی
-     نشان بدهد. تصمیمِ نمایش با صداکننده است؛ این گارد تورِ دوم است. */
+  /* گاردِ دوم؛ تصمیمِ نمایش با صداکننده است */
   if (!data.count) return null
 
   return (
     <div className="tsc">
       {data.categories.map(c => (
-        <Group key={c.id} id={c.id} title={c.title} count={c.services.length}>
+        <Discipline key={c.id} id={c.id} title={c.title} count={c.services.length}>
           {c.services.map(s => (
-            <li key={s.id} className="tsc-row">
-              <span className="tsc-name">{s.title}</span>
-              <span className="tsc-lead" aria-hidden />
-              {s.description && <span className="tsc-desc">{s.description}</span>}
+            <li key={s.id} className="tsc-item">
+              <span className="tsc-dot" aria-hidden />
+              <span>
+                <span className="tsc-name">{s.title}</span>
+                {s.description && <span className="tsc-desc">{s.description}</span>}
+              </span>
             </li>
           ))}
-        </Group>
+        </Discipline>
       ))}
 
-      {/* ⚠️ مقادیرِ ثبت‌شده‌ی پیش از دسته‌بندی. پاک نمی‌شوند چون
+      {/* ⚠️ مقادیرِ ثبت‌شده‌ی پیش از دسته‌بندی: پاک نمی‌شوند چون
           داده‌ی واقعیِ همین متخصص‌اند؛ ساخته هم نمی‌شوند. */}
       {data.legacy.length > 0 && (
-        <Group id="other" title="سایر خدمات" other count={data.legacy.length}>
+        <Discipline id="other" title="سایر خدمات" count={data.legacy.length} other>
           {data.legacy.map(t => (
-            <li key={t} className="tsc-row">
+            <li key={t} className="tsc-item">
+              <span className="tsc-dot" aria-hidden />
               <span className="tsc-name">{t}</span>
-              <span className="tsc-lead" aria-hidden />
             </li>
           ))}
-        </Group>
+        </Discipline>
       )}
     </div>
   )
