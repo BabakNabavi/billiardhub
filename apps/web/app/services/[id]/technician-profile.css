@@ -1,0 +1,385 @@
+/* ─────────────────────────────────────────────────────────────
+   پروفایلِ متخصصِ خدماتِ فنی — سیستمِ بصریِ صفحه.
+
+   ── ایده‌ی صفحه ──
+   «فهرستِ کارِ یک صنعتگر.» بیلیارد ورزشِ دقت است و تعمیراتِ فنی
+   صنعتگری؛ پس صفحه با *دقت* ساخته می‌شود نه با تزئین: شبکه‌ی سخت،
+   خطِ مویی، اندازه‌های صریح، و سفیدیِ عمدی. کاتالوگِ خدمات ستونِ
+   فقراتِ صفحه است، نه یک بخش در میانِ بخش‌ها.
+
+   ── چه چیزی حذف شد و چرا ──
+   نسخه‌ی قبلی پنج قابِ سفیدِ *کاملاً یکسان* بود
+   (`#fff` + `1px` + `radius:18`) با فاصله‌ی یکسانِ
+   `clamp(28px,4vw,44px)` بینِ همه — یعنی صفحه هیچ ریتمی نداشت و
+   هیچ نقطه‌ی تمرکزی. کارت ظرفِ تنبل است: وقتی همه‌چیز کارت باشد،
+   هیچ‌چیز برجسته نیست. این‌جا محتوا روی خودِ کاغذ می‌نشیند و
+   جداکننده خطِ مویی و فضاست. تنها جایی که زمینه عوض می‌شود، بندِ
+   پایانیِ تماس است — همان یک تغییر، کارِ عمق را می‌کند.
+
+   ⚠️ تمِ روشن قیدِ صریحِ مالک است. «تغییرِ زمین» یعنی کاغذِ گرم‌ترِ
+   روشن، نه بندِ تیره.
+   ───────────────────────────────────────────────────────────── */
+
+.tpx {
+  --ink: #1C1B17;
+  --sec: #514C42;
+  --mut: #6F6A5C;
+  --ink-soft: #2B2822;
+  --line: #E7E2D6;
+  --hair: #EFEBE2;
+  --paper: #F7F7F5;
+  --paper-deep: #F1ECE1;
+  /* ⚠️ طلایی این‌جا *دوباره تعریف نمی‌شود*: عدد در `globals.css`
+     یک‌بار زندگی می‌کند و کپیِ دوم فردا از آن عقب می‌افتد.
+     فقط یک تُنِ تیره‌ترِ مخصوصِ متنِ روی تینت اضافه می‌شود، چون
+     `--gold-deep` روی تینتِ ۱۲٪ به ۴٫۰۶ می‌رسد (زیرِ ۴٫۵). */
+  --gold-ink: #7A5427;
+  --gold-rule: rgb(var(--c-gold) / .5);
+
+  /* ── مقیاسِ تایپ ──
+     نسخه‌ی قبلی بینِ ۱۶ و ۲۴ پیکسل هیچ اندازه‌ای نداشت، پس هیچ
+     پله‌ای هم نداشت. این پنج پله عمداً از هم دورند. */
+  --t-display: clamp(2.05rem, 1.2rem + 4vw, 4.25rem);
+  --t-lede: clamp(1.0625rem, .96rem + .5vw, 1.3125rem);
+  --t-title: clamp(1.125rem, 1.02rem + .48vw, 1.4375rem);
+  --t-label: .8125rem;
+  --t-body: .9375rem;
+  --t-meta: .78rem;
+
+  background: var(--paper);
+  color: var(--ink);
+  /* ⚠️ ستونِ فلکس تا بندِ پایانی *ته* صفحه بچسبد: با
+     `min-block-size` تنها، پروفایلِ کم‌محتوا یک نوارِ کاغذیِ
+     روشن زیرِ بندِ تیره‌تر جا می‌گذاشت.
+     `dvh` هم برای حالتِ standaloneِ آی‌اواس. */
+  display: flex;
+  flex-direction: column;
+  min-block-size: 100dvh;
+}
+
+/* ── سطح‌هایی که خودمان نکشیده‌ایم ──
+   انتخابِ متن، مکان‌نما و حلقه‌ی فوکوس با پیش‌فرضِ مرورگر می‌آیند و
+   به هیچ سیستمِ طراحی‌ای تعلق ندارند. ارزان‌ترین نشانه‌ی اینکه صفحه
+   *ساخته* شده نه سرِهم‌بندی. */
+.tpx ::selection { background: rgb(var(--c-gold) / .28); color: var(--ink); }
+.tpx { caret-color: var(--gold-deep); accent-color: var(--gold-deep); }
+/* ⚠️ فقط `outline`. `border-radius` این‌جا شکلِ *خودِ* عنصر را
+   عوض می‌کرد و چون سلکتور نواده‌ای است، به دکمه‌های گردِ گالری و
+   لایت‌باکس هم می‌رسید: کنترلِ دایره‌ای موقعِ فوکوس مربع می‌شد. */
+.tpx :focus-visible {
+  outline: 2px solid var(--gold-deep);
+  outline-offset: 3px;
+}
+
+/* ⚠️ `inline-size: 100%` واجب است، نه تزئین: از وقتی `.tpx` فلکسِ
+   ستونی شد، این جعبه یک آیتمِ فلکس است و حاشیه‌ی `auto` در محورِ
+   عرضی جلوی کش‌آمدن را می‌گیرد — یعنی به عرضِ محتوا جمع می‌شود.
+   اندازه‌گیریِ واقعی در ۱۴۴۰: ۶۳۴ پیکسل به‌جای ۱۱۲۰، در حالی که
+   بندِ پایانی (فرزندِ بلاکِ خودش) ۱۱۲۰ می‌ماند — یعنی همان دو
+   شبکه‌ای که عمداً یکسان تعریف شده‌اند، روی هم نمی‌افتادند. */
+.tpx-wrap {
+  inline-size: 100%;
+  max-inline-size: 1120px;
+  margin-inline: auto;
+  padding-inline: clamp(16px, 3vw, 28px);
+}
+
+/* ═══════════════ بردکرامب ═══════════════ */
+.tpx-crumb {
+  display: flex; align-items: center; flex-wrap: wrap; gap: 0 6px;
+  list-style: none; margin: 0; padding: 18px 0 0;
+  font-size: var(--t-meta); color: var(--mut);
+}
+/* جداکننده در CSS می‌ماند تا صفحه‌خوان «‹» را نخواند */
+.tpx-crumb li + li::before { content: "‹"; padding-inline-end: 6px; color: var(--line); }
+.tpx-crumb a { color: inherit; text-decoration: none; padding-block: 8px; }
+.tpx-crumb a:hover { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
+
+/* خطای ذخیره‌ی گالری — رنگ تنها نشانه نیست، «خطا:» هم می‌آید */
+.tpx-err { font-size: var(--t-meta); line-height: 1.9; color: #A3251F; margin: 12px 0 0; }
+
+/* ═══════════════ سرلوحه ═══════════════ */
+/* ⚠️ «هیرو»ی کارت‌دار نیست. یک لوحِ تایپوگرافیک است که با عکس
+   دوستونه می‌شود و بی‌عکس، تک‌ستونه — و هر دو حالت *عمدی* به نظر
+   می‌رسند. جای‌نگه‌دارِ خاکستری یا مونوگرامِ ساختگی نمی‌گذاریم. */
+.tpx-mast {
+  padding-block: clamp(28px, 4.5vw, 56px) clamp(26px, 3.6vw, 44px);
+  border-block-end: 1px solid var(--line);
+  display: grid;
+  gap: clamp(22px, 3vw, 40px);
+}
+/* ⚠️ ستونِ دوم همیشه هست، عکس باشد یا نباشد. با تک‌ستون، صفحه در
+   ۱۴۴۰ یک نوارِ باریکِ چسبیده به راست می‌شد و نیمِ دیگر خالی —
+   که سفیدیِ عمدی نیست، ترکیب‌بندیِ نامتعادل است.
+   نسبت ۱:۰٫۶۲ است نه ۱:۱: ستونِ نام باید غالب بماند. */
+@media (min-width: 860px) {
+  .tpx-mast {
+    grid-template-columns: minmax(0, 1fr) minmax(232px, .62fr);
+    gap: clamp(32px, 5vw, 72px);
+    align-items: end;
+  }
+  .tpx-mast .aside { padding-block-end: 4px; }
+}
+/* ⚠️ خطِ جداکننده روی *ستون* می‌نشیند نه روی یک پاراگراف.
+   وقتی روی `.tpx-facts` بود، به عرضِ همان متن (۳۴ نویسه) محدود
+   می‌شد و مثلِ یک خطِ سرگردان بالای «تهران» دیده می‌شد. */
+.tpx-mast .aside {
+  display: grid; gap: clamp(14px, 1.8vw, 20px); align-content: end;
+  padding-block-start: clamp(16px, 2vw, 22px);
+  border-block-start: 1px solid var(--line);
+}
+@media (min-width: 860px) {
+  /* در دسکتاپ خطِ ستون است، نه خطِ افقی — همان تیغه‌ی میانِ دو ستونِ
+     یک سرلوحه‌ی چاپی. */
+  .tpx-mast .aside {
+    padding-block-start: 0;
+    border-block-start: none;
+    border-inline-start: 1px solid var(--line);
+    padding-inline-start: clamp(26px, 3.4vw, 44px);
+  }
+  /* ⚠️ در ستونِ باریک، دو دکمه‌ی هم‌ردیف می‌پیچند و دو عرضِ متفاوت
+     می‌سازند — لبه‌ی ژولیده. ستونی و هم‌عرض، بلوکِ تصمیم را قاطع
+     نشان می‌دهد. */
+  .tpx-mast .tpx-acts { flex-direction: column; align-items: stretch; }
+}
+
+.tpx-name {
+  font-size: var(--t-display);
+  font-weight: 800;
+  line-height: 1.22;
+  letter-spacing: -0.022em;
+  margin: 0;
+  text-wrap: balance;
+}
+.tpx-name .vb { vertical-align: 12%; margin-inline-start: 8px; }
+
+/* تخصص *زیرِ* نام می‌نشیند، نه بالایش: برچسبِ بالای تیتر، تیتر را
+   ضعیف می‌کند. این‌جا یک جمله است، نه یک نشان. */
+.tpx-lede {
+  font-size: var(--t-lede);
+  font-weight: 500;
+  line-height: 1.75;
+  color: var(--gold-deep);
+  margin: clamp(10px, 1.4vw, 16px) 0 0;
+  max-inline-size: 30ch;
+}
+
+.tpx-facts {
+  margin: 0;
+  font-size: var(--t-body);
+  line-height: 2.05;
+  color: var(--sec);
+  max-inline-size: 34ch;
+}
+/* ⚠️ عدد از واحدش جدا نشود: در ستونِ باریک «۹» ته یک خط
+   می‌ماند و «خدمت» سرِ خطِ بعد — که هم زشت است هم یک لحظه
+   بی‌معنا. */
+.tpx-facts b { font-weight: 700; color: var(--ink); white-space: nowrap; }
+/* `--line` روی کاغذ ۱٫۲:۱ است؛ جداکننده باید دیده شود */
+.tpx-facts .sep { color: var(--mut); padding-inline: 8px; }
+
+.tpx-intro {
+  margin: clamp(12px, 1.6vw, 18px) 0 0;
+  font-size: var(--t-body);
+  line-height: 2.15;
+  color: var(--sec);
+  max-inline-size: 62ch;
+}
+
+.tpx-acts { display: flex; flex-wrap: wrap; gap: 10px; }
+
+/* پرتره — وقتی هست، تصویرِ واقعی است نه آواتارِ ۱۱۸ پیکسلی.
+   برشِ بلند، بدونِ سایه‌ی درشت، با یک خطِ مویی به‌جای قاب. */
+.tpx-portrait {
+  position: relative;
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  border-radius: 4px;
+  border: 1px solid var(--line);
+  background: var(--paper-deep);
+  padding: 0;
+  inline-size: 100%;
+  cursor: zoom-in;
+}
+@media (max-width: 859px) {
+  .tpx-portrait { max-inline-size: 200px; aspect-ratio: 1 / 1; }
+}
+.tpx-portrait img {
+  inline-size: 100%; block-size: 100%;
+  object-fit: cover; display: block;
+  transition: transform .7s cubic-bezier(.22, 1, .36, 1);
+}
+@media (hover: hover) {
+  .tpx-portrait:hover img { transform: scale(1.03); }
+}
+
+/* ═══════════════ کنش‌ها ═══════════════ */
+.tpx-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  min-block-size: 44px; padding-inline: 20px;
+  border-radius: 10px; border: 1px solid transparent;
+  font: inherit; font-size: .8125rem; font-weight: 700;
+  text-decoration: none; cursor: pointer;
+  transition: background-color .22s cubic-bezier(.22, .61, .36, 1),
+              border-color .22s cubic-bezier(.22, .61, .36, 1),
+              transform .22s cubic-bezier(.22, .61, .36, 1);
+}
+.tpx-btn svg { flex: none; }
+.tpx-btn.gold {
+  background: var(--gold-dim);
+  border-color: rgb(var(--c-gold) / .34);
+  color: var(--gold-ink);
+}
+/* ⚠️ مرزِ دکمه‌ی ثانویه با `--line` روی کاغذ ۱٫۲:۱ می‌داد — یعنی
+   عملاً نامرئی، و تنها چیزی که این کنترل را کنترل نشان می‌دهد.
+   ۳:۱ حداقلِ مرزِ یک عنصرِ تعاملی است. */
+.tpx-btn.wa {
+  background: transparent;
+  border-color: #8B8474;
+  color: var(--sec);
+}
+@media (hover: hover) {
+  .tpx-btn.gold:hover { background: rgb(var(--c-gold) / .2); transform: translateY(-1px); }
+  /* ⚠️ hover باید *تیره‌تر* کند. مقدارِ قبلی روشن‌تر از حالتِ
+     عادی بود و مرز را زیرِ ۳:۱ می‌برد — یعنی نشانه‌ی تعامل،
+     دسترس‌پذیری را خراب می‌کرد. */
+  .tpx-btn.wa:hover { border-color: var(--mut); color: var(--ink); transform: translateY(-1px); }
+}
+
+/* ═══════════════ بخش‌ها ═══════════════ */
+/* ⚠️ فاصله‌ی *بالای* تیتر بیشتر از پایینش است — گروهِ تنگ، جداییِ
+   سخاوتمند. نسخه‌ی قبلی هر دو را برابر گذاشته بود و بخش‌ها روی هم
+   می‌ریختند. */
+.tpx-sec { padding-block-start: clamp(34px, 5vw, 64px); }
+
+/* ⚠️ بدونِ `letter-spacing`: فاصله‌گذاریِ حروف، اتصالِ حروفِ فارسی
+   را می‌شکند. تفاوت با اندازه و وزن و رنگ ساخته می‌شود، نه با
+   ترکینگی که برای لاتین نوشته شده. */
+.tpx-sec > h2 {
+  font-size: var(--t-label);
+  font-weight: 700;
+  color: var(--mut);
+  margin: 0 0 clamp(16px, 2.2vw, 24px);
+}
+
+/* ═══════════════ درباره ═══════════════ */
+.tpx-prose p {
+  font-size: var(--t-body);
+  line-height: 2.2;
+  color: #2B2822;
+  margin: 0 0 1.1em;
+  max-inline-size: 62ch;
+}
+.tpx-prose p:last-child { margin-block-end: 0; }
+
+/* ═══════════════ نمونه‌کار ═══════════════ */
+/* نمونه‌کار محتواست، نه بندانگشتی: تصویر نسبتِ ۴:۳ و عرضِ واقعی
+   می‌گیرد و کارتِ سایه‌دار دورش نیست. */
+.tpx-work { display: grid; gap: clamp(24px, 3.4vw, 44px); }
+@media (min-width: 760px) {
+  .tpx-work { grid-template-columns: 1fr 1fr; gap: clamp(28px, 3vw, 40px); }
+}
+.tpx-work figure { margin: 0; }
+.tpx-work .im {
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  background: var(--paper-deep);
+  border-radius: 4px;
+  margin-block-end: 14px;
+}
+.tpx-work .im img {
+  inline-size: 100%; block-size: 100%;
+  object-fit: cover; display: block;
+  transition: transform .7s cubic-bezier(.22, 1, .36, 1);
+}
+/* ⚠️ hover روی `figure` بود که نه لینک است نه دکمه — همان
+   «پاسخِ بصری به چیزی که کلیک نمی‌شود» که در کاتالوگ ردش کردیم. */
+.tpx-work h3 {
+  font-size: 1rem; font-weight: 700; line-height: 1.7;
+  margin: 0 0 6px;
+}
+.tpx-work .kind { font-size: var(--t-meta); font-weight: 700; color: var(--gold-deep); }
+.tpx-work p {
+  font-size: .8125rem; line-height: 1.95; color: var(--sec);
+  margin: 0; max-inline-size: 52ch;
+}
+.tpx-work .where { font-size: var(--t-meta); color: var(--mut); margin-block-start: 8px; }
+
+/* ═══════════════ فعالیت و دسترسی ═══════════════ */
+/* ⚠️ نه جدول، نه کاشیِ آیکون‌دار. یک مجموعه‌ی سطرِ اندازه‌گیری‌شده
+   که مثلِ مشخصاتِ یک کارگاه خوانده می‌شود. */
+.tpx-facts-grid {
+  display: grid;
+  gap: 0;
+  max-inline-size: 760px;
+}
+@media (min-width: 640px) {
+  .tpx-facts-grid { grid-template-columns: max-content minmax(0, 1fr); column-gap: clamp(20px, 4vw, 56px); }
+}
+.tpx-facts-grid dt {
+  font-size: var(--t-meta); font-weight: 700; color: var(--mut);
+  padding-block: 14px 2px;
+}
+.tpx-facts-grid dd {
+  font-size: var(--t-body); line-height: 1.95; color: var(--ink);
+  margin: 0; padding-block: 0 14px;
+  border-block-end: 1px solid var(--hair);
+}
+@media (min-width: 640px) {
+  .tpx-facts-grid dt { padding-block: 15px; border-block-end: 1px solid var(--hair); }
+  .tpx-facts-grid dd { padding-block: 15px; }
+}
+.tpx-facts-grid dt:last-of-type,
+.tpx-facts-grid dd:last-of-type { border-block-end: none; }
+
+/* ═══════════════ بندِ پایانیِ تماس ═══════════════ */
+/* تنها تغییرِ زمین در کلِ صفحه. عمق از تغییرِ کاغذ می‌آید، نه از
+   سایه‌ی درشت یا هاله‌ی محو. */
+.tpx-close {
+  margin-block-start: auto;
+  padding-block-start: clamp(48px, 7vw, 96px);
+  background: var(--paper-deep);
+  border-block-start: 1px solid var(--line);
+}
+.tpx-close .inner {
+  padding-block: clamp(40px, 6vw, 72px);
+  display: grid;
+  gap: clamp(20px, 3vw, 32px);
+  align-items: end;
+}
+/* ⚠️ همان شبکه‌ی سرلوحه — صفحه با همان ترکیب‌بندی که باز شده،
+   بسته می‌شود. تکرارِ عمدی، نه اتفاق. */
+@media (min-width: 860px) {
+  .tpx-close .inner {
+    grid-template-columns: minmax(0, 1fr) minmax(232px, .62fr);
+    gap: clamp(32px, 5vw, 72px);
+  }
+}
+.tpx-close .say { max-inline-size: 46ch; }
+.tpx-close h2 {
+  font-size: var(--t-title);
+  font-weight: 800; line-height: 1.6;
+  letter-spacing: -0.01em;
+  margin: 0 0 10px;
+}
+.tpx-close p {
+  font-size: var(--t-body); line-height: 2.05; color: var(--sec);
+  margin: 0 0 clamp(20px, 2.6vw, 28px);
+}
+
+/* ═══════════════ حرکت ═══════════════ */
+/* ⚠️ یک لحظه‌ی نویسنده‌دار، نه یک ورودِ یکسان روی هر بخش. نسخه‌ی
+   قبلی `tpFadeUp` را به هر بخش چسبانده بود؛ وقتی همه‌چیز وارد
+   می‌شود، ورود دیگر معنایی ندارد. فقط سرلوحه، و از حالتی که
+   *از پیش دیده می‌شود*. */
+@keyframes tpxRise {
+  from { opacity: .001; transform: translateY(10px); }
+  to   { opacity: 1; transform: none; }
+}
+.tpx-mast > * { animation: tpxRise .62s cubic-bezier(.16, 1, .3, 1) both; }
+.tpx-mast > *:nth-child(2) { animation-delay: .07s; }
+
+@media (prefers-reduced-motion: reduce) {
+  .tpx-mast > * { animation: none; }
+  .tpx-portrait img, .tpx-work .im img, .tpx-btn { transition: none; }
+}
