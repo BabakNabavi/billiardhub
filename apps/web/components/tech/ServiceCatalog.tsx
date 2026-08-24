@@ -1,21 +1,20 @@
+'use client'
+
 /* ─────────────────────────────────────────────────────────────
    کاتالوگِ خدماتِ متخصص.
 
-   ── مسیری که طی شده ──
-   ۱) ابرِ چیپ — طولِ نامِ متفاوت ردیف را می‌شکست.
-   ۲) فهرستِ خط‌دار با راهنمای نقطه‌چین — ریتم درست شد ولی صفحه
-      روزنامه شد.
-   ۳) حالا: هر دسته یک «صفحه‌ی رشته» با زمینِ خودش، و خدمات داخلش
-      در شبکه‌ی کشسان. یک سطح برای هر دسته — نه یک کارت برای هر
-      خدمت، نه یک خط برای هر ردیف.
+   هر دسته یک صحنه است: نقشه‌ی فنیِ همان رشته در قابِ سه‌بعدی، و
+   خدمات کنارش. دسته‌ها یک‌درمیان آینه می‌شوند تا صفحه ریتم بگیرد.
 
-   ⚠️ فقط خدماتی که متخصص انتخاب کرده. دسته‌ی بی‌خدمت اصلاً رندر
-   نمی‌شود؛ `resolveServices` هم مقادیرِ قدیمی را نگه می‌دارد.
+   ⚠️ فقط خدماتی که متخصص انتخاب کرده. دسته‌ی بی‌خدمت رندر نمی‌شود.
    ───────────────────────────────────────────────────────────── */
 
 import type { ReactNode } from 'react'
 import type { ResolvedServices } from '@/lib/tech-services'
 import { toFaDigits } from '@/lib/jalali'
+import { PlateFor } from './CraftPlate'
+import { useTilt } from './use-tilt'
+import './craft-plate.css'
 import './service-catalog.css'
 
 function Discipline({ id, title, count, other, children }: {
@@ -25,14 +24,22 @@ function Discipline({ id, title, count, other, children }: {
   other?: boolean
   children: ReactNode
 }) {
+  const tilt = useTilt()
   return (
     <section className={`tsc-disc${other ? ' is-other' : ''}`} aria-labelledby={`tsc-${id}`}>
-      <div className="tsc-disc-head">
-        <h3 id={`tsc-${id}`}>{title}</h3>
-        {/* شمار در سرِ دسته می‌نشیند، نه کنارِ هر نام */}
-        <span className="tsc-n">{toFaDigits(count)} خدمت</span>
+      {!other && (
+        <div className="tsc-stage" ref={tilt.ref}>
+          <PlateFor id={id} />
+        </div>
+      )}
+      <div className="tsc-body">
+        <div className="tsc-disc-head">
+          <h3 id={`tsc-${id}`}>{title}</h3>
+          {/* شمار در سرِ دسته می‌نشیند، نه کنارِ هر نام */}
+          <span className="tsc-n">{toFaDigits(count)} خدمت</span>
+        </div>
+        <ul className="tsc-grid">{children}</ul>
       </div>
-      <ul className="tsc-grid" data-n={count}>{children}</ul>
     </section>
   )
 }
