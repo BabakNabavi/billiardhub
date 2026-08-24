@@ -25,6 +25,9 @@ import { toFaDigits } from '@/lib/jalali'
 import { norm, keepLongest } from '@/lib/text-dedupe'
 import { resolveServices } from '@/lib/tech-services'
 import { ServiceCatalog } from '@/components/tech/ServiceCatalog'
+import { BenchPlate } from '@/components/tech/CraftPlate'
+import { useTilt, useReveal } from '@/components/tech/use-tilt'
+import '@/components/tech/craft-plate.css'
 import { useVideoEdit } from '@/components/media/useVideoEdit'
 import { detailTitle, type VideoDetail } from '@/lib/media/video-details'
 import { useEffect, useMemo, useRef, useState } from 'react'
@@ -53,15 +56,6 @@ import PendingNotice from '../../../components/profile/PendingNotice'
 import type { Technician } from '../../../lib/technicians-data'
 
 /* آیکون واتساپ (هم‌خانواده‌ی فوتر فروشگاه) */
-/* ⚠️ تصویرِ *واقعیِ* کارگاه که از قبل روی همین سایت، در فهرستِ
-   خدماتِ فنی، استفاده می‌شود. عکسِ خودِ متخصص همیشه مقدم است؛
-   این فقط وقتی می‌آید که او عکسی نگذاشته باشد، و زیرنویسِ صریح
-   دارد تا نمونه‌کارِ شخصی خوانده نشود.
-   ⚠️ هیچ تصویرِ ساختگی یا AI ساخته نمی‌شود. فایلِ دیگرِ همان پوشه
-   (`IMG_0963.png`) کولاژی با ادعای جعلیِ «ISO CERTIFIED» و
-   «SINCE 1995» است و عمداً استفاده نشد. */
-const CRAFT_IMG = '/images/services/repaire.jfif'
-
 /* ⚠️ عددِ ثابت ننویس: نوارِ بالا `paddingTop: env(safe-area-inset-top)`
    دارد و در حالتِ standaloneِ آی‌اواس بلندتر از ۷۲ پیکسل می‌شود؛
    `rootMargin` هم `env()` نمی‌فهمد. پس ارتفاع از *خودِ* نوار
@@ -263,7 +257,11 @@ export default function TechnicianProfilePage() {
      ⚠️ پیش از هر `return`ِ شرطی — وگرنه React #310. */
   const [dock, setDock] = useState(false)
   const heroActsRef = useRef<HTMLDivElement | null>(null)
-  const closeRef = useRef<HTMLElement | null>(null)
+  const closeRef = useRef<HTMLDivElement | null>(null)
+  /* کجیِ سه‌بعدیِ قابِ نقشه + ورودِ بخش‌ها هنگامِ رسیدن به دید */
+  const plateTilt = useTilt()
+  const aboutReveal = useReveal()
+  const svcReveal = useReveal()
   useEffect(() => {
     setDock(false)
     const acts = heroActsRef.current, close = closeRef.current
@@ -308,23 +306,18 @@ export default function TechnicianProfilePage() {
   }
 
   /* ── چه چیزی گفته می‌شود و کجا ──
-     ⚠️ **یک گذر روی همه‌ی متن‌ها**، نه دو گذرِ جدا. عنوان، معرفی و
-     بندهای «درباره» با هم سنجیده می‌شوند تا قاعده‌ی «بلندتر
-     می‌ماند» در مرزِ بینشان هم برقرار باشد. `keepLongest` جایگاه را
-     نگه می‌دارد، پس خانه‌ی اول و دوم سرلوحه‌اند و بقیه «درباره». */
+     ⚠️ یک گذر روی همه‌ی متن‌ها، نه دو گذرِ جدا: قاعده‌ی «بلندتر
+     می‌ماند» باید در مرزِ عنوان/معرفی/درباره هم برقرار باشد.
+     `keepLongest` جایگاه را نگه می‌دارد. */
   const slots = keepLongest([tech.title, tech.intro, ...tech.about])
   const [lede = '', second = ''] = slots.slice(0, 2).filter((x): x is string => !!x)
   const rest = slots.slice(2).filter((x): x is string => !!x)
-  /* ⚠️ «درباره»ی مستقل فقط وقتی که واقعاً متنی برای خواندن باشد:
-     یک جملهٔ کوتاه در نوارِ جدا، همان سفیدیِ بی‌کاری است که این
-     بازطراحی برای حذفش انجام شد. معیار: دو بند، یا یک بندِ
-     دستِ‌کم ۹۰ نویسه‌ای. وگرنه همان جمله در سرلوحه می‌نشیند. */
+  /* بخشِ «درباره» فقط وقتی که واقعاً متنی برای خواندن باشد */
   const hasProse = rest.length > 1 || (rest[0]?.length ?? 0) >= 90
   const about = hasProse ? rest : []
   const claim = hasProse ? second : (second || rest[0] || '')
 
-  /* ⚠️ همه‌جا `norm`: مقدارِ فقط‌فاصله در JS صادق است و بدونِ این،
-     سطرِ خالی با عنوانِ خالی رندر می‌شد. */
+  /* ⚠️ همه‌جا `norm`: مقدارِ فقط‌فاصله در JS صادق است. */
   const club = norm(tech.club)
   const city = norm(tech.city)
   const hours = norm(tech.hours)
@@ -342,20 +335,18 @@ export default function TechnicianProfilePage() {
      نبودنش بدتر است. */
   const phone = norm(tech.phone)
   const wa = norm(tech.whatsapp)
-  const waHref = wa ? `https://wa.me/${wa}` : ''
   const waText = wa
-    ? `${waHref}?text=${encodeURIComponent(`سلام ${tech.name} عزیز، از طریق بیلیارد هاب با شما تماس می‌گیرم.`)}`
+    ? `https://wa.me/${wa}?text=${encodeURIComponent(`سلام ${tech.name} عزیز، از طریق بیلیارد هاب با شما تماس می‌گیرم.`)}`
     : ''
 
   return (
     <div className="tpx">
       {pending && <PendingNotice what="پروفایلِ شما" />}
 
-      {/* ═══ سرلوحه ═══
-          ⚠️ نه کارتِ هویت، نه آواتارِ دایره‌ای. ترکیبِ نامتقارن:
-          هویت در ستونِ بزرگ و یک قابِ مادّی در ستونِ کنار — تنها
-          چیزی که به صفحه عمق و رنگ می‌دهد. */}
-      <header className="tpx-hero">
+      {/* ═══ صحنه ═══
+          ⚠️ زمینِ تیره تمِ صفحه نیست؛ *صحنه* است: کارگاه زیرِ چراغ.
+          محتوای خواندنی پایین‌تر روی کاغذِ روشن می‌نشیند. */}
+      <div className="tpx-stage">
         <div className="tpx-wrap">
           <nav aria-label="مسیر">
             <ol className="tpx-crumb">
@@ -366,153 +357,153 @@ export default function TechnicianProfilePage() {
           </nav>
         </div>
 
-        {/* ⚠️ بیرونِ `.tpx-wrap`: قاب باید تا لبه‌ی صفحه برسد و
-            هم‌زمان ستونِ هویت با بقیه‌ی صفحه هم‌تراز بماند —
-            پدینگِ سمتِ شروع را خودِ شبکه در CSS می‌سازد. */}
-        <div className="tpx-hero-grid">
+        <header className="tpx-hero">
+          <div className="tpx-wrap tpx-hero-grid">
             <div className="tpx-id">
               <h1 className="tpx-name">
                 {tech.name}
                 {tech.verified && <span className="vb"><VerifiedBadge title="متخصص تأیید شده" /></span>}
               </h1>
               {lede && <p className="tpx-lede">{lede}</p>}
-              <p className="tpx-where">
-                <b>{city}</b>
-                {svc.count > 0 && (
-                  <>
-                    <span className="dot" aria-hidden />
-                    <span>{svc.categories.map(c => c.title).join(' و ')}</span>
-                    <span className="dot" aria-hidden />
-                    <b>{toFaDigits(svc.count)} خدمت</b>
-                  </>
-                )}
-              </p>
-              {/* ⚠️ جمله‌ی حرفه‌ای همین‌جا می‌ماند و بخشِ مستقل
-                  نمی‌گیرد: یک جمله در یک نوارِ جدا، فقط سفیدیِ
-                  بی‌کار می‌سازد. بخشِ «درباره» فقط وقتی ساخته
-                  می‌شود که *واقعاً* متنی برای خواندن باشد. */}
               {claim && <p className="tpx-intro">{claim}</p>}
+
+              {/* ⚠️ هیچ عددِ ساختگی: فقط شهر و شمارِ خدماتِ واقعی.
+                  «۱۵ سال تجربه» و «۵۰۰ پروژه» ساخته نمی‌شود. */}
+              <dl className="tpx-stats">
+                {city && city !== '—' && (
+                  <div>
+                    <dt>شهر</dt>
+                    <dd>{city}</dd>
+                  </div>
+                )}
+                {/* ⚠️ `|| 1` حذف شد: پروفایلی که همه‌ی خدماتش قدیمی و
+                    نگاشت‌نشده‌اند `categories.length === 0` دارد ولی
+                    `count > 0` — و آن `|| 1` عددِ «۱ رشته» را از هوا
+                    می‌ساخت. عددِ ساخته‌شده همان چیزی است که قاعده‌ی
+                    خودمان ممنوع کرده. */}
+                {svc.categories.length > 0 && (
+                  <div>
+                    <dt>رشته</dt>
+                    <dd>{toFaDigits(svc.categories.length)}</dd>
+                  </div>
+                )}
+                {svc.count > 0 && (
+                  <div>
+                    <dt>خدمات</dt>
+                    <dd>{toFaDigits(svc.count)}</dd>
+                  </div>
+                )}
+              </dl>
+
               <div className="tpx-acts" ref={heroActsRef}>
                 {phone && <a className="tpx-btn solid" href={`tel:${phone}`}><Phone size={16} aria-hidden /> ارتباط با متخصص</a>}
                 {waText && <a className="tpx-btn ghost" href={waText} target="_blank" rel="noopener noreferrer">{WaIcon} واتساپ</a>}
               </div>
             </div>
 
-            {/* ⚠️ عکسِ خودِ متخصص مقدم است. اگر نداشت، فضای کارِ
-                واقعی می‌آید — با زیرنویسِ صریح، تا کسی آن را
-                نمونه‌کارِ این شخص نخواند. */}
+            {/* ⚠️ نقشه‌ی فنیِ رسم‌شده، نه عکس. عکسِ کارِ دیگران روی
+                صفحه‌ی این شخص ادعای دروغ است و عکسِ استوک صفحه را
+                ارزان می‌کند. این‌جا همان چیزی کشیده می‌شود که او
+                رویش کار می‌کند. */}
             <figure className="tpx-plate">
-              <img
-                src={tech.photo || CRAFT_IMG}
-                /* ⚠️ در حالتِ پس‌افت، تصویر *تزئینِ موضوعی* است و
-                   معنایش را زیرنویس می‌گوید؛ `alt`ِ توصیفی («در حالِ
-                   پارچه‌کشی») همان برداشتِ غلط را به کاربرِ صفحه‌خوان
-                   هم منتقل می‌کرد. */
-                alt={tech.photo ? `عکسِ ${tech.name}` : ''}
-                width={516} height={387}
-                loading="eager" fetchPriority="high" decoding="async"
-              />
-              {!tech.photo && (
-                /* ⚠️ زیرنویس باید *صریح* باشد. «خدماتِ فنیِ بیلیارد —
-                   بیلیارد هاب» یک برچسبِ برند بود، نه سلبِ ادعا: کنارِ
-                   نام و شهر، خواننده آن را کارگاهِ همین شخص می‌خواند. */
-                <figcaption>تصویرِ شاخصِ خدماتِ فنیِ بیلیارد — نمونه‌کارِ این متخصص نیست</figcaption>
-              )}
+              <div className="tpx-plate-in" ref={plateTilt.ref}>
+                <BenchPlate />
+              </div>
+              <figcaption>نقشه‌ی فنی — میز و چوبِ بیلیارد</figcaption>
             </figure>
           </div>
-      </header>
+        </header>
+      </div>
 
-      {/* ═══ معرفیِ حرفه‌ای + مشخصاتِ کار ═══ */}
-      {(hasProse || meta.length > 0) && (
-        <section className="tpx-sec">
-          <div className="tpx-wrap">
-            {hasProse && (
-              <div className="tpx-about">
-                <p className="tpx-claim">{about[0]}</p>
-                {about.length > 1 && (
-                  <div className="tpx-prose">
-                    {about.slice(1).map((p, i) => <p key={i}>{p}</p>)}
-                  </div>
-                )}
+      {/* ═══ بخشِ روشن: خواندنی ═══ */}
+      <div className="tpx-light">
+        {(hasProse || meta.length > 0) && (
+          <section className="tpx-sec" ref={aboutReveal.ref}>
+            <div className="tpx-wrap">
+              {hasProse && (
+                <div className="tpx-about">
+                  <p className="tpx-claim">{about[0]}</p>
+                  {about.length > 1 && (
+                    <div className="tpx-prose">
+                      {about.slice(1).map((p, i) => <p key={i}>{p}</p>)}
+                    </div>
+                  )}
+                </div>
+              )}
+              {meta.length > 0 && (
+                <dl className="tpx-meta">
+                  {meta.map(([k, v]) => (
+                    <div key={k}>
+                      <dt>{k}</dt>
+                      <dd>{v}</dd>
+                    </div>
+                  ))}
+                </dl>
+              )}
+            </div>
+          </section>
+        )}
+
+        {svc.count > 0 && (
+          <section className="tpx-sec" ref={svcReveal.ref}>
+            <div className="tpx-wrap">
+              <div className="tpx-sec-head">
+                <h2>رشته‌های تخصصی</h2>
+                <p>آنچه {tech.name} انجام می‌دهد — فقط خدماتی که خودش انتخاب کرده است.</p>
               </div>
-            )}
-            {meta.length > 0 && (
-              /* ⚠️ `dl` نه جدول و نه کاشیِ آیکون‌دار: رابطه‌ی
-                 «عنوان ← مقدار» را خودِ عنصر می‌گوید. */
-              <dl className="tpx-meta">
-                {meta.map(([k, v]) => (
-                  <div key={k}>
-                    <dt>{k}</dt>
-                    <dd>{v}</dd>
-                  </div>
+              <ServiceCatalog data={svc} />
+            </div>
+          </section>
+        )}
+
+        {tech.projects.length > 0 && (
+          <section className="tpx-sec">
+            <div className="tpx-wrap">
+              <div className="tpx-sec-head"><h2>نمونه‌کارها</h2></div>
+              <div className="tpx-work">
+                {tech.projects.map(p => (
+                  <figure key={p.id}>
+                    <div className="im"><img src={p.image} alt={p.title} loading="lazy" decoding="async" /></div>
+                    <figcaption>
+                      <div className="kind">{p.service}</div>
+                      <h3>{p.title}</h3>
+                      <p>{p.desc}</p>
+                      <div className="where">{p.city}{p.club ? ` — ${p.club}` : ''}</div>
+                    </figcaption>
+                  </figure>
                 ))}
-              </dl>
-            )}
-          </div>
-        </section>
-      )}
-
-      {/* ═══ رشته‌های تخصصی ═══ */}
-      {svc.count > 0 && (
-        <section className="tpx-sec tpx-band-warm">
-          <div className="tpx-wrap">
-            <div className="tpx-sec-head">
-              <h2>رشته‌های تخصصی</h2>
-              <p>آنچه {tech.name} انجام می‌دهد — فقط خدماتی که خودش انتخاب کرده است.</p>
+              </div>
             </div>
-            <ServiceCatalog data={svc} />
-          </div>
-        </section>
-      )}
+          </section>
+        )}
 
-      {tech.projects.length > 0 && (
-        <section className="tpx-sec">
-          <div className="tpx-wrap">
-            <div className="tpx-sec-head"><h2>نمونه‌کارها</h2></div>
-            <div className="tpx-work">
-              {tech.projects.map(p => (
-                <figure key={p.id}>
-                  <div className="im"><img src={p.image} alt={p.title} loading="lazy" decoding="async" /></div>
-                  <figcaption>
-                    <div className="kind">{p.service}</div>
-                    <h3>{p.title}</h3>
-                    <p>{p.desc}</p>
-                    <div className="where">{p.city}{p.club ? ` — ${p.club}` : ''}</div>
-                  </figcaption>
-                </figure>
-              ))}
+        {/* ═══ گالری — همان کامپوننتِ مربی و داور ═══ */}
+        {(tech.gallery.length > 0 || tech.videos.length > 0 || edit.isOwner) && (
+          <section className="tpx-sec">
+            <div className="tpx-wrap">
+              <ProfileGallery
+                images={tech.gallery}
+                videos={tech.videos}
+                /* از نمای نرمال‌شده می‌آید، نه ردیفِ خام: ردیفِ پیش از مهاجرت
+                   هنوز آلبومِ شیئی دارد و نامِ آلبوم آن‌جا نیست. */
+                albumNames={tech.albums}
+                onOpenImage={(urls, index, meta2, ids) => openImage(urls, {
+                  index, ...meta2,
+                  ...(edit.isOwner ? { onDelete: (i: number) => deleteImage(ids[i] ?? '') } : {}),
+                })}
+                onOpenVideo={v => openVideo(v, edit.isOwner ? { onDelete: () => deleteVideo(v.id), onEdit: () => editVideo(v) } : undefined)}
+                canEdit={edit.isOwner} busy={edit.saving || vidBusy}
+                onAddImages={addImages} onAddVideos={addVideoFiles} beforeAddVideos={() => askChannel(String(tech?.name ?? ''))} onNewAlbum={newAlbum}
+              />
+              {edit.error && <p role="alert" className="tpx-err">خطا: {edit.error}</p>}
             </div>
-          </div>
-        </section>
-      )}
+          </section>
+        )}
+      </div>
 
-      {/* ═══ گالری — همان کامپوننتِ مربی و داور ═══ */}
-      {(tech.gallery.length > 0 || tech.videos.length > 0 || edit.isOwner) && (
-        <section className="tpx-sec">
-          <div className="tpx-wrap">
-            <ProfileGallery
-              images={tech.gallery}
-              videos={tech.videos}
-              /* از نمای نرمال‌شده می‌آید، نه ردیفِ خام: ردیفِ پیش از مهاجرت
-                 هنوز آلبومِ شیئی دارد و نامِ آلبوم آن‌جا نیست. */
-              albumNames={tech.albums}
-              onOpenImage={(urls, index, meta2, ids) => openImage(urls, {
-                index, ...meta2,
-                ...(edit.isOwner ? { onDelete: (i: number) => deleteImage(ids[i] ?? '') } : {}),
-              })}
-              onOpenVideo={v => openVideo(v, edit.isOwner ? { onDelete: () => deleteVideo(v.id), onEdit: () => editVideo(v) } : undefined)}
-              canEdit={edit.isOwner} busy={edit.saving || vidBusy}
-              onAddImages={addImages} onAddVideos={addVideoFiles} beforeAddVideos={() => askChannel(String(tech?.name ?? ''))} onNewAlbum={newAlbum}
-            />
-            {edit.error && <p role="alert" className="tpx-err">خطا: {edit.error}</p>}
-          </div>
-        </section>
-      )}
-
-      {/* ═══ نتیجه‌گیری ═══
-          تنها زمینِ تیره‌ی صفحه، در جای درست. */}
-      <section className="tpx-close tpx-on-cloth" ref={closeRef}>
-        <div className="tpx-wrap inner">
+      {/* ═══ نتیجه‌گیری — برگشت به صحنه ═══ */}
+      <section className="tpx-stage tpx-close">
+        <div className="tpx-wrap inner" ref={closeRef}>
           <div>
             <h2>نیاز به تعمیر یا سرویس دارید؟</h2>
             <p>برای هماهنگی و مشاوره، مستقیم با {tech.name} در ارتباط باشید.</p>
@@ -524,9 +515,7 @@ export default function TechnicianProfilePage() {
         </div>
       </section>
 
-      {/* ═══ کنشِ چسبانِ موبایل ═══
-          ⚠️ فقط وقتی کاربر از سرلوحه رد شده و هنوز به بندِ پایانی
-          نرسیده — وگرنه دو دکمه‌ی یکسان هم‌زمان روی صفحه‌اند. */}
+      {/* ═══ داکِ شیشه‌ای — تنها لایه‌ی کنترلِ شناور ═══ */}
       {phone && (
         <div className="tpx-dock" data-show={dock ? '1' : '0'} aria-hidden={!dock}>
           <a className="tpx-btn solid" href={`tel:${phone}`} tabIndex={dock ? 0 : -1}>

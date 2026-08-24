@@ -1,111 +1,101 @@
 /* ─────────────────────────────────────────────────────────────
    کاتالوگِ خدماتِ فنی.
 
-   ── دو غلطی که قبلاً امتحان شد ──
-   ۱) ابرِ چیپ: «تعویض تیپ» (۹ نویسه) کنارِ «تعویض چرم و تور و ریل»
-      (۲۱ نویسه) ردیف را بی‌ریتم می‌کرد.
-   ۲) فهرستِ خط‌دار با راهنمای نقطه‌چین: ریتم درست شد ولی صفحه
-      *روزنامه* شد — ردیف، خط، ردیف، خط.
+   ── سه چیزی که امتحان شد و نشد ──
+   ۱) ابرِ چیپ — طولِ نامِ متفاوت ردیف را می‌شکست.
+   ۲) فهرستِ خط‌دار با راهنمای نقطه‌چین — صفحه روزنامه شد.
+   ۳) قابِ ساده‌ی سفید — درست بود ولی «معمولی» دیده می‌شد.
 
    ── حالا ──
-   هر دسته یک **صفحه‌ی رشته** است: یک قابِ واحد با زمینِ خودش، عنوان
-   و شمار در سرِ آن، و خدمات داخلش در شبکه‌ی `auto-fit`. یعنی *یک*
-   سطح برای هر دسته، نه یک کارت برای هر خدمت و نه یک خط برای هر
-   ردیف.
+   هر دسته یک **صحنه** است: نقشه‌ی فنیِ همان رشته در یک قابِ
+   سه‌بعدی، و خدمات کنارش. یعنی بازدیدکننده اول *می‌بیند* این آدم
+   روی چه چیزی کار می‌کند، بعد فهرست را می‌خواند.
 
-   ⚠️ مسئله‌ی طولِ نامِ متفاوت با `minmax` حل می‌شود نه با بریدن یا
-   کوچک‌کردنِ فونت: ستون‌ها خودشان تعداد را با عرض تنظیم می‌کنند و
-   نامِ بلند در همان خانه می‌پیچد.
-
-   ⚠️ توکن‌ها پس‌افت دارند: `--t-*` روی `.tpx`ِ صفحه تعریف شده‌اند و
-   این فایل مالِ یک کامپوننت است.
+   ⚠️ نقشه‌ها رسم می‌شوند نه دانلود: عکسِ کارِ دیگران روی صفحه‌ی این
+   شخص ادعای دروغ است، و عکسِ استوک صفحه را ارزان می‌کند.
    ───────────────────────────────────────────────────────────── */
 
-.tsc { display: grid; gap: clamp(18px, 2.4vw, 28px); }
+.tsc { display: grid; gap: clamp(28px, 4vw, 56px); }
 
-/* ── صفحه‌ی رشته ── */
 .tsc-disc {
-  border-radius: 16px;
-  background: #fff;
-  border: 1px solid var(--line, #E7E2D6);
-  padding: clamp(20px, 2.8vw, 34px);
-  /* سایه‌ی بسیار کم‌عمق: کاغذی که یک لایه بالاتر است، نه کارتِ شناور */
-  box-shadow: 0 1px 2px rgb(28 27 23 / .03);
+  display: grid;
+  gap: clamp(20px, 3vw, 40px);
+  align-items: center;
+}
+@media (min-width: 900px) {
+  .tsc-disc { grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); }
+  /* دسته‌ی دوم آینه می‌شود تا صفحه ریتمِ زیگ‌زاگ بگیرد */
+  .tsc-disc:nth-child(even) > .tsc-stage { order: 2; }
 }
 
+/* ── صحنه‌ی نقشه ── */
+.tsc-stage {
+  position: relative;
+  perspective: 1400px;
+  border-radius: 20px;
+  padding: clamp(16px, 2.4vw, 28px);
+  background:
+    radial-gradient(90% 70% at 50% 0%, rgb(233 214 168 / .1) 0%, transparent 60%),
+    linear-gradient(180deg, #16211B, #0D1411);
+  box-shadow:
+    0 1px 0 rgb(255 255 255 / .08) inset,
+    0 26px 56px -26px rgb(10 15 12 / .6);
+  overflow: hidden;
+}
+.tsc-stage::after {
+  content: '';
+  position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+  border: 1px solid rgb(var(--c-gold) / .22);
+}
+.tsc-stage .cp {
+  transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+  transition: transform .5s cubic-bezier(.22, 1, .36, 1);
+}
+/* روی موبایل کجی اجرا نمی‌شود؛ لایه‌ی ارتقایافته آن‌جا فقط هزینه است */
+@media (hover: hover) and (pointer: fine) {
+  .tsc-stage .cp { will-change: transform; }
+}
+
+/* ── فهرستِ خدمات ── */
+.tsc-body { min-inline-size: 0; }
 .tsc-disc-head {
   display: flex; align-items: baseline; flex-wrap: wrap; gap: 6px 14px;
-  margin-block-end: clamp(16px, 2vw, 22px);
+  margin-block-end: clamp(14px, 2vw, 20px);
+  padding-block-end: 12px;
+  border-block-end: 1px solid var(--line, #E7E2D6);
 }
 .tsc-disc-head h3 {
-  font-size: var(--t-title, 1.625rem);
-  font-weight: 800; letter-spacing: -0.016em; line-height: 1.4;
+  font-size: var(--t-title, 1.875rem);
+  font-weight: 800; letter-spacing: -0.018em; line-height: 1.35;
   margin: 0; color: var(--ink, #1C1B17);
 }
-.tsc-n {
-  font-size: var(--t-meta, .78rem); font-weight: 700;
-  color: var(--gold-ink, #7A5427);
-  white-space: nowrap;
-  /* یک نشانِ آرام، نه چیپ: بدونِ قاب، فقط تُنِ گرم */
-}
+.tsc-n { font-size: var(--t-meta, .78rem); font-weight: 700; color: var(--gold-ink, #7A5427); white-space: nowrap; }
 
-/* ── شبکه‌ی خدمات ──
-   ⚠️ نه کارت و نه ردیفِ خط‌دار. هر خدمت یک بلوکِ تایپوگرافیک است با
-   یک نشانِ کوچکِ برنجی در ابتدای خط — مثلِ علامتِ لوزِ کنارِ ریلِ
-   میز. جداکننده فاصله است. */
-/* ⚠️ سقفِ سه ستون. با `auto-fit`ِ باز، در ۱۴۴۰ پنج ستون می‌شد و
-   چهار خدمت در عرضِ هزار پیکسل پخش می‌شدند — پراکنده، نه
-   سخاوتمند. سه ستون تراکمِ یک کاتالوگ را نگه می‌دارد. */
+/* ⚠️ نه کارت و نه ردیفِ خط‌دار: بلوکِ تایپوگرافیک با نشانِ لوز —
+   همان علامتی که کنارِ ریلِ میز هست. جداکننده فاصله است. */
 .tsc-grid {
   list-style: none; margin: 0; padding: 0;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr));
-  gap: clamp(14px, 1.8vw, 20px) clamp(20px, 3vw, 36px);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 190px), 1fr));
+  gap: clamp(12px, 1.6vw, 18px) clamp(18px, 2.6vw, 32px);
 }
-@media (min-width: 640px) { .tsc-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-/* ⚠️ تعدادِ ستون از تعدادِ *خدمت* می‌آید، نه فقط از عرض. سه ستون
-   برای دسته‌ی چهارتایی یعنی «۳ + ۱» و یک خانه‌ی خالیِ درشت وسطِ
-   قاب. دسته‌های کوچک دو ستونه می‌مانند و پر به نظر می‌رسند. */
-@media (min-width: 1000px) {
-  .tsc-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-  .tsc-grid[data-n='1'], .tsc-grid[data-n='2'],
-  .tsc-grid[data-n='3'], .tsc-grid[data-n='4'] { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-}
-
 .tsc-item { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 10px; align-items: start; }
-
-/* نشانِ لوز — کوچک، دقیق، هم‌تراز با خطِ اولِ نام */
 .tsc-dot {
-  inline-size: 6px; block-size: 6px;
-  margin-block-start: .62em;
-  rotate: 45deg;
-  background: rgb(var(--c-gold) / .75);
+  inline-size: 6px; block-size: 6px; margin-block-start: .62em;
+  rotate: 45deg; background: rgb(var(--c-gold) / .8);
 }
+.tsc-name { font-size: var(--t-body, .9375rem); font-weight: 700; line-height: 1.75; color: var(--ink-soft, #2B2822); }
+.tsc-desc { display: block; font-size: .8125rem; line-height: 1.95; color: var(--mut, #6F6A5C); margin-block-start: 3px; }
 
-.tsc-name {
-  font-size: var(--t-body, .9375rem);
-  font-weight: 700; line-height: 1.75;
-  color: var(--ink-soft, #2B2822);
-}
-.tsc-desc {
-  display: block;
-  font-size: .8125rem; line-height: 1.95;
-  color: var(--mut, #6F6A5C);
-  margin-block-start: 3px;
-}
+/* ── «سایر خدمات» ── */
+/* دسته‌ی بی‌نقشه: تک‌ستونه می‌ماند و آرام‌تر است، چون واقعاً وضعیتِ
+   دیگری دارد — ولی پنهان نمی‌شود. */
+.tsc-disc.is-other { grid-template-columns: 1fr; }
+.tsc-disc.is-other .tsc-disc-head h3 { font-size: 1.125rem; font-weight: 700; color: var(--sec, #514C42); }
+/* ⚠️ سقفِ سه ستون: بدونِ آن، پنج موردِ «سایر خدمات» در ۱۴۴۰ روی یک
+   ردیفِ هزارپیکسلی پخش می‌شدند — پراکنده، نه سخاوتمند. */
+@media (min-width: 1000px) { .tsc-disc.is-other .tsc-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 
-/* ── دسته‌ی «سایر خدمات» ──
-   واقعاً وضعیتِ دیگری دارد (ثبت‌شده پیش از دسته‌بندی)، پس زمینِ
-   آرام‌تر می‌گیرد — ولی پنهان نمی‌شود. */
-/* ⚠️ خط‌چین نه: مرزِ خط‌چین «جای خالی / محلِ رها کردن» خوانده
-   می‌شود، در حالی که این‌ها داده‌ی واقعی‌اند. تفاوت با زمین گفته
-   می‌شود، نه با نوعِ خط. */
-.tsc-disc.is-other {
-  background: transparent;
-  border-color: #DFD8C8;
-  box-shadow: none;
+@media (prefers-reduced-motion: reduce) {
+  .tsc-stage .cp { transition: none; }
 }
-.tsc-disc.is-other .tsc-disc-head h3 {
-  font-size: 1.0625rem; font-weight: 700; color: var(--sec, #514C42);
-}
-.tsc-disc.is-other .tsc-dot { background: #C7C0AE; }

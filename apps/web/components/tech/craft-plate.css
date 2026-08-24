@@ -1,0 +1,110 @@
+/* ─────────────────────────────────────────────────────────────
+   نقشه‌های فنی — رنگ، عمق و حرکت.
+
+   ⚠️ خط‌ها با `stroke-dasharray` کشیده می‌شوند، نه با fade: نقشه
+   باید *رسم* شود. همین یک تفاوت، «گرافیکِ متحرک» را از «چیزی که
+   محو ظاهر شد» جدا می‌کند.
+
+   ⚠️ همه‌ی حرکت‌ها فقط `transform`، `opacity` و `stroke-dashoffset`
+   را عوض می‌کنند تا روی CPUِ ضعیف هم روی لایه‌ی کامپوزیت بمانند.
+   ───────────────────────────────────────────────────────────── */
+
+.cp {
+  inline-size: 100%;
+  block-size: auto;
+  display: block;
+  overflow: visible;
+}
+
+/* ── خطوط ── */
+.cp-axis,
+.cp-tick,
+.cp-dim line,
+.cp-baulk,
+.cp-d {
+  fill: none;
+  stroke: rgb(var(--c-gold) / .34);
+  stroke-width: 1;
+}
+.cp-axis { stroke-dasharray: 5 7; }
+.cp-baulk { stroke: rgb(255 255 255 / .3); }
+.cp-d { stroke: rgb(255 255 255 / .3); fill: none; }
+.cp-tick { stroke-dasharray: 2 5; }
+
+/* ⚠️ واحدِ viewBox است نه پیکسلِ صفحه: با ۱۵ و مقیاسِ ~۰٫۳۴ در
+   موبایل، برچسب‌ها ~۵ پیکسل می‌شدند — یعنی همان چیزی که کلِ
+   «نقشه‌ی فنی» برایش کشیده شده، ناخوانا. */
+.cp-label {
+  font-family: inherit;
+  font-size: 26px;
+  font-weight: 700;
+  fill: rgb(240 236 226 / .82);
+  letter-spacing: 0;
+}
+/* برچسبِ دوم یک پله پایین‌تر می‌نشیند تا با اولی برخورد نکند */
+.cp-call:nth-child(odd) .cp-label { transform: translateY(26px); }
+.cp-call:nth-child(odd) .cp-tick { transform: scaleY(1.34); transform-origin: top; }
+.cp-node { fill: var(--brass); }
+
+/* ── چوب ── */
+.cp-joint { fill: #C9A96B; }
+.cp-ferrule { fill: #EFE7D6; }
+.cp-tip { fill: #6E7C8C; }
+/* بدونِ `mix-blend-mode`: هر ریپینت یک پاسِ ترکیب اضافه می‌کرد */
+.cp-gloss { opacity: .5; }
+
+/* ── میز ── */
+.cp-frame { fill: none; stroke: #6B4A2B; stroke-width: 12; }
+.cp-pocket { fill: #0A0F0C; stroke: rgb(var(--c-gold) / .5); stroke-width: 2; }
+.cp-dia rect { fill: rgb(var(--c-gold) / .82); }
+
+/* ═══════════════ رسمِ نقشه ═══════════════ */
+/* هر گروه با تأخیرِ خودش وارد می‌شود؛ ترتیب همان ترتیبِ ساختِ یک
+   نقشه است: محور، بدنه، جزئیات، اندازه‌گذاری. */
+@keyframes cpDraw { to { stroke-dashoffset: 0; } }
+@keyframes cpFade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes cpPop {
+  from { opacity: 0; transform: scale(.4); }
+  to { opacity: 1; transform: none; }
+}
+
+/* ⚠️ `pathLength={1}` روی خودِ عنصر + دشِ ۱: طولِ واقعیِ مسیر
+   دیگر مهم نیست. با عددِ ثابت (۱۴۰۰) محیطِ قابِ میز ~۲۲۰۰ بود، پس
+   الگو کوتاه‌تر از مسیر می‌ماند و نقشه *هرگز* کامل رسم نمی‌شد —
+   یک L ناتمام. */
+.cp-axis,
+.cp-frame,
+.cp-baulk,
+.cp-d,
+.cp-span {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+}
+.is-drawn .cp-axis { animation: cpDraw 1.1s cubic-bezier(.22, 1, .36, 1) .05s forwards; }
+.is-drawn .cp-frame { animation: cpDraw 1.5s cubic-bezier(.22, 1, .36, 1) .1s forwards; }
+.is-drawn .cp-baulk,
+.is-drawn .cp-d { animation: cpDraw .9s cubic-bezier(.22, 1, .36, 1) .75s forwards; }
+.is-drawn .cp-span { animation: cpDraw 1s cubic-bezier(.22, 1, .36, 1) .8s forwards; }
+
+.cp-body, .cp-joint, .cp-ferrule, .cp-tip, .cp-gloss, .cp-cloth { opacity: 0; }
+.is-drawn .cp-body,
+.is-drawn .cp-joint,
+.is-drawn .cp-ferrule,
+.is-drawn .cp-tip,
+.is-drawn .cp-gloss,
+.is-drawn .cp-cloth { animation: cpFade .8s ease-out .3s forwards; }
+
+.cp-call, .cp-dim text { opacity: 0; }
+.is-drawn .cp-call { animation: cpFade .5s ease-out forwards; animation-delay: calc(.7s + var(--i) * .09s); }
+.is-drawn .cp-dim text { animation: cpFade .6s ease-out 1.1s forwards; }
+
+.cp-pocket, .cp-dia { opacity: 0; transform-box: fill-box; transform-origin: center; }
+/* ⚠️ `transform` روی فرزندِ SVG کامپوزیت نمی‌شود و هر فریم کلِ
+   نقشه را دوباره رَستر می‌کند؛ محوِ ساده همان اثر را دارد. */
+.is-drawn .cp-pocket { animation: cpFade .45s ease-out forwards; animation-delay: calc(.5s + var(--i) * .06s); }
+.is-drawn .cp-dia { animation: cpFade .4s ease-out forwards; animation-delay: calc(.9s + var(--i) * .04s); }
+
+@media (prefers-reduced-motion: reduce) {
+  .cp-axis, .cp-frame, .cp-baulk, .cp-d, .cp-span { stroke-dasharray: none; stroke-dashoffset: 0; }
+  .cp *, .cp { animation: none !important; opacity: 1 !important; }
+}
