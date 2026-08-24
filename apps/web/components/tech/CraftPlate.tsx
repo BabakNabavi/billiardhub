@@ -2,6 +2,18 @@
 
 import { useId } from 'react'
 
+/* [xِ نقطه‌ی اتصال، xِ برچسب، متن] — برچسب از نقطه فاصله می‌گیرد
+   تا با همسایه‌اش برخورد نکند. */
+type Call = readonly [number, number, string]
+
+const CUE_CALLS: readonly Call[] = [
+  [67, 40, 'تیپ'], [85, 152, 'فرول'], [170, 268, 'شفت'],
+  [246, 386, 'جوینت'], [540, 560, 'بات'],
+]
+const BENCH_CALLS: readonly Call[] = [
+  [99, 70, 'تیپ'], [112, 196, 'فرول'], [458, 430, 'جوینت'], [660, 660, 'بات'],
+]
+
 /* ─────────────────────────────────────────────────────────────
    «پوسترِ» رشته‌های فنی — نقشه‌ی فنیِ کشیده‌شده، نه عکس.
 
@@ -36,7 +48,7 @@ function CuePlate() {
      می‌شوند. */
   const uid = useId()
   return (
-    <svg className="cp cp-cue" viewBox="0 0 880 300" role="presentation" aria-hidden focusable="false">
+    <svg className="cp cp-cue" viewBox="0 0 880 320" role="presentation" aria-hidden focusable="false">
       <defs>
         <linearGradient id={`cp-wood-${uid}`} x1="1" y1="0" x2="0" y2="0">
           <stop offset="0" stopColor="#6B4A2B" />
@@ -69,11 +81,16 @@ function CuePlate() {
         d="M842 132 L842 168 L60 154.5 L60 145.5 Z" />
 
       {/* خط‌چین‌های اندازه‌گذاری */}
-      {[[67, 'تیپ'], [85, 'فرول'], [170, 'شفت'], [246, 'جوینت'], [540, 'بات']].map(([x, label], i) => (
-        <g key={label as string} className="cp-call" style={{ ['--i' as string]: i }}>
-          <line className="cp-tick" x1={x as number} y1="150" x2={x as number} y2="228" />
-          <circle className="cp-node" cx={x as number} cy="150" r="3" />
-          <text className="cp-label" x={x as number} y="248" textAnchor="middle">{label as string}</text>
+      {/* ⚠️ «تیپ» و «فرول» فقط ۱۸ واحد از هم فاصله دارند و برچسبشان
+          روی هم می‌افتاد. راهِ حلِ نقشه‌کشی همین است: خطِ راهنما
+          مورب می‌شود و برچسب جای بازتری می‌نشیند — نه کوچک‌کردنِ
+          فونت که کلِ نقشه را ناخوانا می‌کند. */}
+      {CUE_CALLS.map(([x, lx, label], i) => (
+        <g key={label} className="cp-call" style={{ ['--i' as string]: i }}>
+          <polyline className="cp-tick" fill="none"
+            points={`${x},150 ${x},206 ${lx},228`} />
+          <circle className="cp-node" cx={x} cy="150" r="3" />
+          <text className="cp-label" x={lx} y="256" textAnchor="middle">{label}</text>
         </g>
       ))}
 
@@ -166,7 +183,7 @@ export function BenchPlate() {
   /* مرکزِ ماهوت x=440 */
   const dia = [212, 288, 364, 516, 592, 668]
   return (
-    <svg className="cp cp-bench" viewBox="0 0 880 460" role="presentation" aria-hidden focusable="false">
+    <svg className="cp cp-bench" viewBox="0 0 880 470" role="presentation" aria-hidden focusable="false">
       <defs>
         <linearGradient id={`cpb-cloth-${uid}`} x1="0" y1="0" x2="0" y2="1">
           <stop offset="0" stopColor="#1E5540" />
@@ -204,10 +221,10 @@ export function BenchPlate() {
       <rect className="cp-ferrule" x="104" y="378.5" width="16" height="7" rx="1" />
       <path className="cp-tip" d="M104 378.5 L94 380 L94 384 L104 385.5 Z" />
 
-      {[[99, 'تیپ'], [112, 'فرول'], [458, 'جوینت'], [660, 'بات']].map(([x, label], i) => (
-        <g key={label as string} className="cp-call" style={{ ['--i' as string]: i }}>
-          <line className="cp-tick" x1={x as number} y1="382" x2={x as number} y2="410" />
-          <text className="cp-label" x={x as number} y="430" textAnchor="middle">{label as string}</text>
+      {BENCH_CALLS.map(([x, lx, label], i) => (
+        <g key={label} className="cp-call" style={{ ['--i' as string]: i }}>
+          <polyline className="cp-tick" fill="none" points={`${x},382 ${x},406 ${lx},422`} />
+          <text className="cp-label" x={lx} y="448" textAnchor="middle">{label}</text>
         </g>
       ))}
 

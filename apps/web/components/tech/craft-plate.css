@@ -41,9 +41,8 @@
   fill: rgb(240 236 226 / .82);
   letter-spacing: 0;
 }
-/* برچسبِ دوم یک پله پایین‌تر می‌نشیند تا با اولی برخورد نکند */
-.cp-call:nth-child(odd) .cp-label { transform: translateY(26px); }
-.cp-call:nth-child(odd) .cp-tick { transform: scaleY(1.34); transform-origin: top; }
+/* ⚠️ پله‌ی عمودی برداشته شد: حالا خودِ خطِ راهنما مورب است و
+   برچسب را از همسایه‌اش دور می‌کند — همان کارِ نقشه‌کشی. */
 .cp-node { fill: var(--brass); }
 
 /* ── چوب ── */
