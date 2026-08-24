@@ -351,6 +351,24 @@ export default function TechnicianProfilePage() {
      نبودنش بدتر است. */
   const phone = norm(tech.phone)
   const wa = norm(tech.whatsapp)
+  /* ⚠️ فقط نامِ خدماتِ *واقعیِ خودش*. هیچ کلمه‌ی تزئینی اضافه
+     نمی‌شود — نوار محتواست، نه دکور.
+     ⚠️ یکتا: یک عنوان می‌تواند در دو دسته تکرار شود و کلیدِ تکراری
+     در React خطاست.
+     ⚠️ شرطِ بی‌شکاف‌بودن این است که **یک نسخه از خودِ نوار پهن‌تر
+     باشد**، نه اینکه صرفاً چند کلمه داشته باشد. نوار تمام‌عرضِ
+     صفحه است، پس با ۶۰ نویسه (~۷ قلم، ~۱۵۰۰ پیکسل) روی نمایشگرِ
+     ۱۹۲۰ ته هر دور یک حفره‌ی ~۴۰۰ پیکسلی باز می‌شد — دقیقاً همان
+     چیزی که این تکرار قرار بود جلویش را بگیرد. ۱۸۰ نویسه با
+     محافظه‌کارانه‌ترین حدسِ عرضِ نویسه از ۱۹۲۰ رد می‌شود.
+     ⚠️ سقفِ صریحِ حلقه: عنوانِ خالی در داده طولِ رشته را هرگز
+     بالا نمی‌برد و رندر را قفل می‌کند. */
+  const titles = [...new Set(svc.categories.flatMap(c => c.services.map(x => x.title)))]
+  const marquee: string[] = []
+  if (titles.length > 0) {
+    for (let i = 0; i < 40 && marquee.join('').length < 180; i++) marquee.push(...titles)
+  }
+
   const waText = wa
     ? `https://wa.me/${wa}?text=${encodeURIComponent(`سلام ${tech.name} عزیز، از طریق بیلیارد هاب با شما تماس می‌گیرم.`)}`
     : ''
@@ -388,6 +406,10 @@ export default function TechnicianProfilePage() {
 
               {/* ⚠️ هیچ عددِ ساختگی: فقط شهر و شمارِ خدماتِ واقعی.
                   «۱۵ سال تجربه» و «۵۰۰ پروژه» ساخته نمی‌شود. */}
+              {/* ⚠️ بدونِ این شرط، پروفایلی بی‌شهر و بی‌خدمت یک
+                  `<dl>`ِ خالی می‌ساخت: دو خطِ طلاییِ چسبیده به هم
+                  و یک شکافِ اضافه در سرلوحه. */}
+              {((city && city !== '—') || svc.count > 0) && (
               <dl className="tpx-stats">
                 {city && city !== '—' && (
                   <div data-anim="stat">
@@ -413,6 +435,7 @@ export default function TechnicianProfilePage() {
                   </div>
                 )}
               </dl>
+              )}
 
               <div className="tpx-acts" ref={heroActsRef}>
                 {phone && <a className="tpx-btn solid" data-anim="act" href={`tel:${phone}`}><Phone size={16} aria-hidden /> ارتباط با متخصص</a>}
@@ -432,6 +455,35 @@ export default function TechnicianProfilePage() {
             </figure>
           </div>
         </header>
+
+        {/* ═══ نوارِ حرکتی ═══
+            ⚠️ فهرست دو بار تکرار می‌شود چون انیمیشن نصفِ عرض را
+            جابه‌جا می‌کند: بدونِ نسخه‌ی دوم، وسطِ حلقه شکاف می‌افتد.
+
+            ⚠️ **کلِ نوار `aria-hidden` است، نه فقط نسخه‌ی دوم.**
+            نسخه‌ی اول هم خودش تکرارِ پرکننده است؛ متخصصی با یک
+            خدمت باعث می‌شد صفحه‌خوان همان عنوان را هفت بار بخواند.
+            همین عنوان‌ها پایین‌تر در فهرستِ خدمات یک‌بار و درست
+            اعلام می‌شوند — این نوار تزئینِ همان داده است.
+
+            ⚠️ لایه‌ی `-skew` جداست چون انیمیشنِ CSS و GSAP هر دو
+            `transform` می‌نویسند و **اعلانِ انیمیشنِ CSS در آبشار
+            بالاتر از استایلِ اینلاین است**: روی یک عنصر، اسکیو
+            هرگز دیده نمی‌شد و هر به‌روزرسانی مبدأ حلقه را جابه‌جا
+            می‌کرد. حالا حلقه روی `ul` است و اسکیو روی والدش. */}
+        {marquee.length > 0 && (
+          <div className="tpx-marquee" data-marquee aria-hidden>
+            <div className="tpx-marquee-skew">
+              {/* ⚠️ مقدارِ محاسبه‌شده، پس اینلاین مجاز است: مدتِ ثابت
+                  یعنی نوارِ یک-خدمتی و نوارِ هجده-خدمتی با دو سرعتِ
+                  کاملاً متفاوت می‌دوند. */}
+              <ul style={{ ['--dur' as string]: `${Math.round(marquee.length * 1.7)}s` }}>
+                {marquee.map((t, i) => <li key={i}>{t}</li>)}
+                {marquee.map((t, i) => <li key={`b${i}`}>{t}</li>)}
+              </ul>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* ═══ بخشِ روشن: خواندنی ═══ */}

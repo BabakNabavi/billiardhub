@@ -174,6 +174,41 @@ export function useStageMotion(root: RefObject<HTMLElement | null>, key: string)
         }
       }
 
+      /* نوارِ حرکتی با شتابِ اسکرول کمی خم می‌شود و برمی‌گردد.
+         ⚠️ سقفِ ۷ درجه: بیشتر از این «افکت» می‌شود، نه «وزن».
+         ⚠️ روی لایه‌ی `-skew` نوشته می‌شود نه روی `ul`: حلقه‌ی
+         بی‌پایان یک انیمیشنِ CSS روی `transform` است و اعلانِ
+         انیمیشن در آبشار از استایلِ اینلاین بالاتر است.
+         ⚠️ انتخاب از `el` نه از `document`: تنها انتخابگرِ ناحصورِ
+         این فایل بود و روزی که نوارِ دیگری در لِی‌اوت اضافه شود،
+         بی‌صدا آن را می‌گرفت. */
+      const mq = el.querySelector('[data-marquee] .tpx-marquee-skew')
+      if (mq) {
+        const skew = gsap.quickTo(mq, 'skewX', { duration: .5, ease: 'bh-out' })
+        ScrollTrigger.create({
+          trigger: el, start: 'top top', end: 'bottom top',
+          onUpdate: self => skew(gsap.utils.clamp(-7, 7, self.getVelocity() / -380)),
+        })
+        /* ⚠️ `onUpdate` تنها جایی است که اسکیو نوشته می‌شود، پس اگر
+           به‌روزرسانی در سرعتِ بالا قطع شود (پرشِ لنگر، کلیدِ End،
+           فلیکِ تند از انتهای ناحیه) نوار تا بازگشتِ کاربر روی ۷
+           درجه *یخ می‌زند*. این شنونده صفرش می‌کند و چون داخلِ همین
+           `mm.add` ساخته می‌شود، با `mm.revert()` برداشته می‌شود. */
+        ScrollTrigger.addEventListener('scrollEnd', () => skew(0))
+      }
+
+      /* قابِ نقشه با اسکرول می‌چرخد و بزرگ می‌شود — عمقی که با
+         حرکت ساخته می‌شود، نه با سایه.
+         ⚠️ `transformPerspective` روی خودِ تویین لازم است: `perspective`
+         در CSS روی `.tpx-plate` نشسته و در CSS این خاصیت به *فرزندانِ*
+         عنصر اثر می‌کند نه به تبدیلِ خودِ عنصر — و `[data-plate]`
+         دقیقاً همان `.tpx-plate` است. بدونِ آن `rotateX` فقط یک
+         لهیدگیِ عمودیِ تخت بود، نه عمق. */
+      gsap.fromTo('.tpx-hero [data-plate]',
+        { scale: .94, rotateX: 6, transformPerspective: 1400 },
+        { scale: 1, rotateX: 0, transformPerspective: 1400, ease: 'none',
+          scrollTrigger: { trigger: '.tpx-hero', start: 'top top', end: '+=620', scrub: .7 } })
+
       return () => {
         gsap.ticker.remove(raf)
         gsap.ticker.lagSmoothing(500, 33)
