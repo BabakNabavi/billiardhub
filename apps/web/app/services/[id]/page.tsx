@@ -32,6 +32,7 @@ import '@/components/tech/craft-plate.css'
 import { useVideoEdit } from '@/components/media/useVideoEdit'
 import { detailTitle, type VideoDetail } from '@/lib/media/video-details'
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { preload } from 'react-dom'
 import { ProfileMissing, ProfileLoading } from '@/components/profile/ProfileMissing'
 import { useProfileImageViewer } from '@/components/ProfileImageViewer'
 import { useProfileVideoViewer } from '@/components/profile/ProfileVideoViewer'
@@ -72,6 +73,14 @@ const WaIcon = (
 )
 
 export default function TechnicianProfilePage() {
+  /* ⚠️ در *اولین* رندر، پیش از رسیدنِ داده. `<link>`ِ داخلِ JSX دیر
+     بود: صفحه اول `ProfileLoading` را برمی‌گرداند، پس لینک تازه
+     بعد از پاسخِ شبکه به سند اضافه می‌شد.
+     ⚠️ در `layout` هم گذاشته نمی‌شود: ۱۲۸ کیلوبایت روی *هر* صفحه‌ی
+     سایت، برای فونتی که فقط همین‌جا استفاده می‌شود. */
+  preload('/fonts/Estedad/Estedad-Variable.woff2',
+    { as: 'font', type: 'font/woff2', crossOrigin: 'anonymous' })
+
   const params = useParams()
   const id = (Array.isArray(params?.id) ? params.id[0] : params?.id) ?? ''
   const staticTech = useMemo(() => getTechnician(id), [id])
