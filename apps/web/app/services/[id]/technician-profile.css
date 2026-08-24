@@ -74,9 +74,13 @@
   --line: #E7E2D6;
   --gold-ink: #7A5427;
 
-  --t-display: clamp(2.4rem, 1.3rem + 4.6vw, 4.75rem);
+  /* ⚠️ ۷۶ پیکسل «تیترِ بزرگ» است، نه تایپِ نمایشی. سایت‌هایی که
+     معیارِ ما هستند نام را در ۱۰ تا ۱۵ درصدِ عرضِ صفحه می‌گذارند —
+     یعنی چیزی که *اول* دیده می‌شود، نه چیزی که در گوشه‌ای نشسته.
+     ۱۱vw در ۱۴۴۰ می‌شود ~۱۵۸ پیکسل. */
+  --t-display: clamp(3.25rem, 11vw, 10rem);
   --t-lede: clamp(1.0625rem, .95rem + .6vw, 1.375rem);
-  --t-title: clamp(1.25rem, 1.06rem + .8vw, 1.875rem);
+  --t-title: clamp(1.5rem, 1.1rem + 1.8vw, 2.75rem);
   --t-body: .9375rem;
   --t-meta: .78rem;
 
@@ -155,12 +159,31 @@ html.lenis-on { scroll-behavior: auto !important; }
 
 /* ═══════════════ سرلوحه ═══════════════ */
 .tpx-hero { padding-block: clamp(8px, 2vw, 24px) clamp(48px, 7vw, 104px); }
-.tpx-hero-grid { display: grid; gap: clamp(28px, 4vw, 56px); align-items: center; }
+/* ⚠️ دو ستونِ مساوی، نام را به نصفِ عرض محدود می‌کرد و همان چیزی
+   می‌شد که «گوشه‌ای» دیده می‌شد. حالا نام تمام‌عرض است و نقشه
+   زیرش می‌آید — ترتیبِ خواندن هم همین است: کی، بعد چه.  */
+.tpx-hero-grid { display: grid; gap: clamp(24px, 3.4vw, 44px); }
 @media (min-width: 940px) {
-  .tpx-hero-grid { grid-template-columns: minmax(0, .92fr) minmax(0, 1.08fr); gap: clamp(36px, 5vw, 80px); }
+  /* ⚠️ نقشه هم تمام‌عرض است: در ستونِ ۰٫۷۸ یک کارتِ کوچکِ شناور
+     می‌شد با نیمه‌ی خالی کنارش. در عرضِ کامل، *گرافیکِ* صفحه است.
+     (تک‌ستونی همان پیش‌فرضِ گرید است، پس فقط فاصله عوض می‌شود.) */
+  .tpx-hero-grid { gap: clamp(32px, 4vw, 56px); }
 }
 
 .tpx-id { display: grid; gap: clamp(14px, 1.8vw, 22px); }
+
+/* ⚠️ نامِ ۱۵۸ پیکسلی به‌تنهایی کافی نبود: بقیه‌ی متن زیرش در یک
+   ستونِ باریکِ کنارِ صفحه جمع می‌شد و نیمه‌ی دیگر خالی می‌ماند —
+   یعنی دقیقاً همان «چند خط زیرِ هم»، فقط با تیترِ بزرگ‌تر.
+
+   ⚠️ این‌جا عمداً **جای صریحِ سطر/ستون داده نمی‌شود.** `lede` و
+   `intro` هر دو شرطی‌اند؛ با نبودنِ یکی همه‌ی سطرها یکی بالا
+   می‌روند و هر `grid-row`ِ ثابتی با نوارِ سنجه تصادف می‌کند. پس
+   فقط *ترازِ افقی* عوض می‌شود: کنش‌ها به لبه‌ی مقابلِ متن
+   می‌روند. همان کششِ دو-لبه، بدونِ هیچ فرضی درباره‌ی شمارِ سطرها. */
+@media (min-width: 940px) {
+  .tpx-acts { justify-content: end; }
+}
 
 .tpx-name, .tpx-name * {
   font-family: Estedad, IRANSansX, Tahoma, system-ui, sans-serif !important;
@@ -172,6 +195,11 @@ html.lenis-on { scroll-behavior: auto !important; }
   line-height: 1.3;
   letter-spacing: -0.03em;
   margin: 0;
+  /* ⚠️ کفِ ۳٫۲۵rem یعنی یک نامِ تک‌کلمه‌ایِ بلند در ۳۷۵ پیکسل از
+     جعبه بیرون می‌زند — و `html { overflow-x: clip }` آن را بی‌صدا
+     *می‌بُرد*، نه اینکه قابلِ اسکرول کند. یعنی نامِ شخص، که اصلِ
+     محتوای صفحه است، ناقص دیده می‌شد. */
+  overflow-wrap: anywhere;
   /* ⚠️ `text-wrap: balance` این‌جا نیست: SplitText خطوط را یک‌بار
      اندازه می‌گیرد و منجمد می‌کند، پس بعد از تقسیم بی‌اثر است و
      پیش از آن هم اندازه‌گیری را جابه‌جا می‌کند. */
@@ -196,9 +224,16 @@ html.lenis-on { scroll-behavior: auto !important; }
   margin: 0; padding: 0;
   border-block: 1px solid rgb(var(--c-gold) / .2);
 }
+/* ⚠️ سه سنجه در گوشه‌ی خطِ تمام‌عرض جمع می‌شدند و بقیه‌ی خط
+   بی‌دلیل کشیده بود. پخش‌شدن روی کلِ خط، خط را عمدی می‌کند. */
+
 /* ⚠️ شورت‌هندِ چهارمقداری فیزیکی است و در RTL جهتش برعکس
    می‌شود: فاصله به جداکننده‌ی خودش می‌چسبید. */
+/* ⚠️ `flex: 1 1 auto` نه `1 1 0`: با پایه‌ی صفر هر سنجه در ۳۷۵
+   پیکسل ~۹۲ پیکسل می‌گیرد و شهرِ دوکلمه‌ای («بندر ماهشهر») به دو
+   خط می‌شکند و ارتفاعِ ردیف ناهموار می‌شود. */
 .tpx-stats > div {
+  flex: 1 1 auto;
   padding-block: 14px;
   padding-inline: 0 clamp(16px, 2.4vw, 26px);
   margin-inline-end: clamp(16px, 2.4vw, 26px);
@@ -273,6 +308,47 @@ html.lenis-on { scroll-behavior: auto !important; }
 }
 /* ⚠️ واریانتِ زمینِ روشن حذف شد: هر دو ردیفِ کنش داخلِ بندهای
    تیره‌اند. قاعده‌ی بی‌مصرف فردا بی‌صدا می‌پوسد. */
+
+/* ═══════════════ نوارِ حرکتی ═══════════════ */
+/* ⚠️ تنها حرکتِ *پیوسته*ی صفحه. بقیه‌ی حرکت‌ها یک‌بار اجرا می‌شوند
+   و رد می‌شوند؛ این یکی همیشه هست، پس صفحه در نگاهِ اول «زنده»
+   دیده می‌شود نه ساکن. فقط `transform` — روی لایه‌ی کامپوزیت. */
+.tpx-marquee {
+  /* ⚠️ فاصله‌ی واحد برای هر دو تراز — پایین در محاسبه‌ی حلقه لازم است */
+  --gap: clamp(28px, 4vw, 56px);
+  position: relative;
+  overflow: hidden;
+  padding-block: clamp(14px, 2vw, 22px);
+  border-block: 1px solid rgb(var(--c-gold) / .2);
+  background: rgb(255 255 255 / .02);
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+}
+/* ⚠️ لایه‌ی میانی فقط برای این است که GSAP جایی برای نوشتنِ
+   `skewX` داشته باشد که حلقه‌ی CSS رویش نباشد. */
+.tpx-marquee-skew { will-change: transform; }
+.tpx-marquee ul {
+  display: flex; align-items: center; gap: var(--gap);
+  list-style: none; margin: 0; padding: 0;
+  inline-size: max-content;
+  animation: tpxRun var(--dur, 26s) linear infinite;
+}
+.tpx-marquee li {
+  display: flex; align-items: center; gap: var(--gap);
+  font-size: clamp(1rem, 1.6vw, 1.375rem);
+  font-weight: 700; white-space: nowrap;
+  color: rgb(242 239 231 / .82);
+}
+/* نشانِ لوز بینِ عنوان‌ها — همان علامتِ کنارِ ریلِ میز */
+.tpx-marquee li::after {
+  content: ''; inline-size: 6px; block-size: 6px; rotate: 45deg;
+  background: rgb(var(--c-gold) / .8); flex: none;
+}
+/* ⚠️ نه دقیقاً ۵۰٪. دو نسخه‌ی کنارِ هم ۲n−۱ فاصله دارند، نه ۲n —
+   پس نصفِ عرضِ کل، به‌اندازه‌ی نصفِ یک فاصله کمتر از دوره‌ی واقعیِ
+   تکرار است و هر دور ~۱۴ تا ۲۸ پیکسل پرش دیده می‌شد. */
+@keyframes tpxRun { to { transform: translateX(calc(50% + var(--gap) / 2)); } }
+@media (prefers-reduced-motion: reduce) { .tpx-marquee ul { animation: none; } }
 
 /* ═══════════════ بخشِ روشن ═══════════════ */
 .tpx-light { background: var(--paper); color: var(--ink); }
