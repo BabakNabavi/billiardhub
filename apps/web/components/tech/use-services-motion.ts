@@ -30,7 +30,7 @@ import { SplitText } from 'gsap/SplitText'
 import { CustomEase } from 'gsap/CustomEase'
 import { useEffect, useRef } from 'react'
 import type { RefObject } from 'react'
-import { CUE_STATIONS, CUE_VIEW_W, CUE_VIEW_H, camBox } from './CueObject'
+import { CUE_STATIONS } from './cue-stations'
 
 let registered = false
 function register() {
@@ -129,40 +129,25 @@ export function useServicesMotion(
     const mm = gsap.matchMedia()
     mm.add('(min-width: 1000px)', () => {
       const section = el.querySelector<HTMLElement>('[data-anatomy]')
-      const svg = el.querySelector<SVGSVGElement>('[data-cam]')
-      if (!section || !svg) return
+      const frame = el.querySelector<HTMLElement>('[data-cam]')
+      if (!section || !frame) return
 
-      const box = { v: `0 0 ${CUE_VIEW_W} ${CUE_VIEW_H}` }
-      const setBox = () => svg.setAttribute('viewBox', box.v)
+      /* ⚠️ به‌جای تویینِ `viewBox`ِ یک SVG، پنج رندرِ واقعی روی هم
+         محو/ظاهر می‌شوند. `opacity` روی لایه‌ی کامپوزیت است؛ تویینِ
+         `viewBox` هر فریم کلِ برداری را دوباره رَستر می‌کرد. */
+      const shots = Array.from(frame.querySelectorAll<HTMLImageElement>('img'))
+      if (shots.length !== CUE_STATIONS.length) return
 
-      /* ⚠️ پیشرفتِ اسکرول **خطی نیست نسبت به ایستگاه‌ها**: بینِ هر
-         دو حرکت یک مکث هست، پس `floor(progress × ۵)` نامِ ایستگاه را
-         از دوربین جدا می‌کرد — در ۰٫۶۰۵ برچسب «فرول» می‌شد در حالی
-         که قاب هنوز روی شفت بود. این آرایه نقطه‌ی *رسیدنِ* واقعیِ هر
-         ایستگاه را از خودِ تایم‌لاین می‌گیرد. */
       const marks: number[] = []
-
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: section,
-          /* ⚠️ نه `top top`: ناوبرِ ثابتِ ۷۲ پیکسلی بالای صفحه است و
-             با پینِ چسبیده به لبه، هفتاد و دو پیکسلِ اولِ صحنه در کلِ
-             ۳۹۰vh زیرِ نوارِ مات می‌ماند. */
+          /* ⚠️ نه `top top`: ناوبرِ ثابتِ ۷۲ پیکسلی بالای صفحه است. */
           start: 'top 72px',
           end: () => `+=${CUE_STATIONS.length * 78}%`,
           pin: true,
           scrub: 0.8,
-          /* ⚠️ `invalidateOnRefresh`: طولِ end با درصدِ ارتفاعِ ویوپورت
-             حساب می‌شود و بدونِ این، بعد از چرخشِ صفحه یا تغییرِ
-             اندازه با عددِ کهنه کار می‌کند. */
           invalidateOnRefresh: true,
-          /* ⚠️ بدونِ این، یک `refresh` در میانه‌ی پین مقدارهای شروعِ
-             تویین را از `box.v`ِ *همان لحظه* دوباره ضبط می‌کند و کلِ
-             مسیرِ دوربین تا بارگذاریِ بعدی خراب می‌ماند. */
-          onRefreshInit: () => {
-            box.v = `0 0 ${CUE_VIEW_W} ${CUE_VIEW_H}`
-            setBox()
-          },
           onUpdate: self => {
             let i = 0
             for (let k = 0; k < marks.length; k++) {
@@ -176,32 +161,25 @@ export function useServicesMotion(
         },
       })
 
-      /* از نمای کامل به ایستگاهِ اول، بعد ایستگاه‌به‌ایستگاه */
+      gsap.set(shots, { opacity: 0 })
+      gsap.set(shots[0]!, { opacity: 1 })
+
       const arrive: number[] = []
-      CUE_STATIONS.forEach((st, i) => {
-        tl.to(box, {
-          v: camBox(st.cx, st.cw),
-          duration: 1,
-          ease: i === 0 ? 'power2.inOut' : 'power1.inOut',
-          onUpdate: setBox,
-        })
-        /* لحظه‌ای که دوربین *رسیده* — نه لحظه‌ای که راه افتاده */
+      shots.forEach((img, i) => {
+        if (i > 0) {
+          tl.to(shots[i - 1]!, { opacity: 0, duration: 1, ease: 'power1.inOut' }, '<')
+            .to(img, { opacity: 1, duration: 1, ease: 'power1.inOut' }, '<')
+        } else {
+          tl.to(img, { opacity: 1, duration: 1 })
+        }
         arrive.push(tl.duration())
-        /* مکثِ کوتاه روی هر ایستگاه تا متن خوانده شود.
-           ⚠️ مکث روی یک شیءِ خالی است، نه `{ v: box.v }` — آن مقدار
-           هنگامِ *ساختِ* تایم‌لاین خوانده می‌شود (یعنی نمای کامل)، پس
-           به‌جای ایستادن، دوربین هر بار به عقب پرواز می‌کرد. */
-        if (i < CUE_STATIONS.length - 1) tl.to({}, { duration: 0.35 })
+        if (i < shots.length - 1) tl.to({}, { duration: 0.35 })
       })
 
-      /* ⚠️ آستانه در *میانه‌ی* هر حرکت است، نه لحظه‌ی رسیدن: با
-         آستانه‌ی رسیدن، نام تا پایانِ سفر روی ایستگاهِ قبلی می‌ماند و
-         وقتی دوربین عملاً روی جوینت است هنوز «بات» نوشته. نیم‌واحد
-         عقب‌تر یعنی برچسب همان‌جا عوض می‌شود که چشم هم قانع شده. */
       const total = tl.duration()
       arrive.forEach(t => marks.push(Math.max(0, (t - 0.5) / total)))
 
-      return () => { svg.setAttribute('viewBox', `0 0 ${CUE_VIEW_W} ${CUE_VIEW_H}`) }
+      return () => { gsap.set(shots, { clearProps: 'opacity' }) }
     })
 
     /* موبایل: بدونِ دوربین، ایستگاهِ اول ثابت می‌ماند */

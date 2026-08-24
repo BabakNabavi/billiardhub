@@ -23,16 +23,23 @@
   /* ── جوهر ── */
   --ink: #16171A;
   --ink-2: #4A4A46;
-  --ink-3: #7C7A72;
-  --on-dark: #F2EFE8;
-  --on-dark-2: #A9A69D;
-  --on-dark-3: #6E6C66;
+  /* ⚠️ ۳٫۸۱:۱ بود؛ زیرِ AA، و دقیقاً روی ریزنویسِ ۱۲ پیکسلی. */
+  --ink-3: #63615A;
+  /* نامِ توکن‌ها عوض نشد (ارجاعِ زیاد)، فقط مقدارشان */
+  --on-dark: #16171A;
+  --on-dark-2: #4A4A46;
+  --on-dark-3: #63615A;
 
   /* ── لهجه ── */
+  /* ⚠️ شامپاینِ روشن روی زمینِ روشن ۲٫۰۵:۱ است — برای متن، حلقه‌ی
+     فوکوس و خطِ حالتِ فعال کافی نیست (کف ۳:۱ و برای متن ۴٫۵:۱).
+     پس دو نقش جدا شد: `--champagne` فقط سطحِ پرشده‌ی CTA، و
+     `--accent` هرجا که *خوانده* یا *دیده* می‌شود. */
   --champagne: #C7A66A;
   --champagne-lit: #E4CE9C;
+  --accent: #8F6531;
 
-  --edge-dark: rgb(255 255 255 / .1);
+  --edge-dark: #DBD5C8;
   --edge-light: #DBD5C8;
 
   /* ── تایپ ──
@@ -41,8 +48,10 @@
   /* ⚠️ ۹٫۴vw یعنی ۱۳۵ پیکسل در ۱۴۴۰ — تیتر به سه خط می‌رفت، کلِ
      ویوپورت را می‌خورد و شیء و سنجه‌ها زیرِ خطِ تا می‌افتادند.
      بزرگی به‌تنهایی ترکیب‌بندی نیست؛ آنچه می‌سازدش *نسبت* است. */
-  --t-display: clamp(2.5rem, 7vw, 6.25rem);
-  --t-station: clamp(2.5rem, 7vw, 6rem);
+  /* ⚠️ ۱۰۰ و ۹۶ پیکسل بودند. بزرگ‌ترین تیترِ اندازه‌گیری‌شده در
+     مرجع‌ها ۵۳ تا ۵۴ پیکسل است. */
+  --t-display: clamp(2.25rem, 4.6vw, 4.25rem);
+  --t-station: clamp(2rem, 3.8vw, 3.5rem);
   --t-head: clamp(1.75rem, 3.4vw, 3.25rem);
   --t-row: clamp(1.125rem, 2.1vw, 1.875rem);
   --t-body: clamp(.9375rem, .88rem + .28vw, 1.0625rem);
@@ -82,15 +91,17 @@
 }
 
 /* ═══════════════════ زمینِ گرافیت ═══════════════════ */
+/* ⚠️ بندِ «تیره» دیگر تیره نیست. سه سایتِ مرجع از چهار تا زمینه‌ی
+   سفید/نزدیک‌به‌سفید دارند؛ تنها نمونه‌ی مشکی یک استودیوی نمایشِ
+   کار بود، نه صفحه‌ی محصول. این بند حالا فقط یک تُنِ متفاوت است
+   تا مرزِ روایت دیده شود، نه یک صفحه‌ی سیاه. */
 .tsx-dark {
   position: relative;
-  background: var(--graphite);
-  color: var(--on-dark);
-  /* نورِ صحنه: یک منبعِ نرم از بالا، نه گرادیانِ تزئینی */
-  background-image:
-    radial-gradient(ellipse 80% 52% at 50% -10%, rgb(199 166 106 / .13), transparent 62%),
-    radial-gradient(ellipse 46% 40% at 88% 108%, rgb(199 166 106 / .06), transparent 60%);
+  background: var(--ivory-2);
+  color: var(--ink);
 }
+.tsx-dark .tsx-tag,
+.tsx-dark .tsx-tag-l { color: var(--ink-3); }
 
 /* ═══════════════════ ۱ — هیرو ═══════════════════ */
 /* ⚠️ ناوبرِ سایت `position: fixed` و ۷۲ پیکسل است و در این مسیر
@@ -105,7 +116,6 @@
   overflow: hidden;
 }
 .tsx-hero-top { display: flex; justify-content: space-between; align-items: center; gap: 16px; }
-.tsx-hero-top .tsx-tag { color: var(--champagne); }
 
 .tsx-hero-mid { display: grid; align-content: center; gap: clamp(18px, 3vh, 32px); }
 
@@ -145,25 +155,36 @@
 }
 .tsx-hero-title em {
   font-style: normal;
-  color: var(--champagne-lit);
+  color: var(--accent);
 }
 
 /* ── شیء در ترکیب‌بندی ──
    ⚠️ چوب *زیرِ* تیتر رد می‌شود، نه کنارش. «متن چپ، تصویر راست»
    همان بنری است که قرار بود ساخته نشود. */
+/* ⚠️ قابِ *محصور*، نه تمام‌عرض. الگوی مرجع (Lusion) صحنه‌ی سه‌بعدی
+   را داخلِ یک پنلِ گردگوشه می‌گذارد؛ نسخه‌ی تمام‌عرض کلِ ویوپورت را
+   می‌خورد و تیتر را به نوارِ باریکِ بالای صفحه می‌راند.
+   ⚠️ `aspect-ratio` این‌جا نیست: با `max-block-size` می‌جنگد —
+   ارتفاع بریده می‌شود ولی عرض سرِ جایش می‌ماند و نسبت خراب. یک
+   ارتفاعِ صریح، بدونِ نسبت. */
 .tsx-hero-cue {
   position: relative;
-  /* از لبه‌ی صفحه بیرون می‌زند: شیء ادامه دارد، قاب تمامش می‌کند */
-  inline-size: min(124%, 1560px);
-  margin-inline-start: -12%;
-  filter: drop-shadow(0 26px 54px rgb(0 0 0 / .55));
+  inline-size: 100%;
+  block-size: clamp(220px, 42svh, 460px);
+  border-radius: 14px;
+  overflow: hidden;
+  background: var(--ivory);
+  box-shadow: 0 0 0 1px rgb(22 23 26 / .06), 0 20px 44px -28px rgb(22 23 26 / .32);
 }
 /* ⚠️ سقفِ ارتفاع لازم است: در ویوپورتِ کوتاه، نسبتِ ۲۰۰۰:۲۶۰ چوب را
    از پایینِ قاب بیرون می‌انداخت و نوکش بریده می‌شد. */
-.tsx-hero-cue svg {
-  display: block; inline-size: 100%; block-size: auto;
-  max-block-size: 22svh;
-}
+/* ⚠️ قابِ سه‌بعدی **باید ارتفاعِ صریح داشته باشد.** بومِ R3F از
+   والدش ارتفاع می‌گیرد و والدِ بی‌ارتفاع یعنی بومِ ۱۵۰ پیکسلی: صحنه
+   در نوارِ ۱۰:۱ له می‌شد و صفحه‌ی سایه و نورافکن‌ها مثلِ دو نوارِ
+   خاکستری دیده می‌شدند. */
+
+.tsx-hero-cue > [data-cue-hero] { inline-size: 100%; block-size: 100%; }
+.tsx-hero-cue img { inline-size: 100%; block-size: 100%; object-fit: cover; }
 
 .tsx-hero-meta {
   display: flex;
@@ -195,14 +216,16 @@
 
 /* قابِ دوربین */
 .tsx-cam { position: relative; display: grid; align-content: center; }
-.tsx-cam svg {
-  display: block;
-  inline-size: 100%;
-  /* ⚠️ نسبتِ قاب اینجا قفل می‌شود. دوربین فقط `viewBox` را عوض
-     می‌کند و اگر نسبتِ عنصر شناور باشد، هر تغییرِ اندازه‌ی صفحه
-     قاب را می‌پراند. */
-  aspect-ratio: 1000 / 300;
+/* ⚠️ پنج رندرِ واقعی روی هم چیده می‌شوند و با اسکرول محو/ظاهر
+   می‌شوند. `opacity` روی لایه‌ی کامپوزیت است — ارزان‌تر از تویینِ
+   `viewBox` که هر فریم کلِ SVG را دوباره رَستر می‌کرد. */
+.tsx-cam { position: relative; aspect-ratio: 1400 / 900; border-radius: 14px; overflow: hidden; }
+.tsx-cam img {
+  position: absolute; inset: 0;
+  inline-size: 100%; block-size: 100%; object-fit: cover;
+  opacity: 0;
 }
+.tsx-cam img:first-child { opacity: 1; }
 
 /* نامِ ایستگاه */
 .tsx-station { display: grid; gap: 10px; }
@@ -228,7 +251,6 @@
   letter-spacing: -0.03em;
   margin: 0;
 }
-.tsx-station .tsx-tag { color: var(--champagne); }
 
 /* خدماتِ همان قطعه — سطر، نه چیپ */
 .tsx-station-svc { display: grid; gap: 6px; margin: 0; padding: 0; list-style: none; }
@@ -243,7 +265,7 @@
   content: '';
   inline-size: 14px;
   block-size: 1px;
-  background: var(--champagne);
+  background: var(--accent);
   flex: none;
   translate: 0 -.34em;
 }
@@ -258,7 +280,7 @@
   color: var(--on-dark-3);
   transition: color .4s, border-color .4s;
 }
-.tsx-rail-item.on { color: var(--on-dark); border-block-start-color: var(--champagne); }
+.tsx-rail-item.on { color: var(--on-dark); border-block-start-color: var(--accent); }
 
 /* ═══════════════════ ۳ — فهرستِ خدمات ═══════════════════ */
 .tsx-light { background: var(--ivory); color: var(--ink); }
@@ -309,7 +331,7 @@
   text-align: start;
   cursor: pointer;
 }
-.tsx-item-btn:focus-visible { outline: 2px solid var(--champagne); outline-offset: 2px; }
+.tsx-item-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .tsx-item-c {
   font-size: var(--t-meta);
   color: var(--ink-3);
@@ -317,8 +339,8 @@
   transition: color .35s;
 }
 /* حالتِ انتخاب‌شده — پایدار، نه فقط hover */
-.tsx-item-btn.on .tsx-item-t { color: var(--champagne); }
-.tsx-item-btn.on .tsx-item-n { color: var(--champagne); }
+.tsx-item-btn.on .tsx-item-t { color: var(--accent); }
+.tsx-item-btn.on .tsx-item-n { color: var(--accent); }
 .tsx-item:has(.tsx-item-btn.on)::after { inline-size: 100%; }
 .tsx-item-n {
   font-family: ui-monospace, "SFMono-Regular", Menlo, monospace;
@@ -353,13 +375,13 @@
   inset-inline-start: 0;
   block-size: 1px;
   inline-size: 0;
-  background: var(--champagne);
+  background: var(--accent);
   transition: inline-size .55s cubic-bezier(.22,1,.36,1);
 }
 @media (hover: hover) {
   .tsx-item:hover::after, .tsx-item:focus-within::after { inline-size: 100%; }
   .tsx-item:hover .tsx-item-t, .tsx-item:focus-within .tsx-item-t { translate: -8px 0; }
-  .tsx-item:hover .tsx-item-n, .tsx-item:focus-within .tsx-item-n { color: var(--champagne); }
+  .tsx-item:hover .tsx-item-n, .tsx-item:focus-within .tsx-item-n { color: var(--accent); }
   .tsx-item:hover .tsx-item-c { color: var(--ink-2); }
 }
 
@@ -425,17 +447,17 @@
   position: absolute;
   inset-block-end: -1px; inset-inline-start: 0;
   block-size: 1px; inline-size: 0;
-  background: var(--champagne);
+  background: var(--accent);
   transition: inline-size .55s cubic-bezier(.22,1,.36,1);
 }
 @media (hover: hover) {
   .tsx-person:hover::after { inline-size: 100%; }
   .tsx-person:hover .tsx-person-name { translate: -8px 0; }
   .tsx-person:hover .tsx-person-go {
-    background: var(--champagne); color: #221a08; border-color: var(--champagne);
+    background: var(--accent); color: #221a08; border-color: var(--accent);
   }
 }
-.tsx-person:focus-visible { outline: 2px solid var(--champagne); outline-offset: 4px; }
+.tsx-person:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
 
 /* حالتِ خالی */
 .tsx-empty {
@@ -457,7 +479,7 @@
   margin: 0 0 clamp(20px, 3vh, 34px);
   max-inline-size: 20ch;
 }
-.tsx-cta-h em { font-style: normal; color: var(--champagne-lit); }
+.tsx-cta-h em { font-style: normal; color: var(--accent); }
 
 .tsx-btn {
   display: inline-flex;
@@ -476,10 +498,10 @@
   background: linear-gradient(180deg, var(--champagne-lit), var(--champagne));
   color: #241B09;
 }
-.tsx-btn.ghost { border-color: var(--edge-dark); color: var(--on-dark); }
+.tsx-btn.ghost { border-color: var(--edge-light); color: var(--ink); }
 .tsx-btn:hover { transform: translateY(-2px); }
-.tsx-btn.ghost:hover { border-color: var(--champagne); color: var(--champagne-lit); }
-.tsx-btn:focus-visible { outline: 2px solid var(--champagne); outline-offset: 3px; }
+.tsx-btn.ghost:hover { border-color: var(--accent); color: var(--accent); }
+.tsx-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
 
 /* ═══════════════════ موبایل ═══════════════════
    ⚠️ موبایل نسخه‌ی جمع‌شده‌ی دسکتاپ نیست. بخشِ آناتومی آن‌جا
@@ -492,9 +514,9 @@
   .tsx-anatomy-stage { min-block-size: 0; display: block; }
   .tsx-stations-m { display: grid; gap: clamp(28px, 5vh, 48px); }
   .tsx-station-m { display: grid; gap: 10px; }
-  .tsx-station-m svg {
-    display: block; inline-size: 100%; aspect-ratio: 1000 / 300;
-    border-block: 1px solid var(--edge-dark);
+  .tsx-station-m img {
+    display: block; inline-size: 100%; block-size: auto;
+    border-radius: 12px;
   }
   .tsx-station-m h3 {
     font-size: clamp(1.75rem, 8vw, 2.5rem);
@@ -522,7 +544,7 @@ html:has(.tsx) { scroll-behavior: auto; }
   padding: 10px 16px;
   font-size: .875rem;
 }
-.tsx-btn.ghost-light:hover { border-color: var(--champagne); color: var(--ink); }
+.tsx-btn.ghost-light:hover { border-color: var(--accent); color: var(--ink); }
 
 /* ── شیتِ فیلتر ── */
 .tsx-sheet {
@@ -547,7 +569,7 @@ html:has(.tsx) { scroll-behavior: auto; }
   border: 1px solid var(--edge-light); background: transparent;
   cursor: pointer; display: grid; place-items: center; color: var(--ink-2);
 }
-.tsx-sheet-x:focus-visible { outline: 2px solid var(--champagne); outline-offset: 2px; }
+.tsx-sheet-x:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
 /* ── اسکلتِ بارگذاری ──
    ⚠️ ارتفاع دقیقاً هم‌اندازه‌ی سطرِ واقعی است تا رسیدنِ داده صفحه
@@ -577,6 +599,18 @@ html:has(.tsx) { scroll-behavior: auto; }
   color: var(--ink-3);
 }
 .tsx-clear:hover { color: var(--ink); }
-.tsx-clear:focus-visible { outline: 2px solid var(--champagne); outline-offset: 2px; }
+.tsx-clear:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
-.tsx-tag-gold { color: var(--champagne); }
+/* ⚠️ ویژگیِ ۰,۱,۰ زیرِ `.tsx-dark .tsx-tag-l` (۰,۲,۰) می‌رفت و
+   بی‌اثر بود؛ برچسبِ ایستگاه‌های موبایل خاکستری می‌ماند. */
+.tsx-dark .tsx-tag-gold { color: var(--accent); }
+
+/* ⚠️ پیش از این استایلِ اینلاین بود؛ قاعده‌ی پروژه مقدارِ ثابتِ
+   اینلاین را ممنوع کرده. */
+.tsx-tag-muted { color: var(--ink-3); }
+
+/* ── قابِ سه‌بعدی ──
+   تصویرِ ازپیش‌رندرشده همیشه هست؛ بومِ زنده روی آن می‌نشیند تا در
+   فاصله‌ی بارگذاریِ three.js قابِ خالی دیده نشود. */
+[data-cue-hero] { position: relative; }
+[data-cue-hero] .cue-live { position: absolute; inset: 0; z-index: 1; }

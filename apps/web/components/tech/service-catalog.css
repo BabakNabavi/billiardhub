@@ -23,9 +23,10 @@
   align-items: center;
 }
 @media (min-width: 900px) {
-  .tsc-disc { grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); }
+  /* ⚠️ ستونِ دومِ این گرید برای نقشه‌ی SVG بود که حذف شد؛ با یک
+     فرزند، هر دسته نیمِ ردیف را می‌گرفت و نیمِ دیگر خالی می‌ماند. */
   /* دسته‌ی دوم آینه می‌شود تا صفحه ریتمِ زیگ‌زاگ بگیرد */
-  .tsc-disc:nth-child(even) > .tsc-stage { order: 2; }
+
 }
 
 /* ── صحنه‌ی نقشه ── */

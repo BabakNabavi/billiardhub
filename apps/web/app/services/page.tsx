@@ -30,8 +30,9 @@ import { TECHNICIANS, faDigits, type Technician } from '../../lib/technicians-da
 import { listApprovedTechnicians, profileToTechnician, type TechnicianProfile } from '../../lib/technician-store'
 import { fetchProfiles } from '../../lib/profiles/client'
 import VerifiedBadge from '../../components/VerifiedBadge'
-import { CueObject, CUE_STATIONS, camBox } from '@/components/tech/CueObject'
+import { CUE_STATIONS } from '@/components/tech/cue-stations'
 import { useServicesMotion } from '@/components/tech/use-services-motion'
+import { CueHero } from '@/components/tech/cue3d/CueHero'
 import './services-stage.css'
 
 /* فهرستِ فیلتر از کاتالوگِ واحد می‌آید، نه آرایه‌ی تختِ قدیمی */
@@ -170,7 +171,7 @@ export default function TechnicalServicesPage() {
         <header className="tsx-hero tsx-wrap">
           <div className="tsx-hero-top">
             <span className="tsx-tag-l" data-hero-eyebrow>Billiard Hub · Technical Division</span>
-            <span className="tsx-tag" style={{ color: 'var(--on-dark-3)' }}>
+            <span className="tsx-tag tsx-tag-muted">
               {faDigits(String(ALL_TECH_SERVICES.length))} خدمت
             </span>
           </div>
@@ -190,8 +191,14 @@ export default function TechnicalServicesPage() {
             {/* ⚠️ شیء زیرِ تیتر رد می‌شود، نه در ستونِ کناری. «متن
                 این‌طرف، تصویر آن‌طرف» همان بنری است که قرار نبود
                 ساخته شود. */}
+            {/* ⚠️ رندرِ سه‌بعدیِ واقعی جایگزینِ SVGِ دست‌کشیده شد.
+                دسکتاپ صحنه‌ی زنده، بقیه همان صحنه به‌صورت تصویر. */}
             <div className="tsx-hero-cue" data-hero-cue>
-              <CueObject />
+              <CueHero
+                view={{ target: 7.55, dist: 1.15, spin: 0.5, tilt: -0.2 }}
+                still="/images/cue/hero.webp"
+                alt="نمای نزدیکِ جوینتِ چوبِ بیلیارد"
+              />
             </div>
           </div>
 
@@ -237,8 +244,17 @@ export default function TechnicalServicesPage() {
               </ul>
             </div>
 
-            <div className="tsx-cam">
-              <CueObject camera />
+            {/* پنج رندرِ واقعی، روی هم؛ اسکرول بینشان محو می‌کند.
+                ⚠️ `loading="lazy"` لازم است: `.tsx-cam` زیرِ ۱۰۰۰ پیکسل
+                `display: none` است ولی مخفی‌بودن جلوی دانلود را
+                نمی‌گیرد — بدونِ این، هر بازدیدِ موبایل ~۲۰۰ کیلوبایت
+                WebPِ بی‌مصرف می‌گرفت. */}
+            <div className="tsx-cam" data-cam>
+              {CUE_STATIONS.map(st => (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img key={st.id} src={`/images/cue/${st.id}.webp`} alt="" aria-hidden
+                  width={1200} height={760} loading="lazy" decoding="async" />
+              ))}
             </div>
             </div>
 
@@ -256,7 +272,9 @@ export default function TechnicalServicesPage() {
                 <article className="tsx-station-m" key={st.id} data-reveal>
                   <span className="tsx-tag-l tsx-tag-gold">{ord(i + 1)} · {st.latin}</span>
                   <h3>{st.label}</h3>
-                  <CueObject viewBox={camBox(st.cx, st.cw)} grain={false} alt={null} />
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={`/images/cue/${st.id}.webp`} alt="" aria-hidden
+                    width={1200} height={760} loading="lazy" decoding="async" />
                   <ul className="tsx-station-svc">
                     {st.serviceIds.map(id => {
                       const s = BY_ID.get(id)

@@ -54,17 +54,33 @@
 
 .tpx {
   /* ── زمینِ کارگاه ── */
-  --void: #0A0F0C;
-  --stage: #0E1512;
-  --stage-2: #131C17;
-  --rail: #1D2B23;
+  /* ⚠️ زمین از تیره به روشن رفت. تصمیم از اندازه‌گیریِ خودِ مرجع‌ها
+     آمد نه سلیقه: زمینه‌ی Lusion #FFFFFF، تینیج‌اینجینیرینگ #F9FAF9،
+     لایکا سفید. تنها نمونه‌ی تیره یک استودیوی نمایشِ کار بود، نه
+     صفحه‌ی محصول. */
+  --void: #EDEBE4;
+  --stage: #F3F1EC;
+  --stage-2: #EFEDE6;
+  --rail: #DCD6C9;
 
-  --brass: #C9A96B;
-  --brass-lit: #E7D2A2;
+  /* برنجِ روشن روی کاغذ ~۱٫۴:۱ است — روی زمینِ روشن تُنِ تیره لازم */
+  /* ⚠️ ‎#8F6531 روی `--stage` ‏۴٫۵۷:۱ است ولی روی `--stage-2` فقط
+     ۴٫۱۳:۱، و نیمه‌ی پایینِ صحنه و کلِ بندِ پایانی همان تُن است. */
+  --brass: #7A5427;
+  --brass-lit: #7A5427;
+  /* ⚠️ رنگِ کنش از رنگِ *متن* جدا است. وقتی `--brass` برای خوانایی
+     تیره شد، دکمه‌ی اصلی هم که از همان توکن گرادیان می‌ساخت قهوه‌ایِ
+     گِلی شد. سطحِ طلایی و متنِ طلایی دو کارِ متفاوت‌اند. */
+  --cta: #C9A96B;
+  --cta-lit: #E7D2A2;
+  --cta-ink: #2A1D08;
 
-  --on-dark: #F2EFE7;
-  --on-dark-2: rgb(242 239 231 / .76);
-  --on-dark-3: rgb(242 239 231 / .58);
+  /* نامِ توکن‌ها عمداً عوض نشد: ده‌ها ارجاع در ادامه دارند و تغییرِ
+     نام یعنی ریسکِ جاماندنِ یکی. فقط *مقدار* برگشت. */
+  --on-dark: #16171A;
+  --on-dark-2: rgb(22 23 26 / .74);
+  /* ۳٫۵۰:۱ بود؛ روی ریزنویسِ ۰٫۷۸rem زیرِ AA. */
+  --on-dark-3: rgb(22 23 26 / .62);
 
   --paper: #F7F7F5;
   --ink: #1C1B17;
@@ -78,7 +94,9 @@
      معیارِ ما هستند نام را در ۱۰ تا ۱۵ درصدِ عرضِ صفحه می‌گذارند —
      یعنی چیزی که *اول* دیده می‌شود، نه چیزی که در گوشه‌ای نشسته.
      ۱۱vw در ۱۴۴۰ می‌شود ~۱۵۸ پیکسل. */
-  --t-display: clamp(3.25rem, 11vw, 10rem);
+  /* ⚠️ ۱۵۸ پیکسل بود. بزرگ‌ترین تیترِ اندازه‌گیری‌شده در مرجع‌ها ۵۳
+     تا ۵۴ پیکسل است. «هرچه بزرگ‌تر مدرن‌تر» فرضِ غلطی بود. */
+  --t-display: clamp(2.25rem, 4.6vw, 4.25rem);
   --t-lede: clamp(1.0625rem, .95rem + .6vw, 1.375rem);
   --t-title: clamp(1.5rem, 1.1rem + 1.8vw, 2.75rem);
   --t-body: .9375rem;
@@ -96,7 +114,8 @@
 
 /* ⚠️ سفید روی تینتِ طلایی فقط روی زمینِ تیره خواناست؛ در بندِ
    روشن به ۱٫۴:۱ می‌رسید یعنی متنِ انتخاب‌شده ناخوانا. */
-.tpx-stage ::selection { background: rgb(var(--c-gold) / .34); color: #fff; }
+/* ⚠️ قاعده‌ی سفیدِ صحنه حذف شد: کامنتِ بالا خودش می‌گفت فقط روی
+   زمینِ تیره کار می‌کند، و صحنه دیگر تیره نیست (۱٫۴۲:۱). */
 .tpx-light ::selection { background: rgb(var(--c-gold) / .3); color: var(--ink); }
 .tpx { caret-color: var(--brass); accent-color: var(--brass); }
 .tpx :focus-visible { outline: 2px solid var(--brass-lit); outline-offset: 3px; }
@@ -122,26 +141,23 @@ html.lenis-on { scroll-behavior: auto !important; }
   position: relative;
   isolation: isolate;
   background:
-    radial-gradient(122% 80% at 50% -14%, rgb(233 214 168 / .17) 0%, transparent 62%),
-    radial-gradient(62% 48% at 80% 6%, rgb(23 57 43 / .55) 0%, transparent 70%),
-    linear-gradient(180deg, var(--void) 0%, var(--stage) 46%, var(--stage-2) 100%);
+    radial-gradient(120% 76% at 50% -12%, rgb(255 255 255 / .92) 0%, transparent 58%),
+    linear-gradient(180deg, var(--stage) 0%, var(--stage) 58%, var(--stage-2) 100%);
 }
 /* بافتِ ریزِ ماهوت — هم حسِ پارچه، هم ضدِ باندینگِ گرادیان */
 .tpx-stage::before {
   content: '';
   position: absolute; inset: 0; z-index: 0;
-  background-image:
-    /* ⚠️ دوره‌ی ۳ پیکسلی روی GPUِ موبایل گران است و در DPRِ
-       غیرصحیح موج می‌اندازد؛ ۶ پیکسل همان حس را می‌دهد. */
-    repeating-linear-gradient(45deg, rgb(255 255 255 / .016) 0 1px, transparent 1px 6px),
-    repeating-linear-gradient(-45deg, rgb(0 0 0 / .05) 0 1px, transparent 1px 6px);
+  /* ⚠️ بافتِ ضربدریِ ماهوت برداشته شد: روی زمینِ تیره «پارچه» دیده
+     می‌شد، روی زمینِ روشن فقط نویزِ کثیف. */
+  background-image: none;
   pointer-events: none;
 }
 /* خطِ ریلِ برنجی که صحنه را می‌بندد */
 .tpx-stage::after {
   content: '';
   position: absolute; inset-inline: 0; inset-block-end: 0; block-size: 1px; z-index: 2;
-  background: linear-gradient(90deg, transparent, rgb(var(--c-gold) / .44) 22%, rgb(var(--c-gold) / .44) 78%, transparent);
+  background: var(--line);
 }
 .tpx-stage > * { position: relative; z-index: 1; }
 
@@ -153,7 +169,7 @@ html.lenis-on { scroll-behavior: auto !important; }
 }
 /* ⚠️ U+2039 «‹» آینه‌پذیر است و در بندِ RTL برعکس رندر می‌شود.
    U+203A بعد از آینه‌شدن، شکلِ درست را می‌دهد. */
-.tpx-crumb li + li::before { content: "\203A"; padding-inline-end: 6px; color: rgb(242 239 231 / .48); }
+.tpx-crumb li + li::before { content: "\203A"; padding-inline-end: 6px; color: var(--on-dark-3); }
 .tpx-crumb a { color: inherit; text-decoration: none; padding-block: 14px; padding-inline: 4px; }
 .tpx-crumb a:hover { color: var(--on-dark); text-decoration: underline; text-underline-offset: 3px; }
 
@@ -203,14 +219,14 @@ html.lenis-on { scroll-behavior: auto !important; }
   /* ⚠️ `text-wrap: balance` این‌جا نیست: SplitText خطوط را یک‌بار
      اندازه می‌گیرد و منجمد می‌کند، پس بعد از تقسیم بی‌اثر است و
      پیش از آن هم اندازه‌گیری را جابه‌جا می‌کند. */
-  /* متن انگار زیرِ همان چراغ نشسته */
-  text-shadow: 0 1px 0 rgb(255 255 255 / .06), 0 18px 44px rgb(0 0 0 / .5);
+  /* ⚠️ سایه‌ی متن حذف شد: روی زمینِ روشن به لکه‌ی خاکستری تبدیل
+     می‌شود و لبه‌ی حروفِ فارسی را گِل می‌کند. */
 }
 .tpx-name .vb { vertical-align: 12%; margin-inline-start: 8px; }
 
 .tpx-lede {
   font-size: var(--t-lede); font-weight: 600; line-height: 1.7;
-  color: var(--brass-lit); margin: 0; max-inline-size: 34ch;
+  color: var(--brass); margin: 0; max-inline-size: 34ch;
 }
 .tpx-intro {
   font-size: var(--t-body); line-height: 2.15; color: var(--on-dark-2);
@@ -222,7 +238,7 @@ html.lenis-on { scroll-behavior: auto !important; }
 .tpx-stats {
   display: flex; flex-wrap: wrap;
   margin: 0; padding: 0;
-  border-block: 1px solid rgb(var(--c-gold) / .2);
+  border-block: 1px solid var(--line);
 }
 /* ⚠️ سه سنجه در گوشه‌ی خطِ تمام‌عرض جمع می‌شدند و بقیه‌ی خط
    بی‌دلیل کشیده بود. پخش‌شدن روی کلِ خط، خط را عمدی می‌کند. */
@@ -237,7 +253,7 @@ html.lenis-on { scroll-behavior: auto !important; }
   padding-block: 14px;
   padding-inline: 0 clamp(16px, 2.4vw, 26px);
   margin-inline-end: clamp(16px, 2.4vw, 26px);
-  border-inline-end: 1px solid rgb(var(--c-gold) / .2);
+  border-inline-end: 1px solid var(--line);
 }
 .tpx-stats > div:last-child { border-inline-end: none; margin-inline-end: 0; padding-inline-end: 0; }
 .tpx-stats dt { font-size: var(--t-meta); color: var(--on-dark-3); margin: 0 0 4px; }
@@ -252,15 +268,15 @@ html.lenis-on { scroll-behavior: auto !important; }
 .tpx-plate { position: relative; perspective: 1400px; margin: 0; }
 .tpx-plate-in {
   position: relative;
-  border-radius: 22px;
-  padding: clamp(18px, 2.6vw, 34px);
-  background:
-    linear-gradient(160deg, rgb(255 255 255 / .075), rgb(255 255 255 / .014) 42%, transparent 70%),
-    linear-gradient(180deg, var(--rail), #0F1713);
+  /* ⚠️ ۲۲ پیکسل بود. شعاعِ اندازه‌گیری‌شده در مرجع‌ها ۳ تا ۱۶ است.
+     گوشه‌ی درشت همان چیزی است که رابط را «قالبِ آماده» نشان می‌دهد. */
+  border-radius: 14px;
+  overflow: hidden;
+  padding: 0;
+  background: var(--stage);
   box-shadow:
-    0 1px 0 rgb(255 255 255 / .1) inset,
-    0 -1px 0 rgb(0 0 0 / .5) inset,
-    0 34px 70px -28px rgb(0 0 0 / .82);
+    0 0 0 1px rgb(22 23 26 / .07),
+    0 18px 40px -24px rgb(22 23 26 / .3);
   transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
   transform-style: preserve-3d;
   transition: transform .5s var(--ease);
@@ -270,11 +286,13 @@ html.lenis-on { scroll-behavior: auto !important; }
 @media (hover: hover) and (pointer: fine) {
   .tpx-plate-in { will-change: transform; }
 }
-.tpx-plate-in::after {
-  content: '';
-  position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
-  border: 1px solid rgb(var(--c-gold) / .26);
-}
+/* ⚠️ حاشیه‌ی طلاییِ دورِ قاب برداشته شد: روی زمینِ روشن قاب را
+   «کارتِ تزئینی» می‌کرد. خودِ سایه مرز را می‌سازد. */
+/* ⚠️ همان تله‌ی ارتفاع: بومِ R3F از والد ارتفاع می‌گیرد و بدونِ
+   نسبتِ صریح به ۱۵۰ پیکسل می‌افتد. */
+.tpx-plate-in { aspect-ratio: 1400 / 820; }
+.tpx-plate-in > [data-cue-hero] { inline-size: 100%; block-size: 100%; }
+.tpx-plate-in img { inline-size: 100%; block-size: 100%; object-fit: cover; display: block; }
 .tpx-plate figcaption {
   margin-block-start: 14px;
   font-size: var(--t-meta); line-height: 1.9; color: var(--on-dark-3);
@@ -293,18 +311,20 @@ html.lenis-on { scroll-behavior: auto !important; }
 }
 .tpx-btn svg { flex: none; }
 .tpx-btn.solid {
-  background: linear-gradient(180deg, var(--brass-lit), var(--brass));
-  color: #22180A;
-  box-shadow: 0 1px 0 rgb(255 255 255 / .5) inset, 0 12px 26px -12px rgb(201 169 107 / .8);
+  background: linear-gradient(180deg, var(--cta-lit), var(--cta));
+  color: var(--cta-ink);
+  box-shadow: 0 1px 0 rgb(255 255 255 / .55) inset, 0 12px 26px -14px rgb(143 101 49 / .55);
 }
+/* ⚠️ حاشیه‌ی سفیدِ ۴۸٪ روی زمینِ روشن عملاً نامرئی بود — دکمه‌ی
+   ثانویه هیچ مرزی نداشت. */
 .tpx-btn.ghost {
-  background: rgb(255 255 255 / .05);
-  border-color: rgb(242 239 231 / .48);
-  color: var(--on-dark);
+  background: transparent;
+  border-color: var(--line);
+  color: var(--ink);
 }
 @media (hover: hover) {
-  .tpx-btn.solid:hover { transform: translateY(-2px); box-shadow: 0 1px 0 rgb(255 255 255 / .6) inset, 0 18px 34px -12px rgb(201 169 107 / .9); }
-  .tpx-btn.ghost:hover { transform: translateY(-2px); border-color: var(--on-dark); background: rgb(255 255 255 / .1); }
+  .tpx-btn.solid:hover { transform: translateY(-2px); box-shadow: 0 1px 0 rgb(255 255 255 / .65) inset, 0 18px 34px -16px rgb(143 101 49 / .7); }
+  .tpx-btn.ghost:hover { transform: translateY(-2px); border-color: var(--brass); color: var(--brass); }
 }
 /* ⚠️ واریانتِ زمینِ روشن حذف شد: هر دو ردیفِ کنش داخلِ بندهای
    تیره‌اند. قاعده‌ی بی‌مصرف فردا بی‌صدا می‌پوسد. */
@@ -319,7 +339,7 @@ html.lenis-on { scroll-behavior: auto !important; }
   position: relative;
   overflow: hidden;
   padding-block: clamp(14px, 2vw, 22px);
-  border-block: 1px solid rgb(var(--c-gold) / .2);
+  border-block: 1px solid var(--line);
   background: rgb(255 255 255 / .02);
   -webkit-mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
   mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
@@ -337,7 +357,7 @@ html.lenis-on { scroll-behavior: auto !important; }
   display: flex; align-items: center; gap: var(--gap);
   font-size: clamp(1rem, 1.6vw, 1.375rem);
   font-weight: 700; white-space: nowrap;
-  color: rgb(242 239 231 / .82);
+  color: var(--on-dark-2);
 }
 /* نشانِ لوز بینِ عنوان‌ها — همان علامتِ کنارِ ریلِ میز */
 .tpx-marquee li::after {
@@ -428,8 +448,11 @@ html.lenis-on { scroll-behavior: auto !important; }
   display: flex; gap: 10px;
   padding: 10px;
   border-radius: 22px;
-  background: rgb(14 21 18 / .78);
-  border: 1px solid rgb(255 255 255 / .14);
+  /* ⚠️ داک شیشه‌ی تیره مانده بود در حالی که دکمه‌ی شبح به جوهرِ
+     تیره رفت: برچسبِ ثانویه روی داک ۱٫۷۶:۱ می‌شد — و این همان
+     کنشِ اصلیِ موبایل است. */
+  background: rgb(247 247 245 / .84);
+  border: 1px solid var(--line);
   box-shadow:
     0 1px 0 rgb(255 255 255 / .22) inset,
     0 -1px 0 rgb(0 0 0 / .3) inset,
@@ -468,3 +491,9 @@ html.lenis-on { scroll-behavior: auto !important; }
 
 /* خطای ذخیره‌ی گالری — رنگ تنها نشانه نیست */
 .tpx-err { font-size: var(--t-meta); line-height: 1.9; color: #C0392B; margin: 12px 0 0; }
+
+/* ── قابِ سه‌بعدی ──
+   تصویرِ ازپیش‌رندرشده همیشه هست؛ بومِ زنده روی آن می‌نشیند تا در
+   فاصله‌ی بارگذاریِ three.js قابِ خالی دیده نشود. */
+[data-cue-hero] { position: relative; }
+[data-cue-hero] .cue-live { position: absolute; inset: 0; z-index: 1; }

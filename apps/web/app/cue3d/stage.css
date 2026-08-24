@@ -1,0 +1,5 @@
+/* قابِ صفحه‌ی کمکیِ رندر — استایلِ ثابت، پس در CSS نه اینلاین. */
+.cue-shot { background: #F3F1EC; block-size: 620px; }
+/* حالتِ عکس‌برداری: تمام‌صفحه و روی همه‌ی لایه‌ها، تا ناوبرِ ثابت
+   داخلِ کادرِ رندر نیفتد. */
+.cue-shot.is-bare { position: fixed; inset: 0; z-index: 9999; block-size: auto; }

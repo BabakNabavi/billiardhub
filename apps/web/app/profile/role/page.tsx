@@ -1,9 +1,9 @@
 ﻿'use client'
 
-import { useState, useEffect, type ElementType } from 'react'
+import { useState, useEffect } from 'react'
 import { notify } from '../../../lib/ui/dialogs'
 import { useRouter } from 'next/navigation'
-import { User, BarChart3, GraduationCap, Scale, Wrench, ShoppingBag, Factory, Store } from 'lucide-react'
+import { User, BarChart3, GraduationCap, Scale, Wrench, ShoppingBag, Factory, Store, type LucideIcon } from 'lucide-react'
 import { useAuthStore } from '../../../store/auth.store'
 import { csrfToken, apiFetch } from '../../../lib/http'
 import PlayerDisciplines, { type PlayerDisciplinesValue } from '../../../components/player/PlayerDisciplines'
@@ -30,7 +30,11 @@ interface RoleMeta {
   value: RoleValue
   label: string
   icon: string          // tabler webfont class (used by doc-upload step + chips)
-  Icon: ElementType     // lucide component (used by the role cards)
+  /* ⚠️ `LucideIcon` نه `ElementType`: بعد از افزودنِ
+     react-three-fiber، فضای‌نامِ سراسریِ JSX با عناصرِ three گسترش
+     می‌یابد و `ElementType`ِ عام آن‌قدر پهن می‌شود که پراپ‌هایش به
+     `never` می‌رسند. تایپِ دقیق هم مشکل را حل می‌کند هم درست‌تر است. */
+  Icon: LucideIcon      // lucide component (used by the role cards)
   color: string
   description: string
   requiresDoc: boolean

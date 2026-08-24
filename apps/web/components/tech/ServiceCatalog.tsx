@@ -12,8 +12,6 @@
 import type { ReactNode } from 'react'
 import type { ResolvedServices } from '@/lib/tech-services'
 import { toFaDigits } from '@/lib/jalali'
-import { PlateFor } from './CraftPlate'
-import { useTilt } from './use-tilt'
 import './craft-plate.css'
 import './service-catalog.css'
 
@@ -24,14 +22,12 @@ function Discipline({ id, title, count, other, children }: {
   other?: boolean
   children: ReactNode
 }) {
-  const tilt = useTilt()
   return (
     <section className={`tsc-disc${other ? ' is-other' : ''}`} aria-labelledby={`tsc-${id}`}>
-      {!other && (
-        <div className="tsc-stage" data-plate ref={tilt.ref}>
-          <PlateFor id={id} />
-        </div>
-      )}
+      {/* ⚠️ نقشه‌ی SVGِ دست‌کشیده برداشته شد. برای چوب رندرِ سه‌بعدیِ
+          واقعی داریم، برای میز نه — و گذاشتنِ یکی از این دو کنارِ
+          دیگری دو زبانِ تصویریِ ناهم‌خانواده می‌ساخت. تا وقتی مدلِ میز
+          هم نباشد، هیچ‌کدام تصویر نمی‌گیرند. */}
       <div className="tsc-body">
         <div className="tsc-disc-head">
           <h3 id={`tsc-${id}`}>{title}</h3>

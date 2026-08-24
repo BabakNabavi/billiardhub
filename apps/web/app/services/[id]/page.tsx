@@ -25,7 +25,7 @@ import { toFaDigits } from '@/lib/jalali'
 import { norm, keepLongest } from '@/lib/text-dedupe'
 import { resolveServices } from '@/lib/tech-services'
 import { ServiceCatalog } from '@/components/tech/ServiceCatalog'
-import { BenchPlate } from '@/components/tech/CraftPlate'
+import { CueHero } from '@/components/tech/cue3d/CueHero'
 import { useTilt } from '@/components/tech/use-tilt'
 import { useStageMotion } from '@/components/tech/use-stage-motion'
 import '@/components/tech/craft-plate.css'
@@ -448,10 +448,21 @@ export default function TechnicianProfilePage() {
                 ارزان می‌کند. این‌جا همان چیزی کشیده می‌شود که او
                 رویش کار می‌کند. */}
             <figure className="tpx-plate" data-plate>
+              {/* ⚠️ نقشه‌ی SVGِ دست‌کشیده جایش را به رندرِ سه‌بعدیِ
+                  واقعی داد. اندازه‌گیریِ هفت سایتِ مرجع نشان داد هیچ‌کدام
+                  قهرمانِ صفحه‌شان تصویرِ برداریِ دست‌ساز نیست: یا عکسِ
+                  واقعی است یا WebGL.
+                  دسکتاپ صحنه‌ی زنده می‌گیرد، موبایل همان صحنه را به‌صورت
+                  تصویرِ ~۵۵ کیلوبایتی — نه ۲۵۶ کیلوبایتِ جاوااسکریپت. */}
               <div className="tpx-plate-in" ref={plateTilt.ref}>
-                <BenchPlate />
+                <CueHero
+                  view={{ target: 7.55, dist: 1.15, spin: 0.5, tilt: -0.2 }}
+                  still="/images/cue/hero.webp"
+                  alt="نمای نزدیکِ جوینتِ چوبِ بیلیارد"
+                />
               </div>
-              <figcaption>نقشه‌ی فنی — میز و چوبِ بیلیارد</figcaption>
+              {/* ⚠️ «میز و چوب» می‌گفت ولی رندر فقط چوب است. */}
+              <figcaption>رندرِ فنی — جوینتِ چوبِ بیلیارد</figcaption>
             </figure>
           </div>
         </header>
