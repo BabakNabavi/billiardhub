@@ -100,7 +100,9 @@ export function useStageMotion(root: RefObject<HTMLElement | null>, key: string)
       .from('.tpx-hero [data-anim="intro"]', { y: 20, opacity: 0, duration: .8 }, 0.36)
       .from('.tpx-hero [data-anim="stat"]', { y: 18, opacity: 0, duration: .7, stagger: .07 }, 0.44)
       .from('.tpx-hero [data-anim="act"]', { y: 16, opacity: 0, duration: .7, stagger: .08 }, 0.56)
-      .from('.tpx-hero [data-plate]', { y: 40, opacity: 0, duration: 1.3 }, 0.1)
+      /* لایه‌ی پس‌زمینه فقط محو می‌شود؛ جابه‌جاییِ y آن را از زیرِ
+         پرده بیرون می‌کشید. */
+      .from('.tpx-hero [data-plate]', { opacity: 0, duration: 1.3 }, 0.1)
 
     /* ── رسمِ نقشه‌ها ──
        ⚠️ DrawSVG به‌جای `stroke-dasharray`ِ دستی: طولِ واقعیِ مسیر را
@@ -197,17 +199,10 @@ export function useStageMotion(root: RefObject<HTMLElement | null>, key: string)
         ScrollTrigger.addEventListener('scrollEnd', () => skew(0))
       }
 
-      /* قابِ نقشه با اسکرول می‌چرخد و بزرگ می‌شود — عمقی که با
-         حرکت ساخته می‌شود، نه با سایه.
-         ⚠️ `transformPerspective` روی خودِ تویین لازم است: `perspective`
-         در CSS روی `.tpx-plate` نشسته و در CSS این خاصیت به *فرزندانِ*
-         عنصر اثر می‌کند نه به تبدیلِ خودِ عنصر — و `[data-plate]`
-         دقیقاً همان `.tpx-plate` است. بدونِ آن `rotateX` فقط یک
-         لهیدگیِ عمودیِ تخت بود، نه عمق. */
-      gsap.fromTo('.tpx-hero [data-plate]',
-        { scale: .94, rotateX: 6, transformPerspective: 1400 },
-        { scale: 1, rotateX: 0, transformPerspective: 1400, ease: 'none',
-          scrollTrigger: { trigger: '.tpx-hero', start: 'top top', end: '+=620', scrub: .7 } })
+      /* ⚠️ تویینِ scale/rotateX حذف شد: `[data-plate]` دیگر یک قابِ
+         کوچک نیست، لایه‌ی پس‌زمینه‌ی تمام‌ویوپورت است و کج‌کردنش کلِ
+         صحنه را زیرِ پرده‌ی ثابت می‌لغزاند. */
+
 
       return () => {
         gsap.ticker.remove(raf)

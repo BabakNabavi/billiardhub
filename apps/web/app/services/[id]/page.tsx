@@ -26,9 +26,7 @@ import { norm, keepLongest } from '@/lib/text-dedupe'
 import { resolveServices } from '@/lib/tech-services'
 import { ServiceCatalog } from '@/components/tech/ServiceCatalog'
 import { CueHero } from '@/components/tech/cue3d/CueHero'
-import { useTilt } from '@/components/tech/use-tilt'
 import { useStageMotion } from '@/components/tech/use-stage-motion'
-import '@/components/tech/craft-plate.css'
 import { useVideoEdit } from '@/components/media/useVideoEdit'
 import { detailTitle, type VideoDetail } from '@/lib/media/video-details'
 import { useEffect, useMemo, useRef, useState } from 'react'
@@ -267,9 +265,7 @@ export default function TechnicianProfilePage() {
      ⚠️ پیش از هر `return`ِ شرطی — وگرنه React #310. */
   const [dock, setDock] = useState(false)
   const heroActsRef = useRef<HTMLDivElement | null>(null)
-  const closeRef = useRef<HTMLDivElement | null>(null)
-  /* کجیِ سه‌بعدیِ قابِ نقشه + ورودِ بخش‌ها هنگامِ رسیدن به دید */
-  const plateTilt = useTilt()
+  const closeRef = useRef<HTMLDivElement | null>(null)
   /* ⚠️ رفرنسِ ریشه برای `gsap.context`: همه‌ی تایم‌لاین‌ها به این
      گره محدود می‌شوند تا `revert` واقعاً همه را بکشد. */
   const stageRef = useRef<HTMLDivElement | null>(null)
@@ -392,6 +388,19 @@ export default function TechnicianProfilePage() {
         </div>
 
         <header className="tpx-hero">
+          {/* ⚠️ رسانه تمام‌قابِ پشتِ سرلوحه است و متن رویش می‌نشیند —
+              همان الگویی که در صفحه‌ی محصولِ اپل و مایکروسافت
+              اندازه‌گیری شد. پیش از این رندر در یک پنلِ گردگوشه‌ی
+              حاشیه‌دار *زیرِ* متن بود. */}
+          <div className="tpx-hero-media" data-plate>
+            <CueHero
+              view={{ target: 7.55, dist: 1.15, spin: 0.5, tilt: -0.2 }}
+              still="/images/cue/hero.webp"
+              alt=""
+              ground="#0B0B0C"
+            />
+          </div>
+
           <div className="tpx-wrap tpx-hero-grid">
             <div className="tpx-id" data-anim="idcol">
               {/* ⚠️ `dir="auto"`: نامِ لاتین یا ترکیبی بعد از تقسیمِ SplitText
@@ -443,27 +452,6 @@ export default function TechnicianProfilePage() {
               </div>
             </div>
 
-            {/* ⚠️ نقشه‌ی فنیِ رسم‌شده، نه عکس. عکسِ کارِ دیگران روی
-                صفحه‌ی این شخص ادعای دروغ است و عکسِ استوک صفحه را
-                ارزان می‌کند. این‌جا همان چیزی کشیده می‌شود که او
-                رویش کار می‌کند. */}
-            <figure className="tpx-plate" data-plate>
-              {/* ⚠️ نقشه‌ی SVGِ دست‌کشیده جایش را به رندرِ سه‌بعدیِ
-                  واقعی داد. اندازه‌گیریِ هفت سایتِ مرجع نشان داد هیچ‌کدام
-                  قهرمانِ صفحه‌شان تصویرِ برداریِ دست‌ساز نیست: یا عکسِ
-                  واقعی است یا WebGL.
-                  دسکتاپ صحنه‌ی زنده می‌گیرد، موبایل همان صحنه را به‌صورت
-                  تصویرِ ~۵۵ کیلوبایتی — نه ۲۵۶ کیلوبایتِ جاوااسکریپت. */}
-              <div className="tpx-plate-in" ref={plateTilt.ref}>
-                <CueHero
-                  view={{ target: 7.55, dist: 1.15, spin: 0.5, tilt: -0.2 }}
-                  still="/images/cue/hero.webp"
-                  alt="نمای نزدیکِ جوینتِ چوبِ بیلیارد"
-                />
-              </div>
-              {/* ⚠️ «میز و چوب» می‌گفت ولی رندر فقط چوب است. */}
-              <figcaption>رندرِ فنی — جوینتِ چوبِ بیلیارد</figcaption>
-            </figure>
           </div>
         </header>
 

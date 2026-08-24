@@ -19,7 +19,7 @@ function Scene() {
   }
   return (
     <div className={q.get('bare') === '1' ? 'cue-shot is-bare' : 'cue-shot'}>
-      <CueScene view={{
+      <CueScene ground={q.get('bg') ?? '#0B0B0C'} view={{
         target: n('target', 7.55), dist: n('dist', 1.15),
         spin: n('spin', 0.5), tilt: n('tilt', -0.2),
       }} />

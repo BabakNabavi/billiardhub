@@ -140,6 +140,10 @@ html.lenis-on { scroll-behavior: auto !important; }
 .tpx-stage {
   position: relative;
   isolation: isolate;
+  /* ⚠️ این کلاس فقط سرلوحه نیست: بندِ پایانیِ صفحه (`.tpx-close`) و
+     نوارِ حرکتی هم داخلش‌اند. با مشکی‌کردنش، تیترِ کنشِ پایانی روی
+     مشکی ۱٫۱۷:۱ شد و نوارِ خدمات ۱٫۱۱:۱ — یعنی هر دو نامرئی.
+     تیرگی فقط مالِ `.tpx-hero` است. */
   background:
     radial-gradient(120% 76% at 50% -12%, rgb(255 255 255 / .92) 0%, transparent 58%),
     linear-gradient(180deg, var(--stage) 0%, var(--stage) 58%, var(--stage-2) 100%);
@@ -165,7 +169,8 @@ html.lenis-on { scroll-behavior: auto !important; }
 .tpx-crumb {
   display: flex; align-items: center; flex-wrap: wrap; gap: 0 6px;
   list-style: none; margin: 0; padding: 12px 0 0;
-  font-size: var(--t-meta); color: var(--on-dark-3);
+  font-size: var(--t-meta);
+  color: var(--on-dark-3);
 }
 /* ⚠️ U+2039 «‹» آینه‌پذیر است و در بندِ RTL برعکس رندر می‌شود.
    U+203A بعد از آینه‌شدن، شکلِ درست را می‌دهد. */
@@ -174,7 +179,52 @@ html.lenis-on { scroll-behavior: auto !important; }
 .tpx-crumb a:hover { color: var(--on-dark); text-decoration: underline; text-underline-offset: 3px; }
 
 /* ═══════════════ سرلوحه ═══════════════ */
-.tpx-hero { padding-block: clamp(8px, 2vw, 24px) clamp(48px, 7vw, 104px); }
+/* ── سرلوحه: رسانه تمام‌قاب، متن رویش ── */
+.tpx-hero {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  /* ⚠️ ۱۳۲ نه ۷۲: بالای سرلوحه یک بردکرامب هم هست و با کسرِ فقط
+     ارتفاعِ ناوبر، ردیفِ کنش‌ها زیرِ خطِ تا می‌افتاد. */
+  min-block-size: calc(100svh - 132px);
+  display: grid;
+  align-content: end;
+  background: #0B0B0C;
+  padding-block: clamp(8px, 2vw, 24px) clamp(28px, 4vw, 56px);
+}
+.tpx-hero-media { position: absolute; inset: 0; z-index: 0; }
+.tpx-hero-media [data-cue-hero] { inline-size: 100%; block-size: 100%; }
+.tpx-hero-media img,
+.tpx-hero-media canvas { inline-size: 100%; block-size: 100%; object-fit: cover; }
+/* پرده فقط پایین، جایی که متن می‌نشیند */
+.tpx-hero::after {
+  content: '';
+  position: absolute; inset: 0; z-index: 1; pointer-events: none;
+  /* ⚠️ در ۱۲۸۰×۸۰۰ بالای بلوکِ متن *بالاتر از* پرده می‌افتاد و نامِ
+     متخصص روی افرای روشن ۱٫۰۸:۱ می‌شد. سرلوحه‌ی پروفایل پنج بلوک
+     روی هم دارد، پس پرده باید بلندتر باشد — نه قوی‌تر در ته. */
+  background: linear-gradient(to top,
+    rgb(5 5 6 / .96) 0%,
+    rgb(5 5 6 / .93) 24%,
+    rgb(5 5 6 / .84) 42%,
+    rgb(5 5 6 / .62) 58%,
+    rgb(5 5 6 / .28) 76%,
+    transparent 94%);
+}
+/* ⚠️ همان تله: بدونِ `:not`، این قاعده رسانه را از حالتِ مطلق
+   درمی‌آورد و متن را از قاب بیرون می‌راند. */
+.tpx-hero > *:not(.tpx-hero-media) { position: relative; z-index: 2; }
+/* ⚠️ متنِ سرلوحه روی رسانه‌ی تیره می‌نشیند، پس این بلوک از توکن‌های
+   زمینِ روشن جدا می‌شود. بقیه‌ی صفحه روشن می‌ماند. */
+.tpx-hero .tpx-name { color: #F4F2ED; }
+.tpx-hero .tpx-lede { color: #E4CE9C; }
+.tpx-hero .tpx-intro { color: rgb(244 242 237 / .8); }
+.tpx-hero .tpx-stats { border-block-color: rgb(255 255 255 / .18); }
+.tpx-hero .tpx-stats > div { border-inline-end-color: rgb(255 255 255 / .18); }
+.tpx-hero .tpx-stats dt { color: rgb(244 242 237 / .62); }
+.tpx-hero .tpx-stats dd { color: #F4F2ED; }
+.tpx-hero .tpx-btn.ghost { border-color: rgb(255 255 255 / .34); color: #F4F2ED; }
+.tpx-hero .tpx-btn.ghost:hover { border-color: #E4CE9C; color: #E4CE9C; }
 /* ⚠️ دو ستونِ مساوی، نام را به نصفِ عرض محدود می‌کرد و همان چیزی
    می‌شد که «گوشه‌ای» دیده می‌شد. حالا نام تمام‌عرض است و نقشه
    زیرش می‌آید — ترتیبِ خواندن هم همین است: کی، بعد چه.  */
@@ -260,44 +310,6 @@ html.lenis-on { scroll-behavior: auto !important; }
 .tpx-stats dd { font-size: 1.0625rem; font-weight: 700; color: var(--on-dark); margin: 0; }
 
 .tpx-acts { display: flex; flex-wrap: wrap; gap: 10px; }
-
-/* ═══════════════ قابِ نقشه ═══════════════ */
-/* ⚠️ عمقِ واقعی: قاب در فضای سه‌بعدی می‌چرخد و با حرکتِ نشانگر
-   زاویه‌اش عوض می‌شود. مقدارها از JS روی متغیر می‌آیند و فقط
-   `transform` را تکان می‌دهند — روی لایه‌ی کامپوزیت. */
-.tpx-plate { position: relative; perspective: 1400px; margin: 0; }
-.tpx-plate-in {
-  position: relative;
-  /* ⚠️ ۲۲ پیکسل بود. شعاعِ اندازه‌گیری‌شده در مرجع‌ها ۳ تا ۱۶ است.
-     گوشه‌ی درشت همان چیزی است که رابط را «قالبِ آماده» نشان می‌دهد. */
-  border-radius: 14px;
-  overflow: hidden;
-  padding: 0;
-  background: var(--stage);
-  box-shadow:
-    0 0 0 1px rgb(22 23 26 / .07),
-    0 18px 40px -24px rgb(22 23 26 / .3);
-  transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
-  transform-style: preserve-3d;
-  transition: transform .5s var(--ease);
-}
-/* ⚠️ روی موبایل کجی اصلاً اجرا نمی‌شود؛ لایه‌ی ارتقایافته آن‌جا
-   فقط حافظه‌ی GPU می‌خورد و SVG را تار می‌کند. */
-@media (hover: hover) and (pointer: fine) {
-  .tpx-plate-in { will-change: transform; }
-}
-/* ⚠️ حاشیه‌ی طلاییِ دورِ قاب برداشته شد: روی زمینِ روشن قاب را
-   «کارتِ تزئینی» می‌کرد. خودِ سایه مرز را می‌سازد. */
-/* ⚠️ همان تله‌ی ارتفاع: بومِ R3F از والد ارتفاع می‌گیرد و بدونِ
-   نسبتِ صریح به ۱۵۰ پیکسل می‌افتد. */
-.tpx-plate-in { aspect-ratio: 1400 / 820; }
-.tpx-plate-in > [data-cue-hero] { inline-size: 100%; block-size: 100%; }
-.tpx-plate-in img { inline-size: 100%; block-size: 100%; object-fit: cover; display: block; }
-.tpx-plate figcaption {
-  margin-block-start: 14px;
-  font-size: var(--t-meta); line-height: 1.9; color: var(--on-dark-3);
-  text-align: center;
-}
 
 /* ═══════════════ کنش‌ها ═══════════════ */
 .tpx-btn {
@@ -478,7 +490,8 @@ html.lenis-on { scroll-behavior: auto !important; }
 
    این‌جا فقط دو چیز می‌ماند: حالتِ اولیه‌ی عناصرِ متحرک (تا پیش از
    اجرای JS چیزی نپرد) و حالتِ آرام. */
-.tpx [data-plate] { will-change: transform, opacity; }
+/* ⚠️ `will-change` روی لایه‌ی تمام‌ویوپورت برداشته شد: روی
+   `figure`ِ کوچکِ قبلی ارزان بود، روی این نه. */
 @media (hover: none) { .tpx [data-plate] { will-change: auto; } }
 
 @media (prefers-reduced-motion: reduce) {

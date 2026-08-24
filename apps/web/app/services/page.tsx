@@ -168,15 +168,23 @@ export default function TechnicalServicesPage() {
 
       {/* ═══════════ ۱ — هیرو ═══════════ */}
       <div className="tsx-dark">
-        <header className="tsx-hero tsx-wrap">
-          <div className="tsx-hero-top">
-            <span className="tsx-tag-l" data-hero-eyebrow>Billiard Hub · Technical Division</span>
-            <span className="tsx-tag tsx-tag-muted">
-              {faDigits(String(ALL_TECH_SERVICES.length))} خدمت
-            </span>
+        {/* ⚠️ الگو از صفحه‌ی محصولِ اپل و مایکروسافت گرفته شده و
+            اندازه‌گیری شد: **رسانه تمام‌قاب است و متن رویش می‌نشیند.**
+            نسخه‌ی قبل رسانه را در پنلِ گردگوشه‌ی حاشیه‌دار می‌گذاشت و
+            متن را بالایش — همان چیزی که «کارت» نشانش می‌داد نه
+            «سینماتیک». */}
+        <header className="tsx-hero">
+          <div className="tsx-hero-media" data-hero-cue>
+            <CueHero
+              view={{ target: 7.55, dist: 1.15, spin: 0.5, tilt: -0.2 }}
+              still="/images/cue/hero.webp"
+              alt=""
+              ground="#0B0B0C"
+            />
           </div>
 
-          <div className="tsx-hero-mid">
+          <div className="tsx-hero-copy tsx-wrap">
+            <span className="tsx-tag-l" data-hero-eyebrow>Billiard Hub · Technical Division</span>
             <h1 className="tsx-hero-title" data-hero-title>
               دقت، <em>در هر نقطه</em>
             </h1>
@@ -191,19 +199,10 @@ export default function TechnicalServicesPage() {
             {/* ⚠️ شیء زیرِ تیتر رد می‌شود، نه در ستونِ کناری. «متن
                 این‌طرف، تصویر آن‌طرف» همان بنری است که قرار نبود
                 ساخته شود. */}
-            {/* ⚠️ رندرِ سه‌بعدیِ واقعی جایگزینِ SVGِ دست‌کشیده شد.
-                دسکتاپ صحنه‌ی زنده، بقیه همان صحنه به‌صورت تصویر. */}
-            <div className="tsx-hero-cue" data-hero-cue>
-              <CueHero
-                view={{ target: 7.55, dist: 1.15, spin: 0.5, tilt: -0.2 }}
-                still="/images/cue/hero.webp"
-                alt="نمای نزدیکِ جوینتِ چوبِ بیلیارد"
-              />
-            </div>
           </div>
 
           {/* ⚠️ هیچ عددِ ساختگی: هر سه از داده‌ی واقعی می‌آیند. */}
-          <dl className="tsx-hero-meta" data-hero-meta>
+          <dl className="tsx-hero-meta tsx-wrap" data-hero-meta>
             <div>
               <dt className="tsx-tag-l k">Services</dt>
               <dd className="v" style={{ margin: 0 }}>{faDigits(String(ALL_TECH_SERVICES.length))}</dd>

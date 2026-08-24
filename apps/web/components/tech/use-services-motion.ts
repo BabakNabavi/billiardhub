@@ -104,7 +104,9 @@ export function useServicesMotion(
     }
     gsap.timeline({ defaults: { ease: 'bh-out' } })
       .from('[data-hero-eyebrow]', { y: 14, opacity: 0, duration: .7 }, 0.1)
-      .from('[data-hero-cue]', { xPercent: 12, opacity: 0, duration: 1.5 }, 0.15)
+      /* ⚠️ `xPercent` حذف شد: این عنصر حالا لایه‌ی تمام‌قاب است و
+         لغزاندنش تصویر را از زیرِ پرده‌ی ثابت بیرون می‌کشید. */
+      .from('[data-hero-cue]', { opacity: 0, duration: 1.5 }, 0.15)
       .from('[data-hero-meta] > *', { y: 16, opacity: 0, duration: .7, stagger: .08 }, 0.6)
 
     /* ── ۳) پرده‌برداریِ سطرها ──

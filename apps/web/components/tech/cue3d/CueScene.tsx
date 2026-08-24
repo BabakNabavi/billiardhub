@@ -48,7 +48,7 @@ function Rig({ view }: { view: CueView }) {
 
 export function CueScene({
   view,
-  ground = '#F3F1EC',
+  ground = '#0B0B0C',
   className,
 }: {
   view: CueView
@@ -76,8 +76,8 @@ export function CueScene({
             حذف شده بود؛ بدونش شیء روی زمینِ روشن شناور می‌ماند و
             همان چیزی می‌شود که «چسبانده‌شده» دیده می‌شود. */}
         <ContactShadows
-          position={[0, -0.42, 0]} opacity={0.5} scale={14}
-          blur={2.6} far={2.2} resolution={512} color="#2b241a"
+          position={[0, -0.42, 0]} opacity={0.75} scale={14}
+          blur={2.6} far={2.2} resolution={512} color="#000000"
         />
         {/* — پایانِ نور — */}
       </Suspense>
@@ -102,7 +102,11 @@ export function StudioLights() {
         />
         {/* پرکننده‌ی سرد از روبه‌رو تا سایه‌ها سیاهِ مرده نشوند */}
         <directionalLight position={[-3, -1.5, 2.5]} intensity={0.45} color="#cfe0f0" />
-        <ambientLight intensity={0.35} />
+        {/* ⚠️ روی زمینِ مشکی، محیط تقریباً هیچ نورِ برگشتی نمی‌دهد و
+            شیء در سایه گم می‌شود. این نورِ لبه‌ایِ پشتی همان چیزی
+            است که در عکسِ محصول لبه‌ی درخشان می‌سازد. */}
+        <directionalLight position={[-2.4, 1.6, -3.4]} intensity={2.6} color="#fff6e2" />
+        <ambientLight intensity={0.22} />
 
         {/* محیطِ ساخته‌شده در صحنه — منبعِ بازتابِ فلز و لاک */}
         <Environment resolution={256}>
