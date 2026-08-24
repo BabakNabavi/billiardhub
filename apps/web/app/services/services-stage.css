@@ -1,0 +1,582 @@
+/* ─────────────────────────────────────────────────────────────
+   خدماتِ فنی — سیستمِ بصری.
+
+   ── زمینه‌ها ──
+   صفحه سه زمینِ تمام‌عرض دارد که پشتِ هم می‌آیند:
+   گرافیت (هیرو + آناتومی) ⟵ عاج (فهرست + متخصصان) ⟵ گرافیت (کنش).
+   ⚠️ هیچ‌کدام «کارت روی زمینه» نیستند؛ خودِ زمین عوض می‌شود. این
+   تنها راهِ ساختنِ روایتِ پیوسته بدونِ تلنبارکردنِ بخش‌های جدا.
+
+   ── چرا طلا کم است ──
+   پالت اینجا عاج/گرافیت است و طلا فقط *لهجه* است: خطِ اشاره‌گر،
+   شماره‌ی فعال، یک زیرخط. طلاییِ سراسری همان چیزی است که رابط را
+   ارزان می‌کند.
+   ───────────────────────────────────────────────────────────── */
+
+.tsx {
+  /* ── زمین ── */
+  --graphite: #14161A;
+  --graphite-2: #1B1E23;
+  --ivory: #F3F1EC;
+  --ivory-2: #E9E5DC;
+
+  /* ── جوهر ── */
+  --ink: #16171A;
+  --ink-2: #4A4A46;
+  --ink-3: #7C7A72;
+  --on-dark: #F2EFE8;
+  --on-dark-2: #A9A69D;
+  --on-dark-3: #6E6C66;
+
+  /* ── لهجه ── */
+  --champagne: #C7A66A;
+  --champagne-lit: #E4CE9C;
+
+  --edge-dark: rgb(255 255 255 / .1);
+  --edge-light: #DBD5C8;
+
+  /* ── تایپ ──
+     ⚠️ سه اندازه‌ی نمایشی بیشتر نیست. «هرچه بزرگ‌تر مدرن‌تر» غلط
+     است؛ آنچه ترکیب‌بندی می‌سازد *نسبت* است نه بزرگی. */
+  /* ⚠️ ۹٫۴vw یعنی ۱۳۵ پیکسل در ۱۴۴۰ — تیتر به سه خط می‌رفت، کلِ
+     ویوپورت را می‌خورد و شیء و سنجه‌ها زیرِ خطِ تا می‌افتادند.
+     بزرگی به‌تنهایی ترکیب‌بندی نیست؛ آنچه می‌سازدش *نسبت* است. */
+  --t-display: clamp(2.5rem, 7vw, 6.25rem);
+  --t-station: clamp(2.5rem, 7vw, 6rem);
+  --t-head: clamp(1.75rem, 3.4vw, 3.25rem);
+  --t-row: clamp(1.125rem, 2.1vw, 1.875rem);
+  --t-body: clamp(.9375rem, .88rem + .28vw, 1.0625rem);
+  --t-meta: .75rem;
+
+  color: var(--ink);
+  background: var(--ivory);
+}
+
+.tsx-wrap {
+  inline-size: 100%;
+  max-inline-size: 1320px;
+  margin-inline: auto;
+  padding-inline: clamp(18px, 4vw, 48px);
+}
+
+/* ── ریزنویسِ نقشه ──
+   ⚠️ **دو کلاس، نه یکی.** نسخه‌ی قبلی روی همه‌ی برچسب‌ها
+   `direction: ltr` می‌گذاشت و همان کلاس روی متنِ فارسی هم بود:
+   «۱۸ خدمت» با جهتِ پایه‌ی چپ‌به‌راست، بعد از بازچینشِ دوجهته
+   «خدمت ۱۸» رندر می‌شد و «۱ از ۱۰» می‌شد «۱۰ از ۱». یعنی عددها
+   روی صفحه‌ی زنده برعکس خوانده می‌شدند.
+   `letter-spacing` و `uppercase` هم برای فارسی غلط‌اند: فاصله‌ی
+   حروف اتصالِ خطِ عربی را می‌شکند و بزرگ‌نویسی بی‌معناست. */
+.tsx-tag {
+  font-family: ui-monospace, "SFMono-Regular", Menlo, monospace;
+  font-size: var(--t-meta);
+}
+/* فقط برای برچسبِ واقعاً لاتین: BUTT، Services، Technical Division */
+.tsx-tag-l {
+  font-family: ui-monospace, "SFMono-Regular", Menlo, monospace;
+  font-size: var(--t-meta);
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  direction: ltr;
+  unicode-bidi: isolate;
+}
+
+/* ═══════════════════ زمینِ گرافیت ═══════════════════ */
+.tsx-dark {
+  position: relative;
+  background: var(--graphite);
+  color: var(--on-dark);
+  /* نورِ صحنه: یک منبعِ نرم از بالا، نه گرادیانِ تزئینی */
+  background-image:
+    radial-gradient(ellipse 80% 52% at 50% -10%, rgb(199 166 106 / .13), transparent 62%),
+    radial-gradient(ellipse 46% 40% at 88% 108%, rgb(199 166 106 / .06), transparent 60%);
+}
+
+/* ═══════════════════ ۱ — هیرو ═══════════════════ */
+/* ⚠️ ناوبرِ سایت `position: fixed` و ۷۲ پیکسل است و در این مسیر
+   هیچ‌وقت پنهان نمی‌شود. `100svh` یعنی سنجه‌های پایینِ هیرو دقیقاً
+   همان ۷۲ پیکسل زیرِ خطِ تا می‌افتند. */
+.tsx-hero {
+  position: relative;
+  min-block-size: calc(100svh - 72px);
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  padding-block: clamp(24px, 5vh, 56px) clamp(20px, 4vh, 40px);
+  overflow: hidden;
+}
+.tsx-hero-top { display: flex; justify-content: space-between; align-items: center; gap: 16px; }
+.tsx-hero-top .tsx-tag { color: var(--champagne); }
+
+.tsx-hero-mid { display: grid; align-content: center; gap: clamp(18px, 3vh, 32px); }
+
+/* ⚠️ تیتر به‌تنهایی فقط ~۴۱٪ عرض را می‌گرفت و بقیه‌ی بوم خالی
+   می‌ماند — همان «همه‌چیز در یک ستونِ کناری». حالا تیتر یک گوشه و
+   توضیح گوشه‌ی مقابل می‌نشیند و چوب از زیرِ هر دو رد می‌شود.
+   هر سه عنصر همیشه رندر می‌شوند، پس جای صریحِ ستون امن است. */
+@media (min-width: 900px) {
+  .tsx-hero-mid {
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, .9fr);
+    align-items: end;
+    column-gap: clamp(32px, 5vw, 84px);
+  }
+  .tsx-hero-title { grid-column: 1; }
+  .tsx-hero-lede  { grid-column: 2; align-self: end; padding-block-end: .4em; }
+  .tsx-hero-cue   { grid-column: 1 / -1; }
+}
+
+.tsx-hero-lede {
+  font-size: clamp(1rem, .94rem + .5vw, 1.375rem);
+  line-height: 1.75;
+  color: var(--on-dark-2);
+  margin: 0;
+  max-inline-size: 46ch;
+}
+
+.tsx-hero-title {
+  font-size: var(--t-display);
+  font-weight: 800;
+  line-height: 1.18;
+  letter-spacing: -0.035em;
+  margin: 0;
+  /* ⚠️ `overflow-wrap: anywhere` این‌جا **نیست**: اجازه می‌داد خط
+     هرجایی بشکند و نقطه‌ی پایانِ جمله تنها به سطرِ بعد می‌افتاد.
+     فارسی در فاصله می‌شکند و همان کافی است. */
+  text-wrap: pretty;
+}
+.tsx-hero-title em {
+  font-style: normal;
+  color: var(--champagne-lit);
+}
+
+/* ── شیء در ترکیب‌بندی ──
+   ⚠️ چوب *زیرِ* تیتر رد می‌شود، نه کنارش. «متن چپ، تصویر راست»
+   همان بنری است که قرار بود ساخته نشود. */
+.tsx-hero-cue {
+  position: relative;
+  /* از لبه‌ی صفحه بیرون می‌زند: شیء ادامه دارد، قاب تمامش می‌کند */
+  inline-size: min(124%, 1560px);
+  margin-inline-start: -12%;
+  filter: drop-shadow(0 26px 54px rgb(0 0 0 / .55));
+}
+/* ⚠️ سقفِ ارتفاع لازم است: در ویوپورتِ کوتاه، نسبتِ ۲۰۰۰:۲۶۰ چوب را
+   از پایینِ قاب بیرون می‌انداخت و نوکش بریده می‌شد. */
+.tsx-hero-cue svg {
+  display: block; inline-size: 100%; block-size: auto;
+  max-block-size: 22svh;
+}
+
+.tsx-hero-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: clamp(20px, 4vw, 56px);
+  align-items: end;
+  border-block-start: 1px solid var(--edge-dark);
+  padding-block-start: 16px;
+}
+.tsx-hero-meta div { display: grid; gap: 4px; }
+.tsx-hero-meta dt, .tsx-hero-meta .k { color: var(--on-dark-3); }
+.tsx-hero-meta .v { font-size: 1.375rem; font-weight: 700; line-height: 1; }
+
+/* ═══════════════════ ۲ — آناتومی ═══════════════════ */
+.tsx-anatomy { position: relative; }
+.tsx-anatomy-stage {
+  /* هم‌ارتفاع با ناحیه‌ی واقعاً دیده‌شده، نه کلِ ویوپورت */
+  min-block-size: calc(100svh - 72px);
+  display: grid;
+  grid-template-rows: 1fr auto;
+  gap: clamp(16px, 3vh, 32px);
+  padding-block: clamp(24px, 5vh, 56px);
+}
+.tsx-anatomy-main {
+  display: grid;
+  align-content: center;
+  gap: clamp(12px, 2.4vh, 26px);
+}
+
+/* قابِ دوربین */
+.tsx-cam { position: relative; display: grid; align-content: center; }
+.tsx-cam svg {
+  display: block;
+  inline-size: 100%;
+  /* ⚠️ نسبتِ قاب اینجا قفل می‌شود. دوربین فقط `viewBox` را عوض
+     می‌کند و اگر نسبتِ عنصر شناور باشد، هر تغییرِ اندازه‌ی صفحه
+     قاب را می‌پراند. */
+  aspect-ratio: 1000 / 300;
+}
+
+/* نامِ ایستگاه */
+.tsx-station { display: grid; gap: 10px; }
+/* ⚠️ روی دسکتاپ نام و خدمات دو لبه‌ی مقابلِ هم‌اند: بدونِ این، نام
+   بزرگ در یک گوشه می‌ماند و خدمات زیرش در ستونی باریک جمع می‌شود.
+   هر سه فرزند همیشه رندر می‌شوند، پس جای صریحِ سطر/ستون امن است. */
+@media (min-width: 1000px) {
+  .tsx-station {
+    grid-template-columns: auto 1fr;
+    align-items: end;
+    column-gap: clamp(24px, 4vw, 64px);
+  }
+  .tsx-station-svc {
+    grid-column: 2; grid-row: 1 / 3;
+    align-self: end; justify-self: end;
+    padding-block-end: .45em;
+  }
+}
+.tsx-station-name {
+  font-size: var(--t-station);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  margin: 0;
+}
+.tsx-station .tsx-tag { color: var(--champagne); }
+
+/* خدماتِ همان قطعه — سطر، نه چیپ */
+.tsx-station-svc { display: grid; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.tsx-station-svc li {
+  font-size: var(--t-body);
+  color: var(--on-dark-2);
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+.tsx-station-svc li::before {
+  content: '';
+  inline-size: 14px;
+  block-size: 1px;
+  background: var(--champagne);
+  flex: none;
+  translate: 0 -.34em;
+}
+
+/* ریلِ پیشرفت */
+.tsx-rail { display: flex; gap: 0; border-block-start: 1px solid var(--edge-dark); }
+.tsx-rail-item {
+  flex: 1 1 0;
+  padding-block-start: 12px;
+  border-block-start: 2px solid transparent;
+  margin-block-start: -1px;
+  color: var(--on-dark-3);
+  transition: color .4s, border-color .4s;
+}
+.tsx-rail-item.on { color: var(--on-dark); border-block-start-color: var(--champagne); }
+
+/* ═══════════════════ ۳ — فهرستِ خدمات ═══════════════════ */
+.tsx-light { background: var(--ivory); color: var(--ink); }
+
+.tsx-sec { padding-block: clamp(56px, 10vh, 132px); }
+.tsx-sec-head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  margin-block-end: clamp(24px, 4vh, 48px);
+}
+.tsx-sec-head h2 {
+  font-size: var(--t-head);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+  margin: 0;
+}
+.tsx-sec-head .tsx-tag { color: var(--ink-3); }
+
+/* ── سطرِ خدمت ──
+   ⚠️ نه کارت، نه چیپ. یک سطرِ فهرست با شماره‌ی ساختاری، خطِ جدا و
+   حالتِ فعال. عرضِ خطِ زیرین با تعامل رشد می‌کند — نه تغییرِ رنگِ
+   پس‌زمینه که ارزان‌ترین کارِ ممکن است. */
+.tsx-list { margin: 0; padding: 0; list-style: none; }
+.tsx-item {
+  position: relative;
+  border-block-end: 1px solid var(--edge-light);
+}
+.tsx-item:first-child { border-block-start: 1px solid var(--edge-light); }
+
+/* ⚠️ خودِ دکمه شبکه است، نه `li`: کلِ سطر باید سطحِ کلیک باشد،
+   وگرنه هدفِ لمسی فقط به عرضِ چند کلمه می‌شود. */
+.tsx-item-btn {
+  inline-size: 100%;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: baseline;
+  gap: clamp(12px, 3vw, 40px);
+  padding-block: clamp(14px, 2vh, 22px);
+  padding-inline: 0;
+  background: none;
+  border: none;
+  font: inherit;
+  color: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+.tsx-item-btn:focus-visible { outline: 2px solid var(--champagne); outline-offset: 2px; }
+.tsx-item-c {
+  font-size: var(--t-meta);
+  color: var(--ink-3);
+  white-space: nowrap;
+  transition: color .35s;
+}
+/* حالتِ انتخاب‌شده — پایدار، نه فقط hover */
+.tsx-item-btn.on .tsx-item-t { color: var(--champagne); }
+.tsx-item-btn.on .tsx-item-n { color: var(--champagne); }
+.tsx-item:has(.tsx-item-btn.on)::after { inline-size: 100%; }
+.tsx-item-n {
+  font-family: ui-monospace, "SFMono-Regular", Menlo, monospace;
+  font-size: var(--t-meta);
+  color: var(--ink-3);
+  letter-spacing: .1em;
+  direction: ltr;
+  unicode-bidi: isolate;
+  transition: color .35s;
+}
+.tsx-item-b { display: grid; gap: 6px; }
+.tsx-item-t {
+  font-size: var(--t-row);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.3;
+  transition: translate .45s cubic-bezier(.22,1,.36,1);
+}
+.tsx-item-d {
+  display: block;
+  font-size: var(--t-body);
+  color: var(--ink-2);
+  line-height: 1.8;
+  margin: 0;
+  max-inline-size: 62ch;
+}
+/* خطِ اشاره‌گر: از لبه‌ی آغاز رشد می‌کند */
+.tsx-item::after {
+  content: '';
+  position: absolute;
+  inset-block-end: -1px;
+  inset-inline-start: 0;
+  block-size: 1px;
+  inline-size: 0;
+  background: var(--champagne);
+  transition: inline-size .55s cubic-bezier(.22,1,.36,1);
+}
+@media (hover: hover) {
+  .tsx-item:hover::after, .tsx-item:focus-within::after { inline-size: 100%; }
+  .tsx-item:hover .tsx-item-t, .tsx-item:focus-within .tsx-item-t { translate: -8px 0; }
+  .tsx-item:hover .tsx-item-n, .tsx-item:focus-within .tsx-item-n { color: var(--champagne); }
+  .tsx-item:hover .tsx-item-c { color: var(--ink-2); }
+}
+
+/* ═══════════════════ ۴ — متخصصان ═══════════════════ */
+.tsx-tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  margin-block-end: clamp(20px, 3vh, 32px);
+}
+.tsx-tools .tsx-search { flex: 1 1 260px; min-inline-size: 0; }
+
+/* سطرِ متخصص */
+.tsx-person {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: clamp(12px, 2.4vw, 32px);
+  padding-block: clamp(16px, 2.4vh, 26px);
+  border-block-end: 1px solid var(--edge-light);
+  text-decoration: none;
+  color: inherit;
+  position: relative;
+}
+.tsx-person:first-child { border-block-start: 1px solid var(--edge-light); }
+.tsx-person-n {
+  font-family: ui-monospace, "SFMono-Regular", Menlo, monospace;
+  font-size: var(--t-meta);
+  color: var(--ink-3);
+  direction: ltr;
+  unicode-bidi: isolate;
+}
+.tsx-person-b { display: grid; gap: 5px; min-inline-size: 0; }
+.tsx-person-name {
+  font-size: var(--t-row);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: translate .45s cubic-bezier(.22,1,.36,1);
+}
+.tsx-person-meta {
+  font-size: var(--t-body);
+  color: var(--ink-2);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+}
+.tsx-person-go {
+  inline-size: 40px; block-size: 40px;
+  border: 1px solid var(--edge-light);
+  border-radius: 50%;
+  display: grid; place-items: center;
+  color: var(--ink-2);
+  flex: none;
+  transition: background-color .35s, color .35s, border-color .35s;
+}
+.tsx-person::after {
+  content: '';
+  position: absolute;
+  inset-block-end: -1px; inset-inline-start: 0;
+  block-size: 1px; inline-size: 0;
+  background: var(--champagne);
+  transition: inline-size .55s cubic-bezier(.22,1,.36,1);
+}
+@media (hover: hover) {
+  .tsx-person:hover::after { inline-size: 100%; }
+  .tsx-person:hover .tsx-person-name { translate: -8px 0; }
+  .tsx-person:hover .tsx-person-go {
+    background: var(--champagne); color: #221a08; border-color: var(--champagne);
+  }
+}
+.tsx-person:focus-visible { outline: 2px solid var(--champagne); outline-offset: 4px; }
+
+/* حالتِ خالی */
+.tsx-empty {
+  padding-block: clamp(40px, 8vh, 90px);
+  text-align: center;
+  display: grid;
+  gap: 12px;
+  justify-items: center;
+  color: var(--ink-2);
+}
+
+/* ═══════════════════ ۵ — کنشِ پایانی ═══════════════════ */
+.tsx-cta { padding-block: clamp(64px, 12vh, 150px); }
+.tsx-cta-h {
+  font-size: var(--t-head);
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: -0.03em;
+  margin: 0 0 clamp(20px, 3vh, 34px);
+  max-inline-size: 20ch;
+}
+.tsx-cta-h em { font-style: normal; color: var(--champagne-lit); }
+
+.tsx-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 15px 26px;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 700;
+  text-decoration: none;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: transform .3s cubic-bezier(.22,1,.36,1), background-color .3s, color .3s, border-color .3s;
+}
+.tsx-btn.solid {
+  background: linear-gradient(180deg, var(--champagne-lit), var(--champagne));
+  color: #241B09;
+}
+.tsx-btn.ghost { border-color: var(--edge-dark); color: var(--on-dark); }
+.tsx-btn:hover { transform: translateY(-2px); }
+.tsx-btn.ghost:hover { border-color: var(--champagne); color: var(--champagne-lit); }
+.tsx-btn:focus-visible { outline: 2px solid var(--champagne); outline-offset: 3px; }
+
+/* ═══════════════════ موبایل ═══════════════════
+   ⚠️ موبایل نسخه‌ی جمع‌شده‌ی دسکتاپ نیست. بخشِ آناتومی آن‌جا
+   دوربین ندارد (نه pin نه scrub)؛ به‌جایش ایستگاه‌ها عمودی و
+   ایستا می‌آیند و هر کدام قابِ ثابتِ خودش را نشان می‌دهد. */
+.tsx-stations-m { display: none; }
+
+@media (max-width: 999px) {
+  .tsx-cam, .tsx-rail, .tsx-station { display: none; }
+  .tsx-anatomy-stage { min-block-size: 0; display: block; }
+  .tsx-stations-m { display: grid; gap: clamp(28px, 5vh, 48px); }
+  .tsx-station-m { display: grid; gap: 10px; }
+  .tsx-station-m svg {
+    display: block; inline-size: 100%; aspect-ratio: 1000 / 300;
+    border-block: 1px solid var(--edge-dark);
+  }
+  .tsx-station-m h3 {
+    font-size: clamp(1.75rem, 8vw, 2.5rem);
+    font-weight: 800; letter-spacing: -0.03em; line-height: 1; margin: 0;
+  }
+  .tsx-person { grid-template-columns: auto 1fr; }
+  .tsx-person-go { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tsx-item::after, .tsx-person::after,
+  .tsx-item-t, .tsx-person-name, .tsx-btn { transition-duration: .01ms; }
+}
+
+/* ⚠️ `html { scroll-behavior: smooth }`ِ سراسری با `pin` + `scrub`ِ
+   ScrollTrigger سرِ موقعیت دعوا می‌کند: هر پرشِ برنامه‌ای دوبار نرم
+   می‌شود و بخشِ پین‌شده می‌لرزد. فقط روی همین صفحه خاموش می‌شود. */
+html:has(.tsx) { scroll-behavior: auto; }
+
+/* دکمه‌ی شبح روی زمینِ روشن — پیش از این با استایلِ اینلاین
+   بازنویسی می‌شد چون `.tsx-btn.ghost` برای زمینِ تیره ساخته شده. */
+.tsx-btn.ghost-light {
+  border-color: var(--edge-light);
+  color: var(--ink);
+  padding: 10px 16px;
+  font-size: .875rem;
+}
+.tsx-btn.ghost-light:hover { border-color: var(--champagne); color: var(--ink); }
+
+/* ── شیتِ فیلتر ── */
+.tsx-sheet {
+  position: fixed; inset: 0; z-index: 80;
+  background: rgb(10 10 12 / .55);
+  display: flex; align-items: flex-end; justify-content: center;
+}
+.tsx-sheet-panel {
+  inline-size: 100%; max-inline-size: 640px;
+  background: var(--ivory);
+  border-start-start-radius: 20px; border-start-end-radius: 20px;
+  padding: 16px clamp(16px, 4vw, 24px);
+  padding-block-end: max(16px, env(safe-area-inset-bottom));
+  max-block-size: 82svh; overflow-y: auto;
+}
+.tsx-sheet-head {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-block-end: 16px;
+}
+.tsx-sheet-x {
+  inline-size: 32px; block-size: 32px; border-radius: 8px;
+  border: 1px solid var(--edge-light); background: transparent;
+  cursor: pointer; display: grid; place-items: center; color: var(--ink-2);
+}
+.tsx-sheet-x:focus-visible { outline: 2px solid var(--champagne); outline-offset: 2px; }
+
+/* ── اسکلتِ بارگذاری ──
+   ⚠️ ارتفاع دقیقاً هم‌اندازه‌ی سطرِ واقعی است تا رسیدنِ داده صفحه
+   را جابه‌جا نکند (CLS). */
+.tsx-skel { pointer-events: none; }
+.tsx-skel-n, .tsx-skel-a, .tsx-skel-b {
+  display: block;
+  border-radius: 4px;
+  background: linear-gradient(90deg, var(--ivory-2) 25%, #F7F5F1 50%, var(--ivory-2) 75%);
+  background-size: 200% 100%;
+  animation: tsxShimmer 1.4s linear infinite;
+}
+.tsx-skel-n { inline-size: 18px; block-size: 10px; }
+.tsx-skel-a { inline-size: min(38%, 220px); block-size: 20px; }
+.tsx-skel-b { inline-size: min(58%, 320px); block-size: 13px; }
+@keyframes tsxShimmer { to { background-position: -200% 0; } }
+@media (prefers-reduced-motion: reduce) {
+  .tsx-skel-n, .tsx-skel-a, .tsx-skel-b { animation: none; }
+}
+
+.tsx-empty-h { margin: 0; font-size: 1.125rem; font-weight: 700; }
+.tsx-empty-p { margin: 0; font-size: var(--t-body); color: var(--ink-2); }
+
+.tsx-clear {
+  border: none; background: none; cursor: pointer;
+  font: inherit; font-size: .8125rem; font-weight: 700;
+  color: var(--ink-3);
+}
+.tsx-clear:hover { color: var(--ink); }
+.tsx-clear:focus-visible { outline: 2px solid var(--champagne); outline-offset: 2px; }
+
+.tsx-tag-gold { color: var(--champagne); }
