@@ -64,7 +64,10 @@
   padding-block-end: 12px;
   border-block-end: 1px solid var(--line, #E7E2D6);
 }
-.tsc-disc-head h3 {
+.tsc-disc-head h3, .tsc-disc-head h3 * {
+  /* همان استثنای فونتِ نمایشی؛ دلیلش در technician-profile.css */
+  font-family: Estedad, IRANSansX, Tahoma, system-ui, sans-serif !important;
+  font-variation-settings: "wght" 820;
   font-size: var(--t-title, 1.875rem);
   font-weight: 800; letter-spacing: -0.018em; line-height: 1.35;
   margin: 0; color: var(--ink, #1C1B17);

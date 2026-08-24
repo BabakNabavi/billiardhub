@@ -28,7 +28,7 @@ function Discipline({ id, title, count, other, children }: {
   return (
     <section className={`tsc-disc${other ? ' is-other' : ''}`} aria-labelledby={`tsc-${id}`}>
       {!other && (
-        <div className="tsc-stage" ref={tilt.ref}>
+        <div className="tsc-stage" data-plate ref={tilt.ref}>
           <PlateFor id={id} />
         </div>
       )}
