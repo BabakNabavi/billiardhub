@@ -64,20 +64,20 @@ function CuePlate() {
       </defs>
 
       {/* خطِ محور — مرجعِ همه‌ی اندازه‌ها */}
-      <line className="cp-axis" pathLength={1} x1="40" y1="150" x2="840" y2="150" />
+      <line className="cp-axis" data-draw x1="40" y1="150" x2="840" y2="150" />
 
       {/* بدنه‌ی چوب: از راست کلفت به چپ نازک */}
-      <path className="cp-body" fill={`url(#cp-wood-${uid})`}
+      <path className="cp-body" data-fill fill={`url(#cp-wood-${uid})`}
         d="M842 132 L842 168 L250 161 L250 139 Z" />
-      <path className="cp-body" fill={`url(#cp-wood-${uid})`}
+      <path className="cp-body" data-fill fill={`url(#cp-wood-${uid})`}
         d="M250 139 L250 161 L96 156 L96 144 Z" />
       {/* جوینت — حلقه‌ی برنجیِ وسط */}
-      <rect className="cp-joint" x="238" y="134" width="16" height="32" rx="2" />
+      <rect className="cp-joint" data-fill x="238" y="134" width="16" height="32" rx="2" />
       {/* فرول و تیپ */}
-      <rect className="cp-ferrule" x="74" y="143" width="22" height="14" rx="1.5" />
-      <path className="cp-tip" d="M74 143 L60 145.5 L60 154.5 L74 157 Z" />
+      <rect className="cp-ferrule" data-fill x="74" y="143" width="22" height="14" rx="1.5" />
+      <path className="cp-tip" data-fill d="M74 143 L60 145.5 L60 154.5 L74 157 Z" />
       {/* بازتابِ طولی */}
-      <path className="cp-gloss" fill={`url(#cp-sheen-${uid})`}
+      <path className="cp-gloss" data-fill fill={`url(#cp-sheen-${uid})`}
         d="M842 132 L842 168 L60 154.5 L60 145.5 Z" />
 
       {/* خط‌چین‌های اندازه‌گذاری */}
@@ -86,7 +86,7 @@ function CuePlate() {
           مورب می‌شود و برچسب جای بازتری می‌نشیند — نه کوچک‌کردنِ
           فونت که کلِ نقشه را ناخوانا می‌کند. */}
       {CUE_CALLS.map(([x, lx, label], i) => (
-        <g key={label} className="cp-call" style={{ ['--i' as string]: i }}>
+        <g key={label} className="cp-call" data-fill style={{ ['--i' as string]: i }}>
           <polyline className="cp-tick" fill="none"
             points={`${x},150 ${x},206 ${lx},228`} />
           <circle className="cp-node" cx={x} cy="150" r="3" />
@@ -96,7 +96,7 @@ function CuePlate() {
 
       {/* خطِ اندازه‌ی کلی */}
       <g className="cp-dim">
-        <line className="cp-span" pathLength={1} x1="60" y1="90" x2="842" y2="90" />
+        <line className="cp-span" data-draw x1="60" y1="90" x2="842" y2="90" />
         <line x1="60" y1="82" x2="60" y2="98" />
         <line x1="842" y1="82" x2="842" y2="98" />
         <text className="cp-label" x="451" y="74" textAnchor="middle">تعمیرات چوب</text>
@@ -132,36 +132,36 @@ function TablePlate() {
       </defs>
 
       {/* قابِ چوبی */}
-      <rect className="cp-frame" pathLength={1} x="46" y="52" width="788" height="316" rx="16" />
+      <rect className="cp-frame" data-draw x="46" y="52" width="788" height="316" rx="16" />
       {/* سطحِ بازی */}
-      <rect className="cp-cloth" x="76" y="82" width="728" height="256" rx="4" fill={`url(#cp-cloth-${uid})`} />
-      <rect className="cp-cloth" x="76" y="82" width="728" height="256" rx="4" fill={`url(#cp-lamp-${uid})`} />
+      <rect className="cp-cloth" data-fill x="76" y="82" width="728" height="256" rx="4" fill={`url(#cp-cloth-${uid})`} />
+      <rect className="cp-cloth" data-fill x="76" y="82" width="728" height="256" rx="4" fill={`url(#cp-lamp-${uid})`} />
 
       {/* پاکت‌ها */}
       {[[76, 82], [440, 82], [804, 82], [76, 338], [440, 338], [804, 338]].map(([cx, cy], i) => (
-        <circle key={i} className="cp-pocket" cx={cx} cy={cy} r="15" style={{ ['--i' as string]: i }} />
+        <circle key={i} className="cp-pocket" data-pop cx={cx} cy={cy} r="15" style={{ ['--i' as string]: i }} />
       ))}
 
       {/* خطِ بالک و کمانِ D */}
-      <line className="cp-baulk" pathLength={1} x1="258" y1="82" x2="258" y2="338" />
-      <path className="cp-d" pathLength={1} d="M258 168 A 42 42 0 0 0 258 252" />
+      <line className="cp-baulk" data-draw x1="258" y1="82" x2="258" y2="338" />
+      <path className="cp-d" data-draw d="M258 168 A 42 42 0 0 0 258 252" />
 
       {/* لوزها */}
       {topDiamonds.map((x, i) => (
-        <g key={`t${x}`} className="cp-dia" style={{ ['--i' as string]: i }}>
+        <g key={`t${x}`} className="cp-dia" data-pop style={{ ['--i' as string]: i }}>
           <rect x={x - 4} y="62" width="8" height="8" transform={`rotate(45 ${x} 66)`} />
           <rect x={x - 4} y="350" width="8" height="8" transform={`rotate(45 ${x} 354)`} />
         </g>
       ))}
       {sideDiamonds.map((y, i) => (
-        <g key={`s${y}`} className="cp-dia" style={{ ['--i' as string]: i + 6 }}>
+        <g key={`s${y}`} className="cp-dia" data-pop style={{ ['--i' as string]: i + 6 }}>
           <rect x="52" y={y - 4} width="8" height="8" transform={`rotate(45 56 ${y})`} />
           <rect x="820" y={y - 4} width="8" height="8" transform={`rotate(45 824 ${y})`} />
         </g>
       ))}
 
       <g className="cp-dim">
-        <line className="cp-span" pathLength={1} x1="76" y1="392" x2="804" y2="392" />
+        <line className="cp-span" data-draw x1="76" y1="392" x2="804" y2="392" />
         <line x1="76" y1="384" x2="76" y2="400" />
         <line x1="804" y1="384" x2="804" y2="400" />
         <text className="cp-label" x="440" y="378" textAnchor="middle">تعمیرات میز</text>
@@ -201,35 +201,35 @@ export function BenchPlate() {
           صفحه می‌آید که واقعاً نرم است. */}
 
       {/* میز */}
-      <rect className="cp-frame" pathLength={1} x="72" y="60" width="736" height="248" rx="14" />
-      <rect className="cp-cloth" x="100" y="88" width="680" height="192" rx="3" fill={`url(#cpb-cloth-${uid})`} />
+      <rect className="cp-frame" data-draw x="72" y="60" width="736" height="248" rx="14" />
+      <rect className="cp-cloth" data-fill x="100" y="88" width="680" height="192" rx="3" fill={`url(#cpb-cloth-${uid})`} />
       {[[100, 88], [440, 88], [780, 88], [100, 280], [440, 280], [780, 280]].map(([cx, cy], i) => (
-        <circle key={i} className="cp-pocket" cx={cx} cy={cy} r="13" style={{ ['--i' as string]: i }} />
+        <circle key={i} className="cp-pocket" data-pop cx={cx} cy={cy} r="13" style={{ ['--i' as string]: i }} />
       ))}
-      <line className="cp-baulk" pathLength={1} x1="270" y1="88" x2="270" y2="280" />
-      <path className="cp-d" pathLength={1} d="M270 152 A 32 32 0 0 0 270 216" />
+      <line className="cp-baulk" data-draw x1="270" y1="88" x2="270" y2="280" />
+      <path className="cp-d" data-draw d="M270 152 A 32 32 0 0 0 270 216" />
       {dia.map((x, i) => (
-        <g key={x} className="cp-dia" style={{ ['--i' as string]: i }}>
+        <g key={x} className="cp-dia" data-pop style={{ ['--i' as string]: i }}>
           <rect x={x - 3.5} y="68" width="7" height="7" transform={`rotate(45 ${x} 71.5)`} />
           <rect x={x - 3.5} y="293" width="7" height="7" transform={`rotate(45 ${x} 296.5)`} />
         </g>
       ))}
 
       {/* چوب، زیرِ میز — بات راست، تیپ چپ */}
-      <path className="cp-body" fill={`url(#cpb-wood-${uid})`} d="M810 372 L810 392 L120 385 L120 379 Z" />
-      <rect className="cp-joint" x="452" y="374" width="12" height="16" rx="1.5" />
-      <rect className="cp-ferrule" x="104" y="378.5" width="16" height="7" rx="1" />
-      <path className="cp-tip" d="M104 378.5 L94 380 L94 384 L104 385.5 Z" />
+      <path className="cp-body" data-fill fill={`url(#cpb-wood-${uid})`} d="M810 372 L810 392 L120 385 L120 379 Z" />
+      <rect className="cp-joint" data-fill x="452" y="374" width="12" height="16" rx="1.5" />
+      <rect className="cp-ferrule" data-fill x="104" y="378.5" width="16" height="7" rx="1" />
+      <path className="cp-tip" data-fill d="M104 378.5 L94 380 L94 384 L104 385.5 Z" />
 
       {BENCH_CALLS.map(([x, lx, label], i) => (
-        <g key={label} className="cp-call" style={{ ['--i' as string]: i }}>
+        <g key={label} className="cp-call" data-fill style={{ ['--i' as string]: i }}>
           <polyline className="cp-tick" fill="none" points={`${x},382 ${x},406 ${lx},422`} />
           <text className="cp-label" x={lx} y="448" textAnchor="middle">{label}</text>
         </g>
       ))}
 
       <g className="cp-dim">
-        <line className="cp-span" pathLength={1} x1="100" y1="336" x2="780" y2="336" />
+        <line className="cp-span" data-draw x1="100" y1="336" x2="780" y2="336" />
         <line x1="100" y1="329" x2="100" y2="343" />
         <line x1="780" y1="329" x2="780" y2="343" />
       </g>

@@ -29,19 +29,6 @@ const MAX_DEG = 5
 const calm = () =>
   typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
-/** نقشه وقتی رسم می‌شود که واقعاً دیده شود، نه موقعِ لود. */
-function drawOnView(el: HTMLElement, cls: string, threshold: number, rootMargin = '0px') {
-  const io = new IntersectionObserver(entries => {
-    for (const e of entries) {
-      if (!e.isIntersecting) continue
-      e.target.classList.add(cls)
-      io.unobserve(e.target)
-    }
-  }, { threshold, rootMargin })
-  io.observe(el)
-  return () => io.disconnect()
-}
-
 export function useTilt() {
   /* ⚠️ `useCallback` واجب است، نه آرایش: بدونِ آن هر رندر یک تابعِ
      تازه می‌سازد، React ref را جدا و دوباره وصل می‌کند، و هر
@@ -51,10 +38,11 @@ export function useTilt() {
      ⚠️ وابستگی‌ها خالی است: تابع به هیچ propی تکیه نمی‌کند. */
   const ref = useCallback((el: HTMLElement | null) => {
       if (!el) return
-      const stopDraw = drawOnView(el, 'is-drawn', 0.2)
-
+      /* ⚠️ رسمِ نقشه از این‌جا برداشته شد: حالا DrawSVG در
+         `use-stage-motion` آن را به پیشرفتِ اسکرول گره می‌زند.
+         این هوک فقط مسئولِ کجیِ سه‌بعدی است. */
       const fine = window.matchMedia('(hover: hover) and (pointer: fine)').matches
-      if (calm() || !fine) return stopDraw
+      if (calm() || !fine) return
 
       let frame = 0
       const onMove = (ev: PointerEvent) => {
@@ -77,30 +65,10 @@ export function useTilt() {
       el.addEventListener('pointermove', onMove)
       el.addEventListener('pointerleave', onLeave)
       return () => {
-        stopDraw()
         if (frame) cancelAnimationFrame(frame)
         el.removeEventListener('pointermove', onMove)
         el.removeEventListener('pointerleave', onLeave)
       }
-  }, [])
-  return { ref }
-}
-
-/**
- * ورودِ بخش هنگامِ رسیدن به دید — یک‌بار، بدونِ برگشت.
- *
- * ⚠️ کلاسِ پنهان‌کننده را *JS* اضافه می‌کند، نه CSS. اگر این اسکریپت
- * به هر دلیلی اجرا نشود، محتوا باید دیده شود؛ `opacity:0`ِ پیش‌فرض
- * در CSS یعنی یک باگِ کوچک، کلِ بخش را نامرئی می‌کند.
- */
-export function useReveal() {
-  const ref = useCallback((el: HTMLElement | null) => {
-    if (!el || calm()) return
-    el.classList.add('tpx-reveal')
-    /* ⚠️ آستانه‌ی نسبی نه: ارتفاعِ این بخش‌ها داده‌محور است و
-       متخصصِ هجده‌خدمتی بخشی چند برابرِ ویوپورت می‌سازد که هرگز
-       ۱۰٪ـش دیده نمی‌شود — بخش برای همیشه نامرئی می‌ماند. */
-    return drawOnView(el, 'is-in', 0, '0px 0px -12% 0px')
   }, [])
   return { ref }
 }

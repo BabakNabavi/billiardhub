@@ -25,6 +25,33 @@
    SVG — چند کیلوبایت، برای شبکه‌ی کند.
    ───────────────────────────────────────────────────────────── */
 
+/* ── فونتِ نمایشی ──
+   ⚠️ تیترِ ۷۶ پیکسلی تا دیروز همان فونتِ *رابط* بود، فقط بزرگ‌تر —
+   و همین یکی از دو علتِ اصلیِ آن حسِ «ابتدایی» بود. استعداد یک
+   قلمِ متغیرِ فارسی است (SIL OFL، خودمیزبان) و چون متغیر است،
+   وزنش می‌تواند با اسکرول تغییر کند — همان کاری که سایتِ سالِ
+   Awwwards با Mona Sans Variable می‌کند.
+
+   ⚠️ `swap`: تا رسیدنِ فایل، متن با ایران‌سنس دیده می‌شود. روی
+   شبکه‌ی کندِ ایران، متنِ نامرئی بدترین انتخاب است. */
+/* ⚠️ چرا `!important` ──
+   `app/layout.tsx` یک قفلِ سراسری دارد:
+       * { font-family: var(--font-base) !important; }
+   یعنی تا امروز هیچ فونتِ نمایشی‌ای در هیچ صفحه‌ای اعمال نمی‌شد —
+   همان علتِ ساختاریِ «تیتر همان فونتِ رابط است، فقط بزرگ‌تر».
+   قفل عمدی است و برداشته نمی‌شود؛ فقط همین چند تیتر استثنا
+   می‌گیرند، با تخصیصِ بالاتر. (لایه هم همین الگو را برای یک
+   عنصرِ لاتین دارد.) */
+@font-face {
+  font-family: 'Estedad';
+  /* ⚠️ `format('woff2-variations')` منسوخ است و کرومِ امروز کلِ
+     اعلان را رد می‌کند — فونت بی‌صدا بارگذاری نمی‌شد و تیتر روی
+     ایران‌سنس می‌ماند. نحوِ درست همان `woff2` است. */
+  src: url('/fonts/Estedad/Estedad-Variable.woff2') format('woff2');
+  font-weight: 100 900;
+  font-display: swap;
+}
+
 .tpx {
   /* ── زمینِ کارگاه ── */
   --void: #0A0F0C;
@@ -71,6 +98,11 @@
 .tpx :focus-visible { outline: 2px solid var(--brass-lit); outline-offset: 3px; }
 /* برنجِ روشن روی کاغذ ۱٫۴:۱ است — در بندِ روشن تُنِ تیره لازم است */
 .tpx-light :focus-visible { outline-color: var(--gold-ink); }
+
+/* ⚠️ `globals.css` روی `html` مقدارِ `scroll-behavior: smooth` دارد و
+   با Lenis می‌جنگد: هر پرشِ لنگر دو بار نرم می‌شود. کلاس را خودِ
+   هوک وقتی Lenis روشن است می‌گذارد. */
+html.lenis-on { scroll-behavior: auto !important; }
 
 .tpx-wrap {
   inline-size: 100%;
@@ -130,13 +162,19 @@
 
 .tpx-id { display: grid; gap: clamp(14px, 1.8vw, 22px); }
 
-.tpx-name {
+.tpx-name, .tpx-name * {
+  font-family: Estedad, IRANSansX, Tahoma, system-ui, sans-serif !important;
+  font-variation-settings: "wght" 900;
   font-size: var(--t-display);
   font-weight: 800;
-  line-height: 1.12;
+  /* ⚠️ ۱٫۱۲ برای فارسی تنگ بود: ماسکِ SplitText با `overflow:clip`
+     دقیقاً روی جعبه‌ی خط می‌بُرد و فرودِ «ی/ج/پ» را می‌خورد. */
+  line-height: 1.3;
   letter-spacing: -0.03em;
   margin: 0;
-  text-wrap: balance;
+  /* ⚠️ `text-wrap: balance` این‌جا نیست: SplitText خطوط را یک‌بار
+     اندازه می‌گیرد و منجمد می‌کند، پس بعد از تقسیم بی‌اثر است و
+     پیش از آن هم اندازه‌گیری را جابه‌جا می‌کند. */
   /* متن انگار زیرِ همان چراغ نشسته */
   text-shadow: 0 1px 0 rgb(255 255 255 / .06), 0 18px 44px rgb(0 0 0 / .5);
 }
@@ -240,7 +278,9 @@
 .tpx-light { background: var(--paper); color: var(--ink); }
 .tpx-sec { padding-block: clamp(44px, 6.5vw, 96px); }
 .tpx-sec-head { margin: 0 0 clamp(24px, 3.2vw, 40px); max-inline-size: 62ch; }
-.tpx-sec-head h2 {
+.tpx-sec-head h2, .tpx-sec-head h2 * {
+  font-family: Estedad, IRANSansX, Tahoma, system-ui, sans-serif !important;
+  font-variation-settings: "wght" 820;
   font-size: var(--t-title); font-weight: 800;
   letter-spacing: -0.018em; line-height: 1.45; margin: 0;
 }
@@ -288,7 +328,9 @@
 @media (min-width: 940px) {
   .tpx-close .inner { grid-template-columns: minmax(0, 1fr) auto; gap: clamp(36px, 5vw, 72px); }
 }
-.tpx-close h2 {
+.tpx-close h2, .tpx-close h2 * {
+  font-family: Estedad, IRANSansX, Tahoma, system-ui, sans-serif !important;
+  font-variation-settings: "wght" 850;
   font-size: clamp(1.5rem, 1.15rem + 1.6vw, 2.5rem);
   font-weight: 800; line-height: 1.4; letter-spacing: -0.022em;
   margin: 0 0 14px; text-wrap: balance;
@@ -330,34 +372,22 @@
 @media (min-width: 940px) { .tpx-dock { display: none; } }
 
 /* ═══════════════ حرکت ═══════════════ */
-@keyframes tpxUp {
-  from { opacity: .001; transform: translateY(18px); }
-  to { opacity: 1; transform: none; }
-}
-@keyframes tpxPlateIn {
-  from { opacity: .001; transform: perspective(1400px) rotateY(-9deg) translateY(26px) scale(.97); }
-  to { opacity: 1; transform: none; }
-}
-/* ⚠️ ورودِ قاب روی *ظرفِ بیرونی* می‌نشیند، نه روی خودِ قاب:
-   اعلانِ انیمیشن بر اعلانِ عادی مقدم است و با `fill-mode: both`
-   کلیدِ پایانیِ `transform: none` برای همیشه روی عنصر می‌ماند —
-   یعنی `transform: rotateX(var(--rx))`ِ کجی هرگز اعمال نمی‌شد.
-   اندازه‌گیری: `--rx` ست می‌شد ولی `transform` ماتریسِ همانی بود. */
-.tpx-id > * { animation: tpxUp .72s var(--ease) both; }
-.tpx-id > *:nth-child(2) { animation-delay: .06s; }
-.tpx-id > *:nth-child(3) { animation-delay: .12s; }
-.tpx-id > *:nth-child(4) { animation-delay: .18s; }
-.tpx-id > *:nth-child(5) { animation-delay: .24s; }
-.tpx-plate { animation: tpxPlateIn .95s var(--ease) .1s both; }
+/* ⚠️ `@keyframes`های دست‌ساز از این‌جا برداشته شدند. تک‌تکِ آن‌ها
+   جدا اجرا می‌شدند و هیچ‌چیز با هیچ‌چیز هماهنگ نبود — همان چیزی
+   که صفحه را «سرِهم‌بندی‌شده» نشان می‌داد. حالا یک تایم‌لاینِ واحد
+   در `use-stage-motion.ts` همه را کوریوگرافی می‌کند.
 
-/* ورودِ بخش‌ها هنگامِ رسیدن به دید */
-.tpx-reveal { opacity: 0; transform: translateY(20px); transition: opacity .7s var(--ease), transform .7s var(--ease); }
-.tpx-reveal.is-in { opacity: 1; transform: none; }
+   این‌جا فقط دو چیز می‌ماند: حالتِ اولیه‌ی عناصرِ متحرک (تا پیش از
+   اجرای JS چیزی نپرد) و حالتِ آرام. */
+.tpx [data-plate] { will-change: transform, opacity; }
+@media (hover: none) { .tpx [data-plate] { will-change: auto; } }
 
 @media (prefers-reduced-motion: reduce) {
-  .tpx-id > *, .tpx-plate-in { animation: none; }
-  .tpx-reveal { opacity: 1; transform: none; transition: none; }
-  .tpx-plate-in, .tpx-btn, .tpx-dock { transition: none; }
+  .tpx *, .tpx *::before, .tpx *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
 }
 
 /* خطای ذخیره‌ی گالری — رنگ تنها نشانه نیست */

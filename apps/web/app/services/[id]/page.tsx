@@ -26,7 +26,8 @@ import { norm, keepLongest } from '@/lib/text-dedupe'
 import { resolveServices } from '@/lib/tech-services'
 import { ServiceCatalog } from '@/components/tech/ServiceCatalog'
 import { BenchPlate } from '@/components/tech/CraftPlate'
-import { useTilt, useReveal } from '@/components/tech/use-tilt'
+import { useTilt } from '@/components/tech/use-tilt'
+import { useStageMotion } from '@/components/tech/use-stage-motion'
 import '@/components/tech/craft-plate.css'
 import { useVideoEdit } from '@/components/media/useVideoEdit'
 import { detailTitle, type VideoDetail } from '@/lib/media/video-details'
@@ -260,8 +261,9 @@ export default function TechnicianProfilePage() {
   const closeRef = useRef<HTMLDivElement | null>(null)
   /* کجیِ سه‌بعدیِ قابِ نقشه + ورودِ بخش‌ها هنگامِ رسیدن به دید */
   const plateTilt = useTilt()
-  const aboutReveal = useReveal()
-  const svcReveal = useReveal()
+  /* ⚠️ رفرنسِ ریشه برای `gsap.context`: همه‌ی تایم‌لاین‌ها به این
+     گره محدود می‌شوند تا `revert` واقعاً همه را بکشد. */
+  const stageRef = useRef<HTMLDivElement | null>(null)
   useEffect(() => {
     setDock(false)
     const acts = heroActsRef.current, close = closeRef.current
@@ -286,6 +288,11 @@ export default function TechnicianProfilePage() {
      شرطی — ساخته می‌شود و هوک باید *بالای* همه‌ی return‌ها بماند.
      نبودِ شماره خودش داک را رندر نمی‌کند، پس ناظر بی‌ضرر است. */
   }, [tech?.id])
+
+  /* ⚠️ حرکت فقط وقتی راه می‌افتد که داده رسیده باشد: SplitText
+     روی متنی که هنوز نیامده گره‌های خالی می‌سازد و نام هرگز ظاهر
+     نمی‌شود. */
+  useStageMotion(stageRef, tech ? `${tech.id}|${tech.name}` : '')
 
   /* یونیونِ تفکیک‌شده‌ی  یا هر دو را می‌خواهد یا
      هیچ‌کدام را — پس یک‌جا ساخته و پخش می‌شود. */
@@ -340,7 +347,7 @@ export default function TechnicianProfilePage() {
     : ''
 
   return (
-    <div className="tpx">
+    <div className="tpx" ref={stageRef}>
       {pending && <PendingNotice what="پروفایلِ شما" />}
 
       {/* ═══ صحنه ═══
@@ -359,19 +366,22 @@ export default function TechnicianProfilePage() {
 
         <header className="tpx-hero">
           <div className="tpx-wrap tpx-hero-grid">
-            <div className="tpx-id">
-              <h1 className="tpx-name">
+            <div className="tpx-id" data-anim="idcol">
+              {/* ⚠️ `dir="auto"`: نامِ لاتین یا ترکیبی بعد از تقسیمِ SplitText
+                  (که هر کلمه را `inline-block` می‌کند) ترتیبش برعکس
+                  می‌شد. */}
+              <h1 className="tpx-name" dir="auto" data-split>
                 {tech.name}
                 {tech.verified && <span className="vb"><VerifiedBadge title="متخصص تأیید شده" /></span>}
               </h1>
-              {lede && <p className="tpx-lede">{lede}</p>}
-              {claim && <p className="tpx-intro">{claim}</p>}
+              {lede && <p className="tpx-lede" data-anim="lede">{lede}</p>}
+              {claim && <p className="tpx-intro" data-anim="intro">{claim}</p>}
 
               {/* ⚠️ هیچ عددِ ساختگی: فقط شهر و شمارِ خدماتِ واقعی.
                   «۱۵ سال تجربه» و «۵۰۰ پروژه» ساخته نمی‌شود. */}
               <dl className="tpx-stats">
                 {city && city !== '—' && (
-                  <div>
+                  <div data-anim="stat">
                     <dt>شهر</dt>
                     <dd>{city}</dd>
                   </div>
@@ -382,13 +392,13 @@ export default function TechnicianProfilePage() {
                     می‌ساخت. عددِ ساخته‌شده همان چیزی است که قاعده‌ی
                     خودمان ممنوع کرده. */}
                 {svc.categories.length > 0 && (
-                  <div>
+                  <div data-anim="stat">
                     <dt>رشته</dt>
                     <dd>{toFaDigits(svc.categories.length)}</dd>
                   </div>
                 )}
                 {svc.count > 0 && (
-                  <div>
+                  <div data-anim="stat">
                     <dt>خدمات</dt>
                     <dd>{toFaDigits(svc.count)}</dd>
                   </div>
@@ -396,8 +406,8 @@ export default function TechnicianProfilePage() {
               </dl>
 
               <div className="tpx-acts" ref={heroActsRef}>
-                {phone && <a className="tpx-btn solid" href={`tel:${phone}`}><Phone size={16} aria-hidden /> ارتباط با متخصص</a>}
-                {waText && <a className="tpx-btn ghost" href={waText} target="_blank" rel="noopener noreferrer">{WaIcon} واتساپ</a>}
+                {phone && <a className="tpx-btn solid" data-anim="act" href={`tel:${phone}`}><Phone size={16} aria-hidden /> ارتباط با متخصص</a>}
+                {waText && <a className="tpx-btn ghost" data-anim="act" href={waText} target="_blank" rel="noopener noreferrer">{WaIcon} واتساپ</a>}
               </div>
             </div>
 
@@ -405,7 +415,7 @@ export default function TechnicianProfilePage() {
                 صفحه‌ی این شخص ادعای دروغ است و عکسِ استوک صفحه را
                 ارزان می‌کند. این‌جا همان چیزی کشیده می‌شود که او
                 رویش کار می‌کند. */}
-            <figure className="tpx-plate">
+            <figure className="tpx-plate" data-plate>
               <div className="tpx-plate-in" ref={plateTilt.ref}>
                 <BenchPlate />
               </div>
@@ -418,7 +428,7 @@ export default function TechnicianProfilePage() {
       {/* ═══ بخشِ روشن: خواندنی ═══ */}
       <div className="tpx-light">
         {(hasProse || meta.length > 0) && (
-          <section className="tpx-sec" ref={aboutReveal.ref}>
+          <section className="tpx-sec" data-reveal>
             <div className="tpx-wrap">
               {hasProse && (
                 <div className="tpx-about">
@@ -445,7 +455,7 @@ export default function TechnicianProfilePage() {
         )}
 
         {svc.count > 0 && (
-          <section className="tpx-sec" ref={svcReveal.ref}>
+          <section className="tpx-sec" data-reveal>
             <div className="tpx-wrap">
               <div className="tpx-sec-head">
                 <h2>رشته‌های تخصصی</h2>
@@ -457,7 +467,7 @@ export default function TechnicianProfilePage() {
         )}
 
         {tech.projects.length > 0 && (
-          <section className="tpx-sec">
+          <section className="tpx-sec" data-reveal>
             <div className="tpx-wrap">
               <div className="tpx-sec-head"><h2>نمونه‌کارها</h2></div>
               <div className="tpx-work">
@@ -509,8 +519,8 @@ export default function TechnicianProfilePage() {
             <p>برای هماهنگی و مشاوره، مستقیم با {tech.name} در ارتباط باشید.</p>
           </div>
           <div className="tpx-acts">
-            {phone && <a className="tpx-btn solid" href={`tel:${phone}`}><Phone size={16} aria-hidden /> درخواست خدمات</a>}
-            {waText && <a className="tpx-btn ghost" href={waText} target="_blank" rel="noopener noreferrer">{WaIcon} گفت‌وگو در واتساپ</a>}
+            {phone && <a className="tpx-btn solid" data-anim="act" href={`tel:${phone}`}><Phone size={16} aria-hidden /> درخواست خدمات</a>}
+            {waText && <a className="tpx-btn ghost" data-anim="act" href={waText} target="_blank" rel="noopener noreferrer">{WaIcon} گفت‌وگو در واتساپ</a>}
           </div>
         </div>
       </section>
