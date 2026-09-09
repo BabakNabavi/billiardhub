@@ -8,7 +8,12 @@ import type { Metadata } from 'next'
    پروفایل را به دایرکتوری canonical می‌کرد. `[id]/layout.tsx` آن را
    با canonicalِ خودش بازنویسی می‌کند. */
 
-const title = 'خدمات فنی بیلیارد | تعمیر، رگلاژ و نگهداری تجهیزات | بیلیارد هاب'
+/* ⚠️ بدونِ پسوندِ «بیلیارد هاب». لایه‌ی ریشه قالبِ '%s | بیلیارد هاب'
+   دارد و Next خودش می‌چسباند؛ با پسوندِ دستی، عنوان دوبار تمام
+   می‌شد — روی سایتِ زنده دیده شد. */
+const title = 'خدمات فنی بیلیارد | تعمیر، رگلاژ و نگهداری تجهیزات'
+/* عنوانِ OG قالب نمی‌گیرد، پس پسوند را خودش لازم دارد */
+const ogTitle = `${title} | بیلیارد هاب`
 const description =
   'متخصصان خدمات فنی بیلیارد را بر اساس تخصص و شهر پیدا کنید: تعمیر و سرویس چوب، '
   + 'تعویض نوک و فرول، جوینت، تراز و رگلاژ میز، تعویض پارچه و باند، نصب و جابه‌جایی.'
@@ -18,13 +23,13 @@ export const metadata: Metadata = {
   description,
   alternates: { canonical: '/services' },
   openGraph: {
-    title, description,
+    title: ogTitle, description,
     url: '/services',
     siteName: 'بیلیارد هاب',
     locale: 'fa_IR',
     type: 'website',
   },
-  twitter: { card: 'summary_large_image', title, description },
+  twitter: { card: 'summary_large_image', title: ogTitle, description },
 }
 
 export default function SegmentLayout({ children }: { children: React.ReactNode }) {

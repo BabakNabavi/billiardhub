@@ -19,7 +19,9 @@ import { getProfileBySlug } from '@/lib/profiles/server'
    رندرِ سرور.
    ───────────────────────────────────────────────────────────── */
 
-const BASE = 'خدمات فنی بیلیارد | بیلیارد هاب'
+/* ⚠️ بدونِ پسوند — قالبِ لایه‌ی ریشه ('%s | بیلیارد هاب') آن را
+   می‌چسباند و پسوندِ دستی عنوان را دوبار تمام می‌کرد. */
+const BASE = 'خدمات فنی بیلیارد'
 
 export async function generateMetadata(
   { params }: { params: Promise<{ id: string }> },
@@ -50,7 +52,7 @@ export async function generateMetadata(
     }
   } catch { /* دیتابیس در دسترس نبود — عنوانِ عمومی */ }
 
-  const title = name ? `${name} | متخصص خدمات فنی بیلیارد | بیلیارد هاب` : BASE
+  const title = name ? `${name} | متخصص خدمات فنی بیلیارد` : BASE
   const description = intro
     || 'پروفایل متخصص خدمات فنی بیلیارد: تخصص‌ها، نمونه‌کارها و راه ارتباطی.'
   const url = `/services/${id}`
@@ -62,10 +64,11 @@ export async function generateMetadata(
     /* ⚠️ پروفایلِ تأییدنشده نباید ایندکس شود: هنوز عمومی نیست. */
     ...(approved ? {} : { robots: { index: false, follow: false } }),
     openGraph: {
-      title, description, url,
+      /* OG قالب نمی‌گیرد، پس پسوند این‌جا دستی می‌آید */
+      title: `${title} | بیلیارد هاب`, description, url,
       siteName: 'بیلیارد هاب', locale: 'fa_IR', type: 'profile',
     },
-    twitter: { card: 'summary', title, description },
+    twitter: { card: 'summary', title: `${title} | بیلیارد هاب`, description },
   }
 }
 
