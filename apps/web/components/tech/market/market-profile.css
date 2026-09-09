@@ -84,27 +84,25 @@
   /* ⚠️ ناوبر ثابت در حالت نصب‌شده‌ی iOS ارتفاع ناحیه‌ی امن را هم
      می‌گیرد؛ عدد خالی یعنی تب‌ها زیر نوار گم می‌شوند. */
   position: sticky; inset-block-start: var(--tmp-nav); z-index: 20;
+  padding-block: 8px;
   background: rgb(255 255 255 / .92);
   backdrop-filter: saturate(1.4) blur(8px);
   border-block-end: 1px solid var(--line);
 }
-.tmp-tabs ul {
-  display: flex; gap: 4px; list-style: none; margin: 0; padding: 0;
+/* ⚠️ خط‌زیرِ اختصاصیِ این صفحه برداشته شد و جایش همان `.lq-seg`
+   صفحه‌ی باشگاه و گالری آمد. این‌جا فقط چیدمانِ نوار تنظیم می‌شود.
+
+   ⚠️ `lq-seg-fill` عمدا **نمی‌آید**: باشگاه چهار برچسبِ کوتاه دارد،
+   این‌جا تا پنج تا با «اطلاعات تماس» و «نمونه‌کارها». تقسیمِ مساوی
+   روی ۳۹۰ هر کدام را به ۶۸ پیکسل می‌رساند و متن می‌شکند. */
+.tmp-seg {
+  max-inline-size: 100%;
   overflow-x: auto; scrollbar-width: none;
+  /* نوار وسطِ عرض می‌ماند تا وقتی جا دارد */
+  margin-inline: auto;
 }
-.tmp-tabs ul::-webkit-scrollbar { display: none; }
-.tmp-tabs a {
-  display: inline-flex; align-items: center; min-block-size: 44px;
-  padding-inline: 12px; white-space: nowrap;
-  font-size: 14px; font-weight: 600; color: var(--ink-3);
-  text-decoration: none;
-  border-block-end: 2px solid transparent;
-  transition: color .18s, border-color .18s;
-}
-.tmp-tabs a:hover { color: var(--ink); }
-/* ⚠️ حالت فعال ظریف است: خط دو پیکسلی، نه چیپ پررنگ */
-.tmp-tabs a[aria-current='true'] { color: var(--ink); border-block-end-color: var(--gold); }
-.tmp-tabs a:focus-visible { outline: 2px solid var(--gold-ink); outline-offset: -2px; }
+.tmp-seg::-webkit-scrollbar { display: none; }
+.tmp-tabs .tm-wrap { display: flex; justify-content: center; }
 
 /* ⚠️ لنگر تب‌ها. بدون این، `href="#services"` بخش را زیر
    نوار ثابت و نوار تب‌ها می‌برد. روی خود بخش‌ها می‌نشیند نه

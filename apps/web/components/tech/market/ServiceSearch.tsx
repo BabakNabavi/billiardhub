@@ -36,23 +36,29 @@ export function ServiceSearch({ query, onQuery, city, onCity, cities, onSubmit }
       role="search"
       onSubmit={e => { e.preventDefault(); onSubmit() }}
     >
-      <div className="tm-field">
-        <label className="tm-label" htmlFor={qId}>چه خدمتی نیاز داری؟</label>
-        <input
-          id={qId} className="tm-input" type="search"
-          value={query} onChange={e => onQuery(e.target.value)}
-          placeholder="مثلا تعویض فرول، تراز میز…"
-          autoComplete="off"
-        />
+      {/* ⚠️ دو فیلد داخل **یک** جعبه، نه دو جعبه‌ی جدا: بردرِ بیرونی
+          یکی است و فیلدها با موی‌خط از هم جدا می‌شوند. نسخه‌ی قبلی
+          سه لبه‌ی تودرتو داشت (کارت + بردرِ هر فیلد) که ماژول را
+          شلوغ و ارزان نشان می‌داد. */}
+      <div className="tm-search-fields">
+        <div className="tm-field">
+          <label className="tm-label" htmlFor={qId}>چه خدمتی نیاز دارید؟</label>
+          <input
+            id={qId} className="tm-input" type="search"
+            value={query} onChange={e => onQuery(e.target.value)}
+            placeholder="تعویض پارچه، رگلاژ، تعمیر چوب…"
+            autoComplete="off"
+          />
+        </div>
+
+        <div className="tm-field">
+          <label className="tm-label" htmlFor={cId}>شهر</label>
+          <CityFilterSelect id={cId} value={city} onChange={onCity} withTechnicians={cities} />
+        </div>
       </div>
 
-      <div className="tm-field">
-        <label className="tm-label" htmlFor={cId}>شهر</label>
-        <CityFilterSelect id={cId} value={city} onChange={onCity} withTechnicians={cities} />
-      </div>
-
-      <button className="tm-btn tm-btn--primary" type="submit">
-        <Search size={16} aria-hidden />
+      <button className="tm-btn tm-btn--gold" type="submit">
+        <Search size={17} aria-hidden />
         جستجو
       </button>
     </form>

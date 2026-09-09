@@ -76,38 +76,89 @@
 }
 
 /* ═══════════════ سرلوحه ═══════════════
-   ⚠️ مثل صفحه باشگاه: هیروی تیره با لهجه طلایی، و بدنه روشن زیرش.
-   تضاد این دو، بدنه را سبک و خواندنی نگه می‌دارد. */
+   ⚠️ نسخه قبلی یک مستطیل سیاهِ تمام‌عرض بود با تیتر بزرگِ وسط‌چین،
+   یک کارت شیشه‌ای و عکسی که *زیرِ* آن رها شده بود. سه بلوکِ جدا که
+   به هم ربط بصری نداشتند. حالا یک ترکیبِ واحد است: زمینِ گرمِ روشن،
+   تیترِ مهارشده، ماژول جست‌وجوی یکپارچه، و عکس به‌عنوان جزئی از
+   همان ترکیب نه ضمیمه‌ای زیرش.
+
+   ⚠️ طلایی فقط لهجه است: یک خطِ کوتاه کنار برچسب و دکمه‌ی کنش.
+   نه گرادیان طلایی، نه درخشش، نه زمینه‌ی طلایی. */
 .tm .tm-hero {
-  position: relative; isolation: isolate; overflow: hidden;
-  background: #111114;
-  color: rgb(255 255 255 / .94);
-  border-end-start-radius: 28px; border-end-end-radius: 28px;
-}
-.tm .tm-hero::after {
-  /* تابش نرم گوشه — همان چیزی که به سطح iOS عمق می‌دهد */
-  content: ''; position: absolute; inset: 0; z-index: 0; pointer-events: none;
+  position: relative; isolation: isolate;
+  /* گذارِ نرم از هدرِ سفیدِ سراسری به زمینِ گرم — بدون این، لبه‌ی
+     تیزی بین هدر و هیرو می‌افتد که مصنوعی به نظر می‌رسد. */
   background:
-    radial-gradient(78% 120% at 82% -10%, rgb(199 166 106 / .22), transparent 60%),
-    radial-gradient(60% 90% at 6% 110%, rgb(120 140 255 / .10), transparent 60%);
+    linear-gradient(180deg, #FFFFFF 0%, #FBFAF7 34%, var(--tm-hero-bg) 100%);
+  border-block-end: 1px solid var(--line);
+  --tm-hero-bg: #F7F5F1;
 }
-.tm .tm-hero > * { position: relative; z-index: 1; }
-.tm .tm-hero-media { border-radius: var(--ios-r-lg); overflow: hidden; }
+.tm .tm-hero-in { padding-block: 16px 24px; gap: 24px; }
+
+/* ── برچسب بخش ──
+   ⚠️ چیپِ پرشده روی زمینِ روشن سنگین می‌شود. یک خطِ طلاییِ کوتاه
+   کنار متن، همان نقش را با یک‌دهمِ وزن بصری بازی می‌کند. */
 .tm .tm-eyebrow {
-  display: inline-flex; align-items: center; gap: 6px;
-  padding: 5px 12px; border-radius: 999px;
-  background: rgb(255 255 255 / .10);
-  border: 1px solid rgb(255 255 255 / .14);
-  /* پشت این نوار سطح مات #111114 است؛ تاری چیزی برای تارکردن ندارد
-     و فقط یک لایه ترکیب روی GPU می‌سازد. */
-  color: rgb(255 255 255 / .88);
-  font-size: 11.5px; font-weight: 700;
+  display: flex; align-items: center; gap: 9px;
+  margin: 0 0 12px;
+  color: var(--gold-ink);
+  font-size: 11.5px; font-weight: 800; line-height: 1;
+  background: none; border: 0; padding: 0; border-radius: 0;
 }
-/* ⚠️ market.css به h1 داخل هیرو رنگ --ink (#111) می‌دهد و هیرو حالا
-   #111114 است: تیتر سیاه روی سیاه، کنتراست ۱٫۰۰:۱ و عملا نامرئی.
-   انتخابگر قبلی .tm-h بود که در مارک‌آپ اصلا وجود ندارد. */
-.tm .tm-hero h1, .tm .tm-hero h2 { color: #fff; letter-spacing: 0; }
-.tm .tm-hero-sub { color: rgb(255 255 255 / .66); }
+.tm .tm-eyebrow::after {
+  content: ''; flex: 0 0 24px; block-size: 2px; border-radius: 2px;
+  /* گرادیان کلیدواژه‌ی منطقی ندارد؛ `to left` یعنی «دور از متن» و
+     این صفحه همیشه RTL است. اگر روزی LTR شد، همین‌جا باید بچرخد. */
+  background: linear-gradient(to left, var(--gold), transparent);
+}
+
+/* ── تیتر ──
+   ⚠️ عرض با `ch` بسته می‌شود نه با `<br>`: شکستِ دستی روی ۳۹۰ و
+   ۴۳۰ دو نتیجه‌ی متفاوت می‌دهد و یکی‌شان همیشه بد است. */
+.tm .tm-hero h1 {
+  color: var(--ios-label);
+  font-size: clamp(25px, 6.6vw, 42px);
+  font-weight: 700; line-height: 1.3;
+  letter-spacing: -0.02em;
+  max-inline-size: 14ch;
+  margin: 0 0 12px;
+}
+.tm .tm-hero-sub {
+  color: var(--ink-2);
+  font-size: 14.5px; line-height: 1.75;
+  max-inline-size: 40ch;
+  margin: 0 0 20px;
+}
+
+/* ── عکس ──
+   ⚠️ فایل ۵۱۶×۳۸۷ است. قابِ ۱۶:۱۰ از همان کادرِ ۴:۳ یک برشِ عمدی
+   می‌گیرد (نه کشیدگی، چون `cover`) و ارتفاعِ بی‌دلیل را می‌گیرد؛
+   قابِ بلند روی موبایل جست‌وجو را از تاشو پایین می‌انداخت. */
+.tm .tm-hero-media {
+  aspect-ratio: 16 / 10;
+  border-radius: 24px; overflow: hidden;
+  background: var(--neutral);
+  box-shadow: 0 1px 2px rgb(17 17 17 / .05), 0 22px 48px -22px rgb(17 17 17 / .34);
+}
+.tm .tm-hero-media img {
+  inline-size: 100%; block-size: 100%; object-fit: cover;
+  object-position: 50% 56%;
+  transition: transform .5s cubic-bezier(.22,1,.36,1);
+}
+@media (hover: hover) {
+  .tm .tm-hero-media:hover img { transform: scale(1.03); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tm .tm-hero-media img { transition: none; }
+  .tm .tm-hero-media:hover img { transform: none; }
+}
+
+@media (min-width: 900px) {
+  .tm .tm-hero-in { padding-block: 48px; gap: 48px; }
+  .tm .tm-hero h1 { max-inline-size: 15ch; margin-block-end: 14px; }
+  .tm .tm-hero-sub { font-size: 15.5px; }
+  .tm .tm-hero-media { aspect-ratio: 4 / 3; }
+}
 
 /* ═══════════════ کنترل‌ها ═══════════════ */
 .tm .tm-btn {
@@ -200,18 +251,59 @@
 .tm .tm-chip--more { background: var(--ios-fill-2); color: var(--ios-label-2); }
 
 /* ═══════════════ فهرست دسته‌ها ═══════════════ */
+/* ═══════════════ کارت دسته ═══════════════
+   ⚠️ همان زبانِ کارت‌های «کاوش کن» صفحه‌ی اصلی: نشانِ آیکونِ رنگی با
+   تینتِ مخصوصِ خودش، درخششِ بالا، و بلندشدنِ نرم با سایه‌ی هم‌رنگ.
+   رنگ از `--rgb` می‌آید که کامپوننت روی هر کارت می‌گذارد، پس یک
+   قاعده برای هر هشت دسته کافی است.
+
+   ⚠️ اینها **دکمه‌ی فیلتر**ند نه لینک، پس ردیفِ «مشاهده ←» نمی‌آید:
+   فلش یعنی «به جای دیگری می‌روی» و این‌جا دروغ می‌شد. */
 .tm .tm-cat {
-  background: var(--ios-surface); border: 0;
-  border-radius: var(--ios-r-md);
+  position: relative; overflow: hidden;
+  background: var(--ios-surface); border: 1px solid var(--line);
+  border-radius: 20px;
+  padding: 16px 8px;
   box-shadow: var(--ios-shadow);
-  transition: transform .18s cubic-bezier(.22,1,.36,1);
+  transition: transform .3s cubic-bezier(.22,1,.36,1),
+              box-shadow .3s ease, border-color .22s ease;
 }
-.tm .tm-cat:hover { transform: translateY(-2px); }
+.tm .tm-cat-sheen {
+  position: absolute; inset-block-start: 0; inset-inline: 0; block-size: 46%;
+  background: linear-gradient(180deg, rgb(255 255 255 / .58) 0%, rgb(255 255 255 / 0) 100%);
+  pointer-events: none;
+}
+.tm .tm-cat-ic {
+  display: grid; place-items: center;
+  inline-size: 46px; block-size: 46px; border-radius: 16px;
+  background: linear-gradient(135deg, rgba(var(--rgb), .20), rgba(var(--rgb), .07));
+  border: 1px solid rgba(var(--rgb), .30);
+  box-shadow: 0 4px 14px rgba(var(--rgb), .26);
+}
+/* `flex-shrink` نمی‌آید: .tm-cat گرید است نه فلکس */
+.tm .tm-cat-t {
+  font-size: 13px; font-weight: 700; line-height: 1.35; color: var(--ios-label);
+}
+.tm .tm-cat-n { color: var(--ios-label-2); font-size: 11px; font-weight: 500; }
+@media (hover: hover) {
+  .tm .tm-cat:hover {
+    transform: translateY(-5px);
+    border-color: rgba(var(--rgb), .28);
+    box-shadow: 0 18px 40px -16px rgba(var(--rgb), .40), 0 4px 12px rgb(0 0 0 / .06);
+  }
+}
+.tm .tm-cat:active { transform: scale(.98); }
+/* ⚠️ حالت انتخاب باید از هاور *قوی‌تر* دیده شود، وگرنه کاربر نمی‌فهمد
+   کدام فیلتر روشن است: حلقه‌ی طلایی به‌علاوه‌ی تینتِ زمینه. */
+.tm .tm-cat[aria-pressed='true'] {
+  border-color: var(--gold);
+  background: linear-gradient(180deg, #fff, var(--gold-tint));
+  box-shadow: 0 0 0 1px var(--gold) inset, 0 10px 26px -14px rgb(154 110 56 / .46);
+}
 @media (prefers-reduced-motion: reduce) {
   .tm .tm-cat { transition: none; }
-  .tm .tm-cat:hover { transform: none; }
+  .tm .tm-cat:hover, .tm .tm-cat:active { transform: none; }
 }
-.tm .tm-cat-n { color: var(--ios-label-2); }
 
 /* ═══════════════ ستون فیلتر و شیت ═══════════════ */
 .tm .tm-filters {
@@ -318,14 +410,16 @@
   backdrop-filter: blur(24px) saturate(1.8);
   border-block-end: 1px solid var(--ios-sep);
 }
-.tmp .tmp-tabs a { color: var(--ios-label-2); border-block-end: 0; position: relative; }
-.tmp .tmp-tabs a:hover { color: var(--ios-label); }
-.tmp .tmp-tabs a[aria-current='true'] { color: var(--ios-label); }
-/* ⚠️ نشانگر خط نازک با گوشه گرد به‌جای بردر مربع — جزئیاتی که
-   نوار را iOS نشان می‌دهد. */
-.tmp .tmp-tabs a[aria-current='true']::after {
-  content: ''; position: absolute; inset-block-end: 0; inset-inline: 12px;
-  block-size: 3px; border-radius: 999px 999px 0 0; background: var(--ios-tint);
+/* ⚠️ نشانگرِ خط‌زیرِ این صفحه حذف شد: نوار حالا همان `.lq-seg`ِ
+   مشترک است و حالتِ انتخابش چیپِ سفید با متنِ طلایی است. اگر این
+   قواعد می‌ماندند، با وزنِ بالاتر (`.tmp` + عنصر) بر `.lq-seg > a`
+   غالب می‌شدند و دو نشانگرِ هم‌زمان می‌ساختند. */
+.tmp .tmp-seg > a { min-inline-size: 0; padding-inline: 16px; }
+/* روی موبایل قاعده‌ی سراسری `flex: 1` می‌دهد؛ این نوار باید
+   به‌جای فشرده‌شدن، اسکرول بخورد. */
+@media (max-width: 600px) {
+  .tmp .tmp-seg { display: flex; inline-size: auto; }
+  .tmp .tmp-seg > a { flex: 0 0 auto; padding-inline: 12px; }
 }
 
 /* کارت‌های بدنه: گروه‌بندی به سبک تنظیمات iOS */
@@ -390,6 +484,7 @@
   .tm .tm-link,
   .tm .tm-card-name > a,
   .tmp .tmp-crumb a,
+  .tmp .tmp-seg > a,
   .tmp .ch-gal-tabs > button {
     min-block-size: 44px;
     display: inline-flex;
@@ -413,16 +508,74 @@
    ⚠️ اینها هنوز زبان قبلی را داشتند و کنار سطح‌های تازه ناهماهنگ
    بودند: جعبه جست‌وجو روی هیروی تیره شناور است و نوار چسبان موبایل
    دکمه‌های قرصی دارد ولی خودش گوشه‌دار بود. */
+/* ═══════════════ ماژول جست‌وجو ═══════════════
+   ⚠️ قبلا هر فیلد جعبه‌ی جداگانه‌ای با بردرِ خودش داخل یک کارتِ
+   شیشه‌ای بود: سه لبه‌ی تودرتو. حالا **یک** جعبه بردر دارد و
+   فیلدها با یک موی‌خط از هم جدا می‌شوند — همان کاری که ماژول‌های
+   جست‌وجوی خدمات در محصولات جدی می‌کنند.
+
+   ⚠️ شیشه برداشته شد. پشت این ماژول زمینِ مات است؛ `backdrop-filter`
+   چیزی برای تارکردن ندارد و فقط یک لایه‌ی ترکیب روی GPU می‌سازد. */
 .tm .tm-search {
-  background: rgb(255 255 255 / .10);
-  border: 1px solid rgb(255 255 255 / .16);
-  border-radius: var(--ios-r-lg);
-  backdrop-filter: blur(20px) saturate(1.8);
+  /* ⚠️ `grid-template-columns` و `align-items` باید صریح ریست شوند:
+     market.css در `@media (min-width: 640px)` سه ستون می‌دهد که برای
+     مارک‌آپ قدیمی (دو فیلد + دکمه) بود. حالا فرم دو فرزند دارد، پس
+     بین ۶۴۰ و ۷۶۰ جعبه‌ی فیلدها فشرده و دکمه پهن می‌شد و یک ستونِ
+     خالی هم می‌ماند. این قاعده (۰,۲,۰) در هر عرضی از آن سنگین‌تر است. */
+  display: grid; grid-template-columns: minmax(0, 1fr); align-items: stretch;
+  gap: 12px; padding: 0;
+  background: none; border: 0; border-radius: 0; box-shadow: none;
+  backdrop-filter: none;
 }
-.tm .tm-search .tm-label { color: rgb(255 255 255 / .72); }
+.tm .tm-search-fields {
+  display: grid; overflow: hidden;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  box-shadow: 0 1px 2px rgb(17 17 17 / .04), 0 14px 34px -18px rgb(17 17 17 / .22);
+  transition: border-color .18s, box-shadow .18s;
+}
+.tm .tm-search-fields:focus-within {
+  border-color: var(--gold);
+  box-shadow: 0 1px 2px rgb(17 17 17 / .04), 0 14px 34px -18px rgb(154 110 56 / .34);
+}
+/* ⚠️ اندازه‌گیری در مرورگر: ورودی‌ها ۳۲ پیکسل ارتفاع داشتند. ردیفِ
+   دربرگیرنده بلندتر بود ولی *هدفِ لمسی* خودِ عنصر است، نه ردیفش.
+   پدینگ ردیف کم و ارتفاع خودِ ورودی زیاد شد تا مجموع تغییر نکند. */
+.tm .tm-search .tm-field { gap: 2px; padding: 4px 16px 6px; }
+/* ⚠️ موی‌خطِ جداکننده منطقی است نه جهت‌دار: در ۵۶۰ به بالا فیلدها
+   کنار هم می‌نشینند و خط باید بچرخد، نه اینکه جایش عوض شود. */
+.tm .tm-search .tm-field + .tm-field { border-block-start: 1px solid var(--line); }
+.tm .tm-search .tm-label {
+  color: var(--ink-3); font-size: 11px; font-weight: 700;
+}
+/* فیلدها بی‌بردرند: جعبه‌ی بیرونی خودش بردر است */
 .tm .tm-search .tm-input,
 .tm .tm-search .tm-citybtn {
-  background: rgb(255 255 255 / .92); border-color: transparent;
+  border: 0; background: transparent; box-shadow: none;
+  min-block-size: 44px; padding-inline: 0;
+  font-size: 15px; border-radius: 0;
+}
+.tm .tm-search .tm-citybtn.is-open { border-color: transparent; }
+/* ⚠️ حلقه‌ی فوکوس نباید داخلِ جعبه بریده شود؛ `overflow: hidden`
+   روی والد آن را می‌خورد، پس تورفته کشیده می‌شود. */
+.tm .tm-search .tm-input:focus-visible,
+.tm .tm-search .tm-citybtn:focus-visible {
+  outline: 2px solid var(--gold-ink); outline-offset: -1px; border-radius: 8px;
+}
+.tm .tm-search .tm-btn {
+  inline-size: 100%; min-block-size: 48px;
+  border-radius: var(--ios-r-md); font-size: 15px;
+}
+@media (min-width: 560px) {
+  .tm .tm-search-fields { grid-template-columns: 1.4fr 1fr; }
+  .tm .tm-search .tm-field + .tm-field {
+    border-block-start: 0; border-inline-start: 1px solid var(--line);
+  }
+}
+@media (min-width: 760px) {
+  .tm .tm-search { grid-template-columns: minmax(0, 1fr) auto; align-items: center; }
+  .tm .tm-search .tm-btn { inline-size: auto; padding-inline: 24px; }
 }
 
 .tmp .tmp-sticky {
@@ -433,7 +586,11 @@
   box-shadow: 0 -6px 28px rgb(0 0 0 / .12);
 }
 @supports not (backdrop-filter: blur(1px)) {
-  .tm .tm-search { background: rgb(30 30 34 / .96); }
+  /* ⚠️ این‌جا قبلا `.tm .tm-search { background: rgb(30 30 34 / .96) }`
+     هم بود — بازمانده‌ی هیروی تیره. هم‌وزنِ قاعده‌ی تازه بود ولی
+     پایین‌ترِ فایل، پس برنده می‌شد: روی موتوری بدون backdrop-filter
+     ماژول جست‌وجو یک تخته‌ی تقریبا سیاه روی زمینِ روشن می‌شد و متنِ
+     ورودی (#111) سیاه‌روی‌سیاه. حذف شد. */
   .tmp .tmp-sticky { background: rgb(255 255 255 / .99); }
 }
 
