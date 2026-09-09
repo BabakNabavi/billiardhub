@@ -112,6 +112,7 @@ export default async function WatchPage({ params }: Params) {
   const asMedia = (p: ReturnType<typeof toPublic>): MediaVideo => ({
     id: p.slug, title: p.title, category: p.category as MediaCategoryKey,
     creator: { id: p.creatorHandle, name: p.creatorName, handle: p.creatorHandle },
+    durationSec: p.durationSec, width: p.width, height: p.height,
     duration: p.durationSec
       ? `${String(Math.floor(p.durationSec / 60)).padStart(2, '0')}:${String(p.durationSec % 60).padStart(2, '0')}`
         .replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[Number(d)]!)
