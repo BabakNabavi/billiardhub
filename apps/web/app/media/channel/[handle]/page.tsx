@@ -25,10 +25,11 @@ import { NavOffset, TopBar, Rail, BottomNav, useRailState } from '../../../../co
 import { VideoCard, ShortCard, Avatar } from '../../../../components/media/cards'
 import { SubscribeButton } from '../../../../components/media/social'
 import ShortsViewer from '../../../../components/media/ShortsViewer'
+import ChannelPlaylists from '../../../../components/media/ChannelPlaylists'
 import { toFaDigits } from '../../../../lib/jalali'
 import '../../media.css'
 
-type Tab = 'videos' | 'shorts'
+type Tab = 'videos' | 'shorts' | 'lists'
 
 export default function ChannelPage() {
   const params = useParams()
@@ -41,6 +42,9 @@ export default function ChannelPage() {
   const [failed, setFailed] = useState(false)
   const [tab, setTab] = useState<Tab>('videos')
   const [svAt, setSvAt] = useState<number | null>(null)
+  /* ⚠️ تبِ «لیست‌های پخش» فقط وقتی می‌آید که جدولش روی سرور باشد؛
+     خودِ کامپوننت خبر می‌دهد. */
+  const [hasLists, setHasLists] = useState(false)
 
   /* فقط ویدیوهای همین کانال از سرور خواسته می‌شود — ستونِ
      `creator_handle` ایندکس دارد. */
@@ -101,14 +105,27 @@ export default function ChannelPage() {
 
                 {/* تبِ Shorts فقط وقتی می‌آید که این کانال واقعاً ویدیوی
                     عمودیِ کوتاه داشته باشد. */}
-                {split.shorts.length > 0 && (
+                {(split.shorts.length > 0 || hasLists) && (
                   <div className="mx-tabs" role="group" aria-label="محتوای کانال">
                     <button type="button" aria-pressed={tab === 'videos'} onClick={() => setTab('videos')}>ویدئوها</button>
-                    <button type="button" aria-pressed={tab === 'shorts'} onClick={() => setTab('shorts')}>Shorts</button>
+                    {split.shorts.length > 0 && (
+                      <button type="button" aria-pressed={tab === 'shorts'} onClick={() => setTab('shorts')}>Shorts</button>
+                    )}
+                    {hasLists && (
+                      <button type="button" aria-pressed={tab === 'lists'} onClick={() => setTab('lists')}>لیست‌های پخش</button>
+                    )}
                   </div>
                 )}
 
-                <section className="mx-sec">
+                {/* ⚠️ *یک* نمونه که همیشه mount می‌ماند و فقط پنهان
+                    می‌شود. دو نمونه‌ی شرطی، با هر بار عوض‌کردنِ تب
+                    یکی را unmount و دیگری را mount می‌کرد: یک
+                    درخواستِ تازه و از دست رفتنِ عنوانِ نیمه‌تایپ‌شده. */}
+                <div hidden={tab !== 'lists'}>
+                  <ChannelPlaylists handle={handle} onAvailable={setHasLists} />
+                </div>
+
+                <section className="mx-sec" hidden={tab === 'lists'}>
                   {tab === 'shorts' ? (
                     <div className="mx-grid">
                       {split.shorts.map((v, i) => <ShortCard key={v.id} v={v} onOpen={() => setSvAt(i)} />)}

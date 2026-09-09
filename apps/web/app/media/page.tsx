@@ -42,6 +42,7 @@ import {
   VideoCard, MiniCard, ShortCard, ChannelCard, GridSkeleton,
 } from '../../components/media/cards'
 import ShortsViewer from '../../components/media/ShortsViewer'
+import LiveShelf from '../../components/media/LiveShelf'
 import './media.css'
 
 type Tab = 'all' | 'videos' | 'shorts' | 'channels'
@@ -350,6 +351,11 @@ function Home({
           </div>
         </Shelf>
       )}
+
+      {/* ── پخشِ زنده ──
+          ⚠️ از سیستمِ زنده‌ی موجود می‌آید و اگر جلسه‌ای نباشد اصلاً
+          رندر نمی‌شود. */}
+      <LiveShelf />
 
       {/* ── Shorts ── */}
       {shorts.length > 0 && (
