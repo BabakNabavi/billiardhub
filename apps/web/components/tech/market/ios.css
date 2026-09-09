@@ -1,0 +1,441 @@
+/* ─────────────────────────────────────────────────────────────
+   خدمات فنی — لایه ظاهری iOS.
+
+   ── چرا یک فایل جدا و نه بازنویسی market.css ──
+   ساختار HTML و رفتار این دو صفحه اندازه‌گیری و تایید شده‌اند
+   (انتخابگر شهر، تب‌های چسبان، لنگرها، حالت‌های خالی). دست‌زدن به
+   JSX یعنی دوباره‌کاری همه آن آزمون‌ها. این فایل بعد از دو فایل
+   قبلی بار می‌شود و فقط زبان بصری را عوض می‌کند: همان کلاس‌ها،
+   همان DOM، ظاهر تازه.
+
+   ── زبان بصری ──
+   iOS 26 روی «Liquid Glass» ایستاده: سطح‌های نیمه‌شفاف که پس‌زمینه
+   را تار و اشباع می‌کنند، لبه نازک روشن به‌جای حاشیه پررنگ، گوشه‌های
+   بزرگ و پیوسته، و عمق با سایه پهن و کم‌رنگ نه با خط.
+
+   قاعده‌هایی که از آن گرفته شده:
+   ۱) سطح شیشه‌ای فقط جایی که *روی* چیزی شناور است (نوار چسبان،
+      شیت، پنل شهر، کارت روی زمینه رنگی). شیشه روی زمینه ساده
+      فقط خاکستریِ کدر می‌سازد.
+   ۲) گروه‌بندی به سبک تنظیمات iOS: ردیف‌ها داخل یک کارت با گوشه
+      بزرگ، جداکننده مویی که از لبه فاصله دارد.
+   ۳) کنترل‌ها قرصی‌شکل با پرکننده نیمه‌شفاف، نه دکمه مستطیلی.
+   ۴) تایپ: تیتر بزرگ و ضخیم، متن دوم خاکستری. تضاد از وزن می‌آید
+      نه از رنگ.
+
+   ⚠️ backdrop-filter روی اندروید ضعیف گران است. هر جا استفاده شده
+   سطحش کوچک است (نوار، پنل، شیت) نه کل صفحه، و پشتش رنگ مات هم
+   هست تا اگر مرورگر پشتیبانی نکرد متن خوانا بماند.
+
+   ⚠️ همه‌جا خاصیت منطقی: این صفحه راست‌به‌چپ است.
+   ───────────────────────────────────────────────────────────── */
+
+/* ⚠️ توکن‌ها روی :root‌اند نه فقط .tm/.tmp: پنل شهر با Portal روی
+   body می‌نشیند و بیرون از هر دو است. با تعریف محدود، هر
+   var(--ios-*) داخل آن نامعتبر می‌شد و به مقدار اولیه می‌افتاد —
+   یعنی hover و حالت فعالِ فهرست شهر نامرئی می‌شد. */
+:root {
+  /* ── مواد ──
+     خاکستری‌های سیستمی iOS، نه خاکستری خنثی: ته‌رنگ آبی دارند و
+     کنار طلایی برند سرد و تمیز می‌مانند. */
+  --ios-bg: #F2F2F7;
+  --ios-surface: #FFFFFF;
+  --ios-surface-2: #FAFAFC;
+  --ios-sep: rgb(60 60 67 / .12);
+  --ios-sep-strong: rgb(60 60 67 / .18);
+
+  --ios-label: #1C1C1E;
+  /* ⚠️ اندازه‌گیری‌شده: .60 روی سفید ۳٫۴۵:۱ بود و روی زمینه ۳٫۰۹:۱ —
+     زیر حد AA برای متن ۱۲ تا ۱۴ پیکسلی. .78 می‌شود ۵٫۶:۱. */
+  --ios-label-2: rgb(60 60 67 / .78);
+  /* ⚠️ فقط برای چیزهای غیرمتنی (جداکننده، دستگیره شیت). متن با این
+     رنگ ۱٫۷۴:۱ می‌شد و عملا خوانده نمی‌شد. */
+  --ios-label-3: rgb(60 60 67 / .30);
+
+  --ios-tint: #C7A66A;
+  --ios-tint-ink: #8A6224;
+  --ios-fill: rgb(120 120 128 / .12);
+  --ios-fill-2: rgb(120 120 128 / .08);
+
+  /* شعاع پیوسته — iOS از مربع‌گرد استفاده می‌کند نه دایره ساده */
+  --ios-r-lg: 22px;
+  --ios-r-md: 16px;
+  --ios-r-sm: 12px;
+
+  /* عمق: پهن، کم‌رنگ، بدون خط */
+  --ios-shadow: 0 1px 2px rgb(0 0 0 / .04), 0 8px 24px rgb(0 0 0 / .06);
+  --ios-shadow-lg: 0 2px 6px rgb(0 0 0 / .05), 0 18px 48px rgb(0 0 0 / .10);
+}
+
+/* ⚠️ فقط *توکن‌ها* روی :root‌اند. خودِ زمینه و رنگ باید محدود به این
+   دو صفحه بماند — گذاشتنشان روی :root زمینه کل سایت را عوض می‌کرد. */
+.tm, .tmp {
+  background: var(--ios-bg);
+  color: var(--ios-label);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ═══════════════ سرلوحه ═══════════════
+   ⚠️ مثل صفحه باشگاه: هیروی تیره با لهجه طلایی، و بدنه روشن زیرش.
+   تضاد این دو، بدنه را سبک و خواندنی نگه می‌دارد. */
+.tm .tm-hero {
+  position: relative; isolation: isolate; overflow: hidden;
+  background: #111114;
+  color: rgb(255 255 255 / .94);
+  border-end-start-radius: 28px; border-end-end-radius: 28px;
+}
+.tm .tm-hero::after {
+  /* تابش نرم گوشه — همان چیزی که به سطح iOS عمق می‌دهد */
+  content: ''; position: absolute; inset: 0; z-index: 0; pointer-events: none;
+  background:
+    radial-gradient(78% 120% at 82% -10%, rgb(199 166 106 / .22), transparent 60%),
+    radial-gradient(60% 90% at 6% 110%, rgb(120 140 255 / .10), transparent 60%);
+}
+.tm .tm-hero > * { position: relative; z-index: 1; }
+.tm .tm-hero-media { border-radius: var(--ios-r-lg); overflow: hidden; }
+.tm .tm-eyebrow {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 5px 12px; border-radius: 999px;
+  background: rgb(255 255 255 / .10);
+  border: 1px solid rgb(255 255 255 / .14);
+  /* پشت این نوار سطح مات #111114 است؛ تاری چیزی برای تارکردن ندارد
+     و فقط یک لایه ترکیب روی GPU می‌سازد. */
+  color: rgb(255 255 255 / .88);
+  font-size: 11.5px; font-weight: 700;
+}
+/* ⚠️ market.css به h1 داخل هیرو رنگ --ink (#111) می‌دهد و هیرو حالا
+   #111114 است: تیتر سیاه روی سیاه، کنتراست ۱٫۰۰:۱ و عملا نامرئی.
+   انتخابگر قبلی .tm-h بود که در مارک‌آپ اصلا وجود ندارد. */
+.tm .tm-hero h1, .tm .tm-hero h2 { color: #fff; letter-spacing: 0; }
+.tm .tm-hero-sub { color: rgb(255 255 255 / .66); }
+
+/* ═══════════════ کنترل‌ها ═══════════════ */
+.tm .tm-btn {
+  border-radius: 999px;
+  font-weight: 700;
+  transition: transform .16s cubic-bezier(.22,1,.36,1), background .16s, opacity .16s;
+}
+/* ⚠️ فشردن به‌جای بالاپریدن: روی iOS دکمه هنگام لمس کمی جمع می‌شود.
+   این حرکت لمسی است نه تزئینی و روی موبایل درست حس می‌شود. */
+.tm .tm-btn:active { transform: scale(.965); }
+/* ⚠️ بدون پیشوند، این‌ها وزن کمتری از قاعده‌های بالا داشتند و اصلا
+   اعمال نمی‌شدند: حرکت با reduced-motion هم اجرا می‌شد. */
+@media (prefers-reduced-motion: reduce) {
+  .tm .tm-btn { transition: none; }
+  .tm .tm-btn:active { transform: none; }
+}
+
+.tm .tm-btn--primary,
+
+.tm .tm-btn--gold {
+  background: var(--ios-tint); color: #221803;
+  border: 0; box-shadow: 0 2px 10px rgb(199 166 106 / .34);
+}
+.tm .tm-btn--primary:hover:not(:disabled),
+.tm .tm-btn--gold:hover:not(:disabled) { background: #d3b47c; }
+.tm .tm-btn--outline {
+  background: var(--ios-fill); color: var(--ios-label);
+  border: 0;
+}
+.tm .tm-btn--outline:hover:not(:disabled) { background: rgb(120 120 128 / .18); }
+.tm .tm-btn--quiet { background: transparent; color: var(--ios-tint-ink); border: 0; }
+
+.tm .tm-icon-btn {
+  border-radius: 999px; border: 0;
+  background: var(--ios-fill); color: var(--ios-label);
+}
+.tm .tm-icon-btn:hover:not(:disabled) { background: rgb(120 120 128 / .18); }
+
+/* ورودی‌ها: پرکننده نرم، بدون حاشیه پررنگ */
+.tm .tm-input,
+.tm .tm-select,
+.tm .tm-citybtn {
+  border-radius: var(--ios-r-sm);
+  border: 1px solid transparent;
+  background: var(--ios-fill-2);
+  color: var(--ios-label);
+  transition: background .16s, border-color .16s;
+}
+.tm .tm-input:hover,
+.tm .tm-select:hover,
+.tm .tm-citybtn:hover { background: var(--ios-fill); }
+.tm .tm-input:focus-visible,
+.tm .tm-select:focus-visible,
+.tm .tm-citybtn:focus-visible,
+.tm .tm-citybtn.is-open {
+  background: var(--ios-surface);
+  border-color: var(--ios-tint);
+  outline: none;
+  box-shadow: 0 0 0 4px rgb(199 166 106 / .18);
+}
+.tm .tm-input::placeholder { color: var(--ios-label-2); }
+.tm .tm-label { color: var(--ios-label-2); font-weight: 600; }
+
+/* ═══════════════ کارت متخصص ═══════════════
+   ⚠️ کارت روی زمینه خاکستری می‌نشیند، پس سفید مات است نه شیشه:
+   شیشه روی خاکستری فقط خاکستری کدرتر می‌سازد. */
+.tm .tm-card {
+  background: var(--ios-surface);
+  border: 0;
+  border-radius: var(--ios-r-lg);
+  box-shadow: var(--ios-shadow);
+  transition: transform .2s cubic-bezier(.22,1,.36,1), box-shadow .2s;
+}
+.tm .tm-card:hover { transform: translateY(-2px); box-shadow: var(--ios-shadow-lg); }
+@media (prefers-reduced-motion: reduce) {
+  .tm .tm-card { transition: none; }
+  .tm .tm-card:hover { transform: none; }
+}
+.tm .tm-ava { border-radius: 20px; box-shadow: 0 2px 8px rgb(0 0 0 / .10); }
+.tm .tm-card-name { letter-spacing: -0.01em; }
+.tm .tm-card-title { color: var(--ios-label-2); }
+.tm .tm-card-meta { color: var(--ios-label-2); }
+
+/* تراشه تخصص: پرکننده نرم، بدون حاشیه */
+.tm .tm-chip {
+  border: 0; border-radius: 999px;
+  background: var(--ios-fill); color: var(--ios-label);
+  font-weight: 600;
+}
+.tm .tm-chip--more { background: var(--ios-fill-2); color: var(--ios-label-2); }
+
+/* ═══════════════ فهرست دسته‌ها ═══════════════ */
+.tm .tm-cat {
+  background: var(--ios-surface); border: 0;
+  border-radius: var(--ios-r-md);
+  box-shadow: var(--ios-shadow);
+  transition: transform .18s cubic-bezier(.22,1,.36,1);
+}
+.tm .tm-cat:hover { transform: translateY(-2px); }
+@media (prefers-reduced-motion: reduce) {
+  .tm .tm-cat { transition: none; }
+  .tm .tm-cat:hover { transform: none; }
+}
+.tm .tm-cat-n { color: var(--ios-label-2); }
+
+/* ═══════════════ ستون فیلتر و شیت ═══════════════ */
+.tm .tm-filters {
+  background: var(--ios-surface);
+  border: 0; border-radius: var(--ios-r-lg);
+  box-shadow: var(--ios-shadow);
+}
+/* ⚠️ شیت موبایل تنها جایی است که شیشه واقعا کار می‌کند: روی محتوای
+   صفحه شناور است و تاری، عمق را نشان می‌دهد. */
+.tm .tm-sheet-panel {
+  border-start-start-radius: 28px; border-start-end-radius: 28px;
+  background: rgb(255 255 255 / .82);
+  backdrop-filter: blur(28px) saturate(1.8);
+  box-shadow: 0 -8px 40px rgb(0 0 0 / .18);
+  border: 0;
+}
+/* دستگیره کشیدن — نشانه آشنای شیت iOS */
+/* ⚠️ market.css این دو را با رنگ مات می‌کشد؛ روی پنل شیشه‌ای دو نوار
+   سفید توپر می‌ساختند. */
+.tm .tm-sheet-head, .tm .tm-sheet-foot { background: transparent; }
+.tm .tm-sheet-head {
+  position: relative; border-block-end: 1px solid var(--ios-sep);
+  padding-block-start: 22px;
+}
+.tm .tm-sheet-head::before {
+  content: ''; position: absolute; inset-block-start: 9px; inset-inline: 0;
+  margin-inline: auto; inline-size: 38px; block-size: 5px;
+  border-radius: 999px; background: var(--ios-label-3);
+}
+.tm .tm-sheet-foot { border-block-start: 1px solid var(--ios-sep); }
+/* تاری تمام‌صفحه زیر پرده ۲۸٪ دیده نمی‌شود و روی گوشی ضعیف
+   گران‌ترین حالت است. */
+.tm .tm-sheet { background: rgb(0 0 0 / .28); }
+
+/* پنل شهر: شیشه واقعی — روی صفحه شناور است */
+.tm-citypanel.tm-citypanel {
+  border: 0; border-radius: 20px;
+  background: rgb(255 255 255 / .86);
+  backdrop-filter: blur(30px) saturate(1.9);
+  box-shadow: 0 12px 50px rgb(0 0 0 / .20), 0 0 0 .5px rgb(0 0 0 / .06);
+}
+.tm-citysearch.tm-citysearch { border-block-end: 1px solid var(--ios-sep); }
+.tm-cityopt.tm-cityopt { border-radius: var(--ios-r-sm); }
+.tm-cityopt.tm-cityopt:hover,
+.tm-cityopt.tm-cityopt.is-active { background: var(--ios-fill); }
+.tm-cityprov.tm-cityprov { color: var(--ios-label-2); }
+
+/* ═══════════════ حالت خالی و اسکلتون ═══════════════ */
+.tm .tm-empty {
+  background: var(--ios-surface); border: 0;
+  border-radius: var(--ios-r-lg); box-shadow: var(--ios-shadow);
+}
+.tm .tm-skel-b { border-radius: var(--ios-r-sm); }
+
+/* ═══════════════ فراخوان پایانی ═══════════════ */
+.tm .tm-cta {
+  border-radius: var(--ios-r-lg); border: 0;
+  background: var(--ios-surface); box-shadow: var(--ios-shadow);
+}
+.tm .tm-cta--dark {
+  background: #111114; color: rgb(255 255 255 / .94);
+  box-shadow: var(--ios-shadow-lg);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   صفحه متخصص
+   ═══════════════════════════════════════════════════════════════ */
+
+/* سربرگ تیره، مثل صفحه باشگاه */
+.tmp .tmp-head {
+  position: relative; isolation: isolate; overflow: hidden;
+  background: #111114; color: rgb(255 255 255 / .94);
+  border: 0;
+  border-end-start-radius: 28px; border-end-end-radius: 28px;
+}
+.tmp .tmp-head::after {
+  content: ''; position: absolute; inset: 0; z-index: 0; pointer-events: none;
+  background:
+    radial-gradient(72% 130% at 84% -18%, rgb(199 166 106 / .24), transparent 62%),
+    radial-gradient(56% 100% at 4% 116%, rgb(120 140 255 / .10), transparent 62%);
+}
+.tmp .tmp-head-in { position: relative; z-index: 1; }
+.tmp .tmp-crumb,
+.tmp .tmp-crumb a { color: rgb(255 255 255 / .56); }
+.tmp .tmp-crumb a:hover { color: #fff; }
+.tmp .tmp-crumb li + li::before { color: rgb(255 255 255 / .32); }
+.tmp .tmp-name { color: #fff; letter-spacing: -0.02em; }
+.tmp .tmp-role { color: rgb(255 255 255 / .70); }
+.tmp .tmp-facts { color: rgb(255 255 255 / .62); }
+.tmp .tmp-ava {
+  border-radius: 26px;
+  box-shadow: 0 8px 28px rgb(0 0 0 / .40);
+  border: 1px solid rgb(255 255 255 / .14);
+}
+/* دکمه‌های سربرگ روی زمینه تیره: شیشه روشن */
+.tmp .tmp-head .tm-btn--outline {
+  background: rgb(255 255 255 / .14); color: #fff;
+}
+.tmp .tmp-head .tm-btn--outline:hover { background: rgb(255 255 255 / .22); }
+
+/* نوار تب: شیشه چسبان */
+.tmp .tmp-tabs {
+  background: rgb(242 242 247 / .82);
+  backdrop-filter: blur(24px) saturate(1.8);
+  border-block-end: 1px solid var(--ios-sep);
+}
+.tmp .tmp-tabs a { color: var(--ios-label-2); border-block-end: 0; position: relative; }
+.tmp .tmp-tabs a:hover { color: var(--ios-label); }
+.tmp .tmp-tabs a[aria-current='true'] { color: var(--ios-label); }
+/* ⚠️ نشانگر خط نازک با گوشه گرد به‌جای بردر مربع — جزئیاتی که
+   نوار را iOS نشان می‌دهد. */
+.tmp .tmp-tabs a[aria-current='true']::after {
+  content: ''; position: absolute; inset-block-end: 0; inset-inline: 12px;
+  block-size: 3px; border-radius: 999px 999px 0 0; background: var(--ios-tint);
+}
+
+/* کارت‌های بدنه: گروه‌بندی به سبک تنظیمات iOS */
+.tmp .tmp-card {
+  background: var(--ios-surface); border: 0;
+  border-radius: var(--ios-r-lg);
+  box-shadow: var(--ios-shadow);
+}
+/* تیترهای کارت پروفایل h2اند، نه .tmp-h */
+.tmp .tmp-card > h2 { letter-spacing: -0.01em; }
+.tmp .tmp-prose { color: rgb(60 60 67 / .78); }
+.tmp .tmp-none { color: var(--ios-label-2); }
+.tmp .tmp-more { color: var(--ios-tint-ink); font-weight: 700; }
+
+/* ردیف خدمت: ردیف تنظیمات — جداکننده مویی با تورفتگی */
+.tmp .tmp-svc-row { border-block-start: 1px solid var(--ios-sep); }
+.tmp .tmp-svc-row:first-child { border-block-start: 0; }
+.tmp .tmp-svc-cat { color: var(--ios-tint-ink); font-weight: 700; }
+.tmp .tmp-svc-d { color: var(--ios-label-2); }
+
+.tmp .tmp-work { border-radius: var(--ios-r-md); overflow: hidden; background: var(--ios-fill-2); }
+.tmp .tmp-work-d { color: var(--ios-label-2); }
+.tmp .tmp-work-s { color: var(--ios-tint-ink); }
+
+/* پنل تماس چسبان */
+.tmp .tmp-panel {
+  background: var(--ios-surface); border: 0;
+  border-radius: var(--ios-r-lg); box-shadow: var(--ios-shadow);
+}
+.tmp .tmp-panel-note { color: var(--ios-label-2); }
+.tmp .tmp-facts-grid { color: var(--ios-label-2); }
+
+/* ═══════════════ ریز‌جزئیات مشترک ═══════════════ */
+.tm .tm-sec-head,
+.tmp .tmp-head-act { letter-spacing: -0.01em; }
+.tm .tm-link { color: var(--ios-tint-ink); font-weight: 700; }
+.tm .tm-count,
+.tm .tm-soon { color: var(--ios-label-2); }
+
+/* حلقه فوکوس iOS: حلقه نرم دور عنصر، نه خط تیز */
+/* ⚠️ سایه طلایی به‌تنهایی ۱٫۳۰:۱ روی سفید است و حد ۳:۱ استاندارد را
+   رد می‌کند؛ روی دکمه طلایی هم طلایی روی طلایی می‌شد و عملا نبود.
+   خط بیرونی می‌ماند و سایه فقط درخشش اضافه است.
+
+   ⚠️ border-radius از این قاعده برداشته شد: وزنش از .tm .tm-btn
+   بیشتر بود و دکمه قرصی با فوکوس صفحه‌کلید ناگهان گوشه‌دار می‌شد. */
+.tm a:focus-visible,
+.tm button:focus-visible,
+.tmp a:focus-visible,
+.tmp button:focus-visible {
+  outline: 2px solid var(--ios-tint-ink);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 5px rgb(199 166 106 / .26);
+}
+
+/* ═══════════════ هدف لمسی ═══════════════
+   ⚠️ اندازه‌گیری در ۳۹۰: پنج کنترل زیر ۴۴ پیکسل بودند — لینک
+   «مشاهده همه»، نام روی کارت، لینک‌های مسیر و تب‌های گالری.
+   قاعده عمدا نقطه‌ای است نه فراگیر: `.tmp a` کلی، لینک‌های داخل
+   متن توضیحات را هم بلند می‌کرد و پاراگراف را می‌شکست. */
+@media (max-width: 1023px) {
+  .tm .tm-link,
+  .tm .tm-card-name > a,
+  .tmp .tmp-crumb a,
+  .tmp .ch-gal-tabs > button {
+    min-block-size: 44px;
+    display: inline-flex;
+    align-items: center;
+  }
+  /* نام روی کارت نباید با ارتفاع تازه از متن زیرش فاصله بگیرد */
+  .tm .tm-card-name { align-items: center; }
+}
+
+/* ═══════════════ بدون پشتیبانی از تاری ═══════════════
+   ⚠️ نوار تب چسبان و شیت روی ۰٫۸۲ شفافیت‌اند و به تاری تکیه دارند.
+   مرورگری که backdrop-filter ندارد، محتوای صفحه را از پشتشان نشان
+   می‌دهد و متن ناخوانا می‌شود. */
+@supports not (backdrop-filter: blur(1px)) {
+  .tmp .tmp-tabs { background: rgb(242 242 247 / .98); }
+  .tm .tm-sheet-panel { background: rgb(255 255 255 / .99); }
+  .tm-citypanel.tm-citypanel { background: rgb(255 255 255 / .99); }
+}
+
+/* ═══════════════ دو سطح جامانده ═══════════════
+   ⚠️ اینها هنوز زبان قبلی را داشتند و کنار سطح‌های تازه ناهماهنگ
+   بودند: جعبه جست‌وجو روی هیروی تیره شناور است و نوار چسبان موبایل
+   دکمه‌های قرصی دارد ولی خودش گوشه‌دار بود. */
+.tm .tm-search {
+  background: rgb(255 255 255 / .10);
+  border: 1px solid rgb(255 255 255 / .16);
+  border-radius: var(--ios-r-lg);
+  backdrop-filter: blur(20px) saturate(1.8);
+}
+.tm .tm-search .tm-label { color: rgb(255 255 255 / .72); }
+.tm .tm-search .tm-input,
+.tm .tm-search .tm-citybtn {
+  background: rgb(255 255 255 / .92); border-color: transparent;
+}
+
+.tmp .tmp-sticky {
+  border-start-start-radius: 22px; border-start-end-radius: 22px;
+  border-block-start: 0;
+  background: rgb(255 255 255 / .86);
+  backdrop-filter: blur(24px) saturate(1.8);
+  box-shadow: 0 -6px 28px rgb(0 0 0 / .12);
+}
+@supports not (backdrop-filter: blur(1px)) {
+  .tm .tm-search { background: rgb(30 30 34 / .96); }
+  .tmp .tmp-sticky { background: rgb(255 255 255 / .99); }
+}
+
+/* اسکلتون: خاکستری سرد، هم‌رنگ بقیه صفحه */
+.tm .tm-skel-b { background: rgb(120 120 128 / .14); border-radius: 7px; }

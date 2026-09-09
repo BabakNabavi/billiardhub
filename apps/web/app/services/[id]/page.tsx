@@ -37,6 +37,7 @@ import '@/components/profile/profile-page.css'
 import { TechnicianServices } from '@/components/tech/market/TechnicianServices'
 import '@/components/tech/market/market.css'
 import '@/components/tech/market/market-profile.css'
+import '@/components/tech/market/ios.css'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 /* ⚠️ آیکون تزئینی نداریم: هر آیکونی که این‌جا می‌ماند یا ناوبری
@@ -292,7 +293,7 @@ export default function TechnicianProfilePage() {
   /* تب فعال — فقط برای نشانه‌گذاری، ناوبری با لنگر است */
   const [sec, setSec] = useState('about')
   const heroActsRef = useRef<HTMLDivElement | null>(null)
-  const closeRef = useRef<HTMLDivElement | null>(null)
+  const closeRef = useRef<HTMLDivElement | null>(null)
   /* ریشه‌ی صفحه — ناظر تب فعال و کنش چسبان از این‌جا می‌گردند.
      (پیش‌تر دامنه‌ی `gsap.context` بود؛ آن سیستم حذف شد.) */
   const stageRef = useRef<HTMLDivElement | null>(null)
@@ -346,7 +347,7 @@ export default function TechnicianProfilePage() {
 
   /* ⚠️ حرکت فقط وقتی راه می‌افتد که داده رسیده باشد: SplitText
      روی متنی که هنوز نیامده گره‌های خالی می‌سازد و نام هرگز ظاهر
-     نمی‌شود. */
+     نمی‌شود. */
 
   /* یونیون تفکیک‌شده‌ی  یا هر دو را می‌خواهد یا
      هیچ‌کدام را — پس یک‌جا ساخته و پخش می‌شود. */

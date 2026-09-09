@@ -36,6 +36,9 @@ import {
   ServiceFilters, EMPTY_FILTERS, countActive, type FilterState,
 } from '@/components/tech/market/ServiceFilters'
 import '@/components/tech/market/market.css'
+/* ⚠️ بعد از market.css بار می‌شود: فقط زبان بصری را عوض می‌کند و
+   هیچ کلاسی را جابه‌جا نمی‌کند. */
+import '@/components/tech/market/ios.css'
 
 /** امتیاز تجمیعی هر متخصص — از ستون ردیف، نه jsonb */
 type Rating = { avg: number; count: number }
