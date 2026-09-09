@@ -1,5 +1,6 @@
 import { getSupabaseServer } from '../supabase-server'
 import { resolveUrl, type StorageProvider } from './storage'
+import { sanitizeIlike, faIlikeOr, faTagContains } from './search-term'
 
 /* ─────────────────────────────────────────────────────────────
    بیلیارد مدیا — لایه‌ی داده.
@@ -172,10 +173,19 @@ export async function listPublic(o: ListOpts = {}): Promise<{ items: PublicVideo
   if (o.featuredOnly) q = q.eq('featured', true)
 
   if (o.q) {
-    /* جست‌وجوی ساده و امن: عنوان یا توضیح. `%` و `,` در ورودی
-       می‌توانند الگو را بشکنند، پس پاک می‌شوند. */
-    const term = o.q.replace(/[%,()\\]/g, ' ').trim().slice(0, 80)
-    if (term) q = q.or(`title.ilike.%${term}%,description.ilike.%${term}%`)
+    /* ⚠️ همان سازنده‌ای که نوارِ پیشنهاد استفاده می‌کند. نسخه‌ی قبلی
+       این‌جا تای «ی/ک» را نمی‌زد، پس پیشنهادی که برای «كلوپ» نشان
+       داده می‌شد به صفحه‌ی «چیزی پیدا نشد» می‌رسید — و آن از
+       نشان‌ندادنِ پیشنهاد بدتر است. `*` و `_` هم آن‌جا پاک می‌شوند. */
+    const term = sanitizeIlike(o.q, 80)
+    /* ⚠️ برچسب هم گشته می‌شود: نوارِ پیشنهاد برچسب پیشنهاد می‌دهد و
+       بدونِ این، کلیک روی همان پیشنهاد به صفحه‌ی خالی می‌رسید. */
+    if (term) {
+      q = q.or([
+        faIlikeOr(['title', 'description'], term),
+        faTagContains('tags', term),
+      ].join(','))
+    }
   }
 
   if (o.sort === 'popular') {

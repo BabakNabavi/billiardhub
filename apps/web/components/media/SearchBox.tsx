@@ -4,7 +4,7 @@
    نوار جست‌وجوی بیلیارد مدیا — با مکانیزم یوتوب.
 
    چیزهایی که یوتوب می‌کند و این‌جا هم هست:
-     · با هر حرف (از دو حرف به بالا) پیشنهاد می‌آید، نه بعد از Enter
+     · از همان **حرف اول** پیشنهاد می‌آید، نه بعد از Enter
      · درخواست‌ها debounce می‌شوند تا هر کلید یک درخواست نزند
      · پاسخ کهنه دور ریخته می‌شود؛ فقط آخرین درخواست می‌نویسد
      · بالا/پایین بین پیشنهادها، Enter انتخاب، Escape بستن
@@ -22,6 +22,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Search, X, Clock, Hash, User, Play } from 'lucide-react'
+import { foldCase } from '@/lib/media/search-term'
 
 interface Suggestion {
   kind: 'video' | 'channel' | 'tag' | 'history'
@@ -49,7 +50,18 @@ const pushHist = (t: string) => {
 /* بخش تایپ‌شده را پررنگ می‌کند — همان کاری که یوتوب در پیشنهادها
    می‌کند و کمک می‌کند کاربر تفاوت را ببیند. */
 function Mark({ text, q }: { text: string; q: string }) {
-  const i = q ? text.toLowerCase().indexOf(q.toLowerCase()) : -1
+  /* ⚠️ همان تای «ی/ک» که سرور می‌زند، وگرنه دقیقا در حالتی که این
+     قابلیت برایش ساخته شد (تایپ با صفحه‌کلید عربی روی ردیفِ فارسی)
+     برجسته‌سازی بی‌صدا ناپدید می‌شود.
+
+     ⚠️ برش روی رشته‌ی **اصلی** زده می‌شود، پس فقط تا وقتی درست است
+     که تا طول را عوض نکند. کوچک‌کردن در یونیکد همیشه طول‌ثابت نیست
+     («İ» یعنی U+0130 به دو نویسه باز می‌شود)؛ در آن حالت از
+     برجسته‌سازی صرف‌نظر می‌کنیم — درست نشان‌دادنِ متن از پررنگ‌کردنش
+     مهم‌تر است. */
+  const ft = foldCase(text), fq = foldCase(q)
+  const safe = ft.length === text.length && fq.length === q.length
+  const i = q && safe ? ft.indexOf(fq) : -1
   if (i < 0) return <>{text}</>
   return (
     <>
@@ -84,11 +96,18 @@ export default function SearchBox({ initial = '' }: { initial?: string }) {
 
   useEffect(() => {
     const term = q.trim()
-    if (term.length < 2) { setItems([]); return }
+    if (!term) { setItems([]); return }
     const id = ++reqId.current
     const t = window.setTimeout(async () => {
       try {
-        const r = await fetch(`/api/media/suggest?q=${encodeURIComponent(term)}`, { cache: 'no-store' })
+        /* ⚠️ `no-store` برداشته شد: هر backspace همان درخواستِ قبلی
+           است و کشِ کوتاهِ مرورگر باید جذبش کند. ترتیبِ پاسخ‌ها را
+           `reqId` نگه می‌دارد، نه نبودِ کش. کهنگیِ حداکثر ۳۰ثانیه‌ای
+           فقط روی *اشاره* است؛ خودِ صفحه‌ی نتیجه سمتِ سرور تازه
+           رندر می‌شود. */
+        const r = await fetch(`/api/media/suggest?q=${encodeURIComponent(term)}`)
+        /* ۴۲۹ یعنی «زیادی تند»، نه «چیزی نیست» — فهرستِ قبلی بماند. */
+        if (!r.ok) return
         const j = await r.json() as { items?: Suggestion[] }
         if (id === reqId.current) setItems(j.items ?? [])
       } catch { /* پیشنهاد نیامد — تایپ ادامه دارد */ }
@@ -107,7 +126,7 @@ export default function SearchBox({ initial = '' }: { initial?: string }) {
 
   /* تاریخچه فقط وقتی جعبه خالی است — مثل یوتوب */
   const rows: Suggestion[] = useMemo(() => {
-    if (q.trim().length >= 2) return items
+    if (q.trim() !== '') return items
     return hist.map(h => ({ kind: 'history' as const, text: h }))
   }, [q, items, hist])
 
