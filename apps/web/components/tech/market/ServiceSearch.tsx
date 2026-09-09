@@ -6,14 +6,15 @@
    ⚠️ فرمِ واقعی است نه دکور: `<form>` با `onSubmit`، پس Enter هم
    کار می‌کند و صفحه‌خوان می‌فهمد این یک جست‌وجوست.
 
-   ⚠️ فهرستِ شهر از `getCities`/`getProvinceNames` نمی‌آید بلکه از
-   *شهرهای متخصصانِ موجود*. قاعده‌ی پروژه استفاده از منبعِ واحد را
-   برای **ورودیِ کاربر** الزامی می‌کند؛ این یک فیلترِ فهرست است و
-   نشان‌دادنِ ۱۱۹۳ شهری که هیچ متخصصی ندارند فقط بن‌بست می‌سازد.
+   ⚠️ فهرستِ شهر از منبعِ واحدِ `lib/iran-geo` می‌آید. نسخه‌ی قبلی
+   فقط شهرهای متخصصانِ موجود را می‌داد و کاربرِ اصفهانی شهرش را در
+   فهرست نمی‌دید (۳۱ استان، ۱۱۵۶ شهر).
+   `withTechnicians` فقط برای نشانه‌گذاری است.
    ───────────────────────────────────────────────────────────── */
 
 import { useId } from 'react'
 import { Search } from 'lucide-react'
+import { CityFilterSelect } from './CityFilterSelect'
 
 export interface ServiceSearchProps {
   query: string
@@ -47,10 +48,7 @@ export function ServiceSearch({ query, onQuery, city, onCity, cities, onSubmit }
 
       <div className="tm-field">
         <label className="tm-label" htmlFor={cId}>شهر</label>
-        <select id={cId} className="tm-select" value={city} onChange={e => onCity(e.target.value)}>
-          <option value="all">همه شهرها</option>
-          {cities.map(c => <option key={c} value={c}>{c}</option>)}
-        </select>
+        <CityFilterSelect id={cId} value={city} onChange={onCity} withTechnicians={cities} />
       </div>
 
       <button className="tm-btn tm-btn--primary" type="submit">
