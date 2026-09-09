@@ -39,7 +39,7 @@ const gradeKeyByLabel = (line: string) => GRADES.find(g => stripBidi(line).start
 
 export default function AdminRefereesPage() {
   const { user, _hydrated } = useAuthStore()
-  const [list, setList]         = useState<RefereeProfile[]>([])
+  const [list, setList]         = useState<Array<RefereeProfile & { id: string }>>([])
   const [expanded, setExpanded] = useState<string | null>(null)
   const [tick, setTick]         = useState(0)
   const [err,  setErr]          = useState('')
@@ -64,11 +64,14 @@ export default function AdminRefereesPage() {
   /* ⚠️ کشِ محلی فقط *بعد از* موفقیتِ سرور به‌روز می‌شود.
      پیش‌تر بی‌قیدوشرط نوشته می‌شد: سرور ۴۰۳ می‌داد، ردیف روی صفحه
      عوض‌شده به‌نظر می‌رسید و با اولین بازخوانی برمی‌گشت. */
-  const act = async (slug: string, patch: Partial<RefereeProfile>) => {
-    const res = await patchAdminProfile(slug, patch as Record<string, unknown>)
+  /* ⚠️ خودِ ردیف را می‌گیرد: PATCH با شناسه می‌رود (نامک فقط داخلِ
+     هر نقش یکتاست و بینِ نقش‌ها به ردیفِ اشتباه می‌خورد) و کشِ
+     محلی با نامک کلید می‌خورد. */
+  const act = async (row: { id: string; slug: string }, patch: Partial<RefereeProfile>) => {
+    const res = await patchAdminProfile(row, patch as Record<string, unknown>)
     if (!res.ok) { setErr(res.message ?? 'انجام نشد'); return }
     setErr('')
-    updateRefereeProfile(slug, patch)
+    updateRefereeProfile(row.slug, patch)
     setTick(t => t + 1)
   }
 
@@ -188,18 +191,18 @@ export default function AdminRefereesPage() {
 
                   {/* Actions */}
                   <div style={{ borderTop: CBOR, padding: '13px 18px', display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
-                    <button onClick={() => act(c.slug, { status: 'approved' })} style={btn('rgba(5,118,66,0.10)', '#057642', '1px solid rgba(5,118,66,0.24)')}>
+                    <button onClick={() => act(c, { status: 'approved' })} style={btn('rgba(5,118,66,0.10)', '#057642', '1px solid rgba(5,118,66,0.24)')}>
                       تایید و انتشار پروفایل
                     </button>
                     <button
-                      onClick={() => hasCert && act(c.slug, { status: 'approved', verified: true })}
+                      onClick={() => hasCert && act(c, { status: 'approved', verified: true })}
                       disabled={!hasCert}
                       title={hasCert ? '' : 'داور باید مدرک آپلود کرده باشد'}
                       style={{ ...btn('rgba(0,149,246,0.10)', '#0095F6', '1px solid rgba(0,149,246,0.28)'), opacity: hasCert ? 1 : 0.45, cursor: hasCert ? 'pointer' : 'not-allowed' }}>
                       <VerifiedBadge title="" style={{ marginInlineStart: 0 }} />
                       اعطای تیک آبی تایید
                     </button>
-                    <button onClick={() => act(c.slug, { status: 'rejected' })} style={{ ...btn('transparent', '#b91c1c', '1px solid rgba(239,68,68,0.24)'), marginInlineStart: 'auto' }}>
+                    <button onClick={() => act(c, { status: 'rejected' })} style={{ ...btn('transparent', '#b91c1c', '1px solid rgba(239,68,68,0.24)'), marginInlineStart: 'auto' }}>
                       رد درخواست
                     </button>
                   </div>

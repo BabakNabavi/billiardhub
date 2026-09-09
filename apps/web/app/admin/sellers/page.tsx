@@ -35,9 +35,10 @@ const btn = (bg: string, color: string, border: string): React.CSSProperties => 
 
 export default function AdminSellersPage() {
   const { user, _hydrated } = useAuthStore()
-  const [list, setList]         = useState<SellerProfile[]>([])
+  const [list, setList]         = useState<Array<SellerProfile & { id: string }>>([])
   const [expanded, setExpanded] = useState<string | null>(null)
   const [tick, setTick]         = useState(0)
+  const [err,  setErr]          = useState('')
 
   /* منبع: جدول `profiles` روی سرور — نه localStorage. داشبورد فروشنده
      از قبل روی سرور می‌نوشت ولی این صفحه هنوز از مرورگر می‌خواند. */
@@ -55,9 +56,18 @@ export default function AdminSellersPage() {
   }, [tick])
 
   const isAdmin = !!user && (user.phone === ADMIN_PHONE || user.primaryRole === 'admin')
-  const act = async (slug: string, patch: Partial<SellerProfile>) => {
-    await patchAdminProfile(slug, patch as Record<string, unknown>)
-    updateSellerProfile(slug, patch)   // کش محلی هم هم‌گام بماند
+  /* ⚠️ خودِ ردیف را می‌گیرد: PATCH با شناسه می‌رود (نامک فقط داخلِ
+     هر نقش یکتاست و بینِ نقش‌ها به ردیفِ اشتباه می‌خورد) و کشِ
+     محلی با نامک کلید می‌خورد. */
+  const act = async (row: { id: string; slug: string }, patch: Partial<SellerProfile>) => {
+    /* ⚠️ نتیجه دور ریخته می‌شد و کشِ محلی بی‌قیدوشرط نوشته می‌شد:
+       سرور ۴۰۳ می‌داد، ردیف روی صفحه عوض‌شده به‌نظر می‌رسید و با
+       اولین بازخوانی برمی‌گشت — همان «دکمه کار نمی‌کند»ی که در
+       داوران گزارش شد. */
+    const res = await patchAdminProfile(row, patch as Record<string, unknown>)
+    if (!res.ok) { setErr(res.message ?? 'انجام نشد'); return }
+    setErr('')
+    updateSellerProfile(row.slug, patch)   // کش محلی هم هم‌گام بماند
     setTick(t => t + 1)
   }
 
@@ -94,6 +104,14 @@ export default function AdminSellersPage() {
             <span style={{ ...btn('rgba(5,118,66,0.08)', '#057642', '1px solid rgba(5,118,66,0.20)'), cursor: 'default' }}>کل: {list.length}</span>
           </div>
         </div>
+
+        {/* شکستِ سرور باید دیده شود، وگرنه ادمین دکمه را می‌زند و
+            فکر می‌کند انجام شد. */}
+        {err && (
+          <div role="alert" style={{ margin: '0 0 14px', padding: '10px 14px', borderRadius: 12,
+            background: 'rgba(220,38,38,0.06)', border: '1px solid rgba(220,38,38,0.28)',
+            color: '#991B1B', fontSize: 12.5, fontWeight: 800 }}>{err}</div>
+        )}
 
         {list.length === 0 ? (
           <div style={{ ...card, padding: '48px 24px', textAlign: 'center', color: TEXT_M, fontSize: 14 }}>هنوز فروشگاهی ثبت نشده است.</div>
@@ -168,18 +186,18 @@ export default function AdminSellersPage() {
 
                   {/* Actions */}
                   <div style={{ borderTop: CBOR, padding: '13px 18px', display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
-                    <button onClick={() => act(s.slug, { status: 'approved' })} style={btn('rgba(5,118,66,0.10)', '#057642', '1px solid rgba(5,118,66,0.24)')}>
+                    <button onClick={() => act(s, { status: 'approved' })} style={btn('rgba(5,118,66,0.10)', '#057642', '1px solid rgba(5,118,66,0.24)')}>
                       تایید و انتشار فروشگاه
                     </button>
                     <button
-                      onClick={() => hasCert && act(s.slug, { status: 'approved', verified: true })}
+                      onClick={() => hasCert && act(s, { status: 'approved', verified: true })}
                       disabled={!hasCert}
                       title={hasCert ? '' : 'ابتدا فروشنده باید جواز کسب آپلود کند'}
                       style={{ ...btn('rgba(0,149,246,0.10)', '#0095F6', '1px solid rgba(0,149,246,0.28)'), opacity: hasCert ? 1 : 0.45, cursor: hasCert ? 'pointer' : 'not-allowed' }}>
                       <VerifiedBadge title="" style={{ marginInlineStart: 0 }} />
                       اعطای تیک آبی تایید
                     </button>
-                    <button onClick={() => act(s.slug, { status: 'rejected' })} style={{ ...btn('transparent', '#b91c1c', '1px solid rgba(239,68,68,0.24)'), marginInlineStart: 'auto' }}>
+                    <button onClick={() => act(s, { status: 'rejected' })} style={{ ...btn('transparent', '#b91c1c', '1px solid rgba(239,68,68,0.24)'), marginInlineStart: 'auto' }}>
                       رد درخواست
                     </button>
                   </div>
