@@ -2,15 +2,15 @@
 
 /* مرکز تبلیغات بیلیارد هاب.
 
-   یک صفحه، سه دستهٔ محصول — نه سه سیستمِ جدا:
+   یک صفحه، سه دستهٔ محصول — نه سه سیستم جدا:
 
      · خرید جایگاه تبلیغاتی — فضای تبلیغ (بنر یا ویدیوی پیش‌پخش).
        تعرفه همین‌جا دیده می‌شود و پرداخت مستقیم است.
-     · بسته‌های آگهی — سهمیهٔ ثبتِ آگهی در بیلیارد بازار. پیش‌تر فقط
+     · بسته‌های آگهی — سهمیهٔ ثبت آگهی در بیلیارد بازار. پیش‌تر فقط
        در /plans بود و هیچ ربطی به این صفحه نداشت.
-     · درخواست سفارشی — اسپانسری و کمپینِ خارج از جایگاه‌های استاندارد.
+     · درخواست سفارشی — اسپانسری و کمپین خارج از جایگاه‌های استاندارد.
 
-   هر سه پشتِ صحنه از یک معماری استفاده می‌کنند: کمپین ← سفارش ←
+   هر سه پشت صحنه از یک معماری استفاده می‌کنند: کمپین ← سفارش ←
    پرداخت ← بازبینی ← فعال‌سازی ← آمار ← انقضا. */
 
 import { useEffect, useState } from 'react'
@@ -22,7 +22,7 @@ import BuyPlacement from '../../components/advertise/BuyPlacement'
 import AdPackages from '../../components/advertise/AdPackages'
 import { apiFetch } from '../../lib/http'
 
-/* سه دستهٔ محصولِ یک مرکز — نه سه سیستمِ جدا */
+/* سه دستهٔ محصول یک مرکز — نه سه سیستم جدا */
 const TABS = [
   { id: 'placements' as const, label: 'خرید جایگاه تبلیغاتی', icon: Megaphone },
   { id: 'packages' as const, label: 'بسته‌های آگهی', icon: Package },
@@ -53,10 +53,10 @@ const LABEL: React.CSSProperties = {
 interface PlanTier { id: string; name: string; price: number; durationDays: number; badge: string | null }
 interface Slot {
   key: string; title: string; description: string | null; plans?: PlanTier[]
-  /* جایگاهِ ویدیویی (پیش‌پخش) فایل می‌خواهد، نه فقط متن */
+  /* جایگاه ویدیویی (پیش‌پخش) فایل می‌خواهد، نه فقط متن */
   contentKind?: string
   /* فروختنی = پولی و روشن. جایگاهی که هنوز باز نشده فقط در کشوی
-     درخواستِ سفارشی می‌آید. */
+     درخواست سفارشی می‌آید. */
   sellable?: boolean
   skipAfterSec?: number | null
   maxDurationSec?: number | null
@@ -79,9 +79,9 @@ export default function AdvertisePage() {
   const locked = !!user
 
   /* ── ویدیوی تبلیغ ──
-     جایگاهِ ویدیویی به‌جای متن، فایل می‌خواهد. مدت پیش از آپلود در
-     مرورگر سنجیده می‌شود: فرستادنِ ویدیوی بلند و بعد رد شدنش، هم وقتِ
-     کاربر را می‌گیرد هم پهنای‌باند را. سقفِ نهایی را سرور اعمال می‌کند. */
+     جایگاه ویدیویی به‌جای متن، فایل می‌خواهد. مدت پیش از آپلود در
+     مرورگر سنجیده می‌شود: فرستادن ویدیوی بلند و بعد رد شدنش، هم وقت
+     کاربر را می‌گیرد هم پهنای‌باند را. سقف نهایی را سرور اعمال می‌کند. */
   const [adVideo, setAdVideo] = useState('')
   const [adDuration, setAdDuration] = useState<number | null>(null)
   const [clickUrl, setClickUrl] = useState('')
@@ -117,7 +117,7 @@ export default function AdvertisePage() {
     setUpBusy(true)
     try {
       const { uploadFile } = await import('../../lib/supabase')
-      /* مسیر زیرِ شناسه‌ی خودِ کاربر — سرور همین را بررسی می‌کند */
+      /* مسیر زیر شناسه‌ی خود کاربر — سرور همین را بررسی می‌کند */
       const url = await uploadFile('club-media', f, `ads/${user.id}/${Date.now()}`)
       if (!url) { setUpErr('بارگذاری انجام نشد؛ حجم یا فرمت فایل را بررسی کنید'); return }
       setAdVideo(url)
@@ -126,7 +126,7 @@ export default function AdvertisePage() {
 
   useEffect(() => {
     /* کاتالوگ از سرور فقط جایگاه‌های «پولی» را برمی‌گرداند — جایگاهی که
-       ادمین پولی‌اش نکرده اصلاً گزینه‌ی خرید ندارد (گیت فاز ۴). */
+       ادمین پولی‌اش نکرده اصلا گزینه‌ی خرید ندارد (گیت فاز ۴). */
     void fetch('/api/ads/placements?catalog=1', { cache: 'no-store' })
       .then(r => (r.ok ? r.json() : null))
       .then(j => setSlots(j?.placements ?? []))
@@ -153,8 +153,8 @@ export default function AdvertisePage() {
 
     setSending(true)
     try {
-      /* نشانیِ ویدیو و مقصد داخلِ متنِ درخواست می‌روند تا ادمین همه‌ی
-         اطلاعات را یک‌جا ببیند — بدونِ ساختنِ ستونِ تازه برای چیزی که
+      /* نشانی ویدیو و مقصد داخل متن درخواست می‌روند تا ادمین همه‌ی
+         اطلاعات را یک‌جا ببیند — بدون ساختن ستون تازه برای چیزی که
          فقط یک جایگاه از آن استفاده می‌کند. */
       const extra = videoSlot
         ? `\n\n— ویدیوی تبلیغ: ${adVideo}` +
@@ -210,7 +210,7 @@ export default function AdvertisePage() {
             در بیلیارد هاب تبلیغ کنید
           </h1>
           <p style={{ fontSize: 14, color: SEC, lineHeight: 2, margin: 0, maxWidth: 560, marginInline: 'auto' }}>
-            مخاطب ما دقیقاً همان‌هایی هستند که دنبال بیلیاردند: بازیکن، باشگاه‌دار، مربی و خریدار تجهیزات.
+            مخاطب ما دقیقا همان‌هایی هستند که دنبال بیلیاردند: بازیکن، باشگاه‌دار، مربی و خریدار تجهیزات.
             تعرفه را همین‌جا ببینید و مستقیم پرداخت کنید.
           </p>
 
@@ -228,11 +228,11 @@ export default function AdvertisePage() {
         </div>
 
         {/* ── دو دستهٔ محصول، یک صفحه ──
-            «بسته» سهمیه‌ی ثبتِ آگهی می‌دهد و «جایگاه» فضای تبلیغ
+            «بسته» سهمیه‌ی ثبت آگهی می‌دهد و «جایگاه» فضای تبلیغ
             می‌فروشد. تا امروز این دو در دو صفحه‌ی بی‌ربط بودند
             (/plans و /advertise) و کاربر باید خودش می‌فهمید کدام را
-            می‌خواهد. حالا کنارِ همند و متنِ هر تب تفاوتشان را می‌گوید —
-            که مهم‌تر از کنارِ هم بودنشان است. */}
+            می‌خواهد. حالا کنار همند و متن هر تب تفاوتشان را می‌گوید —
+            که مهم‌تر از کنار هم بودنشان است. */}
         <div style={{ display: 'flex', gap: 8, justifyContent: 'center', flexWrap: 'wrap', marginBottom: 22 }}>
           {TABS.map(t => {
             const on = tab === t.id
@@ -254,7 +254,7 @@ export default function AdvertisePage() {
         {tab === 'placements' && (
           <section style={{ marginBottom: 26 }}>
             <p style={{ fontSize: 12.5, color: MUT, lineHeight: 2, margin: '0 0 14px', textAlign: 'center' }}>
-              فضای تبلیغ در صفحه‌های سایت — بنر، یا ویدیوی پیش‌پخشِ بیلیارد مدیا.
+              فضای تبلیغ در صفحه‌های سایت — بنر، یا ویدیوی پیش‌پخش بیلیارد مدیا.
             </p>
             {user
               ? <BuyPlacement userId={user.id} />
@@ -271,7 +271,7 @@ export default function AdvertisePage() {
         {tab === 'packages' && (
           <section style={{ marginBottom: 26 }}>
             <p style={{ fontSize: 12.5, color: MUT, lineHeight: 2, margin: '0 0 14px', textAlign: 'center' }}>
-              سهمیه‌ی ثبتِ آگهی در بیلیارد بازار — این با خریدِ جایگاه تبلیغاتی فرق دارد.
+              سهمیه‌ی ثبت آگهی در بیلیارد بازار — این با خرید جایگاه تبلیغاتی فرق دارد.
             </p>
             <AdPackages backTo="/advertise" />
           </section>
@@ -332,9 +332,9 @@ export default function AdvertisePage() {
                 onChange={v => set('slotKey', v)} />
               )}
 
-              {/* ── جایگاهِ ویدیویی ──
+              {/* ── جایگاه ویدیویی ──
                   فقط وقتی دیده می‌شود که کاربر جایگاهی انتخاب کرده که
-                  واقعاً ویدیو می‌خواهد. فرم برای بقیه‌ی جایگاه‌ها
+                  واقعا ویدیو می‌خواهد. فرم برای بقیه‌ی جایگاه‌ها
                   دست‌نخورده می‌ماند. */}
               {videoSlot && (
                 <div style={{

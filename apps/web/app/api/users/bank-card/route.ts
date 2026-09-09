@@ -6,29 +6,29 @@ import { digitsOnly, isValidCard, bankOfCard, bankOfIban } from '@/lib/bank';
 import { matchCard, cardToIban } from '@/lib/bank-server';
 import { lockedResponse, isMissingColumn } from '@/lib/verification-lock';
 
-/* کارت بانکی کاربر — مقصد بازگشت وجه رزروِ لغوشده.
+/* کارت بانکی کاربر — مقصد بازگشت وجه رزرو لغوشده.
 
    این مسیر تا امروز وجود نداشت. صفحه‌ی پروفایل به
-   `/api/user/profile/bank-card` درخواست می‌داد که بازمانده‌ی بک‌اندِ
+   `/api/user/profile/bank-card` درخواست می‌داد که بازمانده‌ی بک‌اند
    قدیمی NestJS بود و روی Next هرگز ساخته نشد؛ نتیجه‌اش ۴۰۴ بود که در
    UI به «خطا در ثبت کارت» ترجمه می‌شد — پیامی که هیچ‌کس نمی‌توانست از
    رویش بفهمد مشکل کجاست.
 
-   چرا فقط ذخیره نمی‌کنیم: این کارت مقصدِ پول است. کارتی که به نام
-   شخصِ دیگری باشد یا اشتباه تایپ شده باشد، یعنی پولِ بازگشتی به حساب
+   چرا فقط ذخیره نمی‌کنیم: این کارت مقصد پول است. کارتی که به نام
+   شخص دیگری باشد یا اشتباه تایپ شده باشد، یعنی پول بازگشتی به حساب
    غریبه. پس همان زنجیره‌ی باشگاه این‌جا هم اجرا می‌شود:
-     ۱) Luhn محلی  — کارتِ اشتباه‌تایپ‌شده بدون مصرف اعتبار رد می‌شود
-     ۲) CardMatch  — این کارت واقعاً به همین کد ملی تعلق دارد؟
-     ۳) CardToIban — شبای همان کارت، که مقصدِ واقعیِ بازگشتِ وجه است
+     ۱) Luhn محلی  — کارت اشتباه‌تایپ‌شده بدون مصرف اعتبار رد می‌شود
+     ۲) CardMatch  — این کارت واقعا به همین کد ملی تعلق دارد؟
+     ۳) CardToIban — شبای همان کارت، که مقصد واقعی بازگشت وجه است
 
-   `IbanMatch` لازم نیست: شبا از خودِ کارتی می‌آید که در گامِ ۲ ثابت
-   شد به نامِ همین شخص است، پس تطبیقِ دوباره چیزی اضافه نمی‌کند. */
+   `IbanMatch` لازم نیست: شبا از خود کارتی می‌آید که در گام ۲ ثابت
+   شد به نام همین شخص است، پس تطبیق دوباره چیزی اضافه نمی‌کند. */
 
 export async function PUT(req: NextRequest) {
   const actor = actorFromRequest(req);
   if (!actor) return NextResponse.json({ message: 'ابتدا وارد شوید' }, { status: 401 });
 
-  /* هر استعلام اعتبارِ سرویس را مصرف می‌کند */
+  /* هر استعلام اعتبار سرویس را مصرف می‌کند */
   const rl = await hitRateLimit(req, { action: 'bank-card', max: 10, windowSec: 600 }, actor.id);
   if (!rl.ok) return tooMany(rl.retryAfterSec);
 
@@ -44,7 +44,7 @@ export async function PUT(req: NextRequest) {
 
   const COLS = 'national_id, national_id_verified, birth_date, "firstName", "lastName", bank_card_verified';
   let { data: me, error: meErr } = await sb().from('users').select(COLS).eq('id', actor.id).maybeSingle();
-  /* ستونِ قفل با مهاجرت ۰۳۹ می‌آید؛ تا اجرا نشده ثبتِ کارت نباید بشکند */
+  /* ستون قفل با مهاجرت ۰۳۹ می‌آید؛ تا اجرا نشده ثبت کارت نباید بشکند */
   if (meErr && isMissingColumn(meErr.message)) {
     console.error('[bank-card] ستون bank_card_verified نیست — مهاجرت ۰۳۹ اجرا نشده');
     ({ data: me } = await sb().from('users')
@@ -56,9 +56,9 @@ export async function PUT(req: NextRequest) {
     firstName?: string; lastName?: string; bank_card_verified?: boolean;
   };
 
-  /* قفل — پیش از matchCard، وگرنه اعتبارِ سرویس مصرف شده و بعد جواب
-     دور ریخته می‌شود. تنها راهِ تغییر، تیکتِ پشتیبانی و بازکردنِ ادمین
-     است؛ پیش‌تر خودِ کاربر با دکمه‌ی «تغییر کارت» بی‌نهایت بار
+  /* قفل — پیش از matchCard، وگرنه اعتبار سرویس مصرف شده و بعد جواب
+     دور ریخته می‌شود. تنها راه تغییر، تیکت پشتیبانی و بازکردن ادمین
+     است؛ پیش‌تر خود کاربر با دکمه‌ی «تغییر کارت» بی‌نهایت بار
      می‌توانست استعلام بگیرد. */
   if (u.bank_card_verified) return lockedResponse('bank');
 
@@ -85,18 +85,18 @@ export async function PUT(req: NextRequest) {
 
   /* شبا هم همین‌جا گرفته می‌شود.
 
-     برگشتِ وجه در نهایت به شبا انجام می‌شود نه به کارت، و همین لحظه
-     در دسترس است. اگر ذخیره‌اش نکنیم، موقعِ بازپرداخت باید دوباره
+     برگشت وجه در نهایت به شبا انجام می‌شود نه به کارت، و همین لحظه
+     در دسترس است. اگر ذخیره‌اش نکنیم، موقع بازپرداخت باید دوباره
      استعلام بگیریم — اعتبار مصرف کند و ممکن است سرویس بالا نباشد.
 
-     شکستِ این استعلام کلِ ثبت را باطل نمی‌کند: تطابقِ کارت با هویت
-     — که بخشِ امنیتیِ ماجراست — از قبل انجام شده. */
+     شکست این استعلام کل ثبت را باطل نمی‌کند: تطابق کارت با هویت
+     — که بخش امنیتی ماجراست — از قبل انجام شده. */
   const ib = await cardToIban(card);
   const iban = ib.ok && ib.found ? ib.iban ?? null : null;
 
-  /* نام دارنده از هویتِ احرازشده نوشته می‌شود، نه از ورودیِ کاربر:
-     کارت با همین کد ملی تطبیق داده شده، پس نامِ واقعی همین است. یک
-     فیلدِ متنیِ آزاد فقط اجازه می‌داد کارتِ تأییدشده زیر نامِ دلخواه
+  /* نام دارنده از هویت احرازشده نوشته می‌شود، نه از ورودی کاربر:
+     کارت با همین کد ملی تطبیق داده شده، پس نام واقعی همین است. یک
+     فیلد متنی آزاد فقط اجازه می‌داد کارت تأییدشده زیر نام دلخواه
      بنشیند — همان اشتباهی که در اطلاعات بانکی باشگاه بود. */
   const ownerName = `${u.firstName ?? ''} ${u.lastName ?? ''}`.trim();
 
@@ -111,10 +111,10 @@ export async function PUT(req: NextRequest) {
 
   let { error } = await sb().from('users').update(patch).eq('id', actor.id);
 
-  /* ستون‌های اختیاری: bank_iban با مهاجرت ۰۳۸ و فلگِ قفل با ۰۳۹.
-     تا اجرا نشده‌اند، نبودشان نباید ثبتِ خودِ کارت را بشکند. */
+  /* ستون‌های اختیاری: bank_iban با مهاجرت ۰۳۸ و فلگ قفل با ۰۳۹.
+     تا اجرا نشده‌اند، نبودشان نباید ثبت خود کارت را بشکند. */
   if (error && isMissingColumn(`${error.message} ${error.code ?? ''}`)) {
-    console.error('[users/bank-card] ستونِ اختیاری نیست — مهاجرت ۰۳۸/۰۳۹ اجرا نشده:', error.message);
+    console.error('[users/bank-card] ستون اختیاری نیست — مهاجرت ۰۳۸/۰۳۹ اجرا نشده:', error.message);
     if (error.message.includes('bank_iban')) delete patch.bank_iban;
     delete patch.bank_card_verified;
     delete patch.bank_card_verified_at;
@@ -126,23 +126,23 @@ export async function PUT(req: NextRequest) {
     return NextResponse.json({ message: 'ثبت کارت انجام نشد' }, { status: 500 });
   }
 
-  /* نام بانک از شبا مشتق می‌شود و اگر شبا نیامد، از خودِ کارت —
-     هیچ‌کدام ورودیِ کاربر نیست. */
+  /* نام بانک از شبا مشتق می‌شود و اگر شبا نیامد، از خود کارت —
+     هیچ‌کدام ورودی کاربر نیست. */
   return NextResponse.json({
     ok: true, match: true,
     bankCard: card,
     bankIban: iban ?? '',
     bankCardOwner: ownerName,
     bankName: (iban ? bankOfIban(iban) : bankOfCard(card)) || undefined,
-    /* اگر استعلامِ شبا نگرفت، کاربر باید بداند چرا آن فیلد خالی است */
+    /* اگر استعلام شبا نگرفت، کاربر باید بداند چرا آن فیلد خالی است */
     ibanMessage: iban ? undefined : (ib.message ?? 'شبای این کارت گرفته نشد'),
   });
 }
 
 /** حذف کارت ثبت‌شده — فقط تا وقتی استعلامش تأیید نشده.
  *
- *  اگر این‌جا باز می‌ماند، قفلِ PUT بی‌معنی بود: حذف کن، دوباره ثبت
- *  کن، و هر بار یک استعلامِ تازه. پس از تأیید، تغییر فقط با تیکت. */
+ *  اگر این‌جا باز می‌ماند، قفل PUT بی‌معنی بود: حذف کن، دوباره ثبت
+ *  کن، و هر بار یک استعلام تازه. پس از تأیید، تغییر فقط با تیکت. */
 export async function DELETE(req: NextRequest) {
   const actor = actorFromRequest(req);
   if (!actor) return NextResponse.json({ message: 'ابتدا وارد شوید' }, { status: 401 });

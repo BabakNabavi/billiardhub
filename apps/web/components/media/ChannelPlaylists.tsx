@@ -1,13 +1,13 @@
 'use client'
 
 /* ─────────────────────────────────────────────────────────────
-   لیست‌های پخشِ یک کانال.
+   لیست‌های پخش یک کانال.
 
-   ⚠️ اگر جدولِ لیست روی سرور نباشد (مهاجرتِ ۰۹۳ دستی اجرا می‌شود)
+   ⚠️ اگر جدول لیست روی سرور نباشد (مهاجرت ۰۹۳ دستی اجرا می‌شود)
    نه تب دیده می‌شود نه بخش. `onAvailable` همین را به صفحه‌ی کانال
-   خبر می‌دهد تا تبِ خالی نسازد.
+   خبر می‌دهد تا تب خالی نسازد.
 
-   ⚠️ فرمِ ساخت فقط برای مالکِ کانال می‌آید — و مالکیت را *سرور*
+   ⚠️ فرم ساخت فقط برای مالک کانال می‌آید — و مالکیت را *سرور*
    تصمیم می‌گیرد؛ این‌جا فقط نمایش است. اگر کاربر مالک نباشد سرور
    ۴۰۳ می‌دهد و پیامش دیده می‌شود.
    ───────────────────────────────────────────────────────────── */
@@ -25,7 +25,7 @@ export interface PlaylistCardData {
 }
 
 /* ⚠️ «نشانی دارد» با «بار می‌شود» یکی نیست — همان دلیلی که `Thumb`
-   در `cards.tsx` برایش `onError` دارد: بندانگشتیِ ۴۰۴ آیکنِ عکسِ
+   در `cards.tsx` برایش `onError` دارد: بندانگشتی ۴۰۴ آیکن عکس
    شکسته را روی کارت می‌گذارد. */
 function Poster({ src }: { src: string }) {
   const [failed, setFailed] = useState(false)
@@ -55,9 +55,9 @@ export function PlaylistCard({ p }: { p: PlaylistCardData }) {
 export default function ChannelPlaylists({
   handle, onAvailable,
 }: { handle: string; onAvailable?: (v: boolean) => void }) {
-  /* ⚠️ از پاسخِ سرور می‌آید، نه از حدسِ کلاینت و نه از استورِ
-     احراز هویت: `canEdit` را نشستِ امضاشده روی سرور تعیین کرده.
-     شرط‌گذاشتنِ اضافه روی استور یعنی اگر hydrate نشده بود یا
+  /* ⚠️ از پاسخ سرور می‌آید، نه از حدس کلاینت و نه از استور
+     احراز هویت: `canEdit` را نشست امضاشده روی سرور تعیین کرده.
+     شرط‌گذاشتن اضافه روی استور یعنی اگر hydrate نشده بود یا
      localStorage پاک شده بود، مالک بی‌صدا فرم را از دست می‌داد. */
   const [canEdit, setCanEdit] = useState(false)
   const [rows, setRows] = useState<PlaylistCardData[]>([])
@@ -76,8 +76,8 @@ export default function ChannelPlaylists({
       if (!j.available) { setState('off'); onAvailable?.(false); return }
       setCanEdit(j.canEdit === true)
       setRows(j.data); setState('ready')
-      /* ⚠️ تبِ خالی برای بازدیدکننده ساخته نمی‌شود؛ فقط مالک
-         تبِ بی‌لیست را می‌بیند تا بتواند اولی را بسازد. */
+      /* ⚠️ تب خالی برای بازدیدکننده ساخته نمی‌شود؛ فقط مالک
+         تب بی‌لیست را می‌بیند تا بتواند اولی را بسازد. */
       onAvailable?.(j.data.length > 0 || j.canEdit === true)
     } catch (e) {
       console.error('[playlists]', (e as Error).message)
@@ -124,7 +124,7 @@ export default function ChannelPlaylists({
           <input
             id="mx-pl-t" className="mx-search-in" value={title}
             onChange={e => setTitle(e.target.value)} maxLength={120}
-            placeholder="عنوان لیست تازه — مثلاً «آموزش مبتدی»"
+            placeholder="عنوان لیست تازه — مثلا «آموزش مبتدی»"
           />
           <button className="mx-act" type="button" onClick={create} disabled={busy || !title.trim()}>
             {busy ? <Loader2 size={15} className="mx-spin" aria-hidden /> : <Plus size={15} aria-hidden />}

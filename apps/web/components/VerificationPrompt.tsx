@@ -26,7 +26,7 @@ export const DOC_REQUIRED: Record<VerifiableRole, boolean> = {
 export function verificationText(role: VerifiableRole): string {
   return DOC_REQUIRED[role]
     ? `برای ثبت پروفایل، آپلود ${DOC_LABEL[role]} الزامی است.`
-    : `برای درخواست تیک تأیید و افزایش اعتبار پروفایل، لطفاً ${DOC_LABEL[role]} را آپلود نمایید.`
+    : `برای درخواست تیک تأیید و افزایش اعتبار پروفایل، لطفا ${DOC_LABEL[role]} را آپلود نمایید.`
 }
 
 const GOLD_D = '#8F6531', FELT = '#0E7A38', LINE = '#EAE5DA'
@@ -37,7 +37,7 @@ export default function VerificationPrompt({
   role: VerifiableRole
   /** مدرک انتخاب/ارسال شده — یعنی «در انتظار بررسی»، نه «تأییدشده» */
   done?: boolean
-  /** واقعاً توسط کارشناس تأیید شده — تنها حالتی که سبز می‌شود */
+  /** واقعا توسط کارشناس تأیید شده — تنها حالتی که سبز می‌شود */
   verified?: boolean
   compact?: boolean
   style?: React.CSSProperties

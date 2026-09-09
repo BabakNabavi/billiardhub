@@ -3,7 +3,7 @@
 /* ─────────────────────────────────────────────────────────────
    درباره ما — تجربه‌ی برندینگ Billiard Hub (بازطراحی ۱۴۰۵)
    هیروی سینمایی با مسیر نور توپ → استیتمنت تایپوگرافیک →
-   معرفی ادیتوریال پلتفرم → کارت رسمی شرکت + مُهر برند ثبت‌شده →
+   معرفی ادیتوریال پلتفرم → کارت رسمی شرکت + مهر برند ثبت‌شده →
    اکوسیستم مداری (دسکتاپ: orbit / موبایل: ستون عمودی) → CTA
    بدون هیچ آمار/تیم/تاریخچه‌ی ساختگی.
    ───────────────────────────────────────────────────────────── */
@@ -153,7 +153,7 @@ export default function AboutPage() {
         }
 
         /* ── لوگوهای گوشه‌ی کارت شرکت — هم‌قد و هم‌تراز ──
-           لوگوی آرتا واژه‌نگاشت پهن است؛ ارتفاعش دقیقاً برابر لوگوی بیلیارد هاب */
+           لوگوی آرتا واژه‌نگاشت پهن است؛ ارتفاعش دقیقا برابر لوگوی بیلیارد هاب */
         .ab-clogo { position: absolute; top: 24px; height: 54px; object-fit: contain; }
         .ab-clogo.l { left: 28px; width: auto; max-width: 170px; }
         .ab-clogo.r { right: 28px; width: 54px; border-radius: 13px; border: 1px solid ${LINE}; box-shadow: 0 4px 12px rgba(28,27,23,0.08); }
@@ -162,7 +162,7 @@ export default function AboutPage() {
           .ab-clogo.l { left: 18px; max-width: 128px; } .ab-clogo.r { right: 18px; width: 42px; }
         }
 
-        /* ── مُهر برند ثبت‌شده ── */
+        /* ── مهر برند ثبت‌شده ── */
         @keyframes abSealSpin { to { transform: rotate(360deg); } }
         /* origin بر حسب مختصات viewBox — با درصد، دور مبدأ (0,0) می‌چرخید و متن از کادر بیرون می‌رفت */
         .ab-seal-text { animation: abSealSpin 26s linear infinite; transform-origin: 60px 60px; }
@@ -289,7 +289,7 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* ═══ COMPANY & BRAND — رسمی، مینیمال، با مُهر ═══ */}
+      {/* ═══ COMPANY & BRAND — رسمی، مینیمال، با مهر ═══ */}
       <section style={{ padding: 'clamp(64px,9vw,120px) clamp(20px,4vw,32px)' }}>
         <div className="ab-rev" style={{
           maxWidth: 780, margin: '0 auto', position: 'relative', textAlign: 'center',
@@ -304,7 +304,7 @@ export default function AboutPage() {
           <img loading="lazy" decoding="async" className="ab-clogo r" src="/images/Logo/bh-mark-256-v5.webp" alt="بیلیارد هاب" />
           <span style={{ fontSize: 9.5, fontWeight: 800, letterSpacing: '0.3em', color: MUT }}>COMPANY &amp; BRAND</span>
 
-          {/* مُهر برند ثبت‌شده — متن چرخان آهسته */}
+          {/* مهر برند ثبت‌شده — متن چرخان آهسته */}
           <div style={{ margin: '26px auto 22px', width: 120, height: 120 }}>
             <svg viewBox="0 0 120 120" width="120" height="120" role="img" aria-label="برند ثبت‌شده">
               <defs>

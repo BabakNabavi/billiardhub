@@ -1,17 +1,17 @@
 import { getSupabaseServer } from '@/lib/supabase-server'
 
-/* فهرستِ استوری روی فضای ذخیره‌سازی — یک پیاده‌سازی برای باشگاه و
- * فروشگاه. پیش‌تر هر مسیر نسخه‌ی خودش را داشت و اختلافشان دو باگِ ساکت
+/* فهرست استوری روی فضای ذخیره‌سازی — یک پیاده‌سازی برای باشگاه و
+ * فروشگاه. پیش‌تر هر مسیر نسخه‌ی خودش را داشت و اختلافشان دو باگ ساکت
  * ساخته بود:
  *
  *  ۱) خطای نوشتن دور ریخته می‌شد. آپلود که شکست می‌خورد، مسیر همچنان
  *     ۲۰۱ برمی‌گرداند و پنل «منتشر شد» نشان می‌داد در حالی که هیچ‌چیز
  *     ذخیره نشده بود.
  *  ۲) خطای *خواندن* با «فهرست خالی» یکی گرفته می‌شد. یعنی یک خطای
- *     گذرای شبکه وسطِ انتشار، فهرست را با تکِ استوریِ جدید بازنویسی
- *     می‌کرد و تا ده استوریِ زنده را می‌سوزاند.
+ *     گذرای شبکه وسط انتشار، فهرست را با تک استوری جدید بازنویسی
+ *     می‌کرد و تا ده استوری زنده را می‌سوزاند.
  *
- * حالا «نبودِ فایل» از «خطا» جدا است: اولی فهرستِ خالیِ درست است، دومی
+ * حالا «نبود فایل» از «خطا» جدا است: اولی فهرست خالی درست است، دومی
  * باید مسیر را متوقف کند.
  */
 
@@ -26,7 +26,7 @@ export class StoryIndexError extends Error {}
 
 const indexPath = (prefix: string, id: string) => `${prefix}/${id}/stories/index.json`
 
-/** نبودِ شیء در Supabase Storage با پیام/وضعیتِ خودش شناخته می‌شود. */
+/** نبود شیء در Supabase Storage با پیام/وضعیت خودش شناخته می‌شود. */
 const isMissing = (err: unknown): boolean => {
   const e = err as { status?: number; statusCode?: number | string; message?: string } | null
   const status = Number(e?.status ?? e?.statusCode ?? 0)
@@ -37,7 +37,7 @@ const isMissing = (err: unknown): boolean => {
 export interface StoryIndex {
   read(): Promise<StoredStory[]>
   write(stories: StoredStory[]): Promise<void>
-  /** فایلِ استوری‌هایی که از فهرست بیرون رفته‌اند را پاک می‌کند */
+  /** فایل استوری‌هایی که از فهرست بیرون رفته‌اند را پاک می‌کند */
   purge(gone: StoredStory[]): Promise<void>
 }
 
@@ -50,16 +50,16 @@ export function storyIndex(bucket: string, prefix: string, id: string): StoryInd
       const { data, error } = await getSupabaseServer().storage.from(bucket).download(path)
       if (error) {
         if (isMissing(error)) return []
-        console.error(`${tag} خواندنِ فهرست شکست خورد:`, error)
-        throw new StoryIndexError('خواندنِ فهرستِ استوری انجام نشد')
+        console.error(`${tag} خواندن فهرست شکست خورد:`, error)
+        throw new StoryIndexError('خواندن فهرست استوری انجام نشد')
       }
       if (!data) return []
       try {
         const parsed: unknown = JSON.parse(await data.text())
         return Array.isArray(parsed) ? (parsed as StoredStory[]) : []
       } catch {
-        /* فایلِ خراب: خالی حساب می‌شود تا انتشارِ تازه قفل نشود */
-        console.error(`${tag} فهرستِ خراب — خالی در نظر گرفته شد`)
+        /* فایل خراب: خالی حساب می‌شود تا انتشار تازه قفل نشود */
+        console.error(`${tag} فهرست خراب — خالی در نظر گرفته شد`)
         return []
       }
     },
@@ -71,14 +71,14 @@ export function storyIndex(bucket: string, prefix: string, id: string): StoryInd
         { upsert: true, contentType: 'application/json' },
       )
       if (error) {
-        console.error(`${tag} نوشتنِ فهرست شکست خورد:`, error)
+        console.error(`${tag} نوشتن فهرست شکست خورد:`, error)
         throw new StoryIndexError('ذخیره‌ی استوری انجام نشد')
       }
     },
 
     async purge(gone) {
-      /* نشانیِ عمومیِ Supabase قالبِ ثابتی دارد و مسیرِ داخلِ باکت بعد
-         از نامِ باکت می‌آید. نشانیِ ناشناس رد می‌شود — پاک‌کردنِ
+      /* نشانی عمومی Supabase قالب ثابتی دارد و مسیر داخل باکت بعد
+         از نام باکت می‌آید. نشانی ناشناس رد می‌شود — پاک‌کردن
          کورکورانه بدتر از نگه‌داشتن است. */
       const paths = gone
         .map(s => {
@@ -92,8 +92,8 @@ export function storyIndex(bucket: string, prefix: string, id: string): StoryInd
       try {
         await getSupabaseServer().storage.from(bucket).remove(paths)
       } catch (e) {
-        /* نشتِ فضا بد است ولی نباید مسیر را بشکند */
-        console.error(`${tag} پاک‌کردنِ فایل انجام نشد:`, e)
+        /* نشت فضا بد است ولی نباید مسیر را بشکند */
+        console.error(`${tag} پاک‌کردن فایل انجام نشد:`, e)
       }
     },
   }

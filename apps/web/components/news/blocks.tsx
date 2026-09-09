@@ -1,8 +1,8 @@
 /* ─────────────────────────────────────────────────────────────
    بلوک‌های صفحه‌ی تحریریه.
 
-   ⚠️ هر بلوک وقتی داده‌اش نباشد `null` برمی‌گرداند — نه قابِ خالی،
-   نه «به‌زودی»، نه نمونه‌ی نمایشی. صفحه‌ی یک اتاقِ خبرِ تازه‌راه‌افتاده
+   ⚠️ هر بلوک وقتی داده‌اش نباشد `null` برمی‌گرداند — نه قاب خالی،
+   نه «به‌زودی»، نه نمونه‌ی نمایشی. صفحه‌ی یک اتاق خبر تازه‌راه‌افتاده
    باید کوتاه و صادق باشد، نه پر از جای‌گیر.
    ───────────────────────────────────────────────────────────── */
 
@@ -14,7 +14,7 @@ import type { Article, SectionBlock } from '@/lib/news/server'
 
 const href = (a: Article) => `/news/${encodeURIComponent(a.id)}`
 
-/* ═══ نوارِ فوری ═══ */
+/* ═══ نوار فوری ═══ */
 export function BreakingBar({ items }: { items: Article[] }) {
   if (items.length === 0) return null
   return (
@@ -34,7 +34,7 @@ export function BreakingBar({ items }: { items: Article[] }) {
   )
 }
 
-/* ═══ خبرِ صدر ═══ */
+/* ═══ خبر صدر ═══ */
 export function Lead({ a }: { a: Article }) {
   return (
     <Link className="nr-lead" href={href(a)}>
@@ -73,7 +73,7 @@ export function Secondary({ items }: { items: Article[] }) {
   )
 }
 
-/* ═══ جریانِ زمانی ═══ */
+/* ═══ جریان زمانی ═══ */
 export function Stream({
   items, title = 'آخرین اخبار', more,
 }: { items: Article[]; title?: string; more?: string }) {
@@ -103,7 +103,7 @@ export function Stream({
 
 /* ═══ پربازدیدترین‌ها ═══
    ⚠️ فقط وقتی رندر می‌شود که شمارنده‌ی واقعی عددی بالای صفر داشته
-   باشد؛ فهرستِ «پربازدید» با صفر بازدید یعنی دروغِ تزئینی. */
+   باشد؛ فهرست «پربازدید» با صفر بازدید یعنی دروغ تزئینی. */
 export function MostRead({ items }: { items: Article[] }) {
   if (items.length === 0) return null
   return (
@@ -129,11 +129,11 @@ export function MostRead({ items }: { items: Article[] }) {
   )
 }
 
-/* ═══ بلوکِ بخش ═══
-   ⚠️ دو ترکیبِ متفاوت، بسته به اینکه بخش چند خبر دارد:
-   با سه خبرِ پشتیبان یا بیشتر، «تصویرِ بزرگ + فهرست»؛ با کمتر،
+/* ═══ بلوک بخش ═══
+   ⚠️ دو ترکیب متفاوت، بسته به اینکه بخش چند خبر دارد:
+   با سه خبر پشتیبان یا بیشتر، «تصویر بزرگ + فهرست»؛ با کمتر،
    ردیفی از کارت‌های هم‌وزن. دلیلش را `.nr-row` در CSS توضیح داده:
-   چیدمانِ دوستونی با یک آیتم، یک ستونِ خالی می‌سازد. */
+   چیدمان دوستونی با یک آیتم، یک ستون خالی می‌سازد. */
 export function Band({ b, alt = false, tint = false }: { b: SectionBlock; alt?: boolean; tint?: boolean }) {
   const head = (
     <div className="nr-blockhd">
@@ -193,7 +193,7 @@ export function Band({ b, alt = false, tint = false }: { b: SectionBlock; alt?: 
   )
 }
 
-/* ═══ گزارشِ ویژه ═══ */
+/* ═══ گزارش ویژه ═══ */
 export function Feature({ a }: { a: Article }) {
   return (
     <section className="nr-feature" aria-labelledby="nr-ft">
@@ -219,8 +219,8 @@ export function Feature({ a }: { a: Article }) {
 }
 
 /* ═══ گفت‌وگو ═══
-   ⚠️ چیدمانِ پرتره‌ای فقط وقتی معنا دارد که عکس باشد. مصاحبه‌ی
-   بی‌عکس در همین بلوک ولی به‌شکلِ متنی می‌آید، نه با قابِ خالی. */
+   ⚠️ چیدمان پرتره‌ای فقط وقتی معنا دارد که عکس باشد. مصاحبه‌ی
+   بی‌عکس در همین بلوک ولی به‌شکل متنی می‌آید، نه با قاب خالی. */
 export function Talks({ items }: { items: Article[] }) {
   if (items.length === 0) return null
   return (

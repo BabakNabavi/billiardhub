@@ -16,7 +16,7 @@ import { useEffect, useRef, useState } from 'react'
 
    دلیل: این فایل `'use client'` است، پس هرچه از آن export شود یک
    «ارجاع کلاینت» می‌شود و Server Component نمی‌تواند صدایش بزند.
-   `app/page.tsx` دقیقاً همین کار را می‌کرد و صفحه‌ی اصلی ۵۰۰ داد:
+   `app/page.tsx` دقیقا همین کار را می‌کرد و صفحه‌ی اصلی ۵۰۰ داد:
 
      Attempted to call toPlacementState() from the server but
      toPlacementState is on the client.
@@ -86,13 +86,13 @@ export function usePlacementState(key: PlacementKey, initial?: PlacementState): 
      ─────────────────────────────────────────────────────────────
      پیش‌تر این افکت **همیشه** اجرا می‌شد، حتی وقتی `initial` وجود
      داشت. نتیجه‌اش سه چیز بود، همه پس از hydration:
-       ۱) یک رفت‌وبرگشتِ شبکه‌ی اضافه در بارگذاریِ اول
-       ۲) `setState` با همان داده ⇒ رندرِ دوباره‌ی سه سکشنِ بزرگِ
+       ۱) یک رفت‌وبرگشت شبکه‌ی اضافه در بارگذاری اول
+       ۲) `setState` با همان داده ⇒ رندر دوباره‌ی سه سکشن بزرگ
           صفحه‌ی اصلی (محصولات ویژه، باشگاه‌های پیشنهادی، فروشگاه‌ها)
-       ۳) همان حسِ «عناصر ظاهر می‌شوند و دوباره جایگزین می‌شوند»
+       ۳) همان حس «عناصر ظاهر می‌شوند و دوباره جایگزین می‌شوند»
 
      حالا فقط وقتی می‌پرسد که سرور چیزی نداده باشد. `initial` در همان
-     رندرِ سرور ساخته می‌شود و تازه است؛ بارِ بعدی که کاربر صفحه را
+     رندر سرور ساخته می‌شود و تازه است؛ بار بعدی که کاربر صفحه را
      باز کند دوباره از سرور می‌آید. */
   const seeded = initial != null && initial.status !== 'loading'
 
@@ -141,7 +141,7 @@ export default function AdSlot({ slot, className, style, intervalMs = 5000 }: {
     return () => clearInterval(t)
   }, [banners, intervalMs])
 
-  /* هر کمپین یک‌بار در هر mount نمایش شمرده می‌شود — وقتی واقعاً دیده شد */
+  /* هر کمپین یک‌بار در هر mount نمایش شمرده می‌شود — وقتی واقعا دیده شد */
   const current = banners?.[active] ?? null
   useEffect(() => {
     if (!current) return

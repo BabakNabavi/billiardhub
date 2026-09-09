@@ -1,21 +1,21 @@
 /* ═══════════════════════════════════════════════════════════════
-   کاتالوگِ محصول — داده. **فقط سمتِ سرور.**
+   کاتالوگ محصول — داده. **فقط سمت سرور.**
    ───────────────────────────────────────────────────────────────
    `data/cue-catalog.json`   — ۴ نوع · ۱۱۴ برند · ۴۴۷ مدل
    `data/table_catalog.json` — ۵ نوع ·  ۵۸ برند · ۱۲۱ مدل · سایزها
 
    ── چرا این فایل به مرورگر نمی‌رود ──
-   دو JSON روی هم بیش از صد کیلوبایت‌اند. واردکردنشان در یک کامپوننتِ
-   کلاینت یعنی همان حجم در باندلِ **هر بازدیدکننده‌ی فرم** — در حالی
-   که کلِ جاوااسکریپتِ صفحه‌ی اصلی امروز ۲۱۵ کیلوبایت است.
+   دو JSON روی هم بیش از صد کیلوبایت‌اند. واردکردنشان در یک کامپوننت
+   کلاینت یعنی همان حجم در باندل **هر بازدیدکننده‌ی فرم** — در حالی
+   که کل جاوااسکریپت صفحه‌ی اصلی امروز ۲۱۵ کیلوبایت است.
 
-   پس منطقِ خالص (اعتبارسنجی، تایپ‌ها، برچسب‌ها) در `catalog-rules.ts`
+   پس منطق خالص (اعتبارسنجی، تایپ‌ها، برچسب‌ها) در `catalog-rules.ts`
    نشسته که هیچ داده‌ای وارد نمی‌کند، و کلاینت فقط از آن‌جا می‌خواند.
    کلاینت برندهای **یک نوع** را از `/api/catalog/[category]/[type]`
    می‌گیرد.
 
-   تستِ «مرزِ سرور و کلاینت» در `scripts/test-tournaments.mjs`
-   نگهبانِ همین است.
+   تست «مرز سرور و کلاینت» در `scripts/test-tournaments.mjs`
+   نگهبان همین است.
    ═══════════════════════════════════════════════════════════════ */
 
 import cueRaw from '../../data/cue-catalog.json'
@@ -45,7 +45,7 @@ interface AccessoryCategory {
   specs?: SpecFieldLike[]
 }
 
-/* شکلِ فیلدِ مشخصات این‌جا تکرار نمی‌شود — از `spec-rules` می‌آید */
+/* شکل فیلد مشخصات این‌جا تکرار نمی‌شود — از `spec-rules` می‌آید */
 type SpecFieldLike = Record<string, unknown>
 
 interface CatalogFile {
@@ -53,10 +53,10 @@ interface CatalogFile {
   countries: Record<string, CatalogCountry>
 }
 
-/* ── لوازم جانبی، هم‌شکلِ بقیه ──
-   فایلش `categories[]` دارد نه `types[]`، و `specs` را داخلِ خودِ
+/* ── لوازم جانبی، هم‌شکل بقیه ──
+   فایلش `categories[]` دارد نه `types[]`، و `specs` را داخل خود
    دسته نگه می‌دارد. به‌جای اینکه هر مصرف‌کننده این تفاوت را بداند،
-   همین‌جا به همان شکلِ همیشگی درمی‌آید — پس انتخابگر و مسیرِ API و
+   همین‌جا به همان شکل همیشگی درمی‌آید — پس انتخابگر و مسیر API و
    اعتبارسنجی هیچ‌کدام تغییری نمی‌خواهند. */
 const accFile: CatalogFile = {
   countries: (accRaw as unknown as { countries: Record<string, CatalogCountry> }).countries,
@@ -68,20 +68,20 @@ const accFile: CatalogFile = {
   })),
 }
 
-/** فیلدهای مشخصات، از داخلِ خودِ دسته‌ی لوازم */
+/** فیلدهای مشخصات، از داخل خود دسته‌ی لوازم */
 export const accessorySpecs = (typeId: string) =>
   (accRaw as unknown as { categories: AccessoryCategory[] }).categories
     .find(c => c.id === typeId)?.specs ?? []
 
-/** ایموجیِ دسته — روی ردیفِ دراپ‌داون می‌نشیند */
+/** ایموجی دسته — روی ردیف دراپ‌داون می‌نشیند */
 export const accessoryIcon = (typeId: string) =>
   (accRaw as unknown as { categories: AccessoryCategory[] }).categories
     .find(c => c.id === typeId)?.icon ?? ''
 
 /* ── توپ: جنس، مشتق‌شده ──
    فایل این ستون را ندارد ولی فرم دارد. یک بار همین‌جا حساب
-   می‌شود تا از راهِ payload به `fillFromModel` برسد و مثلِ هر
-   مقدارِ دیگرِ مدل، پیش‌فرضِ قابلِ تغییرِ فروشنده باشد. */
+   می‌شود تا از راه payload به `fillFromModel` برسد و مثل هر
+   مقدار دیگر مدل، پیش‌فرض قابل تغییر فروشنده باشد. */
 const ballSrc = ballRaw as unknown as CatalogFile
 const ballFile: CatalogFile = {
   countries: ballSrc.countries,
@@ -108,15 +108,15 @@ const FILES: Record<CatalogId, CatalogFile> = {
 }
 
 /* ── کشورها از هر سه کاتالوگ ادغام می‌شوند ──
-   هر فایل فهرستِ خودش را دارد و گاهی یکی عقب می‌ماند: کاتالوگِ تازه‌ی
-   میز برندِ سنگاپوری آورد ولی `SG` را در `countries` تعریف نکرده بود —
-   نتیجه‌اش جعبه‌ی خاکستری به‌جای پرچم و نامِ «کشور نامشخص» بود.
+   هر فایل فهرست خودش را دارد و گاهی یکی عقب می‌ماند: کاتالوگ تازه‌ی
+   میز برند سنگاپوری آورد ولی `SG` را در `countries` تعریف نکرده بود —
+   نتیجه‌اش جعبه‌ی خاکستری به‌جای پرچم و نام «کشور نامشخص» بود.
 
-   ادغام یعنی تعریفِ هر فایل، کمبودِ فایلِ دیگر را پر می‌کند. تعریفِ
-   خودِ همان دسته اولویت دارد، چون ممکن است نامِ فارسی‌اش دقیق‌تر باشد.
+   ادغام یعنی تعریف هر فایل، کمبود فایل دیگر را پر می‌کند. تعریف
+   خود همان دسته اولویت دارد، چون ممکن است نام فارسی‌اش دقیق‌تر باشد.
 
-   ⚠️ این جایگزینِ درست‌بودنِ داده نیست — تستِ «هر کشورِ هر سه کاتالوگ
-   پرچمِ SVG دارد» همچنان کمبودِ **شکل** را می‌گیرد. */
+   ⚠️ این جایگزین درست‌بودن داده نیست — تست «هر کشور هر سه کاتالوگ
+   پرچم SVG دارد» همچنان کمبود **شکل** را می‌گیرد. */
 const ALL_COUNTRIES: Record<string, CatalogCountry> = {
   ...(cueRaw as unknown as CatalogFile).countries,
   ...(clothRaw as unknown as CatalogFile).countries,
@@ -165,7 +165,7 @@ export function getModel(
   return getBrand(category, brandId)?.models.find(m => m.id === modelId)
 }
 
-/** همان اعتبارسنجی، با کاتالوگِ کامل — نسخه‌ای که سرور صدا می‌زند */
+/** همان اعتبارسنجی، با کاتالوگ کامل — نسخه‌ای که سرور صدا می‌زند */
 export function validateOnServer(input: CatalogSelection): CatalogValidation {
   const type = getType(input.category, input.type)
   return validateSelection(

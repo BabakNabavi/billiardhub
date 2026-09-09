@@ -180,9 +180,9 @@ export async function syncClubSettlementAccount(opts: {
   const { sb, clubId, actorId, iban } = opts
   if (!clubId || !isValidIban(iban)) return
 
-  /* ⚠️ پیش‌تر این‌جا `select('name')` بود — ستونی که در جدولِ users
-     وجود ندارد. کوئری خطا می‌داد، `catch` بی‌صدا می‌بلعیدش، و نامِ
-     صاحبِ حساب همیشه به «صاحب باشگاه» می‌افتاد. */
+  /* ⚠️ پیش‌تر این‌جا `select('name')` بود — ستونی که در جدول users
+     وجود ندارد. کوئری خطا می‌داد، `catch` بی‌صدا می‌بلعیدش، و نام
+     صاحب حساب همیشه به «صاحب باشگاه» می‌افتاد. */
   const holder = String(opts.holderName || '').trim()
     || await sb().from('users').select('"firstName","lastName"').eq('id', actorId).maybeSingle()
       .then((r: { data: { firstName?: string; lastName?: string } | null }) =>
@@ -205,10 +205,10 @@ export async function syncClubSettlementAccount(opts: {
   await sb().from('club_bank_accounts').insert({
     club_id: clubId,
     account_holder_name: holder || 'صاحب باشگاه',
-    /* نامِ بانک از خودِ شبا مشتق می‌شود اگر فراخواننده نفرستاده باشد.
-       پیش‌تر هر مسیری که آن را پاس نمی‌داد، ردیفی با نامِ بانکِ خالی
-       می‌ساخت — و در تبِ مالی «—» دیده می‌شد، در حالی که شبا از اول
-       نامِ بانک را در خودش دارد. */
+    /* نام بانک از خود شبا مشتق می‌شود اگر فراخواننده نفرستاده باشد.
+       پیش‌تر هر مسیری که آن را پاس نمی‌داد، ردیفی با نام بانک خالی
+       می‌ساخت — و در تب مالی «—» دیده می‌شد، در حالی که شبا از اول
+       نام بانک را در خودش دارد. */
     bank_name: opts.bankName ?? bankOfIban(iban) ?? null,
     iban,
     card_number_last4: opts.cardLast4 ?? null,

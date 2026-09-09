@@ -17,8 +17,8 @@ export async function GET(req: NextRequest) {
 
   const ids = [...new Set(regs.map(r => r.tournament_id))];
 
-  /* ── آیا این ثبت‌نام قابلِ لغو است؟ ──
-     قاعده‌اش (۴ ساعت پیش از پایانِ مهلت، و پیش از قرعه‌کشی) در
+  /* ── آیا این ثبت‌نام قابل لغو است؟ ──
+     قاعده‌اش (۴ ساعت پیش از پایان مهلت، و پیش از قرعه‌کشی) در
      دیتابیس است تا یک جا بماند. رابط فقط جواب را می‌گیرد، وگرنه
      دکمه‌ای نشان می‌دهد که وقتی زده شود خطا می‌گیرد. */
   const cancellable = new Map<string, { can: boolean; reason?: string; hoursLeft?: number }>();

@@ -29,7 +29,7 @@ import { lookupPersonForUser, verifiedRolesOfPerson } from '../identity'
 export type Period = 'day' | 'week' | 'month'
 
 export interface QuotaState {
-  enabled: boolean          // آیا محدودیت اصلاً فعال است؟
+  enabled: boolean          // آیا محدودیت اصلا فعال است؟
   allowed: boolean          // آیا همین حالا می‌تواند آگهی بگذارد؟
   used: number
   limit: number             // ۰ = نامحدود
@@ -122,7 +122,7 @@ export function normalizeFreeQuota(raw: unknown): FreeQuotaSetting {
  * سخاوتمندانه‌ترین سهمیه بین نقش‌ها (MAX، نه جمع) — بر مبنای «تعداد در روز».
  *
  * صفر در موتور آگهی یعنی «نامحدود» (پس سخاوتمندترین)، ولی در موتور
- * استوری یعنی «این نقش اصلاً سهمیه ندارد». با zeroMeansNone، صفر
+ * استوری یعنی «این نقش اصلا سهمیه ندارد». با zeroMeansNone، صفر
  * به‌جای بی‌نهایت، کمترین ارزش را می‌گیرد تا نقش صفر «کاربر عادی»
  * سهمیه‌ی نقش واقعی کاربر را از بین نبرد.
  */
@@ -200,10 +200,10 @@ async function usedInWindow(userId: string, period: Period): Promise<number> {
 /**
  * مصرف ثبت‌شده‌ی شخص در پنجره + زمانی که «یک جای خالی» باز می‌شود.
  *
- * وقتی مصرف از سقف بیشتر شده (مثلاً سهمیه بعد از تنزل نقش کم شده، یا
+ * وقتی مصرف از سقف بیشتر شده (مثلا سهمیه بعد از تنزل نقش کم شده، یا
  * در دوره‌ی خاموشی enforcement ثبت شده)، جای خالی با خروج قدیمی‌ترین
  * مصرف باز نمی‌شود؛ باید آن‌قدر مصرف از پنجره خارج شود که used به
- * limit-1 برسد. پس ردیف تعیین‌کننده، (used-limit+1)اُمین مصرف قدیمی
+ * limit-1 برسد. پس ردیف تعیین‌کننده، (used-limit+1)امین مصرف قدیمی
  * است — نه اولی.
  */
 async function ledgerUsed(personId: string, period: Period, limit: number)
@@ -239,7 +239,7 @@ async function ledgerUsed(personId: string, period: Period, limit: number)
 }
 
 const IDENTITY_MSG = 'برای استفاده از سهمیه‌ی رایگان آگهی، ابتدا هویت خود (کد ملی) را از بخش پروفایل تأیید کنید.'
-const SYSTEM_MSG = 'سیستم سهمیه موقتاً در دسترس نیست؛ چند لحظه بعد دوباره تلاش کنید'
+const SYSTEM_MSG = 'سیستم سهمیه موقتا در دسترس نیست؛ چند لحظه بعد دوباره تلاش کنید'
 
 /** وضعیت کامل سهمیه — هم برای اجازه‌دادن، هم برای نمایش در پنل */
 export async function getQuotaState(userId: string): Promise<QuotaState> {
@@ -335,11 +335,11 @@ export type ConsumeResult =
 
 /**
  * دروازه‌ی ثبت آگهی: بررسی و مصرف سهمیه در یک قدم.
- *   • مسیر پلن: مثل قبل (شمارش products؛ اعتبار فاز ۵ بعداً)
+ *   • مسیر پلن: مثل قبل (شمارش products؛ اعتبار فاز ۵ بعدا)
  *   • مسیر رایگان: مصرف اتمیک با bh_consume_quota — حتی وقتی
  *     enforcement خاموش است ثبت می‌شود (با سقف ۰ = فقط ثبت) تا
  *     تاریخچه برای روز روشن‌شدن واقعی باشد.
- * اگر ثبت آگهی بعداً شکست خورد، releaseConsumption را با
+ * اگر ثبت آگهی بعدا شکست خورد، releaseConsumption را با
  * consumptionId صدا بزنید (جبران خطای فنی — «حذف آگهی» نیست).
  */
 export async function consumeAdQuota(userId: string, refId?: string | null): Promise<ConsumeResult> {
@@ -398,7 +398,7 @@ export async function consumeAdQuota(userId: string, refId?: string | null): Pro
     return {
       ok: false,
       status: 503,
-      body: { message: 'سیستم سهمیه موقتاً در دسترس نیست؛ چند لحظه بعد دوباره تلاش کنید' },
+      body: { message: 'سیستم سهمیه موقتا در دسترس نیست؛ چند لحظه بعد دوباره تلاش کنید' },
     }
   }
 

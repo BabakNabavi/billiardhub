@@ -1,8 +1,8 @@
 'use client'
 
-/* اعطای دسترسیِ ادمین.
-   حساس‌ترین صفحه‌ی پنل — پس عمداً ساده و صریح است: جست‌وجو، یک دکمه،
-   و فهرستِ کسانی که همین حالا ادمین‌اند. */
+/* اعطای دسترسی ادمین.
+   حساس‌ترین صفحه‌ی پنل — پس عمدا ساده و صریح است: جست‌وجو، یک دکمه،
+   و فهرست کسانی که همین حالا ادمین‌اند. */
 
 import { useCallback, useEffect, useState } from 'react'
 import { apiFetch } from '../../../lib/http'
@@ -28,17 +28,17 @@ export default function AdminAccess() {
   const [admins, setAdmins] = useState<U[]>([])
   const [results, setResults] = useState<U[]>([])
   const [me, setMe] = useState('')
-  /* دکمه‌ی «دسترسی» در فهرستِ کاربران با ?q=<شماره> به این‌جا
+  /* دکمه‌ی «دسترسی» در فهرست کاربران با ?q=<شماره> به این‌جا
      می‌آید؛ جست‌وجو پیش‌پر و یک‌بار خودکار اجرا می‌شود.
-     عمداً از `useSearchParams` استفاده نمی‌شود: آن مرزِ
+     عمدا از `useSearchParams` استفاده نمی‌شود: آن مرز
      Suspense می‌خواهد و prerender این صفحه را می‌شکست. */
   const [q, setQ] = useState('')
   const [loading, setLoading] = useState(true)
   const [busy, setBusy] = useState('')
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null)
 
-  /* دسترسی‌های تفکیک‌شده — از /api/admin/permissions می‌آید و کنارِ
-     فهرستِ ادمین‌ها می‌نشیند. `perm[userId]` فهرستِ کلیدهاست؛
+  /* دسترسی‌های تفکیک‌شده — از /api/admin/permissions می‌آید و کنار
+     فهرست ادمین‌ها می‌نشیند. `perm[userId]` فهرست کلیدهاست؛
      `['*']` یعنی سوپرادمین. */
   const [groups, setGroups] = useState<PermGroup[]>([])
   const [perm, setPerm] = useState<Record<string, string[]>>({})
@@ -53,8 +53,8 @@ export default function AdminAccess() {
       setAdmins(j.admins ?? []); setResults(j.results ?? []); setMe(j.me ?? '')
 
       /* دسترسی‌ها جدا خوانده می‌شوند تا اگر مهاجرت هنوز اجرا نشده
-         باشد، فهرستِ ادمین‌ها همچنان کار کند و فقط بخشِ تیک‌ها غایب
-         بماند — نه اینکه کلِ صفحه بشکند. */
+         باشد، فهرست ادمین‌ها همچنان کار کند و فقط بخش تیک‌ها غایب
+         بماند — نه اینکه کل صفحه بشکند. */
       const p = await apiFetch('/api/admin/permissions?all=1', { cache: 'no-store' })
       if (p.ok) {
         const pj = await p.json().catch(() => ({}))
@@ -105,7 +105,7 @@ export default function AdminAccess() {
       </div>
       <p style={{ fontSize: 12.5, color: SEC, lineHeight: 2, margin: '0 0 16px' }}>
         ادمین به همه‌ی داده‌های مالی، تسویه‌ها و اطلاعات کاربران دسترسی دارد.
-        <b style={{ color: INK }}> این دسترسی را فقط به کسی بدهید که کاملاً به او اطمینان دارید.</b>
+        <b style={{ color: INK }}> این دسترسی را فقط به کسی بدهید که کاملا به او اطمینان دارید.</b>
         {' '}هر اعطا و لغو در گزارش ممیزی ثبت می‌شود.
       </p>
 
@@ -203,13 +203,13 @@ export default function AdminAccess() {
               {faNum(u.phone)}
               {groups.length > 0 && (
                 <span style={{ marginInlineStart: 8, color: isSuper ? GOLD_D : MUT, fontWeight: 700 }}>
-                  · {isSuper ? 'سوپرادمین — دسترسیِ کامل' : `${faNum(p.length)} از ${faNum(total)} بخش`}
+                  · {isSuper ? 'سوپرادمین — دسترسی کامل' : `${faNum(p.length)} از ${faNum(total)} بخش`}
                 </span>
               )}
             </div>
           </div>
 
-          {/* تنظیمِ دسترسی — سوپرادمین از این‌جا تغییر نمی‌کند */}
+          {/* تنظیم دسترسی — سوپرادمین از این‌جا تغییر نمی‌کند */}
           {groups.length > 0 && !isSuper && (
             <button onClick={() => setEditing(u)} style={{
               display: 'inline-flex', alignItems: 'center', gap: 5,
@@ -250,7 +250,7 @@ export default function AdminAccess() {
           fontSize: 12.5, color: GOLD_D, fontWeight: 700, lineHeight: 1.9,
         }}>
           <AlertCircle size={15} style={{ flexShrink: 0, marginTop: 2 }} />
-          تنها ادمینِ سامانه شمایید. تا وقتی ادمین دومی نباشد، دسترسی شما قابل برداشتن نیست —
+          تنها ادمین سامانه شمایید. تا وقتی ادمین دومی نباشد، دسترسی شما قابل برداشتن نیست —
           این عمدی است تا سامانه بی‌ادمین نماند.
         </div>
       )}

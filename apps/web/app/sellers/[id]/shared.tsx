@@ -13,7 +13,7 @@ export const SHEEN =
   "relative overflow-hidden before:content-[''] before:pointer-events-none before:absolute before:inset-0 before:-translate-x-[160%] before:skew-x-[-15deg] before:bg-[linear-gradient(110deg,transparent_40%,rgba(255,255,255,0.55)_50%,transparent_60%)] before:transition-transform before:duration-700 hover:before:translate-x-[200%]"
 
 /* دکمه‌ی LQ — طرح دکمه‌های «مشاهده و رزرو» صفحه‌ی اصلی:
-   پس‌زمینه‌ی رنگی محو + بوردر نازک هم‌رنگ + متن هم‌رنگ (بدون سطح توپُر و بدون بلور سنگین).
+   پس‌زمینه‌ی رنگی محو + بوردر نازک هم‌رنگ + متن هم‌رنگ (بدون سطح توپر و بدون بلور سنگین).
    رنگ بg/بوردر/متن را واریانت هر دکمه می‌دهد */
 export const LQ =
   'border transition-all duration-200 hover:-translate-y-px active:scale-95'

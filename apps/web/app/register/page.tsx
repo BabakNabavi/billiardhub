@@ -2,7 +2,7 @@
 
 /* ─────────────────────────────────────────────────────────────
    ثبت‌نام — بازطراحی پریمیوم (۱۴۰۵). منطق دو مرحله‌ای
-   (شماره → اطلاعات) و api عیناً حفظ شده؛ پوسته هم‌خانواده‌ی
+   (شماره → اطلاعات) و api عینا حفظ شده؛ پوسته هم‌خانواده‌ی
    صفحه‌ی ورود: اسپلیت سینمایی + استپر سگمنتی + فیلدهای لوکس.
    بهبود UX: بازگشت به مرحله‌ی قبل.
    ───────────────────────────────────────────────────────────── */
@@ -75,7 +75,7 @@ export default function RegisterPage() {
   const { setAuth } = useAuthStore();
 
   const [step, setStep] = useState<Step>(1);
-  /* باشگاهِ انتخابی — تا ساخته‌شدنِ حساب فقط این‌جا نگه داشته می‌شود */
+  /* باشگاه انتخابی — تا ساخته‌شدن حساب فقط این‌جا نگه داشته می‌شود */
   const [club, setClub] = useState<ClubPickerValue | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -107,7 +107,7 @@ export default function RegisterPage() {
   });
 
   /* رفتن به صفحه‌ی قوانین و برگشت: اطلاعات پرشده گم نشود.
-     رمز عبور عمداً ذخیره نمی‌شود و کاربر دوباره واردش می‌کند. */
+     رمز عبور عمدا ذخیره نمی‌شود و کاربر دوباره واردش می‌کند. */
   useEffect(() => {
     try {
       if (localStorage.getItem('bh_terms_accepted')) setAcceptedTerms(true);
@@ -131,7 +131,7 @@ export default function RegisterPage() {
   };
 
   /* سانیتایز ورودی‌ها: نام‌ها فقط حروف فارسی (بدون عدد و حروف انگلیسی)؛ کد ملی فقط ۱۰ رقم؛
-     موبایل فقط عدد، ۱۱ رقم و حتماً با ۰۹ (اگر با ۹ شروع شد، ۰ اضافه می‌شود) */
+     موبایل فقط عدد، ۱۱ رقم و حتما با ۰۹ (اگر با ۹ شروع شد، ۰ اضافه می‌شود) */
   const sanitize = (key: keyof FormData, v: string): string => {
     const latin = v.replace(/[۰-۹]/g, d => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(d)));
     if (key === 'firstName' || key === 'lastName') return v.replace(/[0-9۰-۹A-Za-z]/g, '');
@@ -173,8 +173,8 @@ export default function RegisterPage() {
   const set = (key: keyof FormData) => (e: React.ChangeEvent<HTMLInputElement>) => {
     const raw = e.target.value;
     if (key === 'password' || key === 'confirmPassword') {
-      /* از تشخیصِ مشترک — بازه‌ی این‌جا فقط `؀-ۿ` بود و نویسه‌های
-         فارسیِ فرم‌های نمایشی (ﭐ-﷿) را نمی‌گرفت. */
+      /* از تشخیص مشترک — بازه‌ی این‌جا فقط `؀-ۿ` بود و نویسه‌های
+         فارسی فرم‌های نمایشی (ﭐ-﷿) را نمی‌گرفت. */
       setPwWarn(passwordHint(raw).persian);
     }
     const v = sanitize(key, raw);
@@ -194,11 +194,11 @@ export default function RegisterPage() {
     if (!/^09[0-9]{9}$/.test(form.phone)) { setError('شماره موبایل معتبر نیست'); return; }
     setLoading(true); setError(''); setPhoneTaken(false);
     /* سرور اول تکراری بودن شماره را چک می‌کند؛ اگر حساب داشته باشد
-       اصلاً پیامکی فرستاده نمی‌شود تا هزینه‌ی اضافه ایجاد نشود. */
+       اصلا پیامکی فرستاده نمی‌شود تا هزینه‌ی اضافه ایجاد نشود. */
     const r = await apiSendOtp(form.phone, 'register');
     setLoading(false);
     if (r.ok) { setOtpOpen(true); setOtp(''); setOtpMsg(''); setResendIn(60); return; }
-    if (r.exists) { setPhoneTaken(true); setError(r.message || 'این شماره قبلاً ثبت‌نام کرده است'); return; }
+    if (r.exists) { setPhoneTaken(true); setError(r.message || 'این شماره قبلا ثبت‌نام کرده است'); return; }
     setError(r.message || 'ارسال کد پیامکی ناموفق بود');
   };
 
@@ -466,7 +466,7 @@ export default function RegisterPage() {
               {/* شماره از قبل حساب دارد ⇒ به‌جای ارسال پیامک، مسیر ورود */}
               {phoneTaken && (
                 <div style={{ background: 'rgba(199,166,106,0.09)', border: '1px solid rgba(199,166,106,0.34)', borderRadius: 14, padding: '14px 16px', marginBottom: 16 }}>
-                  <div style={{ fontSize: 13, fontWeight: 800, color: TEXT, marginBottom: 6 }}>این شماره قبلاً ثبت‌نام کرده است</div>
+                  <div style={{ fontSize: 13, fontWeight: 800, color: TEXT, marginBottom: 6 }}>این شماره قبلا ثبت‌نام کرده است</div>
                   <p style={{ fontSize: 12.5, color: MUT, margin: '0 0 12px', lineHeight: 2 }}>
                     برای ادامه وارد حساب خود شوید. اگر رمز عبورتان را فراموش کرده‌اید، از گزینه‌ی بازیابی استفاده کنید.
                   </p>
@@ -498,9 +498,9 @@ export default function RegisterPage() {
                 className="au-inp" value={otp} inputMode="numeric" maxLength={6} autoFocus
                 onChange={e => { setOtp(e.target.value.replace(/[۰-۹]/g, d => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(d))).replace(/[^0-9]/g, '').slice(0, 6)); setOtpMsg(''); }}
                 onKeyDown={e => { if (e.key === 'Enter') handleVerify(); }}
-                /* بدونِ فاصله‌ی دستی، و تورفتگی **نصفِ** letter-spacing —
-                   جبرانِ فاصله‌ای که CSS پس از آخرین نویسه هم می‌گذارد.
-                   با مقدارِ کامل، همان اندازه به سمتِ دیگر کج می‌شد. */
+                /* بدون فاصله‌ی دستی، و تورفتگی **نصف** letter-spacing —
+                   جبران فاصله‌ای که CSS پس از آخرین نویسه هم می‌گذارد.
+                   با مقدار کامل، همان اندازه به سمت دیگر کج می‌شد. */
                 placeholder="-----"
                 style={{ width: '100%', boxSizing: 'border-box', textAlign: 'center', letterSpacing: '0.5em', textIndent: '0.25em', fontSize: 26, fontWeight: 800, direction: 'ltr', padding: '14px', borderRadius: 14, border: `1px solid ${LINE}`, background: '#fff', color: TEXT, outline: 'none', fontFamily: 'inherit' }}
               />
@@ -567,14 +567,14 @@ export default function RegisterPage() {
                 <ClubPicker
                   value={club} onChange={setClub} autoSave={false}
                   label="باشگاهی که در آن فعالیت می‌کنید (اختیاری)"
-                  hint="می‌توانید بعداً از پروفایلتان انتخاب یا تغییرش دهید."
+                  hint="می‌توانید بعدا از پروفایلتان انتخاب یا تغییرش دهید."
                 />
               </div>
               {field('password', 'رمز عبور', <Lock size={16} />, { placeholder: 'حداقل ۸ کاراکتر', reveal: { shown: showPw, toggle: () => setShowPw(p => !p) } })}
               {pwWarn && (
                 <p style={{ fontSize: 11.5, fontWeight: 700, color: '#B23B2E', margin: '-6px 0 12px', display: 'flex', alignItems: 'center', gap: 6, lineHeight: 1.8 }}>
                   <AlertCircle size={13} style={{ flexShrink: 0 }} />
-                  کیبورد شما فارسی است — لطفاً زبان کیبورد را انگلیسی کنید.
+                  کیبورد شما فارسی است — لطفا زبان کیبورد را انگلیسی کنید.
                 </p>
               )}
               {/* شرط‌های رمز — حین تایپ سبز می‌شوند تا کاربر بعد از زدن دکمه غافلگیر نشود */}

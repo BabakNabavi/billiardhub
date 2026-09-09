@@ -19,29 +19,29 @@ export interface TechnicianProfile {
   city: string
   club: string
   coverage: string[]
-  /* ── نحوه و زمانِ ارائه‌ی خدمات ──
+  /* ── نحوه و زمان ارائه‌ی خدمات ──
      ⚠️ این سه تا در مدل نبودند، پس صفحه‌ی عمومی فقط شهر و شهرهای
-     تحت پوشش را نشان می‌داد. هیچ‌کدام اجباری نیست و هیچ‌کدام مقدارِ
-     پیش‌فرضِ «بله» نمی‌گیرد: چیزی که متخصص نگفته، ساخته نمی‌شود. */
-  /** خدمت در محلِ مشتری (باشگاه/خانه) */
+     تحت پوشش را نشان می‌داد. هیچ‌کدام اجباری نیست و هیچ‌کدام مقدار
+     پیش‌فرض «بله» نمی‌گیرد: چیزی که متخصص نگفته، ساخته نمی‌شود. */
+  /** خدمت در محل مشتری (باشگاه/خانه) */
   onsite: boolean
   /** پذیرش در کارگاه */
   workshop: boolean
-  /** ساعتِ کاری — متنِ آزاد، چون هر کارگاه شکلِ خودش را دارد */
+  /** ساعت کاری — متن آزاد، چون هر کارگاه شکل خودش را دارد */
   hours: string
   intro: string
   about: string[]
   services: TechService[]
   projects: TechProject[]
-  /* همان مدلِ مربی و داور: نامِ آلبوم‌ها این‌جا، عضویت روی رسانه */
+  /* همان مدل مربی و داور: نام آلبوم‌ها این‌جا، عضویت روی رسانه */
   albums: string[]
   gallery: TechMedia[]
   videos: TechVideo[]
   phone: string
   whatsapp: string
   status: 'approved' | 'rejected'
-  /* ستونِ جدولِ `profiles` است نه بخشی از jsonb — `fetchProfiles`
-     کنارِ `data` می‌گذاردش. */
+  /* ستون جدول `profiles` است نه بخشی از jsonb — `fetchProfiles`
+     کنار `data` می‌گذاردش. */
   verified?: boolean
   updatedAt: string
 }
@@ -61,7 +61,7 @@ export function emptyTechnicianProfile(slug: string, ownerId = '', ownerPhone = 
 
 function normalize(raw: Partial<TechnicianProfile> & { slug: string }): TechnicianProfile {
   const p = { ...emptyTechnicianProfile(raw.slug), ...raw }
-  /* ردیفِ پیش از مهاجرت: آلبومِ شیئی به «نام + رسانه» تبدیل می‌شود.
+  /* ردیف پیش از مهاجرت: آلبوم شیئی به «نام + رسانه» تبدیل می‌شود.
      روی خواندن انجام می‌شود تا هیچ عکسی با اولین ذخیره گم نشود. */
   Object.assign(p, normalizeTechMedia(p))
   if (!p.province && p.city) p.province = provinceOfCity(p.city)
@@ -120,11 +120,11 @@ export function newTechnicianSlug(): string {
 
 /* پروفایل ذخیره‌شده → شکل Technician تا صفحات /services بدون تغییر ساختار رندرش کنند */
 export function profileToTechnician(p: TechnicianProfile): Technician {
-  /* ⚠️ اینجا هم نرمال‌سازی لازم است، نه فقط در `normalize`ِ کشِ محلی:
-     صفحه‌ی عمومی داده‌ی خامِ سرور را مستقیم به این تابع می‌دهد و ردیفی
-     که هنوز کلیدِ `gallery` ندارد، `undefined` رد می‌کرد — و صفحه با
+  /* ⚠️ اینجا هم نرمال‌سازی لازم است، نه فقط در `normalize` کش محلی:
+     صفحه‌ی عمومی داده‌ی خام سرور را مستقیم به این تابع می‌دهد و ردیفی
+     که هنوز کلید `gallery` ندارد، `undefined` رد می‌کرد — و صفحه با
      «Cannot read properties of undefined» به error boundary می‌رفت.
-     بیلد و tsc هر دو سبز بودند؛ فقط بازکردنِ صفحه نشانش داد. */
+     بیلد و tsc هر دو سبز بودند؛ فقط بازکردن صفحه نشانش داد. */
   const media = normalizeTechMedia(p)
   return {
     id: p.slug,
@@ -133,11 +133,11 @@ export function profileToTechnician(p: TechnicianProfile): Technician {
     title: p.title || 'متخصص خدمات فنی',
     city: p.city || '—',
     club: p.club || undefined,
-    /* ⚠️ `?? []` و `?? ''` همان دلیلِ بالا را دارند: ردیفِ خامِ سرور
+    /* ⚠️ `?? []` و `?? ''` همان دلیل بالا را دارند: ردیف خام سرور
        می‌تواند کلید نداشته باشد و `.length` روی `undefined` صفحه را
-       به error boundary می‌برد — با بیلد و tsc کاملاً سبز. */
+       به error boundary می‌برد — با بیلد و tsc کاملا سبز. */
     coverage: (p.coverage ?? []).length ? p.coverage : [p.city].filter(Boolean),
-    /* ⚠️ هیچ‌کدام پیش‌فرضِ «بله» ندارند: صفحه‌ی عمومی نباید ادعایی
+    /* ⚠️ هیچ‌کدام پیش‌فرض «بله» ندارند: صفحه‌ی عمومی نباید ادعایی
        بکند که متخصص نکرده است. */
     onsite: p.onsite === true,
     workshop: p.workshop === true,
@@ -146,7 +146,7 @@ export function profileToTechnician(p: TechnicianProfile): Technician {
     about: (p.about ?? []).length ? p.about : [p.intro].filter(Boolean),
     /* ⚠️ دایرکتوری و جست‌وجو با *متن* کار می‌کنند. اگر شناسه‌ی خام
        رد شود، اولین ذخیره‌ی پنل باعث می‌شود کارت «cloth» نشان بدهد
-       و فیلترِ خدمات هیچ نتیجه‌ای برنگرداند. */
+       و فیلتر خدمات هیچ نتیجه‌ای برنگرداند. */
     services: storedToTitles(p.services),
     projects: p.projects,
     albums: media.albums,

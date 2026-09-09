@@ -69,15 +69,15 @@ const CSS = `
 .pcs-val.ph { color: var(--pcs-mut); font-size: 11.5px; }
 .pcs-chev { flex-shrink: 0; color: var(--pcs-mut); transition: transform .2s ease; }
 .pcs-btn.open .pcs-chev { transform: rotate(180deg); color: var(--pcs-gold-d); }
-/* ── چرا fixed و از راهِ Portal ──
-   پنل تا امروز absolute بود و داخلِ همان کارتی می‌ماند که فیلد در
+/* ── چرا fixed و از راه Portal ──
+   پنل تا امروز absolute بود و داخل همان کارتی می‌ماند که فیلد در
    آن است. هر کارتی که overflow:hidden داشت (یا با backdrop-filter
-   — بک‌تیک این‌جا ممنوع است، این متن داخلِ template literal است —
-   بافتِ چینشِ خودش را می‌ساخت) لیست را می‌برید — کاربر باکس را باز
-   می‌کرد و فهرست زیرِ لبه‌ی کارت گم می‌شد.
+   — بک‌تیک این‌جا ممنوع است، این متن داخل template literal است —
+   بافت چینش خودش را می‌ساخت) لیست را می‌برید — کاربر باکس را باز
+   می‌کرد و فهرست زیر لبه‌ی کارت گم می‌شد.
 
    حالا روی body رندر می‌شود و جای واقعی‌اش هر بار اندازه گرفته
-   می‌شود؛ اگر پایینِ صفحه جا نبود، رو به بالا باز می‌شود. */
+   می‌شود؛ اگر پایین صفحه جا نبود، رو به بالا باز می‌شود. */
 .pcs-panel {
   position: fixed; z-index: 9999;
   display: flex; flex-direction: column;
@@ -156,7 +156,7 @@ function Combobox({
     return options.filter(o => o.includes(q))
   }, [options, query])
 
-  /* جای پنل از فضای واقعیِ بالا و پایینِ دکمه حساب می‌شود */
+  /* جای پنل از فضای واقعی بالا و پایین دکمه حساب می‌شود */
   const place = () => {
     const r = wrapRef.current?.getBoundingClientRect()
     if (!r) return
@@ -172,7 +172,7 @@ function Combobox({
     setRect({ top, left, width, maxH })
   }
 
-  /* بستن با کلیک بیرون — پنل حالا بیرونِ wrap است، پس جدا چک می‌شود */
+  /* بستن با کلیک بیرون — پنل حالا بیرون wrap است، پس جدا چک می‌شود */
   useEffect(() => {
     if (!open) return
     const onDoc = (e: MouseEvent) => {

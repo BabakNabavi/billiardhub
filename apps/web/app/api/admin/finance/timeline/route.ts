@@ -3,13 +3,13 @@ import { NextRequest, NextResponse } from 'next/server';
 import { sb, actorFromRequest } from '@/lib/finance/db';
 import { can } from '@/lib/admin/permissions';
 
-/* داستانِ کاملِ یک تراکنش — از پرداخت تا تسویه.
+/* داستان کامل یک تراکنش — از پرداخت تا تسویه.
        /api/admin/finance/timeline?booking=<id>
        /api/admin/finance/timeline?registration=<id>
 
    هدف: بشود روی یک مبلغ کلیک کرد و دید چه بر سرش آمده. رویدادها از
    جدول‌های واقعی ساخته می‌شوند (پرداخت، دفتر، بازپرداخت، تسویه)، نه
-   از یک ستونِ وضعیت — چون وضعیت فقط «الان کجاست» را می‌گوید، نه
+   از یک ستون وضعیت — چون وضعیت فقط «الان کجاست» را می‌گوید، نه
    «چه مسیری آمده». */
 
 interface Ev { at: string; kind: string; label: string; amount?: number; meta?: unknown }
@@ -53,7 +53,7 @@ export async function GET(req: NextRequest) {
     events.push({ at: String(reg.created_at), kind: 'REGISTRATION_CREATED', label: 'ثبت‌نام مسابقه', amount: Number(reg.amount) });
   }
 
-  /* دفتر — قلبِ ماجرا */
+  /* دفتر — قلب ماجرا */
   const ledgerQ = bookingId
     ? sb().from('ledger_entries').select('*').eq('booking_id', bookingId)
     : sb().from('ledger_entries').select('*').like('source_key', `treg:${regId}:%`);

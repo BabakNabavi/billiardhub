@@ -1,23 +1,23 @@
 'use client'
 
 /* ─────────────────────────────────────────────────────────────
-   سرویسِ پنجره‌ها — جایگزینِ `window.confirm` و `window.alert`.
+   سرویس پنجره‌ها — جایگزین `window.confirm` و `window.alert`.
 
-   ── چرا سرویسِ سراسری و نه کامپوننت در هر صفحه ──
-   هجده جای سایت این دو را صدا می‌زدند، همه داخلِ توابعِ async و
+   ── چرا سرویس سراسری و نه کامپوننت در هر صفحه ──
+   هجده جای سایت این دو را صدا می‌زدند، همه داخل توابع async و
    بیشترشان به این شکل:
 
        if (!confirm('…')) return
 
-   اگر جایگزین یک کامپوننتِ حالت‌دار باشد، هر هجده جا باید به دو
-   تکه شکسته شود و هر کدام یک ظرفِ JSX هم لازم دارد — هجده فرصتِ
-   تازه برای باگ، آن هم در مسیرهایی که کارِ برگشت‌ناپذیر می‌کنند.
+   اگر جایگزین یک کامپوننت حالت‌دار باشد، هر هجده جا باید به دو
+   تکه شکسته شود و هر کدام یک ظرف JSX هم لازم دارد — هجده فرصت
+   تازه برای باگ، آن هم در مسیرهایی که کار برگشت‌ناپذیر می‌کنند.
 
    این‌جا `ask()` یک Promise می‌دهد، پس همان خط می‌شود:
 
        if (!(await ask('…'))) return
 
-   ترتیبِ اجرا دست‌نخورده می‌ماند و هیچ صفحه‌ای JSX تازه نمی‌خواهد.
+   ترتیب اجرا دست‌نخورده می‌ماند و هیچ صفحه‌ای JSX تازه نمی‌خواهد.
    پنجره یک‌بار در `layout` سوار می‌شود.
    ───────────────────────────────────────────────────────────── */
 
@@ -31,7 +31,7 @@ export interface AskOptions {
 
 export interface DialogState {
   ask: (AskOptions & { title: string; resolve: (ok: boolean) => void }) | null
-  /* پرسشِ متنی — جایگزینِ `window.prompt`. `null` یعنی انصراف. */
+  /* پرسش متنی — جایگزین `window.prompt`. `null` یعنی انصراف. */
   text: { title: string; body?: string; placeholder?: string; confirmLabel: string; resolve: (v: string | null) => void } | null
   toast: { msg: string; tone: Tone; id: number } | null
 }
@@ -50,10 +50,10 @@ export function subscribe(l: (s: DialogState) => void): () => void {
   return () => { listeners.delete(l) }
 }
 
-/** پرسشِ تأیید. `true` یعنی کاربر تأیید کرد. */
+/** پرسش تأیید. `true` یعنی کاربر تأیید کرد. */
 export function ask(title: string, opts: AskOptions = {}): Promise<boolean> {
   /* روی سرور پنجره‌ای در کار نیست؛ «نه» امن‌ترین پاسخ است چون هیچ
-     کارِ برگشت‌ناپذیری بی‌اجازه انجام نمی‌شود. */
+     کار برگشت‌ناپذیری بی‌اجازه انجام نمی‌شود. */
   if (typeof window === 'undefined') return Promise.resolve(false)
   return new Promise<boolean>(resolve => {
     emit({
@@ -68,7 +68,7 @@ export function ask(title: string, opts: AskOptions = {}): Promise<boolean> {
   })
 }
 
-/** پاسخِ کاربر — فقط `DialogHost` صدایش می‌زند */
+/** پاسخ کاربر — فقط `DialogHost` صدایش می‌زند */
 export function resolveAsk(ok: boolean) {
   const cur = state.ask
   emit({ ask: null })
@@ -76,7 +76,7 @@ export function resolveAsk(ok: boolean) {
 }
 
 let toastId = 0
-/** پیامِ کوتاه. برخلافِ `alert` جریان را متوقف نمی‌کند. */
+/** پیام کوتاه. برخلاف `alert` جریان را متوقف نمی‌کند. */
 export function notify(msg: string, tone: Tone = 'danger') {
   if (typeof window === 'undefined') return
   emit({ toast: { msg, tone, id: ++toastId } })
@@ -84,7 +84,7 @@ export function notify(msg: string, tone: Tone = 'danger') {
 
 export function clearToast() { emit({ toast: null }) }
 
-/** پرسشِ متنی — جایگزینِ `window.prompt`. `null` یعنی انصراف. */
+/** پرسش متنی — جایگزین `window.prompt`. `null` یعنی انصراف. */
 export function askText(
   title: string, opts: { body?: string; placeholder?: string; confirmLabel?: string } = {},
 ): Promise<string | null> {

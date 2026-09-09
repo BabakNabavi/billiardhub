@@ -1,21 +1,21 @@
 'use client'
 
 /* ─────────────────────────────────────────────────────────────
-   خریدِ مستقیمِ جایگاه تبلیغاتی.
+   خرید مستقیم جایگاه تبلیغاتی.
 
-   تا امروز صفحه‌ی /advertise فقط یک فرمِ درخواست بود: کاربر مشخصاتش
+   تا امروز صفحه‌ی /advertise فقط یک فرم درخواست بود: کاربر مشخصاتش
    را می‌فرستاد و منتظر می‌ماند «تعرفه برایتان ارسال شود». در حالی که
-   کلِ زنجیره‌ی خرید در بک‌اند وجود داشت و کار می‌کرد — قیمت‌گذاریِ
-   سرورساید، ساختِ سفارش، درگاه، کالبک، بازبینیِ ادمین — و فقط هیچ
+   کل زنجیره‌ی خرید در بک‌اند وجود داشت و کار می‌کرد — قیمت‌گذاری
+   سرورساید، ساخت سفارش، درگاه، کالبک، بازبینی ادمین — و فقط هیچ
    رابطی به آن وصل نبود.
 
    ── مرزهایی که این کامپوننت رعایت می‌کند ──
    · هیچ قیمتی از این‌جا فرستاده نمی‌شود. کلاینت فقط می‌گوید «کدام
-     جایگاه، کدام پله»؛ مبلغ را سرور از ردیفِ همان پله می‌خواند.
-   · فهرستِ جایگاه‌ها از `/api/ads/campaigns/options` می‌آید که خودش
-     بر اساس نقشِ *تأییدشده*ی کاربر فیلتر می‌کند — نه نقشِ خوداظهار.
-   · ظرفیتِ آزاد پیش از خرید نشان داده می‌شود، و تصمیمِ نهایی هم باز
-     سمتِ سرور و زیرِ قفلِ ردیف گرفته می‌شود؛ این‌جا فقط جلوی رفتنِ
+     جایگاه، کدام پله»؛ مبلغ را سرور از ردیف همان پله می‌خواند.
+   · فهرست جایگاه‌ها از `/api/ads/campaigns/options` می‌آید که خودش
+     بر اساس نقش *تأییدشده*ی کاربر فیلتر می‌کند — نه نقش خوداظهار.
+   · ظرفیت آزاد پیش از خرید نشان داده می‌شود، و تصمیم نهایی هم باز
+     سمت سرور و زیر قفل ردیف گرفته می‌شود؛ این‌جا فقط جلوی رفتن
      بیهوده به درگاه گرفته می‌شود.
    ───────────────────────────────────────────────────────────── */
 
@@ -58,7 +58,7 @@ export default function BuyPlacement({ userId }: { userId: string }) {
   const [planId, setPlanId] = useState('')
   const [title, setTitle] = useState('')
   const [advertiser, setAdvertiser] = useState('')
-  const [creative, setCreative] = useState('')     // نشانیِ فایلِ بارگذاری‌شده
+  const [creative, setCreative] = useState('')     // نشانی فایل بارگذاری‌شده
   const [duration, setDuration] = useState<number | null>(null)
   const [dest, setDest] = useState('')
   const [agreed, setAgreed] = useState(false)
@@ -80,8 +80,8 @@ export default function BuyPlacement({ userId }: { userId: string }) {
   const slot = useMemo(() => opts?.find(o => o.key === key) ?? null, [opts, key])
   const plan = useMemo(() => slot?.plans.find(p => p.id === planId) ?? null, [slot, planId])
 
-  /* با عوض‌شدنِ جایگاه، همه‌ی چیزهای وابسته پاک می‌شوند — وگرنه فایلِ
-     جایگاهِ قبلی روی جایگاهِ تازه می‌ماند و سرور ردش می‌کند. */
+  /* با عوض‌شدن جایگاه، همه‌ی چیزهای وابسته پاک می‌شوند — وگرنه فایل
+     جایگاه قبلی روی جایگاه تازه می‌ماند و سرور ردش می‌کند. */
   useEffect(() => { setPlanId(''); setCreative(''); setDuration(null); setDest(''); setErr('') }, [key])
 
   const full = !!slot && slot.free === 0
@@ -105,9 +105,9 @@ export default function BuyPlacement({ userId }: { userId: string }) {
     setErr(''); setCreative(''); setDuration(null)
 
     if (isVideo) {
-      /* مدت پیش از آپلود در مرورگر سنجیده می‌شود: فرستادنِ ویدیوی بلند
-         و بعد رد شدنش، هم وقتِ کاربر را می‌گیرد هم پهنای‌باند را.
-         سقفِ نهایی را باز سرور اعمال می‌کند. */
+      /* مدت پیش از آپلود در مرورگر سنجیده می‌شود: فرستادن ویدیوی بلند
+         و بعد رد شدنش، هم وقت کاربر را می‌گیرد هم پهنای‌باند را.
+         سقف نهایی را باز سرور اعمال می‌کند. */
       const dur = await probeDuration(f)
       if (dur === null) { setErr('این فایل ویدیوی معتبری نیست'); return }
       const cap = slot.maxDurationSec
@@ -121,7 +121,7 @@ export default function BuyPlacement({ userId }: { userId: string }) {
     setUpBusy(true)
     try {
       const { uploadFile } = await import('../../lib/supabase')
-      /* مسیر زیرِ شناسه‌ی خودِ کاربر — سیاستِ آپلود همین را بررسی می‌کند */
+      /* مسیر زیر شناسه‌ی خود کاربر — سیاست آپلود همین را بررسی می‌کند */
       const url = await uploadFile('club-media', f, `ads/${userId}/${Date.now()}`)
       if (!url) { setErr('بارگذاری انجام نشد؛ حجم یا فرمت فایل را بررسی کنید'); return }
       setCreative(url)
@@ -137,7 +137,7 @@ export default function BuyPlacement({ userId }: { userId: string }) {
 
     setBusy(true); setErr('')
     try {
-      /* مبلغ عمداً فرستاده نمی‌شود. سرور آن را از ردیفِ همین پله
+      /* مبلغ عمدا فرستاده نمی‌شود. سرور آن را از ردیف همین پله
          می‌خواند؛ هر عددی که از این‌جا برود نادیده گرفته می‌شود. */
       const r = await apiFetch('/api/ads/campaigns/buy', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -188,9 +188,9 @@ export default function BuyPlacement({ userId }: { userId: string }) {
         <strong> تبلیغ پیش‌پخش بیلیارد مدیا</strong> — تعریف شده‌اند ولی هنوز برای فروش
         آنلاین باز نشده‌اند.
         <br /><br />
-        {/* راهِ عملی، نه بن‌بست: کاربری که همین حالا می‌خواهد تبلیغ
-            بدهد باید بتواند بگوید، حتی وقتی خریدِ آنلاین باز نیست. */}
-        برای هر کدام می‌توانید از تبِ <strong>«درخواست سفارشی»</strong> همین صفحه درخواست بدهید —
+        {/* راه عملی، نه بن‌بست: کاربری که همین حالا می‌خواهد تبلیغ
+            بدهد باید بتواند بگوید، حتی وقتی خرید آنلاین باز نیست. */}
+        برای هر کدام می‌توانید از تب <strong>«درخواست سفارشی»</strong> همین صفحه درخواست بدهید —
         از جمله تبلیغ روی کلیپ‌های بیلیارد مدیا. تعرفه پس از بررسی برایتان فرستاده می‌شود.
         <br /><br />
         <span style={{ fontSize: 12, color: MUT }}>
@@ -203,7 +203,7 @@ export default function BuyPlacement({ userId }: { userId: string }) {
 
   return (
     <div style={{ display: 'grid', gap: 14 }}>
-      {/* ── کارتِ هر جایگاه ── */}
+      {/* ── کارت هر جایگاه ── */}
       <div style={{ display: 'grid', gap: 10, gridTemplateColumns: 'repeat(auto-fill,minmax(240px,1fr))' }}>
         {opts.map(o => {
           const on = o.key === key
@@ -247,12 +247,12 @@ export default function BuyPlacement({ userId }: { userId: string }) {
         })}
       </div>
 
-      {/* ── فرمِ خرید ── */}
+      {/* ── فرم خرید ── */}
       {slot && (
         <div style={CARD}>
           {full ? (
             <div style={{ fontSize: 13, color: RED, lineHeight: 2 }}>
-              ظرفیت این جایگاه در بازه‌ی پیشِ رو تکمیل است. با آزاد شدن یک جا، همین‌جا قابل خرید می‌شود.
+              ظرفیت این جایگاه در بازه‌ی پیش رو تکمیل است. با آزاد شدن یک جا، همین‌جا قابل خرید می‌شود.
             </div>
           ) : isEntity ? (
             <div style={{ fontSize: 13, color: SEC, lineHeight: 2 }}>
@@ -296,7 +296,7 @@ export default function BuyPlacement({ userId }: { userId: string }) {
                   <label style={LABEL}>عنوان تبلیغ</label>
                   <input style={INPUT} value={title} maxLength={160}
                     onChange={e => { setTitle(e.target.value); setErr('') }}
-                    placeholder="مثلاً: فروش ویژه‌ی چوب‌های حرفه‌ای" />
+                    placeholder="مثلا: فروش ویژه‌ی چوب‌های حرفه‌ای" />
                 </div>
                 <div>
                   <label style={LABEL}>نام برند / کسب‌وکار</label>

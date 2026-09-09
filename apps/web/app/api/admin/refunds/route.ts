@@ -5,19 +5,19 @@ import { can } from '@/lib/admin/permissions';
 import { normalizeReference, referenceProblem, findDuplicateReference } from '@/lib/finance/reference';
 
 /* ─────────────────────────────────────────────────────────────
-   بستنِ بازپرداخت پس از واریزِ دستی.
+   بستن بازپرداخت پس از واریز دستی.
 
    ── چرا این مسیر تا امروز نبود ──
-   تابعِ `bh_complete_refund` از مهاجرتِ ۰۴۱ در دیتابیس هست و درست هم
-   کار می‌کند: وضعیتِ بازپرداخت، وضعیتِ رزرو و مبلغِ برگشتیِ پرداخت را
+   تابع `bh_complete_refund` از مهاجرت ۰۴۱ در دیتابیس هست و درست هم
+   کار می‌کند: وضعیت بازپرداخت، وضعیت رزرو و مبلغ برگشتی پرداخت را
    با هم به‌روز می‌کند. ولی **هیچ مسیری صدایش نمی‌زد**.
 
    یعنی ادمین پول را واریز می‌کرد و هیچ راهی نداشت به سیستم بگوید
    انجام شد. بازپرداخت تا ابد `REQUESTED` می‌ماند، در «دستور پرداخت»
-   تکرار می‌شد، و خطرِ واقعی‌اش پرداختِ دوباره بود.
+   تکرار می‌شد، و خطر واقعی‌اش پرداخت دوباره بود.
 
    ── چرا شماره‌ی پیگیری اجباری است ──
-   بدونش «واریز شد» فقط یک ادعاست و موقعِ اختلاف هیچ ردی برای
+   بدونش «واریز شد» فقط یک ادعاست و موقع اختلاف هیچ ردی برای
    دنبال‌کردن نمی‌ماند.
    ───────────────────────────────────────────────────────────── */
 
@@ -33,7 +33,7 @@ export async function POST(req: NextRequest) {
 
   if (!id) return NextResponse.json({ message: 'شناسه الزامی است' }, { status: 400 });
 
-  /* ── بازپرداختِ رزرو ── */
+  /* ── بازپرداخت رزرو ── */
   if (b?.action === 'complete') {
     const reference = normalizeReference(b?.reference);
     if (!reference) {
@@ -45,8 +45,8 @@ export async function POST(req: NextRequest) {
     const dup = await findDuplicateReference(reference, { table: 'refunds', id });
     if (dup) {
       return NextResponse.json({
-        message: `این شماره پیگیری قبلاً برای «${dup.where}» ثبت شده است.`
-          + ' اگر واریزِ تازه‌ای انجام داده‌اید، شماره پیگیریِ همان تراکنش را وارد کنید.',
+        message: `این شماره پیگیری قبلا برای «${dup.where}» ثبت شده است.`
+          + ' اگر واریز تازه‌ای انجام داده‌اید، شماره پیگیری همان تراکنش را وارد کنید.',
       }, { status: 409 });
     }
 
@@ -67,9 +67,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: true, refund: data });
   }
 
-  /* ── بازپرداختِ تبلیغات ──
-     جدولش جداست (`campaign_orders`) و تابعِ اتمیکی ندارد؛ فقط دو ستونِ
-     مهاجرتِ ۰۶۷ پر می‌شوند. شرطِ `is('refund_paid_at', null)` جلوی ثبتِ
+  /* ── بازپرداخت تبلیغات ──
+     جدولش جداست (`campaign_orders`) و تابع اتمیکی ندارد؛ فقط دو ستون
+     مهاجرت ۰۶۷ پر می‌شوند. شرط `is('refund_paid_at', null)` جلوی ثبت
      دوباره را می‌گیرد. */
   if (b?.action === 'complete-ad') {
     const reference = normalizeReference(b?.reference);
@@ -82,8 +82,8 @@ export async function POST(req: NextRequest) {
     const dup = await findDuplicateReference(reference, { table: 'campaign_orders', id });
     if (dup) {
       return NextResponse.json({
-        message: `این شماره پیگیری قبلاً برای «${dup.where}» ثبت شده است.`
-          + ' اگر واریزِ تازه‌ای انجام داده‌اید، شماره پیگیریِ همان تراکنش را وارد کنید.',
+        message: `این شماره پیگیری قبلا برای «${dup.where}» ثبت شده است.`
+          + ' اگر واریز تازه‌ای انجام داده‌اید، شماره پیگیری همان تراکنش را وارد کنید.',
       }, { status: 409 });
     }
 
@@ -101,7 +101,7 @@ export async function POST(req: NextRequest) {
       }, { status: 400 });
     }
     if (!data) {
-      return NextResponse.json({ message: 'این بازپرداخت قبلاً ثبت شده یا وجود ندارد' }, { status: 409 });
+      return NextResponse.json({ message: 'این بازپرداخت قبلا ثبت شده یا وجود ندارد' }, { status: 409 });
     }
 
     audit({

@@ -30,10 +30,10 @@ interface RoleMeta {
   value: RoleValue
   label: string
   icon: string          // tabler webfont class (used by doc-upload step + chips)
-  /* ⚠️ `LucideIcon` نه `ElementType`: بعد از افزودنِ
-     react-three-fiber، فضای‌نامِ سراسریِ JSX با عناصرِ three گسترش
-     می‌یابد و `ElementType`ِ عام آن‌قدر پهن می‌شود که پراپ‌هایش به
-     `never` می‌رسند. تایپِ دقیق هم مشکل را حل می‌کند هم درست‌تر است. */
+  /* ⚠️ `LucideIcon` نه `ElementType`: بعد از افزودن
+     react-three-fiber، فضای‌نام سراسری JSX با عناصر three گسترش
+     می‌یابد و `ElementType` عام آن‌قدر پهن می‌شود که پراپ‌هایش به
+     `never` می‌رسند. تایپ دقیق هم مشکل را حل می‌کند هم درست‌تر است. */
   Icon: LucideIcon      // lucide component (used by the role cards)
   color: string
   description: string
@@ -86,11 +86,11 @@ const ROLES: RoleMeta[] = [
 const ROLE_MAP = Object.fromEntries(ROLES.map(r => [r.value, r])) as Record<RoleValue, RoleMeta>
 
 // آدرس API بک‌اند NestJS
-/* پیش‌تر این‌جا `http://localhost:3001` بود — بک‌اندِ NestJS که حذف
-   شده. یعنی روی Production همه‌ی این فراخوانی‌ها به یک میزبانِ ناموجود
+/* پیش‌تر این‌جا `http://localhost:3001` بود — بک‌اند NestJS که حذف
+   شده. یعنی روی Production همه‌ی این فراخوانی‌ها به یک میزبان ناموجود
    می‌رفتند و بی‌صدا شکست می‌خوردند: کاربر نقشش را انتخاب می‌کرد،
    صفحه «ثبت شد» می‌گفت و هیچ درخواستی ساخته نمی‌شد. مسیرها حالا
-   نسبی‌اند و به route handlerهای خودِ Next می‌روند. */
+   نسبی‌اند و به route handlerهای خود Next می‌روند. */
 const API = ''
 
 // ─── RoleCard ─────────────────────────────────────────────────
@@ -205,8 +205,8 @@ function DocUploadStep({
   onBack: () => void
   onDone: () => void
 }) {
-  /* مسیرِ مدرک باید زیرِ شناسه‌ی خودِ کاربر باشد؛ /api/upload جز این
-     را رد می‌کند تا کسی مدرکِ دیگری را بازنویسی نکند. */
+  /* مسیر مدرک باید زیر شناسه‌ی خود کاربر باشد؛ /api/upload جز این
+     را رد می‌کند تا کسی مدرک دیگری را بازنویسی نکند. */
   const { user: me } = useAuthStore()
   const [files, setFiles]     = useState<Record<string, File | null>>({})
   const [uploading, setUploading] = useState(false)
@@ -227,7 +227,7 @@ function DocUploadStep({
         setProgress(p => ({ ...p, [roleVal]: 'uploading' }))
         const formData = new FormData()
         formData.append('file', files[roleVal]!)
-        /* باکتِ مدارک خصوصی است و لینکِ عمومی ندارد؛ مسیر برمی‌گردد. */
+        /* باکت مدارک خصوصی است و لینک عمومی ندارد؛ مسیر برمی‌گردد. */
         formData.append('path', `documents/roles/${me?.id ?? ''}/${roleVal}-${Date.now()}`)
 
         try {
@@ -238,15 +238,15 @@ function DocUploadStep({
           })
           if (upRes.ok) {
             const j = await upRes.json()
-            /* فایلِ خصوصی `url` ندارد — `path` همان ارجاعِ ماندگار است */
+            /* فایل خصوصی `url` ندارد — `path` همان ارجاع ماندگار است */
             docUrl = j.path ?? j.url
             setProgress(p => ({ ...p, [roleVal]: 'done' }))
           } else {
-            /* ⚠️ پیش‌تر این‌جا `continue` بود، یعنی شکستِ آپلود کلِ نقش
+            /* ⚠️ پیش‌تر این‌جا `continue` بود، یعنی شکست آپلود کل نقش
                را کنار می‌گذاشت و کاربر بی‌هیچ پیامی نقشش را نمی‌گرفت.
 
                حالا نقش ثبت می‌شود و فقط مدرک همراهش نیست — یعنی
-               «تأیید بدونِ تیک آبی». مدرک را بعداً می‌شود از پروفایل
+               «تأیید بدون تیک آبی». مدرک را بعدا می‌شود از پروفایل
                اضافه کرد. */
             setProgress(p => ({ ...p, [roleVal]: 'error' }))
           }
@@ -386,15 +386,15 @@ function DocUploadStep({
 export default function RolePage() {
   const router = useRouter()
   const { user, updateUser } = useAuthStore()
-  /* همه‌ی نقش‌های کاربر — اصلی و فرعی با هم. `user` عمداً حذف می‌شود:
-     «کاربر عادی» نقش نیست، حالتِ نداشتنِ نقش است. */
+  /* همه‌ی نقش‌های کاربر — اصلی و فرعی با هم. `user` عمدا حذف می‌شود:
+     «کاربر عادی» نقش نیست، حالت نداشتن نقش است. */
   const activeRoles = Array.from(new Set(
     [user?.primaryRole, ...(user?.secondaryRoles ?? [])]
       .filter((r): r is string => !!r && r !== 'user'),
   ))
   const [requests, setRequests] = useState<RoleRequest[]>([])
   const [queued, setQueued]     = useState<Set<RoleValue>>(new Set())
-  /* در حالِ تغییرِ نقشِ اصلی — تا دو کلیکِ پشتِ هم دو درخواست نفرستد */
+  /* در حال تغییر نقش اصلی — تا دو کلیک پشت هم دو درخواست نفرستد */
   const [primaryBusy, setPrimaryBusy] = useState(false)
   const [step, setStep]         = useState<'select' | 'upload'>('select')
   const [toast, setToast]       = useState<string | null>(null)
@@ -403,7 +403,7 @@ export default function RolePage() {
   const [playerInfo, setPlayerInfo] = useState<PlayerDisciplinesValue>({ gender: 'm', entries: [] })
   const [playerErr, setPlayerErr]   = useState('')
 
-  /* اگر قبلاً پروفایل بازیکن ساخته، همان مقادیر پیش‌فرض شوند */
+  /* اگر قبلا پروفایل بازیکن ساخته، همان مقادیر پیش‌فرض شوند */
   useEffect(() => {
     if (!user) return
     const mine = findPlayerByOwner(user)
@@ -471,12 +471,12 @@ export default function RolePage() {
 
     if (queued.has('player')) savePlayerBasics()
 
-    /* ── انتخابِ نقش، نه درخواستِ تأیید ──
-       این‌جا فقط نقش گرفته می‌شود تا کاربر بتواند شروع کند. روی میزِ
+    /* ── انتخاب نقش، نه درخواست تأیید ──
+       این‌جا فقط نقش گرفته می‌شود تا کاربر بتواند شروع کند. روی میز
        ادمین چیزی نمی‌نشیند؛ آن وقتی است که پروفایل تکمیل و «ثبت
        نهایی» شود.
 
-       مدرک اختیاری است: نبودنش یعنی «بدونِ تیک آبی»، نه «رد». نقشی
+       مدرک اختیاری است: نبودنش یعنی «بدون تیک آبی»، نه «رد». نقشی
        که تیک دارد، کاربر را به مرحله‌ی بارگذاری می‌برد ولی می‌تواند
        ردش کند. */
     const canHaveTick = queuedArr.some(r => ROLE_MAP[r].requiresDoc)
@@ -556,10 +556,10 @@ export default function RolePage() {
                 </p>
               </div>
 
-              {/* ── نقشِ اصلی ──
+              {/* ── نقش اصلی ──
                   کسی که چند نقش دارد باید بگوید کدام «خودش» است:
                   همان نشانی که روی آگهی و استوری‌اش می‌نشیند. تا امروز
-                  نقشِ اصلی فقط با گرفتنِ نقشِ تازه عوض می‌شد و کاربر
+                  نقش اصلی فقط با گرفتن نقش تازه عوض می‌شد و کاربر
                   هیچ کنترلی رویش نداشت. */}
               {(() => {
                 const mine = [user?.primaryRole, ...(user?.secondaryRoles ?? [])]
@@ -570,7 +570,7 @@ export default function RolePage() {
                   <div style={{ background: '#fff', border: '1px solid rgba(199,166,106,0.34)', borderRadius: 16, padding: '14px 16px', marginBottom: 16, boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
                     <div style={{ fontSize: 12.5, fontWeight: 800, color: '#8F6531', marginBottom: 4 }}>نقش اصلی شما</div>
                     <p style={{ fontSize: 12, color: 'rgba(0,0,0,0.45)', margin: '0 0 10px', lineHeight: 1.9 }}>
-                      آگهی و استوری شما با نشانِ همین نقش منتشر می‌شود.
+                      آگهی و استوری شما با نشان همین نقش منتشر می‌شود.
                     </p>
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
                       {uniq.map(r => {
@@ -608,13 +608,13 @@ export default function RolePage() {
               })()}
 
               {/* ── نقش‌های فعال ──
-                  تا امروز فقط `secondaryRoles` فهرست می‌شد و نقشِ
-                  **اصلی** اصلاً در آن نبود. کاربری که مثلاً فروشنده
+                  تا امروز فقط `secondaryRoles` فهرست می‌شد و نقش
+                  **اصلی** اصلا در آن نبود. کاربری که مثلا فروشنده
                   (اصلی) و باشگاه‌دار (فرعی) بود، این‌جا فقط یکی را
-                  می‌دید و فکر می‌کرد نقشِ دیگرش از بین رفته.
+                  می‌دید و فکر می‌کرد نقش دیگرش از بین رفته.
 
-                  حذف فقط برای نقش‌های فرعی است: نقشِ اصلی اول باید در
-                  کادرِ بالا عوض شود، وگرنه کاربر بی‌نقش می‌ماند. */}
+                  حذف فقط برای نقش‌های فرعی است: نقش اصلی اول باید در
+                  کادر بالا عوض شود، وگرنه کاربر بی‌نقش می‌ماند. */}
               {activeRoles.length > 0 && (
                 <div style={{ background: '#fff', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 16, padding: '14px 16px', marginBottom: 16, boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
                   <div style={{ fontSize: 12.5, fontWeight: 800, color: 'rgba(0,0,0,0.55)', marginBottom: 10 }}>نقش‌های فعال شما</div>
@@ -626,10 +626,10 @@ export default function RolePage() {
                           <span style={{ fontSize: 10, fontWeight: 800, color: '#7A5626', background: 'rgba(199,166,106,0.22)', borderRadius: 999, padding: '2px 7px' }}>اصلی</span>
                         )}
                         {r !== user?.primaryRole && <button
-                          /* حذف باید *سمتِ سرور* انجام شود. پیش‌تر فقط
-                             `updateUser` صدا زده می‌شد: نقش از استورِ
+                          /* حذف باید *سمت سرور* انجام شود. پیش‌تر فقط
+                             `updateUser` صدا زده می‌شد: نقش از استور
                              مرورگر پاک می‌شد، پیام «نقش حذف شد» می‌آمد، و
-                             سرور هیچ خبری نداشت — با اولین بارگذاریِ تازه
+                             سرور هیچ خبری نداشت — با اولین بارگذاری تازه
                              نقش برمی‌گشت. سرور هم محافظ دارد: باشگاه‌داری
                              که باشگاه دارد نمی‌تواند نقشش را بردارد. */
                           onClick={async () => {
@@ -801,8 +801,8 @@ export default function RolePage() {
             </>
           )}
 
-          {/* مرحله‌ی بارگذاریِ مدرک — تا امروز نوشته شده بود ولی هرگز
-              رندر نمی‌شد، پس نقش‌های مدرک‌خواه بدونِ مدرک ثبت می‌شدند. */}
+          {/* مرحله‌ی بارگذاری مدرک — تا امروز نوشته شده بود ولی هرگز
+              رندر نمی‌شد، پس نقش‌های مدرک‌خواه بدون مدرک ثبت می‌شدند. */}
           {step === 'upload' && (
             <DocUploadStep
               queued={queuedArr}

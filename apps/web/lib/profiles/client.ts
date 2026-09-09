@@ -22,7 +22,7 @@ export interface RemoteProfile<T = Record<string, unknown>> {
   data: T
   status: 'approved' | 'pending' | 'rejected'
   verified: boolean
-  /* ستون‌های تجمیعیِ امتیاز و جلسه — از خودِ ردیف، نه jsonb */
+  /* ستون‌های تجمیعی امتیاز و جلسه — از خود ردیف، نه jsonb */
   ratingAvg?: number
   ratingCount?: number
   sessionPrice?: number
@@ -40,16 +40,16 @@ async function json<T>(r: Response): Promise<T | null> {
 }
 
 /* ── چرا سه حالت، نه دو ──
-   `null` سه چیزِ متفاوت را یکی می‌کرد: «پروفایلی نیست»، «۴۰۱» و
+   `null` سه چیز متفاوت را یکی می‌کرد: «پروفایلی نیست»، «۴۰۱» و
    «شبکه قطع بود». پنل‌ها همه‌شان را «هنوز چیزی ثبت نشده» می‌خواندند
-   و فیلدِ نشانی را باز می‌کردند. روی موبایلِ ایرانی که درخواست
-   تایم‌اوت می‌شود، یعنی فروشنده‌ی موجود می‌توانست نشانیِ منتشرشده‌اش
+   و فیلد نشانی را باز می‌کردند. روی موبایل ایرانی که درخواست
+   تایم‌اوت می‌شود، یعنی فروشنده‌ی موجود می‌توانست نشانی منتشرشده‌اش
    را عوض کند و `saveProfile` — که «یکی به‌ازای هر مالک» است — همان
-   ردیفِ زنده را تغییرِ نام می‌داد.
+   ردیف زنده را تغییر نام می‌داد.
 
    قفل باید در ابهام **بسته** بماند، نه باز. */
 export type MyProfileResult<T> =
-  /* `isMine` را سرور می‌گوید — نه مقایسه‌ی مرورگر. فقط مسیرِ
+  /* `isMine` را سرور می‌گوید — نه مقایسه‌ی مرورگر. فقط مسیر
      `?slug=` آن را برمی‌گرداند. */
   | { state: 'found'; profile: RemoteProfile<T>; isMine?: boolean }
   | { state: 'none' }
@@ -74,10 +74,10 @@ export async function fetchMyProfile<T>(kind: ProfileKind): Promise<RemoteProfil
 
 /** یک پروفایل عمومی با نامک.
  *
- *  با `apiFetch` صدا زده می‌شود نه `fetch` خام: سرور پروفایلِ
+ *  با `apiFetch` صدا زده می‌شود نه `fetch` خام: سرور پروفایل
  *  تأییدنشده را **به صاحبش و ادمین** نشان می‌دهد، و این تصمیم به
- *  نشست وابسته است. بدونِ فرستادنِ نشست، صاحبِ پروفایل هم مهمان
- *  دیده می‌شود و پیش‌نمایشِ کارِ خودش ۴۰۴ می‌گیرد. */
+ *  نشست وابسته است. بدون فرستادن نشست، صاحب پروفایل هم مهمان
+ *  دیده می‌شود و پیش‌نمایش کار خودش ۴۰۴ می‌گیرد. */
 export async function fetchProfile<T>(kind: ProfileKind, slug: string): Promise<RemoteProfile<T> | null> {
   const r = await fetchProfileResult<T>(kind, slug)
   return r.state === 'found' ? r.profile : null
@@ -85,18 +85,18 @@ export async function fetchProfile<T>(kind: ProfileKind, slug: string): Promise<
 
 /** همان، ولی «نبود» و «خطا» را از هم جدا می‌کند.
  *
- *  صفحه‌ی عمومی به این تفاوت نیاز دارد: با `null`ِ یکسان، قطعیِ
+ *  صفحه‌ی عمومی به این تفاوت نیاز دارد: با `null` یکسان، قطعی
  *  شبکه همان «این مربی پیدا نشد» را نشان می‌داد — پیامی که می‌گوید
  *  آدم وجود ندارد، درحالی‌که فقط درخواست نرسیده بود. */
 export async function fetchProfileResult<T>(kind: ProfileKind, slug: string): Promise<MyProfileResult<T>> {
   const r = await apiFetch(`/api/profiles/${kind}?slug=${encodeURIComponent(slug)}`, { cache: 'no-store' }).catch(() => null)
   if (!r) return { state: 'error' }
-  /* ۴۰۴ یعنی واقعاً نیست؛ بقیه‌ی کدهای ناموفق خطای سرورند. */
+  /* ۴۰۴ یعنی واقعا نیست؛ بقیه‌ی کدهای ناموفق خطای سرورند. */
   if (!r.ok) return r.status === 404 ? { state: 'none' } : { state: 'error' }
   const j = await json<{ profile: RemoteProfile<T> | null; isMine?: boolean }>(r)
   if (!j) return { state: 'error' }
   if (!j.profile) return { state: 'none' }
-  /* ⚠️ تنها دروازه‌ی خواندنِ پروفایل در کلاینت همین است، پس تضمینِ
+  /* ⚠️ تنها دروازه‌ی خواندن پروفایل در کلاینت همین است، پس تضمین
      آرایه هم همین‌جا انجام می‌شود — نه در هفت صفحه‌ی جدا که یکی‌شان
      یادش می‌رود. */
   return {
@@ -116,7 +116,7 @@ export async function fetchProfiles<T>(kind: ProfileKind): Promise<RemoteProfile
 
 /* ⚠️ `fetchProfiles` خطا را می‌بلعد و `[]` می‌دهد، پس مصرف‌کننده
    نمی‌تواند «هیچ متخصصی نیست» را از «سرور جواب نداد» جدا کند و
-   روی سایتِ زنده جمله‌ی غلط نشان می‌دهد. این یکی حالت را برمی‌گرداند. */
+   روی سایت زنده جمله‌ی غلط نشان می‌دهد. این یکی حالت را برمی‌گرداند. */
 export type ProfilesResult<T> =
   | { state: 'ok'; profiles: RemoteProfile<T>[] }
   | { state: 'error' }
@@ -136,8 +136,8 @@ export async function saveProfileRemote<T extends Record<string, unknown>>(
   slug: string,
   data: T,
   license?: { number?: string; url?: string },
-  /* مبلغ و مدتِ جلسه ستونِ ردیف‌اند نه داخلِ `data`؛ چون مسیرِ
-     درخواستِ جلسه مبلغ را از دیتابیس برمی‌دارد. */
+  /* مبلغ و مدت جلسه ستون ردیف‌اند نه داخل `data`؛ چون مسیر
+     درخواست جلسه مبلغ را از دیتابیس برمی‌دارد. */
   session?: { price?: number; minutes?: number },
 ): Promise<SaveResult<T>> {
   try {
@@ -155,14 +155,14 @@ export async function saveProfileRemote<T extends Record<string, unknown>>(
     const j = await r.json().catch(() => ({})) as { profile?: RemoteProfile<T>; message?: string }
     if (!r.ok) return { ok: false, profile: null, message: j?.message || 'ذخیره روی سرور انجام نشد' }
 
-    /* ── «ثبتِ نهایی» ──
+    /* ── «ثبت نهایی» ──
        ذخیره‌ی پروفایل همان لحظه‌ای است که کاربر کارش را تمام کرده، پس
-       همین‌جا درخواستِ نقشش هم از `draft` به `pending` می‌رود و روی
-       میزِ ادمین می‌نشیند.
+       همین‌جا درخواست نقشش هم از `draft` به `pending` می‌رود و روی
+       میز ادمین می‌نشیند.
 
        این‌جا انجام می‌شود نه در شش صفحه‌ی داشبورد، چون تنها نقطه‌ی
-       مشترکِ ذخیره‌ی پروفایل همین است؛ تکرارش در هر صفحه یعنی روزی
-       یکی جا می‌ماند و نقشِ آن کاربر هرگز به ادمین نمی‌رسد.
+       مشترک ذخیره‌ی پروفایل همین است؛ تکرارش در هر صفحه یعنی روزی
+       یکی جا می‌ماند و نقش آن کاربر هرگز به ادمین نمی‌رسد.
 
        بی‌صداست: اگر کاربر آن نقش را انتخاب نکرده باشد (۴۰۴) یا شبکه
        قطع باشد، ذخیره‌ی پروفایل نباید شکست بخورد. */

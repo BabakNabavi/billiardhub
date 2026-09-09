@@ -20,7 +20,7 @@ import { getSupabaseServer } from './supabase-server'
 
 const sb = () => getSupabaseServer()
 
-/* کلید هش کد ملی عمداً از env نمی‌آید، بلکه از خود دیتابیس مشترک
+/* کلید هش کد ملی عمدا از env نمی‌آید، بلکه از خود دیتابیس مشترک
    خوانده می‌شود (app_settings.person_hash_salt — جدولی که RLS دارد و
    بدون policy است، پس فقط service-role می‌خواندش).
 
@@ -69,7 +69,7 @@ export function normalizeNationalId(raw: string): string {
     .replace(/[^0-9]/g, '')
 }
 
-/** هَش یکتاساز کد ملی — خود کد ملی هرگز در persons ذخیره نمی‌شود */
+/** هش یکتاساز کد ملی — خود کد ملی هرگز در persons ذخیره نمی‌شود */
 export async function nationalIdHash(nationalId: string): Promise<string> {
   const key = await hmacKey()
   return createHmac('sha256', key).update(normalizeNationalId(nationalId)).digest('hex')
@@ -148,8 +148,8 @@ export async function linkedUserIds(personId: string): Promise<string[]> {
 
 /**
  * بک‌فیل تنبل: هر کاربر کدملی‌تأییدشده که هنوز شخص ندارد، وصل می‌شود.
- * عمداً در سرور پروداکشن اجرا می‌شود (از کران)، نه از ماشین توسعه —
- * چون هش HMAC باید با secret همان محیطی ساخته شود که بعداً در
+ * عمدا در سرور پروداکشن اجرا می‌شود (از کران)، نه از ماشین توسعه —
+ * چون هش HMAC باید با secret همان محیطی ساخته شود که بعدا در
  * register/quota همان هش را می‌سازد؛ وگرنه یک کد ملی دو شخص می‌گرفت.
  * ایدمپوتنت و ارزان (فقط ردیف‌های person_id IS NULL).
  */

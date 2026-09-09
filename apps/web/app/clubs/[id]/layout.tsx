@@ -6,8 +6,8 @@ import { sb } from '@/lib/finance/db'
    صفحه Client Component است و نمی‌تواند metadata صادر کند، پس این لایه
    فقط برای SEO اضافه شده و چیزی جز children رندر نمی‌کند.
 
-   تا امروز صفحه‌ی هر باشگاه عنوانِ پیش‌فرضِ سایت را داشت — یعنی گوگل و
-   هر لینکِ اشتراکی، همه‌ی باشگاه‌ها را «بیلیارد هاب | پلتفرم جامع…»
+   تا امروز صفحه‌ی هر باشگاه عنوان پیش‌فرض سایت را داشت — یعنی گوگل و
+   هر لینک اشتراکی، همه‌ی باشگاه‌ها را «بیلیارد هاب | پلتفرم جامع…»
    می‌دید. این‌ها مهم‌ترین صفحه‌های سایت از نظر جست‌وجو هستند. */
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
@@ -28,7 +28,7 @@ export async function generateMetadata(
     } | null
     if (!c?.name) return {}
 
-    /* باشگاهِ منتشرنشده نباید ایندکس شود */
+    /* باشگاه منتشرنشده نباید ایندکس شود */
     const published = c.isActive !== false &&
       (c.verificationStatus === 'verified' || c.verificationStatus === 'approved')
 
@@ -51,7 +51,7 @@ export async function generateMetadata(
       twitter: { card: 'summary_large_image', title, description },
     }
   } catch {
-    /* دیتابیس در دسترس نبود ⇒ متادیتای پیش‌فرضِ ریشه می‌ماند، نه خطا */
+    /* دیتابیس در دسترس نبود ⇒ متادیتای پیش‌فرض ریشه می‌ماند، نه خطا */
     return {}
   }
 }

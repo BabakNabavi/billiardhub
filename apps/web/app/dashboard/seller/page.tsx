@@ -2,7 +2,7 @@
 /* ─────────────────────────────────────────────────────────────
    پنل صاحب فروشگاه — /dashboard/seller
    دسترسی: هرکس نقش «فروشنده» (seller) را گرفته باشد.
-   هر فیلد اینجا مستقیماً به یک چیز دیدنی در /sellers/<slug> وصل است.
+   هر فیلد اینجا مستقیما به یک چیز دیدنی در /sellers/<slug> وصل است.
    ───────────────────────────────────────────────────────────── */
 import { useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
@@ -49,7 +49,7 @@ const Icon = {
   check:  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>,
 }
 
-/* اسلاگ فروشگاه = همان id در آدرس. فعلاً تک‌فروشگاهی نمونه؛ بعداً از سرور می‌آید. */
+/* اسلاگ فروشگاه = همان id در آدرس. فعلا تک‌فروشگاهی نمونه؛ بعدا از سرور می‌آید. */
 const DEFAULT_SLUG = '1'
 
 export default function SellerDashboard() {
@@ -58,8 +58,8 @@ export default function SellerDashboard() {
 
   const [form, setForm]   = useState<SellerProfile>(() => emptySellerProfile(DEFAULT_SLUG))
   const [loaded, setLoaded] = useState(false)
-  /* نامکی که واقعاً روی سرور ثبت شده. تا وقتی خالی است فیلدِ نشانی
-     باز می‌ماند؛ نامکِ خودکارِ فرم نباید قفلش کند. */
+  /* نامکی که واقعا روی سرور ثبت شده. تا وقتی خالی است فیلد نشانی
+     باز می‌ماند؛ نامک خودکار فرم نباید قفلش کند. */
   const [savedSlug, setSavedSlug] = useState<string | null>(null)
   const [saved, setSaved]   = useState(false)
   const [err, setErr]       = useState('')
@@ -67,7 +67,7 @@ export default function SellerDashboard() {
   const [warn, setWarn]     = useState(false)   // هشدار «بدون جواز کسب»
   const [warnAck, setWarnAck] = useState(false) // کاربر یادآوری را دید و ادامه داد
   const [brandInput, setBrandInput] = useState('')
-  /* نشانیِ تکراری نباید ذخیره شود — دکمه‌ی ذخیره منتظرِ همین می‌ماند */
+  /* نشانی تکراری نباید ذخیره شود — دکمه‌ی ذخیره منتظر همین می‌ماند */
   const [slugStatus, setSlugStatus] = useState<SlugStatus>('idle')
 
   const logoRef   = useRef<HTMLInputElement>(null)
@@ -92,7 +92,7 @@ export default function SellerDashboard() {
     if (!_hydrated) return
     if (!user) { setLoaded(true); return }
 
-    /* اول همان چیزی که در مرورگر هست تا فرم فوراً پر شود، بعد نسخه‌ی
+    /* اول همان چیزی که در مرورگر هست تا فرم فورا پر شود، بعد نسخه‌ی
        سرور که منبع حقیقت است جایش را می‌گیرد. */
     let mine = findSellerByOwner(user)
     if (!mine) {
@@ -116,12 +116,12 @@ export default function SellerDashboard() {
         if (mine) {
           const up = await saveProfileRemote('seller', mine.slug, mine as unknown as Record<string, unknown>,
             { number: mine.licenseNumber, url: mine.certificate?.url ?? '' })
-          /* فقط نوشتنِ تأییدشده قفل می‌کند؛ با ۴۰۹ چیزی نوشته نشده و
-             فیلد باید باز بماند تا نامکِ تکراری قابلِ اصلاح باشد. */
+          /* فقط نوشتن تأییدشده قفل می‌کند؛ با ۴۰۹ چیزی نوشته نشده و
+             فیلد باید باز بماند تا نامک تکراری قابل اصلاح باشد. */
           if (up.ok && up.profile?.slug) setSavedSlug(up.profile.slug)
-          else { setSavedSlug(''); setErr(up.message ?? 'نشانیِ ثبت‌شده خوانده نشد — دوباره تلاش کنید') }
+          else { setSavedSlug(''); setErr(up.message ?? 'نشانی ثبت‌شده خوانده نشد — دوباره تلاش کنید') }
         } else {
-          /* کاربرِ کاملاً تازه: نه ردیفِ سرور، نه کشِ محلی.
+          /* کاربر کاملا تازه: نه ردیف سرور، نه کش محلی.
              صریح باز می‌شود تا نامکش را خودش انتخاب کند. */
           setSavedSlug('')
         }
@@ -203,12 +203,12 @@ export default function SellerDashboard() {
     /* ── وضعیت را فروشنده تعیین نمی‌کند ──
        تا امروز این‌جا `status: 'approved'` نوشته می‌شد، یعنی فروشگاه
        لحظه‌ی ذخیره خودش را منتشرشده اعلام می‌کرد و در «فروشگاه‌ها» و
-       صفحه‌ی اصلی می‌نشست — بی‌آنکه ادمین چیزی دیده باشد. صفِ تأیید
-       عملاً تشریفاتی بود و «رد»ِ ادمین هم با اولین ویرایش برمی‌گشت.
+       صفحه‌ی اصلی می‌نشست — بی‌آنکه ادمین چیزی دیده باشد. صف تأیید
+       عملا تشریفاتی بود و «رد» ادمین هم با اولین ویرایش برمی‌گشت.
 
-       حالا وضعیت اصلاً فرستاده نمی‌شود: سرور برای پروفایلِ تازه
-       `pending` می‌گذارد و در ویرایش دست نمی‌زند، پس تصمیمِ ادمین
-       سرِ جایش می‌ماند. */
+       حالا وضعیت اصلا فرستاده نمی‌شود: سرور برای پروفایل تازه
+       `pending` می‌گذارد و در ویرایش دست نمی‌زند، پس تصمیم ادمین
+       سر جایش می‌ماند. */
     const next: SellerProfile = {
       ...form,
       ownerName,
@@ -218,12 +218,12 @@ export default function SellerDashboard() {
     }
 
     /* منبع حقیقت سرور است؛ localStorage فقط کش همین مرورگر می‌ماند */
-    if (savedSlug === null) { setErr('نشانیِ اختصاصی هنوز خوانده نشده — چند لحظه صبر کنید یا صفحه را تازه کنید'); return }
+    if (savedSlug === null) { setErr('نشانی اختصاصی هنوز خوانده نشده — چند لحظه صبر کنید یا صفحه را تازه کنید'); return }
     const res = await saveProfileRemote('seller', next.slug, next as unknown as Record<string, unknown>,
       { number: next.licenseNumber, url: next.certificate?.url ?? '' })
     if (!res.ok) { setErr(res.message ?? 'ذخیره روی سرور انجام نشد'); return }
 
-    /* از این لحظه نشانی منتشر شده و قفل می‌شود: هر تغییرِ بعدی
+    /* از این لحظه نشانی منتشر شده و قفل می‌شود: هر تغییر بعدی
        لینک‌های منتشرشده و `products."storeSlug"` را می‌شکند. */
     if (res.profile?.slug) setSavedSlug(res.profile.slug)
 
@@ -237,9 +237,9 @@ export default function SellerDashboard() {
   const submit = (e: React.FormEvent) => {
     e.preventDefault()
     if (!form.title.trim()) { setErr('نام فروشگاه لازم است.'); return }
-    /* نشانیِ تکراری یا نامعتبر را نگذار به سرور برسد — آن‌جا فقط یک
+    /* نشانی تکراری یا نامعتبر را نگذار به سرور برسد — آن‌جا فقط یک
        ۴۰۹ می‌گیرد و کاربر نمی‌فهمد کدام فیلد مقصر بوده. */
-    if (slugStatus === 'taken')   { setErr('این نشانی قبلاً گرفته شده است؛ یکی دیگر انتخاب کنید.'); return }
+    if (slugStatus === 'taken')   { setErr('این نشانی قبلا گرفته شده است؛ یکی دیگر انتخاب کنید.'); return }
     if (slugStatus === 'invalid') { setErr('نشانی نامعتبر است — فقط حروف انگلیسی، عدد و خط تیره.'); return }
     /* جواز کسب اجباری نیست (فقط داور مدرکش الزامی است) — یک‌بار یادآوری
        می‌شود و اگر کاربر ادامه بدهد، فروشگاه بدون تیک تأیید ثبت می‌شود. */
@@ -328,11 +328,11 @@ export default function SellerDashboard() {
                   onChange={e => set('title', e.target.value)}/>
                 <p className={HINT}>تیتر اصلی بالای صفحه‌ی فروشگاه.</p>
               </div>
-              {/* فیلدِ «نام کوتاه (برند)» حذف شد — تنها مصرفش فوترِ
-                  فروشگاه بود و فوتر حالا نامِ کاملِ فروشگاه را نشان
-                  می‌دهد، پس یک فیلدِ اضافه برای پرکردن باقی می‌ماند
+              {/* فیلد «نام کوتاه (برند)» حذف شد — تنها مصرفش فوتر
+                  فروشگاه بود و فوتر حالا نام کامل فروشگاه را نشان
+                  می‌دهد، پس یک فیلد اضافه برای پرکردن باقی می‌ماند
                   که هیچ‌جا دیده نمی‌شد. */}
-              {/* نشانیِ اختصاصی — همان چیزی که باشگاه از اول داشت */}
+              {/* نشانی اختصاصی — همان چیزی که باشگاه از اول داشت */}
               <div className="sm:col-span-2">
                 <ProfileSlugField
                   kind="seller" value={form.slug} label="آدرس اختصاصی سایت فروشگاه شما" savedSlug={savedSlug}
@@ -425,7 +425,7 @@ export default function SellerDashboard() {
                 className={INPUT} value={brandInput}
                 onChange={e => setBrandInput(e.target.value)}
                 onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); const v = brandInput.trim(); if (v && !form.brands.includes(v)) { set('brands', [...form.brands, v]); setBrandInput('') } } }}
-                placeholder="مثلاً Predator، Mezz، Aramith…"
+                placeholder="مثلا Predator، Mezz، Aramith…"
               />
               <button type="button" onClick={() => { const v = brandInput.trim(); if (v && !form.brands.includes(v)) { set('brands', [...form.brands, v]); setBrandInput('') } }}
                 className={LQ_BTN}>افزودن</button>
@@ -471,8 +471,8 @@ export default function SellerDashboard() {
                 <label className={LABEL} htmlFor="f-wa">واتساپ</label>
                 <input id="f-wa" className={INPUT} inputMode="tel" value={form.whatsapp}
                   onChange={e => set('whatsapp', e.target.value)} placeholder="989121234567"/>
-                {/* نقطه‌ی پایانِ جمله عمداً نیست: بلافاصله بعد از رقم
-                    می‌آید و در فونتِ فارسی با صفر اشتباه گرفته می‌شود. */}
+                {/* نقطه‌ی پایان جمله عمدا نیست: بلافاصله بعد از رقم
+                    می‌آید و در فونت فارسی با صفر اشتباه گرفته می‌شود. */}
                 <p className={HINT}>با کد کشور و بدون + — مثل ۹۸۹۱۲۱۲۳۴۵۶۷</p>
               </div>
               <div>
@@ -496,20 +496,20 @@ export default function SellerDashboard() {
           </section>
 
           {/* ── چرا «عکس/متن استوری» این‌جا نیست ──
-              این دو فیلد یک استوریِ *دائمی* می‌ساختند: پرکردنشان
+              این دو فیلد یک استوری *دائمی* می‌ساختند: پرکردنشان
               بی‌درنگ حلقه‌ی استوری روی صفحه‌ی فروشگاه می‌گذاشت،
-              هیچ «انتشار»ی لازم نداشت، و چون فیلدِ پروفایل بودند
-              هرگز منقضی نمی‌شدند — روزها می‌ماندند. متنِ خودِ همین
+              هیچ «انتشار»ی لازم نداشت، و چون فیلد پروفایل بودند
+              هرگز منقضی نمی‌شدند — روزها می‌ماندند. متن خود همین
               بخش هم ادعا می‌کرد «تا ۲۴ ساعت در نوار»، که هیچ‌وقت
               درست نبود.
 
-              استوریِ واقعی همان جعبه‌ی پایین است: انقضای ۲۴ساعته
+              استوری واقعی همان جعبه‌ی پایین است: انقضای ۲۴ساعته
               دارد و سرور خودش منقضی‌ها را پاک می‌کند. */}
 
           {/* ═══ استوری‌های ۲۴ ساعته ═══
-              این جعبه پیش‌تر در «فروشگاه من» (فهرستِ آگهی‌ها) بود —
-              جایی که هیچ ربطی به آن نداشت. استوری کنارِ بقیه‌ی
-              تنظیماتِ ویترینِ فروشگاه است. */}
+              این جعبه پیش‌تر در «فروشگاه من» (فهرست آگهی‌ها) بود —
+              جایی که هیچ ربطی به آن نداشت. استوری کنار بقیه‌ی
+              تنظیمات ویترین فروشگاه است. */}
           {user?.id && <StoryManager ownerId={user.id} />}
 
           {/* ═══ عکس‌های «درباره ما» (اسلایدر، حداکثر ۳) ═══ */}
@@ -608,10 +608,10 @@ export default function SellerDashboard() {
               <VerificationPrompt role="seller" done={!!form.certificate} compact />
             </div>
 
-            {/* ── فیلدِ «شماره‌ی جواز کسب» برداشته شد ──
-                فروشنده خودِ فایلِ جواز را آپلود می‌کند و شماره روی
-                همان برگه هست؛ تایپِ دوباره‌اش فقط یک جای دیگر برای
-                غلطِ تایپی می‌ساخت. استعلام از روی فایل در پنل ادمین
+            {/* ── فیلد «شماره‌ی جواز کسب» برداشته شد ──
+                فروشنده خود فایل جواز را آپلود می‌کند و شماره روی
+                همان برگه هست؛ تایپ دوباره‌اش فقط یک جای دیگر برای
+                غلط تایپی می‌ساخت. استعلام از روی فایل در پنل ادمین
                 انجام می‌شود. */}
             {form.certificate ? (
               <div className="flex flex-wrap items-center gap-3 rounded-xl border border-[#E7E2D6] bg-[#FAFAF7] p-3">
@@ -664,7 +664,7 @@ export default function SellerDashboard() {
               </div>
               <h3 className="text-[16px] font-bold">جواز کسب آپلود نشده</h3>
               <p className="mt-2 text-[13px] leading-relaxed text-[#5B564B]">
-                برای درخواست تیک تأیید و افزایش اعتبار پروفایل، لطفاً جواز کسب فروشگاه خود را آپلود نمایید.
+                برای درخواست تیک تأیید و افزایش اعتبار پروفایل، لطفا جواز کسب فروشگاه خود را آپلود نمایید.
                 آپلود آن اختیاری است و می‌توانید فروشگاه را بدون آن هم ثبت کنید.
               </p>
               <div className="mt-4 flex flex-wrap justify-center gap-2">

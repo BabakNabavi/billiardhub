@@ -206,8 +206,8 @@ function ClubCard({ club, view, idx = 0, tournaments = [] }: { club: Club; view:
     <Link href={`/clubs/${club.slug || club.id}`} style={{ textDecoration: 'none', display: 'block' }}>
       <div
         onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)}
-        /* همان سطحِ کارتِ گرید — دو ماده‌ی متفاوت در دو نمای یک فهرست
-           یعنی سوییچِ نما ظاهرِ صفحه را عوض می‌کند. */
+        /* همان سطح کارت گرید — دو ماده‌ی متفاوت در دو نمای یک فهرست
+           یعنی سوییچ نما ظاهر صفحه را عوض می‌کند. */
         className="lq-pcard"
         style={{
           display: 'flex', alignItems: 'stretch', overflow: 'hidden',
@@ -218,7 +218,7 @@ function ClubCard({ club, view, idx = 0, tournaments = [] }: { club: Club; view:
         <div style={{ width: 'clamp(70px,18vw,140px)', flexShrink: 0, position: 'relative', overflow: 'hidden' }}>
           <img loading="lazy" decoding="async" src={img} alt={club.name} style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.75)' }}
             onError={e => { const el = e.target as HTMLImageElement; el.onerror = null; el.src = poolImg; }} />
-          {/* تیکِ تأیید این‌جا نیست — کنارِ نام است. روی گوشه‌ی عکس،
+          {/* تیک تأیید این‌جا نیست — کنار نام است. روی گوشه‌ی عکس،
               معلوم نبود به چه چیزی تعلق دارد. */}
           {/* open badge روی تصویر — same pill style as table type badges */}
           <div style={{ position: 'absolute', bottom: 8, left: 8, fontSize: 10, fontWeight: 700, color: club.isOpen ? '#30C55A' : '#ef4444', background: club.isOpen ? 'rgba(48,197,90,0.10)' : 'rgba(239,68,68,0.10)', border: `1px solid ${club.isOpen ? 'rgba(48,197,90,0.22)' : 'rgba(239,68,68,0.22)'}`, borderRadius: 20, padding: '2px 7px' }}>
@@ -229,7 +229,7 @@ function ClubCard({ club, view, idx = 0, tournaments = [] }: { club: Club; view:
             <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); setStoryOpen(true); }} style={{ position: 'absolute', bottom: 8, right: 8, padding: 0, border: 'none', background: 'none', cursor: 'pointer', zIndex: 5 }}>
               <div style={{ width: 47, height: 47, borderRadius: '50%', background: 'linear-gradient(45deg,#feda75,#fa7e1e,#d62976,#962fbf,#4f5bd5)', padding: 2.5, boxShadow: '0 0 12px rgba(188,24,136,0.5)' }}>
                 <div style={{ width: '100%', height: '100%', borderRadius: '50%', border: '2px solid rgba(0,0,0,0.7)', background: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', boxSizing: 'border-box' }}>
-                  {/* نشانِ پیش‌فرض به‌جای حرفِ اولِ نام */}
+                  {/* نشان پیش‌فرض به‌جای حرف اول نام */}
                   <ClubLogo src={club.logo} name={club.name} size={40} tone="dark" />
                 </div>
               </div>
@@ -240,8 +240,8 @@ function ClubCard({ club, view, idx = 0, tournaments = [] }: { club: Club; view:
         {/* content */}
         <div style={{ flex: 1, padding: '14px 16px', minWidth: 0, display: 'flex', flexDirection: 'column', gap: 6 }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
-            {/* تیک بیرونِ h3 است: نامِ بلند با ellipsis بریده می‌شود و
-                تیکِ داخلِ h3 هم با آن حذف می‌شد. */}
+            {/* تیک بیرون h3 است: نام بلند با ellipsis بریده می‌شود و
+                تیک داخل h3 هم با آن حذف می‌شد. */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 4, minWidth: 0 }}>
               <h3 style={{ fontSize: 16, fontWeight: 800, color: '#111111', margin: 0, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{club.name}</h3>
               {club.isVerified && <VerifiedBadge title="باشگاه تأیید شده" style={{ marginInlineStart: 0 }} />}
@@ -288,12 +288,12 @@ function ClubCard({ club, view, idx = 0, tournaments = [] }: { club: Club; view:
     <Link href={`/clubs/${club.slug || club.id}`} style={{ textDecoration: 'none', display: 'block', height: '100%' }}>
       <div
         onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)}
-        /* سطح از lq-pcard؛ فقط حلقه‌ی طلاییِ hover این‌جا می‌ماند */
+        /* سطح از lq-pcard؛ فقط حلقه‌ی طلایی hover این‌جا می‌ماند */
         className="lq-pcard"
         style={{
           overflow: 'hidden',
           borderColor: hov ? 'rgba(199,166,106,0.50)' : undefined,
-          /* درخششِ لبه‌ی شیشه باید بماند، وگرنه کارت دقیقاً موقعِ hover
+          /* درخشش لبه‌ی شیشه باید بماند، وگرنه کارت دقیقا موقع hover
              جنسش را از دست می‌دهد. */
           boxShadow: hov ? 'inset 0 1px 0 rgba(255,255,255,0.95), 0 0 0 3px rgba(199,166,106,0.10), 0 20px 44px -18px rgba(199,166,106,0.30)' : undefined,
           height: '100%', display: 'flex', flexDirection: 'column',
@@ -306,7 +306,7 @@ function ClubCard({ club, view, idx = 0, tournaments = [] }: { club: Club; view:
             onError={e => { const el = e.target as HTMLImageElement; el.onerror = null; el.src = poolImg; }} />
           <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, transparent 40%, rgba(6,13,10,0.88) 100%)' }} />
 
-          {/* تیکِ تأیید کنارِ نام است، نه روی عکس. */}
+          {/* تیک تأیید کنار نام است، نه روی عکس. */}
           {/* علاقه‌مندی — خودش کلیک را متوقف می‌کند وگرنه کارت باز
               می‌شود. */}
           <div style={{ position: 'absolute', top: 10, left: 10 }}>
@@ -346,7 +346,7 @@ function ClubCard({ club, view, idx = 0, tournaments = [] }: { club: Club; view:
             <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); setStoryOpen(true); }} style={{ position: 'absolute', bottom: 44, right: 12, padding: 0, border: 'none', background: 'none', cursor: 'pointer', zIndex: 5 }}>
               <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'linear-gradient(45deg,#feda75,#fa7e1e,#d62976,#962fbf,#4f5bd5)', padding: 3, boxShadow: '0 0 18px rgba(188,24,136,0.6)' }}>
                 <div style={{ width: '100%', height: '100%', borderRadius: '50%', border: '2px solid rgba(0,0,0,0.75)', background: 'rgba(0,0,0,0.40)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', boxSizing: 'border-box' }}>
-                  {/* نشانِ پیش‌فرض به‌جای حرفِ اولِ نام */}
+                  {/* نشان پیش‌فرض به‌جای حرف اول نام */}
                   <ClubLogo src={club.logo} name={club.name} size={48} tone="dark" />
                 </div>
               </div>
@@ -357,8 +357,8 @@ function ClubCard({ club, view, idx = 0, tournaments = [] }: { club: Club; view:
         {/* body */}
         <div style={{ padding: '14px 14px 0', flex: 1, display: 'flex', flexDirection: 'column', gap: 8 }}>
           <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8 }}>
-            {/* این عنوان می‌پیچد، پس تیک داخلِ h3 می‌آید تا دنبالِ
-                آخرین کلمه بماند و تنها به خطِ بعد نیفتد. */}
+            {/* این عنوان می‌پیچد، پس تیک داخل h3 می‌آید تا دنبال
+                آخرین کلمه بماند و تنها به خط بعد نیفتد. */}
             <h3 style={{ fontSize: 16, fontWeight: 800, color: '#111111', margin: 0, lineHeight: 1.25 }}>
               {club.name}{club.isVerified && <VerifiedBadge title="باشگاه تأیید شده" />}
             </h3>
@@ -536,8 +536,8 @@ export default function ClubsPage() {
 
      پیش‌تر شش باشگاه نمونه همیشه اول فهرست بودند و باشگاه‌های واقعی
      هم‌نام با آن‌ها **حذف** می‌شدند. یعنی صاحب «باشگاه المپیک مشهد»
-     که واقعاً ثبت‌نام کرده بود، نسخه‌ی ساختگی به‌جای باشگاهش نمایش
-     داده می‌شد و صفحه‌ی خودش اصلاً دیده نمی‌شد. */
+     که واقعا ثبت‌نام کرده بود، نسخه‌ی ساختگی به‌جای باشگاهش نمایش
+     داده می‌شد و صفحه‌ی خودش اصلا دیده نمی‌شد. */
   /* فیلترها به سرور می‌روند، نه اینکه کل جدول دانلود و در مرورگر فیلتر
      شود. جستجو با تأخیر کوتاه فرستاده می‌شود تا هر حرف تایپ‌شده یک
      درخواست نسازد. */
@@ -652,7 +652,7 @@ export default function ClubsPage() {
         }
       `}</style>
 
-      {/* رنگِ پایه داخلِ lq-stage است */}
+      {/* رنگ پایه داخل lq-stage است */}
       <div className="lq-stage" style={{ minHeight: '100vh', paddingBottom: 80, direction: 'rtl' }}>
 
         {/* ══ HERO SLIDER ══ */}
@@ -661,8 +661,8 @@ export default function ClubsPage() {
         </div>
 
         {/* ══ STICKY TOOLBAR ══ */}
-        {/* نوارِ چسبان نیمه‌شفاف می‌ماند تا لکه‌های پشتِ شیشه از زیرش
-            دیده شوند؛ نسخه‌ی قبلی تقریباً مات بود و یک نوارِ سفید وسطِ
+        {/* نوار چسبان نیمه‌شفاف می‌ماند تا لکه‌های پشت شیشه از زیرش
+            دیده شوند؛ نسخه‌ی قبلی تقریبا مات بود و یک نوار سفید وسط
             صفحه می‌کشید. */}
         <div style={{ background: 'rgba(250,249,246,0.62)', borderBottom: '1px solid rgba(28,28,26,0.07)', padding: '10px clamp(16px,4vw,40px)', position: 'sticky', top: 62, zIndex: 90, backdropFilter: 'blur(24px) saturate(1.6)', WebkitBackdropFilter: 'blur(24px) saturate(1.6)' }}>
           <div style={{ maxWidth: 1280, margin: '0 auto' }}>

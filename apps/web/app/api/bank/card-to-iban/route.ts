@@ -8,12 +8,12 @@ import { lockedResponse } from '@/lib/verification-lock';
 
    زنجیره‌ی اثبات (هر حلقه یک کار متفاوت می‌کند):
      ۱) Luhn محلی      — کارت اشتباه‌تایپ‌شده بدون مصرف اعتبار رد می‌شود
-     ۲) CardMatch      — این کارت واقعاً به همین کد ملی تعلق دارد؟
+     ۲) CardMatch      — این کارت واقعا به همین کد ملی تعلق دارد؟
      ۳) CardToIban     — شبای همان کارت + نام دارنده
      ۴) IbanMatch      — و همان شبا (مقصد واقعی پول) هم به همین کد ملی است؟
 
-   حلقه‌ی ۴ ظاهراً از ۲ و ۳ نتیجه می‌شود، ولی چون پول به شبا می‌رود نه به
-   کارت، مقصد نهایی مستقیماً هم اثبات می‌شود. */
+   حلقه‌ی ۴ ظاهرا از ۲ و ۳ نتیجه می‌شود، ولی چون پول به شبا می‌رود نه به
+   کارت، مقصد نهایی مستقیما هم اثبات می‌شود. */
 export async function POST(req: NextRequest) {
   const actor = actorFromRequest(req);
   if (!actor) return NextResponse.json({ message: 'احراز هویت الزامی است' }, { status: 401 });
@@ -32,8 +32,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ message: 'دسترسی مجاز نیست' }, { status: 403 });
     }
 
-    /* قفل — پیش از هر سه استعلام. حسابِ تأییدشده فقط با تیکتِ
-       پشتیبانی عوض می‌شود؛ وگرنه هر بازکردنِ فرم سه فراخوانِ پولی
+    /* قفل — پیش از هر سه استعلام. حساب تأییدشده فقط با تیکت
+       پشتیبانی عوض می‌شود؛ وگرنه هر بازکردن فرم سه فراخوان پولی
        (CardMatch + CardToIban + IbanMatch) هزینه می‌تراشید. */
     if (c.ibanVerified && !admin) return lockedResponse('bank');
   }

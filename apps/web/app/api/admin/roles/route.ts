@@ -4,16 +4,16 @@ import { sb, actorFromRequest, audit, clientIp } from '@/lib/finance/db';
 import { notifyRoleApproved, notifyRoleRejected } from '@/lib/notify';
 import { can } from '@/lib/admin/permissions';
 
-/* بررسیِ درخواست‌های نقش توسطِ ادمین.
+/* بررسی درخواست‌های نقش توسط ادمین.
 
-   صفحه‌ی `/admin/roles` از روزِ اول این مسیر را صدا می‌زد و مسیر وجود
-   نداشت. صفحه هم چون پاسخ نمی‌گرفت پرچمِ `svcDown` را بالا می‌برد و
-   پیامِ «سرویس در دسترس نیست» نشان می‌داد — که درست بود ولی هیچ‌کس
-   نمی‌دانست سرویس اصلاً ساخته نشده.
+   صفحه‌ی `/admin/roles` از روز اول این مسیر را صدا می‌زد و مسیر وجود
+   نداشت. صفحه هم چون پاسخ نمی‌گرفت پرچم `svcDown` را بالا می‌برد و
+   پیام «سرویس در دسترس نیست» نشان می‌داد — که درست بود ولی هیچ‌کس
+   نمی‌دانست سرویس اصلا ساخته نشده.
 
    ── تأیید یعنی چه ──
-   نقشِ تأییدشده به `secondaryRoles` اضافه می‌شود و اگر کاربر هنوز
-   نقشِ معناداری ندارد (`user`)، همان نقش `primaryRole` می‌شود.
+   نقش تأییدشده به `secondaryRoles` اضافه می‌شود و اگر کاربر هنوز
+   نقش معناداری ندارد (`user`)، همان نقش `primaryRole` می‌شود.
    `admin` از این مسیر هرگز داده نمی‌شود؛ آن فقط از /admin/access
    می‌آید که محافظ‌های خودش را دارد. */
 
@@ -51,8 +51,8 @@ export async function GET(req: NextRequest) {
 
   const rows = (data ?? []) as Record<string, unknown>[];
 
-  /* نامِ کاربر جدا خوانده می‌شود؛ PostgREST embed این‌جا رابطه‌ی
-     تعریف‌شده ندارد و ساده‌تر از افزودنِ FK همین است. */
+  /* نام کاربر جدا خوانده می‌شود؛ PostgREST embed این‌جا رابطه‌ی
+     تعریف‌شده ندارد و ساده‌تر از افزودن FK همین است. */
   const ids = [...new Set(rows.map(r => String(r.user_id)))];
   const { data: users } = ids.length
     ? await sb().from('users').select('id,phone,"firstName","lastName"').in('id', ids)
@@ -71,7 +71,7 @@ export async function GET(req: NextRequest) {
     };
   });
 
-  /* شمارِ هر وضعیت برای تب‌ها — بدونِ آن، تب‌ها همیشه صفر نشان می‌دادند */
+  /* شمار هر وضعیت برای تب‌ها — بدون آن، تب‌ها همیشه صفر نشان می‌دادند */
   const { data: all } = await sb().from('role_requests').select('status');
   const counts: Record<string, number> = { pending: 0, approved: 0, rejected: 0 };
   for (const r of ((all ?? []) as { status: string }[])) {
@@ -85,8 +85,8 @@ export async function GET(req: NextRequest) {
 /* PATCH { id, action: 'approve' | 'reject', note?, verified? }
 
    `verified` یعنی «تأیید + تیک آبی». تیک جدا از تأیید است: نقش تأیید
-   می‌شود چه مدرک باشد چه نباشد، ولی تیک فقط با مدرکِ معتبر می‌آید —
-   داوری، مربیگری یا جوازِ کسب بسته به نقش. */
+   می‌شود چه مدرک باشد چه نباشد، ولی تیک فقط با مدرک معتبر می‌آید —
+   داوری، مربیگری یا جواز کسب بسته به نقش. */
 export async function PATCH(req: NextRequest) {
   const g = await guard(req);
   if (g.err) return g.err;
@@ -109,11 +109,11 @@ export async function PATCH(req: NextRequest) {
 
   if (rr.status !== 'pending') {
     return NextResponse.json(
-      { message: 'این درخواست قبلاً بررسی شده است' }, { status: 409 });
+      { message: 'این درخواست قبلا بررسی شده است' }, { status: 409 });
   }
 
-  /* ردکردن بدونِ علت یعنی کاربر نمی‌داند چه را اصلاح کند — همان قاعده‌ی
-     ردِ باشگاه. */
+  /* ردکردن بدون علت یعنی کاربر نمی‌داند چه را اصلاح کند — همان قاعده‌ی
+     رد باشگاه. */
   if (action === 'reject' && !note) {
     return NextResponse.json({ message: 'برای رد کردن، علت را بنویسید' }, { status: 400 });
   }
@@ -128,8 +128,8 @@ export async function PATCH(req: NextRequest) {
     const cur = u as { primaryRole?: string; secondaryRoles?: string[] };
 
     const roles = [...new Set([...(cur.secondaryRoles ?? []), rr.role])].filter(Boolean);
-    /* نقشِ اصلی فقط وقتی جابه‌جا می‌شود که کاربر هنوز نقشِ معناداری
-       ندارد. وگرنه تأییدِ «داور» برای یک باشگاه‌دار، باشگاهش را از
+    /* نقش اصلی فقط وقتی جابه‌جا می‌شود که کاربر هنوز نقش معناداری
+       ندارد. وگرنه تأیید «داور» برای یک باشگاه‌دار، باشگاهش را از
        دستش درمی‌آورد. */
     const promote = !cur.primaryRole || cur.primaryRole === 'user';
 
@@ -144,27 +144,27 @@ export async function PATCH(req: NextRequest) {
       return NextResponse.json({ message: 'اعمال نقش انجام نشد' }, { status: 500 });
     }
 
-    /* ── تأییدِ نقش، انتشارِ پروفایل نیست ──
+    /* ── تأیید نقش، انتشار پروفایل نیست ──
        تا امروز همین‌جا `profiles.status = 'approved'` هم زده می‌شد.
-       نتیجه‌اش این بود که پروفایلِ تازه‌ساخته — که عمداً `pending`
-       درج می‌شود — با تأییدِ *نقش* بی‌درنگ روی سایتِ عمومی می‌نشست و
-       صفِ `/admin/coaches` هرگز به آن نمی‌رسید. یک‌بار پروفایلِ مربی
-       ده دقیقه بعد از ساخته‌شدن، بدونِ اینکه کسی محتوایش را دیده
+       نتیجه‌اش این بود که پروفایل تازه‌ساخته — که عمدا `pending`
+       درج می‌شود — با تأیید *نقش* بی‌درنگ روی سایت عمومی می‌نشست و
+       صف `/admin/coaches` هرگز به آن نمی‌رسید. یک‌بار پروفایل مربی
+       ده دقیقه بعد از ساخته‌شدن، بدون اینکه کسی محتوایش را دیده
        باشد، منتشر شد.
 
-       این دو، دو تصمیمِ جدا هستند:
-       • تأییدِ نقش  ⟵ «حق دارد پروفایلِ مربی بسازد»  (این مسیر)
-       • تأییدِ پروفایل ⟵ «محتوایش را دیدم، منتشر شود»  (/admin/coaches)
+       این دو، دو تصمیم جدا هستند:
+       • تأیید نقش  ⟵ «حق دارد پروفایل مربی بسازد»  (این مسیر)
+       • تأیید پروفایل ⟵ «محتوایش را دیدم، منتشر شود»  (/admin/coaches)
 
-       باشگاه استثناست: صفِ جداگانه‌ی پروفایل ندارد و `/admin/clubs`
+       باشگاه استثناست: صف جداگانه‌ی پروفایل ندارد و `/admin/clubs`
        خودش همین `verificationStatus` است، پس فعال‌سازی‌اش می‌ماند.
 
-       ── تیکِ آبی ──
+       ── تیک آبی ──
        تیک یعنی «مدرکش را دیدم و درست بود» و هنوز این‌جا داده می‌شود،
        ولی دیگر انتشار را با خودش نمی‌آورد. روی *پروفایل* می‌نشیند نه
        روی کاربر، چون همان‌جاست که صفحه‌های عمومی می‌خوانندش.
 
-       بدونِ مدرک تیک داده نمی‌شود — حتی اگر ادمین اشتباهاً بزند. */
+       بدون مدرک تیک داده نمی‌شود — حتی اگر ادمین اشتباها بزند. */
     if (withTick) {
       const { data: fresh } = await sb().from('role_requests')
         .select('doc_url').eq('id', id).maybeSingle();
@@ -186,7 +186,7 @@ export async function PATCH(req: NextRequest) {
           .eq('ownerId', rr.user_id).eq('verificationStatus', 'pending');
         if (error) console.error('[admin/roles] tick club', error.message);
       } else {
-        /* فقط تیک. `status` دست‌نخورده می‌ماند تا صفِ پروفایل تصمیم
+        /* فقط تیک. `status` دست‌نخورده می‌ماند تا صف پروفایل تصمیم
            بگیرد — حتی اگر مدرک درست بوده باشد، محتوای پروفایل هنوز
            دیده نشده است. */
         const { error } = await sb().from('profiles')
@@ -195,7 +195,7 @@ export async function PATCH(req: NextRequest) {
         if (error) console.error('[admin/roles] tick profile', error.message);
       }
     } else if (rr.role === 'club_owner') {
-      /* باشگاه صفِ پروفایلِ جدا ندارد؛ همین‌جا فعال می‌شود */
+      /* باشگاه صف پروفایل جدا ندارد؛ همین‌جا فعال می‌شود */
       const { error } = await sb().from('clubs')
         .update({ verificationStatus: 'approved', isActive: true })
         .eq('ownerId', rr.user_id).eq('verificationStatus', 'pending');
@@ -216,12 +216,12 @@ export async function PATCH(req: NextRequest) {
   }
 
   /* ── خبر به کاربر ──
-     نتیجه‌ی بررسی تنها چیزی است که کاربر خودش نمی‌تواند ببیند: موقعِ
-     ثبت روی صفحه تأییدیه گرفته، ولی از تصمیمِ ادمین جز با سرزدنِ
+     نتیجه‌ی بررسی تنها چیزی است که کاربر خودش نمی‌تواند ببیند: موقع
+     ثبت روی صفحه تأییدیه گرفته، ولی از تصمیم ادمین جز با سرزدن
      دوباره خبردار نمی‌شود.
 
-     عمداً یک پیامک، نه دو: تیکِ آبی داخلِ همان پیامکِ تأیید می‌آید.
-     بی‌صداست — شکستِ پیامک نباید تأیید را برگرداند. */
+     عمدا یک پیامک، نه دو: تیک آبی داخل همان پیامک تأیید می‌آید.
+     بی‌صداست — شکست پیامک نباید تأیید را برگرداند. */
   if (action === 'approve') {
     void notifyRoleApproved(rr.user_id, rr.role, withTick);
   } else {

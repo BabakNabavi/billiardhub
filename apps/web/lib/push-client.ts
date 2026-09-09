@@ -22,7 +22,7 @@ export function pushPermission(): 'granted' | 'denied' | 'default' | 'unsupporte
 }
 
 /* ثبت SW + گرفتن مجوز + اشتراک + ذخیره روی سرور. اگر silent=true، مجوز نمی‌پرسد
-   (فقط وقتی قبلاً granted بوده ⇒ تازه‌سازی اشتراک). */
+   (فقط وقتی قبلا granted بوده ⇒ تازه‌سازی اشتراک). */
 export async function enablePush(user: string, silent = false): Promise<'ok' | 'denied' | 'unsupported' | 'error'> {
   if (!pushSupported() || !user) return 'unsupported'
   try {

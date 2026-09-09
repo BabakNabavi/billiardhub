@@ -15,15 +15,15 @@ import { sb } from '../finance/db'
 
 /* ── جایگاه‌ها ────────────────────────────────────────────────── */
 
-/* کلیدهای *داخلی* — آن‌هایی که کدِ صفحه‌ی اصلی مستقیم به نامشان
+/* کلیدهای *داخلی* — آن‌هایی که کد صفحه‌ی اصلی مستقیم به نامشان
    ارجاع می‌دهد. این فهرست دیگر «همه‌ی جایگاه‌های ممکن» نیست: از
-   مهاجرتِ ۰۵۶ ادمین می‌تواند جایگاهِ تازه بسازد و کلیدش این‌جا نیست.
-   نگه داشتنشان فقط برای نگاشتِ کلیدهای قدیمی و ارجاع‌های تایپ‌شده است. */
+   مهاجرت ۰۵۶ ادمین می‌تواند جایگاه تازه بسازد و کلیدش این‌جا نیست.
+   نگه داشتنشان فقط برای نگاشت کلیدهای قدیمی و ارجاع‌های تایپ‌شده است. */
 export const PLACEMENT_KEYS = [
   'market_featured_products_homepage',
   'featured_clubs_homepage',
   'featured_equipment_stores_homepage',
-  /* دو بنرِ زیرِ سکشنِ بیلیارد بازار — قرینه‌ی همان دو تای تجهیزات */
+  /* دو بنر زیر سکشن بیلیارد بازار — قرینه‌ی همان دو تای تجهیزات */
   'market_ads_right',
   'market_ads_left',
   'equipment_ads_right',
@@ -31,13 +31,13 @@ export const PLACEMENT_KEYS = [
   'homepage_bottom_banner',
 ] as const
 export type BuiltinPlacementKey = typeof PLACEMENT_KEYS[number]
-/* جایگاه‌ها ساختنی‌اند، پس کلید یک رشته است نه اتحادِ بسته. اعتبارِ
-   واقعی از وجودِ ردیف در دیتابیس می‌آید؛ این‌جا فقط *شکلِ* کلید
+/* جایگاه‌ها ساختنی‌اند، پس کلید یک رشته است نه اتحاد بسته. اعتبار
+   واقعی از وجود ردیف در دیتابیس می‌آید؛ این‌جا فقط *شکل* کلید
    بررسی می‌شود. */
 export type PlacementKey = string
 
-/* همان قیدی که در دیتابیس هم هست (مهاجرتِ ۰۵۶). کلیدی با فاصله یا
-   حرفِ فارسی در مسیرها و در `Record`های کد می‌شکند. */
+/* همان قیدی که در دیتابیس هم هست (مهاجرت ۰۵۶). کلیدی با فاصله یا
+   حرف فارسی در مسیرها و در `Record`های کد می‌شکند. */
 export const PLACEMENT_KEY_RE = /^[a-z][a-z0-9_]{2,48}$/
 export const isPlacementKey = (v: unknown): v is PlacementKey =>
   typeof v === 'string' && PLACEMENT_KEY_RE.test(v)
@@ -51,11 +51,11 @@ export const LEGACY_KEY_MAP: Record<string, BuiltinPlacementKey> = {
 }
 
 export type PlacementMode = 'free' | 'manual' | 'paid'
-/* `video` با مهاجرتِ ۰۵۱ آمد — تبلیغِ پیش‌پخشِ بیلیارد مدیا. */
+/* `video` با مهاجرت ۰۵۱ آمد — تبلیغ پیش‌پخش بیلیارد مدیا. */
 export type ContentKind = 'banner' | 'entity' | 'video'
-/* «محتوای اسپانسری» نوعِ سومِ محتوا نیست — همان جایگاهِ موجودیتی است
-   با موجودیت‌های بیشتر. اضافه‌کردنِ `contentKind` تازه یعنی تکرارِ کلِ
-   مسیرِ سرو و اعتبارسنجی برای چیزی که فقط جدولِ منبعش فرق دارد. */
+/* «محتوای اسپانسری» نوع سوم محتوا نیست — همان جایگاه موجودیتی است
+   با موجودیت‌های بیشتر. اضافه‌کردن `contentKind` تازه یعنی تکرار کل
+   مسیر سرو و اعتبارسنجی برای چیزی که فقط جدول منبعش فرق دارد. */
 export const ENTITY_TYPES = ['product', 'club', 'seller', 'tournament', 'video'] as const
 export type EntityType = typeof ENTITY_TYPES[number]
 export const isEntityType = (v: unknown): v is EntityType =>
@@ -85,20 +85,20 @@ export interface Placement {
   price: number
   durationDays: number
   sortOrder: number
-  /** فقط جایگاهِ ویدیویی — پس از چند ثانیه «رد کردن» ظاهر شود */
+  /** فقط جایگاه ویدیویی — پس از چند ثانیه «رد کردن» ظاهر شود */
   skipAfterSec: number | null
-  /** فقط جایگاهِ ویدیویی — سقفِ مدتِ تبلیغ */
+  /** فقط جایگاه ویدیویی — سقف مدت تبلیغ */
   maxDurationSec: number | null
-  /* ── مهاجرتِ ۰۵۶: آنچه پیش‌تر در کد هاردکد بود ── */
-  /** نقش‌های تأییدشده‌ای که اجازه‌ی خریدِ این جایگاه را دارند */
+  /* ── مهاجرت ۰۵۶: آنچه پیش‌تر در کد هاردکد بود ── */
+  /** نقش‌های تأییدشده‌ای که اجازه‌ی خرید این جایگاه را دارند */
   advertiserRoles: string[]
-  /** آیا کمپین پیش از نمایش بازبینیِ ادمین می‌خواهد */
+  /** آیا کمپین پیش از نمایش بازبینی ادمین می‌خواهد */
   approvalRequired: boolean
-  /** ابعادِ پیشنهادیِ فایل — فقط راهنمای فرمِ خرید */
+  /** ابعاد پیشنهادی فایل — فقط راهنمای فرم خرید */
   dimensions: string | null
-  /** سقفِ حجمِ فایلِ همین جایگاه (مگابایت) */
+  /** سقف حجم فایل همین جایگاه (مگابایت) */
   maxFileMb: number | null
-  /** قوانینِ ویژه‌ی این جایگاه */
+  /** قوانین ویژه‌ی این جایگاه */
   terms: string | null
 }
 
@@ -108,9 +108,9 @@ type DbPlacement = {
   entity_type: EntityType | null; capacity: number; price: number
   duration_days: number; sort_order: number
   display_count?: number | null; rotation_mode?: RotationMode | null; priority?: number | null
-  /* مخصوصِ جایگاهِ ویدیویی — مهاجرتِ ۰۵۱ */
+  /* مخصوص جایگاه ویدیویی — مهاجرت ۰۵۱ */
   skip_after_sec?: number | null; max_duration_sec?: number | null
-  /* مهاجرتِ ۰۵۶ */
+  /* مهاجرت ۰۵۶ */
   advertiser_roles?: string[] | null; approval_required?: boolean | null
   dimensions?: string | null; max_file_mb?: number | null; terms?: string | null
 }
@@ -124,13 +124,13 @@ const toPlacement = (r: DbPlacement): Placement => ({
   displayCount: Number(r.display_count ?? 0) || 0,
   rotationMode: isRotationMode(r.rotation_mode) ? r.rotation_mode : 'fair',
   priority: Number(r.priority ?? 0) || 0,
-  /* `null` معنادار است: برای جایگاهِ غیرِویدیویی بی‌ربط، و برای
-     ویدیویی یعنی «رد کردن ممکن نیست» / «سقفِ مدت ندارد». */
+  /* `null` معنادار است: برای جایگاه غیرویدیویی بی‌ربط، و برای
+     ویدیویی یعنی «رد کردن ممکن نیست» / «سقف مدت ندارد». */
   skipAfterSec: r.skip_after_sec ?? null,
   maxDurationSec: r.max_duration_sec ?? null,
-  /* ستون‌های ۰۵۶ — پیش از اجرای مهاجرت وجود ندارند، پس پیش‌فرضِ امن:
-     بازبینی لازم است و هیچ نقشی مجاز نیست. «مجاز نیست» یعنی فعلاً
-     خریدنی نیست، که از فروشِ ناخواسته بهتر است. */
+  /* ستون‌های ۰۵۶ — پیش از اجرای مهاجرت وجود ندارند، پس پیش‌فرض امن:
+     بازبینی لازم است و هیچ نقشی مجاز نیست. «مجاز نیست» یعنی فعلا
+     خریدنی نیست، که از فروش ناخواسته بهتر است. */
   advertiserRoles: Array.isArray(r.advertiser_roles) ? r.advertiser_roles.map(String) : [],
   approvalRequired: r.approval_required !== false,
   dimensions: r.dimensions ?? null,
@@ -145,7 +145,7 @@ const clampInt = (v: number, min: number, max: number): number => {
   return Math.max(min, Math.min(max, n))
 }
 
-/** چند کمپین واقعاً نمایش داده می‌شود: display_count، وگرنه ظرفیت */
+/** چند کمپین واقعا نمایش داده می‌شود: display_count، وگرنه ظرفیت */
 export const shownCount = (p: Pick<Placement, 'capacity' | 'displayCount'>): number =>
   p.displayCount > 0 ? Math.min(p.displayCount, p.capacity) : Math.max(0, p.capacity)
 
@@ -168,14 +168,14 @@ export async function getPlacement(key: string): Promise<Placement | null> {
   return toPlacement(data as DbPlacement)
 }
 
-/* ── ساختِ جایگاهِ تازه (مهاجرتِ ۰۵۶) ──
+/* ── ساخت جایگاه تازه (مهاجرت ۰۵۶) ──
 
-   تا امروز هر جایگاهِ تازه یک کامیت و یک دیپلوی می‌خواست، چون کلیدها
+   تا امروز هر جایگاه تازه یک کامیت و یک دیپلوی می‌خواست، چون کلیدها
    در کد هاردکد بودند. حالا ادمین از پنل می‌سازد.
 
-   جایگاهِ تازه عمداً **خاموش** و در حالتِ `manual` متولد می‌شود: جایگاهی
+   جایگاه تازه عمدا **خاموش** و در حالت `manual` متولد می‌شود: جایگاهی
    که همان لحظه‌ی ساخته‌شدن روی سایت ظاهر شود یا فروخته شود، یعنی یک
-   اشتباهِ تایپی مستقیم به کاربر می‌رسد. */
+   اشتباه تایپی مستقیم به کاربر می‌رسد. */
 export async function createPlacement(input: {
   key: string; title: string; description?: string | null; section?: string
   contentKind?: ContentKind; entityType?: EntityType | null
@@ -194,7 +194,7 @@ export async function createPlacement(input: {
 
   const kind: ContentKind =
     input.contentKind === 'entity' || input.contentKind === 'video' ? input.contentKind : 'banner'
-  /* جایگاهِ موجودیتی بدونِ نوعِ موجودیت بی‌معناست و هنگام سرو ساکت
+  /* جایگاه موجودیتی بدون نوع موجودیت بی‌معناست و هنگام سرو ساکت
      خالی می‌ماند؛ همین‌جا جلویش گرفته می‌شود. */
   if (kind === 'entity' && !input.entityType) {
     return { error: 'برای جایگاه موجودیتی، نوع موجودیت را مشخص کنید' }
@@ -228,7 +228,7 @@ export async function createPlacement(input: {
 
   const { data, error } = await sb().from('placements').insert(row).select().single()
   if (error) {
-    /* کلید یکتاست؛ پیامِ خام دیتابیس به کاربر نشان داده نمی‌شود */
+    /* کلید یکتاست؛ پیام خام دیتابیس به کاربر نشان داده نمی‌شود */
     if (String(error.message ?? '').includes('duplicate') || (error as { code?: string }).code === '23505') {
       return { error: 'جایگاهی با این کلید از قبل وجود دارد' }
     }
@@ -257,9 +257,9 @@ export async function updatePlacement(key: string, patch: Partial<{
   if (patch.displayCount !== undefined) row.display_count = clampInt(patch.displayCount, 0, 500)
   if (patch.rotationMode !== undefined && isRotationMode(patch.rotationMode)) row.rotation_mode = patch.rotationMode
   if (patch.priority !== undefined) row.priority = clampInt(patch.priority, -10000, 10000)
-  /* تنظیم‌های جایگاهِ ویدیویی. `null` معنادار است — «رد کردن ممکن
-     نیست» و «سقفِ مدت ندارد» — پس صفر نمی‌شود.
-     سقفِ ۳۰۰ ثانیه: تبلیغِ بلندتر از پنج دقیقه پیش از محتوای اصلی،
+  /* تنظیم‌های جایگاه ویدیویی. `null` معنادار است — «رد کردن ممکن
+     نیست» و «سقف مدت ندارد» — پس صفر نمی‌شود.
+     سقف ۳۰۰ ثانیه: تبلیغ بلندتر از پنج دقیقه پیش از محتوای اصلی،
      هر عددی هم که ادمین بزند، اشتباه است. */
   if (patch.skipAfterSec !== undefined) {
     row.skip_after_sec = patch.skipAfterSec === null ? null : clampInt(patch.skipAfterSec, 0, 60)
@@ -267,7 +267,7 @@ export async function updatePlacement(key: string, patch: Partial<{
   if (patch.maxDurationSec !== undefined) {
     row.max_duration_sec = patch.maxDurationSec === null ? null : clampInt(patch.maxDurationSec, 1, 300)
   }
-  /* ── مهاجرتِ ۰۵۶ ── */
+  /* ── مهاجرت ۰۵۶ ── */
   if (patch.advertiserRoles !== undefined) {
     row.advertiser_roles = Array.isArray(patch.advertiserRoles)
       ? patch.advertiserRoles.map(r => String(r).trim()).filter(Boolean).slice(0, 12)
@@ -313,7 +313,7 @@ export interface Campaign {
   sortOrder: number
   impressions: number
   clicks: number
-  /* تبلیغِ ویدیویی — مهاجرتِ ۰۵۱. برای بنر همیشه صفر می‌مانند. */
+  /* تبلیغ ویدیویی — مهاجرت ۰۵۱. برای بنر همیشه صفر می‌مانند. */
   completedViews: number
   skippedViews: number
   adminNote: string | null
@@ -385,8 +385,8 @@ export function validateContent(placement: Placement, content: Record<string, un
     return null
   }
 
-  /* ⚠️ جایگاهِ ویدیویی شاخه‌ی خودش را نداشت و به شاخه‌ی «موجودیت»
-     می‌افتاد — یعنی از تبلیغِ پیش‌پخش `entity_type` می‌خواست و هر
+  /* ⚠️ جایگاه ویدیویی شاخه‌ی خودش را نداشت و به شاخه‌ی «موجودیت»
+     می‌افتاد — یعنی از تبلیغ پیش‌پخش `entity_type` می‌خواست و هر
      خریدی روی آن با «نوع موجودیت نامعتبر است» رد می‌شد. تا امروز
      دیده نشده بود چون کمپین‌های پیش‌پخش فقط دستی ساخته می‌شدند و از
      این مسیر نمی‌گذشتند. */
@@ -485,14 +485,14 @@ export interface LiveCampaign {
      fixed    — ترتیب ثابت sort_order (چیدمان انتخابی ادمین)
      weighted — قرعه‌کشی وزنی: شانس هر کمپین به وزنش
      fair     — کم‌تحویل‌ترین اول + نویز تصادفی کنترل‌شده
-     random   — بُرزدن کامل
+     random   — برزدن کامل
 
-   مبنای عدالت عمداً `serves` است (شمارنده‌ای که فقط سرور هنگام تحویل
+   مبنای عدالت عمدا `serves` است (شمارنده‌ای که فقط سرور هنگام تحویل
    واقعی زیاد می‌کند) نه `impressions` که بیکن بدون احراز هویت آن را
    می‌نویسد؛ وگرنه هر کسی می‌توانست رقیبش را ته صف بفرستد.
 
-   ضمناً مبنا «نرخ تحویل» است نه شمارش خام: کمپینی که یک ماه است
-   می‌چرخد طبیعتاً تحویل بیشتری دارد و اگر خام مقایسه می‌شد، با
+   ضمنا مبنا «نرخ تحویل» است نه شمارش خام: کمپینی که یک ماه است
+   می‌چرخد طبیعتا تحویل بیشتری دارد و اگر خام مقایسه می‌شد، با
    پیوستن هر کمپین تازه تا مدت‌ها صفر می‌گرفت — یعنی تبلیغ‌کننده‌ای
    که پول داده بود از چرخه بیرون می‌افتاد. نرخ با گذشت زمان خودش
    تصحیح می‌شود و هیچ‌کس برای همیشه گرسنه نمی‌ماند. */
@@ -542,7 +542,7 @@ export function rotateCampaigns<T extends Rotatable>(items: T[], mode: RotationM
 
   const ks = keyed.map(r => r.k)
   const spread = Math.max(...ks) - Math.min(...ks)
-  /* همه هم‌رده (مثلاً همه تازه) ⇒ ترتیب کاملاً تصادفی، نه ترتیب جدول */
+  /* همه هم‌رده (مثلا همه تازه) ⇒ ترتیب کاملا تصادفی، نه ترتیب جدول */
   if (spread <= 0) return shuffle(items)
 
   /* نویز نسبت به پراکندگی همان کلیدها مقیاس می‌گیرد: تساوی‌ها را
@@ -555,7 +555,7 @@ export function rotateCampaigns<T extends Rotatable>(items: T[], mode: RotationM
 }
 
 /** کمپین‌های قابل نمایش هر جایگاه فعال.
-    فقط ACTIVE در پنجره‌ی زمانی؛ جایگاه غیرفعال اصلاً برنمی‌گردد —
+    فقط ACTIVE در پنجره‌ی زمانی؛ جایگاه غیرفعال اصلا برنمی‌گردد —
     نمایش هیچ وابستگی‌ای به هیچ کلید سراسری‌ای ندارد. */
 export type LivePlacementMeta = Pick<Placement,
   'key' | 'contentKind' | 'entityType' | 'capacity' | 'mode' | 'rotationMode' | 'priority'
@@ -605,7 +605,7 @@ export async function livePlacements(onlyKey?: string): Promise<Record<string, {
   for (const p of placements) {
     const limit = shownCount(p)
     const ordered = rotateCampaigns(pool[p.key] ?? [], p.rotationMode).slice(0, Math.max(0, limit))
-    /* فقط جایی که چرخش واقعاً تصمیم می‌گیرد، شمارنده‌ی تحویل لازم است */
+    /* فقط جایی که چرخش واقعا تصمیم می‌گیرد، شمارنده‌ی تحویل لازم است */
     if (p.rotationMode === 'fair') for (const c of ordered) served.push(c.id)
     out[p.key] = {
       placement: {
@@ -782,7 +782,7 @@ export interface AdStats {
 /**
  * آمار کلی تبلیغات — کمپین‌ها، نمایش/کلیک/CTR و درآمد.
  *
- * عمداً روی فهرست صفحه‌بندی‌شده‌ی پنل حساب نمی‌شود: آن فهرست سقف
+ * عمدا روی فهرست صفحه‌بندی‌شده‌ی پنل حساب نمی‌شود: آن فهرست سقف
  * ۵۰۰ ردیف دارد و با رشد کمپین‌ها، آمار بی‌صدا کمتر از واقعیت
  * گزارش می‌شد. این تابع خودش همه‌ی ردیف‌های لازم را می‌خواند.
  */

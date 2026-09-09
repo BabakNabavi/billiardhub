@@ -51,7 +51,7 @@ export async function POST(req: NextRequest) {
 
   if (!user) return NextResponse.json({ message: 'کاربر یافت نشد' }, { status: 404, headers: CORS_HEADERS })
   if (user.national_id_verified) {
-    return NextResponse.json({ message: 'کد ملی شما قبلاً تأیید شده است' }, { status: 400, headers: CORS_HEADERS })
+    return NextResponse.json({ message: 'کد ملی شما قبلا تأیید شده است' }, { status: 400, headers: CORS_HEADERS })
   }
   if (!user.phone) {
     return NextResponse.json({ message: 'ابتدا شماره موبایل خود را ثبت کنید' }, { status: 400, headers: CORS_HEADERS })

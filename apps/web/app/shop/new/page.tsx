@@ -11,8 +11,8 @@ import ProvinceCitySelect from '../../../components/ProvinceCitySelect'
 import { apiFetch } from '../../../lib/http'
 import { uploadFile } from '../../../lib/supabase'
 import { CATEGORY_OPTIONS, CONDITIONS, conditionLabel } from '../../../lib/market/categories'
-/* تعریفِ مشخصاتِ فنی از این‌جا رفت به `lib/market/specs.ts` تا صفحه‌ی
-   جزئیاتِ محصول هم بتواند برچسبِ فارسیِ هر کلید را بخواند. */
+/* تعریف مشخصات فنی از این‌جا رفت به `lib/market/specs.ts` تا صفحه‌ی
+   جزئیات محصول هم بتواند برچسب فارسی هر کلید را بخواند. */
 import { GENERIC_SPECS, CATEGORY_SPECS } from '../../../lib/market/specs'
 import { modernizeType, productTitleParts } from '../../../lib/market/title'
 import { typeIdOf, isAccessoryCategory, isProductCatalog, ACCESSORY_TYPE_OF, type CatalogId } from '../../../lib/market/catalog-rules'
@@ -29,9 +29,9 @@ import { normalizePhone, isValidPhone,
 } from '../../../components/market/AdFormFields'
 
 
-/* دسته‌ها از منبعِ واحد (lib/market/categories).
+/* دسته‌ها از منبع واحد (lib/market/categories).
 
-   پیش‌تر این فهرست دستی بود و با فهرستِ صفحه‌ی بازار یکی نبود: این‌جا
+   پیش‌تر این فهرست دستی بود و با فهرست صفحه‌ی بازار یکی نبود: این‌جا
    فقط «کیس و کیف» (`case-bag`) بود و آن‌جا «کیس چوب» و «کیف توپ» —
    یعنی فروشنده هرگز نمی‌توانست «کیف توپ» را انتخاب کند و آن فیلتر در
    بازار همیشه خالی بود. */
@@ -43,7 +43,7 @@ const CATEGORIES = CATEGORY_OPTIONS
 
 
 // ── Image slot ────────────────────────────────────────────────
-/* `data` فقط برای پیش‌نمایشِ محلی است؛ چیزی که ثبت می‌شود `file` است
+/* `data` فقط برای پیش‌نمایش محلی است؛ چیزی که ثبت می‌شود `file` است
    که پیش از ارسال به Storage می‌رود. پیش‌تر همان `data` — رشته‌ی
    base64 — در دیتابیس ذخیره می‌شد. */
 interface ImgSlot { data: string; name: string; file: File }
@@ -69,11 +69,11 @@ export default function NewProductPage() {
   const [acceptRules, setAcceptRules] = useState(false)
   const [quotaMsg, setQuotaMsg] = useState('')   // سهمیه‌ی آگهی تمام شده   // پذیرش قوانین بیلیارد بازار
   const [quotaNeedsIdentity, setQuotaNeedsIdentity] = useState(false)   // ۴۲۹ به‌خاطر نبود هویت تأییدشده
-  /* انتخابِ چوب — شناسه‌ها؛ رشته‌های نمایشی در همان `form` می‌مانند */
+  /* انتخاب چوب — شناسه‌ها؛ رشته‌های نمایشی در همان `form` می‌مانند */
   const [cue, setCue] = useState<CatalogValue>(EMPTY_CATALOG_VALUE)
   const [specs,     setSpecs]     = useState<Record<string, unknown>>({})
   const [specOthers, setSpecOthers] = useState<Record<string, string>>({})
-  /* هر پیامِ خطا از این‌جا می‌گذرد و وسطِ صفحه نمایش داده می‌شود */
+  /* هر پیام خطا از این‌جا می‌گذرد و وسط صفحه نمایش داده می‌شود */
   const [alert, setAlert] = useState<{ title: string; lines: string[]; tone?: 'error' | 'warn'; action?: AlertAction } | null>(null)
   const showAlert = (title: string, lines: string[], tone: 'error' | 'warn' = 'error', action?: AlertAction) =>
     setAlert({ title, lines, tone, action })
@@ -88,12 +88,12 @@ export default function NewProductPage() {
     const authName = [u.firstName || '', u.lastName || ''].filter(Boolean).join(' ') || u.name || ''
     /* ── فروشگاه از سرور، نه از localStorage ──
        `findSellerByOwner()` حافظه‌ی همین مرورگر را می‌خواند، ولی
-       فروشگاه‌ها مدت‌هاست در جدولِ `profiles` هستند. پس این تابع
-       چیزی پیدا نمی‌کرد و کلِ این بلوک بی‌اثر بود: نه نامِ فروشگاه
-       پیش‌پر می‌شد، نه شهر و آدرس، و نه نامکِ فروشگاه به آگهی
+       فروشگاه‌ها مدت‌هاست در جدول `profiles` هستند. پس این تابع
+       چیزی پیدا نمی‌کرد و کل این بلوک بی‌اثر بود: نه نام فروشگاه
+       پیش‌پر می‌شد، نه شهر و آدرس، و نه نامک فروشگاه به آگهی
        می‌چسبید.
 
-       نسخه‌ی محلی به‌عنوان فالبکِ آفلاین می‌ماند تا فرم روی شبکه‌ی
+       نسخه‌ی محلی به‌عنوان فالبک آفلاین می‌ماند تا فرم روی شبکه‌ی
        قطع هم پیش‌پر شود. */
     void (async () => {
       const mine = await fetchMyProfile<Record<string, any>>('seller').catch(() => null)
@@ -138,7 +138,7 @@ export default function NewProductPage() {
     }
   }, [user])
 
-  /* `boolean` هم پذیرفته می‌شود چون تیکِ «قیمت توافقی» اضافه شد؛
+  /* `boolean` هم پذیرفته می‌شود چون تیک «قیمت توافقی» اضافه شد؛
      همه‌ی فیلدهای دیگر همچنان رشته‌اند. */
   const set = (k: keyof typeof form, v: string | boolean) => {
     setForm(f => ({ ...f, [k]: v }))
@@ -152,24 +152,24 @@ export default function NewProductPage() {
 
   /* ── چوب و میز از کاتالوگ می‌آیند ──
      فقط وقتی دسته یکی از این دو است و نوعش در همان کاتالوگ هست.
-     خالی یعنی همان مسیرِ قدیمیِ `chain.ts` — بقیه‌ی دسته‌ها
+     خالی یعنی همان مسیر قدیمی `chain.ts` — بقیه‌ی دسته‌ها
      (تیپ، گچ، توپ، …) دست‌نخورده‌اند. */
   /* ── کدام دسته‌ها کاتالوگ دارند ──
-     پنج دسته کاتالوگِ خودشان را دارند و ده دسته‌ی لوازم زیرِ یک
-     کاتالوگِ مشترک‌اند که نوعش همان دسته است. */
+     پنج دسته کاتالوگ خودشان را دارند و ده دسته‌ی لوازم زیر یک
+     کاتالوگ مشترک‌اند که نوعش همان دسته است. */
   const catCategory: CatalogId | null =
     isProductCatalog(form.category) ? form.category
       : isAccessoryCategory(form.category) ? 'accessories' : null
-  /* پارچه دو جا هست: کاتالوگِ خودش (برند/مدل) و دسته‌ی لوازم
-     (مشخصات). برندش از کاتالوگِ پارچه می‌آید، نه از لوازم. */
+  /* پارچه دو جا هست: کاتالوگ خودش (برند/مدل) و دسته‌ی لوازم
+     (مشخصات). برندش از کاتالوگ پارچه می‌آید، نه از لوازم. */
   const catTypeId = catCategory === 'accessories'
     ? ACCESSORY_TYPE_OF[form.category] ?? ''
     : catCategory ? typeIdOf(catCategory, form.type) : ''
   const catTypeRows = useCatalogTypes(catCategory)
-  /* همان ورودیِ کش‌شده‌ی انتخابگر — درخواستِ تازه‌ای نمی‌زند */
+  /* همان ورودی کش‌شده‌ی انتخابگر — درخواست تازه‌ای نمی‌زند */
   const { fields: catalogSpecs, loading: specsLoading } = useSpecFields(form.category)
   /* ── دسته‌هایی که هنوز در کاتالوگ نیستند ──
-     تیپ، گچ و کیس تعریفِ دستیِ خودشان را در `specs.ts` دارند. بدونِ
+     تیپ، گچ و کیس تعریف دستی خودشان را در `specs.ts` دارند. بدون
      این پل، فرمشان فقط «وضعیت کالا» نشان می‌داد — همان چیزی که
      انتقال به کاتالوگ بی‌صدا شکسته بود. */
   const specDefs = useMemo(
@@ -178,27 +178,27 @@ export default function NewProductPage() {
       : fromLegacyDefs((CATEGORY_SPECS[form.category] ?? GENERIC_SPECS) as LegacySpecDef[])),
     [catalogSpecs, form.category],
   )
-  /* سوییچِ «پلمب / استفاده‌نشده» — وضعیتِ کالا را قطعی می‌کند */
+  /* سوییچ «پلمب / استفاده‌نشده» — وضعیت کالا را قطعی می‌کند */
   const sealed = specs.isSealed === true
   /* ── یک مقدار، نه دو ──
-     نمایشِ «نو» بدونِ عوض‌شدنِ خودِ مقدار یعنی فروشنده «نو» می‌دید و
+     نمایش «نو» بدون عوض‌شدن خود مقدار یعنی فروشنده «نو» می‌دید و
      سرور «کارکرده» ذخیره می‌کرد. همه‌ی مصرف‌کننده‌ها — دراپ‌داون،
      پیش‌نمایش و بدنه‌ی درخواست — از همین یکی می‌خوانند. */
   const effCondition = sealed ? 'new' : form.condition
   /* ── «نوع» از کجا می‌آید ──
      شش دسته‌ی کاتالوگ‌دار فهرستشان در `TYPE_OPTIONS` است. ده دسته‌ی
-     لوازم ندارند؛ زیرمجموعه‌شان یک **فیلدِ مشخصات** است:
+     لوازم ندارند؛ زیرمجموعه‌شان یک **فیلد مشخصات** است:
      `case_type` (۶ گزینه)، `bag_type` (۵)، `ext_type`، `rest_type`،
      `oil_type`، `accessory_type` (۲۲).
 
      ── چرا کیس و کیف هم از این‌جا می‌آیند ──
-     تا دیروز `TYPE_OPTIONS` یک فهرستِ چهارتاییِ مشترک برایشان داشت
+     تا دیروز `TYPE_OPTIONS` یک فهرست چهارتایی مشترک برایشان داشت
      که با برچسب‌های کاتالوگ یکی نبود. نتیجه‌اش بی‌صدا بود:
-     `optionIdOf` برای برچسبِ بی‌تطبیق رشته‌ی خالی برمی‌گرداند، پس
-     هر آگهیِ کیفِ توپ با `bagType: ''` ذخیره می‌شد — هیچ‌کدام از
+     `optionIdOf` برای برچسب بی‌تطبیق رشته‌ی خالی برمی‌گرداند، پس
+     هر آگهی کیف توپ با `bagType: ''` ذخیره می‌شد — هیچ‌کدام از
      «هارد کیس/سافت کیس/کیف/کوله‌پشتی» در `bag_type` نبود.
 
-     فیلد همیشه پیدا می‌شود تا از کارتِ مشخصات برداشته شود؛ فهرست
+     فیلد همیشه پیدا می‌شود تا از کارت مشخصات برداشته شود؛ فهرست
      فقط وقتی از آن می‌آید که `TYPE_OPTIONS` چیزی نداشته باشد. */
   const specTypeField = formTypeFieldOf(specDefs)
   const typeChoices: string[] | undefined = TYPE_OPTIONS[form.category]
@@ -207,30 +207,30 @@ export default function NewProductPage() {
       ? [...(specTypeField.options ?? []).map(o => o.label_fa),
         ...(specTypeField.allow_other ? ['سایر'] : [])]
       : undefined)
-  /* مقدارِ فعلی همیشه در فهرست می‌ماند — دلیلش در `withCurrent` */
+  /* مقدار فعلی همیشه در فهرست می‌ماند — دلیلش در `withCurrent` */
   const typeOptions = withCurrent(typeChoices, form.type)
-  /* پارچه: فهرستش به نوعِ **میز** وابسته است، پس همان شناسه‌ی نوع */
+  /* پارچه: فهرستش به نوع **میز** وابسته است، پس همان شناسه‌ی نوع */
   const cloth = useCatalogType('cloth', form.category === 'table' ? catTypeId : '')
   const tableCat = useCatalogType('table', form.category === 'table' ? catTypeId : '')
   const tipCat = useCatalogType('tip', form.category === 'tip' ? catTypeId : '')
-  /* payloadِ همان دسته‌ای که الان فعال است — برای پر شدنِ خودکار */
+  /* payload همان دسته‌ای که الان فعال است — برای پر شدن خودکار */
   const activeCat = useCatalogType(catCategory ?? 'cue', catCategory ? catTypeId : '')
   const catData = activeCat.data
 
-  /* ── فهرستِ فیلدهای `source`دار ──
-     اندازه از کاتالوگِ میز می‌آید و برند/مدلِ پارچه از کاتالوگِ
+  /* ── فهرست فیلدهای `source`دار ──
+     اندازه از کاتالوگ میز می‌آید و برند/مدل پارچه از کاتالوگ
      پارچه. هیچ‌کدام در `specs_catalog.json` گزینه ندارند — فقط
-     نامِ منبعشان آن‌جاست. */
+     نام منبعشان آن‌جاست. */
   const clothBrandId = String(specs.clothBrand ?? '')
   const sourceOptionsFor = (id: string): FancyOption[] | undefined => {
-    /* قطرِ تیپ هم `source: types[].sizes` دارد — همان مکانیزمِ
-       سایزِ میز، فقط از کاتالوگِ تیپ. */
+    /* قطر تیپ هم `source: types[].sizes` دارد — همان مکانیزم
+       سایز میز، فقط از کاتالوگ تیپ. */
     if (id === 'diameter' && form.category === 'tip') {
       return sizeOptions(tipCat.data?.sizes)
     }
     /* ── توپ ──
-       قطر و «نوع ست» هر دو به نوعِ توپ وابسته‌اند و از همان
-       payloadِ فعال می‌آیند؛ منبعشان در JSON نوشته شده. */
+       قطر و «نوع ست» هر دو به نوع توپ وابسته‌اند و از همان
+       payload فعال می‌آیند؛ منبعشان در JSON نوشته شده. */
     if (form.category === 'ball' && (id === 'diameter_mm' || id === 'set_type')) {
       return sizeOptions(id === 'diameter_mm' ? catData?.sizes : catData?.setTypes)
     }
@@ -266,15 +266,15 @@ export default function NewProductPage() {
     return undefined
   }
 
-  /* ── تغییرِ یک فیلدِ مشخصات ──
-     دو وابستگیِ آبشاری این‌جاست: عوض‌شدنِ برندِ پارچه مدل را پاک
-     می‌کند، و انتخابِ مدل «نوع پارچه» و «وزن» را خودکار پر می‌کند
+  /* ── تغییر یک فیلد مشخصات ──
+     دو وابستگی آبشاری این‌جاست: عوض‌شدن برند پارچه مدل را پاک
+     می‌کند، و انتخاب مدل «نوع پارچه» و «وزن» را خودکار پر می‌کند
      ولی قفلشان نمی‌کند — فروشنده می‌تواند اصلاحشان کند. */
-  /* آبشار از خودِ داده می‌آید: `depends_on` وابسته‌ها را پاک
-     می‌کند و `auto_from` مقدارِ خودکار را می‌نشاند. پیش‌تر هر دو
-     این‌جا هاردکد بودند و اضافه‌شدنِ وابستگیِ بعدی کد می‌خواست. */
+  /* آبشار از خود داده می‌آید: `depends_on` وابسته‌ها را پاک
+     می‌کند و `auto_from` مقدار خودکار را می‌نشاند. پیش‌تر هر دو
+     این‌جا هاردکد بودند و اضافه‌شدن وابستگی بعدی کد می‌خواست. */
   const onSpecChange = (field: SpecField, v: unknown) => {
-    /* ویژگی‌های مدلِ پارچه — منبعِ پر شدنِ خودکارِ نوع و وزن */
+    /* ویژگی‌های مدل پارچه — منبع پر شدن خودکار نوع و وزن */
     let picked: Record<string, string | undefined> | undefined
     if (field.id === 'cloth_model') {
       const br = cloth.data?.brands.find(b => b.id === clothBrandId)
@@ -287,15 +287,15 @@ export default function NewProductPage() {
   const catFreeInput = !!useCatalogType(catCategory ?? 'cue', catCategory ? catTypeId : '').data?.forceFreeInput
 
   /* ── چرا هم شناسه هم رشته ──
-     ستون‌های `brand` و `model` رشته‌اند و کلِ سایت از همان‌ها
-     می‌خواند: کارتِ بازار، صفحه‌ی جزئیات، آگهی‌های مرتبط، و
-     `title.ts` که نامِ کارت را می‌سازد. پس رشته سرِ جایش می‌ماند و
+     ستون‌های `brand` و `model` رشته‌اند و کل سایت از همان‌ها
+     می‌خواند: کارت بازار، صفحه‌ی جزئیات، آگهی‌های مرتبط، و
+     `title.ts` که نام کارت را می‌سازد. پس رشته سر جایش می‌ماند و
      شناسه **کنارش** ذخیره می‌شود — شناسه برای یکپارچگی و فیلتر،
      رشته برای نمایش. این‌طور هیچ مصرف‌کننده‌ای نمی‌شکند. */
   const onCatalogChange = (v: CatalogValue, labels: { brand: string; model: string }) => {
-    /* ── مدلِ کاتالوگ، مشخصات را پر می‌کند ──
-       مدلِ تیپ سختی و ساختار و Shore D را با خودش دارد. برند و
-       مدل بالای فرم‌اند و هرگز از مسیرِ `onSpecChange` نمی‌گذرند،
+    /* ── مدل کاتالوگ، مشخصات را پر می‌کند ──
+       مدل تیپ سختی و ساختار و Shore D را با خودش دارد. برند و
+       مدل بالای فرم‌اند و هرگز از مسیر `onSpecChange` نمی‌گذرند،
        پس این‌جا انجام می‌شود. قفل نمی‌شوند. */
     const picked = v.modelId && v.modelId !== '__other__'
       ? catData?.brands.find(b => b.id === v.brandId)?.models.find(m => m.id === v.modelId)
@@ -308,10 +308,10 @@ export default function NewProductPage() {
   /* مقدار مؤثر: اگر «سایر» انتخاب شده، متن دستی جای آن می‌نشیند */
   const effBrand = form.brand === 'سایر' ? form.brandOther.trim() : form.brand.trim()
   const effModel = form.model === 'سایر' ? form.modelOther.trim() : form.model.trim()
-  /* «سایر» یعنی متنی که خودِ فروشنده نوشته، نه واژه‌ی «سایر» */
+  /* «سایر» یعنی متنی که خود فروشنده نوشته، نه واژه‌ی «سایر» */
   const effType = form.type === 'سایر' ? form.typeOther.trim() : form.type.trim()
-  /* هر چهار فیلدِ کارتِ «اطلاعات فروشنده» از فروشگاه قفل شده‌اند؟
-     پس کارتی که هیچ‌کدامش قابلِ تغییر نیست نمایش داده نمی‌شود. */
+  /* هر چهار فیلد کارت «اطلاعات فروشنده» از فروشگاه قفل شده‌اند؟
+     پس کارتی که هیچ‌کدامش قابل تغییر نیست نمایش داده نمی‌شود. */
   const sellerLocked = shopNameLocked && geoLocked
 
   const handleCategoryChange = (cat: string) => {
@@ -325,14 +325,14 @@ export default function NewProductPage() {
   const typeDrivenCat = isTypeDrivenCategory
   const setType = (v: string) => {
     /* ── فهرست‌های وابسته به نوع پاک می‌شوند ──
-       بدونِ پاک‌شدن، `12ft` روی پاکت و قطرِ اسنوکر روی کارامبول
+       بدون پاک‌شدن، `12ft` روی پاکت و قطر اسنوکر روی کارامبول
        می‌ماند — دراپ‌داون خالی نشان می‌دهد و سرور ۴۰۰. فهرست از
-       خودِ تعریفِ فیلدها می‌آید، نه دستی. */
+       خود تعریف فیلدها می‌آید، نه دستی. */
     setSpecs(s => {
       const n = { ...s }
       for (const k of typeDependentKeys(specDefs, form.category)) delete n[k]
-      /* ── نوعی که خودش یک فیلدِ مشخصات است ──
-         بالای فرم برچسبِ فارسی انتخاب می‌شود ولی ذخیره‌شدنی شناسه
+      /* ── نوعی که خودش یک فیلد مشخصات است ──
+         بالای فرم برچسب فارسی انتخاب می‌شود ولی ذخیره‌شدنی شناسه
          است؛ وگرنه صفحه‌ی آگهی و فیلترها مقدار را پیدا نمی‌کنند. */
       if (specTypeField) n[specKey(specTypeField.id)] = optionIdOf(specTypeField, v)
       return n
@@ -342,10 +342,10 @@ export default function NewProductPage() {
       for (const k of typeDependentKeys(specDefs, form.category)) delete n[k]
       return n
     })
-    /* برندها بینِ نوع‌ها مشترک نیستند؛ شناسه‌ی برندِ اسنوکر در پاکت بی‌معناست */
+    /* برندها بین نوع‌ها مشترک نیستند؛ شناسه‌ی برند اسنوکر در پاکت بی‌معناست */
     setCue(EMPTY_CATALOG_VALUE)
-    /* عوض‌شدنِ نوع ⇒ توضیحِ «سایر» هم پاک می‌شود، وگرنه متنِ
-       نوعِ قبلی روی نوعِ تازه می‌ماند */
+    /* عوض‌شدن نوع ⇒ توضیح «سایر» هم پاک می‌شود، وگرنه متن
+       نوع قبلی روی نوع تازه می‌ماند */
     setForm(f => ({ ...f, type: v, typeOther: '', ...(typeDrivenCat(f.category) ? { brand: '', brandOther: '', model: '', modelOther: '' } : {}) }))
     setErrors(e => { const n = { ...e }; delete n.type; if (typeDrivenCat(form.category)) { delete n.brand; delete n.model } return n })
   }
@@ -387,19 +387,19 @@ export default function NewProductPage() {
     if (!form.category)           e.category    = 'دسته‌بندی را انتخاب کنید'
     if (!effType)                 e.type        = form.type === 'سایر'
       ? 'برای «سایر» توضیح بنویسید' : 'نوع را مشخص کنید'
-    /* ── برندِ اختیاری ──
-       نوعی که `force_free_input` دارد («میز خانگی») اغلب برندِ
+    /* ── برند اختیاری ──
+       نوعی که `force_free_input` دارد («میز خانگی») اغلب برند
        مشخصی ندارد؛ اجبار یا آگهی را رها می‌کند یا داده‌ی الکی
-       می‌سازد. شرط روی پرچمِ داده است نه شناسه‌ی نوع. */
+       می‌سازد. شرط روی پرچم داده است نه شناسه‌ی نوع. */
     if (!effBrand && !catFreeInput) e.brand = "برند الزامی است"
-    /* مدل اختیاری است: خیلی از فروشنده‌ها مدلِ دقیقِ جنسِ دستِ دوم
-       را نمی‌دانند و اجبارِ آن یعنی یا آگهی ثبت نمی‌شود یا چیزی
+    /* مدل اختیاری است: خیلی از فروشنده‌ها مدل دقیق جنس دست دوم
+       را نمی‌دانند و اجبار آن یعنی یا آگهی ثبت نمی‌شود یا چیزی
        الکی نوشته می‌شود — که بدتر است. */
-    /* آگهیِ توافقی قیمت نمی‌خواهد — همان قاعده‌ای که سرور هم دارد */
+    /* آگهی توافقی قیمت نمی‌خواهد — همان قاعده‌ای که سرور هم دارد */
     if (!form.negotiable && !form.price) e.price = 'قیمت را وارد کنید یا «توافقی» را بزنید'
 
-    /* ── قیمتِ قبل از تخفیف ──
-       اگر کمتر از قیمتِ اصلی باشد یعنی «تخفیفِ منفی»، و کد پایین‌تر
+    /* ── قیمت قبل از تخفیف ──
+       اگر کمتر از قیمت اصلی باشد یعنی «تخفیف منفی»، و کد پایین‌تر
        بی‌صدا درصد را صفر می‌کرد. فروشنده فکر می‌کرد تخفیف گذاشته و
        آگهی هیچ تخفیفی نشان نمی‌داد. */
     if (!form.negotiable && form.price && form.oldPrice) {
@@ -421,9 +421,9 @@ export default function NewProductPage() {
   /* ثبت: اول اعتبارسنجی، بعد مودال انتخاب سکشن؛ کاربر سکشن را می‌زند و finalize ذخیره می‌کند */
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    /* ── تعریفِ فیلدها هنوز نرسیده ──
-       بدونِ آن، حلقه‌ی سریال‌سازی روی آرایه‌ی خالی می‌چرخد و آگهی
-       بدونِ هیچ مشخصه‌ای ذخیره می‌شود. روی موبایلِ کند نادر نیست. */
+    /* ── تعریف فیلدها هنوز نرسیده ──
+       بدون آن، حلقه‌ی سریال‌سازی روی آرایه‌ی خالی می‌چرخد و آگهی
+       بدون هیچ مشخصه‌ای ذخیره می‌شود. روی موبایل کند نادر نیست. */
     if (specsLoading) {
       showAlert('لحظه‌ای صبر کنید', ['فهرست مشخصات فنی هنوز بارگذاری نشده است.'], 'warn')
       return
@@ -432,17 +432,17 @@ export default function NewProductPage() {
     const errs = validate()
     if (Object.keys(errs).length > 0) {
       setErrors(errs)
-      /* روی موبایل کاربر پایینِ فرم است و فیلدِ ناقص را نمی‌بیند؛
-         فهرستِ کامل همان‌جا جلوی چشمش می‌آید. */
+      /* روی موبایل کاربر پایین فرم است و فیلد ناقص را نمی‌بیند؛
+         فهرست کامل همان‌جا جلوی چشمش می‌آید. */
       showAlert('فرم کامل نیست', Object.values(errs))
       return
     }
     /* ── چرا پنجره‌ی «محصول کجا نمایش داده شود» برداشته شد ──
-       آن پنجره جایگاهِ نمایش را از فروشنده می‌پرسید، در حالی که
-       ثبتِ آگهی رایگان است و هیچ جایگاهی فروخته نمی‌شود. یعنی یک
-       تصمیمِ بی‌اثر که فقط یک قدم به مسیرِ ثبت اضافه می‌کرد.
+       آن پنجره جایگاه نمایش را از فروشنده می‌پرسید، در حالی که
+       ثبت آگهی رایگان است و هیچ جایگاهی فروخته نمی‌شود. یعنی یک
+       تصمیم بی‌اثر که فقط یک قدم به مسیر ثبت اضافه می‌کرد.
 
-       جایگاه حالا از راهِ درستش خریده می‌شود: «فوری» (مهاجرت ۰۷۹). */
+       جایگاه حالا از راه درستش خریده می‌شود: «فوری» (مهاجرت ۰۷۹). */
     finalize('newest')
   }
 
@@ -452,15 +452,15 @@ export default function NewProductPage() {
     const rawPrice = Number(toAsciiDigits(form.price).replace(/\D/g, ''))
     const rawOld   = form.oldPrice ? Number(toAsciiDigits(form.oldPrice).replace(/\D/g, '')) : rawPrice
     const disc     = rawOld > rawPrice ? Math.round((1 - rawPrice / rawOld) * 100) : 0
-    /* ── سریال‌سازیِ مشخصات ──
-       **شناسه** ذخیره می‌شود، نه برچسبِ فارسی. با برچسب، فرمِ
+    /* ── سریال‌سازی مشخصات ──
+       **شناسه** ذخیره می‌شود، نه برچسب فارسی. با برچسب، فرم
        ویرایش نمی‌توانست گزینه را پیدا کند و فیلترکردن هم ممکن
        نبود. صفحه‌ی جزئیات با `specDisplayRows` ترجمه‌اش می‌کند و
        آگهی‌های قدیمی که برچسب دارند دست‌نخورده نمایش می‌یابند. */
     const finalSpecs: Record<string, unknown> = { نوع: effType, مدل: effModel }
     for (const f of specDefs) {
       /* ── فیلدی که دیده نمی‌شود ذخیره هم نمی‌شود ──
-         «رنگ توپ» را با نوعِ «تکی» پر کن و بعد نوع را به اسنوکر
+         «رنگ توپ» را با نوع «تکی» پر کن و بعد نوع را به اسنوکر
          عوض کن: فیلد از فرم می‌رود ولی مقدارش می‌ماند و در صفحه‌ی
          جزئیات ظاهر می‌شود. */
       if (isFieldHidden(f, specs, specDefs, catTypeId)) continue
@@ -481,34 +481,34 @@ export default function NewProductPage() {
       finalSpecs[key] = v
     }
 
-    /* ── نامِ آگهی: دسته‌بندی و بعد نوع ──
-       پیش‌تر برند و مدل بود، یعنی کارتِ آگهی «Aramith Tournament
-       Champion» نشان می‌داد و خریدار نمی‌فهمید اصلاً توپ است یا
+    /* ── نام آگهی: دسته‌بندی و بعد نوع ──
+       پیش‌تر برند و مدل بود، یعنی کارت آگهی «Aramith Tournament
+       Champion» نشان می‌داد و خریدار نمی‌فهمید اصلا توپ است یا
        چوب. دسته و نوع همان چیزی است که چشم دنبالش می‌گردد؛ برند و
-       مدل داخلِ مشخصات هستند. */
+       مدل داخل مشخصات هستند. */
     /* «اکسسوری جاسوییچی» ⟵ «جاسوییچی». دلیلش در `SHELF_WORDS` در
        `lib/market/title.ts`؛ همان‌جا آگهی‌های موجود هم درست می‌شوند. */
     const composedName = modernizeType([catLabel, effType].filter(Boolean).join(' '))
       || [effBrand, effModel].filter(Boolean).join(' ') || 'محصول'
 
     /* آگهی روی سرور ثبت می‌شود تا بقیه هم ببینندش. پیش‌تر فقط در
-       localStorage می‌ماند و عملاً هیچ‌کس جز خود آگهی‌دهنده نمی‌دیدش. */
+       localStorage می‌ماند و عملا هیچ‌کس جز خود آگهی‌دهنده نمی‌دیدش. */
     void (async () => {
       try {
         /* ── عکس‌ها اول به Storage ──
-           پیش‌تر رشته‌ی base64 داخلِ همین بدنه‌ی JSON می‌رفت و همان‌جا
-           در ستونِ `images` می‌نشست: پنج عکسِ دومگابایتی ⇒ بدنه‌ی
-           ۱۴ مگابایتی، و بعد همان متن در هر بارگذاریِ بازار
+           پیش‌تر رشته‌ی base64 داخل همین بدنه‌ی JSON می‌رفت و همان‌جا
+           در ستون `images` می‌نشست: پنج عکس دومگابایتی ⇒ بدنه‌ی
+           ۱۴ مگابایتی، و بعد همان متن در هر بارگذاری بازار
            برمی‌گشت. حالا فایل بالا می‌رود و فقط نشانی‌اش ثبت می‌شود.
 
-           آپلود از `/api/upload` می‌گذرد که نوعِ واقعیِ فایل را از
+           آپلود از `/api/upload` می‌گذرد که نوع واقعی فایل را از
            بایت‌ها می‌سنجد و مسیر را محدود می‌کند. */
         const stamp = Date.now()
         const uploaded: string[] = []
         for (let i = 0; i < images.length; i++) {
           const slot = images[i]!
           const url = await uploadFile('club-media', slot.file, `products/${stamp}-${i}`)
-          /* یک عکسِ بالا نرفته، آگهی را بی‌صدا بی‌عکس نمی‌کند:
+          /* یک عکس بالا نرفته، آگهی را بی‌صدا بی‌عکس نمی‌کند:
              فروشنده باید بداند و دوباره تلاش کند. */
           if (!url) {
             showAlert('بارگذاری تصویر انجام نشد', [`تصویر ${i + 1} بالا نرفت؛ دوباره تلاش کنید.`])
@@ -525,20 +525,20 @@ export default function NewProductPage() {
           body: JSON.stringify({
             name: composedName, category: form.category, type: effType,
             brand: effBrand, model: effModel,
-            /* شناسه‌ها کنارِ رشته — رشته برای نمایش، شناسه برای یکپارچگی */
+            /* شناسه‌ها کنار رشته — رشته برای نمایش، شناسه برای یکپارچگی */
             cueType: form.category === 'cue' ? catTypeId || undefined : undefined,
             tableType: form.category === 'table' ? catTypeId || undefined : undefined,
-            /* پارچه ستونِ نوع ندارد؛ این فقط برای اعتبارسنجیِ سرور
+            /* پارچه ستون نوع ندارد؛ این فقط برای اعتبارسنجی سرور
                است تا بداند برند به کدام رشته تعلق دارد. */
             catalogType: catTypeId || undefined,
             brandId: catTypeId && cue.brandId !== '__other__' ? cue.brandId : undefined,
             modelId: catTypeId && cue.modelId !== '__other__' ? cue.modelId : undefined,
             /* سایز فقط برای میز؛ «سایر» شناسه ندارد و متنش می‌رود */
-            /* سایز حالا یک فیلدِ مشخصات است؛ شناسه‌اش همان مقدارِ
+            /* سایز حالا یک فیلد مشخصات است؛ شناسه‌اش همان مقدار
                ذخیره‌شده در specs است و «سایر» شناسه ندارد. */
             tableSizeId: form.category === 'table' && specs.size && specs.size !== '__other__' ? String(specs.size) : undefined,
             tableSizeCustom: form.category === 'table' && specs.size === '__other__' ? (specOthers.size ?? '').trim() || undefined : undefined,
-            /* پارچه: شناسه کنارِ رشته، مثل برندِ خودِ محصول */
+            /* پارچه: شناسه کنار رشته، مثل برند خود محصول */
             clothBrandId: form.category === 'table' && specs.clothBrand && specs.clothBrand !== '__other__' ? String(specs.clothBrand) : undefined,
             clothBrandCustom: form.category === 'table' && specs.clothBrand === '__other__' ? (specOthers.clothBrand ?? '').trim() || undefined : undefined,
             clothModelId: form.category === 'table' && specs.clothModel && specs.clothModel !== '__other__' ? String(specs.clothModel) : undefined,
@@ -556,8 +556,8 @@ export default function NewProductPage() {
         const j = await r.json().catch(() => ({}))
 
         /* ── خطای فیلد از سرور ──
-           سرور برای انتخابِ نامعتبرِ کاتالوگ نقشه‌ی خطا برمی‌گرداند.
-           بدونِ نشاندنش روی فیلد، کاربر فقط یک پیامِ کلی می‌دید و
+           سرور برای انتخاب نامعتبر کاتالوگ نقشه‌ی خطا برمی‌گرداند.
+           بدون نشاندنش روی فیلد، کاربر فقط یک پیام کلی می‌دید و
            نمی‌فهمید کدام باکس ایراد دارد. */
         if (j?.errors && typeof j.errors === 'object') {
           setErrors(e => ({ ...e, ...(j.errors as Record<string, string>) }))
@@ -579,10 +579,10 @@ export default function NewProductPage() {
         if (!r.ok) { showAlert('ثبت آگهی انجام نشد', [j?.message || 'ثبت آگهی روی سرور انجام نشد']); setSubmitting(false); return }
 
         /* ── چرا دیگر خودکار به بازار نمی‌رود ──
-           آگهی‌دهنده پرت می‌شد وسطِ فهرستِ بازار و هیچ‌وقت نمی‌فهمید
-           آگهیِ خودش کجا مدیریت می‌شود — برای حذف یا ارتقا باید
+           آگهی‌دهنده پرت می‌شد وسط فهرست بازار و هیچ‌وقت نمی‌فهمید
+           آگهی خودش کجا مدیریت می‌شود — برای حذف یا ارتقا باید
            صفحه‌ای را حدس می‌زد که هیچ لینکی به آن نداشت. حالا همان
-           لحظه دو راه پیشِ رویش است. */
+           لحظه دو راه پیش رویش است. */
         setSuccess(true)
       } catch {
         showAlert('خطا در ارتباط با سرور', ['ارتباط برقرار نشد؛ دوباره تلاش کنید.'])
@@ -624,7 +624,7 @@ export default function NewProductPage() {
   )
 
   const catLabel = CATEGORIES.find(c => c.id === form.category)?.label ?? ''
-  /* پیش‌نمایش دقیقاً همان دو تکه‌ای را نشان می‌دهد که کارتِ بازار
+  /* پیش‌نمایش دقیقا همان دو تکه‌ای را نشان می‌دهد که کارت بازار
      نشان خواهد داد: «چوب اسنوکر» درشت و «O'min classic» ریزتر.
      اگر دسته و نوع هنوز انتخاب نشده‌اند، برند و مدل خودشان تکه‌ی
      درشت می‌شوند تا پیش‌نمایش خالی نماند. */
@@ -651,7 +651,7 @@ export default function NewProductPage() {
           {/* ── Top nav ──
               فلش به راست است، نه چپ: در RTL «برگشت» یعنی حرکت به راست. */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: -6, marginBottom: 16 }}>
-            {/* ── چرا router.back و نه یک نشانیِ ثابت ──
+            {/* ── چرا router.back و نه یک نشانی ثابت ──
                 این دکمه همیشه به `/shop` می‌رفت، حتی وقتی کاربر از
                 «آگهی‌های من» آمده بود — یعنی «بازگشت» او را جایی
                 می‌برد که نبوده. حالا به همان صفحه‌ی قبلی برمی‌گردد؛
@@ -671,7 +671,7 @@ export default function NewProductPage() {
           </div>
 
           {/* ── Steps indicator ──
-              سرتیترِ صفحه («NEW PRODUCT»، «ثبت محصول جدید» و توضیحش)
+              سرتیتر صفحه («NEW PRODUCT»، «ثبت محصول جدید» و توضیحش)
               برداشته شد: روی موبایل یک صفحه‌ی کامل جا می‌گرفت و کاربر
               باید اسکرول می‌کرد تا به اولین فیلد برسد.
 
@@ -706,8 +706,8 @@ export default function NewProductPage() {
                     <div>
                       <Label required>دسته‌بندی</Label>
                       <FancySelect value={form.category} onChange={handleCategoryChange}
-                        /* همان چیدمانِ ردیفِ برند: تصویر، نام، و
-                           در «نوع» شمارش. تا هر سه دراپ‌داونِ بالای
+                        /* همان چیدمان ردیف برند: تصویر، نام، و
+                           در «نوع» شمارش. تا هر سه دراپ‌داون بالای
                            فرم یک شکل داشته باشند. */
                         options={CATEGORIES.map(c => ({
                           value: c.id, label: c.label, search: c.label,
@@ -727,9 +727,9 @@ export default function NewProductPage() {
                     <div>
                       <Label required>نوع</Label>
                       {/* ── چرا `specsLoading` هم شرط است ──
-                          فهرستِ نوعِ دسته‌های لوازم از `/api/specs` می‌آید. تا
-                          نرسیدنش `typeOptions` تهی است و این فیلد به متنِ آزاد
-                          می‌افتاد — یعنی کاربرِ تندنویس می‌توانست نوعی بنویسد که
+                          فهرست نوع دسته‌های لوازم از `/api/specs` می‌آید. تا
+                          نرسیدنش `typeOptions` تهی است و این فیلد به متن آزاد
+                          می‌افتاد — یعنی کاربر تندنویس می‌توانست نوعی بنویسد که
                           در هیچ فهرستی نیست و شناسه‌اش خالی ذخیره شود. */}
                       {form.category && (typeOptions || specsLoading) ? (
                         <FancySelect value={form.type} onChange={setType}
@@ -758,24 +758,24 @@ export default function NewProductPage() {
                         <input className="nf" type="text" placeholder="مثال: اسنوکر" value={form.type} onChange={e => set('type', e.target.value)} style={inp(errors.type)} />
                       )}
                       {/* ── «سایر» ──
-                          فهرستِ بسته هرچقدر هم کامل باشد، همیشه چیزی
-                          بیرونش می‌ماند. بدونِ این فیلد، فروشنده یا
+                          فهرست بسته هرچقدر هم کامل باشد، همیشه چیزی
+                          بیرونش می‌ماند. بدون این فیلد، فروشنده یا
                           نزدیک‌ترین گزینه‌ی غلط را می‌زند یا آگهی را
                           رها می‌کند. */}
                       {form.type === 'سایر' && (
                         <input className="nf" type="text" value={form.typeOther}
                           onChange={e => set('typeOther', e.target.value)}
-                          placeholder="توضیح دهید — مثال: توپِ تمرینیِ نشانه‌دار"
+                          placeholder="توضیح دهید — مثال: توپ تمرینی نشانه‌دار"
                           style={{ ...inp(errors.type), marginTop: 8, background: 'rgba(199,166,106,0.05)', borderColor: 'rgba(199,166,106,0.30)' }} />
                       )}
                       <ErrMsg msg={errors.type} />
                     </div>
 
-                    {/* ── چوب: انتخابگرِ کاتالوگ ──
+                    {/* ── چوب: انتخابگر کاتالوگ ──
                         دسته‌ی چوب ۱۱۴ برند و ۴۴۷ مدل دارد و از
                         `data/cue-catalog.json` می‌آید، نه از
                         `chain.ts`. بقیه‌ی دسته‌ها (میز، تیپ، گچ، …)
-                        دست‌نخورده همان مسیرِ قبلی را دارند. */}
+                        دست‌نخورده همان مسیر قبلی را دارند. */}
                     {catCategory && catTypeId ? (
                       <CatalogSelector
                         category={catCategory}
@@ -835,24 +835,24 @@ export default function NewProductPage() {
                 {(() => {
                   /* ── فیلدهای دسته از کاتالوگ ──
                      تعریفشان هاردکد بود؛ حالا از `specs_catalog.json`
-                     می‌آید: ۲۲ فیلد برای چوب و ۱۹ برای میز، با متنِ
-                     راهنما و توضیحِ گزینه. برند/مدل/نوع بالای فرم
+                     می‌آید: ۲۲ فیلد برای چوب و ۱۹ برای میز، با متن
+                     راهنما و توضیح گزینه. برند/مدل/نوع بالای فرم
                      آمده‌اند و این‌جا تکرار نمی‌شوند. */
                   const HIDE = new Set(['brand', 'model', 'cue_type', 'table_type', 'condition'])
                   /* ── فیلدی که بالای فرم پرسیده شد ──
-                         «نوع اکسسوری» و همتاهایش در کارتِ اطلاعاتِ محصول
+                         «نوع اکسسوری» و همتاهایش در کارت اطلاعات محصول
                          آمده‌اند؛ تکرارشان این‌جا یعنی یک پرسش در دو جا با
-                         دو مقدارِ ممکن. */
+                         دو مقدار ممکن. */
                   const usable = specDefs.filter(f => !HIDE.has(f.id) && f.id !== specTypeField?.id)
-                  /* فیلدی که شرطش برقرار نیست اصلاً رندر نمی‌شود —
-                     «تعداد لایه» برای تیپِ تک‌لایه و «نوع نگهدارنده»
-                     وقتی نگهدارنده‌ای نیست. از شمارشِ پیشرفت هم بیرون
+                  /* فیلدی که شرطش برقرار نیست اصلا رندر نمی‌شود —
+                     «تعداد لایه» برای تیپ تک‌لایه و «نوع نگهدارنده»
+                     وقتی نگهدارنده‌ای نیست. از شمارش پیشرفت هم بیرون
                      است، وگرنه هدفی شمرده می‌شد که دیده نمی‌شود. */
-                  /* ── وابستگی از `specDefs` حل می‌شود، نه از فهرستِ رندر ──
-                      `usable` والدها را هم فیلتر کرده (نوعِ دسته بالای فرم
-                      رفته)، و «دستِ دستکش» که به `apparel_type` وابسته است
+                  /* ── وابستگی از `specDefs` حل می‌شود، نه از فهرست رندر ──
+                      `usable` والدها را هم فیلتر کرده (نوع دسته بالای فرم
+                      رفته)، و «دست دستکش» که به `apparel_type` وابسته است
                       دیگر والدش را پیدا نمی‌کرد و برای همیشه پنهان می‌ماند.
-                      مسیرِ ذخیره از اول `specDefs` را می‌داد؛ این دو باید
+                      مسیر ذخیره از اول `specDefs` را می‌داد؛ این دو باید
                       یکی باشند. */
                   const shown = usable.filter(f => !isFieldHidden(f, specs, specDefs, catTypeId))
                   const { main: mainSpecs, toggles: toggleSpecs } = splitFields(shown)
@@ -901,7 +901,7 @@ export default function NewProductPage() {
                         )}
 
                         {/* ── سوییچ‌های بله/خیر ──
-                            ته فرم و پشتِ یک خطِ جداکننده: هرکدام یک ردیفِ
+                            ته فرم و پشت یک خط جداکننده: هرکدام یک ردیف
                             کم‌ارتفاع است و قاطی‌شدنشان با شبکه‌ی دوستونی،
                             چیدمان را دندانه‌دار می‌کرد. */}
                         {toggleSpecs.length > 0 && (
@@ -931,13 +931,13 @@ export default function NewProductPage() {
                         <div style={{ marginBottom: 16 }}>
                           <Label required>وضعیت کالا</Label>
                           {/* ── چرا از CONDITIONS خوانده می‌شود ──
-                              این‌جا دستی «like-new» نوشته شده بود، ولی کلیدِ
-                              معتبر «like_new» است. سرور کلیدِ ناشناخته را به
-                              «نو» برمی‌گرداند، پس هر آگهیِ «در حد نو» بی‌صدا
+                              این‌جا دستی «like-new» نوشته شده بود، ولی کلید
+                              معتبر «like_new» است. سرور کلید ناشناخته را به
+                              «نو» برمی‌گرداند، پس هر آگهی «در حد نو» بی‌صدا
                               «نو» ذخیره می‌شد. */}
                           {/* ── پلمب ⇒ وضعیت قطعی است ──
-                            کالای پلمب و استفاده‌نشده به تعریف «نو» است؛ پرسیدنِ دوباره‌اش
-                            یعنی فروشنده می‌تواند «کارکرده»ی پلمب‌شده ثبت کند. با روشن‌شدنِ
+                            کالای پلمب و استفاده‌نشده به تعریف «نو» است؛ پرسیدن دوباره‌اش
+                            یعنی فروشنده می‌تواند «کارکرده»ی پلمب‌شده ثبت کند. با روشن‌شدن
                             آن سوییچ، این فیلد روی «نو» می‌نشیند و غیرفعال می‌شود. */}
                         <FancySelect value={effCondition}
                           onChange={v => set('condition', v)} disabled={sealed}
@@ -961,9 +961,9 @@ export default function NewProductPage() {
               ═══════════════════════════════════════════════════ */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                 {/* ── چرا تصاویر و قیمت این‌جا هستند ──
-                   ستونِ راست (اطلاعات پایه + مشخصات فنی) با ۳۳ فیلد
-                   خیلی بلند شده بود و ستونِ چپ فقط دو کارتِ کوتاه
-                   داشت: نیمه‌ی چپِ صفحه از وسط به پایین خالی می‌ماند
+                   ستون راست (اطلاعات پایه + مشخصات فنی) با ۳۳ فیلد
+                   خیلی بلند شده بود و ستون چپ فقط دو کارت کوتاه
+                   داشت: نیمه‌ی چپ صفحه از وسط به پایین خالی می‌ماند
                    و صفحه بی‌دلیل دراز می‌شد. این دو کارت این‌طرف
                    می‌آیند تا دو ستون تا پایین هم‌ارتفاع بمانند.
                    روی موبایل شبکه تک‌ستونه می‌شود و ترتیب همان است. */}
@@ -1024,11 +1024,11 @@ export default function NewProductPage() {
                   <div style={{ position: 'relative', zIndex: 1 }}>
                     <SectionTitle>قیمت‌گذاری</SectionTitle>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                      {/* ── قیمتِ توافقی ──
-                          بدونِ این گزینه، فروشنده‌ای که نمی‌خواست قیمت بنویسد
-                          مجبور بود صفر بگذارد و کارتِ بازار «۰ تومان» نشان
+                      {/* ── قیمت توافقی ──
+                          بدون این گزینه، فروشنده‌ای که نمی‌خواست قیمت بنویسد
+                          مجبور بود صفر بگذارد و کارت بازار «۰ تومان» نشان
                           می‌داد. با روشن‌شدنش فیلدهای قیمت غیرفعال می‌شوند تا
-                          عددی که قرار نیست دیده شود اصلاً وارد نشود. */}
+                          عددی که قرار نیست دیده شود اصلا وارد نشود. */}
                       <label style={{ display: 'flex', alignItems: 'center', gap: 9, cursor: 'pointer' }}>
                         <input type="checkbox" checked={form.negotiable}
                           onChange={e => set('negotiable', e.target.checked)}
@@ -1072,13 +1072,13 @@ export default function NewProductPage() {
 
                 {/* ── چرا این کارت گاهی نیست ──
                     نام فروشگاه، نام مالک، استان/شهر و آدرس همگی از
-                    پروفایلِ فروشگاه پر و قفل می‌شوند. وقتی هر چهارتا
-                    قفل‌اند، کارت فقط چهار فیلدِ غیرقابلِ تغییر را نشان
+                    پروفایل فروشگاه پر و قفل می‌شوند. وقتی هر چهارتا
+                    قفل‌اند، کارت فقط چهار فیلد غیرقابل تغییر را نشان
                     می‌دهد و بی‌جهت ارتفاع می‌گیرد — پس نمایش داده
-                    نمی‌شود. مقدارها سرِ جایشان‌اند و با آگهی ثبت می‌شوند.
+                    نمی‌شود. مقدارها سر جایشان‌اند و با آگهی ثبت می‌شوند.
 
-                    «اطلاعات تماس» جدا می‌ماند، چون شماره‌ی تماس واقعاً
-                    قابلِ تغییر است. */}
+                    «اطلاعات تماس» جدا می‌ماند، چون شماره‌ی تماس واقعا
+                    قابل تغییر است. */}
                 {!sellerLocked && (
                 <div style={{ background: LQ_BG, backdropFilter: 'blur(40px) saturate(220%)', WebkitBackdropFilter: 'blur(40px) saturate(220%)', border: LQ_BOR, borderRadius: 20, boxShadow: LQ_SHAD, padding: '24px', position: 'relative', overflow: 'hidden', animation: 'fadeUp 0.5s ease both' }}>
                   <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '46%', background: 'linear-gradient(180deg,rgba(255,255,255,0.55) 0%,transparent 100%)', pointerEvents: 'none' }} />
@@ -1168,7 +1168,7 @@ export default function NewProductPage() {
                       <line x1="12" y1="16" x2="12.01" y2="16" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"/>
                     </svg>
                     <p style={{ fontSize: 13, color: TEXT_SEC, lineHeight: 1.75, margin: 0 }}>
-                      اطلاعات تماس شما مستقیماً به خریداران نمایش داده می‌شود ، خریدار مستقیم با شما تماس می‌گیرد.
+                      اطلاعات تماس شما مستقیما به خریداران نمایش داده می‌شود ، خریدار مستقیم با شما تماس می‌گیرد.
                     </p>
                   </div>
                 </div>
@@ -1185,8 +1185,8 @@ export default function NewProductPage() {
                         }
                       </div>
                       <div style={{ flex: 1, minWidth: 0 }}>
-                        {/* همان دو خطی که کارتِ بازار نشان می‌دهد:
-                            بولد بالا، برند و مدل با وزنِ معمولی پایینش */}
+                        {/* همان دو خطی که کارت بازار نشان می‌دهد:
+                            بولد بالا، برند و مدل با وزن معمولی پایینش */}
                         <p style={{ fontSize: 13.5, fontWeight: 800, color: TEXT, margin: '0 0 3px', lineHeight: 1.4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                           {previewParts.head}
                         </p>
@@ -1211,8 +1211,8 @@ export default function NewProductPage() {
               </div>
             </div>
 
-            {/* پیام‌های خطا و سهمیه در پنجره‌ی وسطِ صفحه می‌آیند (AlertDialog)،
-                نه نوارِ بالای فرم — روی موبایل آن نوار هرگز دیده نمی‌شد. */}
+            {/* پیام‌های خطا و سهمیه در پنجره‌ی وسط صفحه می‌آیند (AlertDialog)،
+                نه نوار بالای فرم — روی موبایل آن نوار هرگز دیده نمی‌شد. */}
 
             {/* ── پذیرش قوانین بازار ── */}
             <div className="span-all" style={{ background: LQ_BG, backdropFilter: 'blur(40px)', WebkitBackdropFilter: 'blur(40px)', border: errors.acceptRules ? '1.5px solid rgba(200,60,60,0.42)' : LQ_BOR, borderRadius: 20, boxShadow: LQ_SHAD, padding: '16px 22px', marginBottom: 14, transition: 'border-color .2s' }}>
@@ -1236,7 +1236,7 @@ export default function NewProductPage() {
             {/* ── Submit bar ──
                 دو دکمه هم‌اندازه در یک سطر (هرکدام `flex:1`). راهنمای
                 «* فیلدهای الزامی» برداشته شد: فیلدهای نیازمند، خودشان
-                ستاره دارند و پیامِ خطا حالا وسطِ صفحه می‌آید. */}
+                ستاره دارند و پیام خطا حالا وسط صفحه می‌آید. */}
             <div className="span-all" style={{ background: LQ_BG, backdropFilter: 'blur(40px)', WebkitBackdropFilter: 'blur(40px)', border: LQ_BOR, borderRadius: 20, boxShadow: LQ_SHAD, padding: '14px 16px', display: 'flex', gap: 10, alignItems: 'stretch', animation: 'fadeUp 0.6s ease both', position: 'relative', overflow: 'hidden' }}>
               <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '46%', background: 'linear-gradient(180deg,rgba(255,255,255,0.55) 0%,transparent 100%)', pointerEvents: 'none' }} />
 

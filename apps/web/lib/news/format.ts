@@ -1,9 +1,9 @@
 /* ─────────────────────────────────────────────────────────────
-   قالبِ زمان و عدد در تحریریه.
+   قالب زمان و عدد در تحریریه.
 
-   ⚠️ همه‌ی ساعت‌ها تهران خوانده می‌شوند، نه ساعتِ دستگاهِ بیننده.
+   ⚠️ همه‌ی ساعت‌ها تهران خوانده می‌شوند، نه ساعت دستگاه بیننده.
    خبر لحظه‌ی مشخصی دارد؛ اگر خواننده‌ای بیرون از ایران باشد، «۱۲:۴۵»
-   باید همان ۱۲:۴۵ِ تحریریه بماند وگرنه با تاریخِ شمسیِ کنارش
+   باید همان ۱۲:۴۵ تحریریه بماند وگرنه با تاریخ شمسی کنارش
    نمی‌خواند.
    ───────────────────────────────────────────────────────────── */
 
@@ -11,7 +11,7 @@ import { faDate, toFaDigits } from '../jalali'
 
 const TEHRAN = 'Asia/Tehran'
 
-/** «۱۲:۴۵» به وقتِ تهران */
+/** «۱۲:۴۵» به وقت تهران */
 export function clock(ts: number): string {
   if (!ts) return ''
   const hm = new Intl.DateTimeFormat('en-US', {
@@ -20,16 +20,16 @@ export function clock(ts: number): string {
   return toFaDigits(hm)
 }
 
-/** آیا این لحظه در «امروزِ» تهران است؟ */
+/** آیا این لحظه در «امروز» تهران است؟ */
 function sameTehranDay(a: number, b: number): boolean {
   const f = new Intl.DateTimeFormat('en-CA', { timeZone: TEHRAN })
   return f.format(new Date(a)) === f.format(new Date(b))
 }
 
-/* ── مُهرِ زمانِ جریانِ اخبار ──
-   ⚠️ رفتارِ استانداردِ اتاقِ خبر: خبرِ امروز ساعت می‌گیرد و خبرِ
-   قدیمی‌تر تاریخ. نمایشِ «۳ روز پیش» برای آرشیو بی‌فایده است و
-   نمایشِ تاریخِ کامل برای خبرِ یک‌ساعت‌پیش سرد و بی‌جان. */
+/* ── مهر زمان جریان اخبار ──
+   ⚠️ رفتار استاندارد اتاق خبر: خبر امروز ساعت می‌گیرد و خبر
+   قدیمی‌تر تاریخ. نمایش «۳ روز پیش» برای آرشیو بی‌فایده است و
+   نمایش تاریخ کامل برای خبر یک‌ساعت‌پیش سرد و بی‌جان. */
 export function stamp(ts: number, now = Date.now()): string {
   if (!ts) return ''
   if (sameTehranDay(ts, now)) return clock(ts)
@@ -50,11 +50,11 @@ export function ago(ts: number, now = Date.now()): string {
 /** «۸ مرداد ۱۴۰۵» */
 export const dateOf = (ts: number) => (ts ? faDate(new Date(ts)) : '')
 
-/** شناسه‌ی ماشین‌خوانِ ISO برای `<time dateTime>` و اسکیما */
+/** شناسه‌ی ماشین‌خوان ISO برای `<time dateTime>` و اسکیما */
 export const iso = (ts: number) => (ts ? new Date(ts).toISOString() : undefined)
 
 /** «۴ دقیقه» — صفر یعنی متنی نیست، پس چیزی نشان داده نمی‌شود. */
 export const readTime = (min: number) => (min > 0 ? `${toFaDigits(min)} دقیقه مطالعه` : '')
 
-/** رتبه‌ی دورقمیِ پربازدیدها: ۰۱، ۰۲ … */
+/** رتبه‌ی دورقمی پربازدیدها: ۰۱، ۰۲ … */
 export const rank = (i: number) => toFaDigits(String(i + 1).padStart(2, '0'))

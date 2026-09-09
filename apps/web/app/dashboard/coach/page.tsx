@@ -94,7 +94,7 @@ const emptyForm = {
   slug: '', firstNameFa: '', lastNameFa: '', firstNameEn: '', lastNameEn: '',
   province: '', city: '', disciplines: [] as string[], shortBio: '', fullBio: '',
   grades: [] as CoachGrade[], gallery: [] as CoachMedia[], videos: [] as CoachVideo[],
-  /* نامِ آلبوم‌ها. ⚠️ بدونِ این، پرکردنِ فرم از نسخه‌ی محلی آلبوم‌های
+  /* نام آلبوم‌ها. ⚠️ بدون این، پرکردن فرم از نسخه‌ی محلی آلبوم‌های
      خالی را می‌انداخت و ذخیره‌ی بعدی پاکشان می‌کرد. */
   albums: [] as string[],
   phone: '', whatsapp: '', instagram: '', telegram: '',
@@ -105,13 +105,13 @@ type FormState = typeof emptyForm
 /* small style helpers */
 const card: React.CSSProperties = { background: '#fff', border: CBOR, borderRadius: 16, padding: '22px 24px', boxShadow: '0 2px 16px rgba(17,17,16,0.05)' }
 const inp:  React.CSSProperties = { width: '100%', padding: '10px 13px', border: '1px solid rgba(17,17,16,0.14)', borderRadius: 10, fontSize: 14, fontFamily: 'inherit', background: '#fff', color: TEXT, outline: 'none' }
-/* ── چرا فیلدِ ناقص حاشیه‌ی قرمز می‌گیرد ──
-   تا امروز فقط یک متنِ ریزِ قرمز زیرِ فیلد می‌آمد و یک نوار بالای
-   صفحه. کاربری که ته فرمِ بلند دکمه را می‌زند، نه نوار را می‌بیند
+/* ── چرا فیلد ناقص حاشیه‌ی قرمز می‌گیرد ──
+   تا امروز فقط یک متن ریز قرمز زیر فیلد می‌آمد و یک نوار بالای
+   صفحه. کاربری که ته فرم بلند دکمه را می‌زند، نه نوار را می‌بیند
    و نه آن متن را — پیام می‌گوید «فیلدهای الزامی را کامل کنید» و
-   او دنبالِ فیلدی می‌گردد که پیدا نمی‌شود.
+   او دنبال فیلدی می‌گردد که پیدا نمی‌شود.
 
-   خودِ کادر باید قرمز شود؛ همان چیزی که چشم از دور می‌بیند. */
+   خود کادر باید قرمز شود؛ همان چیزی که چشم از دور می‌بیند. */
 /* همان سقفی که سرور اعمال می‌کند (`MAX_VIDEO` در lib/upload/policy).
    آن فایل کلاینت‌امن نیست، پس عدد این‌جا تکرار شده — و اگر روزی
    عوض شد، هر دو باید با هم عوض شوند. */
@@ -122,7 +122,7 @@ const inpErr: React.CSSProperties = {
 }
 
 const inpRO: React.CSSProperties = { ...inp, background: 'rgba(17,17,16,0.045)', color: 'rgba(17,17,16,0.60)', cursor: 'not-allowed' }
-/* نامِ فارسیِ هر فیلد — پیامِ خطا باید بگوید کدام‌یک، نه «یکی از».
+/* نام فارسی هر فیلد — پیام خطا باید بگوید کدام‌یک، نه «یکی از».
    کلیدها همان‌هایی‌اند که `validate` می‌سازد. */
 const FIELD_LABELS: Record<string, string> = {
   firstNameFa: 'نام (فارسی)',
@@ -137,14 +137,14 @@ const FIELD_LABELS: Record<string, string> = {
 }
 
 const lbl:  React.CSSProperties = { display: 'block', fontSize: 12.5, fontWeight: 700, color: TEXT_S, marginBottom: 6 }
-/* راهنمای ریزِ زیرِ فیلد — بر خلافِ placeholder با تایپ‌کردن ناپدید نمی‌شود */
+/* راهنمای ریز زیر فیلد — بر خلاف placeholder با تایپ‌کردن ناپدید نمی‌شود */
 const hint: React.CSSProperties = { fontSize: 11.5, color: TEXT_M, marginTop: 5, lineHeight: 1.7 }
 
-/* ── برچسبِ فیلدِ لاتین ──
-   خودِ ورودی `dir="ltr"` و چپ‌چین است ولی برچسبش مثلِ بقیه‌ی صفحه
-   راست‌چین می‌ماند: «First name (English)» آن‌طرفِ کادر می‌افتد و چشم
+/* ── برچسب فیلد لاتین ──
+   خود ورودی `dir="ltr"` و چپ‌چین است ولی برچسبش مثل بقیه‌ی صفحه
+   راست‌چین می‌ماند: «First name (English)» آن‌طرف کادر می‌افتد و چشم
    برای هر فیلد دو بار جهت عوض می‌کند. برچسب هم چپ می‌رود تا بالای
-   شروعِ همان متنی بنشیند که توصیفش می‌کند. */
+   شروع همان متنی بنشیند که توصیفش می‌کند. */
 const lblLtr: React.CSSProperties = { ...lbl, textAlign: 'left', direction: 'ltr' }
 const lqBtn: React.CSSProperties = { display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 7, background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.34)', color: GOLD_D, borderRadius: 10, fontWeight: 700, fontSize: 14, padding: '11px 22px', cursor: 'pointer', fontFamily: 'inherit', textDecoration: 'none' }
 const sectionTitle = (t: string, n: number) => (
@@ -158,18 +158,18 @@ function CoachDashboardInner() {
   const { user, _hydrated } = useAuthStore()
   const [form, setForm]       = useState<FormState>(emptyForm)
   const [errors, setErrors]   = useState<Record<string, string>>({})
-  /* پیامِ خطا وسطِ صفحه می‌آید، نه نواری بالای فرمِ بلند که
-     کاربرِ ته صفحه هرگز نمی‌بیندش. */
+  /* پیام خطا وسط صفحه می‌آید، نه نواری بالای فرم بلند که
+     کاربر ته صفحه هرگز نمی‌بیندش. */
   /* عنوان هم در حالت می‌نشیند: همین پنجره برای «فرم کامل نیست»،
      «آپلود نشد» و «ذخیره روی سرور انجام نشد» استفاده می‌شود و یک
-     عنوانِ ثابت روی هر سه، دو تای آخر را دروغ می‌کرد. */
+     عنوان ثابت روی هر سه، دو تای آخر را دروغ می‌کرد. */
   const [alert, setAlert] = useState<{ title: string; lines: string[] } | null>(null)
-  /* مبلغ و مدتِ جلسه ستونِ ردیف‌اند نه بخشی از فرمِ jsonb — پس حالتِ
-     جدا دارند و کنارِ ذخیره فرستاده می‌شوند. */
+  /* مبلغ و مدت جلسه ستون ردیف‌اند نه بخشی از فرم jsonb — پس حالت
+     جدا دارند و کنار ذخیره فرستاده می‌شوند. */
   const [sessionPrice, setSessionPrice] = useState('')
   const [sessionMin, setSessionMin] = useState('60')
-  /* نامکی که واقعاً روی سرور ثبت شده. تا وقتی خالی است فیلدِ نشانی
-     باز می‌ماند؛ نامکِ خودکارِ فرم نباید قفلش کند. */
+  /* نامکی که واقعا روی سرور ثبت شده. تا وقتی خالی است فیلد نشانی
+     باز می‌ماند؛ نامک خودکار فرم نباید قفلش کند. */
   const [savedSlug, setSavedSlug] = useState<string | null>(null)
   const [warnOpen, setWarn]   = useState(false)
   const [submitted, setSubmitted] = useState(false)
@@ -212,30 +212,30 @@ function CoachDashboardInner() {
         if (mine) {
           const up = await saveProfileRemote('coach', mine.slug, mine as unknown as Record<string, unknown>,
             { number: '', url: mine.certificate?.url ?? '' })
-          /* فقط نوشتنِ تأییدشده قفل می‌کند؛ با ۴۰۹ چیزی نوشته نشده و
-             فیلد باید باز بماند تا نامکِ تکراری قابلِ اصلاح باشد. */
+          /* فقط نوشتن تأییدشده قفل می‌کند؛ با ۴۰۹ چیزی نوشته نشده و
+             فیلد باید باز بماند تا نامک تکراری قابل اصلاح باشد. */
           if (up.ok && up.profile?.slug) setSavedSlug(up.profile.slug)
           else setSavedSlug('')
         } else {
-          /* کاربرِ کاملاً تازه: نه ردیفِ سرور، نه کشِ محلی.
+          /* کاربر کاملا تازه: نه ردیف سرور، نه کش محلی.
              صریح باز می‌شود تا نامکش را خودش انتخاب کند. */
           setSavedSlug('')
         }
         return
       }
       setSavedSlug(remote.slug)
-      /* مبلغ و مدتِ جلسه از ستونِ ردیف می‌آیند، نه از jsonb */
+      /* مبلغ و مدت جلسه از ستون ردیف می‌آیند، نه از jsonb */
       if (remote.sessionPrice !== undefined) setSessionPrice(String(remote.sessionPrice || ''))
       if (remote.sessionMin !== undefined) setSessionMin(String(remote.sessionMin || 60))
-      /* ── چرا نامِ حساب دوباره نوشته می‌شود ──
+      /* ── چرا نام حساب دوباره نوشته می‌شود ──
          داده‌ی سرور روی مقدارهای پیش‌پرشده می‌نشیند. پروفایلی که با
-         نامِ خالی ذخیره شده، دقیقاً همان بن‌بستی را برمی‌گرداند که این
-         تغییر برای بستنش بود: فیلدِ قفل‌شده‌ی خالیِ اجباری. تا وقتی
+         نام خالی ذخیره شده، دقیقا همان بن‌بستی را برمی‌گرداند که این
+         تغییر برای بستنش بود: فیلد قفل‌شده‌ی خالی اجباری. تا وقتی
          حساب نام دارد، همان مرجع است. */
       /* ── چرا داده‌ی سرور مستقیم spread نمی‌شود ──
-         مسیرِ ذخیره فقط `typeof === object` را می‌سنجد، پس ردیفی با
+         مسیر ذخیره فقط `typeof === object` را می‌سنجد، پس ردیفی با
          `fullBio: null` ممکن است. `validate` بلافاصله `.trim()` روی
-         همان می‌زند و کلِ صفحه به error boundary می‌رود. فقط
+         همان می‌زند و کل صفحه به error boundary می‌رود. فقط
          رشته‌ها و آرایه‌های واقعی پذیرفته می‌شوند؛ بقیه نادیده. */
       setForm(f => ({
         ...f,
@@ -248,20 +248,20 @@ function CoachDashboardInner() {
   }, [_hydrated, user])
 
 
-  /* قفل فقط وقتی که حساب واقعاً نام دارد — وگرنه کاربر راهی برای
-     پرکردنِ یک فیلدِ اجباری نمی‌داشت. */
-  /* هر کدام جدا: حسابی که فقط نام دارد نباید اجازه‌ی بازنویسیِ همان
-     نام را بدهد، ولی نامِ خانوادگیِ نداشته‌اش باید قابلِ تایپ باشد. */
-  /* `trim` لازم است: نامِ فقط-فاصله قفل می‌کرد ولی از اعتبارسنجی
-     رد نمی‌شد — همان بن‌بستِ فیلدِ اجباریِ غیرقابلِ تایپ. */
+  /* قفل فقط وقتی که حساب واقعا نام دارد — وگرنه کاربر راهی برای
+     پرکردن یک فیلد اجباری نمی‌داشت. */
+  /* هر کدام جدا: حسابی که فقط نام دارد نباید اجازه‌ی بازنویسی همان
+     نام را بدهد، ولی نام خانوادگی نداشته‌اش باید قابل تایپ باشد. */
+  /* `trim` لازم است: نام فقط-فاصله قفل می‌کرد ولی از اعتبارسنجی
+     رد نمی‌شد — همان بن‌بست فیلد اجباری غیرقابل تایپ. */
   const firstLocked = !!user?.firstName?.trim()
   const lastLocked = !!user?.lastName?.trim()
   /* ── چرا خطا همین‌جا پاک می‌شود ──
-     `errors` فقط موقعِ ارسال ساخته می‌شد، پس کادرِ قرمز بعد از اصلاحِ
-     فیلد قرمز می‌ماند تا ارسالِ بعدی — کاربر فکر می‌کرد هنوز ایراد
+     `errors` فقط موقع ارسال ساخته می‌شد، پس کادر قرمز بعد از اصلاح
+     فیلد قرمز می‌ماند تا ارسال بعدی — کاربر فکر می‌کرد هنوز ایراد
      دارد. */
-/* فقط کلیدهایی که خودِ فرم دارد، و فقط با نوعِ درست. هرچه غیرِ این
-   باشد نادیده گرفته می‌شود — مقدارِ پیش‌فرضِ فرم سرِ جایش می‌ماند. */
+/* فقط کلیدهایی که خود فرم دارد، و فقط با نوع درست. هرچه غیر این
+   باشد نادیده گرفته می‌شود — مقدار پیش‌فرض فرم سر جایش می‌ماند. */
 function safeRemote(raw: unknown): Partial<FormState> {
   if (!raw || typeof raw !== 'object') return {}
   const src = raw as Record<string, unknown>
@@ -270,14 +270,14 @@ function safeRemote(raw: unknown): Partial<FormState> {
     if (typeof v === 'string' || typeof v === 'number' || typeof v === 'boolean') out[k] = v
     else if (Array.isArray(v)) out[k] = v
     else if (v && typeof v === 'object') out[k] = v
-    /* null و undefined عمداً رد می‌شوند */
+    /* null و undefined عمدا رد می‌شوند */
   }
   return out as Partial<FormState>
 }
 
   /* ── چرا جدا از `set` هم لازم است ──
      `ProvinceCitySelect` و `ProfileSlugField` و چیپ‌های رشته مستقیم
-     `setForm` صدا می‌زنند، پس کادرِ قرمزشان تا ارسالِ بعدی می‌ماند.
+     `setForm` صدا می‌زنند، پس کادر قرمزشان تا ارسال بعدی می‌ماند.
      این تابع همان پاک‌سازی را جدا در دسترس می‌گذارد. */
   const clearErr = (...keys: string[]) =>
     setErrors(prev => {
@@ -314,7 +314,7 @@ function safeRemote(raw: unknown): Partial<FormState> {
   const setGradeYear = (k: string, year: string) =>
     setForm(f => ({ ...f, grades: f.grades.map(g => (g.key === k ? { ...g, year } : g)) }))
 
-  /* پیشنهادِ نشانی حالا داخلِ خودِ `SiteAddressField` است */
+  /* پیشنهاد نشانی حالا داخل خود `SiteAddressField` است */
   const slugTaken = () => {
     const p = getCoachProfiles()[form.slug]
     if (!p) return false
@@ -335,10 +335,10 @@ function safeRemote(raw: unknown): Partial<FormState> {
   const removeGallery = (id: string) => setForm(f => ({ ...f, gallery: f.gallery.filter(g => g.id !== id) }))
 
   /* ── آلبوم‌ها ──
-     آلبوم فقط یک نام روی خودِ رسانه است — نه فهرستِ جدا با شناسه.
-     پس آلبومِ خالی وجود ندارد و حذفِ یک عکس هیچ‌جا ارجاعِ شکسته
+     آلبوم فقط یک نام روی خود رسانه است — نه فهرست جدا با شناسه.
+     پس آلبوم خالی وجود ندارد و حذف یک عکس هیچ‌جا ارجاع شکسته
      نمی‌گذارد. `datalist` نام‌های موجود را پیشنهاد می‌دهد تا کاربر
-     مجبور به تایپِ دوباره — و غلط‌های املاییِ آلبومِ تکراری — نشود. */
+     مجبور به تایپ دوباره — و غلط‌های املایی آلبوم تکراری — نشود. */
   const setAlbum = (id: string, album: string) =>
     setForm(f => ({
       ...f,
@@ -350,13 +350,13 @@ function safeRemote(raw: unknown): Partial<FormState> {
       .map(n => n.trim()).filter(Boolean),
   ))
 
-  /* ── چرا این‌جا آپلودِ واقعی است ──
+  /* ── چرا این‌جا آپلود واقعی است ──
      تا امروز این دکمه `accept="image/*"` داشت و فقط یک عکس را به‌عنوان
      «بندانگشتی» می‌گرفت؛ ویدیویی در کار نبود و دکمه‌ی پخش روی صفحه‌ی
      عمومی هیچ کاری نمی‌کرد.
 
-     حالا خودِ فایل بالا می‌رود (سرور نوعش را از بایت‌ها می‌سنجد و سقفِ
-     حجم را اعمال می‌کند) و بندانگشتی از یک فریمِ همان ویدیو ساخته
+     حالا خود فایل بالا می‌رود (سرور نوعش را از بایت‌ها می‌سنجد و سقف
+     حجم را اعمال می‌کند) و بندانگشتی از یک فریم همان ویدیو ساخته
      می‌شود — نه چیزی که کاربر جدا انتخاب کند. */
   const [videoBusy, setVideoBusy] = useState(false)
   const addVideo = async (file?: File) => {
@@ -405,18 +405,18 @@ function safeRemote(raw: unknown): Partial<FormState> {
     if (!form.city.trim())        e.city        = 'الزامی'
     if (!form.slug.trim())        e.slug        = 'الزامی'
     else if (!isValidSlug(form.slug)) e.slug     = 'فقط حروف انگلیسی، عدد و خط تیره (۲ تا ۶۰ کاراکتر)'
-    else if (slugTaken())         e.slug        = 'این نشانی قبلاً استفاده شده است'
+    else if (slugTaken())         e.slug        = 'این نشانی قبلا استفاده شده است'
     if (form.disciplines.length === 0) e.disciplines = 'حداقل یک رشته را انتخاب کنید'
     if (!form.fullBio.trim())     e.fullBio     = 'الزامی'
     setErrors(e)
     const keys = Object.keys(e)
     if (keys.length) {
-      /* ── چرا نامِ فیلدها در پیام می‌آید ──
+      /* ── چرا نام فیلدها در پیام می‌آید ──
          «فیلدهای الزامی را تکمیل کنید» به کاربر نمی‌گوید کدام‌یک، و او
-         در فرمی با بیست فیلد دنبالش می‌گردد. حالا فهرست می‌آید، خودِ
+         در فرمی با بیست فیلد دنبالش می‌گردد. حالا فهرست می‌آید، خود
          کادرها قرمز می‌شوند، و صفحه روی اولینشان می‌ایستد. */
-      /* پیامِ خودِ فیلد هم می‌آید وقتی چیزی بیش از «الزامی» دارد —
-         «این نشانی قبلاً استفاده شده» را نباید به «آدرس اختصاصی»
+      /* پیام خود فیلد هم می‌آید وقتی چیزی بیش از «الزامی» دارد —
+         «این نشانی قبلا استفاده شده» را نباید به «آدرس اختصاصی»
          تقلیل داد. */
       setAlert({
         title: 'فرم کامل نیست',
@@ -426,8 +426,8 @@ function safeRemote(raw: unknown): Partial<FormState> {
         }),
       })
       requestAnimationFrame(() => {
-        /* `city` مقصدِ خودش را ندارد و زیرِ همان بلوکِ استان است — بدونِ
-           این، رایج‌ترین حالتِ ناقص (استان پر، شهر خالی) هیچ‌جا نمی‌رفت. */
+        /* `city` مقصد خودش را ندارد و زیر همان بلوک استان است — بدون
+           این، رایج‌ترین حالت ناقص (استان پر، شهر خالی) هیچ‌جا نمی‌رفت. */
         const el = document.querySelector<HTMLElement>(
           `[data-field="${keys[0]}"],[data-field-alt="${keys[0]}"]`)
         el?.scrollIntoView({ behavior: 'smooth', block: 'center' })
@@ -464,7 +464,7 @@ function safeRemote(raw: unknown): Partial<FormState> {
     /* منبع حقیقت سرور است؛ localStorage فقط کش همین مرورگر می‌ماند.
        تا پیش از این فقط localStorage نوشته می‌شد، یعنی پروفایل هیچ‌وقت
        به دیتابیس نمی‌رسید و پنل ادمین آن را نمی‌دید. */
-    if (savedSlug === null) { setAlert({ title: 'یک لحظه', lines: ['نشانیِ اختصاصی هنوز خوانده نشده — چند لحظه صبر کنید یا صفحه را تازه کنید'] }); return }
+    if (savedSlug === null) { setAlert({ title: 'یک لحظه', lines: ['نشانی اختصاصی هنوز خوانده نشده — چند لحظه صبر کنید یا صفحه را تازه کنید'] }); return }
     const res = await saveProfileRemote('coach', profile.slug, profile as unknown as Record<string, unknown>,
       { number: '', url: profile.certificate?.url ?? '' },
       { price: Number(sessionPrice) || 0, minutes: Number(sessionMin) || 60 })
@@ -474,7 +474,7 @@ function safeRemote(raw: unknown): Partial<FormState> {
       return
     }
 
-    /* از این لحظه نشانی منتشر شده و قفل می‌شود: هر تغییرِ بعدی
+    /* از این لحظه نشانی منتشر شده و قفل می‌شود: هر تغییر بعدی
        لینک‌های منتشرشده و ارجاع‌های ذخیره‌شده را می‌شکند. */
     if (res.profile?.slug) setSavedSlug(res.profile.slug)
 
@@ -544,11 +544,11 @@ function safeRemote(raw: unknown): Partial<FormState> {
           {/* وضعیت تأیید — هویت، مدارک و ایمیل */}
           <VerificationBadges />
 
-          {/* ── باکسِ استوری این‌جا نیست ──
-              استوری بلافاصله منتشر می‌شود و ربطی به ثبتِ پروفایل ندارد؛
-              وسطِ فرمِ ثبت فقط حواس را پرت می‌کرد و کاربر فکر می‌کرد
-              بخشی از تکمیلِ پروفایل است. جایش پنلِ خودِ کاربر است، نه
-              فرمِ ثبت. */}
+          {/* ── باکس استوری این‌جا نیست ──
+              استوری بلافاصله منتشر می‌شود و ربطی به ثبت پروفایل ندارد؛
+              وسط فرم ثبت فقط حواس را پرت می‌کرد و کاربر فکر می‌کرد
+              بخشی از تکمیل پروفایل است. جایش پنل خود کاربر است، نه
+              فرم ثبت. */}
 
           {/* دعوت‌ها و جلسه‌ها بالای فرم‌اند: تصمیم‌اند، نه ویرایش */}
           <ClubInvites />
@@ -559,14 +559,14 @@ function safeRemote(raw: unknown): Partial<FormState> {
             {sectionTitle('اطلاعات پایه', 1)}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2,1fr)', gap: 14 }}>
               {/* ── چرا این دو فیلد گاهی قفل نیستند ──
-                  نام از حسابِ کاربری می‌آمد، قفل بود و ستاره هم نداشت —
-                  ولی `validate` اجباری‌اش می‌دانست. حسابی که نامِ فارسی
+                  نام از حساب کاربری می‌آمد، قفل بود و ستاره هم نداشت —
+                  ولی `validate` اجباری‌اش می‌دانست. حسابی که نام فارسی
                   نداشت، فرمی می‌ساخت که **هرگز ثبت نمی‌شد**: کاربر همه‌ی
-                  فیلدهای ستاره‌دار را پر می‌کرد، پیامِ «فیلدهای الزامی را
-                  کامل کنید» می‌گرفت، و فیلدِ مقصر نه ستاره داشت نه قابلِ
+                  فیلدهای ستاره‌دار را پر می‌کرد، پیام «فیلدهای الزامی را
+                  کامل کنید» می‌گرفت، و فیلد مقصر نه ستاره داشت نه قابل
                   تایپ بود.
 
-                  حالا قفل فقط وقتی است که واقعاً مقداری از حساب آمده. */}
+                  حالا قفل فقط وقتی است که واقعا مقداری از حساب آمده. */}
               <div><label style={lbl}>نام{firstLocked ? null : star}</label><input
                 style={firstLocked ? inpRO : (errors.firstNameFa ? inpErr : inp)}
                 value={form.firstNameFa} onChange={e => set('firstNameFa', e.target.value)}
@@ -584,9 +584,9 @@ function safeRemote(raw: unknown): Partial<FormState> {
               </div>
               <div><label style={lblLtr}>Last name (English){star}</label><input data-field="lastNameEn" style={{ ...(errors.lastNameEn ? inpErr : inp), direction: 'ltr', textAlign: 'left' }} value={form.lastNameEn} onChange={e => set('lastNameEn', e.target.value)} />{err('lastNameEn')}</div>
               <div><label style={lblLtr}>First name (English){star}</label><input data-field="firstNameEn" style={{ ...(errors.firstNameEn ? inpErr : inp), direction: 'ltr', textAlign: 'left' }} value={form.firstNameEn} onChange={e => set('firstNameEn', e.target.value)} />{err('firstNameEn')}</div>
-                            {/* نشانیِ اختصاصیِ سایت — همان چیزی که پنلِ باشگاه از اول داشت */}
+                            {/* نشانی اختصاصی سایت — همان چیزی که پنل باشگاه از اول داشت */}
               <div style={{ gridColumn: '1 / -1' }}>
-                <div data-field="slug"> {/* نشانیِ اختصاصی */}
+                <div data-field="slug"> {/* نشانی اختصاصی */}
                 <ProfileSlugField
                   kind="coach" value={form.slug} savedSlug={savedSlug}
                   onChange={v => { setForm(f => ({ ...f, slug: v })); clearErr('slug') }}
@@ -684,16 +684,16 @@ function safeRemote(raw: unknown): Partial<FormState> {
                 const on = gradeSelected(g.key)
                 const yr = form.grades.find(x => x.key === g.key)?.year ?? ''
                 return (
-                  /* ── سال زیرِ نامِ درجه می‌نشیند، نه کنارش ──
-                     قبلاً هر دو در یک ردیفِ افقی بودند: نامِ درجه با
-                     `flex:1` و دراپ‌داونِ سال با عرضِ ثابتِ ۱۵۰. روی
-                     عرضِ موبایل چیزی حدود نصفِ ردیف را همان دراپ‌داون
-                     می‌گرفت و فهرستِ درجه‌ها این شکلی خوانده می‌شد:
-                     «توجیهی — سال دریافت». یعنی فیلدِ سال وسطِ فهرستِ
+                  /* ── سال زیر نام درجه می‌نشیند، نه کنارش ──
+                     قبلا هر دو در یک ردیف افقی بودند: نام درجه با
+                     `flex:1` و دراپ‌داون سال با عرض ثابت ۱۵۰. روی
+                     عرض موبایل چیزی حدود نصف ردیف را همان دراپ‌داون
+                     می‌گرفت و فهرست درجه‌ها این شکلی خوانده می‌شد:
+                     «توجیهی — سال دریافت». یعنی فیلد سال وسط فهرست
                      درجه‌ها می‌افتاد.
 
-                     حالا ردیفِ بالا فقط انتخابِ درجه است و سال، وقتی
-                     درجه‌ای تیک خورد، زیرش با برچسبِ خودش باز می‌شود. */
+                     حالا ردیف بالا فقط انتخاب درجه است و سال، وقتی
+                     درجه‌ای تیک خورد، زیرش با برچسب خودش باز می‌شود. */
                   <div key={g.key} style={{ padding: '9px 12px', borderRadius: 10, border: on ? '1px solid rgba(199,166,106,0.40)' : '1px solid rgba(17,17,16,0.10)', background: on ? 'rgba(199,166,106,0.07)' : '#fff' }}>
                     <button type="button" onClick={() => toggleGrade(idx)} style={{ display: 'flex', alignItems: 'center', gap: 9, background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit', width: '100%', textAlign: 'start', padding: 0 }}>
                       <span style={{ width: 19, height: 19, borderRadius: 6, flexShrink: 0, border: on ? 'none' : '1.5px solid rgba(17,17,16,0.22)', background: on ? GOLD : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -722,7 +722,7 @@ function safeRemote(raw: unknown): Partial<FormState> {
           <div style={card}>
             {sectionTitle('گالری', 4)}
             <label style={lbl}>تصاویر</label>
-            {/* نام‌های آلبومِ موجود — همان‌جا پیشنهاد می‌شوند */}
+            {/* نام‌های آلبوم موجود — همان‌جا پیشنهاد می‌شوند */}
             <datalist id="bh-albums">
               {albumNames.map(n => <option key={n} value={n} />)}
             </datalist>
@@ -768,7 +768,7 @@ function safeRemote(raw: unknown): Partial<FormState> {
           </div>
 
           {/* جلسه‌ی خصوصی — مبلغ و مدت. پرداخت حضوری است و همین‌جا هم
-              نوشته می‌شود تا کسی منتظرِ درگاه نماند. */}
+              نوشته می‌شود تا کسی منتظر درگاه نماند. */}
           <div style={card}>
             {sectionTitle('جلسه‌ی خصوصی', 5)}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2,1fr)', gap: 14 }}>
@@ -785,7 +785,7 @@ function safeRemote(raw: unknown): Partial<FormState> {
             </div>
             <p style={{ fontSize: 12, color: TEXT_S, lineHeight: 1.9, margin: '10px 0 0' }}>
               شاگرد از صفحه‌ی شما درخواست جلسه می‌فرستد و شما تأیید می‌کنید.
-              پرداخت فعلاً حضوری است. مبلغ صفر یعنی «توافقی».
+              پرداخت فعلا حضوری است. مبلغ صفر یعنی «توافقی».
             </p>
           </div>
 
@@ -795,14 +795,14 @@ function safeRemote(raw: unknown): Partial<FormState> {
             <p style={{ fontSize: 12.5, color: TEXT_M, marginBottom: 14 }}>هر کدام را که پر کنید، آیکونش در بخش «راه‌های ارتباطی» پروفایل نمایش داده می‌شود.</p>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2,1fr)', gap: 14 }}>
               {/* ── چرا این دو راهنما ──
-                  دو فیلد دو قالبِ متفاوت می‌خواهند و از روی برچسبشان
-                  معلوم نیست: تماس با صفرِ اول، واتساپ با کدِ کشور و
-                  بدونِ صفر. تنها نشانه، `placeholder` بود که با اولین
-                  کاراکترِ تایپ‌شده ناپدید می‌شود. */}
+                  دو فیلد دو قالب متفاوت می‌خواهند و از روی برچسبشان
+                  معلوم نیست: تماس با صفر اول، واتساپ با کد کشور و
+                  بدون صفر. تنها نشانه، `placeholder` بود که با اولین
+                  کاراکتر تایپ‌شده ناپدید می‌شود. */}
               <div>
                 <label style={lbl}>شماره تماس</label>
                 <input style={{ ...inp, direction: 'ltr', textAlign: 'left' }} inputMode="tel" value={form.phone} onChange={e => set('phone', e.target.value)} placeholder="09121234567" />
-                <div style={hint}>با صفرِ اول و بدون فاصله — <span className="bh-latin" dir="ltr">09121234567</span></div>
+                <div style={hint}>با صفر اول و بدون فاصله — <span className="bh-latin" dir="ltr">09121234567</span></div>
               </div>
               <div>
                 <label style={lbl}>واتساپ</label>
@@ -855,7 +855,7 @@ function safeRemote(raw: unknown): Partial<FormState> {
           </div>
         </div>
       )}
-      {/* پنجره‌ی خطا وسطِ صفحه — همان کامپوننتی که فرمِ آگهی هم دارد */}
+      {/* پنجره‌ی خطا وسط صفحه — همان کامپوننتی که فرم آگهی هم دارد */}
       <AlertDialog
         open={!!alert}
         title={alert?.title ?? ''}
@@ -867,9 +867,9 @@ function safeRemote(raw: unknown): Partial<FormState> {
 }
 
 /* ── چرا گارد ──
-   بدونِ آن، کاربرِ واردنشده کلِ فرم را پر می‌کرد و بعد آپلود و ذخیره
-   با ۴۰۱ برمی‌گشت — و پیامِ «ویدیو بالا نرفت» او را دنبالِ فایل و
-   اینترنت می‌فرستاد، نه دکمه‌ی ورود. پنلِ داور از اول این را داشت. */
+   بدون آن، کاربر واردنشده کل فرم را پر می‌کرد و بعد آپلود و ذخیره
+   با ۴۰۱ برمی‌گشت — و پیام «ویدیو بالا نرفت» او را دنبال فایل و
+   اینترنت می‌فرستاد، نه دکمه‌ی ورود. پنل داور از اول این را داشت. */
 export default function CoachDashboardPage() {
   return (
     <AuthGuard>

@@ -40,8 +40,8 @@ export default function TechnicianDashboard() {
   const [form, setForm]     = useState<TechnicianProfile>(() => emptyTechnicianProfile('draft'))
   const [aboutText, setAboutText] = useState('')
   const [loaded, setLoaded] = useState(false)
-  /* نامکی که واقعاً روی سرور ثبت شده. تا وقتی خالی است فیلدِ نشانی
-     باز می‌ماند؛ نامکِ خودکارِ فرم نباید قفلش کند. */
+  /* نامکی که واقعا روی سرور ثبت شده. تا وقتی خالی است فیلد نشانی
+     باز می‌ماند؛ نامک خودکار فرم نباید قفلش کند. */
   const [savedSlug, setSavedSlug] = useState<string | null>(null)
   const [saved, setSaved]   = useState(false)
   const [err, setErr]       = useState('')
@@ -53,8 +53,8 @@ export default function TechnicianDashboard() {
   const photoRef  = useRef<HTMLInputElement>(null)
   /* آلبوم جدید */
   const [albTitle, setAlbTitle] = useState('')
-  /* ورودیِ عکس به‌ازای هر آلبوم — کلید نامِ آلبوم است، چون آلبوم دیگر
-     شناسه ندارد و خودِ نام هویتش است (همان مدلِ مربی و داور). */
+  /* ورودی عکس به‌ازای هر آلبوم — کلید نام آلبوم است، چون آلبوم دیگر
+     شناسه ندارد و خود نام هویتش است (همان مدل مربی و داور). */
   const albImgRefs = useRef<Record<string, HTMLInputElement | null>>({})
 
   const isTechnician = !!user && [user.primaryRole, ...(user.secondaryRoles ?? [])].includes('technician')
@@ -77,21 +77,21 @@ export default function TechnicianDashboard() {
         if (!remote) {
           if (mine) {
             const up = await saveProfileRemote('technician', mine.slug, mine as unknown as Record<string, unknown>)
-            /* فقط نوشتنِ تأییدشده قفل می‌کند. */
+            /* فقط نوشتن تأییدشده قفل می‌کند. */
             if (up.ok && up.profile?.slug) setSavedSlug(up.profile.slug)
-            else { setSavedSlug(''); setErr(up.message ?? 'نشانیِ ثبت‌شده خوانده نشد — دوباره تلاش کنید') }
+            else { setSavedSlug(''); setErr(up.message ?? 'نشانی ثبت‌شده خوانده نشد — دوباره تلاش کنید') }
           } else {
-            /* کاربرِ کاملاً تازه: نه ردیفِ سرور، نه کشِ محلی.
+            /* کاربر کاملا تازه: نه ردیف سرور، نه کش محلی.
                صریح باز می‌شود تا نامکش را خودش انتخاب کند. */
             setSavedSlug('')
           }
           return
         }
         setSavedSlug(remote.slug)
-        /* ⚠️ ردیفِ سرور می‌تواند هنوز آلبومِ شیئیِ پیش از مهاجرت داشته
-           باشد. بدونِ این تبدیل، پنل روی `x.trim` می‌شکند و — بدتر —
-           اولین ذخیره همان شکل را با شکلِ تازه جایگزین می‌کرد و
-           عکس‌های داخلِ آلبوم‌ها از بین می‌رفت. */
+        /* ⚠️ ردیف سرور می‌تواند هنوز آلبوم شیئی پیش از مهاجرت داشته
+           باشد. بدون این تبدیل، پنل روی `x.trim` می‌شکند و — بدتر —
+           اولین ذخیره همان شکل را با شکل تازه جایگزین می‌کرد و
+           عکس‌های داخل آلبوم‌ها از بین می‌رفت. */
         const merged = { ...base, ...remote.data, ...normalizeTechMedia(remote.data), slug: remote.slug }
         setForm(merged)
         setAboutText((merged.about ?? []).join('\n\n'))
@@ -104,14 +104,14 @@ export default function TechnicianDashboard() {
     setForm(f => ({ ...f, [k]: v })); setSaved(false); setErr('')
   }
 
-  /* ── انتخابِ خدمات ──
-     ⚠️ از این پس *شناسه* ذخیره می‌شود نه متنِ فارسی، تا اصلاحِ
-     نگارشِ یک عنوان انتخابِ کسی را نشکند. مقادیرِ قدیمی که معادلِ
+  /* ── انتخاب خدمات ──
+     ⚠️ از این پس *شناسه* ذخیره می‌شود نه متن فارسی، تا اصلاح
+     نگارش یک عنوان انتخاب کسی را نشکند. مقادیر قدیمی که معادل
      تازه ندارند دست‌نخورده کنارشان می‌مانند — داده‌ی این متخصص
      است، پاک نمی‌شود. */
   const pickedIds = useMemo(() => storedToIds(form.services), [form.services])
-  /* ⚠️ `trim` این‌جا هم لازم است: `storedToIds` تریم می‌کند، پس بدونِ
-     آن یک مقدارِ دارای فاصله در *هر دو* سطل می‌افتاد و ذخیره دوبار
+  /* ⚠️ `trim` این‌جا هم لازم است: `storedToIds` تریم می‌کند، پس بدون
+     آن یک مقدار دارای فاصله در *هر دو* سطل می‌افتاد و ذخیره دوبار
      می‌نوشتش. */
   const keptLegacy = useMemo(
     () => [...new Set((form.services ?? [])
@@ -143,9 +143,9 @@ export default function TechnicianDashboard() {
 
   /* ── آلبوم‌ها ──
      ⚠️ مدل عوض شد و با آن این بخش هم: آلبوم دیگر شیئی با عکس‌های
-     داخلش نیست. نام‌ها در `albums` و خودِ عکس در `gallery` با برچسبِ
-     نامِ آلبوم می‌نشیند — همان چیزی که صفحه‌ی عمومی رندر می‌کند. با دو
-     مدلِ جدا، عکسی که از صفحه‌ی عمومی اضافه می‌شد در پنل دیده نمی‌شد. */
+     داخلش نیست. نام‌ها در `albums` و خود عکس در `gallery` با برچسب
+     نام آلبوم می‌نشیند — همان چیزی که صفحه‌ی عمومی رندر می‌کند. با دو
+     مدل جدا، عکسی که از صفحه‌ی عمومی اضافه می‌شد در پنل دیده نمی‌شد. */
   const addAlbum = () => {
     const n = albTitle.trim()
     if (!n) { setErr('نام آلبوم لازم است.'); return }
@@ -167,8 +167,8 @@ export default function TechnicianDashboard() {
     finally { setBusy(false) }
   }
   const removeGalleryItem = (id: string) => set('gallery', form.gallery.filter(g => g.id !== id))
-  /* حذفِ آلبوم فقط برچسب را برمی‌دارد؛ عکس در گالری می‌ماند. پاک‌کردنِ
-     خودکارِ عکس‌ها با یک کلیک، حذفِ برگشت‌ناپذیرِ چند فایل است. */
+  /* حذف آلبوم فقط برچسب را برمی‌دارد؛ عکس در گالری می‌ماند. پاک‌کردن
+     خودکار عکس‌ها با یک کلیک، حذف برگشت‌ناپذیر چند فایل است. */
   const removeAlbum = (name: string) => {
     set('albums', form.albums.filter(x => x !== name))
     set('gallery', form.gallery.map(g => (g.album === name ? { ...g, album: undefined } : g)))
@@ -194,12 +194,12 @@ export default function TechnicianDashboard() {
 
     /* منبع حقیقت سرور است؛ localStorage فقط کش همین مرورگر می‌ماند.
        تا پیش از این فقط localStorage نوشته می‌شد و پنل ادمین پروفایل را
-       اصلاً نمی‌دید. */
-    if (savedSlug === null) { setErr('نشانیِ اختصاصی هنوز خوانده نشده — چند لحظه صبر کنید یا صفحه را تازه کنید'); return }
+       اصلا نمی‌دید. */
+    if (savedSlug === null) { setErr('نشانی اختصاصی هنوز خوانده نشده — چند لحظه صبر کنید یا صفحه را تازه کنید'); return }
     const res = await saveProfileRemote('technician', profile.slug, profile as unknown as Record<string, unknown>)
     if (!res.ok) { setErr(res.message ?? 'ذخیره روی سرور انجام نشد'); return }
 
-    /* از این لحظه نشانی منتشر شده و قفل می‌شود: هر تغییرِ بعدی
+    /* از این لحظه نشانی منتشر شده و قفل می‌شود: هر تغییر بعدی
        لینک‌های منتشرشده را می‌شکند. */
     if (res.profile?.slug) setSavedSlug(res.profile.slug)
     const saved = (res.profile?.data as typeof profile | undefined) ?? profile
@@ -282,7 +282,7 @@ export default function TechnicianDashboard() {
                 <label className="mb-1.5 block text-[12.5px] font-bold text-[#5B564B]">عنوان تخصصی *</label>
                 <input className={INPUT} value={form.title} onChange={e => set('title', e.target.value)} placeholder="مثال: متخصص پارچه و رگلاژ" />
               </div>
-                            {/* نشانیِ اختصاصیِ سایت — همان چیزی که پنلِ باشگاه از اول داشت */}
+                            {/* نشانی اختصاصی سایت — همان چیزی که پنل باشگاه از اول داشت */}
               <div className="sm:col-span-2">
                 <ProfileSlugField
                   kind="technician" value={form.slug} savedSlug={savedSlug}
@@ -298,9 +298,9 @@ export default function TechnicianDashboard() {
                 />
               </div>
               <div>
-                {/* ورودیِ متنیِ آزاد جای خود را به انتخاب از باشگاه‌های
+                {/* ورودی متنی آزاد جای خود را به انتخاب از باشگاه‌های
                     ثبت‌شده داد: عضویت روی `club_members` می‌نشیند و
-                    شمارشِ اعضای باشگاه از همان‌جا می‌آید. با نامِ دستی،
+                    شمارش اعضای باشگاه از همان‌جا می‌آید. با نام دستی،
                     آن عدد هیچ‌وقت درست نمی‌شد. */}
                 <ClubPicker label="باشگاه / مجموعه‌ی همکار" />
               </div>
@@ -310,19 +310,19 @@ export default function TechnicianDashboard() {
                   onChange={v => set('coverage', v)} />
               </div>
 
-              {/* ── نحوه و زمانِ ارائه‌ی خدمات ──
-                  ⚠️ هیچ‌کدام اجباری نیست و هیچ‌کدام پیش‌فرضِ «بله» ندارد:
+              {/* ── نحوه و زمان ارائه‌ی خدمات ──
+                  ⚠️ هیچ‌کدام اجباری نیست و هیچ‌کدام پیش‌فرض «بله» ندارد:
                   چیزی که متخصص نگفته، در صفحه‌ی عمومی ساخته نمی‌شود. */}
               {/* ⚠️ `fieldset`/`legend` نه `div`/`span`: دو چک‌باکس یک
-                  پرسشِ واحدند و صفحه‌خوان باید آن پرسش را پیش از هر
+                  پرسش واحدند و صفحه‌خوان باید آن پرسش را پیش از هر
                   گزینه بخواند. */}
               <fieldset className="sm:col-span-2">
                 <legend className="mb-2 block text-[12.5px] font-bold text-[#5B564B]">خدمات را چطور ارائه می‌دهید؟</legend>
                 <div className="flex flex-wrap gap-2">
-                  {([['onsite', 'در محلِ شما'], ['workshop', 'پذیرش در کارگاه']] as const).map(([k, label]) => (
-                    /* ⚠️ ورودی `sr-only` است، پس فوکوسِ کیبورد روی چیزی
+                  {([['onsite', 'در محل شما'], ['workshop', 'پذیرش در کارگاه']] as const).map(([k, label]) => (
+                    /* ⚠️ ورودی `sr-only` است، پس فوکوس کیبورد روی چیزی
                        می‌نشیند که دیده نمی‌شود. حلقه باید روی همین
-                       برچسب بیفتد وگرنه کاربرِ کیبورد گم می‌شود. */
+                       برچسب بیفتد وگرنه کاربر کیبورد گم می‌شود. */
                     <label key={k}
                       className={`inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-xl border px-3 text-[13px] font-bold transition has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-gold-deep ${form[k] ? 'border-gold/[.55] bg-gold/[.09] text-[#2B2822]' : 'border-[#E7E2D6] bg-white text-[#5B564B]'}`}>
                       <input type="checkbox" className="sr-only" checked={form[k]}
@@ -344,7 +344,7 @@ export default function TechnicianDashboard() {
                   onChange={e => set('hours', e.target.value)}
                   placeholder="مثال: شنبه تا چهارشنبه، ۱۰ تا ۲۰ — پنجشنبه تا ۱۴" />
                 <p id="tech-hours-help" className="mt-1.5 text-[11.5px] leading-[1.9] text-[#6F6A5C]">
-                  خالی بگذارید اگر ساعتِ ثابتی ندارید؛ در این حالت اصلاً نمایش داده نمی‌شود.
+                  خالی بگذارید اگر ساعت ثابتی ندارید؛ در این حالت اصلا نمایش داده نمی‌شود.
                 </p>
               </div>
               <div className="sm:col-span-2">
@@ -359,13 +359,13 @@ export default function TechnicianDashboard() {
           </section>
 
           {/* ═══ خدمات ═══
-              ⚠️ همان کاتالوگی که در پروفایلِ عمومی دیده می‌شود، فقط
-              قابلِ انتخاب. هر دو از `lib/tech-services` می‌خوانند، پس
+              ⚠️ همان کاتالوگی که در پروفایل عمومی دیده می‌شود، فقط
+              قابل انتخاب. هر دو از `lib/tech-services` می‌خوانند، پس
               نمی‌توانند از هم جدا بیفتند. */}
           <section className={CARD}>
             <h2 className="mb-1 text-[14.5px] font-bold">خدمات فنی من *</h2>
             <p className="mb-4 text-[12.5px] leading-[1.9] text-[#6F6A5C]">
-              فقط چیزهایی را انتخاب کنید که واقعاً انجام می‌دهید؛ همین‌ها در صفحه‌ی
+              فقط چیزهایی را انتخاب کنید که واقعا انجام می‌دهید؛ همین‌ها در صفحه‌ی
               عمومی شما دیده می‌شوند.
             </p>
             <ServicePicker
@@ -414,14 +414,14 @@ export default function TechnicianDashboard() {
               <input className={INPUT} value={prj.title} onChange={e => setPrj(p => ({ ...p, title: e.target.value }))} placeholder="عنوان پروژه — مثال: بازسازی میز اسنوکر" />
               <Select
                 value={prj.service} ariaLabel="نوع خدمات" placeholder="نوع خدمات…"
-                /* از همان کاتالوگِ واحد، نه فهرستِ دومِ هاردکد */
+                /* از همان کاتالوگ واحد، نه فهرست دوم هاردکد */
                 options={ALL_TECH_SERVICES.map(s => ({ value: s.title, label: s.title }))}
                 onChange={v => setPrj(p => ({ ...p, service: v as TechService }))} />
-              {/* ⚠️ ورودیِ متنیِ آزاد بود. قاعده‌ی پروژه: هرجا شهر از
+              {/* ⚠️ ورودی متنی آزاد بود. قاعده‌ی پروژه: هرجا شهر از
                   کاربر گرفته می‌شود باید `ProvinceCitySelect` باشد تا
-                  املا یکی بماند — وگرنه «تهران» و «تهرا ن» دو شهرِ
-                  متفاوت می‌شوند و فیلترِ دایرکتوری آن نمونه‌کار را
-                  پیدا نمی‌کند. خالی‌بودن مجاز است: شهرِ پروفایل
+                  املا یکی بماند — وگرنه «تهران» و «تهرا ن» دو شهر
+                  متفاوت می‌شوند و فیلتر دایرکتوری آن نمونه‌کار را
+                  پیدا نمی‌کند. خالی‌بودن مجاز است: شهر پروفایل
                   پیش‌فرض می‌شود. */}
               <div className="sm:col-span-2">
                 <ProvinceCitySelect
@@ -479,7 +479,7 @@ export default function TechnicianDashboard() {
               )
             })}
 
-            {/* عکس‌های بدونِ آلبوم — در صفحه‌ی عمومی تبِ «تصاویر» هستند */}
+            {/* عکس‌های بدون آلبوم — در صفحه‌ی عمومی تب «تصاویر» هستند */}
             {form.gallery.some(g => !(g.album ?? '').trim()) && (
               <div className="mb-3 rounded-xl border border-[#EFEBE1] bg-[#FAFAF7] p-3">
                 <div className="mb-2 text-[13px] font-bold">بدون آلبوم</div>

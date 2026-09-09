@@ -1,15 +1,15 @@
 'use client'
 
 /* ─────────────────────────────────────────────────────────────
-   جزئیاتِ یک مورد برای تصمیمِ تأیید/رد.
+   جزئیات یک مورد برای تصمیم تأیید/رد.
 
    تصمیم‌گرفتن درباره‌ی چیزی که دیده نمی‌شود تأیید نیست. این کامپوننت
-   هر چیزی را که کاربر ثبت کرده نشان می‌دهد، به‌علاوه‌ی هویتِ حسابش —
+   هر چیزی را که کاربر ثبت کرده نشان می‌دهد، به‌علاوه‌ی هویت حسابش —
    تا بشود دید آنچه ادعا شده با آنچه ثبت شده می‌خواند یا نه.
 
-   برچسبِ فارسی برای کلیدهای شناخته‌شده هست؛ کلیدِ ناشناخته هم نمایش
-   داده می‌شود، فقط با نامِ خودش. عمداً: پنهان‌کردنِ فیلدی که برچسب
-   ندارد یعنی روزی فیلدِ تازه‌ای اضافه می‌شود و ادمین هرگز نمی‌بیندش.
+   برچسب فارسی برای کلیدهای شناخته‌شده هست؛ کلید ناشناخته هم نمایش
+   داده می‌شود، فقط با نام خودش. عمدا: پنهان‌کردن فیلدی که برچسب
+   ندارد یعنی روزی فیلد تازه‌ای اضافه می‌شود و ادمین هرگز نمی‌بیندش.
    ───────────────────────────────────────────────────────────── */
 
 import { useEffect, useState } from 'react'
@@ -60,8 +60,8 @@ const LABEL: Record<string, string> = {
   workHours: 'ساعات کاری', workDays: 'روزهای کاری',
 
   /* ── ستون‌هایی که هنوز انگلیسی روی صفحه می‌نشستند ──
-     هرکدام از این‌ها یک‌بار به‌صورتِ `storyMediaUrl` یا `albums` در
-     پنل دیده شد. فهرست باید کاملِ ستون‌های واقعی باشد، وگرنه هر ستونِ
+     هرکدام از این‌ها یک‌بار به‌صورت `storyMediaUrl` یا `albums` در
+     پنل دیده شد. فهرست باید کامل ستون‌های واقعی باشد، وگرنه هر ستون
      تازه‌ای دوباره خام ظاهر می‌شود. */
   storyMediaUrl: 'استوری', storyText: 'متن استوری',
   storyType: 'نوع استوری', storyExpiresAt: 'انقضای استوری',
@@ -83,21 +83,21 @@ const LABEL: Record<string, string> = {
   nationalId: 'کد ملی', national_id: 'کد ملی', firstName: 'نام', lastName: 'نام خانوادگی',
   primaryRole: 'نقش اصلی', secondaryRoles: 'نقش‌های دیگر',
   smsOptOut: 'انصراف از پیامک', memberSince: 'عضو از',
-  /* متخصصِ خدماتِ فنی */
-  onsite: 'خدمت در محلِ مشتری', workshop: 'پذیرش در کارگاه', hours: 'ساعت کاری',
+  /* متخصص خدمات فنی */
+  onsite: 'خدمت در محل مشتری', workshop: 'پذیرش در کارگاه', hours: 'ساعت کاری',
 }
 
-/* ── فیلدهایی که مقدارشان نشانیِ فایل است ──
-   نشانیِ کاملِ Supabase حدودِ ۱۲۰ نویسه است و در جدولِ دوستونی کلِ
-   ردیف را می‌بلعد — بدونِ اینکه ادمین بتواند کاری با آن بکند. آنچه
-   واقعاً می‌خواهد بداند این است که «هست یا نیست». */
+/* ── فیلدهایی که مقدارشان نشانی فایل است ──
+   نشانی کامل Supabase حدود ۱۲۰ نویسه است و در جدول دوستونی کل
+   ردیف را می‌بلعد — بدون اینکه ادمین بتواند کاری با آن بکند. آنچه
+   واقعا می‌خواهد بداند این است که «هست یا نیست». */
 const MEDIA_URL_KEYS = new Set([
   'storyMediaUrl', 'logo', 'avatar', 'photo', 'cover', 'image',
   'licenseDocumentUrl', 'certificate', 'doc_url',
 ])
 
 /* ── فیلدهایی که فهرست‌اند ──
-   ادمین از دیدنِ ده نشانیِ عکس چیزی دستگیرش نمی‌شود؛ تعداد را
+   ادمین از دیدن ده نشانی عکس چیزی دستگیرش نمی‌شود؛ تعداد را
    می‌خواهد. */
 const COUNT_KEYS = new Set([
   'albums', 'images', 'gallery', 'videos', 'products', 'coaches',
@@ -106,7 +106,7 @@ const COUNT_KEYS = new Set([
 
 const faLabel = (k: string) => LABEL[k] ?? k
 
-/* شمارشِ عناصر — آلبوم علاوه بر تعدادِ خودش، مجموعِ عکس‌هایش را هم دارد */
+/* شمارش عناصر — آلبوم علاوه بر تعداد خودش، مجموع عکس‌هایش را هم دارد */
 function countOf(k: string, v: unknown): string {
   if (!Array.isArray(v)) return v ? 'دارد' : '—'
   if (!v.length) return '—'
@@ -119,8 +119,8 @@ function countOf(k: string, v: unknown): string {
   return `${n} مورد`
 }
 
-/* ── مقدارهایی که خودشان کدِ انگلیسی‌اند ──
-   برچسبِ فارسی وقتی کافی است که مقدارش هم فارسی باشد؛ «وضعیت تأیید:
+/* ── مقدارهایی که خودشان کد انگلیسی‌اند ──
+   برچسب فارسی وقتی کافی است که مقدارش هم فارسی باشد؛ «وضعیت تأیید:
    pending» هنوز نصفه‌انگلیسی است. */
 const VALUE: Record<string, string> = {
   pending: 'در انتظار', approved: 'تأیید شده', verified: 'تأیید شده',
@@ -134,7 +134,7 @@ const VALUE: Record<string, string> = {
   manufacturer: 'تولیدکننده', technician: 'متخصص فنی', player: 'بازیکن',
 }
 
-/* نشانیِ فایل — هر کلیدی که در فهرست نباشد هم نباید نشانیِ صدنویسه‌ای
+/* نشانی فایل — هر کلیدی که در فهرست نباشد هم نباید نشانی صدنویسه‌ای
    روی جدول بریزد. */
 const isUrl = (s: string) => /^(https?:)?\/\//i.test(s) || /^[\w./-]+\/[\w.-]+\.(jpe?g|png|webp|gif|mp4|pdf)$/i.test(s)
 
@@ -156,7 +156,7 @@ function show(v: unknown): string {
   const s = String(v)
   if (/^\d{4}-\d{2}-\d{2}T/.test(s)) return faDateTime(s)
   if (VALUE[s]) return VALUE[s]
-  /* سدِ آخر برای ستون‌های تازه‌ای که هنوز در فهرست نیستند */
+  /* سد آخر برای ستون‌های تازه‌ای که هنوز در فهرست نیستند */
   if (isUrl(s)) return 'دارد'
   return toFaDigits(s)
 }
@@ -189,9 +189,9 @@ export default function ReviewDetails({ type, id }: { type: ReviewType; id: stri
   const [docBusy, setDocBusy] = useState(false)
   const [docErr, setDocErr] = useState('')
 
-  /* ── بازکردنِ مدرک ──
-     مدرکِ باشگاه در باکتِ خصوصی است و لینکِ مستقیم ندارد؛ باید از
-     مسیرِ مجوزدار یک لینکِ امضاشده‌ی کوتاه‌عمر گرفت. پنجره **پیش از**
+  /* ── بازکردن مدرک ──
+     مدرک باشگاه در باکت خصوصی است و لینک مستقیم ندارد؛ باید از
+     مسیر مجوزدار یک لینک امضاشده‌ی کوتاه‌عمر گرفت. پنجره **پیش از**
      await باز می‌شود، وگرنه مرورگر آن را pop-up ناخواسته می‌شمارد و
      می‌بندد. */
   const openDoc = async () => {
@@ -219,7 +219,7 @@ export default function ReviewDetails({ type, id }: { type: ReviewType; id: stri
       const j = await r.json().catch(() => ({}))
       const d = (j?.data ?? {}) as Record<string, unknown>
       /* آنچه استعلام برمی‌گرداند باید دیده شود، نه فقط «تأیید شد» —
-         ادمین باید بتواند با تصویرِ جواز بسنجدش. */
+         ادمین باید بتواند با تصویر جواز بسنجدش. */
       const rows: [string, string][] = []
       for (const [k, label] of [
         ['name', 'نام دارنده'], ['nationalCode', 'کد ملی'], ['jobTitle', 'صنف'],
@@ -279,8 +279,8 @@ export default function ReviewDetails({ type, id }: { type: ReviewType; id: stri
   return (
     <div dir="rtl" style={{ display: 'flex', flexDirection: 'column', gap: 14, fontFamily: 'var(--font-base)' }}>
 
-      {/* ── هویتِ صاحبِ حساب ──
-          مهم‌ترین بخش: تصمیم درباره‌ی یک پروفایل بدونِ دانستنِ اینکه
+      {/* ── هویت صاحب حساب ──
+          مهم‌ترین بخش: تصمیم درباره‌ی یک پروفایل بدون دانستن اینکه
           پشتش چه کسی است، بی‌معنی است. */}
       {o ? (
         <Box title="صاحب حساب">
@@ -297,7 +297,7 @@ export default function ReviewDetails({ type, id }: { type: ReviewType; id: stri
             <F k="تاریخ ثبت‌نام" v={o.createdAt ? faDateTime(String(o.createdAt)) : '—'} />
           </Grid>
 
-          {/* احرازها — چیزی که تشخیصِ حسابِ واقعی از الکی را ممکن می‌کند */}
+          {/* احرازها — چیزی که تشخیص حساب واقعی از الکی را ممکن می‌کند */}
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 11 }}>
             <Pill ok={o.phoneVerified === true} on="موبایل تأییدشده" off="موبایل تأیید نشده" />
             <Pill ok={o.nationalIdVerified === true} on="کد ملی تأییدشده" off="کد ملی تأیید نشده" />
@@ -306,7 +306,7 @@ export default function ReviewDetails({ type, id }: { type: ReviewType; id: stri
       ) : (
         <Box title="صاحب حساب">
           <p style={{ fontSize: 12.5, color: RED, margin: 0, lineHeight: 1.9 }}>
-            حسابِ صاحبِ این مورد پیدا نشد — ممکن است کاربر حذف شده باشد.
+            حساب صاحب این مورد پیدا نشد — ممکن است کاربر حذف شده باشد.
           </p>
         </Box>
       )}
@@ -326,7 +326,7 @@ export default function ReviewDetails({ type, id }: { type: ReviewType; id: stri
           </button>
         ) : (
           <p style={{ fontSize: 12.5, color: MUT, margin: 0, lineHeight: 1.9 }}>
-            مدرکی بارگذاری نشده. <span style={{ color: SEC }}>تأیید همچنان ممکن است — فقط نشانِ تأیید داده نمی‌شود.</span>
+            مدرکی بارگذاری نشده. <span style={{ color: SEC }}>تأیید همچنان ممکن است — فقط نشان تأیید داده نمی‌شود.</span>
           </p>
         )}
         {docErr ? (
@@ -334,10 +334,10 @@ export default function ReviewDetails({ type, id }: { type: ReviewType; id: stri
         ) : null}
 
         {/* ── استعلام ──
-            پیش‌تر خودِ صاحبِ کسب‌وکار شماره را وارد می‌کرد و استعلام
-            می‌گرفت، و نتیجه‌اش تیکِ تأیید می‌داد — یعنی تأییدِ یک
-            کسب‌وکار به ورودیِ خودش وابسته بود. حالا ادمین شماره را از
-            روی تصویرِ جواز می‌خواند و خودش استعلام می‌گیرد. */}
+            پیش‌تر خود صاحب کسب‌وکار شماره را وارد می‌کرد و استعلام
+            می‌گرفت، و نتیجه‌اش تیک تأیید می‌داد — یعنی تأیید یک
+            کسب‌وکار به ورودی خودش وابسته بود. حالا ادمین شماره را از
+            روی تصویر جواز می‌خواند و خودش استعلام می‌گیرد. */}
         {type !== 'role' ? (
           <div style={{ marginTop: 13, paddingTop: 12, borderTop: `1px solid ${LINE}` }}>
             <div style={{ fontSize: 11.5, fontWeight: 800, color: SEC, marginBottom: 7 }}>
@@ -396,7 +396,7 @@ export default function ReviewDetails({ type, id }: { type: ReviewType; id: stri
         ) : null}
       </Box>
 
-      {/* ── آمارِ باشگاه ── */}
+      {/* ── آمار باشگاه ── */}
       {data.counts ? (
         <Box title="وضعیت باشگاه">
           <Grid>
@@ -405,7 +405,7 @@ export default function ReviewDetails({ type, id }: { type: ReviewType; id: stri
           </Grid>
           {(data.counts.tables ?? 0) === 0 ? (
             <p style={{ fontSize: 11.5, color: '#B7791F', margin: '9px 0 0', lineHeight: 1.9 }}>
-              هنوز میزی ثبت نشده — باشگاهِ بدون میز قابل رزرو نیست.
+              هنوز میزی ثبت نشده — باشگاه بدون میز قابل رزرو نیست.
             </p>
           ) : null}
         </Box>
@@ -423,12 +423,12 @@ export default function ReviewDetails({ type, id }: { type: ReviewType; id: stri
               .filter(([, v]) => v !== null && v !== undefined && v !== '' && !(Array.isArray(v) && !v.length))
               .map(([k, v]) => (
                 <F key={k} k={faLabel(k)} v={
-                  /* این دو کدِ انگلیسی ذخیره می‌شوند، نه متن — بدونِ
+                  /* این دو کد انگلیسی ذخیره می‌شوند، نه متن — بدون
                      ترجمه، «info_incomplete» روی صفحه می‌نشست. */
                   k === 'rejectionReason' ? rejectLabel(v)
                     : k === 'birthDate' || k === 'birth_date' ? faBirthDate(v as string)
-                      /* نشانیِ فایل و فهرست‌ها خلاصه می‌شوند — نشانیِ
-                         کامل کلِ ردیف را می‌گرفت و هیچ کمکی نمی‌کرد. */
+                      /* نشانی فایل و فهرست‌ها خلاصه می‌شوند — نشانی
+                         کامل کل ردیف را می‌گرفت و هیچ کمکی نمی‌کرد. */
                       : MEDIA_URL_KEYS.has(k) ? (v ? 'دارد' : '—')
                         : COUNT_KEYS.has(k) ? countOf(k, v)
                           : show(v)

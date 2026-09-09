@@ -3,7 +3,7 @@
 
    جایگاهی که ادمین روی حالت «رایگان» گذاشته، کمپین ندارد؛ محتوایش
    مستقیم از داده‌ی واقعی سایت می‌آید: تازه‌ترین محصولات، باشگاه‌ها و
-   فروشگاه‌ها. خروجی دقیقاً همان شکل EntitySnapshot است که مسیر
+   فروشگاه‌ها. خروجی دقیقا همان شکل EntitySnapshot است که مسیر
    کمپینی می‌سازد، پس کلاینت فرقی بین «رایگان» و «پولی» نمی‌بیند و
    تغییر حالت از پنل ادمین هیچ تغییری در ظاهر نمی‌دهد.
    ───────────────────────────────────────────────────────────── */
@@ -28,7 +28,7 @@ async function freeProducts(limit: number): Promise<EntitySnapshot[]> {
   if (error || !data) return []
 
   return (data as Record<string, unknown>[]).map(r => {
-    /* همان قراردادِ `resolve.ts`: `price` فهرست، `discountPrice` پرداختی */
+    /* همان قرارداد `resolve.ts`: `price` فهرست، `discountPrice` پرداختی */
     const listed = n(r.price)
     const paid = n(r.discountPrice)
     const hasDisc = paid > 0 && paid < listed
@@ -40,7 +40,7 @@ async function freeProducts(limit: number): Promise<EntitySnapshot[]> {
       title: s(r.title, 'محصول'),
       image: imgs[0] || '/images/shop/cue_billiard_2.webp',
       /* ── برند **و مدل** ──
-         کارتِ سکشنِ «بیلیارد بازار» از همین اسنپ‌شات ساخته می‌شود و تا
+         کارت سکشن «بیلیارد بازار» از همین اسنپ‌شات ساخته می‌شود و تا
          امروز فقط برند را حمل می‌کرد؛ «Hunter III» هیچ‌جای صفحه‌ی اصلی
          دیده نمی‌شد. `productTitleParts` تکرار با عنوان را خودش حذف
          می‌کند، پس هر دو خام می‌روند. */
@@ -83,7 +83,7 @@ async function freeClubs(limit: number): Promise<EntitySnapshot[]> {
   return rows.slice(0, limit).map(r => {
     const imgs = Array.isArray(r.images) ? r.images as string[] : []
     /* تفکیک واقعی میزها (میز VIP هم از جنس همان نوع است).
-       ایرهاکی عمداً بیرون است: میز بیلیارد نیست و کارت هم فقط سه
+       ایرهاکی عمدا بیرون است: میز بیلیارد نیست و کارت هم فقط سه
        نوع اسنوکر/پاکت/هی‌بال را نشان می‌دهد. */
     const snooker = n(r.snookerTables) + n(r.vipSnookerTables)
     const pocket = n(r.pocketTables) + n(r.vipPocketTables)
@@ -119,8 +119,8 @@ async function freeSellers(limit: number): Promise<EntitySnapshot[]> {
     return {
       entityType: 'seller' as const, ref: s(r.slug),
       title: s(d.title, 'فروشگاه'),
-      /* خالی می‌ماند تا کارت پوسترِ پیش‌فرضِ خودش را بسازد. نشانیِ
-         قبلی (`store1.jpg`) اصلاً روی دیسک نبود ⇒ ۴۰۴ ⇒ کارت
+      /* خالی می‌ماند تا کارت پوستر پیش‌فرض خودش را بسازد. نشانی
+         قبلی (`store1.jpg`) اصلا روی دیسک نبود ⇒ ۴۰۴ ⇒ کارت
          بی‌عکس. */
       image: s(d.logo) || (Array.isArray(d.banners) ? s((d.banners as string[])[0]) : ''),
       subtitle: s(d.city),
@@ -132,11 +132,11 @@ async function freeSellers(limit: number): Promise<EntitySnapshot[]> {
   })
 }
 
-/* ── محتوای اسپانسری در حالتِ رایگان ──
-   جایگاهِ اسپانسری هم مثل بقیه می‌تواند «رایگان» باشد؛ آن‌وقت به‌جای
-   کمپین، تازه‌ترین‌های واقعیِ سایت را نشان می‌دهد. بدونِ این دو تابع،
+/* ── محتوای اسپانسری در حالت رایگان ──
+   جایگاه اسپانسری هم مثل بقیه می‌تواند «رایگان» باشد؛ آن‌وقت به‌جای
+   کمپین، تازه‌ترین‌های واقعی سایت را نشان می‌دهد. بدون این دو تابع،
    `freeContent` برای مسابقه و ویدیو به شاخه‌ی فروشگاه‌ها می‌افتاد و
-   یک جایگاهِ «مسابقات» بی‌صدا فروشگاه نشان می‌داد. */
+   یک جایگاه «مسابقات» بی‌صدا فروشگاه نشان می‌داد. */
 async function freeTournaments(limit: number): Promise<EntitySnapshot[]> {
   const { data, error } = await sb().from('tournaments')
     .select('id,slug,title,city,cover_url,status,starts_at,entry_fee')
@@ -186,7 +186,7 @@ export async function freeContent(entityType: EntityType, limit: number): Promis
     return await freeSellers(take)
   } catch (e) {
     /* خطا را بی‌صدا رد نکن: بدون لاگ، یک کوئری خراب دائمی از بیرون
-       دقیقاً شبیه «محتوایی نداریم» دیده می‌شود */
+       دقیقا شبیه «محتوایی نداریم» دیده می‌شود */
     console.error('freeContent failed', entityType, e)
     return []
   }

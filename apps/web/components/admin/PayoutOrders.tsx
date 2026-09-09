@@ -4,16 +4,16 @@
    «دستور پرداخت» — الان چقدر، به چه کسی، به کدام شبا.
 
    ── چرا ساخته شد ──
-   همه‌ی این داده‌ها از قبل در پنل بود، ولی در چهار تبِ جدا. برای یک
-   واریزِ ساده باید بین «موجودی باشگاه‌ها» (مبلغ دارد، شبا ندارد)،
-   «تسویه‌ها» (شبا دارد ولی فقط بعد از ساختنِ تسویه) و «بازپرداخت‌ها»
+   همه‌ی این داده‌ها از قبل در پنل بود، ولی در چهار تب جدا. برای یک
+   واریز ساده باید بین «موجودی باشگاه‌ها» (مبلغ دارد، شبا ندارد)،
+   «تسویه‌ها» (شبا دارد ولی فقط بعد از ساختن تسویه) و «بازپرداخت‌ها»
    (مبلغ دارد، مقصد ندارد) رفت‌وبرگشت می‌شد.
 
-   این‌جا یک فهرستِ کارِ اجرایی است: هر ردیف همه‌ی چیزی را دارد که برای
-   نشستن پشتِ بانک لازم است، و بعد از واریز همان‌جا ثبت می‌شود.
+   این‌جا یک فهرست کار اجرایی است: هر ردیف همه‌ی چیزی را دارد که برای
+   نشستن پشت بانک لازم است، و بعد از واریز همان‌جا ثبت می‌شود.
 
-   ردیفِ مسدود (بدونِ شبا یا استعلام‌نشده) پنهان نمی‌شود؛ با علتش
-   می‌ماند — بدهیِ نامرئی همان چیزی است که ماه‌ها بعد می‌ترکد.
+   ردیف مسدود (بدون شبا یا استعلام‌نشده) پنهان نمی‌شود؛ با علتش
+   می‌ماند — بدهی نامرئی همان چیزی است که ماه‌ها بعد می‌ترکد.
    ───────────────────────────────────────────────────────────── */
 
 import { useCallback, useEffect, useState } from 'react'
@@ -29,7 +29,7 @@ const faDate = (iso?: string) => {
   if (!iso) return '—'
   try { return new Intl.DateTimeFormat('fa-IR', { day: 'numeric', month: 'long' }).format(new Date(iso)) } catch { return '—' }
 }
-/* شبا در گروه‌های چهارتایی خواناتر است — موقعِ تایپ در بانک کمتر اشتباه می‌شود */
+/* شبا در گروه‌های چهارتایی خواناتر است — موقع تایپ در بانک کمتر اشتباه می‌شود */
 const prettyIban = (v: string) => {
   const s = String(v || '').replace(/\s/g, '').toUpperCase()
   return s ? (s.startsWith('IR') ? s : `IR${s}`).replace(/(.{4})/g, '$1 ').trim() : ''
@@ -50,7 +50,7 @@ interface UserRow {
   verified: boolean; reason: string
   status: string; createdAt: string; blocked: string | null; warn: string | null
 }
-/* بازپرداختِ تبلیغات — در جدولِ `refunds` نیست و مسیرِ جدا دارد */
+/* بازپرداخت تبلیغات — در جدول `refunds` نیست و مسیر جدا دارد */
 interface AdRow {
   id: string; userName: string; holder: string; phone: string
   amount: number; placement: string; reason: string; createdAt: string
@@ -68,8 +68,8 @@ export default function PayoutOrders({ onChanged }: { onChanged?: () => void }) 
   const [d, setD] = useState<Payload | null>(null)
   const [err, setErr] = useState('')
   const [busy, setBusy] = useState('')
-  /* `kind` تعیین می‌کند پس از گرفتنِ شماره‌ی پیگیری کدام مسیر صدا زده
-     شود — تسویه‌ی باشگاه، بازپرداختِ رزرو، یا بازپرداختِ تبلیغات. */
+  /* `kind` تعیین می‌کند پس از گرفتن شماره‌ی پیگیری کدام مسیر صدا زده
+     شود — تسویه‌ی باشگاه، بازپرداخت رزرو، یا بازپرداخت تبلیغات. */
   const [modal, setModal] = useState<
     { id: string; amount: number; to: string; kind: 'settlement' | 'refund' | 'ad' } | null
   >(null)
@@ -107,7 +107,7 @@ export default function PayoutOrders({ onChanged }: { onChanged?: () => void }) 
 
   return (
     <div>
-      {/* ── جمعِ کل ── */}
+      {/* ── جمع کل ── */}
       <div style={{
         display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(190px,1fr))', gap: 12, marginBottom: 18,
       }}>
@@ -117,7 +117,7 @@ export default function PayoutOrders({ onChanged }: { onChanged?: () => void }) 
       </div>
 
       {nothing && (
-        <Note tone="ok">همه‌چیز تسویه است — هیچ پرداختِ باز‌ی وجود ندارد.</Note>
+        <Note tone="ok">همه‌چیز تسویه است — هیچ پرداخت باز‌ی وجود ندارد.</Note>
       )}
 
       {/* ── به باشگاه‌ها ── */}
@@ -208,10 +208,10 @@ export default function PayoutOrders({ onChanged }: { onChanged?: () => void }) 
                 </>
               )}
               {/* ── دکمه‌ای که تا امروز نبود ──
-                  تابعِ `bh_complete_refund` در دیتابیس بود ولی هیچ مسیری
+                  تابع `bh_complete_refund` در دیتابیس بود ولی هیچ مسیری
                   صدایش نمی‌زد. یعنی ادمین پول را واریز می‌کرد و راهی
                   نداشت به سیستم بگوید انجام شد — بازپرداخت تا ابد باز
-                  می‌ماند و خطرِ پرداختِ دوباره داشت. */}
+                  می‌ماند و خطر پرداخت دوباره داشت. */}
               <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center', marginTop: 12 }}>
                 <button disabled={!!u.blocked || busy === u.id}
                   onClick={() => setModal({ id: u.id, amount: u.amount, to: u.userName, kind: 'refund' })}
@@ -224,7 +224,7 @@ export default function PayoutOrders({ onChanged }: { onChanged?: () => void }) 
       )}
 
       {/* ── به آگهی‌دهندگان ──
-          سفارشِ تبلیغِ بازپرداخت‌شده در جدولِ `refunds` نیست و تا امروز
+          سفارش تبلیغ بازپرداخت‌شده در جدول `refunds` نیست و تا امروز
           هیچ‌جا فهرست نمی‌شد: بدهی در دفتر ثبت می‌شد و هیچ صفحه‌ای
           یادآوری‌اش نمی‌کرد. */}
       {ads.length > 0 && (
@@ -259,9 +259,9 @@ export default function PayoutOrders({ onChanged }: { onChanged?: () => void }) 
       {modal && (
         <RefModal amount={modal.amount} to={modal.to} onClose={() => setModal(null)}
           onSubmit={async ref => {
-            /* هر سه یک پنجره دارند ولی سه مسیرِ متفاوت — تسویه تابعِ
-               اتمیکِ خودش را دارد، بازپرداختِ رزرو `bh_complete_refund`،
-               و بازپرداختِ تبلیغات فقط دو ستونِ مهاجرتِ ۰۶۷. */
+            /* هر سه یک پنجره دارند ولی سه مسیر متفاوت — تسویه تابع
+               اتمیک خودش را دارد، بازپرداخت رزرو `bh_complete_refund`،
+               و بازپرداخت تبلیغات فقط دو ستون مهاجرت ۰۶۷. */
             if (modal.kind === 'settlement') {
               await act({ action: 'complete', id: modal.id, reference: ref }, modal.id)
             } else {
@@ -350,13 +350,13 @@ function Head({ name, sub, amount, badge }: {
   )
 }
 
-/* مقصدِ واریز — شبا/کارت با دکمه‌ی کپی، چون تایپِ دستی‌اش خطاخیز است */
+/* مقصد واریز — شبا/کارت با دکمه‌ی کپی، چون تایپ دستی‌اش خطاخیز است */
 function Dest({ rows, copyLabel, copyValue, raw }: {
   rows: [string, string][]; copyLabel: string; copyValue: string; raw: string
 }) {
   const [done, setDone] = useState(false)
-  /* بدونِ فاصله کپی می‌شود: فرمِ بانک فاصله را نمی‌پذیرد. نمایشِ
-     گروه‌بندی‌شده فقط برای خواندنِ آدم است. */
+  /* بدون فاصله کپی می‌شود: فرم بانک فاصله را نمی‌پذیرد. نمایش
+     گروه‌بندی‌شده فقط برای خواندن آدم است. */
   const copy = async () => {
     if (!raw) return
     try {
@@ -409,7 +409,7 @@ function Blocked({ text }: { text: string }) {
   )
 }
 
-/* هشدار — برخلافِ `Blocked` جلوی پرداخت را نمی‌گیرد، فقط می‌گوید
+/* هشدار — برخلاف `Blocked` جلوی پرداخت را نمی‌گیرد، فقط می‌گوید
    پیش از واریز یک نگاه بیندازید. */
 function Warn({ text }: { text: string }) {
   return (
@@ -451,16 +451,16 @@ function btn(enabled: boolean, primary = false): React.CSSProperties {
   }
 }
 
-/* شماره‌ی پیگیریِ بانک اجباری است: بدونش، «واریز شد» فقط یک ادعاست و
-   موقعِ اختلاف هیچ ردی برای دنبال‌کردن نمی‌ماند.
+/* شماره‌ی پیگیری بانک اجباری است: بدونش، «واریز شد» فقط یک ادعاست و
+   موقع اختلاف هیچ ردی برای دنبال‌کردن نمی‌ماند.
 
-   ⚠️ این عدد **استعلام نمی‌شود** — هیچ سرویسی در دسترسِ ما نیست که
-   بپرسد یک شماره‌ی پیگیری واقعاً متعلق به انتقالی انجام‌شده است. پس
+   ⚠️ این عدد **استعلام نمی‌شود** — هیچ سرویسی در دسترس ما نیست که
+   بپرسد یک شماره‌ی پیگیری واقعا متعلق به انتقالی انجام‌شده است. پس
    سند است نه اثبات، و همین صریح به ادمین گفته می‌شود؛ رابطی که
    وانمود کند تأیید شده، بدتر از رابطی است که راستش را بگوید.
 
-   دو کنترلِ واقعی سمتِ سرور است: قالب، و تکرارِ همان عدد روی
-   پرداختِ دیگر. */
+   دو کنترل واقعی سمت سرور است: قالب، و تکرار همان عدد روی
+   پرداخت دیگر. */
 function RefModal({ amount, to, onClose, onSubmit }: {
   amount: number; to: string; onClose: () => void; onSubmit: (ref: string) => void | Promise<void>
 }) {
@@ -483,11 +483,11 @@ function RefModal({ amount, to, onClose, onSubmit }: {
           شماره پیگیری بانک
         </label>
         <p style={{ fontSize: 11.5, color: MUT, margin: '0 0 8px', lineHeight: 1.9 }}>
-          از رسیدِ همان انتقال. این عدد استعلام نمی‌شود؛ به‌عنوان سندِ
-          واریز با نام و زمانِ شما ثبت می‌شود.
+          از رسید همان انتقال. این عدد استعلام نمی‌شود؛ به‌عنوان سند
+          واریز با نام و زمان شما ثبت می‌شود.
         </p>
         <input value={ref} onChange={e => setRef(e.target.value)} autoFocus
-          placeholder="مثلاً ۱۲۳۴۵۶۷۸"
+          placeholder="مثلا ۱۲۳۴۵۶۷۸"
           style={{
             width: '100%', boxSizing: 'border-box', border: `1px solid ${LINE}`, borderRadius: 10,
             padding: '10px 12px', fontSize: 14, fontFamily: 'inherit', color: INK,

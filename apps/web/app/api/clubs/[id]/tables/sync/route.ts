@@ -4,20 +4,20 @@ import { getSupabaseServer } from '@/lib/supabase-server';
 import { sessionFromRequest } from '@/lib/auth/session';
 import { BUCKET } from '@/lib/social-server';
 
-/* ── عکسِ میز از دیتابیس به Storage منتقل شد ──
+/* ── عکس میز از دیتابیس به Storage منتقل شد ──
 
    تا امروز `photoDataUrl` یک رشته‌ی base64 بود که تا ۴۰۰ هزار کاراکتر
    مستقیم در Postgres می‌نشست. یعنی برای هر میز تا ۴۰۰ کیلوبایت در
-   گران‌ترین جای ذخیره‌سازی، و کشیدنِ همان حجم در هر بار خواندنِ فهرستِ
+   گران‌ترین جای ذخیره‌سازی، و کشیدن همان حجم در هر بار خواندن فهرست
    میزها — حتی وقتی هیچ عکسی نمایش داده نمی‌شود.
 
-   با ده میز و هزار باشگاه این حدودِ چهار گیگابایت داخلِ دیتابیس بود.
+   با ده میز و هزار باشگاه این حدود چهار گیگابایت داخل دیتابیس بود.
 
    حالا بایت‌ها به همان باکتی می‌روند که بقیه‌ی عکس‌های باشگاه در آن
-   هستند و در دیتابیس فقط نشانیِ فایل می‌ماند. ستون دست‌نخورده ماند
-   (هنوز `photoDataUrl` نام دارد) تا کلاینت و صفحه‌ی رزرو بدونِ تغییر
+   هستند و در دیتابیس فقط نشانی فایل می‌ماند. ستون دست‌نخورده ماند
+   (هنوز `photoDataUrl` نام دارد) تا کلاینت و صفحه‌ی رزرو بدون تغییر
    کار کنند — چون هر دو فقط آن را در `src` می‌گذارند و برایشان فرقی
-   ندارد data-URL باشد یا نشانیِ https.
+   ندارد data-URL باشد یا نشانی https.
 
    رشته‌هایی که از قبل https هستند دست نمی‌خورند، پس ذخیره‌ی دوباره‌ی
    یک میز عکسش را دوباره آپلود نمی‌کند. */
@@ -29,7 +29,7 @@ const EXT: Record<string, string> = {
 };
 const MAX_TABLE_PHOTO = 2 * 1024 * 1024;   // ۲ مگابایت — کلاینت به ۹۰۰ پیکسل فشرده می‌کند
 
-/** data-URL → فایل در Storage. خروجی: نشانیِ عمومی، یا null اگر نشد. */
+/** data-URL → فایل در Storage. خروجی: نشانی عمومی، یا null اگر نشد. */
 async function offloadPhoto(value: unknown, clubId: string, idx: number): Promise<string | null> {
   const s = typeof value === 'string' ? value.trim() : '';
   if (!s) return null;
@@ -43,7 +43,7 @@ async function offloadPhoto(value: unknown, clubId: string, idx: number): Promis
   if (!bytes.length || bytes.length > MAX_TABLE_PHOTO) return null;
 
   const ext = EXT[m[1]!] ?? 'jpg';
-  /* نامِ فایل شاملِ زمان است تا عکسِ تازه، نسخه‌ی کش‌شده‌ی قبلی را
+  /* نام فایل شامل زمان است تا عکس تازه، نسخه‌ی کش‌شده‌ی قبلی را
      جای خودش نگذارد. */
   const path = `clubs/${clubId}/tables/${idx}-${Date.now().toString(36)}.${ext}`;
 
@@ -98,9 +98,9 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     vip_pocket: 'VIP پاکت', vipPocket: 'VIP پاکت', airHockey: 'ایرهاکی',
   };
 
-  /* عکس‌ها پیش از ساختِ ردیف‌ها و به‌صورت موازی به Storage می‌روند.
+  /* عکس‌ها پیش از ساخت ردیف‌ها و به‌صورت موازی به Storage می‌روند.
 
-     اگر داخلِ حلقه انجام می‌شد، هر میز یک رفت‌وبرگشتِ اضافه به Storage
+     اگر داخل حلقه انجام می‌شد، هر میز یک رفت‌وبرگشت اضافه به Storage
      می‌داشت و ذخیره‌ی ده میز ده برابر طول می‌کشید. */
   const photoUrls = await Promise.all(
     incoming.map((t, i) => offloadPhoto(t.photoDataUrl, clubId, i)),
@@ -117,7 +117,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     pricePerHour: Math.max(0, Math.min(50_000_000, Math.round(Number(t.pricePerHour) || 0))),
     morningDiscount: Math.max(0, Math.min(100, Math.round(Number(t.morningDiscount) || 0))),
     discountRules: Array.isArray(t.discountRules) && t.discountRules.length > 0 ? t.discountRules : null,
-    /* نشانیِ فایل، نه خودِ فایل — پیش از حلقه در `photoUrls` حل شده */
+    /* نشانی فایل، نه خود فایل — پیش از حلقه در `photoUrls` حل شده */
     photoDataUrl: photoUrls[i] ?? null,
     /* هزینه‌ی بازیکن اضافه در سطح میز. NULL معنادار است: یعنی «تنظیم
        باشگاه اعمال شود»، پس نبود مقدار نباید صفر ذخیره شود. */
@@ -126,8 +126,8 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       ? Math.max(0, Math.min(100, Math.round(Number(t.playerSurchargePercent)))) : null,
     playerSurchargeFrom: Number.isFinite(Number(t.playerSurchargeFrom))
       ? Math.max(1, Math.min(12, Math.round(Number(t.playerSurchargeFrom)))) : null,
-    /* بستنِ رزروِ همین میز — میز ثبت‌شده می‌ماند ولی در صفحه‌ی رزرو
-       دیده نمی‌شود. با isActive فرق دارد: آن یعنی میز اصلاً نیست و از
+    /* بستن رزرو همین میز — میز ثبت‌شده می‌ماند ولی در صفحه‌ی رزرو
+       دیده نمی‌شود. با isActive فرق دارد: آن یعنی میز اصلا نیست و از
        گزارش‌ها هم بیرون می‌رود. */
     reservationClosed: !!t.reservationClosed,
     isActive: true,
@@ -147,10 +147,10 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   const idMap: Record<string, string> = {};
   const keepIds: string[] = [];
 
-  /* ستونِ reservationClosed با مهاجرتِ ۰۳۶ می‌آید. تا وقتی اجرا نشده،
-     نبودنش نباید ذخیره‌ی *کلِ* میزها را بشکند — یعنی یک فیلدِ نو،
+  /* ستون reservationClosed با مهاجرت ۰۳۶ می‌آید. تا وقتی اجرا نشده،
+     نبودنش نباید ذخیره‌ی *کل* میزها را بشکند — یعنی یک فیلد نو،
      قابلیتی را که تا امروز کار می‌کرده از کار بیندازد. یک بار تشخیص
-     داده می‌شود و بقیه‌ی حلقه بدونِ آن ادامه می‌دهد. */
+     داده می‌شود و بقیه‌ی حلقه بدون آن ادامه می‌دهد. */
   let hasClosedColumn = true;
   const rowFor = (t: InTable, i: number) => {
     const r = row(t, i) as Record<string, unknown>;

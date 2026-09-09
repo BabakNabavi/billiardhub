@@ -23,16 +23,16 @@ interface AuthStore {
   _hydrated: boolean;
   /* ── چرا این جدا از `_hydrated` است ──
      `_hydrated` فقط می‌گوید «localStorage خوانده شد» — نه اینکه
-     نتیجه‌اش درست است. منبعِ حقیقتِ نشست کوکیِ httpOnly است و
+     نتیجه‌اش درست است. منبع حقیقت نشست کوکی httpOnly است و
      `SessionBridge` آن را از سرور می‌پرسد، ولی آن پرسش چند صد
      میلی‌ثانیه طول می‌کشد.
 
-     در آن فاصله، صفحه‌ای که فقط `_hydrated` را می‌بیند، کاربرِ
+     در آن فاصله، صفحه‌ای که فقط `_hydrated` را می‌بیند، کاربر
      واردشده را «مهمان» فرض می‌کند و «ابتدا وارد سایت شوید» نشان
      می‌دهد — بعد پیام خودش می‌رود. کاربر این را «گاهی می‌آید، گاهی
-     نه» تجربه می‌کند، که بدترین نوعِ باگ برای گزارش‌کردن است.
+     نه» تجربه می‌کند، که بدترین نوع باگ برای گزارش‌کردن است.
 
-     `authChecked` یعنی «سرور جواب داد». عمداً ذخیره نمی‌شود: هر بار
+     `authChecked` یعنی «سرور جواب داد». عمدا ذخیره نمی‌شود: هر بار
      بارگذاری باید از نو پرسیده شود. */
   authChecked: boolean;
   setAuth: (user: User, token: string) => void;
@@ -51,7 +51,7 @@ export const useAuthStore = create<AuthStore>()(
       _hydrated: false,
       authChecked: false,
       setAuth: (user, token) => set({ user, token }),
-      /* ورودِ موفق خودش یک تأییدِ سرور است */
+      /* ورود موفق خودش یک تأیید سرور است */
       login: (user, token) => set({ user, token, authChecked: true }),
       logout: () => set({ user: null, token: null, authChecked: true }),
       setHydrated: () => set({ _hydrated: true }),
@@ -63,7 +63,7 @@ export const useAuthStore = create<AuthStore>()(
     {
       name: 'auth-storage',
       /* توکن دیگر ذخیره نمی‌شود. نشست روی کوکی httpOnly است و
-         جاوااسکریپت نباید اصلاً به آن دسترسی داشته باشد. فقط اطلاعات
+         جاوااسکریپت نباید اصلا به آن دسترسی داشته باشد. فقط اطلاعات
          نمایشی کاربر (نام، نقش، آواتار) در localStorage می‌ماند. */
       partialize: (state) => ({ user: state.user }) as unknown as AuthStore,
       onRehydrateStorage: () => (state) => {

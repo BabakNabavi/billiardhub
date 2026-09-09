@@ -4,16 +4,16 @@ import { sb } from '@/lib/finance/db';
 import { actorOf, ownsClub, UNAUTHENTICATED, FORBIDDEN } from '@/lib/auth/ownership';
 import { bookingStartsAt } from '@/lib/finance/cancellation';
 
-/* رزروهای یک باشگاه — برای تبِ «رزروها»ی پنلِ باشگاه‌دار.
+/* رزروهای یک باشگاه — برای تب «رزروها»ی پنل باشگاه‌دار.
 
    این مسیر وجود نداشت. داشبورد به `/bookings/club/:id` درخواست می‌داد
-   که بازمانده‌ی بک‌اندِ NestJS بود و روی Next هرگز ساخته نشد؛ نتیجه‌اش
+   که بازمانده‌ی بک‌اند NestJS بود و روی Next هرگز ساخته نشد؛ نتیجه‌اش
    ۴۰۴ بود که در `.catch(() => {})` بی‌صدا بلعیده می‌شد. پس تب همیشه
    خالی می‌ماند و هیچ خطایی هم دیده نمی‌شد — حتی وقتی رزروهای واقعی در
    دیتابیس بودند.
 
-   وضعیت‌ها در دو ستون زندگی می‌کنند: `status` قدیمیِ کوچک‌حرف و
-   `booking_status` بزرگ‌حرفِ فاز مالی. خروجی هر دو را می‌دهد تا UI
+   وضعیت‌ها در دو ستون زندگی می‌کنند: `status` قدیمی کوچک‌حرف و
+   `booking_status` بزرگ‌حرف فاز مالی. خروجی هر دو را می‌دهد تا UI
    موجود دست‌نخورده کار کند. */
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ clubId: string }> }) {
@@ -32,15 +32,15 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ club
     return NextResponse.json([], { headers: { 'Cache-Control': 'no-store' } });
   }
 
-  /* ── رزروِ پرداخت‌نشده رزرو نیست ──
+  /* ── رزرو پرداخت‌نشده رزرو نیست ──
      تا امروز همه‌ی ردیف‌ها برمی‌گشتند، از جمله آن‌هایی که کاربر شروع
      کرده و به درگاه نرفته یا پرداختش نگرفته. باشگاه‌دار آن‌ها را در
      فهرست می‌دید و می‌توانست «تأیید» یا «لغو» بزند — یعنی رزروی را
      قطعی کند که هیچ پولی بابتش نیامده، یا رزروی را «لغو» کند که
-     اصلاً وجود نداشت.
+     اصلا وجود نداشت.
 
      این ردیف‌ها خودشان بعد از ده دقیقه منقضی می‌شوند و ساعتشان آزاد
-     می‌گردد؛ تا آن لحظه هم کارِ باشگاه‌دار نیستند.
+     می‌گردد؛ تا آن لحظه هم کار باشگاه‌دار نیستند.
 
      ردیف‌های قدیمی این ستون‌ها را ندارند و نباید ناپدید شوند، پس شرط
      فقط وقتی اعمال می‌شود که ستون مقداری داشته باشد. */
@@ -72,7 +72,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ club
     return {
       ...r,
       /* `status` قدیمی ممکن است خالی باشد؛ آن‌وقت از ستون تازه ساخته
-         می‌شود تا فیلترهای موجودِ UI بی‌اثر نشوند. */
+         می‌شود تا فیلترهای موجود UI بی‌اثر نشوند. */
       status: r.status ?? String(r.booking_status ?? '').toLowerCase() ?? null,
       user: u ? { firstName: u.firstName ?? '', lastName: u.lastName ?? '', phone: u.phone ?? '' } : null,
       tableNumber: t ? t.number : null,

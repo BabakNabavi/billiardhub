@@ -3,21 +3,21 @@ import { NextRequest, NextResponse } from 'next/server';
 import { sb, actorFromRequest } from '@/lib/finance/db';
 import { can } from '@/lib/admin/permissions';
 
-/* نمای کلیِ مالیِ پلتفرم — فقط ادمین.
-   ارقام از دفتر (منبعِ حقیقت) می‌آیند، نه از کَشِ موجودی.
+/* نمای کلی مالی پلتفرم — فقط ادمین.
+   ارقام از دفتر (منبع حقیقت) می‌آیند، نه از کش موجودی.
 
    دو چیزی که پیش‌تر غلط بود و این‌جا اصلاح شده:
 
    ۱) ردیف‌های `REVERSED` هم شمرده می‌شدند؛ یعنی درآمدی که باطل شده
       همچنان در گزارش می‌ماند. حالا همه‌جا `status='POSTED'` فیلتر است.
 
-   ۲) `Math.abs` روی کمیسیون نشانه‌ی همان باگِ علامتِ متناقض بود
-      (رزرو منفی، مسابقه مثبت). علامت حالا در سطحِ دیتابیس تضمین شده،
+   ۲) `Math.abs` روی کمیسیون نشانه‌ی همان باگ علامت متناقض بود
+      (رزرو منفی، مسابقه مثبت). علامت حالا در سطح دیتابیس تضمین شده،
       پس abs لازم نیست — و اگر روزی منفی دیدیم یعنی مشکلی هست که
       نباید پنهانش کرد.
 
-   «درآمدِ پلتفرم» عمداً با «پولِ دریافتی» یکی گرفته نمی‌شود: کاربر دو
-   میلیون می‌دهد ولی درآمدِ ما فقط کمیسیون و جریمه است. */
+   «درآمد پلتفرم» عمدا با «پول دریافتی» یکی گرفته نمی‌شود: کاربر دو
+   میلیون می‌دهد ولی درآمد ما فقط کمیسیون و جریمه است. */
 
 interface LedgerRow {
   type: string; amount: number; club_id: string | null;
@@ -66,16 +66,16 @@ export async function GET(req: NextRequest) {
   const accs = withClub(accounts.data);
   const setts = withClub(settlements.data);
 
-  /* درآمدِ تبلیغات (مهاجرتِ ۰۵۸). برخلافِ رزرو و مسابقه، سهمِ باشگاه
-     ندارد: کلِ مبلغ درآمدِ پلتفرم است، پس هم در ورودیِ ناخالص می‌آید و
-     هم مستقیم در درآمدِ خالص. */
+  /* درآمد تبلیغات (مهاجرت ۰۵۸). برخلاف رزرو و مسابقه، سهم باشگاه
+     ندارد: کل مبلغ درآمد پلتفرم است، پس هم در ورودی ناخالص می‌آید و
+     هم مستقیم در درآمد خالص. */
   const adGross = sum('AD_REVENUE');
   const adRefunded = -sum('AD_REFUND');               // منفی ذخیره می‌شود
   const adNet = adGross - adRefunded;
 
-  /* ارتقای آگهی (مهاجرتِ ۰۷۹) — تازه‌سازی و فوری. مثلِ تبلیغات
-     صددرصد درآمدِ پلتفرم است و سهمِ باشگاه ندارد. جدا شمرده می‌شود
-     چون تصمیمِ قیمت‌گذاری‌اش جداست. */
+  /* ارتقای آگهی (مهاجرت ۰۷۹) — تازه‌سازی و فوری. مثل تبلیغات
+     صددرصد درآمد پلتفرم است و سهم باشگاه ندارد. جدا شمرده می‌شود
+     چون تصمیم قیمت‌گذاری‌اش جداست. */
   const boostGross = sum('AD_BOOST_REVENUE');
   const boostRefunded = -sum('AD_BOOST_REFUND');
   const boostNet = boostGross - boostRefunded;
@@ -89,12 +89,12 @@ export async function GET(req: NextRequest) {
 
   return NextResponse.json({
     overview: {
-      /* پولی که وارد حسابِ مرکزی شده — این «درآمد» نیست */
+      /* پولی که وارد حساب مرکزی شده — این «درآمد» نیست */
       grossIn,
       bookingRevenue: sum('BOOKING_PAYMENT'),
       tournamentRevenue: sum('TOURNAMENT_PAYMENT'),
 
-      /* درآمدِ تبلیغات — تا امروز هیچ‌جای گزارشِ مالی نبود */
+      /* درآمد تبلیغات — تا امروز هیچ‌جای گزارش مالی نبود */
       adRevenue: adGross,
       adRefunds: adRefunded,
       adNetRevenue: adNet,
@@ -104,14 +104,14 @@ export async function GET(req: NextRequest) {
       boostRefunds: boostRefunded,
       boostNetRevenue: boostNet,
 
-      /* درآمدِ واقعیِ پلتفرم */
+      /* درآمد واقعی پلتفرم */
       platformCommission: commission,
       cancellationFee,
       netPlatformRevenue: commission + cancellationFee + adNet + boostNet,
       commissionFromReservations: sumFrom('PLATFORM_COMMISSION', 'reservation'),
       commissionFromTournaments: sumFrom('PLATFORM_COMMISSION', 'tournament'),
 
-      /* سهمِ باشگاه‌ها و وضعیتِ بدهی */
+      /* سهم باشگاه‌ها و وضعیت بدهی */
       clubEarnings,
       settledOut,
       /* آنچه همین حالا بدهکاریم */
@@ -128,9 +128,9 @@ export async function GET(req: NextRequest) {
       failedPayments: ((payments.data ?? []) as Record<string, unknown>[])
         .filter(p => p.status === 'FAILED').length,
 
-      /* ناوردا: پولِ واردشده باید برابرِ درآمد + سهمِ باشگاه + بازپرداخت
-         باشد. اختلافِ ناصفر یعنی جایی از دفتر ناقص است — بهتر است در
-         خودِ گزارش دیده شود، نه ماه‌ها بعد در حسابرسی. */
+      /* ناوردا: پول واردشده باید برابر درآمد + سهم باشگاه + بازپرداخت
+         باشد. اختلاف ناصفر یعنی جایی از دفتر ناقص است — بهتر است در
+         خود گزارش دیده شود، نه ماه‌ها بعد در حسابرسی. */
       balanceCheck: grossIn - (commission + cancellationFee + clubEarnings + refunded),
     },
     payments: withClub(payments.data),

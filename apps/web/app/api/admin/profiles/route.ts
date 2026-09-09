@@ -34,11 +34,11 @@ export async function PATCH(req: NextRequest) {
 
   const patch: Parameters<typeof reviewProfile>[1] = {};
   if (['approved', 'pending', 'rejected'].includes(String(b?.status))) patch.status = b.status;
-  /* ── تیکِ آبی مجوزِ خودش را دارد ──
-     بقیه‌ی این مسیر (تأیید/رد/جواز) کارِ همان ادمینی است که صفحه‌ی
-     نقش را دارد، ولی اعطای تیک تصمیمِ جداگانه‌ای است و در
-     `PERMISSION_GROUPS` کلیدِ خودش را دارد. بدونِ این بررسی، ادمینی
-     که عمداً کلیدِ `verified` را ندارد می‌توانست با یک درخواستِ
+  /* ── تیک آبی مجوز خودش را دارد ──
+     بقیه‌ی این مسیر (تأیید/رد/جواز) کار همان ادمینی است که صفحه‌ی
+     نقش را دارد، ولی اعطای تیک تصمیم جداگانه‌ای است و در
+     `PERMISSION_GROUPS` کلید خودش را دارد. بدون این بررسی، ادمینی
+     که عمدا کلید `verified` را ندارد می‌توانست با یک درخواست
      مستقیم تیک بدهد. */
   if (typeof b?.verified === 'boolean') {
     if (!(await can(actor.id, 'verified'))) {

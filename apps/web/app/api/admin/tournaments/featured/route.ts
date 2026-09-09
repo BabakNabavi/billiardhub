@@ -3,19 +3,19 @@ import { NextRequest, NextResponse } from 'next/server';
 import { sb, rpc, actorFromRequest, audit, clientIp } from '@/lib/finance/db';
 import { can } from '@/lib/admin/permissions';
 
-/* «رویداد اصلی» صفحه‌ی مسابقات — انتخاب و برداشتنِ آن.
+/* «رویداد اصلی» صفحه‌ی مسابقات — انتخاب و برداشتن آن.
  *
- * ── چرا مسیرِ جدا و چرا فقط ادمین ──
- * بیلبوردِ بالای صفحه‌ی مسابقات تا امروز این‌طور پر می‌شد:
+ * ── چرا مسیر جدا و چرا فقط ادمین ──
+ * بیلبورد بالای صفحه‌ی مسابقات تا امروز این‌طور پر می‌شد:
  *
  *     all.find(t => t.status === 'registration_open')
  *
- * یعنی اولین ردیفِ فهرست، که ترتیبش بر اساسِ تاریخِ شروع بود. پس هر
+ * یعنی اولین ردیف فهرست، که ترتیبش بر اساس تاریخ شروع بود. پس هر
  * باشگاهی که مسابقه‌اش زودتر برگزار می‌شد، بی‌آنکه کسی تصمیم بگیرد
- * بزرگ‌ترین جای صفحه را می‌گرفت — جایگاهی که ارزشِ تبلیغاتی دارد و
+ * بزرگ‌ترین جای صفحه را می‌گرفت — جایگاهی که ارزش تبلیغاتی دارد و
  * نباید قرعه‌کشی باشد.
  *
- * انتخاب هم عمداً در مسیرِ باشگاه نیست: اگر باشگاه‌دار بتواند
+ * انتخاب هم عمدا در مسیر باشگاه نیست: اگر باشگاه‌دار بتواند
  * مسابقه‌ی خودش را «اصلی» کند، همه می‌کنند و پرچم بی‌معنی می‌شود.
  */
 
@@ -36,7 +36,7 @@ export async function GET(req: NextRequest) {
   });
 }
 
-/* PUT { tournamentId } — انتخاب. `null` یعنی برداشتنِ رویداد اصلی. */
+/* PUT { tournamentId } — انتخاب. `null` یعنی برداشتن رویداد اصلی. */
 export async function PUT(req: NextRequest) {
   const actor = actorFromRequest(req);
   if (!actor || !(await can(actor.id, 'tournaments'))) {
@@ -51,8 +51,8 @@ export async function PUT(req: NextRequest) {
     return NextResponse.json({ message: 'شناسه‌ی مسابقه معتبر نیست' }, { status: 400 });
   }
 
-  /* برداشتنِ پرچمِ قبلی و زدنِ تازه در یک تراکنش انجام می‌شود —
-     وگرنه ایندکسِ یکتا وسطِ کار یکی را رد می‌کند. */
+  /* برداشتن پرچم قبلی و زدن تازه در یک تراکنش انجام می‌شود —
+     وگرنه ایندکس یکتا وسط کار یکی را رد می‌کند. */
   const { data, error } = await rpc<{ ok: boolean; reason?: string; status?: string }>(
     'bh_set_featured_tournament', { p_tournament: id, p_actor: actor.id },
   );

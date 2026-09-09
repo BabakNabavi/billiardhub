@@ -1,7 +1,7 @@
 /* ─────────────────────────────────────────────────────────────
    نشست کاربر — تنها منبع ساخت، خواندن و تأیید توکن.
 
-   مرحله‌ی الف: فقط متمرکزسازی. رفتار دقیقاً همان چیزی است که بود
+   مرحله‌ی الف: فقط متمرکزسازی. رفتار دقیقا همان چیزی است که بود
    (JWT هفت‌روزه در هدر Authorization). کوکی، refresh و middleware
    در مرحله‌های بعد روی همین فایل سوار می‌شوند.
 
@@ -80,7 +80,7 @@ export function verifyToken(token: string, expect?: 'at' | 'rt'): SessionUser | 
     if (!c?.sub) return null
     /* توکن‌های نسل قدیم typ ندارند و در مرحله‌ی گذار پذیرفته می‌شوند */
     if (expect && c.typ && c.typ !== expect) return null
-    if (expect === 'rt' && !c.typ) return null   // refresh حتماً باید نسل جدید باشد
+    if (expect === 'rt' && !c.typ) return null   // refresh حتما باید نسل جدید باشد
     return toUser(c)
   } catch { return null }
 }

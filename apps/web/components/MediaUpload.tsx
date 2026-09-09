@@ -18,18 +18,18 @@ import { INK, SEC, MUT, LINE, GOLD, GOLD_D, Field, inp, SPIN_CSS } from './media
 
 /* رنگ‌ها و ورودی‌ها با مرحله‌ی کانال مشترک‌اند — یک منبع، نه دو کپی */
 /* ── چرا ۲۵ و نه ۲۰۰ ──
-   سقفِ واقعی `MAX_VIDEO` در `lib/upload/policy.ts` است و سطلِ
-   `club-media` هم روی همان ۲۵ مگابایت بسته شده. عددِ ۲۰۰ فقط روی این
-   صفحه نوشته بود و کاربر بعد از انتخابِ فایلِ ۱۰۰ مگابایتی خطا
-   می‌گرفت. بالا بردنِ سقف یعنی اول سطل و کانتینر و nginx باید عوض
+   سقف واقعی `MAX_VIDEO` در `lib/upload/policy.ts` است و سطل
+   `club-media` هم روی همان ۲۵ مگابایت بسته شده. عدد ۲۰۰ فقط روی این
+   صفحه نوشته بود و کاربر بعد از انتخاب فایل ۱۰۰ مگابایتی خطا
+   می‌گرفت. بالا بردن سقف یعنی اول سطل و کانتینر و nginx باید عوض
    شوند، نه این عدد. */
 const MAX_MB = 25
 
 /* ── چرا randomUUID مستقیم صدا زده نمی‌شود ──
-   فقط در secure context و روی موتورهای تازه هست؛ وب‌ویوهای قدیمیِ
-   اندروید و مرورگرهای داخلِ اپ — بخشِ واقعی از مخاطبِ این سایت —
-   ندارندش. خطایش هم داخلِ catch گم می‌شد و کاربر پیامِ «اتصال را
-   بررسی کنید» می‌گرفت و دنبالِ اینترنتش می‌گشت. */
+   فقط در secure context و روی موتورهای تازه هست؛ وب‌ویوهای قدیمی
+   اندروید و مرورگرهای داخل اپ — بخش واقعی از مخاطب این سایت —
+   ندارندش. خطایش هم داخل catch گم می‌شد و کاربر پیام «اتصال را
+   بررسی کنید» می‌گرفت و دنبال اینترنتش می‌گشت. */
 function newId(): string {
   if (typeof crypto?.randomUUID === 'function') return crypto.randomUUID()
   const b = new Uint8Array(16)
@@ -76,22 +76,22 @@ export default function MediaUpload({ open, onClose, onUploaded }: { open: boole
   const [phase, setPhase]       = useState('')
   const [err, setErr]           = useState('')
   const vref = useRef<HTMLVideoElement>(null)
-  /* پاسخِ کند از بازکردنِ قبلی نباید روی حالتِ تازه بنشیند */
+  /* پاسخ کند از بازکردن قبلی نباید روی حالت تازه بنشیند */
   const aliveRef = useRef(true)
 
   /* کانال — مثل یوتیوب، برای انتشار لازم است و مرحله‌ی صریحی دارد.
 
      ⚠️ این پنجره تا امروز فقط *یک* کانال می‌شناخت و کورکورانه در
-     اولینِ فهرست منتشر می‌کرد. از وقتی هر نقش می‌تواند کانالِ خودش
+     اولین فهرست منتشر می‌کرد. از وقتی هر نقش می‌تواند کانال خودش
      را داشته باشد، «اولین» یعنی هر کدام که زودتر ساخته شده — و
-     ویدیوی مربی می‌رفت زیرِ کانالِ فروشگاه. */
+     ویدیوی مربی می‌رفت زیر کانال فروشگاه. */
   const [channels, setChannels] = useState<UserChannel[]>([])
   const [channel, setChannel] = useState<UserChannel | null>(null)
-  /** کاربر صریحاً «کانال تازه» زده — با اینکه کانال دارد */
+  /** کاربر صریحا «کانال تازه» زده — با اینکه کانال دارد */
   const [making, setMaking] = useState(false)
   const [chLoaded, setChLoaded] = useState(false)
-  /* ⚠️ «خطا داریم و فهرست خالی است» کافی نبود: نامِ پیشنهادیِ
-     خواندنِ *قبلی* گارد را خاموش می‌کرد و فرمِ «کانال بساز» به
+  /* ⚠️ «خطا داریم و فهرست خالی است» کافی نبود: نام پیشنهادی
+     خواندن *قبلی* گارد را خاموش می‌کرد و فرم «کانال بساز» به
      کاربری که کانال داشت نشان داده می‌شد. */
   const [chFailed, setChFailed] = useState(false)
   const [chName, setChName] = useState('')
@@ -101,9 +101,9 @@ export default function MediaUpload({ open, onClose, onUploaded }: { open: boole
   const ownerKey = user ? (user.phone || user.id || user.firstName || 'user') : ''
 
   useEffect(() => () => { if (videoUrl) URL.revokeObjectURL(videoUrl) }, [videoUrl])
-  /* `user` فقط برای نامِ پیشنهادی لازم است. اگر در وابستگی‌ها بماند،
-     هر به‌روزرسانیِ استورِ احراز هویت افکت را دوباره می‌دواند و
-     انتخابِ کاربر را وسطِ آپلود به کانالِ اول برمی‌گرداند. */
+  /* `user` فقط برای نام پیشنهادی لازم است. اگر در وابستگی‌ها بماند،
+     هر به‌روزرسانی استور احراز هویت افکت را دوباره می‌دواند و
+     انتخاب کاربر را وسط آپلود به کانال اول برمی‌گرداند. */
   const userRef = useRef(user)
   /* نوشتن روی ref در بدنه‌ی رندر عارضه‌ی جانبی است؛ در افکت امن است. */
   useEffect(() => { userRef.current = user }, [user])
@@ -113,9 +113,9 @@ export default function MediaUpload({ open, onClose, onUploaded }: { open: boole
     setErr(''); setChLoaded(false); setChFailed(false)
     const list = await fetchMyChannels(ownerKey)
     if (!aliveRef.current) return
-    /* `null` یعنی نتوانستیم بخوانیم — نه «ندارد». فرمِ «کانال بساز»
-       در آن حالت دروغ می‌گفت و کاربر کانالِ تکراری می‌ساخت. پس
-       فهرستِ کهنه هم باید برود؛ وگرنه کنارِ پیامِ خطا چیپ‌های
+    /* `null` یعنی نتوانستیم بخوانیم — نه «ندارد». فرم «کانال بساز»
+       در آن حالت دروغ می‌گفت و کاربر کانال تکراری می‌ساخت. پس
+       فهرست کهنه هم باید برود؛ وگرنه کنار پیام خطا چیپ‌های
        دفعه‌ی قبل دیده می‌شوند. */
     if (list === null) {
       setChannels([]); setChannel(null); setChLoaded(true); setChFailed(true)
@@ -123,12 +123,12 @@ export default function MediaUpload({ open, onClose, onUploaded }: { open: boole
       return
     }
     setChannels(list)
-    /* انتخابِ فعلی اگر هنوز هست بماند — رفرشِ فهرست نباید مقصدِ
-       انتشار را زیرِ دستِ کاربر عوض کند. */
+    /* انتخاب فعلی اگر هنوز هست بماند — رفرش فهرست نباید مقصد
+       انتشار را زیر دست کاربر عوض کند. */
     setChannel(cur => list.find(c => (c.id ?? c.handle) === (cur?.id ?? cur?.handle)) ?? list[0] ?? null)
     setChLoaded(true)
-    /* نامِ پیشنهادی همان نامِ عمومی است — حسابِ رسمی نباید نامِ شخص
-       را روی کانالِ ویدیو ببرد. */
+    /* نام پیشنهادی همان نام عمومی است — حساب رسمی نباید نام شخص
+       را روی کانال ویدیو ببرد. */
     if (!list.length) { setChName(publicDisplayName(userRef.current, '')); setChHandle('') }
   }, [ownerKey])
 
@@ -152,21 +152,21 @@ export default function MediaUpload({ open, onClose, onUploaded }: { open: boole
     setChName(''); setChHandle(''); setChBio('')
   }
 
-  /* فرمِ ساخت وقتی باز است که کانالی نیست، یا کاربر خودش خواسته */
+  /* فرم ساخت وقتی باز است که کانالی نیست، یا کاربر خودش خواسته */
   const creating = !channel || making
 
-  /* متادیتای واقعیِ فایل، از خودِ مرورگر.
+  /* متادیتای واقعی فایل، از خود مرورگر.
 
      تا امروز فقط رشته‌ی «۰۴:۱۳» برای نمایش ساخته می‌شد و ثانیه/ابعاد
      دور ریخته می‌شد. آن اعداد همان چیزی‌اند که `VideoObject` و نقشه‌ی
-     سایتِ ویدیو لازم دارند — و بدونشان یا آن فیلد نمی‌آید یا باید
-     عددِ ساختگی گذاشت، که به گوگل دروغ می‌گوید.
+     سایت ویدیو لازم دارند — و بدونشان یا آن فیلد نمی‌آید یا باید
+     عدد ساختگی گذاشت، که به گوگل دروغ می‌گوید.
 
      همه‌جا NULL می‌ماند اگر مرورگر نتوانست بخواند؛ صفر گذاشته نمی‌شود. */
   const [meta, setMeta] = useState<{ durationSec?: number; width?: number; height?: number }>({})
 
-  /* ⚠️ هر هوک باید *بالای* بازگشتِ زودهنگام باشد. این یکی پایین بود و
-     فقط چون تنها مصرف‌کننده‌اش پنجره را با `open` ثابتِ true سوار
+  /* ⚠️ هر هوک باید *بالای* بازگشت زودهنگام باشد. این یکی پایین بود و
+     فقط چون تنها مصرف‌کننده‌اش پنجره را با `open` ثابت true سوار
      می‌کند نمی‌ترکید؛ اولین کسی که `open={x}` بنویسد «Rendered more
      hooks than during the previous render» می‌گرفت. */
 
@@ -175,7 +175,7 @@ export default function MediaUpload({ open, onClose, onUploaded }: { open: boole
   const pickVideo = (f?: File) => {
     setErr('')
     if (!f) return
-    if (!f.type.startsWith('video/')) { setErr('لطفاً یک فایل ویدیویی انتخاب کنید'); return }
+    if (!f.type.startsWith('video/')) { setErr('لطفا یک فایل ویدیویی انتخاب کنید'); return }
     if (f.size > MAX_MB * 1024 * 1024) { setErr(`حجم ویدیو نباید بیش از ${faDigits(MAX_MB)} مگابایت باشد`); return }
     if (videoUrl) URL.revokeObjectURL(videoUrl)
     const url = URL.createObjectURL(f)
@@ -209,8 +209,8 @@ export default function MediaUpload({ open, onClose, onUploaded }: { open: boole
     if (!title.trim()) { setErr('عنوان ویدیو را بنویسید'); return }
     setBusy(true)
     try {
-      /* ── چرا UUID و نه مهرِ زمانی ──
-         `uv-1786547589258-4213` قابلِ حدس است: کسی که یک نشانی دارد
+      /* ── چرا UUID و نه مهر زمانی ──
+         `uv-1786547589258-4213` قابل حدس است: کسی که یک نشانی دارد
          می‌تواند نشانی‌های همسایه را بسازد. پسوند هم این‌جا ساخته
          نمی‌شود — سرور از روی بایت‌های واقعی می‌گذاردش. */
       const id = newId()
@@ -227,7 +227,7 @@ export default function MediaUpload({ open, onClose, onUploaded }: { open: boole
         thumb, src,
         description: desc.trim(),
         tags: tags.split(/[،,]/).map(t => t.trim()).filter(Boolean).slice(0, 8),
-        /* متادیتای واقعیِ فایل — پایه‌ی VideoObject و نقشه‌ی سایت */
+        /* متادیتای واقعی فایل — پایه‌ی VideoObject و نقشه‌ی سایت */
         durationSec: meta.durationSec,
         width: meta.width,
         height: meta.height,
@@ -237,12 +237,12 @@ export default function MediaUpload({ open, onClose, onUploaded }: { open: boole
       if (!res?.ok || !res.video) throw new Error('publish')
       const v = res.video
       onUploaded({
-        /* شناسه‌ی نمایشی حالا همان نشانیِ عمومی است */
+        /* شناسه‌ی نمایشی حالا همان نشانی عمومی است */
         id: v.slug, title: v.title, category: v.category as MediaVideo['category'],
         creator: { id: v.creatorHandle, name: v.creatorName, handle: v.creatorHandle },
         duration: duration || '',
         durationSec: meta.durationSec ?? null, width: meta.width ?? null, height: meta.height ?? null,
-        views: 0, likes: 0,
+        views: 0, likes: 0, comments: 0,
         date: todayFa(), ts: Date.now(),
         thumb: v.thumb, src: v.src,
         description: v.description ? v.description.split('\n').filter(Boolean) : [],
@@ -315,7 +315,7 @@ export default function MediaUpload({ open, onClose, onUploaded }: { open: boole
           {videoUrl && (
             <>
               <Field label="عنوان">
-                <input value={title} onChange={e => setTitle(e.target.value)} maxLength={160} placeholder="مثلاً: آموزش کنترل توپ سفید" style={inp} />
+                <input value={title} onChange={e => setTitle(e.target.value)} maxLength={160} placeholder="مثلا: آموزش کنترل توپ سفید" style={inp} />
               </Field>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
                 <div>

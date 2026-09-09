@@ -3,7 +3,7 @@
 
    یک اصل: هویت و مالکیت **هرگز** از بدنه یا کوئری درخواست خوانده
    نمی‌شود. هر تابع این فایل از نشست امضاشده شروع می‌کند و خودش از
-   دیتابیس می‌پرسد که این کاربر واقعاً مالک آن موجودیت هست یا نه.
+   دیتابیس می‌پرسد که این کاربر واقعا مالک آن موجودیت هست یا نه.
 
    پیش‌تر مسیرهای دایرکت/استوری/مدیا هویت را از کلاینت می‌گرفتند و
    همین باعث می‌شد هر کسی به‌جای هر کسی پیام بفرستد یا استوری باشگاه
@@ -45,7 +45,7 @@ export async function actorOf(req: NextRequest): Promise<Actor | null> {
   return {
     id: row.id,
     role: row.primaryRole ?? 'user',
-    /* کلاینت هم دقیقاً همین ترتیب را می‌ساخت: phone || id */
+    /* کلاینت هم دقیقا همین ترتیب را می‌ساخت: phone || id */
     dmKey: (row.phone || row.id || '').trim(),
     isAdmin: row.primaryRole === 'admin',
   }
@@ -73,7 +73,7 @@ export async function ownsSeller(actor: Actor, sellerId: string): Promise<boolea
   if (actor.isAdmin) return true
   if (!sellerId) return false
 
-  /* شناسه فقط وقتی با ستون uuid مقایسه می‌شود که واقعاً uuid باشد؛
+  /* شناسه فقط وقتی با ستون uuid مقایسه می‌شود که واقعا uuid باشد؛
      وگرنه پستگرس با 22P02 کل کوئری را می‌شکند و مالک واقعی هم رد
      می‌شود (همان تله‌ای که در resolve تبلیغات هم دیده بودیم). */
   let q = sb().from('profiles').select('id, slug, owner_id').eq('kind', 'seller')

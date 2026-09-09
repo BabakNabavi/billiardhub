@@ -49,8 +49,8 @@ function mapLocalProduct(up: Record<string, unknown>): Product {
 function mapServerAd(a: Record<string, unknown>): Product {
   const n = (v: unknown, d = 0) => { const x = Number(v); return Number.isFinite(x) ? x : d; };
   const s = (v: unknown, d = '') => (typeof v === 'string' ? v : d);
-  /* `price` قیمتِ خط‌خورده و `discountPrice` پرداختی — پیش‌تر عددِ
-     خط‌خورده از روی درصدِ گردشده بازسازی می‌شد و غلط درمی‌آمد. */
+  /* `price` قیمت خط‌خورده و `discountPrice` پرداختی — پیش‌تر عدد
+     خط‌خورده از روی درصد گردشده بازسازی می‌شد و غلط درمی‌آمد. */
   const listed = n(a.price);
   const paid = n(a.discountPrice);
   const hasDisc = paid > 0 && paid < listed;
@@ -89,8 +89,8 @@ function loadLocalProducts(owner: { id?: string; phone?: string }): Product[] {
 interface Product {
   id: string;
   title: string;
-  /* برند و مدل — خطِ دومِ عنوان. صاحبِ آگهی هم باید پنج چوبش را از
-     هم تشخیص بدهد، مخصوصاً وقتی می‌خواهد یکی را حذف یا ارتقا کند. */
+  /* برند و مدل — خط دوم عنوان. صاحب آگهی هم باید پنج چوبش را از
+     هم تشخیص بدهد، مخصوصا وقتی می‌خواهد یکی را حذف یا ارتقا کند. */
   sub: string;
   price: number;
   discountPrice?: number;
@@ -108,10 +108,10 @@ interface Product {
   createdAt: string;
 }
 
-/* `categoryLabels` و `conditionLabels` حذف شدند: کارتِ فهرست دیگر
-   دسته و وضعیتِ کالا را جدا نمی‌نویسد (عنوانِ آگهی خودش «دسته + نوع»
-   است). آن فهرستِ دسته هم یک کپیِ کهنه‌ی دیگر بود — «آموزشی» داشت که
-   اصلاً دسته نیست و نیمی از دسته‌های واقعی را نداشت. */
+/* `categoryLabels` و `conditionLabels` حذف شدند: کارت فهرست دیگر
+   دسته و وضعیت کالا را جدا نمی‌نویسد (عنوان آگهی خودش «دسته + نوع»
+   است). آن فهرست دسته هم یک کپی کهنه‌ی دیگر بود — «آموزشی» داشت که
+   اصلا دسته نیست و نیمی از دسته‌های واقعی را نداشت. */
 const statusLabels: Record<string, { label: string; color: string; icon: any }> = {
   active: { label: 'فعال', color: 'bg-green-100 text-green-700', icon: <CheckCircle size={12} /> },
   sold: { label: 'فروخته شده', color: 'bg-gray-100 text-gray-600', icon: <CheckCircle size={12} /> },
@@ -127,11 +127,11 @@ export default function MyShopPage() {
   const [deleting, setDeleting] = useState<string | null>(null);
   /* آگهی‌ای که پنجره‌ی ارتقایش باز است */
   const [boostFor, setBoostFor] = useState<{ id: string; title: string } | null>(null);
-  /* پیامِ بازگشت از درگاهِ ارتقا — از کوئریِ نشانی */
+  /* پیام بازگشت از درگاه ارتقا — از کوئری نشانی */
   const [boostMsg, setBoostMsg] = useState("");
 
-  /* ── بازگشت از درگاهِ ارتقا ──
-     کالبک به همین صفحه برمی‌گردد با `?boost=...`. بدونِ این پیام،
+  /* ── بازگشت از درگاه ارتقا ──
+     کالبک به همین صفحه برمی‌گردد با `?boost=...`. بدون این پیام،
      فروشنده پول داده و فقط یک صفحه‌ی معمولی می‌بیند و نمی‌داند
      کارش انجام شد یا نه. */
   useEffect(() => {
@@ -141,11 +141,11 @@ export default function MyShopPage() {
     const kind = q.get("kind");
     setBoostMsg(
       st === "ok"
-        ? (kind === "urgent" ? "آگهی شما فوری شد و در نوارِ فوریِ بازار نشسته است."
+        ? (kind === "urgent" ? "آگهی شما فوری شد و در نوار فوری بازار نشسته است."
                              : "آگهی شما تازه‌سازی شد و به بالای فهرست رفت.")
       : st === "cancelled" ? "پرداخت لغو شد — مبلغی کم نشده است."
-      /* بازکردنِ نشانیِ کالبک بدونِ داده‌ی درگاه: نه موفق است نه
-         ناموفق. گفتنِ «انجام نشد» به کسی که شاید پول داده، دروغِ
+      /* بازکردن نشانی کالبک بدون داده‌ی درگاه: نه موفق است نه
+         ناموفق. گفتن «انجام نشد» به کسی که شاید پول داده، دروغ
          نگران‌کننده‌ای است. */
       : st === "pending" ? "نتیجه‌ی این پرداخت هنوز قطعی نشده — اگر مبلغی کم شده، تا دقایقی دیگر اعمال می‌شود."
       : (q.get("reason") || "ارتقای آگهی انجام نشد."),
@@ -197,15 +197,15 @@ export default function MyShopPage() {
     totalViews: products.reduce((sum, p) => sum + (p.views || 0), 0),
   };
 
-  /* تا تأییدِ سرور «هیچ» نشان نمی‌دهیم — صفحه‌ی خالی برای کاربر یعنی
+  /* تا تأیید سرور «هیچ» نشان نمی‌دهیم — صفحه‌ی خالی برای کاربر یعنی
      «خراب است»، نه «صبر کن». */
   if (!_hydrated || !authChecked) return <PageLoader />;
   if (!user) return null;
 
   /* ── فروشنده یا آگهی‌دهنده‌ی معمولی ──
-     همین صفحه هر دو را سرویس می‌دهد، چون ثبتِ آگهی برای همه باز است.
-     ولی عنوانِ «فروشگاه من» فقط برای فروشنده معنا دارد؛ کسی که یک
-     چوب دستِ‌دوم گذاشته، فهرستِ «آگهی‌های من» می‌بیند. */
+     همین صفحه هر دو را سرویس می‌دهد، چون ثبت آگهی برای همه باز است.
+     ولی عنوان «فروشگاه من» فقط برای فروشنده معنا دارد؛ کسی که یک
+     چوب دست‌دوم گذاشته، فهرست «آگهی‌های من» می‌بیند. */
   const isSeller = [user.primaryRole, ...(user.secondaryRoles ?? [])].includes('seller');
 
   return (
@@ -239,10 +239,10 @@ export default function MyShopPage() {
 
       {/* تب‌ها */}
       <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
-        {/* ── چرا گرید و نه فلکسِ اسکرول‌دار ──
-            چهار تب با `flex-shrink-0` و پدینگِ ۵ روی موبایل جا نمی‌شدند
-            و «در انتظار تأیید» نصفه بیرون می‌ماند — با اسکرولِ افقی که
-            هیچ نشانه‌ای هم نداشت. حالا چهار ستونِ مساوی‌اند و جا هست. */}
+        {/* ── چرا گرید و نه فلکس اسکرول‌دار ──
+            چهار تب با `flex-shrink-0` و پدینگ ۵ روی موبایل جا نمی‌شدند
+            و «در انتظار تأیید» نصفه بیرون می‌ماند — با اسکرول افقی که
+            هیچ نشانه‌ای هم نداشت. حالا چهار ستون مساوی‌اند و جا هست. */}
         <div className="grid grid-cols-4 border-b">
           {[
             { id: 'all', label: 'همه', count: stats.total },
@@ -280,10 +280,10 @@ export default function MyShopPage() {
               )}
             </div>
           ) : (
-            /* ── چرا کادرِ اسکرول‌دار ──
-               فهرست بی‌انتها زیرِ هم می‌رفت؛ با ده آگهی، رسیدن به تهِ
-               صفحه یعنی چند صفحه اسکرول. حالا خودِ فهرست کادرِ خودش را
-               دارد و بقیه‌ی صفحه سرِ جایش می‌ماند. */
+            /* ── چرا کادر اسکرول‌دار ──
+               فهرست بی‌انتها زیر هم می‌رفت؛ با ده آگهی، رسیدن به ته
+               صفحه یعنی چند صفحه اسکرول. حالا خود فهرست کادر خودش را
+               دارد و بقیه‌ی صفحه سر جایش می‌ماند. */
             <div className="max-h-[62vh] overflow-y-auto overscroll-contain pl-1 space-y-2.5">
               {filtered.map(product => (
                 <div key={product.id} className="border border-gray-100 rounded-2xl p-3 hover:border-[rgba(199,166,106,0.45)] transition-colors">
@@ -329,7 +329,7 @@ export default function MyShopPage() {
 
                   {/* ── دکمه‌ها با نام ──
                       تا امروز فقط آیکون بودند و `title` روی موبایل هیچ‌وقت
-                      نشان داده نمی‌شود؛ کاربر جز سطلِ آشغال هیچ‌کدام را
+                      نشان داده نمی‌شود؛ کاربر جز سطل آشغال هیچ‌کدام را
                       نمی‌شناخت. جا هم هست. */}
                   <div className="mt-2.5 grid grid-cols-4 gap-1.5">
                     <Link href={`/shop/${product.id}`}
@@ -343,13 +343,13 @@ export default function MyShopPage() {
                       ویرایش
                     </Link>
                     {/* ── ارتقا ──
-                        کنارِ خودِ آگهی، چون کاری است که روی همان یک
+                        کنار خود آگهی، چون کاری است که روی همان یک
                         آگهی انجام می‌شود. صفحه‌ی جدا یعنی فروشنده
                         باید آگهی را آن‌جا دوباره پیدا کند. */}
                     <button onClick={() => setBoostFor({
                       id: product.id,
                       /* پنجره‌ی ارتقا باید بگوید کدام آگهی — «چوب اسنوکر»
-                         تنها، بینِ پنج چوب، هیچ‌چیز نمی‌گوید. */
+                         تنها، بین پنج چوب، هیچ‌چیز نمی‌گوید. */
                       title: [product.title, product.sub].filter(Boolean).join(' '),
                     })}
                       className={`${LQ} flex flex-col items-center justify-center gap-0.5 py-1.5 text-[11px] font-bold`}>

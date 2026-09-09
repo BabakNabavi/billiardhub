@@ -3,12 +3,12 @@ import { inquiryKey } from './inquiry-key'
 import { writeJson, readJsonFresh, safeKey } from './social-server'
 import { hasAssignedPrefix, INVALID_MOBILE_MESSAGE } from './auth/phone'
 
-/* (ثابتِ نشانیِ پروژه از این‌جا برداشته شد: در هیچ‌جای این فایل
-   استفاده نمی‌شد. منبعِ واحدش `lib/supabase-config.ts` است.) */
+/* (ثابت نشانی پروژه از این‌جا برداشته شد: در هیچ‌جای این فایل
+   استفاده نمی‌شد. منبع واحدش `lib/supabase-config.ts` است.) */
 
 /* کد را هش‌شده ذخیره می‌کنیم تا حتی با خواندن فایل هم کد لو نرود.
 
-   کلید عمداً fallback ندارد: پیش‌تر اگر JWT_SECRET تنظیم نبود، کدها با
+   کلید عمدا fallback ندارد: پیش‌تر اگر JWT_SECRET تنظیم نبود، کدها با
    رشته‌ی ثابت داخل همین فایل هش می‌شدند — یعنی هر کسی که مخزن را
    می‌خواند می‌توانست کد تأیید را از روی هش بسازد. حالا نبود کلید
    صدا می‌کند به‌جای اینکه بی‌صدا امنیت را پایین بیاورد. */
@@ -48,7 +48,7 @@ async function readOtp(m: string): Promise<OtpRec | null> {
   return rec ?? null
 }
 
-/** کدام متن؟ `reset` متنِ اختصاصیِ تغییرِ رمز را می‌فرستد. */
+/** کدام متن؟ `reset` متن اختصاصی تغییر رمز را می‌فرستد. */
 export type OtpPurpose = 'generic' | 'reset'
 
 export async function sendOtp(
@@ -68,25 +68,25 @@ export async function sendOtp(
   const code = String(Math.floor(10000 + Math.random() * 90000))   // ۵ رقمی
   await writeJson(otpPath(m), { hash: hashCode(code), at: now, tries: 0 })
 
-  /* ── متنِ اختصاصیِ تغییرِ رمز، اگر ثبت شده باشد ──
-     قالبِ عمومیِ `s.api.ir` فقط می‌گوید «کد تایید: ۱۲۳۴۵». کسی که آن
+  /* ── متن اختصاصی تغییر رمز، اگر ثبت شده باشد ──
+     قالب عمومی `s.api.ir` فقط می‌گوید «کد تایید: ۱۲۳۴۵». کسی که آن
      را می‌گیرد در حالی که خودش چیزی نخواسته، نمی‌فهمد یک نفر دارد
      رمزش را عوض می‌کند — و همان جمله تنها هشداری است که می‌گیرد.
 
-     تا وقتی کدِ متن در `/admin/sms` وارد نشده، `sendPattern` بی‌صدا
-     رد می‌شود و مسیرِ قدیمی کارش را می‌کند. یعنی این تغییر هیچ‌چیز را
-     نمی‌شکند و به‌محضِ واردکردنِ کد خودش فعال می‌شود. */
+     تا وقتی کد متن در `/admin/sms` وارد نشده، `sendPattern` بی‌صدا
+     رد می‌شود و مسیر قدیمی کارش را می‌کند. یعنی این تغییر هیچ‌چیز را
+     نمی‌شکند و به‌محض واردکردن کد خودش فعال می‌شود. */
   if (purpose === 'reset') {
     try {
       const { sendPattern } = await import('./sms-server')
       const r = await sendPattern('password_reset_otp', m, [code])
       if (r.ok) return { ok: true }
       if (!r.skipped) {
-        /* ثبت شده بود ولی ارسالش شکست خورد — با مسیرِ دیگر دوباره
-           تلاش نمی‌کنیم، چون کد یکی است و دو پیامکِ متفاوت گیج‌کننده. */
+        /* ثبت شده بود ولی ارسالش شکست خورد — با مسیر دیگر دوباره
+           تلاش نمی‌کنیم، چون کد یکی است و دو پیامک متفاوت گیج‌کننده. */
         return { ok: false, message: r.message ?? 'ارسال کد پیامکی ناموفق بود' }
       }
-    } catch { /* به مسیرِ قدیمی می‌افتیم */ }
+    } catch { /* به مسیر قدیمی می‌افتیم */ }
   }
 
   const key = inquiryKey()
@@ -142,7 +142,7 @@ export async function verifyOtp(mobile: string, code: string): Promise<{ ok: boo
   return { ok: true }
 }
 
-/* آیا این شماره اخیراً کدش را تأیید کرده؟ (پیش‌شرط استعلام شاهکار) */
+/* آیا این شماره اخیرا کدش را تأیید کرده؟ (پیش‌شرط استعلام شاهکار) */
 export async function wasOtpVerified(mobile: string): Promise<boolean> {
   const rec = await readOtp(normMobile(mobile))
   return !!(rec?.verifiedAt && Date.now() - rec.verifiedAt < VERIFIED_WINDOW)
@@ -150,7 +150,7 @@ export async function wasOtpVerified(mobile: string): Promise<boolean> {
 
 /* ── نشان «هویتش استعلام شد» ───────────────────────────────────────
    وقتی شاهکار و ثبت‌احوال کد ملی را تأیید کردند، اینجا علامت می‌خورد تا
-   مرحله‌ی ساخت حساب بداند این کد ملی واقعاً استعلام شده است.
+   مرحله‌ی ساخت حساب بداند این کد ملی واقعا استعلام شده است.
 
    خود کد ملی ذخیره نمی‌شود، فقط هش HMACش — چون این باکت عمومی است و
    کد ملی داده‌ی هویتی است. برای تطبیق هم همان هش کافی است. */
@@ -161,7 +161,7 @@ export async function markIdentityVerified(mobile: string, nationalId: string): 
   await writeJson(otpPath(m), { ...rec, idHash: hashCode(nationalId), idAt: Date.now() })
 }
 
-/** آیا همین کد ملی برای همین شماره اخیراً استعلام شده؟ */
+/** آیا همین کد ملی برای همین شماره اخیرا استعلام شده؟ */
 export async function wasIdentityVerified(mobile: string, nationalId: string): Promise<boolean> {
   const rec = await readOtp(normMobile(mobile))
   if (!rec?.idHash || !rec.idAt) return false

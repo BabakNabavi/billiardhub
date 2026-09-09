@@ -1,15 +1,15 @@
 'use client'
 
 /* ─────────────────────────────────────────────────────────────
-   نمایشگرِ عمودیِ Shorts.
+   نمایشگر عمودی Shorts.
 
    ⚠️ فقط کنش‌هایی هست که پشتوانه دارند: رفتن به بعدی/قبلی، صدا،
    و هم‌رسانی. لایک، کامنت و دنبال‌کردن جدول ندارند و دکمه‌ی
    بی‌کارکرد گذاشته نشد — دکمه‌ای که چیزی ذخیره نمی‌کند بدتر از
    نبودنش است.
 
-   ⚠️ فقط ویدیوی *فعال* در DOM است. سه پلیرِ هم‌زمان روی گوشیِ ضعیف
-   یعنی سه رمزگشای ویدیو؛ همان چیزی که مرورگرِ موبایل را می‌خواباند.
+   ⚠️ فقط ویدیوی *فعال* در DOM است. سه پلیر هم‌زمان روی گوشی ضعیف
+   یعنی سه رمزگشای ویدیو؛ همان چیزی که مرورگر موبایل را می‌خواباند.
    ───────────────────────────────────────────────────────────── */
 
 import { useCallback, useEffect, useRef, useState } from 'react'
@@ -31,7 +31,7 @@ export default function ShortsViewer({
     setI(x => Math.min(items.length - 1, Math.max(0, x + d)))
   }, [items.length])
 
-  /* ⚠️ قفلِ اسکرولِ بدنه: بدونِ آن، اسکرولِ روی نمایشگر صفحه‌ی زیرش
+  /* ⚠️ قفل اسکرول بدنه: بدون آن، اسکرول روی نمایشگر صفحه‌ی زیرش
      را می‌برد و بعد از بستن، کاربر جای دیگری از فهرست است. */
   useEffect(() => {
     const prev = document.body.style.overflow
@@ -39,8 +39,8 @@ export default function ShortsViewer({
     return () => { document.body.style.overflow = prev }
   }, [])
 
-  /* ⚠️ `aria-modal` بدونِ دامِ فوکوس فقط یک ادعاست: کاربرِ صفحه‌کلید
-     با Tab از پشتِ پوشش سر درمی‌آورد و بعد از بستن هم نمی‌داند
+  /* ⚠️ `aria-modal` بدون دام فوکوس فقط یک ادعاست: کاربر صفحه‌کلید
+     با Tab از پشت پوشش سر درمی‌آورد و بعد از بستن هم نمی‌داند
      کجاست. همان الگوی `ChannelGate` در همین پوشه. */
   const boxRef = useRef<HTMLDivElement>(null)
   useEffect(() => {
@@ -59,8 +59,8 @@ export default function ShortsViewer({
   }, [])
 
   useEffect(() => {
-    /* ⚠️ فقط بالا/پایین. نگاشتِ افقی در RTL برعکس می‌شود و «بعدی»
-       سمتِ چپ است — ابهامش بیشتر از فایده‌اش. */
+    /* ⚠️ فقط بالا/پایین. نگاشت افقی در RTL برعکس می‌شود و «بعدی»
+       سمت چپ است — ابهامش بیشتر از فایده‌اش. */
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose()
       else if (e.key === 'ArrowDown') { e.preventDefault(); go(1) }
@@ -75,7 +75,7 @@ export default function ShortsViewer({
     return () => window.removeEventListener('keydown', onKey)
   }, [go, onClose])
 
-  /* چرخِ ماوس و کشیدنِ انگشت = ویدیوی بعدی */
+  /* چرخ ماوس و کشیدن انگشت = ویدیوی بعدی */
   const wheelLock = useRef(0)
   const onWheel = (e: React.WheelEvent) => {
     const now = Date.now()
@@ -95,10 +95,10 @@ export default function ShortsViewer({
     const el = ref.current
     if (!el) return
     el.currentTime = 0
-    void el.play().catch(() => { /* پخشِ خودکار رد شد — کاربر می‌زند */ })
-    /* ⚠️ با هر سوایپ، `key` عنصرِ ویدیو را عوض می‌کند و عنصرِ قبلی
-       جدا می‌شود ولی رمزگشا و اتصالِ شبکه‌اش را نگه می‌دارد. روی
-       اندرویدِ ضعیف چند سوایپ کافی است تا پخش بلرزد. */
+    void el.play().catch(() => { /* پخش خودکار رد شد — کاربر می‌زند */ })
+    /* ⚠️ با هر سوایپ، `key` عنصر ویدیو را عوض می‌کند و عنصر قبلی
+       جدا می‌شود ولی رمزگشا و اتصال شبکه‌اش را نگه می‌دارد. روی
+       اندروید ضعیف چند سوایپ کافی است تا پخش بلرزد. */
     return () => { el.pause(); el.removeAttribute('src'); el.load() }
   }, [i])
 

@@ -2,22 +2,22 @@ export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { sb, actorFromRequest } from '@/lib/finance/db';
 
-/* وضعیتِ واقعیِ «تأیید مدارک» برای کاربرِ واردشده.
+/* وضعیت واقعی «تأیید مدارک» برای کاربر واردشده.
 
-   تا امروز نشانِ «تأیید مدارک» از `users.verificationStatus` خوانده
+   تا امروز نشان «تأیید مدارک» از `users.verificationStatus` خوانده
    می‌شد — ولی آن ستون با تأیید **کد ملی** روی 'verified' می‌رود
    (app/api/auth/register و /api/auth/verify/national-id). یعنی همان
-   لحظه که هویت استعلام می‌شد، ردیفِ «تأیید مدارک» هم سبز می‌شد بدون
-   اینکه هیچ مدرکی آپلود یا بررسی شده باشد. دو چیزِ متفاوت روی یک
+   لحظه که هویت استعلام می‌شد، ردیف «تأیید مدارک» هم سبز می‌شد بدون
+   اینکه هیچ مدرکی آپلود یا بررسی شده باشد. دو چیز متفاوت روی یک
    ستون سوار بودند.
 
    مدرک به نقش بستگی دارد و هرکدام جای خودش را دارد:
-     باشگاه‌دار     ⇐ جوازِ کسبِ باشگاه (clubs.licenseDocumentUrl + licenseVerified)
-     مربی/داور/…    ⇐ مدرکِ پروفایلِ همان نقش (profiles.license_url + license_verified)
-     کاربرِ ساده     ⇐ مدرکی لازم نیست
+     باشگاه‌دار     ⇐ جواز کسب باشگاه (clubs.licenseDocumentUrl + licenseVerified)
+     مربی/داور/…    ⇐ مدرک پروفایل همان نقش (profiles.license_url + license_verified)
+     کاربر ساده     ⇐ مدرکی لازم نیست
 
    سه حالت برمی‌گردد، نه دو تا: «لازم نیست» با «هنوز نداده» فرق دارد
-   و کاربرِ ساده نباید ردیفِ قرمزِ همیشگی ببیند. */
+   و کاربر ساده نباید ردیف قرمز همیشگی ببیند. */
 
 type State = 'verified' | 'pending' | 'missing' | 'not_required';
 
@@ -52,14 +52,14 @@ export async function GET(req: NextRequest) {
   const roles = [u.primaryRole, ...(Array.isArray(u.secondaryRoles) ? u.secondaryRoles : [])]
     .filter((r): r is string => typeof r === 'string' && !!r);
 
-  /* ── باشگاه‌دار: جوازِ کسب ── */
+  /* ── باشگاه‌دار: جواز کسب ── */
   if (roles.includes('club_owner')) {
     const { data: clubs } = await sb().from('clubs')
       .select('"licenseDocumentUrl","licenseVerified"').eq('ownerId', actor.id);
     const list = (clubs ?? []) as { licenseDocumentUrl?: string | null; licenseVerified?: boolean }[];
 
-    /* یک باشگاهِ تأییدشده کافی است؛ ولی اگر هیچ‌کدام تأیید نشده، وضعیت
-       سخت‌گیرانه‌ترین حالتِ ممکن است. */
+    /* یک باشگاه تأییدشده کافی است؛ ولی اگر هیچ‌کدام تأیید نشده، وضعیت
+       سخت‌گیرانه‌ترین حالت ممکن است. */
     const approved = list.some(c => !!c.licenseVerified);
     const uploaded = list.some(c => !!String(c.licenseDocumentUrl ?? '').trim());
 

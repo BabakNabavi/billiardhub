@@ -1,26 +1,26 @@
 'use client'
 
 /* ═══════════════════════════════════════════════════════════════
-   ویرایشِ آگهی — همان فرمِ ثبت، با داده‌ی پرشده.
+   ویرایش آگهی — همان فرم ثبت، با داده‌ی پرشده.
    ───────────────────────────────────────────────────────────────
-   نسخه‌ی قبلیِ این صفحه یک فرمِ جداگانه بود که هیچ‌چیزِ فرمِ ثبت را
-   نمی‌شناخت. چهار خرابیِ واقعی داشت:
+   نسخه‌ی قبلی این صفحه یک فرم جداگانه بود که هیچ‌چیز فرم ثبت را
+   نمی‌شناخت. چهار خرابی واقعی داشت:
 
-   ۱. فهرستِ دسته‌بندی‌اش دستی و غلط بود — «آموزشی» داشت که اصلاً
+   ۱. فهرست دسته‌بندی‌اش دستی و غلط بود — «آموزشی» داشت که اصلا
       دسته نیست، و «تیپ»، «گچ»، «پارچه»، «اکستنشن»، «رست»،
-      «روغن»، «حوله»، «کیس چوب» و «کیف توپ» را نداشت. آگهیِ تیپ که
+      «روغن»، «حوله»، «کیس چوب» و «کیف توپ» را نداشت. آگهی تیپ که
       باز می‌شد، دسته‌اش روی «میز بیلیارد» می‌افتاد و **ذخیره،
-      دسته‌ی آگهی را واقعاً عوض می‌کرد.**
-   ۲. فیلدِ «نوع» نداشت. نامِ کارت در بازار از «دسته + نوع» ساخته
-      می‌شود، پس نوعِ غلط یعنی کارتِ غلط — و راهی برای اصلاحش نبود.
-   ۳. مشخصاتِ فنی را جدولِ خامِ «برچسب/مقدار» نشان می‌داد: فروشنده
+      دسته‌ی آگهی را واقعا عوض می‌کرد.**
+   ۲. فیلد «نوع» نداشت. نام کارت در بازار از «دسته + نوع» ساخته
+      می‌شود، پس نوع غلط یعنی کارت غلط — و راهی برای اصلاحش نبود.
+   ۳. مشخصات فنی را جدول خام «برچسب/مقدار» نشان می‌داد: فروشنده
       به‌جای «جنس شفت» می‌دید «shaftMaterial».
-   ۴. قیمتِ آگهیِ تخفیف‌دار را خراب می‌کرد. ستونِ `price` قیمتِ
-      خط‌خورده است و `discountPrice` قیمتِ پرداختی؛ این صفحه هر دو
-      را برعکس می‌خواند و بعد از تقسیم بر درصدِ تخفیف، عددی نجومی
+   ۴. قیمت آگهی تخفیف‌دار را خراب می‌کرد. ستون `price` قیمت
+      خط‌خورده است و `discountPrice` قیمت پرداختی؛ این صفحه هر دو
+      را برعکس می‌خواند و بعد از تقسیم بر درصد تخفیف، عددی نجومی
       می‌ساخت.
 
-   حالا همان اجزای فرمِ ثبت را وارد می‌کند
+   حالا همان اجزای فرم ثبت را وارد می‌کند
    (`components/market/AdFormFields`, `lib/market/chain`,
    `lib/market/specs`) — پس هر تغییری در یکی، در دیگری هم هست.
    ═══════════════════════════════════════════════════════════════ */
@@ -51,7 +51,7 @@ import {
   AlertDialog,
 } from '../../../../components/market/AdFormFields'
 
-/* کلیدهایی که فرمِ ثبت داخلِ specs می‌گذارد ولی بالای فرم فیلدِ خودشان را دارند */
+/* کلیدهایی که فرم ثبت داخل specs می‌گذارد ولی بالای فرم فیلد خودشان را دارند */
 const TOP_LEVEL_SPEC_KEYS = ['نوع', 'مدل']
 
 interface ImgSlot { data: string; name: string; file: File }
@@ -67,10 +67,10 @@ export default function EditProductPage() {
   const [submitting, setSubmitting] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [saved, setSaved] = useState(false)
-  /* پیام‌ها وسطِ صفحه می‌آیند، نه نوارِ بالای فرم — همان دلیلِ فرمِ ثبت */
+  /* پیام‌ها وسط صفحه می‌آیند، نه نوار بالای فرم — همان دلیل فرم ثبت */
   const [alert, setAlert] = useState<{ title: string; lines: string[] } | null>(null)
 
-  /* آگهیِ محلی (userProducts) — آگهی‌های قدیمیِ ساخته‌شده پیش از انتقال به سرور */
+  /* آگهی محلی (userProducts) — آگهی‌های قدیمی ساخته‌شده پیش از انتقال به سرور */
   const [isLocal, setIsLocal] = useState(false)
   const localRef = useRef<Record<string, unknown> | null>(null)
 
@@ -84,11 +84,11 @@ export default function EditProductPage() {
   const [specs, setSpecs] = useState<Record<string, unknown>>({})
   const [rawSpecs, setRawSpecs] = useState<Record<string, unknown>>({})
   const [specOthers, setSpecOthers] = useState<Record<string, string>>({})
-  /* کلیدهایی که در تعریفِ دسته نیستند (داده‌ی قدیمی یا دسته‌ی عوض‌شده).
-     حذف نمی‌شوند — وگرنه ویرایشِ یک آگهی، چیزی را که فروشنده وارد
+  /* کلیدهایی که در تعریف دسته نیستند (داده‌ی قدیمی یا دسته‌ی عوض‌شده).
+     حذف نمی‌شوند — وگرنه ویرایش یک آگهی، چیزی را که فروشنده وارد
      کرده بی‌صدا می‌بلعد. */
   const [legacySpecs, setLegacySpecs] = useState<{ key: string; value: unknown }[]>([])
-  /* انتخابِ چوب و نامِ رشته‌ایِ آگهیِ موجود، تا انتخابگر بتواند
+  /* انتخاب چوب و نام رشته‌ای آگهی موجود، تا انتخابگر بتواند
      یک‌بار آن را به شناسه نگاشت کند */
   const [cue, setCue] = useState<CatalogValue>(EMPTY_CATALOG_VALUE)
   const [legacyCue, setLegacyCue] = useState<{ brand: string; model: string } | undefined>(undefined)
@@ -98,21 +98,21 @@ export default function EditProductPage() {
   const [dragging, setDragging] = useState(false)
   const fileRef = useRef<HTMLInputElement>(null)
 
-  // ── هیدراته‌کردنِ فرم از یک رکورد ────────────────────────────
+  // ── هیدراته‌کردن فرم از یک رکورد ────────────────────────────
   const hydrate = useCallback((p: Record<string, any>, opts: { local: boolean }) => {
     const category = normalizeCategory(p.category)
-    /* نوعِ ذخیره‌شده از همان نگاشتِ نمایش می‌گذرد: «کیس سخت» دقیقاً
-       همان «هارد کیس»ِ کاتالوگ است، پس روی گزینه‌ی واقعی می‌نشیند و
-       ذخیره‌ی بعدی شناسه‌اش را هم می‌نویسد — نه دو ردیفِ هم‌معنا. */
+    /* نوع ذخیره‌شده از همان نگاشت نمایش می‌گذرد: «کیس سخت» دقیقا
+       همان «هارد کیس» کاتالوگ است، پس روی گزینه‌ی واقعی می‌نشیند و
+       ذخیره‌ی بعدی شناسه‌اش را هم می‌نویسد — نه دو ردیف هم‌معنا. */
     const type = modernizeType(String(p.type ?? p.specs?.['نوع'] ?? '').trim())
 
-    /* برند/مدل/نوع: اگر مقدارِ ذخیره‌شده در فهرستِ دراپ‌داون نباشد،
-       «سایر» انتخاب می‌شود و خودِ متن در فیلدِ کناری می‌نشیند —
-       وگرنه باز کردنِ فرم، برندِ فروشنده را پاک می‌کرد.
+    /* برند/مدل/نوع: اگر مقدار ذخیره‌شده در فهرست دراپ‌داون نباشد،
+       «سایر» انتخاب می‌شود و خود متن در فیلد کناری می‌نشیند —
+       وگرنه باز کردن فرم، برند فروشنده را پاک می‌کرد.
 
-       ترتیب مهم است: فهرستِ برند به «نوع» وابسته است و فهرستِ مدل به
+       ترتیب مهم است: فهرست برند به «نوع» وابسته است و فهرست مدل به
        (نوع، برند). پس هر مرحله با همان مقداری حساب می‌شود که در
-       رندر هم استفاده می‌شود، نه با مقدارِ خام. */
+       رندر هم استفاده می‌شود، نه با مقدار خام. */
     const rawBrand = String(p.brand ?? '').trim()
     const rawModel = String(p.model ?? p.specs?.['مدل'] ?? '').trim()
 
@@ -126,8 +126,8 @@ export default function EditProductPage() {
     const mOpts = modelOptionsFor(category, typeValue, brandValue)
     const modelInList = !!mOpts && mOpts.includes(rawModel)
 
-    /* قیمت: ستونِ `price` قیمتِ خط‌خورده است وقتی تخفیف هست، و
-       `discountPrice` قیمتِ پرداختی. */
+    /* قیمت: ستون `price` قیمت خط‌خورده است وقتی تخفیف هست، و
+       `discountPrice` قیمت پرداختی. */
     let current = 0, struck = 0
     if (opts.local) {
       current = Number(p.price) || 0
@@ -156,14 +156,14 @@ export default function EditProductPage() {
       city: String(p.city ?? p.sellerCity ?? ''),
     })
 
-    /* ── مشخصاتِ فنی ──
-       تعریفِ فیلدها با fetch می‌آید و ممکن است هنوز نرسیده باشد، پس
-       این‌جا فقط مقدارِ **خام** نگه داشته می‌شود و تفکیکِ
+    /* ── مشخصات فنی ──
+       تعریف فیلدها با fetch می‌آید و ممکن است هنوز نرسیده باشد، پس
+       این‌جا فقط مقدار **خام** نگه داشته می‌شود و تفکیک
        «شناخته‌شده / باقی‌مانده» در یک effect انجام می‌شود که به
        `specDefs` وابسته است.
 
-       ⚠️ نسخه‌ی قبلی این‌جا با فهرستِ قدیمیِ `CATEGORY_SPECS` تفکیک
-       می‌کرد. نتیجه‌اش این بود که کلیدهای دسته‌هایی که کاتالوگِ تازه
+       ⚠️ نسخه‌ی قبلی این‌جا با فهرست قدیمی `CATEGORY_SPECS` تفکیک
+       می‌کرد. نتیجه‌اش این بود که کلیدهای دسته‌هایی که کاتالوگ تازه
        ندارند (توپ، تیپ، گچ) «شناخته‌شده» حساب می‌شدند، هیچ‌جا رندر
        نمی‌شدند، در `legacySpecs` هم نبودند — و ذخیره‌ی دوباره
        **پاکشان می‌کرد**. */
@@ -187,7 +187,7 @@ export default function EditProductPage() {
         if (!alive) return
         hydrate(p, { local: false })
         return
-      } catch { /* پایین‌تر: فالبکِ محلی */ }
+      } catch { /* پایین‌تر: فالبک محلی */ }
 
       if (!alive) return
       try {
@@ -199,7 +199,7 @@ export default function EditProductPage() {
           hydrate({ ...p, description: p.description, images: p.images ?? (p.img ? [p.img] : []) }, { local: true })
           return
         }
-      } catch { /* localStorage خراب — مثلِ نبودِ آگهی رفتار می‌کند */ }
+      } catch { /* localStorage خراب — مثل نبود آگهی رفتار می‌کند */ }
       setNotFound(true)
       setPageLoading(false)
     })()
@@ -220,14 +220,14 @@ export default function EditProductPage() {
   }
   const setType = (v: string) => {
     /* ── فهرست‌های وابسته به نوع پاک می‌شوند ──
-       بدونِ پاک‌شدن، `12ft` روی پاکت و قطرِ اسنوکر روی کارامبول
+       بدون پاک‌شدن، `12ft` روی پاکت و قطر اسنوکر روی کارامبول
        می‌ماند — دراپ‌داون خالی نشان می‌دهد و سرور ۴۰۰. فهرست از
-       خودِ تعریفِ فیلدها می‌آید، نه دستی. */
+       خود تعریف فیلدها می‌آید، نه دستی. */
     setSpecs(s => {
       const n = { ...s }
       for (const k of typeDependentKeys(specDefs, form.category)) delete n[k]
-      /* ── نوعی که خودش یک فیلدِ مشخصات است ──
-         بالای فرم برچسبِ فارسی انتخاب می‌شود ولی ذخیره‌شدنی شناسه
+      /* ── نوعی که خودش یک فیلد مشخصات است ──
+         بالای فرم برچسب فارسی انتخاب می‌شود ولی ذخیره‌شدنی شناسه
          است؛ وگرنه صفحه‌ی آگهی و فیلترها مقدار را پیدا نمی‌کنند. */
       if (specTypeField) n[specKey(specTypeField.id)] = optionIdOf(specTypeField, v)
       return n
@@ -239,8 +239,8 @@ export default function EditProductPage() {
     })
     setForm(f => ({ ...f, type: v, typeOther: '', ...(isTypeDrivenCategory(f.category) ? { brand: '', brandOther: '', model: '', modelOther: '' } : {}) }))
     setErrors(e => { const n = { ...e }; delete n.type; if (isTypeDrivenCategory(form.category)) { delete n.brand; delete n.model } return n })
-    /* برندها بینِ نوع‌ها مشترک نیستند و سایزها هم — شناسه‌ی نوعِ
-       قبلی روی نوعِ تازه بی‌معناست و سرور ردش می‌کند. */
+    /* برندها بین نوع‌ها مشترک نیستند و سایزها هم — شناسه‌ی نوع
+       قبلی روی نوع تازه بی‌معناست و سرور ردش می‌کند. */
     setCue(EMPTY_CATALOG_VALUE)
   }
   const setBrand = (v: string) => {
@@ -250,28 +250,28 @@ export default function EditProductPage() {
 
   /* چوب از کاتالوگ می‌آید؛ بقیه‌ی دسته‌ها از chain.ts */
   /* ── کدام دسته‌ها کاتالوگ دارند ──
-     پنج دسته کاتالوگِ خودشان را دارند و ده دسته‌ی لوازم زیرِ یک
-     کاتالوگِ مشترک‌اند که نوعش همان دسته است. */
-  /* سوییچِ «پلمب / استفاده‌نشده» — وضعیتِ کالا را قطعی می‌کند */
+     پنج دسته کاتالوگ خودشان را دارند و ده دسته‌ی لوازم زیر یک
+     کاتالوگ مشترک‌اند که نوعش همان دسته است. */
+  /* سوییچ «پلمب / استفاده‌نشده» — وضعیت کالا را قطعی می‌کند */
   const sealed = specs.isSealed === true
   /* ── یک مقدار، نه دو ──
-     نمایشِ «نو» بدونِ عوض‌شدنِ خودِ مقدار یعنی فروشنده «نو» می‌دید و
+     نمایش «نو» بدون عوض‌شدن خود مقدار یعنی فروشنده «نو» می‌دید و
      سرور «کارکرده» ذخیره می‌کرد. همه‌ی مصرف‌کننده‌ها — دراپ‌داون،
      پیش‌نمایش و بدنه‌ی درخواست — از همین یکی می‌خوانند. */
   const effCondition = sealed ? 'new' : form.condition
   const catCategory: CatalogId | null =
     isProductCatalog(form.category) ? form.category
       : isAccessoryCategory(form.category) ? 'accessories' : null
-  /* پارچه دو جا هست: کاتالوگِ خودش (برند/مدل) و دسته‌ی لوازم
-     (مشخصات). برندش از کاتالوگِ پارچه می‌آید، نه از لوازم. */
+  /* پارچه دو جا هست: کاتالوگ خودش (برند/مدل) و دسته‌ی لوازم
+     (مشخصات). برندش از کاتالوگ پارچه می‌آید، نه از لوازم. */
   const catTypeId = catCategory === 'accessories'
     ? ACCESSORY_TYPE_OF[form.category] ?? ''
     : catCategory ? typeIdOf(catCategory, form.type) : ''
-  /* همان ورودیِ کش‌شده‌ی انتخابگر — درخواستِ تازه‌ای نمی‌زند */
+  /* همان ورودی کش‌شده‌ی انتخابگر — درخواست تازه‌ای نمی‌زند */
   const catFreeInput = !!useCatalogType(catCategory ?? 'cue', catCategory ? catTypeId : '').data?.forceFreeInput
   const { fields: catalogSpecs, loading: specsLoading } = useSpecFields(form.category)
   /* ── دسته‌هایی که هنوز در کاتالوگ نیستند ──
-     تیپ، گچ و کیس تعریفِ دستیِ خودشان را در `specs.ts` دارند. بدونِ
+     تیپ، گچ و کیس تعریف دستی خودشان را در `specs.ts` دارند. بدون
      این پل، فرمشان فقط «وضعیت کالا» نشان می‌داد — همان چیزی که
      انتقال به کاتالوگ بی‌صدا شکسته بود. */
   const specDefs = useMemo(
@@ -282,18 +282,18 @@ export default function EditProductPage() {
   )
   /* ── «نوع» از کجا می‌آید ──
      شش دسته‌ی کاتالوگ‌دار فهرستشان در `TYPE_OPTIONS` است. ده دسته‌ی
-     لوازم ندارند؛ زیرمجموعه‌شان یک **فیلدِ مشخصات** است:
+     لوازم ندارند؛ زیرمجموعه‌شان یک **فیلد مشخصات** است:
      `case_type` (۶ گزینه)، `bag_type` (۵)، `ext_type`، `rest_type`،
      `oil_type`، `accessory_type` (۲۲).
 
      ── چرا کیس و کیف هم از این‌جا می‌آیند ──
-     تا دیروز `TYPE_OPTIONS` یک فهرستِ چهارتاییِ مشترک برایشان داشت
+     تا دیروز `TYPE_OPTIONS` یک فهرست چهارتایی مشترک برایشان داشت
      که با برچسب‌های کاتالوگ یکی نبود. نتیجه‌اش بی‌صدا بود:
-     `optionIdOf` برای برچسبِ بی‌تطبیق رشته‌ی خالی برمی‌گرداند، پس
-     هر آگهیِ کیفِ توپ با `bagType: ''` ذخیره می‌شد — هیچ‌کدام از
+     `optionIdOf` برای برچسب بی‌تطبیق رشته‌ی خالی برمی‌گرداند، پس
+     هر آگهی کیف توپ با `bagType: ''` ذخیره می‌شد — هیچ‌کدام از
      «هارد کیس/سافت کیس/کیف/کوله‌پشتی» در `bag_type` نبود.
 
-     فیلد همیشه پیدا می‌شود تا از کارتِ مشخصات برداشته شود؛ فهرست
+     فیلد همیشه پیدا می‌شود تا از کارت مشخصات برداشته شود؛ فهرست
      فقط وقتی از آن می‌آید که `TYPE_OPTIONS` چیزی نداشته باشد. */
   const specTypeField = formTypeFieldOf(specDefs)
   const typeChoices: string[] | undefined = TYPE_OPTIONS[form.category]
@@ -302,12 +302,12 @@ export default function EditProductPage() {
       ? [...(specTypeField.options ?? []).map(o => o.label_fa),
         ...(specTypeField.allow_other ? ['سایر'] : [])]
       : undefined)
-  /* مقدارِ فعلی همیشه در فهرست می‌ماند — دلیلش در `withCurrent` */
+  /* مقدار فعلی همیشه در فهرست می‌ماند — دلیلش در `withCurrent` */
   const typeOptions = withCurrent(typeChoices, form.type)
 
-  /* ── تفکیکِ مقدارِ خام، وقتی تعریفِ فیلدها رسید ──
+  /* ── تفکیک مقدار خام، وقتی تعریف فیلدها رسید ──
      هرچه در کاتالوگ نیست دست‌نخورده در `legacySpecs` می‌ماند و
-     موقعِ ذخیره عیناً برمی‌گردد — بولین و آرایه هم به رشته تبدیل
+     موقع ذخیره عینا برمی‌گردد — بولین و آرایه هم به رشته تبدیل
      نمی‌شوند، وگرنه `['balls','cues']` می‌شد «balls,cues» و
      دفعه‌ی بعد دیگر آرایه نبود. */
   useEffect(() => {
@@ -318,7 +318,7 @@ export default function EditProductPage() {
     for (const [k, v] of Object.entries(rawSpecs)) {
       if (v === undefined || v === null || v === '') continue
       if (TOP_LEVEL_SPEC_KEYS.includes(k)) continue
-      /* کلیدِ جفتِ «سایر» را کنارِ کلیدِ اصلی برمی‌داریم. اگر کلیدِ
+      /* کلید جفت «سایر» را کنار کلید اصلی برمی‌داریم. اگر کلید
          اصلی در کاتالوگ نباشد، این هم باید باقی‌مانده بماند وگرنه
          متنی که فروشنده نوشته بی‌صدا پاک می‌شود. */
       if (k.endsWith('_other')) {
@@ -329,7 +329,7 @@ export default function EditProductPage() {
       if (!known.has(k)) { leftovers.push({ key: k, value: v }); continue }
       const other = rawSpecs[`${k}_other`]
       if (other) { nextSpecs[k] = '__other__'; nextOthers[k] = String(other).trim(); continue }
-      /* آگهیِ قدیمی «سایر: متن» ذخیره می‌کرد */
+      /* آگهی قدیمی «سایر: متن» ذخیره می‌کرد */
       const s = typeof v === 'string' ? v : ''
       if (s.startsWith('سایر:')) { nextSpecs[k] = '__other__'; nextOthers[k] = s.slice('سایر:'.length).trim(); continue }
       nextSpecs[k] = v
@@ -341,20 +341,20 @@ export default function EditProductPage() {
   const cloth = useCatalogType('cloth', form.category === 'table' ? catTypeId : '')
   const tableCat = useCatalogType('table', form.category === 'table' ? catTypeId : '')
   const tipCat = useCatalogType('tip', form.category === 'tip' ? catTypeId : '')
-  /* payloadِ همان دسته‌ای که الان فعال است — برای پر شدنِ خودکار */
+  /* payload همان دسته‌ای که الان فعال است — برای پر شدن خودکار */
   const activeCat = useCatalogType(catCategory ?? 'cue', catCategory ? catTypeId : '')
   const catData = activeCat.data
   const clothBrandId = String(specs.clothBrand ?? '')
 
   const sourceOptionsFor = (id: string): FancyOption[] | undefined => {
-    /* قطرِ تیپ هم `source: types[].sizes` دارد — همان مکانیزمِ
-       سایزِ میز، فقط از کاتالوگِ تیپ. */
+    /* قطر تیپ هم `source: types[].sizes` دارد — همان مکانیزم
+       سایز میز، فقط از کاتالوگ تیپ. */
     if (id === 'diameter' && form.category === 'tip') {
       return sizeOptions(tipCat.data?.sizes)
     }
     /* ── توپ ──
-       قطر و «نوع ست» هر دو به نوعِ توپ وابسته‌اند و از همان
-       payloadِ فعال می‌آیند؛ منبعشان در JSON نوشته شده. */
+       قطر و «نوع ست» هر دو به نوع توپ وابسته‌اند و از همان
+       payload فعال می‌آیند؛ منبعشان در JSON نوشته شده. */
     if (form.category === 'ball' && (id === 'diameter_mm' || id === 'set_type')) {
       return sizeOptions(id === 'diameter_mm' ? catData?.sizes : catData?.setTypes)
     }
@@ -390,11 +390,11 @@ export default function EditProductPage() {
     return undefined
   }
 
-  /* آبشار از خودِ داده می‌آید: `depends_on` وابسته‌ها را پاک
-     می‌کند و `auto_from` مقدارِ خودکار را می‌نشاند. پیش‌تر هر دو
-     این‌جا هاردکد بودند و اضافه‌شدنِ وابستگیِ بعدی کد می‌خواست. */
+  /* آبشار از خود داده می‌آید: `depends_on` وابسته‌ها را پاک
+     می‌کند و `auto_from` مقدار خودکار را می‌نشاند. پیش‌تر هر دو
+     این‌جا هاردکد بودند و اضافه‌شدن وابستگی بعدی کد می‌خواست. */
   const onSpecChange = (field: SpecField, v: unknown) => {
-    /* ویژگی‌های مدلِ پارچه — منبعِ پر شدنِ خودکارِ نوع و وزن */
+    /* ویژگی‌های مدل پارچه — منبع پر شدن خودکار نوع و وزن */
     let picked: Record<string, string | undefined> | undefined
     if (field.id === 'cloth_model') {
       const br = cloth.data?.brands.find(b => b.id === clothBrandId)
@@ -405,11 +405,11 @@ export default function EditProductPage() {
     setErrors(er => { const n = { ...er }; delete n[specKey(field.id)]; return n })
   }
 
-  /* رشته برای نمایش، شناسه برای یکپارچگی — همان قاعده‌ی فرمِ ثبت */
+  /* رشته برای نمایش، شناسه برای یکپارچگی — همان قاعده‌ی فرم ثبت */
   const onCatalogChange = (v: CatalogValue, labels: { brand: string; model: string }) => {
-    /* ── مدلِ کاتالوگ، مشخصات را پر می‌کند ──
-       مدلِ تیپ سختی و ساختار و Shore D را با خودش دارد. برند و
-       مدل بالای فرم‌اند و هرگز از مسیرِ `onSpecChange` نمی‌گذرند،
+    /* ── مدل کاتالوگ، مشخصات را پر می‌کند ──
+       مدل تیپ سختی و ساختار و Shore D را با خودش دارد. برند و
+       مدل بالای فرم‌اند و هرگز از مسیر `onSpecChange` نمی‌گذرند،
        پس این‌جا انجام می‌شود. قفل نمی‌شوند. */
     const picked = v.modelId && v.modelId !== '__other__'
       ? catData?.brands.find(b => b.id === v.brandId)?.models.find(m => m.id === v.modelId)
@@ -451,10 +451,10 @@ export default function EditProductPage() {
     const e: Record<string, string> = {}
     if (!form.category) e.category = 'دسته‌بندی را انتخاب کنید'
     if (!effType) e.type = form.type === 'سایر' ? 'برای «سایر» توضیح بنویسید' : 'نوع را مشخص کنید'
-    /* ── برندِ اختیاری ──
-       نوعی که `force_free_input` دارد («میز خانگی») اغلب برندِ
+    /* ── برند اختیاری ──
+       نوعی که `force_free_input` دارد («میز خانگی») اغلب برند
        مشخصی ندارد؛ اجبار یا آگهی را رها می‌کند یا داده‌ی الکی
-       می‌سازد. شرط روی پرچمِ داده است نه شناسه‌ی نوع. */
+       می‌سازد. شرط روی پرچم داده است نه شناسه‌ی نوع. */
     if (!effBrand && !catFreeInput) e.brand = "برند الزامی است"
     if (!form.negotiable && !form.price) e.price = 'قیمت را وارد کنید یا «توافقی» را بزنید'
     if (!form.negotiable && form.price && form.oldPrice) {
@@ -468,21 +468,21 @@ export default function EditProductPage() {
   }
 
   // ── ذخیره ─────────────────────────────────────────────────────
-  /* ── ساختِ مقدارِ ستونِ specs ──
-     شناسه ذخیره می‌شود نه برچسب: بدونش فرمِ ویرایش نمی‌تواند گزینه
-     را از روی متنِ فارسی پیدا کند. `legacySpecs` کلیدهایی‌اند که در
+  /* ── ساخت مقدار ستون specs ──
+     شناسه ذخیره می‌شود نه برچسب: بدونش فرم ویرایش نمی‌تواند گزینه
+     را از روی متن فارسی پیدا کند. `legacySpecs` کلیدهایی‌اند که در
      کاتالوگ نیستند و دست‌نخورده منتقل می‌شوند تا چیزی گم نشود. */
   const buildSpecs = () => {
     const out: Record<string, unknown> = { نوع: effType, مدل: effModel }
     /* باقی‌مانده‌ها **اول** ریخته می‌شوند تا حلقه‌ی کاتالوگ رویشان
-       بنویسد؛ برعکسش یعنی مقدارِ قدیمی روی چیزی که کاربر همین حالا
+       بنویسد؛ برعکسش یعنی مقدار قدیمی روی چیزی که کاربر همین حالا
        عوض کرده می‌نشیند. */
     legacySpecs.forEach(({ key, value }) => {
       if (typeof value === 'string' ? value.trim() : value !== undefined && value !== null) out[key] = value
     })
     for (const f of specDefs) {
       /* ── فیلدی که دیده نمی‌شود ذخیره هم نمی‌شود ──
-         «رنگ توپ» را با نوعِ «تکی» پر کن و بعد نوع را به اسنوکر
+         «رنگ توپ» را با نوع «تکی» پر کن و بعد نوع را به اسنوکر
          عوض کن: فیلد از فرم می‌رود ولی مقدارش می‌ماند و در صفحه‌ی
          جزئیات ظاهر می‌شود. */
       if (isFieldHidden(f, specs, specDefs, catTypeId)) continue
@@ -503,9 +503,9 @@ export default function EditProductPage() {
 
   const handleSubmit = (ev: React.FormEvent) => {
     ev.preventDefault()
-    /* ── تعریفِ فیلدها هنوز نرسیده ──
-       بدونِ آن، حلقه‌ی سریال‌سازی روی آرایه‌ی خالی می‌چرخد و آگهی
-       بدونِ هیچ مشخصه‌ای ذخیره می‌شود. روی موبایلِ کند نادر نیست. */
+    /* ── تعریف فیلدها هنوز نرسیده ──
+       بدون آن، حلقه‌ی سریال‌سازی روی آرایه‌ی خالی می‌چرخد و آگهی
+       بدون هیچ مشخصه‌ای ذخیره می‌شود. روی موبایل کند نادر نیست. */
     if (specsLoading) {
       setAlert({ title: 'لحظه‌ای صبر کنید', lines: ['فهرست مشخصات فنی هنوز بارگذاری نشده است.'] })
       return
@@ -522,18 +522,18 @@ export default function EditProductPage() {
     const price = Number(toAsciiDigits(form.price).replace(/\D/g, '')) || 0
     const oldRaw = form.oldPrice ? Number(toAsciiDigits(form.oldPrice).replace(/\D/g, '')) : 0
     const old = oldRaw > price ? oldRaw : price
-    /* نامِ آگهی دقیقاً مثلِ فرمِ ثبت ساخته می‌شود — «دسته + نوع».
-       اگر این‌جا فرقی داشت، ویرایشِ ساده‌ی یک آگهی، عنوانِ کارتش را
+    /* نام آگهی دقیقا مثل فرم ثبت ساخته می‌شود — «دسته + نوع».
+       اگر این‌جا فرقی داشت، ویرایش ساده‌ی یک آگهی، عنوان کارتش را
        در بازار عوض می‌کرد. */
-    /* همان تابعی که فرمِ ثبت استفاده می‌کند — بدونش، ذخیره‌ی دوباره‌ی
-       یک آگهیِ قدیمی «اکسسوری …» و «کیس سخت» را برمی‌گرداند روی
+    /* همان تابعی که فرم ثبت استفاده می‌کند — بدونش، ذخیره‌ی دوباره‌ی
+       یک آگهی قدیمی «اکسسوری …» و «کیس سخت» را برمی‌گرداند روی
        عنوانی که تازه تمیز شده بود. */
     const composedName = modernizeType([catLabel, effType].filter(Boolean).join(' '))
       || [effBrand, effModel].filter(Boolean).join(' ') || 'محصول'
 
     void (async () => {
       try {
-        // ── آگهیِ محلی ──
+        // ── آگهی محلی ──
         if (isLocal) {
           const urls = await Promise.all(newImages.map(s => compressImage(s.file, 1200, 0.7)))
           const imgs = [...existingImages, ...urls].filter(Boolean)
@@ -544,14 +544,14 @@ export default function EditProductPage() {
             brand: effBrand, model: effModel,
             cueType: form.category === 'cue' ? catTypeId || undefined : undefined,
             tableType: form.category === 'table' ? catTypeId || undefined : undefined,
-            /* پارچه ستونِ نوع ندارد؛ این فقط برای اعتبارسنجیِ سرور
+            /* پارچه ستون نوع ندارد؛ این فقط برای اعتبارسنجی سرور
                است تا بداند برند به کدام رشته تعلق دارد. */
             catalogType: catTypeId || null,
             brandId: catTypeId && cue.brandId !== '__other__' ? cue.brandId : null,
             modelId: catTypeId && cue.modelId !== '__other__' ? cue.modelId : null,
             tableSizeId: form.category === 'table' && specs.size && specs.size !== '__other__' ? String(specs.size) : null,
             tableSizeCustom: form.category === 'table' && specs.size === '__other__' ? (specOthers.size ?? '').trim() || null : null,
-            /* پارچه: شناسه کنارِ رشته، مثل برندِ خودِ محصول */
+            /* پارچه: شناسه کنار رشته، مثل برند خود محصول */
             clothBrandId: form.category === 'table' && specs.clothBrand && specs.clothBrand !== '__other__' ? String(specs.clothBrand) : null,
             clothBrandCustom: form.category === 'table' && specs.clothBrand === '__other__' ? (specOthers.clothBrand ?? '').trim() || null : null,
             clothModelId: form.category === 'table' && specs.clothModel && specs.clothModel !== '__other__' ? String(specs.clothModel) : null,
@@ -573,7 +573,7 @@ export default function EditProductPage() {
           return
         }
 
-        // ── آگهیِ سرور ──
+        // ── آگهی سرور ──
         const stamp = Date.now()
         const uploaded: string[] = []
         for (let i = 0; i < newImages.length; i++) {
@@ -594,9 +594,9 @@ export default function EditProductPage() {
             brand: effBrand, model: effModel,
             cueType: form.category === 'cue' ? catTypeId || undefined : undefined,
             tableType: form.category === 'table' ? catTypeId || undefined : undefined,
-            /* بقیه‌ی کاتالوگ‌ها ستونِ خودشان را ندارند و نوع را از همین
+            /* بقیه‌ی کاتالوگ‌ها ستون خودشان را ندارند و نوع را از همین
                فیلد می‌گیرند. نبودنش یعنی سرور نوع را نمی‌داند و فیلدهای
-               وابسته به نوع را اشتباه می‌سنجد — آگهیِ توپ ویرایش‌ناپذیر
+               وابسته به نوع را اشتباه می‌سنجد — آگهی توپ ویرایش‌ناپذیر
                می‌شد. */
             catalogType: catTypeId || undefined,
             brandId: catTypeId && cue.brandId !== '__other__' ? cue.brandId : null,
@@ -616,8 +616,8 @@ export default function EditProductPage() {
           const j = await r.json().catch(() => ({}))
 
         /* ── خطای فیلد از سرور ──
-           سرور برای انتخابِ نامعتبرِ کاتالوگ نقشه‌ی خطا برمی‌گرداند.
-           بدونِ نشاندنش روی فیلد، کاربر فقط یک پیامِ کلی می‌دید و
+           سرور برای انتخاب نامعتبر کاتالوگ نقشه‌ی خطا برمی‌گرداند.
+           بدون نشاندنش روی فیلد، کاربر فقط یک پیام کلی می‌دید و
            نمی‌فهمید کدام باکس ایراد دارد. */
         if (j?.errors && typeof j.errors === 'object') {
           setErrors(e => ({ ...e, ...(j.errors as Record<string, string>) }))
@@ -665,11 +665,11 @@ export default function EditProductPage() {
   const HIDE_SPEC = new Set(['brand', 'model', 'cue_type', 'table_type', 'condition'])
   /* فیلدی که بالای فرم پرسیده شد این‌جا تکرار نمی‌شود */
   const usableSpecs = specDefs.filter(f => !HIDE_SPEC.has(f.id) && f.id !== specTypeField?.id)
-                  /* فیلدی که شرطش برقرار نیست اصلاً رندر نمی‌شود —
-                     «تعداد لایه» برای تیپِ تک‌لایه و «نوع نگهدارنده»
-                     وقتی نگهدارنده‌ای نیست. از شمارشِ پیشرفت هم بیرون
+                  /* فیلدی که شرطش برقرار نیست اصلا رندر نمی‌شود —
+                     «تعداد لایه» برای تیپ تک‌لایه و «نوع نگهدارنده»
+                     وقتی نگهدارنده‌ای نیست. از شمارش پیشرفت هم بیرون
                      است، وگرنه هدفی شمرده می‌شد که دیده نمی‌شود. */
-                  /* وابستگی از `specDefs` — دلیلش در فرمِ ثبت */
+                  /* وابستگی از `specDefs` — دلیلش در فرم ثبت */
                   const shown = usableSpecs.filter(f => !isFieldHidden(f, specs, specDefs, catTypeId))
                   const { main: mainSpecs, toggles: toggleSpecs } = splitFields(shown)
   const specProgress = countFilled(shown, specs)
@@ -694,7 +694,7 @@ export default function EditProductPage() {
 
         <div style={{ position: 'relative', zIndex: 1, maxWidth: 1180, margin: '0 auto', padding: 'clamp(18px,3vw,32px) clamp(14px,3vw,28px) 80px' }}>
 
-          {/* ── راهِ برگشت ── */}
+          {/* ── راه برگشت ── */}
           <div style={{ marginTop: -6, marginBottom: 20 }}>
             <Link href="/dashboard/shop" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12.2, color: TEXT_SEC, textDecoration: 'none', padding: '7px 12.5px', borderRadius: 10, background: LQ_BG, border: LQ_BOR, boxShadow: LQ_SHAD, backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)' }}>
               <ChevronRight size={13.5} />
@@ -703,9 +703,9 @@ export default function EditProductPage() {
           </div>
 
           <div style={{ marginBottom: 16, animation: 'fadeUp 0.4s ease both' }}>
-            {/* «EDIT LISTING» و سطرِ خلاصه‌ی محصول برداشته شدند: روی
+            {/* «EDIT LISTING» و سطر خلاصه‌ی محصول برداشته شدند: روی
                 موبایل فقط ارتفاع می‌گرفتند و همان اطلاعات چند سانتیمتر
-                پایین‌تر داخلِ خودِ فیلدها هست. */}
+                پایین‌تر داخل خود فیلدها هست. */}
             <h1 style={{ fontSize: 'clamp(19px,2.6vw,26px)', fontWeight: 900, color: TEXT, margin: 0, letterSpacing: '-0.02em' }}>ویرایش آگهی</h1>
           </div>
 
@@ -737,9 +737,9 @@ export default function EditProductPage() {
                 <div>
                   <Label required>نوع</Label>
                   {/* ── چرا `specsLoading` هم شرط است ──
-                          فهرستِ نوعِ دسته‌های لوازم از `/api/specs` می‌آید. تا
-                          نرسیدنش `typeOptions` تهی است و این فیلد به متنِ آزاد
-                          می‌افتاد — یعنی کاربرِ تندنویس می‌توانست نوعی بنویسد که
+                          فهرست نوع دسته‌های لوازم از `/api/specs` می‌آید. تا
+                          نرسیدنش `typeOptions` تهی است و این فیلد به متن آزاد
+                          می‌افتاد — یعنی کاربر تندنویس می‌توانست نوعی بنویسد که
                           در هیچ فهرستی نیست و شناسه‌اش خالی ذخیره شود. */}
                       {form.category && (typeOptions || specsLoading) ? (
                     <FancySelect value={form.type} onChange={setType}
@@ -753,15 +753,15 @@ export default function EditProductPage() {
                   {form.type === 'سایر' && (
                     <input className="nf" type="text" value={form.typeOther}
                       onChange={e => set('typeOther', e.target.value)}
-                      placeholder="توضیح دهید — مثال: توپِ تمرینیِ نشانه‌دار"
+                      placeholder="توضیح دهید — مثال: توپ تمرینی نشانه‌دار"
                       style={{ ...inp(errors.type), marginTop: 8, background: 'rgba(199,166,106,0.05)', borderColor: 'rgba(199,166,106,0.30)' }} />
                   )}
                   <ErrMsg msg={errors.type} />
                 </div>
 
-                {/* ── چوب: انتخابگرِ کاتالوگ ──
-                    همان کامپوننتی که فرمِ ثبت دارد. اگر این‌جا نسخه‌ی
-                    دیگری می‌گذاشتیم، دقیقاً همان دو-فرمِ ناهمگونی
+                {/* ── چوب: انتخابگر کاتالوگ ──
+                    همان کامپوننتی که فرم ثبت دارد. اگر این‌جا نسخه‌ی
+                    دیگری می‌گذاشتیم، دقیقا همان دو-فرم ناهمگونی
                     ساخته می‌شد که هفته‌ی پیش یکی‌اش کردیم. */}
                 {catCategory && catTypeId ? (
                   <CatalogSelector
@@ -878,7 +878,7 @@ export default function EditProductPage() {
                   <SpecProgress filled={specProgress.filled} total={specProgress.total} />
                 )}
 
-                {/* ── مشخصاتی که در تعریفِ این دسته نیستند ──
+                {/* ── مشخصاتی که در تعریف این دسته نیستند ──
                     آگهی‌های قدیمی (یا آگهی‌ای که دسته‌اش عوض شده) کلیدهایی
                     دارند که فرم نمی‌شناسد. نشان‌ندادنشان یعنی ذخیره‌ی بعدی
                     پاکشان می‌کند. */}
@@ -887,7 +887,7 @@ export default function EditProductPage() {
                     <Label>مشخصات ثبت‌شده‌ی دیگر</Label>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                       {legacySpecs.map((row, i) => {
-                        /* بولین و آرایه در فیلدِ متنی ویرایش‌پذیر
+                        /* بولین و آرایه در فیلد متنی ویرایش‌پذیر
                            نیستند: تبدیلشان به رشته داده را نابود
                            می‌کند. فقط نشان داده می‌شوند و می‌شود
                            حذفشان کرد. */
@@ -919,8 +919,8 @@ export default function EditProductPage() {
                 <div style={{ marginBottom: 16 }}>
                   <Label required>وضعیت کالا</Label>
                   {/* ── پلمب ⇒ وضعیت قطعی است ──
-                      کالای پلمب و استفاده‌نشده به تعریف «نو» است؛ پرسیدنِ دوباره‌اش
-                      یعنی فروشنده می‌تواند «کارکرده»ی پلمب‌شده ثبت کند. با روشن‌شدنِ
+                      کالای پلمب و استفاده‌نشده به تعریف «نو» است؛ پرسیدن دوباره‌اش
+                      یعنی فروشنده می‌تواند «کارکرده»ی پلمب‌شده ثبت کند. با روشن‌شدن
                       آن سوییچ، این فیلد روی «نو» می‌نشیند و غیرفعال می‌شود. */}
                   <FancySelect value={effCondition}
                     onChange={v => set('condition', v)} disabled={sealed}
@@ -1043,7 +1043,7 @@ export default function EditProductPage() {
               </div>
             </div>
 
-            {/* دو دکمه‌ی هم‌اندازه در یک سطر — مثلِ فرمِ ثبت */}
+            {/* دو دکمه‌ی هم‌اندازه در یک سطر — مثل فرم ثبت */}
             <div style={{ display: 'flex', gap: 10, alignItems: 'stretch' }}>
               <button type="submit" disabled={submitting}
                 style={{

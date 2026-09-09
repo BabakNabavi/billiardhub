@@ -64,8 +64,8 @@ export default function UserProfilePage() {
   const [loading, setLoading] = useState(true);
   const { open: openImage, viewer: imageViewer } = useProfileImageViewer();
 
-  /* پیش‌تر `/user/public/:id` صدا زده می‌شد — مسیرِ بک‌اندِ NestJS که
-     حذف شده و ۴۰۴ می‌داد. این صفحه از دکمه‌ی چشمِ فهرستِ کاربرانِ
+  /* پیش‌تر `/user/public/:id` صدا زده می‌شد — مسیر بک‌اند NestJS که
+     حذف شده و ۴۰۴ می‌داد. این صفحه از دکمه‌ی چشم فهرست کاربران
      ادمین باز می‌شود، پس آن دکمه همیشه «کاربر پیدا نشد» می‌داد. */
   useEffect(() => {
     api.get(`/users/${id}`).then((res) => {

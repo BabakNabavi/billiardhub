@@ -2,12 +2,12 @@
    صفحه‌ی خبر.
 
    ── چه چیزی عوض شد ──
-   ⚠️ نسخه‌ی قبل کلاینتی بود و برای نشان‌دادنِ *یک* خبر، **کلِ فهرستِ
-   اخبار** را از `/api/news` می‌گرفت و بینشان می‌گشت. یعنی متنِ خبر
+   ⚠️ نسخه‌ی قبل کلاینتی بود و برای نشان‌دادن *یک* خبر، **کل فهرست
+   اخبار** را از `/api/news` می‌گرفت و بینشان می‌گشت. یعنی متن خبر
    در HTML نبود (بد برای گوگل و برای اولین نمایش) و هر بازدید تا
    ۲۰۰ ردیف داده جابه‌جا می‌کرد. حالا یک پرس‌وجوی نقطه‌ای روی سرور.
 
-   ⚠️ عرضِ متن مهار شده است. خطِ خیلی بلند چشم را در بازگشت به سرِ
+   ⚠️ عرض متن مهار شده است. خط خیلی بلند چشم را در بازگشت به سر
    خط گم می‌کند؛ برای فارسی هم همان قاعده‌ی ۶۰–۷۵ نویسه برقرار است.
    ───────────────────────────────────────────────────────────── */
 
@@ -26,8 +26,8 @@ export const revalidate = 60
 
 export default async function ArticlePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
-  /* ⚠️ Next خودش پارامترِ مسیر را رمزگشایی کرده. رمزگشاییِ دوم روی
-     هر نشانیِ حاویِ «%»ِ تنها (مثلاً /news/50%-off یا کاوشِ یک
+  /* ⚠️ Next خودش پارامتر مسیر را رمزگشایی کرده. رمزگشایی دوم روی
+     هر نشانی حاوی «%» تنها (مثلا /news/50%-off یا کاوش یک
      خزنده) URIError پرتاب می‌کند — و چون پیش از notFound اتفاق
      می‌افتد، بازدیدکننده ۵۰۰ می‌گیرد نه صفحه‌ی «پیدا نشد». */
   const a = await getArticle(id)
@@ -37,8 +37,8 @@ export default async function ArticlePage({ params }: { params: Promise<{ id: st
   const sameSection = all
     .filter(x => x.id !== a.id && x.section && x.section === a.section)
     .slice(0, 5)
-  /* ⚠️ «بیشتر از این بخش» در ستونِ کناری همان خبرهای هم‌بخش را
-     نشان می‌دهد؛ بدونِ این کنارگذاری، «خبرهای مرتبط» دقیقاً همان
+  /* ⚠️ «بیشتر از این بخش» در ستون کناری همان خبرهای هم‌بخش را
+     نشان می‌دهد؛ بدون این کنارگذاری، «خبرهای مرتبط» دقیقا همان
      چهار تیتر را دوباره تکرار می‌کرد. */
   const shown = new Set(sameSection.map(x => x.id))
   const rel = related(a, all.filter(x => !shown.has(x.id)))
@@ -47,8 +47,8 @@ export default async function ArticlePage({ params }: { params: Promise<{ id: st
   const url = absoluteUrl(`/news/${encodeURIComponent(a.id)}`)
   const sec = sectionOf(a.section)
 
-  /* ⚠️ اسکیما فقط فیلدهایی را می‌گیرد که واقعاً داریم. `author` را
-     وقتی نمی‌دانیم چه کسی نوشته، جعل نمی‌کنیم — گوگل نبودِ فیلد را
+  /* ⚠️ اسکیما فقط فیلدهایی را می‌گیرد که واقعا داریم. `author` را
+     وقتی نمی‌دانیم چه کسی نوشته، جعل نمی‌کنیم — گوگل نبود فیلد را
      می‌بخشد، دادهٔ ساختگی را نه. */
   const schema = {
     '@context': 'https://schema.org',
@@ -69,8 +69,8 @@ export default async function ArticlePage({ params }: { params: Promise<{ id: st
     <div className="nr">
       <NavOffset />
       <script type="application/ld+json"
-        /* ⚠️ «<» فرار داده می‌شود: یک «</script>» داخلِ عنوان یا
-           نشانیِ عکس از تگ بیرون می‌زد. */
+        /* ⚠️ «<» فرار داده می‌شود: یک «</script>» داخل عنوان یا
+           نشانی عکس از تگ بیرون می‌زد. */
         dangerouslySetInnerHTML={{ __html: JSON.stringify(schema).replace(/</g, '\\u003c') }} />
 
       <article className="nr-shell nr-article">
@@ -88,8 +88,8 @@ export default async function ArticlePage({ params }: { params: Promise<{ id: st
           {a.excerpt && <p className="nr-standfirst">{a.excerpt}</p>}
 
           <div className="nr-byline">
-            {/* ⚠️ اگر نویسنده به کاربری وصل نباشد، خطِ نویسنده اصلاً
-                نمی‌آید. نامِ جای‌گیر همان داده‌ی جعلی است. */}
+            {/* ⚠️ اگر نویسنده به کاربری وصل نباشد، خط نویسنده اصلا
+                نمی‌آید. نام جای‌گیر همان داده‌ی جعلی است. */}
             {a.author && <span className="nr-author">{a.author}</span>}
             <div className="nr-meta">
               {a.ts > 0 && <span><time dateTime={iso(a.ts)}>{dateOf(a.ts)}</time></span>}
@@ -119,8 +119,8 @@ export default async function ArticlePage({ params }: { params: Promise<{ id: st
                 {a.body.map((p, i) => <p key={i}>{p}</p>)}
               </div>
             ) : (
-              /* ⚠️ خبری که فقط تیتر و چکیده دارد واقعاً همین است؛
-                 متنِ ساختگی جایش نمی‌گذاریم. */
+              /* ⚠️ خبری که فقط تیتر و چکیده دارد واقعا همین است؛
+                 متن ساختگی جایش نمی‌گذاریم. */
               <p className="nr-nobody">متن کامل این خبر هنوز منتشر نشده است.</p>
             )}
 
@@ -142,7 +142,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ id: st
                     <li key={x.id}>
                       <Link href={`/news/${encodeURIComponent(x.id)}`}>
                         <span className="nr-rank" aria-hidden>{rank(i)}</span>
-                        {/* ⚠️ div نه span: تیتر و بلوکِ متادیتا محتوای جریانی‌اند و داخلِ span معتبر نیستند */}
+                        {/* ⚠️ div نه span: تیتر و بلوک متادیتا محتوای جریانی‌اند و داخل span معتبر نیستند */}
                         <div><h3>{x.title}</h3><Meta a={x} /></div>
                       </Link>
                     </li>

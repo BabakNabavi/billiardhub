@@ -7,14 +7,14 @@ import PlaylistClient from './PlaylistClient'
 import '../../media.css'
 
 /* ─────────────────────────────────────────────────────────────
-   صفحه‌ی لیستِ پخش — سرور-کامپوننت.
+   صفحه‌ی لیست پخش — سرور-کامپوننت.
 
    ⚠️ عنوان و ویدیوها روی سرور رندر می‌شوند تا هم در HTML باشند و هم
-   `ItemList`ِ اسکیما از داده‌ی واقعی ساخته شود. تعامل (ریلِ کناری،
-   ناوبری) در بخشِ کلاینت است.
+   `ItemList` اسکیما از داده‌ی واقعی ساخته شود. تعامل (ریل کناری،
+   ناوبری) در بخش کلاینت است.
 
-   ⚠️ عنوان `absolute` است: لایه‌ی میانیِ `media/layout` قالبِ ریشه را
-   مصرف می‌کند، پس رشته‌ی ساده پسوندِ برند را از دست می‌داد.
+   ⚠️ عنوان `absolute` است: لایه‌ی میانی `media/layout` قالب ریشه را
+   مصرف می‌کند، پس رشته‌ی ساده پسوند برند را از دست می‌داد.
    ───────────────────────────────────────────────────────────── */
 
 type Params = { params: Promise<{ slug: string }> }
@@ -44,7 +44,7 @@ export default async function PlaylistPage({ params }: Params) {
   const p = await playlistBySlug(slug)
   if (!p) notFound()
 
-  /* ⚠️ فقط فیلدهایی که واقعاً داریم. لیستِ خالی `ItemList` نمی‌گیرد. */
+  /* ⚠️ فقط فیلدهایی که واقعا داریم. لیست خالی `ItemList` نمی‌گیرد. */
   const schema = p.items.length > 0 ? {
     '@context': 'https://schema.org',
     '@type': 'ItemList',
@@ -69,7 +69,7 @@ export default async function PlaylistPage({ params }: Params) {
         />
       )}
       <PlaylistClient playlist={p} />
-      {/* لینکِ برگشت برای خزنده، حتی اگر جاوااسکریپت اجرا نشود */}
+      {/* لینک برگشت برای خزنده، حتی اگر جاوااسکریپت اجرا نشود */}
       <noscript>
         <Link href={`/media/channel/${encodeURIComponent(p.handle)}`}>بازگشت به کانال</Link>
       </noscript>

@@ -21,11 +21,11 @@ const faDate = (iso?: unknown) => { try { return new Intl.DateTimeFormat('fa-IR'
 type Row = Record<string, unknown>
 interface Data {
   overview: {
-    /* پولی که وارد حسابِ مرکزی شده — این «درآمد» نیست */
+    /* پولی که وارد حساب مرکزی شده — این «درآمد» نیست */
     grossIn: number; bookingRevenue: number; tournamentRevenue: number
-    /* درآمدِ واقعیِ پلتفرم */
+    /* درآمد واقعی پلتفرم */
     platformCommission: number; cancellationFee: number; netPlatformRevenue: number
-    /* درآمدِ تبلیغات — مهاجرتِ ۰۵۸ */
+    /* درآمد تبلیغات — مهاجرت ۰۵۸ */
     adRevenue: number; adRefunds: number; adNetRevenue: number
     boostRevenue: number; boostRefunds: number; boostNetRevenue: number
     commissionFromReservations: number; commissionFromTournaments: number
@@ -38,8 +38,8 @@ interface Data {
   }
   payments: Row[]; clubBalances: Row[]; settlements: Row[]; refunds: Row[]
 }
-/* `payouts` عمداً اول است: پرسشِ روزمره‌ی ادمین «الان چقدر به چه کسی
-   باید بدهم؟» است، نه «درآمدِ کل چقدر بوده». */
+/* `payouts` عمدا اول است: پرسش روزمره‌ی ادمین «الان چقدر به چه کسی
+   باید بدهم؟» است، نه «درآمد کل چقدر بوده». */
 type TabKey = 'payouts' | 'overview' | 'payments' | 'balances' | 'settlements' | 'refunds' | 'commission'
 
 export default function AdminFinance() {
@@ -106,10 +106,10 @@ export default function AdminFinance() {
 
       {tab === 'overview' && (
         <>
-          {/* ── تفکیکِ حیاتی ──
-              «پولِ دریافتی» درآمدِ ما نیست. کاربر دو میلیون می‌دهد ولی
-              درآمدِ پلتفرم فقط کمیسیون و جریمه است؛ بقیه بدهیِ ما به
-              باشگاه است. نمایشِ ناخالص به‌عنوان درآمد، هم گزارشِ
+          {/* ── تفکیک حیاتی ──
+              «پول دریافتی» درآمد ما نیست. کاربر دو میلیون می‌دهد ولی
+              درآمد پلتفرم فقط کمیسیون و جریمه است؛ بقیه بدهی ما به
+              باشگاه است. نمایش ناخالص به‌عنوان درآمد، هم گزارش
               مالیاتی را غلط می‌کند هم تصمیم‌های کسب‌وکار را. */}
           <div style={{ fontSize: 12, color: SEC, marginBottom: 10, lineHeight: 1.9 }}>
             «وجوه دریافتی» پولی است که به حساب مرکزی آمده — درآمد پلتفرم نیست.
@@ -125,7 +125,7 @@ export default function AdminFinance() {
           <div className="af-grid" style={{ marginTop: 12 }}>
             <Stat label="از رزرو" value={o.bookingRevenue} icon={<TrendingUp size={15} />} muted />
             <Stat label="از مسابقات" value={o.tournamentRevenue} icon={<TrendingUp size={15} />} muted />
-            {/* تبلیغات سهمِ باشگاه ندارد: کلِ مبلغ درآمدِ پلتفرم است */}
+            {/* تبلیغات سهم باشگاه ندارد: کل مبلغ درآمد پلتفرم است */}
             <Stat label="از تبلیغات" value={o.adNetRevenue ?? 0} icon={<TrendingUp size={15} />} />
             <Stat label="از ارتقای آگهی" value={o.boostNetRevenue ?? 0} icon={<TrendingUp size={15} />} />
             <Stat label="کمیسیون" value={o.platformCommission} icon={<Wallet size={15} />} />
@@ -168,12 +168,12 @@ export default function AdminFinance() {
             String(b.clubName ?? '—'), <b key="a" style={{ color: GOLD_D }}>{fa(b.available_balance)}</b>,
             fa(b.pending_balance), fa(b.total_earnings), fa(b.total_settled),
             /* ── شرط وارونه بود ──
-               از مهاجرتِ ۰۴۰/۰۴۱ به بعد معنا صریح است:
-               `available_balance` = بدهیِ پرداختنیِ اکنون،
+               از مهاجرت ۰۴۰/۰۴۱ به بعد معنا صریح است:
+               `available_balance` = بدهی پرداختنی اکنون،
                `pending_balance`   = تسویه‌ای که ساخته شده ولی هنوز
                                      پرداخت نشده.
-               دکمه روی `pending` بود، یعنی دقیقاً برعکس: باشگاهی که
-               واقعاً طلبکار بود هیچ دکمه‌ای نداشت، و باشگاهی که تسویه‌اش
+               دکمه روی `pending` بود، یعنی دقیقا برعکس: باشگاهی که
+               واقعا طلبکار بود هیچ دکمه‌ای نداشت، و باشگاهی که تسویه‌اش
                در جریان بود دکمه‌ای می‌گرفت که سرور با
                `nothing_to_settle` ردش می‌کرد. */
             Number(b.available_balance) > 0

@@ -101,7 +101,7 @@ export function bankOfIban(v: string): string | null {
 
 /* ── شماره جواز کسب ─────────────────────────────────────────── */
 
-/** جواز کسب اصناف معمولاً عددی و بین ۶ تا ۱۵ رقم است */
+/** جواز کسب اصناف معمولا عددی و بین ۶ تا ۱۵ رقم است */
 export function isValidLicenseNumber(v: string): boolean {
   const d = digitsOnly(v)
   return d.length >= 6 && d.length <= 15

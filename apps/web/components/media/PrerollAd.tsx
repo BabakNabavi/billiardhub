@@ -4,21 +4,21 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { SkipForward, ExternalLink } from 'lucide-react'
 
 /* ─────────────────────────────────────────────────────────────
-   تبلیغِ پیش‌پخش — لایه‌ای روی پلیرِ موجود.
+   تبلیغ پیش‌پخش — لایه‌ای روی پلیر موجود.
 
-   ── قاعده‌ی اولِ این کامپوننت ──
-   ویدیوی اصلی هرگز نباید به‌خاطرِ تبلیغ نپخشد. هر خطا، هر تأخیر، هر
-   پاسخِ ناقص یعنی «مستقیم برو به ویدیوی اصلی». به همین دلیل هیچ‌جای
+   ── قاعده‌ی اول این کامپوننت ──
+   ویدیوی اصلی هرگز نباید به‌خاطر تبلیغ نپخشد. هر خطا، هر تأخیر، هر
+   پاسخ ناقص یعنی «مستقیم برو به ویدیوی اصلی». به همین دلیل هیچ‌جای
    این فایل چیزی را بلاک نمی‌کند و همه‌ی مسیرهای شکست به `finish()`
    می‌رسند.
 
-   ── چرا تبلیغ در فایلِ اصلی merge نمی‌شود ──
-   دو فایلِ جدا می‌مانند. با merge، عوض‌کردنِ تبلیغ یعنی رمزگذاریِ
-   دوباره‌ی همه‌ی ویدیوها، آمارِ هر کمپین از بین می‌رود و کمپینِ تازه
+   ── چرا تبلیغ در فایل اصلی merge نمی‌شود ──
+   دو فایل جدا می‌مانند. با merge، عوض‌کردن تبلیغ یعنی رمزگذاری
+   دوباره‌ی همه‌ی ویدیوها، آمار هر کمپین از بین می‌رود و کمپین تازه
    روی محتوای قدیمی نمی‌نشیند.
 
    ── شمارش ──
-   نمایش وقتی ثبت می‌شود که تبلیغ *واقعاً شروع به پخش کرده* باشد، نه
+   نمایش وقتی ثبت می‌شود که تبلیغ *واقعا شروع به پخش کرده* باشد، نه
    وقتی درخواستش رفته. «کنجکاوی» و «تماشا» یکی نیستند.
    ───────────────────────────────────────────────────────────── */
 
@@ -46,7 +46,7 @@ export default function PrerollAd({ ad, onFinish }: { ad: PrerollAdData; onFinis
   const [remaining, setRemaining] = useState<number | null>(null)
   const done = useRef(false)
 
-  /* یک‌بار و فقط یک‌بار — هر مسیرِ پایان از این‌جا می‌گذرد */
+  /* یک‌بار و فقط یک‌بار — هر مسیر پایان از این‌جا می‌گذرد */
   const finish = useCallback((why: 'complete' | 'skip') => {
     if (done.current) return
     done.current = true
@@ -54,17 +54,17 @@ export default function PrerollAd({ ad, onFinish }: { ad: PrerollAdData; onFinis
     onFinish()
   }, [ad.campaignId, onFinish])
 
-  /* ── شروعِ پخش ──
+  /* ── شروع پخش ──
 
-     `autoPlay` به‌تنهایی قابلِ اعتماد نیست: مرورگرها ویدیوی صدادار را
-     بدونِ حرکتِ کاربر پخش نمی‌کنند، و حتی وقتی کاربر روی play زده،
-     بعضی محیط‌ها (از جمله مرورگرِ بدونِ دستگاهِ صوتی) درخواست را رد
+     `autoPlay` به‌تنهایی قابل اعتماد نیست: مرورگرها ویدیوی صدادار را
+     بدون حرکت کاربر پخش نمی‌کنند، و حتی وقتی کاربر روی play زده،
+     بعضی محیط‌ها (از جمله مرورگر بدون دستگاه صوتی) درخواست را رد
      می‌کنند. آزمون همین را نشان داد: تبلیغ روی صفحه بود ولی زمانش
      هیچ‌وقت جلو نمی‌رفت، پس دکمه‌ی «رد کردن» هرگز فعال نمی‌شد.
 
      پس صریح play می‌زنیم و اگر رد شد، بی‌صدا دوباره تلاش می‌کنیم.
-     تبلیغِ بی‌صدا از تبلیغی که اصلاً پخش نمی‌شود بهتر است — و بیننده
-     دستِ‌کم گیر نمی‌کند. */
+     تبلیغ بی‌صدا از تبلیغی که اصلا پخش نمی‌شود بهتر است — و بیننده
+     دست‌کم گیر نمی‌کند. */
   useEffect(() => {
     const v = ref.current
     if (!v) return
@@ -74,9 +74,9 @@ export default function PrerollAd({ ad, onFinish }: { ad: PrerollAdData; onFinis
     })
   }, [finish])
 
-  /* تورِ ایمنی: اگر فایلِ تبلیغ خراب باشد یا هرگز شروع نشود، بعد از
-     سقفِ مدت (به‌علاوه‌ی کمی مهلت) به‌هرحال می‌رویم سرِ ویدیوی اصلی.
-     بدونِ این، یک تبلیغِ خرابْ صفحه را قفل می‌کند. */
+  /* تور ایمنی: اگر فایل تبلیغ خراب باشد یا هرگز شروع نشود، بعد از
+     سقف مدت (به‌علاوه‌ی کمی مهلت) به‌هرحال می‌رویم سر ویدیوی اصلی.
+     بدون این، یک تبلیغ خراب صفحه را قفل می‌کند. */
   useEffect(() => {
     const cap = (ad.maxDurationSec ?? 30) + 5
     const t = setTimeout(() => finish('complete'), cap * 1000)
@@ -85,7 +85,7 @@ export default function PrerollAd({ ad, onFinish }: { ad: PrerollAdData; onFinis
 
   const onPlaying = () => {
     /* نمایش این‌جا ثبت می‌شود، نه در `useEffect`: تنها این‌جاست که
-       مطمئنیم فریمی واقعاً روی صفحه رفته. */
+       مطمئنیم فریمی واقعا روی صفحه رفته. */
     track(ad.campaignId, 'impression')
   }
 
@@ -96,8 +96,8 @@ export default function PrerollAd({ ad, onFinish }: { ad: PrerollAdData; onFinis
     if (Number.isFinite(v.duration) && v.duration > 0) {
       setRemaining(Math.max(0, Math.ceil(v.duration - v.currentTime)))
     }
-    /* سقفِ مدت را خودِ پلیر هم اعمال می‌کند — تبلیغِ بلندتر از آنچه
-       جایگاه اجازه می‌دهد نباید وقتِ بیننده را بگیرد. */
+    /* سقف مدت را خود پلیر هم اعمال می‌کند — تبلیغ بلندتر از آنچه
+       جایگاه اجازه می‌دهد نباید وقت بیننده را بگیرد. */
     if (ad.maxDurationSec && v.currentTime >= ad.maxDurationSec) finish('complete')
   }
 
@@ -122,14 +122,14 @@ export default function PrerollAd({ ad, onFinish }: { ad: PrerollAdData; onFinis
         onPlaying={onPlaying}
         onTimeUpdate={onTime}
         onEnded={() => finish('complete')}
-        /* فایلِ خراب یا شبکه‌ی قطع ⇒ ویدیوی اصلی، نه صفحه‌ی گیرکرده */
+        /* فایل خراب یا شبکه‌ی قطع ⇒ ویدیوی اصلی، نه صفحه‌ی گیرکرده */
         onError={() => finish('complete')}
-        onStalled={() => { /* منتظر می‌مانیم؛ تورِ ایمنیِ بالا هست */ }}
+        onStalled={() => { /* منتظر می‌مانیم؛ تور ایمنی بالا هست */ }}
         aria-label={`تبلیغ${ad.title ? ': ' + ad.title : ''}`}
         style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block', background: '#000' }}
       />
 
-      {/* برچسبِ «تبلیغ» — بیننده باید بداند این محتوای اصلی نیست */}
+      {/* برچسب «تبلیغ» — بیننده باید بداند این محتوای اصلی نیست */}
       <div style={{
         position: 'absolute', top: 12, insetInlineStart: 12, display: 'flex', alignItems: 'center', gap: 8,
       }}>
@@ -145,7 +145,7 @@ export default function PrerollAd({ ad, onFinish }: { ad: PrerollAdData; onFinis
         )}
       </div>
 
-      {/* مقصدِ تبلیغ */}
+      {/* مقصد تبلیغ */}
       {ad.clickUrl && (
         <button onClick={openTarget}
           style={{

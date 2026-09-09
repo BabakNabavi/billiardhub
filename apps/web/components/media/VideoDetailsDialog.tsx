@@ -1,24 +1,24 @@
 'use client'
 
 /* ─────────────────────────────────────────────────────────────
-   مشخصاتِ ویدیو پیش از انتشار — مثل صفحه‌ی «Details» یوتیوب.
+   مشخصات ویدیو پیش از انتشار — مثل صفحه‌ی «Details» یوتیوب.
 
    ── چرا هست ──
-   تا امروز عنوانِ ویدیو *نامِ فایل* بود و همان به بیلیارد مدیا
-   می‌رفت. یعنی کلیپی با محتوای عالی زیرِ نامِ
+   تا امروز عنوان ویدیو *نام فایل* بود و همان به بیلیارد مدیا
+   می‌رفت. یعنی کلیپی با محتوای عالی زیر نام
    «screen record 04-14-2026» می‌نشست: برای بیننده بی‌معنا و برای
-   گوگل بی‌ارزش. عنوان مهم‌ترین سیگنالِ جست‌وجو برای ویدیوست و
-   نباید از نامِ فایل بیاید.
+   گوگل بی‌ارزش. عنوان مهم‌ترین سیگنال جست‌وجو برای ویدیوست و
+   نباید از نام فایل بیاید.
 
-   ── فرقِ عمدی با یوتیوب ──
-   یوتیوب فایل را همان لحظه‌ی انتخاب بالا می‌فرستد و فرم را حینِ
-   آپلود نشان می‌دهد. این‌جا برعکس: اول فرم، بعد آپلود. مخاطبِ ما
-   روی شبکه‌ی موبایلِ ایران است و سقفِ فایل ۲۵ مگابایت — اگر کاربر
-   وسطِ فرم پشیمان شود، نباید حجمش رفته باشد.
+   ── فرق عمدی با یوتیوب ──
+   یوتیوب فایل را همان لحظه‌ی انتخاب بالا می‌فرستد و فرم را حین
+   آپلود نشان می‌دهد. این‌جا برعکس: اول فرم، بعد آپلود. مخاطب ما
+   روی شبکه‌ی موبایل ایران است و سقف فایل ۲۵ مگابایت — اگر کاربر
+   وسط فرم پشیمان شود، نباید حجمش رفته باشد.
 
-   ⚠️ منطقِ خالص (اعتبارسنجیِ عنوان، تایپ) در `lib/media/video-details`
+   ⚠️ منطق خالص (اعتبارسنجی عنوان، تایپ) در `lib/media/video-details`
    است، نه این‌جا: هفت صفحه‌ی نقش هم به آن نیاز دارند و نباید برای یک
-   تابعِ رشته‌ای یک کامپوننتِ React ایمپورت کنند.
+   تابع رشته‌ای یک کامپوننت React ایمپورت کنند.
    ───────────────────────────────────────────────────────────── */
 
 import { useCallback, useEffect, useRef, useState } from 'react'
@@ -29,14 +29,14 @@ import { toFaDigits } from '@/lib/jalali'
 import { titleFromFile, weakTitle, type VideoDetail } from '@/lib/media/video-details'
 import './video-details.css'
 
-/** یک ردیفِ فرم: یا فایلی که تازه انتخاب شده، یا ویدیویی که از قبل
+/** یک ردیف فرم: یا فایلی که تازه انتخاب شده، یا ویدیویی که از قبل
  *  منتشر شده و فقط مشخصاتش عوض می‌شود. */
 export interface DetailTarget {
-  /** چیزی که زیرِ پیش‌نمایش نوشته می‌شود (نامِ فایل یا عنوانِ فعلی) */
+  /** چیزی که زیر پیش‌نمایش نوشته می‌شود (نام فایل یا عنوان فعلی) */
   name: string
-  /** فقط در حالتِ آپلود — برای ساختنِ پیش‌نمایشِ محلی */
+  /** فقط در حالت آپلود — برای ساختن پیش‌نمایش محلی */
   file?: File
-  /** فقط در حالتِ ویرایش — بندانگشتیِ ویدیوی منتشرشده */
+  /** فقط در حالت ویرایش — بندانگشتی ویدیوی منتشرشده */
   poster?: string
 }
 
@@ -59,8 +59,8 @@ function DetailRow({ i, target, preview, needCat, value, err, showErr, onChange,
         {target.poster
           ? <img className="vd-prev" src={target.poster} alt="" loading="lazy" decoding="async" />
           : <video className="vd-prev" src={preview} muted playsInline preload="metadata" aria-hidden />}
-        {/* ⚠️ در ویرایش این‌جا عنوانِ *فارسیِ* فعلی می‌نشیند؛ `dir="ltr"`
-            و فونتِ لاتین همان چیزی است که قاعده‌ی RTL منعش می‌کند. */}
+        {/* ⚠️ در ویرایش این‌جا عنوان *فارسی* فعلی می‌نشیند؛ `dir="ltr"`
+            و فونت لاتین همان چیزی است که قاعده‌ی RTL منعش می‌کند. */}
         {target.file
           ? <span className="vd-file bh-latin" dir="ltr" title={target.name}>{target.name}</span>
           : <span className="vd-file" title={target.name}>{target.name}</span>}
@@ -69,7 +69,7 @@ function DetailRow({ i, target, preview, needCat, value, err, showErr, onChange,
       <label className="cg-lab" htmlFor={`vd-t-${i}`}>عنوان</label>
       <input id={`vd-t-${i}`} className="cg-in" value={value.title} maxLength={100} ref={inputRef}
         aria-invalid={bad} aria-describedby={bad ? eid : undefined}
-        placeholder="مثلاً: آموزش ضربه‌ی کشویی برای مبتدی‌ها"
+        placeholder="مثلا: آموزش ضربه‌ی کشویی برای مبتدی‌ها"
         onChange={e => onChange({ title: e.target.value.slice(0, 100) })} />
 
       <label className="cg-lab" htmlFor={`vd-c-${i}`}>دسته‌بندی</label>
@@ -96,17 +96,17 @@ export default function VideoDetailsDialog({
   targets, initial, mode = 'create', busy = false, error = '', onDone, onSkip, onClose,
 }: {
   targets: DetailTarget[]
-  /** ذخیره در جریان است — دکمه باید حالتِ لودینگ داشته باشد */
+  /** ذخیره در جریان است — دکمه باید حالت لودینگ داشته باشد */
   busy?: boolean
   /** خطای ذخیره — پنجره باز می‌ماند تا نوشته‌ی کاربر از دست نرود */
   error?: string
-  /** مقدارِ اولیه — در حالتِ ویرایش، مشخصاتِ فعلیِ ویدیو */
+  /** مقدار اولیه — در حالت ویرایش، مشخصات فعلی ویدیو */
   initial?: VideoDetail[]
   /** `create` = پیش از آپلود · `edit` = ویدیوی منتشرشده */
   mode?: 'create' | 'edit'
-  /** کاربر مشخصات را داد — به ترتیبِ همان `targets` */
+  /** کاربر مشخصات را داد — به ترتیب همان `targets` */
   onDone: (d: VideoDetail[]) => void
-  /** «فقط در گالری بماند» — عنوانِ نوشته‌شده می‌ماند، فقط منتشر نمی‌شود */
+  /** «فقط در گالری بماند» — عنوان نوشته‌شده می‌ماند، فقط منتشر نمی‌شود */
   onSkip?: (d: VideoDetail[]) => void
   /** انصراف */
   onClose: () => void
@@ -114,16 +114,16 @@ export default function VideoDetailsDialog({
   const [items, setItems] = useState<VideoDetail[]>(() =>
     targets.map((tg, i) => initial?.[i]
       ?? { title: titleFromFile(tg.name), category: '', description: '', publish: true }))
-  /* ⚠️ عنوانِ پیش‌پُر برای دقیقاً همان فایل‌هایی که هدفِ این قابلیت‌اند
+  /* ⚠️ عنوان پیش‌پر برای دقیقا همان فایل‌هایی که هدف این قابلیت‌اند
      از اول نامعتبر است. اگر خطا را تا اولین تایپ پنهان کنیم، کاربر یک
-     دکمه‌ی طلاییِ مرده می‌بیند بی‌آنکه بداند چرا. */
+     دکمه‌ی طلایی مرده می‌بیند بی‌آنکه بداند چرا. */
   const [touched, setTouched] = useState(() =>
     targets.some((tg, i) => !!weakTitle(initial?.[i]?.title ?? titleFromFile(tg.name))))
   const [previews, setPreviews] = useState<string[]>([])
   const boxRef = useRef<HTMLDivElement>(null)
   const firstRef = useRef<HTMLInputElement>(null)
 
-  /* ⚠️ ساختنِ blob در بدنه‌ی رندر عارضه‌ی جانبی است و رندرِ دورریخته
+  /* ⚠️ ساختن blob در بدنه‌ی رندر عارضه‌ی جانبی است و رندر دورریخته
      (StrictMode) نشتی می‌ساخت. در افکت ساخته و همان‌جا آزاد می‌شود. */
   useEffect(() => {
     const urls = targets.map(tg => (tg.file ? URL.createObjectURL(tg.file) : ''))
@@ -131,8 +131,8 @@ export default function VideoDetailsDialog({
     return () => urls.forEach(u => { if (u) URL.revokeObjectURL(u) })
   }, [targets])
 
-  /* ⚠️ افکتِ فوکوس نباید به *هویتِ* کالبک وابسته باشد. `onClose` در
-     والد یک آروی درجاست، پس هر رندرِ والد افکت را از نو می‌دواند و
+  /* ⚠️ افکت فوکوس نباید به *هویت* کالبک وابسته باشد. `onClose` در
+     والد یک آروی درجاست، پس هر رندر والد افکت را از نو می‌دواند و
      `focus() + select()` دوباره اجرا می‌شود: مکان‌نما از فیلدی که
      کاربر در آن تایپ می‌کند بیرون می‌پرد و عنوان تمام‌انتخاب می‌شود —
      یعنی نویسه‌ی بعدی همه‌اش را پاک می‌کند. صفحه‌ی باشگاه اسلایدشو
@@ -164,15 +164,15 @@ export default function VideoDetailsDialog({
     setItems(list => list.map((it, k) => (k === i ? { ...it, ...patch } : it)))
   }, [])
 
-  /* ⚠️ در ویرایش، دسته‌بندیِ فعلی در دسترسِ ما نیست؛ اجباری‌کردنش
+  /* ⚠️ در ویرایش، دسته‌بندی فعلی در دسترس ما نیست؛ اجباری‌کردنش
      یعنی کاربر مجبور شود چیزی را که نمی‌بیند دوباره انتخاب کند و هر
-     تغییرِ نام، دسته‌بندیِ درست را بی‌صدا عوض کند. */
+     تغییر نام، دسته‌بندی درست را بی‌صدا عوض کند. */
   const needCat = mode === 'create'
   const errs = items.map(it => weakTitle(it.title) || (!needCat || it.category ? '' : 'دسته‌بندی را انتخاب کنید'))
   const ready = errs.every(e => !e)
 
-  /* ⚠️ عنوانِ نوشته‌شده حتی وقتی منتشر نمی‌شود باید بماند. نسخه‌ی اول
-     در مسیرِ «فقط گالری» عنوان را از نو از نامِ فایل می‌ساخت — یعنی
+  /* ⚠️ عنوان نوشته‌شده حتی وقتی منتشر نمی‌شود باید بماند. نسخه‌ی اول
+     در مسیر «فقط گالری» عنوان را از نو از نام فایل می‌ساخت — یعنی
      همان چیزی که این قابلیت برای حذفش آمده. */
   const kept = (publish: boolean) => items.map((it, i) => ({
     ...it, publish,
@@ -195,8 +195,8 @@ export default function VideoDetailsDialog({
         </h2>
         <p className="cg-sub">
           {mode === 'edit'
-            ? 'عنوانِ تازه هم در گالری و هم در بیلیارد مدیا می‌نشیند. نشانیِ قبلی هم کار می‌کند.'
-            : 'عنوان همان چیزی است که بیننده و گوگل می‌بینند. نامِ فایل عنوان نیست.'}
+            ? 'عنوان تازه هم در گالری و هم در بیلیارد مدیا می‌نشیند. نشانی قبلی هم کار می‌کند.'
+            : 'عنوان همان چیزی است که بیننده و گوگل می‌بینند. نام فایل عنوان نیست.'}
         </p>
 
         <form onSubmit={e => { e.preventDefault(); if (ready && !busy) onDone(kept(true)) }}>
@@ -223,7 +223,7 @@ export default function VideoDetailsDialog({
 
         {onSkip && (
           <button type="button" className="cg-skip" onClick={() => onSkip(kept(false))}>
-            بدونِ انتشار در مدیا — فقط در گالری بماند
+            بدون انتشار در مدیا — فقط در گالری بماند
           </button>
         )}
       </div>

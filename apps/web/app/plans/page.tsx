@@ -3,10 +3,10 @@
 /* بسته‌های آگهی بیلیارد بازار.
 
    بدنه‌ی این صفحه به `components/advertise/AdPackages` منتقل شد تا
-   «مرکز تبلیغات» (/advertise) هم بتواند همان را نشان دهد بدونِ اینکه
+   «مرکز تبلیغات» (/advertise) هم بتواند همان را نشان دهد بدون اینکه
    دو نسخه‌ی موازی از همان کارت‌ها ساخته شود.
 
-   خودِ مسیر عمداً حذف نشد: لینکش در چند جای سایت و احتمالاً در
+   خود مسیر عمدا حذف نشد: لینکش در چند جای سایت و احتمالا در
    نشانی‌های ذخیره‌شده‌ی کاربران هست. */
 
 import Link from 'next/link'
@@ -40,7 +40,7 @@ export default function PlansPage() {
 
         <AdPackages backTo="/plans" />
 
-        {/* بنر تبلیغاتی چیز دیگری است — کاربر نباید بسته بخرد به امیدِ بنر */}
+        {/* بنر تبلیغاتی چیز دیگری است — کاربر نباید بسته بخرد به امید بنر */}
         <div style={{
           marginTop: 28, background: 'rgba(255,255,255,0.78)', border: `1px solid ${LINE}`, borderRadius: 18, padding: '20px 22px',
           display: 'flex', gap: 16, flexWrap: 'wrap', alignItems: 'center',

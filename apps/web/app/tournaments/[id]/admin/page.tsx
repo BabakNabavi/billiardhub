@@ -36,11 +36,11 @@ const GOLD = '#C7A66A', GOLD_D = '#8F6531', INK = '#1C1B17';
 const MUT = '#6F6A5C', LINE = '#EAE5DA', FELT = '#0E7A38', RED = '#B23B2E';
 const GROUND = '#FAF8F3';
 
-/* «چیدن» و «براکت» تازه‌اند: چیدنِ دستی تا امروز اصلاً نبود، و
-   براکت در پنلِ باشگاه دکمه‌ی جدا داشت — جایش این‌جاست، کنارِ
-   قرعه‌کشی و ثبتِ نتیجه. */
-/* «چیدن دستی» تبِ جدا نیست: وقتی جدول ساخته شد، خودش پایینِ همین
-   تبِ قرعه‌کشی می‌آید. دو ورودی برای یک کار فقط سردرگمی می‌سازد. */
+/* «چیدن» و «براکت» تازه‌اند: چیدن دستی تا امروز اصلا نبود، و
+   براکت در پنل باشگاه دکمه‌ی جدا داشت — جایش این‌جاست، کنار
+   قرعه‌کشی و ثبت نتیجه. */
+/* «چیدن دستی» تب جدا نیست: وقتی جدول ساخته شد، خودش پایین همین
+   تب قرعه‌کشی می‌آید. دو ورودی برای یک کار فقط سردرگمی می‌سازد. */
 type AdminTab = 'overview' | 'draw' | 'bracket' | 'matches';
 
 interface Registration {
@@ -90,19 +90,19 @@ export default function TournamentAdminPage() {
     await load();
   };
 
-  /* جدولِ خالی: ساختار ساخته می‌شود ولی جایگاه‌ها خالی می‌مانند تا
-     برگزارکننده در تبِ «چیدن دستی» بچیند. */
+  /* جدول خالی: ساختار ساخته می‌شود ولی جایگاه‌ها خالی می‌مانند تا
+     برگزارکننده در تب «چیدن دستی» بچیند. */
   const doDrawEmpty = async () => {
     setBusy(true); setErr('');
     const { ok, body } = await drawBracket(id, false, true);
     setBusy(false);
     if (!ok) { setErr(body.message ?? 'ساخت جدول انجام نشد'); return; }
-    flash('جدولِ خالی ساخته شد — حالا بازیکنان را بچینید');
+    flash('جدول خالی ساخته شد — حالا بازیکنان را بچینید');
     setTab('draw');
     await load();
   };
 
-  /* پایانِ مسابقه — تا امروز هیچ راهی نبود و مسابقه هیچ‌وقت به تبِ
+  /* پایان مسابقه — تا امروز هیچ راهی نبود و مسابقه هیچ‌وقت به تب
      «پایان یافته» نمی‌رفت. */
   const [askFinish, setAskFinish] = useState(false);
   const doFinish = async () => {
@@ -119,8 +119,8 @@ export default function TournamentAdminPage() {
     await load();
   };
 
-  /* پنجره‌ی بومیِ مرورگر برداشته شد: انگلیسیِ چپ‌به‌راست بود، نشانیِ
-     سایت را بالای خودش می‌نوشت، و برای یک کارِ برگشت‌ناپذیر کمترین
+  /* پنجره‌ی بومی مرورگر برداشته شد: انگلیسی چپ‌به‌راست بود، نشانی
+     سایت را بالای خودش می‌نوشت، و برای یک کار برگشت‌ناپذیر کمترین
      خوانایی را داشت. */
   const [askReset, setAskReset] = useState(false);
 
@@ -167,8 +167,8 @@ export default function TournamentAdminPage() {
       )}
 
       {/* ── تب‌ها ──
-          `flexWrap` باعث می‌شد چهارمی روی موبایل به خطِ دوم بیفتد و
-          نوار نصفه‌نیمه دیده شود. همان نوارِ کشیدنیِ پنلِ باشگاه:
+          `flexWrap` باعث می‌شد چهارمی روی موبایل به خط دوم بیفتد و
+          نوار نصفه‌نیمه دیده شود. همان نوار کشیدنی پنل باشگاه:
           یک ردیف می‌ماند، و اگر جا نشد کشیده می‌شود — نه اینکه
           بشکند. */}
       <DragScroll style={{
@@ -209,17 +209,17 @@ export default function TournamentAdminPage() {
             </div>
           )}
 
-          {/* ── پایانِ مسابقه ──
-              تا امروز هیچ راهی نبود: مسابقه بعد از فینال هم در وضعیتِ
-              قبلی می‌ماند و هیچ‌وقت به تبِ «پایان یافته» نمی‌رفت.
-              عمداً خودکار نیست — بازیِ رده‌بندی یا مراسمِ اهدای جوایز
+          {/* ── پایان مسابقه ──
+              تا امروز هیچ راهی نبود: مسابقه بعد از فینال هم در وضعیت
+              قبلی می‌ماند و هیچ‌وقت به تب «پایان یافته» نمی‌رفت.
+              عمدا خودکار نیست — بازی رده‌بندی یا مراسم اهدای جوایز
               ممکن است بعد از فینال باشد. */}
           {hasBracket && b?.tournament.status !== 'completed' && (
             <div style={{ ...card, gridColumn: '1 / -1', display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
               <div style={{ minWidth: 0, flex: 1 }}>
                 <div style={{ fontSize: 13, fontWeight: 800, color: INK }}>پایان مسابقه</div>
                 <div style={{ fontSize: 11.5, color: MUT, lineHeight: 1.9, marginTop: 2 }}>
-                  مسابقه به تبِ «پایان یافته» می‌رود و نتایج نهایی می‌شوند.
+                  مسابقه به تب «پایان یافته» می‌رود و نتایج نهایی می‌شوند.
                   {!b?.champion && ' هنوز قهرمان مشخص نشده — مطمئنید؟'}
                 </div>
               </div>
@@ -253,10 +253,10 @@ export default function TournamentAdminPage() {
                   {faDigits(pending.length)} ثبت‌نام هنوز پرداخت نشده و وارد براکت نمی‌شود.
                 </p>
               )}
-              {/* ── دو راهِ ساختِ جدول ──
-                  تا امروز فقط قرعه‌کشیِ تصادفی بود، پس برگزارکننده‌ای
+              {/* ── دو راه ساخت جدول ──
+                  تا امروز فقط قرعه‌کشی تصادفی بود، پس برگزارکننده‌ای
                   که می‌خواست خودش بچیند مجبور بود اول تصادفی بریزد و
-                  بعد همه را جابه‌جا کند — و تبِ «چیدن دستی» هم تا آن
+                  بعد همه را جابه‌جا کند — و تب «چیدن دستی» هم تا آن
                   لحظه می‌گفت «اول براکت را بسازید». */}
               <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                 <button onClick={doDraw} disabled={busy || confirmed.length < 2} style={btnGold(busy || confirmed.length < 2)}>
@@ -291,8 +291,8 @@ export default function TournamentAdminPage() {
         </div>
       )}
 
-      {/* ── چیدنِ دستی ──
-          تبِ جدا نداشت که کاربر بین «ساختِ جدول» و «چیدنِ آن» گم
+      {/* ── چیدن دستی ──
+          تب جدا نداشت که کاربر بین «ساخت جدول» و «چیدن آن» گم
           شود؛ همان‌جا که جدول را می‌سازد، پایین‌ترش می‌چیندش. */}
       {tab === 'draw' && hasBracket && (
         <div style={{ marginTop: 16 }}>
@@ -304,20 +304,20 @@ export default function TournamentAdminPage() {
       {tab === 'bracket' && (
         hasBracket ? (
           <>
-            {/* ── نمایشِ بزرگ ──
-                برای مانیتورِ سالن: زمینه‌ی تیره، متنِ درشت، بدونِ
-                نوار و فوتر، و خودش هر چند ثانیه تازه می‌شود. در تبِ
-                تازه باز می‌شود تا پنلِ برگزارکننده بسته نشود. */}
+            {/* ── نمایش بزرگ ──
+                برای مانیتور سالن: زمینه‌ی تیره، متن درشت، بدون
+                نوار و فوتر، و خودش هر چند ثانیه تازه می‌شود. در تب
+                تازه باز می‌شود تا پنل برگزارکننده بسته نشود. */}
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginBottom: 10, flexWrap: 'wrap' }}>
               <a href={`/tournaments/${id}/stage`} target="_blank" rel="noopener noreferrer"
                 style={btnGhostLink}>
                 <Monitor size={14} /> نمایش روی مانیتور
               </a>
-              {/* ── مدیریتِ زنده، پنجره‌ی جدا ──
-                  پیش‌تر کشویی روی خودِ صفحه‌ی مانیتور بود؛ یعنی درست
+              {/* ── مدیریت زنده، پنجره‌ی جدا ──
+                  پیش‌تر کشویی روی خود صفحه‌ی مانیتور بود؛ یعنی درست
                   همان لحظه‌ای که اپراتور نتیجه را ثبت می‌کرد، جدول را
-                  از دیدِ تماشاگر می‌پوشاند. حالا نشانیِ خودش را دارد و
-                  روی گوشیِ اپراتور باز می‌شود. */}
+                  از دید تماشاگر می‌پوشاند. حالا نشانی خودش را دارد و
+                  روی گوشی اپراتور باز می‌شود. */}
               <a href={`/tournaments/${id}/control`} target="_blank" rel="noopener noreferrer"
                 style={btnGhostLink}>
                 <SlidersHorizontal size={14} /> مدیریت زنده
@@ -383,7 +383,7 @@ export default function TournamentAdminPage() {
         tone="gold"
         icon={<Trophy size={24} color="#A07840" />}
         title="اعلام پایان مسابقه"
-        body={<>مسابقه به وضعیتِ <b style={{ color: '#1A1A18' }}>پایان یافته</b> می‌رود و
+        body={<>مسابقه به وضعیت <b style={{ color: '#1A1A18' }}>پایان یافته</b> می‌رود و
           در همان تب دیده می‌شود. پس از این، نتیجه‌ای ثبت یا اصلاح نمی‌شود.</>}
         confirmLabel="بله، تمام شد"
         busy={busy}
@@ -397,22 +397,22 @@ export default function TournamentAdminPage() {
 }
 
 /* ── ویرایشگر یک بازی ──────────────────────────────────────────
-   بای و بازیِ نامشخص ورودی نمی‌گیرند: اولی حریف ندارد و دومی هنوز
+   بای و بازی نامشخص ورودی نمی‌گیرند: اولی حریف ندارد و دومی هنوز
    بازیکنش معلوم نیست.
 
    ── چرا از نو نوشته شد ──
-   نسخه‌ی قبلی دو کادرِ عدد بود و یک دکمه‌ی «ثبت». سه ایراد داشت:
+   نسخه‌ی قبلی دو کادر عدد بود و یک دکمه‌ی «ثبت». سه ایراد داشت:
 
-     • امتیاز کنارِ نامِ بازیکن نبود، یک «۳ – ۲»ی جدا بود. روی
-       مانیتور و در شلوغیِ سالن، فهمیدنِ اینکه کدام عدد مالِ کیست
+     • امتیاز کنار نام بازیکن نبود، یک «۳ – ۲»ی جدا بود. روی
+       مانیتور و در شلوغی سالن، فهمیدن اینکه کدام عدد مال کیست
        یک لحظه مکث می‌خواست — و همان لحظه جای اشتباه‌کردن است.
-     • سقفِ فرمت اعمال نمی‌شد؛ در Best of 5 عددِ ۷ هم پذیرفته
+     • سقف فرمت اعمال نمی‌شد؛ در Best of 5 عدد ۷ هم پذیرفته
        می‌شد.
-     • «ثبت» یعنی «بازی تمام شد و برنده به دورِ بعد رفت». راهی
-       برای نشان‌دادنِ امتیازِ جاری روی مانیتور وجود نداشت.
+     • «ثبت» یعنی «بازی تمام شد و برنده به دور بعد رفت». راهی
+       برای نشان‌دادن امتیاز جاری روی مانیتور وجود نداشت.
 
-   حالا: هر بازیکن عددِ خودش را کنارِ نامش دارد با −/+، دکمه‌ی
-   «تأیید» امتیاز را زنده روی مانیتور می‌برد بدونِ اعلامِ برنده، و
+   حالا: هر بازیکن عدد خودش را کنار نامش دارد با −/+، دکمه‌ی
+   «تأیید» امتیاز را زنده روی مانیتور می‌برد بدون اعلام برنده، و
    «پایان بازی» جداست. */
 function MatchEditor({
   tournamentId, match, target, onDone, onError,
@@ -437,7 +437,7 @@ function MatchEditor({
   const done = match.winner !== null;
 
   /* ── سقف ──
-     هدف از فرمت می‌آید، ولی سقفِ هر بازیکن به امتیازِ حریفش هم
+     هدف از فرمت می‌آید، ولی سقف هر بازیکن به امتیاز حریفش هم
      بستگی دارد: در Best of 5 هدف ۳ است و ۳–۳ وجود ندارد — تا یکی
      به ۳ برسد بازی تمام است و بازنده حداکثر ۲ می‌گیرد. */
   const dirty = s1 !== match.score1 || s2 !== match.score2;
@@ -517,7 +517,7 @@ function MatchEditor({
         )}
       </div>
 
-      {/* ── دو خطِ بازیکن، هر کدام با عددِ خودش ── */}
+      {/* ── دو خط بازیکن، هر کدام با عدد خودش ── */}
       {bye || !ready ? (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
           <PlayerLine name={slotLabel(match, 1)} win={match.winner === 1} dim={!match.p1_name} />
@@ -539,7 +539,7 @@ function MatchEditor({
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 7, flexWrap: 'wrap', marginTop: 11 }}>
-            {/* تأیید ⇒ امتیاز روی مانیتور، بدونِ اعلامِ برنده */}
+            {/* تأیید ⇒ امتیاز روی مانیتور، بدون اعلام برنده */}
             <button onClick={pushLive} disabled={!!busy || !dirty || done}
               style={btnSmall(!!busy || !dirty || done, GOLD_D)}>
               {busy === 'live' ? <Loader2 size={12} style={{ animation: 'taspin 1s linear infinite' }} /> : <Save size={12} />}
@@ -569,12 +569,12 @@ function MatchEditor({
   );
 }
 
-/* یک بازیکن با امتیاز و بالاترین برکِ خودش، کنارِ نامش. */
+/* یک بازیکن با امتیاز و بالاترین برک خودش، کنار نامش. */
 function ScoreLine({ name, win, value, onSet, cap, locked, brk, onBrk, onSaveBrk, brkBusy }: {
   name: string; win: boolean; value: number;
   onSet: (v: number) => void; cap: number; locked: boolean;
-  /* برک مالِ بازیکن است نه بازی: در یک بازی هر دو نفر ممکن است
-     برکِ قابل‌ثبت بزنند. */
+  /* برک مال بازیکن است نه بازی: در یک بازی هر دو نفر ممکن است
+     برک قابل‌ثبت بزنند. */
   brk: string; onBrk: (v: string) => void; onSaveBrk: () => void; brkBusy: boolean;
 }) {
   return (
@@ -593,7 +593,7 @@ function ScoreLine({ name, win, value, onSet, cap, locked, brk, onBrk, onSaveBrk
         {win && <Trophy size={12} style={{ flexShrink: 0 }} />}{name}
       </span>
 
-      {/* بالاترین برکِ همین بازیکن */}
+      {/* بالاترین برک همین بازیکن */}
       <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3, flexShrink: 0 }}>
         <Sparkles size={12} color="#6D28D9" />
         <input aria-label={`بالاترین برک ${name}`} inputMode="numeric" value={brk}
@@ -613,7 +613,7 @@ function ScoreLine({ name, win, value, onSet, cap, locked, brk, onBrk, onSaveBrk
           }}><Save size={12} /></button>
       </span>
 
-      {/* عدد بدونِ کادر، با −/+ دو طرفش */}
+      {/* عدد بدون کادر، با −/+ دو طرفش */}
       <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, flexShrink: 0 }}>
         <StepBtn onClick={() => onSet(value - 1)} disabled={locked || value <= 0} label="کم کردن">
           <Minus size={13} />
@@ -650,8 +650,8 @@ function PlayerLine({ name, win, dim }: { name: string; win: boolean; dim: boole
   return (
     <span style={{
       fontSize: 13.5, fontWeight: win ? 900 : 700,
-      /* «Bye» قرمز است، همان‌جور که در جدول. نشانِ جداگانه‌ی بالای
-         کارت برداشته شد چون همین خط قبلاً آن را می‌گفت. */
+      /* «Bye» قرمز است، همان‌جور که در جدول. نشان جداگانه‌ی بالای
+         کارت برداشته شد چون همین خط قبلا آن را می‌گفت. */
       color: name === 'Bye' ? RED : dim ? MUT : win ? FELT : INK,
       display: 'flex', alignItems: 'center', gap: 5,
       overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
@@ -698,9 +698,9 @@ const banner: React.CSSProperties = {
   display: 'flex', alignItems: 'center', gap: 8, padding: '11px 14px',
   border: '1px solid', borderRadius: 12, fontSize: 12.5, fontWeight: 700, marginBottom: 14,
 };
-/* `flex: 0 0 auto` و `whiteSpace: nowrap`: داخلِ نوارِ کشیدنی هیچ
-   تبی نباید کوچک شود یا برچسبش دو خط شود. قابِ خودِ تب هم برداشته
-   شد چون نوار قاب دارد و دو قابِ تودرتو شلوغ می‌شود. */
+/* `flex: 0 0 auto` و `whiteSpace: nowrap`: داخل نوار کشیدنی هیچ
+   تبی نباید کوچک شود یا برچسبش دو خط شود. قاب خود تب هم برداشته
+   شد چون نوار قاب دارد و دو قاب تودرتو شلوغ می‌شود. */
 const chip = (on: boolean): React.CSSProperties => ({
   flex: '0 0 auto',
   display: 'inline-flex', alignItems: 'center', gap: 5, padding: '8px 15px', borderRadius: 20,
@@ -715,8 +715,8 @@ const btnGold = (dis: boolean): React.CSSProperties => ({
   background: dis ? '#DDD8CC' : GOLD, color: dis ? MUT : '#241B08',
   fontSize: 13.5, fontWeight: 800, cursor: dis ? 'not-allowed' : 'pointer', fontFamily: 'inherit',
 });
-/* دکمه‌ی دوم کنارِ طلایی — همان اندازه ولی کم‌رنگ‌تر، چون انتخابِ
-   جایگزین است نه عملِ اصلی */
+/* دکمه‌ی دوم کنار طلایی — همان اندازه ولی کم‌رنگ‌تر، چون انتخاب
+   جایگزین است نه عمل اصلی */
 const btnGhost = (dis: boolean): React.CSSProperties => ({
   display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 7,
   marginTop: 12, padding: '11px 20px', borderRadius: 11,

@@ -1,13 +1,13 @@
 'use client'
 
-/* پنجره‌ی تأیید و پیامِ کوتاه — یک‌بار در `layout` سوار می‌شود و
+/* پنجره‌ی تأیید و پیام کوتاه — یک‌بار در `layout` سوار می‌شود و
    هر جای سایت با `ask()` / `notify()` صدا زده می‌شود.
 
-   ── چرا پرتالِ روی body ──
-   بعضی از این پنجره‌ها از داخلِ کارتی صدا زده می‌شوند که `transform`
-   یا `overflow: hidden` دارد. آن‌جا `position: fixed` به قابِ همان
+   ── چرا پرتال روی body ──
+   بعضی از این پنجره‌ها از داخل کارتی صدا زده می‌شوند که `transform`
+   یا `overflow: hidden` دارد. آن‌جا `position: fixed` به قاب همان
    کارت محدود می‌شود و دکمه‌ها بریده می‌شوند — همان چیزی که پنجره‌ی
-   گزارش تخلف را غیرقابلِ بستن کرده بود. */
+   گزارش تخلف را غیرقابل بستن کرده بود. */
 
 import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
@@ -33,14 +33,14 @@ export default function DialogHost() {
   useEffect(() => { setMounted(true) }, [])
   useEffect(() => subscribe(setS), [])
 
-  /* پیام خودش می‌رود؛ ماندنش روی صفحه بعد از رفعِ مشکل گیج‌کننده است */
+  /* پیام خودش می‌رود؛ ماندنش روی صفحه بعد از رفع مشکل گیج‌کننده است */
   useEffect(() => {
     if (!s.toast) return
     const t = setTimeout(clearToast, 6000)
     return () => clearTimeout(t)
   }, [s.toast])
 
-  /* Escape پرسش را «نه» می‌بندد — همان رفتارِ پنجره‌ی بومی */
+  /* Escape پرسش را «نه» می‌بندد — همان رفتار پنجره‌ی بومی */
   useEffect(() => {
     if (!s.ask) return
     const esc = (e: KeyboardEvent) => { if (e.key === 'Escape') resolveAsk(false) }
@@ -84,7 +84,7 @@ export default function DialogHost() {
                 )}
               </div>
             </div>
-            {/* دکمه‌ی خطرناک دوم است: کلیکِ بی‌فکر روی اولی نباید کارِ
+            {/* دکمه‌ی خطرناک دوم است: کلیک بی‌فکر روی اولی نباید کار
                 برگشت‌ناپذیر انجام دهد. */}
             <div style={{ display: 'flex', gap: 10 }}>
               <button type="button" onClick={() => resolveAsk(false)} style={{
@@ -103,7 +103,7 @@ export default function DialogHost() {
         document.body,
       )}
 
-      {/* پرسشِ متنی — جایی که فقط «بله/خیر» کافی نیست و متن لازم است */}
+      {/* پرسش متنی — جایی که فقط «بله/خیر» کافی نیست و متن لازم است */}
       {s.text && createPortal(
         <div role="dialog" aria-modal="true"
           onClick={e => { if (e.target === e.currentTarget) { setDraft(''); resolveText(null) } }}

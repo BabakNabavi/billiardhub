@@ -10,8 +10,8 @@ const CORS = {
   'Access-Control-Allow-Headers': 'Content-Type, Authorization',
 };
 
-/* خواندن و نوشتنِ فهرست در `lib/story-index` است — همان چیزی که مسیرِ
-   باشگاه هم از آن استفاده می‌کند. دو نسخه‌ی جدا، دو رفتارِ جدا در برابر
+/* خواندن و نوشتن فهرست در `lib/story-index` است — همان چیزی که مسیر
+   باشگاه هم از آن استفاده می‌کند. دو نسخه‌ی جدا، دو رفتار جدا در برابر
    خطا ساخته بود. */
 const idx = (id: string) => storyIndex('seller-media', 'sellers', id);
 
@@ -38,7 +38,7 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
   const active = all.filter(s => isActive(s, now));
   if (active.length !== all.length) {
     /* منقضی‌ها هم از فهرست و هم از فضای ذخیره‌سازی می‌روند — وگرنه
-       فایلِ عکس تا ابد می‌ماند و پولش پرداخت می‌شود. */
+       فایل عکس تا ابد می‌ماند و پولش پرداخت می‌شود. */
     const gone = all.filter(s => !isActive(s, now));
     void store.write(active).then(() => store.purge(gone)).catch(() => {});
   }
@@ -72,7 +72,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       return NextResponse.json({ message: 'حداکثر ۱۰ استوری مجاز است' }, { status: 400, headers: CORS });
     await store.write([...active, story]);
   } catch (e) {
-    /* شکستِ نوشتن باید دیده شود: پیش‌تر ۲۰۱ برمی‌گشت و پنل «منتشر شد»
+    /* شکست نوشتن باید دیده شود: پیش‌تر ۲۰۱ برمی‌گشت و پنل «منتشر شد»
        نشان می‌داد در حالی که هیچ‌چیز ذخیره نشده بود. */
     return failed(e, 'ذخیره‌ی استوری انجام نشد');
   }
@@ -91,8 +91,8 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
   try {
     const current = await store.read();
     const now = Date.now();
-    /* «پیدا نشد» باید ۴۰۴ باشد نه ok: پنل روی همین پاسخ حذفِ محلی را
-       برمی‌گرداند، و ok گفتن یعنی استوری با رفرشِ بعدی برمی‌گردد. */
+    /* «پیدا نشد» باید ۴۰۴ باشد نه ok: پنل روی همین پاسخ حذف محلی را
+       برمی‌گرداند، و ok گفتن یعنی استوری با رفرش بعدی برمی‌گردد. */
     if (!current.some(s => s.id === storyId))
       return NextResponse.json({ message: 'استوری پیدا نشد' }, { status: 404, headers: CORS });
 
@@ -100,7 +100,7 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
     await store.write(current.filter(s => s.id !== storyId && isActive(s, now)));
     void store.purge(gone);
   } catch (e) {
-    return failed(e, 'حذفِ استوری انجام نشد');
+    return failed(e, 'حذف استوری انجام نشد');
   }
   return NextResponse.json({ ok: true }, { headers: CORS });
 }

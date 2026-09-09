@@ -7,18 +7,18 @@ import { boostPricing, boostState, KIND_LABEL, type BoostKind } from '@/lib/mark
 
 /* ارتقای یک آگهی — «تازه‌سازی» یا «فوری».
 
-   ترتیب عمداً همین است:
+   ترتیب عمدا همین است:
      ۱) هویت و مالکیت
-     ۲) وضعیتِ آگهی (فعال، منقضی‌نشده، فروخته‌نشده)
-     ۳) قیمت از تنظیماتِ سرور — نه از بدنه‌ی درخواست
-     ۴) سفارشِ PENDING
+     ۲) وضعیت آگهی (فعال، منقضی‌نشده، فروخته‌نشده)
+     ۳) قیمت از تنظیمات سرور — نه از بدنه‌ی درخواست
+     ۴) سفارش PENDING
      ۵) تازه بعد از آن، درگاه
 
    هر مبلغی که کلاینت بفرستد نادیده گرفته می‌شود. */
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-/* ── وضعیتِ فعلی، برای پنجره‌ی انتخاب ── */
+/* ── وضعیت فعلی، برای پنجره‌ی انتخاب ── */
 export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string }> }) {
   const { id } = await ctx.params;
   if (!UUID.test(id)) return NextResponse.json({ message: 'آگهی پیدا نشد' }, { status: 404 });
@@ -40,14 +40,14 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string 
 }
 
 /* آگهی‌ای که فروخته یا منقضی شده ارتقا نمی‌گیرد: پولی گرفته می‌شود
-   برای دیده‌شدنِ چیزی که دیگر قابلِ خرید نیست. */
+   برای دیده‌شدن چیزی که دیگر قابل خرید نیست. */
 function eligibility(p: { status?: string; soldAt?: string | null; expiresAt?: string | null }) {
   if (p.soldAt) return { eligible: false, reason: 'این آگهی فروخته شده است' };
   if (p.expiresAt && new Date(p.expiresAt).getTime() < Date.now()) {
     return { eligible: false, reason: 'مهلت این آگهی تمام شده — اول تمدیدش کنید' };
   }
   if (String(p.status ?? '').toLowerCase() !== 'active') {
-    return { eligible: false, reason: 'فقط آگهیِ فعال قابل ارتقا است' };
+    return { eligible: false, reason: 'فقط آگهی فعال قابل ارتقا است' };
   }
   return { eligible: true as const };
 }
@@ -81,7 +81,7 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string
 
   const pricing = await boostPricing();
   if (!pricing.enabled) {
-    return NextResponse.json({ message: 'ارتقای آگهی فعلاً غیرفعال است' }, { status: 503 });
+    return NextResponse.json({ message: 'ارتقای آگهی فعلا غیرفعال است' }, { status: 503 });
   }
 
   const price = kind === 'bump' ? pricing.bump.price : pricing.urgent.price;
@@ -90,9 +90,9 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string
     return NextResponse.json({ message: 'قیمت این گزینه تنظیم نشده است' }, { status: 409 });
   }
 
-  /* ── قفلِ تازه‌سازی ──
-     بدونِ این، کسی که پول دارد هر دقیقه می‌خرد و برای همیشه نفرِ
-     اول می‌ماند؛ آن‌وقت این دیگر ارتقا نیست، اجاره‌ی صدرِ فهرست
+  /* ── قفل تازه‌سازی ──
+     بدون این، کسی که پول دارد هر دقیقه می‌خرد و برای همیشه نفر
+     اول می‌ماند؛ آن‌وقت این دیگر ارتقا نیست، اجاره‌ی صدر فهرست
      است و بقیه از بازار می‌روند. */
   if (kind === 'bump') {
     const st = await boostState(id);

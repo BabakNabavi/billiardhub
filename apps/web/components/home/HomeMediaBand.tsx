@@ -1,14 +1,14 @@
 'use client'
 
 /* ─────────────────────────────────────────────────────────────
-   نوارِ سینماییِ بیلیارد مدیا — صفحه‌ی اصلی.
+   نوار سینمایی بیلیارد مدیا — صفحه‌ی اصلی.
 
-   از `HomeClient` بیرون کشیده شد. آن فایل ۲۲۰۰ خط بود و کلِ صفحه‌ی
-   اصلی را در یک باندلِ واحد می‌گذاشت: مرورگر باید همه‌اش را می‌خواند
+   از `HomeClient` بیرون کشیده شد. آن فایل ۲۲۰۰ خط بود و کل صفحه‌ی
+   اصلی را در یک باندل واحد می‌گذاشت: مرورگر باید همه‌اش را می‌خواند
    و hydrate می‌کرد پیش از آنکه صفحه به کلیک جواب بدهد.
 
-   این سکشن زیرِ خطِ اول است و تا کاربر اسکرول نکند دیده نمی‌شود، پس
-   دلیلی ندارد در همان ثانیه‌ی اول اجرا شود. حالا چانکِ خودش را دارد و
+   این سکشن زیر خط اول است و تا کاربر اسکرول نکند دیده نمی‌شود، پس
+   دلیلی ندارد در همان ثانیه‌ی اول اجرا شود. حالا چانک خودش را دارد و
    با `next/dynamic` بارگذاری می‌شود.
    ───────────────────────────────────────────────────────────── */
 
@@ -18,9 +18,9 @@ import { Play, Eye, Clapperboard, ArrowLeft } from 'lucide-react'
 import { MEDIA_VIDEOS, compactViews } from '../../lib/media-data'
 import { getHiddenVideoIds, getFeaturedOverride } from '../../lib/media-admin-store'
 
-/* فهرستِ محتوای دستی می‌تواند خالی باشد (و امروز هست). پیش‌تر این‌جا
-   `MEDIA_VIDEOS[0]!` نوشته شده بود که با فهرستِ خالی `undefined`
-   می‌شود و اولین `feat.id` کلِ صفحه‌ی اول را می‌شکند. */
+/* فهرست محتوای دستی می‌تواند خالی باشد (و امروز هست). پیش‌تر این‌جا
+   `MEDIA_VIDEOS[0]!` نوشته شده بود که با فهرست خالی `undefined`
+   می‌شود و اولین `feat.id` کل صفحه‌ی اول را می‌شکند. */
 const MEDIA_FEAT = MEDIA_VIDEOS.find(v => v.featured) ?? MEDIA_VIDEOS[0] ?? null
 const MEDIA_MINIS = MEDIA_FEAT
   ? [...MEDIA_VIDEOS].sort((a, b) => b.views - a.views).filter(v => v.id !== MEDIA_FEAT.id).slice(0, 3)
@@ -40,7 +40,7 @@ export default function HomeMediaBand() {
     setMinis([...pool].sort((a, b) => b.views - a.views).filter(v => v.id !== f.id).slice(0, 3));
   }, []);
 
-  /* بدونِ محتوا، نوارِ مدیا اصلاً رندر نمی‌شود — یک سکشنِ سینماییِ خالی
+  /* بدون محتوا، نوار مدیا اصلا رندر نمی‌شود — یک سکشن سینمایی خالی
      بدتر از نبودنش است. */
   if (!feat) return null;
 
@@ -63,7 +63,7 @@ export default function HomeMediaBand() {
         .hm-poster { position: absolute; top: 0; bottom: 0; left: 0; width: 52%; z-index: 0; overflow: hidden;
           -webkit-mask-image: linear-gradient(to right, black 44%, transparent 96%);
           mask-image: linear-gradient(to right, black 44%, transparent 96%); }
-        /* صحنه‌ی سینمایی — تماماً CSS/SVG، بدون عکس؛ المان‌ها بنفش درخشان */
+        /* صحنه‌ی سینمایی — تماما CSS/SVG، بدون عکس؛ المان‌ها بنفش درخشان */
         .hm-stage { position: absolute; inset: 0;
           background: radial-gradient(ellipse 70% 62% at 26% 100%, rgba(139,92,246,0.18), transparent 62%),
                       radial-gradient(ellipse 50% 50% at 20% 6%, rgba(167,139,250,0.10), transparent 60%),

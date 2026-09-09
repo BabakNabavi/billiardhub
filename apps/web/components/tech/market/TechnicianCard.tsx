@@ -1,23 +1,23 @@
 'use client'
 
 /* ─────────────────────────────────────────────────────────────
-   کارتِ متخصص.
+   کارت متخصص.
 
-   ⚠️ کارتِ *اعتماد* است نه کارتِ محصول: باید در دو-سه ثانیه خوانده
+   ⚠️ کارت *اعتماد* است نه کارت محصول: باید در دو-سه ثانیه خوانده
    شود. پس حداکثر پنج قلم اطلاعات و بس.
 
    ── چه چیزی نشان داده می‌شود و چرا ──
-   هر قلم فقط وقتی می‌آید که داده‌اش **واقعاً** وجود دارد:
+   هر قلم فقط وقتی می‌آید که داده‌اش **واقعا** وجود دارد:
    • امتیاز       ← ستون‌های `rating_avg`/`rating_count` روی
-                     `profiles` (تریگرِ مهاجرتِ ۰۸۹). صفر یعنی
-                     هیچ نظری ثبت نشده ⟵ اصلاً نمایش نمی‌دهیم.
-   • تیکِ تأیید   ← ستونِ `verified`، فقط ادمین می‌دهد
-   • اعزام/کارگاه ← `onsite` و `workshop` از خودِ پروفایل
-   • شهر و تخصص   ← داده‌ی ثبت‌شده‌ی خودِ متخصص
+                     `profiles` (تریگر مهاجرت ۰۸۹). صفر یعنی
+                     هیچ نظری ثبت نشده ⟵ اصلا نمایش نمی‌دهیم.
+   • تیک تأیید   ← ستون `verified`، فقط ادمین می‌دهد
+   • اعزام/کارگاه ← `onsite` و `workshop` از خود پروفایل
+   • شهر و تخصص   ← داده‌ی ثبت‌شده‌ی خود متخصص
 
-   ⚠️ «قیمت از…»، «سال سابقه»، «زمانِ پاسخ» و «فاصله» این‌جا نیستند
-   چون هیچ‌کدام ستونی در دیتابیس ندارند. عددِ ساختگی روی پروفایلِ یک
-   آدمِ واقعی، جعلِ اعتبار است.
+   ⚠️ «قیمت از…»، «سال سابقه»، «زمان پاسخ» و «فاصله» این‌جا نیستند
+   چون هیچ‌کدام ستونی در دیتابیس ندارند. عدد ساختگی روی پروفایل یک
+   آدم واقعی، جعل اعتبار است.
    ───────────────────────────────────────────────────────────── */
 
 import Link from 'next/link'
@@ -31,7 +31,7 @@ const MAX_CHIPS = 3
 
 export interface TechnicianCardProps {
   tech: Technician
-  /** میانگینِ امتیاز — فقط وقتی `ratingCount > 0` معنا دارد */
+  /** میانگین امتیاز — فقط وقتی `ratingCount > 0` معنا دارد */
   ratingAvg?: number
   ratingCount?: number
 }
@@ -53,25 +53,35 @@ export function TechnicianCard({ tech, ratingAvg = 0, ratingCount = 0 }: Technic
 
       <div className="tm-card-b">
         <h3 className="tm-card-name">
-          {/* ⚠️ کلِ کارت لینک نیست: داخلش دو دکمه‌ی دیگر هست و لینکِ
-              تودرتو در HTML نامعتبر است. لینک روی خودِ نام. */}
+          {/* ⚠️ کل کارت لینک نیست: داخلش دو دکمه‌ی دیگر هست و لینک
+              تودرتو در HTML نامعتبر است. لینک روی خود نام. */}
           <Link href={href}>{tech.name}</Link>
           {tech.verified && <VerifiedBadge title="متخصص تأیید شده" />}
         </h3>
 
         {tech.title && <p className="tm-card-title">{tech.title}</p>}
 
+        {/* ⚠️ هر نشان رنگ معنادار خودش را دارد، نه رنگ تزئینی:
+            سبز = می‌آید سر کار، بنفش = کارگاه دارد، آبی = مکان،
+            کهربایی = امتیاز. رنگ این‌جا اطلاعات است و کارت را در یک
+            نگاه قابل اسکن می‌کند. */}
         <div className="tm-card-meta">
           {ratingCount > 0 && (
             <span className="tm-rate">
-              <Star size={14} aria-hidden fill="currentColor" />
+              <i className="tm-ic tm-ic--star"><Star size={13} aria-hidden fill="currentColor" /></i>
               {toFaDigits(ratingAvg.toFixed(1))}
               <small>({toFaDigits(String(ratingCount))} نظر)</small>
             </span>
           )}
-          {hasCity && <span><MapPin size={13} aria-hidden />{tech.city}</span>}
-          {tech.onsite && <span><Home size={13} aria-hidden />اعزام به محل</span>}
-          {tech.workshop && <span><Wrench size={13} aria-hidden />پذیرش در کارگاه</span>}
+          {hasCity && (
+            <span><i className="tm-ic tm-ic--city"><MapPin size={13} aria-hidden /></i>{tech.city}</span>
+          )}
+          {tech.onsite && (
+            <span><i className="tm-ic tm-ic--onsite"><Home size={13} aria-hidden /></i>اعزام به محل</span>
+          )}
+          {tech.workshop && (
+            <span><i className="tm-ic tm-ic--shop"><Wrench size={13} aria-hidden /></i>پذیرش در کارگاه</span>
+          )}
         </div>
 
         {chips.length > 0 && (
@@ -94,7 +104,7 @@ export function TechnicianCard({ tech, ratingAvg = 0, ratingCount = 0 }: Technic
   )
 }
 
-/** اسکلتِ بارگذاری — هم‌ارتفاعِ کارتِ واقعی تا صفحه نپرد */
+/** اسکلت بارگذاری — هم‌ارتفاع کارت واقعی تا صفحه نپرد */
 export function TechnicianCardSkeleton() {
   return (
     <div className="tm-card tm-skel" aria-hidden>

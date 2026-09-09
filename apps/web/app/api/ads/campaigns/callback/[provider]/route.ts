@@ -35,7 +35,7 @@ async function handle(req: NextRequest, providerName: string) {
     status: string; provider: string; provider_authority: string | null;
   };
 
-  /* قبلاً پرداخت شده ⇒ فقط نتیجه، بدون اثر دوباره */
+  /* قبلا پرداخت شده ⇒ فقط نتیجه، بدون اثر دوباره */
   if (o.status === 'PAID') return done(true, `&order=${o.id}`);
 
   if (ret.canceled) {
@@ -75,7 +75,7 @@ async function handle(req: NextRequest, providerName: string) {
     return fail('خطا در ثبت تبلیغ — با پشتیبانی تماس بگیرید');
   }
 
-  /* ظرفیت جایگاه در همان تراکنش پر شده بود. تابع عمداً استثنا پرتاب
+  /* ظرفیت جایگاه در همان تراکنش پر شده بود. تابع عمدا استثنا پرتاب
      نمی‌کند (وگرنه علامت‌گذاری سفارش هم برمی‌گشت) و نتیجه را
      برمی‌گرداند؛ این‌جا فقط پیام روشن به کاربر داده می‌شود. */
   const res = (act ?? {}) as { ok?: boolean; reason?: string };

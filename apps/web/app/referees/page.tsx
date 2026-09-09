@@ -11,7 +11,7 @@ const GOLD    = '#C7A66A'
 const GOLD_D  = '#8F6531'
 
 /* page colors (light theme) */
-/* رنگِ پایه‌ی صفحه از کلاسِ مشترکِ lq-stage می‌آید */
+/* رنگ پایه‌ی صفحه از کلاس مشترک lq-stage می‌آید */
 const TEXT    = '#111110'
 const TEXT_S  = 'rgba(17,17,16,0.52)'
 const TEXT_M  = 'rgba(17,17,16,0.28)'
@@ -26,20 +26,20 @@ interface Referee {
   /* ⚠️ `specialty` فقط *اولین* رشته است و کارت با همان نوشته می‌شد:
      داوری که اسنوکر و پاکت و هی‌بال دارد روی کارت «داور اسنوکر»
      می‌شد و در صفحه‌ی خودش هر سه — کاربر همین ناهماهنگی را دید.
-     فهرستِ کامل کنارش می‌ماند؛ `specialty` برای رنگ و نشان است. */
+     فهرست کامل کنارش می‌ماند؛ `specialty` برای رنگ و نشان است. */
   id: string; name: string; specialty: string; disciplines?: string[]; city: string
   experience: number; grade: string; gradeColor: string
   bio: string; photo: string
   verified?: boolean
 }
 
-/* ⚠️ عمداً خالی — پیش از رونمایی پاک شد.
+/* ⚠️ عمدا خالی — پیش از رونمایی پاک شد.
 
-   این آرایه 8 موجودیتِ ساختگی داشت که روی سایتِ زنده مثل داده‌ی
-   واقعی دیده می‌شدند: نام، شهر، امتیاز و مشخصاتی که هیچ‌کدام وجودِ
+   این آرایه 8 موجودیت ساختگی داشت که روی سایت زنده مثل داده‌ی
+   واقعی دیده می‌شدند: نام، شهر، امتیاز و مشخصاتی که هیچ‌کدام وجود
    خارجی نداشتند و کلیکشان به هیچ‌جا نمی‌رسید.
 
-   جای این‌ها با موجودیت‌های واقعیِ سایت پر می‌شود. اگر چیزی نباشد،
+   جای این‌ها با موجودیت‌های واقعی سایت پر می‌شود. اگر چیزی نباشد،
    بخش خالی می‌ماند — که درست است. آرایه نگه داشته شد (نه حذف) تا
    امضای ماژول و مصرف‌کننده‌هایش دست‌نخورده بمانند. */
 const REFEREES: Referee[] = []
@@ -124,9 +124,9 @@ function refereeMotif(motif: string) {
     <svg width={s} viewBox="0 0 100 100" fill="none" aria-hidden>
       <circle cx="50" cy="50" r="38" stroke={GOLD} strokeWidth="1.8" opacity="0.85" fill="rgba(0,0,0,0.18)"/>
       <circle cx="50" cy="50" r="16" fill={GOLD} opacity="0.9"/>
-      {/* ⚠️ `data-no-fa` لازم است: `PersianDigits` هر رقمِ رندرشده را
-          فارسی می‌کند و شماره‌ی توپِ بیلیارد «۸» می‌شد. شماره‌ی توپ
-          یک نشانه است نه عدد در متنِ فارسی. */}
+      {/* ⚠️ `data-no-fa` لازم است: `PersianDigits` هر رقم رندرشده را
+          فارسی می‌کند و شماره‌ی توپ بیلیارد «۸» می‌شد. شماره‌ی توپ
+          یک نشانه است نه عدد در متن فارسی. */}
       <text x="50" y="51" data-no-fa textAnchor="middle" dominantBaseline="central" fontSize="19" fontWeight="800" fill="#1c0e13">8</text>
       <ellipse cx="38" cy="36" rx="7" ry="4" fill={GOLD} opacity="0.22" transform="rotate(-30 38 36)"/>
     </svg>
@@ -203,10 +203,10 @@ function RefereeHeroSlider() {
           </div>
         </div>
 
-        {/* ── نشانگرِ اسلاید دیده نمی‌شود ──
-            آن دایره‌های ریزِ گوشه‌ی تصویر روی هدر شلوغی می‌کردند و
-            هیچ‌کس رویشان کلیک نمی‌کرد؛ اسلایدر خودش می‌چرخد. حذفِ
-            کاملشان ولی کاربرِ کیبورد و صفحه‌خوان را از تغییرِ اسلاید
+        {/* ── نشانگر اسلاید دیده نمی‌شود ──
+            آن دایره‌های ریز گوشه‌ی تصویر روی هدر شلوغی می‌کردند و
+            هیچ‌کس رویشان کلیک نمی‌کرد؛ اسلایدر خودش می‌چرخد. حذف
+            کاملشان ولی کاربر کیبورد و صفحه‌خوان را از تغییر اسلاید
             محروم می‌کرد، پس فقط از دید پنهان شده‌اند و با فوکوس
             دوباره ظاهر می‌شوند. */}
         <div className="hero-dots" style={{ position:'absolute', bottom:14, left:'clamp(24px,6vw,80px)', zIndex:6, display:'flex', gap:7 }}>
@@ -220,9 +220,9 @@ function RefereeHeroSlider() {
 }
 
 /* ── آواتار با حلقه‌ی طلایی ──
-   پیش‌تر این‌جا حلقه‌ی رنگیِ استوری بود که رسانه‌اش عکسِ پروفایلِ خودِ
+   پیش‌تر این‌جا حلقه‌ی رنگی استوری بود که رسانه‌اش عکس پروفایل خود
    داور می‌شد: «استوری»ای که کسی منتشرش نکرده بود و هرگز هم منقضی
-   نمی‌شد. برای داور اصلاً سیستمِ استوری وجود ندارد. */
+   نمی‌شد. برای داور اصلا سیستم استوری وجود ندارد. */
 function RefereeAvatar({ referee, size }: { referee: Referee; size: string }) {
   return <RoleAvatar kind="referee" photo={referee.photo} name={referee.name} size={size} />
 }
@@ -288,15 +288,15 @@ function RefereeCard({ referee, view, idx }: { referee: Referee; view: 'grid' | 
       </div>
       {/* body */}
       <div style={{ padding:'12px 14px 18px', flex:1, display:'flex', flexDirection:'column', alignItems:'center', textAlign:'center' }}>
-        {/* ⚠️ تیک پیش‌تر درونِ خودِ h3 و inline بود؛ `verticalAlign` آن
-            را نسبت به خطِ متن جابه‌جا می‌کرد و کنارِ نام بالا می‌نشست.
-            حالا هر دو آیتمِ یک ردیفِ flex با `alignItems:center`اند —
-            همان الگویی که کارتِ مربی دارد و درست کار می‌کند. */}
+        {/* ⚠️ تیک پیش‌تر درون خود h3 و inline بود؛ `verticalAlign` آن
+            را نسبت به خط متن جابه‌جا می‌کرد و کنار نام بالا می‌نشست.
+            حالا هر دو آیتم یک ردیف flex با `alignItems:center`اند —
+            همان الگویی که کارت مربی دارد و درست کار می‌کند. */}
         <div style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:5, marginBottom:4, maxWidth:'100%' }}>
           <h3 style={{ fontSize:16, fontWeight:800, color:TEXT, lineHeight:1.2, letterSpacing:'-0.02em', minWidth:0, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{referee.name}</h3>
           {referee.verified && <VerifiedBadge style={{ marginInlineStart: 0 }} />}
         </div>
-        {/* `-webkit-box` ارث‌بریِ text-align را قابلِ اتکا نمی‌گذارد؛ صریح نوشته می‌شود */}
+        {/* `-webkit-box` ارث‌بری text-align را قابل اتکا نمی‌گذارد؛ صریح نوشته می‌شود */}
         <p style={{ fontSize:12.5, color:TEXT_S, lineHeight:1.35, marginBottom:9, minHeight:'2.7em', textAlign:'center', display:'-webkit-box', WebkitLineClamp:2, WebkitBoxOrient:'vertical', overflow:'hidden' }}>داور {specText}</p>
         <div style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:5, marginBottom:13, color:TEXT_M }}>
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
@@ -319,9 +319,9 @@ export default function RefereesPage() {
   const [view,      setView]      = useState<'grid' | 'list'>('grid')
   const [localRefs, setLocalRefs] = useState<Referee[]>([])
 
-  /* همان ایرادِ صفحه‌ی مربیان: این فهرست فقط از localStorage می‌آمد،
+  /* همان ایراد صفحه‌ی مربیان: این فهرست فقط از localStorage می‌آمد،
      پس داوری که ثبت می‌شد برای هیچ بازدیدکننده‌ی دیگری دیده نمی‌شد.
-     اول حافظه‌ی همین مرورگر، بعد فهرستِ سرور. */
+     اول حافظه‌ی همین مرورگر، بعد فهرست سرور. */
   useEffect(() => {
     setLocalRefs(listRefereeProfiles().filter(p => p.status === 'approved').map(mapProfileToListReferee))
     void fetchProfiles<RefereeProfile>('referee').then(rows => {
@@ -329,12 +329,12 @@ export default function RefereesPage() {
         .filter(r => r.status === 'approved')
         .map(r => mapProfileToListReferee({ ...r.data, slug: r.slug, verified: r.verified } as RefereeProfile))
       if (remote.length) setLocalRefs(remote)
-    }).catch(() => { /* شبکه قطع بود ⇒ فهرستِ محلی می‌ماند */ })
+    }).catch(() => { /* شبکه قطع بود ⇒ فهرست محلی می‌ماند */ })
   }, [])
   const q = search.trim()
   const referees = [...localRefs, ...REFEREES].filter(r =>
-    /* فیلتر هم روی همه‌ی رشته‌ها: با `specialty` تنها، داورِ
-       سه‌رشته‌ای فقط زیرِ رشته‌ی اولش پیدا می‌شد. */
+    /* فیلتر هم روی همه‌ی رشته‌ها: با `specialty` تنها، داور
+       سه‌رشته‌ای فقط زیر رشته‌ی اولش پیدا می‌شد. */
     (filter === 'all' || (r.disciplines?.length ? r.disciplines.includes(filter) : r.specialty === filter)) &&
     (q === '' || r.name.includes(q) || r.city.includes(q))
   )
@@ -376,9 +376,9 @@ export default function RefereesPage() {
         @media(max-width:700px) {.g5{grid-template-columns:repeat(2,1fr)!important;}}
         @media(max-width:480px) {.g5{grid-template-columns:repeat(2,1fr)!important;}}
         /* mobile: search + toggles drop to their own row under the pills */
-        /* ⚠️ min-width:0 لازم است: این گروه خودش یک آیتمِ فلکس است و با
-           min-width:auto کفِ min-content می‌گیرد — روی ۳۲۰px ۳۳۲ پیکسل
-           می‌شد و دکمه‌های نما ۳۶ پیکسل بیرونِ قاب می‌افتادند. */
+        /* ⚠️ min-width:0 لازم است: این گروه خودش یک آیتم فلکس است و با
+           min-width:auto کف min-content می‌گیرد — روی ۳۲۰px ۳۳۲ پیکسل
+           می‌شد و دکمه‌های نما ۳۶ پیکسل بیرون قاب می‌افتادند. */
         .coach-search-group{min-width:0;}
         @media(max-width:640px){.coach-search-group{flex-basis:100%;margin-inline-start:0!important;}}
         /* list view: 2 cards per row on desktop, 1 on mobile */
@@ -402,10 +402,10 @@ export default function RefereesPage() {
         }}>
           <div style={{ maxWidth:1280, margin:'0 auto', padding:'10px clamp(24px,6vw,80px)',
             display:'flex', alignItems:'center', gap:8, flexWrap:'wrap' }}>
-            {/* ── فیلترها: همان کنترلِ بخش‌بندیِ گالریِ صفحه‌ی پروفایل ──
-                پیش‌تر چهار قرصِ جدا بودند با استایلِ اینلاین و دو
-                هندلرِ hover دستی. `lq-seg` از قبل در globals.css هست،
-                هر چهار حالت را دارد و شکلش با تبِ گالری یکی است. */}
+            {/* ── فیلترها: همان کنترل بخش‌بندی گالری صفحه‌ی پروفایل ──
+                پیش‌تر چهار قرص جدا بودند با استایل اینلاین و دو
+                هندلر hover دستی. `lq-seg` از قبل در globals.css هست،
+                هر چهار حالت را دارد و شکلش با تب گالری یکی است. */}
             <div className="lq-seg" role="tablist" aria-label="فیلتر رشته">
               {([
                 { k:'all',      l:'همه داوران' },
@@ -496,13 +496,13 @@ export default function RefereesPage() {
 
       </div>
 
-      {/* ── مودالِ استوری این‌جا نیست ──
-          رسانه‌اش `storyImage` بود که برابرِ *عکسِ پروفایل* پر می‌شد،
-          و اگر خالی بود یک عکسِ کاتالوگِ ساختگی جایش می‌نشست. یعنی
-          سایت از طرفِ مربی چیزی نشان می‌داد که او نگذاشته بود، و
-          چون فیلدِ پروفایل بود هرگز منقضی نمی‌شد.
+      {/* ── مودال استوری این‌جا نیست ──
+          رسانه‌اش `storyImage` بود که برابر *عکس پروفایل* پر می‌شد،
+          و اگر خالی بود یک عکس کاتالوگ ساختگی جایش می‌نشست. یعنی
+          سایت از طرف مربی چیزی نشان می‌داد که او نگذاشته بود، و
+          چون فیلد پروفایل بود هرگز منقضی نمی‌شد.
 
-          مربی و داور هنوز سیستمِ استوریِ واقعی ندارند؛ تا آن روز
+          مربی و داور هنوز سیستم استوری واقعی ندارند؛ تا آن روز
           حلقه و مودالی هم نباید باشد. */}
     </>
   )

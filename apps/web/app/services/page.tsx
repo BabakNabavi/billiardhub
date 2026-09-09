@@ -1,21 +1,21 @@
 'use client'
 
 /* ─────────────────────────────────────────────────────────────
-   خدماتِ فنی — دایرکتوریِ متخصصان.
+   خدمات فنی — دایرکتوری متخصصان.
 
-   ── مفهومِ قبلی کاملاً برداشته شد ──
-   نسخه‌های پیشین «نمایشِ محصول» بودند: رسانه‌ی تمام‌قاب، تیترِ
-   هشتاد پیکسلی، روایتِ آناتومیِ چوب، دوربینِ اسکرول. هیچ‌کدام به
-   کاری که کاربرِ این صفحه دارد ربط نداشت.
+   ── مفهوم قبلی کاملا برداشته شد ──
+   نسخه‌های پیشین «نمایش محصول» بودند: رسانه‌ی تمام‌قاب، تیتر
+   هشتاد پیکسلی، روایت آناتومی چوب، دوربین اسکرول. هیچ‌کدام به
+   کاری که کاربر این صفحه دارد ربط نداشت.
 
-   این صفحه حالا یک مسیرِ کاری است:
+   این صفحه حالا یک مسیر کاری است:
      نیاز ⟵ خدمت ⟵ متخصص ⟵ اعتماد ⟵ تماس
 
-   ── واقعیتِ داده ──
-   ⚠️ هر قلمِ اطلاعات فقط وقتی رندر می‌شود که ستونش در دیتابیس
+   ── واقعیت داده ──
+   ⚠️ هر قلم اطلاعات فقط وقتی رندر می‌شود که ستونش در دیتابیس
    وجود داشته باشد. آنچه هست: شهر، `onsite`/`workshop`، `verified`،
-   و `rating_avg`/`rating_count` (مهاجرتِ ۰۸۹).
-   آنچه نیست: قیمت، سابقه، زمانِ پاسخ، فاصله، در دسترس بودن.
+   و `rating_avg`/`rating_count` (مهاجرت ۰۸۹).
+   آنچه نیست: قیمت، سابقه، زمان پاسخ، فاصله، در دسترس بودن.
    این چهار نه ساخته می‌شوند و نه با «—» جعل می‌شوند؛ یا حذف‌اند یا
    خاموش و برچسب‌دار.
    ───────────────────────────────────────────────────────────── */
@@ -37,7 +37,7 @@ import {
 } from '@/components/tech/market/ServiceFilters'
 import '@/components/tech/market/market.css'
 
-/** امتیازِ تجمیعیِ هر متخصص — از ستونِ ردیف، نه jsonb */
+/** امتیاز تجمیعی هر متخصص — از ستون ردیف، نه jsonb */
 type Rating = { avg: number; count: number }
 
 export default function TechnicalServicesPage() {
@@ -57,16 +57,16 @@ export default function TechnicalServicesPage() {
   const resultsRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    /* کشِ محلی تا صفحه در قطعیِ شبکه خالی نماند */
+    /* کش محلی تا صفحه در قطعی شبکه خالی نماند */
     try {
       const local = listApprovedTechnicians().map(profileToTechnician)
       if (local.length) setRows(local)
     } catch { /* حافظه‌ی محلی در دسترس نبود */ }
 
-    /* ⚠️ مهلتِ صریح. `fetchProfiles` خودش مهلتی ندارد و اگر روتِ
-       API معلق بماند — که روی شبکه‌ی کند یا دیتابیسِ کند ممکن است —
+    /* ⚠️ مهلت صریح. `fetchProfiles` خودش مهلتی ندارد و اگر روت
+       API معلق بماند — که روی شبکه‌ی کند یا دیتابیس کند ممکن است —
        وعده هرگز settle نمی‌شود و کاربر تا ابد اسکلت می‌بیند، نه
-       خطا و نه دکمه‌ی تلاشِ دوباره. */
+       خطا و نه دکمه‌ی تلاش دوباره. */
     const bail = setTimeout(() => { setFailed(true); setLoading(false) }, 12000)
     void fetchProfilesResult<TechnicianProfile>('technician')
       .then(res => {
@@ -77,7 +77,7 @@ export default function TechnicalServicesPage() {
         setRows(approved.map(r => profileToTechnician(
           { ...r.data, slug: r.slug, verified: r.verified } as TechnicianProfile,
         )))
-        /* ⚠️ امتیاز از خودِ ردیف می‌آید (`ratingAvg`/`ratingCount`)،
+        /* ⚠️ امتیاز از خود ردیف می‌آید (`ratingAvg`/`ratingCount`)،
            نه از jsonb و نه از محاسبه‌ی مرورگر. */
         const m = new Map<string, Rating>()
         for (const r of approved) {
@@ -103,7 +103,7 @@ export default function TechnicalServicesPage() {
 
   const hasAnyRating = ratings.size > 0
 
-  /* شمارِ واقعیِ متخصصِ هر دسته */
+  /* شمار واقعی متخصص هر دسته */
   const catCounts = useMemo(() => {
     const m = new Map<string, number>()
     for (const cat of TECH_CATEGORIES) {
@@ -142,12 +142,12 @@ export default function TechnicalServicesPage() {
     resultsRef.current?.scrollIntoView({ behavior: calm ? 'auto' : 'smooth', block: 'start' })
   }, [])
 
-  /* شیتِ موبایل: قفلِ بدنه، Escape، و بازگشتِ فوکوس */
+  /* شیت موبایل: قفل بدنه، Escape، و بازگشت فوکوس */
   useEffect(() => {
     if (!sheet) { document.body.style.overflow = ''; sheetOpener.current?.focus(); return }
     document.body.style.overflow = 'hidden'
     sheetClose.current?.focus()
-    /* ⚠️ بدونِ دامِ فوکوس، Tab از دلِ یک دیالوگِ `aria-modal` مستقیم
+    /* ⚠️ بدون دام فوکوس، Tab از دل یک دیالوگ `aria-modal` مستقیم
        می‌رود توی صفحه‌ی پشتش — یعنی ادعای مودال دروغ است. */
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') { setSheet(false); return }
@@ -171,7 +171,7 @@ export default function TechnicalServicesPage() {
 
   return (
     <div className="tm">
-      {/* ═══════ ۱ — کشفِ خدمت ═══════ */}
+      {/* ═══════ ۱ — کشف خدمت ═══════ */}
       <section className="tm-hero">
         <div className="tm-wrap tm-hero-in">
           <div>
@@ -188,11 +188,11 @@ export default function TechnicalServicesPage() {
             />
           </div>
 
-          {/* ⚠️ عکسِ واقعیِ تعویضِ ماهوتِ میز — تنها عکسِ واقعیِ این
-              بخش در پروژه. عمداً بدونِ زیرنویسِ «متخصصِ ما»: تصویر
-              *نوعِ کار* را نشان می‌دهد، نه شخصِ مشخصی را، و نسبت‌دادنش
-              به یک متخصصِ ثبت‌شده ادعای دروغ می‌شد.
-              ⚠️ فایل ۵۱۶×۳۸۷ است؛ قاب عمداً بزرگ‌تر از این نمی‌شود تا
+          {/* ⚠️ عکس واقعی تعویض ماهوت میز — تنها عکس واقعی این
+              بخش در پروژه. عمدا بدون زیرنویس «متخصص ما»: تصویر
+              *نوع کار* را نشان می‌دهد، نه شخص مشخصی را، و نسبت‌دادنش
+              به یک متخصص ثبت‌شده ادعای دروغ می‌شد.
+              ⚠️ فایل ۵۱۶×۳۸۷ است؛ قاب عمدا بزرگ‌تر از این نمی‌شود تا
               کشیده و نرم دیده نشود. */}
           <figure className="tm-hero-media">
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -225,7 +225,7 @@ export default function TechnicalServicesPage() {
         </div>
 
         <div className="tm-dir">
-          {/* ستونِ فیلتر — فقط دسکتاپ */}
+          {/* ستون فیلتر — فقط دسکتاپ */}
           <aside className="tm-filters" aria-label="فیلترها">
             <ServiceFilters
               value={filters} onChange={setFilters}
@@ -238,7 +238,7 @@ export default function TechnicalServicesPage() {
               <span className="tm-count" aria-live="polite">
                 {loading ? 'در حال بارگذاری…' : `${faDigits(String(results.length))} متخصص`}
               </span>
-              {/* دکمه‌ی فیلتر فقط زیرِ ۱۰۲۴ معنا دارد */}
+              {/* دکمه‌ی فیلتر فقط زیر ۱۰۲۴ معنا دارد */}
               <button
                 type="button" className="tm-btn tm-btn--outline tm-btn--sm"
                 onClick={e => { sheetOpener.current = e.currentTarget; setSheet(true) }}
@@ -293,7 +293,7 @@ export default function TechnicalServicesPage() {
               </div>
             )}
 
-            {/* ═══════ ۴ — ثبتِ درخواست ═══════ */}
+            {/* ═══════ ۴ — ثبت درخواست ═══════ */}
             <div className="tm-cta tm-cta-mt">
               <div>
                 <h2>متخصص مناسب پیدا نکردی؟</h2>
@@ -308,7 +308,7 @@ export default function TechnicalServicesPage() {
         </div>
       </section>
 
-      {/* ═══════ ۵ — ثبت‌نامِ متخصص ═══════ */}
+      {/* ═══════ ۵ — ثبت‌نام متخصص ═══════ */}
       <section className="tm-sec tm-wrap">
         <div className="tm-cta tm-cta--dark">
           <div>
@@ -322,7 +322,7 @@ export default function TechnicalServicesPage() {
         </div>
       </section>
 
-      {/* ═══════ شیتِ فیلترِ موبایل ═══════ */}
+      {/* ═══════ شیت فیلتر موبایل ═══════ */}
       {sheet && (
         <div className="tm-sheet" role="presentation" onClick={() => setSheet(false)}>
           <div

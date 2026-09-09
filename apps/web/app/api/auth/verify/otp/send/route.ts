@@ -38,14 +38,14 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ message: 'شماره موبایل ثبت نشده' }, { status: 400, headers: CORS_HEADERS })
     }
     if (user.phone_verified) {
-      return NextResponse.json({ message: 'موبایل قبلاً تأیید شده است' }, { status: 400, headers: CORS_HEADERS })
+      return NextResponse.json({ message: 'موبایل قبلا تأیید شده است' }, { status: 400, headers: CORS_HEADERS })
     }
 
     // cooldown یک دقیقه
     if (user.otp_expires_at) {
       const remaining = new Date(user.otp_expires_at).getTime() - Date.now()
       if (remaining > 60 * 1000) {
-        return NextResponse.json({ message: 'لطفاً یک دقیقه صبر کنید' }, { status: 429, headers: CORS_HEADERS })
+        return NextResponse.json({ message: 'لطفا یک دقیقه صبر کنید' }, { status: 429, headers: CORS_HEADERS })
       }
     }
 

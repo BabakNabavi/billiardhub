@@ -3,7 +3,7 @@
 /* ═════════════════════════════════════════════════════════════
    بیلیارد بازار — بازطراحی دیواری‌ساختار (نسخه‌ی نهایی، جایگزین /shop)
    ─────────────────────────────────────────────────────────────
-   ● کاملاً ایزوله: صفحه‌ی فعلی /shop دست‌نخورده است و این مسیر
+   ● کاملا ایزوله: صفحه‌ی فعلی /shop دست‌نخورده است و این مسیر
      را می‌توان بدون هیچ اثری حذف کرد.
    ● معماری الهام‌گرفته از تجربه‌ی مارکت‌پلیس دیوار (سایدبار
      دسته‌ها/فیلترها، قیمت از-تا، زمان انتشار) ولی با هویت بصری
@@ -33,16 +33,16 @@ import {
 import { productTitleParts } from '../../lib/market/title'
 import ProductTitle from '../../components/market/ProductTitle'
 import { CardMeta, CardPrice } from '../../components/market/CardFacts'
-/* همان موتورِ کاروسل‌های صفحه‌ی اصلی: درگِ روان + حرکتِ خودکار */
+/* همان موتور کاروسل‌های صفحه‌ی اصلی: درگ روان + حرکت خودکار */
 import { useHorizontalScroll } from '../../lib/useHorizontalScroll'
 import { normalizeFa } from '../../lib/text-fa'
 
 const GOLD   = '#C7A66A'
-/* عمرِ نشانِ «جدید» — دو روز بود و بیش‌ازحد سخاوتمند: در بازارِ کم‌حجم
-   عملاً همه‌ی آگهی‌ها نشان می‌گرفتند و نشان بی‌معنا می‌شد. */
+/* عمر نشان «جدید» — دو روز بود و بیش‌ازحد سخاوتمند: در بازار کم‌حجم
+   عملا همه‌ی آگهی‌ها نشان می‌گرفتند و نشان بی‌معنا می‌شد. */
 const NEW_BADGE_MS = 24 * 60 * 60 * 1000
 
-/* سقفِ نوارِ فوری. بیشتر از این، نوار به فهرستِ دومِ بازار تبدیل
+/* سقف نوار فوری. بیشتر از این، نوار به فهرست دوم بازار تبدیل
    می‌شود و جایگاهی که فروشنده پولش را داده بی‌ارزش می‌شود. */
 const URGENT_MAX = 12
 
@@ -59,28 +59,28 @@ const parsePrice = (v: string) => {
   return Number.isNaN(n) ? null : n
 }
 
-/* دسته‌ها از منبعِ واحد می‌آیند (lib/market/categories).
+/* دسته‌ها از منبع واحد می‌آیند (lib/market/categories).
 
-   پیش‌تر این‌جا آینه‌ای دستی از فهرستِ فرمِ ثبت آگهی بود و با آن یکی
+   پیش‌تر این‌جا آینه‌ای دستی از فهرست فرم ثبت آگهی بود و با آن یکی
    نبود: فرم فقط «کیس و کیف» داشت و این‌جا «کیس چوب» و «کیف توپ» —
-   یعنی فیلترِ «کیف توپ» هرگز هیچ آگهی‌ای نداشت. */
+   یعنی فیلتر «کیف توپ» هرگز هیچ آگهی‌ای نداشت. */
 const CATS_M = MARKET_CATEGORIES
 const normCat = normalizeCategory
 const catLabel = categoryLabel
 
-/* «نیازمند تعمیر» اضافه شد: بدونِ آن فروشنده‌ی صادق مجبور بود
-   «کارکرده» بزند و خریدار سرِ قرار غافلگیر شود. */
+/* «نیازمند تعمیر» اضافه شد: بدون آن فروشنده‌ی صادق مجبور بود
+   «کارکرده» بزند و خریدار سر قرار غافلگیر شود. */
 type Cond = typeof CONDITIONS[number]['id']
 const COND_LABEL = Object.fromEntries(CONDITIONS.map(c => [c.id, c.label])) as Record<Cond, string>
 
 interface Listing {
   key: string
   id: string | number
-  /** تکه‌ی درشتِ عنوان — دسته‌بندی و نوع */
+  /** تکه‌ی درشت عنوان — دسته‌بندی و نوع */
   name: string
   img: string
   brand: string
-  /* برند و مدل تکه‌ی ریزِ عنوان را می‌سازند: «چوب اسنوکر O'min classic».
+  /* برند و مدل تکه‌ی ریز عنوان را می‌سازند: «چوب اسنوکر O'min classic».
      پیش‌تر کارت فقط تکه‌ی اول را داشت و خریدار نمی‌دانست کدام چوب. */
   model: string
   /** «برند مدل» آماده‌ی نمایش — تکراری‌ها حذف شده */
@@ -92,14 +92,14 @@ interface Listing {
   city: string
   condition: Cond
   createdAt: number | null   // فقط آگهی‌های کاربر تاریخ دارند
-  /* آگهیِ توافقی قیمتِ قابلِ نمایش ندارد — کارت باید «توافقی» بنویسد،
+  /* آگهی توافقی قیمت قابل نمایش ندارد — کارت باید «توافقی» بنویسد،
      نه «۰ تومان» */
   negotiable: boolean
   sold: boolean
-  /* آگهیِ فوری (مهاجرت ۰۷۹) — تا این لحظه در نوارِ بالای بازار
-     می‌نشیند و نشانِ قرمز می‌گیرد. */
+  /* آگهی فوری (مهاجرت ۰۷۹) — تا این لحظه در نوار بالای بازار
+     می‌نشیند و نشان قرمز می‌گیرد. */
   urgentUntil: number | null
-  /* شمارشِ بازدید — پایه‌ی ترتیبِ منصفانه‌ی نوارِ فوری */
+  /* شمارش بازدید — پایه‌ی ترتیب منصفانه‌ی نوار فوری */
   views: number
   source: 'shop' | 'user'
 }
@@ -112,7 +112,7 @@ interface Listing {
 function serverAdToListing(a: Record<string, any>): Listing {
   const imgs = Array.isArray(a.images) ? a.images : []
   /* ── قیمت: خط‌خورده و پرداختی، هر دو از دیتابیس ──
-     پیش‌تر عددِ خط‌خورده از روی درصدِ گردشده بازسازی می‌شد
+     پیش‌تر عدد خط‌خورده از روی درصد گردشده بازسازی می‌شد
      (`price / (1 - disc/100)`) و عددی درمی‌آمد که هیچ فروشنده‌ای
      تایپ نکرده بود: ۷۵۰٬۰۰۰٬۰۰۰ با ٪۹ ⇒ «۸۲۴٬۱۷۵٬۸۲۴». */
   const listed = Number(a.price) || 0
@@ -195,12 +195,12 @@ async function migrateLocalAds(): Promise<void> {
 }
 
 
-/* عنوانِ یک‌خطی از دو تکه‌ی کارت — همان چیزی که در جستجو و alt لازم است */
+/* عنوان یک‌خطی از دو تکه‌ی کارت — همان چیزی که در جستجو و alt لازم است */
 const fullTitle = (l: Listing) => [l.name, l.sub].filter(Boolean).join(' ')
 
 /* ── کارت محصول — همان فرمت عمودی کارت‌های فعلی بازار (ایزوله) ── */
 function MarketCard({ l, i, saved, onSave }: { l: Listing; i: number; saved: boolean; onSave: () => void }) {
-  /* گزارشِ تخلف و alt تصویر عنوانِ کامل را می‌خواهند، نه فقط تکه‌ی اول */
+  /* گزارش تخلف و alt تصویر عنوان کامل را می‌خواهند، نه فقط تکه‌ی اول */
   const full = fullTitle(l)
   return (
     <Link href={`/shop/${l.id}`} className="mk-card lq-pcard" style={{ animationDelay: `${Math.min(i, 12) * 40}ms`, position: 'relative' }}>
@@ -212,8 +212,8 @@ function MarketCard({ l, i, saved, onSave }: { l: Listing; i: number; saved: boo
       <div className="mk-img">
         <img src={l.img} alt={full} loading="lazy"
           onError={e => { (e.target as HTMLImageElement).style.display = 'none' }} />
-        {/* نشانِ فوری بر «جدید» مقدم است: آگهیِ فوری ممکن است تازه
-            هم باشد و دو نشانِ روی هم کارت را شلوغ می‌کند. */}
+        {/* نشان فوری بر «جدید» مقدم است: آگهی فوری ممکن است تازه
+            هم باشد و دو نشان روی هم کارت را شلوغ می‌کند. */}
         {l.urgentUntil && l.urgentUntil > Date.now() ? (
           <span className="mk-urg"><Zap size={9} /> فوری</span>
         ) : l.source === 'user' && l.createdAt && Date.now() - l.createdAt < NEW_BADGE_MS ? (
@@ -222,8 +222,8 @@ function MarketCard({ l, i, saved, onSave }: { l: Listing; i: number; saved: boo
       </div>
       <div className="mk-body">
         <ProductTitle p={{ name: l.name, brand: l.sub }} className="mk-name" headClassName="mk-h" tailClassName="mk-t" />
-        {/* شهر/وضعیت و قیمت از منبعِ واحد — همان چیزی که کارتِ صفحه‌ی
-            اصلی و کارتِ فروشگاه هم رندر می‌کنند */}
+        {/* شهر/وضعیت و قیمت از منبع واحد — همان چیزی که کارت صفحه‌ی
+            اصلی و کارت فروشگاه هم رندر می‌کنند */}
         <CardMeta p={l} />
         <div className="mk-priceline">
           <CardPrice p={l} cls={{ pct: 'mk-pct', box: 'mk-pricebox', old: 'mk-old', now: 'mk-price', unit: 'mk-unit' }} />
@@ -372,11 +372,11 @@ export default function MarketNewPage() {
   useEffect(() => {
     /* فهرست فقط از سرور می‌آید.
 
-       پیش‌تر این‌جا یک کاتالوگِ ثابتِ ساختگی فوراً نشان داده می‌شد تا
+       پیش‌تر این‌جا یک کاتالوگ ثابت ساختگی فورا نشان داده می‌شد تا
        «صفحه خالی نماند» و بعد آگهی‌های واقعی کنارش می‌نشستند. نتیجه
        این بود که بازدیدکننده محصولی می‌دید که وجود نداشت و روی کارتش
-       که کلیک می‌کرد به فروشنده‌ای می‌رسید که ثبت نشده بود. فهرستِ
-       خالی صادق‌تر از فهرستِ دروغین است. */
+       که کلیک می‌کرد به فروشنده‌ای می‌رسید که ثبت نشده بود. فهرست
+       خالی صادق‌تر از فهرست دروغین است. */
     try { setSavedKeys(new Set(JSON.parse(localStorage.getItem('bh_market_saved') ?? '[]'))) } catch {}
 
     void (async () => {
@@ -417,21 +417,21 @@ export default function MarketNewPage() {
     return m
   }, [listings])
 
-  /* ── نوارِ فوری ──
-     نشانِ قرمز روی آگهی‌ای که در جایگاهِ چهارصدم است هیچ ارزشی
+  /* ── نوار فوری ──
+     نشان قرمز روی آگهی‌ای که در جایگاه چهارصدم است هیچ ارزشی
      ندارد؛ کسی که تا آن‌جا اسکرول نکرده رنگش را هم نمی‌بیند. پس
-     «فوری» یک جایگاهِ رزروشده‌ی بالای بازار می‌خرد، نه فقط برچسب.
+     «فوری» یک جایگاه رزروشده‌ی بالای بازار می‌خرد، نه فقط برچسب.
 
      ── چرا ترتیب چرخشی است ──
-     اگر بر اساسِ زمانِ خرید مرتب شود، همان مشکل برمی‌گردد: کسی که
-     دیروز خریده ته نوار می‌رود. کلیدِ مرتب‌سازی هر ساعت عوض می‌شود،
-     پس هر آگهیِ فوری در طولِ روز چند ساعت جلوی نوار است. */
+     اگر بر اساس زمان خرید مرتب شود، همان مشکل برمی‌گردد: کسی که
+     دیروز خریده ته نوار می‌رود. کلید مرتب‌سازی هر ساعت عوض می‌شود،
+     پس هر آگهی فوری در طول روز چند ساعت جلوی نوار است. */
   const matched = useMemo(() => {
     const lo = parsePrice(minP), hi = parsePrice(maxP)
-    /* ── جستجو با همان نرمال‌سازیِ دراپ‌داون ──
-       تا امروز `includes` خام بود: «predator» با حرفِ کوچک و
-       «استراكان» با کافِ عربی هیچ نتیجه‌ای نمی‌داد، در حالی که
-       فهرستِ برند در فرم همان‌ها را پیدا می‌کرد. یک ماچرِ مشترک
+    /* ── جستجو با همان نرمال‌سازی دراپ‌داون ──
+       تا امروز `includes` خام بود: «predator» با حرف کوچک و
+       «استراكان» با کاف عربی هیچ نتیجه‌ای نمی‌داد، در حالی که
+       فهرست برند در فرم همان‌ها را پیدا می‌کرد. یک ماچر مشترک
        برای هر دو. */
     const term = normalizeFa(q)
     let out = listings.filter(l => {
@@ -447,7 +447,7 @@ export default function MarketNewPage() {
         if (time === 'day' && age > 86400000) return false
         if (time === 'week' && age > 86400000 * 7) return false
       }
-      /* مدل هم جستجو می‌شود: کسی که «classic» را می‌نویسد دنبالِ مدل
+      /* مدل هم جستجو می‌شود: کسی که «classic» را می‌نویسد دنبال مدل
          است، و پیش‌تر همان جستجو هیچ نتیجه‌ای نمی‌داد. */
       if (term && !normalizeFa(`${l.name} ${l.brand} ${l.model} ${l.sub}`).includes(term)) return false
       if (showSaved && !savedKeys.has(l.key)) return false
@@ -459,39 +459,39 @@ export default function MarketNewPage() {
     return out
   }, [listings, cat, cities, minP, maxP, cond, onlyDisc, time, q, sort, showSaved, savedKeys])
 
-  /* ── نوارِ فوری ──
-     نشانِ قرمز روی آگهی‌ای که در جایگاهِ چهارصدم است هیچ ارزشی
+  /* ── نوار فوری ──
+     نشان قرمز روی آگهی‌ای که در جایگاه چهارصدم است هیچ ارزشی
      ندارد؛ کسی که تا آن‌جا اسکرول نکرده رنگش را هم نمی‌بیند. پس
-     «فوری» یک جایگاهِ رزروشده‌ی بالای بازار می‌خرد، نه فقط برچسب.
+     «فوری» یک جایگاه رزروشده‌ی بالای بازار می‌خرد، نه فقط برچسب.
 
      ── چرا ترتیب چرخشی است ──
-     اگر بر اساسِ زمانِ خرید مرتب شود، همان مشکل برمی‌گردد: کسی که
-     دیروز خریده ته نوار می‌رود. کلیدِ مرتب‌سازی هر ساعت عوض می‌شود،
-     پس هر آگهیِ فوری در طولِ روز چند ساعت جلوی نوار است.
+     اگر بر اساس زمان خرید مرتب شود، همان مشکل برمی‌گردد: کسی که
+     دیروز خریده ته نوار می‌رود. کلید مرتب‌سازی هر ساعت عوض می‌شود،
+     پس هر آگهی فوری در طول روز چند ساعت جلوی نوار است.
 
      ── دو چیزی که این‌جا عوض شد ──
-     ۱) از `matched` ساخته می‌شود نه از کلِ `listings`. پیش‌تر
-        بازدیدکننده‌ای که «چوب» را جستجو می‌کرد، در نوارِ فوری میز و
+     ۱) از `matched` ساخته می‌شود نه از کل `listings`. پیش‌تر
+        بازدیدکننده‌ای که «چوب» را جستجو می‌کرد، در نوار فوری میز و
         توپ هم می‌دید — نوار فیلترها را نادیده می‌گرفت.
-     ۲) هر آگهی‌ای که این‌جا بیاید، از فهرستِ پایین برداشته می‌شود.
-        تا امروز آگهیِ فوری **دو بار** دیده می‌شد: یک بار در نوار و
-        یک بار وسطِ فهرستِ عادی. با تمام‌شدنِ زمانِ فوری خودبه‌خود
+     ۲) هر آگهی‌ای که این‌جا بیاید، از فهرست پایین برداشته می‌شود.
+        تا امروز آگهی فوری **دو بار** دیده می‌شد: یک بار در نوار و
+        یک بار وسط فهرست عادی. با تمام‌شدن زمان فوری خودبه‌خود
         به فهرست برمی‌گردد، چون این فیلتر روی همان زمان است. */
-  /* ── نمایشِ منصفانه ──
-     چرخشِ ساعتی به‌تنهایی کافی نیست: نوار پیوسته به راست می‌رود، پس
-     جایگاه‌های اولِ نوار بیشتر دیده می‌شوند. اگر ترتیب فقط تصادفی
+  /* ── نمایش منصفانه ──
+     چرخش ساعتی به‌تنهایی کافی نیست: نوار پیوسته به راست می‌رود، پس
+     جایگاه‌های اول نوار بیشتر دیده می‌شوند. اگر ترتیب فقط تصادفی
      باشد، آگهی‌ای که شانس آورده هر ساعت جلو می‌افتد و بازدیدش از
      بقیه فاصله می‌گیرد.
 
-     پس بازدیدِ تاکنونی هم در ترتیب دخالت می‌کند: آگهیِ کم‌بازدیدتر
-     جلوتر می‌نشیند. عاملِ ساعتی سرِ جایش می‌ماند تا مساوی‌ها هر ساعت
+     پس بازدید تاکنونی هم در ترتیب دخالت می‌کند: آگهی کم‌بازدیدتر
+     جلوتر می‌نشیند. عامل ساعتی سر جایش می‌ماند تا مساوی‌ها هر ساعت
      جابه‌جا شوند و ترتیب یخ نزند. */
-  /* ── ترتیبِ منصفانه ──
+  /* ── ترتیب منصفانه ──
      چیدمان تا امروز ساعتی عوض می‌شد، یعنی در یک نشست همیشه همان
      آگهی جلو بود. حالا هر بار که صفحه باز می‌شود دانه عوض می‌شود.
 
-     دانه بعد از mount گذاشته می‌شود نه هنگام رندر: عددِ تصادفی در
-     رندر یعنی خروجیِ سرور و کلاینت یکی نباشد و هیدریشن بشکند. */
+     دانه بعد از mount گذاشته می‌شود نه هنگام رندر: عدد تصادفی در
+     رندر یعنی خروجی سرور و کلاینت یکی نباشد و هیدریشن بشکند. */
   const [urgSeed, setUrgSeed] = useState(0)
   useEffect(() => { setUrgSeed(Math.floor(Math.random() * 1e9)) }, [])
 
@@ -510,22 +510,22 @@ export default function MarketNewPage() {
     return [...live].sort((a, b) => score(a) - score(b)).slice(0, URGENT_MAX)
   }, [matched, urgSeed])
 
-  /* فهرستِ عادی = هرچه در نوارِ فوری نیامده. */
+  /* فهرست عادی = هرچه در نوار فوری نیامده. */
   const filtered = useMemo(() => {
     if (urgent.length === 0) return matched
     const inBar = new Set(urgent.map(l => l.key))
     return matched.filter(l => !inBar.has(l.key))
   }, [matched, urgent])
 
-  /* ── نوارِ فوری: اسکرولِ ساده، بدونِ حرکتِ خودکار ──
-     چهار نسخه‌ی مختلفِ حرکتِ خودکار امتحان شد (انیمیشنِ CSS، ترجمه‌ی
-     transform، حلقه‌ی scrollLeft، و حلقه با اصلاحِ لبه) و هرکدام یک
-     جای دیگر با اسکرولِ بومی جنگید: روی لمس فنری برمی‌گشت، روی
+  /* ── نوار فوری: اسکرول ساده، بدون حرکت خودکار ──
+     چهار نسخه‌ی مختلف حرکت خودکار امتحان شد (انیمیشن CSS، ترجمه‌ی
+     transform، حلقه‌ی scrollLeft، و حلقه با اصلاح لبه) و هرکدام یک
+     جای دیگر با اسکرول بومی جنگید: روی لمس فنری برمی‌گشت، روی
      دسکتاپ قفل حس می‌شد، و توقف و ازسرگیری هیچ‌وقت طبیعی نشد.
 
-     ریشه‌اش یکی است: نوشتنِ scrollLeft از جاوااسکریپت روی عنصری که
+     ریشه‌اش یکی است: نوشتن scrollLeft از جاوااسکریپت روی عنصری که
      کاربر هم دارد اسکرولش می‌کند، یعنی دو کنترل‌کننده روی یک مقدار.
-     پس حرکتِ خودکار برداشته شد؛ نوار فقط با انگشت و با درگِ ماوس
+     پس حرکت خودکار برداشته شد؛ نوار فقط با انگشت و با درگ ماوس
      حرکت می‌کند — همان کاری که مرورگر خودش بی‌نقص انجام می‌دهد.
 
      «منصفانه‌بودن» از ترتیب می‌آید نه از حرکت: چیدمان هر بار که
@@ -614,8 +614,8 @@ export default function MarketNewPage() {
   )
 
   return (
-    /* رنگِ پایه داخلِ `.lq-stage` است؛ پس‌زمینه‌ی ماتِ خودِ عنصر
-       لکه‌های پشتِ شیشه را می‌پوشاند. */
+    /* رنگ پایه داخل `.lq-stage` است؛ پس‌زمینه‌ی مات خود عنصر
+       لکه‌های پشت شیشه را می‌پوشاند. */
     <div dir="rtl" className="lq-stage" style={{ minHeight: '100vh', color: TEXT, fontFamily: 'Vazirmatn,Tahoma,sans-serif' }}>
       <style>{`
         @keyframes mkUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
@@ -627,7 +627,7 @@ export default function MarketNewPage() {
           77%       { transform: translateY(130%);   opacity: 0; }
           86%, 100% { transform: translateY(0);      opacity: 1; }
         }
-        /* اورلی پلیس‌هولدر فلکس است ⇒ متن و کلمه‌ی رول‌شونده دقیقاً هم‌مرکز */
+        /* اورلی پلیس‌هولدر فلکس است ⇒ متن و کلمه‌ی رول‌شونده دقیقا هم‌مرکز */
         .mk-ph { display: flex; align-items: center; gap: 4px; }
         .mk-rollwrap { display: inline-flex; overflow: hidden; height: 1.5em; align-items: center; }
         .mk-roll { display: inline-block; line-height: 1.5; color: ${GOLD_D}; font-weight: 800;
@@ -635,10 +635,10 @@ export default function MarketNewPage() {
         @media (prefers-reduced-motion: reduce) { .mk-roll { animation: none; } }
 
         /* ── کارت — همان فرمت عمودی کارت‌های /shop ── */
-        /* جنسِ سطح از کلاسِ «lq-pcard» می‌آید (globals.css) تا همین
+        /* جنس سطح از کلاس «lq-pcard» می‌آید (globals.css) تا همین
            محصول در صفحه‌ی اصلی و صفحه‌ی فروشگاه هم یک‌شکل باشد؛ این‌جا
            فقط چیدمان می‌ماند.
-           (بک‌تیک در این کامنت ممنوع — داخلِ template literal است) */
+           (بک‌تیک در این کامنت ممنوع — داخل template literal است) */
         .mk-card { display: flex; flex-direction: column; overflow: hidden;
           text-decoration: none; color: inherit;
           animation: mkUp .5s cubic-bezier(.22,1,.36,1) both; }
@@ -648,28 +648,28 @@ export default function MarketNewPage() {
         .mk-card:hover .mk-img img { transform: scale(1.045); }
         .mk-new { position: absolute; top: 8px; right: 8px; display: inline-flex; align-items: center; gap: 3px;
           font-size: 9px; font-weight: 800; color: #fff; background: rgba(27,122,75,0.92); border-radius: 999px; padding: '3px 8px'; padding: 3px 8px; }
-        /* نوارِ فوری: افقی و کشیدنی، تا تعدادِ زیاد آن را نشکند */
-        /* ── نوارِ فوری ──
+        /* نوار فوری: افقی و کشیدنی، تا تعداد زیاد آن را نشکند */
+        /* ── نوار فوری ──
            افقی و کشیدنی. سه چیز این‌جا حیاتی است و یک‌بار با
-           دست‌کاریِ بی‌دقت شکست:
+           دست‌کاری بی‌دقت شکست:
 
-             ۱) min-width صفر روی خودِ نوار. بدونِ آن، ستونِ گریدِ
-                والد به عرضِ *محتوا* باز می‌شود (پیش‌فرضِ آیتمِ گرید
-                auto است) و کلِ صفحه‌ی موبایل به‌جای نوار اسکرولِ افقی
-                می‌گیرد — کارتِ افقی و نوارِ قوانین از لبه می‌زدند
-                بیرون. (بک‌تیک این‌جا ممنوع — داخلِ template literal است)
-             ۲) عرضِ ثابتِ سلول، نه درصدِ ویوپورت.
-             ۳) کششِ عمودی تا کارتِ یک‌خطی و دوخطی هم‌ارتفاع بمانند. */
+             ۱) min-width صفر روی خود نوار. بدون آن، ستون گرید
+                والد به عرض *محتوا* باز می‌شود (پیش‌فرض آیتم گرید
+                auto است) و کل صفحه‌ی موبایل به‌جای نوار اسکرول افقی
+                می‌گیرد — کارت افقی و نوار قوانین از لبه می‌زدند
+                بیرون. (بک‌تیک این‌جا ممنوع — داخل template literal است)
+             ۲) عرض ثابت سلول، نه درصد ویوپورت.
+             ۳) کشش عمودی تا کارت یک‌خطی و دوخطی هم‌ارتفاع بمانند. */
         .mk-urgrow { display: block;
           min-width: 0; max-width: 100%;
           overflow-x: auto; padding-bottom: 8px;
           scroll-snap-type: x proximity; scrollbar-width: none; -ms-overflow-style: none;
           -webkit-overflow-scrolling: touch; }
         .mk-urgrow::-webkit-scrollbar { display: none; }
-        /* ریلِ ساده — عرضش را محتوا تعیین می‌کند و اسکرول کارِ مرورگر است */
+        /* ریل ساده — عرضش را محتوا تعیین می‌کند و اسکرول کار مرورگر است */
         .mk-urgtrack { display: flex; align-items: stretch; gap: 10px; width: max-content; }
-        /* چشمکِ نرم: فقط شفافیت، بدونِ تغییرِ اندازه — تکانِ آیکون
-           کنارِ یک تیترِ ثابت، بی‌قرار به‌نظر می‌رسد نه زنده. */
+        /* چشمک نرم: فقط شفافیت، بدون تغییر اندازه — تکان آیکون
+           کنار یک تیتر ثابت، بی‌قرار به‌نظر می‌رسد نه زنده. */
         .mk-urgzap { animation: mkZap 2.4s ease-in-out infinite; }
         @keyframes mkZap { 0%, 100% { opacity: 1 } 50% { opacity: 0.35 } }
         @media (prefers-reduced-motion: reduce) { .mk-urgzap { animation: none } }
@@ -681,14 +681,14 @@ export default function MarketNewPage() {
           font-size: 9px; font-weight: 800; color: #fff; background: rgba(178,59,46,0.94); border-radius: 999px; padding: 3px 8px; }
         .mk-body { display: flex; flex-direction: column; gap: 6px; padding: 9px 9px 10px; flex: 1; }
         .mk-name { font-size: 12.5px; color: ${TEXT}; line-height: 1.55; min-height: 39px; }
-        /* ── دو خطِ عنوان ──
-           خطِ اول دسته‌بندی و نوع، بولد — همان چیزی که چشم اول دنبالش
-           می‌گردد. خطِ دوم برند و مدل با وزنِ معمولی.
+        /* ── دو خط عنوان ──
+           خط اول دسته‌بندی و نوع، بولد — همان چیزی که چشم اول دنبالش
+           می‌گردد. خط دوم برند و مدل با وزن معمولی.
 
-           کلامپ روی خودِ mk-name نیست (بکتیک این‌جا رشته‌ی style را
-           می‌بندد): با آن، خطِ دومِ عنوان قربانیِ
-           محدودیتِ دو خط می‌شد و برند و مدل — که تازه اضافه شده‌اند —
-           دوباره ناپدید می‌شدند. هر خط کلامپِ خودش را دارد. */
+           کلامپ روی خود mk-name نیست (بکتیک این‌جا رشته‌ی style را
+           می‌بندد): با آن، خط دوم عنوان قربانی
+           محدودیت دو خط می‌شد و برند و مدل — که تازه اضافه شده‌اند —
+           دوباره ناپدید می‌شدند. هر خط کلامپ خودش را دارد. */
         .mk-h { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
           overflow: hidden; font-size: 13px; font-weight: 800; }
         .mk-t { display: block; margin-top: 3px; font-size: 11.5px; font-weight: 400; color: ${MUT};
@@ -701,8 +701,8 @@ export default function MarketNewPage() {
         .mk-old { font-size: 10px; color: ${MUT}; text-decoration: line-through; font-variant-numeric: tabular-nums; }
         .mk-price { font-size: 13px; font-weight: 900; color: ${TEXT}; font-variant-numeric: tabular-nums; white-space: nowrap; }
         .mk-price i { font-style: normal; font-size: 10px; font-weight: 600; color: ${MUT}; }
-        /* ظرفِ دو خطِ قیمت و واژه‌ی «تومان» — پیش‌تر اینلاین بودند و
-           با انتقالِ قیمت به کامپوننتِ مشترک کلاسِ خودشان را گرفتند */
+        /* ظرف دو خط قیمت و واژه‌ی «تومان» — پیش‌تر اینلاین بودند و
+           با انتقال قیمت به کامپوننت مشترک کلاس خودشان را گرفتند */
         .mk-pricebox { margin-inline-start: auto; text-align: left; }
         .mk-unit { font-style: normal; font-size: 10px; font-weight: 600; color: ${MUT}; }
         .mk-old .mk-unit { color: inherit; }
@@ -755,16 +755,16 @@ export default function MarketNewPage() {
           background: rgba(255,255,255,0.9); backdrop-filter: blur(24px) saturate(1.6); -webkit-backdrop-filter: blur(24px) saturate(1.6);
           border-bottom: 1px solid ${LINE}; }
         /* ── فاصله‌ی بالای سرچ‌بار ──
-           نوارِ سایت روی این صفحه اصلاً رندر نمی‌شود، پس سرچ‌بار
-           نخستین چیزِ صفحه است. فاصله از ۱۶ به ۴ و حالا به ۲ رسید،
-           ارتفاعِ خودِ فیلد هم از ۱۲ به ۱۰ کم شد و فاصله‌ی پایین از
+           نوار سایت روی این صفحه اصلا رندر نمی‌شود، پس سرچ‌بار
+           نخستین چیز صفحه است. فاصله از ۱۶ به ۴ و حالا به ۲ رسید،
+           ارتفاع خود فیلد هم از ۱۲ به ۱۰ کم شد و فاصله‌ی پایین از
            ۸ به ۶ — یعنی همه‌ی المان‌های زیرش هم بالا می‌آیند.
 
-           آنچه از این پایین‌تر نمی‌رود همان inset ایمنِ گوشی است
-           (بک‌تیک این‌جا ممنوع — داخلِ template literal است):
+           آنچه از این پایین‌تر نمی‌رود همان inset ایمن گوشی است
+           (بک‌تیک این‌جا ممنوع — داخل template literal است):
            چون layout با viewport-fit=cover کار می‌کند، روی
-           گوشیِ ناچ‌دار در حالتِ PWA این عدد بزرگ است. برداشتنش
-           یعنی رفتنِ فیلد زیرِ ساعت و باتری. */
+           گوشی ناچ‌دار در حالت PWA این عدد بزرگ است. برداشتنش
+           یعنی رفتن فیلد زیر ساعت و باتری. */
         .mk-msearch { display: none; position: sticky; top: 0; z-index: 150; padding: calc(2px + env(safe-area-inset-top)) 14px 6px;
           background: rgba(247,245,240,0.94); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
           border-bottom: 1px solid ${LINE}; }
@@ -774,16 +774,16 @@ export default function MarketNewPage() {
         .mk-mcat { display: flex; flex-direction: column; align-items: center; gap: 6px; background: none; border: none;
           cursor: pointer; font-family: inherit; padding: 0; }
         /* ۵٪+۵٪ بزرگ‌تر (۵۲ ⇒ ۵۸) */
-        /* عرضِ ثابتِ ۵۸ در پنج ستون روی صفحه‌ی ۳۲۰ جا نمی‌شد:
-           ۵×۵۸ + چهار فاصله‌ی ۶ + حاشیه = ۳۲۲ پیکسل، یعنی کلِ صفحه
-           به پهلو کشیده می‌شد. حالا آیکن ستونِ خودش را پر می‌کند و از
+        /* عرض ثابت ۵۸ در پنج ستون روی صفحه‌ی ۳۲۰ جا نمی‌شد:
+           ۵×۵۸ + چهار فاصله‌ی ۶ + حاشیه = ۳۲۲ پیکسل، یعنی کل صفحه
+           به پهلو کشیده می‌شد. حالا آیکن ستون خودش را پر می‌کند و از
            ۵۸ بزرگ‌تر نمی‌شود، پس روی صفحه‌های بزرگ‌تر همان قبلی است. */
         .mk-mcat .ic { width: 100%; max-width: 58px; aspect-ratio: 1; border-radius: 17px; background: #fff; border: 1px solid ${LINE};
           display: flex; align-items: center; justify-content: center; overflow: hidden; transition: all .25s cubic-bezier(.22,1,.36,1); }
         .mk-mcat .ic img { width: 78%; height: 78%; object-fit: contain; }
         .mk-mcat.on .ic { border-color: rgba(199,166,106,0.55); box-shadow: 0 0 0 3px rgba(199,166,106,0.14); background: rgba(199,166,106,0.08); }
         .mk-mcat:active .ic { transform: scale(0.93); }
-        /* ۵٪ بزرگ‌تر از ۱۱px به‌خواستِ کاربر — ۱۱٫۵۵ گرد شده به ۱۱٫۶ */
+        /* ۵٪ بزرگ‌تر از ۱۱px به‌خواست کاربر — ۱۱٫۵۵ گرد شده به ۱۱٫۶ */
         .mk-mcat .lb { font-size: 11.6px; font-weight: 700; color: ${SEC}; }
         .mk-mcat.on .lb { color: ${GOLD_D}; font-weight: 800; }
 
@@ -795,7 +795,7 @@ export default function MarketNewPage() {
         .mk-row:active { transform: scale(0.99); }
         .mk-row .info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 5px; padding-top: 2px; }
         .mk-row .ttl { font-size: 13px; font-weight: 700; color: ${TEXT}; line-height: 1.6; }
-        /* ردیفِ موبایل کمی درشت‌تر از کارت است، پس هر دو خط یک پله بالاتر */
+        /* ردیف موبایل کمی درشت‌تر از کارت است، پس هر دو خط یک پله بالاتر */
         .mk-row .ttl .mk-h { font-size: 13.5px; font-weight: 800; }
         .mk-row .ttl .mk-t { margin-top: 3px; font-size: 12px; font-weight: 400; color: ${MUT}; }
         .mk-row .cnd { font-size: 10.5px; color: ${MUT}; }
@@ -825,11 +825,11 @@ export default function MarketNewPage() {
           background: rgba(255,255,255,0.96); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
           border-top: 1px solid ${LINE}; padding: 4px 8px calc(4px + env(safe-area-inset-bottom));
           grid-template-columns: repeat(4, 1fr); }
-        /* ── چرا خانه‌ی ثابتِ ۲۴ برای آیکون ──
-           سه گزینه آیکونِ ۲۲ داشتند و «ثبت آگهی» یک دایره‌ی ۲۸. یعنی
-           بلندیِ آیکون‌ها یکی نبود و برچسب‌ها روی یک خط نمی‌نشستند —
+        /* ── چرا خانه‌ی ثابت ۲۴ برای آیکون ──
+           سه گزینه آیکون ۲۲ داشتند و «ثبت آگهی» یک دایره‌ی ۲۸. یعنی
+           بلندی آیکون‌ها یکی نبود و برچسب‌ها روی یک خط نمی‌نشستند —
            همان چیزی که «یک اندازه نیستند» دیده می‌شد. حالا هر چهارتا
-           در خانه‌ای با ارتفاعِ ثابت می‌نشینند. */
+           در خانه‌ای با ارتفاع ثابت می‌نشینند. */
         .mk-bnav { display: flex; flex-direction: column; align-items: center; gap: 3px; background: none; border: none;
           cursor: pointer; font-family: inherit; text-decoration: none; padding: 2px 0; color: ${MUT}; }
         .mk-bnav .ic { height: 24px; display: flex; align-items: center; justify-content: center; }
@@ -857,7 +857,7 @@ export default function MarketNewPage() {
 
         /* ── لی‌آوت ── */
         .mk-layout { display: grid; grid-template-columns: 272px minmax(0, 1fr); gap: 22px; align-items: start; }
-        /* باکس فیلترها کاملاً fixed است و با هیچ اسکرولی تکان نمی‌خورد؛
+        /* باکس فیلترها کاملا fixed است و با هیچ اسکرولی تکان نمی‌خورد؛
            ستون گرید (.mk-sidebar) فقط جای ۲۷۲px را رزرو می‌کند.
            right با %‏ (نه vw) حساب می‌شود تا عرض اسکرول‌بار محاسبه را به‌هم نزند. */
         .mk-sidebar { min-width: 0; }
@@ -952,7 +952,7 @@ export default function MarketNewPage() {
             {savedKeys.size > 0 && <span style={{ fontSize: 10, color: MUT }}>{toFa(savedKeys.size)}</span>}
           </button>
 
-          {/* ثبت آگهی — طرح LQ، کاملاً گرد با بوردر */}
+          {/* ثبت آگهی — طرح LQ، کاملا گرد با بوردر */}
           <Link href="/shop/new" className="mk-lqbtn">
             <Plus size={15} /> ثبت آگهی
           </Link>
@@ -1032,7 +1032,7 @@ export default function MarketNewPage() {
                 {chips.map(c => (
                   <span key={c.label} className="mk-chip">
                     {c.label}
-                    <button type="button" aria-label={`برداشتن فیلترِ ${c.label}`} onClick={c.clear}><X size={11} /></button>
+                    <button type="button" aria-label={`برداشتن فیلتر ${c.label}`} onClick={c.clear}><X size={11} /></button>
                   </span>
                 ))}
                 <button type="button" onClick={clearAll}
@@ -1054,11 +1054,11 @@ export default function MarketNewPage() {
               </div>
             ) : (
               <>
-                {/* ── نوارِ فوری ──
-                    بالای فهرستِ عادی و آشکارا جدا از آن. همین
-                    آشکاربودن است که یک جایگاهِ خریدنی را قابلِ قبول
-                    می‌کند؛ اگر آگهیِ فوری در خودِ فهرستِ عادی هم بالا
-                    می‌رفت، کاربر حس می‌کرد هیچ‌جای بازار دستِ آگهیِ
+                {/* ── نوار فوری ──
+                    بالای فهرست عادی و آشکارا جدا از آن. همین
+                    آشکاربودن است که یک جایگاه خریدنی را قابل قبول
+                    می‌کند؛ اگر آگهی فوری در خود فهرست عادی هم بالا
+                    می‌رفت، کاربر حس می‌کرد هیچ‌جای بازار دست آگهی
                     بی‌پول نیست. */}
                 {urgent.length > 0 && (
                   <section style={{ marginBottom: 22 }}>
@@ -1067,8 +1067,8 @@ export default function MarketNewPage() {
                       <h2 style={{ fontSize: 14.5, fontWeight: 900, color: TEXT, margin: 0 }}>فوری</h2>
                     </div>
                     <div className="mk-urgrow" ref={urgRef}>
-                      {/* یک نسخه، بدونِ تکرار — نوار دیگر خودکار حرکت
-                          نمی‌کند، پس نیازی به دورِ اضافه نیست. */}
+                      {/* یک نسخه، بدون تکرار — نوار دیگر خودکار حرکت
+                          نمی‌کند، پس نیازی به دور اضافه نیست. */}
                       <div className="mk-urgtrack">
                         {urgent.map((l, i) => (
                           <div key={l.key} className="mk-urgcell">

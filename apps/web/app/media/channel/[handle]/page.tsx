@@ -3,14 +3,14 @@
 /* ─────────────────────────────────────────────────────────────
    صفحه‌ی کانال — بیلیارد مدیا.
 
-   ⚠️ همان قابِ صفحه‌ی اول. پیش از این ظاهرِ جداگانه‌ای داشت و کاربر
+   ⚠️ همان قاب صفحه‌ی اول. پیش از این ظاهر جداگانه‌ای داشت و کاربر
    با رفتن به کانال از پلتفرم بیرون می‌افتاد.
 
    ⚠️ دکمه‌ی «دنبال کردن» حالا واقعی است (`SubscribeButton`) و فقط
-   وقتی رندر می‌شود که جدولِ اشتراک روی سرور ساخته شده باشد. نسخه‌ی
-   قبلی یک `useState`ِ خالی بود که با رفرش می‌پرید.
+   وقتی رندر می‌شود که جدول اشتراک روی سرور ساخته شده باشد. نسخه‌ی
+   قبلی یک `useState` خالی بود که با رفرش می‌پرید.
 
-   ⚠️ تبِ Shorts از `width`/`height`ِ واقعیِ فایل مشتق می‌شود، نه از
+   ⚠️ تب Shorts از `width`/`height` واقعی فایل مشتق می‌شود، نه از
    ستونی که وجود ندارد.
    ───────────────────────────────────────────────────────────── */
 
@@ -42,11 +42,11 @@ export default function ChannelPage() {
   const [failed, setFailed] = useState(false)
   const [tab, setTab] = useState<Tab>('videos')
   const [svAt, setSvAt] = useState<number | null>(null)
-  /* ⚠️ تبِ «لیست‌های پخش» فقط وقتی می‌آید که جدولش روی سرور باشد؛
-     خودِ کامپوننت خبر می‌دهد. */
+  /* ⚠️ تب «لیست‌های پخش» فقط وقتی می‌آید که جدولش روی سرور باشد؛
+     خود کامپوننت خبر می‌دهد. */
   const [hasLists, setHasLists] = useState(false)
 
-  /* فقط ویدیوهای همین کانال از سرور خواسته می‌شود — ستونِ
+  /* فقط ویدیوهای همین کانال از سرور خواسته می‌شود — ستون
      `creator_handle` ایندکس دارد. */
   useEffect(() => {
     if (!handle) { setLoading(false); return }
@@ -54,7 +54,7 @@ export default function ChannelPage() {
     void fetchVideos({ handle, limit: 48 }).then(r => {
       if (!alive) return
       setRows(r.items.slice().sort((a, b) => b.ts - a.ts))
-      /* ⚠️ شکستِ درخواست نباید «این کانال ویدیویی ندارد» شود */
+      /* ⚠️ شکست درخواست نباید «این کانال ویدیویی ندارد» شود */
       setFailed(!r.ok)
       setLoading(false)
     })
@@ -79,7 +79,7 @@ export default function ChannelPage() {
             ) : failed ? (
               <div className="mx-empty">
                 <h1>ویدیوهای این کانال بارگذاری نشد</h1>
-                <p>این یک خطای موقت است، نه نبودِ ویدیو.</p>
+                <p>این یک خطای موقت است، نه نبود ویدیو.</p>
               </div>
             ) : rows.length === 0 ? (
               <div className="mx-empty">
@@ -103,8 +103,8 @@ export default function ChannelPage() {
                   </div>
                 </header>
 
-                {/* تبِ Shorts فقط وقتی می‌آید که این کانال واقعاً ویدیوی
-                    عمودیِ کوتاه داشته باشد. */}
+                {/* تب Shorts فقط وقتی می‌آید که این کانال واقعا ویدیوی
+                    عمودی کوتاه داشته باشد. */}
                 {(split.shorts.length > 0 || hasLists) && (
                   <div className="mx-tabs" role="group" aria-label="محتوای کانال">
                     <button type="button" aria-pressed={tab === 'videos'} onClick={() => setTab('videos')}>ویدئوها</button>
@@ -118,9 +118,9 @@ export default function ChannelPage() {
                 )}
 
                 {/* ⚠️ *یک* نمونه که همیشه mount می‌ماند و فقط پنهان
-                    می‌شود. دو نمونه‌ی شرطی، با هر بار عوض‌کردنِ تب
+                    می‌شود. دو نمونه‌ی شرطی، با هر بار عوض‌کردن تب
                     یکی را unmount و دیگری را mount می‌کرد: یک
-                    درخواستِ تازه و از دست رفتنِ عنوانِ نیمه‌تایپ‌شده. */}
+                    درخواست تازه و از دست رفتن عنوان نیمه‌تایپ‌شده. */}
                 <div hidden={tab !== 'lists'}>
                   <ChannelPlaylists handle={handle} onAvailable={setHasLists} />
                 </div>

@@ -9,19 +9,19 @@ import WatchClient from './WatchClient'
    صفحه‌ی تماشا — سرور-کامپوننت.
 
    ── چرا سرور ──
-   نسخه‌ی قبلی کلاً کلاینتی بود: فهرستِ ویدیوها را می‌گرفت و بعد در
-   مرورگر دنبالِ ویدیو می‌گشت. یعنی HTMLِ اولیه نه عنوان داشت، نه
+   نسخه‌ی قبلی کلا کلاینتی بود: فهرست ویدیوها را می‌گرفت و بعد در
+   مرورگر دنبال ویدیو می‌گشت. یعنی HTML اولیه نه عنوان داشت، نه
    توضیح، نه canonical و نه داده‌ی ساختاریافته — و این همان صفحه‌ای
    است که قرار است ویدیو از راهش پیدا شود.
 
    حالا داده روی سرور خوانده می‌شود، پس:
-     · عنوان و توضیحِ اختصاصی در خودِ HTML است
-     · ویدیوی نبوده ۴۰۴ واقعی می‌دهد، نه صفحه‌ی ۲۰۰ با متنِ «پیدا نشد»
-     · نشانیِ قدیمی ریدایرکتِ دائمی می‌گیرد، نه ۴۰۴
+     · عنوان و توضیح اختصاصی در خود HTML است
+     · ویدیوی نبوده ۴۰۴ واقعی می‌دهد، نه صفحه‌ی ۲۰۰ با متن «پیدا نشد»
+     · نشانی قدیمی ریدایرکت دائمی می‌گیرد، نه ۴۰۴
      · `VideoObject` فقط با داده‌ی واقعی ساخته می‌شود
    ───────────────────────────────────────────────────────────── */
 
-/* پارامتر عمداً `id` مانده — نامِ پوشه است و عوض‌کردنش یعنی شکستنِ
+/* پارامتر عمدا `id` مانده — نام پوشه است و عوض‌کردنش یعنی شکستن
    لینک‌های موجود. مقدارش حالا slug است. */
 type Params = { params: Promise<{ id: string }> }
 
@@ -46,11 +46,11 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
 
   const cat = mediaCategoryOf(v.category as MediaCategoryKey)
   const url = absoluteUrl(`/media/${v.slug}`)
-  /* از کلید، نه از ستونِ نشانی — همان دلیلِ بالا */
+  /* از کلید، نه از ستون نشانی — همان دلیل بالا */
   const p = toPublic(v)
-  /* توضیحِ متا از توضیحِ خودِ ویدیو می‌آید. اگر کاربر توضیحی ننوشته
-     باشد، جمله‌ای از روی داده‌ی واقعی ساخته می‌شود — نه متنِ پرکننده‌ی
-     بی‌معنی برای موتورِ جست‌وجو. */
+  /* توضیح متا از توضیح خود ویدیو می‌آید. اگر کاربر توضیحی ننوشته
+     باشد، جمله‌ای از روی داده‌ی واقعی ساخته می‌شود — نه متن پرکننده‌ی
+     بی‌معنی برای موتور جست‌وجو. */
   const desc = plain(v.description) ||
     `${v.title} — ${cat?.label ?? 'ویدیو'} در بیلیارد مدیا${v.creator_name ? '، از ' + v.creator_name : ''}.`
 
@@ -87,11 +87,11 @@ export default async function WatchPage({ params }: Params) {
   const v = await load(slug)
 
   if (!v) {
-    /* شاید نشانیِ قدیمی باشد — عنوان که عوض شود slug هم عوض می‌شود.
-       ریدایرکتِ دائمی یعنی اعتبارِ لینک‌های بیرونی حفظ می‌شود.
+    /* شاید نشانی قدیمی باشد — عنوان که عوض شود slug هم عوض می‌شود.
+       ریدایرکت دائمی یعنی اعتبار لینک‌های بیرونی حفظ می‌شود.
 
-       ⚠️ `encodeURIComponent` لازم است: نشانی‌ها فارسی‌اند و هدرِ HTTP
-       فقط ASCII می‌پذیرد. بدونِ آن پاسخ با «نویسه‌ی نامعتبر در هدر»
+       ⚠️ `encodeURIComponent` لازم است: نشانی‌ها فارسی‌اند و هدر HTTP
+       فقط ASCII می‌پذیرد. بدون آن پاسخ با «نویسه‌ی نامعتبر در هدر»
        می‌شکند و کاربر به‌جای ریدایرکت، خطای ۵۰۰ می‌گیرد. */
     const fresh = await slugRedirect(slug)
     if (fresh) permanentRedirect(`/media/${encodeURIComponent(fresh)}`)
@@ -102,17 +102,18 @@ export default async function WatchPage({ params }: Params) {
   const cat = mediaCategoryOf(v.category as MediaCategoryKey)
 
   /* نشانی‌ها همه‌جا از کلید ساخته می‌شوند — هم در متادیتا، هم در
-     داده‌ی ساختاریافته، هم در پلیر. یعنی جابه‌جاییِ آینده‌ی فایل‌ها
+     داده‌ی ساختاریافته، هم در پلیر. یعنی جابه‌جایی آینده‌ی فایل‌ها
      هیچ‌کدام را نمی‌شکند. */
   const pub = toPublic(v)
   const srcUrl = pub.src
   const thumbUrl = pub.thumb
 
-  /* شکلی که کامپوننتِ نمایش می‌فهمد */
+  /* شکلی که کامپوننت نمایش می‌فهمد */
   const asMedia = (p: ReturnType<typeof toPublic>): MediaVideo => ({
     id: p.slug, title: p.title, category: p.category as MediaCategoryKey,
     creator: { id: p.creatorHandle, name: p.creatorName, handle: p.creatorHandle },
     durationSec: p.durationSec, width: p.width, height: p.height,
+    comments: p.comments ?? 0,
     duration: p.durationSec
       ? `${String(Math.floor(p.durationSec / 60)).padStart(2, '0')}:${String(p.durationSec % 60).padStart(2, '0')}`
         .replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[Number(d)]!)
@@ -127,9 +128,9 @@ export default async function WatchPage({ params }: Params) {
   const url = absoluteUrl(`/media/${v.slug}`)
 
   /* ── VideoObject ──
-     فقط فیلدهایی که *واقعاً* داده دارند. مدت، بندانگشتی و تاریخ اگر
-     نباشند اصلاً نمی‌آیند؛ مقدارِ ساختگی هم به گوگل دروغ می‌گوید و هم
-     بعداً باعثِ اخطارِ داده‌ی نامعتبر می‌شود. */
+     فقط فیلدهایی که *واقعا* داده دارند. مدت، بندانگشتی و تاریخ اگر
+     نباشند اصلا نمی‌آیند؛ مقدار ساختگی هم به گوگل دروغ می‌گوید و هم
+     بعدا باعث اخطار داده‌ی نامعتبر می‌شود. */
   const videoLd: Record<string, unknown> = {
     '@context': 'https://schema.org',
     '@type': 'VideoObject',
@@ -174,8 +175,8 @@ export default async function WatchPage({ params }: Params) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(videoLd) }} />
       <script type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(crumbLd) }} />
-      {/* ⚠️ شناسه‌ی مالک از همین ردیفِ سرور می‌آید: صاحبِ ویدیو حق
-          دارد دیدگاهِ دیگران را پاک کند و رابط باید همان را نشان
+      {/* ⚠️ شناسه‌ی مالک از همین ردیف سرور می‌آید: صاحب ویدیو حق
+          دارد دیدگاه دیگران را پاک کند و رابط باید همان را نشان
           بدهد که سرور اجازه می‌دهد. */}
       <WatchClient
         video={asMedia(toPublic(v))}

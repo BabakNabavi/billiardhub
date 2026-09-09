@@ -20,7 +20,7 @@ export interface MatchRow {
   score2: number
   winner: 1 | 2 | null
   status: 'waiting' | 'in_progress' | 'completed'
-  /* «عمداً بی‌حریف» — با «هنوز خالی» فرق دارد (مهاجرت ۰۷۵) */
+  /* «عمدا بی‌حریف» — با «هنوز خالی» فرق دارد (مهاجرت ۰۷۵) */
   p1_bye: boolean
   p2_bye: boolean
   table_number: number | null
@@ -52,8 +52,8 @@ export interface BracketView {
   totalRounds: number
   champion: { name: string; registrationId: string | null } | null
   runnerUp: { name: string } | null
-  /* ── سومِ مشترک ──
-     در حذفیِ یک‌طرفه بدونِ بازیِ رده‌بندی، نفرِ سوم یکی نیست: دو
+  /* ── سوم مشترک ──
+     در حذفی یک‌طرفه بدون بازی رده‌بندی، نفر سوم یکی نیست: دو
      بازنده‌ی نیمه‌نهایی هر دو سوم‌اند. حدس زده نمی‌شود کدام بالاتر
      است — هر دو با هم می‌آیند و صفحه هم همین را می‌نویسد. */
   thirds: string[]

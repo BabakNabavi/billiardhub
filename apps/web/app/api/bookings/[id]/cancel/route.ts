@@ -27,7 +27,7 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string
   if (b.userId !== actor.id && !owner && !admin) {
     return NextResponse.json({ message: 'دسترسی مجاز نیست' }, { status: 403 });
   }
-  if (b.booking_status === 'CANCELLED') return NextResponse.json({ message: 'این رزرو قبلاً کنسل شده است' }, { status: 409 });
+  if (b.booking_status === 'CANCELLED') return NextResponse.json({ message: 'این رزرو قبلا کنسل شده است' }, { status: 409 });
   if (b.booking_status === 'COMPLETED') return NextResponse.json({ message: 'رزرو انجام‌شده قابل کنسل نیست' }, { status: 409 });
 
   /* طبق قوانین: لغو فقط تا ۲ ساعت پیش از شروع. ادمین مستثناست. */
@@ -36,13 +36,13 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string
     return NextResponse.json({ message: 'مهلت لغو گذشته است؛ رزرو تنها تا ۲ ساعت پیش از زمان شروع قابل لغو است' }, { status: 409 });
   }
 
-  /* ── مهلتِ باشگاه‌دار ──
-     مالک تا امروز هیچ محدودیتی نداشت و می‌توانست رزروِ پرداخت‌شده را
+  /* ── مهلت باشگاه‌دار ──
+     مالک تا امروز هیچ محدودیتی نداشت و می‌توانست رزرو پرداخت‌شده را
      حتی یک دقیقه پیش از شروع لغو کند. برای مشتری‌ای که پول داده و
-     خودش را رسانده، آن یعنی از دست دادنِ کلِ برنامه‌اش.
+     خودش را رسانده، آن یعنی از دست دادن کل برنامه‌اش.
 
-     چهار ساعت مرزِ منطقی است: باشگاه‌دار زودتر می‌داند میزش خراب شده
-     یا مشکلی هست، و مشتری هنوز فرصتِ برنامه‌ریزیِ دوباره دارد. */
+     چهار ساعت مرز منطقی است: باشگاه‌دار زودتر می‌داند میزش خراب شده
+     یا مشکلی هست، و مشتری هنوز فرصت برنامه‌ریزی دوباره دارد. */
   const OWNER_CANCEL_HOURS = 4;
   if (owner && !admin) {
     const hoursLeft = (startsAt.getTime() - Date.now()) / 3_600_000;

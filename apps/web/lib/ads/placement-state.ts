@@ -27,14 +27,14 @@ export type PlacementKey =
   | 'equipment_ads_left'
   | 'homepage_bottom_banner'
 
-/* ⚠️ دوقلوی این تایپ در `lib/ads/resolve.ts` است و هر فیلدِ تازه باید
+/* ⚠️ دوقلوی این تایپ در `lib/ads/resolve.ts` است و هر فیلد تازه باید
    به هر دو اضافه شود (`verified` تازه‌ترینش بود).
 
-   عمداً یکی نشده‌اند: `resolve.ts` از `sb()` استفاده می‌کند و
-   server-only است؛ re-export کردنش از این‌جا آن ماژول را به گرافِ
-   کلاینت می‌کشد — همان یالِ شکننده‌ای که یک‌بار صفحه‌ی اصلی را ۵۰۰
+   عمدا یکی نشده‌اند: `resolve.ts` از `sb()` استفاده می‌کند و
+   server-only است؛ re-export کردنش از این‌جا آن ماژول را به گراف
+   کلاینت می‌کشد — همان یال شکننده‌ای که یک‌بار صفحه‌ی اصلی را ۵۰۰
    کرد (توضیحش در `lib/home-types.ts`). اگر روزی یکی‌شان کردی، جای
-   درستش یک فایلِ سومِ بی‌طرفِ فقط-تایپ است. */
+   درستش یک فایل سوم بی‌طرف فقط-تایپ است. */
 export interface EntitySnapshot {
   entityType: 'product' | 'club' | 'seller'
   ref: string
@@ -51,15 +51,15 @@ export interface EntitySnapshot {
   price?: number
   oldPrice?: number
   discountPercent?: number
-  /** آگهیِ توافقی — کارت به‌جای عدد «توافقی» می‌نویسد */
+  /** آگهی توافقی — کارت به‌جای عدد «توافقی» می‌نویسد */
   negotiable?: boolean
-  /** وضعیتِ کالا (نو/کارکرده) — کارت آن را کنارِ شهر نشان می‌دهد */
+  /** وضعیت کالا (نو/کارکرده) — کارت آن را کنار شهر نشان می‌دهد */
   condition?: string
   city?: string
   badge?: string | null
-  /** تیکِ آبی — کارتِ تبلیغاتی همان تیکِ کارتِ عادی را نشان می‌دهد */
+  /** تیک آبی — کارت تبلیغاتی همان تیک کارت عادی را نشان می‌دهد */
   verified?: boolean
-  /** آمار واقعی موجودیت (مثلاً تعداد میز باشگاه)؛ نبودنش = نداریم */
+  /** آمار واقعی موجودیت (مثلا تعداد میز باشگاه)؛ نبودنش = نداریم */
   stats?: { tables?: number; snooker?: number; pocket?: number; highball?: number }
 }
 
@@ -84,11 +84,11 @@ export interface PlacementPayload {
 export type PlacementStatus = 'loading' | 'off' | 'on'
 
 export interface PlacementState {
-  /** off یعنی ادمین جایگاه را غیرفعال کرده ⇒ سکشن اصلاً نباید رندر شود */
+  /** off یعنی ادمین جایگاه را غیرفعال کرده ⇒ سکشن اصلا نباید رندر شود */
   status: PlacementStatus
   items: LiveCampaign[] | null
   mode: 'free' | 'manual' | 'paid' | null
-  /** چند آیتم قرار است دیده شود (۰ یعنی ادمین عمداً هیچ خواسته) */
+  /** چند آیتم قرار است دیده شود (۰ یعنی ادمین عمدا هیچ خواسته) */
   displayCount?: number
 }
 

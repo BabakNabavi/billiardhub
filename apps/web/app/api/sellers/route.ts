@@ -12,10 +12,10 @@ export async function OPTIONS() {
   return new NextResponse(null, { status: 204, headers: CORS });
 }
 
-/* فهرستِ فروشگاه‌های عمومی. منبع و دلیلِ عوض‌شدنش در
+/* فهرست فروشگاه‌های عمومی. منبع و دلیل عوض‌شدنش در
    `lib/sellers-source.ts` توضیح داده شده — خلاصه‌اش: این مسیر
    `users.sellerProfile` را می‌خواند که هیچ‌جای پروژه نمی‌نویسدش، و
-   در Production `[]` برمی‌گرداند در حالی که فروشگاهِ واقعی وجود دارد. */
+   در Production `[]` برمی‌گرداند در حالی که فروشگاه واقعی وجود دارد. */
 export async function GET() {
   try {
     return NextResponse.json(await listPublicStores(), { headers: CORS });

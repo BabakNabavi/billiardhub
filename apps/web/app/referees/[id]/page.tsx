@@ -1,15 +1,15 @@
 'use client'
 
 /* ─────────────────────────────────────────────────────────────
-   پروفایل عمومی داور — همان طرحِ صفحه‌ی مربی.
+   پروفایل عمومی داور — همان طرح صفحه‌ی مربی.
 
    ── چه چیزی رفت ──
-   ۱۰ داورِ ساختگی روی /referees/1..10 عمومی بودند: نام، مدرک و
-   شماره‌ی تلفنِ قابلِ شماره‌گیریِ آدم‌هایی که وجود ندارند. فهرستِ
+   ۱۰ داور ساختگی روی /referees/1..10 عمومی بودند: نام، مدرک و
+   شماره‌ی تلفن قابل شماره‌گیری آدم‌هایی که وجود ندارند. فهرست
    /referees خالی است و هیچ لینکی به آن‌ها نمی‌داد، ولی نشانی‌ها
    زنده بودند. همان کاری که با صفحه‌ی مربی شد.
 
-   هیرو، گالری و خطِ زمان از `components/profile/*` می‌آیند — یک
+   هیرو، گالری و خط زمان از `components/profile/*` می‌آیند — یک
    طرح، دو مصرف‌کننده.
    ───────────────────────────────────────────────────────────── */
 
@@ -26,10 +26,10 @@ import { useOwnerEdit } from '../../../lib/profiles/use-owner-edit'
 import { compressImage } from '../../../lib/seller-store'
 import { uploadFile } from '../../../lib/supabase'
 import { videoMeta, formatDuration } from '../../../lib/video-thumb'
-/* ⚠️ prompt/confirm بومی در این پروژه ممنوع است (گاردِ ایستا دارد):
-   جریان را قفل می‌کنند، استایلِ سایت را نمی‌گیرند و روی وب‌ویوِ
+/* ⚠️ prompt/confirm بومی در این پروژه ممنوع است (گارد ایستا دارد):
+   جریان را قفل می‌کنند، استایل سایت را نمی‌گیرند و روی وب‌ویو
    اپ رفتارشان یکسان نیست. `askText`/`ask` همان کار را با پنجره‌ی
-   خودِ سایت می‌کنند. */
+   خود سایت می‌کنند. */
 import { ask, notify } from '../../../lib/ui/dialogs'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
@@ -47,13 +47,13 @@ const MAX_VIDEO_MB = 25
 
 /* ─── انواع ─── */
 interface GImg  { id:string; url:string; caption:string; album?:string }
-/* `url` نشانیِ فایل است؛ ردیفِ قدیمی فقط بندانگشتی دارد و کارتِ
+/* `url` نشانی فایل است؛ ردیف قدیمی فقط بندانگشتی دارد و کارت
    بی‌پخش رندر می‌شود. */
 interface VItem { id:string; url?:string; thumbnail:string; title:string; duration:string; album?:string }
 
-/* دقیقاً همان چیزی که پنلِ داور ذخیره می‌کند، نه یک ابرمجموعه.
-   فیلدهای مرده‌ی نسخه‌ی قبلی (افتخارات، استوری، رنگِ نشان) با
-   حذفِ داده‌ی نمایشی رفتند. */
+/* دقیقا همان چیزی که پنل داور ذخیره می‌کند، نه یک ابرمجموعه.
+   فیلدهای مرده‌ی نسخه‌ی قبلی (افتخارات، استوری، رنگ نشان) با
+   حذف داده‌ی نمایشی رفتند. */
 interface RefereeView {
   id:string; name:string; city:string; verified:boolean
   photo?:string; coverImage?:string
@@ -88,17 +88,17 @@ export default function RefereeProfilePage() {
   const { id } = useParams<{id:string}>()
   const [localP, setLocalP]   = useState<RefereeProfile | null>(null)
   const [checked, setChecked] = useState(false)
-  /* شبکه شکست، نه اینکه پروفایل نباشد — بدونِ این، قطعیِ اینترنت
-     پیامِ «این داور وجود ندارد» می‌گرفت. */
+  /* شبکه شکست، نه اینکه پروفایل نباشد — بدون این، قطعی اینترنت
+     پیام «این داور وجود ندارد» می‌گرفت. */
   const [netFail, setNetFail] = useState(false)
-  /* مالکِ ردیف — از ستونِ سرور، نه از داده‌ی داخلِ فرم. فقط برای
-     نشان‌دادنِ دکمه‌های ویرایش؛ اجازه‌ی واقعی روی سرور سنجیده می‌شود. */
+  /* مالک ردیف — از ستون سرور، نه از داده‌ی داخل فرم. فقط برای
+     نشان‌دادن دکمه‌های ویرایش؛ اجازه‌ی واقعی روی سرور سنجیده می‌شود. */
   const [ownerId, setOwnerId] = useState<string | null>(null)
-  /* پرچمِ قطعیِ سرور — مقایسه‌ی مرورگر فقط فالبک است */
+  /* پرچم قطعی سرور — مقایسه‌ی مرورگر فقط فالبک است */
   const [mine, setMine] = useState<boolean | undefined>(undefined)
   const [vidBusy, setVidBusy] = useState(false)
-  /* انتشار در بیلیارد مدیا — پنجره فقط وقتی باز می‌شود که کانالِ
-     همین نقش نباشد. آپلودِ گالری هرگز به نتیجه‌اش وابسته نیست. */
+  /* انتشار در بیلیارد مدیا — پنجره فقط وقتی باز می‌شود که کانال
+     همین نقش نباشد. آپلود گالری هرگز به نتیجه‌اش وابسته نیست. */
   const [reloadKey, setReloadKey] = useState(0)
   const [copyState, setCopyState] = useState<'idle' | 'ok' | 'manual'>('idle')
   const flashT = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -106,8 +106,8 @@ export default function RefereeProfilePage() {
 
   /* ── چرا سرور هم خوانده می‌شود ──
      این صفحه فقط `localStorage` را می‌دید، یعنی پروفایل تنها در
-     مرورگرِ خودِ صاحبش دیده می‌شد. حافظه‌ی محلی اول می‌آید چون فوری
-     است؛ پاسخِ سرور رویش می‌نشیند. */
+     مرورگر خود صاحبش دیده می‌شد. حافظه‌ی محلی اول می‌آید چون فوری
+     است؛ پاسخ سرور رویش می‌نشیند. */
   useEffect(() => {
     setNetFail(false)
     if (!id) { setChecked(true); return }
@@ -124,7 +124,7 @@ export default function RefereeProfilePage() {
         }
         else if (r.state === 'error') setNetFail(true)
       } catch {
-        /* `fetchProfileResult` خودش خطا را می‌گیرد؛ تورِ ایمنی است
+        /* `fetchProfileResult` خودش خطا را می‌گیرد؛ تور ایمنی است
            تا استثنای غیرمنتظره صفحه را به «پیدا نشد» نیندازد. */
         if (alive) setNetFail(true)
       } finally {
@@ -138,15 +138,15 @@ export default function RefereeProfilePage() {
   const { open: openImage, viewer: imageViewer } = useProfileImageViewer()
   const { open: openVideo, viewer: videoViewer } = useProfileVideoViewer()
 
-  /* ── ویرایشِ درجا ──
-     ⚠️ این فراخوانی *باید* پیش از هر `return`ِ شرطی باشد. یک‌بار
-     پایین‌تر — بعد از گاردِ اسکلت و گاردِ «پیدا نشد» — نوشته شد و
-     صفحه با React #310 («تعدادِ هوک‌ها عوض شد») سفید می‌شد؛ برای
+  /* ── ویرایش درجا ──
+     ⚠️ این فراخوانی *باید* پیش از هر `return` شرطی باشد. یک‌بار
+     پایین‌تر — بعد از گارد اسکلت و گارد «پیدا نشد» — نوشته شد و
+     صفحه با React #310 («تعداد هوک‌ها عوض شد») سفید می‌شد؛ برای
      همه، نه فقط مالک.
 
-     صاحبِ پروفایل بدونِ رفتن به داشبورد عکس/ویدیو/آلبوم اضافه و حذف
-     می‌کند. `apply` کلِ پروفایل را با یک فیلدِ عوض‌شده ذخیره می‌کند و
-     نشانیِ Storage را که سرور برمی‌گرداند می‌نشاند. */
+     صاحب پروفایل بدون رفتن به داشبورد عکس/ویدیو/آلبوم اضافه و حذف
+     می‌کند. `apply` کل پروفایل را با یک فیلد عوض‌شده ذخیره می‌کند و
+     نشانی Storage را که سرور برمی‌گرداند می‌نشاند. */
   const edit = useOwnerEdit<RefereeProfile>('referee', id, localP, ownerId, setLocalP, mine)
   const { gate: channelGate, ask: askChannel, publish: publishToChannel } = useChannelPublish('referee', ownerId ?? undefined, edit.isOwner, notify)
 
@@ -174,7 +174,7 @@ export default function RefereeProfilePage() {
           <p>{netFail
             ? 'ارتباط با سرور برقرار نشد. اتصال اینترنت را بررسی کنید و دوباره تلاش کنید.'
             : 'ممکن است نشانی اشتباه باشد یا پروفایل هنوز تأیید نشده باشد.'}</p>
-          {/* راهِ بازگشت در حالتِ خطا هم می‌ماند — شاید شبکه برنگردد. */}
+          {/* راه بازگشت در حالت خطا هم می‌ماند — شاید شبکه برنگردد. */}
           <div style={{ display: 'flex', gap: 8, justifyContent: 'center', flexWrap: 'wrap' }}>
             {netFail && (
               <button type="button" className="btn btn-glass btn-sm" style={{ minHeight: 44 }}
@@ -188,14 +188,14 @@ export default function RefereeProfilePage() {
   }
 
   /* ── داده‌ی مشتق ──
-     همه از فیلدهای واقعی می‌آید؛ هیچ عددِ ساختگی ساخته نمی‌شود. */
+     همه از فیلدهای واقعی می‌آید؛ هیچ عدد ساختگی ساخته نمی‌شود. */
   const badge = localP ? badgeFromGrades(localP.grades) : null
   const grade = badge ? { label: badge.label, dots: badge.dots } : undefined
   const disciplines = referee.disciplines.map(k => ({ label: disciplineLabel(k) }))
 
-  /* بر اساسِ رتبه مرتب می‌شود نه سال — همان دلیلِ صفحه‌ی مربی:
-     چیپِ هیرو از `badgeFromGrades` می‌آید که رتبه‌ای است، و اگر
-     خطِ زمان با سال مرتب شود نشانِ «بالاترین درجه» به ردیفِ اشتباه
+  /* بر اساس رتبه مرتب می‌شود نه سال — همان دلیل صفحه‌ی مربی:
+     چیپ هیرو از `badgeFromGrades` می‌آید که رتبه‌ای است، و اگر
+     خط زمان با سال مرتب شود نشان «بالاترین درجه» به ردیف اشتباه
      می‌چسبد. */
   const timeline = localP
     ? [...localP.grades]
@@ -203,8 +203,8 @@ export default function RefereeProfilePage() {
         .map(g => ({ label: g.label, year: g.year }))
     : []
 
-  /* «از سال» = کوچک‌ترین سالِ واقعی. ارقامِ فارسی و عربی نرمال
-     می‌شوند وگرنه `Number('۱۳۹۸')` برابرِ NaN است. */
+  /* «از سال» = کوچک‌ترین سال واقعی. ارقام فارسی و عربی نرمال
+     می‌شوند وگرنه `Number('۱۳۹۸')` برابر NaN است. */
   const sinceYear = (() => {
     const years = (localP?.grades ?? [])
       .map(g => Number(normalizeDigits(String(g.year))))
@@ -215,7 +215,7 @@ export default function RefereeProfilePage() {
   const paragraphs = (referee.fullBio || referee.bio || '').split(/\n{2,}/).map(s => s.trim()).filter(Boolean)
   const publicUrl = `www.billiardhub.net/referees/${referee.id}`
 
-  /* `navigator.clipboard` روی http و سافاریِ قدیمی نیست؛ در آن حالت
+  /* `navigator.clipboard` روی http و سافاری قدیمی نیست؛ در آن حالت
      نشانی انتخاب می‌شود تا کاربر دستی بردارد. */
   const selectUrl = () => {
     const el = document.getElementById('ch-url-code')
@@ -250,25 +250,25 @@ export default function RefereeProfilePage() {
       id: `m${Date.now()}${Math.random().toString(36).slice(2, 7)}`,
       url: await compressImage(fl, 1000, 0.68),
       caption: '',
-      /* از داخلِ آلبوم که اضافه شود، همان‌جا می‌نشیند */
+      /* از داخل آلبوم که اضافه شود، همان‌جا می‌نشیند */
       ...(album ? { album } : {}),
     })))
     await edit.apply(d => ({ ...d, gallery: [...d.gallery, ...items] }))
   }
-  /* ── ویدیو از گالریِ خودِ کاربر ──
-     ⚠️ نسخه‌ی اول نشانیِ آپارات/یوتیوب می‌پرسید — کاربر درست گفت که
-     این اصلاً کارِ این دکمه نیست. حالا مثل عکس فایل انتخاب می‌شود و
-     همان مسیرِ آپلودی می‌رود که پنل استفاده می‌کند
-     (`profiles/videos/<userId>/…` در Storage، نه data:URL داخلِ jsonb
+  /* ── ویدیو از گالری خود کاربر ──
+     ⚠️ نسخه‌ی اول نشانی آپارات/یوتیوب می‌پرسید — کاربر درست گفت که
+     این اصلا کار این دکمه نیست. حالا مثل عکس فایل انتخاب می‌شود و
+     همان مسیر آپلودی می‌رود که پنل استفاده می‌کند
+     (`profiles/videos/<userId>/…` در Storage، نه data:URL داخل jsonb
      که ردیف را می‌ترکاند). */
-  /* `details` از فرمِ مشخصات می‌آید (عنوان/دسته/توضیح). تا دیروز
-     عنوان نامِ فایل بود و همان به مدیا می‌رفت. */
+  /* `details` از فرم مشخصات می‌آید (عنوان/دسته/توضیح). تا دیروز
+     عنوان نام فایل بود و همان به مدیا می‌رفت. */
   const addVideoFiles = async (files: File[], album?: string, details?: VideoDetail[]) => {
-    /* ورودیِ ترکیبیِ داخلِ آلبوم می‌تواند چند ویدیو بدهد؛ یکی‌یکی و
+    /* ورودی ترکیبی داخل آلبوم می‌تواند چند ویدیو بدهد؛ یکی‌یکی و
        ترتیبی بالا می‌روند تا هر کدام روی نسخه‌ی تازه‌ی پروفایل بنشیند. */
     setVidBusy(true)
     /* پیام‌ها ته کار یک‌جا داده می‌شوند: `notify` یک نوار است و
-       فراخوانیِ پشتِ هم فقط آخری را نشان می‌دهد. */
+       فراخوانی پشت هم فقط آخری را نشان می‌دهد. */
     const skipped: string[] = []
     const shipped: PublishVideo[] = []
     try {
@@ -284,13 +284,13 @@ export default function RefereeProfilePage() {
           ...d,
           videos: [...d.videos, { id: vid, url, thumbnail: thumb, title: detailTitle(details, i, file), duration: formatDuration(meta.durationSec), ...(album ? { album } : {}) }],
         }))
-        /* ذخیره که شکست خورد، ادامه‌ی آپلود فقط فایلِ یتیم می‌سازد */
+        /* ذخیره که شکست خورد، ادامه‌ی آپلود فقط فایل یتیم می‌سازد */
         if (!ok) break
         /* ⚠️ فقط ویدیویی که *در گالری ذخیره شد* منتشر می‌شود. پیش‌تر
            این خط بالای `break` بود و ویدیویی که ذخیره‌اش شکست خورده
            بود هم به مدیا می‌رفت: در بیلیارد مدیا زنده، در پروفایل
            نبود، و کاربر پیام «ذخیره انجام نشد» دیده بود. */
-        /* «فقط در گالری بماند» یک تصمیمِ صریحِ کاربر است */
+        /* «فقط در گالری بماند» یک تصمیم صریح کاربر است */
         if (details?.[i]?.publish !== false) {
           shipped.push({
             title: detailTitle(details, i, file), src: url, thumb, durationSec: meta.durationSec,
@@ -304,10 +304,10 @@ export default function RefereeProfilePage() {
       if (skipped.length) notify(`این ویدیوها اضافه نشدند (سقف ${MAX_VIDEO_MB} مگابایت): ${skipped.join('، ')}`)
     }
   }
-  /* ⚠️ نسخه‌ی قبلی نامِ آلبوم را روی «آخرین عکسِ بدونِ آلبوم»
-     می‌نشاند، چون آلبوم فقط از روی رسانه‌ها ساخته می‌شد و آلبومِ خالی
-     ممکن نبود. نتیجه‌اش این بود که آلبومِ تازه‌ی خالی، یکی از عکس‌های
-     تبِ تصاویر را با خودش می‌برد. حالا فقط نام اعلام می‌شود. */
+  /* ⚠️ نسخه‌ی قبلی نام آلبوم را روی «آخرین عکس بدون آلبوم»
+     می‌نشاند، چون آلبوم فقط از روی رسانه‌ها ساخته می‌شد و آلبوم خالی
+     ممکن نبود. نتیجه‌اش این بود که آلبوم تازه‌ی خالی، یکی از عکس‌های
+     تب تصاویر را با خودش می‌برد. حالا فقط نام اعلام می‌شود. */
   const newAlbum = async (name: string) => {
     const n = name.trim()
     if (!n) return
@@ -317,15 +317,15 @@ export default function RefereeProfilePage() {
       return { ...d, albums: [...list, n] }
     })
   }
-  /* ── ویرایشِ عنوانِ ویدیو ──
-     عنوان دو نسخه دارد: ردیفِ گالریِ پروفایل و ردیفِ بیلیارد مدیا.
-     هوک دومی را می‌زند، این تابع اولی را. کلید نشانیِ فایل است،
-     چون گالری شناسه‌ی ردیفِ مدیا را ندارد. */
+  /* ── ویرایش عنوان ویدیو ──
+     عنوان دو نسخه دارد: ردیف گالری پروفایل و ردیف بیلیارد مدیا.
+     هوک دومی را می‌زند، این تابع اولی را. کلید نشانی فایل است،
+     چون گالری شناسه‌ی ردیف مدیا را ندارد. */
   const { dialog: videoEditDialog, edit: editVideo } = useVideoEdit(
     async (target, detail) => {
-      /* ⚠️ `map` بدونِ تطبیق هم «موفق» برمی‌گردد. اگر نشانی جور نشود
-         (کدگذاریِ متفاوت، ردیفِ بی‌url)، هوک «شد» می‌شنید و مدیا را
-         عوض می‌کرد در حالی که گالری عنوانِ قبلی را نشان می‌دهد —
+      /* ⚠️ `map` بدون تطبیق هم «موفق» برمی‌گردد. اگر نشانی جور نشود
+         (کدگذاری متفاوت، ردیف بی‌url)، هوک «شد» می‌شنید و مدیا را
+         عوض می‌کرد در حالی که گالری عنوان قبلی را نشان می‌دهد —
          یعنی دو عنوان برای یک ویدیو. */
       let hit = false
       const ok = await edit.apply(prof => {
@@ -343,9 +343,9 @@ export default function RefereeProfilePage() {
     if (!(await ask('این ویدیو حذف شود؟', { body: 'این کار برگشت‌پذیر نیست.', confirmLabel: 'حذف' }))) return
     await edit.apply(d => ({ ...d, videos: d.videos.filter(v => v.id !== id) }))
   }
-  /* ⚠️ با شناسه، نه با اندیس: داخلِ آلبوم اندیسِ خانه به زیرمجموعه
-     برمی‌گشت و این فیلتر روی کلِ گالری بود — یعنی حذف از داخلِ آلبوم
-     عکسِ دیگری را می‌برد. */
+  /* ⚠️ با شناسه، نه با اندیس: داخل آلبوم اندیس خانه به زیرمجموعه
+     برمی‌گشت و این فیلتر روی کل گالری بود — یعنی حذف از داخل آلبوم
+     عکس دیگری را می‌برد. */
   const deleteImage = async (id: string) => {
     if (!(await ask('این تصویر حذف شود؟', { body: 'این کار برگشت‌پذیر نیست.', confirmLabel: 'حذف' }))) return
     await edit.apply(d => ({ ...d, gallery: d.gallery.filter(g => g.id !== id) }))

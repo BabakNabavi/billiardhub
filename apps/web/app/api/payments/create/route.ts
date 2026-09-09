@@ -24,10 +24,10 @@ export async function POST(req: NextRequest) {
   };
 
   if (b.userId !== actor.id) return NextResponse.json({ message: 'دسترسی مجاز نیست' }, { status: 403 });
-  if (b.payment_status === 'PAID') return NextResponse.json({ message: 'این رزرو قبلاً پرداخت شده است' }, { status: 409 });
+  if (b.payment_status === 'PAID') return NextResponse.json({ message: 'این رزرو قبلا پرداخت شده است' }, { status: 409 });
   if (b.booking_status !== 'PENDING_PAYMENT') return NextResponse.json({ message: 'این رزرو قابل پرداخت نیست' }, { status: 409 });
   if (b.expires_at && new Date(b.expires_at).getTime() < Date.now()) {
-    return NextResponse.json({ message: 'مهلت پرداخت به پایان رسیده؛ لطفاً دوباره رزرو کنید' }, { status: 410 });
+    return NextResponse.json({ message: 'مهلت پرداخت به پایان رسیده؛ لطفا دوباره رزرو کنید' }, { status: 410 });
   }
   if (!b.final_amount || b.final_amount <= 0) {
     return NextResponse.json({ message: 'مبلغ رزرو معتبر نیست' }, { status: 400 });
@@ -36,14 +36,14 @@ export async function POST(req: NextRequest) {
   /* ── دروازه‌ی واقعی الزامی است ──
      `getPaymentProvider()` وقتی درگاهی تنظیم نشده باشد بی‌صدا به mock
      می‌افتد. برای مسابقات از قبل جلویش گرفته شده بود، ولی رزرو این
-     بررسی را نداشت: یعنی رزرو می‌توانست «پرداخت‌شده» شود بدونِ آنکه
-     ریالی جابه‌جا شده باشد — و بعد بدهیِ واقعی به باشگاه بسازد.
+     بررسی را نداشت: یعنی رزرو می‌توانست «پرداخت‌شده» شود بدون آنکه
+     ریالی جابه‌جا شده باشد — و بعد بدهی واقعی به باشگاه بسازد.
 
-     `BH_ALLOW_MOCK_PAYMENTS=1` تنها راهِ آگاهانه‌ی آزمایش است و به‌طور
+     `BH_ALLOW_MOCK_PAYMENTS=1` تنها راه آگاهانه‌ی آزمایش است و به‌طور
      پیش‌فرض خاموش. */
   if (!hasRealGateway() && process.env.BH_ALLOW_MOCK_PAYMENTS !== '1') {
     return NextResponse.json({
-      message: 'پرداخت آنلاین هنوز فعال نیست. لطفاً بعداً تلاش کنید یا با باشگاه تماس بگیرید.',
+      message: 'پرداخت آنلاین هنوز فعال نیست. لطفا بعدا تلاش کنید یا با باشگاه تماس بگیرید.',
       gatewayDisabled: true,
     }, { status: 503 });
   }

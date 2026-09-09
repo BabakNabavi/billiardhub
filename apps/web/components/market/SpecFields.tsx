@@ -1,23 +1,23 @@
 'use client'
 
 /* ═══════════════════════════════════════════════════════════════
-   فیلدهای مشخصاتِ فنی — ساخته‌شده از `specs_catalog.json`.
+   فیلدهای مشخصات فنی — ساخته‌شده از `specs_catalog.json`.
    ───────────────────────────────────────────────────────────────
-   نسخه‌ی قبلی ده فیلدِ هاردکد بود که فقط برچسب و گزینه داشتند.
+   نسخه‌ی قبلی ده فیلد هاردکد بود که فقط برچسب و گزینه داشتند.
    چیزی که فروشنده لازم دارد و نداشت:
 
-     · **متنِ راهنما** زیرِ برچسب — «اسنوکر: ۸.۵ تا ۱۰ · پاکت
-       بیلیارد آمریکایی: ۱۱.۸ تا ۱۳». زیرِ برچسب، نه tooltip:
-       روی موبایل tooltip اصلاً باز نمی‌شود.
-     · **چیپِ مقدارِ رایج** زیرِ فیلدهای عددی — یک لمس به‌جای تایپ.
-     · **توضیح زیرِ هر گزینه** — فروشنده‌ی دستِ‌دوم نمی‌داند سنگِ
+     · **متن راهنما** زیر برچسب — «اسنوکر: ۸.۵ تا ۱۰ · پاکت
+       بیلیارد آمریکایی: ۱۱.۸ تا ۱۳». زیر برچسب، نه tooltip:
+       روی موبایل tooltip اصلا باز نمی‌شود.
+     · **چیپ مقدار رایج** زیر فیلدهای عددی — یک لمس به‌جای تایپ.
+     · **توضیح زیر هر گزینه** — فروشنده‌ی دست‌دوم نمی‌داند سنگ
        میزش ایتالیایی است یا چینی؛ «تیره‌تر، ریزدانه» راهنمایی‌اش
        می‌کند و داده‌ی درست‌تر می‌سازد.
-     · **سوییچِ بله/خیر** به‌جای دراپ‌داونِ «دارد/ندارد».
-     · **چیپِ چندانتخابی** برای «لوازم همراه».
+     · **سوییچ بله/خیر** به‌جای دراپ‌داون «دارد/ندارد».
+     · **چیپ چندانتخابی** برای «لوازم همراه».
 
    ظاهر از `AdFormFields` می‌آید — همان ورودی، همان طلایی، همان
-   شعاعِ گوشه. چیزی از نو ساخته نشده.
+   شعاع گوشه. چیزی از نو ساخته نشده.
    ═══════════════════════════════════════════════════════════════ */
 import { useEffect, useRef, useState } from 'react'
 
@@ -27,10 +27,10 @@ import type { CatalogSize } from '../../lib/market/catalog-rules'
 
 export const SPEC_OTHER = '__other__'
 
-/* ── گزینه‌های فهرستِ وابسته به نوع ──
-   اندازه‌ی میز، قطرِ تیپ، و قطر و «نوع ست»ِ توپ هر چهار یک شکل‌اند:
-   برچسبِ فارسی و یک یادداشتِ کم‌رنگ کنارش. سه بار در هر فرم تکرار
-   شده بود؛ اضافه‌شدنِ هر کاتالوگ یک نسخه‌ی دیگر می‌ساخت.
+/* ── گزینه‌های فهرست وابسته به نوع ──
+   اندازه‌ی میز، قطر تیپ، و قطر و «نوع ست» توپ هر چهار یک شکل‌اند:
+   برچسب فارسی و یک یادداشت کم‌رنگ کنارش. سه بار در هر فرم تکرار
+   شده بود؛ اضافه‌شدن هر کاتالوگ یک نسخه‌ی دیگر می‌ساخت.
 
    `playing_area_cm` فقط میز دارد و لاتین است، پس `dir="ltr"`. */
 export function sizeOptions(rows: CatalogSize[] | undefined): FancyOption[] {
@@ -52,8 +52,8 @@ export function sizeOptions(rows: CatalogSize[] | undefined): FancyOption[] {
 
 /* ── فیلدهای دسته ──
    `specs_catalog.json` سی‌وهشت کیلوبایت است و فرم فیلدهای **یک**
-   دسته را می‌خواهد، نه همه را. پس مثل کاتالوگِ برند از مسیرِ
-   استاتیک می‌آید و در باندلِ کلاینت نمی‌نشیند. */
+   دسته را می‌خواهد، نه همه را. پس مثل کاتالوگ برند از مسیر
+   استاتیک می‌آید و در باندل کلاینت نمی‌نشیند. */
 const specCache = new Map<string, SpecField[]>()
 const specInflight = new Map<string, Promise<SpecField[]>>()
 
@@ -61,7 +61,7 @@ export function useSpecFields(category: string): { fields: SpecField[]; loading:
   const [fields, setFields] = useState<SpecField[]>(() => specCache.get(category) ?? [])
   const [loading, setLoading] = useState(false)
   const [failed, setFailed] = useState(false)
-  /* دسته‌ای که مقدارِ فعلیِ state به آن تعلق دارد */
+  /* دسته‌ای که مقدار فعلی state به آن تعلق دارد */
   const ownerRef = useRef(category)
   const reqId = useRef(0)
 
@@ -91,9 +91,9 @@ export function useSpecFields(category: string): { fields: SpecField[]; loading:
   }, [category])
 
   /* ── هیچ‌وقت فیلدهای دسته‌ی قبلی ──
-     تا وقتی پاسخِ دسته‌ی تازه نرسیده، خروجی خالی است و `loading`
+     تا وقتی پاسخ دسته‌ی تازه نرسیده، خروجی خالی است و `loading`
      روشن. فرم روی همین `loading` دکمه‌ی ذخیره را قفل می‌کند —
-     وگرنه آگهی بدونِ هیچ مشخصه‌ای ذخیره می‌شد. */
+     وگرنه آگهی بدون هیچ مشخصه‌ای ذخیره می‌شد. */
   const fresh = ownerRef.current === category ? fields : (specCache.get(category) ?? [])
   return { fields: fresh, loading: loading || (!!category && !specCache.has(category) && !failed), failed }
 }
@@ -104,13 +104,13 @@ const toFa = (n: number | string) =>
 
 /* ── راهنما ──
    ۱۱.۵ پیکسل و خاکستری: باید خوانده شود ولی برچسب را زیر سایه
-   نبرد. زیرِ برچسب می‌نشیند و بالای خودِ ورودی. */
-/* ── چرا راهنما زیرِ ورودی است، نه بالایش ──
+   نبرد. زیر برچسب می‌نشیند و بالای خود ورودی. */
+/* ── چرا راهنما زیر ورودی است، نه بالایش ──
    فیلدها در شبکه‌ی دوستونی می‌نشینند. وقتی راهنما بالای ورودی بود،
    خانه‌ای که راهنما داشت ورودی‌اش چند پیکسل پایین‌تر می‌افتاد و
-   دو ورودیِ کنارِ هم هم‌تراز نبودند — «جنس بات» کنارِ «گرید شفت».
-   با رفتنِ راهنما به زیر، فاصله‌ی بالای هر ورودی همیشه یکی است
-   (فقط ارتفاعِ برچسب) و کلِ شبکه هم‌تراز می‌ماند. پیامِ خطا هم از
+   دو ورودی کنار هم هم‌تراز نبودند — «جنس بات» کنار «گرید شفت».
+   با رفتن راهنما به زیر، فاصله‌ی بالای هر ورودی همیشه یکی است
+   (فقط ارتفاع برچسب) و کل شبکه هم‌تراز می‌ماند. پیام خطا هم از
    قبل همین‌جا بود. */
 function Help({ text, id }: { text?: string; id?: string }) {
   if (!text) return null
@@ -119,8 +119,8 @@ function Help({ text, id }: { text?: string; id?: string }) {
   )
 }
 
-/* ── چیپِ مقدارِ رایج ──
-   انتخاب‌شده طلایی می‌شود تا معلوم باشد مقدارِ فعلی از همین آمده. */
+/* ── چیپ مقدار رایج ──
+   انتخاب‌شده طلایی می‌شود تا معلوم باشد مقدار فعلی از همین آمده. */
 function CommonChips({
   values, current, onPick,
 }: { values: number[]; current: string; onPick: (v: string) => void }) {
@@ -145,8 +145,8 @@ function CommonChips({
   )
 }
 
-/* ── سوییچِ بله/خیر ──
-   دراپ‌داونِ «دارد/ندارد» دو لمس می‌خواست و در فهرستِ بیست فیلد گم
+/* ── سوییچ بله/خیر ──
+   دراپ‌داون «دارد/ندارد» دو لمس می‌خواست و در فهرست بیست فیلد گم
    می‌شد. تاگل یک لمس است و حالتش از دور پیداست. */
 function Toggle({
   label, help, on, onChange,
@@ -164,7 +164,7 @@ function Toggle({
         width: 38, height: 22, borderRadius: 11, flexShrink: 0, position: 'relative',
         background: on ? GOLD : 'rgba(28,28,26,0.16)', transition: 'background .18s',
       }}>
-        {/* در RTL دسته باید از سمتِ راست حرکت کند، پس منطقی است نه چپ/راست */}
+        {/* در RTL دسته باید از سمت راست حرکت کند، پس منطقی است نه چپ/راست */}
         <span style={{
           position: 'absolute', top: 3, width: 16, height: 16, borderRadius: '50%',
           background: '#fff', boxShadow: '0 1px 3px rgba(0,0,0,0.22)',
@@ -180,8 +180,8 @@ function Toggle({
 }
 
 /* ── چندانتخابی ──
-   چیپ، نه فهرستِ چک‌باکس: «لوازم همراه» نُه گزینه دارد و فهرستِ
-   عمودی نُه ردیف ارتفاع می‌گرفت. */
+   چیپ، نه فهرست چک‌باکس: «لوازم همراه» نه گزینه دارد و فهرست
+   عمودی نه ردیف ارتفاع می‌گرفت. */
 function MultiChips({
   field, value, onChange,
 }: { field: SpecField; value: string[]; onChange: (v: string[]) => void }) {
@@ -210,7 +210,7 @@ function MultiChips({
 export interface SpecFieldProps {
   field: SpecField
   value: unknown
-  /** متنِ «سایر» — با پسوندِ `_other` جدا ذخیره می‌شود */
+  /** متن «سایر» — با پسوند `_other` جدا ذخیره می‌شود */
   otherValue?: string
   onChange: (v: unknown) => void
   onOtherChange?: (v: string) => void
@@ -224,10 +224,10 @@ export function SpecFieldRow({
   field, value, otherValue = '', onChange, onOtherChange, error, sourceOptions, disabled,
 }: SpecFieldProps) {
   const str = value === undefined || value === null ? '' : String(value)
-  /* برچسب باید به خودِ ورودی گره بخورد، وگرنه صفحه‌خوان نامش را نمی‌گوید */
+  /* برچسب باید به خود ورودی گره بخورد، وگرنه صفحه‌خوان نامش را نمی‌گوید */
   const fieldId = `spec-${field.id}`
-  /* راهنما زیرِ ورودی رفت؛ بدونِ این پیوند، صفحه‌خوان اصلاً
-     نمی‌خواندش — کاربرِ بینا آن را می‌بیند و او نه. */
+  /* راهنما زیر ورودی رفت؛ بدون این پیوند، صفحه‌خوان اصلا
+     نمی‌خواندش — کاربر بینا آن را می‌بیند و او نه. */
   const helpId = field.help_fa ? `${fieldId}-help` : undefined
 
   if (field.type === 'boolean') {
@@ -240,8 +240,8 @@ export function SpecFieldRow({
   if (field.type === 'multi_select') {
     return (
       <div>
-        {/* گروهِ چیپ‌ها ورودیِ واحدی ندارد که برچسب به آن بچسبد،
-            پس خودِ گروه نام و راهنما را می‌گیرد. */}
+        {/* گروه چیپ‌ها ورودی واحدی ندارد که برچسب به آن بچسبد،
+            پس خود گروه نام و راهنما را می‌گیرد. */}
         <Label id={`${fieldId}-label`}>{field.label_fa}</Label>
         <div role="group" aria-labelledby={`${fieldId}-label`} aria-describedby={helpId}>
           <MultiChips field={field} value={Array.isArray(value) ? value as string[] : []} onChange={onChange} />
@@ -253,8 +253,8 @@ export function SpecFieldRow({
   }
 
   if (field.type === 'select') {
-    /* فیلدِ `source`دار فهرستش را از بیرون می‌گیرد — اندازه از
-       کاتالوگِ میز می‌آید، برندِ پارچه از کاتالوگِ پارچه. */
+    /* فیلد `source`دار فهرستش را از بیرون می‌گیرد — اندازه از
+       کاتالوگ میز می‌آید، برند پارچه از کاتالوگ پارچه. */
     const base: FancyOption[] = sourceOptions ?? (field.options ?? []).map(o => ({
       value: o.id,
       label: o.label_fa,
@@ -305,7 +305,7 @@ export function SpecFieldRow({
       <input className="nf" id={fieldId}
         type={field.type === 'number' ? 'text' : 'text'}
         inputMode={field.type === 'number' ? 'decimal' : undefined}
-        /* عدد در فیلدِ عددی لاتین می‌ماند، حتی در متنِ فارسی */
+        /* عدد در فیلد عددی لاتین می‌ماند، حتی در متن فارسی */
         dir={field.type === 'number' ? 'ltr' : undefined}
         maxLength={field.max_length ?? undefined}
         value={str}
@@ -323,9 +323,9 @@ export function SpecFieldRow({
 }
 
 /* ── شمارنده‌ی پیشرفت ──
-   عمداً درصد نیست. درصد فشار می‌آورد که پر شود، در حالی که همه‌ی
-   این‌ها جز وضعیت اختیاری‌اند و فروشنده‌ی دستِ‌دوم واقعاً بعضی‌شان
-   را نمی‌داند — عددِ الکی از خالی بدتر است. */
+   عمدا درصد نیست. درصد فشار می‌آورد که پر شود، در حالی که همه‌ی
+   این‌ها جز وضعیت اختیاری‌اند و فروشنده‌ی دست‌دوم واقعا بعضی‌شان
+   را نمی‌داند — عدد الکی از خالی بدتر است. */
 export function SpecProgress({ filled, total }: { filled: number; total: number }) {
   return (
     <div style={{ marginTop: 4, paddingTop: 14, borderTop: '1px solid rgba(28,28,26,0.07)' }}>

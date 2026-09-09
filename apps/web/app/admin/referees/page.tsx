@@ -33,41 +33,46 @@ const btn = (bg: string, color: string, border: string): React.CSSProperties => 
 })
 
 /* key lookup: certificationLines() returns "label — year"; find the grade key by label for the bh-latin class */
-/* ⚠️ متن با نویسه‌ی نامرئیِ دوجهته شروع می‌شود، پس بدونِ پاک‌کردنِ آن
-   'startsWith' هیچ‌وقت جور نمی‌شود و کلاسِ لاتین از دست می‌رود. */
+/* ⚠️ متن با نویسه‌ی نامرئی دوجهته شروع می‌شود، پس بدون پاک‌کردن آن
+   'startsWith' هیچ‌وقت جور نمی‌شود و کلاس لاتین از دست می‌رود. */
 const gradeKeyByLabel = (line: string) => GRADES.find(g => stripBidi(line).startsWith(g.label))?.key ?? ''
 
 export default function AdminRefereesPage() {
   const { user, _hydrated } = useAuthStore()
-  const [list, setList]         = useState<Array<RefereeProfile & { id: string }>>([])
+  const [list, setList]         = useState<Array<RefereeProfile & { id: string; licenseUrl: string; licenseVerified: boolean }>>([])
   const [expanded, setExpanded] = useState<string | null>(null)
   const [tick, setTick]         = useState(0)
   const [err,  setErr]          = useState('')
 
   /* منبع: جدول `profiles` روی سرور — نه localStorage. تا امروز این
      فهرست از مرورگر خود ادمین خوانده می‌شد، پس پروفایلی که داور روی
-     دستگاه خودش ساخته بود اصلاً این‌جا دیده نمی‌شد. */
+     دستگاه خودش ساخته بود اصلا این‌جا دیده نمی‌شد. */
   useEffect(() => {
     void (async () => {
       const rows = await fetchAdminProfiles<RefereeProfile>('referee')
-      /* ⚠️ اینجا فالبکِ localStorage بود: اگر سرور فهرستِ خالی
-         برمی‌گرداند — یا درخواست ۴۰۳/قطع می‌شد — ادمین کشِ مرورگرِ
-         *خودش* را می‌دید. آن کش وضعیتِ لحظه‌ی ثبت را دارد
-         (pending, verified=false)، پس پروفایلِ تأییدشده «در انتظار»
-         نشان داده می‌شد و تأییدِ دوباره هیچ اثری نداشت.
-         فهرستِ خالیِ سرور یعنی خالی. */
+      /* ⚠️ اینجا فالبک localStorage بود: اگر سرور فهرست خالی
+         برمی‌گرداند — یا درخواست ۴۰۳/قطع می‌شد — ادمین کش مرورگر
+         *خودش* را می‌دید. آن کش وضعیت لحظه‌ی ثبت را دارد
+         (pending, verified=false)، پس پروفایل تأییدشده «در انتظار»
+         نشان داده می‌شد و تأیید دوباره هیچ اثری نداشت.
+         فهرست خالی سرور یعنی خالی. */
       setList(rows)
     })()
   }, [tick])
 
   const isAdmin = !!user && (user.phone === ADMIN_PHONE || user.primaryRole === 'admin')
-  /* ⚠️ کشِ محلی فقط *بعد از* موفقیتِ سرور به‌روز می‌شود.
+  /* ⚠️ کش محلی فقط *بعد از* موفقیت سرور به‌روز می‌شود.
      پیش‌تر بی‌قیدوشرط نوشته می‌شد: سرور ۴۰۳ می‌داد، ردیف روی صفحه
      عوض‌شده به‌نظر می‌رسید و با اولین بازخوانی برمی‌گشت. */
-  /* ⚠️ خودِ ردیف را می‌گیرد: PATCH با شناسه می‌رود (نامک فقط داخلِ
-     هر نقش یکتاست و بینِ نقش‌ها به ردیفِ اشتباه می‌خورد) و کشِ
+  /* ⚠️ خود ردیف را می‌گیرد: PATCH با شناسه می‌رود (نامک فقط داخل
+     هر نقش یکتاست و بین نقش‌ها به ردیف اشتباه می‌خورد) و کش
      محلی با نامک کلید می‌خورد. */
-  const act = async (row: { id: string; slug: string }, patch: Partial<RefereeProfile>) => {
+    /* ⚠️ `licenseVerified` ستون ردیف است نه فیلد فرم، پس در تایپ
+   پروفایل نیست و جدا اضافه می‌شود. */
+  const act = async (
+    row: { id: string; slug: string },
+    patch: Partial<RefereeProfile> & { licenseVerified?: boolean },
+  ) => {
     const res = await patchAdminProfile(row, patch as Record<string, unknown>)
     if (!res.ok) { setErr(res.message ?? 'انجام نشد'); return }
     setErr('')
@@ -109,7 +114,7 @@ export default function AdminRefereesPage() {
           </div>
         </div>
 
-        {/* شکستِ سرور باید دیده شود، وگرنه ادمین دکمه را می‌زند و
+        {/* شکست سرور باید دیده شود، وگرنه ادمین دکمه را می‌زند و
             فکر می‌کند انجام شد. */}
         {err && (
           <div role="alert" style={{ margin: '0 0 14px', padding: '10px 14px', borderRadius: 12,
@@ -202,6 +207,23 @@ export default function AdminRefereesPage() {
                       <VerifiedBadge title="" style={{ marginInlineStart: 0 }} />
                       اعطای تیک آبی تایید
                     </button>
+                    {/* ⚠️ تایید مدرک ستون جداگانه‌ای است
+                        (license_verified) و شمارنده داشبورد آن را هم
+                        می‌شمارد. تا امروز هیچ دکمه‌ای این ستون را عوض
+                        نمی‌کرد، پس نشان «در انتظار» روی داشبورد برای
+                        پروفایلی که از هر نظر تایید شده بود هرگز پاک
+                        نمی‌شد و ادمین می‌دید دکمه‌ها کاری نمی‌کنند. */}
+                    {c.licenseUrl && !c.licenseVerified && (
+                      <button onClick={() => act(c, { licenseVerified: true })}
+                        style={btn('rgba(124,58,237,0.10)', '#6D28D9', '1px solid rgba(124,58,237,0.26)')}>
+                        تایید مدرک
+                      </button>
+                    )}
+                    {c.licenseVerified && (
+                      <span style={{ ...btn('rgba(5,118,66,0.08)', '#057642', '1px solid rgba(5,118,66,0.20)'), cursor: 'default' }}>
+                        مدرک تایید شده
+                      </span>
+                    )}
                     <button onClick={() => act(c, { status: 'rejected' })} style={{ ...btn('transparent', '#b91c1c', '1px solid rgba(239,68,68,0.24)'), marginInlineStart: 'auto' }}>
                       رد درخواست
                     </button>

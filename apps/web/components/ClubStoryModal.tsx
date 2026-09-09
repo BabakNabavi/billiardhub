@@ -16,9 +16,9 @@ interface ClubStoryData {
 interface Props {
   club: ClubStoryData;
   onClose: () => void;
-  /* پخشِ چندتایی — اختیاری تا صفحه‌ی باشگاه که یک استوری دارد
-     دست‌نخورده بماند. `onNext` فقط با *تمام‌شدنِ تایمر* صدا زده
-     می‌شود؛ بستنِ دستی (ضربدر، پس‌زمینه، Esc) همیشه `onClose` است. */
+  /* پخش چندتایی — اختیاری تا صفحه‌ی باشگاه که یک استوری دارد
+     دست‌نخورده بماند. `onNext` فقط با *تمام‌شدن تایمر* صدا زده
+     می‌شود؛ بستن دستی (ضربدر، پس‌زمینه، Esc) همیشه `onClose` است. */
   index?: number;
   count?: number;
   onNext?: () => void;
@@ -44,15 +44,15 @@ export default function ClubStoryModal({ club, onClose, index = 0, count = 1, on
     };
     const id = requestAnimationFrame(raf);
     return () => cancelAnimationFrame(id);
-    /* ⚠️ `index` هم باید این‌جا باشد: دو استوری با یک فایلِ یکسان
-       (همان عکس دوباره آپلود شده) نشانیِ رسانه‌شان برابر است، و بدونِ
+    /* ⚠️ `index` هم باید این‌جا باشد: دو استوری با یک فایل یکسان
+       (همان عکس دوباره آپلود شده) نشانی رسانه‌شان برابر است، و بدون
        `index` افکت دوباره اجرا نمی‌شد — نوار پر می‌ماند و پخش می‌ایستاد. */
   }, [index, club.storyMediaUrl]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') { onClose(); return; }
-      /* در راست‌به‌چپ، «جلو» سمتِ چپ است */
+      /* در راست‌به‌چپ، «جلو» سمت چپ است */
       if (e.key === 'ArrowLeft') onNext?.();
       if (e.key === 'ArrowRight') onPrev?.();
     };
@@ -68,7 +68,7 @@ export default function ClubStoryModal({ club, onClose, index = 0, count = 1, on
         @keyframes csModalIn { from{opacity:0;transform:translate(-50%,-50%) scale(0.88);}to{opacity:1;transform:translate(-50%,-50%) scale(1);} }
         @keyframes csOverlay { from{opacity:0;}to{opacity:1;} }
         /* دو ناحیه‌ی ضربه دکمه‌اند و باید حلقه‌ی focus داشته باشند،
-           وگرنه دو توقفگاهِ نامرئی برای کیبورد می‌شوند. */
+           وگرنه دو توقفگاه نامرئی برای کیبورد می‌شوند. */
         .cs-tap:focus-visible { outline: 2px solid rgba(255,255,255,0.9); outline-offset: -6px; border-radius: 8px; }
       `}</style>
 
@@ -97,9 +97,9 @@ export default function ClubStoryModal({ club, onClose, index = 0, count = 1, on
           ? <video src={club.storyMediaUrl} autoPlay muted playsInline loop style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
           : <img loading="lazy" decoding="async" src={club.storyMediaUrl} alt="story" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />}
 
-        {/* ناحیه‌ی ضربه برای جابه‌جایی — ده استوریِ دوازده‌ثانیه‌ای یعنی
-            دو دقیقه پخشِ بی‌گریز. جهت‌ها منطقی‌اند: «بعدی» سمتِ پایانِ
-            خط (در فارسی چپ) و «قبلی» سمتِ آغاز. */}
+        {/* ناحیه‌ی ضربه برای جابه‌جایی — ده استوری دوازده‌ثانیه‌ای یعنی
+            دو دقیقه پخش بی‌گریز. جهت‌ها منطقی‌اند: «بعدی» سمت پایان
+            خط (در فارسی چپ) و «قبلی» سمت آغاز. */}
         {count > 1 && (
           <>
             <button type="button" className="cs-tap" aria-label="استوری قبلی" onClick={onPrev} disabled={index === 0}
@@ -112,9 +112,9 @@ export default function ClubStoryModal({ club, onClose, index = 0, count = 1, on
         {/* Gradient overlays */}
         <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(0,0,0,0.55) 0%, transparent 30%, transparent 55%, rgba(0,0,0,0.65) 100%)', pointerEvents: 'none' }} />
 
-        {/* نوارِ پیشرفت — بخش‌بخش، و در RTL از راست شروع می‌شود
-            (نه `direction:'ltr'`؛ اولین استوری باید کنارِ نامِ صاحبش
-            باشد که خودش سمتِ راست است). */}
+        {/* نوار پیشرفت — بخش‌بخش، و در RTL از راست شروع می‌شود
+            (نه `direction:'ltr'`؛ اولین استوری باید کنار نام صاحبش
+            باشد که خودش سمت راست است). */}
         <div style={{ position: 'absolute', top: 14, insetInline: 14, zIndex: 10, display: 'flex', gap: 4 }}>
           {Array.from({ length: Math.max(1, count) }, (_, i) => (
             <div key={i} style={{ flex: 1, height: 3, borderRadius: 3, background: 'rgba(255,255,255,0.25)', overflow: 'hidden' }}>

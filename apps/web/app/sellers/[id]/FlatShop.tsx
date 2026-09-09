@@ -8,7 +8,7 @@ import { useRouter, useParams } from 'next/navigation'
 import { toFa, faNum, MONO, toggleSet, Icon, LQ, LQ_NEUTRAL, LQ_FELT_ON } from './shared'
 import { fetchProductsBySeller, type ShopProduct } from '../../shop/products'
 import ClubStoryModal from '../../../components/ClubStoryModal'
-/* همان تایپی که پنلِ فروشگاه می‌نویسد — نسخه‌ی محلیِ سوم نمی‌سازیم */
+/* همان تایپی که پنل فروشگاه می‌نویسد — نسخه‌ی محلی سوم نمی‌سازیم */
 import type { SellerStory } from '../../../components/seller/StoryManager'
 import { useProfileImageViewer } from '@/components/ProfileImageViewer'
 import { useProfileVideoViewer } from '@/components/profile/ProfileVideoViewer'
@@ -28,13 +28,13 @@ import { getMockSeller } from '../../../lib/sellers-data'
 import { MARKET_CATEGORIES } from '../../../lib/market/categories'
 import ProductTitle from '../../../components/market/ProductTitle'
 import { CardMeta, CardPrice } from '../../../components/market/CardFacts'
-/* بدونِ این، نوار روی دسکتاپ فقط با شیفت+چرخ حرکت می‌کرد و با موس
+/* بدون این، نوار روی دسکتاپ فقط با شیفت+چرخ حرکت می‌کرد و با موس
    «قفل» حس می‌شد. همان قلابی که کاروسل‌های صفحه‌ی اصلی دارند. */
 import { useHorizontalScroll } from '../../../lib/useHorizontalScroll'
 
 /*
   نسخه‌ی فلت — UX فروشگاه واقعی
-  دسته‌بندی‌ها: عیناً از «بیلیارد بازار» (۱۴ دسته)
+  دسته‌بندی‌ها: عینا از «بیلیارد بازار» (۱۴ دسته)
 */
 
 /* ─── دسته‌بندی‌های بیلیارد بازار ─── */
@@ -61,8 +61,8 @@ const CAT_LABEL = Object.fromEntries(BAZAAR_CATS.map(c => [c.id, c.label])) as R
 interface Product {
   id: string; name: string; cat: CatKey; brand: string; model: string
   price: number; old?: number; disc: number; rating: number; reviews: number; sales: number
-  /* شهر، وضعیت و توافقی‌بودن — همان چیزهایی که کارتِ فهرستِ
-     بازار نشان می‌دهد و این‌جا اصلاً به کارت نمی‌رسیدند */
+  /* شهر، وضعیت و توافقی‌بودن — همان چیزهایی که کارت فهرست
+     بازار نشان می‌دهد و این‌جا اصلا به کارت نمی‌رسیدند */
   city: string; condition: string; negotiable: boolean
   badge?: { text: string; kind: 'sale' | 'new' }; img: string
 }
@@ -82,7 +82,7 @@ const STORE = {
   brands: [] as string[],
   aboutImages: [] as string[],
   /* ⚠️ `false` عمدی است. تا امروز `true` بود و چون `store` با
-     `...STORE` ساخته می‌شود، **هر** فروشگاهی تیکِ آبی می‌گرفت —
+     `...STORE` ساخته می‌شود، **هر** فروشگاهی تیک آبی می‌گرفت —
      حتی آن‌که ادمین تأییدش نکرده بود. تیک از `profile.verified`
      می‌آید و بس. */
   verified: false, rating: 4.8, reviews: 312, memberSince: 1402,
@@ -156,7 +156,7 @@ const STORE_POSTERS = [
   { bg: 'linear-gradient(120deg,#101c2b 0%,#14324a 55%,#0d2334 100%)', sub: 'ABOUT US · درباره ما'         },  // پوستر «درباره ما»
 ]
 
-/* پوستر پیش‌فرض — عیناً به سبک کاور صفحه‌ی مربی: زمینه‌ی تیره + بافت نقطه‌ای +
+/* پوستر پیش‌فرض — عینا به سبک کاور صفحه‌ی مربی: زمینه‌ی تیره + بافت نقطه‌ای +
    گلوی طلایی + خط اریب + وردمارک «بیلیارد هاب» + نام فروشگاه (خودکار) + زیرنویس.
    about=true ⇒ ترکیب وسط‌چین باکس «درباره ما»؛ وگرنه حالت راست‌چین هدر. */
 function StorePoster({ variant, title, about = false }: { variant: number; title?: string; about?: boolean }) {
@@ -310,23 +310,23 @@ export default function FlatShop() {
   const [profile, setProfile] = useState<SellerProfile | null>(null)
   const [mine, setMine] = useState<boolean | undefined>(undefined)
 
-  /* ── ویرایشِ درجا ──
-     ⚠️ پیش از هر `return`ِ شرطیِ این کامپوننت — قاعده‌ی هوک‌ها.
-     `ownerId` از قبل داخلِ `profile` نشانده می‌شود (خطِ بالاتر). */
-  /* عکس‌های گالری از پروفایلِ واقعی */
+  /* ── ویرایش درجا ──
+     ⚠️ پیش از هر `return` شرطی این کامپوننت — قاعده‌ی هوک‌ها.
+     `ownerId` از قبل داخل `profile` نشانده می‌شود (خط بالاتر). */
+  /* عکس‌های گالری از پروفایل واقعی */
   const shots = profile?.gallery ?? []
   const vids = profile?.videos ?? []
   const edit = useOwnerEdit<SellerProfile>('seller', sellerId, profile, profile?.ownerId ?? null, setProfile, mine)
   const { gate: channelGate, ask: askChannel, publish: publishToChannel } = useChannelPublish('seller', profile?.ownerId ?? undefined, edit.isOwner, notify)
 
-  /* ── همان گالریِ مشترکِ بقیه‌ی نقش‌ها ──
+  /* ── همان گالری مشترک بقیه‌ی نقش‌ها ──
      ⚠️ این‌جا فقط یک شبکه‌ی عکس بود: نه ویدیویی، نه آلبومی، و حذف با
      *اندیس* انجام می‌شد. حالا همان کامپوننتی رندر می‌شود که مربی،
-     داور، خدماتِ فنی و بازیکن دارند. */
+     داور، خدمات فنی و بازیکن دارند. */
   const MAX_VIDEO_MB = 25
   const [vidBusy, setVidBusy] = useState(false)
-  /* انتشار در بیلیارد مدیا — پنجره فقط وقتی باز می‌شود که کانالِ
-     همین نقش نباشد. آپلودِ گالری هرگز به نتیجه‌اش وابسته نیست. */
+  /* انتشار در بیلیارد مدیا — پنجره فقط وقتی باز می‌شود که کانال
+     همین نقش نباشد. آپلود گالری هرگز به نتیجه‌اش وابسته نیست. */
 
   const addShots = async (files: File[], album?: string) => {
     const items = await Promise.all(files.map(async fl => ({
@@ -338,8 +338,8 @@ export default function FlatShop() {
     await edit.apply(d => ({ ...d, gallery: [...(d.gallery ?? []), ...items] }))
   }
 
-  /* `details` از فرمِ مشخصات می‌آید (عنوان/دسته/توضیح). تا دیروز
-     عنوان نامِ فایل بود و همان به مدیا می‌رفت. */
+  /* `details` از فرم مشخصات می‌آید (عنوان/دسته/توضیح). تا دیروز
+     عنوان نام فایل بود و همان به مدیا می‌رفت. */
   const addVideoFiles = async (files: File[], album?: string, details?: VideoDetail[]) => {
     setVidBusy(true)
     const skipped: string[] = []
@@ -362,7 +362,7 @@ export default function FlatShop() {
            این خط بالای `break` بود و ویدیویی که ذخیره‌اش شکست خورده
            بود هم به مدیا می‌رفت: در بیلیارد مدیا زنده، در پروفایل
            نبود، و کاربر پیام «ذخیره انجام نشد» دیده بود. */
-        /* «فقط در گالری بماند» یک تصمیمِ صریحِ کاربر است */
+        /* «فقط در گالری بماند» یک تصمیم صریح کاربر است */
         if (details?.[i]?.publish !== false) {
           shipped.push({
             title: detailTitle(details, i, file), src: url, thumb, durationSec: meta.durationSec,
@@ -391,15 +391,15 @@ export default function FlatShop() {
     if (!(await ask('این تصویر حذف شود؟', { body: 'این کار برگشت‌پذیر نیست.', confirmLabel: 'حذف' }))) return
     await edit.apply(d => ({ ...d, gallery: (d.gallery ?? []).filter(g => g.id !== mid) }))
   }
-  /* ── ویرایشِ عنوانِ ویدیو ──
-     عنوان دو نسخه دارد: ردیفِ گالریِ پروفایل و ردیفِ بیلیارد مدیا.
-     هوک دومی را می‌زند، این تابع اولی را. کلید نشانیِ فایل است،
-     چون گالری شناسه‌ی ردیفِ مدیا را ندارد. */
+  /* ── ویرایش عنوان ویدیو ──
+     عنوان دو نسخه دارد: ردیف گالری پروفایل و ردیف بیلیارد مدیا.
+     هوک دومی را می‌زند، این تابع اولی را. کلید نشانی فایل است،
+     چون گالری شناسه‌ی ردیف مدیا را ندارد. */
   const { dialog: videoEditDialog, edit: editVideo } = useVideoEdit(
     async (target, detail) => {
-      /* ⚠️ `map` بدونِ تطبیق هم «موفق» برمی‌گردد. اگر نشانی جور نشود
-         (کدگذاریِ متفاوت، ردیفِ بی‌url)، هوک «شد» می‌شنید و مدیا را
-         عوض می‌کرد در حالی که گالری عنوانِ قبلی را نشان می‌دهد —
+      /* ⚠️ `map` بدون تطبیق هم «موفق» برمی‌گردد. اگر نشانی جور نشود
+         (کدگذاری متفاوت، ردیف بی‌url)، هوک «شد» می‌شنید و مدیا را
+         عوض می‌کرد در حالی که گالری عنوان قبلی را نشان می‌دهد —
          یعنی دو عنوان برای یک ویدیو. */
       let hit = false
       const ok = await edit.apply(prof => {
@@ -421,7 +421,7 @@ export default function FlatShop() {
   /* ── نامکی که وجود ندارد ──
      تا امروز اگر نشانی به فروشگاهی می‌رفت که نبود، صفحه داده‌ی
      نمونه‌ی قدیمی را نشان می‌داد — «فروشگاه تجهیزات بیلیارد بابی» با
-     تلفن و آدرسِ ساختگی. یعنی سایت فروشگاهی را تبلیغ می‌کرد که وجود
+     تلفن و آدرس ساختگی. یعنی سایت فروشگاهی را تبلیغ می‌کرد که وجود
      خارجی ندارد. حالا صریح می‌گوید پیدا نشد. */
   const [missing, setMissing] = useState(false)
   useEffect(() => {
@@ -430,11 +430,11 @@ export default function FlatShop() {
     /* منبع حقیقت سرور است — فروشگاه کاربران دیگر فقط از این‌جا می‌آید */
     void fetchProfileResult<SellerProfile>('seller', sellerId).then(r => {
       const p = r.state === 'found' ? r.profile : null
-      /* پرچمِ قطعیِ سرور — مقایسه‌ی مرورگر بی‌صدا شکست می‌خورد */
+      /* پرچم قطعی سرور — مقایسه‌ی مرورگر بی‌صدا شکست می‌خورد */
       if (r.state === 'found') setMine(r.isMine === true)
-      /* `ownerId` ستونِ واقعیِ ردیف است و باید صریح منتقل شود؛ وگرنه
-         مسیرِ استوری روی ردیف‌هایی که آن را داخلِ data ندارند خالی
-         می‌ماند و همان ناهماهنگیِ قبلی برعکس تکرار می‌شود. */
+      /* `ownerId` ستون واقعی ردیف است و باید صریح منتقل شود؛ وگرنه
+         مسیر استوری روی ردیف‌هایی که آن را داخل data ندارند خالی
+         می‌ماند و همان ناهماهنگی قبلی برعکس تکرار می‌شود. */
       if (p) setProfile({ ...p.data, slug: p.slug, ownerId: p.ownerId, verified: p.verified } as SellerProfile)
       else if (!getSellerProfile(sellerId) && !getMockSeller(sellerId)) setMissing(true)
     })
@@ -442,11 +442,11 @@ export default function FlatShop() {
 
   /* محصولات همین فروشگاه؛ فروشگاه نمونه که محصول اختصاصی ندارد، کاتالوگ دمو را نشان می‌دهد
      تا storefront خالی نماند. */
-  /* محصولات از سرور می‌آیند، نه از کاتالوگِ ساختگی.
+  /* محصولات از سرور می‌آیند، نه از کاتالوگ ساختگی.
 
-     پیش‌تر فروشگاهِ بی‌محصول، محصولاتِ فروشگاهِ «۱» را نشان می‌داد —
-     کالای یک فروشنده زیر نامِ فروشنده‌ی دیگر. فروشگاهِ بی‌محصول باید
-     خالی بماند، و حالا واقعاً می‌ماند. */
+     پیش‌تر فروشگاه بی‌محصول، محصولات فروشگاه «۱» را نشان می‌داد —
+     کالای یک فروشنده زیر نام فروشنده‌ی دیگر. فروشگاه بی‌محصول باید
+     خالی بماند، و حالا واقعا می‌ماند. */
   const [rows, setRows] = useState<ShopProduct[]>([])
   useEffect(() => {
     let alive = true
@@ -490,17 +490,17 @@ export default function FlatShop() {
       whatsapp:     pick(profile.whatsapp, STORE.whatsapp),
       instagram:    pick(profile.instagram, STORE.instagram),
       /* ── استوری از داده‌ی نمونه پر نمی‌شود ──
-         پیش‌تر فروشگاهی که هیچ استوری نگذاشته بود، حلقه‌ی رنگیِ
-         استوری می‌گرفت و با زدنش یک استوریِ ساختگی باز می‌شد
-         («کالکشن چوب‌های کربنی Predator»). یعنی سایت از طرفِ
+         پیش‌تر فروشگاهی که هیچ استوری نگذاشته بود، حلقه‌ی رنگی
+         استوری می‌گرفت و با زدنش یک استوری ساختگی باز می‌شد
+         («کالکشن چوب‌های کربنی Predator»). یعنی سایت از طرف
          فروشنده چیزی تبلیغ می‌کرد که او نگذاشته بود. */
       /* فیلدهای «عکس/متن استوری» پروفایل دیگر خوانده نمی‌شوند: استوری
-         از مسیرِ واقعیِ ۲۴ساعته می‌آید، نه از فیلدِ فرم. */
+         از مسیر واقعی ۲۴ساعته می‌آید، نه از فیلد فرم. */
       phones:       phones.length ? phones : STORE.phones,
     }
   }, [profile, sellerId])
 
-  /* شماره‌ی تماس با کد شهر (استان) — مثلاً ۰۲۱-۶۶۵۵۴۴۳۳ */
+  /* شماره‌ی تماس با کد شهر (استان) — مثلا ۰۲۱-۶۶۵۵۴۴۳۳ */
   const areaCode  = telPrefix(store.province)
   const phoneDig  = store.contactPhone.replace(/\D/g, '')
   const withCode  = !!areaCode && !!phoneDig && !phoneDig.startsWith('0')
@@ -520,21 +520,21 @@ export default function FlatShop() {
   const [urlCopied, setUrlCopied] = useState(false)
   const catStripRef = useRef<HTMLDivElement>(null)
   useHorizontalScroll(catStripRef)
-  /* ── استوری فقط از سیستمِ واقعیِ ۲۴ساعته ──
-     تا امروز حلقه‌ی استوری از فیلدِ `storyImage` فرمِ ثبتِ فروشگاه
+  /* ── استوری فقط از سیستم واقعی ۲۴ساعته ──
+     تا امروز حلقه‌ی استوری از فیلد `storyImage` فرم ثبت فروشگاه
      ساخته می‌شد. آن فیلد پروفایل است نه استوری: انقضا ندارد، هیچ
      «انتشار»ی لازم ندارد، و همان لحظه‌ای که فروشنده عکسی در فرم
      می‌گذاشت روی صفحه‌اش حلقه‌ی استوری ظاهر می‌شد و *روزها* می‌ماند.
 
-     نوارِ استوریِ صفحه‌ی اصلی قبلاً از این فالبک جدا شده بود، ولی
-     این صفحه نه — پس کاربر می‌دید نوار خالی است ولی کارتِ فروشگاه
+     نوار استوری صفحه‌ی اصلی قبلا از این فالبک جدا شده بود، ولی
+     این صفحه نه — پس کاربر می‌دید نوار خالی است ولی کارت فروشگاه
      حلقه دارد.
 
-     مسیرِ `/api/sellers/<ownerId>/stories` همان مدلِ باشگاه است و
+     مسیر `/api/sellers/<ownerId>/stories` همان مدل باشگاه است و
      خودش منقضی‌ها را حذف می‌کند. */
   const [liveStories, setLiveStories] = useState<SellerStory[]>([])
   /* تا وقتی پاسخ نیامده، دکمه نه حلقه دارد نه ادعای استوری —
-     وگرنه معنی‌اش وسطِ کار عوض می‌شود. */
+     وگرنه معنی‌اش وسط کار عوض می‌شود. */
   const [storiesLoading, setStoriesLoading] = useState(true)
   const [storyIdx, setStoryIdx] = useState(0)
   useEffect(() => {
@@ -611,16 +611,16 @@ export default function FlatShop() {
       <style>{`
         /* کارت محصول — هم‌فرم کارت sec1 در صفحه‌ی بیلیارد بازار.
            عرض را گرید تعیین می‌کند (برخلاف sec1 که کاروسل با عرض ثابت است)، ولی نسبت،
-           سهم عکس، گردی، بوردر و فونت‌ها عیناً همان‌اند. */
-        /* جنسِ سطح از .lq-pcard در globals.css می‌آید — همان کارتی که
+           سهم عکس، گردی، بوردر و فونت‌ها عینا همان‌اند. */
+        /* جنس سطح از .lq-pcard در globals.css می‌آید — همان کارتی که
            بازار و صفحه‌ی اصلی هم نشان می‌دهند. این‌جا فقط نسبت و چیدمان. */
         .prod-card-sec1 {
           /* ۱.۷۵ = ۱.۹۴۴ منهای ۱۰٪ */
           aspect-ratio: 1 / 1.75;
-          /* کوچک‌شدن حالا کارِ خودِ گرید است (شش ستون در دسکتاپ)، پس
-             محدودکردنِ عرضِ کارت داخلِ سلول لازم نیست و فقط فاصله‌ی
+          /* کوچک‌شدن حالا کار خود گرید است (شش ستون در دسکتاپ)، پس
+             محدودکردن عرض کارت داخل سلول لازم نیست و فقط فاصله‌ی
              بصری را زیاد می‌کرد.
-             (بک‌تیک در این کامنت ممنوع — داخلِ template literal است) */
+             (بک‌تیک در این کامنت ممنوع — داخل template literal است) */
           width: 100%;
         }
         .pc-body-sec1 { padding: 21px 10px 12px; }
@@ -638,9 +638,9 @@ export default function FlatShop() {
           .pc-name-sec1 { font-size: 13.05px; line-height: 1.35; color: #666; }
         }
         /* ══ پوسته‌ی صفحه ══
-           پس‌زمینه خاکستریِ تختِ #F7F5F0 بود و همه‌چیز رویش سفیدِ
+           پس‌زمینه خاکستری تخت #F7F5F0 بود و همه‌چیز رویش سفید
            بی‌سایه؛ صفحه «خشک» دیده می‌شد چون هیچ عمق و هیچ رنگی
-           نداشت. سه هاله‌ی نرم — طلایی، نمدِ سبز، و کِرِمِ گرم — بدونِ
+           نداشت. سه هاله‌ی نرم — طلایی، نمد سبز، و کرم گرم — بدون
            اینکه خوانایی را کم کنند به صفحه عمق می‌دهند. ثابت‌اند و با
            اسکرول حرکت نمی‌کنند، پس هزینه‌ی رندر ندارند. */
         .shop-shell {
@@ -653,11 +653,11 @@ export default function FlatShop() {
           background-attachment: fixed;
         }
 
-        /* ══ هدرِ گلس ══
-           کارتِ سفیدِ بوردردار جای خودش را به یک سطحِ شیشه‌ای می‌دهد:
-           بلورِ اشباع‌شده، لبه‌ی روشنِ داخلی، و یک هالهٔ طلاییِ نرم که
-           از گوشه رد می‌شود (حالتِ «liquid»). زیرِ بنر می‌نشیند و
-           عکسِ بنر از پشتش کمی پیدا می‌شود. */
+        /* ══ هدر گلس ══
+           کارت سفید بوردردار جای خودش را به یک سطح شیشه‌ای می‌دهد:
+           بلور اشباع‌شده، لبه‌ی روشن داخلی، و یک هالهٔ طلایی نرم که
+           از گوشه رد می‌شود (حالت «liquid»). زیر بنر می‌نشیند و
+           عکس بنر از پشتش کمی پیدا می‌شود. */
         .shop-head {
           position: relative;
           background: linear-gradient(150deg, rgba(255,255,255,0.80) 0%, rgba(252,250,245,0.62) 48%, rgba(247,243,234,0.72) 100%);
@@ -684,7 +684,7 @@ export default function FlatShop() {
         }
         @media (prefers-reduced-motion: reduce) { .shop-head::before { animation: none } }
 
-        /* ── نوارِ دسته‌بندیِ افقی (هم‌شکلِ بیلیارد بازار) ── */
+        /* ── نوار دسته‌بندی افقی (هم‌شکل بیلیارد بازار) ── */
         .scat-wrap {
           border-radius: 16px; padding: 9px 10px;
           background: linear-gradient(135deg, rgba(255,255,255,0.86) 0%, rgba(247,245,240,0.72) 100%);
@@ -724,11 +724,11 @@ export default function FlatShop() {
         .scat.on .scat-ct { color: #8F6531; }
         @media (prefers-reduced-motion: reduce) { .scat { transition: none } .scat:hover { transform: none } }
 
-        /* ── نشانِ برندِ نمایندگی ──
-           نسخه‌ی قبلی لاکی‌مشکی با متنِ طلایی بود؛ روی کاغذِ روشنِ صفحه
-           مثل یک وصله‌ی تیره می‌نشست. حالا شیشه‌ی نمدیِ سبز است — رنگِ
-           متضادِ زمینه‌ی کرِمی — با متنِ روشن و همان زبانِ liquid که
-           هدر دارد: بلور، لبه‌ی روشنِ داخلی، و برقی که با هاور رد
+        /* ── نشان برند نمایندگی ──
+           نسخه‌ی قبلی لاکی‌مشکی با متن طلایی بود؛ روی کاغذ روشن صفحه
+           مثل یک وصله‌ی تیره می‌نشست. حالا شیشه‌ی نمدی سبز است — رنگ
+           متضاد زمینه‌ی کرمی — با متن روشن و همان زبان liquid که
+           هدر دارد: بلور، لبه‌ی روشن داخلی، و برقی که با هاور رد
            می‌شود. */
         .brand-chip {
           position: relative; overflow: hidden;
@@ -792,8 +792,8 @@ export default function FlatShop() {
               ? <ImageSlider images={store.banners} />
               : <PosterSlider variants={[0, 1, 2]} title={store.title} />}
             <div className="pointer-events-none absolute inset-0" style={{ background: 'linear-gradient(180deg,rgba(0,0,0,0.04) 0%,rgba(0,0,0,0.32) 100%)' }} />
-            {/* بزرگ‌نماییِ بنر. فقط وقتی بنرِ واقعی هست — پوسترِ پیش‌فرض
-                تصویرِ فروشگاه نیست و بازکردنش چیزی به کاربر نمی‌دهد.
+            {/* بزرگ‌نمایی بنر. فقط وقتی بنر واقعی هست — پوستر پیش‌فرض
+                تصویر فروشگاه نیست و بازکردنش چیزی به کاربر نمی‌دهد.
                 نقطه‌های اسلایدر بعد از این می‌آیند و رویش می‌مانند. */}
             {store.banners.length > 0 && (
               <button type="button" onClick={() => openImage(store.banners, { title: 'بنر فروشگاه', alt: store.title })}
@@ -804,8 +804,8 @@ export default function FlatShop() {
           {/* کارت فروشگاه — لوگو نیمی روی بنر، بقیه زیر هم */}
           <div className="relative px-4 pb-5 sm:px-6 sm:pb-6">
             {/* لوگو با حلقه‌ی استوری — نیمی روی عکس */}
-            {/* حلقه‌ی رنگی و کلیک فقط وقتی استوریِ واقعی هست؛ وگرنه
-                لوگوی ساده — بدونِ وعده‌ی چیزی که وجود ندارد. */}
+            {/* حلقه‌ی رنگی و کلیک فقط وقتی استوری واقعی هست؛ وگرنه
+                لوگوی ساده — بدون وعده‌ی چیزی که وجود ندارد. */}
             <button
               type="button" onClick={() => { if (hasStory) { setStoryIdx(0); setStoryOpen(true); return } openImage(store.logo ?? '', { title: 'لوگوی فروشگاه', alt: store.title }) }}
               aria-label={hasStory ? 'مشاهده استوری فروشگاه' : 'بزرگ‌نمایی لوگوی فروشگاه'}
@@ -841,17 +841,17 @@ export default function FlatShop() {
 
             {/* برندهای نمایندگی */}
             {/* ── برندهای نمایندگی ──
-                چیپ‌های خاکستریِ قبلی مثل برچسبِ فیلتر بودند، در حالی
-                که این‌ها ادعای اعتبارِ فروشگاه‌اند. حالا هر برند یک
-                نشانِ لاکی‌مشکی با متنِ طلاییِ گرادیانی و حروفِ
-                فاصله‌دار است — همان زبانی که برندهای بین‌المللیِ
-                تجهیزات روی جعبه‌هایشان به کار می‌برند. برقِ نرمی هم
+                چیپ‌های خاکستری قبلی مثل برچسب فیلتر بودند، در حالی
+                که این‌ها ادعای اعتبار فروشگاه‌اند. حالا هر برند یک
+                نشان لاکی‌مشکی با متن طلایی گرادیانی و حروف
+                فاصله‌دار است — همان زبانی که برندهای بین‌المللی
+                تجهیزات روی جعبه‌هایشان به کار می‌برند. برق نرمی هم
                 با هاور از رویش رد می‌شود. */}
-            {/* ── نشانیِ اختصاصیِ فروشگاه ──
-                فروشنده در پنل نشانی می‌سازد ولی هیچ‌جای خودِ صفحه دیده
+            {/* ── نشانی اختصاصی فروشگاه ──
+                فروشنده در پنل نشانی می‌سازد ولی هیچ‌جای خود صفحه دیده
                 نمی‌شد — نه خودش می‌دانست چه شد، نه بازدیدکننده
-                می‌توانست کپی‌اش کند. کره‌ی خطی همان زبانِ آیکونیِ بقیه‌ی
-                صفحه است و تینتِ طلاییِ سیستم را می‌گیرد. */}
+                می‌توانست کپی‌اش کند. کره‌ی خطی همان زبان آیکونی بقیه‌ی
+                صفحه است و تینت طلایی سیستم را می‌گیرد. */}
             <button
               type="button"
               onClick={() => {
@@ -861,7 +861,7 @@ export default function FlatShop() {
                   () => { /* مرورگر اجازه نداد — نشانی همچنان خوانا روی صفحه هست */ },
                 )
               }}
-              title="کپیِ نشانیِ فروشگاه"
+              title="کپی نشانی فروشگاه"
               className="mt-2.5 inline-flex max-w-full items-center gap-1.5 rounded-[10px] border border-[rgba(199,166,106,0.34)] bg-[rgba(199,166,106,0.12)] px-3 py-1.5 text-[12px] font-bold text-[#8F6531] transition hover:-translate-y-0.5"
             >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
@@ -897,12 +897,12 @@ export default function FlatShop() {
           <span className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-[#6F6A5C]">{Icon.search}</span>
         </div>
 
-        {/* ── نوارِ دسته‌بندی ──
-            همان آیکون‌ها و همان ترتیبِ صفحه‌ی «بیلیارد بازار»
-            (`MARKET_CATEGORIES` — منبعِ واحد)، این‌بار افقی و کشیدنی
-            زیرِ سرچ. جای دراپ‌داونِ قبلی را می‌گیرد که کنارِ تیتر
+        {/* ── نوار دسته‌بندی ──
+            همان آیکون‌ها و همان ترتیب صفحه‌ی «بیلیارد بازار»
+            (`MARKET_CATEGORIES` — منبع واحد)، این‌بار افقی و کشیدنی
+            زیر سرچ. جای دراپ‌داون قبلی را می‌گیرد که کنار تیتر
             پنهان بود و کاربر باید بازش می‌کرد تا بفهمد فروشگاه چه
-            دارد. دسته‌ای که محصولی ندارد اصلاً نشان داده نمی‌شود. */}
+            دارد. دسته‌ای که محصولی ندارد اصلا نشان داده نمی‌شود. */}
         <div className="scat-wrap mt-3">
           <div className="scat-strip" ref={catStripRef}>
             <button type="button" onClick={() => setCat('all')}
@@ -931,7 +931,7 @@ export default function FlatShop() {
         {/* تیتر + دراپ‌داون دسته‌بندی */}
         <div className="mb-5 flex flex-wrap items-end justify-between gap-4">
           <div>
-            {/* همان نشانِ طلاییِ «درباره ما» — دو تیترِ اصلیِ صفحه باید
+            {/* همان نشان طلایی «درباره ما» — دو تیتر اصلی صفحه باید
                 یک‌شکل باشند؛ این یکی بی‌رنگ و بی‌نشان مانده بود. */}
             <div className="flex items-center gap-2">
               <span className="h-5 w-[3px] rounded bg-gradient-to-b from-[#C7A66A] to-[#8A6020]" />
@@ -941,12 +941,12 @@ export default function FlatShop() {
               {faNum(visible.length)} محصول{cat !== 'all' ? ` در «${CAT_LABEL[cat]}»` : ''}
             </span>
           </div>
-          {/* دراپ‌داونِ دسته‌بندی برداشته شد — جایش نوارِ افقیِ زیرِ سرچ. */}
+          {/* دراپ‌داون دسته‌بندی برداشته شد — جایش نوار افقی زیر سرچ. */}
         </div>
 
         {/* گرید — ۵ ستون در دسکتاپ (۲ ردیف ۵تایی = ۱۰ در هر صفحه) */}
-        {/* شش کارت در هر سطرِ دسکتاپ. فاصله‌ها هم کم شد: با پنج ستون و
-            گَپِ ۱۶، فاصله‌ی بینِ کارت‌ها از خودِ کارت‌ها به چشم می‌آمد. */}
+        {/* شش کارت در هر سطر دسکتاپ. فاصله‌ها هم کم شد: با پنج ستون و
+            گپ ۱۶، فاصله‌ی بین کارت‌ها از خود کارت‌ها به چشم می‌آمد. */}
         <div className="grid grid-cols-2 gap-2 sm:gap-2.5 min-[640px]:grid-cols-3 min-[860px]:grid-cols-4 min-[1040px]:grid-cols-5 min-[1200px]:grid-cols-6">
             {paged.map(p => {
               const isWished = wish.has(p.id)
@@ -961,7 +961,7 @@ export default function FlatShop() {
                 >
                   <div className="relative shrink-0 basis-[60%] overflow-hidden border-b border-[rgba(28,28,26,0.08)] bg-[rgba(244,243,241,0.85)]">
                     <img src={p.img} alt={p.name} loading="lazy" className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.05]"/>
-                    {/* قلب — خطی تا وقتی انتخاب نشده، توپر بعد از انتخاب (قبلاً همیشه توپر بود و
+                    {/* قلب — خطی تا وقتی انتخاب نشده، توپر بعد از انتخاب (قبلا همیشه توپر بود و
                         فقط رنگ عوض می‌شد). شیشه‌ی مات + فشار کوچک هنگام کلیک. */}
                     <button
                       aria-label={isWished ? 'حذف از علاقه‌مندی' : 'افزودن به علاقه‌مندی'}
@@ -979,11 +979,11 @@ export default function FlatShop() {
 
                   <div className="pc-body-sec1 flex flex-1 flex-col gap-1.5">
                     <ProductTitle p={p} className="pc-name-sec1 text-[14.5px] leading-[1.55] text-[#1C1C1A]" headClassName="pc-h" tailClassName="pc-t" />
-                    {/* شهر و وضعیت — همان نواری که فهرستِ بازار دارد */}
+                    {/* شهر و وضعیت — همان نواری که فهرست بازار دارد */}
                     <CardMeta p={p} />
                     <div className="mt-auto flex items-center gap-1.5">
-                      {/* قیمت از منبعِ واحد: «توافقی» این‌جا چاپ نمی‌شد و
-                          کارت صفرِ دیتابیس را «۰» نشان می‌داد */}
+                      {/* قیمت از منبع واحد: «توافقی» این‌جا چاپ نمی‌شد و
+                          کارت صفر دیتابیس را «۰» نشان می‌داد */}
                       <CardPrice p={p} cls={{
                         pct: `inline-flex shrink-0 items-center justify-center rounded-full bg-[#b400ae] px-2.5 pb-0.5 pt-1 text-[16px] font-extrabold leading-none text-white ${MONO}`,
                         box: 'ms-auto text-right',
@@ -1032,13 +1032,13 @@ export default function FlatShop() {
         )}
       </div>
 
-      {/* ── بخشِ «درباره ما» حذف شد ──
-          همان متنِ «درباره‌ی فروشگاه» سه جای صفحه تکرار می‌شد: زیرِ
-          نامِ فروشگاه در هدر، این‌جا، و در فوتر. یک متن سه بار یعنی
-          صفحه پُر به‌نظر می‌رسد ولی چیزی به خواننده اضافه نمی‌کند.
+      {/* ── بخش «درباره ما» حذف شد ──
+          همان متن «درباره‌ی فروشگاه» سه جای صفحه تکرار می‌شد: زیر
+          نام فروشگاه در هدر، این‌جا، و در فوتر. یک متن سه بار یعنی
+          صفحه پر به‌نظر می‌رسد ولی چیزی به خواننده اضافه نمی‌کند.
           جای اصلی‌اش هدر است، همان‌جا که چشم اول می‌رود. */}
 
-      {/* ═══ گالری فروشگاه — همان کامپوننتِ مشترک ═══ */}
+      {/* ═══ گالری فروشگاه — همان کامپوننت مشترک ═══ */}
       {(shots.length > 0 || vids.length > 0 || edit.isOwner) && (
         <section className="px-4 pb-6 sm:px-6">
           <div className="mx-auto max-w-6xl">
@@ -1154,7 +1154,7 @@ export default function FlatShop() {
           <div className="border-t border-[#E8E3D6] px-6 py-4 sm:px-8">
             <div className="flex flex-wrap items-center justify-between gap-2 text-[11.5px] text-[#6F6A5C]">
               <span>© {toFa(1405)} {store.title} — تمام حقوق محفوظ است</span>
-              {/* نشانِ پلتفرم — فروشگاه فوترِ خودش را دارد، ولی
+              {/* نشان پلتفرم — فروشگاه فوتر خودش را دارد، ولی
                   بازدیدکننده باید بداند این صفحه کجا میزبانی می‌شود. */}
               <Link href="/" className="transition-colors hover:opacity-80">قدرت‌گرفته از بیلیارد <span className="font-bold text-[#C7A66A]">هاب</span></Link>
             </div>

@@ -2,16 +2,16 @@ import 'server-only'
 import { getSupabaseServer } from '../supabase-server'
 
 /* ─────────────────────────────────────────────────────────────
-   لایه‌ی اجتماعیِ بیلیارد مدیا — اشتراک، پسند، دیدگاه.
+   لایه‌ی اجتماعی بیلیارد مدیا — اشتراک، پسند، دیدگاه.
 
-   ⚠️ همه‌ی توابع «جدول نیست» را از «خطا» جدا می‌کنند. مهاجرتِ ۰۹۲
+   ⚠️ همه‌ی توابع «جدول نیست» را از «خطا» جدا می‌کنند. مهاجرت ۰۹۲
    دستی روی سرور اجرا می‌شود و ممکن است کد پیش از آن دیپلوی شود؛
    در آن پنجره صفحه نباید بشکند، فقط باید این بخش‌ها را نشان ندهد.
    همان الگوی `lib/profiles/server`.
 
    ⚠️ هیچ عددی این‌جا ساخته نمی‌شود. اگر جدول نباشد، پاسخ
-   `available: false` است و رابط دکمه را اصلاً رندر نمی‌کند — نه
-   اینکه صفرِ ساختگی نشان بدهد.
+   `available: false` است و رابط دکمه را اصلا رندر نمی‌کند — نه
+   اینکه صفر ساختگی نشان بدهد.
    ───────────────────────────────────────────────────────────── */
 
 const sb = () => getSupabaseServer()
@@ -19,7 +19,7 @@ const missing = (msg?: string) => /does not exist|schema cache/i.test(msg ?? '')
 
 export interface Availability { available: boolean }
 
-/* ═══════════════ اشتراکِ کانال ═══════════════ */
+/* ═══════════════ اشتراک کانال ═══════════════ */
 
 export interface SubState extends Availability {
   subscribers: number
@@ -38,11 +38,11 @@ export async function channelSubState(handle: string, userId?: string): Promise<
       if (missing(error.message)) return { available: false, subscribers: 0, subscribed: false }
       throw new Error(error.message)
     }
-    /* ⚠️ نبودِ جدول همیشه `error` نمی‌دهد: در آزمونِ واقعی روی سروری
-       که مهاجرتِ ۰۹۲ اجرا نشده بود، پاسخ بدونِ خطا ولی با `count`ِ
+    /* ⚠️ نبود جدول همیشه `error` نمی‌دهد: در آزمون واقعی روی سروری
+       که مهاجرت ۰۹۲ اجرا نشده بود، پاسخ بدون خطا ولی با `count`
        null برگشت — و رابط دکمه‌ای نشان می‌داد که نوشتنش ۵۰۳ می‌گرفت،
-       دقیقاً همان دکمه‌ی بی‌کارکردی که این کار آمده حذفش کند.
-       پس «عددِ واقعی نگرفتم» یعنی «در دسترس نیست». */
+       دقیقا همان دکمه‌ی بی‌کارکردی که این کار آمده حذفش کند.
+       پس «عدد واقعی نگرفتم» یعنی «در دسترس نیست». */
     if (typeof count !== 'number') return { available: false, subscribers: 0, subscribed: false }
     let subscribed = false
     if (userId) {
@@ -81,7 +81,7 @@ export async function toggleSubscription(
     } else {
       const { error } = await sb().from('channel_subscriptions')
         .insert({ channel_handle: h, user_id: userId })
-      /* ⚠️ برخوردِ کلیدِ یکتا یعنی دو تبِ هم‌زمان؛ خطا نیست. */
+      /* ⚠️ برخورد کلید یکتا یعنی دو تب هم‌زمان؛ خطا نیست. */
       if (error && !/duplicate key/i.test(error.message)) throw new Error(error.message)
     }
     const st = await channelSubState(h, userId)
@@ -109,7 +109,7 @@ export async function likeState(videoId: string, userId?: string): Promise<LikeS
       if (missing(error.message)) return { available: false, likes: 0, liked: false }
       throw new Error(error.message)
     }
-    /* همان دلیلِ بالا */
+    /* همان دلیل بالا */
     if (typeof count !== 'number') return { available: false, likes: 0, liked: false }
     let liked = false
     if (userId) {
@@ -168,7 +168,7 @@ export interface CommentPage extends Availability {
 
 const str = (v: unknown) => (typeof v === 'string' ? v.trim() : '')
 
-/* نامِ نویسنده‌ها با یک پرس‌وجو، نه یکی به‌ازای هر دیدگاه */
+/* نام نویسنده‌ها با یک پرس‌وجو، نه یکی به‌ازای هر دیدگاه */
 async function names(ids: string[]): Promise<Map<string, string>> {
   const uniq = [...new Set(ids.filter(Boolean))]
   if (uniq.length === 0) return new Map()
@@ -195,7 +195,7 @@ export async function listComments(videoId: string, limit = 50): Promise<Comment
       if (missing(error.message)) return { available: false, items: [], total: 0 }
       throw new Error(error.message)
     }
-    /* همان دلیلِ بالا */
+    /* همان دلیل بالا */
     if (!data || typeof count !== 'number') return { available: false, items: [], total: 0 }
     const rows = (data ?? []) as Record<string, unknown>[]
     const who = await names(rows.map(r => str(r.user_id)))
@@ -208,7 +208,7 @@ export async function listComments(videoId: string, limit = 50): Promise<Comment
       pinned: r.is_pinned === true,
       createdAt: str(r.created_at),
     }))
-    /* یک سطح تودرتو — پاسخ زیرِ دیدگاهِ خودش */
+    /* یک سطح تودرتو — پاسخ زیر دیدگاه خودش */
     const top = all.filter(c => !c.parentId)
     const byParent = new Map<string, CommentRow[]>()
     for (const c of all) {
@@ -218,7 +218,7 @@ export async function listComments(videoId: string, limit = 50): Promise<Comment
     }
     for (const c of top) {
       const kids = byParent.get(c.id)
-      /* پاسخ‌ها از قدیم به جدید خوانده می‌شوند، برعکسِ فهرستِ اصلی */
+      /* پاسخ‌ها از قدیم به جدید خوانده می‌شوند، برعکس فهرست اصلی */
       if (kids) c.replies = kids.reverse()
     }
     return { available: true, items: top, total: count ?? all.length }
@@ -234,8 +234,8 @@ export async function addComment(
   const text = body.trim().slice(0, 2000)
   if (!videoId || !userId || !text) return null
   try {
-    /* ⚠️ کلیدِ خارجی فقط ثابت می‌کند والد *وجود دارد*، نه اینکه
-       والدِ درستی است. بدونِ این بررسی می‌شد پاسخی به دیدگاهِ
+    /* ⚠️ کلید خارجی فقط ثابت می‌کند والد *وجود دارد*، نه اینکه
+       والد درستی است. بدون این بررسی می‌شد پاسخی به دیدگاه
        ویدیوی دیگر یا پاسخ‌به‌پاسخ ثبت کرد؛ هر دو ذخیره می‌شدند،
        در شمارش می‌آمدند، و هیچ‌جا رندر نمی‌شدند چون نمایش فقط یک
        سطح تودرتو دارد. */
@@ -263,11 +263,11 @@ export async function addComment(
   }
 }
 
-/** یک دیدگاه با شناسه — برای بررسیِ اجازه، بدونِ خواندنِ کلِ رشته.
+/** یک دیدگاه با شناسه — برای بررسی اجازه، بدون خواندن کل رشته.
  *
- *  ⚠️ نسخه‌ی اول برای تصمیمِ حذف، ۲۰۰ دیدگاهِ اول را می‌خواند و
+ *  ⚠️ نسخه‌ی اول برای تصمیم حذف، ۲۰۰ دیدگاه اول را می‌خواند و
  *  بینشان می‌گشت. روی ویدیویی با بیش از ۲۰۰ دیدگاه، نویسنده‌ی
- *  واقعی ۴۰۴ می‌گرفت و هرگز نمی‌توانست دیدگاهِ خودش را پاک کند. */
+ *  واقعی ۴۰۴ می‌گرفت و هرگز نمی‌توانست دیدگاه خودش را پاک کند. */
 export async function commentOwner(
   id: string,
 ): Promise<{ userId: string; videoId: string } | null> {
@@ -280,7 +280,7 @@ export async function commentOwner(
   } catch { return null }
 }
 
-/** حذف — فقط نویسنده‌ی دیدگاه یا صاحبِ ویدیو. تصمیمِ مجوز بیرون گرفته می‌شود. */
+/** حذف — فقط نویسنده‌ی دیدگاه یا صاحب ویدیو. تصمیم مجوز بیرون گرفته می‌شود. */
 export async function deleteComment(id: string): Promise<boolean> {
   try {
     const { error } = await sb().from('video_comments').delete().eq('id', id)
@@ -288,7 +288,7 @@ export async function deleteComment(id: string): Promise<boolean> {
   } catch { return false }
 }
 
-/** صاحبِ ویدیو کیست؟ — برای اجازه‌ی حذف و سنجاق */
+/** صاحب ویدیو کیست؟ — برای اجازه‌ی حذف و سنجاق */
 export async function videoOwner(videoId: string): Promise<{ ownerId: string | null; handle: string } | null> {
   try {
     const { data } = await sb().from('videos')

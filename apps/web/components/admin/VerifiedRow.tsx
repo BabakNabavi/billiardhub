@@ -1,7 +1,7 @@
 'use client'
 
 /* ─────────────────────────────────────────────────────────────
-   یک ردیفِ صفِ تیکِ آبی — نام، نوعِ نقش، وضعیتِ مدرک و دکمه‌ی
+   یک ردیف صف تیک آبی — نام، نوع نقش، وضعیت مدرک و دکمه‌ی
    اعطا/برداشتن.
 
    از `app/admin/verified/page.tsx` جدا شد: آن فایل با فهرست و
@@ -75,7 +75,7 @@ export default function VerifiedRow({ row, busy, onToggle }: {
       <div style={{ display: 'flex', gap: 6, flexShrink: 0, alignItems: 'center' }}>
         <Link href={row.href} target="_blank" rel="noopener noreferrer"
           className="lq-icon-btn"
-          title="دیدنِ صفحه‌ی عمومی" aria-label={`دیدنِ صفحه‌ی عمومیِ ${row.name}`}>
+          title="دیدن صفحه‌ی عمومی" aria-label={`دیدن صفحه‌ی عمومی ${row.name}`}>
           <ExternalLink size={15} />
         </Link>
 
@@ -93,8 +93,8 @@ export default function VerifiedRow({ row, busy, onToggle }: {
             برداشتن تیک
           </button>
         ) : (
-          /* بدونِ مدرک هم اعطا ممکن است — گاهی ادمین مدرک را بیرون از
-             سایت دیده — ولی رنگِ کم‌رنگ‌تر یادآوری‌اش می‌کند. */
+          /* بدون مدرک هم اعطا ممکن است — گاهی ادمین مدرک را بیرون از
+             سایت دیده — ولی رنگ کم‌رنگ‌تر یادآوری‌اش می‌کند. */
           <button type="button" className="lq-act"
             onClick={() => onToggle(true)} disabled={locked}
             aria-label={`اعطای تیک آبی به ${row.name}`}

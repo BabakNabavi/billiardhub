@@ -47,7 +47,7 @@ function Secret({ value, onChange, placeholder, autoFocus, onEnter, onCaps }: {
   placeholder: string
   autoFocus?: boolean
   onEnter?: () => void
-  /** وضعیتِ Caps Lock به بالا گزارش می‌شود تا هشدارِ مشترک ساخته شود */
+  /** وضعیت Caps Lock به بالا گزارش می‌شود تا هشدار مشترک ساخته شود */
   onCaps?: (on: boolean) => void
 }) {
   const [show, setShow] = useState(false)
@@ -101,8 +101,8 @@ export default function ChangePassword({ onChanged }: { onChanged?: () => void }
     setOpen(false); setCurrent(''); setNext(''); setConfirm(''); setMsg(null)
   }
 
-  /* هشدارِ چیدمانِ کیبورد برای رمزِ جدید — رمزی که با کیبوردِ فارسی
-     ساخته شود بعداً هم فقط با همان چیدمان تایپ می‌شود. */
+  /* هشدار چیدمان کیبورد برای رمز جدید — رمزی که با کیبورد فارسی
+     ساخته شود بعدا هم فقط با همان چیدمان تایپ می‌شود. */
   const hint = passwordHint(next, caps)
 
   const submit = async () => {
@@ -121,7 +121,7 @@ export default function ChangePassword({ onChanged }: { onChanged?: () => void }
       const j = await r.json().catch(() => ({} as Record<string, unknown>))
       if (!r.ok) {
         setMsg({ text: String(j.message ?? 'تغییر رمز انجام نشد'), bad: true })
-        /* رمزِ فعلیِ اشتباه پاک می‌شود: با نقطه نمایش داده می‌شود و
+        /* رمز فعلی اشتباه پاک می‌شود: با نقطه نمایش داده می‌شود و
            کاربر نمی‌تواند اشتباه را ببیند و اصلاح کند. */
         if (r.status === 400 || r.status === 401) setCurrent('')
         return

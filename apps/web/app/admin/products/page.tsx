@@ -19,9 +19,9 @@ interface Product {
   city: string;
   isVerified: boolean;
   requestedVerification: boolean;
-  /* وضعیتِ چرخه‌ی عمر — جدا از «تیکِ تأیید». تیک یعنی «فروشنده معتبر
+  /* وضعیت چرخه‌ی عمر — جدا از «تیک تأیید». تیک یعنی «فروشنده معتبر
      است»؛ وضعیت یعنی «آگهی منتشر شده یا نه». این دو تا امروز در پنل
-     قاطی بودند و ادمین راهی برای رد کردنِ آگهی نداشت. */
+     قاطی بودند و ادمین راهی برای رد کردن آگهی نداشت. */
   status: string;
   adminNote: string | null;
   images: string[];
@@ -33,12 +33,12 @@ interface Product {
   createdAt: string;
 }
 
-/* برچسبِ دسته از منبعِ واحد می‌آید (lib/market/categories).
-   فهرستِ دستیِ قبلی هفت دسته داشت در حالی که بازار پانزده‌تا دارد —
-   یعنی هشت دسته در پنل با کلیدِ خامِ انگلیسی دیده می‌شدند. */
+/* برچسب دسته از منبع واحد می‌آید (lib/market/categories).
+   فهرست دستی قبلی هفت دسته داشت در حالی که بازار پانزده‌تا دارد —
+   یعنی هشت دسته در پنل با کلید خام انگلیسی دیده می‌شدند. */
 
-/* رنگِ نشانِ هر وضعیت. «رد شده» و «منقضی» عمداً هم‌رنگ نیستند: یکی
-   تصمیمِ ادمین است و دیگری گذشتِ زمان. */
+/* رنگ نشان هر وضعیت. «رد شده» و «منقضی» عمدا هم‌رنگ نیستند: یکی
+   تصمیم ادمین است و دیگری گذشت زمان. */
 const STATUS_STYLE: Record<string, string> = {
   pending:  'bg-yellow-100 text-yellow-700',
   rejected: 'bg-red-100 text-red-700',
@@ -49,8 +49,8 @@ const STATUS_STYLE: Record<string, string> = {
 
 export default function AdminProductsPage() {
   const router = useRouter();
-  /* بدونِ `_hydrated`، نخستین رندر `user` را تهی می‌بیند (استور از
-     localStorage خوانده می‌شود) و ادمین را پیش از باز شدنِ صفحه به
+  /* بدون `_hydrated`، نخستین رندر `user` را تهی می‌بیند (استور از
+     localStorage خوانده می‌شود) و ادمین را پیش از باز شدن صفحه به
      صفحه‌ی اصلی پرت می‌کند — یعنی رفرش یا ورود از بوکمارک کار نمی‌کرد. */
   const { user, _hydrated } = useAuthStore();
   const [products, setProducts] = useState<Product[]>([]);
@@ -63,11 +63,11 @@ export default function AdminProductsPage() {
   useEffect(() => {
     if (!_hydrated) return;
     if (!user || user.primaryRole !== 'admin') { router.push('/'); return; }
-    /* پاسخِ /api/products یک شیء است: { products, total, page, ... }
+    /* پاسخ /api/products یک شیء است: { products, total, page, ... }
        نه آرایه. پیش‌تر همان شیء در state می‌نشست و اولین `.filter`
        صفحه را می‌شکست — یعنی «تأیید محصولات» هرگز چیزی نشان نمی‌داد. */
-    /* `all=1` ⇒ همه‌ی وضعیت‌ها، نه فقط فعال‌ها. بدونِ آن، آگهیِ
-       متوقف، فروخته‌شده یا ردشده در پنل اصلاً دیده نمی‌شد و ادمین
+    /* `all=1` ⇒ همه‌ی وضعیت‌ها، نه فقط فعال‌ها. بدون آن، آگهی
+       متوقف، فروخته‌شده یا ردشده در پنل اصلا دیده نمی‌شد و ادمین
        نمی‌توانست مدیریتش کند. سرور خودش ادمین‌بودن را بررسی می‌کند. */
     api.get('/products?limit=200&all=1').then(res => {
       const list = Array.isArray(res.data) ? res.data : (res.data?.products ?? []);
@@ -89,7 +89,7 @@ export default function AdminProductsPage() {
     }
   };
 
-  /* کلیدِ بازبینی — از تنظیماتِ سرور، نه از حافظه‌ی مرورگر */
+  /* کلید بازبینی — از تنظیمات سرور، نه از حافظه‌ی مرورگر */
   const [approvalOn, setApprovalOn] = useState(false);
   const [savingSetting, setSavingSetting] = useState(false);
 
@@ -114,12 +114,12 @@ export default function AdminProductsPage() {
     } catch { setErr('خطا در ارتباط با سرور'); } finally { setSavingSetting(false); }
   };
 
-  /* ── بازبینیِ آگهی ──
-     جدا از «تیکِ تأیید»: تیک یعنی فروشنده معتبر است، وضعیت یعنی آگهی
+  /* ── بازبینی آگهی ──
+     جدا از «تیک تأیید»: تیک یعنی فروشنده معتبر است، وضعیت یعنی آگهی
      منتشر شده یا نه. تا امروز فقط تیک بود، پس ادمین راهی برای رد
-     کردنِ آگهی نداشت جز حذفِ کامل — که برگشت‌ناپذیر است و فروشنده هم
+     کردن آگهی نداشت جز حذف کامل — که برگشت‌ناپذیر است و فروشنده هم
      هرگز نمی‌فهمید چرا. */
-  /* آگهی‌ای که در حالِ رد کردنش هستیم — تا نوشتنِ دلیل در پنجره */
+  /* آگهی‌ای که در حال رد کردنش هستیم — تا نوشتن دلیل در پنجره */
   const [rejectFor, setRejectFor] = useState<string | null>(null);
   const [rejectNote, setRejectNote] = useState('');
   const [rejectBusy, setRejectBusy] = useState(false);
@@ -127,8 +127,8 @@ export default function AdminProductsPage() {
   const setStatus = async (productId: string, next: ListingStatus, note: string | null = null) => {
     setErr('');
     /* ── چرا پنجره و نه  ──
-       پنجره‌ی بومیِ مرورگر چپ‌به‌راست است، نشانیِ سایت را بالای خودش
-       می‌نویسد، و متنِ چندخطی نمی‌گیرد — در حالی که این متن مستقیم
+       پنجره‌ی بومی مرورگر چپ‌به‌راست است، نشانی سایت را بالای خودش
+       می‌نویسد، و متن چندخطی نمی‌گیرد — در حالی که این متن مستقیم
        به فروشنده نشان داده می‌شود و باید جا برای توضیح داشته باشد. */
     if (next === 'rejected' && !note) { setRejectFor(productId); setRejectNote(''); return; }
     try {
@@ -155,7 +155,7 @@ export default function AdminProductsPage() {
   const filtered = products.filter(p => {
     if (search && !p.title.includes(search)) return false;
     if (filterCategory !== 'all' && p.category !== filterCategory) return false;
-    /* فیلترهای وضعیتِ چرخه‌ی عمر — جدا از تیکِ تأیید */
+    /* فیلترهای وضعیت چرخه‌ی عمر — جدا از تیک تأیید */
     if (['active', 'pending', 'rejected', 'paused', 'sold', 'expired'].includes(filterVerification)) {
       return p.status === filterVerification;
     }
@@ -165,9 +165,9 @@ export default function AdminProductsPage() {
     return true;
   });
 
-  /* دو صفِ جدا که تا امروز یکی شمرده می‌شدند:
-       · آگهیِ در انتظارِ *انتشار* — تصمیمِ اصلیِ ادمین
-       · درخواستِ تیکِ تأیید — که ربطی به انتشار ندارد */
+  /* دو صف جدا که تا امروز یکی شمرده می‌شدند:
+       · آگهی در انتظار *انتشار* — تصمیم اصلی ادمین
+       · درخواست تیک تأیید — که ربطی به انتشار ندارد */
   const awaitingReview = products.filter(p => p.status === 'pending').length;
   const pendingCount = products.filter(p => p.requestedVerification && !p.isVerified).length;
 
@@ -182,7 +182,7 @@ export default function AdminProductsPage() {
           {err}
         </div>
       )}
-      {/* ── کلیدِ بازبینی ──
+      {/* ── کلید بازبینی ──
           این‌جاست نه در صفحه‌ی تنظیمات، چون همان کسی که آگهی‌ها را
           بررسی می‌کند باید بتواند روشن/خاموشش کند و اثرش را همان‌جا
           ببیند. */}
@@ -201,7 +201,7 @@ export default function AdminProductsPage() {
         <span className="text-xs leading-7" style={{ color: '#5B564B' }}>
           {approvalOn
             ? 'هر آگهی تازه تا تأیید شما منتشر نمی‌شود.'
-            : 'آگهی‌ها بی‌درنگ منتشر می‌شوند و شما بعداً می‌توانید ردشان کنید.'}
+            : 'آگهی‌ها بی‌درنگ منتشر می‌شوند و شما بعدا می‌توانید ردشان کنید.'}
         </span>
       </div>
 
@@ -211,7 +211,7 @@ export default function AdminProductsPage() {
           آگهی‌های بیلیارد بازار
         </h1>
         <div className="flex items-center gap-3">
-          {/* صفِ انتشار — مهم‌ترین عدد این صفحه وقتی بازبینی روشن است */}
+          {/* صف انتشار — مهم‌ترین عدد این صفحه وقتی بازبینی روشن است */}
           {awaitingReview > 0 && (
             <button onClick={() => setFilterVerification('pending')}
               className="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm font-bold hover:bg-yellow-200 transition-colors">
@@ -294,8 +294,8 @@ export default function AdminProductsPage() {
                   <div>
                     <div className="font-medium text-sm text-gray-800 line-clamp-1">{product.title}</div>
                     <div className="flex items-center gap-2 mt-0.5 flex-wrap">
-                      {/* وضعیتِ آگهی — همیشه دیده می‌شود جز وقتی فعال است،
-                          چون «فعال» حالتِ عادی است و نشان لازم ندارد. */}
+                      {/* وضعیت آگهی — همیشه دیده می‌شود جز وقتی فعال است،
+                          چون «فعال» حالت عادی است و نشان لازم ندارد. */}
                       {product.status && product.status !== 'active' && (
                         <span className={`text-xs px-1.5 py-0.5 rounded-full ${STATUS_STYLE[product.status] ?? 'bg-gray-100 text-gray-600'}`}>
                           {STATUS_LABEL[product.status as ListingStatus] ?? product.status}
@@ -312,7 +312,7 @@ export default function AdminProductsPage() {
                         </span>
                       )}
                     </div>
-                    {/* دلیلِ رد — فروشنده هم همین را می‌بیند */}
+                    {/* دلیل رد — فروشنده هم همین را می‌بیند */}
                     {product.status === 'rejected' && product.adminNote && (
                       <div className="text-xs text-red-600 mt-1 line-clamp-1" title={product.adminNote}>
                         دلیل: {product.adminNote}
@@ -339,7 +339,7 @@ export default function AdminProductsPage() {
 
                   {/* ── بازبینی ──
                       «انتشار» فقط وقتی معنا دارد که آگهی منتشر نباشد؛
-                      «رد کردن» فقط وقتی هنوز رد نشده. نشان‌دادنِ دکمه‌ای
+                      «رد کردن» فقط وقتی هنوز رد نشده. نشان‌دادن دکمه‌ای
                       که کاری نمی‌کند، ادمین را به شک می‌اندازد. */}
                   {product.status !== 'active' && product.status !== 'sold' && (
                     <button onClick={() => setStatus(product.id, 'active')}
@@ -386,9 +386,9 @@ export default function AdminProductsPage() {
         )}
       </div>
 
-      {/* ── دلیلِ رد ──
+      {/* ── دلیل رد ──
           متن مستقیم به فروشنده نشان داده می‌شود، پس باید جا برای
-          توضیحِ چندخطی داشته باشد — چیزی که  نمی‌دهد. */}
+          توضیح چندخطی داشته باشد — چیزی که  نمی‌دهد. */}
       {rejectFor && (
         <div role="dialog" aria-modal="true"
           onClick={e => { if (e.target === e.currentTarget && !rejectBusy) setRejectFor(null); }}
@@ -406,8 +406,8 @@ export default function AdminProductsPage() {
               رد کردن آگهی
             </h3>
             <p style={{ fontSize: 12.5, color: '#6F6A5C', margin: '0 0 16px', lineHeight: 1.95 }}>
-              دلیل را بنویسید — همین متن به فروشنده نشان داده می‌شود. رد کردنِ بی‌دلیل
-              یعنی همان آگهی دوباره فرستاده می‌شود و وقتِ هر دو طرف تلف می‌شود.
+              دلیل را بنویسید — همین متن به فروشنده نشان داده می‌شود. رد کردن بی‌دلیل
+              یعنی همان آگهی دوباره فرستاده می‌شود و وقت هر دو طرف تلف می‌شود.
             </p>
             <textarea value={rejectNote} onChange={e => setRejectNote(e.target.value)} rows={4}
               placeholder="مثال: تصویر محصول با عنوان آگهی نمی‌خواند."

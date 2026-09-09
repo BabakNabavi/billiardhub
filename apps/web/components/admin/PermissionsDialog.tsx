@@ -2,11 +2,11 @@
 
 /* پنجره‌ی دسترسی‌های یک ادمین.
 
-   هر تیک دقیقاً یک صفحه‌ی پنل است — نه یک دسته‌بندیِ انتزاعی که
-   بعداً باید حدس زد کدام صفحه را می‌گیرد. گروه‌ها فقط برای پیداکردنِ
-   سریع‌اند و هرکدام یک کلیدِ «همه» دارند.
+   هر تیک دقیقا یک صفحه‌ی پنل است — نه یک دسته‌بندی انتزاعی که
+   بعدا باید حدس زد کدام صفحه را می‌گیرد. گروه‌ها فقط برای پیداکردن
+   سریع‌اند و هرکدام یک کلید «همه» دارند.
 
-   ⚠️ «دسترسی ادمین» عمداً در فهرست نیست: دادنِ دسترسی به دیگران کارِ
+   ⚠️ «دسترسی ادمین» عمدا در فهرست نیست: دادن دسترسی به دیگران کار
    سوپرادمین است. اگر تیک‌کردنی بود، اولین ادمینی که آن را می‌گرفت
    می‌توانست خودش را سوپر کند یا مالک را بیرون بیندازد. */
 
@@ -31,7 +31,7 @@ export default function PermissionsDialog({
   const [busy, setBusy] = useState(false)
   const [err, setErr] = useState('')
 
-  /* Esc می‌بندد و بدنه قفل می‌شود — وگرنه پشتِ پنجره اسکرول می‌خورد */
+  /* Esc می‌بندد و بدنه قفل می‌شود — وگرنه پشت پنجره اسکرول می‌خورد */
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
     document.addEventListener('keydown', onKey)
@@ -93,10 +93,10 @@ export default function PermissionsDialog({
         <div style={{ overflowY: 'auto', padding: '4px 18px 14px' }}>
           <p style={{ fontSize: 12, color: SEC, lineHeight: 2, margin: '12px 0 14px' }}>
             فقط بخش‌هایی که تیک بخورند برای این ادمین باز می‌شوند. بقیه‌ی صفحه‌ها نه در پنل
-            دیده می‌شوند و نه از راهِ آدرسِ مستقیم باز می‌شوند.
+            دیده می‌شوند و نه از راه آدرس مستقیم باز می‌شوند.
             <br />
-            <b style={{ color: INK }}>«دسترسی ادمین» در این فهرست نیست</b> — دادنِ دسترسی به دیگران
-            فقط کارِ شماست و قابلِ واگذاری نیست.
+            <b style={{ color: INK }}>«دسترسی ادمین» در این فهرست نیست</b> — دادن دسترسی به دیگران
+            فقط کار شماست و قابل واگذاری نیست.
           </p>
 
           {groups.map(g => {
@@ -111,7 +111,7 @@ export default function PermissionsDialog({
                     marginInlineStart: 'auto', fontSize: 11, fontWeight: 800, fontFamily: 'inherit',
                     padding: '4px 10px', borderRadius: 8, cursor: 'pointer',
                     border: `1px solid ${LINE}`, background: '#FAFAF7', color: SEC,
-                  }}>{allOn ? 'برداشتنِ همه' : 'انتخابِ همه'}</button>
+                  }}>{allOn ? 'برداشتن همه' : 'انتخاب همه'}</button>
                 </div>
                 <div style={{ display: 'grid', gap: 6 }}>
                   {g.items.map(i => {

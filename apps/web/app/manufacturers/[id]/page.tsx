@@ -200,27 +200,27 @@ export default function ManufacturerPage() {
   const mfrId = (Array.isArray(params?.id) ? params.id[0] : params?.id) || DEFAULT_ID
   /* اول داده‌ی ایستا؛ اگر نبود، پروفایل ثبت‌نامی (پنل ⇒ localStorage) */
   const [storedMfr, setStoredMfr] = useState<ReturnType<typeof profileToManufacturer> | null>(null)
-  /* نمای نگاشت‌شده برای ذخیره کافی نیست — پروفایلِ خام هم می‌ماند */
+  /* نمای نگاشت‌شده برای ذخیره کافی نیست — پروفایل خام هم می‌ماند */
   const [rawP, setRawP]           = useState<ManufacturerProfile | null>(null)
   const [ownerId, setOwnerId]     = useState<string | null>(null)
-  /* پرچمِ قطعیِ سرور — مقایسه‌ی مرورگر بی‌صدا شکست می‌خورد */
+  /* پرچم قطعی سرور — مقایسه‌ی مرورگر بی‌صدا شکست می‌خورد */
   const [mine, setMine]           = useState<boolean | undefined>(undefined)
   const { open: openImage, viewer: imageViewer } = useProfileImageViewer()
   const { open: openVideo, viewer: videoViewer } = useProfileVideoViewer()
 
-  /* ⚠️ پیش از هر `return`ِ شرطی — قاعده‌ی هوک‌ها */
+  /* ⚠️ پیش از هر `return` شرطی — قاعده‌ی هوک‌ها */
   const edit = useOwnerEdit<ManufacturerProfile>('manufacturer', mfrId, rawP, ownerId, raw => {
     setRawP(raw); setStoredMfr(profileToManufacturer(raw))
   }, mine)
   const { gate: channelGate, ask: askChannel, publish: publishToChannel } = useChannelPublish('manufacturer', ownerId ?? undefined, edit.isOwner, notify)
-  /* ── همان گالریِ مشترکِ بقیه‌ی نقش‌ها ──
+  /* ── همان گالری مشترک بقیه‌ی نقش‌ها ──
      ⚠️ این‌جا فقط یک شبکه‌ی عکس بود: نه ویدیویی، نه آلبومی، و حذف با
      *اندیس* انجام می‌شد. حالا همان کامپوننتی رندر می‌شود که مربی،
-     داور، خدماتِ فنی و بازیکن دارند. */
+     داور، خدمات فنی و بازیکن دارند. */
   const MAX_VIDEO_MB = 25
   const [vidBusy, setVidBusy] = useState(false)
-  /* انتشار در بیلیارد مدیا — پنجره فقط وقتی باز می‌شود که کانالِ
-     همین نقش نباشد. آپلودِ گالری هرگز به نتیجه‌اش وابسته نیست. */
+  /* انتشار در بیلیارد مدیا — پنجره فقط وقتی باز می‌شود که کانال
+     همین نقش نباشد. آپلود گالری هرگز به نتیجه‌اش وابسته نیست. */
 
   const addShots = async (files: File[], album?: string) => {
     const items = await Promise.all(files.map(async fl => ({
@@ -232,8 +232,8 @@ export default function ManufacturerPage() {
     await edit.apply(d => ({ ...d, gallery: [...(d.gallery ?? []), ...items] }))
   }
 
-  /* `details` از فرمِ مشخصات می‌آید (عنوان/دسته/توضیح). تا دیروز
-     عنوان نامِ فایل بود و همان به مدیا می‌رفت. */
+  /* `details` از فرم مشخصات می‌آید (عنوان/دسته/توضیح). تا دیروز
+     عنوان نام فایل بود و همان به مدیا می‌رفت. */
   const addVideoFiles = async (files: File[], album?: string, details?: VideoDetail[]) => {
     setVidBusy(true)
     const skipped: string[] = []
@@ -256,7 +256,7 @@ export default function ManufacturerPage() {
            این خط بالای `break` بود و ویدیویی که ذخیره‌اش شکست خورده
            بود هم به مدیا می‌رفت: در بیلیارد مدیا زنده، در پروفایل
            نبود، و کاربر پیام «ذخیره انجام نشد» دیده بود. */
-        /* «فقط در گالری بماند» یک تصمیمِ صریحِ کاربر است */
+        /* «فقط در گالری بماند» یک تصمیم صریح کاربر است */
         if (details?.[i]?.publish !== false) {
           shipped.push({
             title: detailTitle(details, i, file), src: url, thumb, durationSec: meta.durationSec,
@@ -285,15 +285,15 @@ export default function ManufacturerPage() {
     if (!(await ask('این تصویر حذف شود؟', { body: 'این کار برگشت‌پذیر نیست.', confirmLabel: 'حذف' }))) return
     await edit.apply(d => ({ ...d, gallery: (d.gallery ?? []).filter(g => g.id !== mid) }))
   }
-  /* ── ویرایشِ عنوانِ ویدیو ──
-     عنوان دو نسخه دارد: ردیفِ گالریِ پروفایل و ردیفِ بیلیارد مدیا.
-     هوک دومی را می‌زند، این تابع اولی را. کلید نشانیِ فایل است،
-     چون گالری شناسه‌ی ردیفِ مدیا را ندارد. */
+  /* ── ویرایش عنوان ویدیو ──
+     عنوان دو نسخه دارد: ردیف گالری پروفایل و ردیف بیلیارد مدیا.
+     هوک دومی را می‌زند، این تابع اولی را. کلید نشانی فایل است،
+     چون گالری شناسه‌ی ردیف مدیا را ندارد. */
   const { dialog: videoEditDialog, edit: editVideo } = useVideoEdit(
     async (target, detail) => {
-      /* ⚠️ `map` بدونِ تطبیق هم «موفق» برمی‌گردد. اگر نشانی جور نشود
-         (کدگذاریِ متفاوت، ردیفِ بی‌url)، هوک «شد» می‌شنید و مدیا را
-         عوض می‌کرد در حالی که گالری عنوانِ قبلی را نشان می‌دهد —
+      /* ⚠️ `map` بدون تطبیق هم «موفق» برمی‌گردد. اگر نشانی جور نشود
+         (کدگذاری متفاوت، ردیف بی‌url)، هوک «شد» می‌شنید و مدیا را
+         عوض می‌کرد در حالی که گالری عنوان قبلی را نشان می‌دهد —
          یعنی دو عنوان برای یک ویدیو. */
       let hit = false
       const ok = await edit.apply(prof => {
@@ -312,7 +312,7 @@ export default function ManufacturerPage() {
     await edit.apply(d => ({ ...d, videos: (d.videos ?? []).filter(v => v.id !== vid) }))
   }
 
-  /* `checked` لازم است تا «پیدا نشد» پیش از رسیدنِ پاسخِ سرور نشان
+  /* `checked` لازم است تا «پیدا نشد» پیش از رسیدن پاسخ سرور نشان
      داده نشود — وگرنه هر بار یک لحظه صفحه‌ی خطا می‌پرید بالا. */
   const [checked, setChecked] = useState(false)
   /* شبکه شکست، نه اینکه پروفایل نباشد */
@@ -342,7 +342,7 @@ export default function ManufacturerPage() {
           setNetFail(true)
         }
       } catch {
-        /* `fetchProfileResult` خودش خطا را می‌گیرد؛ تورِ ایمنی است
+        /* `fetchProfileResult` خودش خطا را می‌گیرد؛ تور ایمنی است
            تا استثنای غیرمنتظره صفحه را به «پیدا نشد» نیندازد. */
         if (alive) setNetFail(true)
       } finally {
@@ -355,8 +355,8 @@ export default function ManufacturerPage() {
 
   /* ── چرا `MANUFACTURERS[0]!` حذف شد ──
      آن آرایه‌ی نمایشی پیش از رونمایی خالی شد، پس این فالبک از آن روز
-     `undefined` برمی‌گرداند و علامتِ `!` فقط تایپ‌چکر را ساکت می‌کرد.
-     نتیجه: هر نشانیِ تولیدکننده‌ای که وجود نداشت، سرِ `mfr.city`
+     `undefined` برمی‌گرداند و علامت `!` فقط تایپ‌چکر را ساکت می‌کرد.
+     نتیجه: هر نشانی تولیدکننده‌ای که وجود نداشت، سر `mfr.city`
      می‌ترکید و کاربر صفحه‌ی «مشکلی پیش آمد» می‌دید — از جمله
      تولیدکننده‌ای که تازه ثبت‌نام کرده و هنوز ذخیره نشده بود. */
   const mfr = getManufacturer(mfrId) ?? storedMfr
@@ -365,14 +365,14 @@ export default function ManufacturerPage() {
 
   /* شماره‌ی تماس (شماره‌ها خودشان کد شهر دارند) */
   const areaCode  = telPrefix(province)
-  /* `mfr` تا پیش از گاردِ پایین می‌تواند تهی باشد؛ این مقادیر فقط
+  /* `mfr` تا پیش از گارد پایین می‌تواند تهی باشد؛ این مقادیر فقط
      پس از آن گارد رندر می‌شوند، ولی محاسبه‌شان باید بی‌خطر بماند. */
   const phoneDig  = (mfr?.phone ?? '').replace(/\D/g, '')
   const withCode  = !!areaCode && !!phoneDig && !phoneDig.startsWith('0')
   const phoneText = withCode ? `${areaCode}-${phoneDig}` : (mfr?.phone ?? '')
   const phoneHref = withCode ? `${areaCode}${phoneDig}` : phoneDig
 
-  /* آرایه‌ی تازه در هر رندر، وابستگیِ دو useMemo پایین را همیشه
+  /* آرایه‌ی تازه در هر رندر، وابستگی دو useMemo پایین را همیشه
      تغییریافته نشان می‌داد و فیلترها بی‌دلیل دوباره اجرا می‌شدند. */
   const PRODUCTS = useMemo(() => mfr?.products ?? [], [mfr])
 
@@ -412,11 +412,11 @@ export default function ManufacturerPage() {
     requestAnimationFrame(() => gridRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }))
   }
 
-  /* ── جایگاهِ این گارد اتفاقی نیست ──
+  /* ── جایگاه این گارد اتفاقی نیست ──
      پس از **همه‌ی** هوک‌ها می‌آید. اگر بالاتر باشد، در رندری که
-     پروفایل نیامده تعدادِ هوک‌ها کمتر می‌شود و React با «تغییرِ
-     ترتیبِ هوک‌ها» می‌شکند. */
-  /* یونیونِ تفکیک‌شده‌ی `ProfileMissing` یا هر دو پراپ را می‌خواهد یا
+     پروفایل نیامده تعداد هوک‌ها کمتر می‌شود و React با «تغییر
+     ترتیب هوک‌ها» می‌شکند. */
+  /* یونیون تفکیک‌شده‌ی `ProfileMissing` یا هر دو پراپ را می‌خواهد یا
      هیچ‌کدام را — پس یک‌جا ساخته و پخش می‌شود. */
   const retryProps = netFail
     ? { netFail: true as const, onRetry: () => { setChecked(false); setReloadKey(k => k + 1) } }
@@ -469,7 +469,7 @@ export default function ManufacturerPage() {
               ? <ImageSlider images={[mfr.bannerImage]} />
               : <PosterSlider variants={[0, 1, 2]} title={mfr.name} />}
             <div className="pointer-events-none absolute inset-0" style={{ background: 'linear-gradient(180deg,rgba(0,0,0,0.04) 0%,rgba(0,0,0,0.32) 100%)' }} />
-            {/* فقط بنرِ واقعی؛ پوسترِ پیش‌فرض تصویرِ کارخانه نیست و
+            {/* فقط بنر واقعی؛ پوستر پیش‌فرض تصویر کارخانه نیست و
                 بزرگ‌کردنش چیزی به کاربر نمی‌دهد. */}
             {mfr.bannerImage && (
               <button type="button" onClick={() => openImage(mfr.bannerImage ?? '', { title: 'بنر', alt: mfr.name })}
@@ -655,7 +655,7 @@ export default function ManufacturerPage() {
         </div>
       </div>
 
-      {/* ═══ گالری تولیدکننده — همان کامپوننتِ مشترک ═══ */}
+      {/* ═══ گالری تولیدکننده — همان کامپوننت مشترک ═══ */}
       {((mfr.gallery?.length ?? 0) > 0 || (rawP?.videos?.length ?? 0) > 0 || edit.isOwner) && (
         <section className="px-4 pb-6 sm:px-6">
           <div className="mx-auto max-w-[1240px]">
@@ -763,7 +763,7 @@ export default function ManufacturerPage() {
           <div className="border-t border-[#E8E3D6] px-6 py-4 sm:px-8">
             <div className="flex flex-wrap items-center justify-between gap-2 text-[11.5px] text-[#6F6A5C]">
               <span>© {toFa(1405)} {mfr.name} — تمام حقوق محفوظ است</span>
-              {/* نشانِ پلتفرم — فروشگاه فوترِ خودش را دارد، ولی
+              {/* نشان پلتفرم — فروشگاه فوتر خودش را دارد، ولی
                   بازدیدکننده باید بداند این صفحه کجا میزبانی می‌شود. */}
               <Link href="/" className="transition-colors hover:opacity-80">قدرت‌گرفته از بیلیارد <span className="font-bold text-[#C7A66A]">هاب</span></Link>
               <Link href="/" className="transition-colors hover:opacity-80">قدرت‌گرفته از بیلیارد <span className="font-bold text-[#C7A66A]">هاب</span></Link>

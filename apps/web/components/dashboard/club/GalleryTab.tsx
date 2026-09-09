@@ -1,17 +1,17 @@
 'use client';
 
 /* ─────────────────────────────────────────────────────────────
-   تبِ «گالری» پنلِ مدیریتِ باشگاه — لوگو، استوری، عکس‌های باشگاه و
+   تب «گالری» پنل مدیریت باشگاه — لوگو، استوری، عکس‌های باشگاه و
    آلبوم‌ها.
 
-   چرا کاملاً جدا شد و prop-drill نشد: این تب حدود بیست `useState` و
-   ده هندلرِ خودش را دارد که هیچ‌جای دیگرِ داشبورد استفاده نمی‌شوند.
-   فرستادنشان به‌صورت prop یعنی بیست‌وپنج prop — بدتر از وضعِ قبلی.
-   پس خودِ state هم به این‌جا آمد و صفحه‌ی مادر فقط سه چیز می‌دهد:
-   باشگاهِ انتخاب‌شده، و راهی برای خبردادنِ تغییرِ لوگو.
+   چرا کاملا جدا شد و prop-drill نشد: این تب حدود بیست `useState` و
+   ده هندلر خودش را دارد که هیچ‌جای دیگر داشبورد استفاده نمی‌شوند.
+   فرستادنشان به‌صورت prop یعنی بیست‌وپنج prop — بدتر از وضع قبلی.
+   پس خود state هم به این‌جا آمد و صفحه‌ی مادر فقط سه چیز می‌دهد:
+   باشگاه انتخاب‌شده، و راهی برای خبردادن تغییر لوگو.
 
-   عکس‌های این‌جا پس‌زمینه‌ی صفحه‌ی عمومیِ باشگاه را می‌سازند
-   (ستونِ `clubs.images`)، پس ذخیره‌شان روی سرور است نه localStorage.
+   عکس‌های این‌جا پس‌زمینه‌ی صفحه‌ی عمومی باشگاه را می‌سازند
+   (ستون `clubs.images`)، پس ذخیره‌شان روی سرور است نه localStorage.
    ───────────────────────────────────────────────────────────── */
 
 import { useState, useEffect, useCallback } from 'react';
@@ -42,11 +42,11 @@ interface ClubLike { id: string; name?: string; logo?: string; images?: unknown;
 
 const uid = (): string => Math.random().toString(36).slice(2, 10);
 
-/* `compressImage` حذف شد: عکسِ آلبوم دیگر data-URL نمی‌شود و مثلِ بقیه‌ی
+/* `compressImage` حذف شد: عکس آلبوم دیگر data-URL نمی‌شود و مثل بقیه‌ی
    عکس‌های باشگاه به Storage می‌رود. */
 
-/* سقفِ عکس‌های باشگاه. این‌ها پس‌زمینه‌ی صفحه‌ی عمومی می‌شوند و
-   بی‌سقف‌بودن هم ردیفِ دیتابیس را سنگین می‌کرد و هم صفحه را. */
+/* سقف عکس‌های باشگاه. این‌ها پس‌زمینه‌ی صفحه‌ی عمومی می‌شوند و
+   بی‌سقف‌بودن هم ردیف دیتابیس را سنگین می‌کرد و هم صفحه را. */
 const MAX_CLUB_PHOTOS = 10;
 
 export default function GalleryTab({ club, onLogoChange }: {
@@ -56,7 +56,7 @@ export default function GalleryTab({ club, onLogoChange }: {
   const [albums, setAlbums] = useState<ClubAlbum[]>([]);
   const [newAlbumName, setNewAlbumName] = useState('');
   const [openAlbumId, setOpenAlbumId] = useState<string | null>(null);
-  /* آلبومی که نامش در حالِ ویرایش است */
+  /* آلبومی که نامش در حال ویرایش است */
   const [editingAlbumId, setEditingAlbumId] = useState<string | null>(null);
   const [editingAlbumName, setEditingAlbumName] = useState('');
   const [uploadingAlbum, setUploadingAlbum] = useState<string | null>(null);
@@ -67,7 +67,7 @@ export default function GalleryTab({ club, onLogoChange }: {
   const [logoUploading, setLogoUploading] = useState(false);
   const [storyUploading, setStoryUploading] = useState(false);
   const [storyList, setStoryList] = useState<ClubStory[]>([]);
-  /* خطای انتشار/حذفِ استوری و لوگو — تا امروز بی‌صدا بلعیده می‌شد */
+  /* خطای انتشار/حذف استوری و لوگو — تا امروز بی‌صدا بلعیده می‌شد */
   const [storyError, setStoryError] = useState('');
   const [albumError, setAlbumError] = useState('');
   const [storyTextColor, setStoryTextColor] = useState('#ffffff');
@@ -79,11 +79,11 @@ export default function GalleryTab({ club, onLogoChange }: {
   const lsKey = useCallback((type: string) => `club-${type}-${club?.id ?? 'none'}`, [club]);
 
   /* ── آلبوم‌ها روی سرور ذخیره می‌شوند ──
-     تا امروز فقط در `localStorage`ِ خودِ باشگاه‌دار بودند و صفحه‌ی عمومیِ
-     باشگاه هم همان کلید را از `localStorage`ِ بازدیدکننده می‌خواند — که
-     همیشه خالی است. یعنی آلبوم‌ها را هیچ‌کس جز خودِ باشگاه‌دار نمی‌دید.
+     تا امروز فقط در `localStorage` خود باشگاه‌دار بودند و صفحه‌ی عمومی
+     باشگاه هم همان کلید را از `localStorage` بازدیدکننده می‌خواند — که
+     همیشه خالی است. یعنی آلبوم‌ها را هیچ‌کس جز خود باشگاه‌دار نمی‌دید.
 
-     ستون `albums` فقط **نشانی** نگه می‌دارد؛ تصویرها مثلِ عکس‌های باشگاه
+     ستون `albums` فقط **نشانی** نگه می‌دارد؛ تصویرها مثل عکس‌های باشگاه
      به Storage می‌روند. */
   const saveAlbums = useCallback(async (next: ClubAlbum[]) => {
     if (!club) return;
@@ -111,7 +111,7 @@ export default function GalleryTab({ club, onLogoChange }: {
     }
   }, [lsKey, club]);
 
-  /* با عوض‌شدنِ باشگاه، همه‌چیزِ این تب دوباره خوانده می‌شود */
+  /* با عوض‌شدن باشگاه، همه‌چیز این تب دوباره خوانده می‌شود */
   useEffect(() => {
     if (!club) { setAlbums([]); setSinglePhotos([]); setStoryList([]); return; }
     const clubId = club.id;
@@ -124,14 +124,14 @@ export default function GalleryTab({ club, onLogoChange }: {
     setOpenAlbumId(null);
 
     /* ── چرا دوباره از سرور می‌خوانیم و از prop استفاده نمی‌کنیم ──
-       `club` یک عکسِ لحظه‌ایِ فهرستی است که موقعِ بازشدنِ داشبورد گرفته
+       `club` یک عکس لحظه‌ای فهرستی است که موقع بازشدن داشبورد گرفته
        شده. پس از ذخیره‌ی یک آلبوم یا عکس، آن فهرست به‌روز نمی‌شود؛
        کافی بود کاربر باشگاه را عوض کند و برگردد تا نسخه‌ی پیش از ذخیره
        را ببیند و خیال کند کارش گم شده. */
     const applyRow = (c: Record<string, unknown> | null) => {
       if (!alive) return;
 
-      /* منبعِ حقیقتِ عکس‌ها سرور است. نسخه‌ی مرورگری فقط برای باشگاهی
+      /* منبع حقیقت عکس‌ها سرور است. نسخه‌ی مرورگری فقط برای باشگاهی
          می‌ماند که هنوز چیزی روی سرور ندارد (داده‌ی پیش از انتقال). */
       const imgs = Array.isArray(c?.images) ? c!.images as string[] : (club.images as string[] | undefined) ?? [];
       const fromServer = imgs.filter(Boolean).slice(0, MAX_CLUB_PHOTOS)
@@ -144,7 +144,7 @@ export default function GalleryTab({ club, onLogoChange }: {
         } catch { setSinglePhotos([]); }
       }
 
-      /* آلبومِ پیش از مهاجرتِ ۰۶۵ فقط در مرورگر بود؛ تا وقتی سرور خالی
+      /* آلبوم پیش از مهاجرت ۰۶۵ فقط در مرورگر بود؛ تا وقتی سرور خالی
          است همان نشان داده می‌شود و اولین ذخیره منتقلش می‌کند. */
       const srvAlbums = Array.isArray(c?.albums) ? c!.albums as ClubAlbum[] : [];
       if (srvAlbums.length) setAlbums(srvAlbums);
@@ -161,8 +161,8 @@ export default function GalleryTab({ club, onLogoChange }: {
       .then(applyRow)
       .catch(() => applyRow(null));
 
-    /* `sync=1` رکوردِ باشگاه را از روی فایلِ استوری‌ها تعمیر می‌کند —
-       برای استوری‌هایی که پیش از مهاجرتِ ۰۶۴ ثبت شده‌اند و رکوردشان
+    /* `sync=1` رکورد باشگاه را از روی فایل استوری‌ها تعمیر می‌کند —
+       برای استوری‌هایی که پیش از مهاجرت ۰۶۴ ثبت شده‌اند و رکوردشان
        ستون‌های استوری را ندارد. */
     fetch(`/api/clubs/${clubId}/stories?sync=1`, { cache: 'no-store' })
       .then(r => r.json())
@@ -193,9 +193,9 @@ export default function GalleryTab({ club, onLogoChange }: {
   };
 
   /* تصویر به Storage می‌رود و فقط نشانی‌اش ذخیره می‌شود.
-     پیش‌تر base64ِ فشرده مستقیم داخلِ داده می‌نشست — که در
-     `localStorage` هم سنگین بود و در یک ستونِ jsonb فاجعه می‌شد: هر
-     `select('*')` روی جدولِ باشگاه‌ها چند مگابایت می‌آورد و صفحه‌ی اولِ
+     پیش‌تر base64 فشرده مستقیم داخل داده می‌نشست — که در
+     `localStorage` هم سنگین بود و در یک ستون jsonb فاجعه می‌شد: هر
+     `select('*')` روی جدول باشگاه‌ها چند مگابایت می‌آورد و صفحه‌ی اول
      سایت همان را می‌زند. */
   const uploadToAlbum = async (albumId: string, files: FileList) => {
     if (!club) return;
@@ -217,7 +217,7 @@ export default function GalleryTab({ club, onLogoChange }: {
         await saveAlbums(albums.map(a => a.id === albumId ? { ...a, items: [...a.items, ...newItems] } : a));
       }
     } catch {
-      setAlbumError('آپلود عکسِ آلبوم انجام نشد؛ دوباره تلاش کنید.');
+      setAlbumError('آپلود عکس آلبوم انجام نشد؛ دوباره تلاش کنید.');
     } finally {
       setUploadingAlbum(null);
     }
@@ -243,9 +243,9 @@ export default function GalleryTab({ club, onLogoChange }: {
     const added: ClubPhoto[] = [];
     try {
       for (const file of picked) {
-        /* روی Storage آپلود می‌شود نه به‌صورت data-URL: ده عکسِ base64
+        /* روی Storage آپلود می‌شود نه به‌صورت data-URL: ده عکس base64
            داخل یک ستون، هم ردیف را چند مگابایتی می‌کند و هم هر بار
-           خواندنِ باشگاه را کند. */
+           خواندن باشگاه را کند. */
         const fd = new FormData();
         fd.append('file', file);
         fd.append('path', `clubs/${club.id}/photos/${Date.now()}-${added.length}`);
@@ -285,9 +285,9 @@ export default function GalleryTab({ club, onLogoChange }: {
   };
 
   /* ── چرا نتیجه‌ی سرور این‌جا مهم است ──
-     تا امروز POST داخل یک `try {} catch {}`ِ خالی بود و کدِ وضعیت هم
-     خوانده نمی‌شد. یعنی اگر سرور ۴۰۳ می‌داد (استوری فقط دستِ مالکِ همان
-     باشگاه است) استوری در فهرستِ محلی نشان داده می‌شد و باشگاه‌دار خیال
+     تا امروز POST داخل یک `try {} catch {}` خالی بود و کد وضعیت هم
+     خوانده نمی‌شد. یعنی اگر سرور ۴۰۳ می‌داد (استوری فقط دست مالک همان
+     باشگاه است) استوری در فهرست محلی نشان داده می‌شد و باشگاه‌دار خیال
      می‌کرد منتشر شده — در حالی که هیچ‌جا ثبت نشده بود. */
   const uploadStory = async (file: File, text: string) => {
     if (!club) return;
@@ -321,11 +321,11 @@ export default function GalleryTab({ club, onLogoChange }: {
         throw new Error(j?.message || 'ثبت استوری روی سرور انجام نشد');
       }
 
-      /* رکوردی که *سرور* نوشت را نگه می‌داریم، نه پیش‌نویسِ محلی را:
-         شناسه و انقضا آن‌جا ساخته می‌شوند و حذفِ بعدی با همان شناسه
+      /* رکوردی که *سرور* نوشت را نگه می‌داریم، نه پیش‌نویس محلی را:
+         شناسه و انقضا آن‌جا ساخته می‌شوند و حذف بعدی با همان شناسه
          انجام می‌شود. */
       const saved = (await r.json().catch(() => null)) as ClubStory | null;
-      if (!saved?.id) throw new Error("پاسخِ سرور خوانده نشد");
+      if (!saved?.id) throw new Error("پاسخ سرور خوانده نشد");
       setStoryList(prev => [...prev, saved]);
       setStoryDraft(null);
       setStoryTextColor('#ffffff');
@@ -371,8 +371,8 @@ export default function GalleryTab({ club, onLogoChange }: {
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 fontSize: 32, fontWeight: 900, color: GOLD,
               }}>
-                {/* همان نشانی که بازدیدکننده می‌بیند — تا صاحبِ باشگاه
-                    پیش‌نمایشِ واقعی داشته باشد، نه حرفِ اولِ نام. */}
+                {/* همان نشانی که بازدیدکننده می‌بیند — تا صاحب باشگاه
+                    پیش‌نمایش واقعی داشته باشد، نه حرف اول نام. */}
                 <ClubLogo src={club?.logo} name={club?.name} size={88} />
               </div>
               <label style={{
@@ -387,9 +387,9 @@ export default function GalleryTab({ club, onLogoChange }: {
                   onChange={e => { const f = e.target.files?.[0]; if (f) uploadLogo(f); e.target.value = ''; }} />
               </label>
 
-              {/* ── حذفِ لوگو ──
+              {/* ── حذف لوگو ──
                   تا امروز فقط جایگزینی ممکن بود. باشگاهی که لوگوی
-                  اشتباهی گذاشته بود هیچ راهی برای برگشتن به حالتِ
+                  اشتباهی گذاشته بود هیچ راهی برای برگشتن به حالت
                   بی‌لوگو نداشت. فقط وقتی دیده می‌شود که لوگویی باشد. */}
               {club?.logo ? (
                 <button type="button" title="حذف لوگو"
@@ -557,7 +557,7 @@ export default function GalleryTab({ club, onLogoChange }: {
             </label>
           </div>
           <p style={{ fontSize: 11.5, color: '#9CA3AF', margin: '0 0 14px', lineHeight: 1.95 }}>
-            این عکس‌ها پس‌زمینه‌ی صفحه‌ی عمومی باشگاه شما می‌شوند. عکسِ اول بیشتر از بقیه دیده می‌شود.
+            این عکس‌ها پس‌زمینه‌ی صفحه‌ی عمومی باشگاه شما می‌شوند. عکس اول بیشتر از بقیه دیده می‌شود.
           </p>
           {photoError && (
             <div style={{ marginBottom: 12, padding: '9px 13px', borderRadius: 10, fontSize: 12, fontWeight: 700,
@@ -644,9 +644,9 @@ export default function GalleryTab({ club, onLogoChange }: {
                         : '🖼'}
                     </div>
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      {/* ── تغییرِ نام ──
-                          آلبوم فقط دکمه‌ی حذف داشت، یعنی یک غلطِ املایی در
-                          نام یعنی ساختنِ آلبومِ تازه و آپلودِ دوباره‌ی همه‌ی
+                      {/* ── تغییر نام ──
+                          آلبوم فقط دکمه‌ی حذف داشت، یعنی یک غلط املایی در
+                          نام یعنی ساختن آلبوم تازه و آپلود دوباره‌ی همه‌ی
                           عکس‌ها. */}
                       {editingAlbumId === album.id ? (
                         <div style={{ display: 'flex', gap: 6 }} onClick={e => e.stopPropagation()}>

@@ -1,9 +1,9 @@
 /* ─────────────────────────────────────────────────────────────
-   ظاهرِ دروازه‌ی کانال — شیشه‌ی مایع، هم‌خانواده‌ی بقیه‌ی سایت.
+   ظاهر دروازه‌ی کانال — شیشه‌ی مایع، هم‌خانواده‌ی بقیه‌ی سایت.
 
-   ⚠️ فقط `backdrop-filter` نوشته می‌شود، بدونِ `-webkit-`. نوشتنِ هر
-   دو باعث می‌شود مینیفایرِ بیلد ادغامشان کند و **فقط نسخه‌ی
-   `-webkit-` را نگه دارد** — که کرومِ امروزی پشتیبانی نمی‌کند و
+   ⚠️ فقط `backdrop-filter` نوشته می‌شود، بدون `-webkit-`. نوشتن هر
+   دو باعث می‌شود مینیفایر بیلد ادغامشان کند و **فقط نسخه‌ی
+   `-webkit-` را نگه دارد** — که کروم امروزی پشتیبانی نمی‌کند و
    شیشه بی‌صدا بی‌اثر می‌شود. پیشوند را autoprefixer اضافه می‌کند.
    ───────────────────────────────────────────────────────────── */
 
@@ -55,7 +55,7 @@
 .cg-title { margin: 0; font-size: clamp(17px, 2.2vw, 20px); font-weight: 800; line-height: 1.6; }
 .cg-sub { margin: 9px 0 0; font-size: 13.5px; line-height: 1.95; color: #6B6659; }
 
-/* ── فهرستِ کانال‌ها ── */
+/* ── فهرست کانال‌ها ── */
 .cg-list { list-style: none; margin: 20px 0 0; padding: 0; display: grid; gap: 9px; text-align: start; }
 .cg-item {
   position: relative; width: 100%; display: grid;
@@ -86,7 +86,7 @@
 @media (hover: hover) { .cg-alt:hover { transform: translateY(-2px) } }
 .cg-alt:focus-visible { outline: 2px solid #8A6229; outline-offset: 2px; }
 
-/* ── فرمِ ساخت ── */
+/* ── فرم ساخت ── */
 .cg-form { margin-top: 18px; text-align: start; }
 .cg-lab { display: block; font-size: 12.5px; font-weight: 700; margin-bottom: 6px; }
 .cg-in {
@@ -128,7 +128,7 @@
   .cg-item, .cg-alt, .cg-go, .cg-x { transition: none; }
 }
 
-/* گامِ پایانیِ ساخت — پیش از بازکردنِ انتخابگرِ فایل */
+/* گام پایانی ساخت — پیش از بازکردن انتخابگر فایل */
 .cg-done {
   margin: 0 0 4px;
   font-size: 13px;

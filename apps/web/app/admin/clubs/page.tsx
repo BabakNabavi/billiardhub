@@ -21,7 +21,7 @@ interface ClubRow {
   ownerId: string;
   verificationStatus: string;
   licenseDocumentUrl?: string;
-  /* بدونِ کلیدِ `clubs` نشانی نمی‌آید ولی «هست/نیست» می‌آید */
+  /* بدون کلید `clubs` نشانی نمی‌آید ولی «هست/نیست» می‌آید */
   hasLicenseDoc?: boolean;
   createdAt: string;
 }
@@ -45,8 +45,8 @@ async function updateStatus(id: string, status: string, rejectionReason?: string
   }
 }
 
-/* مدرکِ جواز در باکتِ خصوصی است و لینکِ مستقیم ندارد؛ سرور پس از بررسی
-   دسترسی یک لینکِ امضاشده‌ی دو دقیقه‌ای می‌دهد. باز کردنِ پنجره پیش از
+/* مدرک جواز در باکت خصوصی است و لینک مستقیم ندارد؛ سرور پس از بررسی
+   دسترسی یک لینک امضاشده‌ی دو دقیقه‌ای می‌دهد. باز کردن پنجره پیش از
    await انجام می‌شود، وگرنه مرورگر آن را pop-up ناخواسته می‌شمارد و
    می‌بندد. */
 async function openLicenseDoc(id: string) {
@@ -65,7 +65,7 @@ async function openLicenseDoc(id: string) {
 const STATUS_LABEL: Record<string, { label: string; color: string; bg: string; icon: React.ReactNode }> = {
   pending:    { label: 'در انتظار بررسی', color: '#92600A', bg: '#FEF3C7', icon: <Clock size={13} /> },
   verified:   { label: 'تأیید + تیک آبی', color: '#166534', bg: '#DCFCE7', icon: <Check size={13} /> },
-  /* منتشرشده ولی بی‌تیک — عمداً رنگش با «تأیید + تیک» یکی نیست تا در
+  /* منتشرشده ولی بی‌تیک — عمدا رنگش با «تأیید + تیک» یکی نیست تا در
      فهرست بی‌نگاه‌کردن به متن هم از هم جدا شوند. */
   approved:   { label: 'منتشر بدون تیک',  color: '#1D4ED8', bg: '#DBEAFE', icon: <Eye size={13} /> },
   rejected:   { label: 'رد شده',          color: '#991B1B', bg: '#FEE2E2', icon: <X size={13} /> },
@@ -74,7 +74,7 @@ const STATUS_LABEL: Record<string, { label: string; color: string; bg: string; i
 
 export default function AdminClubsPage() {
   const router = useRouter();
-  /* بدونِ `_hydrated`، نخستین رندر `user` را تهی می‌بیند (استور از
+  /* بدون `_hydrated`، نخستین رندر `user` را تهی می‌بیند (استور از
      localStorage خوانده می‌شود) و ادمین را به صفحه‌ی ورود پرت می‌کند —
      یعنی رفرش یا ورود از بوکمارک هرگز به این صفحه نمی‌رسید. */
   const { user, _hydrated } = useAuthStore();
@@ -91,7 +91,7 @@ export default function AdminClubsPage() {
   }, [_hydrated, user]);
 
   const [err, setErr] = useState('');
-  /* باشگاهی که در حالِ رد کردنش هستیم، و کدِ علتِ انتخاب‌شده */
+  /* باشگاهی که در حال رد کردنش هستیم، و کد علت انتخاب‌شده */
   const [rejectFor, setRejectFor] = useState<string | null>(null);
   const [rejectCode, setRejectCode] = useState('');
   const [openClub, setOpenClub] = useState<string | null>(null);
@@ -99,10 +99,10 @@ export default function AdminClubsPage() {
   const setStatus = async (id: string, status: string) => {
     /* رد کردن بدون علت پذیرفته نمی‌شود — مالک باید بداند چه را اصلاح کند.
        سرور هم همین را اجبار می‌کند؛ این‌جا فقط زودتر پرسیده می‌شود. */
-    /* رد کردن از پنجره‌ی جدا می‌گذرد، چون علت باید از فهرستِ بسته
-       انتخاب شود: این متن داخلِ پیامکِ مالک می‌رود و سرویسِ پیامک
-       مقدارهای ممکنِ آن را از قبل می‌خواهد. `window.prompt` متنِ آزاد
-       می‌داد و چنین چیزی قابلِ اعلام نیست. */
+    /* رد کردن از پنجره‌ی جدا می‌گذرد، چون علت باید از فهرست بسته
+       انتخاب شود: این متن داخل پیامک مالک می‌رود و سرویس پیامک
+       مقدارهای ممکن آن را از قبل می‌خواهد. `window.prompt` متن آزاد
+       می‌داد و چنین چیزی قابل اعلام نیست. */
     if (status === 'rejected') { setRejectFor(id); setRejectCode(''); return; }
 
     await applyStatus(id, status);
@@ -132,7 +132,7 @@ export default function AdminClubsPage() {
         <div style={{ fontSize: 12, color: GOLD, fontWeight: 700, letterSpacing: '0.2em', marginBottom: 6 }}>ADMIN</div>
         <h1 style={{ fontSize: 24, fontWeight: 900, color: '#111', margin: 0 }}>تأیید باشگاه‌ها</h1>
         <p style={{ fontSize: 13, color: '#6b7280', marginTop: 4 }}>
-          هر دو «تأیید» باشگاه را در سایت منتشر می‌کنند؛ تفاوتشان فقط تیکِ آبی است. رد یعنی برداشتن از فهرست.
+          هر دو «تأیید» باشگاه را در سایت منتشر می‌کنند؛ تفاوتشان فقط تیک آبی است. رد یعنی برداشتن از فهرست.
         </p>
       </div>
 
@@ -181,8 +181,8 @@ export default function AdminClubsPage() {
                     {st.icon} {st.label}
                   </div>
 
-                  {/* مدرک — مدارکِ تازه در باکتِ خصوصی‌اند و لینکِ مستقیم
-                      ندارند، پس از مسیرِ مجوزدار یک لینکِ امضاشده گرفته
+                  {/* مدرک — مدارک تازه در باکت خصوصی‌اند و لینک مستقیم
+                      ندارند، پس از مسیر مجوزدار یک لینک امضاشده گرفته
                       می‌شود. رکوردهای قدیمی که URL کامل دارند هم از همان
                       مسیر برمی‌گردند، پس این‌جا یک رفتار بیشتر نیست. */}
                   {club.licenseDocumentUrl || club.hasLicenseDoc ? (
@@ -229,9 +229,9 @@ export default function AdminClubsPage() {
                       style={{ display: 'flex', alignItems: 'center', gap: 6, background: '#16a34a', color: '#fff', border: 'none', borderRadius: 10, padding: '8px 18px', fontSize: 13, fontWeight: 700, cursor: 'pointer', fontFamily: 'var(--font-base)', opacity: actionLoading === club.id + 'verified' ? 0.6 : 1 }}>
                       <Check size={14} /> تأیید و اعطای تیک
                     </button>
-                    {/* انتشار بدونِ تیک — برای باشگاهی که مدرکی آپلود نکرده
+                    {/* انتشار بدون تیک — برای باشگاهی که مدرکی آپلود نکرده
                         یا مدارکش هنوز بررسی نشده. کارتش در فهرست دیده
-                        می‌شود ولی نشانِ تأیید نمی‌گیرد. */}
+                        می‌شود ولی نشان تأیید نمی‌گیرد. */}
                     {club.verificationStatus !== 'approved' && (
                       <button
                         disabled={!!actionLoading}
@@ -253,8 +253,8 @@ export default function AdminClubsPage() {
                 )}
                 {club.verificationStatus === 'verified' && (
                   <div style={{ display: 'flex', gap: 8, marginTop: 14, paddingTop: 14, borderTop: '1px solid #f3f4f6', flexWrap: 'wrap' }}>
-                    {/* برداشتنِ فقط تیک، بدونِ برداشتنِ باشگاه از سایت —
-                        وگرنه تنها راهِ پس‌گرفتنِ تیکِ اشتباه، «رد» بود که
+                    {/* برداشتن فقط تیک، بدون برداشتن باشگاه از سایت —
+                        وگرنه تنها راه پس‌گرفتن تیک اشتباه، «رد» بود که
                         باشگاه را هم از فهرست حذف می‌کرد. */}
                     <button
                       disabled={!!actionLoading}
@@ -277,9 +277,9 @@ export default function AdminClubsPage() {
         </ScrollList>
       )}
 
-      {/* ── علتِ رد ──
-          فهرستِ بسته، نه متنِ آزاد: این متن داخلِ پیامکِ مالک می‌رود و
-          سرویسِ پیامک مقدارهای ممکنِ آن را از قبل می‌خواهد. */}
+      {/* ── علت رد ──
+          فهرست بسته، نه متن آزاد: این متن داخل پیامک مالک می‌رود و
+          سرویس پیامک مقدارهای ممکن آن را از قبل می‌خواهد. */}
       {rejectFor && (
         <div
           onClick={() => setRejectFor(null)}

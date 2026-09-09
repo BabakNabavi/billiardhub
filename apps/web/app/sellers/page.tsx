@@ -11,7 +11,7 @@ import type { MockSeller } from '../../lib/sellers-data'
 const GOLD     = '#C7A66A'
 const GOLD_D   = '#8F6531'
 const GOLD_G   = 'linear-gradient(135deg,#7A4F10 0%,#C7A66A 50%,#8A6020 100%)'
-/* رنگِ پایه‌ی صفحه حالا داخلِ کلاسِ مشترکِ lq-stage است */
+/* رنگ پایه‌ی صفحه حالا داخل کلاس مشترک lq-stage است */
 const TEXT     = '#1C1C1A'
 const TEXT_SEC = 'rgba(28,28,26,0.52)'
 const TEXT_MUT = 'rgba(28,28,26,0.32)'
@@ -124,14 +124,14 @@ function SellerPosterBg() {
 }
 
 /* ── فقط فروشگاه‌های واقعی ────────────────────────────────────────
-   تا امروز پایه‌ی این فهرست `MOCK_SELLERS` بود: پنج فروشگاهِ ساختگی با
+   تا امروز پایه‌ی این فهرست `MOCK_SELLERS` بود: پنج فروشگاه ساختگی با
    نام و شهر و تلفن، که همیشه — حتی روی Production — به کاربر نشان داده
-   می‌شدند. جدولِ `profiles` صفر ردیف دارد، یعنی هرچه بازدیدکننده در
+   می‌شدند. جدول `profiles` صفر ردیف دارد، یعنی هرچه بازدیدکننده در
    این صفحه می‌دید ساختگی بود.
 
    بدتر اینکه صفحه‌ی اول صادق بود و همین فهرست را خالی نشان می‌داد؛ پس
    کاربر در Home هیچ فروشگاهی نمی‌دید و در /sellers پنج‌تا. همان کاری
-   که قبلاً با `SAMPLE_CLUBS` شد این‌جا هم انجام می‌شود: پایه خالی است و
+   که قبلا با `SAMPLE_CLUBS` شد این‌جا هم انجام می‌شود: پایه خالی است و
    فهرست فقط از فروشگاه‌های تأییدشده‌ی واقعی پر می‌شود. */
 const SELLERS: MockSeller[] = []
 
@@ -147,8 +147,8 @@ function profileToSeller(p: SellerProfile): typeof SELLERS[0] {
     elite: false,
     rating: 5,
     reviewCount: 0,
-    /* شمارِ محصول پیش‌تر از کاتالوگِ ساختگی می‌آمد و برای هر فروشگاهِ
-       واقعی عددِ فروشگاهِ نمونه را نشان می‌داد. تا وقتی شمارِ واقعی از
+    /* شمار محصول پیش‌تر از کاتالوگ ساختگی می‌آمد و برای هر فروشگاه
+       واقعی عدد فروشگاه نمونه را نشان می‌داد. تا وقتی شمار واقعی از
        سرور نیامده، عددی نشان داده نمی‌شود. */
     productCount: 0,
     since: '۱۴۰۴',
@@ -241,8 +241,8 @@ const PhoneIcon =<svg width="16" height="16" viewBox="0 0 24 24" fill="none" str
 function SellerCard({ seller, view }: { seller: typeof SELLERS[0]; view: 'grid' | 'list' }) {
   const [hov, setHov] = useState(false)
 
-  /* جنسِ سطح از کلاسِ مشترکِ lq-pcard می‌آید؛ این‌جا فقط لبه‌ی
-     طلاییِ hover می‌ماند که نشانه‌ی همین فهرست است. */
+  /* جنس سطح از کلاس مشترک lq-pcard می‌آید؛ این‌جا فقط لبه‌ی
+     طلایی hover می‌ماند که نشانه‌ی همین فهرست است. */
   const shell: React.CSSProperties = {
     overflow: 'hidden', cursor: 'pointer',
     borderColor: hov ? 'rgba(199,166,106,0.55)' : undefined,
@@ -292,14 +292,14 @@ function SellerCard({ seller, view }: { seller: typeof SELLERS[0]; view: 'grid' 
   /* ── LIST VIEW ── */
   if (view === 'list') {
     return (
-      /* ── چرا روکشِ لینک و نه onClick روی کارت ──
+      /* ── چرا روکش لینک و نه onClick روی کارت ──
          `<div onClick>` نه با کیبورد باز می‌شود، نه حلقه‌ی فوکوس دارد،
-         نه «باز کردن در تبِ جدید» — و قاعده‌ی دسترس‌پذیریِ پروژه هم
-         ممنوعش می‌کند. لینکِ دورِ کلِ کارت هم نمی‌شود، چون داخلش دکمه‌ی
+         نه «باز کردن در تب جدید» — و قاعده‌ی دسترس‌پذیری پروژه هم
+         ممنوعش می‌کند. لینک دور کل کارت هم نمی‌شود، چون داخلش دکمه‌ی
          تماس و «مشاهده فروشگاه» هستند و `<a>` تودرتو نامعتبر است.
 
-         پس نامِ فروشگاه لینک می‌شود و `::after`ش کلِ کارت را می‌پوشاند:
-         یک لینکِ واقعی با نامِ درست برای صفحه‌خوان، کلیک روی هرجای
+         پس نام فروشگاه لینک می‌شود و `::after`ش کل کارت را می‌پوشاند:
+         یک لینک واقعی با نام درست برای صفحه‌خوان، کلیک روی هرجای
          کارت، و دکمه‌های داخلی که با z-index رویش می‌مانند. */
       <div onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)}
         className="sel-list-card sel-card lq-pcard" style={{ ...shell, display: 'flex', alignItems: 'stretch', minHeight: 158 }}>
@@ -337,7 +337,7 @@ function SellerCard({ seller, view }: { seller: typeof SELLERS[0]; view: 'grid' 
 
   /* ── GRID VIEW ── */
   return (
-    /* روکشِ لینک — دلیلش کنارِ نمای فهرستی */
+    /* روکش لینک — دلیلش کنار نمای فهرستی */
     <div onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)}
       className="sel-card lq-pcard" style={{ ...shell, display: 'flex', flexDirection: 'column', height: '100%' }}>
       {/* banner (ارتفاع +۱۰٪ ⇒ کل کارت بلندتر) */}
@@ -359,8 +359,8 @@ function SellerCard({ seller, view }: { seller: typeof SELLERS[0]; view: 'grid' 
       {/* body — flex تا کارت پر شود و دکمه‌ها ته کارت بچسبند ⇒ همه‌ی کارت‌ها یک‌اندازه */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: '0 18px 18px' }}>
         {/* logo fully visible (no badge overlap on image) */}
-        {/* بدونِ z-index: لوگو تعاملی نیست و اگر بالای روکش بنشیند،
-            کلیک روی همان ناحیه هیچ‌کاری نمی‌کند. ترتیبِ DOM برای
+        {/* بدون z-index: لوگو تعاملی نیست و اگر بالای روکش بنشیند،
+            کلیک روی همان ناحیه هیچ‌کاری نمی‌کند. ترتیب DOM برای
             دیده‌شدنش روی بنر کافی است. */}
         <div style={{ marginTop: -32, marginBottom: 12, position: 'relative' }}>
           <SellerLogo name={seller.name} size={62} />
@@ -475,7 +475,7 @@ export default function SellersPage() {
      بعد از mount، فروشگاه‌های approved از localStorage خوانده و اضافه می‌شوند. */
   const [stores, setStores] = useState<typeof SELLERS>(SELLERS)
   useEffect(() => {
-    /* فوراً هرچه در همین مرورگر هست، بعد فهرست سرور که همه‌ی
+    /* فورا هرچه در همین مرورگر هست، بعد فهرست سرور که همه‌ی
        فروشگاه‌ها را دارد نه فقط فروشگاه خود بیننده. */
     setStores(mergeStores(SELLERS, listApprovedSellers()))
     void fetchProfiles<SellerProfile>('seller').then(rows => {
@@ -521,16 +521,16 @@ export default function SellersPage() {
   return (
     <>
       <style>{`
-        /* ── روکشِ لینکِ کارتِ فروشگاه ──
-           لینک روی نامِ فروشگاه است و شبه‌عنصرش کلِ کارت را می‌پوشاند:
-           کلیک روی هرجای کارت، ولی برای صفحه‌خوان یک لینکِ واقعی با
-           نامِ همان فروشگاه. دکمه‌های داخلی (تماس، مشاهده فروشگاه) با
-           z-index بالاتر رویش می‌مانند تا کارِ خودشان را بکنند.
-           (بک‌تیک در این کامنت ممنوع — داخلِ template literal است) */
+        /* ── روکش لینک کارت فروشگاه ──
+           لینک روی نام فروشگاه است و شبه‌عنصرش کل کارت را می‌پوشاند:
+           کلیک روی هرجای کارت، ولی برای صفحه‌خوان یک لینک واقعی با
+           نام همان فروشگاه. دکمه‌های داخلی (تماس، مشاهده فروشگاه) با
+           z-index بالاتر رویش می‌مانند تا کار خودشان را بکنند.
+           (بک‌تیک در این کامنت ممنوع — داخل template literal است) */
         .sel-card { position: relative; }
         .sel-card-link { color: inherit; text-decoration: none; }
         .sel-card-link::after { content: ''; position: absolute; inset: 0; z-index: 1; }
-        /* ⚠️ حلقه روی خودِ روکش کشیده می‌شود، نه با ':has' روی کارت.
+        /* ⚠️ حلقه روی خود روکش کشیده می‌شود، نه با ':has' روی کارت.
            آن نسخه روی موتوری که ':has' ندارد هیچ نشانه‌ی فوکوسی نمی‌داد
            — و این خرابی بی‌صداست، چون فقط با کیبورد دیده می‌شود. */
         .sel-card-link:focus-visible { outline: none; }
@@ -559,7 +559,7 @@ export default function SellersPage() {
         .sel-list { display: flex; flex-direction: column; gap: 14px; }
         .s-chip { transition: all 0.18s; }
         .s-chip:hover { opacity: 0.85; }
-        /* حالتِ فوکوس از سیستمِ مشترکِ .input می‌آید */
+        /* حالت فوکوس از سیستم مشترک .input می‌آید */
         @media(max-width:640px){
           /* لیست موبایل: افقی و جمع‌وجور مثل باشگاه‌ها (نه ستونی) */
           .sel-list-img { width: clamp(96px,28vw,128px) !important; }
@@ -593,8 +593,8 @@ export default function SellersPage() {
         }
       `}</style>
 
-      {/* رنگِ پایه داخلِ lq-stage است؛ پس‌زمینه‌ی ماتِ خودِ عنصر
-          لکه‌های پشتِ شیشه را می‌پوشاند. */}
+      {/* رنگ پایه داخل lq-stage است؛ پس‌زمینه‌ی مات خود عنصر
+          لکه‌های پشت شیشه را می‌پوشاند. */}
       <div className="lq-stage" style={{ minHeight: '100vh', direction: 'rtl', fontFamily: 'Vazirmatn,Tahoma,sans-serif', color: TEXT }}>
 
         {/* ─────── HERO — coaches-style animated (light) ─────── */}

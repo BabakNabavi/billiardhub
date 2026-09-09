@@ -70,7 +70,7 @@ export async function POST(req: NextRequest) {
   if (!TYPES.has(entityType)) return NextResponse.json({ message: 'نوع معتبر نیست' }, { status: 400 });
   if (!UUID.test(entityId)) return NextResponse.json({ message: 'شناسه معتبر نیست' }, { status: 400 });
 
-  /* موجودیت باید واقعاً وجود داشته باشد — وگرنه فهرست علاقه‌مندی
+  /* موجودیت باید واقعا وجود داشته باشد — وگرنه فهرست علاقه‌مندی
      پر می‌شود از شناسه‌های ساختگی. */
   const src = SOURCE[entityType]!;
   const { data: ent } = await sb().from(src.table).select('id').eq('id', entityId).maybeSingle();

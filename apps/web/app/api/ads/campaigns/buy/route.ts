@@ -50,11 +50,11 @@ export async function POST(req: NextRequest) {
   }
   /* ── جایگاه ویدیویی (پیش‌پخش) ──
 
-     نشانیِ ویدیو باید از خودِ Storage همین سایت باشد، نه هر جای
-     اینترنت. دلیلش امنیت نیست فقط: فایلِ بیرونی می‌تواند هر لحظه عوض
+     نشانی ویدیو باید از خود Storage همین سایت باشد، نه هر جای
+     اینترنت. دلیلش امنیت نیست فقط: فایل بیرونی می‌تواند هر لحظه عوض
      شود یا از دسترس برود، و آن‌وقت تبلیغی که پول برایش داده شده در
      پلیر گیر می‌کند. آپلود از `/api/upload` می‌گذرد که امضای بایتی و
-     سقفِ حجم را بررسی می‌کند. */
+     سقف حجم را بررسی می‌کند. */
   if (q.placement.contentKind === 'video') {
     const raw = String(b?.videoUrl ?? content.videoUrl ?? '').trim();
     const ok = /^https?:\/\/[^/]+\/storage\/v1\/object\/public\/[^/]+\/ads\//.test(raw);
@@ -65,7 +65,7 @@ export async function POST(req: NextRequest) {
       );
     }
     content.videoUrl = raw.slice(0, 800);
-    /* مقصدِ کلیک اختیاری است ولی اگر بود باید نشانیِ درست باشد */
+    /* مقصد کلیک اختیاری است ولی اگر بود باید نشانی درست باشد */
     const dest = String(b?.clickUrl ?? content.clickUrl ?? '').trim();
     content.clickUrl = /^https?:\/\//.test(dest) ? dest.slice(0, 800) : null;
   }

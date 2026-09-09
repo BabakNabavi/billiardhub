@@ -5,7 +5,7 @@ import { checkEmail, normalizeEmail, EMAIL_RE } from '@/lib/email-server';
 
 /* ثبت و تأیید ایمیل کاربر — با استعلام واقعی CheckEmail.
 
-   اختیاری است: نبودش هیچ چیزی را نمی‌بندد. ولی اگر ثبت شود، حتماً از
+   اختیاری است: نبودش هیچ چیزی را نمی‌بندد. ولی اگر ثبت شود، حتما از
    سرویس پرسیده می‌شود و نشانی نامعتبر با ۴۲۲ رد می‌شود؛ تیک سبز
    بی‌پشتوانه داده نمی‌شود.
 
@@ -27,12 +27,12 @@ export async function POST(req: NextRequest) {
   /* ایمیل نباید روی حساب دیگری باشد */
   const { data: taken } = await sb().from('users').select('id').eq('email', email).maybeSingle();
   if (taken && (taken as { id: string }).id !== actor.id) {
-    return NextResponse.json({ message: 'این ایمیل قبلاً روی حساب دیگری ثبت شده است' }, { status: 409 });
+    return NextResponse.json({ message: 'این ایمیل قبلا روی حساب دیگری ثبت شده است' }, { status: 409 });
   }
 
   const res = await checkEmail(email);
   if (!res.ok) {
-    /* سرویس در دسترس نیست ⇒ نه تأیید، نه رد؛ کاربر بعداً دوباره تلاش کند */
+    /* سرویس در دسترس نیست ⇒ نه تأیید، نه رد؛ کاربر بعدا دوباره تلاش کند */
     return NextResponse.json({ message: res.message ?? 'استعلام انجام نشد', unavailable: true }, { status: 503 });
   }
   if (!res.valid) {
@@ -40,7 +40,7 @@ export async function POST(req: NextRequest) {
   }
 
   /* تا این‌جا سرویس گفته این نشانی واقعی و فعال است ⇒ تأیید می‌شود.
-     ایمیل نامعتبر بالاتر با ۴۲۲ رد شده و اصلاً به این‌جا نمی‌رسد. */
+     ایمیل نامعتبر بالاتر با ۴۲۲ رد شده و اصلا به این‌جا نمی‌رسد. */
   const { error } = await sb().from('users')
     .update({ email, email_verified: true, updatedAt: new Date().toISOString() })
     .eq('id', actor.id);

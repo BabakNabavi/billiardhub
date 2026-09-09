@@ -40,9 +40,9 @@ export async function GET(req: NextRequest) {
       startsAt: startsAt.toISOString(),
       canCancel: active && inTime,
       /* اگر لغو ممکن نیست، دلیلش هم برمی‌گردد. بدون این، دکمه فقط
-         ناپدید می‌شد و کاربر فکر می‌کرد اصلاً امکان لغو وجود ندارد. */
+         ناپدید می‌شد و کاربر فکر می‌کرد اصلا امکان لغو وجود ندارد. */
       cancelBlockedReason: active && inTime ? null
-        : !active ? (r.booking_status === 'CANCELLED' ? 'این رزرو قبلاً لغو شده است' : 'این رزرو به پایان رسیده است')
+        : !active ? (r.booking_status === 'CANCELLED' ? 'این رزرو قبلا لغو شده است' : 'این رزرو به پایان رسیده است')
         : startsAt.getTime() <= now.getTime() ? 'زمان این رزرو گذشته است'
         : `مهلت لغو تمام شده — لغو تا ${MIN_CANCEL_HOURS} ساعت پیش از شروع ممکن است`,
       /* پیش‌نمایش بازپرداخت — فقط برای رزرو پرداخت‌شده معنا دارد */

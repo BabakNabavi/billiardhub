@@ -3,21 +3,21 @@ import { NextRequest, NextResponse } from 'next/server';
 import { sb, actorFromRequest, isAdmin, ownsClub } from '@/lib/finance/db';
 import { BOOKING_HORIZON_DAYS } from '@/lib/booking/closure';
 
-/* تقویم و گزارشِ رزروهای باشگاه.
+/* تقویم و گزارش رزروهای باشگاه.
 
-   ── چرا مسیرِ جدا و نه همان فهرستِ رزروها ──
-   فهرستِ رزروها ترتیبِ زمانیِ خام است و برای «فردا چه خبر است؟» باید
+   ── چرا مسیر جدا و نه همان فهرست رزروها ──
+   فهرست رزروها ترتیب زمانی خام است و برای «فردا چه خبر است؟» باید
    دویست ردیف را چشمی فیلتر کرد. این‌جا همان داده به شکلی می‌آید که
-   تصمیم را ممکن می‌کند: روزبه‌روز، با ساعت‌ها و نامِ مشتری.
+   تصمیم را ممکن می‌کند: روزبه‌روز، با ساعت‌ها و نام مشتری.
 
-   ── فقط رزروِ واقعی ──
+   ── فقط رزرو واقعی ──
    ردیف‌های پرداخت‌نشده نمی‌آیند. باشگاه‌دار که فردا صبح برنامه‌اش را
    می‌بندد نباید روی رزروی حساب کند که پولش نیامده و ده دقیقه بعد
    منقضی می‌شود. */
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-/* تاریخِ محلیِ ایران به `YYYY-MM-DD` — نه UTC.
+/* تاریخ محلی ایران به `YYYY-MM-DD` — نه UTC.
    با UTC، بین نیمه‌شب تا ۳:۳۰ بامداد «فردا» یک روز عقب می‌افتاد. */
 function iranDate(offsetDays = 0): string {
   const now = new Date(Date.now() + offsetDays * 86_400_000);
@@ -81,8 +81,8 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string 
   const tableMap = new Map(((tables ?? []) as Record<string, unknown>[])
     .map(t => [String(t.id), String(t.name ?? `میز ${t.number ?? ''}`).trim()]));
 
-  /* هر روزِ افق یک خانه دارد، حتی اگر خالی باشد — تقویم نباید روزهای
-     بی‌رزرو را جا بیندازد، وگرنه شمارشِ روزها به‌هم می‌ریزد. */
+  /* هر روز افق یک خانه دارد، حتی اگر خالی باشد — تقویم نباید روزهای
+     بی‌رزرو را جا بیندازد، وگرنه شمارش روزها به‌هم می‌ریزد. */
   const byDate = new Map<string, Record<string, unknown>[]>();
   for (let i = 0; i <= BOOKING_HORIZON_DAYS; i++) byDate.set(iranDate(i), []);
 

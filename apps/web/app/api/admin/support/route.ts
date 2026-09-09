@@ -5,9 +5,9 @@ import { can } from '@/lib/admin/permissions';
 
 /* تیکت‌های پشتیبانی برای ادمین — خواندن و رسیدگی.
 
-   «رسیدگی» این‌جا یعنی بازکردنِ قفل، نه ویرایشِ مقدار. ادمین شماره
-   کارت یا کد پستیِ تازه را خودش تایپ نمی‌کند: آن مقدار باید از همان
-   زنجیره‌ی استعلام رد شود، وگرنه یک حسابِ تأییدنشده زیر عنوانِ
+   «رسیدگی» این‌جا یعنی بازکردن قفل، نه ویرایش مقدار. ادمین شماره
+   کارت یا کد پستی تازه را خودش تایپ نمی‌کند: آن مقدار باید از همان
+   زنجیره‌ی استعلام رد شود، وگرنه یک حساب تأییدنشده زیر عنوان
    «تأییدشده» می‌نشیند. پس ادمین قفل را باز می‌کند و کاربر یک بار
    دیگر — و فقط یک بار — استعلام می‌گیرد. */
 
@@ -37,8 +37,8 @@ export async function GET(req: NextRequest) {
 
   const tickets = (data ?? []) as Ticket[];
 
-  /* وضعیتِ قفلِ هر تیکت کنارِ خودش می‌آید تا ادمین لازم نباشد برای
-     فهمیدنِ «اصلاً قفل است؟» صفحه عوض کند. */
+  /* وضعیت قفل هر تیکت کنار خودش می‌آید تا ادمین لازم نباشد برای
+     فهمیدن «اصلا قفل است؟» صفحه عوض کند. */
   const userIds = [...new Set(tickets.map(t => t.user_id).filter(Boolean))] as string[];
   const clubIds = [...new Set(tickets.map(t => t.club_id).filter(Boolean))] as string[];
 
@@ -57,7 +57,7 @@ export async function GET(req: NextRequest) {
   return NextResponse.json({ tickets, ...locks }, { headers: { 'Cache-Control': 'no-store' } });
 }
 
-/* رسیدگی: تغییر وضعیت و/یا بازکردنِ یکی از قفل‌ها.
+/* رسیدگی: تغییر وضعیت و/یا بازکردن یکی از قفل‌ها.
    بدنه: { id, status?, adminNote?, unlock?: 'postal' | 'bank' } */
 export async function PATCH(req: NextRequest) {
   const actor = actorFromRequest(req);
@@ -95,8 +95,8 @@ export async function PATCH(req: NextRequest) {
     if (!ticket.user_id) {
       return NextResponse.json({ message: 'این تیکت به کاربری وصل نیست' }, { status: 400 });
     }
-    /* هر دو قفلِ بانکی با هم باز می‌شوند: کاربر ممکن است هم کارتِ
-       شخصی و هم حسابِ باشگاه را عوض کند و دو تیکتِ جدا برای یک
+    /* هر دو قفل بانکی با هم باز می‌شوند: کاربر ممکن است هم کارت
+       شخصی و هم حساب باشگاه را عوض کند و دو تیکت جدا برای یک
        درخواست، هم برای او و هم برای ادمین اضافه‌کاری است. */
     const { error } = await sb().from('users')
       .update({ bank_card_verified: false, bank_card_verified_at: null })
@@ -120,7 +120,7 @@ export async function PATCH(req: NextRequest) {
   };
   if (b.status !== undefined) patch.status = String(b.status);
   if (b.adminNote !== undefined) patch.admin_note = String(b.adminNote).slice(0, 1000);
-  /* بازکردنِ قفل خودش یعنی رسیدگی شد، مگر ادمین وضعیتِ دیگری بخواهد */
+  /* بازکردن قفل خودش یعنی رسیدگی شد، مگر ادمین وضعیت دیگری بخواهد */
   if (unlocked && b.status === undefined) patch.status = 'resolved';
 
   const { data, error } = await sb().from('support_tickets')

@@ -35,10 +35,10 @@ export interface BankResult {
 
 const groupCard = (d: string) => d.replace(/(.{4})/g, '$1-').replace(/-$/, '')
 
-/* ── ارقامِ فارسی ──
-   کاربر با کیبوردِ فارسی «۱۲۳۴» تایپ می‌کند و `replace(/\D/g,'')` آن
+/* ── ارقام فارسی ──
+   کاربر با کیبورد فارسی «۱۲۳۴» تایپ می‌کند و `replace(/\D/g,'')` آن
    را کامل دور می‌ریخت، پس فیلد خالی می‌ماند. نمایش هم لاتین بود در
-   حالی که همه‌ی اعدادِ سایت فارسی‌اند. */
+   حالی که همه‌ی اعداد سایت فارسی‌اند. */
 const FA_DIGITS = '۰۱۲۳۴۵۶۷۸۹'
 const toEnDigits = (v: string) =>
   v.replace(/[۰-۹]/g, d => String(FA_DIGITS.indexOf(d)))
@@ -57,7 +57,7 @@ export default function BankCardVerify({ clubId, value, onChange }: {
   const digits = card.replace(/\D/g, '')
   const verified = !!value?.iban
 
-  /* نامِ حسابِ کاربر، برای مقایسه‌ی چشمی با نامی که بانک برگردانده.
+  /* نام حساب کاربر، برای مقایسه‌ی چشمی با نامی که بانک برگردانده.
      نرمال‌سازی: نیم‌فاصله و فاصله‌های تکراری حذف می‌شوند تا «محمد رضا»
      و «محمدرضا» بی‌دلیل ناهمخوان به‌نظر نرسند. */
   const { user: me } = useAuthStore()
@@ -109,8 +109,8 @@ export default function BankCardVerify({ clubId, value, onChange }: {
         <input
           value={toFaDigits(card)}
           onChange={e => {
-            /* ورودی اول به رقمِ لاتین ترجمه می‌شود، وگرنه هر رقمی که
-               کاربر با کیبوردِ فارسی بزند دور ریخته می‌شد. */
+            /* ورودی اول به رقم لاتین ترجمه می‌شود، وگرنه هر رقمی که
+               کاربر با کیبورد فارسی بزند دور ریخته می‌شد. */
             const d = toEnDigits(e.target.value).replace(/\D/g, '').slice(0, 16)
             setCard(groupCard(d)); setErr(''); if (verified) onChange(null)
           }}
@@ -160,13 +160,13 @@ export default function BankCardVerify({ clubId, value, onChange }: {
             <span style={{ fontSize: 13, fontWeight: 700, color: INK }}>{value.ownerName || '—'}</span>
           </div>
 
-          {/* ── تطبیقِ نام ──
-              بررسیِ اصلی سمتِ سرور و بر پایه‌ی *کد ملی* انجام می‌شود
-              (matchCard و matchIban)، که از مقایسه‌ی متنیِ نام بسیار
+          {/* ── تطبیق نام ──
+              بررسی اصلی سمت سرور و بر پایه‌ی *کد ملی* انجام می‌شود
+              (matchCard و matchIban)، که از مقایسه‌ی متنی نام بسیار
               محکم‌تر است — «محمدرضا» و «محمد رضا» یک نفرند ولی دو رشته.
 
-              این خط فقط برای اطمینانِ چشمیِ خودِ کاربر است: اگر نامِ
-              برگشته از بانک با نامِ حسابش فرق داشت، بداند و بررسی کند.
+              این خط فقط برای اطمینان چشمی خود کاربر است: اگر نام
+              برگشته از بانک با نام حسابش فرق داشت، بداند و بررسی کند.
               چون کد ملی از قبل تطبیق داده شده، این هشدار است نه مانع. */}
           {nameMismatch && (
             <div style={{

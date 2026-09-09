@@ -1,16 +1,16 @@
 /* ─────────────────────────────────────────────────────────────
-   «ادامه تماشا» — پیشرفتِ واقعیِ تماشا روی همین دستگاه.
+   «ادامه تماشا» — پیشرفت واقعی تماشا روی همین دستگاه.
 
    ── چرا localStorage و نه دیتابیس ──
-   ⚠️ جدولی برای تاریخچه‌ی تماشا وجود ندارد و ساختنش مهاجرتِ اسکیماست
-   که تأییدِ صریحِ مالک می‌خواهد. ولی «ادامه تماشا» بدونِ داده یعنی
-   یا بخشِ خالی یا — بدتر — درصدِ ساختگی.
+   ⚠️ جدولی برای تاریخچه‌ی تماشا وجود ندارد و ساختنش مهاجرت اسکیماست
+   که تأیید صریح مالک می‌خواهد. ولی «ادامه تماشا» بدون داده یعنی
+   یا بخش خالی یا — بدتر — درصد ساختگی.
 
-   این راهِ میانی هیچ چیزی جعل نمی‌کند: عدد از خودِ پلیر می‌آید و
-   واقعاً همان‌جایی است که *این* کاربر روی *این* دستگاه رها کرده.
-   محدودیتش صادقانه است: بینِ دستگاه‌ها همگام نمی‌شود.
+   این راه میانی هیچ چیزی جعل نمی‌کند: عدد از خود پلیر می‌آید و
+   واقعا همان‌جایی است که *این* کاربر روی *این* دستگاه رها کرده.
+   محدودیتش صادقانه است: بین دستگاه‌ها همگام نمی‌شود.
 
-   ⚠️ همه‌ی دسترسی‌ها در try/catch‌اند: در حالتِ ناشناسِ سافاری خودِ
+   ⚠️ همه‌ی دسترسی‌ها در try/catch‌اند: در حالت ناشناس سافاری خود
    خواندن استثنا پرتاب می‌کند، نه اینکه null بدهد.
    ───────────────────────────────────────────────────────────── */
 
@@ -26,7 +26,7 @@ export interface WatchMark {
   slug: string
   /** ثانیه‌ی توقف */
   at: number
-  /** طولِ کلِ ویدیو */
+  /** طول کل ویدیو */
   total: number
   /** آخرین تماشا (میلی‌ثانیه) */
   seen: number
@@ -47,10 +47,10 @@ const readAll = (): WatchMark[] => {
 }
 
 const writeAll = (list: WatchMark[]) => {
-  try { window.localStorage.setItem(KEY, JSON.stringify(list.slice(0, MAX))) } catch { /* سهمیه پر یا حالتِ خصوصی */ }
+  try { window.localStorage.setItem(KEY, JSON.stringify(list.slice(0, MAX))) } catch { /* سهمیه پر یا حالت خصوصی */ }
 }
 
-/** ثبتِ جای توقف. تماشای کامل، رکورد را پاک می‌کند. */
+/** ثبت جای توقف. تماشای کامل، رکورد را پاک می‌کند. */
 export function mark(slug: string, at: number, total: number): void {
   if (!slug || !Number.isFinite(at) || !Number.isFinite(total) || total <= 0) return
   const list = readAll().filter(m => m.slug !== slug)
@@ -61,7 +61,7 @@ export function mark(slug: string, at: number, total: number): void {
   writeAll(list)
 }
 
-/** جای توقفِ یک ویدیو — برای ازسرگیری. */
+/** جای توقف یک ویدیو — برای ازسرگیری. */
 export function resumeAt(slug: string): number {
   return readAll().find(m => m.slug === slug)?.at ?? 0
 }
@@ -73,7 +73,7 @@ export function inProgress(): WatchMark[] {
     .sort((a, b) => b.seen - a.seen)
 }
 
-/** ۰ تا ۱ — برای نوارِ روی بندانگشتی. */
+/** ۰ تا ۱ — برای نوار روی بندانگشتی. */
 export const ratioOf = (m: WatchMark) => Math.min(1, Math.max(0, m.at / m.total))
 
 export function forget(slug: string): void {

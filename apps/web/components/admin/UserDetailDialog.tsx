@@ -1,14 +1,14 @@
 'use client'
 
-/* پنجره‌ی مشخصاتِ کاملِ یک کاربر — دکمه‌ی چشمِ فهرستِ کاربران.
+/* پنجره‌ی مشخصات کامل یک کاربر — دکمه‌ی چشم فهرست کاربران.
 
-   پیش‌تر آن دکمه به پروفایلِ عمومی می‌رفت و آن‌جا جز نام چیزی نبود،
-   یعنی ادمین هیچ راهی برای دیدنِ مشخصاتِ یک نفر نداشت.
+   پیش‌تر آن دکمه به پروفایل عمومی می‌رفت و آن‌جا جز نام چیزی نبود،
+   یعنی ادمین هیچ راهی برای دیدن مشخصات یک نفر نداشت.
 
    داده از `/api/admin/users?id=…` می‌آید و همان‌جا محدود شده: رمز و
-   کدهای یک‌بارمصرف هرگز فرستاده نمی‌شوند. هر بار بازکردنِ این پنجره
-   در گزارشِ ممیزی ثبت می‌شود — دیدنِ اطلاعاتِ هویتیِ یک نفر خودش یک
-   رویداد است، نه یک نگاهِ بی‌رد. */
+   کدهای یک‌بارمصرف هرگز فرستاده نمی‌شوند. هر بار بازکردن این پنجره
+   در گزارش ممیزی ثبت می‌شود — دیدن اطلاعات هویتی یک نفر خودش یک
+   رویداد است، نه یک نگاه بی‌رد. */
 
 import { useEffect, useState } from 'react'
 import { apiFetch } from '../../lib/http'
@@ -37,18 +37,18 @@ const date = (v: unknown) => {
   return isNaN(d.getTime()) ? String(v) : d.toLocaleDateString('fa-IR') + ' · ' + d.toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' })
 }
 
-/* تاریخِ تولد همیشه شمسی و با رقمِ فارسی نشان داده می‌شود.
+/* تاریخ تولد همیشه شمسی و با رقم فارسی نشان داده می‌شود.
 
-   ستونِ `birth_date` متنی است و ثبت‌نام همان چیزی را می‌نویسد که کاربر
-   در تقویمِ شمسی انتخاب کرده — «1363/06/02». پس در حالتِ عادی فقط
-   رقم‌ها باید فارسی شوند و بس؛ تبدیلِ تقویم لازم نیست و اگر انجام شود
-   ۱۳۶۳ را سالِ میلادی می‌گیرد و تاریخِ بی‌معنی می‌سازد.
+   ستون `birth_date` متنی است و ثبت‌نام همان چیزی را می‌نویسد که کاربر
+   در تقویم شمسی انتخاب کرده — «1363/06/02». پس در حالت عادی فقط
+   رقم‌ها باید فارسی شوند و بس؛ تبدیل تقویم لازم نیست و اگر انجام شود
+   ۱۳۶۳ را سال میلادی می‌گیرد و تاریخ بی‌معنی می‌سازد.
 
    ولی چند ردیف میلادی («1984-08-24») در همین ستون نشسته‌اند، از
-   واردکردنِ دستی. آن‌ها تبدیل می‌شوند تا ادمین همه‌جا یک قالب ببیند.
+   واردکردن دستی. آن‌ها تبدیل می‌شوند تا ادمین همه‌جا یک قالب ببیند.
 
-   تشخیص از روی جداکننده و سال است، نه حدس: شمسی با «/» و سالِ ۱۳/۱۴،
-   میلادی با «-» و سالِ ۱۹/۲۰. */
+   تشخیص از روی جداکننده و سال است، نه حدس: شمسی با «/» و سال ۱۳/۱۴،
+   میلادی با «-» و سال ۱۹/۲۰. */
 const birthFa = (v: unknown) => {
   const s = String(v ?? '').trim()
   if (!s) return null
@@ -57,8 +57,8 @@ const birthFa = (v: unknown) => {
   return fa(s)
 }
 
-/* یک خانه‌ی «برچسب / مقدار». مقدارِ تهی اصلاً رندر نمی‌شود تا پنجره
-   پر از خطِ «—» نشود. */
+/* یک خانه‌ی «برچسب / مقدار». مقدار تهی اصلا رندر نمی‌شود تا پنجره
+   پر از خط «—» نشود. */
 function Field({ label, value, mono, copy }: { label: string; value: unknown; mono?: boolean; copy?: boolean }) {
   const [done, setDone] = useState(false)
   const s = value === null || value === undefined || value === '' ? null : String(value)
@@ -82,7 +82,7 @@ function Field({ label, value, mono, copy }: { label: string; value: unknown; mo
   )
 }
 
-/* ── فرمِ ویرایش ──
+/* ── فرم ویرایش ──
    همان فیلدهایی که سرور هم می‌پذیرد. اگر این‌جا و آن‌جا از هم جدا
    بیفتند، کاربر فیلدی را پر می‌کند که خاموش دور ریخته می‌شود. */
 const EDIT_FIELDS: { key: string; label: string; ltr?: boolean; hint?: string; area?: boolean }[] = [
@@ -121,7 +121,7 @@ function EditRow({ f, value, onChange }: {
 }
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
-  /* بخشی که همه‌ی خانه‌هایش تهی بوده‌اند عنوانِ بی‌محتوا می‌شد */
+  /* بخشی که همه‌ی خانه‌هایش تهی بوده‌اند عنوان بی‌محتوا می‌شد */
   const any = Array.isArray(children) ? children.some(Boolean) : Boolean(children)
   if (!any) return null
   return (
@@ -163,8 +163,8 @@ export default function UserDetailDialog({ userId, onClose }: { userId: string; 
   const g = (k: string) => u?.[k]
   const name = `${g('firstName') ?? ''} ${g('lastName') ?? ''}`.trim() || 'بدون نام'
 
-  /* ورود به ویرایش: فرم از مقدارهای فعلی پر می‌شود، وگرنه ذخیره‌کردنِ
-     یک فیلدِ دست‌نخورده آن را خالی می‌کند. */
+  /* ورود به ویرایش: فرم از مقدارهای فعلی پر می‌شود، وگرنه ذخیره‌کردن
+     یک فیلد دست‌نخورده آن را خالی می‌کند. */
   const startEdit = () => {
     if (!u) return
     const f: Record<string, string> = {}
@@ -176,7 +176,7 @@ export default function UserDetailDialog({ userId, onClose }: { userId: string; 
     if (saving) return
     setSaving(true); setSaveErr('')
     try {
-      /* فقط تغییرها فرستاده می‌شوند — نه کلِ فرم. این‌طور یک فیلدِ
+      /* فقط تغییرها فرستاده می‌شوند — نه کل فرم. این‌طور یک فیلد
          دست‌نخورده هیچ‌وقت به‌طور تصادفی بازنویسی نمی‌شود. */
       const fields: Record<string, string> = {}
       for (const x of EDIT_FIELDS) {
@@ -203,7 +203,7 @@ export default function UserDetailDialog({ userId, onClose }: { userId: string; 
   const status = String(g('verificationStatus') ?? '')
 
   /* پروفایل‌های نقشی — هرکدام یک شیء JSON است. فقط آن‌هایی که
-     واقعاً محتوا دارند نشان داده می‌شوند. */
+     واقعا محتوا دارند نشان داده می‌شوند. */
   const roleProfiles = ([
     ['playerProfile', 'پروفایل بازیکن'], ['coachProfile', 'پروفایل مربی'],
     ['refereeProfile', 'پروفایل داور'], ['sellerProfile', 'پروفایل فروشنده'],
@@ -275,8 +275,8 @@ export default function UserDetailDialog({ userId, onClose }: { userId: string; 
           {u && editing && (
             <>
               <div style={{ fontSize: 11.5, color: SEC, lineHeight: 1.9, padding: '4px 0 8px' }}>
-                شماره‌ی موبایل، نقش‌ها و وضعیتِ احراز از این‌جا عوض نمی‌شوند.
-                هر تغییری در گزارشِ ممیزی ثبت می‌شود.
+                شماره‌ی موبایل، نقش‌ها و وضعیت احراز از این‌جا عوض نمی‌شوند.
+                هر تغییری در گزارش ممیزی ثبت می‌شود.
               </div>
               {EDIT_FIELDS.map(f => (
                 <EditRow key={f.key} f={f} value={form[f.key] ?? ''}

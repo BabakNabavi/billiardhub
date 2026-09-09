@@ -14,7 +14,7 @@ import { guardSocialInteractions } from '@/lib/features'
 export function OPTIONS() { return new NextResponse(null, { status: 204, headers: CORS }) }
 
 /* ── پرچم «تعاملات اجتماعی» ──────────────────────────────────
-   وقتی خاموش است، این مسیر کاملاً بسته می‌شود — نه فقط رابط کاربری.
+   وقتی خاموش است، این مسیر کاملا بسته می‌شود — نه فقط رابط کاربری.
    مخفی‌کردن دکمه جلوی درخواست مستقیم را نمی‌گیرد.
 
    POST هر چهار قابلیت را می‌سازد (پیام، پاسخ به استوری، لایک و
@@ -115,7 +115,7 @@ export async function POST(req: NextRequest) {
   broadcast(dmTopic(to.key), 'msg', payload)
   broadcast(dmTopic(from.key), 'msg', payload)
 
-  /* بقیه‌ی کارها موازی (قبلاً ترتیبی بود و پوش را چند ثانیه عقب می‌انداخت) */
+  /* بقیه‌ی کارها موازی (قبلا ترتیبی بود و پوش را چند ثانیه عقب می‌انداخت) */
   const body = kind === 'reaction' ? `استیکر ${text}` : kind === 'like' ? '❤️ لایک استوری' : text
   const tasks: Promise<unknown>[] = [
     bumpConvIndex(to.key,   { key: from.key, name: from.name, role: from.role }, text, kind, at, true),

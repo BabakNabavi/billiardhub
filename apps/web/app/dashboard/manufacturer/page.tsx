@@ -35,8 +35,8 @@ export default function ManufacturerDashboard() {
   const [form, setForm]     = useState<ManufacturerProfile>(() => emptyManufacturerProfile('draft'))
   const [specInput, setSpecInput] = useState('')
   const [loaded, setLoaded] = useState(false)
-  /* نامکی که واقعاً روی سرور ثبت شده. تا وقتی خالی است فیلدِ نشانی
-     باز می‌ماند؛ نامکِ خودکارِ فرم نباید قفلش کند. */
+  /* نامکی که واقعا روی سرور ثبت شده. تا وقتی خالی است فیلد نشانی
+     باز می‌ماند؛ نامک خودکار فرم نباید قفلش کند. */
   const [savedSlug, setSavedSlug] = useState<string | null>(null)
   const [saved, setSaved]   = useState(false)
   const [err, setErr]       = useState('')
@@ -54,7 +54,7 @@ export default function ManufacturerDashboard() {
     if (!_hydrated) return
     if (!user) { setLoaded(true); return }
 
-    /* اول نسخه‌ی همین مرورگر تا فرم فوراً پر شود، بعد نسخه‌ی سرور */
+    /* اول نسخه‌ی همین مرورگر تا فرم فورا پر شود، بعد نسخه‌ی سرور */
     const mine = findManufacturerByOwner(user)
     const local = mine ?? emptyManufacturerProfile(newManufacturerSlug(), user.id, user.phone ?? '')
     setForm(local)
@@ -69,12 +69,12 @@ export default function ManufacturerDashboard() {
         if (mine) {
           const up = await saveProfileRemote('manufacturer', mine.slug, mine as unknown as Record<string, unknown>,
             { number: mine.licenseNumber, url: mine.licenseFile?.url ?? '' })
-          /* فقط نوشتنِ تأییدشده قفل می‌کند؛ با ۴۰۹ چیزی نوشته نشده و
-             فیلد باید باز بماند تا نامکِ تکراری قابلِ اصلاح باشد. */
+          /* فقط نوشتن تأییدشده قفل می‌کند؛ با ۴۰۹ چیزی نوشته نشده و
+             فیلد باید باز بماند تا نامک تکراری قابل اصلاح باشد. */
           if (up.ok && up.profile?.slug) setSavedSlug(up.profile.slug)
-          else { setSavedSlug(''); setErr(up.message ?? 'نشانیِ ثبت‌شده خوانده نشد — دوباره تلاش کنید') }
+          else { setSavedSlug(''); setErr(up.message ?? 'نشانی ثبت‌شده خوانده نشد — دوباره تلاش کنید') }
         } else {
-          /* کاربرِ کاملاً تازه: نه ردیفِ سرور، نه کشِ محلی.
+          /* کاربر کاملا تازه: نه ردیف سرور، نه کش محلی.
              صریح باز می‌شود تا نامکش را خودش انتخاب کند. */
           setSavedSlug('')
         }
@@ -161,13 +161,13 @@ export default function ManufacturerDashboard() {
     setBusy(true)
     void (async () => {
       /* منبع حقیقت سرور است؛ localStorage فقط کش همین مرورگر می‌ماند */
-      if (savedSlug === null) { setErr('نشانیِ اختصاصی هنوز خوانده نشده — چند لحظه صبر کنید یا صفحه را تازه کنید'); setBusy(false); return }
+      if (savedSlug === null) { setErr('نشانی اختصاصی هنوز خوانده نشده — چند لحظه صبر کنید یا صفحه را تازه کنید'); setBusy(false); return }
       const res = await saveProfileRemote('manufacturer', next.slug, next as unknown as Record<string, unknown>,
         { number: next.licenseNumber, url: next.licenseFile?.url ?? '' })
       if (!res.ok) { setErr(res.message ?? 'ذخیره روی سرور انجام نشد'); setBusy(false); return }
       /* عکس‌ها روی سرور به نشانی Storage تبدیل شده‌اند */
       if (res.profile?.slug) setSavedSlug(res.profile.slug)
-    /* از این لحظه نشانی منتشر شده و قفل می‌شود: هر تغییرِ بعدی
+    /* از این لحظه نشانی منتشر شده و قفل می‌شود: هر تغییر بعدی
        لینک‌های منتشرشده را می‌شکند. */
       const saved = (res.profile?.data as ManufacturerProfile | undefined) ?? next
       try { saveManufacturerProfile({ ...next, ...saved }) } catch { /* کش پر است */ }
@@ -241,7 +241,7 @@ export default function ManufacturerDashboard() {
                 <label className={LABEL}>سال تأسیس</label>
                 <input className={INPUT} value={form.sinceYear} onChange={e => set('sinceYear', e.target.value)} placeholder="مثال: ۱۳۷۸" />
               </div>
-                            {/* نشانیِ اختصاصیِ سایت — همان چیزی که پنلِ باشگاه از اول داشت */}
+                            {/* نشانی اختصاصی سایت — همان چیزی که پنل باشگاه از اول داشت */}
               <div className="sm:col-span-2">
                 <ProfileSlugField
                   kind="manufacturer" value={form.slug} savedSlug={savedSlug}

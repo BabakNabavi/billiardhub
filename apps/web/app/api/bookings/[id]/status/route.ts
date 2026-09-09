@@ -3,17 +3,17 @@ import { NextRequest, NextResponse } from 'next/server';
 import { sb, audit, clientIp } from '@/lib/finance/db';
 import { actorOf, ownsClub, UNAUTHENTICATED, FORBIDDEN } from '@/lib/auth/ownership';
 
-/* تغییر وضعیتِ یک رزرو توسط باشگاه‌دار.
+/* تغییر وضعیت یک رزرو توسط باشگاه‌دار.
 
    این مسیر هم مثل `/bookings/club/:id` وجود نداشت و دکمه‌های تب رزروها
    بی‌صدا کار نمی‌کردند: درخواست ۴۰۴ می‌گرفت، `catch` خالی بلعیدش، و UI
    خوش‌بینانه وضعیت را عوض‌شده نشان می‌داد. یعنی باشگاه‌دار فکر می‌کرد
    رزرو را تأیید کرده در حالی که هیچ‌چیز ذخیره نشده بود.
 
-   لغو عمداً این‌جا نیست: مسیرِ خودش را دارد
+   لغو عمدا این‌جا نیست: مسیر خودش را دارد
    (/api/bookings/:id/cancel) که بازپرداخت را هم حساب می‌کند. */
 
-/* نگاشتِ وضعیتِ کوچک‌حرفِ قدیمی به ستونِ بزرگ‌حرفِ فاز مالی — هر دو
+/* نگاشت وضعیت کوچک‌حرف قدیمی به ستون بزرگ‌حرف فاز مالی — هر دو
    به‌روز می‌شوند تا گزارش‌ها و UI یک چیز ببینند. */
 const ALLOWED: Record<string, string> = {
   confirmed: 'CONFIRMED',
@@ -42,7 +42,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
   if (!b) return NextResponse.json({ message: 'رزرو یافت نشد' }, { status: 404 });
   if (!(await ownsClub(actor, String(b.clubId)))) return NextResponse.json(FORBIDDEN, { status: 403 });
 
-  /* رزروِ لغوشده دوباره فعال نمی‌شود — پول برگشته و ساعتش آزاد شده. */
+  /* رزرو لغوشده دوباره فعال نمی‌شود — پول برگشته و ساعتش آزاد شده. */
   if (b.booking_status === 'CANCELLED' || b.status === 'cancelled') {
     return NextResponse.json({ message: 'این رزرو لغو شده و قابل تغییر نیست' }, { status: 409 });
   }

@@ -3,13 +3,13 @@ import { NextRequest, NextResponse } from 'next/server';
 import { sb, actorFromRequest } from '@/lib/finance/db';
 import { can } from '@/lib/admin/permissions';
 
-/* فهرستِ تراکنش‌های مالی — پایه‌ی گزارشِ مالیاتی.
-   از نمای `v_financial_transactions` می‌خواند که هر ردیفِ دفتر را با
-   تفکیکِ درآمدِ پلتفرم، سهمِ باشگاه و ورودی/خروجیِ نقدی می‌دهد.
+/* فهرست تراکنش‌های مالی — پایه‌ی گزارش مالیاتی.
+   از نمای `v_financial_transactions` می‌خواند که هر ردیف دفتر را با
+   تفکیک درآمد پلتفرم، سهم باشگاه و ورودی/خروجی نقدی می‌دهد.
 
    هدف این است که اگر حسابرس پرسید «این گردش از کجا آمده»، بشود
    ردیف‌به‌ردیف پاسخ داد: تاریخ، نوع، باشگاه، کاربر، مرجع، و اینکه از
-   آن مبلغ چقدر درآمدِ ما بوده و چقدر سهمِ باشگاه. */
+   آن مبلغ چقدر درآمد ما بوده و چقدر سهم باشگاه. */
 
 const MAX = 1000;
 
@@ -50,9 +50,9 @@ export async function GET(req: NextRequest) {
   const rows = (data ?? []) as Record<string, number | string | null>[];
   const agg = (k: string) => rows.reduce((s, r) => s + Number(r[k] || 0), 0);
 
-  /* ── خروجیِ CSV برای حسابدار و اداره‌ی مالیات ──
+  /* ── خروجی CSV برای حسابدار و اداره‌ی مالیات ──
      هر ردیف شناسه‌های مرجع را هم دارد تا بشود به پرداخت، رزرو و
-     باشگاه وصلش کرد — بدونِ آن‌ها گزارش فقط یک ستون عدد است.
+     باشگاه وصلش کرد — بدون آن‌ها گزارش فقط یک ستون عدد است.
 
      BOM لازم است: بدونش اکسل فارسی را به‌هم‌ریخته نشان می‌دهد. */
   if (q.get('format') === 'csv') {
@@ -88,7 +88,7 @@ export async function GET(req: NextRequest) {
   return NextResponse.json({
     transactions: rows,
     total: count ?? rows.length,
-    /* جمعِ همین صفحه — برای جمعِ کل باید بدونِ صفحه‌بندی گرفت */
+    /* جمع همین صفحه — برای جمع کل باید بدون صفحه‌بندی گرفت */
     pageTotals: {
       grossIn: agg('gross_in'),
       platformRevenue: agg('platform_revenue'),

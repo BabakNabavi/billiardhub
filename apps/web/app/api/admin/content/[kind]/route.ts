@@ -4,11 +4,11 @@ import { sb, actorFromRequest, isAdmin, audit, clientIp } from '@/lib/finance/db
 import { CONTENT, isContentKind, sanitize } from '@/lib/admin/content';
 import { revalidateTag } from 'next/cache';
 
-/* ⚠️ صفحه‌ی اخبار خواندنِ دیتابیس را ۶۰ ثانیه کش می‌کند. بدونِ این،
+/* ⚠️ صفحه‌ی اخبار خواندن دیتابیس را ۶۰ ثانیه کش می‌کند. بدون این،
    ویراستار خبر را منتشر می‌کرد و تا یک دقیقه روی سایت نمی‌دیدش و
    فکر می‌کرد ذخیره نشده. */
-/* ⚠️ Next 16 آرگومانتِ دوم (پروفایلِ عمرِ کش) را اجباری کرده؛
-   صدا زدنِ تک‌آرگومانتی دیگر کامپایل نمی‌شود. */
+/* ⚠️ Next 16 آرگومانت دوم (پروفایل عمر کش) را اجباری کرده؛
+   صدا زدن تک‌آرگومانتی دیگر کامپایل نمی‌شود. */
 const bust = (kind: string) => { if (kind === 'news') revalidateTag('news', 'max'); };
 
 /* CRUD محتوای پنل ادمین — اخبار، رویدادها، رنکینگ و رسانه.
@@ -61,9 +61,9 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ kind: stri
     return NextResponse.json({ message: 'عنوان الزامی است' }, { status: 400 });
   }
 
-  /* ⚠️ نویسنده از نشست خوانده می‌شود، نه از بدنه‌ی درخواست: ستونِ
-     `author_id` عمداً در فهرستِ نوشتنیِ ادمین نیست تا کسی نتواند
-     خبر را به نامِ دیگری ثبت کند. تا امروز اصلاً ست نمی‌شد و هر
+  /* ⚠️ نویسنده از نشست خوانده می‌شود، نه از بدنه‌ی درخواست: ستون
+     `author_id` عمدا در فهرست نوشتنی ادمین نیست تا کسی نتواند
+     خبر را به نام دیگری ثبت کند. تا امروز اصلا ست نمی‌شد و هر
      خبری بی‌نویسنده در دیتابیس می‌نشست. */
   if (kind === 'news') row.author_id = g.actor!.id;
 
@@ -71,7 +71,7 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ kind: stri
   if (error) {
     console.error(`[admin/content/${kind}] insert error:`, error.message);
     if (/duplicate key/i.test(error.message)) {
-      return NextResponse.json({ message: 'این نشانی (slug) قبلاً ثبت شده است' }, { status: 409 });
+      return NextResponse.json({ message: 'این نشانی (slug) قبلا ثبت شده است' }, { status: 409 });
     }
     return NextResponse.json({ message: 'ثبت انجام نشد' }, { status: 500 });
   }

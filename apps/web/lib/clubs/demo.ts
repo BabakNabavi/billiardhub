@@ -1,16 +1,16 @@
 /* ═══════════════════════════════════════════════════════════════
-   باشگاهِ نمایشی — ساخت، فهرست و حذف.
+   باشگاه نمایشی — ساخت، فهرست و حذف.
 
-   شش نوعِ دیگرِ محتوای نمایشی روی جدولِ `profiles` می‌نشینند و از
-   `lib/profiles/server` می‌آیند. باشگاه جدولِ خودش را دارد، پس
-   مسیرِ خودش را هم می‌خواهد — ولی با همان سه قاعده:
+   شش نوع دیگر محتوای نمایشی روی جدول `profiles` می‌نشینند و از
+   `lib/profiles/server` می‌آیند. باشگاه جدول خودش را دارد، پس
+   مسیر خودش را هم می‌خواهد — ولی با همان سه قاعده:
 
      · هر ردیف `is_demo = true` می‌گیرد و همیشه از داده‌ی واقعی جدا
-       می‌ماند (مهاجرتِ ۰۵۹).
-     · تیکِ تأیید نمی‌گیرد. آن تیک یعنی جوازِ کسب استعلام شده و روی
-       باشگاهی که وجودِ خارجی ندارد ادعای درستی نیست.
-     · حذف فقط با شرطِ `is_demo` انجام می‌شود، پس حتی با شناسه‌ی
-       اشتباه هم باشگاهِ یک کاربرِ واقعی از این مسیر پاک نمی‌شود.
+       می‌ماند (مهاجرت ۰۵۹).
+     · تیک تأیید نمی‌گیرد. آن تیک یعنی جواز کسب استعلام شده و روی
+       باشگاهی که وجود خارجی ندارد ادعای درستی نیست.
+     · حذف فقط با شرط `is_demo` انجام می‌شود، پس حتی با شناسه‌ی
+       اشتباه هم باشگاه یک کاربر واقعی از این مسیر پاک نمی‌شود.
    ═══════════════════════════════════════════════════════════════ */
 
 import { sb } from '../finance/db'
@@ -26,9 +26,9 @@ export interface DemoClubInput {
   description?: string
   images?: string[]
   logo?: string
-  /* میزها — دقیقاً همان چهار کلیدی که کارتِ باشگاه در `/clubs`
+  /* میزها — دقیقا همان چهار کلیدی که کارت باشگاه در `/clubs`
      می‌خواند (TABLE_TYPES). نه «کارامبول» داریم نه «نرخ ساعتی»:
-     ستونشان وجود ندارد و قیمت جای دیگری، روی خودِ میز، تعریف می‌شود. */
+     ستونشان وجود ندارد و قیمت جای دیگری، روی خود میز، تعریف می‌شود. */
   snookerTables?: number
   pocketTables?: number
   highballTables?: number
@@ -73,9 +73,9 @@ export async function createDemoClub(input: DemoClubInput): Promise<DemoClubRow>
   const address = s(input.address, 400)
   if (!name || !city || !address) throw new Error('نام، شهر و آدرس لازم است')
 
-  /* عکس‌های data: به Storage منتقل می‌شوند — همان کاری که مسیرِ
-     پروفایل‌های نمایشی می‌کند. بدونِ این، یک عکسِ base64 چند مگابایتی
-     مستقیم داخلِ ردیفِ دیتابیس می‌نشست. */
+  /* عکس‌های data: به Storage منتقل می‌شوند — همان کاری که مسیر
+     پروفایل‌های نمایشی می‌کند. بدون این، یک عکس base64 چند مگابایتی
+     مستقیم داخل ردیف دیتابیس می‌نشست. */
   const images = await offloadImages(
     (input.images ?? []).filter(Boolean), 'clubs/demo',
   ) as string[]
@@ -84,11 +84,11 @@ export async function createDemoClub(input: DemoClubInput): Promise<DemoClubRow>
   const { data, error } = await sb().from('clubs').insert({
     name, city, address,
     province: s(input.province, 80) || null,
-    /* سه ستونِ NOT NULL که فرمِ عمومی هم همیشه پرشان می‌کند.
-       `country` عمداً 'Iran' است نه «ایران» — همان مقداری که فرمِ ثبتِ
-       باشگاه می‌فرستد؛ دو املای متفاوت یعنی فیلترِ کشور روزی نصفِ
+    /* سه ستون NOT NULL که فرم عمومی هم همیشه پرشان می‌کند.
+       `country` عمدا 'Iran' است نه «ایران» — همان مقداری که فرم ثبت
+       باشگاه می‌فرستد؛ دو املای متفاوت یعنی فیلتر کشور روزی نصف
        ردیف‌ها را جا می‌اندازد. مختصات صفر یعنی «ثبت نشده»، که برای
-       باشگاهی که وجودِ خارجی ندارد درست‌ترین مقدار است. */
+       باشگاهی که وجود خارجی ندارد درست‌ترین مقدار است. */
     country: 'Iran',
     latitude: 0,
     longitude: 0,
@@ -105,9 +105,9 @@ export async function createDemoClub(input: DemoClubInput): Promise<DemoClubRow>
     hasParking: !!input.hasParking,
     hasWifi: !!input.hasWifi,
     hasProfessionalCoach: !!input.hasProfessionalCoach,
-    /* دیده شود — کارِ این ردیف دقیقاً همین است */
+    /* دیده شود — کار این ردیف دقیقا همین است */
     isActive: true,
-    /* ولی تیکِ تأیید نگیرد */
+    /* ولی تیک تأیید نگیرد */
     verificationStatus: 'pending',
     is_demo: true,
   }).select('id,name,city,province,address,images,"isActive","createdAt"').single()
@@ -126,7 +126,7 @@ export async function listDemoClubs(): Promise<DemoClubRow[]> {
   return (data as unknown as DbClub[]).map(toRow)
 }
 
-/** حذفِ یک باشگاهِ نمایشی. شرطِ `is_demo` عمدی است. */
+/** حذف یک باشگاه نمایشی. شرط `is_demo` عمدی است. */
 export async function deleteDemoClub(id: string): Promise<boolean> {
   const { error, count } = await sb().from('clubs')
     .delete({ count: 'exact' }).eq('id', id).eq('is_demo', true)

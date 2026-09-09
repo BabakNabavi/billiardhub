@@ -35,11 +35,11 @@ function timeAgo(iso: string): string {
   return `${toFarsiDigits(Math.floor(h / 24))} روز پیش`
 }
 
-/* ── ردیفِ فشرده ──
-   جایگزینِ کارتِ بزرگ. با شصت درخواست، کارتِ ۱۶۰پیکسلی یعنی ادمین
+/* ── ردیف فشرده ──
+   جایگزین کارت بزرگ. با شصت درخواست، کارت ۱۶۰پیکسلی یعنی ادمین
    باید ده صفحه اسکرول کند تا یک تصمیم بگیرد. این ردیف همه‌ی چیزهای
-   لازم — نقش، مدرک، زمان، دو دکمه — را در یک خط جا می‌دهد و کادرِ
-   دلیلِ رد فقط وقتی باز می‌شود که لازم باشد. */
+   لازم — نقش، مدرک، زمان، دو دکمه — را در یک خط جا می‌دهد و کادر
+   دلیل رد فقط وقتی باز می‌شود که لازم باشد. */
 function RequestRow({ req, onAction }: {
   req: RoleRequest
   onAction: (id: string, action: 'approve' | 'reject', note?: string, verified?: boolean) => Promise<void>
@@ -48,8 +48,8 @@ function RequestRow({ req, onAction }: {
   const [rejecting, setRejecting] = useState(false)
   const [note, setNote] = useState('')
   const [busy, setBusy] = useState(false)
-  /* بدونِ جزئیات، تأیید یعنی امضای نادیده: معلوم نیست طرف کیست، چه
-     ثبت کرده، و اطلاعاتش با هویتِ حسابش می‌خواند یا نه. */
+  /* بدون جزئیات، تأیید یعنی امضای نادیده: معلوم نیست طرف کیست، چه
+     ثبت کرده، و اطلاعاتش با هویت حسابش می‌خواند یا نه. */
   const [showDetails, setShowDetails] = useState(false)
 
   const act = async (action: 'approve' | 'reject', verified = false) => {
@@ -59,9 +59,9 @@ function RequestRow({ req, onAction }: {
     setRejecting(false)
   }
 
-  /* «مدرک ندارد» یعنی تیکِ آبی نمی‌گیرد، نه اینکه تأیید نمی‌شود.
-     فروشگاه، تولیدکننده، خدمات فنی و بازیکن بدونِ هیچ مدرکی تأیید
-     می‌شوند — فقط نشانِ تأیید نمی‌گیرند. */
+  /* «مدرک ندارد» یعنی تیک آبی نمی‌گیرد، نه اینکه تأیید نمی‌شود.
+     فروشگاه، تولیدکننده، خدمات فنی و بازیکن بدون هیچ مدرکی تأیید
+     می‌شوند — فقط نشان تأیید نمی‌گیرند. */
   const missingDoc = meta.requiresDoc && !req.doc_url
 
   return (
@@ -117,7 +117,7 @@ function RequestRow({ req, onAction }: {
               تأیید
             </button>
 
-            {/* تیکِ آبی فقط با مدرک. بدونِ مدرک دکمه خاموش است تا ادمین
+            {/* تیک آبی فقط با مدرک. بدون مدرک دکمه خاموش است تا ادمین
                 چیزی را که ندیده تأیید نکند — سرور هم همین را رد می‌کند. */}
             <button onClick={() => act('approve', true)} disabled={busy || missingDoc}
               title={missingDoc ? `برای تیک آبی، ${meta.docHint || 'مدرک'} لازم است` : 'تأیید همراه با تیک آبی'}
@@ -150,8 +150,8 @@ function RequestRow({ req, onAction }: {
 
       {rejecting && (
         <div style={{ display: 'flex', gap: 7, marginTop: 8, flexWrap: 'wrap' }}>
-          {/* فهرستِ بسته، نه متنِ آزاد: این متن داخلِ پیامک می‌رود و
-              سرویسِ پیامک مقدارهای ممکنِ آن را از قبل می‌خواهد. */}
+          {/* فهرست بسته، نه متن آزاد: این متن داخل پیامک می‌رود و
+              سرویس پیامک مقدارهای ممکن آن را از قبل می‌خواهد. */}
           <select value={note} onChange={e => setNote(e.target.value)}
             style={{
               flex: 1, minWidth: 190, background: '#F7F7F5', border: '1px solid rgba(0,0,0,0.08)',
@@ -180,8 +180,8 @@ function RequestRow({ req, onAction }: {
         </div>
       )}
 
-      {/* در ردیف‌های تازه کدِ دلیل ذخیره می‌شود، در ردیف‌های قدیمی
-          متنِ آزاد. `rejectLabel` هر دو را می‌فهمد. */}
+      {/* در ردیف‌های تازه کد دلیل ذخیره می‌شود، در ردیف‌های قدیمی
+          متن آزاد. `rejectLabel` هر دو را می‌فهمد. */}
       {req.status === 'rejected' && req.rejection_note && (
         <div style={{ fontSize: 12, color: '#ef4444', marginTop: 6 }}>
           دلیل: {rejectLabel(req.rejection_note)}
@@ -196,8 +196,8 @@ export default function AdminRolesPage() {
   const router = useRouter()
   const [requests, setRequests] = useState<RoleRequest[]>([])
 
-  /* درخواست‌های یک کاربر کنارِ هم — بیست نفر با سه نقش یعنی شصت
-     ردیفِ پراکنده که ادمین نمی‌فهمد کدامشان مالِ یک نفرند. */
+  /* درخواست‌های یک کاربر کنار هم — بیست نفر با سه نقش یعنی شصت
+     ردیف پراکنده که ادمین نمی‌فهمد کدامشان مال یک نفرند. */
   const grouped = useMemo(() => {
     const by = new Map<string, { key: string; name: string; items: RoleRequest[] }>()
     for (const r of requests) {
@@ -289,7 +289,7 @@ export default function AdminRolesPage() {
           {/* سرویس در دسترس نیست */}
           {svcDown && !loading && (
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'rgba(178,59,46,0.06)', border: '1px solid rgba(178,59,46,0.22)', borderRadius: 12, padding: '12px 16px', marginBottom: 14, fontSize: 13, color: '#A03428' }}>
-              سرویس درخواست‌های نقش فعلاً در دسترس نیست — بعداً دوباره تلاش کنید. (تأیید/لغو نقش‌ها به بک‌اند متصل است)
+              سرویس درخواست‌های نقش فعلا در دسترس نیست — بعدا دوباره تلاش کنید. (تأیید/لغو نقش‌ها به بک‌اند متصل است)
             </div>
           )}
 
@@ -307,8 +307,8 @@ export default function AdminRolesPage() {
             <>
               {/* ── گروه‌بندی بر اساس کاربر ──
                   با کارت‌های بزرگ، بیست نفر که هرکدام سه نقش خواسته‌اند
-                  یعنی شصت کارتِ هم‌شکل پشتِ هم — ادمین نمی‌فهمد کدام
-                  درخواست‌ها مالِ یک نفرند و باید با هم بررسی شوند.
+                  یعنی شصت کارت هم‌شکل پشت هم — ادمین نمی‌فهمد کدام
+                  درخواست‌ها مال یک نفرند و باید با هم بررسی شوند.
 
                   حالا هر کاربر یک بلوک است و نقش‌هایش زیرش، فشرده. */}
               <div style={{ fontSize: 13, color: 'rgba(0,0,0,0.38)', marginBottom: 12 }}>

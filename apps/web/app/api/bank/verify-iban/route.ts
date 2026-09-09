@@ -30,8 +30,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ message: 'دسترسی مجاز نیست' }, { status: 403 });
     }
 
-    /* قفل — همان قاعده‌ی card-to-iban؛ این مسیر راهِ دومِ رسیدن به
-       همان ستون است و اگر باز می‌ماند، قفلِ آن یکی دور زده می‌شد. */
+    /* قفل — همان قاعده‌ی card-to-iban؛ این مسیر راه دوم رسیدن به
+       همان ستون است و اگر باز می‌ماند، قفل آن یکی دور زده می‌شد. */
     if (c.ibanVerified && !admin) return lockedResponse('bank');
   }
 
@@ -57,10 +57,10 @@ export async function POST(req: NextRequest) {
 
   const bankName = bankOfIban(iban);
   if (clubId) {
-    /* نامِ صاحبِ حساب هم روی خودِ باشگاه نوشته می‌شود.
-       پنلِ باشگاه‌دار `clubs.bankCardOwner` را نشان می‌دهد، نه
+    /* نام صاحب حساب هم روی خود باشگاه نوشته می‌شود.
+       پنل باشگاه‌دار `clubs.bankCardOwner` را نشان می‌دهد، نه
        `club_bank_accounts.account_holder_name`. تا امروز فقط دومی پر
-       می‌شد، پس فیلدِ «نام صاحب حساب» همیشه خالی می‌ماند در حالی که
+       می‌شد، پس فیلد «نام صاحب حساب» همیشه خالی می‌ماند در حالی که
        استعلام موفق بوده. */
     const { data: me } = await sb().from('users')
       .select('"firstName","lastName"').eq('id', actor.id).maybeSingle();

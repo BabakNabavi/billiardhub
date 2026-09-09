@@ -1,25 +1,25 @@
 'use client'
 
 /* ─────────────────────────────────────────────────────────────
-   تیکِ آبی — یک میز برای هر هفت نقش.
+   تیک آبی — یک میز برای هر هفت نقش.
 
    ── مشکلی که این صفحه را ساخت ──
    اعطای تیک در شش جای جدا پخش بود: `/admin/coaches`،
    `/admin/referees`، `/admin/sellers` هرکدام دکمه‌ی خودشان را
-   داشتند، `/admin/clubs` هم مالِ باشگاه بود، و بازیکن، متخصص و
-   تولیدکننده اصلاً هیچ دکمه‌ای نداشتند — API از قبل `verified` را
-   می‌پذیرفت ولی هیچ رابطی صدایش نمی‌زد. یعنی تیکِ آن سه نقش عملاً
+   داشتند، `/admin/clubs` هم مال باشگاه بود، و بازیکن، متخصص و
+   تولیدکننده اصلا هیچ دکمه‌ای نداشتند — API از قبل `verified` را
+   می‌پذیرفت ولی هیچ رابطی صدایش نمی‌زد. یعنی تیک آن سه نقش عملا
    غیرقابل‌دادن بود.
 
    بدتر از پخش‌بودن، دیده‌نشدن بود: کسی که مدرک آپلود می‌کرد در هیچ
-   فهرستی ظاهر نمی‌شد. تنها راهِ خبردار شدن این بود که ادمین شانسی
+   فهرستی ظاهر نمی‌شد. تنها راه خبردار شدن این بود که ادمین شانسی
    صفحه‌ی همان نقش را باز کند.
 
-   این‌جا هر هفت نقش در یک فهرست‌اند، تبِ «در انتظار» پیش‌فرض است، و
-   صفحه‌ی اولِ پنل عددش را نشان می‌دهد.
+   این‌جا هر هفت نقش در یک فهرست‌اند، تب «در انتظار» پیش‌فرض است، و
+   صفحه‌ی اول پنل عددش را نشان می‌دهد.
 
-   صفحه‌های تک‌نقشی سرِ جایشان می‌مانند (مدرک، رد کردن، جزئیات)؛ این
-   صفحه فقط کارِ تیک را انجام می‌دهد.
+   صفحه‌های تک‌نقشی سر جایشان می‌مانند (مدرک، رد کردن، جزئیات)؛ این
+   صفحه فقط کار تیک را انجام می‌دهد.
    ───────────────────────────────────────────────────────────── */
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
@@ -42,7 +42,7 @@ const BLUE = '#0095F6'
 
 type Kind = 'club' | 'coach' | 'referee' | 'player' | 'technician' | 'seller' | 'manufacturer'
 
-/* هفت نقش — «کاربر عادی» عمداً نیست: تیک مالِ هویتِ حرفه‌ای است. */
+/* هفت نقش — «کاربر عادی» عمدا نیست: تیک مال هویت حرفه‌ای است. */
 const KINDS: { key: Kind; label: string; href: (slug: string) => string }[] = [
   { key: 'club', label: 'باشگاه', href: s => `/clubs/${s}` },
   { key: 'coach', label: 'مربی', href: s => `/coaches/${s}` },
@@ -56,7 +56,7 @@ const LABEL_OF = Object.fromEntries(KINDS.map(k => [k.key, k.label])) as Record<
 const PROFILE_KINDS = KINDS.filter(k => k.key !== 'club').map(k => k.key)
 
 interface Row {
-  /** کلیدِ یکتا در کلِ فهرست — شناسه‌ها بین جدول‌ها یکتا نیستند */
+  /** کلید یکتا در کل فهرست — شناسه‌ها بین جدول‌ها یکتا نیستند */
   key: string
   kind: Kind
   /** شناسه‌ای که برای نوشتن لازم است: `profiles.id` یا `clubs.id` */
@@ -67,7 +67,7 @@ interface Row {
   verified: boolean
   /** مدرکی آپلود شده که پشتوانه‌ی تیک باشد */
   hasDoc: boolean
-  /** در سایت منتشر است — تیک دادن به پروفایلِ معلق بی‌معناست */
+  /** در سایت منتشر است — تیک دادن به پروفایل معلق بی‌معناست */
   published: boolean
 }
 
@@ -88,8 +88,8 @@ interface ApiClub {
   verificationStatus: string
   licenseDocumentUrl?: string
   isActive?: boolean
-  /* ادمینِ بی‌کلیدِ `clubs` نشانیِ مدرک را نمی‌گیرد؛ سرور به‌جایش
-     همین پرچم را می‌دهد تا نشانِ «مدرک دارد» خاموش نشود. */
+  /* ادمین بی‌کلید `clubs` نشانی مدرک را نمی‌گیرد؛ سرور به‌جایش
+     همین پرچم را می‌دهد تا نشان «مدرک دارد» خاموش نشود. */
   hasLicenseDoc?: boolean
 }
 
@@ -105,7 +105,7 @@ function profileRow(p: ApiProfile): Row {
     sub: [str(d.specialty) || str(d.discipline), str(d.city)].filter(Boolean).join(' · ') || '—',
     href: meta ? meta.href(p.slug) : '#',
     verified: p.verified === true,
-    /* دو جای ممکنِ مدرک: ستونِ جواز، یا فایلِ مدرکِ داخلِ فرم
+    /* دو جای ممکن مدرک: ستون جواز، یا فایل مدرک داخل فرم
        (مربی و داور گواهی‌شان را آن‌جا می‌گذارند). */
     hasDoc: !!str(p.licenseUrl) || !!str(cert?.url),
     published: p.status === 'approved',
@@ -122,17 +122,17 @@ function clubRow(c: ApiClub): Row {
     href: `/clubs/${c.slug || c.id}`,
     verified: c.verificationStatus === 'verified',
     hasDoc: !!str(c.licenseDocumentUrl) || c.hasLicenseDoc === true,
-    /* همان شرطِ فهرستِ عمومی، مو‌به‌مو: هم فعال، هم یکی از دو وضعیتِ
-       تأیید. باشگاهِ غیرفعال در سایت نیست، پس تیک هم نباید بگیرد. */
+    /* همان شرط فهرست عمومی، مو‌به‌مو: هم فعال، هم یکی از دو وضعیت
+       تأیید. باشگاه غیرفعال در سایت نیست، پس تیک هم نباید بگیرد. */
     published: c.isActive !== false
       && (c.verificationStatus === 'verified' || c.verificationStatus === 'approved'),
   }
 }
 
 /* ── چرا نتیجه‌ی «نیمه» ──
-   اگر یکی از دو منبع بیفتد، فهرستِ دیگری همچنان ارزش دارد؛ ولی
-   ادمین باید بداند که چیزی جا افتاده. `catch` خالی یعنی صفِ خرابْ
-   «صفِ خالی» دیده می‌شود و ادمین نتیجه می‌گیرد کاری روی میز نیست. */
+   اگر یکی از دو منبع بیفتد، فهرست دیگری همچنان ارزش دارد؛ ولی
+   ادمین باید بداند که چیزی جا افتاده. `catch` خالی یعنی صف خراب
+   «صف خالی» دیده می‌شود و ادمین نتیجه می‌گیرد کاری روی میز نیست. */
 async function loadRows(): Promise<{ rows: Row[]; partial: boolean }> {
   const [profiles, clubs] = await Promise.all([
     apiFetch('/api/admin/profiles', { cache: 'no-store' })
@@ -159,7 +159,7 @@ async function loadRows(): Promise<{ rows: Row[]; partial: boolean }> {
 
 async function setVerified(row: Row, next: boolean): Promise<void> {
   if (row.kind === 'club') {
-    /* برداشتنِ تیک باشگاه یعنی برگشت به «منتشر بدونِ تیک» — نه «رد».
+    /* برداشتن تیک باشگاه یعنی برگشت به «منتشر بدون تیک» — نه «رد».
        رد کردن باشگاه را از سایت برمی‌دارد و این‌جا مقصود نیست. */
     const r = await apiFetch(`/api/clubs/${row.id}`, {
       method: 'PUT',
@@ -195,8 +195,8 @@ export default function AdminVerifiedPage() {
   const [kind, setKind] = useState<Kind | 'all'>('all')
   const [busy, setBusy] = useState<string | null>(null)
 
-  /* سرور نقشِ ثانویه را هم ادمین می‌شمارد (`isAdmin` در lib/finance/db).
-     گاردِ فقط-`primaryRole` چنین ادمینی را بیرون می‌انداخت، در حالی که
+  /* سرور نقش ثانویه را هم ادمین می‌شمارد (`isAdmin` در lib/finance/db).
+     گارد فقط-`primaryRole` چنین ادمینی را بیرون می‌انداخت، در حالی که
      همه‌ی درخواست‌هایش موفق می‌شد. */
   const isAdminUser = !!user
     && (user.primaryRole === 'admin' || (user.secondaryRoles ?? []).includes('admin'))
@@ -216,8 +216,8 @@ export default function AdminVerifiedPage() {
   }, [_hydrated, authChecked, isAdminUser, router])
 
   /* «در انتظار» یعنی کاری روی میز هست: منتشر شده، تیک ندارد، و
-     مدرکی هم آپلود کرده که بشود درباره‌اش تصمیم گرفت. بدونِ شرطِ
-     مدرک، این تب پر می‌شد از پروفایل‌هایی که اصلاً چیزی نفرستاده‌اند
+     مدرکی هم آپلود کرده که بشود درباره‌اش تصمیم گرفت. بدون شرط
+     مدرک، این تب پر می‌شد از پروفایل‌هایی که اصلا چیزی نفرستاده‌اند
      و صف بی‌معنا می‌شد. */
   const waiting = useMemo(
     () => (rows ?? []).filter(r => r.published && !r.verified && r.hasDoc),
@@ -254,7 +254,7 @@ export default function AdminVerifiedPage() {
               تیک آبی <VerifiedBadge title="" style={{ marginInlineStart: 0 }} />
             </h1>
             <p style={{ fontSize: 12.5, color: MUT, margin: '6px 0 0', lineHeight: 1.9, maxWidth: 560 }}>
-              اعطا و پس‌گرفتنِ تیک برای هر هفت نقش. تیک یعنی «مدرکش دیده و تأیید شده»؛
+              اعطا و پس‌گرفتن تیک برای هر هفت نقش. تیک یعنی «مدرکش دیده و تأیید شده»؛
               برداشتنش پروفایل را از سایت حذف نمی‌کند.
             </p>
           </div>
@@ -273,8 +273,8 @@ export default function AdminVerifiedPage() {
           ]}
         />
 
-        {/* فیلترِ نقش — همان کنترلِ مشترکِ سایت، نه یک ردیفِ دستیِ
-            تازه. hover و focus-visible و حالتِ انتخاب داخلِ .lq-seg است. */}
+        {/* فیلتر نقش — همان کنترل مشترک سایت، نه یک ردیف دستی
+            تازه. hover و focus-visible و حالت انتخاب داخل .lq-seg است. */}
         <div className="lq-seg" style={{ flexWrap: 'wrap', marginBottom: 14 }}>
           {([{ key: 'all' as const, label: 'همه‌ی نقش‌ها' }, ...KINDS]).map(k => (
             <button key={k.key} type="button" aria-pressed={kind === k.key}
@@ -292,7 +292,7 @@ export default function AdminVerifiedPage() {
         )}
 
         {rows === null ? (
-          /* اسکلتِ لودینگ — صفحه نباید یک‌باره از هیچ به فهرست بپرد */
+          /* اسکلت لودینگ — صفحه نباید یک‌باره از هیچ به فهرست بپرد */
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
             {[0, 1, 2, 3].map(i => (
               <div key={i} style={{ height: 66, background: '#fff', border: `1px solid ${LINE}`, borderRadius: 14, opacity: 0.6 }} />
@@ -307,7 +307,7 @@ export default function AdminVerifiedPage() {
             <p style={{ fontSize: 12.5, color: MUT, margin: 0, lineHeight: 1.9 }}>
               {tab === 'waiting'
                 ? 'وقتی کسی مدرکش را آپلود کند، همین‌جا ظاهر می‌شود.'
-                : 'با تبِ دیگری یا نقشِ دیگری امتحان کنید.'}
+                : 'با تب دیگری یا نقش دیگری امتحان کنید.'}
             </p>
           </div>
         ) : (
