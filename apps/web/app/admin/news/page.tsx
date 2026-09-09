@@ -103,6 +103,32 @@ export default function AdminNewsPage() {
     setShowForm(true);
   };
 
+  /* ── انتشار / لغوِ انتشار، مستقیم از فهرست ──
+
+     ⚠️ لغوِ انتشار **`published_at` را پاک نمی‌کند**. نسخه‌ی اول
+     `null` می‌نوشت و آن تاریخ جای دیگری نگه داشته نمی‌شود، پس برای
+     همیشه از دست می‌رفت — و بدتر، انتشارِ دوباره‌ی همان خبر تاریخِ
+     امروز می‌گرفت و یک خبرِ سه‌ماهه دوباره صدرِ صفحه می‌نشست؛ دقیقاً
+     همان چیزی که این کد برای جلوگیری از آن نوشته شده بود.
+     پرس‌وجوهای عمومی فقط روی `status` فیلتر می‌کنند، پس پاک‌کردنِ
+     تاریخ هیچ لازم نبود. */
+  const [busyId, setBusyId] = useState<string | null>(null);
+
+  const togglePublish = async (item: NewsItem) => {
+    if (busyId) return;
+    setBusyId(item.id);
+    try {
+      const next = !item.published;
+      const patch: Record<string, unknown> = { status: next ? 'published' : 'draft' };
+      /* تاریخ فقط بارِ اول نوشته می‌شود */
+      if (next && !item.publishedAt) patch.published_at = new Date().toISOString();
+      const res = await updateContent<DbNews>('news', item.id, patch);
+      if (!res.ok) { setErr(res.message ?? 'تغییر وضعیت انجام نشد'); return; }
+      setErr('');
+      await refresh();
+    } finally { setBusyId(null); }
+  };
+
   const handleDelete = async (id: string) => {
     if (!(await ask('این خبر حذف شود؟'))) return;
     if (await deleteContent('news', id)) setNews(rows => rows.filter(n => n.id !== id));
@@ -124,12 +150,14 @@ export default function AdminNewsPage() {
       cover_url: form.cover.trim(),
       tags: form.tags.split(/[,،]/).map(t => t.trim()).filter(Boolean),
       status: form.published ? 'published' : 'draft',
-      /* ⚠️ لحظه‌ی انتشار فقط یک‌بار ثبت می‌شود. تا امروز هر ویرایشِ
-         یک خبرِ منتشرشده published_at را روی «الان» می‌نوشت، یعنی
-         اصلاحِ یک غلطِ املایی، خبرِ سه‌ماهه را دوباره صدرِ صفحه
-         می‌نشاند. */
-      published_at: form.published ? (form.publishedAt ?? new Date().toISOString()) : null,
     };
+    /* ⚠️ لحظه‌ی انتشار فقط یک‌بار ثبت می‌شود و هرگز پاک نمی‌شود:
+       ویرایشِ یک خبرِ منتشرشده نباید آن را روی «الان» ببرد (خبرِ
+       سه‌ماهه دوباره صدرِ صفحه می‌نشست)، و ذخیره‌ی پیش‌نویس نباید
+       تاریخِ اصلیِ انتشار را نابود کند. */
+    if (form.published && !form.publishedAt) {
+      payload.published_at = new Date().toISOString();
+    }
     /* نامکِ خالی نباید روی ستونِ یکتا بنشیند: دومین خبرِ بی‌نامک با
        خطای «تکراری» رد می‌شد. */
     if (form.slug.trim()) payload.slug = form.slug.trim();
@@ -263,12 +291,22 @@ export default function AdminNewsPage() {
                 <input type="checkbox" checked={form.published}
                   onChange={e => setForm({ ...form, published: e.target.checked })}
                   className="accent-green-600 w-4 h-4" />
-                <span className="text-sm font-medium text-gray-700">انتشار فوری</span>
+                <span className="text-sm font-medium text-gray-700">
+                  انتشار روی سایت
+                  <span className="block text-xs font-normal text-gray-400">
+                    تا وقتی این تیک نخورده باشد، خبر پیش‌نویس می‌ماند و در /news دیده نمی‌شود.
+                  </span>
+                </span>
               </label>
               <button onClick={handleSave}
                 className="bg-green-700 text-white px-6 py-2.5 rounded-xl font-bold hover:bg-green-800 flex items-center gap-2">
                 <Save size={16} />
-                {editingId ? 'ذخیره تغییرات' : 'انتشار خبر'}
+                {/* ⚠️ برچسب باید همان کاری را بگوید که می‌کند: این
+                    دکمه فقط وقتی منتشر می‌کند که تیکِ «انتشار» خورده
+                    باشد. برچسبِ «انتشار خبر» روی حالتِ پیش‌نویس،
+                    ادمین را مطمئن می‌کرد خبر منتشر شده — و بعد آن را
+                    در سایت نمی‌دید. */}
+                {form.published ? (editingId ? 'ذخیره و انتشار' : 'انتشار خبر') : 'ذخیره پیش‌نویس'}
               </button>
             </div>
           </div>
@@ -285,6 +323,13 @@ export default function AdminNewsPage() {
           <div className="col-span-2 text-center">عملیات</div>
         </div>
         <div className="divide-y divide-gray-50">
+          {/* ⚠️ بدونِ این، فهرستِ خالی و شکستِ خواندن یک شکل داشتند:
+              فقط سطرِ عنوان‌ها دیده می‌شد. */}
+          {news.length === 0 && (
+            <div className="px-5 py-12 text-center text-sm text-gray-400">
+              هنوز خبری ثبت نشده است.
+            </div>
+          )}
           {news.map(item => (
             <div key={item.id} className="grid grid-cols-12 items-center px-5 py-4 hover:bg-gray-50">
               <div className="col-span-5">
@@ -303,11 +348,19 @@ export default function AdminNewsPage() {
                 </span>
               </div>
               <div className="col-span-2 flex items-center justify-center gap-2">
-                <button onClick={() => handleEdit(item)}
+                <button onClick={() => void togglePublish(item)}
+                  disabled={busyId === item.id}
+                  title={item.published ? 'بازگرداندن به پیش‌نویس' : 'انتشار روی سایت'}
+                  className={`rounded-lg px-2 py-1 text-xs font-bold transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${item.published
+                    ? 'text-gray-500 hover:bg-gray-100'
+                    : 'bg-green-700 text-white hover:bg-green-800'}`}>
+                  {busyId === item.id ? '…' : item.published ? 'لغو انتشار' : 'انتشار'}
+                </button>
+                <button onClick={() => handleEdit(item)} aria-label={`ویرایش ${item.title}`}
                   className="p-1.5 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors">
                   <Edit size={15} />
                 </button>
-                <button onClick={() => handleDelete(item.id)}
+                <button onClick={() => handleDelete(item.id)} aria-label={`حذف ${item.title}`}
                   className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors">
                   <Trash2 size={15} />
                 </button>
