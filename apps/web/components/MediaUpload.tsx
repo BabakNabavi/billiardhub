@@ -240,7 +240,9 @@ export default function MediaUpload({ open, onClose, onUploaded }: { open: boole
         /* شناسه‌ی نمایشی حالا همان نشانیِ عمومی است */
         id: v.slug, title: v.title, category: v.category as MediaVideo['category'],
         creator: { id: v.creatorHandle, name: v.creatorName, handle: v.creatorHandle },
-        duration: duration || '', views: 0, likes: 0,
+        duration: duration || '',
+        durationSec: meta.durationSec ?? null, width: meta.width ?? null, height: meta.height ?? null,
+        views: 0, likes: 0,
         date: todayFa(), ts: Date.now(),
         thumb: v.thumb, src: v.src,
         description: v.description ? v.description.split('\n').filter(Boolean) : [],

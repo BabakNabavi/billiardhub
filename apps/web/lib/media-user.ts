@@ -14,7 +14,8 @@ export interface RawUserVideo {
 export const toMedia = (v: RawUserVideo): MediaVideo => ({
   id: v.id, title: v.title, category: v.category as MediaCategoryKey,
   creator: { id: v.ownerKey, name: v.creatorName, handle: v.creatorHandle },
-  duration: v.duration, views: v.views, likes: v.likes, date: v.date, ts: v.ts,
+  duration: v.duration, durationSec: null, width: null, height: null,
+  views: v.views, likes: v.likes, date: v.date, ts: v.ts,
   thumb: v.thumb, src: v.src, description: v.description || [], tags: v.tags || [],
 })
 
@@ -45,6 +46,7 @@ export const publicToMedia = (v: PublicVideo): MediaVideo => ({
   category: v.category as MediaCategoryKey,
   creator: { id: v.creatorHandle, name: v.creatorName, handle: v.creatorHandle },
   duration: faDuration(v.durationSec),
+  durationSec: v.durationSec, width: v.width, height: v.height,
   views: v.views, likes: 0,
   date: v.publishedAt ?? '',
   ts: v.publishedAt ? Date.parse(v.publishedAt) : 0,
@@ -54,7 +56,10 @@ export const publicToMedia = (v: PublicVideo): MediaVideo => ({
   featured: v.featured,
 })
 
-export interface VideoPage { items: MediaVideo[]; nextCursor: string | null }
+/* ⚠️ `ok` لازم است: بدونِ آن، شکستِ شبکه و «هیچ ویدیویی نیست» برای
+   رابط یکسان‌اند و صفحه روی خطا می‌نویسد «هنوز ویدیویی منتشر نشده».
+   `items` در حالتِ خطا خالی می‌ماند، پس فراخوان‌های قدیمی نمی‌شکنند. */
+export interface VideoPage { ok: boolean; items: MediaVideo[]; nextCursor: string | null }
 
 export async function fetchVideos(params: {
   category?: string; q?: string; handle?: string; club?: string
@@ -67,10 +72,10 @@ export async function fetchVideos(params: {
       qs.set(k, v === true ? '1' : String(v))
     }
     const r = await apiFetch('/api/media?' + qs.toString(), { cache: 'no-store' })
-    if (!r.ok) return { items: [], nextCursor: null }
+    if (!r.ok) return { ok: false, items: [], nextCursor: null }
     const j = await r.json() as { items?: PublicVideo[]; nextCursor?: string | null }
-    return { items: (j.items ?? []).map(publicToMedia), nextCursor: j.nextCursor ?? null }
-  } catch { return { items: [], nextCursor: null } }
+    return { ok: true, items: (j.items ?? []).map(publicToMedia), nextCursor: j.nextCursor ?? null }
+  } catch { return { ok: false, items: [], nextCursor: null } }
 }
 
 /** سازگاری با فراخوان‌های قدیمی که فقط یک آرایه می‌خواستند. */
