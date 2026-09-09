@@ -33,6 +33,7 @@
   /* ⚠️ نوارِ پیشرفتِ تماشا با طلاییِ همین صفحه، نه یک قرمزِ دوم:
      قاعده‌ی پروژه یک رنگِ تأکید در هر صفحه است. */
   --live: #C7A66A;
+  --danger: #B23B2E;
   --dark: #111111;
 
   /* ⚠️ یک پس‌افتِ واحد. سه جای مختلف دو مقدارِ متفاوت داشتند
@@ -202,7 +203,7 @@
   display: flex; align-items: baseline; gap: 12px;
   margin-block-end: 12px;
 }
-.mx-sec-hd h2 { margin: 0; font-size: 17px; font-weight: 800; line-height: 1.4; }
+.mx-sec-hd :is(h1, h2) { margin: 0; font-size: 17px; font-weight: 800; line-height: 1.4; }
 .mx-sec-hd p { margin: 0; font-size: 12.5px; color: var(--ink-3); }
 .mx-sec-hd .mx-all {
   margin-inline-start: auto; font-size: 12.5px; font-weight: 700; color: var(--gold-ink);
@@ -361,7 +362,7 @@
   border: 1px solid var(--line); border-radius: 14px; background: var(--soft);
   padding: clamp(26px, 6vw, 48px); margin-block: 24px 32px; max-inline-size: 660px;
 }
-.mx-empty h2 { margin: 0 0 8px; font-size: clamp(17px, 2.4vw, 21px); font-weight: 800; line-height: 1.45; }
+.mx-empty :is(h1, h2) { margin: 0 0 8px; font-size: clamp(17px, 2.4vw, 21px); font-weight: 800; line-height: 1.45; }
 .mx-empty p { margin: 0 0 6px; font-size: 13.5px; line-height: 1.9; color: var(--ink-2); max-inline-size: 52ch; }
 .mx-empty-act { display: flex; flex-wrap: wrap; gap: 10px; margin-block-start: 18px; }
 
@@ -413,7 +414,10 @@
   border-block-end: 2px solid transparent;
 }
 .mx-tabs button:hover { color: var(--ink); }
-.mx-tabs button[aria-selected='true'] { color: var(--ink); font-weight: 800; border-block-end-color: var(--ink); }
+/* ⚠️ دکمه‌ها `aria-pressed` می‌گیرند نه `aria-selected` (نقشِ tab
+   بدونِ tabpanel برداشته شد)، پس انتخابگر هم باید همان باشد — وگرنه
+   تبِ فعال هیچ نشانه‌ی بصری‌ای ندارد. */
+.mx-tabs button[aria-pressed='true'] { color: var(--ink); font-weight: 800; border-block-end-color: var(--ink); }
 
 /* ═══════════════ نمایشگرِ Shorts ═══════════════
    ⚠️ تنها جای تمام‌تیره‌ی این محصول. ویدیوی عمودی روی زمینه‌ی روشن
@@ -556,3 +560,77 @@
 /* عرضِ خطوطِ اسکلتون — ثابت‌اند، پس کلاس‌اند نه استایلِ اینلاین */
 .mx-sk-l--w { inline-size: 88%; }
 .mx-sk-l--n { inline-size: 54%; }
+
+/* ═══════════════ اشتراک / پسند / دیدگاه ═══════════════
+   ⚠️ همه‌ی این‌ها وقتی رندر می‌شوند که جدولشان روی سرور باشد. */
+.mx-subwrap { display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.mx-sub-btn {
+  display: inline-flex; align-items: center; gap: 7px;
+  min-block-size: 40px; padding-inline: 18px; border-radius: 999px;
+  border: 0; background: var(--ink); color: #fff; cursor: pointer;
+  font-family: inherit; font-size: 13px; font-weight: 700;
+}
+.mx-sub-btn:hover:not(:disabled) { background: #000; }
+.mx-sub-btn.on { background: var(--soft-2); color: var(--ink); }
+.mx-sub-btn.on:hover:not(:disabled) { background: var(--line); }
+.mx-sub-btn:disabled { opacity: .6; cursor: not-allowed; }
+.mx-sub-btn b { font-weight: 800; font-variant-numeric: tabular-nums; }
+.mx-act.on { background: var(--ink); color: #fff; }
+.mx-act:disabled { opacity: .6; cursor: not-allowed; }
+@media (max-width: 1023px) { .mx-sub-btn { min-block-size: 44px; } }
+
+.mx-err { font-size: 12px; font-weight: 700; color: var(--danger); }
+
+.mx-spin { animation: mxspin .9s linear infinite; }
+@keyframes mxspin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .mx-spin { animation: none; } }
+
+.mx-comments { margin-block-start: 28px; max-inline-size: 860px; }
+.mx-cm-new { margin-block-end: 18px; }
+.mx-cm-new textarea {
+  inline-size: 100%; border: 1px solid var(--line-2); border-radius: 12px;
+  padding: 12px 14px; font-family: inherit; font-size: 14px; line-height: 1.9;
+  color: var(--ink); background: var(--paper); resize: vertical;
+}
+.mx-cm-new textarea:focus-visible { outline: 2px solid var(--gold-ink); outline-offset: -1px; }
+.mx-cm-send { display: flex; justify-content: flex-start; margin-block-start: 8px; }
+.mx-cm-reply { margin: 0 0 8px; font-size: 12.5px; color: var(--ink-3); }
+.mx-cm-reply button {
+  border: 0; background: transparent; color: var(--gold-ink); cursor: pointer;
+  font-family: inherit; font-size: 12.5px; font-weight: 700; padding: 4px;
+}
+
+.mx-cm-list { list-style: none; margin: 0; padding: 0; }
+.mx-cm { padding-block: 14px; border-block-start: 1px solid var(--line); }
+.mx-cm-h { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; font-size: 12.5px; color: var(--ink-3); }
+.mx-cm-h strong { font-size: 13.5px; font-weight: 800; color: var(--ink); }
+.mx-cm p { margin: 6px 0 0; font-size: 14px; line-height: 1.95; color: var(--ink-2); white-space: pre-wrap; }
+.mx-cm-a { display: flex; gap: 4px; margin-block-start: 6px; }
+.mx-cm-a button {
+  display: inline-flex; align-items: center; gap: 4px;
+  border: 0; background: transparent; color: var(--ink-3); cursor: pointer;
+  font-family: inherit; font-size: 12.5px; font-weight: 700;
+  min-block-size: 34px; padding-inline: 8px; border-radius: 8px;
+}
+.mx-cm-a button:hover:not(:disabled) { background: var(--soft-2); color: var(--ink); }
+@media (max-width: 1023px) { .mx-cm-a button { min-block-size: 44px; } }
+/* پاسخ‌ها یک سطح تورفتگی می‌گیرند، نه بیشتر */
+.mx-cm-kids { list-style: none; margin: 10px 0 0; padding-inline-start: 18px; border-inline-start: 2px solid var(--line); }
+.mx-cm--r { padding-block: 10px; border-block-start: 0; }
+
+/* فاصله‌ها و اندازه‌های ثابتِ صفحه‌های کانال — کلاس، نه استایلِ اینلاین */
+.mx-pad-t { padding-block-start: 18px; }
+.mx-pad { padding-block: 48px; }
+.mx-filter { max-inline-size: 420px; margin-block-end: 18px; }
+.mx-sk-chan { block-size: 150px; }
+.mx-chead-act { margin-inline-start: auto; }
+.mx-chead > div:nth-child(2) { min-inline-size: 0; }
+@media (max-width: 639px) { .mx-chead-act { margin-inline-start: 0; inline-size: 100%; } }
+
+/* ⚠️ ورودیِ فیلترِ کانال‌ها بیرونِ `.mx-search-box` است، پس قاب و
+   ارتفاعِ خودش را ندارد — اندازه‌گیری‌شده ۲۶ پیکسل، زیرِ حدِ لمس. */
+.mx-filter .mx-search-in {
+  min-block-size: 44px; padding-inline: 14px;
+  border: 1px solid var(--line-2); border-radius: 999px;
+}
+.mx-filter .mx-search-in:focus-visible { outline: 2px solid var(--gold-ink); outline-offset: -1px; }

@@ -174,7 +174,14 @@ export default async function WatchPage({ params }: Params) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(videoLd) }} />
       <script type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(crumbLd) }} />
-      <WatchClient video={asMedia(toPublic(v))} related={related.map(asMedia)} />
+      {/* ⚠️ شناسه‌ی مالک از همین ردیفِ سرور می‌آید: صاحبِ ویدیو حق
+          دارد دیدگاهِ دیگران را پاک کند و رابط باید همان را نشان
+          بدهد که سرور اجازه می‌دهد. */}
+      <WatchClient
+        video={asMedia(toPublic(v))}
+        related={related.map(asMedia)}
+        ownerId={v.owner_id ?? null}
+      />
     </>
   )
 }
