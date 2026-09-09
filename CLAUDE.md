@@ -8,8 +8,13 @@
 
 - **کامپوننت:** `apps/web/components/ProvinceCitySelect.tsx`
   (دراپ‌داونِ زنجیره‌ایِ استان → شهر، سرچ‌دار، controlled).
-- **داده:** `apps/web/data/iran-geo.json` (۳۱ استان، ۱۱۹۳ شهر — از
-  `sajaddp/list-of-cities-in-Iran`, نسخه‌ی `cities-filtered`).
+- **داده:** `apps/web/data/iran-geo.json` (۳۱ استان، ۱۱۵۶ مدخلِ شهر — از
+  `sajaddp/list-of-cities-in-Iran`, نسخه‌ی `cities-filtered`). شمرده‌شده،
+  نه تخمینی؛ عددِ قبلیِ این خط (۱۱۹۳) با فایل نمی‌خواند.
+  ⚠️ ۳۰ مدخل نامِ تکراری بینِ استان‌هاست (سردشت در چهار استان، فیروزآباد
+  در سه، …)، پس **۱۱۲۶ نامِ یکتا**. هر فهرستی که فقط *نامِ* شهر را مقدار
+  می‌گذارد باید یکتا کند — وگرنه دو گزینه‌ی هم‌مقدار می‌سازد و
+  `select`ِ کنترل‌شده همیشه اولی را برمی‌گزیند.
 - **لودر:** `apps/web/lib/iran-geo.ts` — `getProvinces()`, `getProvinceNames()`,
   `getCities(province)`, `provinceOfCity(city)`.
 

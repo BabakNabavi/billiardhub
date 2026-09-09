@@ -50,7 +50,7 @@ export default function CoverageCitySelect({
      `htmlFor` به ورودیِ اشتباه وصل می‌شود. */
   const uid = useId()
 
-  /* ۱۱۹۳ شهر — یک‌بار صاف می‌شود، نه در هر تایپ */
+  /* ۱۱۵۶ مدخلِ شهر — یک‌بار صاف می‌شود، نه در هر تایپ */
   const all = useMemo<Row[]>(
     () => getProvinces().flatMap(p => p.cities.map(c => ({ city: c, province: p.name }))),
     [])
