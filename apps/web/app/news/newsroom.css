@@ -1,0 +1,698 @@
+/* ─────────────────────────────────────────────────────────────
+   تحریریه‌ی بیلیارد هاب — سیستمِ بصری.
+
+   ── چه چیزی از نسخه‌ی قبل رفت ──
+   شبکه‌ی بی‌پایانِ کارتِ گِرد با پیلِ طلایی و سایه، تیکرِ چشمک‌زن،
+   شمارنده‌ی بازدیدی که همیشه «۰» بود، و گرادیانِ طلایی روی همه‌چیز.
+   آن صفحه یک وبلاگ بود که خودش را خبرگزاری صدا می‌زد.
+
+   ── قاعده‌های این سیستم ──
+   ۱) خط، نه کارت. جداکننده‌ی یک‌پیکسلی کارِ قاب را می‌کند؛ کارتِ
+      سایه‌دار فقط شلوغی است.
+   ۲) سلسله‌مراتب با *اندازه* ساخته می‌شود نه با رنگ. چهار پله‌ی
+      تیتر: صدر، دوم، معمولی، جریان.
+   ۳) طلا فقط لهجه است: نشانِ بخش، حالتِ فعال، خطِ زیرِ عنوانِ بلوک.
+      هیچ زمینه‌ی طلاییِ بزرگی، هیچ گرادیانی.
+   ۴) عکس انتخابی است. خبرِ جریانِ زمانی عکس ندارد — نباید داشته
+      باشد — وگرنه صفحه پینترست می‌شود و تراکمِ خبری می‌میرد.
+
+   ⚠️ `letter-spacing` هیچ‌جای متنِ فارسی نیست. در خطِ عربی حروف
+   به‌هم می‌چسبند و فاصله‌ی حرفی اتصال را می‌شکند؛ چیزی که در
+   لاتین «ظریف» است این‌جا متن را خراب می‌کند.
+   ───────────────────────────────────────────────────────────── */
+
+/* فونتِ تیترِ تحریریه — فقط در همین بخش بار می‌شود.
+   ⚠️ نسخهٔ اول format(woff2-variations) نوشته بود؛ آن شکلِ
+   منسوخ است و کرومِ امروزی کلِ منبع را رد می‌کند —
+   اندازه‌گیری‌شده در مرورگر: تیترها بی‌صدا روی IRANSansX
+   می‌افتادند. */
+@font-face {
+  font-family: 'Estedad';
+  src: url('/fonts/Estedad/Estedad-Variable.woff2') format('woff2');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+.nr {
+  /* ── زمین ──
+     کاغذِ گرم، نه سفیدِ خالص: صفحه‌ی تمام‌سفید زیرِ متنِ سیاهِ متراکم
+     خیره‌کننده است. */
+  --paper: #FFFFFF;
+  --paper-2: #FAF9F7;
+  --paper-3: #F4F2EE;
+
+  /* ── جوهر ── */
+  --ink: #111111;
+  --ink-2: #3F3D39;
+  --ink-3: #6B6862;
+
+  /* ── خط ── */
+  --rule: #E4E1DB;
+  --rule-strong: #C9C5BC;
+
+  /* ── لهجه ── */
+  --gold: #C7A66A;
+  --gold-ink: #8A6224;
+  /* قرمزِ فوری — عمداً کدر و روزنامه‌ای، نه قرمزِ هشدارِ نرم‌افزار */
+  --urgent: #A8281E;
+
+  --shell: 1320px;
+  --gut: clamp(16px, 3vw, 32px);
+
+  background: var(--paper);
+  color: var(--ink);
+  font-family: 'IRANSansX', 'Vazirmatn', Tahoma, sans-serif;
+  /* ⚠️ ارقامِ فارسی در متنِ خبری خواناترند؛ فونت هر دو را دارد. */
+  font-feature-settings: 'ss01';
+}
+
+.nr-shell { max-width: var(--shell); margin-inline: auto; padding-inline: var(--gut); }
+
+/* ⚠️ تیترها با Estedad ست می‌شوند: وزنِ متغیر دارد، پس چهار پله‌ی
+   سلسله‌مراتب واقعاً چهار وزنِ متفاوت‌اند نه یک وزنِ چاق در چهار
+   اندازه. فونت فقط در همین بخش بار می‌شود.
+
+   ⚠️ !important لازم است و تزئینی نیست: app/layout.tsx یک قاعده‌ی
+   سراسریِ «* { font-family: var(--font-base) !important }» دارد که
+   حتی استایلِ اینلاین را هم می‌بلعد. بدونِ این، اعلانِ فونت بی‌صدا
+   می‌بازد — اندازه‌گیری‌شده در مرورگر: getComputedStyle روی هر هفت
+   عرض «IRANSansX» برمی‌گرداند و کلِ سلسله‌مراتبِ تیتر روی فونتِ
+   اشتباه سوار می‌شد. همان الگوی استثنایی که .bh-latin و
+   .bh-wordmark در همان فایل دارند. */
+.nr h1, .nr h2, .nr h3, .nr h4,
+.nr .nr-stream-t, .nr .nr-rank, .nr .nr-hd {
+  font-family: 'Estedad', 'IRANSansX', Tahoma, sans-serif !important;
+}
+.nr h1, .nr h2, .nr h3, .nr .nr-hd { margin: 0; text-wrap: balance; }
+
+.nr a { color: inherit; text-decoration: none; }
+/* دکمه هم مثل لینک باید حلقه‌ی فوکوس بگیرد */
+.nr a:focus-visible, .nr button:focus-visible {
+  outline: 2px solid var(--gold-ink); outline-offset: 3px; border-radius: 2px;
+}
+
+/* ═══════════════ نوارِ فوری ═══════════════
+   ⚠️ بدونِ چشمک، بدونِ انیمیشن. یک نوارِ متراکمِ تیره با نقطه‌ی
+   قرمز. خبرِ فوری با *جای* خودش مهم می‌شود نه با حرکت — و انیمیشنِ
+   تکرارشونده برای کاربرانِ حساس به حرکت واقعاً آزاردهنده است. */
+.nr-breaking { background: #141311; color: #fff; border-block-end: 1px solid #2A2724; }
+.nr-breaking-in {
+  display: flex; align-items: stretch; gap: 0;
+  max-width: var(--shell); margin-inline: auto; padding-inline: var(--gut);
+}
+.nr-breaking-tag {
+  display: inline-flex; align-items: center; gap: 7px; flex-shrink: 0;
+  padding-block: 11px; padding-inline-end: 14px;
+  font-size: 12.5px; font-weight: 800; color: #fff;
+}
+.nr-breaking-dot {
+  inline-size: 7px; block-size: 7px; border-radius: 50%;
+  background: var(--urgent); box-shadow: 0 0 0 3px rgb(168 40 30 / .28);
+}
+.nr-breaking-list {
+  display: flex; gap: 0; list-style: none; margin: 0; padding: 0;
+  min-inline-size: 0; overflow-x: auto; scrollbar-width: none;
+  border-inline-start: 1px solid #37332E;
+}
+.nr-breaking-list::-webkit-scrollbar { display: none; }
+.nr-breaking-list li { display: flex; align-items: center; }
+.nr-breaking-list li + li::before {
+  content: ''; inline-size: 1px; align-self: center; block-size: 14px; background: #37332E;
+}
+.nr-breaking-list a {
+  display: block; padding: 11px 14px; font-size: 13.5px; font-weight: 600;
+  color: #F2EFEA; white-space: nowrap;
+}
+.nr-breaking-list a:hover { color: #fff; text-decoration: underline; text-underline-offset: 3px; }
+@media (max-width: 767px) {
+  .nr-breaking-in { flex-direction: column; }
+  .nr-breaking-tag { padding-block: 9px 0; }
+  .nr-breaking-list { border-inline-start: 0; }
+  .nr-breaking-list a { padding-inline: 0; padding-block: 6px 11px; white-space: normal; }
+  /* در موبایل فقط مهم‌ترینِ فوری‌ها؛ نوارِ چندخطی صفحه را می‌بلعد */
+  .nr-breaking-list li + li { display: none; }
+}
+
+/* ═══════════════ سرلوحه‌ی بخش ═══════════════ */
+.nr-masthead { border-block-end: 1px solid var(--rule); background: var(--paper); }
+/* ⚠️ ارتفاعِ «چرم»ِ بالای صفحه اندازه‌گیری شد: خبرِ اول در ۱۴۴۰ از
+   پیکسلِ ۳۱۱ شروع می‌شد. برای یک صفحه‌ی خبری این یعنی یک‌سومِ
+   قابِ اول را نوار و عنوان گرفته. جمع‌تر شد. */
+.nr-masthead-in {
+  display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap;
+  padding-block: 14px 11px;
+}
+.nr-masthead h1 { font-size: clamp(21px, 3vw, 27px); font-weight: 800; line-height: 1.2; }
+.nr-masthead p { margin: 0; font-size: 13px; color: var(--ink-3); }
+.nr-today {
+  margin-inline-start: auto; font-size: 12.5px; color: var(--ink-3);
+  white-space: nowrap;
+}
+
+/* ═══════════════ ناوبریِ بخش‌ها ═══════════════ */
+.nr-secnav {
+  position: sticky; inset-block-start: var(--nr-nav, calc(73px + env(safe-area-inset-top)));
+  z-index: 20;
+  background: rgb(255 255 255 / .94);
+  backdrop-filter: saturate(1.3) blur(8px);
+  border-block-end: 1px solid var(--rule);
+}
+.nr-secnav ul {
+  display: flex; gap: 0; list-style: none; margin: 0; padding: 0;
+  overflow-x: auto; scrollbar-width: none;
+  max-width: var(--shell); margin-inline: auto; padding-inline: var(--gut);
+}
+.nr-secnav ul::-webkit-scrollbar { display: none; }
+.nr-secnav a {
+  display: inline-flex; align-items: center; min-block-size: 44px;
+  padding-inline: 13px; white-space: nowrap;
+  font-size: 13.5px; font-weight: 600; color: var(--ink-2);
+  border-block-end: 2px solid transparent;
+}
+.nr-secnav li:first-child a { padding-inline-start: 0; }
+.nr-secnav a:hover { color: var(--ink); }
+.nr-secnav a[aria-current='page'] {
+  color: var(--ink); font-weight: 800; border-block-end-color: var(--gold);
+}
+
+/* ═══════════════ اجزای مشترک ═══════════════ */
+
+/* ── کیکر: نامِ بخش بالای تیتر ── */
+.nr-kicker {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 11.5px; font-weight: 800; color: var(--gold-ink);
+  font-family: 'IRANSansX', Tahoma, sans-serif;
+}
+.nr-kicker::before {
+  content: ''; inline-size: 3px; block-size: 12px; background: var(--gold);
+  border-radius: 1px;
+}
+.nr-kicker--urgent { color: var(--urgent); }
+.nr-kicker--urgent::before { background: var(--urgent); }
+
+/* ── نشانِ اعتبار (اختصاصی / به‌روزرسانی شد) ──
+   ⚠️ فقط وقتی متادیتای خبر واقعاً این را می‌گوید. */
+.nr-flag {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 10.5px; font-weight: 800;
+  padding: 2px 7px; border: 1px solid var(--rule-strong); color: var(--ink-2);
+  font-family: 'IRANSansX', Tahoma, sans-serif;
+}
+.nr-flag--gold { border-color: rgb(199 166 106 / .55); color: var(--gold-ink); }
+
+/* ── متادیتای ریز ── */
+.nr-meta {
+  display: flex; align-items: center; flex-wrap: wrap; gap: 4px 10px;
+  font-size: 12px; color: var(--ink-3);
+  font-family: 'IRANSansX', Tahoma, sans-serif;
+}
+.nr-meta > * + *::before {
+  content: '·'; margin-inline-end: 10px; color: var(--rule-strong);
+}
+
+/* ── عکس ──
+   ⚠️ نسبتِ ثابت روی *قاب* است نه روی تصویر، پس پیش از رسیدنِ عکس هم
+   جای خودش را گرفته و صفحه نمی‌پرد (CLS). */
+.nr-fig { position: relative; overflow: hidden; background: var(--paper-3); }
+.nr-fig img {
+  inline-size: 100%; block-size: 100%; object-fit: cover; display: block;
+  transition: transform .5s cubic-bezier(.22,1,.36,1);
+}
+a:hover > .nr-fig img, a:hover .nr-fig img { transform: scale(1.028); }
+@media (prefers-reduced-motion: reduce) { .nr-fig img { transition: none; } }
+.nr-fig--16x9 { aspect-ratio: 16 / 9; }
+.nr-fig--3x2  { aspect-ratio: 3 / 2; }
+.nr-fig--1x1  { aspect-ratio: 1 / 1; }
+.nr-fig--4x5  { aspect-ratio: 4 / 5; }
+
+/* ═══════════════ شبکه‌ی صدرِ صفحه ═══════════════ */
+.nr-front {
+  display: grid; gap: 0;
+  padding-block: 22px 0;
+}
+@media (min-width: 900px) {
+  .nr-front {
+    grid-template-columns: minmax(0, 7fr) minmax(0, 3.6fr);
+    column-gap: 28px;
+  }
+}
+@media (min-width: 1200px) {
+  .nr-front {
+    grid-template-columns: minmax(0, 7fr) minmax(0, 3.5fr) minmax(0, 3fr);
+    column-gap: 30px;
+  }
+}
+
+/* ── خبرِ صدر ── */
+.nr-lead { display: block; padding-block-end: 24px; }
+.nr-lead .nr-fig { margin-block-end: 14px; }
+.nr-lead h2 {
+  font-size: clamp(27px, 4.4vw, 44px);
+  font-weight: 800; line-height: 1.19; margin-block: 8px 10px;
+}
+.nr-lead:hover h2 { text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 4px; }
+.nr-lead-sum {
+  margin: 0 0 12px; font-size: 15.5px; line-height: 1.85; color: var(--ink-2);
+  max-inline-size: 62ch;
+}
+
+/* ── ستونِ خبرهای دوم ── */
+.nr-second {
+  display: flex; flex-direction: column;
+  border-block-start: 1px solid var(--rule);
+}
+@media (min-width: 900px) {
+  .nr-second {
+    border-block-start: 0;
+    border-inline-start: 1px solid var(--rule);
+    padding-inline-start: 28px;
+  }
+}
+.nr-second > a { display: block; padding-block: 18px; }
+.nr-second > a + a { border-block-start: 1px solid var(--rule); }
+.nr-second > a:first-child { padding-block-start: 0; }
+.nr-sec-row { display: grid; grid-template-columns: minmax(0, 1fr) 104px; gap: 14px; align-items: start; }
+.nr-sec-row .nr-fig { grid-column: 2; }
+.nr-second h3 {
+  font-size: clamp(16.5px, 1.6vw, 19px); font-weight: 700; line-height: 1.5;
+  margin-block: 6px 8px;
+}
+.nr-second a:hover h3 { text-decoration: underline; text-underline-offset: 3px; }
+
+/* ── ریلِ آخرین اخبار ── */
+.nr-rail { border-block-start: 1px solid var(--rule); padding-block-start: 18px; }
+@media (min-width: 900px) {
+  .nr-rail { grid-column: 1 / -1; margin-block-start: 4px; }
+}
+@media (min-width: 1200px) {
+  .nr-rail {
+    grid-column: 3; grid-row: 1;
+    border-block-start: 0; padding-block-start: 0;
+    border-inline-start: 1px solid var(--rule); padding-inline-start: 30px;
+  }
+}
+
+/* ── عنوانِ بلوک ── */
+.nr-blockhd {
+  display: flex; align-items: baseline; gap: 12px;
+  border-block-end: 2px solid var(--ink);
+  padding-block-end: 8px; margin-block-end: 4px;
+}
+.nr-blockhd h2, .nr-blockhd h3 { font-size: 15px; font-weight: 800; line-height: 1.4; }
+.nr-blockhd .nr-more {
+  margin-inline-start: auto; font-size: 12.5px; font-weight: 700; color: var(--gold-ink);
+  white-space: nowrap; font-family: 'IRANSansX', Tahoma, sans-serif;
+}
+.nr-blockhd .nr-more:hover { text-decoration: underline; text-underline-offset: 3px; }
+/* گونه‌ی سبک‌تر برای بلوک‌های فرعی */
+.nr-blockhd--thin { border-block-end-width: 1px; border-block-end-color: var(--rule-strong); }
+
+/* ── جریانِ اخبار: ساعت + بخش + تیتر، بدونِ عکس ── */
+.nr-stream { list-style: none; margin: 0; padding: 0; }
+.nr-stream li + li { border-block-start: 1px solid var(--rule); }
+.nr-stream a { display: grid; grid-template-columns: 52px minmax(0, 1fr); gap: 12px; padding-block: 11px; }
+.nr-stream time {
+  font-size: 12.5px; font-weight: 700; color: var(--ink-3); padding-block-start: 2px;
+  font-family: 'IRANSansX', Tahoma, sans-serif; font-variant-numeric: tabular-nums;
+}
+.nr-stream .nr-stream-t {
+  font-size: 14px; font-weight: 600; line-height: 1.62; color: var(--ink);
+  font-family: 'Estedad', 'IRANSansX', Tahoma, sans-serif;
+}
+.nr-stream a:hover .nr-stream-t { text-decoration: underline; text-underline-offset: 3px; }
+.nr-stream .nr-stream-s { display: block; font-size: 11px; font-weight: 700; color: var(--gold-ink); margin-block-end: 3px; }
+
+/* ── پربازدیدترین‌ها ── */
+.nr-ranked { list-style: none; margin: 0; padding: 0; counter-reset: r; }
+.nr-ranked li + li { border-block-start: 1px solid var(--rule); }
+.nr-ranked a { display: grid; grid-template-columns: 34px minmax(0, 1fr); gap: 12px; padding-block: 13px; align-items: start; }
+.nr-ranked .nr-rank {
+  font-size: 19px; font-weight: 800; line-height: 1.1; color: var(--rule-strong);
+  font-family: 'Estedad', 'IRANSansX', Tahoma, sans-serif; font-variant-numeric: tabular-nums;
+}
+.nr-ranked a:hover .nr-rank { color: var(--gold); }
+.nr-ranked h3 { font-size: 14px; font-weight: 700; line-height: 1.6; }
+.nr-ranked a:hover h3 { text-decoration: underline; text-underline-offset: 3px; }
+
+/* ═══════════════ بلوکِ بخش ═══════════════ */
+.nr-band { padding-block: 26px; border-block-start: 1px solid var(--rule); }
+.nr-band--tint { background: var(--paper-2); }
+.nr-sec-grid { display: grid; gap: 22px; align-content: start; }
+@media (min-width: 760px) {
+  .nr-sec-grid { grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr); column-gap: 28px; }
+}
+/* ⚠️ ترکیبِ متناوب: بلوکِ زوج تصویرِ بزرگ را در سمتِ دیگر می‌گذارد،
+   وگرنه صفحه پنج‌بار یک الگو را تکرار می‌کند و خسته‌کننده می‌شود. */
+@media (min-width: 760px) {
+  .nr-band--alt .nr-sec-grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1.55fr); }
+  .nr-band--alt .nr-sec-lead { order: 2; }
+}
+/* ⚠️ سقفِ ارتفاع: در ۱۴۴۰ ستونِ ۱٫۵۵fr حدودِ ۷۵۰ پیکسل عرض دارد و
+   نسبتِ ۳:۲ آن را ۵۰۰ پیکسل بلند می‌کرد — هر بلوکِ بخش یک صفحه
+   می‌شد. */
+.nr-sec-lead .nr-fig { max-block-size: 330px; }
+.nr-sec-lead h3 { font-size: clamp(19px, 2.1vw, 24px); font-weight: 800; line-height: 1.32; margin-block: 10px 8px; }
+.nr-sec-lead:hover h3 { text-decoration: underline; text-underline-offset: 3px; }
+.nr-sec-lead p { margin: 0; font-size: 13.5px; line-height: 1.85; color: var(--ink-2); max-inline-size: 56ch; }
+.nr-sec-list { list-style: none; margin: 0; padding: 0; }
+.nr-sec-list li + li { border-block-start: 1px solid var(--rule); }
+.nr-sec-list a { display: grid; grid-template-columns: minmax(0, 1fr) 86px; gap: 12px; padding-block: 13px; align-items: start; }
+.nr-sec-list a:first-child { padding-block-start: 0; }
+.nr-sec-list :is(h3, h4) { font-size: 14.5px; font-weight: 700; line-height: 1.6; margin: 0 0 6px;
+  font-family: 'Estedad', 'IRANSansX', Tahoma, sans-serif; }
+.nr-sec-list a:hover :is(h3, h4) { text-decoration: underline; text-underline-offset: 3px; }
+/* آیتمِ بی‌عکس نباید ستونِ خالی جا بگذارد */
+.nr-sec-list a.nr-noimg { grid-template-columns: minmax(0, 1fr); }
+
+/* ── گونه‌ی ردیفی ──
+   ⚠️ بخشی که فقط یکی دو خبرِ پشتیبان دارد در چیدمانِ «تصویرِ بزرگ +
+   فهرست» یک ستونِ تقریباً خالی می‌سازد؛ در نماگرفتِ ۱۴۴۰ چهار بلوک
+   این‌طور بودند. آن بخش‌ها به‌جای فهرست، ردیفی از کارت‌های هم‌وزن
+   می‌گیرند — هم خلأ پر می‌شود هم صفحه یک الگو را پنج‌بار تکرار
+   نمی‌کند. */
+/* ⚠️ `auto-fit` نه `auto-fill`: با دو خبر، auto-fill چهار ستونِ
+   ۲۹۹ پیکسلی می‌ساخت و دو تایش خالی می‌ماند — اندازه‌گیری‌شده در
+   ۱۴۴۰: «۲۹۹px ۲۹۹px ۲۹۹px ۲۹۹px» با دو کارت، یعنی ۶۰۰ پیکسل
+   سفیدیِ وسطِ بلوک. auto-fit ستونِ خالی را جمع می‌کند. */
+.nr-row {
+  display: grid; gap: 20px 26px;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+}
+/* کارتِ افقی: عکسِ کوچک کنارِ متن. بلوکِ کم‌خبر نباید عکسِ
+   نیم‌صفحه‌ای بگیرد؛ خبرِ کم یعنی فضای کمتر، نه عکسِ بزرگ‌تر. */
+@media (min-width: 640px) {
+  .nr-row-item { display: grid; grid-template-columns: minmax(0, 1fr) 190px; gap: 16px; align-items: start; }
+  .nr-row-item.nr-noimg { grid-template-columns: minmax(0, 1fr); }
+  .nr-row-item .nr-fig { grid-column: 2; grid-row: 1 / span 3; }
+}
+.nr-row-item h3 {
+  font-size: 16.5px; font-weight: 700; line-height: 1.55; margin-block: 9px 7px;
+}
+.nr-row-item:hover h3 { text-decoration: underline; text-underline-offset: 3px; }
+.nr-row-item .nr-fig { margin-block-end: 2px; }
+
+/* ═══════════════ گزارشِ ویژه ═══════════════ */
+.nr-feature { background: #141311; color: #F5F2EC; }
+.nr-feature .nr-shell { padding-block: 34px; }
+.nr-feature-grid { display: grid; gap: 22px; align-items: center; }
+@media (min-width: 860px) {
+  .nr-feature-grid { grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); column-gap: 36px; }
+}
+.nr-feature .nr-kicker { color: var(--gold); }
+.nr-feature .nr-kicker::before { background: var(--gold); }
+.nr-feature h2 { font-size: clamp(23px, 3.2vw, 34px); font-weight: 800; line-height: 1.28; margin-block: 10px 12px; }
+.nr-feature p { margin: 0 0 14px; font-size: 14.5px; line-height: 1.9; color: #CFC9BF; max-inline-size: 58ch; }
+.nr-feature .nr-meta { color: #A8A197; }
+.nr-feature .nr-meta > * + *::before { color: #55504A; }
+.nr-feature a:hover h2 { text-decoration: underline; text-underline-offset: 4px; }
+
+/* ═══════════════ گفت‌وگو ═══════════════ */
+/* ⚠️ `auto-fill` نه `repeat(4)`: با دو مصاحبه، شبکه‌ی چهارستونی دو
+   پرتره را تا نصفِ صفحه کش می‌داد. auto-fill جای خالی را نگه
+   می‌دارد و کارت‌ها اندازه‌ی طبیعی‌شان می‌مانند. */
+.nr-talks {
+  display: grid; gap: 20px;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 230px), 1fr));
+}
+.nr-talk .nr-fig { margin-block-end: 12px; }
+.nr-talk h3 { font-size: 16px; font-weight: 700; line-height: 1.55; margin-block: 8px 0; }
+.nr-talk:hover h3 { text-decoration: underline; text-underline-offset: 3px; }
+
+/* ═══════════════ حالتِ خالی ═══════════════
+   ⚠️ «هنوز خبری منتشر نشده» یک شکست نیست و نباید مثل خطا دیده شود.
+   قابِ روزنامه‌ایِ ساده، با راهِ خروج. */
+.nr-empty {
+  border: 1px solid var(--rule); border-block-start: 3px solid var(--ink);
+  padding: clamp(28px, 6vw, 56px) clamp(20px, 5vw, 44px);
+  margin-block: 28px 40px; background: var(--paper-2);
+  max-inline-size: 720px;
+}
+.nr-empty h2 { font-size: clamp(19px, 2.6vw, 24px); font-weight: 800; line-height: 1.4; margin-block-end: 10px; }
+.nr-empty p { margin: 0 0 8px; font-size: 14px; line-height: 1.95; color: var(--ink-2); max-inline-size: 54ch; }
+.nr-empty-act { display: flex; flex-wrap: wrap; gap: 10px; margin-block-start: 20px; }
+.nr-btn {
+  display: inline-flex; align-items: center; gap: 6px; min-block-size: 44px;
+  padding-inline: 18px; font-size: 13.5px; font-weight: 700;
+  border: 1px solid var(--ink); color: var(--ink); background: transparent;
+  font-family: 'IRANSansX', Tahoma, sans-serif; cursor: pointer;
+}
+.nr-btn:hover { background: var(--ink); color: #fff; }
+.nr-btn--ghost { border-color: var(--rule-strong); color: var(--ink-2); }
+.nr-btn--ghost:hover { background: var(--paper-3); color: var(--ink); border-color: var(--ink); }
+
+/* ═══════════════ موبایل ═══════════════
+   ⚠️ چیدنِ ستون‌های دسکتاپ روی هم کافی نیست. در موبایل تیترِ صدر
+   باید غالب بماند ولی نصفِ صفحه را نگیرد، و بلافاصله بعدش چند تیترِ
+   دیگر دیده شود — تراکمِ خبری همان چیزی است که یک اپِ خبری را از یک
+   وبلاگ جدا می‌کند. */
+@media (max-width: 899px) {
+  .nr-lead .nr-fig--16x9 { aspect-ratio: 3 / 2; }
+  .nr-lead h2 { font-size: clamp(24px, 6.6vw, 32px); }
+  .nr-lead-sum { font-size: 14.5px; line-height: 1.8; }
+  .nr-second > a:first-child { padding-block-start: 18px; }
+  .nr-sec-row { grid-template-columns: minmax(0, 1fr) 92px; }
+}
+@media (max-width: 479px) {
+  .nr-sec-row { grid-template-columns: minmax(0, 1fr) 84px; gap: 12px; }
+  .nr-second h3 { font-size: 15.5px; }
+  .nr-stream a { grid-template-columns: 46px minmax(0, 1fr); gap: 10px; }
+  .nr-sec-list a { grid-template-columns: minmax(0, 1fr) 76px; }
+}
+
+/* ⚠️ همه‌ی هدف‌های لمسی زیرِ ۱۰۲۴ باید ۴۴ پیکسل بگیرند. ردیف‌های
+   جریان با padding به این عدد می‌رسند، ولی لینک‌های ریزِ داخلِ متن
+   نه — این‌جا صریح می‌شود. */
+@media (max-width: 1023px) {
+  .nr-stream a, .nr-ranked a, .nr-sec-list a { min-block-size: 44px; }
+  .nr-blockhd .nr-more { padding-block: 10px; }
+  /* اندازه‌گیری‌شده: لینکِ مسیر ۳۰ پیکسل بود، زیرِ حدِ لمس */
+  .nr-crumb a { min-block-size: 44px; display: inline-flex; align-items: center; }
+}
+
+/* ═══════════════ جست‌وجو و فیلتر ═══════════════ */
+/* ⚠️ روی صفحه‌ی اول فقط ورودی و دکمه می‌آید. نوارِ کاملِ فیلتر
+   (بخش + بازه) خبرِ صدر را چند صد پیکسل پایین می‌برد و روی موبایل
+   اولین چیزی می‌شود که کاربر می‌بیند — دقیقاً برعکسِ کارِ یک
+   صفحه‌ی اولِ خبری. فیلترها وقتی می‌آیند که کاربر واقعاً در حالِ
+   فیلتر کردن است. */
+.nr-search { padding-block: 14px 4px; }
+.nr-search--slim .nr-search-sel, .nr-search--slim .nr-range { display: none; }
+.nr-search--slim { padding-block: 10px 2px; }
+.nr-search--slim .nr-search-in, .nr-search--slim .nr-search-go { min-block-size: 38px; }
+@media (max-width: 1023px) {
+  .nr-search--slim .nr-search-in, .nr-search--slim .nr-search-go { min-block-size: 44px; }
+}
+.nr-search-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: stretch; }
+/* حالتِ جمع‌وجور همیشه یک خط می‌ماند */
+.nr-search--slim .nr-search-row { flex-wrap: nowrap; }
+.nr-search--slim .nr-search-go { flex-shrink: 0; padding-inline: 14px; }
+/* ⚠️ پایه‌ی ۲۶۰ پیکسلی در ۳۹۰ جا نمی‌شد (۳۵۸ پیکسل فضای مفید منهای
+   دکمه و فاصله)، پس دکمه به خطِ بعد می‌پرید و نزدیکِ ۹۰ پیکسل بالای
+   خبرِ اول هدر می‌رفت — اندازه‌گیری‌شده در ۳۹۰: تیترِ صدر از پیکسلِ
+   ۶۱۰ شروع می‌شد. */
+.nr-search-in {
+  flex: 1 1 140px; min-inline-size: 0; min-block-size: 44px;
+  border: 1px solid var(--rule-strong); background: var(--paper);
+  padding-inline: 14px; font-family: inherit; font-size: 14px; color: var(--ink);
+}
+.nr-search-in::placeholder { color: var(--ink-3); }
+.nr-search-in:focus-visible, .nr-search-sel:focus-visible {
+  outline: 2px solid var(--gold-ink); outline-offset: -1px; border-color: var(--gold-ink);
+}
+.nr-search-sel {
+  min-block-size: 44px; border: 1px solid var(--rule-strong); background: var(--paper);
+  padding-inline: 12px; font-family: inherit; font-size: 13.5px; color: var(--ink);
+}
+.nr-search-go { flex-shrink: 0; }
+
+/* ⚠️ برچسبِ فقط‌صفحه‌خوان. `display:none` نباشد وگرنه صفحه‌خوان هم
+   نمی‌خواندش و ورودی بی‌نام می‌ماند. */
+.nr-sr {
+  position: absolute; inline-size: 1px; block-size: 1px; overflow: hidden;
+  clip-path: inset(50%); white-space: nowrap;
+}
+
+.nr-range { display: flex; gap: 6px; flex-wrap: wrap; border: 0; margin: 10px 0 0; padding: 0; }
+.nr-range-opt { position: relative; }
+.nr-range-opt input {
+  position: absolute; inset: 0; opacity: 0; inline-size: 100%; block-size: 100%;
+  margin: 0; cursor: pointer;
+}
+.nr-range-opt span {
+  display: inline-flex; align-items: center; min-block-size: 34px; padding-inline: 13px;
+  font-size: 12.5px; font-weight: 600; color: var(--ink-2);
+  border: 1px solid var(--rule); background: var(--paper);
+}
+.nr-range-opt input:checked + span {
+  border-color: var(--ink); color: var(--ink); font-weight: 800; background: var(--paper-3);
+}
+.nr-range-opt input:focus-visible + span { outline: 2px solid var(--gold-ink); outline-offset: 2px; }
+.nr-range-opt:hover span { border-color: var(--rule-strong); }
+@media (max-width: 1023px) { .nr-range-opt span { min-block-size: 44px; } }
+
+/* ═══════════════ نوارِ دوتاییِ «مهم‌ترین» + «پربازدید» ═══════════════ */
+.nr-duo {
+  display: grid; gap: 26px;
+  padding-block: 26px 6px; margin-block-start: 22px;
+  border-block-start: 1px solid var(--rule);
+}
+@media (min-width: 860px) {
+  .nr-duo { grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr); column-gap: 34px; }
+}
+
+/* ═══════════════ فهرستِ نتایج ═══════════════ */
+.nr-blockhd--top { margin-block-start: 18px; }
+.nr-results { list-style: none; margin: 0; padding: 0 0 42px; }
+.nr-results li + li { border-block-start: 1px solid var(--rule); }
+.nr-results a {
+  display: grid; grid-template-columns: minmax(0, 1fr) 128px; gap: 16px;
+  padding-block: 18px; align-items: start;
+}
+.nr-results a.nr-noimg { grid-template-columns: minmax(0, 1fr); }
+.nr-results h3 {
+  font-size: clamp(16.5px, 1.9vw, 20px); font-weight: 700; line-height: 1.5;
+  margin-block: 7px 8px;
+  font-family: 'Estedad', 'IRANSansX', Tahoma, sans-serif;
+}
+.nr-results a:hover h3 { text-decoration: underline; text-underline-offset: 3px; }
+.nr-results p {
+  margin: 0 0 8px; font-size: 13.5px; line-height: 1.85; color: var(--ink-2);
+  max-inline-size: 68ch;
+}
+@media (min-width: 760px) { .nr-results a { grid-template-columns: minmax(0, 1fr) 220px; gap: 22px; } }
+
+/* ═══════════════ صفحه‌ی خبر ═══════════════ */
+.nr-article { padding-block: 16px 44px; }
+
+.nr-crumb ol {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 0 6px;
+  list-style: none; margin: 0 0 18px; padding: 0;
+  font-size: 12px; color: var(--ink-3);
+}
+/* ⚠️ U+203A بعد از آینه‌شدنِ RTL شکلِ درست را می‌دهد؛ U+2039 برعکس. */
+.nr-crumb li + li::before { content: '\203A'; padding-inline-end: 6px; color: var(--rule-strong); }
+.nr-crumb a { padding-block: 6px; }
+.nr-crumb a:hover { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
+
+.nr-art-head { max-inline-size: 780px; }
+.nr-art-head h1 {
+  font-size: clamp(26px, 4.4vw, 42px); font-weight: 800; line-height: 1.22;
+  margin-block: 10px 12px;
+}
+.nr-standfirst {
+  margin: 0 0 16px; font-size: clamp(15.5px, 1.8vw, 18px); line-height: 1.85;
+  color: var(--ink-2); font-weight: 500; max-inline-size: 62ch;
+}
+.nr-byline {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px;
+  padding-block: 12px; border-block: 1px solid var(--rule);
+}
+.nr-author { font-size: 13.5px; font-weight: 800; color: var(--ink); }
+
+.nr-art-fig { margin: 22px 0 0; }
+.nr-art-fig .nr-fig { max-block-size: 62vh; }
+
+/* ── شبکه‌ی متن + ستونِ کناری ── */
+.nr-art-grid { display: grid; gap: 28px; padding-block-start: 22px; }
+@media (min-width: 1000px) {
+  .nr-art-grid {
+    grid-template-columns: minmax(0, 1fr) 300px; column-gap: 44px; align-items: start;
+  }
+  .nr-aside { position: sticky; inset-block-start: calc(var(--nr-nav, 73px) + 60px); }
+}
+.nr-aside > section + section { margin-block-start: 28px; }
+
+/* ── بدنه‌ی متن ──
+   ⚠️ عرض با `ch` بسته می‌شود نه با پیکسل: ۶۸ نویسه در هر خط، مستقل
+   از اندازه‌ی فونتِ کاربر. متنِ تمام‌عرض روی دسکتاپ عملاً خوانده
+   نمی‌شود. */
+.nr-body { max-inline-size: 68ch; }
+.nr-body p {
+  margin: 0 0 20px; font-size: 16.5px; line-height: 2.05; color: #1A1917;
+}
+.nr-body p:first-child { font-size: 17.5px; }
+.nr-body a { color: var(--gold-ink); text-decoration: underline; text-underline-offset: 3px; }
+.nr-nobody {
+  margin: 0; padding: 20px; border: 1px dashed var(--rule-strong);
+  font-size: 14px; color: var(--ink-3); max-inline-size: 68ch;
+}
+
+/* ── نوارِ پیشرفتِ مطالعه ──
+   ⚠️ `transform` نه `width`: تغییرِ عرض هر فریم چیدمان را دوباره
+   حساب می‌کند و روی گوشیِ ضعیف اسکرول را می‌لرزاند. */
+.nr-progress {
+  position: fixed; inset-block-start: 0; inset-inline: 0; block-size: 2px;
+  z-index: 40; pointer-events: none; background: transparent;
+}
+.nr-progress span {
+  display: block; block-size: 100%; background: var(--gold);
+  transform-origin: right center; will-change: transform;
+}
+
+/* ── هم‌رسانی ── */
+.nr-share {
+  display: flex; align-items: center; flex-wrap: wrap; gap: 8px;
+  padding-block-end: 22px;
+}
+.nr-share-l { font-size: 12.5px; font-weight: 700; color: var(--ink-3); margin-inline-end: 2px; }
+.nr-share-b {
+  display: inline-flex; align-items: center; gap: 6px;
+  min-block-size: 36px; padding-inline: 12px;
+  border: 1px solid var(--rule-strong); background: var(--paper);
+  font-family: inherit; font-size: 12.5px; font-weight: 700; color: var(--ink-2);
+  cursor: pointer;
+}
+.nr-share-b:hover { border-color: var(--ink); color: var(--ink); }
+@media (max-width: 1023px) { .nr-share-b { min-block-size: 44px; } }
+
+/* ── برچسب‌ها ── */
+.nr-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-block-start: 26px; max-inline-size: 68ch; }
+.nr-tag {
+  display: inline-flex; align-items: center; min-block-size: 34px; padding-inline: 12px;
+  border: 1px solid var(--rule); font-size: 12.5px; font-weight: 600; color: var(--ink-2);
+}
+.nr-tag:hover { border-color: var(--gold); color: var(--gold-ink); }
+@media (max-width: 1023px) { .nr-tag { min-block-size: 44px; } }
+
+/* ستونِ کناری در صفحه‌ی خبر ریلِ صفحه‌ی اول نیست — حاشیه‌ی آن را نگیرد */
+.nr-aside .nr-rail { border-block-start: 0; padding-block-start: 0; }
+
+/* ═══════════════ تراکمِ موبایل ═══════════════
+   ⚠️ اندازه‌گیری‌شده در ۳۹۰×۸۴۴: فقط **یک** تیتر بالای خطِ تا دیده
+   می‌شد. برای یک صفحه‌ی خبری این شکست است — کاربر باید در همان
+   نگاهِ اول بفهمد امروز چند خبر مهم هست، نه اینکه یک عکسِ بزرگ
+   ببیند و بس.
+
+   سه تغییر، هر سه اندازه‌گیری‌شده:
+   ۱) تیتر *بالای* عکس می‌آید. واژه اول، تصویر بعد.
+   ۲) عکسِ صدر ۳:۲ ⟵ ۱۶:۹ (۲۶۰ ⟵ ۲۱۹ پیکسل).
+   ۳) نوارِ فوری به دو خط مهار می‌شود؛ سه‌خطی ۲۵ پیکسل می‌خورد. */
+@media (max-width: 899px) {
+  .nr-lead { display: flex; flex-direction: column; }
+  .nr-lead .nr-kicker { order: 1; }
+  .nr-lead h2 { order: 2; margin-block: 8px 12px; }
+  .nr-lead .nr-fig { order: 3; margin-block-end: 12px; }
+  .nr-lead-sum { order: 4; }
+  .nr-lead .nr-meta { order: 5; }
+  .nr-lead .nr-fig--16x9 { aspect-ratio: 16 / 9; }
+}
+@media (max-width: 767px) {
+  .nr-breaking-list a {
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  /* تاریخِ امروز در موبایل خطِ دوم می‌گرفت و چیزی هم اضافه نمی‌کرد */
+  .nr-today { display: none; }
+  .nr-search { padding-block: 8px 2px; }
+}
+
+/* ⚠️ لید در موبایل به دو خط مهار می‌شود. اندازه‌گیری‌شده در ۳۹۰: بدونِ
+   این، تیترِ خبرِ دوم پایینِ خطِ تا می‌افتاد و کاربر در نگاهِ اول فقط
+   یک خبر می‌دید. متنِ کامل سرِ خودِ خبر هست. */
+@media (max-width: 479px) {
+  .nr-lead-sum {
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+    overflow: hidden; margin-block-end: 10px;
+  }
+}
