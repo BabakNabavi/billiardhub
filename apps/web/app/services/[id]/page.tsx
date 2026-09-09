@@ -482,15 +482,19 @@ export default function TechnicianProfilePage() {
       </header>
 
       {/* ═══════ تب‌ها ═══════ */}
+      {/* ⚠️ همان نوارِ قطعه‌ایِ صفحه‌ی باشگاه و گالری (.lq-seg)، نه
+          خط‌زیرِ اختصاصیِ این صفحه. سه جای سایت سه شکلِ متفاوت تب
+          داشتند و هیچ دلیلی برایش نبود.
+          ⚠️ ولی `<a href="#...">` می‌ماند: اینها لنگرِ درون‌صفحه‌اند
+          نه تبِ واقعی با پنل. دکمه‌کردنشان لینکِ قابل‌اشتراک و
+          باز‌کردن‌در‌تبِ‌جدید را از کاربر می‌گرفت. */}
       <nav className="tmp-tabs" aria-label="بخش‌های پروفایل">
         <div className="tm-wrap">
-          <ul>
+          <div className="lq-seg tmp-seg">
             {tabs.map(([id2, label]) => (
-              <li key={id2}>
-                <a href={`#${id2}`} aria-current={sec === id2 ? 'true' : undefined}>{label}</a>
-              </li>
+              <a key={id2} href={`#${id2}`} aria-current={sec === id2 ? 'true' : undefined}>{label}</a>
             ))}
-          </ul>
+          </div>
         </div>
       </nav>
 

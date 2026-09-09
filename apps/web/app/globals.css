@@ -38,6 +38,11 @@ html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; overflow-x:
   --c-gold-deep: 143 101  49;
   --c-gold-dark: 160 120  64;
   --c-gold-light: 226 201 140;
+  /* ⚠️ طلاییِ متن روی سطحِ سفید. --gold-deep روی چیپِ سفیدِ نوار
+     قطعه‌ای ۴٫۲۳:۱ اندازه‌گیری شد، زیر حد ۴٫۵ — و آن نوار در سه
+     صفحه استفاده می‌شود، پس یک تیره‌ترِ اختصاصی لازم بود نه
+     دست‌کاریِ --gold-deep که جاهای دیگر هم می‌نشیند. */
+  --c-gold-text: 126 88 40;
   --c-line:      0   0   0;   /* خطوط: مشکی کم‌شفاف */
 
   /* ── Surfaces ── */
@@ -64,6 +69,7 @@ html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; overflow-x:
   --gold-deep:   rgb(var(--c-gold-deep));
   --gold-dark:   rgb(var(--c-gold-dark));
   --gold-light:  rgb(var(--c-gold-light));
+  --gold-text:   rgb(var(--c-gold-text));
   --gold-dim:    rgb(var(--c-gold) / .12);
   --gold-border: rgb(var(--c-gold) / .24);
 
@@ -1486,24 +1492,37 @@ select:disabled { opacity: 0.55; cursor: not-allowed; }
   border: 1px solid rgba(17,17,16,0.07);
   backdrop-filter: blur(10px);
 }
-.lq-seg > button {
+/* ⚠️ `> a` هم پذیرفته می‌شود: تب‌هایی که در واقع *لنگرِ درون‌صفحه‌ای*
+   هستند (مثل نوار پروفایل متخصص) باید `<a href="#...">` بمانند —
+   دکمه‌کردنشان ناوبری واقعی را از کاربر می‌گیرد — ولی باید عینا
+   همین نوار دیده شوند. */
+.lq-seg > button,
+.lq-seg > a {
   min-width: 84px;
   padding: 7px 12px;
   border: none;
   border-radius: 10px;
   background: transparent;
-  color: rgba(17,17,16,0.52);
+  /* ⚠️ ۰٫۵۲ اندازه‌گیری‌شده ۳٫۶۷:۱ می‌داد روی زمینه‌ی خودِ نوار —
+     زیر حد ۴٫۵. حداقلِ لازم ۰٫۵۸ است؛ ۰٫۶۴ حاشیه می‌دهد و فاصله‌اش
+     با hover (۰٫۷۸) هم دیده می‌شود. */
+  color: rgba(17,17,16,0.64);
   font-family: inherit;
   font-size: 12.5px;
   font-weight: 700;
   cursor: pointer;
   transition: background .26s cubic-bezier(.22,1,.36,1), color .2s, box-shadow .26s, transform .18s;
 }
-.lq-seg > button:hover { color: rgba(17,17,16,0.78); }
+.lq-seg > a {
+  display: inline-flex; align-items: center; justify-content: center;
+  text-decoration: none; white-space: nowrap;
+}
+.lq-seg > button:hover,
+.lq-seg > a:hover { color: rgba(17,17,16,0.78); }
 /* aria-disabled به‌جای disabled: دکمه در ترتیب Tab می‌ماند و
    صفحه‌خوان به آن می‌رسد، ولی ظاهر و اشاره‌گرش خاموش است. */
 .lq-seg > button[aria-disabled="true"] { opacity: .5; cursor: not-allowed; }
-.lq-seg > button[aria-disabled="true"]:hover { color: rgba(17,17,16,0.52); }
+.lq-seg > button[aria-disabled="true"]:hover { color: rgba(17,17,16,0.64); }
 /* حلقه‌ی فوکوس جدا از حالت انتخاب است و با خاموش‌بودن انیمیشن هم می‌ماند */
 .lq-seg > button:focus-visible {
   outline: 2px solid var(--gold-deep);
@@ -1512,13 +1531,15 @@ select:disabled { opacity: 0.55; cursor: not-allowed; }
 /* دو حالت انتخاب: `aria-selected` برای تب واقعی (که پنل دارد) و
    `aria-pressed` برای دکمه‌های فیلتر. جدول رنکینگ دومی است. */
 .lq-seg > button[aria-selected='true'],
-.lq-seg > button[aria-pressed='true'] {
-  color: var(--gold-deep);
+.lq-seg > button[aria-pressed='true'],
+.lq-seg > a[aria-current='true'] {
+  color: var(--gold-text);
   font-weight: 800;
   background: rgba(255,255,255,0.94);
   box-shadow: 0 1px 2px rgba(17,17,16,0.08), 0 4px 12px -4px rgba(154,110,56,0.30);
 }
-.lq-seg > button:active { transform: scale(.97); }
+.lq-seg > button:active, .lq-seg > a:active { transform: scale(.97); }
+.lq-seg > a:focus-visible { outline: 2px solid var(--gold-deep); outline-offset: 2px; }
 
 /* ── دکمه‌ی کنش ردیف پنل ──
    ردیف‌های پنل ادمین دکمه‌هایشان را اینلاین استایل می‌دادند و هیچ‌کدام
@@ -1581,7 +1602,7 @@ select:disabled { opacity: 0.55; cursor: not-allowed; }
    خود صفحه — که فقط به‌خاطر ترتیب سند بر globals برنده می‌شد. */
 @media (max-width: 600px) {
   .lq-seg { display: flex; width: 100%; }
-  .lq-seg > button { min-width: 0; flex: 1; padding: 7px 6px; }
+  .lq-seg > button, .lq-seg > a { min-width: 0; flex: 1; padding: 7px 6px; }
   .lq-seg-fill { display: grid; }
 }
 
@@ -1666,7 +1687,7 @@ select:disabled { opacity: 0.55; cursor: not-allowed; }
 @media (prefers-reduced-motion: reduce) {
   .lq-rise, .lq-enter-sheen::after, .lq-halo { animation: none !important; }
   .booking-row { transition: none !important; }
-  .lqg-hover, .lq-tile, .lq-seg > button, .lq-pcard { transition: none !important; }
+  .lqg-hover, .lq-tile, .lq-seg > button, .lq-seg > a, .lq-pcard { transition: none !important; }
   .lqg-hover:hover, .lq-tile:hover, .lq-pcard:hover { transform: none !important; }
 }
 
