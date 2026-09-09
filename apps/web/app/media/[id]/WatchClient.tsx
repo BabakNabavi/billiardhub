@@ -32,9 +32,16 @@ import { mark, resumeAt } from '../../../lib/media/watch-progress'
 import { upNext } from '../../../lib/media/shelf'
 import { NavOffset } from '../../../components/media/shell'
 import { MiniCard, Avatar } from '../../../components/media/cards'
+import { SubscribeButton, LikeButton } from '../../../components/media/social'
+import Comments from '../../../components/media/Comments'
 import '../media.css'
 
-export default function WatchClient({ video, related }: { video: MediaVideo; related: MediaVideo[] }) {
+/* ⚠️ `ownerId` از سرور می‌آید: بدونِ آن صاحبِ ویدیو دکمه‌ی حذفِ
+   دیدگاهِ دیگران را نمی‌دید، در حالی که سرور آن اجازه را می‌دهد —
+   رابط و سرور دو حرفِ متفاوت می‌زدند. */
+export default function WatchClient(
+  { video, related, ownerId }: { video: MediaVideo; related: MediaVideo[]; ownerId?: string | null },
+) {
   const mainRef = useRef<HTMLVideoElement>(null)
 
   /* ── تبلیغِ پیش‌پخش ──
@@ -191,8 +198,12 @@ export default function WatchClient({ video, related }: { video: MediaVideo; rel
                 </div>
               </div>
 
+              {/* ⚠️ فقط وقتی جدولِ اشتراک روی سرور باشد رندر می‌شود */}
+              <SubscribeButton handle={video.creator.handle} />
+
               {/* ⚠️ فقط کنش‌هایی که واقعاً کاری می‌کنند. */}
               <div className="mx-acts">
+                <LikeButton slug={video.id} />
                 <a className="mx-act" target="_blank" rel="noopener noreferrer"
                   href={`https://t.me/share/url?url=${encodeURIComponent(pageUrl)}&text=${shareText}`}>
                   <Send size={15} aria-hidden /> تلگرام
@@ -224,6 +235,8 @@ export default function WatchClient({ video, related }: { video: MediaVideo; rel
                 ))}
               </div>
             )}
+            {/* ⚠️ اگر جدولِ دیدگاه نباشد، این بخش اصلاً نمی‌آید */}
+            <Comments slug={video.id} ownerId={ownerId ?? null} />
           </div>
 
           {/* ── بعدی برای تماشا ──
