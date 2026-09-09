@@ -35,7 +35,7 @@ export const TECH_CATEGORIES = [
     serviceIds: ['straighten', 'full-service', 'butt-resize', 'extension'],
   },
   {
-    id: 'tip-ferrule', title: 'نوک و فرول', icon: 'circle-dot',
+    id: 'tip-ferrule', title: 'تیپ و فرول', icon: 'circle-dot',
     serviceIds: ['tip-replace', 'ferrule-replace', 'ferrule-resize'],
   },
   {

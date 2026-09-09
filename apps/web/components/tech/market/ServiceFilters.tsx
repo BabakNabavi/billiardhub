@@ -14,6 +14,7 @@
    طوری که انگار کار می‌کند — بدترین حالت است.
    ───────────────────────────────────────────────────────────── */
 
+import { CityFilterSelect } from './CityFilterSelect'
 
 export interface FilterState {
   city: string
@@ -51,13 +52,12 @@ export function ServiceFilters({ value, onChange, cities, hasAnyRating, idPrefix
     <>
       <div className="tm-fgroup">
         <label className="tm-fhead" htmlFor={`${idPrefix}-city`}>شهر</label>
-        <select
-          id={`${idPrefix}-city`} className="tm-select"
-          value={value.city} onChange={e => set({ city: e.target.value })}
-        >
-          <option value="all">همه شهرها</option>
-          {cities.map(c => <option key={c} value={c}>{c}</option>)}
-        </select>
+        <CityFilterSelect
+          id={`${idPrefix}-city`}
+          value={value.city}
+          onChange={c => set({ city: c })}
+          withTechnicians={cities}
+        />
       </div>
 
       <fieldset className="tm-fgroup">
