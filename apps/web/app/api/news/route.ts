@@ -16,7 +16,7 @@ import { sb } from '@/lib/finance/db';
 export async function GET() {
   const { data, error } = await sb()
     .from('news')
-    .select('id,slug,title,excerpt,body,cover_url,category,tags,published_at,created_at')
+    .select('id,slug,title,excerpt,body,cover_url,category,tags,published_at,created_at,updated_at,views')
     .eq('status', 'published')
     .order('published_at', { ascending: false, nullsFirst: false })
     .limit(200);
