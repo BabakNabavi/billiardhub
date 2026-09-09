@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   title: 'ورود | بیلیارد هاب',
   description: 'ورود به حساب کاربری بیلیارد هاب.',
   alternates: { canonical: '/login' },
-  /* صفحه‌ی ورود ارزشِ ایندکس ندارد و نباید در نتایج بیاید */
+  /* صفحه‌ی ورود ارزش ایندکس ندارد و نباید در نتایج بیاید */
   robots: { index: false, follow: true },
   openGraph: {
     title: 'ورود | بیلیارد هاب',

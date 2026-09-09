@@ -1,23 +1,23 @@
 'use client'
 
 /* ─────────────────────────────────────────────────────────────
-   پروفایلِ متخصصِ خدماتِ فنی.
+   پروفایل متخصص خدمات فنی.
 
    ── ایده‌ی صفحه: کارگاه ──
-   نسخه‌ی پیش از این ادیتوریال بود — تیتر، خطِ نقطه‌چین، ردیفِ متنی —
-   و نتیجه‌اش روزنامه شد نه وب‌سایتِ یک حرفه‌ای: صفحه فقط کاغذِ سفید
-   و متنِ مشکی و خطِ طلایی داشت، بدونِ هیچ *ماده*ای.
+   نسخه‌ی پیش از این ادیتوریال بود — تیتر، خط نقطه‌چین، ردیف متنی —
+   و نتیجه‌اش روزنامه شد نه وب‌سایت یک حرفه‌ای: صفحه فقط کاغذ سفید
+   و متن مشکی و خط طلایی داشت، بدون هیچ *ماده*ای.
 
-   حالا صفحه از موادِ همین حرفه ساخته می‌شود — ماهوت، چوب، برنج —
-   و هویتِ متخصص رویشان می‌نشیند. سه زمینِ متفاوت ریتم می‌سازند:
-   سرلوحه‌ی روشن با قابِ مادّی ← خدمات روی کاغذِ گرم ← بندِ پایانیِ
+   حالا صفحه از مواد همین حرفه ساخته می‌شود — ماهوت، چوب، برنج —
+   و هویت متخصص رویشان می‌نشیند. سه زمین متفاوت ریتم می‌سازند:
+   سرلوحه‌ی روشن با قاب مادی ← خدمات روی کاغذ گرم ← بند پایانی
    ماهوتی.
 
    ── قاعده‌ی حاکم بر ساختار ──
-   ⚠️ بخش، به‌خاطرِ *وجودِ داده* ساخته نمی‌شود. هر بخش باید چیزی
-   بگوید که جای دیگری گفته نشده؛ وگرنه اصلاً رندر نمی‌شود.
+   ⚠️ بخش، به‌خاطر *وجود داده* ساخته نمی‌شود. هر بخش باید چیزی
+   بگوید که جای دیگری گفته نشده؛ وگرنه اصلا رندر نمی‌شود.
 
-   سیستمِ بصری در `technician-profile.css`. داده از
+   سیستم بصری در `technician-profile.css`. داده از
    `lib/technicians-data` و `lib/technician-store`.
    ───────────────────────────────────────────────────────────── */
 import { useChannelPublish, type PublishVideo } from '@/components/media/useChannelPublish'
@@ -39,7 +39,7 @@ import '@/components/tech/market/market.css'
 import '@/components/tech/market/market-profile.css'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
-/* ⚠️ آیکونِ تزئینی نداریم: هر آیکونی که این‌جا می‌ماند یا ناوبری
+/* ⚠️ آیکون تزئینی نداریم: هر آیکونی که این‌جا می‌ماند یا ناوبری
    است یا کنش. `MapPin` و `Clock` با بازطراحی حذف شدند — شهر و
    ساعت، *متن*اند و آیکون چیزی به آن‌ها اضافه نمی‌کرد. */
 import { Wrench, Phone, MapPin, Home } from 'lucide-react'
@@ -56,19 +56,19 @@ import PendingNotice from '../../../components/profile/PendingNotice'
 import type { Technician } from '../../../lib/technicians-data'
 
 /* آیکون واتساپ (هم‌خانواده‌ی فوتر فروشگاه) */
-/* ⚠️ عددِ ثابت ننویس: نوارِ بالا `paddingTop: env(safe-area-inset-top)`
-   دارد و در حالتِ standaloneِ آی‌اواس بلندتر از ۷۲ پیکسل می‌شود؛
-   `rootMargin` هم `env()` نمی‌فهمد. پس ارتفاع از *خودِ* نوار
-   پرسیده می‌شود. ۷۲ فقط پس‌افتِ نبودِ نوار است. */
+/* ⚠️ عدد ثابت ننویس: نوار بالا `paddingTop: env(safe-area-inset-top)`
+   دارد و در حالت standalone آی‌اواس بلندتر از ۷۲ پیکسل می‌شود؛
+   `rootMargin` هم `env()` نمی‌فهمد. پس ارتفاع از *خود* نوار
+   پرسیده می‌شود. ۷۲ فقط پس‌افت نبود نوار است. */
 const navOffset = () => {
   const nav = document.querySelector('body > nav, header nav')
   const h = nav?.getBoundingClientRect().height ?? 0
   return h > 0 ? Math.round(h) : 72
 }
 
-/* ⚠️ همان دلیلِ بالا، این بار برای CSS: `scroll-margin`ِ لنگرها
-   باید بداند نوارِ ثابت و نوارِ تب‌ها *واقعاً* چقدر بلندند.
-   مقدارِ پس‌افت در `market-profile.css` است؛ این‌جا فقط با
+/* ⚠️ همان دلیل بالا، این بار برای CSS: `scroll-margin` لنگرها
+   باید بداند نوار ثابت و نوار تب‌ها *واقعا* چقدر بلندند.
+   مقدار پس‌افت در `market-profile.css` است؛ این‌جا فقط با
    اندازه‌ی اندازه‌گیری‌شده بازنویسی می‌شود. */
 const useTopOffsets = (ref: RefObject<HTMLDivElement | null>, ready: boolean) => {
   useEffect(() => {
@@ -83,9 +83,9 @@ const useTopOffsets = (ref: RefObject<HTMLDivElement | null>, ready: boolean) =>
     }
     apply()
     window.addEventListener('resize', apply)
-    /* چرخشِ گوشی و باز شدنِ ناحیه‌ی امن هیچ‌کدام رویدادِ resize
-       قابل‌اتکایی روی iOS نمی‌دهند؛ ناظرِ اندازه می‌دهد. ناوبر هم
-       پاییده می‌شود: ارتفاعش با safe-area و ناوبریِ نرم عوض
+    /* چرخش گوشی و باز شدن ناحیه‌ی امن هیچ‌کدام رویداد resize
+       قابل‌اتکایی روی iOS نمی‌دهند؛ ناظر اندازه می‌دهد. ناوبر هم
+       پاییده می‌شود: ارتفاعش با safe-area و ناوبری نرم عوض
        می‌شود و آن‌وقت لنگر کهنه می‌ماند. */
     const ro = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(apply)
     if (ro && tabs) ro.observe(tabs)
@@ -95,9 +95,9 @@ const useTopOffsets = (ref: RefObject<HTMLDivElement | null>, ready: boolean) =>
 }
 
 export default function TechnicianProfilePage() {
-  /* ⚠️ در *اولین* رندر، پیش از رسیدنِ داده. `<link>`ِ داخلِ JSX دیر
+  /* ⚠️ در *اولین* رندر، پیش از رسیدن داده. `<link>` داخل JSX دیر
      بود: صفحه اول `ProfileLoading` را برمی‌گرداند، پس لینک تازه
-     بعد از پاسخِ شبکه به سند اضافه می‌شد.
+     بعد از پاسخ شبکه به سند اضافه می‌شد.
      ⚠️ در `layout` هم گذاشته نمی‌شود: ۱۲۸ کیلوبایت روی *هر* صفحه‌ی
      سایت، برای فونتی که فقط همین‌جا استفاده می‌شود. */
   preload('/fonts/Estedad/Estedad-Variable.woff2',
@@ -110,15 +110,15 @@ export default function TechnicianProfilePage() {
   /* پروفایل‌های ثبت‌نامی (پنل ⇒ localStorage) بعد از mount خوانده می‌شوند */
   const [stored, setStored]   = useState<Technician | null>(null)
   const [checked, setChecked] = useState(false)
-  /* وضعیتِ پروفایلِ سرور. سرور نسخه‌ی تأییدنشده را فقط به صاحبش
-     و ادمین می‌دهد، پس اگر رسید یعنی حقِ دیدنش را داریم — ولی
+  /* وضعیت پروفایل سرور. سرور نسخه‌ی تأییدنشده را فقط به صاحبش
+     و ادمین می‌دهد، پس اگر رسید یعنی حق دیدنش را داریم — ولی
      باید بداند دیگران نمی‌بینندش، وگرنه لینک را جایی می‌فرستد
      که همه «پیدا نشد» می‌گیرند. */
   const [pending, setPending] = useState(false)
-  /* نمای نگاشت‌شده برای ویرایش کافی نیست — پروفایلِ خام هم می‌ماند */
+  /* نمای نگاشت‌شده برای ویرایش کافی نیست — پروفایل خام هم می‌ماند */
   const [rawP, setRawP]       = useState<TechnicianProfile | null>(null)
   const [ownerId, setOwnerId] = useState<string | null>(null)
-  /* پرچمِ قطعیِ سرور — مقایسه‌ی مرورگر بی‌صدا شکست می‌خورد */
+  /* پرچم قطعی سرور — مقایسه‌ی مرورگر بی‌صدا شکست می‌خورد */
   const [mine, setMine] = useState<boolean | undefined>(undefined)
   /* شبکه شکست، نه اینکه پروفایل نباشد */
   const [netFail, setNetFail] = useState(false)
@@ -126,18 +126,18 @@ export default function TechnicianProfilePage() {
   const { open: openImage, viewer: imageViewer } = useProfileImageViewer()
   const { open: openVideo, viewer: videoViewer } = useProfileVideoViewer()
   /* ── چرا سرور هم خوانده می‌شود ──
-     تا امروز این صفحه فقط `localStorage` را می‌خواند، یعنی پروفایلِ
-     یک متخصص را تنها روی دستگاهِ خودش می‌شد دید. تیکِ آبی هم ستونِ
-     جدولِ `profiles` است و اصلاً در localStorage نیست، پس هرگز
-     نمایش داده نمی‌شد. کشِ محلی به‌عنوان مقدارِ اولیه می‌ماند تا
-     صفحه در نبودِ شبکه خالی نشود. */
+     تا امروز این صفحه فقط `localStorage` را می‌خواند، یعنی پروفایل
+     یک متخصص را تنها روی دستگاه خودش می‌شد دید. تیک آبی هم ستون
+     جدول `profiles` است و اصلا در localStorage نیست، پس هرگز
+     نمایش داده نمی‌شد. کش محلی به‌عنوان مقدار اولیه می‌ماند تا
+     صفحه در نبود شبکه خالی نشود. */
   useEffect(() => {
-    /* پیش از خروجِ زودهنگام: وگرنه `netFail`ِ نامکِ قبلی کهنه می‌ماند. */
+    /* پیش از خروج زودهنگام: وگرنه `netFail` نامک قبلی کهنه می‌ماند. */
     setNetFail(false)
     if (staticTech) { setChecked(true); return }
 
-    /* بازنشانی — همان دلیلِ صفحه‌ی بازیکن: پروفایلِ قبلی نباید زیرِ
-       نشانیِ تازه بماند. */
+    /* بازنشانی — همان دلیل صفحه‌ی بازیکن: پروفایل قبلی نباید زیر
+       نشانی تازه بماند. */
     setChecked(false)
     const local = getTechnicianProfile(id)
     setStored(local ? profileToTechnician(local) : null)
@@ -147,8 +147,8 @@ export default function TechnicianProfilePage() {
       try {
         const r = await fetchProfileResult<TechnicianProfile>('technician', id)
         if (!alive) return
-        /* همان دلیلِ صفحه‌ی بازیکن: قضاوتِ دوباره‌ی کلاینت،
-           پیش‌نمایشِ صاحبِ پروفایل را حذف می‌کرد. */
+        /* همان دلیل صفحه‌ی بازیکن: قضاوت دوباره‌ی کلاینت،
+           پیش‌نمایش صاحب پروفایل را حذف می‌کرد. */
         if (r.state === 'found') {
           const p = r.profile
           setPending(p.status !== 'approved')
@@ -160,7 +160,7 @@ export default function TechnicianProfilePage() {
           setNetFail(true)
         }
       } catch {
-        /* `fetchProfileResult` خودش خطا را می‌گیرد؛ تورِ ایمنی است
+        /* `fetchProfileResult` خودش خطا را می‌گیرد؛ تور ایمنی است
            تا استثنای غیرمنتظره صفحه را به «پیدا نشد» نیندازد. */
         if (alive) setNetFail(true)
       } finally {
@@ -172,25 +172,25 @@ export default function TechnicianProfilePage() {
   }, [id, staticTech, reloadKey])
 
   const tech = staticTech ?? stored
-  /* کاتالوگ یک‌بار حل می‌شود: هم هیرو خلاصه‌اش را می‌خواهد، هم بخشِ
-     خدمات خودش را. `resolveServices` مقادیرِ قدیمی را هم نگه می‌دارد. */
+  /* کاتالوگ یک‌بار حل می‌شود: هم هیرو خلاصه‌اش را می‌خواهد، هم بخش
+     خدمات خودش را. `resolveServices` مقادیر قدیمی را هم نگه می‌دارد. */
   const svc = useMemo(() => resolveServices(tech?.services), [tech?.services])
 
-  /* ⚠️ پیش از هر `return`ِ شرطی — وگرنه React #310 و صفحه‌ی سفید */
+  /* ⚠️ پیش از هر `return` شرطی — وگرنه React #310 و صفحه‌ی سفید */
   const edit = useOwnerEdit<TechnicianProfile>('technician', id, rawP, ownerId, raw => {
     setRawP(raw); setStored(profileToTechnician(raw))
   }, mine)
   const { gate: channelGate, ask: askChannel, publish: publishToChannel } = useChannelPublish('technician', ownerId ?? undefined, edit.isOwner, notify)
 
-  /* ── همان گالریِ مربی و داور ──
-     ⚠️ این صفحه گالریِ خودش را داشت: نوارِ آلبوم، شبکه‌ی ماسونری و یک
-     لایت‌باکسِ دست‌ساز. یعنی دو پیاده‌سازی برای یک چیز، با دو رفتار —
-     همان دوباره‌کاری‌ای که بارها منبعِ باگ بوده. حالا کامپوننتِ مشترک
+  /* ── همان گالری مربی و داور ──
+     ⚠️ این صفحه گالری خودش را داشت: نوار آلبوم، شبکه‌ی ماسونری و یک
+     لایت‌باکس دست‌ساز. یعنی دو پیاده‌سازی برای یک چیز، با دو رفتار —
+     همان دوباره‌کاری‌ای که بارها منبع باگ بوده. حالا کامپوننت مشترک
      رندر می‌کند و این‌جا فقط «چه چیزی ذخیره شود» می‌ماند. */
   const MAX_VIDEO_MB = 25
   const [vidBusy, setVidBusy] = useState(false)
-  /* انتشار در بیلیارد مدیا — پنجره فقط وقتی باز می‌شود که کانالِ
-     همین نقش نباشد. آپلودِ گالری هرگز به نتیجه‌اش وابسته نیست. */
+  /* انتشار در بیلیارد مدیا — پنجره فقط وقتی باز می‌شود که کانال
+     همین نقش نباشد. آپلود گالری هرگز به نتیجه‌اش وابسته نیست. */
 
   const addImages = async (files: File[], album?: string) => {
     const items = await Promise.all(files.map(async fl => ({
@@ -202,8 +202,8 @@ export default function TechnicianProfilePage() {
     await edit.apply(d => ({ ...d, gallery: [...(d.gallery ?? []), ...items] }))
   }
 
-  /* `details` از فرمِ مشخصات می‌آید (عنوان/دسته/توضیح). تا دیروز
-     عنوان نامِ فایل بود و همان به مدیا می‌رفت. */
+  /* `details` از فرم مشخصات می‌آید (عنوان/دسته/توضیح). تا دیروز
+     عنوان نام فایل بود و همان به مدیا می‌رفت. */
   const addVideoFiles = async (files: File[], album?: string, details?: VideoDetail[]) => {
     setVidBusy(true)
     const skipped: string[] = []
@@ -226,7 +226,7 @@ export default function TechnicianProfilePage() {
            این خط بالای `break` بود و ویدیویی که ذخیره‌اش شکست خورده
            بود هم به مدیا می‌رفت: در بیلیارد مدیا زنده، در پروفایل
            نبود، و کاربر پیام «ذخیره انجام نشد» دیده بود. */
-        /* «فقط در گالری بماند» یک تصمیمِ صریحِ کاربر است */
+        /* «فقط در گالری بماند» یک تصمیم صریح کاربر است */
         if (details?.[i]?.publish !== false) {
           shipped.push({
             title: detailTitle(details, i, file), src: url, thumb, durationSec: meta.durationSec,
@@ -255,15 +255,15 @@ export default function TechnicianProfilePage() {
     if (!(await ask('این تصویر حذف شود؟', { body: 'این کار برگشت‌پذیر نیست.', confirmLabel: 'حذف' }))) return
     await edit.apply(d => ({ ...d, gallery: (d.gallery ?? []).filter(g => g.id !== mid) }))
   }
-  /* ── ویرایشِ عنوانِ ویدیو ──
-     عنوان دو نسخه دارد: ردیفِ گالریِ پروفایل و ردیفِ بیلیارد مدیا.
-     هوک دومی را می‌زند، این تابع اولی را. کلید نشانیِ فایل است،
-     چون گالری شناسه‌ی ردیفِ مدیا را ندارد. */
+  /* ── ویرایش عنوان ویدیو ──
+     عنوان دو نسخه دارد: ردیف گالری پروفایل و ردیف بیلیارد مدیا.
+     هوک دومی را می‌زند، این تابع اولی را. کلید نشانی فایل است،
+     چون گالری شناسه‌ی ردیف مدیا را ندارد. */
   const { dialog: videoEditDialog, edit: editVideo } = useVideoEdit(
     async (target, detail) => {
-      /* ⚠️ `map` بدونِ تطبیق هم «موفق» برمی‌گردد. اگر نشانی جور نشود
-         (کدگذاریِ متفاوت، ردیفِ بی‌url)، هوک «شد» می‌شنید و مدیا را
-         عوض می‌کرد در حالی که گالری عنوانِ قبلی را نشان می‌دهد —
+      /* ⚠️ `map` بدون تطبیق هم «موفق» برمی‌گردد. اگر نشانی جور نشود
+         (کدگذاری متفاوت، ردیف بی‌url)، هوک «شد» می‌شنید و مدیا را
+         عوض می‌کرد در حالی که گالری عنوان قبلی را نشان می‌دهد —
          یعنی دو عنوان برای یک ویدیو. */
       let hit = false
       const ok = await edit.apply(prof => {
@@ -282,22 +282,22 @@ export default function TechnicianProfilePage() {
     await edit.apply(d => ({ ...d, videos: (d.videos ?? []).filter(v => v.id !== vid) }))
   }
 
-  /* ── کنشِ چسبانِ موبایل ──
+  /* ── کنش چسبان موبایل ──
      ⚠️ همیشه روی صفحه نیست: تا وقتی دکمه‌های سرلوحه دیده
-     می‌شوند لازم نیست، و روی بندِ پایانی هم دو دکمه‌ی یکسان
+     می‌شوند لازم نیست، و روی بند پایانی هم دو دکمه‌ی یکسان
      هم‌زمان می‌شد. `IntersectionObserver` هر دو را می‌پاید.
-     ⚠️ پیش از هر `return`ِ شرطی — وگرنه React #310. */
+     ⚠️ پیش از هر `return` شرطی — وگرنه React #310. */
   const [dock, setDock] = useState(false)
   const [openAbout, setOpenAbout] = useState(false)
-  /* تبِ فعال — فقط برای نشانه‌گذاری، ناوبری با لنگر است */
+  /* تب فعال — فقط برای نشانه‌گذاری، ناوبری با لنگر است */
   const [sec, setSec] = useState('about')
   const heroActsRef = useRef<HTMLDivElement | null>(null)
   const closeRef = useRef<HTMLDivElement | null>(null)
-  /* ریشه‌ی صفحه — ناظرِ تبِ فعال و کنشِ چسبان از این‌جا می‌گردند.
+  /* ریشه‌ی صفحه — ناظر تب فعال و کنش چسبان از این‌جا می‌گردند.
      (پیش‌تر دامنه‌ی `gsap.context` بود؛ آن سیستم حذف شد.) */
   const stageRef = useRef<HTMLDivElement | null>(null)
 
-  /* لنگرِ تب‌ها با ارتفاعِ واقعیِ نوارها هم‌تراز می‌شود */
+  /* لنگر تب‌ها با ارتفاع واقعی نوارها هم‌تراز می‌شود */
   useTopOffsets(stageRef, Boolean(tech?.id))
 
   useEffect(() => {
@@ -307,10 +307,10 @@ export default function TechnicianProfilePage() {
     const seen = new Set<Element>()
     const io = new IntersectionObserver(entries => {
       for (const e of entries) {
-        /* ⚠️ «هنوز نرسیده» با «رد شده» یکی نیست. بندِ پایانی در
-           هر دو حالت قطع می‌شود، و بدونِ این تفکیک، کاربر وقتی از
-           بندِ پایانی گذشت و به فوترِ سایت رسید دوباره داک را
-           می‌دید — دقیقاً همان چیزی که این گارد برای جلوگیری از
+        /* ⚠️ «هنوز نرسیده» با «رد شده» یکی نیست. بند پایانی در
+           هر دو حالت قطع می‌شود، و بدون این تفکیک، کاربر وقتی از
+           بند پایانی گذشت و به فوتر سایت رسید دوباره داک را
+           می‌دید — دقیقا همان چیزی که این گارد برای جلوگیری از
            آن نوشته شده. */
         const passed = e.target === close && e.boundingClientRect.top < 0
         if (e.isIntersecting || passed) seen.add(e.target)
@@ -322,10 +322,10 @@ export default function TechnicianProfilePage() {
     return () => io.disconnect()
   /* ⚠️ به `phone` بسته نمی‌شود: آن پایین‌تر — بعد از گاردهای
      شرطی — ساخته می‌شود و هوک باید *بالای* همه‌ی return‌ها بماند.
-     نبودِ شماره خودش داک را رندر نمی‌کند، پس ناظر بی‌ضرر است. */
+     نبود شماره خودش داک را رندر نمی‌کند، پس ناظر بی‌ضرر است. */
   }, [tech?.id])
 
-  /* تبِ فعال از روی بخشی که در قابِ دید است.
+  /* تب فعال از روی بخشی که در قاب دید است.
      threshold پایین چون بخش‌ها بلندترند از ویوپورت. */
   useEffect(() => {
     const ids = ['about', 'services', 'work', 'media', 'contact']
@@ -348,7 +348,7 @@ export default function TechnicianProfilePage() {
      روی متنی که هنوز نیامده گره‌های خالی می‌سازد و نام هرگز ظاهر
      نمی‌شود. */
 
-  /* یونیونِ تفکیک‌شده‌ی  یا هر دو را می‌خواهد یا
+  /* یونیون تفکیک‌شده‌ی  یا هر دو را می‌خواهد یا
      هیچ‌کدام را — پس یک‌جا ساخته و پخش می‌شود. */
   const retryProps = netFail
     ? { netFail: true as const, onRetry: () => { setChecked(false); setReloadKey(k => k + 1) } }
@@ -367,23 +367,23 @@ export default function TechnicianProfilePage() {
   }
 
   /* ── چه چیزی گفته می‌شود و کجا ──
-     ⚠️ یک گذر روی همه‌ی متن‌ها، نه دو گذرِ جدا: قاعده‌ی «بلندتر
-     می‌ماند» باید در مرزِ عنوان/معرفی/درباره هم برقرار باشد.
+     ⚠️ یک گذر روی همه‌ی متن‌ها، نه دو گذر جدا: قاعده‌ی «بلندتر
+     می‌ماند» باید در مرز عنوان/معرفی/درباره هم برقرار باشد.
      `keepLongest` جایگاه را نگه می‌دارد. */
   const slots = keepLongest([tech.title, tech.intro, ...tech.about])
   const [lede = '', second = ''] = slots.slice(0, 2).filter((x): x is string => !!x)
   const rest = slots.slice(2).filter((x): x is string => !!x)
-  /* بخشِ «درباره» فقط وقتی که واقعاً متنی برای خواندن باشد */
+  /* بخش «درباره» فقط وقتی که واقعا متنی برای خواندن باشد */
   const hasProse = rest.length > 1 || (rest[0]?.length ?? 0) >= 90
   const about = hasProse ? rest : []
   const claim = hasProse ? second : (second || rest[0] || '')
 
-  /* ⚠️ همه‌جا `norm`: مقدارِ فقط‌فاصله در JS صادق است. */
+  /* ⚠️ همه‌جا `norm`: مقدار فقط‌فاصله در JS صادق است. */
   const club = norm(tech.club)
   const city = norm(tech.city)
   const hours = norm(tech.hours)
   const coverage = tech.coverage.map(norm).filter(c => c && c !== city)
-  const delivery = [tech.onsite && 'در محلِ شما', tech.workshop && 'پذیرش در کارگاه']
+  const delivery = [tech.onsite && 'در محل شما', tech.workshop && 'پذیرش در کارگاه']
     .filter((x): x is string => !!x)
   const meta: [string, string][] = [
     ...(club ? [['باشگاه / مجموعه', club] as [string, string]] : []),
@@ -392,21 +392,21 @@ export default function TechnicianProfilePage() {
     ...(hours ? [['ساعت کاری', hours] as [string, string]] : []),
   ]
 
-  /* ⚠️ ردیفِ بدونِ شماره ممکن است؛ کنشی که کارِ خودش را نمی‌کند از
+  /* ⚠️ ردیف بدون شماره ممکن است؛ کنشی که کار خودش را نمی‌کند از
      نبودنش بدتر است. */
   const phone = norm(tech.phone)
   const wa = norm(tech.whatsapp)
-  /* ⚠️ فقط نامِ خدماتِ *واقعیِ خودش*. هیچ کلمه‌ی تزئینی اضافه
+  /* ⚠️ فقط نام خدمات *واقعی خودش*. هیچ کلمه‌ی تزئینی اضافه
      نمی‌شود — نوار محتواست، نه دکور.
-     ⚠️ یکتا: یک عنوان می‌تواند در دو دسته تکرار شود و کلیدِ تکراری
+     ⚠️ یکتا: یک عنوان می‌تواند در دو دسته تکرار شود و کلید تکراری
      در React خطاست.
-     ⚠️ شرطِ بی‌شکاف‌بودن این است که **یک نسخه از خودِ نوار پهن‌تر
-     باشد**، نه اینکه صرفاً چند کلمه داشته باشد. نوار تمام‌عرضِ
-     صفحه است، پس با ۶۰ نویسه (~۷ قلم، ~۱۵۰۰ پیکسل) روی نمایشگرِ
-     ۱۹۲۰ ته هر دور یک حفره‌ی ~۴۰۰ پیکسلی باز می‌شد — دقیقاً همان
+     ⚠️ شرط بی‌شکاف‌بودن این است که **یک نسخه از خود نوار پهن‌تر
+     باشد**، نه اینکه صرفا چند کلمه داشته باشد. نوار تمام‌عرض
+     صفحه است، پس با ۶۰ نویسه (~۷ قلم، ~۱۵۰۰ پیکسل) روی نمایشگر
+     ۱۹۲۰ ته هر دور یک حفره‌ی ~۴۰۰ پیکسلی باز می‌شد — دقیقا همان
      چیزی که این تکرار قرار بود جلویش را بگیرد. ۱۸۰ نویسه با
-     محافظه‌کارانه‌ترین حدسِ عرضِ نویسه از ۱۹۲۰ رد می‌شود.
-     ⚠️ سقفِ صریحِ حلقه: عنوانِ خالی در داده طولِ رشته را هرگز
+     محافظه‌کارانه‌ترین حدس عرض نویسه از ۱۹۲۰ رد می‌شود.
+     ⚠️ سقف صریح حلقه: عنوان خالی در داده طول رشته را هرگز
      بالا نمی‌برد و رندر را قفل می‌کند. */
 
   const waText = wa
@@ -414,7 +414,7 @@ export default function TechnicianProfilePage() {
     : ''
 
   /* تب‌ها فقط لنگرند، نه روتر: محتوا کوتاه است و صفحه‌ی جدا برای
-     هر تب یعنی سه رفت‌وبرگشتِ اضافه روی شبکه‌ی کند. */
+     هر تب یعنی سه رفت‌وبرگشت اضافه روی شبکه‌ی کند. */
   const tabs: [string, string][] = [
     ['about', 'معرفی'],
     ['services', 'خدمات'],
@@ -429,9 +429,9 @@ export default function TechnicianProfilePage() {
       {/* ⚠️ بازطراحی این را جا انداخته بود: متخصصی که پروفایلش
           هنوز تأیید نشده، صفحه‌ی عادی می‌دید و نمی‌فهمید لینکش
           برای کسی باز نمی‌شود. */}
-      {pending && <PendingNotice what="پروفایلِ شما" />}
+      {pending && <PendingNotice what="پروفایل شما" />}
 
-      {/* ═══════ سربرگِ پروفایل ═══════ */}
+      {/* ═══════ سربرگ پروفایل ═══════ */}
       <header className="tmp-head">
         <div className="tm-wrap tmp-head-in">
           <nav aria-label="مسیر">
@@ -505,7 +505,7 @@ export default function TechnicianProfilePage() {
                   {claim && <p>{claim}</p>}
                   {about.map((t, k) => <p key={k}>{t}</p>)}
                 </div>
-                {/* دکمه فقط وقتی متن واقعاً بلند است */}
+                {/* دکمه فقط وقتی متن واقعا بلند است */}
                 {(about.length > 0 || (claim?.length ?? 0) > 220) && (
                   <button type="button" className="tmp-more" onClick={() => setOpenAbout(v => !v)}>
                     {openAbout ? 'بستن' : 'مشاهده بیشتر'}
@@ -551,7 +551,7 @@ export default function TechnicianProfilePage() {
             </section>
           )}
 
-          {/* ── گالری — همان کامپوننتِ مربی و داور ── */}
+          {/* ── گالری — همان کامپوننت مربی و داور ── */}
           {(tech.gallery.length > 0 || tech.videos.length > 0 || edit.isOwner) && (
             <section className="tmp-card" id="media">
               <ProfileGallery
@@ -605,7 +605,7 @@ export default function TechnicianProfilePage() {
           </section>
         </div>
 
-        {/* ── پنلِ تماسِ چسبان (دسکتاپ) ── */}
+        {/* ── پنل تماس چسبان (دسکتاپ) ── */}
         <aside className="tmp-panel" aria-label="تماس با متخصص">
           <h2>{tech.name}</h2>
           {lede && <p className="tmp-role">{lede}</p>}
@@ -623,7 +623,7 @@ export default function TechnicianProfilePage() {
         </aside>
       </div>
 
-      {/* ── کنشِ چسبانِ موبایل ── */}
+      {/* ── کنش چسبان موبایل ── */}
       {phone && (
         <div className="tmp-sticky" data-show={dock ? '1' : '0'} aria-hidden={!dock}>
           <a className="tm-btn tm-btn--gold" href={`tel:${phone}`} tabIndex={dock ? 0 : -1}>

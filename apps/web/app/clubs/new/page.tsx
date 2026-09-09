@@ -112,7 +112,7 @@ export default function NewClubPage() {
     if (!slugEdited && form.name) setSlug(persianToSlug(form.name));
   }, [form.name, slugEdited]);
 
-  /* بررسیِ در دسترس بودنِ نشانی داخلِ `SiteAddressField` انجام می‌شود و
+  /* بررسی در دسترس بودن نشانی داخل `SiteAddressField` انجام می‌شود و
      نتیجه‌اش از `onStatusChange` به همین‌جا برمی‌گردد. */
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -159,10 +159,10 @@ export default function NewClubPage() {
     if (!form.province)       { setError('استان باشگاه را انتخاب کنید'); return; }
     if (!form.city.trim())    { setError('شهر باشگاه را انتخاب کنید'); return; }
     if (!form.address.trim()) { setError('آدرس کامل باشگاه را وارد کنید'); return; }
-    if (slug && slugStatus === 'taken')   { setError('نام سایت انتخابی قبلاً رزرو شده؛ نام دیگری بگذارید'); return; }
+    if (slug && slugStatus === 'taken')   { setError('نام سایت انتخابی قبلا رزرو شده؛ نام دیگری بگذارید'); return; }
     if (slug && slugStatus === 'invalid') { setError('نام سایت فقط می‌تواند حروف انگلیسی کوچک، عدد و خط تیره داشته باشد'); return; }
     /* اگر کارت استعلام شده، تأییدش هم باید گرفته شده باشد — پول به همان شبا می‌رود */
-    if (bank && !bank.confirmed) { setError('لطفاً درستی اطلاعات بانکی را تأیید کنید'); return; }
+    if (bank && !bank.confirmed) { setError('لطفا درستی اطلاعات بانکی را تأیید کنید'); return; }
 
     setLoading(true);
     setError('');
@@ -252,7 +252,7 @@ export default function NewClubPage() {
       `}</style>
 
       {/* خطا — وسط صفحه.
-          قبلاً خطا بالای فرم می‌نشست و در فرمی به این بلندی کاربر باید
+          قبلا خطا بالای فرم می‌نشست و در فرمی به این بلندی کاربر باید
           کل صفحه را بالا می‌رفت تا بفهمد چه شده. */}
       {error && (
         <div onClick={() => setError('')} role="alert"
@@ -340,9 +340,9 @@ export default function NewClubPage() {
               </div>
             </div>
 
-            {/* آدرس اختصاصی سایت — همان کامپوننتی که پنلِ باشگاه‌دار و
-                پروفایلِ مربی/داور هم از آن استفاده می‌کنند، تا یک ظاهر و
-                یک قاعده در کلِ سایت بماند. */}
+            {/* آدرس اختصاصی سایت — همان کامپوننتی که پنل باشگاه‌دار و
+                پروفایل مربی/داور هم از آن استفاده می‌کنند، تا یک ظاهر و
+                یک قاعده در کل سایت بماند. */}
             <SiteAddressField
               value={slug}
               onChange={v => { setSlugEdited(true); setSlug(v); }}
@@ -528,7 +528,7 @@ export default function NewClubPage() {
             <BankCardVerify value={bank} onChange={setBank} />
             {!bank && (
               <p style={{ fontSize: 12, color: '#6F6A5C', marginTop: 10 }}>
-                می‌توانید اطلاعات بانکی را بعداً از داشبورد باشگاه تکمیل کنید.
+                می‌توانید اطلاعات بانکی را بعدا از داشبورد باشگاه تکمیل کنید.
               </p>
             )}
           </div>

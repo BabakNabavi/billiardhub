@@ -33,13 +33,13 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ message: 'امکان رزرو در گذشته وجود ندارد' }, { status: 400 });
   }
 
-  /* ── افقِ رزرو: دو هفته ──
-     بدونِ سقف، کسی می‌توانست ساعتی را شش ماه بعد بگیرد و آن ساعت تا
+  /* ── افق رزرو: دو هفته ──
+     بدون سقف، کسی می‌توانست ساعتی را شش ماه بعد بگیرد و آن ساعت تا
      آن روز برای بقیه بسته می‌ماند — در حالی که نه باشگاه می‌داند
      شش ماه بعد باز است، نه قیمتش همان است.
 
-     دو هفته با تقویمِ پنلِ باشگاه‌دار هم یکی است، پس چیزی که آن‌جا
-     دیده می‌شود دقیقاً همان چیزی است که قابلِ رزرو است. */
+     دو هفته با تقویم پنل باشگاه‌دار هم یکی است، پس چیزی که آن‌جا
+     دیده می‌شود دقیقا همان چیزی است که قابل رزرو است. */
   if (bookingStartsAt(bookingDate, hours.join(',')).getTime() > Date.now() + BOOKING_HORIZON_DAYS * 86_400_000) {
     return NextResponse.json({
       message: `رزرو حداکثر تا ${BOOKING_HORIZON_DAYS} روز آینده ممکن است`,
@@ -60,19 +60,19 @@ export async function POST(req: NextRequest) {
 
   if (closure.always) {
     return NextResponse.json(
-      { message: 'رزرو آنلاین این باشگاه بسته است. لطفاً مستقیم با باشگاه تماس بگیرید.' },
+      { message: 'رزرو آنلاین این باشگاه بسته است. لطفا مستقیم با باشگاه تماس بگیرید.' },
       { status: 409 },
     );
   }
   if (isDateClosed(bookingDate, closure)) {
     return NextResponse.json(
-      { message: 'رزرو آنلاین این باشگاه برای این تاریخ بسته است. لطفاً روز دیگری انتخاب کنید.' },
+      { message: 'رزرو آنلاین این باشگاه برای این تاریخ بسته است. لطفا روز دیگری انتخاب کنید.' },
       { status: 409 },
     );
   }
 
-  /* بستنِ موقت ممکن است فقط چند ساعتِ اولِ روز را ببندد — پس تاریخ باز
-     است ولی همان ساعت‌ها نه. بدونِ این بررسی، کاربر می‌توانست ساعتی را
+  /* بستن موقت ممکن است فقط چند ساعت اول روز را ببندد — پس تاریخ باز
+     است ولی همان ساعت‌ها نه. بدون این بررسی، کاربر می‌توانست ساعتی را
      رزرو کند که باشگاه‌دار بسته بود. */
   const blockedHours = closedHours(bookingDate, closure);
   if (blockedHours.length > 0) {
@@ -85,10 +85,10 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  /* ── قیمت‌گذاری سروری: میز باید واقعاً در همین باشگاه ثبت شده باشد ── */
+  /* ── قیمت‌گذاری سروری: میز باید واقعا در همین باشگاه ثبت شده باشد ── */
   const { data: tableRow } = await sb().from('tables')
-    /* ستون‌ها با * خوانده می‌شوند نه با نام: تا وقتی مهاجرتِ ۰۳۶ اجرا
-       نشده، نام‌بردن از reservationClosed کلِ کوئری را خطا می‌کرد و
+    /* ستون‌ها با * خوانده می‌شوند نه با نام: تا وقتی مهاجرت ۰۳۶ اجرا
+       نشده، نام‌بردن از reservationClosed کل کوئری را خطا می‌کرد و
        نتیجه‌اش «این میز ثبت نشده» بود — یعنی هیچ رزروی انجام نمی‌شد. */
     .select('*')
     .eq('id', tableId).maybeSingle();
@@ -108,8 +108,8 @@ export async function POST(req: NextRequest) {
   if (t.isActive === false) {
     return NextResponse.json({ message: 'این میز در حال حاضر غیرفعال است' }, { status: 409 });
   }
-  /* قفلِ سطحِ میز. پنهان‌کردنش در UI کافی نیست — شناسه‌ی میز از
-     مرورگر می‌آید و یک درخواستِ دستی می‌توانست همان میز را رزرو کند. */
+  /* قفل سطح میز. پنهان‌کردنش در UI کافی نیست — شناسه‌ی میز از
+     مرورگر می‌آید و یک درخواست دستی می‌توانست همان میز را رزرو کند. */
   if (t.reservationClosed === true) {
     return NextResponse.json({ message: 'رزرو این میز در حال حاضر بسته است' }, { status: 409 });
   }
@@ -147,7 +147,7 @@ export async function POST(req: NextRequest) {
   if (error) {
     const m = error.message || '';
     if (/booking_slots_unique|duplicate key/i.test(m)) {
-      return NextResponse.json({ message: 'این ساعت‌ها هم‌اکنون رزرو شده‌اند؛ لطفاً بازه‌ی دیگری انتخاب کنید' }, { status: 409 });
+      return NextResponse.json({ message: 'این ساعت‌ها هم‌اکنون رزرو شده‌اند؛ لطفا بازه‌ی دیگری انتخاب کنید' }, { status: 409 });
     }
     if (/does not exist|schema cache|function/i.test(m)) {
       return NextResponse.json({ message: 'سیستم رزرو هنوز راه‌اندازی نشده است (مایگریشن دیتابیس اجرا نشده)' }, { status: 503 });

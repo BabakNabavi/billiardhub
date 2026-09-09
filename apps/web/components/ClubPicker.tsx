@@ -3,13 +3,13 @@
 /* ─────────────────────────────────────────────────────────────
    «باشگاهی که در آن فعالیت می‌کنید» — یک کامپوننت برای همه‌ی نقش‌ها.
 
-   چرا یکی: این انتخاب باید در ثبت‌نام و در پروفایلِ هر شش نقش باشد.
-   هفت نسخه‌ی جدا یعنی هفت رفتارِ کمی متفاوت و روزی یکی از قلم
+   چرا یکی: این انتخاب باید در ثبت‌نام و در پروفایل هر شش نقش باشد.
+   هفت نسخه‌ی جدا یعنی هفت رفتار کمی متفاوت و روزی یکی از قلم
    می‌افتد. عضویت هم سراسری است — یک کاربر در یک زمان عضو یک
    باشگاه است، فارغ از این‌که مربی باشد یا فروشنده.
 
-   انتخابِ دستی عمداً ممکن نیست: عضویت روی `club_members` می‌نشیند و
-   شمارشِ اعضای باشگاه از همان‌جا می‌آید. اگر کسی بتواند نامِ دلخواه
+   انتخاب دستی عمدا ممکن نیست: عضویت روی `club_members` می‌نشیند و
+   شمارش اعضای باشگاه از همان‌جا می‌آید. اگر کسی بتواند نام دلخواه
    بنویسد، آن عدد بی‌معنی می‌شود.
    ───────────────────────────────────────────────────────────── */
 
@@ -26,15 +26,15 @@ const GOLD_D = '#8F6531', FELT = '#0E7A38'
 export interface ClubPickerValue { id: string; name: string }
 
 interface Props {
-  /* اگر ندهید، کامپوننت خودش عضویتِ فعلی را از سرور می‌خواند و
+  /* اگر ندهید، کامپوننت خودش عضویت فعلی را از سرور می‌خواند و
      نگه می‌دارد. در هفت صفحه استفاده می‌شود؛ اگر هر کدام مجبور
-     بودند state و بارگذاری خودشان را بنویسند، همان‌جا هفت رفتارِ
+     بودند state و بارگذاری خودشان را بنویسند، همان‌جا هفت رفتار
      کمی متفاوت درست می‌شد. */
   value?: ClubPickerValue | null
   onChange?: (v: ClubPickerValue | null) => void
   /** برچسب بالای کادر — پیش‌فرض برای همه‌ی نقش‌ها یکی است */
   label?: string
-  /** توضیحِ زیر برچسب */
+  /** توضیح زیر برچسب */
   hint?: string
   /* عضویت را همین‌جا روی سرور ثبت کن. در فرم‌هایی که دکمه‌ی ذخیره‌ی
      خودشان را دارند هم درست است، چون عضویت جدا از پروفایل نگهداری
@@ -42,8 +42,8 @@ interface Props {
   autoSave?: boolean
 }
 
-/* نامِ باشگاه‌ها فارسی است و کاربر ممکن است «ي» عربی یا «ك» بنویسد.
-   بدون یکسان‌سازی، جست‌وجوی «یاس» باشگاهِ «ياس» را پیدا نمی‌کند. */
+/* نام باشگاه‌ها فارسی است و کاربر ممکن است «ي» عربی یا «ك» بنویسد.
+   بدون یکسان‌سازی، جست‌وجوی «یاس» باشگاه «ياس» را پیدا نمی‌کند. */
 const norm = (s: string) =>
   s.replace(/[يى]/g, 'ی').replace(/ك/g, 'ک').replace(/‌/g, ' ')
     .replace(/\s+/g, ' ').trim().toLowerCase()
@@ -53,7 +53,7 @@ export default function ClubPicker({
   hint = 'فقط باشگاه‌های ثبت‌شده در سایت',
   autoSave = true,
 }: Props) {
-  /* حالتِ خودگردان: وقتی صفحه‌ای `value` نمی‌دهد، همین‌جا نگه داشته
+  /* حالت خودگردان: وقتی صفحه‌ای `value` نمی‌دهد، همین‌جا نگه داشته
      و از سرور خوانده می‌شود. */
   const controlled = valueProp !== undefined
   const [own, setOwn] = useState<ClubPickerValue | null>(null)
@@ -80,7 +80,7 @@ export default function ClubPicker({
   const searchRef = useRef<HTMLInputElement>(null)
 
   /* فهرست فقط وقتی گرفته می‌شود که پنجره باز شود — این کامپوننت در
-     هفت صفحه هست و گرفتنِ فهرست در بارگذاریِ همه‌شان بی‌دلیل است. */
+     هفت صفحه هست و گرفتن فهرست در بارگذاری همه‌شان بی‌دلیل است. */
   useEffect(() => {
     if (!open || clubs) return
     void fetchClubOptions().then(setClubs).catch(() => setClubs([]))
@@ -90,7 +90,7 @@ export default function ClubPicker({
     if (open) setTimeout(() => searchRef.current?.focus(), 60)
   }, [open])
 
-  /* شمارِ اعضای باشگاهِ انتخاب‌شده — همان عددی که کاربر به آن اضافه شد */
+  /* شمار اعضای باشگاه انتخاب‌شده — همان عددی که کاربر به آن اضافه شد */
   const loadMembers = useCallback((id: string) => {
     void apiFetch(`/api/clubs/membership?clubId=${encodeURIComponent(id)}`, { cache: 'no-store' })
       .then(r => (r.ok ? r.json() : null))
@@ -98,7 +98,7 @@ export default function ClubPicker({
       .catch(() => { })
   }, [])
 
-  /* دریافتِ پیامکِ باشگاه — عضو باید بتواند خاموشش کند */
+  /* دریافت پیامک باشگاه — عضو باید بتواند خاموشش کند */
   const [optOut, setOptOut] = useState(false)
   const [optBusy, setOptBusy] = useState(false)
   useEffect(() => {
@@ -122,8 +122,8 @@ export default function ClubPicker({
   }
   useEffect(() => { if (value?.id) loadMembers(value.id); else setMembers(null) }, [value?.id, loadMembers])
 
-  /* بدنه هنگام باز بودنِ پنجره قفل می‌شود — روی موبایل بدون این،
-     اسکرولِ پس‌زمینه زیرِ پنجره حرکت می‌کند. */
+  /* بدنه هنگام باز بودن پنجره قفل می‌شود — روی موبایل بدون این،
+     اسکرول پس‌زمینه زیر پنجره حرکت می‌کند. */
   useEffect(() => {
     if (!open) return
     const prev = document.body.style.overflow
@@ -209,8 +209,8 @@ export default function ClubPicker({
             {busy ? <Loader2 size={13} className="animate-spin" /> : 'حذف'}
           </button>
 
-          {/* اجازه‌ی پیامکِ باشگاه — بدونِ این، تنها راهِ نگرفتنِ پیامک
-              ترکِ باشگاه بود. */}
+          {/* اجازه‌ی پیامک باشگاه — بدون این، تنها راه نگرفتن پیامک
+              ترک باشگاه بود. */}
           {autoSave ? (
             <label style={{
               flex: '1 1 100%', display: 'flex', alignItems: 'center', gap: 8,
@@ -267,8 +267,8 @@ const ghostBtn: React.CSSProperties = {
 }
 
 /* ── پنجره‌ی انتخاب ──
-   با portal روی body می‌نشیند: این کامپوننت داخلِ فرم‌هایی می‌رود که
-   خودشان کارت و overflow دارند، و بدون portal پنجره زیرِ آن‌ها
+   با portal روی body می‌نشیند: این کامپوننت داخل فرم‌هایی می‌رود که
+   خودشان کارت و overflow دارند، و بدون portal پنجره زیر آن‌ها
    بریده می‌شد. */
 function Sheet({
   clubs, filtered, q, setQ, busy, selectedId, searchRef, onPick, onClose,

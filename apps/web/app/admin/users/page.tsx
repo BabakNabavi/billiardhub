@@ -49,8 +49,8 @@ const verificationLabels: Record<string, string> = {
 
 export default function AdminUsersPage() {
   const router = useRouter();
-  /* بدونِ `_hydrated`، نخستین رندر `user` را تهی می‌بیند (استور از
-     localStorage خوانده می‌شود) و ادمین را پیش از باز شدنِ صفحه به
+  /* بدون `_hydrated`، نخستین رندر `user` را تهی می‌بیند (استور از
+     localStorage خوانده می‌شود) و ادمین را پیش از باز شدن صفحه به
      صفحه‌ی اصلی پرت می‌کند — یعنی رفرش یا ورود از بوکمارک کار نمی‌کرد. */
   const { user, _hydrated, authChecked } = useAuthStore();
   const [users, setUsers] = useState<User[]>([]);
@@ -63,9 +63,9 @@ export default function AdminUsersPage() {
   const [err, setErr] = useState('');
 
   /* منبع: `/api/admin/users`.
-     پیش‌تر `api.get('/user/all')` بود — مسیرِ بک‌اندِ NestJS که حذف
+     پیش‌تر `api.get('/user/all')` بود — مسیر بک‌اند NestJS که حذف
      شده و در Next وجود ندارد. نتیجه‌اش ۴۰۴ بود که در `.catch` بلعیده
-     می‌شد و صفحه فهرستِ خالی نشان می‌داد، در حالی که کارتِ داشبورد
+     می‌شد و صفحه فهرست خالی نشان می‌داد، در حالی که کارت داشبورد
      همان لحظه ۲۱ کاربر می‌شمرد. */
   useEffect(() => {
     if (!_hydrated || !authChecked) return;
@@ -169,8 +169,8 @@ export default function AdminUsersPage() {
           <div className="text-center py-16 text-gray-400">کاربری پیدا نشد</div>
         ) : (
           /* ── چرا قاب ──
-             فهرست بدونِ سقف رها بود: با پانصد کاربر صفحه چند ده هزار
-             پیکسل بلند می‌شد و هرچه پایینِ فهرست بود ناپیدا. */
+             فهرست بدون سقف رها بود: با پانصد کاربر صفحه چند ده هزار
+             پیکسل بلند می‌شد و هرچه پایین فهرست بود ناپیدا. */
           <ScrollList count={filtered.length} min={8} gap={0}
             className="divide-y divide-gray-50">
             {filtered.map(u => (
@@ -203,9 +203,9 @@ export default function AdminUsersPage() {
                   )}
                 </div>
                 <div className="col-span-2 flex items-center justify-center gap-1">
-                  {/* پیش‌تر این دکمه به پروفایلِ عمومی می‌رفت و آن‌جا
-                      جز نام چیزی نبود — ادمین هیچ راهی برای دیدنِ
-                      مشخصاتِ یک نفر نداشت. */}
+                  {/* پیش‌تر این دکمه به پروفایل عمومی می‌رفت و آن‌جا
+                      جز نام چیزی نبود — ادمین هیچ راهی برای دیدن
+                      مشخصات یک نفر نداشت. */}
                   <button onClick={() => setDetail(u.id)}
                     className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="مشاهده مشخصات">
                     <Eye size={15} />
@@ -222,10 +222,10 @@ export default function AdminUsersPage() {
                       <XCircle size={15} />
                     </button>
                   )}
-                  {/* این دکمه `onClick` نداشت — یک آیکنِ تزئینی بود که
-                      کلیک‌کردنش هیچ کاری نمی‌کرد. مدیریتِ دسترسیِ ادمین
+                  {/* این دکمه `onClick` نداشت — یک آیکن تزئینی بود که
+                      کلیک‌کردنش هیچ کاری نمی‌کرد. مدیریت دسترسی ادمین
                       صفحه‌ی خودش را دارد (با محافظ‌های «آخرین ادمین» و
-                      «نقشِ خود»)، پس این‌جا فقط به همان‌جا می‌بریم و
+                      «نقش خود»)، پس این‌جا فقط به همان‌جا می‌بریم و
                       شماره را برای جست‌وجو پیش‌پر می‌کنیم. */}
                   <button onClick={() => router.push('/admin/access?q=' + encodeURIComponent(u.phone ?? ''))}
                     className="p-1.5 text-gray-400 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors"

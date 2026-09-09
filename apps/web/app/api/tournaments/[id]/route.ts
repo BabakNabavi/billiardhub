@@ -7,13 +7,13 @@ import { notifyTournamentCancelled } from '@/lib/notify';
 
 /* یک مسابقه — خواندن، ویرایش، لغو.
 
-   تا امروز این مسیر اصلاً وجود نداشت: مسابقه ساخته می‌شد و دیگر هیچ
+   تا امروز این مسیر اصلا وجود نداشت: مسابقه ساخته می‌شد و دیگر هیچ
    راهی برای اصلاحش نبود. غلط تایپی در عنوان، تاریخ اشتباه یا مبلغ
    نادرست ⇒ فقط لغو و ساخت دوباره.
 
-   حذف فیزیکی عمداً نیست: مسابقه‌ای که ثبت‌نام یا پرداخت داشته سابقه‌ی
+   حذف فیزیکی عمدا نیست: مسابقه‌ای که ثبت‌نام یا پرداخت داشته سابقه‌ی
    مالی دارد و پاک‌کردنش یعنی گم‌شدن رد پول. «لغو» جای حذف را می‌گیرد
-   و فقط مسابقه‌ی پیش‌نویس بدون ثبت‌نام واقعاً حذف می‌شود. */
+   و فقط مسابقه‌ی پیش‌نویس بدون ثبت‌نام واقعا حذف می‌شود. */
 
 import { ALL_FORMATS, normalizeDiscipline, optionsFor } from '@/lib/tournaments/formats';
 import { safeCover } from '../route';
@@ -24,19 +24,19 @@ const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
    حال اجرا یا تمام‌شده نباید تاریخ و مبلغش عوض شود. */
 const FROZEN = new Set(['ongoing', 'completed', 'cancelled']);
 
-/* ── گذرهای مجازِ وضعیت ──────────────────────────────────────────
-   تا امروز هیچ راهی برای عوض‌کردنِ وضعیت نبود: مسابقه با `draft`
+/* ── گذرهای مجاز وضعیت ──────────────────────────────────────────
+   تا امروز هیچ راهی برای عوض‌کردن وضعیت نبود: مسابقه با `draft`
    ساخته می‌شد، فهرست‌های عمومی پیش‌نویس را نشان نمی‌دهند، و دکمه‌ی
    انتشاری هم وجود نداشت — یعنی یک بن‌بست.
 
    هر گذری هم مجاز نیست. نقشه‌ی زیر فقط چیزهایی را می‌پذیرد که
-   معنا دارند؛ «شروع مسابقه» و «پایان» کارِ این مسیر نیست و جای
+   معنا دارند؛ «شروع مسابقه» و «پایان» کار این مسیر نیست و جای
    خودش را دارد. */
 const TRANSITIONS: Record<string, string[]> = {
   draft: ['registration_open'],
   registration_open: ['registration_closed', 'draft'],
   registration_closed: ['registration_open'],
-  /* published بازمانده‌ی داده‌ی قدیمی است؛ راهِ خروج داشته باشد */
+  /* published بازمانده‌ی داده‌ی قدیمی است؛ راه خروج داشته باشد */
   published: ['registration_open', 'draft'],
 };
 
@@ -57,7 +57,7 @@ async function guard(req: NextRequest, id: string) {
   return { actor, t };
 }
 
-/* وضعیت‌هایی که هر کسی حق دیدنشان را دارد. `draft` عمداً بیرون است:
+/* وضعیت‌هایی که هر کسی حق دیدنشان را دارد. `draft` عمدا بیرون است:
    پیش‌نویس یعنی باشگاه هنوز منتشرش نکرده. */
 const PUBLIC_STATUSES = new Set([
   'published', 'registration_open', 'registration_closed',
@@ -70,11 +70,11 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string 
   const t = await getTournament(id);
   if (!t) return NextResponse.json({ message: 'مسابقه یافت نشد' }, { status: 404 });
 
-  /* فهرستِ عمومی پیش‌نویس‌ها را فیلتر می‌کرد، ولی این مسیر نمی‌کرد:
-     با داشتنِ شناسه، عنوان و مبلغ و تاریخِ مسابقه‌ی منتشرنشده برای هر
-     کسی خوانده می‌شد. مالکِ باشگاه و ادمین همچنان می‌بینند؛ بقیه نه.
+  /* فهرست عمومی پیش‌نویس‌ها را فیلتر می‌کرد، ولی این مسیر نمی‌کرد:
+     با داشتن شناسه، عنوان و مبلغ و تاریخ مسابقه‌ی منتشرنشده برای هر
+     کسی خوانده می‌شد. مالک باشگاه و ادمین همچنان می‌بینند؛ بقیه نه.
 
-     پاسخ عمداً ۴۰۴ است نه ۴۰۳: ۴۰۳ خودش تأیید می‌کند که چنین مسابقه‌ای
+     پاسخ عمدا ۴۰۴ است نه ۴۰۳: ۴۰۳ خودش تأیید می‌کند که چنین مسابقه‌ای
      وجود دارد. */
   if (!PUBLIC_STATUSES.has(t.status)) {
     const actor = await actorOf(req);
@@ -110,9 +110,9 @@ export async function PATCH(req: NextRequest, ctx: { params: Promise<{ id: strin
       }, { status: 409 });
     }
 
-    /* برگرداندن به پیش‌نویس یعنی مسابقه از دیدِ عموم ناپدید می‌شود.
+    /* برگرداندن به پیش‌نویس یعنی مسابقه از دید عموم ناپدید می‌شود.
        اگر کسی ثبت‌نام کرده باشد، این یعنی رویدادی که رویش حساب کرده
-       بی‌خبر غیب شود — پس بسته است. راهِ درستش «لغو» است که به
+       بی‌خبر غیب شود — پس بسته است. راه درستش «لغو» است که به
        ثبت‌نام‌کننده‌ها خبر می‌دهد. */
     if (next === 'draft') {
       const { count } = await sb().from('tournament_registrations')
@@ -136,12 +136,12 @@ export async function PATCH(req: NextRequest, ctx: { params: Promise<{ id: strin
   if (b.description !== undefined) patch.description = String(b.description ?? '').slice(0, 5000) || null;
   if (b.prize !== undefined) patch.prize = String(b.prize ?? '').slice(0, 200) || null;
   if (b.rules !== undefined) patch.rules = String(b.rules ?? '').slice(0, 5000) || null;
-  /* تهی یعنی «برگرد به پوسترِ پیش‌فرض» — پس پاک‌کردن هم ممکن است */
+  /* تهی یعنی «برگرد به پوستر پیش‌فرض» — پس پاک‌کردن هم ممکن است */
   if (b.coverUrl !== undefined) patch.cover_url = safeCover(b.coverUrl);
   if (typeof b.discipline === 'string') patch.discipline = normalizeDiscipline(b.discipline);
   if (b.matchFormat !== undefined) {
-    /* فرمت باید با نوعِ بازی بخواند — و نوعِ بازی ممکن است در همین
-       درخواست عوض شده باشد، پس مقدارِ تازه ملاک است نه ردیفِ فعلی. */
+    /* فرمت باید با نوع بازی بخواند — و نوع بازی ممکن است در همین
+       درخواست عوض شده باشد، پس مقدار تازه ملاک است نه ردیف فعلی. */
     const disc = normalizeDiscipline(
       typeof b.discipline === 'string' ? b.discipline : t.discipline);
     const raw = String(b.matchFormat ?? '');
@@ -150,7 +150,7 @@ export async function PATCH(req: NextRequest, ctx: { params: Promise<{ id: strin
   }
   if (b.startsAt !== undefined) patch.starts_at = isoOrNull(b.startsAt);
   if (b.registrationEndsAt !== undefined) patch.registration_ends_at = isoOrNull(b.registrationEndsAt);
-  /* زمانِ باز شدنِ ثبت‌نام. تهی‌کردنش یعنی «دیگر زمان‌بندی نیست» —
+  /* زمان باز شدن ثبت‌نام. تهی‌کردنش یعنی «دیگر زمان‌بندی نیست» —
      مسابقه همان‌جا که هست می‌ماند تا باشگاه‌دار دستی بازش کند. */
   if (b.registrationStartsAt !== undefined) {
     patch.registration_starts_at = isoOrNull(b.registrationStartsAt);
@@ -178,13 +178,13 @@ export async function PATCH(req: NextRequest, ctx: { params: Promise<{ id: strin
     const next = Math.max(0, Math.min(500_000_000, Math.round(Number(b.entryFee) || 0)));
 
     /* ── چرا مقایسه لازم است ──
-       شرط پیش‌تر فقط «آیا مبلغ در بدنه هست؟» را می‌پرسید. ولی فرمِ
+       شرط پیش‌تر فقط «آیا مبلغ در بدنه هست؟» را می‌پرسید. ولی فرم
        ویرایش همه‌ی فیلدها را با هم می‌فرستد، پس مبلغ همیشه در بدنه
        است — حتی وقتی کاربر دستش هم به آن نزده. نتیجه‌اش این بود که
-       اصلاحِ یک غلطِ تایپی در عنوان با پیامِ «پس از اولین پرداخت،
+       اصلاح یک غلط تایپی در عنوان با پیام «پس از اولین پرداخت،
        مبلغ ورودی تغییر نمی‌کند» رد می‌شد.
 
-       مقدارِ یکسان اصلاً تغییر نیست؛ فقط مقدارِ متفاوت باید بسته
+       مقدار یکسان اصلا تغییر نیست؛ فقط مقدار متفاوت باید بسته
        باشد. */
     if (next !== t.entry_fee) {
       const { count } = await sb().from('tournament_registrations')
@@ -205,25 +205,25 @@ export async function PATCH(req: NextRequest, ctx: { params: Promise<{ id: strin
       { message: 'مهلت ثبت‌نام نمی‌تواند بعد از تاریخ برگزاری باشد' }, { status: 400 });
   }
 
-  /* ── زمان‌بندیِ باز شدنِ ثبت‌نام: همان قاعده‌ی مسیرِ ساخت ──
-     مسیرِ POST این را داشت و این‌جا نداشت. نتیجه‌اش دقیقاً همان چیزی
-     بود که زمان‌بندی باید جلویش را می‌گرفت: باشگاه‌دار تاریخِ باز
+  /* ── زمان‌بندی باز شدن ثبت‌نام: همان قاعده‌ی مسیر ساخت ──
+     مسیر POST این را داشت و این‌جا نداشت. نتیجه‌اش دقیقا همان چیزی
+     بود که زمان‌بندی باید جلویش را می‌گرفت: باشگاه‌دار تاریخ باز
      شدن را روی فردا می‌گذاشت و «انتشار و باز کردن ثبت‌نام» را می‌زد،
-     ثبت‌نام **همان لحظه** باز می‌شد و مسابقه هرگز به تبِ «بزودی»
-     نمی‌رفت. هیچ خطایی هم نمی‌داد — قاعده‌ای که در یکی از دو مسیرِ
+     ثبت‌نام **همان لحظه** باز می‌شد و مسابقه هرگز به تب «بزودی»
+     نمی‌رفت. هیچ خطایی هم نمی‌داد — قاعده‌ای که در یکی از دو مسیر
      نوشتن باشد و در دیگری نه، همین شکلی بی‌صدا از کار می‌افتد.
 
-     `patch` با `in` خوانده می‌شود نه با `??`: تهی‌کردنِ زمان‌بندی
-     («دیگر زمان‌بندی نیست») مقدارِ `null` می‌فرستد و `??` آن را با
-     مقدارِ قبلیِ ردیف جایگزین می‌کرد — یعنی لغوِ زمان‌بندی کار
+     `patch` با `in` خوانده می‌شود نه با `??`: تهی‌کردن زمان‌بندی
+     («دیگر زمان‌بندی نیست») مقدار `null` می‌فرستد و `??` آن را با
+     مقدار قبلی ردیف جایگزین می‌کرد — یعنی لغو زمان‌بندی کار
      نمی‌کرد. */
   const regStarts = ('registration_starts_at' in patch
     ? patch.registration_starts_at
     : t.registration_starts_at) as string | null;
 
-  /* رشته‌های تاریخ با عدد سنجیده می‌شوند نه با `>`: مقدارِ `patch`
-     همیشه ISOیِ نرمال است ولی مقدارِ ردیف از PostgREST با
-     `+00:00` می‌آید، و مقایسه‌ی حرفیِ دو قالبِ متفاوت غلط جواب
+  /* رشته‌های تاریخ با عدد سنجیده می‌شوند نه با `>`: مقدار `patch`
+     همیشه ISOی نرمال است ولی مقدار ردیف از PostgREST با
+     `+00:00` می‌آید، و مقایسه‌ی حرفی دو قالب متفاوت غلط جواب
      می‌دهد. */
   const ms = (v: string | null) => (v ? Date.parse(v) : NaN);
   if (regStarts && regEnds && ms(regStarts) >= ms(regEnds)) {
@@ -231,8 +231,8 @@ export async function PATCH(req: NextRequest, ctx: { params: Promise<{ id: strin
       { message: 'زمان باز شدن ثبت‌نام باید پیش از مهلت پایان آن باشد' }, { status: 400 });
   }
 
-  /* «در آینده» شرطِ لازم است: مسابقه‌ای که هفته‌ی پیش سرِ وقت باز
-     شده نباید با ویرایشِ جایزه‌اش به «بزودی» برگردد. */
+  /* «در آینده» شرط لازم است: مسابقه‌ای که هفته‌ی پیش سر وقت باز
+     شده نباید با ویرایش جایزه‌اش به «بزودی» برگردد. */
   const nextStatus = String(patch.status ?? t.status);
   if (regStarts && nextStatus === 'registration_open' && ms(regStarts) > Date.now()) {
     patch.status = 'published';
@@ -267,7 +267,7 @@ export async function DELETE(req: NextRequest, ctx: { params: Promise<{ id: stri
   const { count: regs } = await sb().from('tournament_registrations')
     .select('id', { count: 'exact', head: true }).eq('tournament_id', id);
 
-  /* پیش‌نویس بدون ثبت‌نام: چیزی برای نگه‌داشتن نیست ⇒ واقعاً حذف */
+  /* پیش‌نویس بدون ثبت‌نام: چیزی برای نگه‌داشتن نیست ⇒ واقعا حذف */
   if ((regs ?? 0) === 0 && (t.status === 'draft' || t.status === 'published')) {
     const { error } = await sb().from('tournaments').delete().eq('id', id);
     if (error) return NextResponse.json({ message: 'حذف انجام نشد' }, { status: 500 });

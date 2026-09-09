@@ -4,9 +4,9 @@ import { resolveUrl, type StorageProvider } from './storage'
 /* ─────────────────────────────────────────────────────────────
    بیلیارد مدیا — لایه‌ی داده.
 
-   متادیتا در جدولِ `videos` است (مهاجرتِ ۰۴۸)؛ خودِ فایل در Storage.
-   پیش‌تر همه‌چیز در یک فایلِ JSON بود که هر خواندن کلش را می‌آورد و
-   هر نوشتن کلش را بازمی‌نوشت — یعنی دو آپلودِ هم‌زمان یکی را گم
+   متادیتا در جدول `videos` است (مهاجرت ۰۴۸)؛ خود فایل در Storage.
+   پیش‌تر همه‌چیز در یک فایل JSON بود که هر خواندن کلش را می‌آورد و
+   هر نوشتن کلش را بازمی‌نوشت — یعنی دو آپلود هم‌زمان یکی را گم
    می‌کرد و صفحه‌بندی/جست‌وجو در حافظه انجام می‌شد.
    ───────────────────────────────────────────────────────────── */
 
@@ -29,6 +29,9 @@ export interface VideoRow {
   duration_sec: number | null
   width: number | null
   height: number | null
+  /* از مهاجرت ۰۹۲؛ ردیف‌های پیش از آن ندارندش */
+  likes_count?: number | null
+  comments_count?: number | null
   mime: string | null
   size_bytes: number | null
   status: VideoStatus
@@ -39,14 +42,14 @@ export interface VideoRow {
   created_at: string
   updated_at: string
   published_at: string | null
-  /* از مهاجرتِ ۰۵۰ — کلیدِ فایل بدونِ دامنه. `src`/`thumb` برای
+  /* از مهاجرت ۰۵۰ — کلید فایل بدون دامنه. `src`/`thumb` برای
      ردیف‌های قدیمی می‌مانند. */
   storage_provider?: StorageProvider
   storage_key?: string | null
   thumb_key?: string | null
 }
 
-/** شکلی که به مرورگر می‌رود — بدونِ شناسه‌ی مالک و یادداشتِ داخلی. */
+/** شکلی که به مرورگر می‌رود — بدون شناسه‌ی مالک و یادداشت داخلی. */
 export interface PublicVideo {
   slug: string
   title: string
@@ -62,14 +65,16 @@ export interface PublicVideo {
   width: number | null
   height: number | null
   views: number
+  likes: number
+  comments: number
   publishedAt: string | null
   featured: boolean
 }
 
 export function toPublic(r: VideoRow): PublicVideo {
-  /* نشانی از کلید ساخته می‌شود، نه از ستونِ نشانی. یعنی جابه‌جاییِ
-     آینده‌ی فایل‌ها فقط یک تغییر در `publicUrlFor` است، نه دست‌کاریِ
-     رشته در همه‌ی ردیف‌ها. ردیف‌های بدونِ کلید همان نشانیِ قدیمی را
+  /* نشانی از کلید ساخته می‌شود، نه از ستون نشانی. یعنی جابه‌جایی
+     آینده‌ی فایل‌ها فقط یک تغییر در `publicUrlFor` است، نه دست‌کاری
+     رشته در همه‌ی ردیف‌ها. ردیف‌های بدون کلید همان نشانی قدیمی را
      می‌گیرند. */
   const provider = r.storage_provider ?? 'supabase'
   return {
@@ -80,25 +85,30 @@ export function toPublic(r: VideoRow): PublicVideo {
     src: resolveUrl(r.storage_key, r.src, provider),
     thumb: resolveUrl(r.thumb_key, r.thumb, provider),
     durationSec: r.duration_sec, width: r.width, height: r.height,
-    views: r.views, publishedAt: r.published_at, featured: r.featured,
+    views: r.views,
+    /* ⚠️ ستون‌ها ممکن است هنوز روی سرور نباشند (مهاجرت دستی اجرا
+       می‌شود). نبودشان یعنی صفر، و صفر هم نمایش داده نمی‌شود. */
+    likes: Math.max(0, Number(r.likes_count) || 0),
+    comments: Math.max(0, Number(r.comments_count) || 0),
+    publishedAt: r.published_at, featured: r.featured,
   }
 }
 
-/* ── نشانیِ عمومی ─────────────────────────────────────────────
+/* ── نشانی عمومی ─────────────────────────────────────────────
 
-   از عنوان ساخته می‌شود تا هم برای آدم خوانا باشد هم برای موتورِ
-   جست‌وجو معنا داشته باشد. حروفِ فارسی در URL مجازند و مرورگر
+   از عنوان ساخته می‌شود تا هم برای آدم خوانا باشد هم برای موتور
+   جست‌وجو معنا داشته باشد. حروف فارسی در URL مجازند و مرورگر
    خودش نمایششان می‌دهد؛ فقط نویسه‌هایی که در مسیر معنا دارند
    (`/`, `?`, `#`, فاصله) حذف می‌شوند.
 
-   دنباله‌ی کوتاهِ تصادفی همیشه اضافه می‌شود، نه فقط هنگامِ برخورد:
-   بدونِ آن، دو ویدیو با عنوانِ یکسان به یک slug می‌رسند و دومی باید
-   در یک حلقه‌ی تلاش‌ودوباره ساخته شود — که زیرِ بار مسابقه می‌دهد. */
+   دنباله‌ی کوتاه تصادفی همیشه اضافه می‌شود، نه فقط هنگام برخورد:
+   بدون آن، دو ویدیو با عنوان یکسان به یک slug می‌رسند و دومی باید
+   در یک حلقه‌ی تلاش‌ودوباره ساخته شود — که زیر بار مسابقه می‌دهد. */
 export function makeSlug(title: string): string {
   const base = String(title ?? '')
     .trim()
     .toLowerCase()
-    .replace(/[‌‏‎]/g, '')          // نویسه‌های نامرئیِ فارسی
+    .replace(/[‌‏‎]/g, '')          // نویسه‌های نامرئی فارسی
     .replace(/[^\p{L}\p{N}]+/gu, '-')
     .replace(/^-+|-+$/g, '')
     .slice(0, 70)
@@ -109,13 +119,26 @@ export function makeSlug(title: string): string {
 
 const sb = () => getSupabaseServer()
 
-/* ستون‌هایی که فهرستِ عمومی لازم دارد. `description` عمداً نیست:
-   در کارت نمایش داده نمی‌شود و آوردنش یعنی کشیدنِ متنِ بلند برای
+/* ستون‌هایی که فهرست عمومی لازم دارد. `description` عمدا نیست:
+   در کارت نمایش داده نمی‌شود و آوردنش یعنی کشیدن متن بلند برای
    بیست کارت. صفحه‌ی تماشا خودش کاملش را می‌گیرد. */
-const LIST_COLS =
+/* ⚠️ `likes_count`/`comments_count` با `*` نمی‌آیند چون فهرست
+   ستون‌ها صریح است. اگر مهاجرت ۰۹۲ هنوز اجرا نشده باشد PostgREST
+   کل پرس‌وجو را رد می‌کند، پس جدا و با گارد خوانده می‌شوند. */
+const BASE_COLS =
   'slug,title,category,tags,creator_name,creator_handle,club_id,thumb,src,' +
   'storage_provider,storage_key,thumb_key,' +
   'duration_sec,width,height,views,published_at,featured'
+const FULL_COLS = BASE_COLS + ',likes_count,comments_count'
+
+/* ⚠️ گارد یک‌بار فرایند: اگر ستون‌های مهاجرت ۰۹۲ نباشند، PostgREST
+   کل پرس‌وجو را رد می‌کند و صفحه مدیا خالی می‌شود — نه فقط شمارنده.
+   اولین رد، حالت ساده را قفل می‌کند تا هر درخواست بعدی دو بار
+   پرس‌وجو نزند. با اجرای مهاجرت و ری‌استارت سرویس، حالت کامل
+   برمی‌گردد. */
+let socialCols = true
+const noColumn = (m?: string) => /does not exist|schema cache|column/i.test(m ?? '')
+const cols = () => (socialCols ? FULL_COLS : BASE_COLS)
 
 export interface ListOpts {
   category?: string
@@ -124,22 +147,22 @@ export interface ListOpts {
   clubId?: string
   sort?: 'recent' | 'popular'
   limit?: number
-  /** مکان‌نمای صفحه‌بندی — `published_at` آخرین ردیفِ صفحه‌ی قبل */
+  /** مکان‌نمای صفحه‌بندی — `published_at` آخرین ردیف صفحه‌ی قبل */
   before?: string
   featuredOnly?: boolean
 }
 
 /**
- * فهرستِ ویدیوهای منتشرشده‌ی عمومی.
+ * فهرست ویدیوهای منتشرشده‌ی عمومی.
  *
  * صفحه‌بندی مکان‌نمایی است، نه offset: با `offset` هرچه جلوتر بروی
- * دیتابیس باید همان تعداد ردیف را بشمارد و دور بیندازد، و اگر بینِ
+ * دیتابیس باید همان تعداد ردیف را بشمارد و دور بیندازد، و اگر بین
  * دو صفحه ویدیوی تازه‌ای منتشر شود ردیف‌ها جابه‌جا می‌شوند.
  */
 export async function listPublic(o: ListOpts = {}): Promise<{ items: PublicVideo[]; nextCursor: string | null }> {
   const limit = Math.min(Math.max(Number(o.limit) || 24, 1), 48)
 
-  let q = sb().from('videos').select(LIST_COLS)
+  let q = sb().from('videos').select(cols())
     .eq('status', 'published')
     .eq('visibility', 'public')
 
@@ -162,9 +185,26 @@ export async function listPublic(o: ListOpts = {}): Promise<{ items: PublicVideo
     if (o.before) q = q.lt('published_at', o.before)
   }
 
-  /* یکی بیشتر می‌گیریم تا بدانیم صفحه‌ی بعدی هست یا نه — بدونِ
-     شمردنِ کلِ جدول. */
-  const { data, error } = await q.limit(limit + 1)
+  /* یکی بیشتر می‌گیریم تا بدانیم صفحه‌ی بعدی هست یا نه — بدون
+     شمردن کل جدول. */
+  let { data, error } = await q.limit(limit + 1)
+  /* ⚠️ ستون‌های ۰۹۲ نبودند ⇒ یک‌بار بدون آن‌ها دوباره امتحان کن و
+     حالت ساده را قفل کن. بدون این، نبود مهاجرت یعنی صفحه مدیا
+     کاملا خالی، نه فقط بی‌شمارنده. */
+  if (error && socialCols && noColumn(error.message)) {
+    socialCols = false
+    console.warn('[media] ستون‌های ۰۹۲ نیستند؛ شمارنده پسند و دیدگاه خاموش شد')
+    let r2 = sb().from('videos').select(cols())
+      .eq('status', 'published').eq('visibility', 'public')
+    if (o.category && o.category !== 'all') r2 = r2.eq('category', o.category)
+    if (o.handle) r2 = r2.eq('creator_handle', o.handle)
+    if (o.clubId) r2 = r2.eq('club_id', o.clubId)
+    if (o.featuredOnly) r2 = r2.eq('featured', true)
+    if (o.sort === 'popular') r2 = r2.order('views', { ascending: false })
+    else { r2 = r2.order('published_at', { ascending: false, nullsFirst: false }); if (o.before) r2 = r2.lt('published_at', o.before) }
+    const again = await r2.limit(limit + 1)
+    data = again.data; error = again.error
+  }
   if (error) { console.error('[media] list:', error.message); return { items: [], nextCursor: null } }
 
   const rows = (data ?? []) as unknown as VideoRow[]
@@ -182,12 +222,12 @@ export async function getPublicBySlug(slug: string): Promise<VideoRow | null> {
   const { data } = await sb().from('videos').select('*').eq('slug', slug).maybeSingle()
   const row = data as VideoRow | null
   if (!row) return null
-  /* `unlisted` با داشتنِ نشانی باز می‌شود ولی در فهرست و sitemap نیست */
+  /* `unlisted` با داشتن نشانی باز می‌شود ولی در فهرست و sitemap نیست */
   if (row.status !== 'published' || row.visibility === 'private') return null
   return row
 }
 
-/** نشانیِ قدیمی → شناسه، برای ریدایرکت */
+/** نشانی قدیمی → شناسه، برای ریدایرکت */
 export async function slugRedirect(oldSlug: string): Promise<string | null> {
   const { data } = await sb().from('video_slug_history')
     .select('video_id').eq('slug', oldSlug).maybeSingle()
@@ -199,14 +239,14 @@ export async function slugRedirect(oldSlug: string): Promise<string | null> {
 
 /** ویدیوهای مرتبط — اول هم‌دسته، بعد تازه‌ترین‌های دیگر.
  *
- *  ⚠️ نسخه‌ی اول فقط هم‌دسته را می‌گرفت. با آرشیوِ کوچک (یا دسته‌ای
- *  که تنها یک ویدیو دارد) نتیجه *خالی* بود و ستونِ «بعدی برای
- *  تماشا» اصلاً رندر نمی‌شد — اندازه‌گیری‌شده روی داده‌ی واقعی:
- *  صفر آیتم. حالا با تازه‌ترین‌های دیگر پر می‌شود؛ همه‌شان ردیفِ
+ *  ⚠️ نسخه‌ی اول فقط هم‌دسته را می‌گرفت. با آرشیو کوچک (یا دسته‌ای
+ *  که تنها یک ویدیو دارد) نتیجه *خالی* بود و ستون «بعدی برای
+ *  تماشا» اصلا رندر نمی‌شد — اندازه‌گیری‌شده روی داده‌ی واقعی:
+ *  صفر آیتم. حالا با تازه‌ترین‌های دیگر پر می‌شود؛ همه‌شان ردیف
  *  واقعی‌اند، فقط دامنه بازتر است.
  */
 export async function relatedTo(row: VideoRow, count = 12): Promise<PublicVideo[]> {
-  const base = sb().from('videos').select(LIST_COLS)
+  const base = sb().from('videos').select(cols())
     .eq('status', 'published').eq('visibility', 'public')
     .neq('slug', row.slug)
 
@@ -217,7 +257,7 @@ export async function relatedTo(row: VideoRow, count = 12): Promise<PublicVideo[
   if (rows.length >= count) return rows.map(toPublic)
 
   const seen = new Set([row.slug, ...rows.map(r => r.slug)])
-  const rest = await sb().from('videos').select(LIST_COLS)
+  const rest = await sb().from('videos').select(cols())
     .eq('status', 'published').eq('visibility', 'public')
     .neq('slug', row.slug)
     .order('published_at', { ascending: false, nullsFirst: false })
@@ -230,7 +270,7 @@ export async function relatedTo(row: VideoRow, count = 12): Promise<PublicVideo[
   return rows.map(toPublic)
 }
 
-/** دسته‌هایی که واقعاً ویدیوی منتشرشده دارند. */
+/** دسته‌هایی که واقعا ویدیوی منتشرشده دارند. */
 export async function activeCategories(): Promise<Record<string, number>> {
   const { data } = await sb().from('videos').select('category')
     .eq('status', 'published').eq('visibility', 'public')
@@ -240,11 +280,11 @@ export async function activeCategories(): Promise<Record<string, number>> {
 }
 
 /* ─────────────────────────────────────────────────────────────
-   هندل‌های کانالِ خودِ کاربر.
+   هندل‌های کانال خود کاربر.
 
-   ⚠️ گاردِ انتشار به این نیاز دارد: `creatorHandle` از بدنه می‌آید و
-   بدونِ بررسی، هر کاربرِ واردشده می‌توانست ویدیو را زیرِ کانالِ
-   دیگری منتشر کند و در فهرستِ آن کانال بنشیند.
+   ⚠️ گارد انتشار به این نیاز دارد: `creatorHandle` از بدنه می‌آید و
+   بدون بررسی، هر کاربر واردشده می‌توانست ویدیو را زیر کانال
+   دیگری منتشر کند و در فهرست آن کانال بنشیند.
    ───────────────────────────────────────────────────────────── */
 export async function myChannelHandles(actor: { id: string; dmKey?: string }): Promise<string[]> {
   const { readJson } = await import('../social-server')

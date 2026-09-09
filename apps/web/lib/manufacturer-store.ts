@@ -35,11 +35,11 @@ export interface ManufacturerProfile {
   address: string
   hours: string
   bannerImage: string
-  /* ── گالریِ تصاویر ──
-     تا امروز تولیدکننده فقط یک بنر داشت و هیچ جایی برای نشان‌دادنِ
-     کارگاه، خطِ تولید یا نمونه‌کار نبود. کلیدِ اختیاری است تا
-     ردیف‌های موجود بدونِ مهاجرت کار کنند. */
-  /* همان شکلِ رسانه‌ی بقیه‌ی نقش‌ها؛ `caption`/`album` اختیاری‌اند
+  /* ── گالری تصاویر ──
+     تا امروز تولیدکننده فقط یک بنر داشت و هیچ جایی برای نشان‌دادن
+     کارگاه، خط تولید یا نمونه‌کار نبود. کلید اختیاری است تا
+     ردیف‌های موجود بدون مهاجرت کار کنند. */
+  /* همان شکل رسانه‌ی بقیه‌ی نقش‌ها؛ `caption`/`album` اختیاری‌اند
      چون ردیف‌های موجود فقط `{id,url}` دارند. */
   gallery?: { id: string; url: string; caption?: string; album?: string }[]
   albums?: string[]
@@ -47,8 +47,8 @@ export interface ManufacturerProfile {
   products: MfrProduct[]
 
   status: 'approved' | 'rejected'
-  /* تیکِ آبی — فقط ادمین می‌دهد و روی ستونِ `profiles.verified`
-     می‌نشیند، نه داخلِ jsonb. این‌جا اختیاری است چون پروفایلِ
+  /* تیک آبی — فقط ادمین می‌دهد و روی ستون `profiles.verified`
+     می‌نشیند، نه داخل jsonb. این‌جا اختیاری است چون پروفایل
      ذخیره‌شده‌ی محلی آن را ندارد؛ `fetchProfiles` کنارش می‌گذارد. */
   verified?: boolean
   updatedAt: string
@@ -124,20 +124,20 @@ export function newManufacturerSlug(): string {
 }
 
 /* پروفایل ذخیره‌شده → شکل MockManufacturer تا صفحات /manufacturers مستقیم رندرش کنند */
-/* ⚠️ «نبودن» تنها حالتِ خراب نیست: `data` یک jsonbِ آزاد است و
+/* ⚠️ «نبودن» تنها حالت خراب نیست: `data` یک jsonb آزاد است و
    صفحه با `as ManufacturerProfile` رویش cast می‌کند، پس `specialties`
-   می‌تواند رشته باشد و بعد `.some(...)` در فهرستِ تولیدکنندگان
-   بترکد. یک گاردِ نوع در همین مرز، همه‌ی مصرف‌کننده‌ها را می‌پوشاند. */
+   می‌تواند رشته باشد و بعد `.some(...)` در فهرست تولیدکنندگان
+   بترکد. یک گارد نوع در همین مرز، همه‌ی مصرف‌کننده‌ها را می‌پوشاند. */
 const arr = <T,>(v: unknown): T[] => (Array.isArray(v) ? v as T[] : [])
 
 export function profileToManufacturer(p: ManufacturerProfile): MockManufacturer {
   /* ── چرا همه‌جا گارد ──
-     ⚠️ این تابع `p.sinceYear.replace(...)` را بی‌گارد صدا می‌زد. مسیرِ
-     ذخیره فقط `typeof === object` را می‌سنجد، پس ردیفی بدونِ
+     ⚠️ این تابع `p.sinceYear.replace(...)` را بی‌گارد صدا می‌زد. مسیر
+     ذخیره فقط `typeof === object` را می‌سنجد، پس ردیفی بدون
      `sinceYear` (یا با `null`) ممکن است — و آن‌وقت این تابع استثنا
-     می‌داد، صفحه‌ی عمومی داخلِ `catch` می‌افتاد و به بازدیدکننده
-     «ارتباط با سرور برقرار نشد» نشان می‌داد. یعنی یک فیلدِ نبوده،
-     خودش را «قطعیِ اینترنت» جا می‌زد. همان تله برای آرایه‌ها هم بود
+     می‌داد، صفحه‌ی عمومی داخل `catch` می‌افتاد و به بازدیدکننده
+     «ارتباط با سرور برقرار نشد» نشان می‌داد. یعنی یک فیلد نبوده،
+     خودش را «قطعی اینترنت» جا می‌زد. همان تله برای آرایه‌ها هم بود
      (`p.products.length`). */
   const since = String(p.sinceYear ?? '')
   const yearNum = parseInt(since.replace(/[۰-۹]/g, d => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(d))), 10)
@@ -146,7 +146,7 @@ export function profileToManufacturer(p: ManufacturerProfile): MockManufacturer 
     name: p.name || 'تولیدکننده',
     city: p.city || '—',
     /* پیش‌تر این‌جا `false` هاردکد بود: تیکی که ادمین می‌داد هرگز روی
-       کارتِ /manufacturers دیده نمی‌شد. */
+       کارت /manufacturers دیده نمی‌شد. */
     verified: p.verified === true,
     elite: false,
     since: since ? `از ${since}` : '—',

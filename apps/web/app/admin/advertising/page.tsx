@@ -3,7 +3,7 @@
 /* پنل تبلیغات (فاز ۲) — شش جایگاه مستقل، کمپین‌ها، پلن‌های قیمت،
    و درخواست‌های تبلیغ.
 
-   عمداً هیچ کلید سراسری‌ای وجود ندارد: هر جایگاه Active/Inactive و
+   عمدا هیچ کلید سراسری‌ای وجود ندارد: هر جایگاه Active/Inactive و
    Mode (رایگان/دستی/پولی) خودش را دارد — طبق تصمیم D1. */
 
 import { useCallback, useEffect, useState } from 'react'
@@ -55,7 +55,7 @@ const ROTATION_FA: Record<Rotation, string> = {
   fair: 'عادلانه', weighted: 'وزنی', random: 'تصادفی', fixed: 'ثابت',
 }
 const ROTATION_HINT: Record<Rotation, string> = {
-  fair: 'کم‌نمایش‌ترین اول', weighted: 'به‌نسبت وزن', random: 'بُرخورده', fixed: 'ترتیب ثابت',
+  fair: 'کم‌نمایش‌ترین اول', weighted: 'به‌نسبت وزن', random: 'برخورده', fixed: 'ترتیب ثابت',
 }
 const ROTATION_OPTS = (['fair', 'weighted', 'random', 'fixed'] as Rotation[])
   .map(r => ({ value: r, label: ROTATION_FA[r], hint: ROTATION_HINT[r] }))
@@ -65,14 +65,14 @@ interface Placement {
   isActive: boolean; mode: Mode; contentKind: 'banner' | 'entity' | 'video'
   entityType: string | null; capacity: number; price: number; durationDays: number
   displayCount: number; rotationMode: Rotation; priority: number
-  /* فقط جایگاهِ ویدیویی (پیش‌پخش) — مهاجرتِ ۰۵۱ */
+  /* فقط جایگاه ویدیویی (پیش‌پخش) — مهاجرت ۰۵۱ */
   skipAfterSec: number | null; maxDurationSec: number | null
 }
 interface Campaign {
   id: string; placementKey: string; advertiser: string; title: string
   content: Record<string, unknown>; status: string
   startsAt: string; endsAt: string; impressions: number; clicks: number
-  /* تبلیغِ ویدیویی — برای بنر همیشه صفر */
+  /* تبلیغ ویدیویی — برای بنر همیشه صفر */
   completedViews?: number; skippedViews?: number
 }
 interface Plan {
@@ -90,8 +90,8 @@ interface AdRequest {
   id: string; name: string; phone: string; email: string | null; company: string | null
   slot_key: string | null; message: string; status: string; created_at: string
 }
-/* سفارشِ خرید — بدونِ این، ادمین نمی‌داند کدام کمپین اصلاً پولی
-   پرداخت شده و چه چیزی قابلِ بازگرداندن است (مهاجرتِ ۰۵۸) */
+/* سفارش خرید — بدون این، ادمین نمی‌داند کدام کمپین اصلا پولی
+   پرداخت شده و چه چیزی قابل بازگرداندن است (مهاجرت ۰۵۸) */
 interface AdOrder {
   id: string; campaign_id: string | null; user_id: string
   amount: number; status: string
@@ -318,10 +318,10 @@ function StatsSection({ s }: { s: Stats }) {
 }
 
 /* ── ردیف جایگاه — Active و Mode مستقل ─────────────────────── */
-/* ── ساختِ جایگاهِ تازه ──────────────────────────────────────────
-   تا مهاجرتِ ۰۵۶ کلیدِ هر جایگاه در کد هاردکد بود و هر جایگاهِ تازه یک
-   دیپلوی می‌خواست. جایگاهِ ساخته‌شده عمداً خاموش و «دستی» متولد می‌شود:
-   جایگاهی که همان لحظه روی سایت ظاهر شود یعنی اشتباهِ تایپی مستقیم به
+/* ── ساخت جایگاه تازه ──────────────────────────────────────────
+   تا مهاجرت ۰۵۶ کلید هر جایگاه در کد هاردکد بود و هر جایگاه تازه یک
+   دیپلوی می‌خواست. جایگاه ساخته‌شده عمدا خاموش و «دستی» متولد می‌شود:
+   جایگاهی که همان لحظه روی سایت ظاهر شود یعنی اشتباه تایپی مستقیم به
    بازدیدکننده می‌رسد. */
 const ROLE_OPTS = [
   { key: 'club_owner', fa: 'باشگاه‌دار' },
@@ -335,8 +335,8 @@ const KIND_OPTS = [
   { value: 'video' as const, label: 'ویدیو (پیش‌پخش)' },
   { value: 'entity' as const, label: 'موجودیت (کارت محصول/باشگاه/فروشگاه)' },
 ]
-/* مسابقه و ویدیو برای «محتوای اسپانسری» — نوعِ تازه‌ی تبلیغ نیستند،
-   همان جایگاهِ موجودیتی‌اند با جدولِ منبعِ متفاوت. */
+/* مسابقه و ویدیو برای «محتوای اسپانسری» — نوع تازه‌ی تبلیغ نیستند،
+   همان جایگاه موجودیتی‌اند با جدول منبع متفاوت. */
 const ENTITY_OPTS = [
   { value: 'product' as const, label: 'محصول' },
   { value: 'club' as const, label: 'باشگاه' },
@@ -501,8 +501,8 @@ function PlacementRow({ p, busy, campaignCount, onPatch }: {
   const [days, setDays] = useState(String(p.durationDays))
   const [shown, setShown] = useState(String(p.displayCount))
   const [prio, setPrio] = useState(String(p.priority))
-  /* جایگاهِ ویدیویی: خالی یعنی `null` — «رد کردن ممکن نیست» /
-     «سقفِ مدت ندارد» — که با صفر یکی نیست. */
+  /* جایگاه ویدیویی: خالی یعنی `null` — «رد کردن ممکن نیست» /
+     «سقف مدت ندارد» — که با صفر یکی نیست. */
   const isVideo = p.contentKind === 'video'
   const [skip, setSkip] = useState(p.skipAfterSec === null ? '' : String(p.skipAfterSec))
   const [maxDur, setMaxDur] = useState(p.maxDurationSec === null ? '' : String(p.maxDurationSec))
@@ -567,7 +567,7 @@ function PlacementRow({ p, busy, campaignCount, onPatch }: {
             onChange={e => setShown(digits(e.target.value))} title="۰ = به‌اندازه‌ی ظرفیت" />
           {Number(shown) > Number(cap) && Number(cap) >= 0 && (
             <div style={{ fontSize: 10.5, color: '#B7791F', marginTop: 4, lineHeight: 1.6 }}>
-              بیش از ظرفیت است؛ عملاً {fa(cap)} نمایش داده می‌شود.
+              بیش از ظرفیت است؛ عملا {fa(cap)} نمایش داده می‌شود.
             </div>
           )}
         </div>
@@ -597,7 +597,7 @@ function PlacementRow({ p, busy, campaignCount, onPatch }: {
             <div style={{ width: 116 }}>
               <label style={LABEL}>رد کردن پس از (ثانیه)</label>
               <input style={{ ...INPUT, background: '#fff', textAlign: 'center' }} inputMode="numeric" value={fa(skip)}
-                onChange={e => setSkip(digits(e.target.value))} title="خالی = بیننده اصلاً نمی‌تواند رد کند" />
+                onChange={e => setSkip(digits(e.target.value))} title="خالی = بیننده اصلا نمی‌تواند رد کند" />
               {skip.trim() !== '' && maxDur.trim() !== '' && Number(skip) >= Number(maxDur) && (
                 <div style={{ fontSize: 10.5, color: '#B7791F', marginTop: 4, lineHeight: 1.6 }}>
                   از سقف مدت بیشتر است؛ دکمه‌ی رد کردن هرگز فعال نمی‌شود.
@@ -638,17 +638,17 @@ function CampaignsSection({ placements, campaigns, orders, onChanged, flash, cal
   call: (method: string, body?: Record<string, unknown>, query?: string) => Promise<Record<string, unknown> | null>
 }) {
   const [busy, setBusy] = useState('')
-  /* سفارشِ هر کمپین — برای نشان‌دادنِ مبلغ و امکانِ بازگرداندنش */
+  /* سفارش هر کمپین — برای نشان‌دادن مبلغ و امکان بازگرداندنش */
   const orderOf = new Map(orders.filter(o => o.campaign_id).map(o => [String(o.campaign_id), o]))
 
   const refund = async (order: AdOrder) => {
     /* بازپرداخت پول را برمی‌گرداند و کمپین را می‌خواباند — برگشت‌ناپذیر
-       است، پس تأییدِ صریح می‌گیریم. */
+       است، پس تأیید صریح می‌گیریم. */
     const reason = await askText(
       `بازگرداندن ${fa(order.amount)} تومان و لغو کمپین`,
       {
         body: 'دلیل بازپرداخت در گزارش مالی ثبت می‌شود و برگشت‌پذیر نیست.',
-        placeholder: 'مثال: کمپین به‌درخواست خودِ تبلیغ‌دهنده لغو شد.',
+        placeholder: 'مثال: کمپین به‌درخواست خود تبلیغ‌دهنده لغو شد.',
         confirmLabel: 'بازپرداخت',
       },
     )
@@ -656,7 +656,7 @@ function CampaignsSection({ placements, campaigns, orders, onChanged, flash, cal
     setBusy(order.id)
     try {
       const r = await call('PATCH', { type: 'refund', orderId: order.id, reason })
-      if (r) { await onChanged(); flash(r.already ? 'این سفارش قبلاً بازپرداخت شده بود' : 'بازپرداخت ثبت شد') }
+      if (r) { await onChanged(); flash(r.already ? 'این سفارش قبلا بازپرداخت شده بود' : 'بازپرداخت ثبت شد') }
     } finally { setBusy('') }
   }
 
@@ -770,9 +770,9 @@ function CampaignsSection({ placements, campaigns, orders, onChanged, flash, cal
                   <div style={{ fontSize: 11, color: MUT, marginTop: 3 }}>
                     {faDate(c.startsAt)} تا {faDate(c.endsAt)} · {fa(c.impressions)} نمایش · {fa(c.clicks)} کلیک
                   </div>
-                  {/* شمارنده‌های پیش‌پخش — فقط وقتی واقعاً عددی هست.
-                      نرخِ رد کردن از مجموعِ پایان‌یافته‌ها حساب می‌شود، نه
-                      از کلِ نمایش‌ها؛ نمایشی که هنوز تمام نشده نه کامل
+                  {/* شمارنده‌های پیش‌پخش — فقط وقتی واقعا عددی هست.
+                      نرخ رد کردن از مجموع پایان‌یافته‌ها حساب می‌شود، نه
+                      از کل نمایش‌ها؛ نمایشی که هنوز تمام نشده نه کامل
                       است نه ردشده. */}
                   {p?.contentKind === 'video' && ((c.completedViews ?? 0) + (c.skippedViews ?? 0)) > 0 && (
                     <div style={{ fontSize: 11, color: MUT, marginTop: 3 }}>
@@ -788,8 +788,8 @@ function CampaignsSection({ placements, campaigns, orders, onChanged, flash, cal
                   <Select compact value={c.status} options={STATUS_OPTS} ariaLabel="تغییر وضعیت"
                     onChange={v => void setStatus(c.id, v)} />
                 </div>
-                {/* بازپرداخت فقط برای سفارشِ واقعاً پرداخت‌شده معنا دارد.
-                    کمپینِ ادمین‌ساخته سفارشی ندارد و دکمه‌ای هم نمی‌گیرد. */}
+                {/* بازپرداخت فقط برای سفارش واقعا پرداخت‌شده معنا دارد.
+                    کمپین ادمین‌ساخته سفارشی ندارد و دکمه‌ای هم نمی‌گیرد. */}
                 {(() => {
                   const o = orderOf.get(c.id)
                   if (!o) return null
@@ -875,7 +875,7 @@ function PlansSection({ plans, placements, onChanged, flash, call }: {
       </div>
       <p style={{ fontSize: 12.5, color: MUT, margin: '0 0 14px', lineHeight: 1.95 }}>
         قیمت‌ها از دیتابیس خوانده می‌شوند، نه از کد. هر جایگاه می‌تواند چند پله‌ی مدت داشته باشد
-        (مثلاً ۷ روزه، ۳۰ روزه، ۳ ماهه). پلنی که سفارش ثبت‌شده دارد حذف نمی‌شود و فقط غیرفعال می‌گردد.
+        (مثلا ۷ روزه، ۳۰ روزه، ۳ ماهه). پلنی که سفارش ثبت‌شده دارد حذف نمی‌شود و فقط غیرفعال می‌گردد.
       </p>
 
       {open && (
@@ -884,7 +884,7 @@ function PlansSection({ plans, placements, onChanged, flash, call }: {
             <div style={{ gridColumn: '1 / -1' }}>
               <label style={LABEL}>نام پلن *</label>
               <input style={INPUT} value={draft.name} onChange={e => setDraft(d => ({ ...d, name: e.target.value }))}
-                placeholder="مثلاً بنر کناری راست — ۳۰ روزه" />
+                placeholder="مثلا بنر کناری راست — ۳۰ روزه" />
             </div>
             <div style={{ gridColumn: '1 / -1' }}>
               <label style={LABEL}>جایگاه</label>
@@ -908,7 +908,7 @@ function PlansSection({ plans, placements, onChanged, flash, call }: {
                 onChange={e => setDraft(d => ({ ...d, creditAmount: digits(e.target.value) }))} /></div>
             <div><label style={LABEL}>برچسب</label>
               <input style={INPUT} value={draft.badge} onChange={e => setDraft(d => ({ ...d, badge: e.target.value }))}
-                placeholder="مثلاً پرمیوم" /></div>
+                placeholder="مثلا پرمیوم" /></div>
             <div style={{ gridColumn: '1 / -1' }}><label style={LABEL}>توضیح</label>
               <input style={INPUT} value={draft.description} onChange={e => setDraft(d => ({ ...d, description: e.target.value }))} /></div>
           </div>

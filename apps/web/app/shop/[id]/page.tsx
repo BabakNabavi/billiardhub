@@ -19,7 +19,7 @@ import { CONDITIONS, normalizeCondition } from '../../../lib/market/categories'
 import { fetchProfile } from '../../../lib/profiles/client'
 
 /* ─── tokens (تم بازار: طلایی/برنزی روی کاغذ روشن) ─── */
-/* رنگِ پایه‌ی صفحه حالا داخلِ کلاسِ مشترکِ lq-stage است */
+/* رنگ پایه‌ی صفحه حالا داخل کلاس مشترک lq-stage است */
 const GOLD  = '#C7A66A'
 const GOLDD = '#8F6531'
 const TEXT  = '#1C1C1A'
@@ -57,14 +57,14 @@ const lqWhite: React.CSSProperties = {
 
 /* آگهی کاربر روی سرور uuid دارد، محصولات کاتالوگ عدد؛ این صفحه هر دو را نشان می‌دهد.
 
-   `model` این‌جا اضافه شده چون تیترِ صفحه دو تکه است — «چوب اسنوکر»
+   `model` این‌جا اضافه شده چون تیتر صفحه دو تکه است — «چوب اسنوکر»
    درشت و «O'min classic» ریزتر — و مدل در `ShopProduct` نبود. */
 type Detail = Omit<ShopProduct, 'id'> & {
   id: number | string
   model?: string
   /* ── تماس فقط این‌جا ──
-     این دو از `ShopProduct` (مدلِ فهرست) برداشته شدند: هیچ کارتی
-     نمایششان نمی‌دهد و بودنشان در پاسخِ فهرست یعنی با یک درخواست
+     این دو از `ShopProduct` (مدل فهرست) برداشته شدند: هیچ کارتی
+     نمایششان نمی‌دهد و بودنشان در پاسخ فهرست یعنی با یک درخواست
      می‌شد شماره‌ی همه‌ی فروشنده‌ها را یک‌جا برداشت. این صفحه یک آگهی
      را نشان می‌دهد و مقدارش را از `/api/market/ads/[id]` می‌گیرد. */
   sellerPhone?: string
@@ -72,11 +72,11 @@ type Detail = Omit<ShopProduct, 'id'> & {
   /* ── همه‌ی تصویرها، نه فقط اولی ──
      فروشنده تا هشت عکس آپلود می‌کند و سرور هر هشت را ذخیره می‌کند،
      ولی این صفحه فقط `images[0]` را می‌خواند و بقیه هیچ‌جا دیده
-     نمی‌شدند — نه گالری‌ای بود، نه نشانه‌ای که عکسِ دیگری هم هست. */
+     نمی‌شدند — نه گالری‌ای بود، نه نشانه‌ای که عکس دیگری هم هست. */
   images?: string[]
 }
 
-/* شکلِ سبکی که مسیرِ «مشابه» برمی‌گرداند — نه کلِ محصول */
+/* شکل سبکی که مسیر «مشابه» برمی‌گرداند — نه کل محصول */
 interface RelatedItem {
   id: string
   title: string
@@ -100,9 +100,9 @@ function normalizeUserProduct(up: Record<string, unknown>): Detail {
   const imgs = Array.isArray(up.images)
     ? (up.images as unknown[]).map(x => str(x)).filter(Boolean)
     : undefined
-  /* `price` قیمتِ خط‌خورده است و `discountPrice` پرداختی — همان
-     قراردادی که `app/shop/products.ts` دارد. پیش‌تر این‌جا عددِ
-     خط‌خورده از روی درصدِ گردشده بازسازی می‌شد و غلط درمی‌آمد. */
+  /* `price` قیمت خط‌خورده است و `discountPrice` پرداختی — همان
+     قراردادی که `app/shop/products.ts` دارد. پیش‌تر این‌جا عدد
+     خط‌خورده از روی درصد گردشده بازسازی می‌شد و غلط درمی‌آمد. */
   const listed = num(up.price)
   const paid   = num(up.discountPrice)
   const hasDisc = paid > 0 && paid < listed
@@ -114,18 +114,18 @@ function normalizeUserProduct(up: Record<string, unknown>): Detail {
     id:             typeof up.id === 'string' ? up.id : num(up.id),
     cat:            str(up.category, 'other'),
     img:            str(up.img) || imgs?.[0] || '/images/shop/cue_billiard_2.webp',
-    /* `img` تصویرِ اصلی می‌ماند (آگهیِ قدیمیِ محلی فقط همین را دارد)؛
+    /* `img` تصویر اصلی می‌ماند (آگهی قدیمی محلی فقط همین را دارد)؛
        گالری از این فهرست ساخته می‌شود. */
     images:         imgs && imgs.length > 0 ? imgs : undefined,
     name:           str(up.name) || str(up.title, 'محصول'),
     desc:           str(up.description),
     brand:          str(up.brand),
-    /* مدل ممکن است فقط داخلِ `specs` باشد — همان بازیابی‌ای که فرمِ
-       ویرایش دارد. حالا که ردیفِ «مدل» از جدولِ مشخصات برداشته شده،
-       بدونِ این بازیابی از کلِ صفحه غایب می‌شد. */
+    /* مدل ممکن است فقط داخل `specs` باشد — همان بازیابی‌ای که فرم
+       ویرایش دارد. حالا که ردیف «مدل» از جدول مشخصات برداشته شده،
+       بدون این بازیابی از کل صفحه غایب می‌شد. */
     model:          str(up.model) || str((up.specs as Record<string, unknown> | null | undefined)?.['مدل']),
     price,
-    /* آگهیِ قدیمیِ محلی `old` دارد؛ ردیفِ سرور قیمتِ فهرست را در
+    /* آگهی قدیمی محلی `old` دارد؛ ردیف سرور قیمت فهرست را در
        `price` نگه می‌دارد. */
     old:            num(up.old, hasDisc ? listed : price),
     disc,
@@ -147,15 +147,15 @@ function normalizeUserProduct(up: Record<string, unknown>): Detail {
 
 export default function ProductDetailPage() {
   const { id } = useParams<{ id: string }>()
-  /* کاتالوگِ ثابتِ ساختگی برداشته شد؛ هر محصول از سرور می‌آید. */
+  /* کاتالوگ ثابت ساختگی برداشته شد؛ هر محصول از سرور می‌آید. */
   const staticProduct: ShopProduct | undefined = undefined
 
   /* اگر در کاتالوگ نمونه نبود، آگهی را از سرور بخوان (و برای آگهی‌های
      قدیمی که هنوز در همین مرورگر مانده‌اند، از localStorage).
      تا آمدن پاسخ «در حال بارگذاری» نشان می‌دهیم تا «پیدا نشد» فلش نزند. */
   const [userProduct, setUserProduct] = useState<Detail | null>(null)
-  /* ردیفِ خامِ سرور — فیلدهایی مثل negotiable و status در نگاشتِ
-     نمایشی نیستند و باید از خودِ ردیف خوانده شوند. */
+  /* ردیف خام سرور — فیلدهایی مثل negotiable و status در نگاشت
+     نمایشی نیستند و باید از خود ردیف خوانده شوند. */
   const [rawAd, setRawAd] = useState<Record<string, unknown> | null>(null)
   const [checked, setChecked] = useState(false)
   useEffect(() => {
@@ -181,36 +181,36 @@ export default function ProductDetailPage() {
   }, [id])
 
   const product: Detail | undefined = staticProduct ?? userProduct ?? undefined
-  /* از خودِ ردیفِ سرور خوانده می‌شوند، نه از شکلِ نگاشت‌شده — تا اگر
+  /* از خود ردیف سرور خوانده می‌شوند، نه از شکل نگاشت‌شده — تا اگر
      روزی نگاشت عوض شد، این دو بی‌صدا خاموش نشوند. */
-  /* برچسبِ فارسیِ هر کلید از همان تعریفی می‌آید که فرمِ ثبت با آن
+  /* برچسب فارسی هر کلید از همان تعریفی می‌آید که فرم ثبت با آن
      ساخته می‌شود (`lib/market/specs.ts`)، پس هیچ‌وقت از هم دور
      نمی‌افتند. */
   /* ── مقدارها شناسه‌اند، نه برچسب ──
-     تعریفِ فیلدها از همان مسیرِ استاتیکی می‌آید که فرم استفاده
-     می‌کند، پس برچسب‌ها هرگز از فرم دور نمی‌افتند. آگهیِ قدیمی که
-     برچسبِ فارسی ذخیره کرده همان‌طور نشان داده می‌شود. */
+     تعریف فیلدها از همان مسیر استاتیکی می‌آید که فرم استفاده
+     می‌کند، پس برچسب‌ها هرگز از فرم دور نمی‌افتند. آگهی قدیمی که
+     برچسب فارسی ذخیره کرده همان‌طور نشان داده می‌شود. */
   const { fields: specDefs } = useSpecFields(String(product?.cat ?? ''))
-  /* اندازه و پارچه از کاتالوگِ میز/پارچه می‌آیند، نه از تعریفِ
+  /* اندازه و پارچه از کاتالوگ میز/پارچه می‌آیند، نه از تعریف
      مشخصات — پس همان‌ها را هم می‌گیریم تا برچسب حل شود. */
   const tableTypeId = String(rawAd?.tableType ?? '')
   const clothCat = useCatalogType('cloth', tableTypeId)
   /* ── فهرست‌های وابسته به نوع، هر دسته‌ای که باشد ──
-     اندازه‌ی میز و قطرِ تیپ و قطر و نوعِ ستِ توپ، همه شناسه ذخیره
-     می‌شوند و برچسبشان در کاتالوگِ **همان دسته** است. پیش‌تر فقط
+     اندازه‌ی میز و قطر تیپ و قطر و نوع ست توپ، همه شناسه ذخیره
+     می‌شوند و برچسبشان در کاتالوگ **همان دسته** است. پیش‌تر فقط
      میز حل می‌شد و بقیه شناسه‌ی لاتین نشان می‌دادند: «نوع ست:
-     full-22». حالا از روی `source` حل می‌شود، نه نامِ فیلد. */
+     full-22». حالا از روی `source` حل می‌شود، نه نام فیلد. */
   const adCatId: CatalogId | null =
     isProductCatalog(String(product?.cat ?? '')) ? (product!.cat as CatalogId)
       : isAccessoryCategory(String(product?.cat ?? '')) ? 'accessories' : null
-  /* چوب و میز شناسه‌ی نوع را در ستونِ خودشان دارند و همان مقدم
-     است؛ بقیه فقط برچسبِ فارسی دارند و از نگاشت می‌آیند. */
+  /* چوب و میز شناسه‌ی نوع را در ستون خودشان دارند و همان مقدم
+     است؛ بقیه فقط برچسب فارسی دارند و از نگاشت می‌آیند. */
   const storedTypeId = String(rawAd?.tableType ?? rawAd?.cueType ?? '')
   const adTypeId = adCatId === 'accessories'
     ? ACCESSORY_TYPE_OF[String(product?.cat ?? '')] ?? ''
     : storedTypeId || (adCatId ? typeIdOf(adCatId, String(rawAd?.type ?? '')) : '')
   const ownCat = useCatalogType(adCatId ?? 'cue', adCatId ? adTypeId : '')
-  /* کشور از شناسه‌ی برندِ ذخیره‌شده پیدا می‌شود؛ برندِ دستی کشوری
+  /* کشور از شناسه‌ی برند ذخیره‌شده پیدا می‌شود؛ برند دستی کشوری
      ندارد و پرچمی هم نشان داده نمی‌شود. */
   const brandRow = ownCat.data?.brands.find(b => b.id === String(rawAd?.brandId ?? ''))
   const brandCountry = brandRow?.country ?? null
@@ -231,12 +231,12 @@ export default function ProductDetailPage() {
     }, k => legacyLabelOf(product?.cat, k)),
     [specDefs, rawAd, ownCat.data, clothCat.data, product?.cat],
   )
-  /* دسته‌ای که کاتالوگِ تازه ندارد، از تعریفِ قدیمی برچسب می‌گیرد */
+  /* دسته‌ای که کاتالوگ تازه ندارد، از تعریف قدیمی برچسب می‌گیرد */
   /* ── یک سازنده‌ی ردیف، نه دو ──
      پیش‌تر دسته‌ی بی‌تعریف به `specRows` می‌افتاد که «نوع» و «مدل» را
      نشان می‌داد، ارقام را فارسی نمی‌کرد و «__other__» خام می‌گذاشت —
      دو صفحه‌ی جزئیات با دو رفتار. حالا `specDisplayRows` همیشه
-     می‌سازد و برچسبِ کلیدِ ناشناخته از `legacyLabelOf` می‌آید. */
+     می‌سازد و برچسب کلید ناشناخته از `legacyLabelOf` می‌آید. */
   const specRows_ = specs
   const negotiable = rawAd?.negotiable === true
   const sold = String(rawAd?.status ?? '') === 'sold'
@@ -247,10 +247,10 @@ export default function ProductDetailPage() {
      «رفتن به فروشگاه» به صفحه‌ی خالی می‌رسید. */
   const hasStore = !!staticProduct || !!(userProduct && String(userProduct.sellerId ?? '').trim())
 
-  /* ── نشانِ سبزِ «فروشگاه» فقط برای فروشگاهِ تأییدشده ──
+  /* ── نشان سبز «فروشگاه» فقط برای فروشگاه تأییدشده ──
      تا امروز هر آگهی‌ای که به فروشگاهی وصل بود این نشان را می‌گرفت،
-     حتی فروشگاهی که جواز آپلود نکرده و تیک ندارد. یعنی سایت از طرفِ
-     خودش اعتبار می‌داد. حالا از خودِ پروفایل خوانده می‌شود. */
+     حتی فروشگاهی که جواز آپلود نکرده و تیک ندارد. یعنی سایت از طرف
+     خودش اعتبار می‌داد. حالا از خود پروفایل خوانده می‌شود. */
   const [storeVerified, setStoreVerified] = useState(false)
   useEffect(() => {
     const slug = String(userProduct?.sellerId ?? '').trim()
@@ -264,16 +264,16 @@ export default function ProductDetailPage() {
 
   const [wished, setWished] = useState(false)
 
-  /* تصویرِ انتخاب‌شده‌ی گالری. با عوض‌شدنِ آگهی به اولی برمی‌گردد،
-     وگرنه رفتن از آگهیِ هشت‌عکسه به آگهیِ دوعکسه تصویرِ خالی می‌داد. */
+  /* تصویر انتخاب‌شده‌ی گالری. با عوض‌شدن آگهی به اولی برمی‌گردد،
+     وگرنه رفتن از آگهی هشت‌عکسه به آگهی دوعکسه تصویر خالی می‌داد. */
   const [imgIdx, setImgIdx] = useState(0)
   /* نمای تمام‌صفحه‌ی عکس‌ها */
   const [zoomed, setZoomed] = useState(false)
   useEffect(() => { setImgIdx(0); setZoomed(false) }, [id])
 
   /* ── محصولات مشابه ──
-     رتبه‌بندی سمتِ سرور انجام می‌شود: دسته، برند، نوع، شهر، وضعیت و
-     نزدیکیِ قیمت. رتبه‌بندی در مرورگر یعنی همه‌ی آگهی‌ها باید دانلود
+     رتبه‌بندی سمت سرور انجام می‌شود: دسته، برند، نوع، شهر، وضعیت و
+     نزدیکی قیمت. رتبه‌بندی در مرورگر یعنی همه‌ی آگهی‌ها باید دانلود
      شوند تا هشت کارت نشان داده شود. */
   const [related, setRelated] = useState<RelatedItem[]>([])
   useEffect(() => {
@@ -306,15 +306,15 @@ export default function ProductDetailPage() {
 
   /* ── تیتر در دو تکه ──
      «چوب اسنوکر» درشت، «O'min classic» ریزتر کنارش. پیش‌تر فقط تکه‌ی
-     اول بود و برند و مدل — که فروشنده نوشته بود — تا پایینِ صفحه در
-     جدولِ مشخصات دیده نمی‌شدند. */
+     اول بود و برند و مدل — که فروشنده نوشته بود — تا پایین صفحه در
+     جدول مشخصات دیده نمی‌شدند. */
   const { head: titleHead, tail: titleTail } = productTitleParts(product)
-  /* هرجا یک رشته لازم است (واتساپ، گزارشِ تخلف) عنوانِ کامل می‌رود؛
+  /* هرجا یک رشته لازم است (واتساپ، گزارش تخلف) عنوان کامل می‌رود؛
      «سلام، درباره چوب اسنوکر سوال داشتم» به فروشنده‌ای که پنج چوب
      گذاشته هیچ‌چیز نمی‌گوید. */
   const fullName = productTitle(product)
 
-  /* گالری: همه‌ی عکس‌های آگهی. آگهیِ بی‌عکس و آگهیِ قدیمیِ محلی که
+  /* گالری: همه‌ی عکس‌های آگهی. آگهی بی‌عکس و آگهی قدیمی محلی که
      فقط یک نشانی دارد، هر دو به همان یک تصویر می‌رسند. */
   const gallery = product.images && product.images.length > 0 ? product.images : [product.img]
   const shown = Math.min(imgIdx, gallery.length - 1)
@@ -322,8 +322,8 @@ export default function ProductDetailPage() {
   const waLink = `https://wa.me/${product.sellerWhatsapp}?text=${encodeURIComponent(`سلام، درباره «${fullName}» در بیلیارد بازار سوال داشتم`)}`
 
   return (
-    /* رنگِ پایه داخلِ lq-stage است؛ پس‌زمینه‌ی ماتِ خودِ عنصر لکه‌های
-       پشتِ شیشه را می‌پوشاند. */
+    /* رنگ پایه داخل lq-stage است؛ پس‌زمینه‌ی مات خود عنصر لکه‌های
+       پشت شیشه را می‌پوشاند. */
     <div className="lq-stage" style={{ minHeight: '100vh', direction: 'rtl', fontFamily: 'Vazirmatn,Tahoma,sans-serif', color: TEXT }}>
       <style>{`
         .lq-lift{transition:all .3s cubic-bezier(0.22,1,0.36,1);}
@@ -342,9 +342,9 @@ export default function ProductDetailPage() {
       `}</style>
 
       {/* ── سربرگ باریک ── */}
-      {/* `safe-top`: در حالتِ نصب‌شده‌ی iOS این هدر زیرِ نوارِ وضعیت
-          می‌افتاد و دکمه‌ی بازگشت و عنوان زیرِ ساعت و آنتن قرار
-          می‌گرفتند. تعریفِ کلاس در `app/layout.tsx`. */}
+      {/* `safe-top`: در حالت نصب‌شده‌ی iOS این هدر زیر نوار وضعیت
+          می‌افتاد و دکمه‌ی بازگشت و عنوان زیر ساعت و آنتن قرار
+          می‌گرفتند. تعریف کلاس در `app/layout.tsx`. */}
       <header className="safe-top" style={{ position: 'sticky', top: 0, zIndex: 40, background: 'rgba(255,255,255,0.82)', backdropFilter: 'blur(28px) saturate(1.8)', WebkitBackdropFilter: 'blur(28px) saturate(1.8)', borderBottom: `1px solid ${HAIR}` }}>
         <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 clamp(14px,3vw,28px)', height: 58, display: 'flex', alignItems: 'center', gap: 14 }}>
           <Link href="/shop" style={{ display: 'flex', alignItems: 'center', gap: 8, textDecoration: 'none', flexShrink: 0 }}>
@@ -377,17 +377,17 @@ export default function ProductDetailPage() {
           <div className="lq-sheen pd-media" style={{ ...glassPanel, borderRadius: 26, padding: 14, position: 'sticky', top: 74 }}>
             <div style={{ position: 'relative', width: '100%', paddingTop: '92%', borderRadius: 16, overflow: 'hidden', background: '#EFEDE9' }}>
               {/* ── زدن روی عکس ⇒ نمای تمام‌صفحه ──
-                  کادرِ کارت عکس را `cover` می‌برد؛ خریداری که دنبالِ
-                  خط‌وخشِ یک کالای دستِ‌دوم است دقیقاً همان بخشِ
+                  کادر کارت عکس را `cover` می‌برد؛ خریداری که دنبال
+                  خط‌وخش یک کالای دست‌دوم است دقیقا همان بخش
                   بریده‌شده را می‌خواهد ببیند. */}
               <button type="button" onClick={() => setZoomed(true)}
-                aria-label="بزرگ‌نماییِ تصویر"
+                aria-label="بزرگ‌نمایی تصویر"
                 style={{ position: 'absolute', inset: 0, padding: 0, border: 'none', background: 'none', cursor: 'zoom-in', display: 'block' }}>
                 <img loading="lazy" decoding="async" src={gallery[shown]} alt={fullName} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
               </button>
-              {/* ── همان برچسبِ بازار ──
-                  قرمزِ مستطیلیِ «۱۵٪ تخفیف» با پیلِ بنفشِ «٪۱۵» در
-                  فهرستِ بازار فرق داشت؛ یک محصول در دو صفحه دو نشانِ
+              {/* ── همان برچسب بازار ──
+                  قرمز مستطیلی «۱۵٪ تخفیف» با پیل بنفش «٪۱۵» در
+                  فهرست بازار فرق داشت؛ یک محصول در دو صفحه دو نشان
                   متفاوت می‌گرفت. رنگ و شکل و متن هر سه یکی شد. */}
               {product.disc > 0 && (
                 <div dir="ltr" style={{ position: 'absolute', top: 12, insetInlineStart: 12, background: '#b400ae', color: '#fff', fontSize: 13.8, fontWeight: 800, borderRadius: 999, padding: '5px 12px 3px', lineHeight: 1 }}>
@@ -402,9 +402,9 @@ export default function ProductDetailPage() {
               </button>
             </div>
 
-            {/* ── نوارِ عکس‌ها ──
-                فقط وقتی بیش از یک عکس هست. یک تصویرِ تنها با نوارِ
-                تک‌خانه‌ای زیرش، شبیهِ چیزی است که کار نمی‌کند. */}
+            {/* ── نوار عکس‌ها ──
+                فقط وقتی بیش از یک عکس هست. یک تصویر تنها با نوار
+                تک‌خانه‌ای زیرش، شبیه چیزی است که کار نمی‌کند. */}
             {gallery.length > 1 && (
               <div style={{ display: 'flex', gap: 8, marginTop: 12, overflowX: 'auto', paddingBottom: 2 }}>
                 {gallery.map((src, i) => (
@@ -426,15 +426,15 @@ export default function ProductDetailPage() {
 
           {/* اطلاعات */}
           <div>
-            {/* ── باکسِ هویتِ محصول ──
-                چیپِ دسته‌بندیِ کادردار برداشته شد: همان واژه در نانِ
-                بالای صفحه و در سرِ عنوان هم هست، پس سه بار تکرار
+            {/* ── باکس هویت محصول ──
+                چیپ دسته‌بندی کادردار برداشته شد: همان واژه در نان
+                بالای صفحه و در سر عنوان هم هست، پس سه بار تکرار
                 می‌شد.
 
-                برند و مدل حالا هم‌وزنِ عنوان‌اند، نه زیرنویسِ ریز.
-                برای خریدارِ تجهیزات «O'min Classic» مهم‌تر از «چوب
+                برند و مدل حالا هم‌وزن عنوان‌اند، نه زیرنویس ریز.
+                برای خریدار تجهیزات «O'min Classic» مهم‌تر از «چوب
                 اسنوکر» است — آن یکی می‌گوید چه چیزی است، این یکی
-                می‌گوید کدام. جهتشان هم خودکار است: با                 نامِ لاتین از چپ و نامِ فارسی از راست چیده می‌شود. */}
+                می‌گوید کدام. جهتشان هم خودکار است: با                 نام لاتین از چپ و نام فارسی از راست چیده می‌شود. */}
             <div style={{ ...glassPanel, borderRadius: 20, padding: '16px 18px', marginBottom: 16 }}>
               <h1 style={{ fontSize: 'clamp(19px,2.4vw,25px)', fontWeight: 800, lineHeight: 1.45, margin: 0, letterSpacing: '-0.01em' }}>
                 {titleHead}
@@ -444,9 +444,9 @@ export default function ProductDetailPage() {
                   marginTop: 8, paddingTop: 10, borderTop: '1px dashed rgba(28,28,26,0.12)',
                   display: 'flex', alignItems: 'baseline', gap: 9, flexWrap: 'wrap',
                 }}>
-                  {/* ── پرچمِ کشورِ سازنده ──
-                      در فرم کنارِ هر برند پرچم بود و این‌جا نبود؛ برای
-                      خریدارِ چوب، انگلیسی‌بودن یا چینی‌بودنِ برند یکی از
+                  {/* ── پرچم کشور سازنده ──
+                      در فرم کنار هر برند پرچم بود و این‌جا نبود؛ برای
+                      خریدار چوب، انگلیسی‌بودن یا چینی‌بودن برند یکی از
                       اولین چیزهایی است که می‌سنجد. */}
                   {brandCountry && <CountryFlag code={brandCountry} label={brandCountryFa} />}
                   <span {...keepLatinProps(titleTail)}
@@ -460,15 +460,15 @@ export default function ProductDetailPage() {
             {/* ── امتیاز و «موجود در انبار» هر دو برداشته شدند ──
                 امتیاز عددش ثابت و ساختگی بود (۵٫۰ با ۰ نظر).
 
-                «موجود در انبار» هم پشتوانه‌ای نداشت: این‌جا آگهیِ
-                دستِ‌دوم است، نه فروشگاهی با انبار. موجودی هیچ‌جا
+                «موجود در انبار» هم پشتوانه‌ای نداشت: این‌جا آگهی
+                دست‌دوم است، نه فروشگاهی با انبار. موجودی هیچ‌جا
                 شمرده نمی‌شود (`stock` همیشه ۱ ذخیره می‌شود) و آگهی
-                ممکن است همین حالا فروخته شده باشد. برچسبِ سبزِ
-                «موجود» روی چنین چیزی، همان دروغِ کوچکی است که به
-                همه‌ی صفحه بی‌اعتمادی می‌دهد. وضعیتِ واقعی — «فروخته
+                ممکن است همین حالا فروخته شده باشد. برچسب سبز
+                «موجود» روی چنین چیزی، همان دروغ کوچکی است که به
+                همه‌ی صفحه بی‌اعتمادی می‌دهد. وضعیت واقعی — «فروخته
                 شد» — جای خودش نشان داده می‌شود. */}
 
-            {/* آگهیِ فروخته‌شده باز می‌ماند (لینکش ممکن است جایی باشد)
+            {/* آگهی فروخته‌شده باز می‌ماند (لینکش ممکن است جایی باشد)
                 ولی خریدار باید بی‌درنگ بفهمد که دیگر موجود نیست. */}
             {sold && (
               <div style={{
@@ -480,11 +480,11 @@ export default function ProductDetailPage() {
               </div>
             )}
 
-            {/* ── توضیحاتِ فروشنده ──
-                یک پاراگرافِ لخت بود؛ کنارِ کارتِ شیشه‌ایِ فروشنده و
-                جدولِ مشخصات، مثل متنی می‌ماند که جا مانده. حالا خودش
-                یک بلوکِ مستقل است: نشانِ طلاییِ عمودی، تیترِ کوچک، و
-                علامتِ نقل‌قول در پس‌زمینه که به متن وزن می‌دهد بدونِ
+            {/* ── توضیحات فروشنده ──
+                یک پاراگراف لخت بود؛ کنار کارت شیشه‌ای فروشنده و
+                جدول مشخصات، مثل متنی می‌ماند که جا مانده. حالا خودش
+                یک بلوک مستقل است: نشان طلایی عمودی، تیتر کوچک، و
+                علامت نقل‌قول در پس‌زمینه که به متن وزن می‌دهد بدون
                 آنکه خواندنش را سخت کند. */}
             {!!product.desc.trim() && (
               <div style={{ ...glassPanel, borderRadius: 20, padding: '16px 18px 18px', marginBottom: 20, position: 'relative', overflow: 'hidden' }}>
@@ -500,17 +500,17 @@ export default function ProductDetailPage() {
             )}
 
             {/* ── مشخصات فنی ──
-                فروشنده هنگام ثبتِ آگهی ده‌ها مشخصه پر می‌کند — طول،
-                وزن، قطرِ تیپ، جنسِ شفت، ضخامتِ سنگ — و همه‌شان در
+                فروشنده هنگام ثبت آگهی ده‌ها مشخصه پر می‌کند — طول،
+                وزن، قطر تیپ، جنس شفت، ضخامت سنگ — و همه‌شان در
                 دیتابیس می‌نشستند و **هیچ‌جا دیده نمی‌شدند**. بازدیدکننده
-                فقط عنوان و قیمت را می‌دید، یعنی دقیقاً همان چیزی که
-                خریدِ آنلاینِ تجهیزات را غیرممکن می‌کند.
+                فقط عنوان و قیمت را می‌دید، یعنی دقیقا همان چیزی که
+                خرید آنلاین تجهیزات را غیرممکن می‌کند.
 
-                طرح عمداً با بقیه‌ی جدول‌های سایت فرق دارد: خطِ نقطه‌چینِ
-                رابط بینِ نام و مقدار — همان چیزی که در برگه‌ی مشخصاتِ
+                طرح عمدا با بقیه‌ی جدول‌های سایت فرق دارد: خط نقطه‌چین
+                رابط بین نام و مقدار — همان چیزی که در برگه‌ی مشخصات
                 کاتالوگ‌های حرفه‌ای دیده می‌شود — به‌جای ردیف‌های
-                راه‌راه. چشم بدونِ مکث از نامِ مشخصه به مقدارش می‌رسد،
-                حتی وقتی طولِ نام‌ها یکی نیست. */}
+                راه‌راه. چشم بدون مکث از نام مشخصه به مقدارش می‌رسد،
+                حتی وقتی طول نام‌ها یکی نیست. */}
             {specRows_.length > 0 && (
               <div style={{ ...glassPanel, borderRadius: 20, padding: '18px 18px 8px', marginBottom: 20 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 9, marginBottom: 14 }}>
@@ -521,9 +521,9 @@ export default function ProductDetailPage() {
                   </span>
                 </div>
                 {/* ── زیرعنوان‌ها ──
-                    میز ۳۳ مشخصه دارد و فهرستِ تخت خوانده نمی‌شود.
-                    گروه‌ها از خودِ شناسه‌ی فیلدها می‌آیند و دسته‌های
-                    کم‌ردیف (زیرِ ۱۶) همان فهرستِ سابق را می‌گیرند. */}
+                    میز ۳۳ مشخصه دارد و فهرست تخت خوانده نمی‌شود.
+                    گروه‌ها از خود شناسه‌ی فیلدها می‌آیند و دسته‌های
+                    کم‌ردیف (زیر ۱۶) همان فهرست سابق را می‌گیرند. */}
                 {groupedRows(specRows_).map(g => (
                   <div key={g.title ?? '_'}>
                     {g.title && (
@@ -539,9 +539,9 @@ export default function ProductDetailPage() {
                           <span aria-hidden style={{ flex: 1, minWidth: 12, alignSelf: 'center', height: 1, borderBottom: '1.5px dotted rgba(28,28,26,0.20)' }} />
                           {/* ── مقدار می‌شکند، برچسب نه ──
                               «لمینت ضدآتش (Wilsonart و مشابه)» با nowrap از
-                              ستونِ ۲۴۰ پیکسلی سرریز می‌کرد. */}
-                          {/* مقدارِ لاتین ارقامش لاتین می‌ماند: «6811 Tournament
-                              30oz» نامِ مدل است، نه عدد. */}
+                              ستون ۲۴۰ پیکسلی سرریز می‌کرد. */}
+                          {/* مقدار لاتین ارقامش لاتین می‌ماند: «6811 Tournament
+                              30oz» نام مدل است، نه عدد. */}
                           <span {...keepLatinProps(s.value)}
                             style={{ fontSize: 13, fontWeight: 700, color: TEXT, textAlign: 'end', minWidth: 0 }}>{s.value}</span>
                         </div>
@@ -553,13 +553,13 @@ export default function ProductDetailPage() {
             )}
 
             {/* ── وضعیت کالا ──
-                هر آگهی در دیتابیس ستونِ `condition` دارد و فرمِ ثبت هم
+                هر آگهی در دیتابیس ستون `condition` دارد و فرم ثبت هم
                 اجباری پرش می‌کند، ولی صفحه‌ی جزئیات هیچ‌جا نشانش
                 نمی‌داد — خریدار نمی‌فهمید کالا نو است یا کارکرده، در
-                حالی که کارتِ فهرست این را می‌گفت.
+                حالی که کارت فهرست این را می‌گفت.
 
-                برچسبِ فارسی از `conditionLabel` می‌آید (همان منبعی که
-                فرم و کارت‌ها هم از آن می‌خوانند)، و رنگ با خودِ وضعیت
+                برچسب فارسی از `conditionLabel` می‌آید (همان منبعی که
+                فرم و کارت‌ها هم از آن می‌خوانند)، و رنگ با خود وضعیت
                 عوض می‌شود تا در یک نگاه خوانده شود. */}
             {(() => {
               const cond = normalizeCondition(product.condition)
@@ -595,7 +595,7 @@ export default function ProductDetailPage() {
               )
             })()}
 
-            {/* قیمت — آگهیِ توافقی عدد ندارد، پس عدد هم نشان نمی‌دهیم */}
+            {/* قیمت — آگهی توافقی عدد ندارد، پس عدد هم نشان نمی‌دهیم */}
             <div style={{ ...lqWhite, borderRadius: 18, padding: '16px 18px', marginBottom: 16 }}>
               {negotiable ? (
                 <div style={{ display: 'flex', alignItems: 'baseline', gap: 10 }}>
@@ -675,9 +675,9 @@ export default function ProductDetailPage() {
             {/* ── سه «تضمین» برداشته شدند ──
                 «گارانتی اصالت کالا»، «ارسال به سراسر کشور» و «۷ روز
                 ضمانت بازگشت» هیچ‌کدام پشتوانه‌ای نداشتند: بیلیارد هاب
-                طرفِ معامله نیست و کالا را نه می‌فرستد نه پس می‌گیرد.
-                نوشتنشان درست کنارِ متنی که می‌گوید «طرف معامله نیستیم»
-                هم متناقض بود و هم می‌توانست تعهدِ حقوقی بسازد. */}
+                طرف معامله نیست و کالا را نه می‌فرستد نه پس می‌گیرد.
+                نوشتنشان درست کنار متنی که می‌گوید «طرف معامله نیستیم»
+                هم متناقض بود و هم می‌توانست تعهد حقوقی بسازد. */}
           </div>
         </div>
 
@@ -701,15 +701,15 @@ export default function ProductDetailPage() {
                     )}
                   </div>
                   <div style={{ padding: '10px 10px 12px', flex: 1, display: 'flex', flexDirection: 'column', gap: 6 }}>
-                    {/* همان دو خطِ کارتِ بازار: بولد بالا، برند و مدل پایینش */}
+                    {/* همان دو خط کارت بازار: بولد بالا، برند و مدل پایینش */}
                     <span style={{ fontSize: 12, fontWeight: 800, color: TEXT, lineHeight: 1.5, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{rp.head}</span>
                     {rp.tail && (
                       <span style={{ fontSize: 11, fontWeight: 400, color: TSEC, lineHeight: 1.5, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{rp.tail}</span>
                     )}
-                    {/* برند حالا در خطِ عنوان است؛ دوباره گفتنش تکرار بود */}
+                    {/* برند حالا در خط عنوان است؛ دوباره گفتنش تکرار بود */}
                     {p.city && <span style={{ fontSize: 10.5, color: TMUT }}>{p.city}</span>}
                     <div style={{ marginTop: 'auto', fontSize: 13, fontWeight: 800, color: '#1A6B3A' }}>
-                      {/* آگهیِ توافقی قیمت ندارد؛ «۰ تومان» دروغ است */}
+                      {/* آگهی توافقی قیمت ندارد؛ «۰ تومان» دروغ است */}
                       {p.negotiable
                         ? 'توافقی'
                         : <>{fmt(p.price)} <span style={{ fontSize: 11, fontWeight: 500 }}>تومان</span></>}

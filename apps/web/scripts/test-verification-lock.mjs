@@ -372,7 +372,7 @@ const head = s => console.log(`\n■ ${s}`)
   t('مهرِ نقش پاسخِ سرور را می‌خواند',
     /if \(!r\.ok \|\| !j\?\.channel\) return miss\(\)/.test(code('components/media/useChannelPublish.tsx')))
   t('نبودِ کلیدِ مالک هم پیام دارد',
-    /کانالِ شما شناسایی نشد/.test(code('components/media/useChannelPublish.tsx')))
+    /کانال شما شناسایی نشد/.test(code('components/media/useChannelPublish.tsx')))
   const media = code('app/api/media/route.ts')
   t('انتشار در کانالِ غریبه بسته است', /myChannelHandles/.test(media))
   /* ⚠️ `clubId` هم از بدنه می‌آید؛ بدونِ گارد هر کسی ویدیویش را زیرِ
@@ -513,7 +513,7 @@ const head = s => console.log(`\n■ ${s}`)
   t('یافتن با src به خودِ کاربر محدود است',
     /if \(src && !id && !slug && !actor\.isAdmin\) sel = sel\.eq\('owner_id', actor\.id\)/.test(media))
   t('خطای خواندن بلعیده نمی‌شود',
-    /error: findErr/.test(media) && /خواندنِ ویدیو انجام نشد/.test(media))
+    /error: findErr/.test(media) && /خواندن ویدیو انجام نشد/.test(media))
   /* «منتشر نشده» باید از «خطا» جدا بماند */
   t('«ردیفِ مدیا نیست» کدِ خودش را دارد',
     /code: 'no-media-row'/.test(media) && /j\.code === 'no-media-row'/.test(ve))

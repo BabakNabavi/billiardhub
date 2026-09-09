@@ -17,7 +17,7 @@ import {
    هر جایگاه مستقل است: is_active و mode جدا؛ هیچ کلید سراسری‌ای
    خوانده یا نوشته نمی‌شود. */
 
-/* اعداد ورودی ممکن است فارسی باشند. علامت منفی عمداً حفظ می‌شود:
+/* اعداد ورودی ممکن است فارسی باشند. علامت منفی عمدا حفظ می‌شود:
    «اولویت ‎−۳» یعنی پایین‌ترین اولویت، نه ‎+۳. سقف هم لازم است چون
    عدد بزرگ‌تر از integer پستگرس، خطای ۵۰۰ می‌داد. */
 const MAX_INT = 2_000_000_000;
@@ -55,8 +55,8 @@ export async function GET(req: NextRequest) {
       listPricingPlans(false),
       sb().from('ad_requests').select('*').order('created_at', { ascending: false }).limit(200)
         .then(r => (r.error ? [] : (r.data ?? []))),
-      /* سفارش‌ها کنارِ کمپین‌ها لازم‌اند: بدونشان ادمین نمی‌داند کدام
-         کمپین اصلاً پولی پرداخت شده و چه چیزی قابلِ بازگرداندن است. */
+      /* سفارش‌ها کنار کمپین‌ها لازم‌اند: بدونشان ادمین نمی‌داند کدام
+         کمپین اصلا پولی پرداخت شده و چه چیزی قابل بازگرداندن است. */
       sb().from('campaign_orders')
         .select('id,campaign_id,user_id,amount,status,paid_at,refunded_at,refund_amount,refund_reason,created_at')
         .order('created_at', { ascending: false }).limit(500)
@@ -94,9 +94,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ plan }, { status: 201 });
   }
 
-  /* ── جایگاهِ تازه (مهاجرتِ ۰۵۶) ──
-     تا امروز هر جایگاه یک کامیت و یک دیپلوی می‌خواست. جایگاهِ تازه
-     خاموش و در حالتِ دستی متولد می‌شود تا اشتباهِ تایپی مستقیم روی
+  /* ── جایگاه تازه (مهاجرت ۰۵۶) ──
+     تا امروز هر جایگاه یک کامیت و یک دیپلوی می‌خواست. جایگاه تازه
+     خاموش و در حالت دستی متولد می‌شود تا اشتباه تایپی مستقیم روی
      سایت ننشیند. */
   if (b?.type === 'placement') {
     const made = await createPlacement({
@@ -196,7 +196,7 @@ export async function PATCH(req: NextRequest) {
       patch.rotationMode = b.rotationMode as RotationMode;
     }
     if (b.priority !== undefined) patch.priority = num(b.priority);
-    /* جایگاهِ ویدیویی (پیش‌پخش). `null` را عمداً عبور می‌دهیم چون
+    /* جایگاه ویدیویی (پیش‌پخش). `null` را عمدا عبور می‌دهیم چون
        معنا دارد: skip=null یعنی «رد کردن ممکن نیست». بازه‌ها را
        `updatePlacement` می‌بندد. */
     if (b.skipAfterSec !== undefined) {
@@ -236,9 +236,9 @@ export async function PATCH(req: NextRequest) {
   }
 
   /* ── بازپرداخت ──
-     مبلغ از خودِ سفارش خوانده می‌شود، نه از بدنه‌ی درخواست؛ ادمین فقط
-     تعیین می‌کند کامل باشد یا جزئی. تابعِ دیتابیس اتمیک است: سفارش،
-     کمپین و ردیفِ دفتر در یک تراکنش، و بازپرداختِ دوباره اثری ندارد. */
+     مبلغ از خود سفارش خوانده می‌شود، نه از بدنه‌ی درخواست؛ ادمین فقط
+     تعیین می‌کند کامل باشد یا جزئی. تابع دیتابیس اتمیک است: سفارش،
+     کمپین و ردیف دفتر در یک تراکنش، و بازپرداخت دوباره اثری ندارد. */
   if (b?.type === 'refund') {
     const orderId = str(b?.orderId, 60);
     if (!orderId) return NextResponse.json({ message: 'شناسه‌ی سفارش لازم است' }, { status: 400 });
@@ -324,7 +324,7 @@ export async function DELETE(req: NextRequest) {
     return error ? NextResponse.json({ message: 'انجام نشد' }, { status: 500 }) : NextResponse.json({ ok: true });
   }
 
-  /* پلن: اگر سفارشی به آن ارجاع دارد فقط غیرفعال می‌شود، وگرنه واقعاً
+  /* پلن: اگر سفارشی به آن ارجاع دارد فقط غیرفعال می‌شود، وگرنه واقعا
      حذف. با ?mode=disable همیشه فقط غیرفعال می‌شود. */
   const planId = sp.get('plan') ?? '';
   if (planId) {

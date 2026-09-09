@@ -7,7 +7,7 @@
    ───────────────────────────────────────────────────────────── */
 import { provinceOfCity } from './iran-geo'
 
-/* همان شکلِ رسانه‌ی بقیه‌ی نقش‌ها. `caption` و `album` اختیاری‌اند
+/* همان شکل رسانه‌ی بقیه‌ی نقش‌ها. `caption` و `album` اختیاری‌اند
    چون ردیف‌های موجود فقط `{id,url}` دارند. */
 export interface SellerShot { id: string; url: string; caption?: string; album?: string }
 export interface SellerVideo { id: string; url?: string; thumbnail: string; title: string; duration: string; album?: string }
@@ -42,8 +42,8 @@ export interface SellerProfile {
 
   /* ── استوری (حلقه‌ی دور لوگو) ── */
   /* ⚠️ منسوخ — استوری نیست.
-     این دو یک استوریِ دائمیِ بی‌انقضا می‌ساختند و از فرم برداشته
-     شدند. برای ردیف‌های قدیمی فقط به‌عنوان فالبکِ *بنر* خوانده
+     این دو یک استوری دائمی بی‌انقضا می‌ساختند و از فرم برداشته
+     شدند. برای ردیف‌های قدیمی فقط به‌عنوان فالبک *بنر* خوانده
      می‌شوند (app/sellers/page.tsx)، نه استوری. هیچ‌جای تازه‌ای
      ننویسیدشان. */
   storyImage: string
@@ -54,7 +54,7 @@ export interface SellerProfile {
 
   /* ── گالری تصاویر فروشگاه ── */
   gallery: SellerShot[]
-  /** نامِ آلبوم‌ها — عضویت روی خودِ رسانه است */
+  /** نام آلبوم‌ها — عضویت روی خود رسانه است */
   albums?: string[]
   videos?: SellerVideo[]
 

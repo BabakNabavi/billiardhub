@@ -51,13 +51,13 @@ async function nameOf(userId: string): Promise<string> {
   return `${u.firstName ?? ''} ${u.lastName ?? ''}`.trim()
 }
 
-/* ── نقشِ حرفه‌ای ────────────────────────────────────────────────
-   خطِ دومِ پیامک، مخصوصِ هر نقش. عمداً این‌جاست نه در `lib/roles`:
-   آن فایل به کلاینت هم می‌رود و این متن‌ها فقط سمتِ سرور لازم‌اند.
+/* ── نقش حرفه‌ای ────────────────────────────────────────────────
+   خط دوم پیامک، مخصوص هر نقش. عمدا این‌جاست نه در `lib/roles`:
+   آن فایل به کلاینت هم می‌رود و این متن‌ها فقط سمت سرور لازم‌اند.
 
-   «کاربر عادی» عمداً نیست — نقشی که بررسی نمی‌شود پیامکِ تأیید هم
+   «کاربر عادی» عمدا نیست — نقشی که بررسی نمی‌شود پیامک تأیید هم
    ندارد. */
-/* ⚠️ هیچ‌کدام به «گرامی» ختم نمی‌شوند: خطِ اول از قبل «{نام} گرامی»
+/* ⚠️ هیچ‌کدام به «گرامی» ختم نمی‌شوند: خط اول از قبل «{نام} گرامی»
    است و «سارا رضایی گرامی / مربی گرامی» دو بار سلام‌کردن است. */
 const ROLE_LINE: Record<string, string> = {
   referee: 'داور ارزنده‌ی کشور',
@@ -69,7 +69,7 @@ const ROLE_LINE: Record<string, string> = {
   technician: 'متخصص محترم',
 }
 
-/** نقش تأیید شد — با یا بدونِ تیکِ آبی */
+/** نقش تأیید شد — با یا بدون تیک آبی */
 export async function notifyRoleApproved(
   userId: string, role: string, withTick: boolean,
 ): Promise<void> {
@@ -83,13 +83,13 @@ export async function notifyRoleApproved(
 
 /* نقش رد شد — دلیل همیشه همراهش می‌رود.
 
-   `reason` از فهرستِ بسته‌ی `REJECT_REASONS` می‌آید. سرویسِ پیامک
-   مقدارهای ممکنِ این متغیر را از قبل می‌خواهد، پس متنِ آزاد این‌جا
-   قابلِ ارسال نیست. `rejectLabel` هر ورودیِ ناشناخته را به «موارد
-   دیگر» می‌برد — سدِ آخر، تا حتی یک مسیرِ قدیمی هم نتواند مقدارِ
+   `reason` از فهرست بسته‌ی `REJECT_REASONS` می‌آید. سرویس پیامک
+   مقدارهای ممکن این متغیر را از قبل می‌خواهد، پس متن آزاد این‌جا
+   قابل ارسال نیست. `rejectLabel` هر ورودی ناشناخته را به «موارد
+   دیگر» می‌برد — سد آخر، تا حتی یک مسیر قدیمی هم نتواند مقدار
    اعلام‌نشده بفرستد.
 
-   یادداشتِ آزادِ ادمین از بین نمی‌رود؛ در داشبورد و ممیزی می‌ماند. */
+   یادداشت آزاد ادمین از بین نمی‌رود؛ در داشبورد و ممیزی می‌ماند. */
 export async function notifyRoleRejected(
   userId: string, role: string, reason: string,
 ): Promise<void> {
@@ -101,12 +101,12 @@ export async function notifyRoleRejected(
   } catch { /* اطلاع‌رسانی نباید رد را بشکند */ }
 }
 
-/* ── گزارشِ تخلف ────────────────────────────────────────────────
+/* ── گزارش تخلف ────────────────────────────────────────────────
    تا امروز گزارش فقط در جدول می‌نشست و ادمین تنها وقتی خبردار می‌شد
-   که خودش سراغِ صفحه‌ی گزارش‌ها می‌رفت. برای آگهیِ کلاهبرداری، آن
+   که خودش سراغ صفحه‌ی گزارش‌ها می‌رفت. برای آگهی کلاهبرداری، آن
    فاصله همان مدتی است که آگهی روی سایت می‌ماند.
 
-   شماره از تنظیماتِ `report_alert_phone` خوانده می‌شود، نه از کد:
+   شماره از تنظیمات `report_alert_phone` خوانده می‌شود، نه از کد:
    شماره‌ی ادمین عوض می‌شود و نباید دیپلوی بخواهد. خالی بودنش یعنی
    «پیامک نفرست» و هیچ خطایی نمی‌دهد. */
 export async function notifyReportCreated(input: {
@@ -126,7 +126,7 @@ export async function notifyReportCreated(input: {
     }
     const what = `${KIND[input.targetType] ?? 'محتوا'}${input.targetTitle ? ` «${input.targetTitle.slice(0, 40)}»` : ''}`
     notifyPattern(phone, 'report_created', [what, input.reasonLabel])
-  } catch { /* اطلاع‌رسانی هرگز نباید ثبتِ گزارش را بشکند */ }
+  } catch { /* اطلاع‌رسانی هرگز نباید ثبت گزارش را بشکند */ }
 }
 
 /** رزرو قطعی شد — به کاربر، و خبر رزرو جدید به باشگاه‌دار */
@@ -144,7 +144,7 @@ export async function notifyBookingConfirmed(bookingId: string): Promise<void> {
 
   /* باشگاه‌دار هم باید بداند میزش پر شده.
 
-     مقصد لزوماً شماره‌ی خود مالک نیست: بسیاری از باشگاه‌ها به نام یک
+     مقصد لزوما شماره‌ی خود مالک نیست: بسیاری از باشگاه‌ها به نام یک
      نفر ثبت‌اند ولی کس دیگری اداره‌شان می‌کند. اگر «شماره‌ی
      اطلاع‌رسانی» تنظیم شده باشد، پیامک به همان می‌رود. */
   if (club && club.ownerId !== b.userId) {
@@ -158,7 +158,7 @@ export async function notifyBookingConfirmed(bookingId: string): Promise<void> {
         || ''
     }
     const target = club.notifyPhone ?? (club.ownerId ? await phoneOf(club.ownerId) : null)
-    /* نامِ خودِ مالک برای خطاب، و نامِ رزروکننده داخلِ متن */
+    /* نام خود مالک برای خطاب، و نام رزروکننده داخل متن */
     const ownerName = club.ownerId ? await nameOf(club.ownerId) : ''
     notifyPattern(target, 'booking_for_owner',
       [ownerName, tableName || 'یک میز', club.name, date, time, userName])
@@ -170,8 +170,8 @@ export async function notifyBookingCancelled(bookingId: string, refund: number):
   const b = await loadBooking(bookingId)
   if (!b) return
   const club = await clubOf(b.clubId)
-  /* دو الگوی جدا: پنل ملی‌پیامک شرط داخلِ متن نمی‌پذیرد، پس «با بازگشت
-     وجه» و «بدونِ آن» دو متنِ ثبت‌شده‌ی متفاوت‌اند. */
+  /* دو الگوی جدا: پنل ملی‌پیامک شرط داخل متن نمی‌پذیرد، پس «با بازگشت
+     وجه» و «بدون آن» دو متن ثبت‌شده‌ی متفاوت‌اند. */
   const who = await nameOf(b.userId)
   const cName = club?.name ?? 'باشگاه'
   const cDate = faDate(b.bookingDate)
@@ -190,15 +190,15 @@ export async function notifySettlementPaid(clubId: string, amount: number): Prom
    رویدادهای ماژول باشگاه — تأیید، رد، و مسابقات.
 
    تا امروز هیچ‌کدام اعلانی نداشتند: ادمین باشگاهی را رد می‌کرد و
-   مالک هیچ‌وقت خبردار نمی‌شد؛ فقط اگر تصادفاً به داشبوردش سر می‌زد
+   مالک هیچ‌وقت خبردار نمی‌شد؛ فقط اگر تصادفا به داشبوردش سر می‌زد
    وضعیت را می‌دید — آن‌هم بدون علت.
    ───────────────────────────────────────────────────────────── */
 
 async function ownerPhoneOf(clubId: string): Promise<{ phone: string | null; name: string; owner: string }> {
   const c = await clubOf(clubId)
   if (!c) return { phone: null, name: 'باشگاه', owner: '' }
-  /* نامِ مالک برای خطابِ پیامک؛ شماره‌ی اعلانِ باشگاه اگر ثبت شده،
-     وگرنه موبایلِ مالک. */
+  /* نام مالک برای خطاب پیامک؛ شماره‌ی اعلان باشگاه اگر ثبت شده،
+     وگرنه موبایل مالک. */
   const owner = c.ownerId ? await nameOf(c.ownerId) : ''
   if (c.notifyPhone) return { phone: c.notifyPhone, name: c.name, owner }
   const phone = c.ownerId ? await phoneOf(c.ownerId) : null
@@ -212,11 +212,11 @@ export async function notifyClubApproved(clubId: string): Promise<void> {
   notifyPattern(phone, 'club_approved', [owner, name])
 }
 
-/** باشگاه رد شد — علت حتماً گفته می‌شود، وگرنه مالک نمی‌داند چه را اصلاح کند */
+/** باشگاه رد شد — علت حتما گفته می‌شود، وگرنه مالک نمی‌داند چه را اصلاح کند */
 export async function notifyClubRejected(clubId: string, reason: string): Promise<void> {
   const { phone, name, owner } = await ownerPhoneOf(clubId)
   if (!phone) return
-  /* علت از فهرستِ بسته می‌آید — سرویسِ پیامک مقدارهای ممکنِ این
+  /* علت از فهرست بسته می‌آید — سرویس پیامک مقدارهای ممکن این
      متغیر را از قبل می‌خواهد. `rejectLabel` خالی و ناشناخته را هم
      به «موارد دیگر» می‌برد، پس جای علت هیچ‌وقت خالی نمی‌ماند. */
   notifyPattern(phone, 'club_rejected', [owner, name, rejectLabel(reason)])
@@ -226,7 +226,7 @@ export async function notifyClubRejected(clubId: string, reason: string): Promis
 export async function notifyTournamentCreated(clubId: string, title: string): Promise<void> {
   const { phone, name, owner } = await ownerPhoneOf(clubId)
   if (!phone) return
-  /* رسیدِ ثبتِ مسابقه الگوی جدا ندارد: مالک همان لحظه در داشبورد
+  /* رسید ثبت مسابقه الگوی جدا ندارد: مالک همان لحظه در داشبورد
      می‌بیندش، پس یک الگوی تأییدشده‌ی دیگر ارزشش را ندارد. */
   void title; void phone; void name
 }
@@ -268,15 +268,15 @@ export async function notifyTournamentRegistered(registrationId: string): Promis
     [await nameOf(reg.user_id), tt.title ?? 'مسابقه', tt.starts_at ? faDate(tt.starts_at) : '—'])
 }
 
-/** خبرِ ثبت‌نامِ تازه برای برگزارکننده — «فلانی ثبت‌نام کرد، نفر ۵ از ۱۶»
+/** خبر ثبت‌نام تازه برای برگزارکننده — «فلانی ثبت‌نام کرد، نفر ۵ از ۱۶»
  *
  *  ── چرا شمارنده در متن است ──
- *  خبرِ خالیِ «یک نفر ثبت‌نام کرد» باشگاه‌دار را مجبور می‌کند پنل را
+ *  خبر خالی «یک نفر ثبت‌نام کرد» باشگاه‌دار را مجبور می‌کند پنل را
  *  باز کند تا بفهمد چقدر مانده. با «نفر ۵ از ۱۶» همان پیامک به
- *  سؤالِ اصلی جواب می‌دهد و اگر مسابقه دارد پر می‌شود، خودش را
+ *  سؤال اصلی جواب می‌دهد و اگر مسابقه دارد پر می‌شود، خودش را
  *  نشان می‌دهد.
  *
- *  شمارش شاملِ ثبت‌نامِ حضوری هم هست — همان عددی که ظرفیت را
+ *  شمارش شامل ثبت‌نام حضوری هم هست — همان عددی که ظرفیت را
  *  می‌بندد، نه فقط آنلاین‌ها. */
 export async function notifyOrganizerOfRegistration(registrationId: string): Promise<void> {
   const { data: r } = await sb().from('tournament_registrations')
@@ -294,13 +294,13 @@ export async function notifyOrganizerOfRegistration(registrationId: string): Pro
 
   const club = await clubOf(tt.club_id)
   /* `notifyPhone` شماره‌ای است که باشگاه برای اطلاع‌رسانی داده؛ اگر
-     نداشت، شماره‌ی خودِ مالک. */
+     نداشت، شماره‌ی خود مالک. */
   const phone = club?.notifyPhone
     ?? (club?.ownerId ? await phoneOf(club.ownerId) : null)
   if (!phone) return
 
-  /* همان قاعده‌ی ظرفیت که تابعِ دیتابیس دارد: رزروشده = قطعی +
-     در انتظارِ پرداخت. */
+  /* همان قاعده‌ی ظرفیت که تابع دیتابیس دارد: رزروشده = قطعی +
+     در انتظار پرداخت. */
   const { count } = await sb().from('tournament_registrations')
     .select('id', { count: 'exact', head: true })
     .eq('tournament_id', reg.tournament_id)
@@ -310,8 +310,8 @@ export async function notifyOrganizerOfRegistration(registrationId: string): Pro
     || (reg.user_id ? await nameOf(reg.user_id) : '')
     || 'یک بازیکن'
 
-  /* خطاب به مالک، دقیقاً مثلِ `booking_for_owner`. اگر شماره‌ی
-     اطلاع‌رسانی دستِ کسِ دیگری باشد باز هم نامِ مالک نوشته می‌شود —
+  /* خطاب به مالک، دقیقا مثل `booking_for_owner`. اگر شماره‌ی
+     اطلاع‌رسانی دست کس دیگری باشد باز هم نام مالک نوشته می‌شود —
      همان رفتاری که آن الگو دارد و تأیید شده است. */
   const ownerName = club?.ownerId ? await nameOf(club.ownerId) : ''
 
@@ -338,7 +338,7 @@ export async function notifyWaitlistPromoted(registrationId: string, needsPaymen
   const phone = await phoneOf(reg.user_id)
   if (!phone) return
 
-  /* پیام پولی حتماً باید فوریت را برساند: صندلی نگه داشته شده ولی
+  /* پیام پولی حتما باید فوریت را برساند: صندلی نگه داشته شده ولی
      تا پرداخت‌نشدن قطعی نیست. */
   const body = needsPayment
     ? `جا در «${title}» برای شما باز شد.\nبرای قطعی‌شدن، هزینه‌ی ثبت‌نام را از داشبورد پرداخت کنید.`

@@ -16,22 +16,22 @@ import { can } from '@/lib/admin/permissions'
    ویدیوهای بیلیارد مدیا.
 
    ── چه چیزی عوض شد ──
-   متادیتا از یک فایلِ JSON در Storage به جدولِ `videos` رفت. آن
-   ساختار هر خواندن را به آوردنِ کلِ فهرست و هر نوشتن را به بازنویسیِ
-   کلش تبدیل می‌کرد: دو آپلودِ هم‌زمان یکی را گم می‌کرد، سقفِ ۸۰۰
+   متادیتا از یک فایل JSON در Storage به جدول `videos` رفت. آن
+   ساختار هر خواندن را به آوردن کل فهرست و هر نوشتن را به بازنویسی
+   کلش تبدیل می‌کرد: دو آپلود هم‌زمان یکی را گم می‌کرد، سقف ۸۰۰
    ویدیو در کد هاردکد بود، و صفحه‌بندی/جست‌وجو در حافظه انجام می‌شد.
 
-   ── شکلِ پاسخ ──
+   ── شکل پاسخ ──
    `GET` حالا `{ items, nextCursor }` برمی‌گرداند، نه آرایه‌ی خام.
    مصرف‌کننده‌ی قدیمی (`fetchUserVideos`) هم‌زمان به‌روز شد.
    ───────────────────────────────────────────────────────────── */
 
-/* کلیدهای معتبرِ دسته‌بندی — منبعش همان فهرستی است که رابط نشان می‌دهد */
+/* کلیدهای معتبر دسته‌بندی — منبعش همان فهرستی است که رابط نشان می‌دهد */
 const CATEGORY_KEYS = new Set<string>(MEDIA_CATEGORIES.map(c => c.key))
 
 export function OPTIONS() { return new NextResponse(null, { status: 204, headers: CORS }) }
 
-/* GET — فهرستِ عمومی، با فیلتر و صفحه‌بندیِ مکان‌نمایی.
+/* GET — فهرست عمومی، با فیلتر و صفحه‌بندی مکان‌نمایی.
    ?category= &q= &handle= &club= &sort=recent|popular &limit= &before= */
 export async function GET(req: NextRequest) {
   const p = req.nextUrl.searchParams
@@ -50,13 +50,13 @@ export async function GET(req: NextRequest) {
   })
 }
 
-/* POST { video } → ثبتِ ویدیوی تازه (پس از آپلودِ فایل‌ها) */
+/* POST { video } → ثبت ویدیوی تازه (پس از آپلود فایل‌ها) */
 export async function POST(req: NextRequest) {
   const actor = await actorOf(req)
   if (!actor) return NextResponse.json(UNAUTHENTICATED, { status: 401, headers: CORS })
 
-  /* انتشارِ ویدیو کارِ سنگینی است (فایل در Storage نشسته). سقفِ نرخ
-     جلوی پرکردنِ فهرست با درخواستِ پیاپی را می‌گیرد. */
+  /* انتشار ویدیو کار سنگینی است (فایل در Storage نشسته). سقف نرخ
+     جلوی پرکردن فهرست با درخواست پیاپی را می‌گیرد. */
   const rl = await hitRateLimit(req, { action: 'video-post', max: 20, windowSec: 3600 }, actor.id)
   if (!rl.ok) return tooMany(rl.retryAfterSec)
 
@@ -68,8 +68,8 @@ export async function POST(req: NextRequest) {
   if (!title) return NextResponse.json({ ok: false, message: 'عنوان الزامی است' }, { status: 400, headers: CORS })
   if (!src) return NextResponse.json({ ok: false, message: 'فایل ویدیو مشخص نیست' }, { status: 400, headers: CORS })
 
-  /* عنوانِ برابرِ نامِ فایل بی‌معنی است و برای موتورِ جست‌وجو هم بی‌ارزش.
-     جلویش این‌جا گرفته می‌شود، نه در رابط — رابط قابلِ دور زدن است. */
+  /* عنوان برابر نام فایل بی‌معنی است و برای موتور جست‌وجو هم بی‌ارزش.
+     جلویش این‌جا گرفته می‌شود، نه در رابط — رابط قابل دور زدن است. */
   if (/^[\w-]+\.(mp4|mov|webm|avi|mkv)$/i.test(title) || /^(img|vid|video|movie)[_-]?\d+$/i.test(title)) {
     return NextResponse.json(
       { ok: false, message: 'عنوان نباید نام فایل باشد؛ عنوانی بنویسید که محتوای ویدیو را توضیح دهد' },
@@ -78,8 +78,8 @@ export async function POST(req: NextRequest) {
   }
 
   /* ⚠️ `creatorHandle` از بدنه می‌آمد و هیچ‌جا بررسی نمی‌شد: هر
-     کاربرِ واردشده می‌توانست ویدیو را زیرِ کانالِ *هر کسِ دیگری*
-     منتشر کند، و فهرستِ آن کانال همان را نشان می‌داد. */
+     کاربر واردشده می‌توانست ویدیو را زیر کانال *هر کس دیگری*
+     منتشر کند، و فهرست آن کانال همان را نشان می‌داد. */
   const wantHandle = String(v.creatorHandle ?? '').replace(/[^A-Za-z0-9_.-]/g, '_').slice(0, 60)
   if (wantHandle && wantHandle !== actor.id) {
     const mine = await myChannelHandles(actor)
@@ -90,18 +90,18 @@ export async function POST(req: NextRequest) {
   }
 
   /* ⚠️ `clubId` هم مثل `creatorHandle` از بدنه می‌آید و تا امروز
-     بررسی نمی‌شد. با وصل‌شدنِ گالریِ باشگاه به این مسیر، یعنی هر
-     کاربرِ واردشده می‌توانست ویدیویش را زیرِ *هر باشگاهی* بنشاند و
-     در فیلترِ `?club=` همان باشگاه ظاهر شود. */
+     بررسی نمی‌شد. با وصل‌شدن گالری باشگاه به این مسیر، یعنی هر
+     کاربر واردشده می‌توانست ویدیویش را زیر *هر باشگاهی* بنشاند و
+     در فیلتر `?club=` همان باشگاه ظاهر شود. */
   const wantClub = String(v.clubId ?? '').trim()
   if (wantClub) {
     if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(wantClub)) {
       return NextResponse.json({ ok: false, message: 'شناسه‌ی باشگاه معتبر نیست' }, { status: 400, headers: CORS })
     }
     const { data: club, error: cErr } = await getSupabaseServer()
-      /* ⚠️ ستون `ownerId` است نه `owner_id` — جدولِ `clubs` شترکوهانه
-         نام‌گذاری شده و نامِ اشتباه خطای PostgREST می‌داد، یعنی هر
-         ویدیوی گالریِ باشگاه ۵۰۰ می‌گرفت. */
+      /* ⚠️ ستون `ownerId` است نه `owner_id` — جدول `clubs` شترکوهانه
+         نام‌گذاری شده و نام اشتباه خطای PostgREST می‌داد، یعنی هر
+         ویدیوی گالری باشگاه ۵۰۰ می‌گرفت. */
       .from('clubs').select('ownerId').eq('id', wantClub).maybeSingle()
     /* خطای خواندن «مالک نیست» نیست — قضاوت نمی‌کنیم، رد می‌کنیم. */
     if (cErr) {
@@ -120,9 +120,9 @@ export async function POST(req: NextRequest) {
     description: Array.isArray(v.description)
       ? v.description.map(String).join('\n').slice(0, 4000)
       : String(v.description ?? '').slice(0, 4000),
-    /* ⚠️ تا دیروز کلاینت همیشه ثابتِ `other` می‌فرستاد؛ از حالا کاربر
-       انتخابش می‌کند. کلیدِ ناشناخته خطا نمی‌دهد، فقط ویدیو را در
-       *همه‌ی* فیلترهای `/media` نامرئی می‌کند — بدترین نوعِ شکست. */
+    /* ⚠️ تا دیروز کلاینت همیشه ثابت `other` می‌فرستاد؛ از حالا کاربر
+       انتخابش می‌کند. کلید ناشناخته خطا نمی‌دهد، فقط ویدیو را در
+       *همه‌ی* فیلترهای `/media` نامرئی می‌کند — بدترین نوع شکست. */
     category: CATEGORY_KEYS.has(String(v.category)) ? String(v.category) : 'other',
     tags: Array.isArray(v.tags) ? v.tags.map(String).slice(0, 8) : [],
     owner_id: actor.id,
@@ -131,17 +131,17 @@ export async function POST(req: NextRequest) {
     club_id: wantClub || null,
     src,
     thumb: String(v.thumb ?? ''),
-    /* کلیدِ فایل جدا از نشانی ذخیره می‌شود.
+    /* کلید فایل جدا از نشانی ذخیره می‌شود.
 
-       نشانیِ مطلق نامِ ارائه‌دهنده و باکت را در ردیف می‌پزد؛ با کلید،
-       جابه‌جاییِ آینده‌ی فایل‌ها یک تغییرِ تابع است نه جراحی روی رشته‌ی
+       نشانی مطلق نام ارائه‌دهنده و باکت را در ردیف می‌پزد؛ با کلید،
+       جابه‌جایی آینده‌ی فایل‌ها یک تغییر تابع است نه جراحی روی رشته‌ی
        هر ردیف. `null` اگر نشانی از این پروژه نباشد. */
     storage_provider: 'supabase',
     storage_key: keyFromUrl(src),
     thumb_key: keyFromUrl(String(v.thumb ?? '')),
     /* متادیتای واقعی اگر کلاینت استخراج کرده باشد؛ وگرنه NULL.
        صفر گذاشته نمی‌شود — در داده‌ی ساختاریافته‌ی گوگل، «۰ ثانیه»
-       دروغ است ولی «نداریم» فقط یک فیلدِ نیامده. */
+       دروغ است ولی «نداریم» فقط یک فیلد نیامده. */
     duration_sec: Number.isFinite(Number(v.durationSec)) && Number(v.durationSec) > 0
       ? Math.round(Number(v.durationSec)) : null,
     width: Number(v.width) > 0 ? Math.round(Number(v.width)) : null,
@@ -163,33 +163,33 @@ export async function POST(req: NextRequest) {
   return NextResponse.json({ ok: true, video: toPublic(data as VideoRow) }, { status: 201, headers: CORS })
 }
 
-/* DELETE ?slug= یا ?id= → حذفِ ویدیوی خودِ کاربر (یا ادمین) */
+/* DELETE ?slug= یا ?id= → حذف ویدیوی خود کاربر (یا ادمین) */
 const PATCH_BODY = z.object({
   src: z.string().max(2048).optional(),
   slug: z.string().max(160).optional(),
   id: z.string().max(64).optional(),
-  /* اختیاری تا اصلاحِ فقط-دسته هم ممکن باشد */
+  /* اختیاری تا اصلاح فقط-دسته هم ممکن باشد */
   title: z.string().max(300).optional(),
   category: z.string().max(60).optional(),
   description: z.string().max(4000).optional(),
 })
 
 /* ── PATCH { src|slug|id, title?, category?, description? } ──
-   ویرایشِ مشخصاتِ ویدیوی *خودِ کاربر*.
+   ویرایش مشخصات ویدیوی *خود کاربر*.
 
-   ⚠️ تا امروز فقط مسیرِ ادمین می‌توانست عنوان را عوض کند و هیچ صفحه‌ای
-   از آن استفاده نمی‌کرد — یعنی ویدیویی که یک‌بار با نامِ فایل منتشر
-   شده بود تا ابد همان می‌ماند. عنوان مهم‌ترین سیگنالِ جست‌وجوست؛
-   صاحبِ ویدیو باید بتواند اصلاحش کند.
+   ⚠️ تا امروز فقط مسیر ادمین می‌توانست عنوان را عوض کند و هیچ صفحه‌ای
+   از آن استفاده نمی‌کرد — یعنی ویدیویی که یک‌بار با نام فایل منتشر
+   شده بود تا ابد همان می‌ماند. عنوان مهم‌ترین سیگنال جست‌وجوست؛
+   صاحب ویدیو باید بتواند اصلاحش کند.
 
-   ⚠️ `src` هم پذیرفته می‌شود چون گالریِ پروفایل فقط نشانیِ فایل را
-   نگه می‌دارد، نه شناسه‌ی ردیفِ مدیا. */
+   ⚠️ `src` هم پذیرفته می‌شود چون گالری پروفایل فقط نشانی فایل را
+   نگه می‌دارد، نه شناسه‌ی ردیف مدیا. */
 export async function PATCH(req: NextRequest) {
   const actor = await actorOf(req)
   if (!actor) return NextResponse.json(UNAUTHENTICATED, { status: 401, headers: CORS })
 
-  /* ⚠️ هر تغییرِ عنوان یک ردیفِ تازه در تاریخچه‌ی نشانی می‌نویسد و
-     نشانیِ عمومی را می‌چرخاند؛ بدونِ سقف، هم جدول باد می‌کند هم
+  /* ⚠️ هر تغییر عنوان یک ردیف تازه در تاریخچه‌ی نشانی می‌نویسد و
+     نشانی عمومی را می‌چرخاند؛ بدون سقف، هم جدول باد می‌کند هم
      نشانی‌های `/media/…` بی‌ثبات می‌شوند. */
   const rl = await hitRateLimit(req, { action: 'video-patch', max: 30, windowSec: 3600 }, actor.id)
   if (!rl.ok) return tooMany(rl.retryAfterSec)
@@ -198,7 +198,7 @@ export async function PATCH(req: NextRequest) {
   if (!parsed.success) {
     const bad = parsed.error.issues[0]
     return NextResponse.json(
-      { ok: false, message: `مقدارِ «${String(bad?.path?.[0] ?? 'ورودی')}» پذیرفته نشد` },
+      { ok: false, message: `مقدار «${String(bad?.path?.[0] ?? 'ورودی')}» پذیرفته نشد` },
       { status: 400, headers: CORS })
   }
   const b = parsed.data
@@ -209,10 +209,10 @@ export async function PATCH(req: NextRequest) {
     return NextResponse.json({ ok: false, message: 'ویدیو مشخص نشده است' }, { status: 400, headers: CORS })
   }
 
-  /* عنوان اختیاری است تا اصلاحِ فقط-دسته یا فقط-توضیح هم ممکن باشد */
+  /* عنوان اختیاری است تا اصلاح فقط-دسته یا فقط-توضیح هم ممکن باشد */
   const title = b.title !== undefined ? b.title.trim().slice(0, 160) : ''
   if (title) {
-    /* همان قاعده‌ای که فرمِ آپلود اعمال می‌کند — یک منبع، دو مصرف‌کننده */
+    /* همان قاعده‌ای که فرم آپلود اعمال می‌کند — یک منبع، دو مصرف‌کننده */
     const weak = weakTitle(title)
     if (weak) return NextResponse.json({ ok: false, message: weak }, { status: 400, headers: CORS })
   }
@@ -221,8 +221,8 @@ export async function PATCH(req: NextRequest) {
   let sel = sb.from('videos').select('id,slug,title,owner_id')
   /* ⚠️ `src` یکتا نیست و POST هر رشته‌ای را می‌پذیرد، پس دو ردیف با یک
      نشانی ممکن است. `maybeSingle` در آن حالت `null` می‌دهد — یعنی
-     مالکِ واقعی برای همیشه ۴۰۴ می‌گرفت. با محدودکردن به خودِ کاربر،
-     ردیفِ غریبه اصلاً وارد نتیجه نمی‌شود. */
+     مالک واقعی برای همیشه ۴۰۴ می‌گرفت. با محدودکردن به خود کاربر،
+     ردیف غریبه اصلا وارد نتیجه نمی‌شود. */
   sel = id ? sel.eq('id', id) : slug ? sel.eq('slug', slug) : sel.eq('src', src)
   if (src && !id && !slug && !actor.isAdmin) sel = sel.eq('owner_id', actor.id)
   const { data, error: findErr } = await sel.maybeSingle()
@@ -230,7 +230,7 @@ export async function PATCH(req: NextRequest) {
      و به کاربر «ویدیو پیدا نشد» گفته می‌شد. */
   if (findErr) {
     console.error('[media] patch lookup:', findErr.message)
-    return NextResponse.json({ ok: false, message: 'خواندنِ ویدیو انجام نشد' }, { status: 500, headers: CORS })
+    return NextResponse.json({ ok: false, message: 'خواندن ویدیو انجام نشد' }, { status: 500, headers: CORS })
   }
   const prev = data as { id: string; slug: string; title: string; owner_id: string | null } | null
   /* `code` تا کلاینت «منتشر نشده» را از «خطا» جدا کند */
@@ -251,7 +251,7 @@ export async function PATCH(req: NextRequest) {
   if (b.description !== undefined) patch.description = String(b.description).slice(0, 4000)
 
   /* عنوان که عوض شود نشانی هم باید عوض شود، وگرنه نشانی با محتوا
-     نمی‌خواند. نشانیِ قبلی در تاریخچه می‌ماند تا ۴۰۴ ندهد. */
+     نمی‌خواند. نشانی قبلی در تاریخچه می‌ماند تا ۴۰۴ ندهد. */
   const renamed = !!title && title !== prev.title
   if (renamed) patch.slug = makeSlug(title)
 
@@ -262,7 +262,7 @@ export async function PATCH(req: NextRequest) {
   }
 
   /* ⚠️ *بعد از* موفقیت: نسخه‌ی اول تاریخچه را اول می‌نوشت، پس اگر
-     به‌روزرسانی شکست می‌خورد نشانیِ زنده به‌عنوان «قدیمی» ثبت می‌شد. */
+     به‌روزرسانی شکست می‌خورد نشانی زنده به‌عنوان «قدیمی» ثبت می‌شد. */
   if (renamed) await sb.from('video_slug_history').upsert({ slug: prev.slug, video_id: prev.id })
 
   return NextResponse.json({ ok: true, video: toPublic(row as VideoRow) }, { headers: CORS })
@@ -296,11 +296,11 @@ export async function DELETE(req: NextRequest) {
     return NextResponse.json({ ok: false, message: 'حذف انجام نشد' }, { status: 500, headers: CORS })
   }
 
-  /* فایل‌ها هم می‌روند — وگرنه انبارِ فایلِ مرده دوباره پر می‌شود.
-     شکستش پاسخ را خراب نمی‌کند؛ `scripts/orphan-report.mjs` بعداً
+  /* فایل‌ها هم می‌روند — وگرنه انبار فایل مرده دوباره پر می‌شود.
+     شکستش پاسخ را خراب نمی‌کند؛ `scripts/orphan-report.mjs` بعدا
      هرچه جا مانده را نشان می‌دهد. */
-  /* کلید ترجیح دارد بر تجزیه‌ی نشانی: نشانی می‌تواند پارامترِ اضافه یا
-     رمزگذاریِ متفاوت داشته باشد، کلید همان چیزی است که در باکت نشسته. */
+  /* کلید ترجیح دارد بر تجزیه‌ی نشانی: نشانی می‌تواند پارامتر اضافه یا
+     رمزگذاری متفاوت داشته باشد، کلید همان چیزی است که در باکت نشسته. */
   void removeFiles([
     target.storage_key ?? keyFromUrl(target.src),
     target.thumb_key ?? keyFromUrl(target.thumb),
@@ -312,9 +312,9 @@ export async function DELETE(req: NextRequest) {
 async function removeFiles(keys: (string | null | undefined)[]) {
   const paths = [...new Set(
     /* ── چرا دو پیشوند ──
-       آپلودهای تازه زیرِ `media/` می‌روند و قدیمی‌ها زیرِ
-       `social/media/`. با فقط یکی، فایلِ ویدیوی حذف‌شده برای همیشه
-       روی دیسک می‌ماند — دقیقاً همان چیزی که کلِ این کار برای
+       آپلودهای تازه زیر `media/` می‌روند و قدیمی‌ها زیر
+       `social/media/`. با فقط یکی، فایل ویدیوی حذف‌شده برای همیشه
+       روی دیسک می‌ماند — دقیقا همان چیزی که کل این کار برای
        جلوگیری از آن است. */
     keys.filter((k): k is string =>
       typeof k === 'string' && (isMediaKey(k) || k.startsWith('social/media/'))),

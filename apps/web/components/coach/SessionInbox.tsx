@@ -1,10 +1,10 @@
 'use client'
 
-/* جلسه‌های مربی — سمتِ خودش.
+/* جلسه‌های مربی — سمت خودش.
 
    درخواست‌های شاگردان می‌آید و مربی تأیید یا رد می‌کند. همین تأیید
-   است که بعداً به شاگرد اجازه‌ی امتیازدادن می‌دهد (بعد از گذشتنِ
-   زمانِ جلسه)، پس عمداً ساده و صریح نگه داشته شده.
+   است که بعدا به شاگرد اجازه‌ی امتیازدادن می‌دهد (بعد از گذشتن
+   زمان جلسه)، پس عمدا ساده و صریح نگه داشته شده.
    ───────────────────────────────────────────────────────────── */
 
 import { useCallback, useEffect, useState } from 'react'
@@ -32,7 +32,7 @@ const LABEL: Record<string, { t: string; c: string; bg: string }> = {
 export default function SessionInbox() {
   const [list, setList] = useState<Session[] | null>(null)
   /* خطا نباید به «جلسه‌ای ندارید» ترجمه شود — همان تله‌ای که در
-     کامپوننتِ نظرها هم بود. */
+     کامپوننت نظرها هم بود. */
   const [failed, setFailed] = useState(false)
   const [busy, setBusy] = useState('')
   const [err, setErr] = useState('')
@@ -63,7 +63,7 @@ export default function SessionInbox() {
     } catch { setErr('ارتباط با سرور برقرار نشد') } finally { setBusy('') }
   }
 
-  /* بدونِ جلسه، کارت نمی‌آید — پنل از قبل بلند است. ولی «نشد بخوانم»
+  /* بدون جلسه، کارت نمی‌آید — پنل از قبل بلند است. ولی «نشد بخوانم»
      با «چیزی نیست» یکی نیست. */
   if (failed) {
     return (
@@ -87,7 +87,7 @@ export default function SessionInbox() {
         جلسه‌ها
       </h2>
       <p style={{ fontSize: 12.5, color: MUT, lineHeight: 1.9, margin: '0 0 14px' }}>
-        جلسه‌ای که تأیید کنید، پس از گذشتنِ زمانش به شاگرد اجازه‌ی ثبت نظر می‌دهد.
+        جلسه‌ای که تأیید کنید، پس از گذشتن زمانش به شاگرد اجازه‌ی ثبت نظر می‌دهد.
         پرداخت حضوری است.
       </p>
 
@@ -116,8 +116,8 @@ export default function SessionInbox() {
                     </button>
                   </span>
                 )}
-                {/* درخواستی که زمانش گذشته دیگر قابلِ تأیید نیست:
-                    تأییدِ گذشته یعنی ساختنِ اجازه‌ی امتیاز از هوا. */}
+                {/* درخواستی که زمانش گذشته دیگر قابل تأیید نیست:
+                    تأیید گذشته یعنی ساختن اجازه‌ی امتیاز از هوا. */}
                 {s.status === 'requested' && s.past && (
                   <span style={{ marginInlineStart: 'auto', fontSize: 11.5, color: MUT }}>زمانش گذشت</span>
                 )}

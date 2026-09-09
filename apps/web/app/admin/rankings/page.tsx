@@ -15,34 +15,34 @@ import {
 import { apiFetch } from '../../../lib/http';
 
 
-/* یک سلولِ کوچک: نشان‌دادن، آپلود، و برداشتن.
+/* یک سلول کوچک: نشان‌دادن، آپلود، و برداشتن.
    آپلود از همان `uploadFile` پروژه می‌رود تا مسیر و باکت یکی بماند. */
 function AvatarCell({ value, name, onChange }: { value?: string; name: string; onChange: (url: string) => void }) {
   const [busy, setBusy] = useState(false)
 
   const pick = async (file: File | undefined) => {
     if (!file) return
-    if (!file.type.startsWith('image/')) { notify('فقط فایلِ تصویری پذیرفته می‌شود.'); return }
+    if (!file.type.startsWith('image/')) { notify('فقط فایل تصویری پذیرفته می‌شود.'); return }
     if (file.size > 8 * 1024 * 1024) { notify('حجم عکس نباید بیشتر از ۸ مگابایت باشد.'); return }
     setBusy(true)
     try {
-      /* نامِ فایل تصادفی است، نه نامِ کاربر: مسیر عمومی می‌شود و
-         `upsert` روشن است، پس دو ادمین با یک نامِ فایل همدیگر را
+      /* نام فایل تصادفی است، نه نام کاربر: مسیر عمومی می‌شود و
+         `upsert` روشن است، پس دو ادمین با یک نام فایل همدیگر را
          بازنویسی می‌کردند. */
       /* فشرده‌سازی پیش از آپلود: این عکس در فهرستی تا ۱۲۸ ردیفی و در
-         اندازه‌ی ۴۶ پیکسل دیده می‌شود. فرستادنِ فایلِ خامِ دوربین هم
-         پهنای‌باندِ کاربرِ ایرانی را می‌سوزاند هم فضا را. خروجی همیشه
+         اندازه‌ی ۴۶ پیکسل دیده می‌شود. فرستادن فایل خام دوربین هم
+         پهنای‌باند کاربر ایرانی را می‌سوزاند هم فضا را. خروجی همیشه
          JPEG است، پس پسوند هم ثابت. */
       const squared = await compressAvatar(file, 'player.jpg')
       const url = await uploadFile('club-media', squared, `rankings/${crypto.randomUUID()}.jpg`)
-      /* شکستِ آپلود باید دیده شود، نه اینکه بی‌صدا هیچ‌چیز عوض نشود */
+      /* شکست آپلود باید دیده شود، نه اینکه بی‌صدا هیچ‌چیز عوض نشود */
       if (!url) { notify("آپلود عکس انجام نشد — دوباره تلاش کنید."); return }
       onChange(url)
     } catch {
       /* `compressAvatar` روی فایلی که مرورگر نمی‌تواند رمزگشایی کند
-         (HEIC بیرونِ سافاری، فایلِ خراب) پرتاب می‌کند. بدونِ این، فقط
+         (HEIC بیرون سافاری، فایل خراب) پرتاب می‌کند. بدون این، فقط
          چرخنده می‌ایستاد و هیچ پیامی نمی‌آمد. */
-      notify('خواندنِ این عکس ممکن نشد — فرمتِ دیگری امتحان کنید.')
+      notify('خواندن این عکس ممکن نشد — فرمت دیگری امتحان کنید.')
     } finally { setBusy(false) }
   }
 
@@ -81,9 +81,9 @@ export default function AdminRankingsPage() {
 
   /* منبع: `app_settings.rankings_board` روی سرور. تا امروز این جدول
      فقط در localStorage بود، پس رنکینگی که ادمین وارد می‌کرد روی
-     دستگاه دیگری — و برای کاربران — اصلاً وجود نداشت. کش محلی
+     دستگاه دیگری — و برای کاربران — اصلا وجود نداشت. کش محلی
      به‌عنوان نسخه‌ی اولیه می‌ماند تا صفحه لحظه‌ی اول خالی نباشد. */
-  /* «روی سرور هست یا نه» — برای هشدارِ پایین.
+  /* «روی سرور هست یا نه» — برای هشدار پایین.
      null = هنوز نمی‌دانیم. */
   const [onServer, setOnServer] = useState<boolean | null>(null);
 
@@ -120,7 +120,7 @@ export default function AdminRankingsPage() {
     setRankings(newRankings);
   };
 
-  /* ⚠️ فیلدهای مرتبط با هم نوشته می‌شوند، نه با چند بار صدا زدنِ
+  /* ⚠️ فیلدهای مرتبط با هم نوشته می‌شوند، نه با چند بار صدا زدن
      `updatePlayer`: هرکدام از همان `rankings` کپی می‌گیرند، پس آخری
      نوشته‌ی قبلی‌ها را دور می‌ریخت. */
   const updateName = (index: number, first?: string, last?: string) => {
@@ -130,8 +130,8 @@ export default function AdminRankingsPage() {
     const lastName = last ?? cur.lastName ?? '';
     next[sport]![gender]![category]![index] = {
       ...cur, firstName, lastName,
-      /* بدونِ فالبک: با `|| cur.name` پاک‌کردنِ هر دو فیلد نامِ قدیمی
-         را نگه می‌داشت و ردیف روی سایت می‌ماند بدونِ راهی برای حذفش. */
+      /* بدون فالبک: با `|| cur.name` پاک‌کردن هر دو فیلد نام قدیمی
+         را نگه می‌داشت و ردیف روی سایت می‌ماند بدون راهی برای حذفش. */
       name: [firstName, lastName].filter(Boolean).join(' ').trim(),
     };
     setRankings(next);
@@ -167,7 +167,7 @@ export default function AdminRankingsPage() {
     } catch { setErr('خطا در ارتباط با سرور'); return; }
 
     saveRankings(rankings);            // کش محلی، حالا که سرور تأیید کرد
-    setOnServer(true);                 // هشدارِ «فقط محلی» دیگر لازم نیست
+    setOnServer(true);                 // هشدار «فقط محلی» دیگر لازم نیست
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
   };
@@ -195,17 +195,17 @@ export default function AdminRankingsPage() {
         </div>
       )}
 
-      {/* ── هشدارِ «هنوز روی سرور نیست» ──
+      {/* ── هشدار «هنوز روی سرور نیست» ──
           این جدول زمانی فقط در localStorage بود. ادمینی که پیش از آن
           بازیکن وارد کرده، همچنان داده‌اش را این‌جا می‌بیند — چون از
-          مرورگرِ خودش خوانده می‌شود — ولی سایت چیزی نشان نمی‌دهد.
-          بدونِ این هشدار، تنها نشانه‌ی مشکل «صفحه‌ی رنکینگِ خالی» بود
+          مرورگر خودش خوانده می‌شود — ولی سایت چیزی نشان نمی‌دهد.
+          بدون این هشدار، تنها نشانه‌ی مشکل «صفحه‌ی رنکینگ خالی» بود
           که هیچ ربطی به این صفحه به نظر نمی‌رسید. */}
       {onServer === false && (
         <div className="mb-5 rounded-xl border px-4 py-3 text-sm font-bold leading-7"
           style={{ background: 'rgba(199,166,106,0.10)', borderColor: 'rgba(199,166,106,0.34)', color: '#8F6531' }}>
           این جدول هنوز روی سرور ذخیره نشده و فقط روی همین مرورگر است —
-          پس در صفحه‌ی رنکینگِ سایت چیزی دیده نمی‌شود.
+          پس در صفحه‌ی رنکینگ سایت چیزی دیده نمی‌شود.
           برای انتشار، یک‌بار دکمه‌ی «ذخیره» را بزنید.
         </div>
       )}
@@ -253,10 +253,10 @@ export default function AdminRankingsPage() {
                 {g === 'آقایان' ? '👨 آقایان' : '👩 بانوان'}
               </button>
               {gender === g && (
-                /* space-y-1: دکمه‌های دسته‌بندی بدونِ فاصله دقیقاً روی هم
-                   می‌نشستند و مرزِ دسته‌ی فعال با دسته‌ی بعدی گم می‌شد.
-                   ⚠️ این‌جا بعدِ «&& (» زمینه‌ی عبارتِ جاوااسکریپت است نه
-                   JSX، پس کامنتِ آکولادیِ JSX این‌جا خطای پارس می‌دهد. */
+                /* space-y-1: دکمه‌های دسته‌بندی بدون فاصله دقیقا روی هم
+                   می‌نشستند و مرز دسته‌ی فعال با دسته‌ی بعدی گم می‌شد.
+                   ⚠️ این‌جا بعد «&& (» زمینه‌ی عبارت جاوااسکریپت است نه
+                   JSX، پس کامنت آکولادی JSX این‌جا خطای پارس می‌دهد. */
                 <div className="p-1 space-y-1">
                   {Object.keys(rankings[sport]?.[g] ?? {}).map(cat => (
                     <button key={cat} onClick={() => setCategory(cat)}
@@ -301,7 +301,7 @@ export default function AdminRankingsPage() {
                     {toFa(index + 1)}
                   </span>
                 </div>
-                {/* عکسِ بازیکن — همان چیزی که در /ranking به‌جای آیکونِ
+                {/* عکس بازیکن — همان چیزی که در /ranking به‌جای آیکون
                     پیش‌فرض می‌نشیند */}
                 <div className="col-span-1 flex justify-center">
                   <AvatarCell
@@ -310,8 +310,8 @@ export default function AdminRankingsPage() {
                     onChange={url => updatePlayer(index, 'avatar', url)}
                   />
                 </div>
-                {/* ⚠️ دو فیلدِ جدا. تا وقتی یکی بود، صفحه‌ی رنکینگ باید
-                    حدس می‌زد مرزِ نام و فامیل کجاست — و هر حدسی یکی از
+                {/* ⚠️ دو فیلد جدا. تا وقتی یکی بود، صفحه‌ی رنکینگ باید
+                    حدس می‌زد مرز نام و فامیل کجاست — و هر حدسی یکی از
                     «علی لله گانی» یا «سید شهاب الدین ابوذریان» را خراب
                     می‌کرد. `name` هم به‌روز می‌ماند چون بقیه‌ی سایت
                     همان را می‌خواند. */}
@@ -322,7 +322,7 @@ export default function AdminRankingsPage() {
                     onChange={e => updateName(index, e.target.value, undefined)}
                     className="w-full border border-gray-200 rounded-lg px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
                     placeholder="نام"
-                    aria-label={`نامِ بازیکنِ رتبه ${index + 1}`}
+                    aria-label={`نام بازیکن رتبه ${index + 1}`}
                   />
                 </div>
                 <div className="col-span-2 sm:col-span-2 sm:pe-1">
@@ -332,13 +332,13 @@ export default function AdminRankingsPage() {
                     onChange={e => updateName(index, undefined, e.target.value)}
                     className="w-full border border-gray-200 rounded-lg px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
                     placeholder="نام خانوادگی"
-                    aria-label={`نامِ خانوادگیِ بازیکنِ رتبه ${index + 1}`}
+                    aria-label={`نام خانوادگی بازیکن رتبه ${index + 1}`}
                   />
                 </div>
-                {/* قاعده‌ی ثابتِ پروژه: شهر همیشه از ProvinceCitySelect.
-                    ورودیِ متنیِ آزاد این‌جا مستقیم روی جدولِ عمومی
-                    می‌نشست، پس یک غلطِ تایپی همان‌جا منتشر می‌شد.
-                    استانِ ردیف‌های قدیمی از خودِ شهر بک‌فیل می‌شود. */}
+                {/* قاعده‌ی ثابت پروژه: شهر همیشه از ProvinceCitySelect.
+                    ورودی متنی آزاد این‌جا مستقیم روی جدول عمومی
+                    می‌نشست، پس یک غلط تایپی همان‌جا منتشر می‌شد.
+                    استان ردیف‌های قدیمی از خود شهر بک‌فیل می‌شود. */}
                 <div className="col-span-6 sm:col-span-2 sm:px-1">
                   <ProvinceCitySelect
                     size="sm"

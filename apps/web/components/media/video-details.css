@@ -1,18 +1,18 @@
 /* ─────────────────────────────────────────────────────────────
-   فرمِ مشخصاتِ ویدیو — روی همان واژگانِ دروازه‌ی کانال سوار است
+   فرم مشخصات ویدیو — روی همان واژگان دروازه‌ی کانال سوار است
    (`cg-back`, `cg-box`, `cg-in`, `cg-go` …) و فقط چیزهایی را
-   اضافه می‌کند که مخصوصِ این فرم‌اند.
+   اضافه می‌کند که مخصوص این فرم‌اند.
 
-   ⚠️ فقط `backdrop-filter` نوشته می‌شود، بدونِ `-webkit-` — همان
+   ⚠️ فقط `backdrop-filter` نوشته می‌شود، بدون `-webkit-` — همان
    تله‌ای که در `channel-gate.css` توضیح داده شده.
    ───────────────────────────────────────────────────────────── */
 
-/* ⚠️ بالاتر از نوارِ چسبانِ پایینِ صفحه‌ی باشگاه بنشیند */
+/* ⚠️ بالاتر از نوار چسبان پایین صفحه‌ی باشگاه بنشیند */
 .vd-back { z-index: 1300; }
 
 .vd-box { width: min(100%, 520px); text-align: center; }
 
-/* فهرست می‌تواند بلند شود؛ خودش اسکرول می‌گیرد نه کلِ صفحه */
+/* فهرست می‌تواند بلند شود؛ خودش اسکرول می‌گیرد نه کل صفحه */
 .vd-list {
   margin-top: 18px; text-align: start;
   display: grid; gap: 16px;
@@ -39,8 +39,8 @@
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 
-/* ⚠️ `appearance: none` بدونِ شورون، این *اجباری‌ترین* کنترلِ فرم را
-   از دو فیلدِ متنیِ کنارش غیرقابلِ تشخیص می‌کرد. */
+/* ⚠️ `appearance: none` بدون شورون، این *اجباری‌ترین* کنترل فرم را
+   از دو فیلد متنی کنارش غیرقابل تشخیص می‌کرد. */
 .vd-selwrap { position: relative; }
 .vd-selwrap::after {
   content: ''; position: absolute; inset-inline-start: 14px; top: 18px;
@@ -56,7 +56,7 @@
   .vd-prev { inline-size: 54px; block-size: 38px; }
 }
 
-/* چرخشِ لودر — همان الگوی بقیه‌ی پنجره‌ها */
+/* چرخش لودر — همان الگوی بقیه‌ی پنجره‌ها */
 @keyframes vdSpin { to { transform: rotate(360deg) } }
 .vd-spin { animation: vdSpin 1s linear infinite; }
 @media (prefers-reduced-motion: reduce) { .vd-spin { animation: none } }

@@ -38,7 +38,7 @@ interface Club {
   id: string; name: string; managerName: string; description: string;
   address: string; city: string; province?: string; country: string;
   latitude: number; longitude: number; phone: string; website: string; slug?: string;
-  /* مالکِ باشگاه — برای نشان‌دادنِ دکمه‌های ویرایش روی صفحه‌ی عمومی */
+  /* مالک باشگاه — برای نشان‌دادن دکمه‌های ویرایش روی صفحه‌ی عمومی */
   ownerId?: string;
   snookerTables: number; pocketTables: number; highballTables: number;
   vipSnookerTables: number; vipPocketTables: number; airHockeyTables: number;
@@ -47,8 +47,8 @@ interface Club {
   specialFeatures: string; workingHours: any; images: string[]; videos: string[];
   logo?: string; hasActiveStory?: boolean; storyMediaUrl?: string; storyType?: string; storyText?: string;
   verificationStatus?: string;
-  /* محتوای نمایشی که باشگاه‌دار در پنلش وارد می‌کند — از مهاجرتِ ۰۶۵ به
-     بعد روی خودِ رکورد است، نه در مرورگرِ او. */
+  /* محتوای نمایشی که باشگاه‌دار در پنلش وارد می‌کند — از مهاجرت ۰۶۵ به
+     بعد روی خود رکورد است، نه در مرورگر او. */
   coaches?: unknown; albums?: unknown; clubStats?: unknown;
 }
 
@@ -73,22 +73,22 @@ const sampleClub: Club = {
   hasActiveStory: false,
 };
 
-/* `slug` نشانیِ عمومیِ مربی است. ⚠️ تا امروز فقط `id` (شناسه‌ی ردیفِ
+/* `slug` نشانی عمومی مربی است. ⚠️ تا امروز فقط `id` (شناسه‌ی ردیف
    پروفایل) ذخیره می‌شد و صفحه‌ی باشگاه با همان به /coaches/<id>
    می‌رفت — که هیچ‌وقت وجود نداشت و «این مربی پیدا نشد» می‌داد.
-   برای ردیف‌های قدیمی که `slug` ندارند، از فهرستِ عمومی نگاشتِ
+   برای ردیف‌های قدیمی که `slug` ندارند، از فهرست عمومی نگاشت
    id→slug ساخته می‌شود. */
-/* همان تعریفِ صفحه‌ی مربیان و داوران — سالِ جاریِ شمسی */
+/* همان تعریف صفحه‌ی مربیان و داوران — سال جاری شمسی */
 const CUR_JYEAR = (() => { try { return parseInt(new Intl.DateTimeFormat('en-US-u-ca-persian', { year: 'numeric' }).format(new Date()), 10) || 1404 } catch { return 1404 } })();
 
-/* `status` تازه است: افزودنِ مربی حالا یک دعوت است تا خودش بپذیرد.
-   نبودش یعنی ردیفِ پیش از این تغییر ⇒ پذیرفته. */
-/* ⚠️ `rating` عمداً نیست: امتیاز از `profile_reviews` می‌آید و در
-   `coachInfo` نگه داشته می‌شود، نه در داده‌ی خودِ باشگاه. */
+/* `status` تازه است: افزودن مربی حالا یک دعوت است تا خودش بپذیرد.
+   نبودش یعنی ردیف پیش از این تغییر ⇒ پذیرفته. */
+/* ⚠️ `rating` عمدا نیست: امتیاز از `profile_reviews` می‌آید و در
+   `coachInfo` نگه داشته می‌شود، نه در داده‌ی خود باشگاه. */
 interface CoachEntry { id: string; slug?: string; name: string; title: string; exp: string; bio: string; status?: 'pending' | 'accepted' | 'rejected'; }
 interface ClubAlbumItem { id: string; dataUrl: string; name: string; caption: string; }
 interface ClubAlbum { id: string; name: string; createdAt: string; items: ClubAlbumItem[]; }
-/* همان شکلِ ویدیوی بقیه‌ی نقش‌ها */
+/* همان شکل ویدیوی بقیه‌ی نقش‌ها */
 interface ClubVideo { id: string; url?: string; thumbnail: string; title: string; duration: string; album?: string }
 interface ClubStats { members: string; tournaments: string; yearsActive: string; dailyCapacity: string; }
 
@@ -147,8 +147,8 @@ export default function ClubProfilePage() {
   const [tab, setTab]                 = useState<'info' | 'tournaments' | 'gallery' | 'schedule'>('info');
 
   /* ── فهرست بیرون از JSX ──
-     هم نوارِ تب و هم هندلرِ کلیدهای جهت به همین ترتیب نیاز دارند؛ دو
-     نسخه یعنی یک روز یکی‌شان عوض می‌شود و ناوبریِ کیبورد از جای
+     هم نوار تب و هم هندلر کلیدهای جهت به همین ترتیب نیاز دارند؛ دو
+     نسخه یعنی یک روز یکی‌شان عوض می‌شود و ناوبری کیبورد از جای
      اشتباه رد می‌شود. */
   const CLUB_TABS = [
     { key: 'info',        label: 'اطلاعات' },
@@ -161,33 +161,33 @@ export default function ClubProfilePage() {
 
   const [activeCoach, setActiveCoach] = useState<number | null>(null);
   const [coaches, setCoaches]         = useState<CoachEntry[]>([]);
-  /* نگاشتِ شناسه‌ی پروفایل ⟵ نامک، برای ردیف‌های قدیمیِ مربی که
-     فقط `id` دارند. بدونِ آن، دکمه‌ی «مشاهده صفحه مربی» به نشانیِ
+  /* نگاشت شناسه‌ی پروفایل ⟵ نامک، برای ردیف‌های قدیمی مربی که
+     فقط `id` دارند. بدون آن، دکمه‌ی «مشاهده صفحه مربی» به نشانی
      ناموجود می‌رفت. */
   const [coachSlugs, setCoachSlugs]   = useState<Record<string, string>>({});
-  /* ── چرا عنوانِ مربی از پروفایلش خوانده می‌شود ──
-     ⚠️ عنوانی که این‌جا نشان داده می‌شد، متنی بود که باشگاه‌دار موقعِ
-     افزودنِ مربی تایپ کرده — و همان لحظه هم منجمد می‌شد. نتیجه‌اش
-     همان ناهماهنگیِ صفحه‌ی داوران بود: کارت «اسنوکر» می‌گفت و صفحه‌ی
-     خودِ مربی «اسنوکر · پاکت بیلیارد · هی‌بال». مربی که رشته‌ای اضافه
+  /* ── چرا عنوان مربی از پروفایلش خوانده می‌شود ──
+     ⚠️ عنوانی که این‌جا نشان داده می‌شد، متنی بود که باشگاه‌دار موقع
+     افزودن مربی تایپ کرده — و همان لحظه هم منجمد می‌شد. نتیجه‌اش
+     همان ناهماهنگی صفحه‌ی داوران بود: کارت «اسنوکر» می‌گفت و صفحه‌ی
+     خود مربی «اسنوکر · پاکت بیلیارد · هی‌بال». مربی که رشته‌ای اضافه
      کند، این‌جا هیچ‌وقت به‌روز نمی‌شد.
 
-     پس وقتی مربی پروفایل دارد، رشته‌هایش از همان‌جا می‌آید و متنِ
-     دستیِ باشگاه فقط جای خالی را پر می‌کند. */
+     پس وقتی مربی پروفایل دارد، رشته‌هایش از همان‌جا می‌آید و متن
+     دستی باشگاه فقط جای خالی را پر می‌کند. */
   const [coachInfo, setCoachInfo] = useState<Record<string, { disciplines: string[]; sinceYear: number; ratingAvg: number; ratingCount: number }>>({});
   const [slugCopied, setSlugCopied]   = useState(false);
   const [clubAlbums, setClubAlbums]   = useState<ClubAlbum[]>([]);
-  /* ── ویرایشِ درجا برای مالکِ باشگاه ──
-     باشگاه در جدولِ `clubs` است نه `profiles`، پس `useOwnerEdit`
-     این‌جا جواب نمی‌دهد و همان کار با API خودِ باشگاه انجام می‌شود.
-     ستونِ `albums` از قبل در allowlistِ PUT هست. */
+  /* ── ویرایش درجا برای مالک باشگاه ──
+     باشگاه در جدول `clubs` است نه `profiles`، پس `useOwnerEdit`
+     این‌جا جواب نمی‌دهد و همان کار با API خود باشگاه انجام می‌شود.
+     ستون `albums` از قبل در allowlist PUT هست. */
   const [albumBusy, setAlbumBusy]     = useState(false);
   const [albumErr, setAlbumErr]       = useState('');
   const clubFileRef                   = useRef<HTMLInputElement>(null);
-  /* آلبومِ انتخاب‌شده در تبِ گالری — `null` یعنی «همه تصاویر» */
+  /* آلبوم انتخاب‌شده در تب گالری — `null` یعنی «همه تصاویر» */
   const [pickedAlbum, setPickedAlbum] = useState<string | null>(null);
   const [clubStats, setClubStats]     = useState<ClubStats>(DEFAULT_STATS);
-  /* شمرده‌شده‌ها جدا از آمارِ دستی نگه داشته می‌شوند تا با مقدارِ
+  /* شمرده‌شده‌ها جدا از آمار دستی نگه داشته می‌شوند تا با مقدار
      localStorage قاطی نشوند. `null` یعنی هنوز از سرور نیامده. */
   const [liveStats, setLiveStats]     = useState<{ members: number; tournaments: number } | null>(null);
   const [storyViewer, setStoryViewer] = useState(false);
@@ -207,7 +207,7 @@ export default function ClubProfilePage() {
   const [tournAlbums, setTournAlbums] = useState<TournAlbum[]>([]);
   const [openAlbumId, setOpenAlbumId] = useState<string | null>(null);
 
-  /* مسابقات این باشگاه — `null` یعنی هنوز نیامده، `[]` یعنی واقعاً هیچ */
+  /* مسابقات این باشگاه — `null` یعنی هنوز نیامده، `[]` یعنی واقعا هیچ */
   const [clubTournaments, setClubTournaments] = useState<Tournament[] | null>(null);
   useEffect(() => {
     if (!id) return;
@@ -229,25 +229,25 @@ export default function ClubProfilePage() {
     setTournAlbums(albums);
   }, [clubTournaments]);
 
-  /* ── مربیان، آمارِ دستی و آلبوم‌ها از خودِ رکوردِ باشگاه می‌آیند ──
-     تا امروز این سه از `localStorage`ِ **بازدیدکننده** خوانده می‌شدند —
-     با کلیدهایی که فقط در مرورگرِ خودِ باشگاه‌دار وجود داشتند. یعنی
+  /* ── مربیان، آمار دستی و آلبوم‌ها از خود رکورد باشگاه می‌آیند ──
+     تا امروز این سه از `localStorage` **بازدیدکننده** خوانده می‌شدند —
+     با کلیدهایی که فقط در مرورگر خود باشگاه‌دار وجود داشتند. یعنی
      باشگاه‌دار همه‌چیز را می‌دید و مطمئن بود منتشر شده، ولی هیچ
      بازدیدکننده‌ای هرگز نه مربی‌ای می‌دید نه آلبومی. */
   useEffect(() => {
     if (Array.isArray(club.coaches)) {
       const list = club.coaches as CoachEntry[];
-      /* ⚠️ فقط مربیانی که دعوت را پذیرفته‌اند دیده می‌شوند. بدونِ این،
-         هر باشگاهی می‌توانست نامِ هر مربی‌ای را کنارِ خودش بگذارد — و
-         از آن‌جا که امتیاز هم از راهِ همان فهرست سنجیده می‌شود، این
+      /* ⚠️ فقط مربیانی که دعوت را پذیرفته‌اند دیده می‌شوند. بدون این،
+         هر باشگاهی می‌توانست نام هر مربی‌ای را کنار خودش بگذارد — و
+         از آن‌جا که امتیاز هم از راه همان فهرست سنجیده می‌شود، این
          فقط یک ادعای تبلیغاتی نبود. */
       setCoaches(list.filter(c => (c.status ?? 'accepted') === 'accepted'));
-      /* ── نامکِ مربی برای ردیف‌های قدیمی ──
+      /* ── نامک مربی برای ردیف‌های قدیمی ──
          ردیف‌هایی که پیش از این تغییر ذخیره شده‌اند فقط `id` دارند.
-         فهرستِ عمومیِ مربیان هم `id` دارد هم `slug`، پس نگاشت از
+         فهرست عمومی مربیان هم `id` دارد هم `slug`، پس نگاشت از
          همان‌جا ساخته می‌شود و دکمه‌ی «مشاهده صفحه مربی» درست می‌رود. */
-      /* یک درخواست، دو کار: نامکِ ردیف‌های قدیمی و رشته‌های واقعیِ
-         هر مربی. قبلاً فقط وقتی نامک نبود صدا زده می‌شد. */
+      /* یک درخواست، دو کار: نامک ردیف‌های قدیمی و رشته‌های واقعی
+         هر مربی. قبلا فقط وقتی نامک نبود صدا زده می‌شد. */
       if (list.length) {
         void (async () => {
           try {
@@ -263,17 +263,17 @@ export default function ClubProfilePage() {
                 ? (p.data!.disciplines as unknown[]).filter((x): x is string => typeof x === 'string')
                 : [];
               /* ── سابقه هم دستی بود ──
-                 ⚠️ فیلدِ «سابقه» را هم باشگاه‌دار تایپ می‌کرد و معمولاً
-                 خالی می‌ماند. صفحه‌ی مربیان از سالِ *اولین مدرک* حسابش
+                 ⚠️ فیلد «سابقه» را هم باشگاه‌دار تایپ می‌کرد و معمولا
+                 خالی می‌ماند. صفحه‌ی مربیان از سال *اولین مدرک* حسابش
                  می‌کند؛ همان حساب این‌جا هم انجام می‌شود تا دو عدد
                  متفاوت برای یک نفر وجود نداشته باشد. */
               const grades = Array.isArray(p.data?.grades) ? p.data!.grades as { year?: unknown }[] : [];
               const yr = parseInt(String(grades[0]?.year ?? ''), 10);
-              /* با هر دو کلید نگه داشته می‌شود: ردیفِ قدیمی `id` دارد و
-                 ردیفِ تازه `slug`. */
-              /* ⚠️ «امتیاز» هم فیلدِ دستیِ باشگاه بود. حالا از ستونِ
-                 تجمیعیِ خودِ پروفایل می‌آید که تریگرِ جدولِ نظرها
-                 نگهش می‌دارد (مهاجرتِ ۰۸۹). */
+              /* با هر دو کلید نگه داشته می‌شود: ردیف قدیمی `id` دارد و
+                 ردیف تازه `slug`. */
+              /* ⚠️ «امتیاز» هم فیلد دستی باشگاه بود. حالا از ستون
+                 تجمیعی خود پروفایل می‌آید که تریگر جدول نظرها
+                 نگهش می‌دارد (مهاجرت ۰۸۹). */
               const entry = {
                 disciplines: d,
                 sinceYear: Number.isNaN(yr) ? 0 : yr,
@@ -285,7 +285,7 @@ export default function ClubProfilePage() {
             }
             setCoachSlugs(map);
             setCoachInfo(info);
-          } catch { /* شبکه — متنِ دستیِ باشگاه می‌ماند، نه صفحه‌ی خالی */ }
+          } catch { /* شبکه — متن دستی باشگاه می‌ماند، نه صفحه‌ی خالی */ }
         })();
       }
     }
@@ -298,7 +298,7 @@ export default function ClubProfilePage() {
   useEffect(() => {
     if (!id) return;
     /* اعضا و مسابقات از سرور شمرده می‌آیند. تا امروز از localStorage
-       خوانده می‌شدند، یعنی فقط در مرورگرِ خودِ باشگاه‌دار عددی داشتند و
+       خوانده می‌شدند، یعنی فقط در مرورگر خود باشگاه‌دار عددی داشتند و
        هر بازدیدکننده‌ی دیگری جای آن‌ها را خالی می‌دید. */
     fetch(`/api/clubs/${id}/stats`, { cache: 'no-store' })
       .then(r => r.ok ? r.json() : null)
@@ -352,7 +352,7 @@ export default function ClubProfilePage() {
   /* اگر باشگاه نیامد باید همان را بگوییم. پیش‌تر state با یک باشگاه
      ساختگی مقداردهی شده بود، پس شکست درخواست یا شناسه‌ی اشتباه به
      نمایش «باشگاه سنچوری تهران» با تلفن و نشانی جعلی ختم می‌شد. */
-  /* وضعیتِ بستنِ رزرو — همان مسیری که صفحه‌ی رزرو می‌خواند، تا هر دو
+  /* وضعیت بستن رزرو — همان مسیری که صفحه‌ی رزرو می‌خواند، تا هر دو
      یک چیز بگویند. شکستش دکمه را نمی‌بندد: بدترین حالت این است که
      کاربر یک صفحه جلوتر پیام را ببیند. */
   useEffect(() => {
@@ -386,15 +386,15 @@ export default function ClubProfilePage() {
     return () => clearInterval(t);
   }, [images.length]);
 
-  /* وقتی باشگاه رزرو را «همیشه» بسته کرده، بردنِ کاربر به صفحه‌ی رزرو
-     فقط یک کلیکِ اضافه است تا همان‌جا پیامِ بسته‌بودن را ببیند. پس
+  /* وقتی باشگاه رزرو را «همیشه» بسته کرده، بردن کاربر به صفحه‌ی رزرو
+     فقط یک کلیک اضافه است تا همان‌جا پیام بسته‌بودن را ببیند. پس
      دکمه از همین‌جا خاموش می‌شود و دلیلش نوشته می‌شود. */
   const bookingClosed = bookingStatus?.always === true;
   const goBook = () => {
     if (bookingClosed) return;
     user ? router.push(`/booking/${club.id}`) : router.push('/login');
   };
-  /* رشته‌های واقعیِ مربی؛ نبودشان یعنی همان متنِ دستیِ باشگاه */
+  /* رشته‌های واقعی مربی؛ نبودشان یعنی همان متن دستی باشگاه */
   const coachOf = (c: CoachEntry) => coachInfo[c.slug ?? ''] ?? coachInfo[c.id];
   const coachTitle = (c: CoachEntry): string => {
     const d = coachOf(c)?.disciplines ?? [];
@@ -405,24 +405,24 @@ export default function ClubProfilePage() {
     const i = coachOf(c);
     return i && i.ratingCount > 0 ? toFa(i.ratingAvg.toFixed(1)) : '';
   };
-  /* سابقه از سالِ اولین مدرک؛ نبودش یعنی همان متنِ دستیِ باشگاه */
+  /* سابقه از سال اولین مدرک؛ نبودش یعنی همان متن دستی باشگاه */
   const coachExp = (c: CoachEntry): string => {
     const y = coachOf(c)?.sinceYear ?? 0;
     if (!y) return c.exp;
     const n = Math.max(0, CUR_JYEAR - y);
-    return n > 0 ? `${toFa(n)} سال سابقه` : 'سالِ اول';
+    return n > 0 ? `${toFa(n)} سال سابقه` : 'سال اول';
   };
 
   const popupCoach = activeCoach !== null ? (coaches[activeCoach] ?? null) : null;
-  /* نامکِ ذخیره‌شده اولویت دارد؛ وگرنه از نگاشتِ فهرستِ عمومی */
+  /* نامک ذخیره‌شده اولویت دارد؛ وگرنه از نگاشت فهرست عمومی */
   const popupCoachSlug = popupCoach ? (popupCoach.slug || coachSlugs[popupCoach.id] || '') : '';
 
-  /* مالک از ستونِ `ownerId` سرور می‌آید — فقط برای نشان‌دادنِ دکمه؛
-     اجازه‌ی واقعی را همان مسیرِ PUT می‌سنجد. */
+  /* مالک از ستون `ownerId` سرور می‌آید — فقط برای نشان‌دادن دکمه؛
+     اجازه‌ی واقعی را همان مسیر PUT می‌سنجد. */
   /* ── دو نشانه، با «یا» ──
-     پرچمِ سرور (`isMine`) قطعی است ولی با توکنِ منقضی بی‌صدا `false`
+     پرچم سرور (`isMine`) قطعی است ولی با توکن منقضی بی‌صدا `false`
      می‌شود؛ مقایسه‌ی مرورگر هم به حافظه‌ی محلی تکیه دارد که می‌تواند
-     پاک باشد. هرکدام کافی است — اجازه‌ی واقعی را مسیرِ PUT می‌سنجد. */
+     پاک باشد. هرکدام کافی است — اجازه‌ی واقعی را مسیر PUT می‌سنجد. */
   const isClubOwner = (club as { isMine?: boolean }).isMine === true
     || (!!user?.id && !!club.ownerId && user.id === club.ownerId);
 
@@ -441,25 +441,25 @@ export default function ClubProfilePage() {
     } finally { setAlbumBusy(false); }
   };
 
-  /* ── نگاشتِ آلبومِ باشگاه به مدلِ مشترک ──
-     شکلِ ذخیره‌ی باشگاه `{id,name,items:[{id,dataUrl,caption}]}` است و
+  /* ── نگاشت آلبوم باشگاه به مدل مشترک ──
+     شکل ذخیره‌ی باشگاه `{id,name,items:[{id,dataUrl,caption}]}` است و
      دست‌نخورده می‌ماند؛ این‌جا فقط برای رندر به همان شکلی درمی‌آید که
      بقیه‌ی نقش‌ها دارند. شناسه‌ی هر عکس «آلبوم/شناسه» است تا حذف
      بداند از کدام آلبوم بردارد. */
-  /* ── ویدیوهای گالریِ باشگاه ──
-     ستونِ `galleryVideos` (مهاجرتِ ۰۸۸). ستونِ قدیمیِ `videos` عمداً
-     دست‌نخورده است: آن ویدیوی معرفیِ باشگاه است، نه گالری. */
+  /* ── ویدیوهای گالری باشگاه ──
+     ستون `galleryVideos` (مهاجرت ۰۸۸). ستون قدیمی `videos` عمدا
+     دست‌نخورده است: آن ویدیوی معرفی باشگاه است، نه گالری. */
   const clubVideos = Array.isArray((club as { galleryVideos?: unknown }).galleryVideos)
     ? ((club as { galleryVideos?: ClubVideo[] }).galleryVideos ?? [])
     : [];
 
   /* ── دروازه‌ی کانال ──
      باشگاه هفتمین نقشی بود که به این جریان وصل شد و تا امروز
-     ویدیوهایش فقط در گالریِ خودش می‌ماند و به بیلیارد مدیا نمی‌رفت. */
+     ویدیوهایش فقط در گالری خودش می‌ماند و به بیلیارد مدیا نمی‌رفت. */
   const { gate: channelGate, ask: askChannel, publish: publishToChannel } =
     /* ⚠️ `ownerId` گاهی از سرور نمی‌آید ولی `isMine` درست است؛
-       آن‌وقت کلیدِ خالی یعنی انتشار بی‌صدا رد می‌شد. کلیدِ نشست
-       جایگزینِ درستی است — سرور خودش مالکیت را می‌سنجد. */
+       آن‌وقت کلید خالی یعنی انتشار بی‌صدا رد می‌شد. کلید نشست
+       جایگزین درستی است — سرور خودش مالکیت را می‌سنجد. */
     useChannelPublish('club', club.ownerId || user?.id || undefined, isClubOwner, notify);
 
   const saveClubVideos = async (next: ClubVideo[]) => {
@@ -470,7 +470,7 @@ export default function ClubProfilePage() {
         body: JSON.stringify({ galleryVideos: next }),
       });
       if (!r.ok) { setAlbumErr('ذخیره روی سرور انجام نشد'); return false }
-      /* پاسخِ سرور ردیفِ تازه است؛ همان را می‌نشانیم تا صفحه با
+      /* پاسخ سرور ردیف تازه است؛ همان را می‌نشانیم تا صفحه با
          دیتابیس یکی بماند. */
       const j = await r.json().catch(() => null) as Record<string, unknown> | null;
       if (j) setClub(c => ({ ...c, ...j }) as typeof c);
@@ -480,11 +480,11 @@ export default function ClubProfilePage() {
     } finally { setAlbumBusy(false); }
   };
 
-  /* `details` از فرمِ مشخصات می‌آید (عنوان/دسته/توضیح). */
+  /* `details` از فرم مشخصات می‌آید (عنوان/دسته/توضیح). */
   const addClubVideos = async (files: File[], album?: string, details?: VideoDetail[]) => {
     const skipped: string[] = [];
-    /* ⚠️ فقط ویدیوهایی که *واقعاً* ذخیره شدند منتشر می‌شوند؛ وگرنه
-       شکستِ ذخیره در گالری، ویدیوی یتیم در مدیا می‌ساخت. */
+    /* ⚠️ فقط ویدیوهایی که *واقعا* ذخیره شدند منتشر می‌شوند؛ وگرنه
+       شکست ذخیره در گالری، ویدیوی یتیم در مدیا می‌ساخت. */
     const saved: PublishVideo[] = [];
     let next = clubVideos;
     for (const [i, file] of files.entries()) {
@@ -498,7 +498,7 @@ export default function ClubProfilePage() {
       const title = detailTitle(details, i, file);
       next = [...next, { id: vid, url, thumbnail: thumb, title, duration: formatDuration(meta.durationSec), ...(album ? { album } : {}) }];
       if (!(await saveClubVideos(next))) break
-      /* «فقط در گالری بماند» یک تصمیمِ صریحِ کاربر است */
+      /* «فقط در گالری بماند» یک تصمیم صریح کاربر است */
       if (details?.[i]?.publish !== false) {
         saved.push({
           title, src: url, thumb, durationSec: meta.durationSec, clubId: club.id,
@@ -510,11 +510,11 @@ export default function ClubProfilePage() {
     if (saved.length) await publishToChannel(saved, club.name);
   };
 
-  /* ── ویرایشِ عنوانِ ویدیو ── (توضیح در بقیه‌ی نقش‌ها) */
+  /* ── ویرایش عنوان ویدیو ── (توضیح در بقیه‌ی نقش‌ها) */
   const { dialog: videoEditDialog, edit: editVideo } = useVideoEdit(
     async (target, detail) => {
-      /* ⚠️ بدونِ این، نبودِ ردیف هم «موفق» شمرده می‌شد و مدیا عوض
-         می‌شد در حالی که گالری عنوانِ قبلی را نشان می‌دهد. */
+      /* ⚠️ بدون این، نبود ردیف هم «موفق» شمرده می‌شد و مدیا عوض
+         می‌شد در حالی که گالری عنوان قبلی را نشان می‌دهد. */
       if (!clubVideos.some(x => x.url === target.url)) return false;
       return await saveClubVideos(clubVideos.map(x => (x.url === target.url ? { ...x, title: detail.title } : x)));
     },
@@ -562,8 +562,8 @@ export default function ClubProfilePage() {
     setSlugCopied(true); setTimeout(() => setSlugCopied(false), 1800);
   };
 
-  /* صفر یک عددِ درست است، نه «خالی»: باشگاهِ تازه باید ۰ عضو نشان بدهد
-     نه جای خالی. پس برخلاف دو ردیفِ بعدی این‌جا `|| null` نداریم. */
+  /* صفر یک عدد درست است، نه «خالی»: باشگاه تازه باید ۰ عضو نشان بدهد
+     نه جای خالی. پس برخلاف دو ردیف بعدی این‌جا `|| null` نداریم. */
   const statsRows = [
     { label: 'اعضای فعال',  v: liveStats ? liveStats.members.toLocaleString('fa-IR') : null,     color: '#C7A66A' },
     { label: 'مسابقات',      v: liveStats ? liveStats.tournaments.toLocaleString('fa-IR') : null, color: '#f59e0b' },
@@ -600,26 +600,26 @@ export default function ClubProfilePage() {
         @keyframes fadeIn    { from{opacity:0;transform:translate(-50%,-48%) scale(0.94)} to{opacity:1;transform:translate(-50%,-50%) scale(1)} }
         @keyframes pulse     { 0%,100%{opacity:1} 50%{opacity:0.4} }
 
-        /* ── تب‌های جعبه‌ای با خطِ رنگیِ بالا ──
-           تب‌ها به هم چسبیده‌اند و یک نوارِ یکپارچه می‌سازند؛ تبِ فعال
-           سفید است با یک خطِ بنفشِ نازک بالای خودش.
+        /* ── تب‌های جعبه‌ای با خط رنگی بالا ──
+           تب‌ها به هم چسبیده‌اند و یک نوار یکپارچه می‌سازند؛ تب فعال
+           سفید است با یک خط بنفش نازک بالای خودش.
 
-           خطِ جداکننده فقط روی تب‌های دوم به بعد گذاشته می‌شود،
-           وگرنه حاشیه‌ی دو تبِ همسایه کنارِ هم می‌نشیند و جداکننده
+           خط جداکننده فقط روی تب‌های دوم به بعد گذاشته می‌شود،
+           وگرنه حاشیه‌ی دو تب همسایه کنار هم می‌نشیند و جداکننده
            دو برابر ضخیم دیده می‌شود. */
-        /* نوارِ تب همان کنترلِ بخش‌بندی‌شده‌ی مشترک است (globals.css).
-           نسخه‌ی محلی چهار عرضِ متفاوت می‌ساخت و رنگِ تأکیدش بنفش بود،
-           در حالی که تأکیدِ این صفحه طلایی است. */
+        /* نوار تب همان کنترل بخش‌بندی‌شده‌ی مشترک است (globals.css).
+           نسخه‌ی محلی چهار عرض متفاوت می‌ساخت و رنگ تأکیدش بنفش بود،
+           در حالی که تأکید این صفحه طلایی است. */
 
 
-        /* این سطح کنارِ کارت‌های شیشه‌ای می‌نشیند؛ سفیدِ تخت وسطشان مثلِ
+        /* این سطح کنار کارت‌های شیشه‌ای می‌نشیند؛ سفید تخت وسطشان مثل
            وصله دیده می‌شد. */
         .coach-card { display:block;width:100%;text-align:start;font:inherit;color:inherit;padding:16px;background:rgba(255,255,255,0.62);border:1px solid rgba(255,255,255,0.70);backdrop-filter:blur(14px) saturate(1.5);-webkit-backdrop-filter:blur(14px) saturate(1.5);border-radius:16px;transition:all 0.3s;cursor:pointer }
         .coach-card:hover { background:rgba(199,166,106,0.03);border-color:rgba(199,166,106,0.28);transform:translateY(-3px) }
         .coach-card:focus-visible { outline:2px solid #C7A66A;outline-offset:3px }
 
-        /* minmax(0,…) نه 1fr: کمینه‌ی «auto» یعنی ستون زیرِ عرضِ محتوا
-           نمی‌رود، پس یک رشته‌ی بلندِ nowrap کلِ صفحه را پهن می‌کند. */
+        /* minmax(0,…) نه 1fr: کمینه‌ی «auto» یعنی ستون زیر عرض محتوا
+           نمی‌رود، پس یک رشته‌ی بلند nowrap کل صفحه را پهن می‌کند. */
         .info-grid { display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:28px;align-items:start }
         @media(max-width:960px){ .info-grid{grid-template-columns:minmax(0,1fr)} }
         /* هیچ تصویری نباید از قابش بیرون بزند */
@@ -668,15 +668,15 @@ export default function ClubProfilePage() {
 
         .hero-top-btn { top: 32px }
         @media(min-width:961px){ .hero-top-btn { top: 36px } }
-        /* ۱۰٪ کوچک‌تر. اندازه‌ها اینلاین‌اند و بدونِ important
+        /* ۱۰٪ کوچک‌تر. اندازه‌ها اینلاین‌اند و بدون important
            بازنویسی نمی‌شوند — همان تله‌ای که در این پروژه بارها
            پیش آمده. */
         .hero-top-btn { font-size: 13.5px !important; padding: 7px 14px !important; }
         .hero-top-btn > span:last-child { font-size: 12.5px !important; }
       `}</style>
 
-      {/* همان لایه‌ی لیکوییدِ صفحه‌ی مربی. رنگِ پایه داخلِ `.lq-stage` است؛
-          پس‌زمینه‌ی ماتِ خودِ عنصر لکه‌ها را می‌پوشاند. */}
+      {/* همان لایه‌ی لیکویید صفحه‌ی مربی. رنگ پایه داخل `.lq-stage` است؛
+          پس‌زمینه‌ی مات خود عنصر لکه‌ها را می‌پوشاند. */}
       <div className="lq-stage" style={{ minHeight: '100vh', direction: 'rtl', fontFamily: 'Vazirmatn, sans-serif', paddingBottom: 90 }}>
 
         {/* ══ HERO ══ */}
@@ -689,7 +689,7 @@ export default function ClubProfilePage() {
           <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom,rgba(4,2,8,0.72) 0%,transparent 28%,transparent 42%,rgba(4,2,8,0.98) 100%)', pointerEvents: 'none' }} />
           <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse 70% 60% at 18% 60%,rgba(199,166,106,0.07) 0%,transparent 100%)', pointerEvents: 'none' }} />
 
-          {/* بزرگ‌نماییِ تصویرِ هیرو. نقطه‌ها، دکمه‌ی بازگشت و کارتِ نام
+          {/* بزرگ‌نمایی تصویر هیرو. نقطه‌ها، دکمه‌ی بازگشت و کارت نام
               بعد از این می‌آیند و رویش می‌نشینند، پس کلیکشان دزدیده
               نمی‌شود. */}
           <button type="button" onClick={() => openImage(images, { index: slide, title: 'تصاویر باشگاه', alt: club.name })}
@@ -721,16 +721,16 @@ export default function ClubProfilePage() {
               <div style={{ position: 'relative', flexShrink: 0 }}>
                 {hasStory && <div style={{ position: 'absolute', inset: -4, borderRadius: '50%', zIndex: 0, background: 'linear-gradient(45deg,#feda75,#fa7e1e,#d62976,#962fbf,#4f5bd5)' }} />}
                 {hasStory && <div style={{ position: 'absolute', inset: -1, borderRadius: '50%', zIndex: 1, border: '3px solid rgba(10,8,6,0.92)' }} />}
-                {/* دکمه، نه div: هم قاعده‌ی دسترس‌پذیریِ پروژه، هم اینکه
+                {/* دکمه، نه div: هم قاعده‌ی دسترس‌پذیری پروژه، هم اینکه
                     حالا با کیبورد هم باز می‌شود. */}
                 <button type="button" onClick={() => { if (hasStory) { setStoryViewer(true); return } openImage(club.logo ?? '', { title: 'لوگوی باشگاه', alt: club.name }) }}
                   aria-label={hasStory ? 'مشاهده استوری باشگاه' : 'بزرگ‌نمایی لوگوی باشگاه'} disabled={!hasStory && !club.logo}
-                  /* اندازه با آواتارِ بقیه‌ی نقش‌ها یکی است — همان
+                  /* اندازه با آواتار بقیه‌ی نقش‌ها یکی است — همان
                      clamp(106px,15vw,156px) که در profile-page.css
                      برای هیروی مربی و داور تعریف شده. */
                   style={{ position: 'relative', zIndex: 2, width: 'clamp(106px,15vw,156px)', height: 'clamp(106px,15vw,156px)', padding: 0, borderRadius: '50%', background: club.logo ? 'transparent' : 'rgba(199,166,106,0.18)', border: hasStory ? 'none' : '2px solid rgba(199,166,106,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 26, fontWeight: 900, color: '#C7A66A', fontFamily: 'inherit', backdropFilter: 'blur(20px)', overflow: 'hidden', cursor: (hasStory || club.logo) ? 'pointer' : 'default' }}>
-                  {/* لوگوی آپلودشده، وگرنه نشانِ پیش‌فرضِ باشگاه —
-                      پیش‌تر فقط حرفِ اولِ نام نوشته می‌شد. */}
+                  {/* لوگوی آپلودشده، وگرنه نشان پیش‌فرض باشگاه —
+                      پیش‌تر فقط حرف اول نام نوشته می‌شد. */}
                   <ClubLogo src={club.logo} name={club.name} size="100%" tone="dark" />
                 </button>
                 {isAdmin && <button style={{ position: 'absolute', bottom: -2, left: -2, zIndex: 3, width: 22, height: 22, borderRadius: '50%', background: '#C7A66A', border: '2px solid #0A0806', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', padding: 0 }}><Camera size={10} color="#0A0806" /></button>}
@@ -754,7 +754,7 @@ export default function ClubProfilePage() {
               <div style={{ display: 'flex', alignItems: 'center', gap: 5, background: 'rgba(255,255,255,0.08)', backdropFilter: 'blur(12px)', borderRadius: 20, padding: '5px 12px', fontSize: 14, color: 'rgba(255,255,255,0.82)' }}>
                 <MapPin size={11} style={{ color: '#C7A66A' }} />
                 {/* استان فقط وقتی می‌آید که با شهر یکی نباشد. برای
-                    «تهران / تهران» یا «اصفهان / اصفهان» تکرارِ بی‌فایده
+                    «تهران / تهران» یا «اصفهان / اصفهان» تکرار بی‌فایده
                     بود و فضای هدر را می‌گرفت. */}
                 {club.province && club.province.trim() !== club.city?.trim() ? `${club.province} / ` : ''}{club.city}
               </div>
@@ -763,8 +763,8 @@ export default function ClubProfilePage() {
                   <Navigation size={11} /> {distance}
                 </div>
               )}
-              {/* ⚠️ ستاره‌های هدر حذف شد. عددِ «۴.۸» ثابت و ساختگی بود —
-                  هیچ نظری پشتش نبود. امتیازِ واقعی کارتِ خودش را پایینِ
+              {/* ⚠️ ستاره‌های هدر حذف شد. عدد «۴.۸» ثابت و ساختگی بود —
+                  هیچ نظری پشتش نبود. امتیاز واقعی کارت خودش را پایین
                   صفحه دارد و از نظرهای ثبت‌شده می‌آید. */}
             </div>
           </div>
@@ -850,8 +850,8 @@ export default function ClubProfilePage() {
                       if (active.length === 0) return (
                         <div style={{ fontSize: 13, color: 'rgba(0,0,0,0.30)', textAlign: 'center', padding: '8px 0' }}>اطلاعات میز ثبت نشده</div>
                       );
-                      /* دو ستون به‌جای فهرستِ تک‌ستونی: هر ردیف فقط یک
-                         برچسبِ کوتاه و یک عدد دارد و نصفِ عرض برایش کافی
+                      /* دو ستون به‌جای فهرست تک‌ستونی: هر ردیف فقط یک
+                         برچسب کوتاه و یک عدد دارد و نصف عرض برایش کافی
                          است. «مجموع» تمام‌عرض می‌ماند تا از بقیه جدا
                          دیده شود. */
                       return (
@@ -883,8 +883,8 @@ export default function ClubProfilePage() {
                       <div style={{ fontSize: 13, color: 'rgba(0,0,0,0.35)', padding: '8px 4px' }}>هنوز مربی‌ای معرفی نشده</div>
                     )}
                     {/* دکمه است نه div: با کیبورد باز می‌شود و صفحه‌خوان
-                        می‌شناسدش. aria-label عمداً ندارد — محتوای خودش
-                        (نام، رشته، سابقه، امتیاز) نامِ بهتری است. */}
+                        می‌شناسدش. aria-label عمدا ندارد — محتوای خودش
+                        (نام، رشته، سابقه، امتیاز) نام بهتری است. */}
                     {coaches.map((c, i) => (
                       <button type="button" key={c.id || i} className="coach-card"
                         onClick={() => setActiveCoach(i)}>
@@ -896,7 +896,7 @@ export default function ClubProfilePage() {
                             <div style={{ fontSize: 16, fontWeight: 800, color: '#111111', marginBottom: 3 }}>{c.name}</div>
                             <div style={{ fontSize: 13, color: 'rgba(0,0,0,0.42)' }}>{coachTitle(c)}{coachExp(c) ? ` · ${coachExp(c)}` : ''}</div>
                           </div>
-                          {/* امتیازِ واقعی؛ بدونِ نظر، هیچ عددی نشان
+                          {/* امتیاز واقعی؛ بدون نظر، هیچ عددی نشان
                               داده نمی‌شود — «۰ از ۵» بدتر از نبودنش است. */}
                           {coachRating(c) && (
                             <div style={{ display: 'flex', alignItems: 'center', gap: 3, flexShrink: 0 }}>
@@ -936,8 +936,8 @@ export default function ClubProfilePage() {
                         </div>
                       )}
                       {club.slug && (
-                        /* ⚠️ `alignItems:center` آیکون را وسطِ *کلِ* بلوکِ
-                           دوخطی می‌نشاند، نه کنارِ عنوان. `flex-start`
+                        /* ⚠️ `alignItems:center` آیکون را وسط *کل* بلوک
+                           دوخطی می‌نشاند، نه کنار عنوان. `flex-start`
                            با کمی فاصله‌ی بالا، هم‌ترازش می‌کند. */
                         <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, fontSize: 13 }}>
                           <Globe size={14} style={{ color: '#8b5cf6', flexShrink: 0, marginTop: 3 }} />
@@ -991,11 +991,11 @@ export default function ClubProfilePage() {
                   <div style={{ padding: '12px 18px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, flexWrap: 'wrap' }}>
                     <div style={{ fontSize: 14, color: 'rgba(0,0,0,0.42)', display: 'flex', alignItems: 'center', gap: 6, flex: 1, minWidth: 0 }}>
                       <MapPin size={12} style={{ color: '#C7A66A', flexShrink: 0 }} />
-                      {/* `overflow`/`text-overflow` روی عنصرِ inline اثر
-                          ندارد — پس `nowrap` کلِ نشانیِ بلند را باز
-                          می‌کرد و کمینه‌ی عرضِ ستون را به ۵۴۸ پیکسل
-                          می‌رساند؛ نتیجه‌اش بیرون‌زدنِ کلِ صفحه در موبایل
-                          بود. با `display:block` سه‌نقطه واقعاً کار
+                      {/* `overflow`/`text-overflow` روی عنصر inline اثر
+                          ندارد — پس `nowrap` کل نشانی بلند را باز
+                          می‌کرد و کمینه‌ی عرض ستون را به ۵۴۸ پیکسل
+                          می‌رساند؛ نتیجه‌اش بیرون‌زدن کل صفحه در موبایل
+                          بود. با `display:block` سه‌نقطه واقعا کار
                           می‌کند و ستون آزادانه کوچک می‌شود. */}
                       <span style={{ display: 'block', minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{club.address}، {club.city}</span>
                     </div>
@@ -1119,7 +1119,7 @@ export default function ClubProfilePage() {
           {tab === 'tournaments' && (() => {
             /* مسابقات واقعی همین باشگاه از سرور — پیش‌تر از آرایه‌ی
                نمونه فیلتر می‌شد و باشگاه‌های واقعی همیشه فهرست خالی
-               می‌دیدند، مگر نامشان اتفاقاً با یکی از نمونه‌ها یکی بود. */
+               می‌دیدند، مگر نامشان اتفاقا با یکی از نمونه‌ها یکی بود. */
             if (clubTournaments === null) return (
               <div id="cpanel-tournaments" role="tabpanel" aria-labelledby="ctab-tournaments" style={{ textAlign: 'center', padding: '60px 20px', color: 'rgba(0,0,0,0.35)' }}>
                 در حال دریافت مسابقات…
@@ -1338,10 +1338,10 @@ export default function ClubProfilePage() {
               )}
 
               {/* Static albums */}
-              {/* ── گالری: همان کامپوننتِ مشترکِ بقیه‌ی نقش‌ها ──
-                  ⚠️ این‌جا نوارِ آلبومِ ۷۷ پیکسلی و یک شبکه‌ی جدا بود.
-                  شکلِ ذخیره‌ی باشگاه دست‌نخورده می‌ماند (جدولش جداست و
-                  عوض‌کردنش مهاجرت می‌خواهد)؛ فقط در همین دو خط به مدلِ
+              {/* ── گالری: همان کامپوننت مشترک بقیه‌ی نقش‌ها ──
+                  ⚠️ این‌جا نوار آلبوم ۷۷ پیکسلی و یک شبکه‌ی جدا بود.
+                  شکل ذخیره‌ی باشگاه دست‌نخورده می‌ماند (جدولش جداست و
+                  عوض‌کردنش مهاجرت می‌خواهد)؛ فقط در همین دو خط به مدل
                   مشترک نگاشت می‌شود. */}
               <ProfileGallery
                 images={clubGalleryImages}
@@ -1458,7 +1458,7 @@ export default function ClubProfilePage() {
             <button
               onClick={() => { if (!popupCoachSlug) return; setActiveCoach(null); router.push(`/coaches/${popupCoachSlug}`); }}
               disabled={!popupCoachSlug}
-              title={popupCoachSlug ? undefined : 'این مربی هنوز نشانیِ عمومی ندارد'}
+              title={popupCoachSlug ? undefined : 'این مربی هنوز نشانی عمومی ندارد'}
               style={{ width: '100%', padding: '13px', background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.35)', borderRadius: 18, color: '#C7A66A', fontSize: 16, fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
               مشاهده صفحه مربی <ChevronLeft size={15} />
             </button>
@@ -1467,14 +1467,14 @@ export default function ClubProfilePage() {
         </>
       )}
 
-      {/* ── نوارِ پایانیِ باشگاه ──
-          فوترِ سایت از این صفحه برداشته شد (مثل صفحه‌ی فروشگاه)، ولی
+      {/* ── نوار پایانی باشگاه ──
+          فوتر سایت از این صفحه برداشته شد (مثل صفحه‌ی فروشگاه)، ولی
           صفحه نباید بی‌پایان بماند. این نوار همان کاری را می‌کند که
-          فوترِ فروشگاه می‌کند: کپی‌رایتِ خودِ باشگاه، و نشانِ پلتفرمی
+          فوتر فروشگاه می‌کند: کپی‌رایت خود باشگاه، و نشان پلتفرمی
           که میزبانش است. */}
-      {/* ⚠️ این فوتر خواهرِ لایه‌ی لیکویید است، نه فرزندش. لکه‌های
-          رنگیِ پشتِ شیشه با position:fixed کشیده می‌شوند و هر خواهرِ
-          بدونِ z-index زیرشان می‌رود — فوتر نامرئی می‌شد. */}
+      {/* ⚠️ این فوتر خواهر لایه‌ی لیکویید است، نه فرزندش. لکه‌های
+          رنگی پشت شیشه با position:fixed کشیده می‌شوند و هر خواهر
+          بدون z-index زیرشان می‌رود — فوتر نامرئی می‌شد. */}
       <footer style={{ position: 'relative', zIndex: 1, padding: '0 clamp(16px,4vw,32px) 28px' }}>
         <div style={{
           maxWidth: 1240, margin: '0 auto', borderTop: '1px solid #E8E3D6',

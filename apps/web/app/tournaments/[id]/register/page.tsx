@@ -41,7 +41,7 @@ export default function RegisterPage() {
   const router  = useRouter();
   /* مسابقه‌ی واقعی از سرور — پیش‌تر اگر شناسه پیدا نمی‌شد، اولین
      مسابقه‌ی آرایه‌ی ساختگی نشان داده می‌شد و کاربر برای مسابقه‌ای
-     ثبت‌نام می‌کرد که اصلاً وجود نداشت. */
+     ثبت‌نام می‌کرد که اصلا وجود نداشت. */
   const [t, setT] = useState<Tournament | null>(null);
   const [loadingT, setLoadingT] = useState(true);
   useEffect(() => {
@@ -164,7 +164,7 @@ export default function RegisterPage() {
     try {
       const r = await apiFetch(`/api/tournaments/${id}/register`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({}),   // مبلغ عمداً فرستاده نمی‌شود
+        body: JSON.stringify({}),   // مبلغ عمدا فرستاده نمی‌شود
       });
       const j = await r.json().catch(() => ({} as Record<string, unknown>));
 
@@ -198,12 +198,12 @@ export default function RegisterPage() {
   <title>فیش واریزی — بیلیارد هاب</title>
   <style>
     /* ── چرا فونت محلی، نه Google Fonts ──
-       تنها جای سایت بود که به دامنه‌ی خارجی وصل می‌شد. کلِ بقیه از
+       تنها جای سایت بود که به دامنه‌ی خارجی وصل می‌شد. کل بقیه از
        IRANSansX محلی (public/fonts) استفاده می‌کند.
 
-       دو ایراد داشت: در ایران کند یا بلاک است، و اگر اینترنتِ بین‌الملل
-       قطع باشد فیش بدون فونت باز می‌شود — دقیقاً همان لحظه‌ای که کاربر
-       سندِ پرداختش را می‌خواهد. */
+       دو ایراد داشت: در ایران کند یا بلاک است، و اگر اینترنت بین‌الملل
+       قطع باشد فیش بدون فونت باز می‌شود — دقیقا همان لحظه‌ای که کاربر
+       سند پرداختش را می‌خواهد. */
     @font-face { font-family:'IRANSansX'; src:url('/fonts/IranSans/IRANSansX-Regular.woff2') format('woff2'); font-weight:400; font-display:swap }
     @font-face { font-family:'IRANSansX'; src:url('/fonts/IranSans/IRANSansX-Bold.woff2') format('woff2'); font-weight:700; font-display:swap }
     @font-face { font-family:'IRANSansX'; src:url('/fonts/IranSans/IRANSansX-Black.woff2') format('woff2'); font-weight:900; font-display:swap }
@@ -300,8 +300,8 @@ export default function RegisterPage() {
 
   /* ─── Shared header ───────────────────────────────────────────── */
   const Header = () => (
-    /* ناحیه‌ی امنِ iOS داخلِ خودِ padding حساب می‌شود، نه با کلاسِ
-       `safe-top`: این عنصر `padding` اینلاین دارد و استایلِ اینلاین بر
+    /* ناحیه‌ی امن iOS داخل خود padding حساب می‌شود، نه با کلاس
+       `safe-top`: این عنصر `padding` اینلاین دارد و استایل اینلاین بر
        کلاس مقدم است، پس کلاس بی‌صدا بی‌اثر می‌ماند. */
     <div style={{
       background: '#fff', borderBottom: '1px solid rgba(0,0,0,0.06)',
@@ -331,9 +331,9 @@ export default function RegisterPage() {
           <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'rgba(199,166,106,0.12)', border: '2px solid rgba(199,166,106,0.35)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px' }}>
             <CheckCircle2 size={30} color="#C7A66A" />
           </div>
-          <div style={{ fontSize: 20, fontWeight: 900, color: '#111', marginBottom: 10 }}>قبلاً ثبت‌نام کرده‌اید</div>
+          <div style={{ fontSize: 20, fontWeight: 900, color: '#111', marginBottom: 10 }}>قبلا ثبت‌نام کرده‌اید</div>
           <div style={{ fontSize: 14, color: '#888', lineHeight: 1.8, marginBottom: 28 }}>
-            شماره موبایل شما قبلاً در این مسابقه ثبت‌نام شده است.<br />
+            شماره موبایل شما قبلا در این مسابقه ثبت‌نام شده است.<br />
             وضعیت ثبت‌نام را در پنل کاربری دنبال کنید.
           </div>
           <div style={{ display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap' }}>
@@ -386,9 +386,9 @@ export default function RegisterPage() {
           overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
           {t.name}
         </div>
-        {/* ساعت کنارِ تاریخ. پیش‌تر فقط روز نوشته می‌شد و بازیکن
-            نمی‌دانست مسابقه صبح است یا شب — همان اطلاعاتی که دقیقاً
-            سرِ لحظه‌ی پرداخت لازم دارد. */}
+        {/* ساعت کنار تاریخ. پیش‌تر فقط روز نوشته می‌شد و بازیکن
+            نمی‌دانست مسابقه صبح است یا شب — همان اطلاعاتی که دقیقا
+            سر لحظه‌ی پرداخت لازم دارد. */}
         <div style={{ fontSize: 13, color: '#999', marginTop: 3 }}>
           {t.date}{t.startTime ? ` — ساعت ${toFa(t.startTime)}` : ''} • {t.clubName}
         </div>
@@ -426,7 +426,7 @@ export default function RegisterPage() {
           <div style={{ fontSize: 17, fontWeight: 700, color: 'rgba(255,255,255,0.85)', marginBottom: 8 }}>
             در حال اتصال به درگاه…
           </div>
-          <div style={{ fontSize: 14, color: 'rgba(255,255,255,0.35)' }}>لطفاً صبر کنید</div>
+          <div style={{ fontSize: 14, color: 'rgba(255,255,255,0.35)' }}>لطفا صبر کنید</div>
         </div>
       </div>
       <style>{`@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}`}</style>
@@ -591,7 +591,7 @@ export default function RegisterPage() {
             <AlertCircle size={18} color="#8F6531" style={{ flexShrink: 0, marginTop: 2 }} />
             <div>
               <div style={{ fontSize: 15, fontWeight: 800, color: '#111', marginBottom: 4 }}>
-                فعلاً امکان پرداخت آنلاین نیست
+                فعلا امکان پرداخت آنلاین نیست
               </div>
               <div style={{ fontSize: 14, color: '#777', lineHeight: 1.9 }}>
                 {payUnavailable}

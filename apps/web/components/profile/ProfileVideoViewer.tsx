@@ -4,17 +4,17 @@
    نمای تمام‌صفحه‌ی ویدیوی پروفایل.
 
    ── چرا لازم شد ──
-   ⚠️ ویدیو تا امروز داخلِ خانه‌ی ۱۱۶ پیکسلیِ شبکه پخش می‌شد. یعنی
-   فیلم در قابِ بندانگشتی اجرا می‌شد و نوارِ کنترلِ مرورگر — که
-   ارتفاعِ ثابت دارد — نصفِ همان مربع را می‌گرفت؛ کاربر درست گفت
-   «نصفش نوشته است». کلیک باید مثلِ عکس، نمای تمام‌صفحه باز کند.
+   ⚠️ ویدیو تا امروز داخل خانه‌ی ۱۱۶ پیکسلی شبکه پخش می‌شد. یعنی
+   فیلم در قاب بندانگشتی اجرا می‌شد و نوار کنترل مرورگر — که
+   ارتفاع ثابت دارد — نصف همان مربع را می‌گرفت؛ کاربر درست گفت
+   «نصفش نوشته است». کلیک باید مثل عکس، نمای تمام‌صفحه باز کند.
 
    ── چرا از `ImageLightbox` استفاده نمی‌کند ──
-   آن کامپوننت بر پایه‌ی `<img>` و پیمایشِ بینِ چند تصویر ساخته شده
-   (کشیدنِ انگشت، پیش/بعد). ویدیو نه پیمایش می‌خواهد نه کشیدن — و
-   کشیدن روی ویدیو با نوارِ زمانِ خودش تداخل دارد. ولی رفتارهای
-   «پنجره‌ی تمام‌صفحه» عیناً از همان‌جا آمده‌اند: Escape، قفلِ اسکرول،
-   دکمه‌ی بازگشتِ گوشی، و برگرداندنِ فوکوس.
+   آن کامپوننت بر پایه‌ی `<img>` و پیمایش بین چند تصویر ساخته شده
+   (کشیدن انگشت، پیش/بعد). ویدیو نه پیمایش می‌خواهد نه کشیدن — و
+   کشیدن روی ویدیو با نوار زمان خودش تداخل دارد. ولی رفتارهای
+   «پنجره‌ی تمام‌صفحه» عینا از همان‌جا آمده‌اند: Escape، قفل اسکرول،
+   دکمه‌ی بازگشت گوشی، و برگرداندن فوکوس.
    ───────────────────────────────────────────────────────────── */
 
 import { useCallback, useEffect, useRef, useState } from 'react'
@@ -30,16 +30,16 @@ export function useProfileVideoViewer() {
   } | null>(null)
   const closeRef = useRef<HTMLButtonElement>(null)
   const boxRef = useRef<HTMLDivElement>(null)
-  /* عنصری که پیش از باز شدنِ پنجره فوکوس داشت — باید به آن برگردد */
+  /* عنصری که پیش از باز شدن پنجره فوکوس داشت — باید به آن برگردد */
   const prevFocus = useRef<HTMLElement | null>(null)
 
   const open = useCallback((v: ViewerVideo, opts?: {
     onDelete?: () => void | Promise<void>
-    /** ویرایشِ عنوان/دسته — فقط برای صاحبِ ویدیو */
+    /** ویرایش عنوان/دسته — فقط برای صاحب ویدیو */
     onEdit?: () => void
   }) => {
-    /* ردیفِ قدیمی فقط بندانگشتی دارد و چیزی برای پخش نیست. خانه‌ی
-       شبکه هم برای همین‌ها دکمه نمی‌سازد؛ این گارد تورِ دوم است. */
+    /* ردیف قدیمی فقط بندانگشتی دارد و چیزی برای پخش نیست. خانه‌ی
+       شبکه هم برای همین‌ها دکمه نمی‌سازد؛ این گارد تور دوم است. */
     if (!v.url) return
     prevFocus.current = document.activeElement as HTMLElement | null
     setState({ v, onDelete: opts?.onDelete, onEdit: opts?.onEdit })
@@ -51,7 +51,7 @@ export function useProfileVideoViewer() {
     if (!state) return
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') { close(); return }
-      /* `aria-modal` بدونِ تلّه‌ی فوکوس یعنی Tab پشتِ روکش می‌رود */
+      /* `aria-modal` بدون تله‌ی فوکوس یعنی Tab پشت روکش می‌رود */
       if (e.key !== 'Tab') return
       const items = boxRef.current?.querySelectorAll<HTMLElement>('button, video')
       if (!items?.length) return
@@ -61,7 +61,7 @@ export function useProfileVideoViewer() {
       else if (!e.shiftKey && cur === last) { e.preventDefault(); first.focus() }
     }
     document.addEventListener('keydown', onKey)
-    /* قفلِ اسکرولِ پس‌زمینه — وگرنه صفحه زیرِ روکش تکان می‌خورد */
+    /* قفل اسکرول پس‌زمینه — وگرنه صفحه زیر روکش تکان می‌خورد */
     const prev = document.body.style.overflow
     document.body.style.overflow = 'hidden'
     closeRef.current?.focus()
@@ -72,9 +72,9 @@ export function useProfileVideoViewer() {
     }
   }, [state, close])
 
-  /* دکمه‌ی بازگشتِ گوشی باید پنجره را ببندد، نه صفحه را عوض کند —
-     همان کاری که `ImageLightbox` می‌کند. در PWAِ نصب‌شده این تنها
-     راهِ بستن با ژستِ کاربر است. */
+  /* دکمه‌ی بازگشت گوشی باید پنجره را ببندد، نه صفحه را عوض کند —
+     همان کاری که `ImageLightbox` می‌کند. در PWA نصب‌شده این تنها
+     راه بستن با ژست کاربر است. */
   useEffect(() => {
     if (!state) return
     let pushed = false
@@ -93,8 +93,8 @@ export function useProfileVideoViewer() {
       onClick={e => { if (e.target === e.currentTarget) close() }}>
       <div className="pvv-bar">
         {state.onEdit && (
-          /* ⚠️ پنجره بسته می‌شود: فرمِ ویرایش خودش یک پنجره‌ی مودال است
-             و دو مودالِ روی هم، تلّه‌ی فوکوس را می‌شکند. */
+          /* ⚠️ پنجره بسته می‌شود: فرم ویرایش خودش یک پنجره‌ی مودال است
+             و دو مودال روی هم، تله‌ی فوکوس را می‌شکند. */
           <button type="button" className="pvv-btn"
             onClick={() => { const go = state.onEdit; close(); go?.() }}
             aria-label="ویرایش عنوان و دسته‌بندی">
@@ -103,7 +103,7 @@ export function useProfileVideoViewer() {
         )}
         {state.onDelete && (
           /* ⚠️ بعد از حذف باید بسته شود: نسخه‌ی اول باز می‌ماند و روی
-             نشانیِ حذف‌شده پخش می‌کرد؛ کلیکِ دوم هم یک ذخیره‌ی دیگر
+             نشانی حذف‌شده پخش می‌کرد؛ کلیک دوم هم یک ذخیره‌ی دیگر
              می‌فرستاد. */
           <button type="button" className="pvv-btn pvv-del"
             onClick={async () => { await state.onDelete?.(); close() }}
@@ -115,7 +115,7 @@ export function useProfileVideoViewer() {
           <X size={20} aria-hidden />
         </button>
       </div>
-      {/* ویدیوی آپلودیِ کاربر است و زیرنویسی همراهش نیست */}
+      {/* ویدیوی آپلودی کاربر است و زیرنویسی همراهش نیست */}
       <video className="pvv-video" src={state.v.url} poster={state.v.thumbnail || undefined}
         controls autoPlay playsInline />
       {state.v.title && <p className="pvv-title">{state.v.title}</p>}

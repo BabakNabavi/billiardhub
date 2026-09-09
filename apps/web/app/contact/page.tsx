@@ -3,9 +3,9 @@
 /* ─────────────────────────────────────────────────────────────
    تماس با ما — تجربه‌ی ارتباط دیجیتال Billiard Hub (بازطراحی ۱۴۰۵)
    هیروی سینمایی با میز مینیمال SVG → کامپوزیشن واحد:
-   کانال‌های تعاملی (کپی ایمیل، میان‌بُر موضوع) + فرم فلوتینگ‌لیبل
+   کانال‌های تعاملی (کپی ایمیل، میان‌بر موضوع) + فرم فلوتینگ‌لیبل
    با ولیدیشن، لودینگ و انیمیشن موفقیت. فرم به `/api/contact` می‌رود
-   و تیکتِ واقعی می‌سازد؛ در شکست، خطا نشان می‌دهد نه موفقیتِ دروغین.
+   و تیکت واقعی می‌سازد؛ در شکست، خطا نشان می‌دهد نه موفقیت دروغین.
    ───────────────────────────────────────────────────────────── */
 
 import { useEffect, useId, useRef, useState } from 'react'
@@ -34,15 +34,15 @@ const CONTACT = {
   phoneDial: '02122859551',   // برای لینک tel:
   city: 'تهران',
   address: 'تهران، پاسداران، خیابان شهید محمود گل نبی، پلاک ۳۶',
-  instagram: '',    // TODO: آدرس کامل پروفایل — فعلاً نمایش داده نمی‌شود
-  telegram: '',     // TODO: آدرس کامل کانال — فعلاً نمایش داده نمی‌شود
+  instagram: '',    // TODO: آدرس کامل پروفایل — فعلا نمایش داده نمی‌شود
+  telegram: '',     // TODO: آدرس کامل کانال — فعلا نمایش داده نمی‌شود
 }
 
 /* «تبلیغات» این‌جا نیست — فرم خودش را در /advertise دارد */
-/* دو موضوعِ آخر تنها راهِ تغییرِ کد پستی و اطلاعات بانکی‌اند: آن دو
-   پس از یک استعلامِ موفق قفل می‌شوند، چون هر استعلام برای ما هزینه
+/* دو موضوع آخر تنها راه تغییر کد پستی و اطلاعات بانکی‌اند: آن دو
+   پس از یک استعلام موفق قفل می‌شوند، چون هر استعلام برای ما هزینه
    دارد. ترتیب عمدی است — این دو بالاتر از «سایر» می‌آیند تا کاربری
-   که از پیامِ قفل به این‌جا آمده، سریع پیدایشان کند. */
+   که از پیام قفل به این‌جا آمده، سریع پیدایشان کند. */
 const SUBJECTS = [
   'پشتیبانی', 'مشاوره', 'همکاری', 'پیشنهاد و انتقاد',
   'درخواست تغییر کد پستی', 'درخواست ویرایش اطلاعات بانکی',
@@ -158,19 +158,19 @@ export default function ContactPage() {
   const [sent, setSent] = useState(false)
   const [copied, setCopied] = useState(false)
   const formRef = useRef<HTMLDivElement>(null)
-  /* باشگاهی که تیکت درباره‌ی آن است — از لینکِ پیامِ قفل می‌آید تا
-     ادمین بداند دقیقاً کدام قفل را باید باز کند. */
+  /* باشگاهی که تیکت درباره‌ی آن است — از لینک پیام قفل می‌آید تا
+     ادمین بداند دقیقا کدام قفل را باید باز کند. */
   const [clubId, setClubId] = useState('')
 
-  /* پیامِ قفل کاربر را با ?subject=… به این‌جا می‌فرستد. بدونِ این،
-     کاربرِ قفل‌شده باید موضوع را از فهرست پیدا می‌کرد — و اگر اشتباه
-     انتخاب می‌کرد، تیکت در صفِ درستی نمی‌نشست. */
+  /* پیام قفل کاربر را با ?subject=… به این‌جا می‌فرستد. بدون این،
+     کاربر قفل‌شده باید موضوع را از فهرست پیدا می‌کرد — و اگر اشتباه
+     انتخاب می‌کرد، تیکت در صف درستی نمی‌نشست. */
   useEffect(() => {
     const q = new URLSearchParams(window.location.search)
     const s = q.get('subject') ?? ''
     if (SUBJECTS.includes(s)) {
       setForm(f => ({ ...f, subject: s }))
-      /* کمی صبر تا لِی‌اوت بنشیند، وگرنه اسکرول به جای اشتباه می‌رود */
+      /* کمی صبر تا لی‌اوت بنشیند، وگرنه اسکرول به جای اشتباه می‌رود */
       setTimeout(() => formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 350)
     }
     const c = q.get('clubId') ?? ''
@@ -213,17 +213,17 @@ export default function ContactPage() {
     ev.preventDefault()
     if (!validate()) return
     setLoading(true)
-    /* پیش‌تر این‌جا به بک‌اندِ مرده‌ی NestJS پست می‌شد و در شکست، پیام
-       در localStorageی خودِ کاربر می‌نشست و باز هم «ارسال شد» نشان
-       داده می‌شد — یعنی هیچ تیکتی هرگز به دستِ کسی نمی‌رسید. حالا که
-       تغییرِ کد پستی و اطلاعات بانکی فقط از همین راه ممکن است، آن
+    /* پیش‌تر این‌جا به بک‌اند مرده‌ی NestJS پست می‌شد و در شکست، پیام
+       در localStorageی خود کاربر می‌نشست و باز هم «ارسال شد» نشان
+       داده می‌شد — یعنی هیچ تیکتی هرگز به دست کسی نمی‌رسید. حالا که
+       تغییر کد پستی و اطلاعات بانکی فقط از همین راه ممکن است، آن
        دروغ کاربر را به بن‌بست می‌برد. */
     try {
-      /* `apiFetch` هدرِ CSRF را از کوکیِ خواندنی برمی‌دارد و می‌گذارد.
-         با `fetch` خام، کاربرِ *واردشده* همیشه ۴۰۳ می‌گرفت:
+      /* `apiFetch` هدر CSRF را از کوکی خواندنی برمی‌دارد و می‌گذارد.
+         با `fetch` خام، کاربر *واردشده* همیشه ۴۰۳ می‌گرفت:
          «توکن امنیتی درخواست معتبر نیست». مهمان مشکلی نداشت چون
-         بررسیِ CSRF فقط وقتی نشست هست اعمال می‌شود — برای همین در
-         تستِ مهمان دیده نشد. */
+         بررسی CSRF فقط وقتی نشست هست اعمال می‌شود — برای همین در
+         تست مهمان دیده نشد. */
       const res = await apiFetch('/api/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -286,7 +286,7 @@ export default function ContactPage() {
         .ct-grid { display: grid; grid-template-columns: minmax(0,5fr) minmax(0,7fr); }
         @media (max-width: 860px) { .ct-grid { grid-template-columns: minmax(0, 1fr); } .ct-side { border-inline-start: none !important; border-top: 1px solid ${LINE}; } }
 
-        /* نام و ایمیل کنارِ هم فقط وقتی جا هست */
+        /* نام و ایمیل کنار هم فقط وقتی جا هست */
         .ct-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 22px; }
         @media (max-width: 560px) { .ct-fields { grid-template-columns: minmax(0, 1fr); } }
         @media (prefers-reduced-motion: reduce) {
@@ -380,7 +380,7 @@ export default function ContactPage() {
                 </span>
               </div>
 
-              {/* میان‌بُرهای موضوع — می‌پرد به فرم با موضوع ازپیش‌انتخاب‌شده */}
+              {/* میان‌برهای موضوع — می‌پرد به فرم با موضوع ازپیش‌انتخاب‌شده */}
               <button type="button" className="ct-ch" onClick={() => jumpToForm('همکاری')} style={{ ['--cc' as never]: BALLS.yellow }}>
                 <span className="ic"><Handshake size={18} /></span>
                 <span style={{ minWidth: 0 }}>
@@ -460,7 +460,7 @@ export default function ContactPage() {
                     ) : (<>ارسال پیام <Send size={15} /></>)}
                   </button>
 
-                  {/* شکستِ ارسال باید دیده شود — پیش‌تر بی‌صدا رد می‌شد
+                  {/* شکست ارسال باید دیده شود — پیش‌تر بی‌صدا رد می‌شد
                       و کاربر «ارسال شد» می‌دید. */}
                   {errors.submit && (
                     <div style={{ marginTop: 12, padding: '10px 12px', borderRadius: 10, background: 'rgba(178,59,46,0.08)', border: '1px solid rgba(178,59,46,0.22)', fontSize: 12.5, fontWeight: 700, color: '#B23B2E', lineHeight: 1.7 }}>
@@ -478,7 +478,7 @@ export default function ContactPage() {
                       strokeDasharray="60" strokeDashoffset="60" style={{ animation: 'ctDash .6s .7s cubic-bezier(.4,0,.2,1) forwards' }} />
                   </svg>
                   <h3 style={{ fontSize: 20, fontWeight: 900, margin: '0 0 8px' }}>پیام شما ثبت شد</h3>
-                  {/* بدونِ این خط، کاربر نمی‌داند پاسخ کجا می‌آید و منتظرِ
+                  {/* بدون این خط، کاربر نمی‌داند پاسخ کجا می‌آید و منتظر
                       پیامک یا ایمیلی می‌ماند که هیچ‌وقت نمی‌رسد. */}
                   <p style={{ fontSize: 13, color: SEC, lineHeight: 2, margin: '0 0 22px' }}>
                     ممنون که با بیلیارد هاب در ارتباطی — تیم ما پیامت را بررسی می‌کند.

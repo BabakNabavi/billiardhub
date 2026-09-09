@@ -1,29 +1,30 @@
 'use client'
 
 /* ─────────────────────────────────────────────────────────────
-   قابِ بیلیارد مدیا — نوارِ بالا، ریلِ کناریِ دسکتاپ، ناوبریِ پایینِ
+   قاب بیلیارد مدیا — نوار بالا، ریل کناری دسکتاپ، ناوبری پایین
    موبایل.
 
-   ⚠️ مدیا عمداً ناوبریِ خودش را دارد. کاربری که واردِ یک پلتفرمِ
+   ⚠️ مدیا عمدا ناوبری خودش را دارد. کاربری که وارد یک پلتفرم
    ویدیو می‌شود انتظار دارد «خانه / Shorts / کانال‌ها / تاریخچه» را
-   کنارِ دستش ببیند، نه منویِ عمومیِ سایت را. نوارِ سراسریِ بیلیارد
-   هاب سرِ جایش می‌ماند؛ این زیرِ آن می‌نشیند.
+   کنار دستش ببیند، نه منوی عمومی سایت را. نوار سراسری بیلیارد
+   هاب سر جایش می‌ماند؛ این زیر آن می‌نشیند.
 
    ⚠️ هیچ آیتمی که پشتوانه‌ی داده ندارد در ناوبری نیست: «اشتراک‌ها»،
    «لیست‌های پخش» و «پخش زنده» جدول ندارند، پس لینکشان هم ساخته
-   نشد. لینکِ مرده بدتر از نبودِ لینک است.
+   نشد. لینک مرده بدتر از نبود لینک است.
    ───────────────────────────────────────────────────────────── */
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
-  Menu, Search, Home, Clapperboard, Users2, Trophy, Newspaper, UploadCloud, User,
+  Menu, Home, Clapperboard, Users2, Trophy, Newspaper, UploadCloud, User,
 } from 'lucide-react'
+import SearchBox from './SearchBox'
 
-/* ── هم‌ترازی با نوارِ ثابتِ سایت ──
-   ⚠️ همان تله‌ی صفحه‌ی خدماتِ فنی: عددِ ثابت در حالتِ نصب‌شده‌ی iOS
-   غلط می‌شود چون ناحیه‌ی امن نوار را بلندتر می‌کند. ارتفاع از خودِ
+/* ── هم‌ترازی با نوار ثابت سایت ──
+   ⚠️ همان تله‌ی صفحه‌ی خدمات فنی: عدد ثابت در حالت نصب‌شده‌ی iOS
+   غلط می‌شود چون ناحیه‌ی امن نوار را بلندتر می‌کند. ارتفاع از خود
    نوار پرسیده می‌شود. */
 export function NavOffset() {
   useEffect(() => {
@@ -48,13 +49,13 @@ export function NavOffset() {
 }
 
 export interface TopBarProps {
-  /** برای برچسبِ درستِ دکمه‌ی جمع‌کردن */
+  /** برای برچسب درست دکمه‌ی جمع‌کردن */
   railMini?: boolean
   q: string
   onQ: (v: string) => void
   onSubmit: () => void
   onToggleRail: () => void
-  /** فقط وقتی کاربر واقعاً می‌تواند ویدیو منتشر کند */
+  /** فقط وقتی کاربر واقعا می‌تواند ویدیو منتشر کند */
   onUpload?: () => void
 }
 
@@ -75,26 +76,14 @@ export function TopBar({ q, onQ, onSubmit, onToggleRail, onUpload, railMini = fa
           <span>بیلیارد مدیا</span>
         </Link>
 
-        <form
-          className="mx-search" role="search"
-          onSubmit={e => { e.preventDefault(); onSubmit() }}
-        >
-          <div className="mx-search-box">
-            <label className="mx-sr-only" htmlFor="mx-q">جست‌وجو در ویدیوها</label>
-            <input
-              id="mx-q" type="search" value={q} onChange={e => onQ(e.target.value)}
-              placeholder="جست‌وجوی ویدیو، بازیکن، مسابقه یا کانال…"
-              autoComplete="off"
-            />
-          </div>
-          <button className="mx-search-go" type="submit" aria-label="جست‌وجو">
-            <Search size={17} />
-          </button>
-        </form>
+        {/* ⚠️ جست‌وجو کامپوننت خودش را دارد: با هر حرف پیشنهاد
+            می‌آورد و خودش ناوبری می‌کند، پس نوار بالا دیگر لازم
+            نیست q را نگه دارد. */}
+        <SearchBox initial={q} />
 
         <div className="mx-top-act">
-          {/* ⚠️ دکمه‌ی انتشار فقط برای کسی که واقعاً کانال دارد. یک
-              «+»ِ همیشگی که به دیوارِ «شما کانال ندارید» بخورد، وعده‌ی
+          {/* ⚠️ دکمه‌ی انتشار فقط برای کسی که واقعا کانال دارد. یک
+              «+» همیشگی که به دیوار «شما کانال ندارید» بخورد، وعده‌ی
               دروغ است. */}
           {onUpload && (
             <button className="mx-iconbtn" type="button" onClick={onUpload}>
@@ -109,7 +98,7 @@ export function TopBar({ q, onQ, onSubmit, onToggleRail, onUpload, railMini = fa
 
 export interface RailItem { href: string; label: string; icon: React.ReactNode }
 
-/* ⚠️ حالتِ فعال از مسیرِ واقعی می‌آید. نسخه‌ی اول یک رشته‌ی دستی
+/* ⚠️ حالت فعال از مسیر واقعی می‌آید. نسخه‌ی اول یک رشته‌ی دستی
    می‌گرفت که هرگز با `/media/channels` برابر نمی‌شد، پس آن آیتم
    هیچ‌وقت `aria-current` نمی‌گرفت. */
 export function Rail({ tab }: { tab?: string }) {
@@ -172,11 +161,11 @@ export function BottomNav({ tab, onUpload }: { tab?: string; onUpload?: () => vo
   )
 }
 
-/** حالتِ باز/بسته‌ی ریل — روی همین مرورگر یادش می‌ماند. */
+/** حالت باز/بسته‌ی ریل — روی همین مرورگر یادش می‌ماند. */
 export function useRailState() {
   const [mini, setMini] = useState(false)
   useEffect(() => {
-    try { setMini(localStorage.getItem('bh:media:rail') === 'mini') } catch { /* حالتِ خصوصی */ }
+    try { setMini(localStorage.getItem('bh:media:rail') === 'mini') } catch { /* حالت خصوصی */ }
   }, [])
   const toggle = () => setMini(m => {
     const n = !m

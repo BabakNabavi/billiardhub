@@ -11,8 +11,8 @@ import { normalizePhoneFa } from '@/lib/text-fa';
 /* یک آگهی بیلیارد بازار — خواندن، ویرایش و حذف.
    ویرایش و حذف فقط برای صاحب آگهی یا ادمین. */
 
-/* ورودیِ خالی پیش‌فرض می‌دهد نه صفر — `Number('')` صفر است و همین
-   در مسیرِ فهرست باعث شده بود سقفِ نتایج ۱ شود. */
+/* ورودی خالی پیش‌فرض می‌دهد نه صفر — `Number('')` صفر است و همین
+   در مسیر فهرست باعث شده بود سقف نتایج ۱ شود. */
 const num = (v: unknown, d = 0) => {
   const cleaned = String(v ?? '')
     .replace(/[۰-۹]/g, x => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(x)))
@@ -33,7 +33,7 @@ async function load(id: string) {
 
 export async function GET(_req: NextRequest, ctx: { params: Promise<{ id: string }> }) {
   const { id } = await ctx.params;
-  /* شناسه‌های عددی متعلق به کاتالوگ نمونه‌اند و اصلاً در دیتابیس نیستند */
+  /* شناسه‌های عددی متعلق به کاتالوگ نمونه‌اند و اصلا در دیتابیس نیستند */
   if (!UUID.test(id)) return NextResponse.json({ message: 'آگهی پیدا نشد' }, { status: 404 });
 
   const ad = await load(id);
@@ -41,12 +41,12 @@ export async function GET(_req: NextRequest, ctx: { params: Promise<{ id: string
 
   /* ── چه کسی چه چیزی را می‌بیند ──
 
-     `sold` و `expired` عمداً عمومی می‌مانند: لینکشان ممکن است در
-     نتایج جست‌وجو یا در پیامِ کسی باشد و ۴۰۴ دادن به بازدیدکننده
-     چیزی جز سردرگمی نیست — صفحه با نشانِ «فروخته شد» بازتر است.
+     `sold` و `expired` عمدا عمومی می‌مانند: لینکشان ممکن است در
+     نتایج جست‌وجو یا در پیام کسی باشد و ۴۰۴ دادن به بازدیدکننده
+     چیزی جز سردرگمی نیست — صفحه با نشان «فروخته شد» بازتر است.
 
      ولی `paused`، `pending` و `rejected` نباید عمومی باشند. تا امروز
-     هر کسی که نشانی را داشت، آگهیِ متوقف‌شده یا ردشده را کامل — با
+     هر کسی که نشانی را داشت، آگهی متوقف‌شده یا ردشده را کامل — با
      شماره‌ی تماس — می‌دید. */
   const PUBLIC = ['active', 'sold', 'expired'];
   if (!PUBLIC.includes(String(ad.status))) {
@@ -58,13 +58,13 @@ export async function GET(_req: NextRequest, ctx: { params: Promise<{ id: string
   }
 
   /* ── شمارنده‌ی بازدید ──
-     پیش‌تر هر بارگذاریِ صفحه یکی بالا می‌برد، یعنی فروشنده با ده بار
-     رفرش آگهی‌اش را «پربازدید» می‌کرد و مرتب‌سازیِ محبوب‌ترین بی‌معنی
+     پیش‌تر هر بارگذاری صفحه یکی بالا می‌برد، یعنی فروشنده با ده بار
+     رفرش آگهی‌اش را «پربازدید» می‌کرد و مرتب‌سازی محبوب‌ترین بی‌معنی
      می‌شد.
 
-     حالا هر بیننده در هر ساعت یک‌بار شمرده می‌شود. بیننده با هشِ
-     برگشت‌ناپذیرِ IP+UA شناخته می‌شود — نه کوکی، نه شناسه‌ی کاربر —
-     پس چیزی درباره‌ی هویتِ کسی ذخیره نمی‌شود. شمارش داخلِ دیتابیس و
+     حالا هر بیننده در هر ساعت یک‌بار شمرده می‌شود. بیننده با هش
+     برگشت‌ناپذیر IP+UA شناخته می‌شود — نه کوکی، نه شناسه‌ی کاربر —
+     پس چیزی درباره‌ی هویت کسی ذخیره نمی‌شود. شمارش داخل دیتابیس و
      اتمیک است. شکستش نباید صفحه را خراب کند. */
   const viewer = viewerHash(clientIp(_req), _req.headers.get('user-agent'));
   if (viewer) {
@@ -101,12 +101,12 @@ export async function PATCH(req: NextRequest, ctx: { params: Promise<{ id: strin
   if (b?.model !== undefined) patch.model = str(b?.model, 80);
   if (b?.type !== undefined) patch.type = str(b?.type, 80);
   if (b?.sellerName !== undefined) patch.sellerName = str(b?.sellerName, 120);
-  if (b?.sellerPhone !== undefined) /* همان یک شکلِ مسیرِ ثبت — وگرنه ویرایش شکلِ دوم را برمی‌گرداند */
+  if (b?.sellerPhone !== undefined) /* همان یک شکل مسیر ثبت — وگرنه ویرایش شکل دوم را برمی‌گرداند */
     patch.sellerPhone = normalizePhoneFa(b?.sellerPhone) || str(b?.sellerPhone, 20);
   if (b?.sellerWhatsapp !== undefined) patch.sellerWhatsapp = str(b?.sellerWhatsapp, 20);
   if (b?.specs !== undefined) patch.specs = b?.specs && typeof b.specs === 'object' ? b.specs : null;
 
-  /* همان ستون‌های ایندکس‌دارِ مسیرِ ثبت — وگرنه ویرایش، ستون و
+  /* همان ستون‌های ایندکس‌دار مسیر ثبت — وگرنه ویرایش، ستون و
      `specs` را از هم دور می‌اندازد. */
   if (b?.specs && typeof b.specs === 'object') {
     const sIn = b.specs as Record<string, unknown>;
@@ -119,11 +119,11 @@ export async function PATCH(req: NextRequest, ctx: { params: Promise<{ id: strin
     patch.cuePieces = pk('pieces');
   }
 
-  /* ── همان قاعده‌های مسیرِ ثبت ──
+  /* ── همان قاعده‌های مسیر ثبت ──
      تا امروز ویرایش نه ستون‌های کاتالوگ را می‌پذیرفت نه مشخصات را
      می‌سنجید. یعنی ستون‌های ایندکس‌دار با محتوای `specs` از هم دور
-     می‌افتادند و کلِ اعتبارسنجیِ POST با یک PATCH دور زده می‌شد.
-     قاعده‌ای که در یکی از دو مسیرِ نوشتن باشد و در دیگری نه، باگِ
+     می‌افتادند و کل اعتبارسنجی POST با یک PATCH دور زده می‌شد.
+     قاعده‌ای که در یکی از دو مسیر نوشتن باشد و در دیگری نه، باگ
      فرداست — این پروژه چند بار همین را دیده. */
   const cat = normalizeCategory(str(b?.category, 60));
   const catType = str(cat === 'cue' ? b?.cueType : cat === 'table' ? b?.tableType : b?.catalogType, 40);
@@ -138,14 +138,14 @@ export async function PATCH(req: NextRequest, ctx: { params: Promise<{ id: strin
   if ((isProductCatalog(cat) || isAccessoryCategory(cat)) && catType) {
     const brandId = str(b?.brandId, 80) || null;
     const check = validateOnServer({
-      /* دسته‌های لوازم زیرِ یک کاتالوگِ مشترک‌اند */
-      /* ── ترتیبِ این شرط مهم است ──
-         «پارچه» هم شناسه‌ی کاتالوگِ خودش را دارد و هم یکی از ده
+      /* دسته‌های لوازم زیر یک کاتالوگ مشترک‌اند */
+      /* ── ترتیب این شرط مهم است ──
+         «پارچه» هم شناسه‌ی کاتالوگ خودش را دارد و هم یکی از ده
          دسته‌ی لوازم است. تا امروز `isAccessoryCategory` اول سنجیده
-         می‌شد، پس آگهیِ پارچه با `category='accessories'` اعتبارسنجی
-         می‌شد و نوعِ «snooker» در فهرستِ نوع‌های لوازم نبود — نتیجه‌اش
+         می‌شد، پس آگهی پارچه با `category='accessories'` اعتبارسنجی
+         می‌شد و نوع «snooker» در فهرست نوع‌های لوازم نبود — نتیجه‌اش
          «نوع را انتخاب کنید» روی فرمی که نوع را انتخاب کرده بود.
-         کاتالوگِ اختصاصی مقدم است، مثلِ خودِ فرم. */
+         کاتالوگ اختصاصی مقدم است، مثل خود فرم. */
       category: (isProductCatalog(cat) ? cat : 'accessories') as CatalogId,
       type: catType,
       brandId,
@@ -188,30 +188,30 @@ export async function PATCH(req: NextRequest, ctx: { params: Promise<{ id: strin
       patch.clothModelCustom = cmId ? null : str(b?.clothModelCustom, 60) || null;
     }
   }
-  /* همان قاعده‌ی مسیرِ ثبت: base64 به Storage می‌رود و نشانی ذخیره
-     می‌شود. قاعده‌ای که در یکی از دو مسیرِ نوشتن باشد و در دیگری نه،
-     یعنی ویرایشِ آگهی همان متنِ چندمگابایتی را برمی‌گرداند. */
+  /* همان قاعده‌ی مسیر ثبت: base64 به Storage می‌رود و نشانی ذخیره
+     می‌شود. قاعده‌ای که در یکی از دو مسیر نوشتن باشد و در دیگری نه،
+     یعنی ویرایش آگهی همان متن چندمگابایتی را برمی‌گرداند. */
   if (Array.isArray(b?.images)) patch.images = await normalizeAdImages(b.images, actor.id);
 
-  /* وضعیت‌هایی که خودِ فروشنده می‌تواند بگذارد.
+  /* وضعیت‌هایی که خود فروشنده می‌تواند بگذارد.
 
-     `sold` تازه است و لازم بود: بدونِ آن، فروشنده‌ای که کالایش رفته
-     یا آگهی را متوقف می‌کرد (و خریدارِ بعدی فکر می‌کرد حذف شده) یا
+     `sold` تازه است و لازم بود: بدون آن، فروشنده‌ای که کالایش رفته
+     یا آگهی را متوقف می‌کرد (و خریدار بعدی فکر می‌کرد حذف شده) یا
      رهایش می‌کرد و تلفنش برای کالای نبوده زنگ می‌خورد.
 
-     `pending`، `rejected` و `deleted` عمداً این‌جا نیستند — آن‌ها
-     تصمیمِ ادمین‌اند و از این مسیر قابلِ گذاشتن نباشند. */
+     `pending`، `rejected` و `deleted` عمدا این‌جا نیستند — آن‌ها
+     تصمیم ادمین‌اند و از این مسیر قابل گذاشتن نباشند. */
   const SELLER_STATUSES = ['active', 'paused', 'sold'];
   if (b?.status !== undefined && SELLER_STATUSES.includes(String(b.status))) {
     patch.status = String(b.status);
-    /* لحظه‌ی فروش ثبت می‌شود و با فعال‌شدنِ دوباره پاک — وگرنه آگهیِ
-       دوباره‌فعال، تاریخِ فروشِ قدیمی را با خودش می‌کشید. */
+    /* لحظه‌ی فروش ثبت می‌شود و با فعال‌شدن دوباره پاک — وگرنه آگهی
+       دوباره‌فعال، تاریخ فروش قدیمی را با خودش می‌کشید. */
     patch.soldAt = String(b.status) === 'sold' ? new Date().toISOString() : null;
   }
 
-  /* تمدید: عمرِ آگهی از همین لحظه شصت روز می‌شود.
+  /* تمدید: عمر آگهی از همین لحظه شصت روز می‌شود.
 
-     آگهیِ منقضی هم تمدید می‌شود و به فعال برمی‌گردد؛ نبودنِ این راه
+     آگهی منقضی هم تمدید می‌شود و به فعال برمی‌گردد؛ نبودن این راه
      یعنی فروشنده باید آگهی را از نو بسازد و یک سهمیه‌ی دیگر بدهد. */
   if (b?.renew === true) {
     patch.expiresAt = new Date(Date.now() + 60 * 86400_000).toISOString();
@@ -222,17 +222,17 @@ export async function PATCH(req: NextRequest, ctx: { params: Promise<{ id: strin
   if (b?.price !== undefined || b?.negotiable !== undefined) {
     const negotiable = b?.negotiable !== undefined ? b.negotiable === true : ad.negotiable === true;
     const price = Math.max(0, Math.round(num(b?.price ?? ad.price)));
-    /* همان قاعده‌ی ثبتِ آگهی — قیمت فقط وقتی اجباری است که توافقی
-       نباشد. تکرارِ قاعده در دو مسیر خطرناک است، پس دیتابیس هم قیدش
-       را دارد (مهاجرتِ ۰۶۰). */
+    /* همان قاعده‌ی ثبت آگهی — قیمت فقط وقتی اجباری است که توافقی
+       نباشد. تکرار قاعده در دو مسیر خطرناک است، پس دیتابیس هم قیدش
+       را دارد (مهاجرت ۰۶۰). */
     if (!negotiable && price <= 0) {
       return NextResponse.json({ message: 'قیمت را وارد کنید یا گزینه‌ی «توافقی» را بزنید' }, { status: 400 });
     }
     if (price > 100_000_000_000) {
       return NextResponse.json({ message: 'مبلغ واردشده معتبر نیست' }, { status: 400 });
     }
-    /* همان قراردادِ مسیرِ ثبت: `price` قیمتِ خط‌خورده و `discountPrice`
-       قیمتِ پرداختی. اگر این‌جا برعکس بنویسیم، ویرایشِ یک آگهی عددِ
+    /* همان قرارداد مسیر ثبت: `price` قیمت خط‌خورده و `discountPrice`
+       قیمت پرداختی. اگر این‌جا برعکس بنویسیم، ویرایش یک آگهی عدد
        خط‌خورده‌اش را دوباره خراب می‌کند. */
     const old = Math.max(price, Math.min(100_000_000_000, Math.round(num(b?.old, price))));
     const discounted = !negotiable && old > price;

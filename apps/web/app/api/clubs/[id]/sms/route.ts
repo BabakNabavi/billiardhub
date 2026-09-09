@@ -30,13 +30,13 @@ async function guard(req: NextRequest, clubId: string) {
 
 /* مقدارهای فرم.
 
-   هیچ‌کدام متنِ آزاد نیستند و این عمدی است: سرویسِ پیامک مقدارهای
-   ممکنِ هر متغیر را از قبل می‌خواهد، و متنی که باشگاه‌دار تایپ کند
-   قابلِ اعلام نیست. جدا از آن، یک فیلدِ بی‌قید در پیامکی که از طرفِ
-   سایت می‌رود دقیقاً ابزارِ کلاهبرداری است.
+   هیچ‌کدام متن آزاد نیستند و این عمدی است: سرویس پیامک مقدارهای
+   ممکن هر متغیر را از قبل می‌خواهد، و متنی که باشگاه‌دار تایپ کند
+   قابل اعلام نیست. جدا از آن، یک فیلد بی‌قید در پیامکی که از طرف
+   سایت می‌رود دقیقا ابزار کلاهبرداری است.
 
-   تاریخ به قالبِ ثابتِ «۲۵ مرداد ۱۴۰۵» درمی‌آید — هم خواناتر، هم
-   قابلِ اعلام. */
+   تاریخ به قالب ثابت «۲۵ مرداد ۱۴۰۵» درمی‌آید — هم خواناتر، هم
+   قابل اعلام. */
 function cleanArgs(tplKey: string, raw: unknown): string[] | { error: string } {
   const tpl = clubTemplate(tplKey);
   if (!tpl) return { error: 'متن انتخابی معتبر نیست' };
@@ -62,7 +62,7 @@ function cleanArgs(tplKey: string, raw: unknown): string[] | { error: string } {
       continue;
     }
 
-    /* jalali — فقط قالبِ خودِ تقویم پذیرفته است */
+    /* jalali — فقط قالب خود تقویم پذیرفته است */
     const fa = faJalali(v);
     if (fa === v) return { error: `«${f.label}» را از تقویم انتخاب کنید` };
     out.push(fa);
@@ -85,9 +85,9 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string 
   if (key) {
     const args = (() => { try { return JSON.parse(sp.get('args') ?? '[]'); } catch { return []; } })();
     const c = cleanArgs(key, args);
-    /* برای برآورد، مقدارهای ناقص خطا نیستند — کاربر هنوز در حالِ پر
+    /* برای برآورد، مقدارهای ناقص خطا نیستند — کاربر هنوز در حال پر
        کردن است و باید هزینه را ببیند. جای خالی با «…» پر می‌شود تا
-       طولِ متن تقریباً درست بماند. */
+       طول متن تقریبا درست بماند. */
     const safe = Array.isArray(c) ? c : (clubTemplate(key)?.fields ?? []).map((_, i) =>
       String((Array.isArray(args) ? args[i] : '') ?? '').trim() || '…');
     est = await quote(id, g.actor!.id, g.clubName!, key, safe);
@@ -97,11 +97,11 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string 
     .select('id,template_key,recipient_count,total_amount,status,sent_count,failed_count,created_at,sent_at')
     .eq('club_id', id).order('created_at', { ascending: false }).limit(20);
 
-  /* ── متنی که کدش ثبت نشده قابلِ خرید نیست ──
-     بدونِ این، باشگاه‌دار می‌توانست پول بدهد و هیچ پیامکی نرود:
-     `sendPattern` بی‌صدا رد می‌کند و کمپین «ناموفق» می‌شود. کدِ متن
-     را پنلِ ملی‌پیامک بعد از تأییدِ هر متن می‌دهد، پس تا آن لحظه این
-     الگو واقعاً وجود ندارد. */
+  /* ── متنی که کدش ثبت نشده قابل خرید نیست ──
+     بدون این، باشگاه‌دار می‌توانست پول بدهد و هیچ پیامکی نرود:
+     `sendPattern` بی‌صدا رد می‌کند و کمپین «ناموفق» می‌شود. کد متن
+     را پنل ملی‌پیامک بعد از تأیید هر متن می‌دهد، پس تا آن لحظه این
+     الگو واقعا وجود ندارد. */
   const ready = await registeredPatterns(CLUB_TEMPLATES.map(t => t.key));
 
   return NextResponse.json({
@@ -123,8 +123,8 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string
   const args = cleanArgs(key, body.args);
   if (!Array.isArray(args)) return NextResponse.json({ message: args.error }, { status: 400 });
 
-  /* سدِ دوم، سمتِ سرور: رابط دکمه را خاموش می‌کند ولی یک درخواستِ
-     دستی همچنان می‌رسید — و نتیجه‌اش پولِ گرفته‌شده و پیامکِ نرفته
+  /* سد دوم، سمت سرور: رابط دکمه را خاموش می‌کند ولی یک درخواست
+     دستی همچنان می‌رسید — و نتیجه‌اش پول گرفته‌شده و پیامک نرفته
      بود. */
   if (!(await registeredPatterns([key])).has(key)) {
     return NextResponse.json({
@@ -133,12 +133,12 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string
   }
 
   /* قیمت دوباره سمت سرور حساب می‌شود. عددی که کلاینت فرستاده هرگز
-     استفاده نمی‌شود — وگرنه یک درخواستِ دستکاری‌شده می‌توانست
+     استفاده نمی‌شود — وگرنه یک درخواست دستکاری‌شده می‌توانست
      پنجاه پیامک را به قیمت یکی بخرد. */
   const q = await quote(id, g.actor!.id, g.clubName!, key, args);
   if ('error' in q) return NextResponse.json({ message: q.error }, { status: 400 });
 
-  /* سفارشِ بازِ قبلی را ببند تا ایندکسِ یکتا نخورد و کاربر گیر نکند */
+  /* سفارش باز قبلی را ببند تا ایندکس یکتا نخورد و کاربر گیر نکند */
   await sb().from('club_sms_campaigns')
     .update({ status: 'CANCELED', updated_at: new Date().toISOString() })
     .eq('club_id', id).eq('status', 'PENDING_PAYMENT');

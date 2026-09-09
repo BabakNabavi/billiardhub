@@ -16,12 +16,12 @@ async function countMembers(clubId: string): Promise<number> {
   return error ? 0 : (count ?? 0);
 }
 
-/** تعداد اعضای یک باشگاه — عمومی. با `?mine=1` عضویتِ خودِ کاربر. */
+/** تعداد اعضای یک باشگاه — عمومی. با `?mine=1` عضویت خود کاربر. */
 export async function GET(req: NextRequest) {
   const sp = new URL(req.url).searchParams;
 
-  /* عضویتِ خودِ کاربر — تا فرم‌های پروفایل بتوانند وضعیت فعلی را
-     نشان دهند. بدون این، کاربری که قبلاً باشگاه انتخاب کرده هر بار
+  /* عضویت خود کاربر — تا فرم‌های پروفایل بتوانند وضعیت فعلی را
+     نشان دهند. بدون این، کاربری که قبلا باشگاه انتخاب کرده هر بار
      کادر را خالی می‌بیند و فکر می‌کند ثبت نشده. */
   if (sp.get('mine') === '1') {
     const actor = actorFromRequest(req);
@@ -34,7 +34,7 @@ export async function GET(req: NextRequest) {
     if (!clubId) return NextResponse.json({ club: null }, { headers: { 'Cache-Control': 'no-store' } });
 
     const { data: club } = await sb().from('clubs').select('id,name').eq('id', clubId).maybeSingle();
-    /* باشگاه ممکن است حذف شده باشد ولی ردیفِ عضویت مانده باشد */
+    /* باشگاه ممکن است حذف شده باشد ولی ردیف عضویت مانده باشد */
     if (!club) return NextResponse.json({ club: null }, { headers: { 'Cache-Control': 'no-store' } });
 
     return NextResponse.json({
@@ -85,10 +85,10 @@ export async function POST(req: NextRequest) {
   });
 }
 
-/* ── روشن/خاموش کردنِ پیامکِ باشگاه ──
-   عضو باید بتواند نه بگوید. بدونِ این، تنها راهِ نگرفتنِ پیامک ترکِ
-   باشگاه است — که یعنی عددِ اعضای باشگاه هم می‌پرد و عضو برای یک
-   ترجیحِ کوچک، عضویتش را از دست می‌دهد. */
+/* ── روشن/خاموش کردن پیامک باشگاه ──
+   عضو باید بتواند نه بگوید. بدون این، تنها راه نگرفتن پیامک ترک
+   باشگاه است — که یعنی عدد اعضای باشگاه هم می‌پرد و عضو برای یک
+   ترجیح کوچک، عضویتش را از دست می‌دهد. */
 export async function PATCH(req: NextRequest) {
   const actor = actorFromRequest(req);
   if (!actor) return NextResponse.json({ message: 'ابتدا وارد شوید' }, { status: 401 });

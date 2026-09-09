@@ -18,14 +18,14 @@ export interface PlayerTournament {
   result: string
 }
 
-/* ── رسانه: همان مدلِ مربی، داور و خدماتِ فنی ──
-   ⚠️ آلبومِ بازیکن هم شیء بود و عکس‌ها داخلش. یعنی چهارمین مدلِ
-   متفاوت برای یک مفهوم. حالا نامِ آلبوم روی خودِ رسانه است و فهرستِ
+/* ── رسانه: همان مدل مربی، داور و خدمات فنی ──
+   ⚠️ آلبوم بازیکن هم شیء بود و عکس‌ها داخلش. یعنی چهارمین مدل
+   متفاوت برای یک مفهوم. حالا نام آلبوم روی خود رسانه است و فهرست
    نام‌ها در `albums`. */
 export interface PlayerMedia { id: string; url: string; caption: string; album?: string }
 export interface PlayerVideo { id: string; url?: string; thumbnail: string; title: string; duration: string; album?: string }
 
-/** شکلِ قدیمی — فقط برای خواندنِ ردیف‌های پیش از مهاجرت */
+/** شکل قدیمی — فقط برای خواندن ردیف‌های پیش از مهاجرت */
 export interface PlayerAlbumLegacy {
   id: string
   title: string
@@ -40,7 +40,7 @@ export interface Player {
   /** رشته‌ها با رده‌ی سنی و دسته — پروفایل‌های ساخته‌شده توسط کاربر */
   disciplines?: import('./player-categories').DisciplineEntry[]
   city: string
-  /** استان — از فرمِ ثبت‌نام می‌آید؛ زیرِ شهر در کارتِ مشخصات */
+  /** استان — از فرم ثبت‌نام می‌آید؛ زیر شهر در کارت مشخصات */
   province?: string
   country: string
   /** رتبه‌ی رنکینگ ملی — undefined یعنی بدون رنکینگ */
@@ -51,19 +51,19 @@ export interface Player {
   featured?: boolean         // ستاره‌ی ویژه (Elite)
   club?: { name: string; href?: string }
   /** رنگ دوتون کارت — از پالت محدود برند */
-  /** تیکِ آبی — ستونِ `profiles.verified`، فقط ادمین می‌دهد */
+  /** تیک آبی — ستون `profiles.verified`، فقط ادمین می‌دهد */
   verified?: boolean
   tone: 'felt' | 'night' | 'bronze'
-  /** عکسِ پروفایل (آواتار) — نبودنش یعنی اولین عکسِ گالری */
+  /** عکس پروفایل (آواتار) — نبودنش یعنی اولین عکس گالری */
   photo?: string
-  /** تصویرِ پس‌زمینه‌ی نوارِ بالا (نه پرتره) */
+  /** تصویر پس‌زمینه‌ی نوار بالا (نه پرتره) */
   scene: string
   intro: string
   bio: string[]
   careerStart: string
   highlights: PlayerHighlight[]
   tournaments: PlayerTournament[]
-  /** نامِ آلبوم‌ها — عضویت روی خودِ رسانه است */
+  /** نام آلبوم‌ها — عضویت روی خود رسانه است */
   albums: string[]
   gallery: PlayerMedia[]
   videos: PlayerVideo[]
@@ -71,13 +71,13 @@ export interface Player {
   tags: string[]
 }
 
-/* ⚠️ عمداً خالی — پیش از رونمایی پاک شد.
+/* ⚠️ عمدا خالی — پیش از رونمایی پاک شد.
 
-   این آرایه 49 موجودیتِ ساختگی داشت که روی سایتِ زنده مثل داده‌ی
-   واقعی دیده می‌شدند: نام، شهر، امتیاز و مشخصاتی که هیچ‌کدام وجودِ
+   این آرایه 49 موجودیت ساختگی داشت که روی سایت زنده مثل داده‌ی
+   واقعی دیده می‌شدند: نام، شهر، امتیاز و مشخصاتی که هیچ‌کدام وجود
    خارجی نداشتند و کلیکشان به هیچ‌جا نمی‌رسید.
 
-   جای این‌ها با موجودیت‌های واقعیِ سایت پر می‌شود. اگر چیزی نباشد،
+   جای این‌ها با موجودیت‌های واقعی سایت پر می‌شود. اگر چیزی نباشد،
    بخش خالی می‌ماند — که درست است. آرایه نگه داشته شد (نه حذف) تا
    امضای ماژول و مصرف‌کننده‌هایش دست‌نخورده بمانند. */
 export const PLAYERS: Player[] = []
@@ -101,9 +101,9 @@ export const TONES: Record<Player['tone'], { from: string; to: string; glow: str
 export const faDigits = (v: string | number) =>
   String(v).replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[+d] ?? d)
 
-/* ── ردیفِ قدیمی به مدلِ تازه ──
-   عینِ همان مبدلِ خدماتِ فنی: روی *خواندن* تبدیل می‌شود تا هیچ عکسی
-   با اولین ذخیره گم نشود و مهاجرتِ دیتابیس لازم نباشد. */
+/* ── ردیف قدیمی به مدل تازه ──
+   عین همان مبدل خدمات فنی: روی *خواندن* تبدیل می‌شود تا هیچ عکسی
+   با اولین ذخیره گم نشود و مهاجرت دیتابیس لازم نباشد. */
 export function normalizePlayerMedia(d: {
   albums?: unknown; gallery?: unknown; videos?: unknown
 }): { albums: string[]; gallery: PlayerMedia[]; videos: PlayerVideo[] } {

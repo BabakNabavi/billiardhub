@@ -12,7 +12,7 @@ import VerifiedBadge from '../../components/VerifiedBadge'
 const GOLD     = '#C7A66A'
 const GOLD_D   = '#8F6531'
 const GOLD_G   = 'linear-gradient(135deg,#7A4F10 0%,#C7A66A 50%,#8A6020 100%)'
-/* هم‌رنگِ پایه‌ی صحنه — وگرنه نوارِ چسبان وصله می‌شود */
+/* هم‌رنگ پایه‌ی صحنه — وگرنه نوار چسبان وصله می‌شود */
 const BG       = '#F4F2EE'
 const TEXT     = '#1C1C1A'
 const TEXT_SEC = 'rgba(28,28,26,0.52)'
@@ -408,8 +408,8 @@ export default function ManufacturersPage() {
   useEffect(() => {
     void fetchProfiles<ManufacturerProfile>('manufacturer').then(rows => {
       setRemoteMfrs(rows.filter(r => r.status === 'approved')
-        /* `verified` ستونِ جدولِ `profiles` است، نه داخلِ jsonb —
-           بدونِ این، تیکِ ادمین به کارت نمی‌رسید. */
+        /* `verified` ستون جدول `profiles` است، نه داخل jsonb —
+           بدون این، تیک ادمین به کارت نمی‌رسید. */
         .map(r => ({ ...r.data, slug: r.slug, verified: r.verified } as ManufacturerProfile)))
     })
   }, [])
@@ -457,7 +457,7 @@ export default function ManufacturersPage() {
         .sel-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 20px; grid-auto-rows: 1fr; }
         @media(max-width:1000px) { .sel-grid { grid-template-columns: repeat(2,1fr) !important; } }
         @media(max-width:600px)  { .sel-grid { grid-template-columns: 1fr !important; } }
-        /* حالتِ فوکوس از سیستمِ مشترکِ .input می‌آید */
+        /* حالت فوکوس از سیستم مشترک .input می‌آید */
         @media(max-width:640px){
           .sel-list-img { width: clamp(96px,28vw,128px) !important; }
           .sel-list-actions { display: none !important; }

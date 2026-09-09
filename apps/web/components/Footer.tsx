@@ -133,8 +133,8 @@ export default function Footer() {
         }
         .ft-dev-mob { display: none; }
         .ft-copy-short { display: none; }
-        /* سه ستونِ PLATFORM/EXPLORE/ACCOUNT در یک سطر می‌مانند. با دو
-           ستون، ستونِ سوم به سطرِ بعد می‌افتاد و فوتر بی‌دلیل بلند
+        /* سه ستون PLATFORM/EXPLORE/ACCOUNT در یک سطر می‌مانند. با دو
+           ستون، ستون سوم به سطر بعد می‌افتاد و فوتر بی‌دلیل بلند
            می‌شد — در حالی که برچسب‌ها کوتاه‌اند و جا هست. */
         @media (max-width: 900px) {
           .ft-grid { grid-template-columns: repeat(3,1fr) !important; gap: 20px 20px !important; margin-bottom: 30px !important; }
@@ -145,8 +145,8 @@ export default function Footer() {
         @media (max-width: 520px) {
           .ft-grid { grid-template-columns: repeat(3,1fr) !important; gap: 14px 10px !important; margin-bottom: 16px !important; }
           .ft-brand { grid-column: 1 / -1 !important; }
-          /* «بیلیارد بازار» بلندترین برچسب است و در ستونِ ۱۱۰ پیکسلی
-             می‌شکند؛ کمی کوچک‌تر و بدونِ شکستنِ کلمه جا می‌شود. */
+          /* «بیلیارد بازار» بلندترین برچسب است و در ستون ۱۱۰ پیکسلی
+             می‌شکند؛ کمی کوچک‌تر و بدون شکستن کلمه جا می‌شود. */
           .ft-grid a { font-size: 13px !important; white-space: nowrap; }
           .ft-heading { font-size: 10px !important; letter-spacing: 0.10em !important; }
           .ft-tagline { margin-bottom: 10px !important; }
@@ -156,14 +156,14 @@ export default function Footer() {
           .ft-contact { gap: 4px 16px !important; padding: 9px 0 !important; margin-bottom: 8px !important; }
           /* ── نوار آخر در موبایل: یک خط، نه سه ──
              پیش‌تر ستونی بود و کپی‌رایت، «قوانین» و «حریم خصوصی» هر
-             کدام یک سطر می‌گرفتند — سه سطر برای سه عبارتِ کوتاه، که
+             کدام یک سطر می‌گرفتند — سه سطر برای سه عبارت کوتاه، که
              فوتر را بی‌دلیل بلند می‌کرد.
 
              هر سه کوتاه‌اند و روی صفحه‌ی ۳۲۰ پیکسلی هم در یک خط جا
              می‌شوند؛ فونت کمی کوچک‌تر و فاصله‌ی کمتر کافی است. */
-          /* کپی‌رایت و دو لینک در یک ردیف؛ اعتبارِ توسعه‌دهنده سطرِ
-             بعد. flex-wrap با flex-basis صد درصد روی آخری دقیقاً
-             همین را می‌دهد — بدونِ گرید یا مدیا-کوئریِ دوم. */
+          /* کپی‌رایت و دو لینک در یک ردیف؛ اعتبار توسعه‌دهنده سطر
+             بعد. flex-wrap با flex-basis صد درصد روی آخری دقیقا
+             همین را می‌دهد — بدون گرید یا مدیا-کوئری دوم. */
           .ft-bottom { flex-direction: row !important; flex-wrap: wrap !important; justify-content: center !important;
                        gap: 6px 12px !important; text-align: center; margin-top: 0 !important; line-height: 1.5; }
           .ft-bottom > div { padding: 0; }
@@ -173,12 +173,12 @@ export default function Footer() {
           .ft-copy-long { display: none !important; }
           .ft-copy-short { display: inline !important; }
           .ft-dev-desk { display: none !important; }
-          /* اعتبارِ توسعه‌دهنده و نوارِ حقوقی نزدیکِ هم بمانند */
+          /* اعتبار توسعه‌دهنده و نوار حقوقی نزدیک هم بمانند */
           .ft-dev-mob { display: block !important; flex-basis: 100% !important; margin-top: 0; }
           /* در موبایل نشان‌ها وسط می‌نشینند و کمی بالاتر. فاصله‌ی
-             پایینشان همان چیزی است که نوارِ حقوقی را از نشان جدا
-             نگه می‌دارد — بدونِ آن، نوار به نشان می‌چسبد و نشان به
-             خطِ بالای خودش. */
+             پایینشان همان چیزی است که نوار حقوقی را از نشان جدا
+             نگه می‌دارد — بدون آن، نوار به نشان می‌چسبد و نشان به
+             خط بالای خودش. */
           .ft-seals { justify-content: center !important; margin-top: -38px !important; padding-bottom: 14px !important; }
           .ft-link { font-size: 12px !important; padding: 4px 0 !important; min-height: 24px !important; }
           .ft-link svg { display: none; }
@@ -216,9 +216,9 @@ export default function Footer() {
               </div>
             </div>
 
-            {/* `marginTop` منفی‌تر: شعار باید زیرِ لوگو بنشیند نه جدا از
+            {/* `marginTop` منفی‌تر: شعار باید زیر لوگو بنشیند نه جدا از
                 آن. line-height پیش‌فرض فاصله‌ی نامرئی می‌سازد و همان
-                باعث می‌شد دو خطِ مرتبط، دو بلوکِ جدا به نظر برسند. */}
+                باعث می‌شد دو خط مرتبط، دو بلوک جدا به نظر برسند. */}
             <p className="ft-tagline" style={{ color: DIM, fontSize: '13.5px', lineHeight: 1.65, marginBottom: '14px', maxWidth: '260px', marginTop: '-8px' }}>
               اولین پلتفرم تخصصی بیلیارد ایران
             </p>
@@ -254,8 +254,8 @@ export default function Footer() {
 
         {/* ── Contact strip ─────────────────────────── */}
         {/* `marginTop` منفی نوار را به شبکه‌ی بالا نزدیک می‌کند؛ پیش‌تر
-            فاصله‌ی پایینِ شبکه و padding این نوار روی هم می‌نشستند و
-            یک شکافِ بی‌دلیل می‌ساختند. */}
+            فاصله‌ی پایین شبکه و padding این نوار روی هم می‌نشستند و
+            یک شکاف بی‌دلیل می‌ساختند. */}
         <div className="ft-contact" style={{ borderTop: `1px solid ${BORDER}`, borderBottom: `1px solid ${BORDER}`, padding: '11px 0', marginTop: '-10px', marginBottom: '14px', display: 'flex', gap: '24px', flexWrap: 'wrap' }}>
           {[
             { icon: <MapPin size={13} style={{ color: GOLD, flexShrink: 0 }} />, text: 'تهران، پاسداران' },
@@ -283,27 +283,27 @@ export default function Footer() {
           </div>
         </div>
 
-        {/* ── نشانِ اعتمادِ الکترونیکی ────────────────
-            جای متعارفش همین‌جاست: پایینِ صفحه، پیش از نوارِ حقوقی.
-            در فوترِ عمومی است تا شرطِ اینماد — دیده‌شدن بدونِ ورود به
+        {/* ── نشان اعتماد الکترونیکی ────────────────
+            جای متعارفش همین‌جاست: پایین صفحه، پیش از نوار حقوقی.
+            در فوتر عمومی است تا شرط اینماد — دیده‌شدن بدون ورود به
             حساب — برقرار بماند. */}
-        {/* `flex-end` در چیدمانِ راست‌به‌چپ یعنی سمتِ چپ — همان‌جایی که
+        {/* `flex-end` در چیدمان راست‌به‌چپ یعنی سمت چپ — همان‌جایی که
             نشان‌های اعتماد در سایت‌های فارسی می‌نشینند.
 
             دو نشان از پایین هم‌تراز می‌شوند نه از وسط: قدشان یکی نیست
-            (پی‌پینگ ۱۷۳ و اینماد کوتاه‌تر) و هم‌ترازیِ وسط باعث می‌شد
+            (پی‌پینگ ۱۷۳ و اینماد کوتاه‌تر) و هم‌ترازی وسط باعث می‌شد
             کوتاه‌تری معلق به نظر برسد. `align-items: flex-end` هر دو
-            را روی یک خطِ کف می‌نشاند.
+            را روی یک خط کف می‌نشاند.
 
             `gap: 20px` — کمتر از آن دو نشان به هم می‌چسبند و مثل یک
             تصویر دیده می‌شوند؛ بیشتر از آن ربطشان به هم گم می‌شود. */}
-        {/* ── جبرانِ فضای خالیِ scale ──
+        {/* ── جبران فضای خالی scale ──
             `scale(0.8)` جعبه‌ی عنصر را کوچک نمی‌کند، پس ۲۰٪ فضای
             خالی می‌ماند. `transform-origin` روی *پایین* است، یعنی
             فضای خالی **بالای** نشان جمع می‌شود نه پایینش.
 
-            پس جبران باید بالا باشد نه پایین. حاشیه‌ی منفیِ پایین
-            (تلاشِ قبلی) نشان‌ها را روی نوارِ زیرشان می‌نشاند. */}
+            پس جبران باید بالا باشد نه پایین. حاشیه‌ی منفی پایین
+            (تلاش قبلی) نشان‌ها را روی نوار زیرشان می‌نشاند. */}
         <div className="ft-seals" style={{
           display: 'flex', justifyContent: 'flex-end', alignItems: 'flex-end',
           gap: '8px', flexWrap: 'wrap',
@@ -316,7 +316,7 @@ export default function Footer() {
         {/* ── Bottom bar ────────────────────────────── */}
         <div className="ft-bottom" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
           {/* دسکتاپ جا دارد و جمله‌ی کامل رسمی‌تر است؛ موبایل جا ندارد
-              و باید در همان یک سطر با دو لینکِ حقوقی بماند. */}
+              و باید در همان یک سطر با دو لینک حقوقی بماند. */}
           <div style={{ fontSize: '13px', color: DIM2, whiteSpace: 'nowrap' }}>
             <span className="ft-copy-long">© ۱۴۰۵ تمامی حقوق برای بیلیارد هاب محفوظ است</span>
             <span className="ft-copy-short">© ۱۴۰۵ بیلیارد هاب</span>

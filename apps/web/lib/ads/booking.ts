@@ -4,7 +4,7 @@
    سه اصل امنیتی که در کل این فایل رعایت شده‌اند:
      ۱) قیمت همیشه از ردیف پلن در دیتابیس خوانده می‌شود؛ هیچ عددی از
         کلاینت پذیرفته نمی‌شود.
-     ۲) پلن باید واقعاً به همان جایگاه تعلق داشته باشد — وگرنه کاربر
+     ۲) پلن باید واقعا به همان جایگاه تعلق داشته باشد — وگرنه کاربر
         می‌توانست پلن ارزان یک جایگاه را به جایگاه گران‌تر بچسباند.
      ۳) کاربر فقط جایگاه‌هایی را می‌بیند که نقش تأییدشده‌اش اجازه می‌دهد.
    ───────────────────────────────────────────────────────────── */
@@ -17,16 +17,16 @@ import {
 } from './core'
 
 /* ── واجد شرایط بودن ─────────────────────────────────────────
-   هر جایگاه به نقش‌هایی گره خورده که منطقاً صاحب آن محتوا هستند:
+   هر جایگاه به نقش‌هایی گره خورده که منطقا صاحب آن محتوا هستند:
    باشگاه‌دار باشگاهش را برجسته می‌کند، فروشنده فروشگاهش را، تولیدکننده
    محصولش را. بنرهای عمومی برای هر کسب‌وکار تأییدشده باز است. */
-/* ⚠️ این نگاشت دیگر منبعِ حقیقت نیست.
+/* ⚠️ این نگاشت دیگر منبع حقیقت نیست.
 
-   از مهاجرتِ ۰۵۶ نقش‌های مجازِ هر جایگاه در ستونِ `advertiser_roles`
-   خودِ ردیف است، چون ادمین می‌تواند جایگاه بسازد و کدی که فهرستش را
-   نگه دارد باید برای هر جایگاهِ تازه دوباره دیپلوی شود.
+   از مهاجرت ۰۵۶ نقش‌های مجاز هر جایگاه در ستون `advertiser_roles`
+   خود ردیف است، چون ادمین می‌تواند جایگاه بسازد و کدی که فهرستش را
+   نگه دارد باید برای هر جایگاه تازه دوباره دیپلوی شود.
 
-   این ثابت فقط پشتیبانِ ردیف‌هایی است که هنوز ستونشان خالی است — و
+   این ثابت فقط پشتیبان ردیف‌هایی است که هنوز ستونشان خالی است — و
    `rolesFor` اول سراغ ردیف می‌رود. */
 export const PLACEMENT_ROLES: Record<string, string[]> = {
   market_featured_products_homepage: ['manufacturer', 'seller'],
@@ -39,7 +39,7 @@ export const PLACEMENT_ROLES: Record<string, string[]> = {
   homepage_bottom_banner: ['club_owner', 'seller', 'manufacturer'],
 }
 
-/** نقش‌های مجازِ یک جایگاه — از خودِ ردیف، و اگر خالی بود از نگاشتِ قدیمی */
+/** نقش‌های مجاز یک جایگاه — از خود ردیف، و اگر خالی بود از نگاشت قدیمی */
 export const rolesFor = (p: Pick<Placement, 'key' | 'advertiserRoles'>): string[] =>
   (p.advertiserRoles?.length ? p.advertiserRoles : (PLACEMENT_ROLES[p.key] ?? []))
 
@@ -54,7 +54,7 @@ export interface Eligibility {
  * جایگاه‌هایی که این کاربر می‌تواند بخرد.
  *
  * فقط جایگاه‌های `paid` (گیت فاز ۴) و فقط آن‌هایی که نقش تأییدشده‌ی
- * کاربر اجازه می‌دهد. نقش خوداظهار `users.primaryRole` عمداً نادیده
+ * کاربر اجازه می‌دهد. نقش خوداظهار `users.primaryRole` عمدا نادیده
  * گرفته می‌شود چون کاربر خودش می‌تواند تغییرش دهد — مبنا همان
  * نقش‌های تأییدشده‌ی فاز ۳ است.
  */
@@ -67,7 +67,7 @@ export async function eligibleFor(userId: string): Promise<Eligibility> {
   const roles = await verifiedRolesOfPerson(lookup.personId)
   /* فقط جایگاهی که هم پولی است و هم روشن، خریدنی است.
 
-     `isActive` تا امروز این‌جا بررسی نمی‌شد: جایگاهِ خاموش در فهرستِ
+     `isActive` تا امروز این‌جا بررسی نمی‌شد: جایگاه خاموش در فهرست
      خرید می‌آمد، کاربر تا درگاه می‌رفت و آن‌جا `reserve_campaign_slot`
      با PLACEMENT_INACTIVE ردش می‌کرد — یعنی خطا در بدترین لحظه. */
   const paid = (await listPlacements()).filter(p => p.mode === 'paid' && p.isActive)
@@ -77,7 +77,7 @@ export async function eligibleFor(userId: string): Promise<Eligibility> {
   const withPlans = await Promise.all(allowed.map(async p => {
     const plans = await plansForPlacement(p.key)
     /* ظرفیت برای کوتاه‌ترین پله سنجیده می‌شود: اگر برای کمترین مدت هم
-       جا نباشد، برای مدت‌های بلندتر قطعاً نیست. */
+       جا نباشد، برای مدت‌های بلندتر قطعا نیست. */
     const shortest = plans.reduce((m, x) => Math.min(m, x.durationDays), Infinity)
     return {
       ...p,
@@ -92,10 +92,10 @@ export async function eligibleFor(userId: string): Promise<Eligibility> {
 
 /* ── ظرفیت ────────────────────────────────────────────────────
 
-   ظرفیت تا امروز فقط سقفِ *نمایش* بود و هیچ‌جا هنگام خرید بررسی
-   نمی‌شد؛ روی جایگاهِ یک‌ظرفیتی می‌شد بی‌نهایت کمپین فروخت. شمارش و
-   رزرو حالا هر دو در دیتابیس و زیرِ قفلِ ردیفِ جایگاه انجام می‌شوند
-   (مهاجرتِ ۰۵۵) — بررسی و درج در دو رفت‌وبرگشتِ جدا یعنی دو خریدارِ
+   ظرفیت تا امروز فقط سقف *نمایش* بود و هیچ‌جا هنگام خرید بررسی
+   نمی‌شد؛ روی جایگاه یک‌ظرفیتی می‌شد بی‌نهایت کمپین فروخت. شمارش و
+   رزرو حالا هر دو در دیتابیس و زیر قفل ردیف جایگاه انجام می‌شوند
+   (مهاجرت ۰۵۵) — بررسی و درج در دو رفت‌وبرگشت جدا یعنی دو خریدار
    هم‌زمان هر دو «جا هست» می‌بینند. */
 
 export interface Availability {
@@ -147,7 +147,7 @@ export type QuoteResult = Quote | { ok: false; status: number; message: string }
 export async function quote(placementKey: string, planId: string): Promise<QuoteResult> {
   const placement = await getPlacement(placementKey)
   if (!placement) return { ok: false, status: 404, message: 'جایگاه پیدا نشد' }
-  if (placement.mode !== 'paid') return { ok: false, status: 409, message: 'این جایگاه فعلاً قابل خرید نیست' }
+  if (placement.mode !== 'paid') return { ok: false, status: 409, message: 'این جایگاه فعلا قابل خرید نیست' }
 
   const { data, error } = await sb().from('ad_pricing_plans').select('*').eq('id', planId).maybeSingle()
   if (error || !data) return { ok: false, status: 404, message: 'پلن پیدا نشد' }
@@ -203,9 +203,9 @@ export async function createOrder(
 
   const now = Date.now()
 
-  /* رزروِ اتمیک: شمردنِ ظرفیت و ساختِ کمپین در یک تراکنش، زیرِ قفلِ
-     ردیفِ جایگاه. اگر این‌جا اول می‌شمردیم و بعد درج می‌کردیم، دو
-     خریدارِ هم‌زمان هر دو «جا هست» می‌دیدند و هر دو پول می‌دادند. */
+  /* رزرو اتمیک: شمردن ظرفیت و ساخت کمپین در یک تراکنش، زیر قفل
+     ردیف جایگاه. اگر این‌جا اول می‌شمردیم و بعد درج می‌کردیم، دو
+     خریدار هم‌زمان هر دو «جا هست» می‌دیدند و هر دو پول می‌دادند. */
   const { data: reserved, error: resErr } = await rpc<string>('reserve_campaign_slot', {
     p_placement: q.placement.key,
     p_user: userId,
@@ -217,14 +217,14 @@ export async function createOrder(
   })
 
   if (resErr || !reserved) {
-    /* کدهای کوتاهِ تابع به پیامِ فارسی. متنِ خام دیتابیس هرگز به
+    /* کدهای کوتاه تابع به پیام فارسی. متن خام دیتابیس هرگز به
        کاربر نشان داده نمی‌شود. */
     const raw = String(resErr?.message ?? '')
     if (raw.includes('PLACEMENT_FULL')) {
       return { error: 'ظرفیت این جایگاه در این بازه تکمیل است' }
     }
     if (raw.includes('PLACEMENT_INACTIVE')) {
-      return { error: 'این جایگاه فعلاً فعال نیست' }
+      return { error: 'این جایگاه فعلا فعال نیست' }
     }
     if (raw.includes('PLACEMENT_NOT_FOUND')) {
       return { error: 'جایگاه پیدا نشد' }
@@ -243,7 +243,7 @@ export async function createOrder(
     duration_days: q.durationDays,
     status: 'PENDING',
     provider: 'pending',
-    /* اسنپ‌شات: قیمت و مشخصات لحظه‌ی خرید بماند حتی اگر پلن بعداً عوض شود */
+    /* اسنپ‌شات: قیمت و مشخصات لحظه‌ی خرید بماند حتی اگر پلن بعدا عوض شود */
     snapshot: {
       placementTitle: q.placement.title,
       planName: q.plan.name,
@@ -321,12 +321,12 @@ export async function myCampaigns(userId: string): Promise<MyCampaign[]> {
       impressions: imp,
       clicks: clk,
       ctr: imp > 0 ? (clk / imp) * 100 : 0,
-      /* شمارنده‌های تبلیغِ ویدیویی (مهاجرتِ ۰۵۱). برای جایگاه‌های
+      /* شمارنده‌های تبلیغ ویدیویی (مهاجرت ۰۵۱). برای جایگاه‌های
          بنری همیشه صفرند و داشبورد آن‌ها را نشان نمی‌دهد — بخشی که
-         عددِ بی‌معنی نشان بدهد بدتر از نبودنش است. */
+         عدد بی‌معنی نشان بدهد بدتر از نبودنش است. */
       completedViews: Number(r.completed_views) || 0,
       skippedViews: Number(r.skipped_views) || 0,
-      /* نرخِ رد کردن: از مجموعِ *پایان‌یافته‌ها*، نه از کلِ نمایش‌ها.
+      /* نرخ رد کردن: از مجموع *پایان‌یافته‌ها*، نه از کل نمایش‌ها.
          نمایشی که هنوز تمام نشده هنوز نه کامل است نه ردشده. */
       skipRate: (Number(r.completed_views) || 0) + (Number(r.skipped_views) || 0) > 0
         ? ((Number(r.skipped_views) || 0) /

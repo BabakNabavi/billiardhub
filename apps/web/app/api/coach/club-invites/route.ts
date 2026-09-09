@@ -6,31 +6,31 @@ import { sb, audit, clientIp } from '@/lib/finance/db';
 /* دعوت‌های باشگاه برای مربی.
 
    ── چرا لازم شد ──
-   ⚠️ فهرستِ مربیانِ باشگاه را تا امروز فقط باشگاه‌دار می‌نوشت و مربی
-   هیچ‌جا خبردار نمی‌شد. یعنی هر باشگاهی می‌توانست نامِ هر مربی‌ای را
-   کنارِ خودش بگذارد — و از وقتی امتیازِ مربی از راهِ همان باشگاه
-   سنجیده می‌شود، این دیگر فقط یک ادعای تبلیغاتی نیست: مسیرِ
+   ⚠️ فهرست مربیان باشگاه را تا امروز فقط باشگاه‌دار می‌نوشت و مربی
+   هیچ‌جا خبردار نمی‌شد. یعنی هر باشگاهی می‌توانست نام هر مربی‌ای را
+   کنار خودش بگذارد — و از وقتی امتیاز مربی از راه همان باشگاه
+   سنجیده می‌شود، این دیگر فقط یک ادعای تبلیغاتی نیست: مسیر
    امتیازدادن به آن مربی را هم باز می‌کند.
 
-   حالا افزودنِ مربی یک *دعوت* است: تا خودش نپذیرد، نه در صفحه‌ی
-   عمومیِ باشگاه دیده می‌شود و نه کسی از آن راه به او امتیاز می‌دهد.
+   حالا افزودن مربی یک *دعوت* است: تا خودش نپذیرد، نه در صفحه‌ی
+   عمومی باشگاه دیده می‌شود و نه کسی از آن راه به او امتیاز می‌دهد.
 
    ── ردیف‌های قدیمی ──
    ورودی‌های پیش از این تغییر `status` ندارند و «پذیرفته» حساب
    می‌شوند. برعکسش یعنی مربیانی که امروز روی صفحه‌ی باشگاه هستند
    یک‌شبه ناپدید شوند — تغییری که کسی نخواسته بود.
 
-   ── چرا مسیرِ جدا و نه همان PUTِ باشگاه ──
-   نویسنده این‌جا مربی است نه مالکِ باشگاه؛ مسیرِ باشگاه درست کارش را
+   ── چرا مسیر جدا و نه همان PUT باشگاه ──
+   نویسنده این‌جا مربی است نه مالک باشگاه؛ مسیر باشگاه درست کارش را
    می‌کند و هرکسی جز مالک را رد می‌کند. پس اجازه‌ی این عمل جداگانه
-   سنجیده می‌شود: فقط صاحبِ همان پروفایلِ مربی. */
+   سنجیده می‌شود: فقط صاحب همان پروفایل مربی. */
 
 type Entry = Record<string, unknown> & { id?: unknown; slug?: unknown; status?: unknown };
 
 const isMine = (e: Entry, profileId: string, slug: string) =>
   String(e.id ?? '') === profileId || (!!slug && String(e.slug ?? '') === slug);
 
-/** پروفایلِ مربیِ خودِ کاربر */
+/** پروفایل مربی خود کاربر */
 async function myCoachProfile(userId: string) {
   const { data, error } = await sb().from('profiles')
     .select('id,slug').eq('kind', 'coach').eq('owner_id', userId).maybeSingle();
@@ -62,14 +62,14 @@ export async function GET(req: NextRequest) {
       clubName: row.name,
       clubSlug: row.slug,
       logo: row.logo,
-      /* نبودِ `status` یعنی ردیفِ پیش از این تغییر ⇒ پذیرفته */
+      /* نبود `status` یعنی ردیف پیش از این تغییر ⇒ پذیرفته */
       status: typeof mine.status === 'string' ? mine.status : 'accepted',
     });
   }
   return NextResponse.json({ invites }, { headers: { 'Cache-Control': 'no-store' } });
 }
 
-/* POST { clubId, action } — پذیرفتن یا ردکردنِ دعوت */
+/* POST { clubId, action } — پذیرفتن یا ردکردن دعوت */
 export async function POST(req: NextRequest) {
   const actor = await actorOf(req);
   if (!actor) return NextResponse.json(UNAUTHENTICATED, { status: 401 });
@@ -97,8 +97,8 @@ export async function POST(req: NextRequest) {
     found = true;
     return { ...e, status: action === 'accept' ? 'accepted' : 'rejected', decidedAt: new Date().toISOString() };
   });
-  /* ⚠️ فقط ردیفِ خودِ این مربی عوض می‌شود و بقیه‌ی آرایه دست‌نخورده
-     برمی‌گردد: نوشتنِ کلِ ستون یعنی هر تغییرِ هم‌زمانِ باشگاه‌دار
+  /* ⚠️ فقط ردیف خود این مربی عوض می‌شود و بقیه‌ی آرایه دست‌نخورده
+     برمی‌گردد: نوشتن کل ستون یعنی هر تغییر هم‌زمان باشگاه‌دار
      پاک می‌شد. */
   if (!found) return NextResponse.json({ message: 'دعوتی از این باشگاه ندارید' }, { status: 404 });
 

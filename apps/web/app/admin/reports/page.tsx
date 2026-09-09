@@ -44,7 +44,7 @@ export default function AdminReports() {
   const [busy, setBusy] = useState('')
   const [note, setNote] = useState<Record<string, string>>({})
 
-  /* شماره‌ی هشدار — در تنظیماتِ سرور، نه در کد: شماره‌ی ادمین عوض
+  /* شماره‌ی هشدار — در تنظیمات سرور، نه در کد: شماره‌ی ادمین عوض
      می‌شود و نباید دیپلوی بخواهد. */
   const [alertPhone, setAlertPhone] = useState('')
   const [phoneDraft, setPhoneDraft] = useState('')
@@ -110,9 +110,9 @@ export default function AdminReports() {
         ) : null}
       </div>
 
-      {/* ── هشدارِ پیامکی ──
-          بدونِ شماره، ادمین فقط وقتی خبردار می‌شود که خودش این صفحه را
-          باز کند. برای آگهیِ کلاهبرداری، آن فاصله همان مدتی است که
+      {/* ── هشدار پیامکی ──
+          بدون شماره، ادمین فقط وقتی خبردار می‌شود که خودش این صفحه را
+          باز کند. برای آگهی کلاهبرداری، آن فاصله همان مدتی است که
           آگهی روی سایت می‌ماند. */}
       <div style={{
         display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap',
@@ -141,7 +141,7 @@ export default function AdminReports() {
         )}
         {!alertPhone && (
           <span style={{ fontSize: 11, color: MUT, lineHeight: 1.8 }}>
-            الان فقط نشانِ داشبورد کار می‌کند.
+            الان فقط نشان داشبورد کار می‌کند.
           </span>
         )}
       </div>

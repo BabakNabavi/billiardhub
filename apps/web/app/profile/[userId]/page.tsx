@@ -73,8 +73,8 @@ const ROLES: RoleMeta[] = [
     profileFields: [
       { key: 'displayName', label: 'نام کامل', type: 'text', placeholder: 'نام و نام‌خانوادگی', required: true },
       { key: 'specialty', label: 'تخصص', type: 'select', placeholder: '', options: ['اسنوکر', 'پاکت بیلیارد', 'کارامبول', 'هندیکپ'], required: true },
-      { key: 'nationalRank', label: 'رتبه ملی', type: 'number', placeholder: 'مثلاً ۱۲', required: false },
-      { key: 'yearsActive', label: 'سال‌های فعالیت', type: 'number', placeholder: 'مثلاً ۸', required: false },
+      { key: 'nationalRank', label: 'رتبه ملی', type: 'number', placeholder: 'مثلا ۱۲', required: false },
+      { key: 'yearsActive', label: 'سال‌های فعالیت', type: 'number', placeholder: 'مثلا ۸', required: false },
       { key: 'club', label: 'باشگاه فعلی', type: 'text', placeholder: 'نام باشگاه', required: false },
       { key: 'bio', label: 'بیوگرافی ورزشی', type: 'textarea', placeholder: 'افتخارات، سابقه بازی...', required: false },
       { key: 'instagram', label: 'اینستاگرام', type: 'url', placeholder: 'https://instagram.com/...', required: false },
@@ -86,12 +86,12 @@ const ROLES: RoleMeta[] = [
     profileFields: [
       { key: 'displayName', label: 'نام کامل', type: 'text', placeholder: 'نام و نام‌خانوادگی', required: true },
       { key: 'specialty', label: 'رشته تدریس', type: 'select', placeholder: '', options: ['اسنوکر', 'پاکت بیلیارد', 'کارامبول', 'همه رشته‌ها'], required: true },
-      /* «ملی» برداشته شد: در فهرستِ رسمیِ درجه‌ها چنین درجه‌ای نیست.
-         مقدارِ ذخیره‌شده‌ی قدیمی پایین‌تر گزینه‌ی خودش را می‌گیرد. */
+      /* «ملی» برداشته شد: در فهرست رسمی درجه‌ها چنین درجه‌ای نیست.
+         مقدار ذخیره‌شده‌ی قدیمی پایین‌تر گزینه‌ی خودش را می‌گیرد. */
       { key: 'licenseLevel', label: 'درجه مربیگری', type: 'select', placeholder: '', options: ['درجه ۳', 'درجه ۲', 'درجه ۱'], required: false },
-      { key: 'experience', label: 'سابقه تدریس (سال)', type: 'number', placeholder: 'مثلاً ۵', required: true },
+      { key: 'experience', label: 'سابقه تدریس (سال)', type: 'number', placeholder: 'مثلا ۵', required: true },
       { key: 'location', label: 'شهر فعالیت', type: 'text', placeholder: 'تهران، اصفهان...', required: true },
-      { key: 'sessionPrice', label: 'هزینه هر جلسه (تومان)', type: 'number', placeholder: 'مثلاً ۵۰۰۰۰۰', required: false },
+      { key: 'sessionPrice', label: 'هزینه هر جلسه (تومان)', type: 'number', placeholder: 'مثلا ۵۰۰۰۰۰', required: false },
       { key: 'bio', label: 'درباره من', type: 'textarea', placeholder: 'روش تدریس، سوابق، دستاوردها...', required: false },
     ],
   },
@@ -103,7 +103,7 @@ const ROLES: RoleMeta[] = [
       { key: 'licenseLevel', label: 'درجه داوری', type: 'select', placeholder: '', options: ['درجه ۳', 'درجه ۲', 'درجه ۱', 'بین‌المللی'], required: true },
       { key: 'specialty', label: 'رشته داوری', type: 'select', placeholder: '', options: ['اسنوکر', 'پاکت بیلیارد', 'کارامبول', 'همه رشته‌ها'], required: true },
       { key: 'location', label: 'شهر', type: 'text', placeholder: 'محل اقامت', required: true },
-      { key: 'matchCount', label: 'تعداد مسابقات داوری‌شده', type: 'number', placeholder: 'مثلاً ۴۰', required: false },
+      { key: 'matchCount', label: 'تعداد مسابقات داوری‌شده', type: 'number', placeholder: 'مثلا ۴۰', required: false },
       { key: 'bio', label: 'سوابق داوری', type: 'textarea', placeholder: 'مسابقات مهم، لیگ‌ها...', required: false },
     ],
   },
@@ -134,7 +134,7 @@ const ROLES: RoleMeta[] = [
     description: 'تولید تجهیزات بیلیارد',
     profileFields: [
       { key: 'displayName', label: 'نام برند / کارخانه', type: 'text', placeholder: 'نام رسمی', required: true },
-      { key: 'founded', label: 'سال تأسیس', type: 'number', placeholder: 'مثلاً ۱۳۸۵', required: false },
+      { key: 'founded', label: 'سال تأسیس', type: 'number', placeholder: 'مثلا ۱۳۸۵', required: false },
       { key: 'location', label: 'محل تولید', type: 'text', placeholder: 'استان / شهر', required: true },
       { key: 'website', label: 'وب‌سایت', type: 'url', placeholder: 'https://...', required: false },
       { key: 'bio', label: 'درباره برند', type: 'textarea', placeholder: 'تاریخچه، ظرفیت تولید، افتخارات...', required: false },
@@ -146,7 +146,7 @@ const ROLES: RoleMeta[] = [
     profileFields: [
       { key: 'displayName', label: 'نام باشگاه', type: 'text', placeholder: 'نام رسمی باشگاه', required: true },
       { key: 'location', label: 'آدرس', type: 'text', placeholder: 'شهر — محله', required: true },
-      { key: 'tableCount', label: 'تعداد میزها', type: 'number', placeholder: 'مثلاً ۶', required: true },
+      { key: 'tableCount', label: 'تعداد میزها', type: 'number', placeholder: 'مثلا ۶', required: true },
       { key: 'phone', label: 'شماره باشگاه', type: 'text', placeholder: '۰۲۱...', required: true },
       { key: 'instagram', label: 'اینستاگرام', type: 'url', placeholder: 'https://instagram.com/...', required: false },
       { key: 'bio', label: 'معرفی باشگاه', type: 'textarea', placeholder: 'امکانات، ساعت‌کاری، خدمات...', required: false },
@@ -195,9 +195,9 @@ function Field({
           style={{ ...base, appearance: 'none' as any }}
         >
           <option value="">انتخاب کنید...</option>
-          {/* ⚠️ مقدارِ ذخیره‌شده‌ای که دیگر در فهرست نیست (مثلاً «ملی»ِ
+          {/* ⚠️ مقدار ذخیره‌شده‌ای که دیگر در فهرست نیست (مثلا «ملی»
               قدیمی) گزینه‌ی خودش را می‌گیرد؛ وگرنه select خالی می‌افتد،
-              در شمارشِ «تکمیل‌شده» می‌آید، و ذخیره‌ی بعدی بی‌صدا همان
+              در شمارش «تکمیل‌شده» می‌آید، و ذخیره‌ی بعدی بی‌صدا همان
               مقدار را دوباره می‌نویسد. */}
           {value && !field.options?.includes(value) && <option value={value}>{value}</option>}
           {field.options?.map(o => <option key={o} value={o}>{o}</option>)}
@@ -283,7 +283,7 @@ function RoleForm({ role, onSaved }: { role: RoleMeta; onSaved: () => void }) {
             key={f.key}
             field={f}
             /* داده‌ی قدیمی «پول» ذخیره کرده و فهرست حالا «پاکت
-               بیلیارد» دارد؛ بدونِ نگاشت، دراپ‌داون خالی می‌افتد. */
+               بیلیارد» دارد؛ بدون نگاشت، دراپ‌داون خالی می‌افتد. */
             value={f.key === 'specialty' ? normalizeDiscipline(data[f.key]) : (data[f.key] ?? '')}
             onChange={v => setData(d => ({ ...d, [f.key]: v }))}
           />

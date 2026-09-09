@@ -8,7 +8,7 @@
    localStorage بودند. یعنی:
      • هر ادمین روی مرورگر خودش فهرست متفاوتی می‌دید
      • هیچ‌کدام از تأییدها روی سرور ثبت نمی‌شد
-     • پروفایل‌هایی که کاربران واقعاً ساخته بودند اصلاً دیده نمی‌شدند
+     • پروفایل‌هایی که کاربران واقعا ساخته بودند اصلا دیده نمی‌شدند
 
    دادهٔ واقعی از قبل در جدول `profiles` بود و `/api/admin/profiles`
    هم تأیید/رد را پیاده کرده بود؛ فقط این صفحه‌ها به آن وصل نبودند.
@@ -26,6 +26,9 @@ interface ApiProfile {
   kind: ProfileKind
   status: 'approved' | 'pending' | 'rejected'
   verified?: boolean
+  /* مدرک/جواز — ستون ردیف است، نه فیلد فرم */
+  licenseUrl?: string | null
+  licenseVerified?: boolean
   data?: Record<string, unknown> | null
 }
 
@@ -82,11 +85,11 @@ export async function loadProfileRows(kind: ProfileKind): Promise<AdminRow[]> {
 }
 
 /* ── چرا این‌ها نتیجه برمی‌گردانند ──
-   ⚠️ هر سه تابع قبلاً `void` بودند و `patchAdminProfile` هر خطایی را
+   ⚠️ هر سه تابع قبلا `void` بودند و `patchAdminProfile` هر خطایی را
    با یک `catch {}` خالی می‌بلعید. ادمین دکمه‌ی «تیک آبی» را می‌زد،
-   سرور ۴۰۳ می‌داد (کلیدِ دسترسیِ `verified` را نداشت) و صفحه *هیچ*
-   نمی‌گفت — بدتر: کشِ محلی خوش‌بینانه به‌روز می‌شد و ردیف عوض‌شده
-   به‌نظر می‌رسید تا اولین بازخوانی. «می‌زنم ولی کار نمی‌کند» دقیقاً
+   سرور ۴۰۳ می‌داد (کلید دسترسی `verified` را نداشت) و صفحه *هیچ*
+   نمی‌گفت — بدتر: کش محلی خوش‌بینانه به‌روز می‌شد و ردیف عوض‌شده
+   به‌نظر می‌رسید تا اولین بازخوانی. «می‌زنم ولی کار نمی‌کند» دقیقا
    همین بود. حالا شکست دیده می‌شود. */
 export interface AdminActionResult { ok: boolean; message?: string }
 
@@ -105,7 +108,7 @@ async function patchProfile(body: Record<string, unknown>): Promise<AdminActionR
   }
 }
 
-/** اعطا یا پس‌گرفتنِ تیکِ آبی — جدا از انتشار */
+/** اعطا یا پس‌گرفتن تیک آبی — جدا از انتشار */
 export async function setProfileVerified(id: string, next: boolean): Promise<AdminActionResult> {
   return patchProfile({ id, verified: next })
 }
@@ -119,48 +122,52 @@ export async function toggleProfile(id: string, current: 'approved' | 'rejected'
    (مربیان و داوران) و به‌جای AdminRow، خود شیء پروفایل را می‌خواهند. */
 
 /** فهرست خام پروفایل‌های یک نقش، با شکل همان نقش */
-/** فهرستِ خامِ یک نقش. `id` همیشه همراه است — کنش‌های ادمین به آن
- *  نیاز دارند و نامک برای شناساییِ ردیف کافی نیست. */
-export async function fetchAdminProfiles<T extends object>(kind: ProfileKind): Promise<Array<T & { id: string }>> {
+/** فهرست خام یک نقش. `id` همیشه همراه است — کنش‌های ادمین به آن
+ *  نیاز دارند و نامک برای شناسایی ردیف کافی نیست. */
+export async function fetchAdminProfiles<T extends object>(
+  kind: ProfileKind,
+): Promise<Array<T & { id: string; licenseUrl: string; licenseVerified: boolean }>> {
   try {
     const r = await apiFetch(`/api/admin/profiles?kind=${kind}`, { cache: 'no-store' })
     if (!r.ok) return []
     const j = await r.json().catch(() => null) as { profiles?: Record<string, ApiProfile[]> } | null
     const list = j?.profiles?.[kind] ?? []
     /* `slug` و `status` از ستون‌های خود ردیف می‌آیند، نه از data */
-    /* `verified` هم ستونِ ردیف است. بدونِ این، صفحه‌های ادمینِ
-       مربی/داور/فروشگاه تیک را از داخلِ jsonb می‌خواندند — جایی که
-       فرمِ خودِ کاربر می‌نویسد و ادمین نه. */
+    /* `verified` هم ستون ردیف است. بدون این، صفحه‌های ادمین
+       مربی/داور/فروشگاه تیک را از داخل jsonb می‌خواندند — جایی که
+       فرم خود کاربر می‌نویسد و ادمین نه. */
     return list.map(p => ({
       ...(p.data ?? {}), slug: p.slug, status: p.status, id: p.id,
       verified: p.verified === true,
-      /* ⚠️ کستِ دومرحله‌ای لازم است و کوتاهی نیست: `p.data` یک
+      licenseUrl: p.licenseUrl ?? '',
+      licenseVerified: p.licenseVerified === true,
+      /* ⚠️ کست دومرحله‌ای لازم است و کوتاهی نیست: `p.data` یک
          `Record<string, unknown>` است و TS نمی‌تواند بداند شکلش با `T`
-         می‌خواند. تکِ‌مرحله‌ای کامپایل نمی‌شود. مرزِ واقعیِ اعتماد
-         سمتِ سرور است، نه این‌جا. */
-    })) as unknown as Array<T & { id: string }>
+         می‌خواند. تک‌مرحله‌ای کامپایل نمی‌شود. مرز واقعی اعتماد
+         سمت سرور است، نه این‌جا. */
+    })) as unknown as Array<T & { id: string; licenseUrl: string; licenseVerified: boolean }>
   } catch { return [] }
 }
 
 /* ── تغییر وضعیت/تأیید یک پروفایل ──
 
-   ⚠️ **این تابع با نامک کار می‌کرد و غلط بود.** ایندکسِ دیتابیس
-   `UNIQUE (kind, slug)` است (مهاجرتِ ۰۰۸) — یعنی نامک فقط *داخلِ
-   هر نقش* یکتاست، نه در کلِ جدول. نسخه‌ی قبلی فهرستِ **همه‌ی
+   ⚠️ **این تابع با نامک کار می‌کرد و غلط بود.** ایندکس دیتابیس
+   `UNIQUE (kind, slug)` است (مهاجرت ۰۰۸) — یعنی نامک فقط *داخل
+   هر نقش* یکتاست، نه در کل جدول. نسخه‌ی قبلی فهرست **همه‌ی
    نقش‌ها** را می‌گرفت و اولین ردیفی را که نامکش می‌خورد برمی‌داشت،
-   و ترتیبِ `PROFILE_KINDS` هم `coach` را پیش از `referee`
+   و ترتیب `PROFILE_KINDS` هم `coach` را پیش از `referee`
    می‌گذارد.
 
    نتیجه‌ی عملی: کسی که هم مربی است هم داور و هر دو پروفایلش یک
-   نامک دارد، وقتی ادمین در صفحه‌ی داوران «تأیید» را می‌زد، ردیفِ
-   **مربی** به‌روز می‌شد. ردیفِ داور برای همیشه «در انتظار»
-   می‌ماند و ادمین می‌دید که دکمه هیچ کاری نمی‌کند — دقیقاً همان
+   نامک دارد، وقتی ادمین در صفحه‌ی داوران «تأیید» را می‌زد، ردیف
+   **مربی** به‌روز می‌شد. ردیف داور برای همیشه «در انتظار»
+   می‌ماند و ادمین می‌دید که دکمه هیچ کاری نمی‌کند — دقیقا همان
    گزارشی که رسید.
 
-   حالا شناسه‌ی ردیف مستقیم می‌آید. یک درخواستِ کمتر هم هست: آن
-   GETِ واسط اصلاً لازم نبود. */
+   حالا شناسه‌ی ردیف مستقیم می‌آید. یک درخواست کمتر هم هست: آن
+   GET واسط اصلا لازم نبود. */
 /** ⚠️ شیء می‌گیرد نه دو رشته: `id` و `slug` هر دو `string`اند و
- *  جابه‌جا نوشتنشان بی‌صدا کامپایل می‌شود و همان باگِ ردیفِ اشتباه
+ *  جابه‌جا نوشتنشان بی‌صدا کامپایل می‌شود و همان باگ ردیف اشتباه
  *  را برمی‌گرداند. */
 export async function patchAdminProfile(
   row: { id: string }, patch: Record<string, unknown>,
@@ -171,7 +178,12 @@ export async function patchAdminProfile(
   const body: Record<string, unknown> = { id }
   if (typeof patch.status === 'string') body.status = patch.status
   if (typeof patch.verified === 'boolean') body.verified = patch.verified
-  if (!('status' in body) && !('verified' in body)) return { ok: false, message: 'چیزی برای تغییر نبود' }
+  /* ⚠️ تایید مدرک ستون جداگانه است و تا امروز از این‌جا رد
+     نمی‌شد، در حالی که مسیر سرور از قبل پشتیبانی‌اش می‌کرد. */
+  if (typeof patch.licenseVerified === 'boolean') body.licenseVerified = patch.licenseVerified
+  if (!('status' in body) && !('verified' in body) && !('licenseVerified' in body)) {
+    return { ok: false, message: 'چیزی برای تغییر نبود' }
+  }
 
   return patchProfile(body)
 }
@@ -188,7 +200,7 @@ export function profileAdminSource(kind: ProfileKind) {
       const row = cache.find(r => r.slug === id)
       await toggleProfile(id, row?.status ?? 'rejected')
     },
-    /* حذف پروفایل از پنل عمداً پیاده نشده: پاک‌کردن کار کاربر
+    /* حذف پروفایل از پنل عمدا پیاده نشده: پاک‌کردن کار کاربر
        برگشت‌ناپذیر است و «تعلیق» همان اثر نمایشی را دارد. */
     remove: async (id: string) => {
       const row = cache.find(r => r.slug === id)

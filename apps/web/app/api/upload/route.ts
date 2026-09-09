@@ -19,10 +19,10 @@ import { capFor, rateOpts, resolvePath, sniff } from '@/lib/upload/policy';
      ۴) مسیر ایمن — بدون ../ و فقط زیر پیشوندهای مجاز
    ───────────────────────────────────────────────────────────── */
 
-/* سقف‌ها، پیشوندهای مجاز، تشخیصِ نوع و بررسیِ مالکیت همه به
-   `lib/upload/policy.ts` رفتند. دلیلش مسیرِ دومِ آپلود است
+/* سقف‌ها، پیشوندهای مجاز، تشخیص نوع و بررسی مالکیت همه به
+   `lib/upload/policy.ts` رفتند. دلیلش مسیر دوم آپلود است
    (`/api/upload/sign`): دو نسخه از این قواعد یعنی روزی یکی‌شان عقب
-   می‌ماند و همان می‌شود درِ باز. */
+   می‌ماند و همان می‌شود در باز. */
 
 export async function POST(req: NextRequest) {
   const actor = await actorOf(req);
@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
   const bytes = Buffer.from(await file.arrayBuffer());
   const kind = sniff(bytes);
   if (!kind) {
-    /* SVG و هر چیز ناشناخته‌ی دیگر عمداً رد می‌شود: SVG می‌تواند
+    /* SVG و هر چیز ناشناخته‌ی دیگر عمدا رد می‌شود: SVG می‌تواند
        اسکریپت داشته باشد و پروژه هیچ‌جا به آن نیاز ندارد. */
     return NextResponse.json({ message: 'فرمت فایل پشتیبانی نمی‌شود' }, { status: 415 });
   }
@@ -72,11 +72,11 @@ export async function POST(req: NextRequest) {
     .from(bucket)
     .upload(path, bytes, {
       contentType: kind.mime,
-      /* بازنویسی فقط جایی که مالکیت واقعاً بررسی شد.
+      /* بازنویسی فقط جایی که مالکیت واقعا بررسی شد.
          مسیرهای دیگر (profiles/، products/، sellers/، social/) شناسه‌ی
-         صاحبشان را به شکلِ یکسانی در مسیر ندارند، پس اگر بازنویسی باز
-         بماند یک کاربر می‌تواند فایلِ دیگری را عوض کند. همه‌ی این
-         مسیرها نامِ یکتا می‌سازند، پس خاموش‌بودنش چیزی را نمی‌شکند. */
+         صاحبشان را به شکل یکسانی در مسیر ندارند، پس اگر بازنویسی باز
+         بماند یک کاربر می‌تواند فایل دیگری را عوض کند. همه‌ی این
+         مسیرها نام یکتا می‌سازند، پس خاموش‌بودنش چیزی را نمی‌شکند. */
       upsert: v.ownerChecked === true,
       /* پیش‌فرض Supabase روی no-cache است، یعنی هر بازدیدکننده هر بار
          عکس باشگاه/محصول را دوباره دانلود می‌کند. نام فایل شامل
@@ -90,8 +90,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ message: 'آپلود انجام نشد' }, { status: 500 });
   }
 
-  /* فایلِ خصوصی لینک عمومی ندارد. مسیرش برمی‌گردد و خواندنش از مسیرِ
-     مجوزدارِ خودش انجام می‌شود (مثلاً /api/clubs/:id/license-doc). */
+  /* فایل خصوصی لینک عمومی ندارد. مسیرش برمی‌گردد و خواندنش از مسیر
+     مجوزدار خودش انجام می‌شود (مثلا /api/clubs/:id/license-doc). */
   if (bucket !== 'club-media') {
     return NextResponse.json({ path, mime: kind.mime, private: true });
   }

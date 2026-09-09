@@ -2,7 +2,7 @@
 
 /* ─────────────────────────────────────────────────────────────
    پروفایل بازیکن — «Athlete Profile» سینمایی و ادیتوریال.
-   عمداً از پروفایل مربی/داور/متخصص متمایز است: هیروی تیره با
+   عمدا از پروفایل مربی/داور/متخصص متمایز است: هیروی تیره با
    تایپوگرافی مونومنتال و رنکینگ گرافیکی → هویت → بیوگرافی →
    Career Highlights (تایم‌لاین) → مسابقات → باشگاه → گالری
    آلبوم‌دار + لایت‌باکس → پیوند با اخبار و بیلیارد مدیا.
@@ -40,12 +40,12 @@ import HonourMark, { type HonourRank } from '@/components/player/HonourMark'
 import './athlete.css'
 import { MEDIA_VIDEOS } from '../../../lib/media-data'
 
-/* سالِ جاریِ شمسی — همان تعریفِ صفحه‌های دیگر */
+/* سال جاری شمسی — همان تعریف صفحه‌های دیگر */
 /* «۲۰۲۳» یا «2023» → 2023. سال‌ها دستی وارد می‌شوند و هر دو شکل می‌آیند. */
 const faNum = (v: string) => parseInt(String(v).replace(/[۰-۹]/g, ch => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(ch))), 10) || 0
 
-/* ⚠️ فیلدِ سال آزاد است: یکی «۱۴۰۲» می‌نویسد و دیگری «2023». مقایسه‌ی
-   خامِ این دو یعنی ۲۰۱۹ بالاتر از ۱۴۰۲ بنشیند و «آخرین عنوان» غلط
+/* ⚠️ فیلد سال آزاد است: یکی «۱۴۰۲» می‌نویسد و دیگری «2023». مقایسه‌ی
+   خام این دو یعنی ۲۰۱۹ بالاتر از ۱۴۰۲ بنشیند و «آخرین عنوان» غلط
    شود. همه به شمسی می‌آیند و بعد مقایسه می‌شوند. */
 const jYear = (v: string) => { const y = faNum(v); return y > 1900 ? y - 621 : y }
 
@@ -60,35 +60,35 @@ export default function PlayerProfilePage() {
   /* پروفایل‌های ثبت‌نامی (پنل بازیکن ⇒ localStorage) بعد از mount خوانده می‌شوند */
   const [stored, setStored]   = useState<Player | null>(null)
   const [checked, setChecked] = useState(false)
-  /* وضعیتِ پروفایلِ سرور. سرور نسخه‌ی تأییدنشده را فقط به صاحبش
-     و ادمین می‌دهد، پس اگر رسید یعنی حقِ دیدنش را داریم — ولی
+  /* وضعیت پروفایل سرور. سرور نسخه‌ی تأییدنشده را فقط به صاحبش
+     و ادمین می‌دهد، پس اگر رسید یعنی حق دیدنش را داریم — ولی
      باید بداند دیگران نمی‌بینندش، وگرنه لینک را جایی می‌فرستد
      که همه «پیدا نشد» می‌گیرند. */
   const [pending, setPending] = useState(false)
-  /* ── چرا پروفایلِ خام هم نگه داشته می‌شود ──
+  /* ── چرا پروفایل خام هم نگه داشته می‌شود ──
      `stored` نمای *نگاشت‌شده* است (`Player`)، و ذخیره باید همان
-     شکلی برگردد که پنل می‌نویسد (`PlayerProfile`). بدونِ نگه‌داشتنِ
-     خام، ویرایشِ درجا داده را بازنویسیِ ناقص می‌کرد. */
+     شکلی برگردد که پنل می‌نویسد (`PlayerProfile`). بدون نگه‌داشتن
+     خام، ویرایش درجا داده را بازنویسی ناقص می‌کرد. */
   const [rawP, setRawP]       = useState<PlayerProfile | null>(null)
   const [ownerId, setOwnerId] = useState<string | null>(null)
-  /* پرچمِ قطعیِ سرور — مقایسه‌ی مرورگر بی‌صدا شکست می‌خورد */
+  /* پرچم قطعی سرور — مقایسه‌ی مرورگر بی‌صدا شکست می‌خورد */
   const [mine, setMine] = useState<boolean | undefined>(undefined)
   /* شبکه شکست، نه اینکه پروفایل نباشد */
   const [netFail, setNetFail] = useState(false)
   const [reloadKey, setReloadKey] = useState(0)
   /* ── چرا سرور هم خوانده می‌شود ──
-     پیش‌تر فقط `localStorage` خوانده می‌شد، یعنی پروفایلِ یک بازیکن
-     تنها روی دستگاهِ خودش دیده می‌شد. تیکِ آبی هم ستونِ جدولِ
-     `profiles` است و اصلاً در localStorage نیست. کشِ محلی مقدارِ
-     اولیه می‌ماند تا صفحه در نبودِ شبکه خالی نشود. */
+     پیش‌تر فقط `localStorage` خوانده می‌شد، یعنی پروفایل یک بازیکن
+     تنها روی دستگاه خودش دیده می‌شد. تیک آبی هم ستون جدول
+     `profiles` است و اصلا در localStorage نیست. کش محلی مقدار
+     اولیه می‌ماند تا صفحه در نبود شبکه خالی نشود. */
   useEffect(() => {
-    /* پیش از خروجِ زودهنگام: وگرنه `netFail`ِ نامکِ قبلی روی
-       پروفایلِ ایستا کهنه می‌ماند. */
+    /* پیش از خروج زودهنگام: وگرنه `netFail` نامک قبلی روی
+       پروفایل ایستا کهنه می‌ماند. */
     setNetFail(false)
     if (staticPlayer) { setChecked(true); return }
 
-    /* بازنشانی: بدونِ این، رفتن از /players/ali به /players/reza
-       پروفایلِ علی را — با تیکِ علی — زیرِ نشانیِ رضا نگه می‌داشت، و
+    /* بازنشانی: بدون این، رفتن از /players/ali به /players/reza
+       پروفایل علی را — با تیک علی — زیر نشانی رضا نگه می‌داشت، و
        اگر رضا وجود نداشت «بازیکن پیدا نشد» هرگز نشان داده نمی‌شد. */
     setChecked(false)
     const local = getPlayerProfile(id)
@@ -99,10 +99,10 @@ export default function PlayerProfilePage() {
       try {
         const r = await fetchProfileResult<PlayerProfile>('player', id)
         if (!alive) return
-        /* شرطِ `status === 'approved'` این‌جا اشتباه بود: سرور
-           پروفایلِ تأییدنشده را فقط به صاحبش و ادمین می‌دهد، پس هر
+        /* شرط `status === 'approved'` این‌جا اشتباه بود: سرور
+           پروفایل تأییدنشده را فقط به صاحبش و ادمین می‌دهد، پس هر
            چیزی که رسید حق دیدنش را دارد. با آن شرط، بازیکن
-           پیش‌نمایشِ پروفایلِ خودش را «پیدا نشد» می‌دید. */
+           پیش‌نمایش پروفایل خودش را «پیدا نشد» می‌دید. */
         if (r.state === 'found') {
           const p = r.profile
           setPending(p.status !== 'approved')
@@ -111,12 +111,12 @@ export default function PlayerProfilePage() {
           setMine(r.isMine === true)
           setStored(profileToPlayer(raw))
         } else if (r.state === 'error') {
-          /* کشِ محلی می‌ماند؛ فقط اگر چیزی هم در کش نبود، پیامِ
+          /* کش محلی می‌ماند؛ فقط اگر چیزی هم در کش نبود، پیام
              خطای شبکه نشان داده می‌شود نه «پیدا نشد». */
           setNetFail(true)
         }
       } catch {
-        /* `fetchProfileResult` خودش خطا را می‌گیرد؛ تورِ ایمنی است
+        /* `fetchProfileResult` خودش خطا را می‌گیرد؛ تور ایمنی است
            تا استثنای غیرمنتظره صفحه را به «پیدا نشد» نیندازد. */
         if (alive) setNetFail(true)
       } finally {
@@ -129,7 +129,7 @@ export default function PlayerProfilePage() {
 
   const player = staticPlayer ?? stored
 
-  /* ⚠️ پیش از هر `return`ِ شرطی. یک‌بار در صفحه‌ی مربی پایین‌تر
+  /* ⚠️ پیش از هر `return` شرطی. یک‌بار در صفحه‌ی مربی پایین‌تر
      نوشته شد و صفحه با React #310 سفید شد. */
   const edit = useOwnerEdit<PlayerProfile>('player', id, rawP, ownerId, raw => {
     setRawP(raw); setStored(profileToPlayer(raw))
@@ -137,22 +137,22 @@ export default function PlayerProfilePage() {
   const { gate: channelGate, ask: askChannel, publish: publishToChannel } = useChannelPublish('player', ownerId ?? undefined, edit.isOwner, notify)
 
   /* ⚠️ هر دو هوک پیش از returnهای شرطی — قاعده‌ی هوک‌ها. یک‌بار در
-     صفحه‌ی مربی زیرِ شرط رفت و صفحه با React #310 سفید شد. */
-  /* آدرسِ عکسِ گالری ممکن است ۴۰۴ باشد؛ بدونِ این، به‌جای مونوگرام
-     آیکونِ عکسِ شکسته داخلِ قابِ طاقی می‌نشیند. */
+     صفحه‌ی مربی زیر شرط رفت و صفحه با React #310 سفید شد. */
+  /* آدرس عکس گالری ممکن است ۴۰۴ باشد؛ بدون این، به‌جای مونوگرام
+     آیکون عکس شکسته داخل قاب طاقی می‌نشیند. */
   const [badPortrait, setBadPortrait] = useState('')
 
   const { open: openImage, viewer: imageViewer } = useProfileImageViewer()
   const { open: openVideo, viewer: videoViewer } = useProfileVideoViewer()
 
-  /* ── همان گالریِ بقیه‌ی نقش‌ها ──
-     ⚠️ این صفحه هم گالریِ خودش را داشت: نوارِ آلبوم، ماسونری و
-     لایت‌باکسِ دست‌ساز. حالا کامپوننتِ مشترک رندر می‌کند و این‌جا فقط
+  /* ── همان گالری بقیه‌ی نقش‌ها ──
+     ⚠️ این صفحه هم گالری خودش را داشت: نوار آلبوم، ماسونری و
+     لایت‌باکس دست‌ساز. حالا کامپوننت مشترک رندر می‌کند و این‌جا فقط
      «چه چیزی ذخیره شود» می‌ماند. */
   const MAX_VIDEO_MB = 25
   const [vidBusy, setVidBusy] = useState(false)
-  /* انتشار در بیلیارد مدیا — پنجره فقط وقتی باز می‌شود که کانالِ
-     همین نقش نباشد. آپلودِ گالری هرگز به نتیجه‌اش وابسته نیست. */
+  /* انتشار در بیلیارد مدیا — پنجره فقط وقتی باز می‌شود که کانال
+     همین نقش نباشد. آپلود گالری هرگز به نتیجه‌اش وابسته نیست. */
 
   const addImages = async (files: File[], album?: string) => {
     const items = await Promise.all(files.map(async fl => ({
@@ -164,8 +164,8 @@ export default function PlayerProfilePage() {
     await edit.apply(d => ({ ...d, gallery: [...(d.gallery ?? []), ...items] }))
   }
 
-  /* `details` از فرمِ مشخصات می‌آید (عنوان/دسته/توضیح). تا دیروز
-     عنوان نامِ فایل بود و همان به مدیا می‌رفت. */
+  /* `details` از فرم مشخصات می‌آید (عنوان/دسته/توضیح). تا دیروز
+     عنوان نام فایل بود و همان به مدیا می‌رفت. */
   const addVideoFiles = async (files: File[], album?: string, details?: VideoDetail[]) => {
     setVidBusy(true)
     const skipped: string[] = []
@@ -188,7 +188,7 @@ export default function PlayerProfilePage() {
            این خط بالای `break` بود و ویدیویی که ذخیره‌اش شکست خورده
            بود هم به مدیا می‌رفت: در بیلیارد مدیا زنده، در پروفایل
            نبود، و کاربر پیام «ذخیره انجام نشد» دیده بود. */
-        /* «فقط در گالری بماند» یک تصمیمِ صریحِ کاربر است */
+        /* «فقط در گالری بماند» یک تصمیم صریح کاربر است */
         if (details?.[i]?.publish !== false) {
           shipped.push({
             title: detailTitle(details, i, file), src: url, thumb, durationSec: meta.durationSec,
@@ -217,15 +217,15 @@ export default function PlayerProfilePage() {
     if (!(await ask('این تصویر حذف شود؟', { body: 'این کار برگشت‌پذیر نیست.', confirmLabel: 'حذف' }))) return
     await edit.apply(d => ({ ...d, gallery: (d.gallery ?? []).filter(g => g.id !== mid) }))
   }
-  /* ── ویرایشِ عنوانِ ویدیو ──
-     عنوان دو نسخه دارد: ردیفِ گالریِ پروفایل و ردیفِ بیلیارد مدیا.
-     هوک دومی را می‌زند، این تابع اولی را. کلید نشانیِ فایل است،
-     چون گالری شناسه‌ی ردیفِ مدیا را ندارد. */
+  /* ── ویرایش عنوان ویدیو ──
+     عنوان دو نسخه دارد: ردیف گالری پروفایل و ردیف بیلیارد مدیا.
+     هوک دومی را می‌زند، این تابع اولی را. کلید نشانی فایل است،
+     چون گالری شناسه‌ی ردیف مدیا را ندارد. */
   const { dialog: videoEditDialog, edit: editVideo } = useVideoEdit(
     async (target, detail) => {
-      /* ⚠️ `map` بدونِ تطبیق هم «موفق» برمی‌گردد. اگر نشانی جور نشود
-         (کدگذاریِ متفاوت، ردیفِ بی‌url)، هوک «شد» می‌شنید و مدیا را
-         عوض می‌کرد در حالی که گالری عنوانِ قبلی را نشان می‌دهد —
+      /* ⚠️ `map` بدون تطبیق هم «موفق» برمی‌گردد. اگر نشانی جور نشود
+         (کدگذاری متفاوت، ردیف بی‌url)، هوک «شد» می‌شنید و مدیا را
+         عوض می‌کرد در حالی که گالری عنوان قبلی را نشان می‌دهد —
          یعنی دو عنوان برای یک ویدیو. */
       let hit = false
       const ok = await edit.apply(prof => {
@@ -254,12 +254,12 @@ export default function PlayerProfilePage() {
     return MEDIA_VIDEOS.filter(v => v.tags.some(t => player.tags.includes(t)) || v.category === 'interviews').slice(0, 3)
   }, [player])
 
-  /* ⚠️ edit.isOwner مستقل از player و دیرتر true می‌شود (پروبِ ?mine=1).
-     بخشِ گالریِ مالک همان لحظه سوار می‌شود؛ بدونِ این دپندنسی هرگز
-     زیرِ نظر نمی‌رود و برای همیشه با opacity صفر می‌ماند. */
+  /* ⚠️ edit.isOwner مستقل از player و دیرتر true می‌شود (پروب ?mine=1).
+     بخش گالری مالک همان لحظه سوار می‌شود؛ بدون این دپندنسی هرگز
+     زیر نظر نمی‌رود و برای همیشه با opacity صفر می‌ماند. */
   useReveal([player, edit.isOwner])
 
-  /* یونیونِ تفکیک‌شده‌ی  یا هر دو را می‌خواهد یا
+  /* یونیون تفکیک‌شده‌ی  یا هر دو را می‌خواهد یا
      هیچ‌کدام را — پس یک‌جا ساخته و پخش می‌شود. */
   const retryProps = netFail
     ? { netFail: true as const, onRetry: () => { setChecked(false); setReloadKey(k => k + 1) } }
@@ -282,35 +282,35 @@ export default function PlayerProfilePage() {
   const disciplineLines = (player.disciplines ?? []).map(e => entryLabel(e, player.gender))
 
   /* ── پرتره ──
-     مدلِ بازیکن فیلدِ «عکسِ پرتره» ندارد؛ فقط `scene` (بافتِ پس‌زمینه)
-     و گالری. پس اولین عکسِ گالری پرتره می‌شود و اگر گالری خالی بود،
-     مونوگرامِ حروفِ لاتین — جای خالیِ خاکستری صفحه را ارزان می‌کند. */
-  /* آدرسِ خراب ذخیره می‌شود نه یک بولین: با عوض‌شدنِ بازیکن یا جایگزینیِ
-     عکس، پرچمِ چسبنده مونوگرام را روی عکسِ سالم هم نگه می‌داشت. */
-  /* ⚠️ تا امروز آواتار «اولین عکسِ گالری» بود، یعنی کاربر هیچ راهی
-     برای انتخابش نداشت. حالا فیلدِ خودش را دارد و گالری فقط پشتیبان
+     مدل بازیکن فیلد «عکس پرتره» ندارد؛ فقط `scene` (بافت پس‌زمینه)
+     و گالری. پس اولین عکس گالری پرتره می‌شود و اگر گالری خالی بود،
+     مونوگرام حروف لاتین — جای خالی خاکستری صفحه را ارزان می‌کند. */
+  /* آدرس خراب ذخیره می‌شود نه یک بولین: با عوض‌شدن بازیکن یا جایگزینی
+     عکس، پرچم چسبنده مونوگرام را روی عکس سالم هم نگه می‌داشت. */
+  /* ⚠️ تا امروز آواتار «اولین عکس گالری» بود، یعنی کاربر هیچ راهی
+     برای انتخابش نداشت. حالا فیلد خودش را دارد و گالری فقط پشتیبان
      است (برای پروفایل‌های پیش از این تغییر). */
   const portraitSrc = player.photo || player.gallery[0]?.url || ''
   const portrait = portraitSrc && portraitSrc !== badPortrait ? portraitSrc : ''
-  /* ⚠️ نگاشتِ پروفایل برای نامِ لاتینِ خالی رشته‌ی 'PLAYER' و برای
-     سالِ شروع '—' می‌گذارد. اگر همان‌ها را رندر کنیم، «PLAYER» با
-     ۲۳۶ پیکسل پشتِ هیرو می‌نشیند و «از سال —» زیرِ نام. */
+  /* ⚠️ نگاشت پروفایل برای نام لاتین خالی رشته‌ی 'PLAYER' و برای
+     سال شروع '—' می‌گذارد. اگر همان‌ها را رندر کنیم، «PLAYER» با
+     ۲۳۶ پیکسل پشت هیرو می‌نشیند و «از سال —» زیر نام. */
   const latin = player.nameEn && player.nameEn !== 'PLAYER' ? player.nameEn : ''
   const since = player.careerStart && player.careerStart !== '—' ? player.careerStart : ''
-  /* مونوگرام برای وقتی عکسی نیست — پانلِ تیره خالی نماند */
+  /* مونوگرام برای وقتی عکسی نیست — پانل تیره خالی نماند */
   const initials = (latin || player.name).split(/\s+/).filter(Boolean).map(w => w[0]).join('').slice(0, 2).toUpperCase()
 
   /* ── آمار ──
-     فقط چیزی که واقعاً در داده هست. «۰ عنوان» بدتر از نبودنِ کارت
-     است، پس خانه‌ی خالی اصلاً رندر نمی‌شود. رتبه‌ی رنکینگ هم عمداً
-     این‌جا نیست: عددش را خودِ بازیکن وارد می‌کرد. */
+     فقط چیزی که واقعا در داده هست. «۰ عنوان» بدتر از نبودن کارت
+     است، پس خانه‌ی خالی اصلا رندر نمی‌شود. رتبه‌ی رنکینگ هم عمدا
+     این‌جا نیست: عددش را خود بازیکن وارد می‌کرد. */
   const years = (() => {
     const y = jYear(since)
     return y > 1300 ? Math.max(0, CUR_JYEAR - y) : 0
   })()
   /* ── مشخصات ──
-     فقط فیلدی که واقعاً داده دارد. ⚠️ `profileToPlayer` برای شهرِ خالی
-     «—» می‌گذارد نه رشته‌ی خالی، پس بررسیِ falsy کافی نیست و همان
+     فقط فیلدی که واقعا داده دارد. ⚠️ `profileToPlayer` برای شهر خالی
+     «—» می‌گذارد نه رشته‌ی خالی، پس بررسی falsy کافی نیست و همان
      خانه‌ی «—»ای رندر می‌شد که این‌جا از آن پرهیز می‌کنیم. */
   const has = (v?: string) => !!v && v !== '—'
   const honours = [...player.highlights].sort((a, b) => jYear(b.year) - jYear(a.year))
@@ -318,7 +318,7 @@ export default function PlayerProfilePage() {
   const lastHonour = honours[0]
 
   const vitals: { label: string; value: string; sub?: string }[] = [
-    /* تهران/تهران زیرِ هم بی‌معنی است — استان فقط وقتی می‌آید که
+    /* تهران/تهران زیر هم بی‌معنی است — استان فقط وقتی می‌آید که
        با شهر یکی نباشد. */
     ...(has(player.city)
       ? [{ label: 'شهر', value: player.city,
@@ -341,9 +341,9 @@ export default function PlayerProfilePage() {
   const hasGallery = player.gallery.length > 0 || player.videos.length > 0 || edit.isOwner
   const hasRelated = relatedNews.length > 0 || relatedVids.length > 0
 
-  /* ⚠️ کلیدِ آخرین بخش باید از همان شرط‌هایی بیاید که رندر را تعیین
-     می‌کنند. نسخه‌ی قبل یک زنجیره‌ی جدا داشت و روی پروفایلِ تازه —
-     که هیچ بخشی ندارد — نامِ بخشی را می‌گفت که رندر نمی‌شد؛ نتیجه
+  /* ⚠️ کلید آخرین بخش باید از همان شرط‌هایی بیاید که رندر را تعیین
+     می‌کنند. نسخه‌ی قبل یک زنجیره‌ی جدا داشت و روی پروفایل تازه —
+     که هیچ بخشی ندارد — نام بخشی را می‌گفت که رندر نمی‌شد؛ نتیجه
      صفحه‌ای بی‌فاصله‌ی کف. */
   const shown = [
     stats.length ? 'career' : '',
@@ -359,19 +359,19 @@ export default function PlayerProfilePage() {
 
   return (
     <div className="ath">
-      {pending && <PendingNotice what="پروفایلِ شما" />}
+      {pending && <PendingNotice what="پروفایل شما" />}
 
-      {/* ═══════════ نوارِ هویت ═══════════ */}
+      {/* ═══════════ نوار هویت ═══════════ */}
       <header className={vitals.length > 0 ? 'ath-hero ath-hero--card' : 'ath-hero'}>
-        {/* ⚠️ عکسِ پس‌زمینه‌ی بازیکن دوباره برگشت. در نسخه‌ی قبل حذف
+        {/* ⚠️ عکس پس‌زمینه‌ی بازیکن دوباره برگشت. در نسخه‌ی قبل حذف
             شده بود — یعنی گزینه‌ی «تصویر پس‌زمینه» در پنل کار می‌کرد
-            ولی هیچ‌جا دیده نمی‌شد. بدونِ آن `backdrop-filter` هم چیزی
+            ولی هیچ‌جا دیده نمی‌شد. بدون آن `backdrop-filter` هم چیزی
             برای شکستن ندارد و شیشه فقط «سفید» می‌شود. */}
         {player.scene && (
           <div className="ath-hero-bg" aria-hidden
-            /* ⚠️ `encodeURI` نشانیِ از قبل انکودشده‌ی استوریج را دوباره
+            /* ⚠️ `encodeURI` نشانی از قبل انکودشده‌ی استوریج را دوباره
                انکود می‌کند (`%20` ⟵ `%2520`). چیزی که این‌جا لازم است
-               فرار دادنِ نقل‌قول است، نه انکودِ URI. */
+               فرار دادن نقل‌قول است، نه انکود URI. */
             style={{ backgroundImage: `url("${player.scene.replace(/["\\]/g, '')}")` }} />
         )}
         <div className="ath-hero-veil" aria-hidden />
@@ -398,7 +398,7 @@ export default function PlayerProfilePage() {
               {player.name}
               {player.verified && (
                 <span className="ath-tick">
-                  {/* اندازه با em تا با نامِ کشسان هم‌مقیاس بماند */}
+                  {/* اندازه با em تا با نام کشسان هم‌مقیاس بماند */}
                   <VerifiedBadge title="بازیکن تأیید شده"
                     style={{ inlineSize: '0.34em', blockSize: '0.34em', marginInlineStart: 0 }} />
                 </span>
@@ -410,7 +410,7 @@ export default function PlayerProfilePage() {
         </div>
       </header>
 
-      {/* ═══════════ مشخصات — روی درزِ تیره/روشن ═══════════ */}
+      {/* ═══════════ مشخصات — روی درز تیره/روشن ═══════════ */}
       {vitals.length > 0 && (
         <div className="ath-wrap ath-vitals-wrap">
           <dl className="ath-vitals ath-glass">
@@ -456,16 +456,16 @@ export default function PlayerProfilePage() {
               <h2 id="ath-h-honours">افتخارات</h2>
               <span className="ath-en" aria-hidden>HONOURS</span><span className="ath-rule" />
             </div>
-            {/* دو ستون در عرضِ کامل، دو سومِ جدول را خالی می‌گذارد */}
-            {/* ⚠️ این‌جا جدول بود و کاربر درست گفت «مثلِ روزنامه است».
-                دو ستونِ متن در عرضِ کامل هیچ سلسله‌مراتبی نمی‌سازد.
-                حالا هر افتخار یک کارت است با مدالِ سال؛ رنگِ مدال از
-                خودِ عنوان خوانده می‌شود، اختراع نمی‌شود. */}
-            {/* `list-style: none` در سافاری معنایِ فهرست را می‌گیرد */}
+            {/* دو ستون در عرض کامل، دو سوم جدول را خالی می‌گذارد */}
+            {/* ⚠️ این‌جا جدول بود و کاربر درست گفت «مثل روزنامه است».
+                دو ستون متن در عرض کامل هیچ سلسله‌مراتبی نمی‌سازد.
+                حالا هر افتخار یک کارت است با مدال سال؛ رنگ مدال از
+                خود عنوان خوانده می‌شود، اختراع نمی‌شود. */}
+            {/* `list-style: none` در سافاری معنای فهرست را می‌گیرد */}
             <ol className="ath-honours ath-r" role="list">
               {honours.map((h, i) => {
-                /* ⚠️ متنِ آزادِ کاربر است، پس الگو محتاط می‌ماند و
-                   «دوم»ِ تنها را نمی‌گیرد: «دومین قهرمانی» یک *برد*
+                /* ⚠️ متن آزاد کاربر است، پس الگو محتاط می‌ماند و
+                   «دوم» تنها را نمی‌گیرد: «دومین قهرمانی» یک *برد*
                    است و نقره‌ای‌کردنش دروغ می‌شود. */
                 const rank: HonourRank =
                   /نا[یئ]ب\s*قهرمان|نقره|runner[-\s]?up|silver/i.test(h.title) ? 2
@@ -477,7 +477,7 @@ export default function PlayerProfilePage() {
                     style={{ '--d': `${Math.min(i, 6) * 55}ms` } as React.CSSProperties}>
                     <span className="ath-hon-mark"><HonourMark rank={rank} /></span>
                     <span className="ath-hon-txt">
-                      {/* ⚠️ شکلِ نشان تنها سیگنال نباشد — صفحه‌خوان
+                      {/* ⚠️ شکل نشان تنها سیگنال نباشد — صفحه‌خوان
                           تصویر را نمی‌بیند. */}
                       {rank > 1 && <span className="ath-sr">{rank === 2 ? 'مقام دوم — ' : 'مقام سوم — '}</span>}
                       <span className="ath-hon-t">{h.title}</span>
@@ -619,9 +619,9 @@ export default function PlayerProfilePage() {
           </section>
         )}
 
-        {/* ⚠️ پروفایلی که هنوز چیزی ندارد نباید بعد از کارتِ مشخصات
+        {/* ⚠️ پروفایلی که هنوز چیزی ندارد نباید بعد از کارت مشخصات
             ناگهان تمام شود — نه برای بازدیدکننده، نه برای صاحبش که
-            باید بداند قدمِ بعدی چیست. */}
+            باید بداند قدم بعدی چیست. */}
         {shown.length === 0 && (
           <section className="ath-sec ath-sec--last">
             <div className="ath-glass ath-empty">

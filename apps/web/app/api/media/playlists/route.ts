@@ -2,11 +2,11 @@ export const dynamic = 'force-dynamic'
 
 import { NextRequest, NextResponse } from 'next/server'
 /* ⚠️ `actorOf` نه `actorFromRequest`: دومی فقط `{id, role}`
-   می‌دهد، ولی `myChannelHandles` با `dmKey` (که برای این پلتفرمِ
-   شماره‌محور تقریباً همیشه شماره‌ی موبایل است) کلید می‌خورد. با
-   `actorFromRequest` این تابع برای *هر* مالکِ واقعی فهرستِ خالی
-   برمی‌گرداند — یعنی فرمِ ساخت هرگز نمی‌آمد و هر نوشتنی ۴۰۳
-   می‌شد. مسیرِ انتشارِ ویدیو هم همین `actorOf` را می‌دهد. */
+   می‌دهد، ولی `myChannelHandles` با `dmKey` (که برای این پلتفرم
+   شماره‌محور تقریبا همیشه شماره‌ی موبایل است) کلید می‌خورد. با
+   `actorFromRequest` این تابع برای *هر* مالک واقعی فهرست خالی
+   برمی‌گرداند — یعنی فرم ساخت هرگز نمی‌آمد و هر نوشتنی ۴۰۳
+   می‌شد. مسیر انتشار ویدیو هم همین `actorOf` را می‌دهد. */
 import { actorOf } from '@/lib/auth/ownership'
 import { hitRateLimit, tooMany } from '@/lib/auth/rate-limit'
 import { myChannelHandles } from '@/lib/media/server'
@@ -19,13 +19,13 @@ import { videoIdBySlug } from '@/lib/media/social'
 /* ─────────────────────────────────────────────────────────────
    لیست‌های پخش.
 
-   ⚠️ اجازه‌ی نوشتن از مالکیتِ *کانال* می‌آید، نه از `owner_id`ِ ردیف:
+   ⚠️ اجازه‌ی نوشتن از مالکیت *کانال* می‌آید، نه از `owner_id` ردیف:
    کاربر می‌تواند چند کانال داشته باشد و `myChannelHandles` همان
-   بررسی‌ای است که مسیرِ انتشارِ ویدیو هم انجام می‌دهد. بدونِ آن، هر
-   کاربرِ واردشده می‌توانست در لیستِ کانالِ دیگری دست ببرد.
+   بررسی‌ای است که مسیر انتشار ویدیو هم انجام می‌دهد. بدون آن، هر
+   کاربر واردشده می‌توانست در لیست کانال دیگری دست ببرد.
 
-   ⚠️ اعتبارسنجی دستی است (Zod وابستگیِ این اپ نیست): هر ورودی سقفِ
-   طول دارد و `action` از فهرستِ بسته می‌آید.
+   ⚠️ اعتبارسنجی دستی است (Zod وابستگی این اپ نیست): هر ورودی سقف
+   طول دارد و `action` از فهرست بسته می‌آید.
    ───────────────────────────────────────────────────────────── */
 
 const ACTIONS = ['create', 'add', 'remove', 'delete'] as const
@@ -48,7 +48,7 @@ export async function GET(req: NextRequest) {
   if (!handle) return NextResponse.json({ message: 'پارامتر لازم است' }, { status: 400 })
 
   /* ⚠️ مالکیت را سرور تصمیم می‌گیرد و به رابط *می‌گوید*. کلاینت راهی
-     برای دانستنش ندارد و حدس‌زدنش یعنی فرمِ ساخت روی کانالِ دیگران. */
+     برای دانستنش ندارد و حدس‌زدنش یعنی فرم ساخت روی کانال دیگران. */
   const actor = await actorOf(req).catch(() => null)
   const canEdit = actor
     ? (await myChannelHandles(actor)).includes(handle.toLowerCase())
@@ -68,8 +68,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ message: 'کنش نامعتبر' }, { status: 400 })
   }
 
-  /* ⚠️ ساخت و افزودن یک بودجه نداشته باشند: پرکردنِ یک لیستِ
-     چهل‌ویدیویی کلِ سهمیه را می‌سوزاند. */
+  /* ⚠️ ساخت و افزودن یک بودجه نداشته باشند: پرکردن یک لیست
+     چهل‌ویدیویی کل سهمیه را می‌سوزاند. */
   const rl = action === 'create'
     ? await hitRateLimit(req, { action: 'media_playlist_new', max: 10, windowSec: 600 }, actor.id)
     : await hitRateLimit(req, { action: 'media_playlist', max: 120, windowSec: 600 }, actor.id)
@@ -91,7 +91,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ slug: r.slug }, { status: 201 })
   }
 
-  /* بقیه‌ی کنش‌ها روی یک لیستِ موجودند */
+  /* بقیه‌ی کنش‌ها روی یک لیست موجودند */
   const plSlug = s(b.playlist, 120)
   const pl = plSlug ? await playlistHandle(plSlug) : null
   if (!pl) return NextResponse.json({ message: 'لیست پیدا نشد' }, { status: 404 })

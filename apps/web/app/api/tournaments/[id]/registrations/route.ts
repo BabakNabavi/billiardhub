@@ -13,7 +13,7 @@ import { promoteWaitlist } from '@/lib/tournaments/waitlist';
    مالکیت از دیتابیس اثبات می‌شود (`ownsClub`)، نه از هر شناسه‌ای که
    کلاینت بفرستد. `forOrganizer` هم فقط فیلدهای مجاز را بیرون می‌دهد:
    شماره‌ی پیگیری تراکنش می‌آید ولی هیچ اطلاعات بانکی در کار نیست —
-   اصلاً چنین چیزی ذخیره نمی‌شود. */
+   اصلا چنین چیزی ذخیره نمی‌شود. */
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -38,7 +38,7 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string 
   const g = await guard(req, id);
   if (g.error) return g.error;
 
-  /* پیش از خواندنِ فهرست، سفارش‌های از مهلت‌گذشته منقضی می‌شوند —
+  /* پیش از خواندن فهرست، سفارش‌های از مهلت‌گذشته منقضی می‌شوند —
      وگرنه برگزارکننده نامی را «در انتظار پرداخت» می‌بیند که ساعت‌ها
      پیش رهایش کرده‌اند و صندلی‌اش هنوز اشغال است. */
   await expireStalePending();
@@ -68,15 +68,15 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string 
   }, { headers: { 'Cache-Control': 'no-store' } });
 }
 
-/* ── PUT · افزودنِ ثبت‌نامِ حضوری ──────────────────────────────────
-   کسی که تلفنی یا دمِ در ثبت‌نام می‌کند هم یک صندلی می‌گیرد. تا
-   امروز باشگاه‌دار هیچ راهی برای واردکردنش نداشت، پس عددِ ظرفیت در
-   سایت با واقعیتِ سالن نمی‌خواند: مسابقه‌ی ۱۶ نفره‌ای که ۱۰ نفرش
-   حضوری آمده بودند، در سایت «۶ نفر» نشان می‌داد و شش صندلیِ
+/* ── PUT · افزودن ثبت‌نام حضوری ──────────────────────────────────
+   کسی که تلفنی یا دم در ثبت‌نام می‌کند هم یک صندلی می‌گیرد. تا
+   امروز باشگاه‌دار هیچ راهی برای واردکردنش نداشت، پس عدد ظرفیت در
+   سایت با واقعیت سالن نمی‌خواند: مسابقه‌ی ۱۶ نفره‌ای که ۱۰ نفرش
+   حضوری آمده بودند، در سایت «۶ نفر» نشان می‌داد و شش صندلی
    ناموجود را هم می‌فروخت.
 
-   ظرفیت در خودِ تابعِ دیتابیس و با قفلِ ردیف سنجیده می‌شود، پس
-   افزودنِ دستی و پرداختِ آنلاین نمی‌توانند هم‌زمان از سقف رد شوند. */
+   ظرفیت در خود تابع دیتابیس و با قفل ردیف سنجیده می‌شود، پس
+   افزودن دستی و پرداخت آنلاین نمی‌توانند هم‌زمان از سقف رد شوند. */
 export async function PUT(req: NextRequest, ctx: { params: Promise<{ id: string }> }) {
   const { id } = await ctx.params;
   const g = await guard(req, id);
@@ -89,7 +89,7 @@ export async function PUT(req: NextRequest, ctx: { params: Promise<{ id: string 
   }
 
   /* مبلغ اختیاری است: باشگاه‌دار ممکن است تخفیف داده باشد یا بازیکن
-     مهمان باشد. نبودنش یعنی «همان ورودیِ مسابقه». */
+     مهمان باشد. نبودنش یعنی «همان ورودی مسابقه». */
   const rawAmount = b?.amount;
   const amount = rawAmount === undefined || rawAmount === null || rawAmount === ''
     ? null
@@ -124,10 +124,10 @@ export async function PUT(req: NextRequest, ctx: { params: Promise<{ id: string 
   }, { status: 201 });
 }
 
-/* ── DELETE · حذفِ ثبت‌نامِ حضوری ──
-   فقط ردیفِ حضوری. ثبت‌نامِ آنلاین پولِ واقعی پشتش دارد و مسیرش
-   بازپرداخت است (`POST`) نه حذف — وگرنه ردِ تراکنش گم می‌شود و
-   دفترِ مالی با درگاه نمی‌خواند. */
+/* ── DELETE · حذف ثبت‌نام حضوری ──
+   فقط ردیف حضوری. ثبت‌نام آنلاین پول واقعی پشتش دارد و مسیرش
+   بازپرداخت است (`POST`) نه حذف — وگرنه رد تراکنش گم می‌شود و
+   دفتر مالی با درگاه نمی‌خواند. */
 export async function DELETE(req: NextRequest, ctx: { params: Promise<{ id: string }> }) {
   const { id } = await ctx.params;
   const g = await guard(req, id);
@@ -138,8 +138,8 @@ export async function DELETE(req: NextRequest, ctx: { params: Promise<{ id: stri
     return NextResponse.json({ message: 'شناسه‌ی ثبت‌نام معتبر نیست' }, { status: 400 });
   }
 
-  /* باید متعلق به همین مسابقه باشد، وگرنه مالکِ یک باشگاه می‌توانست
-     ثبت‌نامِ باشگاهِ دیگری را پاک کند. */
+  /* باید متعلق به همین مسابقه باشد، وگرنه مالک یک باشگاه می‌توانست
+     ثبت‌نام باشگاه دیگری را پاک کند. */
   const rows = await registrationsOf(id);
   const target = rows.find(r => r.id === registrationId);
   if (!target) return NextResponse.json({ message: 'ثبت‌نام در این مسابقه پیدا نشد' }, { status: 404 });
@@ -159,7 +159,7 @@ export async function DELETE(req: NextRequest, ctx: { params: Promise<{ id: stri
     newValue: { tournamentId: id }, ip: clientIp(req) ?? undefined,
   });
 
-  /* صندلی آزاد شد ⇒ نفر اولِ صفِ انتظار بالا می‌آید */
+  /* صندلی آزاد شد ⇒ نفر اول صف انتظار بالا می‌آید */
   const promoted = await promoteWaitlist(id);
 
   return NextResponse.json({ ok: true, promoted, seatsLeft: await seatsLeft(id) });
@@ -168,7 +168,7 @@ export async function DELETE(req: NextRequest, ctx: { params: Promise<{ id: stri
 /* بازپرداخت یک ثبت‌نام توسط برگزارکننده.
 
    خود انتقال پول به عهده‌ی درگاه است و تا نبود API رسمی آن انجام
-   نمی‌شود؛ این‌جا فقط وضعیت و دفتر مالی به‌روز می‌شوند. عمداً وانمود
+   نمی‌شود؛ این‌جا فقط وضعیت و دفتر مالی به‌روز می‌شوند. عمدا وانمود
    نمی‌کنیم پولی برگشته است. */
 export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string }> }) {
   const { id } = await ctx.params;

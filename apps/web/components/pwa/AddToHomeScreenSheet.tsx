@@ -7,7 +7,7 @@ import { persistDismissal, type A2hsAction } from '../../lib/pwa/a2hs'
 
    این کامپوننت هیچ تصمیمی درباره‌ی «نشان بدهم یا نه» نمی‌گیرد؛ آن کار
    در `AddToHomeScreenGate` انجام شده و این‌جا فقط نمایش است. به همین
-   دلیل هم با `dynamic(..., { ssr:false })` بارگذاری می‌شود و کدش اصلاً
+   دلیل هم با `dynamic(..., { ssr:false })` بارگذاری می‌شود و کدش اصلا
    به دست کاربر اندروید/دسکتاپ نمی‌رسد.
 
    چرا CSS در <style> و نه inline: به media query (آیپد/لنداسکیپ)،
@@ -99,8 +99,8 @@ export default function AddToHomeScreenSheet({ onClose }: { onClose: () => void 
 
     document.addEventListener('keydown', onKey)
     return () => document.removeEventListener('keydown', onKey)
-    /* عمداً `document.body.style.overflow` را قفل نمی‌کنیم: این یک راهنمای
-       اختیاری است، نه یک مودال مسدودکننده. ضمناً قفل بدنه با قفل منوی
+    /* عمدا `document.body.style.overflow` را قفل نمی‌کنیم: این یک راهنمای
+       اختیاری است، نه یک مودال مسدودکننده. ضمنا قفل بدنه با قفل منوی
        موبایل Navbar تداخل پیدا می‌کرد و اسکرول را برای همیشه می‌بست. */
   }, [dismiss])
 
@@ -155,7 +155,7 @@ export default function AddToHomeScreenSheet({ onClose }: { onClose: () => void 
 
           {/* یک دکمه، یک تصمیم.
 
-              «بعداً» حذف شد: دو دکمه با دو مدت سکوت متفاوت هم انتخاب را
+              «بعدا» حذف شد: دو دکمه با دو مدت سکوت متفاوت هم انتخاب را
               سخت می‌کرد هم رفتار را غیرقابل‌پیش‌بینی. کسی که الان وقت
               ندارد، همان × بالا را می‌زند و راهنما دفعه‌ی بعد برمی‌گردد. */}
           <div className="bh-a2hs-actions">

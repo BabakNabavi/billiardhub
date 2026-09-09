@@ -1,25 +1,25 @@
 'use client'
 
 /* ─────────────────────────────────────────────────────────────
-   «شهرهای تحت پوشش» — انتخابِ چندتاییِ شهر از فهرستِ واقعیِ ایران.
+   «شهرهای تحت پوشش» — انتخاب چندتایی شهر از فهرست واقعی ایران.
 
    ── مشکلی که این را ساخت ──
-   فیلدِ قبلی یک `<input>` متنیِ خالی بود با دکمه‌ی `+`. زدنِ `+` بدونِ
+   فیلد قبلی یک `<input>` متنی خالی بود با دکمه‌ی `+`. زدن `+` بدون
    تایپ هیچ کاری نمی‌کرد و کاربر فکر می‌کرد خراب است؛ و چون هر متنی
    پذیرفته می‌شد، «تهرون» و «تهران» دو شهر متفاوت می‌شدند.
 
    داده از همان `lib/iran-geo` می‌آید که بقیه‌ی پروژه استفاده می‌کند —
-   قاعده‌ی «منبعِ واحدِ استان و شهر» در CLAUDE.md. این‌جا
-   `ProvinceCitySelect` جواب نمی‌داد چون آن یکی یک جفتِ استان→شهر
+   قاعده‌ی «منبع واحد استان و شهر» در CLAUDE.md. این‌جا
+   `ProvinceCitySelect` جواب نمی‌داد چون آن یکی یک جفت استان→شهر
    می‌گیرد و این فیلد چند شهر از چند استان می‌خواهد.
 
    «کل ایران» گزینه‌ی اول است و انحصاری: انتخابش بقیه را کنار می‌زند،
    چون «کل ایران + تهران» خودش را نقض می‌کند.
 
    ── چرا منوی دکمه‌ای و نه listbox ──
-   `role="listbox"` فقط `option` می‌پذیرد؛ با فرزندِ `<button>` صفحه‌خوان
-   فهرست را خالی اعلام می‌کند. تا وقتی ناوبریِ کاملِ combobox با
-   `aria-activedescendant` نداریم، منوی سرراستِ دکمه‌ای صادق‌تر است.
+   `role="listbox"` فقط `option` می‌پذیرد؛ با فرزند `<button>` صفحه‌خوان
+   فهرست را خالی اعلام می‌کند. تا وقتی ناوبری کامل combobox با
+   `aria-activedescendant` نداریم، منوی سرراست دکمه‌ای صادق‌تر است.
    ───────────────────────────────────────────────────────────── */
 
 import { useEffect, useId, useMemo, useRef, useState } from 'react'
@@ -34,7 +34,7 @@ export interface CoverageCitySelectProps {
   value: string[]
   onChange: (v: string[]) => void
   label?: string
-  /** سقفِ پیشنهادهای نمایش‌داده‌شده — بقیه با جست‌وجو پیدا می‌شوند */
+  /** سقف پیشنهادهای نمایش‌داده‌شده — بقیه با جست‌وجو پیدا می‌شوند */
   maxOptions?: number
 }
 
@@ -47,10 +47,10 @@ export default function CoverageCitySelect({
   const [open, setOpen] = useState(false)
   const wrap = useRef<HTMLDivElement>(null)
   /* دو نمونه روی یک صفحه نباید شناسه‌ی یکسان بسازند، وگرنه
-     `htmlFor` به ورودیِ اشتباه وصل می‌شود. */
+     `htmlFor` به ورودی اشتباه وصل می‌شود. */
   const uid = useId()
 
-  /* ۱۱۵۶ مدخلِ شهر — یک‌بار صاف می‌شود، نه در هر تایپ */
+  /* ۱۱۵۶ مدخل شهر — یک‌بار صاف می‌شود، نه در هر تایپ */
   const all = useMemo<Row[]>(
     () => getProvinces().flatMap(p => p.cities.map(c => ({ city: c, province: p.name }))),
     [])
@@ -58,8 +58,8 @@ export default function CoverageCitySelect({
   const picked = useMemo(() => new Set(value), [value])
   const allIran = picked.has(ALL_IRAN)
 
-  /* شمارِ کلِ نتیجه‌ها جداست تا بشود گفت «و N شهرِ دیگر» —
-     بریدنِ بی‌صدای فهرست، «پیدا نشد» به نظر می‌رسد. */
+  /* شمار کل نتیجه‌ها جداست تا بشود گفت «و N شهر دیگر» —
+     بریدن بی‌صدای فهرست، «پیدا نشد» به نظر می‌رسد. */
   const { shown, total } = useMemo(() => {
     const t = q.trim()
     const base = (t ? all.filter(r => r.city.includes(t) || r.province.includes(t)) : all)
@@ -98,12 +98,12 @@ export default function CoverageCitySelect({
             onChange={e => { setQ(e.target.value); setOpen(true) }}
             onFocus={() => setOpen(true)}
             onKeyDown={e => {
-              /* با جست‌وجوی خالی، `shown[0]` فقط اولین شهرِ اولین استان
+              /* با جست‌وجوی خالی، `shown[0]` فقط اولین شهر اولین استان
                  است — نه چیزی که کاربر قصدش را داشته. */
               if (e.key === 'Enter' && q.trim()) { e.preventDefault(); const f = shown[0]; if (f) add(f.city) }
               if (e.key === 'Escape') setOpen(false)
             }}
-            placeholder="نامِ شهر یا استان را بنویسید…"
+            placeholder="نام شهر یا استان را بنویسید…"
             className={`w-full rounded-[10px] border border-[#E7E2D6] bg-[#FAFAF7] py-2 pe-3 ps-8 text-[13px] text-[#1C1B17] transition focus:border-[rgba(199,166,106,0.55)] ${RING}`} />
         </div>
         <button type="button" onClick={() => setOpen(o => !o)}
@@ -136,7 +136,7 @@ export default function CoverageCitySelect({
               ))}
               {total > shown.length && (
                 <p className="border-t border-[#F0EDE8] px-3 py-2 text-center text-[11.5px] text-[#6F6A5C]">
-                  و {total - shown.length} شهرِ دیگر — نامش را بنویسید
+                  و {total - shown.length} شهر دیگر — نامش را بنویسید
                 </p>
               )}
             </>

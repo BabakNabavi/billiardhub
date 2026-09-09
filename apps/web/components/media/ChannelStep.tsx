@@ -1,18 +1,18 @@
 'use client'
 
 /* ─────────────────────────────────────────────────────────────
-   مرحله‌ی کانالِ پنجره‌ی آپلود — انتخاب یا ساخت.
+   مرحله‌ی کانال پنجره‌ی آپلود — انتخاب یا ساخت.
 
    ── چرا جدا شد ──
-   تا دیروز کاربر فقط یک کانال داشت، پس این «مرحله» یک فرمِ ساده بود
-   که یک‌بار در عمر دیده می‌شد. حالا هر نقشِ کاربر می‌تواند کانالِ
+   تا دیروز کاربر فقط یک کانال داشت، پس این «مرحله» یک فرم ساده بود
+   که یک‌بار در عمر دیده می‌شد. حالا هر نقش کاربر می‌تواند کانال
    خودش را داشته باشد و مرحله سه حالت دارد (انتخاب، ساخت، خطای
-   خواندن) با حالتِ خودش — چیزی که دیگر جای بودن در دلِ فرمِ ویدیو
+   خواندن) با حالت خودش — چیزی که دیگر جای بودن در دل فرم ویدیو
    را نداشت.
 
-   ⚠️ «انتخابگر» عمداً رادیوگروپِ واقعی است، نه چند دکمه‌ی کنارِ هم:
-   انتخابِ *یکی از چند تا* است، باید یک ایستگاهِ Tab باشد و با فلش
-   عوض شود. دکمه‌ی «کانال تازه» بیرونِ گروه است چون رادیو نیست.
+   ⚠️ «انتخابگر» عمدا رادیوگروپ واقعی است، نه چند دکمه‌ی کنار هم:
+   انتخاب *یکی از چند تا* است، باید یک ایستگاه Tab باشد و با فلش
+   عوض شود. دکمه‌ی «کانال تازه» بیرون گروه است چون رادیو نیست.
    ───────────────────────────────────────────────────────────── */
 
 import { useRef } from 'react'
@@ -30,7 +30,7 @@ const chip = (on: boolean): React.CSSProperties => ({
   border: `1px solid ${on ? 'rgba(199,166,106,0.55)' : LINE}`,
 })
 
-/** نوارِ انتخابِ کانالِ مقصد — بالای فرمِ ویدیو. */
+/** نوار انتخاب کانال مقصد — بالای فرم ویدیو. */
 export function ChannelPicker({ channels, channel, onPick, onNew }: {
   channels: UserChannel[]
   channel: UserChannel | null
@@ -40,16 +40,16 @@ export function ChannelPicker({ channels, channel, onPick, onNew }: {
   const groupRef = useRef<HTMLDivElement>(null)
 
   /* ── جابه‌جایی با فلش ──
-     بدونِ این، کاربرِ کیبورد باید از تک‌تکِ چیپ‌ها Tab بزند و
+     بدون این، کاربر کیبورد باید از تک‌تک چیپ‌ها Tab بزند و
      رادیوگروپ فقط ظاهرش رادیوگروپ است. */
   const onKey = (e: React.KeyboardEvent) => {
     const KEYS = ['ArrowRight', 'ArrowLeft', 'ArrowUp', 'ArrowDown', 'Home', 'End']
     if (!KEYS.includes(e.key) || channels.length < 2) return
     e.preventDefault()
     const n = channels.length
-    /* اگر انتخابِ فعلی در فهرست نبود، `-1` جهتِ فلش را وارونه می‌کرد */
+    /* اگر انتخاب فعلی در فهرست نبود، `-1` جهت فلش را وارونه می‌کرد */
     const cur = Math.max(0, channels.findIndex(c => key(c) === key(channel)))
-    /* راست‌به‌چپ: فلشِ راست یعنی «قبلی» */
+    /* راست‌به‌چپ: فلش راست یعنی «قبلی» */
     const step = e.key === 'ArrowLeft' || e.key === 'ArrowDown' ? 1
       : e.key === 'ArrowRight' || e.key === 'ArrowUp' ? -1 : 0
     const next = e.key === 'Home' ? 0 : e.key === 'End' ? n - 1 : (cur + step + n) % n
@@ -59,8 +59,8 @@ export function ChannelPicker({ channels, channel, onPick, onNew }: {
 
   return (
     <div style={{ padding: '14px 20px 0', display: 'flex', flexDirection: 'column', gap: 8 }}>
-      {/* ⚠️ بدونِ این نوار، انتشار همیشه در کانالِ اولِ فهرست بود و
-          کاربرِ چندنقشی هیچ راهی برای اصلاحش نداشت. */}
+      {/* ⚠️ بدون این نوار، انتشار همیشه در کانال اول فهرست بود و
+          کاربر چندنقشی هیچ راهی برای اصلاحش نداشت. */}
       <span style={{ fontSize: 11.5, fontWeight: 800, color: MUT }}>انتشار در کانال</span>
       <div role="radiogroup" aria-label="انتشار در کانال" ref={groupRef} onKeyDown={onKey}
         style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
@@ -84,7 +84,7 @@ export function ChannelPicker({ channels, channel, onPick, onNew }: {
   )
 }
 
-/** فرمِ ساختِ کانال — و حالتِ «فهرست خوانده نشد». */
+/** فرم ساخت کانال — و حالت «فهرست خوانده نشد». */
 export function ChannelCreate({
   loaded, failed, err, hasChannels, busy,
   name, handle, bio, onName, onHandle, onBio, onCreate, onRetry, onBack,
@@ -111,9 +111,9 @@ export function ChannelCreate({
     )
   }
 
-  /* ⚠️ گارد روی یک پرچمِ صریح است، نه روی «خطا داریم و فهرست خالی
-     است». حالتِ دوم با نامِ پیشنهادیِ باقی‌مانده از خواندنِ قبلی
-     خاموش می‌شد و دوباره همان فرمِ دروغین را نشان می‌داد. */
+  /* ⚠️ گارد روی یک پرچم صریح است، نه روی «خطا داریم و فهرست خالی
+     است». حالت دوم با نام پیشنهادی باقی‌مانده از خواندن قبلی
+     خاموش می‌شد و دوباره همان فرم دروغین را نشان می‌داد. */
   if (failed) {
     return (
       <div role="alert" style={{ padding: 20, textAlign: 'center', display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -144,7 +144,7 @@ export function ChannelCreate({
 
       <Field label="نام کانال">
         <input value={name} onChange={e => onName(e.target.value.slice(0, 60))}
-          placeholder="مثلاً: آکادمی بیلیارد من" style={inp} />
+          placeholder="مثلا: آکادمی بیلیارد من" style={inp} />
       </Field>
 
       <Field label="هندل کانال (انگلیسی)">
@@ -163,7 +163,7 @@ export function ChannelCreate({
 
       {err && <div role="alert" style={{ fontSize: 12.5, fontWeight: 700, color: '#B23B2E', background: 'rgba(178,59,46,0.08)', border: '1px solid rgba(178,59,46,0.2)', borderRadius: 10, padding: '9px 12px' }}>{err}</div>}
 
-      {/* ⚠️ دکمه باید *دیده شود* که خاموش است؛ طلاییِ همیشگی به کاربر
+      {/* ⚠️ دکمه باید *دیده شود* که خاموش است؛ طلایی همیشگی به کاربر
           می‌گفت بزن، و زدن هیچ کاری نمی‌کرد. */}
       <button type="button" onClick={onCreate} disabled={!can}
         style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, minHeight: 44, padding: '13px', borderRadius: 12, border: 'none', cursor: can ? 'pointer' : 'not-allowed', fontFamily: 'inherit', fontSize: 14, fontWeight: 800, background: can ? GOLD : '#EDE9E1', color: can ? '#241B08' : MUT, transition: 'background .2s' }}>
@@ -178,9 +178,9 @@ export function ChannelCreate({
       )}
 
       <p style={{ fontSize: 11, color: MUT, textAlign: 'center', margin: 0, lineHeight: 1.9 }}>
-        {/* ⚠️ متنِ قبلی می‌گفت «کانال یک‌بار ساخته می‌شود» — از وقتی هر
-            نقش کانالِ خودش را دارد، این دیگر درست نیست. */}
-        می‌توانید برای هر نقشِ خود کانالِ جدا داشته باشید؛ هنگام آپلود انتخاب می‌کنید.
+        {/* ⚠️ متن قبلی می‌گفت «کانال یک‌بار ساخته می‌شود» — از وقتی هر
+            نقش کانال خودش را دارد، این دیگر درست نیست. */}
+        می‌توانید برای هر نقش خود کانال جدا داشته باشید؛ هنگام آپلود انتخاب می‌کنید.
       </p>
     </div>
   )

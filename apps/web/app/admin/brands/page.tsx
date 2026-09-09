@@ -3,11 +3,11 @@
 /* ─────────────────────────────────────────────────────────────
    برندهای بیلیارد بازار.
 
-   تا امروز برند متنِ آزاد بود: «Predator»، «predator» و «پریداتور»
-   سه برندِ جدا می‌شدند، پس فیلترِ برند هرگز کامل نبود.
+   تا امروز برند متن آزاد بود: «Predator»، «predator» و «پریداتور»
+   سه برند جدا می‌شدند، پس فیلتر برند هرگز کامل نبود.
 
-   فروشنده همچنان می‌تواند برندی بنویسد که در فهرست نیست — بازارِ
-   دستِ‌دومِ بیلیارد پر از برندِ محلی است و اجبار به فهرست یعنی همه
+   فروشنده همچنان می‌تواند برندی بنویسد که در فهرست نیست — بازار
+   دست‌دوم بیلیارد پر از برند محلی است و اجبار به فهرست یعنی همه
    «متفرقه» را می‌زنند. آن برندها این‌جا **غیرفعال** ظاهر می‌شوند تا
    شما تأیید یا نادیده‌شان بگیرید.
    ───────────────────────────────────────────────────────────── */
@@ -109,7 +109,7 @@ export default function AdminBrandsPage() {
   if (!user || user.primaryRole !== 'admin') return null
 
   const list = brands ?? []
-  /* برندهای پیشنهادیِ فروشنده‌ها بالا می‌آیند — کارِ روی میز است */
+  /* برندهای پیشنهادی فروشنده‌ها بالا می‌آیند — کار روی میز است */
   const suggested = list.filter(b => !b.is_active)
   const active = list.filter(b => b.is_active)
 
@@ -126,7 +126,7 @@ export default function AdminBrandsPage() {
       </div>
       <p style={{ fontSize: 12.5, color: SEC, lineHeight: 2, margin: '0 0 18px' }}>
         فروشنده می‌تواند برندی بنویسد که در فهرست نیست؛ آن برند این‌جا «پیشنهاد تازه» می‌شود.
-        تا وقتی فعالش نکنید، در کشوی ثبت آگهی به کسی نشان داده نمی‌شود — ولی آگهیِ ثبت‌شده
+        تا وقتی فعالش نکنید، در کشوی ثبت آگهی به کسی نشان داده نمی‌شود — ولی آگهی ثبت‌شده
         برندش را از دست نمی‌دهد.
       </p>
 
@@ -141,7 +141,7 @@ export default function AdminBrandsPage() {
         <input style={{ ...INPUT, flex: 1, minWidth: 200, background: '#fff' }}
           value={newName} onChange={e => { setNewName(e.target.value); setErr('') }}
           onKeyDown={e => { if (e.key === 'Enter') void add() }}
-          placeholder="نام برند تازه — مثلاً Kamui" />
+          placeholder="نام برند تازه — مثلا Kamui" />
         <button type="button" onClick={() => void add()} disabled={adding} style={BTN}>
           {adding ? <Loader2 size={14} className="animate-spin" /> : <Plus size={14} />} افزودن
         </button>

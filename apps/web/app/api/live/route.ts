@@ -85,7 +85,7 @@ export async function POST(req: NextRequest) {
     if (!s) return NextResponse.json({ ok: false, message: 'جلسه یافت نشد' }, { status: 404, headers: CORS })
     /* فقط صاحب پخش می‌تواند تپش/پایان بفرستد.
        شرط قبلی به `b.ownerKey` نگاه می‌کرد و با **حذف** آن از بدنه
-       کاملاً دور زده می‌شد؛ حالا مبنا نشست است. */
+       کاملا دور زده می‌شد؛ حالا مبنا نشست است. */
     const me = actor.dmKey || actor.id
     if (s.ownerKey !== me && !actor.isAdmin) {
       return NextResponse.json(FORBIDDEN, { status: 403, headers: CORS })

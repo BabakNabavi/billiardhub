@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const { phone: rawPhone, password } = body;
 
-    /* شماره پیش از هر کاری به قالب واحد می‌آید. تا امروز خامْ جستجو
+    /* شماره پیش از هر کاری به قالب واحد می‌آید. تا امروز خام جستجو
        می‌شد، پس +98 یا ارقام فارسی «کاربر پیدا نشد» می‌گرفت و کاربر
        پیام «رمز اشتباه» می‌دید. */
     const phone = normalizePhone(rawPhone);
@@ -66,8 +66,8 @@ export async function POST(req: NextRequest) {
 
     const passwordMatch = await bcrypt.compare(password, user.password);
     if (!passwordMatch) {
-      /* آرگومان سوم: این شماره واقعاً حساب دارد ⇒ اگر قفل شد، هشدارِ
-         پیامکی برایش برود. شاخه‌ی بالا (شماره‌ی ناموجود) عمداً `false`
+      /* آرگومان سوم: این شماره واقعا حساب دارد ⇒ اگر قفل شد، هشدار
+         پیامکی برایش برود. شاخه‌ی بالا (شماره‌ی ناموجود) عمدا `false`
          می‌ماند تا برای کسی که ربطی به ماجرا ندارد پیامک نرود. */
       await loginFailed(req, String(phone), true);
       return NextResponse.json(

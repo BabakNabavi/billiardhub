@@ -45,8 +45,8 @@ export default function PlayerDashboard() {
   const [bioText, setBioText] = useState('')
   const [tagInput, setTagInput] = useState('')
   const [loaded, setLoaded] = useState(false)
-  /* نامکی که واقعاً روی سرور ثبت شده. تا وقتی خالی است فیلدِ نشانی
-     باز می‌ماند؛ نامکِ خودکارِ فرم نباید قفلش کند. */
+  /* نامکی که واقعا روی سرور ثبت شده. تا وقتی خالی است فیلد نشانی
+     باز می‌ماند؛ نامک خودکار فرم نباید قفلش کند. */
   const [savedSlug, setSavedSlug] = useState<string | null>(null)
   const [saved, setSaved]   = useState(false)
   const [err, setErr]       = useState('')
@@ -82,21 +82,21 @@ export default function PlayerDashboard() {
         if (!remote) {
           if (mine) {
             const up = await saveProfileRemote('player', mine.slug, mine as unknown as Record<string, unknown>)
-            /* فقط نوشتنِ تأییدشده قفل می‌کند؛ وگرنه فیلد باز می‌ماند
-               تا کاربر بتواند نامکِ تکراری را اصلاح کند. */
+            /* فقط نوشتن تأییدشده قفل می‌کند؛ وگرنه فیلد باز می‌ماند
+               تا کاربر بتواند نامک تکراری را اصلاح کند. */
             if (up.ok && up.profile?.slug) setSavedSlug(up.profile.slug)
-            else { setSavedSlug(''); setErr(up.message ?? 'نشانیِ ثبت‌شده خوانده نشد — دوباره تلاش کنید') }
+            else { setSavedSlug(''); setErr(up.message ?? 'نشانی ثبت‌شده خوانده نشد — دوباره تلاش کنید') }
           } else {
-            /* کاربرِ کاملاً تازه: نه ردیفِ سرور، نه کشِ محلی.
+            /* کاربر کاملا تازه: نه ردیف سرور، نه کش محلی.
                صریح باز می‌شود تا نامکش را خودش انتخاب کند. */
             setSavedSlug('')
           }
           return
         }
         setSavedSlug(remote.slug)
-        /* ⚠️ ردیفِ سرور می‌تواند هنوز آلبومِ شیئیِ پیش از مهاجرت داشته
-           باشد؛ بدونِ این تبدیل پنل روی `x.trim` می‌شکند و اولین ذخیره
-           عکس‌های داخلِ آلبوم‌ها را دور می‌ریزد. */
+        /* ⚠️ ردیف سرور می‌تواند هنوز آلبوم شیئی پیش از مهاجرت داشته
+           باشد؛ بدون این تبدیل پنل روی `x.trim` می‌شکند و اولین ذخیره
+           عکس‌های داخل آلبوم‌ها را دور می‌ریزد. */
         const merged = { ...base, ...remote.data, ...normalizePlayerMedia(remote.data), slug: remote.slug }
         setForm(merged)
         setBioText((merged.bio ?? []).join('\n\n'))
@@ -109,7 +109,7 @@ export default function PlayerDashboard() {
     setForm(f => ({ ...f, [k]: v })); setSaved(false); setErr('')
   }
 
-  /* آواتار کوچک نمایش داده می‌شود؛ ۶۰۰px کافی است و بارِ شبکه‌ی
+  /* آواتار کوچک نمایش داده می‌شود؛ ۶۰۰px کافی است و بار شبکه‌ی
      کند را چند برابر کم می‌کند. */
   const pickPhoto = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0]; if (!f) return
@@ -140,8 +140,8 @@ export default function PlayerDashboard() {
   }
 
   /* ── آلبوم‌ها ──
-     همان مدلِ بقیه‌ی نقش‌ها: نام‌ها در `albums` و خودِ عکس در
-     `gallery` با برچسبِ نامِ آلبوم. با دو مدلِ جدا، عکسی که از
+     همان مدل بقیه‌ی نقش‌ها: نام‌ها در `albums` و خود عکس در
+     `gallery` با برچسب نام آلبوم. با دو مدل جدا، عکسی که از
      صفحه‌ی عمومی اضافه می‌شد در پنل دیده نمی‌شد. */
   const addAlbum = () => {
     const n = albTitle.trim()
@@ -164,7 +164,7 @@ export default function PlayerDashboard() {
     finally { setBusy(false) }
   }
   const removeGalleryItem = (id: string) => set('gallery', form.gallery.filter(g => g.id !== id))
-  /* حذفِ آلبوم فقط برچسب را برمی‌دارد؛ عکس در گالری می‌ماند */
+  /* حذف آلبوم فقط برچسب را برمی‌دارد؛ عکس در گالری می‌ماند */
   const removeAlbum = (name: string) => {
     set('albums', form.albums.filter(x => x !== name))
     set('gallery', form.gallery.map(g => (g.album === name ? { ...g, album: undefined } : g)))
@@ -189,12 +189,12 @@ export default function PlayerDashboard() {
 
     /* منبع حقیقت سرور است؛ localStorage فقط کش همین مرورگر می‌ماند.
        تا پیش از این فقط localStorage نوشته می‌شد و پنل ادمین پروفایل را
-       اصلاً نمی‌دید. */
-    if (savedSlug === null) { setErr('نشانیِ اختصاصی هنوز خوانده نشده — چند لحظه صبر کنید یا صفحه را تازه کنید'); return }
+       اصلا نمی‌دید. */
+    if (savedSlug === null) { setErr('نشانی اختصاصی هنوز خوانده نشده — چند لحظه صبر کنید یا صفحه را تازه کنید'); return }
     const res = await saveProfileRemote('player', profile.slug, profile as unknown as Record<string, unknown>)
     if (!res.ok) { setErr(res.message ?? 'ذخیره روی سرور انجام نشد'); return }
 
-    /* از این لحظه نشانی منتشر شده و قفل می‌شود: هر تغییرِ بعدی
+    /* از این لحظه نشانی منتشر شده و قفل می‌شود: هر تغییر بعدی
        لینک‌های منتشرشده را می‌شکند. */
     if (res.profile?.slug) setSavedSlug(res.profile.slug)
     const saved = (res.profile?.data as typeof profile | undefined) ?? profile
@@ -263,7 +263,7 @@ export default function PlayerDashboard() {
                   }}
                 />
               </div>
-                            {/* نشانیِ اختصاصیِ سایت — همان چیزی که پنلِ باشگاه از اول داشت */}
+                            {/* نشانی اختصاصی سایت — همان چیزی که پنل باشگاه از اول داشت */}
               <div className="sm:col-span-2">
                 <ProfileSlugField
                   kind="player" value={form.slug} savedSlug={savedSlug}
@@ -287,7 +287,7 @@ export default function PlayerDashboard() {
               </div>
               {/* ── رتبه‌ی رنکینگ ملی این‌جا نیست ──
                   رنکینگ را فدراسیون تعیین می‌کند و ادمین در
-                  /admin/rankings واردش می‌کند. فیلدِ آزاد یعنی هر
+                  /admin/rankings واردش می‌کند. فیلد آزاد یعنی هر
                   بازیکنی می‌توانست خودش را «رتبه‌ی ۱» معرفی کند. */}
               <div>
                 <label className={LABEL}>باشگاه محل تمرین</label>
@@ -308,7 +308,7 @@ export default function PlayerDashboard() {
               {/* «ملی‌پوش هستم» و «رده‌ی جوانان» برداشته شدند — هر دو
                   ادعای خوداظهار بودند و هیچ‌کس راستی‌آزمایی‌شان
                   نمی‌کرد. رشته و دسته‌ی بازیکن همان بالا انتخاب
-                  می‌شود و همان معیارِ واقعی است. */}
+                  می‌شود و همان معیار واقعی است. */}
             </div>
           </section>
 
@@ -330,7 +330,7 @@ export default function PlayerDashboard() {
                 )
               })}
             </div>
-              {/* ⚠️ ردیف حالا چهار دکمه و دو پیش‌نمایش دارد؛ بدونِ
+              {/* ⚠️ ردیف حالا چهار دکمه و دو پیش‌نمایش دارد؛ بدون
                   شکستن، روی ۳۷۵px برچسب‌ها له می‌شوند. */}
             <div className="flex flex-wrap items-center gap-3">
               <input ref={photoRef} type="file" accept="image/*" className="hidden" onChange={pickPhoto} />
@@ -415,9 +415,9 @@ export default function PlayerDashboard() {
             </div>
           </section>
 
-          {/* بخشِ «مسابقات و حضورها» برداشته شد — صفحه‌ی عمومی
+          {/* بخش «مسابقات و حضورها» برداشته شد — صفحه‌ی عمومی
               دیگر نشانش نمی‌دهد، پس فرمی که خروجی‌اش دیده نمی‌شود
-              فقط وقتِ کاربر را می‌گرفت. */}
+              فقط وقت کاربر را می‌گرفت. */}
 
           {/* ═══ گالری ═══ */}
           <section className={CARD}>
@@ -454,7 +454,7 @@ export default function PlayerDashboard() {
               )
             })}
 
-            {/* عکس‌های بدونِ آلبوم — در صفحه‌ی عمومی تبِ «تصاویر» هستند */}
+            {/* عکس‌های بدون آلبوم — در صفحه‌ی عمومی تب «تصاویر» هستند */}
             {form.gallery.some(g => !(g.album ?? '').trim()) && (
               <div className="mb-3 rounded-xl border border-[#EFEBE1] bg-[#FAFAF7] p-3">
                 <div className="mb-2 text-[13px] font-bold">بدون آلبوم</div>
@@ -476,8 +476,8 @@ export default function PlayerDashboard() {
           </section>
 
           {/* ═══ ذخیره ═══ */}
-          {/* روی موبایل دکمه یک سطرِ کامل می‌گیرد و وسط‌چین است؛
-              کنارِ متنِ وضعیت فشرده‌شدنش، هم زشت بود هم هدفِ لمس را
+          {/* روی موبایل دکمه یک سطر کامل می‌گیرد و وسط‌چین است؛
+              کنار متن وضعیت فشرده‌شدنش، هم زشت بود هم هدف لمس را
               از ۴۴px کوچک‌تر می‌کرد. */}
           <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:flex-wrap sm:items-center">
             <button type="submit"

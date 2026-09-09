@@ -3,21 +3,21 @@ import { NextRequest, NextResponse } from 'next/server';
 import { sb, actorFromRequest, audit, clientIp } from '@/lib/finance/db';
 import { can } from '@/lib/admin/permissions';
 
-/* مسابقاتِ باشگاه‌ها برای ادمین.
+/* مسابقات باشگاه‌ها برای ادمین.
 
-   چرا این مسیر لازم بود: `/admin/events` جدولِ `events` را می‌خواند —
+   چرا این مسیر لازم بود: `/admin/events` جدول `events` را می‌خواند —
    رویدادهای محتوایی که ادمین دستی می‌سازد. مسابقاتی که باشگاه‌ها
-   می‌سازند در جدولِ `tournaments` هستند و هیچ‌جای پنلِ ادمین دیده
-   نمی‌شدند. یعنی مسابقه‌ای با ثبت‌نام و پول، بدونِ هیچ نظارتی. */
+   می‌سازند در جدول `tournaments` هستند و هیچ‌جای پنل ادمین دیده
+   نمی‌شدند. یعنی مسابقه‌ای با ثبت‌نام و پول، بدون هیچ نظارتی. */
 
 const STATUSES = new Set([
   'draft', 'published', 'registration_open', 'registration_closed',
   'ongoing', 'completed', 'cancelled',
 ]);
 
-/* همان مجموعه‌ای که مسیرِ باشگاه می‌پذیرد — دو مسیر نباید فرمت‌های
-   متفاوتی قبول کنند. پیش‌تر این‌جا هاردکد بود و فقط پنج مقدارِ bo را
-   می‌شناخت، یعنی مسابقه‌ای که ادمین با فرمتِ race یا زمان‌دار می‌ساخت
+/* همان مجموعه‌ای که مسیر باشگاه می‌پذیرد — دو مسیر نباید فرمت‌های
+   متفاوتی قبول کنند. پیش‌تر این‌جا هاردکد بود و فقط پنج مقدار bo را
+   می‌شناخت، یعنی مسابقه‌ای که ادمین با فرمت race یا زمان‌دار می‌ساخت
    بی‌صدا NULL می‌گرفت. */
 import { ALL_FORMATS as FORMATS } from '@/lib/tournaments/formats';
 
@@ -64,7 +64,7 @@ export async function GET(req: NextRequest) {
       clubName: clubName.get(String(r.club_id)) ?? '—',
       registrations: mine.length,
       paidRegistrations: paid.length,
-      /* درآمدِ ناخالص و تفکیکش — همان اعدادی که در دفتر هم هست */
+      /* درآمد ناخالص و تفکیکش — همان اعدادی که در دفتر هم هست */
       grossRevenue: paid.reduce((s, x) => s + Number(x.amount || 0), 0),
       platformCommission: paid.reduce((s, x) => s + Number(x.commission_amount || 0), 0),
       clubShare: paid.reduce((s, x) => s + Number(x.net_amount || 0), 0),
@@ -80,7 +80,7 @@ export async function GET(req: NextRequest) {
   }, { headers: { 'Cache-Control': 'no-store' } });
 }
 
-/* ساختِ مسابقه توسطِ ادمین — برای باشگاهی که خودش انتخاب می‌کند.
+/* ساخت مسابقه توسط ادمین — برای باشگاهی که خودش انتخاب می‌کند.
    بدنه: { clubId, title, entryFee, maxPlayers, startsAt?, discipline?, status? } */
 export async function POST(req: NextRequest) {
   const actor = actorFromRequest(req);
@@ -115,16 +115,16 @@ export async function POST(req: NextRequest) {
     return Number.isFinite(t) ? new Date(t).toISOString() : null;
   })();
 
-  /* همان قاعده‌ی مسیرِ باشگاه — مهلتِ ثبت‌نام بعد از خودِ مسابقه بی‌معنی
-     است. تا امروز این مسیر اصلاً مهلت را نمی‌پذیرفت، پس بررسی هم نداشت. */
+  /* همان قاعده‌ی مسیر باشگاه — مهلت ثبت‌نام بعد از خود مسابقه بی‌معنی
+     است. تا امروز این مسیر اصلا مهلت را نمی‌پذیرفت، پس بررسی هم نداشت. */
   if (startsAt && registrationEndsAt && registrationEndsAt > startsAt) {
     return NextResponse.json(
       { message: 'مهلت ثبت‌نام نمی‌تواند بعد از تاریخ برگزاری باشد' }, { status: 400 });
   }
 
-  /* فیلدها عمداً با مسیرِ باشگاه یکی است. پیش‌تر این‌جا فقط عنوان و
+  /* فیلدها عمدا با مسیر باشگاه یکی است. پیش‌تر این‌جا فقط عنوان و
      مبلغ و ظرفیت و تاریخ پذیرفته می‌شد؛ یعنی مسابقه‌ای که ادمین
-     می‌ساخت رشته و فرمت و جایزه و مهلتِ ثبت‌نام نداشت و با مسابقه‌ی
+     می‌ساخت رشته و فرمت و جایزه و مهلت ثبت‌نام نداشت و با مسابقه‌ی
      ساخته‌ی باشگاه یکسان نبود. */
   const c = club as { name?: string; city?: string; province?: string };
   const { data, error } = await sb().from('tournaments').insert({
@@ -156,10 +156,10 @@ export async function POST(req: NextRequest) {
   return NextResponse.json({ ok: true, tournament: data }, { status: 201 });
 }
 
-/* حذفِ فیزیکیِ مسابقه.
-   فقط وقتی هیچ ثبت‌نامِ پرداخت‌شده‌ای ندارد: حذفِ مسابقه‌ای که پول
-   جابه‌جا کرده، ردیف‌های دفتر را یتیم می‌کند و ردِ پول گم می‌شود.
-   در آن حالت راهِ درست «لغو» است که سابقه را نگه می‌دارد. */
+/* حذف فیزیکی مسابقه.
+   فقط وقتی هیچ ثبت‌نام پرداخت‌شده‌ای ندارد: حذف مسابقه‌ای که پول
+   جابه‌جا کرده، ردیف‌های دفتر را یتیم می‌کند و رد پول گم می‌شود.
+   در آن حالت راه درست «لغو» است که سابقه را نگه می‌دارد. */
 export async function DELETE(req: NextRequest) {
   const actor = actorFromRequest(req);
   if (!actor || !(await can(actor.id, 'tournaments'))) {
@@ -177,11 +177,11 @@ export async function DELETE(req: NextRequest) {
     .eq('tournament_id', id).eq('payment_status', 'PAID');
   if ((paid ?? 0) > 0) {
     return NextResponse.json({
-      message: `این مسابقه ${paid} ثبت‌نامِ پرداخت‌شده دارد و حذف نمی‌شود — سابقه‌ی مالی باید بماند. به‌جایش لغوش کنید.`,
+      message: `این مسابقه ${paid} ثبت‌نام پرداخت‌شده دارد و حذف نمی‌شود — سابقه‌ی مالی باید بماند. به‌جایش لغوش کنید.`,
     }, { status: 409 });
   }
 
-  /* ثبت‌نام‌های پرداخت‌نشده مانعی ندارند و با خودِ مسابقه می‌روند */
+  /* ثبت‌نام‌های پرداخت‌نشده مانعی ندارند و با خود مسابقه می‌روند */
   await sb().from('tournament_registrations').delete().eq('tournament_id', id);
   const { error } = await sb().from('tournaments').delete().eq('id', id);
   if (error) {
@@ -197,9 +197,9 @@ export async function DELETE(req: NextRequest) {
   return NextResponse.json({ ok: true });
 }
 
-/* ادمین می‌تواند وضعیتِ مسابقه را عوض کند — مثلاً مسابقه‌ای که باشگاه
-   رهایش کرده یا محتوایش نامناسب است. برخلافِ مسیرِ باشگاه، این‌جا
-   محدودیتِ گذر نداریم چون ادمین باید بتواند هر وضعیتِ گیرکرده‌ای را
+/* ادمین می‌تواند وضعیت مسابقه را عوض کند — مثلا مسابقه‌ای که باشگاه
+   رهایش کرده یا محتوایش نامناسب است. برخلاف مسیر باشگاه، این‌جا
+   محدودیت گذر نداریم چون ادمین باید بتواند هر وضعیت گیرکرده‌ای را
    درست کند؛ ولی هر تغییر در ممیزی ثبت می‌شود. */
 export async function PATCH(req: NextRequest) {
   const actor = actorFromRequest(req);
@@ -216,15 +216,15 @@ export async function PATCH(req: NextRequest) {
   const { data: before } = await sb().from('tournaments').select('*').eq('id', id).maybeSingle();
   if (!before) return NextResponse.json({ message: 'مسابقه پیدا نشد' }, { status: 404 });
 
-  /* بردنِ مسابقه‌ی دارای ثبت‌نامِ پرداخت‌شده به پیش‌نویس یعنی رویدادی که
-     مردم پولش را داده‌اند از سایت غیب شود. راهِ درستش لغو است. */
+  /* بردن مسابقه‌ی دارای ثبت‌نام پرداخت‌شده به پیش‌نویس یعنی رویدادی که
+     مردم پولش را داده‌اند از سایت غیب شود. راه درستش لغو است. */
   if (status === 'draft') {
     const { count } = await sb().from('tournament_registrations')
       .select('id', { count: 'exact', head: true })
       .eq('tournament_id', id).eq('payment_status', 'PAID');
     if ((count ?? 0) > 0) {
       return NextResponse.json({
-        message: `این مسابقه ${count} ثبت‌نامِ پرداخت‌شده دارد و به پیش‌نویس برنمی‌گردد. آن را لغو کنید.`,
+        message: `این مسابقه ${count} ثبت‌نام پرداخت‌شده دارد و به پیش‌نویس برنمی‌گردد. آن را لغو کنید.`,
       }, { status: 409 });
     }
   }

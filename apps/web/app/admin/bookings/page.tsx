@@ -2,7 +2,7 @@
 
 /* مدیریت رزروها — فهرست، جستجو، فیلتر وضعیت و لغو رزرو با بازپرداخت.
    لغو از همان مسیر /api/bookings/[id]/cancel انجام می‌شود تا اثر مالی
-   (بازپرداخت، دفتر کل، رکورد refund) دقیقاً مثل لغو کاربر ثبت شود. */
+   (بازپرداخت، دفتر کل، رکورد refund) دقیقا مثل لغو کاربر ثبت شود. */
 
 import { useCallback, useEffect, useState } from 'react'
 import { notify } from '../../../lib/ui/dialogs'

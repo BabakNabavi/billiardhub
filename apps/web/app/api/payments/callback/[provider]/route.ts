@@ -19,7 +19,7 @@ async function handle(req: NextRequest, providerName: string) {
   const ret = await readGatewayReturn(req);
   const authority = ret.authority;
 
-  /* شناسه‌ی سفارش معمولاً در کوئریِ returnUrl است؛ اگر درگاهی آن را
+  /* شناسه‌ی سفارش معمولا در کوئری returnUrl است؛ اگر درگاهی آن را
      نگه ندارد، `clientRefId` که خودمان هنگام ساخت فرستادیم جایش را
      می‌گیرد. */
   const paymentId = url.searchParams.get('payment') || ret.clientRefId || '';
@@ -32,7 +32,7 @@ async function handle(req: NextRequest, providerName: string) {
   if (!pRow) return fail('پرداخت یافت نشد');
   const pay = pRow as { id: string; booking_id: string; amount: number; status: string; provider: string; provider_authority: string | null };
 
-  /* قبلاً تأیید شده ⇒ فقط به نتیجه هدایت کن (بدون هیچ عملیات مالی تکراری) */
+  /* قبلا تأیید شده ⇒ فقط به نتیجه هدایت کن (بدون هیچ عملیات مالی تکراری) */
   if (pay.status === 'PAID') {
     return NextResponse.redirect(new URL(`/booking/result?ok=1&booking=${pay.booking_id}`, callbackOrigin()), { status: 303 });
   }
@@ -45,11 +45,11 @@ async function handle(req: NextRequest, providerName: string) {
 
   const provider = getPaymentProvider(pay.provider || providerName);
 
-  /* ── شناسه‌ی درگاه از دیتابیس می‌آید، نه از نوارِ نشانی ──
-     پیش‌تر `authority || pay.provider_authority` بود، یعنی مقدارِ
-     کوئری‌استرینگ اولویت داشت. با آن، کسی می‌توانست شناسه‌ی یک پرداختِ
-     واقعاً موفقِ *دیگر* را روی این پرداخت سوار کند و درگاه آن را تأیید
-     می‌کرد. حالا فقط همان شناسه‌ای معتبر است که موقعِ ساختِ پرداخت
+  /* ── شناسه‌ی درگاه از دیتابیس می‌آید، نه از نوار نشانی ──
+     پیش‌تر `authority || pay.provider_authority` بود، یعنی مقدار
+     کوئری‌استرینگ اولویت داشت. با آن، کسی می‌توانست شناسه‌ی یک پرداخت
+     واقعا موفق *دیگر* را روی این پرداخت سوار کند و درگاه آن را تأیید
+     می‌کرد. حالا فقط همان شناسه‌ای معتبر است که موقع ساخت پرداخت
      ذخیره شده؛ اگر درگاه شناسه‌ی دیگری برگرداند، ناسازگاری است. */
   const auth = pay.provider_authority || '';
   if (!auth) return fail('شناسه‌ی پرداخت نامعتبر است');

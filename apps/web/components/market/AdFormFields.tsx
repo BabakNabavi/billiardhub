@@ -1,11 +1,11 @@
 'use client'
 
 /* ═══════════════════════════════════════════════════════════════
-   اجزای مشترکِ فرمِ آگهی — منبعِ واحد.
+   اجزای مشترک فرم آگهی — منبع واحد.
    ───────────────────────────────────────────────────────────────
-   این‌ها تا امروز فقط داخلِ `app/shop/new/page.tsx` بودند. فرمِ
-   ویرایش نسخه‌ی خودش را داشت: دراپ‌داونِ دیگر، رنگِ دیگر، ورودیِ
-   دیگر — و مهم‌تر از ظاهر، رفتارِ دیگر. حالا هر دو فرم دقیقاً یک
+   این‌ها تا امروز فقط داخل `app/shop/new/page.tsx` بودند. فرم
+   ویرایش نسخه‌ی خودش را داشت: دراپ‌داون دیگر، رنگ دیگر، ورودی
+   دیگر — و مهم‌تر از ظاهر، رفتار دیگر. حالا هر دو فرم دقیقا یک
    چیز را نشان می‌دهند.
    ═══════════════════════════════════════════════════════════════ */
 
@@ -24,22 +24,22 @@ export const LQ_BOR   = '1px solid rgba(255,255,255,0.85)'
 export const LQ_SHAD  = 'inset 0 1.5px 0 rgba(255,255,255,0.95), 0 8px 32px rgba(0,0,0,0.07)'
 export const ERR      = '#EF4444'
 
-/* استایلِ مشترکِ صفحه — هر دو فرم همین را در <style> می‌گذارند.
-   (بک‌تیک این‌جا ممنوع — این رشته داخلِ template literal مصرف می‌شود) */
+/* استایل مشترک صفحه — هر دو فرم همین را در <style> می‌گذارند.
+   (بک‌تیک این‌جا ممنوع — این رشته داخل template literal مصرف می‌شود) */
 export const AD_FORM_CSS = `
   @keyframes fadeUp { from{opacity:0;transform:translateY(18px)} to{opacity:1;transform:none} }
   @keyframes fadeIn { from{opacity:0} to{opacity:1} }
   @keyframes popIn { from{opacity:0;transform:scale(0.94)} to{opacity:1;transform:scale(1)} }
   * { box-sizing: border-box; }
   .nf:focus { border-color: ${GOLD} !important; box-shadow: 0 0 0 3px rgba(199,166,106,0.14) !important; }
-  /* ── حلقه‌ی focus روی دکمه‌های شبیهِ فیلد ──
-     چیپ‌های مقدار، تاگلِ بله/خیر و چیپ‌های چندانتخابی همه دکمه‌اند
+  /* ── حلقه‌ی focus روی دکمه‌های شبیه فیلد ──
+     چیپ‌های مقدار، تاگل بله/خیر و چیپ‌های چندانتخابی همه دکمه‌اند
      و مرورگر حلقه‌ی پیش‌فرض را با outline:none  ریست از دست داده
-     بود. بدونِ این، پیمایش با کیبورد نامرئی است. */
+     بود. بدون این، پیمایش با کیبورد نامرئی است. */
   .fchip:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(199,166,106,0.30); border-color: ${GOLD} !important; }
   .fchip:hover:not(:disabled) { border-color: rgba(199,166,106,0.45); }
   .fchip:disabled { opacity: .5; cursor: not-allowed; }
-  /* راهنمای داخلِ فیلد ریزتر و کم‌رنگ‌تر از متنِ واقعی است، تا با
+  /* راهنمای داخل فیلد ریزتر و کم‌رنگ‌تر از متن واقعی است، تا با
      چیزی که کاربر نوشته اشتباه گرفته نشود */
   .nf::placeholder { color: rgba(28,28,26,0.22); font-size: 12.6px; }
   .drop-area { transition: border-color 0.2s, background 0.2s, transform 0.15s; }
@@ -49,36 +49,36 @@ export const AD_FORM_CSS = `
   .cond-btn { transition: all 0.2s; cursor: pointer; }
   .cond-btn:hover { border-color: ${GOLD} !important; }
   @media(max-width:820px) { .two-col { grid-template-columns: 1fr !important; } .spec-grid { grid-template-columns: 1fr !important; } }
-  /* استایلِ اینلاین دو ستون می‌گذارد؛ بدونِ important بی‌اثر است */
+  /* استایل اینلاین دو ستون می‌گذارد؛ بدون important بی‌اثر است */
   @media(min-width:1100px) { .span-cols .spec-grid { grid-template-columns: 1fr 1fr 1fr !important; } }
   /* ── مشخصات فنی روی دسکتاپ سه‌ستونه ──
-     این کارت ردیفِ خودش را دارد و کلِ عرض را می‌گیرد. با دو ستون،
-     ۳۳ فیلدِ میز ۱۷ ردیف می‌شد؛ با سه ستون ۱۱ ردیف. زیرِ ۱۱۰۰
-     پیکسل به دو و زیرِ ۸۲۰ به یک ستون برمی‌گردد. */
-  /* ── چیدمانِ دسکتاپ: دو ستونِ متعادل ──
-     یک ستون، صفحه را ۴۵۴۰ پیکسل دراز می‌کرد. دو ستونِ دستی هم
-     جواب نداد: کارتِ مشخصات با ۳۳ فیلد ۲۶۱۲ پیکسل است و هر تقسیمِ
-     ثابتی یک طرف را تا پایین می‌بُرد و طرفِ دیگر را از وسط خالی
+     این کارت ردیف خودش را دارد و کل عرض را می‌گیرد. با دو ستون،
+     ۳۳ فیلد میز ۱۷ ردیف می‌شد؛ با سه ستون ۱۱ ردیف. زیر ۱۱۰۰
+     پیکسل به دو و زیر ۸۲۰ به یک ستون برمی‌گردد. */
+  /* ── چیدمان دسکتاپ: دو ستون متعادل ──
+     یک ستون، صفحه را ۴۵۴۰ پیکسل دراز می‌کرد. دو ستون دستی هم
+     جواب نداد: کارت مشخصات با ۳۳ فیلد ۲۶۱۲ پیکسل است و هر تقسیم
+     ثابتی یک طرف را تا پایین می‌برد و طرف دیگر را از وسط خالی
      می‌گذاشت.
 
-     پس تقسیم به خودِ مرورگر سپرده شد: «column-count» ارتفاع را
+     پس تقسیم به خود مرورگر سپرده شد: «column-count» ارتفاع را
      متعادل می‌کند و «break-inside: avoid» نمی‌گذارد کارتی وسطش
-     بشکند. ساختارِ DOM دست‌نخورده می‌ماند — همان یک ستونِ موبایل،
-     فقط با یک قاعده‌ی CSS. (تلاشِ قبلی JSX را جابه‌جا کرد و
+     بشکند. ساختار DOM دست‌نخورده می‌ماند — همان یک ستون موبایل،
+     فقط با یک قاعده‌ی CSS. (تلاش قبلی JSX را جابه‌جا کرد و
      تودرتویی را بی‌صدا شکست؛ نه tsc دید نه تست.)
 
-     ردیفِ قوانین و دکمه‌ها «column-span: all» می‌گیرند تا مثلِ
-     قبل کلِ عرض را بگیرند و ته صفحه بمانند. */
+     ردیف قوانین و دکمه‌ها «column-span: all» می‌گیرند تا مثل
+     قبل کل عرض را بگیرند و ته صفحه بمانند. */
   .two-col { grid-template-columns: 1fr !important; }
   @media(min-width:900px) {
     .ad-cols { display: block !important; column-count: 2; column-gap: 20px; column-fill: balance; }
     .ad-cols > * { break-inside: avoid; margin-bottom: 20px; }
     .ad-cols > .span-all { column-span: all; }
-    /* کارتِ مشخصات کلِ عرض را می‌گیرد: ۳۳ فیلد در یک ستونِ ۵۵۰
+    /* کارت مشخصات کل عرض را می‌گیرد: ۳۳ فیلد در یک ستون ۵۵۰
        پیکسلی ۲۹۷۸ پیکسل بود و هیچ تعادلی ممکن نمی‌شد. تمام‌عرض،
        شبکه‌ی داخلی‌اش سه‌ستونه می‌شود و به ~۱۱۰۰ می‌رسد. */
     .ad-cols > .span-cols { column-span: all; }
-    /* کارتِ تمام‌عرض نباید تُنُک شود: چهار فیلدش دو ستون می‌شوند */
+    /* کارت تمام‌عرض نباید تنک شود: چهار فیلدش دو ستون می‌شوند */
     .span-cols .info-grid { display: grid !important; grid-template-columns: 1fr 1fr; gap: 16px 20px; }
   }
 `
@@ -105,7 +105,7 @@ export function toAsciiDigits(s: string) {
 
 /* ── یک نرمال‌ساز، نه دو ──
    الگوریتم در `lib/text-fa` است چون سرور هم همان را لازم دارد؛ دو
-   نسخه یعنی همان دو شکلِ ذخیره‌شده‌ای که این کار برای حذفش بود. */
+   نسخه یعنی همان دو شکل ذخیره‌شده‌ای که این کار برای حذفش بود. */
 export { normalizePhoneFa as normalizePhone, isIranMobile as isValidPhone } from '../../lib/text-fa'
 
 export function fmtPrice(v: string) {
@@ -118,30 +118,30 @@ export function fmtPrice(v: string) {
 export interface FancyOption {
   value: string
   label: string
-  /** متنی که جست‌وجو رویش انجام می‌شود؛ نبودنش یعنی خودِ `label` */
+  /** متنی که جست‌وجو رویش انجام می‌شود؛ نبودنش یعنی خود `label` */
   search?: string
-  /** رندرِ سفارشیِ ردیف و حالتِ بسته — پرچم، زیرنویس، شمارش */
+  /** رندر سفارشی ردیف و حالت بسته — پرچم، زیرنویس، شمارش */
   node?: React.ReactNode
-  /** سرتیترِ غیرقابلِ کلیک که پیش از این گزینه می‌آید */
+  /** سرتیتر غیرقابل کلیک که پیش از این گزینه می‌آید */
   group?: string
 }
 
 export function FancySelect({ id, value, onChange, options, placeholder = 'انتخاب...', searchPlaceholder, disabled, error, describedBy }: {
-  /** شناسه‌ی دکمه — تا `<label htmlFor>` واقعاً به چیزی برسد */
+  /** شناسه‌ی دکمه — تا `<label htmlFor>` واقعا به چیزی برسد */
   id?: string
   value: string
   onChange: (v: string) => void
   /* `search` و `node` و `group` اختیاری‌اند و همه‌ی فراخوان‌های قبلی
      دست‌نخورده کار می‌کنند. `search` وقتی لازم است که کاربر با چیزی
-     جز برچسب هم بگردد (نامِ فارسی، نامِ کشور)، و `node` وقتی که ردیف
+     جز برچسب هم بگردد (نام فارسی، نام کشور)، و `node` وقتی که ردیف
      بیش از یک رشته باشد. */
   options: FancyOption[]
   placeholder?: string
-  /** متنِ جست‌وجوی داخلِ فهرست — پیش‌فرض «جستجو...» */
+  /** متن جست‌وجوی داخل فهرست — پیش‌فرض «جستجو...» */
   searchPlaceholder?: string
   disabled?: boolean
   error?: boolean
-  /** شناسه‌ی متنِ راهنما — صفحه‌خوان باید آن را هم بخواند */
+  /** شناسه‌ی متن راهنما — صفحه‌خوان باید آن را هم بخواند */
   describedBy?: string
 }) {
   const [open, setOpen] = useState(false)
@@ -152,13 +152,13 @@ export function FancySelect({ id, value, onChange, options, placeholder = 'ان�
   const searchable = options.length > 8
 
   /* ── چرا این‌قدر حساب‌وکتاب برای یک دراپ‌داون ──
-     نسخه‌ی قبلی همیشه پنل را زیرِ دکمه می‌گذاشت با ارتفاعِ ثابتِ
-     ۲۶۴ پیکسل. روی موبایل، دکمه‌ای که پایینِ صفحه بود پنلی می‌ساخت
-     که نیمی از آن بیرونِ نمایشگر بود — و چون پنل `position:fixed`
-     است، اسکرول هم به آن نمی‌رسید. یعنی گزینه‌های پایینِ فهرست
-     عملاً قابلِ انتخاب نبودند.
+     نسخه‌ی قبلی همیشه پنل را زیر دکمه می‌گذاشت با ارتفاع ثابت
+     ۲۶۴ پیکسل. روی موبایل، دکمه‌ای که پایین صفحه بود پنلی می‌ساخت
+     که نیمی از آن بیرون نمایشگر بود — و چون پنل `position:fixed`
+     است، اسکرول هم به آن نمی‌رسید. یعنی گزینه‌های پایین فهرست
+     عملا قابل انتخاب نبودند.
 
-     حالا فضای واقعیِ بالا و پایینِ دکمه اندازه گرفته می‌شود: اگر
+     حالا فضای واقعی بالا و پایین دکمه اندازه گرفته می‌شود: اگر
      پایین جا نبود پنل رو به بالا باز می‌شود، و ارتفاعش هرگز از
      فضای موجود بیشتر نمی‌شود. */
   const place = () => {
@@ -194,7 +194,7 @@ export function FancySelect({ id, value, onChange, options, placeholder = 'ان�
   }, [open])
 
   const cur = options.find(o => o.value === value)
-  /* جست‌وجو روی متنِ نرمال‌شده: «مك درموت» با کیبوردِ عربی، و
+  /* جست‌وجو روی متن نرمال‌شده: «مك درموت» با کیبورد عربی، و
      «مک‌درموت» با نیم‌فاصله، باید همان «McDermott» را پیدا کنند.
      چون فاصله‌ها حذف می‌شوند، «cue craft» هم «CueCraft» را می‌گیرد. */
   const needle = normalizeFa(q)
@@ -227,7 +227,7 @@ export function FancySelect({ id, value, onChange, options, placeholder = 'ان�
         }}>
           {searchable && (
             <div style={{ padding: 8, borderBottom: '1px solid rgba(28,28,26,0.07)', flexShrink: 0 }}>
-              {/* روی موبایل فوکوسِ خودکار کیبورد را بالا می‌آورد و همان
+              {/* روی موبایل فوکوس خودکار کیبورد را بالا می‌آورد و همان
                   پنلی را که تازه جا شده بود دوباره از صفحه بیرون می‌اندازد */}
               <input autoFocus={typeof window !== 'undefined' && window.innerWidth > 820}
                 value={q} onChange={e => setQ(e.target.value)} placeholder={searchPlaceholder ?? 'جستجو...'} dir="rtl"
@@ -239,9 +239,9 @@ export function FancySelect({ id, value, onChange, options, placeholder = 'ان�
               <div style={{ padding: '18px 10px', textAlign: 'center', fontSize: 13, color: TEXT_MUT }}>موردی یافت نشد</div>
             ) : list.map((o, i) => {
               const s = o.value === value
-              /* سرتیترِ گروه فقط وقتی می‌آید که با ردیفِ قبلی فرق کند —
+              /* سرتیتر گروه فقط وقتی می‌آید که با ردیف قبلی فرق کند —
                  و هنگام جست‌وجو هم درست کار می‌کند، چون روی همان
-                 فهرستِ فیلترشده حساب می‌شود. */
+                 فهرست فیلترشده حساب می‌شود. */
               const head = o.group && o.group !== list[i - 1]?.group ? o.group : null
               return (
                 <div key={o.value}>
@@ -254,10 +254,10 @@ export function FancySelect({ id, value, onChange, options, placeholder = 'ان�
                   style={{
                     display: 'flex', width: '100%', alignItems: 'center', justifyContent: 'space-between', gap: 8,
                     padding: '11px 12px', border: 'none', borderRadius: 9, cursor: 'pointer', textAlign: 'right',
-                    /* ── خطِ جداکننده زیرِ هر گزینه ──
-                       فهرستِ برند تا صد ردیف می‌شود و بدونِ خط، نامِ
-                       فارسی و شمارشِ ردیفِ بعدی با هم قاطی می‌شدند.
-                       آخرین ردیف خط نمی‌گیرد تا کفِ پنجره تمیز بماند. */
+                    /* ── خط جداکننده زیر هر گزینه ──
+                       فهرست برند تا صد ردیف می‌شود و بدون خط، نام
+                       فارسی و شمارش ردیف بعدی با هم قاطی می‌شدند.
+                       آخرین ردیف خط نمی‌گیرد تا کف پنجره تمیز بماند. */
                     borderBottom: i === list.length - 1 ? 'none' : '1px solid rgba(28,28,26,0.07)',
                     fontFamily: 'Vazirmatn,Tahoma,sans-serif', fontSize: 14,
                     background: s ? 'rgba(199,166,106,0.14)' : 'transparent', color: s ? GOLD_D : TEXT, fontWeight: s ? 800 : 500,
@@ -303,13 +303,13 @@ export function SectionTitle({ children }: { children: React.ReactNode }) {
 }
 
 /* ── پنجره‌ی پیام ──
-   خطاها تا امروز به‌صورت یک نوارِ رنگی بالای فرم نشان داده می‌شدند.
-   روی دسکتاپ دیده می‌شد؛ روی موبایل نه — کاربر پایینِ فرم دکمه را
-   می‌زد، صفحه تکان نمی‌خورد و هیچ نمی‌فهمید چرا. حالا هر پیامی وسطِ
+   خطاها تا امروز به‌صورت یک نوار رنگی بالای فرم نشان داده می‌شدند.
+   روی دسکتاپ دیده می‌شد؛ روی موبایل نه — کاربر پایین فرم دکمه را
+   می‌زد، صفحه تکان نمی‌خورد و هیچ نمی‌فهمید چرا. حالا هر پیامی وسط
    صفحه می‌آید، جایی که چشم همان‌جاست.
 
-   قفلِ بدنه عمداً دست نمی‌خورد: `touchAction:none` روی پوشش کافی است
-   تا پس‌زمینه با لمس اسکرول نشود، بدونِ اینکه استایلِ body عوض شود. */
+   قفل بدنه عمدا دست نمی‌خورد: `touchAction:none` روی پوشش کافی است
+   تا پس‌زمینه با لمس اسکرول نشود، بدون اینکه استایل body عوض شود. */
 export interface AlertAction { href: string; label: string }
 
 export function AlertDialog({ open, title, lines, tone = 'error', action, onClose }: {
@@ -439,7 +439,7 @@ export function SpecField({ field, value, otherValue, onChange, onOtherChange, d
 
         {showOther && (
           <div style={{ marginTop: 8, animation: 'fadeIn 0.25s ease both' }}>
-            <input className="nf" type="text" placeholder="لطفاً توضیح دهید..." value={otherValue}
+            <input className="nf" type="text" placeholder="لطفا توضیح دهید..." value={otherValue}
               onChange={e => onOtherChange(e.target.value)}
               style={{ ...inp(), background: 'rgba(199,166,106,0.05)', borderColor: 'rgba(199,166,106,0.30)' }} />
           </div>

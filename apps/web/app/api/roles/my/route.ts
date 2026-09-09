@@ -2,14 +2,14 @@ export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { sb, actorFromRequest, audit, clientIp } from '@/lib/finance/db';
 
-/* درخواست‌های نقشِ خودِ کاربر.
+/* درخواست‌های نقش خود کاربر.
 
    صفحه‌ی `/profile/role` این را می‌خواند تا نشان دهد کدام نقش در
    انتظار است، کدام تأیید شده و کدام رد. تا امروز مسیر وجود نداشت، پس
-   صفحه همیشه فهرستِ خالی می‌گرفت: کاربر بعد از ثبتِ درخواست هیچ
-   بازخوردی نمی‌دید و نمی‌دانست اصلاً چیزی ثبت شده یا نه.
+   صفحه همیشه فهرست خالی می‌گرفت: کاربر بعد از ثبت درخواست هیچ
+   بازخوردی نمی‌دید و نمی‌دانست اصلا چیزی ثبت شده یا نه.
 
-   صاحبِ داده همیشه از نشست می‌آید، نه از کوئری. */
+   صاحب داده همیشه از نشست می‌آید، نه از کوئری. */
 export async function GET(req: NextRequest) {
   const actor = actorFromRequest(req);
   if (!actor) return NextResponse.json({ message: 'ابتدا وارد شوید' }, { status: 401 });
@@ -24,7 +24,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ requests: [] });
   }
 
-  /* نقش‌های فعلیِ کاربر هم برمی‌گردد تا صفحه بتواند «همین حالا داری» را
+  /* نقش‌های فعلی کاربر هم برمی‌گردد تا صفحه بتواند «همین حالا داری» را
      از «درخواست داده‌ای» جدا کند. */
   const { data: u } = await sb().from('users')
     .select('"primaryRole","secondaryRoles"').eq('id', actor.id).maybeSingle();
@@ -36,10 +36,10 @@ export async function GET(req: NextRequest) {
   }, { headers: { 'Cache-Control': 'no-store' } });
 }
 
-/* ── انتخابِ نقشِ اصلی ──
+/* ── انتخاب نقش اصلی ──
    کسی که چند نقش دارد باید یکی را «اصلی» کند: همان نشانی است که
-   روی آگهی و استوری‌اش می‌نشیند. تا امروز نقشِ اصلی فقط با گرفتنِ
-   نقشِ تازه عوض می‌شد و کاربر هیچ کنترلی رویش نداشت. */
+   روی آگهی و استوری‌اش می‌نشیند. تا امروز نقش اصلی فقط با گرفتن
+   نقش تازه عوض می‌شد و کاربر هیچ کنترلی رویش نداشت. */
 export async function PUT(req: NextRequest) {
   const actor = actorFromRequest(req);
   if (!actor) return NextResponse.json({ message: 'ابتدا وارد شوید' }, { status: 401 });
@@ -53,20 +53,20 @@ export async function PUT(req: NextRequest) {
   if (!u) return NextResponse.json({ message: 'کاربر پیدا نشد' }, { status: 404 });
   const cur = u as { primaryRole?: string; secondaryRoles?: string[] };
 
-  /* فقط نقشی که واقعاً دارد. بدونِ این بررسی، هر کسی با یک درخواستِ
+  /* فقط نقشی که واقعا دارد. بدون این بررسی، هر کسی با یک درخواست
      دستی خودش را «باشگاه‌دار» می‌کرد. */
   const owned = [cur.primaryRole, ...(cur.secondaryRoles ?? [])].filter(Boolean);
   if (!owned.includes(role)) {
     return NextResponse.json({ message: 'این نقش را ندارید' }, { status: 403 });
   }
-  /* نقشِ ادمین جای دیگری مدیریت می‌شود و نباید از این مسیر
-     نقشِ نمایشیِ آگهی شود. */
+  /* نقش ادمین جای دیگری مدیریت می‌شود و نباید از این مسیر
+     نقش نمایشی آگهی شود. */
   if (role === 'admin') {
-    return NextResponse.json({ message: 'نقش ادمین نقشِ نمایشی نیست' }, { status: 400 });
+    return NextResponse.json({ message: 'نقش ادمین نقش نمایشی نیست' }, { status: 400 });
   }
   if (cur.primaryRole === role) return NextResponse.json({ ok: true, primaryRole: role });
 
-  /* نقشِ قبلی گم نمی‌شود — به فهرستِ دوم می‌رود */
+  /* نقش قبلی گم نمی‌شود — به فهرست دوم می‌رود */
   const nextSecondary = Array.from(new Set([
     ...(cur.secondaryRoles ?? []).filter(r => r && r !== role),
     ...(cur.primaryRole && cur.primaryRole !== 'user' ? [cur.primaryRole] : []),
@@ -94,9 +94,9 @@ export async function PUT(req: NextRequest) {
 
    ── چرا این مسیر لازم شد ──
    صفحه‌ی /profile/role دکمه‌ی «حذف نقش» داشت که فقط `updateUser` را
-   صدا می‌زد: نقش از استورِ zustand پاک می‌شد و رابط «نقش حذف شد»
-   می‌گفت، ولی هیچ‌وقت به سرور گفته نمی‌شد. یعنی حذف نمایشِ محض بود و
-   با اولین بارگذاریِ تازه برمی‌گشت.
+   صدا می‌زد: نقش از استور zustand پاک می‌شد و رابط «نقش حذف شد»
+   می‌گفت، ولی هیچ‌وقت به سرور گفته نمی‌شد. یعنی حذف نمایش محض بود و
+   با اولین بارگذاری تازه برمی‌گشت.
 
    ── محافظ ──
    نقشی که به یک دارایی گره خورده برداشته نمی‌شود. باشگاه‌داری که
@@ -104,7 +104,7 @@ export async function PUT(req: NextRequest) {
    دیگر باشگاه‌دار نیست و از پنل خودش بیرون می‌افتد.
 
    `admin` هم از این‌جا برداشته نمی‌شود؛ آن محافظ‌های خودش را در
-   /api/admin/grant-admin دارد (آخرین ادمین، نقشِ خود…). */
+   /api/admin/grant-admin دارد (آخرین ادمین، نقش خود…). */
 export async function DELETE(req: NextRequest) {
   const actor = actorFromRequest(req);
   if (!actor) return NextResponse.json({ message: 'ابتدا وارد شوید' }, { status: 401 });
@@ -127,13 +127,13 @@ export async function DELETE(req: NextRequest) {
       .select('id', { count: 'exact', head: true }).eq('ownerId', actor.id);
     if ((count ?? 0) > 0) {
       return NextResponse.json({
-        message: `شما ${count} باشگاه ثبت‌شده دارید و تا وقتی صاحبِ باشگاه هستید نقشِ «باشگاه‌دار» برداشته نمی‌شود.`,
+        message: `شما ${count} باشگاه ثبت‌شده دارید و تا وقتی صاحب باشگاه هستید نقش «باشگاه‌دار» برداشته نمی‌شود.`,
       }, { status: 409 });
     }
   }
 
   const nextSecondary = (cur.secondaryRoles ?? []).filter(r => r !== role);
-  /* اگر همین نقش، نقشِ اصلی بود، به نخستین نقشِ باقی‌مانده برگرد —
+  /* اگر همین نقش، نقش اصلی بود، به نخستین نقش باقی‌مانده برگرد —
      وگرنه کاربر بی‌نقش می‌ماند و هیچ داشبوردی برایش باز نمی‌شود. */
   const nextPrimary = cur.primaryRole === role
     ? (nextSecondary.find(r => r && r !== 'admin') ?? 'user')

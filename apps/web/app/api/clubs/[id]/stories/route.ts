@@ -11,10 +11,10 @@ const CORS = {
   'Access-Control-Allow-Headers': 'Content-Type, Authorization',
 };
 
-/* فهرست در `lib/story-index` است — همان پیاده‌سازی که مسیرِ فروشگاه
+/* فهرست در `lib/story-index` است — همان پیاده‌سازی که مسیر فروشگاه
    هم می‌خواند. آن‌جا خطای نوشتن و خطای خواندن جدی گرفته می‌شوند:
-   نوشتنِ ناموفق دیگر ۲۰۱ نمی‌دهد، و خطای خواندن با «فهرست خالی» یکی
-   گرفته نمی‌شود (که یک‌بار می‌توانست ده استوریِ زنده را پاک کند). */
+   نوشتن ناموفق دیگر ۲۰۱ نمی‌دهد، و خطای خواندن با «فهرست خالی» یکی
+   گرفته نمی‌شود (که یک‌بار می‌توانست ده استوری زنده را پاک کند). */
 const idx = (id: string) => storyIndex('club-media', 'clubs', id);
 
 const isActive = (s: StoredStory, now: number) =>
@@ -26,15 +26,15 @@ const failed = (e: unknown, fallback: string) =>
     { status: 500, headers: CORS },
   );
 
-/* ── چرا رکوردِ باشگاه هم به‌روز می‌شود ─────────────────────────────────
-   خودِ استوری‌ها در همین فایلِ ذخیره‌سازی می‌مانند، ولی صفحه‌ی اول و
-   کارتِ باشگاه و صفحه‌ی باشگاه هیچ‌کدام این فایل را نمی‌خوانند: آن‌ها
-   `club.hasActiveStory` و `club.storyMediaUrl` را از جدولِ `clubs`
-   می‌خوانند. تا امروز هیچ‌چیز آن ستون‌ها را نمی‌نوشت (اصلاً وجود
-   نداشتند) پس استوریِ باشگاه ذخیره می‌شد و هیچ‌جا دیده نمی‌شد.
+/* ── چرا رکورد باشگاه هم به‌روز می‌شود ─────────────────────────────────
+   خود استوری‌ها در همین فایل ذخیره‌سازی می‌مانند، ولی صفحه‌ی اول و
+   کارت باشگاه و صفحه‌ی باشگاه هیچ‌کدام این فایل را نمی‌خوانند: آن‌ها
+   `club.hasActiveStory` و `club.storyMediaUrl` را از جدول `clubs`
+   می‌خوانند. تا امروز هیچ‌چیز آن ستون‌ها را نمی‌نوشت (اصلا وجود
+   نداشتند) پس استوری باشگاه ذخیره می‌شد و هیچ‌جا دیده نمی‌شد.
 
-   تازه‌ترین استوریِ فعال روی رکورد می‌نشیند؛ نبودنش یعنی پاک‌کردنِ
-   ستون‌ها. بی‌صداست: اگر مهاجرتِ ۰۶۴ هنوز اجرا نشده باشد، نباید انتشارِ
+   تازه‌ترین استوری فعال روی رکورد می‌نشیند؛ نبودنش یعنی پاک‌کردن
+   ستون‌ها. بی‌صداست: اگر مهاجرت ۰۶۴ هنوز اجرا نشده باشد، نباید انتشار
    استوری شکست بخورد. */
 async function syncClubRow(id: string, active: any[]): Promise<void> {
   const latest = [...active].sort(
@@ -67,16 +67,16 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
   const now = Date.now();
   const active = all.filter(s => isActive(s, now));
 
-  /* `?sync=1` — تعمیرِ رکورد از روی فایل. فقط پنلِ باشگاه‌دار آن را
-     می‌فرستد؛ نوارِ استوریِ صفحه‌ی اول نه، وگرنه هر بارگذاریِ صفحه‌ی
+  /* `?sync=1` — تعمیر رکورد از روی فایل. فقط پنل باشگاه‌دار آن را
+     می‌فرستد؛ نوار استوری صفحه‌ی اول نه، وگرنه هر بارگذاری صفحه‌ی
      اول یک UPDATE بی‌فایده به دیتابیس می‌زد.
 
-     این همان چیزی است که استوریِ ثبت‌شده‌ی پیش از مهاجرتِ ۰۶۴ را هم
-     نجات می‌دهد: کافی است باشگاه‌دار یک‌بار تبِ گالری را باز کند. */
+     این همان چیزی است که استوری ثبت‌شده‌ی پیش از مهاجرت ۰۶۴ را هم
+     نجات می‌دهد: کافی است باشگاه‌دار یک‌بار تب گالری را باز کند. */
   const wantsSync = req.nextUrl.searchParams.get('sync') === '1';
   if (active.length !== all.length) {
     /* منقضی‌شده‌ها فقط از فهرست بیرون نروند — فایلشان هم برود.
-       پاک‌سازی *بعد از* نوشتنِ موفق، وگرنه فایلی می‌رود که هنوز در
+       پاک‌سازی *بعد از* نوشتن موفق، وگرنه فایلی می‌رود که هنوز در
        فهرست است. */
     const gone = all.filter(s => !isActive(s, now));
     void store.write(active).then(() => store.purge(gone)).catch(() => { });
@@ -103,8 +103,8 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   if (denied) return denied;
 
   /* همان قاعده‌ی فروشگاه: انقضا از سرور، نه از بدنه‌ی درخواست.
-     این‌جا مهم‌تر هم هست چون `syncClubRow` همان تاریخ را داخلِ ستونِ
-     `storyExpiresAt` می‌نویسد و حلقه‌ی کارتِ باشگاه از آن می‌آید. */
+     این‌جا مهم‌تر هم هست چون `syncClubRow` همان تاریخ را داخل ستون
+     `storyExpiresAt` می‌نویسد و حلقه‌ی کارت باشگاه از آن می‌آید. */
   const story = normalizeStory(await req.json().catch(() => null));
   if (!story) return NextResponse.json({ message: 'رسانه‌ی استوری معتبر نیست' }, { status: 400, headers: CORS });
 
@@ -136,19 +136,19 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
   try {
     const current = await store.read();
     const now = Date.now();
-    /* «پیدا نشد» یعنی ۴۰۴، نه ok — وگرنه پنل حذفِ محلی را نگه می‌دارد
-       و استوری با رفرشِ بعدی برمی‌گردد. */
+    /* «پیدا نشد» یعنی ۴۰۴، نه ok — وگرنه پنل حذف محلی را نگه می‌دارد
+       و استوری با رفرش بعدی برمی‌گردد. */
     if (!current.some(s => s.id === storyId))
       return NextResponse.json({ message: 'استوری پیدا نشد' }, { status: 404, headers: CORS });
 
     const updated = current.filter(s => s.id !== storyId && isActive(s, now));
     await store.write(updated);
     await syncClubRow(id, updated);
-    /* هرچه از فهرست افتاد — چه حذفِ دستی چه انقضا — فایلش هم می‌رود */
+    /* هرچه از فهرست افتاد — چه حذف دستی چه انقضا — فایلش هم می‌رود */
     const keep = new Set(updated.map(s => s?.id));
     void store.purge(current.filter(s => !keep.has(s?.id)));
   } catch (e) {
-    return failed(e, 'حذفِ استوری انجام نشد');
+    return failed(e, 'حذف استوری انجام نشد');
   }
   return NextResponse.json({ ok: true }, { headers: CORS });
 }

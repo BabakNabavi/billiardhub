@@ -114,7 +114,7 @@ async function handle(req: NextRequest, providerName: string) {
       action: 'TOURNAMENT_PAYMENT_REJECTED', entityType: 'tournament_registration',
       entityId: reg.id, newValue: { reason: out.reason }, ip: clientIp(req) ?? undefined,
     });
-    /* پول گرفته شده ولی نتوانستیم قطعی کنیم (مثلاً ظرفیت پر شد یا
+    /* پول گرفته شده ولی نتوانستیم قطعی کنیم (مثلا ظرفیت پر شد یا
        مبلغ نخواند) — نیازمند بازپرداخت است و باید دیده شود. */
     return back(out.reason === 'full_after_payment' ? 'full' : 'mismatch', `&r=${reg.id}`);
   }
@@ -128,7 +128,7 @@ async function handle(req: NextRequest, providerName: string) {
   /* ثبت‌نام قطعی شد ⇒ رسید پیامکی. بی‌صدا، چون شکست پیامک نباید
      پرداخت موفق را به صفحه‌ی خطا ببرد. */
   void notifyTournamentRegistered(reg.id).catch(() => { /* بی‌صدا */ });
-  /* و خبرِ همین ثبت‌نام برای برگزارکننده، با شمارنده‌ی ظرفیت */
+  /* و خبر همین ثبت‌نام برای برگزارکننده، با شمارنده‌ی ظرفیت */
   void notifyOrganizerOfRegistration(reg.id).catch(() => { /* بی‌صدا */ });
 
   return back('ok', `&r=${reg.id}`);

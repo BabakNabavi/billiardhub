@@ -27,7 +27,7 @@ export async function PATCH(
   if (!t) return NextResponse.json({ message: 'مسابقه یافت نشد' }, { status: 404 });
   if (!(await ownsClub(actor, t.club_id))) return NextResponse.json(FORBIDDEN, { status: 403 });
 
-  /* بازی باید واقعاً مال همین مسابقه باشد — matchId از کلاینت می‌آید */
+  /* بازی باید واقعا مال همین مسابقه باشد — matchId از کلاینت می‌آید */
   const { data: m } = await sb().from('tournament_matches')
     .select('id,tournament_id,status').eq('id', matchId).maybeSingle();
   const match = m as { id: string; tournament_id: string; status: string } | null;
@@ -37,9 +37,9 @@ export async function PATCH(
 
   const b = await req.json().catch(() => ({}));
 
-  /* ── امتیازِ زنده ──
-     فقط عدد را جابه‌جا می‌کند. تا امروز تنها راهِ نوشتنِ امتیاز
-     `bh_match_report` بود که همان لحظه برنده اعلام می‌کرد و به دورِ
+  /* ── امتیاز زنده ──
+     فقط عدد را جابه‌جا می‌کند. تا امروز تنها راه نوشتن امتیاز
+     `bh_match_report` بود که همان لحظه برنده اعلام می‌کرد و به دور
      بعد صعود می‌داد — یعنی برای اینکه روی مانیتور ۱–۰ دیده شود،
      بازی باید تمام‌شده اعلام می‌شد. */
   if (b?.live === true) {

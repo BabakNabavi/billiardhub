@@ -51,7 +51,7 @@ export default function ForgotPasswordPage() {
   const [caps, setCaps]         = useState(false);
   const tick = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  /* هشدارِ چیدمانِ کیبورد — از خودِ مقدارِ فیلد، نه از حدس */
+  /* هشدار چیدمان کیبورد — از خود مقدار فیلد، نه از حدس */
   const hint = passwordHint(pass, caps);
 
   /* شمارش معکوس ارسال دوباره */
@@ -103,7 +103,7 @@ export default function ForgotPasswordPage() {
   };
 
   const resetPass = async () => {
-    /* رمزی که با کیبوردِ فارسی ساخته شود، بعداً هم فقط با همان چیدمان
+    /* رمزی که با کیبورد فارسی ساخته شود، بعدا هم فقط با همان چیدمان
        تایپ می‌شود — یعنی کاربر خودش را از حسابش بیرون می‌کند. */
     if (hint.persian) { setError('کیبورد روی فارسی است — رمز را با حروف انگلیسی بنویسید.'); return; }
     if (!RULES.every(r => r.ok(pass))) { setError('رمز عبور همه‌ی شرط‌های زیر را ندارد'); return; }
@@ -166,18 +166,18 @@ export default function ForgotPasswordPage() {
         .au-inp { flex: 1; min-width: 0; background: transparent; border: none; outline: none;
           padding: 14px 14px; font-size: 14.5px; color: ${TEXT}; font-family: inherit; direction: ltr; text-align: right; }
         .au-inp::placeholder { color: #B7B0A0; direction: rtl; font-size: 12.5px; letter-spacing: normal; }
-        /* ── وسط‌چینِ واقعی ──
+        /* ── وسط‌چین واقعی ──
            CSS بعد از *هر* نویسه — از جمله آخری — فاصله می‌گذارد. پس
-           جعبه‌ی متن به اندازه‌ی یک letter-spacing از خودِ نوشته
-           پهن‌تر است و وسط‌چین‌کردنِ جعبه، نوشته را نصفِ آن فاصله به چپ
+           جعبه‌ی متن به اندازه‌ی یک letter-spacing از خود نوشته
+           پهن‌تر است و وسط‌چین‌کردن جعبه، نوشته را نصف آن فاصله به چپ
            می‌اندازد.
 
-           جبرانش **نصفِ** letter-spacing است، نه تمامش. مقدارِ قبلی
-           تمامِ ۸px بود، یعنی ۴px به سمتِ دیگر کج می‌کرد — همان کجی که
+           جبرانش **نصف** letter-spacing است، نه تمامش. مقدار قبلی
+           تمام ۸px بود، یعنی ۴px به سمت دیگر کج می‌کرد — همان کجی که
            دیده می‌شد. */
         .au-inp.otp { text-align: center; letter-spacing: 8px; text-indent: 4px; font-size: 19px; font-weight: 800; padding-inline: 8px; }
-        /* جای‌نگهدار همان قاعده را می‌خواهد، وگرنه قاعده‌ی عمومیِ بالا
-           letter-spacing را normal می‌کند و خط‌تیره‌ها با تورفتگیِ
+        /* جای‌نگهدار همان قاعده را می‌خواهد، وگرنه قاعده‌ی عمومی بالا
+           letter-spacing را normal می‌کند و خط‌تیره‌ها با تورفتگی
            جبران‌نشده کج می‌نشینند. */
         .au-inp.otp::placeholder { letter-spacing: inherit; font-size: inherit; direction: ltr; }
 
@@ -295,9 +295,9 @@ export default function ForgotPasswordPage() {
                 onFocus={() => setFocus('code')}
                 onBlur={() => setFocus('')}
                 onKeyDown={e => e.key === 'Enter' && submit()}
-                /* بدونِ فاصله: خودِ letter-spacing فاصله‌ها را می‌سازد و
-                   جای‌نگهدار دقیقاً مثلِ پنج رقمِ واقعی می‌نشیند. با
-                   فاصله‌های دستی، پنج خط‌تیره می‌شد نُه نویسه و کج. */
+                /* بدون فاصله: خود letter-spacing فاصله‌ها را می‌سازد و
+                   جای‌نگهدار دقیقا مثل پنج رقم واقعی می‌نشیند. با
+                   فاصله‌های دستی، پنج خط‌تیره می‌شد نه نویسه و کج. */
                 placeholder="-----"
                 autoComplete="one-time-code"
                 autoFocus
@@ -311,7 +311,7 @@ export default function ForgotPasswordPage() {
 
                 سرویس پیامک برای هر شماره‌ای «موفق» گزارش می‌دهد — حتی
                 شماره‌ای که وجود ندارد — و هیچ گزارش تحویلی نمی‌دهد. پس
-                نرسیدن پیامک از سمت ما اصلاً قابل تشخیص نیست و کاربر
+                نرسیدن پیامک از سمت ما اصلا قابل تشخیص نیست و کاربر
                 بی‌آنکه بداند منتظر می‌ماند.
 
                 این کادر تنها کاری است که از دست ما برمی‌آید: گفتن اینکه
@@ -383,9 +383,9 @@ export default function ForgotPasswordPage() {
               />
             </div>
 
-            {/* ── هشدارِ چیدمانِ کیبورد ──
-                این‌جا از صفحه‌ی ورود هم مهم‌تر است: رمزی که با کیبوردِ
-                فارسی ساخته شود، بعداً هم فقط با همان چیدمان قابلِ
+            {/* ── هشدار چیدمان کیبورد ──
+                این‌جا از صفحه‌ی ورود هم مهم‌تر است: رمزی که با کیبورد
+                فارسی ساخته شود، بعدا هم فقط با همان چیدمان قابل
                 تایپ است — یعنی کاربر خودش را از حسابش بیرون می‌کند. */}
             {hint.message && (
               <div style={{

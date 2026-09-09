@@ -5,7 +5,7 @@ import { sb } from '@/lib/finance/db'
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
-/* همان مجموعه‌ای که مسیرِ عمومی می‌پذیرد — پیش‌نویس عمومی نیست، پس
+/* همان مجموعه‌ای که مسیر عمومی می‌پذیرد — پیش‌نویس عمومی نیست، پس
    ایندکس هم نمی‌شود. */
 const PUBLIC = new Set([
   'published', 'registration_open', 'registration_closed',

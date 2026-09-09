@@ -35,14 +35,14 @@ function timeAgo(ts: number): string {
 const preview = (kind: string, text: string) =>
   kind === 'reaction' ? `استیکر ${text}` : kind === 'like' ? '❤️ لایک استوری' : text
 
-/* پرچم تعاملات خاموش ⇒ کل صفحه‌ی دایرکت اصلاً mount نمی‌شود.
+/* پرچم تعاملات خاموش ⇒ کل صفحه‌ی دایرکت اصلا mount نمی‌شود.
    مهم است که گیت *بیرون* کامپوننت باشد، نه یک return زودهنگام داخلش:
    با return زودهنگام، همه‌ی useEffectها (خواندن گفتگوها، Realtime،
    ثبت اشتراک پوش) باز هم اجرا می‌شدند. */
 export default function DirectPage() {
   return useSocialInteractions()
     ? <DirectInner />
-    : <FeatureDisabled title="پیام خصوصی موقتاً غیرفعال است" note="گفتگوهای شما محفوظ‌اند و با فعال‌شدن دوباره‌ی این بخش در دسترس خواهند بود." />
+    : <FeatureDisabled title="پیام خصوصی موقتا غیرفعال است" note="گفتگوهای شما محفوظ‌اند و با فعال‌شدن دوباره‌ی این بخش در دسترس خواهند بود." />
 }
 
 function DirectInner() {
@@ -63,7 +63,7 @@ function DirectInner() {
   const [pushState, setPushState] = useState<'granted' | 'denied' | 'default' | 'unsupported'>('unsupported')
   const [confirmDel, setConfirmDel] = useState(false)
 
-  /* منبع واحد ویوپورت: کل صفحه دقیقاً روی ناحیه‌ی دیدنی می‌نشیند (height + translateY)
+  /* منبع واحد ویوپورت: کل صفحه دقیقا روی ناحیه‌ی دیدنی می‌نشیند (height + translateY)
      ⇒ نوار پاسخ همیشه بالای کیبورد، پیام‌ها هرگز زیر هدر، بدون جابجایی iOS */
   const vp = useVisualViewport()
 
@@ -76,7 +76,7 @@ function DirectInner() {
   useEffect(() => { activeRef.current = active }, [active])
 
   const meKey = user ? (user.phone || user.id || (user.firstName ?? 'user')) : ''
-  /* نامی که روی پیامِ ارسالی می‌نشیند و طرفِ مقابل می‌بیند */
+  /* نامی که روی پیام ارسالی می‌نشیند و طرف مقابل می‌بیند */
   const meName = user ? publicDisplayName(user) : ''
 
   useEffect(() => { if (_hydrated && authChecked && !user) router.replace('/login') }, [_hydrated, authChecked, user, router])
@@ -91,7 +91,7 @@ function DirectInner() {
   }
   useEffect(() => { if (user) loadConvs() }, [user]) // eslint-disable-line
 
-  /* Web Push: وضعیت مجوز؛ اگر قبلاً granted بوده، اشتراک را بی‌صدا تازه کن */
+  /* Web Push: وضعیت مجوز؛ اگر قبلا granted بوده، اشتراک را بی‌صدا تازه کن */
   useEffect(() => {
     if (!meKey) return
     const p = pushPermission(); setPushState(p)
@@ -179,7 +179,7 @@ function DirectInner() {
   }, [user]) // eslint-disable-line
 
   /* خواندن افزایشی: فقط پیام‌های تازه‌تر از آخرین‌چه‌داریم را می‌گیرد و ادغام می‌کند.
-     کرسرهای رسید فقط جلو می‌روند (Math.max) — قبلاً پاسخ کهنه‌ی storage مقدار
+     کرسرهای رسید فقط جلو می‌روند (Math.max) — قبلا پاسخ کهنه‌ی storage مقدار
      realtime را بازنویسی می‌کرد و تیک آبی برمی‌گشت به یک تیک. */
   const refreshThread = async (c: ConvIndexItem) => {
     const t = await fetchThread(c.convId, meKey, lastAtRef.current)
@@ -248,7 +248,7 @@ function DirectInner() {
   if (!_hydrated || !authChecked || !user) return null
 
   return (
-    /* ستون ثابت که دقیقاً روی ناحیه‌ی دیدنی می‌نشیند (height=vp.height، translateY=offsetTop).
+    /* ستون ثابت که دقیقا روی ناحیه‌ی دیدنی می‌نشیند (height=vp.height، translateY=offsetTop).
        هدر بالا / محتوا وسط با اسکرول داخلی / نوار پاسخ پایین ⇒ همیشه بالای کیبورد،
        پیام‌ها هرگز زیر هدر، و روی iOS با کیبورد جابجا/نصفه نمی‌شود. */
     <div dir="rtl" style={{

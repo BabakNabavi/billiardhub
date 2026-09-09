@@ -44,7 +44,7 @@ export interface Bracket {
   totalRounds: number
   champion: { name: string; registrationId: string | null } | null
   runnerUp: { name: string } | null
-  /* دو بازنده‌ی نیمه‌نهایی — سومِ مشترک */
+  /* دو بازنده‌ی نیمه‌نهایی — سوم مشترک */
   thirds?: string[]
 }
 
@@ -56,8 +56,8 @@ export async function fetchBracket(tournamentId: string): Promise<Bracket | null
   } catch { return null }
 }
 
-/** `empty` یعنی ساختارِ جدول ساخته شود ولی جایگاه‌ها خالی بمانند —
- *  برای چیدنِ کاملاً دستی. بدونِ آن، تنها راهِ ساختِ جدول قرعه‌کشیِ
+/** `empty` یعنی ساختار جدول ساخته شود ولی جایگاه‌ها خالی بمانند —
+ *  برای چیدن کاملا دستی. بدون آن، تنها راه ساخت جدول قرعه‌کشی
  *  تصادفی بود و برگزارکننده باید بعدش همه را جابه‌جا می‌کرد. */
 export async function drawBracket(tournamentId: string, shuffle = true, empty = false) {
   const r = await apiFetch(`/api/tournaments/${tournamentId}/matches`, {
@@ -80,9 +80,9 @@ export async function reportResult(tournamentId: string, matchId: string, score1
   return { ok: r.ok, body: await r.json().catch(() => ({})) as { message?: string } }
 }
 
-/* امتیازِ زنده — بدونِ اعلامِ برنده و بدونِ صعود.
-   `reportResult` هر دو کار را با هم می‌کرد، پس نشان‌دادنِ امتیازِ
-   جاری روی مانیتور یعنی تمام‌شده اعلام‌کردنِ بازی. */
+/* امتیاز زنده — بدون اعلام برنده و بدون صعود.
+   `reportResult` هر دو کار را با هم می‌کرد، پس نشان‌دادن امتیاز
+   جاری روی مانیتور یعنی تمام‌شده اعلام‌کردن بازی. */
 export async function liveScore(tournamentId: string, matchId: string, score1: number, score2: number) {
   const r = await apiFetch(`/api/tournaments/${tournamentId}/matches/${matchId}`, {
     method: 'PATCH', headers: { 'Content-Type': 'application/json' },
@@ -91,7 +91,7 @@ export async function liveScore(tournamentId: string, matchId: string, score1: n
   return { ok: r.ok, body: await r.json().catch(() => ({})) as { message?: string } }
 }
 
-/** بالاترین برکِ یک بازیکن در یک بازی. `value = null` یعنی پاک کن. */
+/** بالاترین برک یک بازیکن در یک بازی. `value = null` یعنی پاک کن. */
 export async function setHighBreak(
   tournamentId: string, matchId: string, player: 1 | 2, value: number | null,
 ) {
@@ -102,8 +102,8 @@ export async function setHighBreak(
   return { ok: r.ok, body: await r.json().catch(() => ({})) as { message?: string } }
 }
 
-/** چند فریم برای بُرد لازم است — همان قاعده‌ی `bh_format_target`.
- *  `null` یعنی سقفی در کار نیست (بازیِ زمان‌دار). */
+/** چند فریم برای برد لازم است — همان قاعده‌ی `bh_format_target`.
+ *  `null` یعنی سقفی در کار نیست (بازی زمان‌دار). */
 export function formatTarget(format: string | null | undefined): number | null {
   if (!format) return null
   const race = /^race(\d{1,2})$/.exec(format)
@@ -113,7 +113,7 @@ export function formatTarget(format: string | null | undefined): number | null {
   return null
 }
 
-/** بالاترین برکِ کلِ مسابقه — بیشترینِ برک‌های ثبت‌شده‌ی بازی‌ها */
+/** بالاترین برک کل مسابقه — بیشترین برک‌های ثبت‌شده‌ی بازی‌ها */
 export function tournamentHighBreak(b: Bracket): { value: number; name: string } | null {
   let best: { value: number; name: string } | null = null
   for (const m of b.matches) {
@@ -145,7 +145,7 @@ export async function patchMatch(
   return { ok: r.ok, body: await r.json().catch(() => ({})) as { message?: string } }
 }
 
-/* ── چیدنِ دستی ──────────────────────────────────────────────── */
+/* ── چیدن دستی ──────────────────────────────────────────────── */
 
 export interface PoolPlayer { id: string; name: string; source: string }
 
@@ -169,26 +169,26 @@ async function seedPatch(tournamentId: string, payload: Record<string, unknown>)
   return { ok: r.ok, body: await r.json().catch(() => ({})) }
 }
 
-/** تعویضِ دو جایگاه — عملِ پایه‌ی جابه‌جایی. هیچ‌کس گم نمی‌شود. */
+/** تعویض دو جایگاه — عمل پایه‌ی جابه‌جایی. هیچ‌کس گم نمی‌شود. */
 export const swapSlots = (
   tournamentId: string,
   a: { matchId: string; slot: 1 | 2 },
   b: { matchId: string; slot: 1 | 2 },
 ) => seedPatch(tournamentId, { action: 'swap', a, b })
 
-/** گذاشتنِ بازیکنی از استخر روی یک جایگاه. `null` یعنی خالی‌کردن.
- *  `bye` یعنی «این جایگاه عمداً بی‌حریف می‌ماند» — که تا مهاجرتِ ۰۷۵
- *  با «خالی» یکی بود، و برای همین رهاکردنِ تراشه‌ی Bye روی جدول هیچ
- *  اثری نداشت و تراشه سرِ جایش برمی‌گشت. */
+/** گذاشتن بازیکنی از استخر روی یک جایگاه. `null` یعنی خالی‌کردن.
+ *  `bye` یعنی «این جایگاه عمدا بی‌حریف می‌ماند» — که تا مهاجرت ۰۷۵
+ *  با «خالی» یکی بود، و برای همین رهاکردن تراشه‌ی Bye روی جدول هیچ
+ *  اثری نداشت و تراشه سر جایش برمی‌گشت. */
 export const placeSlot = (
   tournamentId: string, matchId: string, slot: 1 | 2,
   registrationId: string | null, bye = false,
 ) => seedPatch(tournamentId, { action: 'place', matchId, slot, registrationId, bye })
 
-/** خالی‌کردنِ همه‌ی جایگاه‌های دورِ اول — برای چیدنِ کاملاً دستی */
+/** خالی‌کردن همه‌ی جایگاه‌های دور اول — برای چیدن کاملا دستی */
 export const clearSlots = (tournamentId: string) => seedPatch(tournamentId, { action: 'clear' })
 
-/** تأییدِ چیدمانِ دستی — بای‌ها بسته و برنده‌شان صعود می‌کند */
+/** تأیید چیدمان دستی — بای‌ها بسته و برنده‌شان صعود می‌کند */
 export const finalizeSeeding = (tournamentId: string) => seedPatch(tournamentId, { action: 'finalize' })
 
 /* ── کمکی‌های نمایش ── */
@@ -197,15 +197,15 @@ export const faDigits = (v: string | number) =>
   String(v ?? '').replace(/[0-9]/g, d => '۰۱۲۳۴۵۶۷۸۹'[+d]!)
 
 /* «بای» گفته می‌شود چون معنایش این است که حریفی وجود ندارد و بازی
-   برگزار نمی‌شود. جایگاهِ دورهای بعد فقط خط تیره می‌گیرد: عبارتِ
-   «در انتظار دور قبل» چیزی نمی‌گفت که خودِ خالی‌بودن نگوید، و در
-   جدولِ بزرگ ده‌ها بار تکرار می‌شد. */
+   برگزار نمی‌شود. جایگاه دورهای بعد فقط خط تیره می‌گیرد: عبارت
+   «در انتظار دور قبل» چیزی نمی‌گفت که خود خالی‌بودن نگوید، و در
+   جدول بزرگ ده‌ها بار تکرار می‌شد. */
 export function slotLabel(match: Match, slot: 1 | 2): string {
   const name = slot === 1 ? match.p1_name : match.p2_name
   if (name) return name
   const other = slot === 1 ? match.p2_name : match.p1_name
   /* «Bye» و نه ترجمه‌اش: همان واژه‌ای است که روی تراشه‌ی چیدمان و در
-     هر جدولِ بیلیارد نوشته می‌شود، و کوتاه‌تر هم هست. */
+     هر جدول بیلیارد نوشته می‌شود، و کوتاه‌تر هم هست. */
   if (match.round === 1) return other ? 'Bye' : '—'
   return '—'
 }

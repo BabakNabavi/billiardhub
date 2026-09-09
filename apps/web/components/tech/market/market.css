@@ -1,20 +1,20 @@
 /* ─────────────────────────────────────────────────────────────
-   خدماتِ فنی — سیستمِ بصریِ مارکت‌پلیس.
+   خدمات فنی — سیستم بصری مارکت‌پلیس.
 
-   ── تغییرِ مفهوم ──
-   نسخه‌های پیشین این بخش «نمایشِ محصول» بودند: رسانه‌ی تمام‌قاب،
-   تیترِ درشت، روایتِ آناتومیِ چوب. آن مفهوم کاملاً برداشته شد.
+   ── تغییر مفهوم ──
+   نسخه‌های پیشین این بخش «نمایش محصول» بودند: رسانه‌ی تمام‌قاب،
+   تیتر درشت، روایت آناتومی چوب. آن مفهوم کاملا برداشته شد.
    این‌جا یک صفحه‌ی *پیداکردن* است، نه یک صفحه‌ی *تماشا کردن*:
    نیاز ⟵ خدمت ⟵ متخصص ⟵ اعتماد ⟵ تماس.
 
-   ── مقیاسِ تایپ ──
-   ⚠️ عمداً کوچک. بزرگ‌ترین متنِ صفحه ۴۰ پیکسل است، نه ۸۰. در یک
-   دایرکتوری، تیترِ درشت فقط ردیف‌ها را از قاب بیرون می‌راند.
+   ── مقیاس تایپ ──
+   ⚠️ عمدا کوچک. بزرگ‌ترین متن صفحه ۴۰ پیکسل است، نه ۸۰. در یک
+   دایرکتوری، تیتر درشت فقط ردیف‌ها را از قاب بیرون می‌راند.
 
    ── طلا ──
-   ⚠️ `--gold` فقط *لهجه* است: حالتِ انتخاب، ستاره، و سطحِ یک دکمه.
-   هیچ متنِ بدنه، هیچ حاشیه‌ی عمومی و هیچ زمینه‌ی بزرگی طلایی نیست.
-   طلاییِ روشن روی کاغذ ۲٫۰۵:۱ است، پس هرجا *خوانده* می‌شود
+   ⚠️ `--gold` فقط *لهجه* است: حالت انتخاب، ستاره، و سطح یک دکمه.
+   هیچ متن بدنه، هیچ حاشیه‌ی عمومی و هیچ زمینه‌ی بزرگی طلایی نیست.
+   طلایی روشن روی کاغذ ۲٫۰۵:۱ است، پس هرجا *خوانده* می‌شود
    `--gold-ink` می‌آید نه `--gold`.
    ───────────────────────────────────────────────────────────── */
 
@@ -56,7 +56,7 @@
   padding-inline: var(--gutter);
 }
 
-/* عنوانِ بخش — یک اندازه، همه‌جا */
+/* عنوان بخش — یک اندازه، همه‌جا */
 .tm-h2 {
   font-size: 20px; font-weight: 700; line-height: 1.4;
   letter-spacing: -0.01em; margin: 0; color: var(--ink);
@@ -76,7 +76,7 @@
 /* ═══════════════ دکمه ═══════════════ */
 .tm-btn {
   display: inline-flex; align-items: center; justify-content: center; gap: 6px;
-  /* ⚠️ کفِ ۴۴ پیکسل — قاعده‌ی هدفِ لمسی */
+  /* ⚠️ کف ۴۴ پیکسل — قاعده‌ی هدف لمسی */
   min-block-size: 44px;
   padding-inline: 16px;
   border-radius: var(--r-ctl);
@@ -120,7 +120,7 @@
 
 /* ═══════════════ ۱ — سرلوحه‌ی کشف ═══════════════
    ⚠️ جمع‌وجور و کاربردی. نه رسانه‌ی تمام‌ویوپورت، نه پرده، نه
-   تیترِ ۸۰ پیکسلی. کارِ این بخش این است که کاربر در پنج ثانیه
+   تیتر ۸۰ پیکسلی. کار این بخش این است که کاربر در پنج ثانیه
    جست‌وجویش را شروع کند. */
 .tm-hero { background: var(--surface); border-block-end: 1px solid var(--line); }
 .tm-hero-in {
@@ -151,7 +151,7 @@
   margin: 0 0 24px; max-inline-size: 52ch;
 }
 
-/* تصویرِ سرلوحه */
+/* تصویر سرلوحه */
 .tm-hero-media {
   position: relative; overflow: hidden;
   border-radius: var(--r-card);
@@ -161,7 +161,7 @@
 @media (min-width: 900px) { .tm-hero-media { aspect-ratio: 5 / 4; } }
 .tm-hero-media img { inline-size: 100%; block-size: 100%; object-fit: cover; display: block; }
 
-/* ── ماژولِ جست‌وجو ── */
+/* ── ماژول جست‌وجو ── */
 .tm-search {
   display: grid; gap: 8px;
   padding: 12px;
@@ -180,8 +180,8 @@
 .tm-sec { padding-block: 32px; }
 @media (min-width: 768px) { .tm-sec { padding-block: 48px; } }
 
-/* ⚠️ روی موبایل اسکرولِ افقی، نه شبکه‌ی ۱۵ کارتِ ریز. */
-/* اسکرولرِ افقی از همان گاتر استفاده می‌کند */
+/* ⚠️ روی موبایل اسکرول افقی، نه شبکه‌ی ۱۵ کارت ریز. */
+/* اسکرولر افقی از همان گاتر استفاده می‌کند */
 .tm-cats {
   display: grid; grid-auto-flow: column; grid-auto-columns: 148px;
   gap: 8px; overflow-x: auto; padding-block-end: 4px;
@@ -228,19 +228,19 @@
   .tm-dir { grid-template-columns: 264px minmax(0, 1fr); gap: 32px; }
 }
 
-/* نوارِ کنترل‌های بالای نتایج */
+/* نوار کنترل‌های بالای نتایج */
 .tm-controls {
   display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
   margin-block-end: 16px;
 }
 .tm-count { font-size: 13px; color: var(--ink-3); margin-inline-end: auto; }
 
-/* ── ستونِ فیلتر (دسکتاپ) ── */
+/* ── ستون فیلتر (دسکتاپ) ── */
 .tm-filters {
   display: none;
-  /* ⚠️ ناوبر `fixed` است و در حالتِ نصب‌شده‌ی iOS بالای آن
-     `env(safe-area-inset-top)` هم اضافه می‌شود؛ بدونِ این جمله،
-     ستون زیرِ نوار گیر می‌کند. */
+  /* ⚠️ ناوبر `fixed` است و در حالت نصب‌شده‌ی iOS بالای آن
+     `env(safe-area-inset-top)` هم اضافه می‌شود؛ بدون این جمله،
+     ستون زیر نوار گیر می‌کند. */
   position: sticky; inset-block-start: calc(88px + env(safe-area-inset-top));
   background: var(--surface);
   border: 1px solid var(--line);
@@ -262,15 +262,15 @@
 .tm-check:has(input:disabled) { color: var(--ink-3); cursor: not-allowed; }
 
 /* ⚠️ فیلترهایی که هنوز داده‌شان در دیتابیس نیست: دیده می‌شوند ولی
-   خاموش‌اند و دلیلش نوشته شده. جعلِ فیلتر بدتر از نبودنش است. */
+   خاموش‌اند و دلیلش نوشته شده. جعل فیلتر بدتر از نبودنش است. */
 .tm-soon {
   font-size: 11px; font-weight: 600; color: var(--ink-3);
   background: var(--neutral); border-radius: var(--r-chip);
   padding: 2px 8px; margin-inline-start: auto;
 }
 
-/* ═══════════════ ۴ — کارتِ متخصص ═══════════════
-   ⚠️ کارتِ *اعتماد*، نه کارتِ محصول. در دو تا سه ثانیه باید خوانده
+/* ═══════════════ ۴ — کارت متخصص ═══════════════
+   ⚠️ کارت *اعتماد*، نه کارت محصول. در دو تا سه ثانیه باید خوانده
    شود، پس حداکثر پنج قلم اطلاعات. */
 .tm-list { display: grid; gap: 12px; }
 .tm-card {
@@ -315,7 +315,7 @@
 .tm-rate svg { color: var(--gold); }
 .tm-rate small { font-weight: 500; color: var(--ink-3); }
 
-/* تخصص‌ها — چیپِ کم‌رنگ، حداکثر سه تا */
+/* تخصص‌ها — چیپ کم‌رنگ، حداکثر سه تا */
 .tm-chips { display: flex; flex-wrap: wrap; gap: 4px; }
 .tm-chip {
   font-size: 12px; color: var(--ink-2);
@@ -364,10 +364,10 @@
 .tm-cta--dark { background: var(--ink); border-color: var(--ink); color: #fff; }
 .tm-cta--dark p { color: rgb(255 255 255 / .74); }
 
-/* ═══════════════ شیتِ فیلترِ موبایل ═══════════════ */
-/* ⚠️ ناوبرِ سایت `z-index: 200` دارد. با ۹۰، شیتی که خودش را
-   `aria-modal` اعلام می‌کند زیرِ نوار می‌ماند و نوار همچنان
-   کلیک‌پذیر است — یعنی مودالِ دروغ. */
+/* ═══════════════ شیت فیلتر موبایل ═══════════════ */
+/* ⚠️ ناوبر سایت `z-index: 200` دارد. با ۹۰، شیتی که خودش را
+   `aria-modal` اعلام می‌کند زیر نوار می‌ماند و نوار همچنان
+   کلیک‌پذیر است — یعنی مودال دروغ. */
 .tm-sheet {
   position: fixed; inset: 0; z-index: 300;
   background: rgb(17 17 17 / .48);
@@ -405,36 +405,111 @@
 }
 .tm-icon-btn:focus-visible { outline: 2px solid var(--gold-ink); outline-offset: 2px; }
 
-/* ⚠️ دکمه‌ی فیلترِ موبایل. ستونِ فیلتر از ۱۰۲۴ به بالا دائمی است،
-   پس این دکمه فقط زیرِ آن معنا دارد — نه به‌عنوان استایلِ اینلاین
+/* ⚠️ دکمه‌ی فیلتر موبایل. ستون فیلتر از ۱۰۲۴ به بالا دائمی است،
+   پس این دکمه فقط زیر آن معنا دارد — نه به‌عنوان استایل اینلاین
    که همیشه روشن بماند. */
 [data-mobile-filters] { display: inline-flex; }
 @media (min-width: 1024px) { [data-mobile-filters] { display: none; } }
 .tm-cats > li { min-inline-size: 0; }
 .tm-cats .tm-cat { inline-size: 100%; }
 
-/* ⚠️ هر دو `ul`اند و بدونِ این، نشانه‌ی گلوله و تورفتگیِ پیش‌فرضِ
+/* ⚠️ هر دو `ul`اند و بدون این، نشانه‌ی گلوله و تورفتگی پیش‌فرض
    مرورگر می‌ماند. */
 .tm-cats, .tm-chips, .tm-list { list-style: none; margin-block: 0; }
 .tm-chips { padding: 0; }
 
-/* ⚠️ قابِ تصویر عمداً کوچک‌تر از نیمِ سرلوحه است: فایلِ موجود
+/* ⚠️ قاب تصویر عمدا کوچک‌تر از نیم سرلوحه است: فایل موجود
    ۵۱۶×۳۸۷ است و بزرگ‌تر از این، نرم و کشیده دیده می‌شود. */
 figure.tm-hero-media { margin: 0; max-inline-size: 520px; justify-self: end; }
 
-/* ⚠️ کفِ ۴۴ پیکسل روی لمس. نسخه‌ی کوچکِ دکمه برای دسکتاپ خوب است
-   ولی روی موبایل هدفِ ۳۶ پیکسلی زیرِ قاعده‌ی پروژه است. */
+/* ⚠️ کف ۴۴ پیکسل روی لمس. نسخه‌ی کوچک دکمه برای دسکتاپ خوب است
+   ولی روی موبایل هدف ۳۶ پیکسلی زیر قاعده‌ی پروژه است. */
 @media (max-width: 1023px) {
   .tm-btn--sm { min-block-size: 44px; }
   .tm-check { min-block-size: 44px; }
   .tm-icon-btn { inline-size: 44px; block-size: 44px; }
 }
 
-/* فاصله‌ی بندِ کنش — به‌جای استایلِ اینلاینِ ثابت */
+/* فاصله‌ی بند کنش — به‌جای استایل اینلاین ثابت */
 .tm-cta-mt { margin-block-start: 24px; }
 
-/* ⚠️ گاتِر یک‌جا تعریف می‌شود: اسکرولرِ افقی با حاشیه‌ی منفی
-   همان مقدار را لازم دارد و دو عددِ جدا از هم دور می‌افتند. */
+/* ⚠️ گاتر یک‌جا تعریف می‌شود: اسکرولر افقی با حاشیه‌ی منفی
+   همان مقدار را لازم دارد و دو عدد جدا از هم دور می‌افتند. */
 .tm { --gutter: 16px; }
 @media (min-width: 768px) { .tm { --gutter: 24px; } }
 @media (min-width: 1280px) { .tm { --gutter: 32px; } }.tm-note { margin: 0 0 8px; }
+
+/* ═══════════ انتخابگر شهر — جعبه سرچ‌دار ═══════════
+   ⚠️ select بومی با ۱۱۲۶ گزینه روی موبایل یک استوانه هزارسطری بود.
+   این جعبه با تایپ فیلتر می‌شود و استان هر شهر را هم نشان می‌دهد. */
+.tm-citybtn {
+  display: flex; align-items: center; gap: 8px;
+  inline-size: 100%; text-align: start; cursor: pointer;
+  font-family: inherit;
+}
+.tm-citybtn > span:first-child { flex: 1; min-inline-size: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tm-citybtn-ph { color: var(--ink-3); }
+.tm-citybtn svg { flex-shrink: 0; color: var(--ink-3); transition: transform .18s; }
+.tm-citybtn.is-open svg { transform: rotate(180deg); }
+.tm-citybtn.is-open { border-color: var(--gold-ink); }
+
+.tm-citypanel {
+  position: fixed; z-index: 400;
+  display: flex; flex-direction: column; overflow: hidden;
+  background: #fff; border: 1px solid var(--line-strong);
+  border-radius: 14px;
+  box-shadow: 0 18px 46px rgb(17 17 16 / .16), 0 2px 8px rgb(17 17 16 / .06);
+  font-family: inherit;
+}
+.tm-citysearch {
+  display: flex; align-items: center; gap: 8px; flex-shrink: 0;
+  padding: 10px 12px; border-block-end: 1px solid var(--line);
+  color: var(--ink-3);
+}
+.tm-citysearch input {
+  flex: 1; min-inline-size: 0; border: 0; outline: none; background: transparent;
+  font-family: inherit; font-size: 14px; color: var(--ink); min-block-size: 28px;
+}
+.tm-citysearch input::placeholder { color: var(--ink-3); }
+.tm-citysearch > button {
+  display: inline-flex; align-items: center; justify-content: center;
+  inline-size: 26px; block-size: 26px; border: 0; border-radius: 50%;
+  background: var(--neutral); color: var(--ink-2); cursor: pointer; flex-shrink: 0;
+}
+
+.tm-citylist { flex: 1; min-block-size: 0; overflow-y: auto; overscroll-behavior: contain; padding: 6px; }
+.tm-cityopt {
+  display: flex; align-items: center; gap: 8px; inline-size: 100%;
+  min-block-size: 44px; padding-inline: 12px; border: 0; border-radius: 10px;
+  background: transparent; cursor: pointer; text-align: start;
+  font-family: inherit; font-size: 14px; color: var(--ink);
+}
+.tm-cityopt:hover, .tm-cityopt.is-active { background: var(--bg); }
+.tm-cityopt.is-sel { color: var(--gold-ink); font-weight: 700; }
+.tm-cityname { flex: 1; min-inline-size: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tm-cityprov { font-size: 11.5px; color: var(--ink-3); flex-shrink: 0; }
+/* شهری که واقعا متخصص دارد */
+.tm-citydot {
+  inline-size: 6px; block-size: 6px; border-radius: 50%;
+  background: #0E7A38; flex-shrink: 0;
+}
+.tm-cityopt svg { color: var(--gold-ink); flex-shrink: 0; }
+.tm-cityempty { margin: 0; padding: 26px 12px; text-align: center; font-size: 13px; color: var(--ink-3); }
+
+/* ═══════════ نشان‌های رنگی کارت متخصص ═══════════
+   ⚠️ رنگ این‌جا تزئین نیست، معنا دارد: کاربر باید در یک نگاه بفهمد
+   این متخصص سر کار می‌آید یا باید چوب را ببری کارگاهش. نسخه قبلی
+   همه آیکن‌ها را خاکستری می‌کرد و کارت یکدست و بی‌جان بود. */
+.tm-ic {
+  display: inline-flex; align-items: center; justify-content: center;
+  inline-size: 22px; block-size: 22px; border-radius: 7px; flex-shrink: 0;
+  margin-inline-end: 5px;
+}
+.tm-ic--star   { background: rgb(245 158 11 / .16); color: #B45309; }
+.tm-ic--city   { background: rgb(37 99 235 / .12);  color: #1D4ED8; }
+.tm-ic--onsite { background: rgb(5 118 66 / .12);   color: #057642; }
+.tm-ic--shop   { background: rgb(124 58 237 / .12); color: #6D28D9; }
+
+/* آیکن داخل نشان دیگر نباید رنگ متن را ارث ببرد */
+.tm-card-meta span { display: inline-flex; align-items: center; }
+.tm-card-meta .tm-ic svg { color: currentColor; }

@@ -16,7 +16,7 @@ const fa = (n: number) => Math.round(Number(n) || 0).toLocaleString('fa-IR')
 
 interface Finance {
   balance: { available: number; pending: number; totalEarnings: number; totalCommission: number; totalSettled: number }
-  /* تفکیکِ فروشِ ناخالص — از `/api/clubs/[id]/finance` */
+  /* تفکیک فروش ناخالص — از `/api/clubs/[id]/finance` */
   breakdown?: {
     grossSales: number; fromReservations: number; fromTournaments: number
     platformCommission: number; clubShare: number; reversed: number
@@ -71,20 +71,20 @@ export default function ClubFinance({ clubId, onEditBank }: { clubId: string; on
       <section>
         <Head icon={<Wallet size={17} style={{ color: GOLD_D }} />} title="گردش مالی"
           desc="سهم شما از هر رزرو، و سهم پلتفرم که به‌صورت کمیسیون کسر می‌شود." />
-        {/* برچسبِ «در جریان» پیش‌تر یعنی «رزروهای هنوز برگزارنشده» بود.
-            با مدلِ تازه، سهمِ باشگاه اصلاً پیش از برگزاری ساخته نمی‌شود؛
+        {/* برچسب «در جریان» پیش‌تر یعنی «رزروهای هنوز برگزارنشده» بود.
+            با مدل تازه، سهم باشگاه اصلا پیش از برگزاری ساخته نمی‌شود؛
             پس آن ستون حالا معنای دیگری دارد: تسویه‌ای که تأیید شده و
-            هنوز به حساب ننشسته. برچسبِ قدیمی گمراه‌کننده می‌شد. */}
+            هنوز به حساب ننشسته. برچسب قدیمی گمراه‌کننده می‌شد. */}
         <div className="cf-grid">
           <Stat label="قابل تسویه" value={d.balance.available} tone="gold" strong
-            hint="سهم شما از رزروها و مسابقاتِ برگزارشده، پس از کسر کمیسیون" />
+            hint="سهم شما از رزروها و مسابقات برگزارشده، پس از کسر کمیسیون" />
           <Stat label="در انتظار تسویه" value={d.balance.pending}
             hint="تسویه‌ای که تأیید شده و در حال انتقال به حساب شماست" />
           <Stat label="پرداخت‌شده به شما" value={d.balance.totalSettled} hint="آنچه تا امروز به حسابتان رسیده" />
           <Stat label="کمیسیون پلتفرم" value={d.balance.totalCommission} muted hint="سهم بیلیارد هاب" />
         </div>
 
-        {/* تفکیکِ «چرا این عدد» — بدونِ آن، باشگاه‌دار فقط یک رقم
+        {/* تفکیک «چرا این عدد» — بدون آن، باشگاه‌دار فقط یک رقم
             می‌بیند و راهی برای راستی‌آزمایی‌اش ندارد. */}
         {d.breakdown && (
           <div className="cf-grid" style={{ marginTop: 10 }}>

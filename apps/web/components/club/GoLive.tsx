@@ -159,7 +159,7 @@ export default function GoLive({ clubId, clubName, ownerKey }: { clubId: string;
           <label style={{ display: 'block' }}>
             <span style={{ display: 'block', fontSize: 11.5, fontWeight: 800, color: SEC, marginBottom: 6 }}>عنوان پخش</span>
             <input value={title} onChange={e => setTitle(e.target.value.slice(0, 90))}
-              placeholder={`مثلاً: فینال مسابقات ${clubName}`}
+              placeholder={`مثلا: فینال مسابقات ${clubName}`}
               style={{ width: '100%', boxSizing: 'border-box', padding: '11px 13px', borderRadius: 12, border: `1px solid ${LINE}`, background: GROUND, fontSize: 13.5, fontFamily: 'inherit', color: INK, outline: 'none' }} />
           </label>
           <SelectField label="رشته" value={discipline} onChange={setDiscipline} options={DISCIPLINES} />

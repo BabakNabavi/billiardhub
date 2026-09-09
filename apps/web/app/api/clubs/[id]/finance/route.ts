@@ -4,7 +4,7 @@ import { sb, actorFromRequest, isAdmin, ownsClub } from '@/lib/finance/db';
 import { bankOfIban } from '@/lib/bank';
 
 /* داشبورد مالی باشگاه — فقط مالک همان باشگاه یا ادمین (RBAC).
-   موجودی از club_accounts (کَش) و صحتش از ledger بازبینی می‌شود. */
+   موجودی از club_accounts (کش) و صحتش از ledger بازبینی می‌شود. */
 export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string }> }) {
   const { id: clubId } = await ctx.params;
   const actor = actorFromRequest(req);
@@ -22,8 +22,8 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string 
     sb().from('club_accounts').select('*').eq('club_id', clubId).maybeSingle(),
     sb().from('club_bank_accounts').select('id,account_holder_name,bank_name,iban,verification_status,rejection_reason,verified_at')
         .eq('club_id', clubId).eq('is_active', true).maybeSingle(),
-    /* `status='POSTED'` لازم است وگرنه ردیفِ باطل‌شده هم درآمد حساب
-       می‌شود. و برگشتِ سهم (`CLUB_EARNING_REVERSAL`) هم باید بیاید،
+    /* `status='POSTED'` لازم است وگرنه ردیف باطل‌شده هم درآمد حساب
+       می‌شود. و برگشت سهم (`CLUB_EARNING_REVERSAL`) هم باید بیاید،
        وگرنه پس از یک لغو، درآمد بیشتر از واقع نشان داده می‌شود. */
     sb().from('ledger_entries').select('type,amount,created_at,meta')
         .eq('club_id', clubId).eq('status', 'POSTED')
@@ -37,7 +37,7 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string 
 
   type Led = { type: string; amount: number; created_at: string; meta?: { source?: string } | null };
   const led = (ledger.data ?? []) as Led[];
-  /* «درآمد» برای باشگاه یعنی سهمِ خودش: تعلق‌گرفته منهای برگشت‌خورده */
+  /* «درآمد» برای باشگاه یعنی سهم خودش: تعلق‌گرفته منهای برگشت‌خورده */
   const earnings = led.filter(e => e.type === 'CLUB_EARNING' || e.type === 'CLUB_EARNING_REVERSAL');
   const sum = (from?: string) => earnings
     .filter(e => !from || e.created_at >= from)
@@ -53,9 +53,9 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string 
   /* شماره‌ی شبا فقط به‌صورت ماسک‌شده برمی‌گردد */
   const bk = bank.data as { iban?: string; bank_name?: string | null } | null;
   const maskedIban = bk?.iban ? `${bk.iban.slice(0, 6)}${'•'.repeat(Math.max(0, bk.iban.length - 10))}${bk.iban.slice(-4)}` : null;
-  /* ردیف‌هایی که پیش از اصلاحِ `syncClubSettlementAccount` ساخته شده‌اند
-     نامِ بانک ندارند. شبا خودش آن را در خود دارد، پس به‌جای «—» از
-     همان مشتق می‌شود — بدونِ دست‌زدن به داده‌ی ذخیره‌شده. */
+  /* ردیف‌هایی که پیش از اصلاح `syncClubSettlementAccount` ساخته شده‌اند
+     نام بانک ندارند. شبا خودش آن را در خود دارد، پس به‌جای «—» از
+     همان مشتق می‌شود — بدون دست‌زدن به داده‌ی ذخیره‌شده. */
   const bankName = bk?.bank_name || (bk?.iban ? bankOfIban(bk.iban) : null);
 
   return NextResponse.json({
@@ -69,8 +69,8 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string 
       totalSettled: a.total_settled ?? 0,
     },
     revenue: { today: sum(startOfDay), week: sum(weekAgo), month: sum(monthAgo), total: sum() },
-    /* تفکیکی که باشگاه‌دار برای فهمیدنِ «چرا این عدد» لازم دارد:
-       فروشِ ناخالص، کمیسیونِ ما، و سهمِ خودش — به‌تفکیکِ رزرو و مسابقه */
+    /* تفکیکی که باشگاه‌دار برای فهمیدن «چرا این عدد» لازم دارد:
+       فروش ناخالص، کمیسیون ما، و سهم خودش — به‌تفکیک رزرو و مسابقه */
     breakdown: {
       grossSales: sumType('BOOKING_PAYMENT') + sumType('TOURNAMENT_PAYMENT'),
       fromReservations: sumType('BOOKING_PAYMENT'),

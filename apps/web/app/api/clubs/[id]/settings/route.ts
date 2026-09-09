@@ -6,16 +6,16 @@ import { actorOf, ownsClub, UNAUTHENTICATED, FORBIDDEN } from '@/lib/auth/owners
 /* تنظیمات عملیاتی باشگاه — چیزهایی که مالک روزمره عوض می‌کند و
    نباید با فرم بلند «ویرایش اطلاعات» قاطی شوند.
 
-   عمداً فقط همین چند کلید پذیرفته می‌شوند: یک PATCH باز روی جدول
+   عمدا فقط همین چند کلید پذیرفته می‌شوند: یک PATCH باز روی جدول
    clubs یعنی مالک می‌تواند `ibanVerified` یا `verificationStatus` خودش
    را هم دستکاری کند. */
 
 interface Body {
   closeTodayReservations?: unknown;
   notifyPhone?: unknown;
-  /* بستنِ موقت: تعدادِ ساعت، یا 'always'، یا null برای بازکردن.
-     پیش‌تر این مقدار فقط در localStorageی مرورگرِ باشگاه‌دار می‌نشست —
-     سرور از آن بی‌خبر بود و رزرو واقعاً بسته نمی‌شد. */
+  /* بستن موقت: تعداد ساعت، یا 'always'، یا null برای بازکردن.
+     پیش‌تر این مقدار فقط در localStorageی مرورگر باشگاه‌دار می‌نشست —
+     سرور از آن بی‌خبر بود و رزرو واقعا بسته نمی‌شد. */
   closeForHours?: unknown;
 }
 
@@ -53,8 +53,8 @@ export async function PATCH(req: NextRequest, ctx: { params: Promise<{ id: strin
     patch.closeTodayReservations = !!b.closeTodayReservations;
   }
 
-  /* بستنِ موقت. ساعت را سرور به لحظه تبدیل می‌کند، نه مرورگر: ساعتِ
-     دستگاهِ کاربر ممکن است اشتباه باشد و آن‌وقت قفل زودتر یا دیرتر
+  /* بستن موقت. ساعت را سرور به لحظه تبدیل می‌کند، نه مرورگر: ساعت
+     دستگاه کاربر ممکن است اشتباه باشد و آن‌وقت قفل زودتر یا دیرتر
      باز می‌شد. */
   if (b.closeForHours !== undefined) {
     const v = b.closeForHours;
@@ -85,9 +85,9 @@ export async function PATCH(req: NextRequest, ctx: { params: Promise<{ id: strin
 
   let { error } = await sb().from('clubs').update(patch).eq('id', id);
 
-  /* ستونِ reserveClosedUntil با مهاجرتِ ۰۳۶ می‌آید. تا وقتی اجرا نشده،
+  /* ستون reserveClosedUntil با مهاجرت ۰۳۶ می‌آید. تا وقتی اجرا نشده،
      نبودنش نباید ذخیره‌ی بقیه‌ی تنظیمات — مثل «بستن رزرو امروز» — را
-     هم بشکند. همان الگوی postalCode در مسیرِ باشگاه. */
+     هم بشکند. همان الگوی postalCode در مسیر باشگاه. */
   if (error && /does not exist|PGRST204/i.test(`${error.message} ${error.code ?? ''}`)
       && 'reserveClosedUntil' in patch && error.message.includes('reserveClosedUntil')) {
     console.error('[clubs/:id/settings] ستون reserveClosedUntil نیست — مهاجرت ۰۳۶ اجرا نشده');

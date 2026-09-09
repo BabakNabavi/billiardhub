@@ -47,7 +47,7 @@ export class ZarinPalProvider implements PaymentProvider {
       })
       const j = await r.json().catch(() => null) as { data?: { code?: number; ref_id?: number } } | null
       const code = j?.data?.code
-      /* ۱۰۰ = تأیید موفق، ۱۰۱ = قبلاً تأیید شده (هر دو یعنی پرداخت‌شده) */
+      /* ۱۰۰ = تأیید موفق، ۱۰۱ = قبلا تأیید شده (هر دو یعنی پرداخت‌شده) */
       if (code === 100 || code === 101) {
         return { ok: true, paid: true, refId: String(j?.data?.ref_id ?? ''), amount: input.amount, raw: j }
       }
@@ -60,7 +60,7 @@ export class ZarinPalProvider implements PaymentProvider {
   }
 
   async refundPayment(_input: RefundInput): Promise<RefundResult> {
-    /* بازپرداخت خودکار زرین‌پال نیازمند توکن جداگانه است؛ فعلاً دستی. */
+    /* بازپرداخت خودکار زرین‌پال نیازمند توکن جداگانه است؛ فعلا دستی. */
     return { ok: false, message: 'بازپرداخت خودکار فعال نیست — تسویه/بازگشت به‌صورت دستی انجام شود' }
   }
 }

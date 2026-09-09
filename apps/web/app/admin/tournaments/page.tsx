@@ -1,11 +1,11 @@
 'use client'
 
-/* مسابقاتِ باشگاه‌ها در پنلِ ادمین.
+/* مسابقات باشگاه‌ها در پنل ادمین.
 
-   این صفحه نبود و نبودنش یک شکافِ نظارتی بود: منوی «مسابقات و
-   رویدادها» جدولِ `events` را نشان می‌داد (رویدادهای محتوایی که خودِ
-   ادمین می‌سازد)، در حالی که مسابقاتِ واقعیِ باشگاه‌ها — همان‌هایی که
-   ثبت‌نام و پول دارند — در جدولِ `tournaments` بودند و هیچ‌جا دیده
+   این صفحه نبود و نبودنش یک شکاف نظارتی بود: منوی «مسابقات و
+   رویدادها» جدول `events` را نشان می‌داد (رویدادهای محتوایی که خود
+   ادمین می‌سازد)، در حالی که مسابقات واقعی باشگاه‌ها — همان‌هایی که
+   ثبت‌نام و پول دارند — در جدول `tournaments` بودند و هیچ‌جا دیده
    نمی‌شدند. */
 
 import { useCallback, useEffect, useState } from 'react'
@@ -50,8 +50,8 @@ export default function AdminTournaments() {
   const [busy, setBusy] = useState('')
   const [clubs, setClubs] = useState<{ id: string; name: string }[]>([])
   const [showNew, setShowNew] = useState(false)
-  /* فیلدها عمداً همان‌هایی است که پنلِ باشگاه دارد — دو فرم برای یک
-     موجودیت نباید امکاناتِ متفاوت بدهند. */
+  /* فیلدها عمدا همان‌هایی است که پنل باشگاه دارد — دو فرم برای یک
+     موجودیت نباید امکانات متفاوت بدهند. */
   const [nf, setNf] = useState({
     clubId: '', title: '', entryFee: '', maxPlayers: '16', startsAt: '',
     discipline: 'snooker', matchFormat: '', registrationEndsAt: '', prize: '', description: '',
@@ -83,7 +83,7 @@ export default function AdminTournaments() {
     finally { setBusy('') }
   }
 
-  /* `null` یعنی «هیچ رویداد اصلی‌ای نباشد» — آن‌وقت بیلبورد اصلاً
+  /* `null` یعنی «هیچ رویداد اصلی‌ای نباشد» — آن‌وقت بیلبورد اصلا
      نمایش داده نمی‌شود و همه‌ی مسابقات در گرید می‌آیند. */
   const setFeatured = async (id: string | null) => {
     setBusy(id ?? 'featured'); setErr('')
@@ -156,7 +156,7 @@ export default function AdminTournaments() {
       </div>
       <p style={{ fontSize: 12.5, color: SEC, lineHeight: 2, margin: '0 0 16px' }}>
         مسابقاتی که باشگاه‌ها ساخته‌اند — با ثبت‌نام و پول واقعی.
-        این با «رویدادها» فرق دارد؛ آن‌ها محتوای دستیِ خودِ شماست.
+        این با «رویدادها» فرق دارد؛ آن‌ها محتوای دستی خود شماست.
       </p>
 
       <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 12 }}>
@@ -180,9 +180,9 @@ export default function AdminTournaments() {
         }}><AlertCircle size={15} style={{ flexShrink: 0, marginTop: 2 }} />{err}</div>
       )}
 
-      {/* ── ساختِ مسابقه توسطِ ادمین ──
-          باشگاه اجباری است: مسابقه بدونِ باشگاه، بدونِ حسابِ تسویه و
-          بدونِ صاحب می‌ماند. */}
+      {/* ── ساخت مسابقه توسط ادمین ──
+          باشگاه اجباری است: مسابقه بدون باشگاه، بدون حساب تسویه و
+          بدون صاحب می‌ماند. */}
       {showNew && (
         <div style={{ ...card, display: 'grid', gap: 10, gridTemplateColumns: 'repeat(auto-fit,minmax(180px,1fr))' }}>
           <Field label="باشگاه">
@@ -230,7 +230,7 @@ export default function AdminTournaments() {
               onChange={e => setNf(p => ({ ...p, registrationEndsAt: e.target.value }))} />
           </Field>
           <Field label="جایزه (اختیاری)">
-            <input value={nf.prize} style={inp} placeholder="مثلاً ۱۰٬۰۰۰٬۰۰۰ تومان"
+            <input value={nf.prize} style={inp} placeholder="مثلا ۱۰٬۰۰۰٬۰۰۰ تومان"
               onChange={e => setNf(p => ({ ...p, prize: e.target.value }))} />
           </Field>
           <div style={{ gridColumn: '1 / -1' }}>
@@ -310,11 +310,11 @@ export default function AdminTournaments() {
             }}><ExternalLink size={12} /> صفحه‌ی عمومی</Link>
 
             {/* ── رویداد اصلی ──
-                بیلبوردِ بالای صفحه‌ی مسابقات تا امروز خودکار پر
+                بیلبورد بالای صفحه‌ی مسابقات تا امروز خودکار پر
                 می‌شد: «اولین مسابقه‌ای که ثبت‌نامش باز است». چون
-                فهرست بر اساسِ تاریخِ شروع مرتب می‌شود، عملاً هر
+                فهرست بر اساس تاریخ شروع مرتب می‌شود، عملا هر
                 باشگاهی که زودتر برگزار می‌کرد بزرگ‌ترین جای صفحه را
-                می‌گرفت — جایگاهی که ارزشِ تبلیغاتی دارد و نباید
+                می‌گرفت — جایگاهی که ارزش تبلیغاتی دارد و نباید
                 قرعه‌کشی باشد. حالا فقط از این‌جا انتخاب می‌شود. */}
             {t.is_featured ? (
               <Act on={busy !== t.id} onClick={() => void setFeatured(null)}>
@@ -341,8 +341,8 @@ export default function AdminTournaments() {
                 لغو مسابقه
               </Act>
             )}
-            {/* حذفِ فیزیکی فقط وقتی پولی جابه‌جا نشده؛ سرور هم مستقل
-                همین را بررسی می‌کند و در غیرِ این صورت ۴۰۹ می‌دهد. */}
+            {/* حذف فیزیکی فقط وقتی پولی جابه‌جا نشده؛ سرور هم مستقل
+                همین را بررسی می‌کند و در غیر این صورت ۴۰۹ می‌دهد. */}
             {t.paidRegistrations === 0 && (
               <Act on={busy !== t.id} tone="stop" onClick={() => void remove(t.id)}>
                 <Trash2 size={12} /> حذف

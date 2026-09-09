@@ -39,12 +39,12 @@ export interface ProfileField {
 
 /* ── واژه‌ی «پول» ──
    در بازار ایران کسی «پول» را به‌معنای Pool نمی‌شناسد؛ همه «پاکت
-   بیلیارد» می‌گویند. برچسبِ فهرست عوض شد، ولی `specialty` مقدارش
-   **همان رشته‌ی فارسی** است — یعنی پروفایل‌هایی که قبلاً «پول» ذخیره
+   بیلیارد» می‌گویند. برچسب فهرست عوض شد، ولی `specialty` مقدارش
+   **همان رشته‌ی فارسی** است — یعنی پروفایل‌هایی که قبلا «پول» ذخیره
    کرده‌اند مقداری دارند که دیگر در فهرست نیست و دراپ‌داونشان خالی
    می‌افتد.
 
-   پس موقعِ خواندن نگاشت می‌شود. نوشتن همیشه با نامِ تازه انجام
+   پس موقع خواندن نگاشت می‌شود. نوشتن همیشه با نام تازه انجام
    می‌شود، و این نگاشت فقط برای داده‌ی قدیمی است. */
 const LEGACY_DISCIPLINE: Record<string, string> = {
   'پول': 'پاکت بیلیارد',
@@ -68,14 +68,14 @@ export const ROLES: RoleMeta[] = [
   },
   {
     value: 'player', label: 'بازیکن رنکینگی', icon: 'ti-chart-bar', color: '#C7A66A',
-    /* بازیکن فعلاً مدرک نمی‌خواهد — سازوکارِ رنکینگ هنوز تعیین نشده. */
+    /* بازیکن فعلا مدرک نمی‌خواهد — سازوکار رنکینگ هنوز تعیین نشده. */
     description: 'رنکینگ ملی بیلیارد', requiresDoc: false,
     docHint: '',
     profileFields: [
       { key: 'displayName', label: 'نام کامل', type: 'text', placeholder: 'نام و نام‌خانوادگی', required: true },
       { key: 'specialty', label: 'تخصص', type: 'select', placeholder: '', options: ['اسنوکر', 'پاکت بیلیارد', 'کارامبول', 'هندیکپ'], required: true },
-      { key: 'nationalRank', label: 'رتبه ملی', type: 'number', placeholder: 'مثلاً ۱۲', required: false },
-      { key: 'yearsActive', label: 'سال‌های فعالیت', type: 'number', placeholder: 'مثلاً ۸', required: false },
+      { key: 'nationalRank', label: 'رتبه ملی', type: 'number', placeholder: 'مثلا ۱۲', required: false },
+      { key: 'yearsActive', label: 'سال‌های فعالیت', type: 'number', placeholder: 'مثلا ۸', required: false },
       { key: 'club', label: 'باشگاه فعلی', type: 'text', placeholder: 'نام باشگاه', required: false },
       { key: 'bio', label: 'بیوگرافی ورزشی', type: 'textarea', placeholder: 'افتخارات، سابقه بازی...', required: false },
       { key: 'instagram', label: 'اینستاگرام', type: 'url', placeholder: 'https://instagram.com/...', required: false },
@@ -91,9 +91,9 @@ export const ROLES: RoleMeta[] = [
       /* «ملی» این‌جا هم برداشته شد. دو تعریف از یک فهرست داریم و فقط
          یکی‌شان اصلاح شده بود — همان که رندر می‌شود. */
       { key: 'licenseLevel', label: 'درجه مربیگری', type: 'select', placeholder: '', options: ['درجه ۳', 'درجه ۲', 'درجه ۱'], required: false },
-      { key: 'experience', label: 'سابقه تدریس (سال)', type: 'number', placeholder: 'مثلاً ۵', required: true },
+      { key: 'experience', label: 'سابقه تدریس (سال)', type: 'number', placeholder: 'مثلا ۵', required: true },
       { key: 'location', label: 'شهر فعالیت', type: 'text', placeholder: 'تهران، اصفهان...', required: true },
-      { key: 'sessionPrice', label: 'هزینه هر جلسه (تومان)', type: 'number', placeholder: 'مثلاً ۵۰۰۰۰۰', required: false },
+      { key: 'sessionPrice', label: 'هزینه هر جلسه (تومان)', type: 'number', placeholder: 'مثلا ۵۰۰۰۰۰', required: false },
       { key: 'bio', label: 'درباره من', type: 'textarea', placeholder: 'روش تدریس، سوابق، دستاوردها...', required: false },
     ],
   },
@@ -106,7 +106,7 @@ export const ROLES: RoleMeta[] = [
       { key: 'licenseLevel', label: 'درجه داوری', type: 'select', placeholder: '', options: ['درجه ۳', 'درجه ۲', 'درجه ۱', 'بین‌المللی'], required: true },
       { key: 'specialty', label: 'رشته داوری', type: 'select', placeholder: '', options: ['اسنوکر', 'پاکت بیلیارد', 'کارامبول', 'همه رشته‌ها'], required: true },
       { key: 'location', label: 'شهر', type: 'text', placeholder: 'محل اقامت', required: true },
-      { key: 'matchCount', label: 'تعداد مسابقات داوری‌شده', type: 'number', placeholder: 'مثلاً ۴۰', required: false },
+      { key: 'matchCount', label: 'تعداد مسابقات داوری‌شده', type: 'number', placeholder: 'مثلا ۴۰', required: false },
       { key: 'bio', label: 'سوابق داوری', type: 'textarea', placeholder: 'مسابقات مهم، لیگ‌ها...', required: false },
     ],
   },
@@ -139,7 +139,7 @@ export const ROLES: RoleMeta[] = [
     docHint: 'جواز کسب — برای تیک آبی',
     profileFields: [
       { key: 'displayName', label: 'نام برند / کارخانه', type: 'text', placeholder: 'نام رسمی', required: true },
-      { key: 'founded', label: 'سال تأسیس', type: 'number', placeholder: 'مثلاً ۱۳۸۵', required: false },
+      { key: 'founded', label: 'سال تأسیس', type: 'number', placeholder: 'مثلا ۱۳۸۵', required: false },
       { key: 'location', label: 'محل تولید', type: 'text', placeholder: 'استان / شهر', required: true },
       { key: 'website', label: 'وب‌سایت', type: 'url', placeholder: 'https://...', required: false },
       { key: 'bio', label: 'درباره برند', type: 'textarea', placeholder: 'تاریخچه، ظرفیت تولید، افتخارات...', required: false },
@@ -152,7 +152,7 @@ export const ROLES: RoleMeta[] = [
     profileFields: [
       { key: 'displayName', label: 'نام باشگاه', type: 'text', placeholder: 'نام رسمی باشگاه', required: true },
       { key: 'location', label: 'آدرس', type: 'text', placeholder: 'شهر — محله', required: true },
-      { key: 'tableCount', label: 'تعداد میزها', type: 'number', placeholder: 'مثلاً ۶', required: true },
+      { key: 'tableCount', label: 'تعداد میزها', type: 'number', placeholder: 'مثلا ۶', required: true },
       { key: 'phone', label: 'شماره باشگاه', type: 'text', placeholder: '۰۲۱...', required: true },
       { key: 'instagram', label: 'اینستاگرام', type: 'url', placeholder: 'https://instagram.com/...', required: false },
       { key: 'bio', label: 'معرفی باشگاه', type: 'textarea', placeholder: 'امکانات، ساعت‌کاری، خدمات...', required: false },
@@ -165,20 +165,20 @@ export const ROLE_MAP = Object.fromEntries(
 ) as Record<RoleValue, RoleMeta>
 
 /* ═══════════════════════════════════════════════════════════════
-   پنلِ واقعیِ هر نقش — منبعِ واحد.
+   پنل واقعی هر نقش — منبع واحد.
    ───────────────────────────────────────────────────────────────
    هر نقش یک صفحه دارد که پروفایلش آن‌جا ساخته و ویرایش می‌شود، و
-   همان صفحه روی جدولِ `profiles` می‌نویسد.
+   همان صفحه روی جدول `profiles` می‌نویسد.
 
-   کنارِ آن، `/profile/setup` یک فرمِ دومِ عمومی داشت که از روی
+   کنار آن، `/profile/setup` یک فرم دوم عمومی داشت که از روی
    `profileFields` ساخته می‌شد و روی `PUT /api/roles/<role>/profile`
    ذخیره می‌کرد — مسیری که در این پروژه **وجود ندارد** و در تولید
-   ۴۰۴ می‌دهد. یعنی کاربر برای هر هشت نقش فرم را پر می‌کرد، پیامِ
+   ۴۰۴ می‌دهد. یعنی کاربر برای هر هشت نقش فرم را پر می‌کرد، پیام
    «ذخیره شد» می‌گرفت و هیچ‌چیز ذخیره نمی‌شد.
 
-   حالا هر جایی که می‌خواهد کاربر را به «فرمِ پروفایلِ نقشش»
-   بفرستد، از این جدول می‌خواند. یک نقشِ تازه یعنی یک ردیفِ این‌جا،
-   نه یک فرمِ تازه.
+   حالا هر جایی که می‌خواهد کاربر را به «فرم پروفایل نقشش»
+   بفرستد، از این جدول می‌خواند. یک نقش تازه یعنی یک ردیف این‌جا،
+   نه یک فرم تازه.
    ═══════════════════════════════════════════════════════════════ */
 export interface RolePanel { path: string; label: string }
 

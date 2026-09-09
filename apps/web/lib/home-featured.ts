@@ -7,7 +7,7 @@ import type { RealClub, RealProduct, RealStore, HomeFeatured } from './home-type
 /* ─────────────────────────────────────────────────────────────
    پشتوانه‌ی سه سکشن صفحه‌ی اصلی — خوانده‌شده روی سرور.
 
-   چرا سرور و نه کلاینت: `app/page.tsx` عمداً وجود دارد تا این سه
+   چرا سرور و نه کلاینت: `app/page.tsx` عمدا وجود دارد تا این سه
    سکشن در HTML اولیه باشند (خزنده‌ها و رندر اول). وقتی این داده را
    با useEffect در مرورگر گرفتم، کارت‌ها از HTML بیرون افتادند و همان
    مشکلی که آن لایه حل کرده بود برگشت.
@@ -27,26 +27,26 @@ const CLUB_IMG = [
 ]
 const PRODUCT_IMG = '/images/shop/cue_billiard_1.jpg'
 /* ── این فایل وجود نداشت ──
-   کارتِ فروشگاه در صفحه‌ی اصلی بی‌عکس می‌ماند چون نشانیِ فالبک ۴۰۴
-   می‌داد و onError عکس را پنهان می‌کرد. کلاینت نشانیِ درست را داشت و
-   فقط این مقدارِ سمتِ سرور جا مانده بود. */
+   کارت فروشگاه در صفحه‌ی اصلی بی‌عکس می‌ماند چون نشانی فالبک ۴۰۴
+   می‌داد و onError عکس را پنهان می‌کرد. کلاینت نشانی درست را داشت و
+   فقط این مقدار سمت سرور جا مانده بود. */
 const STORE_IMG = '/images/stores/IMG_0974.png'
 
 export async function loadHomeFeatured(): Promise<HomeFeatured> {
   const sb = getSupabaseServer()
 
   /* فروشگاه‌ها از همان منبعی که `/api/sellers` می‌خواند — وگرنه
-     مقدارِ اولیه‌ی سرور و فتچِ کلاینت دو چیزِ متفاوت می‌شدند و
+     مقدار اولیه‌ی سرور و فتچ کلاینت دو چیز متفاوت می‌شدند و
      کارت‌ها بعد از hydration جابه‌جا می‌شدند. زودتر شروع می‌شود تا
-     همچنان موازیِ دو کوئریِ دیگر بماند. */
+     همچنان موازی دو کوئری دیگر بماند. */
   const storesP = listPublicStores(FEATURED_STORES_MAX).catch(() => [] as PublicStore[])
 
   const [clubsRes, productsRes] = await Promise.allSettled([
     sb.from('clubs')
       /* ⚠️ `hasActiveStory` ستون است ولی هیچ‌کس نمی‌نویسدش — همیشه
-         NULL. یعنی حلقه‌ی استوری روی کارتِ باشگاهِ صفحه‌ی اصلی هرگز
-         روشن نمی‌شد. مثل `app/api/clubs/route.ts` از تاریخِ انقضا
-         مشتق می‌شود تا با گذشتنِ ۲۴ ساعت خودش خاموش شود. */
+         NULL. یعنی حلقه‌ی استوری روی کارت باشگاه صفحه‌ی اصلی هرگز
+         روشن نمی‌شد. مثل `app/api/clubs/route.ts` از تاریخ انقضا
+         مشتق می‌شود تا با گذشتن ۲۴ ساعت خودش خاموش شود. */
       .select('id,name,city,images,storyExpiresAt,"verificationStatus",snookerTables,pocketTables,highballTables,vipSnookerTables,vipPocketTables')
       .eq('isActive', true).order('createdAt', { ascending: false }).limit(FEATURED_CLUBS_MAX),
     sb.from('products')
@@ -74,7 +74,7 @@ export async function loadHomeFeatured(): Promise<HomeFeatured> {
   }
   const n = (v: number | null | undefined) => v ?? 0
 
-  /* امتیاز و تعداد نظر صفر می‌ماند تا سیستم نظر واقعاً وجود داشته باشد؛
+  /* امتیاز و تعداد نظر صفر می‌ماند تا سیستم نظر واقعا وجود داشته باشد؛
      کارت خودش صفر را نمایش نمی‌دهد. */
   const clubs: RealClub[] = rows<C>(clubsRes).map((c, i) => ({
     id: c.id,
@@ -99,9 +99,9 @@ export async function loadHomeFeatured(): Promise<HomeFeatured> {
   const products: RealProduct[] = rows<P>(productsRes).map(p => ({
     id: p.id,
     name: modernizeType(p.title ?? ''),
-    /* برند **و مدل** — و بدونِ جانشینِ ساختگی. این سومین نویسنده‌ی
-       همین کارت است (کنارِ `ads/free` و `ads/resolve`) و تنها
-       نویسنده‌ی مسیرِ SSR؛ جا انداختنش یعنی اولین رندر برند-تنها
+    /* برند **و مدل** — و بدون جانشین ساختگی. این سومین نویسنده‌ی
+       همین کارت است (کنار `ads/free` و `ads/resolve`) و تنها
+       نویسنده‌ی مسیر SSR؛ جا انداختنش یعنی اولین رندر برند-تنها
        بود و بعد از hydration عوض می‌شد. */
     sub: p.brand ?? '',
     model: p.model ?? '',
@@ -123,7 +123,7 @@ export async function loadHomeFeatured(): Promise<HomeFeatured> {
       city: p.city,
       specialty: p.specialty,
       rating: 0, reviews: 0,
-      /* خالی یعنی «لوگو ندارد» ⇒ کارت پوسترِ پیش‌فرض می‌سازد */
+      /* خالی یعنی «لوگو ندارد» ⇒ کارت پوستر پیش‌فرض می‌سازد */
       img: p.logo || s.avatar || '',
       badge: null,
       verified: s.verified === true,

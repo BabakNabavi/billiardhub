@@ -45,7 +45,7 @@ export async function POST(req: NextRequest) {
     // بررسی تعداد تلاش
     if ((user.otp_attempts ?? 0) >= OTP_MAX_ATTEMPTS) {
       return NextResponse.json(
-        { message: 'تعداد تلاش‌های مجاز تمام شد. لطفاً مجدداً درخواست کد کنید' },
+        { message: 'تعداد تلاش‌های مجاز تمام شد. لطفا مجددا درخواست کد کنید' },
         { status: 429, headers: CORS_HEADERS }
       )
     }

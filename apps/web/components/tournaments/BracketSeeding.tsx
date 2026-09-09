@@ -1,24 +1,24 @@
 'use client'
 
 /* ─────────────────────────────────────────────────────────────
-   چیدنِ دستیِ براکت.
+   چیدن دستی براکت.
 
    ── چرا لازم است ──
-   قرعه‌کشیِ تصادفی برای برگزارکننده‌ی واقعی کافی نیست: بازیکنانِ
-   هم‌باشگاه نباید دورِ اول به هم بخورند، نفراتِ سیدشده باید در دو
-   نیمه‌ی متفاوت بیفتند، و کسی که دیر می‌رسد باید بازیِ دیرتری
-   بگیرد. همه‌ی این‌ها یعنی جابه‌جاییِ دستی.
+   قرعه‌کشی تصادفی برای برگزارکننده‌ی واقعی کافی نیست: بازیکنان
+   هم‌باشگاه نباید دور اول به هم بخورند، نفرات سیدشده باید در دو
+   نیمه‌ی متفاوت بیفتند، و کسی که دیر می‌رسد باید بازی دیرتری
+   بگیرد. همه‌ی این‌ها یعنی جابه‌جایی دستی.
 
-   نسخه‌ی قبلیِ سایت این را داشت ولی فقط در حافظه‌ی مرورگر می‌ماند و
+   نسخه‌ی قبلی سایت این را داشت ولی فقط در حافظه‌ی مرورگر می‌ماند و
    با رفرش می‌رفت. حالا هر جابه‌جایی همان لحظه در دیتابیس ثبت
    می‌شود.
 
-   ── چرا فقط دورِ اول ──
-   جایگاه‌های دورهای بعد را نتیجه‌ی بازی پر می‌کند، نه دستِ
+   ── چرا فقط دور اول ──
+   جایگاه‌های دورهای بعد را نتیجه‌ی بازی پر می‌کند، نه دست
    برگزارکننده. سرور هم مستقل همین را بررسی می‌کند.
 
    ── دو شیوه‌ی تعامل ──
-   دسکتاپ درگ‌اند‌دراپ دارد. موبایل ندارد (لمس، درگِ HTML5 را
+   دسکتاپ درگ‌اند‌دراپ دارد. موبایل ندارد (لمس، درگ HTML5 را
    شلیک نمی‌کند)، پس همان‌جا «انتخاب کن، بعد مقصد را بزن» کار
    می‌کند. هر دو به یک API می‌رسند.
    ───────────────────────────────────────────────────────────── */
@@ -75,29 +75,29 @@ export default function BracketSeeding({ tournamentId, onChanged }: {
   const rightHalf = round1.filter(m => m.match_index < mid)
   const leftHalf = round1.filter(m => m.match_index >= mid)
 
-  /* ── مقصدِ یک رهاکردن ── */
+  /* ── مقصد یک رهاکردن ── */
   const dropOn = async (ref: SlotRef) => {
     if (!held || busy) return
     setBusy(true)
     try {
       if (held.from === 'bye') {
-        /* بای یک واقعیتِ ذخیره‌شده است، نه «خالی». تا مهاجرتِ ۰۷۵
+        /* بای یک واقعیت ذخیره‌شده است، نه «خالی». تا مهاجرت ۰۷۵
            همین‌جا `null` فرستاده می‌شد — یعنی «خالی کن» — و چون
-           جایگاه از قبل خالی بود، هیچ‌چیز عوض نمی‌شد و تراشه سرِ
+           جایگاه از قبل خالی بود، هیچ‌چیز عوض نمی‌شد و تراشه سر
            جایش برمی‌گشت. */
         await after(await placeSlot(tournamentId, ref.matchId, ref.slot, null, true))
       } else if (held.from === 'pool') {
         await after(await placeSlot(tournamentId, ref.matchId, ref.slot, held.player.id))
       } else {
-        /* جایگاه به جایگاه ⇒ تعویض. با «انتساب» ساکنِ مقصد بی‌صدا
-           حذف می‌شد و چون همه‌ی جایگاه‌ها پر به‌نظر می‌رسند، تا روزِ
+        /* جایگاه به جایگاه ⇒ تعویض. با «انتساب» ساکن مقصد بی‌صدا
+           حذف می‌شد و چون همه‌ی جایگاه‌ها پر به‌نظر می‌رسند، تا روز
            مسابقه کسی نمی‌فهمید. */
         await after(await swapSlots(tournamentId, held.ref, ref))
       }
     } finally { setBusy(false); setHeld(null); setHover('') }
   }
 
-  /* پس‌گرفتنِ یک بای — بدونِ این، جایگاهی که اشتباهی بای شده هیچ
+  /* پس‌گرفتن یک بای — بدون این، جایگاهی که اشتباهی بای شده هیچ
      راهی برای برگشتن نداشت جز «خالی‌کردن همه». */
   const clearBye = async (ref: SlotRef) => {
     if (busy) return
@@ -106,7 +106,7 @@ export default function BracketSeeding({ tournamentId, onChanged }: {
     finally { setBusy(false); setHeld(null); setHover('') }
   }
 
-  /* رهاکردن روی استخر = برداشتنِ بازیکن از براکت */
+  /* رهاکردن روی استخر = برداشتن بازیکن از براکت */
   const dropOnPool = async () => {
     if (!held || held.from !== 'slot' || busy) return
     setBusy(true)
@@ -118,11 +118,11 @@ export default function BracketSeeding({ tournamentId, onChanged }: {
   const doShuffle = async () => {
     setBusy(true)
     try {
-      /* قرعه‌کشیِ دوباره روی براکتِ موجود رد می‌شود، پس اول خالی و بعد
+      /* قرعه‌کشی دوباره روی براکت موجود رد می‌شود، پس اول خالی و بعد
          پر می‌کنیم — همان کاری که «قرعه‌کشی مجدد» باید بکند. */
       const cleared = await clearSlots(tournamentId)
       if (!cleared.ok) { setErr(cleared.body.message ?? 'انجام نشد'); return }
-      /* چیدنِ تصادفیِ استخر در جایگاه‌های خالی */
+      /* چیدن تصادفی استخر در جایگاه‌های خالی */
       const fresh = await fetchSeedingPool(tournamentId)
       const players = shuffle(fresh?.pool ?? [])
       const slots: SlotRef[] = []
@@ -138,7 +138,7 @@ export default function BracketSeeding({ tournamentId, onChanged }: {
     } finally { setBusy(false) }
   }
 
-  /* پیامِ موفقیت — کوتاه و خودرو. بدونِ آن، تأییدِ چیدمان هیچ
+  /* پیام موفقیت — کوتاه و خودرو. بدون آن، تأیید چیدمان هیچ
      بازخوردی نداشت جز اینکه چند برچسب عوض می‌شد. */
   const [done, setDone] = useState('')
   const doFinalize = async () => {
@@ -169,27 +169,27 @@ export default function BracketSeeding({ tournamentId, onChanged }: {
     </div>
   )
 
-  /* ── چرا «بای» شروعِ مسابقه نیست ──
-     بازیِ تک‌نفره از همان لحظه‌ی ساخت برنده دارد. اگر آن را «نتیجه»
-     بشماریم، به‌محضِ تأییدِ چیدمان همه‌چیز قفل می‌شد و پیامِ
+  /* ── چرا «بای» شروع مسابقه نیست ──
+     بازی تک‌نفره از همان لحظه‌ی ساخت برنده دارد. اگر آن را «نتیجه»
+     بشماریم، به‌محض تأیید چیدمان همه‌چیز قفل می‌شد و پیام
      «نتیجه‌ای ثبت شده» می‌آمد — در حالی که هیچ بازی‌ای انجام نشده
-     بود. مسابقه وقتی شروع شده که یک بازیِ **واقعی** نتیجه گرفته
+     بود. مسابقه وقتی شروع شده که یک بازی **واقعی** نتیجه گرفته
      باشد. سرور هم همین تعریف را دارد (مهاجرت ۰۷۳). */
   const started = b.matches.some(m =>
     m.winner !== null && !!m.p1_registration_id && !!m.p2_registration_id)
 
   /* ── چیپ‌های بای ──
-     جدولِ ۱۶تایی با ۱۳ بازیکن، سه جایگاهِ خالی دارد. بدونِ چیزی که
+     جدول ۱۶تایی با ۱۳ بازیکن، سه جایگاه خالی دارد. بدون چیزی که
      نماینده‌ی آن خالی‌ها باشد، برگزارکننده نمی‌داند کجا را خالی
      بگذارد و «تأیید چیدمان» هم می‌گوید چیدمان ناقص است.
 
-     گذاشتنِ بای روی جایگاه یعنی «این جایگاه بی‌حریف بماند»، و کسی
+     گذاشتن بای روی جایگاه یعنی «این جایگاه بی‌حریف بماند»، و کسی
      که روبه‌رویش است خودکار صعود می‌کند.
 
-     `placedByes` از خودِ جدول شمرده می‌شود، نه از حافظه‌ی مرورگر:
-     تا مهاجرتِ ۰۷۵ بای هیچ‌جا ذخیره نمی‌شد، پس این عدد هرگز کم
-     نمی‌شد و «تأیید چیدمان» — که شرطش صفرشدنِ همین است — برای
-     جدولی که تعدادِ بازیکنش توانِ دو نبود هیچ‌وقت فعال نمی‌شد. */
+     `placedByes` از خود جدول شمرده می‌شود، نه از حافظه‌ی مرورگر:
+     تا مهاجرت ۰۷۵ بای هیچ‌جا ذخیره نمی‌شد، پس این عدد هرگز کم
+     نمی‌شد و «تأیید چیدمان» — که شرطش صفرشدن همین است — برای
+     جدولی که تعداد بازیکنش توان دو نبود هیچ‌وقت فعال نمی‌شد. */
   const totalSlots = round1.length * 2
   const filled = round1.reduce((n, m) =>
     n + (m.p1_registration_id ? 1 : 0) + (m.p2_registration_id ? 1 : 0), 0)
@@ -207,9 +207,9 @@ export default function BracketSeeding({ tournamentId, onChanged }: {
         .bs-halves{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px }
         @media (max-width: 560px){ .bs-halves{ grid-template-columns:1fr } }
 
-        /* ── فهرستِ چیده‌نشده‌ها ──
+        /* ── فهرست چیده‌نشده‌ها ──
            تک‌ستونه بود و با ۱۶ بازیکن آن‌قدر بلند می‌شد که در گوشی
-           باید تا انتهایش اسکرول می‌کردی تا به خودِ جدول برسی. دو
+           باید تا انتهایش اسکرول می‌کردی تا به خود جدول برسی. دو
            ستون همان فهرست را نصف می‌کند. */
         .bs-pool{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:6px }
         @media (min-width: 781px){ .bs-pool{ grid-template-columns:1fr } }
@@ -227,7 +227,7 @@ export default function BracketSeeding({ tournamentId, onChanged }: {
           <span>
             بازیکن را از فهرست بکشید روی جایگاه، یا دو جایگاه را روی هم بیندازید تا جابه‌جا شوند.
             در گوشی: یک‌بار روی بازیکن بزنید، بعد روی جایگاه.
-            تراشه‌ی قرمزِ <b>Bye</b> هم مثلِ بازیکن گذاشته می‌شود؛ زدن روی جایگاهِ بای پسش می‌گیرد.
+            تراشه‌ی قرمز <b>Bye</b> هم مثل بازیکن گذاشته می‌شود؛ زدن روی جایگاه بای پسش می‌گیرد.
           </span>
         </div>
       )}
@@ -244,20 +244,20 @@ export default function BracketSeeding({ tournamentId, onChanged }: {
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 14 }}>
         <button type="button" disabled={busy || started} onClick={() => void doShuffle()} style={btn(!busy && !started)}>
           {busy ? <Loader2 size={13} style={{ animation: 'bsp 1s linear infinite' }} /> : <Shuffle size={13} />}
-          چیدنِ تصادفی
+          چیدن تصادفی
         </button>
         <button type="button" disabled={busy || started} onClick={() => void doClear()} style={btn(!busy && !started, true)}>
           <Eraser size={13} /> خالی‌کردن همه
         </button>
-        {/* «تازه‌سازی» برداشته شد: هر عملِ موفق خودش `load()` را صدا
+        {/* «تازه‌سازی» برداشته شد: هر عمل موفق خودش `load()` را صدا
             می‌زند، پس دکمه فقط همان چیزی را دوباره می‌خواند که همین
             الان روی صفحه است. */}
 
-        {/* ── تأییدِ چیدمان ──
+        {/* ── تأیید چیدمان ──
             بازی‌هایی که یک طرفشان خالی مانده باید بای شوند و
-            برنده‌شان به دورِ دوم برود — همان کاری که قرعه‌کشیِ
-            خودکار در لحظه‌ی ساخت می‌کند. بدونِ این، جدولی که دستی
-            چیده شده جایگاه‌های دورِ دوم را خالی نگه می‌دارد و
+            برنده‌شان به دور دوم برود — همان کاری که قرعه‌کشی
+            خودکار در لحظه‌ی ساخت می‌کند. بدون این، جدولی که دستی
+            چیده شده جایگاه‌های دور دوم را خالی نگه می‌دارد و
             به‌نظر می‌رسد نصفه است. */}
         <button type="button" disabled={busy || started || pool.length > 0 || byeCount > 0}
           onClick={() => void doFinalize()}
@@ -268,12 +268,12 @@ export default function BracketSeeding({ tournamentId, onChanged }: {
 
       {(pool.length > 0 || byeCount > 0) && !started && (
         <div style={{ fontSize: 11.5, color: MUT, marginBottom: 12, lineHeight: 1.9 }}>
-          تا وقتی چیزی در فهرستِ «چیده‌نشده» مانده — بازیکن یا بای — چیدمان تأیید نمی‌شود.
+          تا وقتی چیزی در فهرست «چیده‌نشده» مانده — بازیکن یا بای — چیدمان تأیید نمی‌شود.
         </div>
       )}
 
       <div className="bs-grid">
-        {/* ── استخرِ چیده‌نشده‌ها ── */}
+        {/* ── استخر چیده‌نشده‌ها ── */}
         <div
           onDragOver={e => { if (held?.from === 'slot') { e.preventDefault(); setHover('pool') } }}
           onDragLeave={() => setHover('')}
@@ -326,8 +326,8 @@ export default function BracketSeeding({ tournamentId, onChanged }: {
               {/* ── بای ──
                   بعد از بازیکن‌ها، چون بازیکن است که چیده می‌شود و
                   بای چیزی است که از جدول اضافه می‌آید. قرمز هم برای
-                  همین: تراشه‌ای که رنگِ بازیکن داشته باشد، ناخواسته
-                  مثلِ یک نفرِ دیگر خوانده می‌شود. */}
+                  همین: تراشه‌ای که رنگ بازیکن داشته باشد، ناخواسته
+                  مثل یک نفر دیگر خوانده می‌شود. */}
               {Array.from({ length: byeCount }).map((_, i) => {
                 const on = held?.from === 'bye'
                 return (
@@ -354,7 +354,7 @@ export default function BracketSeeding({ tournamentId, onChanged }: {
           )}
         </div>
 
-        {/* ── جایگاه‌های دورِ اول، دو نیمه ── */}
+        {/* ── جایگاه‌های دور اول، دو نیمه ── */}
         <div className="bs-halves">
           <HalfColumn title="نیمه‌ی راست" matches={rightHalf}
             held={held} hover={hover} setHover={setHover} setHeld={setHeld}

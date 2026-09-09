@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   title: 'ثبت‌نام | بیلیارد هاب',
   description: 'ساخت حساب کاربری در بیلیارد هاب.',
   alternates: { canonical: '/register' },
-  /* صفحه‌ی ثبت‌نام ارزشِ ایندکس ندارد و نباید در نتایج بیاید */
+  /* صفحه‌ی ثبت‌نام ارزش ایندکس ندارد و نباید در نتایج بیاید */
   robots: { index: false, follow: true },
   openGraph: {
     title: 'ثبت‌نام | بیلیارد هاب',

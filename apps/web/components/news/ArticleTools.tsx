@@ -1,28 +1,28 @@
 'use client'
 
 /* ─────────────────────────────────────────────────────────────
-   ابزارهای صفحه‌ی خبر: نوارِ پیشرفتِ مطالعه، اشتراک‌گذاری، و ثبتِ
-   بازدیدِ واقعی.
+   ابزارهای صفحه‌ی خبر: نوار پیشرفت مطالعه، اشتراک‌گذاری، و ثبت
+   بازدید واقعی.
 
-   ⚠️ تنها تکه‌ی کلاینتیِ صفحه‌ی خبر است. متنِ خبر روی سرور رندر
+   ⚠️ تنها تکه‌ی کلاینتی صفحه‌ی خبر است. متن خبر روی سرور رندر
    می‌شود و این کامپوننت هیچ محتوایی نمی‌سازد — فقط ابزار.
    ───────────────────────────────────────────────────────────── */
 
 import { useEffect, useState } from 'react'
 import { Link2, Check, Send } from 'lucide-react'
 
-/* ── ثبتِ بازدید ──
-   ⚠️ یک‌بار در هر نشست برای هر خبر. بدونِ این گارد، رفرشِ صفحه و
-   برگشتِ کاربر عدد را باد می‌کند و «پربازدیدترین‌ها» به یک فهرستِ
+/* ── ثبت بازدید ──
+   ⚠️ یک‌بار در هر نشست برای هر خبر. بدون این گارد، رفرش صفحه و
+   برگشت کاربر عدد را باد می‌کند و «پربازدیدترین‌ها» به یک فهرست
    بی‌معنا تبدیل می‌شود. */
 function useViewPing(id: string) {
   useEffect(() => {
     if (!id) return
     const key = `nr:v:${id}`
-    try { if (sessionStorage.getItem(key)) return } catch { /* حالتِ خصوصی */ }
+    try { if (sessionStorage.getItem(key)) return } catch { /* حالت خصوصی */ }
 
-    /* ⚠️ بعد از یک مکث، نه در لحظه‌ی باز شدن: بازکردن و بستنِ فوری
-       «خواندن» نیست. ۸ ثانیه مرزِ محافظه‌کارانه‌ای است. */
+    /* ⚠️ بعد از یک مکث، نه در لحظه‌ی باز شدن: بازکردن و بستن فوری
+       «خواندن» نیست. ۸ ثانیه مرز محافظه‌کارانه‌ای است. */
     const t = window.setTimeout(() => {
       try { sessionStorage.setItem(key, '1') } catch { /* بی‌اهمیت */ }
       void fetch('/api/news/view', {
@@ -36,7 +36,7 @@ function useViewPing(id: string) {
   }, [id])
 }
 
-/* ── نوارِ پیشرفتِ مطالعه ── */
+/* ── نوار پیشرفت مطالعه ── */
 function useProgress() {
   const [p, setP] = useState(0)
   useEffect(() => {
@@ -78,7 +78,7 @@ export default function ArticleTools({ id, title, url }: { id: string; title: st
 
   return (
     <>
-      {/* ⚠️ `aria-hidden`: عددِ درصدِ اسکرول برای صفحه‌خوان نویز است،
+      {/* ⚠️ `aria-hidden`: عدد درصد اسکرول برای صفحه‌خوان نویز است،
           نه اطلاعات. */}
       <div className="nr-progress" aria-hidden>
         <span style={{ transform: `scaleX(${p})` }} />
@@ -103,7 +103,7 @@ export default function ArticleTools({ id, title, url }: { id: string; title: st
         <button className="nr-share-b" type="button" onClick={copy}>
           {copied ? <><Check size={14} aria-hidden /> کپی شد</> : <><Link2 size={14} aria-hidden /> کپی نشانی</>}
         </button>
-        {/* ⚠️ تغییرِ متنِ دکمه برای صفحه‌خوان اعلام نمی‌شود */}
+        {/* ⚠️ تغییر متن دکمه برای صفحه‌خوان اعلام نمی‌شود */}
         <span className="nr-sr" role="status" aria-live="polite">{copied ? 'نشانی کپی شد' : ''}</span>
       </div>
     </>

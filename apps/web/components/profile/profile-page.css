@@ -1,21 +1,21 @@
 /* ─────────────────────────────────────────────────────────────
-   پروفایلِ نقش‌های حرفه‌ای (مربی و داور) — لایه‌ی ظاهری.
+   پروفایل نقش‌های حرفه‌ای (مربی و داور) — لایه‌ی ظاهری.
 
-   در فایلِ خودش است نه داخلِ <style> صفحه: صفحه‌ی داور قرار است همین
-   را بگیرد، و استایلِ داخلِ JSX یعنی نسخه‌ی دوم و از آن‌جا به بعد دو
-   طرحِ کمی‌متفاوت.
+   در فایل خودش است نه داخل <style> صفحه: صفحه‌ی داور قرار است همین
+   را بگیرد، و استایل داخل JSX یعنی نسخه‌ی دوم و از آن‌جا به بعد دو
+   طرح کمی‌متفاوت.
 
    همه‌ی رنگ‌ها از توکن‌های `globals.css` می‌آیند. فونت هم همان
-   IRANSansX پروژه است — نُه وزن دارد و برای تضادِ تایپوگرافیک کافی
-   است؛ فونتِ تازه اضافه نشده.
+   IRANSansX پروژه است — نه وزن دارد و برای تضاد تایپوگرافیک کافی
+   است؛ فونت تازه اضافه نشده.
    ───────────────────────────────────────────────────────────── */
 
 .ch-wrap { max-width: 1160px; margin: 0 auto; padding-inline: clamp(16px, 3vw, 32px); }
 
 /* ═══ هیرو ═══ */
-/* ⚠️ لایه‌ها z-indexِ مثبت دارند، نه منفی. با اعدادِ منفی همه‌چیز به
-   «isolation: isolate» بند بود: برداشتنِ آن یک خط، هر سه لایه را
-   پشتِ پس‌زمینه‌ی خودِ هیرو می‌فرستاد و کلِ هیرو یک مستطیلِ سیاه
+/* ⚠️ لایه‌ها z-index مثبت دارند، نه منفی. با اعداد منفی همه‌چیز به
+   «isolation: isolate» بند بود: برداشتن آن یک خط، هر سه لایه را
+   پشت پس‌زمینه‌ی خود هیرو می‌فرستاد و کل هیرو یک مستطیل سیاه
    می‌شد. حالا ترتیب مستقل از آن است. */
 .ch-hero {
   position: relative;
@@ -25,28 +25,28 @@
   overflow: hidden;
 }
 /* ── چرا دو لایه، و چرا فقط روی دسکتاپ ──
-   `cover` عکس را می‌بُرد و روی دسکتاپِ پهن فقط نوارِ میانیِ آن دیده
-   می‌شد. `contain` تنهایی دو نوارِ خالی کنارش می‌گذارد، پس دو لایه
-   شد: یکی `cover`ِ تارشده که قاب را پر می‌کند و رویش `contain` که
-   کلِ عکس را نشان می‌دهد.
+   `cover` عکس را می‌برد و روی دسکتاپ پهن فقط نوار میانی آن دیده
+   می‌شد. `contain` تنهایی دو نوار خالی کنارش می‌گذارد، پس دو لایه
+   شد: یکی `cover` تارشده که قاب را پر می‌کند و رویش `contain` که
+   کل عکس را نشان می‌دهد.
 
-   ⚠️ این را اول به همه‌ی عرض‌ها دادم — اشتباه بود. روی موبایل قابِ
+   ⚠️ این را اول به همه‌ی عرض‌ها دادم — اشتباه بود. روی موبایل قاب
    هیرو بلند و باریک است و `cover` همان‌جا درست کار می‌کرد؛ `contain`
-   عکس را کوچک و شناور وسطِ نوارهای تار می‌کرد. پس پیش‌فرض همان
-   `cover`ِ قبلی است و دولایه فقط از ۷۰۰px به بالا فعال می‌شود. */
+   عکس را کوچک و شناور وسط نوارهای تار می‌کرد. پس پیش‌فرض همان
+   `cover` قبلی است و دولایه فقط از ۷۰۰px به بالا فعال می‌شود. */
 .ch-hero-img {
   position: absolute; inset: 0; z-index: 0;
   background-size: cover; background-position: center; background-repeat: no-repeat;
-  /* عکسِ کاور پس‌زمینه است نه سوژه: اشباعِ کم و تیرگی، متن را خوانا
-     نگه می‌دارد بدونِ اینکه عکس حذف شود. */
+  /* عکس کاور پس‌زمینه است نه سوژه: اشباع کم و تیرگی، متن را خوانا
+     نگه می‌دارد بدون اینکه عکس حذف شود. */
   /* ⚠️ تیرگی ۲۰٪ کم شد (brightness .42 ⟵ .53) و خاکستری‌سازی هم
-     سبک‌تر: کاورِ کاربر زیرِ فیلترِ قبلی تقریباً ناپدید می‌شد. متن
+     سبک‌تر: کاور کاربر زیر فیلتر قبلی تقریبا ناپدید می‌شد. متن
      همچنان روی لایه‌ی تیره‌کننده‌ی جدا می‌نشیند، پس خوانا می‌ماند. */
   filter: grayscale(0.32) brightness(0.53) contrast(1.04);
 }
-/* لایه‌ی پرکننده: همان عکس، تار و بزرگ‌شده، پشتِ لایه‌ی اصلی.
+/* لایه‌ی پرکننده: همان عکس، تار و بزرگ‌شده، پشت لایه‌ی اصلی.
    روی موبایل رندر می‌شود ولی دیده نمی‌شود، چون لایه‌ی رویی آن‌جا
-   خودش `cover` است و کاملاً پوشانده‌اش می‌کند. */
+   خودش `cover` است و کاملا پوشانده‌اش می‌کند. */
 .ch-hero-fill { display: none; }
 @media (min-width: 700px) {
   .ch-hero-img { background-size: contain; }
@@ -64,15 +64,15 @@
     linear-gradient(to top, var(--bg-dark, #111) 4%, rgba(17, 17, 17, 0.72) 44%, rgba(17, 17, 17, 0.34) 100%),
     radial-gradient(70% 90% at 78% 12%, rgba(199, 166, 106, 0.20), transparent 62%);
 }
-/* پوسترِ پیش‌فرض از قبل تیره و کنترل‌شده است؛ لایه‌ی کاملِ عکس
-   رویش گرافیک را می‌بلعید و فقط یک مستطیلِ سیاه می‌ماند. این نسخه
+/* پوستر پیش‌فرض از قبل تیره و کنترل‌شده است؛ لایه‌ی کامل عکس
+   رویش گرافیک را می‌بلعید و فقط یک مستطیل سیاه می‌ماند. این نسخه
    تنها آن‌قدر تیره می‌کند که متن خوانا بماند. */
 .ch-hero-scrim[data-poster] {
-  /* تا ۰.۲۶ ادامه می‌یابد نه `transparent`: بردکرامب دقیقاً روی همین
-     لبه می‌نشیند و روی نمدِ روشنِ پوستر کنتراستش می‌افتاد. */
+  /* تا ۰.۲۶ ادامه می‌یابد نه `transparent`: بردکرامب دقیقا روی همین
+     لبه می‌نشیند و روی نمد روشن پوستر کنتراستش می‌افتاد. */
   background: linear-gradient(to top, var(--bg-dark, #111) 2%, rgba(17, 17, 17, 0.46) 40%, rgba(17, 17, 17, 0.26) 100%);
 }
-/* نامِ لاتینِ توخالی — عمقِ بصری بدونِ افزودنِ محتوا */
+/* نام لاتین توخالی — عمق بصری بدون افزودن محتوا */
 .ch-hero-ghost {
   position: absolute; z-index: 2;
   bottom: -6px; inset-inline-start: -8px;
@@ -89,11 +89,11 @@
   padding-block: clamp(16px, 2.4vw, 26px) clamp(26px, 4vw, 48px);
 }
 /* شناسه ته هیرو می‌نشیند و بردکرامب بالا — فضای میانی همان چیزی
-   است که به عکسِ کاور اجازه‌ی دیده‌شدن می‌دهد. */
+   است که به عکس کاور اجازه‌ی دیده‌شدن می‌دهد. */
 .ch-hero-body > .ch-hero-row { margin-top: auto; }
 
-/* `flex-wrap` لازم است: در ۳۷۵px نامِ بلند به خطِ بعد می‌رفت ولی
-   جداکننده‌ها روی خطِ اول جا می‌ماندند. */
+/* `flex-wrap` لازم است: در ۳۷۵px نام بلند به خط بعد می‌رفت ولی
+   جداکننده‌ها روی خط اول جا می‌ماندند. */
 .ch-crumb { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; row-gap: 4px; font-size: 12px; margin-bottom: clamp(24px, 5vw, 56px); }
 .ch-crumb a { color: rgba(255, 255, 255, 0.58); text-decoration: none; transition: color .18s; }
 .ch-crumb a:hover { color: var(--gold, #C7A66A); }
@@ -104,8 +104,8 @@
 .ch-hero-row { display: flex; align-items: flex-end; gap: clamp(16px, 2.6vw, 28px); flex-wrap: wrap; }
 
 .ch-avatar {
-  /* ⚠️ کفِ موبایل ۱۰٪ بزرگ‌تر شد (۹۶ ⟵ ۱۰۶). این اندازه مرجعِ
-     آواتارِ *همه‌ی* نقش‌هاست — باشگاه هم همین را می‌گیرد. */
+  /* ⚠️ کف موبایل ۱۰٪ بزرگ‌تر شد (۹۶ ⟵ ۱۰۶). این اندازه مرجع
+     آواتار *همه‌ی* نقش‌هاست — باشگاه هم همین را می‌گیرد. */
   width: clamp(106px, 15vw, 156px); aspect-ratio: 1; flex-shrink: 0;
   border-radius: 50%; overflow: hidden;
   background: rgba(255, 255, 255, 0.06);
@@ -114,7 +114,7 @@
   display: flex; align-items: center; justify-content: center;
   color: var(--gold, #C7A66A);
 }
-/* آواتارِ بی‌عکس نشانِ نقش می‌گیرد، نه حرفِ اولِ نام. پس‌زمینه‌اش
+/* آواتار بی‌عکس نشان نقش می‌گیرد، نه حرف اول نام. پس‌زمینه‌اش
    کمی روشن‌تر است تا «جای خالی» به‌نظر نرسد. */
 .ch-avatar[data-glyph] {
   background: linear-gradient(150deg, rgba(199,166,106,0.16), rgba(255,255,255,0.04));
@@ -122,8 +122,8 @@
 }
 .ch-avatar[data-glyph] svg { width: 46%; height: 46%; }
 .ch-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
-/* آواتار وقتی عکسِ واقعی دارد دکمه می‌شود — پس باید هر چهار حالتش
-   را داشته باشد. globals.css قاعده‌ی سراسریِ «button { cursor: pointer }»
+/* آواتار وقتی عکس واقعی دارد دکمه می‌شود — پس باید هر چهار حالتش
+   را داشته باشد. globals.css قاعده‌ی سراسری «button { cursor: pointer }»
    ندارد، پس این‌جا صریح نوشته می‌شود. */
 button.ch-avatar { padding: 0; cursor: pointer; transition: border-color .22s, box-shadow .22s; }
 button.ch-avatar:hover { border-color: var(--gold, #C7A66A); box-shadow: 0 14px 46px rgba(0, 0, 0, 0.55); }
@@ -136,14 +136,14 @@ button.ch-avatar:focus-visible { outline: 2px solid var(--gold, #C7A66A); outlin
   font-size: clamp(28px, 5.6vw, 58px); font-weight: 900; line-height: 1.1;
   letter-spacing: -0.02em; margin: 0; color: #fff;
 }
-/* فقط واژه‌ی آخرِ نام به تیک می‌چسبد — نه کلِ نام. اندازه و فاصله‌ی
-   خودِ تیک اینلاین در ProfileHero داده می‌شود، چون VerifiedBadge
-   استایلِ اینلاین می‌گذارد و کلاس در برابرش بی‌اثر است. */
+/* فقط واژه‌ی آخر نام به تیک می‌چسبد — نه کل نام. اندازه و فاصله‌ی
+   خود تیک اینلاین در ProfileHero داده می‌شود، چون VerifiedBadge
+   استایل اینلاین می‌گذارد و کلاس در برابرش بی‌اثر است. */
 .ch-name-tail { white-space: nowrap; }
 
 .ch-chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 12px 0 0; padding: 0; list-style: none; }
-/* چیپِ رشته خنثی است — تنها تأکیدِ رنگیِ هیرو، طلاییِ چیپِ درجه است.
-   ۰.۵۵ آلفا روی این پس‌زمینه‌ی تیره کنتراستِ کافی نمی‌داد؛ متن
+/* چیپ رشته خنثی است — تنها تأکید رنگی هیرو، طلایی چیپ درجه است.
+   ۰.۵۵ آلفا روی این پس‌زمینه‌ی تیره کنتراست کافی نمی‌داد؛ متن
    کدر شده بود. */
 .ch-chip {
   --c: #fff;
@@ -154,8 +154,8 @@ button.ch-avatar:focus-visible { outline: 2px solid var(--gold, #C7A66A); outlin
   border-radius: 999px; padding: 4px 12px;
 }
 .ch-chip-grade { --c: var(--gold, #C7A66A); font-weight: 800; }
-/* جداسازیِ دوجهته: برچسبِ درجه می‌تواند حرفِ لاتین داشته باشد
-   («آسیایی B») و در بندِ راست‌به‌چپ جابه‌جا می‌شود. */
+/* جداسازی دوجهته: برچسب درجه می‌تواند حرف لاتین داشته باشد
+   («آسیایی B») و در بند راست‌به‌چپ جابه‌جا می‌شود. */
 .ch-iso { unicode-bidi: isolate; }
 .ch-dots { display: inline-flex; gap: 3px; }
 .ch-dots i { width: 5px; height: 5px; border-radius: 50%; background: rgba(199, 166, 106, 0.28); }
@@ -171,7 +171,7 @@ button.ch-avatar:focus-visible { outline: 2px solid var(--gold, #C7A66A); outlin
 .ch-cta { display: flex; gap: 8px; flex-wrap: wrap; }
 .ch-btn {
   display: inline-flex; align-items: center; justify-content: center; gap: 7px;
-  /* ۴۴ پیکسل — کفِ اندازه‌ی هدفِ لمسی */
+  /* ۴۴ پیکسل — کف اندازه‌ی هدف لمسی */
   min-height: 44px; padding-inline: 18px; border-radius: 12px;
   font-family: inherit; font-size: 13px; font-weight: 800;
   text-decoration: none; cursor: pointer;
@@ -199,9 +199,9 @@ button.ch-avatar:focus-visible { outline: 2px solid var(--gold, #C7A66A); outlin
   .ch-btn:hover { transform: none; }
 }
 
-/* ── اسکلتِ بارگذاری ──
-   جای یک `div`ِ خالی. سه شکلِ اصلیِ صفحه — نوارِ هیرو، خطوطِ متن،
-   کارتِ کناری — را با همان ابعاد نگه می‌دارد تا وقتی داده رسید
+/* ── اسکلت بارگذاری ──
+   جای یک `div` خالی. سه شکل اصلی صفحه — نوار هیرو، خطوط متن،
+   کارت کناری — را با همان ابعاد نگه می‌دارد تا وقتی داده رسید
    چیزی نپرد (CLS). */
 .ch-skel { min-height: 100vh; background: var(--bg-primary, #F7F7F5); }
 .ch-skel-hero { min-height: clamp(300px, 44vh, 440px); background: #16161A; }
@@ -226,28 +226,28 @@ button.ch-avatar:focus-visible { outline: 2px solid var(--gold, #C7A66A); outlin
 
 .ch-col { display: flex; flex-direction: column; gap: clamp(24px, 4vw, 40px); min-width: 0; }
 main.ch-col > section { max-width: 760px; }
-/* ستونِ کناری روی دسکتاپ همراهِ اسکرول می‌ماند — تماس و مدارک
+/* ستون کناری روی دسکتاپ همراه اسکرول می‌ماند — تماس و مدارک
    نباید با پایین‌رفتن از دست بروند. */
 @media (min-width: 941px) { .ch-rail { position: sticky; top: 84px; } }
 
 .ch-sec-head { display: flex; align-items: baseline; gap: 12px; margin-bottom: 16px; }
 .ch-sec-head h2 { font-size: 19px; font-weight: 900; color: var(--text-primary, #111); margin: 0; letter-spacing: -0.01em; }
-/* ⚠️ #999 روی زمینه‌ی روشن تضادِ ۲.۶۶ می‌داد — زیرِ کفِ ۴.۵. با
-   #6E6E6E می‌شود ۵.۱ و همان حسِ «کم‌رنگ» را می‌دهد. */
+/* ⚠️ #999 روی زمینه‌ی روشن تضاد ۲.۶۶ می‌داد — زیر کف ۴.۵. با
+   #6E6E6E می‌شود ۵.۱ و همان حس «کم‌رنگ» را می‌دهد. */
 .ch-sec-head .en { font-size: 11px; font-weight: 800; letter-spacing: 0.22em; color: var(--text-tertiary, #6E6E6E); direction: ltr; }
-/* ⚠️ `90deg` فیزیکی است و در RTL خط از سرِ اشتباه محو می‌شد: طلایی
-   ته صفحه می‌ماند و کنارِ عنوان — جایی که باید به آن وصل شود —
+/* ⚠️ `90deg` فیزیکی است و در RTL خط از سر اشتباه محو می‌شد: طلایی
+   ته صفحه می‌ماند و کنار عنوان — جایی که باید به آن وصل شود —
    شفاف بود. `to left` منطقی است و در هر دو جهت درست می‌نشیند. */
 .ch-sec-head .rule { flex: 1; height: 1px; background: linear-gradient(to left, rgba(199,166,106,0.42), transparent); }
 
 .ch-card { background: var(--bg-surface, #fff); border: 1px solid #E7E2D6; border-radius: 18px; padding: clamp(18px, 2.6vw, 26px); }
 .ch-empty { font-size: 13px; color: var(--text-tertiary, #6E6E6E); line-height: 2; margin: 0; }
 
-/* معرفی — متنِ خوانا، نه متنِ فشرده */
+/* معرفی — متن خوانا، نه متن فشرده */
 .ch-prose { font-size: 15px; line-height: 2.1; color: #33312D; margin: 0; }
 .ch-prose + .ch-prose { margin-top: 14px; }
 
-/* ═══ خطِ زمانِ درجه ═══ */
+/* ═══ خط زمان درجه ═══ */
 .ch-tl { list-style: none; margin: 0; padding: 0; position: relative; }
 .ch-tl::before {
   content: ''; position: absolute; inset-block: 6px; inset-inline-start: 5px; width: 1px;
@@ -271,7 +271,7 @@ main.ch-col > section { max-width: 760px; }
   border-radius: 999px; padding: 2px 9px;
 }
 
-/* ═══ نشانیِ عمومی ═══ */
+/* ═══ نشانی عمومی ═══ */
 .ch-url { display: flex; align-items: center; gap: 8px; }
 .ch-url code {
   flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
@@ -312,10 +312,10 @@ main.ch-col > section { max-width: 760px; }
   border-radius: 999px; padding: 1px 6px; font-variant-numeric: tabular-nums;
 }
 
-/* ⚠️ «تصویرِ نخست دو برابر» برداشته شد. با خانه‌ی ۲۳۲ پیکسلی منطق
+/* ⚠️ «تصویر نخست دو برابر» برداشته شد. با خانه‌ی ۲۳۲ پیکسلی منطق
    داشت؛ با خانه‌ی ۱۱۶ چیزی به چشم اضافه نمی‌کرد و چون خانه‌ی ۲×۲ در
    شبکه‌ی auto-fill جا را ناهموار می‌کند، ته ردیف حفره می‌ماند.
-   شبکه‌ی یکنواخت این‌جا هم تمیزتر است هم قابلِ پیش‌بینی. */
+   شبکه‌ی یکنواخت این‌جا هم تمیزتر است هم قابل پیش‌بینی. */
 .ch-gal-grid {
   display: grid; gap: 10px; justify-content: start;
   grid-template-columns: repeat(auto-fill, minmax(88px, 116px));
@@ -330,9 +330,9 @@ main.ch-col > section { max-width: 760px; }
 .ch-gal-cell:hover { box-shadow: 0 14px 34px rgba(28,27,23,0.18); }
 .ch-gal-cell:hover img { transform: scale(1.06); }
 .ch-gal-cell:focus-visible { outline: 2px solid var(--gold-deep, #8F6531); outline-offset: 3px; }
-/* ⚠️ با خانه‌ی ۱۱۶ پیکسلی، نوارِ عنوان روی هاور نصفِ تصویر را
-   می‌پوشاند و متنش زیرِ کفِ خوانایی می‌رفت. عنوان از بین نرفته —
-   `alt` تصویر و عنوانِ داخلِ نمای تمام‌صفحه همان را دارند. */
+/* ⚠️ با خانه‌ی ۱۱۶ پیکسلی، نوار عنوان روی هاور نصف تصویر را
+   می‌پوشاند و متنش زیر کف خوانایی می‌رفت. عنوان از بین نرفته —
+   `alt` تصویر و عنوان داخل نمای تمام‌صفحه همان را دارند. */
 .ch-gal-cap { display: none; }
 
 .ch-vid-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 172px)); gap: 10px; justify-content: start; }
@@ -354,16 +354,16 @@ main.ch-col > section { max-width: 760px; }
   .ch-gal-cell:hover img { transform: none; }
 }
 
-/* پیامِ وضعیتِ کپی.
+/* پیام وضعیت کپی.
    ⚠️ اول «empty:‌ display:none» نوشته شده بود و همان چیزی را که قرار
-   بود درست کند خنثی می‌کرد: ناحیه‌ی aria-live که در لحظه‌ی تغییرِ
+   بود درست کند خنثی می‌کرد: ناحیه‌ی aria-live که در لحظه‌ی تغییر
    محتوا پنهان باشد، مطمئن اعلام نمی‌شود. عنصر می‌ماند و فقط
-   ارتفاعِ یک خط رزرو می‌شود تا چیزی هم جابه‌جا نشود. */
+   ارتفاع یک خط رزرو می‌شود تا چیزی هم جابه‌جا نشود. */
 .ch-sr-live { margin: 8px 0 0; font-size: 11px; line-height: 1.5; min-height: 1.5em; color: var(--text-tertiary, #6E6E6E); }
 
 
-/* ── آدرسِ اختصاصی روی هیرو ──
-   همان نشانیِ ستونِ کناری، این‌بار جایی که بازدیدکننده اول نگاه
+/* ── آدرس اختصاصی روی هیرو ──
+   همان نشانی ستون کناری، این‌بار جایی که بازدیدکننده اول نگاه
    می‌کند. دکمه است چون کپی می‌کند، پس هر چهار حالت را دارد. */
 .ch-addr {
   display: inline-flex; align-items: center; gap: 7px;
@@ -387,7 +387,7 @@ main.ch-col > section { max-width: 760px; }
 @media (prefers-reduced-motion: reduce) { .ch-addr { transition: none; } }
 
 /* ═══ آلبوم‌ها ═══
-   آلبوم یک نامِ روی رسانه است، پس این‌ها فقط نمای گروه‌بندی‌اند و
+   آلبوم یک نام روی رسانه است، پس این‌ها فقط نمای گروه‌بندی‌اند و
    هیچ حالتی برای خودشان ذخیره نمی‌کنند. */
 .ch-alb-grid {
   display: grid; gap: 10px; justify-content: start;
@@ -436,24 +436,24 @@ main.ch-col > section { max-width: 760px; }
 
 /* ── همه‌ی خانه‌ها یک اندازه ──
    ⚠️ سه تب سه شبکه‌ی متفاوت داشتند: عکس ۱۱۶ مربع، ویدیو ۱۷۲ در
-   نسبتِ ۱۶:۹، آلبوم ۲۰۰. کاربر خواست همه — عکس، ویدیو، آلبوم و خودِ
-   خانه‌ی «+» — یک اندازه باشند: همان اندازه‌ی تبِ تصاویر. حالا هر سه
+   نسبت ۱۶:۹، آلبوم ۲۰۰. کاربر خواست همه — عکس، ویدیو، آلبوم و خود
+   خانه‌ی «+» — یک اندازه باشند: همان اندازه‌ی تب تصاویر. حالا هر سه
    از `.ch-gal-grid` استفاده می‌کنند و این‌ها فقط محتوا را در همان
-   قابِ مربع جا می‌دهند. */
-/* `.ch-vid-sq` رفت: کارتِ ویدیو دیگر داخلِ خانه پخش نمی‌شود و
-   خانه‌ی مربعِ خودش را دارد (`.ch-vid-tile`). */
+   قاب مربع جا می‌دهند. */
+/* `.ch-vid-sq` رفت: کارت ویدیو دیگر داخل خانه پخش نمی‌شود و
+   خانه‌ی مربع خودش را دارد (`.ch-vid-tile`). */
 
-/* کارتِ آلبوم داخلِ همان شبکه‌ی مربع */
+/* کارت آلبوم داخل همان شبکه‌ی مربع */
 .ch-gal-grid > .ch-alb { aspect-ratio: 1; gap: 6px; padding: 6px; }
 .ch-gal-grid > .ch-alb .ch-alb-cover { flex: 1; aspect-ratio: auto; }
 .ch-gal-grid > .ch-alb .ch-alb-name { font-size: 11.5px; }
 .ch-gal-grid > .ch-alb .ch-alb-n { font-size: 10px; }
 
 /* ── نمای تمام‌صفحه‌ی ویدیو ──
-   ⚠️ ویدیو پیش از این داخلِ خانه‌ی ۱۱۶ پیکسلی پخش می‌شد و نوارِ
-   کنترل نصفِ مربع را می‌گرفت. */
-/* ⚠️ z-index باید از نوارِ ناوبری (۲۰۰) بالاتر باشد. با ۱۲۰، نوار
-   روی «تمام‌صفحه» می‌نشست و دقیقاً همان‌جا بود که دکمه‌ی بستن است. */
+   ⚠️ ویدیو پیش از این داخل خانه‌ی ۱۱۶ پیکسلی پخش می‌شد و نوار
+   کنترل نصف مربع را می‌گرفت. */
+/* ⚠️ z-index باید از نوار ناوبری (۲۰۰) بالاتر باشد. با ۱۲۰، نوار
+   روی «تمام‌صفحه» می‌نشست و دقیقا همان‌جا بود که دکمه‌ی بستن است. */
 .pvv-back {
   position: fixed; inset: 0; z-index: 210;
   background: rgba(12, 11, 10, 0.92);
@@ -482,7 +482,7 @@ main.ch-col > section { max-width: 760px; }
 .pvv-title { margin: 0; color: rgba(255, 255, 255, 0.86); font-size: 13px; text-align: center; }
 
 /* ── خانه‌ی ویدیو در شبکه ──
-   فقط پوستر و نشانِ پخش؛ عنوان روی خانه نمی‌آید (در ۱۱۶ پیکسل
+   فقط پوستر و نشان پخش؛ عنوان روی خانه نمی‌آید (در ۱۱۶ پیکسل
    ناخواناست) و در `aria-label` و نمای تمام‌صفحه هست. */
 .ch-vid-tile {
   position: relative; padding: 0; border: none; cursor: pointer;
@@ -505,14 +505,14 @@ main.ch-col > section { max-width: 760px; }
   padding: 1px 5px; border-radius: 5px; pointer-events: none;
 }
 
-/* (خانه‌ی «+» همه‌جا `.ch-gal-cell` است؛ قاعده‌ی مخصوصِ `.ch-alb`
+/* (خانه‌ی «+» همه‌جا `.ch-gal-cell` است؛ قاعده‌ی مخصوص `.ch-alb`
    که این‌جا بود هیچ‌وقت به عنصری نمی‌خورد و برداشته شد.) */
 
-/* ── قابِ نقطه‌چینِ خانه‌ی «+» ──
+/* ── قاب نقطه‌چین خانه‌ی «+» ──
    ⚠️ `.ch-add-tile` در `globals.css` نقطه‌چین تعریف شده بود ولی دیده
    نمی‌شد: `.ch-gal-cell` این‌جا `border: none` دارد، هم‌وزن است و
-   دیرتر بارگذاری می‌شود، پس برنده می‌شد. با دو کلاسِ کنارِ هم وزن
-   بالاتر می‌رود و قاب سرِ جایش می‌ماند. */
+   دیرتر بارگذاری می‌شود، پس برنده می‌شد. با دو کلاس کنار هم وزن
+   بالاتر می‌رود و قاب سر جایش می‌ماند. */
 .ch-gal-cell.ch-add-tile {
   border: 1.5px dashed rgba(199, 166, 106, 0.5);
   background: var(--gold-dim, rgba(199, 166, 106, 0.10));

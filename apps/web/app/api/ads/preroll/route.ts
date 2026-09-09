@@ -4,16 +4,16 @@ import { clientIp } from '@/lib/finance/db'
 import { pickPreroll, trackAdEvent, viewerHash, type AdEvent } from '@/lib/ads/preroll'
 
 /* ─────────────────────────────────────────────────────────────
-   تبلیغِ پیش‌پخش — انتخاب و شمارش.
+   تبلیغ پیش‌پخش — انتخاب و شمارش.
 
    ── چرا شناسه‌ی بیننده از کلاینت گرفته نمی‌شود ──
-   هرچه کلاینت بفرستد قابلِ عوض‌کردن است؛ با یک شناسه‌ی تازه در هر
-   درخواست، هم سقفِ فراوانی بی‌معنی می‌شود هم ضدِجعل. این‌جا از IP و
+   هرچه کلاینت بفرستد قابل عوض‌کردن است؛ با یک شناسه‌ی تازه در هر
+   درخواست، هم سقف فراوانی بی‌معنی می‌شود هم ضدجعل. این‌جا از IP و
    مرورگر ساخته می‌شود.
 
    ── چرا خطا هم `null` برمی‌گرداند ──
-   نبودِ تبلیغ حالتِ عادی است، نه استثنا. پلیر نباید برای این منتظر
-   بماند یا بشکند: هر پاسخِ غیرِ ویدیو یعنی «مستقیم برو به ویدیوی
+   نبود تبلیغ حالت عادی است، نه استثنا. پلیر نباید برای این منتظر
+   بماند یا بشکند: هر پاسخ غیر ویدیو یعنی «مستقیم برو به ویدیوی
    اصلی».
    ───────────────────────────────────────────────────────────── */
 
@@ -25,7 +25,7 @@ export async function GET(req: NextRequest) {
   try {
     const ad = await pickPreroll(viewerOf(req))
     return NextResponse.json({ ad }, {
-      /* هرگز کش نشود: انتخاب به بیننده و سقفِ او بستگی دارد */
+      /* هرگز کش نشود: انتخاب به بیننده و سقف او بستگی دارد */
       headers: { 'Cache-Control': 'no-store' },
     })
   } catch (e) {
@@ -36,7 +36,7 @@ export async function GET(req: NextRequest) {
 
 const EVENTS = new Set<AdEvent>(['impression', 'complete', 'skip', 'click'])
 
-/* POST { campaignId, event } → ثبتِ رویداد */
+/* POST { campaignId, event } → ثبت رویداد */
 export async function POST(req: NextRequest) {
   const b = await req.json().catch(() => ({})) as Record<string, unknown>
   const campaignId = String(b.campaignId ?? '')

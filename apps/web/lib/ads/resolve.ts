@@ -18,21 +18,21 @@ export interface EntitySnapshot {
   title: string
   image: string
   subtitle: string          // برند / شهر / تخصص — بسته به نوع
-  /** مدلِ محصول — جدا از برند، برای حذفِ تکرار با عنوان */
+  /** مدل محصول — جدا از برند، برای حذف تکرار با عنوان */
   model?: string
   href: string
-  price?: number            // فقط محصول — قیمتِ پرداختی
-  oldPrice?: number         // قیمتِ خط‌خورده
+  price?: number            // فقط محصول — قیمت پرداختی
+  oldPrice?: number         // قیمت خط‌خورده
   discountPercent?: number
-  /** آگهیِ توافقی قیمتِ قابلِ نمایش ندارد؛ کارت باید «توافقی» بنویسد
+  /** آگهی توافقی قیمت قابل نمایش ندارد؛ کارت باید «توافقی» بنویسد
       نه «۰ تومان». */
   negotiable?: boolean
-  /** وضعیتِ کالا (نو/کارکرده) — کارت آن را کنارِ شهر نشان می‌دهد */
+  /** وضعیت کالا (نو/کارکرده) — کارت آن را کنار شهر نشان می‌دهد */
   condition?: string
   city?: string
   badge?: string | null
-  /** تیکِ آبی. کارتِ تبلیغاتی هم باید همان تیکی را نشان دهد که کارتِ
-   *  عادی نشان می‌دهد — وگرنه باشگاهِ تأییدشده با تبلیغ‌شدن تیکش را
+  /** تیک آبی. کارت تبلیغاتی هم باید همان تیکی را نشان دهد که کارت
+   *  عادی نشان می‌دهد — وگرنه باشگاه تأییدشده با تبلیغ‌شدن تیکش را
    *  از دست می‌داد. */
   verified?: boolean
   /** آمار واقعی موجودیت — نبودنش یعنی «نداریم»، نه صفر */
@@ -54,10 +54,10 @@ async function resolveProducts(rawRefs: string[]): Promise<Map<string, EntitySna
     .in('id', refs)
   for (const r of (data as Record<string, unknown>[] ?? [])) {
     if (s(r.status) !== 'active') continue
-    /* ── همان قراردادِ بقیه‌ی سایت ──
-       `price` قیمتِ فهرست است و `discountPrice` پرداختی. تا امروز
-       این‌جا `price` مستقیم به کارت می‌رفت و قیمتِ خط‌خورده از روی
-       درصدِ گِردشده بازسازی می‌شد — عددی که هیچ‌وقت دقیق درنمی‌آمد. */
+    /* ── همان قرارداد بقیه‌ی سایت ──
+       `price` قیمت فهرست است و `discountPrice` پرداختی. تا امروز
+       این‌جا `price` مستقیم به کارت می‌رفت و قیمت خط‌خورده از روی
+       درصد گردشده بازسازی می‌شد — عددی که هیچ‌وقت دقیق درنمی‌آمد. */
     const listed = n(r.price)
     const paid = n(r.discountPrice)
     const hasDisc = paid > 0 && paid < listed
@@ -69,7 +69,7 @@ async function resolveProducts(rawRefs: string[]): Promise<Map<string, EntitySna
       title: s(r.title, 'محصول'),
       image: imgs[0] || '/images/shop/cue_billiard_2.webp',
       /* ── برند **و مدل** ──
-         کارتِ سکشنِ «بیلیارد بازار» از همین اسنپ‌شات ساخته می‌شود و تا
+         کارت سکشن «بیلیارد بازار» از همین اسنپ‌شات ساخته می‌شود و تا
          امروز فقط برند را حمل می‌کرد؛ «Hunter III» هیچ‌جای صفحه‌ی اصلی
          دیده نمی‌شد. `productTitleParts` تکرار با عنوان را خودش حذف
          می‌کند، پس هر دو خام می‌روند. */
@@ -124,8 +124,8 @@ async function resolveSellers(refs: string[]): Promise<Map<string, EntitySnapsho
     out.set(s(r.slug), {
       entityType: 'seller', ref: s(r.slug),
       title: s(d.title, 'فروشگاه'),
-      /* خالی می‌ماند تا کارت پوسترِ پیش‌فرضِ خودش را بسازد. نشانیِ
-         قبلی (`store1.jpg`) اصلاً روی دیسک نبود ⇒ ۴۰۴ ⇒ کارت
+      /* خالی می‌ماند تا کارت پوستر پیش‌فرض خودش را بسازد. نشانی
+         قبلی (`store1.jpg`) اصلا روی دیسک نبود ⇒ ۴۰۴ ⇒ کارت
          بی‌عکس. */
       image: s(d.logo) || (Array.isArray(d.banners) ? s((d.banners as string[])[0]) : ''),
       subtitle: s(d.city),
@@ -141,14 +141,14 @@ async function resolveSellers(refs: string[]): Promise<Map<string, EntitySnapsho
 /** یک دسته ارجاع هم‌نوع → اسنپ‌شات‌ها، با حفظ ترتیب ورودی */
 /* ── محتوای اسپانسری ──
 
-   «مسابقهٔ اسپانسری» و «ویدیوی اسپانسری» نوعِ تازه‌ای از تبلیغ نیستند؛
-   همان جایگاهِ موجودیتی‌اند با جدولِ منبعِ متفاوت. به همین دلیل به‌جای
-   ساختنِ `contentKind` تازه — که کلِ مسیرِ سرو، اعتبارسنجی و پنل ادمین
+   «مسابقهٔ اسپانسری» و «ویدیوی اسپانسری» نوع تازه‌ای از تبلیغ نیستند؛
+   همان جایگاه موجودیتی‌اند با جدول منبع متفاوت. به همین دلیل به‌جای
+   ساختن `contentKind` تازه — که کل مسیر سرو، اعتبارسنجی و پنل ادمین
    را تکرار می‌کرد — فقط دو resolver اضافه شد.
 
    هر دو همان قاعده‌ی بقیه را دارند: چیزی که منتشر نشده یا خصوصی است
    هرگز به‌عنوان محتوای اسپانسری سرو نمی‌شود، حتی اگر ادمین کمپینش را
-   فعال کرده باشد. تبلیغ نباید درِ پشتیِ دیدنِ محتوای منتشرنشده باشد. */
+   فعال کرده باشد. تبلیغ نباید در پشتی دیدن محتوای منتشرنشده باشد. */
 async function resolveTournaments(rawRefs: string[]): Promise<Map<string, EntitySnapshot>> {
   const out = new Map<string, EntitySnapshot>()
   const refs = rawRefs.filter(x => UUID.test(x))
@@ -167,7 +167,7 @@ async function resolveTournaments(rawRefs: string[]): Promise<Map<string, Entity
       subtitle: s(r.city),
       href: `/tournaments/${s(r.slug) || s(r.id)}`,
       city: s(r.city),
-      /* ورودیِ رایگان خودش یک مزیتِ گفتنی است */
+      /* ورودی رایگان خودش یک مزیت گفتنی است */
       badge: n(r.entry_fee) === 0 ? 'ورود رایگان' : null,
     })
   }

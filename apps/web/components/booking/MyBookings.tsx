@@ -69,16 +69,16 @@ export default function MyBookings() {
   )
 
   return (
-    /* ── چرا اسکرولِ داخلی ──
-       فهرست هرچه بلندتر می‌شد، کلِ داشبورد را پایین می‌راند: کاربری
+    /* ── چرا اسکرول داخلی ──
+       فهرست هرچه بلندتر می‌شد، کل داشبورد را پایین می‌راند: کاربری
        با ۱۲ رزرو، برای رسیدن به بخش‌های بعدی باید از دوازده کارت رد
-       می‌شد. حالا تا چهار کارت کاملاً باز است و بعد از آن خودِ باکس
-       اسکرول می‌گیرد. حد بر حسبِ ارتفاع است نه تعداد، چون کارت‌ها
-       ارتفاعِ یکسان ندارند. */
+       می‌شد. حالا تا چهار کارت کاملا باز است و بعد از آن خود باکس
+       اسکرول می‌گیرد. حد بر حسب ارتفاع است نه تعداد، چون کارت‌ها
+       ارتفاع یکسان ندارند. */
     <div style={{
       display: 'flex', flexDirection: 'column', gap: 10,
       maxHeight: 'min(60vh, 420px)', overflowY: 'auto',
-      /* بدونِ این، کارتِ آخر دقیقاً روی لبه می‌چسبد و به‌نظر می‌رسد
+      /* بدون این، کارت آخر دقیقا روی لبه می‌چسبد و به‌نظر می‌رسد
          فهرست تمام شده */
       paddingBottom: 2, paddingInlineEnd: 2,
       scrollbarWidth: 'thin',
@@ -106,7 +106,7 @@ export default function MyBookings() {
                   <X size={12} /> لغو رزرو
                 </button>
               ) : b.cancelBlockedReason && b.booking_status !== 'CANCELLED' ? (
-                /* دلیل نوشته می‌شود؛ نبود دکمه به‌تنهایی یعنی «اصلاً
+                /* دلیل نوشته می‌شود؛ نبود دکمه به‌تنهایی یعنی «اصلا
                    امکان لغو نیست» که پیام درستی نبود. */
                 <div style={{ marginTop: 8, fontSize: 11, color: MUT, display: 'flex', alignItems: 'center', gap: 4 }}>
                   <X size={11} style={{ flexShrink: 0 }} /> {b.cancelBlockedReason}
@@ -125,13 +125,13 @@ export default function MyBookings() {
       {confirm && (
         <div onClick={() => !busy && setConfirm(null)}
           style={{ position: 'fixed', inset: 0, zIndex: 3000, background: 'rgba(20,18,14,0.5)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 18 }}>
-          {/* ── چرا این پنجره ارتفاع و اسکرولِ خودش را دارد ──
-              با بازشدنِ «قوانین لغو رزرو» بلندتر از صفحه‌ی گوشی
+          {/* ── چرا این پنجره ارتفاع و اسکرول خودش را دارد ──
+              با بازشدن «قوانین لغو رزرو» بلندتر از صفحه‌ی گوشی
               می‌شد و چون پوشش وسط‌چین است، از **بالا و پایین** بریده
               می‌شد: نه عنوان دیده می‌شد نه دکمه‌ی تأیید. یعنی کاربر
               پنجره‌ای می‌دید که نه می‌شد خواندش نه بستنش.
 
-              `dvh` برای نوارِ آدرسِ موبایل است که ارتفاعِ واقعی را
+              `dvh` برای نوار آدرس موبایل است که ارتفاع واقعی را
               کم می‌کند؛ `vh` قبلش برای مرورگرهای قدیمی می‌ماند. */}
           <div onClick={e => e.stopPropagation()} dir="rtl" className="bh-cancel-card"
             style={{ width: '100%', maxWidth: 380, background: '#fff', borderRadius: 20, border: `1px solid ${LINE}`, padding: 22, textAlign: 'center', fontFamily: 'var(--font-base)' }}>
@@ -183,7 +183,7 @@ export default function MyBookings() {
               max-height: 86vh;
               max-height: 86dvh;
               overflow-y: auto;
-              /* اسکرولِ داخلِ پنجره نباید صفحه‌ی زیرین را هم بلغزاند */
+              /* اسکرول داخل پنجره نباید صفحه‌ی زیرین را هم بلغزاند */
               overscroll-behavior: contain;
               -webkit-overflow-scrolling: touch;
             }

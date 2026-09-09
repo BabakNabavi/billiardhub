@@ -53,7 +53,7 @@ export function jalaliToGregorian(jy: number, jm: number, jd: number): [number, 
 }
 
 /** «۸ مرداد ۱۴۰۵» از یک تاریخ ISO یا Date */
-/* همه‌ی تاریخ‌ها با ساعتِ تهران خوانده می‌شوند، نه ساعتِ دستگاه */
+/* همه‌ی تاریخ‌ها با ساعت تهران خوانده می‌شوند، نه ساعت دستگاه */
 const TEHRAN = 'Asia/Tehran'
 
 export function faDate(input: string | Date | null | undefined): string {
@@ -66,15 +66,15 @@ export function faDate(input: string | Date | null | undefined): string {
 
 /* ── تاریخ تولد ──
    دو قالب در دیتابیس هست و هر دو معتبرند:
-     «۱۳۶۳/۶/۲»   — از تقویمِ سایت، همان شمسی
-     «1984-08-24» — میلادی، از مسیرهای قدیمی و از استعلامِ ثبت‌احوال
+     «۱۳۶۳/۶/۲»   — از تقویم سایت، همان شمسی
+     «1984-08-24» — میلادی، از مسیرهای قدیمی و از استعلام ثبت‌احوال
 
    `faDate` دومی را درست می‌خواند ولی اولی را هم میلادی فرض می‌کند و
-   نتیجه‌اش بی‌معنی می‌شود (سالِ ۱۳۶۳ میلادی!). این تابع اول تشخیص
+   نتیجه‌اش بی‌معنی می‌شود (سال ۱۳۶۳ میلادی!). این تابع اول تشخیص
    می‌دهد کدام است.
 
-   مرزِ ۱۷۰۰ دلخواه نیست: سالِ شمسی هرگز به آن نمی‌رسد و سالِ میلادیِ
-   یک تاریخِ تولد هرگز کمتر از آن نیست. */
+   مرز ۱۷۰۰ دلخواه نیست: سال شمسی هرگز به آن نمی‌رسد و سال میلادی
+   یک تاریخ تولد هرگز کمتر از آن نیست. */
 export function faBirthDate(input: string | null | undefined): string {
   const s = String(input ?? '').trim()
   if (!s) return '—'
@@ -107,9 +107,9 @@ export function faDateTime(input: string | Date | null | undefined): string {
   if (!input) return '—'
   const d = input instanceof Date ? input : new Date(input)
   if (isNaN(d.getTime())) return '—'
-  /* ⚠️ `getHours()` ساعتِ *دستگاهِ بیننده* را می‌دهد. برای یک قرارِ
-     مشترک این یعنی مربی و شاگردی که در دو منطقه‌اند دو ساعتِ متفاوت
-     می‌بینند و هر دو هم فکر می‌کنند درست است. مخاطبِ این سایت ایران
+  /* ⚠️ `getHours()` ساعت *دستگاه بیننده* را می‌دهد. برای یک قرار
+     مشترک این یعنی مربی و شاگردی که در دو منطقه‌اند دو ساعت متفاوت
+     می‌بینند و هر دو هم فکر می‌کنند درست است. مخاطب این سایت ایران
      است، پس ساعت همیشه تهران خوانده می‌شود. */
   const hm = new Intl.DateTimeFormat('en-US', {
     timeZone: TEHRAN, hour: '2-digit', minute: '2-digit', hour12: false,
@@ -117,10 +117,10 @@ export function faDateTime(input: string | Date | null | undefined): string {
   return `${faDate(d)} — ساعت ${toFaDigits(hm)}`
 }
 
-/** رشته‌ی `datetime-local` ⟵ لحظه‌ی واقعی، با فرضِ ساعتِ تهران.
+/** رشته‌ی `datetime-local` ⟵ لحظه‌ی واقعی، با فرض ساعت تهران.
  *
  *  ⚠️ `new Date('2026-08-20T18:00')` را مرورگر با منطقه‌ی *خودش*
- *  تفسیر می‌کند. ایران از ۲۰۲۲ ساعتِ تابستانی ندارد، پس `+03:30`
+ *  تفسیر می‌کند. ایران از ۲۰۲۲ ساعت تابستانی ندارد، پس `+03:30`
  *  ثابت است و همین‌جا صریح نوشته می‌شود. */
 export function tehranInstant(local: string): Date {
   return new Date(`${local.length === 16 ? local + ':00' : local}+03:30`)

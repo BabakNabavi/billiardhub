@@ -74,6 +74,50 @@ CREATE INDEX IF NOT EXISTS video_comments_video_idx
 CREATE INDEX IF NOT EXISTS video_comments_parent_idx ON public.video_comments (parent_id)
   WHERE parent_id IS NOT NULL;
 
+-- ═══════════ شمارنده روی خود videos ═══════════
+-- ⚠️ کارت ویدیو باید تعداد پسند و دیدگاه را نشان بدهد. بدون این
+-- ستون‌ها هر شبکه بیست‌کارتی چهل شمارش جداگانه لازم داشت. تریگر
+-- نگهشان می‌دارد تا هیچ‌وقت از واقعیت جدا نیفتند.
+--
+-- صفر این‌جا دروغ نیست: ویدیویی که کسی نپسندیده واقعا صفر پسند
+-- دارد. رابط هم فقط بالای صفر را نشان می‌دهد.
+ALTER TABLE public.videos
+  ADD COLUMN IF NOT EXISTS likes_count    integer NOT NULL DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS comments_count integer NOT NULL DEFAULT 0;
+
+CREATE OR REPLACE FUNCTION public.bh_video_likes_refresh()
+RETURNS trigger
+LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
+DECLARE v uuid;
+BEGIN
+  v := COALESCE(NEW.video_id, OLD.video_id);
+  UPDATE videos SET likes_count = (SELECT count(*)::int FROM video_likes WHERE video_id = v)
+   WHERE id = v;
+  RETURN NULL;
+END $$;
+
+DROP TRIGGER IF EXISTS bh_video_likes_aiud ON public.video_likes;
+CREATE TRIGGER bh_video_likes_aiud
+AFTER INSERT OR DELETE ON public.video_likes
+FOR EACH ROW EXECUTE FUNCTION public.bh_video_likes_refresh();
+
+CREATE OR REPLACE FUNCTION public.bh_video_comments_refresh()
+RETURNS trigger
+LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
+DECLARE v uuid;
+BEGIN
+  v := COALESCE(NEW.video_id, OLD.video_id);
+  UPDATE videos SET comments_count =
+    (SELECT count(*)::int FROM video_comments WHERE video_id = v AND is_hidden = false)
+   WHERE id = v;
+  RETURN NULL;
+END $$;
+
+DROP TRIGGER IF EXISTS bh_video_comments_aiud ON public.video_comments;
+CREATE TRIGGER bh_video_comments_aiud
+AFTER INSERT OR UPDATE OF is_hidden OR DELETE ON public.video_comments
+FOR EACH ROW EXECUTE FUNCTION public.bh_video_comments_refresh();
+
 -- ═══════════ امنیت ═══════════
 -- RLS روشن و بدونِ سیاست ⇒ هیچ نقشِ عادی‌ای ردیفی نمی‌بیند؛ REVOKE هم
 -- لایه‌ی دوم است. کلیدِ سرویس از هر دو عبور می‌کند و تنها راهِ

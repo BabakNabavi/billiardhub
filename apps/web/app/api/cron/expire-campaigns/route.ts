@@ -35,7 +35,7 @@ export async function GET(req: NextRequest) {
     audit({ actorRole: 'system', action: 'CAMPAIGNS_EXPIRED', newValue: r });
   }
 
-  /* فاز ۳ — بک‌فیل اشخاص: عمداً این‌جا (روی سرور پروداکشن) اجرا می‌شود
+  /* فاز ۳ — بک‌فیل اشخاص: عمدا این‌جا (روی سرور پروداکشن) اجرا می‌شود
      تا هش کد ملی با secret همین محیط ساخته شود، نه ماشین توسعه. */
   const persons = await backfillPersons();
   if (persons.linked > 0) {

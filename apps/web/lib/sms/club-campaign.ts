@@ -1,8 +1,8 @@
 /* ─────────────────────────────────────────────────────────────
-   پیامکِ باشگاه به اعضا — منطقِ سمتِ سرور.
+   پیامک باشگاه به اعضا — منطق سمت سرور.
 
-   یک جا نگه داشته می‌شود چون سه مسیر به آن نیاز دارند: برآوردِ
-   هزینه، ساختِ کمپین، و ارسال پس از پرداخت. اگر قیمت در دو جا
+   یک جا نگه داشته می‌شود چون سه مسیر به آن نیاز دارند: برآورد
+   هزینه، ساخت کمپین، و ارسال پس از پرداخت. اگر قیمت در دو جا
    حساب شود، روزی یکی عوض می‌شود و کاربر مبلغی غیر از آنچه دیده
    پرداخت می‌کند.
    ───────────────────────────────────────────────────────────── */
@@ -29,8 +29,8 @@ export async function pricing(): Promise<ClubSmsPricing> {
     return {
       unitPrice: num(v.unitPrice, FALLBACK.unitPrice),
       setupFee: num(v.setupFee, FALLBACK.setupFee),
-      /* نبودِ کلید یعنی خاموش — یک تنظیمِ ناقص نباید ناخواسته
-         امکانِ ارسالِ انبوه را باز کند. */
+      /* نبود کلید یعنی خاموش — یک تنظیم ناقص نباید ناخواسته
+         امکان ارسال انبوه را باز کند. */
       enabled: v.enabled === true,
     }
   } catch { return FALLBACK }
@@ -39,13 +39,13 @@ export async function pricing(): Promise<ClubSmsPricing> {
 export interface Recipient { userId: string; mobile: string; name: string }
 
 /* ── گیرنده‌ها ──
-   شماره و نام از پروفایلِ خودِ کاربر خوانده می‌شود، نه از چیزی که
+   شماره و نام از پروفایل خود کاربر خوانده می‌شود، نه از چیزی که
    باشگاه‌دار وارد کرده.
 
    سه فیلتر عمدی‌اند:
      • `sms_opt_out` — عضوی که نه گفته
      • شماره‌ی نامعتبر — ردیف‌های قدیمی یا ناقص
-     • خودِ مالک — پیامکِ خودش به خودش، هم بی‌معنی هم پولی */
+     • خود مالک — پیامک خودش به خودش، هم بی‌معنی هم پولی */
 export async function recipientsOf(clubId: string, ownerId: string): Promise<Recipient[]> {
   const { data: rows } = await sb().from('club_members')
     .select('user_id').eq('club_id', clubId).eq('sms_opt_out', false)
@@ -62,7 +62,7 @@ export async function recipientsOf(clubId: string, ownerId: string): Promise<Rec
       .replace(/[^0-9]/g, '')
     if (!/^09\d{9}$/.test(mobile)) continue
     const name = `${u.firstName ?? ''} ${u.lastName ?? ''}`.trim()
-    /* نامِ خالی یعنی «{0} عزیز» می‌شود « عزیز» — بی‌آبرو ولی نه خطا.
+    /* نام خالی یعنی «{0} عزیز» می‌شود « عزیز» — بی‌آبرو ولی نه خطا.
        «هم‌باشگاهی» جای خالی را پر می‌کند و پیامک همچنان معنا دارد. */
     out.push({ userId: u.id, mobile, name: name || 'هم‌باشگاهی' })
   }
@@ -70,10 +70,10 @@ export async function recipientsOf(clubId: string, ownerId: string): Promise<Rec
 }
 
 /* ── چرا «هیچ عضوی پیدا نشد» کافی نیست ──
-   این جمله شبیهِ خرابی است، در حالی که سه حالتِ کاملاً متفاوت به
-   آن می‌رسند و کارِ باشگاه‌دار در هر سه فرق می‌کند:
+   این جمله شبیه خرابی است، در حالی که سه حالت کاملا متفاوت به
+   آن می‌رسند و کار باشگاه‌دار در هر سه فرق می‌کند:
 
-     • هنوز کسی عضو نشده        ⇒ باید نشانیِ باشگاهش را پخش کند
+     • هنوز کسی عضو نشده        ⇒ باید نشانی باشگاهش را پخش کند
      • تنها عضو خودش است        ⇒ همه‌چیز درست است، فقط کسی نیست
      • همه پیامک را خاموش کرده  ⇒ کاری از دستش برنمی‌آید
 
@@ -93,7 +93,7 @@ async function noRecipientReason(clubId: string, ownerId: string): Promise<strin
   if (others.every(r => r.sms_opt_out === true)) {
     return 'همه‌ی اعضا دریافت پیامک باشگاه را خاموش کرده‌اند'
   }
-  return 'هیچ عضوی با شماره‌ی موبایلِ معتبر پیدا نشد'
+  return 'هیچ عضوی با شماره‌ی موبایل معتبر پیدا نشد'
 }
 
 export interface Quote {
@@ -101,13 +101,13 @@ export interface Quote {
   unitPrice: number
   setupFee: number
   total: number
-  /* بیشترین تعداد بخش در میانِ گیرنده‌ها — طولِ نام فرق می‌کند، پس
+  /* بیشترین تعداد بخش در میان گیرنده‌ها — طول نام فرق می‌کند، پس
      یک عدد برای همه درست نیست. */
   maxParts: number
   sample: string
 }
 
-/** برآوردِ هزینه — همان محاسبه‌ای که هنگام ساختِ کمپین هم اجرا می‌شود */
+/** برآورد هزینه — همان محاسبه‌ای که هنگام ساخت کمپین هم اجرا می‌شود */
 export async function quote(
   clubId: string, ownerId: string, clubName: string, templateKey: string, args: string[],
 ): Promise<Quote | { error: string }> {
@@ -115,12 +115,12 @@ export async function quote(
   if (!tpl) return { error: 'متن انتخابی معتبر نیست' }
 
   const p = await pricing()
-  if (!p.enabled) return { error: 'ارسال پیامک به اعضا فعلاً غیرفعال است' }
+  if (!p.enabled) return { error: 'ارسال پیامک به اعضا فعلا غیرفعال است' }
 
   const list = await recipientsOf(clubId, ownerId)
   if (!list.length) return { error: await noRecipientReason(clubId, ownerId) }
 
-  /* `{1}` نامِ باشگاه است و از دیتابیس می‌آید — نه از فرم */
+  /* `{1}` نام باشگاه است و از دیتابیس می‌آید — نه از فرم */
   const full = [clubName, ...args]
 
   let maxParts = 1
@@ -140,11 +140,11 @@ export async function quote(
 }
 
 /* ── ارسال ──
-   پس از تأییدِ پرداخت اجرا می‌شود. هیچ‌وقت throw نمی‌کند: پول گرفته
-   شده و یک استثنا نباید کمپین را در حالتِ نامعلوم رها کند.
+   پس از تأیید پرداخت اجرا می‌شود. هیچ‌وقت throw نمی‌کند: پول گرفته
+   شده و یک استثنا نباید کمپین را در حالت نامعلوم رها کند.
 
-   ردیفِ گیرنده با کلیدِ مرکب نوشته می‌شود، پس اجرای دوباره‌ی همین
-   تابع پیامکِ تکراری نمی‌فرستد. */
+   ردیف گیرنده با کلید مرکب نوشته می‌شود، پس اجرای دوباره‌ی همین
+   تابع پیامک تکراری نمی‌فرستد. */
 export async function sendCampaign(campaignId: string): Promise<{ sent: number; failed: number }> {
   const { data: cRow } = await sb().from('club_sms_campaigns')
     .select('id,club_id,created_by,template_key,args,status').eq('id', campaignId).maybeSingle()
@@ -168,7 +168,7 @@ export async function sendCampaign(campaignId: string): Promise<{ sent: number; 
   await sb().from('club_sms_campaigns')
     .update({ status: 'SENDING', updated_at: new Date().toISOString() }).eq('id', c.id)
 
-  /* کسانی که قبلاً در همین کمپین پیامک گرفته‌اند دوباره نمی‌گیرند */
+  /* کسانی که قبلا در همین کمپین پیامک گرفته‌اند دوباره نمی‌گیرند */
   const { data: doneRows } = await sb().from('club_sms_recipients')
     .select('user_id').eq('campaign_id', c.id)
   const already = new Set((doneRows as { user_id: string }[] ?? []).map(r => r.user_id))

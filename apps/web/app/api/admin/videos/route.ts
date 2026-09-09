@@ -8,22 +8,22 @@ import { makeSlug, type VideoRow } from '@/lib/media/server'
 import { keyFromUrl } from '@/lib/media/storage'
 
 /* ─────────────────────────────────────────────────────────────
-   مدیریتِ ویدیوها — پنلِ ادمین.
+   مدیریت ویدیوها — پنل ادمین.
 
    ── چرا ساخته شد ──
    پنل تا امروز از `lib/media-admin-store` می‌خواند که **فقط
-   localStorage** بود. یعنی «مخفی‌کردن» و «ویژه‌کردن» تنها روی مرورگرِ
-   همان ادمین اثر داشت؛ بازدیدکننده‌ها هیچ تفاوتی نمی‌دیدند و ادمینِ
+   localStorage** بود. یعنی «مخفی‌کردن» و «ویژه‌کردن» تنها روی مرورگر
+   همان ادمین اثر داشت؛ بازدیدکننده‌ها هیچ تفاوتی نمی‌دیدند و ادمین
    دوم هم نه. دکمه‌ها کار می‌کردند ولی کاری نمی‌کردند.
 
-   حالا هر تغییر می‌رود در جدول و در گزارشِ ممیزی ثبت می‌شود.
+   حالا هر تغییر می‌رود در جدول و در گزارش ممیزی ثبت می‌شود.
    ───────────────────────────────────────────────────────────── */
 
 const STATUS = new Set(['draft', 'pending', 'published', 'rejected', 'hidden'])
 const VISIBILITY = new Set(['public', 'unlisted', 'private'])
 
-/* ستون‌هایی که ادمین ویرایش می‌کند. `views`, `owner_id`, `src` عمداً
-   نیستند: بازدید داده‌ی سنجش است نه تنظیم، و مالک و فایل با ویرایشِ
+/* ستون‌هایی که ادمین ویرایش می‌کند. `views`, `owner_id`, `src` عمدا
+   نیستند: بازدید داده‌ی سنجش است نه تنظیم، و مالک و فایل با ویرایش
    متن عوض نمی‌شوند. */
 const EDITABLE = ['title', 'description', 'category', 'tags', 'thumb'] as const
 
@@ -36,7 +36,7 @@ async function guard(req: NextRequest) {
   return { actor }
 }
 
-/* GET ?status=&q=&limit= → فهرستِ کامل برای پنل (شاملِ غیرِعمومی‌ها) */
+/* GET ?status=&q=&limit= → فهرست کامل برای پنل (شامل غیرعمومی‌ها) */
 export async function GET(req: NextRequest) {
   const g = await guard(req)
   if (g.err) return g.err
@@ -83,7 +83,7 @@ export async function PATCH(req: NextRequest) {
     const s = String(b.status)
     if (!STATUS.has(s)) return NextResponse.json({ message: 'وضعیت نامعتبر است' }, { status: 400 })
     patch.status = s
-    /* لحظه‌ی انتشار یک‌بار ثبت می‌شود و با مخفی/آشکارکردنِ بعدی عوض
+    /* لحظه‌ی انتشار یک‌بار ثبت می‌شود و با مخفی/آشکارکردن بعدی عوض
        نمی‌شود — وگرنه ویدیوی قدیمی با هر بار بازبینی به بالای فهرست
        و بالای نقشه‌ی سایت می‌پرد. */
     if (s === 'published' && !prev.published_at) patch.published_at = new Date().toISOString()
@@ -97,14 +97,14 @@ export async function PATCH(req: NextRequest) {
 
   if (b.featured !== undefined) {
     patch.featured = !!b.featured
-    /* «ویژه» یکی است. بدونِ این، چند ویدیو هم‌زمان ویژه می‌شدند و
+    /* «ویژه» یکی است. بدون این، چند ویدیو هم‌زمان ویژه می‌شدند و
        هیروی صفحه‌ی مدیا هر بار یکی‌شان را تصادفی نشان می‌داد. */
     if (patch.featured) await sb.from('videos').update({ featured: false }).eq('featured', true)
   }
 
   if (b.rejectNote !== undefined) patch.reject_note = String(b.rejectNote).slice(0, 500) || null
 
-  /* ویرایشِ متن */
+  /* ویرایش متن */
   const f = (b.fields && typeof b.fields === 'object' ? b.fields : {}) as Record<string, unknown>
   for (const k of EDITABLE) {
     if (!(k in f)) continue
@@ -113,7 +113,7 @@ export async function PATCH(req: NextRequest) {
   }
 
   /* عنوان که عوض شود، نشانی هم باید عوض شود — وگرنه نشانی با محتوا
-     نمی‌خواند. نشانیِ قبلی در تاریخچه می‌ماند تا ۴۰۴ ندهد. */
+     نمی‌خواند. نشانی قبلی در تاریخچه می‌ماند تا ۴۰۴ ندهد. */
   if (typeof patch.title === 'string' && patch.title && patch.title !== prev.title) {
     const nextSlug = makeSlug(patch.title as string)
     await sb.from('video_slug_history').upsert({ slug: prev.slug, video_id: prev.id })
@@ -145,7 +145,7 @@ export async function PATCH(req: NextRequest) {
   return NextResponse.json({ ok: true, video: data })
 }
 
-/* DELETE ?id= → حذفِ کاملِ ویدیو و فایل‌هایش */
+/* DELETE ?id= → حذف کامل ویدیو و فایل‌هایش */
 export async function DELETE(req: NextRequest) {
   const g = await guard(req)
   if (g.err) return g.err
@@ -168,7 +168,7 @@ export async function DELETE(req: NextRequest) {
     return NextResponse.json({ message: 'حذف انجام نشد' }, { status: 500 })
   }
 
-  /* فایل‌ها هم می‌روند — وگرنه انبارِ فایلِ مرده دوباره پر می‌شود.
+  /* فایل‌ها هم می‌روند — وگرنه انبار فایل مرده دوباره پر می‌شود.
      کلید ترجیح دارد بر تجزیه‌ی نشانی. */
   const paths = [v.storage_key ?? keyFromUrl(v.src), v.thumb_key ?? keyFromUrl(v.thumb)]
     /* هر دو نسل: `media/` تازه و `social/media/` قدیمی */

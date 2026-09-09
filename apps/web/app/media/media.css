@@ -1,21 +1,21 @@
 /* ─────────────────────────────────────────────────────────────
-   بیلیارد مدیا — سیستمِ بصریِ پلتفرمِ ویدیو.
+   بیلیارد مدیا — سیستم بصری پلتفرم ویدیو.
 
    ── قاعده‌ی اول: محتوا ستاره است ──
-   رابط نباید با ویدیو رقابت کند. پس: بدونِ گرادیان، بدونِ شیشه،
-   بدونِ کارتِ سایه‌دار، بدونِ حاشیه‌ی تزئینی. کارت فقط یک
-   بندانگشتی است و سه خط متنِ زیرش. رنگِ صفحه خنثی است تا
+   رابط نباید با ویدیو رقابت کند. پس: بدون گرادیان، بدون شیشه،
+   بدون کارت سایه‌دار، بدون حاشیه‌ی تزئینی. کارت فقط یک
+   بندانگشتی است و سه خط متن زیرش. رنگ صفحه خنثی است تا
    بندانگشتی‌ها — که خودشان رنگی‌اند — بیرون بزنند.
 
-   ── سطحِ روشن و سطحِ تیره ──
-   مرورِ محتوا روی کاغذِ روشن است، نه یک سایتِ تمام‌سیاه. تیرگی فقط
-   جایی می‌آید که *ویدیو* آن‌جاست: قابِ پلیر، نمایشگرِ Shorts، و
-   بندانگشتیِ در حالِ بارگذاری.
+   ── سطح روشن و سطح تیره ──
+   مرور محتوا روی کاغذ روشن است، نه یک سایت تمام‌سیاه. تیرگی فقط
+   جایی می‌آید که *ویدیو* آن‌جاست: قاب پلیر، نمایشگر Shorts، و
+   بندانگشتی در حال بارگذاری.
 
-   ⚠️ طلا فقط برای حالتِ فعال و نشانه‌هاست. هیچ زمینه‌ی طلاییِ
-   بزرگی، هیچ متنِ طلاییِ بدنه‌ای.
+   ⚠️ طلا فقط برای حالت فعال و نشانه‌هاست. هیچ زمینه‌ی طلایی
+   بزرگی، هیچ متن طلایی بدنه‌ای.
 
-   ⚠️ `letter-spacing` روی متنِ فارسی نیست — در خطِ عربی حروف را
+   ⚠️ `letter-spacing` روی متن فارسی نیست — در خط عربی حروف را
    از هم می‌کند.
    ───────────────────────────────────────────────────────────── */
 
@@ -30,16 +30,16 @@
   --line-2: #CFCBC3;
   --gold: #C7A66A;
   --gold-ink: #8A6224;
-  /* ⚠️ نوارِ پیشرفتِ تماشا با طلاییِ همین صفحه، نه یک قرمزِ دوم:
-     قاعده‌ی پروژه یک رنگِ تأکید در هر صفحه است. */
+  /* ⚠️ نوار پیشرفت تماشا با طلایی همین صفحه، نه یک قرمز دوم:
+     قاعده‌ی پروژه یک رنگ تأکید در هر صفحه است. */
   --live: #C7A66A;
   --danger: #B23B2E;
   --dark: #111111;
 
-  /* ⚠️ یک پس‌افتِ واحد. سه جای مختلف دو مقدارِ متفاوت داشتند
+  /* ⚠️ یک پس‌افت واحد. سه جای مختلف دو مقدار متفاوت داشتند
      (`73px` و `calc(73px + env(...))`)، پس اگر `NavOffset` نوار را
-     پیدا نمی‌کرد، نوارها در حالتِ نصب‌شده‌ی iOS به‌اندازه‌ی ناحیه‌ی
-     امن از هم جدا می‌افتادند — دقیقاً همان حالتی که قرار بود
+     پیدا نمی‌کرد، نوارها در حالت نصب‌شده‌ی iOS به‌اندازه‌ی ناحیه‌ی
+     امن از هم جدا می‌افتادند — دقیقا همان حالتی که قرار بود
      پوشش داده شود. */
   --nav-h: var(--mx-nav, calc(73px + env(safe-area-inset-top)));
   --rail: 232px;
@@ -58,16 +58,16 @@
   outline: 2px solid var(--gold-ink); outline-offset: 2px; border-radius: 4px;
 }
 
-/* ═══════════════ چیدمانِ کلی ═══════════════ */
+/* ═══════════════ چیدمان کلی ═══════════════ */
 .mx-frame { display: block; }
 @media (min-width: 1024px) {
-  /* ⚠️ ریل در RTL سمتِ راست می‌نشیند — `grid` با ترتیبِ منطقی این را
+  /* ⚠️ ریل در RTL سمت راست می‌نشیند — `grid` با ترتیب منطقی این را
      خودش می‌دهد، پس هیچ `left/right`ی در کد نیست. */
   .mx-frame { display: grid; grid-template-columns: var(--rail) minmax(0, 1fr); }
   .mx-frame[data-rail='mini'] { grid-template-columns: var(--rail-mini) minmax(0, 1fr); }
 }
 
-/* ── نوارِ بالا ── */
+/* ── نوار بالا ── */
 .mx-top {
   position: sticky; inset-block-start: var(--nav-h);
   z-index: 30;
@@ -136,7 +136,7 @@
 .mx-iconbtn--plain:hover { background: var(--soft-2); }
 @media (max-width: 767px) { .mx-iconbtn span { display: none; } .mx-iconbtn { padding-inline: 0; inline-size: 40px; } }
 
-/* ═══════════════ ریلِ کناری (دسکتاپ) ═══════════════ */
+/* ═══════════════ ریل کناری (دسکتاپ) ═══════════════ */
 .mx-rail { display: none; }
 @media (min-width: 1024px) {
   .mx-rail {
@@ -162,7 +162,7 @@
 .mx-rail a[aria-current='page'] { background: var(--soft-2); color: var(--ink); font-weight: 800; }
 .mx-rail a svg { flex-shrink: 0; }
 
-/* حالتِ باریک — فقط آیکن، با برچسبِ زیرش */
+/* حالت باریک — فقط آیکن، با برچسب زیرش */
 [data-rail='mini'] .mx-rail a {
   flex-direction: column; gap: 5px; min-block-size: 68px;
   justify-content: center; padding-inline: 2px; font-size: 10.5px; font-weight: 600;
@@ -212,7 +212,7 @@
 .mx-sec-hd .mx-all:hover { text-decoration: underline; text-underline-offset: 3px; }
 
 /* ── قفسه‌ی افقی ──
-   ⚠️ اسکرولِ ذاتیِ مرورگر با scroll-snap، نه یک کاروسلِ جاوااسکریپتی:
+   ⚠️ اسکرول ذاتی مرورگر با scroll-snap، نه یک کاروسل جاوااسکریپتی:
    روی موبایل لمس طبیعی می‌ماند، با صفحه‌کلید کار می‌کند، و هیچ
    باندلی اضافه نمی‌کند. */
 .mx-shelf {
@@ -220,7 +220,7 @@
   overflow-x: auto; scroll-snap-type: x proximity;
   padding-block-end: 6px;
   scrollbar-width: thin;
-  /* لبه‌ها تا کنارِ صفحه کشیده می‌شوند تا «ادامه دارد» حس شود */
+  /* لبه‌ها تا کنار صفحه کشیده می‌شوند تا «ادامه دارد» حس شود */
   margin-inline: calc(var(--gut) * -1); padding-inline: var(--gut);
 }
 .mx-shelf > * { scroll-snap-align: start; }
@@ -232,10 +232,10 @@
 }
 
 /* ── شبکه‌ی ویدیو ──
-   ⚠️ `auto-fill` با کفِ ۲۶۰ پیکسل: کارتِ ویدیو زیرِ این عرض دیگر
-   خوانا نیست (عنوانِ دو خطی می‌شکند و نامِ کانال بریده می‌شود).
-   سقفِ چهار ستون هم عمدی است — پنج کارتِ ریز روی صفحه‌ی بزرگ
-   شبکه‌ی عکس می‌سازد، نه فهرستِ ویدیو. */
+   ⚠️ `auto-fill` با کف ۲۶۰ پیکسل: کارت ویدیو زیر این عرض دیگر
+   خوانا نیست (عنوان دو خطی می‌شکند و نام کانال بریده می‌شود).
+   سقف چهار ستون هم عمدی است — پنج کارت ریز روی صفحه‌ی بزرگ
+   شبکه‌ی عکس می‌سازد، نه فهرست ویدیو. */
 .mx-grid {
   display: grid; gap: 22px 16px;
   grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr));
@@ -244,7 +244,7 @@
   .mx-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 }
 
-/* ═══════════════ کارتِ ویدیو ═══════════════ */
+/* ═══════════════ کارت ویدیو ═══════════════ */
 .mx-card { display: block; min-inline-size: 0; }
 .mx-tn {
   position: relative; aspect-ratio: 16 / 9; overflow: hidden;
@@ -260,14 +260,14 @@
   position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
   color: rgb(255 255 255 / .34);
 }
-/* مدت — کوچک، تیره، بدونِ افکت */
+/* مدت — کوچک، تیره، بدون افکت */
 .mx-dur {
   position: absolute; inset-block-end: 6px; inset-inline-end: 6px;
   padding: 1px 5px; border-radius: 4px;
   background: rgb(0 0 0 / .82); color: #fff;
   font-size: 11.5px; font-weight: 700; font-variant-numeric: tabular-nums;
 }
-/* نوارِ پیشرفتِ تماشا — داده‌ی واقعیِ همین دستگاه */
+/* نوار پیشرفت تماشا — داده‌ی واقعی همین دستگاه */
 .mx-prog {
   position: absolute; inset-inline: 0; inset-block-end: 0; block-size: 3px;
   background: rgb(255 255 255 / .3);
@@ -294,7 +294,7 @@
 }
 .mx-sub > * + *::before { content: '·'; margin-inline-end: 8px; }
 
-/* ═══════════════ کارتِ Shorts ═══════════════ */
+/* ═══════════════ کارت Shorts ═══════════════ */
 .mx-short { display: block; min-inline-size: 0; }
 .mx-short-tn {
   position: relative; aspect-ratio: 9 / 16; overflow: hidden;
@@ -309,7 +309,7 @@
 
 /* ═══════════════ محتوای شاخص ═══════════════
    ⚠️ سرلوحه‌ی تبلیغاتی نیست: بندانگشتی غالب است و کنارش دو سه
-   پیشنهادِ فشرده. هیچ تیترِ تزئینیِ درشتی. */
+   پیشنهاد فشرده. هیچ تیتر تزئینی درشتی. */
 .mx-feat { display: grid; gap: 18px; padding-block: 18px 6px; }
 @media (min-width: 900px) {
   .mx-feat { grid-template-columns: minmax(0, 1.9fr) minmax(0, 1fr); column-gap: 24px; align-items: start; }
@@ -338,7 +338,7 @@
 }
 @media (max-width: 479px) { .mx-mini { grid-template-columns: 124px minmax(0, 1fr); gap: 10px; } }
 
-/* ═══════════════ کارتِ کانال ═══════════════ */
+/* ═══════════════ کارت کانال ═══════════════ */
 .mx-chan {
   display: flex; flex-direction: column; align-items: center; gap: 8px;
   padding: 18px 12px; border: 1px solid var(--line); border-radius: 12px;
@@ -357,7 +357,7 @@
 }
 .mx-tag--gold { background: rgb(199 166 106 / .16); color: var(--gold-ink); }
 
-/* ═══════════════ حالتِ خالی و اسکلتون ═══════════════ */
+/* ═══════════════ حالت خالی و اسکلتون ═══════════════ */
 .mx-empty {
   border: 1px solid var(--line); border-radius: 14px; background: var(--soft);
   padding: clamp(26px, 6vw, 48px); margin-block: 24px 32px; max-inline-size: 660px;
@@ -366,8 +366,8 @@
 .mx-empty p { margin: 0 0 6px; font-size: 13.5px; line-height: 1.9; color: var(--ink-2); max-inline-size: 52ch; }
 .mx-empty-act { display: flex; flex-wrap: wrap; gap: 10px; margin-block-start: 18px; }
 
-/* ⚠️ اسکلتون هم‌شکلِ کارتِ واقعی است، نه یک مستطیلِ خاکستری: اگر
-   ابعادش فرق کند، لحظه‌ی رسیدنِ داده صفحه می‌پرد. */
+/* ⚠️ اسکلتون هم‌شکل کارت واقعی است، نه یک مستطیل خاکستری: اگر
+   ابعادش فرق کند، لحظه‌ی رسیدن داده صفحه می‌پرد. */
 .mx-sk { background: var(--soft-2); border-radius: var(--r); position: relative; overflow: hidden; }
 .mx-sk::after {
   content: ''; position: absolute; inset: 0;
@@ -379,7 +379,7 @@
 .mx-sk-tn { aspect-ratio: 16 / 9; }
 .mx-sk-l { block-size: 12px; border-radius: 4px; margin-block-start: 9px; }
 
-/* ═══════════════ ناوبریِ پایینِ موبایل ═══════════════ */
+/* ═══════════════ ناوبری پایین موبایل ═══════════════ */
 .mx-bottom {
   position: fixed; inset-inline: 0; inset-block-end: 0; z-index: 40;
   display: flex; background: rgb(255 255 255 / .97);
@@ -414,14 +414,14 @@
   border-block-end: 2px solid transparent;
 }
 .mx-tabs button:hover { color: var(--ink); }
-/* ⚠️ دکمه‌ها `aria-pressed` می‌گیرند نه `aria-selected` (نقشِ tab
-   بدونِ tabpanel برداشته شد)، پس انتخابگر هم باید همان باشد — وگرنه
-   تبِ فعال هیچ نشانه‌ی بصری‌ای ندارد. */
+/* ⚠️ دکمه‌ها `aria-pressed` می‌گیرند نه `aria-selected` (نقش tab
+   بدون tabpanel برداشته شد)، پس انتخابگر هم باید همان باشد — وگرنه
+   تب فعال هیچ نشانه‌ی بصری‌ای ندارد. */
 .mx-tabs button[aria-pressed='true'] { color: var(--ink); font-weight: 800; border-block-end-color: var(--ink); }
 
-/* ═══════════════ نمایشگرِ Shorts ═══════════════
+/* ═══════════════ نمایشگر Shorts ═══════════════
    ⚠️ تنها جای تمام‌تیره‌ی این محصول. ویدیوی عمودی روی زمینه‌ی روشن
-   دو نوارِ سفیدِ کنارش می‌سازد و بدترین حالتِ ممکن است. */
+   دو نوار سفید کنارش می‌سازد و بدترین حالت ممکن است. */
 .mx-sv {
   position: fixed; inset: 0; z-index: 300; background: #000;
   display: flex; align-items: center; justify-content: center;
@@ -472,8 +472,8 @@
   border-radius: 12px; overflow: hidden;
 }
 @media (max-width: 767px) {
-  /* ⚠️ پلیر روی موبایل تا لبه می‌رود و گوشه نمی‌گیرد — قابِ گِرد در
-     عرضِ کامل فقط چهار مثلثِ سفید کنارِ ویدیو می‌سازد. */
+  /* ⚠️ پلیر روی موبایل تا لبه می‌رود و گوشه نمی‌گیرد — قاب گرد در
+     عرض کامل فقط چهار مثلث سفید کنار ویدیو می‌سازد. */
   .mx-player { border-radius: 0; margin-inline: calc(var(--gut) * -1); }
 }
 .mx-player video { inline-size: 100%; block-size: 100%; display: block; object-fit: contain; background: #000; }
@@ -499,16 +499,16 @@
 .mx-desc p:last-child { margin: 0; }
 .mx-upnext { display: grid; gap: 12px; align-content: start; }
 
-/* ═══════════════ سربرگِ کانال ═══════════════ */
+/* ═══════════════ سربرگ کانال ═══════════════ */
 .mx-chead { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; padding-block: 20px; }
 .mx-chead .mx-ava { inline-size: 84px; block-size: 84px; font-size: 30px; }
 .mx-chead h1 { margin: 0 0 4px; font-size: clamp(19px, 2.6vw, 25px); font-weight: 800; line-height: 1.3; }
 .mx-chead p { margin: 0; font-size: 13px; color: var(--ink-3); line-height: 1.7; }
 
-/* ردیفِ تک‌دکمه‌ای (مثلاً «ویدیوهای بیشتر») */
+/* ردیف تک‌دکمه‌ای (مثلا «ویدیوهای بیشتر») */
 .mx-center { display: flex; justify-content: center; }
 
-/* برچسبِ فقط‌صفحه‌خوان — `display:none` نباشد وگرنه خوانده هم نمی‌شود */
+/* برچسب فقط‌صفحه‌خوان — `display:none` نباشد وگرنه خوانده هم نمی‌شود */
 .mx-sr-only {
   position: absolute; inline-size: 1px; block-size: 1px; overflow: hidden;
   clip-path: inset(50%); white-space: nowrap;
@@ -526,38 +526,38 @@
   white-space: nowrap; max-inline-size: 46ch;
 }
 
-/* ── ردیفِ برچسب‌ها ── */
+/* ── ردیف برچسب‌ها ── */
 .mx-tagrow { display: flex; flex-wrap: wrap; gap: 8px; margin-block-start: 14px; }
 .mx-tagrow .mx-tag { min-block-size: 34px; padding-inline: 12px; }
 .mx-tagrow .mx-tag:hover { background: var(--line); }
 @media (max-width: 1023px) { .mx-tagrow .mx-tag { min-block-size: 44px; } }
 
-/* صاحبِ ویدیو: نام پررنگ، متادیتا زیرش، کنش‌ها ته خط */
+/* صاحب ویدیو: نام پررنگ، متادیتا زیرش، کنش‌ها ته خط */
 .mx-owner > div:nth-child(2) { min-inline-size: 0; }
 .mx-owner strong { font-size: 14px; font-weight: 800; color: var(--ink); }
 @media (max-width: 639px) {
   .mx-acts { margin-inline-start: 0; inline-size: 100%; }
 }
 
-/* ⚠️ اندازه‌گیری‌شده در ۳۹۰: نشانِ «بیلیارد مدیا» ۲۶ پیکسل و
-   «مشاهده همه» ۳۶ پیکسل بودند — هر دو زیرِ حدِ لمس. */
+/* ⚠️ اندازه‌گیری‌شده در ۳۹۰: نشان «بیلیارد مدیا» ۲۶ پیکسل و
+   «مشاهده همه» ۳۶ پیکسل بودند — هر دو زیر حد لمس. */
 .mx-brand { min-block-size: 40px; }
 @media (max-width: 1023px) {
   .mx-brand { min-block-size: 44px; }
   .mx-sec-hd .mx-all { min-block-size: 44px; display: inline-flex; align-items: center; }
 }
 
-/* اندازه‌گیری‌شده در صفحه‌ی تماشا: لینکِ مسیر ۳۶ و نامِ کانال ۱۹
-   پیکسل بودند — هر دو زیرِ حدِ لمس روی موبایل. */
+/* اندازه‌گیری‌شده در صفحه‌ی تماشا: لینک مسیر ۳۶ و نام کانال ۱۹
+   پیکسل بودند — هر دو زیر حد لمس روی موبایل. */
 @media (max-width: 1023px) {
   .mx-crumbs a { min-block-size: 44px; display: inline-flex; align-items: center; }
   .mx-owner a.mx-by { min-block-size: 44px; display: inline-flex; align-items: center; }
 }
 
-/* پوششِ تبلیغِ پیش‌پخش — روی پلیر، نه در جریانِ آن */
+/* پوشش تبلیغ پیش‌پخش — روی پلیر، نه در جریان آن */
 .mx-adlayer { position: absolute; inset: 0; z-index: 5; }
 
-/* عرضِ خطوطِ اسکلتون — ثابت‌اند، پس کلاس‌اند نه استایلِ اینلاین */
+/* عرض خطوط اسکلتون — ثابت‌اند، پس کلاس‌اند نه استایل اینلاین */
 .mx-sk-l--w { inline-size: 88%; }
 .mx-sk-l--n { inline-size: 54%; }
 
@@ -618,7 +618,7 @@
 .mx-cm-kids { list-style: none; margin: 10px 0 0; padding-inline-start: 18px; border-inline-start: 2px solid var(--line); }
 .mx-cm--r { padding-block: 10px; border-block-start: 0; }
 
-/* فاصله‌ها و اندازه‌های ثابتِ صفحه‌های کانال — کلاس، نه استایلِ اینلاین */
+/* فاصله‌ها و اندازه‌های ثابت صفحه‌های کانال — کلاس، نه استایل اینلاین */
 .mx-pad-t { padding-block-start: 18px; }
 .mx-pad { padding-block: 48px; }
 .mx-filter { max-inline-size: 420px; margin-block-end: 18px; }
@@ -627,15 +627,15 @@
 .mx-chead > div:nth-child(2) { min-inline-size: 0; }
 @media (max-width: 639px) { .mx-chead-act { margin-inline-start: 0; inline-size: 100%; } }
 
-/* ⚠️ ورودیِ فیلترِ کانال‌ها بیرونِ `.mx-search-box` است، پس قاب و
-   ارتفاعِ خودش را ندارد — اندازه‌گیری‌شده ۲۶ پیکسل، زیرِ حدِ لمس. */
+/* ⚠️ ورودی فیلتر کانال‌ها بیرون `.mx-search-box` است، پس قاب و
+   ارتفاع خودش را ندارد — اندازه‌گیری‌شده ۲۶ پیکسل، زیر حد لمس. */
 .mx-filter .mx-search-in {
   min-block-size: 44px; padding-inline: 14px;
   border: 1px solid var(--line-2); border-radius: 999px;
 }
 .mx-filter .mx-search-in:focus-visible { outline: 2px solid var(--gold-ink); outline-offset: -1px; }
 
-/* ═══════════════ پخشِ زنده ═══════════════ */
+/* ═══════════════ پخش زنده ═══════════════ */
 .mx-livedot {
   display: inline-block; inline-size: 8px; block-size: 8px; border-radius: 50%;
   background: #C0392B; margin-inline-end: 7px;
@@ -655,10 +655,10 @@
 .mx-livecard p { margin: 0; font-size: 12.5px; color: var(--ink-3); }
 .mx-liveviewers { margin-block-start: 4px; font-variant-numeric: tabular-nums; }
 
-/* ═══════════════ لیستِ پخش ═══════════════ */
+/* ═══════════════ لیست پخش ═══════════════ */
 .mx-pl { display: block; min-inline-size: 0; }
-/* ⚠️ چند بندانگشتی روی هم — نشانه‌ی بصریِ «این یک مجموعه است»، نه
-   یک ویدیوی تکی. کارتِ بی‌ویدیو آیکن می‌گیرد نه قابِ خالی. */
+/* ⚠️ چند بندانگشتی روی هم — نشانه‌ی بصری «این یک مجموعه است»، نه
+   یک ویدیوی تکی. کارت بی‌ویدیو آیکن می‌گیرد نه قاب خالی. */
 .mx-pl-stack {
   position: relative; aspect-ratio: 16 / 9; border-radius: var(--r);
   overflow: hidden; background: var(--dark); display: flex;
@@ -698,3 +698,47 @@
   font-size: 13px; font-weight: 700; color: var(--ink-3);
   padding-block-start: 6px; font-variant-numeric: tabular-nums;
 }
+
+/* ═══════════════ جست‌وجوی پیشنهادی ═══════════════
+   ⚠️ همان مکانیزم یوتوب: پیشنهاد با هر حرف، نه بعد از Enter. */
+.mx-search { position: relative; flex: 1 1 auto; min-inline-size: 0; }
+.mx-search-form { display: flex; gap: 8px; }
+.mx-search-clear {
+  display: inline-flex; align-items: center; justify-content: center;
+  inline-size: 30px; block-size: 30px; margin-inline-end: 6px; flex-shrink: 0;
+  border: 0; border-radius: 50%; background: transparent;
+  color: var(--ink-3); cursor: pointer;
+}
+.mx-search-clear:hover { background: var(--soft-2); color: var(--ink); }
+
+.mx-suggest {
+  position: absolute; inset-block-start: calc(100% + 6px); inset-inline: 0;
+  z-index: 60; overflow: hidden;
+  background: var(--paper); border: 1px solid var(--line);
+  border-radius: 14px;
+  box-shadow: 0 16px 42px rgb(17 17 16 / .14), 0 2px 8px rgb(17 17 16 / .06);
+  padding: 6px;
+}
+.mx-sg {
+  display: flex; align-items: center; gap: 10px; inline-size: 100%;
+  min-block-size: 42px; padding-inline: 10px; border: 0; border-radius: 10px;
+  background: transparent; cursor: pointer; text-align: start;
+  font-family: inherit; font-size: 14px; color: var(--ink);
+}
+.mx-sg:hover, .mx-sg.is-active { background: var(--soft-2); }
+.mx-sg svg { color: var(--ink-3); flex-shrink: 0; }
+.mx-sg-t { flex: 1; min-inline-size: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* بخش تایپ‌شده پررنگ می‌شود — بقیه عبارت عادی می‌ماند */
+.mx-sg-t b { font-weight: 800; }
+.mx-sg-k {
+  font-size: 11px; font-weight: 700; color: var(--ink-3);
+  background: var(--soft-2); border-radius: 5px; padding: 2px 7px; flex-shrink: 0;
+}
+.mx-sg-clear {
+  inline-size: 100%; min-block-size: 40px; border: 0; border-radius: 10px;
+  border-block-start: 1px solid var(--line); margin-block-start: 4px;
+  background: transparent; cursor: pointer;
+  font-family: inherit; font-size: 12.5px; font-weight: 700; color: var(--gold-ink);
+}
+.mx-sg-clear:hover { background: var(--soft); }
+@media (max-width: 1023px) { .mx-sg { min-block-size: 46px; } }

@@ -14,7 +14,7 @@ export async function OPTIONS() {
 
 /* نقش مستقیم داخل رشته‌ی فیلتر PostgREST می‌نشیند؛ پس باید از فهرست
    بسته بیاید. وگرنه یک ویرگول در مقدار، شرط اضافه به همان or() تزریق
-   می‌کرد و مثلاً کاربران غیرفعال هم برمی‌گشتند. */
+   می‌کرد و مثلا کاربران غیرفعال هم برمی‌گشتند. */
 const ROLES = new Set([
   'user', 'player', 'coach', 'referee',
   'technician', 'seller', 'manufacturer', 'club_owner',

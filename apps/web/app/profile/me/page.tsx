@@ -13,8 +13,8 @@ import ChangePassword from '../../../components/auth/ChangePassword'
 import Select from '../../../components/ui/Select'
 import Avatar from '../../../components/ui/Avatar'
 import { uploadFile } from '../../../lib/supabase'
-/* نسخه‌ی محلیِ این تابع برداشته شد: پنلِ رنکینگ هم لازمش داشت و
-   کپی‌کردنش یعنی دو عددِ کیفیت که روزی از هم جدا می‌افتند. */
+/* نسخه‌ی محلی این تابع برداشته شد: پنل رنکینگ هم لازمش داشت و
+   کپی‌کردنش یعنی دو عدد کیفیت که روزی از هم جدا می‌افتند. */
 import { compressAvatar } from '../../../lib/images/compress-avatar'
 import { bankOfIban, bankOfCard, prettyIban } from '../../../lib/bank'
 import {
@@ -49,7 +49,7 @@ interface UserProfile {
   clubNameManual?: string
   bankCard?: string
   bankCardOwner?: string
-  /* شبای همان کارت — از استعلام، نه ورودیِ کاربر */
+  /* شبای همان کارت — از استعلام، نه ورودی کاربر */
   bankIban?: string
   /* کارت استعلام‌شده و قفل است؛ بازکردنش فقط با ادمین */
   bankCardVerified?: boolean
@@ -128,7 +128,7 @@ const inputStyle: React.CSSProperties = {
 }
 
 /* ClubSearch حذف شد — کارش را ClubPicker می‌کند، همان که در
-   پروفایلِ شش نقشِ دیگر هم هست. */
+   پروفایل شش نقش دیگر هم هست. */
 
 // ─── Bank card formatter ──────────────────────────────────────
 function formatCard(v: string) {
@@ -153,12 +153,12 @@ export default function ProfileMePage() {
   const [bankCard, setBankCard] = useState('')
   const [bankOwner, setBankOwner] = useState('')
   const [bankBusy, setBankBusy] = useState(false)
-  /* شبا و نام بانک خروجیِ استعلام‌اند؛ نام بانک از پیشوندِ شبا مشتق
+  /* شبا و نام بانک خروجی استعلام‌اند؛ نام بانک از پیشوند شبا مشتق
      می‌شود و ستون جدا نمی‌خواهد. */
   const [bankIban, setBankIban] = useState('')
   const [bankName, setBankName] = useState('')
-  /* پس از استعلامِ موفق، فیلدِ کارت و دکمه قفل می‌شوند تا هر بار
-     اعتبارِ سرویس بی‌دلیل مصرف نشود. «تغییر کارت» بازش می‌کند. */
+  /* پس از استعلام موفق، فیلد کارت و دکمه قفل می‌شوند تا هر بار
+     اعتبار سرویس بی‌دلیل مصرف نشود. «تغییر کارت» بازش می‌کند. */
   const [cardLocked, setCardLocked] = useState(false)
   const [clubName, setClubName] = useState('')
   const [clubId, setClubId]     = useState('')
@@ -168,8 +168,8 @@ export default function ProfileMePage() {
   const fileRef = useRef<HTMLInputElement>(null)
 
   /* اگر API در دسترس نبود، از حساب محلی (store) پر می‌کنیم —
-     قبلاً به /login می‌فرستاد که خودش به /dashboard برمی‌گشت و
-     «ویرایش پروفایل» عملاً بی‌اثر می‌شد */
+     قبلا به /login می‌فرستاد که خودش به /dashboard برمی‌گشت و
+     «ویرایش پروفایل» عملا بی‌اثر می‌شد */
   const buildLocalProfile = (): UserProfile | null => {
     const u = useAuthStore.getState().user
     if (!u) return null
@@ -197,9 +197,9 @@ export default function ProfileMePage() {
     setBankCard(j.bankCard ? formatCard(j.bankCard) : '')
     setBankIban(j.bankIban ?? '')
     setBankName(j.bankIban ? (bankOfIban(j.bankIban) ?? '') : (j.bankCard ? (bankOfCard(j.bankCard) ?? '') : ''))
-    /* فلگِ سرور ملاک است. بک‌فیل با «کارت خالی نیست» فقط برای پیش از
+    /* فلگ سرور ملاک است. بک‌فیل با «کارت خالی نیست» فقط برای پیش از
        اجرای مهاجرت ۰۳۹ است؛ پس از آن، ادمین که قفل را باز می‌کند
-       کارت را پاک نمی‌کند، و حدسِ قدیمی همچنان قفل نشان می‌داد. */
+       کارت را پاک نمی‌کند، و حدس قدیمی همچنان قفل نشان می‌داد. */
     setCardLocked(j.bankCardVerified ?? !!j.bankCard)
     setClubName(j.clubNameManual ?? '')
     setAddress(j.address ?? '')
@@ -232,7 +232,7 @@ export default function ProfileMePage() {
   const handleSave = async () => {
     setSaving(true)
     try {
-      /* فقط فیلدهای قابل ویرایش؛ نام، کد ملی و تاریخ تولد اصلاً فرستاده
+      /* فقط فیلدهای قابل ویرایش؛ نام، کد ملی و تاریخ تولد اصلا فرستاده
          نمی‌شوند — سرور هم اگر بیایند نادیده‌شان می‌گیرد. */
       const res = await apiFetch('/api/users/profile', {
         method: 'PATCH',
@@ -252,14 +252,14 @@ export default function ProfileMePage() {
      آپلود شود؛ dataURL دیگر ذخیره نمی‌شود (پایین‌تر توضیح داده شده). */
 
   /* ─────────────────────────────────────────────────────────────
-     عکس پروفایل — چرا این تابع کاملاً بازنویسی شد.
+     عکس پروفایل — چرا این تابع کاملا بازنویسی شد.
 
      نسخه‌ی قبلی به `${API}/user/profile/avatar` می‌زد، یعنی بک‌اند
-     NestJS روی `localhost:3001` که در پروداکشن اصلاً وجود ندارد. آن
+     NestJS روی `localhost:3001` که در پروداکشن اصلا وجود ندارد. آن
      درخواست همیشه شکست می‌خورد و مسیر fallback اجرا می‌شد: عکس به شکل
      dataURL فقط در localStorage می‌نشست.
 
-     نتیجه دقیقاً همان چیزی بود که کاربر گزارش کرد — عکس عوض می‌شد،
+     نتیجه دقیقا همان چیزی بود که کاربر گزارش کرد — عکس عوض می‌شد،
      ولی با خروج و ورود دوباره ناپدید می‌شد. چون هرگز به دیتابیس
      نرفته بود: `logout()` استور محلی را پاک می‌کرد و ورود بعدی
      کاربر را از دیتابیس می‌خواند، جایی که `avatar` خالی بود.
@@ -278,8 +278,8 @@ export default function ProfileMePage() {
   /* حذف عکس = نوشتن رشته‌ی خالی در همان ستون. فایل روی استوریج دست
      نمی‌خورد (ممکن است جای دیگری هم به آن ارجاع باشد) — فقط پیوندش از
      پروفایل برداشته می‌شود. */
-  /* پنجره‌ی خودِ مرورگر (`window.confirm`) جای این‌جا نبود: قالبش با
-     هیچ‌جای سایت نمی‌خواند، فارسی‌اش دستِ مرورگر است و در موبایل
+  /* پنجره‌ی خود مرورگر (`window.confirm`) جای این‌جا نبود: قالبش با
+     هیچ‌جای سایت نمی‌خواند، فارسی‌اش دست مرورگر است و در موبایل
      بالای صفحه می‌پرد. */
   const [confirmAvatar, setConfirmAvatar] = useState(false)
 
@@ -336,11 +336,11 @@ export default function ProfileMePage() {
     }
   }
 
-  /* مسیرِ قبلی به بک‌اندِ NestJS اشاره می‌کرد که هیچ‌وقت روی Next ساخته
+  /* مسیر قبلی به بک‌اند NestJS اشاره می‌کرد که هیچ‌وقت روی Next ساخته
      نشد؛ همیشه ۴۰۴ می‌گرفت و در UI به «خطا در ثبت کارت» ترجمه می‌شد —
      پیامی که هیچ سرنخی از علت نمی‌داد.
 
-     نامِ دارنده دیگر فرستاده نمی‌شود: سرور آن را از هویتِ احرازشده
+     نام دارنده دیگر فرستاده نمی‌شود: سرور آن را از هویت احرازشده
      می‌نویسد، چون کارت با همان کد ملی تطبیق داده می‌شود. */
   const handleBankCard = async () => {
     const clean = toEnDigits(bankCard).replace(/\D/g, '')
@@ -363,14 +363,14 @@ export default function ProfileMePage() {
         setCardLocked(true)
         showToast(
           j.ibanMessage
-            /* کارت تأیید شد ولی شبا نیامد — نباید مثل موفقیتِ کامل
-               نشان داده شود، وگرنه کاربر فیلدِ خالیِ شبا را نمی‌فهمد. */
+            /* کارت تأیید شد ولی شبا نیامد — نباید مثل موفقیت کامل
+               نشان داده شود، وگرنه کاربر فیلد خالی شبا را نمی‌فهمد. */
             ? `کارت ثبت شد، ولی ${j.ibanMessage}`
             : j.bankName ? `کارت بانک ${j.bankName} ثبت شد` : 'کارت بانکی ثبت شد',
           j.ibanMessage ? 'error' : undefined,
         )
       } else {
-        /* پیامِ سرور دقیق است (هویت تأییدنشده، کارتِ شخصِ دیگر، قطعیِ
+        /* پیام سرور دقیق است (هویت تأییدنشده، کارت شخص دیگر، قطعی
            سرویس) و باید همان به کاربر برسد، نه یک «خطا» کلی. */
         showToast(j?.message || 'ثبت کارت انجام نشد', 'error')
       }
@@ -381,8 +381,8 @@ export default function ProfileMePage() {
     }
   }
 
-  /* عضویت در باشگاه حالا داخلِ ClubPicker انجام می‌شود — همان
-     کامپوننتی که در پروفایلِ شش نقشِ دیگر هم به کار می‌رود. */
+  /* عضویت در باشگاه حالا داخل ClubPicker انجام می‌شود — همان
+     کامپوننتی که در پروفایل شش نقش دیگر هم به کار می‌رود. */
 
   if (loading) return (
     <div style={{ minHeight: '100vh', background: '#F7F7F5', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Vazirmatn, Tahoma, sans-serif' }}>
@@ -420,7 +420,7 @@ export default function ProfileMePage() {
           <div style={{ padding: '0 16px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginTop: 8, marginBottom: 20 }}>
               {/* ── آواتار ──
-                  کل دایره دکمه است، نه فقط نشان گوشه — کاربر معمولاً
+                  کل دایره دکمه است، نه فقط نشان گوشه — کاربر معمولا
                   روی خود عکس می‌زند. نشان دوربین هم بزرگ‌تر و واضح‌تر
                   شد و دیگر از فونت CDN نمی‌آید (که در ایران اغلب
                   بارگذاری نمی‌شد و آیکون نامرئی می‌ماند). */}
@@ -518,9 +518,9 @@ export default function ProfileMePage() {
                   <input value={toFa(profile.nationalId ?? '—')} disabled style={{ ...lockedStyle, direction: 'ltr', textAlign: 'right' }} />
                 </Field>
                 <Field label="تاریخ تولد">
-                  {/* حساب‌های قدیمی تاریخِ تولد را میلادی ذخیره کرده‌اند
-                      (از استعلامِ ثبت‌احوال). `faBirthDate` هر دو قالب را
-                      شمسی نشان می‌دهد؛ خودِ مقدار دست نمی‌خورد. */}
+                  {/* حساب‌های قدیمی تاریخ تولد را میلادی ذخیره کرده‌اند
+                      (از استعلام ثبت‌احوال). `faBirthDate` هر دو قالب را
+                      شمسی نشان می‌دهد؛ خود مقدار دست نمی‌خورد. */}
                   <input value={faBirthDate(profile.birthDate)} disabled style={lockedStyle} />
                 </Field>
               </div>
@@ -570,9 +570,9 @@ export default function ProfileMePage() {
             </Section>
 
             {/* ── اطلاعات تماس ──
-                استان و شهر از بخشِ جداگانه‌ی «موقعیت» به این‌جا آمدند:
+                استان و شهر از بخش جداگانه‌ی «موقعیت» به این‌جا آمدند:
                 هر چهارتا یک چیز را می‌گویند — کجا می‌شود پیدایتان کرد —
-                و دو کارتِ جدا فقط صفحه را بلند می‌کرد. ترتیب هم از کلی
+                و دو کارت جدا فقط صفحه را بلند می‌کرد. ترتیب هم از کلی
                 به جزئی است: استان، شهر، نشانی، تلفن. */}
             <Section title="اطلاعات تماس" icon={<Contact size={18} />} color="#3D63E6">
               <ProvinceCitySelect
@@ -592,7 +592,7 @@ export default function ProfileMePage() {
             </Section>
 
             {/* ── باشگاه ──
-                کامپوننتِ مشترک، همان که در پروفایلِ شش نقشِ دیگر هم
+                کامپوننت مشترک، همان که در پروفایل شش نقش دیگر هم
                 هست. پیش‌تر این صفحه نسخه‌ی خودش را داشت؛ دو پیاده‌سازی
                 یعنی روزی یکی از قلم می‌افتد. */}
             <Section title="باشگاه" icon={<Store size={18} />} color="#a78bfa">
@@ -615,9 +615,9 @@ export default function ProfileMePage() {
               <p style={{ fontSize: 13, color: 'rgba(0,0,0,0.45)', margin: '0 0 12px', lineHeight: 1.6 }}>
                 برای لغو رزرو و تسویه حساب — کارت باید به نام خودتان باشد
               </p>
-              {/* شماره‌ی کارت پیش‌تر دو جا بود: یک‌بار در نشانِ کهربایی
+              {/* شماره‌ی کارت پیش‌تر دو جا بود: یک‌بار در نشان کهربایی
                   بالای بخش و یک‌بار در فیلد. حالا فقط فیلد، که همان
-                  مقدارِ ذخیره‌شده را نشان می‌دهد و قابل ویرایش است. */}
+                  مقدار ذخیره‌شده را نشان می‌دهد و قابل ویرایش است. */}
               <Field label="شماره کارت">
                 <input
                   value={toFa(bankCard)}
@@ -632,9 +632,9 @@ export default function ProfileMePage() {
                 />
               </Field>
 
-              {/* سه فیلدِ بعدی خروجیِ استعلام‌اند، نه ورودیِ کاربر. یک
-                  فیلدِ آزاد فقط اجازه می‌داد کارتِ تأییدشده زیر نام یا
-                  بانکِ دلخواه بنشیند. */}
+              {/* سه فیلد بعدی خروجی استعلام‌اند، نه ورودی کاربر. یک
+                  فیلد آزاد فقط اجازه می‌داد کارت تأییدشده زیر نام یا
+                  بانک دلخواه بنشیند. */}
               <Field label="شماره شبا">
                 <input value={bankIban ? toFa(prettyIban(bankIban)) : '—'} readOnly tabIndex={-1}
                   style={{ ...lockedStyle, direction: 'ltr', textAlign: 'center', fontFamily: 'monospace', fontSize: 13.5 }} />
@@ -672,8 +672,8 @@ export default function ProfileMePage() {
               )}
             </Section>
 
-            {/* بخشِ «دسترسی‌ها» حذف شد: پنج ردیف بود که همیشه و برای همه
-                تیکِ سبز داشتند — هیچ‌کدام واقعاً وضعیتی را نشان نمی‌داد
+            {/* بخش «دسترسی‌ها» حذف شد: پنج ردیف بود که همیشه و برای همه
+                تیک سبز داشتند — هیچ‌کدام واقعا وضعیتی را نشان نمی‌داد
                 و فقط صفحه را بلند می‌کرد. */}
 
             {/* ── Save button ── */}
@@ -689,10 +689,10 @@ export default function ProfileMePage() {
           </div>
         </div>
 
-        {/* ── تأییدِ حذفِ عکس ──
-            جای `window.confirm` را گرفت: آن پنجره قالبِ مرورگر را دارد،
+        {/* ── تأیید حذف عکس ──
+            جای `window.confirm` را گرفت: آن پنجره قالب مرورگر را دارد،
             با هیچ‌جای سایت نمی‌خواند، و در موبایل بالای صفحه می‌پرد.
-            این‌جا عکسِ فعلی هم نشان داده می‌شود تا کاربر ببیند دقیقاً
+            این‌جا عکس فعلی هم نشان داده می‌شود تا کاربر ببیند دقیقا
             چه چیزی را پاک می‌کند. */}
         {confirmAvatar && (
           <div

@@ -10,7 +10,7 @@ const PERSON_URL  = 'https://s.api.ir/api/sw1/PersonInfo'
 export function normName(s: string): string {
   return (s || '')
     .replace(/[يى]/g, 'ی').replace(/ك/g, 'ک')
-    .replace(/[ً-ْٰ‌‏‎]/g, '')
+    .replace(/[-ٰ‌‏‎]/g, '')
     .replace(/\s+/g, ' ')
     .trim()
 }

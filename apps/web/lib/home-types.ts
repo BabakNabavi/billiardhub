@@ -1,7 +1,7 @@
 /* ─────────────────────────────────────────────────────────────
    شکل داده‌ای که کارت‌های صفحه‌ی اصلی می‌گیرند.
 
-   عمداً در ماژول خودش است، نه داخل `app/HomeClient.tsx`:
+   عمدا در ماژول خودش است، نه داخل `app/HomeClient.tsx`:
    HomeClient یک Client Component است و `lib/home-featured.ts` که
    روی سرور اجرا می‌شود باید همین تایپ‌ها را بشناسد. ایمپورت‌کردنشان
    از دل یک فایل `'use client'` یک یال شکننده در گراف ماژول‌ها
@@ -28,7 +28,7 @@ export interface RealClub {
   badge: string | null
   tags: string[]
   hasStory: boolean
-  /** تیکِ آبی — `verificationStatus === 'verified'`. «منتشر بدونِ
+  /** تیک آبی — `verificationStatus === 'verified'`. «منتشر بدون
    *  تیک» (`approved`) هم در فهرست هست ولی تیک نمی‌گیرد. */
   verified: boolean
 }
@@ -45,11 +45,11 @@ export interface RealProduct {
   price: number
   sale: number
   pct: number
-  /* آگهیِ توافقی قیمتِ قابلِ نمایش ندارد — کارت باید «توافقی»
+  /* آگهی توافقی قیمت قابل نمایش ندارد — کارت باید «توافقی»
      بنویسد، نه «۰ تومان». */
   negotiable: boolean
-  /* شهر و وضعیتِ کالا — کارتِ صفحه‌ی اصلی این دو را نداشت، در حالی
-     که همان آگهی در فهرستِ بازار نشانشان می‌داد */
+  /* شهر و وضعیت کالا — کارت صفحه‌ی اصلی این دو را نداشت، در حالی
+     که همان آگهی در فهرست بازار نشانشان می‌داد */
   city: string
   condition: string
 }
@@ -57,7 +57,7 @@ export interface RealProduct {
 export interface RealStore {
   id: string
   name: string
-  /** تیکِ آبی — `profiles.verified` */
+  /** تیک آبی — `profiles.verified` */
   verified: boolean
   city: string
   specialty: string

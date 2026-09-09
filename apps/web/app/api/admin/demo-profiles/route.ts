@@ -6,24 +6,24 @@ import {
   createDemoProfile, listDemoProfiles, deleteDemoProfile,
   PROFILE_KINDS, type ProfileKind,
 } from '@/lib/profiles/server'
-/* باشگاه جدولِ خودش را دارد؛ از نگاهِ ادمین ولی همان «محتوای نمایشی»
-   است، پس از همین مسیر می‌گذرد و گاردِ یکسانی دارد. */
+/* باشگاه جدول خودش را دارد؛ از نگاه ادمین ولی همان «محتوای نمایشی»
+   است، پس از همین مسیر می‌گذرد و گارد یکسانی دارد. */
 import { createDemoClub, listDemoClubs, deleteDemoClub } from '@/lib/clubs/demo'
 
 /* ─────────────────────────────────────────────────────────────
-   محتوای نمایشیِ صفحه‌های عمومی.
+   محتوای نمایشی صفحه‌های عمومی.
 
-   سایتِ تازه‌رونمایی‌شده‌ای که همه‌ی فهرست‌هایش خالی است، به بازدیدکننده
+   سایت تازه‌رونمایی‌شده‌ای که همه‌ی فهرست‌هایش خالی است، به بازدیدکننده
    می‌گوید این‌جا چیزی نیست. این مسیر به ادمین اجازه می‌دهد فهرست‌ها را
    پر کند تا وقتی کسب‌وکارهای واقعی بیایند.
 
    ── مرزها ──
-   · فقط ادمین با دسترسیِ `content`.
+   · فقط ادمین با دسترسی `content`.
    · هر ردیف `is_demo = true` می‌گیرد، پس همیشه از داده‌ی واقعی جدا
-     می‌ماند و یک‌جا قابلِ پاک‌شدن است.
-   · تیکِ «تأییدشده» روی این‌ها گذاشته نمی‌شود — نه از این‌جا و نه از
+     می‌ماند و یک‌جا قابل پاک‌شدن است.
+   · تیک «تأییدشده» روی این‌ها گذاشته نمی‌شود — نه از این‌جا و نه از
      هیچ‌جای دیگر. آن تیک یعنی هویت استعلام شده.
-   · ساخت و حذف هر دو در گزارشِ ممیزی ثبت می‌شوند.
+   · ساخت و حذف هر دو در گزارش ممیزی ثبت می‌شوند.
    ───────────────────────────────────────────────────────────── */
 
 const isKind = (v: unknown): v is ProfileKind =>
@@ -41,17 +41,17 @@ function makeSlug(raw: string, kind: string): string {
   return s ? `${s}-${rand}` : `${kind}-${rand}`
 }
 
-/* ── پرکردنِ فیلدهای اجباریِ هر نوع ──
+/* ── پرکردن فیلدهای اجباری هر نوع ──
 
-   هر صفحه‌ی عمومی رکورد را با تابعِ نگاشتِ خودش به کارت تبدیل می‌کند و
+   هر صفحه‌ی عمومی رکورد را با تابع نگاشت خودش به کارت تبدیل می‌کند و
    آن توابع روی فیلدهایشان مستقیم متد صدا می‌زنند: `p.ranking.replace`,
    `p.products.length`, `p.phones.filter`… اگر فیلدی نباشد، همان‌جا
-   خطا می‌دهد و کلِ فهرست خالی می‌ماند — بی‌سروصدا، چون در `.catch`
+   خطا می‌دهد و کل فهرست خالی می‌ماند — بی‌سروصدا، چون در `.catch`
    بلعیده می‌شود.
 
-   این‌جا شکلِ کامل ساخته می‌شود تا هر ردیفِ نمایشی، از هر مسیری که
-   ساخته شود، حتماً روی صفحه بنشیند. نامِ نمایشی هم برای هر نوع در
-   فیلدِ درستش تکرار می‌شود (فروشگاه `title` می‌خواهد، بقیه `name`). */
+   این‌جا شکل کامل ساخته می‌شود تا هر ردیف نمایشی، از هر مسیری که
+   ساخته شود، حتما روی صفحه بنشیند. نام نمایشی هم برای هر نوع در
+   فیلد درستش تکرار می‌شود (فروشگاه `title` می‌خواهد، بقیه `name`). */
 function withDefaults(kind: ProfileKind, d: Record<string, unknown>): Record<string, unknown> {
   const s = (v: unknown, fb = '') => (typeof v === 'string' && v.trim() ? v : fb)
   const arr = (v: unknown) => (Array.isArray(v) ? v : [])
@@ -84,13 +84,13 @@ function withDefaults(kind: ProfileKind, d: Record<string, unknown>): Record<str
       }
 
     case 'seller':
-      /* کارتِ فروشگاه نام را از `title` می‌خواند، نه `name` */
+      /* کارت فروشگاه نام را از `title` می‌خواند، نه `name` */
       return {
         ...common, title: s(d.title, name),
         desc: intro, contactPhone: s(d.contactPhone) || s(d.phone),
         phones: arr(d.phones), brands: arr(d.brands),
         /* ⚠️ `storyImage: … || photo` این‌جا بود و همان باگ را می‌ساخت:
-           عکسِ پروفایلِ نمونه خودبه‌خود «استوری» می‌شد. استوری فقط از
+           عکس پروفایل نمونه خودبه‌خود «استوری» می‌شد. استوری فقط از
            `/api/sellers/<ownerId>/stories` می‌آید و انقضا دارد. */
       }
 
@@ -125,9 +125,9 @@ function withDefaults(kind: ProfileKind, d: Record<string, unknown>): Record<str
         national: d.national === true, youth: d.youth === true,
         gender: d.gender === 'f' ? 'f' : 'm',
         clubName: s(d.clubName), tone: s(d.tone, 'felt'),
-        /* ⚠️ پیش‌تر عکسِ پروفایل جای صحنه هم می‌نشست، چون بازیکن
-           فیلدِ عکس نداشت. حالا دارد، و همان عکس دیگر نباید تمام‌عرض
-           پشتِ نوارِ بالا کشیده شود. */
+        /* ⚠️ پیش‌تر عکس پروفایل جای صحنه هم می‌نشست، چون بازیکن
+           فیلد عکس نداشت. حالا دارد، و همان عکس دیگر نباید تمام‌عرض
+           پشت نوار بالا کشیده شود. */
         photo,
         scene: s(d.scene),
         bio: arr(d.bio).length ? arr(d.bio) : [intro].filter(Boolean),
@@ -155,8 +155,8 @@ export async function GET(req: NextRequest) {
   if (g.err) return g.err
   const kindParam = new URL(req.url).searchParams.get('kind')
 
-  /* باشگاه جدولِ خودش را دارد، پس فهرستش هم از جای دیگری می‌آید — ولی
-     از همین مسیر، چون از نگاهِ ادمین همان «محتوای نمایشی» است. */
+  /* باشگاه جدول خودش را دارد، پس فهرستش هم از جای دیگری می‌آید — ولی
+     از همین مسیر، چون از نگاه ادمین همان «محتوای نمایشی» است. */
   if (kindParam === 'club') {
     return NextResponse.json({ profiles: [], clubs: await listDemoClubs() })
   }
@@ -164,7 +164,7 @@ export async function GET(req: NextRequest) {
   const kind = isKind(kindParam) ? kindParam : undefined
   return NextResponse.json({
     profiles: await listDemoProfiles(kind),
-    /* بدونِ فیلترِ نوع، باشگاه‌ها هم می‌آیند تا پنل یک‌بار بخواند */
+    /* بدون فیلتر نوع، باشگاه‌ها هم می‌آیند تا پنل یک‌بار بخواند */
     clubs: kind ? [] : await listDemoClubs(),
   })
 }
@@ -175,8 +175,8 @@ export async function POST(req: NextRequest) {
 
   const b = await req.json().catch(() => ({})) as Record<string, unknown>
 
-  /* ── باشگاهِ نمایشی ──
-     مهم‌ترین فهرستِ سایت، و تنها فهرستی که ادمین نمی‌توانست پرش کند. */
+  /* ── باشگاه نمایشی ──
+     مهم‌ترین فهرست سایت، و تنها فهرستی که ادمین نمی‌توانست پرش کند. */
   if (b.kind === 'club') {
     const d = (b.data && typeof b.data === 'object' ? b.data : {}) as Record<string, unknown>
     const num = (v: unknown) => {
@@ -213,18 +213,18 @@ export async function POST(req: NextRequest) {
     } catch (e) {
       const msg = e instanceof Error ? e.message : 'ساخت انجام نشد'
       console.error('[admin/demo-profiles] club', msg)
-      /* پیامِ اعتبارسنجی به کاربر می‌رسد، خطای دیتابیس نه */
+      /* پیام اعتبارسنجی به کاربر می‌رسد، خطای دیتابیس نه */
       const known = /لازم است/.test(msg)
       return NextResponse.json({ message: known ? msg : 'ساخت باشگاه انجام نشد' }, { status: known ? 400 : 500 })
     }
   }
 
   if (!isKind(b.kind)) {
-    return NextResponse.json({ message: 'نوعِ نامعتبر' }, { status: 400 })
+    return NextResponse.json({ message: 'نوع نامعتبر' }, { status: 400 })
   }
   const data = (b.data && typeof b.data === 'object' ? b.data : {}) as Record<string, unknown>
 
-  /* نام لازم است — بدونِ آن کارت روی صفحه بی‌معنی می‌شود */
+  /* نام لازم است — بدون آن کارت روی صفحه بی‌معنی می‌شود */
   const name = String(
     data.firstNameFa || data.name || data.shopName || data.brandName || '',
   ).trim()
@@ -237,7 +237,7 @@ export async function POST(req: NextRequest) {
       ownerId: g.actor!.id,
       slug,
       /* `verified` اگر از کلاینت آمده باشد در `withDefaults` دور ریخته
-         می‌شود؛ مقدارِ ستون را هم `createDemoProfile` خودش false
+         می‌شود؛ مقدار ستون را هم `createDemoProfile` خودش false
          می‌گذارد. یعنی دو لایه، چون این یکی جای اشتباه ندارد. */
       data: { ...withDefaults(b.kind, data), slug },
     })
@@ -266,10 +266,10 @@ export async function DELETE(req: NextRequest) {
   if (!id) return NextResponse.json({ message: 'شناسه مشخص نیست' }, { status: 400 })
 
   if (sp.get('kind') === 'club') {
-    /* شرطِ is_demo داخلِ خودِ تابع است، پس حتی شناسه‌ی اشتباه هم
-       باشگاهِ یک کاربرِ واقعی را پاک نمی‌کند. */
+    /* شرط is_demo داخل خود تابع است، پس حتی شناسه‌ی اشتباه هم
+       باشگاه یک کاربر واقعی را پاک نمی‌کند. */
     const gone = await deleteDemoClub(id)
-    if (!gone) return NextResponse.json({ message: 'باشگاهِ نمایشی با این شناسه پیدا نشد' }, { status: 404 })
+    if (!gone) return NextResponse.json({ message: 'باشگاه نمایشی با این شناسه پیدا نشد' }, { status: 404 })
     void audit({
       actorId: g.actor!.id, actorRole: 'admin', action: 'DEMO_CLUB_DELETED',
       entityType: 'club', entityId: id, ip: clientIp(req) ?? undefined,
@@ -278,7 +278,7 @@ export async function DELETE(req: NextRequest) {
   }
 
   const ok = await deleteDemoProfile(id)
-  if (!ok) return NextResponse.json({ message: 'ردیفِ نمایشی با این شناسه پیدا نشد' }, { status: 404 })
+  if (!ok) return NextResponse.json({ message: 'ردیف نمایشی با این شناسه پیدا نشد' }, { status: 404 })
 
   void audit({
     actorId: g.actor!.id, actorRole: 'admin', action: 'DEMO_PROFILE_DELETED',

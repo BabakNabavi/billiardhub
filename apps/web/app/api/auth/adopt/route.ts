@@ -38,7 +38,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: false, message: 'توکن معتبر نیست' }, { status: 401, headers: CORS_HEADERS });
   }
 
-  /* کاربر باید واقعاً وجود داشته باشد (ممکن است حسابش حذف شده باشد) */
+  /* کاربر باید واقعا وجود داشته باشد (ممکن است حسابش حذف شده باشد) */
   const { data } = await getSupabaseServer()
     .from('users').select('id,phone,"primaryRole"').eq('id', claims.id).maybeSingle();
   const u = data as { id: string; phone?: string; primaryRole?: string } | null;

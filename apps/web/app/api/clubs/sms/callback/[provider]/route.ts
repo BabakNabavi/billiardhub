@@ -9,11 +9,11 @@ import { sendCampaign } from '@/lib/sms/club-campaign';
 /* بازگشت از درگاه — پیامک باشگاه به اعضا.
 
    به گفته‌ی کلاینت اعتماد نمی‌شود: پرداخت سمت سرور verify می‌شود و
-   مبلغِ واقعی با مبلغِ سفارش سنجیده می‌شود. کالبکِ تکراری هم دو بار
-   اثر نمی‌گذارد — سفارشِ `PAID` بی‌درنگ به نتیجه می‌رود.
+   مبلغ واقعی با مبلغ سفارش سنجیده می‌شود. کالبک تکراری هم دو بار
+   اثر نمی‌گذارد — سفارش `PAID` بی‌درنگ به نتیجه می‌رود.
 
-   ارسال بعد از تأیید انجام می‌شود و ردیفِ گیرنده کلیدِ مرکب دارد، پس
-   حتی اگر این مسیر دوباره اجرا شود کسی پیامکِ تکراری نمی‌گیرد. */
+   ارسال بعد از تأیید انجام می‌شود و ردیف گیرنده کلید مرکب دارد، پس
+   حتی اگر این مسیر دوباره اجرا شود کسی پیامک تکراری نمی‌گیرد. */
 
 async function handle(req: NextRequest, providerName: string) {
   const url = req.nextUrl;
@@ -36,7 +36,7 @@ async function handle(req: NextRequest, providerName: string) {
     status: string; provider: string | null; provider_ref: string | null;
   };
 
-  /* قبلاً پرداخت و ارسال شده ⇒ فقط نتیجه */
+  /* قبلا پرداخت و ارسال شده ⇒ فقط نتیجه */
   if (c.status === 'PAID' || c.status === 'SENDING' || c.status === 'SENT') {
     return done(true, `&campaign=${c.id}`);
   }
@@ -61,7 +61,7 @@ async function handle(req: NextRequest, providerName: string) {
     return fail(v.message || 'پرداخت تأیید نشد');
   }
 
-  /* مبلغِ واقعی باید با قیمتِ سرور یکی باشد */
+  /* مبلغ واقعی باید با قیمت سرور یکی باشد */
   if (typeof v.amount === 'number' && v.amount !== c.total_amount) {
     await sb().from('club_sms_campaigns')
       .update({ status: 'FAILED', error_note: 'مبلغ پرداخت با سفارش هم‌خوانی ندارد' })
@@ -84,9 +84,9 @@ async function handle(req: NextRequest, providerName: string) {
   });
 
   /* ارسال همین‌جا و پیش از هدایت انجام می‌شود.
-     کارِ پس‌زمینه در محیطِ بی‌سرور تضمینی نیست — تابع می‌تواند پیش از
-     تمام‌شدنِ حلقه خاموش شود و باشگاه‌دار پول داده باشد و پیامکی
-     نرفته باشد. کندیِ چند ثانیه‌ای بهترین معامله‌ی این‌جاست. */
+     کار پس‌زمینه در محیط بی‌سرور تضمینی نیست — تابع می‌تواند پیش از
+     تمام‌شدن حلقه خاموش شود و باشگاه‌دار پول داده باشد و پیامکی
+     نرفته باشد. کندی چند ثانیه‌ای بهترین معامله‌ی این‌جاست. */
   const r = await sendCampaign(c.id);
   return done(true, `&campaign=${c.id}&sent=${r.sent}`);
 }

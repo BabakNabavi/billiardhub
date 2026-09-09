@@ -1,15 +1,15 @@
 'use client'
 
 /* ─────────────────────────────────────────────────────────────
-   دنبال‌کردنِ کانال و پسندِ ویدیو.
+   دنبال‌کردن کانال و پسند ویدیو.
 
    ⚠️ هر دو اگر سرور بگوید `available: false` **هیچ چیزی رندر
-   نمی‌کنند**. مهاجرتِ ۰۹۲ دستی روی سرور اجرا می‌شود و ممکن است کد
+   نمی‌کنند**. مهاجرت ۰۹۲ دستی روی سرور اجرا می‌شود و ممکن است کد
    پیش از آن دیپلوی شود؛ در آن پنجره نباید دکمه‌ی بی‌کارکرد دیده
    شود — همان چیزی که این‌ها آمده‌اند جایگزینش کنند.
 
    ⚠️ هیچ عددی خوش‌بینانه نوشته نمی‌شود: شمارش همان است که سرور
-   برگردانده. تغییرِ خوش‌بینانه‌ی رابط بود که کاربر را مطمئن می‌کرد
+   برگردانده. تغییر خوش‌بینانه‌ی رابط بود که کاربر را مطمئن می‌کرد
    کاری انجام شده در حالی که نشده بود.
    ───────────────────────────────────────────────────────────── */
 
@@ -32,7 +32,7 @@ export async function socialPost(body: Record<string, unknown>) {
   return { ok: r.ok, status: r.status, j }
 }
 
-/* ═══════════════ دنبال کردنِ کانال ═══════════════ */
+/* ═══════════════ دنبال کردن کانال ═══════════════ */
 export function SubscribeButton({ handle }: { handle: string }) {
   const { user } = useAuthStore()
   const [st, setSt] = useState<SubState | null>(null)
@@ -75,7 +75,7 @@ export function SubscribeButton({ handle }: { handle: string }) {
         {busy ? <Loader2 size={15} className="mx-spin" aria-hidden />
           : st.subscribed ? <BellRing size={15} aria-hidden /> : <BellPlus size={15} aria-hidden />}
         {st.subscribed ? 'دنبال می‌کنید' : 'دنبال کردن'}
-        {/* ⚠️ عدد فقط وقتی می‌آید که واقعاً کسی دنبال کرده باشد */}
+        {/* ⚠️ عدد فقط وقتی می‌آید که واقعا کسی دنبال کرده باشد */}
         {st.subscribers > 0 && <b>{toFaDigits(st.subscribers)}</b>}
       </button>
       {err && <span className="mx-err" role="alert">{err}</span>}

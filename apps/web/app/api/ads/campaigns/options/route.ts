@@ -21,7 +21,7 @@ export async function GET(req: NextRequest) {
         skipAfterSec: p.skipAfterSec ?? null,
         maxDurationSec: p.maxDurationSec ?? null,
         requiredRoles: PLACEMENT_ROLES[p.key] ?? [],
-        /* ظرفیتِ آزاد پیش از خرید — کاربر باید بداند جا هست یا نه،
+        /* ظرفیت آزاد پیش از خرید — کاربر باید بداند جا هست یا نه،
            نه اینکه بعد از پرداخت بفهمد. `free = -1` یعنی بی‌سقف. */
         capacity: p.avail?.capacity ?? p.capacity,
         used: p.avail?.used ?? 0,

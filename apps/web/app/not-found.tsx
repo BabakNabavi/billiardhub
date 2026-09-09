@@ -2,7 +2,7 @@ import Link from 'next/link'
 import type { Metadata } from 'next'
 
 /* بدون این فایل، Next صفحه‌ی پیش‌فرض انگلیسی خودش را نشان می‌داد —
-   وسط یک سایت کاملاً فارسی راست‌به‌چپ. */
+   وسط یک سایت کاملا فارسی راست‌به‌چپ. */
 
 export const metadata: Metadata = {
   title: 'صفحه پیدا نشد | بیلیارد هاب',

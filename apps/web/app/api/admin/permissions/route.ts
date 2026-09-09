@@ -9,12 +9,12 @@ import {
 /* دسترسی‌های تفکیک‌شده‌ی ادمین‌ها.
 
    ── چه کسی چه می‌بیند ──
-   · هر ادمین می‌تواند دسترسیِ **خودش** را بخواند (پنل با همین
+   · هر ادمین می‌تواند دسترسی **خودش** را بخواند (پنل با همین
      تصمیم می‌گیرد کدام کارت‌ها را نشان دهد)
-   · فقط سوپرادمین می‌تواند فهرستِ همه را ببیند یا چیزی را عوض کند */
+   · فقط سوپرادمین می‌تواند فهرست همه را ببیند یا چیزی را عوض کند */
 
-/* GET               → دسترسی‌های خودم + فهرستِ کلیدها
-   GET ?all=1        → دسترسیِ همه‌ی ادمین‌ها (فقط سوپرادمین) */
+/* GET               → دسترسی‌های خودم + فهرست کلیدها
+   GET ?all=1        → دسترسی همه‌ی ادمین‌ها (فقط سوپرادمین) */
 export async function GET(req: NextRequest) {
   const actor = actorFromRequest(req)
   if (!actor) return NextResponse.json({ message: 'ابتدا وارد شوید' }, { status: 401 })
@@ -29,7 +29,7 @@ export async function GET(req: NextRequest) {
 
   if (!iAmSuper) return NextResponse.json({ message: 'فقط سوپرادمین می‌تواند دسترسی‌ها را ببیند' }, { status: 403 })
 
-  /* همه‌ی ادمین‌ها + دسترسیِ هرکدام، در یک پاسخ */
+  /* همه‌ی ادمین‌ها + دسترسی هرکدام، در یک پاسخ */
   const { data: admins } = await sb().from('users')
     .select('id,phone,"firstName","lastName","primaryRole","secondaryRoles"')
     .or('primaryRole.eq.admin,secondaryRoles.cs.{admin}')
@@ -48,7 +48,7 @@ export async function GET(req: NextRequest) {
   })
 }
 
-/* PATCH { userId, permissions: string[] } → جایگزینیِ کاملِ فهرست */
+/* PATCH { userId, permissions: string[] } → جایگزینی کامل فهرست */
 export async function PATCH(req: NextRequest) {
   const actor = actorFromRequest(req)
   if (!actor) return NextResponse.json({ message: 'ابتدا وارد شوید' }, { status: 401 })
@@ -61,11 +61,11 @@ export async function PATCH(req: NextRequest) {
 
   const keys = Array.isArray(b?.permissions) ? b.permissions.map(String) : []
   const unknown = keys.filter(k => !ALL_KEYS.includes(k))
-  if (unknown.length) return NextResponse.json({ message: `کلیدِ ناشناخته: ${unknown.join(', ')}` }, { status: 400 })
+  if (unknown.length) return NextResponse.json({ message: `کلید ناشناخته: ${unknown.join(', ')}` }, { status: 400 })
 
-  /* ── محافظِ سوپرادمین ──
-     ادمینِ معمولی نمی‌تواند سوپر شود، و سوپرادمینِ موجود از این مسیر
-     پایین آورده نمی‌شود. اگر این نبود، اولین ادمینی که دسترسیِ
+  /* ── محافظ سوپرادمین ──
+     ادمین معمولی نمی‌تواند سوپر شود، و سوپرادمین موجود از این مسیر
+     پایین آورده نمی‌شود. اگر این نبود، اولین ادمینی که دسترسی
      «دسترسی ادمین» را می‌گرفت می‌توانست مالک را حذف کند. */
   const target = await permissionsOf(userId)
   if (target.includes(ALL))

@@ -32,9 +32,9 @@ const roleLabels: Record<string, { label: string; color: string }> = {
 export default function AdminVerificationsPage() {
   const router = useRouter();
   /* `_hydrated` لازم است: استور از localStorage خوانده می‌شود و در
-     نخستین رندر `user` تهی است. بدونِ این محافظ، هر رفرش یا هر ورود
-     از بوکمارک ادمین را به صفحه‌ی اصلی پرت می‌کرد — صفحه اصلاً باز
-     نمی‌شد. (ابزارِ سنجشِ UI این را لو داد: به‌جای عناصرِ پنل،
+     نخستین رندر `user` تهی است. بدون این محافظ، هر رفرش یا هر ورود
+     از بوکمارک ادمین را به صفحه‌ی اصلی پرت می‌کرد — صفحه اصلا باز
+     نمی‌شد. (ابزار سنجش UI این را لو داد: به‌جای عناصر پنل،
      `section.clubs-section` صفحه‌ی اصلی را اندازه می‌گرفت.) */
   const { user, _hydrated } = useAuthStore();
   const [requests, setRequests] = useState<VerificationRequest[]>([]);
@@ -45,9 +45,9 @@ export default function AdminVerificationsPage() {
   useEffect(() => {
     if (!_hydrated) return;
     if (!user || user.primaryRole !== 'admin') { router.push('/'); return; }
-    /* منبع: `/api/admin/users`. پیش‌تر `/user/all` بود — مسیرِ
-       بک‌اندِ حذف‌شده‌ی NestJS که ۴۰۴ می‌داد و `.catch` بی‌صدا
-       می‌بلعیدش، پس صفِ احراز هویت همیشه خالی به نظر می‌رسید. */
+    /* منبع: `/api/admin/users`. پیش‌تر `/user/all` بود — مسیر
+       بک‌اند حذف‌شده‌ی NestJS که ۴۰۴ می‌داد و `.catch` بی‌صدا
+       می‌بلعیدش، پس صف احراز هویت همیشه خالی به نظر می‌رسید. */
     void (async () => {
       try {
         const r = await apiFetch('/api/admin/users', { cache: 'no-store' });

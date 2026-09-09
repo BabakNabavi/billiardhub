@@ -149,7 +149,7 @@ function JalaliCalendar({ jYear, jMonth, selectedDay, todayJY, todayJM, todayJD,
   todayJY:number; todayJM:number; todayJD:number;
   maxJY:number; maxJM:number; maxJD:number;
   onSelect:(d:number)=>void; onPrev:()=>void; onNext:()=>void;
-  /** روزهایی که باشگاه رزروشان را بسته — غیرقابل انتخاب، با رنگِ خودشان */
+  /** روزهایی که باشگاه رزروشان را بسته — غیرقابل انتخاب، با رنگ خودشان */
   isClosedDay?:(d:number)=>boolean;
 }) {
   const dim  = jDaysInMonth(jYear, jMonth);
@@ -174,7 +174,7 @@ function JalaliCalendar({ jYear, jMonth, selectedDay, todayJY, todayJM, todayJD,
           if(!day) return <div key={i}/>;
           const isPast = jYear<todayJY||(jYear===todayJY&&jMonth<todayJM)||(jYear===todayJY&&jMonth===todayJM&&day<todayJD);
           const isFutureLocked = jYear>maxJY||(jYear===maxJY&&jMonth>maxJM)||(jYear===maxJY&&jMonth===maxJM&&day>maxJD);
-          /* روزِ بسته هم غیرقابل انتخاب است، ولی رنگش با «گذشته» فرق
+          /* روز بسته هم غیرقابل انتخاب است، ولی رنگش با «گذشته» فرق
              می‌کند تا کاربر بفهمد بسته است نه تمام‌شده. */
           const isClosed = !isPast && !isFutureLocked && !!isClosedDay?.(day);
           const isDisabled = isPast||isFutureLocked||isClosed;
@@ -197,7 +197,7 @@ function JalaliCalendar({ jYear, jMonth, selectedDay, todayJY, todayJM, todayJD,
         })}
       </div>
       <div style={{marginTop:'10px',fontSize: '12px',color:'rgba(0,0,0,0.30)',textAlign:'center'}}>{/* عدد از همان منبعی می‌آید که سرور با آن رد می‌کند، تا این
-          جمله هیچ‌وقت با رفتارِ واقعی جدا نیفتد. */}
+          جمله هیچ‌وقت با رفتار واقعی جدا نیفتد. */}
       رزرو تا حداکثر {toFa(BOOKING_HORIZON_DAYS)} روز آینده امکان‌پذیر است</div>
     </div>
   );
@@ -244,7 +244,7 @@ function BookingContent() {
   const today = new Date();
   const [tJY,tJM,tJD] = toJalali(today.getFullYear(), today.getMonth()+1, today.getDate());
 
-  /* تقویم دقیقاً تا همان روزی باز است که سرور می‌پذیرد. پیش‌تر ۲۸ روز
+  /* تقویم دقیقا تا همان روزی باز است که سرور می‌پذیرد. پیش‌تر ۲۸ روز
      نشان می‌داد ولی سرور بیش از ۱۴ را رد می‌کرد — یعنی کاربر روزی را
      انتخاب می‌کرد که رزروش همان‌جا شکست می‌خورد. */
   const maxDateG = new Date(today); maxDateG.setDate(today.getDate()+BOOKING_HORIZON_DAYS);
@@ -256,10 +256,10 @@ function BookingContent() {
   const isoDate = jDay ? toISO(jYear,jMonth,jDay) : '';
 
   const [loading, setLoading]       = useState(true);
-  /* وضعیتِ بستنِ رزرو — از سرور، نه از localStorage.
-     پیش‌تر کلیدِ مرورگر خوانده می‌شد؛ آن کلید فقط در مرورگرِ خودِ
+  /* وضعیت بستن رزرو — از سرور، نه از localStorage.
+     پیش‌تر کلید مرورگر خوانده می‌شد؛ آن کلید فقط در مرورگر خود
      باشگاه‌دار وجود داشت، پس بازدیدکننده قفل را نمی‌دید و باشگاه‌دار
-     کلِ صفحه را بسته می‌دید — حتی برای روزهایی که باز بودند. */
+     کل صفحه را بسته می‌دید — حتی برای روزهایی که باز بودند. */
   const [closure, setClosure] = useState<ClosureState>({ always: false, untilMs: null, closeToday: false });
   const [slotsLoad, setSlotsLoad]   = useState(false);
   const [booking, setBooking]       = useState(false);
@@ -273,8 +273,8 @@ function BookingContent() {
 
   useEffect(()=>{
     /* وضعیت بستن رزرو از سرور. شکستش صفحه را نمی‌بندد — بدترین حالت
-       این است که قفل در UI دیده نشود، و سرورِ ثبتِ رزرو همچنان جلوی
-       رزروِ نادرست را می‌گیرد. */
+       این است که قفل در UI دیده نشود، و سرور ثبت رزرو همچنان جلوی
+       رزرو نادرست را می‌گیرد. */
     fetch(`/api/clubs/${clubId}/booking-status`, { cache: 'no-store' })
       .then(r => r.ok ? r.json() : null)
       .then(j => { if (j) setClosure(closureState({ closeToday: j.closeToday, closedUntil: j.always ? 'always' : j.closedUntil })); })
@@ -310,7 +310,7 @@ function BookingContent() {
     if(hour===rangeStart){ setRangeStart(null); setSelectedSlots([hour]); return; }
     if(hour<rangeStart){ setRangeStart(hour); setSelectedSlots([hour]); setRangeError('ابتدا ساعت شروع، سپس ساعت پایان را انتخاب کنید'); return; }
     const {range,blocked} = buildRange(slots,rangeStart,hour);
-    if(blocked){ setRangeError('این بازه شامل ساعات رزرو شده است. لطفاً بازه دیگری انتخاب کنید'); return; }
+    if(blocked){ setRangeError('این بازه شامل ساعات رزرو شده است. لطفا بازه دیگری انتخاب کنید'); return; }
     setSelectedSlots(range); setRangeStart(null);
   },[rangeStart,slots]);
 
@@ -353,7 +353,7 @@ function BookingContent() {
       setRedirecting(true);
       window.location.href = paymentUrl;
     } catch(e:any){
-      setError(e?.response?.data?.message||'خطا در ثبت رزرو. لطفاً دوباره تلاش کنید.');
+      setError(e?.response?.data?.message||'خطا در ثبت رزرو. لطفا دوباره تلاش کنید.');
     } finally { setBooking(false); }
   };
 
@@ -370,7 +370,7 @@ function BookingContent() {
   const extraPlayerN = extraPlayers(playerCount, surcharge);
 
   /* میزها بر اساس نوع — ترتیب از lib/tables/order می‌آید تا داشبورد و
-     این صفحه یک چیدمان داشته باشند. درونِ هر گروه هم به ترتیبِ شماره. */
+     این صفحه یک چیدمان داشته باشند. درون هر گروه هم به ترتیب شماره. */
   const groupedTables = (() => {
     const by = new Map<string, typeof tables>();
     for (const t of sortTables(tables)) {
@@ -380,8 +380,8 @@ function BookingContent() {
     }
     return [...by.entries()].sort((a, b) => tableTypeRank(a[0]) - tableTypeRank(b[0]));
   })();
-  /* ساعت‌های بسته‌ی همین تاریخ — هم برای رنگِ قرمزِ شبکه، هم برای
-     نگذاشتنِ کاربر در دامِ انتخابی که سرور بعداً رد می‌کند. */
+  /* ساعت‌های بسته‌ی همین تاریخ — هم برای رنگ قرمز شبکه، هم برای
+     نگذاشتن کاربر در دام انتخابی که سرور بعدا رد می‌کند. */
   const blockedHours = isoDate ? closedHours(isoDate, closure) : [];
 
   const totalPrice   = Math.round(baseTotal*playerMultiplier(playerCount,surcharge));
@@ -403,7 +403,7 @@ function BookingContent() {
       <div style={{textAlign:'center'}}>
         <div style={{width:52,height:52,border:'2px solid rgba(199,166,106,0.16)',borderTop:'2px solid #C7A66A',borderRadius:'50%',margin:'0 auto 18px',animation:'spin 0.85s linear infinite'}}/>
         <div style={{fontSize:16,fontWeight:800,color:'#111111',marginBottom:6}}>در حال انتقال به درگاه پرداخت…</div>
-        <div style={{fontSize:13,color:'rgba(0,0,0,0.42)'}}>لطفاً صفحه را نبندید</div>
+        <div style={{fontSize:13,color:'rgba(0,0,0,0.42)'}}>لطفا صفحه را نبندید</div>
       </div>
       <style>{`@keyframes spin{to{transform:rotate(360deg);}}`}</style>
     </div>
@@ -411,18 +411,18 @@ function BookingContent() {
 
 
   /* ── رزرو آنلاین *همیشه* بسته است ──
-     تنها حالتی که کلِ صفحه معنا ندارد. بستنِ امروز یا بستنِ چند ساعت
+     تنها حالتی که کل صفحه معنا ندارد. بستن امروز یا بستن چند ساعت
      این‌جا نمی‌آید: آن‌ها فقط همان روز یا همان ساعت‌ها را می‌بندند و
-     کاربر باید بتواند تاریخِ دیگری انتخاب کند. تا امروز هر سه حالت
-     به همین صفحه می‌رسیدند و کاربر اصلاً نمی‌توانست رزرو کند. */
+     کاربر باید بتواند تاریخ دیگری انتخاب کند. تا امروز هر سه حالت
+     به همین صفحه می‌رسیدند و کاربر اصلا نمی‌توانست رزرو کند. */
   if (closure.always) return (
     <div className="lq-stage" style={{minHeight:'100vh',direction:'rtl',fontFamily:'Vazirmatn,Tahoma,sans-serif',display:'flex',alignItems:'center',justifyContent:'center',padding:20}}>
       <div style={{maxWidth:420,textAlign:'center',background:'#fff',borderRadius:22,border:'1px solid rgba(0,0,0,0.07)',boxShadow:'0 12px 40px rgba(0,0,0,0.06)',padding:'36px 28px'}}>
         <div style={{width:66,height:66,borderRadius:'50%',background:'rgba(220,38,38,0.10)',display:'flex',alignItems:'center',justifyContent:'center',margin:'0 auto 18px'}}>
           <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#DC2626" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
         </div>
-        {/* «تا اطلاع بعدی» نه «موقتاً»: این حالت پایانِ مشخصی ندارد و
-            «موقتاً» به کاربر می‌گفت کمی بعد دوباره سر بزند. */}
+        {/* «تا اطلاع بعدی» نه «موقتا»: این حالت پایان مشخصی ندارد و
+            «موقتا» به کاربر می‌گفت کمی بعد دوباره سر بزند. */}
         <h1 style={{fontSize:19,fontWeight:900,color:'#111',margin:'0 0 10px'}}>رزروها تا اطلاع بعدی بسته است</h1>
         <p style={{fontSize:14,color:'rgba(0,0,0,0.55)',lineHeight:1.8,margin:'0 0 22px'}}>
           {club?.name ?? 'این باشگاه'} رزرو اینترنتی را تا اطلاع بعدی غیرفعال کرده است. برای رزرو، مستقیم با باشگاه تماس بگیرید.
@@ -474,21 +474,21 @@ function BookingContent() {
 
         <div style={{maxWidth:'720px',margin:'0 auto',padding:'clamp(20px,4vw,36px) clamp(16px,3vw,24px)'}}>
 
-          {/* ── خطا در پنجره، نه در نوارِ بالای صفحه ──
-              نوارِ قبلی این‌جا بود، ولی دکمه‌ی پرداخت پایینِ صفحه است.
+          {/* ── خطا در پنجره، نه در نوار بالای صفحه ──
+              نوار قبلی این‌جا بود، ولی دکمه‌ی پرداخت پایین صفحه است.
               کاربر دکمه را می‌زد، صفحه تکان نمی‌خورد، و علتش بیرون از
               دید ظاهر می‌شد. */}
           <AlertDialog open={!!error} onClose={() => setError('')} message={error} />
 
-          {/* ── قفلِ جزئی ──
-              رزرو باز است ولی بعضی روزها یا ساعت‌ها بسته‌اند. بدونِ این
+          {/* ── قفل جزئی ──
+              رزرو باز است ولی بعضی روزها یا ساعت‌ها بسته‌اند. بدون این
               نوار، کاربر فقط خانه‌های قرمز را می‌دید و علتش را نمی‌فهمید. */}
           {(closure.closeToday || closure.untilMs !== null) && (
             <div style={{display:'flex',alignItems:'flex-start',gap:10,padding:'12px 15px',marginBottom:'14px',
               background:'rgba(245,158,11,0.08)',border:'1px solid rgba(245,158,11,0.28)',borderRadius:14}}>
               <AlertCircle size={15} style={{color:'#B45309',flexShrink:0,marginTop:2}}/>
               <span style={{fontSize:13.5,color:'#92600A',lineHeight:1.9}}>
-                {/* متنِ قبلی سه جمله بود و تاریخ و ساعت را هم می‌گفت؛
+                {/* متن قبلی سه جمله بود و تاریخ و ساعت را هم می‌گفت؛
                     کاربر فقط می‌خواهد بداند امروز می‌تواند رزرو کند یا
                     نه. روزهای بسته در تقویم قرمزند و خودشان گویا. */}
                 رزروهای این باشگاه برای امروز بسته است
@@ -517,7 +517,7 @@ function BookingContent() {
               </div>
             )}
             {/* میزها بر اساس نوع دسته می‌شوند — اسنوکرها زیر هم، پاکت‌ها
-                زیر هم و… . قبلاً به همان ترتیبی که از دیتابیس می‌آمدند
+                زیر هم و… . قبلا به همان ترتیبی که از دیتابیس می‌آمدند
                 پشت سر هم می‌نشستند و انتخابشان گیج‌کننده بود. */}
             <div style={{display:'flex',flexDirection:'column',gap:'8px'}}>
               {groupedTables.map(([type, group])=>(
@@ -545,8 +545,8 @@ function BookingContent() {
                     }
                     <div style={{flex:1,minWidth:0}}>
                       <div style={{display:'flex',alignItems:'center',gap:'8px',marginBottom:'3px',flexWrap:'wrap'}}>
-                        {/* «میز ۱ | اسنوکر» — رشته داخلِ خودِ عنوان است، پس
-                            نشانِ دکمه‌مانندِ کنارش حذف شد: دو بار یک چیز را
+                        {/* «میز ۱ | اسنوکر» — رشته داخل خود عنوان است، پس
+                            نشان دکمه‌مانند کنارش حذف شد: دو بار یک چیز را
                             می‌گفتند و کارت را شلوغ می‌کرد. */}
                         <span style={{fontSize: '16px',fontWeight:800,color:isSel?color:'#111'}}>
                           {table.number ? `میز ${toFa(table.number)} ` : ''}
@@ -577,8 +577,8 @@ function BookingContent() {
               <span style={{width:'3px',height:'13px',background:'linear-gradient(135deg,#06b6d4,#a78bfa)',borderRadius:'2px',display:'inline-block',flexShrink:0}}/>
               تعداد بازیکنان
             </div>
-            {/* شمارنده وسطِ باکس، و هر توضیح یا محاسبه‌ای زیرِ آن.
-                پیش‌تر شمارنده چپ‌چین بود و توضیح کنارش می‌نشست؛ در عرضِ
+            {/* شمارنده وسط باکس، و هر توضیح یا محاسبه‌ای زیر آن.
+                پیش‌تر شمارنده چپ‌چین بود و توضیح کنارش می‌نشست؛ در عرض
                 کم، آن دو از هم دور می‌افتادند و ربطشان گم می‌شد. */}
             <div style={{display:'flex',flexDirection:'column',alignItems:'center',gap:14}}>
               <div style={{display:'flex',alignItems:'center',gap:'16px'}}>
@@ -709,7 +709,7 @@ function BookingContent() {
                       <div style={{display:'flex',gap:'8px',flexWrap:'wrap'}}>
                         <span style={{fontSize: '14px',color:'rgba(0,0,0,0.45)',background:'rgba(0,0,0,0.05)',padding:'4px 12px',borderRadius:'20px',fontWeight:600}}>{toFa(totalHours)} ساعت</span>
                         {/* درصد از همان محاسبه‌ای می‌آید که مبلغ را می‌سازد.
-                            قبلاً این‌جا «>۲» و «۱۵٪» هاردکد بود و با نرخ
+                            قبلا این‌جا «>۲» و «۱۵٪» هاردکد بود و با نرخ
                             واقعی باشگاه نمی‌خواند: کاربر نفر دوم را اضافه
                             می‌کرد، برچسبی نمی‌دید ولی مبلغ بالا می‌رفت. */}
                         {extraPlayerN>0&&<span style={{fontSize: '14px',color:'#f59e0b',background:'rgba(245,158,11,0.08)',padding:'4px 12px',borderRadius:'20px',fontWeight:700}}>{toFa(playerCount)} نفر +{toFa(extraPlayerN*surcharge.percent)}٪</span>}

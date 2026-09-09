@@ -7,8 +7,8 @@
    «۱۳۶۳/۶/۲» با ارقام لاتین است تا سرویس‌های استعلام همان را بپذیرند.
 
    پنل تقویم در portal روی <body> رندر می‌شود، نه داخل فرم: کارت
-   ثبت‌نام `overflow: hidden` دارد و تقویم را از وسط می‌بُرید. با
-   position: fixed و محاسبه‌ی جا، هیچ والدی نمی‌تواند ببُردش و اگر
+   ثبت‌نام `overflow: hidden` دارد و تقویم را از وسط می‌برید. با
+   position: fixed و محاسبه‌ی جا، هیچ والدی نمی‌تواند ببردش و اگر
    زیر فیلد جا نباشد، خودش بالای فیلد باز می‌شود. */
 
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
@@ -149,10 +149,10 @@ export interface JalaliDatePickerProps {
   maxYear?: number
   error?: string
   id?: string
-  /** کدام سمتِ امروز قابلِ انتخاب است؟
+  /** کدام سمت امروز قابل انتخاب است؟
    *
    *  این کامپوننت برای تاریخ تولد نوشته شده بود و آینده را می‌بست.
-   *  برای تاریخِ برگزاریِ مسابقه دقیقاً برعکس لازم است: گذشته باید
+   *  برای تاریخ برگزاری مسابقه دقیقا برعکس لازم است: گذشته باید
    *  بسته باشد. با `'future'` امروز و بعدش باز می‌ماند. */
   direction?: 'past' | 'future'
 }
@@ -168,8 +168,8 @@ export default function JalaliDatePicker({
   }, [])
 
   const future = direction === 'future'
-  /* برای رویداد، سالِ گذشته بی‌معناست و صد سالِ بعد هم. پیش‌فرضِ دو
-     سال — امسال و سالِ بعد — همان چیزی است که یک باشگاه لازم دارد. */
+  /* برای رویداد، سال گذشته بی‌معناست و صد سال بعد هم. پیش‌فرض دو
+     سال — امسال و سال بعد — همان چیزی است که یک باشگاه لازم دارد. */
   const loYear = minYear ?? (future ? today.y : today.y - 100)
   const hiYear = maxYear ?? (future ? today.y + 1 : today.y)   // تاریخ تولد آینده بی‌معناست
 
@@ -256,8 +256,8 @@ export default function JalaliDatePicker({
     return [...Array(pad).fill(null), ...Array.from({ length: n }, (_, i) => i + 1)] as (number | null)[]
   }, [viewY, viewM])
 
-  /* دو سمتِ امروز جدا حساب می‌شوند و بسته به `direction` یکی بسته
-     می‌شود. خودِ امروز در هر دو حالت باز است. */
+  /* دو سمت امروز جدا حساب می‌شوند و بسته به `direction` یکی بسته
+     می‌شود. خود امروز در هر دو حالت باز است. */
   const isAfterToday = (d: number) =>
     viewY > today.y
     || (viewY === today.y && viewM > today.m)
@@ -366,7 +366,7 @@ export default function JalaliDatePicker({
 
       {error && <div style={{ fontSize: 11.5, fontWeight: 700, color: '#B23B2E', marginTop: 5 }}>{error}</div>}
 
-      {/* روی <body> رندر می‌شود تا overflow: hidden هیچ والدی نبُردش */}
+      {/* روی <body> رندر می‌شود تا overflow: hidden هیچ والدی نبردش */}
       {open && mounted && createPortal(panel, document.body)}
     </div>
   )

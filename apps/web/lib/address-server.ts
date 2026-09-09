@@ -3,10 +3,10 @@
    کلید هیچ‌وقت به مرورگر نمی‌رود؛ همان قرارداد استعلام‌های بانکی.
 
    نکته‌ی مشترک با bank-server: این سرویس برای «پیدا نشد» هم HTTP 200
-   با success=true برمی‌گرداند و فقط data را null می‌گذارد. پس «نبودِ
-   نتیجه» یک پاسخ منفیِ واقعی است، نه «سرویس در دسترس نیست» — و این
+   با success=true برمی‌گرداند و فقط data را null می‌گذارد. پس «نبود
+   نتیجه» یک پاسخ منفی واقعی است، نه «سرویس در دسترس نیست» — و این
    دو باید در UI فرق کنند: اولی یعنی «کدت را بررسی کن»، دومی یعنی
-   «بعداً دوباره امتحان کن».
+   «بعدا دوباره امتحان کن».
    ───────────────────────────────────────────────────────────── */
 
 import { inquiryKey } from './inquiry-key'
@@ -36,13 +36,13 @@ export interface PostalCodeResult {
   data?: PostalAddress
   message?: string
   unavailable?: boolean
-  /* پاسخِ خامِ سرویس در حالتِ خطا — فقط برای عیب‌یابی. مسیرِ API
+  /* پاسخ خام سرویس در حالت خطا — فقط برای عیب‌یابی. مسیر API
      تصمیم می‌گیرد این را به چه کسی نشان بدهد.
 
-     چرا لازم شد: همین سرویس روی ماشینِ محلی کار می‌کرد و روی
-     پروداکشن ۵۰۳ می‌داد، و پیامِ کاربرپسندِ «استعلام ناموفق بود»
-     هیچ سرنخی نمی‌داد که مشکل از کلید است، از سطحِ دسترسی، یا از
-     خودِ سرویس. */
+     چرا لازم شد: همین سرویس روی ماشین محلی کار می‌کرد و روی
+     پروداکشن ۵۰۳ می‌داد، و پیام کاربرپسند «استعلام ناموفق بود»
+     هیچ سرنخی نمی‌داد که مشکل از کلید است، از سطح دسترسی، یا از
+     خود سرویس. */
   providerCode?: string | number
   providerMessage?: string
 }
@@ -65,7 +65,7 @@ export function normalizePostalCode(raw: string): string {
 
 export const isValidPostalCode = (raw: string): boolean => {
   const p = normalizePostalCode(raw)
-  /* ده رقم، و نه همه یک رقمِ تکراری — «۰۰۰۰۰۰۰۰۰۰» شکلاً درست است
+  /* ده رقم، و نه همه یک رقم تکراری — «۰۰۰۰۰۰۰۰۰۰» شکلا درست است
      ولی هیچ‌وقت کد واقعی نیست و فقط اعتبار سرویس را می‌سوزاند. */
   return /^\d{10}$/.test(p) && !/^(\d)\1{9}$/.test(p)
 }
@@ -120,16 +120,16 @@ export async function lookupPostalCode(raw: string): Promise<PostalCodeResult> {
   if (j.success === false) {
     if (code === 400) return { ok: false, message: 'کد پستی معتبر نیست' }
 
-    /* قطعیِ سرویسِ بالادستیِ خودِ ارائه‌دهنده. پیامِ واقعی‌اش این است:
+    /* قطعی سرویس بالادستی خود ارائه‌دهنده. پیام واقعی‌اش این است:
        «استعلام مورد نظر پاسخ نمی دهد | باز گشت هزینه فراخوانی» — یعنی
        اعتبار هم مصرف نشده. این با «کد پستی اشتباه» زمین تا آسمان فرق
-       دارد و کاربر باید بداند تقصیر او نیست، وگرنه کدِ درستش را ده بار
+       دارد و کاربر باید بداند تقصیر او نیست، وگرنه کد درستش را ده بار
        بازبینی می‌کند. */
     if (code === 503 || /پاسخ نمی ?دهد|باز ?گشت هزینه/.test(j.message || '')) {
       console.error('PostalCodePro upstream down:', j.message)
       return {
         ok: false, unavailable: true,
-        message: 'سرویس استعلام کد پستی موقتاً پاسخ نمی‌دهد. کمی بعد دوباره تلاش کنید — کد پستی شما مشکلی ندارد.',
+        message: 'سرویس استعلام کد پستی موقتا پاسخ نمی‌دهد. کمی بعد دوباره تلاش کنید — کد پستی شما مشکلی ندارد.',
         providerCode: j.code ?? undefined, providerMessage: j.message ?? undefined,
       }
     }
@@ -140,7 +140,7 @@ export async function lookupPostalCode(raw: string): Promise<PostalCodeResult> {
   }
 
   const d = j.data
-  /* success=true ولی data خالی ⇒ پاسخ منفیِ واقعی */
+  /* success=true ولی data خالی ⇒ پاسخ منفی واقعی */
   if (!d || typeof d !== 'object') {
     return { ok: true, found: false, message: 'برای این کد پستی آدرسی یافت نشد. کد را بررسی کنید.' }
   }
@@ -154,7 +154,7 @@ export async function lookupPostalCode(raw: string): Promise<PostalCodeResult> {
   }
 
   /* اگر هیچ فیلد معناداری برنگشت، همان «پیدا نشد» است. `address` تنها
-     ملاک نیست: بعضی رکوردها فقط اجزا دارند و آدرسِ سرهم‌شده ندارند. */
+     ملاک نیست: بعضی رکوردها فقط اجزا دارند و آدرس سرهم‌شده ندارند. */
   if (!data.address && !data.province && !data.city && !data.street) {
     return { ok: true, found: false, message: 'برای این کد پستی آدرسی یافت نشد. کد را بررسی کنید.' }
   }
@@ -162,7 +162,7 @@ export async function lookupPostalCode(raw: string): Promise<PostalCodeResult> {
   return { ok: true, found: true, data }
 }
 
-/** آدرسِ خوانا از اجزا — وقتی خودِ سرویس `address` نداده باشد */
+/** آدرس خوانا از اجزا — وقتی خود سرویس `address` نداده باشد */
 export function composeAddress(a: PostalAddress): string {
   return [
     a.street, a.street2,

@@ -11,7 +11,7 @@ import { promoteWaitlist } from '@/lib/tournaments/waitlist';
 
 /* ثبت‌نام در مسابقه + شروع پرداخت.
 
-   ترتیب کار عمداً همین است:
+   ترتیب کار عمدا همین است:
      ۱) هویت از نشست
      ۲) سفارش در دیتابیس ساخته می‌شود و مبلغ **همان‌جا** از جدول
         مسابقه خوانده و Snapshot می‌شود
@@ -25,7 +25,7 @@ const REASON_FA: Record<string, string> = {
   not_found: 'مسابقه پیدا نشد',
   registration_closed: 'ثبت‌نام این مسابقه باز نیست',
   deadline_passed: 'مهلت ثبت‌نام تمام شده است',
-  already_registered: 'شما قبلاً در این مسابقه ثبت‌نام کرده‌اید',
+  already_registered: 'شما قبلا در این مسابقه ثبت‌نام کرده‌اید',
   full: 'ظرفیت مسابقه تکمیل است',
   server_error: 'ثبت‌نام انجام نشد',
 };
@@ -70,7 +70,7 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string
 
   /* مسابقه‌ی رایگان — همان‌جا قطعی شد، درگاهی لازم نیست */
   if (out.free) {
-    /* مسیرِ رایگان هیچ‌وقت از کالبک نمی‌گذرد، پس اگر خبردادن فقط
+    /* مسیر رایگان هیچ‌وقت از کالبک نمی‌گذرد، پس اگر خبردادن فقط
        آن‌جا باشد، برگزارکننده‌ی مسابقه‌ی رایگان هرگز خبردار نمی‌شود. */
     void notifyOrganizerOfRegistration(out.registrationId!).catch(() => { /* بی‌صدا */ });
     return NextResponse.json({
@@ -80,10 +80,10 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string
   }
 
   /* ── پرداخت ──
-     عمداً `hasRealGateway()` پرسیده می‌شود، نه `isConfigured()`:
+     عمدا `hasRealGateway()` پرسیده می‌شود، نه `isConfigured()`:
      رجیستری درگاه وقتی چیزی تنظیم نباشد به mock برمی‌گردد و mock
      همیشه «پیکربندی‌شده» است. تکیه بر آن یعنی اعلام «پرداخت موفق»
-     بدون جابه‌جایی ریالی — همان اشتباهی که این ماژول قبلاً داشت. */
+     بدون جابه‌جایی ریالی — همان اشتباهی که این ماژول قبلا داشت. */
   if (!hasRealGateway()) {
     /* صادقانه: سفارش ساخته شد ولی درگاه فعال نیست. هیچ رسید ساختگی
        صادر نمی‌شود و ثبت‌نام در PENDING_PAYMENT می‌ماند. */
@@ -133,12 +133,12 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string 
   }, { headers: { 'Cache-Control': 'no-store' } });
 }
 
-/* ── لغوِ ثبت‌نام توسطِ خودِ بازیکن ───────────────────────────────
+/* ── لغو ثبت‌نام توسط خود بازیکن ───────────────────────────────
    تا امروز راهی نبود: بازیکن پول می‌داد و برای انصراف باید به
-   باشگاه زنگ می‌زد — کاری که برای رزروِ میز از اول خودکار بود.
+   باشگاه زنگ می‌زد — کاری که برای رزرو میز از اول خودکار بود.
 
-   قاعده و مهلت در تابعِ دیتابیس است (مهاجرت ۰۷۴)، نه این‌جا: اگر
-   بررسی سمتِ برنامه باشد، دو درخواستِ هم‌زمان می‌توانند از آن رد
+   قاعده و مهلت در تابع دیتابیس است (مهاجرت ۰۷۴)، نه این‌جا: اگر
+   بررسی سمت برنامه باشد، دو درخواست هم‌زمان می‌توانند از آن رد
    شوند و صندلی دوبار آزاد شود. */
 export async function DELETE(req: NextRequest, ctx: { params: Promise<{ id: string }> }) {
   const { id } = await ctx.params;
@@ -158,7 +158,7 @@ export async function DELETE(req: NextRequest, ctx: { params: Promise<{ id: stri
 
   if (error || !data?.ok) {
     const msg = data?.reason === 'too_late'
-      ? 'مهلتِ انصراف گذشته است — تا ۴ ساعت پیش از پایانِ ثبت‌نام امکان‌پذیر بود'
+      ? 'مهلت انصراف گذشته است — تا ۴ ساعت پیش از پایان ثبت‌نام امکان‌پذیر بود'
       : data?.reason === 'bracket_drawn' ? 'جدول قرعه‌کشی شده و جایگاه‌ها قطعی‌اند'
       : data?.reason === 'not_yours' ? 'این ثبت‌نام متعلق به شما نیست'
       : 'لغو ثبت‌نام انجام نشد';
@@ -171,13 +171,13 @@ export async function DELETE(req: NextRequest, ctx: { params: Promise<{ id: stri
     newValue: { refunded: data.refunded ?? 0 }, ip: clientIp(req) ?? undefined,
   });
 
-  /* صندلی آزاد شد ⇒ نفرِ اولِ صفِ انتظار بالا می‌آید */
+  /* صندلی آزاد شد ⇒ نفر اول صف انتظار بالا می‌آید */
   const promoted = await promoteWaitlist(id);
 
   return NextResponse.json({
     ok: true, refunded: data.refunded ?? 0, promoted,
     message: (data.refunded ?? 0) > 0
-      ? 'ثبت‌نام لغو شد. مبلغ طیِ روزهای آینده بازگردانده می‌شود.'
+      ? 'ثبت‌نام لغو شد. مبلغ طی روزهای آینده بازگردانده می‌شود.'
       : 'ثبت‌نام لغو شد.',
   });
 }

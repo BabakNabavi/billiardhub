@@ -4,13 +4,13 @@ import { getSupabaseServer } from '@/lib/supabase-server';
 import { isValidSlug } from '@/lib/slug';
 import { PROFILE_KINDS, type ProfileKind } from '@/lib/profiles/server';
 
-/* در دسترس بودنِ نشانیِ اختصاصی برای پروفایل‌های نقش — همتای
+/* در دسترس بودن نشانی اختصاصی برای پروفایل‌های نقش — همتای
    `/api/clubs/slug-check`، که تا امروز فقط باشگاه داشتش.
 
-   ── چرا یکتایی سراسری است و نه به تفکیکِ نوع ──
+   ── چرا یکتایی سراسری است و نه به تفکیک نوع ──
    نامک در نشانی می‌نشیند (`/coaches/parsa`, `/sellers/parsa`) و در
-   نگاهِ اول به‌نظر می‌رسد دو نوعِ متفاوت می‌توانند نامکِ یکسان داشته
-   باشند. ولی ایندکسِ یکتاییِ جدول روی خودِ `slug` است، پس دومی موقعِ
+   نگاه اول به‌نظر می‌رسد دو نوع متفاوت می‌توانند نامک یکسان داشته
+   باشند. ولی ایندکس یکتایی جدول روی خود `slug` است، پس دومی موقع
    ذخیره با خطای «تکراری» رد می‌شد — و کاربر تا لحظه‌ی ذخیره سبز
    می‌دید. این‌جا همان قاعده‌ی دیتابیس بررسی می‌شود، نه یک قاعده‌ی
    خوش‌بینانه‌ی دیگر. */
@@ -31,8 +31,8 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ kind: strin
   }
 
   const slug = req.nextUrl.searchParams.get('slug')?.toLowerCase().trim();
-  /* شناسه‌ی پروفایلِ خودِ کاربر — تا ویرایشِ بدونِ تغییرِ نامک،
-     نامکِ خودش را «گرفته‌شده» گزارش نکند. */
+  /* شناسه‌ی پروفایل خود کاربر — تا ویرایش بدون تغییر نامک،
+     نامک خودش را «گرفته‌شده» گزارش نکند. */
   const excludeId = req.nextUrl.searchParams.get('excludeId');
 
   if (!slug) return NextResponse.json({ available: false, error: 'slug الزامی است' }, { status: 400, headers: CORS });
@@ -44,9 +44,9 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ kind: strin
   if (excludeId) q = q.neq('id', excludeId);
   const { data } = await q.maybeSingle();
 
-  /* نامک با نامکِ باشگاه هم نباید تصادم کند؟ نه — مسیرها جدا هستند
-     (`/clubs/x` در برابر `/coaches/x`) و جدول‌ها هم جدا. فقط داخلِ
-     `profiles` یکتاست، چون ایندکسِ یکتایی همان‌جاست. */
+  /* نامک با نامک باشگاه هم نباید تصادم کند؟ نه — مسیرها جدا هستند
+     (`/clubs/x` در برابر `/coaches/x`) و جدول‌ها هم جدا. فقط داخل
+     `profiles` یکتاست، چون ایندکس یکتایی همان‌جاست. */
   void (kind as ProfileKind);
   return NextResponse.json({ available: !data }, { headers: CORS });
 }

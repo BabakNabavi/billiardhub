@@ -26,16 +26,16 @@ export interface AdminRow {
   subtitle: string;
   status: 'approved' | 'rejected';
   href: string;
-  /* شناسه‌ی ردیفِ `profiles` — برای نشان‌دادنِ جزئیات پیش از تصمیم.
+  /* شناسه‌ی ردیف `profiles` — برای نشان‌دادن جزئیات پیش از تصمیم.
      اختیاری است تا صفحه‌هایی که هنوز آن را نمی‌دهند نشکنند؛ بدونش
      فقط دکمه‌ی «جزئیات» دیده نمی‌شود. */
   profileId?: string;
-  /* تیکِ آبی. جدا از `status` است: «منتشر شده» یعنی در سایت دیده
+  /* تیک آبی. جدا از `status` است: «منتشر شده» یعنی در سایت دیده
      می‌شود، «تیک‌دار» یعنی مدرکش تأیید شده. */
   verified?: boolean;
 }
 
-/* هر سه کنش می‌توانند هیچ برنگردانند (رفتارِ قدیمی) یا نتیجه بدهند */
+/* هر سه کنش می‌توانند هیچ برنگردانند (رفتار قدیمی) یا نتیجه بدهند */
 type ActionResult = void | { ok: boolean; message?: string };
 
 export default function ProfileAdmin({
@@ -49,17 +49,17 @@ export default function ProfileAdmin({
      localStorage به دیتابیس منتقل شد و خواندن/نوشتن شبکه‌ای است. */
   load: () => AdminRow[] | Promise<AdminRow[]>;
   /* نتیجه اختیاری است تا صفحه‌های قدیمی نشکنند؛ اگر برگردد و
-     ok:false باشد، پیامِ سرور به‌جای «انجام شد» نشان داده می‌شود. */
+     ok:false باشد، پیام سرور به‌جای «انجام شد» نشان داده می‌شود. */
   toggle: (slug: string) => ActionResult | Promise<ActionResult>;
   remove: (slug: string) => ActionResult | Promise<ActionResult>;
-  /* نبودنش یعنی این صفحه کارِ تیک را انجام نمی‌دهد و دکمه‌اش هم
+  /* نبودنش یعنی این صفحه کار تیک را انجام نمی‌دهد و دکمه‌اش هم
      نباید دیده شود. */
   setVerified?: (slug: string, next: boolean) => ActionResult | Promise<ActionResult>;
 }) {
   /* ── چرا دکمه‌ها متن دارند ──
-     ⚠️ هر چهار دکمه فقط آیکون بودند: سپر، سپرِ خط‌خورده، چشم، سطلِ
-     زباله. حتی ادمینِ همین سایت نمی‌دانست کدام «انتشار» است و کدام
-     «تیک آبی» — و اشتباهش برگشت‌پذیر نبود. متن کنارِ آیکون می‌آید. */
+     ⚠️ هر چهار دکمه فقط آیکون بودند: سپر، سپر خط‌خورده، چشم، سطل
+     زباله. حتی ادمین همین سایت نمی‌دانست کدام «انتشار» است و کدام
+     «تیک آبی» — و اشتباهش برگشت‌پذیر نبود. متن کنار آیکون می‌آید. */
   const actBtn = (extra: React.CSSProperties = {}): React.CSSProperties => ({
     display: 'inline-flex', alignItems: 'center', gap: 6,
     minHeight: 34, padding: '0 10px', borderRadius: 10,
@@ -91,7 +91,7 @@ export default function ProfileAdmin({
 
   /* ── چرا نتیجه سنجیده می‌شود ──
      ⚠️ پیش‌تر هر کنش بی‌قیدوشرط «انجام شد» می‌گفت. اگر سرور ۴۰۳
-     می‌داد (مثلاً ادمین کلیدِ «تیک آبی» را نداشت) پیامِ موفقیت
+     می‌داد (مثلا ادمین کلید «تیک آبی» را نداشت) پیام موفقیت
      می‌آمد و هیچ‌چیز عوض نشده بود. «می‌زنم ولی کار نمی‌کند» همین بود. */
   const run = async (action: () => ActionResult | Promise<ActionResult>, okMsg: string) => {
     const res = await action();
@@ -167,11 +167,11 @@ export default function ProfileAdmin({
                       <FileSearch size={14} />{open === r.slug ? 'بستن' : 'جزئیات'}
                     </button>
                   ) : null}
-                  {/* ── تیکِ آبی ──
+                  {/* ── تیک آبی ──
                       تا امروز این سه صفحه (بازیکن، متخصص، تولیدکننده)
-                      هیچ راهی برای دادنِ تیک نداشتند؛ API از قبل
+                      هیچ راهی برای دادن تیک نداشتند؛ API از قبل
                       `verified` را می‌پذیرفت ولی هیچ دکمه‌ای صدایش
-                      نمی‌زد. صفِ کاملِ هر هفت نقش در /admin/verified است. */}
+                      نمی‌زد. صف کامل هر هفت نقش در /admin/verified است. */}
                   {setVerified && (
                     <button onClick={() => {
                       const next = !r.verified;

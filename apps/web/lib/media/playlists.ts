@@ -6,21 +6,21 @@ import { resolveUrl, type StorageProvider } from './storage'
 /* ─────────────────────────────────────────────────────────────
    لیست‌های پخش — لایه‌ی سرور.
 
-   ⚠️ مثلِ بقیه‌ی لایه‌ی اجتماعی، «جدول نیست» از «خطا» جدا است:
-   مهاجرتِ ۰۹۳ دستی اجرا می‌شود و کد ممکن است زودتر دیپلوی شود. در
-   آن پنجره تبِ «لیست‌های پخش» اصلاً نباید دیده شود.
+   ⚠️ مثل بقیه‌ی لایه‌ی اجتماعی، «جدول نیست» از «خطا» جدا است:
+   مهاجرت ۰۹۳ دستی اجرا می‌شود و کد ممکن است زودتر دیپلوی شود. در
+   آن پنجره تب «لیست‌های پخش» اصلا نباید دیده شود.
 
-   ⚠️ مالکیت با هندلِ کانال بررسی می‌شود، نه با `owner_id`: کاربر
-   می‌تواند چند کانال داشته باشد و `myChannelHandles` منبعِ واحدِ
-   همان بررسی است که مسیرِ انتشارِ ویدیو هم از آن استفاده می‌کند.
+   ⚠️ مالکیت با هندل کانال بررسی می‌شود، نه با `owner_id`: کاربر
+   می‌تواند چند کانال داشته باشد و `myChannelHandles` منبع واحد
+   همان بررسی است که مسیر انتشار ویدیو هم از آن استفاده می‌کند.
    ───────────────────────────────────────────────────────────── */
 
 const sb = () => getSupabaseServer()
 const missing = (msg?: string) => /does not exist|schema cache/i.test(msg ?? '')
 const str = (v: unknown) => (typeof v === 'string' ? v.trim() : '')
 
-/* ⚠️ برای بندانگشتی کلِ `VideoRow` لازم نیست و وانمود‌کردن به آن
-   (`as unknown as VideoRow`) همان درِ پشتیِ `any` است: ستون‌های
+/* ⚠️ برای بندانگشتی کل `VideoRow` لازم نیست و وانمود‌کردن به آن
+   (`as unknown as VideoRow`) همان در پشتی `any` است: ستون‌های
    انتخاب‌شده ناقص‌اند و `toPublic` روی آن‌ها `description: undefined`
    می‌سازد در حالی که تایپ می‌گوید `string`. */
 interface ThumbRow {
@@ -40,7 +40,7 @@ export interface Playlist {
   description: string
   handle: string
   count: number
-  /** بندانگشتیِ چند ویدیوی اول — کارتِ لیست چند تصویر نشان می‌دهد */
+  /** بندانگشتی چند ویدیوی اول — کارت لیست چند تصویر نشان می‌دهد */
   posters: string[]
 }
 
@@ -55,7 +55,7 @@ const LIST_COLS =
   'storage_provider,storage_key,thumb_key,' +
   'duration_sec,width,height,views,published_at,featured'
 
-/** لیست‌های عمومیِ یک کانال. */
+/** لیست‌های عمومی یک کانال. */
 export async function channelPlaylists(handle: string): Promise<PlaylistResult<Playlist[]>> {
   const h = handle.trim().toLowerCase()
   if (!h) return { available: true, data: [] }
@@ -87,9 +87,9 @@ export async function channelPlaylists(handle: string): Promise<PlaylistResult<P
       arr.push(str(it.video_id)); byList.set(k, arr)
     }
 
-    /* ⚠️ ویدیوی لیست باید *همچنان* عمومی و منتشرشده باشد. بدونِ
+    /* ⚠️ ویدیوی لیست باید *همچنان* عمومی و منتشرشده باشد. بدون
        این فیلتر، ویدیویی که بعد از افزودن به لیست خصوصی یا
-       پیش‌نویس شده، بندانگشتی‌اش روی کارتِ عمومیِ کانال می‌ماند و
+       پیش‌نویس شده، بندانگشتی‌اش روی کارت عمومی کانال می‌ماند و
        در شمارش هم می‌آید — کارت می‌گفت «۵ ویدیو» و صفحه‌ی لیست
        سه‌تا نشان می‌داد. */
     const allVideoIds = [...new Set([...byList.values()].flat())]
@@ -132,8 +132,8 @@ export async function playlistBySlug(slug: string): Promise<PlaylistDetail | nul
       .eq('slug', s).maybeSingle()
     if (error || !data) return null
     const p = data as Record<string, unknown>
-    /* `unlisted` با داشتنِ نشانی باز می‌شود؛ `private` نه — همان
-       قاعده‌ی خودِ ویدیوها. */
+    /* `unlisted` با داشتن نشانی باز می‌شود؛ `private` نه — همان
+       قاعده‌ی خود ویدیوها. */
     if (str(p.visibility) === 'private') return null
 
     const { data: items } = await sb().from('playlist_items')
@@ -148,7 +148,7 @@ export async function playlistBySlug(slug: string): Promise<PlaylistDetail | nul
         .in('id', ids).eq('status', 'published').neq('visibility', 'private')
       const rows = (vids ?? []) as unknown as (VideoRow & { id: string })[]
       const byId = new Map(rows.map(v => [v.id, toPublic(v)]))
-      /* ترتیبِ لیست حفظ می‌شود، نه ترتیبی که دیتابیس برگردانده */
+      /* ترتیب لیست حفظ می‌شود، نه ترتیبی که دیتابیس برگردانده */
       videos = ids.map(id => byId.get(id)).filter((v): v is PublicVideo => Boolean(v))
     }
 
@@ -194,7 +194,7 @@ export async function createPlaylist(
   }
 }
 
-/** هندلِ صاحبِ یک لیست — برای بررسیِ اجازه پیش از نوشتن. */
+/** هندل صاحب یک لیست — برای بررسی اجازه پیش از نوشتن. */
 export async function playlistHandle(slug: string): Promise<{ id: string; handle: string } | null> {
   try {
     const { data } = await sb().from('playlists')
@@ -210,8 +210,8 @@ export async function playlistHandle(slug: string): Promise<{ id: string; handle
 
 export async function addToPlaylist(playlistId: string, videoId: string): Promise<WriteResult> {
   try {
-    /* جای تازه = بعد از آخرین آیتم. بدونِ این، همه‌ی آیتم‌ها
-       `position = 0` می‌گیرند و ترتیب فقط به زمانِ افزودن می‌افتد. */
+    /* جای تازه = بعد از آخرین آیتم. بدون این، همه‌ی آیتم‌ها
+       `position = 0` می‌گیرند و ترتیب فقط به زمان افزودن می‌افتد. */
     const { data: last } = await sb().from('playlist_items')
       .select('position').eq('playlist_id', playlistId)
       .order('position', { ascending: false }).limit(1).maybeSingle()

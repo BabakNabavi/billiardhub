@@ -3,32 +3,33 @@
 /* ─────────────────────────────────────────────────────────────
    کارت‌های بیلیارد مدیا.
 
-   سلسله‌مراتبِ هر کارت ثابت است و از آن تخطی نمی‌شود:
-   ویدیو ⟵ عنوان ⟵ سازنده ⟵ متادیتا. هیچ نشانِ تزئینی، هیچ حاشیه،
+   سلسله‌مراتب هر کارت ثابت است و از آن تخطی نمی‌شود:
+   ویدیو ⟵ عنوان ⟵ سازنده ⟵ متادیتا. هیچ نشان تزئینی، هیچ حاشیه،
    هیچ سایه.
 
-   ⚠️ هر تکه‌ی متادیتا فقط وقتی رندر می‌شود که واقعاً وجود داشته
-   باشد: «۰ بازدید» نوشته نمی‌شود، مدتِ ثبت‌نشده جای خالی نمی‌گذارد،
-   و تاریخِ نامعلوم «—» نمی‌گیرد.
+   ⚠️ هر تکه‌ی متادیتا فقط وقتی رندر می‌شود که واقعا وجود داشته
+   باشد: «۰ بازدید» نوشته نمی‌شود، مدت ثبت‌نشده جای خالی نمی‌گذارد،
+   و تاریخ نامعلوم «—» نمی‌گیرد.
    ───────────────────────────────────────────────────────────── */
 
 import { useState } from 'react'
 import Link from 'next/link'
 import { Play } from 'lucide-react'
 import { compactViews, type MediaVideo } from '../../lib/media-data'
+import { ThumbsUp, MessageCircle, Eye } from 'lucide-react'
 import { faDate, toFaDigits } from '../../lib/jalali'
 import type { ShelfChannel } from '../../lib/media/shelf'
 
 const href = (v: MediaVideo) => `/media/${encodeURIComponent(v.id)}`
 
 /* ── بندانگشتی ──
-   ⚠️ «نشانی دارد» با «بار می‌شود» یکی نیست: ویدیوهای زنده نشانیِ
-   بندانگشتیِ ۴۰۴ داشتند و مرورگر آیکنِ عکسِ شکسته را روی کارت
-   می‌گذاشت. `key` روی خودِ نشانی است تا با عوض‌شدنِ آن، پرچمِ شکست
+   ⚠️ «نشانی دارد» با «بار می‌شود» یکی نیست: ویدیوهای زنده نشانی
+   بندانگشتی ۴۰۴ داشتند و مرورگر آیکن عکس شکسته را روی کارت
+   می‌گذاشت. `key` روی خود نشانی است تا با عوض‌شدن آن، پرچم شکست
    صفر شود. */
-/* ⚠️ `sizes` برداشته شد: بدونِ `srcSet` هیچ اثری ندارد و فقط
-   وانمود می‌کند تصویر واکنش‌گراست. بندانگشتی‌ها یک فایلِ ذخیره‌شده
-   دارند و نسخه‌ی چندگانه‌شان کارِ لایه‌ی Storage است، نه این‌جا. */
+/* ⚠️ `sizes` برداشته شد: بدون `srcSet` هیچ اثری ندارد و فقط
+   وانمود می‌کند تصویر واکنش‌گراست. بندانگشتی‌ها یک فایل ذخیره‌شده
+   دارند و نسخه‌ی چندگانه‌شان کار لایه‌ی Storage است، نه این‌جا. */
 export function Thumb({
   v, priority = false, progress,
 }: { v: MediaVideo; priority?: boolean; progress?: number }) {
@@ -63,16 +64,21 @@ export function Avatar({ name, src }: { name: string; src?: string }) {
   )
 }
 
-/** متادیتای زیرِ عنوان — هر تکه فقط اگر واقعی باشد. */
+/* متادیتای زیر عنوان — هر تکه فقط اگر واقعی باشد.
+
+   ⚠️ صفر نمایش داده نمی‌شود. ویدیویی که کسی ندیده «۰ بازدید»
+   نمی‌گیرد؛ جای خالی صادق‌تر از صفر است. */
 export function SubMeta({ v }: { v: MediaVideo }) {
-  const bits: string[] = []
-  if (v.views > 0) bits.push(`${compactViews(v.views)} بازدید`)
+  const bits: React.ReactNode[] = []
+  if (v.views > 0) bits.push(<><Eye size={12} aria-hidden /> {compactViews(v.views)}</>)
+  if (v.likes > 0) bits.push(<><ThumbsUp size={12} aria-hidden /> {compactViews(v.likes)}</>)
+  if (v.comments > 0) bits.push(<><MessageCircle size={12} aria-hidden /> {compactViews(v.comments)}</>)
   if (v.ts > 0) bits.push(faDate(new Date(v.ts)))
   if (bits.length === 0) return null
-  return <div className="mx-sub">{bits.map(b => <span key={b}>{b}</span>)}</div>
+  return <div className="mx-sub">{bits.map((b, i) => <span key={i}>{b}</span>)}</div>
 }
 
-/* ═══ کارتِ استانداردِ ویدیو ═══ */
+/* ═══ کارت استاندارد ویدیو ═══ */
 export function VideoCard({
   v, priority = false, progress, flat = false,
 }: { v: MediaVideo; priority?: boolean; progress?: number; flat?: boolean }) {
@@ -91,7 +97,7 @@ export function VideoCard({
   )
 }
 
-/* ═══ کارتِ فشرده (ریلِ «بعدی» و ستونِ کنارِ شاخص) ═══ */
+/* ═══ کارت فشرده (ریل «بعدی» و ستون کنار شاخص) ═══ */
 export function MiniCard({ v, progress }: { v: MediaVideo; progress?: number }) {
   return (
     <Link className="mx-mini" href={href(v)}>
@@ -105,14 +111,14 @@ export function MiniCard({ v, progress }: { v: MediaVideo; progress?: number }) 
   )
 }
 
-/* ═══ کارتِ Shorts ═══
-   ⚠️ نسبتِ ۹:۱۶ و بدونِ آواتار: قفسه‌ی Shorts باید سریع اسکن شود،
+/* ═══ کارت Shorts ═══
+   ⚠️ نسبت ۹:۱۶ و بدون آواتار: قفسه‌ی Shorts باید سریع اسکن شود،
    نه اینکه هر کارت پنج تکه متادیتا داشته باشد. */
-/* ⚠️ همیشه لینک است، حتی وقتی نمایشگرِ عمودی باز می‌شود:
-     · `<button>` نمی‌تواند `<h3>` در خود داشته باشد (مدلِ محتوا)
-     · کارتِ دکمه‌ای نه ایندکس می‌شود، نه با کلیکِ وسط در تبِ تازه
+/* ⚠️ همیشه لینک است، حتی وقتی نمایشگر عمودی باز می‌شود:
+     · `<button>` نمی‌تواند `<h3>` در خود داشته باشد (مدل محتوا)
+     · کارت دکمه‌ای نه ایندکس می‌شود، نه با کلیک وسط در تب تازه
        باز می‌شود، نه نشانی‌اش کپی‌شدنی است
-   کلیکِ ساده جلوی ناوبری را می‌گیرد و نمایشگر را باز می‌کند؛ اگر
+   کلیک ساده جلوی ناوبری را می‌گیرد و نمایشگر را باز می‌کند؛ اگر
    جاوااسکریپت نبود، لینک به صفحه‌ی ویدیو می‌رود. */
 export function ShortCard({ v, onOpen }: { v: MediaVideo; onOpen?: () => void }) {
   const inner = (
@@ -136,9 +142,9 @@ export function ShortCard({ v, onOpen }: { v: MediaVideo; onOpen?: () => void })
   )
 }
 
-/* ═══ کارتِ کانال ═══
+/* ═══ کارت کانال ═══
    ⚠️ «دنبال‌کننده» نشان داده نمی‌شود چون جدولی برایش نیست. آنچه
-   نشان داده می‌شود شمارشِ واقعیِ ویدیوهای منتشرشده است. */
+   نشان داده می‌شود شمارش واقعی ویدیوهای منتشرشده است. */
 export function ChannelCard({ c }: { c: ShelfChannel }) {
   return (
     <Link className="mx-chan" href={`/media/channel/${encodeURIComponent(c.handle)}`}>

@@ -25,10 +25,10 @@ const TEXT   = '#1C1B17'
 const SEC    = '#5B564B'
 const MUT    = '#6F6A5C'
 const LINE   = '#E7E2D6'
-/* رنگِ پایه‌ی صفحه از کلاسِ مشترکِ lq-stage می‌آید */
+/* رنگ پایه‌ی صفحه از کلاس مشترک lq-stage می‌آید */
 
 /* «ملی‌پوشان»، «رنکینگ» و «جوانان» حذف شدند: هر سه به فیلدهای
-   خوداظهارِ حذف‌شده تکیه داشتند، پس از این پس هیچ بازیکنی با آن‌ها
+   خوداظهار حذف‌شده تکیه داشتند، پس از این پس هیچ بازیکنی با آن‌ها
    جور در نمی‌آمد و هر سه تب برای همیشه خالی می‌ماندند. */
 type Seg = 'all' | 'snooker' | 'pool' | 'women'
 const SEGMENTS: [Seg, string][] = [
@@ -44,15 +44,15 @@ function PlayerCard({ p, i, size = 'std' }: { p: Player; i: number; size?: 'std'
   const d = DISCIPLINE_LABEL[p.discipline]
   return (
     <Link href={`/players/${p.id}`} className={`pl-card pl-${size}`} style={{ animationDelay: `${Math.min(i, 8) * 65}ms` }}>
-      {/* دوتون: صحنه‌ی محو زیر گرادیان تُن */}
+      {/* دوتون: صحنه‌ی محو زیر گرادیان تن */}
       <div className="pl-scene" style={{ backgroundImage: `url(${p.scene})` }} />
       <div className="pl-tone" style={{ background: `linear-gradient(165deg, ${t.from}E8 12%, ${t.to}F2 58%, ${t.from}FA 100%)` }} />
       <div className="pl-glow" style={{ background: `radial-gradient(circle at 82% 14%, ${t.glow}, transparent 58%)` }} />
       {/* قاب داخلی مویی */}
       <div className="pl-frame" />
 
-      {/* رنکینگ روی کارت نیست: عددش را خودِ بازیکن وارد می‌کرد.
-          رنکینگِ رسمی صفحه‌ی /ranking را دارد. */}
+      {/* رنکینگ روی کارت نیست: عددش را خود بازیکن وارد می‌کرد.
+          رنکینگ رسمی صفحه‌ی /ranking را دارد. */}
 
       {/* برچسب‌های بالای کارت */}
       <div className="pl-top">
@@ -86,7 +86,7 @@ export default function PlayersPage() {
   /* بازیکنان ثبت‌نامی (پنل ⇒ localStorage) بعد از mount خوانده و اول لیست می‌نشینند */
   const [registered, setRegistered] = useState<Player[]>([])
 
-  /* اول حافظه‌ی همین مرورگر (فوری)، بعد فهرستِ سرور — وگرنه بازیکنی
+  /* اول حافظه‌ی همین مرورگر (فوری)، بعد فهرست سرور — وگرنه بازیکنی
      که ثبت می‌شود فقط روی همان دستگاه دیده می‌شود. */
   useEffect(() => {
     setRegistered(listApprovedPlayers().map(profileToPlayer))
@@ -95,7 +95,7 @@ export default function PlayersPage() {
         .filter(r => r.status === 'approved')
         .map(r => profileToPlayer({ ...r.data, slug: r.slug, verified: r.verified } as PlayerProfile))
       if (remote.length) setRegistered(remote)
-    }).catch(() => { /* شبکه قطع بود ⇒ فهرستِ محلی می‌ماند */ })
+    }).catch(() => { /* شبکه قطع بود ⇒ فهرست محلی می‌ماند */ })
   }, [])
 
   const ALL = useMemo(() => {
@@ -113,7 +113,7 @@ export default function PlayersPage() {
       if (seg === 'women' && p.gender !== 'f') return false
       if (q && !p.name.includes(q) && !p.nameEn.toLowerCase().includes(q.toLowerCase()) && !p.city.includes(q) && !p.country.includes(q) && !DISCIPLINE_LABEL[p.discipline].fa.includes(q)) return false
       return true
-      /* مرتب‌سازی بر اساسِ رنکینگ برداشته شد: آن فیلد را هیچ مسیری
+      /* مرتب‌سازی بر اساس رنکینگ برداشته شد: آن فیلد را هیچ مسیری
          دیگر پر نمی‌کند، پس همه ۹۹ می‌شدند و ترتیب تصادفی بود. */
     })
   }, [ALL, seg, query])
@@ -209,7 +209,7 @@ export default function PlayersPage() {
         .pl-seg.on { background: linear-gradient(135deg, rgba(199,166,106,0.16), rgba(199,166,106,0.10));
           color: ${GOLD_D}; box-shadow: inset 0 0 0 1px rgba(199,166,106,0.36); }
 
-        /* حالتِ فوکوس از کلاسِ مشترکِ lq-field می‌آید */
+        /* حالت فوکوس از کلاس مشترک lq-field می‌آید */
 
         /* ═══ هیروی سینمایی ═══ */
         .pl-hero { position: relative; overflow: hidden; background: #0D0C0A; color: #fff; }
@@ -229,8 +229,8 @@ export default function PlayersPage() {
         <div style={{ position: 'absolute', top: '-20%', bottom: '-20%', left: '38%', width: 1, background: 'linear-gradient(180deg,transparent,rgba(199,166,106,0.5),transparent)', transform: 'rotate(14deg)' }} />
         <div className="pl-hero-word">PLAYERS</div>
         <div className="plx-wrap" style={{ position: 'relative', padding: 'clamp(40px,6vw,76px) clamp(16px,3vw,28px) clamp(34px,5vw,60px)' }}>
-          {/* گوشه‌ی بالا-چپِ تصویر، بیرون از جریانِ متن.
-              `insetInlineEnd` در RTL همان سمتِ چپِ فیزیکی است. */}
+          {/* گوشه‌ی بالا-چپ تصویر، بیرون از جریان متن.
+              `insetInlineEnd` در RTL همان سمت چپ فیزیکی است. */}
           <span style={{
             position: 'absolute', top: 'clamp(14px,2vw,22px)', insetInlineEnd: 'clamp(16px,3vw,28px)',
             display: 'inline-flex', alignItems: 'center', gap: 8,
@@ -239,9 +239,9 @@ export default function PlayersPage() {
             borderRadius: 999, padding: '4px 11px',
           }}>
             {/* پوسته در RTL می‌ماند و فقط متن ltr می‌شود: با `direction`
-                روی خودِ عنصرِ abspos، مرورگرها سرِ اینکه `insetInlineEnd`
+                روی خود عنصر abspos، مرورگرها سر اینکه `insetInlineEnd`
                 نسبت به کدام جهت حل شود اختلاف دارند و برچسب می‌تواند
-                سرِ راست بنشیند. */}
+                سر راست بنشیند. */}
             <span dir="ltr">BILLIARD HUB · ELITE</span>
           </span>
           <h1 style={{ fontSize: 'clamp(30px,5vw,56px)', fontWeight: 900, margin: 0, lineHeight: 1.2, letterSpacing: '-0.02em' }}>
@@ -249,10 +249,10 @@ export default function PlayersPage() {
           </h1>
           <div style={{ width: 70, height: 3, borderRadius: 2, marginTop: 14, background: `linear-gradient(90deg,${GOLD},#8A6020)`, transformOrigin: 'right', animation: 'plScaleX .55s .3s ease both' }} />
           <p style={{ margin: '14px 0 0', fontSize: 'clamp(12.5px,1.5vw,14.5px)', color: 'rgba(255,255,255,0.62)', maxWidth: 520, lineHeight: 2, animation: 'plFadeUp .5s .35s ease both' }}>
-            {/* «ملی‌پوشان» و «رنکینگ» از متن رفتند چون هر دو فیلدِ
+            {/* «ملی‌پوشان» و «رنکینگ» از متن رفتند چون هر دو فیلد
                 خوداظهار بودند و حذف شدند؛ متنی که به چیزی اشاره کند
                 که صفحه دیگر ندارد، وعده‌ی توخالی است. */}
-            چهره‌های شاخصِ اسنوکر و پاکت بیلیارد — حرفه‌ای‌های میز را این‌جا بشناسید.
+            چهره‌های شاخص اسنوکر و پاکت بیلیارد — حرفه‌ای‌های میز را این‌جا بشناسید.
           </p>
         </div>
       </header>

@@ -32,24 +32,24 @@ export interface PlayerProfile {
   youth: boolean
   clubName: string
   tone: Player['tone']
-  /** عکسِ پروفایل (آواتار). ⚠️ بازیکن تنها نقشی بود که این فیلد را
-      نداشت و صفحه ناچار اولین عکسِ گالری را آواتار می‌کرد — یعنی
+  /** عکس پروفایل (آواتار). ⚠️ بازیکن تنها نقشی بود که این فیلد را
+      نداشت و صفحه ناچار اولین عکس گالری را آواتار می‌کرد — یعنی
       کاربر هیچ راهی برای انتخابش نداشت. */
   photo: string
-  scene: string              // تصویر پس‌زمینه‌ی نوارِ بالا (آپلودی)
+  scene: string              // تصویر پس‌زمینه‌ی نوار بالا (آپلودی)
   intro: string
   bio: string[]
   careerStart: string
   highlights: PlayerHighlight[]
   tournaments: PlayerTournament[]
-  /* همان مدلِ بقیه‌ی نقش‌ها: نامِ آلبوم‌ها این‌جا، عضویت روی رسانه */
+  /* همان مدل بقیه‌ی نقش‌ها: نام آلبوم‌ها این‌جا، عضویت روی رسانه */
   albums: string[]
   gallery: PlayerMedia[]
   videos: PlayerVideo[]
   tags: string[]
 
   status: 'approved' | 'rejected'
-  /* ستونِ جدولِ `profiles` است نه داخلِ jsonb */
+  /* ستون جدول `profiles` است نه داخل jsonb */
   verified?: boolean
   updatedAt: string
 }
@@ -127,9 +127,9 @@ export function newPlayerSlug(): string {
 
 /* پروفایل ذخیره‌شده → شکل Player تا صفحات /players مستقیم رندرش کنند */
 export function profileToPlayer(p: PlayerProfile): Player {
-  /* ⚠️ همان تله‌ی خدماتِ فنی: صفحه‌ی عمومی داده‌ی خامِ سرور را مستقیم
-     به این تابع می‌دهد و ردیفی که کلیدِ `gallery` ندارد `undefined`
-     رد می‌کرد — صفحه به error boundary می‌رفت، با بیلدِ سبز. */
+  /* ⚠️ همان تله‌ی خدمات فنی: صفحه‌ی عمومی داده‌ی خام سرور را مستقیم
+     به این تابع می‌دهد و ردیفی که کلید `gallery` ندارد `undefined`
+     رد می‌کرد — صفحه به error boundary می‌رفت، با بیلد سبز. */
   const media = normalizePlayerMedia(p)
   const rank = parseInt(String(p.ranking ?? '').replace(/[۰-۹]/g, d => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(d))), 10)
   return {
@@ -147,11 +147,11 @@ export function profileToPlayer(p: PlayerProfile): Player {
     club: p.clubName ? { name: p.clubName } : undefined,
     tone: p.tone,
     scene: p.scene || '/images/shop/snooker-table.webp',
-    /* ⚠️ ردیفِ پیش از افزودنِ این فیلد null می‌دهد؛ صفحه رویش .length صدا می‌زند */
+    /* ⚠️ ردیف پیش از افزودن این فیلد null می‌دهد؛ صفحه رویش .length صدا می‌زند */
     photo: p.photo || '',
     intro: p.intro || '',
     /* استان در فرم گرفته می‌شود ولی تا امروز به نمای صفحه نمی‌رسید؛
-       کارتِ مشخصات به‌جایش «ایران» را زیرِ شهر نشان می‌داد. */
+       کارت مشخصات به‌جایش «ایران» را زیر شهر نشان می‌داد. */
     province: p.province || provinceOfCity(p.city || '') || '',
     bio: p.bio.length ? p.bio : [p.intro].filter(Boolean),
     careerStart: p.careerStart || '—',

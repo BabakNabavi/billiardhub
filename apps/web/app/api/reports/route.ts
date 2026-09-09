@@ -8,7 +8,7 @@ import { notifyReportCreated } from '@/lib/notify';
 
 /* فهرست از `lib/moderation/reasons` می‌آید — پیش‌تر این‌جا و در
    `ReportButton` دو نسخه‌ی جدا بود و هر واگرایی یعنی کاربر دلیلی
-   می‌بیند که سرور نمی‌شناسد. `export` برای سازگاریِ واردکننده‌های
+   می‌بیند که سرور نمی‌شناسد. `export` برای سازگاری واردکننده‌های
    قبلی می‌ماند. */
 export { REPORT_REASONS } from '@/lib/moderation/reasons';
 import { REPORT_REASONS } from '@/lib/moderation/reasons';
@@ -55,7 +55,7 @@ export async function POST(req: NextRequest) {
   if (error) {
     const m = error.message || '';
     if (/duplicate key|reports_one_open_per_user/i.test(m)) {
-      return NextResponse.json({ message: 'شما قبلاً این مورد را گزارش کرده‌اید؛ در حال بررسی است.' }, { status: 409 });
+      return NextResponse.json({ message: 'شما قبلا این مورد را گزارش کرده‌اید؛ در حال بررسی است.' }, { status: 409 });
     }
     if (/does not exist|schema cache/i.test(m)) {
       return NextResponse.json({ message: 'سامانه‌ی گزارش تخلف هنوز راه‌اندازی نشده است' }, { status: 503 });
@@ -63,8 +63,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ message: 'ثبت گزارش انجام نشد' }, { status: 500 });
   }
 
-  /* ادمین بی‌درنگ خبردار می‌شود. `await` عمدی است: روی سرورلسِ
-     Vercel کارِ رهاشده بعد از پاسخ ممکن است هرگز اجرا نشود، و خودِ
+  /* ادمین بی‌درنگ خبردار می‌شود. `await` عمدی است: روی سرورلس
+     Vercel کار رهاشده بعد از پاسخ ممکن است هرگز اجرا نشود، و خود
      تابع هر خطایی را می‌بلعد پس تأخیرش ناچیز و بی‌خطر است. */
   await notifyReportCreated({
     targetType,

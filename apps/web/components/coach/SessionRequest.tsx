@@ -1,11 +1,11 @@
 'use client'
 
-/* درخواستِ جلسه‌ی مربی — سمتِ شاگرد.
+/* درخواست جلسه‌ی مربی — سمت شاگرد.
 
-   ── چرا فرمِ کوچک و نه تقویم ──
-   تقویمِ در دسترس‌بودنِ مربی هنوز ساخته نشده. تا آن روز، شاگرد زمانِ
+   ── چرا فرم کوچک و نه تقویم ──
+   تقویم در دسترس‌بودن مربی هنوز ساخته نشده. تا آن روز، شاگرد زمان
    پیشنهادی می‌فرستد و مربی تأیید یا رد می‌کند — همان چیزی که امروز
-   هم در واقعیت بینشان می‌گذرد، فقط ثبت‌شده. ساختنِ تقویمی که پشتش
+   هم در واقعیت بینشان می‌گذرد، فقط ثبت‌شده. ساختن تقویمی که پشتش
    داده‌ی در دسترس‌بودن نیست، فقط وعده‌ی دروغ می‌دهد.
 
    ⚠️ پرداخت درون‌سایتی نیست و همین‌جا هم صریح نوشته می‌شود؛ مبلغ
@@ -25,7 +25,7 @@ const fa = (v: string | number) => String(v ?? '').replace(/[0-9]/g, d => '۰۱�
 
 export default function SessionRequest({ coachSlug, price, minutes }: {
   coachSlug: string
-  /** مبلغِ توافقیِ جلسه — صفر یعنی مربی مبلغی اعلام نکرده */
+  /** مبلغ توافقی جلسه — صفر یعنی مربی مبلغی اعلام نکرده */
   price: number
   minutes: number
 }) {
@@ -36,8 +36,8 @@ export default function SessionRequest({ coachSlug, price, minutes }: {
   const [busy, setBusy] = useState(false)
   const [err, setErr] = useState('')
   const [done, setDone] = useState(false)
-  /* کفِ انتخاب‌پذیرِ فرم = همان کفی که سرور می‌پذیرد (نیم‌ساعت بعد)،
-     به وقتِ تهران. بدونش کاربر زمانی را انتخاب می‌کند و بعدِ ارسال
+  /* کف انتخاب‌پذیر فرم = همان کفی که سرور می‌پذیرد (نیم‌ساعت بعد)،
+     به وقت تهران. بدونش کاربر زمانی را انتخاب می‌کند و بعد ارسال
      ۴۰۰ می‌گیرد. */
   const minWhen = new Date(Date.now() + 31 * 60 * 1000)
     .toLocaleString('sv-SE', { timeZone: 'Asia/Tehran' }).slice(0, 16).replace(' ', 'T')
@@ -82,7 +82,7 @@ export default function SessionRequest({ coachSlug, price, minutes }: {
       <label htmlFor="sess-when" style={{ display: 'block', fontSize: 12.5, fontWeight: 700, color: TEXT, marginBottom: 6 }}>
         زمان پیشنهادی
       </label>
-      {/* ورودیِ زمان لاتین است و باید چپ‌به‌راست بماند */}
+      {/* ورودی زمان لاتین است و باید چپ‌به‌راست بماند */}
       <input id="sess-when" type="datetime-local" value={when} onChange={e => setWhen(e.target.value)} dir="ltr" min={minWhen}
         style={{ width: '100%', boxSizing: 'border-box', padding: '10px 12px', borderRadius: 10, border: LINE, background: '#fff', fontSize: 13.5, fontFamily: 'inherit', color: TEXT }} />
 
@@ -90,7 +90,7 @@ export default function SessionRequest({ coachSlug, price, minutes }: {
         توضیح (اختیاری)
       </label>
       <textarea id="sess-note" value={note} onChange={e => setNote(e.target.value.slice(0, 500))} rows={2}
-        placeholder="مثلاً: سطح مبتدی، تمرکز روی ضربه‌ی پایه"
+        placeholder="مثلا: سطح مبتدی، تمرکز روی ضربه‌ی پایه"
         style={{ width: '100%', boxSizing: 'border-box', padding: '10px 12px', borderRadius: 10, border: LINE, background: '#fff', fontSize: 13.5, fontFamily: 'inherit', color: TEXT, resize: 'vertical' }} />
 
       <p style={{ fontSize: 12, color: MUT, lineHeight: 1.9, margin: '10px 0 0' }}>

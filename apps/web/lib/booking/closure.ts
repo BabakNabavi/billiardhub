@@ -1,32 +1,32 @@
 /* ─────────────────────────────────────────────────────────────
-   بستنِ رزرو — منطقِ مشترکِ سرور و مرورگر.
+   بستن رزرو — منطق مشترک سرور و مرورگر.
 
-   سه سازوکارِ مستقل وجود دارد و تا امروز هرکدام جای دیگری زندگی
-   می‌کرد؛ نتیجه‌اش رفتارِ متناقض بود:
+   سه سازوکار مستقل وجود دارد و تا امروز هرکدام جای دیگری زندگی
+   می‌کرد؛ نتیجه‌اش رفتار متناقض بود:
 
-     ۱) بستنِ امروز       (clubs.closeTodayReservations)
-        فقط روزِ جاری. روزهای آینده باز.
+     ۱) بستن امروز       (clubs.closeTodayReservations)
+        فقط روز جاری. روزهای آینده باز.
 
-     ۲) بستنِ موقت        (clubs.reserveClosedUntil)
-        از همین لحظه تا یک زمانِ مشخص — که ممکن است وسطِ امروز
-        تمام شود. پس یک قفلِ *ساعتی* است، نه روزانه.
+     ۲) بستن موقت        (clubs.reserveClosedUntil)
+        از همین لحظه تا یک زمان مشخص — که ممکن است وسط امروز
+        تمام شود. پس یک قفل *ساعتی* است، نه روزانه.
 
-     ۳) بستنِ یک میز      (tables.reservationClosed)
+     ۳) بستن یک میز      (tables.reservationClosed)
         فقط همان میز؛ بقیه‌ی میزها باز.
 
    نکته‌ی کلیدی که پیش‌تر رعایت نمی‌شد: هیچ‌کدام از این‌ها نباید
    «صفحه‌ی رزرو» را ببندد. باید فقط همان روز یا همان ساعت‌ها یا همان
-   میز بسته شود. کاربر باید بتواند تاریخِ دیگری انتخاب کند.
+   میز بسته شود. کاربر باید بتواند تاریخ دیگری انتخاب کند.
    ───────────────────────────────────────────────────────────── */
 
-/** «امروز» به وقتِ تهران — با UTC، از ۲۰:۳۰ به بعد فردا حساب می‌شد */
+/** «امروز» به وقت تهران — با UTC، از ۲۰:۳۰ به بعد فردا حساب می‌شد */
 export function todayInTehran(now: Date = new Date()): string {
   return new Intl.DateTimeFormat('en-CA', {
     timeZone: 'Asia/Tehran', year: 'numeric', month: '2-digit', day: '2-digit',
   }).format(now)
 }
 
-/** ساعتِ جاری به وقتِ تهران (۰..۲۳) */
+/** ساعت جاری به وقت تهران (۰..۲۳) */
 export function hourInTehran(now: Date = new Date()): number {
   return Number(new Intl.DateTimeFormat('en-GB', {
     timeZone: 'Asia/Tehran', hour: '2-digit', hour12: false,
@@ -42,9 +42,9 @@ export interface ClosureInput {
 }
 
 export interface ClosureState {
-  /** همیشه بسته — تنها حالتی که کلِ رزرو معنا ندارد */
+  /** همیشه بسته — تنها حالتی که کل رزرو معنا ندارد */
   always: boolean
-  /** لحظه‌ی پایانِ بستنِ موقت (میلی‌ثانیه)، اگر فعال باشد */
+  /** لحظه‌ی پایان بستن موقت (میلی‌ثانیه)، اگر فعال باشد */
   untilMs: number | null
   closeToday: boolean
 }
@@ -65,14 +65,14 @@ export function closureState({ closeToday, closedUntil, now = new Date() }: Clos
   return { always: false, untilMs: ms, closeToday: !!closeToday }
 }
 
-/** آیا کلِ این تاریخ بسته است؟ (نه کلِ رزرو) */
+/** آیا کل این تاریخ بسته است؟ (نه کل رزرو) */
 export function isDateClosed(date: string, s: ClosureState, now: Date = new Date()): boolean {
   if (s.always) return true
   if (s.closeToday && date === todayInTehran(now)) return true
 
-  /* بستنِ موقت فقط وقتی کلِ یک روز را می‌بندد که تا پایانِ آن روز ادامه
-     داشته باشد؛ وگرنه فقط چند ساعتِ اولش بسته است و بقیه‌ی روز باز
-     می‌ماند — این‌جا بود که پیش‌تر کلِ صفحه بسته می‌شد. */
+  /* بستن موقت فقط وقتی کل یک روز را می‌بندد که تا پایان آن روز ادامه
+     داشته باشد؛ وگرنه فقط چند ساعت اولش بسته است و بقیه‌ی روز باز
+     می‌ماند — این‌جا بود که پیش‌تر کل صفحه بسته می‌شد. */
   if (s.untilMs !== null) {
     const endOfDate = Date.parse(`${date}T23:59:59+03:30`)
     if (Number.isFinite(endOfDate) && s.untilMs >= endOfDate) return true
@@ -81,8 +81,8 @@ export function isDateClosed(date: string, s: ClosureState, now: Date = new Date
 }
 
 /**
- * ساعت‌هایی از یک تاریخ که به‌خاطر بستنِ موقت قابلِ رزرو نیستند.
- * برای نمایشِ قرمزِ همان ساعت‌ها در شبکه‌ی رزرو.
+ * ساعت‌هایی از یک تاریخ که به‌خاطر بستن موقت قابل رزرو نیستند.
+ * برای نمایش قرمز همان ساعت‌ها در شبکه‌ی رزرو.
  */
 export function closedHours(date: string, s: ClosureState, now: Date = new Date()): number[] {
   if (s.always) return Array.from({ length: 24 }, (_, i) => i)
@@ -91,23 +91,23 @@ export function closedHours(date: string, s: ClosureState, now: Date = new Date(
 
   const out: number[] = []
   for (let h = 0; h < 24; h++) {
-    /* یک ساعت وقتی بسته است که *شروعش* پیش از پایانِ قفل باشد:
-       اگر قفل تا ۱۴:۳۰ است، ساعتِ ۱۴ هم هنوز بسته است چون بخشی از
-       آن درونِ بازه‌ی قفل می‌افتد. */
+    /* یک ساعت وقتی بسته است که *شروعش* پیش از پایان قفل باشد:
+       اگر قفل تا ۱۴:۳۰ است، ساعت ۱۴ هم هنوز بسته است چون بخشی از
+       آن درون بازه‌ی قفل می‌افتد. */
     const slotStart = Date.parse(`${date}T${String(h).padStart(2, '0')}:00:00+03:30`)
     if (Number.isFinite(slotStart) && slotStart < s.untilMs) out.push(h)
   }
   return out
 }
 
-/* ── اولویتِ سازوکارها ──────────────────────────────────────────
+/* ── اولویت سازوکارها ──────────────────────────────────────────
    قفل‌ها هم‌عرض نیستند؛ یکی روی دیگری را می‌پوشاند. ترتیب از قوی به
    ضعیف: همیشه ← امروز ← ۱۲ ساعت ← ۶ ساعت ← ۳ ساعت.
 
    کاربردش این است که گزینه‌ی ضعیف‌تر وقتی قوی‌تری فعال است خاموش
-   شود. بدونِ این، باشگاه‌دار می‌توانست روی «همیشه بسته» دکمه‌ی «۳
-   ساعت» را بزند و نتیجه‌اش *بازشدنِ* رزرو بود — یعنی دکمه دقیقاً
-   برعکسِ نامش عمل می‌کرد. */
+   شود. بدون این، باشگاه‌دار می‌توانست روی «همیشه بسته» دکمه‌ی «۳
+   ساعت» را بزند و نتیجه‌اش *بازشدن* رزرو بود — یعنی دکمه دقیقا
+   برعکس نامش عمل می‌کرد. */
 
 export type ClosureOption = 3 | 6 | 12 | 'always'
 
@@ -118,11 +118,11 @@ export function optionRank(opt: ClosureOption | 'today'): number {
   return RANK[String(opt)] ?? -1
 }
 
-/** کدام گزینه همین حالا فعال است؟ (برای نشان‌دادنِ حالتِ «زده‌شده»)
+/** کدام گزینه همین حالا فعال است؟ (برای نشان‌دادن حالت «زده‌شده»)
  *
- *  از زمانِ باقی‌مانده حساب می‌شود نه از چیزی که ذخیره شده باشد: اگر
+ *  از زمان باقی‌مانده حساب می‌شود نه از چیزی که ذخیره شده باشد: اگر
  *  «۱۲ ساعت» یک ساعت پیش زده شده، یازده ساعت مانده و همچنان همان
- *  دکمه باید فعال دیده شود. پس به نزدیک‌ترین سطلِ بالاتر گرد می‌شود. */
+ *  دکمه باید فعال دیده شود. پس به نزدیک‌ترین سطل بالاتر گرد می‌شود. */
 export function activeOption(s: ClosureState, now: Date = new Date()): ClosureOption | null {
   if (s.always) return 'always'
   if (s.untilMs === null) return null
@@ -132,7 +132,7 @@ export function activeOption(s: ClosureState, now: Date = new Date()): ClosureOp
   return 12
 }
 
-/** قوی‌ترین قفلِ فعال — مبنای خاموش‌کردنِ گزینه‌های ضعیف‌تر */
+/** قوی‌ترین قفل فعال — مبنای خاموش‌کردن گزینه‌های ضعیف‌تر */
 export function activeRank(s: ClosureState, now: Date = new Date()): number {
   if (s.always) return optionRank('always')
   if (s.closeToday) return optionRank('today')
@@ -143,8 +143,8 @@ export function activeRank(s: ClosureState, now: Date = new Date()): number {
 /** آیا این گزینه باید خاموش باشد؟
  *
  *  قاعده یکی است و همه‌ی حالت‌های خواسته‌شده از آن درمی‌آید: هر گزینه
- *  که رتبه‌اش *پایین‌تر* از قفلِ فعلی است خاموش می‌شود. پس «همیشه»
- *  هیچ‌وقت خاموش نمی‌شود مگر خودش فعال باشد، و تیکِ «امروز» فقط با
+ *  که رتبه‌اش *پایین‌تر* از قفل فعلی است خاموش می‌شود. پس «همیشه»
+ *  هیچ‌وقت خاموش نمی‌شود مگر خودش فعال باشد، و تیک «امروز» فقط با
  *  «همیشه» خاموش می‌شود. */
 export function isOptionDisabled(opt: ClosureOption | 'today', s: ClosureState, now: Date = new Date()): boolean {
   /* «همیشه» استثناست: وقتی فعال است هیچ راهی جز «باز کردن رزرو»
@@ -155,29 +155,29 @@ export function isOptionDisabled(opt: ClosureOption | 'today', s: ClosureState, 
   return activeRank(s, now) > optionRank(opt)
 }
 
-/* ── افقِ رزرو ──
-   تا چند روزِ آینده می‌شود رزرو کرد. یک منبعِ واحد تا صفحه‌ی رزرو،
-   سرور، و تقویمِ پنلِ باشگاه‌دار هیچ‌وقت از هم جدا نیفتند: اگر تقویم
+/* ── افق رزرو ──
+   تا چند روز آینده می‌شود رزرو کرد. یک منبع واحد تا صفحه‌ی رزرو،
+   سرور، و تقویم پنل باشگاه‌دار هیچ‌وقت از هم جدا نیفتند: اگر تقویم
    چهارده روز نشان دهد ولی سرور ده روز بپذیرد، کاربر روزی را انتخاب
    می‌کند که رزروش رد می‌شود. */
 export const BOOKING_HORIZON_DAYS = 14
 
-/** آخرین تاریخِ قابلِ رزرو — `YYYY-MM-DD` */
+/** آخرین تاریخ قابل رزرو — `YYYY-MM-DD` */
 export function lastBookableDate(from: Date = new Date()): string {
   const d = new Date(from.getTime() + BOOKING_HORIZON_DAYS * 86_400_000)
   return d.toISOString().slice(0, 10)
 }
 
-/** متنِ خوانا برای نشان‌دادن وضعیت */
+/** متن خوانا برای نشان‌دادن وضعیت */
 export function closureLabel(s: ClosureState): string {
   if (s.always) return 'رزرو آنلاین همیشه بسته است'
   if (s.untilMs !== null) {
     /* ── چرا فقط تاریخ، نه ساعت ──
-       قفل تا **پایانِ** آن روز ادامه دارد، ولی ساعتِ نمایش‌داده‌شده
-       لحظه‌ی پایانِ بازه بود — مثلاً «۱۴/۰۵ ۲۰:۳۰». کاربر آن را
+       قفل تا **پایان** آن روز ادامه دارد، ولی ساعت نمایش‌داده‌شده
+       لحظه‌ی پایان بازه بود — مثلا «۱۴/۰۵ ۲۰:۳۰». کاربر آن را
        «ساعت ۲۰:۳۰ باز می‌شود» می‌خواند، که درست نیست.
 
-       تاریخ تنها، به‌علاوه‌ی «تا پایان شب»، همان چیزی است که واقعاً
+       تاریخ تنها، به‌علاوه‌ی «تا پایان شب»، همان چیزی است که واقعا
        رخ می‌دهد. */
     const until = new Date(s.untilMs).toLocaleDateString('fa-IR', {
       timeZone: 'Asia/Tehran', day: '2-digit', month: 'long',

@@ -40,7 +40,7 @@ const ROTATION_GRACE_MS = 60_000
 /* ── هر چند وقت یک‌بار رفرش‌توکن بچرخد ──────────────────────────
    تا امروز *با هر بار تمدید* می‌چرخید. کلاینت هر ۱۲ دقیقه تمدید
    می‌کند، یعنی روزی بیش از صد چرخش — و هر چرخش یک فرصت برای این که
-   نسخه‌ای از توکن قدیمی جایی جا بماند و بعداً ارائه شود.
+   نسخه‌ای از توکن قدیمی جایی جا بماند و بعدا ارائه شود.
 
    در جدول sessions یک نمونه‌ی واقعی ثبت شد: توکنی **۱۵ دقیقه** بعد از
    چرخش ارائه شد و کل نشست باطل شد. پنجره‌ی مهلت ۶۰ ثانیه‌ای جلوی آن را
@@ -49,7 +49,7 @@ const ROTATION_GRACE_MS = 60_000
    که از bfcache برگشته).
 
    با چرخش ۱۲ ساعته، تعداد این فرصت‌ها از روزی صدتا به روزی دوتا می‌رسد
-   و بینِ دو چرخش، همه‌ی نسخه‌های توکن یکی و معتبرند.
+   و بین دو چرخش، همه‌ی نسخه‌های توکن یکی و معتبرند.
 
    معامله‌ی امنیتی، آگاهانه: توکن دزدیده‌شده تا سقف ۱۲ ساعت کار می‌کند
    نه تا اولین تمدید. در برابرش، کاربر واقعی چند بار در روز از حساب
@@ -151,7 +151,7 @@ export async function checkRefresh(sid: string, presented: string): Promise<Refr
 
 /* ── کوکی‌ها ──────────────────────────────────────────────────── */
 
-/* Secure فقط در production: روی http://localhost کوکی Secure اصلاً
+/* Secure فقط در production: روی http://localhost کوکی Secure اصلا
    ست نمی‌شود و توسعه از کار می‌افتد. بقیه‌ی صفات یکسان می‌مانند تا
    رفتار dev و prod از هم دور نشود. */
 const isProd = () => process.env.NODE_ENV === 'production'
@@ -176,14 +176,14 @@ export function setSessionCookies(
   res.cookies.set(REFRESH_COOKIE, tokens.refresh, {
     httpOnly: true, secure, sameSite: 'lax', path: '/api/auth', maxAge: REFRESH_TTL_SEC,
   })
-  /* CSRF عمداً httpOnly نیست: کلاینت باید بتواند بخواند و در هدر بگذارد */
+  /* CSRF عمدا httpOnly نیست: کلاینت باید بتواند بخواند و در هدر بگذارد */
   res.cookies.set(CSRF_COOKIE, tokens.csrf ?? newCsrfToken(), {
     httpOnly: false, secure, sameSite: 'lax', path: '/', maxAge: REFRESH_TTL_SEC,
   })
   return res
 }
 
-/** پاک‌کردن کوکی‌ها — Path باید دقیقاً همانی باشد که موقع ست استفاده شد */
+/** پاک‌کردن کوکی‌ها — Path باید دقیقا همانی باشد که موقع ست استفاده شد */
 export function clearSessionCookies(res: NextResponse): NextResponse {
   const secure = isProd()
   const kill = (name: string, path: string) =>
@@ -203,7 +203,7 @@ export async function issueSession(
 ): Promise<{ sid: string | null; access: string }> {
   const sid = await createSession(user.id, meta)
 
-  /* اگر ساخت نشست ممکن نشد (مثلاً مایگریشن اجرا نشده) باز هم کوکی
+  /* اگر ساخت نشست ممکن نشد (مثلا مایگریشن اجرا نشده) باز هم کوکی
      access داده می‌شود تا کاربر بیرون نیفتد؛ فقط رفرش نخواهد داشت. */
   const access = signAccessToken({ id: user.id, role: user.role, phone: user.phone, sid: sid ?? undefined })
   if (!sid) {

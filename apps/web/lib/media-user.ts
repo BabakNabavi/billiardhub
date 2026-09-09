@@ -15,13 +15,16 @@ export const toMedia = (v: RawUserVideo): MediaVideo => ({
   id: v.id, title: v.title, category: v.category as MediaCategoryKey,
   creator: { id: v.ownerKey, name: v.creatorName, handle: v.creatorHandle },
   duration: v.duration, durationSec: null, width: null, height: null,
-  views: v.views, likes: v.likes, date: v.date, ts: v.ts,
+  views: v.views, likes: v.likes, comments: 0, date: v.date, ts: v.ts,
   thumb: v.thumb, src: v.src, description: v.description || [], tags: v.tags || [],
 })
 
-/* ── شکلِ تازه‌ی پاسخِ سرور ──
-   `/api/media` حالا از جدولِ `videos` می‌خواند و
+/* ── شکل تازه‌ی پاسخ سرور ──
+   `/api/media` حالا از جدول `videos` می‌خواند و
    `{ items, nextCursor }` می‌دهد، نه آرایه‌ی خام. */
+/* ⚠️ دوقلوی `PublicVideo` lib/media/server است — آن یکی سرورساید
+   است و این یکی برای مرورگر. هر فیلدی که آن‌جا اضافه شود باید
+   این‌جا هم بیاید، وگرنه بی‌صدا از هم می‌افتند. */
 export interface PublicVideo {
   slug: string; title: string; description: string
   category: string; tags: string[]
@@ -29,9 +32,11 @@ export interface PublicVideo {
   src: string; thumb: string
   durationSec: number | null; width: number | null; height: number | null
   views: number; publishedAt: string | null; featured: boolean
+  /* از مهاجرت ۰۹۲ — تا پیش از اجرایش نمی‌آیند، پس اختیاری‌اند */
+  likes?: number; comments?: number
 }
 
-/** `mm:ss` با رقمِ فارسی — چیزی که کارت نشان می‌دهد. */
+/** `mm:ss` با رقم فارسی — چیزی که کارت نشان می‌دهد. */
 export const faDuration = (sec: number | null): string => {
   if (!sec || sec <= 0) return ''
   const m = Math.floor(sec / 60), s = Math.floor(sec % 60)
@@ -40,14 +45,14 @@ export const faDuration = (sec: number | null): string => {
 }
 
 export const publicToMedia = (v: PublicVideo): MediaVideo => ({
-  /* `id` حالا همان نشانیِ عمومی است — مسیرِ صفحه از همین ساخته می‌شود */
+  /* `id` حالا همان نشانی عمومی است — مسیر صفحه از همین ساخته می‌شود */
   id: v.slug,
   title: v.title,
   category: v.category as MediaCategoryKey,
   creator: { id: v.creatorHandle, name: v.creatorName, handle: v.creatorHandle },
   duration: faDuration(v.durationSec),
   durationSec: v.durationSec, width: v.width, height: v.height,
-  views: v.views, likes: 0,
+  views: v.views, likes: v.likes ?? 0, comments: v.comments ?? 0,
   date: v.publishedAt ?? '',
   ts: v.publishedAt ? Date.parse(v.publishedAt) : 0,
   thumb: v.thumb, src: v.src,
@@ -56,9 +61,9 @@ export const publicToMedia = (v: PublicVideo): MediaVideo => ({
   featured: v.featured,
 })
 
-/* ⚠️ `ok` لازم است: بدونِ آن، شکستِ شبکه و «هیچ ویدیویی نیست» برای
+/* ⚠️ `ok` لازم است: بدون آن، شکست شبکه و «هیچ ویدیویی نیست» برای
    رابط یکسان‌اند و صفحه روی خطا می‌نویسد «هنوز ویدیویی منتشر نشده».
-   `items` در حالتِ خطا خالی می‌ماند، پس فراخوان‌های قدیمی نمی‌شکنند. */
+   `items` در حالت خطا خالی می‌ماند، پس فراخوان‌های قدیمی نمی‌شکنند. */
 export interface VideoPage { ok: boolean; items: MediaVideo[]; nextCursor: string | null }
 
 export async function fetchVideos(params: {
@@ -83,7 +88,7 @@ export async function fetchUserVideos(): Promise<MediaVideo[]> {
   return (await fetchVideos({ limit: 48 })).items
 }
 
-/* ورودیِ ثبتِ ویدیو. `durationSec`/`width`/`height` عمداً اختیاری‌اند
+/* ورودی ثبت ویدیو. `durationSec`/`width`/`height` عمدا اختیاری‌اند
    و اگر مرورگر نتوانست بخواند فرستاده نمی‌شوند — سرور آن‌ها را NULL
    نگه می‌دارد، نه صفر. صفر در داده‌ی ساختاریافته یعنی «طولش صفر
    است» که دروغ است. */
@@ -105,7 +110,7 @@ export async function postUserVideo(video: NewVideoInput): Promise<{ ok?: boolea
   } catch { return { ok: false } }
 }
 
-/* مالکیت از نشست می‌آید؛ پارامترِ `user` فقط برای سازگاریِ امضا مانده
+/* مالکیت از نشست می‌آید؛ پارامتر `user` فقط برای سازگاری امضا مانده
    و سرور به آن نگاه نمی‌کند. */
 export async function deleteUserVideo(slugOrId: string, _user?: string): Promise<boolean> {
   try {
@@ -116,14 +121,14 @@ export async function deleteUserVideo(slugOrId: string, _user?: string): Promise
 
 /* ── کانال کاربر (برای انتشار ویدیو لازم است، مثل یوتیوب) ──
 
-   ⚠️ تایپ اینجا کپیِ سومِ `UserChannel` بود و `role`/`roles`/`id`
-   نداشت؛ یعنی هر کدی که از این فایل می‌خواند، کانالِ چندنقشی را
-   بی‌نقش می‌دید. حالا از منبعِ واحد می‌آید. */
+   ⚠️ تایپ اینجا کپی سوم `UserChannel` بود و `role`/`roles`/`id`
+   نداشت؛ یعنی هر کدی که از این فایل می‌خواند، کانال چندنقشی را
+   بی‌نقش می‌دید. حالا از منبع واحد می‌آید. */
 export type { UserChannel } from '@/lib/media/channel'
 import type { UserChannel, ChannelRole } from '@/lib/media/channel'
 
-/* ⚠️ `fetchMyChannel` (تکی) برداشته شد: «اولین کانالِ فهرست» همان
-   چیزی بود که ویدیوی مربی را زیرِ کانالِ فروشگاه می‌برد. هر
+/* ⚠️ `fetchMyChannel` (تکی) برداشته شد: «اولین کانال فهرست» همان
+   چیزی بود که ویدیوی مربی را زیر کانال فروشگاه می‌برد. هر
    مصرف‌کننده باید فهرست را بگیرد و انتخاب را به کاربر بدهد. */
 /** همه‌ی کانال‌های کاربر. `null` یعنی نتوانستیم بخوانیم — نه «ندارد». */
 export async function fetchMyChannels(ownerKey: string): Promise<UserChannel[] | null> {
@@ -135,15 +140,15 @@ export async function fetchMyChannels(ownerKey: string): Promise<UserChannel[] |
   } catch { return null }
 }
 
-/* ⚠️ `checkHandle` برداشته شد: مصرف‌کننده نداشت و مسیرِ POST خودش
-   هندلِ تکراری را با ۴۰۹ و پیامِ فارسی رد می‌کند. یک گاردِ بی‌مصرف
+/* ⚠️ `checkHandle` برداشته شد: مصرف‌کننده نداشت و مسیر POST خودش
+   هندل تکراری را با ۴۰۹ و پیام فارسی رد می‌کند. یک گارد بی‌مصرف
    یعنی گاردی که هیچ‌وقت با سرور هماهنگ نمی‌ماند. */
 
-/* `id` را حتماً بفرست وقتی کانالِ موجودی را ویرایش می‌کنی — بدونِ
-   آن، عوض‌کردنِ هندل یک کانالِ *تازه* می‌سازد. */
-/* ⚠️ `ownerKey` عمداً در امضا نیست: سرور مالک را از نشست می‌گیرد و
-   پارامترِ کلاینت را نادیده می‌گیرد. نگه‌داشتنش دعوت به همان اشتباهی
-   بود که کلیدِ نشست برای بستنش آمد. */
+/* `id` را حتما بفرست وقتی کانال موجودی را ویرایش می‌کنی — بدون
+   آن، عوض‌کردن هندل یک کانال *تازه* می‌سازد. */
+/* ⚠️ `ownerKey` عمدا در امضا نیست: سرور مالک را از نشست می‌گیرد و
+   پارامتر کلاینت را نادیده می‌گیرد. نگه‌داشتنش دعوت به همان اشتباهی
+   بود که کلید نشست برای بستنش آمد. */
 export async function saveChannel(c: { id?: string; name: string; handle: string; bio?: string; avatar?: string; role?: ChannelRole; addRole?: ChannelRole }): Promise<{ ok?: boolean; channel?: UserChannel; message?: string }> {
   try {
     const r = await apiFetch('/api/media/channel', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(c) })

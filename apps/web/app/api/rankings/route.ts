@@ -10,7 +10,7 @@ import { sb } from '@/lib/finance/db';
    صفحه به فهرست نمونه‌ی داخل کد برمی‌گشت و داده‌ی ساختگی نشان می‌داد.
 
    نوشتن همچنان فقط از /api/admin/settings و فقط با ادمین ممکن است؛
-   این مسیر صرفاً خواندنی است. */
+   این مسیر صرفا خواندنی است. */
 
 export async function GET() {
   const { data, error } = await sb()

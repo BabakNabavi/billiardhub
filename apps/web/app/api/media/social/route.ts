@@ -12,22 +12,22 @@ import {
 /* ─────────────────────────────────────────────────────────────
    اشتراک / پسند / دیدگاه — یک مسیر برای هر سه.
 
-   ⚠️ `available: false` در پاسخ یعنی جدولِ مربوطه هنوز روی سرور
-   ساخته نشده (مهاجرتِ ۰۹۲ دستی اجرا می‌شود). رابط در آن حالت دکمه
-   را اصلاً رندر نمی‌کند — نه اینکه صفر نشان بدهد یا خطا بیندازد.
+   ⚠️ `available: false` در پاسخ یعنی جدول مربوطه هنوز روی سرور
+   ساخته نشده (مهاجرت ۰۹۲ دستی اجرا می‌شود). رابط در آن حالت دکمه
+   را اصلا رندر نمی‌کند — نه اینکه صفر نشان بدهد یا خطا بیندازد.
 
-   ⚠️ GET بدونِ ورود هم کار می‌کند (شمارش عمومی است)؛ فقط وضعیتِ
+   ⚠️ GET بدون ورود هم کار می‌کند (شمارش عمومی است)؛ فقط وضعیت
    «خودم پسندیده‌ام / دنبال می‌کنم» به نشست نیاز دارد.
 
-   ⚠️ اعتبارسنجی دستی است و نه با Zod: Zod وابستگیِ `apps/web`
-   نیست و افزودنِ dependency در این پروژه اجازه‌ی جدا می‌خواهد.
-   هر ورودی سقفِ طول دارد و `action` از فهرستِ بسته می‌آید.
+   ⚠️ اعتبارسنجی دستی است و نه با Zod: Zod وابستگی `apps/web`
+   نیست و افزودن dependency در این پروژه اجازه‌ی جدا می‌خواهد.
+   هر ورودی سقف طول دارد و `action` از فهرست بسته می‌آید.
    ───────────────────────────────────────────────────────────── */
 
 const ACTIONS = ['subscribe', 'like', 'comment', 'deleteComment'] as const
 type Action = typeof ACTIONS[number]
 
-/** رشته‌ی امن: فقط رشته، بریده تا سقف، بدونِ فاصله‌ی حاشیه. */
+/** رشته‌ی امن: فقط رشته، بریده تا سقف، بدون فاصله‌ی حاشیه. */
 const s = (v: unknown, max: number) =>
   (typeof v === 'string' ? v : '').trim().slice(0, max)
 
@@ -52,7 +52,7 @@ export async function GET(req: NextRequest) {
   return NextResponse.json({ likes, ...(comments ? { comments } : {}) })
 }
 
-/* «جدول نیست» ⟵ ۵۰۳ ، «خطا» ⟵ ۵۰۰ ، وگرنه وضعیتِ تازه. */
+/* «جدول نیست» ⟵ ۵۰۳ ، «خطا» ⟵ ۵۰۰ ، وگرنه وضعیت تازه. */
 const toggleResponse = (r: { kind: string; state?: unknown }) =>
   r.kind === 'ok'
     ? NextResponse.json(r.state)
@@ -70,13 +70,13 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ message: 'کنش نامعتبر' }, { status: 400 })
   }
 
-  /* ⚠️ سقفِ نرخ روی *نوشتن*: بدونِ آن یک حلقه می‌تواند صدها دیدگاه
-     بگذارد یا شمارنده‌ی اشتراک را با ثبت/حذفِ پیاپی بکوبد. */
+  /* ⚠️ سقف نرخ روی *نوشتن*: بدون آن یک حلقه می‌تواند صدها دیدگاه
+     بگذارد یا شمارنده‌ی اشتراک را با ثبت/حذف پیاپی بکوبد. */
   const rl = await hitRateLimit(req, { action: 'media_social', max: 60, windowSec: 600 }, actor.id)
   if (!rl.ok) return tooMany(rl.retryAfterSec)
 
   if (action === 'subscribe') {
-    /* ۳۰ نویسه — همان سقفِ `channel_subs_handle_chk` در مهاجرت */
+    /* ۳۰ نویسه — همان سقف `channel_subs_handle_chk` در مهاجرت */
     const handle = s(b.channel, 30)
     if (!handle) return NextResponse.json({ message: 'کانال لازم است' }, { status: 400 })
     return toggleResponse(await toggleSubscription(handle, actor.id))
@@ -93,7 +93,7 @@ export async function POST(req: NextRequest) {
     if (!body) return NextResponse.json({ message: 'متن دیدگاه خالی است' }, { status: 400 })
     const parent = s(b.parentId, 40) || undefined
     const row = await addComment(id, actor.id, body, parent)
-    /* `null` یعنی والدِ نامعتبر یا خطای ثبت — هر دو ۴۰۰ */
+    /* `null` یعنی والد نامعتبر یا خطای ثبت — هر دو ۴۰۰ */
     if (!row) return NextResponse.json({ message: 'دیدگاه ثبت نشد' }, { status: 400 })
     return NextResponse.json({ comment: row }, { status: 201 })
   }
@@ -102,9 +102,9 @@ export async function POST(req: NextRequest) {
   const cid = s(b.commentId, 40)
   if (!cid) return NextResponse.json({ message: 'شناسه لازم است' }, { status: 400 })
 
-  /* ⚠️ ردیف مستقیم خوانده می‌شود. نسخه‌ی اول ۲۰۰ دیدگاهِ اول را
-     می‌گرفت و بینشان می‌گشت — روی ویدیویی با دیدگاهِ بیشتر،
-     نویسنده‌ی واقعی ۴۰۴ می‌گرفت و هرگز نمی‌توانست دیدگاهِ خودش را
+  /* ⚠️ ردیف مستقیم خوانده می‌شود. نسخه‌ی اول ۲۰۰ دیدگاه اول را
+     می‌گرفت و بینشان می‌گشت — روی ویدیویی با دیدگاه بیشتر،
+     نویسنده‌ی واقعی ۴۰۴ می‌گرفت و هرگز نمی‌توانست دیدگاه خودش را
      پاک کند. */
   const target = await commentOwner(cid)
   if (!target || target.videoId !== id) {

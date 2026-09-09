@@ -4,7 +4,7 @@ import { getSupabaseServer } from '@/lib/supabase-server'
 export const dynamic = 'force-dynamic'
 
 /* شناسه‌ی محصول در دیتابیس uuid است. اگر چیز دیگری بیاید، PostgREST
-   خطای 22P02 می‌دهد و قبلاً همان متن خام («invalid input syntax for
+   خطای 22P02 می‌دهد و قبلا همان متن خام («invalid input syntax for
    type uuid…») با کد ۵۰۰ به کاربر برمی‌گشت — هم نشت اطلاعات داخلی
    بود، هم از نظر معنایی غلط: شناسه‌ی بی‌شکل یعنی «پیدا نشد»، نه
    «خطای سرور». حالا پیش از رفتن به دیتابیس بررسی می‌شود. */
@@ -51,19 +51,19 @@ export async function GET(
   }
 }
 
-/* ── عملیاتِ ادمین روی محصول ──────────────────────────────────────
-   صفحه‌ی «تأیید محصولات» از روزِ اول `PUT /products/:id` و
+/* ── عملیات ادمین روی محصول ──────────────────────────────────────
+   صفحه‌ی «تأیید محصولات» از روز اول `PUT /products/:id` و
    `DELETE /products/:id` را صدا می‌زد و این فایل فقط `GET` داشت. هر
    دو ۴۰۵ می‌گرفتند و صفحه خطا را در `.catch` می‌بلعید: دکمه‌ی «تأیید»
    زده می‌شد، ردیف در رابط سبز می‌شد، و در دیتابیس هیچ اتفاقی
    نمی‌افتاد — تا اولین رفرش.
 
-   `PATCH` هم پذیرفته می‌شود چون فعلِ درست‌تر برای تغییرِ جزئی است؛
-   `PUT` برای سازگاری با فراخوانیِ موجود می‌ماند. */
+   `PATCH` هم پذیرفته می‌شود چون فعل درست‌تر برای تغییر جزئی است؛
+   `PUT` برای سازگاری با فراخوانی موجود می‌ماند. */
 
 import { actorFromRequest, isAdmin, audit, clientIp } from '@/lib/finance/db'
 
-/* فقط همین دو پرچم از بیرون قابلِ تغییرند. فهرستِ سفید عمدی است:
+/* فقط همین دو پرچم از بیرون قابل تغییرند. فهرست سفید عمدی است:
    با بدنه‌ی خام، ادمین (یا هر باگی) می‌توانست `price` یا `sellerId`
    را هم عوض کند. */
 const ADMIN_FIELDS = ['isVerified', 'isOfficialStore'] as const
@@ -90,16 +90,16 @@ async function applyPatch(req: NextRequest, id: string) {
     if (Object.prototype.hasOwnProperty.call(body, k)) patch[k] = !!body[k]
   }
 
-  /* ── بازبینیِ آگهی ──
-     ادمین می‌تواند وضعیت را عوض کند، ولی فقط میانِ همین چهار مقدار.
-     `deleted` این‌جا نیست چون حذف مسیرِ خودش را دارد و قاطی‌شدنشان
+  /* ── بازبینی آگهی ──
+     ادمین می‌تواند وضعیت را عوض کند، ولی فقط میان همین چهار مقدار.
+     `deleted` این‌جا نیست چون حذف مسیر خودش را دارد و قاطی‌شدنشان
      یعنی «رد کردن» و «حذف» یک دکمه می‌شوند.
 
-     دلیلِ رد در `adminNote` می‌نشیند تا فروشنده بداند چرا. */
+     دلیل رد در `adminNote` می‌نشیند تا فروشنده بداند چرا. */
   const ADMIN_STATUSES = ['active', 'pending', 'rejected', 'paused']
   if (typeof body.status === 'string' && ADMIN_STATUSES.includes(body.status)) {
     patch.status = body.status
-    /* تأییدِ آگهیِ منقضی‌شده بدونِ تمدید بی‌فایده است — همان لحظه از
+    /* تأیید آگهی منقضی‌شده بدون تمدید بی‌فایده است — همان لحظه از
        فهرست بیرون می‌ماند. */
     if (body.status === 'active') {
       patch.expiresAt = new Date(Date.now() + 60 * 86400_000).toISOString()
@@ -110,9 +110,9 @@ async function applyPatch(req: NextRequest, id: string) {
   }
 
   if (Object.keys(patch).length === 0) {
-    return NextResponse.json({ error: 'تغییرِ مجازی فرستاده نشد' }, { status: 400 })
+    return NextResponse.json({ error: 'تغییر مجازی فرستاده نشد' }, { status: 400 })
   }
-  /* تأیید یعنی درخواستِ تأیید رسیدگی شده */
+  /* تأیید یعنی درخواست تأیید رسیدگی شده */
   if (patch.isVerified === true) patch.requestedVerification = false
   patch.updatedAt = new Date().toISOString()
 
@@ -165,8 +165,8 @@ export async function DELETE(req: NextRequest, context: { params: Promise<{ id: 
     return NextResponse.json({ error: 'خطای سرور' }, { status: 500 })
   }
 
-  /* بدنه‌ی کامل در ممیزی می‌ماند: حذفِ محصول برگشت‌پذیر نیست و
-     دست‌کم باید بشود فهمید چه چیزی و به‌دستِ چه کسی رفته. */
+  /* بدنه‌ی کامل در ممیزی می‌ماند: حذف محصول برگشت‌پذیر نیست و
+     دست‌کم باید بشود فهمید چه چیزی و به‌دست چه کسی رفته. */
   void audit({
     actorId: (guard as { id: string }).id, actorRole: 'admin',
     action: 'PRODUCT_DELETED_BY_ADMIN', entityType: 'product', entityId: id,

@@ -31,7 +31,7 @@ async function handle(req: NextRequest, providerName: string) {
     status: string; provider: string; provider_authority: string | null;
   };
 
-  /* قبلاً پرداخت شده ⇒ فقط نتیجه، بدون اثر دوباره */
+  /* قبلا پرداخت شده ⇒ فقط نتیجه، بدون اثر دوباره */
   if (o.status === 'PAID') return done(true, `&order=${o.id}`);
 
   if (ret.canceled) {

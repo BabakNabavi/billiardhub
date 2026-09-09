@@ -31,8 +31,8 @@ interface RankingPlayer {
 
 const sports = [
   { value: 'snooker', label: 'اسنوکر' },
-  /* `short` فقط برای موبایل: «پاکت بیلیارد» در عرضِ کم دوخطی می‌شد و
-     قابِ رشته را از قابِ جنسیت بلندتر می‌کرد. */
+  /* `short` فقط برای موبایل: «پاکت بیلیارد» در عرض کم دوخطی می‌شد و
+     قاب رشته را از قاب جنسیت بلندتر می‌کرد. */
   { value: 'pocket', label: 'پاکت بیلیارد', short: 'پاکت' },
   { value: 'highball', label: 'هی‌بال', soon: true },
 ]
@@ -56,7 +56,7 @@ const TEXT   = '#1C1B17'
 const SEC    = '#5B564B'
 const MUT    = '#6F6A5C'
 const LINE   = '#E7E2D6'
-/* رنگِ پایه‌ی صفحه از کلاسِ مشترکِ lq-stage می‌آید */
+/* رنگ پایه‌ی صفحه از کلاس مشترک lq-stage می‌آید */
 
 import { breakAllahLigature } from '../../lib/fa-ligature'
 import { splitFaName } from '../../lib/fa-name'
@@ -88,7 +88,7 @@ function TrendChip({ diff, onDark = false }: { diff: number; onDark?: boolean })
   return <Minus size={12} style={{ color: onDark ? 'rgba(255,255,255,0.3)' : 'rgba(28,27,23,0.22)' }} />
 }
 
-/* پرتره: عکسِ آپلودشده‌ی بازیکن، وگرنه آیکونِ آدمک */
+/* پرتره: عکس آپلودشده‌ی بازیکن، وگرنه آیکون آدمک */
 function Portrait({ p, size, onDark = false }: { p: RankingPlayer; size: number; onDark?: boolean }) {
   return (
     <span style={{
@@ -102,7 +102,7 @@ function Portrait({ p, size, onDark = false }: { p: RankingPlayer; size: number;
       {p.avatar
         ? <img loading="lazy" decoding="async" src={p.avatar} alt={p.name} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
         : (
-          /* آیکونِ آدمک — حرفِ اولِ نام نه: در فارسی خیلی از نام‌ها با
+          /* آیکون آدمک — حرف اول نام نه: در فارسی خیلی از نام‌ها با
              یک حرف شروع می‌شوند و مونوگرام هیچ‌چیز نمی‌گوید. */
           <svg viewBox="0 0 24 24" width="58%" height="58%" fill="none" aria-hidden="true"
             stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"
@@ -160,17 +160,17 @@ export default function RankingsPage() {
         /* ⚠️ کنترل‌ها دیگر پوسته‌ی محلی ندارند: همان .lq-seg مشترک
            را می‌گیرند. این‌جا فقط چیدمان تنظیم می‌شود.
            در موبایل هر پنج دکمه (سه رشته + دو جنسیت) باید در یک ردیف
-           جا شوند، پس عرضِ کفِ ۸۴ پیکسلیِ .lq-seg > button برداشته
+           جا شوند، پس عرض کف ۸۴ پیکسلی .lq-seg > button برداشته
            می‌شود — همان کاری که صفحه‌ی مربی هم می‌کند. */
-        /* nowrap در خودِ قاعده‌ی پایه: در مدیاکوئری گذاشتنش اثر نمی‌کرد
+        /* nowrap در خود قاعده‌ی پایه: در مدیاکوئری گذاشتنش اثر نمی‌کرد
            و در ۳۶۰ تا ۳۹۰ ردیف دو سطر می‌شد. گروه‌ها خودشان جمع
-           می‌شوند، پس نیازی به شکستنِ سطر نیست. */
+           می‌شوند، پس نیازی به شکستن سطر نیست. */
         .rk-row1 { display: flex; gap: 10px; align-items: center; flex-wrap: nowrap; }
         .rk-sports { flex: 0 1 auto; min-width: 0; }
         .rk-genders { flex: 0 0 auto; }
         .rk-cats { display: flex; max-width: 100%; overflow-x: auto; scrollbar-width: none; }
         .rk-cats::-webkit-scrollbar { display: none; }
-        /* ⚠️ این قواعد با حذفِ بلوکِ استایلِ قدیمی از دست رفته بودند:
+        /* ⚠️ این قواعد با حذف بلوک استایل قدیمی از دست رفته بودند:
            نشان بی‌فاصله به عنوان می‌چسبید و جای دسکتاپش را هم نداشت. */
         .rk-badge-row { display: flex; justify-content: flex-end; }
         .rk-badge { margin-bottom: 14px; }
@@ -184,14 +184,14 @@ export default function RankingsPage() {
         @media (max-width: 620px) {
           .rk-row1 > .lq-seg > button { min-width: 0; padding: 7px 6px; font-size: 11.5px; flex: 1; }
           /* ⚠️ هر دو گروه باید بتوانند جمع شوند. با flex:0 0 auto روی
-             جنسیت، تمامِ فشار روی رشته می‌افتاد و آن گروه تا ۸ پیکسل
-             — یعنی فقط padding — جمع می‌شد. سهم به نسبتِ تعدادِ دکمه. */
+             جنسیت، تمام فشار روی رشته می‌افتاد و آن گروه تا ۸ پیکسل
+             — یعنی فقط padding — جمع می‌شد. سهم به نسبت تعداد دکمه. */
           .rk-sports { flex: 3 1 0; min-width: 0; }
           .rk-genders { flex: 2 1 0; min-width: 0; }
           .rk-cats > button { min-width: 0; flex: 1; padding: 7px 6px; font-size: 11.5px; }
-          /* ⚠️ بدونِ :has(). روی سافاریِ قدیمی‌تر آن قاعده کنار می‌رفت
-             ولی قاعده‌ی برچسبِ کوتاه می‌ماند و *هر دو* دیده می‌شدند:
-             «پاکت بیلیاردپاکت». حالا کلاس روی خودِ عنصر است. */
+          /* ⚠️ بدون :has(). روی سافاری قدیمی‌تر آن قاعده کنار می‌رفت
+             ولی قاعده‌ی برچسب کوتاه می‌ماند و *هر دو* دیده می‌شدند:
+             «پاکت بیلیاردپاکت». حالا کلاس روی خود عنصر است. */
           .rk-sports .rk-lbl-full.has-short { display: none; }
           .rk-sports .rk-lbl-short { display: inline; }
         }
@@ -216,18 +216,18 @@ export default function RankingsPage() {
           box-shadow: inset 0 1px 0 rgba(255,255,255,0.5), inset 1px 0 0 rgba(255,255,255,0.16),
             inset 0 -2px 5px rgba(0,0,0,0.2);
           text-shadow: 0 1px 4px rgba(0,0,0,0.3), 0 0 12px rgba(255,255,255,0.5); }
-        /* بلوک نام عرض ثابت دارد تا ستون شهرها در همه‌ی ردیف‌ها دقیقاً هم‌راستا بماند */
-        /* ── ترتیب و اولویتِ جمع‌شدن، یک‌جا برای همه‌ی عرض‌ها ──
-           پیش‌تر این قواعد در دو مدیاکوئریِ ≤۶۴۰ و ≥۹۰۰ تکرار شده
-           بودند و بازه‌ی ۶۴۰ تا ۹۰۰ چیدمانِ قدیمی را نگه می‌داشت.
+        /* بلوک نام عرض ثابت دارد تا ستون شهرها در همه‌ی ردیف‌ها دقیقا هم‌راستا بماند */
+        /* ── ترتیب و اولویت جمع‌شدن، یک‌جا برای همه‌ی عرض‌ها ──
+           پیش‌تر این قواعد در دو مدیاکوئری ≤۶۴۰ و ≥۹۰۰ تکرار شده
+           بودند و بازه‌ی ۶۴۰ تا ۹۰۰ چیدمان قدیمی را نگه می‌داشت.
 
-           ⚠️ order روی همه‌ی فرزندها لازم است: پیش‌فرضِ ۰ یعنی هر
+           ⚠️ order روی همه‌ی فرزندها لازم است: پیش‌فرض ۰ یعنی هر
            چیزی که ترتیب نگرفته، *جلوتر* از همه می‌افتد. یک بار امتیاز
            بی‌ترتیب ماند و در دسکتاپ پیش از نام رندر شد.
 
-           نام با ضریبِ ۹۹۹ اول جمع می‌شود (تا کفِ ۷۲ و بعد سه‌نقطه)،
+           نام با ضریب ۹۹۹ اول جمع می‌شود (تا کف ۷۲ و بعد سه‌نقطه)،
            شهر فقط در تنگنای واقعی. هیچ‌کدام flex-shrink صفر نیستند
-           وگرنه ردیف زیرِ overflow:hidden بریده می‌شود. */
+           وگرنه ردیف زیر overflow:hidden بریده می‌شود. */
         .rk-row .chip { order: 0 }
         .rk-row .rk-portrait { order: 0 }
         .rk-name { order: 1 }
@@ -236,8 +236,8 @@ export default function RankingsPage() {
         .rk-row .rk-trend { order: 4 }
         .rk-row .rk-pts { order: 5 }
         .rk-name { flex: 0 999 auto; min-width: 72px; padding: 11px 0;
-          /* تشدیدِ «لله» با ZWJ حل شد نه با font-feature-settings —
-             شرحش در lib/fa-ligature. خاموش‌کردنِ ویژگی یا بی‌اثر بود یا
+          /* تشدید «لله» با ZWJ حل شد نه با font-feature-settings —
+             شرحش در lib/fa-ligature. خاموش‌کردن ویژگی یا بی‌اثر بود یا
              «لا» را به خطر می‌انداخت. */ }
         .rk-city { flex: 0 1 auto; min-width: 0; max-width: none;
           margin-inline-start: 0; margin-inline-end: clamp(10px, 1.4vw, 18px);
@@ -245,12 +245,12 @@ export default function RankingsPage() {
           overflow: hidden; text-overflow: ellipsis; }
         /* ترک گرید نباید با min-content ردیف‌ها بازتر از کانتینر شود */
         .rk-rowwrap { min-width: 0; }
-        /* دو بازیکن در هر سطر: رتبه‌ی ۱ راست، ۲ چپ، ۳ زیرِ ۱ … */
+        /* دو بازیکن در هر سطر: رتبه‌ی ۱ راست، ۲ چپ، ۳ زیر ۱ … */
         .rk-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
         @media (max-width: 900px) { .rk-grid { grid-template-columns: minmax(0, 1fr); } }
-        /* دو بازیکن در هر سطر یعنی هر کارت نصفِ عرض است — بلوکِ نام و
-           فاصله‌ی شهر باید جمع شوند وگرنه تبِ امتیاز از لبه بیرون می‌زند
-           و کارت می‌بُردش. */
+        /* دو بازیکن در هر سطر یعنی هر کارت نصف عرض است — بلوک نام و
+           فاصله‌ی شهر باید جمع شوند وگرنه تب امتیاز از لبه بیرون می‌زند
+           و کارت می‌بردش. */
         @media (min-width: 900.02px) {
 
         }
@@ -277,7 +277,7 @@ export default function RankingsPage() {
         <div style={{ position: 'absolute', top: '-20%', bottom: '-20%', left: '32%', width: 1, background: 'linear-gradient(180deg,transparent,rgba(199,166,106,0.45),transparent)', transform: 'rotate(14deg)' }} />
         <div className="rk-hero-word">RANKINGS</div>
         <div className="rk-wrap" style={{ position: 'relative', padding: 'clamp(32px,5vw,58px) clamp(16px,3vw,28px) clamp(26px,4vw,44px)' }}>
-          {/* بالا و سمتِ چپ — `insetInlineEnd` در راست‌به‌چپ یعنی چپ */}
+          {/* بالا و سمت چپ — `insetInlineEnd` در راست‌به‌چپ یعنی چپ */}
           <div className="rk-badge-row">
           <span className="rk-badge" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, fontSize: 8.55, fontWeight: 800, letterSpacing: '0.26em', color: GOLD, border: '1px solid rgba(199,166,106,0.4)', background: 'rgba(199,166,106,0.10)', borderRadius: 999, padding: '5px 14px' }}>
             <Trophy size={10} /> <span dir="ltr">OFFICIAL RANKINGS</span>
@@ -295,11 +295,11 @@ export default function RankingsPage() {
       {/* ═══ کنترل‌ها (همان منطق قبلی، پوسته‌ی جدید) ═══ */}
       <div style={{ position: 'sticky', top: 62, zIndex: 40, background: 'rgba(247,247,245,0.92)', backdropFilter: 'blur(18px) saturate(1.6)', WebkitBackdropFilter: 'blur(18px) saturate(1.6)', borderBottom: `1px solid ${LINE}` }}>
         <div className="rk-wrap" style={{ padding: '10px clamp(16px,3vw,28px)', display: 'flex', flexDirection: 'column', gap: 10 }}>
-          {/* دو گروهِ جدا در یک ردیف: هرکدام قابِ شیشه‌ای خودش را دارد،
-              پس با اینکه کنارِ هم‌اند پیداست که به هم ربطی ندارند. */}
+          {/* دو گروه جدا در یک ردیف: هرکدام قاب شیشه‌ای خودش را دارد،
+              پس با اینکه کنار هم‌اند پیداست که به هم ربطی ندارند. */}
           <div className="rk-row1">
-            {/* گروهِ فیلتر است نه tab: پنلِ متناظری ندارد که `aria-controls`
-              به آن اشاره کند، و `role="tab"` بدونِ tabpanel ARIA نامعتبر
+            {/* گروه فیلتر است نه tab: پنل متناظری ندارد که `aria-controls`
+              به آن اشاره کند، و `role="tab"` بدون tabpanel ARIA نامعتبر
               می‌سازد. */}
             <div className="lq-seg rk-sports" role="group" aria-label="رشته">
               {sports.map(s => (
@@ -307,10 +307,10 @@ export default function RankingsPage() {
                   key={s.value}
                   type="button"
                   aria-pressed={sport === s.value}
-                  /* نشانِ دیداریِ «به زودی» برداشته شد چون ردیف را
-                     می‌شکست، ولی خودِ خبر نباید گم شود: `title` روی لمس
-                     دیده نمی‌شود، پس در نامِ دسترس‌پذیر می‌آید.
-                     `aria-disabled` به‌جای `disabled` تا دکمه از ترتیبِ
+                  /* نشان دیداری «به زودی» برداشته شد چون ردیف را
+                     می‌شکست، ولی خود خبر نباید گم شود: `title` روی لمس
+                     دیده نمی‌شود، پس در نام دسترس‌پذیر می‌آید.
+                     `aria-disabled` به‌جای `disabled` تا دکمه از ترتیب
                      Tab بیرون نیفتد و صفحه‌خوان به آن برسد. */
                   aria-disabled={!!s.soon}
                   aria-label={s.soon ? `${s.label} — به زودی` : undefined}
@@ -372,8 +372,8 @@ export default function RankingsPage() {
               <section className="rk-grid">
                 {players.map((p, i) => {
                   const diff = p.previousRank ? p.previousRank - p.rank : 0
-                  /* فیلدهای صریحِ ادمین مقدم‌اند؛ نبودشان یعنی قاعده‌ی
-                     `lib/fa-name` (پیشوندِ احترام + پسوندِ بسته). */
+                  /* فیلدهای صریح ادمین مقدم‌اند؛ نبودشان یعنی قاعده‌ی
+                     `lib/fa-name` (پیشوند احترام + پسوند بسته). */
                   const guess = splitFaName(p.name)
                   const firstName = breakAllahLigature(p.firstName?.trim() || guess.firstName)
                   const lastName = breakAllahLigature(p.lastName?.trim() || guess.lastName)

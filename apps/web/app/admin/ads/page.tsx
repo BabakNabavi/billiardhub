@@ -5,7 +5,7 @@ import { redirect } from 'next/navigation';
    بازدیدکننده‌ای آن بنرها را نمی‌دید.
 
    جایش را /admin/ad-slots گرفت که روی دیتابیس کار می‌کند و بنرهایش
-   واقعاً روی سایت نمایش داده می‌شوند. */
+   واقعا روی سایت نمایش داده می‌شوند. */
 export default function AdminAdsRedirect() {
   redirect('/admin/ad-slots');
 }

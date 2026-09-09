@@ -27,15 +27,15 @@ interface NewsItem {
   date: string;
   cover: string;
   slug: string;
-  /* لحظه‌ی انتشارِ ثبت‌شده — تا ویرایش آن را جابه‌جا نکند */
+  /* لحظه‌ی انتشار ثبت‌شده — تا ویرایش آن را جابه‌جا نکند */
   publishedAt: string | null;
 }
 
-/* ⚠️ فهرستِ دسته دیگر این‌جا ساخته نمی‌شود. تا امروز این پنل
-   tournament | ranking | club | product | general می‌نوشت و سایتِ
-   عمومی دنبالِ snooker | pool | players | … می‌گشت — هیچ‌کدام با
+/* ⚠️ فهرست دسته دیگر این‌جا ساخته نمی‌شود. تا امروز این پنل
+   tournament | ranking | club | product | general می‌نوشت و سایت
+   عمومی دنبال snooker | pool | players | … می‌گشت — هیچ‌کدام با
    دیگری هم‌پوشانی نداشت، پس **هر خبری که این‌جا منتشر می‌شد روی
-   سایت برچسبِ «اخبار اسنوکر» می‌خورد**. حالا هر دو یک منبع دارند. */
+   سایت برچسب «اخبار اسنوکر» می‌خورد**. حالا هر دو یک منبع دارند. */
 const categories = NEWS_SECTIONS.map(s => ({ value: s.key, label: s.label }));
 
 
@@ -69,7 +69,7 @@ export default function AdminNewsPage() {
       title: r.title ?? '',
       summary: r.excerpt ?? '',
       content: r.body ?? '',
-      /* مقدارِ قدیمیِ دیتابیس هم به بخشِ درست ترجمه می‌شود */
+      /* مقدار قدیمی دیتابیس هم به بخش درست ترجمه می‌شود */
       category: normalizeSection(r.category) ?? '',
       tags: (r.tags ?? []).join('، '),
       published: r.status === 'published',
@@ -93,9 +93,9 @@ export default function AdminNewsPage() {
     setEditingId(item.id);
     setForm({
       title: item.title, summary: item.summary, content: item.content,
-      /* ⚠️ مقدارِ نانگاشتنی (`general` یا هر مقدارِ ناشناخته) نباید
-         با بازکردنِ فرم بی‌صدا «اسنوکر» شود — ویراستاری که فقط
-         یک غلطِ املایی را درست می‌کند بخشِ خبر را هم عوض می‌کرد. */
+      /* ⚠️ مقدار نانگاشتنی (`general` یا هر مقدار ناشناخته) نباید
+         با بازکردن فرم بی‌صدا «اسنوکر» شود — ویراستاری که فقط
+         یک غلط املایی را درست می‌کند بخش خبر را هم عوض می‌کرد. */
       category: item.category, tags: item.tags,
       published: item.published, cover: item.cover, slug: item.slug,
       publishedAt: item.publishedAt,
@@ -103,14 +103,14 @@ export default function AdminNewsPage() {
     setShowForm(true);
   };
 
-  /* ── انتشار / لغوِ انتشار، مستقیم از فهرست ──
+  /* ── انتشار / لغو انتشار، مستقیم از فهرست ──
 
-     ⚠️ لغوِ انتشار **`published_at` را پاک نمی‌کند**. نسخه‌ی اول
+     ⚠️ لغو انتشار **`published_at` را پاک نمی‌کند**. نسخه‌ی اول
      `null` می‌نوشت و آن تاریخ جای دیگری نگه داشته نمی‌شود، پس برای
-     همیشه از دست می‌رفت — و بدتر، انتشارِ دوباره‌ی همان خبر تاریخِ
-     امروز می‌گرفت و یک خبرِ سه‌ماهه دوباره صدرِ صفحه می‌نشست؛ دقیقاً
+     همیشه از دست می‌رفت — و بدتر، انتشار دوباره‌ی همان خبر تاریخ
+     امروز می‌گرفت و یک خبر سه‌ماهه دوباره صدر صفحه می‌نشست؛ دقیقا
      همان چیزی که این کد برای جلوگیری از آن نوشته شده بود.
-     پرس‌وجوهای عمومی فقط روی `status` فیلتر می‌کنند، پس پاک‌کردنِ
+     پرس‌وجوهای عمومی فقط روی `status` فیلتر می‌کنند، پس پاک‌کردن
      تاریخ هیچ لازم نبود. */
   const [busyId, setBusyId] = useState<string | null>(null);
 
@@ -120,7 +120,7 @@ export default function AdminNewsPage() {
     try {
       const next = !item.published;
       const patch: Record<string, unknown> = { status: next ? 'published' : 'draft' };
-      /* تاریخ فقط بارِ اول نوشته می‌شود */
+      /* تاریخ فقط بار اول نوشته می‌شود */
       if (next && !item.publishedAt) patch.published_at = new Date().toISOString();
       const res = await updateContent<DbNews>('news', item.id, patch);
       if (!res.ok) { setErr(res.message ?? 'تغییر وضعیت انجام نشد'); return; }
@@ -140,8 +140,8 @@ export default function AdminNewsPage() {
     setErr('');
 
     /* ⚠️ جداکننده‌ی برچسب هم «,» و هم «،» است: این فیلد به فارسی پر
-       می‌شود و ویرگولِ فارسی تا امروز جداکننده حساب نمی‌شد، پس
-       «فوری، اسنوکر» یک برچسبِ به‌هم‌چسبیده می‌ساخت. */
+       می‌شود و ویرگول فارسی تا امروز جداکننده حساب نمی‌شد، پس
+       «فوری، اسنوکر» یک برچسب به‌هم‌چسبیده می‌ساخت. */
     const payload: Record<string, unknown> = {
       title: form.title.trim(),
       excerpt: form.summary.trim(),
@@ -152,13 +152,13 @@ export default function AdminNewsPage() {
       status: form.published ? 'published' : 'draft',
     };
     /* ⚠️ لحظه‌ی انتشار فقط یک‌بار ثبت می‌شود و هرگز پاک نمی‌شود:
-       ویرایشِ یک خبرِ منتشرشده نباید آن را روی «الان» ببرد (خبرِ
-       سه‌ماهه دوباره صدرِ صفحه می‌نشست)، و ذخیره‌ی پیش‌نویس نباید
-       تاریخِ اصلیِ انتشار را نابود کند. */
+       ویرایش یک خبر منتشرشده نباید آن را روی «الان» ببرد (خبر
+       سه‌ماهه دوباره صدر صفحه می‌نشست)، و ذخیره‌ی پیش‌نویس نباید
+       تاریخ اصلی انتشار را نابود کند. */
     if (form.published && !form.publishedAt) {
       payload.published_at = new Date().toISOString();
     }
-    /* نامکِ خالی نباید روی ستونِ یکتا بنشیند: دومین خبرِ بی‌نامک با
+    /* نامک خالی نباید روی ستون یکتا بنشیند: دومین خبر بی‌نامک با
        خطای «تکراری» رد می‌شد. */
     if (form.slug.trim()) payload.slug = form.slug.trim();
 
@@ -249,9 +249,9 @@ export default function AdminNewsPage() {
               </div>
             </div>
 
-            {/* ⚠️ نوارِ «فوری» و بلوکِ «گزارش ویژه» در سایت با همین
+            {/* ⚠️ نوار «فوری» و بلوک «گزارش ویژه» در سایت با همین
                 برچسب‌ها روشن می‌شوند. جدول ستونی برایشان ندارد و
-                ستونِ خیالی هم ساخته نشد. */}
+                ستون خیالی هم ساخته نشد. */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">نشان‌های تحریریه</label>
               <div className="flex flex-wrap gap-3">
@@ -302,8 +302,8 @@ export default function AdminNewsPage() {
                 className="bg-green-700 text-white px-6 py-2.5 rounded-xl font-bold hover:bg-green-800 flex items-center gap-2">
                 <Save size={16} />
                 {/* ⚠️ برچسب باید همان کاری را بگوید که می‌کند: این
-                    دکمه فقط وقتی منتشر می‌کند که تیکِ «انتشار» خورده
-                    باشد. برچسبِ «انتشار خبر» روی حالتِ پیش‌نویس،
+                    دکمه فقط وقتی منتشر می‌کند که تیک «انتشار» خورده
+                    باشد. برچسب «انتشار خبر» روی حالت پیش‌نویس،
                     ادمین را مطمئن می‌کرد خبر منتشر شده — و بعد آن را
                     در سایت نمی‌دید. */}
                 {form.published ? (editingId ? 'ذخیره و انتشار' : 'انتشار خبر') : 'ذخیره پیش‌نویس'}
@@ -323,8 +323,8 @@ export default function AdminNewsPage() {
           <div className="col-span-2 text-center">عملیات</div>
         </div>
         <div className="divide-y divide-gray-50">
-          {/* ⚠️ بدونِ این، فهرستِ خالی و شکستِ خواندن یک شکل داشتند:
-              فقط سطرِ عنوان‌ها دیده می‌شد. */}
+          {/* ⚠️ بدون این، فهرست خالی و شکست خواندن یک شکل داشتند:
+              فقط سطر عنوان‌ها دیده می‌شد. */}
           {news.length === 0 && (
             <div className="px-5 py-12 text-center text-sm text-gray-400">
               هنوز خبری ثبت نشده است.

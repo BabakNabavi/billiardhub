@@ -4,7 +4,7 @@
    شمارش از همان جاییست که خود استوری‌ها ذخیره می‌شوند (فایل ایندکس
    روی سرور)، نه از مرورگر کاربر.
 
-   ترتیب — دقیقاً مثل آگهی:
+   ترتیب — دقیقا مثل آگهی:
      ۱) کلید stories_quota_enabled خاموش ⇒ هیچ محدودیتی نیست
      ۲) بسته‌ی فعال ⇒ سهمیه‌ی همان بسته
      ۳) وگرنه ⇒ سهمیه‌ی رایگان نقش
@@ -105,7 +105,7 @@ export async function getStoryQuotaState(
   } else {
     const roles = roleHint ? [roleHint] : await rolesOf(userId)
     /* در استوری، صفر یعنی «این نقش سهمیه ندارد» — نه نامحدود؛ وگرنه
-       نقش صفر «کاربر عادی» سهمیه‌ی نقش واقعی را می‌بلعید و مثلاً
+       نقش صفر «کاربر عادی» سهمیه‌ی نقش واقعی را می‌بلعید و مثلا
        بازیکن هم بدون استوری می‌ماند. */
     const picked = pickRoleQuota(free, roles, { zeroMeansNone: true })
     period = picked.quota.period
@@ -128,7 +128,7 @@ export async function getStoryQuotaState(
   /* سهمیه‌ی صفر بسته یعنی نامحدود */
   if (limit <= 0 && plan) return { ...base, allowed: true }
 
-  /* نقشی که اصلاً حق استوری ندارد */
+  /* نقشی که اصلا حق استوری ندارد */
   if (limit <= 0) {
     return {
       ...base, allowed: false,

@@ -1,17 +1,17 @@
 'use client'
 
 /* ─────────────────────────────────────────────────────────────
-   محتوای نمایشیِ صفحه‌های عمومی.
+   محتوای نمایشی صفحه‌های عمومی.
 
    سایتی که همه‌ی فهرست‌هایش خالی است، به بازدیدکننده می‌گوید این‌جا
    چیزی نیست. این صفحه فهرست‌ها را پر می‌کند تا کسب‌وکارهای واقعی
    بیایند و جایشان را بگیرند.
 
-   هر ردیف با نشانِ `is_demo` ساخته می‌شود، پس همیشه از داده‌ی واقعی
+   هر ردیف با نشان `is_demo` ساخته می‌شود، پس همیشه از داده‌ی واقعی
    جدا می‌ماند و هر وقت خواستی یکی‌یکی یا یک‌جا پاک می‌شود.
 
-   تیکِ «تأییدشده» روی این‌ها نمی‌آید. آن تیک یعنی هویت استعلام شده و
-   روی موجودیتی که وجودِ خارجی ندارد ادعای درستی نیست.
+   تیک «تأییدشده» روی این‌ها نمی‌آید. آن تیک یعنی هویت استعلام شده و
+   روی موجودیتی که وجود خارجی ندارد ادعای درستی نیست.
    ───────────────────────────────────────────────────────────── */
 
 import { useEffect, useState } from 'react'
@@ -35,12 +35,12 @@ const KINDS: { key: Kind; fa: string; page: string }[] = [
   { key: 'manufacturer', fa: 'تولیدکننده',  page: '/manufacturers' },
   { key: 'technician',   fa: 'خدمات فنی',   page: '/services' },
   { key: 'player',       fa: 'بازیکن',      page: '/players' },
-  /* باشگاه جدولِ خودش را دارد و فرمِ خودش را می‌خواهد؛ از نگاهِ ادمین
+  /* باشگاه جدول خودش را دارد و فرم خودش را می‌خواهد؛ از نگاه ادمین
      ولی همان محتوای نمایشی است، پس همین‌جا می‌ماند. */
   { key: 'club',         fa: 'باشگاه',      page: '/clubs' },
 ]
 
-/* امکاناتِ باشگاه — همان کلیدهایی که کارتِ `/clubs` نشانشان می‌دهد */
+/* امکانات باشگاه — همان کلیدهایی که کارت `/clubs` نشانشان می‌دهد */
 const AMENITIES = [
   { key: 'hasCafe', fa: 'کافه' },
   { key: 'hasParking', fa: 'پارکینگ' },
@@ -86,9 +86,9 @@ export default function DemoContentPage() {
   const [disc, setDisc] = useState<string[]>(['snooker'])
   const [phone, setPhone] = useState('')
 
-  /* ── فیلدهای مخصوصِ باشگاه ──
-     باشگاه شخص نیست: آدرس و تعدادِ میز دارد و همان‌ها هستند که کارتش
-     را در فهرستِ عمومی می‌سازند. */
+  /* ── فیلدهای مخصوص باشگاه ──
+     باشگاه شخص نیست: آدرس و تعداد میز دارد و همان‌ها هستند که کارتش
+     را در فهرست عمومی می‌سازند. */
   const [address, setAddress] = useState('')
   const [snooker, setSnooker] = useState('')
   const [pocket, setPocket] = useState('')
@@ -110,8 +110,8 @@ export default function DemoContentPage() {
       const r = await apiFetch(`/api/admin/demo-profiles?kind=${kind}`, { cache: 'no-store' })
       const j = await r.json().catch(() => ({}))
       if (!r.ok) { setErr(j?.message ?? 'خواندن فهرست انجام نشد'); return }
-      /* باشگاه‌ها از جدولِ دیگری می‌آیند؛ به همان شکلِ Row ترجمه
-         می‌شوند تا فهرستِ پایین یک کد داشته باشد نه دو تا. */
+      /* باشگاه‌ها از جدول دیگری می‌آیند؛ به همان شکل Row ترجمه
+         می‌شوند تا فهرست پایین یک کد داشته باشد نه دو تا. */
       if (kind === 'club') {
         setRows((j.clubs ?? []).map((c: Record<string, unknown>) => ({
           id: String(c.id), kind: 'club' as Kind, slug: String(c.id),
@@ -129,7 +129,7 @@ export default function DemoContentPage() {
   }
 
   /* عکس به data:URL تبدیل می‌شود؛ سرور خودش آن را در استوریج
-     می‌گذارد و آدرسِ نهایی را جای این رشته می‌نشاند. */
+     می‌گذارد و آدرس نهایی را جای این رشته می‌نشاند. */
   const onPhoto = (f?: File) => {
     if (!f) return
     if (f.size > 3 * 1024 * 1024) { setErr('عکس نباید بیشتر از ۳ مگابایت باشد'); return }
@@ -149,8 +149,8 @@ export default function DemoContentPage() {
     if (!firstName.trim()) { setErr('نام الزامی است'); return }
 
     /* ── باشگاه ──
-       شکلِ داده‌اش با پروفایل‌ها یکی نیست، پس مسیرِ خودش را دارد.
-       شهر و آدرس اجباری‌اند: کارتِ باشگاه بدونِ آن‌ها روی صفحه معنی
+       شکل داده‌اش با پروفایل‌ها یکی نیست، پس مسیر خودش را دارد.
+       شهر و آدرس اجباری‌اند: کارت باشگاه بدون آن‌ها روی صفحه معنی
        ندارد و سرور هم ردش می‌کند. */
     if (isClub) {
       if (!geo.city) { setErr('استان و شهر را انتخاب کنید'); return }
@@ -187,7 +187,7 @@ export default function DemoContentPage() {
 
     setSaving(true); setErr('')
     try {
-      /* شکلِ `data` همان چیزی است که صفحه‌ی عمومیِ هر نوع می‌خواند —
+      /* شکل `data` همان چیزی است که صفحه‌ی عمومی هر نوع می‌خواند —
          وگرنه ردیف ساخته می‌شود ولی روی کارت خالی می‌افتد. */
       const data: Record<string, unknown> = {
         firstNameFa: firstName.trim(), lastNameFa: lastName.trim(),
@@ -236,12 +236,12 @@ export default function DemoContentPage() {
         <h1 style={{ fontSize: 19, fontWeight: 900, color: INK, margin: 0 }}>محتوای نمایشی</h1>
       </div>
       <p style={{ fontSize: 12.5, color: SEC, lineHeight: 2, margin: '0 0 18px' }}>
-        این‌ها فهرست‌های عمومی را پر می‌کنند تا سایت خالی دیده نشود. همه با نشانِ «نمایشی» ذخیره
-        می‌شوند و از داده‌ی واقعی جدا می‌مانند — هر وقت کسب‌وکارِ واقعی جایش را گرفت، یکی را حذف کن.
-        تیکِ «تأییدشده» روی این‌ها نمی‌آید.
+        این‌ها فهرست‌های عمومی را پر می‌کنند تا سایت خالی دیده نشود. همه با نشان «نمایشی» ذخیره
+        می‌شوند و از داده‌ی واقعی جدا می‌مانند — هر وقت کسب‌وکار واقعی جایش را گرفت، یکی را حذف کن.
+        تیک «تأییدشده» روی این‌ها نمی‌آید.
       </p>
 
-      {/* انتخابِ نوع */}
+      {/* انتخاب نوع */}
       <div style={{ display: 'flex', gap: 7, flexWrap: 'wrap', marginBottom: 18 }}>
         {KINDS.map(k => (
           <button key={k.key} onClick={() => setKind(k.key)} style={{
@@ -261,7 +261,7 @@ export default function DemoContentPage() {
         </div>
       )}
 
-      {/* فرمِ ساخت */}
+      {/* فرم ساخت */}
       <div style={{ border: `1px solid ${LINE}`, borderRadius: 14, padding: 16, marginBottom: 22, background: '#FEFEFC' }}>
         <div style={{ fontSize: 13, fontWeight: 900, color: GOLD_D, marginBottom: 12 }}>
           افزودن {cur.fa} نمایشی
@@ -286,7 +286,7 @@ export default function DemoContentPage() {
         </div>
 
         {/* ── فیلدهای باشگاه ──
-            آدرس و تعدادِ میز چیزهایی‌اند که کارتِ باشگاه را در فهرستِ
+            آدرس و تعداد میز چیزهایی‌اند که کارت باشگاه را در فهرست
             عمومی می‌سازند؛ بدونشان ردیف ساخته می‌شود ولی روی صفحه
             خالی می‌افتد. */}
         {isClub && (
@@ -310,7 +310,7 @@ export default function DemoContentPage() {
                 <input style={{ ...box, textAlign: 'center' }} inputMode="numeric" value={vip}
                   onChange={e => setVip(e.target.value)} /></div>
             </div>
-            {/* همان کلیدهایی که کارتِ باشگاه به‌عنوان نشانِ امکانات نشان می‌دهد */}
+            {/* همان کلیدهایی که کارت باشگاه به‌عنوان نشان امکانات نشان می‌دهد */}
             <div style={{ marginTop: 12 }}>
               <label style={label}>امکانات</label>
               <div style={{ display: 'flex', gap: 7, flexWrap: 'wrap' }}>
@@ -366,7 +366,7 @@ export default function DemoContentPage() {
             style={{ fontSize: 12, color: SEC, fontFamily: 'inherit' }} />
           {photo && <img src={photo} alt="" loading="lazy" decoding="async" style={{ marginTop: 8, width: 74, height: 74, objectFit: 'cover', borderRadius: 10, border: `1px solid ${LINE}` }} />}
           <div style={{ fontSize: 10.5, color: MUT, marginTop: 5 }}>
-            از عکسِ چهره‌ی اشخاصِ واقعی استفاده نکن — عکسِ میز، باشگاه یا تصویرِ بدونِ چهره امن است.
+            از عکس چهره‌ی اشخاص واقعی استفاده نکن — عکس میز، باشگاه یا تصویر بدون چهره امن است.
           </div>
         </div>
 
@@ -389,7 +389,7 @@ export default function DemoContentPage() {
         </span>
         <a href={cur.page} target="_blank" rel="noopener noreferrer"
           style={{ fontSize: 12, fontWeight: 700, color: GOLD_D, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 4 }}>
-          دیدنِ صفحه‌ی عمومی <ExternalLink size={12} />
+          دیدن صفحه‌ی عمومی <ExternalLink size={12} />
         </a>
       </div>
 

@@ -44,7 +44,7 @@ export async function POST(req: NextRequest) {
   /* شماره‌ی تازه نباید روی حساب دیگری باشد — قبل از خرج پیامک */
   const { data: taken } = await sb().from('users').select('id').eq('phone', phone).maybeSingle();
   if (taken && (taken as { id: string }).id !== actor.id) {
-    return NextResponse.json({ message: 'این شماره قبلاً روی حساب دیگری ثبت شده است' }, { status: 409 });
+    return NextResponse.json({ message: 'این شماره قبلا روی حساب دیگری ثبت شده است' }, { status: 409 });
   }
 
   /* ── گام ۱: ارسال کد ── */
@@ -78,7 +78,7 @@ export async function POST(req: NextRequest) {
     .eq('id', actor.id);
   if (error) {
     if (/duplicate key/i.test(error.message)) {
-      return NextResponse.json({ message: 'این شماره قبلاً ثبت شده است' }, { status: 409 });
+      return NextResponse.json({ message: 'این شماره قبلا ثبت شده است' }, { status: 409 });
     }
     return NextResponse.json({ message: 'تغییر شماره انجام نشد' }, { status: 500 });
   }

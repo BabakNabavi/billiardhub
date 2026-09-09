@@ -3,29 +3,29 @@ import { NextRequest, NextResponse } from 'next/server';
 import { sb, actorFromRequest, audit, clientIp } from '@/lib/finance/db';
 import { isSuperAdmin } from '@/lib/admin/permissions';
 
-/* اعطا و لغوِ دسترسیِ ادمین.
+/* اعطا و لغو دسترسی ادمین.
 
-   حساس‌ترین عملیاتِ کلِ سامانه است: ادمین به همه‌ی داده‌ی مالی، تسویه‌ها
-   و اطلاعاتِ کاربران دسترسی دارد. پس چند محافظ:
+   حساس‌ترین عملیات کل سامانه است: ادمین به همه‌ی داده‌ی مالی، تسویه‌ها
+   و اطلاعات کاربران دسترسی دارد. پس چند محافظ:
 
-   · فقط ادمینِ فعلی می‌تواند ادمینِ تازه بسازد.
-   · هیچ‌کس نمی‌تواند نقشِ *خودش* را بردارد — وگرنه یک اشتباه، سامانه
+   · فقط ادمین فعلی می‌تواند ادمین تازه بسازد.
+   · هیچ‌کس نمی‌تواند نقش *خودش* را بردارد — وگرنه یک اشتباه، سامانه
      را بی‌ادمین می‌کند و برگرداندنش فقط با SQL ممکن است.
-   · آخرین ادمین قابلِ حذف نیست، به همان دلیل.
+   · آخرین ادمین قابل حذف نیست، به همان دلیل.
    · هر تغییر با «چه کسی، چه زمانی، روی چه کسی» در `audit_logs`.
 
-   نقشِ قبلی در `secondaryRoles` نگه داشته می‌شود تا با لغوِ دسترسیِ
-   ادمین، کاربر به نقشِ واقعی‌اش برگردد نه به یک حسابِ بی‌نقش. */
+   نقش قبلی در `secondaryRoles` نگه داشته می‌شود تا با لغو دسترسی
+   ادمین، کاربر به نقش واقعی‌اش برگردد نه به یک حساب بی‌نقش. */
 
 interface U {
   id: string; phone: string; firstName?: string; lastName?: string;
   primaryRole?: string; secondaryRoles?: string[];
 }
 
-/* ⚠️ این مسیر عمداً فقط برای **سوپرادمین** است، نه هر ادمینی.
-   پیش‌تر هر ادمین می‌توانست ادمینِ تازه بسازد یا ادمینِ دیگری را
+/* ⚠️ این مسیر عمدا فقط برای **سوپرادمین** است، نه هر ادمینی.
+   پیش‌تر هر ادمین می‌توانست ادمین تازه بسازد یا ادمین دیگری را
    بردارد — یعنی کسی که فقط برای «تأیید محصولات» ادمین شده بود،
-   می‌توانست مالکِ سایت را از پنل بیرون بیندازد. */
+   می‌توانست مالک سایت را از پنل بیرون بیندازد. */
 export async function GET(req: NextRequest) {
   const actor = actorFromRequest(req);
   if (!actor || !(await isSuperAdmin(actor.id))) {
@@ -38,7 +38,7 @@ export async function GET(req: NextRequest) {
     .select('id,phone,"firstName","lastName","primaryRole","secondaryRoles"')
     .eq('primaryRole', 'admin');
 
-  /* جست‌وجو فقط با شماره یا نام — فهرستِ کاملِ کاربران این‌جا لازم
+  /* جست‌وجو فقط با شماره یا نام — فهرست کامل کاربران این‌جا لازم
      نیست و نشان‌دادنش بی‌دلیل داده را در معرض می‌گذارد. */
   let found: U[] = [];
   if (q.length >= 3) {
@@ -79,17 +79,17 @@ export async function POST(req: NextRequest) {
   const u = target as U;
 
   if (!grant) {
-    /* برداشتنِ نقشِ خود ⇒ قفل‌شدنِ بیرون از پنل با یک کلیک */
+    /* برداشتن نقش خود ⇒ قفل‌شدن بیرون از پنل با یک کلیک */
     if (userId === actor.id) {
       return NextResponse.json({
-        message: 'دسترسی ادمینِ خودتان را نمی‌توانید بردارید — از حساب دیگری این کار را بکنید',
+        message: 'دسترسی ادمین خودتان را نمی‌توانید بردارید — از حساب دیگری این کار را بکنید',
       }, { status: 409 });
     }
     const { count } = await sb().from('users')
       .select('id', { count: 'exact', head: true }).eq('primaryRole', 'admin');
     if ((count ?? 0) <= 1) {
       return NextResponse.json({
-        message: 'این تنها ادمینِ سامانه است و دسترسی‌اش برداشته نمی‌شود',
+        message: 'این تنها ادمین سامانه است و دسترسی‌اش برداشته نمی‌شود',
       }, { status: 409 });
     }
   }
@@ -103,11 +103,11 @@ export async function POST(req: NextRequest) {
   let nextRoles: string[];
 
   if (grant) {
-    /* نقشِ قبلی بایگانی می‌شود تا با لغو، کاربر به همان برگردد */
+    /* نقش قبلی بایگانی می‌شود تا با لغو، کاربر به همان برگردد */
     nextPrimary = 'admin';
     nextRoles = [...new Set([...roles, u.primaryRole ?? 'user', 'admin'])].filter(Boolean);
   } else {
-    /* اولین نقشِ غیرادمینِ ذخیره‌شده، وگرنه کاربرِ عادی */
+    /* اولین نقش غیرادمین ذخیره‌شده، وگرنه کاربر عادی */
     nextPrimary = roles.find(r => r && r !== 'admin') ?? 'user';
     nextRoles = roles.filter(r => r !== 'admin');
   }
