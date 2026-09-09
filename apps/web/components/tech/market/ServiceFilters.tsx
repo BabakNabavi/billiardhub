@@ -78,25 +78,27 @@ export function ServiceFilters({ value, onChange, cities, hasAnyRating, idPrefix
         ))}
       </fieldset>
 
-      <fieldset className="tm-fgroup">
-        <legend>امتیاز</legend>
-        {!hasAnyRating && (
-          <p className="tm-card-title tm-note">
-            هنوز نظری ثبت نشده است.
-          </p>
-        )}
-        {([[0, 'همه'], [4, '۴ و بالاتر'], [4.5, '۴٫۵ و بالاتر']] as const).map(([v, label]) => (
-          <label className="tm-check" key={v}>
-            <input
-              type="radio" name={`${idPrefix}-rate`}
-              checked={value.minRating === v}
-              disabled={!hasAnyRating && v !== 0}
-              onChange={() => set({ minRating: v })}
-            />
-            {label}
-          </label>
-        ))}
-      </fieldset>
+      {/* ⚠️ فیلترِ امتیاز فقط وقتی *وجود دارد* که نظری در کار باشد.
+          امروز روتِ نظرات فقط `coach` را می‌پذیرد
+          (`app/api/profiles/[kind]/[slug]/reviews/route.ts`)، پس متخصص
+          هرگز امتیاز نمی‌گیرد و این بخش همیشه خاموش می‌ماند —
+          سه کنترلِ مرده که هر بار رندر می‌شوند. به‌محضِ افزوده‌شدنِ
+          `'technician'` به `KINDS`، خودبه‌خود برمی‌گردد. */}
+      {hasAnyRating && (
+        <fieldset className="tm-fgroup">
+          <legend>امتیاز</legend>
+          {([[0, 'همه'], [4, '۴ و بالاتر'], [4.5, '۴٫۵ و بالاتر']] as const).map(([v, label]) => (
+            <label className="tm-check" key={v}>
+              <input
+                type="radio" name={`${idPrefix}-rate`}
+                checked={value.minRating === v}
+                onChange={() => set({ minRating: v })}
+              />
+              {label}
+            </label>
+          ))}
+        </fieldset>
+      )}
 
       <div className="tm-fgroup">
         <label className="tm-check">
