@@ -24,9 +24,6 @@ import { useChannelPublish, type PublishVideo } from '@/components/media/useChan
 import { toFaDigits } from '@/lib/jalali'
 import { norm, keepLongest } from '@/lib/text-dedupe'
 import { resolveServices } from '@/lib/tech-services'
-import { ServiceCatalog } from '@/components/tech/ServiceCatalog'
-import { CueHero } from '@/components/tech/cue3d/CueHero'
-import { useStageMotion } from '@/components/tech/use-stage-motion'
 import { useVideoEdit } from '@/components/media/useVideoEdit'
 import { detailTitle, type VideoDetail } from '@/lib/media/video-details'
 import { useEffect, useMemo, useRef, useState } from 'react'
@@ -36,13 +33,15 @@ import { useProfileImageViewer } from '@/components/ProfileImageViewer'
 import { useProfileVideoViewer } from '@/components/profile/ProfileVideoViewer'
 import ProfileGallery from '@/components/profile/ProfileGallery'
 import '@/components/profile/profile-page.css'
-import './technician-profile.css'
+import { TechnicianServices } from '@/components/tech/market/TechnicianServices'
+import '@/components/tech/market/market.css'
+import '@/components/tech/market/market-profile.css'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 /* ⚠️ آیکونِ تزئینی نداریم: هر آیکونی که این‌جا می‌ماند یا ناوبری
    است یا کنش. `MapPin` و `Clock` با بازطراحی حذف شدند — شهر و
    ساعت، *متن*اند و آیکون چیزی به آن‌ها اضافه نمی‌کرد. */
-import { Wrench, Phone } from 'lucide-react'
+import { Wrench, Phone, MapPin, Home } from 'lucide-react'
 import { getTechnician } from '../../../lib/technicians-data'
 import { useOwnerEdit } from '../../../lib/profiles/use-owner-edit'
 import { compressImage } from '../../../lib/seller-store'
@@ -65,10 +64,6 @@ const navOffset = () => {
   const h = nav?.getBoundingClientRect().height ?? 0
   return h > 0 ? Math.round(h) : 72
 }
-
-const WaIcon = (
-  <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.77.46 3.45 1.28 4.9L2 22l5.32-1.39a9.9 9.9 0 004.72 1.2h.01c5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.13-2.9-7A9.82 9.82 0 0012.04 2z"/></svg>
-)
 
 export default function TechnicianProfilePage() {
   /* ⚠️ در *اولین* رندر، پیش از رسیدنِ داده. `<link>`ِ داخلِ JSX دیر
@@ -264,10 +259,13 @@ export default function TechnicianProfilePage() {
      هم‌زمان می‌شد. `IntersectionObserver` هر دو را می‌پاید.
      ⚠️ پیش از هر `return`ِ شرطی — وگرنه React #310. */
   const [dock, setDock] = useState(false)
+  const [openAbout, setOpenAbout] = useState(false)
+  /* تبِ فعال — فقط برای نشانه‌گذاری، ناوبری با لنگر است */
+  const [sec, setSec] = useState('about')
   const heroActsRef = useRef<HTMLDivElement | null>(null)
   const closeRef = useRef<HTMLDivElement | null>(null)
-  /* ⚠️ رفرنسِ ریشه برای `gsap.context`: همه‌ی تایم‌لاین‌ها به این
-     گره محدود می‌شوند تا `revert` واقعاً همه را بکشد. */
+  /* ریشه‌ی صفحه — ناظرِ تبِ فعال و کنشِ چسبان از این‌جا می‌گردند.
+     (پیش‌تر دامنه‌ی `gsap.context` بود؛ آن سیستم حذف شد.) */
   const stageRef = useRef<HTMLDivElement | null>(null)
   useEffect(() => {
     setDock(false)
@@ -294,10 +292,28 @@ export default function TechnicianProfilePage() {
      نبودِ شماره خودش داک را رندر نمی‌کند، پس ناظر بی‌ضرر است. */
   }, [tech?.id])
 
+  /* تبِ فعال از روی بخشی که در قابِ دید است.
+     threshold پایین چون بخش‌ها بلندترند از ویوپورت. */
+  useEffect(() => {
+    const ids = ['about', 'services', 'work', 'media', 'contact']
+    const nodes = ids
+      .map(i => document.getElementById(i))
+      .filter((n): n is HTMLElement => Boolean(n))
+    if (nodes.length === 0) return
+    const io = new IntersectionObserver(entries => {
+      const vis = entries.filter(e => e.isIntersecting)
+      if (vis.length === 0) return
+      const top = vis.reduce((a, b) =>
+        a.boundingClientRect.top < b.boundingClientRect.top ? a : b)
+      setSec(top.target.id)
+    }, { rootMargin: `-${navOffset() + 56}px 0px -55% 0px`, threshold: 0 })
+    for (const n of nodes) io.observe(n)
+    return () => io.disconnect()
+  }, [tech?.id])
+
   /* ⚠️ حرکت فقط وقتی راه می‌افتد که داده رسیده باشد: SplitText
      روی متنی که هنوز نیامده گره‌های خالی می‌سازد و نام هرگز ظاهر
-     نمی‌شود. */
-  useStageMotion(stageRef, tech ? `${tech.id}|${tech.name}` : '')
+     نمی‌شود. */
 
   /* یونیونِ تفکیک‌شده‌ی  یا هر دو را می‌خواهد یا
      هیچ‌کدام را — پس یک‌جا ساخته و پخش می‌شود. */
@@ -359,243 +375,230 @@ export default function TechnicianProfilePage() {
      محافظه‌کارانه‌ترین حدسِ عرضِ نویسه از ۱۹۲۰ رد می‌شود.
      ⚠️ سقفِ صریحِ حلقه: عنوانِ خالی در داده طولِ رشته را هرگز
      بالا نمی‌برد و رندر را قفل می‌کند. */
-  const titles = [...new Set(svc.categories.flatMap(c => c.services.map(x => x.title)))]
-  const marquee: string[] = []
-  if (titles.length > 0) {
-    for (let i = 0; i < 40 && marquee.join('').length < 180; i++) marquee.push(...titles)
-  }
 
   const waText = wa
     ? `https://wa.me/${wa}?text=${encodeURIComponent(`سلام ${tech.name} عزیز، از طریق بیلیارد هاب با شما تماس می‌گیرم.`)}`
     : ''
 
+  /* تب‌ها فقط لنگرند، نه روتر: محتوا کوتاه است و صفحه‌ی جدا برای
+     هر تب یعنی سه رفت‌وبرگشتِ اضافه روی شبکه‌ی کند. */
+  const tabs: [string, string][] = [
+    ['about', 'معرفی'],
+    ['services', 'خدمات'],
+    ...(tech.projects.length > 0 ? [['work', 'نمونه‌کارها'] as [string, string]] : []),
+    ...(tech.gallery.length > 0 || tech.videos.length > 0
+      ? [['media', 'گالری'] as [string, string]] : []),
+    ['contact', 'اطلاعات تماس'],
+  ]
+
   return (
-    <div className="tpx" ref={stageRef}>
+    <div className="tm tmp" ref={stageRef}>
+      {/* ⚠️ بازطراحی این را جا انداخته بود: متخصصی که پروفایلش
+          هنوز تأیید نشده، صفحه‌ی عادی می‌دید و نمی‌فهمید لینکش
+          برای کسی باز نمی‌شود. */}
       {pending && <PendingNotice what="پروفایلِ شما" />}
 
-      {/* ═══ صحنه ═══
-          ⚠️ زمینِ تیره تمِ صفحه نیست؛ *صحنه* است: کارگاه زیرِ چراغ.
-          محتوای خواندنی پایین‌تر روی کاغذِ روشن می‌نشیند. */}
-      <div className="tpx-stage">
-        <div className="tpx-wrap">
+      {/* ═══════ سربرگِ پروفایل ═══════ */}
+      <header className="tmp-head">
+        <div className="tm-wrap tmp-head-in">
           <nav aria-label="مسیر">
-            <ol className="tpx-crumb">
+            <ol className="tmp-crumb">
               <li><Link href="/">خانه</Link></li>
               <li><Link href="/services">خدمات فنی</Link></li>
               <li aria-current="page">{tech.name}</li>
             </ol>
           </nav>
-        </div>
 
-        <header className="tpx-hero">
-          {/* ⚠️ رسانه تمام‌قابِ پشتِ سرلوحه است و متن رویش می‌نشیند —
-              همان الگویی که در صفحه‌ی محصولِ اپل و مایکروسافت
-              اندازه‌گیری شد. پیش از این رندر در یک پنلِ گردگوشه‌ی
-              حاشیه‌دار *زیرِ* متن بود. */}
-          <div className="tpx-hero-media" data-plate>
-            <CueHero
-              view={{ target: 7.55, dist: 1.15, spin: 0.5, tilt: -0.2 }}
-              still="/images/cue/hero.webp"
-              alt=""
-              ground="#0B0B0C"
-            />
-          </div>
+          <div className="tmp-id">
+            <span className="tmp-ava" aria-hidden>
+              {tech.photo
+                // eslint-disable-next-line @next/next/no-img-element
+                ? <img src={tech.photo} alt="" decoding="async" />
+                : tech.name.slice(0, 1)}
+            </span>
 
-          <div className="tpx-wrap tpx-hero-grid">
-            <div className="tpx-id" data-anim="idcol">
-              {/* ⚠️ `dir="auto"`: نامِ لاتین یا ترکیبی بعد از تقسیمِ SplitText
-                  (که هر کلمه را `inline-block` می‌کند) ترتیبش برعکس
-                  می‌شد. */}
-              <h1 className="tpx-name" dir="auto" data-split>
+            <div>
+              <h1 className="tmp-name">
                 {tech.name}
-                {tech.verified && <span className="vb"><VerifiedBadge title="متخصص تأیید شده" /></span>}
+                {tech.verified && <VerifiedBadge title="متخصص تأیید شده" />}
               </h1>
-              {lede && <p className="tpx-lede" data-anim="lede">{lede}</p>}
-              {claim && <p className="tpx-intro" data-anim="intro">{claim}</p>}
+              {lede && <p className="tmp-role">{lede}</p>}
+              <p className="tmp-facts">
+                {city && <span><MapPin size={13} aria-hidden />{city}</span>}
+                {tech.onsite && <span><Home size={13} aria-hidden />اعزام به محل</span>}
+                {tech.workshop && <span><Wrench size={13} aria-hidden />پذیرش در کارگاه</span>}
+                {svc.count > 0 && <span>{toFaDigits(String(svc.count))} خدمت ثبت‌شده</span>}
+              </p>
+            </div>
 
-              {/* ⚠️ هیچ عددِ ساختگی: فقط شهر و شمارِ خدماتِ واقعی.
-                  «۱۵ سال تجربه» و «۵۰۰ پروژه» ساخته نمی‌شود. */}
-              {/* ⚠️ بدونِ این شرط، پروفایلی بی‌شهر و بی‌خدمت یک
-                  `<dl>`ِ خالی می‌ساخت: دو خطِ طلاییِ چسبیده به هم
-                  و یک شکافِ اضافه در سرلوحه. */}
-              {((city && city !== '—') || svc.count > 0) && (
-              <dl className="tpx-stats">
-                {city && city !== '—' && (
-                  <div data-anim="stat">
-                    <dt>شهر</dt>
-                    <dd>{city}</dd>
-                  </div>
-                )}
-                {/* ⚠️ `|| 1` حذف شد: پروفایلی که همه‌ی خدماتش قدیمی و
-                    نگاشت‌نشده‌اند `categories.length === 0` دارد ولی
-                    `count > 0` — و آن `|| 1` عددِ «۱ رشته» را از هوا
-                    می‌ساخت. عددِ ساخته‌شده همان چیزی است که قاعده‌ی
-                    خودمان ممنوع کرده. */}
-                {svc.categories.length > 0 && (
-                  <div data-anim="stat">
-                    <dt>رشته</dt>
-                    <dd>{toFaDigits(svc.categories.length)}</dd>
-                  </div>
-                )}
-                {svc.count > 0 && (
-                  <div data-anim="stat">
-                    <dt>خدمات</dt>
-                    <dd>{toFaDigits(svc.count)}</dd>
-                  </div>
-                )}
-              </dl>
+            <div className="tmp-head-act" ref={heroActsRef}>
+              {phone && (
+                <a className="tm-btn tm-btn--gold" href={`tel:${phone}`}>
+                  <Phone size={16} aria-hidden />درخواست خدمت
+                </a>
               )}
-
-              <div className="tpx-acts" ref={heroActsRef}>
-                {phone && <a className="tpx-btn solid" data-anim="act" href={`tel:${phone}`}><Phone size={16} aria-hidden /> ارتباط با متخصص</a>}
-                {waText && <a className="tpx-btn ghost" data-anim="act" href={waText} target="_blank" rel="noopener noreferrer">{WaIcon} واتساپ</a>}
-              </div>
-            </div>
-
-          </div>
-        </header>
-
-        {/* ═══ نوارِ حرکتی ═══
-            ⚠️ فهرست دو بار تکرار می‌شود چون انیمیشن نصفِ عرض را
-            جابه‌جا می‌کند: بدونِ نسخه‌ی دوم، وسطِ حلقه شکاف می‌افتد.
-
-            ⚠️ **کلِ نوار `aria-hidden` است، نه فقط نسخه‌ی دوم.**
-            نسخه‌ی اول هم خودش تکرارِ پرکننده است؛ متخصصی با یک
-            خدمت باعث می‌شد صفحه‌خوان همان عنوان را هفت بار بخواند.
-            همین عنوان‌ها پایین‌تر در فهرستِ خدمات یک‌بار و درست
-            اعلام می‌شوند — این نوار تزئینِ همان داده است.
-
-            ⚠️ لایه‌ی `-skew` جداست چون انیمیشنِ CSS و GSAP هر دو
-            `transform` می‌نویسند و **اعلانِ انیمیشنِ CSS در آبشار
-            بالاتر از استایلِ اینلاین است**: روی یک عنصر، اسکیو
-            هرگز دیده نمی‌شد و هر به‌روزرسانی مبدأ حلقه را جابه‌جا
-            می‌کرد. حالا حلقه روی `ul` است و اسکیو روی والدش. */}
-        {marquee.length > 0 && (
-          <div className="tpx-marquee" data-marquee aria-hidden>
-            <div className="tpx-marquee-skew">
-              {/* ⚠️ مقدارِ محاسبه‌شده، پس اینلاین مجاز است: مدتِ ثابت
-                  یعنی نوارِ یک-خدمتی و نوارِ هجده-خدمتی با دو سرعتِ
-                  کاملاً متفاوت می‌دوند. */}
-              <ul style={{ ['--dur' as string]: `${Math.round(marquee.length * 1.7)}s` }}>
-                {marquee.map((t, i) => <li key={i}>{t}</li>)}
-                {marquee.map((t, i) => <li key={`b${i}`}>{t}</li>)}
-              </ul>
+              {waText && (
+                <a className="tm-btn tm-btn--outline" href={waText} target="_blank" rel="noopener noreferrer">
+                  واتساپ
+                </a>
+              )}
             </div>
           </div>
-        )}
-      </div>
+        </div>
+      </header>
 
-      {/* ═══ بخشِ روشن: خواندنی ═══ */}
-      <div className="tpx-light">
-        {(hasProse || meta.length > 0) && (
-          <section className="tpx-sec" data-reveal>
-            <div className="tpx-wrap">
-              {hasProse && (
-                <div className="tpx-about">
-                  <p className="tpx-claim">{about[0]}</p>
-                  {about.length > 1 && (
-                    <div className="tpx-prose">
-                      {about.slice(1).map((p, i) => <p key={i}>{p}</p>)}
-                    </div>
-                  )}
+      {/* ═══════ تب‌ها ═══════ */}
+      <nav className="tmp-tabs" aria-label="بخش‌های پروفایل">
+        <div className="tm-wrap">
+          <ul>
+            {tabs.map(([id2, label]) => (
+              <li key={id2}>
+                <a href={`#${id2}`} aria-current={sec === id2 ? 'true' : undefined}>{label}</a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </nav>
+
+      {/* ═══════ بدنه ═══════ */}
+      <div className="tm-wrap tmp-body">
+        <div className="tmp-main">
+          {/* ── معرفی ── */}
+          <section className="tmp-card" id="about" aria-labelledby="tmp-about-h">
+            <h2 id="tmp-about-h">درباره متخصص</h2>
+            {claim || about.length > 0 ? (
+              <>
+                <div className={`tmp-prose${openAbout ? '' : ' tmp-clamp'}`}>
+                  {claim && <p>{claim}</p>}
+                  {about.map((t, k) => <p key={k}>{t}</p>)}
                 </div>
-              )}
-              {meta.length > 0 && (
-                <dl className="tpx-meta">
-                  {meta.map(([k, v]) => (
-                    <div key={k}>
-                      <dt>{k}</dt>
-                      <dd>{v}</dd>
+                {/* دکمه فقط وقتی متن واقعاً بلند است */}
+                {(about.length > 0 || (claim?.length ?? 0) > 220) && (
+                  <button type="button" className="tmp-more" onClick={() => setOpenAbout(v => !v)}>
+                    {openAbout ? 'بستن' : 'مشاهده بیشتر'}
+                  </button>
+                )}
+              </>
+            ) : (
+              <p className="tmp-none">این متخصص هنوز معرفی‌ای ننوشته است.</p>
+            )}
+
+            {meta.length > 0 && (
+              <dl className="tmp-facts-grid tmp-facts-mt">
+                {meta.map(([k, v]) => (
+                  <div key={k}><dt>{k}</dt><dd>{v}</dd></div>
+                ))}
+              </dl>
+            )}
+          </section>
+
+          {/* ── خدمات ── */}
+          <section className="tmp-card" id="services" aria-labelledby="tmp-svc-h">
+            <h2 id="tmp-svc-h">خدمات</h2>
+            <TechnicianServices data={svc} phone={phone || undefined} />
+          </section>
+
+          {/* ── نمونه‌کارها ── */}
+          {tech.projects.length > 0 && (
+            <section className="tmp-card" id="work" aria-labelledby="tmp-work-h">
+              <h2 id="tmp-work-h">نمونه‌کارها</h2>
+              <div className="tmp-work">
+                {tech.projects.map(pr => (
+                  <article key={pr.id}>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={pr.image} alt={pr.title} loading="lazy" decoding="async" />
+                    <div className="tmp-work-b">
+                      <span className="tmp-work-t">{pr.title}</span>
+                      {pr.service && <span className="tmp-work-s">{pr.service}</span>}
+                      {pr.desc && <span className="tmp-work-d">{pr.desc}</span>}
                     </div>
-                  ))}
-                </dl>
-              )}
-            </div>
-          </section>
-        )}
-
-        {svc.count > 0 && (
-          <section className="tpx-sec" data-reveal>
-            <div className="tpx-wrap">
-              <div className="tpx-sec-head">
-                <h2>رشته‌های تخصصی</h2>
-                <p>آنچه {tech.name} انجام می‌دهد — فقط خدماتی که خودش انتخاب کرده است.</p>
-              </div>
-              <ServiceCatalog data={svc} />
-            </div>
-          </section>
-        )}
-
-        {tech.projects.length > 0 && (
-          <section className="tpx-sec" data-reveal>
-            <div className="tpx-wrap">
-              <div className="tpx-sec-head"><h2>نمونه‌کارها</h2></div>
-              <div className="tpx-work">
-                {tech.projects.map(p => (
-                  <figure key={p.id}>
-                    <div className="im"><img src={p.image} alt={p.title} loading="lazy" decoding="async" /></div>
-                    <figcaption>
-                      <div className="kind">{p.service}</div>
-                      <h3>{p.title}</h3>
-                      <p>{p.desc}</p>
-                      <div className="where">{p.city}{p.club ? ` — ${p.club}` : ''}</div>
-                    </figcaption>
-                  </figure>
+                  </article>
                 ))}
               </div>
-            </div>
-          </section>
-        )}
+            </section>
+          )}
 
-        {/* ═══ گالری — همان کامپوننتِ مربی و داور ═══ */}
-        {(tech.gallery.length > 0 || tech.videos.length > 0 || edit.isOwner) && (
-          <section className="tpx-sec">
-            <div className="tpx-wrap">
+          {/* ── گالری — همان کامپوننتِ مربی و داور ── */}
+          {(tech.gallery.length > 0 || tech.videos.length > 0 || edit.isOwner) && (
+            <section className="tmp-card" id="media">
               <ProfileGallery
                 images={tech.gallery}
                 videos={tech.videos}
-                /* از نمای نرمال‌شده می‌آید، نه ردیفِ خام: ردیفِ پیش از مهاجرت
-                   هنوز آلبومِ شیئی دارد و نامِ آلبوم آن‌جا نیست. */
                 albumNames={tech.albums}
                 onOpenImage={(urls, index, meta2, ids) => openImage(urls, {
                   index, ...meta2,
                   ...(edit.isOwner ? { onDelete: (i: number) => deleteImage(ids[i] ?? '') } : {}),
                 })}
-                onOpenVideo={v => openVideo(v, edit.isOwner ? { onDelete: () => deleteVideo(v.id), onEdit: () => editVideo(v) } : undefined)}
+                onOpenVideo={v => openVideo(v, edit.isOwner
+                  ? { onDelete: () => deleteVideo(v.id), onEdit: () => editVideo(v) }
+                  : undefined)}
                 canEdit={edit.isOwner} busy={edit.saving || vidBusy}
-                onAddImages={addImages} onAddVideos={addVideoFiles} beforeAddVideos={() => askChannel(String(tech?.name ?? ''))} onNewAlbum={newAlbum}
+                onAddImages={addImages} onAddVideos={addVideoFiles}
+                beforeAddVideos={() => askChannel(String(tech?.name ?? ''))}
+                onNewAlbum={newAlbum}
               />
-              {edit.error && <p role="alert" className="tpx-err">خطا: {edit.error}</p>}
-            </div>
+              {edit.error && <p role="alert" className="tmp-none">خطا: {edit.error}</p>}
+            </section>
+          )}
+
+          {/* ── تماس ── */}
+          <section className="tmp-card" id="contact" aria-labelledby="tmp-c-h" ref={closeRef}>
+            <h2 id="tmp-c-h">اطلاعات تماس</h2>
+            {phone || waText ? (
+              <div className="tmp-row">
+                {phone && (
+                  <a className="tm-btn tm-btn--gold" href={`tel:${phone}`}>
+                    <Phone size={16} aria-hidden />{toFaDigits(phone)}
+                  </a>
+                )}
+                {waText && (
+                  <a className="tm-btn tm-btn--outline" href={waText} target="_blank" rel="noopener noreferrer">
+                    واتساپ
+                  </a>
+                )}
+              </div>
+            ) : (
+              <p className="tmp-none">راه ارتباطی ثبت نشده است.</p>
+            )}
+            {coverage.length > 0 && (
+              <>
+                <h2 className="tmp-h2-mt">محدوده خدمات</h2>
+                <ul className="tm-chips">
+                  {city && <li className="tm-chip">{city}</li>}
+                  {coverage.map(c => <li key={c} className="tm-chip">{c}</li>)}
+                </ul>
+              </>
+            )}
           </section>
-        )}
+        </div>
+
+        {/* ── پنلِ تماسِ چسبان (دسکتاپ) ── */}
+        <aside className="tmp-panel" aria-label="تماس با متخصص">
+          <h2>{tech.name}</h2>
+          {lede && <p className="tmp-role">{lede}</p>}
+          {phone && (
+            <a className="tm-btn tm-btn--gold" href={`tel:${phone}`}>
+              <Phone size={16} aria-hidden />درخواست خدمت
+            </a>
+          )}
+          {waText && (
+            <a className="tm-btn tm-btn--outline" href={waText} target="_blank" rel="noopener noreferrer">
+              گفت‌وگو در واتساپ
+            </a>
+          )}
+          {hours && <p className="tmp-panel-note">ساعت کاری: {hours}</p>}
+        </aside>
       </div>
 
-      {/* ═══ نتیجه‌گیری — برگشت به صحنه ═══ */}
-      <section className="tpx-stage tpx-close">
-        <div className="tpx-wrap inner" ref={closeRef}>
-          <div>
-            <h2>نیاز به تعمیر یا سرویس دارید؟</h2>
-            <p>برای هماهنگی و مشاوره، مستقیم با {tech.name} در ارتباط باشید.</p>
-          </div>
-          <div className="tpx-acts">
-            {phone && <a className="tpx-btn solid" data-anim="act" href={`tel:${phone}`}><Phone size={16} aria-hidden /> درخواست خدمات</a>}
-            {waText && <a className="tpx-btn ghost" data-anim="act" href={waText} target="_blank" rel="noopener noreferrer">{WaIcon} گفت‌وگو در واتساپ</a>}
-          </div>
-        </div>
-      </section>
-
-      {/* ═══ داکِ شیشه‌ای — تنها لایه‌ی کنترلِ شناور ═══ */}
+      {/* ── کنشِ چسبانِ موبایل ── */}
       {phone && (
-        <div className="tpx-dock" data-show={dock ? '1' : '0'} aria-hidden={!dock}>
-          <a className="tpx-btn solid" href={`tel:${phone}`} tabIndex={dock ? 0 : -1}>
-            <Phone size={16} aria-hidden /> ارتباط با متخصص
+        <div className="tmp-sticky" data-show={dock ? '1' : '0'} aria-hidden={!dock}>
+          <a className="tm-btn tm-btn--gold" href={`tel:${phone}`} tabIndex={dock ? 0 : -1}>
+            <Phone size={16} aria-hidden />درخواست خدمت
           </a>
           {waText && (
-            <a className="tpx-btn ghost" href={waText} target="_blank" rel="noopener noreferrer" tabIndex={dock ? 0 : -1}
-              aria-label="گفت‌وگو در واتساپ">
-              {WaIcon}
-            </a>
+            <a className="tm-btn tm-btn--outline" href={waText} target="_blank" rel="noopener noreferrer"
+              tabIndex={dock ? 0 : -1} aria-label="گفت‌وگو در واتساپ">واتساپ</a>
           )}
         </div>
       )}

@@ -17,9 +17,6 @@ const PRIVATE = [
   '/login',
   '/register',
   '/forgot-password',
-  /* صفحه‌ی کمکیِ رندرِ سه‌بعدی — فقط ورودیِ اسکریپتِ پیش‌رندر است و
-     محتوایی برای کاربر ندارد. */
-  '/cue3d',
   '/advertise/dashboard',
   '/advertise/result',
 ]

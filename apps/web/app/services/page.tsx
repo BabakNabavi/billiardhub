@@ -1,113 +1,167 @@
 'use client'
 
 /* ─────────────────────────────────────────────────────────────
-   خدماتِ فنی — تجربه‌ی بخشِ فنیِ بیلیارد هاب.
+   خدماتِ فنی — دایرکتوریِ متخصصان.
 
-   ── چه چیزی عوض شد و چرا ──
-   نسخه‌ی پیشین یک شبکه‌ی کارت بود: کارتِ گرد روی زمینه‌ی روشن،
-   چیپ‌های قرصی‌شکل برای خدمات، و یک `fadeUp` برای همه‌چیز. آن
-   الگو محتوا را *فهرست* می‌کرد ولی چیزی درباره‌ی کار نمی‌گفت.
+   ── مفهومِ قبلی کاملاً برداشته شد ──
+   نسخه‌های پیشین «نمایشِ محصول» بودند: رسانه‌ی تمام‌قاب، تیترِ
+   هشتاد پیکسلی، روایتِ آناتومیِ چوب، دوربینِ اسکرول. هیچ‌کدام به
+   کاری که کاربرِ این صفحه دارد ربط نداشت.
 
-   حالا صفحه دورِ آناتومیِ خودِ چوب ساخته شده — که تصادفی نیست:
-   کاتالوگِ واقعیِ خدمات (`TECH_SERVICE_CATEGORIES`) عیناً همان
-   قطعات را نام می‌برد؛ تیپ، فرول، جوینت، بات، وزن، بالانس. یعنی
-   استعاره از داده درآمده، نه از ذهنِ طراح.
+   این صفحه حالا یک مسیرِ کاری است:
+     نیاز ⟵ خدمت ⟵ متخصص ⟵ اعتماد ⟵ تماس
 
-   ── چه چیزی دست‌نخورده ماند ──
-   ⚠️ جست‌وجو، فیلترِ شهر، فیلترِ خدمت، شیتِ موبایل و منبعِ داده
-   (`TECHNICIANS` + پروفایل‌های تأییدشده‌ی راه‌دور) همگی همان
-   قبلی‌اند. این صفحه کارِ واقعیِ کاربر را انجام می‌دهد؛ بازطراحی
-   حق ندارد کارکرد را قربانیِ ترکیب‌بندی کند.
+   ── واقعیتِ داده ──
+   ⚠️ هر قلمِ اطلاعات فقط وقتی رندر می‌شود که ستونش در دیتابیس
+   وجود داشته باشد. آنچه هست: شهر، `onsite`/`workshop`، `verified`،
+   و `rating_avg`/`rating_count` (مهاجرتِ ۰۸۹).
+   آنچه نیست: قیمت، سابقه، زمانِ پاسخ، فاصله، در دسترس بودن.
+   این چهار نه ساخته می‌شوند و نه با «—» جعل می‌شوند؛ یا حذف‌اند یا
+   خاموش و برچسب‌دار.
    ───────────────────────────────────────────────────────────── */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
-import { Search, SlidersHorizontal, X, ArrowLeft, Phone } from 'lucide-react'
+import { SlidersHorizontal, X, UserPlus, Send } from 'lucide-react'
+import { TECH_CATEGORIES, titlesOfCategory } from '@/lib/tech-categories'
+import { TECHNICIANS, faDigits, type Technician } from '@/lib/technicians-data'
 import {
-  TECH_SERVICE_CATEGORIES, ALL_TECH_SERVICES, type TechServiceDef,
-} from '@/lib/tech-services'
-import { TECHNICIANS, faDigits, type Technician } from '../../lib/technicians-data'
-import { listApprovedTechnicians, profileToTechnician, type TechnicianProfile } from '../../lib/technician-store'
-import { fetchProfiles } from '../../lib/profiles/client'
-import VerifiedBadge from '../../components/VerifiedBadge'
-import { CUE_STATIONS } from '@/components/tech/cue-stations'
-import { useServicesMotion } from '@/components/tech/use-services-motion'
-import { CueHero } from '@/components/tech/cue3d/CueHero'
-import './services-stage.css'
+  listApprovedTechnicians, profileToTechnician, type TechnicianProfile,
+} from '@/lib/technician-store'
+import { fetchProfilesResult } from '@/lib/profiles/client'
+import { TechnicianCard, TechnicianCardSkeleton } from '@/components/tech/market/TechnicianCard'
+import { ServiceSearch } from '@/components/tech/market/ServiceSearch'
+import { ServiceCategoryList } from '@/components/tech/market/ServiceCategoryList'
+import {
+  ServiceFilters, EMPTY_FILTERS, countActive, type FilterState,
+} from '@/components/tech/market/ServiceFilters'
+import '@/components/tech/market/market.css'
 
-/* فهرستِ فیلتر از کاتالوگِ واحد می‌آید، نه آرایه‌ی تختِ قدیمی */
-const SERVICE_TITLES = ALL_TECH_SERVICES.map(x => x.title)
-
-/** شماره‌ی دورقمیِ فارسی برای فهرست‌ها — ۰۱، ۰۲، … */
-const ord = (n: number) => faDigits(String(n).padStart(2, '0'))
-
-/** نگاشتِ شناسه‌ی خدمت به تعریفش — برای ایستگاه‌های آناتومی */
-const BY_ID = new Map(ALL_TECH_SERVICES.map(s => [s.id, s]))
+/** امتیازِ تجمیعیِ هر متخصص — از ستونِ ردیف، نه jsonb */
+type Rating = { avg: number; count: number }
 
 export default function TechnicalServicesPage() {
-  const root = useRef<HTMLDivElement>(null)
-  const sheetClose = useRef<HTMLButtonElement>(null)
-  const sheetOpener = useRef<HTMLElement | null>(null)
-
-  /* ⚠️ آرایه‌ی خالی، نه خواندنِ localStorage در مقدارِ اولیه:
-     مقداردهیِ اولیه روی سرور هم اجرا می‌شود، آن‌جا localStorage
-     نیست، و HTMLِ سرور با اولین رندرِ کلاینت فرق می‌کرد — یعنی
-     خطای هیدراسیون. داده‌ی محلی در افکتِ زیر می‌آید. */
-  const [registered, setRegistered] = useState<Technician[]>([])
-  const [query, setQuery] = useState('')
-  const [city, setCity] = useState('all')
-  const [service, setService] = useState('all')
-  const [sheet, setSheet] = useState(false)
-  const [station, setStation] = useState(0)
-  /* ⚠️ هر فهرست باید سه حالت داشته باشد: اسکلتِ بارگذاری، خالی و
-     خطا. بدونِ اینها، شکستِ شبکه از «متخصصی نیست» قابلِ تشخیص
-     نبود و اولین رندرِ *هر* بازدید «متخصصی پیدا نشد» می‌گفت. */
+  const [rows, setRows] = useState<Technician[]>([])
+  const [ratings, setRatings] = useState<Map<string, Rating>>(new Map())
   const [loading, setLoading] = useState(true)
   const [failed, setFailed] = useState(false)
 
-  /* ⚠️ setState پایدار است، ولی هوکِ حرکت این را در کلوژر نگه
-     می‌دارد؛ صریح‌کردنش جلوی بازساختِ بی‌مورد را می‌گیرد. */
-  const onStation = useCallback((i: number) => setStation(i), [])
+  const [query, setQuery] = useState('')
+  const [category, setCategory] = useState<string | null>(null)
+  const [filters, setFilters] = useState<FilterState>(EMPTY_FILTERS)
+  const [sheet, setSheet] = useState(false)
+
+  const sheetClose = useRef<HTMLButtonElement>(null)
+  const sheetPanel = useRef<HTMLDivElement>(null)
+  const sheetOpener = useRef<HTMLElement | null>(null)
+  const resultsRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
+    /* کشِ محلی تا صفحه در قطعیِ شبکه خالی نماند */
     try {
       const local = listApprovedTechnicians().map(profileToTechnician)
-      if (local.length) setRegistered(local)
+      if (local.length) setRows(local)
     } catch { /* حافظه‌ی محلی در دسترس نبود */ }
-    void fetchProfiles<TechnicianProfile>('technician')
-      .then(rows => {
-        const remote = rows
-          .filter(r => r.status === 'approved')
-          .map(r => profileToTechnician({ ...r.data, slug: r.slug, verified: r.verified } as TechnicianProfile))
-        if (remote.length) setRegistered(remote)
+
+    /* ⚠️ مهلتِ صریح. `fetchProfiles` خودش مهلتی ندارد و اگر روتِ
+       API معلق بماند — که روی شبکه‌ی کند یا دیتابیسِ کند ممکن است —
+       وعده هرگز settle نمی‌شود و کاربر تا ابد اسکلت می‌بیند، نه
+       خطا و نه دکمه‌ی تلاشِ دوباره. */
+    const bail = setTimeout(() => { setFailed(true); setLoading(false) }, 12000)
+    void fetchProfilesResult<TechnicianProfile>('technician')
+      .then(res => {
+        clearTimeout(bail)
+        if (res.state === 'error') { setFailed(true); return }
+        const remote = res.profiles
+        const approved = remote.filter(r => r.status === 'approved')
+        setRows(approved.map(r => profileToTechnician(
+          { ...r.data, slug: r.slug, verified: r.verified } as TechnicianProfile,
+        )))
+        /* ⚠️ امتیاز از خودِ ردیف می‌آید (`ratingAvg`/`ratingCount`)،
+           نه از jsonb و نه از محاسبه‌ی مرورگر. */
+        const m = new Map<string, Rating>()
+        for (const r of approved) {
+          if ((r.ratingCount ?? 0) > 0) {
+            m.set(r.slug, { avg: r.ratingAvg ?? 0, count: r.ratingCount ?? 0 })
+          }
+        }
+        setRatings(m)
         setFailed(false)
       })
-      .catch(() => setFailed(true))
-      .finally(() => setLoading(false))
+      .finally(() => { clearTimeout(bail); setLoading(false) })
   }, [])
 
   const ALL = useMemo(() => {
-    const staticOnly = TECHNICIANS.filter(t => !registered.some(r => r.id === t.id))
-    return [...registered, ...staticOnly]
-  }, [registered])
+    const staticOnly = TECHNICIANS.filter(t => !rows.some(r => r.id === t.id))
+    return [...rows, ...staticOnly]
+  }, [rows])
 
   const cities = useMemo(
-    () => [...new Set(ALL.map(t => t.city).filter(c => c && c !== '—'))],
+    () => [...new Set(ALL.map(t => t.city).filter(c => c && c !== '—'))].sort(),
     [ALL],
   )
 
-  /* قفلِ اسکرول + Escape + رفت‌وبرگشتِ فوکوس هنگامِ بازبودنِ شیت */
-  useEffect(() => {
-    if (!sheet) {
-      document.body.style.overflow = ''
-      /* ⚠️ فوکوس باید به همان دکمه‌ای برگردد که شیت را باز کرد،
-         وگرنه کاربرِ کیبورد به ابتدای صفحه پرت می‌شود. */
-      sheetOpener.current?.focus()
-      return
+  const hasAnyRating = ratings.size > 0
+
+  /* شمارِ واقعیِ متخصصِ هر دسته */
+  const catCounts = useMemo(() => {
+    const m = new Map<string, number>()
+    for (const cat of TECH_CATEGORIES) {
+      const titles = new Set(titlesOfCategory(cat.id))
+      m.set(cat.id, ALL.filter(t => t.services.some(s => titles.has(s))).length)
     }
+    return m
+  }, [ALL])
+
+  const results = useMemo(() => {
+    const q = query.trim()
+    const catTitles = category ? new Set(titlesOfCategory(category)) : null
+    return ALL.filter(t => {
+      if (filters.city !== 'all' && t.city !== filters.city) return false
+      if (filters.mode === 'onsite' && !t.onsite) return false
+      if (filters.mode === 'workshop' && !t.workshop) return false
+      if (filters.verifiedOnly && !t.verified) return false
+      if (filters.minRating > 0) {
+        const r = ratings.get(t.id)
+        if (!r || r.avg < filters.minRating) return false
+      }
+      if (catTitles && !t.services.some(s => catTitles.has(s))) return false
+      if (q
+        && !t.name.includes(q) && !t.title.includes(q)
+        && !t.services.some(s => s.includes(q))
+        && !(t.club ?? '').includes(q)) return false
+      return true
+    })
+  }, [ALL, query, category, filters, ratings])
+
+  const active = countActive(filters) + (category ? 1 : 0)
+  const clearAll = useCallback(() => { setFilters(EMPTY_FILTERS); setCategory(null); setQuery('') }, [])
+
+  const scrollToResults = useCallback(() => {
+    const calm = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    resultsRef.current?.scrollIntoView({ behavior: calm ? 'auto' : 'smooth', block: 'start' })
+  }, [])
+
+  /* شیتِ موبایل: قفلِ بدنه، Escape، و بازگشتِ فوکوس */
+  useEffect(() => {
+    if (!sheet) { document.body.style.overflow = ''; sheetOpener.current?.focus(); return }
     document.body.style.overflow = 'hidden'
     sheetClose.current?.focus()
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setSheet(false) }
+    /* ⚠️ بدونِ دامِ فوکوس، Tab از دلِ یک دیالوگِ `aria-modal` مستقیم
+       می‌رود توی صفحه‌ی پشتش — یعنی ادعای مودال دروغ است. */
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') { setSheet(false); return }
+      if (e.key !== 'Tab') return
+      const root = sheetPanel.current
+      if (!root) return
+      const f = [...root.querySelectorAll<HTMLElement>(
+        'a[href],button:not([disabled]),input:not([disabled]),select:not([disabled]),[tabindex]:not([tabindex="-1"])',
+      )].filter(el => el.offsetParent !== null)
+      if (f.length === 0) return
+      const first = f[0]!, last = f[f.length - 1]!
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus() }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus() }
+    }
     document.addEventListener('keydown', onKey)
     return () => {
       document.body.style.overflow = ''
@@ -115,409 +169,189 @@ export default function TechnicalServicesPage() {
     }
   }, [sheet])
 
-  const filtered = useMemo(() => {
-    const q = query.trim()
-    return ALL.filter(t => {
-      if (city !== 'all' && t.city !== city) return false
-      if (service !== 'all' && !t.services.includes(service)) return false
-      if (q && !t.name.includes(q) && !t.title.includes(q)
-        && !t.services.some(s => s.includes(q)) && !(t.club ?? '').includes(q)) return false
-      return true
-    })
-  }, [ALL, query, city, service])
-
-  /* ⚠️ شمارِ واقعی، از همان فهرستی که پایین‌تر رندر می‌شود. عددِ
-     ثابت یا تخمینی نوشته نمی‌شود. */
-  const svcCount = useMemo(() => {
-    const m = new Map<string, number>()
-    for (const t of ALL) for (const x of t.services) m.set(x, (m.get(x) ?? 0) + 1)
-    return m
-  }, [ALL])
-
-  /* ⚠️ سطرِ خدمت پیش از این `tabIndex={0}`ِ بی‌کار داشت: با کیبورد
-     فوکوس می‌گرفت و هیچ کاری نمی‌کرد. حالا کارِ واقعی دارد —
-     فهرستِ متخصصان را به همان خدمت فیلتر می‌کند. */
-  const pickService = useCallback((title: string) => {
-    setService(prev => (prev === title ? 'all' : title))
-    const calm = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    document.getElementById('tsx-people')?.scrollIntoView({
-      behavior: calm ? 'auto' : 'smooth', block: 'start',
-    })
-  }, [])
-
-  const activeFilters = (city !== 'all' ? 1 : 0) + (service !== 'all' ? 1 : 0)
-  const clearFilters = () => { setCity('all'); setService('all') }
-
-  /* ⚠️ حرکت تا پیش از آماده‌شدنِ فهرست ساخته نمی‌شود: ScrollTrigger
-     ارتفاع را در لحظه‌ی ساخت اندازه می‌گیرد و اگر سطرها بعداً
-     برسند، همه‌ی نقطه‌های شروع/پایان غلط می‌مانند. */
-  /* ⚠️ پیش از این کلِ سیستمِ حرکت پشتِ `ALL.length > 0` بود. چون
-     `TECHNICIANS` خالی است، سایتی بدونِ متخصصِ تأییدشده نه ورودِ
-     هیرو می‌گرفت و نه دوربینِ آناتومی — در حالی که آناتومی هیچ
-     ربطی به فهرستِ متخصصان ندارد. حالا حرکت همیشه ساخته می‌شود و
-     شمارِ سطرها فقط باعثِ اندازه‌گیریِ دوباره می‌شود. */
-  useServicesMotion(root, onStation, ALL.length)
-
-  const active = CUE_STATIONS[station] ?? CUE_STATIONS[0]
-
-  /* ⚠️ `div` نه `main`: چیدمانِ ریشه خودش `<main>{children}</main>`
-     دارد و دو لندمارکِ main در یک سند غلط است. `dir="rtl"` هم روی
-     `<html>` هست و تکرارش ممنوع. */
   return (
-    <div className="tsx" ref={root}>
-
-      {/* ═══════════ ۱ — هیرو ═══════════ */}
-      <div className="tsx-dark">
-        {/* ⚠️ الگو از صفحه‌ی محصولِ اپل و مایکروسافت گرفته شده و
-            اندازه‌گیری شد: **رسانه تمام‌قاب است و متن رویش می‌نشیند.**
-            نسخه‌ی قبل رسانه را در پنلِ گردگوشه‌ی حاشیه‌دار می‌گذاشت و
-            متن را بالایش — همان چیزی که «کارت» نشانش می‌داد نه
-            «سینماتیک». */}
-        <header className="tsx-hero">
-          <div className="tsx-hero-media" data-hero-cue>
-            <CueHero
-              view={{ target: 7.55, dist: 1.15, spin: 0.5, tilt: -0.2 }}
-              still="/images/cue/hero.webp"
-              alt=""
-              ground="#0B0B0C"
+    <div className="tm">
+      {/* ═══════ ۱ — کشفِ خدمت ═══════ */}
+      <section className="tm-hero">
+        <div className="tm-wrap tm-hero-in">
+          <div>
+            <p className="tm-eyebrow">خدمات فنی بیلیارد</p>
+            <h1>متخصص مناسب برای تجهیزات بیلیاردت را پیدا کن</h1>
+            <p className="tm-hero-sub">
+              از تعمیر و بازسازی چوب تا رگلاژ و تعمیر میز؛ متخصصان خدمات فنی بیلیارد را
+              بر اساس تخصص و موقعیت پیدا کن.
+            </p>
+            <ServiceSearch
+              query={query} onQuery={setQuery}
+              city={filters.city} onCity={c => setFilters(f => ({ ...f, city: c }))}
+              cities={cities} onSubmit={scrollToResults}
             />
           </div>
 
-          <div className="tsx-hero-copy tsx-wrap">
-            <span className="tsx-tag-l" data-hero-eyebrow>Billiard Hub · Technical Division</span>
-            <h1 className="tsx-hero-title" data-hero-title>
-              دقت، <em>در هر نقطه</em>
-            </h1>
-            {/* ⚠️ فقط چیزی که از داده اثبات می‌شود: هجده خدمت در دو
-                دسته‌ی کاتالوگ. هیچ ادعای کیفی («بهترین»، «سریع‌ترین»)
-                نوشته نمی‌شود چون پشتش داده‌ای نیست. */}
-            <p className="tsx-hero-lede">
-              تعمیر و سرویسِ چوب و میزِ بیلیارد — {faDigits(String(ALL_TECH_SERVICES.length))} خدمتِ فنی،
-              روی هر قطعه‌ای که کار می‌خواهد.
-            </p>
+          {/* ⚠️ عکسِ واقعیِ تعویضِ ماهوتِ میز — تنها عکسِ واقعیِ این
+              بخش در پروژه. عمداً بدونِ زیرنویسِ «متخصصِ ما»: تصویر
+              *نوعِ کار* را نشان می‌دهد، نه شخصِ مشخصی را، و نسبت‌دادنش
+              به یک متخصصِ ثبت‌شده ادعای دروغ می‌شد.
+              ⚠️ فایل ۵۱۶×۳۸۷ است؛ قاب عمداً بزرگ‌تر از این نمی‌شود تا
+              کشیده و نرم دیده نشود. */}
+          <figure className="tm-hero-media">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/images/services/repaire.jfif"
+              alt="دو متخصص در حال تعویض ماهوت میز اسنوکر"
+              width={516} height={387} decoding="async" fetchPriority="high"
+            />
+          </figure>
+        </div>
+      </section>
 
-            {/* ⚠️ شیء زیرِ تیتر رد می‌شود، نه در ستونِ کناری. «متن
-                این‌طرف، تصویر آن‌طرف» همان بنری است که قرار نبود
-                ساخته شود. */}
-          </div>
+      {/* ═══════ ۲ — دسته‌های خدمت ═══════ */}
+      <section className="tm-sec tm-wrap" aria-labelledby="tm-cats-h">
+        <div className="tm-sec-head">
+          <h2 className="tm-h2" id="tm-cats-h">خدمات فنی</h2>
+          <Link className="tm-link" href="#tm-people">مشاهده همه متخصصان</Link>
+        </div>
+        <ServiceCategoryList
+          active={category}
+          onPick={id => { setCategory(id); scrollToResults() }}
+          counts={catCounts}
+        />
+      </section>
 
-          {/* ⚠️ هیچ عددِ ساختگی: هر سه از داده‌ی واقعی می‌آیند. */}
-          <dl className="tsx-hero-meta tsx-wrap" data-hero-meta>
-            <div>
-              <dt className="tsx-tag-l k">Services</dt>
-              <dd className="v" style={{ margin: 0 }}>{faDigits(String(ALL_TECH_SERVICES.length))}</dd>
-            </div>
-            <div>
-              <dt className="tsx-tag-l k">Registers</dt>
-              <dd className="v" style={{ margin: 0 }}>{faDigits(String(TECH_SERVICE_CATEGORIES.length))}</dd>
-            </div>
-            <div>
-              <dt className="tsx-tag-l k">Technicians</dt>
-              <dd className="v" style={{ margin: 0 }}>{faDigits(String(ALL.length))}</dd>
-            </div>
-          </dl>
-        </header>
+      {/* ═══════ ۳ — دایرکتوری ═══════ */}
+      <section className="tm-sec tm-wrap" id="tm-people" aria-labelledby="tm-people-h" ref={resultsRef}>
+        <div className="tm-sec-head">
+          <h2 className="tm-h2" id="tm-people-h">متخصصان خدمات فنی</h2>
+        </div>
 
-        {/* ═══════════ ۲ — آناتومی ═══════════ */}
-        <section className="tsx-anatomy" data-anatomy aria-labelledby="tsx-anatomy-h">
-          <h2 id="tsx-anatomy-h" className="sr-only">آناتومیِ چوب و خدماتِ هر قطعه</h2>
+        <div className="tm-dir">
+          {/* ستونِ فیلتر — فقط دسکتاپ */}
+          <aside className="tm-filters" aria-label="فیلترها">
+            <ServiceFilters
+              value={filters} onChange={setFilters}
+              cities={cities} hasAnyRating={hasAnyRating} idPrefix="d"
+            />
+          </aside>
 
-          <div className="tsx-anatomy-stage tsx-wrap">
-            {/* — دسکتاپ: یک دوربین که روی چوب حرکت می‌کند —
-                ⚠️ نام و قاب در یک گروه‌اند تا *با هم* در ارتفاع مرکز
-                شوند. جدا که بودند، هرکدام در ردیفِ خودش وسط می‌نشست و
-                بینشان یک نوارِ خالیِ بی‌دلیل می‌ماند. */}
-            <div className="tsx-anatomy-main">
-            {/* ⚠️ `aria-live` روی کلِ بلوک بود و با هر تغییرِ ایستگاه
-                نام + برچسب + چهار خدمت دوباره خوانده می‌شد. حالا فقط
-                نامِ قطعه اعلام می‌شود. */}
-            <span className="sr-only" aria-live="polite">{active.label}</span>
-            <div className="tsx-station">
-              <span className="tsx-tag-l">{active.latin}</span>
-              <p className="tsx-station-name">{active.label}</p>
-              <ul className="tsx-station-svc">
-                {active.serviceIds.map(id => {
-                  const s = BY_ID.get(id)
-                  return s ? <li key={id}>{s.title}</li> : null
-                })}
-              </ul>
-            </div>
-
-            {/* پنج رندرِ واقعی، روی هم؛ اسکرول بینشان محو می‌کند.
-                ⚠️ `loading="lazy"` لازم است: `.tsx-cam` زیرِ ۱۰۰۰ پیکسل
-                `display: none` است ولی مخفی‌بودن جلوی دانلود را
-                نمی‌گیرد — بدونِ این، هر بازدیدِ موبایل ~۲۰۰ کیلوبایت
-                WebPِ بی‌مصرف می‌گرفت. */}
-            <div className="tsx-cam" data-cam>
-              {CUE_STATIONS.map(st => (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img key={st.id} src={`/images/cue/${st.id}.webp`} alt="" aria-hidden
-                  width={1200} height={760} loading="lazy" decoding="async" />
-              ))}
-            </div>
-            </div>
-
-            <ol className="tsx-rail">
-              {CUE_STATIONS.map((st, i) => (
-                <li key={st.id} className={`tsx-rail-item tsx-tag-l${i === station ? ' on' : ''}`}>
-                  {ord(i + 1)} · {st.latin}
-                </li>
-              ))}
-            </ol>
-
-            {/* — موبایل: ایستگاه‌های ایستا، بدونِ pin و بدونِ scrub — */}
-            <div className="tsx-stations-m">
-              {CUE_STATIONS.map((st, i) => (
-                <article className="tsx-station-m" key={st.id} data-reveal>
-                  <span className="tsx-tag-l tsx-tag-gold">{ord(i + 1)} · {st.latin}</span>
-                  <h3>{st.label}</h3>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={`/images/cue/${st.id}.webp`} alt="" aria-hidden
-                    width={1200} height={760} loading="lazy" decoding="async" />
-                  <ul className="tsx-station-svc">
-                    {st.serviceIds.map(id => {
-                      const s = BY_ID.get(id)
-                      return s ? <li key={id}>{s.title}</li> : null
-                    })}
-                  </ul>
-                </article>
-              ))}
-            </div>
-          </div>
-        </section>
-      </div>
-
-      {/* ═══════════ ۳ — ثبتِ خدمات ═══════════ */}
-      <div className="tsx-light">
-        {TECH_SERVICE_CATEGORIES.map(cat => (
-          <section className="tsx-sec tsx-wrap" key={cat.id} aria-labelledby={`reg-${cat.id}`}>
-            <div className="tsx-sec-head" data-reveal>
-              <h2 id={`reg-${cat.id}`}>{cat.title}</h2>
-              <span className="tsx-tag">
-                {faDigits(String(cat.services.length))} خدمت
+          <div>
+            <div className="tm-controls">
+              <span className="tm-count" aria-live="polite">
+                {loading ? 'در حال بارگذاری…' : `${faDigits(String(results.length))} متخصص`}
               </span>
-            </div>
-            <ul className="tsx-list" data-rows>
-              {cat.services.map((s: TechServiceDef, i) => {
-                const n = svcCount.get(s.title) ?? 0
-                const on = service === s.title
-                return (
-                  <li className="tsx-item" key={s.id}>
-                    <button
-                      type="button"
-                      className={`tsx-item-btn${on ? ' on' : ''}`}
-                      aria-pressed={on}
-                      onClick={() => pickService(s.title)}
-                    >
-                      <span className="tsx-item-n">{ord(i + 1)}</span>
-                      <span className="tsx-item-b">
-                        <span className="tsx-item-t">{s.title}</span>
-                        {/* توضیح فقط وقتی در کاتالوگ هست — متنِ پرکننده ساخته نمی‌شود */}
-                        {s.description && <span className="tsx-item-d">{s.description}</span>}
-                      </span>
-                      {/* ⚠️ برای صفر «—» می‌آید نه «بدون متخصص». عدد
-                          پنهان نمی‌شود — چیزی ادعا هم نمی‌شود — ولی
-                          امروز ۱۴ از ۱۸ خدمت متخصصی ندارند و تکرارِ
-                          چهارده‌باره‌ی آن جمله کاتالوگ را خراب نشان
-                          می‌داد، نه خالی. خالی‌بودن در حالتِ خالیِ
-                          فهرستِ پایین صریح گفته می‌شود. */}
-                      <span className="tsx-item-c">
-                        {n > 0 ? `${faDigits(String(n))} متخصص` : '—'}
-                      </span>
-                    </button>
-                  </li>
-                )
-              })}
-            </ul>
-          </section>
-        ))}
-
-        {/* ═══════════ ۴ — متخصصان ═══════════ */}
-        <section className="tsx-sec tsx-wrap" id="tsx-people" aria-labelledby="tsx-people-h">
-          <div className="tsx-sec-head" data-reveal>
-            <h2 id="tsx-people-h">متخصصان</h2>
-            <span className="tsx-tag">
-              {faDigits(String(filtered.length))} از {faDigits(String(ALL.length))}
-            </span>
-          </div>
-
-          <div className="tsx-tools">
-            <div className="tsx-search" style={{ position: 'relative' }}>
-              <input
-                className="input input-glass input-sm input-icon-start"
-                type="search"
-                aria-label="جستجوی متخصص، تخصص یا باشگاه"
-                value={query}
-                onChange={e => setQuery(e.target.value)}
-                placeholder="جستجوی متخصص، تخصص یا باشگاه…"
-              />
-              <Search size={15} aria-hidden style={{ position: 'absolute', insetInlineStart: 13, top: '50%', transform: 'translateY(-50%)', color: 'var(--ink-3)', pointerEvents: 'none' }} />
-            </div>
-
-            {/* فیلترِ شهر — روی همه‌ی اندازه‌ها یک `<select>`ِ معنایی */}
-            <label className="sr-only" htmlFor="tsx-city">فیلترِ شهر</label>
-            <select
-              id="tsx-city" className="input input-glass input-sm"
-              value={city} onChange={e => setCity(e.target.value)}
-              style={{ inlineSize: 'auto' }}
-            >
-              <option value="all">همه شهرها</option>
-              {cities.map(c => <option key={c} value={c}>{c}</option>)}
-            </select>
-
-            <button className="tsx-btn ghost-light" type="button"
-              onClick={e => { sheetOpener.current = e.currentTarget; setSheet(true) }}>
-              <SlidersHorizontal size={15} aria-hidden />
-              خدمات
-              {/* ⚠️ `activeFilters` شهر را هم می‌شمرد: انتخابِ فقط شهر
-                  دکمه‌ی «خدمات» را «خدمات (۱)» نشان می‌داد. */}
-              {service !== 'all' && ' (۱)'}
-            </button>
-
-            {activeFilters > 0 && (
-              <button className="tsx-clear" type="button" onClick={clearFilters}>
-                پاک‌کردنِ فیلترها
+              {/* دکمه‌ی فیلتر فقط زیرِ ۱۰۲۴ معنا دارد */}
+              <button
+                type="button" className="tm-btn tm-btn--outline tm-btn--sm"
+                onClick={e => { sheetOpener.current = e.currentTarget; setSheet(true) }}
+                data-mobile-filters
+              >
+                <SlidersHorizontal size={15} aria-hidden />
+                فیلترها{active > 0 && ` (${faDigits(String(active))})`}
               </button>
+              {active > 0 && (
+                <button type="button" className="tm-btn tm-btn--quiet tm-btn--sm" onClick={clearAll}>
+                  پاک‌کردن
+                </button>
+              )}
+            </div>
+
+            {loading ? (
+              <div className="tm-list" aria-hidden>
+                {Array.from({ length: 3 }, (_, i) => <TechnicianCardSkeleton key={i} />)}
+              </div>
+            ) : failed && ALL.length === 0 ? (
+              <div className="tm-empty" role="alert">
+                <h3>فهرست متخصصان بارگذاری نشد</h3>
+                <p>ارتباط با سرور برقرار نشد. اتصال اینترنت را بررسی کن و دوباره تلاش کن.</p>
+                <button className="tm-btn tm-btn--outline" type="button"
+                  onClick={() => window.location.reload()}>تلاش دوباره</button>
+              </div>
+            ) : results.length === 0 ? (
+              <div className="tm-empty">
+                <h3>متخصصی با این جست‌وجو پیدا نشد</h3>
+                <p>
+                  {active > 0
+                    ? 'فیلترها را کمتر کن یا شهر دیگری را امتحان کن.'
+                    : 'هنوز متخصصی در این بخش ثبت نشده است.'}
+                </p>
+                {active > 0 && (
+                  <button className="tm-btn tm-btn--outline" type="button" onClick={clearAll}>
+                    نمایش همه
+                  </button>
+                )}
+              </div>
+            ) : (
+              <div className="tm-list">
+                {results.map(t => {
+                  const r = ratings.get(t.id)
+                  return (
+                    <TechnicianCard
+                      key={t.id} tech={t}
+                      ratingAvg={r?.avg} ratingCount={r?.count}
+                    />
+                  )
+                })}
+              </div>
             )}
+
+            {/* ═══════ ۴ — ثبتِ درخواست ═══════ */}
+            <div className="tm-cta tm-cta-mt">
+              <div>
+                <h2>متخصص مناسب پیدا نکردی؟</h2>
+                <p>نیازت را برای ما توضیح بده تا درخواستت را برای متخصصان مرتبط ارسال کنیم.</p>
+              </div>
+              <Link className="tm-btn tm-btn--gold" href="/support?topic=technical-service">
+                <Send size={16} aria-hidden />
+                ثبت درخواست خدمات
+              </Link>
+            </div>
           </div>
+        </div>
+      </section>
 
-          {loading ? (
-            /* اسکلتِ بارگذاری — ارتفاعِ سطرها را از پیش می‌گیرد تا
-               رسیدنِ داده صفحه را نپراند */
-            <div aria-hidden>
-              {Array.from({ length: 4 }, (_, i) => (
-                <div className="tsx-person tsx-skel" key={i}>
-                  <span className="tsx-skel-n" />
-                  <span className="tsx-person-b">
-                    <span className="tsx-skel-a" />
-                    <span className="tsx-skel-b" />
-                  </span>
-                </div>
-              ))}
-              <span className="sr-only" aria-live="polite">در حالِ بارگذاریِ فهرستِ متخصصان</span>
-            </div>
-          ) : failed && ALL.length === 0 ? (
-            /* ⚠️ خطا از «خالی» جداست: پیش از این هر دو یک پیام
-               می‌دادند و قطعیِ شبکه شبیهِ «متخصصی نیست» دیده می‌شد. */
-            <div className="tsx-empty" role="alert">
-              <p className="tsx-empty-h">فهرستِ متخصصان بارگذاری نشد.</p>
-              <p className="tsx-empty-p">ارتباط با سرور برقرار نشد. اتصال را بررسی کنید.</p>
-              <button className="tsx-btn ghost-light" type="button"
-                onClick={() => window.location.reload()}>
-                تلاشِ دوباره
-              </button>
-            </div>
-          ) : filtered.length === 0 ? (
-            <div className="tsx-empty">
-              {/* ⚠️ پیامِ مشخص، نه «چیزی پیدا نشد»: کاربری که روی یک
-                  خدمت کلیک کرده باید بداند مشکل جست‌وجویش نیست —
-                  هنوز کسی آن خدمت را ثبت نکرده. */}
-              <p className="tsx-empty-h">
-                {service !== 'all'
-                  ? `هنوز متخصصی برای «${service}» ثبت نشده.`
-                  : 'متخصصی با این جست‌وجو پیدا نشد.'}
-              </p>
-              <button className="tsx-btn ghost-light" type="button"
-                onClick={() => { setQuery(''); clearFilters() }}>
-                نمایشِ همه
-              </button>
-            </div>
-          ) : (
-            <div data-rows>
-              {filtered.map((t, i) => (
-                <Link className="tsx-person" key={t.id} href={`/services/${t.id}`}>
-                  <span className="tsx-person-n">{ord(i + 1)}</span>
-                  <span className="tsx-person-b">
-                    <span className="tsx-person-name">
-                      {t.name}
-                      {t.verified && <VerifiedBadge title="متخصص تأیید شده" />}
-                    </span>
-                    <span className="tsx-person-meta">
-                      <span>{t.title}</span>
-                      {t.city && t.city !== '—' && <span>· {t.city}</span>}
-                      {t.services.length > 0 && (
-                        <span>· {faDigits(String(t.services.length))} خدمت</span>
-                      )}
-                    </span>
-                  </span>
-                  <span className="tsx-person-go" aria-hidden>
-                    <ArrowLeft size={16} />
-                  </span>
-                </Link>
-              ))}
-            </div>
-          )}
-        </section>
-      </div>
-
-      {/* ═══════════ ۵ — کنشِ پایانی ═══════════ */}
-      <div className="tsx-dark">
-        <section className="tsx-cta tsx-wrap" data-reveal>
-          <h2 className="tsx-cta-h">
-            چوبت از فرم افتاده؟ <em>برگردانش به فرم.</em>
-          </h2>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12 }}>
-            {/* ⚠️ این پیش از این به `/dashboard/technician` می‌رفت که
-                پنلِ ثبت‌نامِ *خودِ متخصص* است و بازدیدکننده‌ی عادی را
-                با «این صفحه مخصوص متخصصان خدمات فنی است» رد می‌کند.
-                یعنی کنشِ اصلیِ صفحه به بن‌بستِ دسترسی می‌رسید. */}
-            <a className="tsx-btn solid" href="#tsx-people">
-              <Phone size={16} aria-hidden />
-              یافتنِ متخصص
-            </a>
-            <Link className="tsx-btn ghost" href="/dashboard/technician">
-              ثبت‌نام به‌عنوانِ متخصص
-            </Link>
+      {/* ═══════ ۵ — ثبت‌نامِ متخصص ═══════ */}
+      <section className="tm-sec tm-wrap">
+        <div className="tm-cta tm-cta--dark">
+          <div>
+            <h2>خدمات فنی ارائه می‌دهی؟</h2>
+            <p>پروفایل حرفه‌ای خودت را در بیلیارد هاب بساز و خدماتت را به مشتریان جدید معرفی کن.</p>
           </div>
-        </section>
-      </div>
+          <Link className="tm-btn tm-btn--gold" href="/dashboard/technician">
+            <UserPlus size={16} aria-hidden />
+            ثبت‌نام به عنوان متخصص
+          </Link>
+        </div>
+      </section>
 
-      {/* ═══════════ شیتِ فیلترِ خدمات ═══════════ */}
+      {/* ═══════ شیتِ فیلترِ موبایل ═══════ */}
       {sheet && (
-        <div className="tsx-sheet" onClick={() => setSheet(false)}>
-          {/* ⚠️ نقشِ dialog روی *پنل* است نه روی پس‌زمینه: پیش از این
-              روی همان divی بود که کارش بستن با کلیک است، پس نامِ
-              دسترس‌پذیر متعلق به پرده می‌شد نه به محتوا.
-              ⚠️ `aria-modal` بدونِ مدیریتِ فوکوس دروغ است — حالا فوکوس
-              وارد می‌شود، Escape می‌بندد و فوکوس برمی‌گردد. */}
+        <div className="tm-sheet" role="presentation" onClick={() => setSheet(false)}>
           <div
-            className="tsx-sheet-panel"
-            role="dialog" aria-modal="true" aria-labelledby="tsx-sheet-h"
+            ref={sheetPanel}
+            className="tm-sheet-panel"
+            role="dialog" aria-modal="true" aria-labelledby="tm-sheet-h"
             onClick={e => e.stopPropagation()}
           >
-            <div className="tsx-sheet-head">
-              <strong id="tsx-sheet-h">خدمات</strong>
-              <button ref={sheetClose} className="tsx-sheet-x" type="button"
+            <div className="tm-sheet-head">
+              <strong id="tm-sheet-h">فیلترها</strong>
+              <button ref={sheetClose} type="button" className="tm-icon-btn"
                 onClick={() => setSheet(false)} aria-label="بستن">
                 <X size={16} aria-hidden />
               </button>
             </div>
 
-            <ul className="tsx-list">
-              <li className="tsx-item">
-                <button type="button" className={`tsx-item-btn${service === 'all' ? ' on' : ''}`}
-                  aria-pressed={service === 'all'}
-                  onClick={() => { setService('all'); setSheet(false) }}>
-                  <span className="tsx-item-n">—</span>
-                  <span className="tsx-item-b"><span className="tsx-item-t">همه خدمات</span></span>
-                  <span className="tsx-item-c">{faDigits(String(ALL.length))}</span>
-                </button>
-              </li>
-              {SERVICE_TITLES.map((t, i) => {
-                const n = svcCount.get(t) ?? 0
-                return (
-                  <li className="tsx-item" key={t}>
-                    <button type="button" className={`tsx-item-btn${service === t ? ' on' : ''}`}
-                      aria-pressed={service === t}
-                      onClick={() => { setService(t); setSheet(false) }}>
-                      <span className="tsx-item-n">{ord(i + 1)}</span>
-                      <span className="tsx-item-b"><span className="tsx-item-t">{t}</span></span>
-                      <span className="tsx-item-c">{n > 0 ? faDigits(String(n)) : '—'}</span>
-                    </button>
-                  </li>
-                )
-              })}
-            </ul>
+            <ServiceFilters
+              value={filters} onChange={setFilters}
+              cities={cities} hasAnyRating={hasAnyRating} idPrefix="m"
+            />
+
+            <div className="tm-sheet-foot">
+              <button type="button" className="tm-btn tm-btn--outline"
+                onClick={() => setFilters(EMPTY_FILTERS)}>پاک‌کردن</button>
+              <button type="button" className="tm-btn tm-btn--primary"
+                onClick={() => setSheet(false)}>
+                نمایش {faDigits(String(results.length))} متخصص
+              </button>
+            </div>
           </div>
         </div>
       )}

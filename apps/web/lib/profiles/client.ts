@@ -114,6 +114,20 @@ export async function fetchProfiles<T>(kind: ProfileKind): Promise<RemoteProfile
   return j?.profiles ?? []
 }
 
+/* ⚠️ `fetchProfiles` خطا را می‌بلعد و `[]` می‌دهد، پس مصرف‌کننده
+   نمی‌تواند «هیچ متخصصی نیست» را از «سرور جواب نداد» جدا کند و
+   روی سایتِ زنده جمله‌ی غلط نشان می‌دهد. این یکی حالت را برمی‌گرداند. */
+export type ProfilesResult<T> =
+  | { state: 'ok'; profiles: RemoteProfile<T>[] }
+  | { state: 'error' }
+
+export async function fetchProfilesResult<T>(kind: ProfileKind): Promise<ProfilesResult<T>> {
+  const r = await fetch(`/api/profiles/${kind}`, { cache: 'no-store' }).catch(() => null)
+  if (!r || !r.ok) return { state: 'error' }
+  const j = await json<{ profiles: RemoteProfile<T>[] }>(r)
+  return j ? { state: 'ok', profiles: j.profiles ?? [] } : { state: 'error' }
+}
+
 export interface SaveResult<T> { ok: boolean; profile: RemoteProfile<T> | null; message?: string }
 
 /** ذخیره‌ی پروفایل خود کاربر */

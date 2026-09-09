@@ -1,0 +1,440 @@
+/* ─────────────────────────────────────────────────────────────
+   خدماتِ فنی — سیستمِ بصریِ مارکت‌پلیس.
+
+   ── تغییرِ مفهوم ──
+   نسخه‌های پیشین این بخش «نمایشِ محصول» بودند: رسانه‌ی تمام‌قاب،
+   تیترِ درشت، روایتِ آناتومیِ چوب. آن مفهوم کاملاً برداشته شد.
+   این‌جا یک صفحه‌ی *پیداکردن* است، نه یک صفحه‌ی *تماشا کردن*:
+   نیاز ⟵ خدمت ⟵ متخصص ⟵ اعتماد ⟵ تماس.
+
+   ── مقیاسِ تایپ ──
+   ⚠️ عمداً کوچک. بزرگ‌ترین متنِ صفحه ۴۰ پیکسل است، نه ۸۰. در یک
+   دایرکتوری، تیترِ درشت فقط ردیف‌ها را از قاب بیرون می‌راند.
+
+   ── طلا ──
+   ⚠️ `--gold` فقط *لهجه* است: حالتِ انتخاب، ستاره، و سطحِ یک دکمه.
+   هیچ متنِ بدنه، هیچ حاشیه‌ی عمومی و هیچ زمینه‌ی بزرگی طلایی نیست.
+   طلاییِ روشن روی کاغذ ۲٫۰۵:۱ است، پس هرجا *خوانده* می‌شود
+   `--gold-ink` می‌آید نه `--gold`.
+   ───────────────────────────────────────────────────────────── */
+
+.tm {
+  /* ── زمین ── */
+  --bg: #F7F6F3;
+  --surface: #FFFFFF;
+  --neutral: #E8E5DF;
+
+  /* ── جوهر ── */
+  --ink: #111111;
+  --ink-2: #4B4A46;
+  --ink-3: #6E6C66;
+
+  /* ── لهجه ── */
+  --gold: #C7A66A;
+  --gold-ink: #8A6224;
+  --gold-tint: rgb(199 166 106 / .12);
+
+  --line: #E4E1DA;
+  --line-strong: #D3CFC6;
+
+  /* ── شعاع ── */
+  --r-card: 12px;
+  --r-ctl: 10px;
+  --r-chip: 999px;
+
+  --shadow-card: 0 1px 2px rgb(17 17 17 / .04), 0 1px 1px rgb(17 17 17 / .03);
+  --shadow-lift: 0 4px 14px -4px rgb(17 17 17 / .1), 0 2px 4px rgb(17 17 17 / .04);
+
+  background: var(--bg);
+  color: var(--ink);
+}
+
+.tm-wrap {
+  inline-size: 100%;
+  max-inline-size: 1280px;
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+/* عنوانِ بخش — یک اندازه، همه‌جا */
+.tm-h2 {
+  font-size: 20px; font-weight: 700; line-height: 1.4;
+  letter-spacing: -0.01em; margin: 0; color: var(--ink);
+}
+@media (min-width: 768px) { .tm-h2 { font-size: 24px; } }
+
+.tm-sec-head {
+  display: flex; align-items: baseline; justify-content: space-between;
+  gap: 12px; margin-block-end: 16px;
+}
+.tm-link {
+  font-size: 13px; font-weight: 600; color: var(--gold-ink);
+  text-decoration: none; white-space: nowrap;
+}
+.tm-link:hover { text-decoration: underline; text-underline-offset: 3px; }
+
+/* ═══════════════ دکمه ═══════════════ */
+.tm-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  /* ⚠️ کفِ ۴۴ پیکسل — قاعده‌ی هدفِ لمسی */
+  min-block-size: 44px;
+  padding-inline: 16px;
+  border-radius: var(--r-ctl);
+  border: 1px solid transparent;
+  font: inherit; font-size: 14px; font-weight: 600;
+  text-decoration: none; cursor: pointer;
+  transition: background-color .18s, border-color .18s, color .18s, box-shadow .18s;
+}
+.tm-btn:disabled { opacity: .45; cursor: not-allowed; }
+.tm-btn:focus-visible { outline: 2px solid var(--gold-ink); outline-offset: 2px; }
+
+.tm-btn--primary { background: var(--ink); color: #fff; }
+.tm-btn--primary:hover:not(:disabled) { background: #000; }
+
+.tm-btn--gold { background: var(--gold); color: #221806; }
+.tm-btn--gold:hover:not(:disabled) { background: #BE9A59; }
+
+.tm-btn--outline { background: var(--surface); border-color: var(--line-strong); color: var(--ink); }
+.tm-btn--outline:hover:not(:disabled) { border-color: var(--ink-3); }
+
+.tm-btn--quiet { background: transparent; color: var(--ink-2); }
+.tm-btn--quiet:hover:not(:disabled) { background: var(--neutral); }
+
+.tm-btn--sm { min-block-size: 36px; padding-inline: 12px; font-size: 13px; }
+
+/* ═══════════════ ورودی ═══════════════ */
+.tm-field { display: grid; gap: 6px; min-inline-size: 0; }
+.tm-label { font-size: 12px; font-weight: 600; color: var(--ink-3); }
+.tm-input, .tm-select {
+  inline-size: 100%; min-block-size: 44px;
+  padding-inline: 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-ctl);
+  background: var(--surface);
+  font: inherit; font-size: 14px; color: var(--ink);
+}
+.tm-input::placeholder { color: var(--ink-3); }
+.tm-input:focus-visible, .tm-select:focus-visible {
+  outline: 2px solid var(--gold-ink); outline-offset: -1px; border-color: transparent;
+}
+
+/* ═══════════════ ۱ — سرلوحه‌ی کشف ═══════════════
+   ⚠️ جمع‌وجور و کاربردی. نه رسانه‌ی تمام‌ویوپورت، نه پرده، نه
+   تیترِ ۸۰ پیکسلی. کارِ این بخش این است که کاربر در پنج ثانیه
+   جست‌وجویش را شروع کند. */
+.tm-hero { background: var(--surface); border-block-end: 1px solid var(--line); }
+.tm-hero-in {
+  display: grid; gap: 24px;
+  padding-block: 24px 32px;
+}
+@media (min-width: 900px) {
+  .tm-hero-in {
+    grid-template-columns: minmax(0, 1fr) minmax(0, .82fr);
+    align-items: center;
+    gap: 48px;
+    padding-block: 48px;
+  }
+}
+.tm-eyebrow {
+  font-size: 12px; font-weight: 700; color: var(--gold-ink);
+  margin: 0 0 8px;
+}
+.tm-hero h1 {
+  font-size: 26px; font-weight: 700; line-height: 1.45;
+  letter-spacing: -0.015em; margin: 0 0 12px; color: var(--ink);
+  text-wrap: pretty;
+}
+@media (min-width: 768px) { .tm-hero h1 { font-size: 34px; line-height: 1.35; } }
+@media (min-width: 1280px) { .tm-hero h1 { font-size: 40px; } }
+.tm-hero-sub {
+  font-size: 15px; line-height: 1.9; color: var(--ink-2);
+  margin: 0 0 24px; max-inline-size: 52ch;
+}
+
+/* تصویرِ سرلوحه */
+.tm-hero-media {
+  position: relative; overflow: hidden;
+  border-radius: var(--r-card);
+  background: var(--neutral);
+  aspect-ratio: 4 / 3;
+}
+@media (min-width: 900px) { .tm-hero-media { aspect-ratio: 5 / 4; } }
+.tm-hero-media img { inline-size: 100%; block-size: 100%; object-fit: cover; display: block; }
+
+/* ── ماژولِ جست‌وجو ── */
+.tm-search {
+  display: grid; gap: 8px;
+  padding: 12px;
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-card);
+  box-shadow: var(--shadow-card);
+}
+@media (min-width: 640px) {
+  .tm-search { grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr) auto; align-items: end; }
+}
+.tm-search .tm-btn { inline-size: 100%; }
+@media (min-width: 640px) { .tm-search .tm-btn { inline-size: auto; padding-inline: 24px; } }
+
+/* ═══════════════ ۲ — دسته‌های خدمت ═══════════════ */
+.tm-sec { padding-block: 32px; }
+@media (min-width: 768px) { .tm-sec { padding-block: 48px; } }
+
+/* ⚠️ روی موبایل اسکرولِ افقی، نه شبکه‌ی ۱۵ کارتِ ریز. */
+/* اسکرولرِ افقی از همان گاتر استفاده می‌کند */
+.tm-cats {
+  display: grid; grid-auto-flow: column; grid-auto-columns: 148px;
+  gap: 8px; overflow-x: auto; padding-block-end: 4px;
+  scroll-snap-type: x proximity;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  /* لبه‌تا‌لبه روی موبایل تا معلوم شود اسکرول دارد */
+  margin-inline: calc(var(--gutter) * -1); padding-inline: var(--gutter);
+}
+@media (min-width: 768px) {
+  .tm-cats {
+    grid-auto-flow: row; grid-auto-columns: auto;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    overflow: visible; margin-inline: 0; padding-inline: 0; gap: 12px;
+  }
+}
+@media (min-width: 1280px) { .tm-cats { grid-template-columns: repeat(8, minmax(0, 1fr)); } }
+
+.tm-cat {
+  scroll-snap-align: start;
+  display: grid; gap: 8px; justify-items: center; text-align: center;
+  padding: 16px 8px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-card);
+  color: var(--ink);
+  font: inherit; font-size: 13px; font-weight: 600;
+  cursor: pointer;
+  transition: border-color .18s, box-shadow .18s, background-color .18s;
+}
+.tm-cat:hover { border-color: var(--line-strong); box-shadow: var(--shadow-card); }
+.tm-cat:focus-visible { outline: 2px solid var(--gold-ink); outline-offset: 2px; }
+.tm-cat svg { color: var(--ink-3); transition: color .18s; }
+.tm-cat:hover svg { color: var(--gold-ink); }
+.tm-cat[aria-pressed='true'] {
+  border-color: var(--gold); background: var(--gold-tint);
+}
+.tm-cat[aria-pressed='true'] svg { color: var(--gold-ink); }
+.tm-cat-n { font-size: 11px; font-weight: 500; color: var(--ink-3); }
+
+/* ═══════════════ ۳ — دایرکتوری ═══════════════ */
+.tm-dir { display: grid; gap: 16px; align-items: start; }
+@media (min-width: 1024px) {
+  .tm-dir { grid-template-columns: 264px minmax(0, 1fr); gap: 32px; }
+}
+
+/* نوارِ کنترل‌های بالای نتایج */
+.tm-controls {
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  margin-block-end: 16px;
+}
+.tm-count { font-size: 13px; color: var(--ink-3); margin-inline-end: auto; }
+
+/* ── ستونِ فیلتر (دسکتاپ) ── */
+.tm-filters {
+  display: none;
+  /* ⚠️ ناوبر `fixed` است و در حالتِ نصب‌شده‌ی iOS بالای آن
+     `env(safe-area-inset-top)` هم اضافه می‌شود؛ بدونِ این جمله،
+     ستون زیرِ نوار گیر می‌کند. */
+  position: sticky; inset-block-start: calc(88px + env(safe-area-inset-top));
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-card);
+  padding: 16px;
+}
+@media (min-width: 1024px) { .tm-filters { display: block; } }
+.tm-fgroup + .tm-fgroup { margin-block-start: 24px; padding-block-start: 16px; border-block-start: 1px solid var(--line); }
+.tm-fgroup > legend, .tm-fgroup > .tm-fhead {
+  font-size: 13px; font-weight: 700; color: var(--ink); margin-block-end: 8px; padding: 0;
+}
+.tm-fgroup fieldset { border: 0; margin: 0; padding: 0; }
+
+.tm-check {
+  display: flex; align-items: center; gap: 8px;
+  min-block-size: 36px; font-size: 14px; color: var(--ink-2); cursor: pointer;
+}
+.tm-check input { inline-size: 16px; block-size: 16px; accent-color: var(--gold-ink); flex: none; }
+.tm-check:has(input:disabled) { color: var(--ink-3); cursor: not-allowed; }
+
+/* ⚠️ فیلترهایی که هنوز داده‌شان در دیتابیس نیست: دیده می‌شوند ولی
+   خاموش‌اند و دلیلش نوشته شده. جعلِ فیلتر بدتر از نبودنش است. */
+.tm-soon {
+  font-size: 11px; font-weight: 600; color: var(--ink-3);
+  background: var(--neutral); border-radius: var(--r-chip);
+  padding: 2px 8px; margin-inline-start: auto;
+}
+
+/* ═══════════════ ۴ — کارتِ متخصص ═══════════════
+   ⚠️ کارتِ *اعتماد*، نه کارتِ محصول. در دو تا سه ثانیه باید خوانده
+   شود، پس حداکثر پنج قلم اطلاعات. */
+.tm-list { display: grid; gap: 12px; }
+.tm-card {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 12px;
+  padding: 16px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-card);
+  transition: border-color .18s, box-shadow .18s;
+}
+.tm-card:hover { border-color: var(--line-strong); box-shadow: var(--shadow-lift); }
+@media (min-width: 640px) { .tm-card { grid-template-columns: auto minmax(0, 1fr) auto; gap: 16px; } }
+
+.tm-ava {
+  inline-size: 56px; block-size: 56px; border-radius: 50%;
+  object-fit: cover; background: var(--neutral); flex: none;
+  display: grid; place-items: center;
+  font-size: 20px; font-weight: 700; color: var(--gold-ink);
+  overflow: hidden;
+}
+.tm-ava img { inline-size: 100%; block-size: 100%; object-fit: cover; }
+@media (min-width: 640px) { .tm-ava { inline-size: 64px; block-size: 64px; } }
+
+.tm-card-b { display: grid; gap: 6px; min-inline-size: 0; }
+.tm-card-name {
+  display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+  font-size: 16px; font-weight: 700; color: var(--ink); line-height: 1.4;
+}
+.tm-card-name a { color: inherit; text-decoration: none; }
+.tm-card-name a:hover { text-decoration: underline; text-underline-offset: 3px; }
+.tm-card-title { font-size: 13px; color: var(--ink-2); line-height: 1.6; }
+.tm-card-meta {
+  display: flex; align-items: center; gap: 4px 12px; flex-wrap: wrap;
+  font-size: 12px; color: var(--ink-3);
+}
+.tm-card-meta span { display: inline-flex; align-items: center; gap: 4px; }
+
+/* امتیاز — فقط وقتی نظری ثبت شده باشد */
+.tm-rate { display: inline-flex; align-items: center; gap: 4px; font-size: 13px; color: var(--ink); font-weight: 600; }
+.tm-rate svg { color: var(--gold); }
+.tm-rate small { font-weight: 500; color: var(--ink-3); }
+
+/* تخصص‌ها — چیپِ کم‌رنگ، حداکثر سه تا */
+.tm-chips { display: flex; flex-wrap: wrap; gap: 4px; }
+.tm-chip {
+  font-size: 12px; color: var(--ink-2);
+  background: var(--bg); border: 1px solid var(--line);
+  border-radius: var(--r-chip); padding: 3px 10px;
+  white-space: nowrap;
+}
+.tm-chip--more { color: var(--ink-3); border-style: dashed; }
+
+.tm-card-act { display: flex; gap: 8px; align-items: center; }
+@media (max-width: 639px) { .tm-card-act { grid-column: 1 / -1; } .tm-card-act .tm-btn { flex: 1; } }
+@media (min-width: 640px) { .tm-card-act { flex-direction: column; align-items: stretch; justify-content: center; } }
+
+
+/* ═══════════════ حالت‌ها ═══════════════ */
+.tm-skel { border-color: var(--line); }
+.tm-skel-b {
+  display: block; border-radius: 6px;
+  background: linear-gradient(90deg, var(--neutral) 25%, #F2F0EC 50%, var(--neutral) 75%);
+  background-size: 200% 100%; animation: tmShimmer 1.4s linear infinite;
+}
+@keyframes tmShimmer { to { background-position: -200% 0; } }
+@media (prefers-reduced-motion: reduce) { .tm-skel-b { animation: none; } }
+
+.tm-empty {
+  display: grid; gap: 12px; justify-items: center; text-align: center;
+  padding: 48px 24px;
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-card);
+}
+.tm-empty h3 { font-size: 16px; font-weight: 700; margin: 0; }
+.tm-empty p { font-size: 14px; color: var(--ink-2); margin: 0; max-inline-size: 44ch; line-height: 1.8; }
+
+/* ═══════════════ ۵ — بندهای کنش ═══════════════ */
+.tm-cta {
+  display: grid; gap: 16px;
+  padding: 24px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-card);
+}
+@media (min-width: 768px) {
+  .tm-cta { grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 24px; padding: 32px; }
+}
+.tm-cta h2 { font-size: 18px; font-weight: 700; margin: 0 0 6px; }
+.tm-cta p { font-size: 14px; color: var(--ink-2); margin: 0; line-height: 1.8; max-inline-size: 60ch; }
+.tm-cta--dark { background: var(--ink); border-color: var(--ink); color: #fff; }
+.tm-cta--dark p { color: rgb(255 255 255 / .74); }
+
+/* ═══════════════ شیتِ فیلترِ موبایل ═══════════════ */
+/* ⚠️ ناوبرِ سایت `z-index: 200` دارد. با ۹۰، شیتی که خودش را
+   `aria-modal` اعلام می‌کند زیرِ نوار می‌ماند و نوار همچنان
+   کلیک‌پذیر است — یعنی مودالِ دروغ. */
+.tm-sheet {
+  position: fixed; inset: 0; z-index: 300;
+  background: rgb(17 17 17 / .48);
+  display: flex; align-items: flex-end;
+}
+.tm-sheet-panel {
+  inline-size: 100%; max-block-size: 86svh; overflow-y: auto;
+  background: var(--surface);
+  border-start-start-radius: 16px; border-start-end-radius: 16px;
+  padding: 16px;
+  padding-block-end: max(16px, env(safe-area-inset-bottom));
+}
+.tm-sheet-head {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; margin-block-end: 16px;
+  position: sticky; inset-block-start: -16px;
+  background: var(--surface); padding-block: 8px;
+}
+.tm-sheet-head strong { font-size: 16px; }
+.tm-sheet-foot {
+  display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 8px;
+  margin-block-start: 24px; position: sticky; inset-block-end: 0;
+  background: var(--surface); padding-block: 12px;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .tm-sheet-panel { animation: tmSheetUp .24s cubic-bezier(.22,1,.36,1); }
+  @keyframes tmSheetUp { from { transform: translateY(12%); } }
+}
+
+.tm-icon-btn {
+  inline-size: 40px; block-size: 40px; flex: none;
+  display: grid; place-items: center;
+  border: 1px solid var(--line-strong); border-radius: var(--r-ctl);
+  background: var(--surface); color: var(--ink-2); cursor: pointer;
+}
+.tm-icon-btn:focus-visible { outline: 2px solid var(--gold-ink); outline-offset: 2px; }
+
+/* ⚠️ دکمه‌ی فیلترِ موبایل. ستونِ فیلتر از ۱۰۲۴ به بالا دائمی است،
+   پس این دکمه فقط زیرِ آن معنا دارد — نه به‌عنوان استایلِ اینلاین
+   که همیشه روشن بماند. */
+[data-mobile-filters] { display: inline-flex; }
+@media (min-width: 1024px) { [data-mobile-filters] { display: none; } }
+.tm-cats > li { min-inline-size: 0; }
+.tm-cats .tm-cat { inline-size: 100%; }
+
+/* ⚠️ هر دو `ul`اند و بدونِ این، نشانه‌ی گلوله و تورفتگیِ پیش‌فرضِ
+   مرورگر می‌ماند. */
+.tm-cats, .tm-chips, .tm-list { list-style: none; margin-block: 0; }
+.tm-chips { padding: 0; }
+
+/* ⚠️ قابِ تصویر عمداً کوچک‌تر از نیمِ سرلوحه است: فایلِ موجود
+   ۵۱۶×۳۸۷ است و بزرگ‌تر از این، نرم و کشیده دیده می‌شود. */
+figure.tm-hero-media { margin: 0; max-inline-size: 520px; justify-self: end; }
+
+/* ⚠️ کفِ ۴۴ پیکسل روی لمس. نسخه‌ی کوچکِ دکمه برای دسکتاپ خوب است
+   ولی روی موبایل هدفِ ۳۶ پیکسلی زیرِ قاعده‌ی پروژه است. */
+@media (max-width: 1023px) {
+  .tm-btn--sm { min-block-size: 44px; }
+  .tm-check { min-block-size: 44px; }
+  .tm-icon-btn { inline-size: 44px; block-size: 44px; }
+}
+
+/* فاصله‌ی بندِ کنش — به‌جای استایلِ اینلاینِ ثابت */
+.tm-cta-mt { margin-block-start: 24px; }
+
+/* ⚠️ گاتِر یک‌جا تعریف می‌شود: اسکرولرِ افقی با حاشیه‌ی منفی
+   همان مقدار را لازم دارد و دو عددِ جدا از هم دور می‌افتند. */
+.tm { --gutter: 16px; }
+@media (min-width: 768px) { .tm { --gutter: 24px; } }
+@media (min-width: 1280px) { .tm { --gutter: 32px; } }.tm-note { margin: 0 0 8px; }

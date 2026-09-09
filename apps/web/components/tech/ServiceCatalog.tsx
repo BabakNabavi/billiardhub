@@ -12,7 +12,6 @@
 import type { ReactNode } from 'react'
 import type { ResolvedServices } from '@/lib/tech-services'
 import { toFaDigits } from '@/lib/jalali'
-import './craft-plate.css'
 import './service-catalog.css'
 
 function Discipline({ id, title, count, other, children }: {

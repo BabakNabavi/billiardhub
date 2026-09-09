@@ -1,0 +1,206 @@
+/* ─────────────────────────────────────────────────────────────
+   پروفایلِ متخصص — ادامه‌ی همان سیستمِ `market.css`.
+
+   ⚠️ عمداً فایلِ جدا ولی توکن‌های مشترک: دو صفحه باید *یک محصول*
+   دیده شوند. رنگ، شعاع، مقیاسِ تایپ و دکمه‌ها همه از `.tm` می‌آیند.
+
+   ── چه چیزی از نسخه‌ی قبل رفت ──
+   سرلوحه‌ی سینماییِ تمام‌قاب، پرده‌ی گرادیانی، نوارِ حرکتیِ خدمات و
+   داکِ شیشه‌ای. هیچ‌کدام به «این آدم کیست و چه بلد است» کمک نمی‌کرد.
+   ───────────────────────────────────────────────────────────── */
+
+/* ═══════════ سربرگِ پروفایل ═══════════ */
+.tmp-head { background: var(--surface); border-block-end: 1px solid var(--line); }
+.tmp-head-in { padding-block: 20px 24px; }
+
+.tmp-crumb {
+  display: flex; align-items: center; flex-wrap: wrap; gap: 0 6px;
+  list-style: none; margin: 0; padding: 12px 0 0;
+  font-size: 12px; color: var(--ink-3);
+}
+/* ⚠️ U+2039 «‹» آینه‌پذیر است و در RTL برعکس می‌شود؛ U+203A بعد از
+   آینه‌شدن شکلِ درست را می‌دهد. */
+.tmp-crumb li + li::before { content: "\203A"; padding-inline-end: 6px; color: var(--ink-3); }
+.tmp-crumb a { color: inherit; text-decoration: none; padding-block: 8px; }
+.tmp-crumb a:hover { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
+
+.tmp-id {
+  display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 16px;
+  align-items: start;
+}
+@media (min-width: 768px) {
+  .tmp-id { grid-template-columns: auto minmax(0, 1fr) auto; gap: 24px; align-items: center; }
+}
+
+/* ⚠️ پرتره عمداً بزرگ نیست. یک متخصص باید حرفه‌ای دیده شود، نه
+   سلبریتی؛ عکسِ غول‌پیکر جای اطلاعاتِ مفید را می‌گیرد. */
+.tmp-ava {
+  inline-size: 72px; block-size: 72px; border-radius: 50%;
+  overflow: hidden; background: var(--neutral); flex: none;
+  display: grid; place-items: center;
+  font-size: 26px; font-weight: 700; color: var(--gold-ink);
+  border: 1px solid var(--line);
+}
+.tmp-ava img { inline-size: 100%; block-size: 100%; object-fit: cover; }
+@media (min-width: 768px) { .tmp-ava { inline-size: 96px; block-size: 96px; font-size: 34px; } }
+
+.tmp-name {
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  font-size: 22px; font-weight: 700; line-height: 1.4; margin: 0 0 4px;
+  color: var(--ink);
+}
+@media (min-width: 768px) { .tmp-name { font-size: 28px; } }
+.tmp-role { font-size: 14px; color: var(--ink-2); margin: 0 0 8px; line-height: 1.6; }
+.tmp-facts {
+  display: flex; flex-wrap: wrap; gap: 6px 16px;
+  font-size: 13px; color: var(--ink-3); margin: 0;
+}
+.tmp-facts span { display: inline-flex; align-items: center; gap: 4px; }
+
+.tmp-head-act { display: flex; gap: 8px; flex-wrap: wrap; }
+@media (max-width: 767px) { .tmp-head-act { grid-column: 1 / -1; margin-block-start: 4px; } .tmp-head-act .tm-btn { flex: 1; } }
+
+/* ═══════════ تب‌ها ═══════════ */
+.tmp-tabs {
+  /* ⚠️ ناوبرِ ثابت در حالتِ نصب‌شده‌ی iOS ارتفاعِ ناحیه‌ی امن را هم
+     می‌گیرد؛ عددِ خالی یعنی تب‌ها زیرِ نوار گم می‌شوند. */
+  position: sticky; inset-block-start: calc(72px + env(safe-area-inset-top)); z-index: 20;
+  background: rgb(255 255 255 / .92);
+  backdrop-filter: saturate(1.4) blur(8px);
+  border-block-end: 1px solid var(--line);
+}
+.tmp-tabs ul {
+  display: flex; gap: 4px; list-style: none; margin: 0; padding: 0;
+  overflow-x: auto; scrollbar-width: none;
+}
+.tmp-tabs ul::-webkit-scrollbar { display: none; }
+.tmp-tabs a {
+  display: inline-flex; align-items: center; min-block-size: 44px;
+  padding-inline: 12px; white-space: nowrap;
+  font-size: 14px; font-weight: 600; color: var(--ink-3);
+  text-decoration: none;
+  border-block-end: 2px solid transparent;
+  transition: color .18s, border-color .18s;
+}
+.tmp-tabs a:hover { color: var(--ink); }
+/* ⚠️ حالتِ فعال ظریف است: خطِ دو پیکسلی، نه چیپِ پررنگ */
+.tmp-tabs a[aria-current='true'] { color: var(--ink); border-block-end-color: var(--gold); }
+.tmp-tabs a:focus-visible { outline: 2px solid var(--gold-ink); outline-offset: -2px; }
+
+/* ═══════════ بدنه ═══════════ */
+.tmp-body { display: grid; gap: 24px; align-items: start; padding-block: 24px 32px; }
+@media (min-width: 1024px) {
+  .tmp-body { grid-template-columns: minmax(0, 1fr) 320px; gap: 32px; padding-block: 32px 48px; }
+}
+
+.tmp-card {
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: var(--r-card); padding: 16px;
+}
+@media (min-width: 768px) { .tmp-card { padding: 24px; } }
+.tmp-card + .tmp-card { margin-block-start: 16px; }
+.tmp-card > h2 {
+  font-size: 17px; font-weight: 700; margin: 0 0 12px; color: var(--ink);
+}
+
+.tmp-prose { font-size: 15px; line-height: 2; color: var(--ink-2); margin: 0; }
+.tmp-prose p { margin: 0 0 12px; }
+.tmp-prose p:last-child { margin-block-end: 0; }
+/* «مشاهده بیشتر» — دیوارِ متن بسته می‌ماند تا کاربر بخواهد */
+.tmp-clamp {
+  display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.tmp-more {
+  margin-block-start: 8px; border: 0; background: none; padding: 0;
+  font: inherit; font-size: 13px; font-weight: 600; color: var(--gold-ink); cursor: pointer;
+}
+.tmp-more:hover { text-decoration: underline; text-underline-offset: 3px; }
+.tmp-more:focus-visible { outline: 2px solid var(--gold-ink); outline-offset: 2px; }
+
+/* ── اطلاعاتِ حرفه‌ای ── */
+.tmp-facts-grid { display: grid; gap: 12px; margin: 0; }
+@media (min-width: 640px) { .tmp-facts-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.tmp-facts-grid > div { display: grid; gap: 2px; }
+.tmp-facts-grid dt { font-size: 12px; color: var(--ink-3); }
+.tmp-facts-grid dd { font-size: 14px; font-weight: 600; color: var(--ink); margin: 0; }
+
+/* ── سطرِ خدمت ── */
+.tmp-svc { list-style: none; margin: 0; padding: 0; }
+.tmp-svc > li + li { border-block-start: 1px solid var(--line); }
+.tmp-svc-row {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center; gap: 12px; padding-block: 12px;
+}
+.tmp-svc-b { display: grid; gap: 2px; min-inline-size: 0; }
+.tmp-svc-t { font-size: 15px; font-weight: 600; color: var(--ink); }
+.tmp-svc-d { font-size: 13px; color: var(--ink-3); line-height: 1.7; }
+.tmp-svc-cat {
+  font-size: 12px; font-weight: 700; color: var(--ink-3);
+  margin-block: 16px 4px;
+}
+.tmp-svc-cat:first-child { margin-block-start: 0; }
+
+/* ── نمونه‌کارها ── */
+.tmp-work { display: grid; gap: 12px; }
+@media (min-width: 640px) { .tmp-work { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (min-width: 1280px) { .tmp-work { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.tmp-work article {
+  border: 1px solid var(--line); border-radius: var(--r-card);
+  overflow: hidden; background: var(--surface);
+}
+.tmp-work img {
+  inline-size: 100%; aspect-ratio: 4 / 3; object-fit: cover; display: block;
+  background: var(--neutral);
+}
+.tmp-work-b { padding: 12px; display: grid; gap: 4px; }
+.tmp-work-t { font-size: 14px; font-weight: 600; color: var(--ink); }
+.tmp-work-d { font-size: 13px; color: var(--ink-3); line-height: 1.7; }
+.tmp-work-s { font-size: 12px; color: var(--gold-ink); font-weight: 600; }
+
+/* ── پنلِ تماسِ چسبان ── */
+.tmp-panel { display: none; }
+@media (min-width: 1024px) {
+  .tmp-panel {
+    display: block; position: sticky; inset-block-start: calc(128px + env(safe-area-inset-top));
+    background: var(--surface); border: 1px solid var(--line);
+    border-radius: var(--r-card); padding: 16px;
+  }
+}
+.tmp-panel h2 { font-size: 15px; font-weight: 700; margin: 0 0 4px; }
+.tmp-panel .tmp-role { font-size: 13px; margin-block-end: 16px; }
+.tmp-panel .tm-btn { inline-size: 100%; }
+.tmp-panel .tm-btn + .tm-btn { margin-block-start: 8px; }
+.tmp-panel-note {
+  font-size: 12px; color: var(--ink-3); line-height: 1.8;
+  margin: 12px 0 0; padding-block-start: 12px; border-block-start: 1px solid var(--line);
+}
+
+/* ── کنشِ چسبانِ موبایل ── */
+.tmp-sticky {
+  position: fixed; inset-inline: 0; inset-block-end: 0; z-index: 40;
+  display: flex; gap: 8px; padding: 8px 16px;
+  padding-block-end: max(8px, env(safe-area-inset-bottom));
+  background: rgb(255 255 255 / .94);
+  backdrop-filter: saturate(1.4) blur(10px);
+  border-block-start: 1px solid var(--line);
+  transform: translateY(110%);
+  transition: transform .26s cubic-bezier(.22,1,.36,1);
+}
+.tmp-sticky[data-show='1'] { transform: none; }
+.tmp-sticky .tm-btn { flex: 1; }
+@media (min-width: 1024px) { .tmp-sticky { display: none; } }
+@media (prefers-reduced-motion: reduce) { .tmp-sticky { transition: none; } }
+
+/* ⚠️ فضای انتهایی تا کنشِ چسبان محتوای آخر را نپوشاند */
+@media (max-width: 1023px) { .tmp-body { padding-block-end: 88px; } }
+
+/* ── حالتِ خالی ── */
+.tmp-none {
+  font-size: 14px; color: var(--ink-3); line-height: 1.9; margin: 0;
+}
+
+/* کمکی‌های چیدمان — به‌جای استایلِ اینلاینِ ثابت */
+.tmp-facts-mt { margin-block-start: 16px; }
+.tmp-h2-mt { margin-block-start: 24px; }
+.tmp-row { display: flex; gap: 8px; flex-wrap: wrap; }
