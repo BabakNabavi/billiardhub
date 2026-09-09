@@ -119,7 +119,9 @@ export async function toggleProfile(id: string, current: 'approved' | 'rejected'
    (مربیان و داوران) و به‌جای AdminRow، خود شیء پروفایل را می‌خواهند. */
 
 /** فهرست خام پروفایل‌های یک نقش، با شکل همان نقش */
-export async function fetchAdminProfiles<T>(kind: ProfileKind): Promise<T[]> {
+/** فهرستِ خامِ یک نقش. `id` همیشه همراه است — کنش‌های ادمین به آن
+ *  نیاز دارند و نامک برای شناساییِ ردیف کافی نیست. */
+export async function fetchAdminProfiles<T extends object>(kind: ProfileKind): Promise<Array<T & { id: string }>> {
   try {
     const r = await apiFetch(`/api/admin/profiles?kind=${kind}`, { cache: 'no-store' })
     if (!r.ok) return []
@@ -132,25 +134,41 @@ export async function fetchAdminProfiles<T>(kind: ProfileKind): Promise<T[]> {
     return list.map(p => ({
       ...(p.data ?? {}), slug: p.slug, status: p.status, id: p.id,
       verified: p.verified === true,
-    })) as T[]
+      /* ⚠️ کستِ دومرحله‌ای لازم است و کوتاهی نیست: `p.data` یک
+         `Record<string, unknown>` است و TS نمی‌تواند بداند شکلش با `T`
+         می‌خواند. تکِ‌مرحله‌ای کامپایل نمی‌شود. مرزِ واقعیِ اعتماد
+         سمتِ سرور است، نه این‌جا. */
+    })) as unknown as Array<T & { id: string }>
   } catch { return [] }
 }
 
-/** تغییر وضعیت/تأیید یک پروفایل با نامک */
-export async function patchAdminProfile(slug: string, patch: Record<string, unknown>): Promise<AdminActionResult> {
-  let hit: ApiProfile | undefined
-  try {
-    /* PATCH با شناسه کار می‌کند، پس اول شناسه‌ی همین نامک را پیدا می‌کنیم */
-    const r = await apiFetch('/api/admin/profiles', { cache: 'no-store' })
-    if (!r.ok) return { ok: false, message: r.status === 403 ? 'دسترسی مجاز نیست' : 'فهرست پروفایل‌ها خوانده نشد' }
-    const j = await r.json().catch(() => null) as { profiles?: Record<string, ApiProfile[]> } | null
-    hit = Object.values(j?.profiles ?? {}).flat().find(p => p.slug === slug)
-  } catch {
-    return { ok: false, message: 'ارتباط با سرور برقرار نشد' }
-  }
-  if (!hit) return { ok: false, message: 'این پروفایل روی سرور پیدا نشد' }
+/* ── تغییر وضعیت/تأیید یک پروفایل ──
 
-  const body: Record<string, unknown> = { id: hit.id }
+   ⚠️ **این تابع با نامک کار می‌کرد و غلط بود.** ایندکسِ دیتابیس
+   `UNIQUE (kind, slug)` است (مهاجرتِ ۰۰۸) — یعنی نامک فقط *داخلِ
+   هر نقش* یکتاست، نه در کلِ جدول. نسخه‌ی قبلی فهرستِ **همه‌ی
+   نقش‌ها** را می‌گرفت و اولین ردیفی را که نامکش می‌خورد برمی‌داشت،
+   و ترتیبِ `PROFILE_KINDS` هم `coach` را پیش از `referee`
+   می‌گذارد.
+
+   نتیجه‌ی عملی: کسی که هم مربی است هم داور و هر دو پروفایلش یک
+   نامک دارد، وقتی ادمین در صفحه‌ی داوران «تأیید» را می‌زد، ردیفِ
+   **مربی** به‌روز می‌شد. ردیفِ داور برای همیشه «در انتظار»
+   می‌ماند و ادمین می‌دید که دکمه هیچ کاری نمی‌کند — دقیقاً همان
+   گزارشی که رسید.
+
+   حالا شناسه‌ی ردیف مستقیم می‌آید. یک درخواستِ کمتر هم هست: آن
+   GETِ واسط اصلاً لازم نبود. */
+/** ⚠️ شیء می‌گیرد نه دو رشته: `id` و `slug` هر دو `string`اند و
+ *  جابه‌جا نوشتنشان بی‌صدا کامپایل می‌شود و همان باگِ ردیفِ اشتباه
+ *  را برمی‌گرداند. */
+export async function patchAdminProfile(
+  row: { id: string }, patch: Record<string, unknown>,
+): Promise<AdminActionResult> {
+  const id = row?.id
+  if (!id) return { ok: false, message: 'شناسه‌ی پروفایل در دست نیست' }
+
+  const body: Record<string, unknown> = { id }
   if (typeof patch.status === 'string') body.status = patch.status
   if (typeof patch.verified === 'boolean') body.verified = patch.verified
   if (!('status' in body) && !('verified' in body)) return { ok: false, message: 'چیزی برای تغییر نبود' }
