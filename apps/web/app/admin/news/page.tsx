@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useAuthStore } from '../../../store/auth.store';
 import { Newspaper, Plus, X, Save, Edit, Trash2 } from 'lucide-react';
 import { listContent, createContent, updateContent, deleteContent } from '../../../lib/admin/content-client';
+import { NEWS_SECTIONS, normalizeSection, sectionLabel, EDITORIAL_TAGS } from '../../../lib/news/sections';
 
 /* شکل ردیف دیتابیس (snake_case) — جدول `news` در مهاجرت ۰۲۵ */
 interface DbNews {
@@ -24,18 +25,24 @@ interface NewsItem {
   tags: string;
   published: boolean;
   date: string;
+  cover: string;
+  slug: string;
+  /* لحظه‌ی انتشارِ ثبت‌شده — تا ویرایش آن را جابه‌جا نکند */
+  publishedAt: string | null;
 }
 
-const categories = [
-  { value: 'tournament', label: 'مسابقات' },
-  { value: 'ranking', label: 'رنکینگ' },
-  { value: 'club', label: 'باشگاه‌ها' },
-  { value: 'product', label: 'محصولات' },
-  { value: 'general', label: 'عمومی' },
-];
+/* ⚠️ فهرستِ دسته دیگر این‌جا ساخته نمی‌شود. تا امروز این پنل
+   tournament | ranking | club | product | general می‌نوشت و سایتِ
+   عمومی دنبالِ snooker | pool | players | … می‌گشت — هیچ‌کدام با
+   دیگری هم‌پوشانی نداشت، پس **هر خبری که این‌جا منتشر می‌شد روی
+   سایت برچسبِ «اخبار اسنوکر» می‌خورد**. حالا هر دو یک منبع دارند. */
+const categories = NEWS_SECTIONS.map(s => ({ value: s.key, label: s.label }));
 
 
-const emptyForm = { title: '', summary: '', content: '', category: 'general', tags: '', published: false };
+const emptyForm = {
+  title: '', summary: '', content: '', category: NEWS_SECTIONS[0].key as string,
+  tags: '', published: false, cover: '', slug: '', publishedAt: null as string | null,
+};
 
 export default function AdminNewsPage() {
   const router = useRouter();
@@ -62,9 +69,13 @@ export default function AdminNewsPage() {
       title: r.title ?? '',
       summary: r.excerpt ?? '',
       content: r.body ?? '',
-      category: r.category ?? 'general',
+      /* مقدارِ قدیمیِ دیتابیس هم به بخشِ درست ترجمه می‌شود */
+      category: normalizeSection(r.category) ?? '',
       tags: (r.tags ?? []).join('، '),
       published: r.status === 'published',
+      cover: String(r.cover_url ?? ''),
+      slug: String(r.slug ?? ''),
+      publishedAt: (r.published_at as string | null) ?? null,
       date: r.published_at
         ? new Date(r.published_at).toLocaleDateString('fa-IR')
         : new Date(String(r.created_at ?? Date.now())).toLocaleDateString('fa-IR'),
@@ -80,7 +91,15 @@ export default function AdminNewsPage() {
 
   const handleEdit = (item: NewsItem) => {
     setEditingId(item.id);
-    setForm({ title: item.title, summary: item.summary, content: item.content, category: item.category, tags: item.tags, published: item.published });
+    setForm({
+      title: item.title, summary: item.summary, content: item.content,
+      /* ⚠️ مقدارِ نانگاشتنی (`general` یا هر مقدارِ ناشناخته) نباید
+         با بازکردنِ فرم بی‌صدا «اسنوکر» شود — ویراستاری که فقط
+         یک غلطِ املایی را درست می‌کند بخشِ خبر را هم عوض می‌کرد. */
+      category: item.category, tags: item.tags,
+      published: item.published, cover: item.cover, slug: item.slug,
+      publishedAt: item.publishedAt,
+    });
     setShowForm(true);
   };
 
@@ -94,16 +113,26 @@ export default function AdminNewsPage() {
     if (!form.title.trim()) { setErr('عنوان خبر الزامی است'); return; }
     setErr('');
 
-    /* ستون‌های جدول snake_case‌اند و tags آرایه است، نه رشته‌ی جداشده با ویرگول */
-    const payload = {
-      title: form.title,
-      excerpt: form.summary,
+    /* ⚠️ جداکننده‌ی برچسب هم «,» و هم «،» است: این فیلد به فارسی پر
+       می‌شود و ویرگولِ فارسی تا امروز جداکننده حساب نمی‌شد، پس
+       «فوری، اسنوکر» یک برچسبِ به‌هم‌چسبیده می‌ساخت. */
+    const payload: Record<string, unknown> = {
+      title: form.title.trim(),
+      excerpt: form.summary.trim(),
       body: form.content,
       category: form.category,
-      tags: form.tags.split(',').map(t => t.trim()).filter(Boolean),
+      cover_url: form.cover.trim(),
+      tags: form.tags.split(/[,،]/).map(t => t.trim()).filter(Boolean),
       status: form.published ? 'published' : 'draft',
-      published_at: form.published ? new Date().toISOString() : null,
+      /* ⚠️ لحظه‌ی انتشار فقط یک‌بار ثبت می‌شود. تا امروز هر ویرایشِ
+         یک خبرِ منتشرشده published_at را روی «الان» می‌نوشت، یعنی
+         اصلاحِ یک غلطِ املایی، خبرِ سه‌ماهه را دوباره صدرِ صفحه
+         می‌نشاند. */
+      published_at: form.published ? (form.publishedAt ?? new Date().toISOString()) : null,
     };
+    /* نامکِ خالی نباید روی ستونِ یکتا بنشیند: دومین خبرِ بی‌نامک با
+       خطای «تکراری» رد می‌شد. */
+    if (form.slug.trim()) payload.slug = form.slug.trim();
 
     const res = editingId
       ? await updateContent<DbNews>('news', editingId, payload)
@@ -163,6 +192,7 @@ export default function AdminNewsPage() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">دسته‌بندی</label>
                 <select value={form.category} onChange={e => setForm({ ...form, category: e.target.value })}
                   className="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500">
+                  <option value="">بدون بخش</option>
                   {categories.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
                 </select>
               </div>
@@ -171,6 +201,46 @@ export default function AdminNewsPage() {
                 <input type="text" value={form.tags} onChange={e => setForm({ ...form, tags: e.target.value })}
                   className="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500"
                   placeholder="با کاما جدا کنید" />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label htmlFor="news-cover" className="block text-sm font-medium text-gray-700 mb-1">نشانی تصویر کاور</label>
+                <input id="news-cover" type="url" dir="ltr" value={form.cover} onChange={e => setForm({ ...form, cover: e.target.value })}
+                  className="w-full border border-gray-200 rounded-xl px-4 py-3 text-start focus:outline-none focus:ring-2 focus:ring-green-500"
+                  placeholder="https://…" />
+                <p className="mt-1 text-xs text-gray-400">بدون تصویر، خبر به‌شکل متنی نمایش داده می‌شود.</p>
+              </div>
+              <div>
+                <label htmlFor="news-slug" className="block text-sm font-medium text-gray-700 mb-1">نامک (slug)</label>
+                <input id="news-slug" type="text" dir="ltr" value={form.slug} onChange={e => setForm({ ...form, slug: e.target.value })}
+                  className="w-full border border-gray-200 rounded-xl px-4 py-3 text-start focus:outline-none focus:ring-2 focus:ring-green-500"
+                  placeholder="asia-championship-final" />
+                <p className="mt-1 text-xs text-gray-400">خالی بگذارید تا نشانی از شناسه ساخته شود.</p>
+              </div>
+            </div>
+
+            {/* ⚠️ نوارِ «فوری» و بلوکِ «گزارش ویژه» در سایت با همین
+                برچسب‌ها روشن می‌شوند. جدول ستونی برایشان ندارد و
+                ستونِ خیالی هم ساخته نشد. */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">نشان‌های تحریریه</label>
+              <div className="flex flex-wrap gap-3">
+                {EDITORIAL_TAGS.map(t => {
+                  const list = form.tags.split(/[,،]/).map(x => x.trim()).filter(Boolean);
+                  const on = list.includes(t);
+                  return (
+                    <label key={t} className="flex items-center gap-2 cursor-pointer text-sm">
+                      <input type="checkbox" checked={on} className="accent-green-600 w-4 h-4"
+                        onChange={e => {
+                          const next = e.target.checked ? [...list, t] : list.filter(x => x !== t);
+                          setForm({ ...form, tags: next.join('، ') });
+                        }} />
+                      <span className="font-medium text-gray-700">{t}</span>
+                    </label>
+                  );
+                })}
               </div>
             </div>
 
@@ -223,7 +293,7 @@ export default function AdminNewsPage() {
               </div>
               <div className="col-span-2">
                 <span className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded-lg">
-                  {categories.find(c => c.value === item.category)?.label}
+                  {sectionLabel(item.category)}
                 </span>
               </div>
               <div className="col-span-2 text-xs text-gray-500">{item.date}</div>

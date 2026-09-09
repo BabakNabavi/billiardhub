@@ -1,232 +1,199 @@
-'use client'
-
 /* ─────────────────────────────────────────────────────────────
-   جزئیات خبر — هم‌خانواده‌ی صفحه‌ی لیست (/news): تم روشن، RTL،
-   تصویر هیرو، لید خلاصه، متن، برچسب‌ها، اشتراک‌گذاری و اخبار
-   مرتبط (سایدبار چسبان در دسکتاپ). داده از lib/news-data.
+   صفحه‌ی خبر.
+
+   ── چه چیزی عوض شد ──
+   ⚠️ نسخه‌ی قبل کلاینتی بود و برای نشان‌دادنِ *یک* خبر، **کلِ فهرستِ
+   اخبار** را از `/api/news` می‌گرفت و بینشان می‌گشت. یعنی متنِ خبر
+   در HTML نبود (بد برای گوگل و برای اولین نمایش) و هر بازدید تا
+   ۲۰۰ ردیف داده جابه‌جا می‌کرد. حالا یک پرس‌وجوی نقطه‌ای روی سرور.
+
+   ⚠️ عرضِ متن مهار شده است. خطِ خیلی بلند چشم را در بازگشت به سرِ
+   خط گم می‌کند؛ برای فارسی هم همان قاعده‌ی ۶۰–۷۵ نویسه برقرار است.
    ───────────────────────────────────────────────────────────── */
 
-import { absoluteUrl } from '../../../lib/site-url'
-import { useEffect, useMemo, useState } from 'react'
+import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import { useParams } from 'next/navigation'
-import { Clock3, Eye, ChevronLeft, Link2, Check, Zap, ArrowLeft } from 'lucide-react'
-import {
-  getArticle, categoryOf, faNum, NEWS_CATEGORIES, fetchNewsArticles, type NewsArticle,
-} from '../../../lib/news-data'
+import { getArticle, listPublished, related } from '@/lib/news/server'
+import { sectionLabel, sectionOf } from '@/lib/news/sections'
+import { dateOf, iso, readTime, rank } from '@/lib/news/format'
+import { absoluteUrl } from '@/lib/site-url'
+import ArticleTools from '@/components/news/ArticleTools'
+import NavOffset from '@/components/news/NavOffset'
+import { Cover, Meta, Kicker } from '@/components/news/bits'
+import '../newsroom.css'
 
-const GOLD   = '#C7A66A'
-const GOLD_D = '#8F6531'
-const TEXT   = '#1C1B17'
-const SEC    = '#5B564B'
-const MUT    = '#6F6A5C'
-const LINE   = '#E7E2D6'
-const BG     = '#F7F7F5'
+export const revalidate = 60
 
-export default function NewsDetailPage() {
-  const params = useParams()
-  const id = (Array.isArray(params?.id) ? params.id[0] : params?.id) ?? ''
-  /* خبر از سرور می‌آید. `getArticle` روی فهرستِ محلی کار می‌کند که
-     حالا خالی است، پس تنها به آن تکیه نمی‌کنیم — وگرنه هر خبرِ واقعیِ
-     منتشرشده «پیدا نشد» می‌شد. */
-  const [article, setArticle] = useState(() => getArticle(id))
-  const [all, setAll] = useState<NewsArticle[]>([])
-  const [loading, setLoading] = useState(true)
-  useEffect(() => {
-    let alive = true
-    void fetchNewsArticles().then(rows => {
-      if (!alive) return
-      setAll(rows)
-      setArticle(rows.find(a => a.id === id) ?? getArticle(id))
-      setLoading(false)
-    })
-    return () => { alive = false }
-  }, [id])
-  const related = useMemo(() => {
-    if (!article) return []
-    const same = all.filter(x => x.id !== article.id && x.category === article.category)
-    const rest = all.filter(x => x.id !== article.id && x.category !== article.category)
-    return [...same, ...rest].slice(0, 4)
-  }, [article, all])
-  const [copied, setCopied] = useState(false)
+export default async function ArticlePage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
+  /* ⚠️ Next خودش پارامترِ مسیر را رمزگشایی کرده. رمزگشاییِ دوم روی
+     هر نشانیِ حاویِ «%»ِ تنها (مثلاً /news/50%-off یا کاوشِ یک
+     خزنده) URIError پرتاب می‌کند — و چون پیش از notFound اتفاق
+     می‌افتد، بازدیدکننده ۵۰۰ می‌گیرد نه صفحه‌ی «پیدا نشد». */
+  const a = await getArticle(id)
+  if (!a) notFound()
 
-  /* تا وقتی پاسخ نیامده «پیدا نشد» نگو */
-  if (loading && !article) {
-    return (
-      <div dir="rtl" style={{ minHeight: '70vh', background: BG }} />
-    )
-  }
+  const all = await listPublished()
+  const sameSection = all
+    .filter(x => x.id !== a.id && x.section && x.section === a.section)
+    .slice(0, 5)
+  /* ⚠️ «بیشتر از این بخش» در ستونِ کناری همان خبرهای هم‌بخش را
+     نشان می‌دهد؛ بدونِ این کنارگذاری، «خبرهای مرتبط» دقیقاً همان
+     چهار تیتر را دوباره تکرار می‌کرد. */
+  const shown = new Set(sameSection.map(x => x.id))
+  const rel = related(a, all.filter(x => !shown.has(x.id)))
+  const mostRead = all.filter(x => x.views > 0 && x.id !== a.id)
+    .sort((x, y) => y.views - x.views).slice(0, 5)
+  const url = absoluteUrl(`/news/${encodeURIComponent(a.id)}`)
+  const sec = sectionOf(a.section)
 
-  if (!article) {
-    return (
-      <div dir="rtl" style={{ minHeight: '70vh', background: BG, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Vazirmatn,Tahoma,sans-serif', padding: 20 }}>
-        <div style={{ textAlign: 'center', background: '#fff', border: `1px solid ${LINE}`, borderRadius: 18, padding: '40px 34px', maxWidth: 380 }}>
-          <p style={{ fontSize: 17, fontWeight: 900, color: TEXT, margin: '0 0 8px' }}>خبر پیدا نشد</p>
-          <p style={{ fontSize: 13, color: MUT, margin: '0 0 20px', lineHeight: 1.8 }}>ممکن است این خبر حذف شده یا نشانی تغییر کرده باشد.</p>
-          <Link href="/news" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '10px 20px', borderRadius: 10, textDecoration: 'none', fontSize: 13, fontWeight: 800, background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.34)', color: GOLD_D }}>
-            بازگشت به اخبار <ArrowLeft size={14} />
-          </Link>
-        </div>
-      </div>
-    )
-  }
-
-  const cat = categoryOf(article.category)
-  /* URL کانونیکال ثابت — هم برای SSR هم کلاینت یکی است (بدون hydration mismatch) */
-  const pageUrl = absoluteUrl(`/news/${article.id}`)
-  const shareText = encodeURIComponent(article.title)
-
-  const copyLink = async () => {
-    try { await navigator.clipboard.writeText(pageUrl); setCopied(true); window.setTimeout(() => setCopied(false), 1800) } catch { /* ignore */ }
+  /* ⚠️ اسکیما فقط فیلدهایی را می‌گیرد که واقعاً داریم. `author` را
+     وقتی نمی‌دانیم چه کسی نوشته، جعل نمی‌کنیم — گوگل نبودِ فیلد را
+     می‌بخشد، دادهٔ ساختگی را نه. */
+  const schema = {
+    '@context': 'https://schema.org',
+    '@type': 'NewsArticle',
+    headline: a.title,
+    ...(a.excerpt ? { description: a.excerpt } : {}),
+    ...(a.cover ? { image: [a.cover] } : {}),
+    ...(a.ts ? { datePublished: iso(a.ts) } : {}),
+    ...(a.updatedTs ? { dateModified: iso(a.updatedTs) } : {}),
+    ...(a.author ? { author: [{ '@type': 'Person', name: a.author }] } : {}),
+    ...(sec ? { articleSection: sec.label } : {}),
+    publisher: { '@type': 'Organization', name: 'بیلیارد هاب' },
+    mainEntityOfPage: { '@type': 'WebPage', '@id': url },
+    inLanguage: 'fa-IR',
   }
 
   return (
-    <div dir="rtl" style={{ minHeight: '100vh', background: BG, color: TEXT, fontFamily: 'Vazirmatn,Tahoma,sans-serif' }}>
-      <style>{`
-        @keyframes ndFadeUp { from { opacity:0; transform: translateY(14px); } to { opacity:1; transform:none; } }
-        .nd-wrap { max-width: 1180px; margin: 0 auto; padding: 0 clamp(16px,3vw,28px); }
-        .nd-layout { display: grid; grid-template-columns: minmax(0,1fr) 330px; gap: 26px; align-items: start; }
-        .nd-share-btn { display:inline-flex; align-items:center; justify-content:center; gap:6px; height:38px;
-          border-radius:10px; cursor:pointer; text-decoration:none; font-family:inherit; font-size:12.5px; font-weight:700;
-          background:rgba(199,166,106,0.10); border:1px solid rgba(199,166,106,0.30); color:${GOLD_D};
-          padding: 0 14px; transition: all .22s cubic-bezier(.22,1,.36,1); }
-        .nd-share-btn:hover { transform: translateY(-2px); background: rgba(199,166,106,0.17); }
-        .nd-rel { display:flex; gap:12px; padding:12px 10px; border-radius:12px; text-decoration:none; transition: background .2s; }
-        .nd-rel:hover { background: rgba(199,166,106,0.07); }
-        .nd-rel img { width:76px; height:58px; border-radius:10px; object-fit:cover; flex-shrink:0; border:1px solid ${LINE}; }
-        .nd-rel-title { font-size:12.5px; font-weight:700; color:${TEXT}; line-height:1.65; margin:0 0 4px;
-          display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; transition: color .2s; }
-        .nd-rel:hover .nd-rel-title { color:${GOLD_D}; }
-        .nd-tag { font-size:11.5px; font-weight:700; color:${SEC}; background:#fff; border:1px solid ${LINE};
-          border-radius:999px; padding:6px 13px; text-decoration:none; transition: all .2s; }
-        .nd-tag:hover { color:${GOLD_D}; border-color: rgba(199,166,106,0.4); }
-        @media (max-width: 940px) { .nd-layout { grid-template-columns: 1fr; } .nd-side { position: static !important; } }
-      `}</style>
+    <div className="nr">
+      <NavOffset />
+      <script type="application/ld+json"
+        /* ⚠️ «<» فرار داده می‌شود: یک «</script>» داخلِ عنوان یا
+           نشانیِ عکس از تگ بیرون می‌زد. */
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(schema).replace(/</g, '\\u003c') }} />
 
-      <div className="nd-wrap" style={{ paddingTop: 18, paddingBottom: 72 }}>
-
-        {/* ── بردکرامب ── */}
-        <nav style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: MUT, marginBottom: 16, animation: 'ndFadeUp .4s ease both' }}>
-          <Link href="/" style={{ color: MUT, textDecoration: 'none' }}>خانه</Link>
-          <ChevronLeft size={12} />
-          <Link href="/news" style={{ color: MUT, textDecoration: 'none' }}>اخبار</Link>
-          <ChevronLeft size={12} />
-          <span style={{ color: SEC, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 260 }}>{article.title}</span>
+      <article className="nr-shell nr-article">
+        <nav className="nr-crumb" aria-label="مسیر">
+          <ol>
+            <li><Link href="/">خانه</Link></li>
+            <li><Link href="/news">اخبار</Link></li>
+            {sec && <li><Link href={`/news?s=${sec.key}`}>{sec.label}</Link></li>}
+          </ol>
         </nav>
 
-        <div className="nd-layout">
+        <header className="nr-art-head">
+          <Kicker a={a} urgent={a.breaking} />
+          <h1>{a.title}</h1>
+          {a.excerpt && <p className="nr-standfirst">{a.excerpt}</p>}
 
-          {/* ═══ ستون اصلی ═══ */}
-          <article style={{ minWidth: 0 }}>
-
-            {/* سربرگ خبر */}
-            <header style={{ marginBottom: 18, animation: 'ndFadeUp .45s .05s ease both' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 12 }}>
-                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 11.5, fontWeight: 800, padding: '5px 12px', borderRadius: 999, background: 'rgba(199,166,106,0.10)', border: '1px solid rgba(199,166,106,0.26)', color: GOLD_D }}>
-                  <span style={{ width: 6, height: 6, borderRadius: '50%', background: cat.dot }} />
-                  {cat.label}
+          <div className="nr-byline">
+            {/* ⚠️ اگر نویسنده به کاربری وصل نباشد، خطِ نویسنده اصلاً
+                نمی‌آید. نامِ جای‌گیر همان داده‌ی جعلی است. */}
+            {a.author && <span className="nr-author">{a.author}</span>}
+            <div className="nr-meta">
+              {a.ts > 0 && <span><time dateTime={iso(a.ts)}>{dateOf(a.ts)}</time></span>}
+              {a.updatedTs && (
+                <span>
+                  به‌روزرسانی <time dateTime={iso(a.updatedTs)}>{dateOf(a.updatedTs)}</time>
                 </span>
-                {article.breaking && (
-                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 800, color: '#B23B2E', background: 'rgba(178,59,46,0.09)', border: '1px solid rgba(178,59,46,0.22)', borderRadius: 999, padding: '4px 11px' }}>
-                    <Zap size={11} /> خبر فوری
-                  </span>
-                )}
+              )}
+              {a.readMinutes > 0 && <span>{readTime(a.readMinutes)}</span>}
+              {a.exclusive && <span className="nr-flag nr-flag--gold">اختصاصی</span>}
+            </div>
+          </div>
+        </header>
+
+        {a.cover && (
+          <figure className="nr-art-fig">
+            <Cover a={a} ratio="16x9" priority sizes="(min-width: 1100px) 760px, 100vw" />
+          </figure>
+        )}
+
+        <div className="nr-art-grid">
+          <div>
+            <ArticleTools id={a.id} title={a.title} url={url} />
+
+            {a.body.length > 0 ? (
+              <div className="nr-body" id="nr-body">
+                {a.body.map((p, i) => <p key={i}>{p}</p>)}
               </div>
-              <h1 style={{ fontSize: 'clamp(20px,3.2vw,30px)', fontWeight: 900, lineHeight: 1.65, margin: '0 0 14px', letterSpacing: '-0.01em' }}>
-                {article.title}
-              </h1>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px 16px', flexWrap: 'wrap', fontSize: 12.5, color: MUT }}>
-                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
-                  <span style={{ width: 30, height: 30, borderRadius: '50%', background: `linear-gradient(135deg,${GOLD},#8A6020)`, color: '#fff', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: 12.5, fontWeight: 900 }}>
-                    {article.author.slice(0, 1)}
-                  </span>
-                  <span style={{ color: SEC, fontWeight: 700 }}>{article.author}</span>
-                </span>
-                <span>{article.date}</span>
-                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><Clock3 size={12} /> {article.readTime} مطالعه</span>
-                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><Eye size={12} /> {faNum(article.views)} بازدید</span>
-              </div>
-            </header>
+            ) : (
+              /* ⚠️ خبری که فقط تیتر و چکیده دارد واقعاً همین است؛
+                 متنِ ساختگی جایش نمی‌گذاریم. */
+              <p className="nr-nobody">متن کامل این خبر هنوز منتشر نشده است.</p>
+            )}
 
-            {/* تصویر هیرو */}
-            <div style={{ position: 'relative', borderRadius: 20, overflow: 'hidden', border: `1px solid ${LINE}`, boxShadow: '0 6px 26px rgba(28,27,23,0.09)', marginBottom: 22, animation: 'ndFadeUp .5s .1s ease both' }}>
-              <img loading="lazy" decoding="async" src={article.image} alt={article.title} style={{ width: '100%', display: 'block', aspectRatio: '16/8.2', objectFit: 'cover' }} />
-              <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, rgba(0,0,0,0.05) 0%, transparent 30%)' }} />
-            </div>
-
-            {/* لید */}
-            <div style={{ background: '#fff', borderRadius: 14, border: `1px solid ${LINE}`, borderInlineStart: `3px solid ${GOLD}`, padding: '16px 18px', marginBottom: 22, animation: 'ndFadeUp .5s .14s ease both' }}>
-              <p style={{ margin: 0, fontSize: 14, fontWeight: 700, lineHeight: 2, color: SEC }}>{article.excerpt}</p>
-            </div>
-
-            {/* متن خبر */}
-            <div style={{ animation: 'ndFadeUp .5s .18s ease both' }}>
-              {article.body.map((p, i) => (
-                <p key={i} style={{ fontSize: 14.5, lineHeight: 2.25, color: '#2B2822', margin: '0 0 18px' }}>{p}</p>
-              ))}
-            </div>
-
-            {/* برچسب‌ها */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', margin: '26px 0 0', paddingTop: 20, borderTop: `1px solid ${LINE}` }}>
-              <span style={{ fontSize: 12, fontWeight: 800, color: MUT }}>برچسب‌ها:</span>
-              {article.tags.map(t => <span key={t} className="nd-tag">#{t}</span>)}
-            </div>
-
-            {/* اشتراک‌گذاری */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', marginTop: 18, background: '#fff', border: `1px solid ${LINE}`, borderRadius: 14, padding: '14px 16px' }}>
-              <span style={{ fontSize: 12.5, fontWeight: 800, color: SEC }}>اشتراک‌گذاری خبر:</span>
-              <a className="nd-share-btn" href={`https://wa.me/?text=${shareText}%0A${encodeURIComponent(pageUrl)}`} target="_blank" rel="noopener noreferrer">واتساپ</a>
-              <a className="nd-share-btn" href={`https://t.me/share/url?url=${encodeURIComponent(pageUrl)}&text=${shareText}`} target="_blank" rel="noopener noreferrer">تلگرام</a>
-              <button className="nd-share-btn" onClick={copyLink}>
-                {copied ? <Check size={14} /> : <Link2 size={14} />}
-                {copied ? 'کپی شد' : 'کپی لینک'}
-              </button>
-            </div>
-          </article>
-
-          {/* ═══ سایدبار ═══ */}
-          <aside className="nd-side" style={{ position: 'sticky', top: 84, display: 'flex', flexDirection: 'column', gap: 18, animation: 'ndFadeUp .5s .2s ease both' }}>
-
-            {/* اخبار مرتبط */}
-            <div style={{ background: '#fff', border: `1px solid ${LINE}`, borderRadius: 16, padding: '16px 10px 8px', boxShadow: '0 2px 10px rgba(28,27,23,0.05)' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 9, margin: '0 8px 8px' }}>
-                <span style={{ width: 3, height: 16, borderRadius: 2, background: `linear-gradient(180deg,${GOLD},#8A6020)` }} />
-                <h2 style={{ fontSize: 14, fontWeight: 900, margin: 0 }}>اخبار مرتبط</h2>
-              </div>
-              {related.map(r => (
-                <Link key={r.id} href={`/news/${r.id}`} className="nd-rel">
-                  <img src={r.image} alt={r.title} loading="lazy" />
-                  <div style={{ minWidth: 0 }}>
-                    <p className="nd-rel-title">{r.title}</p>
-                    <span style={{ fontSize: 10.5, color: MUT }}>{categoryOf(r.category).label} · {r.date}</span>
-                  </div>
-                </Link>
-              ))}
-              <div style={{ padding: '8px 8px 10px' }}>
-                <Link href="/news" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, padding: '10px 0', borderRadius: 10, textDecoration: 'none', fontSize: 12.5, fontWeight: 800, background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.34)', color: GOLD_D }}>
-                  مشاهده همه اخبار <ArrowLeft size={13} />
-                </Link>
-              </div>
-            </div>
-
-            {/* دسته‌بندی‌ها */}
-            <div style={{ background: '#fff', border: `1px solid ${LINE}`, borderRadius: 16, padding: 16, boxShadow: '0 2px 10px rgba(28,27,23,0.05)' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 9, marginBottom: 12 }}>
-                <span style={{ width: 3, height: 16, borderRadius: 2, background: `linear-gradient(180deg,${GOLD},#8A6020)` }} />
-                <h2 style={{ fontSize: 14, fontWeight: 900, margin: 0 }}>دسته‌بندی‌ها</h2>
-              </div>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-                {NEWS_CATEGORIES.map(c => (
-                  <Link key={c.key} href="/news" className="nd-tag" style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-                    <span style={{ width: 6, height: 6, borderRadius: '50%', background: c.dot }} />
-                    {c.label}
-                  </Link>
+            {a.tags.length > 0 && (
+              <div className="nr-tags">
+                {a.tags.map(t => (
+                  <Link key={t} href={`/news?q=${encodeURIComponent(t)}`} className="nr-tag">{t}</Link>
                 ))}
               </div>
-            </div>
+            )}
+          </div>
+
+          <aside className="nr-aside">
+            {mostRead.length > 0 && (
+              <section aria-labelledby="nr-a-mr">
+                <div className="nr-blockhd"><h2 id="nr-a-mr">پربازدیدترین‌ها</h2></div>
+                <ol className="nr-ranked">
+                  {mostRead.map((x, i) => (
+                    <li key={x.id}>
+                      <Link href={`/news/${encodeURIComponent(x.id)}`}>
+                        <span className="nr-rank" aria-hidden>{rank(i)}</span>
+                        {/* ⚠️ div نه span: تیتر و بلوکِ متادیتا محتوای جریانی‌اند و داخلِ span معتبر نیستند */}
+                        <div><h3>{x.title}</h3><Meta a={x} /></div>
+                      </Link>
+                    </li>
+                  ))}
+                </ol>
+              </section>
+            )}
+
+            {sameSection.length > 0 && sec && (
+              <section aria-labelledby="nr-a-sec">
+                <div className="nr-blockhd nr-blockhd--thin">
+                  <h2 id="nr-a-sec">بیشتر از {sec.label}</h2>
+                  <Link className="nr-more" href={`/news?s=${sec.key}`}>مشاهده همه</Link>
+                </div>
+                <ul className="nr-stream">
+                  {sameSection.map(x => (
+                    <li key={x.id}>
+                      <Link href={`/news/${encodeURIComponent(x.id)}`}>
+                        <time dateTime={iso(x.ts)}>{dateOf(x.ts)}</time>
+                        <span className="nr-stream-t">{x.title}</span>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            )}
           </aside>
         </div>
-      </div>
+      </article>
+
+      {rel.length > 0 && (
+        <section className="nr-band nr-band--tint" aria-labelledby="nr-rel">
+          <div className="nr-shell">
+            <div className="nr-blockhd"><h2 id="nr-rel">خبرهای مرتبط</h2></div>
+            <ul className="nr-results">
+              {rel.map(x => (
+                <li key={x.id}>
+                  <Link href={`/news/${encodeURIComponent(x.id)}`} className={x.cover ? undefined : 'nr-noimg'}>
+                    <div>
+                      <span className="nr-kicker">{sectionLabel(x.section)}</span>
+                      <h3>{x.title}</h3>
+                      <Meta a={x} />
+                    </div>
+                    <Cover a={x} ratio="3x2" sizes="(min-width: 760px) 220px, 128px" />
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </section>
+      )}
     </div>
   )
 }
