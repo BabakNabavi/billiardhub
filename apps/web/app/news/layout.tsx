@@ -1,23 +1,34 @@
 import type { Metadata } from 'next'
 
-/* متادیتای این بخش. خود صفحه Client Component است و نمی‌تواند
-   metadata صادر کند، پس این لایه فقط برای SEO اضافه شده و
-   چیزی جز children رندر نمی‌کند. */
+/* ─────────────────────────────────────────────────────────────
+   لایه‌ی بخشِ اخبار.
+
+   ⚠️ فونتِ تیترِ تحریریه فقط همین‌جا preload می‌شود، نه در
+   `app/layout`: ۱۲۸ کیلوبایت روی *هر* صفحه‌ی سایت برای فونتی که
+   جای دیگری استفاده نمی‌شود. خودِ `@font-face` در `newsroom.css`
+   است.
+
+   ⚠️ متادیتای این‌جا فقط پس‌افت است — هر سه صفحه‌ی بخش
+   (`page.tsx`، `[id]/page.tsx`) عنوان و canonicalِ خودشان را با
+   `absolute` می‌دهند.
+   ───────────────────────────────────────────────────────────── */
+
 export const metadata: Metadata = {
-  title: 'اخبار بیلیارد | بیلیارد هاب',
-  description: 'تازه‌ترین اخبار بیلیارد، اسنوکر و رویدادهای ورزشی ایران.',
+  title: 'اخبار بیلیارد هاب',
+  description: 'اتاق خبر بیلیارد هاب: اسنوکر، پول، کاروم، مسابقات، بازیکنان و صنعت بیلیارد.',
   alternates: { canonical: '/news' },
-  openGraph: {
-    title: 'اخبار بیلیارد | بیلیارد هاب',
-    description: 'تازه‌ترین اخبار بیلیارد، اسنوکر و رویدادهای ورزشی ایران.',
-    url: '/news',
-    siteName: 'بیلیارد هاب',
-    locale: 'fa_IR',
-    type: 'website',
-  },
-  twitter: { card: 'summary_large_image', title: 'اخبار بیلیارد | بیلیارد هاب', description: 'تازه‌ترین اخبار بیلیارد، اسنوکر و رویدادهای ورزشی ایران.' },
 }
 
 export default function SegmentLayout({ children }: { children: React.ReactNode }) {
-  return <>{children}</>
+  return (
+    <>
+      {/* Server Component است؛ `<link>` مستقیم در head می‌نشیند و
+          هیچ جاوااسکریپتی به باندلِ کلاینت اضافه نمی‌کند. */}
+      <link
+        rel="preload" as="font" type="font/woff2" crossOrigin="anonymous"
+        href="/fonts/Estedad/Estedad-Variable.woff2"
+      />
+      {children}
+    </>
+  )
 }

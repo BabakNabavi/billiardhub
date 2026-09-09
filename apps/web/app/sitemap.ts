@@ -1,5 +1,10 @@
 import type { MetadataRoute } from 'next'
 import { base } from './robots'
+import { NEWS_SECTIONS } from '@/lib/news/sections'
+
+/* ⚠️ نقشه در زمانِ build ساخته می‌شد، یعنی خبرِ تازه تا دیپلویِ بعدی
+   در نقشه نبود. ساعتی یک‌بار بازسازی می‌شود. */
+export const revalidate = 3600
 
 /* نقشه‌ی سایت فقط صفحه‌های عمومی ثابت را می‌دهد. صفحه‌های داینامیک
    (باشگاه/مربی/محصول) عمداً این‌جا نیستند: برای فهرست‌کردنشان باید در
@@ -42,10 +47,45 @@ const MEDIA_CATEGORY_KEYS = [
   'gear', 'technical-services', 'clubs-events',
 ]
 
-export default function sitemap(): MetadataRoute.Sitemap {
+/* ── خبرها ──
+   ⚠️ قاعده‌ی بالای فایل «به دیتابیس دست نزن» بود، چون شکستِ خواندن
+   کلِ build را می‌شکست. خبر اما بدونِ نشانیِ تک‌تکِ مقاله‌ها در نقشه
+   عملاً ایندکس نمی‌شود. پس استثنا با گاردِ کامل: هر خطا و هر تأخیرِ
+   بیش از دو ثانیه یعنی فهرستِ خالی، و نقشه‌ی ایستا سرِ جایش می‌ماند.
+   هیچ مسیری از این تابع نمی‌تواند throw کند. */
+async function newsEntries(root: string): Promise<MetadataRoute.Sitemap> {
+  try {
+    const { listPublished } = await import('@/lib/news/server')
+    let timer: ReturnType<typeof setTimeout> | undefined
+    const rows = await Promise.race([
+      listPublished(200),
+      new Promise<never[]>(r => { timer = setTimeout(() => r([]), 2000) }),
+    ]).finally(() => { if (timer) clearTimeout(timer) })
+    return rows.map(a => ({
+      url: `${root}/news/${encodeURIComponent(a.id)}`,
+      lastModified: new Date(a.updatedTs ?? a.ts ?? Date.now()),
+      changeFrequency: 'weekly' as const,
+      priority: 0.6,
+    }))
+  } catch (e) {
+    /* خاموش نماند: نقشه‌ی خبرِ همیشه‌خالی دیده نمی‌شود */
+    console.error('[sitemap] news:', (e as Error).message)
+    return []
+  }
+}
+
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const root = base()
   const now = new Date()
   return [
+    /* بخش‌های تحریریه — ثابت، بدونِ دیتابیس */
+    ...NEWS_SECTIONS.map(s => ({
+      url: `${root}/news?s=${s.key}`,
+      lastModified: now,
+      changeFrequency: 'daily' as const,
+      priority: 0.5,
+    })),
+    ...(await newsEntries(root)),
     ...ROUTES.map(r => ({
       url: `${root}${r.path}`,
       lastModified: now,
