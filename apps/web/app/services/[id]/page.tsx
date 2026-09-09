@@ -27,6 +27,7 @@ import { resolveServices } from '@/lib/tech-services'
 import { useVideoEdit } from '@/components/media/useVideoEdit'
 import { detailTitle, type VideoDetail } from '@/lib/media/video-details'
 import { useEffect, useMemo, useRef, useState } from 'react'
+import type { RefObject } from 'react'
 import { preload } from 'react-dom'
 import { ProfileMissing, ProfileLoading } from '@/components/profile/ProfileMissing'
 import { useProfileImageViewer } from '@/components/ProfileImageViewer'
@@ -63,6 +64,34 @@ const navOffset = () => {
   const nav = document.querySelector('body > nav, header nav')
   const h = nav?.getBoundingClientRect().height ?? 0
   return h > 0 ? Math.round(h) : 72
+}
+
+/* ⚠️ همان دلیلِ بالا، این بار برای CSS: `scroll-margin`ِ لنگرها
+   باید بداند نوارِ ثابت و نوارِ تب‌ها *واقعاً* چقدر بلندند.
+   مقدارِ پس‌افت در `market-profile.css` است؛ این‌جا فقط با
+   اندازه‌ی اندازه‌گیری‌شده بازنویسی می‌شود. */
+const useTopOffsets = (ref: RefObject<HTMLDivElement | null>, ready: boolean) => {
+  useEffect(() => {
+    const root = ref.current
+    if (!root || !ready) return
+    const tabs = root.querySelector('.tmp-tabs')
+    const nav = document.querySelector('body > nav, header nav')
+    const apply = () => {
+      root.style.setProperty('--tmp-nav', `${navOffset()}px`)
+      const th = tabs?.getBoundingClientRect().height ?? 0
+      if (th > 0) root.style.setProperty('--tmp-tabs-h', `${Math.round(th)}px`)
+    }
+    apply()
+    window.addEventListener('resize', apply)
+    /* چرخشِ گوشی و باز شدنِ ناحیه‌ی امن هیچ‌کدام رویدادِ resize
+       قابل‌اتکایی روی iOS نمی‌دهند؛ ناظرِ اندازه می‌دهد. ناوبر هم
+       پاییده می‌شود: ارتفاعش با safe-area و ناوبریِ نرم عوض
+       می‌شود و آن‌وقت لنگر کهنه می‌ماند. */
+    const ro = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(apply)
+    if (ro && tabs) ro.observe(tabs)
+    if (ro && nav) ro.observe(nav)
+    return () => { window.removeEventListener('resize', apply); ro?.disconnect() }
+  }, [ref, ready])
 }
 
 export default function TechnicianProfilePage() {
@@ -267,6 +296,10 @@ export default function TechnicianProfilePage() {
   /* ریشه‌ی صفحه — ناظرِ تبِ فعال و کنشِ چسبان از این‌جا می‌گردند.
      (پیش‌تر دامنه‌ی `gsap.context` بود؛ آن سیستم حذف شد.) */
   const stageRef = useRef<HTMLDivElement | null>(null)
+
+  /* لنگرِ تب‌ها با ارتفاعِ واقعیِ نوارها هم‌تراز می‌شود */
+  useTopOffsets(stageRef, Boolean(tech?.id))
+
   useEffect(() => {
     setDock(false)
     const acts = heroActsRef.current, close = closeRef.current

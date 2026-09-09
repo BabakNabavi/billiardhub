@@ -9,6 +9,25 @@
    داکِ شیشه‌ای. هیچ‌کدام به «این آدم کیست و چه بلد است» کمک نمی‌کرد.
    ───────────────────────────────────────────────────────────── */
 
+/* ═══════════ ارتفاعِ نوارهای بالا ═══════════
+   ⚠️ اندازه‌گیری‌شده روی سایتِ زنده (۳۹۰ / ۷۶۸ / ۱۲۸۰ / ۱۴۴۰ —
+   هر چهار یکی): نوارِ ثابتِ سایت ۷۳ پیکسل و نوارِ تب‌ها ۴۵
+   پیکسل است. پیش از این، لنگرِ تب‌ها هیچ حاشیه‌ای نداشت و
+   کلیک روی «خدمات» بخش را دقیقاً روی y=0 می‌گذاشت — یعنی ۱۱۷
+   پیکسلِ اولش، شاملِ خودِ عنوان، زیرِ این دو نوار پنهان می‌شد و
+   کاربر وسطِ بخش فرود می‌آمد.
+
+   ⚠️ عددها فقط پس‌افت‌اند. `useTopOffsets` در صفحه ارتفاعِ
+   واقعیِ هر دو نوار را می‌گیرد و همین دو متغیر را بازنویسی
+   می‌کند — در حالتِ standaloneِ آی‌اواس نوار بلندتر است و
+   عددِ ثابت باز هم بخش را نصفه می‌کرد. */
+.tmp {
+  --tmp-nav: calc(73px + env(safe-area-inset-top));
+  --tmp-tabs-h: 45px;
+  /* ۱۲ پیکسل هوا، تا عنوانِ بخش به لبه‌ی نوار نچسبد */
+  --tmp-anchor: calc(var(--tmp-nav) + var(--tmp-tabs-h) + 12px);
+}
+
 /* ═══════════ سربرگِ پروفایل ═══════════ */
 .tmp-head { background: var(--surface); border-block-end: 1px solid var(--line); }
 .tmp-head-in { padding-block: 20px 24px; }
@@ -64,7 +83,7 @@
 .tmp-tabs {
   /* ⚠️ ناوبرِ ثابت در حالتِ نصب‌شده‌ی iOS ارتفاعِ ناحیه‌ی امن را هم
      می‌گیرد؛ عددِ خالی یعنی تب‌ها زیرِ نوار گم می‌شوند. */
-  position: sticky; inset-block-start: calc(72px + env(safe-area-inset-top)); z-index: 20;
+  position: sticky; inset-block-start: var(--tmp-nav); z-index: 20;
   background: rgb(255 255 255 / .92);
   backdrop-filter: saturate(1.4) blur(8px);
   border-block-end: 1px solid var(--line);
@@ -86,6 +105,12 @@
 /* ⚠️ حالتِ فعال ظریف است: خطِ دو پیکسلی، نه چیپِ پررنگ */
 .tmp-tabs a[aria-current='true'] { color: var(--ink); border-block-end-color: var(--gold); }
 .tmp-tabs a:focus-visible { outline: 2px solid var(--gold-ink); outline-offset: -2px; }
+
+/* ⚠️ لنگرِ تب‌ها. بدونِ این، `href="#services"` بخش را زیرِ
+   نوارِ ثابت و نوارِ تب‌ها می‌برد. روی خودِ بخش‌ها می‌نشیند نه
+   روی `html { scroll-padding }`، چون صفحه‌های دیگرِ سایت
+   نوارِ تب ندارند و آن‌جا این حاشیه فقط پرشِ بی‌دلیل می‌سازد. */
+.tmp-main > .tmp-card { scroll-margin-block-start: var(--tmp-anchor); }
 
 /* ═══════════ بدنه ═══════════ */
 .tmp-body { display: grid; gap: 24px; align-items: start; padding-block: 24px 32px; }
@@ -162,7 +187,7 @@
 .tmp-panel { display: none; }
 @media (min-width: 1024px) {
   .tmp-panel {
-    display: block; position: sticky; inset-block-start: calc(128px + env(safe-area-inset-top));
+    display: block; position: sticky; inset-block-start: calc(var(--tmp-anchor) - 2px);
     background: var(--surface); border: 1px solid var(--line);
     border-radius: var(--r-card); padding: 16px;
   }
