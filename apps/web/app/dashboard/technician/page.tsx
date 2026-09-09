@@ -48,7 +48,7 @@ export default function TechnicianDashboard() {
   const [busy, setBusy]     = useState(false)
 
   /* فرم پروژه‌ی جدید */
-  const [prj, setPrj] = useState({ title: '', desc: '', city: '', club: '', service: '' as TechService | '', image: '' })
+  const [prj, setPrj] = useState({ title: '', desc: '', city: '', province: '', club: '', service: '' as TechService | '', image: '' })
   const prjImgRef = useRef<HTMLInputElement>(null)
   const photoRef  = useRef<HTMLInputElement>(null)
   /* آلبوم جدید */
@@ -138,7 +138,7 @@ export default function TechnicianDashboard() {
       image: prj.image || '/images/services/repaire.jfif',
     }
     set('projects', [...form.projects, p])
-    setPrj({ title: '', desc: '', city: '', club: '', service: '', image: '' })
+    setPrj({ title: '', desc: '', city: '', province: '', club: '', service: '', image: '' })
   }
 
   /* ── آلبوم‌ها ──
@@ -417,7 +417,21 @@ export default function TechnicianDashboard() {
                 /* از همان کاتالوگِ واحد، نه فهرستِ دومِ هاردکد */
                 options={ALL_TECH_SERVICES.map(s => ({ value: s.title, label: s.title }))}
                 onChange={v => setPrj(p => ({ ...p, service: v as TechService }))} />
-              <input className={INPUT} value={prj.city} onChange={e => setPrj(p => ({ ...p, city: e.target.value }))} placeholder={`شهر (پیش‌فرض: ${form.city || '—'})`} />
+              {/* ⚠️ ورودیِ متنیِ آزاد بود. قاعده‌ی پروژه: هرجا شهر از
+                  کاربر گرفته می‌شود باید `ProvinceCitySelect` باشد تا
+                  املا یکی بماند — وگرنه «تهران» و «تهرا ن» دو شهرِ
+                  متفاوت می‌شوند و فیلترِ دایرکتوری آن نمونه‌کار را
+                  پیدا نمی‌کند. خالی‌بودن مجاز است: شهرِ پروفایل
+                  پیش‌فرض می‌شود. */}
+              <div className="sm:col-span-2">
+                <ProvinceCitySelect
+                  value={{ province: prj.province, city: prj.city }}
+                  onChange={v => setPrj(p => ({ ...p, province: v.province, city: v.city }))}
+                  provinceLabel="استان نمونه‌کار"
+                  cityLabel={`شهر نمونه‌کار (پیش‌فرض: ${form.city || '—'})`}
+                  size="sm"
+                />
+              </div>
               <input className={INPUT} value={prj.club} onChange={e => setPrj(p => ({ ...p, club: e.target.value }))} placeholder="باشگاه / محل انجام (اگر بود)" />
               <input className={`${INPUT} sm:col-span-2`} value={prj.desc} onChange={e => setPrj(p => ({ ...p, desc: e.target.value }))} placeholder="توضیح کوتاه پروژه…" />
               <div className="flex items-center gap-3 sm:col-span-2">
