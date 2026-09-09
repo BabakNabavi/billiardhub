@@ -197,15 +197,37 @@ export async function slugRedirect(oldSlug: string): Promise<string | null> {
   return (v as { slug?: string } | null)?.slug ?? null
 }
 
-/** ویدیوهای مرتبط — هم‌دسته، به‌جز خودش. */
-export async function relatedTo(row: VideoRow, count = 8): Promise<PublicVideo[]> {
-  const { data } = await sb().from('videos').select(LIST_COLS)
+/** ویدیوهای مرتبط — اول هم‌دسته، بعد تازه‌ترین‌های دیگر.
+ *
+ *  ⚠️ نسخه‌ی اول فقط هم‌دسته را می‌گرفت. با آرشیوِ کوچک (یا دسته‌ای
+ *  که تنها یک ویدیو دارد) نتیجه *خالی* بود و ستونِ «بعدی برای
+ *  تماشا» اصلاً رندر نمی‌شد — اندازه‌گیری‌شده روی داده‌ی واقعی:
+ *  صفر آیتم. حالا با تازه‌ترین‌های دیگر پر می‌شود؛ همه‌شان ردیفِ
+ *  واقعی‌اند، فقط دامنه بازتر است.
+ */
+export async function relatedTo(row: VideoRow, count = 12): Promise<PublicVideo[]> {
+  const base = sb().from('videos').select(LIST_COLS)
     .eq('status', 'published').eq('visibility', 'public')
-    .eq('category', row.category)
     .neq('slug', row.slug)
-    .order('views', { ascending: false })
-    .limit(count)
-  return ((data ?? []) as unknown as VideoRow[]).map(toPublic)
+
+  const same = await base.eq('category', row.category)
+    .order('views', { ascending: false }).limit(count)
+  const rows = ((same.data ?? []) as unknown as VideoRow[])
+
+  if (rows.length >= count) return rows.map(toPublic)
+
+  const seen = new Set([row.slug, ...rows.map(r => r.slug)])
+  const rest = await sb().from('videos').select(LIST_COLS)
+    .eq('status', 'published').eq('visibility', 'public')
+    .neq('slug', row.slug)
+    .order('published_at', { ascending: false, nullsFirst: false })
+    .limit(count * 2)
+  for (const r of ((rest.data ?? []) as unknown as VideoRow[])) {
+    if (seen.has(r.slug)) continue
+    seen.add(r.slug); rows.push(r)
+    if (rows.length >= count) break
+  }
+  return rows.map(toPublic)
 }
 
 /** دسته‌هایی که واقعاً ویدیوی منتشرشده دارند. */

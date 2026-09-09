@@ -8,7 +8,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
-import { Play, ArrowLeft, ChevronLeft, BellPlus, BellRing, Clapperboard, Loader2 } from 'lucide-react'
+import { Play, ArrowLeft, ChevronLeft, Clapperboard, Loader2 } from 'lucide-react'
 import { MEDIA_VIDEOS, channelsFrom, compactViews, faDigits, mediaCategoryOf, type MediaVideo } from '../../../../lib/media-data'
 import { fetchVideos } from '../../../../lib/media-user'
 
@@ -34,7 +34,6 @@ export default function ChannelPage() {
   const merged  = useMemo(() => [...MEDIA_VIDEOS, ...userVids], [userVids])
   const channel = useMemo(() => channelsFrom(merged).find(c => c.creator.handle === handle) ?? null, [merged, handle])
   const videos  = useMemo(() => merged.filter(v => v.creator.handle === handle).sort((a, b) => b.ts - a.ts), [merged, handle])
-  const [following, setFollowing] = useState(false)
 
   if (!channel && !uLoaded) {
     return (
@@ -113,9 +112,11 @@ export default function ChannelPage() {
                 <span>{compactViews(channel.totalViews)} بازدید کل</span>
               </div>
             </div>
-            <button className={`ch-follow${following ? ' on' : ''}`} onClick={() => setFollowing(f => !f)}>
-              {following ? <BellRing size={15} /> : <BellPlus size={15} />}{following ? 'دنبال می‌کنید' : 'دنبال کردن'}
-            </button>
+            {/* ⚠️ دکمه‌ی «دنبال کردن» برداشته شد. فقط `useState` بود:
+                هیچ درخواستی نمی‌رفت و با یک رفرش همه‌چیز می‌پرید.
+                جدولی برای اشتراک وجود ندارد و ساختنش مهاجرتِ
+                اسکیماست. همان تصمیمی که در صفحه‌ی تماشا گرفته شد —
+                نیمه‌اجرا کردنِ یک قاعده یعنی اجرا نکردنش. */}
           </div>
         </div>
       </header>

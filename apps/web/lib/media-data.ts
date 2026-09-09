@@ -36,6 +36,11 @@ export interface MediaVideo {
   creator: MediaCreator
   /** mm:ss با ارقام فارسی */
   duration: string
+  /* ⚠️ ابعاد و ثانیه‌ی خام لازم‌اند: تشخیصِ Shorts از روی همین‌هاست
+     (عمودی و کوتاه). NULL یعنی «ثبت نشده»، نه صفر. */
+  durationSec: number | null
+  width: number | null
+  height: number | null
   views: number
   likes: number
   date: string

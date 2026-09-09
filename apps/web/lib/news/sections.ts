@@ -32,10 +32,13 @@ export interface NewsSection {
 export const NEWS_SECTIONS = [
   { key: 'snooker',     label: 'اسنوکر',        short: 'اسنوکر',  nav: true,
     blurb: 'اخبار اسنوکر: تورنمنت‌ها، بازیکنان و نتایج' },
-  { key: 'pool',        label: 'پول',            short: 'پول',     nav: true,
-    blurb: 'اخبار پول و بیلیارد پاکتی' },
-  { key: 'carom',       label: 'کاروم',          short: 'کاروم',   nav: true,
-    blurb: 'اخبار کاروم و سه‌بانده' },
+  { key: 'pool',        label: 'پاکت بیلیارد',   short: 'پاکت',    nav: true,
+    blurb: 'اخبار پاکت بیلیارد: هشت‌توپ، نه‌توپ و ده‌توپ' },
+  /* ⚠️ «کاروم» برداشته شد و جایش «هی بال» آمد. کلیدِ `highball`
+     همان کلیدی است که جدولِ `events` (مهاجرتِ ۰۲۵) و دسته‌های
+     بیلیارد مدیا از قبل به کار می‌برند — کلیدِ تازه نساختیم. */
+  { key: 'highball',    label: 'هی بال',         short: 'هی بال',  nav: true,
+    blurb: 'اخبار هی بال' },
   { key: 'tournaments', label: 'مسابقات',        short: 'مسابقات', nav: true,
     blurb: 'مسابقات و قهرمانی‌های داخلی و بین‌المللی' },
   { key: 'players',     label: 'بازیکنان',       short: 'بازیکنان', nav: true,
@@ -75,8 +78,14 @@ const ALIASES: Record<string, NewsSectionKey> = {
   gear: 'equipment',
   interviews: 'interview',
   pocket: 'pool',
-  threecushion: 'carom',
-  'three-cushion': 'carom',
+  '8ball': 'pool',
+  '9ball': 'pool',
+  '10ball': 'pool',
+  highbal: 'highball',
+  'high-ball': 'highball',
+  /* ⚠️ `carom` دیگر بخشی ندارد. ردیفی که با این مقدار ذخیره شده
+     باشد بی‌بخش می‌شود (برچسبِ «اخبار») — نه اینکه زورکی به بخشِ
+     دیگری برود. امروز چنین ردیفی وجود ندارد. */
 }
 
 /** مقدارِ خامِ دیتابیس ⟵ کلیدِ بخش، یا `null` اگر بخشی ندارد. */
