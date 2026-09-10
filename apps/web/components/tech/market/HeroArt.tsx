@@ -1,30 +1,29 @@
 /* ─────────────────────────────────────────────────────────────
-   پوسترِ سرلوحه — دو صحنه‌ی متفاوت برای دو صفحه.
+   پوسترِ سرلوحه — دو صحنه، هر کدام برای موضوعِ صفحه‌ی خودش.
 
-   ── چرا نسخه‌ی اول رد شد ──
-   مالک گفت «بچه‌گانه». درست بود: چند لکه‌ی نورِ تخت، یک خطِ مورب و
-   یک شبکه — همان چیزی که هر قالبِ آماده‌ای دارد. هیچ *جسمی* در
-   صحنه نبود، پس چیزی هم برای نگاه‌کردن نبود.
+   ── چرا دو نسخه‌ی قبلی رد شدند ──
+   اولی لکه‌های نورِ تخت بود؛ دومی یک کره و یک چوب. مالک هر دو را رد
+   کرد و بارِ دوم گفت «مناسبِ موضوعِ صفحه نیست». مشکل *تکنیک* نبود،
+   **موضوع** بود: کره و چوب یعنی «بیلیارد»، نه «خدماتِ فنی».
 
-   ── چه چیزی عوض شد ──
-   حالا صحنه جسم دارد و اجسام حجم دارند. حجم از چهار چیز می‌آید که
-   هیچ‌کدام موتورِ سه‌بعدی لازم ندارند:
-     · نورِ اصلی از یک سو و پایانه‌ی سایه در سوی دیگر
-     · نورِ بازتابیِ ضعیف روی لبه‌ی تاریک (وگرنه کره تخت می‌شود)
-     · هایلایتِ آینه‌ای، کوچک و جابه‌جا از مرکز
-     · سایه‌ی تماس روی سطح — بدونش جسم شناور است، نه نشسته
+   ── موضوعِ تازه: ابزار و اندازه‌گیری ──
+     · صفحه‌ی خدمات — کولیس روی فرولِ چوب
+     · صفحه‌ی متخصص — خودِ چوب، سرتاسرِ نوار
 
-   ── چرا باز هم SVG ──
-   ⚠️ افزودن dependency بدون اجازه ممنوع است، و مخاطبِ اصلی موبایلِ
-   ایرانی است: شبکه‌ی کند و CPU ضعیف. گرادیانِ SVG رایگان است و
-   بایتِ شبکه هم ندارد (درون‌خطی است)؛ WebGL هیچ‌کدام نیست.
+   ── چرا SVG و نه تصویرِ تولیدشده ──
+   ⚠️ زنجیره‌ی تولیدِ تصویرِ هوش مصنوعی روی این دستگاه نصب نیست:
+   `ai-multimodal`، `ai-artist` و محیطِ پایتونِ مشترک وجود ندارند و
+   خودِ پایتون هم نصب نیست.
 
-   ⚠️ حرکت فقط روی `transform` و `opacity` است. هیچ فیلتری متحرک
-   نیست: انیمیشنِ فیلتر هر فریم دوباره رستر می‌کند و همان چیزی است
-   که گوشیِ ضعیف را می‌خواباند.
+   ── قاعده‌ی کادر ──
+   ⚠️ `slice` با max مقیاس می‌دهد، پس روی قابِ باریک فقط نوارِ
+   باریکی از عرضِ viewBox دیده می‌شود. سرلوحه‌ی خدمات روی ۳۹۰ حدود
+   ۵۲۰ واحد نشان می‌دهد، پس همه‌ی اجسام زیر x=۵۶۰ چیده شده‌اند.
+   نوارِ پروفایل اما روی موبایل *بلند* می‌شود و فقط ~۲۰۰ واحد
+   می‌ماند؛ آن‌جا یک ترکیبِ دومِ عمودی رندر می‌شود، نه همان صحنه.
 
-   ⚠️ `prefers-reduced-motion` همه را می‌ایستاند و صحنه‌ی ساکن خودش
-   کامل است.
+   ⚠️ سایه‌ی تماس گرادیان است نه `feGaussianBlur`: فیلتر داخل گروهِ
+   متحرک، هر فریم دوباره رستر می‌شود.
    ───────────────────────────────────────────────────────────── */
 
 export type HeroArtVariant = 'services' | 'profile'
@@ -33,229 +32,222 @@ export function HeroArt({ variant }: { variant: HeroArtVariant }) {
   return (
     <div className={`tmha tmha--${variant}`} aria-hidden>
       {variant === 'services' ? <ServicesScene /> : <ProfileScene />}
-      {/* دانه‌ی ریز: همان چیزی که سطحِ دیجیتال را از «گرادیانِ تخت»
-          به «ماده» می‌برد. گرادیانِ بی‌دانه همیشه ارزان دیده می‌شود. */}
       <span className="tmha-grain" />
       <span className="tmha-sheen" />
     </div>
   )
 }
 
+/* مواد مشترک. `id` پیشونداست تا دو صحنه در یک سند تصادم نکنند. */
+function Materials({ id }: { id: string }) {
+  return (
+    <>
+      {/* استوانه: لبه‌ی تیره ← نوارِ روشن ← میانه ← لبه‌ی تیره */}
+      <linearGradient id={`${id}Steel`} x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stopColor="#2A2E33" />
+        <stop offset=".18" stopColor="#8E97A1" />
+        <stop offset=".38" stopColor="#E7ECF1" />
+        <stop offset=".58" stopColor="#9BA3AD" />
+        <stop offset=".82" stopColor="#4C535B" />
+        <stop offset="1" stopColor="#31383F" />
+      </linearGradient>
+      <linearGradient id={`${id}SteelDim`} x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stopColor="#202428" />
+        <stop offset=".3" stopColor="#5E666F" />
+        <stop offset=".55" stopColor="#8A939D" />
+        <stop offset="1" stopColor="#2A3036" />
+      </linearGradient>
+      <linearGradient id={`${id}Brass`} x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stopColor="#4A3B1E" />
+        <stop offset=".22" stopColor="#C9A85F" />
+        <stop offset=".42" stopColor="#F6E7BF" />
+        <stop offset=".66" stopColor="#B08F4D" />
+        <stop offset="1" stopColor="#332714" />
+      </linearGradient>
+      <linearGradient id={`${id}Wood`} x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stopColor="#2C2117" />
+        <stop offset=".26" stopColor="#9A7345" />
+        <stop offset=".46" stopColor="#C99A64" />
+        <stop offset=".72" stopColor="#7A5A34" />
+        <stop offset="1" stopColor="#241A11" />
+      </linearGradient>
+      {/* سایه‌ی تماس — گرادیان، نه فیلتر */}
+      <radialGradient id={`${id}Shadow`}>
+        <stop offset="0" stopColor="#000000" stopOpacity=".62" />
+        <stop offset=".6" stopColor="#000000" stopOpacity=".26" />
+        <stop offset="1" stopColor="#000000" stopOpacity="0" />
+      </radialGradient>
+      <linearGradient id={`${id}Glint`} x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0" stopColor="#FFFFFF" stopOpacity="0" />
+        <stop offset=".5" stopColor="#FFFFFF" stopOpacity=".8" />
+        <stop offset="1" stopColor="#FFFFFF" stopOpacity="0" />
+      </linearGradient>
+    </>
+  )
+}
+
 /* ═══════════════════════════════════════════════════════════
-   خدمات فنی — دقتِ ابزار
-   کره در کانون، نوکِ چوب که به آن نزدیک می‌شود، و یک لایه‌ی نازکِ
-   مدرج که «اندازه‌گیری» را می‌رساند.
+   صفحه‌ی خدمات — کولیس روی فرول
+
+   ⚠️ فک‌ها واقعا فرول را در بر می‌گیرند: لبه‌ی راستِ فکِ ثابت ۲۸۲،
+   شانه‌ی فرول ۲۸۲، و گنبدِ نوک تا ۳۸۱ می‌رسد که فکِ متحرک از ۳۸۰
+   شروع می‌شود — یعنی تماس، نه فاصله.
+   ⚠️ فرول عمدا از ۲۷۰ کشیده شده، ۱۲ واحد زیرِ چوب: چوب و فرول با
+   `.tmha-cue` ۱۰ واحد drift می‌کنند ولی کولیس نمی‌کند، پس درزِ
+   لب‌به‌لب از پشتِ فک بیرون می‌آمد. با هم‌پوشانی، drift نمی‌تواند
+   بازش کند.
    ═══════════════════════════════════════════════════════════ */
 function ServicesScene() {
-  /* ⚠️ `xMin` نه `xMid`: قابِ موبایل باریک و بلند است و `slice`
-     وسطِ صحنه را نگه می‌دارد — یعنی دقیقا کره را از کادر بیرون
-     می‌انداخت و فقط زمینه‌ی خالی می‌ماند. با چسباندن به لبه‌ی
-     شروع، جسمِ اصلی همیشه در کادر است. روی دسکتاپ بی‌اثر است
-     چون آن‌جا برش عمودی است نه افقی. */
   return (
     <svg className="tmha-svg" viewBox="0 0 1200 600" preserveAspectRatio="xMinYMid slice">
       <defs>
-        <radialGradient id="svcGround" cx="76%" cy="8%" r="86%">
-          <stop offset="0" stopColor="#1B4A36" />
-          <stop offset=".42" stopColor="#11291F" />
-          <stop offset="1" stopColor="#0B0D0F" />
+        <Materials id="svc" />
+        <radialGradient id="svcGround" cx="24%" cy="26%" r="84%">
+          <stop offset="0" stopColor="#1A3A2C" />
+          <stop offset=".44" stopColor="#101A16" />
+          <stop offset="1" stopColor="#08090A" />
         </radialGradient>
-
-        {/* کره: هایلایت بالا-چپ، پایانه، و تاریکیِ لبه */}
-        <radialGradient id="svcBall" cx="34%" cy="27%" r="78%">
-          <stop offset="0" stopColor="#7BF0B4" />
-          <stop offset=".22" stopColor="#2FBF77" />
-          <stop offset=".58" stopColor="#0E7A46" />
-          <stop offset=".86" stopColor="#04301C" />
-          <stop offset="1" stopColor="#02150E" />
-        </radialGradient>
-        {/* نورِ بازتابی روی لبه‌ی تاریک — بدونِ این، کره تخت است */}
-        <radialGradient id="svcRim" cx="72%" cy="82%" r="46%">
-          <stop offset="0" stopColor="#3FBE7C" stopOpacity=".55" />
-          <stop offset="1" stopColor="#3FBE7C" stopOpacity="0" />
-        </radialGradient>
-        <radialGradient id="svcSpec" cx="50%" cy="50%" r="50%">
-          <stop offset="0" stopColor="#FFFFFF" stopOpacity=".92" />
-          <stop offset=".55" stopColor="#FFFFFF" stopOpacity=".22" />
-          <stop offset="1" stopColor="#FFFFFF" stopOpacity="0" />
-        </radialGradient>
-
-        {/* فلز: نوارِ روشن در میانه، تیره در دو لبه — همان چیزی که
-            استوانه را استوانه نشان می‌دهد */}
-        <linearGradient id="svcFerrule" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#6B5B3A" />
-          <stop offset=".34" stopColor="#F2E4C4" />
-          <stop offset=".62" stopColor="#C9AE79" />
-          <stop offset="1" stopColor="#4A3D26" />
-        </linearGradient>
-        <linearGradient id="svcShaft" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#3A3025" />
-          <stop offset=".36" stopColor="#B99A66" />
-          <stop offset=".70" stopColor="#7A6440" />
-          <stop offset="1" stopColor="#2A241B" />
-        </linearGradient>
-
-        {/* ⚠️ فیلترِ محوِ هاله برداشته شد: همان نتیجه با گرادیانِ
-            رادیال به‌دست می‌آید و رستر نمی‌خواهد. روی گوشیِ ضعیف،
-            محوِ تمام‌قاب گران‌ترین کارِ این صحنه بود. */}
-        <radialGradient id="svcHalo">
-          <stop offset="0" stopColor="#128A4B" stopOpacity=".46" />
-          <stop offset=".55" stopColor="#128A4B" stopOpacity=".20" />
+        <radialGradient id="svcKey">
+          <stop offset="0" stopColor="#3FBE7C" stopOpacity=".36" />
+          <stop offset=".55" stopColor="#128A4B" stopOpacity=".15" />
           <stop offset="1" stopColor="#128A4B" stopOpacity="0" />
         </radialGradient>
-        <filter id="svcContact" x="-60%" y="-160%" width="220%" height="420%">
-          <feGaussianBlur stdDeviation="17" />
-        </filter>
       </defs>
 
       <rect width="1200" height="600" fill="url(#svcGround)" />
+      <ellipse className="tmha-halo" cx="250" cy="200" rx="400" ry="320" fill="url(#svcKey)" />
 
-      {/* ⚠️ کلِ صحنه آینه می‌شود. علتش ترکیب است نه سلیقه: پرده‌ی
-          دسکتاپ سمتِ راست (سمتِ متن) مات است و سمتِ چپ باز. صحنه‌ی
-          اولیه کره را سمتِ راست گذاشته بود، یعنی بهترین جسمِ صحنه
-          زیرِ مات‌ترین بخش پنهان می‌شد و سمتِ باز فقط شفتِ خالی
-          داشت. با آینه، برخوردِ نوکِ چوب و کره در نور می‌افتد. */}
-      <g transform="translate(1200,0) scale(-1,1)">
+      {/* لایه‌ی مدرجِ پس‌زمینه */}
+      <g stroke="#8FE3B4" strokeOpacity=".13" strokeWidth="1.4">
+        {Array.from({ length: 22 }, (_, i) => (
+          <line key={i} x1={20 + i * 24} y1="418" x2={20 + i * 24} y2={i % 5 === 0 ? 382 : 402} />
+        ))}
+        <line x1="20" y1="418" x2="530" y2="418" strokeOpacity=".22" />
+      </g>
 
-      <ellipse className="tmha-halo" cx="880" cy="250" rx="300" ry="255" fill="url(#svcHalo)" />
-
-      {/* لایه‌ی مدرج */}
-      <g className="tmha-rings" fill="none" stroke="#8FE3B4">
-        <circle cx="880" cy="278" r="196" strokeOpacity=".20" />
-        <circle cx="880" cy="278" r="258" strokeOpacity=".11" />
-        <g strokeOpacity=".26" strokeWidth="1.5">
-          {Array.from({ length: 24 }, (_, i) => {
-            const a = (i / 24) * Math.PI * 2
-            const r2 = i % 6 === 0 ? 176 : 187
-            return (
-              <line key={i}
-                x1={(880 + Math.cos(a) * 196).toFixed(1)}
-                y1={(278 + Math.sin(a) * 196).toFixed(1)}
-                x2={(880 + Math.cos(a) * r2).toFixed(1)}
-                y2={(278 + Math.sin(a) * r2).toFixed(1)} />
-            )
-          })}
+      {/* ── چوب ── */}
+      <g className="tmha-cue">
+        <ellipse cx="160" cy="284" rx="250" ry="20" fill="url(#svcShadow)" />
+        <rect x="-40" y="234" width="322" height="34" rx="0" fill="url(#svcWood)" />
+        <g stroke="#3A2A18" strokeOpacity=".38" strokeWidth="1.2">
+          <path d="M-20 246h270M-20 254h270M-20 261h270" />
         </g>
+        <rect x="270" y="236" width="96" height="30" rx="0" fill="url(#svcBrass)" />
+        <path d="M366 236a15 15 0 0 1 0 30z" fill="#CBBFA6" />
       </g>
 
-      <ellipse cx="872" cy="436" rx="132" ry="26" fill="#000" opacity=".55" filter="url(#svcContact)" />
+      {/* ── کولیس ── */}
+      <g>
+        {/* بدنه و فکِ ثابت — بی‌حرکت */}
+        <rect x="250" y="172" width="310" height="32" rx="8" fill="url(#svcSteel)" />
+        <g stroke="#1B2024" strokeOpacity=".55" strokeWidth="1.4">
+          {Array.from({ length: 16 }, (_, i) => (
+            <line key={i} x1={268 + i * 18} y1="176" x2={268 + i * 18} y2={i % 4 === 0 ? 192 : 185} />
+          ))}
+        </g>
+        <rect x="260" y="194" width="22" height="76" rx="5" fill="url(#svcSteel)" />
 
-      {/* چوب: شفت، فرول، تیپ */}
-      {/* ⚠️ یک چرخش روی *والد*، نه سه چرخش جدا. نسخه‌ی قبلی هر تکه
-          را حول مرکزِ خودش می‌چرخاند، پس سه قطعه از هم جدا می‌شدند:
-          انتهای شفت روی (۶۷۲،۲۹۲) می‌افتاد و فرول روی (۶۶۵،۳۶۶) —
-          ۷۴ واحد فاصله. در تصویر یک میله‌ی معلق دیده می‌شد و یک
-          قرصِ روشنِ بی‌ربط کنارش. */}
-      <g className="tmha-cue" transform="rotate(-13 690 360)">
-        <rect x="60" y="351" width="606" height="19" rx="9.5" fill="url(#svcShaft)" />
-        <rect x="664" y="347" width="52" height="27" rx="8" fill="url(#svcFerrule)" />
-        <path d="M716 347h11a13.5 13.5 0 0 1 0 27h-11z" fill="#D9CBB0" opacity=".92" />
-      </g>
+        {/* ⚠️ فقط کشویی و فکِ متحرک انیمیشن می‌گیرند. نسخه‌ی قبلی کلِ
+            ابزار را جابه‌جا می‌کرد، یعنی کولیس «باز» نمی‌شد بلکه
+            سُر می‌خورد و رابطه‌اش با فرول به هم می‌ریخت. */}
+        <g className="tmha-caliper">
+          <rect x="380" y="206" width="20" height="64" rx="5" fill="url(#svcSteelDim)" />
+          <rect x="366" y="164" width="56" height="48" rx="8" fill="url(#svcSteelDim)" />
+          <rect x="374" y="172" width="40" height="6" rx="3" fill="#E7ECF1" opacity=".55" />
+        </g>
 
-      <g className="tmha-ball">
-        <circle cx="880" cy="278" r="128" fill="url(#svcBall)" />
-        <circle cx="880" cy="278" r="128" fill="url(#svcRim)" />
-        <ellipse cx="836" cy="228" rx="42" ry="30" fill="url(#svcSpec)"
-          transform="rotate(-24 836 228)" />
-        <ellipse cx="932" cy="342" rx="20" ry="9" fill="#8FE3B4" opacity=".22" />
-      </g>
+        {/* برقِ رونده — مسیرش با متغیر تنظیم می‌شود */}
+        <rect className="tmha-glint tmha-glint--beam" x="250" y="172" width="110" height="32" rx="8"
+          fill="url(#svcGlint)" opacity=".5" />
       </g>
     </svg>
   )
 }
 
 /* ═══════════════════════════════════════════════════════════
-   پروفایل متخصص — سطحِ کار
-   ⚠️ عمدا صحنه‌ی دیگری: نور از چپ می‌آید نه راست، افق پایین‌تر
-   است، و به‌جای یک کره دو توپ با عمقِ میدان می‌آید. دو صفحه باید
-   با یک نگاه از هم تشخیص داده شوند.
+   صفحه‌ی متخصص — چوب
+
+   ⚠️ دو ترکیب، نه یکی. نوارِ دسکتاپ پهن و کوتاه است (~۱۷۳ پیکسل)
+   ولی روی موبایل محتوا روی هم می‌چیند و نوار بلند می‌شود؛ آن‌وقت
+   `slice` فقط ~۲۰۰ واحد از عرض را نگه می‌دارد و صحنه‌ی افقی کاملا
+   بیرون از کادر می‌افتد. پس یک ترکیبِ عمودیِ جدا برای موبایل.
    ═══════════════════════════════════════════════════════════ */
 function ProfileScene() {
-  /* ⚠️ سربرگِ پروفایل یک **نوارِ پهن و کوتاه** است (روی ۱۴۴۰ حدود
-     ۱۷۰ پیکسل). صحنه‌ی اولِ این‌جا برای قابِ بلند ساخته شده بود، پس
-     `slice` فقط بالای توپ را نگه می‌داشت و بقیه لکه‌ی محو می‌شد.
-     نسبتِ viewBox به همان نوار نزدیک شد و اجسام کوچک‌تر و روی یک
-     خط نشستند.
-
-     ⚠️ و عمدا صحنه‌ی دیگری است: نور از چپ، پالتِ گرم (برنجی) به‌جای
-     سبزِ اشباع، و دو جسم به‌جای یک کره — دو صفحه باید با یک نگاه
-     از هم تشخیص داده شوند. */
   return (
-    <svg className="tmha-svg" viewBox="0 0 1200 300" preserveAspectRatio="xMinYMid slice">
-      <defs>
-        <linearGradient id="prfGround" x1="0" y1="0" x2=".4" y2="1">
-          <stop offset="0" stopColor="#17392B" />
-          <stop offset=".55" stopColor="#0D1F17" />
-          <stop offset="1" stopColor="#090B0C" />
-        </linearGradient>
-        <linearGradient id="prfRake" x1="0" y1="0" x2="1" y2=".5">
-          <stop offset="0" stopColor="#4FD394" stopOpacity="0" />
-          <stop offset=".28" stopColor="#4FD394" stopOpacity=".24" />
-          <stop offset=".58" stopColor="#4FD394" stopOpacity=".07" />
-          <stop offset="1" stopColor="#4FD394" stopOpacity="0" />
-        </linearGradient>
+    <>
+      <svg className="tmha-svg tmha-wide" viewBox="0 0 1200 160" preserveAspectRatio="xMinYMid slice">
+        <defs>
+          <Materials id="prf" />
+          <linearGradient id="prfGround" x1="0" y1="0" x2=".4" y2="1">
+            <stop offset="0" stopColor="#15332A" />
+            <stop offset=".55" stopColor="#0D1A16" />
+            <stop offset="1" stopColor="#08090A" />
+          </linearGradient>
+          <radialGradient id="prfKey">
+            <stop offset="0" stopColor="#E8CD8E" stopOpacity=".24" />
+            <stop offset=".55" stopColor="#B98F3E" stopOpacity=".09" />
+            <stop offset="1" stopColor="#B98F3E" stopOpacity="0" />
+          </radialGradient>
+        </defs>
 
-        {/* برنجی — گرمِ عمدی، در برابر سبزِ صفحه‌ی خدمات */}
-        <radialGradient id="prfBallA" cx="32%" cy="26%" r="78%">
-          <stop offset="0" stopColor="#FFF3D2" />
-          <stop offset=".24" stopColor="#E8CD8E" />
-          <stop offset=".62" stopColor="#9C7838" />
-          <stop offset=".88" stopColor="#3E2F18" />
-          <stop offset="1" stopColor="#1C150B" />
-        </radialGradient>
-        <radialGradient id="prfRim" cx="74%" cy="80%" r="46%">
-          <stop offset="0" stopColor="#E8CD8E" stopOpacity=".42" />
-          <stop offset="1" stopColor="#E8CD8E" stopOpacity="0" />
-        </radialGradient>
-        <radialGradient id="prfBallB" cx="32%" cy="26%" r="78%">
-          <stop offset="0" stopColor="#D6EDE0" />
-          <stop offset=".28" stopColor="#63AE8E" />
-          <stop offset=".66" stopColor="#1F5A41" />
-          <stop offset="1" stopColor="#0A1D16" />
-        </radialGradient>
-        <radialGradient id="prfSpec" cx="50%" cy="50%" r="50%">
-          <stop offset="0" stopColor="#FFFFFF" stopOpacity=".9" />
-          <stop offset=".5" stopColor="#FFFFFF" stopOpacity=".16" />
-          <stop offset="1" stopColor="#FFFFFF" stopOpacity="0" />
-        </radialGradient>
+        <rect width="1200" height="160" fill="url(#prfGround)" />
+        <ellipse className="tmha-halo" cx="330" cy="36" rx="380" ry="160" fill="url(#prfKey)" />
+        <path d="M0 132h1200" stroke="#FFFFFF" strokeOpacity=".07" strokeWidth="2" />
 
-        <radialGradient id="prfHalo">
-          <stop offset="0" stopColor="#12A167" stopOpacity=".34" />
-          <stop offset=".55" stopColor="#12A167" stopOpacity=".15" />
-          <stop offset="1" stopColor="#12A167" stopOpacity="0" />
-        </radialGradient>
-        {/* عمقِ میدان: جسمِ دورتر نرم‌تر است */}
-        <filter id="prfFar" x="-30%" y="-30%" width="160%" height="160%">
-          <feGaussianBlur stdDeviation="3.2" />
-        </filter>
-        <filter id="prfContact" x="-70%" y="-260%" width="240%" height="620%">
-          <feGaussianBlur stdDeviation="9" />
-        </filter>
-      </defs>
+        {/* ⚠️ سه ابزارِ پراکنده بود و هر سه روی محتوا می‌افتاد: دسته‌ی
+            آچار زیرِ دکمه‌ها و سوهان پشتِ ردیفِ چیپ‌ها. علتش ساختاری
+            است — نوار تمام‌عرض است ولی محتوا در ظرفِ وسط‌چین، پس
+            «ناحیه‌ی خالی» با عرضِ پنجره جابه‌جا می‌شود و هیچ نقطه‌ی
+            امنی برای جسمِ کوچک نمی‌ماند. یک جسمِ پیوسته‌ی سرتاسری این
+            مشکل را ندارد: از هرجا رد شود، عمدی خوانده می‌شود. */}
+        <g className="tmha-tool-a">
+          <ellipse cx="300" cy="150" rx="330" ry="9" fill="url(#prfShadow)" />
+          <rect x="-60" y="118" width="400" height="27" rx="0" fill="url(#prfWood)" />
+          <g stroke="#3A2A18" strokeOpacity=".34" strokeWidth="1.1">
+            <path d="M-40 127h380M-40 134h380M-40 140h380" />
+          </g>
+          <rect x="334" y="116" width="19" height="31" rx="0" fill="url(#prfBrass)" />
+          <rect x="347" y="120" width="72" height="23" rx="0" fill="url(#prfBrass)" />
+          <path d="M417 120a11.5 11.5 0 0 1 0 23z" fill="#CBBFA6" />
+          <rect className="tmha-glint tmha-glint--beam" x="-60" y="118" width="150" height="27" rx="0"
+            fill="url(#prfGlint)" opacity=".4" />
+        </g>
+      </svg>
 
-      <rect width="1200" height="300" fill="url(#prfGround)" />
-      <rect className="tmha-rake" width="1200" height="300" fill="url(#prfRake)" />
+      {/* ── ترکیبِ موبایل: همان چوب، روی قطر ── */}
+      <svg className="tmha-svg tmha-tall" viewBox="0 0 420 420" preserveAspectRatio="xMidYMid slice">
+        <defs>
+          <Materials id="prm" />
+          <linearGradient id="prmGround" x1="0" y1="0" x2=".5" y2="1">
+            <stop offset="0" stopColor="#15332A" />
+            <stop offset=".55" stopColor="#0D1A16" />
+            <stop offset="1" stopColor="#08090A" />
+          </linearGradient>
+          <radialGradient id="prmKey">
+            <stop offset="0" stopColor="#E8CD8E" stopOpacity=".24" />
+            <stop offset=".55" stopColor="#B98F3E" stopOpacity=".09" />
+            <stop offset="1" stopColor="#B98F3E" stopOpacity="0" />
+          </radialGradient>
+        </defs>
 
-      <ellipse className="tmha-halo" cx="180" cy="96" rx="270" ry="180" fill="url(#prfHalo)" />
+        <rect width="420" height="420" fill="url(#prmGround)" />
+        <ellipse className="tmha-halo" cx="120" cy="90" rx="240" ry="220" fill="url(#prmKey)" />
 
-      {/* خطِ باند — افقِ صحنه */}
-      <path d="M0 228h1200" stroke="#FFFFFF" strokeOpacity=".06" strokeWidth="2" />
-
-      {/* جسمِ دور */}
-      <g filter="url(#prfFar)" opacity=".8">
-        <ellipse cx="352" cy="230" rx="38" ry="8" fill="#000" opacity=".5" />
-        <circle cx="356" cy="198" r="34" fill="url(#prfBallB)" />
-        <ellipse cx="345" cy="185" rx="10" ry="7" fill="url(#prfSpec)" transform="rotate(-22 345 185)" />
-      </g>
-
-      {/* جسمِ نزدیک */}
-      <g className="tmha-ball">
-        <ellipse cx="170" cy="231" rx="66" ry="12" fill="#000" opacity=".55" filter="url(#prfContact)" />
-        <circle cx="176" cy="166" r="64" fill="url(#prfBallA)" />
-        <circle cx="176" cy="166" r="64" fill="url(#prfRim)" />
-        <ellipse cx="154" cy="141" rx="20" ry="14" fill="url(#prfSpec)" transform="rotate(-24 154 141)" />
-        <ellipse cx="204" cy="200" rx="11" ry="5" fill="#FFE9B8" opacity=".22" />
-      </g>
-    </svg>
+        <g transform="rotate(31 210 210)">
+          <g className="tmha-tool-a">
+            <ellipse cx="250" cy="232" rx="250" ry="12" fill="url(#prmShadow)" />
+            <rect x="100" y="192" width="420" height="30" rx="0" fill="url(#prmWood)" />
+            <g stroke="#3A2A18" strokeOpacity=".34" strokeWidth="1.1">
+              <path d="M120 202h380M120 209h380M120 216h380" />
+            </g>
+            <rect x="86" y="190" width="20" height="34" rx="0" fill="url(#prmBrass)" />
+            <rect x="16" y="194" width="76" height="26" rx="0" fill="url(#prmBrass)" />
+            <path d="M18 194a13 13 0 0 0 0 26z" fill="#CBBFA6" />
+            <rect className="tmha-glint" x="100" y="192" width="160" height="30" rx="0"
+              fill="url(#prmGlint)" opacity=".4" />
+          </g>
+        </g>
+      </svg>
+    </>
   )
 }

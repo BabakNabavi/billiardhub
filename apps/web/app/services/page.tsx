@@ -185,15 +185,14 @@ export default function TechnicalServicesPage() {
         <HeroArt variant="services" />
         <div className="tm-wrap tm-hero-in">
           <div>
-            <p className="tm-eyebrow">خدمات فنی بیلیارد</p>
             {/* ⚠️ تیتر کوتاه شد و لحنش رسمی: نسخه‌ی قبلی یازده کلمه بود
                 و روی ۳۹۰ چهار خط می‌گرفت، یعنی تاشوی اول را کامل
                 می‌خورد و ماژول جست‌وجو زیر خط دید می‌افتاد. */}
-            <h1>متخصص تجهیزات بیلیارد را پیدا کنید</h1>
+            <h1>متخصصین خدمات فنی بیلیارد</h1>
             {/* ⚠️ خط تیره برداشته شد: در RTL سرِ خط دوم می‌افتاد و
                 جمله را دو تکه‌ی بی‌ربط نشان می‌داد. */}
             <p className="tm-hero-sub">
-              تعمیر، رگلاژ و تعویض قطعات را از متخصصان ثبت‌شده بگیرید.
+              تعمیر، رگلاژ، تعویض و نصب قطعات را از متخصصان ثبت‌شده بگیرید
             </p>
             <ServiceSearch
               query={query} onQuery={setQuery}
@@ -261,7 +260,7 @@ export default function TechnicalServicesPage() {
             ) : failed && ALL.length === 0 ? (
               <div className="tm-empty" role="alert">
                 <h3>فهرست متخصصان بارگذاری نشد</h3>
-                <p>ارتباط با سرور برقرار نشد. اتصال اینترنت را بررسی کن و دوباره تلاش کن.</p>
+                <p>ارتباط با سرور برقرار نشد. اتصال اینترنت را بررسی کن و دوباره تلاش کن</p>
                 <button className="tm-btn tm-btn--outline" type="button"
                   onClick={() => window.location.reload()}>تلاش دوباره</button>
               </div>
@@ -270,8 +269,8 @@ export default function TechnicalServicesPage() {
                 <h3>متخصصی با این جست‌وجو پیدا نشد</h3>
                 <p>
                   {active > 0
-                    ? 'فیلترها را کمتر کن یا شهر دیگری را امتحان کن.'
-                    : 'هنوز متخصصی در این بخش ثبت نشده است.'}
+                    ? 'فیلترها را کمتر کن یا شهر دیگری را امتحان کن'
+                    : 'هنوز متخصصی در این بخش ثبت نشده است'}
                 </p>
                 {active > 0 && (
                   <button className="tm-btn tm-btn--outline" type="button" onClick={clearAll}>
@@ -297,7 +296,7 @@ export default function TechnicalServicesPage() {
             <div className="tm-cta tm-cta-mt">
               <div>
                 <h2>متخصص مناسب پیدا نکردی؟</h2>
-                <p>نیازت را برای ما توضیح بده تا درخواستت را برای متخصصان مرتبط ارسال کنیم.</p>
+                <p>نیازت را برای ما توضیح بده تا درخواستت را برای متخصصان مرتبط ارسال کنیم</p>
               </div>
               <Link className="tm-btn tm-btn--gold" href="/support?topic=technical-service">
                 <Send size={16} aria-hidden />
@@ -313,7 +312,7 @@ export default function TechnicalServicesPage() {
         <div className="tm-cta tm-cta--dark">
           <div>
             <h2>خدمات فنی ارائه می‌دهی؟</h2>
-            <p>پروفایل حرفه‌ای خودت را در بیلیارد هاب بساز و خدماتت را به مشتریان جدید معرفی کن.</p>
+            <p>پروفایل حرفه‌ای خودت را در بیلیارد هاب بساز و خدماتت را به مشتریان جدید معرفی کن</p>
           </div>
           <Link className="tm-btn tm-btn--gold" href="/dashboard/technician">
             <UserPlus size={16} aria-hidden />

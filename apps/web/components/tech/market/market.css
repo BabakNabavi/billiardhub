@@ -135,10 +135,8 @@
     padding-block: 48px;
   }
 }
-.tm-eyebrow {
-  font-size: 12px; font-weight: 700; color: var(--gold-ink);
-  margin: 0 0 8px;
-}
+/* ⚠️ `.tm-eyebrow` حذف شد: برچسبِ «خدمات فنی بیلیارد» از سرلوحه
+   برداشته شد و دیگر هیچ مارک‌آپی این کلاس را ندارد. */
 .tm-hero h1 {
   font-size: 26px; font-weight: 700; line-height: 1.45;
   letter-spacing: -0.015em; margin: 0 0 12px; color: var(--ink);

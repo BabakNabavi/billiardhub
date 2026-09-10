@@ -266,7 +266,7 @@ export default function TechnicianProfilePage() {
   }
 
   const deleteImage = async (mid: string) => {
-    if (!(await ask('این تصویر حذف شود؟', { body: 'این کار برگشت‌پذیر نیست.', confirmLabel: 'حذف' }))) return
+    if (!(await ask('این تصویر حذف شود؟', { body: 'این کار برگشت‌پذیر نیست', confirmLabel: 'حذف' }))) return
     await edit.apply(d => ({ ...d, gallery: (d.gallery ?? []).filter(g => g.id !== mid) }))
   }
   /* ── ویرایش عنوان ویدیو ──
@@ -292,7 +292,7 @@ export default function TechnicianProfilePage() {
   )
 
   const deleteVideo = async (vid: string) => {
-    if (!(await ask('این ویدیو حذف شود؟', { body: 'این کار برگشت‌پذیر نیست.', confirmLabel: 'حذف' }))) return
+    if (!(await ask('این ویدیو حذف شود؟', { body: 'این کار برگشت‌پذیر نیست', confirmLabel: 'حذف' }))) return
     await edit.apply(d => ({ ...d, videos: (d.videos ?? []).filter(v => v.id !== vid) }))
   }
 
@@ -373,7 +373,7 @@ export default function TechnicianProfilePage() {
       <ProfileMissing
         icon={<Wrench size={34} />}
         title="متخصص پیدا نشد"
-        message="ممکن است این پروفایل حذف شده یا نشانی تغییر کرده باشد."
+        message="ممکن است این پروفایل حذف شده یا نشانی تغییر کرده باشد"
         backHref="/services" backLabel="بازگشت به خدمات فنی"
         {...retryProps}
       />
@@ -457,9 +457,9 @@ export default function TechnicianProfilePage() {
 
       {/* ═══════ سربرگ پروفایل ═══════ */}
       <header className="tmp-head">
-        {/* ⚠️ پوسترِ این صفحه عمدا با صفحه‌ی خدمات فرق دارد: نور از
-            سمت مقابل می‌آید و ترکیبش میدانِ ماهوت است نه چوب و
-            کمان — تا دو صفحه از هم تشخیص داده شوند. */}
+        {/* ⚠️ پوسترِ این صفحه عمدا با صفحه‌ی خدمات فرق دارد: خودِ
+            چوب سرتاسرِ نوار با نورِ گرم — نه صحنه‌ی سبزِ کولیس. دو
+            صفحه باید با یک نگاه از هم تشخیص داده شوند. */}
         <HeroArt variant="profile" />
         <div className="tm-wrap tmp-head-in">
           <nav aria-label="مسیر">
@@ -556,7 +556,7 @@ export default function TechnicianProfilePage() {
                 )}
               </>
             ) : (
-              <p className="tmp-none">این متخصص هنوز معرفی‌ای ننوشته است.</p>
+              <p className="tmp-none">این متخصص هنوز معرفی‌ای ننوشته است</p>
             )}
 
             {meta.length > 0 && (
@@ -642,7 +642,7 @@ export default function TechnicianProfilePage() {
                 )}
               </div>
             ) : (
-              <p className="tmp-none">راه ارتباطی ثبت نشده است.</p>
+              <p className="tmp-none">راه ارتباطی ثبت نشده است</p>
             )}
             {coverage.length > 0 && (
               <>

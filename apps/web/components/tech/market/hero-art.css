@@ -15,6 +15,19 @@
   background: #0B0D0F;
 }
 
+/* ⚠️ دو ترکیب برای نوارِ پروفایل — یکی پهن، یکی بلند. کدام دیده
+   شود را همان نقطه‌ای تعیین می‌کند که چیدمانِ سربرگ عوض می‌شود. */
+/* ⚠️ وزن بالاتر از `.tmha-svg` لازم است، نه ترتیب: هر دو (۰,۱,۰)
+   بودند و `.tmha-svg { display: block }` که پایین‌تر است برنده
+   می‌شد — نتیجه‌اش این بود که هر دو ترکیب هم‌زمان رندر می‌شدند.
+   اندازه‌گیری‌شده در مرورگر: هر دو `block`. */
+.tmha .tmha-tall { display: block; }
+.tmha .tmha-wide { display: none; }
+@media (min-width: 768px) {
+  .tmha .tmha-tall { display: none; }
+  .tmha .tmha-wide { display: block; }
+}
+
 .tmha-svg {
   position: absolute; inset: 0;
   inline-size: 100%; block-size: 100%;
@@ -45,37 +58,38 @@
 }
 
 /* ── حرکتِ اجسام ──
-   دامنه عمدا خیلی کوچک است: صحنه باید «زنده» باشد نه «متحرک». */
-.tmha-ball  { animation: tmha-float 14s ease-in-out infinite; }
-.tmha-cue   { animation: tmha-nudge 16s ease-in-out infinite; }
-.tmha-halo  { animation: tmha-pulse 12s ease-in-out infinite; }
-/* ⚠️ چرخشِ کمان‌ها **برداشته شد**، نه اینکه مبدأش درست شود.
-   دو دلیل، هر دو اندازه‌گیری‌شده:
-   ۱) `transform-origin` من ۳۲۰ بود چون فکر می‌کردم آینه‌شدنِ گروه
-      مختصات را برمی‌گرداند. برنمی‌گرداند: ترنسفورمِ CSS روی عنصرِ
-      SVG در فضای کاربریِ *خودِ عنصر* حل می‌شود، یعنی ۸۸۰. با ۳۲۰،
-      کمان‌ها روی شعاعِ ۵۶۰ مدار می‌زدند و نیمی از چرخه بیرون قاب
-      بودند — و نیمِ دیگر از روی متن رد می‌شدند.
-   ۲) همان رد شدن از روی متن یعنی عددهای کنتراستِ من فقط برای
-      فریمِ صفر معتبر بودند. لایه‌ی ساکن هر دو مشکل را می‌برد و
-      یک انیمیشنِ دائمیِ بزرگ هم از روی گوشیِ ضعیف کم می‌کند. */
-.tmha-rake  { animation: tmha-pulse 18s ease-in-out infinite; }
+   دامنه عمدا خیلی کوچک است: صحنه باید «زنده» باشد نه «متحرک».
+   ⚠️ برقِ رونده روی فلز، تنها چیزی است که واقعا حرکت را نشان
+   می‌دهد؛ بقیه فقط نفس می‌کشند. */
+.tmha-halo    { animation: tmha-pulse 14s ease-in-out infinite; }
+.tmha-cue     { animation: tmha-drift 20s ease-in-out infinite; }
+.tmha-caliper { animation: tmha-caliper 16s ease-in-out infinite; }
+.tmha-tool-a  { animation: tmha-drift 22s ease-in-out infinite; }
+.tmha-glint   { animation: tmha-glint 9s ease-in-out infinite; }
 
-@keyframes tmha-float {
+@keyframes tmha-drift {
   0%, 100% { transform: translate3d(0, 0, 0); }
-  50%      { transform: translate3d(0, -10px, 0); }
+  50%      { transform: translate3d(10px, -5px, 0); }
 }
-@keyframes tmha-nudge {
+/* کشویی آرام *باز* می‌شود و برمی‌گردد. مثبت، نه منفی: منفی یعنی فک
+   داخلِ فرول می‌رفت. */
+@keyframes tmha-caliper {
   0%, 100% { transform: translate3d(0, 0, 0); }
-  50%      { transform: translate3d(14px, -6px, 0); }
+  50%      { transform: translate3d(16px, 0, 0); }
 }
+/* ⚠️ مسیرِ ثابتِ ۲۶۰ واحد برای بدنه‌ی ۳۱۰ واحدیِ کولیس درست بود، ولی
+   دسته‌ی ۱۵۰ واحدیِ آچار را رد می‌کرد و یک نوارِ سفیدِ شناور روی
+   پس‌زمینه می‌ساخت. حالا هر جسم مسیرِ خودش را می‌دهد. */
+@keyframes tmha-glint {
+  0%   { transform: translate3d(-40px, 0, 0); opacity: 0; }
+  35%  { opacity: .55; }
+  70%  { transform: translate3d(var(--tmha-glint-x, 260px), 0, 0); opacity: 0; }
+  100% { transform: translate3d(var(--tmha-glint-x, 260px), 0, 0); opacity: 0; }
+}
+.tmha-glint--beam { --tmha-glint-x: 190px; }
 @keyframes tmha-pulse {
   0%, 100% { opacity: .78; }
   50%      { opacity: 1; }
-}
-@keyframes tmha-spin {
-  from { transform: rotate(0deg); }
-  to   { transform: rotate(360deg); }
 }
 @keyframes tmha-sweep {
   0%, 100% { transform: translate3d(-12%, 0, 0); opacity: .55; }
@@ -92,7 +106,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .tmha-ball, .tmha-cue, .tmha-halo, .tmha-rings, .tmha-rake, .tmha-sheen {
-    animation: none;
-  }
+  .tmha-halo, .tmha-cue, .tmha-caliper, .tmha-tool-a,
+  .tmha-glint, .tmha-sheen { animation: none; }
+  .tmha-glint { opacity: 0; }
 }
