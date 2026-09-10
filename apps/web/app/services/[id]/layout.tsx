@@ -46,9 +46,12 @@ export async function generateMetadata(
       approved = p.status === 'approved'
       const d = p.data as { name?: unknown; title?: unknown; intro?: unknown }
       name = typeof d.name === 'string' ? d.name.trim() : ''
-      const t = typeof d.title === 'string' ? d.title.trim() : ''
       const i = typeof d.intro === 'string' ? d.intro.trim() : ''
-      intro = i || t
+      /* ⚠️ «i || t» بود. حالا که عنوان برای همه ثابتِ «خدمات فنی»
+         است، هر متخصصِ بدون معرفی همان یک جمله را به‌عنوان توضیحِ
+         متا می‌گرفت — چند صفحه با توضیحِ یکسان و بی‌ارزش. نبودنش
+         بهتر است: توضیحِ عمومیِ پایین جایش را می‌گیرد. */
+      intro = i
     }
   } catch { /* دیتابیس در دسترس نبود — عنوان عمومی */ }
 

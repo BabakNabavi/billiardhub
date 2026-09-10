@@ -23,6 +23,7 @@
 import { useChannelPublish, type PublishVideo } from '@/components/media/useChannelPublish'
 import { toFaDigits } from '@/lib/jalali'
 import { norm, keepLongest } from '@/lib/text-dedupe'
+import { telNumber, waLink } from '@/lib/phone-wa'
 import { resolveServices } from '@/lib/tech-services'
 import { useVideoEdit } from '@/components/media/useVideoEdit'
 import { detailTitle, type VideoDetail } from '@/lib/media/video-details'
@@ -395,8 +396,12 @@ export default function TechnicianProfilePage() {
 
   /* ⚠️ ردیف بدون شماره ممکن است؛ کنشی که کار خودش را نمی‌کند از
      نبودنش بدتر است. */
-  const phone = norm(tech.phone)
-  const wa = norm(tech.whatsapp)
+  /* ⚠️ شماره‌ها از `norm` (که فقط فاصله را جمع می‌کند) به
+     نرمال‌سازیِ واقعیِ شماره منتقل شدند. لینک واتساپ پیش‌تر مستقیم
+     از مقدارِ خام ساخته می‌شد، پس «@» یا فاصله یا نشانی wa.me که
+     کاربر پیست کرده بود داخل مسیر می‌رفت و پیام‌دادن کار نمی‌کرد.
+     نامعتبر ⟵ رشته‌ی خالی ⟵ دکمه اصلا ساخته نمی‌شود. */
+  const phone = telNumber(tech.phone)
   /* ⚠️ فقط نام خدمات *واقعی خودش*. هیچ کلمه‌ی تزئینی اضافه
      نمی‌شود — نوار محتواست، نه دکور.
      ⚠️ یکتا: یک عنوان می‌تواند در دو دسته تکرار شود و کلید تکراری
@@ -410,9 +415,13 @@ export default function TechnicianProfilePage() {
      ⚠️ سقف صریح حلقه: عنوان خالی در داده طول رشته را هرگز
      بالا نمی‌برد و رندر را قفل می‌کند. */
 
-  const waText = wa
-    ? `https://wa.me/${wa}?text=${encodeURIComponent(`سلام ${tech.name} عزیز، از طریق بیلیارد هاب با شما تماس می‌گیرم.`)}`
-    : ''
+  /* ⚠️ `whatsapp || phone` کافی نبود: ردیفِ قدیمی می‌تواند مقدارِ
+     *ناخالی ولی بی‌مصرف* داشته باشد («ندارم»، آی‌دی اینستاگرام،
+     شماره‌ی خارجی). آن‌وقت شرط برقرار بود، `waNumber` خالی
+     برمی‌گرداند و دکمه ناپدید می‌شد — با اینکه شماره‌ی موبایلِ
+     معتبر در فیلدِ تماس بود. */
+  const waMsg = `سلام ${tech.name} عزیز، از طریق بیلیارد هاب با شما تماس می‌گیرم.`
+  const waText = waLink(tech.whatsapp, waMsg) || waLink(tech.phone, waMsg)
 
   /* تب‌ها فقط لنگرند، نه روتر: محتوا کوتاه است و صفحه‌ی جدا برای
      هر تب یعنی سه رفت‌وبرگشت اضافه روی شبکه‌ی کند. */
