@@ -76,88 +76,137 @@
 }
 
 /* ═══════════════ سرلوحه ═══════════════
-   ⚠️ نسخه قبلی یک مستطیل سیاهِ تمام‌عرض بود با تیتر بزرگِ وسط‌چین،
-   یک کارت شیشه‌ای و عکسی که *زیرِ* آن رها شده بود. سه بلوکِ جدا که
-   به هم ربط بصری نداشتند. حالا یک ترکیبِ واحد است: زمینِ گرمِ روشن،
-   تیترِ مهارشده، ماژول جست‌وجوی یکپارچه، و عکس به‌عنوان جزئی از
-   همان ترکیب نه ضمیمه‌ای زیرش.
 
-   ⚠️ طلایی فقط لهجه است: یک خطِ کوتاه کنار برچسب و دکمه‌ی کنش.
-   نه گرادیان طلایی، نه درخشش، نه زمینه‌ی طلایی. */
+   ── چرا نسخه‌ی سوم ──
+   نسخه‌ی اول یک مستطیل سیاه بود با عکسی که *زیرش* رها شده بود.
+   نسخه‌ی دوم زمین را روشن کرد ولی همان اشتباه را نگه داشت و بدتر
+   کرد: تیتر ← فرم سفید ← دکمه ← عکس بزرگ، یعنی قیافه‌ی یک سایت
+   جست‌وجوی خدماتِ عمومی.
+
+   مشکل هیچ‌وقت رنگ نبود؛ **ترکیب** بود. عکس یک بلوکِ محتوایی جدا
+   بود نه جزئی از سرلوحه.
+
+   ── چه شد ──
+   عکس رفت *پشتِ* محتوا. سرلوحه یک فضاست، نه سه جعبه‌ی روی هم.
+   روی موبایل هیچ عکسِ مستقلی نیست: آن قابِ ۲۲۴ پیکسلی تنها کارش
+   پایین‌راندنِ جست‌وجو زیر خط دید بود.
+
+   ⚠️ کارگردانیِ هنریِ واکنش‌گرا، نه بزرگ‌کردنِ موبایل: روی موبایل
+   پوششِ عمودیِ سنگین است و عکس فقط بافت می‌دهد؛ روی دسکتاپ پوشش
+   افقی می‌شود و عکس در سمتِ چپ واقعا دیده می‌شود. یک فایل، دو
+   ترکیب. */
 .tm .tm-hero {
-  position: relative; isolation: isolate;
-  /* گذارِ نرم از هدرِ سفیدِ سراسری به زمینِ گرم — بدون این، لبه‌ی
-     تیزی بین هدر و هیرو می‌افتد که مصنوعی به نظر می‌رسد. */
-  background:
-    linear-gradient(180deg, #FFFFFF 0%, #FBFAF7 34%, var(--tm-hero-bg) 100%);
-  border-block-end: 1px solid var(--line);
-  --tm-hero-bg: #F7F5F1;
+  position: relative; isolation: isolate; overflow: hidden;
+  background: #111114;
+  color: rgb(255 255 255 / .94);
+  /* ⚠️ market.css به .tm-hero یک border-block-end روشن می‌دهد؛
+     روی زمینِ #111114 یک خطِ روشن دورِ لبه‌ی گردشده می‌کشید. */
+  border-block-end: 0;
+  /* گوشه‌ی پایین ملایم تا بخش روشنِ بعدی زیرش سُر بخورد و مرز
+     عمدی به نظر برسد، نه بریدگی. */
+  border-end-start-radius: var(--ios-r-lg); border-end-end-radius: var(--ios-r-lg);
 }
-.tm .tm-hero-in { padding-block: 16px 24px; gap: 24px; }
+.tm .tm-hero-bg {
+  position: absolute; inset: 0; z-index: 0;
+  inline-size: 100%; block-size: 100%;
+  object-fit: cover;
+  /* کانونِ برش روی ناحیه‌ی کار — دست‌ها و سطحِ میز */
+  object-position: 50% 62%;
+  /* ⚠️ محوِ ملایم عمدی است و دو کار می‌کند: زمینه‌ی پشتِ متن باید
+     نرم باشد (کارِ همیشگیِ عکسِ زمینه)، و فایل ۵۱۶×۳۸۷ است پس
+     بزرگ‌نمایی روی دسکتاپ بدون آن دانه‌دار دیده می‌شد. */
+  filter: saturate(.55) contrast(1.05) brightness(.86) blur(1.2px);
+  /* محو لبه را شفاف می‌کند؛ کمی بزرگ‌تر از قاب تا لبه پیدا نشود */
+  transform: scale(1.06);
+}
+/* پوششِ خوانایی. روی موبایل عمودی و سنگین: متن روی هر نقطه‌ی
+   عکس باید خوانا باشد، نه فقط جایی که تیره افتاده. */
+.tm .tm-hero::after {
+  content: ''; position: absolute; inset: 0; z-index: 1; pointer-events: none;
+  background:
+    linear-gradient(180deg,
+      rgb(17 17 20 / .78) 0%,
+      rgb(17 17 20 / .62) 40%,
+      rgb(17 17 20 / .90) 100%),
+    radial-gradient(84% 58% at 88% 4%, rgb(199 166 106 / .16), transparent 62%);
+}
+.tm .tm-hero-in { position: relative; z-index: 2; padding-block: 32px 48px; gap: 0; }
 
 /* ── برچسب بخش ──
-   ⚠️ چیپِ پرشده روی زمینِ روشن سنگین می‌شود. یک خطِ طلاییِ کوتاه
-   کنار متن، همان نقش را با یک‌دهمِ وزن بصری بازی می‌کند. */
+   ⚠️ چیپِ پرشده نیست: یک خطِ طلاییِ کوتاه کنار متن، همان نقش را
+   با کسری از وزنِ بصری بازی می‌کند و کارت‌سازیِ بی‌مورد نمی‌آورد. */
 .tm .tm-eyebrow {
-  display: flex; align-items: center; gap: 9px;
-  margin: 0 0 12px;
-  color: var(--gold-ink);
-  font-size: 11.5px; font-weight: 800; line-height: 1;
-  background: none; border: 0; padding: 0; border-radius: 0;
+  display: flex; align-items: center; gap: 8px;
+  margin: 0 0 16px; padding: 0; border: 0; border-radius: 0; background: none;
+  color: rgb(214 186 134 / .96);
+  /* کفِ متادیتای پروژه ۱۲ است؛ ۱۱٫۵ زیرش بود */
+  font-size: 12px; font-weight: 700; line-height: 1;
 }
 .tm .tm-eyebrow::after {
   content: ''; flex: 0 0 24px; block-size: 2px; border-radius: 2px;
-  /* گرادیان کلیدواژه‌ی منطقی ندارد؛ `to left` یعنی «دور از متن» و
-     این صفحه همیشه RTL است. اگر روزی LTR شد، همین‌جا باید بچرخد. */
+  /* گرادیان کلیدواژه‌ی منطقی ندارد؛ «to left» یعنی دور از متن و
+     این صفحه همیشه RTL است. */
   background: linear-gradient(to left, var(--gold), transparent);
 }
 
 /* ── تیتر ──
    ⚠️ عرض با `ch` بسته می‌شود نه با `<br>`: شکستِ دستی روی ۳۹۰ و
-   ۴۳۰ دو نتیجه‌ی متفاوت می‌دهد و یکی‌شان همیشه بد است. */
+   ۴۳۰ دو نتیجه می‌دهد و یکی‌شان همیشه بد است.
+   ⚠️ وزن ۷۰۰ نه ۸۰۰: فارسیِ خیلی سیاه روی زمینِ تیره پخش می‌شود. */
 .tm .tm-hero h1 {
-  color: var(--ios-label);
-  font-size: clamp(25px, 6.6vw, 42px);
-  font-weight: 700; line-height: 1.3;
-  letter-spacing: -0.02em;
-  max-inline-size: 14ch;
+  color: #fff;
+  font-size: clamp(26px, 6.8vw, 44px);
+  font-weight: 700; line-height: 1.32;
+  letter-spacing: -0.015em;
+  /* ⚠️ ۱۳ch تیتر را روی ۳۹۰ سه‌خطی می‌کرد. `balance` هم برداشته شد:
+     خطوط را هم‌اندازه می‌کند و همان سه‌خطی را تثبیت می‌کرد. */
+  max-inline-size: 17ch;
   margin: 0 0 12px;
+  text-wrap: pretty;
 }
 .tm .tm-hero-sub {
-  color: var(--ink-2);
-  font-size: 14.5px; line-height: 1.75;
-  max-inline-size: 40ch;
-  margin: 0 0 20px;
-}
-
-/* ── عکس ──
-   ⚠️ فایل ۵۱۶×۳۸۷ است. قابِ ۱۶:۱۰ از همان کادرِ ۴:۳ یک برشِ عمدی
-   می‌گیرد (نه کشیدگی، چون `cover`) و ارتفاعِ بی‌دلیل را می‌گیرد؛
-   قابِ بلند روی موبایل جست‌وجو را از تاشو پایین می‌انداخت. */
-.tm .tm-hero-media {
-  aspect-ratio: 16 / 10;
-  border-radius: 24px; overflow: hidden;
-  background: var(--neutral);
-  box-shadow: 0 1px 2px rgb(17 17 17 / .05), 0 22px 48px -22px rgb(17 17 17 / .34);
-}
-.tm .tm-hero-media img {
-  inline-size: 100%; block-size: 100%; object-fit: cover;
-  object-position: 50% 56%;
-  transition: transform .5s cubic-bezier(.22,1,.36,1);
-}
-@media (hover: hover) {
-  .tm .tm-hero-media:hover img { transform: scale(1.03); }
-}
-@media (prefers-reduced-motion: reduce) {
-  .tm .tm-hero-media img { transition: none; }
-  .tm .tm-hero-media:hover img { transform: none; }
+  /* ⚠️ ۰٫۷۰ روی روشن‌ترین پیکسلِ عکس ۴٫۷۱:۱ اندازه‌گیری شد —
+     عبور می‌کرد ولی حاشیه‌اش تا کفِ ۴٫۵ نازک بود و زمینه این‌جا
+     عکس است نه رنگِ ثابت. */
+  color: rgb(255 255 255 / .80);
+  font-size: 14px; line-height: 1.7;
+  max-inline-size: 34ch;
+  margin: 0 0 24px;
 }
 
 @media (min-width: 900px) {
-  .tm .tm-hero-in { padding-block: 48px; gap: 48px; }
-  .tm .tm-hero h1 { max-inline-size: 15ch; margin-block-end: 14px; }
-  .tm .tm-hero-sub { font-size: 15.5px; }
-  .tm .tm-hero-media { aspect-ratio: 4 / 3; }
+  /* ⚠️ پوشش از عمودی به افقی می‌چرخد: سمتِ راست (شروعِ RTL) تقریبا
+     مات برای متن، سمتِ چپ باز تا عکس واقعا دیده شود. */
+  .tm .tm-hero::after {
+    background:
+      linear-gradient(to left,
+        rgb(17 17 20 / .97) 0%,
+        rgb(17 17 20 / .93) 34%,
+        rgb(17 17 20 / .62) 68%,
+        rgb(17 17 20 / .38) 100%),
+      radial-gradient(60% 90% at 88% 0%, rgb(199 166 106 / .14), transparent 60%);
+  }
+  /* ⚠️ `filter` کوتاه‌نویسی است: نوشتنِ دوباره‌اش `blur` را می‌انداخت،
+     آن هم دقیقا این‌جا که بدترین حالت است — پوشش تا ۰٫۳۸ باز می‌شود
+     و بزرگ‌نمایی از ۵۱۶ به ۱۴۴۰ حدود ۲٫۸ برابر. blur در مختصاتِ
+     محلی اعمال می‌شود، پس هرچه ضریبِ cover بزرگ‌تر، روی صفحه
+     نازک‌تر دیده می‌شود؛ برای همین این‌جا بیشتر است. */
+  .tm .tm-hero-bg {
+    object-position: 50% 50%;
+    filter: saturate(.5) contrast(1.1) brightness(.78) blur(1.6px);
+  }
+  .tm .tm-hero-in {
+    padding-block: 64px;
+    grid-template-columns: minmax(0, 1fr);
+  }
+  /* ستونِ محتوا عرضِ خوانا می‌گیرد و بقیه‌ی قاب به عکس می‌رسد */
+  /* ⚠️ ستون از ۴۶ch به ۶۲۰px رفت چون جست‌وجو هم داخلش است و
+     placeholderِ «تعویض پارچه، رگلاژ، تعمیر چوب…» بریده می‌شد.
+     خوانایی متن با سقفِ خودِ h1 و زیرعنوان حفظ می‌شود، نه با
+     تنگ‌کردنِ کلِ ستون. */
+  .tm .tm-hero-in > div { max-inline-size: 620px; }
+  .tm .tm-hero h1 { max-inline-size: 15ch; margin-block-end: 12px; }
+  .tm .tm-hero-sub { font-size: 15px; max-inline-size: 44ch; }
 }
 
 /* ═══════════════ کنترل‌ها ═══════════════ */
@@ -504,71 +553,87 @@
   .tm-citypanel.tm-citypanel { background: rgb(255 255 255 / .99); }
 }
 
-/* ═══════════════ دو سطح جامانده ═══════════════
-   ⚠️ اینها هنوز زبان قبلی را داشتند و کنار سطح‌های تازه ناهماهنگ
-   بودند: جعبه جست‌وجو روی هیروی تیره شناور است و نوار چسبان موبایل
-   دکمه‌های قرصی دارد ولی خودش گوشه‌دار بود. */
+/* ═══════════════ نوار چسبانِ صفحه‌ی پروفایل ═══════════════
+   ⚠️ این بلوک حین بازنویسیِ سرلوحه دوبار سهوا پاک شد — یک‌بار با
+   جایگزینیِ محدوده و یک‌بار با پاک‌سازیِ بلوکِ تکراریِ @supports.
+   ios.css را صفحه‌ی پروفایل هم بار می‌کند؛ بدون این، نوار چسبانِ
+   موبایلِ آن صفحه به شکلِ پیش از لایه‌ی iOS برمی‌گشت: گوشه‌ی تیز،
+   بردر بالا، و تاریِ ضعیف‌تر. خارج از محدوده‌ی این تسک بود.
+   ⚠️ اندازه‌گیری‌شده در مرورگر، نه فرض: شعاع ۲۲، بدون بردر بالا. */
+.tmp .tmp-sticky {
+  border-start-start-radius: 22px; border-start-end-radius: 22px;
+  border-block-start: 0;
+  background: rgb(255 255 255 / .86);
+  backdrop-filter: blur(24px) saturate(1.8);
+  box-shadow: 0 -6px 28px rgb(0 0 0 / .12);
+}
+@supports not (backdrop-filter: blur(1px)) {
+  .tmp .tmp-sticky { background: rgb(255 255 255 / .99); }
+}
 /* ═══════════════ ماژول جست‌وجو ═══════════════
-   ⚠️ قبلا هر فیلد جعبه‌ی جداگانه‌ای با بردرِ خودش داخل یک کارتِ
-   شیشه‌ای بود: سه لبه‌ی تودرتو. حالا **یک** جعبه بردر دارد و
-   فیلدها با یک موی‌خط از هم جدا می‌شوند — همان کاری که ماژول‌های
-   جست‌وجوی خدمات در محصولات جدی می‌کنند.
+   ⚠️ کارتِ سفیدِ بزرگ نیست و کارتِ شیشه‌ای هم نیست. یک نوارِ روشنِ
+   جمع‌وجور روی سرلوحه‌ی تیره: بیشترین کنتراست برای ورودی‌ها،
+   بدون لایه‌ی شیشه‌ای که پشتش چیزی برای تارکردن ندارد.
 
-   ⚠️ شیشه برداشته شد. پشت این ماژول زمینِ مات است؛ `backdrop-filter`
-   چیزی برای تارکردن ندارد و فقط یک لایه‌ی ترکیب روی GPU می‌سازد. */
+   ⚠️ **یک** سطح بردر دارد؛ فیلدها با موی‌خط جدا می‌شوند. جعبه در
+   جعبه همان چیزی است که ظاهر قالبِ آماده می‌سازد. */
 .tm .tm-search {
-  /* ⚠️ `grid-template-columns` و `align-items` باید صریح ریست شوند:
-     market.css در `@media (min-width: 640px)` سه ستون می‌دهد که برای
-     مارک‌آپ قدیمی (دو فیلد + دکمه) بود. حالا فرم دو فرزند دارد، پس
-     بین ۶۴۰ و ۷۶۰ جعبه‌ی فیلدها فشرده و دکمه پهن می‌شد و یک ستونِ
-     خالی هم می‌ماند. این قاعده (۰,۲,۰) در هر عرضی از آن سنگین‌تر است. */
+  /* ⚠️ ریستِ صریحِ گرید لازم است: market.css در `min-width: 640px`
+     سه ستون برای مارک‌آپِ قدیمی می‌داد و بین ۶۴۰ و ۷۶۰ فرم را
+     خراب می‌کرد. این قاعده (۰,۲,۰) از آن سنگین‌تر است. */
   display: grid; grid-template-columns: minmax(0, 1fr); align-items: stretch;
-  gap: 12px; padding: 0;
+  gap: 8px; padding: 0;
   background: none; border: 0; border-radius: 0; box-shadow: none;
   backdrop-filter: none;
 }
 .tm .tm-search-fields {
   display: grid; overflow: hidden;
+  /* ⚠️ بردرِ ۱۴٪ سفید این‌جا نامرئی بود: زمینه مات است و بردر
+     رویش ترکیب می‌شد. حلقه‌ی بیرونی با box-shadow کشیده می‌شود. */
   background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: 18px;
-  box-shadow: 0 1px 2px rgb(17 17 17 / .04), 0 14px 34px -18px rgb(17 17 17 / .22);
-  transition: border-color .18s, box-shadow .18s;
+  border: 0;
+  border-radius: var(--ios-r-md);
+  /* ⚠️ ۰٫۱۰ روی زمینِ #111114 عملا دیده نمی‌شد (اختلافِ ~۱٫۰۵:۱) */
+  box-shadow: 0 0 0 1px rgb(255 255 255 / .22), 0 14px 34px -18px rgb(0 0 0 / .55);
+  transition: box-shadow .2s;
 }
 .tm .tm-search-fields:focus-within {
-  border-color: var(--gold);
-  box-shadow: 0 1px 2px rgb(17 17 17 / .04), 0 14px 34px -18px rgb(154 110 56 / .34);
+  box-shadow: 0 0 0 2px rgb(199 166 106 / .55), 0 14px 34px -18px rgb(0 0 0 / .55);
 }
-/* ⚠️ اندازه‌گیری در مرورگر: ورودی‌ها ۳۲ پیکسل ارتفاع داشتند. ردیفِ
-   دربرگیرنده بلندتر بود ولی *هدفِ لمسی* خودِ عنصر است، نه ردیفش.
-   پدینگ ردیف کم و ارتفاع خودِ ورودی زیاد شد تا مجموع تغییر نکند. */
-.tm .tm-search .tm-field { gap: 2px; padding: 4px 16px 6px; }
-/* ⚠️ موی‌خطِ جداکننده منطقی است نه جهت‌دار: در ۵۶۰ به بالا فیلدها
-   کنار هم می‌نشینند و خط باید بچرخد، نه اینکه جایش عوض شود. */
+.tm .tm-search .tm-field { gap: 0; padding: 4px 16px; }
 .tm .tm-search .tm-field + .tm-field { border-block-start: 1px solid var(--line); }
 .tm .tm-search .tm-label {
-  color: var(--ink-3); font-size: 11px; font-weight: 700;
+  /* ⚠️ ۱۰٫۵ پیکسل زیر کفِ متادیتای پروژه (۱۲) بود */
+  color: var(--ink-3); font-size: 12px; font-weight: 700;
 }
-/* فیلدها بی‌بردرند: جعبه‌ی بیرونی خودش بردر است */
+/* فیلدها بی‌بردرند: سطحِ بیرونی خودش مرز است */
 .tm .tm-search .tm-input,
 .tm .tm-search .tm-citybtn {
   border: 0; background: transparent; box-shadow: none;
+  /* ⚠️ ۴۰ پیکسل اندازه‌گیری شد، زیر حداقلِ ۴۴ */
   min-block-size: 44px; padding-inline: 0;
-  font-size: 15px; border-radius: 0;
+  /* ⚠️ ۱۶ نه ۱۵: سافاریِ iOS زیر ۱۶ پیکسل هنگام فوکوس صفحه را زوم
+     می‌کند و کاربر با یک تپ از قابِ صفحه بیرون می‌افتد. مخاطبِ اصلی
+     این پروژه موبایل است. */
+  font-size: 16px; border-radius: 0; color: var(--ink);
 }
 .tm .tm-search .tm-citybtn.is-open { border-color: transparent; }
-/* ⚠️ حلقه‌ی فوکوس نباید داخلِ جعبه بریده شود؛ `overflow: hidden`
-   روی والد آن را می‌خورد، پس تورفته کشیده می‌شود. */
+/* ⚠️ حلقه‌ی فوکوس تورفته کشیده می‌شود چون والد `overflow: hidden` دارد */
 .tm .tm-search .tm-input:focus-visible,
 .tm .tm-search .tm-citybtn:focus-visible {
-  outline: 2px solid var(--gold-ink); outline-offset: -1px; border-radius: 8px;
+  outline: 2px solid var(--gold-ink); outline-offset: -2px; border-radius: 8px;
+}
+/* ⚠️ حلقه‌ی فوکوسِ دکمه روی زمینِ #111114 با طلاییِ تیره حدود ۳٫۴:۱
+   می‌شد. داخل سرلوحه طلاییِ روشن لازم است. */
+.tm .tm-hero .tm-btn:focus-visible {
+  outline: 2px solid var(--ios-tint); outline-offset: 3px;
 }
 .tm .tm-search .tm-btn {
   inline-size: 100%; min-block-size: 48px;
-  border-radius: var(--ios-r-md); font-size: 15px;
+  border-radius: var(--ios-r-sm); font-size: 15px;
 }
 @media (min-width: 560px) {
-  .tm .tm-search-fields { grid-template-columns: 1.4fr 1fr; }
+  .tm .tm-search-fields { grid-template-columns: 1.45fr 1fr; }
   .tm .tm-search .tm-field + .tm-field {
     border-block-start: 0; border-inline-start: 1px solid var(--line);
   }
@@ -578,21 +643,6 @@
   .tm .tm-search .tm-btn { inline-size: auto; padding-inline: 24px; }
 }
 
-.tmp .tmp-sticky {
-  border-start-start-radius: 22px; border-start-end-radius: 22px;
-  border-block-start: 0;
-  background: rgb(255 255 255 / .86);
-  backdrop-filter: blur(24px) saturate(1.8);
-  box-shadow: 0 -6px 28px rgb(0 0 0 / .12);
-}
-@supports not (backdrop-filter: blur(1px)) {
-  /* ⚠️ این‌جا قبلا `.tm .tm-search { background: rgb(30 30 34 / .96) }`
-     هم بود — بازمانده‌ی هیروی تیره. هم‌وزنِ قاعده‌ی تازه بود ولی
-     پایین‌ترِ فایل، پس برنده می‌شد: روی موتوری بدون backdrop-filter
-     ماژول جست‌وجو یک تخته‌ی تقریبا سیاه روی زمینِ روشن می‌شد و متنِ
-     ورودی (#111) سیاه‌روی‌سیاه. حذف شد. */
-  .tmp .tmp-sticky { background: rgb(255 255 255 / .99); }
-}
 
 /* اسکلتون: خاکستری سرد، هم‌رنگ بقیه صفحه */
 .tm .tm-skel-b { background: rgb(120 120 128 / .14); border-radius: 7px; }

@@ -176,6 +176,27 @@ export default function TechnicalServicesPage() {
     <div className="tm">
       {/* ═══════ ۱ — کشف خدمت ═══════ */}
       <section className="tm-hero">
+        {/* ⚠️ عکس **لایه‌ی زمینه** است، نه کارتی زیر فرم. نسخه‌ی قبلی
+            یک قاب ۲۲۴ پیکسلی زیر جست‌وجو می‌گذاشت که روی ۳۹۰ تنها
+            کارش پایین‌راندنِ محتوا بود.
+
+            ⚠️ انتخاب عکس — و دلیلِ ردِ بقیه: کلِ پروژه یک عکسِ واقعی
+            از کارِ فنی دارد و همین است (تعویض ماهوتِ میز). بقیه‌ی
+            نامزدها رندرِ CGI بودند؛ `HS/1` را امتحان کردم و با
+            بزرگ‌نمایی معلوم شد شماره‌گذاریِ توپ‌ها غلط است — توپِ
+            زردِ شماره ۶ (۶ سبز است)، آبی با ۸ روی آن، و عددِ توپِ
+            بنفشِ جلو مخدوش. جلوی چشمِ متخصص و بازیکنِ بیلیارد،
+            همان «ظاهرِ ساخته‌ی هوش مصنوعی» است که نباید.
+
+            ⚠️ فایل ۵۱۶×۳۸۷ است. برای قابِ مستقل کوچک بود، ولی برای
+            لایه‌ی زمینه‌ی محو زیر پوششِ تیره کافی است.
+
+            `alt` خالی چون تزئینی است؛ پیامِ صفحه در متن آمده. */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          className="tm-hero-bg" src="/images/services/repaire.jfif" alt=""
+          width={516} height={387} decoding="async" fetchPriority="high"
+        />
         <div className="tm-wrap tm-hero-in">
           <div>
             <p className="tm-eyebrow">خدمات فنی بیلیارد</p>
@@ -195,20 +216,6 @@ export default function TechnicalServicesPage() {
             />
           </div>
 
-          {/* ⚠️ عکس واقعی تعویض ماهوت میز — تنها عکس واقعی این
-              بخش در پروژه. عمدا بدون زیرنویس «متخصص ما»: تصویر
-              *نوع کار* را نشان می‌دهد، نه شخص مشخصی را، و نسبت‌دادنش
-              به یک متخصص ثبت‌شده ادعای دروغ می‌شد.
-              ⚠️ فایل ۵۱۶×۳۸۷ است؛ قاب عمدا بزرگ‌تر از این نمی‌شود تا
-              کشیده و نرم دیده نشود. */}
-          <figure className="tm-hero-media">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="/images/services/repaire.jfif"
-              alt="دو متخصص در حال تعویض ماهوت میز اسنوکر"
-              width={516} height={387} decoding="async" fetchPriority="high"
-            />
-          </figure>
         </div>
       </section>
 
