@@ -1,126 +1,261 @@
 /* ─────────────────────────────────────────────────────────────
-   پوسترِ سرلوحه — دو ترکیبِ متفاوت برای دو صفحه.
+   پوسترِ سرلوحه — دو صحنه‌ی متفاوت برای دو صفحه.
 
-   ── چرا ساخته شد ──
-   سرلوحه‌ی هر دو صفحه یک عکسِ تیره بود؛ مالک گفت جذاب نیست و
-   می‌خواهد هر صفحه پوسترِ خودش را داشته باشد.
+   ── چرا نسخه‌ی اول رد شد ──
+   مالک گفت «بچه‌گانه». درست بود: چند لکه‌ی نورِ تخت، یک خطِ مورب و
+   یک شبکه — همان چیزی که هر قالبِ آماده‌ای دارد. هیچ *جسمی* در
+   صحنه نبود، پس چیزی هم برای نگاه‌کردن نبود.
 
-   ── چرا SVG و CSS، نه کتابخانه‌ی سه‌بعدی ──
-   ⚠️ افزودن dependency بدون اجازه ممنوع است (CLAUDE.md)، و مخاطبِ
-   اصلی موبایلِ ایرانی است: شبکه‌ی کند و CPU ضعیف. یک بوم WebGL
-   برای زمینه‌ی یک سرلوحه، صدها کیلوبایت و یک حلقه‌ی رندرِ دائمی
-   می‌آورد که باتری می‌خورد.
+   ── چه چیزی عوض شد ──
+   حالا صحنه جسم دارد و اجسام حجم دارند. حجم از چهار چیز می‌آید که
+   هیچ‌کدام موتورِ سه‌بعدی لازم ندارند:
+     · نورِ اصلی از یک سو و پایانه‌ی سایه در سوی دیگر
+     · نورِ بازتابیِ ضعیف روی لبه‌ی تاریک (وگرنه کره تخت می‌شود)
+     · هایلایتِ آینه‌ای، کوچک و جابه‌جا از مرکز
+     · سایه‌ی تماس روی سطح — بدونش جسم شناور است، نه نشسته
 
-   پس عمق از چیزی می‌آید که واقعا رایگان است: چند لایه‌ی مستقل با
-   `translateZ` روی یک والدِ `perspective`، نورِ رادیال، و حرکتِ خیلی
-   کند فقط روی `transform`/`opacity` (هر دو روی GPU، بدون layout).
+   ── چرا باز هم SVG ──
+   ⚠️ افزودن dependency بدون اجازه ممنوع است، و مخاطبِ اصلی موبایلِ
+   ایرانی است: شبکه‌ی کند و CPU ضعیف. گرادیانِ SVG رایگان است و
+   بایتِ شبکه هم ندارد (درون‌خطی است)؛ WebGL هیچ‌کدام نیست.
 
-   ⚠️ هیچ‌کدام از این‌ها بایت شبکه ندارد: SVG درون‌خطی است و بخشی از
-   همان HTML که به‌هرحال می‌آید.
+   ⚠️ حرکت فقط روی `transform` و `opacity` است. هیچ فیلتری متحرک
+   نیست: انیمیشنِ فیلتر هر فریم دوباره رستر می‌کند و همان چیزی است
+   که گوشیِ ضعیف را می‌خواباند.
 
-   ⚠️ `prefers-reduced-motion` همه‌ی حرکت را خاموش می‌کند و ترکیب
-   ساکن هم کامل است — حرکت تزئین است، نه محتوا.
+   ⚠️ `prefers-reduced-motion` همه را می‌ایستاند و صحنه‌ی ساکن خودش
+   کامل است.
    ───────────────────────────────────────────────────────────── */
 
 export type HeroArtVariant = 'services' | 'profile'
 
-/**
- * زمینه‌ی تزئینی سرلوحه. `aria-hidden` است و هیچ معنایی حمل
- * نمی‌کند؛ پیامِ صفحه در متن آمده.
- */
 export function HeroArt({ variant }: { variant: HeroArtVariant }) {
   return (
     <div className={`tmha tmha--${variant}`} aria-hidden>
-      {/* نورهای محیطی — لایه‌ی دور */}
-      <span className="tmha-glow tmha-glow--1" />
-      <span className="tmha-glow tmha-glow--2" />
-
-      {/* لایه‌ی میانی: بافتِ ماهوت */}
-      <span className="tmha-weave" />
-
-      {variant === 'services' ? <ServicesArt /> : <ProfileArt />}
-
-      {/* براقیِ آرامِ روی همه — لایه‌ی نزدیک */}
+      {variant === 'services' ? <ServicesScene /> : <ProfileScene />}
+      {/* دانه‌ی ریز: همان چیزی که سطحِ دیجیتال را از «گرادیانِ تخت»
+          به «ماده» می‌برد. گرادیانِ بی‌دانه همیشه ارزان دیده می‌شود. */}
+      <span className="tmha-grain" />
       <span className="tmha-sheen" />
     </div>
   )
 }
 
-/* ── خدمات فنی: دقت و ابزار ──
-   کمانِ هم‌مرکز (میدانِ اندازه‌گیری) + خطِ چوب + دایره‌ی نوک. */
-function ServicesArt() {
+/* ═══════════════════════════════════════════════════════════
+   خدمات فنی — دقتِ ابزار
+   کره در کانون، نوکِ چوب که به آن نزدیک می‌شود، و یک لایه‌ی نازکِ
+   مدرج که «اندازه‌گیری» را می‌رساند.
+   ═══════════════════════════════════════════════════════════ */
+function ServicesScene() {
+  /* ⚠️ `xMin` نه `xMid`: قابِ موبایل باریک و بلند است و `slice`
+     وسطِ صحنه را نگه می‌دارد — یعنی دقیقا کره را از کادر بیرون
+     می‌انداخت و فقط زمینه‌ی خالی می‌ماند. با چسباندن به لبه‌ی
+     شروع، جسمِ اصلی همیشه در کادر است. روی دسکتاپ بی‌اثر است
+     چون آن‌جا برش عمودی است نه افقی. */
   return (
-    <svg className="tmha-svg" viewBox="0 0 800 500" preserveAspectRatio="xMidYMid slice">
+    <svg className="tmha-svg" viewBox="0 0 1200 600" preserveAspectRatio="xMinYMid slice">
       <defs>
-        <linearGradient id="haCue" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stopColor="#D9C79A" stopOpacity=".85" />
-          <stop offset="1" stopColor="#8A6224" stopOpacity=".25" />
+        <radialGradient id="svcGround" cx="76%" cy="8%" r="86%">
+          <stop offset="0" stopColor="#1B4A36" />
+          <stop offset=".42" stopColor="#11291F" />
+          <stop offset="1" stopColor="#0B0D0F" />
+        </radialGradient>
+
+        {/* کره: هایلایت بالا-چپ، پایانه، و تاریکیِ لبه */}
+        <radialGradient id="svcBall" cx="34%" cy="27%" r="78%">
+          <stop offset="0" stopColor="#7BF0B4" />
+          <stop offset=".22" stopColor="#2FBF77" />
+          <stop offset=".58" stopColor="#0E7A46" />
+          <stop offset=".86" stopColor="#04301C" />
+          <stop offset="1" stopColor="#02150E" />
+        </radialGradient>
+        {/* نورِ بازتابی روی لبه‌ی تاریک — بدونِ این، کره تخت است */}
+        <radialGradient id="svcRim" cx="72%" cy="82%" r="46%">
+          <stop offset="0" stopColor="#3FBE7C" stopOpacity=".55" />
+          <stop offset="1" stopColor="#3FBE7C" stopOpacity="0" />
+        </radialGradient>
+        <radialGradient id="svcSpec" cx="50%" cy="50%" r="50%">
+          <stop offset="0" stopColor="#FFFFFF" stopOpacity=".92" />
+          <stop offset=".55" stopColor="#FFFFFF" stopOpacity=".22" />
+          <stop offset="1" stopColor="#FFFFFF" stopOpacity="0" />
+        </radialGradient>
+
+        {/* فلز: نوارِ روشن در میانه، تیره در دو لبه — همان چیزی که
+            استوانه را استوانه نشان می‌دهد */}
+        <linearGradient id="svcFerrule" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#6B5B3A" />
+          <stop offset=".34" stopColor="#F2E4C4" />
+          <stop offset=".62" stopColor="#C9AE79" />
+          <stop offset="1" stopColor="#4A3D26" />
         </linearGradient>
-        <radialGradient id="haTip">
-          <stop offset="0" stopColor="#9CF0BE" stopOpacity="1" />
+        <linearGradient id="svcShaft" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#3A3025" />
+          <stop offset=".36" stopColor="#B99A66" />
+          <stop offset=".70" stopColor="#7A6440" />
+          <stop offset="1" stopColor="#2A241B" />
+        </linearGradient>
+
+        {/* ⚠️ فیلترِ محوِ هاله برداشته شد: همان نتیجه با گرادیانِ
+            رادیال به‌دست می‌آید و رستر نمی‌خواهد. روی گوشیِ ضعیف،
+            محوِ تمام‌قاب گران‌ترین کارِ این صحنه بود. */}
+        <radialGradient id="svcHalo">
+          <stop offset="0" stopColor="#128A4B" stopOpacity=".46" />
+          <stop offset=".55" stopColor="#128A4B" stopOpacity=".20" />
           <stop offset="1" stopColor="#128A4B" stopOpacity="0" />
         </radialGradient>
+        <filter id="svcContact" x="-60%" y="-160%" width="220%" height="420%">
+          <feGaussianBlur stdDeviation="17" />
+        </filter>
       </defs>
 
-      {/* کمان‌های هم‌مرکز — «تراز و اندازه» */}
-      <g className="tmha-rings" fill="none" stroke="#7FE0A6" strokeOpacity=".34">
-        <circle cx="640" cy="150" r="90" />
-        <circle cx="640" cy="150" r="140" strokeOpacity=".24" />
-        <circle cx="640" cy="150" r="196" strokeOpacity=".15" />
+      <rect width="1200" height="600" fill="url(#svcGround)" />
+
+      {/* ⚠️ کلِ صحنه آینه می‌شود. علتش ترکیب است نه سلیقه: پرده‌ی
+          دسکتاپ سمتِ راست (سمتِ متن) مات است و سمتِ چپ باز. صحنه‌ی
+          اولیه کره را سمتِ راست گذاشته بود، یعنی بهترین جسمِ صحنه
+          زیرِ مات‌ترین بخش پنهان می‌شد و سمتِ باز فقط شفتِ خالی
+          داشت. با آینه، برخوردِ نوکِ چوب و کره در نور می‌افتد. */}
+      <g transform="translate(1200,0) scale(-1,1)">
+
+      <ellipse className="tmha-halo" cx="880" cy="250" rx="300" ry="255" fill="url(#svcHalo)" />
+
+      {/* لایه‌ی مدرج */}
+      <g className="tmha-rings" fill="none" stroke="#8FE3B4">
+        <circle cx="880" cy="278" r="196" strokeOpacity=".20" />
+        <circle cx="880" cy="278" r="258" strokeOpacity=".11" />
+        <g strokeOpacity=".26" strokeWidth="1.5">
+          {Array.from({ length: 24 }, (_, i) => {
+            const a = (i / 24) * Math.PI * 2
+            const r2 = i % 6 === 0 ? 176 : 187
+            return (
+              <line key={i}
+                x1={(880 + Math.cos(a) * 196).toFixed(1)}
+                y1={(278 + Math.sin(a) * 196).toFixed(1)}
+                x2={(880 + Math.cos(a) * r2).toFixed(1)}
+                y2={(278 + Math.sin(a) * r2).toFixed(1)} />
+            )
+          })}
+        </g>
       </g>
 
-      {/* شبکه‌ی ظریفِ نقشه‌کشی */}
-      <g stroke="#FFFFFF" strokeOpacity=".085">
-        {Array.from({ length: 9 }, (_, i) => (
-          <line key={i} x1={i * 100} y1="0" x2={i * 100} y2="500" />
-        ))}
-        {Array.from({ length: 6 }, (_, i) => (
-          <line key={i} x1="0" y1={i * 100} x2="800" y2={i * 100} />
-        ))}
+      <ellipse cx="872" cy="436" rx="132" ry="26" fill="#000" opacity=".55" filter="url(#svcContact)" />
+
+      {/* چوب: شفت، فرول، تیپ */}
+      {/* ⚠️ یک چرخش روی *والد*، نه سه چرخش جدا. نسخه‌ی قبلی هر تکه
+          را حول مرکزِ خودش می‌چرخاند، پس سه قطعه از هم جدا می‌شدند:
+          انتهای شفت روی (۶۷۲،۲۹۲) می‌افتاد و فرول روی (۶۶۵،۳۶۶) —
+          ۷۴ واحد فاصله. در تصویر یک میله‌ی معلق دیده می‌شد و یک
+          قرصِ روشنِ بی‌ربط کنارش. */}
+      <g className="tmha-cue" transform="rotate(-13 690 360)">
+        <rect x="60" y="351" width="606" height="19" rx="9.5" fill="url(#svcShaft)" />
+        <rect x="664" y="347" width="52" height="27" rx="8" fill="url(#svcFerrule)" />
+        <path d="M716 347h11a13.5 13.5 0 0 1 0 27h-11z" fill="#D9CBB0" opacity=".92" />
       </g>
 
-      {/* خطِ چوب */}
-      <g>
-        <line x1="90" y1="430" x2="660" y2="118" stroke="url(#haCue)" strokeWidth="9" strokeLinecap="round" />
-        <line x1="90" y1="430" x2="660" y2="118" stroke="#FFFFFF" strokeOpacity=".24" strokeWidth="1.8" strokeLinecap="round" />
+      <g className="tmha-ball">
+        <circle cx="880" cy="278" r="128" fill="url(#svcBall)" />
+        <circle cx="880" cy="278" r="128" fill="url(#svcRim)" />
+        <ellipse cx="836" cy="228" rx="42" ry="30" fill="url(#svcSpec)"
+          transform="rotate(-24 836 228)" />
+        <ellipse cx="932" cy="342" rx="20" ry="9" fill="#8FE3B4" opacity=".22" />
       </g>
-
-      {/* نوکِ چوب — تنها نقطه‌ی رنگیِ صحنه */}
-      <circle className="tmha-tip" cx="668" cy="114" r="58" fill="url(#haTip)" />
+      </g>
     </svg>
   )
 }
 
-/* ── پروفایل متخصص: میدانِ ماهوت ──
-   ترکیبِ عمدا متفاوت: نه کمان و نه چوب، بلکه یک میدانِ سبزِ کم‌عمق
-   با نوارِ نورِ مورب — تا دو صفحه از هم تشخیص داده شوند. */
-function ProfileArt() {
+/* ═══════════════════════════════════════════════════════════
+   پروفایل متخصص — سطحِ کار
+   ⚠️ عمدا صحنه‌ی دیگری: نور از چپ می‌آید نه راست، افق پایین‌تر
+   است، و به‌جای یک کره دو توپ با عمقِ میدان می‌آید. دو صفحه باید
+   با یک نگاه از هم تشخیص داده شوند.
+   ═══════════════════════════════════════════════════════════ */
+function ProfileScene() {
+  /* ⚠️ سربرگِ پروفایل یک **نوارِ پهن و کوتاه** است (روی ۱۴۴۰ حدود
+     ۱۷۰ پیکسل). صحنه‌ی اولِ این‌جا برای قابِ بلند ساخته شده بود، پس
+     `slice` فقط بالای توپ را نگه می‌داشت و بقیه لکه‌ی محو می‌شد.
+     نسبتِ viewBox به همان نوار نزدیک شد و اجسام کوچک‌تر و روی یک
+     خط نشستند.
+
+     ⚠️ و عمدا صحنه‌ی دیگری است: نور از چپ، پالتِ گرم (برنجی) به‌جای
+     سبزِ اشباع، و دو جسم به‌جای یک کره — دو صفحه باید با یک نگاه
+     از هم تشخیص داده شوند. */
   return (
-    <svg className="tmha-svg" viewBox="0 0 800 400" preserveAspectRatio="xMidYMid slice">
+    <svg className="tmha-svg" viewBox="0 0 1200 300" preserveAspectRatio="xMinYMid slice">
       <defs>
-        <linearGradient id="haBar" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0" stopColor="#128A4B" stopOpacity="0" />
-          <stop offset=".45" stopColor="#3FBE7C" stopOpacity=".50" />
-          <stop offset="1" stopColor="#128A4B" stopOpacity="0" />
+        <linearGradient id="prfGround" x1="0" y1="0" x2=".4" y2="1">
+          <stop offset="0" stopColor="#17392B" />
+          <stop offset=".55" stopColor="#0D1F17" />
+          <stop offset="1" stopColor="#090B0C" />
         </linearGradient>
-        <radialGradient id="haPocket">
-          <stop offset=".55" stopColor="#000000" stopOpacity=".55" />
-          <stop offset="1" stopColor="#000000" stopOpacity="0" />
+        <linearGradient id="prfRake" x1="0" y1="0" x2="1" y2=".5">
+          <stop offset="0" stopColor="#4FD394" stopOpacity="0" />
+          <stop offset=".28" stopColor="#4FD394" stopOpacity=".24" />
+          <stop offset=".58" stopColor="#4FD394" stopOpacity=".07" />
+          <stop offset="1" stopColor="#4FD394" stopOpacity="0" />
+        </linearGradient>
+
+        {/* برنجی — گرمِ عمدی، در برابر سبزِ صفحه‌ی خدمات */}
+        <radialGradient id="prfBallA" cx="32%" cy="26%" r="78%">
+          <stop offset="0" stopColor="#FFF3D2" />
+          <stop offset=".24" stopColor="#E8CD8E" />
+          <stop offset=".62" stopColor="#9C7838" />
+          <stop offset=".88" stopColor="#3E2F18" />
+          <stop offset="1" stopColor="#1C150B" />
         </radialGradient>
+        <radialGradient id="prfRim" cx="74%" cy="80%" r="46%">
+          <stop offset="0" stopColor="#E8CD8E" stopOpacity=".42" />
+          <stop offset="1" stopColor="#E8CD8E" stopOpacity="0" />
+        </radialGradient>
+        <radialGradient id="prfBallB" cx="32%" cy="26%" r="78%">
+          <stop offset="0" stopColor="#D6EDE0" />
+          <stop offset=".28" stopColor="#63AE8E" />
+          <stop offset=".66" stopColor="#1F5A41" />
+          <stop offset="1" stopColor="#0A1D16" />
+        </radialGradient>
+        <radialGradient id="prfSpec" cx="50%" cy="50%" r="50%">
+          <stop offset="0" stopColor="#FFFFFF" stopOpacity=".9" />
+          <stop offset=".5" stopColor="#FFFFFF" stopOpacity=".16" />
+          <stop offset="1" stopColor="#FFFFFF" stopOpacity="0" />
+        </radialGradient>
+
+        <radialGradient id="prfHalo">
+          <stop offset="0" stopColor="#12A167" stopOpacity=".34" />
+          <stop offset=".55" stopColor="#12A167" stopOpacity=".15" />
+          <stop offset="1" stopColor="#12A167" stopOpacity="0" />
+        </radialGradient>
+        {/* عمقِ میدان: جسمِ دورتر نرم‌تر است */}
+        <filter id="prfFar" x="-30%" y="-30%" width="160%" height="160%">
+          <feGaussianBlur stdDeviation="3.2" />
+        </filter>
+        <filter id="prfContact" x="-70%" y="-260%" width="240%" height="620%">
+          <feGaussianBlur stdDeviation="9" />
+        </filter>
       </defs>
 
-      {/* نوارهای نورِ مورب */}
-      <g className="tmha-bars">
-        <rect x="-120" y="40" width="1040" height="54" fill="url(#haBar)" transform="rotate(-14 400 200)" />
-        <rect x="-120" y="210" width="1040" height="30" fill="url(#haBar)" opacity=".6" transform="rotate(-14 400 200)" />
+      <rect width="1200" height="300" fill="url(#prfGround)" />
+      <rect className="tmha-rake" width="1200" height="300" fill="url(#prfRake)" />
+
+      <ellipse className="tmha-halo" cx="180" cy="96" rx="270" ry="180" fill="url(#prfHalo)" />
+
+      {/* خطِ باند — افقِ صحنه */}
+      <path d="M0 228h1200" stroke="#FFFFFF" strokeOpacity=".06" strokeWidth="2" />
+
+      {/* جسمِ دور */}
+      <g filter="url(#prfFar)" opacity=".8">
+        <ellipse cx="352" cy="230" rx="38" ry="8" fill="#000" opacity=".5" />
+        <circle cx="356" cy="198" r="34" fill="url(#prfBallB)" />
+        <ellipse cx="345" cy="185" rx="10" ry="7" fill="url(#prfSpec)" transform="rotate(-22 345 185)" />
       </g>
 
-      {/* گوشه‌ی میز — عمقِ ملایم */}
-      <circle cx="86" cy="330" r="120" fill="url(#haPocket)" />
-      <circle cx="724" cy="74" r="150" fill="url(#haPocket)" opacity=".7" />
-
-      {/* خطِ باند */}
-      <line x1="0" y1="318" x2="800" y2="264" stroke="#FFFFFF" strokeOpacity=".14" strokeWidth="2" />
+      {/* جسمِ نزدیک */}
+      <g className="tmha-ball">
+        <ellipse cx="170" cy="231" rx="66" ry="12" fill="#000" opacity=".55" filter="url(#prfContact)" />
+        <circle cx="176" cy="166" r="64" fill="url(#prfBallA)" />
+        <circle cx="176" cy="166" r="64" fill="url(#prfRim)" />
+        <ellipse cx="154" cy="141" rx="20" ry="14" fill="url(#prfSpec)" transform="rotate(-24 154 141)" />
+        <ellipse cx="204" cy="200" rx="11" ry="5" fill="#FFE9B8" opacity=".22" />
+      </g>
     </svg>
   )
 }

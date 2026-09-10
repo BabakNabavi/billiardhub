@@ -399,17 +399,20 @@
    صفحه می‌گرفت و تنظیمِ پرده‌ی خوانایی را هم به هم می‌زد. */
 .tmp .tmp-head-in { position: relative; z-index: 1; }
 .tmp .tmp-crumb,
-.tmp .tmp-crumb a { color: rgb(255 255 255 / .56); }
+.tmp .tmp-crumb a { color: rgb(255 255 255 / .82); }
 .tmp .tmp-crumb a:hover { color: #fff; }
-.tmp .tmp-crumb li + li::before { color: rgb(255 255 255 / .32); }
+.tmp .tmp-crumb li + li::before { color: rgb(255 255 255 / .50); }
 .tmp .tmp-name { color: #fff; letter-spacing: -0.02em; }
 /* ⚠️ فقط داخلِ سربرگِ تیره. این قاعده به کلِ `.tmp` می‌داد و
    `.tmp-panel` (کارتِ سفیدِ چسبانِ دسکتاپ) هم همان نقش را دارد —
    یعنی متنِ سفید روی زمینه‌ی سفید. اندازه‌گیری‌شده: کنتراست ۱٫۰۰
    روی ۱۴۴۰، یعنی عملا نامرئی. از پیش از این تغییرات هم همین‌طور
    بود؛ سنجشِ همه‌ی عناصر پیدایش کرد. */
-.tmp .tmp-head .tmp-role { color: rgb(255 255 255 / .70); }
-.tmp .tmp-facts { color: rgb(255 255 255 / .62); }
+/* ⚠️ روی پوستر، خاکستری‌های کم‌رنگ دیگر کافی نیستند: با روشِ
+   پیکسلی، نقش ۲٫۶۸ و متادیتا ۲٫۵۱ و مسیر ۱٫۱۲ اندازه‌گیری شدند.
+   روی زمینِ تختِ قبلی همین رنگ‌ها ۷ تا ۹ می‌دادند. */
+.tmp .tmp-head .tmp-role { color: rgb(255 255 255 / .88); }
+.tmp .tmp-facts { color: rgb(255 255 255 / .86); }
 /* ⚠️ نشان‌های رنگی برای کارتِ روشن ساخته شده بودند: متنِ سیر روی
    تینتِ ۱۲٪ که خودش روی سربرگِ تیره می‌نشیند یعنی تیره روی تیره.
    روی این سطح، تینت پررنگ‌تر و رنگِ آیکون روشن می‌شود. */
@@ -463,8 +466,65 @@
 .tmp .tmp-more { color: var(--ios-tint-ink); font-weight: 700; }
 
 /* ردیف خدمت: ردیف تنظیمات — جداکننده مویی با تورفتگی */
-.tmp .tmp-svc-row { border-block-start: 1px solid var(--ios-sep); }
-.tmp .tmp-svc-row:first-child { border-block-start: 0; }
+/* ═══════════════ ردیف‌های کپسولی ═══════════════
+   ⚠️ خط‌کشیِ بینِ ردیف‌ها جای خود را به کپسولِ مستقل داد: هر ردیف
+   یک شیء است، نه سطری از یک جدول. کاشیِ تیره‌ی آیکون در ابتدای
+   ردیف، عنوان وسط، و کنش در انتها.
+
+   ⚠️ گوشه کاملا قرصی نیست (۱۸ نه ۹۹۹): ردیفِ دوخطی — عنوان به
+   علاوه‌ی توضیح — با قرصِ کامل بیضی می‌شود. */
+.tmp .tmp-svc > li + li { border-block-start: 0; }
+.tmp .tmp-svc > li { margin-block-end: 8px; }
+.tmp .tmp-svc > li:last-child { margin-block-end: 0; }
+.tmp .tmp-svc-row {
+  border-block-start: 0;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 12px; padding: 8px 12px;
+  background: var(--ios-surface-2);
+  border: 1px solid var(--ios-sep);
+  border-radius: 18px;
+  transition: border-color .18s, background .18s;
+}
+@media (hover: hover) {
+  .tmp .tmp-svc-row:hover { border-color: rgb(var(--sn) / .34); background: var(--ios-surface); }
+}
+/* کاشیِ آیکون */
+.tmp .tmp-svc-ic {
+  display: grid; place-items: center; flex-shrink: 0;
+  inline-size: 42px; block-size: 42px; border-radius: 13px;
+  background: #17181B; color: #EBE6DC;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / .10), 0 4px 12px rgb(0 0 0 / .16);
+}
+.tmp .tmp-svc-ic svg { inline-size: 21px; block-size: 21px; }
+.tmp .tmp-svc-t { font-size: 14px; font-weight: 700; }
+
+/* ── «درباره متخصص»: همان زبانِ کپسولی ── */
+.tmp .tmp-facts-grid { gap: 8px; color: var(--ios-label-2); }
+@media (min-width: 640px) { .tmp .tmp-facts-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.tmp .tmp-facts-grid > div {
+  /* نشان یک ستون و دو ردیف را می‌گیرد؛ عنوان و مقدار ردیف‌های خودشان */
+  display: grid; grid-template-columns: auto minmax(0, 1fr);
+  grid-template-rows: auto auto; align-items: center;
+  column-gap: 12px; row-gap: 1px;
+  padding: 8px 12px;
+  background: var(--ios-surface-2);
+  border: 1px solid var(--ios-sep);
+  border-radius: 18px;
+}
+.tmp .tmp-fact-ic {
+  grid-row: 1 / -1;
+  display: grid; place-items: center; flex-shrink: 0;
+  inline-size: 38px; block-size: 38px; border-radius: 12px;
+  background: rgb(var(--sn) / .12); color: var(--sn-ink);
+  border: 1px solid rgb(var(--sn) / .22);
+}
+.tmp .tmp-facts-grid dt { font-size: 12px; color: var(--ios-label-2); }
+.tmp .tmp-facts-grid dd { margin: 0; font-size: 14px; font-weight: 700; color: var(--ios-label); }
+/* متنِ معرفی هم یک کپسول است، نه پاراگرافِ رها */
+.tmp .tmp-card .tmp-prose {
+  padding: 12px 14px; border-radius: 18px;
+  background: var(--ios-surface-2); border: 1px solid var(--ios-sep);
+}
 .tmp .tmp-svc-cat { color: var(--ios-tint-ink); font-weight: 700; }
 .tmp .tmp-svc-d { color: var(--ios-label-2); }
 
@@ -478,7 +538,6 @@
   border-radius: var(--ios-r-lg); box-shadow: var(--ios-shadow);
 }
 .tmp .tmp-panel-note { color: var(--ios-label-2); }
-.tmp .tmp-facts-grid { color: var(--ios-label-2); }
 
 /* ═══════════════ ریز‌جزئیات مشترک ═══════════════ */
 .tm .tm-sec-head,
@@ -743,8 +802,18 @@
    نزدیک‌ترین والدِ موقعیت‌دار می‌چسبد و از قاب بیرون می‌زند. */
 .tm .tm-hero > *:not(.tmha), .tmp .tmp-head > *:not(.tmha) { position: relative; z-index: 1; }
 /* پرده‌ی خوانایی برای هر صفحه جدا — با اندازه‌گیری تنظیم می‌شود */
-.tm .tm-hero .tmha { --tmha-veil: linear-gradient(180deg, rgb(17 17 20 / .60) 0%, rgb(17 17 20 / .44) 42%, rgb(17 17 20 / .84) 100%); }
+.tm .tm-hero .tmha { --tmha-veil: linear-gradient(180deg, rgb(11 13 15 / .78) 0%, rgb(11 13 15 / .70) 45%, rgb(11 13 15 / .90) 100%); }
 @media (min-width: 900px) {
-  .tm .tm-hero .tmha { --tmha-veil: linear-gradient(to left, rgb(17 17 20 / .90) 0%, rgb(17 17 20 / .74) 38%, rgb(17 17 20 / .34) 72%, rgb(17 17 20 / .14) 100%); }
+  .tm .tm-hero .tmha { --tmha-veil: linear-gradient(to left, rgb(11 13 15 / .90) 0%, rgb(11 13 15 / .72) 38%, rgb(11 13 15 / .28) 72%, rgb(11 13 15 / .10) 100%); }
 }
-.tmp .tmp-head .tmha { --tmha-veil: linear-gradient(180deg, rgb(17 17 20 / .62) 0%, rgb(17 17 20 / .48) 50%, rgb(17 17 20 / .82) 100%); }
+/* ⚠️ روی موبایل عمودی می‌ماند، ولی از ۹۰۰ به بالا افقی می‌شود —
+   همان کاری که سرلوحه‌ی خدمات می‌کند و به همان دلیل: محتوای این
+   سربرگ (مسیر، نام، متادیتا) سمتِ شروع است و اجسامِ صحنه سمتِ
+   پایان. با پرده‌ی عمودی، لینک‌های مسیر روی بخشِ روشنِ صحنه
+   می‌افتادند — کنتراستِ اندازه‌گیری‌شده ۱٫۱۲:۱، یعنی نامرئی.
+   ⚠️ این را روشِ پیکسلی پیدا کرد؛ سنجشِ مبتنی بر background-color
+   عددِ ۵٫۲۸ می‌داد چون اصلا پیکسل‌های پوستر را نمی‌بیند. */
+.tmp .tmp-head .tmha { --tmha-veil: linear-gradient(180deg, rgb(11 13 15 / .62) 0%, rgb(11 13 15 / .48) 50%, rgb(11 13 15 / .84) 100%); }
+@media (min-width: 900px) {
+  .tmp .tmp-head .tmha { --tmha-veil: linear-gradient(to left, rgb(11 13 15 / .92) 0%, rgb(11 13 15 / .80) 42%, rgb(11 13 15 / .34) 76%, rgb(11 13 15 / .14) 100%); }
+}
