@@ -110,23 +110,6 @@
    عکس باید خوانا باشد، نه فقط جایی که تیره افتاده. */
 .tm .tm-hero-in { position: relative; z-index: 2; padding-block: 32px 48px; gap: 0; }
 
-/* ── برچسب بخش ──
-   ⚠️ چیپِ پرشده نیست: یک خطِ طلاییِ کوتاه کنار متن، همان نقش را
-   با کسری از وزنِ بصری بازی می‌کند و کارت‌سازیِ بی‌مورد نمی‌آورد. */
-.tm .tm-eyebrow {
-  display: flex; align-items: center; gap: 8px;
-  margin: 0 0 16px; padding: 0; border: 0; border-radius: 0; background: none;
-  color: rgb(214 186 134 / .96);
-  /* کفِ متادیتای پروژه ۱۲ است؛ ۱۱٫۵ زیرش بود */
-  font-size: 12px; font-weight: 700; line-height: 1;
-}
-.tm .tm-eyebrow::after {
-  content: ''; flex: 0 0 24px; block-size: 2px; border-radius: 2px;
-  /* گرادیان کلیدواژه‌ی منطقی ندارد؛ «to left» یعنی دور از متن و
-     این صفحه همیشه RTL است. */
-  background: linear-gradient(to left, var(--gold), transparent);
-}
-
 /* ── تیتر ──
    ⚠️ عرض با `ch` بسته می‌شود نه با `<br>`: شکستِ دستی روی ۳۹۰ و
    ۴۳۰ دو نتیجه می‌دهد و یکی‌شان همیشه بد است.
@@ -460,7 +443,22 @@
   box-shadow: var(--ios-shadow);
 }
 /* تیترهای کارت پروفایل h2اند، نه .tmp-h */
-.tmp .tmp-card > h2 { letter-spacing: -0.01em; }
+/* ⚠️ «خدمات»، «تعمیرات چوب»، «تعمیرات میز» و «سایر خدمات» مثل
+   پانویس دیده می‌شدند: عنوانِ بخش ۱۷ پیکسل و عنوانِ دسته ۱۲
+   پیکسلِ کم‌رنگ بود — از متنِ خودِ ردیف‌ها کوچک‌تر. حالا هم
+   بزرگ‌ترند، هم نشانه‌ی بصریِ خودشان را دارند. */
+.tmp .tmp-card > h2,
+.tmp .tmp-card .ch-sec-head > h2 {
+  font-size: 20px; font-weight: 800; letter-spacing: -0.02em;
+  display: flex; align-items: center; gap: 12px;
+  color: var(--ios-label);
+}
+/* میله‌ی سبزِ کوتاه — همان زبانی که عنوان‌های صفحه‌ی باشگاه دارند */
+.tmp .tmp-card > h2::before,
+.tmp .tmp-card .ch-sec-head > h2::before {
+  content: ''; flex: 0 0 4px; block-size: 24px; border-radius: 3px;
+  background: linear-gradient(180deg, rgb(var(--sn)), rgb(var(--sn) / .45));
+}
 .tmp .tmp-prose { color: rgb(60 60 67 / .78); }
 .tmp .tmp-none { color: var(--ios-label-2); }
 .tmp .tmp-more { color: var(--ios-tint-ink); font-weight: 700; }
@@ -525,7 +523,25 @@
   padding: 12px 14px; border-radius: 18px;
   background: var(--ios-surface-2); border: 1px solid var(--ios-sep);
 }
-.tmp .tmp-svc-cat { color: var(--ios-tint-ink); font-weight: 700; }
+/* عنوانِ دسته: پررنگ‌تر، بزرگ‌تر، و با نقطه‌ی سبزِ کوچک تا از
+   ردیف‌های زیرش تفکیک شود ولی با عنوانِ بخش هم اشتباه نگیرد. */
+.tmp .tmp-svc-cat {
+  display: flex; align-items: center; gap: 8px;
+  margin-block: 4px 12px;
+  font-size: 15px; font-weight: 800; letter-spacing: -0.01em;
+  color: var(--sn-ink);
+}
+.tmp .tmp-svc-cat::before {
+  content: ''; flex: 0 0 8px; block-size: 8px; border-radius: 50%;
+  background: rgb(var(--sn));
+  box-shadow: 0 0 0 3px rgb(var(--sn) / .16);
+}
+/* ⚠️ `:first-child` **هر** دسته را می‌گرفت نه اولی را: هر دسته
+   داخل `<div>`ِ خودش است و اولین فرزندِ همان div. یعنی فاصله‌ی ۲۰
+   پیکسلی هیچ‌وقت اعمال نمی‌شد و «تعمیرات میز» چسبیده به فهرستِ
+   قبلی می‌ماند — دقیقا برعکسِ چیزی که خواسته شده بود. */
+.tmp .tmp-card > div + div > .tmp-svc-cat { margin-block-start: 24px; }
+.tmp .tmp-card .ch-sec-head { align-items: center; }
 .tmp .tmp-svc-d { color: var(--ios-label-2); }
 
 .tmp .tmp-work { border-radius: var(--ios-r-md); overflow: hidden; background: var(--ios-fill-2); }
@@ -813,7 +829,7 @@
    می‌افتادند — کنتراستِ اندازه‌گیری‌شده ۱٫۱۲:۱، یعنی نامرئی.
    ⚠️ این را روشِ پیکسلی پیدا کرد؛ سنجشِ مبتنی بر background-color
    عددِ ۵٫۲۸ می‌داد چون اصلا پیکسل‌های پوستر را نمی‌بیند. */
-.tmp .tmp-head .tmha { --tmha-veil: linear-gradient(180deg, rgb(11 13 15 / .62) 0%, rgb(11 13 15 / .48) 50%, rgb(11 13 15 / .84) 100%); }
-@media (min-width: 900px) {
+.tmp .tmp-head .tmha { --tmha-veil: linear-gradient(180deg, rgb(11 13 15 / .62) 0%, rgb(11 13 15 / .52) 50%, rgb(11 13 15 / .84) 100%); }
+@media (min-width: 768px) {
   .tmp .tmp-head .tmha { --tmha-veil: linear-gradient(to left, rgb(11 13 15 / .92) 0%, rgb(11 13 15 / .80) 42%, rgb(11 13 15 / .34) 76%, rgb(11 13 15 / .14) 100%); }
 }
