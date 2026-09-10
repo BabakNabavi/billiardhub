@@ -23,6 +23,7 @@
 import { useChannelPublish, type PublishVideo } from '@/components/media/useChannelPublish'
 import { toFaDigits } from '@/lib/jalali'
 import { norm, keepLongest } from '@/lib/text-dedupe'
+import { telNumber, waLink } from '@/lib/phone-wa'
 import { resolveServices } from '@/lib/tech-services'
 import { useVideoEdit } from '@/components/media/useVideoEdit'
 import { detailTitle, type VideoDetail } from '@/lib/media/video-details'
@@ -37,13 +38,15 @@ import '@/components/profile/profile-page.css'
 import { TechnicianServices } from '@/components/tech/market/TechnicianServices'
 import '@/components/tech/market/market.css'
 import '@/components/tech/market/market-profile.css'
+import { HeroArt } from '@/components/tech/market/HeroArt'
+import '@/components/tech/market/hero-art.css'
 import '@/components/tech/market/ios.css'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 /* ⚠️ آیکون تزئینی نداریم: هر آیکونی که این‌جا می‌ماند یا ناوبری
    است یا کنش. `MapPin` و `Clock` با بازطراحی حذف شدند — شهر و
    ساعت، *متن*اند و آیکون چیزی به آن‌ها اضافه نمی‌کرد. */
-import { Wrench, Phone, MapPin, Home } from 'lucide-react'
+import { Wrench, Phone, MapPin, Home, ClipboardList } from 'lucide-react'
 import { getTechnician } from '../../../lib/technicians-data'
 import { useOwnerEdit } from '../../../lib/profiles/use-owner-edit'
 import { compressImage } from '../../../lib/seller-store'
@@ -395,8 +398,12 @@ export default function TechnicianProfilePage() {
 
   /* ⚠️ ردیف بدون شماره ممکن است؛ کنشی که کار خودش را نمی‌کند از
      نبودنش بدتر است. */
-  const phone = norm(tech.phone)
-  const wa = norm(tech.whatsapp)
+  /* ⚠️ شماره‌ها از `norm` (که فقط فاصله را جمع می‌کند) به
+     نرمال‌سازیِ واقعیِ شماره منتقل شدند. لینک واتساپ پیش‌تر مستقیم
+     از مقدارِ خام ساخته می‌شد، پس «@» یا فاصله یا نشانی wa.me که
+     کاربر پیست کرده بود داخل مسیر می‌رفت و پیام‌دادن کار نمی‌کرد.
+     نامعتبر ⟵ رشته‌ی خالی ⟵ دکمه اصلا ساخته نمی‌شود. */
+  const phone = telNumber(tech.phone)
   /* ⚠️ فقط نام خدمات *واقعی خودش*. هیچ کلمه‌ی تزئینی اضافه
      نمی‌شود — نوار محتواست، نه دکور.
      ⚠️ یکتا: یک عنوان می‌تواند در دو دسته تکرار شود و کلید تکراری
@@ -410,9 +417,13 @@ export default function TechnicianProfilePage() {
      ⚠️ سقف صریح حلقه: عنوان خالی در داده طول رشته را هرگز
      بالا نمی‌برد و رندر را قفل می‌کند. */
 
-  const waText = wa
-    ? `https://wa.me/${wa}?text=${encodeURIComponent(`سلام ${tech.name} عزیز، از طریق بیلیارد هاب با شما تماس می‌گیرم.`)}`
-    : ''
+  /* ⚠️ `whatsapp || phone` کافی نبود: ردیفِ قدیمی می‌تواند مقدارِ
+     *ناخالی ولی بی‌مصرف* داشته باشد («ندارم»، آی‌دی اینستاگرام،
+     شماره‌ی خارجی). آن‌وقت شرط برقرار بود، `waNumber` خالی
+     برمی‌گرداند و دکمه ناپدید می‌شد — با اینکه شماره‌ی موبایلِ
+     معتبر در فیلدِ تماس بود. */
+  const waMsg = `سلام ${tech.name} عزیز، از طریق بیلیارد هاب با شما تماس می‌گیرم.`
+  const waText = waLink(tech.whatsapp, waMsg) || waLink(tech.phone, waMsg)
 
   /* تب‌ها فقط لنگرند، نه روتر: محتوا کوتاه است و صفحه‌ی جدا برای
      هر تب یعنی سه رفت‌وبرگشت اضافه روی شبکه‌ی کند. */
@@ -434,6 +445,10 @@ export default function TechnicianProfilePage() {
 
       {/* ═══════ سربرگ پروفایل ═══════ */}
       <header className="tmp-head">
+        {/* ⚠️ پوسترِ این صفحه عمدا با صفحه‌ی خدمات فرق دارد: نور از
+            سمت مقابل می‌آید و ترکیبش میدانِ ماهوت است نه چوب و
+            کمان — تا دو صفحه از هم تشخیص داده شوند. */}
+        <HeroArt variant="profile" />
         <div className="tm-wrap tmp-head-in">
           <nav aria-label="مسیر">
             <ol className="tmp-crumb">
@@ -457,11 +472,22 @@ export default function TechnicianProfilePage() {
                 {tech.verified && <VerifiedBadge title="متخصص تأیید شده" />}
               </h1>
               {lede && <p className="tmp-role">{lede}</p>}
+              {/* ⚠️ آیکون‌ها داخل نشانِ رنگی می‌روند — همان زبانی که
+                  کارت متخصص در دایرکتوری دارد. پیش‌تر خطی و هم‌رنگِ
+                  متنِ کم‌رنگِ سربرگ بودند و عملا دیده نمی‌شدند. */}
               <p className="tmp-facts">
-                {city && <span><MapPin size={13} aria-hidden />{city}</span>}
-                {tech.onsite && <span><Home size={13} aria-hidden />اعزام به محل</span>}
-                {tech.workshop && <span><Wrench size={13} aria-hidden />پذیرش در کارگاه</span>}
-                {svc.count > 0 && <span>{toFaDigits(String(svc.count))} خدمت ثبت‌شده</span>}
+                {city && (
+                  <span><i className="tm-ic tm-ic--city" aria-hidden><MapPin size={13} /></i>{city}</span>
+                )}
+                {tech.onsite && (
+                  <span><i className="tm-ic tm-ic--onsite" aria-hidden><Home size={13} /></i>اعزام به محل</span>
+                )}
+                {tech.workshop && (
+                  <span><i className="tm-ic tm-ic--shop" aria-hidden><Wrench size={13} /></i>پذیرش در کارگاه</span>
+                )}
+                {svc.count > 0 && (
+                  <span><i className="tm-ic tm-ic--star" aria-hidden><ClipboardList size={13} /></i>{toFaDigits(String(svc.count))} خدمت ثبت‌شده</span>
+                )}
               </p>
             </div>
 

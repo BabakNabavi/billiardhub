@@ -8,6 +8,11 @@ import { provinceOfCity } from './iran-geo'
 import { storedToTitles } from './tech-services'
 import { normalizeTechMedia, type Technician, type TechProject, type TechMedia, type TechVideo, type TechService } from './technicians-data'
 
+/** عنوان عمومیِ این نقش — ثابت است و فرم دیگر آن را نمی‌پرسد.
+ *  ⚠️ دو نسخه‌ی هاردکد بود («خدمات فنی» در پنل و «متخصص خدمات فنی»
+ *  این‌جا) و از هم افتاده بودند. */
+export const TECH_TITLE = 'خدمات فنی'
+
 export interface TechnicianProfile {
   slug: string
   ownerId: string
@@ -128,9 +133,11 @@ export function profileToTechnician(p: TechnicianProfile): Technician {
   const media = normalizeTechMedia(p)
   return {
     id: p.slug,
+    /* ⚠️ جانشینِ *نام* با جانشینِ *عنوان* یکی نیست — یک جایگزینیِ
+       سراسری این دو را قاطی کرده بود. */
     name: p.name || 'متخصص خدمات فنی',
     photo: p.photo || undefined,
-    title: p.title || 'متخصص خدمات فنی',
+    title: p.title || TECH_TITLE,
     city: p.city || '—',
     club: p.club || undefined,
     /* ⚠️ `?? []` و `?? ''` همان دلیل بالا را دارند: ردیف خام سرور

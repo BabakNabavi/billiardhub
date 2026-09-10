@@ -80,17 +80,12 @@ export default function PlayerDashboard() {
         if (res.state === 'error') return
         const remote = res.state === 'found' ? res.profile : null
         if (!remote) {
-          if (mine) {
-            const up = await saveProfileRemote('player', mine.slug, mine as unknown as Record<string, unknown>)
-            /* فقط نوشتن تأییدشده قفل می‌کند؛ وگرنه فیلد باز می‌ماند
-               تا کاربر بتواند نامک تکراری را اصلاح کند. */
-            if (up.ok && up.profile?.slug) setSavedSlug(up.profile.slug)
-            else { setSavedSlug(''); setErr(up.message ?? 'نشانی ثبت‌شده خوانده نشد — دوباره تلاش کنید') }
-          } else {
-            /* کاربر کاملا تازه: نه ردیف سرور، نه کش محلی.
-               صریح باز می‌شود تا نامکش را خودش انتخاب کند. */
-            setSavedSlug('')
-          }
+          /* ⚠️ این‌جا قبلا پروفایلِ محلی **بی‌اجازه روی سرور ذخیره
+             می‌شد** و بعد نشانیِ اختصاصی قفل می‌شد: کاربر پنل را
+             باز می‌کرد، هنوز چیزی تایید نکرده بود، و نامکِ خودکار
+             برایش ثبت و دائمی شده بود. تا وقتی خودش «ذخیره» را
+             نزند چیزی روی سرور نمی‌رود. */
+          setSavedSlug('')
           return
         }
         setSavedSlug(remote.slug)

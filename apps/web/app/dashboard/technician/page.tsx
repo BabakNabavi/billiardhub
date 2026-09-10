@@ -21,10 +21,12 @@ import { storedToIds, idsToStored, toServiceId, ALL_TECH_SERVICES } from '@/lib/
 import { ServicePicker } from '@/components/tech/ServicePicker'
 import {
   emptyTechnicianProfile, findTechnicianByOwner, newTechnicianSlug,
-  saveTechnicianProfile, type TechnicianProfile,
+  saveTechnicianProfile, TECH_TITLE, type TechnicianProfile,
   // (منبع حقیقت از این پس سرور است؛ این‌ها فقط کش محلی‌اند)
 } from '../../../lib/technician-store'
 import { fetchMyProfileResult, saveProfileRemote } from '../../../lib/profiles/client'
+import { telNumber } from '../../../lib/phone-wa'
+import { INVALID_MOBILE_MESSAGE } from '../../../lib/auth/phone'
 import VerificationBadges from '../../../components/VerificationBadges'
 import { Plus, Trash2, Images, Wrench, ArrowLeft, Check } from 'lucide-react'
 
@@ -64,7 +66,11 @@ export default function TechnicianDashboard() {
     if (user) {
       const mine = findTechnicianByOwner(user)
       const authName = [user.firstName, user.lastName].filter(Boolean).join(' ')
-      const base = mine ?? { ...emptyTechnicianProfile(newTechnicianSlug(), user.id, user.phone ?? ''), name: authName }
+      /* ⚠️ نام همیشه از حسابِ کاربری می‌آید، نه از ردیفِ پروفایل:
+         فیلدش قفل است و اگر ردیفِ قدیمی نامِ دیگری داشته باشد،
+         همان قفل با مقدارِ نامرتبط پر می‌شد. */
+      const base0 = mine ?? emptyTechnicianProfile(newTechnicianSlug(), user.id, user.phone ?? '')
+      const base = authName ? { ...base0, name: authName } : base0
       setForm(base)
       setAboutText(base.about.join('\n\n'))
 
@@ -75,16 +81,13 @@ export default function TechnicianDashboard() {
       if (res.state === 'error') return
       const remote = res.state === 'found' ? res.profile : null
         if (!remote) {
-          if (mine) {
-            const up = await saveProfileRemote('technician', mine.slug, mine as unknown as Record<string, unknown>)
-            /* فقط نوشتن تأییدشده قفل می‌کند. */
-            if (up.ok && up.profile?.slug) setSavedSlug(up.profile.slug)
-            else { setSavedSlug(''); setErr(up.message ?? 'نشانی ثبت‌شده خوانده نشد — دوباره تلاش کنید') }
-          } else {
-            /* کاربر کاملا تازه: نه ردیف سرور، نه کش محلی.
-               صریح باز می‌شود تا نامکش را خودش انتخاب کند. */
-            setSavedSlug('')
-          }
+          /* ⚠️ این‌جا قبلا پروفایلِ محلی **بی‌اجازه روی سرور ذخیره
+             می‌شد** و بعد نشانی قفل می‌شد. یعنی کاربر پنل را باز
+             می‌کرد، هنوز چیزی تایید نکرده بود، و نامکِ خودکار
+             (چیزی مثل `technician-7`) برایش ثبت و دائمی شده بود.
+             حالا تا وقتی خودش «ذخیره» را نزند چیزی روی سرور نمی‌رود
+             و فیلد نشانی باز می‌ماند. */
+          setSavedSlug('')
           return
         }
         setSavedSlug(remote.slug)
@@ -178,13 +181,24 @@ export default function TechnicianDashboard() {
   const submit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!form.name.trim())  { setErr('نام و نام‌خانوادگی لازم است.'); return }
-    if (!form.title.trim()) { setErr('عنوان تخصصی لازم است.'); return }
     if (!form.city)         { setErr('شهر را انتخاب کنید.'); return }
     if (!form.services.length) { setErr('حداقل یک نوع خدمات را انتخاب کنید.'); return }
     if (!form.phone.trim()) { setErr('شماره تماس لازم است.'); return }
+    /* ⚠️ بدون این، شماره‌ی خراب ذخیره می‌شد و صفحه‌ی عمومی بی‌صدا
+       هیچ دکمه‌ی تماسی نمی‌ساخت. */
+    const telOk = telNumber(form.phone)
+    if (!telOk) { setErr(INVALID_MOBILE_MESSAGE); return }
+    if (form.whatsapp.trim() && !telNumber(form.whatsapp)) {
+      setErr('شماره واتساپ معتبر نیست.'); return
+    }
 
     const profile = {
       ...form,
+      /* ⚠️ ثابت، نه ورودیِ کاربر — فیلدش از فرم برداشته شد */
+      title: TECH_TITLE,
+      /* شماره‌ها به شکل متعارف ذخیره می‌شوند، نه همان‌طور که تایپ شدند */
+      phone: telOk,
+      whatsapp: form.whatsapp.trim() ? telNumber(form.whatsapp) : '',
       ownerId: user?.id || form.ownerId,
       ownerPhone: user?.phone || form.ownerPhone,
       about: aboutText.split(/\n{2,}/).map(s => s.trim()).filter(Boolean),
@@ -275,13 +289,27 @@ export default function TechnicianDashboard() {
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
-                <label className="mb-1.5 block text-[12.5px] font-bold text-[#5B564B]">نام و نام‌خانوادگی *</label>
-                <input className={INPUT} value={form.name} onChange={e => set('name', e.target.value)} placeholder="مثال: مهدی کرمی" />
+                <label className="mb-1.5 block text-[12.5px] font-bold text-[#5B564B]" htmlFor="tech-name">نام و نام‌خانوادگی</label>
+                {/* ⚠️ قفل: نام از حسابِ کاربری می‌آید. اگر این‌جا
+                    قابل تایپ بماند، نامِ پروفایلِ عمومی با نامِ
+                    احرازشده یکی نمی‌ماند و «تایید هویت» بی‌معنا
+                    می‌شود.
+                    ⚠️ `readOnly` نه `disabled`: مقدارِ غیرفعال در
+                    ترتیب Tab نمی‌آید و صفحه‌خوان ردش می‌کند —
+                    کاربر باید بتواند بخواند و کپی کند. */}
+                <input
+                  id="tech-name" className={`${INPUT} cursor-not-allowed bg-[#F4F2ED] text-[#5B564B]`}
+                  value={form.name} readOnly aria-readonly="true"
+                  placeholder="از حساب کاربری" />
+                <p className="mt-1 text-[11px] text-[#8A8577]">
+                  از حساب کاربری‌تان می‌آید. برای تغییر، به تنظیمات حساب بروید.
+                </p>
               </div>
-              <div>
-                <label className="mb-1.5 block text-[12.5px] font-bold text-[#5B564B]">عنوان تخصصی *</label>
-                <input className={INPUT} value={form.title} onChange={e => set('title', e.target.value)} placeholder="مثال: متخصص پارچه و رگلاژ" />
-              </div>
+              {/* ⚠️ «عنوان تخصصی» حذف شد: این صفحه فقط یک نوع پروفایل
+                  دارد و عنوانش همیشه «خدمات فنی» است. فیلدِ آزاد فقط
+                  متن‌های ناهمگون می‌ساخت («تعمیرکار»، «متخصص چوب»، …)
+                  که زیر نامِ همه با هم فرق می‌کرد. مقدارش در `submit`
+                  ثابت گذاشته می‌شود. */}
                             {/* نشانی اختصاصی سایت — همان چیزی که پنل باشگاه از اول داشت */}
               <div className="sm:col-span-2">
                 <ProfileSlugField
@@ -291,7 +319,13 @@ export default function TechnicianDashboard() {
                 />
               </div>
 <div className="sm:col-span-2">
+                {/* ⚠️ یک جعبه به‌جای دو دراپ‌داون زنجیره‌ای — همان شکلی
+                    که فیلترِ شهرِ «خدمات فنی» و «شهرهای تحت پوشش»
+                    دارند: شهر تایپ می‌شود و استانش کم‌رنگ کنارش
+                    می‌آید. هم جای کمتری می‌گیرد، هم یک مرحله کمتر
+                    است، هم با بقیه‌ی سایت یکی می‌شود. */}
                 <ProvinceCitySelect
+                  variant="box" label="شهر"
                   value={{ province: form.province, city: form.city }}
                   onChange={v => { set('province', v.province); set('city', v.city) }}
                   required
@@ -384,7 +418,7 @@ export default function TechnicianDashboard() {
               </div>
               <div>
                 <label className="mb-1.5 block text-[12.5px] font-bold text-[#5B564B]">واتساپ</label>
-                <input className={INPUT} dir="ltr" style={{ textAlign: 'right' }} value={form.whatsapp} onChange={e => set('whatsapp', e.target.value)} placeholder="989xxxxxxxxx" />
+                <input className={INPUT} dir="ltr" style={{ textAlign: 'right' }} value={form.whatsapp} onChange={e => set('whatsapp', e.target.value)} placeholder="09xxxxxxxxx" />
               </div>
             </div>
           </section>
@@ -425,11 +459,10 @@ export default function TechnicianDashboard() {
                   پیش‌فرض می‌شود. */}
               <div className="sm:col-span-2">
                 <ProvinceCitySelect
+                  variant="box"
                   value={{ province: prj.province, city: prj.city }}
                   onChange={v => setPrj(p => ({ ...p, province: v.province, city: v.city }))}
-                  provinceLabel="استان نمونه‌کار"
-                  cityLabel={`شهر نمونه‌کار (پیش‌فرض: ${form.city || '—'})`}
-                  size="sm"
+                  label={`شهر نمونه‌کار (پیش‌فرض: ${form.city || '—'})`}
                 />
               </div>
               <input className={INPUT} value={prj.club} onChange={e => setPrj(p => ({ ...p, club: e.target.value }))} placeholder="باشگاه / محل انجام (اگر بود)" />

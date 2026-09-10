@@ -209,18 +209,12 @@ function CoachDashboardInner() {
       if (res.state === 'error') return
       const remote = res.state === 'found' ? res.profile : null
       if (!remote) {
-        if (mine) {
-          const up = await saveProfileRemote('coach', mine.slug, mine as unknown as Record<string, unknown>,
-            { number: '', url: mine.certificate?.url ?? '' })
-          /* فقط نوشتن تأییدشده قفل می‌کند؛ با ۴۰۹ چیزی نوشته نشده و
-             فیلد باید باز بماند تا نامک تکراری قابل اصلاح باشد. */
-          if (up.ok && up.profile?.slug) setSavedSlug(up.profile.slug)
-          else setSavedSlug('')
-        } else {
-          /* کاربر کاملا تازه: نه ردیف سرور، نه کش محلی.
-             صریح باز می‌شود تا نامکش را خودش انتخاب کند. */
-          setSavedSlug('')
-        }
+        /* ⚠️ این‌جا قبلا پروفایلِ محلی **بی‌اجازه روی سرور ذخیره
+           می‌شد** و بعد نشانیِ اختصاصی قفل می‌شد: کاربر پنل را
+           باز می‌کرد، هنوز چیزی تایید نکرده بود، و نامکِ خودکار
+           برایش ثبت و دائمی شده بود. تا وقتی خودش «ذخیره» را
+           نزند چیزی روی سرور نمی‌رود. */
+        setSavedSlug('')
         return
       }
       setSavedSlug(remote.slug)
