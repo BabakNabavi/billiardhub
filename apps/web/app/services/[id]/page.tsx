@@ -38,13 +38,15 @@ import '@/components/profile/profile-page.css'
 import { TechnicianServices } from '@/components/tech/market/TechnicianServices'
 import '@/components/tech/market/market.css'
 import '@/components/tech/market/market-profile.css'
+import { HeroArt } from '@/components/tech/market/HeroArt'
+import '@/components/tech/market/hero-art.css'
 import '@/components/tech/market/ios.css'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 /* ⚠️ آیکون تزئینی نداریم: هر آیکونی که این‌جا می‌ماند یا ناوبری
    است یا کنش. `MapPin` و `Clock` با بازطراحی حذف شدند — شهر و
    ساعت، *متن*اند و آیکون چیزی به آن‌ها اضافه نمی‌کرد. */
-import { Wrench, Phone, MapPin, Home } from 'lucide-react'
+import { Wrench, Phone, MapPin, Home, ClipboardList } from 'lucide-react'
 import { getTechnician } from '../../../lib/technicians-data'
 import { useOwnerEdit } from '../../../lib/profiles/use-owner-edit'
 import { compressImage } from '../../../lib/seller-store'
@@ -443,6 +445,10 @@ export default function TechnicianProfilePage() {
 
       {/* ═══════ سربرگ پروفایل ═══════ */}
       <header className="tmp-head">
+        {/* ⚠️ پوسترِ این صفحه عمدا با صفحه‌ی خدمات فرق دارد: نور از
+            سمت مقابل می‌آید و ترکیبش میدانِ ماهوت است نه چوب و
+            کمان — تا دو صفحه از هم تشخیص داده شوند. */}
+        <HeroArt variant="profile" />
         <div className="tm-wrap tmp-head-in">
           <nav aria-label="مسیر">
             <ol className="tmp-crumb">
@@ -466,11 +472,22 @@ export default function TechnicianProfilePage() {
                 {tech.verified && <VerifiedBadge title="متخصص تأیید شده" />}
               </h1>
               {lede && <p className="tmp-role">{lede}</p>}
+              {/* ⚠️ آیکون‌ها داخل نشانِ رنگی می‌روند — همان زبانی که
+                  کارت متخصص در دایرکتوری دارد. پیش‌تر خطی و هم‌رنگِ
+                  متنِ کم‌رنگِ سربرگ بودند و عملا دیده نمی‌شدند. */}
               <p className="tmp-facts">
-                {city && <span><MapPin size={13} aria-hidden />{city}</span>}
-                {tech.onsite && <span><Home size={13} aria-hidden />اعزام به محل</span>}
-                {tech.workshop && <span><Wrench size={13} aria-hidden />پذیرش در کارگاه</span>}
-                {svc.count > 0 && <span>{toFaDigits(String(svc.count))} خدمت ثبت‌شده</span>}
+                {city && (
+                  <span><i className="tm-ic tm-ic--city" aria-hidden><MapPin size={13} /></i>{city}</span>
+                )}
+                {tech.onsite && (
+                  <span><i className="tm-ic tm-ic--onsite" aria-hidden><Home size={13} /></i>اعزام به محل</span>
+                )}
+                {tech.workshop && (
+                  <span><i className="tm-ic tm-ic--shop" aria-hidden><Wrench size={13} /></i>پذیرش در کارگاه</span>
+                )}
+                {svc.count > 0 && (
+                  <span><i className="tm-ic tm-ic--star" aria-hidden><ClipboardList size={13} /></i>{toFaDigits(String(svc.count))} خدمت ثبت‌شده</span>
+                )}
               </p>
             </div>
 

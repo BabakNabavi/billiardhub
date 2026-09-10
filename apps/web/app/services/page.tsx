@@ -38,6 +38,8 @@ import {
 import '@/components/tech/market/market.css'
 /* ⚠️ بعد از market.css بار می‌شود: فقط زبان بصری را عوض می‌کند و
    هیچ کلاسی را جابه‌جا نمی‌کند. */
+import { HeroArt } from '@/components/tech/market/HeroArt'
+import '@/components/tech/market/hero-art.css'
 import '@/components/tech/market/ios.css'
 
 /** امتیاز تجمیعی هر متخصص — از ستون ردیف، نه jsonb */
@@ -176,27 +178,11 @@ export default function TechnicalServicesPage() {
     <div className="tm">
       {/* ═══════ ۱ — کشف خدمت ═══════ */}
       <section className="tm-hero">
-        {/* ⚠️ عکس **لایه‌ی زمینه** است، نه کارتی زیر فرم. نسخه‌ی قبلی
-            یک قاب ۲۲۴ پیکسلی زیر جست‌وجو می‌گذاشت که روی ۳۹۰ تنها
-            کارش پایین‌راندنِ محتوا بود.
-
-            ⚠️ انتخاب عکس — و دلیلِ ردِ بقیه: کلِ پروژه یک عکسِ واقعی
-            از کارِ فنی دارد و همین است (تعویض ماهوتِ میز). بقیه‌ی
-            نامزدها رندرِ CGI بودند؛ `HS/1` را امتحان کردم و با
-            بزرگ‌نمایی معلوم شد شماره‌گذاریِ توپ‌ها غلط است — توپِ
-            زردِ شماره ۶ (۶ سبز است)، آبی با ۸ روی آن، و عددِ توپِ
-            بنفشِ جلو مخدوش. جلوی چشمِ متخصص و بازیکنِ بیلیارد،
-            همان «ظاهرِ ساخته‌ی هوش مصنوعی» است که نباید.
-
-            ⚠️ فایل ۵۱۶×۳۸۷ است. برای قابِ مستقل کوچک بود، ولی برای
-            لایه‌ی زمینه‌ی محو زیر پوششِ تیره کافی است.
-
-            `alt` خالی چون تزئینی است؛ پیامِ صفحه در متن آمده. */}
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          className="tm-hero-bg" src="/images/services/repaire.jfif" alt=""
-          width={516} height={387} decoding="async" fetchPriority="high"
-        />
+        {/* ⚠️ عکس جای خود را به پوسترِ طراحی‌شده داد: مالک گفت آن
+            تصویرِ تیره جذاب نیست و هر صفحه باید پوسترِ خودش را
+            داشته باشد. هیچ بایتِ شبکه‌ای اضافه نمی‌کند — SVG
+            درون‌خطی و CSS. */}
+        <HeroArt variant="services" />
         <div className="tm-wrap tm-hero-in">
           <div>
             <p className="tm-eyebrow">خدمات فنی بیلیارد</p>

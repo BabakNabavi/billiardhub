@@ -106,30 +106,8 @@
      عمدی به نظر برسد، نه بریدگی. */
   border-end-start-radius: var(--ios-r-lg); border-end-end-radius: var(--ios-r-lg);
 }
-.tm .tm-hero-bg {
-  position: absolute; inset: 0; z-index: 0;
-  inline-size: 100%; block-size: 100%;
-  object-fit: cover;
-  /* کانونِ برش روی ناحیه‌ی کار — دست‌ها و سطحِ میز */
-  object-position: 50% 62%;
-  /* ⚠️ محوِ ملایم عمدی است و دو کار می‌کند: زمینه‌ی پشتِ متن باید
-     نرم باشد (کارِ همیشگیِ عکسِ زمینه)، و فایل ۵۱۶×۳۸۷ است پس
-     بزرگ‌نمایی روی دسکتاپ بدون آن دانه‌دار دیده می‌شد. */
-  filter: saturate(.55) contrast(1.05) brightness(.86) blur(1.2px);
-  /* محو لبه را شفاف می‌کند؛ کمی بزرگ‌تر از قاب تا لبه پیدا نشود */
-  transform: scale(1.06);
-}
 /* پوششِ خوانایی. روی موبایل عمودی و سنگین: متن روی هر نقطه‌ی
    عکس باید خوانا باشد، نه فقط جایی که تیره افتاده. */
-.tm .tm-hero::after {
-  content: ''; position: absolute; inset: 0; z-index: 1; pointer-events: none;
-  background:
-    linear-gradient(180deg,
-      rgb(17 17 20 / .78) 0%,
-      rgb(17 17 20 / .62) 40%,
-      rgb(17 17 20 / .90) 100%),
-    radial-gradient(84% 58% at 88% 4%, rgb(199 166 106 / .16), transparent 62%);
-}
 .tm .tm-hero-in { position: relative; z-index: 2; padding-block: 32px 48px; gap: 0; }
 
 /* ── برچسب بخش ──
@@ -177,25 +155,12 @@
 @media (min-width: 900px) {
   /* ⚠️ پوشش از عمودی به افقی می‌چرخد: سمتِ راست (شروعِ RTL) تقریبا
      مات برای متن، سمتِ چپ باز تا عکس واقعا دیده شود. */
-  .tm .tm-hero::after {
-    background:
-      linear-gradient(to left,
-        rgb(17 17 20 / .97) 0%,
-        rgb(17 17 20 / .93) 34%,
-        rgb(17 17 20 / .62) 68%,
-        rgb(17 17 20 / .38) 100%),
-      radial-gradient(60% 90% at 88% 0%, rgb(199 166 106 / .14), transparent 60%);
-  }
-  /* ⚠️ `filter` کوتاه‌نویسی است: نوشتنِ دوباره‌اش `blur` را می‌انداخت،
+    /* ⚠️ `filter` کوتاه‌نویسی است: نوشتنِ دوباره‌اش `blur` را می‌انداخت،
      آن هم دقیقا این‌جا که بدترین حالت است — پوشش تا ۰٫۳۸ باز می‌شود
      و بزرگ‌نمایی از ۵۱۶ به ۱۴۴۰ حدود ۲٫۸ برابر. blur در مختصاتِ
      محلی اعمال می‌شود، پس هرچه ضریبِ cover بزرگ‌تر، روی صفحه
      نازک‌تر دیده می‌شود؛ برای همین این‌جا بیشتر است. */
-  .tm .tm-hero-bg {
-    object-position: 50% 50%;
-    filter: saturate(.5) contrast(1.1) brightness(.78) blur(1.6px);
-  }
-  .tm .tm-hero-in {
+    .tm .tm-hero-in {
     padding-block: 64px;
     grid-template-columns: minmax(0, 1fr);
   }
@@ -428,20 +393,34 @@
   border: 0;
   border-end-start-radius: 28px; border-end-end-radius: 28px;
 }
-.tmp .tmp-head::after {
-  content: ''; position: absolute; inset: 0; z-index: 0; pointer-events: none;
-  background:
-    radial-gradient(72% 130% at 84% -18%, rgb(199 166 106 / .24), transparent 62%),
-    radial-gradient(56% 100% at 4% 116%, rgb(120 140 255 / .10), transparent 62%);
-}
+/* ⚠️ `.tmp .tmp-head::after` (تابشِ طلایی) حذف شد: شبه‌عنصر است،
+   پس قاعده‌ی `> *:not(.tmha)` شاملش نمی‌شود و با z-index صفر و
+   ترتیبِ سند، *روی* پوستر می‌افتاد — یک پرده‌ی طلایی که فقط این
+   صفحه می‌گرفت و تنظیمِ پرده‌ی خوانایی را هم به هم می‌زد. */
 .tmp .tmp-head-in { position: relative; z-index: 1; }
 .tmp .tmp-crumb,
 .tmp .tmp-crumb a { color: rgb(255 255 255 / .56); }
 .tmp .tmp-crumb a:hover { color: #fff; }
 .tmp .tmp-crumb li + li::before { color: rgb(255 255 255 / .32); }
 .tmp .tmp-name { color: #fff; letter-spacing: -0.02em; }
-.tmp .tmp-role { color: rgb(255 255 255 / .70); }
+/* ⚠️ فقط داخلِ سربرگِ تیره. این قاعده به کلِ `.tmp` می‌داد و
+   `.tmp-panel` (کارتِ سفیدِ چسبانِ دسکتاپ) هم همان نقش را دارد —
+   یعنی متنِ سفید روی زمینه‌ی سفید. اندازه‌گیری‌شده: کنتراست ۱٫۰۰
+   روی ۱۴۴۰، یعنی عملا نامرئی. از پیش از این تغییرات هم همین‌طور
+   بود؛ سنجشِ همه‌ی عناصر پیدایش کرد. */
+.tmp .tmp-head .tmp-role { color: rgb(255 255 255 / .70); }
 .tmp .tmp-facts { color: rgb(255 255 255 / .62); }
+/* ⚠️ نشان‌های رنگی برای کارتِ روشن ساخته شده بودند: متنِ سیر روی
+   تینتِ ۱۲٪ که خودش روی سربرگِ تیره می‌نشیند یعنی تیره روی تیره.
+   روی این سطح، تینت پررنگ‌تر و رنگِ آیکون روشن می‌شود. */
+.tmp .tmp-head .tm-ic { inline-size: 24px; block-size: 24px; border-radius: 8px; }
+.tmp .tmp-head .tm-ic--city   { background: rgb(96 165 250 / .20); color: #93C5FD; }
+.tmp .tmp-head .tm-ic--onsite { background: rgb(52 211 153 / .20); color: #6EE7B7; }
+.tmp .tmp-head .tm-ic--shop   { background: rgb(167 139 250 / .20); color: #C4B5FD; }
+.tmp .tmp-head .tm-ic--star   { background: rgb(251 191 36 / .20); color: #FCD34D; }
+.tmp .tmp-head .tm-ic svg { color: currentColor; }
+/* ردیف با نشان‌ها کمی بازتر نفس می‌کشد */
+.tmp .tmp-head .tmp-facts { gap: 14px 16px; align-items: center; }
 .tmp .tmp-ava {
   border-radius: 26px;
   box-shadow: 0 8px 28px rgb(0 0 0 / .40);
@@ -538,6 +517,11 @@
     min-block-size: 44px;
     display: inline-flex;
     align-items: center;
+    /* ⚠️ همین قاعده باعثِ «دفرمه‌شدن» تب‌های گالری بود: برای بزرگ‌کردنِ
+       هدفِ لمسی دکمه را `inline-flex` کرد ولی محورِ افقی را تنظیم
+       نکرد، پس متنِ هر سه تب از وسط به لبه‌ی شروع پرید. دکمه‌ی
+       معمولی متنش وسط است؛ فلکس این را نگه نمی‌دارد. */
+    justify-content: center;
   }
   /* نام روی کارت نباید با ارتفاع تازه از متن زیرش فاصله بگیرد */
   .tm .tm-card-name { align-items: center; }
@@ -607,6 +591,14 @@
   color: var(--ink-3); font-size: 12px; font-weight: 700;
 }
 /* فیلدها بی‌بردرند: سطحِ بیرونی خودش مرز است */
+/* ⚠️ متنِ ورودی ۱۶ می‌ماند (زیر ۱۶ سافاریِ iOS صفحه را زوم می‌کند)
+   ولی خودِ placeholder کوچک‌تر می‌شود: ۱۶ در برابر برچسبِ ۱۲ پیکسلیِ
+   بالای همان فیلد بزرگ‌تر بود و راهنما از عنوانش تو‌چشم‌تر می‌زد.
+   زوم به `font-size` خودِ input نگاه می‌کند، نه به placeholder. */
+.tm .tm-search .tm-input::placeholder { font-size: 13px; }
+/* ⚠️ فقط جای‌نگهدار کوچک است؛ خودِ دکمه ۱۶ می‌ماند وگرنه با
+   انتخابِ شهر اندازه‌ی متن می‌پرید. */
+.tm .tm-search .tm-citybtn .tm-citybtn-ph { font-size: 13px; }
 .tm .tm-search .tm-input,
 .tm .tm-search .tm-citybtn {
   border: 0; background: transparent; box-shadow: none;
@@ -639,10 +631,120 @@
   }
 }
 @media (min-width: 760px) {
-  .tm .tm-search { grid-template-columns: minmax(0, 1fr) auto; align-items: center; }
-  .tm .tm-search .tm-btn { inline-size: auto; padding-inline: 24px; }
+  /* ⚠️ اندازه‌گیری‌شده: جعبه‌ی فیلدها ۷۱ پیکسل بود و دکمه ۴۸ — دکمه
+     وسطِ یک ستونِ بلندتر شناور می‌ماند و کوچک و بی‌ربط دیده می‌شد.
+     `stretch` هم‌قدشان می‌کند و شعاع هم یکی می‌شود. */
+  .tm .tm-search { grid-template-columns: minmax(0, 1fr) auto; align-items: stretch; }
+  .tm .tm-search .tm-btn {
+    inline-size: auto; padding-inline: 28px;
+    min-block-size: 0; border-radius: var(--ios-r-md);
+  }
 }
 
 
 /* اسکلتون: خاکستری سرد، هم‌رنگ بقیه صفحه */
 .tm .tm-skel-b { background: rgb(120 120 128 / .14); border-radius: 7px; }
+
+
+/* ═══════════════ دکمه‌ها — طرح LQ با لهجه‌ی سبز ═══════════════
+   ⚠️ «سبز» به‌جای طلایی، فقط در این دو صفحه. طلایی هویتِ کلِ سایت
+   است و دست نخورده می‌ماند؛ این‌جا با `.tm`/`.tmp` محدود شده.
+
+   ⚠️ طرح LQ یعنی دکمه‌ی تینتی: زمینه‌ی کم‌رنگ، بردر هم‌رنگِ پررنگ‌تر،
+   متنِ تیره‌ی هم‌خانواده، شعاع ۱۰، و بلندشدنِ نرم روی هاور — همان
+   الگویی که پنل‌ها از قبل دارند (`LQ_BTN`).
+
+   ⚠️ روی سرلوحه‌ی تیره همان تینتِ روشن خوانا نیست، پس آن‌جا نسخه‌ی
+   پررنگ‌تر با متنِ روشن می‌آید. هر دو حالت اندازه‌گیری شده‌اند. */
+.tm, .tmp {
+  --sn: 18 138 75;          /* سبزِ اسنوکر */
+  --sn-ink: #0A5730;        /* متن روی زمینِ روشن */
+  --sn-ink-dark: #8FE3B4;   /* متن روی زمینِ تیره */
+}
+.tm .tm-btn--gold, .tm .tm-btn--primary,
+.tmp .tm-btn--gold, .tmp .tm-btn--primary {
+  background: rgb(var(--sn) / .12);
+  border: 1px solid rgb(var(--sn) / .34);
+  color: var(--sn-ink);
+  border-radius: 10px;
+  box-shadow: none;
+  transition: transform .16s cubic-bezier(.22,1,.36,1), background .16s, border-color .16s;
+}
+/* ⚠️ `:not(:disabled)` فقط برای وزن نیست: قاعده‌ی طلاییِ قبلیِ این
+   فایل (0,4,0) بود و بدون آن، هاور دوباره طلایی می‌شد و متنِ سبزِ
+   تیره رویش ۴٫۳۴:۱ می‌داد — زیر حد. */
+.tm .tm-btn--gold:hover:not(:disabled), .tm .tm-btn--primary:hover:not(:disabled),
+.tmp .tm-btn--gold:hover:not(:disabled), .tmp .tm-btn--primary:hover:not(:disabled) {
+  background: rgb(var(--sn) / .18);
+  border-color: rgb(var(--sn) / .48);
+  transform: translateY(-2px);
+}
+.tm .tm-btn--outline, .tmp .tm-btn--outline {
+  /* ⚠️ کوتاه‌نویسی لازم است: قاعده‌ی بالاترِ همین فایل `border: 0`
+     می‌دهد و اعلانِ تنهای `border-color` هیچ خطی نمی‌کشد. */
+  border: 1px solid rgb(var(--sn) / .30);
+  color: var(--sn-ink);
+  border-radius: 10px;
+}
+.tm .tm-btn--outline:hover:not(:disabled), .tmp .tm-btn--outline:hover:not(:disabled) {
+  background: rgb(var(--sn) / .10);
+  border-color: rgb(var(--sn) / .48);
+}
+/* روی سرلوحه‌ی تیره ــ هر دو صفحه
+   ⚠️ نسخه‌ی اول فقط `.tm .tm-hero` را پوشش می‌داد و سربرگِ تیره‌ی
+   پروفایل جا مانده بود: متنِ سبزِ تیره روی تینتِ تیره، کنتراستِ
+   اندازه‌گیری‌شده ۱٫۹۵:۱ — عملا نامرئی. */
+.tm .tm-hero .tm-btn--gold, .tm .tm-hero .tm-btn--primary,
+.tm .tm-cta--dark .tm-btn--gold, .tm .tm-cta--dark .tm-btn--primary,
+.tmp .tmp-head .tm-btn--gold, .tmp .tmp-head .tm-btn--primary {
+  background: rgb(var(--sn) / .30);
+  border-color: rgb(var(--sn) / .52);
+  color: var(--sn-ink-dark);
+}
+.tm .tm-hero .tm-btn--gold:hover, .tm .tm-hero .tm-btn--primary:hover,
+.tm .tm-cta--dark .tm-btn--gold:hover, .tm .tm-cta--dark .tm-btn--primary:hover,
+.tmp .tmp-head .tm-btn--gold:hover, .tmp .tmp-head .tm-btn--primary:hover {
+  background: rgb(var(--sn) / .42);
+  border-color: rgb(var(--sn) / .68);
+}
+.tm .tm-hero .tm-btn:focus-visible,
+.tm .tm-cta--dark .tm-btn:focus-visible,
+.tmp .tmp-head .tm-btn:focus-visible {
+  outline-color: var(--sn-ink-dark);
+  /* هاله‌ی طلاییِ پیش‌فرض هم باید سبز شود، وگرنه دورِ دکمه‌ی سبز
+     یک حلقه‌ی طلایی می‌ماند. */
+  box-shadow: 0 0 0 5px rgb(var(--sn) / .26);
+}
+/* دکمه‌ی خطی روی سربرگ تیره هم باید بردر روشن داشته باشد */
+.tmp .tmp-head .tm-btn--outline {
+  border: 1px solid rgb(255 255 255 / .26); color: #fff;
+  background: rgb(255 255 255 / .14);
+}
+/* ⚠️ هاورِ ۱۰٪ از حالتِ عادیِ ۱۴٪ کم‌رنگ‌تر بود: دکمه با نزدیک‌شدنِ
+   اشاره‌گر عقب می‌نشست. */
+.tmp .tmp-head .tm-btn--outline:hover:not(:disabled) {
+  background: rgb(255 255 255 / .24); border-color: rgb(255 255 255 / .44);
+}
+/* دسته‌ی انتخاب‌شده هم دیگر طلایی نیست */
+.tm .tm-cat[aria-pressed='true'] {
+  border-color: rgb(var(--sn) / .55);
+  background: linear-gradient(180deg, #fff, rgb(var(--sn) / .10));
+  box-shadow: 0 0 0 1px rgb(var(--sn) / .55) inset, 0 10px 26px -14px rgb(var(--sn) / .40);
+}
+@media (prefers-reduced-motion: reduce) {
+  .tm .tm-btn--gold, .tm .tm-btn--primary,
+  .tmp .tm-btn--gold, .tmp .tm-btn--primary { transition: none; }
+  .tm .tm-btn--gold:hover, .tm .tm-btn--primary:hover,
+  .tmp .tm-btn--gold:hover, .tmp .tm-btn--primary:hover { transform: none; }
+}
+
+/* ═══════════════ پوستر سرلوحه ═══════════════
+   ⚠️ هر دو سربرگ باید ظرفِ لایه‌ها شوند، وگرنه پوسترِ absolute به
+   نزدیک‌ترین والدِ موقعیت‌دار می‌چسبد و از قاب بیرون می‌زند. */
+.tm .tm-hero > *:not(.tmha), .tmp .tmp-head > *:not(.tmha) { position: relative; z-index: 1; }
+/* پرده‌ی خوانایی برای هر صفحه جدا — با اندازه‌گیری تنظیم می‌شود */
+.tm .tm-hero .tmha { --tmha-veil: linear-gradient(180deg, rgb(17 17 20 / .60) 0%, rgb(17 17 20 / .44) 42%, rgb(17 17 20 / .84) 100%); }
+@media (min-width: 900px) {
+  .tm .tm-hero .tmha { --tmha-veil: linear-gradient(to left, rgb(17 17 20 / .90) 0%, rgb(17 17 20 / .74) 38%, rgb(17 17 20 / .34) 72%, rgb(17 17 20 / .14) 100%); }
+}
+.tmp .tmp-head .tmha { --tmha-veil: linear-gradient(180deg, rgb(17 17 20 / .62) 0%, rgb(17 17 20 / .48) 50%, rgb(17 17 20 / .82) 100%); }

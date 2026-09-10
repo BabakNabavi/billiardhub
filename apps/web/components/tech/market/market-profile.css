@@ -225,5 +225,9 @@
 
 /* کمکی‌های چیدمان — به‌جای استایل اینلاین ثابت */
 .tmp-facts-mt { margin-block-start: 16px; }
-.tmp-h2-mt { margin-block-start: 24px; }
+/* ⚠️ وزن باید از `.tmp-card > h2` (۰,۱,۱) بالاتر باشد. نسخه‌ی قبلی
+   کلاسِ تنها بود (۰,۱,۰) و کوتاه‌نویسیِ `margin: 0 0 12px` آن قاعده
+   حاشیه‌ی بالا را صفر می‌کرد — «محدوده خدمات» دقیقا می‌چسبید به
+   ردیفِ شماره‌ی تماس. اندازه‌گیری‌شده: فاصله ۰ پیکسل بود. */
+.tmp-card > h2.tmp-h2-mt { margin-block-start: 24px; }
 .tmp-row { display: flex; gap: 8px; flex-wrap: wrap; }
