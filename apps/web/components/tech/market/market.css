@@ -152,14 +152,8 @@
 }
 
 /* تصویر سرلوحه */
-.tm-hero-media {
-  position: relative; overflow: hidden;
-  border-radius: var(--r-card);
-  background: var(--neutral);
-  aspect-ratio: 4 / 3;
-}
-@media (min-width: 900px) { .tm-hero-media { aspect-ratio: 5 / 4; } }
-.tm-hero-media img { inline-size: 100%; block-size: 100%; object-fit: cover; display: block; }
+/* ⚠️ `.tm-hero-media` حذف شد: سرلوحه دیگر قابِ عکسِ جدا ندارد و
+   عکس لایه‌ی زمینه است. */
 
 /* ── ماژول جست‌وجو ── */
 .tm-search {
@@ -419,7 +413,6 @@
 
 /* ⚠️ قاب تصویر عمدا کوچک‌تر از نیم سرلوحه است: فایل موجود
    ۵۱۶×۳۸۷ است و بزرگ‌تر از این، نرم و کشیده دیده می‌شود. */
-figure.tm-hero-media { margin: 0; max-inline-size: 520px; justify-self: end; }
 
 /* ⚠️ کف ۴۴ پیکسل روی لمس. نسخه‌ی کوچک دکمه برای دسکتاپ خوب است
    ولی روی موبایل هدف ۳۶ پیکسلی زیر قاعده‌ی پروژه است. */
