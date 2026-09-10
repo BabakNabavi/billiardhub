@@ -343,7 +343,7 @@ export default function ProfileGallery({
           `aria-controls` نباید به شناسه‌ای اشاره کند که وجود ندارد. */}
       <div id="chpanel-photos" role="tabpanel" aria-labelledby="chtab-photos" hidden={tab !== 'photos'}>
         {images.length === 0 && !canEdit
-          ? empty(<Images size={30} aria-hidden />, 'هنوز تصویری اضافه نشده است.')
+          ? empty(<Images size={30} aria-hidden />, 'هنوز تصویری اضافه نشده است')
           : (
             <div className="ch-gal-grid">
               {canEdit && onAddImages && addTile('افزودن تصویر', () => pickImages())}
@@ -354,7 +354,7 @@ export default function ProfileGallery({
 
       <div id="chpanel-videos" role="tabpanel" aria-labelledby="chtab-videos" hidden={tab !== 'videos'}>
         {videos.length === 0 && !canEdit
-          ? empty(<Clapperboard size={30} aria-hidden />, 'هنوز ویدیویی اضافه نشده است.')
+          ? empty(<Clapperboard size={30} aria-hidden />, 'هنوز ویدیویی اضافه نشده است')
           /* ⚠️ شبکه‌ی ویدیو ستون‌های خودش را داشت و خانه‌ها اندازه‌ی
              دیگری می‌گرفتند. کاربر خواست هر سه تب یک اندازه باشند —
              همان اندازه‌ی تب تصاویر. پس همان شبکه استفاده می‌شود. */
@@ -382,7 +382,7 @@ export default function ProfileGallery({
 
       <div id="chpanel-albums" role="tabpanel" aria-labelledby="chtab-albums" hidden={tab !== 'albums'}>
         {albums.length === 0 && !canEdit ? (
-          empty(<FolderOpen size={30} aria-hidden />, 'هنوز آلبومی ساخته نشده است.')
+          empty(<FolderOpen size={30} aria-hidden />, 'هنوز آلبومی ساخته نشده است')
         ) : current ? (
           <>
             <div className="ch-alb-head">
@@ -402,7 +402,7 @@ export default function ProfileGallery({
               {current.videos.map(v => videoCell(v))}
             </div>
             {!canEdit && current.images.length === 0 && current.videos.length === 0 && (
-              empty(<FolderOpen size={30} aria-hidden />, 'این آلبوم هنوز خالی است.')
+              empty(<FolderOpen size={30} aria-hidden />, 'این آلبوم هنوز خالی است')
             )}
           </>
         ) : (

@@ -28,7 +28,7 @@ export interface TechnicianServicesProps {
 export function TechnicianServices({ data, phone }: TechnicianServicesProps) {
   const empty = data.categories.length === 0 && data.legacy.length === 0
   if (empty) {
-    return <p className="tmp-none">این متخصص هنوز خدماتی ثبت نکرده است.</p>
+    return <p className="tmp-none">این متخصص هنوز خدماتی ثبت نکرده است</p>
   }
 
   const action = (title: string) =>
@@ -47,7 +47,7 @@ export function TechnicianServices({ data, phone }: TechnicianServicesProps) {
     <>
       {data.categories.map(cat => (
         <div key={cat.id}>
-          <p className="tmp-svc-cat">{cat.title}</p>
+          <h3 className="tmp-svc-cat">{cat.title}</h3>
           <ul className="tmp-svc">
             {cat.services.map(s => (
               <li key={s.id}>
@@ -70,7 +70,7 @@ export function TechnicianServices({ data, phone }: TechnicianServicesProps) {
 
       {data.legacy.length > 0 && (
         <div>
-          <p className="tmp-svc-cat">سایر خدمات</p>
+          <h3 className="tmp-svc-cat">سایر خدمات</h3>
           <ul className="tmp-svc">
             {data.legacy.map(t => (
               <li key={t}>
