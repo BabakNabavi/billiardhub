@@ -46,7 +46,8 @@ import { useParams } from 'next/navigation'
 /* ⚠️ آیکون تزئینی نداریم: هر آیکونی که این‌جا می‌ماند یا ناوبری
    است یا کنش. `MapPin` و `Clock` با بازطراحی حذف شدند — شهر و
    ساعت، *متن*اند و آیکون چیزی به آن‌ها اضافه نمی‌کرد. */
-import { Wrench, Phone, MapPin, Home, ClipboardList } from 'lucide-react'
+import { Wrench, Phone, MapPin, Home, ClipboardList, Building2, Map, Clock } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
 import { getTechnician } from '../../../lib/technicians-data'
 import { useOwnerEdit } from '../../../lib/profiles/use-owner-edit'
 import { compressImage } from '../../../lib/seller-store'
@@ -96,6 +97,15 @@ const useTopOffsets = (ref: RefObject<HTMLDivElement | null>, ready: boolean) =>
     if (ro && nav) ro.observe(nav)
     return () => { window.removeEventListener('resize', apply); ro?.disconnect() }
   }, [ref, ready])
+}
+
+interface MetaRow {
+  k: string
+  v: string
+  /* ⚠️ تایپِ خودِ lucide، نه امضای دست‌ساز: کامپوننت‌های lucide
+     `ForwardRefExoticComponent`اند و `ReactNode` برمی‌گردانند، پس
+     با `(p) => JSX.Element` جور درنمی‌آیند. */
+  I: LucideIcon
 }
 
 export default function TechnicianProfilePage() {
@@ -389,11 +399,13 @@ export default function TechnicianProfilePage() {
   const coverage = tech.coverage.map(norm).filter(c => c && c !== city)
   const delivery = [tech.onsite && 'در محل شما', tech.workshop && 'پذیرش در کارگاه']
     .filter((x): x is string => !!x)
-  const meta: [string, string][] = [
-    ...(club ? [['باشگاه / مجموعه', club] as [string, string]] : []),
-    ...(coverage.length ? [['شهرهای تحت پوشش', coverage.join('، ')] as [string, string]] : []),
-    ...(delivery.length ? [['نحوه‌ی ارائه', delivery.join(' · ')] as [string, string]] : []),
-    ...(hours ? [['ساعت کاری', hours] as [string, string]] : []),
+  /* ⚠️ هر ردیف آیکونِ خودش را دارد. ردیفِ «برچسب/مقدار»ِ خالی کنار
+     فهرستِ خدماتِ آیکون‌دار ناتمام به نظر می‌رسید. */
+  const meta: MetaRow[] = [
+    ...(club ? [{ k: 'باشگاه / مجموعه', v: club, I: Building2 }] : []),
+    ...(coverage.length ? [{ k: 'شهرهای تحت پوشش', v: coverage.join('، '), I: Map }] : []),
+    ...(delivery.length ? [{ k: 'نحوه‌ی ارائه', v: delivery.join(' · '), I: Wrench }] : []),
+    ...(hours ? [{ k: 'ساعت کاری', v: hours, I: Clock }] : []),
   ]
 
   /* ⚠️ ردیف بدون شماره ممکن است؛ کنشی که کار خودش را نمی‌کند از
@@ -549,8 +561,16 @@ export default function TechnicianProfilePage() {
 
             {meta.length > 0 && (
               <dl className="tmp-facts-grid tmp-facts-mt">
-                {meta.map(([k, v]) => (
-                  <div key={k}><dt>{k}</dt><dd>{v}</dd></div>
+                {/* ⚠️ `<span>` دور `dt`/`dd` برداشته شد: مدلِ محتوایِ
+                    `<dl>` آن را نمی‌پذیرد و نگاشتِ «عنوان ⟵ مقدار» در
+                    درختِ دسترس‌پذیری از بین می‌رفت. چیدمان با گرید
+                    انجام می‌شود، نه با ظرفِ اضافه. */}
+                {meta.map(({ k, v, I }) => (
+                  <div key={k}>
+                    <span className="tmp-fact-ic" aria-hidden><I size={17} /></span>
+                    <dt>{k}</dt>
+                    <dd>{v}</dd>
+                  </div>
                 ))}
               </dl>
             )}

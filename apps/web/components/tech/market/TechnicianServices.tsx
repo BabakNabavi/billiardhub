@@ -17,6 +17,7 @@
 
 import { Phone } from 'lucide-react'
 import type { ResolvedServices } from '@/lib/tech-services'
+import { ServiceIcon } from './ServiceIcons'
 
 export interface TechnicianServicesProps {
   data: ResolvedServices
@@ -51,6 +52,10 @@ export function TechnicianServices({ data, phone }: TechnicianServicesProps) {
             {cat.services.map(s => (
               <li key={s.id}>
                 <div className="tmp-svc-row">
+                  {/* کاشیِ تیره‌ی آیکون در ابتدای ردیف */}
+                  <span className="tmp-svc-ic" aria-hidden>
+                    <ServiceIcon id={s.id} />
+                  </span>
                   <span className="tmp-svc-b">
                     <span className="tmp-svc-t">{s.title}</span>
                     {s.description && <span className="tmp-svc-d">{s.description}</span>}
@@ -70,6 +75,11 @@ export function TechnicianServices({ data, phone }: TechnicianServicesProps) {
             {data.legacy.map(t => (
               <li key={t}>
                 <div className="tmp-svc-row">
+                  <span className="tmp-svc-ic" aria-hidden>
+                    {/* شناسه‌ی کاتالوگ ندارد ⟵ آیکون عمومی، نه جای خالی:
+                        ردیفِ بی‌آیکون کنار بقیه شکسته به نظر می‌رسد. */}
+                    <ServiceIcon id="" />
+                  </span>
                   <span className="tmp-svc-b"><span className="tmp-svc-t">{t}</span></span>
                   {action(t)}
                 </div>
