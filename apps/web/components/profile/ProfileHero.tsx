@@ -52,12 +52,15 @@ export interface ProfileHeroProps {
   backLabel: string
   /** آدرس اختصاصی — روی هیرو هم دیده و کپی می‌شود */
   publicUrl: string
+  /* ⚠️ کنشِ اصلیِ صفحه داخلِ خودِ هدر. اختیاری است چون صفحه‌ی داور
+     کنشی ندارد و نباید جای خالی بگیرد. */
+  actions?: React.ReactNode
 }
 
 export default function ProfileHero({
   name, nameLatin, city, sinceYear, photo, cover, verified,
   grade, disciplines, onOpenPhoto,
-  role, backHref, backLabel, publicUrl,
+  role, backHref, backLabel, publicUrl, actions,
 }: ProfileHeroProps) {
   /* ── آدرس اختصاصی روی هیرو ──
      همان چیزی که در ستون کناری هست، این‌بار جایی که بازدیدکننده
@@ -104,10 +107,16 @@ export default function ProfileHero({
         <div className="ch-hero-row">
           {/* بزرگ‌نمایی فقط وقتی عکس واقعی هست — دکمه‌ای که یک نشان
               پیش‌فرض را باز کند، وعده‌ی توخالی است. */}
-          {photo && onOpenPhoto
-            ? <button type="button" className="ch-avatar" onClick={() => onOpenPhoto(photo)}
-                aria-label="بزرگ‌نمایی عکس پروفایل">{avatar}</button>
-            : <div className="ch-avatar" data-glyph={photo ? undefined : '1'}>{avatar}</div>}
+          {/* ⚠️ حلقه یک لایه‌ی جداست، نه `border` روی خودِ آواتار:
+              گرادیانِ مخروطی را نمی‌شود روی border گذاشت، و اگر
+              `background` خودِ دکمه شود، عکس رویش می‌افتد و حلقه
+              دیده نمی‌شود. */}
+          <span className="ch-avatar-ring">
+            {photo && onOpenPhoto
+              ? <button type="button" className="ch-avatar" onClick={() => onOpenPhoto(photo)}
+                  aria-label="بزرگ‌نمایی عکس پروفایل">{avatar}</button>
+              : <div className="ch-avatar" data-glyph={photo ? undefined : '1'}>{avatar}</div>}
+          </span>
 
           <div className="ch-hero-id">
             {/* ── تیک چسبیده به نام ──
@@ -153,6 +162,9 @@ export default function ProfileHero({
               ))}
             </ul>
 
+            {/* ⚠️ متا و نامک یک ردیفِ روان شدند: قبلا سه بلوکِ جدا
+                بودند و ارتفاعِ هدر را بی‌دلیل بالا می‌بردند. */}
+            <div className="ch-hero-meta">
             <p className="ch-meta">
               <MapPin size={13} aria-hidden />{city || '—'}
               {sinceYear && <><span className="ch-sep" aria-hidden />از سال {toFaDigits(sinceYear)}</>}
@@ -167,10 +179,13 @@ export default function ProfileHero({
             </button>
             {/* ⚠️ حالتِ شکست باید شنیده شود، وگرنه دکمه بی‌صدا هیچ
                 کاری نمی‌کند. */}
+            </div>
             <span aria-live="polite" className="ch-sr-live">
               {copyState === 'ok' ? 'نشانی در کلیپ‌بورد کپی شد'
                 : copyState === 'manual' ? 'مرورگر اجازه‌ی کپی نداد؛ نشانی انتخاب شد — با Ctrl+C بردارید' : ''}
             </span>
+
+            {actions && <div className="ch-hero-act">{actions}</div>}
           </div>
 
         </div>
