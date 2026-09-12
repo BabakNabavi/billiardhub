@@ -519,3 +519,167 @@ main.ch-col > section { max-width: 760px; }
 }
 .ch-gal-cell.ch-add-tile:hover:not(:disabled) { border-color: rgba(199, 166, 106, 0.75); }
 
+
+
+/* ═══════════════════════════════════════════════════════════
+   صفحه‌ی مربی — چیدمانِ کانالی
+
+   بریف: «میکسی از اینستاگرام و یوتوب». یعنی دو چیز مشخص:
+   محتوا (ویدیو و عکس) اولِ صفحه و تمام‌عرض باشد نه در ستونِ
+   باریکِ کناری، و بالای صفحه یک نوارِ آمار و یک نوارِ تب داشته
+   باشد که هویتِ «کانال» می‌دهد.
+
+   ⚠️ عددِ ساختگی ممنوع: نوارِ آمار فقط چیزی را می‌شمارد که در
+   پروفایل هست. «دنبال‌کننده» و «شاگرد» داده‌ای در این پروژه
+   ندارند و ساخته نمی‌شوند.
+   ═══════════════════════════════════════════════════════════ */
+
+/* ── نوارِ آمار ── */
+.ch-ch .ch-stats-wrap {
+  background: var(--surface, #fff);
+  border-block-end: 1px solid var(--line, rgba(17,17,17,.08));
+}
+.ch-ch .ch-stats {
+  list-style: none; margin: 0; padding: 0;
+  display: flex; flex-wrap: wrap; gap: 8px 32px;
+  padding-block: 16px;
+}
+.ch-ch .ch-stats li {
+  display: grid; gap: 2px; min-inline-size: 0;
+}
+.ch-ch .ch-stats b {
+  font-size: 20px; font-weight: 800; letter-spacing: -0.02em;
+  color: var(--ink, #111);
+}
+.ch-ch .ch-stats .ch-stats-t { font-size: 15px; }
+/* ⚠️ `--ink-3` این‌جا تعریف نشده و مقدارِ سراسری‌اش `#999` است —
+   ۲٫۸۵:۱ روی سفید. توکنِ درستِ این شیت `--text-tertiary` است. */
+.ch-ch .ch-stats span { font-size: 12px; color: var(--text-tertiary, #6E6E6E); }
+
+/* ── نوارِ تب‌ها ──
+   ⚠️ `top` عددِ ثابت نیست: نوارِ بالای سایت در حالتِ standalone
+   آی‌اواس بلندتر می‌شود، پس `env()` هم داخلِ محاسبه می‌آید. */
+.ch-ch .ch-tabsbar {
+  /* ⚠️ نوارِ سایت `fixed` است با ارتفاعِ ۷۳ و z-index ۲۰۰؛ با
+     `top: 0` نوارِ تب دقیقا پشتش می‌رفت و اصلا دیده نمی‌شد.
+     عددِ ثابت هم ننویس: همان نوار در حالتِ standalone آی‌اواس
+     `env(safe-area-inset-top)` را هم می‌گیرد و بلندتر می‌شود. */
+  position: sticky; top: calc(72px + env(safe-area-inset-top, 0px)); z-index: 20;
+  background: color-mix(in srgb, var(--surface, #fff) 88%, transparent);
+  backdrop-filter: saturate(160%) blur(12px);
+  border-block-end: 1px solid var(--line, rgba(17,17,17,.08));
+}
+.ch-ch .ch-tabsbar-in {
+  display: flex; gap: 4px; overflow-x: auto;
+  scrollbar-width: none;
+}
+.ch-ch .ch-tabsbar-in::-webkit-scrollbar { display: none; }
+.ch-ch .ch-tabsbar a {
+  flex: 0 0 auto;
+  display: inline-flex; align-items: center;
+  min-block-size: 44px; padding-inline: 16px;
+  font-size: 14px; font-weight: 700; text-decoration: none;
+  color: var(--text-tertiary, #6E6E6E);
+  border-block-end: 2px solid transparent;
+  transition: color .18s, border-color .18s;
+}
+.ch-ch .ch-tabsbar a:hover { color: var(--ink, #111); }
+.ch-ch .ch-tabsbar a:focus-visible {
+  outline: 2px solid var(--gold, #C7A66A); outline-offset: -4px; border-radius: 8px;
+}
+/* ⚠️ لنگرها زیرِ نوارِ چسبان نیفتند */
+/* هر دو نوار باید رد شوند: نوارِ سایت + نوارِ تب */
+/* ⚠️ `[id]` ممنوع: داخلِ همین صفحه `#sess-when`، `#sess-note` و
+   تب‌های گالری هم id دارند، و فوکوسِ آن ورودی‌ها روی موبایل با
+   ۱۲۶ پیکسل حاشیه‌ی اضافه اسکرول می‌شد. */
+.ch-ch #media, .ch-ch #about, .ch-ch #career, .ch-ch #reviews {
+  scroll-margin-block-start: calc(126px + env(safe-area-inset-top, 0px));
+}
+.ch-ch #media:focus-visible, .ch-ch #about:focus-visible,
+.ch-ch #career:focus-visible, .ch-ch #reviews:focus-visible {
+  outline: 2px solid var(--gold, #C7A66A); outline-offset: 6px; border-radius: 12px;
+}
+
+/* ── بخش‌ها ── */
+.ch-ch .ch-body { padding-block: 24px 48px; }
+.ch-ch .ch-sec { margin-block-end: 24px; }
+.ch-ch .ch-two { display: grid; gap: 24px; }
+@media (min-width: 1024px) {
+  .ch-ch .ch-two { grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); align-items: start; }
+}
+
+/* ── نوارِ رزرو ── */
+.ch-ch .ch-book {
+  display: grid; gap: 16px;
+  margin-block-end: 24px; padding: 20px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, #14331F 0%, #0E2418 58%, #0B0D0F 100%);
+  border: 1px solid rgb(255 255 255 / .10);
+  box-shadow: 0 18px 44px -26px rgb(0 0 0 / .6);
+}
+@media (min-width: 860px) {
+  .ch-ch .ch-book { grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 24px; }
+}
+.ch-ch .ch-book-t h2 {
+  margin: 0 0 4px; font-size: 19px; font-weight: 800; letter-spacing: -0.02em;
+  color: #fff;
+}
+.ch-ch .ch-book-t p { margin: 0; font-size: 13px; color: rgb(255 255 255 / .74); }
+/* ⚠️ رنگ‌های `SessionRequest` اینلاین‌اند و برای کارتِ سفید تنظیم
+   شده‌اند؛ روی این زمینه‌ی تیره متنِ جمع‌شده‌اش ۲٫۹:۱ می‌شد، و
+   override بدونِ `!important` هم روی اینلاین بی‌اثر است. پس به‌جای
+   جنگیدن با اینلاین، خودِ ناحیه سطحِ روشن می‌گیرد. */
+.ch-ch .ch-book-a {
+  background: #FAFAF7; border-radius: 14px; padding: 12px;
+}
+
+/* ── ردیفِ راه‌های ارتباطی داخلِ «درباره» ── */
+.ch-ch .ch-links--row { margin-block-start: 16px; }
+
+/* ── رسانه: شبکه‌ی بزرگ‌تر، مثلِ کانال ──
+   ⚠️ فقط زیرِ `.ch-ch`: همین کلاس‌ها را صفحه‌ی داور هم دارد. */
+/* ⚠️ روی موبایل سه‌ستونیِ پرکننده — همان شبکه‌ای که کاربر از
+   اینستاگرام می‌شناسد. روی دسکتاپ سقف دارد: با `1fr`ِ چهارستونی
+   هر کاشی ~۲۵۰ پیکسل می‌شد و پروفایلی با دو عکس تُنُک دیده
+   می‌شد. */
+.ch-ch .ch-gal-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+@media (min-width: 640px) {
+  .ch-ch .ch-gal-grid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 210px));
+    gap: 12px; justify-content: start;
+  }
+}
+.ch-ch .ch-gal-cell, .ch-ch .ch-vid-tile {
+  transition: transform .22s cubic-bezier(.2,.7,.3,1), box-shadow .22s;
+}
+@media (hover: hover) {
+  .ch-ch .ch-gal-cell:hover, .ch-ch .ch-vid-tile:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 16px 32px -20px rgb(0 0 0 / .45);
+  }
+}
+
+/* ── آشکارسازیِ اسکرول ──
+   ⚠️ حالتِ پایه آشکار است؛ کلاسِ `--off` را جاوااسکریپت می‌گذارد و
+   برمی‌دارد. اگر اسکریپت نرسد، محتوا دیده می‌شود. */
+.ch-ch .ch-rv {
+  transition: opacity .5s ease, transform .5s cubic-bezier(.2,.7,.3,1);
+}
+.ch-ch .ch-rv--off { opacity: 0; transform: translateY(14px); }
+
+@media (prefers-reduced-motion: reduce) {
+  .ch-ch .ch-rv, .ch-ch .ch-gal-cell, .ch-ch .ch-vid-tile,
+  .ch-ch .ch-tabsbar a { transition: none; }
+  .ch-ch .ch-rv--off { opacity: 1; transform: none; }
+  .ch-ch .ch-gal-cell:hover, .ch-ch .ch-vid-tile:hover { transform: none; }
+}
+
+/* پس‌افتِ نبودِ blur — همان الگویی که ios.css دارد */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .ch-ch .ch-tabsbar { background: var(--bg-surface, #fff); }
+}
+/* اسکلتِ نوارِ تب */
+.ch-ch .ch-skel-tabs {
+  block-size: 45px;
+  border-block-end: 1px solid var(--border-soft, rgba(17,17,17,.08));
+}

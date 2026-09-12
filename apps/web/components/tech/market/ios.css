@@ -640,7 +640,7 @@
   .tm .tm-card-name > a,
   .tmp .tmp-crumb a,
   .tmp .tmp-seg > a,
-  .tmp .tmp-slug-copy, /* ↓ هر دو محور، وگرنه ۳۵ پیکسل پهنا می‌ماند */
+  .tmp .tmp-head .tmp-slug,
   .tmp .ch-gal-tabs > button {
     min-block-size: 44px;
     display: inline-flex;
@@ -910,32 +910,26 @@
 .tmp .tmp-svc-pick[data-on='1'] .tmp-svc-box svg { color: #fff; }
 
 /* ═══════════════ نشانیِ اختصاصی روی سربرگ ═══════════════ */
+/* ⚠️ کلِ پیل دکمه است، نه ظرفی با دکمه‌ی جدا داخلش: نسخه‌ی قبلی
+   یک دکمه‌ی سبزِ پررنگ داشت که نوار را بی‌دلیل پهن می‌کرد. همان
+   الگوی `.ch-addr`ِ سربرگِ مربی. */
 .tmp .tmp-head .tmp-slug {
-  display: inline-flex; align-items: center; gap: 6px;
-  margin-block: 10px 0; padding-block: 3px; padding-inline: 10px 3px;
-  border-radius: 999px;
-  background: rgb(255 255 255 / .08);
-  border: 1px solid rgb(255 255 255 / .16);
-  max-inline-size: 100%;
-}
-.tmp .tmp-head .tmp-slug code {
-  font-size: 12px; color: rgb(255 255 255 / .92);
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-}
-.tmp .tmp-slug-copy {
-  display: inline-flex; align-items: center; justify-content: center;
-  gap: 4px; flex-shrink: 0;
-  min-inline-size: 34px; padding-block: 6px; padding-inline: 10px;
-  border: 0; border-radius: 999px; cursor: pointer;
-  background: rgb(var(--sn) / .40); color: #fff;
+  display: inline-flex; align-items: center; gap: 7px;
+  margin-block: 10px 0; min-block-size: 34px; padding-inline: 12px;
+  border-radius: 999px; cursor: pointer;
   font: inherit; font-size: 12px; font-weight: 700;
-  transition: background .16s;
+  max-inline-size: 100%;
+  transition: background .2s, border-color .2s;
 }
-.tmp .tmp-slug-copy:hover:not(:disabled) { background: rgb(var(--sn) / .58); }
-.tmp .tmp-slug-copy:focus-visible {
-  outline: 2px solid #fff; outline-offset: 2px;
+.tmp .tmp-head .tmp-slug svg { color: #F4E3BC; flex-shrink: 0; }
+.tmp .tmp-head .tmp-slug code {
+  direction: ltr; font-size: 12px; color: rgb(255 255 255 / .88);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-inline-size: 0;
 }
+.tmp .tmp-head .tmp-slug:hover { background: rgb(26 29 32 / .92); border-color: rgb(255 255 255 / .34); }
+.tmp .tmp-head .tmp-slug:focus-visible { outline: 2px solid #F4E3BC; outline-offset: 3px; }
+@media (prefers-reduced-motion: reduce) { .tmp .tmp-head .tmp-slug { transition: none; } }
 /* ⚠️ فقط برای خواننده‌ی صفحه — `display:none` را نمی‌خوانند. */
 .tmp-sr-live {
   position: absolute; inline-size: 1px; block-size: 1px;
@@ -1010,6 +1004,8 @@
 }
 /* نامک هم روی عکس است، نه روی رنگِ ثابت */
 .tmp .tmp-head .tmp-slug {
+  /* ⚠️ `border-color` تنها بی‌اثر است اگر `border-width/style` جایی
+     اعلام نشده باشد — و قاعده‌ی پایه دیگر `border` ندارد. */
   background: rgb(16 18 20 / .82);
-  border-color: rgb(255 255 255 / .20);
+  border: 1px solid rgb(255 255 255 / .20);
 }

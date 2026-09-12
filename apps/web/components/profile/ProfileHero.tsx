@@ -21,7 +21,7 @@
    ───────────────────────────────────────────────────────────── */
 
 'use client'
-import { useState, useRef, useEffect } from 'react'
+import { useCopyUrl } from '@/hooks/use-copy-url'
 import Link from 'next/link'
 import { MapPin, Check, Link2 as LinkIcon } from 'lucide-react'
 import VerifiedBadge from '../VerifiedBadge'
@@ -63,15 +63,13 @@ export default function ProfileHero({
      همان چیزی که در ستون کناری هست، این‌بار جایی که بازدیدکننده
      اول نگاه می‌کند. کپی همان‌جا انجام می‌شود تا کسی مجبور نباشد
      تا پایین صفحه اسکرول کند. */
-  const [copied, setCopied] = useState(false)
-  const tRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  useEffect(() => () => { if (tRef.current) clearTimeout(tRef.current) }, [])
-  const copy = async () => {
-    try { await navigator.clipboard.writeText(`https://${publicUrl}`) } catch { /* اجازه نبود */ }
-    setCopied(true)
-    if (tRef.current) clearTimeout(tRef.current)
-    tRef.current = setTimeout(() => setCopied(false), 1800)
-  }
+  /* ⚠️ نسخه‌ی قبلی `catch` را خالی می‌گذاشت و بعدش بی‌قیدوشرط
+     `setCopied(true)` می‌زد: وقتی مرورگر اجازه نمی‌داد — سافاری
+     بیرونِ ژستِ کاربر، مبدأِ ناامن، یا ردِ مجوز — کاربر ✓ «کپی شد»
+     می‌دید در حالی که هیچ‌چیز کپی نشده بود. هوکِ مشترک سه حالت
+     دارد و حالتِ شکست را هم اعلام می‌کند. */
+  const { state: copyState, copy } = useCopyUrl('ch-hero-url', `https://${publicUrl}`)
+  const copied = copyState === 'ok'
   /* نبود عکس دیگر یک حرف تنها نیست */
   const avatar = photo
     ? <img src={photo} alt={`عکس ${name}`} loading="eager" decoding="async" />
@@ -161,10 +159,18 @@ export default function ProfileHero({
             </p>
 
             <button type="button" onClick={copy} className="ch-addr"
-              aria-label={copied ? 'آدرس اختصاصی کپی شد' : 'کپی آدرس اختصاصی'}>
+              aria-label={copied ? `آدرس اختصاصی کپی شد: ${publicUrl}`
+                : copyState === 'manual' ? `مرورگر اجازه‌ی کپی نداد؛ نشانی انتخاب شد: ${publicUrl}`
+                : `کپی آدرس اختصاصی: ${publicUrl}`}>
               {copied ? <Check size={13} aria-hidden /> : <LinkIcon size={13} aria-hidden />}
-              <code dir="ltr">{publicUrl}</code>
+              <code id="ch-hero-url" dir="ltr">{publicUrl}</code>
             </button>
+            {/* ⚠️ حالتِ شکست باید شنیده شود، وگرنه دکمه بی‌صدا هیچ
+                کاری نمی‌کند. */}
+            <span aria-live="polite" className="ch-sr-live">
+              {copyState === 'ok' ? 'نشانی در کلیپ‌بورد کپی شد'
+                : copyState === 'manual' ? 'مرورگر اجازه‌ی کپی نداد؛ نشانی انتخاب شد — با Ctrl+C بردارید' : ''}
+            </span>
           </div>
 
         </div>
