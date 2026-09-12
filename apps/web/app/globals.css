@@ -1058,9 +1058,17 @@ h1                               { font-weight: 800; }
    (رنگ و فونت بدون !important می‌مانند تا صفحه‌ای که عمدا تم دیگری
    می‌خواهد بتواند عوضشان کند.) */
 select {
-  appearance: none;
+  /* ترتیبِ متعارف: prefix اول، استاندارد آخر.
+     ⚠️ این ترتیب خروجیِ بیلد را عوض *نمی‌کند*: پروژه `browserslist`
+     ندارد و Next هدف‌های مدرنِ خودش را می‌گیرد، که در آن‌ها
+     `appearance` بدونِ prefix پشتیبانی می‌شود — پس مینیفایر هر دو
+     نسخه‌ی prefixed را عمدا می‌اندازد و درست هم می‌اندازد. اگر روزی
+     هدف‌ها عقب‌تر رفتند، این ترتیب از قبل درست است.
+     ⚠️ `backdrop-filter` فرق دارد: آن‌جا سافاری هنوز به prefix نیاز
+     دارد، پس ترتیب واقعا مهم است. */
   -webkit-appearance: none;
   -moz-appearance: none;
+  appearance: none;
   background-color: #fff;
   background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%238F6531' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
   background-repeat: no-repeat;

@@ -395,7 +395,6 @@ export default function CoachProfilePage() {
         name={coach.name}
         nameLatin={latin || undefined}
         city={coach.city}
-        sinceYear={sinceYear || undefined}
         photo={coach.photo}
         cover={coach.coverImage}
         verified={coach.verified}

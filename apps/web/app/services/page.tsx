@@ -213,18 +213,23 @@ export default function TechnicalServicesPage() {
         </div>
       </section>
 
-      {/* ═══════ ۲ — دسته‌های خدمت ═══════ */}
-      <section className="tm-sec tm-wrap" aria-labelledby="tm-cats-h">
-        <div className="tm-sec-head">
-          <h2 className="tm-h2" id="tm-cats-h">خدمات فنی</h2>
-          <Link className="tm-link" href="#tm-people">مشاهده همه متخصصان</Link>
-        </div>
-        <ServiceCategoryList
-          active={category}
-          onPick={id => { setCategory(id); scrollToResults() }}
-          counts={catCounts}
-        />
-      </section>
+      {/* ═══════ ۲ — دسته‌های خدمت ═══════
+          ⚠️ قابِ گرادیانی و کارت‌های شیشه‌ای عینا از نوارِ «کاوش کن»ِ
+          صفحه‌ی اصلی می‌آید؛ مالک خواست این دو شبکه یکی دیده شوند.
+          لکه‌ها با شبه‌المان‌اند نه `div`، چون تزئینِ محض‌اند. */}
+      <div className="tm-explore">
+        <section className="tm-sec tm-wrap" aria-labelledby="tm-cats-h">
+          <div className="tm-sec-head">
+            <h2 className="tm-h2" id="tm-cats-h">خدمات فنی</h2>
+            <Link className="tm-link" href="#tm-people">مشاهده همه متخصصان</Link>
+          </div>
+          <ServiceCategoryList
+            active={category}
+            onPick={id => { setCategory(id); scrollToResults() }}
+            counts={catCounts}
+          />
+        </section>
+      </div>
 
       {/* ═══════ ۳ — دایرکتوری ═══════ */}
       <section className="tm-sec tm-wrap" id="tm-people" aria-labelledby="tm-people-h" ref={resultsRef}>
