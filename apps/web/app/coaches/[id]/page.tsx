@@ -25,7 +25,7 @@ import { useProfileImageViewer } from '@/components/ProfileImageViewer'
 import { useProfileVideoViewer } from '@/components/profile/ProfileVideoViewer'
 import { normalizeDigits } from '@/lib/text-fa'
 import { toFaDigits } from '@/lib/jalali'
-import { Phone, Send } from 'lucide-react'
+import { Phone, Send, CalendarPlus } from 'lucide-react'
 import { getCoachProfile, badgeFromGrades, disciplineLabel, GRADES, type CoachProfile } from '@/lib/coach-store'
 
 /* همان سقفی که پنل اعمال می‌کند */
@@ -401,6 +401,17 @@ export default function CoachProfilePage() {
         onOpenPhoto={u => openImage(u, { title: coach.name, alt: `عکس ${coach.name}` })}
         role="coach" backHref="/coaches" backLabel="مربیان"
         publicUrl={publicUrl}
+        actions={
+          <>
+            {/* ⚠️ لنگر است نه دکمه‌ی تکراری: فرمِ رزرو یکی است و
+                پایین‌تر رندر می‌شود. دو نمونه یعنی دو state. */}
+            {!edit.isOwner && (
+              <a className="ch-hero-cta" href="#ch-sess-h">
+                <CalendarPlus size={17} aria-hidden />درخواست جلسه
+              </a>
+            )}
+          </>
+        }
       />
 
       {/* ── نوارِ آمار ──

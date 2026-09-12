@@ -592,7 +592,7 @@ main.ch-col > section { max-width: 760px; }
 /* ⚠️ `[id]` ممنوع: داخلِ همین صفحه `#sess-when`، `#sess-note` و
    تب‌های گالری هم id دارند، و فوکوسِ آن ورودی‌ها روی موبایل با
    ۱۲۶ پیکسل حاشیه‌ی اضافه اسکرول می‌شد. */
-.ch-ch #media, .ch-ch #about, .ch-ch #career, .ch-ch #reviews {
+.ch-ch #media, .ch-ch #about, .ch-ch #career, .ch-ch #reviews, .ch-ch #ch-sess-h {
   scroll-margin-block-start: calc(126px + env(safe-area-inset-top, 0px));
 }
 .ch-ch #media:focus-visible, .ch-ch #about:focus-visible,
@@ -682,4 +682,111 @@ main.ch-col > section { max-width: 760px; }
 .ch-ch .ch-skel-tabs {
   block-size: 45px;
   border-block-end: 1px solid var(--border-soft, rgba(17,17,17,.08));
+}
+
+
+/* ═══════════════════════════════════════════════════════════
+   هدرِ پروفایل — بازطراحی
+
+   ⚠️ این بلوک روی صفحه‌ی داور هم می‌نشیند چون `ProfileHero`
+   مشترک است. همه‌ی چیزهایی که این‌جاست ساختاری‌اند و برای هر دو
+   نقش درست‌اند؛ چیزی که فقط به مربی ربط دارد زیرِ `.ch-ch` است.
+   ═══════════════════════════════════════════════════════════ */
+
+/* ── حرکتِ سینماتیکِ کاور ──
+   ⚠️ فقط `transform`. `filter` روی این لایه‌ها ثابت است و متحرک
+   نمی‌شود: انیمیشنِ فیلتر هر فریم دوباره رستر می‌کند و روی
+   اندرویدِ ضعیف فریم می‌اندازد. */
+/* ⚠️ `.ch-hero-fill` عمدا `scale(1.12)` دارد و انیمیشن آن مقدار را
+   بی‌صدا می‌خورد؛ آن لایه `blur(26px)` است و با ۱٫۰۳ لبه‌اش داخلِ
+   قاب می‌آمد و نوارِ `#111` بالای هیرو بیرون می‌زد.
+   ⚠️ از ۷۰۰px به بالا `.ch-hero-img` روی `contain` است و کلِ کاورِ
+   کاربر باید دیده شود — بزرگ‌نمایی دقیقا همان چیزی را می‌بُرد که آن
+   چیدمانِ دولایه برایش ساخته شده. پس حرکت فقط روی موبایل می‌ماند، و
+   روی پوسترِ ساخته‌شده که عکسِ کسی نیست. */
+.ch-hero-img, .cp {
+  transform-origin: 50% 40%;
+  animation: ch-ken 52s ease-in-out infinite alternate;
+}
+@media (min-width: 700px) {
+  .ch-hero-img { animation: none; transform: none; }
+}
+@keyframes ch-ken {
+  from { transform: scale(1.03); }
+  to   { transform: scale(1.10) translate3d(1.2%, -1%, 0); }
+}
+
+/* ── حلقه‌ی گرادیانی دورِ آواتار ── */
+.ch-avatar-ring {
+  display: inline-grid; place-items: center; flex-shrink: 0;
+  padding: 3px; border-radius: 50%;
+  background: conic-gradient(from 210deg,
+    #C7A66A 0deg, #F4E3BC 90deg, #8F6531 190deg, #F4E3BC 280deg, #C7A66A 360deg);
+  /* ⚠️ سایه این‌جا نه: خودِ `.ch-avatar` سایه‌ی ۰ ۱۲ ۴۰ دارد و
+     دوتا روی هم می‌نشست. */
+}
+/* ⚠️ آواتار پس‌زمینه‌ی نیمه‌شفاف دارد (`rgba(255,255,255,.06)`).
+   روی زمینه‌ی تیره‌ی هیرو این تیره دیده می‌شد، ولی حالا حلقه‌ی
+   طلاییِ ماتِ پشتش از لایش می‌زند بیرون و کلِ دایره یک سکه‌ی طلا
+   می‌شود. پس داخلِ حلقه پایه‌ی مات می‌گیرد.
+   ⚠️ بردرِ طلاییِ خودش هم دیگر لازم نیست: دو خطِ طلایی تودرتو. */
+.ch-avatar-ring > .ch-avatar {
+  background-color: #12161A;
+  border-color: rgb(0 0 0 / .38);
+}
+/* ⚠️ `button.ch-avatar:hover` وزنِ بالاتری دارد (type+class+pseudo)
+   و بردر را دوباره طلایی می‌کرد — همان دو حلقه‌ی تودرتویی که این
+   بلوک قرار بود جلویش را بگیرد. */
+.ch-avatar-ring > button.ch-avatar:hover { border-color: rgb(0 0 0 / .38); }
+/* ⚠️ حلقه‌ی فوکوسِ طلایی با `outline-offset: 4px` دقیقا روی حلقه‌ی
+   طلایی می‌نشست: طلا روی طلا، عملا نامرئی برای کاربرِ کیبورد. */
+.ch-avatar-ring > button.ch-avatar:focus-visible {
+  outline-color: #fff; outline-offset: 7px;
+}
+.ch-avatar-ring > .ch-avatar[data-glyph] {
+  background-color: #12161A;
+  background-image: linear-gradient(150deg, rgba(199,166,106,.20), rgba(255,255,255,.05));
+}
+
+/* ── متا + نامک در یک ردیف ── */
+.ch-hero-meta {
+  display: flex; flex-wrap: wrap; align-items: center;
+  gap: 8px 14px; margin-block-start: 12px;
+}
+.ch-hero-meta .ch-meta { margin: 0; }
+.ch-hero-meta .ch-addr { margin-top: 0; }
+
+/* ── ردیفِ کنشِ هدر ── */
+.ch-hero-act {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 10px;
+  margin-block-start: 16px;
+}
+.ch-hero-cta {
+  display: inline-flex; align-items: center; gap: 8px;
+  min-block-size: 44px; padding-inline: 18px;
+  border-radius: 999px; text-decoration: none;
+  font-size: 14px; font-weight: 800;
+  background: #F4E3BC; color: #2A1E08;
+  border: 1px solid rgb(255 255 255 / .22);
+  transition: background .2s, transform .2s;
+}
+.ch-hero-cta:hover { background: #FDF4DC; transform: translateY(-1px); }
+.ch-hero-cta:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+/* ⚠️ آیکونِ تنها باید هدفِ لمسیِ کامل داشته باشد */
+.ch-hero-ico {
+  display: inline-grid; place-items: center;
+  inline-size: 44px; block-size: 44px;
+  border-radius: 50%;
+  color: #fff; text-decoration: none;
+  background: rgb(255 255 255 / .10);
+  border: 1px solid rgb(255 255 255 / .20);
+  transition: background .2s, border-color .2s;
+}
+.ch-hero-ico:hover { background: rgb(255 255 255 / .20); border-color: rgb(255 255 255 / .38); }
+.ch-hero-ico:focus-visible { outline: 2px solid var(--gold, #C7A66A); outline-offset: 3px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .ch-hero-img, .cp { animation: none; transform: none; }
+  .ch-hero-cta, .ch-hero-ico { transition: none; }
+  .ch-hero-cta:hover { transform: none; }
 }
