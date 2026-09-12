@@ -226,9 +226,9 @@ export default function CoachProfilePage() {
          نوارِ تب ← رسانه‌ی تمام‌عرض. */
       <div className="ch-page ch-ch ch-skel" role="status" aria-busy="true" aria-label="در حال بارگذاری پروفایل مربی">
         <div className="ch-skel-hero" />
-        <div className="ch-stats-wrap"><div className="ch-wrap">
-          <div className="ch-skel-line ch-skel-sm" />
-        </div></div>
+        {/* ⚠️ آمار حالا داخلِ خودِ هدر است، پس اسکلت هم باید هدرِ
+            بلندتر نشان دهد — وگرنه لحظه‌ی رسیدنِ داده حدود ۸۵ پیکسل
+            پرش دارد، دقیقا همان چیزی که اسکلت برای نبودنش هست. */}
         <div className="ch-skel-tabs" />
         <div className="ch-body"><div className="ch-wrap">
           <div className="ch-skel-line ch-skel-sm" />
@@ -388,6 +388,9 @@ export default function CoachProfilePage() {
 
   return (
     <div className="ch-page ch-ch">
+      {/* ⚠️ آمار فقط چیزهایی را می‌شمارد که واقعا در پروفایل هست.
+          هیچ عددِ «دنبال‌کننده» یا «شاگرد» ساخته نمی‌شود؛ پروژه
+          داده‌اش را ندارد. آیتمِ صفر اصلا رندر نمی‌شود. */}
       <ProfileHero
         name={coach.name}
         nameLatin={latin || undefined}
@@ -401,26 +404,8 @@ export default function CoachProfilePage() {
         onOpenPhoto={u => openImage(u, { title: coach.name, alt: `عکس ${coach.name}` })}
         role="coach" backHref="/coaches" backLabel="مربیان"
         publicUrl={publicUrl}
-        actions={
-          <>
-            {/* ⚠️ لنگر است نه دکمه‌ی تکراری: فرمِ رزرو یکی است و
-                پایین‌تر رندر می‌شود. دو نمونه یعنی دو state. */}
-            {!edit.isOwner && (
-              <a className="ch-hero-cta" href="#ch-sess-h">
-                <CalendarPlus size={17} aria-hidden />درخواست جلسه
-              </a>
-            )}
-          </>
-        }
-      />
-
-      {/* ── نوارِ آمار ──
-          ⚠️ فقط شمارشِ چیزهایی که واقعا در پروفایل هست. هیچ عددِ
-          «دنبال‌کننده» یا «شاگرد» ساخته نمی‌شود؛ پروژه داده‌اش را
-          ندارد و عددِ ساختگی روی پروفایلِ آدمِ واقعی از نبودش بدتر
-          است. آیتمِ صفر اصلا رندر نمی‌شود. */}
-      <div className="ch-stats-wrap">
-        <div className="ch-wrap">
+        posterBase="coach"
+        stats={
           <ul className="ch-stats">
             {coach.videos.length > 0 && (
               <li><b>{toFaDigits(String(coach.videos.length))}</b><span>ویدیو</span></li>
@@ -434,8 +419,19 @@ export default function CoachProfilePage() {
             {grade && <li><b className="ch-stats-t">{grade.label}</b><span>بالاترین درجه</span></li>}
             {sinceYear && <li><b>{toFaDigits(sinceYear)}</b><span>شروع مربیگری</span></li>}
           </ul>
-        </div>
-      </div>
+        }
+        actions={
+          <>
+            {/* ⚠️ لنگر است نه دکمه‌ی تکراری: فرمِ رزرو یکی است و
+                پایین‌تر رندر می‌شود. دو نمونه یعنی دو state. */}
+            {!edit.isOwner && (
+              <a className="ch-hero-cta" href="#ch-sess-h">
+                <CalendarPlus size={17} aria-hidden />درخواست جلسه
+              </a>
+            )}
+          </>
+        }
+      />
 
       {/* ── نوارِ تب‌ها ──
           لنگر است نه روتر: محتوا کوتاه است و صفحه‌ی جدا برای هر تب

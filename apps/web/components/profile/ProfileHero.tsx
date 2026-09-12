@@ -55,12 +55,19 @@ export interface ProfileHeroProps {
   /* ⚠️ کنشِ اصلیِ صفحه داخلِ خودِ هدر. اختیاری است چون صفحه‌ی داور
      کنشی ندارد و نباید جای خالی بگیرد. */
   actions?: React.ReactNode
+  /* ⚠️ آمار داخلِ خودِ هدر می‌نشیند — همان کاری که پروفایلِ راننده در
+     F1 و پروفایلِ بازیکن در WST می‌کنند. نوارِ جدا زیرِ هدر، صفحه را
+     دو تکه می‌کرد و هیچ‌کدام قوی نبود. */
+  stats?: React.ReactNode
+  /* نامِ پایه‌ی پوسترِ نقش، بدون عرض و پسوند. اگر ندهی، پوسترِ
+     برداریِ ساخته‌شده رندر می‌شود. */
+  posterBase?: string
 }
 
 export default function ProfileHero({
   name, nameLatin, city, sinceYear, photo, cover, verified,
   grade, disciplines, onOpenPhoto,
-  role, backHref, backLabel, publicUrl, actions,
+  role, backHref, backLabel, publicUrl, actions, stats, posterBase,
 }: ProfileHeroProps) {
   /* ── آدرس اختصاصی روی هیرو ──
      همان چیزی که در ستون کناری هست، این‌بار جایی که بازدیدکننده
@@ -85,7 +92,7 @@ export default function ProfileHero({
   const head  = parts.join(' ')
 
   return (
-    <header className="ch-hero">
+    <header className={'ch-hero' + (!cover && posterBase ? ' ch-hero--photo' : '')}>
       {/* کاور واقعی اگر هست، وگرنه پوستر ساخته‌شده — نه عکس قرضی
           یک میز اسنوکر اتفاقی که روی پروفایل همه می‌نشست. */}
       {cover
@@ -93,8 +100,28 @@ export default function ProfileHero({
             <div className="ch-hero-fill" style={{ backgroundImage: `url(${cover})` }} />
             <div className="ch-hero-img" style={{ backgroundImage: `url(${cover})` }} />
           </>
-        : <CoverPoster tone={role} />}
-      <div className="ch-hero-scrim" data-poster={cover ? undefined : '1'} />
+        : posterBase
+          ? (
+            /* ⚠️ دو ترکیب: قابِ افقیِ دسکتاپ و قابِ عمودیِ موبایل. یک
+               عکسِ افقی روی گوشی فقط یک نوارِ باریکِ میانی نشان می‌دهد.
+               سوژه در هر دو سمتِ چپ است. ⚠️ سمتِ راست خودِ عکس تیره
+               *نیست* — پارچه‌ی سبز تا لبه می‌آید؛ چیزی که متن را
+               خوانا می‌کند توقفِ ۹۲٪ِ پرده است، نه خودِ قاب. پرده را
+               به اعتمادِ «عکس آن‌جا تیره است» ضعیف نکن. */
+            <picture>
+              <source media="(max-width: 699px)" type="image/avif"
+                srcSet={[480, 640, 848, 1170].map(w => `/images/coaches/${posterBase}-tall-${w}.avif ${w}w`).join(', ')} sizes="100vw" />
+              <source media="(max-width: 699px)" type="image/webp"
+                srcSet={[480, 640, 848, 1170].map(w => `/images/coaches/${posterBase}-tall-${w}.webp ${w}w`).join(', ')} sizes="100vw" />
+              <source type="image/avif"
+                srcSet={[768, 1024, 1264, 1920].map(w => `/images/coaches/${posterBase}-wide-${w}.avif ${w}w`).join(', ')} sizes="100vw" />
+              <img className="ch-hero-photo" alt="" decoding="async" fetchPriority="high"
+                src={`/images/coaches/${posterBase}-wide-1024.webp`}
+                srcSet={[768, 1024, 1264, 1920].map(w => `/images/coaches/${posterBase}-wide-${w}.webp ${w}w`).join(', ')} sizes="100vw" />
+            </picture>
+          )
+          : <CoverPoster tone={role} />}
+      <div className="ch-hero-scrim" data-poster={cover ? undefined : '1'} data-photo={!cover && posterBase ? '1' : undefined} />
       {nameLatin && <div className="ch-hero-ghost" aria-hidden>{nameLatin}</div>}
 
       <div className="ch-wrap ch-hero-body">
@@ -189,6 +216,8 @@ export default function ProfileHero({
           </div>
 
         </div>
+
+        {stats && <div className="ch-hero-stats">{stats}</div>}
       </div>
     </header>
   )
