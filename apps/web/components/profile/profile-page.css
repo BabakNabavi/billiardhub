@@ -573,6 +573,12 @@ main.ch-col > section { max-width: 760px; }
   display: flex; gap: 4px; overflow-x: auto;
   scrollbar-width: none;
 }
+/* ⚠️ در RTL شروعِ فلکس سمتِ راست است و نوار به راست می‌چسبید. */
+@media (max-width: 699px) {
+  /* ⚠️ `safe`: با `center`ِ ساده، اگر تب‌ها سرریز کنند لبه‌ی شروع
+     (راست در RTL) غیرقابل‌دسترس می‌شود. */
+  .ch-ch .ch-tabsbar-in { justify-content: safe center; }
+}
 .ch-ch .ch-tabsbar-in::-webkit-scrollbar { display: none; }
 .ch-ch .ch-tabsbar a {
   flex: 0 0 auto;
@@ -617,21 +623,17 @@ main.ch-col > section { max-width: 760px; }
   border: 1px solid rgb(255 255 255 / .10);
   box-shadow: 0 18px 44px -26px rgb(0 0 0 / .6);
 }
-@media (min-width: 860px) {
-  .ch-ch .ch-book { grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 24px; }
-}
+/* ⚠️ دوستونه نباشد: یک عبارتِ دوخطی نصفِ عرضِ صفحه را می‌گرفت و فرم
+   نصفِ دیگر را. متن بالای فرم می‌نشیند و هر دو تمام‌عرض‌اند. */
 .ch-ch .ch-book-t h2 {
   margin: 0 0 4px; font-size: 19px; font-weight: 800; letter-spacing: -0.02em;
   color: #fff;
 }
 .ch-ch .ch-book-t p { margin: 0; font-size: 13px; color: rgb(255 255 255 / .74); }
-/* ⚠️ رنگ‌های `SessionRequest` اینلاین‌اند و برای کارتِ سفید تنظیم
-   شده‌اند؛ روی این زمینه‌ی تیره متنِ جمع‌شده‌اش ۲٫۹:۱ می‌شد، و
-   override بدونِ `!important` هم روی اینلاین بی‌اثر است. پس به‌جای
-   جنگیدن با اینلاین، خودِ ناحیه سطحِ روشن می‌گیرد. */
-.ch-ch .ch-book-a {
-  background: #FAFAF7; border-radius: 14px; padding: 12px;
-}
+/* ⚠️ این‌جا کادر نگذار. فرمِ باز خودش زمینه‌ی روشن و بردر دارد، پس
+   یک کادرِ دیگر دورش یعنی سه باکسِ تودرتو: نوارِ تیره، کادرِ روشن،
+   خودِ فرم. مشکلِ کنتراستِ دکمه‌ی بسته هم آن‌جا حل شد که ساخته
+   می‌شود — رنگش توپر شد. */
 
 /* ── ردیفِ راه‌های ارتباطی داخلِ «درباره» ── */
 .ch-ch .ch-links--row { margin-block-start: 16px; }
@@ -826,16 +828,11 @@ main.ch-col > section { max-width: 760px; }
   }
 }
 
-/* ── نامِ درشت‌تر، با میله‌ی تأکید ── */
-/* ⚠️ فقط حالتِ عکسی. بدونِ این قید، صفحه‌ی داور هم نامِ درشت‌تر و
-   میله‌ی طلایی می‌گرفت روی پوستری که برایشان طراحی نشده. */
+/* ── نامِ درشت‌تر ── */
+/* ⚠️ فقط حالتِ عکسی. بدونِ این قید، صفحه‌ی داور هم نامِ درشت‌تر را
+   می‌گرفت روی پوستری که برایش طراحی نشده. */
 .ch-hero--photo .ch-hero-id > .ch-name { font-size: clamp(32px, 6.4vw, 68px); letter-spacing: -0.03em; }
-.ch-hero--photo .ch-hero-id > .ch-name::before {
-  content: ''; display: block;
-  inline-size: 54px; block-size: 4px; border-radius: 2px;
-  margin-block-end: 14px;
-  background: linear-gradient(90deg, #F4E3BC, #C7A66A 60%, transparent);
-}
+
 
 /* ── نوارِ آمار داخلِ هدر ── */
 .ch-hero-stats {
@@ -855,14 +852,7 @@ main.ch-col > section { max-width: 760px; }
 /* ⚠️ منطقی، نه `:first-child`: در RTL اولین آیتم سمتِ راست است و
    خطِ جداکننده باید از دومی به بعد باشد. */
 .ch-hero-stats .ch-stats li:first-child { border-inline-start: 0; padding-inline-start: 0; }
-/* ⚠️ زیرِ ۷۰۰ نوار می‌شکند و جداکننده‌ی اولین آیتمِ سطرِ دوم در هوا
-   می‌ماند. آن‌جا شبکه می‌شود و خط‌ها کلا برداشته. */
-@media (max-width: 699px) {
-  .ch-hero-stats .ch-stats {
-    display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 16px;
-  }
-  .ch-hero-stats .ch-stats li { border-inline-start: 0; padding-inline: 0; }
-}
+
 .ch-hero-stats .ch-stats b {
   font-size: clamp(18px, 2.4vw, 26px); font-weight: 800; letter-spacing: -0.02em;
   color: #fff; line-height: 1.2;
@@ -871,6 +861,27 @@ main.ch-col > section { max-width: 760px; }
 .ch-hero-stats .ch-stats span {
   font-size: 11.5px; font-weight: 600; letter-spacing: .02em;
   color: rgb(255 255 255 / .74);
+}
+
+/* ── موبایل: همان یک سطر، با همان خط‌های جداکننده ──
+   ⚠️ `flex-wrap` برداشته شد، وگرنه جداکننده‌ی اولین آیتمِ سطرِ دوم
+   در هوا می‌ماند. اندازه‌ها کوچک می‌شوند تا پنج قلم در ۳۵۸ پیکسل
+   جا شوند؛ `overflow-x` فقط شیرِ اطمینان است برای نامِ درجه‌ی بلند.
+   ⚠️ وسط‌چین: `flex-start` در RTL یعنی راست، و نوار به یک سمت
+   می‌چسبید. */
+@media (max-width: 699px) {
+  .ch-hero-stats .ch-stats {
+    flex-wrap: nowrap; justify-content: safe center;
+    overflow-x: auto; scrollbar-width: none;
+  }
+  .ch-hero-stats .ch-stats::-webkit-scrollbar { display: none; }
+    /* ⚠️ بدونِ `flex: 0 0 auto` آیتم‌ها جمع می‌شوند به‌جای اینکه
+     سرریز کنند، پس `overflow-x` هیچ‌وقت فعال نمی‌شود و برچسبِ
+     `nowrap` روی آیتمِ بغلی می‌افتد. */
+  .ch-hero-stats .ch-stats li { flex: 0 0 auto; padding-inline: 9px; text-align: center; }
+  .ch-hero-stats .ch-stats b { font-size: 16px; }
+  .ch-hero-stats .ch-stats .ch-stats-t { font-size: 12.5px; }
+  .ch-hero-stats .ch-stats span { font-size: 10px; white-space: nowrap; }
 }
 
 
@@ -886,3 +897,29 @@ main.ch-col > section { max-width: 760px; }
   background: rgb(24 18 6 / .88);
   border-color: rgb(199 166 106 / .46);
 }
+
+
+/* ── تراشه‌های ساعتِ درخواستِ جلسه ──
+   ⚠️ ۴۴ پیکسل، نه ۳۸: این متراکم‌ترین ناحیه‌ی لمسیِ صفحه است (۳۲
+   هدف کنار هم) و مخاطبِ اصلی موبایل است. */
+.sess-slots {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(62px, 1fr)); gap: 6px;
+}
+.sess-slot {
+  min-block-size: 44px; border-radius: 9px; cursor: pointer;
+  font: inherit; font-size: 13px; font-weight: 700;
+  border: 1px solid #EAE5DA; background: #fff; color: #1C1B17;
+  transition: background .15s, border-color .15s;
+}
+@media (hover: hover) {
+  .sess-slot:hover:not(:disabled) { background: #FAF6EC; border-color: #C7A66A; }
+}
+.sess-slot[data-on] {
+  border-color: #C7A66A; background: rgba(199,166,106,0.18); color: #8F6531;
+}
+/* ⚠️ `#B3AEA1` روی `#F3F1EB` یعنی ۱٫۹:۱ — خواندنی نبود، و دلیلِ
+   غیرفعال‌کردن به‌جای حذف همین بود که کاربر *ببیند* کدام ساعت
+   بسته است. */
+.sess-slot:disabled { background: #F3F1EB; color: #6F6A5C; cursor: not-allowed; }
+.sess-slot:focus-visible { outline: 2px solid #8F6531; outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) { .sess-slot { transition: none; } }
