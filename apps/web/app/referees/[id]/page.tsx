@@ -150,6 +150,35 @@ export default function RefereeProfilePage() {
   const edit = useOwnerEdit<RefereeProfile>('referee', id, localP, ownerId, setLocalP, mine)
   const { gate: channelGate, ask: askChannel, publish: publishToChannel } = useChannelPublish('referee', ownerId ?? undefined, edit.isOwner, notify)
 
+  /* ⚠️ این هوک باید **بالای** returnهای زودهنگام بماند. قبلا پایین‌تر
+     بود و نتیجه‌اش این بود که رندر اول (`checked === false`، یعنی
+     اسکلت) یک هوک کمتر صدا می‌زد و رندر بعدی — وقتی داده می‌رسید —
+     یکی بیشتر. React با خطای #310 کل صفحه را می‌انداخت، پس صفحه‌ی
+     مربی و داور *همیشه* بعد از لود شدن می‌ترکید و کاربر «مشکلی پیش
+     آمد» می‌دید. هر هوک تازه‌ای هم از این به بعد باید همین‌جا، بالای
+     خط `if (!checked)` اضافه شود. */
+  /* ── ویرایش عنوان ویدیو ──
+     عنوان دو نسخه دارد: ردیف گالری پروفایل و ردیف بیلیارد مدیا.
+     هوک دومی را می‌زند، این تابع اولی را. کلید نشانی فایل است،
+     چون گالری شناسه‌ی ردیف مدیا را ندارد. */
+  const { dialog: videoEditDialog, edit: editVideo } = useVideoEdit(
+    async (target, detail) => {
+      /* ⚠️ `map` بدون تطبیق هم «موفق» برمی‌گردد. اگر نشانی جور نشود
+         (کدگذاری متفاوت، ردیف بی‌url)، هوک «شد» می‌شنید و مدیا را
+         عوض می‌کرد در حالی که گالری عنوان قبلی را نشان می‌دهد —
+         یعنی دو عنوان برای یک ویدیو. */
+      let hit = false
+      const ok = await edit.apply(prof => {
+        const list = prof.videos ?? []
+        hit = list.some(x => x.url === target.url)
+        if (!hit) return prof
+        return { ...prof, videos: list.map(x => (x.url === target.url ? { ...x, title: detail.title } : x)) }
+      })
+      return ok && hit
+    },
+    notify,
+  )
+
   if (!checked) {
     return (
       <div className="ch-page ch-skel" role="status" aria-busy="true" aria-label="در حال بارگذاری پروفایل داور">
@@ -317,27 +346,6 @@ export default function RefereeProfilePage() {
       return { ...d, albums: [...list, n] }
     })
   }
-  /* ── ویرایش عنوان ویدیو ──
-     عنوان دو نسخه دارد: ردیف گالری پروفایل و ردیف بیلیارد مدیا.
-     هوک دومی را می‌زند، این تابع اولی را. کلید نشانی فایل است،
-     چون گالری شناسه‌ی ردیف مدیا را ندارد. */
-  const { dialog: videoEditDialog, edit: editVideo } = useVideoEdit(
-    async (target, detail) => {
-      /* ⚠️ `map` بدون تطبیق هم «موفق» برمی‌گردد. اگر نشانی جور نشود
-         (کدگذاری متفاوت، ردیف بی‌url)، هوک «شد» می‌شنید و مدیا را
-         عوض می‌کرد در حالی که گالری عنوان قبلی را نشان می‌دهد —
-         یعنی دو عنوان برای یک ویدیو. */
-      let hit = false
-      const ok = await edit.apply(prof => {
-        const list = prof.videos ?? []
-        hit = list.some(x => x.url === target.url)
-        if (!hit) return prof
-        return { ...prof, videos: list.map(x => (x.url === target.url ? { ...x, title: detail.title } : x)) }
-      })
-      return ok && hit
-    },
-    notify,
-  )
 
   const deleteVideo = async (id: string) => {
     if (!(await ask('این ویدیو حذف شود؟', { body: 'این کار برگشت‌پذیر نیست.', confirmLabel: 'حذف' }))) return
@@ -470,7 +478,7 @@ export default function RefereeProfilePage() {
 
       {imageViewer}
       {videoViewer}
-      {channelGate}
+      {channelGate}
       {videoEditDialog}
     </div>
   )

@@ -56,6 +56,11 @@ export default function AdminNewsPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState(emptyForm);
   const [saved, setSaved] = useState(false);
+  /* ⚠️ این پایین‌تر بود، بعدِ `if (!_hydrated) return null`. یعنی
+     رندرِ اول یک هوک کمتر داشت و رندرِ بعد از hydrate یکی بیشتر —
+     React با #310 کلِ صفحه را می‌انداخت و «انتشار خبر» اصلا باز
+     نمی‌شد. هر هوکِ تازه باید همین بالا بماند. */
+  const [busyId, setBusyId] = useState<string | null>(null);
 
   /* گارد بعد از hydrate — وگرنه ادمین موقع رفرش بی‌دلیل bounce می‌شد */
   useEffect(() => {
@@ -112,8 +117,6 @@ export default function AdminNewsPage() {
      همان چیزی که این کد برای جلوگیری از آن نوشته شده بود.
      پرس‌وجوهای عمومی فقط روی `status` فیلتر می‌کنند، پس پاک‌کردن
      تاریخ هیچ لازم نبود. */
-  const [busyId, setBusyId] = useState<string | null>(null);
-
   const togglePublish = async (item: NewsItem) => {
     if (busyId) return;
     setBusyId(item.id);

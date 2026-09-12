@@ -54,7 +54,7 @@ export const TECH_SERVICE_CATEGORIES: TechServiceCategory[] = [
       cue('straighten', 'تاب‌گیری'),
       cue('full-service', 'سرویس کامل چوب',
         'احیای رنگ و خطوط و روغن‌کاری‌های چندمرحله‌ای بابت محافظت از چوب'),
-      cue('joint', 'تعویض و نصب جوینت', 'رزوه وسط و انتهای چوب'),
+      cue('joint', 'تعویض و نصب جوینت', 'رزوه‌ی وسط و انتهای چوب، تعویض جوینت شکسته و نصب جوینت نو'),
       cue('weight', 'تغییر وزن'),
       cue('balance', 'تغییر بالانس'),
       cue('butt-resize', 'تغییر سایز بات'),

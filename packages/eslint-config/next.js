@@ -50,6 +50,10 @@ export const nextJsConfig = [
     settings: { react: { version: "detect" } },
     rules: {
       ...pluginReactHooks.configs.recommended.rules,
+      // ⚠️ پیش‌فرضِ این قاعده "warn" است و دقیقا به همین دلیل یک باگِ
+      // ترتیبِ هوک تا سایتِ زنده رفت و صفحه‌ی مربی و داور را کامل
+      // می‌انداخت: لینت دیده بودش ولی کسی بینِ هشدارها ندیدش.
+      "react-hooks/rules-of-hooks": "error",
       // React scope no longer necessary with new JSX transform.
       "react/react-in-jsx-scope": "off",
     },
