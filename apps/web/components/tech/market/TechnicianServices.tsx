@@ -15,33 +15,59 @@
    ناپدید می‌شود.
    ───────────────────────────────────────────────────────────── */
 
-import { Phone } from 'lucide-react'
+import { Check, Phone } from 'lucide-react'
 import type { ResolvedServices } from '@/lib/tech-services'
 import { ServiceIcon } from './ServiceIcons'
 
 export interface TechnicianServicesProps {
   data: ResolvedServices
-  /** شماره‌ی تماس — اگر نبود، کنش درخواست رندر نمی‌شود */
-  phone?: string
+  /** عنوان خدماتی که کاربر تیک زده */
+  selected?: string[]
+  /** اگر ندهی، ردیف‌ها فقط خواندنی‌اند و تیکی رندر نمی‌شود */
+  onToggle?: (title: string) => void
+  /** ⚠️ پس‌افت برای متخصصی که واتساپ ندارد ولی تلفن دارد — مثلا
+      کارگاهی با شماره‌ی ثابت. بدونِ این، ردیف‌هایش هیچ کنشی
+      نمی‌گرفتند، در حالی که قبلا همه‌شان لینکِ تماس داشتند. */
+  telHref?: string
 }
 
-export function TechnicianServices({ data, phone }: TechnicianServicesProps) {
+export function TechnicianServices({ data, selected, onToggle, telHref }: TechnicianServicesProps) {
   const empty = data.categories.length === 0 && data.legacy.length === 0
   if (empty) {
     return <p className="tmp-none">این متخصص هنوز خدماتی ثبت نکرده است</p>
   }
 
-  const action = (title: string) =>
-    phone ? (
-      <a
-        className="tm-btn tm-btn--outline tm-btn--sm"
-        href={`tel:${phone}`}
+  /* ⚠️ ترتیبِ فرزندها در RTL برعکسِ چیزی است که در کد می‌بینی:
+     اولین فرزند سمتِ **راست** می‌نشیند. پس «درخواست» اول می‌آید تا
+     راست بیفتد و مربعِ تیک بعدش تا چپ بیفتد — همان چیدمانی که
+     خواسته شده. */
+  const action = (title: string) => {
+    if (!onToggle) {
+      return telHref ? (
+        <a className="tm-btn tm-btn--outline tm-btn--sm" href={telHref} aria-label={`تماس برای ${title}`}>
+          <Phone size={14} aria-hidden />
+          تماس
+        </a>
+      ) : null
+    }
+    const on = (selected ?? []).includes(title)
+    return (
+      <button
+        type="button"
+        role="checkbox"
+        aria-checked={on}
         aria-label={`درخواست ${title}`}
+        data-on={on ? '1' : '0'}
+        className="tm-btn tm-btn--outline tm-btn--sm tmp-svc-pick"
+        onClick={() => onToggle(title)}
       >
-        <Phone size={14} aria-hidden />
-        درخواست
-      </a>
-    ) : null
+        <span>درخواست</span>
+        <span className="tmp-svc-box" aria-hidden>
+          {on && <Check size={12} strokeWidth={3} />}
+        </span>
+      </button>
+    )
+  }
 
   return (
     <>

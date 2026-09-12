@@ -542,7 +542,9 @@
    قبلی می‌ماند — دقیقا برعکسِ چیزی که خواسته شده بود. */
 .tmp .tmp-card > div + div > .tmp-svc-cat { margin-block-start: 24px; }
 .tmp .tmp-card .ch-sec-head { align-items: center; }
-.tmp .tmp-svc-d { color: var(--ios-label-2); }
+/* توضیحِ ردیف ریزتر از عنوان می‌ماند تا عنوان خوانده شود، نه
+   توضیح. ۱۲ پیکسل کفِ خواناییِ متنِ فارسیِ ثانویه است. */
+.tmp .tmp-svc-d { color: var(--ios-label-2); font-size: 12px; line-height: 1.65; }
 
 .tmp .tmp-work { border-radius: var(--ios-r-md); overflow: hidden; background: var(--ios-fill-2); }
 .tmp .tmp-work-d { color: var(--ios-label-2); }
@@ -588,6 +590,7 @@
   .tm .tm-card-name > a,
   .tmp .tmp-crumb a,
   .tmp .tmp-seg > a,
+  .tmp .tmp-slug-copy,
   .tmp .ch-gal-tabs > button {
     min-block-size: 44px;
     display: inline-flex;
@@ -832,4 +835,58 @@
 .tmp .tmp-head .tmha { --tmha-veil: linear-gradient(180deg, rgb(11 13 15 / .62) 0%, rgb(11 13 15 / .52) 50%, rgb(11 13 15 / .84) 100%); }
 @media (min-width: 768px) {
   .tmp .tmp-head .tmha { --tmha-veil: linear-gradient(to left, rgb(11 13 15 / .92) 0%, rgb(11 13 15 / .80) 42%, rgb(11 13 15 / .34) 76%, rgb(11 13 15 / .14) 100%); }
+}
+
+/* ═══════════════ انتخابِ چندتاییِ خدمات ═══════════════
+   ردیف دیگر مستقیم زنگ نمی‌زند: کاربر چند خدمت را تیک می‌زند و
+   متنِ پیامِ واتساپ از روی همان‌ها ساخته می‌شود. */
+.tmp .tmp-svc-pick { gap: 8px; }
+.tmp .tmp-svc-box {
+  display: grid; place-items: center;
+  inline-size: 18px; block-size: 18px;
+  border-radius: 6px;
+  border: 1.5px solid rgb(var(--sn));
+  background: #fff;
+  transition: background .16s, border-color .16s;
+}
+.tmp .tmp-svc-pick[data-on='1'] {
+  border-color: rgb(var(--sn) / .55);
+  background: rgb(var(--sn) / .12);
+  color: var(--sn-ink);
+}
+.tmp .tmp-svc-pick[data-on='1'] .tmp-svc-box {
+  background: rgb(var(--sn)); border-color: rgb(var(--sn)); color: #fff;
+}
+.tmp .tmp-svc-pick[data-on='1'] .tmp-svc-box svg { color: #fff; }
+
+/* ═══════════════ نشانیِ اختصاصی روی سربرگ ═══════════════ */
+.tmp .tmp-head .tmp-slug {
+  display: inline-flex; align-items: center; gap: 6px;
+  margin-block: 10px 0; padding-block: 3px; padding-inline: 10px 3px;
+  border-radius: 999px;
+  background: rgb(255 255 255 / .08);
+  border: 1px solid rgb(255 255 255 / .16);
+  max-inline-size: 100%;
+}
+.tmp .tmp-head .tmp-slug code {
+  font-size: 12px; color: rgb(255 255 255 / .92);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.tmp .tmp-slug-copy {
+  display: inline-flex; align-items: center; gap: 4px; flex-shrink: 0;
+  padding-block: 6px; padding-inline: 10px;
+  border: 0; border-radius: 999px; cursor: pointer;
+  background: rgb(var(--sn) / .40); color: #fff;
+  font: inherit; font-size: 12px; font-weight: 700;
+  transition: background .16s;
+}
+.tmp .tmp-slug-copy:hover:not(:disabled) { background: rgb(var(--sn) / .58); }
+.tmp .tmp-slug-copy:focus-visible {
+  outline: 2px solid #fff; outline-offset: 2px;
+}
+/* ⚠️ فقط برای خواننده‌ی صفحه — `display:none` را نمی‌خوانند. */
+.tmp-sr-live {
+  position: absolute; inline-size: 1px; block-size: 1px;
+  overflow: hidden; clip-path: inset(50%); white-space: nowrap;
 }

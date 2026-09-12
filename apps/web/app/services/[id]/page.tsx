@@ -28,6 +28,7 @@ import { resolveServices } from '@/lib/tech-services'
 import { useVideoEdit } from '@/components/media/useVideoEdit'
 import { detailTitle, type VideoDetail } from '@/lib/media/video-details'
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCopyUrl } from '@/hooks/use-copy-url'
 import type { RefObject } from 'react'
 import { preload } from 'react-dom'
 import { ProfileMissing, ProfileLoading } from '@/components/profile/ProfileMissing'
@@ -46,7 +47,7 @@ import { useParams } from 'next/navigation'
 /* ⚠️ آیکون تزئینی نداریم: هر آیکونی که این‌جا می‌ماند یا ناوبری
    است یا کنش. `MapPin` و `Clock` با بازطراحی حذف شدند — شهر و
    ساعت، *متن*اند و آیکون چیزی به آن‌ها اضافه نمی‌کرد. */
-import { Wrench, Phone, MapPin, Home, ClipboardList, Building2, Map, Clock } from 'lucide-react'
+import { Wrench, Phone, MapPin, Home, ClipboardList, Building2, Map, Clock, Copy, Check } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { getTechnician } from '../../../lib/technicians-data'
 import { useOwnerEdit } from '../../../lib/profiles/use-owner-edit'
@@ -60,7 +61,16 @@ import VerifiedBadge from '../../../components/VerifiedBadge'
 import PendingNotice from '../../../components/profile/PendingNotice'
 import type { Technician } from '../../../lib/technicians-data'
 
-/* آیکون واتساپ (هم‌خانواده‌ی فوتر فروشگاه) */
+/* آیکون واتساپ. `lucide` نشانِ برند ندارد و این گلیف سه جای همین
+   فایل لازم می‌شود، پس یک‌بار این‌جا تعریف می‌شود نه سه‌بار inline. */
+function WaGlyph({ size = 16 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden focusable="false">
+      <path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.46 1.32 4.96L2 22l5.25-1.38a9.9 9.9 0 0 0 4.79 1.22h.01c5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0 0 12.04 2zm0 18.13a8.23 8.23 0 0 1-4.2-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.2 8.2 0 0 1-1.26-4.36c0-4.54 3.7-8.23 8.25-8.23 2.2 0 4.27.86 5.83 2.42a8.18 8.18 0 0 1 2.41 5.82c0 4.54-3.7 8.21-8.24 8.21zm4.52-6.16c-.25-.12-1.47-.72-1.69-.81-.23-.08-.39-.12-.56.12-.17.25-.64.81-.79.98-.14.17-.29.19-.54.06-.25-.12-1.05-.39-1.99-1.23-.74-.66-1.23-1.47-1.38-1.72-.14-.25-.01-.38.11-.5.11-.11.25-.29.37-.43.12-.14.17-.25.25-.41.08-.17.04-.31-.02-.43-.06-.12-.56-1.34-.76-1.84-.2-.48-.4-.42-.56-.43h-.47c-.17 0-.43.06-.66.31-.23.25-.86.85-.86 2.07 0 1.22.89 2.4 1.01 2.56.12.17 1.75 2.67 4.23 3.74.59.26 1.05.41 1.41.52.59.19 1.13.16 1.56.1.48-.07 1.47-.6 1.67-1.18.21-.58.21-1.07.14-1.18-.06-.11-.22-.17-.47-.29z" />
+    </svg>
+  )
+}
+
 /* ⚠️ عدد ثابت ننویس: نوار بالا `paddingTop: env(safe-area-inset-top)`
    دارد و در حالت standalone آی‌اواس بلندتر از ۷۲ پیکسل می‌شود؛
    `rootMargin` هم `env()` نمی‌فهمد. پس ارتفاع از *خود* نوار
@@ -305,6 +315,14 @@ export default function TechnicianProfilePage() {
   const [openAbout, setOpenAbout] = useState(false)
   /* تب فعال — فقط برای نشانه‌گذاری، ناوبری با لنگر است */
   const [sec, setSec] = useState('about')
+  /* خدماتی که کاربر تیک زده — متنِ پیامِ واتساپ از همین ساخته می‌شود */
+  const [picked, setPicked] = useState<string[]>([])
+  const togglePick = (t: string) =>
+    setPicked(p => (p.includes(t) ? p.filter(x => x !== t) : [...p, t]))
+  /* ⚠️ نشانی این بالا ساخته می‌شود چون هوک است و نمی‌تواند بعدِ
+     `if (!tech)` بیاید. `id` از روتر می‌آید و همیشه هست. */
+  const publicUrl = `www.billiardhub.net/services/${id}`
+  const { state: copyState, copy: copyUrl } = useCopyUrl('tmp-url-code', `https://${publicUrl}`)
   const heroActsRef = useRef<HTMLDivElement | null>(null)
   const closeRef = useRef<HTMLDivElement | null>(null)
   /* ریشه‌ی صفحه — ناظر تب فعال و کنش چسبان از این‌جا می‌گردند.
@@ -434,7 +452,17 @@ export default function TechnicianProfilePage() {
      شماره‌ی خارجی). آن‌وقت شرط برقرار بود، `waNumber` خالی
      برمی‌گرداند و دکمه ناپدید می‌شد — با اینکه شماره‌ی موبایلِ
      معتبر در فیلدِ تماس بود. */
-  const waMsg = `سلام ${tech.name} عزیز، از طریق بیلیارد هاب با شما تماس می‌گیرم.`
+  /* ⚠️ «خدمت» یا «خدمات» بسته به تعداد، و آخرین قلم با «و» وصل
+     می‌شود نه با ویرگول — وگرنه جمله فارسیِ درست نیست. */
+  const waMsg = (() => {
+    const base = `سلام ${tech.name} عزیز، از طریق بیلیارد هاب به شما پیام می‌دهم`
+    if (picked.length === 0) return base
+    const q = picked.map(t => `«${t}»`)
+    const list = q.length === 1 ? q[0] : `${q.slice(0, -1).join('، ')} و ${q[q.length - 1]}`
+    return `${base}، درخواست ${picked.length === 1 ? 'خدمت' : 'خدمات'} ${list} را دارم`
+  })()
+
+  const waCount = picked.length > 0 ? ` (${toFaDigits(String(picked.length))})` : ''
   const waText = waLink(tech.whatsapp, waMsg) || waLink(tech.phone, waMsg)
 
   /* تب‌ها فقط لنگرند، نه روتر: محتوا کوتاه است و صفحه‌ی جدا برای
@@ -501,17 +529,33 @@ export default function TechnicianProfilePage() {
                   <span><i className="tm-ic tm-ic--star" aria-hidden><ClipboardList size={13} /></i>{toFaDigits(String(svc.count))} خدمت ثبت‌شده</span>
                 )}
               </p>
+              {/* ⚠️ نشانیِ اختصاصی روی خودِ سربرگ است نه در کارتِ کناری:
+                  متخصص باید بتواند از همان‌جایی که پروفایلش را می‌بیند
+                  لینکش را بردارد و بفرستد. `dir="ltr"` لازم است وگرنه
+                  نشانی لاتین در متنِ راست‌به‌چپ تکه‌تکه دیده می‌شود. */}
+              <p className="tmp-slug">
+                <code id="tmp-url-code" dir="ltr">{publicUrl}</code>
+                <button type="button" onClick={copyUrl} className="tmp-slug-copy"
+                  aria-label={copyState === 'ok' ? 'نشانی کپی شد' : 'کپی نشانی اختصاصی'}>
+                  {copyState === 'ok' ? <Check size={14} aria-hidden /> : <Copy size={14} aria-hidden />}
+                  <span>{copyState === 'ok' ? 'کپی شد' : copyState === 'manual' ? 'دستی' : 'کپی'}</span>
+                </button>
+              </p>
+              <span aria-live="polite" className="tmp-sr-live">
+                {copyState === 'ok' ? 'نشانی در کلیپ‌بورد کپی شد'
+                  : copyState === 'manual' ? 'مرورگر اجازه‌ی کپی نداد؛ نشانی انتخاب شد — با Ctrl+C بردارید' : ''}
+              </span>
             </div>
 
             <div className="tmp-head-act" ref={heroActsRef}>
               {phone && (
                 <a className="tm-btn tm-btn--gold" href={`tel:${phone}`}>
-                  <Phone size={16} aria-hidden />درخواست خدمت
+                  <Phone size={16} aria-hidden />تماس
                 </a>
               )}
               {waText && (
                 <a className="tm-btn tm-btn--outline" href={waText} target="_blank" rel="noopener noreferrer">
-                  واتساپ
+                  <WaGlyph />درخواست خدمت{waCount}
                 </a>
               )}
             </div>
@@ -579,7 +623,9 @@ export default function TechnicianProfilePage() {
           {/* ── خدمات ── */}
           <section className="tmp-card" id="services" aria-labelledby="tmp-svc-h">
             <h2 id="tmp-svc-h">خدمات</h2>
-            <TechnicianServices data={svc} phone={phone || undefined} />
+            <TechnicianServices data={svc} selected={picked}
+              onToggle={waText ? togglePick : undefined}
+              telHref={phone ? `tel:${phone}` : undefined} />
           </section>
 
           {/* ── نمونه‌کارها ── */}
@@ -662,12 +708,12 @@ export default function TechnicianProfilePage() {
           {lede && <p className="tmp-role">{lede}</p>}
           {phone && (
             <a className="tm-btn tm-btn--gold" href={`tel:${phone}`}>
-              <Phone size={16} aria-hidden />درخواست خدمت
+              <Phone size={16} aria-hidden />تماس
             </a>
           )}
           {waText && (
             <a className="tm-btn tm-btn--outline" href={waText} target="_blank" rel="noopener noreferrer">
-              گفت‌وگو در واتساپ
+              <WaGlyph />درخواست خدمت{waCount}
             </a>
           )}
           {hours && <p className="tmp-panel-note">ساعت کاری: {hours}</p>}
@@ -675,14 +721,18 @@ export default function TechnicianProfilePage() {
       </div>
 
       {/* ── کنش چسبان موبایل ── */}
-      {phone && (
+      {(phone || waText) && (
         <div className="tmp-sticky" data-show={dock ? '1' : '0'} aria-hidden={!dock}>
-          <a className="tm-btn tm-btn--gold" href={`tel:${phone}`} tabIndex={dock ? 0 : -1}>
-            <Phone size={16} aria-hidden />درخواست خدمت
-          </a>
+          {phone && (
+            <a className="tm-btn tm-btn--gold" href={`tel:${phone}`} tabIndex={dock ? 0 : -1}>
+              <Phone size={16} aria-hidden />تماس
+            </a>
+          )}
           {waText && (
             <a className="tm-btn tm-btn--outline" href={waText} target="_blank" rel="noopener noreferrer"
-              tabIndex={dock ? 0 : -1} aria-label="گفت‌وگو در واتساپ">واتساپ</a>
+              tabIndex={dock ? 0 : -1}>
+              <WaGlyph />درخواست خدمت{waCount}
+            </a>
           )}
         </div>
       )}
