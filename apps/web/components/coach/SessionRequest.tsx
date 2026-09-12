@@ -179,9 +179,9 @@ export default function SessionRequest({ coachSlug, price, minutes }: {
         style={{ width: '100%', boxSizing: 'border-box', padding: '10px 12px', borderRadius: 10, border: LINE, background: '#fff', fontSize: 13.5, fontFamily: 'inherit', color: TEXT, resize: 'vertical' }} />
 
       <p style={{ fontSize: 12, color: MUT, lineHeight: 1.9, margin: '10px 0 0' }}>
-        مدت جلسه {fa(minutes)} دقیقه
-        {price > 0 ? ` · مبلغ ${fa(price.toLocaleString('en-US'))} تومان` : ' · مبلغ توافقی'}.
-        {' '}پرداخت حضوری است و از طریق سایت انجام نمی‌شود.
+        مدت جلسه {fa(minutes)} دقیقه ، مبلغ{' '}
+        {price > 0 ? `${fa(price.toLocaleString('en-US'))} تومان` : 'توافقی'}
+        {' '}و پرداخت حضوری است و از طریق پلتفرم انجام نمی‌شود
       </p>
 
       {err && <p role="alert" style={{ fontSize: 12.5, color: RED, fontWeight: 700, margin: '8px 0 0' }}>{err}</p>}

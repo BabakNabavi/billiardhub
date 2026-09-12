@@ -84,7 +84,6 @@ export default function ExploreStrip() {
           <h3 style={{ fontSize: 'clamp(17px,1.9vw,24px)', fontWeight: 800, color: TEXT, letterSpacing: '-0.03em', margin: 0 }}>
             بیشتر در بیلیارد هاب کاوش کن
           </h3>
-          <div style={{ width: 54, height: 3, borderRadius: 2, margin: '12px auto 0', background: 'linear-gradient(90deg,#C7A66A,#8A6020)' }} />
         </div>
 
         <div className="stats-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(8,1fr)', gap: 12 }}>

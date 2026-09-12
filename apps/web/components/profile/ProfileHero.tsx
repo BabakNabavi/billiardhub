@@ -194,6 +194,11 @@ export default function ProfileHero({
             <div className="ch-hero-meta">
             <p className="ch-meta">
               <MapPin size={13} aria-hidden />{city || '—'}
+              {/* ⚠️ شرط روی *وجودِ propِ دیگر* نباشد: با `!stats` روزی
+                  که صفحه‌ی داور نوارِ آمار بگیرد، این خط بی‌صدا و
+                  بدونِ هیچ تغییرِ کدی ناپدید می‌شد. تصمیم مالِ خودِ
+                  فراخوان است — صفحه‌ی مربی `sinceYear` را اصلا
+                  نمی‌فرستد چون در نوارِ آمارش هست. */}
               {sinceYear && <><span className="ch-sep" aria-hidden />از سال {toFaDigits(sinceYear)}</>}
             </p>
 
