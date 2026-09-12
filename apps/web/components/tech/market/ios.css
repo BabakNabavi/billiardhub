@@ -115,23 +115,66 @@
    ۴۳۰ دو نتیجه می‌دهد و یکی‌شان همیشه بد است.
    ⚠️ وزن ۷۰۰ نه ۸۰۰: فارسیِ خیلی سیاه روی زمینِ تیره پخش می‌شود. */
 .tm .tm-hero h1 {
+  /* ⚠️ رنگ این‌جا می‌ماند حتی با اینکه هر دو span رنگِ خودشان را
+     دارند: بدونش `color: var(--ink)`ِ market.css می‌نشیند — جوهرِ
+     تمِ روشن روی زمینِ تقریبا مشکی. امروز چیزی خراب نمی‌کند ولی
+     گاردش از بین می‌رود. */
   color: #fff;
-  font-size: clamp(26px, 6.8vw, 44px);
-  font-weight: 700; line-height: 1.32;
-  letter-spacing: -0.015em;
-  /* ⚠️ ۱۳ch تیتر را روی ۳۹۰ سه‌خطی می‌کرد. `balance` هم برداشته شد:
-     خطوط را هم‌اندازه می‌کند و همان سه‌خطی را تثبیت می‌کرد. */
-  max-inline-size: 17ch;
-  margin: 0 0 12px;
-  text-wrap: pretty;
+  margin: 0 0 16px;
+  line-height: 1.12;
+  /* ⚠️ هیچ واحدِ وابسته به فونت این‌جا نیاید. h1 دیگر `font-size`
+     اعلام نمی‌کند و ۲۶/۳۴/۴۰px را از market.css ارث می‌برد، پس هم
+     `ch` و هم `em` روی همان حساب می‌شدند نه روی ۶۴px:
+     `max-inline-size: 22ch` یعنی ۳۴۳px، و `letter-spacing: -0.03em`
+     یعنی −۱٫۲px (−۰٫۰۱۹em) روی سطرِ ۶۴px. هر دو به خودِ spanها رفتند. */
+  max-inline-size: none;
+}
+.tm .tm-hero-k,
+.tm .tm-hero-t { display: block; }
+/* سطرِ اول: کوچک‌تر، سبک‌تر، کمی عقب‌نشسته — نقشش معرفیِ سطرِ دوم است */
+.tm .tm-hero-k {
+  font-size: clamp(17px, 4.2vw, 26px);
+  font-weight: 500;
+  color: rgb(255 255 255 / .74);
+  margin-block-end: 4px;
+}
+/* سطرِ دوم: خودِ تیتر */
+.tm .tm-hero-t {
+  font-size: clamp(31px, 8.6vw, 64px);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: #fff;
+}
+/* ⚠️ `color: transparent` فقط داخلِ `@supports` — اگر مرورگر
+   `background-clip: text` نداشته باشد، تیتر کاملا نامرئی می‌شد. */
+@supports (background-clip: text) or (-webkit-background-clip: text) {
+  .tm .tm-hero-t {
+    background-image: linear-gradient(to bottom, #FFFFFF 0%, #FFFFFF 46%, #CFD6DF 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .tm .tm-hero-t::selection {
+    color: #0B0D0F; -webkit-text-fill-color: #0B0D0F; background: #CFD6DF;
+  }
+  /* پس‌زمینه در چاپ کشیده نمی‌شود و تیتر کلا محو می‌شد */
+  @media print {
+    .tm .tm-hero-t {
+      background: none; color: #111; -webkit-text-fill-color: #111;
+    }
+  }
 }
 .tm .tm-hero-sub {
   /* ⚠️ ۰٫۷۰ روی روشن‌ترین پیکسلِ عکس ۴٫۷۱:۱ اندازه‌گیری شد —
      عبور می‌کرد ولی حاشیه‌اش تا کفِ ۴٫۵ نازک بود و زمینه این‌جا
      عکس است نه رنگِ ثابت. */
-  color: rgb(255 255 255 / .80);
-  font-size: 14px; line-height: 1.7;
-  max-inline-size: 34ch;
+  color: rgb(255 255 255 / .82);
+  font-size: clamp(14px, 3.3vw, 16px);
+  font-weight: 500;
+  line-height: 1.75;
+  /* ⚠️ ۳۸ch «بگیرید» را تنها به سطر دوم می‌انداخت. */
+  max-inline-size: 46ch;
+  text-wrap: pretty;
   margin: 0 0 24px;
 }
 
@@ -153,8 +196,12 @@
      خوانایی متن با سقفِ خودِ h1 و زیرعنوان حفظ می‌شود، نه با
      تنگ‌کردنِ کلِ ستون. */
   .tm .tm-hero-in > div { max-inline-size: 620px; }
-  .tm .tm-hero h1 { max-inline-size: 15ch; margin-block-end: 12px; }
-  .tm .tm-hero-sub { font-size: 15px; max-inline-size: 44ch; }
+  /* ⚠️ این خط سقفِ `none`ِ بالا را می‌خورد: وزنش برابر است ولی
+     بعدتر می‌آید. `ch` هم این‌جا دوبرابر گمراه‌کننده بود، چون
+     h1 دیگر font-size اعلام نمی‌کند و ۴۰px را از market.css
+     ارث می‌برد — یعنی ۱۵ch برابرِ ۳۴۳px می‌شد. */
+  .tm .tm-hero h1 { max-inline-size: none; margin-block-end: 12px; }
+  .tm .tm-hero-sub { font-size: 15px; max-inline-size: 48ch; }
 }
 
 /* ═══════════════ کنترل‌ها ═══════════════ */
