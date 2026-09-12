@@ -201,7 +201,7 @@ export default function TechnicalServicesPage() {
             {/* ⚠️ خط تیره برداشته شد: در RTL سرِ خط دوم می‌افتاد و
                 جمله را دو تکه‌ی بی‌ربط نشان می‌داد. */}
             <p className="tm-hero-sub">
-              تعمیر، رگلاژ، تعویض و نصب قطعات را از متخصصان ثبت‌شده بگیرید
+              تعمیر، رگلاژ، تعویض و نصب قطعات را از متخصصان ثبت‌شده بخواهید
             </p>
             <ServiceSearch
               query={query} onQuery={setQuery}

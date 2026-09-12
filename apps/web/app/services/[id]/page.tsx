@@ -47,7 +47,7 @@ import { useParams } from 'next/navigation'
 /* ⚠️ آیکون تزئینی نداریم: هر آیکونی که این‌جا می‌ماند یا ناوبری
    است یا کنش. `MapPin` و `Clock` با بازطراحی حذف شدند — شهر و
    ساعت، *متن*اند و آیکون چیزی به آن‌ها اضافه نمی‌کرد. */
-import { Wrench, Phone, MapPin, Home, ClipboardList, Building2, Map, Clock, Copy, Check } from 'lucide-react'
+import { Wrench, Phone, MapPin, Home, ClipboardList, Building2, Map, Clock, Copy, Check, ChevronLeft, TextCursorInput } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { getTechnician } from '../../../lib/technicians-data'
 import { useOwnerEdit } from '../../../lib/profiles/use-owner-edit'
@@ -537,8 +537,12 @@ export default function TechnicianProfilePage() {
                 <code id="tmp-url-code" dir="ltr">{publicUrl}</code>
                 <button type="button" onClick={copyUrl} className="tmp-slug-copy"
                   aria-label={copyState === 'ok' ? 'نشانی کپی شد' : 'کپی نشانی اختصاصی'}>
-                  {copyState === 'ok' ? <Check size={14} aria-hidden /> : <Copy size={14} aria-hidden />}
-                  <span>{copyState === 'ok' ? 'کپی شد' : copyState === 'manual' ? 'دستی' : 'کپی'}</span>
+                  {/* ⚠️ متنِ کنارِ آیکون برداشته شد؛ خودِ آیکون گویاست.
+                      نامِ دسترس‌پذیر از `aria-label` می‌آید، پس دکمه
+                      برای خواننده‌ی صفحه هنوز نام دارد. */}
+                  {copyState === 'ok' ? <Check size={15} aria-hidden />
+                    : copyState === 'manual' ? <TextCursorInput size={15} aria-hidden />
+                    : <Copy size={15} aria-hidden />}
                 </button>
               </p>
               <span aria-live="polite" className="tmp-sr-live">
@@ -674,19 +678,47 @@ export default function TechnicianProfilePage() {
           {/* ── تماس ── */}
           <section className="tmp-card" id="contact" aria-labelledby="tmp-c-h" ref={closeRef}>
             <h2 id="tmp-c-h">اطلاعات تماس</h2>
+            {/* ⚠️ دو دکمه‌ی کنارِ هم بود و از یک فرمِ عمومی استفاده
+                می‌کرد؛ هیچ‌چیزی نمی‌گفت جز «یک شماره و یک واتساپ».
+                حالا هر راه یک ردیفِ کپسولی است با کاشیِ رنگیِ خودش،
+                برچسب، و مقدار — همان زبانی که فهرستِ خدمات دارد. */}
             {phone || waText ? (
-              <div className="tmp-row">
+              <ul className="tmp-ct">
                 {phone && (
-                  <a className="tm-btn tm-btn--gold" href={`tel:${phone}`}>
-                    <Phone size={16} aria-hidden />{toFaDigits(phone)}
-                  </a>
+                  <li>
+                    <a className="tmp-ct-row" href={`tel:${phone}`}>
+                      <span className="tmp-ct-ic tmp-ct-ic--tel" aria-hidden><Phone size={19} /></span>
+                      <span className="tmp-ct-b">
+                        <span className="tmp-ct-k">تماس تلفنی</span>
+                        {/* ⚠️ `dir="ltr"` روی خودِ سلول، کلِ سلول را چپ‌چین
+                            می‌کرد. ولی حذفِ کاملش هم غلط است: `telNumber`
+                            برای شماره‌ی ثابت «+» را نگه می‌دارد و «+» در
+                            ابتدای سطرِ RTL به *راستِ* عدد می‌افتد. `bdi`
+                            اینلاین است و هر دو را حل می‌کند. */}
+                        <span className="tmp-ct-v"><bdi>{toFaDigits(phone)}</bdi></span>
+                      </span>
+                      {/* در RTL جهتِ «رفتن» چپ است، پس chevron هم چپ */}
+                      <span className="tmp-ct-go" aria-hidden><ChevronLeft size={18} /></span>
+                    </a>
+                  </li>
                 )}
                 {waText && (
-                  <a className="tm-btn tm-btn--outline" href={waText} target="_blank" rel="noopener noreferrer">
-                    واتساپ
-                  </a>
+                  <li>
+                    <a className="tmp-ct-row" href={waText} target="_blank" rel="noopener noreferrer">
+                      <span className="tmp-ct-ic tmp-ct-ic--wa" aria-hidden><WaGlyph size={19} /></span>
+                      <span className="tmp-ct-b">
+                        <span className="tmp-ct-k">
+                          {picked.length > 0
+                            ? `${toFaDigits(String(picked.length))} خدمت انتخاب شده`
+                            : 'پیام آماده فرستاده می‌شود'}
+                        </span>
+                        <span className="tmp-ct-v">درخواست خدمت در واتساپ</span>
+                      </span>
+                      <span className="tmp-ct-go" aria-hidden><ChevronLeft size={18} /></span>
+                    </a>
+                  </li>
                 )}
-              </div>
+              </ul>
             ) : (
               <p className="tmp-none">راه ارتباطی ثبت نشده است</p>
             )}
