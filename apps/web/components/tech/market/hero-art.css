@@ -1,11 +1,11 @@
 /* ─────────────────────────────────────────────────────────────
-   پوسترِ سرلوحه — قاب، دانه، و حرکت.
+   پوسترِ سرلوحه — قاب، عکس، دانه، و حرکت.
 
-   ⚠️ حرکت فقط `transform` و `opacity` است، و هیچ فیلتری متحرک
+   ⚠️ حرکت فقط `transform` و `opacity` است و هیچ فیلتری متحرک
    نیست: انیمیشنِ فیلتر هر فریم دوباره رستر می‌کند و روی اندرویدِ
    ضعیف — که مخاطبِ اصلی است — همان چیزی است که فریم می‌اندازد.
 
-   ⚠️ همه‌ی حرکت با `prefers-reduced-motion` می‌ایستد و صحنه‌ی ساکن
+   ⚠️ همه‌ی حرکت با `prefers-reduced-motion` می‌ایستد و قابِ ساکن
    خودش کامل است.
    ───────────────────────────────────────────────────────────── */
 
@@ -14,24 +14,31 @@
   overflow: hidden; pointer-events: none;
   background: #0B0D0F;
 }
+.tmha picture { display: contents; }
 
-/* ⚠️ دو ترکیب برای نوارِ پروفایل — یکی پهن، یکی بلند. کدام دیده
-   شود را همان نقطه‌ای تعیین می‌کند که چیدمانِ سربرگ عوض می‌شود. */
-/* ⚠️ وزن بالاتر از `.tmha-svg` لازم است، نه ترتیب: هر دو (۰,۱,۰)
-   بودند و `.tmha-svg { display: block }` که پایین‌تر است برنده
-   می‌شد — نتیجه‌اش این بود که هر دو ترکیب هم‌زمان رندر می‌شدند.
-   اندازه‌گیری‌شده در مرورگر: هر دو `block`. */
-.tmha .tmha-tall { display: block; }
-.tmha .tmha-wide { display: none; }
-@media (min-width: 768px) {
-  .tmha .tmha-tall { display: none; }
-  .tmha .tmha-wide { display: block; }
-}
-
-.tmha-svg {
+/* ── خودِ عکس ──
+   ⚠️ `object-position` سمتِ شروعِ **فیزیکی** را می‌خواهد، نه منطقی:
+   سوژه در هر دو فایل سمتِ چپِ کادر است و باید بماند، مستقل از
+   جهتِ نوشتار. برشِ افقی همیشه از سمتِ راستِ عکس می‌خورد — همان
+   جایی که عمدا خالی است. */
+.tmha-img {
   position: absolute; inset: 0;
   inline-size: 100%; block-size: 100%;
   display: block;
+  object-fit: cover;
+  object-position: left center;
+  transform-origin: 30% 55%;
+  animation: tmha-ken 48s ease-in-out infinite alternate;
+}
+/* نوارِ پروفایل خیلی کوتاه است: برشِ عمودی باید روی میزِ کار بیفتد،
+   نه روی سقفِ قاب. */
+.tmha--profile .tmha-img { object-position: left 58%; }
+
+/* حرکتِ سینماتیک: بسیار آرام و بسیار کم‌دامنه. بزرگ‌نمایی هیچ‌وقت
+   زیر ۱ نمی‌رود تا لبه‌ی عکس وارد قاب نشود. */
+@keyframes tmha-ken {
+  from { transform: scale(1.04); }
+  to   { transform: scale(1.11) translate3d(1.4%, -1.2%, 0); }
 }
 
 /* ── دانه ──
@@ -44,7 +51,7 @@
      blend، کلِ سرلوحه را در یک گروهِ ترکیب می‌گذارد و ارتقای لایه را
      برای هرچه زیرش هست بی‌اثر می‌کند. شفافیتِ ساده همان دانه را
      می‌دهد بدون آن هزینه. */
-  opacity: .18;
+  opacity: .12;
   background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2'/></filter><rect width='120' height='120' filter='url(%23n)' opacity='.55'/></svg>");
   background-size: 180px 180px;
 }
@@ -53,43 +60,8 @@
 .tmha-sheen {
   position: absolute; inset: -20%;
   background: linear-gradient(108deg,
-    transparent 36%, rgb(255 255 255 / .055) 48%, transparent 58%);
+    transparent 36%, rgb(255 255 255 / .045) 48%, transparent 58%);
   animation: tmha-sweep 26s ease-in-out infinite;
-}
-
-/* ── حرکتِ اجسام ──
-   دامنه عمدا خیلی کوچک است: صحنه باید «زنده» باشد نه «متحرک».
-   ⚠️ برقِ رونده روی فلز، تنها چیزی است که واقعا حرکت را نشان
-   می‌دهد؛ بقیه فقط نفس می‌کشند. */
-.tmha-halo    { animation: tmha-pulse 14s ease-in-out infinite; }
-.tmha-cue     { animation: tmha-drift 20s ease-in-out infinite; }
-.tmha-caliper { animation: tmha-caliper 16s ease-in-out infinite; }
-.tmha-tool-a  { animation: tmha-drift 22s ease-in-out infinite; }
-.tmha-glint   { animation: tmha-glint 9s ease-in-out infinite; }
-
-@keyframes tmha-drift {
-  0%, 100% { transform: translate3d(0, 0, 0); }
-  50%      { transform: translate3d(10px, -5px, 0); }
-}
-/* کشویی آرام *باز* می‌شود و برمی‌گردد. مثبت، نه منفی: منفی یعنی فک
-   داخلِ فرول می‌رفت. */
-@keyframes tmha-caliper {
-  0%, 100% { transform: translate3d(0, 0, 0); }
-  50%      { transform: translate3d(16px, 0, 0); }
-}
-/* ⚠️ مسیرِ ثابتِ ۲۶۰ واحد برای بدنه‌ی ۳۱۰ واحدیِ کولیس درست بود، ولی
-   دسته‌ی ۱۵۰ واحدیِ آچار را رد می‌کرد و یک نوارِ سفیدِ شناور روی
-   پس‌زمینه می‌ساخت. حالا هر جسم مسیرِ خودش را می‌دهد. */
-@keyframes tmha-glint {
-  0%   { transform: translate3d(-40px, 0, 0); opacity: 0; }
-  35%  { opacity: .55; }
-  70%  { transform: translate3d(var(--tmha-glint-x, 260px), 0, 0); opacity: 0; }
-  100% { transform: translate3d(var(--tmha-glint-x, 260px), 0, 0); opacity: 0; }
-}
-.tmha-glint--beam { --tmha-glint-x: 190px; }
-@keyframes tmha-pulse {
-  0%, 100% { opacity: .78; }
-  50%      { opacity: 1; }
 }
 @keyframes tmha-sweep {
   0%, 100% { transform: translate3d(-12%, 0, 0); opacity: .55; }
@@ -106,7 +78,6 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .tmha-halo, .tmha-cue, .tmha-caliper, .tmha-tool-a,
-  .tmha-glint, .tmha-sheen { animation: none; }
-  .tmha-glint { opacity: 0; }
+  .tmha-img, .tmha-sheen { animation: none; }
+  .tmha-img { transform: scale(1.04); }
 }

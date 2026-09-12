@@ -121,7 +121,10 @@
      گاردش از بین می‌رود. */
   color: #fff;
   margin: 0 0 16px;
-  line-height: 1.12;
+  /* ⚠️ ۱٫۱۲ برای فارسی در اندازه‌ی نمایشی تنگ بود و نقطه‌ی «ف» در
+     «فنی» از بالای جعبه‌ی سطر بیرون می‌زد و بریده دیده می‌شد.
+     لاتین با ۱٫۱ مشکلی ندارد، فارسی ندارد. */
+  line-height: 1.34;
   /* ⚠️ هیچ واحدِ وابسته به فونت این‌جا نیاید. h1 دیگر `font-size`
      اعلام نمی‌کند و ۲۶/۳۴/۴۰px را از market.css ارث می‌برد، پس هم
      `ch` و هم `em` روی همان حساب می‌شدند نه روی ۶۴px:
@@ -140,22 +143,22 @@
 }
 /* سطرِ دوم: خودِ تیتر */
 .tm .tm-hero-t {
-  font-size: clamp(31px, 8.6vw, 64px);
+  font-size: clamp(28px, 7.6vw, 56px);
   font-weight: 800;
   letter-spacing: -0.03em;
-  color: #fff;
+  color: #F4E3BC;
 }
 /* ⚠️ `color: transparent` فقط داخلِ `@supports` — اگر مرورگر
    `background-clip: text` نداشته باشد، تیتر کاملا نامرئی می‌شد. */
 @supports (background-clip: text) or (-webkit-background-clip: text) {
   .tm .tm-hero-t {
-    background-image: linear-gradient(to bottom, #FFFFFF 0%, #FFFFFF 46%, #CFD6DF 100%);
+    background-image: linear-gradient(to bottom, #FDF4DC 0%, #F4E3BC 44%, #D6B87E 100%);
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
   }
   .tm .tm-hero-t::selection {
-    color: #0B0D0F; -webkit-text-fill-color: #0B0D0F; background: #CFD6DF;
+    color: #0B0D0F; -webkit-text-fill-color: #0B0D0F; background: #F4E3BC;
   }
   /* پس‌زمینه در چاپ کشیده نمی‌شود و تیتر کلا محو می‌شد */
   @media print {
@@ -637,7 +640,7 @@
   .tm .tm-card-name > a,
   .tmp .tmp-crumb a,
   .tmp .tmp-seg > a,
-  .tmp .tmp-slug-copy,
+  .tmp .tmp-slug-copy, /* ↓ هر دو محور، وگرنه ۳۵ پیکسل پهنا می‌ماند */
   .tmp .ch-gal-tabs > button {
     min-block-size: 44px;
     display: inline-flex;
@@ -713,17 +716,17 @@
 .tm .tm-search .tm-field + .tm-field { border-block-start: 1px solid var(--line); }
 .tm .tm-search .tm-label {
   /* ⚠️ ۱۰٫۵ پیکسل زیر کفِ متادیتای پروژه (۱۲) بود */
-  color: var(--ink-3); font-size: 12px; font-weight: 700;
+  color: var(--ios-label); font-size: 12px; font-weight: 700;
 }
 /* فیلدها بی‌بردرند: سطحِ بیرونی خودش مرز است */
 /* ⚠️ متنِ ورودی ۱۶ می‌ماند (زیر ۱۶ سافاریِ iOS صفحه را زوم می‌کند)
    ولی خودِ placeholder کوچک‌تر می‌شود: ۱۶ در برابر برچسبِ ۱۲ پیکسلیِ
    بالای همان فیلد بزرگ‌تر بود و راهنما از عنوانش تو‌چشم‌تر می‌زد.
    زوم به `font-size` خودِ input نگاه می‌کند، نه به placeholder. */
-.tm .tm-search .tm-input::placeholder { font-size: 13px; }
+.tm .tm-search .tm-input::placeholder { font-size: 12px; }
 /* ⚠️ فقط جای‌نگهدار کوچک است؛ خودِ دکمه ۱۶ می‌ماند وگرنه با
    انتخابِ شهر اندازه‌ی متن می‌پرید. */
-.tm .tm-search .tm-citybtn .tm-citybtn-ph { font-size: 13px; }
+.tm .tm-search .tm-citybtn .tm-citybtn-ph { font-size: 12px; color: var(--ios-label-2); }
 .tm .tm-search .tm-input,
 .tm .tm-search .tm-citybtn {
   border: 0; background: transparent; box-shadow: none;
@@ -868,7 +871,7 @@
    نزدیک‌ترین والدِ موقعیت‌دار می‌چسبد و از قاب بیرون می‌زند. */
 .tm .tm-hero > *:not(.tmha), .tmp .tmp-head > *:not(.tmha) { position: relative; z-index: 1; }
 /* پرده‌ی خوانایی برای هر صفحه جدا — با اندازه‌گیری تنظیم می‌شود */
-.tm .tm-hero .tmha { --tmha-veil: linear-gradient(180deg, rgb(11 13 15 / .78) 0%, rgb(11 13 15 / .70) 45%, rgb(11 13 15 / .90) 100%); }
+.tm .tm-hero .tmha { --tmha-veil: linear-gradient(180deg, rgb(11 13 15 / .80) 0%, rgb(11 13 15 / .74) 45%, rgb(11 13 15 / .90) 100%); }
 @media (min-width: 900px) {
   .tm .tm-hero .tmha { --tmha-veil: linear-gradient(to left, rgb(11 13 15 / .90) 0%, rgb(11 13 15 / .72) 38%, rgb(11 13 15 / .28) 72%, rgb(11 13 15 / .10) 100%); }
 }
@@ -879,9 +882,9 @@
    می‌افتادند — کنتراستِ اندازه‌گیری‌شده ۱٫۱۲:۱، یعنی نامرئی.
    ⚠️ این را روشِ پیکسلی پیدا کرد؛ سنجشِ مبتنی بر background-color
    عددِ ۵٫۲۸ می‌داد چون اصلا پیکسل‌های پوستر را نمی‌بیند. */
-.tmp .tmp-head .tmha { --tmha-veil: linear-gradient(180deg, rgb(11 13 15 / .62) 0%, rgb(11 13 15 / .52) 50%, rgb(11 13 15 / .84) 100%); }
+.tmp .tmp-head .tmha { --tmha-veil: linear-gradient(180deg, rgb(11 13 15 / .66) 0%, rgb(11 13 15 / .70) 50%, rgb(11 13 15 / .88) 100%); }
 @media (min-width: 768px) {
-  .tmp .tmp-head .tmha { --tmha-veil: linear-gradient(to left, rgb(11 13 15 / .92) 0%, rgb(11 13 15 / .80) 42%, rgb(11 13 15 / .34) 76%, rgb(11 13 15 / .14) 100%); }
+  .tmp .tmp-head .tmha { --tmha-veil: linear-gradient(to left, rgb(11 13 15 / .92) 0%, rgb(11 13 15 / .80) 42%, rgb(11 13 15 / .50) 76%, rgb(11 13 15 / .34) 100%); }
 }
 
 /* ═══════════════ انتخابِ چندتاییِ خدمات ═══════════════
@@ -921,8 +924,9 @@
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 .tmp .tmp-slug-copy {
-  display: inline-flex; align-items: center; gap: 4px; flex-shrink: 0;
-  padding-block: 6px; padding-inline: 10px;
+  display: inline-flex; align-items: center; justify-content: center;
+  gap: 4px; flex-shrink: 0;
+  min-inline-size: 34px; padding-block: 6px; padding-inline: 10px;
   border: 0; border-radius: 999px; cursor: pointer;
   background: rgb(var(--sn) / .40); color: #fff;
   font: inherit; font-size: 12px; font-weight: 700;
@@ -936,4 +940,76 @@
 .tmp-sr-live {
   position: absolute; inline-size: 1px; block-size: 1px;
   overflow: hidden; clip-path: inset(50%); white-space: nowrap;
+}
+
+
+/* ═══════════════ اطلاعات تماس ═══════════════
+   همان زبانِ کپسولیِ فهرستِ خدمات: کاشیِ رنگی، برچسبِ ریز، مقدارِ
+   پررنگ، و نشانه‌ی رفتن. */
+.tmp .tmp-ct { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.tmp .tmp-ct-row {
+  display: grid; grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center; gap: 12px;
+  padding: 10px 12px;
+  background: var(--ios-surface-2);
+  border: 1px solid var(--ios-sep);
+  border-radius: 18px;
+  color: inherit; text-decoration: none;
+  transition: border-color .18s, background .18s;
+}
+@media (hover: hover) {
+  .tmp a.tmp-ct-row:hover { border-color: rgb(var(--sn) / .34); background: var(--ios-surface); }
+}
+.tmp .tmp-ct-ic {
+  display: grid; place-items: center;
+  inline-size: 42px; block-size: 42px; border-radius: 13px;
+  color: #fff;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / .14), 0 4px 12px rgb(0 0 0 / .16);
+}
+/* ⚠️ سبزِ برندِ واتساپ عمدا با سبزِ سایت فرق دارد: کاربر آن رنگ را
+   می‌شناسد و یکی‌کردنشان تشخیص را سخت می‌کند. */
+.tmp .tmp-ct-ic--tel { background: linear-gradient(180deg, #2E7D53, #17603A); }
+.tmp .tmp-ct-ic--wa  { background: linear-gradient(180deg, #25C35E, #167D3C); }
+.tmp .tmp-ct-b { display: grid; gap: 2px; min-inline-size: 0; }
+.tmp .tmp-ct-k { font-size: 12px; color: var(--ios-label-2); }
+.tmp .tmp-ct-v {
+  font-size: 15px; font-weight: 700; color: var(--ios-label);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.tmp .tmp-ct-go { display: grid; place-items: center; color: var(--ios-label-2); }
+
+
+/* ═══════════ دکمه‌های سربرگِ پروفایل روی عکس ═══════════
+   ⚠️ اندازه‌گیری‌شده: با دکمه‌ی شیشه‌ای (سفیدِ ۱۴٪ و سبزِ ۳۰٪) روی
+   عکسِ واقعی، کنتراستِ متن ۱٫۶۲:۱ بود — عملا ناخوانا. علتش پوستر
+   نیست، خودِ دکمه است: شیشه روی *عکس* یعنی زمینه‌ی متن هر پیکسل
+   عکس است. پرده را آن‌قدر که لازم بود بالا نمی‌شود برد بی‌اینکه
+   عکس از بین برود، پس دکمه متریالِ مات شد — همان کاری که iOS روی
+   عکس می‌کند.
+   ⚠️ این بلوک بعدِ قواعدِ عمومیِ `.tmp .tmp-head .tm-btn--*` می‌آید
+   و وزنش هم بالاتر است، وگرنه بی‌اثر می‌ماند. */
+.tmp .tmp-head .tmp-head-act .tm-btn--gold,
+.tmp .tmp-head .tmp-head-act .tm-btn--primary {
+  background: rgb(20 116 66);
+  border-color: rgb(255 255 255 / .18);
+  color: #fff;
+}
+.tmp .tmp-head .tmp-head-act .tm-btn--gold:hover:not(:disabled),
+.tmp .tmp-head .tmp-head-act .tm-btn--primary:hover:not(:disabled) {
+  background: rgb(15 92 53 / .97);
+  border-color: rgb(255 255 255 / .34);
+}
+.tmp .tmp-head .tmp-head-act .tm-btn--outline {
+  background: rgb(16 18 20 / .92);
+  border: 1px solid rgb(255 255 255 / .24);
+  color: #fff;
+}
+.tmp .tmp-head .tmp-head-act .tm-btn--outline:hover:not(:disabled) {
+  background: rgb(26 29 32 / .94);
+  border-color: rgb(255 255 255 / .38);
+}
+/* نامک هم روی عکس است، نه روی رنگِ ثابت */
+.tmp .tmp-head .tmp-slug {
+  background: rgb(16 18 20 / .82);
+  border-color: rgb(255 255 255 / .20);
 }
