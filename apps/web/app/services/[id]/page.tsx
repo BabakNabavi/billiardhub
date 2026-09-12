@@ -686,10 +686,10 @@ export default function TechnicianProfilePage() {
               <ul className="tmp-ct">
                 {phone && (
                   <li>
-                    <a className="tmp-ct-row" href={`tel:${phone}`}>
+                    <a className="tmp-ct-row" href={`tel:${phone}`}
+                      aria-label={`تماس با ${toFaDigits(phone)}`}>
                       <span className="tmp-ct-ic tmp-ct-ic--tel" aria-hidden><Phone size={19} /></span>
                       <span className="tmp-ct-b">
-                        <span className="tmp-ct-k">تماس تلفنی</span>
                         {/* ⚠️ `dir="ltr"` روی خودِ سلول، کلِ سلول را چپ‌چین
                             می‌کرد. ولی حذفِ کاملش هم غلط است: `telNumber`
                             برای شماره‌ی ثابت «+» را نگه می‌دارد و «+» در
@@ -707,11 +707,11 @@ export default function TechnicianProfilePage() {
                     <a className="tmp-ct-row" href={waText} target="_blank" rel="noopener noreferrer">
                       <span className="tmp-ct-ic tmp-ct-ic--wa" aria-hidden><WaGlyph size={19} /></span>
                       <span className="tmp-ct-b">
-                        <span className="tmp-ct-k">
-                          {picked.length > 0
-                            ? `${toFaDigits(String(picked.length))} خدمت انتخاب شده`
-                            : 'پیام آماده فرستاده می‌شود'}
-                        </span>
+                        {picked.length > 0 && (
+                          <span className="tmp-ct-k">
+                            {`${toFaDigits(String(picked.length))} خدمت انتخاب شده`}
+                          </span>
+                        )}
                         <span className="tmp-ct-v">درخواست خدمت در واتساپ</span>
                       </span>
                       <span className="tmp-ct-go" aria-hidden><ChevronLeft size={18} /></span>
