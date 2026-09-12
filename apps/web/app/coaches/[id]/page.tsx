@@ -474,9 +474,7 @@ export default function CoachProfilePage() {
                 <h2 id="ch-sess-h">جلسه‌ی خصوصی با {coach.name}</h2>
                 <p>زمان و مکان را با خودِ مربی هماهنگ می‌کنید</p>
               </div>
-              <div className="ch-book-a">
-                <SessionRequest coachSlug={id} price={sessionPrice} minutes={sessionMin} />
-              </div>
+              <SessionRequest coachSlug={id} price={sessionPrice} minutes={sessionMin} />
             </section>
           )}
 

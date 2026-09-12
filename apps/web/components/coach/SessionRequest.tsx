@@ -13,10 +13,15 @@
    ───────────────────────────────────────────────────────────── */
 
 import { useEffect, useMemo, useState } from 'react'
+/* ⚠️ تقویمِ فارسی از قبل در پروژه هست — نسخه‌ی دوم نساز. همین
+   کامپوننت را فرمِ مسابقه هم استفاده می‌کند و `direction="future"`
+   روزهای گذشته را می‌بندد. */
+import JalaliDatePicker from '../ui/JalaliDatePicker'
+import { normalizeDigits } from '../../lib/text-fa'
 import { CalendarPlus, Loader2, Check } from 'lucide-react'
 import { apiFetch } from '../../lib/http'
 import { useAuthStore } from '../../store/auth.store'
-import { tehranInstant, toJalali, J_MONTHS, J_DAY_NAMES, toFaDigits } from '../../lib/jalali'
+import { tehranInstant, jalaliToGregorian, toFaDigits } from '../../lib/jalali'
 
 const GOLD_D = '#8F6531', TEXT = '#1C1B17', MUT = '#6F6A5C', RED = '#B23B2E', GREEN = '#0E7A38'
 const LINE = '1px solid #EAE5DA'
@@ -34,9 +39,10 @@ export default function SessionRequest({ coachSlug, price, minutes }: {
   /* ⚠️ روز و ساعت جدا نگه داشته می‌شوند و فقط لحظه‌ی ارسال به هم
      می‌چسبند. `when` همان قرارداد قبلی را دارد ("YYYY-MM-DDTHH:MM")
      چون `tehranInstant` همان را می‌خواهد. */
-  const [day, setDay] = useState('')
+  /* مقدارِ تقویم به شکلِ «۱۴۰۵/۶/۲۲»؛ `day` شکلِ میلادیِ همان است
+     چون قرارداد با سرور همان است. */
+  const [jDate, setJDate] = useState('')
   const [time, setTime] = useState('')
-  const when = day && time ? `${day}T${time}` : ''
   const [note, setNote] = useState('')
   const [busy, setBusy] = useState(false)
   const [err, setErr] = useState('')
@@ -48,71 +54,57 @@ export default function SessionRequest({ coachSlug, price, minutes }: {
     .toLocaleString('sv-SE', { timeZone: 'Asia/Tehran' }).slice(0, 16)
   const minDate = minLocal.slice(0, 10)
   const minTime = minLocal.slice(11, 16)
-  /* ⚠️ «امروز» را نمی‌شود از روی `minDate` فهمید: `minDate` کفِ
-     مجاز است (اکنون + ۳۱ دقیقه)، پس از ۲۳:۲۹ به بعد خودش فردا
-     می‌شود و برچسبِ «امروز» یک روز جلو می‌افتاد — کاربر روزی را
-     رزرو می‌کرد که برچسب خلافش را می‌گفت. */
-  const todayTehran = new Date()
-    .toLocaleString('sv-SE', { timeZone: 'Asia/Tehran' }).slice(0, 10)
 
-  /* ── نیم‌ساعت‌های یک روز ──
-     ⚠️ برای *امروز* ساعت‌های گذشته حذف می‌شوند، وگرنه کاربر زمانی
-     می‌فرستد که سرور با ۴۰۰ ردش می‌کند. */
-  const slotsFor = (value: string) => {
-    const out: { value: string; label: string }[] = []
+  /* «۱۴۰۵/۶/۲۲» ⟵ «2026-09-13» */
+  const day = useMemo(() => {
+    if (!jDate) return ''
+    const [jy, jm, jd] = normalizeDigits(jDate).split('/').map(Number)
+    if (!jy || !jm || !jd) return ''
+    const [gy, gm, gd] = jalaliToGregorian(jy, jm, jd)
+    return `${gy}-${String(gm).padStart(2, '0')}-${String(gd).padStart(2, '0')}`
+  }, [jDate])
+
+  /* ⚠️ بعد از `day` اعلام می‌شود، نه کنارِ stateها: `day` دیگر state
+     نیست بلکه از تقویم مشتق می‌شود. */
+  const when = day && time ? `${day}T${time}` : ''
+
+  /* ── نیم‌ساعت‌های روزِ انتخاب‌شده ──
+     ⚠️ ساعتِ گذشته فقط *غیرفعال* می‌شود، نه حذف: جای خالی در شبکه
+     به کاربر می‌گوید آن ساعت وجود دارد ولی گذشته، و این از
+     ناپدیدشدنِ بی‌توضیح بهتر است. */
+  const slots = useMemo(() => {
+    const out: { value: string; label: string; past: boolean }[] = []
     for (let h = 8; h <= 23; h++) {
       for (const m of ['00', '30']) {
         const v = `${String(h).padStart(2, '0')}:${m}`
-        if (value === minDate && v < minTime) continue
-        out.push({ value: v, label: toFaDigits(v) })
+        /* ⚠️ `day === minDate` تنها کافی نیست: روزی که کاملا گذشته
+           هم ممکن است انتخاب شود. تقویم «امروز» را از ساعتِ
+           **دستگاه** می‌گیرد نه تهران، پس دستگاهی که عقب‌تر است
+           روزی را باز نشان می‌دهد که در تهران تمام شده؛ و بینِ
+           ۲۳:۲۹ تا ۲۳:۵۹ خودِ `minDate` فردا می‌شود. */
+        out.push({ value: v, label: toFaDigits(v), past: day < minDate || (day === minDate && v < minTime) })
       }
     }
     return out
-  }
+  }, [day, minDate, minTime])
 
-  /* ── روزهای پیشِ رو، با نامِ فارسی ──
-     ⚠️ لنگر ظهرِ UTC است نه نیمه‌شب: با نیمه‌شب، جمع‌کردنِ ۲۴ ساعت در
-     مرزِ تغییرِ ساعت یک روز جا می‌اندازد یا تکرار می‌کند.
-     ⚠️ `J_DAY_NAMES` از شنبه شروع می‌شود ولی `getUTCDay` از یک‌شنبه،
-     پس اندیس یک واحد می‌چرخد.
-     ⚠️ روزی که هیچ ساعتی برایش نمانده اصلا نمی‌آید — وگرنه کاربر
-     «امروز» را می‌زد و به فهرستِ ساعتِ خالی می‌رسید بی‌هیچ توضیحی. */
-  const days = useMemo(() => {
-    const out: { value: string; label: string }[] = []
-    const base = Date.parse(minDate + 'T12:00:00Z')
-    for (let i = 0; i < 31 && out.length < 30; i++) {
-      const d = new Date(base + i * 86400000)
-      const gy = d.getUTCFullYear(), gm = d.getUTCMonth() + 1, gd = d.getUTCDate()
-      const value = `${gy}-${String(gm).padStart(2, '0')}-${String(gd).padStart(2, '0')}`
-      if (slotsFor(value).length === 0) continue
-      const [jy, jm, jd] = toJalali(gy, gm, gd)
-      const dayName = J_DAY_NAMES[(d.getUTCDay() + 1) % 7]
-      const dayNum = `${toFaDigits(jd)} ${J_MONTHS[jm - 1]}`
-      const tomorrow = new Date(Date.parse(todayTehran + 'T12:00:00Z') + 86400000)
-        .toISOString().slice(0, 10)
-      const label = value === todayTehran ? `امروز · ${dayName} ${dayNum}`
-        : value === tomorrow ? `فردا · ${dayName} ${dayNum}`
-          : `${dayName} ${dayNum} ${toFaDigits(jy)}`
-      out.push({ value, label })
-    }
-    return out
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [minDate, minTime, todayTehran])
-
-  const times = useMemo(() => (day ? slotsFor(day) : []),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [day, minDate, minTime])
-
-  /* ⚠️ `minLocal` هر رندر دوباره حساب می‌شود، پس با گذرِ زمان یک
-     گزینه‌ی انتخاب‌شده می‌تواند از فهرست بیفتد. آن‌وقت `select` خالی
-     دیده می‌شود ولی `when` هنوز پر است و دکمه فعال می‌ماند و
-     زمانِ گذشته پست می‌شود. */
+  /* ⚠️ `minLocal` هر رندر دوباره حساب می‌شود، پس با گذرِ زمان ساعتِ
+     انتخاب‌شده می‌تواند گذشته شود. آن‌وقت تراشه انتخاب‌شده می‌ماند
+     ولی زمانِ گذشته پست می‌شود. */
   useEffect(() => {
-    if (day && !days.some(d => d.value === day)) { setDay(''); setTime(''); return }
-    if (time && !times.some(t => t.value === time)) setTime('')
-  }, [days, times, day, time])
+    if (time && slots.some(t => t.value === time && t.past)) setTime('')
+  }, [slots, time])
 
   const submit = async () => {
+    /* ⚠️ افکتِ پاک‌سازی فقط وقتی کار می‌کند که رندرِ تازه‌ای رخ دهد،
+       و این فرم هیچ تیکی ندارد: کاربر می‌تواند ساعت ۱۴:۰۰ را
+       انتخاب کند، بنشیند تا ۱۴:۱۰ و بزند. تنها جایی که قطعا اجرا
+       می‌شود همین‌جاست. */
+    const floor = new Date(Date.now() + 31 * 60 * 1000)
+      .toLocaleString('sv-SE', { timeZone: 'Asia/Tehran' }).slice(0, 16).replace(' ', 'T')
+    if (when < floor) {
+      setTime(''); setErr('این ساعت گذشته است؛ ساعت دیگری انتخاب کنید'); return
+    }
     setBusy(true); setErr('')
     try {
       const r = await apiFetch('/api/coach/sessions', {
@@ -139,8 +131,12 @@ export default function SessionRequest({ coachSlug, price, minutes }: {
         style={{
           display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 7,
           width: '100%', height: 44, borderRadius: 11, cursor: 'pointer', fontFamily: 'inherit',
-          fontSize: 13.5, fontWeight: 800, color: GOLD_D,
-          background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.34)',
+          /* ⚠️ این دکمه روی نوارِ *تیره*ی رزرو می‌نشیند، نه روی کارتِ
+             سفید. تینتِ طلاییِ ۱۲٪ با متنِ #8F6531 آن‌جا ۲٫۹:۱ می‌داد.
+             پرِ توپر هم کنتراست را حل می‌کند هم کنشِ اصلیِ صفحه را
+             آن‌طور که باید پررنگ می‌کند. */
+          fontSize: 13.5, fontWeight: 800, color: '#2A1E08',
+          background: '#F4E3BC', border: '1px solid rgba(255,255,255,0.22)',
         }}>
         <CalendarPlus size={16} /> درخواست جلسه
       </button>
@@ -150,29 +146,30 @@ export default function SessionRequest({ coachSlug, price, minutes }: {
   return (
     <div style={{ border: LINE, borderRadius: 12, padding: 14, background: '#FAFAF7' }}>
       {/* ⚠️ `datetime-local` تقویمِ میلادی و ارقامِ لاتینِ مرورگر را
-          می‌آورد — وسطِ فرمِ فارسی. حالا مثل رزروِ میزِ باشگاه: روز با
-          نامِ فارسی و ساعت با ارقامِ فارسی. */}
-      <label htmlFor="sess-day" style={{ display: 'block', fontSize: 12.5, fontWeight: 700, color: TEXT, marginBottom: 6 }}>
-        روز
-      </label>
-      <select id="sess-day" value={day} onChange={e => { setDay(e.target.value); setTime('') }}
-        style={{ width: '100%', boxSizing: 'border-box', padding: '10px 12px', borderRadius: 10, border: LINE, background: '#fff', fontSize: 13.5, fontFamily: 'inherit', color: TEXT }}>
-        <option value="">انتخاب کنید</option>
-        {days.map(d => <option key={d.value} value={d.value}>{d.label}</option>)}
-      </select>
+          می‌آورد — وسطِ فرمِ فارسی. حالا تقویمِ فارسیِ خودِ پروژه، و
+          ساعت به‌جای فهرستِ کشویی یک شبکه‌ی تراشه. */}
+      <JalaliDatePicker id="sess-date" label="تاریخ" direction="future"
+        placeholder="انتخاب تاریخ" value={jDate} onChange={setJDate} />
 
-      <label htmlFor="sess-time" style={{ display: 'block', fontSize: 12.5, fontWeight: 700, color: TEXT, margin: '12px 0 6px' }}>
-        ساعت
-      </label>
-      <select id="sess-time" value={time} onChange={e => { if (day) setTime(e.target.value) }}
-        aria-disabled={!day} aria-describedby={!day ? 'sess-time-hint' : undefined}
-        style={{ width: '100%', boxSizing: 'border-box', padding: '10px 12px', borderRadius: 10, border: LINE, background: day ? '#fff' : '#F3F1EB', fontSize: 13.5, fontFamily: 'inherit', color: day ? TEXT : MUT }}>
-        <option value="">{day ? 'انتخاب کنید' : 'اول روز را انتخاب کنید'}</option>
-        {times.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
-      </select>
-      {!day && <p id="sess-time-hint" style={{ fontSize: 11.5, color: MUT, margin: '6px 0 0' }}>
-        اول روز را انتخاب کنید
-      </p>}
+      <p id="sess-time-h" style={{ fontSize: 12.5, fontWeight: 700, color: TEXT, margin: '14px 0 8px' }}>ساعت</p>
+      {!day
+        ? <p style={{ fontSize: 12, color: MUT, margin: 0 }}>اول تاریخ را انتخاب کنید</p>
+        : slots.every(t => t.past)
+          ? <p style={{ fontSize: 12, color: RED, margin: 0 }}>این روز گذشته است؛ روز دیگری انتخاب کنید</p>
+        : (
+          <div role="group" aria-labelledby="sess-time-h"
+            className="sess-slots">
+            {slots.map(t => (
+              /* ⚠️ کلاس، نه استایلِ اینلاین: چهار حالتِ لازمِ پروژه —
+                 به‌ویژه `:hover` — با اینلاین قابل بیان نیست. */
+              <button key={t.value} type="button" className="sess-slot" disabled={t.past}
+                onClick={() => setTime(t.value)} aria-pressed={time === t.value}
+                data-on={time === t.value ? '1' : undefined}>
+                {t.label}
+              </button>
+            ))}
+          </div>
+        )}
 
       <label htmlFor="sess-note" style={{ display: 'block', fontSize: 12.5, fontWeight: 700, color: TEXT, margin: '12px 0 6px' }}>
         توضیح (اختیاری)
