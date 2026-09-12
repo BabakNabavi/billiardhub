@@ -47,7 +47,7 @@ import { useParams } from 'next/navigation'
 /* ⚠️ آیکون تزئینی نداریم: هر آیکونی که این‌جا می‌ماند یا ناوبری
    است یا کنش. `MapPin` و `Clock` با بازطراحی حذف شدند — شهر و
    ساعت، *متن*اند و آیکون چیزی به آن‌ها اضافه نمی‌کرد. */
-import { Wrench, Phone, MapPin, Home, ClipboardList, Building2, Map, Clock, Copy, Check, ChevronLeft, TextCursorInput } from 'lucide-react'
+import { Wrench, Phone, MapPin, Home, ClipboardList, Building2, Map, Clock, Check, ChevronLeft, TextCursorInput, Link2 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { getTechnician } from '../../../lib/technicians-data'
 import { useOwnerEdit } from '../../../lib/profiles/use-owner-edit'
@@ -533,18 +533,13 @@ export default function TechnicianProfilePage() {
                   متخصص باید بتواند از همان‌جایی که پروفایلش را می‌بیند
                   لینکش را بردارد و بفرستد. `dir="ltr"` لازم است وگرنه
                   نشانی لاتین در متنِ راست‌به‌چپ تکه‌تکه دیده می‌شود. */}
-              <p className="tmp-slug">
+              <button type="button" onClick={copyUrl} className="tmp-slug"
+                aria-label={copyState === 'ok' ? `نشانی کپی شد: ${publicUrl}` : `کپی نشانی اختصاصی: ${publicUrl}`}>
+                {copyState === 'ok' ? <Check size={13} aria-hidden />
+                  : copyState === 'manual' ? <TextCursorInput size={13} aria-hidden />
+                  : <Link2 size={13} aria-hidden />}
                 <code id="tmp-url-code" dir="ltr">{publicUrl}</code>
-                <button type="button" onClick={copyUrl} className="tmp-slug-copy"
-                  aria-label={copyState === 'ok' ? 'نشانی کپی شد' : 'کپی نشانی اختصاصی'}>
-                  {/* ⚠️ متنِ کنارِ آیکون برداشته شد؛ خودِ آیکون گویاست.
-                      نامِ دسترس‌پذیر از `aria-label` می‌آید، پس دکمه
-                      برای خواننده‌ی صفحه هنوز نام دارد. */}
-                  {copyState === 'ok' ? <Check size={15} aria-hidden />
-                    : copyState === 'manual' ? <TextCursorInput size={15} aria-hidden />
-                    : <Copy size={15} aria-hidden />}
-                </button>
-              </p>
+              </button>
               <span aria-live="polite" className="tmp-sr-live">
                 {copyState === 'ok' ? 'نشانی در کلیپ‌بورد کپی شد'
                   : copyState === 'manual' ? 'مرورگر اجازه‌ی کپی نداد؛ نشانی انتخاب شد — با Ctrl+C بردارید' : ''}

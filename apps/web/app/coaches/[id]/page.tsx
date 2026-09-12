@@ -2,7 +2,7 @@
 import { useChannelPublish, type PublishVideo } from '@/components/media/useChannelPublish'
 import { useVideoEdit } from '@/components/media/useVideoEdit'
 import { detailTitle, type VideoDetail } from '@/lib/media/video-details'
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import ProfileHero from '../../../components/profile/ProfileHero'
 import ProfileGallery from '../../../components/profile/ProfileGallery'
 import Reviews from '../../../components/reviews/Reviews'
@@ -24,7 +24,8 @@ import Link from 'next/link'
 import { useProfileImageViewer } from '@/components/ProfileImageViewer'
 import { useProfileVideoViewer } from '@/components/profile/ProfileVideoViewer'
 import { normalizeDigits } from '@/lib/text-fa'
-import { Phone, Send, Copy, Check } from 'lucide-react'
+import { toFaDigits } from '@/lib/jalali'
+import { Phone, Send } from 'lucide-react'
 import { getCoachProfile, badgeFromGrades, disciplineLabel, GRADES, type CoachProfile } from '@/lib/coach-store'
 
 /* همان سقفی که پنل اعمال می‌کند */
@@ -87,9 +88,6 @@ export default function CoachProfilePage() {
   const [vidBusy, setVidBusy] = useState(false)
   /* انتشار در بیلیارد مدیا — پنجره فقط وقتی باز می‌شود که کانال
      همین نقش نباشد. آپلود گالری هرگز به نتیجه‌اش وابسته نیست. */
-  const [copyState, setCopyState] = useState<'idle' | 'ok' | 'manual'>('idle')
-  const flashT = useRef<ReturnType<typeof setTimeout> | null>(null)
-  useEffect(() => () => { if (flashT.current) clearTimeout(flashT.current) }, [])
 
   /* ── چرا سرور هم خوانده می‌شود ──
      این صفحه فقط `localStorage` را می‌دید، یعنی پروفایل — عکس، معرفی،
@@ -154,6 +152,49 @@ export default function CoachProfilePage() {
      عنوان دو نسخه دارد: ردیف گالری پروفایل و ردیف بیلیارد مدیا.
      هوک دومی را می‌زند، این تابع اولی را. کلید نشانی فایل است،
      چون گالری شناسه‌ی ردیف مدیا را ندارد. */
+  /* ── آشکارسازیِ بخش‌ها هنگام اسکرول ──
+     ⚠️ `animation-timeline: view()` هنوز همه‌جا نیست، پس ناظرِ
+     تقاطع. حرکت فقط opacity/transform است.
+     ⚠️ حالتِ پایه **آشکار** است و کلاسِ پنهان‌کننده را خودِ اسکریپت
+     می‌گذارد؛ پس اگر جاوااسکریپت نرسد یا کاربر حرکتِ کم بخواهد،
+     محتوا دیده می‌شود نه اینکه برای همیشه نامرئی بماند. */
+  useEffect(() => {
+    if (typeof IntersectionObserver === 'undefined') return
+    if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return
+    const els = Array.from(document.querySelectorAll('.ch-rv'))
+    if (!els.length) return
+    /* ⚠️ چیزی که همین الان داخلِ قاب است نباید پنهان شود: روی
+       گوشیِ کند رنگ‌آمیزی شده، بعد hydration پنهانش می‌کند و نیم
+       ثانیه بعد برمی‌گردد — یک پرشِ دیدنی. */
+    const below = els.filter(el => el.getBoundingClientRect().top >= window.innerHeight * 0.9)
+    below.forEach(el => el.classList.add('ch-rv--off'))
+    const io = new IntersectionObserver(entries => {
+      for (const e of entries) {
+        if (!e.isIntersecting) continue
+        e.target.classList.remove('ch-rv--off')
+        io.unobserve(e.target)
+      }
+    }, { rootMargin: '0px 0px -8% 0px', threshold: 0.06 })
+    below.forEach(el => io.observe(el))
+
+    /* ── تبِ فعال ──
+       بدونِ این، شیارِ ۲ پیکسلیِ زیرِ تب‌ها هیچ‌وقت روشن نمی‌شد و
+       نوار نمی‌گفت کجای صفحه‌ای. */
+    const ids = ['media', 'about', 'career', 'reviews']
+    const marks = ids.map(i => document.getElementById(i)).filter(Boolean) as Element[]
+    const spy = new IntersectionObserver(entries => {
+      const hit = entries.filter(e => e.isIntersecting)
+        .sort((x, y) => y.intersectionRatio - x.intersectionRatio)[0]
+      if (!hit) return
+      for (const l of document.querySelectorAll('.ch-tabsbar a')) {
+        l.toggleAttribute('data-on', l.getAttribute('href') === '#' + hit.target.id)
+      }
+    }, { rootMargin: '-30% 0px -55% 0px', threshold: [0, 0.2, 0.6] })
+    marks.forEach(el => spy.observe(el))
+
+    return () => { io.disconnect(); spy.disconnect() }
+  }, [checked, reloadKey])
+
   const { dialog: videoEditDialog, edit: editVideo } = useVideoEdit(
     async (target, detail) => {
       /* ⚠️ `map` بدون تطبیق هم «موفق» برمی‌گردد. اگر نشانی جور نشود
@@ -180,15 +221,18 @@ export default function CoachProfilePage() {
          را بیشتر خواننده‌های صفحه نادیده می‌گیرند و اسکلت هیچ
          چیزی اعلام نمی‌کرد. عرض خطوط هم به CSS رفت — مقدار ثابت
          اینلاین جای درستش نیست. */
-      <div className="ch-page ch-skel" role="status" aria-busy="true" aria-label="در حال بارگذاری پروفایل مربی">
+      /* ⚠️ اسکلت باید شکلِ چیزی باشد که می‌آید، وگرنه لحظه‌ی رسیدنِ
+         داده یک بازچینشِ دیدنی است. این‌جا: هیرو ← نوارِ آمار ←
+         نوارِ تب ← رسانه‌ی تمام‌عرض. */
+      <div className="ch-page ch-ch ch-skel" role="status" aria-busy="true" aria-label="در حال بارگذاری پروفایل مربی">
         <div className="ch-skel-hero" />
-        <div className="ch-body"><div className="ch-wrap ch-cols">
-          <div className="ch-col">
-            <div className="ch-skel-line ch-skel-sm" />
-            <div className="ch-skel-line" /><div className="ch-skel-line" />
-            <div className="ch-skel-line ch-skel-md" />
-          </div>
-          <div className="ch-col ch-rail"><div className="ch-skel-card" /></div>
+        <div className="ch-stats-wrap"><div className="ch-wrap">
+          <div className="ch-skel-line ch-skel-sm" />
+        </div></div>
+        <div className="ch-skel-tabs" />
+        <div className="ch-body"><div className="ch-wrap">
+          <div className="ch-skel-line ch-skel-sm" />
+          <div className="ch-skel-card" />
         </div></div>
       </div>
     )
@@ -254,40 +298,6 @@ export default function CoachProfilePage() {
   })()
   const paragraphs = (coach.fullBio || coach.bio || '').split(/\n{2,}/).map(s => s.trim()).filter(Boolean)
   const publicUrl = `www.billiardhub.net/coaches/${coach.id}`
-
-  /* ── چرا فالبک لازم است ──
-     `navigator.clipboard` روی http (همان مسیر تست گوشی در شبکه‌ی
-     محلی) و در سافاری قدیمی وجود ندارد. نسخه‌ی قبلی در آن حالت
-     بی‌صدا `return` می‌کرد: دکمه فشرده می‌شد و هیچ اتفاقی نمی‌افتاد.
-     حالا نشانی انتخاب می‌شود تا کاربر با Ctrl/⌘+C خودش بردارد. */
-  const selectUrl = () => {
-    const el = document.getElementById('ch-url-code')
-    if (!el || typeof window.getSelection !== 'function') return
-    const r = document.createRange()
-    r.selectNodeContents(el)
-    const sel = window.getSelection()
-    sel?.removeAllRanges()
-    sel?.addRange(r)
-  }
-
-  /* تایمر قبلی هر بار پاک می‌شود: با دو کلیک پشت‌هم، تایمر اول
-     پیام کلیک دوم را زودتر خاموش می‌کرد. */
-  const flash = (s: 'ok' | 'manual') => {
-    setCopyState(s)
-    if (flashT.current) clearTimeout(flashT.current)
-    flashT.current = setTimeout(() => setCopyState('idle'), 2200)
-  }
-
-  const copyUrl = async () => {
-    if (!navigator.clipboard?.writeText) { selectUrl(); flash('manual'); return }
-    try {
-      await navigator.clipboard.writeText(`https://${publicUrl}`)
-      flash('ok')
-    } catch {
-      /* اجازه‌ی کلیپ‌بورد نبود — نشانی را انتخاب می‌کنیم تا دستی بردارد */
-      selectUrl(); flash('manual')
-    }
-  }
 
   const latin = localP ? `${localP.firstNameEn} ${localP.lastNameEn}`.trim().toUpperCase() : ''
 
@@ -377,7 +387,7 @@ export default function CoachProfilePage() {
   }
 
   return (
-    <div className="ch-page">
+    <div className="ch-page ch-ch">
       <ProfileHero
         name={coach.name}
         nameLatin={latin || undefined}
@@ -393,30 +403,48 @@ export default function CoachProfilePage() {
         publicUrl={publicUrl}
       />
 
+      {/* ── نوارِ آمار ──
+          ⚠️ فقط شمارشِ چیزهایی که واقعا در پروفایل هست. هیچ عددِ
+          «دنبال‌کننده» یا «شاگرد» ساخته نمی‌شود؛ پروژه داده‌اش را
+          ندارد و عددِ ساختگی روی پروفایلِ آدمِ واقعی از نبودش بدتر
+          است. آیتمِ صفر اصلا رندر نمی‌شود. */}
+      <div className="ch-stats-wrap">
+        <div className="ch-wrap">
+          <ul className="ch-stats">
+            {coach.videos.length > 0 && (
+              <li><b>{toFaDigits(String(coach.videos.length))}</b><span>ویدیو</span></li>
+            )}
+            {coach.gallery.length > 0 && (
+              <li><b>{toFaDigits(String(coach.gallery.length))}</b><span>تصویر</span></li>
+            )}
+            {(localP?.albums?.length ?? 0) > 0 && (
+              <li><b>{toFaDigits(String(localP?.albums?.length ?? 0))}</b><span>آلبوم</span></li>
+            )}
+            {grade && <li><b className="ch-stats-t">{grade.label}</b><span>بالاترین درجه</span></li>}
+            {sinceYear && <li><b>{toFaDigits(sinceYear)}</b><span>شروع مربیگری</span></li>}
+          </ul>
+        </div>
+      </div>
+
+      {/* ── نوارِ تب‌ها ──
+          لنگر است نه روتر: محتوا کوتاه است و صفحه‌ی جدا برای هر تب
+          روی شبکه‌ی کند یعنی رفت‌وبرگشتِ اضافه. */}
+      <nav className="ch-tabsbar" aria-label="بخش‌های صفحه">
+        <div className="ch-wrap ch-tabsbar-in">
+          <a href="#media">رسانه</a>
+          <a href="#about">درباره</a>
+          <a href="#career">مسیر مربیگری</a>
+          <a href="#reviews">نظرها</a>
+        </div>
+      </nav>
+
       <div className="ch-body">
-        <div className="ch-wrap ch-cols">
+        <div className="ch-wrap">
 
-          <main className="ch-col">
-            <section aria-labelledby="ch-about-h">
-              <div className="ch-sec-head">
-                <h2 id="ch-about-h">معرفی</h2>
-                <span className="en">ABOUT</span>
-                <span className="rule" aria-hidden />
-              </div>
-              {paragraphs.length === 0
-                ? <p className="ch-empty">این مربی هنوز معرفی‌ای ننوشته است.</p>
-                : paragraphs.map((t, i) => <p key={i} className="ch-prose">{t}</p>)}
-            </section>
-
-            <section aria-labelledby="ch-path-h">
-              <div className="ch-sec-head">
-                <h2 id="ch-path-h">مسیر مربیگری</h2>
-                <span className="en">CAREER</span>
-                <span className="rule" aria-hidden />
-              </div>
-              <GradeTimeline items={timeline} freeCoach={localP?.freeCoach ?? false} />
-            </section>
-
+          {/* ── رسانه، تمام‌عرض ──
+              ⚠️ پیش‌تر داخلِ ستونِ باریکِ کناری بود و ویدیوها اندازه‌ی
+              تمبر دیده می‌شدند. محتوای اصلیِ یک مربی همین است. */}
+          <section id="media" tabIndex={-1} className="ch-sec ch-rv">
             <ProfileGallery
               images={coach.gallery}
               videos={coach.videos}
@@ -430,38 +458,34 @@ export default function CoachProfilePage() {
               onAddImages={addImages} onAddVideos={addVideoFiles} beforeAddVideos={() => askChannel(String(coach?.name ?? ''))} onNewAlbum={newAlbum}
             />
             {edit.error && <p className="ch-empty" role="alert">{edit.error}</p>}
+          </section>
 
-            {/* ── امتیاز و نظرها ──
-                ⚠️ کارت مربی تا امروز عددی به‌نام «امتیاز» داشت که
-                خود باشگاه‌دار تایپ می‌کرد. حالا داده‌ی واقعی است و
-                همان کامپوننتی رندر می‌شود که باشگاه استفاده می‌کند. */}
-            <section className="ch-card" style={{ marginTop: 16 }}>
-              <Reviews endpoint={`/api/profiles/coach/${encodeURIComponent(id)}/reviews`} subject="این مربی"
-                cannotReviewNote="برای ثبت نظر باید در باشگاهی که این مربی در آن ثبت شده، رزرو قطعی داشته باشید." />
-            </section>
-          </main>
-
-          <aside className="ch-col ch-rail" aria-label="اطلاعات مربی">
-            {/* ── درخواست جلسه ──
-                برای مالک پروفایل معنی ندارد؛ برای بقیه بالای ستون
-                کناری می‌نشیند، جایی که چشم اول می‌رود. */}
-            {!edit.isOwner && (
-              <section className="ch-card" aria-labelledby="ch-sess-h">
-                <div className="ch-sec-head">
-                  <h2 id="ch-sess-h">جلسه‌ی خصوصی</h2>
-                  <span className="rule" aria-hidden />
-                </div>
+          {/* ── نوارِ رزرو — برای مالکِ پروفایل معنی ندارد ── */}
+          {!edit.isOwner && (
+            <section className="ch-book ch-rv" aria-labelledby="ch-sess-h">
+              <div className="ch-book-t">
+                <h2 id="ch-sess-h">جلسه‌ی خصوصی با {coach.name}</h2>
+                <p>زمان و مکان را با خودِ مربی هماهنگ می‌کنید</p>
+              </div>
+              <div className="ch-book-a">
                 <SessionRequest coachSlug={id} price={sessionPrice} minutes={sessionMin} />
-              </section>
-            )}
+              </div>
+            </section>
+          )}
 
-            {(coach.phone || coach.whatsapp || coach.instagram || coach.telegram) && (
-              <section className="ch-card" aria-labelledby="ch-contact-h">
-                <div className="ch-sec-head">
-                  <h2 id="ch-contact-h">راه‌های ارتباطی</h2>
-                  <span className="rule" aria-hidden />
-                </div>
-                <div className="ch-links">
+          <div className="ch-two">
+            <section id="about" tabIndex={-1} className="ch-sec ch-rv" aria-labelledby="ch-about-h">
+              <div className="ch-sec-head">
+                <h2 id="ch-about-h">معرفی</h2>
+                <span className="en">ABOUT</span>
+                <span className="rule" aria-hidden />
+              </div>
+              {paragraphs.length === 0
+                ? <p className="ch-empty">این مربی هنوز معرفی‌ای ننوشته است</p>
+                : paragraphs.map((t, i) => <p key={i} className="ch-prose">{t}</p>)}
+
+              {(coach.phone || coach.whatsapp || coach.instagram || coach.telegram) && (
+                <div className="ch-links ch-links--row">
                   {coach.phone && (
                     <a href={`tel:${coach.phone}`} className="ch-link" aria-label="تماس تلفنی">
                       <Phone size={17} aria-hidden />
@@ -488,30 +512,23 @@ export default function CoachProfilePage() {
                     </a>
                   )}
                 </div>
-              </section>
-            )}
+              )}
+            </section>
 
-            <section className="ch-card" aria-labelledby="ch-url-h">
+            <section id="career" tabIndex={-1} className="ch-sec ch-rv" aria-labelledby="ch-path-h">
               <div className="ch-sec-head">
-                <h2 id="ch-url-h">آدرس اختصاصی</h2>
-                <span className="en">MY LINK</span>
+                <h2 id="ch-path-h">مسیر مربیگری</h2>
+                <span className="en">CAREER</span>
                 <span className="rule" aria-hidden />
               </div>
-              <div className="ch-url">
-                <code id="ch-url-code" dir="ltr">{publicUrl}</code>
-                <button type="button" onClick={copyUrl} className="ch-url-copy"
-                  aria-label={copyState === 'ok' ? 'نشانی کپی شد' : 'کپی نشانی عمومی'}>
-                  {copyState === 'ok' ? <Check size={15} aria-hidden /> : <Copy size={15} aria-hidden />}
-                  {copyState === 'ok' ? 'کپی شد' : copyState === 'manual' ? 'دستی کپی کنید' : 'کپی'}
-                </button>
-              </div>
-              {/* پیام زنده تا خواننده‌ی صفحه هم نتیجه را بشنود */}
-              <p aria-live="polite" className="ch-sr-live">
-                {copyState === 'ok' ? 'نشانی در کلیپ‌بورد کپی شد.'
-                  : copyState === 'manual' ? 'مرورگر اجازه‌ی کپی نداد؛ نشانی انتخاب شد — با Ctrl+C بردارید.' : ''}
-              </p>
+              <GradeTimeline items={timeline} freeCoach={localP?.freeCoach ?? false} />
             </section>
-          </aside>
+          </div>
+
+          <section id="reviews" tabIndex={-1} className="ch-card ch-rv">
+            <Reviews endpoint={`/api/profiles/coach/${encodeURIComponent(id)}/reviews`} subject="این مربی"
+              cannotReviewNote="برای ثبت نظر باید در باشگاهی که این مربی در آن ثبت شده، رزرو قطعی داشته باشید." />
+          </section>
 
         </div>
       </div>
