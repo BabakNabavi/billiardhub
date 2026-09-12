@@ -12,11 +12,11 @@
    حضوری تسویه می‌شود.
    ───────────────────────────────────────────────────────────── */
 
-import { useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { CalendarPlus, Loader2, Check } from 'lucide-react'
 import { apiFetch } from '../../lib/http'
 import { useAuthStore } from '../../store/auth.store'
-import { tehranInstant } from '../../lib/jalali'
+import { tehranInstant, toJalali, J_MONTHS, J_DAY_NAMES, toFaDigits } from '../../lib/jalali'
 
 const GOLD_D = '#8F6531', TEXT = '#1C1B17', MUT = '#6F6A5C', RED = '#B23B2E', GREEN = '#0E7A38'
 const LINE = '1px solid #EAE5DA'
@@ -31,7 +31,12 @@ export default function SessionRequest({ coachSlug, price, minutes }: {
 }) {
   const { user } = useAuthStore()
   const [open, setOpen] = useState(false)
-  const [when, setWhen] = useState('')
+  /* ⚠️ روز و ساعت جدا نگه داشته می‌شوند و فقط لحظه‌ی ارسال به هم
+     می‌چسبند. `when` همان قرارداد قبلی را دارد ("YYYY-MM-DDTHH:MM")
+     چون `tehranInstant` همان را می‌خواهد. */
+  const [day, setDay] = useState('')
+  const [time, setTime] = useState('')
+  const when = day && time ? `${day}T${time}` : ''
   const [note, setNote] = useState('')
   const [busy, setBusy] = useState(false)
   const [err, setErr] = useState('')
@@ -39,8 +44,73 @@ export default function SessionRequest({ coachSlug, price, minutes }: {
   /* کف انتخاب‌پذیر فرم = همان کفی که سرور می‌پذیرد (نیم‌ساعت بعد)،
      به وقت تهران. بدونش کاربر زمانی را انتخاب می‌کند و بعد ارسال
      ۴۰۰ می‌گیرد. */
-  const minWhen = new Date(Date.now() + 31 * 60 * 1000)
-    .toLocaleString('sv-SE', { timeZone: 'Asia/Tehran' }).slice(0, 16).replace(' ', 'T')
+  const minLocal = new Date(Date.now() + 31 * 60 * 1000)
+    .toLocaleString('sv-SE', { timeZone: 'Asia/Tehran' }).slice(0, 16)
+  const minDate = minLocal.slice(0, 10)
+  const minTime = minLocal.slice(11, 16)
+  /* ⚠️ «امروز» را نمی‌شود از روی `minDate` فهمید: `minDate` کفِ
+     مجاز است (اکنون + ۳۱ دقیقه)، پس از ۲۳:۲۹ به بعد خودش فردا
+     می‌شود و برچسبِ «امروز» یک روز جلو می‌افتاد — کاربر روزی را
+     رزرو می‌کرد که برچسب خلافش را می‌گفت. */
+  const todayTehran = new Date()
+    .toLocaleString('sv-SE', { timeZone: 'Asia/Tehran' }).slice(0, 10)
+
+  /* ── نیم‌ساعت‌های یک روز ──
+     ⚠️ برای *امروز* ساعت‌های گذشته حذف می‌شوند، وگرنه کاربر زمانی
+     می‌فرستد که سرور با ۴۰۰ ردش می‌کند. */
+  const slotsFor = (value: string) => {
+    const out: { value: string; label: string }[] = []
+    for (let h = 8; h <= 23; h++) {
+      for (const m of ['00', '30']) {
+        const v = `${String(h).padStart(2, '0')}:${m}`
+        if (value === minDate && v < minTime) continue
+        out.push({ value: v, label: toFaDigits(v) })
+      }
+    }
+    return out
+  }
+
+  /* ── روزهای پیشِ رو، با نامِ فارسی ──
+     ⚠️ لنگر ظهرِ UTC است نه نیمه‌شب: با نیمه‌شب، جمع‌کردنِ ۲۴ ساعت در
+     مرزِ تغییرِ ساعت یک روز جا می‌اندازد یا تکرار می‌کند.
+     ⚠️ `J_DAY_NAMES` از شنبه شروع می‌شود ولی `getUTCDay` از یک‌شنبه،
+     پس اندیس یک واحد می‌چرخد.
+     ⚠️ روزی که هیچ ساعتی برایش نمانده اصلا نمی‌آید — وگرنه کاربر
+     «امروز» را می‌زد و به فهرستِ ساعتِ خالی می‌رسید بی‌هیچ توضیحی. */
+  const days = useMemo(() => {
+    const out: { value: string; label: string }[] = []
+    const base = Date.parse(minDate + 'T12:00:00Z')
+    for (let i = 0; i < 31 && out.length < 30; i++) {
+      const d = new Date(base + i * 86400000)
+      const gy = d.getUTCFullYear(), gm = d.getUTCMonth() + 1, gd = d.getUTCDate()
+      const value = `${gy}-${String(gm).padStart(2, '0')}-${String(gd).padStart(2, '0')}`
+      if (slotsFor(value).length === 0) continue
+      const [jy, jm, jd] = toJalali(gy, gm, gd)
+      const dayName = J_DAY_NAMES[(d.getUTCDay() + 1) % 7]
+      const dayNum = `${toFaDigits(jd)} ${J_MONTHS[jm - 1]}`
+      const tomorrow = new Date(Date.parse(todayTehran + 'T12:00:00Z') + 86400000)
+        .toISOString().slice(0, 10)
+      const label = value === todayTehran ? `امروز · ${dayName} ${dayNum}`
+        : value === tomorrow ? `فردا · ${dayName} ${dayNum}`
+          : `${dayName} ${dayNum} ${toFaDigits(jy)}`
+      out.push({ value, label })
+    }
+    return out
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [minDate, minTime, todayTehran])
+
+  const times = useMemo(() => (day ? slotsFor(day) : []),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [day, minDate, minTime])
+
+  /* ⚠️ `minLocal` هر رندر دوباره حساب می‌شود، پس با گذرِ زمان یک
+     گزینه‌ی انتخاب‌شده می‌تواند از فهرست بیفتد. آن‌وقت `select` خالی
+     دیده می‌شود ولی `when` هنوز پر است و دکمه فعال می‌ماند و
+     زمانِ گذشته پست می‌شود. */
+  useEffect(() => {
+    if (day && !days.some(d => d.value === day)) { setDay(''); setTime(''); return }
+    if (time && !times.some(t => t.value === time)) setTime('')
+  }, [days, times, day, time])
 
   const submit = async () => {
     setBusy(true); setErr('')
@@ -79,12 +149,30 @@ export default function SessionRequest({ coachSlug, price, minutes }: {
 
   return (
     <div style={{ border: LINE, borderRadius: 12, padding: 14, background: '#FAFAF7' }}>
-      <label htmlFor="sess-when" style={{ display: 'block', fontSize: 12.5, fontWeight: 700, color: TEXT, marginBottom: 6 }}>
-        زمان پیشنهادی
+      {/* ⚠️ `datetime-local` تقویمِ میلادی و ارقامِ لاتینِ مرورگر را
+          می‌آورد — وسطِ فرمِ فارسی. حالا مثل رزروِ میزِ باشگاه: روز با
+          نامِ فارسی و ساعت با ارقامِ فارسی. */}
+      <label htmlFor="sess-day" style={{ display: 'block', fontSize: 12.5, fontWeight: 700, color: TEXT, marginBottom: 6 }}>
+        روز
       </label>
-      {/* ورودی زمان لاتین است و باید چپ‌به‌راست بماند */}
-      <input id="sess-when" type="datetime-local" value={when} onChange={e => setWhen(e.target.value)} dir="ltr" min={minWhen}
-        style={{ width: '100%', boxSizing: 'border-box', padding: '10px 12px', borderRadius: 10, border: LINE, background: '#fff', fontSize: 13.5, fontFamily: 'inherit', color: TEXT }} />
+      <select id="sess-day" value={day} onChange={e => { setDay(e.target.value); setTime('') }}
+        style={{ width: '100%', boxSizing: 'border-box', padding: '10px 12px', borderRadius: 10, border: LINE, background: '#fff', fontSize: 13.5, fontFamily: 'inherit', color: TEXT }}>
+        <option value="">انتخاب کنید</option>
+        {days.map(d => <option key={d.value} value={d.value}>{d.label}</option>)}
+      </select>
+
+      <label htmlFor="sess-time" style={{ display: 'block', fontSize: 12.5, fontWeight: 700, color: TEXT, margin: '12px 0 6px' }}>
+        ساعت
+      </label>
+      <select id="sess-time" value={time} onChange={e => { if (day) setTime(e.target.value) }}
+        aria-disabled={!day} aria-describedby={!day ? 'sess-time-hint' : undefined}
+        style={{ width: '100%', boxSizing: 'border-box', padding: '10px 12px', borderRadius: 10, border: LINE, background: day ? '#fff' : '#F3F1EB', fontSize: 13.5, fontFamily: 'inherit', color: day ? TEXT : MUT }}>
+        <option value="">{day ? 'انتخاب کنید' : 'اول روز را انتخاب کنید'}</option>
+        {times.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
+      </select>
+      {!day && <p id="sess-time-hint" style={{ fontSize: 11.5, color: MUT, margin: '6px 0 0' }}>
+        اول روز را انتخاب کنید
+      </p>}
 
       <label htmlFor="sess-note" style={{ display: 'block', fontSize: 12.5, fontWeight: 700, color: TEXT, margin: '12px 0 6px' }}>
         توضیح (اختیاری)

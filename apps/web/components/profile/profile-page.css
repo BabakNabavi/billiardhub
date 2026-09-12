@@ -704,7 +704,7 @@ main.ch-col > section { max-width: 760px; }
    کاربر باید دیده شود — بزرگ‌نمایی دقیقا همان چیزی را می‌بُرد که آن
    چیدمانِ دولایه برایش ساخته شده. پس حرکت فقط روی موبایل می‌ماند، و
    روی پوسترِ ساخته‌شده که عکسِ کسی نیست. */
-.ch-hero-img, .cp {
+.ch-hero-img, .cp, .ch-hero-photo {
   transform-origin: 50% 40%;
   animation: ch-ken 52s ease-in-out infinite alternate;
 }
@@ -786,7 +786,103 @@ main.ch-col > section { max-width: 760px; }
 .ch-hero-ico:focus-visible { outline: 2px solid var(--gold, #C7A66A); outline-offset: 3px; }
 
 @media (prefers-reduced-motion: reduce) {
-  .ch-hero-img, .cp { animation: none; transform: none; }
+  .ch-hero-img, .cp, .ch-hero-photo { animation: none; transform: none; }
   .ch-hero-cta, .ch-hero-ico { transition: none; }
   .ch-hero-cta:hover { transform: none; }
+}
+
+
+/* ═══════════════════════════════════════════════════════════
+   پوسترِ عکسیِ هدر + نوارِ آمار
+
+   الگو از پروفایلِ راننده در F1 و پروفایلِ بازیکن در WST گرفته
+   شده: عکسِ بزرگِ سوژه، نامِ درشت، و **آمار داخلِ خودِ هدر** — نه
+   یک نوارِ جدا زیرش که صفحه را دو تکه می‌کند.
+   ═══════════════════════════════════════════════════════════ */
+
+.ch-hero-photo {
+  position: absolute; inset: 0; z-index: 0;
+  inline-size: 100%; block-size: 100%;
+  object-fit: cover;
+  /* ⚠️ سوژه سمتِ چپِ **فیزیکی** است و باید بماند؛ برشِ افقی همیشه از
+     سمتِ راست می‌خورد، همان‌جا که عمدا خالی است. */
+  object-position: left center;
+  display: block;
+  transform-origin: 34% 50%;
+}
+/* ⚠️ عکسِ واقعی روشن‌تر از پوسترِ برداری است و متنِ سفید رویش
+   می‌نشیند؛ پرده باید سنگین‌تر شود، وگرنه نام و چیپ‌ها روی دستِ
+   روشنِ عکس می‌افتند. */
+.ch-hero-scrim[data-photo] {
+  background:
+    linear-gradient(to left, rgb(11 13 15 / .92) 0%, rgb(11 13 15 / .78) 38%,
+      rgb(11 13 15 / .42) 72%, rgb(11 13 15 / .30) 100%),
+    linear-gradient(180deg, rgb(11 13 15 / .58) 0%, rgb(11 13 15 / .30) 46%, rgb(11 13 15 / .74) 100%);
+}
+@media (max-width: 699px) {
+  .ch-hero-scrim[data-photo] {
+    background: linear-gradient(180deg,
+      rgb(11 13 15 / .70) 0%, rgb(11 13 15 / .56) 40%, rgb(11 13 15 / .88) 100%);
+  }
+}
+
+/* ── نامِ درشت‌تر، با میله‌ی تأکید ── */
+/* ⚠️ فقط حالتِ عکسی. بدونِ این قید، صفحه‌ی داور هم نامِ درشت‌تر و
+   میله‌ی طلایی می‌گرفت روی پوستری که برایشان طراحی نشده. */
+.ch-hero--photo .ch-hero-id > .ch-name { font-size: clamp(32px, 6.4vw, 68px); letter-spacing: -0.03em; }
+.ch-hero--photo .ch-hero-id > .ch-name::before {
+  content: ''; display: block;
+  inline-size: 54px; block-size: 4px; border-radius: 2px;
+  margin-block-end: 14px;
+  background: linear-gradient(90deg, #F4E3BC, #C7A66A 60%, transparent);
+}
+
+/* ── نوارِ آمار داخلِ هدر ── */
+.ch-hero-stats {
+  margin-block-start: clamp(16px, 2.4vw, 26px);
+  padding-block-start: 16px;
+  border-block-start: 1px solid rgb(255 255 255 / .16);
+}
+.ch-hero-stats .ch-stats {
+  list-style: none; margin: 0; padding: 0;
+  display: flex; flex-wrap: wrap; gap: 10px 0;
+}
+.ch-hero-stats .ch-stats li {
+  display: grid; gap: 2px; min-inline-size: 0;
+  padding-inline: clamp(14px, 2.2vw, 28px);
+  border-inline-start: 1px solid rgb(255 255 255 / .14);
+}
+/* ⚠️ منطقی، نه `:first-child`: در RTL اولین آیتم سمتِ راست است و
+   خطِ جداکننده باید از دومی به بعد باشد. */
+.ch-hero-stats .ch-stats li:first-child { border-inline-start: 0; padding-inline-start: 0; }
+/* ⚠️ زیرِ ۷۰۰ نوار می‌شکند و جداکننده‌ی اولین آیتمِ سطرِ دوم در هوا
+   می‌ماند. آن‌جا شبکه می‌شود و خط‌ها کلا برداشته. */
+@media (max-width: 699px) {
+  .ch-hero-stats .ch-stats {
+    display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 16px;
+  }
+  .ch-hero-stats .ch-stats li { border-inline-start: 0; padding-inline: 0; }
+}
+.ch-hero-stats .ch-stats b {
+  font-size: clamp(18px, 2.4vw, 26px); font-weight: 800; letter-spacing: -0.02em;
+  color: #fff; line-height: 1.2;
+}
+.ch-hero-stats .ch-stats .ch-stats-t { font-size: clamp(13px, 1.6vw, 16px); color: #F4E3BC; }
+.ch-hero-stats .ch-stats span {
+  font-size: 11.5px; font-weight: 600; letter-spacing: .02em;
+  color: rgb(255 255 255 / .74);
+}
+
+
+/* ⚠️ چیپ پس‌زمینه‌ی ۱۰٪ سفید دارد — روی پوسترِ برداریِ تیره کار
+   می‌کرد، ولی روی عکسِ واقعی نه. با حرکتِ Ken-Burns توپِ سفید زیرِ
+   چیپ‌ها می‌لغزد و کنتراست تا ۳٫۹:۱ می‌افتد؛ سنجشِ ایستا این را
+   نمی‌بیند چون فقط یک فریم را می‌گیرد. پایه‌ی مات، مستقل از عکس. */
+.ch-hero--photo .ch-chip {
+  background: rgb(14 16 18 / .86);
+  border-color: rgb(255 255 255 / .26);
+}
+.ch-hero--photo .ch-chip-grade {
+  background: rgb(24 18 6 / .88);
+  border-color: rgb(199 166 106 / .46);
 }
