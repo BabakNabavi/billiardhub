@@ -593,6 +593,13 @@ main.ch-col > section { max-width: 760px; }
 .ch-ch .ch-body { padding-block: 24px 48px; }
 .ch-ch .ch-sec { margin-block-end: 24px; }
 .ch-ch .ch-two { display: grid; gap: 24px; }
+.ch-ch .ch-col-main, .ch-ch .ch-col-rail { display: grid; gap: 24px; align-content: start; }
+/* ⚠️ نه order و نه display:contents: ترتیبِ DOM خودش درست است
+   (معرفی ← جلسه ← مسیر ← نظرها) چون «نظرها» بیرونِ ستون‌هاست.
+   order فقط ترتیبِ *دیداری* را عوض می‌کند و فوکوس و صفحه‌خوان روی
+   DOM می‌مانند — ناسازگاری با WCAG 2.4.3. ضمنا آن قاعده‌ها به
+   .ch-ch بسته بودند و صفحه‌ی داور را هم جابه‌جا می‌کردند. */
+.ch-ch .ch-col-main > .ch-sec, .ch-ch .ch-col-rail > .ch-sec { margin-block-end: 0; }
 @media (min-width: 1024px) {
   .ch-ch .ch-two { grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); align-items: start; }
 }
@@ -600,7 +607,7 @@ main.ch-col > section { max-width: 760px; }
 /* ── نوارِ رزرو ── */
 .ch-ch .ch-book {
   display: grid; gap: 16px;
-  margin-block-end: 24px; padding: 20px;
+  padding: 20px;
   border-radius: 20px;
   background: linear-gradient(135deg, #14331F 0%, #0E2418 58%, #0B0D0F 100%);
   border: 1px solid rgb(255 255 255 / .10);
@@ -941,9 +948,12 @@ main.ch-col > section { max-width: 760px; }
   position: relative;
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
-  align-items: center; gap: 14px;
-  padding: 12px 14px;
-  border-radius: 16px;
+  align-items: center; gap: 12px;
+  /* ⚠️ ۸ به‌جای ۱۲: ردیفِ ۷۳ پیکسلی برای دو خطِ کوتاه زیادی گشاد
+     بود و ده پله ستونِ ریل را به ۸۳۶ می‌رساند — یعنی سفیدیِ خالی
+     کنارِ ستونِ اصلی. */
+  padding: 6px 12px;
+  border-radius: 13px;
   /* پله‌ی نگرفته کم‌رنگ است ولی *خوانا* می‌ماند: قرار است مسیر را
      نشان دهد، نه پنهانش کند. */
   color: var(--text-tertiary, #6E6E6E);
@@ -952,10 +962,13 @@ main.ch-col > section { max-width: 760px; }
 /* خطِ عمودیِ نردبان — از نشانه‌ی هر پله به بعدی */
 .ch-ladder .rf-step::before {
   content: ''; position: absolute;
-  inset-block-start: calc(12px + 12px); inset-block-end: -2px;
+  /* padding + نیمِ نشانه — با `align-self: start` روی نشانه ثابت است */
+  inset-block-start: calc(6px + 12px); inset-block-end: -2px;
   /* ⚠️ در RTL `inline-end` یعنی *چپ*، ولی نشانه‌ی پله سمتِ شروع
      (راست) است؛ با `inline-end` خط زیرِ ستونِ سال می‌افتاد. */
-  inset-inline-end: auto; inset-inline-start: 25px;
+  /* ⚠️ مرکزِ نشانه = padding-inline (۱۲) + نیمِ نشانه (۱۲)؛ منهای
+     نیمِ ضخامتِ خط. با تغییرِ padding این عدد هم باید عوض شود. */
+  inset-inline-end: auto; inset-inline-start: calc(12px + 12px - 1px);
   inline-size: 2px; background: var(--border-soft, rgba(17,17,17,.10));
 }
 .ch-ladder .rf-step:last-child::before { display: none; }
@@ -989,13 +1002,13 @@ main.ch-col > section { max-width: 760px; }
   background: currentColor; opacity: .5;
 }
 
-.ch-ladder .rf-step-body { display: grid; gap: 6px; min-inline-size: 0; }
+.ch-ladder .rf-step-body { display: grid; gap: 2px; min-inline-size: 0; }
 /* ⚠️ `wrap` لازم است: روی ۳۹۰ پیکسل، برچسبِ لاتینِ بلند + سال +
    نشان در یک خط جا نمی‌شوند و بدونِ آن ردیف افقی سرریز می‌کرد. */
 .ch-ladder .rf-step-meta {
   display: flex; align-items: center; flex-wrap: wrap; gap: 8px 10px;
 }
-.ch-ladder .rf-step-label { font-size: 14px; font-weight: 700; justify-self: start; }
+.ch-ladder .rf-step-label { font-size: 13.5px; font-weight: 700; line-height: 1.5; justify-self: start; }
 .ch-ladder .rf-step[data-has] .rf-step-label { font-weight: 800; }
 
 /* نقطه‌های سطح — همان زبانی که چیپِ درجه در هیرو دارد */
@@ -1010,13 +1023,13 @@ main.ch-col > section { max-width: 760px; }
    (سبزِ `#16A34A` روی `#EFF8F2`) — زیرِ کفِ ۴٫۵. همان آمیزه‌ی
    تیره‌کننده‌ی کاشی‌های خدمات، این‌جا هم. */
 .ch-ladder .rf-step-year {
-  font-size: 13px; font-weight: 800;
+  font-size: 12.5px; font-weight: 800; line-height: 1.5;
   color: color-mix(in srgb, var(--c) 62%, #16150F);
   font-variant-numeric: tabular-nums;
 }
 /* ⚠️ «پیشِ رو» باید *کم‌رنگ‌تر از متن* باشد ولی از کفِ ۴٫۵ نیفتد؛
    `--text-tertiary` روی سفید ۵٫۱:۱ می‌دهد. */
-.ch-ladder .rf-step-next { font-size: 12px; color: var(--text-tertiary, #6E6E6E); }
+.ch-ladder .rf-step-next { font-size: 12px; line-height: 1.5; color: var(--text-tertiary, #6E6E6E); }
 
 /* نشانِ «مدرک تأیید شده» روی بالاترین پله */
 .ch-ladder .rf-step-badge {
