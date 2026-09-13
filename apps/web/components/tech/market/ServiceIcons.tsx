@@ -220,6 +220,53 @@ const Generic = (p: P) => (
   </S>
 )
 
+/* ═══════════ خدماتِ بدونِ شناسه‌ی کاتالوگ ═══════════
+   ⚠️ این‌ها از روی *واژه‌های عنوان* انتخاب می‌شوند، نه تصادفی.
+   قاعده‌ی بالای همین فایل سرِ جایش است: آیکونِ نامربوط بدتر از
+   نداشتن است، پس هرچه جور نشود همان `Generic` را می‌گیرد. */
+
+/** جابه‌جایی میز — میز روی چرخِ حمل با فلشِ حرکت */
+const MoveTable = (p: P) => (
+  <S {...p}>
+    <path d="M3 7.5h13v5H3z" />
+    <path d="M5 12.5v3M14 12.5v3" />
+    <circle cx="6" cy="17.5" r="1.6" />
+    <circle cx="13" cy="17.5" r="1.6" />
+    <path d="M18 5.5h3.5v3.5" />
+    <path d="M21.5 5.5 17 10" />
+  </S>
+)
+
+/** بازسازی — میز با فلشِ چرخشیِ نوسازی */
+const Refurbish = (p: P) => (
+  <S {...p}>
+    <path d="M3 12.5h10v5H3z" />
+    <path d="M5 17.5v2.5M11 17.5v2.5" />
+    <path d="M15.5 8.5a4.5 4.5 0 1 1 1.6 5.6" />
+    <path d="M15 4.6v4h4" />
+  </S>
+)
+
+/** ساخت و تعمیر قطعات — پیچ و مهره با سوهان */
+const Parts = (p: P) => (
+  <S {...p}>
+    <circle cx="8" cy="8" r="3.2" />
+    <path d="M8 4.8V3M8 13v-1.8M4.8 8H3M13 8h-1.8" />
+    <path d="M12.5 19.5 19 13l2 2-6.5 6.5z" />
+    <path d="M11 21l1.5-1.5" />
+  </S>
+)
+
+/** تعمیر میز — میز با آچار */
+const TableRepair = (p: P) => (
+  <S {...p}>
+    <path d="M2.5 8h11v5h-11z" />
+    <path d="M4.5 13v3M11.5 13v3" />
+    <path d="M18.2 6.6a3 3 0 0 0 3.6 3.6" />
+    <path d="M19.8 11.2 15 16a1.7 1.7 0 0 0 2.4 2.4l4.8-4.8" />
+  </S>
+)
+
 const MAP: Record<string, (p: P) => React.JSX.Element> = {
   'ferrule-replace': FerruleReplace,
   'ferrule-resize': FerruleResize,
@@ -241,8 +288,47 @@ const MAP: Record<string, (p: P) => React.JSX.Element> = {
   diamonds: Diamonds,
 }
 
-/** آیکون یک خدمت. شناسه‌ی ناشناخته ⟵ آیکونِ عمومی، نه جای خالی. */
-export function ServiceIcon({ id, className }: { id: string; className?: string }) {
-  const Icon = MAP[id] ?? Generic
-  return <Icon className={className} />
+/* ── تشخیص از روی متن، برای ردیف‌های بی‌شناسه ──
+   ترتیب مهم است: «بازسازی میز» هم «بازسازی» دارد هم «میز»، و
+   بازسازی معنای دقیق‌تری است، پس بالاتر می‌آید. */
+const BY_WORD: ReadonlyArray<[RegExp, (p: P) => React.JSX.Element]> = [
+  /* ── قطعه‌های چوب، پیش از خودِ «چوب» ──
+     ⚠️ ترتیب حیاتی است: «تعویض نوک چوب» اگر اول به `چوب` بخورد،
+     آیکونِ تاب‌گیری می‌گیرد. هر الگوی خاص باید بالای الگوی عامش
+     بماند. */
+  [/فرول/, FerruleReplace],
+  [/تیپ|نوک/, TipReplace],
+  [/جوینت/, Joint],
+  [/اکستنشن/, Extension],
+
+  /* کارهای میز */
+  [/جابهجای|جابجای|حمل|انتقال/, MoveTable],
+  [/بازساز|نوساز/, Refurbish],
+  [/پارچه|ماهوت/, Cloth],
+  [/تراز|رگلاژ/, Level],
+  [/باند|لاستیک/, Cushion],
+  [/پاکت|توری/, PocketSet],
+  [/لوز/, Diamonds],
+  [/تعمیر.*میز|میز.*تعمیر/, TableRepair],
+
+  /* عام‌ها، آخر */
+  [/قطعه|قطعات/, Parts],
+  [/نصب|مونتاژ/, Install],
+  [/چوب|شفت/, Straighten],
+  [/میز/, TableRepair],
+]
+
+/** آیکون یک خدمت. شناسه‌ی کاتالوگ اولویت دارد؛ بعد واژه‌های عنوان؛
+ *  و اگر هیچ‌کدام جور نشد، آیکونِ عمومی — نه جای خالی. */
+export function ServiceIcon({ id, title, className }: { id: string; title?: string; className?: string }) {
+  let Icon = MAP[id]
+  if (!Icon && title) {
+    /* نیم‌فاصله و فاصله حذف می‌شوند تا «جابه‌جایی»، «جابجایی» و
+       «جا به جایی» یک چیز باشند. بقیه‌ی الگوها هم روی رشته‌ی
+       فشرده درست کار می‌کنند. */
+    const t = title.replace(/[\u200c\s]+/g, '')
+    Icon = BY_WORD.find(([re]) => re.test(t))?.[1]
+  }
+  const Final = Icon ?? Generic
+  return <Final className={className} />
 }

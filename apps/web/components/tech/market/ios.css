@@ -524,12 +524,16 @@
   display: flex; align-items: center; gap: 12px;
   color: var(--ios-label);
 }
-/* میله‌ی سبزِ کوتاه — همان زبانی که عنوان‌های صفحه‌ی باشگاه دارند */
-.tmp .tmp-card > h2::before,
-.tmp .tmp-card .ch-sec-head > h2::before {
-  content: ''; flex: 0 0 4px; block-size: 24px; border-radius: 3px;
-  background: linear-gradient(180deg, rgb(var(--sn)), rgb(var(--sn) / .45));
+/* ⚠️ میله‌ی سبزِ کوتاه برداشته شد: همان یک شکل کنارِ «درباره»،
+   «خدمات»، «گالری» و «تماس» تکرار می‌شد و چیزی نمی‌گفت. حالا هر
+   عنوان آیکونِ مرتبطِ خودش را در JSX دارد. */
+.tmp .tmp-card > h2 > svg,
+.tmp .tmp-card .ch-sec-head > h2 > svg {
+  flex: 0 0 auto; color: rgb(var(--sn));
 }
+/* خطِ کشیده‌ی کنارِ عنوانِ گالری هم فقط در همین صفحه می‌رود —
+   کامپوننتش با مربی و داور مشترک است و آن دو نگهش می‌دارند. */
+.tmp .tmp-card .ch-sec-head > .rule { display: none; }
 .tmp .tmp-prose { color: rgb(60 60 67 / .78); }
 .tmp .tmp-none { color: var(--ios-label-2); }
 .tmp .tmp-more { color: var(--ios-tint-ink); font-weight: 700; }

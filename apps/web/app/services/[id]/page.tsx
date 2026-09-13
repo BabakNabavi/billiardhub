@@ -36,6 +36,7 @@ import { useProfileImageViewer } from '@/components/ProfileImageViewer'
 import { useProfileVideoViewer } from '@/components/profile/ProfileVideoViewer'
 import ProfileGallery from '@/components/profile/ProfileGallery'
 import '@/components/profile/profile-page.css'
+import SectionIcon from '@/components/tech/market/SectionIcon'
 import { TechnicianServices } from '@/components/tech/market/TechnicianServices'
 import '@/components/tech/market/market.css'
 import '@/components/tech/market/market-profile.css'
@@ -590,7 +591,7 @@ export default function TechnicianProfilePage() {
         <div className="tmp-main">
           {/* ── معرفی ── */}
           <section className="tmp-card" id="about" aria-labelledby="tmp-about-h">
-            <h2 id="tmp-about-h">درباره متخصص</h2>
+            <h2 id="tmp-about-h"><SectionIcon name="about" />درباره متخصص</h2>
             {claim || about.length > 0 ? (
               <>
                 <div className={`tmp-prose${openAbout ? '' : ' tmp-clamp'}`}>
@@ -627,7 +628,7 @@ export default function TechnicianProfilePage() {
 
           {/* ── خدمات ── */}
           <section className="tmp-card" id="services" aria-labelledby="tmp-svc-h">
-            <h2 id="tmp-svc-h">خدمات</h2>
+            <h2 id="tmp-svc-h"><SectionIcon name="services" />خدمات</h2>
             <TechnicianServices data={svc} selected={picked}
               onToggle={waText ? togglePick : undefined}
               telHref={phone ? `tel:${phone}` : undefined} />
@@ -636,7 +637,7 @@ export default function TechnicianProfilePage() {
           {/* ── نمونه‌کارها ── */}
           {tech.projects.length > 0 && (
             <section className="tmp-card" id="work" aria-labelledby="tmp-work-h">
-              <h2 id="tmp-work-h">نمونه‌کارها</h2>
+              <h2 id="tmp-work-h"><SectionIcon name="work" />نمونه‌کارها</h2>
               <div className="tmp-work">
                 {tech.projects.map(pr => (
                   <article key={pr.id}>
@@ -657,6 +658,7 @@ export default function TechnicianProfilePage() {
           {(tech.gallery.length > 0 || tech.videos.length > 0 || edit.isOwner) && (
             <section className="tmp-card" id="media">
               <ProfileGallery
+                headIcon={<SectionIcon name="gallery" />}
                 images={tech.gallery}
                 videos={tech.videos}
                 albumNames={tech.albums}
@@ -678,7 +680,7 @@ export default function TechnicianProfilePage() {
 
           {/* ── تماس ── */}
           <section className="tmp-card" id="contact" aria-labelledby="tmp-c-h" ref={closeRef}>
-            <h2 id="tmp-c-h">اطلاعات تماس</h2>
+            <h2 id="tmp-c-h"><SectionIcon name="contact" />اطلاعات تماس</h2>
             {/* ⚠️ دو دکمه‌ی کنارِ هم بود و از یک فرمِ عمومی استفاده
                 می‌کرد؛ هیچ‌چیزی نمی‌گفت جز «یک شماره و یک واتساپ».
                 حالا هر راه یک ردیفِ کپسولی است با کاشیِ رنگیِ خودش،
@@ -725,7 +727,7 @@ export default function TechnicianProfilePage() {
             )}
             {coverage.length > 0 && (
               <>
-                <h2 className="tmp-h2-mt">محدوده خدمات</h2>
+                <h2 className="tmp-h2-mt"><SectionIcon name="coverage" />محدوده خدمات</h2>
                 <ul className="tm-chips">
                   {city && <li className="tm-chip">{city}</li>}
                   {coverage.map(c => <li key={c} className="tm-chip">{c}</li>)}

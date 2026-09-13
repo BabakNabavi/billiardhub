@@ -210,7 +210,7 @@ function MarketCard({ l, i, saved, onSave }: { l: Listing; i: number; saved: boo
     <Link href={`/shop/${l.id}`} className="mk-card lq-pcard" style={{ animationDelay: `${Math.min(i, 12) * 40}ms` }}>
       <ProductMedia
         src={l.img} alt={full} href={`/shop/${l.id}`}
-        reportId={l.id} reportTitle={full} imgCount={l.imgCount}
+        imgCount={l.imgCount}
         saved={saved} onToggleSave={onSave}
         imgClassName="mk-zoom">
         {/* نشان فوری بر «جدید» مقدم است: آگهی فوری ممکن است تازه
@@ -252,7 +252,7 @@ function MarketRow({ l, i, saved, onSave }: { l: Listing; i: number; saved: bool
           همان نشان‌ها و همان اندازه‌ها را می‌آورد. */}
       <ProductMedia
         src={l.img} alt={full} href={`/shop/${l.id}`}
-        reportId={l.id} reportTitle={full} imgCount={l.imgCount}
+        imgCount={l.imgCount}
         saved={saved} onToggleSave={onSave}
         className="bh-pm--sq" />
     </Link>
@@ -804,10 +804,10 @@ export default function MarketNewPage() {
            می‌شکند ولی نشان‌ها همان اندازه و همان جنس می‌مانند. */
         .mk-row .bh-pm--sq { width: 108px; height: 108px; aspect-ratio: auto; border-radius: 11px;
           border: 1px solid rgba(28,28,26,0.08); border-bottom-width: 1px; }
-        /* ⚠️ فقط شمارِ عکس می‌رود؛ «نشان کردن» باید بماند وگرنه
-           کاربرِ موبایل این امکان را از فهرست از دست می‌دهد. */
-        .mk-row .bh-pm--sq .bh-pm-cnt { display: none; }
+        /* قابِ ۱۰۸ حالا جا دارد چون پرچم رفته: هم‌رسانی چپ‌بالا،
+           نشان راست‌بالا، شمارِ عکس راست‌پایین. */
         .mk-row .bh-pm--sq .bh-pm-bk { top: 6px; right: 6px; }
+        .mk-row .bh-pm--sq .bh-pm-cnt { bottom: 6px; right: 6px; height: 22px; padding-inline: 6px; font-size: 10.5px; }
         .mk-row .bh-pm--sq .bh-pm-col { top: 6px; left: 6px; gap: 5px; }
         .mk-row .bh-pm--sq .bh-pm-chip { width: 25px; height: 25px; border-radius: 8px; }
         .mk-row .pctn { background: #b400ae; color: #fff; font-size: 10px; font-weight: 800;

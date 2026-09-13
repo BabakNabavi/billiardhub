@@ -7,7 +7,7 @@ import ProfileHero from '../../../components/profile/ProfileHero'
 import ProfileGallery from '../../../components/profile/ProfileGallery'
 import Reviews from '../../../components/reviews/Reviews'
 import SessionRequest from '../../../components/coach/SessionRequest'
-import GradeTimeline from '../../../components/profile/GradeTimeline'
+import GradeLadder from '../../../components/profile/GradeLadder'
 import ProfileContactLinks from '../../../components/profile/ProfileContactLinks'
 import { useProfileSections } from '@/hooks/use-profile-sections'
 import '../../../components/profile/profile-page.css'
@@ -247,11 +247,14 @@ export default function CoachProfilePage() {
      بر اساس رتبه است. دو عدد متناقض روی یک صفحه.
      حالا هر دو از یک ترتیب می‌آیند: اندیس `GRADES` — همان چیزی که
      `certificationLines` هم استفاده می‌کند. */
-  const timeline = localP
-    ? [...localP.grades]
-        .sort((a, b) => GRADES.findIndex(x => x.key === b.key) - GRADES.findIndex(x => x.key === a.key))
-        .map(g => ({ label: g.label, year: g.year }))
-    : []
+  /* ⚠️ نردبان با *کلید* کار می‌کند نه برچسب: برچسب متنِ نمایشی
+     است و ممکن است عوض شود، ولی کلید همان چیزی است که `GRADES`
+     می‌شناسد. کلیدِ ناشناخته همین‌جا می‌افتد. */
+  const earned = new Map(
+    (localP?.grades ?? [])
+      .filter(g => GRADES.some(x => x.key === g.key))
+      .map(g => [g.key, g.year] as const),
+  )
 
   /* «از سال» = کوچک‌ترین سال واقعی، مستقل از ترتیب تایم‌لاین.
      ارقام فارسی و عربی با هلپر مشترک `normalizeDigits` نرمال
@@ -465,7 +468,14 @@ export default function CoachProfilePage() {
                 <span className="en">CAREER</span>
                 <span className="rule" aria-hidden />
               </div>
-              <GradeTimeline items={timeline} freeCoach={localP?.freeCoach ?? false} />
+              {/* «مربی آزاد» یک انتخابِ صریح در پنل است، نه پروفایلِ
+                  ناتمام؛ متنِ «ثبت نشده» او را ناقص جلوه می‌داد. */}
+              <div className="ch-card ch-ladder">
+                <GradeLadder grades={GRADES} earned={earned} verified={coach.verified}
+                  emptyText={localP?.freeCoach
+                    ? 'این مربی به‌عنوان مربی آزاد فعالیت می‌کند و مدرک فدراسیونی ثبت نکرده است.'
+                    : 'هنوز درجه‌ای ثبت نشده است.'} />
+              </div>
             </section>
           </div>
 

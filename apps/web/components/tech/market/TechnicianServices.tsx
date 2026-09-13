@@ -113,9 +113,9 @@ export function TechnicianServices({ data, selected, onToggle, telHref }: Techni
               <li key={t}>
                 <div className="tmp-svc-row">
                   <span className="tmp-svc-ic" aria-hidden>
-                    {/* شناسه‌ی کاتالوگ ندارد ⟵ آیکون عمومی، نه جای خالی:
-                        ردیفِ بی‌آیکون کنار بقیه شکسته به نظر می‌رسد. */}
-                    <ServiceIcon id="" />
+                    {/* شناسه‌ی کاتالوگ ندارد، پس آیکون از روی واژه‌های
+                        خودِ عنوان انتخاب می‌شود — نه یک آچار برای همه. */}
+                    <ServiceIcon id="" title={t} />
                   </span>
                   <span className="tmp-svc-b"><span className="tmp-svc-t">{t}</span></span>
                   {action(t)}

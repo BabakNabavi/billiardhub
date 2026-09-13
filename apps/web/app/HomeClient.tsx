@@ -574,7 +574,7 @@ function BazaarCard({ p, className, style }: { p: RealProduct; className?: strin
     <Link prefetch={false} href={`/shop/${p.id}`} className={`bz-card lq-pcard${className ? ` ${className}` : ''}`} style={style}>
       <ProductMedia
         src={p.img} alt={p.name} href={`/shop/${p.id}`}
-        reportId={p.id} reportTitle={p.name} imgCount={p.imgCount ?? 0} />
+        imgCount={p.imgCount ?? 0} />
       <div className="bz-body">
         {/* همان کامپوننتی که کارت فروشگاه و فهرست بازار هم از آن
             استفاده می‌کنند — تا یک محصول در سه صفحه یک‌شکل باشد. */}
@@ -2109,10 +2109,10 @@ useEffect(() => {
               onMouseEnter={() => { mktPausedRef.current = true; }}
               onMouseLeave={() => { mktPausedRef.current = false; }}
             >
-              {/* ارتفاع اندازه‌گیری‌شده است: عکس ۱۵۰×۰٫۸۶ ≈ ۱۲۹ و
-                  بدنه ۱۱۱ — نسبت ضرب می‌شود، نه تقسیم. */}
+              {/* ارتفاع اندازه‌گیری‌شده است: عکس ۱۵۰×۰٫۹۵ ≈ ۱۴۳ و
+                  بدنه ۱۰۵ — نسبت ضرب می‌شود، نه تقسیم. */}
               {MKT_LOOP.map((p, i) => (
-                <BazaarCard key={`${p.id}-${i}`} p={p} style={{ width: 150, height: 240 }} />
+                <BazaarCard key={`${p.id}-${i}`} p={p} style={{ width: 150, height: 248 }} />
               ))}
             </div>
           )}
@@ -2120,7 +2120,7 @@ useEffect(() => {
           {(!mktMounted || isMobile) && (
             <div ref={mktSliderRef} className="mkt-mobile-slider">
               {HOME_PRODUCTS.map((p) => (
-                <BazaarCard key={p.id} p={p} className="mkt-mob-card" style={{ width: '39.7vw', minWidth: 146, scrollSnapAlign: 'center', height: 'clamp(238px,63.5vw,262px)' }} />
+                <BazaarCard key={p.id} p={p} className="mkt-mob-card" style={{ width: '39.7vw', minWidth: 146, scrollSnapAlign: 'center', height: 'clamp(246px,65.5vw,272px)' }} />
               ))}
             </div>
           )}

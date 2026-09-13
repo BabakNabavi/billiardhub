@@ -12,7 +12,10 @@
   flex: 0 0 auto;
   /* نسبتِ رسمیِ قابِ تصویرِ محصول در کلِ سایت — تنها جایی که
      تعریف می‌شود. */
-  aspect-ratio: 1 / 0.86;
+  /* ⚠️ ۰٫۹۵ (نه ۰٫۸۶): قاب ۱۰٪ بلندتر شد تا خودِ محصول درشت‌تر
+     دیده شود. هر تغییر این عدد ارتفاعِ کارتِ صفحه‌ی اصلی را هم
+     جابه‌جا می‌کند — آن‌جا اندازه‌گیری‌شده تنظیم است. */
+  aspect-ratio: 1 / 0.95;
   inline-size: 100%;
   overflow: hidden;
   background: rgba(244, 243, 241, 0.85);
@@ -21,7 +24,9 @@
 .bh-pm-img {
   position: absolute; inset: 0;
   inline-size: 100%; block-size: 100%;
-  object-fit: cover; display: block;
+  /* پیش‌فرضِ مرورگر هم همین است، ولی صریح نوشته شده چون «عکس کمی
+     بالاتر است» یک گزارشِ واقعی بود و این خط جای بحث نمی‌گذارد. */
+  object-fit: cover; object-position: center center; display: block;
   transition: transform .5s cubic-bezier(.22, 1, .36, 1);
 }
 
@@ -56,17 +61,6 @@
 .bh-pm-chip:focus-visible {
   outline: 2px solid #C7A66A; outline-offset: 2px;
 }
-
-/* ⚠️ `ReportButton` استایلِ اینلاینِ خودش را دارد (`background:none`
-   و `padding:5`) و اینلاین از کلاس می‌برد — بدونِ `!important`
-   این خانه هیچ‌وقت اعمال نمی‌شد. */
-.bh-pm-rp {
-  background: rgba(28, 28, 26, 0.68) !important;
-  padding: 0 !important;
-  color: #fff !important;
-  border: 1px solid rgba(255, 255, 255, 0.22) !important;
-}
-.bh-pm-rp:hover { background: rgba(178, 59, 46, 0.92) !important; color: #fff !important; }
 
 .bh-pm-bk { position: absolute; top: 8px; right: 8px; z-index: 2; }
 .bh-pm-bk.on { background: rgba(199, 166, 106, 0.92); border-color: rgba(255, 255, 255, 0.4); }
