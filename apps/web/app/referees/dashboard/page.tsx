@@ -1,8 +1,6 @@
 'use client'
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { provinceOfCity } from '../../../lib/iran-geo'
-import { uploadFile } from '../../../lib/supabase'
-import { videoMeta, formatDuration } from '../../../lib/video-thumb'
 import { AlertDialog } from '../../../components/market/AdFormFields'
 import Select from '../../../components/ui/Select'
 
@@ -85,8 +83,6 @@ const compressDataUrl = (dataUrl: string, maxDim: number, quality = 0.72): Promi
     im.src = dataUrl
   })
 
-const rid = () => Math.random().toString(36).slice(2, 9)
-
 const emptyForm = {
   slug: '', firstNameFa: '', lastNameFa: '', firstNameEn: '', lastNameEn: '',
   province: '', city: '', disciplines: [] as string[], shortBio: '', fullBio: '',
@@ -109,11 +105,6 @@ const inp:  React.CSSProperties = { width: '100%', padding: '10px 13px', border:
    او دنبال فیلدی می‌گردد که پیدا نمی‌شود.
 
    خود کادر باید قرمز شود؛ همان چیزی که چشم از دور می‌بیند. */
-/* همان سقفی که سرور اعمال می‌کند (`MAX_VIDEO` در lib/upload/policy).
-   آن فایل کلاینت‌امن نیست، پس عدد این‌جا تکرار شده — و اگر روزی
-   عوض شد، هر دو باید با هم عوض شوند. */
-const MAX_VIDEO_MB = 25
-
 const inpErr: React.CSSProperties = {
   ...inp, borderColor: 'rgba(239,68,68,0.75)', background: 'rgba(239,68,68,0.035)',
 }
@@ -165,8 +156,6 @@ function RefereeDashboardInner() {
      باز می‌ماند؛ نامک خودکار فرم نباید قفلش کند. */
   const [savedSlug, setSavedSlug] = useState<string | null>(null)
   const [submitted, setSubmitted] = useState(false)
-  const galleryInput = useRef<HTMLInputElement>(null)
-  const videoInput   = useRef<HTMLInputElement>(null)
 
 
   /* prefill from the logged-in user; load existing submission if any.
@@ -207,7 +196,7 @@ function RefereeDashboardInner() {
              فیلد باید باز بماند تا نامک تکراری قابل اصلاح باشد. */
           if (up.ok && up.profile?.slug) setSavedSlug(up.profile.slug)
           else setSavedSlug('')
-        } else {
+        } else {
           /* کاربر کاملا تازه: نه ردیف سرور، نه کش محلی.
              صریح باز می‌شود تا نامکش را خودش انتخاب کند. */
           setSavedSlug('')
@@ -312,68 +301,12 @@ function safeRemote(raw: unknown): Partial<FormState> {
 
   const addPhoto = async (file?: File) => { if (file) set('photo', await compressImage(file, 480, 0.82)) }
   const addCover = async (file?: File) => { if (file) set('coverImage', await compressImage(file, 1280, 0.72)) }
-  const addGallery = async (files: FileList | null) => {
-    if (!files) return
-    const items: RefereeMedia[] = []
-    for (const f of Array.from(files).slice(0, 12)) items.push({ id: rid(), url: await compressImage(f, 1100, 0.72), caption: '' })
-    setForm(f => ({ ...f, gallery: [...f.gallery, ...items] }))
-  }
-  const setCaption = (id: string, caption: string) =>
-    setForm(f => ({ ...f, gallery: f.gallery.map(g => (g.id === id ? { ...g, caption } : g)) }))
-  const removeGallery = (id: string) => setForm(f => ({ ...f, gallery: f.gallery.filter(g => g.id !== id) }))
-
-  /* ── آلبوم‌ها ──
-     آلبوم فقط یک نام روی خود رسانه است — نه فهرست جدا با شناسه.
-     پس آلبوم خالی وجود ندارد و حذف یک عکس هیچ‌جا ارجاع شکسته
-     نمی‌گذارد. `datalist` نام‌های موجود را پیشنهاد می‌دهد تا کاربر
-     مجبور به تایپ دوباره — و غلط‌های املایی آلبوم تکراری — نشود. */
-  const setAlbum = (id: string, album: string) =>
-    setForm(f => ({
-      ...f,
-      gallery: f.gallery.map(g => (g.id === id ? { ...g, album } : g)),
-      videos:  f.videos.map(v => (v.id === id ? { ...v, album } : v)),
-    }))
-  const albumNames = Array.from(new Set(
-    [...form.albums, ...[...form.gallery, ...form.videos].map(m => m.album ?? '')]
-      .map(n => n.trim()).filter(Boolean),
-  ))
-
-  /* ── چرا این‌جا آپلود واقعی است ──
-     تا امروز این دکمه `accept="image/*"` داشت و فقط یک عکس را به‌عنوان
-     «بندانگشتی» می‌گرفت؛ ویدیویی در کار نبود و دکمه‌ی پخش روی صفحه‌ی
-     عمومی هیچ کاری نمی‌کرد.
-
-     حالا خود فایل بالا می‌رود (سرور نوعش را از بایت‌ها می‌سنجد و سقف
-     حجم را اعمال می‌کند) و بندانگشتی از یک فریم همان ویدیو ساخته
-     می‌شود — نه چیزی که کاربر جدا انتخاب کند. */
-  const [videoBusy, setVideoBusy] = useState(false)
-  const addVideo = async (file?: File) => {
-    if (!file) return
-    /* سقف را همین‌جا می‌سنجیم: `uploadFile` برای هر شکستی `null`
-       می‌دهد و نمی‌شود فهمید حجم بود یا شبکه. */
-    if (file.size > MAX_VIDEO_MB * 1024 * 1024) {
-      setAlert({ title: 'ویدیو بزرگ است', lines: [`حجم ویدیو نباید بیش از ${MAX_VIDEO_MB} مگابایت باشد.`] })
-      return
-    }
-    setVideoBusy(true)
-    try {
-      const meta = await videoMeta(file)
-      const id = rid()
-      const url = await uploadFile('club-media', file, `profiles/videos/${user?.id ?? "anon"}/${id}`)
-      if (!url) { setAlert({ title: 'ویدیو بالا نرفت', lines: ['دوباره تلاش کنید؛ اگر باز هم نشد، فرمت یا حجم فایل را بررسی کنید.'] }); return }
-      /* بندانگشتی اختیاری است: نبودنش ویدیو را بی‌فایده نمی‌کند */
-      const thumb = meta.thumb
-        ? (await uploadFile('club-media', meta.thumb, `profiles/videos/${user?.id ?? "anon"}/${id}-thumb`)) ?? ''
-        : ''
-      setForm(f => ({
-        ...f,
-        videos: [...f.videos, { id, url, thumbnail: thumb, title: '', duration: formatDuration(meta.durationSec) }],
-      }))
-    } finally { setVideoBusy(false) }
-  }
-  const setVideo = (id: string, patch: Partial<RefereeVideo>) =>
-    setForm(f => ({ ...f, videos: f.videos.map(v => (v.id === id ? { ...v, ...patch } : v)) }))
-  const removeVideo = (id: string) => setForm(f => ({ ...f, videos: f.videos.filter(v => v.id !== id) }))
+  /* ⚠️ گالری و ویدیو از این پنل برداشته شدند — داور همان کار را
+     در صفحه‌ی خودش با دکمه‌ی + در تب‌های تصاویر/ویدیو/آلبوم انجام
+     می‌دهد. ولی `form.gallery`، `form.videos` و `form.albums`
+     عمدا در حالت می‌مانند: `doSubmit` کلِ پروفایل را می‌نویسد، پس
+     اگر این‌ها از فرم بیفتند هر ذخیره‌ی پنل رسانه‌ی موجود را پاک
+     می‌کند. */
 
   const addCertificate = async (file?: File) => {
     if (!file) return
@@ -687,58 +620,9 @@ function safeRemote(raw: unknown): Partial<FormState> {
             </div>
           </div>
 
-          {/* 4 — Gallery */}
+          {/* 4 — Contact */}
           <div style={card}>
-            {sectionTitle('گالری', 4)}
-            <label style={lbl}>تصاویر</label>
-            {/* نام‌های آلبوم موجود — همان‌جا پیشنهاد می‌شوند */}
-            <datalist id="bh-albums">
-              {albumNames.map(n => <option key={n} value={n} />)}
-            </datalist>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(150px,1fr))', gap: 10, marginBottom: 12 }}>
-              {form.gallery.map(g => (
-                <div key={g.id} style={{ border: CBOR, borderRadius: 10, overflow: 'hidden', background: 'rgba(17,17,16,0.04)' }}>
-                  <div style={{ position: 'relative', aspectRatio: '1' }}>
-                    <img loading="lazy" decoding="async" src={g.url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
-                    <button type="button" onClick={() => removeGallery(g.id)} aria-label="حذف" style={{ position: 'absolute', top: 6, left: 6, width: 24, height: 24, borderRadius: '50%', background: 'rgba(0,0,0,0.55)', border: 'none', color: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
-                    </button>
-                  </div>
-                  <input value={g.caption} onChange={e => setCaption(g.id, e.target.value)} placeholder="کپشن..." style={{ ...inp, border: 'none', borderTop: CBOR, borderRadius: 0, fontSize: 12, padding: '7px 10px' }} />
-                  <input value={g.album ?? ''} onChange={e => setAlbum(g.id, e.target.value)}
-                    list="bh-albums" placeholder="آلبوم (اختیاری)..."
-                    style={{ ...inp, border: 'none', borderTop: CBOR, borderRadius: 0, fontSize: 12, padding: '7px 10px', color: GOLD_D }} />
-                </div>
-              ))}
-              <button type="button" onClick={() => galleryInput.current?.click()} style={{ aspectRatio: '1', border: '1.5px dashed rgba(199,166,106,0.45)', borderRadius: 10, background: 'rgba(199,166,106,0.05)', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 6, color: GOLD_D, fontFamily: 'inherit', fontSize: 12, fontWeight: 700 }}>
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={GOLD} strokeWidth="2"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
-                افزودن تصویر
-              </button>
-              <input ref={galleryInput} type="file" accept="image/*" multiple hidden onChange={e => { addGallery(e.target.files); e.target.value = '' }} />
-            </div>
-
-            <label style={lbl}>ویدیوها (اختیاری)</label>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-              {form.videos.map(v => (
-                <div key={v.id} style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap', border: CBOR, borderRadius: 10, padding: 10 }}>
-                  <div style={{ width: 76, height: 46, borderRadius: 8, overflow: 'hidden', background: 'rgba(17,17,16,0.06)', flexShrink: 0 }}>
-                    {v.thumbnail && <img loading="lazy" decoding="async" src={v.thumbnail} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
-                  </div>
-                  <input value={v.title} onChange={e => setVideo(v.id, { title: e.target.value })} placeholder="عنوان ویدیو" style={{ ...inp, flex: 1, minWidth: 140, padding: '8px 11px', fontSize: 13 }} />
-                  <input value={v.duration} onChange={e => setVideo(v.id, { duration: e.target.value })} placeholder="مدت (۱۲:۳۴)" style={{ ...inp, width: 110, padding: '8px 11px', fontSize: 13 }} />
-                  <button type="button" onClick={() => removeVideo(v.id)} aria-label="حذف" style={{ background: 'none', border: 'none', cursor: 'pointer', color: TEXT_M, padding: 4 }}>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
-                  </button>
-                </div>
-              ))}
-              <button type="button" onClick={() => videoInput.current?.click()} disabled={videoBusy} style={{ ...lqBtn, background: 'transparent', border: '1px dashed rgba(199,166,106,0.45)', alignSelf: 'flex-start', fontSize: 13, padding: '9px 16px' }}>{videoBusy ? 'در حال آپلود…' : '+ افزودن ویدیو'}</button>
-              <input ref={videoInput} type="file" accept="video/mp4,video/quicktime,video/webm" hidden onChange={e => { void addVideo(e.target.files?.[0]); e.target.value = '' }} />
-            </div>
-          </div>
-
-          {/* 5 — Contact */}
-          <div style={card}>
-            {sectionTitle('راه‌های ارتباطی', 5)}
+            {sectionTitle('راه‌های ارتباطی', 4)}
             <p style={{ fontSize: 12.5, color: TEXT_M, marginBottom: 14 }}>هر کدام را که پر کنید، آیکونش در بخش «راه‌های ارتباطی» پروفایل نمایش داده می‌شود.</p>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2,1fr)', gap: 14 }}>
               {/* دو قالب متفاوت — دلیلش کنار همین بلوک در پنل مربی */}
@@ -757,9 +641,9 @@ function safeRemote(raw: unknown): Partial<FormState> {
             </div>
           </div>
 
-          {/* 6 — Certificate (MANDATORY) */}
+          {/* 5 — Certificate (MANDATORY) */}
           <div data-field="certificate" style={{ ...card, border: errors.certificate ? '1px solid rgba(239,68,68,0.45)' : CBOR }}>
-            {sectionTitle('آپلود مدرک داوری (الزامی)', 6)}
+            {sectionTitle('آپلود مدرک داوری (الزامی)', 5)}
             <p style={{ fontSize: 12.5, color: TEXT_M, marginBottom: 14, lineHeight: 1.8 }}>آپلود مدرک داوری برای ثبت پروفایل <b style={{ color: '#b91c1c' }}>الزامی</b> است. این مدرک توسط ادمین سیستم بررسی می‌شود؛ در صورت تایید، پروفایل شما با تیک آبی تایید منتشر می‌شود.</p>
             {form.certificate && (
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, border: '1px solid rgba(5,118,66,0.25)', background: 'rgba(5,118,66,0.06)', borderRadius: 10, padding: '11px 14px', marginBottom: 10 }}>

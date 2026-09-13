@@ -124,7 +124,11 @@ export default function ReportButton({
           آن را نمی‌گیرد. */}
       {open && mounted && createPortal(
         <div
-          onClick={() => !busy && setOpen(false)}
+          /* ⚠️ `preventDefault`/`stopPropagation` لازم است: پرتال در
+             درختِ React حباب می‌کند و این دکمه حالا داخلِ کارتی است
+             که خودش `<Link>` یا `onClick={router.push}` دارد —
+             بستنِ پنجره با کلیکِ بیرون، صفحه را عوض می‌کرد. */
+          onClick={e => { e.preventDefault(); e.stopPropagation(); if (!busy) setOpen(false) }}
           onMouseDown={e => e.stopPropagation()}
           role="dialog" aria-modal="true" aria-label="گزارش تخلف"
           style={{ position: 'fixed', inset: 0, zIndex: 4000, background: 'rgba(20,18,14,0.5)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}>

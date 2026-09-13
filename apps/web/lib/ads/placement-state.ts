@@ -40,6 +40,8 @@ export interface EntitySnapshot {
   ref: string
   title: string
   image: string
+  /** تعدادِ کلِ عکس‌های آگهی — دوقلویش در resolve.ts پرش می‌کند */
+  imgCount?: number
   /** برند (یا شهر/تخصص، بسته به نوع) */
   subtitle: string
   /* ── چرا مدل جداست ──

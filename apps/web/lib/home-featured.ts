@@ -106,6 +106,7 @@ export async function loadHomeFeatured(): Promise<HomeFeatured> {
     sub: p.brand ?? '',
     model: p.model ?? '',
     img: p.images?.[0] || PRODUCT_IMG,
+    imgCount: Array.isArray(p.images) ? p.images.length : 0,
     brand: (p.brand || 'BILLIARD').toUpperCase(),
     city: p.city ?? '', condition: p.condition ?? 'new',
     price: n(p.price),

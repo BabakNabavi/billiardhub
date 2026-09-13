@@ -43,6 +43,8 @@ import { useDeferredStart } from '../lib/useDeferredStart';
 import { modernizeType } from '../lib/market/title';
 import ProductTitle from '../components/market/ProductTitle';
 import { CardMeta, CardPrice } from '../components/market/CardFacts';
+import ProductMedia from '../components/market/ProductMedia';
+import '../components/market/product-media.css';
 import { thumbUrl } from '../lib/media/thumb';
 import VerifiedBadge from '../components/VerifiedBadge';
 
@@ -543,9 +545,6 @@ const BAZAAR_CSS = `
      صفحه‌ی فروشگاه نشان می‌دهند. این‌جا فقط چیدمان می‌ماند. */
   .bz-card { text-decoration:none; overflow:hidden;
     display:flex; flex-direction:column; flex-shrink:0; }
-  .bz-img { width:100%; flex:0 0 60%; position:relative; background:rgba(244,243,241,0.85);
-    overflow:hidden; border-bottom:1px solid rgba(28,28,26,0.08); }
-  .bz-img img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
   .bz-body { padding:9px 8px 8px; flex:1; display:flex; flex-direction:column;
     gap:4px; overflow:hidden; }
   /* ── تیتر دوتکه، هم‌شکل کارت «بیلیارد بازار» ──
@@ -573,10 +572,9 @@ const BAZAAR_CSS = `
 function BazaarCard({ p, className, style }: { p: RealProduct; className?: string; style?: React.CSSProperties }) {
   return (
     <Link prefetch={false} href={`/shop/${p.id}`} className={`bz-card lq-pcard${className ? ` ${className}` : ''}`} style={style}>
-      <div className="bz-img">
-        <img loading="lazy" decoding="async" src={p.img} alt={p.name}
-          onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
-      </div>
+      <ProductMedia
+        src={p.img} alt={p.name} href={`/shop/${p.id}`}
+        reportId={p.id} reportTitle={p.name} imgCount={p.imgCount ?? 0} />
       <div className="bz-body">
         {/* همان کامپوننتی که کارت فروشگاه و فهرست بازار هم از آن
             استفاده می‌کنند — تا یک محصول در سه صفحه یک‌شکل باشد. */}
@@ -912,6 +910,9 @@ export default function HomeClient({ initialPlacements, initialFeatured, service
         sub: p.brand ?? '',
         model: p.model ?? '',
         img: thumbUrl(p.images?.[0], PROD_W) || IMG.cue,
+        /* ⚠️ سازنده‌ی دومِ همین تایپ است. جا انداختنش یعنی نشانِ
+           شمارِ عکس در اولین رنگ‌آمیزی بیاید و بعدِ hydration برود. */
+        imgCount: p.images?.length ?? 0,
         brand: (p.brand || 'BILLIARD').toUpperCase(),
         price: p.price ?? 0, sale: p.discountPrice ?? p.price ?? 0,
         pct: p.discountPercent ?? 0, negotiable: p.negotiable === true,
@@ -956,6 +957,7 @@ export default function HomeClient({ initialPlacements, initialFeatured, service
          می‌کرد که هیچ اطلاعاتی نداشت؛ خالی‌بودنش راست‌تر است. */
       id: e.ref, name: modernizeType(e.title), sub: e.subtitle, model: e.model ?? '',
       img: thumbUrl(e.image, PROD_W),
+      imgCount: e.imgCount ?? 0,
       brand: (e.subtitle || 'BILLIARD').toUpperCase(),
       price: e.oldPrice ?? e.price ?? 0, sale: e.price ?? 0, pct: e.discountPercent ?? 0,
       /* ── چرا این خط سه بار اشتباه بود ──
@@ -1185,8 +1187,11 @@ export default function HomeClient({ initialPlacements, initialFeatured, service
         const cardCenter = card.offsetLeft + card.offsetWidth / 2;
         const dist = Math.abs(cardCenter - sliderCenter);
         const t = Math.max(0, 1 - dist / (slider.offsetWidth * 0.50));
-        const sx = (1 - t * 0.05).toFixed(3);
-        card.style.transform = `scaleX(${sx})`;
+        /* ⚠️ این‌جا `scaleX` بود — یعنی کارت تا ۵٪ *فقط افقی* له
+           می‌شد. عکسِ محصول کج و باریک‌تر می‌شد و همان محصول در
+           کارتِ کناری اندازه‌ی دیگری داشت (اندازه‌گیری شده:
+           ۱۴۸ / ۱۵۰ / ۱۵۳ پیکسل در یک ردیف). نشانه‌ی تمرکز با سایه
+           می‌ماند، ولی هیچ عکسی دیگر تغییر شکل نمی‌دهد. */
         card.style.filter = t > 0.3
           ? `drop-shadow(0 ${(t * 5).toFixed(1)}px ${(t * 12).toFixed(1)}px rgba(0,0,0,${(t * 0.13).toFixed(2)}))`
           : 'none';
@@ -1221,8 +1226,11 @@ export default function HomeClient({ initialPlacements, initialFeatured, service
         const cardCenter = card.offsetLeft + card.offsetWidth / 2;
         const dist = Math.abs(cardCenter - sliderCenter);
         const t = Math.max(0, 1 - dist / (slider.offsetWidth * 0.50));
-        const sx = (1 - t * 0.05).toFixed(3);
-        card.style.transform = `scaleX(${sx})`;
+        /* ⚠️ این‌جا `scaleX` بود — یعنی کارت تا ۵٪ *فقط افقی* له
+           می‌شد. عکسِ محصول کج و باریک‌تر می‌شد و همان محصول در
+           کارتِ کناری اندازه‌ی دیگری داشت (اندازه‌گیری شده:
+           ۱۴۸ / ۱۵۰ / ۱۵۳ پیکسل در یک ردیف). نشانه‌ی تمرکز با سایه
+           می‌ماند، ولی هیچ عکسی دیگر تغییر شکل نمی‌دهد. */
         card.style.filter = t > 0.3
           ? `drop-shadow(0 ${(t * 5).toFixed(1)}px ${(t * 12).toFixed(1)}px rgba(0,0,0,${(t * 0.13).toFixed(2)}))`
           : 'none';
@@ -2101,9 +2109,10 @@ useEffect(() => {
               onMouseEnter={() => { mktPausedRef.current = true; }}
               onMouseLeave={() => { mktPausedRef.current = false; }}
             >
-              {/* ابعاد ۵٪ بزرگ‌تر از قبل — ۱۴۳×۲۷۴ بود */}
+              {/* ارتفاع اندازه‌گیری‌شده است: عکس ۱۵۰×۰٫۸۶ ≈ ۱۲۹ و
+                  بدنه ۱۱۱ — نسبت ضرب می‌شود، نه تقسیم. */}
               {MKT_LOOP.map((p, i) => (
-                <BazaarCard key={`${p.id}-${i}`} p={p} style={{ width: 150, height: 288 }} />
+                <BazaarCard key={`${p.id}-${i}`} p={p} style={{ width: 150, height: 240 }} />
               ))}
             </div>
           )}
@@ -2111,7 +2120,7 @@ useEffect(() => {
           {(!mktMounted || isMobile) && (
             <div ref={mktSliderRef} className="mkt-mobile-slider">
               {HOME_PRODUCTS.map((p) => (
-                <BazaarCard key={p.id} p={p} className="mkt-mob-card" style={{ width: '39.7vw', minWidth: 146, scrollSnapAlign: 'center', height: 'clamp(230px,67.2vw,311px)' }} />
+                <BazaarCard key={p.id} p={p} className="mkt-mob-card" style={{ width: '39.7vw', minWidth: 146, scrollSnapAlign: 'center', height: 'clamp(238px,63.5vw,262px)' }} />
               ))}
             </div>
           )}

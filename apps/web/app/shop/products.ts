@@ -16,6 +16,8 @@ export interface ShopProduct {
   id: string | number
   cat: string
   img: string
+  /** تعدادِ کلِ عکس‌های آگهی */
+  imgCount: number
   name: string
   desc: string
   brand: string
@@ -70,6 +72,7 @@ export function toShopProduct(r: Record<string, unknown>): ShopProduct {
     id: String(r.id ?? ''),
     cat: s(r.category, 'other'),
     img: images[0] ?? '',
+    imgCount: images.length,
     name: s(r.title, 'محصول'),
     desc: s(r.description),
     brand: s(r.brand),
