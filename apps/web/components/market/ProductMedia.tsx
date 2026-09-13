@@ -21,8 +21,22 @@
 
 import type { ReactNode } from 'react'
 import { useEffect, useRef, useState } from 'react'
-import { Bookmark, Share2, Images, Check } from 'lucide-react'
+import { Bookmark, Images, Check } from 'lucide-react'
 import { toFaDigits } from '../../lib/jalali'
+
+/* ── چرا آیکونِ دستی به‌جای `Share2`ی lucide ──
+   ⚠️ `Share2` سه گرهِ نامتقارن دارد؛ کادرش وسط است (اندازه گرفتم:
+   انحرافِ ۰٫۱۳ پیکسل) ولی *وزنِ دیداری*‌اش پایین-چپ می‌افتد و
+   داخلِ یک مربعِ کوچک کج به نظر می‌رسد. این یکی حولِ محورِ عمودی
+   متقارن است، پس وسطِ کادر هم دیده می‌شود. */
+const ShareGlyph = () => (
+  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor"
+    strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden focusable="false">
+    <path d="M12 3.5v11" />
+    <path d="m8.2 7.3 3.8-3.8 3.8 3.8" />
+    <path d="M5.5 13.5v5a2 2 0 0 0 2 2h9a2 2 0 0 0 2-2v-5" />
+  </svg>
+)
 
 export interface ProductMediaProps {
   src: string
@@ -64,7 +78,7 @@ export default function ProductMedia({
         <button type="button" className={'bh-pm-chip bh-pm-bk' + (saved ? ' on' : '')}
           aria-label={saved ? savedTxt.on : savedTxt.off} aria-pressed={!!saved}
           onClick={e => { e.preventDefault(); e.stopPropagation(); onToggleSave() }}>
-          <Bookmark size={14} />
+          <span className="bh-pm-face"><Bookmark size={14} /></span>
         </button>
       )}
 
@@ -172,7 +186,7 @@ function ShareChip({ href, title }: { href: string; title: string }) {
   return (
     <button type="button" className={'bh-pm-chip bh-pm-sh' + (state === 'idle' ? '' : ' ' + state)}
       onClick={share} aria-label="هم‌رسانی">
-      {done ? <Check size={14} strokeWidth={3} /> : <Share2 size={14} />}
+      <span className="bh-pm-face">{done ? <Check size={14} strokeWidth={3} /> : <ShareGlyph />}</span>
       {/* ⚠️ گره همیشه در درخت می‌ماند و فقط دیداری پنهان می‌شود:
           ناحیه‌ی زنده‌ای که همراهِ متنش ظاهر شود، در NVDA/JAWS
           اعلام نمی‌شود. */}

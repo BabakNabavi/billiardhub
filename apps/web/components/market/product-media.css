@@ -38,41 +38,53 @@
   display: flex; flex-direction: column; gap: 6px;
 }
 
-/* خانه‌ی مشترکِ نشان‌ها — یک اندازه برای همه.
-   ⚠️ پس‌زمینه *یکی نیست*: چیپ‌های آیکونی ۰٫۵۲ و شمارنده ۰٫۶۵.
-   دلیلش سرِ هر کدام نوشته شده. */
+/* ── هدفِ لمس در برابر سطحِ دیده‌شده ──
+   ⚠️ دکمه ۲۶×۲۶ است و زیرِ ۲۴ نمی‌رود (WCAG 2.5.8)، ولی چیزی که
+   رنگ می‌گیرد `.bh-pm-face`ی ۲۰ پیکسلی داخلش است. پس شیشه کوچک‌تر
+   دیده می‌شود و کمتر از عکسِ محصول را می‌پوشاند، بی‌آنکه دکمه
+   سخت‌تر لمس شود. */
 .bh-pm-chip {
-  /* ⚠️ ۲۵×۲۵ کفِ کار است: WCAG 2.5.8 هدفِ لمس را ۲۴×۲۴ می‌خواهد.
-     کوچک‌ترش نکن. */
-  inline-size: 25px; block-size: 25px;
-  border-radius: 8px;
+  inline-size: 26px; block-size: 26px;
+  background: none; border: 0; padding: 0; cursor: pointer;
   display: flex; align-items: center; justify-content: center;
-  padding: 0; cursor: pointer;
-  /* ── چرا ۰٫۵۸ برای این‌ها و ۰٫۶۵ برای شمارنده ──
-     این چیپ‌ها فقط *آیکون* دارند و کفِ WCAG برایشان ۳:۱ است.
-     اندازه‌گیریِ پیکسلی روی بدترین حالت (عکسِ سفید): ۰٫۵۲ → ۳٫۵۰.
-     حاشیه ۰٫۵۰ است، پس کم‌رنگ‌ترش نکن. شمارنده متن دارد و کفش
-     ۴٫۵ است، پس تیره‌تر می‌ماند (پایین‌تر همین فایل). */
-  background: rgba(28, 28, 26, 0.52);
-  border: 1px solid rgba(255, 255, 255, 0.22);
-  backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
   color: #fff;
-  transition: background .2s, color .2s, transform .2s;
 }
-.bh-pm-chip:hover { background: rgba(28, 28, 26, 0.66); transform: translateY(-1px); }
-.bh-pm-chip:active { transform: translateY(0); }
-.bh-pm-chip:focus-visible {
-  outline: 2px solid #C7A66A; outline-offset: 2px;
+.bh-pm-chip:active .bh-pm-face { transform: scale(0.94); }
+.bh-pm-chip:focus-visible { outline: 2px solid #C7A66A; outline-offset: 2px; border-radius: 8px; }
+
+/* سطحِ شیشه‌ای — مشترکِ دکمه‌ها و شمارنده */
+.bh-pm-face, .bh-pm-cnt {
+  /* ── چرا ترتیبِ پیشوند این است ──
+     ⚠️ اگر نسخه‌ی بی‌پیشوند *اول* بیاید، lightningcss حذفش می‌کند و
+     فقط `-webkit-` می‌ماند؛ روی خروجیِ زنده دیدم که شیشه اصلا کار
+     نمی‌کرد و چیپ یک لکه‌ی طوسیِ تخت بود. پیشوند اول، استاندارد
+     بعد: هر دو می‌مانند. */
+  -webkit-backdrop-filter: blur(10px) saturate(1.3);
+  backdrop-filter: blur(10px) saturate(1.3);
+  border: 1px solid rgba(255, 255, 255, 0.26);
+  color: #fff;
+  transition: background .2s, transform .2s;
+}
+.bh-pm-face {
+  inline-size: 20px; block-size: 20px; border-radius: 7px;
+  display: flex; align-items: center; justify-content: center;
+  /* ── چرا ۰٫۵۰ و نه کمتر ──
+     ⚠️ بلور روی عکسِ سفید هیچ کمکی نمی‌کند (سفیدِ تار باز سفید
+     است). اندازه‌گیری‌شده روی همین کارت‌ها: ۰٫۴۲ → ۲٫۶۲ که زیرِ
+     کفِ ۳:۱ی عنصرِ غیرمتنی است؛ ۰٫۵۰ → ۳٫۳. چون سفید روشن‌ترین
+     رنگِ ممکن است، این عدد کف است نه نمونه. کم‌رنگ‌ترش نکن —
+     کوچک‌ترشدنِ خودِ سطح و شیشه‌ی واقعی سبکی را می‌سازند. */
+  background: rgba(28, 28, 26, 0.50);
+}
+/* ⚠️ داخلِ گاردِ hover: روی لمس این حالت بعد از تپ می‌چسبد و چیپ
+   تیره می‌ماند. بقیه‌ی پروژه همین را رعایت کرده. */
+@media (hover: hover) {
+  .bh-pm-chip:hover .bh-pm-face { background: rgba(28, 28, 26, 0.62); }
 }
 
-/* ── بازخوردِ «کپی شد» ──
-   حباب فقط وقتی متن دارد دیده می‌شود، پس در حالتِ عادی جا نمی‌گیرد. */
-/* ⚠️ فقط این چیپ `relative` می‌شود. روی `.bh-pm-chip` پایه بود و
-   با `.bh-pm-bk { position: absolute }` هم‌وزن می‌شد — فقط ترتیبِ
-   فایل نگهش داشته بود. */
 .bh-pm-sh { position: relative; }
-.bh-pm-sh.done { background: rgba(14, 122, 56, 0.92); border-color: rgba(255, 255, 255, 0.5); }
-.bh-pm-sh.fail { background: rgba(178, 59, 46, 0.92); border-color: rgba(255, 255, 255, 0.5); }
+.bh-pm-sh.done .bh-pm-face { background: rgba(14, 122, 56, 0.94); border-color: rgba(255, 255, 255, 0.5); }
+.bh-pm-sh.fail .bh-pm-face { background: rgba(178, 59, 46, 0.94); border-color: rgba(255, 255, 255, 0.5); }
 .bh-pm-toast {
   /* ⚠️ `left` فیزیکی، نه `inset-inline-start`: چیپ گوشه‌ی چپِ عکس
      است و در RTL منطقی یعنی *راست*، پس حباب به سمت بیرونِ قاب باز
@@ -90,35 +102,34 @@
 .bh-pm-toast:empty { opacity: 0; visibility: hidden; }
 
 .bh-pm-bk { position: absolute; top: 8px; right: 8px; z-index: 2; }
-.bh-pm-bk.on {
+.bh-pm-bk.on .bh-pm-face {
   background: rgba(199, 166, 106, 0.94);
   border-color: rgba(255, 255, 255, 0.5);
   /* ⚠️ سفید روی این طلایی ۲٫۱۵:۱ بود — زیرِ کفِ ۳:۱، و بدتر از
      حالتِ خنثی. مرکبِ تیره روی همان طلایی حدود ۱۰:۱ می‌دهد. */
   color: #221806;
 }
-.bh-pm-bk.on svg { fill: currentColor; }
+.bh-pm-bk.on .bh-pm-face svg { fill: currentColor; }
 
 /* شمارِ عکس‌ها — راست‌پایین، با همان جنسِ شیشه‌ای */
 .bh-pm-cnt {
   position: absolute; bottom: 8px; right: 8px; z-index: 2;
   display: inline-flex; align-items: center; gap: 4px;
-  block-size: 25px; padding-inline: 7px;
-  border-radius: 9px;
+  block-size: 22px; padding-inline: 6px;
+  border-radius: 7px;
   /* ⚠️ ۰٫۶۵ نه ۰٫۵۲: این یکی *متن* دارد و در ۱۱٫۵px هیچ‌وقت
      «بزرگ» حساب نمی‌شود — حتی با وزنِ ۸۰۰ — پس کفش ۴٫۵:۱ است و
      با سبک‌شدنِ وزن هم عوض نمی‌شود. اندازه‌گیری‌شده: ۰٫۶۵ → ۴٫۸۲. */
+  /* بوردر و شیشه از قاعده‌ی مشترکِ بالا می‌آیند */
   background: rgba(28, 28, 26, 0.65);
-  border: 1px solid rgba(255, 255, 255, 0.22);
-  backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
   color: #fff;
-  font-size: 11.5px; font-weight: 500; line-height: 1;
+  font-size: 11px; font-weight: 500; line-height: 1;
   font-variant-numeric: tabular-nums;
   pointer-events: none;
 }
 
 
 @media (prefers-reduced-motion: reduce) {
-  .bh-pm-img, .bh-pm-chip { transition: none; }
-  .bh-pm-chip:hover { transform: none; }
+  .bh-pm-img, .bh-pm-face { transition: none; }
+  .bh-pm-chip:active .bh-pm-face { transform: none; }
 }

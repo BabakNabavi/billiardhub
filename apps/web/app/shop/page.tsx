@@ -248,7 +248,7 @@ function MarketRow({ l, i, saved, onSave }: { l: Listing; i: number; saved: bool
         </span>
         <span className="cty"><MapPin size={10} style={{ color: PIN_GREEN }} /> {l.city || 'ایران'}</span>
       </div>
-      {/* ⚠️ ردیفِ موبایل عکسِ مربعِ ۱۳۱ دارد، نه قابِ نسبت‌دار؛ پس
+      {/* ⚠️ ردیفِ موبایل عکسِ مربعِ ۱۴۴ دارد، نه قابِ نسبت‌دار؛ پس
           `ProductMedia` این‌جا با کلاسِ bh-pm--sq نسبت را وامی‌گذارد ولی
           همان نشان‌ها و همان اندازه‌ها را می‌آورد. */}
       <ProductMedia
@@ -806,11 +806,10 @@ export default function MarketNewPage() {
         /* ⚠️ ۱۱۹ = ۱۰۸ + ۱۰٪. و align-self وسط، وگرنه عکس بالای
            ردیفِ ۱۵۵ پیکسلی می‌چسبد و ۳۵ پیکسل زیرش خالی می‌ماند —
            همان چیزی که «وسط نیست» دیده می‌شد. */
-        /* ۱۳۱ = ۱۱۹ + ۱۰٪ (و ۱۰۸ اولیه + ۲۱٪). چیپ‌ها همان ۲۵ پایه
-           می‌مانند — پایین‌تر نرو، کفِ لمسِ WCAG 2.5.8 است. */
-        .mk-row .bh-pm--sq { width: 131px; height: 131px; aspect-ratio: auto; border-radius: 13px;
+        /* ۱۴۴ = ۱۳۱ + ۱۰٪ (از ۱۰۸ اولیه: +۳۳٪). */
+        .mk-row .bh-pm--sq { width: 144px; height: 144px; aspect-ratio: auto; border-radius: 13px;
           align-self: center; border: 1px solid rgba(28,28,26,0.08); border-bottom-width: 1px; }
-        /* قابِ ۱۳۱ جا دارد چون پرچم رفته: هم‌رسانی چپ‌بالا،
+        /* قابِ ۱۴۴ جا دارد چون پرچم رفته: هم‌رسانی چپ‌بالا،
            نشان راست‌بالا، شمارِ عکس راست‌پایین. */
         .mk-row .bh-pm--sq .bh-pm-bk { top: 6px; right: 6px; }
         .mk-row .bh-pm--sq .bh-pm-cnt { bottom: 6px; right: 6px; height: 22px; padding-inline: 6px; font-size: 10.5px; }
@@ -818,7 +817,10 @@ export default function MarketNewPage() {
         /* ⚠️ زیرِ ۳۶۰ پیکسل، ۱۳۱ بس‌که جا می‌گیرد که قیمتِ ۱۰رقمی
            از کارت می‌زند بیرون (ستونِ متن ~۱۲۳ می‌ماند). قرارِ
            پروژه ۳۷۵ است، ولی این یک خط ارزانش می‌کند. */
-        @media (max-width: 360px) { .mk-row .bh-pm--sq { width: 116px; height: 116px; } }
+        /* ⚠️ زیرِ ۳۶۰ پیکسل، ۱۴۴ آن‌قدر جا می‌گیرد که ستونِ متن به
+           ~۱۱۰ می‌رسد و قیمتِ ۱۰رقمی از کارت می‌زند بیرون. در ۳۷۵
+           حدود ۱۷۳ می‌ماند و مشکلی نیست. */
+        @media (max-width: 360px) { .mk-row .bh-pm--sq { width: 120px; height: 120px; } }
         .mk-row .pctn { background: #b400ae; color: #fff; font-size: 10px; font-weight: 800;
           border-radius: 999px; padding: 2px 7px 1px; line-height: 1.4; flex-shrink: 0; }
         .mk-row .oldp { font-size: 10.5px; color: ${MUT}; text-decoration: line-through;
