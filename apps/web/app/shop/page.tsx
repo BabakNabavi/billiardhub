@@ -248,7 +248,7 @@ function MarketRow({ l, i, saved, onSave }: { l: Listing; i: number; saved: bool
         </span>
         <span className="cty"><MapPin size={10} style={{ color: PIN_GREEN }} /> {l.city || 'ایران'}</span>
       </div>
-      {/* ⚠️ ردیفِ موبایل عکسِ مربعِ ۱۱۹ دارد، نه قابِ نسبت‌دار؛ پس
+      {/* ⚠️ ردیفِ موبایل عکسِ مربعِ ۱۳۱ دارد، نه قابِ نسبت‌دار؛ پس
           `ProductMedia` این‌جا با کلاسِ bh-pm--sq نسبت را وامی‌گذارد ولی
           همان نشان‌ها و همان اندازه‌ها را می‌آورد. */}
       <ProductMedia
@@ -806,16 +806,19 @@ export default function MarketNewPage() {
         /* ⚠️ ۱۱۹ = ۱۰۸ + ۱۰٪. و align-self وسط، وگرنه عکس بالای
            ردیفِ ۱۵۵ پیکسلی می‌چسبد و ۳۵ پیکسل زیرش خالی می‌ماند —
            همان چیزی که «وسط نیست» دیده می‌شد. */
-        .mk-row .bh-pm--sq { width: 119px; height: 119px; aspect-ratio: auto; border-radius: 12px;
+        /* ۱۳۱ = ۱۱۹ + ۱۰٪ (و ۱۰۸ اولیه + ۲۱٪). چیپ‌ها همان ۲۵ پایه
+           می‌مانند — پایین‌تر نرو، کفِ لمسِ WCAG 2.5.8 است. */
+        .mk-row .bh-pm--sq { width: 131px; height: 131px; aspect-ratio: auto; border-radius: 13px;
           align-self: center; border: 1px solid rgba(28,28,26,0.08); border-bottom-width: 1px; }
-        /* قابِ ۱۱۹ جا دارد چون پرچم رفته: هم‌رسانی چپ‌بالا،
+        /* قابِ ۱۳۱ جا دارد چون پرچم رفته: هم‌رسانی چپ‌بالا،
            نشان راست‌بالا، شمارِ عکس راست‌پایین. */
         .mk-row .bh-pm--sq .bh-pm-bk { top: 6px; right: 6px; }
         .mk-row .bh-pm--sq .bh-pm-cnt { bottom: 6px; right: 6px; height: 22px; padding-inline: 6px; font-size: 10.5px; }
         .mk-row .bh-pm--sq .bh-pm-col { top: 6px; left: 6px; gap: 5px; }
-        /* ⚠️ ۲۶ = ۵٪ کمتر از پایه‌ی ۲۷. پایین‌تر نرو: کفِ لمسِ
-           WCAG 2.5.8 برابر ۲۴×۲۴ است. */
-        .mk-row .bh-pm--sq .bh-pm-chip { width: 26px; height: 26px; border-radius: 8px; }
+        /* ⚠️ زیرِ ۳۶۰ پیکسل، ۱۳۱ بس‌که جا می‌گیرد که قیمتِ ۱۰رقمی
+           از کارت می‌زند بیرون (ستونِ متن ~۱۲۳ می‌ماند). قرارِ
+           پروژه ۳۷۵ است، ولی این یک خط ارزانش می‌کند. */
+        @media (max-width: 360px) { .mk-row .bh-pm--sq { width: 116px; height: 116px; } }
         .mk-row .pctn { background: #b400ae; color: #fff; font-size: 10px; font-weight: 800;
           border-radius: 999px; padding: 2px 7px 1px; line-height: 1.4; flex-shrink: 0; }
         .mk-row .oldp { font-size: 10.5px; color: ${MUT}; text-decoration: line-through;

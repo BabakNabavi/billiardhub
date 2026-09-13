@@ -39,31 +39,55 @@
 }
 
 /* خانه‌ی مشترکِ نشان‌ها — یک اندازه برای همه.
-   ⚠️ ۲۷×۲۷ بالای کفِ ۲۴×۲۴ی WCAG 2.5.8 است؛ کوچک‌ترش نکن.
-   ⚠️ پس‌زمینه *یکی نیست*: چیپ‌های آیکونی ۰٫۵۸ و شمارنده ۰٫۶۵.
-   دلیلش پایین‌تر، سرِ هر کدام نوشته شده. */
+   ⚠️ پس‌زمینه *یکی نیست*: چیپ‌های آیکونی ۰٫۵۲ و شمارنده ۰٫۶۵.
+   دلیلش سرِ هر کدام نوشته شده. */
 .bh-pm-chip {
-  /* ۵٪ کوچک‌تر از ۲۸ — و همچنان بالای کفِ ۲۴×۲۴ی WCAG 2.2 AA. */
-  inline-size: 27px; block-size: 27px;
-  border-radius: 9px;
+  /* ⚠️ ۲۵×۲۵ کفِ کار است: WCAG 2.5.8 هدفِ لمس را ۲۴×۲۴ می‌خواهد.
+     کوچک‌ترش نکن. */
+  inline-size: 25px; block-size: 25px;
+  border-radius: 8px;
   display: flex; align-items: center; justify-content: center;
   padding: 0; cursor: pointer;
   /* ── چرا ۰٫۵۸ برای این‌ها و ۰٫۶۵ برای شمارنده ──
      این چیپ‌ها فقط *آیکون* دارند و کفِ WCAG برایشان ۳:۱ است.
-     اندازه‌گیریِ پیکسلی روی کارت‌های واقعیِ بازار: ۰٫۵۸ بدترین
-     حالت را ۳٫۸۵ می‌دهد — امن. شمارنده متن دارد و کفش ۴٫۵ است،
-     پس کمی تیره‌تر می‌ماند (پایین‌تر در همین فایل). */
-  background: rgba(28, 28, 26, 0.58);
+     اندازه‌گیریِ پیکسلی روی بدترین حالت (عکسِ سفید): ۰٫۵۲ → ۳٫۵۰.
+     حاشیه ۰٫۵۰ است، پس کم‌رنگ‌ترش نکن. شمارنده متن دارد و کفش
+     ۴٫۵ است، پس تیره‌تر می‌ماند (پایین‌تر همین فایل). */
+  background: rgba(28, 28, 26, 0.52);
   border: 1px solid rgba(255, 255, 255, 0.22);
   backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
   color: #fff;
   transition: background .2s, color .2s, transform .2s;
 }
-.bh-pm-chip:hover { background: rgba(28, 28, 26, 0.70); transform: translateY(-1px); }
+.bh-pm-chip:hover { background: rgba(28, 28, 26, 0.66); transform: translateY(-1px); }
 .bh-pm-chip:active { transform: translateY(0); }
 .bh-pm-chip:focus-visible {
   outline: 2px solid #C7A66A; outline-offset: 2px;
 }
+
+/* ── بازخوردِ «کپی شد» ──
+   حباب فقط وقتی متن دارد دیده می‌شود، پس در حالتِ عادی جا نمی‌گیرد. */
+/* ⚠️ فقط این چیپ `relative` می‌شود. روی `.bh-pm-chip` پایه بود و
+   با `.bh-pm-bk { position: absolute }` هم‌وزن می‌شد — فقط ترتیبِ
+   فایل نگهش داشته بود. */
+.bh-pm-sh { position: relative; }
+.bh-pm-sh.done { background: rgba(14, 122, 56, 0.92); border-color: rgba(255, 255, 255, 0.5); }
+.bh-pm-sh.fail { background: rgba(178, 59, 46, 0.92); border-color: rgba(255, 255, 255, 0.5); }
+.bh-pm-toast {
+  /* ⚠️ `left` فیزیکی، نه `inset-inline-start`: چیپ گوشه‌ی چپِ عکس
+     است و در RTL منطقی یعنی *راست*، پس حباب به سمت بیرونِ قاب باز
+     می‌شد و `overflow:hidden` نصفش می‌کرد. مثلِ خودِ چیپ‌ها، جهتِ
+     این‌ها دیداری است نه متنی. */
+  position: absolute; top: calc(100% + 6px); left: 0;
+  padding: 3px 7px; border-radius: 7px; white-space: nowrap;
+  font-size: 10.5px; font-weight: 600; line-height: 1.6;
+  background: rgba(14, 122, 56, 0.94); color: #fff;
+  pointer-events: none;
+}
+.bh-pm-sh.fail .bh-pm-toast { background: rgba(178, 59, 46, 0.94); }
+/* ⚠️ دیداری پنهان، نه ساختاری: ناحیه‌ی زنده باید در درخت بماند
+   وگرنه اعلام نمی‌شود. */
+.bh-pm-toast:empty { opacity: 0; visibility: hidden; }
 
 .bh-pm-bk { position: absolute; top: 8px; right: 8px; z-index: 2; }
 .bh-pm-bk.on {
@@ -79,20 +103,20 @@
 .bh-pm-cnt {
   position: absolute; bottom: 8px; right: 8px; z-index: 2;
   display: inline-flex; align-items: center; gap: 4px;
-  block-size: 27px; padding-inline: 8px;
+  block-size: 25px; padding-inline: 7px;
   border-radius: 9px;
-  /* ⚠️ ۰٫۶۵ نه ۰٫۵۸: این یکی *متن* دارد (۱۱٫۵px بولد، که «بزرگ»
-     حساب نمی‌شود) و کفش ۴٫۵:۱ است. اندازه‌گیری‌شده: ۰٫۶۲ → ۴٫۳۶،
-     ۰٫۶۵ → ۴٫۸۲. */
+  /* ⚠️ ۰٫۶۵ نه ۰٫۵۲: این یکی *متن* دارد و در ۱۱٫۵px هیچ‌وقت
+     «بزرگ» حساب نمی‌شود — حتی با وزنِ ۸۰۰ — پس کفش ۴٫۵:۱ است و
+     با سبک‌شدنِ وزن هم عوض نمی‌شود. اندازه‌گیری‌شده: ۰٫۶۵ → ۴٫۸۲. */
   background: rgba(28, 28, 26, 0.65);
   border: 1px solid rgba(255, 255, 255, 0.22);
   backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
   color: #fff;
-  font-size: 11.5px; font-weight: 800; line-height: 1;
+  font-size: 11.5px; font-weight: 500; line-height: 1;
   font-variant-numeric: tabular-nums;
   pointer-events: none;
 }
-.bh-pm-cnt b { font-weight: 800; }
+
 
 @media (prefers-reduced-motion: reduce) {
   .bh-pm-img, .bh-pm-chip { transition: none; }
