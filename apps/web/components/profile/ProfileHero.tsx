@@ -30,6 +30,19 @@ import RoleGlyph, { type RoleGlyphKind } from './RoleGlyph'
 import { toFaDigits } from '@/lib/jalali'
 import { keepLatinProps } from '@/lib/text-fa'
 
+/* ── نردبانِ عرضِ هر پوستر ──
+   ⚠️ هیچ پله‌ای بالاتر از رزولوشنِ بومیِ فایل نباشد: پله‌ی ناموجود
+   یعنی ۴۰۴ و هدرِ سیاهِ خالی، و پله‌ی بزرگ‌تر از منبع یعنی تحویلِ
+   پیکسلِ ساختگی با هزینه‌ی بایت. هر پوسترِ تازه باید این‌جا ثبت شود. */
+export type PosterBase = 'coach' | 'referee'
+
+const POSTER_SIZES: Record<PosterBase, { wide: readonly number[]; tall: readonly number[] }> = {
+  coach:   { wide: [768, 1024, 1264, 1920], tall: [480, 640, 848, 1170] },
+  /* منبعِ پوسترِ داور خودش ۱۲۶۴×۸۴۸ است؛ پله‌ی بالاتر پیکسلِ
+     ساختگی می‌شد، پس نردبان این‌جا تمام می‌شود. */
+  referee: { wide: [768, 1024, 1264],       tall: [480, 640, 848] },
+}
+
 export interface ProfileHeroProps {
   name: string
   /** نام لاتین برای متن توخالی پس‌زمینه — نبودنش یعنی کشیده نشود */
@@ -61,7 +74,7 @@ export interface ProfileHeroProps {
   stats?: React.ReactNode
   /* نامِ پایه‌ی پوسترِ نقش، بدون عرض و پسوند. اگر ندهی، پوسترِ
      برداریِ ساخته‌شده رندر می‌شود. */
-  posterBase?: string
+  posterBase?: PosterBase
 }
 
 export default function ProfileHero({
@@ -69,6 +82,7 @@ export default function ProfileHero({
   grade, disciplines, onOpenPhoto,
   role, backHref, backLabel, publicUrl, actions, stats, posterBase,
 }: ProfileHeroProps) {
+  const sizes = posterBase ? POSTER_SIZES[posterBase] : POSTER_SIZES.coach
   /* ── آدرس اختصاصی روی هیرو ──
      همان چیزی که در ستون کناری هست، این‌بار جایی که بازدیدکننده
      اول نگاه می‌کند. کپی همان‌جا انجام می‌شود تا کسی مجبور نباشد
@@ -110,14 +124,14 @@ export default function ProfileHero({
                به اعتمادِ «عکس آن‌جا تیره است» ضعیف نکن. */
             <picture>
               <source media="(max-width: 699px)" type="image/avif"
-                srcSet={[480, 640, 848, 1170].map(w => `/images/coaches/${posterBase}-tall-${w}.avif ${w}w`).join(', ')} sizes="100vw" />
+                srcSet={sizes.tall.map(w => `/images/coaches/${posterBase}-tall-${w}.avif ${w}w`).join(', ')} sizes="100vw" />
               <source media="(max-width: 699px)" type="image/webp"
-                srcSet={[480, 640, 848, 1170].map(w => `/images/coaches/${posterBase}-tall-${w}.webp ${w}w`).join(', ')} sizes="100vw" />
+                srcSet={sizes.tall.map(w => `/images/coaches/${posterBase}-tall-${w}.webp ${w}w`).join(', ')} sizes="100vw" />
               <source type="image/avif"
-                srcSet={[768, 1024, 1264, 1920].map(w => `/images/coaches/${posterBase}-wide-${w}.avif ${w}w`).join(', ')} sizes="100vw" />
+                srcSet={sizes.wide.map(w => `/images/coaches/${posterBase}-wide-${w}.avif ${w}w`).join(', ')} sizes="100vw" />
               <img className="ch-hero-photo" alt="" decoding="async" fetchPriority="high"
                 src={`/images/coaches/${posterBase}-wide-1024.webp`}
-                srcSet={[768, 1024, 1264, 1920].map(w => `/images/coaches/${posterBase}-wide-${w}.webp ${w}w`).join(', ')} sizes="100vw" />
+                srcSet={sizes.wide.map(w => `/images/coaches/${posterBase}-wide-${w}.webp ${w}w`).join(', ')} sizes="100vw" />
             </picture>
           )
           : <CoverPoster tone={role} />}
