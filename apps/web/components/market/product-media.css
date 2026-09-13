@@ -34,7 +34,7 @@
    ⚠️ `left`/`right` دیداری‌اند و عمدی: این‌ها روی خودِ عکس
    می‌نشینند و جای‌شان نباید با جهتِ متن بچرخد. */
 .bh-pm-col {
-  position: absolute; top: 8px; left: 8px; z-index: 2;
+  position: absolute; top: 5px; left: 5px; z-index: 2;
   display: flex; flex-direction: column; gap: 6px;
 }
 
@@ -47,13 +47,17 @@
   inline-size: 26px; block-size: 26px;
   background: none; border: 0; padding: 0; cursor: pointer;
   display: flex; align-items: center; justify-content: center;
-  color: #fff;
 }
 .bh-pm-chip:active .bh-pm-face { transform: scale(0.94); }
 .bh-pm-chip:focus-visible { outline: 2px solid #C7A66A; outline-offset: 2px; border-radius: 8px; }
 
 /* سطحِ شیشه‌ای — مشترکِ دکمه‌ها و شمارنده */
 .bh-pm-face, .bh-pm-cnt {
+  /* ⚠️ این لبه *تشخیصِ دکمه* را تأمین نمی‌کند: روی عکسِ سفید خودش
+     ۱٫۲۷:۱ است. آنچه دکمه را پیدا می‌کند خودِ گلیف است (۱۷ روی
+     سفید، ۶٫۴ روی سیاه)، پس WCAG 1.4.11 برقرار است چون مرز تنها
+     نشانه‌ی وجودِ دکمه نیست. تیره‌ترکردنِ بوردر تا ۳:۱ یک خطِ
+     تو‌چشم می‌شد — دقیقا خلافِ خواسته. عمق را سایه می‌دهد. */
   /* ── چرا ترتیبِ پیشوند این است ──
      ⚠️ اگر نسخه‌ی بی‌پیشوند *اول* بیاید، lightningcss حذفش می‌کند و
      فقط `-webkit-` می‌ماند؛ روی خروجیِ زنده دیدم که شیشه اصلا کار
@@ -61,30 +65,28 @@
      بعد: هر دو می‌مانند. */
   -webkit-backdrop-filter: blur(10px) saturate(1.3);
   backdrop-filter: blur(10px) saturate(1.3);
-  border: 1px solid rgba(255, 255, 255, 0.26);
-  color: #fff;
+  border: 1px solid rgba(28, 28, 26, 0.12);
+  box-shadow: 0 1px 3px rgba(28, 28, 26, 0.16);
   transition: background .2s, transform .2s;
 }
 .bh-pm-face {
   inline-size: 20px; block-size: 20px; border-radius: 7px;
   display: flex; align-items: center; justify-content: center;
-  /* ── چرا ۰٫۵۰ و نه کمتر ──
-     ⚠️ بلور روی عکسِ سفید هیچ کمکی نمی‌کند (سفیدِ تار باز سفید
-     است). اندازه‌گیری‌شده روی همین کارت‌ها: ۰٫۴۲ → ۲٫۶۲ که زیرِ
-     کفِ ۳:۱ی عنصرِ غیرمتنی است؛ ۰٫۵۰ → ۳٫۳. چون سفید روشن‌ترین
-     رنگِ ممکن است، این عدد کف است نه نمونه. کم‌رنگ‌ترش نکن —
-     کوچک‌ترشدنِ خودِ سطح و شیشه‌ی واقعی سبکی را می‌سازند. */
-  background: rgba(28, 28, 26, 0.50);
+  color: #1C1C1A;
+  /* ⚠️ بدترین حالتِ جوهرِ تیره، عکسِ *سیاه* است (سطح بین ۱۵۸ و ۲۵۵
+     نوسان می‌کند). اندازه‌گیریِ پیکسلی: ۶٫۳۸ — بالای کفِ ۳:۱.
+     روشن‌ترش نکن. */
+  background: rgba(255, 255, 255, 0.62);
 }
 /* ⚠️ داخلِ گاردِ hover: روی لمس این حالت بعد از تپ می‌چسبد و چیپ
    تیره می‌ماند. بقیه‌ی پروژه همین را رعایت کرده. */
 @media (hover: hover) {
-  .bh-pm-chip:hover .bh-pm-face { background: rgba(28, 28, 26, 0.62); }
+  .bh-pm-chip:hover .bh-pm-face { background: rgba(255, 255, 255, 0.88); }
 }
 
 .bh-pm-sh { position: relative; }
-.bh-pm-sh.done .bh-pm-face { background: rgba(14, 122, 56, 0.94); border-color: rgba(255, 255, 255, 0.5); }
-.bh-pm-sh.fail .bh-pm-face { background: rgba(178, 59, 46, 0.94); border-color: rgba(255, 255, 255, 0.5); }
+.bh-pm-sh.done .bh-pm-face { background: rgba(14, 122, 56, 0.96); border-color: rgba(28, 28, 26, 0.12); color: #fff; }
+.bh-pm-sh.fail .bh-pm-face { background: rgba(178, 59, 46, 0.96); border-color: rgba(28, 28, 26, 0.12); color: #fff; }
 .bh-pm-toast {
   /* ⚠️ `left` فیزیکی، نه `inset-inline-start`: چیپ گوشه‌ی چپِ عکس
      است و در RTL منطقی یعنی *راست*، پس حباب به سمت بیرونِ قاب باز
@@ -101,10 +103,10 @@
    وگرنه اعلام نمی‌شود. */
 .bh-pm-toast:empty { opacity: 0; visibility: hidden; }
 
-.bh-pm-bk { position: absolute; top: 8px; right: 8px; z-index: 2; }
+.bh-pm-bk { position: absolute; top: 5px; right: 5px; z-index: 2; }
 .bh-pm-bk.on .bh-pm-face {
   background: rgba(199, 166, 106, 0.94);
-  border-color: rgba(255, 255, 255, 0.5);
+  border-color: rgba(28, 28, 26, 0.12);
   /* ⚠️ سفید روی این طلایی ۲٫۱۵:۱ بود — زیرِ کفِ ۳:۱، و بدتر از
      حالتِ خنثی. مرکبِ تیره روی همان طلایی حدود ۱۰:۱ می‌دهد. */
   color: #221806;
@@ -113,6 +115,9 @@
 
 /* شمارِ عکس‌ها — راست‌پایین، با همان جنسِ شیشه‌ای */
 .bh-pm-cnt {
+  /* ⚠️ ۸ نه ۵: چیپ‌ها سطحِ رنگ‌شده‌شان ۳px داخلِ دکمه است، پس با
+     ۵ لبه‌ی دیداری‌شان روی ۸ می‌افتد. شمارنده تورفتگی ندارد، پس
+     برای هم‌ترازی با آن‌ها — و با نشانِ «فوری/جدید» — باید ۸ باشد. */
   position: absolute; bottom: 8px; right: 8px; z-index: 2;
   display: inline-flex; align-items: center; gap: 4px;
   block-size: 22px; padding-inline: 6px;
@@ -121,8 +126,10 @@
      «بزرگ» حساب نمی‌شود — حتی با وزنِ ۸۰۰ — پس کفش ۴٫۵:۱ است و
      با سبک‌شدنِ وزن هم عوض نمی‌شود. اندازه‌گیری‌شده: ۰٫۶۵ → ۴٫۸۲. */
   /* بوردر و شیشه از قاعده‌ی مشترکِ بالا می‌آیند */
-  background: rgba(28, 28, 26, 0.65);
-  color: #fff;
+  /* ⚠️ این یکی *متن* دارد، پس کفش ۴٫۵:۱ است. روی عکسِ سیاه
+     اندازه‌گیری شد: ۸٫۰۹. */
+  background: rgba(255, 255, 255, 0.70);
+  color: #1C1C1A;
   font-size: 11px; font-weight: 500; line-height: 1;
   font-variant-numeric: tabular-nums;
   pointer-events: none;

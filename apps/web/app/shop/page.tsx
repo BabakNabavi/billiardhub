@@ -248,7 +248,7 @@ function MarketRow({ l, i, saved, onSave }: { l: Listing; i: number; saved: bool
         </span>
         <span className="cty"><MapPin size={10} style={{ color: PIN_GREEN }} /> {l.city || 'ایران'}</span>
       </div>
-      {/* ⚠️ ردیفِ موبایل عکسِ مربعِ ۱۴۴ دارد، نه قابِ نسبت‌دار؛ پس
+      {/* ⚠️ ردیفِ موبایل عکسِ مربعِ ۱۴۳ دارد، نه قابِ نسبت‌دار؛ پس
           `ProductMedia` این‌جا با کلاسِ bh-pm--sq نسبت را وامی‌گذارد ولی
           همان نشان‌ها و همان اندازه‌ها را می‌آورد. */}
       <ProductMedia
@@ -789,7 +789,7 @@ export default function MarketNewPage() {
         /* ── ردیف افقی موبایل (به سبک دیوار، با هویت بازار) ── */
         .mk-rows { display: none; flex-direction: column; gap: 10px; }
         .mk-row { display: flex; gap: 12px;
-          padding: 11px; text-decoration: none; color: inherit; position: relative;
+          padding: 5px 11px; text-decoration: none; color: inherit; position: relative;
           animation: mkUp .45s cubic-bezier(.22,1,.36,1) both; }
         .mk-row:active { transform: scale(0.99); }
         .mk-row .info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 5px; padding-top: 2px; }
@@ -801,25 +801,28 @@ export default function MarketNewPage() {
         .mk-row .prc { font-size: 13.5px; font-weight: 900; color: ${TEXT}; font-variant-numeric: tabular-nums; }
         .mk-row .prc i { font-style: normal; font-size: 10px; font-weight: 600; color: ${MUT}; }
         .mk-row .cty { font-size: 10.5px; color: ${MUT}; display: flex; align-items: center; gap: 4px; margin-top: auto; }
-        /* ⚠️ ردیفِ موبایل مربع است، نه نسبتِ کارت — نسبت را
-           می‌شکند ولی نشان‌ها همان اندازه و همان جنس می‌مانند. */
-        /* ⚠️ ۱۱۹ = ۱۰۸ + ۱۰٪. و align-self وسط، وگرنه عکس بالای
-           ردیفِ ۱۵۵ پیکسلی می‌چسبد و ۳۵ پیکسل زیرش خالی می‌ماند —
-           همان چیزی که «وسط نیست» دیده می‌شد. */
-        /* ۱۴۴ = ۱۳۱ + ۱۰٪ (از ۱۰۸ اولیه: +۳۳٪). */
-        .mk-row .bh-pm--sq { width: 144px; height: 144px; aspect-ratio: auto; border-radius: 13px;
+        /* ── قابِ عکسِ ردیف ──
+           ⚠️ ردیفِ موبایل مربع است، نه نسبتِ کارت؛ کلاسِ bh-pm--sq
+           نسبت را می‌شکند ولی نشان‌ها همان اندازه و جنس می‌مانند.
+
+           ⚠️ ارتفاعِ خودِ ردیف را همین عکس تعیین می‌کند. با ۱۴۴ و
+           حاشیه‌ی ۱۱، ردیف از ۱۵۵ به ۱۶۸ می‌رفت — یعنی *کارت* هم
+           بزرگ می‌شد، که خواسته نبود. حاشیه‌ی عمودی ۵ شد تا ارتفاع
+           همان بماند: ۱۴۳ + ۱۰ + ۲ (بوردرِ lq-pcard) = ۱۵۵.
+
+           ⚠️ align-self وسط، وگرنه عکس بالای ردیف می‌چسبد و زیرش
+           خالی می‌ماند — همان چیزی که «وسط نیست» دیده می‌شد. */
+        .mk-row .bh-pm--sq { width: 143px; height: 143px; aspect-ratio: auto; border-radius: 13px;
           align-self: center; border: 1px solid rgba(28,28,26,0.08); border-bottom-width: 1px; }
-        /* قابِ ۱۴۴ جا دارد چون پرچم رفته: هم‌رسانی چپ‌بالا،
-           نشان راست‌بالا، شمارِ عکس راست‌پایین. */
-        .mk-row .bh-pm--sq .bh-pm-bk { top: 6px; right: 6px; }
-        .mk-row .bh-pm--sq .bh-pm-cnt { bottom: 6px; right: 6px; height: 22px; padding-inline: 6px; font-size: 10.5px; }
-        .mk-row .bh-pm--sq .bh-pm-col { top: 6px; left: 6px; gap: 5px; }
-        /* ⚠️ زیرِ ۳۶۰ پیکسل، ۱۳۱ بس‌که جا می‌گیرد که قیمتِ ۱۰رقمی
-           از کارت می‌زند بیرون (ستونِ متن ~۱۲۳ می‌ماند). قرارِ
-           پروژه ۳۷۵ است، ولی این یک خط ارزانش می‌کند. */
-        /* ⚠️ زیرِ ۳۶۰ پیکسل، ۱۴۴ آن‌قدر جا می‌گیرد که ستونِ متن به
+        /* نشان‌ها: هم‌رسانی چپ‌بالا، نشان‌کردن راست‌بالا، شمارِ عکس
+           راست‌پایین. ۵ برای دکمه‌ها چون سطحِ رنگ‌شده‌شان ۳ داخل‌تر
+           است؛ شمارنده تورفتگی ندارد و روی ۸ می‌ماند. */
+        .mk-row .bh-pm--sq .bh-pm-bk { top: 5px; right: 5px; }
+        .mk-row .bh-pm--sq .bh-pm-cnt { bottom: 8px; right: 8px; height: 22px; padding-inline: 6px; font-size: 10.5px; }
+        .mk-row .bh-pm--sq .bh-pm-col { top: 5px; left: 5px; gap: 5px; }
+        /* ⚠️ زیرِ ۳۶۰ پیکسل، ۱۴۳ آن‌قدر جا می‌گیرد که ستونِ متن به
            ~۱۱۰ می‌رسد و قیمتِ ۱۰رقمی از کارت می‌زند بیرون. در ۳۷۵
-           حدود ۱۷۳ می‌ماند و مشکلی نیست. */
+           حدود ۱۶۴ می‌ماند و مشکلی نیست. */
         @media (max-width: 360px) { .mk-row .bh-pm--sq { width: 120px; height: 120px; } }
         .mk-row .pctn { background: #b400ae; color: #fff; font-size: 10px; font-weight: 800;
           border-radius: 999px; padding: 2px 7px 1px; line-height: 1.4; flex-shrink: 0; }
