@@ -38,7 +38,9 @@
   /* ── مواد ──
      خاکستری‌های سیستمی iOS، نه خاکستری خنثی: ته‌رنگ آبی دارند و
      کنار طلایی برند سرد و تمیز می‌مانند. */
-  --ios-bg: #F2F2F7;
+  /* ⚠️ `#F2F2F7`ِ سیستمیِ iOS ته‌رنگِ آبی دارد و کنارِ پالتِ گرمِ
+     سایت (`--bg: #F7F6F3`) سرد و بیگانه دیده می‌شد. */
+  --ios-bg: #F7F6F3;
   --ios-surface: #FFFFFF;
   --ios-surface-2: #FAFAFC;
   --ios-sep: rgb(60 60 67 / .12);
@@ -290,10 +292,12 @@
 .tm .tm-card-meta { color: var(--ios-label-2); }
 
 /* تراشه تخصص: پرکننده نرم، بدون حاشیه */
+/* ⚠️ خاکستریِ خنثی بود و کنارِ زبانِ رنگیِ باشگاه بی‌جان دیده
+   می‌شد. تینتِ سبزِ سایت، مثلِ چیپ‌های باشگاه. */
 .tm .tm-chip {
-  border: 0; border-radius: 999px;
-  background: var(--ios-fill); color: var(--ios-label);
-  font-weight: 600;
+  border: 1px solid rgb(var(--sn) / .22); border-radius: 999px;
+  background: rgb(var(--sn) / .08); color: var(--sn-ink);
+  font-weight: 700;
 }
 .tm .tm-chip--more { background: var(--ios-fill-2); color: var(--ios-label-2); }
 
@@ -554,11 +558,18 @@
   .tmp .tmp-svc-row:hover { border-color: rgb(var(--sn) / .34); background: var(--ios-surface); }
 }
 /* کاشیِ آیکون */
+/* ⚠️ رنگِ خودِ گلیف با `color-mix` تیره می‌شود: رنگِ اشباعِ پالت روی
+   تینتِ روشن کفِ ۳:۱ را رد می‌کند. با این آمیزه بدترین حالت —
+   سبزِ `48,197,90` — به ۳٫۸۸:۱ می‌رسد. */
 .tmp .tmp-svc-ic {
   display: grid; place-items: center; flex-shrink: 0;
   inline-size: 42px; block-size: 42px; border-radius: 13px;
-  background: #17181B; color: #EBE6DC;
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / .10), 0 4px 12px rgb(0 0 0 / .16);
+  /* ⚠️ پیش‌فرضِ خنثی لازم است: خدمتی که در هیچ دسته‌ی کشفی نیست
+     `--rgb` نمی‌گیرد و بدونِ آن `rgb(var(--rgb))` نامعتبر می‌شود. */
+  background: linear-gradient(135deg, rgba(var(--rgb, 120,120,128), .22), rgba(var(--rgb, 120,120,128), .10));
+  border: 1px solid rgba(var(--rgb, 120,120,128), .32);
+  color: color-mix(in srgb, rgb(var(--rgb, 120,120,128)) 62%, #16150F);
+  box-shadow: 0 4px 12px rgba(var(--rgb, 120,120,128), .20);
 }
 .tmp .tmp-svc-ic svg { inline-size: 21px; block-size: 21px; }
 .tmp .tmp-svc-t { font-size: 14px; font-weight: 700; }
@@ -1068,3 +1079,20 @@
    چیزی که واقعا لازم بود پرکردنِ صریحِ ارتفاع است تا کارتِ دوخطی
    بقیه را کوتاه نگذارد. */
 .tm .tm-cat { display: grid; align-content: start; block-size: 100%; }
+
+
+/* ═══════════ ردیف‌های «درباره متخصص» ═══════════
+   ⚠️ باشگاه هر قلمِ «امکانات» را با تینتِ خودش نشان می‌دهد و همان
+   چیزی است که صفحه را زنده می‌کند؛ این‌جا همه خاکستریِ یکسان بود. */
+/* `--rgb` را خودِ ردیف از داده می‌گیرد — این‌جا فقط مصرف می‌شود. */
+.tmp .tmp-facts-grid > div {
+  background: rgba(var(--rgb), .07);
+  border-color: rgba(var(--rgb), .22);
+}
+/* ⚠️ نشانِ این ردیف `.tmp-fact-ic` است نه `.tm-ic`؛ با انتخاب‌گرِ
+   غلط، کپسولِ آبی یا بنفش یک نشانِ سبز داخلش می‌ماند. */
+.tmp .tmp-facts-grid > div .tmp-fact-ic {
+  background: rgba(var(--rgb), .18);
+  border: 1px solid rgba(var(--rgb), .30);
+  color: color-mix(in srgb, rgb(var(--rgb)) 62%, #16150F);
+}

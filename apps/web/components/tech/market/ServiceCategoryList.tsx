@@ -19,6 +19,7 @@ import {
 import type { CSSProperties } from 'react'
 import { TECH_CATEGORIES, type TechCategoryIcon } from '@/lib/tech-categories'
 import { toFaDigits } from '@/lib/jalali'
+import { TINTS } from './category-tints'
 
 const ICONS: Record<TechCategoryIcon, typeof Wrench> = {
   wrench: Wrench,
@@ -29,20 +30,6 @@ const ICONS: Record<TechCategoryIcon, typeof Wrench> = {
   layers: Layers,
   truck: Truck,
   grip: Grip,
-}
-
-/* ⚠️ رنگ این‌جاست نه در `lib/tech-categories`: آن فایل منبعِ واحدِ
-   *داده*ی دسته‌هاست و رنگ یک تصمیم نمایشی است. همان پالتِ نوار
-   «کاوش کن» صفحه‌ی اصلی، تا این دو شبکه یکی دیده شوند. */
-const TINTS: Record<TechCategoryIcon, { color: string; rgb: string }> = {
-  wrench:        { color: '#4A9EFF', rgb: '74,158,255'  },
-  'circle-dot':  { color: '#F472B6', rgb: '244,114,182' },
-  link:          { color: '#B97BFF', rgb: '185,123,255' },
-  scale:         { color: '#30C55A', rgb: '48,197,90'   },
-  ruler:         { color: '#C7A66A', rgb: '199,166,106' },
-  layers:        { color: '#06b6d4', rgb: '6,182,212'   },
-  truck:         { color: '#fb923c', rgb: '251,146,60'  },
-  grip:          { color: '#ef4444', rgb: '239,68,68'   },
 }
 
 export interface ServiceCategoryListProps {

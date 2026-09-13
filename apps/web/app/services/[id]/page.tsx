@@ -112,6 +112,12 @@ const useTopOffsets = (ref: RefObject<HTMLDivElement | null>, ready: boolean) =>
 interface MetaRow {
   k: string
   v: string
+  /* ⚠️ رنگ به *داده* بسته است نه به ترتیبِ رندر. با `nth-child`،
+     «نحوه‌ی ارائه» روی پروفایلی که باشگاه دارد آبی می‌شد و روی
+     پروفایلی که ندارد سبز — دو پروفایل کنارِ هم دو کدِ رنگیِ
+     متناقض یاد می‌دادند. رنگ‌ها همان‌هایی‌اند که نشانِ همین
+     مفاهیم در کارتِ متخصص دارد. */
+  rgb: string
   /* ⚠️ تایپِ خودِ lucide، نه امضای دست‌ساز: کامپوننت‌های lucide
      `ForwardRefExoticComponent`اند و `ReactNode` برمی‌گردانند، پس
      با `(p) => JSX.Element` جور درنمی‌آیند. */
@@ -420,10 +426,10 @@ export default function TechnicianProfilePage() {
   /* ⚠️ هر ردیف آیکونِ خودش را دارد. ردیفِ «برچسب/مقدار»ِ خالی کنار
      فهرستِ خدماتِ آیکون‌دار ناتمام به نظر می‌رسید. */
   const meta: MetaRow[] = [
-    ...(club ? [{ k: 'باشگاه / مجموعه', v: club, I: Building2 }] : []),
-    ...(coverage.length ? [{ k: 'شهرهای تحت پوشش', v: coverage.join('، '), I: Map }] : []),
-    ...(delivery.length ? [{ k: 'نحوه‌ی ارائه', v: delivery.join(' · '), I: Wrench }] : []),
-    ...(hours ? [{ k: 'ساعت کاری', v: hours, I: Clock }] : []),
+    ...(club ? [{ k: 'باشگاه / مجموعه', v: club, I: Building2, rgb: '185,123,255' }] : []),
+    ...(coverage.length ? [{ k: 'شهرهای تحت پوشش', v: coverage.join('، '), I: Map, rgb: '74,158,255' }] : []),
+    ...(delivery.length ? [{ k: 'نحوه‌ی ارائه', v: delivery.join(' · '), I: Wrench, rgb: '48,197,90' }] : []),
+    ...(hours ? [{ k: 'ساعت کاری', v: hours, I: Clock, rgb: '199,166,106' }] : []),
   ]
 
   /* ⚠️ ردیف بدون شماره ممکن است؛ کنشی که کار خودش را نمی‌کند از
@@ -608,8 +614,8 @@ export default function TechnicianProfilePage() {
                     `<dl>` آن را نمی‌پذیرد و نگاشتِ «عنوان ⟵ مقدار» در
                     درختِ دسترس‌پذیری از بین می‌رفت. چیدمان با گرید
                     انجام می‌شود، نه با ظرفِ اضافه. */}
-                {meta.map(({ k, v, I }) => (
-                  <div key={k}>
+                {meta.map(({ k, v, I, rgb }) => (
+                  <div key={k} style={{ '--rgb': rgb } as React.CSSProperties}>
                     <span className="tmp-fact-ic" aria-hidden><I size={17} /></span>
                     <dt>{k}</dt>
                     <dd>{v}</dd>

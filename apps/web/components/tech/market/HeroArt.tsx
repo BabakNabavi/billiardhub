@@ -32,7 +32,6 @@ export function HeroArt({ variant }: { variant: HeroArtVariant }) {
         <source type="image/avif" srcSet={set(base, 'avif')} sizes="100vw" />
         {/* ⚠️ `alt=""` عمدی است: عکس تزئینِ سرلوحه است و کلِ ظرف هم
             `aria-hidden` دارد. متنِ معنادار در خودِ سربرگ است. */}
-        {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           className="tmha-img"
           src={`/images/services/${base}-1024.webp`}
