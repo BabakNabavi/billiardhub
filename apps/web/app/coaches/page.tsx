@@ -20,7 +20,7 @@ const TEXT_M  = 'rgba(17,17,16,0.28)'
    کارت قبلا «اسنوکر · پاکت بیلیارد · هی‌بال» با واژه‌ی نقش جلویش
    بود: آن واژه روی صفحه‌ی مربیان تکراری است و نقطه‌ها بینِ
    عبارت‌های دوکلمه‌ای گم می‌شدند. */
-import { SPEC_SEP, PIN_BLUE } from '@/lib/profile-cards'
+import { SPEC_SEP, PIN_GREEN } from '@/lib/profile-cards'
 
 const SPECS: Record<string, { label: string; color: string; glow: string }> = {
   snooker:  { label: 'اسنوکر',       color: '#7C3AED', glow: 'rgba(124,58,237,0.30)' },
@@ -230,7 +230,7 @@ function CoachCard({ coach, view, idx }: { coach: Coach; view: 'grid' | 'list'; 
           </div>
           <p style={{ fontSize:12, color:TEXT_S, marginBottom:5 }}>{specText}</p>
           <div style={{ display:'flex', alignItems:'center', gap:5, color:TEXT_M }}>
-            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke={PIN_BLUE} strokeWidth="2" aria-hidden><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke={PIN_GREEN} strokeWidth="2" aria-hidden><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
             <span style={{ fontSize:11.5, color:TEXT_S }}>{coach.city}</span>
           </div>
         </div>
@@ -271,7 +271,7 @@ function CoachCard({ coach, view, idx }: { coach: Coach; view: 'grid' | 'list'; 
         </div>
         <p style={{ fontSize:12.5, color:TEXT_S, lineHeight:1.35, marginBottom:9, minHeight:'2.7em', display:'-webkit-box', WebkitLineClamp:2, WebkitBoxOrient:'vertical', overflow:'hidden' }}>{specText}</p>
         <div style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:5, marginBottom:13, color:TEXT_M }}>
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={PIN_BLUE} strokeWidth="2" aria-hidden><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={PIN_GREEN} strokeWidth="2" aria-hidden><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
           <span style={{ fontSize:11.5, color:TEXT_S }}>{coach.city}</span>
         </div>
         <div style={{ flex:1 }}/>

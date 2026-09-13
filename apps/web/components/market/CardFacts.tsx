@@ -18,9 +18,9 @@
    ═══════════════════════════════════════════════════════════════ */
 
 import { MapPin } from 'lucide-react'
+import { PIN_GREEN } from '@/lib/profile-cards'
 import { conditionLabel } from '../../lib/market/categories'
 
-const GOLD = '#C7A66A'
 
 /** حداقل چیزی که هر کارت محصول باید بداند */
 export interface CardFacts {
@@ -42,9 +42,13 @@ const faNum = (n: number) => n.toLocaleString('fa-IR')
    ظاهرش همان چیزی است که فهرست بازار داشت و کاربر آن را «درست»
    می‌داند؛ حالا هر سه کارت همان را دارند. */
 export function CardMeta({ p, style }: { p: CardFacts; style?: React.CSSProperties }) {
+  /* ⚠️ ۰٫۶۲ نه ۰٫۴۲: نامِ شهر ۱۰ پیکسل است و با ۰٫۴۲ کنتراستش
+     روی سطحِ کارت ۲٫۶۱:۱ می‌شد — زیرِ کفِ ۴٫۵:۱ برای متنِ کوچک.
+     ۰٫۶۲ آن را به ~۴٫۶ می‌برد و هنوز فرعی دیده می‌شود. */
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 10, color: 'rgba(28,28,26,0.42)', ...style }}>
-      <MapPin size={10} style={{ color: GOLD, flexShrink: 0 }} />
+    <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 10, color: 'rgba(28,28,26,0.62)', ...style }}>
+      {/* سبز، مثلِ نشانه‌ی مکان روی کارتِ مربی و داور */}
+      <MapPin size={10} style={{ color: PIN_GREEN, flexShrink: 0 }} />
       <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.city || 'ایران'}</span>
       <span style={{ marginInlineStart: 'auto', background: '#F4F3F1', borderRadius: 999, padding: '1.5px 7px', fontWeight: 700, flexShrink: 0 }}>
         {conditionLabel(p.condition)}

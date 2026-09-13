@@ -63,13 +63,13 @@ export default function ProductMedia({
         <button type="button" className={'bh-pm-chip bh-pm-bk' + (saved ? ' on' : '')}
           aria-label={saved ? savedTxt.on : savedTxt.off} aria-pressed={!!saved}
           onClick={e => { e.preventDefault(); e.stopPropagation(); onToggleSave() }}>
-          <Bookmark size={15} />
+          <Bookmark size={14} />
         </button>
       )}
 
       {imgCount > 1 && (
         <span className="bh-pm-cnt" role="img" aria-label={`${imgCount} عکس`}>
-          <Images size={13} aria-hidden />
+          <Images size={12} aria-hidden />
           <b>{toFaDigits(imgCount)}</b>
         </span>
       )}
@@ -96,7 +96,7 @@ function ShareChip({ href, title }: { href: string; title: string }) {
   }
   return (
     <button type="button" className="bh-pm-chip bh-pm-sh" onClick={share} aria-label="هم‌رسانی">
-      <Share2 size={15} />
+      <Share2 size={14} />
     </button>
   )
 }

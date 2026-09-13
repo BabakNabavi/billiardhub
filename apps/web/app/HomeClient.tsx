@@ -44,6 +44,7 @@ import { modernizeType } from '../lib/market/title';
 import ProductTitle from '../components/market/ProductTitle';
 import { CardMeta, CardPrice } from '../components/market/CardFacts';
 import ProductMedia from '../components/market/ProductMedia';
+import { PIN_GREEN } from '../lib/profile-cards';
 import '../components/market/product-media.css';
 import { thumbUrl } from '../lib/media/thumb';
 import VerifiedBadge from '../components/VerifiedBadge';
@@ -436,7 +437,7 @@ function ClubCard({ club, h = '360px', featured = false }: { club: RealClub; h?:
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '3px' }}>
               <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'rgba(0,0,0,0.40)', fontSize: '12px' }}>
-                <MapPin size={10} style={{ color: GOLD }} />{club.city}{club.dist ? `، ${club.dist}` : ''}
+                <MapPin size={10} style={{ color: PIN_GREEN }} />{club.city}{club.dist ? `، ${club.dist}` : ''}
               </span>
               {/* امتیاز فقط وقتی واقعا داریمش — صفر یعنی «هنوز نظری نیست» */}
               {club.rating > 0 && (
@@ -513,7 +514,7 @@ function ClubCard({ club, h = '360px', featured = false }: { club: RealClub; h?:
             </div>
             )}
             <div style={{ display: 'flex', alignItems: 'center', gap: '2px', color: 'rgba(0,0,0,0.40)', fontSize: '11px' }}>
-              <MapPin size={9} style={{ color: GOLD, flexShrink: 0 }} />{club.city}
+              <MapPin size={9} style={{ color: PIN_GREEN, flexShrink: 0 }} />{club.city}
             </div>
             <div style={{ flex: 1 }} />
             <div className="cta-lq cta-lq-sm" style={{ borderRadius: rad }}>
@@ -654,7 +655,7 @@ function SellerCard({ s }: { s: RealStore }) {
           {s.name}{s.verified && <VerifiedBadge title="فروشگاه تأیید شده" />}
         </div>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '3px', marginTop: '3px', fontSize: '11px', color: TEXT_M }}>
-          <MapPin size={9} style={{ color: GOLD }} />{s.city}
+          <MapPin size={9} style={{ color: PIN_GREEN }} />{s.city}
         </div>
         <div style={{ fontSize: '11px', color: TEXT_M, marginTop: '1px' }}>{s.specialty}</div>
         {/* امتیاز فقط وقتی واقعی باشد — برای فروشگاه تازه چیزی جعل نمی‌شود */}
