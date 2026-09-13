@@ -38,41 +38,53 @@
   display: flex; flex-direction: column; gap: 6px;
 }
 
-/* خانه‌ی مشترکِ هر سه نشان — یک اندازه، یک پس‌زمینه.
-   ⚠️ ۲۸×۲۸ بالای کفِ ۲۴×۲۴ی WCAG 2.2 AA است. */
+/* خانه‌ی مشترکِ نشان‌ها — یک اندازه برای همه.
+   ⚠️ ۲۷×۲۷ بالای کفِ ۲۴×۲۴ی WCAG 2.5.8 است؛ کوچک‌ترش نکن.
+   ⚠️ پس‌زمینه *یکی نیست*: چیپ‌های آیکونی ۰٫۵۸ و شمارنده ۰٫۶۵.
+   دلیلش پایین‌تر، سرِ هر کدام نوشته شده. */
 .bh-pm-chip {
-  inline-size: 28px; block-size: 28px;
+  /* ۵٪ کوچک‌تر از ۲۸ — و همچنان بالای کفِ ۲۴×۲۴ی WCAG 2.2 AA. */
+  inline-size: 27px; block-size: 27px;
   border-radius: 9px;
   display: flex; align-items: center; justify-content: center;
   padding: 0; cursor: pointer;
-  /* ⚠️ آلفا ۰٫۶۸ است نه کمتر: بیشترِ عکس‌های محصول پس‌زمینه‌ی سفید
-     دارند و با ۰٫۴۲ آیکونِ سفید روی چیپ ۲٫۶۳:۱ می‌شد — زیرِ کفِ
-     ۴٫۵:۱ — متنِ شمارِ عکس ۱۱٫۵px بولد است و «بزرگ» حساب نمی‌شود.
-     اندازه‌گیریِ پیکسلی روی کارت‌های واقعی: ۰٫۶۲ بدترین حالت را
-     ۴٫۳۶ می‌داد، ۰٫۶۸ آن را بالای کف می‌برد. */
-  background: rgba(28, 28, 26, 0.68);
+  /* ── چرا ۰٫۵۸ برای این‌ها و ۰٫۶۵ برای شمارنده ──
+     این چیپ‌ها فقط *آیکون* دارند و کفِ WCAG برایشان ۳:۱ است.
+     اندازه‌گیریِ پیکسلی روی کارت‌های واقعیِ بازار: ۰٫۵۸ بدترین
+     حالت را ۳٫۸۵ می‌دهد — امن. شمارنده متن دارد و کفش ۴٫۵ است،
+     پس کمی تیره‌تر می‌ماند (پایین‌تر در همین فایل). */
+  background: rgba(28, 28, 26, 0.58);
   border: 1px solid rgba(255, 255, 255, 0.22);
   backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
   color: #fff;
   transition: background .2s, color .2s, transform .2s;
 }
-.bh-pm-chip:hover { background: rgba(28, 28, 26, 0.78); transform: translateY(-1px); }
+.bh-pm-chip:hover { background: rgba(28, 28, 26, 0.70); transform: translateY(-1px); }
 .bh-pm-chip:active { transform: translateY(0); }
 .bh-pm-chip:focus-visible {
   outline: 2px solid #C7A66A; outline-offset: 2px;
 }
 
 .bh-pm-bk { position: absolute; top: 8px; right: 8px; z-index: 2; }
-.bh-pm-bk.on { background: rgba(199, 166, 106, 0.92); border-color: rgba(255, 255, 255, 0.4); }
+.bh-pm-bk.on {
+  background: rgba(199, 166, 106, 0.94);
+  border-color: rgba(255, 255, 255, 0.5);
+  /* ⚠️ سفید روی این طلایی ۲٫۱۵:۱ بود — زیرِ کفِ ۳:۱، و بدتر از
+     حالتِ خنثی. مرکبِ تیره روی همان طلایی حدود ۱۰:۱ می‌دهد. */
+  color: #221806;
+}
 .bh-pm-bk.on svg { fill: currentColor; }
 
 /* شمارِ عکس‌ها — راست‌پایین، با همان جنسِ شیشه‌ای */
 .bh-pm-cnt {
   position: absolute; bottom: 8px; right: 8px; z-index: 2;
   display: inline-flex; align-items: center; gap: 4px;
-  block-size: 28px; padding-inline: 8px;
+  block-size: 27px; padding-inline: 8px;
   border-radius: 9px;
-  background: rgba(28, 28, 26, 0.68);
+  /* ⚠️ ۰٫۶۵ نه ۰٫۵۸: این یکی *متن* دارد (۱۱٫۵px بولد، که «بزرگ»
+     حساب نمی‌شود) و کفش ۴٫۵:۱ است. اندازه‌گیری‌شده: ۰٫۶۲ → ۴٫۳۶،
+     ۰٫۶۵ → ۴٫۸۲. */
+  background: rgba(28, 28, 26, 0.65);
   border: 1px solid rgba(255, 255, 255, 0.22);
   backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
   color: #fff;

@@ -1,5 +1,6 @@
 ﻿'use client';
 
+import { PIN_GREEN } from '@/lib/profile-cards'
 import { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
 import api from '../../lib/api';
@@ -254,7 +255,7 @@ function ClubCard({ club, view, idx = 0, tournaments = [] }: { club: Club; view:
             )}
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: 'rgba(0,0,0,0.45)' }}>
-            <MapPin size={10} color="#C7A66A" />{club.city}
+            <MapPin size={10} color={PIN_GREEN} />{club.city}
             {club.distance !== undefined && <span style={{ color: '#A07840' }}>· {toFa(club.distance.toFixed(1))} km</span>}
           </div>
           <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap', alignItems: 'center', marginTop: 'auto' }}>
@@ -339,7 +340,7 @@ function ClubCard({ club, view, idx = 0, tournaments = [] }: { club: Club; view:
           </div>
 
           <div style={{ position: 'absolute', bottom: 10, right: 10, background: 'rgba(0,0,0,0.50)', borderRadius: 20, padding: '3px 9px', fontSize: 13, color: 'rgba(255,255,255,0.88)', display: 'flex', alignItems: 'center', gap: 3 }}>
-            <MapPin size={9} color="#C7A66A" />{club.city}
+            <MapPin size={9} color={PIN_GREEN} />{club.city}
           </div>
           {/* story ring */}
           {club.hasActiveStory && club.storyMediaUrl && (

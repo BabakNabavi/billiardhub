@@ -24,6 +24,7 @@ import {
   ScrollText, ArrowLeft,
 } from 'lucide-react'
 import ProductMedia from '../../components/market/ProductMedia'
+import { PIN_GREEN } from '@/lib/profile-cards'
 import '../../components/market/product-media.css'
 import { apiFetch } from '../../lib/http'
 import { getProvinceNames, getCities } from '../../lib/iran-geo'
@@ -245,9 +246,9 @@ function MarketRow({ l, i, saved, onSave }: { l: Listing; i: number; saved: bool
         <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
           <CardPrice p={l} cls={{ pct: 'pctn', old: 'oldp', now: 'prc', unit: 'mk-unit' }} />
         </span>
-        <span className="cty"><MapPin size={10} style={{ color: GOLD }} /> {l.city || 'ایران'}</span>
+        <span className="cty"><MapPin size={10} style={{ color: PIN_GREEN }} /> {l.city || 'ایران'}</span>
       </div>
-      {/* ⚠️ ردیفِ موбایل عکسِ مربعِ ۱۰۸ دارد، نه قابِ نسبت‌دار؛ پس
+      {/* ⚠️ ردیفِ موبایل عکسِ مربعِ ۱۱۹ دارد، نه قابِ نسبت‌دار؛ پس
           `ProductMedia` این‌جا با کلاسِ bh-pm--sq نسبت را وامی‌گذارد ولی
           همان نشان‌ها و همان اندازه‌ها را می‌آورد. */}
       <ProductMedia
@@ -802,14 +803,19 @@ export default function MarketNewPage() {
         .mk-row .cty { font-size: 10.5px; color: ${MUT}; display: flex; align-items: center; gap: 4px; margin-top: auto; }
         /* ⚠️ ردیفِ موبایل مربع است، نه نسبتِ کارت — نسبت را
            می‌شکند ولی نشان‌ها همان اندازه و همان جنس می‌مانند. */
-        .mk-row .bh-pm--sq { width: 108px; height: 108px; aspect-ratio: auto; border-radius: 11px;
-          border: 1px solid rgba(28,28,26,0.08); border-bottom-width: 1px; }
-        /* قابِ ۱۰۸ حالا جا دارد چون پرچم رفته: هم‌رسانی چپ‌بالا،
+        /* ⚠️ ۱۱۹ = ۱۰۸ + ۱۰٪. و align-self وسط، وگرنه عکس بالای
+           ردیفِ ۱۵۵ پیکسلی می‌چسبد و ۳۵ پیکسل زیرش خالی می‌ماند —
+           همان چیزی که «وسط نیست» دیده می‌شد. */
+        .mk-row .bh-pm--sq { width: 119px; height: 119px; aspect-ratio: auto; border-radius: 12px;
+          align-self: center; border: 1px solid rgba(28,28,26,0.08); border-bottom-width: 1px; }
+        /* قابِ ۱۱۹ جا دارد چون پرچم رفته: هم‌رسانی چپ‌بالا،
            نشان راست‌بالا، شمارِ عکس راست‌پایین. */
         .mk-row .bh-pm--sq .bh-pm-bk { top: 6px; right: 6px; }
         .mk-row .bh-pm--sq .bh-pm-cnt { bottom: 6px; right: 6px; height: 22px; padding-inline: 6px; font-size: 10.5px; }
         .mk-row .bh-pm--sq .bh-pm-col { top: 6px; left: 6px; gap: 5px; }
-        .mk-row .bh-pm--sq .bh-pm-chip { width: 25px; height: 25px; border-radius: 8px; }
+        /* ⚠️ ۲۶ = ۵٪ کمتر از پایه‌ی ۲۷. پایین‌تر نرو: کفِ لمسِ
+           WCAG 2.5.8 برابر ۲۴×۲۴ است. */
+        .mk-row .bh-pm--sq .bh-pm-chip { width: 26px; height: 26px; border-radius: 8px; }
         .mk-row .pctn { background: #b400ae; color: #fff; font-size: 10px; font-weight: 800;
           border-radius: 999px; padding: 2px 7px 1px; line-height: 1.4; flex-shrink: 0; }
         .mk-row .oldp { font-size: 10.5px; color: ${MUT}; text-decoration: line-through;
