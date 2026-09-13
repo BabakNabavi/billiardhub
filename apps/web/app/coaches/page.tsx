@@ -16,6 +16,12 @@ const TEXT    = '#111110'
 const TEXT_S  = 'rgba(17,17,16,0.52)'
 const TEXT_M  = 'rgba(17,17,16,0.28)'
 
+/* ── چرا بدونِ واژه‌ی نقش و با خطِ عمودی ──
+   کارت قبلا «اسنوکر · پاکت بیلیارد · هی‌بال» با واژه‌ی نقش جلویش
+   بود: آن واژه روی صفحه‌ی مربیان تکراری است و نقطه‌ها بینِ
+   عبارت‌های دوکلمه‌ای گم می‌شدند. */
+import { SPEC_SEP, PIN_BLUE } from '@/lib/profile-cards'
+
 const SPECS: Record<string, { label: string; color: string; glow: string }> = {
   snooker:  { label: 'اسنوکر',       color: '#7C3AED', glow: 'rgba(124,58,237,0.30)' },
   pocket:   { label: 'پاکت بیلیارد', color: GOLD_D,    glow: 'rgba(154,110,56,0.30)' },
@@ -202,6 +208,9 @@ function CoachAvatar({ coach, size }: { coach: Coach; size: string }) {
 /* ── Coach card — grid + list ── */
 function CoachCard({ coach, view, idx }: { coach: Coach; view: 'grid' | 'list'; idx: number }) {
   const sp = SPECS[coach.specialty]
+  const specText = coach.disciplines?.length
+    ? coach.disciplines.map(d => SPECS[d]?.label ?? d).join(SPEC_SEP)
+    : (sp?.label ?? 'بیلیارد')
 
   if (view === 'list') {
     return (
@@ -219,9 +228,9 @@ function CoachCard({ coach, view, idx }: { coach: Coach; view: 'grid' | 'list'; 
             <h3 style={{ fontSize:15, fontWeight:800, color:TEXT, lineHeight:1.2, letterSpacing:'-0.02em', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{coach.name}</h3>
             {coach.verified && <VerifiedBadge title="مربی تأیید شده" style={{ marginInlineStart: 0 }} />}
           </div>
-          <p style={{ fontSize:12, color:TEXT_S, marginBottom:5 }}>مربی {coach.disciplines && coach.disciplines.length ? coach.disciplines.map(d => SPECS[d]?.label ?? d).join(' · ') : (sp?.label ?? 'بیلیارد')}</p>
+          <p style={{ fontSize:12, color:TEXT_S, marginBottom:5 }}>{specText}</p>
           <div style={{ display:'flex', alignItems:'center', gap:5, color:TEXT_M }}>
-            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke={PIN_BLUE} strokeWidth="2" aria-hidden><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
             <span style={{ fontSize:11.5, color:TEXT_S }}>{coach.city}</span>
           </div>
         </div>
@@ -260,9 +269,9 @@ function CoachCard({ coach, view, idx }: { coach: Coach; view: 'grid' | 'list'; 
           <h3 style={{ fontSize:16, fontWeight:800, color:TEXT, lineHeight:1.2, letterSpacing:'-0.02em' }}>{coach.name}</h3>
           {coach.verified && <VerifiedBadge title="مربی تأیید شده" style={{ marginInlineStart: 0 }} />}
         </div>
-        <p style={{ fontSize:12.5, color:TEXT_S, lineHeight:1.35, marginBottom:9, minHeight:'2.7em', display:'-webkit-box', WebkitLineClamp:2, WebkitBoxOrient:'vertical', overflow:'hidden' }}>مربی {coach.disciplines && coach.disciplines.length ? coach.disciplines.map(d => SPECS[d]?.label ?? d).join(' · ') : (sp?.label ?? 'بیلیارد')}</p>
+        <p style={{ fontSize:12.5, color:TEXT_S, lineHeight:1.35, marginBottom:9, minHeight:'2.7em', display:'-webkit-box', WebkitLineClamp:2, WebkitBoxOrient:'vertical', overflow:'hidden' }}>{specText}</p>
         <div style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:5, marginBottom:13, color:TEXT_M }}>
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={PIN_BLUE} strokeWidth="2" aria-hidden><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
           <span style={{ fontSize:11.5, color:TEXT_S }}>{coach.city}</span>
         </div>
         <div style={{ flex:1 }}/>
