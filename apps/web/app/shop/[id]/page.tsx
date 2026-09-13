@@ -117,6 +117,7 @@ function normalizeUserProduct(up: Record<string, unknown>): Detail {
     /* `img` تصویر اصلی می‌ماند (آگهی قدیمی محلی فقط همین را دارد)؛
        گالری از این فهرست ساخته می‌شود. */
     images:         imgs && imgs.length > 0 ? imgs : undefined,
+    imgCount:       imgs?.length ?? 0,
     name:           str(up.name) || str(up.title, 'محصول'),
     desc:           str(up.description),
     brand:          str(up.brand),

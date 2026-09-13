@@ -39,6 +39,7 @@ async function freeProducts(limit: number): Promise<EntitySnapshot[]> {
       entityType: 'product' as const, ref: s(r.id),
       title: s(r.title, 'محصول'),
       image: imgs[0] || '/images/shop/cue_billiard_2.webp',
+      imgCount: imgs.length,
       /* ── برند **و مدل** ──
          کارت سکشن «بیلیارد بازار» از همین اسنپ‌شات ساخته می‌شود و تا
          امروز فقط برند را حمل می‌کرد؛ «Hunter III» هیچ‌جای صفحه‌ی اصلی

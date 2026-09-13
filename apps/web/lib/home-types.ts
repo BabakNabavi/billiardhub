@@ -41,6 +41,8 @@ export interface RealProduct {
      عنوان را تکه‌به‌تکه حذف کند */
   model?: string
   img: string
+  /** تعدادِ کلِ عکس‌های آگهی — نشانِ گوشه‌ی عکس از همین می‌آید */
+  imgCount?: number
   brand: string
   price: number
   sale: number

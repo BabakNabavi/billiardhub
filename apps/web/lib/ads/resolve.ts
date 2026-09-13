@@ -17,6 +17,8 @@ export interface EntitySnapshot {
   ref: string
   title: string
   image: string
+  /** تعدادِ کلِ عکس‌های آگهی — نشانِ گوشه‌ی کارت از همین می‌آید */
+  imgCount?: number
   subtitle: string          // برند / شهر / تخصص — بسته به نوع
   /** مدل محصول — جدا از برند، برای حذف تکرار با عنوان */
   model?: string
@@ -68,6 +70,7 @@ async function resolveProducts(rawRefs: string[]): Promise<Map<string, EntitySna
       entityType: 'product', ref: s(r.id),
       title: s(r.title, 'محصول'),
       image: imgs[0] || '/images/shop/cue_billiard_2.webp',
+      imgCount: imgs.length,
       /* ── برند **و مدل** ──
          کارت سکشن «بیلیارد بازار» از همین اسنپ‌شات ساخته می‌شود و تا
          امروز فقط برند را حمل می‌کرد؛ «Hunter III» هیچ‌جای صفحه‌ی اصلی
