@@ -16,10 +16,13 @@
 import { useChannelPublish, type PublishVideo } from '@/components/media/useChannelPublish'
 import { useVideoEdit } from '@/components/media/useVideoEdit'
 import { detailTitle, type VideoDetail } from '@/lib/media/video-details'
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import ProfileHero from '../../../components/profile/ProfileHero'
 import ProfileGallery from '../../../components/profile/ProfileGallery'
-import GradeTimeline from '../../../components/profile/GradeTimeline'
+import RefereeLadder from '../../../components/referee/RefereeLadder'
+import ProfileContactLinks from '../../../components/profile/ProfileContactLinks'
+import { useProfileSections } from '@/hooks/use-profile-sections'
+import { toFaDigits } from '@/lib/jalali'
 import '../../../components/profile/profile-page.css'
 import { fetchProfileResult } from '../../../lib/profiles/client'
 import { useOwnerEdit } from '../../../lib/profiles/use-owner-edit'
@@ -35,12 +38,15 @@ import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import { useProfileImageViewer } from '@/components/ProfileImageViewer'
 import { useProfileVideoViewer } from '@/components/profile/ProfileVideoViewer'
-import { normalizeDigits } from '@/lib/text-fa'
-import { Phone, Send, Copy, Check } from 'lucide-react'
+import { normalizeDigits, keepLatinProps } from '@/lib/text-fa'
+
 import {
   getRefereeProfile, badgeFromGrades, disciplineLabel, GRADES,
   type RefereeProfile,
 } from '../../../lib/referee-store'
+
+/* ترتیبِ نوارِ تب. بیرونِ کامپوننت چون مرجعش باید بین رندرها یکی بماند. */
+const SECTION_IDS = ['credentials', 'about', 'media', 'contact'] as const
 
 /* همان سقفی که پنل اعمال می‌کند */
 const MAX_VIDEO_MB = 25
@@ -100,9 +106,6 @@ export default function RefereeProfilePage() {
   /* انتشار در بیلیارد مدیا — پنجره فقط وقتی باز می‌شود که کانال
      همین نقش نباشد. آپلود گالری هرگز به نتیجه‌اش وابسته نیست. */
   const [reloadKey, setReloadKey] = useState(0)
-  const [copyState, setCopyState] = useState<'idle' | 'ok' | 'manual'>('idle')
-  const flashT = useRef<ReturnType<typeof setTimeout> | null>(null)
-  useEffect(() => () => { if (flashT.current) clearTimeout(flashT.current) }, [])
 
   /* ── چرا سرور هم خوانده می‌شود ──
      این صفحه فقط `localStorage` را می‌دید، یعنی پروفایل تنها در
@@ -161,6 +164,10 @@ export default function RefereeProfilePage() {
      عنوان دو نسخه دارد: ردیف گالری پروفایل و ردیف بیلیارد مدیا.
      هوک دومی را می‌زند، این تابع اولی را. کلید نشانی فایل است،
      چون گالری شناسه‌ی ردیف مدیا را ندارد. */
+  /* ⚠️ بالای هر early return — این فایل قبلا دقیقا با یک هوکِ
+     زیرِ گارد، خطای React #310 روی سایتِ زنده داد. */
+  useProfileSections(SECTION_IDS, [checked, reloadKey])
+
   const { dialog: videoEditDialog, edit: editVideo } = useVideoEdit(
     async (target, detail) => {
       /* ⚠️ `map` بدون تطبیق هم «موفق» برمی‌گردد. اگر نشانی جور نشود
@@ -181,15 +188,17 @@ export default function RefereeProfilePage() {
 
   if (!checked) {
     return (
-      <div className="ch-page ch-skel" role="status" aria-busy="true" aria-label="در حال بارگذاری پروفایل داور">
+      /* ⚠️ اسکلت باید *چیدمانِ تازه* را بگوید: هیرو ← نوارِ تب ←
+         یک ستون. نسخه‌ی قبلی هنوز دو ستونیِ قدیمی بود و لحظه‌ی
+         رسیدنِ داده همان پرشی را می‌داد که اسکلت برای نبودنش هست.
+         ⚠️ کلاسِ `ch-ch` اجباری است: `.ch-skel-tabs` فقط زیرِ آن
+         استایل دارد. */
+      <div className="ch-page ch-ch ch-skel" role="status" aria-busy="true" aria-label="در حال بارگذاری پروفایل داور">
         <div className="ch-skel-hero" />
-        <div className="ch-body"><div className="ch-wrap ch-cols">
-          <div className="ch-col">
-            <div className="ch-skel-line ch-skel-sm" />
-            <div className="ch-skel-line" /><div className="ch-skel-line" />
-            <div className="ch-skel-line ch-skel-md" />
-          </div>
-          <div className="ch-col ch-rail"><div className="ch-skel-card" /></div>
+        <div className="ch-skel-tabs" />
+        <div className="ch-body"><div className="ch-wrap">
+          <div className="ch-skel-line ch-skel-sm" />
+          <div className="ch-skel-card" />
         </div></div>
       </div>
     )
@@ -226,11 +235,17 @@ export default function RefereeProfilePage() {
      چیپ هیرو از `badgeFromGrades` می‌آید که رتبه‌ای است، و اگر
      خط زمان با سال مرتب شود نشان «بالاترین درجه» به ردیف اشتباه
      می‌چسبد. */
-  const timeline = localP
-    ? [...localP.grades]
-        .sort((a, b) => GRADES.findIndex(x => x.key === b.key) - GRADES.findIndex(x => x.key === a.key))
-        .map(g => ({ label: g.label, year: g.year }))
-    : []
+  /* ⚠️ نردبان به *کلید* نیاز دارد نه برچسب: برچسب متنِ نمایشی است و
+     ممکن است عوض شود، ولی کلید همان چیزی است که `GRADES` می‌شناسد. */
+  /* ⚠️ کلیدی که `GRADES` نمی‌شناسد باید *همین‌جا* بیفتد، نه در
+     نردبان: نردبان بی‌صدا ردش می‌کرد ولی آمارِ هیرو می‌شمردش، و
+     پروفایلی با کلیدِ ناشناخته «۲ درجه‌ی ثبت‌شده» را کنارِ
+     «هنوز درجه‌ای ثبت نشده» نشان می‌داد. */
+  const earned = new Map(
+    (localP?.grades ?? [])
+      .filter(g => GRADES.some(x => x.key === g.key))
+      .map(g => [g.key, g.year] as const),
+  )
 
   /* «از سال» = کوچک‌ترین سال واقعی. ارقام فارسی و عربی نرمال
      می‌شوند وگرنه `Number('۱۳۹۸')` برابر NaN است. */
@@ -243,34 +258,6 @@ export default function RefereeProfilePage() {
 
   const paragraphs = (referee.fullBio || referee.bio || '').split(/\n{2,}/).map(s => s.trim()).filter(Boolean)
   const publicUrl = `www.billiardhub.net/referees/${referee.id}`
-
-  /* `navigator.clipboard` روی http و سافاری قدیمی نیست؛ در آن حالت
-     نشانی انتخاب می‌شود تا کاربر دستی بردارد. */
-  const selectUrl = () => {
-    const el = document.getElementById('ch-url-code')
-    if (!el || typeof window.getSelection !== 'function') return
-    const r = document.createRange()
-    r.selectNodeContents(el)
-    const sel = window.getSelection()
-    sel?.removeAllRanges()
-    sel?.addRange(r)
-  }
-
-  const flash = (s: 'ok' | 'manual') => {
-    setCopyState(s)
-    if (flashT.current) clearTimeout(flashT.current)
-    flashT.current = setTimeout(() => setCopyState('idle'), 2200)
-  }
-
-  const copyUrl = async () => {
-    if (!navigator.clipboard?.writeText) { selectUrl(); flash('manual'); return }
-    try {
-      await navigator.clipboard.writeText(`https://${publicUrl}`)
-      flash('ok')
-    } catch {
-      selectUrl(); flash('manual')
-    }
-  }
 
   const latin = localP ? `${localP.firstNameEn} ${localP.lastNameEn}`.trim().toUpperCase() : ''
 
@@ -360,12 +347,14 @@ export default function RefereeProfilePage() {
   }
 
   return (
-    <div className="ch-page">
+    <div className="ch-page ch-ch ch-rf">
+      {/* ⚠️ آمار فقط چیزی را می‌شمارد که واقعا در پروفایل هست. برای
+          داور هیچ «تعداد مسابقه» یا «فینال» در این پروژه ثبت
+          نمی‌شود، پس ساخته هم نمی‌شود. */}
       <ProfileHero
         name={referee.name}
         nameLatin={latin || undefined}
         city={referee.city}
-        sinceYear={sinceYear || undefined}
         photo={referee.photo}
         cover={referee.coverImage}
         verified={referee.verified}
@@ -374,32 +363,84 @@ export default function RefereeProfilePage() {
         onOpenPhoto={u => openImage(u, { title: referee.name, alt: `عکس ${referee.name}` })}
         role="referee" backHref="/referees" backLabel="داوران"
         publicUrl={publicUrl}
+        posterBase="referee"
+        stats={
+          <ul className="ch-stats">
+            {grade && <li><b dir="auto" {...keepLatinProps(grade.label, 'ch-stats-t ch-iso')}>{grade.label}</b><span>بالاترین درجه</span></li>}
+            {earned.size > 0 && (
+              <li><b>{toFaDigits(String(earned.size))}</b><span>درجه‌ی ثبت‌شده</span></li>
+            )}
+            {sinceYear && <li><b>{toFaDigits(sinceYear)}</b><span>شروع داوری</span></li>}
+            {disciplines.length > 0 && (
+              <li><b>{toFaDigits(String(disciplines.length))}</b><span>رشته</span></li>
+            )}
+            {referee.videos.length > 0 && (
+              <li><b>{toFaDigits(String(referee.videos.length))}</b><span>ویدیو</span></li>
+            )}
+          </ul>
+        }
       />
 
-      <div className="ch-body">
-        <div className="ch-wrap ch-cols">
+      <nav className="ch-tabsbar" aria-label="بخش‌های صفحه">
+        <div className="ch-wrap ch-tabsbar-in">
+          <a href="#credentials">اعتبارنامه</a>
+          <a href="#about">معرفی</a>
+          <a href="#media">رسانه</a>
+          <a href="#contact">هماهنگی</a>
+        </div>
+      </nav>
 
-          <main className="ch-col">
-            <section aria-labelledby="ch-about-h">
+      <div className="ch-body">
+        <div className="ch-wrap">
+
+          {/* ── نردبانِ اعتبارنامه — محورِ صفحه ── */}
+          <section id="credentials" tabIndex={-1} className="ch-sec ch-rv" aria-labelledby="rf-cred-h">
+            <div className="ch-sec-head">
+              <h2 id="rf-cred-h">اعتبارنامه‌ی داوری</h2>
+              <span className="en">CREDENTIALS</span>
+              <span className="rule" aria-hidden />
+            </div>
+            <div className="ch-card rf-cred">
+              <RefereeLadder earned={earned} verified={referee.verified} />
+            </div>
+          </section>
+
+          <div className="ch-two">
+            <section id="about" tabIndex={-1} className="ch-sec ch-rv" aria-labelledby="ch-about-h">
               <div className="ch-sec-head">
                 <h2 id="ch-about-h">معرفی</h2>
                 <span className="en">ABOUT</span>
                 <span className="rule" aria-hidden />
               </div>
               {paragraphs.length === 0
-                ? <p className="ch-empty">این داور هنوز معرفی‌ای ننوشته است.</p>
+                ? <p className="ch-empty">این داور هنوز معرفی‌ای ننوشته است</p>
                 : paragraphs.map((t, i) => <p key={i} className="ch-prose">{t}</p>)}
             </section>
 
-            <section aria-labelledby="ch-path-h">
+            {/* ── هماهنگی، نه رزرو ──
+                ⚠️ داور خدمتی نمی‌فروشد؛ این کارت راهِ تماسِ باشگاه و
+                برگزارکننده برای *دعوت به داوری* است. با عنوانِ
+                «رزرو» یا «درخواست خدمت» نقشِ او را اشتباه نشان
+                می‌داد. */}
+            <section id="contact" tabIndex={-1} className="ch-sec ch-rv" aria-labelledby="rf-contact-h">
               <div className="ch-sec-head">
-                <h2 id="ch-path-h">مسیر داوری</h2>
-                <span className="en">CAREER</span>
+                <h2 id="rf-contact-h">هماهنگی داوری</h2>
+                <span className="en">CONTACT</span>
                 <span className="rule" aria-hidden />
               </div>
-              <GradeTimeline items={timeline} />
+              <div className="ch-card rf-contact">
+                <p className="rf-contact-note">
+                  برای دعوت به داوریِ مسابقه یا هماهنگیِ حضور، از این راه‌ها تماس بگیرید
+                </p>
+                <ProfileContactLinks
+                  phone={referee.phone} whatsapp={referee.whatsapp}
+                  instagram={referee.instagram} telegram={referee.telegram}
+                  empty={<p className="ch-empty">راه ارتباطی ثبت نشده است</p>} />
+              </div>
             </section>
+          </div>
 
+          <section id="media" tabIndex={-1} className="ch-sec ch-rv">
             <ProfileGallery
               images={referee.gallery}
               videos={referee.videos}
@@ -413,65 +454,7 @@ export default function RefereeProfilePage() {
               onAddImages={addImages} onAddVideos={addVideoFiles} beforeAddVideos={() => askChannel(String(referee?.name ?? ''))} onNewAlbum={newAlbum}
             />
             {edit.error && <p className="ch-empty" role="alert">{edit.error}</p>}
-          </main>
-
-          <aside className="ch-col ch-rail" aria-label="اطلاعات داور">
-            {(referee.phone || referee.whatsapp || referee.instagram || referee.telegram) && (
-              <section className="ch-card" aria-labelledby="ch-contact-h">
-                <div className="ch-sec-head">
-                  <h2 id="ch-contact-h">راه‌های ارتباطی</h2>
-                  <span className="rule" aria-hidden />
-                </div>
-                <div className="ch-links">
-                  {referee.phone && (
-                    <a href={`tel:${referee.phone}`} className="ch-link" aria-label="تماس تلفنی">
-                      <Phone size={17} aria-hidden />
-                    </a>
-                  )}
-                  {referee.whatsapp && (
-                    <a href={`https://wa.me/${referee.whatsapp}`} target="_blank" rel="noopener noreferrer"
-                      className="ch-link" aria-label="واتساپ">
-                      <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-                        <path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.77.46 3.45 1.28 4.9L2 22l5.32-1.39a9.9 9.9 0 004.72 1.2h.01c5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.13-2.9-7A9.82 9.82 0 0012.04 2z" />
-                      </svg>
-                    </a>
-                  )}
-                  {referee.instagram && (
-                    <a href={`https://instagram.com/${referee.instagram}`} target="_blank" rel="noopener noreferrer"
-                      className="ch-link" aria-label="اینستاگرام">
-                      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" aria-hidden><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor"/></svg>
-                    </a>
-                  )}
-                  {referee.telegram && (
-                    <a href={`https://t.me/${referee.telegram}`} target="_blank" rel="noopener noreferrer"
-                      className="ch-link" aria-label="تلگرام">
-                      <Send size={17} aria-hidden />
-                    </a>
-                  )}
-                </div>
-              </section>
-            )}
-
-            <section className="ch-card" aria-labelledby="ch-url-h">
-              <div className="ch-sec-head">
-                <h2 id="ch-url-h">آدرس اختصاصی</h2>
-                <span className="en">MY LINK</span>
-                <span className="rule" aria-hidden />
-              </div>
-              <div className="ch-url">
-                <code id="ch-url-code" dir="ltr">{publicUrl}</code>
-                <button type="button" onClick={copyUrl} className="ch-url-copy"
-                  aria-label={copyState === 'ok' ? 'نشانی کپی شد' : 'کپی نشانی عمومی'}>
-                  {copyState === 'ok' ? <Check size={15} aria-hidden /> : <Copy size={15} aria-hidden />}
-                  {copyState === 'ok' ? 'کپی شد' : copyState === 'manual' ? 'دستی کپی کنید' : 'کپی'}
-                </button>
-              </div>
-              <p aria-live="polite" className="ch-sr-live">
-                {copyState === 'ok' ? 'نشانی در کلیپ‌بورد کپی شد.'
-                  : copyState === 'manual' ? 'مرورگر اجازه‌ی کپی نداد؛ نشانی انتخاب شد — با Ctrl+C بردارید.' : ''}
-              </p>
-            </section>
-          </aside>
+          </section>
 
         </div>
       </div>

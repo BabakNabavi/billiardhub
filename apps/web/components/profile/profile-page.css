@@ -590,6 +590,10 @@ main.ch-col > section { max-width: 760px; }
   transition: color .18s, border-color .18s;
 }
 .ch-ch .ch-tabsbar a:hover { color: var(--ink, #111); }
+.ch-ch .ch-tabsbar a[data-on] {
+  color: var(--ink, #111);
+  border-block-end-color: var(--gold, #C7A66A);
+}
 .ch-ch .ch-tabsbar a:focus-visible {
   outline: 2px solid var(--gold, #C7A66A); outline-offset: -4px; border-radius: 8px;
 }
@@ -598,11 +602,13 @@ main.ch-col > section { max-width: 760px; }
 /* ⚠️ `[id]` ممنوع: داخلِ همین صفحه `#sess-when`، `#sess-note` و
    تب‌های گالری هم id دارند، و فوکوسِ آن ورودی‌ها روی موبایل با
    ۱۲۶ پیکسل حاشیه‌ی اضافه اسکرول می‌شد. */
-.ch-ch #media, .ch-ch #about, .ch-ch #career, .ch-ch #reviews, .ch-ch #ch-sess-h {
+.ch-ch #media, .ch-ch #about, .ch-ch #career, .ch-ch #reviews,
+.ch-ch #credentials, .ch-ch #contact, .ch-ch #ch-sess-h {
   scroll-margin-block-start: calc(126px + env(safe-area-inset-top, 0px));
 }
 .ch-ch #media:focus-visible, .ch-ch #about:focus-visible,
-.ch-ch #career:focus-visible, .ch-ch #reviews:focus-visible {
+.ch-ch #career:focus-visible, .ch-ch #reviews:focus-visible,
+.ch-ch #credentials:focus-visible, .ch-ch #contact:focus-visible {
   outline: 2px solid var(--gold, #C7A66A); outline-offset: 6px; border-radius: 12px;
 }
 
@@ -923,3 +929,125 @@ main.ch-col > section { max-width: 760px; }
 .sess-slot:disabled { background: #F3F1EB; color: #6F6A5C; cursor: not-allowed; }
 .sess-slot:focus-visible { outline: 2px solid #8F6531; outline-offset: 2px; }
 @media (prefers-reduced-motion: reduce) { .sess-slot { transition: none; } }
+
+
+/* ═══════════════════════════════════════════════════════════
+   صفحه‌ی داور — پرونده‌ی اعتبارنامه
+
+   ⚠️ همه‌چیز زیرِ `.ch-rf` قفل است. صفحه‌ی مربی همین شیت را
+   استفاده می‌کند و چیدمانِ کانالی (`.ch-ch`) بینشان مشترک است؛
+   فقط آنچه مالِ داور است این‌جاست.
+
+   ── چرا نردبان ──
+   خطِ زمانِ مربی فقط گرفته‌ها را نشان می‌دهد. برای داور خودِ
+   ساختارِ هشت‌پله‌ی فدراسیون معنا دارد — بیننده باید ببیند این آدم
+   کجای آن ایستاده. پس همه‌ی پله‌ها رندر می‌شوند: گرفته‌ها پررنگ با
+   سال، بقیه کم‌رنگ به‌عنوان مسیرِ پیشِ رو.
+   ═══════════════════════════════════════════════════════════ */
+
+.ch-rf .rf-cred { padding: clamp(14px, 2vw, 22px); }
+
+.ch-rf .rf-ladder { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+
+.ch-rf .rf-step {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center; gap: 14px;
+  padding: 12px 14px;
+  border-radius: 16px;
+  /* پله‌ی نگرفته کم‌رنگ است ولی *خوانا* می‌ماند: قرار است مسیر را
+     نشان دهد، نه پنهانش کند. */
+  color: var(--text-tertiary, #6E6E6E);
+  transition: background .2s, color .2s;
+}
+/* خطِ عمودیِ نردبان — از نشانه‌ی هر پله به بعدی */
+.ch-rf .rf-step::before {
+  content: ''; position: absolute;
+  inset-block-start: calc(12px + 12px); inset-block-end: -2px;
+  /* ⚠️ در RTL `inline-end` یعنی *چپ*، ولی نشانه‌ی پله سمتِ شروع
+     (راست) است؛ با `inline-end` خط زیرِ ستونِ سال می‌افتاد. */
+  inset-inline-end: auto; inset-inline-start: 25px;
+  inline-size: 2px; background: var(--border-soft, rgba(17,17,17,.10));
+}
+.ch-rf .rf-step:last-child::before { display: none; }
+
+.ch-rf .rf-step[data-has] {
+  color: var(--text-primary, #111);
+  background: color-mix(in srgb, var(--c) 7%, transparent);
+}
+.ch-rf .rf-step[data-has]::before { background: color-mix(in srgb, var(--c) 34%, transparent); }
+
+/* نشانه‌ی پله */
+.ch-rf .rf-step-mark {
+  /* ⚠️ ردیف `align-items: center` است، پس مرکزِ نشانه `rowHeight/2`
+     می‌شود و مبدأ ثابتِ خط فقط تا وقتی می‌خواند که ردیف کوتاه بماند.
+     با `align-self: start` مرکزِ نشانه در هر بلندی‌ای همان
+     `padding + نیمِ نشانه` است — اگر خطِ متا روی موبایل بشکند هم
+     خط از دلِ دایره شروع می‌شود، نه از بالای آن. */
+  align-self: start;
+  position: relative; z-index: 1;
+  display: grid; place-items: center;
+  inline-size: 24px; block-size: 24px; border-radius: 50%;
+  background: var(--bg-surface, #fff);
+  border: 2px solid var(--border-soft, rgba(17,17,17,.14));
+  color: var(--text-tertiary, #6E6E6E);
+}
+.ch-rf .rf-step[data-has] .rf-step-mark {
+  background: var(--c); border-color: var(--c); color: #fff;
+}
+.ch-rf .rf-step-dot {
+  inline-size: 6px; block-size: 6px; border-radius: 50%;
+  background: currentColor; opacity: .5;
+}
+
+.ch-rf .rf-step-body { display: grid; gap: 6px; min-inline-size: 0; }
+/* ⚠️ `wrap` لازم است: روی ۳۹۰ پیکسل، برچسبِ لاتینِ بلند + سال +
+   نشان در یک خط جا نمی‌شوند و بدونِ آن ردیف افقی سرریز می‌کرد. */
+.ch-rf .rf-step-meta {
+  display: flex; align-items: center; flex-wrap: wrap; gap: 8px 10px;
+}
+.ch-rf .rf-step-label { font-size: 14px; font-weight: 700; justify-self: start; }
+.ch-rf .rf-step[data-has] .rf-step-label { font-weight: 800; }
+
+/* نقطه‌های سطح — همان زبانی که چیپِ درجه در هیرو دارد */
+.ch-rf .rf-step-dots { display: inline-flex; gap: 3px; }
+.ch-rf .rf-step-dots i {
+  inline-size: 5px; block-size: 5px; border-radius: 50%;
+  background: currentColor; opacity: .22;
+}
+.ch-rf .rf-step-dots i[data-on] { opacity: 1; color: var(--c); background: var(--c); }
+
+/* ⚠️ رنگِ خامِ درجه روی تینتِ روشنِ همان درجه ۳٫۰۴:۱ می‌داد
+   (سبزِ `#16A34A` روی `#EFF8F2`) — زیرِ کفِ ۴٫۵. همان آمیزه‌ی
+   تیره‌کننده‌ی کاشی‌های خدمات، این‌جا هم. */
+.ch-rf .rf-step-year {
+  font-size: 13px; font-weight: 800;
+  color: color-mix(in srgb, var(--c) 62%, #16150F);
+  font-variant-numeric: tabular-nums;
+}
+/* ⚠️ «پیشِ رو» باید *کم‌رنگ‌تر از متن* باشد ولی از کفِ ۴٫۵ نیفتد؛
+   `--text-tertiary` روی سفید ۵٫۱:۱ می‌دهد. */
+.ch-rf .rf-step-next { font-size: 12px; color: var(--text-tertiary, #6E6E6E); }
+
+/* نشانِ «مدرک تأیید شده» روی بالاترین پله */
+.ch-rf .rf-step-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  font-size: 11.5px; font-weight: 800;
+  background: color-mix(in srgb, var(--c) 14%, transparent);
+  border: 1px solid color-mix(in srgb, var(--c) 34%, transparent);
+  color: color-mix(in srgb, var(--c) 62%, #16150F);
+}
+
+/* ── کارتِ هماهنگی ── */
+.ch-rf .rf-contact { padding: clamp(14px, 2vw, 20px); }
+.ch-rf .rf-contact-note {
+  margin: 0 0 14px; font-size: 13px; line-height: 1.9;
+  color: var(--text-secondary, #444);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ch-rf .rf-step { transition: none; }
+}
