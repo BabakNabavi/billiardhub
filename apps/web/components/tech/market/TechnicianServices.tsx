@@ -18,6 +18,18 @@
 import { Check, Phone } from 'lucide-react'
 import type { ResolvedServices } from '@/lib/tech-services'
 import { ServiceIcon } from './ServiceIcons'
+import { tintForService } from './category-tints'
+import type { CSSProperties } from 'react'
+
+/* ⚠️ رنگ از روی *خودِ خدمت* می‌آید نه از گروهِ نمایشی: کاتالوگ فقط
+   دو گروه دارد («تعمیرات چوب» و «تعمیرات میز»)، پس رنگ‌دادن به
+   گروه یعنی ده کاشیِ هم‌رنگ و بعد هشت‌تای دیگر — همان دیواری که
+   قرار بود شکسته شود. دسته‌بندیِ کشفِ `/services` هشت دسته دارد و
+   همان است که کاربر در کارت‌ها دیده. */
+const tintStyle = (serviceId: string): CSSProperties | undefined => {
+  const t = tintForService(serviceId)
+  return t ? ({ '--rgb': t.rgb } as CSSProperties) : undefined
+}
 
 export interface TechnicianServicesProps {
   data: ResolvedServices
@@ -77,8 +89,7 @@ export function TechnicianServices({ data, selected, onToggle, telHref }: Techni
           <ul className="tmp-svc">
             {cat.services.map(s => (
               <li key={s.id}>
-                <div className="tmp-svc-row">
-                  {/* کاشیِ تیره‌ی آیکون در ابتدای ردیف */}
+                <div className="tmp-svc-row" style={tintStyle(s.id)}>
                   <span className="tmp-svc-ic" aria-hidden>
                     <ServiceIcon id={s.id} />
                   </span>
