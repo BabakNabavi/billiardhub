@@ -8,6 +8,8 @@ import ProfileGallery from '../../../components/profile/ProfileGallery'
 import Reviews from '../../../components/reviews/Reviews'
 import SessionRequest from '../../../components/coach/SessionRequest'
 import GradeTimeline from '../../../components/profile/GradeTimeline'
+import ProfileContactLinks from '../../../components/profile/ProfileContactLinks'
+import { useProfileSections } from '@/hooks/use-profile-sections'
 import '../../../components/profile/profile-page.css'
 import { fetchProfileResult } from '../../../lib/profiles/client'
 import { useOwnerEdit } from '../../../lib/profiles/use-owner-edit'
@@ -25,10 +27,13 @@ import { useProfileImageViewer } from '@/components/ProfileImageViewer'
 import { useProfileVideoViewer } from '@/components/profile/ProfileVideoViewer'
 import { normalizeDigits } from '@/lib/text-fa'
 import { toFaDigits } from '@/lib/jalali'
-import { Phone, Send, CalendarPlus } from 'lucide-react'
+import { CalendarPlus } from 'lucide-react'
 import { getCoachProfile, badgeFromGrades, disciplineLabel, GRADES, type CoachProfile } from '@/lib/coach-store'
 
 /* همان سقفی که پنل اعمال می‌کند */
+/* ترتیبِ نوارِ تب. بیرونِ کامپوننت چون مرجعش باید بین رندرها یکی بماند. */
+const SECTION_IDS = ['media', 'about', 'career', 'reviews'] as const
+
 const MAX_VIDEO_MB = 25
 
 /* ─── انواع ─── */
@@ -152,48 +157,9 @@ export default function CoachProfilePage() {
      عنوان دو نسخه دارد: ردیف گالری پروفایل و ردیف بیلیارد مدیا.
      هوک دومی را می‌زند، این تابع اولی را. کلید نشانی فایل است،
      چون گالری شناسه‌ی ردیف مدیا را ندارد. */
-  /* ── آشکارسازیِ بخش‌ها هنگام اسکرول ──
-     ⚠️ `animation-timeline: view()` هنوز همه‌جا نیست، پس ناظرِ
-     تقاطع. حرکت فقط opacity/transform است.
-     ⚠️ حالتِ پایه **آشکار** است و کلاسِ پنهان‌کننده را خودِ اسکریپت
-     می‌گذارد؛ پس اگر جاوااسکریپت نرسد یا کاربر حرکتِ کم بخواهد،
-     محتوا دیده می‌شود نه اینکه برای همیشه نامرئی بماند. */
-  useEffect(() => {
-    if (typeof IntersectionObserver === 'undefined') return
-    if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return
-    const els = Array.from(document.querySelectorAll('.ch-rv'))
-    if (!els.length) return
-    /* ⚠️ چیزی که همین الان داخلِ قاب است نباید پنهان شود: روی
-       گوشیِ کند رنگ‌آمیزی شده، بعد hydration پنهانش می‌کند و نیم
-       ثانیه بعد برمی‌گردد — یک پرشِ دیدنی. */
-    const below = els.filter(el => el.getBoundingClientRect().top >= window.innerHeight * 0.9)
-    below.forEach(el => el.classList.add('ch-rv--off'))
-    const io = new IntersectionObserver(entries => {
-      for (const e of entries) {
-        if (!e.isIntersecting) continue
-        e.target.classList.remove('ch-rv--off')
-        io.unobserve(e.target)
-      }
-    }, { rootMargin: '0px 0px -8% 0px', threshold: 0.06 })
-    below.forEach(el => io.observe(el))
-
-    /* ── تبِ فعال ──
-       بدونِ این، شیارِ ۲ پیکسلیِ زیرِ تب‌ها هیچ‌وقت روشن نمی‌شد و
-       نوار نمی‌گفت کجای صفحه‌ای. */
-    const ids = ['media', 'about', 'career', 'reviews']
-    const marks = ids.map(i => document.getElementById(i)).filter(Boolean) as Element[]
-    const spy = new IntersectionObserver(entries => {
-      const hit = entries.filter(e => e.isIntersecting)
-        .sort((x, y) => y.intersectionRatio - x.intersectionRatio)[0]
-      if (!hit) return
-      for (const l of document.querySelectorAll('.ch-tabsbar a')) {
-        l.toggleAttribute('data-on', l.getAttribute('href') === '#' + hit.target.id)
-      }
-    }, { rootMargin: '-30% 0px -55% 0px', threshold: [0, 0.2, 0.6] })
-    marks.forEach(el => spy.observe(el))
-
-    return () => { io.disconnect(); spy.disconnect() }
-  }, [checked, reloadKey])
+  /* ⚠️ بالای هر early return — این فایل قبلا دقیقا با یک هوکِ
+     زیرِ گارد، خطای React #310 روی سایتِ زنده داد. */
+  useProfileSections(SECTION_IDS, [checked, reloadKey])
 
   const { dialog: videoEditDialog, edit: editVideo } = useVideoEdit(
     async (target, detail) => {
@@ -488,35 +454,9 @@ export default function CoachProfilePage() {
                 ? <p className="ch-empty">این مربی هنوز معرفی‌ای ننوشته است</p>
                 : paragraphs.map((t, i) => <p key={i} className="ch-prose">{t}</p>)}
 
-              {(coach.phone || coach.whatsapp || coach.instagram || coach.telegram) && (
-                <div className="ch-links ch-links--row">
-                  {coach.phone && (
-                    <a href={`tel:${coach.phone}`} className="ch-link" aria-label="تماس تلفنی">
-                      <Phone size={17} aria-hidden />
-                    </a>
-                  )}
-                  {coach.whatsapp && (
-                    <a href={`https://wa.me/${coach.whatsapp}`} target="_blank" rel="noopener noreferrer"
-                      className="ch-link" aria-label="واتساپ">
-                      <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-                        <path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.77.46 3.45 1.28 4.9L2 22l5.32-1.39a9.9 9.9 0 004.72 1.2h.01c5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.13-2.9-7A9.82 9.82 0 0012.04 2z" />
-                      </svg>
-                    </a>
-                  )}
-                  {coach.instagram && (
-                    <a href={`https://instagram.com/${coach.instagram}`} target="_blank" rel="noopener noreferrer"
-                      className="ch-link" aria-label="اینستاگرام">
-                      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" aria-hidden><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor"/></svg>
-                    </a>
-                  )}
-                  {coach.telegram && (
-                    <a href={`https://t.me/${coach.telegram}`} target="_blank" rel="noopener noreferrer"
-                      className="ch-link" aria-label="تلگرام">
-                      <Send size={17} aria-hidden />
-                    </a>
-                  )}
-                </div>
-              )}
+              <ProfileContactLinks
+                phone={coach.phone} whatsapp={coach.whatsapp}
+                instagram={coach.instagram} telegram={coach.telegram} />
             </section>
 
             <section id="career" tabIndex={-1} className="ch-sec ch-rv" aria-labelledby="ch-path-h">
