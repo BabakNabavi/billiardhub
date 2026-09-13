@@ -27,8 +27,15 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ kind: strin
   if (mine) {
     const actor = actorFromRequest(req);
     if (!actor) return NextResponse.json({ message: 'ابتدا وارد شوید' }, { status: 401 });
-    const p = await getProfileByOwner(kind, actor.id);
-    return NextResponse.json({ profile: p }, { headers: { 'Cache-Control': 'no-store' } });
+    /* ⚠️ خطا باید ۵۰۰ برگردد، نه ۲۰۰ با profile خالی: کلاینت
+       ۲۰۰+null را «پروفایل ندارد» می‌فهمد و پنل روی آن رسانه‌ی
+       خالی می‌نویسد. */
+    try {
+      const p = await getProfileByOwner(kind, actor.id);
+      return NextResponse.json({ profile: p }, { headers: { 'Cache-Control': 'no-store' } });
+    } catch {
+      return NextResponse.json({ message: 'خواندن پروفایل انجام نشد' }, { status: 500 });
+    }
   }
 
   if (slug) {
