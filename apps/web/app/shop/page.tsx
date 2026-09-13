@@ -23,7 +23,8 @@ import {
   Sparkles, Store, Bookmark, Home, Plus, LayoutGrid, Zap,
   ScrollText, ArrowLeft,
 } from 'lucide-react'
-import ReportButton from '../../components/ReportButton'
+import ProductMedia from '../../components/market/ProductMedia'
+import '../../components/market/product-media.css'
 import { apiFetch } from '../../lib/http'
 import { getProvinceNames, getCities } from '../../lib/iran-geo'
 import {
@@ -79,6 +80,8 @@ interface Listing {
   /** تکه‌ی درشت عنوان — دسته‌بندی و نوع */
   name: string
   img: string
+  /** تعدادِ کلِ عکس‌های آگهی — نشانِ گوشه‌ی عکس از همین می‌آید */
+  imgCount: number
   brand: string
   /* برند و مدل تکه‌ی ریز عنوان را می‌سازند: «چوب اسنوکر O'min classic».
      پیش‌تر کارت فقط تکه‌ی اول را داشت و خریدار نمی‌دانست کدام چوب. */
@@ -127,6 +130,7 @@ function serverAdToListing(a: Record<string, any>): Listing {
     key: `db-${a.id}`, id: a.id,
     name: head,
     img: imgs[0] || '/images/shop/cue_billiard_2.webp',
+    imgCount: imgs.length,
     brand: a.brand || '',
     model: a.model || '',
     sub: tail,
@@ -203,15 +207,12 @@ function MarketCard({ l, i, saved, onSave }: { l: Listing; i: number; saved: boo
   /* گزارش تخلف و alt تصویر عنوان کامل را می‌خواهند، نه فقط تکه‌ی اول */
   const full = fullTitle(l)
   return (
-    <Link href={`/shop/${l.id}`} className="mk-card lq-pcard" style={{ animationDelay: `${Math.min(i, 12) * 40}ms`, position: 'relative' }}>
-      <button type="button" className={`mk-bk${saved ? ' on' : ''}`} aria-label="نشان کردن"
-        onClick={e => { e.preventDefault(); e.stopPropagation(); onSave() }}>
-        <Bookmark size={16} />
-      </button>
-      <ReportButton targetId={l.id} targetTitle={full} className="mk-rp" />
-      <div className="mk-img">
-        <img src={l.img} alt={full} loading="lazy"
-          onError={e => { (e.target as HTMLImageElement).style.display = 'none' }} />
+    <Link href={`/shop/${l.id}`} className="mk-card lq-pcard" style={{ animationDelay: `${Math.min(i, 12) * 40}ms` }}>
+      <ProductMedia
+        src={l.img} alt={full} href={`/shop/${l.id}`}
+        reportId={l.id} reportTitle={full} imgCount={l.imgCount}
+        saved={saved} onToggleSave={onSave}
+        imgClassName="mk-zoom">
         {/* نشان فوری بر «جدید» مقدم است: آگهی فوری ممکن است تازه
             هم باشد و دو نشان روی هم کارت را شلوغ می‌کند. */}
         {l.urgentUntil && l.urgentUntil > Date.now() ? (
@@ -219,7 +220,7 @@ function MarketCard({ l, i, saved, onSave }: { l: Listing; i: number; saved: boo
         ) : l.source === 'user' && l.createdAt && Date.now() - l.createdAt < NEW_BADGE_MS ? (
           <span className="mk-new"><Sparkles size={9} /> جدید</span>
         ) : null}
-      </div>
+      </ProductMedia>
       <div className="mk-body">
         <ProductTitle p={{ name: l.name, brand: l.sub }} className="mk-name" headClassName="mk-h" tailClassName="mk-t" />
         {/* شهر/وضعیت و قیمت از منبع واحد — همان چیزی که کارت صفحه‌ی
@@ -246,15 +247,14 @@ function MarketRow({ l, i, saved, onSave }: { l: Listing; i: number; saved: bool
         </span>
         <span className="cty"><MapPin size={10} style={{ color: GOLD }} /> {l.city || 'ایران'}</span>
       </div>
-      <button type="button" className={`mk-bk${saved ? ' on' : ''}`} aria-label="نشان کردن"
-        onClick={e => { e.preventDefault(); e.stopPropagation(); onSave() }}>
-        <Bookmark size={16} />
-      </button>
-      <ReportButton targetId={l.id} targetTitle={full} className="mk-rp" />
-      <span className="pic">
-        <img src={l.img} alt={full} loading="lazy"
-          onError={e => { (e.target as HTMLImageElement).style.display = 'none' }} />
-      </span>
+      {/* ⚠️ ردیفِ موбایل عکسِ مربعِ ۱۰۸ دارد، نه قابِ نسبت‌دار؛ پس
+          `ProductMedia` این‌جا با کلاسِ bh-pm--sq نسبت را وامی‌گذارد ولی
+          همان نشان‌ها و همان اندازه‌ها را می‌آورد. */}
+      <ProductMedia
+        src={l.img} alt={full} href={`/shop/${l.id}`}
+        reportId={l.id} reportTitle={full} imgCount={l.imgCount}
+        saved={saved} onToggleSave={onSave}
+        className="bh-pm--sq" />
     </Link>
   )
 }
@@ -642,12 +642,10 @@ export default function MarketNewPage() {
         .mk-card { display: flex; flex-direction: column; overflow: hidden;
           text-decoration: none; color: inherit;
           animation: mkUp .5s cubic-bezier(.22,1,.36,1) both; }
-        .mk-img { position: relative; aspect-ratio: 1 / 0.86; background: rgba(244,243,241,0.85); border-bottom: 1px solid rgba(28,28,26,0.08); overflow: hidden; }
-        .mk-img img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
-          transition: transform .6s cubic-bezier(.22,1,.36,1); }
-        .mk-card:hover .mk-img img { transform: scale(1.045); }
-        .mk-new { position: absolute; top: 8px; right: 8px; display: inline-flex; align-items: center; gap: 3px;
-          font-size: 9px; font-weight: 800; color: #fff; background: rgba(27,122,75,0.92); border-radius: 999px; padding: '3px 8px'; padding: 3px 8px; }
+        /* قاب و نشان‌های عکس از product-media.css می‌آیند — این‌جا فقط بزرگ‌نماییِ هاور */
+        .mk-card:hover .mk-zoom { transform: scale(1.045); }
+        .mk-new { position: absolute; bottom: 8px; left: 8px; z-index: 2; display: inline-flex; align-items: center; gap: 3px;
+          font-size: 9px; font-weight: 800; color: #fff; background: rgba(27,122,75,0.92); border-radius: 999px; padding: 3px 8px; }
         /* نوار فوری: افقی و کشیدنی، تا تعداد زیاد آن را نشکند */
         /* ── نوار فوری ──
            افقی و کشیدنی. سه چیز این‌جا حیاتی است و یک‌بار با
@@ -677,7 +675,7 @@ export default function MarketNewPage() {
         .mk-urgcell > * { width: 100%; }
         @media (max-width: 560px) { .mk-urgcell { width: 144px; } }
 
-        .mk-urg { position: absolute; top: 8px; right: 8px; display: inline-flex; align-items: center; gap: 3px;
+        .mk-urg { position: absolute; bottom: 8px; left: 8px; z-index: 2; display: inline-flex; align-items: center; gap: 3px;
           font-size: 9px; font-weight: 800; color: #fff; background: rgba(178,59,46,0.94); border-radius: 999px; padding: 3px 8px; }
         .mk-body { display: flex; flex-direction: column; gap: 6px; padding: 9px 9px 10px; flex: 1; }
         .mk-name { font-size: 12.5px; color: ${TEXT}; line-height: 1.55; min-height: 39px; }
@@ -802,22 +800,21 @@ export default function MarketNewPage() {
         .mk-row .prc { font-size: 13.5px; font-weight: 900; color: ${TEXT}; font-variant-numeric: tabular-nums; }
         .mk-row .prc i { font-style: normal; font-size: 10px; font-weight: 600; color: ${MUT}; }
         .mk-row .cty { font-size: 10.5px; color: ${MUT}; display: flex; align-items: center; gap: 4px; margin-top: auto; }
-        .mk-row .pic { width: 108px; height: 108px; border-radius: 11px; overflow: hidden; flex-shrink: 0;
-          background: rgba(244,243,241,0.85); border: 1px solid rgba(28,28,26,0.08); position: relative; }
-        .mk-row .pic img { width: 100%; height: 100%; object-fit: cover; }
+        /* ⚠️ ردیفِ موبایل مربع است، نه نسبتِ کارت — نسبت را
+           می‌شکند ولی نشان‌ها همان اندازه و همان جنس می‌مانند. */
+        .mk-row .bh-pm--sq { width: 108px; height: 108px; aspect-ratio: auto; border-radius: 11px;
+          border: 1px solid rgba(28,28,26,0.08); border-bottom-width: 1px; }
+        /* ⚠️ فقط شمارِ عکس می‌رود؛ «نشان کردن» باید بماند وگرنه
+           کاربرِ موبایل این امکان را از فهرست از دست می‌دهد. */
+        .mk-row .bh-pm--sq .bh-pm-cnt { display: none; }
+        .mk-row .bh-pm--sq .bh-pm-bk { top: 6px; right: 6px; }
+        .mk-row .bh-pm--sq .bh-pm-col { top: 6px; left: 6px; gap: 5px; }
+        .mk-row .bh-pm--sq .bh-pm-chip { width: 25px; height: 25px; border-radius: 8px; }
         .mk-row .pctn { background: #b400ae; color: #fff; font-size: 10px; font-weight: 800;
           border-radius: 999px; padding: 2px 7px 1px; line-height: 1.4; flex-shrink: 0; }
         .mk-row .oldp { font-size: 10.5px; color: ${MUT}; text-decoration: line-through;
           font-variant-numeric: tabular-nums; margin-top: -2px; }
-        .mk-bk { position: absolute; top: 10px; left: 11px; background: none; border: none; cursor: pointer;
-          color: ${MUT}; padding: 4px; display: flex; z-index: 2; }
-        .mk-bk.on { color: ${GOLD_D}; }
-        .mk-bk.on svg { fill: ${GOLD_D}; }
-        /* گزارش تخلف — زیر آیکون نشان، با همان تراز */
-        .mk-rp { position: absolute; top: 35px; left: 11px; z-index: 2;
-          color: rgba(0,0,0,0.22) !important; transition: color .2s; }
-        .mk-rp:hover { color: #B23B2E !important; }
-        .mk-row .mk-rp { top: auto; bottom: 10px; left: 11px; }
+        /* نشان‌کردن و گزارش تخلف حالا داخلِ ProductMedia اند */
 
         /* ── نوار پایین موبایل ── */
         /* left/right صریح — insetInline در CSS معتبر نیست و نوار جمع می‌شد */

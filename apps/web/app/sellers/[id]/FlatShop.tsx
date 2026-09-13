@@ -28,6 +28,8 @@ import { getMockSeller } from '../../../lib/sellers-data'
 import { MARKET_CATEGORIES } from '../../../lib/market/categories'
 import ProductTitle from '../../../components/market/ProductTitle'
 import { CardMeta, CardPrice } from '../../../components/market/CardFacts'
+import ProductMedia from '../../../components/market/ProductMedia'
+import '../../../components/market/product-media.css'
 /* بدون این، نوار روی دسکتاپ فقط با شیفت+چرخ حرکت می‌کرد و با موس
    «قفل» حس می‌شد. همان قلابی که کاروسل‌های صفحه‌ی اصلی دارند. */
 import { useHorizontalScroll } from '../../../lib/useHorizontalScroll'
@@ -65,6 +67,8 @@ interface Product {
      بازار نشان می‌دهد و این‌جا اصلا به کارت نمی‌رسیدند */
   city: string; condition: string; negotiable: boolean
   badge?: { text: string; kind: 'sale' | 'new' }; img: string
+  /** تعدادِ کلِ عکس‌های آگهی — نشانِ گوشه‌ی عکس از همین می‌آید */
+  imgCount: number
 }
 
 const DEFAULT_SLUG = '1'
@@ -112,6 +116,7 @@ function productsForSeller(rows: ShopProduct[]): Product[] {
     negotiable: sp.negotiable,
     badge: sp.disc > 0 ? { text: `${toFa(sp.disc)}٪ تخفیف`, kind: 'sale' as const } : undefined,
     img: sp.img,
+    imgCount: sp.imgCount,
   }))
 }
 
@@ -615,8 +620,11 @@ export default function FlatShop() {
         /* جنس سطح از .lq-pcard در globals.css می‌آید — همان کارتی که
            بازار و صفحه‌ی اصلی هم نشان می‌دهند. این‌جا فقط نسبت و چیدمان. */
         .prod-card-sec1 {
-          /* ۱.۷۵ = ۱.۹۴۴ منهای ۱۰٪ */
-          aspect-ratio: 1 / 1.75;
+          /* ⚠️ نسبتِ ثابتِ کارت برداشته شد. قابِ عکس حالا نسبتِ خودش
+             را دارد (فرمولِ واحدِ سایت) و بدنه هم محتوای خودش را
+             می‌خواهد؛ با ارتفاعِ ثابت مجموعشان بیشتر می‌شد و
+             overflow hidden ردیفِ قیمت را می‌برید. گرید خودش
+             کارت‌های یک ردیف را هم‌ارتفاع می‌کند. */
           /* کوچک‌شدن حالا کار خود گرید است (شش ستون در دسکتاپ)، پس
              محدودکردن عرض کارت داخل سلول لازم نیست و فقط فاصله‌ی
              بصری را زیاد می‌کرد.
@@ -633,7 +641,6 @@ export default function FlatShop() {
           display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
         }
         @media(max-width:700px) {
-          .prod-card-sec1 { aspect-ratio: 1 / 1.662; }  /* ۱.۸۴۷ منهای ۱۰٪ */
           .pc-body-sec1 { padding: 14px 7px 7px; }
           .pc-name-sec1 { font-size: 13.05px; line-height: 1.35; color: #666; }
         }
@@ -769,9 +776,6 @@ export default function FlatShop() {
 
         /* دکمه‌ی علاقه‌مندی */
         .wish-btn { transition: transform .18s cubic-bezier(0.22,1,0.36,1), color .18s, background .18s, border-color .18s; }
-        .wish-btn:hover  { transform: scale(1.08); }
-        .wish-btn:active { transform: scale(0.9); }
-        @media (prefers-reduced-motion: reduce) { .wish-btn { transition: none; } .wish-btn:hover, .wish-btn:active { transform: none; } }
       `}</style>
 
       {/* ── breadcrumb ── */}
@@ -959,23 +963,16 @@ export default function FlatShop() {
                   onClick={() => router.push(`/shop/${p.id}`)}
                   className="prod-card-sec1 lq-pcard group flex cursor-pointer flex-col overflow-hidden"
                 >
-                  <div className="relative shrink-0 basis-[60%] overflow-hidden border-b border-[rgba(28,28,26,0.08)] bg-[rgba(244,243,241,0.85)]">
-                    <img src={p.img} alt={p.name} loading="lazy" className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.05]"/>
-                    {/* قلب — خطی تا وقتی انتخاب نشده، توپر بعد از انتخاب (قبلا همیشه توپر بود و
-                        فقط رنگ عوض می‌شد). شیشه‌ی مات + فشار کوچک هنگام کلیک. */}
-                    <button
-                      aria-label={isWished ? 'حذف از علاقه‌مندی' : 'افزودن به علاقه‌مندی'}
-                      aria-pressed={isWished}
-                      onClick={e => { e.stopPropagation(); setWish(prev => toggleSet(prev, p.id)) }}
-                      className={`wish-btn absolute left-2.5 top-2.5 z-10 flex h-9 w-9 items-center justify-center rounded-full border backdrop-blur-md ${
-                        isWished
-                          ? 'border-[#B23B2E]/30 bg-white/85 text-[#B23B2E]'
-                          : 'border-white/70 bg-white/55 text-[#5B564B] hover:text-[#B23B2E]'
-                      }`}
-                    >
-                      {isWished ? Icon.heart : Icon.heartO}
-                    </button>
-                  </div>
+                  {/* ⚠️ عکس دیگر «۶۰٪ ارتفاعِ کارت» نیست؛ نسبتش همان
+                      نسبتِ بازار و صفحه‌ی اصلی است. تا امروز یک محصول
+                      در سه صفحه سه شکل داشت. */}
+                  <ProductMedia
+                    src={p.img} alt={p.name} href={`/shop/${p.id}`}
+                    reportId={p.id} reportTitle={p.name} imgCount={p.imgCount}
+                    saved={isWished}
+                    saveLabel={{ on: 'حذف از علاقه‌مندی', off: 'افزودن به علاقه‌مندی' }}
+                    onToggleSave={() => setWish(prev => toggleSet(prev, p.id))}
+                    imgClassName="group-hover:scale-[1.05]" />
 
                   <div className="pc-body-sec1 flex flex-1 flex-col gap-1.5">
                     <ProductTitle p={p} className="pc-name-sec1 text-[14.5px] leading-[1.55] text-[#1C1C1A]" headClassName="pc-h" tailClassName="pc-t" />
