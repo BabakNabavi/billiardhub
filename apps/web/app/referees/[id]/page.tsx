@@ -19,7 +19,7 @@ import { detailTitle, type VideoDetail } from '@/lib/media/video-details'
 import { useState, useEffect } from 'react'
 import ProfileHero from '../../../components/profile/ProfileHero'
 import ProfileGallery from '../../../components/profile/ProfileGallery'
-import RefereeLadder from '../../../components/referee/RefereeLadder'
+import GradeLadder from '../../../components/profile/GradeLadder'
 import ProfileContactLinks from '../../../components/profile/ProfileContactLinks'
 import { useProfileSections } from '@/hooks/use-profile-sections'
 import { toFaDigits } from '@/lib/jalali'
@@ -400,8 +400,9 @@ export default function RefereeProfilePage() {
               <span className="en">CREDENTIALS</span>
               <span className="rule" aria-hidden />
             </div>
-            <div className="ch-card rf-cred">
-              <RefereeLadder earned={earned} verified={referee.verified} />
+            <div className="ch-card ch-ladder">
+              <GradeLadder grades={GRADES} earned={earned} verified={referee.verified}
+                emptyText="هنوز درجه‌ای برای این داور ثبت نشده است" />
             </div>
           </section>
 

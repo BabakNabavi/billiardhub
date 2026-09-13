@@ -247,29 +247,6 @@ main.ch-col > section { max-width: 760px; }
 .ch-prose { font-size: 15px; line-height: 2.1; color: #33312D; margin: 0; }
 .ch-prose + .ch-prose { margin-top: 14px; }
 
-/* ═══ خط زمان درجه ═══ */
-.ch-tl { list-style: none; margin: 0; padding: 0; position: relative; }
-.ch-tl::before {
-  content: ''; position: absolute; inset-block: 6px; inset-inline-start: 5px; width: 1px;
-  background: linear-gradient(180deg, var(--gold, #C7A66A), rgba(199,166,106,0.16));
-}
-.ch-tl-item {
-  position: relative; padding-inline-start: 24px; padding-block: 8px;
-  display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap;
-}
-.ch-tl-dot {
-  position: absolute; inset-inline-start: 0; top: 15px;
-  width: 11px; height: 11px; border-radius: 50%;
-  background: var(--bg-surface, #fff); border: 2px solid rgba(199,166,106,0.42);
-}
-.ch-tl-item[data-now] .ch-tl-dot { border-color: var(--gold, #C7A66A); background: var(--gold, #C7A66A); box-shadow: 0 0 0 4px rgba(199,166,106,0.16); }
-.ch-tl-year { font-size: 12px; font-weight: 800; color: var(--gold-deep, #8F6531); font-variant-numeric: tabular-nums; min-width: 42px; }
-.ch-tl-label { font-size: 14px; font-weight: 700; color: var(--text-primary, #111); }
-.ch-tl-badge {
-  font-size: 11px; font-weight: 800; color: var(--gold-deep, #8F6531);
-  background: var(--gold-dim, rgba(199,166,106,0.12)); border: 1px solid var(--gold-border, rgba(199,166,106,0.24));
-  border-radius: 999px; padding: 2px 9px;
-}
 
 /* ═══ نشانی عمومی ═══ */
 .ch-url { display: flex; align-items: center; gap: 8px; }
@@ -942,7 +919,7 @@ main.ch-col > section { max-width: 760px; }
 
 
 /* ═══════════════════════════════════════════════════════════
-   صفحه‌ی داور — پرونده‌ی اعتبارنامه
+   نردبانِ درجه‌ها + پرونده‌ی اعتبارنامه‌ی داور
 
    ⚠️ همه‌چیز زیرِ `.ch-rf` قفل است. صفحه‌ی مربی همین شیت را
    استفاده می‌کند و چیدمانِ کانالی (`.ch-ch`) بینشان مشترک است؛
@@ -955,11 +932,12 @@ main.ch-col > section { max-width: 760px; }
    سال، بقیه کم‌رنگ به‌عنوان مسیرِ پیشِ رو.
    ═══════════════════════════════════════════════════════════ */
 
-.ch-rf .rf-cred { padding: clamp(14px, 2vw, 22px); }
+/* کارتِ نردبان — هر دو صفحه‌ی داور و مربی */
+.ch-ladder { padding: clamp(14px, 2vw, 22px); }
 
-.ch-rf .rf-ladder { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+.ch-ladder .rf-ladder { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
 
-.ch-rf .rf-step {
+.ch-ladder .rf-step {
   position: relative;
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
@@ -972,7 +950,7 @@ main.ch-col > section { max-width: 760px; }
   transition: background .2s, color .2s;
 }
 /* خطِ عمودیِ نردبان — از نشانه‌ی هر پله به بعدی */
-.ch-rf .rf-step::before {
+.ch-ladder .rf-step::before {
   content: ''; position: absolute;
   inset-block-start: calc(12px + 12px); inset-block-end: -2px;
   /* ⚠️ در RTL `inline-end` یعنی *چپ*، ولی نشانه‌ی پله سمتِ شروع
@@ -980,16 +958,16 @@ main.ch-col > section { max-width: 760px; }
   inset-inline-end: auto; inset-inline-start: 25px;
   inline-size: 2px; background: var(--border-soft, rgba(17,17,17,.10));
 }
-.ch-rf .rf-step:last-child::before { display: none; }
+.ch-ladder .rf-step:last-child::before { display: none; }
 
-.ch-rf .rf-step[data-has] {
+.ch-ladder .rf-step[data-has] {
   color: var(--text-primary, #111);
   background: color-mix(in srgb, var(--c) 7%, transparent);
 }
-.ch-rf .rf-step[data-has]::before { background: color-mix(in srgb, var(--c) 34%, transparent); }
+.ch-ladder .rf-step[data-has]::before { background: color-mix(in srgb, var(--c) 34%, transparent); }
 
 /* نشانه‌ی پله */
-.ch-rf .rf-step-mark {
+.ch-ladder .rf-step-mark {
   /* ⚠️ ردیف `align-items: center` است، پس مرکزِ نشانه `rowHeight/2`
      می‌شود و مبدأ ثابتِ خط فقط تا وقتی می‌خواند که ردیف کوتاه بماند.
      با `align-self: start` مرکزِ نشانه در هر بلندی‌ای همان
@@ -1003,45 +981,45 @@ main.ch-col > section { max-width: 760px; }
   border: 2px solid var(--border-soft, rgba(17,17,17,.14));
   color: var(--text-tertiary, #6E6E6E);
 }
-.ch-rf .rf-step[data-has] .rf-step-mark {
+.ch-ladder .rf-step[data-has] .rf-step-mark {
   background: var(--c); border-color: var(--c); color: #fff;
 }
-.ch-rf .rf-step-dot {
+.ch-ladder .rf-step-dot {
   inline-size: 6px; block-size: 6px; border-radius: 50%;
   background: currentColor; opacity: .5;
 }
 
-.ch-rf .rf-step-body { display: grid; gap: 6px; min-inline-size: 0; }
+.ch-ladder .rf-step-body { display: grid; gap: 6px; min-inline-size: 0; }
 /* ⚠️ `wrap` لازم است: روی ۳۹۰ پیکسل، برچسبِ لاتینِ بلند + سال +
    نشان در یک خط جا نمی‌شوند و بدونِ آن ردیف افقی سرریز می‌کرد. */
-.ch-rf .rf-step-meta {
+.ch-ladder .rf-step-meta {
   display: flex; align-items: center; flex-wrap: wrap; gap: 8px 10px;
 }
-.ch-rf .rf-step-label { font-size: 14px; font-weight: 700; justify-self: start; }
-.ch-rf .rf-step[data-has] .rf-step-label { font-weight: 800; }
+.ch-ladder .rf-step-label { font-size: 14px; font-weight: 700; justify-self: start; }
+.ch-ladder .rf-step[data-has] .rf-step-label { font-weight: 800; }
 
 /* نقطه‌های سطح — همان زبانی که چیپِ درجه در هیرو دارد */
-.ch-rf .rf-step-dots { display: inline-flex; gap: 3px; }
-.ch-rf .rf-step-dots i {
+.ch-ladder .rf-step-dots { display: inline-flex; gap: 3px; }
+.ch-ladder .rf-step-dots i {
   inline-size: 5px; block-size: 5px; border-radius: 50%;
   background: currentColor; opacity: .22;
 }
-.ch-rf .rf-step-dots i[data-on] { opacity: 1; color: var(--c); background: var(--c); }
+.ch-ladder .rf-step-dots i[data-on] { opacity: 1; color: var(--c); background: var(--c); }
 
 /* ⚠️ رنگِ خامِ درجه روی تینتِ روشنِ همان درجه ۳٫۰۴:۱ می‌داد
    (سبزِ `#16A34A` روی `#EFF8F2`) — زیرِ کفِ ۴٫۵. همان آمیزه‌ی
    تیره‌کننده‌ی کاشی‌های خدمات، این‌جا هم. */
-.ch-rf .rf-step-year {
+.ch-ladder .rf-step-year {
   font-size: 13px; font-weight: 800;
   color: color-mix(in srgb, var(--c) 62%, #16150F);
   font-variant-numeric: tabular-nums;
 }
 /* ⚠️ «پیشِ رو» باید *کم‌رنگ‌تر از متن* باشد ولی از کفِ ۴٫۵ نیفتد؛
    `--text-tertiary` روی سفید ۵٫۱:۱ می‌دهد. */
-.ch-rf .rf-step-next { font-size: 12px; color: var(--text-tertiary, #6E6E6E); }
+.ch-ladder .rf-step-next { font-size: 12px; color: var(--text-tertiary, #6E6E6E); }
 
 /* نشانِ «مدرک تأیید شده» روی بالاترین پله */
-.ch-rf .rf-step-badge {
+.ch-ladder .rf-step-badge {
   display: inline-flex; align-items: center; gap: 6px;
   padding: 5px 10px;
   border-radius: 999px;
@@ -1059,5 +1037,5 @@ main.ch-col > section { max-width: 760px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .ch-rf .rf-step { transition: none; }
+  .ch-ladder .rf-step { transition: none; }
 }

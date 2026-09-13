@@ -56,17 +56,20 @@ export interface CoachProfile {
 }
 
 /* Coaching grades — ordered from the first (entry) certificate upward. */
-export const GRADES: { key: string; label: string; dots: number }[] = [
-  { key: 'orientation', label: 'توجیهی',                            dots: 1 },
-  { key: 'd3',          label: 'درجه ۳',                            dots: 1 },
-  { key: 'd2',          label: 'درجه ۲',                            dots: 2 },
-  { key: 'd1',          label: 'درجه ۱',                            dots: 2 },
-  { key: 'asiaC',       label: 'C آسیایی',                          dots: 3 },
-  { key: 'asiaB',       label: 'B آسیایی',                          dots: 3 },
-  { key: 'asiaA',       label: 'A آسیایی',                          dots: 4 },
-  { key: 'wpbsa1',      label: 'WPBSA Level 1',                     dots: 4 },
-  { key: 'wpbsa2',      label: 'WPBSA Level 2 (1st4sport Certificate)', dots: 5 },
-  { key: 'wpbsa3',      label: 'WPBSA Level 3 Advance Coach',       dots: 5 },
+/* ⚠️ `color` برای نردبانِ درجه‌ها (`GradeLadder`) است. بدونش رنگ از
+   `dots` ساخته می‌شد و دو پله‌ی هم‌نقطه — «توجیهی» و «درجه ۳» —
+   یک رنگ می‌گرفتند. همان نردبانِ معناییِ داور: هرچه بالاتر، گرم‌تر. */
+export const GRADES: { key: string; label: string; dots: number; color: string }[] = [
+  { key: 'orientation', label: 'توجیهی',                            dots: 1, color: '#64748b' },
+  { key: 'd3',          label: 'درجه ۳',                            dots: 1, color: '#16A34A' },
+  { key: 'd2',          label: 'درجه ۲',                            dots: 2, color: '#15803D' },
+  { key: 'd1',          label: 'درجه ۱',                            dots: 2, color: '#C2410C' },
+  { key: 'asiaC',       label: 'C آسیایی',                          dots: 3, color: '#B45309' },
+  { key: 'asiaB',       label: 'B آسیایی',                          dots: 3, color: '#8F6531' },
+  { key: 'asiaA',       label: 'A آسیایی',                          dots: 4, color: '#C7A66A' },
+  { key: 'wpbsa1',      label: 'WPBSA Level 1',                     dots: 4, color: '#94A3B8' },
+  { key: 'wpbsa2',      label: 'WPBSA Level 2 (1st4sport Certificate)', dots: 5, color: '#4F46E5' },
+  { key: 'wpbsa3',      label: 'WPBSA Level 3 Advance Coach',       dots: 5, color: '#7C3AED' },
 ]
 
 export const DISCIPLINES: { key: string; label: string; color: string }[] = [
