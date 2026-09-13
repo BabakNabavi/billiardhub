@@ -248,7 +248,7 @@ function MarketRow({ l, i, saved, onSave }: { l: Listing; i: number; saved: bool
         </span>
         <span className="cty"><MapPin size={10} style={{ color: PIN_GREEN }} /> {l.city || 'ایران'}</span>
       </div>
-      {/* ⚠️ ردیفِ موبایل عکسِ مربعِ ۱۴۳ دارد، نه قابِ نسبت‌دار؛ پس
+      {/* ⚠️ ردیفِ موبایل عکسِ مربعِ ۱۳۷ دارد، نه قابِ نسبت‌دار؛ پس
           `ProductMedia` این‌جا با کلاسِ bh-pm--sq نسبت را وامی‌گذارد ولی
           همان نشان‌ها و همان اندازه‌ها را می‌آورد. */}
       <ProductMedia
@@ -788,17 +788,23 @@ export default function MarketNewPage() {
 
         /* ── ردیف افقی موبایل (به سبک دیوار، با هویت بازار) ── */
         .mk-rows { display: none; flex-direction: column; gap: 10px; }
-        .mk-row { display: flex; gap: 12px;
-          padding: 5px 11px; text-decoration: none; color: inherit; position: relative;
+        /* ⚠️ min-height نه height: کارت هیچ‌وقت از ۱۵۵ کوتاه‌تر
+           نمی‌شود، ولی اگر متن بلند شد می‌تواند رشد کند و عکس هم
+           با آن کشیده می‌شود — پس حاشیه‌ها در هر حالتی قرینه‌اند. */
+        .mk-row { display: flex; gap: 12px; min-height: 155px;
+          padding: 8px; text-decoration: none; color: inherit; position: relative;
           animation: mkUp .45s cubic-bezier(.22,1,.36,1) both; }
         .mk-row:active { transform: scale(0.99); }
         .mk-row .info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 5px; padding-top: 2px; }
         .mk-row .ttl { font-size: 13px; font-weight: 700; color: ${TEXT}; line-height: 1.6; }
         /* ردیف موبایل کمی درشت‌تر از کارت است، پس هر دو خط یک پله بالاتر */
-        .mk-row .ttl .mk-h { font-size: 13.5px; font-weight: 800; }
-        .mk-row .ttl .mk-t { margin-top: 3px; font-size: 12px; font-weight: 400; color: ${MUT}; }
+        .mk-row .ttl .mk-h { font-size: 13.5px; font-weight: 800;
+          display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .mk-row .ttl .mk-t { margin-top: 3px; font-size: 12px; font-weight: 400; color: ${MUT};
+          display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .mk-row .cnd { font-size: 10.5px; color: ${MUT}; }
-        .mk-row .prc { font-size: 13.5px; font-weight: 900; color: ${TEXT}; font-variant-numeric: tabular-nums; }
+        .mk-row .prc { font-size: 13.5px; font-weight: 900; color: ${TEXT}; font-variant-numeric: tabular-nums;
+          white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
         .mk-row .prc i { font-style: normal; font-size: 10px; font-weight: 600; color: ${MUT}; }
         .mk-row .cty { font-size: 10.5px; color: ${MUT}; display: flex; align-items: center; gap: 4px; margin-top: auto; }
         /* ── قابِ عکسِ ردیف ──
@@ -807,26 +813,37 @@ export default function MarketNewPage() {
 
            ⚠️ ارتفاعِ خودِ ردیف را همین عکس تعیین می‌کند. با ۱۴۴ و
            حاشیه‌ی ۱۱، ردیف از ۱۵۵ به ۱۶۸ می‌رفت — یعنی *کارت* هم
-           بزرگ می‌شد، که خواسته نبود. حاشیه‌ی عمودی ۵ شد تا ارتفاع
-           همان بماند: ۱۴۳ + ۱۰ + ۲ (بوردرِ lq-pcard) = ۱۵۵.
+           بزرگ می‌شد، که خواسته نبود. عکس اندازه شد تا ارتفاع
+           همان بماند: ۱۳۷ + ۱۶ + ۲ (بوردرِ lq-pcard) = ۱۵۵. حاشیه در
+           هر چهار طرف ۸ است تا قابِ عکس متوازن دیده شود.
 
            ⚠️ align-self وسط، وگرنه عکس بالای ردیف می‌چسبد و زیرش
            خالی می‌ماند — همان چیزی که «وسط نیست» دیده می‌شد. */
-        .mk-row .bh-pm--sq { width: 143px; height: 143px; aspect-ratio: auto; border-radius: 13px;
-          align-self: center; border: 1px solid rgba(28,28,26,0.08); border-bottom-width: 1px; }
+        /* ⚠️ ارتفاع از ردیف می‌آید، نه از مربعِ ثابت. با اندازه‌ی
+           ثابت، ردیفِ بلندتر عکس را وسط می‌گذاشت و فاصله‌ی بالا/پایین
+           از چپ بیشتر می‌شد (سنجیده: ردیفِ ۱۹۲، بالا ۳۰ در برابر ۹).
+           با stretch حاشیه همیشه همان ۸ است. برش را object-fit
+           می‌گیرد، پس غیرمربع‌شدنِ قاب دیده نمی‌شود. */
+        .mk-row .bh-pm--sq { width: 137px; height: auto; aspect-ratio: auto; border-radius: 13px;
+          align-self: stretch; border: 1px solid rgba(28,28,26,0.08); border-bottom-width: 1px; }
         /* نشان‌ها: هم‌رسانی چپ‌بالا، نشان‌کردن راست‌بالا، شمارِ عکس
            راست‌پایین. ۵ برای دکمه‌ها چون سطحِ رنگ‌شده‌شان ۳ داخل‌تر
            است؛ شمارنده تورفتگی ندارد و روی ۸ می‌ماند. */
         .mk-row .bh-pm--sq .bh-pm-bk { top: 5px; right: 5px; }
         .mk-row .bh-pm--sq .bh-pm-cnt { bottom: 8px; right: 8px; height: 22px; padding-inline: 6px; font-size: 10.5px; }
         .mk-row .bh-pm--sq .bh-pm-col { top: 5px; left: 5px; gap: 5px; }
-        /* ⚠️ زیرِ ۳۶۰ پیکسل، ۱۴۳ آن‌قدر جا می‌گیرد که ستونِ متن به
-           ~۱۱۰ می‌رسد و قیمتِ ۱۰رقمی از کارت می‌زند بیرون. در ۳۷۵
-           حدود ۱۶۴ می‌ماند و مشکلی نیست. */
-        @media (max-width: 360px) { .mk-row .bh-pm--sq { width: 120px; height: 120px; } }
+        /* ⚠️ زیرِ ۳۶۰ عکس کوچک‌تر می‌شود چون ستونِ متن تنگ می‌شود،
+           ولی ۱۳۱ (نه کمتر) تا ارتفاعِ ردیف را پر کند و حاشیه‌ی
+           بالا/پایین با چپ یکی بماند. اندازه‌گیری در ۳۲۰: ستونِ
+           متن ۱۲۷ پیکسل، بدونِ سرریزِ قیمت. */
+        @media (max-width: 360px) {
+          .mk-row { min-height: 149px; }
+          .mk-row .bh-pm--sq { width: 131px; }
+        }
         .mk-row .pctn { background: #b400ae; color: #fff; font-size: 10px; font-weight: 800;
           border-radius: 999px; padding: 2px 7px 1px; line-height: 1.4; flex-shrink: 0; }
         .mk-row .oldp { font-size: 10.5px; color: ${MUT}; text-decoration: line-through;
+          white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
           font-variant-numeric: tabular-nums; margin-top: -2px; }
         /* نشان‌کردن و گزارش تخلف حالا داخلِ ProductMedia اند */
 
