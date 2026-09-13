@@ -435,54 +435,68 @@ export default function CoachProfilePage() {
             {edit.error && <p className="ch-empty" role="alert">{edit.error}</p>}
           </section>
 
-          {/* ── نوارِ رزرو — برای مالکِ پروفایل معنی ندارد ── */}
-          {!edit.isOwner && (
-            <section className="ch-book ch-rv" aria-labelledby="ch-sess-h">
-              <div className="ch-book-t">
-                <h2 id="ch-sess-h">جلسه‌ی خصوصی با {coach.name}</h2>
-                <p>زمان و مکان را با خودِ مربی هماهنگ می‌کنید</p>
-              </div>
-              <SessionRequest coachSlug={id} price={sessionPrice} minutes={sessionMin} />
-            </section>
-          )}
-
+          {/* ── دو ستون ──
+              ⚠️ ستونِ اصلی سه بخش می‌گیرد و ریل یکی. پیش‌تر «معرفی»
+              تنها کنارِ نردبان می‌ماند و چون نردبان بلند است، زیرِ
+              «معرفی» حدود ۷۰۰ پیکسل سفیدیِ خالی می‌افتاد
+              (اندازه‌گیری‌شده: ۱۳۸ در برابر ۸۳۶). «جلسه‌ی خصوصی» هم
+              یک سطرِ کاملِ ۱۰۹۶ پیکسلی می‌گرفت که هیچ لازم نداشت. */}
           <div className="ch-two">
-            <section id="about" tabIndex={-1} className="ch-sec ch-rv" aria-labelledby="ch-about-h">
-              <div className="ch-sec-head">
-                <h2 id="ch-about-h">معرفی</h2>
-                <span className="en">ABOUT</span>
-                <span className="rule" aria-hidden />
-              </div>
-              {paragraphs.length === 0
-                ? <p className="ch-empty">این مربی هنوز معرفی‌ای ننوشته است</p>
-                : paragraphs.map((t, i) => <p key={i} className="ch-prose">{t}</p>)}
+            <div className="ch-col-main">
+              <section id="about" tabIndex={-1} className="ch-sec ch-rv" aria-labelledby="ch-about-h">
+                <div className="ch-sec-head">
+                  <h2 id="ch-about-h">معرفی</h2>
+                  <span className="en">ABOUT</span>
+                  <span className="rule" aria-hidden />
+                </div>
+                {paragraphs.length === 0
+                  ? <p className="ch-empty">این مربی هنوز معرفی‌ای ننوشته است</p>
+                  : paragraphs.map((t, i) => <p key={i} className="ch-prose">{t}</p>)}
 
-              <ProfileContactLinks
-                phone={coach.phone} whatsapp={coach.whatsapp}
-                instagram={coach.instagram} telegram={coach.telegram} />
-            </section>
+                <ProfileContactLinks
+                  phone={coach.phone} whatsapp={coach.whatsapp}
+                  instagram={coach.instagram} telegram={coach.telegram} />
+              </section>
 
-            <section id="career" tabIndex={-1} className="ch-sec ch-rv" aria-labelledby="ch-path-h">
-              <div className="ch-sec-head">
-                <h2 id="ch-path-h">مسیر مربیگری</h2>
-                <span className="en">CAREER</span>
-                <span className="rule" aria-hidden />
-              </div>
-              {/* «مربی آزاد» یک انتخابِ صریح در پنل است، نه پروفایلِ
-                  ناتمام؛ متنِ «ثبت نشده» او را ناقص جلوه می‌داد. */}
-              <div className="ch-card ch-ladder">
-                <GradeLadder grades={GRADES} earned={earned} verified={coach.verified}
-                  emptyText={localP?.freeCoach
-                    ? 'این مربی به‌عنوان مربی آزاد فعالیت می‌کند و مدرک فدراسیونی ثبت نکرده است.'
-                    : 'هنوز درجه‌ای ثبت نشده است.'} />
-              </div>
-            </section>
+              {/* ── نوارِ رزرو — برای مالکِ پروفایل معنی ندارد ── */}
+              {!edit.isOwner && (
+                <section className="ch-book ch-rv" aria-labelledby="ch-sess-h">
+                  <div className="ch-book-t">
+                    <h2 id="ch-sess-h">جلسه‌ی خصوصی با {coach.name}</h2>
+                    <p>زمان و مکان را با خودِ مربی هماهنگ می‌کنید</p>
+                  </div>
+                  <SessionRequest coachSlug={id} price={sessionPrice} minutes={sessionMin} />
+                </section>
+              )}
+
+              {/* ⚠️ «نظرها» عمدا داخلِ همین ستون است: بیرون که بود،
+                  ستونِ اصلی ۳۱۹ در برابر ریلِ ۶۳۷ می‌شد و ۳۱۸ پیکسل
+                  سفیدیِ خالی می‌ماند. تنها هزینه‌اش این است که روی
+                  موبایل «نظرها» پیش از «مسیر مربیگری» می‌آید. */}
+              <section id="reviews" tabIndex={-1} className="ch-card ch-rv">
+                <Reviews endpoint={`/api/profiles/coach/${encodeURIComponent(id)}/reviews`} subject="این مربی"
+                  cannotReviewNote="برای ثبت نظر باید در باشگاهی که این مربی در آن ثبت شده، رزرو قطعی داشته باشید." />
+              </section>
+            </div>
+
+            <div className="ch-col-rail">
+              <section id="career" tabIndex={-1} className="ch-sec ch-rv" aria-labelledby="ch-path-h">
+                <div className="ch-sec-head">
+                  <h2 id="ch-path-h">مسیر مربیگری</h2>
+                  <span className="en">CAREER</span>
+                  <span className="rule" aria-hidden />
+                </div>
+                {/* «مربی آزاد» یک انتخابِ صریح در پنل است، نه پروفایلِ
+                    ناتمام؛ متنِ «ثبت نشده» او را ناقص جلوه می‌داد. */}
+                <div className="ch-card ch-ladder">
+                  <GradeLadder grades={GRADES} earned={earned} verified={coach.verified}
+                    emptyText={localP?.freeCoach
+                      ? 'این مربی به‌عنوان مربی آزاد فعالیت می‌کند و مدرک فدراسیونی ثبت نکرده است.'
+                      : 'هنوز درجه‌ای ثبت نشده است.'} />
+                </div>
+              </section>
+            </div>
           </div>
-
-          <section id="reviews" tabIndex={-1} className="ch-card ch-rv">
-            <Reviews endpoint={`/api/profiles/coach/${encodeURIComponent(id)}/reviews`} subject="این مربی"
-              cannotReviewNote="برای ثبت نظر باید در باشگاهی که این مربی در آن ثبت شده، رزرو قطعی داشته باشید." />
-          </section>
 
         </div>
       </div>
