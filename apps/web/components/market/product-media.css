@@ -40,11 +40,12 @@
   border-radius: 9px;
   display: flex; align-items: center; justify-content: center;
   padding: 0; cursor: pointer;
-  /* ⚠️ آلفا ۰٫۶۲ است نه کمتر: بیشترِ عکس‌های محصول پس‌زمینه‌ی سفید
+  /* ⚠️ آلفا ۰٫۶۸ است نه کمتر: بیشترِ عکس‌های محصول پس‌زمینه‌ی سفید
      دارند و با ۰٫۴۲ آیکونِ سفید روی چیپ ۲٫۶۳:۱ می‌شد — زیرِ کفِ
-     ۳:۱ی WCAG برای عنصرِ غیرمتنی. ۰٫۶۲ روی سفیدِ خالص ۴٫۸ می‌دهد،
-     یعنی بدترین حالتِ ممکن هم امن است. اندازه‌گیری شده. */
-  background: rgba(28, 28, 26, 0.62);
+     ۴٫۵:۱ — متنِ شمارِ عکس ۱۱٫۵px بولد است و «بزرگ» حساب نمی‌شود.
+     اندازه‌گیریِ پیکسلی روی کارت‌های واقعی: ۰٫۶۲ بدترین حالت را
+     ۴٫۳۶ می‌داد، ۰٫۶۸ آن را بالای کف می‌برد. */
+  background: rgba(28, 28, 26, 0.68);
   border: 1px solid rgba(255, 255, 255, 0.22);
   backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
   color: #fff;
@@ -60,7 +61,7 @@
    و `padding:5`) و اینلاین از کلاس می‌برد — بدونِ `!important`
    این خانه هیچ‌وقت اعمال نمی‌شد. */
 .bh-pm-rp {
-  background: rgba(28, 28, 26, 0.62) !important;
+  background: rgba(28, 28, 26, 0.68) !important;
   padding: 0 !important;
   color: #fff !important;
   border: 1px solid rgba(255, 255, 255, 0.22) !important;
@@ -77,7 +78,7 @@
   display: inline-flex; align-items: center; gap: 4px;
   block-size: 28px; padding-inline: 8px;
   border-radius: 9px;
-  background: rgba(28, 28, 26, 0.62);
+  background: rgba(28, 28, 26, 0.68);
   border: 1px solid rgba(255, 255, 255, 0.22);
   backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
   color: #fff;

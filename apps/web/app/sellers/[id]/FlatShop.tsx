@@ -774,8 +774,6 @@ export default function FlatShop() {
           .brand-chip:hover { transform: none; }
         }
 
-        /* دکمه‌ی علاقه‌مندی */
-        .wish-btn { transition: transform .18s cubic-bezier(0.22,1,0.36,1), color .18s, background .18s, border-color .18s; }
       `}</style>
 
       {/* ── breadcrumb ── */}
