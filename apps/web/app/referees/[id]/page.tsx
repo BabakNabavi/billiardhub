@@ -13,6 +13,7 @@
    طرح، دو مصرف‌کننده.
    ───────────────────────────────────────────────────────────── */
 
+import { applyImagePatch } from '@/lib/profiles/edit-image'
 import { useChannelPublish, type PublishVideo } from '@/components/media/useChannelPublish'
 import { useVideoEdit } from '@/components/media/useVideoEdit'
 import { detailTitle, type VideoDetail } from '@/lib/media/video-details'
@@ -338,6 +339,10 @@ export default function RefereeProfilePage() {
     if (!(await ask('این ویدیو حذف شود؟', { body: 'این کار برگشت‌پذیر نیست.', confirmLabel: 'حذف' }))) return
     await edit.apply(d => ({ ...d, videos: d.videos.filter(v => v.id !== id) }))
   }
+  const editImage = async (id: string, patch: { caption: string; album: string }) => {
+    await edit.apply(d => applyImagePatch({ ...d, gallery: d.gallery ?? [] }, id, patch) as typeof d)
+  }
+
   /* ⚠️ با شناسه، نه با اندیس: داخل آلبوم اندیس خانه به زیرمجموعه
      برمی‌گشت و این فیلتر روی کل گالری بود — یعنی حذف از داخل آلبوم
      عکس دیگری را می‌برد. */
@@ -453,6 +458,7 @@ export default function RefereeProfilePage() {
               albumNames={localP?.albums ?? []}
               canEdit={edit.isOwner} busy={edit.saving || vidBusy}
               onAddImages={addImages} onAddVideos={addVideoFiles} beforeAddVideos={() => askChannel(String(referee?.name ?? ''))} onNewAlbum={newAlbum}
+                onEditImage={editImage}
             />
             {edit.error && <p className="ch-empty" role="alert">{edit.error}</p>}
           </section>

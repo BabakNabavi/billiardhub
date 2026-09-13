@@ -171,7 +171,15 @@ export async function getProfileBySlug(kind: ProfileKind, slug: string): Promise
 
 export async function getProfileByOwner(kind: ProfileKind, ownerId: string): Promise<ProfileRow | null> {
   const { data, error } = await sb().from('profiles').select('*').eq('kind', kind).eq('owner_id', ownerId).maybeSingle()
-  if (error || !data) return null
+  /* ⚠️ خطای دیتابیس *نباید* شبیهِ «ردیفی نیست» دیده شود: پنل‌های
+     داشبورد روی همین تفاوت تصمیم می‌گیرند که رسانه‌ی موجود را نگه
+     دارند یا خالی بنویسند، پس یک قطعیِ لحظه‌ای می‌توانست همه‌ی
+     عکس‌های یک پروفایل را پاک کند. */
+  if (error) {
+    if (missing(error.message)) return null
+    throw new Error(error.message)
+  }
+  if (!data) return null
   return toProfile(data as DbRow)
 }
 

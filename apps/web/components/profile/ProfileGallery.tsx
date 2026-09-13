@@ -30,7 +30,7 @@ import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import type { AskResult } from '@/components/media/useChannelPublish'
 import VideoDetailsDialog, { type DetailTarget } from '@/components/media/VideoDetailsDialog'
 import type { VideoDetail } from '@/lib/media/video-details'
-import { Images, Clapperboard, FolderOpen, ArrowRight, Plus, Play, Loader2 } from 'lucide-react'
+import { Images, Clapperboard, FolderOpen, ArrowRight, Plus, Play, Loader2, Pencil } from 'lucide-react'
 import { useTabKeys } from '@/hooks/use-tab-keys'
 import { toFaDigits } from '@/lib/jalali'
 import { askText, notify } from '@/lib/ui/dialogs'
@@ -46,7 +46,7 @@ type Tab = typeof TABS[number]
 
 export default function ProfileGallery({
   images, videos, albumNames = [], onOpenImage, onOpenVideo, headIcon,
-  canEdit = false, busy = false, onAddImages, onAddVideos, onNewAlbum, beforeAddVideos,
+  canEdit = false, busy = false, onAddImages, onAddVideos, onNewAlbum, beforeAddVideos, onEditImage,
 }: {
   images: GalleryImage[]
   videos: GalleryVideo[]
@@ -70,6 +70,12 @@ export default function ProfileGallery({
      برود و برگردد. */
   canEdit?: boolean
   busy?: boolean
+  /* ── ویرایشِ کپشن و آلبومِ رسانه‌ی موجود ──
+     ⚠️ این دو تا امروز فقط در کارتِ گالریِ داشبورد بودند. با
+     برداشتنِ آن کارت، کپشن هیچ راهی برای تنظیم نداشت (یعنی `alt`
+     هر عکس برای همیشه «تصویر گالری» می‌ماند) و عکسِ آپلودشده هم
+     دیگر به آلبوم منتقل نمی‌شد. */
+  onEditImage?: (id: string, patch: { caption: string; album: string }) => void | Promise<void>
   /** `album` یعنی رسانه مستقیم داخل همان آلبوم بنشیند */
   onAddImages?: (files: File[], album?: string) => void | Promise<void>
   /* ویدیو هم مثل عکس از گالری خود کاربر انتخاب می‌شود.
@@ -161,12 +167,24 @@ export default function ProfileGallery({
   const onTabKey = useTabKeys(TABS, tab, choose, 'chtab-')
 
   const cell = (g: GalleryImage, list: GalleryImage[], i: number) => (
-    <button key={g.id} type="button" className="ch-gal-cell"
-      onClick={() => onOpenImage(list.map(x => x.url), i, { title: g.caption || 'تصویر', alt: g.caption || 'تصویر گالری' }, list.map(x => x.id))}>
-      {/* عنوان جای دیگری است: `alt` و عنوان نمای تمام‌صفحه.
-          نوار روی خانه‌ی ۱۱۶ پیکسلی نصف تصویر را می‌پوشاند. */}
-      <img src={g.url} alt={g.caption || 'تصویر گالری'} loading="lazy" decoding="async" />
-    </button>
+    /* ⚠️ `div` نه `button`: دکمه‌ی ویرایش داخلش می‌نشیند و دکمه در
+       دکمه HTML نامعتبر است. خودِ خانه یک `button`ِ جدا روی کل
+       سطح است، پس رفتار صفحه‌کلید دست‌نخورده می‌ماند. */
+    <div key={g.id} className="ch-gal-cell ch-gal-cell--wrap">
+      <button type="button" className="ch-gal-open"
+        onClick={() => onOpenImage(list.map(x => x.url), i, { title: g.caption || 'تصویر', alt: g.caption || 'تصویر گالری' }, list.map(x => x.id))}>
+        {/* عنوان جای دیگری است: `alt` و عنوان نمای تمام‌صفحه.
+            نوار روی خانه‌ی ۱۱۶ پیکسلی نصف تصویر را می‌پوشاند. */}
+        <img src={g.url} alt={g.caption || 'تصویر گالری'} loading="lazy" decoding="async" />
+      </button>
+      {canEdit && onEditImage && (
+        <button type="button" className="ch-gal-edit" disabled={busy || working}
+          onClick={() => void editImage(g)}
+          aria-label={`ویرایش کپشن و آلبومِ ${g.caption || 'این تصویر'}`} title="کپشن و آلبوم">
+          <Pencil size={14} aria-hidden />
+        </button>
+      )}
+    </div>
   )
 
   /* ── خانه‌ی ویدیو ──
@@ -293,6 +311,29 @@ export default function ProfileGallery({
          هم می‌انداخت و کاربر هیچ پیامی نمی‌دید. */
       notify('افزودن رسانه انجام نشد؛ دوباره تلاش کنید')
     } finally { setWorking(false) }
+  }
+
+  /* ── ویرایشِ کپشن و آلبوم ──
+     دو پرسشِ پشتِ‌هم با همان پنجره‌های خودِ سایت. لغو در هر مرحله
+     یعنی هیچ تغییری ثبت نشود — نه اینکه نیمه‌کاره ذخیره شود. */
+  const editImage = async (g: GalleryImage) => {
+    const caption = await askText('کپشن تصویر', {
+      allowEmpty: true, initial: g.caption, tone: 'gold',
+      body: 'این متن `alt` تصویر و عنوانِ نمای تمام‌صفحه می‌شود. خالی هم مجاز است.',
+      placeholder: g.caption || 'مثلا: تمرین ضربه‌ی کششی',
+    })
+    if (caption === null) return
+    const album = await askText('آلبوم تصویر', {
+      allowEmpty: true, initial: g.album ?? '', tone: 'gold',
+      body: albumNames.length
+        ? `آلبوم‌های موجود: ${albumNames.join('، ')} — خالی یعنی بدون آلبوم.`
+        : 'نام آلبوم؛ خالی یعنی بدون آلبوم.',
+      placeholder: g.album || 'نام آلبوم',
+    })
+    if (album === null) return
+    setWorking(true)
+    try { await onEditImage?.(g.id, { caption: caption.trim(), album: album.trim() }) }
+    finally { setWorking(false) }
   }
 
   const askAlbumName = async () => {

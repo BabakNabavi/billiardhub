@@ -20,6 +20,7 @@
    سیستم بصری در `technician-profile.css`. داده از
    `lib/technicians-data` و `lib/technician-store`.
    ───────────────────────────────────────────────────────────── */
+import { applyImagePatch } from '@/lib/profiles/edit-image'
 import { useChannelPublish, type PublishVideo } from '@/components/media/useChannelPublish'
 import { toFaDigits } from '@/lib/jalali'
 import { norm, keepLongest } from '@/lib/text-dedupe'
@@ -280,6 +281,10 @@ export default function TechnicianProfilePage() {
       if (list.some(x => x.trim() === n)) return d
       return { ...d, albums: [...list, n] }
     })
+  }
+
+  const editImage = async (id: string, patch: { caption: string; album: string }) => {
+    await edit.apply(d => applyImagePatch({ ...d, gallery: d.gallery ?? [] }, id, patch) as typeof d)
   }
 
   const deleteImage = async (mid: string) => {
@@ -673,6 +678,7 @@ export default function TechnicianProfilePage() {
                 onAddImages={addImages} onAddVideos={addVideoFiles}
                 beforeAddVideos={() => askChannel(String(tech?.name ?? ''))}
                 onNewAlbum={newAlbum}
+                onEditImage={editImage}
               />
               {edit.error && <p role="alert" className="tmp-none">خطا: {edit.error}</p>}
             </section>

@@ -32,7 +32,14 @@ export interface AskOptions {
 export interface DialogState {
   ask: (AskOptions & { title: string; resolve: (ok: boolean) => void }) | null
   /* پرسش متنی — جایگزین `window.prompt`. `null` یعنی انصراف. */
-  text: { title: string; body?: string; placeholder?: string; confirmLabel: string; resolve: (v: string | null) => void } | null
+  /* `allowEmpty`: مقدارِ خالی هم نتیجه‌ی معتبری است (پاک‌کردنِ کپشن).
+     `initial`: متنِ فعلی، تا ویرایش یعنی اصلاح نه تایپِ دوباره.
+     `tone`: هر پرسشِ متنی ویرانگر نیست. */
+  text: {
+    title: string; body?: string; placeholder?: string; confirmLabel: string
+    allowEmpty?: boolean; initial?: string; tone?: 'gold' | 'danger'
+    resolve: (v: string | null) => void
+  } | null
   toast: { msg: string; tone: Tone; id: number } | null
 }
 
@@ -86,14 +93,24 @@ export function clearToast() { emit({ toast: null }) }
 
 /** پرسش متنی — جایگزین `window.prompt`. `null` یعنی انصراف. */
 export function askText(
-  title: string, opts: { body?: string; placeholder?: string; confirmLabel?: string } = {},
+  title: string,
+  opts: {
+    body?: string; placeholder?: string; confirmLabel?: string
+    /** خالی هم نتیجه است — برای پاک‌کردنِ کپشن یا بیرون‌آوردن از آلبوم */
+    allowEmpty?: boolean
+    /** متنِ فعلی که در کادر می‌نشیند */
+    initial?: string
+    tone?: 'gold' | 'danger'
+  } = {},
 ): Promise<string | null> {
   if (typeof window === 'undefined') return Promise.resolve(null)
   return new Promise<string | null>(resolve => {
     emit({
       text: {
         title, body: opts.body, placeholder: opts.placeholder,
-        confirmLabel: opts.confirmLabel ?? 'تأیید', resolve,
+        confirmLabel: opts.confirmLabel ?? 'تأیید',
+        allowEmpty: opts.allowEmpty, initial: opts.initial, tone: opts.tone,
+        resolve,
       },
     })
   })

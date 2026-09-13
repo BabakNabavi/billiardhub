@@ -1,6 +1,7 @@
 'use client'
 import { useState, useEffect } from 'react'
 import { provinceOfCity } from '../../../lib/iran-geo'
+import { fetchFreshMedia, FRESH_MEDIA_FAIL } from '../../../lib/profiles/fresh-media'
 import AuthGuard from '../../../components/AuthGuard'
 import { AlertDialog } from '../../../components/market/AdFormFields'
 import Select from '../../../components/ui/Select'
@@ -375,13 +376,28 @@ function safeRemote(raw: unknown): Partial<FormState> {
       compressDataUrl(form.photo, 480, 0.8),
       compressDataUrl(form.coverImage, 1200, 0.7),
     ])
-    const gallery = await Promise.all(form.gallery.map(async g => ({ ...g, url: await compressDataUrl(g.url, 1000, 0.68) })))
-    const videos  = await Promise.all(form.videos.map(async v => ({ ...v, thumbnail: await compressDataUrl(v.thumbnail, 700, 0.7) })))
+    /* ── رسانه از سرور، نه از فرم ──
+       ⚠️ فرم در لحظه‌ی باز شدنِ پنل پر می‌شود. اگر کاربر پنل را باز
+       بگذارد و در تبِ دیگر از صفحه‌ی عمومیِ خودش عکس اضافه کند،
+       نوشتنِ `form.gallery` آن عکس‌ها را بی‌صدا پاک می‌کند —
+       `POST` کلِ `data` را جایگزین می‌کند و patch جزئی ندارد.
+       اگر خواندن نشد، ذخیره **انجام نمی‌شود**. */
+    const fresh = await fetchFreshMedia('coach')
+    if (fresh.state === 'error') { setAlert(FRESH_MEDIA_FAIL); return }
+    /* ⚠️ `none` یعنی هنوز ردیفی روی سرور نیست — پیش‌نویسی که فقط
+       در localStorage است. آن‌جا باید *خودِ فرم* برود، وگرنه اولین
+       ذخیره رسانه‌ی همان پیش‌نویس را پاک می‌کند. */
+    const src = fresh.state === 'ok'
+      ? { gallery: fresh.media.gallery as CoachMedia[], videos: fresh.media.videos as CoachVideo[], albums: fresh.media.albums }
+      : { gallery: form.gallery, videos: form.videos, albums: form.albums }
+    const gallery = await Promise.all(src.gallery.map(async g => ({ ...g, url: await compressDataUrl(g.url, 1000, 0.68) })))
+    const videos  = await Promise.all(src.videos.map(async v => ({ ...v, thumbnail: await compressDataUrl(v.thumbnail, 700, 0.7) })))
     const certificate = form.certificate && form.certificate.url.startsWith('data:image')
       ? { ...form.certificate, url: await compressDataUrl(form.certificate.url, 1300, 0.75) }
       : form.certificate
     const profile: CoachProfile = {
       ...form, photo, coverImage, gallery, videos, certificate,
+      albums: src.albums,
       slug: form.slug.trim().toLowerCase(),
       status: 'pending',
       verified: false,
