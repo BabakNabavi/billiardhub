@@ -8,6 +8,7 @@
    آلبوم‌دار + لایت‌باکس → پیوند با اخبار و بیلیارد مدیا.
    ───────────────────────────────────────────────────────────── */
 
+import { applyImagePatch } from '@/lib/profiles/edit-image'
 import { useChannelPublish, type PublishVideo } from '@/components/media/useChannelPublish'
 import { useVideoEdit } from '@/components/media/useVideoEdit'
 import { detailTitle, type VideoDetail } from '@/lib/media/video-details'
@@ -211,6 +212,10 @@ export default function PlayerProfilePage() {
       if (list.some(x => x.trim() === n)) return d
       return { ...d, albums: [...list, n] }
     })
+  }
+
+  const editImage = async (id: string, patch: { caption: string; album: string }) => {
+    await edit.apply(d => applyImagePatch({ ...d, gallery: d.gallery ?? [] }, id, patch) as typeof d)
   }
 
   const deleteImage = async (mid: string) => {
@@ -581,6 +586,7 @@ export default function PlayerProfilePage() {
                 onOpenVideo={v => openVideo(v, edit.isOwner ? { onDelete: () => deleteVideo(v.id), onEdit: () => editVideo(v) } : undefined)}
                 canEdit={edit.isOwner} busy={edit.saving || vidBusy}
                 onAddImages={addImages} onAddVideos={addVideoFiles} beforeAddVideos={() => askChannel(String(player?.name ?? ''))} onNewAlbum={newAlbum}
+                onEditImage={editImage}
               />
               {edit.error && <p role="alert" className="ath-err">{edit.error}</p>}
             </div>

@@ -307,6 +307,41 @@ main.ch-col > section { max-width: 760px; }
 .ch-gal-cell:hover { box-shadow: 0 14px 34px rgba(28,27,23,0.18); }
 .ch-gal-cell:hover img { transform: scale(1.06); }
 .ch-gal-cell:focus-visible { outline: 2px solid var(--gold-deep, #8F6531); outline-offset: 3px; }
+
+/* ── خانه‌ی تصویر وقتی صاحبش نگاه می‌کند ──
+   ⚠️ خودِ خانه دیگر `button` نیست (دکمه در دکمه نامعتبر است)؛
+   یک `div` است با دو دکمه‌ی هم‌سطح: بازکردن روی کلِ سطح، و
+   ویرایشِ کپشن/آلبوم در گوشه. */
+.ch-gal-open {
+  position: absolute; inset: 0; padding: 0; border: none; cursor: pointer;
+  background: none; inline-size: 100%; block-size: 100%;
+}
+.ch-gal-open:focus-visible { outline: 2px solid var(--gold-deep, #8F6531); outline-offset: 3px; border-radius: 10px; }
+/* ⚠️ ۲۶×۲۶ بالای کفِ لمسِ ۲۴×۲۴ی WCAG 2.5.8. همیشه دیده می‌شود، نه
+   فقط روی هاور: روی گوشی هاوری در کار نیست. */
+.ch-gal-edit {
+  position: absolute; inset-block-start: 6px; inset-inline-end: 6px; z-index: 2;
+  inline-size: 26px; block-size: 26px; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  padding: 0; cursor: pointer;
+  background: rgba(255, 255, 255, 0.86);
+  border: 1px solid rgba(28, 28, 26, 0.14);
+  color: #1C1C1A;
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  transition: background .2s;
+}
+.ch-gal-edit:disabled { opacity: .5; cursor: default; }
+.ch-gal-edit:focus-visible { outline: 2px solid var(--gold-deep, #8F6531); outline-offset: 2px; }
+@media (hover: hover) {
+  .ch-gal-edit:hover { background: #fff; }
+}
+/* ⚠️ روی گوشی خانه ~۸۰ پیکسل است و دکمه‌ی ۲۶ گوشه‌ی آن را می‌گیرد؛
+   با هدفِ بزرگ‌تر، لمسِ گوشه دیگر «بازکردن» را از دست نمی‌دهد
+   چون خودِ دکمه واضح‌تر است. */
+@media (pointer: coarse) {
+  .ch-gal-edit { inline-size: 32px; block-size: 32px; border-radius: 10px; }
+}
 /* ⚠️ با خانه‌ی ۱۱۶ پیکسلی، نوار عنوان روی هاور نصف تصویر را
    می‌پوشاند و متنش زیر کف خوانایی می‌رفت. عنوان از بین نرفته —
    `alt` تصویر و عنوان داخل نمای تمام‌صفحه همان را دارند. */

@@ -28,6 +28,10 @@ const toneOf = (t: Tone) => t === 'ok'
 export default function DialogHost() {
   const [s, setS] = useState<DialogState>({ ask: null, text: null, toast: null })
   const [draft, setDraft] = useState('')
+  /* ⚠️ ویرایش یعنی اصلاحِ متنِ فعلی، نه تایپِ دوباره‌ی آن. کلیدِ
+     وابستگی خودِ شیءِ پرسش است تا هر بار که پنجره باز می‌شود
+     کادر با مقدارِ همان بار پر شود. */
+  useEffect(() => { if (s.text) setDraft(s.text.initial ?? '') }, [s.text])
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => { setMounted(true) }, [])
@@ -137,14 +141,25 @@ export default function DialogHost() {
                 background: '#F4F3F1', color: SEC, fontSize: 13.5, fontWeight: 800,
                 cursor: 'pointer', fontFamily: 'inherit',
               }}>انصراف</button>
-              <button type="button" disabled={!draft.trim()}
-                onClick={() => { const v = draft.trim(); setDraft(''); resolveText(v) }} style={{
-                  flex: 1, padding: 12, borderRadius: 12, border: 'none',
-                  background: draft.trim() ? '#dc2626' : 'rgba(0,0,0,0.12)',
-                  color: draft.trim() ? '#fff' : 'rgba(0,0,0,0.35)',
-                  fontSize: 13.5, fontWeight: 800, fontFamily: 'inherit',
-                  cursor: draft.trim() ? 'pointer' : 'not-allowed',
-                }}>{s.text.confirmLabel}</button>
+              {/* ⚠️ ‏با `allowEmpty` مقدارِ خالی هم نتیجه است. بدونِ آن،
+                  «پاک‌کردنِ کپشن» و «بیرون‌آوردن از آلبوم» ممکن نبود:
+                  تنها راهِ خروج با کادرِ خالی، انصراف بود که `null`
+                  می‌دهد و تغییری ثبت نمی‌کند. */}
+              {(() => {
+                const okEmpty = s.text!.allowEmpty === true
+                const ready = okEmpty || !!draft.trim()
+                const danger = s.text!.tone !== 'gold'
+                return (
+                  <button type="button" disabled={!ready}
+                    onClick={() => { const v = draft.trim(); setDraft(''); resolveText(v) }} style={{
+                      flex: 1, padding: 12, borderRadius: 12, border: 'none',
+                      background: ready ? (danger ? '#dc2626' : '#C7A66A') : 'rgba(0,0,0,0.12)',
+                      color: ready ? (danger ? '#fff' : '#1A1408') : 'rgba(0,0,0,0.35)',
+                      fontSize: 13.5, fontWeight: 800, fontFamily: 'inherit',
+                      cursor: ready ? 'pointer' : 'not-allowed',
+                    }}>{s.text!.confirmLabel}</button>
+                )
+              })()}
             </div>
           </div>
         </div>,

@@ -1,4 +1,5 @@
 'use client'
+import { applyImagePatch } from '@/lib/profiles/edit-image'
 import { useChannelPublish, type PublishVideo } from '@/components/media/useChannelPublish'
 import { useVideoEdit } from '@/components/media/useVideoEdit'
 import { detailTitle, type VideoDetail } from '@/lib/media/video-details'
@@ -390,6 +391,10 @@ export default function FlatShop() {
       if (list.some(x => x.trim() === n)) return d
       return { ...d, albums: [...list, n] }
     })
+  }
+
+  const editImage = async (id: string, patch: { caption: string; album: string }) => {
+    await edit.apply(d => applyImagePatch({ ...d, gallery: d.gallery ?? [] }, id, patch) as typeof d)
   }
 
   const deleteShot = async (mid: string) => {
@@ -1048,6 +1053,7 @@ export default function FlatShop() {
               onOpenVideo={v => openVideo(v, edit.isOwner ? { onDelete: () => deleteVideo(v.id), onEdit: () => editVideo(v) } : undefined)}
               canEdit={edit.isOwner} busy={edit.saving || vidBusy}
               onAddImages={addShots} onAddVideos={addVideoFiles} beforeAddVideos={() => askChannel(String(profile?.title ?? ''))} onNewAlbum={newAlbum}
+              onEditImage={editImage}
             />
             {edit.error && <p role="alert" style={{ fontSize: 12, color: '#b91c1c', marginTop: 10 }}>{edit.error}</p>}
           </div>
