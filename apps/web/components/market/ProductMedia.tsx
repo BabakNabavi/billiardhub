@@ -13,8 +13,8 @@
    حالا نسبت این‌جا تعریف می‌شود و همه از همین‌جا می‌خوانند.
 
    ── چیدمانِ نشان‌ها ──
-   ستونِ چپ‌بالا: هم‌رسانی، و درست زیرش گزارش تخلف — هم‌اندازه و با
-   یک پس‌زمینه. راست‌بالا: نشان‌کردن. راست‌پایین: شمارِ عکس‌ها.
+   چپ‌بالا: هم‌رسانی. راست‌بالا: نشان‌کردن. راست‌پایین: شمارِ عکس‌ها.
+   ⚠️ گزارشِ تخلف عمدا این‌جا نیست — صفحه‌ی خودِ آگهی دارَدش.
    ⚠️ چپ/راستِ *دیداری* عمدی است و با `inset-inline` جابه‌جا نمی‌شود:
    این‌ها روی خودِ عکس‌اند و جای‌شان به جهتِ متن ربطی ندارد.
    ───────────────────────────────────────────────────────────── */
@@ -22,16 +22,12 @@
 import type { ReactNode } from 'react'
 import { Bookmark, Share2, Images } from 'lucide-react'
 import { toFaDigits } from '../../lib/jalali'
-import ReportButton from '../ReportButton'
 
 export interface ProductMediaProps {
   src: string
   alt: string
   /** نشانیِ صفحه‌ی محصول — برای هم‌رسانی */
   href: string
-  /** شناسه‌ی آگهی برای گزارش تخلف. نبودنش یعنی دکمه‌ی پرچم نیاید. */
-  reportId?: string | number
-  reportTitle?: string
   /** تعداد کلِ عکس‌های آگهی — کمتر از ۲ یعنی نشان نیاید. */
   imgCount?: number
   saved?: boolean
@@ -46,7 +42,7 @@ export interface ProductMediaProps {
 }
 
 export default function ProductMedia({
-  src, alt, href, reportId, reportTitle, imgCount = 0,
+  src, alt, href, imgCount = 0,
   saved, onToggleSave, saveLabel, children, className, imgClassName,
 }: ProductMediaProps) {
   const savedTxt = saveLabel ?? { on: 'برداشتن نشان', off: 'نشان کردن' }
@@ -56,12 +52,11 @@ export default function ProductMedia({
         className={'bh-pm-img' + (imgClassName ? ' ' + imgClassName : '')}
         onError={e => { (e.target as HTMLImageElement).style.visibility = 'hidden' }} />
 
-      {/* ستونِ چپ‌بالا */}
+      {/* ستونِ چپ‌بالا — فعلا یک نشان دارد، ولی ستون می‌ماند:
+          پرچمِ گزارش این‌جا بود و اگر روزی نشانِ دیگری اضافه شود
+          همین‌جا زیرِ هم می‌نشیند. */}
       <div className="bh-pm-col">
         <ShareChip href={href} title={alt} />
-        {reportId !== undefined && (
-          <ReportButton targetId={reportId} targetTitle={reportTitle ?? alt} className="bh-pm-chip bh-pm-rp" />
-        )}
       </div>
 
       {onToggleSave && (

@@ -966,7 +966,7 @@ export default function FlatShop() {
                       در سه صفحه سه شکل داشت. */}
                   <ProductMedia
                     src={p.img} alt={p.name} href={`/shop/${p.id}`}
-                    reportId={p.id} reportTitle={p.name} imgCount={p.imgCount}
+                    imgCount={p.imgCount}
                     saved={isWished}
                     saveLabel={{ on: 'حذف از علاقه‌مندی', off: 'افزودن به علاقه‌مندی' }}
                     onToggleSave={() => setWish(prev => toggleSet(prev, p.id))}
