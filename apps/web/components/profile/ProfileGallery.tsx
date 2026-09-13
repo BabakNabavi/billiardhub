@@ -45,11 +45,15 @@ const TABS = ['photos', 'videos', 'albums'] as const
 type Tab = typeof TABS[number]
 
 export default function ProfileGallery({
-  images, videos, albumNames = [], onOpenImage, onOpenVideo,
+  images, videos, albumNames = [], onOpenImage, onOpenVideo, headIcon,
   canEdit = false, busy = false, onAddImages, onAddVideos, onNewAlbum, beforeAddVideos,
 }: {
   images: GalleryImage[]
   videos: GalleryVideo[]
+  /** ⚠️ آیکونِ کنارِ عنوان — فقط صفحه‌ی متخصص می‌فرستد. این کامپوننت
+   *  بینِ متخصص، مربی و داور مشترک است و آن دو باید دقیقا همان
+   *  چیزی بمانند که بودند. */
+  headIcon?: React.ReactNode
   /** نام آلبوم‌های اعلام‌شده — آلبوم خالی هم باید دیده شود */
   albumNames?: string[]
   /** کل فهرست + اندیس، تا داخل نما بشود بعدی/قبلی رفت */
@@ -305,7 +309,7 @@ export default function ProfileGallery({
   return (
     <section aria-labelledby="ch-gallery-h">
       <div className="ch-sec-head">
-        <h2 id="ch-gallery-h">گالری</h2>
+        <h2 id="ch-gallery-h">{headIcon}گالری</h2>
         <span className="en">GALLERY</span>
         <span className="rule" aria-hidden />
       </div>
