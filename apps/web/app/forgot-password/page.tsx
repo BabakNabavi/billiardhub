@@ -15,8 +15,8 @@ import { passwordHint, capsFrom } from '../../lib/auth/password-hints';
 const toFa    = (v: string) => v.replace(/[0-9]/g, d => '۰۱۲۳۴۵۶۷۸۹'[+d] ?? d);
 const toLatin = (v: string) => v.replace(/[۰-۹]/g, ch => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(ch))).replace(/[^0-9]/g, '');
 
-const GOLD   = '#C7A66A';
-const GOLD_D = '#8F6531';
+const GOLD   = 'rgb(var(--c-em))';
+const GOLD_D = 'rgb(var(--c-em))';
 const TEXT   = '#1C1B17';
 const SEC    = '#5B564B';
 const MUT    = '#6F6A5C';
@@ -156,11 +156,11 @@ export default function ForgotPasswordPage() {
           box-shadow: 0 18px 60px rgba(28,27,23,0.08);
           animation: auUp .55s cubic-bezier(.22,1,.36,1) both; position: relative; overflow: hidden; }
         .au-card::before { content: ''; position: absolute; top: 0; inset-inline: 0; height: 3px;
-          background: linear-gradient(90deg, #8A6020, ${GOLD}, #8A6020); }
+          background: rgb(var(--c-em)); }
 
         .au-wrap { display: flex; align-items: center; background: #FAFAF7; border: 1px solid ${LINE};
           border-radius: 13px; transition: border-color .25s, box-shadow .25s; min-width: 0; }
-        .au-wrap.on { border-color: rgba(199,166,106,0.65); box-shadow: 0 0 0 3px rgba(199,166,106,0.14); background: #fff; }
+        .au-wrap.on { border-color: rgb(var(--c-em) / 0.65); box-shadow: 0 0 0 3px rgb(var(--c-em) / 0.14); background: #fff; }
         .au-ic { padding: 0 14px 0 0; color: ${MUT}; display: flex; align-items: center; flex-shrink: 0; transition: color .25s; }
         .au-wrap.on .au-ic { color: ${GOLD_D}; }
         .au-inp { flex: 1; min-width: 0; background: transparent; border: none; outline: none;
@@ -182,12 +182,12 @@ export default function ForgotPasswordPage() {
         .au-inp.otp::placeholder { letter-spacing: inherit; font-size: inherit; direction: ltr; }
 
         .au-btn { width: 100%; padding: 15px; border: none; border-radius: 13px; cursor: pointer;
-          font-family: inherit; font-size: 15px; font-weight: 800; color: #241B08;
-          background: linear-gradient(135deg, #E8CE96, ${GOLD} 55%, #A8853F);
-          box-shadow: 0 12px 30px rgba(199,166,106,0.32);
+          font-family: inherit; font-size: 15px; font-weight: 600; color: #fff;
+          background: rgb(var(--c-em));
+          box-shadow: 0 4px 14px rgb(var(--c-ink) / .12);
           display: flex; align-items: center; justify-content: center; gap: 10px;
           transition: transform .25s cubic-bezier(.22,1,.36,1), box-shadow .25s, opacity .2s; }
-        .au-btn:not(:disabled):hover { transform: translateY(-2px); box-shadow: 0 18px 40px rgba(199,166,106,0.42); }
+        .au-btn:not(:disabled):hover { transform: translateY(-2px); background: var(--brand-dark); box-shadow: 0 8px 22px rgb(var(--c-ink) / .16); }
         .au-btn:not(:disabled):active { transform: scale(0.985); }
         .au-btn:disabled { opacity: .65; cursor: not-allowed; }
 
@@ -200,7 +200,7 @@ export default function ForgotPasswordPage() {
         /* پله‌های سه‌گانه */
         .au-steps { display: flex; align-items: center; gap: 6px; margin: 0 0 20px; }
         .au-steps i { flex: 1; height: 3px; border-radius: 2px; background: ${LINE}; transition: background .35s; }
-        .au-steps i.on { background: linear-gradient(90deg, ${GOLD}, #8A6020); }
+        .au-steps i.on { background: linear-gradient(90deg, ${GOLD}, rgb(var(--c-em))); }
 
         /* شرط‌های رمز */
         .au-rules { list-style: none; padding: 0; margin: 10px 0 20px; display: grid; gap: 6px; }
@@ -241,7 +241,7 @@ export default function ForgotPasswordPage() {
 
       <div className="au-card">
         <h1 style={{ fontSize: 23, fontWeight: 900, color: TEXT, margin: '0 0 6px', letterSpacing: '-0.02em' }}>{title}</h1>
-        <div style={{ width: 46, height: 3, borderRadius: 2, background: `linear-gradient(90deg,${GOLD},#8A6020)`, transformOrigin: 'right', animation: 'auX .5s .2s ease both', marginBottom: 10 }} />
+        <div style={{ width: 46, height: 3, borderRadius: 2, background: `linear-gradient(90deg,${GOLD},rgb(var(--c-em)))`, transformOrigin: 'right', animation: 'auX .5s .2s ease both', marginBottom: 10 }} />
         <p style={{ fontSize: 13, color: MUT, margin: '0 0 22px', lineHeight: 1.95 }}>{lead}</p>
 
         {step !== 'done' && (
@@ -318,7 +318,7 @@ export default function ForgotPasswordPage() {
                 چه چیزی ممکن است اشتباه باشد و راه تماس. */}
             <div style={{
               marginTop: 14, padding: '11px 13px', borderRadius: 12,
-              background: 'rgba(199,166,106,0.07)', border: '1px solid rgba(199,166,106,0.22)',
+              background: 'rgb(var(--c-em) / 0.07)', border: '1px solid rgb(var(--c-em) / 0.22)',
             }}>
               <div style={{ fontSize: 12.5, fontWeight: 800, color: '#6B5225', marginBottom: 6 }}>
                 کد به دستتان نرسید؟
@@ -330,7 +330,7 @@ export default function ForgotPasswordPage() {
               </ul>
               <Link href="/contact" style={{
                 display: 'inline-flex', alignItems: 'center', gap: 6, marginTop: 9,
-                fontSize: 12.5, fontWeight: 700, color: '#8F6531', textDecoration: 'none',
+                fontSize: 12.5, fontWeight: 700, color: 'rgb(var(--c-em))', textDecoration: 'none',
               }}>
                 تماس با پشتیبانی ←
               </Link>
@@ -391,10 +391,10 @@ export default function ForgotPasswordPage() {
               <div style={{
                 display: 'flex', alignItems: 'flex-start', gap: 7, marginTop: 10,
                 padding: '9px 11px', borderRadius: 10, lineHeight: 1.9,
-                background: hint.persian ? 'rgba(178,59,46,0.07)' : 'rgba(199,166,106,0.10)',
-                border: `1px solid ${hint.persian ? 'rgba(178,59,46,0.28)' : 'rgba(199,166,106,0.32)'}`,
+                background: hint.persian ? 'rgba(178,59,46,0.07)' : 'rgb(var(--c-em) / 0.10)',
+                border: `1px solid ${hint.persian ? 'rgba(178,59,46,0.28)' : 'rgb(var(--c-em) / 0.32)'}`,
                 fontSize: 12, fontWeight: 700,
-                color: hint.persian ? '#B23B2E' : '#8F6531',
+                color: hint.persian ? '#B23B2E' : 'rgb(var(--c-em))',
               }}>
                 <AlertCircle size={14} style={{ flexShrink: 0, marginTop: 2 }} />
                 <span>{hint.message}</span>
@@ -427,7 +427,7 @@ export default function ForgotPasswordPage() {
         <button className="au-btn" onClick={submit} disabled={loading}>
           {loading ? (
             <>
-              <span style={{ width: 17, height: 17, border: '2px solid rgba(36,27,8,0.25)', borderTop: '2px solid #241B08', borderRadius: '50%', animation: 'spin .7s linear infinite', display: 'inline-block' }} />
+              <span style={{ width: 17, height: 17, border: '2px solid rgba(36,27,8,0.25)', borderTop: '2px solid #fff', borderRadius: '50%', animation: 'spin .7s linear infinite', display: 'inline-block' }} />
               کمی صبر کنید…
             </>
           ) : btnLabel}
