@@ -1,14 +1,12 @@
+import { WORDMARK_GOLD } from '@/lib/brand'
 import Link from 'next/link';
 import { MapPin, Phone, Mail, ChevronLeft } from 'lucide-react';
 import EnamadSeal from './EnamadSeal';
 import PayPingSeal from './PayPingSeal';
 
 const GOLD    = '#C7A66A';
-/* همان طلایی ولی خوانا برای متن روی پس‌زمینه‌ی روشن فوتر (۵٫۰۲:۱) */
-/* ⚠️ هم‌خانواده‌ی طلاییِ نوار: هر دو H=39° S=52٪، فقط روشنایی فرق
-   دارد. روی زمینه‌ی روشنِ فوتر: ۵٫۰۰ — کف ۴٫۵. یک مقدارِ مشترک
-   برای هر دو ممکن نیست (روی زمینه‌ی دیگری زیرِ کف می‌افتد). */
-const GOLD_TXT = '#806128';
+/* طلاییِ نشانِ متنی — دقیقا همان که نوار دارد. */
+const GOLD_TXT = WORDMARK_GOLD;
 const TEXT    = '#1A1917';
 /* آلفا از ۰٫۵۲ به ۰٫۶۲: روی پس‌زمینه‌ی فوتر ۳٫۴۷:۱ می‌داد (محاسبه‌شده) */
 const DIM     = 'rgba(26,25,23,0.62)';
@@ -201,7 +199,7 @@ export default function Footer() {
             {/* Logo + wordmark */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '14px' }}>
               <img
-                src="/images/Logo/bh-mark-256-v6.webp"
+                src="/images/Logo/bh-mark-256-v7.webp"
                 loading="lazy" decoding="async"
                 alt="بیلیارد هاب"
                 style={{ width: '40px', height: '40px', objectFit: 'contain', flexShrink: 0, borderRadius: '10px' }}

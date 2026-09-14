@@ -1,5 +1,6 @@
 ﻿'use client';
 
+import { WORDMARK_GOLD } from '@/lib/brand'
 import Link from 'next/link';
 import { useState, useRef, useEffect } from 'react';
 import { useAuthStore } from '../store/auth.store';
@@ -16,12 +17,12 @@ import { subscribeDM } from '../lib/realtime';
 import Stories from './Stories';
 import Avatar from './ui/Avatar';
 
-/* ⚠️ هم‌خانواده‌ی طلاییِ فوتر: هر دو H=39° S=52٪ (رنگ‌مایه‌ی
-   #C7A66A)، فقط روشنایی فرق دارد چون زمینه‌ها فرق دارند.
-   روی نوارِ تیره: ۶٫۴۲ — کف ۴٫۵. */
-const GOLD = '#B68B3A';
-const GOLD_LIGHT = 'rgba(182,139,58,0.1)';
-const GOLD_BORDER = 'rgba(182,139,58,0.22)';
+/* ⚠️ طلاییِ نشانِ متنی از lib/brand می‌آید و با فوتر یکی است.
+   دلیلِ عددش همان‌جا نوشته شده — مخصوصا اینکه همین کلمه در نوار
+   روی *دو* زمینه‌ی متضاد می‌نشیند. */
+const GOLD = WORDMARK_GOLD;
+const GOLD_LIGHT = 'rgba(140,106,44,0.1)';
+const GOLD_BORDER = 'rgba(140,106,44,0.22)';
 
 const exploreMenu = [
   {
@@ -350,7 +351,7 @@ export default function Navbar() {
             {/* سایه‌ی خیلی نرم + بول ظریف (هایلایت بالا، تیرگی پایین) */}
             <div style={{ position: 'relative', width: '40px', height: '40px', borderRadius: '12px', overflow: 'hidden', flexShrink: 0,
               boxShadow: '0 1px 2px rgba(28,27,23,0.12), 0 4px 9px rgba(184,147,58,0.13)' }}>
-                <img loading="eager" decoding="async" src="/images/Logo/bh-mark-256-v6.webp" alt="بیلیارد هاب" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                <img loading="eager" decoding="async" src="/images/Logo/bh-mark-256-v7.webp" alt="بیلیارد هاب" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                 <span aria-hidden style={{ position: 'absolute', inset: 0, borderRadius: '12px', pointerEvents: 'none',
                   boxShadow: 'inset 0 1px 1px rgba(255,255,255,0.26), inset 0 -1px 2px rgba(60,40,10,0.18)' }} />
               </div>

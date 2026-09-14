@@ -10,25 +10,25 @@
   "theme_color": "#C7A66A",
   "icons": [
     {
-      "src": "/images/Logo/bh-icon-192-v6.png",
+      "src": "/images/Logo/bh-icon-192-v7.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/images/Logo/bh-mark-256-v6.png",
+      "src": "/images/Logo/bh-mark-256-v7.png",
       "sizes": "256x256",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/images/Logo/bh-icon-512-v6.png",
+      "src": "/images/Logo/bh-icon-512-v7.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/images/Logo/bh-maskable-512-v6.png",
+      "src": "/images/Logo/bh-maskable-512-v7.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"

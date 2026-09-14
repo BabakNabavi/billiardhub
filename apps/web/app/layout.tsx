@@ -48,9 +48,9 @@ export const metadata: Metadata = {
     /* تصویر اشتراک‌گذاری — تا امروز نبود و شبکه‌های اجتماعی خودشان
        چیزی از صفحه برمی‌داشتند. لوگوی تازه اندازه‌ی استاندارد ۱۲۰۰×۶۳۰
        را دارد. */
-    images: [{ url: '/images/Logo/bh-og-v6.png', width: 1200, height: 630, alt: 'بیلیارد هاب' }],
+    images: [{ url: '/images/Logo/bh-og-v7.png', width: 1200, height: 630, alt: 'بیلیارد هاب' }],
   },
-  twitter: { card: 'summary_large_image', images: ['/images/Logo/bh-og-v6.png'] },
+  twitter: { card: 'summary_large_image', images: ['/images/Logo/bh-og-v7.png'] },
   manifest: '/manifest.json',
   icons: {
     icon: [
@@ -58,9 +58,9 @@ export const metadata: Metadata = {
          `/favicon.ico` سرو می‌کند و لینکش را با هش نسخه در head
          می‌گذارد. سطر دستی فقط یک نسخه‌ی دوم می‌ساخت — و وقتی فایلش
          گم شد، همان سطر یک ۴۰۴ در هر صفحه بود. */
-      { url: '/images/Logo/bh-favicon-96-v6.png', sizes: '96x96', type: 'image/png' },
-      { url: '/images/Logo/bh-favicon-32-v6.png', sizes: '32x32', type: 'image/png' },
-      { url: '/images/Logo/bh-favicon-16-v6.png', sizes: '16x16', type: 'image/png' },
+      { url: '/images/Logo/bh-favicon-96-v7.png', sizes: '96x96', type: 'image/png' },
+      { url: '/images/Logo/bh-favicon-32-v7.png', sizes: '32x32', type: 'image/png' },
+      { url: '/images/Logo/bh-favicon-16-v7.png', sizes: '16x16', type: 'image/png' },
     ],
     /* ── چرا v5 ──
        iOS آیکون یک میان‌بر نصب‌شده را **هرگز** به‌روز نمی‌کند و
@@ -68,7 +68,7 @@ export const metadata: Metadata = {
        فایل عوض شده بود ولی نشانی نه، پس لوگوی قدیمی می‌ماند.
        عوض‌کردن نام تنها راهی است که نصب تازه فایل تازه بگیرد.
        میان‌برهای نصب‌شده باید یک‌بار حذف و دوباره اضافه شوند. */
-    apple: '/images/Logo/bh-apple-180-v6.png',
+    apple: '/images/Logo/bh-apple-180-v7.png',
   },
   appleWebApp: {
     capable: true,
