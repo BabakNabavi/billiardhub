@@ -31,7 +31,7 @@ import {
   Search, ChevronDown, ArrowLeft, ArrowRight,
   MapPin, Star, Heart, Trophy, Users,
   ShoppingBag, Building2, Wrench, GraduationCap,
-  Clock, Eye, CheckCircle, X, Calendar,
+  Eye, X, Calendar,
   Hammer, Scissors, Settings, Truck, Radio, Scale, Play, Clapperboard,
 } from 'lucide-react';
 import AdSlot, { usePlacementState, type EntitySnapshot, type PlacementKey, type PlacementState } from '../components/ads/AdSlot';
@@ -137,14 +137,14 @@ function SR({
 /* ═══════════════════════════════════════════════════════════════
    TOKENS
 ═══════════════════════════════════════════════════════════════ */
-const GOLD     = '#C7A66A';
-const GOLD_D   = '#A07840';
+const GOLD     = 'var(--brand)';
+const GOLD_D   = 'var(--brand)';
 /* رنگ متن دکمه‌های طلایی. GOLD_D روی پس‌زمینه‌ی rgba(199,166,106,0.12)
    فقط ۳٫۵۵:۱ می‌داد که زیر حد ۴٫۵:۱ است؛ این یکی ۴٫۹۵:۱ می‌دهد.
    حدس زدن جواب نداد — محاسبه شد. */
-const CTA_INK  = '#8A6020';
-const GOLD_DIM = 'rgba(199,166,106,0.60)';
-const GOLD_BOR = 'rgba(199,166,106,0.22)';
+const CTA_INK  = 'rgb(var(--c-em))';
+const GOLD_DIM = 'var(--brand)';
+const GOLD_BOR = 'var(--border)';
 
 /* لرزش کوتاه هنگام تعویض کارت.
 
@@ -160,9 +160,9 @@ function vibrate(ms = 8) {
   if (!userTapped) return;
   try { navigator.vibrate?.(ms); } catch { /* دستگاهی که پشتیبانی نمی‌کند */ }
 }
-const TEXT     = '#1A1917';
-const TEXT_M   = 'rgba(26,25,23,0.28)';
-const BORDER   = 'rgba(26,25,23,0.07)';
+const TEXT     = 'rgb(var(--c-ink))';
+const TEXT_M   = 'rgb(var(--c-ink-2))';
+const BORDER   = 'var(--border)';
 const GRN = '#1E6641';
 const BRN = '#6B3A1F';
 const BLU = '#1A4A7A';
@@ -245,15 +245,8 @@ const FEATURE_CARDS = [
   { Icon: ShoppingBag, title: 'خرید و فروش',        caption: 'خرید و فروش انواع تجهیزات بیلیارد',                   href: '/shop',          clr: '#B97BFF', rgb: '185,123,255'  },
   { Icon: Users,       title: 'جامعه بیلیارد',      caption: 'ارتباط با همه‌ی صنوف بیلیاردی و اشتراک تجربه‌ها',   href: '/players',       clr: '#FF6B9D', rgb: '255,107,157'  },
   { Icon: Building2,   title: 'تولیدکنندگان',       caption: 'معرفی بهترین تولیدکنندگان تجهیزات',                   href: '/manufacturers', clr: '#06b6d4', rgb: '6,182,212'    },
-  { Icon: Wrench,         title: 'خدمات فنی',    caption: 'خدمات نصب و تعمیر تجهیزات بیلیارد',                      href: '/services', clr: '#C7A66A', rgb: '199,166,106' },
+  { Icon: Wrench,         title: 'خدمات فنی',    caption: 'خدمات نصب و تعمیر تجهیزات بیلیارد',                      href: '/services', clr: 'var(--brand)', rgb: '199,166,106' },
   { Icon: GraduationCap, title: 'آموزش',         caption: 'آموزش آکادمیک با برترین مربیان و بالاترین سطح',            href: '/coaches',  clr: '#F472B6', rgb: '244,114,182' },
-];
-
-const TRUST_ITEMS = [
-  { Icon: Users,       label: 'جامعه فعال',       sub: 'در حال رشد',          clr: '#B97BFF', rgb: '185,123,255' },
-  { Icon: CheckCircle, label: 'پرداخت امن',        sub: 'سریع و مطمئن',        clr: '#4A9EFF', rgb: '74,158,255'  },
-  { Icon: Clock,       label: 'پشتیبانی ۲۴/۷',   sub: 'همیشه در کنار شما',   clr: '#30C55A', rgb: '48,197,90'   },
-  { Icon: Star,        label: 'تجربه‌ای متفاوت',  sub: 'برای عاشقان بیلیارد', clr: '#C7A66A', rgb: '199,166,106' },
 ];
 
 /* ═══════════════════════════════════════════════════════════════
@@ -432,7 +425,7 @@ function ClubCard({ club, h = '360px', featured = false }: { club: RealClub; h?:
             flexDirection: 'column', justifyContent: 'flex-start',
             overflow: 'hidden', gap: '3px',
           }}>
-            <div style={{ fontSize: featured ? '17px' : '14px', fontWeight: 800, color: '#1a1a1a', letterSpacing: '-0.02em', lineHeight: 1.2 }}>
+            <div style={{ fontSize: featured ? '17px' : '14px', fontWeight: 600, color: '#1a1a1a', letterSpacing: '-0.02em', lineHeight: 1.2 }}>
               {club.name}{club.verified && <VerifiedBadge title="باشگاه تأیید شده" />}
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '3px' }}>
@@ -462,7 +455,7 @@ function ClubCard({ club, h = '360px', featured = false }: { club: RealClub; h?:
             </div>
             )}
             <div style={{ flex: 1 }} />
-            <div style={{ height: '1px', background: 'linear-gradient(to left, transparent, rgba(199,166,106,0.35), transparent)', margin: '6px 0' }} />
+            <div style={{ height: '1px', background: 'linear-gradient(to left, transparent, var(--brand), transparent)', margin: '6px 0' }} />
             <div style={{ display: 'flex', justifyContent: 'center' }}>
               {/* هاور با CSS انجام می‌شود، نه با state `hov`.
                   دو سود: استایل تکراری از HTML بیرون می‌رود، و هر
@@ -492,7 +485,7 @@ function ClubCard({ club, h = '360px', featured = false }: { club: RealClub; h?:
             overflow: 'hidden', gap: '6px',
           }}>
             {/* ۱۳ → ۱۴٫۳ → ۱۵ → ۱۶٫۵ (۱۰٪ دیگر) */}
-            <div style={{ fontSize: '16.5px', fontWeight: 800, color: '#1a1a1a',
+            <div style={{ fontSize: '16.5px', fontWeight: 600, color: '#1a1a1a',
               letterSpacing: '-0.02em', textAlign: 'center', lineHeight: 1.2 }}>
               {club.name.replace(/^باشگاه\s+/, '')}
               {club.verified && <VerifiedBadge title="باشگاه تأیید شده" />}
@@ -555,11 +548,11 @@ const BAZAAR_CSS = `
      عادی — دقیقا همان چیزی که در فهرست بازار هست. */
   .bz-name { font-size:12.5px; color:#1C1B17; line-height:1.5; display:block; overflow:hidden; }
   .bz-h { display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;
-    overflow:hidden; font-weight:800; }
+    overflow:hidden; font-weight: 600; }
   .bz-t { display:block; margin-top:3px; font-size:11px; font-weight:400; color:#6E695C;
     white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .bz-row { margin-top:auto; display:flex; align-items:center; gap:5px; }
-  .bz-pct { background:#b400ae; color:#fff; font-size:12px; font-weight:800;
+  .bz-pct { background:#b400ae; color:#fff; font-size:12px; font-weight: 600;
     border-radius:999px; padding:3px 8px 1px; line-height:1;
     display:inline-flex; align-items:center; justify-content:center; flex-shrink:0; }
   .bz-prices { margin-inline-start:auto; text-align:right; }
@@ -620,7 +613,7 @@ function SellerCard({ s }: { s: RealStore }) {
           پوستر تخت گوشه‌های سفید درشتی می‌ساخت که مثل هاله‌ی سفید
           دور کارت دیده می‌شد. کارت سفید می‌ماند — فقط برش کم‌عمق‌تر
           شد تا آن دو لکه از بین برود. */}
-      <div style={{ position: 'relative', height: '150px', overflow: 'hidden', borderRadius: 0 }}>
+      <div style={{ position: 'relative', height: '150px', overflow: 'hidden', borderRadius: '0 0 50% 50% / 0 0 26px 26px' }}>
         {/* ── فروشگاه بی‌لوگو ⇒ پوستر پیش‌فرض، نه عکس عمومی ──
             تا امروز یک عکس ثابت فروشگاه نشان داده می‌شد که ربطی به
             این فروشگاه نداشت (و پیش‌تر حتی نشانی‌اش ۴۰۴ می‌داد و کارت
@@ -636,7 +629,7 @@ function SellerCard({ s }: { s: RealStore }) {
              نام. بافت نقطه‌ای، هالهٔ بلور و زیرنویس لاتین برداشته
              شدند — روی کارتی به این کوچکی شلوغی می‌ساختند. */
           <div style={{ position: 'absolute', inset: 0, background: '#0d3a29', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <span style={{ fontSize: 34, fontWeight: 900, color: 'rgba(199,166,106,0.85)' }}>
+            <span style={{ fontSize: 34, fontWeight: 700, color: 'var(--brand)' }}>
               {s.name.trim().charAt(0) || 'ف'}
             </span>
           </div>
@@ -644,14 +637,14 @@ function SellerCard({ s }: { s: RealStore }) {
         {/* gradient overlay */}
         <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.28) 100%)' }} />
         {s.badge && (
-          <div style={{ position: 'absolute', top: '10px', right: '10px', background: GOLD, color: '#1a1a1a', fontSize: '9px', fontWeight: 800, padding: '3px 10px', borderRadius: '20px', letterSpacing: '0.05em' }}>
+          <div style={{ position: 'absolute', top: '10px', right: '10px', background: GOLD, color: '#1a1a1a', fontSize: '9px', fontWeight: 600, padding: '3px 10px', borderRadius: '20px', letterSpacing: '0.05em' }}>
             {s.badge}
           </div>
         )}
       </div>
       {/* Info */}
       <div style={{ padding: '14px 14px 16px', textAlign: 'center' }}>
-        <div style={{ fontSize: '14px', fontWeight: 800, color: TEXT, lineHeight: 1.3 }}>
+        <div style={{ fontSize: '14px', fontWeight: 600, color: TEXT, lineHeight: 1.3 }}>
           {s.name}{s.verified && <VerifiedBadge title="فروشگاه تأیید شده" />}
         </div>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '3px', marginTop: '3px', fontSize: '11px', color: TEXT_M }}>
@@ -666,7 +659,7 @@ function SellerCard({ s }: { s: RealStore }) {
             <span style={{ fontSize: '10px', color: TEXT_M }}>({s.reviews})</span>
           </div>
         )}
-        <div style={{ marginTop: '12px', padding: '8px 0', borderRadius: '10px', background: 'rgba(199,166,106,0.08)', border: `1px solid ${GOLD_BOR}`, color: CTA_INK, fontSize: '12px', fontWeight: 700 }}>
+        <div style={{ marginTop: '12px', padding: '8px 0', borderRadius: '10px', background: 'var(--brand-tint)', border: `1px solid ${GOLD_BOR}`, color: CTA_INK, fontSize: '12px', fontWeight: 700 }}>
           مشاهده فروشگاه
         </div>
       </div>
@@ -698,9 +691,9 @@ function MktBanner({ slides, label, body, cta, accent, href, initialIdx = 0, lqC
       <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', padding: '0 20px' }}>
         <div>
           <div style={{ fontSize: '9px', color: accent, fontWeight: 700, letterSpacing: '0.24em', marginBottom: '5px', textShadow: '0 1px 6px rgba(0,0,0,0.9)' }}>{label}</div>
-          <div style={{ fontSize: 'clamp(13px,1.3vw,18px)', fontWeight: 900, color: '#fff', letterSpacing: '-0.03em', lineHeight: 1.2, marginBottom: '10px', textShadow: '0 2px 10px rgba(0,0,0,0.85)' }} dangerouslySetInnerHTML={{ __html: body }} />
+          <div style={{ fontSize: 'clamp(13px,1.3vw,18px)', fontWeight: 700, color: '#fff', letterSpacing: '-0.03em', lineHeight: 1.2, marginBottom: '10px', textShadow: '0 2px 10px rgba(0,0,0,0.85)' }} dangerouslySetInnerHTML={{ __html: body }} />
           <div style={lqCta
-            ? { display: 'inline-flex', alignItems: 'center', gap: '5px', background: '#F6F1E8', border: '1px solid rgba(199,166,106,0.45)', color: CTA_INK, padding: '5px 13px', borderRadius: '10px', fontSize: '11px', fontWeight: 700 }
+            ? { display: 'inline-flex', alignItems: 'center', gap: '5px', background: 'rgb(var(--c-paper))', border: '1px solid var(--brand-line)', color: CTA_INK, padding: '5px 13px', borderRadius: '10px', fontSize: '11px', fontWeight: 700 }
             : { display: 'inline-flex', alignItems: 'center', gap: '5px', background: accent, padding: '4px 12px', borderRadius: '20px', fontSize: '11px', fontWeight: 700, color: isDark ? '#1a1a1a' : '#fff' }
           }>{cta} <ArrowLeft size={9} /></div>
         </div>
@@ -1373,12 +1366,12 @@ useEffect(() => {
 
         /* ─── GOLD / Primary ─── */
         .btn-primary {
-          background:rgba(199,166,106,0.10);
+          background:var(--brand-tint);
           color:${GOLD};
-          border:1px solid rgba(199,166,106,0.22);
+          border:1px solid var(--border);
           padding:14px 32px; font-size:14px; font-weight:700;
         }
-        .btn-primary:hover { background:rgba(199,166,106,0.18); }
+        .btn-primary:hover { background:var(--brand-tint); }
 
         /* ─── GREEN ─── */
         .btn-green {
@@ -1410,15 +1403,15 @@ useEffect(() => {
         /* «مشاهده همه» — دکمه به طرح LQ (تینت طلایی برند) */
         .see-all-lq {
           display:inline-flex; align-items:center; gap:6px;
-          background:rgba(199,166,106,0.12); color:#8F6531;
-          border:1px solid rgba(199,166,106,0.34); border-radius:10px;
+          background:var(--brand-tint); color:var(--brand);
+          border:1px solid var(--border); border-radius:10px;
           padding:9px 16px; font-size:13px; font-weight:700; text-decoration:none;
           transition:background .2s ease, transform .25s cubic-bezier(.22,1,.36,1), box-shadow .25s;
         }
-        .see-all-lq:hover { background:rgba(199,166,106,0.18); transform:translateY(-2px); box-shadow:0 8px 20px rgba(199,166,106,0.20); }
+        .see-all-lq:hover { background:var(--brand-tint-2); transform:translateY(-2px); box-shadow:0 8px 20px rgb(var(--c-ink) / 0.076); }
         @media(max-width:640px){ .see-all-lq { padding:6px 12px; font-size:11.5px; gap:4px; border-radius:8px; } }
         /* روی سکشن‌های تیره متن طلایی روشن‌تر تا خوانا بماند */
-        .see-all-lq.on-dark { color:${GOLD}; border-color:rgba(199,166,106,0.42); }
+        .see-all-lq.on-dark { color:${GOLD}; border-color:var(--brand-line); }
 
         /* ظرف محتوای هیرو کلیک را رد می‌کند (توضیحش کنار خودش)، ولی
            هرچه داخلش است باید کلیک‌پذیر بماند. */
@@ -1458,30 +1451,30 @@ useEffect(() => {
            رشته‌ی کامل استایل در HTML می‌آمد. هاورش از کارت والد می‌آید. */
         .cta-lq {
           width:90%; text-align:center; padding:9px 0;
-          background:rgba(199,166,106,0.12);
+          background:var(--brand-tint);
           border:1px solid ${GOLD_BOR};
           color:${CTA_INK}; font-size:13px; font-weight:700;
           font-family:var(--font-base);
           transition:box-shadow .3s ease, background .3s ease, transform .3s ease;
-          box-shadow:0 0 0 rgba(199,166,106,0);
+          box-shadow:0 0 0 rgb(var(--c-ink) / 0);
         }
         .cta-lq-sm { padding:6px 0; font-size:12px; }
         @media (hover:hover) {
           .club-card-x:hover .cta-lq {
-            background:rgba(199,166,106,0.20);
+            background:var(--brand-tint);
             transform:translateY(-1px);
-            box-shadow:0 8px 20px rgba(199,166,106,0.34);
+            box-shadow:0 8px 20px rgb(var(--c-ink) / 0.129);
           }
-          .club-card-x:hover .cta-lq-sm { box-shadow:0 6px 16px rgba(199,166,106,0.32); }
+          .club-card-x:hover .cta-lq-sm { box-shadow:0 6px 16px rgb(var(--c-ink) / 0.122); }
         }
-        .sec-title{font-size:clamp(28px,4vw,52px);font-weight:900;letter-spacing:-0.048em;line-height:0.96;margin:0 0 6px;}
+        .sec-title{font-size:clamp(24px,3.2vw,40px);font-weight:700;letter-spacing:-0.022em;line-height:1.16;margin:0 0 8px;}
         .sec-rule {height:3px;width:64px;border-radius:2px;margin-top:14px;background:linear-gradient(90deg,currentColor,transparent);}
         /* وردمارک outline پس‌زمینه‌ی هر سکشن — امضای هویت جدید */
         .sec-word{position:absolute;top:2px;inset-inline-end:-6px;font-weight:900;font-size:clamp(56px,9vw,120px);line-height:1;letter-spacing:0.03em;color:transparent;-webkit-text-stroke:1px var(--wc,rgba(28,27,23,0.06));user-select:none;pointer-events:none;direction:ltr;}
         /* خط مویی اریب — امضای برند */
         .sec-hair{position:absolute;top:-25%;bottom:-25%;width:1px;transform:rotate(14deg);pointer-events:none;}
         /* لبه‌های محو مارکی فروشندگان */
-        .sellers-desk{-webkit-mask-image:linear-gradient(to right,transparent 0,black 4%,black 96%,transparent 100%);mask-image:linear-gradient(to right,transparent 0,black 4%,black 96%,transparent 100%);}
+        .sellers-desk{-webkit-mask-image:linear-gradient(to right,transparent 0,black 4%,black 100%);mask-image:linear-gradient(to right,transparent 0,black 4%,black 100%);}
 
         .prod-hover{transition:transform .4s cubic-bezier(.4,0,.2,1),box-shadow .4s ease;}
         .prod-hover:hover{transform:translateY(-6px);box-shadow:0 20px 52px rgba(26,25,23,0.12)!important;}
@@ -1617,7 +1610,7 @@ useEffect(() => {
           background:rgba(255,255,255,0.92); border:1px solid rgba(28,27,23,0.10);
           color:#5B564B; box-shadow:0 4px 16px rgba(28,27,23,0.12);
           transition:transform .2s, color .2s; }
-        .clubs-nav:hover { transform:translateY(-50%) scale(1.06); color:#8F6531; }
+        .clubs-nav:hover { transform:translateY(-50%) scale(1.06); color:var(--brand); }
         .mkt-mobile-slider { display:none; gap:10px; overflow-x:auto; scrollbar-width:none; padding:2px 18px 16px; scroll-snap-type:x proximity; }
         .mkt-mobile-slider::-webkit-scrollbar { display:none; }
         .mkt-split::-webkit-scrollbar { display:none; }
@@ -1890,11 +1883,11 @@ useEffect(() => {
         }}>
           {/* Headline — رنگی با spans */}
           <h1 className="hb hero-h1" style={{
-            fontSize: 'clamp(29px, 4.6vw, 66px)', fontWeight: 900, lineHeight: 1.08,
+            fontSize: 'clamp(29px, 4.6vw, 66px)', fontWeight: 700, lineHeight: 1.08,
             margin: '0 0 22px', letterSpacing: '-0.03em', textAlign: 'center', whiteSpace: 'nowrap',
           }}>
             <span style={{ color: '#ffffff', textShadow: '0 2px 28px rgba(0,0,0,0.55)' }}>پلتفرم جامع و تخصصی </span>
-            <span style={{ color: '#D4A843', textShadow: '0 2px 10px rgba(212,168,67,0.40), 0 2px 28px rgba(0,0,0,0.55)' }}>بیلیارد</span>
+            <span style={{ color: '#ffffff', textShadow: '0 2px 28px rgba(0,0,0,0.55)' }}>بیلیارد</span>
           </h1>
 
           {/* Subtitle — نقطه‌ی اتصال؛ عمدا کم‌وزن‌تر از تیتر */}
@@ -1908,7 +1901,7 @@ useEffect(() => {
             اتصال بی‌واسطه؛ خانه‌ی دیجیتال جامعه‌ی بیلیارد{' '}
             {/* «ایران» با گرادیان عمودی پرچم: سبز → سفید → قرمز */}
             <span style={{
-              fontWeight: 800,
+              fontWeight: 600,
               background: 'linear-gradient(180deg, #2EAD4F 0%, #2EAD4F 34%, #FFFFFF 44%, #FFFFFF 56%, #E03C31 66%, #E03C31 100%)',
               WebkitBackgroundClip: 'text', backgroundClip: 'text',
               WebkitTextFillColor: 'transparent', color: 'transparent',
@@ -1976,50 +1969,13 @@ useEffect(() => {
                   width: i === activeCard ? '20px' : '5px',
                   borderRadius: '3px', flexShrink: 0,
                   background: i === activeCard ? GOLD : 'rgba(255,255,255,0.25)',
-                  boxShadow: i === activeCard ? '0 0 8px rgba(199,166,106,0.5)' : 'none',
+                  boxShadow: i === activeCard ? '0 0 8px rgb(var(--c-ink) / 0.19)' : 'none',
                   transition: 'all 0.35s cubic-bezier(0.22,1,0.36,1)',
                 }} />
               ))}
             </div>
           </div>
 
-          {/* Trust items — unified box with 4 cells divided by thin lines */}
-          <div className="he trust-box" style={{ marginTop: '44px' }}>
-            <div className="trust-grid" style={{
-              display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr',
-              zoom: 0.8,
-              background: 'rgba(10,9,14,0.30)',
-              backdropFilter: 'blur(40px) saturate(170%)',
-              WebkitBackdropFilter: 'blur(40px) saturate(170%)',
-              borderRadius: '20px',
-              border: '1px solid rgba(255,255,255,0.12)',
-              boxShadow: '0 10px 36px rgba(0,0,0,0.30), inset 0 1px 0 rgba(255,255,255,0.14)',
-              overflow: 'hidden',
-            }}>
-              {TRUST_ITEMS.map((item, i) => (
-                <div key={i} style={{
-                  display: 'flex', flexDirection: 'row', alignItems: 'center',
-                  gap: '9px', padding: '10px 14px',
-                  borderLeft: i < 3 ? '1px solid rgba(255,255,255,0.09)' : 'none',
-                }}>
-                  <div style={{
-                    width: '30px', height: '30px', borderRadius: '50%',
-                    background: `rgba(${item.rgb},0.13)`,
-                    border: `1px solid rgba(${item.rgb},0.22)`,
-                    display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-                    boxShadow: `0 0 8px rgba(${item.rgb},0.14)`,
-                  }}>
-                    <item.Icon size={14} color={item.clr}
-                      style={{ filter: `drop-shadow(0 0 3px rgba(${item.rgb},0.35))` }} />
-                  </div>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                    <span className="trust-label" style={{ fontSize: '11px', fontWeight: 700, color: 'rgba(255,255,255,0.92)', whiteSpace: 'nowrap' }}>{item.label}</span>
-                    <span className="trust-sub" style={{ fontSize: '9px', color: 'rgba(255,255,255,0.45)', fontWeight: 500, whiteSpace: 'nowrap' }}>{item.sub}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
 
         </div>
 
@@ -2034,16 +1990,14 @@ useEffect(() => {
       {/* §2 CLUB DISCOVERY ══════════════════════════════════════
           جایگاه featured_clubs_homepage غیرفعال ⇒ کل سکشن حذف */}
       {showClubs && (
-      <section className="clubs-section" style={{ position: 'relative', overflow: 'hidden', background: 'linear-gradient(180deg,#F3F1ED 0%,#EEECE6 100%)', padding: 'clamp(36px,3.5vw,52px) clamp(16px,5%,80px) clamp(56px,5.5vw,80px)' }}>
-        <div aria-hidden style={{ position: 'absolute', top: '-18%', right: '-6%', width: 'min(520px,50vw)', height: 420, borderRadius: '50%', background: 'radial-gradient(circle, rgba(20,83,45,0.10) 0%, transparent 62%)', filter: 'blur(52px)', pointerEvents: 'none' }} />
-        <div aria-hidden className="sec-hair" style={{ left: '28%', background: 'linear-gradient(180deg,transparent,rgba(20,83,45,0.28),transparent)' }} />
+      <section className="clubs-section" style={{ position: 'relative', overflow: 'hidden', background: 'rgb(var(--c-surface))', padding: 'clamp(36px,3.5vw,52px) clamp(16px,5%,80px) clamp(56px,5.5vw,80px)' }}>
         <div aria-hidden className="sec-word" style={{ ['--wc' as never]: 'rgba(20,83,45,0.07)' }}>CLUBS</div>
+        <div aria-hidden style={{ position: 'absolute', top: '-18%', right: '-6%', width: 'min(520px,50vw)', height: 420, borderRadius: '50%', background: 'radial-gradient(circle, rgba(20,83,45,0.10) 0%, transparent 62%)', filter: 'blur(52px)', pointerEvents: 'none' }} />
         <div style={{ maxWidth: '1340px', margin: '0 auto', position: 'relative', zIndex: 1 }}>
           <SR>
             <div className="clubs-hd" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '44px', flexWrap: 'wrap', gap: '20px' }}>
               <div>
                 <h2 className="sec-title" style={{ color: TEXT, fontSize: 'clamp(20px,2.84vw,37px)' }}>باشگاه‌های پیشنهادی</h2>
-                <div className="sec-rule" style={{ color: GRN }} />
               </div>
               <Link prefetch={false} href="/clubs" className="see-all-lq">
                 مشاهده همه <ArrowLeft size={12} />
@@ -2084,16 +2038,15 @@ useEffect(() => {
       {/* §3 MARKETPLACE ═════════════════════════════════════════
           جایگاه market_featured_products_homepage غیرفعال ⇒ حذف سکشن */}
       {showProducts && (
-      <section className="marketplace-section" style={{ position: 'relative', overflow: 'hidden', background: 'linear-gradient(180deg,#FFFFFF 0%,#FBF9F5 100%)', padding: 'clamp(36px,3.5vw,52px) clamp(16px,5%,80px) clamp(20px,2vw,32px)' }}>
+      <section className="marketplace-section" style={{ position: 'relative', overflow: 'hidden', background: 'rgb(var(--c-paper))', padding: 'clamp(36px,3.5vw,52px) clamp(16px,5%,80px) clamp(20px,2vw,32px)' }}>
+        <div aria-hidden className="sec-word" style={{ ['--wc' as never]: 'rgba(160,120,64,0.09)' }}>BAZAAR</div>
         <div aria-hidden style={{ position: 'absolute', top: '-16%', left: '-5%', width: 'min(480px,46vw)', height: 400, borderRadius: '50%', background: 'radial-gradient(circle, rgba(160,120,64,0.09) 0%, transparent 62%)', filter: 'blur(50px)', pointerEvents: 'none' }} />
         <div aria-hidden style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(rgba(28,27,23,0.035) 1px, transparent 1px)', backgroundSize: '20px 20px', WebkitMaskImage: 'linear-gradient(100deg, transparent 55%, black 90%)', maskImage: 'linear-gradient(100deg, transparent 55%, black 90%)', pointerEvents: 'none' }} />
-        <div aria-hidden className="sec-word" style={{ ['--wc' as never]: 'rgba(160,120,64,0.09)' }}>BAZAAR</div>
         <div style={{ maxWidth: '1340px', margin: '0 auto', position: 'relative', zIndex: 1 }}>
           <SR>
             <div className="marketplace-hd" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '44px', flexWrap: 'wrap', gap: '20px' }}>
               <div>
                 <h2 className="sec-title" style={{ color: TEXT, fontSize: 'clamp(20px,2.84vw,37px)' }}>بیلیارد بازار</h2>
-                <div className="sec-rule" style={{ color: BRN }} />
               </div>
               <Link prefetch={false} href="/shop" className="see-all-lq">
                 مشاهده همه <ArrowLeft size={12} />
@@ -2176,10 +2129,9 @@ useEffect(() => {
           سکشن تا وقتی «فهرست فروشگاه‌ها» یا یکی از دو بنر کناری
           محتوایی دارد رندر می‌شود — هر سه جایگاه مستقل‌اند. */}
       {showSellersSection && (
-      <section className="sellers-section" style={{ position: 'relative', overflow: 'hidden', background: 'linear-gradient(180deg,#F3F1ED 0%,#F0EDE7 100%)', padding: 'clamp(36px,3.5vw,52px) clamp(16px,5%,80px) clamp(20px,2vw,32px)' }}>
-        <div aria-hidden style={{ position: 'absolute', top: '-20%', right: '10%', width: 'min(500px,48vw)', height: 400, borderRadius: '50%', background: 'radial-gradient(circle, rgba(199,166,106,0.13) 0%, transparent 62%)', filter: 'blur(52px)', pointerEvents: 'none' }} />
-        <div aria-hidden className="sec-hair" style={{ left: '34%', background: 'linear-gradient(180deg,transparent,rgba(199,166,106,0.35),transparent)' }} />
+      <section className="sellers-section" style={{ position: 'relative', overflow: 'hidden', background: 'rgb(var(--c-surface))', padding: 'clamp(36px,3.5vw,52px) clamp(16px,5%,80px) clamp(20px,2vw,32px)' }}>
         <div aria-hidden className="sec-word" style={{ ['--wc' as never]: 'rgba(154,110,56,0.08)' }}>SELLERS</div>
+        <div aria-hidden style={{ position: 'absolute', top: '-20%', right: '10%', width: 'min(500px,48vw)', height: 400, borderRadius: '50%', background: 'radial-gradient(circle, var(--brand-tint) 0%, transparent 62%)', filter: 'blur(52px)', pointerEvents: 'none' }} />
         <div style={{ maxWidth: '1340px', margin: '0 auto', position: 'relative', zIndex: 1 }}>
           {/* عنوان فقط وقتی فهرستی زیرش هست — اگر جایگاه فروشگاه‌ها
               خاموش باشد و فقط بنر کناری بماند، تیتر بی‌محتوا نمی‌آید */}
@@ -2188,7 +2140,6 @@ useEffect(() => {
             <div className="sellers-hd" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '44px', flexWrap: 'wrap', gap: '20px' }}>
               <div>
                 <h2 className="sec-title" style={{ color: TEXT, fontSize: 'clamp(20px,2.84vw,37px)' }}>فروشندگان تجهیزات</h2>
-                <div className="sec-rule" style={{ color: GOLD }} />
               </div>
               <Link prefetch={false} href="/sellers" className="see-all-lq">
                 مشاهده همه <ArrowLeft size={12} />

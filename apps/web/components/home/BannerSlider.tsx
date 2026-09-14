@@ -72,10 +72,10 @@ export default function BannerSlider({ slides }: { slides: readonly BannerSlide[
             <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to left, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.28) 55%, transparent 100%)' }} />
             <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', padding: '0 clamp(20px,5%,80px)' }}>
               <div style={{ maxWidth: '420px', textAlign: 'right' }}>
-                <h3 style={{ fontSize: 'clamp(22px,3.2vw,42px)', fontWeight: 900, color: '#fff', letterSpacing: '-0.04em', lineHeight: 1.05, marginBottom: '10px' }}>{slide.title}</h3>
-                <p style={{ fontSize: 'clamp(13px,1.4vw,17px)', color: 'rgba(255,255,255,0.65)', marginBottom: '22px', lineHeight: 1.6 }}>{slide.sub}</p>
+                <h3 style={{ fontSize: 'clamp(22px,3.2vw,42px)', fontWeight: 700, color: '#fff', letterSpacing: '-0.025em', lineHeight: 1.12, marginBottom: '10px' }}>{slide.title}</h3>
+                <p style={{ fontSize: 'clamp(13px,1.4vw,17px)', color: 'rgba(255,255,255,0.86)', marginBottom: '22px', lineHeight: 1.6 }}>{slide.sub}</p>
                 <Link href={slide.link} style={{ textDecoration: 'none' }}>
-                  <button className="banner-cta-btn" style={{ background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(20px) saturate(180%)', WebkitBackdropFilter: 'blur(20px) saturate(180%)', color: '#fff', border: '1px solid rgba(255,255,255,0.32)', borderRadius: '100px', padding: '11px 28px', fontSize: '13px', fontWeight: 700, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '6px', boxShadow: 'inset 0 1.5px 0 rgba(255,255,255,0.28), 0 4px 20px rgba(0,0,0,0.18)' }}>
+                  <button className="banner-cta-btn" style={{ background: 'rgb(var(--c-em))', color: '#fff', border: 'none', borderRadius: '10px', padding: '11px 24px', fontSize: '13px', fontWeight: 600, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
                     {slide.cta} <ArrowLeft size={12} />
                   </button>
                 </Link>
@@ -105,11 +105,11 @@ export default function BannerSlider({ slides }: { slides: readonly BannerSlide[
         </div>
         {/* Arrow prev/next */}
         <button aria-label="اسلاید قبلی" onClick={() => { setActiveBanner(p => (p - 1 + BANNER_SLIDES.length) % BANNER_SLIDES.length); startBannerTimer(); }}
-          style={{ position: 'absolute', right: '16px', top: '50%', transform: 'translateY(-50%)', background: 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.25)', borderRadius: '50%', width: '38px', height: '38px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>
+          style={{ position: 'absolute', insetInlineEnd: '16px', top: '50%', transform: 'translateY(-50%)', background: 'rgba(0,0,0,0.42)', border: '1px solid rgba(255,255,255,0.22)', borderRadius: '50%', width: '38px', height: '38px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>
           <ArrowRight size={16} />
         </button>
         <button aria-label="اسلاید بعدی" onClick={() => { setActiveBanner(p => (p + 1) % BANNER_SLIDES.length); startBannerTimer(); }}
-          style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', background: 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.25)', borderRadius: '50%', width: '38px', height: '38px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>
+          style={{ position: 'absolute', insetInlineStart: '16px', top: '50%', transform: 'translateY(-50%)', background: 'rgba(0,0,0,0.42)', border: '1px solid rgba(255,255,255,0.22)', borderRadius: '50%', width: '38px', height: '38px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>
           <ArrowLeft size={16} />
         </button>
       </div>

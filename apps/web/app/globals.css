@@ -28,12 +28,28 @@ html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; overflow-x:
      `var(--gold)` می‌نویسند. پس عدد یک‌بار این‌جا کانالی تعریف
      می‌شود و توکن رنگی قدیمی از روی همان ساخته می‌شود — هر دو
      مصرف‌کننده زنده می‌مانند و عدد جای دوم ندارد. */
-  --c-paper:   247 247 245;   /* زمینه‌ی اصلی */
-  --c-mist:    243 242 239;   /* زمینه‌ی دوم */
-  --c-surface: 255 255 255;
-  --c-ink:      17  17  17;   /* جوهر */
-  --c-ink-2:   102 102 102;
-  --c-ink-3:   110 110 110;
+  /* ── سطح‌ها: عاجی گرم، نه سفیدِ استریل ── */
+  --c-paper:   247 246 242;   /* #F7F6F2 عاجِ گرم — زمینه‌ی اصلی */
+  --c-mist:    238 236 230;   /* #EEECE6 خنثیِ گرم — ریتمِ بینِ بخش‌ها */
+  --c-surface: 255 255 255;   /* #FFFFFF سطحِ کارت */
+
+  /* ── جوهر: فقط دو پله ──
+     ⚠️ پله‌ی سومِ قبلی (#6E6E6E) روی --c-mist فقط ۴٫۳۲:۱ می‌داد،
+     یعنی زیرِ کفِ AA. به‌جای نگه‌داشتنِ یک پله‌ی مردود، سلسله‌مراتب
+     با اندازه و وزن ساخته می‌شود نه با خاکستریِ سوم. */
+  --c-ink:      23  26  25;   /* #171A19 زغالی */
+  /* ⚠️ مشخصات #6C716E گفته بود؛ روی #EEECE6 اندازه‌گیری شد ۴٫۲۱:۱ —
+     مردود. پنج پله تیره‌تر شد تا روی هر سه سطح رد شود:
+     mist ۴٫۵۳ · ivory ۴٫۹۵ · white ۵٫۳۵. اختلاف دیداری نامرئی است. */
+  --c-ink-2:   103 108 105;   /* #676C69 خاکستریِ آرام */
+  --c-ink-3:   103 108 105;   /* هم‌مقدار با بالا — پله‌ی سوم حذف شد */
+
+  /* ── زمرد: تنها رنگِ تأکیدِ رابط ──
+     ⚠️ سهمِ دیداری ۵ تا ۱۰ درصد. اگر سایت «سبز» دیده شد یعنی
+     این‌ها جایی نشسته‌اند که باید خنثی می‌ماندند. */
+  --c-em:        15  91  77;  /* #0F5B4D اصلی — ۸٫۰۰:۱ روی سفید */
+  --c-em-dark:    8  63  54;  /* #083F36 تیره — هاور، فوتر */
+  --c-em-accent: 46 125 107;  /* #2E7D6B تأکیدِ کنترل‌شده — ۴٫۹۳:۱ */
   --c-gold:    199 166 106;
   --c-gold-deep: 143 101  49;
   --c-gold-dark: 160 120  64;
@@ -60,27 +76,49 @@ html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; overflow-x:
   --text-on-dark:   rgba(255,255,255,0.92);
   --text-on-dark-2: rgba(255,255,255,0.58);
 
-  /* ── Accent Gold ── */
-  --gold:        rgb(var(--c-gold));
-  /* سایه‌ی تیره‌تر طلایی — تا امروز فقط به‌صورت fallback نوشته می‌شد */
-  /* ۴.۰۳:۱ بود، یعنی کمی زیر ۴.۵. تیره‌تر شد تا ۴.۶۱:۱ — اختلاف
-     دیداری‌اش تقریبا نامرئی است ولی متن ریز طلایی خواناتر می‌شود.
-     برگرداندن: همین یک خط به #9A6E38. */
-  --gold-deep:   rgb(var(--c-gold-deep));
-  --gold-dark:   rgb(var(--c-gold-dark));
-  --gold-light:  rgb(var(--c-gold-light));
-  --gold-text:   rgb(var(--c-gold-text));
-  --gold-dim:    rgb(var(--c-gold) / .12);
-  --gold-border: rgb(var(--c-gold) / .24);
+  /* ═══ تأکیدِ برند — زمرد ═══
+     نامِ توکن‌ها عمدا عوض *نشد*: ۱۱۷ مصرف‌کننده در ده فایلِ CSS دارند
+     و همه‌شان جای «تأکید»اند — حلقه‌ی فوکوس، دکمه‌ی اصلی، برچسبِ بخش.
+     دقیقا همان‌ها باید زمرد شوند. عوض‌کردنِ نام یعنی ۱۱۷ ویرایشِ
+     بی‌حاصل و ریسکِ جاافتادن. نامِ تازه برای کدِ جدید است. */
+  --brand:        rgb(var(--c-em));
+  --brand-dark:   rgb(var(--c-em-dark));
+  --brand-accent: rgb(var(--c-em-accent));
+  --brand-tint:   rgb(var(--c-em) / .07);
+  --brand-tint-2: rgb(var(--c-em) / .14);
+  /* ⚠️ روی زمینه‌ی تیره، زمردِ اصلی ۲٫۴۰:۱ می‌دهد و دیده نمی‌شود.
+     این پله ۶٫۶۰:۱ می‌دهد و فقط همان‌جا استفاده می‌شود. */
+  --brand-on-dark: #4FA890;
+  /* کانالِ برند — برای جاهایی که شفافیتِ دلخواه می‌خواهند */
+  --gold-ch: var(--c-em);
+  --brand-ch: var(--c-em);
+  --brand-line:   rgb(var(--c-em) / .22);
 
-  /* Legacy alias (keep backward compat with inline styles already written) */
-  --accent:        rgb(var(--c-gold));
-  --accent-light:  rgb(var(--c-gold-light));
-  --accent-dim:    rgb(var(--c-gold) / .12);
-  --accent-glow:   rgb(var(--c-gold) / .22);
+  /* مترادف‌های قدیمی — همگی حالا زمردند، نه طلایی */
+  --gold:        var(--brand);
+  --gold-deep:   var(--brand);
+  --gold-dark:   var(--brand);
+  --gold-light:  var(--brand-accent);
+  --gold-text:   var(--brand);
+  --gold-dim:    var(--brand-tint);
+  --gold-border: var(--brand-line);
 
-  /* ── Borders ── */
-  --border:        rgb(var(--c-line) / .06);
+  --accent:        var(--brand);
+  --accent-light:  var(--brand-accent);
+  --accent-dim:    var(--brand-tint);
+  --accent-glow:   rgb(var(--c-em) / .18);
+
+  /* ⚠️ تنها جایی که طلایی می‌ماند: نشانِ متنیِ برند.
+     بندِ ۲۱ — لوگو می‌تواند طلایی بماند، رابط نه. */
+  --wordmark-gold: rgb(var(--c-gold-deep));
+
+  /* ── Borders ──
+     ⚠️ --c-line مشکیِ کم‌شفاف می‌ماند چون ده‌ها جا مستقیم با شفافیتِ
+     دلخواه صدایش می‌زنند. ولی دو پله‌ی معناییِ زیر حالا رنگِ ثابتِ
+     #E4E5E1 مشخصات را می‌دهند؛ روی عاجی تقریبا همان چیزی است که
+     مشکیِ ۶٪ می‌ساخت، ولی یک عددِ مشخص دارد نه نتیجه‌ی ترکیب. */
+  --c-border:    228 229 225;   /* #E4E5E1 */
+  --border:        rgb(var(--c-border));
   --border-medium: rgb(var(--c-line) / .10);
   --border-strong: rgb(var(--c-line) / .16);
 
@@ -100,7 +138,7 @@ html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; overflow-x:
   --r6: 32px;
 
   /* ── Category Tints (very subtle) ── */
-  --tint-tournament: rgba(199,166,106,0.06);
+  --tint-tournament: rgb(var(--c-em) / .04);
   --tint-news:       rgba(59,130,246,0.05);
   --tint-clubs:      rgba(34,197,94,0.05);
   --tint-market:     rgba(245,158,11,0.05);
@@ -172,8 +210,8 @@ body {
 ══════════════════════════════════════════ */
 ::-webkit-scrollbar { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track { background: rgba(0,0,0,0.03); }
-::-webkit-scrollbar-thumb { background: rgba(199,166,106,0.30); border-radius: 99px; }
-::-webkit-scrollbar-thumb:hover { background: rgba(199,166,106,0.52); }
+::-webkit-scrollbar-thumb { background: var(--brand-tint); border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: var(--brand); }
 
 /* ══════════════════════════════════════════
    CARD SYSTEM — Apple / Linear inspired
@@ -444,13 +482,13 @@ body {
 
 /* Primary — Gold */
 .btn-primary {
-  background: linear-gradient(135deg, #C7A66A 0%, #A07840 100%);
+  background: var(--brand);
   color: #fff;
-  box-shadow: 0 1px 0 rgba(255,255,255,0.18) inset, 0 4px 14px rgba(199,166,106,0.28);
+  box-shadow: 0 1px 0 rgba(255,255,255,0.18) inset, 0 4px 14px rgb(var(--c-ink) / 0.106);
 }
 .btn-primary:hover {
-  background: linear-gradient(135deg, #D4B87E 0%, #B08850 100%);
-  box-shadow: 0 1px 0 rgba(255,255,255,0.22) inset, 0 6px 20px rgba(199,166,106,0.36);
+  background: var(--brand-dark);
+  box-shadow: 0 1px 0 rgba(255,255,255,0.22) inset, 0 6px 20px rgb(var(--c-ink) / 0.137);
   transform: translateY(-1px);
 }
 
@@ -517,7 +555,7 @@ body {
    پس گرفته شد — همان دوباره‌کاری‌ای که قاعده‌ی ۲ پروژه منع می‌کند. */
 /* دراپ‌داون باز — به‌جای رنگ درون‌خطی، که بر :hover برنده می‌شد و
    بی‌صدا حاشیه‌ی هاور را از کار می‌انداخت. */
-.btn.is-open { border-color: rgba(199,166,106,0.55); color: var(--gold-deep); }
+.btn.is-open { border-color: var(--brand-line); color: var(--gold-deep); }
 
 .btn:focus-visible {
   outline: 2px solid var(--gold-deep);
@@ -635,10 +673,10 @@ body {
 .input-glass:hover { border-color: rgba(28,28,26,0.18); }
 .input-glass:focus {
   background: rgba(255,255,255,0.94);
-  border-color: rgba(199,166,106,0.55);
+  border-color: var(--brand);
   box-shadow:
     inset 0 1.5px 0 rgba(255,255,255,0.95),
-    0 0 0 3px rgba(199,166,106,0.14),
+    0 0 0 3px rgb(var(--c-em) / .18),
     0 6px 20px rgba(28,28,26,0.07);
 }
 
@@ -660,7 +698,7 @@ body {
   border: 1px solid;
   letter-spacing: 0.02em;
 }
-.badge-gold    { background: rgba(199,166,106,0.12); border-color: rgba(199,166,106,0.28); color: #7A5A2A; }
+.badge-gold    { background: var(--brand-tint); border-color: var(--brand-line); color: var(--brand); }
 .badge-green   { background: rgba(34,197,94,0.10);   border-color: rgba(34,197,94,0.24);   color: #15803d; }
 .badge-cyan    { background: rgba(6,182,212,0.10);   border-color: rgba(6,182,212,0.24);   color: #0e7490; }
 .badge-violet  { background: rgba(139,92,246,0.10);  border-color: rgba(139,92,246,0.24);  color: #6d28d9; }
@@ -876,7 +914,7 @@ h1                               { font-weight: 800; }
   mix-blend-mode: multiply;
   opacity: 0.5;
 }
-.orb-gold   { background: radial-gradient(ellipse, rgba(199,166,106,0.22) 0%, transparent 65%); }
+.orb-gold   { background: radial-gradient(ellipse, var(--brand-tint) 0%, transparent 65%); }
 .orb-green  { background: radial-gradient(ellipse, rgba(34,197,94,0.14) 0%, transparent 65%); }
 .orb-blue   { background: radial-gradient(ellipse, rgba(59,130,246,0.12) 0%, transparent 65%); }
 .orb-violet { background: radial-gradient(ellipse, rgba(139,92,246,0.12) 0%, transparent 65%); }
@@ -1085,11 +1123,11 @@ select {
   cursor: pointer;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
-select:hover { border-color: rgba(199, 166, 106, 0.5) !important; }
+select:hover { border-color: var(--brand-line) !important; }
 select:focus {
   outline: none;
-  border-color: rgba(199, 166, 106, 0.65) !important;
-  box-shadow: 0 0 0 3px rgba(199, 166, 106, 0.14);
+  border-color: var(--brand) !important;
+  box-shadow: 0 0 0 3px rgb(var(--c-em) / .18);
 }
 select:disabled { opacity: 0.55; cursor: not-allowed; }
 
@@ -1137,7 +1175,7 @@ select:disabled { opacity: 0.55; cursor: not-allowed; }
   overflow: visible;
   transition: border-color 0.2s ease, background 0.2s ease;
 }
-.bh-tf-photo:hover { border-color: rgba(199, 166, 106, 0.6); background: rgba(199, 166, 106, 0.05); }
+.bh-tf-photo:hover { border-color: var(--brand-line); background: var(--brand-tint); }
 .bh-tf-photo img {
   width: 100%; height: 100%;
   object-fit: cover; border-radius: 9px;
@@ -1374,9 +1412,9 @@ select:disabled { opacity: 0.55; cursor: not-allowed; }
   z-index: -1;
   pointer-events: none;
   background:
-    radial-gradient(38rem 30rem at 78% -6%,  rgba(199,166,106,0.34), transparent 62%),
+    radial-gradient(38rem 30rem at 78% -6%,  var(--brand-tint), transparent 62%),
     radial-gradient(32rem 26rem at 6%  22%,  rgba(122,160,196,0.26), transparent 64%),
-    /* rgba(154,110,56) = #9A6E38 قدیم به دهدهی. تزئین محض پس‌زمینه
+    /* rgba(154,110,56) = #9A6E38 به دهدهی. تزئین محض پس‌زمینه
        است و کنتراست ندارد، پس عمدا دست‌نخورده ماند. */
     radial-gradient(34rem 30rem at 92% 78%,  rgba(154,110,56,0.22),  transparent 66%),
     radial-gradient(30rem 24rem at 22% 104%, rgba(34,197,94,0.15),   transparent 62%),
@@ -1488,7 +1526,7 @@ select:disabled { opacity: 0.55; cursor: not-allowed; }
   box-shadow: inset 0 0 0 1px rgba(255,255,255,0.30);
   transition: box-shadow .3s;
 }
-.lq-tile:hover::after { box-shadow: inset 0 0 0 1.5px rgba(199,166,106,0.85); }
+.lq-tile:hover::after { box-shadow: inset 0 0 0 1.5px rgb(var(--c-ink) / 0.323); }
 
 /* کنترل بخش‌بندی‌شده‌ی تب‌ها — هر تب دقیقا هم‌اندازه */
 .lq-seg {
@@ -1588,7 +1626,7 @@ select:disabled { opacity: 0.55; cursor: not-allowed; }
   cursor: pointer;
   transition: border-color .18s, color .18s, background .18s;
 }
-.lq-icon-btn:hover { border-color: rgba(199,166,106,0.45); color: var(--gold-deep); }
+.lq-icon-btn:hover { border-color: var(--brand-line); color: var(--gold-deep); }
 .lq-icon-btn:focus-visible {
   outline: 2px solid var(--gold-deep);
   outline-offset: 2px;
@@ -1653,7 +1691,7 @@ select:disabled { opacity: 0.55; cursor: not-allowed; }
 }
 .lq-pcard:hover {
   transform: translateY(-4px);
-  border-color: rgba(199,166,106,0.42);
+  border-color: var(--brand-line);
   box-shadow:
     inset 0 1px 0 rgba(255,255,255,0.95),
     0 2px 4px rgba(17,17,16,0.05),
@@ -1688,7 +1726,7 @@ select:disabled { opacity: 0.55; cursor: not-allowed; }
 }
 .booking-row:hover {
   background: #F3F2EF;
-  border-color: rgba(199,166,106,0.34);
+  border-color: var(--border);
   box-shadow: 0 6px 18px -10px rgba(17,17,16,0.20);
 }
 
@@ -1720,14 +1758,14 @@ select:disabled { opacity: 0.55; cursor: not-allowed; }
   min-height: 44px; padding-inline: 20px; border-radius: 10px;
   font-family: inherit; font-size: 13px; font-weight: 800;
   text-decoration: none; cursor: pointer;
-  color: var(--gold-deep, #8F6531);
-  background: rgba(199, 166, 106, 0.12);
-  border: 1px solid rgba(199, 166, 106, 0.34);
+  color: var(--gold-deep, var(--brand));
+  background: var(--brand-tint);
+  border: 1px solid var(--border);
   transition: background .2s, border-color .2s, transform .2s cubic-bezier(.22, 1, .36, 1);
 }
-.lq-cta:hover { background: rgba(199, 166, 106, 0.20); border-color: rgba(199, 166, 106, 0.48); transform: translateY(-2px); }
+.lq-cta:hover { background: var(--brand-tint-2); border-color: var(--brand); transform: translateY(-2px); }
 .lq-cta:active { transform: translateY(0); }
-.lq-cta:focus-visible { outline: 2px solid var(--gold-deep, #8F6531); outline-offset: 3px; }
+.lq-cta:focus-visible { outline: 2px solid var(--gold-deep, var(--brand-line)); outline-offset: 3px; }
 @media (prefers-reduced-motion: reduce) {
   .lq-cta { transition: none; }
   .lq-cta:hover { transform: none; }
@@ -1753,16 +1791,16 @@ select:disabled { opacity: 0.55; cursor: not-allowed; }
      در صفحه‌ی فروشگاه — که آن فایل استایل را ایمپورت نمی‌کند —
      خانه ۱۱۶×۲۸ شد، یعنی یک نوار باریک به‌جای مربع. */
   aspect-ratio: 1; border-radius: 10px; overflow: hidden;
-  color: var(--gold-deep, #8F6531);
-  background: var(--gold-dim, rgba(199, 166, 106, 0.10));
-  border: 1.5px dashed rgba(199, 166, 106, 0.5);
+  color: var(--gold-deep, var(--brand));
+  background: var(--gold-dim, var(--brand-tint));
+  border: 1.5px dashed var(--brand-line);
   transition: background .2s, border-color .2s, color .2s;
 }
 .ch-add-tile:hover:not(:disabled) {
-  background: rgba(199, 166, 106, 0.18);
-  border-color: rgba(199, 166, 106, 0.75);
+  background: var(--brand-tint-2);
+  border-color: var(--brand);
 }
-.ch-add-tile:focus-visible { outline: 2px solid var(--gold-deep, #8F6531); outline-offset: 3px; }
+.ch-add-tile:focus-visible { outline: 2px solid var(--gold-deep, var(--brand-line)); outline-offset: 3px; }
 .ch-add-tile:disabled { cursor: progress; opacity: .6; }
 .ch-spin { animation: ch-rot .9s linear infinite; }
 @keyframes ch-rot { to { transform: rotate(360deg) } }

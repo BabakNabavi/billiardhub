@@ -4,7 +4,7 @@ import { MapPin, Phone, Mail, ChevronLeft } from 'lucide-react';
 import EnamadSeal from './EnamadSeal';
 import PayPingSeal from './PayPingSeal';
 
-const GOLD    = '#C7A66A';
+const GOLD    = 'var(--brand)';
 /* طلاییِ نشانِ متنی — دقیقا همان که نوار دارد. */
 const GOLD_TXT = WORDMARK_GOLD;
 const TEXT    = '#1A1917';
@@ -88,10 +88,10 @@ export default function Footer() {
   /* صفحات ورود/ثبت‌نام فوتر ندارند */
   /* بازار اپ‌شل است و دایرکت تمام‌صفحه — فوتر ندارند */
   return (
-    <footer style={{ background: '#F5F3EF', borderTop: `1px solid ${BORDER}`, position: 'relative', overflow: 'hidden', direction: 'rtl' }}>
+    <footer style={{ background: 'rgb(var(--c-mist))', borderTop: `1px solid ${BORDER}`, position: 'relative', overflow: 'hidden', direction: 'rtl' }}>
 
       {/* Subtle top gold line */}
-      <div style={{ position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)', width: '320px', height: '1px', background: `linear-gradient(90deg,transparent,${GOLD}50,transparent)` }} />
+      <div style={{ position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)', width: '320px', height: '1px', background: `linear-gradient(90deg,transparent,rgb(var(--c-em) / .31),transparent)` }} />
 
       <style>{`
         .ft-link {
@@ -126,11 +126,11 @@ export default function Footer() {
           cursor: pointer; text-decoration: none;
         }
         .ft-social:hover {
-          background: rgba(199,166,106,0.12);
-          border-color: rgba(199,166,106,0.35);
+          background: var(--brand-tint);
+          border-color: var(--brand-line);
           color: ${GOLD};
           transform: translateY(-2px);
-          box-shadow: 0 4px 14px rgba(199,166,106,0.18);
+          box-shadow: 0 4px 14px rgb(var(--c-ink) / 0.068);
         }
         .ft-dev-mob { display: none; }
         .ft-copy-short { display: none; }
@@ -205,7 +205,7 @@ export default function Footer() {
                 style={{ width: '40px', height: '40px', objectFit: 'contain', flexShrink: 0, borderRadius: '10px' }}
               />
               <div>
-                <div style={{ fontWeight: 900, fontSize: '20px', letterSpacing: '-0.02em', lineHeight: 1.1 }}>
+                <div style={{ fontWeight: 700, fontSize: '20px', letterSpacing: '-0.02em', lineHeight: 1.1 }}>
                   <span style={{ color: TEXT }}>بیلیارد </span>
                   <span style={{ color: GOLD_TXT }}>هاب</span>
                 </div>

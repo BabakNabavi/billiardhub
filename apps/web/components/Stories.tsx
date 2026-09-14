@@ -367,7 +367,7 @@ function StoryViewer({ groups, activeGroup, activeStory, liked, showEmojis, comm
               <button className={`story-ic${liked ? ' on' : ''}`} onClick={onLike} aria-label="لایک">
                 <Heart size={25} fill={liked?'#ef4444':'none'} />
               </button>
-              <button className="story-ic" onClick={onToggleEmojis} aria-label="استیکر" style={{ color: showEmojis ? '#C7A66A' : '#fff' }}>
+              <button className="story-ic" onClick={onToggleEmojis} aria-label="استیکر" style={{ color: showEmojis ? 'var(--brand)' : '#fff' }}>
                 <Smile size={25} />
               </button>
               <button className="story-ic" onClick={onSendComment} aria-label="ارسال" style={{ opacity: comment.trim() ? 1 : 0.5 }}>
@@ -662,7 +662,7 @@ export default function Stories() {
           userAvatar: c.name?.[0] ?? '؟',
           logoUrl: c.logo || undefined,
           userRole: 'club',
-          roleColor: '#C7A66A',
+          roleColor: '#0F5B4D',
           roleLabel: 'باشگاه',
           allSeen: false,
           stories: stories.map((s: any) => ({
@@ -842,7 +842,7 @@ export default function Stories() {
         .st-inner {
           width: 67px; height: 67px; border-radius: 50%;
           display: flex; align-items: center; justify-content: center;
-          font-weight: 900; font-size: 24px; color: #fff;
+          font-weight: 700; font-size: 24px; color: #fff;
           border: 2px solid rgba(4,2,10,0.55); overflow: hidden;
         }
         .st-name {
@@ -856,12 +856,12 @@ export default function Stories() {
         {/* Add story button — فقط نقش‌های واجد استوری (کاربر عادی نمی‌بیند) */}
         {user && canPost && (
           <div className="st-item" onClick={() => { setPostErr(''); setPosting(true); }} role="button">
-            <div className="st-ring" style={{ background: 'rgba(199,166,106,0.16)', border: '1.5px dashed rgba(199,166,106,0.45)' }}>
-              <div className="st-inner" style={{ background: 'rgba(199,166,106,0.08)', border: 'none' }}>
-                <Plus size={18} style={{ color: '#C7A66A' }} />
+            <div className="st-ring" style={{ background: 'var(--brand-tint-2)', border: '1.5px dashed var(--brand)' }}>
+              <div className="st-inner" style={{ background: 'var(--brand-tint)', border: 'none' }}>
+                <Plus size={18} style={{ color: 'var(--brand)' }} />
               </div>
             </div>
-            <span className="st-name" style={{ color: 'rgba(199,166,106,0.80)' }}>جدید</span>
+            <span className="st-name" style={{ color: 'var(--brand)' }}>جدید</span>
           </div>
         )}
 
@@ -929,17 +929,17 @@ export default function Stories() {
         <div onClick={() => setPosting(false)} style={{ position:'fixed', inset:0, zIndex:99999, background:'rgba(0,0,0,0.6)', backdropFilter:'blur(10px)', display:'flex', alignItems:'center', justifyContent:'center', padding:16, direction:'rtl' }}>
           <div onClick={e => e.stopPropagation()} style={{ background:'#fff', borderRadius:20, width:'min(420px,94vw)', padding:22, boxShadow:'0 30px 80px rgba(0,0,0,0.4)', fontFamily:"'Vazirmatn',Tahoma,sans-serif" }}>
             <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:14 }}>
-              <h3 style={{ fontSize:16, fontWeight:800, color:'#111110', margin:0 }}>افزودن استوری</h3>
+              <h3 style={{ fontSize:16, fontWeight: 600, color:'#111110', margin:0 }}>افزودن استوری</h3>
               <button onClick={() => setPosting(false)} aria-label="بستن" style={{ background:'none', border:'none', cursor:'pointer', color:'#888', display:'flex' }}><X size={18} /></button>
             </div>
-            <div style={{ fontSize:12.5, color:'#777', marginBottom:12 }}>به‌عنوان <span style={{ color:roleInfo.color, fontWeight:800 }}>{roleInfo.label}</span> منتشر می‌شود و ۲۴ ساعت در نوار استوری صفحه‌ی اول نمایش داده می‌شود.</div>
+            <div style={{ fontSize:12.5, color:'#777', marginBottom:12 }}>به‌عنوان <span style={{ color:roleInfo.color, fontWeight: 600 }}>{roleInfo.label}</span> منتشر می‌شود و ۲۴ ساعت در نوار استوری صفحه‌ی اول نمایش داده می‌شود.</div>
             {/* شمارنده‌ی سقف روزانه */}
-            <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:14, padding:'8px 12px', borderRadius:10, background:'rgba(199,166,106,0.08)', border:'1px solid rgba(199,166,106,0.22)' }}>
-              <span style={{ fontSize:11.5, fontWeight:700, color:'#8F6531' }}>سقف امروز:</span>
-              <span style={{ fontSize:12, fontWeight:800, color:'#1C1B17' }}>{usedToday.toLocaleString('fa-IR')} از {dailyLimit.toLocaleString('fa-IR')}</span>
+            <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:14, padding:'8px 12px', borderRadius:10, background:'var(--brand-tint)', border:'1px solid var(--border)' }}>
+              <span style={{ fontSize:11.5, fontWeight:700, color:'var(--brand)' }}>سقف امروز:</span>
+              <span style={{ fontSize:12, fontWeight: 600, color:'#1C1B17' }}>{usedToday.toLocaleString('fa-IR')} از {dailyLimit.toLocaleString('fa-IR')}</span>
               <span style={{ marginInlineStart:'auto', display:'flex', gap:4 }}>
                 {Array.from({ length: dailyLimit }).map((_, i) => (
-                  <span key={i} style={{ width:8, height:8, borderRadius:'50%', background: i < usedToday ? '#C7A66A' : 'rgba(199,166,106,0.25)' }} />
+                  <span key={i} style={{ width:8, height:8, borderRadius:'50%', background: i < usedToday ? 'var(--brand)' : 'var(--brand-tint)' }} />
                 ))}
               </span>
             </div>
@@ -952,14 +952,14 @@ export default function Stories() {
                 <button onClick={() => setStoryImg('')} aria-label="حذف" style={{ position:'absolute', top:8, insetInlineStart:8, width:30, height:30, borderRadius:'50%', background:'rgba(0,0,0,0.6)', border:'none', color:'#fff', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center' }}><X size={15} /></button>
               </div>
             ) : (
-              <label style={{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', gap:8, border:'1.5px dashed rgba(199,166,106,0.5)', borderRadius:14, padding:'34px 16px', cursor:'pointer', color:'#8F6531', fontWeight:700, marginBottom:14 }}>
-                <Plus size={26} style={{ color:'#C7A66A' }} />
+              <label style={{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', gap:8, border:'1.5px dashed var(--brand-line)', borderRadius:14, padding:'34px 16px', cursor:'pointer', color:'var(--brand)', fontWeight:700, marginBottom:14 }}>
+                <Plus size={26} style={{ color:'var(--brand)' }} />
                 انتخاب تصویر استوری
                 <input type="file" accept="image/*" hidden onChange={e => onStoryFile(e.target.files?.[0])} />
               </label>
             )}
             <input value={storyCaption} onChange={e => setStoryCaption(e.target.value)} placeholder="کپشن (اختیاری)..." style={{ width:'100%', padding:'10px 13px', border:'1px solid rgba(17,17,16,0.14)', borderRadius:10, fontSize:14, fontFamily:'inherit', outline:'none', marginBottom:16, direction:'rtl' }} />
-            <button onClick={publishStory} disabled={!storyImg || publishing} style={{ width:'100%', padding:'12px', borderRadius:10, border:'1px solid rgba(199,166,106,0.34)', background: (storyImg && !publishing) ? 'rgba(199,166,106,0.14)' : 'rgba(17,17,16,0.05)', color: (storyImg && !publishing) ? '#8F6531' : '#aaa', fontWeight:800, fontSize:14, cursor: (storyImg && !publishing) ? 'pointer' : 'not-allowed', fontFamily:'inherit' }}>{publishing ? 'در حال انتشار…' : 'انتشار استوری'}</button>
+            <button onClick={publishStory} disabled={!storyImg || publishing} style={{ width:'100%', padding:'12px', borderRadius:10, border:'1px solid var(--border)', background: (storyImg && !publishing) ? 'var(--brand-tint)' : 'rgba(17,17,16,0.05)', color: (storyImg && !publishing) ? 'var(--brand)' : '#aaa', fontWeight: 600, fontSize:14, cursor: (storyImg && !publishing) ? 'pointer' : 'not-allowed', fontFamily:'inherit' }}>{publishing ? 'در حال انتشار…' : 'انتشار استوری'}</button>
           </div>
         </div>,
         document.body
