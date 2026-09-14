@@ -1,6 +1,6 @@
 ﻿'use client';
 
-import { WORDMARK_GOLD } from '@/lib/brand'
+import { WORDMARK_GREEN, WORDMARK_GREEN_ON_DARK } from '@/lib/brand'
 import Link from 'next/link';
 import { useState, useRef, useEffect } from 'react';
 import { useAuthStore } from '../store/auth.store';
@@ -22,7 +22,7 @@ import Avatar from './ui/Avatar';
    روی *دو* زمینه‌ی متضاد می‌نشیند. */
 /* ⚠️ اینها دیگر طلایی نیستند. نام عمدا نگه داشته شد چون در ۲۰ جای
    همین فایل صدا می‌شوند و تغییرِ نام فقط ریسکِ جاافتادن دارد.
-   طلایی فقط روی خودِ نشانِ متنی می‌ماند (WORDMARK_GOLD). */
+   رنگِ برند فقط روی خودِ نشانِ متنی می‌ماند (lib/brand.ts). */
 const GOLD = 'var(--brand)';
 /* سه‌تاییِ کانالِ برند — هرجا رنگ با شفافیت ترکیب می‌شود */
 const BRAND_CH = '15 91 77';
@@ -246,6 +246,8 @@ export default function Navbar() {
   /* ⚠️ تأکید باید با زمینه عوض شود: زمردِ اصلی روی هیروی تیره
      ۲٫۴۰:۱ است و دیده نمی‌شود؛ پله‌ی روشن ۶٫۶۰:۱ می‌دهد. */
   const ACC       = isLight ? 'var(--brand)' : 'var(--brand-on-dark)';
+  /* ⚠️ نشانِ متنی هم روی دو زمینه‌ی متضاد می‌نشیند — جزئیات در lib/brand.ts */
+  const WM        = isLight ? WORDMARK_GREEN : WORDMARK_GREEN_ON_DARK;
   const ACC_CH    = isLight ? '15 91 77' : '79 168 144';
   const TEXT      = isLight ? '#1C1C1A' : 'rgba(255,255,255,0.88)';
   const TEXT_MUT  = isLight ? 'rgba(28,28,26,0.48)' : 'rgba(255,255,255,0.48)';
@@ -360,13 +362,13 @@ export default function Navbar() {
             {/* سایه‌ی خیلی نرم + بول ظریف (هایلایت بالا، تیرگی پایین) */}
             <div style={{ position: 'relative', width: '40px', height: '40px', borderRadius: '12px', overflow: 'hidden', flexShrink: 0,
               boxShadow: '0 1px 2px rgba(28,27,23,0.12), 0 4px 9px rgb(var(--c-ink) / 0.05)' }}>
-                <img loading="eager" decoding="async" src="/images/Logo/bh-mark-256-v7.webp" alt="بیلیارد هاب" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                <img loading="eager" decoding="async" src="/images/Logo/bh-mark-256-v8.webp" alt="بیلیارد هاب" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                 <span aria-hidden style={{ position: 'absolute', inset: 0, borderRadius: '12px', pointerEvents: 'none',
                   boxShadow: 'inset 0 1px 1px rgba(255,255,255,0.26), inset 0 -1px 2px rgba(60,40,10,0.18)' }} />
               </div>
             <span className="nav-brand" style={{ fontWeight: 700, fontSize: '20px', letterSpacing: '-0.03em', whiteSpace: 'nowrap', transition: 'color 0.4s' }}>
               <span style={{ color: isLight ? '#000000' : '#ffffff' }}>بیلیارد</span>{' '}
-              <span style={{ color: WORDMARK_GOLD }}>هاب</span>
+              <span style={{ color: WM }}>هاب</span>
             </span>
           </Link>
 
@@ -403,7 +405,7 @@ export default function Navbar() {
 
                   {/* Header row */}
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 24px 12px', borderBottom: '1px solid rgba(28,28,26,0.06)' }}>
-                    <span style={{ fontSize: '10px', color: WORDMARK_GOLD, letterSpacing: '0.28em', fontWeight: 700 }}>EXPLORE BILLIARD HUB</span>
+                    <span style={{ fontSize: '10px', color: WORDMARK_GREEN, letterSpacing: '0.28em', fontWeight: 700 }}>EXPLORE BILLIARD HUB</span>
                     <button onClick={() => setExploreOpen(false)} style={{ background: 'rgba(28,28,26,0.05)', border: '1px solid rgba(28,28,26,0.08)', borderRadius: '8px', cursor: 'pointer', color: 'rgba(28,28,26,0.38)', padding: '5px', display: 'flex', transition: 'all 0.2s' }}>
                       <X size={12} />
                     </button>
@@ -706,11 +708,11 @@ export default function Navbar() {
                 هندسی با همان حس حروف بزرگ می‌نشیند. */}
             <span aria-label="بیلیارد هاب" className="bh-wordmark" style={{
               fontSize: '21px', fontWeight: 400, letterSpacing: '0.14em',
-              color: '#FFFFFF', direction: 'ltr', whiteSpace: 'nowrap', userSelect: 'none',
+              color: 'rgb(var(--c-ink))', direction: 'ltr', whiteSpace: 'nowrap', userSelect: 'none',
             }}>
-              <span style={{ textShadow: '0 1px 2px rgba(0,0,0,0.38), 0 0 1px rgba(0,0,0,0.55)' }}>BILLIARD</span>
+              <span>BILLIARD</span>
               {' '}
-              <span style={{ textShadow: '0 1px 2px rgba(184,147,58,0.85), 0 0 6px rgba(184,147,58,0.55)' }}>HUB</span>
+              <span style={{ color: WORDMARK_GREEN }}>HUB</span>
             </span>
             <button onClick={() => setMobileOpen(false)} aria-label="بستن منو"
               style={{ position: 'absolute', insetInlineStart: '20px', top: '50%', transform: 'translateY(-50%)', background: 'rgba(28,28,26,0.05)', border: '1px solid rgba(28,28,26,0.1)', borderRadius: '12px', cursor: 'pointer', color: 'rgba(28,28,26,0.5)', padding: '8px', display: 'flex' }}>

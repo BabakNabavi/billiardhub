@@ -546,21 +546,21 @@ const BAZAAR_CSS = `
      معمولی، پس دسته‌بندی و نوع هیچ برجستگی‌ای نداشتند و چشم مجبور بود
      کل خط را بخواند. حالا سر تیتر بولد است و برند/مدل زیرش با وزن
      عادی — دقیقا همان چیزی که در فهرست بازار هست. */
-  .bz-name { font-size:12.5px; color:#1C1B17; line-height:1.5; display:block; overflow:hidden; }
+  .bz-name { font-size:var(--ad-title); color:#1C1B17; line-height:var(--ad-title-lh); display:block; overflow:hidden; }
   .bz-h { display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;
-    overflow:hidden; font-weight: 600; }
-  .bz-t { display:block; margin-top:3px; font-size:11px; font-weight:400; color:#6E695C;
+    overflow:hidden; font-weight:var(--ad-title-w); }
+  .bz-t { display:block; margin-top:3px; font-size:var(--ad-sub); font-weight:var(--ad-sub-w); color:#6E695C;
     white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .bz-row { margin-top:auto; display:flex; align-items:center; gap:5px; }
-  .bz-pct { background:#b400ae; color:#fff; font-size:12px; font-weight: 600;
+  .bz-pct { background:#b400ae; color:#fff; font-size:var(--ad-pct); font-weight:var(--ad-pct-w);
     border-radius:999px; padding:3px 8px 1px; line-height:1;
     display:inline-flex; align-items:center; justify-content:center; flex-shrink:0; }
   .bz-prices { margin-inline-start:auto; text-align:right; }
-  .bz-old { font-size:10px; color:#6E695C; text-decoration:line-through;
+  .bz-old { font-size:var(--ad-old); color:#6E695C; text-decoration:line-through;
     line-height:1.1; font-variant-numeric:tabular-nums; white-space:nowrap; }
-  .bz-new { font-size:12.5px; font-weight:700; color:#1C1B17;
+  .bz-new { font-size:var(--ad-price); font-weight:var(--ad-price-w); color:#1C1B17;
     font-variant-numeric:tabular-nums; white-space:nowrap; }
-  .bz-unit { font-size:9px; font-weight:500; }
+  .bz-unit { font-size:var(--ad-unit); font-weight:var(--ad-unit-w); }
 `;
 
 function BazaarCard({ p, className, style }: { p: RealProduct; className?: string; style?: React.CSSProperties }) {

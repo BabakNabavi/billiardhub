@@ -110,7 +110,6 @@ html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; overflow-x:
 
   /* ⚠️ تنها جایی که طلایی می‌ماند: نشانِ متنیِ برند.
      بندِ ۲۱ — لوگو می‌تواند طلایی بماند، رابط نه. */
-  --wordmark-gold: rgb(var(--c-gold-deep));
 
   /* ── Borders ──
      ⚠️ --c-line مشکیِ کم‌شفاف می‌ماند چون ده‌ها جا مستقیم با شفافیتِ
@@ -128,6 +127,18 @@ html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; overflow-x:
   --shadow-md: 0 2px 6px rgba(0,0,0,0.06), 0 8px 24px rgba(0,0,0,0.06);
   --shadow-lg: 0 4px 12px rgba(0,0,0,0.07), 0 16px 40px rgba(0,0,0,0.07);
   --shadow-xl: 0 8px 20px rgba(0,0,0,0.08), 0 32px 64px rgba(0,0,0,0.08);
+
+  /* ═══ قلمِ کارتِ آگهی — منبعِ واحد ═══
+     ⚠️ مقادیر از کارتِ «بیلیارد بازار»ِ صفحه‌ی اصلی می‌آیند؛ مالک
+     همان را پسندید. سه کارت (خانه، /shop، ردیفِ موبایل) و هر کارتِ
+     آگهیِ تازه باید از این‌ها بخوانند، نه از عددِ محلی. */
+  --ad-title:    12.5px;  --ad-title-w: 600;  --ad-title-lh: 1.5;
+  --ad-sub:      11px;    --ad-sub-w:   400;
+  --ad-meta:     10px;
+  --ad-price:    12.5px;  --ad-price-w: 700;
+  --ad-old:      10px;
+  --ad-unit:     9px;     --ad-unit-w:  500;
+  --ad-pct:      12px;    --ad-pct-w:   600;
 
   /* ── Radii ── */
   --r1: 6px;

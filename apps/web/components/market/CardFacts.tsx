@@ -46,7 +46,7 @@ export function CardMeta({ p, style }: { p: CardFacts; style?: React.CSSProperti
      روی سطحِ کارت ۲٫۶۱:۱ می‌شد — زیرِ کفِ ۴٫۵:۱ برای متنِ کوچک.
      ۰٫۶۲ آن را به ~۴٫۶ می‌برد و هنوز فرعی دیده می‌شود. */
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 10, color: 'rgba(28,28,26,0.62)', ...style }}>
+    <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 'var(--ad-meta)', color: 'rgba(28,28,26,0.62)', ...style }}>
       {/* سبز، مثلِ نشانه‌ی مکان روی کارتِ مربی و داور */}
       <MapPin size={10} style={{ color: PIN_GREEN, flexShrink: 0 }} />
       <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.city || 'ایران'}</span>

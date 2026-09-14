@@ -24,6 +24,7 @@ import {
   ScrollText, ArrowLeft,
 } from 'lucide-react'
 import ProductMedia from '../../components/market/ProductMedia'
+import { WORDMARK_GREEN } from '@/lib/brand'
 import { PIN_GREEN } from '@/lib/profile-cards'
 import '../../components/market/product-media.css'
 import { apiFetch } from '../../lib/http'
@@ -39,7 +40,7 @@ import { CardMeta, CardPrice } from '../../components/market/CardFacts'
 import { useHorizontalScroll } from '../../lib/useHorizontalScroll'
 import { normalizeFa } from '../../lib/text-fa'
 
-const GOLD   = '#C7A66A'
+const GOLD   = WORDMARK_GREEN   /* نشانِ متنیِ سربرگ */
 /* عمر نشان «جدید» — دو روز بود و بیش‌ازحد سخاوتمند: در بازار کم‌حجم
    عملا همه‌ی آگهی‌ها نشان می‌گرفتند و نشان بی‌معنا می‌شد. */
 const NEW_BADGE_MS = 24 * 60 * 60 * 1000
@@ -48,7 +49,7 @@ const NEW_BADGE_MS = 24 * 60 * 60 * 1000
    می‌شود و جایگاهی که فروشنده پولش را داده بی‌ارزش می‌شود. */
 const URGENT_MAX = 12
 
-const GOLD_D = '#8F6531'
+const GOLD_D = 'rgb(var(--c-em))'  /* تأکیدِ رابط */
 const TEXT   = '#1C1B17'
 const SEC    = '#5B564B'
 const MUT    = '#6F6A5C'
@@ -679,7 +680,7 @@ export default function MarketNewPage() {
         .mk-urg { position: absolute; bottom: 8px; left: 8px; z-index: 2; display: inline-flex; align-items: center; gap: 3px;
           font-size: 9px; font-weight: 800; color: #fff; background: rgba(178,59,46,0.94); border-radius: 999px; padding: 3px 8px; }
         .mk-body { display: flex; flex-direction: column; gap: 6px; padding: 9px 9px 10px; flex: 1; }
-        .mk-name { font-size: 12.5px; color: ${TEXT}; line-height: 1.55; min-height: 39px; }
+        .mk-name { font-size: var(--ad-title); color: ${TEXT}; line-height: var(--ad-title-lh); min-height: 39px; }
         /* ── دو خط عنوان ──
            خط اول دسته‌بندی و نوع، بولد — همان چیزی که چشم اول دنبالش
            می‌گردد. خط دوم برند و مدل با وزن معمولی.
@@ -689,21 +690,21 @@ export default function MarketNewPage() {
            محدودیت دو خط می‌شد و برند و مدل — که تازه اضافه شده‌اند —
            دوباره ناپدید می‌شدند. هر خط کلامپ خودش را دارد. */
         .mk-h { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
-          overflow: hidden; font-size: 13px; font-weight: 800; }
-        .mk-t { display: block; margin-top: 3px; font-size: 11.5px; font-weight: 400; color: ${MUT};
+          overflow: hidden; font-size: var(--ad-title); font-weight: var(--ad-title-w); }
+        .mk-t { display: block; margin-top: 3px; font-size: var(--ad-sub); font-weight: var(--ad-sub-w); color: ${MUT};
           white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .mk-meta { display: flex; align-items: center; gap: 4px; font-size: 10px; color: ${MUT}; }
+        .mk-meta { display: flex; align-items: center; gap: 4px; font-size: var(--ad-meta); color: ${MUT}; }
         .mk-cond { margin-inline-start: auto; background: #F4F3F1; border-radius: 999px; padding: 1.5px 7px; font-weight: 700; }
         .mk-priceline { margin-top: auto; display: flex; align-items: center; gap: 5px; }
-        .mk-pct { background: #b400ae; color: #fff; font-size: 11.5px; font-weight: 800; border-radius: 999px;
+        .mk-pct { background: #b400ae; color: #fff; font-size: var(--ad-pct); font-weight: var(--ad-pct-w); border-radius: 999px;
           padding: 3px 8px 1px; line-height: 1; }
-        .mk-old { font-size: 10px; color: ${MUT}; text-decoration: line-through; font-variant-numeric: tabular-nums; }
-        .mk-price { font-size: 13px; font-weight: 900; color: ${TEXT}; font-variant-numeric: tabular-nums; white-space: nowrap; }
-        .mk-price i { font-style: normal; font-size: 10px; font-weight: 600; color: ${MUT}; }
+        .mk-old { font-size: var(--ad-old); color: ${MUT}; text-decoration: line-through; font-variant-numeric: tabular-nums; }
+        .mk-price { font-size: var(--ad-price); font-weight: var(--ad-price-w); color: ${TEXT}; font-variant-numeric: tabular-nums; white-space: nowrap; }
+        .mk-price i { font-style: normal; font-size: var(--ad-unit); font-weight: var(--ad-unit-w); color: ${MUT}; }
         /* ظرف دو خط قیمت و واژه‌ی «تومان» — پیش‌تر اینلاین بودند و
            با انتقال قیمت به کامپوننت مشترک کلاس خودشان را گرفتند */
         .mk-pricebox { margin-inline-start: auto; text-align: left; }
-        .mk-unit { font-style: normal; font-size: 10px; font-weight: 600; color: ${MUT}; }
+        .mk-unit { font-style: normal; font-size: var(--ad-unit); font-weight: var(--ad-unit-w); color: ${MUT}; }
         .mk-old .mk-unit { color: inherit; }
 
         /* ── سایدبار ── */
@@ -796,17 +797,17 @@ export default function MarketNewPage() {
           animation: mkUp .45s cubic-bezier(.22,1,.36,1) both; }
         .mk-row:active { transform: scale(0.99); }
         .mk-row .info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 5px; padding-top: 2px; }
-        .mk-row .ttl { font-size: 13px; font-weight: 700; color: ${TEXT}; line-height: 1.6; }
+        .mk-row .ttl { font-size: var(--ad-title); font-weight: var(--ad-title-w); color: ${TEXT}; line-height: 1.6; }
         /* ردیف موبایل کمی درشت‌تر از کارت است، پس هر دو خط یک پله بالاتر */
-        .mk-row .ttl .mk-h { font-size: 13.5px; font-weight: 800;
+        .mk-row .ttl .mk-h { font-size: var(--ad-title); font-weight: var(--ad-title-w);
           display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-        .mk-row .ttl .mk-t { margin-top: 3px; font-size: 12px; font-weight: 400; color: ${MUT};
+        .mk-row .ttl .mk-t { margin-top: 3px; font-size: var(--ad-sub); font-weight: var(--ad-sub-w); color: ${MUT};
           display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .mk-row .cnd { font-size: 10.5px; color: ${MUT}; }
-        .mk-row .prc { font-size: 13.5px; font-weight: 900; color: ${TEXT}; font-variant-numeric: tabular-nums;
+        .mk-row .cnd { font-size: var(--ad-meta); color: ${MUT}; }
+        .mk-row .prc { font-size: var(--ad-price); font-weight: var(--ad-price-w); color: ${TEXT}; font-variant-numeric: tabular-nums;
           white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
-        .mk-row .prc i { font-style: normal; font-size: 10px; font-weight: 600; color: ${MUT}; }
-        .mk-row .cty { font-size: 10.5px; color: ${MUT}; display: flex; align-items: center; gap: 4px; margin-top: auto; }
+        .mk-row .prc i { font-style: normal; font-size: var(--ad-unit); font-weight: var(--ad-unit-w); color: ${MUT}; }
+        .mk-row .cty { font-size: var(--ad-meta); color: ${MUT}; display: flex; align-items: center; gap: 4px; margin-top: auto; }
         /* ── قابِ عکسِ ردیف ──
            ⚠️ ردیفِ موبایل مربع است، نه نسبتِ کارت؛ کلاسِ bh-pm--sq
            نسبت را می‌شکند ولی نشان‌ها همان اندازه و جنس می‌مانند.
@@ -840,9 +841,9 @@ export default function MarketNewPage() {
           .mk-row { min-height: 149px; }
           .mk-row .bh-pm--sq { width: 131px; }
         }
-        .mk-row .pctn { background: #b400ae; color: #fff; font-size: 10px; font-weight: 800;
+        .mk-row .pctn { background: #b400ae; color: #fff; font-size: var(--ad-pct); font-weight: var(--ad-pct-w);
           border-radius: 999px; padding: 2px 7px 1px; line-height: 1.4; flex-shrink: 0; }
-        .mk-row .oldp { font-size: 10.5px; color: ${MUT}; text-decoration: line-through;
+        .mk-row .oldp { font-size: var(--ad-old); color: ${MUT}; text-decoration: line-through;
           white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
           font-variant-numeric: tabular-nums; margin-top: -2px; }
         /* نشان‌کردن و گزارش تخلف حالا داخلِ ProductMedia اند */
@@ -934,8 +935,8 @@ export default function MarketNewPage() {
         <div style={{ maxWidth: 1300, margin: '0 auto', padding: '0 clamp(16px,3vw,32px)', height: 76, display: 'flex', alignItems: 'center', gap: 14 }}>
           {/* برند */}
           <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 9, textDecoration: 'none', flexShrink: 0 }}>
-            <span style={{ width: 36, height: 36, borderRadius: 10, overflow: 'hidden', flexShrink: 0, boxShadow: '0 2px 10px rgba(199,166,106,0.26)' }}>
-              <img loading="lazy" decoding="async" src="/images/Logo/bh-mark-256-v7.webp" alt="بیلیارد هاب" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            <span style={{ width: 36, height: 36, borderRadius: 10, overflow: 'hidden', flexShrink: 0, boxShadow: '0 2px 10px rgb(var(--c-ink) / .10)' }}>
+              <img loading="lazy" decoding="async" src="/images/Logo/bh-mark-256-v8.webp" alt="بیلیارد هاب" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             </span>
             <span style={{ fontWeight: 900, fontSize: 17.5, letterSpacing: '-0.02em', color: TEXT, whiteSpace: 'nowrap' }}>
               بیلیارد <span style={{ color: GOLD }}>هاب</span>

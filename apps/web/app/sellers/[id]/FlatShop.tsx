@@ -187,7 +187,7 @@ function StorePoster({ variant, title, about = false }: { variant: number; title
       <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', background: p.bg }}>
         {layers}
         <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 'clamp(7px,1.2vw,12px)', padding: 'clamp(12px,2vw,22px) 16px', textAlign: 'center' }}>
-          <img loading="lazy" decoding="async" src="/images/Logo/bh-header-v7.png" alt="بیلیارد هاب" style={{ height: 'clamp(19px,3.2vw,34px)', width: 'auto' }}/>
+          <img loading="lazy" decoding="async" src="/images/Logo/bh-header-v8.png" alt="بیلیارد هاب" style={{ height: 'clamp(19px,3.2vw,34px)', width: 'auto' }}/>
           {title && <div style={{ fontSize: 'clamp(14px,2.5vw,23px)', fontWeight: 800, color: '#fff', lineHeight: 1.28, maxWidth: '94%', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{title}</div>}
           {subtitleRow(true)}
         </div>
@@ -200,7 +200,7 @@ function StorePoster({ variant, title, about = false }: { variant: number; title
       {layers}
       {/* وردمارک BILLIARD HUB + نام فروشگاه + زیرنویس (راست‌چین) */}
       <div style={{ position: 'absolute', top: '50%', insetInlineEnd: 'clamp(22px,5vw,54px)', transform: 'translateY(-50%)', display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 9, maxWidth: 'min(62%,520px)' }}>
-        <img loading="lazy" decoding="async" src="/images/Logo/bh-header-v7.png" alt="بیلیارد هاب" style={{ height: 'clamp(22px,3.3vw,36px)', width: 'auto' }}/>
+        <img loading="lazy" decoding="async" src="/images/Logo/bh-header-v8.png" alt="بیلیارد هاب" style={{ height: 'clamp(22px,3.3vw,36px)', width: 'auto' }}/>
         {title && <div style={{ fontSize: 'clamp(15px,2.3vw,24px)', fontWeight: 800, color: '#fff', lineHeight: 1.25, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{title}</div>}
         {subtitleRow(false)}
       </div>
@@ -639,15 +639,22 @@ export default function FlatShop() {
         .pc-body-sec1 { padding: 21px 10px 12px; }
         /* نام محصول — حداکثر دو خط، مثل sec1 */
         .pc-h { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
-          overflow: hidden; font-weight: 800; }
-        .pc-t { display: block; margin-top: 3px; font-size: 11.5px; font-weight: 400; color: #6F6A5C;
+          overflow: hidden; font-weight: var(--ad-title-w); }
+        .pc-t { display: block; margin-top: 3px; font-size: var(--ad-sub); font-weight: var(--ad-sub-w); color: #6F6A5C;
           white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .pc-name-sec1 {
           display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+          font-size: var(--ad-title); line-height: var(--ad-title-lh); color: #1C1C1A;
         }
+        /* قیمت و پیلِ درصد — همان توکنِ دو کارتِ دیگر */
+        .pc-pct  { font-size: var(--ad-pct);   font-weight: var(--ad-pct-w); }
+        .pc-old  { font-size: var(--ad-old); }
+        .pc-now  { font-size: var(--ad-price); font-weight: var(--ad-price-w); }
+        .pc-unit { font-size: var(--ad-unit);  font-weight: var(--ad-unit-w); }
         @media(max-width:700px) {
           .pc-body-sec1 { padding: 14px 7px 7px; }
-          .pc-name-sec1 { font-size: 13.05px; line-height: 1.35; color: #666; }
+          /* ⚠️ رنگِ خاکستریِ موبایل در تبدیل گم شده بود */
+          .pc-name-sec1 { line-height: 1.35; color: #666; }
         }
         /* ══ پوسته‌ی صفحه ══
            پس‌زمینه خاکستری تخت #F7F5F0 بود و همه‌چیز رویش سفید
@@ -978,18 +985,18 @@ export default function FlatShop() {
                     imgClassName="group-hover:scale-[1.05]" />
 
                   <div className="pc-body-sec1 flex flex-1 flex-col gap-1.5">
-                    <ProductTitle p={p} className="pc-name-sec1 text-[14.5px] leading-[1.55] text-[#1C1C1A]" headClassName="pc-h" tailClassName="pc-t" />
+                    <ProductTitle p={p} className="pc-name-sec1" headClassName="pc-h" tailClassName="pc-t" />
                     {/* شهر و وضعیت — همان نواری که فهرست بازار دارد */}
                     <CardMeta p={p} />
                     <div className="mt-auto flex items-center gap-1.5">
                       {/* قیمت از منبع واحد: «توافقی» این‌جا چاپ نمی‌شد و
                           کارت صفر دیتابیس را «۰» نشان می‌داد */}
                       <CardPrice p={p} cls={{
-                        pct: `inline-flex shrink-0 items-center justify-center rounded-full bg-[#b400ae] px-2.5 pb-0.5 pt-1 text-[16px] font-extrabold leading-none text-white ${MONO}`,
+                        pct: `inline-flex shrink-0 items-center justify-center rounded-full bg-[#b400ae] px-2.5 pb-0.5 pt-1 leading-none text-white pc-pct ${MONO}`,
                         box: 'ms-auto text-right',
-                        old: `-mb-[3px] mt-[3px] text-[12.3px] leading-[1.1] text-[rgba(28,28,26,0.5)] line-through tabular-nums ${MONO}`,
-                        now: `text-[15.5px] font-bold tabular-nums text-[#1C1C1A] ${MONO}`,
-                        unit: 'inline-block text-[10.6px] font-medium no-underline',
+                        old: `-mb-[3px] mt-[3px] leading-[1.1] text-[rgba(28,28,26,0.5)] line-through tabular-nums pc-old ${MONO}`,
+                        now: `tabular-nums text-[#1C1C1A] pc-now ${MONO}`,
+                        unit: 'inline-block no-underline pc-unit',
                       }} />
                     </div>
                   </div>
