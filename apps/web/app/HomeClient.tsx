@@ -322,10 +322,10 @@ const CLUB_IMG_FALLBACK = [IMG.club1, IMG.club2, IMG.club3, IMG.club4, IMG.club5
 /* SERVICES_LIST به components/home/ServicesSection.tsx منتقل شد */
 
 const BANNER_SLIDES = [
-  { img:IMG.wall1,  title:'بزرگترین پلتفرم بیلیارد ایران', sub:'بهترین باشگاه‌ها را کشف و رزرو کن',  link:'/clubs',       cta:'رزرو میز',       accent:GRN  },
+  { img:IMG.wall1,  title:'باشگاه‌های بیلیارد ایران', sub:'باشگاه نزدیکت را پیدا کن و میز رزرو کن',  link:'/clubs',       cta:'رزرو میز',       accent:GRN  },
   { img:IMG.wall3,  title:'مسابقات سراسری بیلیارد ۱۴۰۴',  sub:'ثبت‌نام و شرکت در رقابت‌های ملی',   link:'/tournaments', cta:'ثبت‌نام',        accent:BLU  },
-  { img:IMG.wall4,  title:'آکادمی آموزش بیلیارد هاب',     sub:'با بهترین مربیان یاد بگیر',           link:'/coaches',     cta:'شروع یادگیری',  accent:PRP  },
-  { img:IMG.wall5,  title:'تخفیف ویژه تجهیزات تابستان',   sub:'تا ۳۰٪ تخفیف روی محصولات برند اصل', link:'/shop',        cta:'خرید کن',        accent:GOLD },
+  { img:IMG.wall4,  title:'آکادمی آموزش بیلیارد هاب',     sub:'مربیان ثبت‌شده‌ی بیلیارد هاب',           link:'/coaches',     cta:'شروع یادگیری',  accent:PRP  },
+  { img:IMG.wall5,  title:'بازارِ تجهیزات بیلیارد',        sub:'خرید و فروش چوب، میز و لوازم جانبی', link:'/shop',        cta:'خرید کن',        accent:GOLD },
   { img:IMG.wall12, title:'خدمات فنی تخصصی در محل',       sub:'نصب، تعمیر و سرویس حرفه‌ای میزها',   link:'/services',    cta:'درخواست خدمت',  accent:BRN  },
 ];
 
@@ -378,7 +378,7 @@ function ClubCard({ club, h = '360px', featured = false }: { club: RealClub; h?:
           }}
         >
           {/* ── Image: top 60% ── */}
-          <div className="club-img-x" style={{ flex: '0 0 60%', position: 'relative', overflow: 'hidden', borderRadius: `${rad} ${rad} 0 0` }}>
+          <div className="club-img-x" style={{ flex: '1 1 auto', minHeight: 0, position: 'relative', overflow: 'hidden', borderRadius: `${rad} ${rad} 0 0` }}>
             <img loading="lazy" decoding="async" src={club.img} alt={club.name}
               onError={e => { const el = e.target as HTMLImageElement; el.onerror = null; el.src = '/images/clubs/club3.jpg'; }}
               style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover',
@@ -419,16 +419,19 @@ function ClubCard({ club, h = '360px', featured = false }: { club: RealClub; h?:
 
           {/* ── Desktop info panel ── */}
           <div className="club-desk-panel" style={{
-            flex: '0 0 40%', background: '#fff',
+            /* ⚠️ ارتفاع از *محتوا* می‌آید نه از درصدِ کارت. با ۴۰٪ ثابت،
+               دکمه در ۶۴۰ و ۱۰۲۴ سی‌ودو پیکسل زیرِ کف می‌افتاد و
+               overflow:hidden می‌بریدش. */
+            flex: '0 0 auto', background: '#fff',
             borderRadius: `0 0 ${rad} ${rad}`,
-            padding: '14px 15px 13px',
-            flexDirection: 'column', justifyContent: 'flex-start',
-            overflow: 'hidden', gap: '3px',
+            padding: '14px 15px 19px',
+            flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start',
+            overflow: 'hidden', gap: '3px', textAlign: 'center',
           }}>
             <div style={{ fontSize: featured ? '17px' : '14px', fontWeight: 600, color: '#1a1a1a', letterSpacing: '-0.02em', lineHeight: 1.2 }}>
               {club.name}{club.verified && <VerifiedBadge title="باشگاه تأیید شده" />}
             </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '3px' }}>
+            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '10px', marginTop: '3px' }}>
               <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'rgba(0,0,0,0.40)', fontSize: '12px' }}>
                 <MapPin size={10} style={{ color: PIN_GREEN }} />{club.city}{club.dist ? `، ${club.dist}` : ''}
               </span>
@@ -442,7 +445,7 @@ function ClubCard({ club, h = '360px', featured = false }: { club: RealClub; h?:
               )}
             </div>
             {club.tables > 0 && (
-            <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap', marginTop: '4px' }}>
+            <div style={{ display: 'flex', justifyContent: 'center', gap: '5px', flexWrap: 'wrap', marginTop: '4px' }}>
               {[
                 { label: 'اسنوکر', n: snookerTables, clr: '#1B7A38' },
                 { label: 'پاکت',   n: pocketTables,  clr: '#1D4ED8' },
@@ -455,8 +458,8 @@ function ClubCard({ club, h = '360px', featured = false }: { club: RealClub; h?:
             </div>
             )}
             <div style={{ flex: 1 }} />
-            <div style={{ height: '1px', background: 'linear-gradient(to left, transparent, var(--brand), transparent)', margin: '6px 0' }} />
-            <div style={{ display: 'flex', justifyContent: 'center' }}>
+            <div style={{ alignSelf: 'stretch', height: '1px', background: 'linear-gradient(to left, transparent, var(--brand), transparent)', margin: '6px 0' }} />
+            <div style={{ alignSelf: 'stretch', display: 'flex', justifyContent: 'center' }}>
               {/* هاور با CSS انجام می‌شود، نه با state `hov`.
                   دو سود: استایل تکراری از HTML بیرون می‌رود، و هر
                   ورود/خروج ماوس دیگر یک رندر React راه نمی‌اندازد. */}
@@ -1450,7 +1453,8 @@ useEffect(() => {
         /* دکمه‌ی «مشاهده و رزرو» — هشت بار روی صفحه تکرار می‌شد و هر بار
            رشته‌ی کامل استایل در HTML می‌آمد. هاورش از کارت والد می‌آید. */
         .cta-lq {
-          width:90%; text-align:center; padding:9px 0;
+          /* ۴۱ → ۳۴: بزرگ‌ترین تک‌آیتمِ پنل بود. */
+          width:90%; text-align:center; padding:7px 0;
           background:var(--brand-tint);
           border:1px solid ${GOLD_BOR};
           color:${CTA_INK}; font-size:13px; font-weight:700;
@@ -2008,7 +2012,7 @@ useEffect(() => {
           <div ref={clubsDeskRef} className="clubs-desk clubs-strip">
             {HOME_CLUBS.map((c, i) => (
               <div key={c.id} className="club-desk-card">
-                <SR delay={Math.min(i, 4) * 60}><ClubCard club={c} h="clamp(303px,29.16vw,401px)" /></SR>
+                <SR delay={Math.min(i, 4) * 60}><ClubCard club={c} h="clamp(372px,33vw,430px)" /></SR>
               </div>
             ))}
           </div>

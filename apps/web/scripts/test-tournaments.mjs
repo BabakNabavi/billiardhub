@@ -2465,8 +2465,7 @@ console.log('\n― واژه‌ی پاکت بیلیارد ―');
     "'پول'", '"پول"', '>پول ', 'پول ۸',
   ];
   const files = [
-    'lib/roles.ts', 'app/profile/[userId]/page.tsx', 'app/results/page.tsx',
-    'app/seller/[id]/page.tsx', 'app/admin/tournaments/page.tsx',
+    'lib/roles.ts', 'app/profile/[userId]/page.tsx', 'app/admin/tournaments/page.tsx',
     'lib/market/specs.ts', 'lib/market/chain.ts',
   ];
   const hits = [];
@@ -5013,7 +5012,7 @@ console.log('\n― صحنه روی همه‌ی صفحه‌های اصلی ―');
     'app/news/page.tsx', 'app/tournaments/page.tsx', 'app/services/page.tsx',
     'app/manufacturers/page.tsx', 'app/advertise/page.tsx', 'app/cart/page.tsx',
     'app/checkout/page.tsx', 'app/live/page.tsx', 'app/plans/page.tsx',
-    'app/ranking/page.tsx', 'app/results/page.tsx', 'app/story-plans/page.tsx',
+    'app/ranking/page.tsx', 'app/story-plans/page.tsx',
   ];
   const missing = [];
   /* دنبالِ خودِ className می‌گردیم نه نامِ کلاس: هفت فایل کامنتی دارند

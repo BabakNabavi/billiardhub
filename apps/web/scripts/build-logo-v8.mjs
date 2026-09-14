@@ -14,11 +14,11 @@
    ───────────────────────────────────────────────────────────── */
 import { createRequire } from 'node:module'
 import { copyFileSync } from 'node:fs'
-const req = createRequire('I:/Billiard Plus/billiard-plus/package.json')
+const req = createRequire(import.meta.url)
 const sharp = req('sharp')
 
 const DIR = 'public/images/Logo/'
-const PACK = 'assets/Logo-green/'
+const PACK = DIR   /* بسته‌ی منبع کنارِ خروجی‌ها */
 const out = []
 
 /* نشانِ بریده — منبعِ همه‌ی خروجی‌ها */
