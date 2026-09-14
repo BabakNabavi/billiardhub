@@ -135,7 +135,7 @@ export default function AddToHomeScreenSheet({ onClose }: { onClose: () => void 
             <div className="bh-a2hs-badge">
               {/* آیکون برند — همان فایلی که iOS برای Home Screen استفاده می‌کند */}
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/images/Logo/bh-apple-180-v5.png" alt="" width={52} height={52} loading="lazy" decoding="async" />
+              <img src="/images/Logo/bh-apple-180-v6.png" alt="" width={52} height={52} loading="lazy" decoding="async" />
             </div>
             <div className="bh-a2hs-titles">
               <h2 className="bh-a2hs-title">{TEXT.title}</h2>
