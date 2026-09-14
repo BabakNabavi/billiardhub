@@ -194,13 +194,14 @@
 
 .tm-cat {
   scroll-snap-align: start;
-  display: grid; gap: 8px; justify-items: center; text-align: center;
+  /* اندازه و گپ از ios.css می‌آید — این‌جا تکرار نشود. */
+  display: grid; justify-items: center; text-align: center;
   padding: 16px 8px;
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: var(--r-card);
   color: var(--ink);
-  font: inherit; font-size: 13px; font-weight: 600;
+  font: inherit;
   cursor: pointer;
   transition: border-color .18s, box-shadow .18s, background-color .18s;
 }
@@ -211,7 +212,6 @@
 .tm-cat[aria-pressed='true'] {
   border-color: var(--gold); background: var(--gold-tint);
 }
-.tm-cat-n { font-size: 11px; font-weight: 500; color: var(--ink-3); }
 
 /* ═══════════════ ۳ — دایرکتوری ═══════════════ */
 .tm-dir { display: grid; gap: 16px; align-items: start; }

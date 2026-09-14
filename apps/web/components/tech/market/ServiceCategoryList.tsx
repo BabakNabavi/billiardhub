@@ -40,6 +40,9 @@ export interface ServiceCategoryListProps {
   counts: ReadonlyMap<string, number>
 }
 
+/* ⚠️ باید داخلِ `<div className="tm">` سوار شود: تمامِ ظاهرِ کارت
+   (گپ، پدینگ، گردی، هر دو اندازه‌ی قلم) در ios.css پشتِ `.tm …`
+   است و market.css فقط اسکلتِ بی‌استایل را دارد. */
 export function ServiceCategoryList({ active, onPick, counts }: ServiceCategoryListProps) {
   return (
     <ul className="tm-cats">

@@ -322,6 +322,7 @@
   backdrop-filter: saturate(240%);
   border: 1px solid rgb(255 255 255 / .82);
   border-radius: 22px;
+  gap: 10px;
   padding: clamp(14px, 1.6vw, 22px) clamp(10px, 1vw, 14px);
   box-shadow: inset 0 1.5px 0 rgb(255 255 255 / .95), 0 8px 32px rgb(0 0 0 / .07);
   transition: background .3s ease, transform .3s cubic-bezier(.22,1,.36,1),
@@ -346,10 +347,18 @@
   box-shadow: 0 4px 14px rgba(var(--rgb), .28);
 }
 /* `flex-shrink` نمی‌آید: .tm-cat گرید است نه فلکس */
+/* ⚠️ این دو اندازه عینا از `.xp-card`ِ `components/home/ExploreStrip.tsx`
+   (خط ۱۰۲ و ۱۰۴، گپ در خط ۴۳) می‌آیند و باید `clamp` بمانند:
+   با اندازه‌ی ثابت، زیرِ ۱۴۴۰ کارتِ خدمات درشت‌تر از کارتِ «کاوش کن»
+   دیده می‌شد (عنوان ۱۳ در برابر ۱۰، توضیح ۱۱ در برابر ۹). */
 .tm .tm-cat-t {
-  font-size: 13px; font-weight: 700; line-height: 1.35; color: var(--ios-label);
+  font-size: clamp(10px, 0.95vw, 13px); font-weight: 700; line-height: 1.3;
+  color: var(--ios-label);
 }
-.tm .tm-cat-n { color: var(--ios-label-2); font-size: 11px; font-weight: 500; }
+.tm .tm-cat-n {
+  color: var(--ios-label-2);
+  font-size: clamp(9px, 0.78vw, 11px); font-weight: 400; line-height: 1.4;
+}
 @media (hover: hover) {
   .tm .tm-cat:hover {
     background: rgb(255 255 255 / .82);
