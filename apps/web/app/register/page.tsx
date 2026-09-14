@@ -369,9 +369,10 @@ export default function RegisterPage() {
           background: rgb(var(--c-em));
           box-shadow: 0 4px 14px rgb(var(--c-ink) / .12);
           display: flex; align-items: center; justify-content: center; gap: 10px;
-          transition: transform .25s cubic-bezier(.22,1,.36,1), box-shadow .25s, opacity .2s; }
+          transition: transform .25s cubic-bezier(.22,1,.36,1), background-color .2s, box-shadow .25s, opacity .2s; }
         .au-btn:not(:disabled):hover { transform: translateY(-2px); background: var(--brand-dark); box-shadow: 0 8px 22px rgb(var(--c-ink) / .16); }
         .au-btn:not(:disabled):active { transform: scale(0.985); }
+        .au-btn:focus-visible { outline: 2px solid var(--brand-dark); outline-offset: 3px; }
         .au-btn:disabled { opacity: .65; cursor: not-allowed; }
 
         /* استپر سگمنتی */
@@ -381,7 +382,7 @@ export default function RegisterPage() {
         .au-step .n { width: 21px; height: 21px; border-radius: 50%; display: inline-flex; align-items: center;
           justify-content: center; font-size: 11px; font-weight: 900; transition: all .3s; }
         .au-step .b { height: 3px; border-radius: 2px; background: ${LINE}; overflow: hidden; }
-        .au-step .b i { display: block; height: 100%; background: linear-gradient(90deg,rgb(var(--c-em)),${GOLD});
+        .au-step .b i { display: block; height: 100%; background: rgb(var(--c-em));
           transition: width .45s cubic-bezier(.22,1,.36,1); }
 
         .au-row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
@@ -433,7 +434,7 @@ export default function RegisterPage() {
                 <div key={s.n} className="au-step">
                   <div className="t" style={{ color: active || done ? GOLD_D : MUT }}>
                     <span className="n" style={{
-                      background: done ? `linear-gradient(135deg,rgb(var(--c-em)),${GOLD})` : active ? 'rgb(var(--c-em) / 0.14)' : '#EFEBE1',
+                      background: done ? `rgb(var(--c-em))` : active ? 'rgb(var(--c-em) / 0.14)' : '#EFEBE1',
                       color: done ? '#fff' : active ? GOLD_D : MUT,
                       border: active ? '1px solid rgb(var(--c-em) / 0.5)' : '1px solid transparent',
                     }}>
@@ -450,7 +451,7 @@ export default function RegisterPage() {
           <h1 style={{ fontSize: 22, fontWeight: 900, color: TEXT, margin: '0 0 6px', letterSpacing: '-0.02em' }}>
             {otpOpen ? 'تأیید شماره موبایل' : step === 1 ? 'ساخت حساب جدید' : 'تکمیل اطلاعات حساب'}
           </h1>
-          <div style={{ width: 46, height: 3, borderRadius: 2, background: `linear-gradient(90deg,${GOLD},rgb(var(--c-em)))`, transformOrigin: 'right', animation: 'auX .5s .2s ease both', marginBottom: 10 }} />
+          <div style={{ width: 46, height: 3, borderRadius: 2, background: `rgb(var(--c-em))`, transformOrigin: 'right', animation: 'auX .5s .2s ease both', marginBottom: 10 }} />
           <p style={{ fontSize: 13, color: MUT, margin: '0 0 22px', lineHeight: 1.8 }}>
             {otpOpen ? `کد ۵ رقمی به شماره ${toFa(form.phone)} پیامک شد` : step === 1 ? 'ابتدا شماره موبایل خود را وارد کنید' : `کاربر گرامی ${toFa(form.phone)} اکنون اطلاعات حساب را کامل کنید`}
           </p>
@@ -483,7 +484,7 @@ export default function RegisterPage() {
               )}
 
               <button className="au-btn" onClick={handleContinue} disabled={loading || phoneTaken}>
-                {loading ? (<><span style={{ width: 17, height: 17, border: '2px solid rgba(36,27,8,0.25)', borderTop: '2px solid #fff', borderRadius: '50%', animation: 'spin .7s linear infinite', display: 'inline-block' }} /> در حال ارسال کد…</>) : (<>ادامه <ArrowLeft size={15} /></>)}
+                {loading ? (<><span style={{ width: 17, height: 17, border: '2px solid rgba(255,255,255,0.32)', borderTop: '2px solid #fff', borderRadius: '50%', animation: 'spin .7s linear infinite', display: 'inline-block' }} /> در حال ارسال کد…</>) : (<>ادامه <ArrowLeft size={15} /></>)}
               </button>
             </div>
           )}
@@ -506,7 +507,7 @@ export default function RegisterPage() {
               />
               {otpMsg && <p style={{ fontSize: 12, fontWeight: 700, color: otpMsg.includes('ارسال شد') ? '#0E7A38' : '#B23B2E', margin: '10px 0 0', textAlign: 'center' }}>{otpMsg}</p>}
               <button className="au-btn" onClick={handleVerify} disabled={otpBusy} style={{ marginTop: 16 }}>
-                {otpBusy ? (<><span style={{ width: 17, height: 17, border: '2px solid rgba(36,27,8,0.25)', borderTop: '2px solid #fff', borderRadius: '50%', animation: 'spin .7s linear infinite', display: 'inline-block' }} /> بررسی…</>) : (<><ShieldCheck size={16} /> تأیید و ادامه</>)}
+                {otpBusy ? (<><span style={{ width: 17, height: 17, border: '2px solid rgba(255,255,255,0.32)', borderTop: '2px solid #fff', borderRadius: '50%', animation: 'spin .7s linear infinite', display: 'inline-block' }} /> بررسی…</>) : (<><ShieldCheck size={16} /> تأیید و ادامه</>)}
               </button>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 12 }}>
                 <button onClick={handleResend} disabled={resendIn > 0 || otpBusy}
@@ -523,8 +524,8 @@ export default function RegisterPage() {
                   نمی‌دهد، پس نرسیدن کد از سمت ما قابل تشخیص نیست. تنها
                   کاری که می‌شود کرد این است که کاربر بی‌خبر نماند. */}
               <div style={{ marginTop: 14, padding: '11px 13px', borderRadius: 12, background: 'rgb(var(--c-em) / 0.07)', border: '1px solid rgb(var(--c-em) / 0.22)' }}>
-                <div style={{ fontSize: 12.5, fontWeight: 800, color: '#6B5225', marginBottom: 6 }}>کد به دستتان نرسید؟</div>
-                <ul style={{ margin: 0, paddingInlineStart: 16, fontSize: 12, lineHeight: 2, color: '#6B5225' }}>
+                <div style={{ fontSize: 12.5, fontWeight: 800, color: 'rgb(var(--c-em))', marginBottom: 6 }}>کد به دستتان نرسید؟</div>
+                <ul style={{ margin: 0, paddingInlineStart: 16, fontSize: 12, lineHeight: 2, color: 'rgb(var(--c-em))' }}>
                   <li>چند دقیقه صبر کنید و «ارسال مجدد» را بزنید.</li>
                   <li>پوشه‌ی پیام‌های مسدودشده یا فیلترشده‌ی گوشی را ببینید.</li>
                   <li>اگر باز هم نرسید، شماره‌ی دیگری امتحان کنید یا با پشتیبانی تماس بگیرید.</li>
@@ -644,7 +645,7 @@ export default function RegisterPage() {
               <button className="au-btn" onClick={handleRegister} disabled={loading} style={{ marginTop: 6 }}>
                 {loading ? (
                   <>
-                    <span style={{ width: 17, height: 17, border: '2px solid rgba(36,27,8,0.25)', borderTop: '2px solid #fff', borderRadius: '50%', animation: 'spin .7s linear infinite', display: 'inline-block' }} />
+                    <span style={{ width: 17, height: 17, border: '2px solid rgba(255,255,255,0.32)', borderTop: '2px solid #fff', borderRadius: '50%', animation: 'spin .7s linear infinite', display: 'inline-block' }} />
                     {busyStep || 'در حال ساخت حساب…'}
                   </>
                 ) : 'ثبت نام'}

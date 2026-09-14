@@ -160,14 +160,15 @@ export default function LoginPage() {
           background: rgb(var(--c-em));
           box-shadow: 0 4px 14px rgb(var(--c-ink) / .12);
           display: flex; align-items: center; justify-content: center; gap: 10px;
-          transition: transform .25s cubic-bezier(.22,1,.36,1), box-shadow .25s, opacity .2s; }
+          transition: transform .25s cubic-bezier(.22,1,.36,1), background-color .2s, box-shadow .25s, opacity .2s; }
         .au-btn:not(:disabled):hover { transform: translateY(-2px); background: var(--brand-dark); box-shadow: 0 8px 22px rgb(var(--c-ink) / .16); }
         .au-btn:not(:disabled):active { transform: scale(0.985); }
+        .au-btn:focus-visible { outline: 2px solid var(--brand-dark); outline-offset: 3px; }
         .au-btn:disabled { opacity: .65; cursor: not-allowed; }
 
         .au-forgot { font-size: 12px; font-weight: 700; color: ${GOLD_D}; text-decoration: none;
           border-bottom: 1px solid rgb(var(--c-em) / 0.45); padding-bottom: 1px; transition: border-color .2s, color .2s; }
-        .au-forgot:hover { color: rgb(var(--c-em)); border-bottom-color: ${GOLD_D}; }
+        .au-forgot:hover { color: var(--brand-dark); border-bottom-color: var(--brand-dark); }
 
         /* ── خطای مرکزی: وسط صفحه، جلوی چشم کاربر ── */
         @keyframes auFade { from { opacity: 0; } to { opacity: 1; } }
@@ -203,7 +204,7 @@ export default function LoginPage() {
 
       <div className="au-card">
         <h1 style={{ fontSize: 23, fontWeight: 900, color: TEXT, margin: '0 0 6px', letterSpacing: '-0.02em' }}>ورود به حساب</h1>
-        <div style={{ width: 46, height: 3, borderRadius: 2, background: `linear-gradient(90deg,${GOLD},rgb(var(--c-em)))`, transformOrigin: 'right', animation: 'auX .5s .2s ease both', marginBottom: 10 }} />
+        <div style={{ width: 46, height: 3, borderRadius: 2, background: `rgb(var(--c-em))`, transformOrigin: 'right', animation: 'auX .5s .2s ease both', marginBottom: 10 }} />
         <p style={{ fontSize: 13, color: MUT, margin: '0 0 24px', lineHeight: 1.8 }}>با شماره موبایل خود وارد شوید</p>
 
         <div style={{ marginBottom: 14 }}>
@@ -281,7 +282,7 @@ export default function LoginPage() {
         <button className="au-btn" onClick={handleLogin} disabled={loading}>
           {loading ? (
             <>
-              <span style={{ width: 17, height: 17, border: '2px solid rgba(36,27,8,0.25)', borderTop: '2px solid #fff', borderRadius: '50%', animation: 'spin .7s linear infinite', display: 'inline-block' }} />
+              <span style={{ width: 17, height: 17, border: '2px solid rgba(255,255,255,0.32)', borderTop: '2px solid #fff', borderRadius: '50%', animation: 'spin .7s linear infinite', display: 'inline-block' }} />
               در حال ورود…
             </>
           ) : 'ورود به حساب'}

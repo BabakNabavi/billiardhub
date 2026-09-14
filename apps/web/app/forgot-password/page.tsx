@@ -186,9 +186,10 @@ export default function ForgotPasswordPage() {
           background: rgb(var(--c-em));
           box-shadow: 0 4px 14px rgb(var(--c-ink) / .12);
           display: flex; align-items: center; justify-content: center; gap: 10px;
-          transition: transform .25s cubic-bezier(.22,1,.36,1), box-shadow .25s, opacity .2s; }
+          transition: transform .25s cubic-bezier(.22,1,.36,1), background-color .2s, box-shadow .25s, opacity .2s; }
         .au-btn:not(:disabled):hover { transform: translateY(-2px); background: var(--brand-dark); box-shadow: 0 8px 22px rgb(var(--c-ink) / .16); }
         .au-btn:not(:disabled):active { transform: scale(0.985); }
+        .au-btn:focus-visible { outline: 2px solid var(--brand-dark); outline-offset: 3px; }
         .au-btn:disabled { opacity: .65; cursor: not-allowed; }
 
         .au-ghost { width: 100%; margin-top: 10px; padding: 12px; border-radius: 12px; cursor: pointer;
@@ -200,7 +201,7 @@ export default function ForgotPasswordPage() {
         /* پله‌های سه‌گانه */
         .au-steps { display: flex; align-items: center; gap: 6px; margin: 0 0 20px; }
         .au-steps i { flex: 1; height: 3px; border-radius: 2px; background: ${LINE}; transition: background .35s; }
-        .au-steps i.on { background: linear-gradient(90deg, ${GOLD}, rgb(var(--c-em))); }
+        .au-steps i.on { background: rgb(var(--c-em)); }
 
         /* شرط‌های رمز */
         .au-rules { list-style: none; padding: 0; margin: 10px 0 20px; display: grid; gap: 6px; }
@@ -241,7 +242,7 @@ export default function ForgotPasswordPage() {
 
       <div className="au-card">
         <h1 style={{ fontSize: 23, fontWeight: 900, color: TEXT, margin: '0 0 6px', letterSpacing: '-0.02em' }}>{title}</h1>
-        <div style={{ width: 46, height: 3, borderRadius: 2, background: `linear-gradient(90deg,${GOLD},rgb(var(--c-em)))`, transformOrigin: 'right', animation: 'auX .5s .2s ease both', marginBottom: 10 }} />
+        <div style={{ width: 46, height: 3, borderRadius: 2, background: `rgb(var(--c-em))`, transformOrigin: 'right', animation: 'auX .5s .2s ease both', marginBottom: 10 }} />
         <p style={{ fontSize: 13, color: MUT, margin: '0 0 22px', lineHeight: 1.95 }}>{lead}</p>
 
         {step !== 'done' && (
@@ -320,10 +321,10 @@ export default function ForgotPasswordPage() {
               marginTop: 14, padding: '11px 13px', borderRadius: 12,
               background: 'rgb(var(--c-em) / 0.07)', border: '1px solid rgb(var(--c-em) / 0.22)',
             }}>
-              <div style={{ fontSize: 12.5, fontWeight: 800, color: '#6B5225', marginBottom: 6 }}>
+              <div style={{ fontSize: 12.5, fontWeight: 800, color: 'rgb(var(--c-em))', marginBottom: 6 }}>
                 کد به دستتان نرسید؟
               </div>
-              <ul style={{ margin: 0, paddingInlineStart: 16, fontSize: 12, lineHeight: 2, color: '#6B5225' }}>
+              <ul style={{ margin: 0, paddingInlineStart: 16, fontSize: 12, lineHeight: 2, color: 'rgb(var(--c-em))' }}>
                 <li>چند دقیقه صبر کنید و «ارسال دوباره» را بزنید.</li>
                 <li>پوشه‌ی پیام‌های مسدودشده یا فیلترشده‌ی گوشی را ببینید.</li>
                 <li>اگر باز هم نرسید، ممکن است اپراتور آن شماره پیامک ما را تحویل ندهد.</li>
@@ -427,7 +428,7 @@ export default function ForgotPasswordPage() {
         <button className="au-btn" onClick={submit} disabled={loading}>
           {loading ? (
             <>
-              <span style={{ width: 17, height: 17, border: '2px solid rgba(36,27,8,0.25)', borderTop: '2px solid #fff', borderRadius: '50%', animation: 'spin .7s linear infinite', display: 'inline-block' }} />
+              <span style={{ width: 17, height: 17, border: '2px solid rgba(255,255,255,0.32)', borderTop: '2px solid #fff', borderRadius: '50%', animation: 'spin .7s linear infinite', display: 'inline-block' }} />
               کمی صبر کنید…
             </>
           ) : btnLabel}
