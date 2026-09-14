@@ -63,7 +63,7 @@ export function ServiceCategoryList({ active, onPick, counts }: ServiceCategoryL
               {/* درخشش بالای کارت — همان جزئیاتی که نوار «کاوش کن» دارد */}
               <span aria-hidden className="tm-cat-sheen" />
               <span aria-hidden className="tm-cat-ic">
-                <Icon size={21} strokeWidth={1.8} color={tint.color} />
+                <Icon size={18} strokeWidth={1.8} color={tint.color} />
               </span>
               <span className="tm-cat-t">{cat.title}</span>
               {n > 0 && <span className="tm-cat-n">{toFaDigits(String(n))} متخصص</span>}

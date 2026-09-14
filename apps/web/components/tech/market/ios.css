@@ -310,8 +310,11 @@
 
    ⚠️ اینها **دکمه‌ی فیلتر**ند نه لینک، پس ردیفِ «مشاهده ←» نمی‌آید:
    فلش یعنی «به جای دیگری می‌روی» و این‌جا دروغ می‌شد. */
-/* ⚠️ مقادیر عینا از `.xp-card`ِ نوارِ «کاوش کن» برداشته شده — شیشه
-   روی قابِ گرادیانی، نه سطحِ مات. اگر آن‌جا عوض شد، این‌جا هم. */
+/* ⚠️ چه چیزی از `.xp-card`ِ «کاوش کن» می‌آید و چه چیزی *عمدا* فرق دارد:
+     می‌آید  → شیشه، حاشیه، سایه، گذار، و دو کلمپِ قلم (پایین‌تر)
+     فرق دارد → گردی ۱۶ (نه ۲۲)، گپ ۸ (نه ۱۰)، پدینگِ کمتر، کاشیِ ۳۶ (نه ۴۶)
+   دلیلِ تفاوت پایین‌تر نوشته شده. اگر «کاوش کن» عوض شد، فقط دسته‌ی
+   اول را هم‌گام کن — دسته‌ی دوم را نه. */
 .tm .tm-cat {
   position: relative; overflow: hidden;
   background: rgb(255 255 255 / .52);
@@ -321,9 +324,13 @@
   -webkit-backdrop-filter: saturate(240%);
   backdrop-filter: saturate(240%);
   border: 1px solid rgb(255 255 255 / .82);
-  border-radius: 22px;
-  gap: 10px;
-  padding: clamp(14px, 1.6vw, 22px) clamp(10px, 1vw, 14px);
+  border-radius: 16px;
+  gap: 8px;
+  /* ⚠️ عمدا کمتر از `.xp-card` است: آن کارت چهار ردیف دارد (کاشی،
+     برچسب، توضیح، «مشاهده ←») و این یکی حداکثر سه — ردیفِ شمارش فقط
+     وقتی n>0 است. با پدینگِ یکسان، کارت ۱۴۲ عرض در برابر ۱۶۱ ارتفاع
+     می‌شد؛ حالا ۱۴۲×۱۱۴. */
+  padding: clamp(11px, 1.05vw, 15px) clamp(9px, 0.9vw, 12px);
   box-shadow: inset 0 1.5px 0 rgb(255 255 255 / .95), 0 8px 32px rgb(0 0 0 / .07);
   transition: background .3s ease, transform .3s cubic-bezier(.22,1,.36,1),
               box-shadow .3s ease, border-color .3s ease;
@@ -337,18 +344,18 @@
 .tm .tm-cat-sheen {
   position: absolute; inset-block-start: 0; inset-inline: 0; block-size: 46%;
   background: linear-gradient(180deg, rgb(255 255 255 / .55) 0%, rgb(255 255 255 / 0) 100%);
-  pointer-events: none; border-radius: 22px 22px 0 0;
+  pointer-events: none; border-radius: 16px 16px 0 0;
 }
 .tm .tm-cat-ic {
   display: grid; place-items: center;
-  inline-size: 46px; block-size: 46px; border-radius: 14px;
+  inline-size: 36px; block-size: 36px; border-radius: 12px;
   background: linear-gradient(135deg, rgba(var(--rgb), .20), rgba(var(--rgb), .08));
   border: 1px solid rgba(var(--rgb), .32);
-  box-shadow: 0 4px 14px rgba(var(--rgb), .28);
+  box-shadow: 0 3px 11px rgba(var(--rgb), .28);
 }
 /* `flex-shrink` نمی‌آید: .tm-cat گرید است نه فلکس */
 /* ⚠️ این دو اندازه عینا از `.xp-card`ِ `components/home/ExploreStrip.tsx`
-   (خط ۱۰۲ و ۱۰۴، گپ در خط ۴۳) می‌آیند و باید `clamp` بمانند:
+   (خط ۱۰۲ و ۱۰۴) می‌آیند و باید `clamp` بمانند:
    با اندازه‌ی ثابت، زیرِ ۱۴۴۰ کارتِ خدمات درشت‌تر از کارتِ «کاوش کن»
    دیده می‌شد (عنوان ۱۳ در برابر ۱۰، توضیح ۱۱ در برابر ۹). */
 .tm .tm-cat-t {
