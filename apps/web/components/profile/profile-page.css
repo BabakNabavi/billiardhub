@@ -18,6 +18,12 @@
    پشت پس‌زمینه‌ی خود هیرو می‌فرستاد و کل هیرو یک مستطیل سیاه
    می‌شد. حالا ترتیب مستقل از آن است. */
 .ch-hero {
+  /* ⚠️ زمردِ اصلی روی این زمینه ۲٫۴۰:۱ است. هر چیزی که این‌جا
+     var(--gold) می‌خواند باید پله‌ی روشن را بگیرد — یک جا، نه
+     شانزده قاعده‌ی جداگانه. */
+  --gold: var(--brand-on-dark, #4FA890);
+  --gold-ch: 79 168 144;
+  --gold-light: var(--brand-on-dark, #4FA890);
   position: relative;
   isolation: isolate;
   background: var(--bg-dark, #111111);
@@ -62,7 +68,7 @@
   position: absolute; inset: 0; z-index: 1;
   background:
     linear-gradient(to top, var(--bg-dark, #111) 4%, rgba(17, 17, 17, 0.72) 44%, rgba(17, 17, 17, 0.34) 100%),
-    radial-gradient(70% 90% at 78% 12%, rgba(199, 166, 106, 0.20), transparent 62%);
+    radial-gradient(70% 90% at 78% 12%, rgb(var(--gold-ch) / 0.20), transparent 62%);
 }
 /* پوستر پیش‌فرض از قبل تیره و کنترل‌شده است؛ لایه‌ی کامل عکس
    رویش گرافیک را می‌بلعید و فقط یک مستطیل سیاه می‌ماند. این نسخه
@@ -109,7 +115,7 @@
   width: clamp(106px, 15vw, 156px); aspect-ratio: 1; flex-shrink: 0;
   border-radius: 50%; overflow: hidden;
   background: rgba(255, 255, 255, 0.06);
-  border: 2px solid rgba(199, 166, 106, 0.55);
+  border: 2px solid rgb(var(--gold-ch) / 0.55);
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
   display: flex; align-items: center; justify-content: center;
   color: var(--gold, #C7A66A);
@@ -117,7 +123,7 @@
 /* آواتار بی‌عکس نشان نقش می‌گیرد، نه حرف اول نام. پس‌زمینه‌اش
    کمی روشن‌تر است تا «جای خالی» به‌نظر نرسد. */
 .ch-avatar[data-glyph] {
-  background: linear-gradient(150deg, rgba(199,166,106,0.16), rgba(255,255,255,0.04));
+  background: rgb(255 255 255 / .08);
   color: var(--gold, #C7A66A);
 }
 .ch-avatar[data-glyph] svg { width: 46%; height: 46%; }
@@ -158,7 +164,7 @@ button.ch-avatar:focus-visible { outline: 2px solid var(--gold, #C7A66A); outlin
    («آسیایی B») و در بند راست‌به‌چپ جابه‌جا می‌شود. */
 .ch-iso { unicode-bidi: isolate; }
 .ch-dots { display: inline-flex; gap: 3px; }
-.ch-dots i { width: 5px; height: 5px; border-radius: 50%; background: rgba(199, 166, 106, 0.28); }
+.ch-dots i { width: 5px; height: 5px; border-radius: 50%; background: rgb(255 255 255 / .22); }
 .ch-dots i[data-on] { background: var(--gold, #C7A66A); }
 
 .ch-meta {
@@ -180,8 +186,8 @@ button.ch-avatar:focus-visible { outline: 2px solid var(--gold, #C7A66A); outlin
 .ch-btn:hover { transform: translateY(-2px); }
 .ch-btn:active { transform: translateY(0); }
 .ch-btn:focus-visible { outline: 2px solid var(--gold, #C7A66A); outline-offset: 3px; }
-.ch-btn-gold { background: var(--gold, #C7A66A); color: #1A1408; border: 1px solid var(--gold, #C7A66A); }
-.ch-btn-gold:hover { background: var(--gold-light, #E2C98C); }
+.ch-btn-gold { background: var(--brand); color: #fff; border: 1px solid var(--brand); }
+.ch-btn-gold:hover { background: var(--brand-dark); }
 .ch-btn-ghost {
   background: rgba(255, 255, 255, 0.08); color: rgba(255, 255, 255, 0.88);
   border: 1px solid rgba(255, 255, 255, 0.18);
@@ -238,7 +244,7 @@ main.ch-col > section { max-width: 760px; }
 /* ⚠️ `90deg` فیزیکی است و در RTL خط از سر اشتباه محو می‌شد: طلایی
    ته صفحه می‌ماند و کنار عنوان — جایی که باید به آن وصل شود —
    شفاف بود. `to left` منطقی است و در هر دو جهت درست می‌نشیند. */
-.ch-sec-head .rule { flex: 1; height: 1px; background: linear-gradient(to left, rgba(199,166,106,0.42), transparent); }
+.ch-sec-head .rule { flex: 1; height: 1px; background: linear-gradient(to left, rgb(var(--gold-ch) / 0.42), transparent); }
 
 .ch-card { background: var(--bg-surface, #fff); border: 1px solid #E7E2D6; border-radius: 18px; padding: clamp(18px, 2.6vw, 26px); }
 .ch-empty { font-size: 13px; color: var(--text-tertiary, #6E6E6E); line-height: 2; margin: 0; }
@@ -261,11 +267,11 @@ main.ch-col > section { max-width: 760px; }
   min-height: 40px; padding-inline: 12px; border-radius: 9px; cursor: pointer;
   font-family: inherit; font-size: 13px; font-weight: 800;
   color: var(--gold-deep, #8F6531);
-  background: var(--gold-dim, rgba(199,166,106,0.12));
-  border: 1px solid var(--gold-border, rgba(199,166,106,0.24));
+  background: var(--gold-dim, rgb(var(--gold-ch) / 0.12));
+  border: 1px solid var(--gold-border, rgb(var(--gold-ch) / 0.24));
   transition: background .2s, border-color .2s;
 }
-.ch-url-copy:hover { background: rgba(199,166,106,0.20); border-color: rgba(199,166,106,0.45); }
+.ch-url-copy:hover { background: rgb(var(--gold-ch) / 0.20); border-color: rgb(var(--gold-ch) / 0.45); }
 .ch-url-copy:focus-visible { outline: 2px solid var(--gold-deep, #8F6531); outline-offset: 2px; }
 
 /* ═══ راه‌های ارتباطی ═══ */
@@ -276,7 +282,7 @@ main.ch-col > section { max-width: 760px; }
   border: 1px solid #E7E2D6; background: #FAFAF7; color: var(--text-secondary, #666);
   text-decoration: none; transition: color .2s, border-color .2s, background .2s, transform .2s;
 }
-.ch-link:hover { color: var(--gold-deep, #8F6531); border-color: rgba(199,166,106,0.45); background: var(--gold-dim, rgba(199,166,106,0.12)); transform: translateY(-2px); }
+.ch-link:hover { color: var(--gold-deep, #8F6531); border-color: rgb(var(--gold-ch) / 0.45); background: var(--gold-dim, rgb(var(--gold-ch) / 0.12)); transform: translateY(-2px); }
 .ch-link:focus-visible { outline: 2px solid var(--gold-deep, #8F6531); outline-offset: 2px; }
 
 @media (prefers-reduced-motion: reduce) { .ch-link { transition: none; } .ch-link:hover { transform: none; } }
@@ -285,7 +291,7 @@ main.ch-col > section { max-width: 760px; }
 .ch-gal-tabs { margin-bottom: 16px; }
 .ch-gal-n {
   margin-inline-start: 6px; font-size: 11px; font-weight: 800;
-  color: var(--gold-deep, #8F6531); background: var(--gold-dim, rgba(199,166,106,0.12));
+  color: var(--gold-deep, #8F6531); background: var(--gold-dim, rgb(var(--gold-ch) / 0.12));
   border-radius: 999px; padding: 1px 6px; font-variant-numeric: tabular-nums;
 }
 
@@ -411,7 +417,7 @@ main.ch-col > section { max-width: 760px; }
   border: 1px solid #E7E2D6; background: #FBFAF7;
   font-family: inherit; transition: border-color .2s, box-shadow .2s, transform .2s;
 }
-.ch-alb:hover { border-color: rgba(199, 166, 106, 0.45); box-shadow: 0 10px 26px rgba(28, 27, 23, 0.10); transform: translateY(-2px); }
+.ch-alb:hover { border-color: rgb(var(--gold-ch) / 0.45); box-shadow: 0 10px 26px rgba(28, 27, 23, 0.10); transform: translateY(-2px); }
 .ch-alb:focus-visible { outline: 2px solid var(--gold-deep, #8F6531); outline-offset: 3px; }
 .ch-alb-cover {
   aspect-ratio: 4 / 3; border-radius: 8px; overflow: hidden; background: #EDE9E0;
@@ -432,10 +438,10 @@ main.ch-col > section { max-width: 760px; }
   min-height: 34px; padding: 0 12px; border-radius: 10px; cursor: pointer;
   font-family: inherit; font-size: 12px; font-weight: 800;
   color: var(--gold-deep, #8F6531);
-  background: var(--gold-dim, rgba(199,166,106,0.12));
-  border: 1px solid rgba(199, 166, 106, 0.34);
+  background: var(--gold-dim, rgb(var(--gold-ch) / 0.12));
+  border: 1px solid rgb(var(--gold-ch) / 0.34);
 }
-.ch-alb-back:hover { background: rgba(199, 166, 106, 0.20); }
+.ch-alb-back:hover { background: rgb(var(--gold-ch) / 0.20); }
 .ch-alb-back:focus-visible { outline: 2px solid var(--gold-deep, #8F6531); outline-offset: 2px; }
 
 @media (max-width: 700px) { .ch-alb-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; } }
@@ -485,7 +491,7 @@ main.ch-col > section { max-width: 760px; }
   transition: background .2s, border-color .2s;
 }
 .pvv-btn:hover { background: rgba(255, 255, 255, 0.18); }
-.pvv-btn:focus-visible { outline: 2px solid #C7A66A; outline-offset: 2px; }
+.pvv-btn:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
 .pvv-del:hover { background: rgba(220, 38, 38, 0.30); border-color: rgba(220, 38, 38, 0.55); }
 .pvv-video {
   max-width: min(1100px, 100%); max-height: 78dvh; width: auto; border-radius: 12px;
@@ -526,10 +532,10 @@ main.ch-col > section { max-width: 760px; }
    دیرتر بارگذاری می‌شود، پس برنده می‌شد. با دو کلاس کنار هم وزن
    بالاتر می‌رود و قاب سر جایش می‌ماند. */
 .ch-gal-cell.ch-add-tile {
-  border: 1.5px dashed rgba(199, 166, 106, 0.5);
-  background: var(--gold-dim, rgba(199, 166, 106, 0.10));
+  border: 1.5px dashed rgb(var(--gold-ch) / 0.5);
+  background: var(--gold-dim, rgb(var(--gold-ch) / 0.10));
 }
-.ch-gal-cell.ch-add-tile:hover:not(:disabled) { border-color: rgba(199, 166, 106, 0.75); }
+.ch-gal-cell.ch-add-tile:hover:not(:disabled) { border-color: rgb(var(--gold-ch) / 0.75); }
 
 
 
@@ -747,8 +753,7 @@ main.ch-col > section { max-width: 760px; }
 .ch-avatar-ring {
   display: inline-grid; place-items: center; flex-shrink: 0;
   padding: 3px; border-radius: 50%;
-  background: conic-gradient(from 210deg,
-    #C7A66A 0deg, #F4E3BC 90deg, #8F6531 190deg, #F4E3BC 280deg, #C7A66A 360deg);
+  background: var(--gold);
   /* ⚠️ سایه این‌جا نه: خودِ `.ch-avatar` سایه‌ی ۰ ۱۲ ۴۰ دارد و
      دوتا روی هم می‌نشست. */
 }
@@ -772,7 +777,7 @@ main.ch-col > section { max-width: 760px; }
 }
 .ch-avatar-ring > .ch-avatar[data-glyph] {
   background-color: #12161A;
-  background-image: linear-gradient(150deg, rgba(199,166,106,.20), rgba(255,255,255,.05));
+  background-image: linear-gradient(150deg, rgb(var(--gold-ch) / .20), rgba(255,255,255,.05));
 }
 
 /* ── متا + نامک در یک ردیف ── */
@@ -792,12 +797,12 @@ main.ch-col > section { max-width: 760px; }
   display: inline-flex; align-items: center; gap: 8px;
   min-block-size: 44px; padding-inline: 18px;
   border-radius: 999px; text-decoration: none;
-  font-size: 14px; font-weight: 800;
-  background: #F4E3BC; color: #2A1E08;
+  font-size: 14px; font-weight: 600;
+  background: #fff; color: rgb(var(--c-ink));
   border: 1px solid rgb(255 255 255 / .22);
   transition: background .2s, transform .2s;
 }
-.ch-hero-cta:hover { background: #FDF4DC; transform: translateY(-1px); }
+.ch-hero-cta:hover { background: rgb(var(--c-paper)); transform: translateY(-1px); }
 .ch-hero-cta:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
 /* ⚠️ آیکونِ تنها باید هدفِ لمسیِ کامل داشته باشد */
 .ch-hero-ico {
@@ -885,7 +890,7 @@ main.ch-col > section { max-width: 760px; }
   color: #fff; line-height: 1.2;
 }
 .ch-hero-stats .ch-stats .ch-stats-t {
-  font-size: clamp(13px, 1.6vw, 16px); color: #F4E3BC;
+  font-size: clamp(13px, 1.6vw, 16px); color: var(--gold-light);
   /* ⚠️ بدونِ این، نامِ درجه‌ی بلند دو خط می‌شود و از ردیفِ ثابتِ
      گرید بیرون می‌زند، درست روی برچسبِ زیرش. */
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
@@ -930,7 +935,7 @@ main.ch-col > section { max-width: 760px; }
 }
 .ch-hero--photo .ch-chip-grade {
   background: rgb(24 18 6 / .88);
-  border-color: rgb(199 166 106 / .46);
+  border-color: rgb(var(--gold-ch) / .46);
 }
 
 
@@ -947,16 +952,16 @@ main.ch-col > section { max-width: 760px; }
   transition: background .15s, border-color .15s;
 }
 @media (hover: hover) {
-  .sess-slot:hover:not(:disabled) { background: #FAF6EC; border-color: #C7A66A; }
+  .sess-slot:hover:not(:disabled) { background: var(--brand-tint); border-color: var(--gold); }
 }
 .sess-slot[data-on] {
-  border-color: #C7A66A; background: rgba(199,166,106,0.18); color: #8F6531;
+  border-color: var(--gold); background: rgb(var(--gold-ch) / 0.18); color: var(--gold);
 }
 /* ⚠️ `#B3AEA1` روی `#F3F1EB` یعنی ۱٫۹:۱ — خواندنی نبود، و دلیلِ
    غیرفعال‌کردن به‌جای حذف همین بود که کاربر *ببیند* کدام ساعت
    بسته است. */
 .sess-slot:disabled { background: #F3F1EB; color: #6F6A5C; cursor: not-allowed; }
-.sess-slot:focus-visible { outline: 2px solid #8F6531; outline-offset: 2px; }
+.sess-slot:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
 @media (prefers-reduced-motion: reduce) { .sess-slot { transition: none; } }
 
 

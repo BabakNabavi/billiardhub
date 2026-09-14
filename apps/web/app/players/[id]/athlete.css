@@ -33,9 +33,9 @@
   --ink-3:  #706B5E;   /* ۴٫۷:۱ روی کرم — متن زیر ۱۸px کف ۴٫۵ می‌خواهد */
   --paper:  #F4F1E9;
   --night:  #0B0B09;
-  --gold:   #C7A66A;
-  --gold-d: #8A6229;
-  --gold-l: #E3CC96;
+  --gold: var(--brand, #0F5B4D);
+  --gold-d: var(--brand-dark, #083F36);
+  --gold-l: var(--brand-accent, #2E7D6B);
   --line:   rgba(22, 21, 15, .09);
   --nline:  rgba(255, 255, 255, .14);
   --r:      18px;

@@ -355,7 +355,7 @@ export default function Navbar() {
                 <span aria-hidden style={{ position: 'absolute', inset: 0, borderRadius: '12px', pointerEvents: 'none',
                   boxShadow: 'inset 0 1px 1px rgba(255,255,255,0.26), inset 0 -1px 2px rgba(60,40,10,0.18)' }} />
               </div>
-            <span className="nav-brand" style={{ fontWeight: 900, fontSize: '20px', letterSpacing: '-0.03em', whiteSpace: 'nowrap', transition: 'color 0.4s' }}>
+            <span className="nav-brand" style={{ fontWeight: 700, fontSize: '20px', letterSpacing: '-0.03em', whiteSpace: 'nowrap', transition: 'color 0.4s' }}>
               <span style={{ color: isLight ? '#000000' : '#ffffff' }}>بیلیارد</span>{' '}
               <span style={{ color: GOLD }}>هاب</span>
             </span>
@@ -403,8 +403,8 @@ export default function Navbar() {
                   {/* 3 columns */}
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', padding: '4px 0' }}>
                     {exploreMenu.map((section, si) => {
-                      const colColor = si === 0 ? '#B8933A' : si === 1 ? '#3B82C4' : '#1E7A44';
-                      const colColorLight = si === 0 ? '#C7A66A' : si === 1 ? '#4A9EFF' : '#30C55A';
+                      const colColor = si === 0 ? 'var(--brand)' : si === 1 ? '#3B82C4' : '#1E7A44';
+                      const colColorLight = si === 0 ? 'var(--brand)' : si === 1 ? '#4A9EFF' : '#30C55A';
                       return (
                         <div key={si} style={{ borderRight: si < 2 ? '1px solid rgba(28,28,26,0.06)' : 'none', padding: '16px 20px 20px' }}>
                           {/* Column header */}
@@ -447,9 +447,9 @@ export default function Navbar() {
                       <div style={{ fontSize: '12px', fontWeight: 700, color: 'rgba(28,28,26,0.7)' }}>اولین پلتفرم تخصصی بیلیارد ایران</div>
                       <div style={{ fontSize: '11px', color: 'rgba(28,28,26,0.36)', marginTop: '2px' }}>اتصال بی واسطه و خانه‌ی دیجیتال جامعه‌ی بیلیارد کشور</div>
                     </div>
-                    <Link prefetch={false} href="/register" onClick={() => setExploreOpen(false)} style={{ fontSize: '13px', color: '#8F6531', fontWeight: 700, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '5px', background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.34)', borderRadius: '10px', padding: '7px 16px', whiteSpace: 'nowrap', transition: 'transform .25s cubic-bezier(.22,1,.36,1), background .2s' }}
-                      onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.background = 'rgba(199,166,106,0.18)'; }}
-                      onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.background = 'rgba(199,166,106,0.12)'; }}>
+                    <Link prefetch={false} href="/register" onClick={() => setExploreOpen(false)} style={{ fontSize: '13px', color: 'var(--brand)', fontWeight: 700, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '5px', background: 'var(--brand-tint)', border: '1px solid var(--border)', borderRadius: '10px', padding: '7px 16px', whiteSpace: 'nowrap', transition: 'transform .25s cubic-bezier(.22,1,.36,1), background .2s' }}
+                      onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.background = 'rgb(var(--c-em) / .14)'; }}
+                      onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.background = 'var(--brand-tint)'; }}>
                       ثبت‌نام رایگان <ArrowLeft size={10} />
                     </Link>
                   </div>
@@ -486,7 +486,7 @@ export default function Navbar() {
                   style={{ position: 'relative', width: '44px', height: '44px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: notifOpen ? GOLD_LIGHT : 'none', border: 'none', cursor: 'pointer', borderRadius: '12px', color: notifOpen ? GOLD : TEXT_MUT, transition: 'color 0.2s' }}>
                   <Bell size={22} />
                   {notifUnread > 0 && (
-                    <span style={{ position: 'absolute', top: '6px', right: '6px', minWidth: '16px', height: '16px', padding: '0 4px', background: '#ef4444', color: '#fff', fontSize: '9.5px', fontWeight: 800, borderRadius: '999px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1.5px solid #fff', boxShadow: '0 0 8px rgba(239,68,68,0.6)' }}>
+                    <span style={{ position: 'absolute', top: '6px', right: '6px', minWidth: '16px', height: '16px', padding: '0 4px', background: '#ef4444', color: '#fff', fontSize: '9.5px', fontWeight: 600, borderRadius: '999px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1.5px solid #fff', boxShadow: '0 0 8px rgba(239,68,68,0.6)' }}>
                       {notifUnread > 9 ? '۹+' : notifUnread.toLocaleString('fa-IR')}
                     </span>
                   )}
@@ -494,18 +494,18 @@ export default function Navbar() {
                 {notifOpen && (
                   <div style={{ position: 'absolute', top: 'calc(100% + 10px)', left: 0, width: '320px', maxWidth: '92vw', background: 'rgba(252,251,249,0.98)', border: '1px solid rgba(28,28,26,0.08)', borderRadius: '18px', boxShadow: '0 24px 60px rgba(28,28,26,0.16)', backdropFilter: 'blur(30px)', zIndex: 320, overflow: 'hidden', animation: 'fadeDown 0.2s ease both' }}>
                     <div style={{ padding: '14px 18px 10px', borderBottom: '1px solid rgba(28,28,26,0.06)', display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <span style={{ fontSize: 14, fontWeight: 900, color: TEXT }}>اعلان‌ها</span>
-                      <Link prefetch={false} href="/direct" onClick={() => setNotifOpen(false)} style={{ marginInlineStart: 'auto', fontSize: 11.5, fontWeight: 700, color: '#8F6531', textDecoration: 'none' }}>دایرکت</Link>
+                      <span style={{ fontSize: 14, fontWeight: 700, color: TEXT }}>اعلان‌ها</span>
+                      <Link prefetch={false} href="/direct" onClick={() => setNotifOpen(false)} style={{ marginInlineStart: 'auto', fontSize: 11.5, fontWeight: 700, color: 'var(--brand)', textDecoration: 'none' }}>دایرکت</Link>
                     </div>
                     <div style={{ maxHeight: '340px', overflowY: 'auto' }}>
                       {notifs.length === 0 ? (
                         <div style={{ padding: '30px 18px', textAlign: 'center', fontSize: 12.5, color: 'rgba(28,28,26,0.4)' }}>اعلانی نیست</div>
                       ) : notifs.slice(0, 20).map(n => (
                         <Link prefetch={false} key={n.id} href="/direct" onClick={() => setNotifOpen(false)}
-                          style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: '11px 16px', textDecoration: 'none', color: 'inherit', borderBottom: '1px solid rgba(28,28,26,0.04)', background: n.read ? 'transparent' : 'rgba(199,166,106,0.06)' }}>
-                          <span style={{ width: 30, height: 30, borderRadius: '50%', flexShrink: 0, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 900, color: '#241B08', background: 'linear-gradient(135deg,#E8CE96,#8A6020)' }}>{n.fromName.charAt(0)}</span>
+                          style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: '11px 16px', textDecoration: 'none', color: 'inherit', borderBottom: '1px solid rgba(28,28,26,0.04)', background: n.read ? 'transparent' : 'var(--brand-tint)' }}>
+                          <span style={{ width: 30, height: 30, borderRadius: '50%', flexShrink: 0, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 600, color: '#fff', background: 'rgb(var(--c-em))' }}>{n.fromName.charAt(0)}</span>
                           <span style={{ minWidth: 0, flex: 1 }}>
-                            <span style={{ fontSize: 12.5, color: '#1C1B17', lineHeight: 1.7 }}><b style={{ fontWeight: 800 }}>{n.fromName}</b> {notifText(n)}</span>
+                            <span style={{ fontSize: 12.5, color: '#1C1B17', lineHeight: 1.7 }}><b style={{ fontWeight: 600 }}>{n.fromName}</b> {notifText(n)}</span>
                           </span>
                         </Link>
                       ))}
@@ -523,7 +523,7 @@ export default function Navbar() {
                 onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = TEXT_MUT }}>
                 <Send size={20} />
                 {dmUnread > 0 && (
-                  <span style={{ position: 'absolute', top: '5px', right: '5px', minWidth: '16px', height: '16px', padding: '0 4px', background: '#ef4444', color: '#fff', fontSize: '9.5px', fontWeight: 800, borderRadius: '999px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 8px rgba(239,68,68,0.6)', border: '1.5px solid #fff' }}>
+                  <span style={{ position: 'absolute', top: '5px', right: '5px', minWidth: '16px', height: '16px', padding: '0 4px', background: '#ef4444', color: '#fff', fontSize: '9.5px', fontWeight: 600, borderRadius: '999px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 8px rgba(239,68,68,0.6)', border: '1.5px solid #fff' }}>
                     {dmUnread > 9 ? '۹+' : dmUnread.toLocaleString('fa-IR')}
                   </span>
                 )}
@@ -713,7 +713,7 @@ export default function Navbar() {
           <div style={{ padding: '16px 20px' }}>
             {!user ? (
               <Link prefetch={false} href="/login" onClick={() => setMobileOpen(false)}
-                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', padding: '15px', borderRadius: '16px', background: 'linear-gradient(135deg,rgba(184,147,58,0.15),rgba(184,147,58,0.06))', border: `1px solid ${GOLD}`, color: GOLD, fontSize: '17px', fontWeight: 800, textDecoration: 'none' }}>
+                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', padding: '15px', borderRadius: '16px', background: 'linear-gradient(135deg,rgba(184,147,58,0.15),rgba(184,147,58,0.06))', border: `1px solid ${GOLD}`, color: GOLD, fontSize: '17px', fontWeight: 600, textDecoration: 'none' }}>
                 <User size={17} /> ورود | ثبت‌نام رایگان
               </Link>
             ) : (

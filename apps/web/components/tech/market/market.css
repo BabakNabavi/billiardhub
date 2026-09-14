@@ -30,9 +30,9 @@
   --ink-3: #6E6C66;
 
   /* ── لهجه ── */
-  --gold: #C7A66A;
-  --gold-ink: #8A6224;
-  --gold-tint: rgb(199 166 106 / .12);
+  --gold: var(--brand, #0F5B4D);
+  --gold-ink: var(--brand, #0F5B4D);
+  --gold-tint: var(--brand-tint, rgb(15 91 77 / .07));
 
   --line: #E4E1DA;
   --line-strong: #D3CFC6;

@@ -195,7 +195,7 @@ export default function RootLayout({
           ::-webkit-scrollbar-thumb:hover { background: rgba(184,147,58,0.55); }
         `}</style>
       </head>
-      <body style={{ backgroundColor: '#F7F7F5', margin: 0, padding: 0 }}>
+      <body style={{ backgroundColor: 'var(--bg-primary)', margin: 0, padding: 0 }}>
         <ScrollToTop />
         {/* همه‌ی ارقام رندرشده فارسی می‌شوند — ورودی‌ها و کد دست‌نخورده */}
         <PersianDigits />
