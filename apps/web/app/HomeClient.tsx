@@ -613,7 +613,7 @@ function SellerCard({ s }: { s: RealStore }) {
           پوستر تخت گوشه‌های سفید درشتی می‌ساخت که مثل هاله‌ی سفید
           دور کارت دیده می‌شد. کارت سفید می‌ماند — فقط برش کم‌عمق‌تر
           شد تا آن دو لکه از بین برود. */}
-      <div style={{ position: 'relative', height: '150px', overflow: 'hidden', borderRadius: 0 }}>
+      <div style={{ position: 'relative', height: '150px', overflow: 'hidden', borderRadius: '0 0 50% 50% / 0 0 26px 26px' }}>
         {/* ── فروشگاه بی‌لوگو ⇒ پوستر پیش‌فرض، نه عکس عمومی ──
             تا امروز یک عکس ثابت فروشگاه نشان داده می‌شد که ربطی به
             این فروشگاه نداشت (و پیش‌تر حتی نشانی‌اش ۴۰۴ می‌داد و کارت
@@ -1470,11 +1470,11 @@ useEffect(() => {
         .sec-title{font-size:clamp(24px,3.2vw,40px);font-weight:700;letter-spacing:-0.022em;line-height:1.16;margin:0 0 8px;}
         .sec-rule {height:3px;width:64px;border-radius:2px;margin-top:14px;background:linear-gradient(90deg,currentColor,transparent);}
         /* وردمارک outline پس‌زمینه‌ی هر سکشن — امضای هویت جدید */
-        .sec-word{position:absolute;top:2px;inset-inline-end:-6px;font-weight: 700;font-size:clamp(56px,9vw,120px);line-height:1;letter-spacing:0.03em;color:transparent;-webkit-text-stroke:1px var(--wc,rgba(28,27,23,0.06));user-select:none;pointer-events:none;direction:ltr;}
+        .sec-word{position:absolute;top:2px;inset-inline-end:-6px;font-weight:900;font-size:clamp(56px,9vw,120px);line-height:1;letter-spacing:0.03em;color:transparent;-webkit-text-stroke:1px var(--wc,rgba(28,27,23,0.06));user-select:none;pointer-events:none;direction:ltr;}
         /* خط مویی اریب — امضای برند */
         .sec-hair{position:absolute;top:-25%;bottom:-25%;width:1px;transform:rotate(14deg);pointer-events:none;}
         /* لبه‌های محو مارکی فروشندگان */
-        .sellers-desk{-webkit-mask-image:linear-gradient(to right,transparent 0,black 4%,black 96%,transparent 100%);mask-image:linear-gradient(to right,transparent 0,black 4%,black 96%,transparent 100%);}
+        .sellers-desk{-webkit-mask-image:linear-gradient(to right,transparent 0,black 4%,black 100%);mask-image:linear-gradient(to right,transparent 0,black 4%,black 100%);}
 
         .prod-hover{transition:transform .4s cubic-bezier(.4,0,.2,1),box-shadow .4s ease;}
         .prod-hover:hover{transform:translateY(-6px);box-shadow:0 20px 52px rgba(26,25,23,0.12)!important;}
@@ -1925,30 +1925,34 @@ useEffect(() => {
                     <Link prefetch={false} key={i} href={card.href} className={`feat-card${isDup ? ' feat-dup' : ''}`} style={{ textDecoration: 'none', flexShrink: 0, display: 'flex', scrollSnapAlign: 'center' }}>
                       <div style={{
                         width: '118px', padding: '18px 10px 16px',
-                        background: 'rgba(10,9,14,0.46)',
-                        backdropFilter: 'blur(14px)',
-                        WebkitBackdropFilter: 'blur(14px)',
-                        border: `1px solid ${active ? 'var(--brand-line)' : 'rgba(255,255,255,0.13)'}`,
-                        borderRadius: '14px',
+                        background: `linear-gradient(180deg, rgba(${card.rgb},0.11) 0%, rgba(10,9,14,0.34) 40%, rgba(10,9,14,0.42) 100%)`,
+                        backdropFilter: 'blur(26px) saturate(160%)',
+                        WebkitBackdropFilter: 'blur(26px) saturate(160%)',
+                        border: `1px solid ${active ? 'rgba(199,166,106,0.52)' : 'rgba(255,255,255,0.13)'}`,
+                        borderRadius: '20px',
                         display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px',
                         textAlign: 'center', flex: 1,
-                        boxShadow: '0 6px 18px rgba(0,0,0,0.26)',
+                        boxShadow: active
+                          ? 'inset 0 1px 0 rgba(255,255,255,0.14), 0 12px 32px rgba(0,0,0,0.42), 0 0 24px rgba(199,166,106,0.14)'
+                          : 'inset 0 1px 0 rgba(255,255,255,0.08), 0 8px 22px rgba(0,0,0,0.30)',
                         cursor: 'pointer',
                         transition: 'box-shadow 0.35s ease, border-color 0.35s ease',
                       }}>
                         <div style={{
                           width: '46px', height: '46px', borderRadius: '14px',
-                          background: 'rgba(255,255,255,0.10)',
-                          border: '1px solid rgba(255,255,255,0.18)',
+                          background: `rgba(${card.rgb},0.12)`,
+                          border: `1px solid rgba(${card.rgb},0.24)`,
                           display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+                          boxShadow: `0 0 14px rgba(${card.rgb},0.18), inset 0 1px 0 rgba(255,255,255,0.10)`,
                           marginBottom: '32px',
                         }}>
-                          <card.Icon size={21} strokeWidth={1.6} color="#FFFFFF" />
+                          <card.Icon size={22} color={card.clr}
+                            style={{ filter: `drop-shadow(0 0 5px rgba(${card.rgb},0.40))` }} />
                         </div>
-                        <div style={{ fontSize: '14px', fontWeight: 600, color: '#fff', lineHeight: 1.3 }}>
+                        <div style={{ fontSize: '14px', fontWeight: 800, color: '#fff', lineHeight: 1.3 }}>
                           {card.title}
                         </div>
-                        <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.72)', lineHeight: 1.6, flex: 1 }}>
+                        <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.42)', lineHeight: 1.65, flex: 1 }}>
                           {card.caption}
                         </div>
                       </div>
@@ -1987,13 +1991,13 @@ useEffect(() => {
           جایگاه featured_clubs_homepage غیرفعال ⇒ کل سکشن حذف */}
       {showClubs && (
       <section className="clubs-section" style={{ position: 'relative', overflow: 'hidden', background: 'rgb(var(--c-surface))', padding: 'clamp(36px,3.5vw,52px) clamp(16px,5%,80px) clamp(56px,5.5vw,80px)' }}>
+        <div aria-hidden className="sec-word" style={{ ['--wc' as never]: 'rgba(20,83,45,0.07)' }}>CLUBS</div>
         <div aria-hidden style={{ position: 'absolute', top: '-18%', right: '-6%', width: 'min(520px,50vw)', height: 420, borderRadius: '50%', background: 'radial-gradient(circle, rgba(20,83,45,0.10) 0%, transparent 62%)', filter: 'blur(52px)', pointerEvents: 'none' }} />
         <div style={{ maxWidth: '1340px', margin: '0 auto', position: 'relative', zIndex: 1 }}>
           <SR>
             <div className="clubs-hd" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '44px', flexWrap: 'wrap', gap: '20px' }}>
               <div>
                 <h2 className="sec-title" style={{ color: TEXT, fontSize: 'clamp(20px,2.84vw,37px)' }}>باشگاه‌های پیشنهادی</h2>
-                <div className="sec-rule" style={{ color: GRN }} />
               </div>
               <Link prefetch={false} href="/clubs" className="see-all-lq">
                 مشاهده همه <ArrowLeft size={12} />
@@ -2035,6 +2039,7 @@ useEffect(() => {
           جایگاه market_featured_products_homepage غیرفعال ⇒ حذف سکشن */}
       {showProducts && (
       <section className="marketplace-section" style={{ position: 'relative', overflow: 'hidden', background: 'rgb(var(--c-paper))', padding: 'clamp(36px,3.5vw,52px) clamp(16px,5%,80px) clamp(20px,2vw,32px)' }}>
+        <div aria-hidden className="sec-word" style={{ ['--wc' as never]: 'rgba(160,120,64,0.09)' }}>BAZAAR</div>
         <div aria-hidden style={{ position: 'absolute', top: '-16%', left: '-5%', width: 'min(480px,46vw)', height: 400, borderRadius: '50%', background: 'radial-gradient(circle, rgba(160,120,64,0.09) 0%, transparent 62%)', filter: 'blur(50px)', pointerEvents: 'none' }} />
         <div aria-hidden style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(rgba(28,27,23,0.035) 1px, transparent 1px)', backgroundSize: '20px 20px', WebkitMaskImage: 'linear-gradient(100deg, transparent 55%, black 90%)', maskImage: 'linear-gradient(100deg, transparent 55%, black 90%)', pointerEvents: 'none' }} />
         <div style={{ maxWidth: '1340px', margin: '0 auto', position: 'relative', zIndex: 1 }}>
@@ -2042,7 +2047,6 @@ useEffect(() => {
             <div className="marketplace-hd" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '44px', flexWrap: 'wrap', gap: '20px' }}>
               <div>
                 <h2 className="sec-title" style={{ color: TEXT, fontSize: 'clamp(20px,2.84vw,37px)' }}>بیلیارد بازار</h2>
-                <div className="sec-rule" style={{ color: BRN }} />
               </div>
               <Link prefetch={false} href="/shop" className="see-all-lq">
                 مشاهده همه <ArrowLeft size={12} />
@@ -2126,6 +2130,7 @@ useEffect(() => {
           محتوایی دارد رندر می‌شود — هر سه جایگاه مستقل‌اند. */}
       {showSellersSection && (
       <section className="sellers-section" style={{ position: 'relative', overflow: 'hidden', background: 'rgb(var(--c-surface))', padding: 'clamp(36px,3.5vw,52px) clamp(16px,5%,80px) clamp(20px,2vw,32px)' }}>
+        <div aria-hidden className="sec-word" style={{ ['--wc' as never]: 'rgba(154,110,56,0.08)' }}>SELLERS</div>
         <div aria-hidden style={{ position: 'absolute', top: '-20%', right: '10%', width: 'min(500px,48vw)', height: 400, borderRadius: '50%', background: 'radial-gradient(circle, var(--brand-tint) 0%, transparent 62%)', filter: 'blur(52px)', pointerEvents: 'none' }} />
         <div style={{ maxWidth: '1340px', margin: '0 auto', position: 'relative', zIndex: 1 }}>
           {/* عنوان فقط وقتی فهرستی زیرش هست — اگر جایگاه فروشگاه‌ها
@@ -2135,7 +2140,6 @@ useEffect(() => {
             <div className="sellers-hd" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '44px', flexWrap: 'wrap', gap: '20px' }}>
               <div>
                 <h2 className="sec-title" style={{ color: TEXT, fontSize: 'clamp(20px,2.84vw,37px)' }}>فروشندگان تجهیزات</h2>
-                <div className="sec-rule" style={{ color: GOLD }} />
               </div>
               <Link prefetch={false} href="/sellers" className="see-all-lq">
                 مشاهده همه <ArrowLeft size={12} />
