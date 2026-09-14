@@ -16,9 +16,12 @@ import { subscribeDM } from '../lib/realtime';
 import Stories from './Stories';
 import Avatar from './ui/Avatar';
 
-const GOLD = '#B8933A';
-const GOLD_LIGHT = 'rgba(184,147,58,0.1)';
-const GOLD_BORDER = 'rgba(184,147,58,0.22)';
+/* ⚠️ هم‌خانواده‌ی طلاییِ فوتر: هر دو H=39° S=52٪ (رنگ‌مایه‌ی
+   #C7A66A)، فقط روشنایی فرق دارد چون زمینه‌ها فرق دارند.
+   روی نوارِ تیره: ۶٫۴۲ — کف ۴٫۵. */
+const GOLD = '#B68B3A';
+const GOLD_LIGHT = 'rgba(182,139,58,0.1)';
+const GOLD_BORDER = 'rgba(182,139,58,0.22)';
 
 const exploreMenu = [
   {
