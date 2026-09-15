@@ -36,6 +36,7 @@ const exploreMenu = [
     items: [
       { href: '/coaches',      label: 'مربیان',         icon: <Star size={14} />,     desc: 'مربیان مجاز' },
       { href: '/referees',     label: 'داوران',          icon: <Trophy size={14} />,   desc: 'داوران رسمی' },
+      { href: '/players',      label: 'بازیکنان',        icon: <Users size={14} />,    desc: 'بازیکنانِ ثبت‌شده' },
       { href: '/ranking',      label: 'رنکینگ',          icon: <Trophy size={14} />,   desc: 'جدول رنکینگ' },
     ],
   },
@@ -43,7 +44,7 @@ const exploreMenu = [
     title: 'تجهیزات و خدمات',
     color: BRAND_CH,
     items: [
-      { href: '/sellers',       label: 'فروشگاه‌ها',   icon: <ShoppingBag size={14} />, desc: 'فروشگاه‌های تجهیزات' },
+
       { href: '/manufacturers', label: 'تولیدکنندگان', icon: <Factory size={14} />,    desc: 'سازندگان تجهیزات' },
       { href: '/services',      label: 'خدمات فنی',   icon: <Wrench size={14} />,     desc: 'متخصصان فنی بیلیارد' },
       { href: '/live',          label: 'پخش زنده',    icon: <Radio size={14} />,      desc: 'پخش زنده مسابقات' },
@@ -384,7 +385,7 @@ export default function Navbar() {
           <div className="desk" style={{ alignItems: 'center', gap: '24px', marginRight: '12px', flexShrink: 0 }}>
             <Link prefetch={false} href="/clubs"   className={`nav-a ${pathname === '/clubs'   ? 'active' : ''}`}>باشگاه‌ها</Link>
             <Link prefetch={false} href="/shop"    className={`nav-a ${pathname === '/shop'    ? 'active' : ''}`}>بیلیارد بازار</Link>
-            <Link prefetch={false} href="/players"     className={`nav-a ${pathname === '/players'     ? 'active' : ''}`}>بازیکنان</Link>
+            <Link prefetch={false} href="/sellers"     className={`nav-a ${pathname === '/sellers'     ? 'active' : ''}`}>فروشگاه‌ها</Link>
             <Link prefetch={false} href="/tournaments" className={`nav-a ${pathname.startsWith('/tournaments') ? 'active' : ''}`}>مسابقات</Link>
 
             <div ref={exploreRef} style={{ position: 'relative' }}>
