@@ -359,12 +359,20 @@ export default function Navbar() {
 
           {/* Logo */}
           <Link prefetch={false} href="/" onClick={e => { if (pathname === '/') { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); } }} style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none', flexShrink: 0 }}>
-            {/* سایه‌ی خیلی نرم + بول ظریف (هایلایت بالا، تیرگی پایین) */}
+            {/* ⚠️ نشان با زمینه عوض می‌شود:
+                  هیروی تیره → کاشیِ پُرِ سبز، با قاب و بِوِل
+                  نوارِ روشن → همان نشانِ فوتر، بدونِ قاب
+                بِوِل و سایه برای کاشیِ پُر ساخته شده‌اند؛ روی نشانِ
+                شفاف یک جعبه‌ی برجسته‌ی خالی می‌سازند. */}
             <div style={{ position: 'relative', width: '40px', height: '40px', borderRadius: '12px', overflow: 'hidden', flexShrink: 0,
-              boxShadow: '0 1px 2px rgba(28,27,23,0.12), 0 4px 9px rgb(var(--c-ink) / 0.05)' }}>
-                <img loading="eager" decoding="async" src="/images/Logo/bh-nav-256-v8.webp" alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                <span aria-hidden style={{ position: 'absolute', inset: 0, borderRadius: '12px', pointerEvents: 'none',
-                  boxShadow: 'inset 0 1px 1px rgba(255,255,255,0.26), inset 0 -1px 2px rgba(0,0,0,0.18)' }} />
+              boxShadow: isLight ? 'none' : '0 1px 2px rgba(28,27,23,0.12), 0 4px 9px rgb(var(--c-ink) / 0.05)' }}>
+                <img loading="eager" decoding="async"
+                  src={isLight ? '/images/Logo/bh-mark-256-v8.webp' : '/images/Logo/bh-nav-256-v8.webp'}
+                  alt="" style={{ width: '100%', height: '100%', objectFit: isLight ? 'contain' : 'cover' }} />
+                {!isLight && (
+                  <span aria-hidden style={{ position: 'absolute', inset: 0, borderRadius: '12px', pointerEvents: 'none',
+                    boxShadow: 'inset 0 1px 1px rgba(255,255,255,0.26), inset 0 -1px 2px rgba(0,0,0,0.18)' }} />
+                )}
               </div>
             <span className="nav-brand" style={{ fontWeight: 700, fontSize: '20px', letterSpacing: '-0.03em', whiteSpace: 'nowrap', transition: 'color 0.4s' }}>
               <span style={{ color: isLight ? '#000000' : '#ffffff' }}>بیلیارد</span>{' '}
