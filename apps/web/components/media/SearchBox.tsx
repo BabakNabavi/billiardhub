@@ -202,10 +202,13 @@ export default function SearchBox({ initial = '' }: { initial?: string }) {
               <X size={16} aria-hidden />
             </button>
           )}
+          {/* ⚠️ ذره‌بین *داخلِ* قاب است، نه دکمه‌ی جدا کنارش. در DOM
+              آخر می‌آید تا Tab اول به خودِ فیلد برسد؛ `order:-1` در
+              CSS جای دیداری‌اش را ابتدای قاب نگه می‌دارد. */}
+          <button className="mx-search-go" type="submit" aria-label="جست‌وجو">
+            <Search size={16} aria-hidden />
+          </button>
         </div>
-        <button className="mx-search-go" type="submit" aria-label="جست‌وجو">
-          <Search size={17} aria-hidden />
-        </button>
       </form>
 
       {open && rows.length > 0 && (

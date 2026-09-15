@@ -104,7 +104,7 @@
 .mx-search-box {
   flex: 1 1 auto; min-inline-size: 0; display: flex; align-items: center;
   border: 1px solid var(--line-2); border-radius: 999px; background: var(--paper);
-  padding-inline-start: 16px;
+  padding-inline-start: 10px; padding-inline-end: 16px;
   transition: border-color .18s;
 }
 .mx-search-box:focus-within { border-color: var(--gold-ink); }
@@ -114,14 +114,20 @@
   font-family: inherit; font-size: 14px; color: var(--ink);
 }
 .mx-search-box input::placeholder { color: var(--ink-3); }
+/* ⚠️ دکمه حالا *داخلِ* قاب است: نه حاشیه‌ی جداکننده می‌خواهد نه
+   زمینه‌ی مجزا، وگرنه دوباره «چسبیده به بیرون» دیده می‌شود. */
 .mx-search-go {
+  /* ⚠️ order منفی: در DOM بعد از ورودی می‌آید تا Tab اول به خودِ
+     فیلد برسد، ولی دیداری سمتِ شروعِ قاب می‌نشیند. */
+  order: -1;
   display: inline-flex; align-items: center; justify-content: center;
-  inline-size: 58px; min-block-size: 42px; flex-shrink: 0;
-  border: 0; border-inline-start: 1px solid var(--line);
-  background: var(--soft); color: var(--ink-2); cursor: pointer;
-  border-start-end-radius: 999px; border-end-end-radius: 999px;
+  inline-size: 30px; block-size: 30px; flex-shrink: 0; padding: 0;
+  border: 0; border-radius: 999px;
+  background: transparent; color: var(--ink-3); cursor: pointer;
+  transition: color .18s, background .18s;
 }
-.mx-search-go:hover { background: var(--soft-2); }
+.mx-search-go:hover { color: var(--ink); background: var(--soft); }
+.mx-search-go:focus-visible { outline: 2px solid var(--gold-ink); outline-offset: 2px; }
 
 .mx-top-act { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
 .mx-iconbtn {
@@ -702,10 +708,10 @@
 /* ═══════════════ جست‌وجوی پیشنهادی ═══════════════
    ⚠️ همان مکانیزم یوتوب: پیشنهاد با هر حرف، نه بعد از Enter. */
 .mx-search { position: relative; flex: 1 1 auto; min-inline-size: 0; }
-.mx-search-form { display: flex; gap: 8px; }
+.mx-search-form { display: flex; }
 .mx-search-clear {
   display: inline-flex; align-items: center; justify-content: center;
-  inline-size: 30px; block-size: 30px; margin-inline-end: 6px; flex-shrink: 0;
+  inline-size: 30px; block-size: 30px; flex-shrink: 0;
   border: 0; border-radius: 50%; background: transparent;
   color: var(--ink-3); cursor: pointer;
 }
