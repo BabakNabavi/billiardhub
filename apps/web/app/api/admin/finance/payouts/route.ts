@@ -34,8 +34,15 @@ export async function GET(req: NextRequest) {
 
   const [accounts, settlements, refunds] = await Promise.all([
     sb().from('club_accounts').select('club_id,available_balance,pending_balance'),
-    /* تسویه‌های باز = دستور پرداختی که ساخته شده ولی هنوز واریز نشده */
-    sb().from('settlements').select('*').in('status', ['PENDING', 'PROCESSING'])
+    /* تسویه‌های باز = دستور پرداختی که ساخته شده ولی هنوز واریز نشده.
+
+       ⚠️ `APPROVED` حتما باید این‌جا باشد: از مهاجرت ۰۴۱ به بعد
+       `bh_create_settlement` تسویه را مستقیم با همین وضعیت می‌سازد (ادمین
+       در همان لحظه تأییدش کرده). بدونِ آن، دستورِ پرداخت **در لحظه‌ی
+       ساخته‌شدن** از این صفحه محو می‌شد: نه در فهرستِ تسویه‌های باز
+       می‌آمد، و نه در فهرستِ «طلبکارِ بدون دستور پرداخت» — چون
+       `available_balance` همان لحظه صفر شده بود. */
+    sb().from('settlements').select('*').in('status', ['PENDING', 'APPROVED', 'PROCESSING'])
       .order('requested_at', { ascending: true }),
     /* `FAILED` هم می‌آید: تلاش واریز شکست خورده یعنی پول **هنوز**
        نرسیده و بدهی سر جایش است. کنارگذاشتنش یعنی همان بازپرداختی

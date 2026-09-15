@@ -5,6 +5,7 @@ import { can } from '@/lib/admin/permissions';
 import { getSettlementProvider } from '@/lib/settlement';
 import { notifySettlementPaid } from '@/lib/notify';
 import { normalizeReference, referenceProblem, findDuplicateReference } from '@/lib/finance/reference';
+import { tehranToday } from '@/lib/finance/range';
 
 /* تسویه — فقط ادمین. عملیات مالی داخل توابع اتمیک دیتابیس انجام می‌شود. */
 
@@ -21,8 +22,35 @@ export async function POST(req: NextRequest) {
 
   if (b?.action === 'create') {
     if (!b?.clubId) return NextResponse.json({ message: 'clubId الزامی است' }, { status: 400 });
-    const r = await provider.createSettlement(String(b.clubId), actor.id);
-    if (!r.ok) return NextResponse.json({ message: r.message }, { status: 400 });
+
+    const amount = b?.amount == null || b.amount === '' ? null : Number(b.amount);
+    if (amount !== null && (!Number.isFinite(amount) || amount <= 0)) {
+      return NextResponse.json({ message: 'مبلغ معتبر نیست' }, { status: 400 });
+    }
+
+    /* ── ضدِ دابل‌کلیک ──
+       بدونِ کلیدِ ضدِتکرار، دو کلیکِ پشتِ‌هم دو دستورِ پرداخت برای یک
+       بدهی می‌ساخت و ادمین می‌توانست دو بار واریز کند. کلید به باشگاه و
+       مبلغ و روز بسته است: تسویه‌ی دوم برای همان باشگاه در همان روز با
+       همان مبلغ تقریبا همیشه اشتباه است، و اگر واقعا لازم بود فردا
+       ساخته می‌شود. */
+    /* روزِ **تهران**، نه UTC: بین ۰۰:۰۰ تا ۰۳:۳۰ کلیدِ UTC به روزِ قبل
+       برمی‌گردد و پنجره‌ی ضدِدابل‌کلیک از وسط نصف می‌شود.
+
+       `retry` راهِ خروج است: اگر تسویه‌ی قبلی شکست خورده و بدهی
+       برگشته، ادمین باید بتواند همان مبلغ را همان روز دوباره ثبت کند.
+       بدونِ آن، کلیدِ ضدِتکرار تا فردا راه را می‌بست. */
+    const retry = String(b?.retry ?? '').slice(0, 40).replace(/[^\w:-]/g, '');
+    const idem = `club:${b.clubId}:${tehranToday()}:${amount ?? 'all'}${retry ? `:${retry}` : ''}`;
+
+    const r = await provider.createSettlement(String(b.clubId), actor.id, amount, idem);
+    if (!r.ok) {
+      /* برخوردِ کلید یعنی «قبلا ساخته شده»، نه «نشد» — ادمین باید
+         بداند کدام دستور موجود است تا سراغش برود. */
+      const dup = /پیش‌تر ساخته شده/.test(r.message ?? '');
+      return NextResponse.json(
+        { message: r.message, duplicate: dup, idem }, { status: dup ? 409 : 400 });
+    }
     audit({ actorId: actor.id, actorRole: 'admin', action: 'SETTLEMENT_CREATED',
             entityType: 'settlement', entityId: r.settlement?.id, newValue: { amount: r.settlement?.amount, clubId: b.clubId }, ip });
     return NextResponse.json(r.settlement, { status: 201 });
