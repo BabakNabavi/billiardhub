@@ -102,23 +102,45 @@ if (anyClub) {
 
 /* ── ۳) سازگاریِ موجودی با دفتر ────────────────────────────────────── */
 head('۳) موجودیِ باشگاه = دفتر')
-const accs = (await get('club_accounts?select=club_id,pending_balance,total_earnings,total_settled')).b ?? []
+/* ⚠️ ستونِ درست `available_balance` است، نه `pending_balance`.
+   مهاجرت ۰۴۰ معنای هر دو را صریح عوض کرد:
+     available = بدهیِ پرداختنیِ اکنون (این با دفتر سنجیده می‌شود)
+     pending   = تسویه‌ای که تأیید شده ولی هنوز واریز نشده
+   این تست هنوز معنای پیش از ۰۴۰ را می‌سنجید، پس روی **هر** باشگاهی که
+   واقعا طلبکار باشد برای همیشه قرمز می‌ماند — و تستی که همیشه قرمز
+   است، دیگر کسی نگاهش نمی‌کند. */
+const accs = (await get('club_accounts?select=club_id,available_balance,pending_balance,total_earnings,total_settled')).b ?? []
 const led = (await get('ledger_entries?select=club_id,type,amount,status&status=eq.POSTED')).b ?? []
+const setts = (await get('settlements?select=club_id,amount,status')).b ?? []
 let drift = []
 for (const a of accs) {
   const rows = led.filter(l => l.club_id === a.club_id)
   const earned = rows.filter(l => l.type === 'CLUB_EARNING').reduce((s, l) => s + Number(l.amount), 0)
   const rev = rows.filter(l => l.type === 'CLUB_EARNING_REVERSAL').reduce((s, l) => s - Number(l.amount), 0)
   const settled = rows.filter(l => l.type === 'SETTLEMENT').reduce((s, l) => s - Number(l.amount), 0)
+    - rows.filter(l => l.type === 'SETTLEMENT_REVERSAL').reduce((s, l) => s + Number(l.amount), 0)
   const expected = earned - rev - settled
-  if (Number(a.pending_balance) !== expected) drift.push({ club: a.club_id.slice(0, 8), was: a.pending_balance, should: expected })
+  if (Number(a.available_balance) !== expected) {
+    drift.push({ club: a.club_id.slice(0, 8), was: a.available_balance, should: expected })
+  }
+  /* «در انتظار تسویه» باید دقیقا جمعِ تسویه‌های باز باشد */
+  const inflight = setts.filter(s => s.club_id === a.club_id
+    && ['PENDING', 'APPROVED', 'PROCESSING'].includes(s.status))
+    .reduce((s, x) => s + Number(x.amount), 0)
+  if (Number(a.pending_balance) !== inflight) {
+    drift.push({ club: a.club_id.slice(0, 8), field: 'pending', was: a.pending_balance, should: inflight })
+  }
 }
-t('هیچ باشگاهی موجودیِ منحرف ندارد', drift.length === 0, JSON.stringify(drift).slice(0, 200))
+t('هیچ باشگاهی موجودیِ منحرف ندارد', drift.length === 0, JSON.stringify(drift).slice(0, 220))
 
 /* ── ۴) ناوردایِ علامت در دفتر ─────────────────────────────────────── */
 head('۴) کنوانسیونِ علامت')
-const POS = ['BOOKING_PAYMENT', 'TOURNAMENT_PAYMENT', 'PLATFORM_COMMISSION', 'CLUB_EARNING', 'CANCELLATION_FEE', 'SETTLEMENT_REVERSAL']
-const NEG = ['REFUND', 'SETTLEMENT', 'CLUB_EARNING_REVERSAL']
+/* باید آینه‌ی `ledger_sign_chk` بماند (مهاجرت ۰۹۴). نوعی که این‌جا
+   نباشد، تست فقط وانمود می‌کند پوششش می‌دهد. */
+const POS = ['BOOKING_PAYMENT', 'TOURNAMENT_PAYMENT', 'PLATFORM_COMMISSION', 'CLUB_EARNING',
+  'CANCELLATION_FEE', 'SETTLEMENT_REVERSAL', 'AD_REVENUE', 'AD_BOOST_REVENUE']
+const NEG = ['REFUND', 'SETTLEMENT', 'CLUB_EARNING_REVERSAL',
+  'PLATFORM_COMMISSION_REVERSAL', 'AD_REFUND', 'AD_BOOST_REFUND']
 const badPos = led.filter(l => POS.includes(l.type) && Number(l.amount) < 0)
 const badNeg = led.filter(l => NEG.includes(l.type) && Number(l.amount) > 0)
 t('نوع‌های درآمدی همه مثبت‌اند', badPos.length === 0, JSON.stringify(badPos.slice(0, 3)))

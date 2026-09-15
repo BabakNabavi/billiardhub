@@ -57,7 +57,9 @@ const ledgerOf = async clubId => {
   return {
     rows,
     payment: sum('BOOKING_PAYMENT') + sum('TOURNAMENT_PAYMENT'),
-    commission: sum('PLATFORM_COMMISSION'),
+    /* کمیسیونِ خالص — وگرنه سناریوی «لغو پس از برگزاری» چیزی را
+       می‌سنجد که با عددِ `/api/admin/finance` فرق دارد. */
+    commission: sum('PLATFORM_COMMISSION') + sum('PLATFORM_COMMISSION_REVERSAL'),
     clubEarning: sum('CLUB_EARNING'),
     clubReversal: sum('CLUB_EARNING_REVERSAL'),
     refund: sum('REFUND'),
