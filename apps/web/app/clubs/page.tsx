@@ -239,8 +239,8 @@ function ClubCard({ club, view, idx = 0, tournaments = [] }: { club: Club; view:
         </div>
 
         {/* content */}
-        <div style={{ flex: 1, padding: '14px 16px', minWidth: 0, display: 'flex', flexDirection: 'column', gap: 6 }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+        <div style={{ flex: 1, padding: '14px 16px', minWidth: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: 6 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, flexWrap: 'wrap', maxWidth: '100%' }}>
             {/* تیک بیرون h3 است: نام بلند با ellipsis بریده می‌شود و
                 تیک داخل h3 هم با آن حذف می‌شد. */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 4, minWidth: 0 }}>
@@ -254,11 +254,11 @@ function ClubCard({ club, view, idx = 0, tournaments = [] }: { club: Club; view:
               </div>
             )}
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: 'rgba(0,0,0,0.45)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, fontSize: 13, color: 'rgba(0,0,0,0.45)' }}>
             <MapPin size={10} color={PIN_GREEN} />{club.city}
             {club.distance !== undefined && <span style={{ color: '#A07840' }}>· {toFa(club.distance.toFixed(1))} km</span>}
           </div>
-          <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap', alignItems: 'center', marginTop: 'auto' }}>
+          <div style={{ display: 'flex', justifyContent: 'center', gap: 5, flexWrap: 'wrap', alignItems: 'center', marginTop: 'auto' }}>
             {activeTables.slice(0, 3).map(t => (
               <span key={t.key} style={{ fontSize: 12, color: t.color, background: `${t.color}12`, border: `1px solid ${t.color}22`, borderRadius: 20, padding: '2px 8px', fontWeight: 700 }}>
                 {toFa((club as any)[t.key])} {t.label}
@@ -270,7 +270,7 @@ function ClubCard({ club, view, idx = 0, tournaments = [] }: { club: Club; view:
             </span>
           </div>
           {tournBadge && (
-            <div style={{ marginTop: 6, display: 'flex' }}>
+            <div style={{ marginTop: 6, display: 'flex', justifyContent: 'center' }}>
               <span style={{ fontSize: 11, fontWeight: 800, color: tournBadge.color, background: tournBadge.bg, border: `1px solid ${tournBadge.border}`, borderRadius: 20, padding: '3px 10px', animation: tournBadge.pulse ? 'gentlePulse 1.8s ease-in-out infinite' : 'none', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
                 <Trophy size={9} /> {tournBadge.label}
               </span>
@@ -356,8 +356,8 @@ function ClubCard({ club, view, idx = 0, tournaments = [] }: { club: Club; view:
         </div>
 
         {/* body */}
-        <div style={{ padding: '14px 14px 0', flex: 1, display: 'flex', flexDirection: 'column', gap: 8 }}>
-          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8 }}>
+        <div style={{ padding: '14px 14px 0', flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: 8 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, flexWrap: 'wrap' }}>
             {/* این عنوان می‌پیچد، پس تیک داخل h3 می‌آید تا دنبال
                 آخرین کلمه بماند و تنها به خط بعد نیفتد. */}
             <h3 style={{ fontSize: 16, fontWeight: 800, color: '#111111', margin: 0, lineHeight: 1.25 }}>
@@ -376,7 +376,7 @@ function ClubCard({ club, view, idx = 0, tournaments = [] }: { club: Club; view:
           </div>
 
           {/* table type pills */}
-          <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', justifyContent: 'center', gap: 4, flexWrap: 'wrap' }}>
             {activeTables.slice(0, 3).map(t => (
               <span key={t.key} style={{ fontSize: 12, color: t.color, background: `${t.color}10`, border: `1px solid ${t.color}22`, borderRadius: 20, padding: '2px 8px', fontWeight: 700 }}>
                 {toFa((club as any)[t.key])} {t.label}
@@ -385,7 +385,7 @@ function ClubCard({ club, view, idx = 0, tournaments = [] }: { club: Club; view:
           </div>
 
           {/* amenity icons */}
-          <div style={{ display: 'flex', gap: 5 }}>
+          <div style={{ display: 'flex', justifyContent: 'center', gap: 5 }}>
             {AMENITIES.map(a => (
               <div key={a.key} title={a.label} style={{ width: 28, height: 28, borderRadius: 8, background: (club as any)[a.key] ? 'rgba(199,166,106,0.10)' : 'rgba(0,0,0,0.03)', border: `1px solid ${(club as any)[a.key] ? 'rgba(199,166,106,0.28)' : 'rgba(0,0,0,0.06)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: (club as any)[a.key] ? '#A07840' : 'rgba(0,0,0,0.18)' }}>
                 {a.icon}
@@ -406,7 +406,7 @@ function ClubCard({ club, view, idx = 0, tournaments = [] }: { club: Club; view:
         {/* footer */}
         <div style={{ padding: '10px 14px 14px', marginTop: 'auto' }}>
           <div style={{ height: 1, background: 'rgba(0,0,0,0.06)', marginBottom: 10 }} />
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, flexWrap: 'wrap' }}>
             <span style={{ fontSize: 13, color: 'rgba(0,0,0,0.38)', display: 'flex', alignItems: 'center', gap: 3 }}>
               <Users size={10} />{toFa(club.memberCount ?? 0)} عضو
             </span>
