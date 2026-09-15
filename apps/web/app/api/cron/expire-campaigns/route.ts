@@ -2,6 +2,7 @@ export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { rpc, audit } from '@/lib/finance/db';
 import { backfillPersons } from '@/lib/identity';
+import { cronForbidden } from '@/lib/cron-guard';
 
 /* انقضای خودکار کمپین‌های تبلیغاتی (فاز ۲):
    SCHEDULED ای که زمانش رسیده ⇒ ACTIVE، و ACTIVE ای که تمام شده ⇒ EXPIRED.
@@ -11,16 +12,14 @@ import { backfillPersons } from '@/lib/identity';
    این cron فقط تضمین می‌کند وضعیت رکوردها (و پنل ادمین) حتی بدون
    ترافیک هم با واقعیت همگام بماند.
 
-   امنیت: اگر CRON_SECRET تنظیم شده باشد، فقط با همان هدر اجرا می‌شود
-   (Vercel هنگام اجرای cron خودش هدر را می‌فرستد). */
+   امنیت: راز درست (`CRON_SECRET`) یا درخواستِ لوکال — `lib/cron-guard`.
+   زمان‌بند: `/opt/billiardhub/cron-tick.sh` در crontab سرور، نه
+   `vercel.json` که از زمان مهاجرت به VPS مرده است. */
 export async function GET(req: NextRequest) {
-  const secret = process.env.CRON_SECRET;
-  if (secret) {
-    const auth = req.headers.get('authorization') || '';
-    if (auth !== `Bearer ${secret}`) {
-      return NextResponse.json({ message: 'دسترسی مجاز نیست' }, { status: 401 });
-    }
-  }
+  /* راز درست، یا درخواستِ واقعا لوکال. نسخه‌ی قبلی بدونِ راز کاملا
+     باز بود — و این مسیرها وضعیتِ مالی را عوض می‌کنند. */
+  const bad = cronForbidden(req);
+  if (bad) return NextResponse.json({ message: bad.message }, { status: bad.status });
 
   const { data, error } = await rpc<{ activated: number; expired: number }>('bh_expire_campaigns', {});
   if (error) {

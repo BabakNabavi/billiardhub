@@ -1,6 +1,7 @@
 export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { rpc, audit } from '@/lib/finance/db';
+import { cronForbidden } from '@/lib/cron-guard';
 
 /* تحویل خدمت — رزروهایی که سانسشان تمام شده COMPLETED می‌شوند و
    همان‌جا سهم باشگاه و کمیسیون پلتفرم در دفتر ثبت می‌شود.
@@ -14,27 +15,25 @@ import { rpc, audit } from '@/lib/finance/db';
    تکمیل شده دوباره ردیف مالی نمی‌سازد (کلید یکتای `source_key`).
    پس اجرای چندباره در یک روز بی‌خطر است.
 
-   ⚠️ زمان‌بندی عمدا روزانه است (`0 4 * * *`)، نه ساعتی.
-   پلن Hobby در Vercel فقط کرون روزانه می‌پذیرد و کرون ساعتی را در
-   *اعتبارسنجی کانفیگ* رد می‌کند — یعنی کل دیپلوی شکست می‌خورد پیش
-   از آن‌که بیلد شروع شود، بدون آنکه دیپلوی ناموفقی در فهرست ثبت شود.
-   یک‌بار همین اتفاق افتاد و شش کامیت شش ساعت روی GitHub ماندند بدون
-   آن‌که کسی بفهمد چرا منتشر نمی‌شوند.
+   ⚠️⚠️ زمان‌بند کجاست: `/opt/billiardhub/cron-tick.sh` روی سرور، از
+   طریق `crontab -l` کاربر root. **نه** `apps/web/vercel.json`.
 
-   نتیجه‌ی این محدودیت: طلب باشگاه تا ۲۴ ساعت پس از برگزاری ساخته
-   می‌شود، نه بلافاصله. اگر روزی پلن به Pro ارتقا یافت، برگرداندن
-   `0 * * * *` بی‌خطر است.
+   آن فایل از زمان مهاجرت به VPS مرده است و ورسل دیگر استفاده نمی‌شود
+   (CLAUDE.md). نتیجه‌اش این بود که این کرون ماه‌ها اجرا نشد و هیچ
+   رزروی COMPLETED نشد — یعنی هیچ باشگاهی طلبکار نشد و تسویه عملا
+   غیرممکن ماند، در حالی که همه‌ی کد درست بود. اگر روزی زمان‌بندی را
+   عوض کردی، آن اسکریپت را عوض کن، نه vercel.json را.
 
-   امنیت: مثل بقیه‌ی cronها، اگر CRON_SECRET تنظیم باشد فقط با همان
-   هدر اجرا می‌شود. Vercel خودش آن را می‌فرستد. */
+   زمان‌بندی روزانه است (`5 4 * * *`): طلب باشگاه تا ۲۴ ساعت پس از
+   برگزاری ساخته می‌شود، نه بلافاصله. ساعتی‌کردنش بی‌خطر است — تابع
+   idempotent است.
+
+   امنیت: راز درست (`CRON_SECRET`) یا درخواستِ لوکال — `lib/cron-guard`. */
 export async function GET(req: NextRequest) {
-  const secret = process.env.CRON_SECRET;
-  if (secret) {
-    const auth = req.headers.get('authorization') || '';
-    if (auth !== `Bearer ${secret}`) {
-      return NextResponse.json({ message: 'دسترسی مجاز نیست' }, { status: 401 });
-    }
-  }
+  /* راز درست، یا درخواستِ واقعا لوکال. نسخه‌ی قبلی بدونِ راز کاملا
+     باز بود — و این مسیرها وضعیتِ مالی را عوض می‌کنند. */
+  const bad = cronForbidden(req);
+  if (bad) return NextResponse.json({ message: bad.message }, { status: bad.status });
 
   const { data, error } = await rpc<number>('bh_complete_due_bookings', {});
   if (error) {

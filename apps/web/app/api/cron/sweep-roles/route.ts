@@ -1,6 +1,7 @@
 export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { rpc, audit } from '@/lib/finance/db';
+import { cronForbidden } from '@/lib/cron-guard';
 
 /* ═══════════════════════════════════════════════════════════════
    ممیزی نقش‌های رهاشده.
@@ -19,17 +20,15 @@ import { rpc, audit } from '@/lib/finance/db';
    دوباره انتخاب کند و از نو ۷۲ ساعت وقت داشته باشد. پس‌گرفتن نقش
    مجازات نیست، تمیزکاری است.
 
-   امنیت: اگر CRON_SECRET تنظیم شده باشد، فقط با همان هدر اجرا می‌شود
-   (Vercel هنگام اجرای cron خودش هدر را می‌فرستد).
+   امنیت: راز درست (`CRON_SECRET`) یا درخواستِ لوکال — `lib/cron-guard`.
+   زمان‌بند: `/opt/billiardhub/cron-tick.sh` در crontab سرور، نه
+   `vercel.json` که از زمان مهاجرت به VPS مرده است.
    ═══════════════════════════════════════════════════════════════ */
 export async function GET(req: NextRequest) {
-  const secret = process.env.CRON_SECRET;
-  if (secret) {
-    const auth = req.headers.get('authorization') || '';
-    if (auth !== `Bearer ${secret}`) {
-      return NextResponse.json({ message: 'دسترسی مجاز نیست' }, { status: 401 });
-    }
-  }
+  /* راز درست، یا درخواستِ واقعا لوکال. نسخه‌ی قبلی بدونِ راز کاملا
+     باز بود — و این مسیرها وضعیتِ مالی را عوض می‌کنند. */
+  const bad = cronForbidden(req);
+  if (bad) return NextResponse.json({ message: bad.message }, { status: bad.status });
 
   const { data, error } = await rpc<{ removed_user: string; removed_role: string }[]>(
     'bh_sweep_stale_roles', { p_hours: 72 },
