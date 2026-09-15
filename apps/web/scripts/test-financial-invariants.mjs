@@ -86,6 +86,9 @@ const PROBES = [
   ['bh_tournament_confirm',     { p_registration_id: NIL, p_provider: 'probe', p_ref_id: 'probe', p_amount: 0 }],
   ['bh_create_settlement',      { p_club_id: NIL, p_admin: NIL, p_amount: null, p_idem: null }],
   ['bh_commission_for_ctx',     { p_club_id: NIL, p_amount: 1000, p_context: 'RESERVATION' }],
+  /* مهاجرت ۰۹۴ */
+  ['bh_finance_totals',         { p_from: null, p_to: null, p_club: NIL, p_with_held: false }],
+  ['bh_backfill_completed_ledger', {}],
 ]
 for (const [fn, args] of PROBES) {
   const r = await rpc(fn, args)
