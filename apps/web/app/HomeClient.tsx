@@ -619,22 +619,45 @@ function SellerCard({ s }: { s: RealStore }) {
       <div style={{ position: 'relative', height: '150px', overflow: 'hidden', borderRadius: '0 0 50% 50% / 0 0 26px 26px' }}>
         {/* ── فروشگاه بی‌لوگو ⇒ پوستر پیش‌فرض، نه عکس عمومی ──
             تا امروز یک عکس ثابت فروشگاه نشان داده می‌شد که ربطی به
-            این فروشگاه نداشت (و پیش‌تر حتی نشانی‌اش ۴۰۴ می‌داد و کارت
-            کاملا بی‌عکس می‌ماند). حالا همان پوستر لایه‌ای صفحه‌ی
-            فروشگاه این‌جا هم ساخته می‌شود: گرادیان نمد سبز، بافت
-            نقطه‌ای، هالهٔ طلایی، و حرف اول نام فروشگاه. */}
+            این فروشگاه نداشت. جزئیاتِ پوستر پایین‌تر نوشته شده. */}
         {s.img ? (
           <img loading="lazy" decoding="async" src={s.img} alt={s.name}
             style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.5s ease', transform: hov ? 'scale(1.07)' : 'scale(1)' }}
             onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
         ) : (
-          /* پوستر ساده و بی‌افکت: یک زمینه‌ی نمدی یکدست و حرف اول
-             نام. بافت نقطه‌ای، هالهٔ بلور و زیرنویس لاتین برداشته
-             شدند — روی کارتی به این کوچکی شلوغی می‌ساختند. */
-          <div style={{ position: 'absolute', inset: 0, background: '#0d3a29', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <span style={{ fontSize: 34, fontWeight: 700, color: 'var(--brand)' }}>
-              {s.name.trim().charAt(0) || 'ف'}
-            </span>
+          /* ⚠️ پوسترِ پیش‌فرض — فروشگاهی که هنوز عکس نگذاشته.
+             همه با CSS ساخته می‌شود، بدونِ فایلِ تصویر: مخاطبِ اصلی
+             موبایلِ ایرانی با شبکه‌ی کند است و یک پوسترِ تصویری برای
+             هر کارتِ بی‌عکس، بارِ بی‌دلیل بود. */
+          <div style={{
+            position: 'absolute', inset: 0,
+            background: 'radial-gradient(120% 90% at 72% 8%, #1E6B52 0%, #14523E 42%, #0B3227 100%)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}>
+            {/* بافتِ اریبِ نازک — نقش نیست، فقط سطح را از تخت‌بودن درمی‌آورد */}
+            <span aria-hidden style={{
+              position: 'absolute', inset: 0,
+              backgroundImage: 'repeating-linear-gradient(115deg, rgba(255,255,255,0.05) 0 1px, transparent 1px 13px)',
+            }} />
+            {/* قوسِ نور از بالا-راست، مثلِ نورِ سردرِ میزِ بیلیارد */}
+            <span aria-hidden style={{
+              position: 'absolute', right: '-28%', top: '-52%',
+              width: '128%', aspectRatio: '1', borderRadius: '50%',
+              background: 'radial-gradient(circle, rgba(255,255,255,0.14) 0%, rgba(255,255,255,0.04) 38%, transparent 66%)',
+            }} />
+            {/* حرفِ اولِ نام — بزرگ و کم‌رنگ، پشتِ همه */}
+            <span aria-hidden style={{
+              position: 'absolute', fontSize: 96, fontWeight: 700, lineHeight: 1,
+              color: 'rgba(255,255,255,0.07)', userSelect: 'none',
+            }}>{s.name.trim().charAt(0) || 'ف'}</span>
+            {/* نشانِ کوچکِ روشن در مرکز */}
+            <span aria-hidden style={{
+              position: 'relative', display: 'grid', placeItems: 'center',
+              width: 46, height: 46, borderRadius: 14,
+              background: 'rgba(255,255,255,0.12)',
+              border: '1px solid rgba(255,255,255,0.22)',
+              fontSize: 20, fontWeight: 700, color: '#fff',
+            }}>{s.name.trim().charAt(0) || 'ف'}</span>
           </div>
         )}
         {/* gradient overlay */}

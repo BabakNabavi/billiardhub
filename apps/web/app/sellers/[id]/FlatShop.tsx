@@ -824,12 +824,12 @@ export default function FlatShop() {
               type="button" onClick={() => { if (hasStory) { setStoryIdx(0); setStoryOpen(true); return } openImage(store.logo ?? '', { title: 'لوگوی فروشگاه', alt: store.title }) }}
               aria-label={hasStory ? 'مشاهده استوری فروشگاه' : 'بزرگ‌نمایی لوگوی فروشگاه'}
               disabled={!hasStory && !store.logo}
-              className={`-mt-12 block shrink-0 rounded-full p-[3px] transition-transform duration-200 sm:-mt-14${hasStory ? ' hover:scale-105 active:scale-95' : ''}`}
+              className={`block shrink-0 rounded-full p-[3px] transition-transform duration-200${hasStory ? ' hover:scale-105 active:scale-95' : ''}`}
               style={hasStory
-                ? { background: 'linear-gradient(135deg,#feda75,#fa7e1e,#d62976,#962fbf,#4f5bd5)', boxShadow: '0 6px 18px rgba(214,41,118,0.30)', width: 'fit-content' }
-                : { background: 'rgba(28,28,26,0.10)', width: 'fit-content', cursor: 'default' }}
+                ? { marginBlockStart: 'calc(clamp(106px,15vw,156px) / -2)', background: 'linear-gradient(135deg,#feda75,#fa7e1e,#d62976,#962fbf,#4f5bd5)', boxShadow: '0 6px 18px rgba(214,41,118,0.30)', width: 'fit-content' }
+                : { marginBlockStart: 'calc(clamp(106px,15vw,156px) / -2)', background: 'rgba(28,28,26,0.10)', width: 'fit-content', cursor: 'default' }}
             >
-              <span className="flex h-[80px] w-[80px] items-center justify-center overflow-hidden rounded-full border-[3px] border-white bg-gradient-to-bl from-[#14532D] to-[#1E6B3C] text-white sm:h-[94px] sm:w-[94px]">
+              <span className="flex items-center justify-center overflow-hidden rounded-full border-[3px] border-white bg-gradient-to-bl from-[#14532D] to-[#1E6B3C] text-white" style={{ width: 'clamp(106px,15vw,156px)', height: 'clamp(106px,15vw,156px)' }}>
                 {store.logo
                   ? <img loading="lazy" decoding="async" src={store.logo} alt={store.title} className="h-full w-full object-cover"/>
                   : Icon.storefront}
