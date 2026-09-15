@@ -8,6 +8,8 @@ import { notify } from '../../../lib/ui/dialogs'
 import { apiFetch } from '../../../lib/http'
 import CommissionPanel from '../../../components/admin/CommissionPanel'
 import PayoutOrders from '../../../components/admin/PayoutOrders'
+import TransactionsReport from '../../../components/admin/TransactionsReport'
+import { tehranDay } from '../../../lib/finance/range'
 import {
   Wallet, TrendingUp, CreditCard, Landmark, RotateCcw, Loader2,
   ArrowDownToLine, CheckCircle2, AlertCircle, X,
@@ -33,14 +35,21 @@ interface Data {
     clubEarnings: number; payableNow: number; inFlightSettlement: number
     completedSettlement: number; settledOut: number
     refunds: number; pendingRefunds: number; failedPayments: number
-    /* اگر ناصفر باشد یعنی دفتر ناقص است */
-    balanceCheck: number
+    /* پولی که نگه داشته‌ایم؛ `null` در گزارشِ بازه‌ای (وضعیتِ لحظه‌ای است) */
+    heldForUndelivered: number | null
+    /* ناصفر یعنی دفتر ناقص است؛ `null` یعنی روی این نما سنجیدنی نیست */
+    balanceCheck: number | null
   }
   payments: Row[]; clubBalances: Row[]; settlements: Row[]; refunds: Row[]
+  filters: { from: string; to: string; clubId: string; ranged: boolean }
 }
 /* `payouts` عمدا اول است: پرسش روزمره‌ی ادمین «الان چقدر به چه کسی
    باید بدهم؟» است، نه «درآمد کل چقدر بوده». */
-type TabKey = 'payouts' | 'overview' | 'payments' | 'balances' | 'settlements' | 'refunds' | 'commission'
+type TabKey = 'payouts' | 'overview' | 'report' | 'payments' | 'balances' | 'settlements' | 'refunds' | 'commission'
+
+/* از همان هلپرِ سرور — نه یک کپیِ محلیِ آفست. نیمه‌شبِ UTC ۳:۳۰
+   زودتر است و بازه را یک روز جابه‌جا می‌کرد. */
+const irDay = tehranDay
 
 export default function AdminFinance() {
   const [d, setD] = useState<Data | null>(null)
@@ -49,14 +58,23 @@ export default function AdminFinance() {
   const [tab, setTab] = useState<TabKey>('payouts')
   const [busy, setBusy] = useState('')
   const [modal, setModal] = useState<{ id: string; amount: number } | null>(null)
+  /* بازه‌ی گزارش — خالی یعنی «از آغاز تا امروز» */
+  const [from, setFrom] = useState('')
+  const [to, setTo] = useState('')
+
+  const qs = useCallback(() => {
+    const p = new URLSearchParams()
+    if (from && to) { p.set('from', from); p.set('to', to) }
+    return p.toString() ? `?${p}` : ''
+  }, [from, to])
 
   const load = useCallback(async () => {
     try {
-      const r = await apiFetch('/api/admin/finance', { credentials: 'include', headers: { }, cache: 'no-store' })
+      const r = await apiFetch(`/api/admin/finance${qs()}`, { credentials: 'include', headers: { }, cache: 'no-store' })
       if (!r.ok) { setErr((await r.json().catch(() => ({})))?.message || 'دسترسی مجاز نیست'); setLoading(false); return }
       setD(await r.json()); setErr(''); setLoading(false)
     } catch { setErr('خطا در ارتباط با سرور'); setLoading(false) }
-  }, [])
+  }, [qs])
   useEffect(() => { load() }, [load])
 
   const act = async (body: Record<string, unknown>, key: string) => {
@@ -79,7 +97,8 @@ export default function AdminFinance() {
   const o = d.overview
   const TABS: [TabKey, string, number][] = [
     ['payouts', 'دستور پرداخت', 0],
-    ['overview', 'نمای کلی', 0], ['payments', 'پرداخت‌ها', d.payments.length],
+    ['overview', 'نمای کلی', 0], ['report', 'گزارش تراکنش‌ها', 0],
+    ['payments', 'پرداخت‌ها', d.payments.length],
     ['balances', 'موجودی باشگاه‌ها', d.clubBalances.length], ['settlements', 'تسویه‌ها', d.settlements.length],
     ['refunds', 'بازپرداخت‌ها', d.refunds.length], ['commission', 'کمیسیون', 0],
   ]
@@ -102,7 +121,41 @@ export default function AdminFinance() {
         ))}
       </div>
 
+      {/* ── بازه‌ی گزارش ──
+          تا امروز این مسیر سه پارامتر `from/to/clubId` را پشتیبانی
+          می‌کرد ولی صفحه هیچ‌وقت نمی‌فرستادشان — یعنی «گزارش از فلان
+          تاریخ تا فلان تاریخ» عملا وجود نداشت. */}
+      {/* `balances` هم کنار گذاشته می‌شود: موجودی‌ها از `club_accounts`
+          می‌آیند و اصلا بازه‌پذیر نیستند، پس نوارِ تاریخ آن‌جا فقط
+          توهمِ فیلتر می‌ساخت. */}
+      {tab !== 'payouts' && tab !== 'commission' && tab !== 'balances' && (
+        <div className="af-range">
+          <span className="af-range-l">بازه:</span>
+          {([['امروز', 0], ['۷ روز', 6], ['۳۰ روز', 29]] as const).map(([lbl, back]) => (
+            <button key={lbl} type="button" onClick={() => { setFrom(irDay(back)); setTo(irDay(0)) }}
+              style={from === irDay(back) && to === irDay(0) ? chipOn : chipOff}>{lbl}</button>
+          ))}
+          <button type="button" onClick={() => { setFrom(''); setTo('') }}
+            style={!from && !to ? chipOn : chipOff}>از آغاز</button>
+          <label className="af-range-f">
+            <span>از</span>
+            <input type="date" dir="ltr" value={from} max={to || irDay(0)} onChange={e => setFrom(e.target.value)} />
+          </label>
+          <label className="af-range-f">
+            <span>تا</span>
+            <input type="date" dir="ltr" value={to} min={from} max={irDay(0)} onChange={e => setTo(e.target.value)} />
+          </label>
+          {from && to && (
+            <span className="af-range-n">
+              {d.filters?.ranged ? 'اعمال شد' : 'در حال اعمال…'}
+            </span>
+          )}
+        </div>
+      )}
+
       {tab === 'payouts' && <PayoutOrders onChanged={load} />}
+
+      {tab === 'report' && <TransactionsReport from={from} to={to} />}
 
       {tab === 'overview' && (
         <>
@@ -134,18 +187,31 @@ export default function AdminFinance() {
             <Stat label="تسویه‌شده" value={o.completedSettlement} icon={<CheckCircle2 size={15} />} />
             <Stat label="بازپرداخت‌ها" value={o.refunds} icon={<RotateCcw size={15} />} muted />
             <Stat label="بازپرداخت در انتظار" value={o.pendingRefunds} icon={<RotateCcw size={15} />} muted />
+            {/* بدونِ این عدد، «ناترازی دفتر» برای ادمین قابل توضیح
+                نیست: این پولی است که نزدِ ماست ولی هنوز نه درآمد است
+                نه بدهی — رزروِ برگزارنشده، مسابقه‌ی تمام‌نشده، و
+                بازپرداختی که هنوز واریز نشده. */}
+            {typeof o.heldForUndelivered === 'number' && (
+              <Stat label="نگه‌داشته (تکلیف‌نامشخص)" value={o.heldForUndelivered} icon={<Wallet size={15} />} muted />
+            )}
           </div>
 
           {/* ناوردا: اگر ناصفر شود یعنی جایی از دفتر ناقص است.
-              بی‌صدا نگه‌داشتنش یعنی ماه‌ها بعد در حسابرسی معلوم شود. */}
-          {o.balanceCheck !== 0 && (
+              بی‌صدا نگه‌داشتنش یعنی ماه‌ها بعد در حسابرسی معلوم شود.
+
+              ⚠️ `null` یعنی «سنجیدنی نیست» — روی بازه‌ی محدود یا یک
+              باشگاه، این معادله ذاتا ناصفر است (پرداختِ ماهِ قبل،
+              برگزاریِ این ماه). شرطِ قبلی `!== 0` بود که `null` را هم
+              می‌گرفت و هشدار را همیشه روشن نگه می‌داشت. */}
+          {typeof o.balanceCheck === 'number' && o.balanceCheck !== 0 && (
             <div style={{
               marginTop: 14, padding: '12px 15px', borderRadius: 12,
               background: 'rgba(239,68,68,0.06)', border: '1px solid rgba(239,68,68,0.28)',
               fontSize: 12.5, fontWeight: 700, color: '#991B1B', lineHeight: 1.9,
             }}>
               ⚠ ناترازی دفتر: {fa(o.balanceCheck)} تومان.
-              وجوه دریافتی باید برابر «کمیسیون + جریمه + سهم باشگاه‌ها + بازپرداخت» باشد.
+              وجوه دریافتی منهای بازپرداخت‌ها باید برابر «درآمد پلتفرم + سهم باشگاه‌ها
+              + پول نگه‌داشته‌شده‌ی رزروهای برگزارنشده» باشد.
               این اختلاف یعنی رویدادی در دفتر ثبت نشده — پیش از هر تسویه‌ای بررسی شود.
             </div>
           )}
@@ -192,7 +258,9 @@ export default function AdminFinance() {
             faDate(s.completed_at || s.requested_at),
             String(s.status) === 'COMPLETED' ? <span key="b" style={{ fontSize: 11.5, color: FELT }}>✓</span> : (
               <span key="b" style={{ display: 'inline-flex', gap: 6 }}>
-                {String(s.status) === 'PENDING' && (
+                {/* `APPROVED` هم باید دکمه بگیرد: از ۰۴۱ به بعد تسویه با
+                    همین وضعیت ساخته می‌شود، نه `PENDING`. */}
+                {(String(s.status) === 'PENDING' || String(s.status) === 'APPROVED') && (
                   <button onClick={() => act({ action: 'process', id: s.id }, String(s.id))} disabled={busy === s.id} style={btnGhost}>شروع</button>
                 )}
                 <button onClick={() => setModal({ id: String(s.id), amount: Number(s.amount) })} style={btnPrimary}>ثبت واریز</button>
@@ -216,6 +284,19 @@ export default function AdminFinance() {
         .af-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
         @media (max-width: 900px) { .af-grid { grid-template-columns: repeat(2, 1fr); } }
         @media (max-width: 560px) { .af-grid { grid-template-columns: 1fr; } }
+
+        .af-range { display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
+          padding: 11px 14px; background: ${GROUND}; border: 1px solid ${LINE};
+          border-radius: 12px; margin-bottom: 16px; }
+        .af-range-l { font-size: 12px; font-weight: 800; color: ${MUT}; }
+        .af-range-f { display: inline-flex; align-items: center; gap: 6px;
+          font-size: 11.5px; color: ${MUT}; }
+        .af-range-f input { font-family: inherit; font-size: 12px; color: ${INK};
+          background: #fff; border: 1px solid ${LINE}; border-radius: 9px;
+          padding: 6px 9px; }
+        .af-range button:focus-visible, .af-range-f input:focus-visible {
+          outline: 2px solid ${GOLD_D}; outline-offset: 2px; }
+        .af-range-n { font-size: 11px; color: ${MUT}; margin-inline-start: auto; }
       `}</style>
     </div>
   )
@@ -224,6 +305,11 @@ export default function AdminFinance() {
 /* ── اجزا ── */
 const btnPrimary: React.CSSProperties = { padding: '6px 13px', borderRadius: 9, border: 'none', background: GOLD, color: '#241B08', fontSize: 11.5, fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit' }
 const btnGhost: React.CSSProperties = { padding: '6px 12px', borderRadius: 9, border: `1px solid ${LINE}`, background: '#fff', color: SEC, fontSize: 11.5, fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit' }
+
+/* چیپ‌های میان‌بُرِ بازه — روشن/خاموش */
+const chipBase: React.CSSProperties = { padding: '6px 12px', borderRadius: 999, fontSize: 11.5, fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit' }
+const chipOn: React.CSSProperties = { ...chipBase, background: INK, color: '#fff', border: `1px solid ${INK}` }
+const chipOff: React.CSSProperties = { ...chipBase, background: '#fff', color: SEC, border: `1px solid ${LINE}` }
 
 const Center = ({ children }: { children: React.ReactNode }) => (
   <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 70, textAlign: 'center' }}>{children}</div>

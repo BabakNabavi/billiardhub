@@ -5,6 +5,7 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import { apiFetch } from '../../lib/http'
+import { tehranDay } from '../../lib/finance/range'
 import {
   Wallet, TrendingUp, Clock3, Landmark, ShieldCheck,
   AlertCircle, Loader2, ArrowDownToLine, Receipt, X,
@@ -22,27 +23,47 @@ interface Finance {
     platformCommission: number; clubShare: number; reversed: number
   }
   revenue: { today: number; week: number; month: number; total: number }
+  /* گزارشِ بازه‌ی انتخابیِ کاربر — «از فلان تاریخ تا فلان تاریخ» */
+  range?: {
+    from: string; to: string; preset: string
+    grossSales: number; fromReservations: number; fromTournaments: number
+    platformCommission: number; clubShare: number; refunded: number; entries: number
+  }
   bankAccount: { account_holder_name?: string; bank_name?: string; iban?: string; verification_status?: string; rejection_reason?: string } | null
   bookings: { today: number; upcoming: number; completed: number; cancelled: number; recent: Record<string, unknown>[] }
   settlements: Record<string, unknown>[]
 }
 
 
+/* از همان هلپرِ سرور — نه یک کپیِ محلیِ آفست */
+const irDay = tehranDay
+
 export default function ClubFinance({ clubId, onEditBank }: { clubId: string; onEditBank?: () => void }) {
   const [d, setD] = useState<Finance | null>(null)
   const [loading, setLoading] = useState(true)
   const [err, setErr] = useState('')
+  /* بازه‌ی گزارش — پیش‌فرضِ سرور ۳۰ روز اخیر است */
+  const [from, setFrom] = useState(irDay(29))
+  const [to, setTo] = useState(irDay(0))
 
-  const load = useCallback(async () => {
+  /* ── چرا گاردِ `alive` ──
+     `load` حالا به بازه وابسته است. دو تغییرِ پشتِ‌هم تاریخ می‌توانند
+     خارج از ترتیب برگردند و پنل عددهای بازه‌ی قبلی را زیرِ برچسبِ
+     بازه‌ی جدید نشان بدهد — بدترین حالتِ ممکن در یک صفحه‌ی مالی. */
+  useEffect(() => {
     if (!clubId) return
-    try {
-      const r = await apiFetch(`/api/clubs/${clubId}/finance`, { credentials: 'include', headers: { }, cache: 'no-store' })
-      if (!r.ok) { setErr((await r.json().catch(() => ({})))?.message || 'دریافت اطلاعات مالی ممکن نشد'); setLoading(false); return }
-      setD(await r.json()); setErr(''); setLoading(false)
-    } catch { setErr('خطا در ارتباط با سرور'); setLoading(false) }
-  }, [clubId])
-
-  useEffect(() => { load() }, [load])
+    let alive = true
+    const q = from && to ? `?from=${from}&to=${to}` : ''
+    apiFetch(`/api/clubs/${clubId}/finance${q}`, { credentials: 'include', headers: { }, cache: 'no-store' })
+      .then(async r => {
+        const j = await r.json().catch(() => ({}))
+        if (!alive) return
+        if (!r.ok) { setErr(j?.message || 'دریافت اطلاعات مالی ممکن نشد'); setLoading(false); return }
+        setD(j); setErr(''); setLoading(false)
+      })
+      .catch(() => { if (alive) { setErr('خطا در ارتباط با سرور'); setLoading(false) } })
+    return () => { alive = false }
+  }, [clubId, from, to])
 
   if (loading) return <div style={{ padding: 60, textAlign: 'center', color: MUT }}><Loader2 size={26} style={{ animation: 'cfspin 1s linear infinite' }} /><style>{`@keyframes cfspin{to{transform:rotate(360deg)}}`}</style></div>
   if (err) return <Empty icon={<AlertCircle size={26} />} title="اطلاعات مالی در دسترس نیست" desc={err} />
@@ -56,16 +77,49 @@ export default function ClubFinance({ clubId, onEditBank }: { clubId: string; on
       {/* ── درآمد ──
           هر عدد یک زیرنویس دارد. بدون آن، «امروز / این هفته / این ماه»
           معلوم نبود مجموع چه چیزی است و از کجا می‌آید. */}
+      {/* ⚠️ توضیحِ قبلی می‌گفت «پیش از کسر کمیسیون» در حالی که عدد
+          دقیقا **بعد از** کسر کمیسیون است — سهمِ خودِ باشگاه. و لحظه‌ی
+          ثبتش «برگزاریِ رزرو» است نه «پرداخت». همان ابهامی که سرِ پول
+          دعوا درست می‌کند. فروشِ ناخالص جداگانه در بخشِ تفکیک می‌آید. */}
       <section>
-        <Head icon={<TrendingUp size={17} style={{ color: FELT }} />} title="درآمد"
-          desc="مجموع مبلغ رزروهای پرداخت‌شده‌ی این باشگاه، پیش از کسر کمیسیون." />
+        <Head icon={<TrendingUp size={17} style={{ color: FELT }} />} title="سهم شما"
+          desc="سهم خودتان از رزروها و مسابقات برگزارشده، پس از کسر کمیسیون. مبلغ در لحظه‌ی برگزاری ثبت می‌شود، نه لحظه‌ی پرداخت." />
         <div className="cf-grid">
-          <Stat label="امروز" value={d.revenue.today} tone="felt" hint="رزروهای پرداخت‌شده‌ی امروز" />
-          <Stat label="این هفته" value={d.revenue.week} hint="از شنبه تا امروز" />
-          <Stat label="این ماه" value={d.revenue.month} hint="از اول ماه جاری" />
-          <Stat label="کل درآمد" value={d.revenue.total} strong hint="از آغاز فعالیت باشگاه" />
+          <Stat label="امروز" value={d.revenue.today} tone="felt" hint="از نیمه‌شب امروز به وقت تهران" />
+          <Stat label="۷ روز اخیر" value={d.revenue.week} hint="امروز و شش روز پیش از آن" />
+          <Stat label="۳۰ روز اخیر" value={d.revenue.month} hint="امروز و بیست‌ونه روز پیش از آن" />
+          <Stat label="کل" value={d.revenue.total} strong hint="از آغاز فعالیت باشگاه" />
         </div>
       </section>
+
+      {/* ── گزارش بازه‌ای ──
+          تا امروز باشگاه‌دار نمی‌توانست بپرسد «از فلان تاریخ تا فلان
+          تاریخ چقدر شد» — این مسیر اصلا پارامتر تاریخ نمی‌پذیرفت. */}
+      {d.range && (
+        <section>
+          <Head icon={<Receipt size={17} style={{ color: GOLD_D }} />} title="گزارش بازه‌ای"
+            desc="هر بازه‌ای که بخواهید — هر دو سر شامل همان روز است." />
+          <div className="cf-range">
+            {([['امروز', 0], ['۷ روز', 6], ['۳۰ روز', 29], ['۹۰ روز', 89]] as const).map(([lbl, back]) => (
+              <button key={lbl} type="button" onClick={() => { setFrom(irDay(back)); setTo(irDay(0)) }}
+                className={from === irDay(back) && to === irDay(0) ? 'cf-chip on' : 'cf-chip'}>{lbl}</button>
+            ))}
+            <label className="cf-f"><span>از</span>
+              <input type="date" dir="ltr" value={from} max={to} onChange={e => setFrom(e.target.value)} /></label>
+            <label className="cf-f"><span>تا</span>
+              <input type="date" dir="ltr" value={to} min={from} max={irDay(0)} onChange={e => setTo(e.target.value)} /></label>
+          </div>
+          <div className="cf-grid" style={{ marginTop: 10 }}>
+            <Stat label="سهم شما در این بازه" value={d.range.clubShare} tone="felt" strong />
+            <Stat label="فروش ناخالص" value={d.range.grossSales} muted hint="کل مبلغی که مشتریان پرداخت کرده‌اند" />
+            <Stat label="کمیسیون پلتفرم" value={d.range.platformCommission} muted />
+            <Stat label="بازپرداخت‌شده" value={d.range.refunded} muted />
+          </div>
+          {d.range.entries === 0 && (
+            <p style={{ fontSize: 12, color: MUT, marginTop: 8 }}>در این بازه رویداد مالی‌ای ثبت نشده است.</p>
+          )}
+        </section>
+      )}
 
       {/* ── موجودی ── */}
       <section>
@@ -167,6 +221,18 @@ export default function ClubFinance({ clubId, onEditBank }: { clubId: string; on
       <style>{`
         .cf-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
         @media (max-width: 860px) { .cf-grid { grid-template-columns: repeat(2, 1fr); } }
+
+        .cf-range { display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
+          padding: 10px 12px; background: ${GROUND}; border: 1px solid ${LINE};
+          border-radius: 12px; }
+        .cf-chip { font-family: inherit; font-size: 11.5px; font-weight: 800; color: ${SEC};
+          background: #fff; border: 1px solid ${LINE}; border-radius: 999px;
+          padding: 6px 12px; cursor: pointer; }
+        .cf-chip.on { background: ${INK}; color: #fff; border-color: ${INK}; }
+        .cf-chip:focus-visible, .cf-f input:focus-visible { outline: 2px solid ${GOLD_D}; outline-offset: 2px; }
+        .cf-f { display: inline-flex; align-items: center; gap: 6px; font-size: 11.5px; color: ${MUT}; }
+        .cf-f input { font-family: inherit; font-size: 12px; color: ${INK}; background: #fff;
+          border: 1px solid ${LINE}; border-radius: 9px; padding: 6px 9px; }
       `}</style>
     </div>
   )
