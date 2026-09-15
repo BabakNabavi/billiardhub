@@ -1,7 +1,8 @@
 export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
-import { sb, actorFromRequest } from '@/lib/finance/db';
+import { sb, rpc, actorFromRequest } from '@/lib/finance/db';
 import { can } from '@/lib/admin/permissions';
+import { resolveRange } from '@/lib/finance/range';
 
 /* نمای کلی مالی پلتفرم — فقط ادمین.
    ارقام از دفتر (منبع حقیقت) می‌آیند، نه از کش موجودی.
@@ -17,47 +18,75 @@ import { can } from '@/lib/admin/permissions';
       نباید پنهانش کرد.
 
    «درآمد پلتفرم» عمدا با «پول دریافتی» یکی گرفته نمی‌شود: کاربر دو
-   میلیون می‌دهد ولی درآمد ما فقط کمیسیون و جریمه است. */
+   میلیون می‌دهد ولی درآمد ما فقط کمیسیون و جریمه است.
 
-interface LedgerRow {
-  type: string; amount: number; club_id: string | null;
-  status: string; meta?: { source?: string } | null;
-}
+   ── بازه ──
+   `?from&to` (هر دو `YYYY-MM-DD` به وقت تهران و **شاملِ** روز پایان)
+   و `?clubId`. پیش‌تر این سه پارامتر فقط روی دفتر اثر داشتند و
+   تسویه‌ها، بازپرداخت‌ها و پرداخت‌ها بی‌توجه به بازه، فقط ۵۰ ردیفِ
+   آخرِ کل تاریخ را نشان می‌دادند — یعنی «گزارشِ شهریور» عددِ تسویه‌ی
+   مرداد را هم داشت. */
 
 export async function GET(req: NextRequest) {
   const actor = actorFromRequest(req);
   if (!actor || !(await can(actor.id, 'finance'))) return NextResponse.json({ message: 'دسترسی مجاز نیست' }, { status: 403 });
 
   const q = req.nextUrl.searchParams;
-  const from = q.get('from') ?? '';
-  const to = q.get('to') ?? '';
   const clubId = q.get('clubId') ?? '';
+  /* بازه فقط وقتی اعمال می‌شود که کاربر خواسته باشد؛ بدونِ آن گزارش
+     «از آغاز تا امروز» است — همان رفتارِ قبلی. */
+  const wants = !!(q.get('from') && q.get('to'));
+  const range = resolveRange(q.get('from'), q.get('to'));
 
-  let ledgerQ = sb().from('ledger_entries')
-    .select('type,amount,club_id,status,created_at,meta')
-    .eq('status', 'POSTED');
-  if (from) ledgerQ = ledgerQ.gte('created_at', from);
-  if (to) ledgerQ = ledgerQ.lte('created_at', to);
-  if (clubId) ledgerQ = ledgerQ.eq('club_id', clubId);
+  const inRange = <T extends { gte: (c: string, v: string) => T; lte: (c: string, v: string) => T }>(x: T, col = 'created_at') =>
+    wants ? x.gte(col, range.fromISO).lte(col, range.toISO) : x;
 
-  const [ledger, payments, accounts, settlements, refunds, clubs] = await Promise.all([
-    ledgerQ,
-    sb().from('payments')
-      .select('id,booking_id,tournament_registration_id,user_id,club_id,amount,gross_amount,commission_amount,club_amount,status,provider,purpose,created_at')
-      .order('created_at', { ascending: false }).limit(100),
-    sb().from('club_accounts').select('*'),
-    sb().from('settlements').select('*').order('requested_at', { ascending: false }).limit(50),
-    sb().from('refunds')
-      .select('id,booking_id,club_id,user_id,amount,gross_amount,cancellation_fee,status,created_at')
-      .order('created_at', { ascending: false }).limit(50),
+  let paymentsQ = sb().from('payments')
+    .select('id,booking_id,tournament_registration_id,user_id,club_id,amount,gross_amount,commission_amount,club_amount,status,provider,purpose,created_at')
+    .order('created_at', { ascending: false }).limit(100);
+  paymentsQ = inRange(paymentsQ);
+  if (clubId) paymentsQ = paymentsQ.eq('club_id', clubId);
+
+  let settlementsQ = sb().from('settlements').select('*')
+    .order('requested_at', { ascending: false }).limit(200);
+  settlementsQ = inRange(settlementsQ, 'requested_at');
+  if (clubId) settlementsQ = settlementsQ.eq('club_id', clubId);
+
+  let refundsQ = sb().from('refunds')
+    .select('id,booking_id,tournament_registration_id,club_id,user_id,amount,gross_amount,cancellation_fee,status,created_at')
+    .order('created_at', { ascending: false }).limit(200);
+  refundsQ = inRange(refundsQ);
+  if (clubId) refundsQ = refundsQ.eq('club_id', clubId);
+
+  let accountsQ = sb().from('club_accounts').select('*');
+  if (clubId) accountsQ = accountsQ.eq('club_id', clubId);
+
+  /* ── چرا جمع‌ها از یک تابعِ دیتابیس می‌آیند ──
+     نسخه‌ی قبلی کلِ `ledger_entries` را می‌کشید و در جاوااسکریپت جمع
+     می‌زد. PostgREST سقفِ پیش‌فرضِ سطر دارد، پس با رشدِ دفتر همه‌ی
+     عددهای این صفحه بی‌صدا کمتر از واقع می‌شدند — بدون هیچ خطایی. */
+  const [totals, payments, accounts, settlements, refunds, clubs] = await Promise.all([
+    rpc<Record<string, number>>('bh_finance_totals', {
+      p_from: wants ? range.fromISO : null,
+      p_to: wants ? range.toISO : null,
+      p_club: clubId || null,
+      /* `HELD` یک وضعیتِ لحظه‌ای است و بازه نمی‌شناسد؛ فقط در نمای
+         «از آغاز» معنا دارد، جایی که ناوردا هم سنجیده می‌شود. */
+      p_with_held: !wants,
+    }),
+    paymentsQ, accountsQ, settlementsQ, refundsQ,
     sb().from('clubs').select('id,name'),
   ]);
 
-  const rows = (ledger.data ?? []) as LedgerRow[];
-  const sum = (t: string) => rows.filter(r => r.type === t).reduce((s, r) => s + Number(r.amount || 0), 0);
-  const sumFrom = (t: string, src: string) => rows
-    .filter(r => r.type === t && r.meta?.source === src)
-    .reduce((s, r) => s + Number(r.amount || 0), 0);
+  /* عددِ غلط بدتر از خطاست: صفحه‌ی مالی باید صریح بگوید نتوانست */
+  if (totals.error) {
+    console.error('[admin/finance] bh_finance_totals:', totals.error.message);
+    return NextResponse.json(
+      { message: 'محاسبه‌ی ارقام مالی انجام نشد — آیا مهاجرت ۰۹۴ اجرا شده؟' }, { status: 503 });
+  }
+
+  const T = (totals.data ?? {}) as Record<string, number>;
+  const sum = (t: string) => Number(T[t] || 0);
 
   const clubName = new Map((clubs.data ?? []).map((c: Record<string, unknown>) => [String(c.id), String(c.name)]));
   const withClub = (rowsIn: unknown): Record<string, unknown>[] =>
@@ -81,11 +110,21 @@ export async function GET(req: NextRequest) {
   const boostNet = boostGross - boostRefunded;
 
   const grossIn = sum('BOOKING_PAYMENT') + sum('TOURNAMENT_PAYMENT') + adGross + boostGross;
-  const commission = sum('PLATFORM_COMMISSION');
+  /* کمیسیونِ خالص: برگشتِ کمیسیونِ رزروِ لغوشده هم کسر می‌شود.
+     پیش‌تر آن برگشت با نوعِ `ADJUSTMENT` نوشته می‌شد و هیچ گزارشی
+     نمی‌دیدش — یعنی کمیسیونی که پس داده بودیم تا ابد «درآمد» می‌ماند. */
+  const commission = sum('PLATFORM_COMMISSION') + sum('PLATFORM_COMMISSION_REVERSAL');
   const cancellationFee = sum('CANCELLATION_FEE');
   const refunded = -sum('REFUND');                    // منفی ذخیره می‌شود
   const clubEarnings = sum('CLUB_EARNING') + sum('CLUB_EARNING_REVERSAL');
   const settledOut = -sum('SETTLEMENT') - sum('SETTLEMENT_REVERSAL');
+
+  /* ── پولی که هنوز تکلیفش روشن نیست ──
+     رزروِ پرداخت‌شده‌ی برگزارنشده، رزروِ NO_SHOW، و ثبت‌نامِ مسابقه‌ای
+     که هنوز تمام نشده: پولش نزدِ ماست ولی نه درآمد است نه بدهی. تا
+     امروز این عدد هیچ‌جا نبود و همین `balanceCheck` را همیشه ناصفر
+     نگه می‌داشت. محاسبه‌اش در `bh_finance_totals` است. */
+  const heldForUndelivered = sum('HELD');
 
   return NextResponse.json({
     overview: {
@@ -108,8 +147,8 @@ export async function GET(req: NextRequest) {
       platformCommission: commission,
       cancellationFee,
       netPlatformRevenue: commission + cancellationFee + adNet + boostNet,
-      commissionFromReservations: sumFrom('PLATFORM_COMMISSION', 'reservation'),
-      commissionFromTournaments: sumFrom('PLATFORM_COMMISSION', 'tournament'),
+      commissionFromReservations: sum('COMMISSION_RESERVATION'),
+      commissionFromTournaments: sum('COMMISSION_TOURNAMENT'),
 
       /* سهم باشگاه‌ها و وضعیت بدهی */
       clubEarnings,
@@ -128,15 +167,42 @@ export async function GET(req: NextRequest) {
       failedPayments: ((payments.data ?? []) as Record<string, unknown>[])
         .filter(p => p.status === 'FAILED').length,
 
-      /* ناوردا: پول واردشده باید برابر درآمد + سهم باشگاه + بازپرداخت
-         باشد. اختلاف ناصفر یعنی جایی از دفتر ناقص است — بهتر است در
-         خود گزارش دیده شود، نه ماه‌ها بعد در حسابرسی. */
-      balanceCheck: grossIn - (commission + cancellationFee + clubEarnings + refunded),
+      /* پولی که نگه داشته‌ایم — رزروِ برگزارنشده، NO_SHOW، ثبت‌نامِ
+         مسابقه‌ی تمام‌نشده، و بازپرداختِ هنوز پرداخت‌نشده. وضعیتِ
+         لحظه‌ای است، پس در گزارشِ بازه‌ای `null` برمی‌گردد تا با
+         عددهای جریانیِ همان بازه قاطی نشود. */
+      heldForUndelivered: wants ? null : heldForUndelivered,
+
+      /* ── ناوردا ──
+         پولِ واردشده باید برابر باشد با: درآمدِ ما + سهمِ باشگاه‌ها +
+         بازپرداخت + پولی که هنوز نگه داشته‌ایم.
+
+         نسخه‌ی قبلی این عدد **همیشه ناصفر** بود، چون درآمدِ تبلیغات را
+         در `grossIn` می‌آورد ولی در سمتِ راست نمی‌گذاشت، و پولِ
+         رزروهای برگزارنشده را هم اصلا حساب نمی‌کرد. زنگِ خطری که
+         همیشه روشن است، زنگِ خطر نیست.
+
+         معادله — فقط رزرو و مسابقه، چون تبلیغات و ارتقا سهمِ باشگاه
+         ندارند و در هر دو سمت حذف می‌شوند:
+
+           پرداختِ رزرو + پرداختِ مسابقه − بازپرداخت
+             = کمیسیونِ خالص + جریمه‌ی لغو + سهمِ باشگاه‌ها (تجمعی)
+               + پولِ نگه‌داشته‌شده
+
+         تسویه عمدا در هیچ سمتی نیست: انتقالِ «بدهی» به «پرداخت‌شده»
+         است، و `clubEarnings` تجمعی می‌ماند.
+
+         روی بازه‌ی محدود ذاتا ناصفر می‌شود (پرداختِ ماهِ قبل، برگزاریِ
+         این ماه)، پس فقط در نمای «از آغاز» سنجیده می‌شود. */
+      balanceCheck: wants || clubId
+        ? null
+        : (sum('BOOKING_PAYMENT') + sum('TOURNAMENT_PAYMENT') - refunded)
+          - (commission + cancellationFee + clubEarnings + heldForUndelivered),
     },
     payments: withClub(payments.data),
     clubBalances: accs,
     settlements: setts,
     refunds: withClub(refunds.data),
-    filters: { from, to, clubId },
+    filters: { from: wants ? range.from : '', to: wants ? range.to : '', clubId, ranged: wants },
   }, { headers: { 'Cache-Control': 'no-store' } });
 }
