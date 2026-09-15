@@ -209,7 +209,7 @@ export default function Footer() {
                   <span style={{ color: TEXT }}>بیلیارد </span>
                   <span style={{ color: GOLD_TXT }}>هاب</span>
                 </div>
-                <div style={{ fontSize: '10px', letterSpacing: '0.16em', marginTop: '8px', fontWeight: 600 }}>
+                <div dir="ltr" style={{ fontSize: '10px', letterSpacing: '0.16em', marginTop: '2px', fontWeight: 600 }}>
                   <span style={{ color: DIM2 }}>BILLIARD </span>
                   <span style={{ color: GOLD_TXT }}>HUB</span>
                   <span style={{ color: DIM2 }}> | IRAN</span>

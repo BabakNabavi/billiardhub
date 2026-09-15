@@ -58,6 +58,15 @@ await sharp({ create: { width: 1200, height: 630, channels: 4, background: '#fff
   .composite([{ input: og, gravity: 'center' }]).png({ compressionLevel: 9 }).toFile(DIR + 'bh-og-v8.png')
 out.push(['bh-og-v8.png', '۱۲۰۰×۶۳۰'])
 
+/* ⚠️ نشانِ نوار *بریده نمی‌شود*: برخلافِ بقیه، یک کاشیِ آماده است
+   (مربعِ سبزِ پُر با BH سفید). trim حاشیه‌ی سبز را می‌بُرد و فقط
+   حروف می‌ماند — یک‌بار همین شد. */
+await sharp(DIR + 'logo-nav.png').resize(256, 256, { fit: 'cover' })
+  .png({ compressionLevel: 9 }).toFile(DIR + 'bh-nav-256-v8.png')
+await sharp(DIR + 'logo-nav.png').resize(256, 256, { fit: 'cover' })
+  .webp({ quality: 92 }).toFile(DIR + 'bh-nav-256-v8.webp')
+out.push(['bh-nav-256-v8.webp', 'نشانِ نوار — بدونِ بُرش'])
+
 copyFileSync(PACK + 'favicon.ico', 'app/favicon.ico')
 out.push(['app/favicon.ico', 'کپی از بسته'])
 

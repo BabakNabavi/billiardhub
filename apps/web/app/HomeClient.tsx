@@ -1048,13 +1048,13 @@ export default function HomeClient({ initialPlacements, initialFeatured, service
     /* در RTL موقعیت اسکرول منفی است؛ مقدار مثبت به ۰ گیر می‌کرد و
        حرکت خودکار اصلا شروع نمی‌شد. */
     const sign = scrollSign(el);
-    setPos(el, sign, el.scrollWidth / 2);
+    setPos(el, sign, 0);
     let last = 0;
     const tick = (t: number) => {
       if (last && !mktPausedRef.current) {
         const half = el.scrollWidth / 2;
-        let p = getPos(el, sign) - (SPEED * (t - last)) / 1000;
-        if (p <= 0) p += half;
+        let p = getPos(el, sign) + (SPEED * (t - last)) / 1000;
+        if (p >= half) p -= half;
         setPos(el, sign, p);
       }
       last = t;

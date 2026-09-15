@@ -354,17 +354,20 @@
   box-shadow: 0 3px 11px rgba(var(--rgb), .28);
 }
 /* `flex-shrink` نمی‌آید: .tm-cat گرید است نه فلکس */
-/* ⚠️ این دو اندازه عینا از `.xp-card`ِ `components/home/ExploreStrip.tsx`
-   (خط ۱۰۲ و ۱۰۴) می‌آیند و باید `clamp` بمانند:
-   با اندازه‌ی ثابت، زیرِ ۱۴۴۰ کارتِ خدمات درشت‌تر از کارتِ «کاوش کن»
-   دیده می‌شد (عنوان ۱۳ در برابر ۱۰، توضیح ۱۱ در برابر ۹). */
+/* ⚠️ این دو اندازه *دیگر* برابرِ `.xp-card` نیستند — مالک خواست
+   ده درصد بزرگ‌تر باشند، پس عمدا یک پله بالاترند:
+     این‌جا        clamp(11px, 1.05vw, 14px)  و  clamp(10px, 0.86vw, 12px)
+     .xp-card      clamp(10px, 0.95vw, 13px)  و  clamp(9px, 0.78vw, 11px)
+   شکلِ `clamp` باید بماند: با اندازه‌ی ثابت، زیرِ ۱۴۴۰ کارت بی‌تناسب
+   درشت می‌شد. اگر خواستی دوباره یکی‌شان کنی، هر دو فایل را با هم
+   عوض کن — نه فقط این یکی. */
 .tm .tm-cat-t {
-  font-size: clamp(10px, 0.95vw, 13px); font-weight: 700; line-height: 1.3;
+  font-size: clamp(11px, 1.05vw, 14px); font-weight: 700; line-height: 1.3;
   color: var(--ios-label);
 }
 .tm .tm-cat-n {
   color: var(--ios-label-2);
-  font-size: clamp(9px, 0.78vw, 11px); font-weight: 400; line-height: 1.4;
+  font-size: clamp(10px, 0.86vw, 12px); font-weight: 400; line-height: 1.4;
 }
 @media (hover: hover) {
   .tm .tm-cat:hover {
