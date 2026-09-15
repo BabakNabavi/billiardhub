@@ -361,13 +361,13 @@ export default function TournamentsPage() {
         <div className="tn-hero-word">CHAMPIONSHIP</div>
         <div className="tn-wrap" style={{ position: 'relative', padding: 'clamp(36px,5.4vw,70px) clamp(16px,3vw,28px) clamp(30px,4.6vw,54px)', display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: '20px 32px', flexWrap: 'wrap' }}>
           <div style={{ minWidth: 0 }}>
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 8, fontWeight: 800, letterSpacing: '0.24em', color: GOLD, border: '1px solid rgba(199,166,106,0.4)', background: 'rgba(199,166,106,0.10)', borderRadius: 999, padding: '4px 11px', marginTop: -34, marginBottom: 14 }}>
+            <span style={{ position: 'absolute', top: 'clamp(14px,2vw,24px)', insetInlineEnd: 'clamp(16px,3vw,28px)', display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 8, fontWeight: 800, letterSpacing: '0.24em', color: GOLD, border: '1px solid rgba(199,166,106,0.4)', background: 'rgba(199,166,106,0.10)', borderRadius: 999, padding: '4px 11px', }}>
               <Trophy size={9} /> OFFICIAL TOURNAMENTS
             </span>
             <h1 style={{ fontSize: 'clamp(30px,5vw,54px)', fontWeight: 900, margin: 0, lineHeight: 1.2, letterSpacing: '-0.02em' }}>
               مسابقات <span style={{ background: `linear-gradient(135deg,#E8CE96,${GOLD} 50%,#8A6020)`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>بیلیارد</span>
             </h1>
-            <div style={{ width: 70, height: 3, borderRadius: 2, marginTop: 14, background: `linear-gradient(90deg,${GOLD},#8A6020)`, transformOrigin: 'right', animation: 'tnScaleX .55s .3s ease both' }} />
+            <div style={{ display: 'none', width: 70, height: 3, borderRadius: 2, marginTop: 14, background: `linear-gradient(90deg,${GOLD},#8A6020)`, transformOrigin: 'right', animation: 'tnScaleX .55s .3s ease both' }} />
             <p style={{ margin: '14px 0 0', fontSize: 'clamp(12px,1.4vw,14px)', color: 'rgba(255,255,255,0.6)', maxWidth: 470, lineHeight: 2, animation: 'tnFadeUp .5s .35s ease both' }}>
               از لیگ‌های باشگاهی تا جام‌های قهرمانی ، رویدادها را در پلتفرم بیلیارد هاب را دنبال کنید.
             </p>
