@@ -1,6 +1,6 @@
 export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
-import { sb, audit, clientIp } from '@/lib/finance/db';
+import { sb, rpc, audit, clientIp } from '@/lib/finance/db';
 import { actorOf, ownsClub, UNAUTHENTICATED, FORBIDDEN } from '@/lib/auth/ownership';
 
 /* تغییر وضعیت یک رزرو توسط باشگاه‌دار.
@@ -37,14 +37,43 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     );
   }
 
-  const { data: row } = await sb().from('bookings').select('"clubId",status,booking_status').eq('id', id).maybeSingle();
-  const b = row as { clubId?: string; status?: string; booking_status?: string } | null;
+  const { data: row } = await sb().from('bookings').select('"clubId",status,booking_status,payment_status').eq('id', id).maybeSingle();
+  const b = row as { clubId?: string; status?: string; booking_status?: string; payment_status?: string } | null;
   if (!b) return NextResponse.json({ message: 'رزرو یافت نشد' }, { status: 404 });
   if (!(await ownsClub(actor, String(b.clubId)))) return NextResponse.json(FORBIDDEN, { status: 403 });
 
   /* رزرو لغوشده دوباره فعال نمی‌شود — پول برگشته و ساعتش آزاد شده. */
   if (b.booking_status === 'CANCELLED' || b.status === 'cancelled') {
     return NextResponse.json({ message: 'این رزرو لغو شده و قابل تغییر نیست' }, { status: 409 });
+  }
+
+  /* ── «تکمیل‌شده» یک رویدادِ مالی است، نه یک برچسب ──
+     در مدلِ حسابِ مرکزی، سهمِ باشگاه و کمیسیونِ پلتفرم دقیقا در لحظه‌ی
+     COMPLETED در دفتر نوشته می‌شوند — و تنها جایی که این کار را می‌کند
+     `bh_complete_booking` است.
+
+     پیش‌تر این مسیر با یک UPDATE خام همان ستون را عوض می‌کرد. اثرش
+     بازگشت‌ناپذیر بود: رزرو COMPLETED می‌شد بدونِ هیچ ردیفِ مالی، و چون
+     `bh_complete_due_bookings` فقط دنبالِ CONFIRMED می‌گردد و
+     `bh_complete_booking` روی COMPLETED زود برمی‌گردد، سهمِ آن باشگاه
+     برای همیشه از بین می‌رفت. */
+  if (ALLOWED[next] === 'COMPLETED') {
+    if (b.payment_status !== 'PAID') {
+      return NextResponse.json(
+        { message: 'رزروِ پرداخت‌نشده تکمیل نمی‌شود' }, { status: 409 });
+    }
+    const { error: finErr } = await rpc('bh_complete_booking', { p_booking_id: id });
+    if (finErr) {
+      console.error('[bookings/:id/status] bh_complete_booking:', finErr.message);
+      return NextResponse.json({ message: 'تکمیلِ رزرو انجام نشد' }, { status: 500 });
+    }
+    void audit({
+      actorId: actor.id, actorRole: 'club_owner', action: 'BOOKING_COMPLETED',
+      entityType: 'booking', entityId: id,
+      oldValue: { status: b.status ?? null }, newValue: { status: 'completed' },
+      ip: clientIp(req) ?? undefined,
+    });
+    return NextResponse.json({ ok: true, id, status: 'completed', booking_status: 'COMPLETED' });
   }
 
   const patch: Record<string, unknown> = {

@@ -1,7 +1,7 @@
 export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { actorOf, ownsClub, UNAUTHENTICATED, FORBIDDEN } from '@/lib/auth/ownership';
-import { sb, audit, clientIp } from '@/lib/finance/db';
+import { sb, rpc, audit, clientIp } from '@/lib/finance/db';
 import { getTournament } from '@/lib/tournaments/server';
 
 /* تغییر وضعیت مسابقه توسط برگزارکننده.
@@ -48,12 +48,30 @@ export async function PATCH(req: NextRequest, ctx: { params: Promise<{ id: strin
     }, { status: 409 });
   }
 
-  const { error } = await sb().from('tournaments')
-    .update({ status: next, updated_at: new Date().toISOString() }).eq('id', id);
+  /* ── پایانِ مسابقه یک رویدادِ مالی است، نه فقط تغییرِ وضعیت ──
+     `bh_tournament_complete` کمیسیونِ پلتفرم و سهمِ برگزارکننده را از
+     ثبت‌نام‌های پرداخت‌شده در دفتر می‌نویسد و خودش هم وضعیت را
+     `completed` می‌کند.
 
-  if (error) {
-    console.error('[tournaments/status]', error.message);
-    return NextResponse.json({ message: 'تغییر وضعیت انجام نشد' }, { status: 500 });
+     پیش‌تر این‌جا فقط یک UPDATE ساده بود و آن تابع در کلِ کد صدا زده
+     نمی‌شد. نتیجه: پولِ ثبت‌نام به‌عنوان `TOURNAMENT_PAYMENT` وارد حسابِ
+     مرکزی می‌شد و برای همیشه همان‌جا می‌ماند — نه کمیسیونش درآمد
+     می‌شد، نه سهمِ باشگاه بدهی. */
+  if (next === 'completed') {
+    const { error: finErr } = await rpc('bh_tournament_complete', { p_tournament_id: id });
+    if (finErr) {
+      console.error('[tournaments/status] bh_tournament_complete:', finErr.message);
+      return NextResponse.json(
+        { message: 'ثبتِ مالیِ پایانِ مسابقه انجام نشد؛ وضعیت تغییر نکرد' }, { status: 500 });
+    }
+  } else {
+    const { error } = await sb().from('tournaments')
+      .update({ status: next, updated_at: new Date().toISOString() }).eq('id', id);
+
+    if (error) {
+      console.error('[tournaments/status]', error.message);
+      return NextResponse.json({ message: 'تغییر وضعیت انجام نشد' }, { status: 500 });
+    }
   }
 
   void audit({
