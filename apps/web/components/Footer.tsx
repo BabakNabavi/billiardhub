@@ -61,14 +61,14 @@ const nav = [
     links: [
       { href: '/clubs',    label: 'باشگاه‌ها'                   },
       { href: '/shop',     label: 'بیلیارد بازار'               },
-      { href: '/sellers',  label: 'فروشگاه‌ها', mobile: false   },
+      { href: '/tournaments', label: 'مسابقات', mobile: false },
     ],
   },
   {
     heading: 'EXPLORE',
     color: '#1D6FA8',
     links: [
-      { href: '/players',  label: 'بازیکنان'              },
+      { href: '/sellers',  label: 'فروشگاه‌ها'            },
       { href: '/coaches',  label: 'مربیان'                },
       { href: '/referees', label: 'داوران', mobile: false },
     ],
@@ -149,7 +149,7 @@ export default function Footer() {
           /* «بیلیارد بازار» بلندترین برچسب است و در ستون ۱۱۰ پیکسلی
              می‌شکند؛ کمی کوچک‌تر و بدون شکستن کلمه جا می‌شود. */
           .ft-grid a { font-size: 13px !important; white-space: nowrap; }
-          .ft-heading { font-size: 10px !important; letter-spacing: 0.10em !important; }
+
           .ft-tagline { margin-bottom: 10px !important; }
           .ft-inner { padding: 26px 18px 12px !important; }
           /* نوار آدرس/تلفن: gap ۲۴ برای چیدمان یک‌سطری دسکتاپ بود. در موبایل آیتم‌ها می‌شکنند و
@@ -183,7 +183,7 @@ export default function Footer() {
           .ft-seals { justify-content: center !important; margin-top: -38px !important; padding-bottom: 14px !important; }
           .ft-link { font-size: 12px !important; padding: 4px 0 !important; min-height: 24px !important; }
           .ft-link svg { display: none; }
-          .ft-heading { margin-bottom: 10px !important; }
+
         }
       `}</style>
 
@@ -237,8 +237,10 @@ export default function Footer() {
           {/* Nav columns */}
           {nav.map(col => (
             <div key={col.heading}>
-              {/* letter-spacing فقط برای تیترهای لاتین؛ روی فارسی حروف چسبان را باز می‌کند */}
-              <div className="ft-heading" style={{ fontSize: /[A-Z]/.test(col.heading) ? '11px' : '12px', color: col.color, letterSpacing: /[A-Z]/.test(col.heading) ? '0.18em' : 0, fontWeight: 700, marginBottom: '13px' }}>{col.heading}</div>
+              {/* ⚠️ تیترهای لاتین (PLATFORM/EXPLORE/ACCOUNT) به‌خواستِ
+                  مالک حذف شدند. خودِ عنصر هم نباید بماند وگرنه یک
+                  بلوکِ خالی فاصله می‌سازد. */}
+
               {col.links.map(item => (
                 /* `ft-only-desk` در موبایل مخفی می‌شود — با CSS و نه با
                    شرط جاوااسکریپتی، تا فوتر Server Component بماند و
@@ -259,7 +261,7 @@ export default function Footer() {
             یک شکاف بی‌دلیل می‌ساختند. */}
         <div className="ft-contact" style={{ borderTop: `1px solid ${BORDER}`, borderBottom: `1px solid ${BORDER}`, padding: '11px 0', marginTop: '-10px', marginBottom: '14px', display: 'flex', gap: '24px', flexWrap: 'wrap' }}>
           {[
-            { icon: <MapPin size={13} style={{ color: GOLD, flexShrink: 0 }} />, text: 'تهران، پاسداران' },
+            { icon: <MapPin size={13} style={{ color: GOLD, flexShrink: 0 }} />, text: 'تهران' },
             { icon: <Phone  size={13} style={{ color: GOLD, flexShrink: 0 }} />, text: '۰۲۱-۲۲۸۵۹۵۵۱' },
             { icon: <Mail   size={13} style={{ color: GOLD, flexShrink: 0 }} />, text: 'info@billiardhub.net' },
           ].map((c, i) => (
