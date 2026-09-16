@@ -198,10 +198,15 @@ export default function SmsToMembers({ clubId }: { clubId: string }) {
             {tpl.fields.map((f, i) => (
               <div key={f.index}>
                 {f.type === 'jalali' ? (
+                  /* ⚠️ `direction="future"` لازم است: پیش‌فرضِ کامپوننت
+                     `'past'` است (حالتِ تاریخِ تولد) که **آینده** را
+                     می‌بندد و گذشته را باز می‌گذارد — دقیقا برعکسِ
+                     چیزی که پیامکِ اطلاع‌رسانی می‌خواهد. باشگاه‌دار
+                     می‌توانست برای دیروز پیامک بفرستد. */
                   <JalaliDatePicker
                     id={`sms-f-${f.index}`} label={f.label} value={args[i] ?? ''}
                     onChange={v => setArgs(a => a.map((x, j) => (j === i ? v : x)))}
-                    placeholder={f.placeholder}
+                    placeholder={f.placeholder} direction="future"
                   />
                 ) : (
                   <>
