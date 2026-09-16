@@ -8,7 +8,7 @@ import { useAuthStore } from '../../../store/auth.store';
 import {
   MapPin, Phone, Globe, Clock, Star, Navigation, Copy,
   ChevronLeft, ChevronRight, Calendar, Check,
-  Camera, Trophy, Users, Medal,
+  Camera, Trophy, Users, Medal, Link as LinkIcon,
 } from 'lucide-react';
 import {
   STATUS_LABELS, STATUS_COLORS, GAME_TYPE_LABELS, type Tournament,
@@ -562,15 +562,6 @@ export default function ClubProfilePage() {
     setSlugCopied(true); setTimeout(() => setSlugCopied(false), 1800);
   };
 
-  /* ── ظرفیت روزانه، وقتی باشگاه‌دار واردش نکرده ──
-     این دو ردیف تا امروز فقط از فیلدهای دستیِ پنل می‌آمدند، و چون
-     تقریبا هیچ باشگاهی پرشان نمی‌کند، بخشِ «آمار باشگاه» همیشه فقط دو
-     عدد نشان می‌داد.
-
-     ظرفیت را می‌شود **واقعا حساب کرد**: تعداد میزها × ساعت‌های باز
-     بودن در روز. این یک عددِ مشتق است، نه ساختگی — پس برچسبش هم
-     «ساعت‌میز» است تا با «۸۰ نفر»ی که باشگاه‌دار ممکن است دستی وارد
-     کند اشتباه نشود. مقدارِ دستی همیشه اولویت دارد. */
   /* شماره‌ی تماس با کد شهر — مثلا ۰۲۱-۲۲۸۵۹۵۵۱. شماره بدونِ کد ذخیره
      می‌شود، پس بدونِ این، لینکِ `tel:` هم به جایی نمی‌رسید.
      منطقش در `lib/iran-geo` است تا صفحه‌ی فروشگاه و تولیدکننده هم
@@ -578,48 +569,21 @@ export default function ClubProfilePage() {
   const { text: phoneText, href: phoneHref, digits: phoneDig } =
     iranTel(club.phone, club.province, club.city);
 
-  const derivedCapacity = (() => {
-    const tables = Number(club.snookerTables ?? 0) + Number(club.pocketTables ?? 0)
-      + Number(club.highballTables ?? 0) + Number(club.vipSnookerTables ?? 0)
-      + Number(club.vipPocketTables ?? 0);
-    if (!tables) return null;
-
-    type Day = { open?: string; close?: string; isOpen?: boolean };
-    const wh = (club.workingHours ?? {}) as Record<string, Day>;
-    /* روزِ امروز ملاک است، نه «اولین کلیدِ شیء» — باشگاهی که جمعه
-       ساعتِ دیگری دارد وگرنه عددِ روزِ اشتباه می‌گرفت. */
-    const open = Object.values(wh).filter(d => d?.isOpen && d.open && d.close);
-    const day = (todayKey && wh[todayKey]?.isOpen ? wh[todayKey] : open[0]) as Day | undefined;
-    if (!day?.open || !day.close) return null;
-
-    /* دقیقه، نه فقط ساعت: ۱۰:۳۰ تا ۲۳:۳۰ سیزده ساعت است نه سیزده‌ونیم
-       اگر دقیقه‌ها دور ریخته شوند. */
-    const mins = (t: string) => {
-      const [h, m] = String(t).split(':').map(n => Number(n) || 0);
-      return (h ?? 0) * 60 + (m ?? 0);
-    };
-    const a = mins(day.open), b = mins(day.close);
-    /* ⚠️ بستنِ بعد از نیمه‌شب رایج است («۱۸:۰۰ تا ۰۲:۰۰» و به‌ویژه
-       «۰۹:۰۰ تا ۰۰:۰۰»). تفریقِ ساده منفی می‌شد و ردیف بی‌صدا حذف
-       می‌شد — یعنی همان داده‌ای که این محاسبه برایش نوشته شده. */
-    const span = a === b ? 24 * 60 : ((b - a) % (24 * 60) + 24 * 60) % (24 * 60);
-    if (span <= 0) return null;
-
-    const tableHours = Math.round((tables * span) / 60);
-    if (!tableHours) return null;
-    return `${tableHours.toLocaleString('fa-IR')} ساعت‌میز`;
-  })();
-
   /* صفر یک عدد درست است، نه «خالی»: باشگاه تازه باید ۰ عضو نشان بدهد
-     نه جای خالی. پس برخلاف ردیف «سال‌ها سابقه» این‌جا `|| null` نداریم. */
+     نه جای خالی. پس برخلاف دو ردیف بعدی این‌جا `|| null` نداریم.
+
+     ── چرا دو ردیفِ آخر مشتق نمی‌شوند ──
+     یک‌بار «ظرفیت روزانه» را از میزها × ساعتِ کاری حساب کردم و
+     «۸۴ ساعت‌میز» درآمد — واحدی که خودم ساخته بودم و برای هیچ
+     باشگاه‌داری معنا نداشت. هر دوی این‌ها **اظهارِ خودِ باشگاه‌دار**اند:
+     «۲۰ سال سابقه» یعنی بیست سال است باشگاه دارد، نه بیست سال است در
+     بیلیارد هاب ثبت شده؛ و ظرفیت هم عددی است که خودش می‌داند. به
+     عددی که وارد می‌کند اعتماد می‌شود و جای دیگری ساخته نمی‌شود. */
   const statsRows = [
     { label: 'اعضای فعال',  v: liveStats ? liveStats.members.toLocaleString('fa-IR') : null,     color: '#C7A66A' },
     { label: 'مسابقات',      v: liveStats ? liveStats.tournaments.toLocaleString('fa-IR') : null, color: '#f59e0b' },
-    /* سابقه مشتق‌شدنی نیست: `createdAt` یعنی «از کی در بیلیارد هاب
-       است»، نه «چند سال است کار می‌کند». نوشتنِ یکی به‌جای دیگری یک
-       عددِ ساختگی است، پس فقط مقدارِ دستی نشان داده می‌شود. */
     { label: 'سال‌ها سابقه', v: clubStats.yearsActive   || null, color: '#a78bfa' },
-    { label: 'ظرفیت روزانه', v: clubStats.dailyCapacity || derivedCapacity, color: '#06b6d4' },
+    { label: 'ظرفیت روزانه', v: clubStats.dailyCapacity || null, color: '#06b6d4' },
   ];
 
   if (loading) return (
@@ -650,6 +614,31 @@ export default function ClubProfilePage() {
         @keyframes fadeUp    { from{opacity:0;transform:translateY(18px)} to{opacity:1;transform:translateY(0)} }
         @keyframes fadeIn    { from{opacity:0;transform:translate(-50%,-48%) scale(0.94)} to{opacity:1;transform:translate(-50%,-50%) scale(1)} }
         @keyframes pulse     { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+        /* ── نشانی اختصاصی روی هدر ──
+           آینه‌ی کلاسِ ch-addr در components/profile/profile-page.css
+           (صفحه‌ی داور و مربی) تا هر سه پروفایل یک شکل باشند.
+           ⚠️ بک‌تیک در این بلوک ننویس: کلِ CSS داخلِ یک template
+           literal است و بک‌تیک همان‌جا می‌بنددش. */
+        .cp-addr {
+          display: inline-flex; align-items: center; gap: 7px;
+          margin-top: 8px; min-height: 30px; padding: 0 11px;
+          border-radius: 999px; cursor: pointer;
+          font-family: inherit; font-size: 12px; font-weight: 700;
+          color: rgba(255,255,255,0.82);
+          background: rgba(255,255,255,0.08);
+          border: 1px solid rgba(255,255,255,0.18);
+          transition: background .2s, border-color .2s;
+          max-width: 100%;
+        }
+        .cp-addr code {
+          direction: ltr; font-family: inherit; font-size: 12px;
+          overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0;
+        }
+        .cp-addr svg { color: #C7A66A; flex-shrink: 0; }
+        .cp-addr:hover { background: rgba(255,255,255,0.14); border-color: rgba(255,255,255,0.32); }
+        .cp-addr:focus-visible { outline: 2px solid #C7A66A; outline-offset: 3px; }
+        @media (prefers-reduced-motion: reduce) { .cp-addr { transition: none; } }
 
         /* ── شماره‌ی تماس ──
            لینک بود ولی دقیقا شبیه متنِ ساده‌ی قبلی: کسی نمی‌فهمید
@@ -780,7 +769,12 @@ export default function ClubProfilePage() {
           </div>
 
 
-          <div style={{ position: 'absolute', bottom: 'clamp(28px,5%,48px)', left: 0, right: 0, zIndex: 10, padding: 'clamp(12px,2vw,24px) clamp(16px,4vw,40px) 0' }}>
+          {/* ⚠️ کفِ این بلوک با آمدنِ ردیفِ «نشانی اختصاصی» بالاتر رفت.
+              پیش‌تر `clamp(28px,5%,48px)` بود و گروهِ آواتار/نام/مدیر
+              درست به لبه‌ی پایینِ تصویر می‌چسبید؛ یک ردیفِ سی‌پیکسلیِ
+              تازه یعنی یا نشانی از کادر بیرون می‌زد یا چیپ‌های
+              شهر/فاصله روی هم می‌افتادند. */}
+          <div style={{ position: 'absolute', bottom: 'clamp(52px,8%,76px)', left: 0, right: 0, zIndex: 10, padding: 'clamp(12px,2vw,24px) clamp(16px,4vw,40px) 0' }}>
             <div style={{ display: 'flex', alignItems: 'flex-end', gap: 14, marginBottom: 10 }}>
               <div style={{ position: 'relative', flexShrink: 0 }}>
                 {hasStory && <div style={{ position: 'absolute', inset: -4, borderRadius: '50%', zIndex: 0, background: 'linear-gradient(45deg,#feda75,#fa7e1e,#d62976,#962fbf,#4f5bd5)' }} />}
@@ -815,6 +809,23 @@ export default function ClubProfilePage() {
                     مدیر: {club.managerName}
                   </div>
                 )}
+                {/* ── نشانی اختصاصی، مثل صفحه‌ی داور ──
+                    همان الگوی `ch-addr` در `ProfileHero`: نشانی دیده
+                    می‌شود و با یک کلیک کپی. تا امروز فقط در پنلِ خودِ
+                    باشگاه‌دار بود، پس بازدیدکننده راهی برای برداشتنِ
+                    لینکِ کوتاه نداشت. */}
+                {club.slug && (
+                  <button type="button" onClick={copySlugUrl} className="cp-addr"
+                    aria-label={slugCopied ? `آدرس اختصاصی کپی شد: billiardhub.net/clubs/${club.slug}`
+                      : `کپی آدرس اختصاصی: billiardhub.net/clubs/${club.slug}`}>
+                    {slugCopied ? <Check size={12} aria-hidden /> : <LinkIcon size={12} aria-hidden />}
+                    <code dir="ltr">billiardhub.net/clubs/{club.slug}</code>
+                  </button>
+                )}
+                <span aria-live="polite" style={{
+                  position: 'absolute', width: 1, height: 1, overflow: 'hidden',
+                  clip: 'rect(0 0 0 0)', whiteSpace: 'nowrap',
+                }}>{slugCopied ? 'نشانی در کلیپ‌بورد کپی شد' : ''}</span>
               </div>
             </div>
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
