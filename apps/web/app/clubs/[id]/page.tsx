@@ -806,7 +806,7 @@ export default function ClubProfilePage() {
                 </div>
                 {club.managerName && (
                   <div style={{ fontSize: 'clamp(13px, 2vw, 16px)', color: 'rgba(255,255,255,0.55)', marginTop: 4, fontWeight: 500 }}>
-                    مدیر: {club.managerName}
+                    مدیریت: {club.managerName}
                   </div>
                 )}
                 {/* ── نشانی اختصاصی، مثل صفحه‌ی داور ──
@@ -830,7 +830,7 @@ export default function ClubProfilePage() {
             </div>
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 5, background: 'rgba(255,255,255,0.08)', backdropFilter: 'blur(12px)', borderRadius: 20, padding: '5px 12px', fontSize: 14, color: 'rgba(255,255,255,0.82)' }}>
-                <MapPin size={11} style={{ color: '#C7A66A' }} />
+                <MapPin size={11} style={{ color: '#30C55A' }} />
                 {/* استان فقط وقتی می‌آید که با شهر یکی نباشد. برای
                     «تهران / تهران» یا «اصفهان / اصفهان» تکرار بی‌فایده
                     بود و فضای هدر را می‌گرفت. */}
@@ -1050,15 +1050,12 @@ export default function ClubProfilePage() {
                       آمار باشگاه
                     </div>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
-                      {statsRows.filter(x => x.v).map((x, i) => (
+                      {statsRows.map((x, i) => (
                         <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 10px', borderRadius: 10, background: 'rgba(0,0,0,0.02)' }}>
                           <span style={{ fontSize: 14, color: 'rgba(0,0,0,0.45)' }}>{x.label}</span>
-                          <span style={{ fontSize: 16, fontWeight: 800, color: x.color }}>{x.v}</span>
+                          <span style={{ fontSize: 16, fontWeight: 800, color: x.v ? x.color : 'rgba(0,0,0,0.25)' }}>{x.v ?? "—"}</span>
                         </div>
                       ))}
-                      {statsRows.every(x => !x.v) && (
-                        <div style={{ fontSize: 13, color: 'rgba(0,0,0,0.3)', textAlign: 'center', padding: '8px 0' }}>هنوز آماری ثبت نشده</div>
-                      )}
                     </div>
                   </div>
                 </div>
@@ -1187,15 +1184,12 @@ export default function ClubProfilePage() {
                     آمار باشگاه
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
-                    {statsRows.filter(x => x.v).map((x, i) => (
+                    {statsRows.map((x, i) => (
                       <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 10px', borderRadius: 10, background: 'rgba(0,0,0,0.02)' }}>
                         <span style={{ fontSize: 14, color: 'rgba(0,0,0,0.45)' }}>{x.label}</span>
-                        <span style={{ fontSize: 16, fontWeight: 800, color: x.color }}>{x.v}</span>
+                        <span style={{ fontSize: 16, fontWeight: 800, color: x.v ? x.color : 'rgba(0,0,0,0.25)' }}>{x.v ?? "—"}</span>
                       </div>
                     ))}
-                    {statsRows.every(x => !x.v) && (
-                      <div style={{ fontSize: 13, color: 'rgba(0,0,0,0.3)', textAlign: 'center', padding: '8px 0' }}>هنوز آماری ثبت نشده</div>
-                    )}
                   </div>
                 </div>
               </div>
