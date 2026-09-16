@@ -61,7 +61,11 @@ export const GRADES: { key: string; label: string; dots: number; color: string; 
   { key: 'd3',            label: 'درجه ۳',                             dots: 1, color: '#16A34A' },
   { key: 'd2',            label: 'درجه ۲',                             dots: 2, color: '#16A34A' },
   { key: 'd1',            label: 'درجه ۱',                             dots: 3, color: '#C2410C' },
-  { key: 'national',      label: 'داور ملی',                           dots: 3, color: '#8F6531' },
+  /* ⚠️ «داور ملی» (`national`) از این فهرست برداشته شد. این تنها
+     منبعِ درجه‌هاست، پس نه در فرمِ ثبت‌نام پیشنهاد می‌شود و نه در
+     نمایش می‌آید. کلیدش عمدا دوباره استفاده نشود: پروفایل‌هایی که
+     قبلا ثبتش کرده‌اند هنوز آن را در `grades` دارند و با برگشتنِ
+     کلید، دوباره ظاهر می‌شوند. */
   { key: 'acbsSilver',    label: 'ACBS Silver Referee',                dots: 4, color: '#94A3B8', latin: true },
   { key: 'acbsGold',      label: 'ACBS Gold Referee',                  dots: 4, color: '#C7A66A', latin: true },
   { key: 'international', label: 'International Referee (WPBSA/IBSF)',  dots: 5, color: '#7C3AED', latin: true },
@@ -155,6 +159,13 @@ export function badgeFromGrades(grades: RefereeGrade[]): { label: string; dots: 
 /* Certifications list for the profile: «داور ملی — ۱۳۹۸» style, highest first. */
 export function certificationLines(grades: RefereeGrade[]): string[] {
   return [...grades]
+    /* ⚠️ کلیدی که `GRADES` نمی‌شناسد باید همین‌جا بیفتد. بدونِ این،
+       درجه‌ی حذف‌شده‌ای که در پروفایل‌های قدیمی ذخیره مانده (مثل
+       `national`) همچنان با برچسبِ ذخیره‌شده‌اش چاپ می‌شد — یعنی
+       برداشتنش از `GRADES` فقط فرم را پاک می‌کرد، نه نمایش را.
+       `findIndex` هم برای کلیدِ ناشناخته ۱- می‌دهد و ترتیب را به‌هم
+       می‌ریخت. */
+    .filter(g => GRADES.some(x => x.key === g.key))
     .sort((a, b) => GRADES.findIndex(x => x.key === b.key) - GRADES.findIndex(x => x.key === a.key))
     /* ── چرا جداکننده‌های دوجهته ──
        برچسب درجه می‌تواند حرف لاتین داشته باشد («A آسیایی») و سال با
