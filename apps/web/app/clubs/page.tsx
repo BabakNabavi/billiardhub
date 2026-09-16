@@ -695,7 +695,7 @@ export default function ClubsPage() {
                 </button>
 
                 {filterOpen && (
-                  <div style={{ position: 'absolute', top: 'calc(100% + 10px)', right: 0, width: 300, background: 'rgba(255,255,255,0.78)', border: '1px solid rgba(0,0,0,0.08)', borderRadius: 18, padding: 18, zIndex: 9999, boxShadow: '0 20px 60px rgba(0,0,0,0.14)', backdropFilter: 'blur(20px)', animation: 'fadeUp 0.2s ease both' }}>
+                  <div style={{ position: 'absolute', top: 'calc(100% + 10px)', right: 0, width: 300, background: 'rgba(255,255,255,0.985)', border: '1px solid rgba(0,0,0,0.10)', borderRadius: 18, padding: 18, zIndex: 9999, boxShadow: '0 24px 70px rgba(0,0,0,0.22)', backdropFilter: 'blur(28px) saturate(1.4)', WebkitBackdropFilter: 'blur(28px) saturate(1.4)', animation: 'fadeUp 0.2s ease both' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
                       <span style={{ fontSize: 16, fontWeight: 800, color: '#111111' }}>فیلترها</span>
                       <div style={{ display: 'flex', gap: 8 }}>
@@ -705,10 +705,10 @@ export default function ClubsPage() {
                     </div>
 
                     <div style={{ marginBottom: 14 }}>
-                      <div style={{ fontSize: 12, color: 'rgba(0,0,0,0.35)', fontWeight: 700, marginBottom: 8 }}>نوع میز</div>
+                      <div style={{ fontSize: 12, color: 'rgba(0,0,0,0.62)', fontWeight: 700, marginBottom: 8 }}>نوع میز</div>
                       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
                         {TABLE_TYPES.map(t => (
-                          <button key={t.key} onClick={() => toggleType(t.key)} style={{ padding: '5px 12px', borderRadius: 20, fontSize: 13, fontWeight: 600, border: `1px solid ${selectedTypes.includes(t.key) ? `${t.color}40` : 'rgba(0,0,0,0.09)'}`, background: selectedTypes.includes(t.key) ? `${t.color}14` : 'transparent', color: selectedTypes.includes(t.key) ? t.color : 'rgba(0,0,0,0.50)', cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.2s' }}>
+                          <button key={t.key} onClick={() => toggleType(t.key)} style={{ padding: '5px 12px', borderRadius: 20, fontSize: 13, fontWeight: 600, border: `1px solid ${selectedTypes.includes(t.key) ? `${t.color}40` : 'rgba(0,0,0,0.09)'}`, background: selectedTypes.includes(t.key) ? `${t.color}14` : 'transparent', color: selectedTypes.includes(t.key) ? t.color : 'rgba(0,0,0,0.66)', cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.2s' }}>
                             {t.label}
                           </button>
                         ))}
@@ -716,10 +716,10 @@ export default function ClubsPage() {
                     </div>
 
                     <div style={{ marginBottom: 14 }}>
-                      <div style={{ fontSize: 12, color: 'rgba(0,0,0,0.35)', fontWeight: 700, marginBottom: 8 }}>امکانات</div>
+                      <div style={{ fontSize: 12, color: 'rgba(0,0,0,0.62)', fontWeight: 700, marginBottom: 8 }}>امکانات</div>
                       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
                         {AMENITIES.map(a => (
-                          <button key={a.key} onClick={() => toggleAmen(a.key)} style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '5px 10px', borderRadius: 20, fontSize: 13, fontWeight: 600, border: `1px solid ${selectedAmens.includes(a.key) ? 'rgba(199,166,106,0.40)' : 'rgba(0,0,0,0.09)'}`, background: selectedAmens.includes(a.key) ? 'rgba(199,166,106,0.10)' : 'transparent', color: selectedAmens.includes(a.key) ? '#A07840' : 'rgba(0,0,0,0.50)', cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.2s' }}>
+                          <button key={a.key} onClick={() => toggleAmen(a.key)} style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '5px 10px', borderRadius: 20, fontSize: 13, fontWeight: 600, border: `1px solid ${selectedAmens.includes(a.key) ? 'rgba(199,166,106,0.40)' : 'rgba(0,0,0,0.09)'}`, background: selectedAmens.includes(a.key) ? 'rgba(199,166,106,0.10)' : 'transparent', color: selectedAmens.includes(a.key) ? '#A07840' : 'rgba(0,0,0,0.66)', cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.2s' }}>
                             {a.icon}{a.label}
                           </button>
                         ))}
@@ -733,7 +733,7 @@ export default function ClubsPage() {
                         { label: 'در حال ثبت‌نام مسابقه',            val: onlyTournament, set: setOnlyTourn   },
                       ].map((tog, i) => (
                         <div key={i} onClick={() => tog.set((p: boolean) => !p)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer', padding: '6px 0' }}>
-                          <span style={{ fontSize: 15, color: 'rgba(0,0,0,0.60)', fontWeight: 500 }}>{tog.label}</span>
+                          <span style={{ fontSize: 15, color: 'rgba(0,0,0,0.70)', fontWeight: 500 }}>{tog.label}</span>
                           <div style={{ width: 36, height: 20, borderRadius: 10, background: tog.val ? '#C7A66A' : 'rgba(0,0,0,0.12)', position: 'relative', transition: 'all 0.3s', flexShrink: 0 }}>
                             <div style={{ position: 'absolute', top: 3, width: 14, height: 14, borderRadius: '50%', background: '#fff', transition: 'all 0.3s', left: tog.val ? 19 : 3, boxShadow: '0 2px 4px rgba(0,0,0,0.20)' }} />
                           </div>
@@ -751,7 +751,7 @@ export default function ClubsPage() {
                   <ChevronDown size={11} style={{ transition: 'transform 0.3s', transform: sortOpen ? 'rotate(180deg)' : 'none', color: 'rgba(0,0,0,0.35)' }} />
                 </button>
                 {sortOpen && (
-                  <div style={{ position: 'absolute', top: 'calc(100% + 10px)', right: 0, minWidth: 170, background: 'rgba(255,255,255,0.78)', border: '1px solid rgba(0,0,0,0.08)', borderRadius: 14, padding: 6, zIndex: 9999, boxShadow: '0 20px 60px rgba(0,0,0,0.12)', backdropFilter: 'blur(20px)', animation: 'fadeUp 0.2s ease both' }}>
+                  <div style={{ position: 'absolute', top: 'calc(100% + 10px)', right: 0, minWidth: 170, background: 'rgba(255,255,255,0.985)', border: '1px solid rgba(0,0,0,0.10)', borderRadius: 14, padding: 6, zIndex: 9999, boxShadow: '0 24px 70px rgba(0,0,0,0.20)', backdropFilter: 'blur(28px) saturate(1.4)', WebkitBackdropFilter: 'blur(28px) saturate(1.4)', animation: 'fadeUp 0.2s ease both' }}>
                     {availSorts.map(opt => (
                       <button key={opt.value} className="dd-item" onClick={() => { setSortBy(opt.value); setSortOpen(false); }}
                         style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 10, padding: '9px 12px', borderRadius: 9, border: 'none', background: sortBy === opt.value ? 'rgba(199,166,106,0.10)' : 'transparent', color: sortBy === opt.value ? '#A07840' : 'rgba(0,0,0,0.65)', fontSize: 15, fontWeight: sortBy === opt.value ? 700 : 500, cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.15s', textAlign: 'right' }}>
