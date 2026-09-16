@@ -5,12 +5,16 @@ import { priceBooking, hoursBetween, bookingReference, surchargeOf, type PricedT
 import { bookingStartsAt } from '@/lib/finance/cancellation';
 import { closureState, isDateClosed, closedHours, BOOKING_HORIZON_DAYS } from '@/lib/booking/closure';
 
-const HOLD_MINUTES = 10;   // رزرو پرداخت‌نشده پس از ۱۰ دقیقه آزاد می‌شود
+/* رزرو پرداخت‌نشده پس از این مدت آزاد می‌شود.
+   ۱۵ دقیقه: کاربر باید فرصتِ رفتن به درگاه، وارد کردن رمز دوم و
+   برگشتن را داشته باشد. رهاکردنِ صریح (انصراف پشتِ درگاه) دیگر منتظرِ
+   این مهلت نمی‌ماند — کالبک همان لحظه اسلات را آزاد می‌کند. */
+const HOLD_MINUTES = 15;
 
 /* ثبت رزرو موقت:
    ۱) قیمت روی سرور بازمحاسبه می‌شود (مبلغ ارسالی کلاینت ملاک نیست)
    ۲) رزرو و قفل ساعت‌ها در یک تراکنش اتمیک ⇒ دابل‌بوکینگ ممکن نیست
-   ۳) رزرو با مهلت ۱۰ دقیقه ساخته می‌شود و پرداخت‌نشده خودکار آزاد می‌گردد */
+   ۳) رزرو با مهلت ۱۵ دقیقه ساخته می‌شود و پرداخت‌نشده خودکار آزاد می‌گردد */
 export async function POST(req: NextRequest) {
   const actor = actorFromRequest(req);
   if (!actor) return NextResponse.json({ message: 'احراز هویت الزامی است' }, { status: 401 });

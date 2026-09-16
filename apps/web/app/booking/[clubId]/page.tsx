@@ -336,6 +336,9 @@ function BookingContent() {
         pricePerHour:selectedTable.pricePerHour, playerCount, currency:'IRT',
       });
       const bookingId = res.data?.id ?? '';
+      /* مهلتِ نگه‌داشتن از خودِ سرور می‌آید، نه عددِ ثابت در متن —
+         یک‌بار سرور ۱۵ دقیقه شد و این جمله ۱۰ دقیقه ماند. */
+      const holdMin = Number(res.data?.holdMinutes) || 15;
       /* ایجاد پرداخت و هدایت مستقیم به درگاه — هیچ صفحه‌ی میانی دیگری نیست */
       let paymentUrl: string | null = null;
       try {
@@ -345,7 +348,7 @@ function BookingContent() {
         setError(pe?.response?.data?.message || 'اتصال به درگاه پرداخت ممکن نشد');
       }
       if(!paymentUrl){
-        setError(prev=>prev||'اتصال به درگاه پرداخت ممکن نشد؛ رزرو شما تا ۱۰ دقیقه نگه داشته می‌شود.');
+        setError(prev=>prev||`اتصال به درگاه پرداخت ممکن نشد؛ رزرو شما تا ${toFa(holdMin)} دقیقه نگه داشته می‌شود.`);
         return;
       }
       /* #16: immediately mark booked slots as reserved in local state */
