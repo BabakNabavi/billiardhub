@@ -10,7 +10,10 @@ export const sb = () => getSupabaseServer()
 /** فراخوانی تابع اتمیک دیتابیس (هر تابع = یک تراکنش) */
 export async function rpc<T>(fn: string, args: Record<string, unknown>) {
   const { data, error } = await sb().rpc(fn, args)
-  return { data: data as T | null, error: error as { message?: string } | null }
+  /* `code` هم لازم است: تشخیصِ «تابع وجود ندارد» (PGRST202) از روی
+     متنِ پیام شکننده است — «does not exist» برای ستون و جدولِ ناموجود
+     هم می‌آید و آن‌وقت یک خطای واقعی به مسیرِ پشتیبان می‌رود. */
+  return { data: data as T | null, error: error as { message?: string; code?: string } | null }
 }
 
 export interface Actor { id: string; role: string }
