@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { sb, rpc, actorFromRequest, isAdmin, ownsClub } from '@/lib/finance/db';
 import { bankOfIban } from '@/lib/bank';
 import { tehranDayStart, tehranToday, resolveRange } from '@/lib/finance/range';
+import { isVisibleBooking } from '@/lib/bookings/visibility';
 
 /** خروجیِ `bh_finance_totals` — نگاشتِ نوعِ دفتر به جمعِ مبلغ */
 type Rec = Record<string, number>;
@@ -66,18 +67,26 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string 
     rpc<Rec>('bh_finance_totals', { p_from: weekAgo, p_to: null, p_club: clubId, p_with_held: false }),
     rpc<Rec>('bh_finance_totals', { p_from: monthAgo, p_to: null, p_club: clubId, p_with_held: false }),
     sb().from('bookings').select('id,booking_reference,"bookingDate","timeSlots",final_amount,club_amount,booking_status,payment_status,settlement_status,"createdAt"')
-      .eq('clubId', clubId).order('createdAt', { ascending: false }).limit(50),
+      .eq('clubId', clubId)
+      .not('booking_status', 'in', '(PENDING_PAYMENT,EXPIRED)')
+      .order('createdAt', { ascending: false }).limit(50),
     sb().from('settlements').select('id,amount,status,reference_number,requested_at,completed_at')
       .eq('club_id', clubId).order('requested_at', { ascending: false }).limit(20),
 
     cnt(x => x.from('bookings').select('id', { count: 'exact', head: true })
-      .eq('clubId', clubId).eq('bookingDate', today)),
+      .eq('clubId', clubId).eq('bookingDate', today)
+      .not('booking_status', 'in', '(PENDING_PAYMENT,EXPIRED)')
+      .neq('payment_status', 'UNPAID')),
     cnt(x => x.from('bookings').select('id', { count: 'exact', head: true })
       .eq('clubId', clubId).gt('bookingDate', today).eq('booking_status', 'CONFIRMED')),
     cnt(x => x.from('bookings').select('id', { count: 'exact', head: true })
       .eq('clubId', clubId).eq('booking_status', 'COMPLETED')),
     cnt(x => x.from('bookings').select('id', { count: 'exact', head: true })
-      .eq('clubId', clubId).eq('booking_status', 'CANCELLED')),
+      /* ⚠️ هر انصراف پشتِ درگاه حالا یک ردیفِ CANCELLEDِ
+         پرداخت‌نشده می‌سازد. بدونِ این شرط، شمارنده‌ی «لغو شده» بالا
+         می‌رفت در حالی که تبِ رزروها هیچ ردیفی نشان نمی‌داد. */
+      .eq('clubId', clubId).eq('booking_status', 'CANCELLED')
+      .neq('payment_status', 'UNPAID')),
   ]);
 
   /* ⚠️ هر پنج فراخوان باید چک شوند، نه فقط اولی. اگر یکی شکست بخورد و
@@ -102,7 +111,8 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string 
 
   const ALL = of(allT), RNG = of(rangeT);
   const a = (acc.data ?? {}) as Record<string, number>;
-  const rows = (recent.data ?? []) as Record<string, unknown>[];
+  /* همان قاعده‌ی فهرست‌ها — CANCELLEDِ هرگز پرداخت‌نشده هم بیفتد */
+  const rows = ((recent.data ?? []) as Record<string, unknown>[]).filter(isVisibleBooking);
 
   /* شماره‌ی شبا فقط به‌صورت ماسک‌شده برمی‌گردد */
   const bk = bank.data as { iban?: string; bank_name?: string | null } | null;

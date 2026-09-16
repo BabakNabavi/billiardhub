@@ -2,6 +2,7 @@ export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { sb, actorFromRequest, isAdmin, ownsClub } from '@/lib/finance/db';
 import { BOOKING_HORIZON_DAYS } from '@/lib/booking/closure';
+import { isVisibleBooking } from '@/lib/bookings/visibility';
 
 /* تقویم و گزارش رزروهای باشگاه.
 
@@ -57,11 +58,14 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string 
     booking_status: string; payment_status: string; booking_reference: string | null
   };
 
-  /* لغوشده و پرداخت‌نشده هر دو کنار می‌روند: اولی دیگر رزرو نیست،
-     دومی هنوز نشده. */
-  const rows = ((data ?? []) as unknown as Row[]).filter(r =>
-    r.booking_status !== 'CANCELLED' && r.booking_status !== 'PENDING_PAYMENT'
-    && r.payment_status !== 'UNPAID');
+  /* ── تقویم عمدا سخت‌گیرتر از فهرستِ رزروهاست ──
+     قاعده‌ی پایه از `lib/bookings/visibility` می‌آید تا چند نسخه‌ی
+     دست‌نویس از یک شرط در سایت نماند. ولی تقویم یک شرطِ اضافه دارد:
+     رزروِ **لغوشده** هم نباید خانه‌ی ساعت را پر کند، حتی اگر پرداخت و
+     بعد بازپرداخت شده باشد — آن ساعت دیگر آزاد است. */
+  const rows = ((data ?? []) as unknown as Row[])
+    .filter(isVisibleBooking)
+    .filter(r => r.booking_status !== 'CANCELLED' && r.payment_status !== 'UNPAID');
 
   /* نام و شماره‌ی مشتری‌ها — یک کوئری، نه یکی به‌ازای هر رزرو */
   const userIds = [...new Set(rows.map(r => r.userId).filter(Boolean))];
