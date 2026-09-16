@@ -430,7 +430,10 @@ const SLIDER_IMAGES = [
   { src: '/images/clubs/club1.png',  title: 'باشگاه‌های حرفه‌ای', sub: 'تجربه بازی در بهترین محیط‌ها' },
   { src: '/images/clubs/club2.jpg',  title: 'رزرو آنلاین میز',     sub: 'در هر زمان، از هر کجا' },
   { src: '/images/clubs/club3.jpg',  title: 'مربیان',               sub: 'یادگیری با بهترین‌ها' },
-  { src: '/images/clubs/club4.png',  title: '۵۴۸ باشگاه',          sub: 'در سراسر ایران' },
+  /* ⚠️ این‌جا «۵۴۸ باشگاه» بود — عددی ساختگی که با تعداد واقعیِ
+     باشگاه‌های ثبت‌شده هیچ نسبتی نداشت و با رشدِ سایت هم عوض نمی‌شد.
+     جایش یک ویژگیِ واقعی نشست. */
+  { src: '/images/clubs/club4.png',  title: 'کافه بیلیارد',         sub: 'در سراسر ایران' },
   { src: '/images/clubs/club4.png',  title: 'جامعه بیلیارد',        sub: 'بیلیارد هاب، اتصال همه' },
 ];
 
