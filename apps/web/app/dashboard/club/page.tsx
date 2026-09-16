@@ -1039,6 +1039,21 @@ export default function ClubDashboardPage() {
       const savedSlug = (res?.data as { slug?: string | null } | undefined)?.slug;
       if (savedSlug !== undefined) {
         setClubs(prev => prev.map(c => c.id === selectedClub.id ? { ...c, slug: savedSlug ?? undefined } : c));
+        /* ⚠️ `selectedClub` هم باید به‌روز شود، نه فقط فهرست: قفلِ
+           نشانی از روی همین می‌خواند. بدون این، باشگاه‌دار نشانی را
+           ذخیره می‌کرد، فیلد باز می‌ماند، دوباره عوضش می‌کرد و تازه
+           سرور ۴۰۹ می‌داد — خطایی که معلوم نبود از کجا آمده.
+
+           ⚠️ فقط وقتی **واقعا** عوض شده. PUT همیشه کلِ ردیف را
+           برمی‌گرداند، پس ساختنِ بی‌قیدِ شیءِ تازه یعنی هر ذخیره
+           هویتِ `selectedClub` را عوض می‌کند و افکتِ بزرگِ بارگذاریِ
+           باشگاه دوباره اجرا می‌شود — که از جمله پیامِ «ذخیره شد» را
+           همان لحظه پاک می‌کرد. */
+        const nextSlug = savedSlug ?? undefined;
+        if (nextSlug !== selectedClub.slug) {
+          setSelectedClub(prev => (prev && prev.id === selectedClub.id
+            ? { ...prev, slug: nextSlug } : prev));
+        }
       }
     } catch (e) {
       /* axios خطای HTTP را پرتاب می‌کند و پیام خود سرور در
@@ -2324,9 +2339,16 @@ export default function ClubDashboardPage() {
               {/* ── آدرس اختصاصی سایت ──
                   موقع ثبت باشگاه گرفته می‌شد ولی از آن به بعد هیچ‌جای
                   پنل دیده نمی‌شد، پس باشگاه‌دار نه می‌دانست نشانی‌اش چیست
-                  نه می‌توانست عوضش کند. */}
+                  نه می‌توانست عوضش کند.
+
+                  ⚠️ `locked` از **باشگاهِ ذخیره‌شده** خوانده می‌شود، نه از
+                  `clubInfo.slug`ِ فرم — وگرنه همان لحظه که کاربر حرفِ
+                  اول را تایپ می‌کرد فیلد قفل می‌شد. سرور هم همین قاعده
+                  را جدا اعمال می‌کند؛ این‌جا فقط جلوی تایپِ بیهوده و
+                  خطای غافلگیرکننده را می‌گیرد. */}
               <div style={{ gridColumn: '1 / -1' }}>
                 <SiteAddressField
+                  locked={!!selectedClub?.slug}
                   value={clubInfo.slug}
                   onChange={v => setClubInfo(p => ({ ...p, slug: v }))}
                   basePath="clubs"

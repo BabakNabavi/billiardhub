@@ -92,7 +92,7 @@ export async function PUT(
      برداشته شده تا پایان عمر توکن هنوز `role:'admin'` دارد. */
   const isAdmin = await can(userId, 'clubs');
 
-  const { data: club } = await getSupabaseServer().from('clubs').select('ownerId').eq('id', id).single();
+  const { data: club } = await getSupabaseServer().from('clubs').select('ownerId,slug').eq('id', id).single();
   if (!club) return NextResponse.json({ message: 'باشگاه یافت نشد' }, { status: 404, headers: CORS });
 
   if (!isAdmin && club.ownerId !== userId) {
@@ -137,6 +137,29 @@ export async function PUT(
      `clubs_slug_uniq` (مهاجرت ۰۶۶) تضمین می‌کند. */
   if (Object.prototype.hasOwnProperty.call(body, 'slug')) {
     const raw = String(body.slug ?? '').trim().toLowerCase();
+
+    /* ── یک‌بار ثبت، بعد قفل ──
+       نشانی اختصاصی جایی است که باشگاه لینکش را همه‌جا پخش می‌کند:
+       اینستاگرام، کارت ویزیت، پیامک به اعضا. عوض‌کردنش یعنی همه‌ی
+       آن لینک‌ها ۴۰۴ می‌شوند و کسی هم خبردار نمی‌شود. پس فقط تا
+       وقتی خالی است نوشتنی می‌ماند.
+
+       ادمین مستثناست: اشتباه تایپی یا نشانی توهین‌آمیز باید از یک
+       جایی قابل اصلاح باشد. فرستادنِ همان مقدارِ فعلی هم خطا نیست،
+       چون فرم کل ردیف را PATCH می‌کند و بدون این استثنا هر ذخیره‌ی
+       عادی رد می‌شد. */
+    /* ⚠️ هر دو سر باید یکسان نرمال شوند. `raw` پایین‌حرف و trim شده
+       است ولی مقدارِ ذخیره‌شده لزوما نه — مسیرِ ساختِ باشگاه slug را
+       خام می‌نوشت. مقایسه‌ی نرمال‌نشده یعنی باشگاهی با یک حرفِ بزرگ
+       در نشانی، از این به بعد روی **هر** ذخیره ۴۰۹ می‌گرفت و چون فیلد
+       قفل است هیچ راهی هم برای اصلاحش نداشت. */
+    const current = String((club as { slug?: string | null }).slug ?? '').trim().toLowerCase();
+    if (!isAdmin && current && raw !== current) {
+      return NextResponse.json(
+        { message: 'آدرس اختصاصی پس از ثبت اولیه قابل تغییر نیست. برای اصلاح با پشتیبانی تماس بگیرید.' },
+        { status: 409, headers: CORS });
+    }
+
     if (!raw) {
       /* خالی ⇒ NULL، نه رشته‌ی تهی: چند NULL با ایندکس یکتا مشکلی
          ندارند ولی دو رشته‌ی خالی با هم برخورد می‌کنند. */
