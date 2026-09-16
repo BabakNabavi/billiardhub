@@ -6,9 +6,11 @@
 import { useCallback, useEffect, useState } from 'react'
 import { apiFetch } from '../../lib/http'
 import { tehranDay } from '../../lib/finance/range'
+import { toJalali, jalaliToGregorian, faDateLong } from '../../lib/jalali'
+import JalaliDatePicker from '../ui/JalaliDatePicker'
 import {
   Wallet, TrendingUp, Clock3, Landmark, ShieldCheck,
-  AlertCircle, Loader2, ArrowDownToLine, Receipt, X,
+  AlertCircle, Loader2, ArrowDownToLine, Receipt, Printer, X,
 } from 'lucide-react'
 
 const INK = '#1C1B17', SEC = '#5B564B', MUT = '#6F6A5C', LINE = '#EAE5DA'
@@ -37,6 +39,24 @@ interface Finance {
 
 /* از همان هلپرِ سرور — نه یک کپیِ محلیِ آفست */
 const irDay = tehranDay
+
+/* ── مرزِ میلادی ⟷ شمسی ──
+   API با `YYYY-MM-DD`ِ میلادی کار می‌کند و `JalaliDatePicker` با
+   «۱۴۰۵/۶/۲۵». تبدیل فقط همین‌جا انجام می‌شود تا هیچ‌جای دیگری دو
+   تقویم قاطی نشود. ورودیِ خراب `null` برمی‌گرداند و فراخوان
+   نادیده‌اش می‌گیرد — بازه‌ی نامعتبر بهتر است اصلا اعمال نشود. */
+const gToJ = (g: string): string => {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(g)
+  if (!m) return ''
+  const [jy, jm, jd] = toJalali(Number(m[1]), Number(m[2]), Number(m[3]))
+  return `${jy}/${jm}/${jd}`
+}
+const jToG = (j: string): string | null => {
+  const m = /^(\d{3,4})\/(\d{1,2})\/(\d{1,2})$/.exec(j.trim())
+  if (!m) return null
+  const [gy, gm, gd] = jalaliToGregorian(Number(m[1]), Number(m[2]), Number(m[3]))
+  return `${gy}-${String(gm).padStart(2, '0')}-${String(gd).padStart(2, '0')}`
+}
 
 export default function ClubFinance({ clubId, onEditBank }: { clubId: string; onEditBank?: () => void }) {
   const [d, setD] = useState<Finance | null>(null)
@@ -99,22 +119,91 @@ export default function ClubFinance({ clubId, onEditBank }: { clubId: string; on
         <section>
           <Head icon={<Receipt size={17} style={{ color: GOLD_D }} />} title="گزارش بازه‌ای"
             desc="هر بازه‌ای که بخواهید — هر دو سر شامل همان روز است." />
-          <div className="cf-range">
+          {/* ⚠️ `<input type="date">` برداشته شد: تقویمِ بومیِ مرورگر
+              میلادی است و باشگاه‌دار باید تاریخ شمسی را در ذهنش تبدیل
+              می‌کرد. `JalaliDatePicker` همان کامپوننتی است که بقیه‌ی
+              پنل استفاده می‌کند. مقدارش «۱۴۰۵/۶/۲۵» است و در مرز به
+              میلادی تبدیل می‌شود، چون API با `YYYY-MM-DD` کار می‌کند. */}
+          <div className="cf-range no-print">
             {([['امروز', 0], ['۷ روز', 6], ['۳۰ روز', 29], ['۹۰ روز', 89]] as const).map(([lbl, back]) => (
               <button key={lbl} type="button" onClick={() => { setFrom(irDay(back)); setTo(irDay(0)) }}
                 className={from === irDay(back) && to === irDay(0) ? 'cf-chip on' : 'cf-chip'}>{lbl}</button>
             ))}
-            <label className="cf-f"><span>از</span>
-              <input type="date" dir="ltr" value={from} max={to} onChange={e => setFrom(e.target.value)} /></label>
-            <label className="cf-f"><span>تا</span>
-              <input type="date" dir="ltr" value={to} min={from} max={irDay(0)} onChange={e => setTo(e.target.value)} /></label>
+            {/* ── چرا بازه در خودِ UI اعتبارسنجی می‌شود ──
+                با `<input type="date">` صفتِ `min`/`max` جلوی بازه‌ی
+                وارونه را می‌گرفت؛ `JalaliDatePicker` چنین چیزی ندارد.
+                سرور هم بازه‌ی وارونه را بی‌صدا به پیش‌فرض برمی‌گرداند،
+                پس کاربر عددهای ۳۰ روز را زیرِ برچسبِ بازه‌ی خودش
+                می‌دید. حالا اگر جابه‌جا شد، همان لحظه دیگری هم
+                هم‌راستا می‌شود.
+
+                دکمه‌ی ✕ کامپوننت `''` می‌فرستد؛ بدونِ این شاخه یک
+                کنترلِ دیدنی بود که هیچ کاری نمی‌کرد. */}
+            <div className="cf-dp">
+              <JalaliDatePicker id="cf-from" label="از تاریخ" value={gToJ(from)}
+                onChange={v => {
+                  if (!v) { setFrom(irDay(29)); return }
+                  const g = jToG(v); if (!g) return
+                  setFrom(g); if (g > to) setTo(g)
+                }} />
+            </div>
+            <div className="cf-dp">
+              <JalaliDatePicker id="cf-to" label="تا تاریخ" value={gToJ(to)}
+                onChange={v => {
+                  if (!v) { setTo(irDay(0)); return }
+                  const g = jToG(v); if (!g) return
+                  setTo(g); if (g < from) setFrom(g)
+                }} />
+            </div>
+            <button type="button" className="cf-print" onClick={() => window.print()}>
+              <Printer size={14} /> چاپ گزارش
+            </button>
           </div>
+
+          {/* ── ورقِ گزارش ──
+             هرچه چاپ می‌شود داخلِ یک ظرفِ واحد است. با پنهان‌کردنِ
+             بقیه به‌تنهایی، آن بخش‌ها جایشان را نگه می‌داشتند و برگه
+             با یکی‌دو صفحه‌ی سفید شروع می‌شد. */}
+          <div className="cf-sheet">
+          {/* ── سربرگِ چاپ ──
+             فقط موقع پرینت دیده می‌شود. بدونِ آن، برگه‌ی چاپ‌شده یک
+             مشت عدد بی‌عنوان است: معلوم نیست مالِ کدام باشگاه، کدام
+             بازه، و کِی گرفته شده. */}
+          <div className="print-only cf-ph">
+            <h2>گزارش مالی باشگاه</h2>
+            {/* ⚠️ بازه از **پاسخِ سرور** خوانده می‌شود، نه از state محلی.
+                سرور بازه‌ی نامعتبر را بی‌صدا به «۳۰ روز اخیر» برمی‌گرداند
+                (`lib/finance/range.ts`)، پس چاپ‌کردنِ مقدارِ محلی یعنی
+                برگه‌ای که بازه‌اش با عددهایش نمی‌خواند — بدترین نوعِ
+                سندِ مالی.
+
+                `faDateLong` سالِ شمسی را هم می‌آورد؛ `faDate`ِ محلیِ این
+                فایل فقط «۲۵ شهریور» می‌دهد که روی کاغذ بی‌سال است. */}
+            <p>بازه: از {faDateLong(d.range.from)} تا {faDateLong(d.range.to)}</p>
+            <p>تاریخ تهیه‌ی گزارش: {faDateLong(new Date())}</p>
+          </div>
+
           <div className="cf-grid" style={{ marginTop: 10 }}>
             <Stat label="سهم شما در این بازه" value={d.range.clubShare} tone="felt" strong />
             <Stat label="فروش ناخالص" value={d.range.grossSales} muted hint="کل مبلغی که مشتریان پرداخت کرده‌اند" />
             <Stat label="کمیسیون پلتفرم" value={d.range.platformCommission} muted />
             <Stat label="بازپرداخت‌شده" value={d.range.refunded} muted />
           </div>
+
+          {/* تفکیکِ رزرو و مسابقه — روی کاغذ لازم است، وگرنه «فروش
+              ناخالص» یک عددِ بی‌توضیح می‌ماند. */}
+          <table className="cf-tbl">
+            <tbody>
+              <tr><th>از رزرو میز</th><td>{fa(d.range.fromReservations)} تومان</td></tr>
+              <tr><th>از مسابقات</th><td>{fa(d.range.fromTournaments)} تومان</td></tr>
+              <tr><th>فروش ناخالص</th><td>{fa(d.range.grossSales)} تومان</td></tr>
+              <tr><th>کمیسیون بیلیارد هاب</th><td>{fa(d.range.platformCommission)} تومان</td></tr>
+              <tr><th>بازپرداخت به مشتریان</th><td>{fa(d.range.refunded)} تومان</td></tr>
+              <tr className="cf-tbl-sum"><th>سهم شما</th><td>{fa(d.range.clubShare)} تومان</td></tr>
+            </tbody>
+          </table>
+          </div>
+
           {d.range.entries === 0 && (
             <p style={{ fontSize: 12, color: MUT, marginTop: 8 }}>در این بازه رویداد مالی‌ای ثبت نشده است.</p>
           )}
@@ -233,6 +322,51 @@ export default function ClubFinance({ clubId, onEditBank }: { clubId: string; on
         .cf-f { display: inline-flex; align-items: center; gap: 6px; font-size: 11.5px; color: ${MUT}; }
         .cf-f input { font-family: inherit; font-size: 12px; color: ${INK}; background: #fff;
           border: 1px solid ${LINE}; border-radius: 9px; padding: 6px 9px; }
+        /* دو تقویم کنار چیپ‌ها؛ در موبایل تمام‌عرض می‌شوند */
+        .cf-dp { min-width: 160px; flex: 1 1 160px; }
+        .cf-print { display: inline-flex; align-items: center; gap: 6px; font-family: inherit;
+          font-size: 11.5px; font-weight: 800; color: #fff; background: ${INK};
+          border: 1px solid ${INK}; border-radius: 999px; padding: 7px 13px; cursor: pointer; }
+        .cf-print:hover { opacity: .88; }
+        .cf-print:focus-visible { outline: 2px solid ${GOLD_D}; outline-offset: 2px; }
+
+        /* جدولِ تفکیک — روی صفحه هم مفید است، روی کاغذ لازم */
+        .cf-tbl { width: 100%; border-collapse: collapse; margin-top: 12px;
+          font-size: 12.5px; border: 1px solid ${LINE}; border-radius: 12px; overflow: hidden; }
+        .cf-tbl th { text-align: start; font-weight: 700; color: ${SEC};
+          padding: 9px 12px; border-bottom: 1px solid ${LINE}; background: ${GROUND}; }
+        .cf-tbl td { text-align: end; font-weight: 800; color: ${INK};
+          padding: 9px 12px; border-bottom: 1px solid ${LINE}; }
+        .cf-tbl tr:last-child th, .cf-tbl tr:last-child td { border-bottom: 0; }
+        .cf-tbl-sum th, .cf-tbl-sum td { background: rgba(14,122,56,0.06); color: ${FELT}; }
+
+        .print-only { display: none; }
+
+        /* ── چاپ ──
+           بدونِ این، دستورِ چاپ کلِ داشبورد را می‌گیرد: منو، تب‌ها،
+           دکمه‌ها و بقیه‌ی بخش‌ها. باشگاه‌دار می‌خواهد همین یک گزارش
+           را روی کاغذ داشته باشد، نه عکسِ صفحه. */
+        @media print {
+          .print-only { display: block; }
+          .no-print { display: none !important; }
+          /* هرچیزی که جدِ ورق نیست پنهان می‌شود — ولی پنهان‌کردن کافی
+             نیست: ورق باید از جریانِ صفحه بیرون بیاید و برود بالای
+             کاغذ، وگرنه فضایی که بقیه اشغال کرده‌اند به‌صورت صفحه‌ی
+             سفید چاپ می‌شود. */
+          body * { visibility: hidden; }
+          .cf-sheet, .cf-sheet * { visibility: visible; }
+          .cf-sheet {
+            position: absolute; top: 0; inset-inline: 0;
+            width: 100%; margin: 0; padding: 0;
+            page-break-inside: avoid;
+          }
+          .cf-ph { text-align: center; margin-bottom: 10pt; }
+          .cf-ph h2 { font-size: 16pt; margin: 0 0 6pt; }
+          .cf-ph p { font-size: 10pt; margin: 2pt 0; color: #333; }
+          .cf-tbl, .cf-tbl th, .cf-tbl td { border-color: #999 !important; }
+          .cf-tbl th { background: #f2f2f2 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+          @page { margin: 14mm; }
+        }
       `}</style>
     </div>
   )
