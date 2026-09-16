@@ -7,6 +7,7 @@ import { AlertCircle, Loader2, Lock } from 'lucide-react';
 import api from '../../../lib/api';
 import { uploadFile } from '../../../lib/supabase';
 import ProvinceCitySelect from '../../../components/ProvinceCitySelect';
+import { telPrefix, normalizeLocalPhone } from '../../../lib/iran-geo';
 import { useAuthStore } from '../../../store/auth.store';
 import { persianToSlug } from '../../../lib/slug';
 import SiteAddressField, { type SlugStatus } from '../../../components/SiteAddressField';
@@ -115,6 +116,10 @@ export default function NewClubPage() {
   /* بررسی در دسترس بودن نشانی داخل `SiteAddressField` انجام می‌شود و
      نتیجه‌اش از `onStatusChange` به همین‌جا برمی‌گردد. */
 
+  /* کد تلفنِ استانِ انتخاب‌شده — همان جدولِ `data/iran-geo.json` که
+     شهر و استان از آن می‌آید، پس دو منبع نمی‌شود. */
+  const phoneArea = telPrefix(form.province);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
     if (type === 'checkbox') set(name, (e.target as HTMLInputElement).checked);
@@ -199,6 +204,11 @@ export default function NewClubPage() {
 
       await api.post('/clubs', {
         ...form,
+        /* ── قرارداد: فقط شماره‌ی محلی ذخیره می‌شود ──
+           بدونِ نرمال‌سازی، ارقامِ فارسی و فاصله و کدی که کاربر دستی
+           تایپ کرده همان‌طور خام می‌نشست و نمایشِ بعدی «۰۲۱-۰۲۱…»
+           می‌شد. کدِ استان اگر اولِ شماره آمده باشد برداشته می‌شود. */
+        phone: normalizeLocalPhone(form.phone, form.province),
         managerName,
         latitude: parseFloat(form.latitude) || 0,
         longitude: parseFloat(form.longitude) || 0,
@@ -327,11 +337,36 @@ export default function NewClubPage() {
               <textarea name="description" value={form.description} onChange={handleChange}
                 className={`${inputCls} dark-input`} style={inputStyle} rows={3} placeholder="معرفی باشگاه…" />
             </div>
-            <div className="grid grid-cols-2 gap-4 mb-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
               <div>
-                <label className={labelCls} style={labelStyle}>تلفن</label>
-                <input type="tel" name="phone" value={form.phone} onChange={handleChange}
-                  className={`${inputCls} dark-input`} style={inputStyle} placeholder="۰۲۱۱۲۳۴۵۶۷۸" />
+                <label className={labelCls} style={labelStyle} htmlFor="club-phone">تلفن</label>
+                {/* ── کد شهر جدا و خودکار ──
+                    پیش‌تر یک فیلدِ آزاد بود و عملا همه فقط هشت رقمِ
+                    محلی را وارد می‌کردند («۲۲۸۵۹۵۵۱»). نتیجه: شماره‌ای
+                    که روی موبایل قابلِ تماس نبود. کد از استانِ همین فرم
+                    مشتق می‌شود و کنارِ فیلد **نمایش** داده می‌شود تا
+                    معلوم باشد چه چیزی ذخیره خواهد شد.
+
+                    عمدا داخلِ `value` نمی‌رود: شماره در دیتابیس بدونِ
+                    کد ذخیره می‌ماند (مثلِ بقیه‌ی پروفایل‌ها) و هرجا
+                    نمایش داده شود با `telPrefix` کامل می‌شود. */}
+                <div style={{ display: 'flex', alignItems: 'stretch', gap: 6 }}>
+                  <span dir="ltr" style={{
+                    display: 'inline-flex', alignItems: 'center', padding: '0 12px',
+                    borderRadius: 10, border: '1px solid rgba(255,255,255,0.14)',
+                    background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.68)',
+                    fontSize: 14, fontWeight: 700, whiteSpace: 'nowrap',
+                  }}>{phoneArea || '—'}</span>
+                  <input id="club-phone" type="tel" name="phone" value={form.phone} onChange={handleChange}
+                    className={`${inputCls} dark-input`} style={{ ...inputStyle, flex: 1 }}
+                    placeholder="۲۲۸۵۹۵۵۱" inputMode="numeric"
+                    aria-describedby="club-phone-h" />
+                </div>
+                <p id="club-phone-h" style={{ fontSize: 11.5, color: 'rgba(255,255,255,0.45)', marginTop: 6 }}>
+                  {phoneArea
+                    ? `کد ${phoneArea} از استان انتخابی گرفته شد — فقط شماره‌ی محلی را وارد کنید.`
+                    : 'ابتدا استان را انتخاب کنید تا کد شهر تعیین شود.'}
+                </p>
               </div>
               <div>
                 <label className={labelCls} style={labelStyle}>وبسایت</label>

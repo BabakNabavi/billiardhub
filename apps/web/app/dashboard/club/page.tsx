@@ -22,7 +22,7 @@ import api from '../../../lib/api';
 import ProvinceCitySelect from '../../../components/ProvinceCitySelect';
 import SiteAddressField, { type SlugStatus } from '../../../components/SiteAddressField';
 import DragScroll from '../../../components/ui/DragScroll';
-import { provinceOfCity } from '../../../lib/iran-geo';
+import { provinceOfCity, telPrefix, normalizeLocalPhone } from '../../../lib/iran-geo';
 import { useAuthStore } from '../../../store/auth.store';
 import { formatCard, isValidCard, bankOfCard, formatIban, isValidIban, bankOfIban, prettyIban } from '../../../lib/bank';
 import { apiFetch } from '../../../lib/http';
@@ -1032,6 +1032,10 @@ export default function ClubDashboardPage() {
         /* خالی ⇒ `null`، نه رشته‌ی تهی: ستون `slug` یکتاست و دو رشته‌ی
            خالی با هم برخورد می‌کنند، ولی چند `null` مشکلی ندارند. */
         slug: clubInfo.slug || null,
+        /* همان قراردادِ فرمِ ثبت: فقط شماره‌ی محلی ذخیره می‌شود و کد
+           شهر موقعِ نمایش اضافه می‌گردد. بدونِ این، ارقامِ فارسی و کدِ
+           دستی‌تایپ‌شده خام می‌نشست و نمایش «۰۲۱-۰۲۱…» می‌شد. */
+        phone: normalizeLocalPhone(clubInfo.phone, clubInfo.province),
         bankName: derivedBankName || clubInfo.bankName,
       });
       setInfoMsg({ ok: true, text: 'اطلاعات باشگاه ذخیره شد' });
@@ -2504,7 +2508,17 @@ export default function ClubDashboardPage() {
                   </div>
                 </div>
               </div>
-              <InputField label="تلفن"         value={clubInfo.phone}       onChange={v => setClubInfo(p => ({...p, phone: v}))} placeholder="021-..." />
+              {/* ── کد شهر ──
+                  placeholderِ قبلی «021-...» بود و باشگاه‌دار را به
+                  واردکردنِ کد تشویق می‌کرد، ولی جای دیگری از سایت آن
+                  را جدا نمی‌کرد. کد از استانِ همین فرم مشتق و در
+                  راهنما نشان داده می‌شود؛ ذخیره‌شده فقط شماره‌ی محلی
+                  می‌ماند و نمایش همه‌جا با `telPrefix` کامل می‌شود. */}
+              <InputField label="تلفن"         value={clubInfo.phone}       onChange={v => setClubInfo(p => ({...p, phone: v}))}
+                placeholder="۲۲۸۵۹۵۵۱"
+                hint={telPrefix(clubInfo.province)
+                  ? `کد شهر ${telPrefix(clubInfo.province)} خودکار اضافه می‌شود — فقط شماره‌ی محلی را وارد کنید.`
+                  : 'استان را انتخاب کنید تا کد شهر تعیین شود.'} />
               <InputField label="وبسایت"       value={clubInfo.website}     onChange={v => setClubInfo(p => ({...p, website: v}))} placeholder="https://..." />
               <div style={{ gridColumn: '1 / -1' }}>
                 {/* ── جواز کسب ──
