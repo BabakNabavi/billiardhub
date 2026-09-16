@@ -68,13 +68,21 @@ function SubjectSelect({ value, onChange, options, error }: {
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
   useEffect(() => {
-    const fn = (e: MouseEvent) => { if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false) }
-    document.addEventListener('mousedown', fn)
-    return () => document.removeEventListener('mousedown', fn)
+    /* `pointerdown` و نه `mousedown`: روی لمس، `mousedown` شبیه‌سازی‌شده
+       با تأخیر می‌آید و گاهی اصلا نمی‌آید، پس پنل باز می‌ماند. */
+    const fn = (e: Event) => { if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false) }
+    const esc = (e: KeyboardEvent) => { if (e.key === 'Escape') setOpen(false) }
+    document.addEventListener('pointerdown', fn)
+    document.addEventListener('keydown', esc)
+    return () => {
+      document.removeEventListener('pointerdown', fn)
+      document.removeEventListener('keydown', esc)
+    }
   }, [])
   return (
     <div ref={ref} style={{ position: 'relative' }}>
       <button type="button" onClick={() => setOpen(p => !p)}
+        aria-haspopup="listbox" aria-expanded={open} aria-controls="ct-subject-list"
         style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10,
           padding: '12px 16px', borderRadius: 12, cursor: 'pointer', fontFamily: 'inherit', fontSize: 14, fontWeight: 700,
           color: value ? TEXT : MUT, textAlign: 'right',
@@ -89,12 +97,25 @@ function SubjectSelect({ value, onChange, options, error }: {
         </svg>
       </button>
       {open && (
-        <div style={{ position: 'absolute', top: 'calc(100% + 6px)', insetInline: 0, zIndex: 40,
+        /* ── چرا ارتفاع و اسکرولِ داخلی ──
+           پنل `overflow: hidden` بود و هیچ سقفِ ارتفاعی نداشت. با هفت
+           گزینه روی موبایل از پایینِ صفحه بیرون می‌زد و چون خودش
+           اسکرول نداشت، کشیدن با انگشت هیچ کاری نمی‌کرد — کاربر فقط
+           چند مورد اول را می‌دید و لیست «قفل» به‌نظر می‌رسید.
+
+           `overscrollBehavior: contain` هم لازم است: بدونش وقتی به ته
+           فهرست می‌رسی، حرکت به صفحه‌ی پشت سرایت می‌کند و پنل زیرِ
+           انگشت جابه‌جا می‌شود. همان الگوی `JalaliDatePicker`. */
+        <div id="ct-subject-list" role="listbox" aria-label="موضوع پیام"
+          style={{ position: 'absolute', top: 'calc(100% + 6px)', insetInline: 0, zIndex: 40,
           background: 'rgba(255,255,255,0.96)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
-          border: `1px solid ${LINE}`, borderRadius: 14, overflow: 'hidden',
+          border: `1px solid ${LINE}`, borderRadius: 14,
+          maxHeight: 'min(52vh, 280px)', overflowY: 'auto', overscrollBehavior: 'contain',
+          WebkitOverflowScrolling: 'touch',
           boxShadow: '0 18px 46px rgba(28,27,23,0.14)', animation: 'ctEnter .28s cubic-bezier(.22,1,.36,1) both' }}>
           {options.map(o => (
-            <button key={o} type="button" onClick={() => { onChange(o); setOpen(false) }}
+            <button key={o} type="button" role="option" aria-selected={value === o}
+              onClick={() => { onChange(o); setOpen(false) }}
               onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(199,166,106,0.09)' }}
               onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent' }}
               style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10,
