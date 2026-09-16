@@ -8,7 +8,7 @@ import { useAuthStore } from '../../../store/auth.store';
 import {
   MapPin, Phone, Globe, Clock, Star, Navigation, Copy,
   ChevronLeft, ChevronRight, Calendar, Check,
-  Camera, Plus, Trophy, Users, Medal,
+  Camera, Trophy, Users, Medal,
 } from 'lucide-react';
 import {
   STATUS_LABELS, STATUS_COLORS, GAME_TYPE_LABELS, type Tournament,
@@ -33,6 +33,7 @@ import { ask } from '../../../lib/ui/dialogs'
 import { DISCIPLINES } from '../../../lib/coach-store'
 import VerifiedBadge from '../../../components/VerifiedBadge'
 import FavoriteButton from '../../../components/FavoriteButton';
+import { iranTel } from '../../../lib/iran-geo'
 
 interface Club {
   id: string; name: string; managerName: string; description: string;
@@ -194,7 +195,6 @@ export default function ClubProfilePage() {
   const { open: openImage, viewer: imageViewer } = useProfileImageViewer()
   const { open: openVideo, viewer: videoViewer } = useProfileVideoViewer()
 
-  const isAdmin = false;
 
   /* ── Tournament Gallery Albums ── */
   type AlbumItem = { id: string; type: 'image' | 'video'; dataUrl: string; name: string; caption: string; uploadedAt: string };
@@ -510,17 +510,17 @@ export default function ClubProfilePage() {
     if (saved.length) await publishToChannel(saved, club.name);
   };
 
-  /* ── ویرایش عنوان ویدیو ── (توضیح در بقیه‌ی نقش‌ها) */
-  const { dialog: videoEditDialog, edit: editVideo } = useVideoEdit(
+  /* ── ویرایش عنوان ویدیو ── (توضیح در بقیه‌ی نقش‌ها) */
+  const { dialog: videoEditDialog, edit: editVideo } = useVideoEdit(
     async (target, detail) => {
       /* ⚠️ بدون این، نبود ردیف هم «موفق» شمرده می‌شد و مدیا عوض
          می‌شد در حالی که گالری عنوان قبلی را نشان می‌دهد. */
       if (!clubVideos.some(x => x.url === target.url)) return false;
       return await saveClubVideos(clubVideos.map(x => (x.url === target.url ? { ...x, title: detail.title } : x)));
     },
-    notify,
-  );
-
+    notify,
+  );
+
   const deleteClubVideo = async (vid: string) => {
     if (!(await ask('این ویدیو حذف شود؟', { body: 'این کار برگشت‌پذیر نیست.', confirmLabel: 'حذف' }))) return;
     await saveClubVideos(clubVideos.filter(v => v.id !== vid));
@@ -562,13 +562,64 @@ export default function ClubProfilePage() {
     setSlugCopied(true); setTimeout(() => setSlugCopied(false), 1800);
   };
 
+  /* ── ظرفیت روزانه، وقتی باشگاه‌دار واردش نکرده ──
+     این دو ردیف تا امروز فقط از فیلدهای دستیِ پنل می‌آمدند، و چون
+     تقریبا هیچ باشگاهی پرشان نمی‌کند، بخشِ «آمار باشگاه» همیشه فقط دو
+     عدد نشان می‌داد.
+
+     ظرفیت را می‌شود **واقعا حساب کرد**: تعداد میزها × ساعت‌های باز
+     بودن در روز. این یک عددِ مشتق است، نه ساختگی — پس برچسبش هم
+     «ساعت‌میز» است تا با «۸۰ نفر»ی که باشگاه‌دار ممکن است دستی وارد
+     کند اشتباه نشود. مقدارِ دستی همیشه اولویت دارد. */
+  /* شماره‌ی تماس با کد شهر — مثلا ۰۲۱-۲۲۸۵۹۵۵۱. شماره بدونِ کد ذخیره
+     می‌شود، پس بدونِ این، لینکِ `tel:` هم به جایی نمی‌رسید.
+     منطقش در `lib/iran-geo` است تا صفحه‌ی فروشگاه و تولیدکننده هم
+     همان یک پیاده‌سازی را داشته باشند. */
+  const { text: phoneText, href: phoneHref, digits: phoneDig } =
+    iranTel(club.phone, club.province, club.city);
+
+  const derivedCapacity = (() => {
+    const tables = Number(club.snookerTables ?? 0) + Number(club.pocketTables ?? 0)
+      + Number(club.highballTables ?? 0) + Number(club.vipSnookerTables ?? 0)
+      + Number(club.vipPocketTables ?? 0);
+    if (!tables) return null;
+
+    type Day = { open?: string; close?: string; isOpen?: boolean };
+    const wh = (club.workingHours ?? {}) as Record<string, Day>;
+    /* روزِ امروز ملاک است، نه «اولین کلیدِ شیء» — باشگاهی که جمعه
+       ساعتِ دیگری دارد وگرنه عددِ روزِ اشتباه می‌گرفت. */
+    const open = Object.values(wh).filter(d => d?.isOpen && d.open && d.close);
+    const day = (todayKey && wh[todayKey]?.isOpen ? wh[todayKey] : open[0]) as Day | undefined;
+    if (!day?.open || !day.close) return null;
+
+    /* دقیقه، نه فقط ساعت: ۱۰:۳۰ تا ۲۳:۳۰ سیزده ساعت است نه سیزده‌ونیم
+       اگر دقیقه‌ها دور ریخته شوند. */
+    const mins = (t: string) => {
+      const [h, m] = String(t).split(':').map(n => Number(n) || 0);
+      return (h ?? 0) * 60 + (m ?? 0);
+    };
+    const a = mins(day.open), b = mins(day.close);
+    /* ⚠️ بستنِ بعد از نیمه‌شب رایج است («۱۸:۰۰ تا ۰۲:۰۰» و به‌ویژه
+       «۰۹:۰۰ تا ۰۰:۰۰»). تفریقِ ساده منفی می‌شد و ردیف بی‌صدا حذف
+       می‌شد — یعنی همان داده‌ای که این محاسبه برایش نوشته شده. */
+    const span = a === b ? 24 * 60 : ((b - a) % (24 * 60) + 24 * 60) % (24 * 60);
+    if (span <= 0) return null;
+
+    const tableHours = Math.round((tables * span) / 60);
+    if (!tableHours) return null;
+    return `${tableHours.toLocaleString('fa-IR')} ساعت‌میز`;
+  })();
+
   /* صفر یک عدد درست است، نه «خالی»: باشگاه تازه باید ۰ عضو نشان بدهد
-     نه جای خالی. پس برخلاف دو ردیف بعدی این‌جا `|| null` نداریم. */
+     نه جای خالی. پس برخلاف ردیف «سال‌ها سابقه» این‌جا `|| null` نداریم. */
   const statsRows = [
     { label: 'اعضای فعال',  v: liveStats ? liveStats.members.toLocaleString('fa-IR') : null,     color: '#C7A66A' },
     { label: 'مسابقات',      v: liveStats ? liveStats.tournaments.toLocaleString('fa-IR') : null, color: '#f59e0b' },
+    /* سابقه مشتق‌شدنی نیست: `createdAt` یعنی «از کی در بیلیارد هاب
+       است»، نه «چند سال است کار می‌کند». نوشتنِ یکی به‌جای دیگری یک
+       عددِ ساختگی است، پس فقط مقدارِ دستی نشان داده می‌شود. */
     { label: 'سال‌ها سابقه', v: clubStats.yearsActive   || null, color: '#a78bfa' },
-    { label: 'ظرفیت روزانه', v: clubStats.dailyCapacity || null, color: '#06b6d4' },
+    { label: 'ظرفیت روزانه', v: clubStats.dailyCapacity || derivedCapacity, color: '#06b6d4' },
   ];
 
   if (loading) return (
@@ -599,6 +650,19 @@ export default function ClubProfilePage() {
         @keyframes fadeUp    { from{opacity:0;transform:translateY(18px)} to{opacity:1;transform:translateY(0)} }
         @keyframes fadeIn    { from{opacity:0;transform:translate(-50%,-48%) scale(0.94)} to{opacity:1;transform:translate(-50%,-50%) scale(1)} }
         @keyframes pulse     { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+        /* ── شماره‌ی تماس ──
+           لینک بود ولی دقیقا شبیه متنِ ساده‌ی قبلی: کسی نمی‌فهمید
+           زدنی است. حالا تینتِ طلاییِ CTA دارد و حلقه‌ی فوکوس. */
+        .cp-tel {
+          color: #8F6531; text-decoration: none; font-weight: 700;
+          border-block-end: 1px dashed rgba(199,166,106,0.55);
+          padding-block-end: 1px; transition: color .2s, border-color .2s;
+        }
+        .cp-tel:hover { color: #C7A66A; border-block-end-color: #C7A66A; }
+        .cp-tel:focus-visible {
+          outline: 2px solid #C7A66A; outline-offset: 3px; border-radius: 4px;
+        }
 
         /* ── تب‌های جعبه‌ای با خط رنگی بالا ──
            تب‌ها به هم چسبیده‌اند و یک نوار یکپارچه می‌سازند؛ تب فعال
@@ -733,8 +797,11 @@ export default function ClubProfilePage() {
                       پیش‌تر فقط حرف اول نام نوشته می‌شد. */}
                   <ClubLogo src={club.logo} name={club.name} size="100%" tone="dark" />
                 </button>
-                {isAdmin && <button style={{ position: 'absolute', bottom: -2, left: -2, zIndex: 3, width: 22, height: 22, borderRadius: '50%', background: '#C7A66A', border: '2px solid #0A0806', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', padding: 0 }}><Camera size={10} color="#0A0806" /></button>}
-                {isAdmin && !hasStory && <button style={{ position: 'absolute', top: -2, left: -2, zIndex: 3, width: 22, height: 22, borderRadius: '50%', background: '#ef4444', border: '2px solid #0A0806', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', padding: 0 }}><Plus size={10} color="#fff" /></button>}
+                {/* ⚠️ این‌جا دو دکمه بود — دوربین (تغییر لوگو) و + (افزودن
+                    استوری) — که **هیچ `onClick`ی نداشتند**: کلیک می‌شدند و
+                    هیچ اتفاقی نمی‌افتاد. هر دو کار حالا جای درست خودش را
+                    در تب «گالری» پنل مدیریت دارد، پس به‌جای وصل‌کردنِ
+                    مسیرِ دوم، خودِ دکمه‌ها برداشته شدند. */}
               </div>
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
@@ -923,10 +990,18 @@ export default function ClubProfilePage() {
                         <MapPin size={14} style={{ color: '#C7A66A', marginTop: 2, flexShrink: 0 }} />
                         <span style={{ lineHeight: 1.6 }}>{club.address}، {club.city}</span>
                       </div>
-                      {club.phone && (
+                      {phoneDig && (
                         <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 15 }}>
                           <Phone size={14} style={{ color: '#C7A66A', flexShrink: 0 }} />
-                          <span style={{ color: 'rgba(0,0,0,0.45)' }}>{club.phone}</span>
+                          {/* ── چرا لینک و چرا کد شهر ──
+                              شماره متنِ ساده بود: روی موبایل زدنش هیچ
+                              کاری نمی‌کرد. و چون بدونِ کد شهر ذخیره
+                              می‌شود («۲۲۸۵۹۵۵۱»)، حتی کپی‌کردنش هم به
+                              تماس نمی‌رسید. `dir="ltr"` لازم است وگرنه
+                              رقم‌ها در بافتِ راست‌به‌چپ جابه‌جا دیده
+                              می‌شوند. */}
+                          <a href={`tel:${phoneHref}`} dir="ltr"
+                            className="cp-tel" aria-label="تماس با باشگاه">{phoneText}</a>
                         </div>
                       )}
                       {club.website && (
@@ -1068,10 +1143,11 @@ export default function ClubProfilePage() {
                       <MapPin size={14} style={{ color: '#C7A66A', marginTop: 2, flexShrink: 0 }} />
                       <span style={{ lineHeight: 1.6 }}>{club.address}، {club.city}</span>
                     </div>
-                    {club.phone && (
+                    {phoneDig && (
                       <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 15 }}>
                         <Phone size={14} style={{ color: '#C7A66A', flexShrink: 0 }} />
-                        <span style={{ color: 'rgba(0,0,0,0.45)' }}>{club.phone}</span>
+                        <a href={`tel:${phoneHref}`} dir="ltr"
+                          className="cp-tel" aria-label="تماس با باشگاه">{phoneText}</a>
                       </div>
                     )}
                     {club.website && (
@@ -1490,7 +1566,7 @@ export default function ClubProfilePage() {
 
       {imageViewer}
       {videoViewer}
-      {channelGate}
+      {channelGate}
       {videoEditDialog}
 
       {storyViewer && club.storyMediaUrl && (
