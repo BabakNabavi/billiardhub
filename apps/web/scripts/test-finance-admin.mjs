@@ -10,7 +10,18 @@ const rest=async(p,i)=>{const r=await fetch(U+'/rest/v1/'+p,{...(i??{}),headers:
 const me=(await rest('users?select=id,phone,"primaryRole","secondaryRoles"&phone=eq.09001327283')).b[0]
 if(!me||me.primaryRole==='admin'){console.log('✗ حسابِ آزمایشی نامناسب');process.exit(1)}
 const ORIG={primaryRole:me.primaryRole,secondaryRoles:me.secondaryRoles}
-const restore=()=>rest('users?id=eq.'+me.id,{method:'PATCH',body:JSON.stringify(ORIG)})
+
+/* ── چرا مجوز هم لازم است ──
+   `can()` دیگر به `primaryRole` نگاه نمی‌کند؛ کلیدها را از جدولِ جدای
+   `admin_permissions` می‌خواند. این تست فقط نقش را عوض می‌کرد، پس هر
+   مسیرِ مالی ۴۰۳ می‌گرفت و شش ✗ می‌داد که ربطی به کدِ مالی نداشت.
+   ردیفِ قبلی نگه داشته می‌شود تا دقیقا به همان حال برگردد. */
+const PREV_PERM=(await rest('admin_permissions?select=permissions&user_id=eq.'+me.id)).b?.[0]??null
+const restore=async()=>{
+  await rest('users?id=eq.'+me.id,{method:'PATCH',body:JSON.stringify(ORIG)})
+  if(PREV_PERM) await rest('admin_permissions?user_id=eq.'+me.id,{method:'PATCH',body:JSON.stringify({permissions:PREV_PERM.permissions})})
+  else await rest('admin_permissions?user_id=eq.'+me.id,{method:'DELETE'})
+}
 for(const sg of ['SIGINT','SIGTERM','SIGPIPE'])process.on(sg,()=>{restore().finally(()=>process.exit(130))})
 let pass=0,fail=0
 const t=(n,ok,x='')=>{ok?pass++:fail++;console.log('  '+(ok?'✓':'✗')+' '+n+(ok?'':'  ← '+x))}
@@ -31,6 +42,8 @@ try{
  }
 
  await rest('users?id=eq.'+me.id,{method:'PATCH',body:JSON.stringify({primaryRole:'admin',secondaryRoles:[...new Set([...(ORIG.secondaryRoles??[]),'admin'])]})})
+ /* نقش کافی نیست — کلیدهای صفحه هم باید داده شوند، وگرنه `can()` رد می‌کند */
+ await rest('admin_permissions',{method:'POST',headers:{Prefer:'resolution=merge-duplicates,return=representation'},body:JSON.stringify({user_id:me.id,permissions:['finance','bookings','commission']})})
  const adm=tk('admin')
 
  head('داشبوردِ مالی — اعداد از دفترِ واقعی')
