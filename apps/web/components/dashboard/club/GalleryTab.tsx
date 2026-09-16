@@ -1,8 +1,12 @@
 'use client';
 
 /* ─────────────────────────────────────────────────────────────
-   تب «گالری» پنل مدیریت باشگاه — لوگو، استوری، عکس‌های باشگاه و
-   آلبوم‌ها.
+   تب «گالری» پنل مدیریت باشگاه — لوگو و استوریِ باشگاه.
+
+   «عکس‌های باشگاه» و «آلبوم‌ها» از این تب برداشته شدند: همان کار از
+   دکمه‌ی + در گالریِ صفحه‌ی خودِ باشگاه انجام می‌شود و دو مسیر برای
+   یک کار فقط باشگاه‌دار را سردرگم می‌کرد. استوری اما این‌جا ماند —
+   استوریِ *باشگاه* است (حلقه‌ی طلایی روی کارت) و جای دیگری ندارد.
 
    چرا کاملا جدا شد و prop-drill نشد: این تب حدود بیست `useState` و
    ده هندلر خودش را دارد که هیچ‌جای دیگر داشبورد استفاده نمی‌شوند.
@@ -10,17 +14,15 @@
    پس خود state هم به این‌جا آمد و صفحه‌ی مادر فقط سه چیز می‌دهد:
    باشگاه انتخاب‌شده، و راهی برای خبردادن تغییر لوگو.
 
-   عکس‌های این‌جا پس‌زمینه‌ی صفحه‌ی عمومی باشگاه را می‌سازند
-   (ستون `clubs.images`)، پس ذخیره‌شان روی سرور است نه localStorage.
+   لوگو و استوری هر دو روی سرور ذخیره می‌شوند، نه localStorage.
    ───────────────────────────────────────────────────────────── */
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { ask } from '../../../lib/ui/dialogs'
-import { Camera, Loader2, Trash2, Plus, X, Image as ImageIcon, Upload, FolderPlus, AlertCircle, Pencil, Check } from 'lucide-react';
+import { Camera, Loader2, Trash2, Upload, AlertCircle } from 'lucide-react';
 import api from '../../../lib/api';
 import { apiFetch } from '../../../lib/http';
 import { uploadFile } from '../../../lib/supabase';
-import { toFa as faDigit } from '../../ui/FaNumberInput';
 import ClubLogo from '../../club/ClubLogo';
 import { Card, SectionTitle } from './fields';
 
@@ -34,132 +36,43 @@ export interface ClubStory {
   textPos: 'top' | 'center' | 'bottom';
   createdAt: string; expiresAt: string;
 }
-export interface ClubPhoto { id: string; dataUrl: string; name: string }
-export interface ClubAlbumItem { id: string; dataUrl: string; name: string; caption: string }
-export interface ClubAlbum { id: string; name: string; createdAt: string; items: ClubAlbumItem[] }
 
-interface ClubLike { id: string; name?: string; logo?: string; images?: unknown; albums?: unknown }
+interface ClubLike { id: string; name?: string; logo?: string }
 
-const uid = (): string => Math.random().toString(36).slice(2, 10);
 
-/* `compressImage` حذف شد: عکس آلبوم دیگر data-URL نمی‌شود و مثل بقیه‌ی
-   عکس‌های باشگاه به Storage می‌رود. */
 
-/* سقف عکس‌های باشگاه. این‌ها پس‌زمینه‌ی صفحه‌ی عمومی می‌شوند و
-   بی‌سقف‌بودن هم ردیف دیتابیس را سنگین می‌کرد و هم صفحه را. */
-const MAX_CLUB_PHOTOS = 10;
 
 export default function GalleryTab({ club, onLogoChange }: {
   club: ClubLike | null;
   onLogoChange: (url: string) => void;
 }) {
-  const [albums, setAlbums] = useState<ClubAlbum[]>([]);
-  const [newAlbumName, setNewAlbumName] = useState('');
-  const [openAlbumId, setOpenAlbumId] = useState<string | null>(null);
-  /* آلبومی که نامش در حال ویرایش است */
-  const [editingAlbumId, setEditingAlbumId] = useState<string | null>(null);
-  const [editingAlbumName, setEditingAlbumName] = useState('');
-  const [uploadingAlbum, setUploadingAlbum] = useState<string | null>(null);
-  const [singlePhotos, setSinglePhotos] = useState<ClubPhoto[]>([]);
-  const [photoError, setPhotoError] = useState('');
-  const [uploadingSingle, setUploadingSingle] = useState(false);
   const [storyDraft, setStoryDraft] = useState<{ file: File; previewUrl: string; text: string } | null>(null);
   const [logoUploading, setLogoUploading] = useState(false);
   const [storyUploading, setStoryUploading] = useState(false);
   const [storyList, setStoryList] = useState<ClubStory[]>([]);
   /* خطای انتشار/حذف استوری و لوگو — تا امروز بی‌صدا بلعیده می‌شد */
   const [storyError, setStoryError] = useState('');
-  const [albumError, setAlbumError] = useState('');
   const [storyTextColor, setStoryTextColor] = useState('#ffffff');
   const [storyTextSize, setStoryTextSize] = useState(15);
   const [storyTextBold, setStoryTextBold] = useState(false);
   const [storyTextAlign, setStoryTextAlign] = useState<'right'|'center'|'left'>('center');
   const [storyTextPos, setStoryTextPos] = useState<'top'|'center'|'bottom'>('bottom');
 
-  const lsKey = useCallback((type: string) => `club-${type}-${club?.id ?? 'none'}`, [club]);
 
-  /* ── آلبوم‌ها روی سرور ذخیره می‌شوند ──
-     تا امروز فقط در `localStorage` خود باشگاه‌دار بودند و صفحه‌ی عمومی
-     باشگاه هم همان کلید را از `localStorage` بازدیدکننده می‌خواند — که
-     همیشه خالی است. یعنی آلبوم‌ها را هیچ‌کس جز خود باشگاه‌دار نمی‌دید.
 
-     ستون `albums` فقط **نشانی** نگه می‌دارد؛ تصویرها مثل عکس‌های باشگاه
-     به Storage می‌روند. */
-  const saveAlbums = useCallback(async (next: ClubAlbum[]) => {
-    if (!club) return;
-    const before = albums;
-    setAlbums(next);
-    setAlbumError('');
-    try {
-      await api.put(`/clubs/${club.id}`, { albums: next });
-      try { localStorage.removeItem(lsKey('albums')); } catch { /* ignore */ }
-    } catch {
-      setAlbums(before);
-      setAlbumError('ذخیره‌ی آلبوم روی سرور انجام نشد؛ دوباره تلاش کنید.');
-    }
-  }, [lsKey, club, albums]);
+  /* با عوض‌شدن باشگاه، همه‌چیز این تب دوباره خوانده می‌شود.
 
-  const savePhotos = useCallback(async (next: ClubPhoto[]) => {
-    if (!club) return;
-    setSinglePhotos(next);
-    setPhotoError('');
-    try {
-      await api.put(`/clubs/${club.id}`, { images: next.map(p => p.dataUrl) });
-      try { localStorage.removeItem(lsKey('photos')); } catch { /* ignore */ }
-    } catch {
-      setPhotoError('ذخیره‌ی عکس‌ها روی سرور انجام نشد؛ دوباره تلاش کنید.');
-    }
-  }, [lsKey, club]);
-
-  /* با عوض‌شدن باشگاه، همه‌چیز این تب دوباره خوانده می‌شود */
+     وابستگی به **شناسه** است نه به خودِ شیء: والد با هر ذخیره یک شیءِ
+     تازه می‌سازد و با وابستگیِ شیئی، این افکت دوباره اجرا می‌شد و
+     setStoryDraft(null) پیش‌نویسِ نیمه‌کاره‌ی استوری (فایل، متن و
+     تنظیمِ رنگ) را بی‌صدا دور می‌ریخت. */
+  const clubId = club?.id;
   useEffect(() => {
-    if (!club) { setAlbums([]); setSinglePhotos([]); setStoryList([]); return; }
-    const clubId = club.id;
+    if (!clubId) { setStoryList([]); return; }
     let alive = true;
 
-    setPhotoError('');
-    setAlbumError('');
     setStoryError('');
     setStoryDraft(null);
-    setOpenAlbumId(null);
-
-    /* ── چرا دوباره از سرور می‌خوانیم و از prop استفاده نمی‌کنیم ──
-       `club` یک عکس لحظه‌ای فهرستی است که موقع بازشدن داشبورد گرفته
-       شده. پس از ذخیره‌ی یک آلبوم یا عکس، آن فهرست به‌روز نمی‌شود؛
-       کافی بود کاربر باشگاه را عوض کند و برگردد تا نسخه‌ی پیش از ذخیره
-       را ببیند و خیال کند کارش گم شده. */
-    const applyRow = (c: Record<string, unknown> | null) => {
-      if (!alive) return;
-
-      /* منبع حقیقت عکس‌ها سرور است. نسخه‌ی مرورگری فقط برای باشگاهی
-         می‌ماند که هنوز چیزی روی سرور ندارد (داده‌ی پیش از انتقال). */
-      const imgs = Array.isArray(c?.images) ? c!.images as string[] : (club.images as string[] | undefined) ?? [];
-      const fromServer = imgs.filter(Boolean).slice(0, MAX_CLUB_PHOTOS)
-        .map((u, i) => ({ id: `srv-${i}`, dataUrl: u, name: '' }));
-      if (fromServer.length) setSinglePhotos(fromServer);
-      else {
-        try {
-          const p = localStorage.getItem(`club-photos-${clubId}`);
-          setSinglePhotos(p ? JSON.parse(p) : []);
-        } catch { setSinglePhotos([]); }
-      }
-
-      /* آلبوم پیش از مهاجرت ۰۶۵ فقط در مرورگر بود؛ تا وقتی سرور خالی
-         است همان نشان داده می‌شود و اولین ذخیره منتقلش می‌کند. */
-      const srvAlbums = Array.isArray(c?.albums) ? c!.albums as ClubAlbum[] : [];
-      if (srvAlbums.length) setAlbums(srvAlbums);
-      else {
-        try {
-          const a = localStorage.getItem(`club-albums-${clubId}`);
-          setAlbums(a ? JSON.parse(a) : []);
-        } catch { setAlbums([]); }
-      }
-    };
-
-    apiFetch(`/api/clubs/${clubId}`, { cache: 'no-store' })
-      .then(r => (r.ok ? r.json() : null))
-      .then(applyRow)
-      .catch(() => applyRow(null));
 
     /* `sync=1` رکورد باشگاه را از روی فایل استوری‌ها تعمیر می‌کند —
        برای استوری‌هایی که پیش از مهاجرت ۰۶۴ ثبت شده‌اند و رکوردشان
@@ -170,104 +83,19 @@ export default function GalleryTab({ club, onLogoChange }: {
       .catch(() => { if (alive) setStoryList([]); });
 
     return () => { alive = false; };
-  }, [club]);
+  }, [clubId]);
 
-  const createAlbum = () => {
-    if (!newAlbumName.trim()) return;
-    const album: ClubAlbum = { id: uid(), name: newAlbumName.trim(), createdAt: new Date().toISOString(), items: [] };
-    void saveAlbums([album, ...albums]);
-    setNewAlbumName('');
-    setOpenAlbumId(album.id);
-  };
 
-  const deleteAlbum = (id: string) => {
-    void saveAlbums(albums.filter(a => a.id !== id));
-    if (openAlbumId === id) setOpenAlbumId(null);
-  };
 
-  const commitAlbumName = (id: string) => {
-    const name = editingAlbumName.trim();
-    setEditingAlbumId(null);
-    if (!name || name === albums.find(a => a.id === id)?.name) return;
-    void saveAlbums(albums.map(a => (a.id === id ? { ...a, name } : a)));
-  };
 
   /* تصویر به Storage می‌رود و فقط نشانی‌اش ذخیره می‌شود.
      پیش‌تر base64 فشرده مستقیم داخل داده می‌نشست — که در
      `localStorage` هم سنگین بود و در یک ستون jsonb فاجعه می‌شد: هر
      `select('*')` روی جدول باشگاه‌ها چند مگابایت می‌آورد و صفحه‌ی اول
      سایت همان را می‌زند. */
-  const uploadToAlbum = async (albumId: string, files: FileList) => {
-    if (!club) return;
-    setUploadingAlbum(albumId);
-    setAlbumError('');
-    const newItems: ClubAlbumItem[] = [];
-    try {
-      for (const file of Array.from(files)) {
-        if (!file.type.startsWith('image/')) continue;
-        const fd = new FormData();
-        fd.append('file', file);
-        fd.append('path', `clubs/${club.id}/albums/${albumId}/${Date.now()}-${newItems.length}`);
-        const r = await apiFetch('/api/upload', { method: 'POST', body: fd });
-        const j = await r.json().catch(() => ({} as { url?: string; message?: string }));
-        if (!r.ok || !j?.url) throw new Error(j?.message);
-        newItems.push({ id: uid(), dataUrl: j.url, name: file.name, caption: '' });
-      }
-      if (newItems.length) {
-        await saveAlbums(albums.map(a => a.id === albumId ? { ...a, items: [...a.items, ...newItems] } : a));
-      }
-    } catch {
-      setAlbumError('آپلود عکس آلبوم انجام نشد؛ دوباره تلاش کنید.');
-    } finally {
-      setUploadingAlbum(null);
-    }
-  };
 
-  const deletePhotoFromAlbum = (albumId: string, itemId: string) => {
-    void saveAlbums(albums.map(a =>
-      a.id === albumId ? { ...a, items: a.items.filter(i => i.id !== itemId) } : a
-    ));
-  };
 
-  const uploadSinglePhotos = async (files: FileList) => {
-    if (!club) return;
-    setPhotoError('');
-    const room = MAX_CLUB_PHOTOS - singlePhotos.length;
-    if (room <= 0) {
-      setPhotoError(`حداکثر ${MAX_CLUB_PHOTOS} عکس — برای افزودن عکس تازه، یکی را حذف کنید.`);
-      return;
-    }
 
-    setUploadingSingle(true);
-    const picked = Array.from(files).filter(f => f.type.startsWith('image/')).slice(0, room);
-    const added: ClubPhoto[] = [];
-    try {
-      for (const file of picked) {
-        /* روی Storage آپلود می‌شود نه به‌صورت data-URL: ده عکس base64
-           داخل یک ستون، هم ردیف را چند مگابایتی می‌کند و هم هر بار
-           خواندن باشگاه را کند. */
-        const fd = new FormData();
-        fd.append('file', file);
-        fd.append('path', `clubs/${club.id}/photos/${Date.now()}-${added.length}`);
-        const r = await apiFetch('/api/upload', { method: 'POST', body: fd });
-        const j = await r.json().catch(() => ({}));
-        if (!r.ok || !j?.url) throw new Error(j?.message);
-        added.push({ id: uid(), dataUrl: j.url, name: file.name });
-      }
-      if (picked.length < Array.from(files).filter(f => f.type.startsWith('image/')).length) {
-        setPhotoError(`فقط ${picked.length} عکس اضافه شد — سقف ${MAX_CLUB_PHOTOS} عکس است.`);
-      }
-      await savePhotos([...singlePhotos, ...added]);
-    } catch {
-      setPhotoError('آپلود عکس انجام نشد؛ دوباره تلاش کنید.');
-    } finally {
-      setUploadingSingle(false);
-    }
-  };
-
-  const deleteSinglePhoto = (id: string) => {
-    void savePhotos(singlePhotos.filter(p => p.id !== id));
-  };
 
   const uploadLogo = async (file: File) => {
     if (!club) return;
@@ -533,222 +361,18 @@ export default function GalleryTab({ club, onLogoChange }: {
             </div>
           ) : null}
         </Card>
-         {/* ── Single photos ── */}
-        <Card style={{ marginBottom: 16 }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, marginBottom: 6, flexWrap: 'wrap' }}>
-            <SectionTitle style={{ margin: 0 }}>
-              عکس‌های باشگاه
-              <span style={{ fontSize: 12, fontWeight: 700, color: '#9CA3AF', marginInlineStart: 8 }}>
-                {faDigit(String(singlePhotos.length))} از {faDigit(String(MAX_CLUB_PHOTOS))}
-              </span>
-            </SectionTitle>
-            <label style={{
-              display: 'inline-flex', alignItems: 'center', gap: 7,
-              cursor: (uploadingSingle || singlePhotos.length >= MAX_CLUB_PHOTOS) ? 'not-allowed' : 'pointer',
-              opacity: (uploadingSingle || singlePhotos.length >= MAX_CLUB_PHOTOS) ? 0.5 : 1,
-              padding: '8px 16px', borderRadius: 20,
-              background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.38)',
-              fontSize: 13, fontWeight: 700, color: '#A07840',
-            }}>
-              {uploadingSingle ? <><Loader2 size={13} style={{ animation: 'spin 1s linear infinite' }} /> آپلود...</> : <><Camera size={13} /> آپلود عکس</>}
-              <input type="file" accept="image/*" multiple style={{ display: 'none' }}
-                disabled={uploadingSingle || singlePhotos.length >= MAX_CLUB_PHOTOS}
-                onChange={e => { if (e.target.files?.length) void uploadSinglePhotos(e.target.files); e.target.value = ''; }} />
-            </label>
-          </div>
-          <p style={{ fontSize: 11.5, color: '#9CA3AF', margin: '0 0 14px', lineHeight: 1.95 }}>
-            این عکس‌ها پس‌زمینه‌ی صفحه‌ی عمومی باشگاه شما می‌شوند. عکس اول بیشتر از بقیه دیده می‌شود.
-          </p>
-          {photoError && (
-            <div style={{ marginBottom: 12, padding: '9px 13px', borderRadius: 10, fontSize: 12, fontWeight: 700,
-              background: 'rgba(239,68,68,0.07)', border: '1px solid rgba(239,68,68,0.22)', color: '#991B1B' }}>
-              {photoError}
-            </div>
-          )}
-          {singlePhotos.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '28px 0', color: '#9CA3AF', fontSize: 13 }}>
-              هنوز عکسی آپلود نشده — از دکمه بالا عکس اضافه کنید
-            </div>
-          ) : (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(100px, 1fr))', gap: 8 }}>
-              {singlePhotos.map(photo => (
-                <div key={photo.id} style={{ position: 'relative', aspectRatio: '1', borderRadius: 10, overflow: 'hidden' }}>
-                  <img loading="lazy" decoding="async" src={photo.dataUrl} alt={photo.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                  <button onClick={() => deleteSinglePhoto(photo.id)} style={{
-                    position: 'absolute', top: 4, left: 4,
-                    background: 'rgba(0,0,0,0.65)', color: '#fff', border: 'none',
-                    borderRadius: '50%', width: 22, height: 22, fontSize: 12,
-                    cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  }}>×</button>
-                </div>
-              ))}
-            </div>
-          )}
-        </Card>
-         {/* Create album */}
-        <Card style={{ marginBottom: 16 }}>
-          <SectionTitle>ایجاد آلبوم جدید</SectionTitle>
-          <div style={{ display: 'flex', gap: 10 }}>
-            <input
-              value={newAlbumName}
-              onChange={e => setNewAlbumName(e.target.value)}
-              placeholder="نام آلبوم"
-              onKeyDown={e => { if (e.key === 'Enter') createAlbum(); }}
-              style={{
-                flex: 1, border: '1px solid #E5E7EB', borderRadius: 10, padding: '10px 14px',
-                fontSize: 14, fontFamily: 'var(--font-base)', color: DARK, outline: 'none',
-                background: '#FAFAFA',
-              }}
-            />
-            <button onClick={createAlbum} disabled={!newAlbumName.trim()} style={{
-              background: GOLD, color: '#fff', border: 'none', borderRadius: 10,
-              padding: '10px 20px', fontSize: 14, fontWeight: 700, cursor: 'pointer',
-              fontFamily: 'var(--font-base)', opacity: newAlbumName.trim() ? 1 : 0.5,
-            }}>+ ایجاد</button>
-          </div>
-          {albumError && (
-            <div style={{
-              display: 'flex', alignItems: 'flex-start', gap: 7, marginTop: 12,
-              padding: '10px 12px', borderRadius: 10, lineHeight: 1.9,
-              background: 'rgba(220,38,38,0.06)', border: '1px solid rgba(220,38,38,0.28)',
-              fontSize: 12.5, fontWeight: 700, color: '#B91C1C',
-            }}>
-              <AlertCircle size={14} style={{ flexShrink: 0, marginTop: 2 }} />
-              <span>{albumError}</span>
-            </div>
-          )}
-        </Card>
-         {/* Albums list */}
-        {albums.length === 0 ? (
-          <Card style={{ textAlign: 'center', padding: 48 }}>
-            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 10 }}><ImageIcon size={44} color="#D1D5DB" strokeWidth={1.2} /></div>
-            <p style={{ color: '#6B7280', fontSize: 14 }}>هنوز آلبومی ایجاد نشده</p>
-          </Card>
-        ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-            {albums.map(album => {
-              const isOpen = openAlbumId === album.id;
-              const cover = album.items[0]?.dataUrl;
-              return (
-                <Card key={album.id} style={{ padding: 0, overflow: 'hidden' }}>
-                  {/* Album header */}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '14px 18px', cursor: 'pointer' }}
-                    onClick={() => setOpenAlbumId(isOpen ? null : album.id)}>
-                    <div style={{
-                      width: 52, height: 52, borderRadius: 12, overflow: 'hidden', flexShrink: 0,
-                      background: `${GOLD}15`, border: `1px solid ${GOLD}30`,
-                      display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22,
-                    }}>
-                      {cover
-                        ? <img loading="lazy" decoding="async" src={cover} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                        : '🖼'}
-                    </div>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      {/* ── تغییر نام ──
-                          آلبوم فقط دکمه‌ی حذف داشت، یعنی یک غلط املایی در
-                          نام یعنی ساختن آلبوم تازه و آپلود دوباره‌ی همه‌ی
-                          عکس‌ها. */}
-                      {editingAlbumId === album.id ? (
-                        <div style={{ display: 'flex', gap: 6 }} onClick={e => e.stopPropagation()}>
-                          <input
-                            autoFocus
-                            value={editingAlbumName}
-                            onChange={e => setEditingAlbumName(e.target.value)}
-                            onKeyDown={e => {
-                              if (e.key === 'Enter') commitAlbumName(album.id);
-                              if (e.key === 'Escape') setEditingAlbumId(null);
-                            }}
-                            style={{
-                              flex: 1, minWidth: 0, boxSizing: 'border-box',
-                              border: `1px solid ${GOLD}66`, borderRadius: 8, padding: '7px 10px',
-                              fontSize: 14, fontFamily: 'var(--font-base)', color: DARK,
-                              background: '#fff', outline: 'none',
-                            }}
-                          />
-                          <button onClick={() => commitAlbumName(album.id)} title="ذخیره"
-                            style={{ background: `${GOLD}1F`, color: '#A07840', border: `1px solid ${GOLD}55`, borderRadius: 8, padding: '0 11px', cursor: 'pointer' }}>
-                            <Check size={14} />
-                          </button>
-                          <button onClick={() => setEditingAlbumId(null)} title="انصراف"
-                            style={{ background: 'rgba(0,0,0,0.04)', color: '#6B7280', border: '1px solid rgba(0,0,0,0.12)', borderRadius: 8, padding: '0 11px', cursor: 'pointer' }}>
-                            <X size={14} />
-                          </button>
-                        </div>
-                      ) : (
-                        <>
-                          <div style={{ fontWeight: 700, fontSize: 15, color: DARK }}>{album.name}</div>
-                          <div style={{ fontSize: 12, color: '#9CA3AF', marginTop: 2 }}>
-                            {album.items.length} تصویر · {new Date(album.createdAt).toLocaleDateString('fa-IR')}
-                          </div>
-                        </>
-                      )}
-                    </div>
-                    {editingAlbumId !== album.id && (
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <button
-                          title="تغییر نام آلبوم"
-                          onClick={e => { e.stopPropagation(); setEditingAlbumId(album.id); setEditingAlbumName(album.name); }}
-                          style={{
-                            display: 'inline-flex', alignItems: 'center', gap: 5,
-                            background: `${GOLD}14`, color: '#A07840', border: `1px solid ${GOLD}44`, borderRadius: 8,
-                            padding: '5px 10px', fontSize: 12, cursor: 'pointer', fontFamily: 'var(--font-base)',
-                          }}><Pencil size={12} /> ویرایش</button>
-                        <button
-                          onClick={e => { e.stopPropagation(); deleteAlbum(album.id); }}
-                          style={{
-                            background: '#FEE2E2', color: '#991B1B', border: 'none', borderRadius: 8,
-                            padding: '5px 10px', fontSize: 12, cursor: 'pointer', fontFamily: 'var(--font-base)',
-                          }}>حذف</button>
-                        <span style={{ fontSize: 18, color: '#ccc', transition: 'transform .2s', transform: isOpen ? 'rotate(180deg)' : 'none', display: 'inline-block' }}>▾</span>
-                      </div>
-                    )}
-                  </div>
-                   {/* Expanded */}
-                  {isOpen && (
-                    <div style={{ padding: '0 18px 18px', borderTop: '1px solid #F0EDE8' }}>
-                      {/* Upload */}
-                      <div style={{ paddingTop: 14, marginBottom: 14 }}>
-                        <label style={{
-                          display: 'inline-flex', alignItems: 'center', gap: 8, cursor: 'pointer',
-                          padding: '9px 18px', borderRadius: 20,
-                          background: `${GOLD}12`, border: `1px solid ${GOLD}44`,
-                          fontSize: 13, fontWeight: 700, color: '#A07840',
-                        }}>
-                          {uploadingAlbum === album.id ? <><Loader2 size={12} /> آپلود...</> : <><Camera size={12} /> افزودن تصویر</>}
-                          <input type="file" accept="image/*" multiple style={{ display: 'none' }}
-                            onChange={e => { if (e.target.files?.length) uploadToAlbum(album.id, e.target.files); e.target.value = ''; }} />
-                        </label>
-                      </div>
-                       {/* Image grid */}
-                      {album.items.length > 0 ? (
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(100px, 1fr))', gap: 8 }}>
-                          {album.items.map(item => (
-                            <div key={item.id} style={{ position: 'relative', aspectRatio: '1', borderRadius: 10, overflow: 'hidden' }}>
-                              <img loading="lazy" decoding="async" src={item.dataUrl} alt={item.name}
-                                style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                              <button
-                                onClick={() => deletePhotoFromAlbum(album.id, item.id)}
-                                style={{
-                                  position: 'absolute', top: 4, left: 4,
-                                  background: 'rgba(0,0,0,0.65)', color: '#fff', border: 'none',
-                                  borderRadius: '50%', width: 22, height: 22, fontSize: 12,
-                                  cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                }}>×</button>
-                            </div>
-                          ))}
-                        </div>
-                      ) : (
-                        <div style={{ padding: '24px 0', textAlign: 'center', color: '#9CA3AF', fontSize: 13 }}>
-                          هنوز تصویری اضافه نشده
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </Card>
-              );
-            })}
-          </div>
-        )}
+        {/* ── «عکس‌های باشگاه» و «آلبوم‌ها» از این‌جا برداشته شدند ──
+            هر دو همان کاری را می‌کردند که دکمه‌ی + در گالریِ صفحه‌ی
+            خودِ باشگاه (`/clubs/[id]` ⟵ ProfileGallery با
+            `canEdit={isClubOwner}`) انجام می‌دهد: افزودن عکس، ویدیو و
+            آلبوم تازه. دو مسیر برای یک کار یعنی باشگاه‌دار نمی‌داند
+            کدام «واقعی» است.
+
+            ⚠️ بخشِ استوری عمدا مانده و تکراری **نیست**: نوارِ استوریِ
+            صفحه‌ی اول (`components/Stories.tsx`) استوریِ *کاربر* را در
+            جدولِ اجتماعی ثبت می‌کند، ولی این‌جا `/api/clubs/:id/stories`
+            صدا زده می‌شود — استوریِ *باشگاه*، همان که حلقه‌ی طلایی را
+            روی کارتِ باشگاه می‌کشد. برداشتنش یعنی حذفِ آن قابلیت. */}
       </div>
     </>
   );
