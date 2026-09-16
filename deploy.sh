@@ -60,7 +60,13 @@ fi
 echo "── بسته‌بندی ──"
 tar --exclude-vcs --exclude='node_modules' --exclude='.next' --exclude='backups' \
     --exclude='.turbo' --exclude='*.log' --exclude='.env*' $PUB_EXCLUDE \
-    -czf /tmp/bh-deploy.tgz apps packages package.json package-lock.json turbo.json
+    -czf /tmp/bh-deploy.tgz apps packages package.json package-lock.json turbo.json cron-tick.sh
+# ⚠️ `cron-tick.sh` عمدا در بسته است. زمان‌بندِ چهار کرونِ اپ پیش‌تر
+# `apps/web/vercel.json` بود و از زمانِ مهاجرت به VPS مرده ماند — یعنی
+# ماه‌ها هیچ رزروی COMPLETED نشد و تسویه با باشگاه‌ها غیرممکن بود.
+# نگه‌داشتنِ اسکریپت فقط روی سرور، همان تله را از نو می‌ساخت: نسخه‌ی
+# ریپو و نسخه‌ی سرور بی‌صدا از هم دور می‌افتادند.
+# (خطِ crontab دستی نصب می‌شود؛ این‌جا فقط خودِ فایل به‌روز می‌ماند.)
 # ── چرا فهرستِ فایل‌ها هم می‌رود ──
 # `tar -xzf` روی پوشه‌ی موجود می‌ریزد و چیزی پاک نمی‌کند. این برای
 # `public` عمدی و لازم است، ولی برای کد یک تله بود: فایلی که در ریپو
