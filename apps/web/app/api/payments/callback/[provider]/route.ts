@@ -37,11 +37,36 @@ async function handle(req: NextRequest, providerName: string) {
     return NextResponse.redirect(new URL(`/booking/result?ok=1&booking=${pay.booking_id}`, callbackOrigin()), { status: 303 });
   }
 
-  /* کاربر پرداخت را لغو کرده است */
-  if (ret.canceled) {
-    await sb().from('payments').update({ status: 'CANCELED', updated_at: new Date().toISOString() }).eq('id', pay.id);
-    return fail('پرداخت توسط شما لغو شد');
-  }
+  /* ── رهاکردنِ رزروِ پرداخت‌نشده ──
+     تا امروز فقط *پرداخت* لغو می‌شد و خودِ رزرو تا پایانِ مهلت در
+     `PENDING_PAYMENT` می‌ماند و ساعتش را نگه می‌داشت. کاربری که پشتِ
+     درگاه منصرف می‌شد، همان ساعت را برای خودش و برای بقیه ربعِ ساعت
+     قفل می‌کرد — و هر تلاشِ دوباره یک ساعتِ تازه هم قفل می‌کرد.
+
+     ⚠️ گاردِ وضعیت حیاتی است. این مسیر احراز هویت ندارد و تنها رازش
+     شناسه‌ی پرداخت است که در مرورگرِ خودِ کاربر می‌گردد. بدونِ گارد،
+     یک درخواستِ تکراری یا ساختگی با `status=0` می‌توانست رزروی را که
+     **پول داده شده** نابود کند: `bh_cancel_booking` روی رزروِ PAID
+     شاخه‌ی مالی را می‌رود و با `p_refund=0` کلِ مبلغ را جریمه‌ی لغو
+     می‌نویسد و ساعت را برای فروشِ دوباره آزاد می‌کند. */
+  const releaseBooking = async (reason: string) => {
+    if (!pay.booking_id) return;
+
+    const { data: bk } = await sb().from('bookings')
+      .select('booking_status,payment_status').eq('id', pay.booking_id).maybeSingle();
+    const b = bk as { booking_status?: string; payment_status?: string } | null;
+    if (!b || b.booking_status !== 'PENDING_PAYMENT' || b.payment_status === 'PAID') return;
+
+    const { error } = await rpc('bh_cancel_booking', {
+      p_booking_id: pay.booking_id, p_refund: 0, p_reason: reason,
+    });
+    if (error) {
+      console.error('[payments/callback] release failed:', error.message);
+      /* ساعتِ گیرکرده باید در پنل دیده شود، نه فقط در ژورنالِ سرور */
+      audit({ action: 'BOOKING_RELEASE_FAILED', entityType: 'booking',
+              entityId: pay.booking_id, newValue: { reason, error: error.message } });
+    }
+  };
 
   const provider = getPaymentProvider(pay.provider || providerName);
 
@@ -58,14 +83,51 @@ async function handle(req: NextRequest, providerName: string) {
     return fail('شناسه‌ی پرداخت با درخواست اولیه هم‌خوانی ندارد');
   }
 
+  /* ── دقیقا یک بار استعلام ──
+     ⚠️ نسخه‌ی اولِ این اصلاح دو بار `verifyPayment` می‌زد (یک‌بار در
+     شاخه‌ی «لغو» و یک‌بار این‌جا). استعلامِ پی‌پینگ idempotent هست ولی
+     **پایدار نیست**: بارِ اول می‌تواند ۲۰۰ بدهد (پول گرفته شده) و
+     بارِ دوم ۲۰۲/۵۰۲ که به `ok:false` نگاشت می‌شود — آن‌وقت پرداخت
+     FAILED علامت می‌خورد در حالی که پول رفته، و هیچ ردیفِ بازپرداختی
+     هم ساخته نمی‌شود. یعنی پول بی‌ردّ گم می‌شود. */
   const v = await provider.verifyPayment({
     paymentId: pay.id, authority: auth, amount: pay.amount, refId: ret.refId,
+    canceled: ret.canceled,
   });
-  if (!v.ok || !v.paid) {
+
+  /* ── «لغو» ادعای درگاه است، نه حقیقت ──
+     `ret.canceled` از پارامترهای بازگشتیِ درگاه با یک قاعده‌ی تقریبی
+     ساخته می‌شود (`nok|cancel|fail`, `status=0`, …) و امضا ندارد. تا
+     وقتی نتیجه‌اش فقط یک پیام بود، اشتباهش بی‌ضرر بود؛ حالا که
+     رهاکردن فوری است، تصمیم را استعلام می‌گیرد نه ادعا.
+
+     اگر استعلام بگوید پول رفته، «لغو» نادیده گرفته می‌شود و رزرو
+     قطعی می‌شود. وضعیتِ پرداخت هم **پیش از** استعلام دست نمی‌خورد:
+     نوشتنِ زودهنگامِ CANCELED می‌توانست کلیدِ یکتای idempotency را
+     بسوزاند و تلاشِ دوباره را ۵۰۰ کند. */
+  if (!v.paid) {
+    const canceled = ret.canceled;
     await sb().from('payments').update({
-      status: 'FAILED', raw_response: (v.raw ?? { message: v.message }) as object, updated_at: new Date().toISOString(),
+      status: canceled ? 'CANCELED' : 'FAILED',
+      raw_response: (v.raw ?? { message: v.message, canceled }) as object,
+      updated_at: new Date().toISOString(),
     }).eq('id', pay.id);
-    return fail(v.message || 'پرداخت تأیید نشد');
+
+    /* ⚠️ `!v.paid` به‌تنهایی کافی **نیست**. آداپتورها هر پاسخِ
+       ناموفقی را `paid: false` می‌دادند — از جمله ۴۰۱ (توکنِ منقضی)،
+       ۴۲۹ و ۵xx. یعنی یک قطعیِ نیم‌ساعته‌ی درگاه می‌توانست ساعتِ
+       همه‌ی رزروهای در جریان را آزاد کند در حالی که پول رفته بود.
+
+       `definitive` فقط برای پاسخ‌هایی ست می‌شود که واقعا یعنی «این
+       پرداخت هرگز تأیید نمی‌شود». استثنا: وقتی درگاه خودش «لغو» اعلام
+       کرده و اصلا کدِ رهگیری نداده، پرداخت هیچ‌وقت قابلِ تأیید نخواهد
+       بود — انتظارِ پانزده‌دقیقه‌ای چیزی به دست نمی‌آورد. */
+    const neverVerifiable = ret.canceled && !ret.refId;
+    if ((v.ok && v.definitive) || neverVerifiable) {
+      await releaseBooking(ret.canceled ? 'انصراف از پرداخت' : 'پرداخت انجام نشد');
+    }
+
+    return fail(ret.canceled ? 'پرداخت توسط شما لغو شد' : (v.message || 'پرداخت تأیید نشد'));
   }
 
   /* بررسی مبلغ — اگر مبلغ واقعی با مورد انتظار نخواند، هرگز تأیید نکن */
@@ -76,7 +138,7 @@ async function handle(req: NextRequest, providerName: string) {
   }
 
   /* تأیید اتمیک: پرداخت + رزرو + دفتر مالی + کمیسیون + موجودی باشگاه */
-  const { error } = await rpc('bh_confirm_payment', {
+  const { data: confirmed, error } = await rpc<{ booking_status?: string }>('bh_confirm_payment', {
     p_payment_id: pay.id, p_provider_ref: v.refId ?? '', p_amount: pay.amount,
   });
   if (error) {
@@ -84,6 +146,35 @@ async function handle(req: NextRequest, providerName: string) {
     audit({ action: 'PAYMENT_CONFIRM_FAILED', entityType: 'payment', entityId: pay.id, newValue: { error: m } });
     if (/amount_mismatch/.test(m)) return fail('مغایرت مبلغ');
     return fail('خطا در نهایی‌کردن رزرو — با پشتیبانی تماس بگیرید');
+  }
+
+  /* ── کالبکِ دیرهنگام ──
+     `bh_confirm_payment` روی رزروی که دیگر `PENDING_PAYMENT` نیست
+     عمدا خطا **نمی‌دهد**: پرداخت را PAID می‌کند، ردیفِ دفتر می‌نویسد
+     و یک بدهیِ بازپرداخت باز می‌کند، بعد عادی برمی‌گردد — و کامنتِ
+     مهاجرت ۰۴۱ می‌گوید فراخوان باید `booking_status` را بخواند.
+
+     تا دیروز این مسیر تقریبا دست‌نیافتنی بود چون رزرو تمامِ پانزده
+     دقیقه سرِ جایش می‌ماند. حالا که انصراف فوری رزرو را لغو می‌کند،
+     مسیرِ زنده‌ای است: بدونِ این بررسی، به کاربر «رزرو قطعی شد»
+     پیامک می‌رفت و به باشگاه‌دار «میزت پر شد» — برای ساعتی که لغو
+     شده و شاید به دیگری فروخته شده باشد. */
+  /* ⚠️ خواندن باید **تام** باشد. `RETURNS bookings` از PostgREST یک
+     شیء برمی‌گردد نه آرایه، ولی اگر روزی این عوض شود، «نتوانستم
+     بخوانم» نباید «دیر رسید» تفسیر شود — آن‌وقت هر پرداختِ موفق پیام
+     شکست می‌گرفت. پس در نبودِ مقدار، مستقیم از خودِ رزرو می‌پرسیم. */
+  const raw = confirmed as unknown;
+  let bookingStatus = (Array.isArray(raw) ? raw[0] : raw as { booking_status?: string } | null)?.booking_status;
+  if (!bookingStatus) {
+    const { data: bk } = await sb().from('bookings')
+      .select('booking_status').eq('id', pay.booking_id).maybeSingle();
+    bookingStatus = (bk as { booking_status?: string } | null)?.booking_status;
+  }
+
+  if (bookingStatus !== 'CONFIRMED') {
+    audit({ action: 'PAYMENT_LATE_CALLBACK', entityType: 'payment', entityId: pay.id,
+            newValue: { bookingStatus: bookingStatus ?? null, refId: v.refId }, ip: clientIp(req) ?? undefined });
+    return fail('پرداخت شما دریافت شد ولی مهلت این رزرو گذشته بود — مبلغ بازگردانده می‌شود');
   }
 
   audit({ action: 'PAYMENT_CONFIRMED', entityType: 'payment', entityId: pay.id,
