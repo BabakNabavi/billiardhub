@@ -12,6 +12,7 @@ import { BOOKING_HORIZON_DAYS } from '../../../lib/booking/closure';
 import { surchargeOf, extraPlayers, playerMultiplier } from '../../../lib/finance/pricing';
 import { sortTables, tableTypeRank } from '../../../lib/tables/order';
 import { closureState, isDateClosed, closedHours, closureLabel, type ClosureState } from '../../../lib/booking/closure';
+import { markPendingHold, peekPendingHold, clearPendingHold } from '../../../lib/bookings/pending-hold';
 import {
   ChevronRight, ChevronLeft, Check, Clock,
   CheckCircle, AlertCircle, X, Info, CreditCard,
@@ -288,8 +289,69 @@ function BookingContent() {
       .then(t=>{ setTables(Array.isArray(t.data)?t.data:[]); setLoading(false); });
   },[clubId]);
 
+  /* ── برگشت از درگاه بدونِ پرداخت ──
+     یک‌بار، پیش از هر چیزِ دیگر: اگر یادداشتِ «رفتم به درگاه» هست،
+     یعنی کاربر به درگاه رفته و حالا این‌جاست — پس پرداخت نکرده.
+     هولدش همان لحظه آزاد می‌شود تا ساعت سبز شود، نه بعد از مهلت.
+
+     صفحه‌ی نتیجه‌ی پرداخت یادداشت را خودش پاک می‌کند، پس پرداختِ
+     موفق هرگز به این‌جا نمی‌رسد. */
+  const [released, setReleased] = useState(false);
+  const [slotsKey, setSlotsKey] = useState(0);
+  const abandoning = useRef('');
   useEffect(()=>{
-    if(!selectedTable||!isoDate) return;
+    const run = ()=>{
+      /* بی‌قید و شرط، پیش از هر چیز: اگر این کد اجرا می‌شود یعنی ما
+         روی صفحه‌ی رزرو هستیم، نه در راهِ درگاه. برگشت از bfcache
+         صفحه را با همان stateِ لحظه‌ی رفتن برمی‌گرداند — یعنی
+         `redirecting` هنوز true است و کاربر پشتِ اسپینرِ تمام‌صفحه‌ی
+         «در حال انتقال به درگاه» گیر می‌کند، بدون هیچ راهِ خروجی جز
+         ریلود. این حالت پس از پرداختِ **موفق** هم پیش می‌آید (صفحه‌ی
+         نتیجه ← دکمه‌ی back)، جایی که اصلا یادداشتی در کار نیست — پس
+         این دو خط باید بالاتر از بررسیِ یادداشت باشند. */
+      setRedirecting(false); setError('');
+
+      const pending = peekPendingHold();
+      if(!pending){ setReleased(true); return }
+      /* یادداشت فقط پس از پاسخِ سرور پاک می‌شود، ولی گاردِ in-flight
+         جلوی ارسالِ دوباره را می‌گیرد (StrictMode، و pageshow که
+         بلافاصله بعد از mount شلیک می‌کند). */
+      if(abandoning.current === pending) return;
+      abandoning.current = pending;
+
+      setReleased(false); setSlotsLoad(true);
+
+      /* مهلتِ کوتاه: پیش‌فرضِ axios سی ثانیه است و تا آن لحظه
+         `released` روی false می‌ماند، یعنی کاربر اسکلتِ ساعت‌ها را
+         نیم‌دقیقه نگاه می‌کند. */
+      api.post(`/bookings/${pending}/abandon`, undefined, { timeout: 8000 })
+        .then(()=>clearPendingHold())
+        .catch(()=>{ /* مهلت و پاک‌سازیِ سرور خودشان آزادش می‌کنند */ })
+        .finally(()=>{
+          abandoning.current = '';
+          /* ⚠️ عمداً بدونِ گاردِ mount. در StrictMode ترتیب
+             افکت←پاک‌سازی←افکت است: اجرای دوم روی گاردِ in-flight
+             برمی‌گردد و `released` را false رها می‌کند، پس اگر اجرای
+             اول هم به‌خاطرِ unmount ساکت بماند هیچ‌کس دیگر آن را true
+             نمی‌کند و ساعت‌ها برای همیشه در حالِ بارگذاری می‌مانند.
+             در ری‌اکت ۱۹ set روی کامپوننتِ unmount شده بی‌اثر است. */
+          setReleased(true); setSlotsKey(k=>k+1);
+        });
+    };
+
+    /* ⚠️ فقط useEffect کافی نیست. رفتن به درگاه یک ناوبریِ کامل است و
+       برگشت با دکمه‌ی back در سافاریِ موبایل صفحه را از bfcache
+       برمی‌گرداند — کامپوننت دوباره mount نمی‌شود، پس این افکت هرگز
+       اجرا نمی‌شد و ساعت قرمز می‌ماند. `pageshow` با persisted دقیقا
+       همین حالت را می‌گیرد. */
+    const onShow = (e: PageTransitionEvent)=>{ if(e.persisted) run() };
+    window.addEventListener('pageshow', onShow);
+    run();
+    return ()=>window.removeEventListener('pageshow', onShow);
+  },[]);
+
+  useEffect(()=>{
+    if(!selectedTable||!isoDate||!released) return;
     setSlotsLoad(true); setSlots([]); setSelectedSlots([]); setRangeStart(null); setRangeError('');
     api.get(`/bookings/slots?clubId=${clubId}&tableId=${selectedTable.id}&date=${isoDate}`)
       .then(r=>{
@@ -298,7 +360,7 @@ function BookingContent() {
         setTimeout(()=>slotsRef.current?.scrollIntoView({behavior:'smooth',block:'nearest'}),100);
       })
       .catch(()=>{ setSlots(openSlots(isoDate)); setSlotsLoad(false); });
-  },[selectedTable,isoDate,clubId]);
+  },[selectedTable,isoDate,clubId,released,slotsKey]);
 
   const handleSlotClick = useCallback((hour:number, isBooked:boolean)=>{
     if(isBooked) return;
@@ -336,9 +398,6 @@ function BookingContent() {
         pricePerHour:selectedTable.pricePerHour, playerCount, currency:'IRT',
       });
       const bookingId = res.data?.id ?? '';
-      /* مهلتِ نگه‌داشتن از خودِ سرور می‌آید، نه عددِ ثابت در متن —
-         یک‌بار سرور ۱۵ دقیقه شد و این جمله ۱۰ دقیقه ماند. */
-      const holdMin = Number(res.data?.holdMinutes) || 15;
       /* ایجاد پرداخت و هدایت مستقیم به درگاه — هیچ صفحه‌ی میانی دیگری نیست */
       let paymentUrl: string | null = null;
       try {
@@ -348,11 +407,29 @@ function BookingContent() {
         setError(pe?.response?.data?.message || 'اتصال به درگاه پرداخت ممکن نشد');
       }
       if(!paymentUrl){
-        setError(prev=>prev||`اتصال به درگاه پرداخت ممکن نشد؛ رزرو شما تا ${toFa(holdMin)} دقیقه نگه داشته می‌شود.`);
+        /* به درگاه نرسیدیم ⇒ نگه‌داشتنِ ساعت هیچ فایده‌ای ندارد و فقط
+           همان ساعت را برای تلاشِ دوباره‌ی خودِ کاربر قرمز می‌کند.
+           پیش‌تر این‌جا نوشته می‌شد «رزرو شما تا ۱۵ دقیقه نگه داشته
+           می‌شود» — که هم بی‌فایده بود هم دیگر درست نیست. */
+        /* await لازم است: بدونِ آن، رفرشِ ساعت‌ها مسابقه را می‌برد و
+           کاربر ساعتِ خودش را هنوز «مشغول» می‌بیند، زیرِ پیامی که
+           می‌گوید رزروی ثبت نشد. */
+        if(bookingId){
+          await api.post(`/bookings/${bookingId}/abandon`, undefined, { timeout: 8000 })
+            .catch(e=>console.error('[booking] abandon failed', e));
+        }
+        setError(prev=>prev||'اتصال به درگاه پرداخت ممکن نشد؛ رزروی ثبت نشد. لطفا دوباره تلاش کنید.');
+        setSlotsKey(k=>k+1);
         return;
       }
       /* #16: immediately mark booked slots as reserved in local state */
       setSlots(prev=>prev.map(s=>({...s,isBooked:s.isBooked||selectedSlots.includes(s.hour)})));
+      /* ── نشانه‌ی «رفتم به درگاه» ──
+         کالبک فقط با دکمه‌ی انصرافِ خودِ درگاه می‌آید؛ بستنِ تب یا
+         دکمه‌ی back هیچ خبری نمی‌دهد و ساعت تا پایانِ مهلت قفل
+         می‌ماند. با این یادداشت، لحظه‌ای که کاربر به همین صفحه
+         برگردد هولدش آزاد می‌شود. */
+      markPendingHold(bookingId);
       setRedirecting(true);
       window.location.href = paymentUrl;
     } catch(e:any){

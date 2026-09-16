@@ -9,6 +9,7 @@ import { CheckCircle2, XCircle, Loader2, ArrowLeft, CalendarDays, Clock3 } from 
 import { faDateLong, faTimeRange, faNum } from '../../../lib/jalali'
 import CancellationPolicy from '../../../components/booking/CancellationPolicy'
 import { apiFetch } from '../../../lib/http'
+import { clearPendingHold } from '../../../lib/bookings/pending-hold'
 
 const INK = '#1C1B17', SEC = '#5B564B', MUT = '#6F6A5C', LINE = '#EAE5DA'
 const GOLD_D = '#8F6531', FELT = '#0E7A38'
@@ -34,6 +35,13 @@ function BookingResult() {
   const reason = sp.get('reason') || ''
   const [b, setB] = useState<B | null>(null)
   const [loading, setLoading] = useState(!!bookingId)
+
+  /* یادداشتِ «رفتم به درگاه» هر نتیجه‌ای که داشت این‌جا پاک می‌شود:
+     رسیدن به این صفحه یعنی کالبک آمده و سرور وضعیت را می‌داند.
+     بدون این، برگشتن به صفحه‌ی رزرو در همان تب یک درخواستِ «رها کن»
+     روی رزروی می‌فرستاد که تکلیفش روشن شده. سرور ردش می‌کند، ولی
+     فرستادنش هم بی‌مورد است. */
+  useEffect(() => { clearPendingHold() }, [])
 
   useEffect(() => {
     if (!bookingId) return
