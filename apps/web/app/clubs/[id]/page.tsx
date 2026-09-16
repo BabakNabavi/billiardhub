@@ -175,7 +175,7 @@ export default function ClubProfilePage() {
 
      پس وقتی مربی پروفایل دارد، رشته‌هایش از همان‌جا می‌آید و متن
      دستی باشگاه فقط جای خالی را پر می‌کند. */
-  const [coachInfo, setCoachInfo] = useState<Record<string, { disciplines: string[]; sinceYear: number; ratingAvg: number; ratingCount: number }>>({});
+  const [coachInfo, setCoachInfo] = useState<Record<string, { disciplines: string[]; sinceYear: number; ratingAvg: number; ratingCount: number; photo: string }>>({});
   const [slugCopied, setSlugCopied]   = useState(false);
   const [clubAlbums, setClubAlbums]   = useState<ClubAlbum[]>([]);
   /* ── ویرایش درجا برای مالک باشگاه ──
@@ -253,10 +253,10 @@ export default function ClubProfilePage() {
           try {
             const r = await fetch('/api/profiles/coach', { cache: 'no-store' });
             const j = await r.json().catch(() => null) as {
-              profiles?: { id?: string; slug?: string; ratingAvg?: unknown; ratingCount?: unknown; data?: { disciplines?: unknown; grades?: unknown } }[]
+              profiles?: { id?: string; slug?: string; ratingAvg?: unknown; ratingCount?: unknown; data?: { disciplines?: unknown; grades?: unknown; photo?: unknown } }[]
             } | null;
             const map: Record<string, string> = {};
-            const info: Record<string, { disciplines: string[]; sinceYear: number; ratingAvg: number; ratingCount: number }> = {};
+            const info: Record<string, { disciplines: string[]; sinceYear: number; ratingAvg: number; ratingCount: number; photo: string }> = {};
             for (const p of j?.profiles ?? []) {
               if (p.id && p.slug) map[p.id] = p.slug;
               const d = Array.isArray(p.data?.disciplines)
@@ -274,11 +274,17 @@ export default function ClubProfilePage() {
               /* ⚠️ «امتیاز» هم فیلد دستی باشگاه بود. حالا از ستون
                  تجمیعی خود پروفایل می‌آید که تریگر جدول نظرها
                  نگهش می‌دارد (مهاجرت ۰۸۹). */
+              /* ── عکس پروفایل ──
+                 ردیفِ مربی روی رکوردِ باشگاه عکس ندارد (فقط نام و متنِ
+                 دستیِ باشگاه‌دار)، پس کارت همیشه حرفِ اولِ نام را
+                 می‌گذاشت. عکس از همین پاسخ می‌آید — همان درخواستی که
+                 برای نامک و رشته و امتیاز هم زده می‌شود. */
               const entry = {
                 disciplines: d,
                 sinceYear: Number.isNaN(yr) ? 0 : yr,
                 ratingAvg: Number(p.ratingAvg ?? 0),
                 ratingCount: Number(p.ratingCount ?? 0),
+                photo: typeof p.data?.photo === 'string' ? p.data.photo : '',
               };
               if (p.id) info[p.id] = entry;
               if (p.slug) info[p.slug] = entry;
@@ -412,6 +418,9 @@ export default function ClubProfilePage() {
     const n = Math.max(0, CUR_JYEAR - y);
     return n > 0 ? `${toFa(n)} سال سابقه` : 'سال اول';
   };
+
+  /* عکس پروفایل مربی؛ نبودش یعنی برگشت به حرفِ اولِ نام */
+  const coachPhoto = (c: CoachEntry): string => coachOf(c)?.photo ?? '';
 
   const popupCoach = activeCoach !== null ? (coaches[activeCoach] ?? null) : null;
   /* نامک ذخیره‌شده اولویت دارد؛ وگرنه از نگاشت فهرست عمومی */
@@ -967,8 +976,14 @@ export default function ClubProfilePage() {
                       <button type="button" key={c.id || i} className="coach-card"
                         onClick={() => setActiveCoach(i)}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-                          <div style={{ width: 44, height: 44, borderRadius: 12, background: 'linear-gradient(135deg,#C7A66A,#A07840)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 19, fontWeight: 900, color: '#fff', flexShrink: 0 }}>
-                            {c.name[0]}
+                          {/* عکس پروفایل اگر هست، وگرنه حرفِ اولِ نام.
+                              `object-fit: cover` لازم است وگرنه عکسِ
+                              غیرمربع کش می‌آید. */}
+                          <div style={{ width: 44, height: 44, borderRadius: 12, background: 'linear-gradient(135deg,#C7A66A,#A07840)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 19, fontWeight: 900, color: '#fff', flexShrink: 0, overflow: 'hidden' }}>
+                            {coachPhoto(c)
+                              ? <img src={coachPhoto(c)} alt="" loading="lazy" decoding="async"
+                                  style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                              : c.name[0]}
                           </div>
                           <div style={{ flex: 1, minWidth: 0 }}>
                             <div style={{ fontSize: 16, fontWeight: 800, color: '#111111', marginBottom: 3 }}>{c.name}</div>
@@ -1515,8 +1530,11 @@ export default function ClubProfilePage() {
 
             {/* Avatar */}
             <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 16 }}>
-              <div style={{ width: 68, height: 68, borderRadius: 20, background: 'linear-gradient(135deg,#C7A66A,#A07840)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 29, fontWeight: 900, color: '#fff' }}>
-                {popupCoach.name[0]}
+              <div style={{ width: 68, height: 68, borderRadius: 20, background: 'linear-gradient(135deg,#C7A66A,#A07840)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 29, fontWeight: 900, color: '#fff', overflow: 'hidden' }}>
+                {coachPhoto(popupCoach)
+                  ? <img src={coachPhoto(popupCoach)} alt={`عکس ${popupCoach.name}`} loading="lazy" decoding="async"
+                      style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  : popupCoach.name[0]}
               </div>
             </div>
 
