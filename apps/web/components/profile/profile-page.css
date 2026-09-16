@@ -633,7 +633,10 @@ main.ch-col > section { max-width: 760px; }
 /* ── بخش‌ها ── */
 .ch-ch .ch-body { padding-block: 24px 48px; }
 .ch-ch .ch-sec { margin-block-end: 24px; }
-.ch-ch .ch-two { display: grid; gap: 24px; }
+/* ⚠️ حاشیه‌ی پایین لازم است: «نظرها» حالا بعد از این گرید و بیرونِ
+   ستون‌هاست، و `.ch-sec` فقط `margin-block-end` دارد — بدونِ این،
+   کارتِ نظرها چسبیده به تهِ گرید می‌نشست. */
+.ch-ch .ch-two { display: grid; gap: 24px; margin-block-end: 24px; }
 .ch-ch .ch-col-main, .ch-ch .ch-col-rail { display: grid; gap: 24px; align-content: start; }
 /* ⚠️ نه order و نه display:contents: ترتیبِ DOM خودش درست است
    (معرفی ← جلسه ← مسیر ← نظرها) چون «نظرها» بیرونِ ستون‌هاست.

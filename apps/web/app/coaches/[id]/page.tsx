@@ -475,14 +475,6 @@ export default function CoachProfilePage() {
                 </section>
               )}
 
-              {/* ⚠️ «نظرها» عمدا داخلِ همین ستون است: بیرون که بود،
-                  ستونِ اصلی ۳۱۹ در برابر ریلِ ۶۳۷ می‌شد و ۳۱۸ پیکسل
-                  سفیدیِ خالی می‌ماند. تنها هزینه‌اش این است که روی
-                  موبایل «نظرها» پیش از «مسیر مربیگری» می‌آید. */}
-              <section id="reviews" tabIndex={-1} className="ch-card ch-rv">
-                <Reviews endpoint={`/api/profiles/coach/${encodeURIComponent(id)}/reviews`} subject="این مربی"
-                  cannotReviewNote="برای ثبت نظر باید در باشگاهی که این مربی در آن ثبت شده، رزرو قطعی داشته باشید." />
-              </section>
             </div>
 
             <div className="ch-col-rail">
@@ -503,6 +495,33 @@ export default function CoachProfilePage() {
               </section>
             </div>
           </div>
+
+          {/* ── نظرها، پس از «مسیر مربیگری» ──
+              پیش‌تر داخلِ ستونِ اصلی بود، یعنی در DOM **قبل از** مسیر
+              مربیگری می‌آمد و روی موبایل هم همان‌جا دیده می‌شد.
+
+              ⚠️ با `order` درست نشد — کامنتِ خودِ CSS هم همین را
+              می‌گوید: ترتیبِ دیداری را عوض می‌کند ولی فوکوس و
+              صفحه‌خوان روی DOM می‌مانند (نقضِ WCAG 2.4.3). پس خودِ
+              DOM جابه‌جا شد.
+
+              حالا بیرونِ هر دو ستون و تمام‌عرض است — که برای خواندنِ
+              نظرها بهتر هم هست. نگرانیِ قدیمیِ «۳۱۸ پیکسل سفیدی» دیگر
+              برقرار نیست: آن وقتی بود که ستونِ اصلی فقط «معرفی» را
+              داشت؛ حالا «معرفی» و «جلسه‌ی خصوصی» هر دو در آن‌اند. */}
+          {/* سرتیتر لازم است: حالا که بخش سطح‌بالاست، بدونِ `h2` از
+              تیترِ صفحه مستقیم به `h3`های داخلِ `Reviews` می‌پرید، و
+              خودِ بخش هم نامِ دسترس‌پذیر نداشت — برخلافِ همه‌ی
+              خواهرهایش که `aria-labelledby` دارند. */}
+          <section id="reviews" tabIndex={-1} className="ch-sec ch-rv" aria-labelledby="ch-rv-h">
+            <div className="ch-sec-head">
+              <h2 id="ch-rv-h">نظرها</h2>
+              <span className="en">REVIEWS</span>
+              <span className="rule" aria-hidden />
+            </div>
+            <Reviews endpoint={`/api/profiles/coach/${encodeURIComponent(id)}/reviews`} subject="این مربی"
+              cannotReviewNote="برای ثبت نظر باید در باشگاهی که این مربی در آن ثبت شده، رزرو قطعی داشته باشید." />
+          </section>
 
         </div>
       </div>
