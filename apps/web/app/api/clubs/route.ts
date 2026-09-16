@@ -6,6 +6,7 @@ import { getSupabaseServer } from '@/lib/supabase-server';
 import { sessionFromRequest } from '@/lib/auth/session';
 import { cardToIban, matchCard, matchIban } from '@/lib/bank-server';
 import { actorFromRequest, isAdmin } from '@/lib/finance/db';
+import { isUUID, isValidSlug } from '@/lib/slug';
 
 const CORS_HEADERS = {
   'Vary': 'Origin',
@@ -79,9 +80,32 @@ export async function GET(req: NextRequest) {
       'isActive', 'createdAt',
     ].join(',');
 
-    let q = getSupabaseServer().from('clubs').select(isAdminReq ? '*' : PUBLIC_COLUMNS);
+    /* ── تعداد اعضا ──
+       کارتِ باشگاه همیشه «۰ عضو» نشان می‌داد چون `memberCount` هیچ‌جا
+       ساخته نمی‌شد. شمردن در جاوااسکریپت یعنی کشیدنِ کلِ
+       `club_members` به حافظه و بی‌صدا کم‌شمار شدن زیرِ سقفِ سطرِ
+       PostgREST. کلیدِ خارجیِ `club_members_club_fk` از مهاجرت ۰۳۲
+       وجود دارد، پس شمارش سمتِ دیتابیس انجام می‌شود — یک کوئری و
+       بدونِ سقف.
 
-    if (!isAdminReq) {
+       ⚠️ اگر آن کلید نباشد، PostgREST **کلِ درخواست** را با
+       `PGRST200` رد می‌کند، نه اینکه embed را نادیده بگیرد. و این
+       مسیر را صفحه‌ی اصلی، نوارِ استوری و فهرستِ باشگاه‌ها می‌خوانند —
+       یعنی یک ۴۰۰ این‌جا کلِ سایت را سفید می‌کند. پس کوئری دوبار
+       ساخته می‌شود و در صورتِ خطای رابطه، بدونِ شمارش دوباره اجرا
+       می‌شود: بدترین حالت «۰ عضو» است، همان رفتارِ امروز. */
+    const MEMBERS = 'club_members(count)';
+    const build = (withMembers: boolean) => {
+      const cols = isAdminReq ? '*' : PUBLIC_COLUMNS;
+      return getSupabaseServer().from('clubs')
+        .select(withMembers ? `${cols},${MEMBERS}` : cols);
+    };
+    /* فیلترها باید روی هر دو نسخه یکسان اعمال شوند، پس یک‌جا تعریف
+       می‌شوند و نه دو بار کپی — وگرنه روزی یکی عوض می‌شود و آن یکی نه. */
+    const withFilters = (base: ReturnType<typeof build>) => {
+      let q = base;
+
+      if (!isAdminReq) {
       /* دیده‌شدن عمومی = هم منتشرشده، هم تأییدشده.
          `isActive` تنها کافی نیست: داده‌ی قدیمی با وضعیت pending هم
          isActive=true داشت و در فهرست عمومی می‌نشست.
@@ -115,9 +139,21 @@ export async function GET(req: NextRequest) {
         if (sp.get(a) === '1') q = q.eq(a, true);
       }
       if (sp.get('playstations') === '1') q = q.gt('playstations', 0);
-    }
+      }
 
-    const { data: clubs, error } = await q.order('createdAt', { ascending: false }).limit(500);
+      return q.order('createdAt', { ascending: false }).limit(500);
+    };
+
+    let { data: clubs, error } = await withFilters(build(true));
+
+    /* رابطه پیدا نشد ⇒ بدونِ شمارشِ اعضا دوباره اجرا کن. این‌طور
+       ترتیبِ دیپلوی و مهاجرت بی‌اهمیت می‌شود و بدترین حالت «۰ عضو»
+       است، نه صفحه‌ی سفید. */
+    if (error && /PGRST200|relationship|schema cache/i.test(
+      `${(error as { code?: string }).code ?? ''} ${error.message}`)) {
+      console.warn('[clubs] شمارشِ اعضا در دسترس نیست — بدونِ آن ادامه:', error.message);
+      ({ data: clubs, error } = await withFilters(build(false)));
+    }
 
     if (error) {
       console.error('[clubs] db error:', error.message);
@@ -143,11 +179,26 @@ export async function GET(req: NextRequest) {
        پس PostgREST نمی‌تواند شکل ردیف را استنتاج کند. ردیف‌ها این‌جا
        همان چیزی‌اند که بالا انتخاب شده. */
     const rows = (clubs ?? []) as unknown as Record<string, unknown>[];
-    const withBadge = rows.map((c: Record<string, unknown>) => ({
-      ...(isAdminReq && !canSeePrivate ? stripClubPrivate(c) : c),
-      isVerified: c.verificationStatus === 'verified',
-      hasActiveStory: !!c.storyExpiresAt && new Date(String(c.storyExpiresAt)).getTime() > now,
-    }));
+
+    /* PostgREST شمارشِ embed را به‌صورت `club_members: [{ count: n }]`
+       برمی‌گرداند. اگر مهاجرت ۰۹۶ اجرا نشده باشد کلید اصلا نمی‌آید و
+       عدد صفر می‌ماند — همان رفتارِ قبلی، نه خطا. */
+    const memberCountOf = (c: Record<string, unknown>): number => {
+      const raw = c.club_members;
+      if (Array.isArray(raw)) return Number((raw[0] as { count?: number })?.count ?? 0) || 0;
+      return Number((raw as { count?: number } | null)?.count ?? 0) || 0;
+    };
+
+    const withBadge = rows.map((c: Record<string, unknown>) => {
+      const { club_members: _m, ...rest } = c;
+      const base = isAdminReq && !canSeePrivate ? stripClubPrivate(rest) : rest;
+      return {
+        ...base,
+        isVerified: c.verificationStatus === 'verified',
+        hasActiveStory: !!c.storyExpiresAt && new Date(String(c.storyExpiresAt)).getTime() > now,
+        memberCount: memberCountOf(c),
+      };
+    });
 
     return NextResponse.json(withBadge, { status: 200, headers: CORS_HEADERS });
   } catch {
@@ -201,7 +252,20 @@ export async function POST(req: NextRequest) {
       isActive: true,
       verificationStatus: 'approved',
     };
-    if (slug) insertData.slug = slug;
+    /* ── نشانی اختصاصی، همان‌طور که PUT می‌نویسدش ──
+       پیش‌تر مقدار خام می‌نشست: بدونِ trim، بدونِ پایین‌حرف‌کردن و
+       بدونِ بررسیِ قالب. حالا که نشانی پس از ثبتِ اول قفل می‌شود،
+       یک حرفِ بزرگ یا فاصله‌ی اضافی برای همیشه روی ردیف می‌ماند و
+       صاحبش راهی برای اصلاحش ندارد. */
+    const cleanSlug = String(slug ?? '').trim().toLowerCase();
+    if (cleanSlug) {
+      if (!isValidSlug(cleanSlug) || isUUID(cleanSlug)) {
+        return NextResponse.json(
+          { message: 'آدرس اختصاصی نامعتبر است — فقط حروف انگلیسی کوچک، عدد و خط تیره' },
+          { status: 400, headers: CORS_HEADERS });
+      }
+      insertData.slug = cleanSlug;
+    }
 
     /* ── اطلاعات بانکی: اثبات سمت سرور ──
        کارت باید به نام همان کسی باشد که حسابش احراز شده. اگر استعلام
