@@ -128,9 +128,30 @@ export function tehranInstant(local: string): Date {
 
 /** «۱۸:۰۰ تا ۲۰:۰۰» از رشته‌ی ساعت‌های رزرو ("18,19") */
 export function faTimeRange(timeSlots: string | null | undefined): string {
-  const hours = String(timeSlots ?? '').split(',').map(Number).filter(n => !isNaN(n)).sort((a, b) => a - b)
+  /* ⚠️ `Number('')` صفر است، نه NaN. پس فیلترِ `!isNaN` رشته‌ی خالی را
+     رد نمی‌کرد و `''.split(',')` ⟵ `['']` ⟵ `[0]` می‌شد: رزروِ
+     بدونِ ساعت «۰۰:۰۰ تا ۰۱:۰۰» نشان داده می‌شد، انگار نیمه‌شب رزرو
+     شده. تکه‌ی خالی باید *پیش از* تبدیل بیفتد. */
+  const hours = String(timeSlots ?? '')
+    .split(',')
+    .map(s => s.trim())
+    .filter(s => /^\d+$/.test(s))
+    .map(Number)
+    /* ساعتِ خارج از بازه یعنی داده‌ی خراب، نه یک ساعتِ واقعی —
+       بدونِ این، «۲۵» به «۲۵:۰۰ تا ۲۶:۰۰» تبدیل می‌شد. */
+    .filter(n => n >= 0 && n <= 23)
+    .sort((a, b) => a - b)
   if (hours.length === 0) return '—'
-  const from = toFaDigits(String(hours[0]).padStart(2, '0'))
-  const to = toFaDigits(String(hours[hours.length - 1]! + 1).padStart(2, '0'))
-  return `${from}:۰۰ تا ${to}:۰۰`
+
+  /* ── ساعت‌های ناپیوسته ──
+     نوشتنِ «اولین تا آخرین+۱» برای «۸,۱۴» می‌شد «۰۸:۰۰ تا ۱۵:۰۰»،
+     یعنی هفت ساعت به‌جای دو. هر بازه‌ی پیوسته جدا نوشته می‌شود. */
+  const runs: [number, number][] = []
+  for (const h of hours) {
+    const last = runs[runs.length - 1]
+    if (last && h === last[1] + 1) last[1] = h
+    else if (!last || h !== last[1]) runs.push([h, h])
+  }
+  const hh = (n: number) => toFaDigits(String(n).padStart(2, '0'))
+  return runs.map(([a, b]) => `${hh(a)}:۰۰ تا ${hh(b + 1)}:۰۰`).join('، ')
 }

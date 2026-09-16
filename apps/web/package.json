@@ -13,6 +13,7 @@
     "test:a2hs:ui": "node scripts/test-a2hs-ui.mjs",
     "test:phone": "node scripts/test-phone.mjs",
     "test:tel": "npx --yes tsx scripts/test-iran-tel.mjs",
+    "test:booking-view": "npx --yes tsx scripts/test-booking-view.mjs",
     "test:social": "node scripts/test-social-flag.mjs",
     "test:avatar": "node scripts/test-avatar.mjs",
     "test:session": "node scripts/test-session.mjs",
