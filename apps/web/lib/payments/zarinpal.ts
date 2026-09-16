@@ -45,13 +45,24 @@ export class ZarinPalProvider implements PaymentProvider {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ merchant_id: this.merchant, amount: toRial(input.amount), authority: input.authority }),
       })
-      const j = await r.json().catch(() => null) as { data?: { code?: number; ref_id?: number } } | null
-      const code = j?.data?.code
+      /* ⚠️ زرین‌پال v4 در شکست `data` را **آرایه‌ی خالی** می‌دهد و کد را
+         در `errors.code` می‌گذارد. خواندن فقط از `data.code` یعنی کد
+         همیشه `undefined` بود و هیچ شکستی «قطعی» تشخیص داده نمی‌شد. */
+      const j = await r.json().catch(() => null) as
+        { data?: { code?: number; ref_id?: number }; errors?: { code?: number } } | null
+      const code = j?.data?.code ?? j?.errors?.code
       /* ۱۰۰ = تأیید موفق، ۱۰۱ = قبلا تأیید شده (هر دو یعنی پرداخت‌شده) */
       if (code === 100 || code === 101) {
         return { ok: true, paid: true, refId: String(j?.data?.ref_id ?? ''), amount: input.amount, raw: j }
       }
-      return { ok: true, paid: false, message: 'پرداخت تأیید نشد', raw: j }
+      /* بدنه‌ی خوانده‌نشده یا بی‌کد یعنی «نمی‌دانم»، نه «پرداخت نشد».
+         بدونِ این تفکیک، یک خطای موقتِ زرین‌پال ساعتِ رزرو را آزاد
+         می‌کرد در حالی که ممکن بود پول رفته باشد. */
+      return {
+        ok: true, paid: false,
+        definitive: typeof code === 'number',
+        message: 'پرداخت تأیید نشد', raw: j,
+      }
     } catch { return { ok: false, paid: false, message: 'خطا در تأیید پرداخت' } }
   }
 

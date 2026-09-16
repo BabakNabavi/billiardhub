@@ -29,9 +29,17 @@ export class MockPaymentProvider implements PaymentProvider {
     return { ok: true, authority, redirectUrl: url }
   }
 
+  /* ⚠️ `canceled` باید پذیرفته شود، وگرنه درگاهِ ساختگی برای «انصراف»
+     هم «پرداخت شد» می‌گفت: صفحه‌ی mock با `status=NOK` برمی‌گشت،
+     استعلام `paid:true` می‌داد، رزرو قطعی می‌شد و پیامکِ «رزرو قطعی
+     شد» می‌رفت. یعنی نه انصراف کار می‌کرد و نه مسیرِ رهاکردنِ ساعت
+     در محیطِ آزمایشی اصلا اجرا می‌شد. */
   async verifyPayment(input: VerifyPaymentInput): Promise<VerifyPaymentResult> {
     const expected = `MOCK-${input.paymentId}-${this.sign(input.paymentId, input.amount)}`
     if (input.authority !== expected) return { ok: false, paid: false, message: 'authority نامعتبر است' }
+    if (input.canceled) {
+      return { ok: true, paid: false, definitive: true, message: 'پرداخت لغو شد' }
+    }
     return { ok: true, paid: true, refId: `MOCKREF-${Date.now().toString(36).toUpperCase()}`, amount: input.amount }
   }
 

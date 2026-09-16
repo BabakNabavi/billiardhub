@@ -123,7 +123,25 @@ export class PayPingProvider implements PaymentProvider {
         return { ok: false, paid: false, message: 'تأیید پرداخت در حال پردازش است؛ لحظاتی بعد دوباره تلاش کنید', raw: j }
       }
 
-      return { ok: true, paid: false, message: errText(j) || 'پرداخت تأیید نشد', raw: j }
+      /* ── «قطعا پرداخت نشد» در برابر «نتوانستم بفهمم» ──
+         تا امروز هر پاسخِ ناموفقی `paid: false` می‌شد؛ توکنِ منقضی
+         (۴۰۱)، سقفِ درخواست (۴۲۹) و خطای خودِ درگاه (۵xx) از «کاربر
+         پول نداد» جدا نبودند.
+
+         فقط ۴۰۰ و ۴۰۴ با بدنه‌ی خوانده‌شده قطعی‌اند — بدنه‌ی
+         خوانده‌نشده ممکن است صفحه‌ی خطای HTMLِ یک پروکسی باشد.
+
+         ⚠️ یک استثنا: مغایرتِ مبلغ هم ۴۰۰ می‌گیرد، ولی آن یعنی پول
+         **گرفته شده** (با مبلغی دیگر). آزادکردنِ ساعت در آن حالت یعنی
+         فروشِ دوباره‌ی ساعتی که پولش رفته. */
+      const AMOUNT_MISMATCH = new Set([104, 105])
+      const code = j?.metaData?.code
+      const definitive = (r.status === 400 || r.status === 404) && j !== null
+        && !(typeof code === 'number' && AMOUNT_MISMATCH.has(code))
+      return {
+        ok: true, paid: false, definitive,
+        message: errText(j) || 'پرداخت تأیید نشد', raw: j,
+      }
     } catch { return { ok: false, paid: false, message: 'خطا در تأیید پرداخت' } }
   }
 
