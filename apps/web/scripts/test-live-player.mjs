@@ -374,6 +374,56 @@ ok('facing و builtIn واقعا استفاده می‌شوند', strip(addp3).i
 ok('محدودیتِ گوشی پیش از تلاش گفته می‌شود',
   addp3.includes('فقط یک دوربین هم‌زمان باز می‌شود'));
 
+console.log('\n■ ۱۲) جای پخش زنده در سایت');
+const clubPage = read('app/clubs/[id]/page.tsx');
+const livePage = read('app/live/page.tsx');
+const navbar   = read('components/Navbar.tsx');
+const badge    = read('components/live/LiveNavBadge.tsx');
+const dash     = read('app/dashboard/club/page.tsx');
+const apiSrc   = read('app/api/live/route.ts');
+
+ok('مدیریت پخش در صفحه‌ی خودِ باشگاه است', strip(clubPage).includes('<GoLive'));
+ok('از داشبورد برداشته شد',
+  !strip(dash).includes('<GoLive') && !strip(dash).includes("key: 'live'"));
+ok('تب پخش زنده کنارِ بقیه‌ی تب‌هاست',
+  strip(clubPage).includes("label: 'پخش زنده'") && strip(clubPage).includes('BASE_TABS'));
+ok('تب برای باشگاه‌دار همیشه، برای بقیه فقط هنگام پخش',
+  strip(clubPage).includes('isClubOwner || liveSession !== null'));
+ok('تب قرمز با نقطه‌ی چشمک‌زن', clubPage.includes('.ctab-live') && clubPage.includes('ctab-dot--on'));
+ok('بازدیدکننده پخش را همان‌جا می‌بیند', strip(clubPage).includes('<LivePlayer'));
+ok('با پایانِ پخش، بیننده روی صفحه‌ی «پایان یافت» می‌ماند نه پنلِ خالی',
+  strip(clubPage).includes("tab === 'live'") && strip(clubPage).includes('ended={liveSession === null}'));
+
+ok('دکمه‌ی «باشگاه دارید؟ پخش کنید» حذف شد', !livePage.includes('باشگاه دارید'));
+ok('متن تازه‌ی صفحه‌ی پخش', livePage.includes('دوربین فیلمبرداری پخش کنند'));
+
+ok('نشانِ پخش زنده در نوار بالا — دسکتاپ',
+  strip(navbar).includes('<LiveNavBadge variant="desktop" />'));
+ok('نشانِ پخش زنده در نوار بالا — موبایل',
+  strip(navbar).includes('<LiveNavBadge variant="mobile" />'));
+ok('نشان به صفحه‌ی پخش‌ها می‌رود', strip(badge).includes('href="/live"'));
+ok('نشان قرمز با دایره‌ی چشمک‌زن',
+  strip(badge).includes('lnb-dot') && navbar.includes('lnbPulse'));
+ok('وقتی پخشی نیست هیچ‌چیز نشان داده نمی‌شود',
+  strip(badge).includes('if (count === 0) return null'));
+ok('در تبِ پنهان نظرسنجی نمی‌کند',
+  strip(read('lib/live/live-count.ts')).includes("document.visibilityState !== 'visible'"));
+ok('مسیرِ سبکِ probe برای نوار بالا', strip(apiSrc).includes("searchParams.get('probe')"));
+ok('یک تایمر برای هر دو نسخه‌ی نشان (نه دو تا)',
+  strip(read('lib/live/live-count.ts')).includes('subs.size === 0') && !strip(badge).includes('setInterval'));
+ok('استایلِ نشان یک‌بار تزریق می‌شود', !strip(badge).includes('<style') && navbar.includes('.lnb {'));
+ok('روی موبایلِ باریک فقط نقطه می‌ماند (سرریزِ نوار)',
+  navbar.includes('max-width:430px') && navbar.includes('.lnb--mob .lnb-txt { display:none }'));
+ok('متنِ قرمز حدِ کنتراست را رد می‌کند',
+  navbar.includes('color:#dc2626') && clubPage.includes('color:#dc2626 !important'));
+ok('با پنج تب، عنوان‌ها دو خطی نمی‌شوند', clubPage.includes('white-space:nowrap'));
+ok('تبِ پخش زنده وسط‌چین است', clubPage.includes('justify-content:center; gap:6px'));
+ok('probe هم‌زمان چند اسکنِ موازی راه نمی‌اندازد', strip(apiSrc).includes('probeInflight'));
+ok('یک تعریف از «زنده» برای فهرست و probe', strip(apiSrc).includes('async function liveSessions'));
+ok('پاسخِ probe کش می‌شود (هزینه مستقل از ترافیک)',
+  strip(apiSrc).includes('probeCache') && strip(apiSrc).includes('PROBE_TTL'));
+ok('خطای probe نوار بالای سایت را نمی‌شکند', strip(apiSrc).includes('return NextResponse.json({ count: 0 }'));
+
 console.log('\n' + '─'.repeat(52));
 console.log(`  ${fail === 0 ? '✓' : '✗'} ${pass} پاس، ${fail} ناموفق\n`);
 process.exit(fail === 0 ? 0 : 1);
