@@ -7,7 +7,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
-import { ArrowRight, Users, Building2, Radio } from 'lucide-react';
+import { ArrowRight, Users, Building2 } from 'lucide-react';
 import LivePlayer from '../../../components/live/LivePlayer';
 import { fetchLiveSession, type LiveSession } from '../../../lib/live/client';
 
@@ -72,7 +72,6 @@ export default function LiveWatchPage() {
                   <Building2 size={14} /> {session.clubName}
                 </Link>
                 <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5 }}><Users size={14} /> {fa(session.viewers)} بیننده</span>
-                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5 }}><Radio size={14} /> {session.discipline}</span>
               </div>
             </>
           ) : (

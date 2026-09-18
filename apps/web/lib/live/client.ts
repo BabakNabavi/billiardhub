@@ -5,7 +5,11 @@ import type { LiveAngle } from './angles'
 
 export interface LiveSession {
   id: string; clubId: string; clubName: string; title: string
-  ownerKey: string; discipline: string
+  ownerKey: string
+  /** سرور همچنان مقدارِ پیش‌فرض می‌گذارد؛ از باشگاه‌دار پرسیده نمی‌شود
+   *  و هیچ‌جا نمایش داده نمی‌شود، پس نمایشش یعنی نشان‌دادنِ چیزی که
+   *  کسی انتخابش نکرده. */
+  discipline?: string
   startedAt: number; lastBeat: number; viewers: number; ended?: boolean
   /** فقط وقتی یک جلسه‌ی مشخص خوانده شود پر است؛ فهرست آن را نمی‌آورد. */
   angles?: LiveAngle[]
@@ -47,7 +51,9 @@ export const fetchLiveSession = async (id: string): Promise<LiveSession | null |
   } catch { return undefined }
 }
 
-export const startLive = (body: { clubId: string; clubName: string; ownerKey: string; title: string; discipline: string; angleLabel?: string }) =>
+/* «رشته» دیگر از باشگاه‌دار پرسیده نمی‌شود — عنوانِ پخش همان را
+   می‌گوید. سرور مقدارِ پیش‌فرض خودش را می‌گذارد. */
+export const startLive = (body: { clubId: string; clubName: string; ownerKey: string; title: string; angleLabel?: string }) =>
   post<{ ok?: boolean; session?: LiveSession; message?: string }>({ action: 'start', ...body }, {})
 
 /** `angleId` مشخص می‌کند کدام دوربین دارد تپش می‌فرستد. بدونِ آن،

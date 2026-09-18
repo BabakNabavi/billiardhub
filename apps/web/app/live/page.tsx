@@ -108,7 +108,6 @@ export default function LivePage() {
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12, flexWrap: 'wrap' }}>
                       <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#ef4444', display: 'inline-block', animation: 'pulse 1.5s infinite' }} />
                       <span style={{ fontSize: 13, fontWeight: 700, color: '#ef4444' }}>LIVE</span>
-                      <span style={{ fontSize: 13, color: 'rgba(0,0,0,0.40)' }}>· {s.discipline}</span>
                       <span style={{ marginRight: 'auto', display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 13, color: 'rgba(0,0,0,0.40)' }}>
                         <Users size={13} /> {fa(s.viewers)}
                       </span>
