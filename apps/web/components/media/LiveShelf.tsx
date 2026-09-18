@@ -31,7 +31,10 @@ export default function LiveShelf() {
     let alive = true
     const load = async () => {
       const r = await fetchLiveSessions()
-      if (alive) setRows(r.filter(s => !s.ended))
+      /* undefined یعنی نتوانستیم بپرسیم ⇒ قفسه دست‌نخورده می‌ماند.
+         با آرایه‌ی خالی، یک قطعیِ لحظه‌ای کلِ بخش را از صفحه‌ی اول
+         حذف می‌کرد و بعد دوباره برمی‌گرداند. */
+      if (alive && r !== undefined) setRows(r.filter(s => !s.ended))
     }
     /* ⚠️ در تب پنهان نظرسنجی نکن. هر فراخوانی روی سرور یک
        فهرست‌گیری Storage به‌علاوه‌ی تا ۲۰۰ خواندن فایل است؛ تیک‌زدن

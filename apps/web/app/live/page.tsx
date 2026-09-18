@@ -26,10 +26,16 @@ export default function LivePage() {
 
   useEffect(() => {
     let alive = true;
-    const load = () => fetchLiveSessions().then(r => { if (alive) setRows(r); });
+    /* undefined یعنی نتوانستیم بپرسیم ⇒ فهرستِ قبلی نگه داشته می‌شود.
+       نوشتنِ آرایه‌ی خالی، یک قطعیِ لحظه‌ای را «هیچ پخشی نیست» نشان
+       می‌داد و کارت‌های زنده از صفحه می‌پریدند. */
+    const load = async () => {
+      const r = await fetchLiveSessions();
+      if (alive && r !== undefined) setRows(r);
+    };
     load();
-    const iv = setInterval(load, 15_000);
-    const onVis = () => { if (document.visibilityState === 'visible') load(); };
+    const iv = setInterval(() => void load(), 15_000);
+    const onVis = () => { if (document.visibilityState === 'visible') void load(); };
     document.addEventListener('visibilitychange', onVis);
     return () => { alive = false; clearInterval(iv); document.removeEventListener('visibilitychange', onVis); };
   }, []);
