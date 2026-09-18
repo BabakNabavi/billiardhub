@@ -38,11 +38,24 @@ export default function FeedTile({
     <div style={{
       position: 'relative', borderRadius: main ? 18 : 14, overflow: 'hidden',
       background: '#111', aspectRatio: '16/9',
+      /* ⚠️ در حالتِ افقیِ گوشی، ۱۶:۹ از عرضِ کامل بلندتر از ویوپورت
+         می‌شود و پیش‌نمایش از صفحه می‌زند بیرون؛ آن‌وقت رسیدن به
+         دکمه‌های زیرش کارِ سختی است. */
+      /* عرض هم باید سقف بگیرد: با width:100% و aspect-ratio، سقفِ
+         ارتفاع تنها، جعبه‌ای تمام‌عرض با نوارهای سیاهِ بزرگ می‌سازد. */
+      maxHeight: main ? '52dvh' : '30dvh',
+      maxWidth: main ? 'calc(52dvh * 16 / 9)' : 'calc(30dvh * 16 / 9)',
+      marginInline: 'auto',
+      width: '100%',
     }}>
       {/* پیش‌نمایشِ خودِ باشگاه‌دار همیشه بی‌صداست، وگرنه صدای سالن از
           بلندگوی همان گوشی برمی‌گردد و سوت می‌کشد. */}
+      {/* contain و نه cover: باشگاه‌دار باید دقیقا همان کادری را
+          ببیند که فرستاده می‌شود. با cover، وقتی سقفِ ارتفاع فعال شود
+          بالا و پایینِ تصویر بریده می‌شد و او خیال می‌کرد میز کامل در
+          کادر است. */}
       <video ref={ref} autoPlay muted playsInline
-        style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+        style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
 
       <div style={{
         position: 'absolute', top: 8, insetInlineStart: 8,

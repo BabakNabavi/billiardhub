@@ -20,6 +20,30 @@ export const PLAYER_CSS = `
   outline: none;
   -webkit-tap-highlight-color: transparent;
   box-shadow: 0 20px 50px rgba(0,0,0,0.22);
+  /* ⚠️ سقفِ ارتفاع. با فقط aspect-ratio، در حالتِ افقیِ موبایل
+     ۱۶:۹ از عرضِ کامل بلندتر از خودِ ویوپورت می‌شد: تصویر از صفحه
+     می‌زد بیرون و کنترل‌ها دستِ‌نیافتنی می‌شدند.
+
+     max-width هم لازم است، نه فقط max-height: با width:100% و
+     aspect-ratio، سقفِ ارتفاع فقط ارتفاع را می‌برد و عرض سرِ جایش
+     می‌ماند — نتیجه‌اش یک جعبه‌ی سیاهِ تمام‌عرض با تصویرِ کوچک در وسط
+     و کنترل‌هایی چسبیده به دو لبه‌ی دور بود.
+
+     78vh پیش از 78dvh: iOS 15.0 تا 15.3 خطِ dvh را کلا می‌اندازد. */
+  max-height: 78vh;
+  max-height: 78dvh;
+  max-width: calc(78vh * 16 / 9);
+  max-width: calc(78dvh * 16 / 9);
+  margin-inline: auto;
+}
+/* در افقیِ گوشی جای عمودی خیلی کم است؛ کمی بیشتر سخت‌گیری. */
+@media (orientation: landscape) and (max-height: 520px) {
+  .bpv {
+    max-height: 72vh;
+    max-height: 72dvh;
+    max-width: calc(72vh * 16 / 9);
+    max-width: calc(72dvh * 16 / 9);
+  }
 }
 .bpv:focus-visible { box-shadow: 0 0 0 3px rgba(199,166,106,0.75); }
 
@@ -40,6 +64,8 @@ export const PLAYER_CSS = `
   aspect-ratio: auto;
   width: 100%;
   height: 100%;
+  max-height: none;
+  max-width: none;
   box-shadow: none;
 }
 .bpv[data-cssfs="1"] {

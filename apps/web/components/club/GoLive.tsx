@@ -19,15 +19,15 @@
    ───────────────────────────────────────────────────────────── */
 
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react'
-import Link from 'next/link'
 import {
-  Radio, Video, VideoOff, Loader2, SwitchCamera, ExternalLink, AlertCircle,
+  Radio, Video, VideoOff, Loader2, SwitchCamera, AlertCircle,
   Plus, MonitorUp, Settings2, Link2, Check, Users,
 } from 'lucide-react'
 import {
   subscribe, getSnapshot, getServerSnapshot, isBroadcasting,
   startSession, adoptSession, addFeed, removeFeed, toggleMic,
-  endLocal, dropLocalFeeds, replaceMain, setQuality as storeSetQuality, setError as storeSetError,
+  endLocal, dropLocalFeeds, replaceMain, deadFeeds, reviveNow,
+  setQuality as storeSetQuality, setError as storeSetError,
 } from '../../lib/live/broadcast-store'
 import { fetchLiveSessions, type LiveSession } from '../../lib/live/client'
 import { MAIN_ANGLE, MAX_ANGLES, defaultAngleLabel } from '../../lib/live/angles'
@@ -64,6 +64,9 @@ export default function GoLive({ clubId, clubName, ownerKey }: { clubId: string;
   const [showAdd, setShowAdd] = useState(false)
   const [copied, setCopied] = useState(false)
   const [swapping, setSwapping] = useState(false)
+  /* این دستگاه ثابت کرده که بیش از یک دوربین هم‌زمان نمی‌دهد — دکمه‌ی
+     افزودن دیگر نشان داده نمی‌شود تا همان چرخه تکرار نشود. */
+  const [singleCam, setSingleCam] = useState(false)
   const [localErr, setLocalErr] = useState('')
   const [elapsed, setElapsed] = useState(0)
 
@@ -75,6 +78,9 @@ export default function GoLive({ clubId, clubName, ownerKey }: { clubId: string;
   const broadcasting = st.feeds.length > 0
   const live = st.session ?? joinable
   const err = localErr || st.error
+  /* پیامِ «در حال وصلِ دوباره» خبر است نه خطا؛ در کادرِ قرمز هم
+     خطای واقعیِ استور را پنهان می‌کرد. */
+  const recovering = broadcasting && st.feeds.some(f => f.dead)
   /* ⚠️ استور سراسری است ولی این کامپوننت برای هر باشگاه جدا رندر
      می‌شود. مالکی که دو باشگاه دارد می‌توانست پخشِ باشگاه الف را
      ببیند در حالی که باشگاه ب انتخاب شده — و «دوربین دیگر» زاویه را
@@ -187,7 +193,10 @@ export default function GoLive({ clubId, clubName, ownerKey }: { clubId: string;
     setBusy(false)
   }
 
-  /* ── افزودنِ دوربین ── */
+  /* ── افزودنِ دوربین ──
+     دیده‌بانِ دوربین‌های مرده در استور است، نه این‌جا: اگر افکتِ این
+     کامپوننت بود، با عوض‌کردنِ تبِ پنل از کار می‌افتاد و دوربینی که
+     در آن فاصله می‌مرد هرگز برنمی‌گشت. */
   const addCam = async (devId: string, label: string) => {
     const target = live
     if (!target || adding) return
@@ -197,6 +206,23 @@ export default function GoLive({ clubId, clubName, ownerKey }: { clubId: string;
     const r = await openCamera(presetOf(st.quality), { deviceId: devId, audio: false })
     if (!r.stream) { if (r.error) setLocalErr(r.error); setAdding(false); return }
     if (!aliveRef.current) { stopStream(r.stream); setAdding(false); return }
+
+    /* ⚠️ بررسیِ حیاتی: آیا بازکردنِ این دوربین، دوربینِ قبلی را کشت؟
+       روی اغلبِ گوشی‌ها جلو و عقب هم‌زمان باز نمی‌شوند.
+
+       رویدادِ ended از یک تسکِ جدا می‌آید و هیچ ترتیبی نسبت به بازگشتِ
+       getUserMedia ندارد، پس یک مهلتِ کوتاه لازم است — بدونِ آن،
+       بررسی گاهی چیزی نمی‌دید و زاویه روی سرور ساخته می‌شد. */
+    await new Promise(res => window.setTimeout(res, 450))
+    if (deadFeeds().length > 0) {
+      stopStream(r.stream)
+      await reviveNow()
+      setSingleCam(true)
+      setLocalErr('این دستگاه نمی‌تواند دو دوربین را هم‌زمان باز کند. برای میز بعدی، پنل را روی گوشی یا لپ‌تاپ دیگری با همین حساب باز کنید.')
+      setShowAdd(false)
+      setAdding(false)
+      return
+    }
 
     const ok = await addFeed({ stream: r.stream, kind: 'camera', deviceId: devId, label })
     if (ok) setShowAdd(false)
@@ -278,7 +304,7 @@ export default function GoLive({ clubId, clubName, ownerKey }: { clubId: string;
         <FeedTile feed={mainFeed} main elapsed={`${fa(+mm)}:${fa(+ss)}`}
           onToggleMic={() => toggleMic(MAIN_ANGLE)} />
       ) : broadcasting ? null : (
-        <div style={{ position: 'relative', borderRadius: 18, overflow: 'hidden', background: '#111', aspectRatio: '16/9' }}>
+        <div style={{ position: 'relative', borderRadius: 18, overflow: 'hidden', background: '#111', aspectRatio: '16/9', maxHeight: '52dvh', maxWidth: 'calc(52dvh * 16 / 9)', width: '100%', marginInline: 'auto' }}>
           {preview ? (
             <video ref={previewRef} autoPlay muted playsInline
               style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
@@ -362,6 +388,12 @@ export default function GoLive({ clubId, clubName, ownerKey }: { clubId: string;
         </p>
       )}
 
+      {recovering && (
+        <div role="status" style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12.5, fontWeight: 700, color: GOLD_D, background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.34)', borderRadius: 12, padding: '10px 13px' }}>
+          <Loader2 size={15} className="gl-spin" aria-hidden /> دوربین قطع شد؛ در حال وصل دوباره…
+        </div>
+      )}
+
       {err && (
         <div role="alert" style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12.5, fontWeight: 700, color: '#B23B2E', background: 'rgba(178,59,46,0.08)', border: '1px solid rgba(178,59,46,0.2)', borderRadius: 12, padding: '10px 13px' }}>
           <AlertCircle size={15} aria-hidden /> {err}
@@ -411,25 +443,20 @@ export default function GoLive({ clubId, clubName, ownerKey }: { clubId: string;
             </span>
           </div>
 
-          {/* ⚠️ «مشاهده» عمدا در تبِ تازه باز می‌شود. روی موبایل، ناوبری
-              در همان تب یعنی ترکِ این صفحه — و همان چیزی که گزارش شد:
-              کاربر ناگهان از پخش بیرون می‌افتاد و تماشاگر می‌شد.
-              کپیِ لینک راهِ امنِ فرستادنش برای دیگران است. */}
+          {/* ⚠️ دکمه‌ی «مشاهده» حذف شد. پخش‌کننده دلیلی ندارد پخشِ خودش
+              را تماشا کند، و روی موبایل — به‌ویژه در حالتِ نصب‌شده —
+              target="_blank" در همان تب باز می‌شود: صفحه عوض می‌شود،
+              سند از بین می‌رود و پخش با آن می‌میرد. کپیِ لینک همان
+              کاری را می‌کند که واقعا لازم است: فرستادن برای دیگران. */}
           {live && (
-            <div style={{ display: 'flex', gap: 8 }}>
-              <button type="button" onClick={() => void copyLink()}
-                style={{ ...btn, flex: 1, background: '#fff', border: `1px solid ${LINE}`, color: INK }}>
-                {copied ? <Check size={16} aria-hidden /> : <Link2 size={16} aria-hidden />}
-                {copied ? 'کپی شد' : 'کپی لینک پخش'}
-              </button>
-              <Link href={`/live/${live.id}`} target="_blank" rel="noopener noreferrer"
-                style={{ ...btn, flex: 1, background: '#fff', border: `1px solid ${LINE}`, color: INK, textDecoration: 'none' }}>
-                مشاهده <ExternalLink size={14} aria-hidden />
-              </Link>
-            </div>
+            <button type="button" onClick={() => void copyLink()}
+              style={{ ...btn, background: '#fff', border: `1px solid ${LINE}`, color: INK }}>
+              {copied ? <Check size={16} aria-hidden /> : <Link2 size={16} aria-hidden />}
+              {copied ? 'لینک کپی شد' : 'کپی لینک پخش برای تماشاگران'}
+            </button>
           )}
 
-          {st.feeds.length < MAX_ANGLES && (
+          {st.feeds.length < MAX_ANGLES && !singleCam && (
             showAdd ? (
               <AddCameraPanel cams={cams} busy={adding}
                 usedIds={st.feeds.map(f => f.deviceId).filter(Boolean)}

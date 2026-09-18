@@ -29,7 +29,14 @@ export default function AddCameraPanel({
 }) {
   /* دوربین‌های در حالِ استفاده کنار گذاشته می‌شوند: بازکردنِ دوباره‌ی
      همان ورودی روی اغلبِ دستگاه‌ها NotReadableError می‌دهد. */
-  const free = cams.filter(c => c.deviceId && !usedIds.includes(c.deviceId));
+  /* ترتیبِ مفید: اول ورودیِ بیرونی (کارتِ کپچرِ دوربینِ حرفه‌ای —
+     همان چیزی که برای پخشِ میز می‌خواهند)، بعد دوربینِ پشت، و
+     دوربینِ جلو آخر چون تقریبا هیچ‌وقت انتخابِ درست نیست. */
+  const rank = (c: CamDevice) => (!c.builtIn ? 0 : c.facing === 'back' ? 1 : c.facing === 'unknown' ? 2 : 3);
+  const free = cams
+    .filter(c => c.deviceId && !usedIds.includes(c.deviceId))
+    .slice()
+    .sort((a, b) => rank(a) - rank(b));
   const [deviceId, setDeviceId] = useState('');
   const [label, setLabel] = useState(suggestedLabel);
 
@@ -53,6 +60,13 @@ export default function AddCameraPanel({
           <X size={16} />
         </button>
       </div>
+
+      {/* روی گوشی معمولا دوربینِ جلو و عقب هم‌زمان باز نمی‌شوند؛ بهتر
+          است پیش از تلاش بداند تا پخشش سیاه نشود. */}
+      <p style={{ fontSize: 11.5, color: SEC, margin: 0, lineHeight: 1.9 }}>
+        روی بیشتر گوشی‌ها فقط یک دوربین هم‌زمان باز می‌شود. برای میز دوم، پنل را
+        روی دستگاه دیگری با همین حساب باز کنید.
+      </p>
 
       {free.length === 0 ? (
         <p style={{ fontSize: 12, color: SEC, margin: 0, lineHeight: 1.9 }}>

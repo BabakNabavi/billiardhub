@@ -4,7 +4,7 @@ import { startBroadcast, type Broadcaster } from './webrtc';
 import { startLive, beatLive, stopLive, addAngle, type LiveSession } from './client';
 import { MAIN_ANGLE, MAX_ANGLES } from './angles';
 import { presetOf, retuneTrack, DEFAULT_QUALITY, type QualityId } from './quality';
-import { stopStream } from './devices';
+import { stopStream, openCamera } from './devices';
 
 /* ─────────────────────────────────────────────────────────────
    حالتِ پخشِ زنده — بیرون از ری‌اکت.
@@ -35,6 +35,9 @@ export interface BroadcastFeed {
   stream: MediaStream;
   viewers: number;
   micOn: boolean;
+  /** تصویرش قطع شده — سیستم‌عامل دوربین را گرفته یا اشتراکِ صفحه تمام
+   *  شده. همان لحظه از رویدادِ خودِ ترک ست می‌شود، نه با نظرسنجی. */
+  dead: boolean;
 }
 
 export interface BroadcastState {
@@ -109,7 +112,7 @@ function syncUnloadGuard(): void {
   if (state.feeds.length > 0) window.addEventListener('beforeunload', onBeforeUnload);
 }
 
-function afterChange(): void { syncHeartbeat(); syncUnloadGuard() }
+function afterChange(): void { syncHeartbeat(); syncUnloadGuard(); syncWatchdog() }
 
 /** آیا این دستگاه همین حالا در حال پخش است؟ */
 export function isBroadcasting(): boolean { return state.feeds.length > 0 }
@@ -135,9 +138,58 @@ function attach(
 
   if (!bc) { stopStream(stream); set({ error: 'اتصال بی‌درنگ در دسترس نیست' }); return false }
   bcs.set(angleId, bc);
-  set({ feeds: [...state.feeds, { angleId, label, kind, deviceId, stream, viewers: 0, micOn: true }] });
+  set({ feeds: [...state.feeds, { angleId, label, kind, deviceId, stream, viewers: 0, micOn: true, dead: false }] });
+  watchTrack(angleId, stream);
   afterChange();
   return true;
+}
+
+/* ── تشخیصِ مرگِ تصویر ──
+   نظرسنجی روی readyState دیر و غیرقابل‌اتکاست: بینِ لحظه‌ای که
+   getUserMedia برمی‌گردد و لحظه‌ای که ترکِ قبلی 'ended' می‌شود هیچ
+   ترتیبی تضمین نشده. پس به خودِ رویدادها گوش می‌دهیم تا وضعیت
+   همان لحظه معلوم باشد.
+
+   ⚠️ سافاری دوربینِ قطع‌شده را «mute» می‌کند نه 'ended'. ولی mute
+   لحظه‌ای هم واقعی است (سوییچِ اپ، تماس)، پس فقط اگر چند ثانیه
+   ادامه داشت مرگ حساب می‌شود. */
+const MUTE_GRACE_MS = 6_000;
+const muteTimers = new Map<string, number>();
+
+function markDead(angleId: string, dead: boolean): void {
+  const f = state.feeds.find(x => x.angleId === angleId);
+  if (!f || f.dead === dead) return;
+  set({ feeds: state.feeds.map(x => x.angleId === angleId ? { ...x, dead } : x) });
+  if (dead) afterChange();
+}
+
+function watchTrack(angleId: string, stream: MediaStream): void {
+  const t = stream.getVideoTracks()[0];
+  if (!t) return;
+
+  t.onended = () => {
+    const f = state.feeds.find(x => x.angleId === angleId);
+    /* پایانِ اشتراکِ صفحه یعنی خودِ کاربر «Stop sharing» را زده؛ این
+       خواستِ اوست، نه خرابی. بازکردنِ دوربین به‌جایش فاجعه بود:
+       تصویرِ دوربینِ عقب داخلِ کاشیِ «تابلوی امتیاز». */
+    if (f?.kind === 'screen') { removeFeed(angleId); return }
+    markDead(angleId, true);
+  };
+
+  t.onmute = () => {
+    const prev = muteTimers.get(angleId);
+    if (prev) window.clearTimeout(prev);
+    muteTimers.set(angleId, window.setTimeout(() => {
+      muteTimers.delete(angleId);
+      if (t.muted) markDead(angleId, true);
+    }, MUTE_GRACE_MS));
+  };
+
+  t.onunmute = () => {
+    const prev = muteTimers.get(angleId);
+    if (prev) { window.clearTimeout(prev); muteTimers.delete(angleId) }
+    markDead(angleId, false);
+  };
 }
 
 export async function startSession(opts: {
@@ -209,6 +261,108 @@ export function toggleMic(angleId: string): void {
   set({ feeds: state.feeds.map(x => x.angleId === angleId ? { ...x, micOn: next } : x) });
 }
 
+/* ── سلامتِ دوربین‌ها ──
+   روی اغلبِ گوشی‌ها دوربینِ جلو و عقب هم‌زمان باز نمی‌شوند: بازکردنِ
+   دومی، اولی را خاموش می‌کند و ترکش به حالتِ 'ended' می‌رود. نتیجه‌اش
+   همان چیزی بود که گزارش شد — صفحه‌ی سیاه، سوییچِ بی‌اثر، و تصویری که
+   حتی با بستنِ دوربینِ دوم هم برنمی‌گشت.
+
+   سیستم‌عامل خبرمان نمی‌کند، پس باید خودمان نگاه کنیم. */
+export function deadFeeds(): BroadcastFeed[] {
+  /* فقط دوربین. اشتراکِ صفحه با خواستِ کاربر تمام می‌شود و بالاتر،
+     در onended، حذف شده است. */
+  return state.feeds.filter(f => f.kind === 'camera' && f.dead);
+}
+
+/* ── تلاشِ محدود برای وصلِ دوباره ──
+   بدونِ سقف، دو حالتِ بدِ واقعی پیش می‌آید: اگر دستگاه فقط یک دوربین
+   هم‌زمان بدهد، وصل‌کردنِ A دوربینِ B را می‌کشد و برعکس — تا ابد هر
+   پنج ثانیه؛ و اگر اجازه‌ی دوربین پس گرفته شده باشد، getUserMedia تا
+   پایانِ پخش کوبیده می‌شود. */
+const MAX_REVIVE = 3;
+const tries = new Map<string, number>();
+let reviving = false;
+let watchTimer: number | null = null;
+
+export function isReviving(): boolean { return reviving }
+
+async function reviveOnce(): Promise<void> {
+  if (reviving) return;
+  const dead = deadFeeds();
+  if (dead.length === 0) return;
+  reviving = true;
+  try {
+    for (const f of dead) {
+      const n = (tries.get(f.angleId) ?? 0) + 1;
+      tries.set(f.angleId, n);
+      if (n > MAX_REVIVE) {
+        set({ error: 'دوربین وصل نشد. دوربین دیگری انتخاب کنید یا پخش را دوباره شروع کنید.' });
+        continue;
+      }
+      const r = await openCamera(presetOf(state.quality), {
+        deviceId: f.deviceId || undefined,
+        facing: f.deviceId ? undefined : 'environment',
+        audio: f.angleId === MAIN_ANGLE,
+      });
+      if (!r.stream) continue;
+
+      const ok = await reviveFeed(f.angleId, r.stream);
+      if (!ok) continue;
+      tries.delete(f.angleId);
+
+      /* ⚠️ اگر وصل‌کردنِ این یکی، دیگری را کشت، دستگاه بیش از یک
+         دوربینِ هم‌زمان نمی‌دهد. ادامه دادن یعنی پینگ‌پنگِ بی‌پایان. */
+      if (deadFeeds().some(x => x.angleId !== f.angleId)) {
+        set({ error: 'این دستگاه فقط یک دوربین را هم‌زمان باز می‌کند.' });
+        break;
+      }
+    }
+  } finally { reviving = false }
+}
+
+function syncWatchdog(): void {
+  if (typeof window === 'undefined') return;
+  const want = state.feeds.some(f => f.kind === 'camera');
+  if (want && watchTimer === null) {
+    watchTimer = window.setInterval(() => {
+      if (document.visibilityState !== 'visible') return;
+      void reviveOnce();
+    }, 5_000);
+  } else if (!want && watchTimer !== null) {
+    window.clearInterval(watchTimer);
+    watchTimer = null;
+    tries.clear();
+  }
+}
+
+/** تلاشِ فوری — برای لحظه‌ای که خودمان می‌دانیم چیزی شکسته. */
+export async function reviveNow(): Promise<void> { await reviveOnce() }
+
+/** جایگزینیِ تصویرِ یک دوربینِ خاص — برای برگرداندنِ دوربینی که
+ *  سیستم‌عامل خاموشش کرده. */
+export async function reviveFeed(angleId: string, stream: MediaStream): Promise<boolean> {
+  const f = state.feeds.find(x => x.angleId === angleId);
+  if (!f) { stopStream(stream); return false }
+  stream.getAudioTracks().forEach(t => { t.enabled = f.micOn });
+  await bcs.get(angleId)?.replaceStream(stream);
+
+  /* ⚠️ همان گاردِ کهنگیِ replaceMain. بدونِ آن، دو وصلِ هم‌زمانِ یک
+     زاویه هر دو استریمِ قدیمی را می‌بندند و استریمِ وسطی برای همیشه
+     باز می‌ماند — دوربینی روشن که هیچ‌کس نمی‌بندد، و روی گوشی همان
+     دوربین بلافاصله بقیه را می‌کشد. */
+  const now = state.feeds.find(x => x.angleId === angleId);
+  if (!now || now.stream !== f.stream) { stopStream(stream); return false }
+
+  stopStream(f.stream);
+  const deviceId = String(stream.getVideoTracks()[0]?.getSettings().deviceId ?? f.deviceId);
+  set({
+    feeds: state.feeds.map(x => x.angleId === angleId
+      ? { ...x, stream, deviceId, dead: false } : x),
+  });
+  watchTrack(angleId, stream);
+  return true;
+}
+
 /** تعویضِ تصویرِ دوربینِ اصلی بدونِ قطعِ بیننده‌ها. */
 export async function replaceMain(stream: MediaStream, deviceId: string): Promise<void> {
   const main = state.feeds.find(f => f.angleId === MAIN_ANGLE);
@@ -228,7 +382,8 @@ export async function replaceMain(stream: MediaStream, deviceId: string): Promis
   if (!now || now.stream !== main.stream) { stopStream(stream); return }
 
   stopStream(main.stream);
-  set({ feeds: state.feeds.map(f => f.angleId === MAIN_ANGLE ? { ...f, stream, deviceId } : f) });
+  set({ feeds: state.feeds.map(f => f.angleId === MAIN_ANGLE ? { ...f, stream, deviceId, dead: false } : f) });
+  watchTrack(MAIN_ANGLE, stream);
 }
 
 /** پایانِ کارِ این دستگاه. مالک کلِ پخش را می‌بندد؛ مهمان فقط دوربینِ خودش را. */

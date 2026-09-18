@@ -15,7 +15,58 @@ import { videoConstraints, audioConstraints, type QualityPreset } from './qualit
 
 export interface CamDevice {
   deviceId: string;
+  /** نامِ خوانا برای نمایش. */
   label: string;
+  /** اگر از روی برچسب قابلِ تشخیص بود. */
+  facing: 'front' | 'back' | 'unknown';
+  /** دوربینِ داخلیِ خودِ دستگاه، در برابرِ ورودیِ بیرونی مثل کارتِ کپچر. */
+  builtIn: boolean;
+}
+
+/* ── نامِ خوانا ──
+   کروم روی اندروید چیزهایی مثل «camera2 0, facing back» برمی‌گرداند و
+   گاهی چند ورودیِ مجازی (واید، تله، عمق) هم کنارش می‌گذارد. همین باعث
+   شد باشگاه‌دار بپرسد «این چند نوع دوربین چی هستند؟». پس هرجا بتوانیم
+   نامِ فارسیِ روشن می‌گذاریم و نامِ خام را کنار می‌گذاریم. */
+const BACK  = /\b(back|rear|environment|world)\b/i;
+const FRONT = /\b(front|user|selfie)\b/i;
+/* دوربینِ عمق و مادون‌قرمز تصویرِ معمولی نمی‌دهند و فقط فهرست را شلوغ
+   می‌کنند. ورودیِ بیرونی (کارتِ کپچر) هرگز این‌جا نمی‌افتد. */
+const NOT_A_CAMERA = /\b(depth|infrared|ir camera|tof)\b/i;
+
+function describeCamera(raw: string): CamDevice['facing'] {
+  if (BACK.test(raw)) return 'back';
+  if (FRONT.test(raw)) return 'front';
+  return 'unknown';
+}
+
+const faNum = (n: number) => n.toLocaleString('fa-IR');
+
+/* صفتِ لنز را از نامِ خام بیرون می‌کشد: روی آیفون سه ورودی به نام
+   «Back Camera»، «Back Dual Wide Camera» و «Back Ultra Wide Camera»
+   هست و اگر همه به «دوربین پشت» تبدیل شوند، دقیقا همان اطلاعاتی گم
+   می‌شود که برای کادرکردنِ میز به درد می‌خورد. */
+function lensHint(raw: string): string {
+  const cleaned = raw
+    .replace(/\b(back|rear|front|user|environment|world|selfie)\b/gi, ' ')
+    .replace(/\bcamera\d*\b/gi, ' ')
+    .replace(/[,()]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+  /* «camera2 0» و مشابهش اطلاعاتی ندارند */
+  return /^[\d\s]*$/.test(cleaned) ? '' : cleaned;
+}
+
+function friendlyLabel(raw: string, facing: CamDevice['facing'], nth: number): string {
+  if (facing === 'back' || facing === 'front') {
+    const base = facing === 'back' ? 'دوربین پشت' : 'دوربین جلو';
+    const hint = lensHint(raw);
+    if (hint) return `${base} (${hint})`;
+    return nth > 1 ? `${base} ${faNum(nth)}` : base;
+  }
+  /* نامِ خام برای ورودی‌های بیرونی مفید است — «USB Video» یا نامِ
+     کارتِ کپچر دقیقا همان چیزی است که باشگاه‌دار دنبالش می‌گردد. */
+  return raw;
 }
 
 /** برچسبِ خالی یعنی هنوز اجازه‌ی دوربین داده نشده — مرورگر تا آن
@@ -28,12 +79,25 @@ export async function listCameras(): Promise<CamDevice[]> {
   if (typeof navigator === 'undefined' || !navigator.mediaDevices?.enumerateDevices) return [];
   try {
     const all = await navigator.mediaDevices.enumerateDevices();
-    return all
-      .filter(d => d.kind === 'videoinput')
-      .map((d, i) => ({
-        deviceId: d.deviceId,
-        label: d.label || `دوربین ${i + 1}`,
-      }));
+    const vids = all.filter(d => d.kind === 'videoinput');
+    /* اگر فیلتر همه را برداشت (تبلتی که تنها ورودی‌اش «IR Camera» نام
+       دارد) هیچ‌چیز نشان ندادن بدتر از نشان‌دادنِ همان است. */
+    const shown = vids.filter(d => !NOT_A_CAMERA.test(d.label));
+    const seen = { back: 0, front: 0, unknown: 0 };
+    return (shown.length > 0 ? shown : vids)
+      .map((d, i) => {
+        const raw = d.label || '';
+        const facing = describeCamera(raw);
+        seen[facing] += 1;
+        return {
+          deviceId: d.deviceId,
+          label: raw ? friendlyLabel(raw, facing, seen[facing]) : `دوربین ${faNum(i + 1)}`,
+          facing,
+          /* برچسبِ خالی یعنی هنوز اجازه داده نشده؛ در آن حالت فرضِ
+             «داخلی» امن‌تر است چون اکثریت همین‌اند. */
+          builtIn: facing !== 'unknown' || raw === '',
+        };
+      });
   } catch { return [] }
 }
 
