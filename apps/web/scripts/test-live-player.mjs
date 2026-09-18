@@ -112,6 +112,7 @@ const golive = read('components/club/GoLive.tsx');
 const rtc    = read('lib/live/webrtc.ts');
 const api    = read('app/api/live/route.ts');
 const css    = read('lib/live/player-styles.ts');
+const store  = read('lib/live/broadcast-store.ts');
 const strip  = t => t.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, '');
 
 console.log('\n■ ۳) تمام‌صفحه — باگی که گزارش شد');
@@ -154,7 +155,8 @@ ok('کیفیت وسطِ پخش قابلِ تغییر است', /setQuality/.test(
 ok('انتخابِ دستگاه برای دوربینِ حرفه‌ای', /listCameras/.test(strip(golive)));
 ok('اشتراکِ صفحه برای تابلوی امتیاز', /openScreen/.test(strip(golive)));
 ok('دوربینِ دوم از دستگاهِ دیگر هم ممکن است', /joinable/.test(strip(golive)));
-ok('هر دوربین تپشِ خودش را می‌فرستد', /f\.angleId, f\.label/.test(strip(golive)));
+ok('هر دوربین تپشِ خودش را می‌فرستد',
+  strip(store).includes('f.angleId, f.label'));
 
 console.log('\n■ ۶) سرور');
 ok('زاویه‌ها فایلِ جدا دارند (ضدِ کلوبر)', /aPath\(id, angle/.test(strip(api)));
@@ -202,8 +204,10 @@ ok('نقشِ ARIA درست است (group، نه tablist/dialog)',
   !/role="tablist"/.test(strip(player)) && !/role="tab"/.test(strip(player)) && !/role="dialog"/.test(strip(panels)));
 ok('فریمِ یخ‌زده هنگامِ سوییچ پاک می‌شود', /el\.srcObject = null/.test(strip(player)));
 ok('دوربینِ مهمان پس از پایانِ پخش بسته می‌شود', /missesRef/.test(strip(golive)));
-ok('تپش با تغییرِ هویتِ شیء از نو ساخته نمی‌شود', /live\?\.id, ownerKey/.test(strip(golive)));
-ok('کیفیت وسطِ پخش، قیدِ خودِ دوربین را هم عوض می‌کند', /retuneTrack/.test(strip(golive)));
+ok('تپش دیگر افکتِ ری‌اکت نیست (با هر رندر از نو ساخته نمی‌شود)',
+  strip(store).includes('beatTimer = window.setInterval'));
+ok('کیفیت وسطِ پخش، قیدِ خودِ دوربین را هم عوض می‌کند',
+  strip(store).includes('retuneTrack(f.stream, p)'));
 ok('شکستِ ICE «پایان» نیست و قابلِ تلاشِ دوباره است',
   strip(rtc).includes("pc.connectionState === 'failed') onState('error')")
   && !strip(rtc).includes("'closed'].includes(pc.connectionState)) onState('ended')"));
@@ -211,8 +215,8 @@ ok('فهرستِ جلسات هم «نتوانستم بپرسم» را جدا م�
   strip(client).includes('Promise<LiveSession[] | undefined>'));
 ok('خاموش‌کردنِ دوربینِ مهمان روی خطای شبکه رخ نمی‌دهد',
   strip(golive).includes('all === undefined) return'));
-ok('attach پیش از ساختِ Broadcaster زنده‌بودن را بررسی می‌کند',
-  strip(golive).includes('if (!aliveRef.current) { stopStream(stream); return false }'));
+ok('استریم پیش از تحویل به استور، زنده‌بودنِ صفحه را بررسی می‌کند',
+  strip(golive).split('if (!aliveRef.current) { stopStream(r.stream)').length - 1 >= 3);
 ok('makePeer دیگر promiseی سرگردان نیست',
   strip(rtc).includes('makePeer(String(v)).catch'));
 ok('main.json صریح خوانده می‌شود، نه با اعتماد به ترتیبِ فهرست',
@@ -223,6 +227,79 @@ ok('انتخابگرِ دوربین با دوربینِ واقعا باز هم�
   strip(golive).includes('if (real) setDeviceId(real)'));
 ok('تا نیامدنِ اولین پاسخ، شروعِ پخش غیرفعال است',
   strip(golive).includes('!polled'));
+
+console.log('\n■ ۸) باگ‌های گزارش‌شده‌ی تستِ واقعی');
+const addp  = read('components/club/live/AddCameraPanel.tsx');
+
+/* «یهو از پخش خارج شدم و تماشاکننده شدم» — چون GoLive با
+   {activeTab === 'live' && …} رندر می‌شود و unmountش پخش را می‌کشت. */
+ok('حالتِ پخش بیرون از کامپوننت است', /useSyncExternalStore/.test(strip(golive)));
+ok('پاک‌سازیِ کامپوننت دیگر stopLive صدا نمی‌زند',
+  !/stopLive/.test(strip(golive)));
+ok('پاک‌سازیِ کامپوننت فقط پیش‌نمایش را می‌بندد',
+  /aliveRef\.current = false[\s\S]{0,140}stopStream\(previewStreamRef\.current\)/.test(strip(golive))
+  && !/feeds[\s\S]{0,40}forEach[\s\S]{0,60}stop\(\)/.test(strip(golive)));
+ok('تپش داخلِ استور است، نه افکتِ کامپوننت',
+  /beatTimer/.test(strip(store)) && !/beatLive/.test(strip(golive)));
+ok('هشدارِ بستنِ صفحه هنگام پخش', /beforeunload/.test(strip(store)));
+ok('لینکِ «مشاهده» تبِ تازه و noopener دارد',
+  /rel="noopener noreferrer"/.test(strip(golive)));
+ok('راهِ امنِ اشتراک لینک هست (کپی)', /clipboard\.writeText/.test(strip(golive)));
+
+/* «دوربین جدید زدم، دوربین جلو روشن شد» */
+ok('دوربینِ افزوده خودکار انتخاب نمی‌شود',
+  !/cams\.find\(c => c\.deviceId && !used\.has/.test(strip(golive))
+  && /AddCameraPanel/.test(strip(golive)));
+ok('پنلِ افزودن، انتخابِ دستگاه و نام دارد',
+  strip(addp).includes('onAdd(selected, label') && addp.includes('کدام دوربین'));
+ok('دوربینِ در حالِ استفاده در فهرست نمی‌آید',
+  /!usedIds\.includes\(c\.deviceId\)/.test(strip(addp)));
+ok('نامِ پیش‌فرض بر اساسِ میز است', /میز /.test(read('lib/live/angles.ts')));
+ok('باشگاه‌دار نامِ دوربینِ اصلی را هم می‌دهد', /mainLabel/.test(strip(golive)));
+
+/* چند دستگاه با یک حساب */
+ok('دستگاهِ مهمان پخشِ جاری را می‌پذیرد', /adoptSession/.test(strip(golive)));
+ok('مهمان فقط دوربینِ خودش را قطع می‌کند',
+  /st\.owned \? 'پایان پخش' : 'قطع دوربین این دستگاه'/.test(strip(golive)));
+ok('راهنمای چند دستگاه در رابط هست', /روی گوشی یا لپ‌تاپ دیگری/.test(golive));
+
+/* فیلدِ رشته حذف شد */
+ok('فیلدِ رشته حذف شده', !/DISCIPLINES/.test(strip(golive)));
+ok('هیچ صفحه‌ای رشته را نشان نمی‌دهد',
+  !strip(read('app/live/[id]/page.tsx')).includes('discipline')
+  && !strip(read('app/live/page.tsx')).includes('discipline'));
+
+/* تعویضِ دوربینِ اصلی وسطِ پخش */
+ok('دوربینِ اصلی وسطِ پخش قابلِ تعویض است',
+  /replaceMain/.test(strip(golive)) && /pickMainCamera/.test(strip(golive)));
+
+console.log('\n■ ۹) موارد بازبینیِ دورِ دوم');
+const indi = read('components/live/LiveIndicator.tsx');
+const addp2 = read('components/club/live/AddCameraPanel.tsx');
+const sel = read('components/ui/SelectField.tsx');
+const layout = read('app/layout.tsx');
+
+ok('پخش هیچ‌وقت بدونِ کنترلِ دیده‌شدنی اجرا نمی‌شود',
+  strip(layout).includes('<LiveIndicator />') && strip(indi).includes('endLocal'));
+ok('نشان وقتی پخشی نیست چیزی رندر نمی‌کند',
+  strip(indi).includes('if (st.feeds.length === 0) return null'));
+ok('تعویضِ دوربین وضعیتِ میکروفون را حفظ می‌کند',
+  strip(store).includes('t.enabled = main.micOn'));
+ok('تعویضِ هم‌زمانِ دوربین استریمِ برنده را نمی‌بندد',
+  strip(store).includes('now.stream !== main.stream'));
+ok('جلسه‌ی بی‌تصویر روی سرور رها نمی‌شود',
+  strip(store).includes('await stopLive(r.session.id, opts.ownerKey)'));
+ok('شکستِ «پایان پخش» پنهان نمی‌ماند',
+  strip(store).includes('پایان پخش روی سرور ثبت نشد'));
+ok('تعویضِ دوربین گاردِ in-flight دارد', strip(golive).includes('swapping'));
+ok('پخشِ باشگاهِ دیگر با این باشگاه قاطی نمی‌شود',
+  strip(golive).includes('st.session.clubId !== clubId'));
+ok('انتخابِ کهنه‌ی دوربین به دکمه نشت نمی‌کند',
+  strip(addp2).includes('free.some(c => c.deviceId === deviceId)'));
+ok('پنلِ افزودن حلقه‌ی فوکوس دارد', /acp-btn:focus-visible/.test(addp2));
+ok('SelectField قابلِ غیرفعال‌شدن و برچسب‌دار است',
+  strip(sel).includes('disabled?: boolean') && strip(sel).includes('aria-haspopup="listbox"'));
+ok('تپش روی سرور اجرا نمی‌شود', strip(store).includes("typeof window === 'undefined'"));
 
 console.log('\n' + '─'.repeat(52));
 console.log(`  ${fail === 0 ? '✓' : '✗'} ${pass} پاس، ${fail} ناموفق\n`);
