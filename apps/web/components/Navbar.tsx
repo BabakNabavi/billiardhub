@@ -13,6 +13,7 @@ import {
 import { useRouter, usePathname } from 'next/navigation';
 import { fetchConversations, fetchNotifs, markNotifsRead, type Notif } from '../lib/social';
 import { useSocialInteractions } from './features/FeatureFlags';
+import LiveNavBadge from './live/LiveNavBadge';
 import { subscribeDM } from '../lib/realtime';
 import Stories from './Stories';
 import Avatar from './ui/Avatar';
@@ -308,6 +309,46 @@ export default function Navbar() {
         .desk { display:flex !important; }
         .mob  { display:none  !important; }
         @media(max-width:900px) { .desk{display:none!important;} .mob{display:flex!important;} }
+
+        /* ── نشانِ پخش زنده ──
+           استایلش این‌جاست نه در خودِ کامپوننت: آن کامپوننت دو بار
+           mount می‌شود (دسکتاپ و موبایل) و بلوکِ استایلِ داخلی‌اش دو
+           بار تزریق می‌شد.
+
+           ⚠️ متنِ قرمز #ef4444 روی پس‌زمینه‌ی روشن ۳٫۷۶:۱ است و از حدِ
+           ۴٫۵:۱ رد نمی‌شود. متن #dc2626 می‌گیرد (۴٫۸۳:۱) و #ef4444
+           فقط برای نقطه و حاشیه می‌ماند. */
+        .lnb {
+          display:inline-flex; align-items:center; gap:6px;
+          text-decoration:none; white-space:nowrap; flex-shrink:0;
+          color:#dc2626; font-weight:800; font-size:14px;
+          border:1px solid rgba(239,68,68,0.32);
+          background:rgba(239,68,68,0.08);
+          border-radius:999px; padding:6px 12px;
+          transition:background .2s ease, border-color .2s ease;
+        }
+        .lnb:hover { background:rgba(239,68,68,0.15); border-color:rgba(239,68,68,0.5) }
+        .lnb:focus-visible { outline:2px solid #dc2626; outline-offset:2px }
+        .lnb-dot {
+          width:8px; height:8px; border-radius:50%;
+          background:#ef4444; flex-shrink:0;
+          animation:lnbPulse 1.4s infinite;
+        }
+        @keyframes lnbPulse { 0%,100%{opacity:1} 50%{opacity:.25} }
+
+        /* ⚠️ روی موبایل نوار تنگ است. با متن، ردیف در ۳۷۵ پیکسل سرریز
+           می‌کرد (همه‌ی آیتم‌ها flex-shrink:0 هستند). پس از ۴۳۰ به
+           پایین فقط نقطه می‌ماند، هم‌اندازه‌ی بقیه‌ی دکمه‌های آیکونی.
+           نامِ کامل در aria-label حفظ شده. */
+        .lnb--mob { font-size:12.5px; padding:6px 10px; gap:5px; min-height:40px }
+        @media(max-width:430px) {
+          .lnb--mob .lnb-txt { display:none }
+          .lnb--mob {
+            width:40px; height:40px; min-height:40px;
+            padding:0; justify-content:center;
+          }
+        }
+        @media (prefers-reduced-motion: reduce) { .lnb-dot { animation:none } }
         /* تبلت (iPad Pro / Surface): منوی «بیشتر» از چپ بیرون می‌زد ⇒ وسط ویوپورت فیکس می‌شود */
         @media(min-width:901px) and (max-width:1240px){
           /* بدون transform — انیمیشن fadeDown خودش transform را پر می‌کند و وسط‌چینی را می‌شکست */
@@ -479,6 +520,8 @@ export default function Navbar() {
                 </div>
               )}
             </div>
+            {/* نشانِ پخش زنده — فقط وقتی واقعا پخشی در جریان است */}
+            <LiveNavBadge variant="desktop" />
           </div>
 
           {/* Search bar */}
@@ -493,6 +536,11 @@ export default function Navbar() {
 
           {/* Right actions — all icon buttons 44×44px, icon size 22 */}
           <div className="nav-actions" style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0, minWidth: 0 }}>
+
+            {/* نشانِ پخش زنده — موبایل. کنارِ ذره‌بین، چون جای دیگری نیست.
+                بدونِ wrapper: آن span حتی وقتی نشان null بود یک gap از
+                ردیفِ تنگِ موبایل می‌گرفت. */}
+            <LiveNavBadge variant="mobile" />
 
             {/* Search — mobile only */}
             <button ref={searchBtnRef} aria-label="جستجو" className="mob nav-ico" onClick={() => setSearchOpen(p => !p)}

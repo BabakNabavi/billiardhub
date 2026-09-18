@@ -65,5 +65,16 @@ export const beatLive = (id: string, ownerKey: string, viewers: number, angleId?
 export const stopLive = (id: string, ownerKey: string) =>
   post({ action: 'stop', id, ownerKey }, {})
 
+/** فقط «چند پخش زنده هست؟» — برای نشانِ نوارِ بالا. سبک است و
+ *  سرور پاسخش را ۱۵ ثانیه کش می‌کند. */
+export const probeLive = async (): Promise<number> => {
+  try {
+    const r = await apiFetch('/api/live?probe=1', { cache: 'no-store' })
+    if (!r.ok) return 0
+    const d = await r.json()
+    return Number(d?.count) || 0
+  } catch { return 0 }
+}
+
 export const addAngle = (id: string, label: string) =>
   post<{ ok?: boolean; angle?: LiveAngle; message?: string }>({ action: 'add-angle', id, label }, {})

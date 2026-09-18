@@ -73,10 +73,54 @@ async function readAngles(id: string): Promise<LiveAngle[]> {
   } catch { return [] }
 }
 
+/* ── کشِ کوتاهِ «آیا کسی زنده است؟» ──
+   نشانِ پخش زنده در نوارِ بالای **همه‌ی** صفحه‌هاست. اگر هر بیننده
+   مستقیم فهرست را می‌گرفت، هر بار یک list به‌علاوه‌ی تا ۲۰۰ دانلود
+   می‌شد — یعنی هزینه‌ی سرور با تعدادِ بازدیدکننده بالا می‌رفت.
+
+   با این کش، هزینه‌ی واقعی مستقل از ترافیک است: حداکثر یک محاسبه در
+   هر ۱۵ ثانیه. ۱۵ ثانیه از پنجره‌ی کهنگی (۴۵ ثانیه) خیلی کوتاه‌تر
+   است، پس تأخیرِ نشان محسوس نیست. */
+let probeCache: { at: number; count: number } | null = null;
+/* ⚠️ خودِ وعده کش می‌شود، نه فقط نتیجه. کلاینت‌ها هر ۶۰ ثانیه
+   می‌پرسند و درخواست‌ها دقیقا سرِ مرزِ انقضای کش جمع می‌شوند؛ بدونِ
+   این، هر کدام یک اسکنِ کاملِ Storage را جدا شروع می‌کرد. */
+let probeInflight: Promise<number> | null = null;
+const PROBE_TTL = 15_000;
+
+/* یک تعریف از «زنده»، نه دو تا — وگرنه روزی که معنای کهنگی عوض شود
+   یکی‌شان جا می‌ماند. */
+async function liveSessions(): Promise<LiveSession[]> {
+  const { data } = await getSupabaseServer().storage.from(BUCKET).list(DIR, { limit: 200 })
+  const files = (data ?? []).filter(f => f.name.endsWith('.json'))
+  const all = await Promise.all(files.map(f => readJsonFresh<LiveSession | null>(`${DIR}/${f.name}`, null)))
+  const now = Date.now()
+  return (all.filter(Boolean) as LiveSession[])
+    .filter(s => !s.ended && now - s.lastBeat <= STALE)
+    .sort((a, b) => b.startedAt - a.startedAt)
+}
+
 /* GET            → جلسات فعال
-   GET ?id=...    → یک جلسه، همراه با دوربین‌های زنده‌اش */
+   GET ?id=...    → یک جلسه، همراه با دوربین‌های زنده‌اش
+   GET ?probe=1   → فقط تعدادِ پخش‌های زنده (سبک، برای نوار بالا) */
 export async function GET(req: NextRequest) {
   const id = req.nextUrl.searchParams.get('id')
+
+  if (req.nextUrl.searchParams.get('probe')) {
+    if (probeCache && Date.now() - probeCache.at < PROBE_TTL) {
+      return NextResponse.json({ count: probeCache.count }, { headers: { ...CORS, 'Cache-Control': 'no-store' } })
+    }
+    try {
+      probeInflight ??= liveSessions()
+        .then(list => { probeCache = { at: Date.now(), count: list.length }; return list.length })
+        .finally(() => { probeInflight = null })
+      const count = await probeInflight
+      return NextResponse.json({ count }, { headers: { ...CORS, 'Cache-Control': 'no-store' } })
+    } catch {
+      /* خطا نباید نوارِ بالای سایت را بشکند — «کسی زنده نیست» امن‌ترین پاسخ است. */
+      return NextResponse.json({ count: 0 }, { headers: { ...CORS, 'Cache-Control': 'no-store' } })
+    }
+  }
   if (id) {
     const s = await readJsonFresh<LiveSession | null>(sPath(id), null)
     if (!s || s.ended || Date.now() - s.lastBeat > STALE) {
@@ -87,16 +131,9 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const { data } = await getSupabaseServer().storage.from(BUCKET).list(DIR, { limit: 200 })
-    const files = (data ?? []).filter(f => f.name.endsWith('.json'))
-    const all = await Promise.all(files.map(f => readJsonFresh<LiveSession | null>(`${DIR}/${f.name}`, null)))
-    const now = Date.now()
-    const live = (all.filter(Boolean) as LiveSession[])
-      .filter(s => !s.ended && now - s.lastBeat <= STALE)
-      .sort((a, b) => b.startedAt - a.startedAt)
     /* فهرست عمدا زاویه‌ها را نمی‌خواند: برای هر جلسه یک list به‌علاوه‌ی
        چند download بود، روی صفحه‌ای که هر ۱۵ ثانیه تازه می‌شود. */
-    return NextResponse.json(live, { headers: { ...CORS, 'Cache-Control': 'no-store' } })
+    return NextResponse.json(await liveSessions(), { headers: { ...CORS, 'Cache-Control': 'no-store' } })
   } catch {
     return NextResponse.json([], { headers: { ...CORS, 'Cache-Control': 'no-store' } })
   }
