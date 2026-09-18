@@ -10,6 +10,7 @@ import ScrollToTop from '../components/ScrollToTop';
 import AppBoot from '../components/AppBoot';
 import PersianDigits from '../components/PersianDigits';
 import AddToHomeScreenGate from '../components/pwa/AddToHomeScreenGate';
+import LiveIndicator from '../components/live/LiveIndicator';
 import { FeatureFlagsProvider } from '../components/features/FeatureFlags';
 import { SITE_URL } from '../lib/site-url';
 
@@ -219,6 +220,11 @@ export default function RootLayout({
         {/* پنجره‌ی تأیید و پیام کوتاه — یک‌جا برای کل سایت، به‌جای
             پنجره‌ی بومی مرورگر که چپ‌به‌راست است و نشانی سایت را
             بالای خودش می‌نویسد. */}
+        {/* نشانِ «در حال پخش» — پخش زنده عمدا از عمرِ کامپوننتِ پنل
+            مستقل است (تا عوض‌کردنِ تب آن را نکشد)، پس باید هر جای
+            سایت دیده شود و همان‌جا هم بشود تمامش کرد. وقتی پخشی در
+            جریان نیست هیچ‌چیز رندر نمی‌کند. */}
+        <LiveIndicator />
         <DialogHost />
         <ToastProvider />
         {/* راهنمای «افزودن به صفحه‌ی اصلی» — فقط iOS/Safari و فقط وقتی
