@@ -11,13 +11,12 @@ import {
   LayoutDashboard, FileText, Grid3X3, Clock, CalendarDays, Trophy,
   Camera, GraduationCap, AlertTriangle, Trash2, Building2, Phone,
   Plus, Pencil, Eye, Upload, CheckCircle, XCircle, ImageIcon, Settings,
-  Loader2, Wallet, Radio, MapPin, MessageSquare, CalendarClock,
+  Loader2, Wallet, MapPin, MessageSquare, CalendarClock,
 } from 'lucide-react';
 import ClubFinance from '../../../components/club/ClubFinance';
 import SmsToMembers from '../../../components/club/SmsToMembers';
 import ClubSchedule from '../../../components/club/ClubSchedule';
 import { rejectLabel } from '../../../lib/moderation/reasons';
-import GoLive from '../../../components/club/GoLive';
 import api from '../../../lib/api';
 import ProvinceCitySelect from '../../../components/ProvinceCitySelect';
 import SiteAddressField, { type SlugStatus } from '../../../components/SiteAddressField';
@@ -1967,7 +1966,6 @@ export default function ClubDashboardPage() {
        بداند فردا چند رزرو دارد. */
     { key: 'schedule',    label: 'تقویم و گزارش', Icon: CalendarClock, badge: tomorrowCount || undefined },
     { key: 'finance',     label: 'مالی',       Icon: Wallet },
-    { key: 'live',        label: 'پخش زنده',   Icon: Radio },
     { key: 'tournaments', label: 'مسابقات',    Icon: Trophy },
     { key: 'gallery',     label: 'گالری',      Icon: ImageIcon },
     { key: 'coaches',     label: 'مربیان',     Icon: GraduationCap },
@@ -3973,10 +3971,9 @@ export default function ClubDashboardPage() {
         <ClubFinance clubId={selectedClub.id} onEditBank={() => setActiveTab('info')} />
       )}
 
-      {/* ════ Tab: Live ════ */}
-      {activeTab === 'live' && selectedClub && (
-        <GoLive clubId={selectedClub.id} clubName={selectedClub.name} ownerKey={user?.phone || user?.id || 'owner'} />
-      )}
+      {/* ⚠️ تبِ «پخش زنده» از داشبورد به صفحه‌ی خودِ باشگاه منتقل شد.
+          جایش آن‌جاست: باشگاه‌دار همان صفحه‌ای را می‌بیند که مخاطبش
+          می‌بیند، کنارِ اطلاعات و گالری و مسابقات. */}
 
       {/* ════ Tab: Gallery ════ */}
       {activeTab === 'gallery' && (

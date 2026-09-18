@@ -34,6 +34,9 @@ import { DISCIPLINES } from '../../../lib/coach-store'
 import VerifiedBadge from '../../../components/VerifiedBadge'
 import FavoriteButton from '../../../components/FavoriteButton';
 import { iranTel } from '../../../lib/iran-geo'
+import { fetchLiveSessions, fetchLiveSession, type LiveSession } from '../../../lib/live/client'
+import GoLive from '../../../components/club/GoLive'
+import LivePlayer from '../../../components/live/LivePlayer'
 
 interface Club {
   id: string; name: string; managerName: string; description: string;
@@ -145,19 +148,20 @@ export default function ClubProfilePage() {
   const [bookingStatus, setBookingStatus] = useState<{ always?: boolean; label?: string } | null>(null);
   const [slide, setSlide]             = useState(0);
   const [distance, setDistance]       = useState<string | null>('۲.۳ کیلومتر');
-  const [tab, setTab]                 = useState<'info' | 'tournaments' | 'gallery' | 'schedule'>('info');
+  const [tab, setTab]                 = useState<'info' | 'tournaments' | 'gallery' | 'schedule' | 'live'>('info');
+  /* جلسه‌ی پخشِ زنده‌ی همین باشگاه. خالی یعنی پخشی در جریان نیست. */
+  const [liveSession, setLiveSession] = useState<LiveSession | null>(null);
 
   /* ── فهرست بیرون از JSX ──
      هم نوار تب و هم هندلر کلیدهای جهت به همین ترتیب نیاز دارند؛ دو
      نسخه یعنی یک روز یکی‌شان عوض می‌شود و ناوبری کیبورد از جای
      اشتباه رد می‌شود. */
-  const CLUB_TABS = [
+  const BASE_TABS = [
     { key: 'info',        label: 'اطلاعات' },
     { key: 'gallery',     label: 'گالری' },
     { key: 'tournaments', label: 'مسابقات' },
     { key: 'schedule',    label: 'ساعت کاری' },
   ] as const;
-  const onTabKey = useTabKeys(CLUB_TABS.map(x => x.key), tab, setTab, 'ctab-');
 
 
   const [activeCoach, setActiveCoach] = useState<number | null>(null);
@@ -435,6 +439,56 @@ export default function ClubProfilePage() {
   const isClubOwner = (club as { isMine?: boolean }).isMine === true
     || (!!user?.id && !!club.ownerId && user.id === club.ownerId);
 
+  /* ── تبِ پخش زنده ──
+     برای باشگاه‌دار همیشه هست (از همین‌جا پخش را شروع می‌کند) و برای
+     بقیه فقط وقتی واقعا پخشی در جریان باشد؛ تبِ خالی برای بازدیدکننده
+     فقط شلوغی است. */
+  /* تا وقتی خودِ همین تب انتخاب است نگهش می‌داریم: با پایانِ پخش،
+     پراندنِ بیننده به تبِ «اطلاعات» بی‌توضیح است و فوکوسش را هم روی
+     دکمه‌ای می‌اندازد که دیگر وجود ندارد. پخش‌کننده صفحه‌ی «پایان
+     یافت»ِ خودش را دارد. */
+  const showLiveTab = isClubOwner || liveSession !== null || tab === 'live';
+  /* آخرین جلسه‌ای که این بیننده باز کرده بود — تا وقتی پخش تمام شد،
+     پخش‌کننده بتواند پیامِ «پایان یافت» را نشان دهد به‌جای پنلِ خالی. */
+  const watchedLive = useRef<LiveSession | null>(null);
+  if (liveSession) watchedLive.current = liveSession;
+  const CLUB_TABS = showLiveTab
+    ? ([...BASE_TABS, { key: 'live' as const, label: 'پخش زنده' }] as const)
+    : BASE_TABS;
+
+  /* اگر پخش تمام شد و بازدیدکننده روی همان تب بود، تب ناپدید می‌شود و
+     او روی پنلی می‌ماند که دیگر دکمه‌ای ندارد. */
+  const onTabKey = useTabKeys(CLUB_TABS.map(x => x.key), tab, setTab, 'ctab-');
+
+  /* ── آیا این باشگاه همین حالا پخش دارد؟ ──
+     وقتی روی تبِ پخش هستیم تندتر و با جزئیات (فهرستِ دوربین‌ها) خوانده
+     می‌شود؛ بیرونِ آن فقط برای اینکه بدانیم تب را نشان بدهیم یا نه. */
+  useEffect(() => {
+    if (!club.id) return;
+    let alive = true;
+    const look = async () => {
+      if (document.visibilityState !== 'visible') return;
+      if (tab === 'live' && liveSession) {
+        const s = await fetchLiveSession(liveSession.id);
+        if (alive && s !== undefined) setLiveSession(s);
+        return;
+      }
+      const all = await fetchLiveSessions();
+      if (!alive || all === undefined) return;
+      const hit = all.find(x => x.clubId === club.id && !x.ended) ?? null;
+      setLiveSession(prev => (prev?.id === hit?.id ? prev : hit));
+    };
+    void look();
+    const t = window.setInterval(() => void look(), tab === 'live' ? 20_000 : 45_000);
+    document.addEventListener('visibilitychange', look);
+    return () => {
+      alive = false;
+      window.clearInterval(t);
+      document.removeEventListener('visibilitychange', look);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [club.id, tab, liveSession?.id]);
+
   const saveAlbums = async (next: ClubAlbum[]) => {
     setAlbumBusy(true); setAlbumErr('');
     const before = clubAlbums;
@@ -623,6 +677,26 @@ export default function ClubProfilePage() {
         @keyframes fadeUp    { from{opacity:0;transform:translateY(18px)} to{opacity:1;transform:translateY(0)} }
         @keyframes fadeIn    { from{opacity:0;transform:translate(-50%,-48%) scale(0.94)} to{opacity:1;transform:translate(-50%,-50%) scale(1)} }
         @keyframes pulse     { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+        /* تبِ پخش زنده — قرمز، با نقطه‌ای که فقط هنگامِ پخشِ واقعی
+           چشمک می‌زند. رنگ باید در حالتِ انتخاب‌نشده هم دیده شود،
+           چون همان نشانه‌ی «این‌جا خبری هست» است. */
+        /* ⚠️ متنِ #ef4444 روی پس‌زمینه‌ی روشن ۳٫۷۶:۱ است و از حدِ ۴٫۵:۱
+           رد نمی‌شود؛ #dc2626 می‌شود ۴٫۸۳:۱. قرمزِ روشن فقط برای نقطه. */
+        .ctab-live { color:#dc2626 !important; font-weight:800; display:inline-flex; align-items:center; justify-content:center; gap:6px }
+        .ctab-live[aria-selected="true"] { color:#dc2626 !important }
+        .ctab-dot { width:7px; height:7px; border-radius:50%; background:rgba(239,68,68,0.35); flex-shrink:0 }
+        .ctab-dot--on { background:#ef4444; animation:pulse 1.4s infinite }
+        @media (prefers-reduced-motion: reduce) { .ctab-dot--on { animation:none } }
+
+        /* ⚠️ با تبِ پنجم، هر ستون روی ۳۷۵ پیکسل حدود ۵۴ پیکسل جا دارد و
+           «ساعت کاری» و «پخش زنده» دو خطی می‌شدند و ارتفاعِ نوار دو
+           برابر می‌شد. */
+        @media(max-width:600px) {
+          .lq-seg-fill > button { font-size:11.5px; white-space:nowrap; padding-inline:4px }
+          .ctab-dot { width:5px; height:5px }
+          .ctab-live { gap:4px }
+        }
 
         /* ── نشانی اختصاصی روی هدر ──
            آینه‌ی کلاسِ ch-addr در components/profile/profile-page.css
@@ -866,7 +940,11 @@ export default function ClubProfilePage() {
               {CLUB_TABS.map(t => (
                 <button key={t.key} type="button" role="tab" aria-selected={tab === t.key}
                   id={`ctab-${t.key}`} aria-controls={`cpanel-${t.key}`} tabIndex={tab === t.key ? 0 : -1}
-                  onClick={() => setTab(t.key)}>{t.label}</button>
+                  className={t.key === 'live' ? 'ctab-live' : undefined}
+                  onClick={() => setTab(t.key)}>
+                  {t.key === 'live' && <span className={liveSession ? 'ctab-dot ctab-dot--on' : 'ctab-dot'} aria-hidden />}
+                  {t.label}
+                </button>
               ))}
             </div>
           </div>
@@ -1487,6 +1565,54 @@ export default function ClubProfilePage() {
                   })}
                 </div>
               </div>
+            </div>
+          )}
+
+          {/* ── LIVE TAB ──
+              مدیریتِ پخش این‌جاست، نه در داشبورد: باشگاه‌دار همان‌جایی
+              پخش را شروع می‌کند که صفحه‌ی خودِ باشگاه است.
+
+              خودِ پخش در استورِ سراسری زندگی می‌کند، پس عوض‌کردنِ تب
+              قطعش نمی‌کند. */}
+          {tab === 'live' && (
+            <div id="cpanel-live" role="tabpanel" aria-labelledby="ctab-live"
+              style={{ animation: 'fadeUp 0.4s ease both', maxWidth: 820, margin: '0 auto' }}>
+
+              {isClubOwner ? (
+                <div className="lqg" style={{ padding: 'clamp(16px,3vw,24px)' }}>
+                  <h2 style={{ fontSize: 17, fontWeight: 800, color: '#111111', margin: '0 0 6px', display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <span style={{ width: 3, height: 16, background: '#ef4444', borderRadius: 2, display: 'inline-block', flexShrink: 0 }} />
+                    پخش زنده باشگاه
+                  </h2>
+                  <p style={{ fontSize: 13, color: 'rgba(0,0,0,0.45)', lineHeight: 1.9, margin: '0 0 18px' }}>
+                    مسابقات خود را مستقیم از گوشی یا دوربین فیلم‌برداری پخش کنید. پخش شما در صفحه‌ی «پخش زنده» سایت دیده می‌شود.
+                  </p>
+                  <GoLive clubId={club.id} clubName={club.name} ownerKey={user?.phone || user?.id || 'owner'} />
+                </div>
+              ) : liveSession || watchedLive.current ? (
+                <>
+                  <LivePlayer
+                    sessionId={(liveSession ?? watchedLive.current)!.id}
+                    angles={liveSession?.angles ?? []}
+                    title={(liveSession ?? watchedLive.current)!.title}
+                    viewers={liveSession?.viewers ?? 0}
+                    startedAt={(liveSession ?? watchedLive.current)!.startedAt}
+                    ended={liveSession === null}
+                  />
+                  <p style={{ fontSize: 13.5, fontWeight: 700, color: '#111111', margin: '16px 0 0', textAlign: 'center' }}>
+                    {(liveSession ?? watchedLive.current)!.title}
+                  </p>
+                </>
+              ) : (
+                <div className="lqg" style={{ padding: 'clamp(24px,5vw,40px)', textAlign: 'center' }}>
+                  <p style={{ fontSize: 15, fontWeight: 800, color: '#111111', margin: '0 0 8px' }}>
+                    این باشگاه در حال حاضر پخش زنده‌ای ندارد
+                  </p>
+                  <p style={{ fontSize: 13.5, color: 'rgba(0,0,0,0.42)', margin: 0, lineHeight: 2 }}>
+                    هر وقت پخشی شروع شود، همین‌جا نمایش داده می‌شود.
+                  </p>
+                </div>
+              )}
             </div>
           )}
         </div>
