@@ -13,13 +13,16 @@ const GOLD_D = '#8F6531', GROUND = '#FAF8F3'
 export interface SelectOption { value: string; label: string; dot?: string }
 
 export default function SelectField({
-  value, onChange, options, placeholder = 'انتخاب کنید', label,
+  value, onChange, options, placeholder = 'انتخاب کنید', label, disabled = false,
 }: {
   value: string
   onChange: (v: string) => void
   options: SelectOption[]
   placeholder?: string
   label?: string
+  /** برای وقتی تغییرِ مقدار در جریان است (مثلا تعویضِ دوربینِ زنده)
+   *  و تغییرِ دوباره وسطِ کار وضعیت را خراب می‌کند. */
+  disabled?: boolean
 }) {
   const [open, setOpen] = useState(false)
   const [mobile, setMobile] = useState(false)
@@ -78,13 +81,20 @@ export default function SelectField({
   return (
     <>
       {label && <span style={{ display: 'block', fontSize: 11.5, fontWeight: 800, color: SEC, marginBottom: 6 }}>{label}</span>}
+      {/* دکمه تنها کنترلِ این فیلد است؛ بدونِ aria-label اسکرین‌ریدر
+          فقط مقدارِ انتخاب‌شده را می‌خواند و نمی‌گوید فیلد چیست. */}
       <button ref={btnRef} type="button" onClick={() => setOpen(o => !o)}
+        disabled={disabled}
+        aria-label={label}
+        aria-haspopup="listbox"
+        aria-expanded={open}
         style={{
           width: '100%', boxSizing: 'border-box', display: 'flex', alignItems: 'center', gap: 9,
-          padding: '11px 13px', borderRadius: 12, cursor: 'pointer', fontFamily: 'inherit', fontSize: 13.5,
+          padding: '11px 13px', borderRadius: 12, cursor: disabled ? 'default' : 'pointer', fontFamily: 'inherit', fontSize: 13.5,
           background: GROUND, border: `1px solid ${open ? 'rgba(199,166,106,0.55)' : LINE}`,
           color: selected ? INK : MUT, textAlign: 'right', transition: 'border-color .2s',
           boxShadow: open ? '0 0 0 3px rgba(199,166,106,0.13)' : 'none',
+          opacity: disabled ? 0.6 : 1,
         }}>
         {selected?.dot && <span style={{ width: 9, height: 9, borderRadius: '50%', background: selected.dot, flexShrink: 0 }} />}
         <span style={{ flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontWeight: selected ? 700 : 500 }}>

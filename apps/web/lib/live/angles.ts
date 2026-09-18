@@ -35,18 +35,14 @@ export const MAIN_ANGLE = 'main';
 /** پنجره‌ی کهنگی — هم‌اندازه‌ی جلسه. */
 export const ANGLE_STALE_MS = 45_000;
 
-/* نام‌های پیشنهادی. باشگاه‌دار می‌تواند تایپ کند، ولی اغلب نمی‌کند و
-   «دوربین ۲» چیزی به بیننده نمی‌گوید. */
-export const ANGLE_LABEL_SUGGESTIONS = [
-  'نمای کلی میز',
-  'نمای نزدیک',
-  'نمای بازیکن',
-  'میز کناری',
-  'تابلوی امتیاز',
-];
+/* نام‌های پیشنهادی. کاربردِ واقعی پوششِ چند **میز** است، نه چند
+   نمای یک میز — پس پیش‌فرض هم همان را می‌گوید. باشگاه‌دار می‌تواند
+   عوضش کند و همین نام برای بیننده نمایش داده می‌شود. */
+const FA_DIGITS = '۰۱۲۳۴۵۶۷۸۹';
+const faNum = (n: number) => String(n).replace(/[0-9]/g, d => FA_DIGITS.charAt(Number(d)));
 
 export function defaultAngleLabel(index: number): string {
-  return ANGLE_LABEL_SUGGESTIONS[index] ?? `دوربین ${index + 1}`;
+  return `میز ${faNum(index + 1)}`;
 }
 
 /** کانالِ سیگنالینگِ یک زاویه. زاویه‌ی اصلی نامِ تاریخی‌اش را نگه
