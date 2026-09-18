@@ -242,8 +242,8 @@ ok('پاک‌سازیِ کامپوننت فقط پیش‌نمایش را می‌
 ok('تپش داخلِ استور است، نه افکتِ کامپوننت',
   /beatTimer/.test(strip(store)) && !/beatLive/.test(strip(golive)));
 ok('هشدارِ بستنِ صفحه هنگام پخش', /beforeunload/.test(strip(store)));
-ok('لینکِ «مشاهده» تبِ تازه و noopener دارد',
-  /rel="noopener noreferrer"/.test(strip(golive)));
+/* دکمه‌ی «مشاهده» کلا حذف شد — سخت‌گیرانه‌تر از noopener. دلیلش در
+   بخشِ ۱۰ بررسی می‌شود. */
 ok('راهِ امنِ اشتراک لینک هست (کپی)', /clipboard\.writeText/.test(strip(golive)));
 
 /* «دوربین جدید زدم، دوربین جلو روشن شد» */
@@ -300,6 +300,79 @@ ok('پنلِ افزودن حلقه‌ی فوکوس دارد', /acp-btn:focus-vis
 ok('SelectField قابلِ غیرفعال‌شدن و برچسب‌دار است',
   strip(sel).includes('disabled?: boolean') && strip(sel).includes('aria-haspopup="listbox"'));
 ok('تپش روی سرور اجرا نمی‌شود', strip(store).includes("typeof window === 'undefined'"));
+
+console.log('\n■ ۱۰) گزارشِ دومِ تستِ واقعی');
+const dev = read('lib/live/devices.ts');
+const tile = read('components/club/live/FeedTile.tsx');
+const q = read('lib/live/quality.ts');
+
+/* «دوربین جلو را روشن کردم، عقب قطع شد و صفحه سیاه شد» */
+ok('مرگِ دوربین تشخیص داده می‌شود', strip(store).includes('dead: boolean'));
+ok('دوربینِ مرده قابلِ برگرداندن است', strip(store).includes('reviveFeed'));
+ok('اگر دوربینِ دوم اولی را بکشد، عقب‌نشینی می‌شود',
+  strip(golive).includes('deadFeeds().length > 0') && strip(golive).includes('await reviveNow()'));
+ok('پیامِ روشن به‌جای صفحه‌ی سیاه',
+  golive.includes('نمی‌تواند دو دوربین را هم‌زمان باز کند'));
+ok('دیده‌بانِ دوره‌ای برای دوربینِ قطع‌شده',
+  strip(store).includes('void reviveOnce()'));
+
+/* «چندین نوع دوربین داره؟ اینا چی هستند؟» */
+ok('نامِ دوربین‌ها فارسی و روشن است', dev.includes('دوربین پشت') && dev.includes('دوربین جلو'));
+ok('حسگرهای عمق/مادون‌قرمز از فهرست حذف می‌شوند', strip(dev).includes('NOT_A_CAMERA'));
+ok('نامِ خامِ ورودیِ بیرونی حفظ می‌شود (کارتِ کپچر)', strip(dev).includes('return raw'));
+
+/* «میکروفون ضعیف هست» */
+ok('کنترلِ خودکارِ بهره روشن است', /autoGainControl: true/.test(strip(q)));
+
+/* «دکمه‌ی مشاهده را زدم، از پخش اومدم بیرون» */
+ok('دکمه‌ی مشاهده برای پخش‌کننده حذف شده',
+  !strip(golive).includes('مشاهده') && !strip(golive).includes("target=\"_blank\""));
+ok('کپیِ لینک جایگزینش است', strip(golive).includes('copyLink'));
+
+/* «در حالت افقی تصویر بزرگ‌تر از صفحه می‌شود» */
+ok('پخش‌کننده سقفِ ارتفاع دارد', /max-height: 78dvh/.test(css));
+ok('در تمام‌صفحه سقف برداشته می‌شود', /max-height: none/.test(css));
+ok('پیش‌نمایشِ پنل هم سقف دارد', strip(tile).includes("maxHeight: main ? '52dvh'"));
+ok('پیش‌نمایش کادرِ واقعی را نشان می‌دهد نه بریده', strip(tile).includes("objectFit: 'contain'"));
+
+console.log('\n■ ۱۱) تله‌های بازیابیِ دوربین');
+const dev2 = read('lib/live/devices.ts');
+const tile2 = read('components/club/live/FeedTile.tsx');
+const addp3 = read('components/club/live/AddCameraPanel.tsx');
+
+ok('پایانِ اشتراکِ صفحه دوربین باز نمی‌کند',
+  strip(store).includes("f?.kind === 'screen'") && strip(store).includes("f.kind === 'camera' && f.dead"));
+ok('مرگ از رویداد فهمیده می‌شود نه نظرسنجی',
+  strip(store).includes('t.onended =') && strip(store).includes('watchTrack'));
+ok('mute طولانیِ سافاری هم مرگ حساب می‌شود',
+  strip(store).includes('t.onmute') && strip(store).includes('MUTE_GRACE_MS'));
+ok('mute کوتاه مرگ حساب نمی‌شود', strip(store).includes('t.onunmute'));
+ok('reviveFeed گاردِ کهنگی دارد (نشتیِ دوربینِ روشن)',
+  strip(store).includes('now.stream !== f.stream'));
+ok('وصلِ دوباره سقفِ تلاش دارد', strip(store).includes('MAX_REVIVE'));
+ok('پینگ‌پنگِ دو دوربین متوقف می‌شود',
+  strip(store).includes('فقط یک دوربین را هم‌زمان باز می‌کند'));
+ok('یک گاردِ مشترک برای همه‌ی مسیرهای وصلِ دوباره',
+  strip(store).includes('if (reviving) return') && strip(store).includes('finally { reviving = false }'));
+ok('دیده‌بان در استور است، نه افکتِ کامپوننت',
+  strip(store).includes('syncWatchdog') && !strip(golive).includes('setInterval(async'));
+ok('بررسیِ عقب‌نشینی به رویداد فرصت می‌دهد',
+  strip(golive).includes('setTimeout(res, 450)'));
+ok('دستگاهِ تک‌دوربینه دیگر دکمه‌ی افزودن ندارد', strip(golive).includes('!singleCam'));
+ok('پیامِ «در حال وصل» خطا نیست', strip(golive).includes('recovering'));
+
+ok('عرض هم سقف دارد، نه فقط ارتفاع',
+  /max-width: calc\(78dvh \* 16 \/ 9\)/.test(css) && strip(tile2).includes('maxWidth:'));
+ok('نسخه‌ی vh برای iOSِ قدیمی', /max-height: 78vh/.test(css));
+ok('در تمام‌صفحه هر دو سقف برداشته می‌شود', /max-width: none/.test(css));
+
+ok('صفتِ لنز حفظ می‌شود (Ultra Wide)', strip(dev2).includes('lensHint'));
+ok('ارقامِ فارسی در نامِ دوربین', strip(dev2).includes("toLocaleString('fa-IR')"));
+ok('اگر فیلتر همه را برداشت، فهرست خالی نمی‌ماند',
+  strip(dev2).includes('shown.length > 0 ? shown : vids'));
+ok('facing و builtIn واقعا استفاده می‌شوند', strip(addp3).includes('c.builtIn'));
+ok('محدودیتِ گوشی پیش از تلاش گفته می‌شود',
+  addp3.includes('فقط یک دوربین هم‌زمان باز می‌شود'));
 
 console.log('\n' + '─'.repeat(52));
 console.log(`  ${fail === 0 ? '✓' : '✗'} ${pass} پاس، ${fail} ناموفق\n`);
