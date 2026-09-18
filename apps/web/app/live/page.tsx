@@ -5,11 +5,9 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
 import { Radio, Users, Clock3, Building2, Loader2 } from 'lucide-react';
 import { fetchLiveSessions, type LiveSession } from '../../lib/live/client';
 
-const GOLD_DARK = '#A07840';
 const fa = (n: number) => Number(n || 0).toLocaleString('fa-IR');
 
 const since = (ts: number) => {
@@ -85,11 +83,8 @@ export default function LivePage() {
               </span>
               <p style={{ fontSize: 16, fontWeight: 800, margin: '0 0 8px' }}>در حال حاضر پخش زنده‌ای نیست</p>
               <p style={{ fontSize: 13.5, color: 'rgba(0,0,0,0.42)', margin: '0 0 20px', lineHeight: 2 }}>
-                باشگاه‌ها می‌توانند مسابقات خود را مستقیم از گوشی پخش کنند.<br />هر وقت پخشی شروع شود، همین‌جا نمایش داده می‌شود.
+                باشگاه‌ها می‌توانند مسابقات خود را مستقیم از طریق گوشی و یا دوربین فیلمبرداری پخش کنند.<br />هر وقت پخشی شروع شود، همین‌جا نمایش داده می‌شود.
               </p>
-              <Link href="/dashboard/club" style={{ display: 'inline-flex', alignItems: 'center', gap: 7, padding: '11px 22px', borderRadius: 12, textDecoration: 'none', fontSize: 13.5, fontWeight: 800, background: 'rgba(199,166,106,0.14)', border: '1px solid rgba(199,166,106,0.4)', color: GOLD_DARK }}>
-                <Radio size={15} /> باشگاه دارید؟ پخش کنید
-              </Link>
             </div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
