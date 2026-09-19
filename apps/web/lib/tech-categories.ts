@@ -31,7 +31,7 @@ export interface TechCategory {
 
 export const TECH_CATEGORIES = [
   {
-    id: 'cue-repair', title: 'تعمیر و سرویس چوب', icon: 'wrench',
+    id: 'cue-repair', title: 'سرویس چوب', icon: 'wrench',
     serviceIds: ['straighten', 'full-service', 'butt-resize', 'extension'],
   },
   {

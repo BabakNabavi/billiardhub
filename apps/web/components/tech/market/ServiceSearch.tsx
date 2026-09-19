@@ -41,6 +41,13 @@ export function ServiceSearch({ query, onQuery, city, onCity, cities, onSubmit }
       role="search"
       onSubmit={e => { e.preventDefault(); onSubmit() }}
     >
+      {/* ⚠️ دکمه اول می‌آید، نه آخر: مالک خواست ذره‌بینِ سبز در سمتِ
+          شروع (راست) و روبه‌روی همان فیلدی باشد که «تعمیر چوب، رگلاژ…»
+          را نشان می‌دهد — روی موبایل و دسکتاپ هر دو. */}
+      <button className="tm-search-go" type="submit" aria-label="جستجو">
+        <Search size={19} aria-hidden />
+      </button>
+
       <div className="tm-search-fields">
         <div className="tm-field tm-field--q">
           <label className="tm-label" htmlFor={qId}>چه خدماتی نیاز دارید؟</label>
@@ -57,16 +64,13 @@ export function ServiceSearch({ query, onQuery, city, onCity, cities, onSubmit }
               «همه شهرها» می‌نشیند. برچسبِ متنی پنهان است چون خودِ
               نشان و مقدارِ انتخاب‌شده گویا هستند، ولی برای صفحه‌خوان
               می‌ماند. */}
-          <span aria-hidden className="tm-search-pin"><MapPin size={17} /></span>
           <label className="tm-label tm-sr" htmlFor={cId}>شهر</label>
           <CityFilterSelect id={cId} value={city} onChange={onCity} withTechnicians={cities} />
+          {/* نشانِ مکان سمتِ چپِ کادر — به خواست مالک، در هر دو اندازه */}
+          <span aria-hidden className="tm-search-pin"><MapPin size={17} /></span>
         </div>
       </div>
 
-      {/* دایره‌ی سبزِ تیره — تنها کنشِ اصلیِ نوار */}
-      <button className="tm-search-go" type="submit" aria-label="جستجو">
-        <Search size={19} aria-hidden />
-      </button>
     </form>
   )
 }
