@@ -12,7 +12,6 @@ import VerifiedBadge from '../../components/VerifiedBadge'
 const GOLD     = '#C7A66A'
 const GOLD_D   = '#8F6531'
 /* هم‌رنگ پایه‌ی صحنه — وگرنه نوار چسبان وصله می‌شود */
-const BG       = '#F4F2EE'
 const TEXT     = '#1C1C1A'
 const TEXT_SEC = 'rgba(28,28,26,0.52)'
 const TEXT_MUT = 'rgba(28,28,26,0.32)'
@@ -201,29 +200,6 @@ const calcDistance = (lat1: number, lon1: number, lat2: number, lon2: number) =>
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
 }
 
-// ── Logo — آیکون مدرن کارخانه (تولیدکنندگان لوگوی آپلودی ندارند) ──
-function MfrLogo({ name, size = 62 }: { name: string; size?: number }) {
-  return (
-    <div style={{
-      width: size, height: size, borderRadius: '50%', flexShrink: 0,
-      padding: 2.5, background: `linear-gradient(135deg,${GOLD},${GOLD_D})`,
-      boxShadow: `0 6px 18px rgba(199,166,106,0.45)`,
-    }}>
-      <div style={{
-        width: '100%', height: '100%', borderRadius: '50%', overflow: 'hidden',
-        border: '2.5px solid #fff',
-        background: 'linear-gradient(135deg,#14532D,#1E6B3C)',
-        display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff',
-      }} aria-label={name}>
-        <svg width={size * 0.5} height={size * 0.5} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M2 20a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8l-7 5V8l-7 5V4a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/>
-          <path d="M7 18h.01"/><path d="M12 18h.01"/><path d="M17 18h.01"/>
-        </svg>
-      </div>
-    </div>
-  )
-}
-
 const PhoneIcon =<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 9.91a16 16 0 0 0 6.18 6.18l1.47-1.47a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
 
 // ── Manufacturer Card — grid + list, modern gold theme ──────────
@@ -239,12 +215,19 @@ function MfrCard({ mfr, view }: { mfr: MockManufacturer; view: 'grid' | 'list' }
     transition: 'all 0.28s cubic-bezier(0.22,1,0.36,1)', cursor: 'pointer',
   }
 
+  /* ⚠️ شهر این‌جا نیست: روی خودِ بنر نشسته، همان‌جا که کارتِ باشگاه
+     هم نشانش می‌دهد. دو بار تکرارش فقط ردیف را شلوغ می‌کرد.
+     ⚠️ و چون `metaRow` بینِ هر دو نما مشترک است، چیپ باید روی بنرِ
+     *هر دو* بنشیند وگرنه نمای فهرستی شهر را از دست می‌دهد. */
+  const cityChip = mfr.city ? (
+    <div style={{ position: 'absolute', bottom: 10, insetInlineStart: 12, background: 'rgba(0,0,0,0.42)', backdropFilter: 'blur(8px)', color: 'rgba(255,255,255,0.92)', fontSize: 11.5, fontWeight: 600, borderRadius: 20, padding: '3px 10px', display: 'flex', alignItems: 'center', gap: 4 }}>
+      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" aria-hidden><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+      {mfr.city}
+    </div>
+  ) : null
+
   const metaRow = (
     <div style={{ display: 'flex', alignItems: 'center', gap: 14, fontSize: 13, color: TEXT_SEC, flexWrap: 'wrap' }}>
-      <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-        {mfr.city}
-      </span>
       <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
         از {mfr.since}
@@ -294,6 +277,7 @@ function MfrCard({ mfr, view }: { mfr: MockManufacturer; view: 'grid' | 'list' }
               رسمی
             </div>
           )}
+          {cityChip}
         </div>
         <div className="sel-list-body" style={{ flex: 1, minWidth: 0, padding: '16px 18px', display: 'flex', flexDirection: 'column', gap: 10 }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
@@ -328,22 +312,27 @@ function MfrCard({ mfr, view }: { mfr: MockManufacturer; view: 'grid' | 'list' }
           <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
           {mfr.responseTime}
         </div>
+        {cityChip}
       </div>
 
       {/* body — flex تا کارت پر شود و دکمه‌ها ته کارت بچسبند ⇒ همه‌ی کارت‌ها یک‌اندازه */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: '0 18px 18px' }}>
-        <div style={{ marginTop: -32, marginBottom: 12, position: 'relative', zIndex: 2 }}>
-          <MfrLogo name={mfr.name} size={62} />
-        </div>
-
+      {/* ⚠️ نشانِ گردِ شناورِ روی بنر برداشته شد: یک گلیفِ ساختگی بود
+          (از نام ساخته می‌شد، نه لوگوی واقعی) که نصفش روی عکس
+          می‌افتاد و همان چیزی بود که کارت را «بهم‌ریخته» نشان می‌داد.
+          کارتِ باشگاه هم چنین چیزی ندارد. */}
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: '16px 18px 18px' }}>
         <div style={{ margin: '0 0 5px' }}>
           <h3 style={{ fontSize: 16, fontWeight: 800, color: TEXT, margin: 0, lineHeight: 1.35 }}>{mfr.name}{mfr.verified && <VerifiedBadge title="تولیدکننده‌ی تأیید شده" />}</h3>
         </div>
 
-        <p style={{ fontSize: 12.5, color: TEXT_SEC, margin: '0 0 12px', lineHeight: 1.6, minHeight: 40, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{mfr.description}</p>
+        {mfr.description && (
+          <p style={{ fontSize: 12.5, color: TEXT_SEC, margin: '0 0 12px', lineHeight: 1.6, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{mfr.description}</p>
+        )}
 
         <div style={{ marginBottom: 12 }}>{metaRow}</div>
-        <div style={{ marginBottom: 16, minHeight: 26 }}>{specRow}</div>
+        {/* ⚠️ `minHeight` ثابت برداشته شد: تولیدکننده‌ای که تخصصی ثبت
+            نکرده، یک نوارِ خالیِ ۲۶ پیکسلی وسطِ کارتش می‌ماند. */}
+        {specRow && <div style={{ marginBottom: 16 }}>{specRow}</div>}
 
         <div style={{ marginTop: 'auto', display: 'flex', gap: 8, borderTop: '1px solid rgba(28,28,26,0.06)', paddingTop: 14 }}>
           <div style={{ flex: 1 }}>
@@ -510,8 +499,79 @@ export default function ManufacturersPage() {
         }
         @media(max-width:640px){
           .dd-label { display: none !important; }
-          .dd-btn { min-width: 0 !important; padding: 9px 11px !important; }
+          .dd-btn { min-width: 0 !important; padding: 0 11px !important; }
           .sel-hide-mob { display: none !important; }
+        }
+
+        /* ══ نوار ابزار — هم‌شکلِ نوارِ صفحه‌ی باشگاه‌ها ══ */
+        .mfr-tb {
+          position: sticky; top: 62px; z-index: 90;
+          padding: 10px clamp(16px,4vw,40px);
+          background: rgba(250,249,246,0.62);
+          border-block-end: 1px solid rgba(28,28,26,0.07);
+          backdrop-filter: blur(24px) saturate(1.6);
+          -webkit-backdrop-filter: blur(24px) saturate(1.6);
+        }
+        .mfr-tb-in { max-width: 1280px; margin: 0 auto; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+        /* همه‌ی کنترل‌ها یک ارتفاع: ردیفِ ناهم‌ارتفاع همان چیزی است که
+           نوار را «بهم‌ریخته» نشان می‌داد.
+           (padding این‌جا نیاید — اینلاین است و بدون !important بازنده) */
+        .mfr-tb-in .dd-btn { height: 44px; }
+
+        .mfr-tb-srch {
+          display: flex; align-items: center; gap: 8px;
+          height: 44px; padding-inline: 14px; border-radius: 12px;
+          flex: 1 1 160px; min-width: 150px; max-width: 300px;
+          background: rgba(255,255,255,0.72);
+          border: 1px solid rgba(28,28,26,0.10);
+          transition: border-color .3s, box-shadow .3s;
+        }
+        .mfr-tb-srch:focus-within { border-color: rgba(199,166,106,0.45); box-shadow: 0 0 0 3px rgba(199,166,106,0.10); }
+        .mfr-tb-srch > svg { flex-shrink: 0; color: rgba(0,0,0,0.30); }
+        .mfr-tb-srch input {
+          flex: 1; min-width: 0; border: 0; background: none; outline: none;
+          font: inherit; font-size: 13.5px; color: #1C1C1A;
+        }
+        .mfr-tb-srch input::placeholder { color: rgba(0,0,0,0.32); }
+        .mfr-tb-srch input::-webkit-search-cancel-button { display: none; }
+        .mfr-tb-srch > button {
+          display: flex; flex-shrink: 0; padding: 0; border: 0; background: none;
+          color: rgba(0,0,0,0.35); cursor: pointer;
+        }
+        .mfr-tb-srch > button:hover { color: rgba(0,0,0,0.6); }
+
+        .mfr-tb-btn {
+          display: flex; align-items: center; justify-content: center; gap: 7px; flex-shrink: 0;
+          height: 44px; padding-inline: 16px; border-radius: 12px; white-space: nowrap;
+          font: inherit; font-size: 13.5px; font-weight: 700; cursor: pointer;
+          border: 1px solid rgba(0,0,0,0.09); background: #fff; color: rgba(0,0,0,0.55);
+          transition: all .2s;
+        }
+        .mfr-tb-btn:hover { border-color: rgba(199,166,106,0.40); background: rgba(199,166,106,0.06); }
+        .mfr-tb-btn:focus-visible, .mfr-tb-vbtn:focus-visible, .mfr-tb-srch > button:focus-visible {
+          outline: 2px solid #14532D; outline-offset: 2px;
+        }
+        .mfr-tb-btn:disabled { cursor: not-allowed; opacity: .6; }
+        .mfr-tb-btn.on { border-color: rgba(199,166,106,0.40); background: rgba(199,166,106,0.10); color: #A07840; }
+        .mfr-tb-btn.bad { border-color: rgba(239,68,68,0.40); color: #dc2626; }
+        .mfr-tb-spin {
+          width: 14px; height: 14px; border-radius: 50%; display: inline-block;
+          border: 2px solid rgba(199,166,106,0.3); border-top-color: #C7A66A;
+          animation: spin .8s linear infinite;
+        }
+
+        .mfr-tb-view { display: flex; gap: 4px; flex-shrink: 0; }
+        .mfr-tb-vbtn {
+          width: 44px; height: 44px; border-radius: 12px; cursor: pointer;
+          display: flex; align-items: center; justify-content: center;
+          border: 1px solid rgba(28,28,26,0.10); background: #fff; color: rgba(0,0,0,0.42);
+          transition: all .2s;
+        }
+        .mfr-tb-vbtn:hover { border-color: rgba(199,166,106,0.36); background: rgba(199,166,106,0.06); }
+        .mfr-tb-vbtn.on { border-color: rgba(199,166,106,0.40); background: rgba(199,166,106,0.12); color: #A07840; }
+        @media (prefers-reduced-motion: reduce) {
+          .mfr-tb-btn, .mfr-tb-vbtn, .mfr-tb-srch { transition: none; }
+          .mfr-tb-spin { animation: none; }
         }
       `}</style>
 
@@ -520,24 +580,31 @@ export default function ManufacturersPage() {
         {/* ─────── HERO — همان الگوی صفحه‌ی مربیان ─────── */}
         <MfrHeroSlider />
 
-        {/* ─────── BODY ─────── */}
-        <div style={{ maxWidth: 1160, margin: '0 auto', padding: '0 clamp(16px,3vw,32px) 64px' }}>
-
-          {/* ─── STICKY: search + filter ─── */}
-          <div style={{ position: 'sticky', top: 72, zIndex: 50, background: BG, paddingTop: 14, paddingBottom: 12, marginBottom: 12, display: 'flex', flexDirection: 'column', gap: 10 }}>
-
-            <div style={{ position: 'relative' }}>
-              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke={GOLD_D} strokeWidth="2.2" style={{ position: 'absolute', insetInlineStart: 16, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', zIndex: 2 }}>
+        {/* ══ نوار ابزارِ چسبان — همان نوارِ صفحه‌ی باشگاه‌ها ══
+            نسخه‌ی قبلی دو بلوکِ روی هم بود: یک سرچ‌باکسِ تمام‌عرض و
+            زیرش یک کارتِ شیشه‌ایِ فیلترها. روی دسکتاپ نزدیک ۱۴۰
+            پیکسل از بالای فهرست را می‌گرفت و دو سطحِ شیشه‌ی تودرتو
+            می‌ساخت. حالا یک ردیف است، تمام‌عرض، با همان شیشه‌ی
+            نیمه‌شفاف و همان ارتفاعِ ۴۴ که صفحه‌ی باشگاه‌ها دارد. */}
+        <div className="mfr-tb">
+          <div className="mfr-tb-in">
+            <div className="mfr-tb-srch">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" aria-hidden>
                 <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
               </svg>
               <input
-                className="input input-glass input-icon-start-lg" type="search" aria-label="جستجوی تولیدکننده"
+                type="search" aria-label="جستجوی تولیدکننده"
                 placeholder="جستجوی تولیدکننده، شهر یا تخصص..."
                 value={search} onChange={e => setSearch(e.target.value)}
               />
+              {search && (
+                <button type="button" onClick={() => setSearch('')} aria-label="پاک‌کردن جستجو">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" aria-hidden>
+                    <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+                  </svg>
+                </button>
+              )}
             </div>
-
-            <div className="sel-filterbar" style={{ background: 'rgba(255,255,255,0.9)', backdropFilter: 'blur(28px) saturate(190%)', WebkitBackdropFilter: 'blur(28px) saturate(190%)', border: '1px solid rgba(255,255,255,0.8)', borderRadius: 16, boxShadow: 'inset 0 1.5px 0 rgba(255,255,255,0.95), 0 8px 26px rgba(28,28,26,0.08)', padding: 10, display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
 
             <span className="sel-hide-mob" style={{ display: 'contents' }}>
               <Dropdown label="تخصص:" options={CATEGORY_OPTIONS} value={category} onChange={setCategory} minWidth={150} />
@@ -547,29 +614,41 @@ export default function ManufacturersPage() {
             </span>
             <Dropdown label="وضعیت:" options={STATUS_OPTIONS} value={status} onChange={setStatus} minWidth={140} />
 
-            <button onClick={getLocation} title={locError ? 'دسترسی به موقعیت رد شد' : 'نزدیک‌ترین تولیدکنندگان'} style={{
-              display: 'flex', alignItems: 'center', gap: 7, padding: '9px 15px', borderRadius: 12, cursor: 'pointer', fontFamily: 'Vazirmatn,Tahoma,sans-serif', fontSize: 12.5, fontWeight: 700,
-              border: nearMe ? `1.5px solid ${GOLD}` : locError ? '1px solid rgba(239,68,68,0.4)' : '1px solid rgba(28,28,26,0.1)',
-              background: nearMe ? 'rgba(199,166,106,0.14)' : 'rgba(255,255,255,0.7)', color: nearMe ? GOLD_D : locError ? '#ef4444' : TEXT_SEC, transition: 'all .2s',
-            }}>
+            {/* ⚠️ دکمه‌ی حالت‌دار است، پس `aria-pressed`؛ و در حالِ
+                گرفتنِ موقعیت غیرفعال، وگرنه کلیکِ دوم یک درخواستِ
+                موازیِ دیگر می‌فرستد. خطا هم باید *گفته* شود نه فقط
+                قرمز شود. */}
+            <button
+              type="button" onClick={getLocation}
+              disabled={locLoading}
+              aria-pressed={nearMe}
+              aria-busy={locLoading || undefined}
+              title={locError ? 'دسترسی به موقعیت رد شد' : 'نزدیک‌ترین تولیدکنندگان'}
+              className={'mfr-tb-btn' + (nearMe ? ' on' : '') + (locError ? ' bad' : '')}
+            >
               {locLoading
-                ? <span style={{ width: 14, height: 14, border: '2px solid rgba(199,166,106,0.3)', borderTop: `2px solid ${GOLD}`, borderRadius: '50%', display: 'inline-block', animation: 'spin .8s linear infinite' }} />
-                : <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2a7 7 0 0 0-7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 0 0-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>}
+                ? <span className="mfr-tb-spin" aria-hidden />
+                : <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M12 2a7 7 0 0 0-7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 0 0-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>}
               نزدیک من
             </button>
+            {/* خطای موقعیت باید شنیده هم بشود، نه فقط قرمز دیده شود */}
+            <span aria-live="polite" className="sr-only">
+              {locError ? 'دسترسی به موقعیت رد شد' : locLoading ? 'در حال یافتن موقعیت شما' : ''}
+            </span>
 
-            <div style={{ display: 'flex', gap: 4 }}>
-              {([['grid', <svg key="g" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>], ['list', <svg key="l" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><circle cx="3.5" cy="6" r="1.5" fill="currentColor" stroke="none"/><circle cx="3.5" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="3.5" cy="18" r="1.5" fill="currentColor" stroke="none"/></svg>]] as const).map(([v, icon]) => (
-                <button key={v} onClick={() => setView(v as 'grid'|'list')} aria-label={v === 'grid' ? 'نمای شبکه‌ای' : 'نمای لیستی'} style={{
-                  width: 36, height: 36, borderRadius: 10, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all .2s',
-                  border: `1px solid ${view === v ? 'rgba(199,166,106,0.4)' : 'rgba(28,28,26,0.1)'}`,
-                  background: view === v ? 'rgba(199,166,106,0.12)' : '#fff', color: view === v ? GOLD_D : TEXT_MUT,
-                }}>{icon}</button>
+            <div className="mfr-tb-view">
+              {([['grid', <svg key="g" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>], ['list', <svg key="l" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><circle cx="3.5" cy="6" r="1.5" fill="currentColor" stroke="none"/><circle cx="3.5" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="3.5" cy="18" r="1.5" fill="currentColor" stroke="none"/></svg>]] as const).map(([v, icon]) => (
+                <button key={v} type="button" onClick={() => setView(v as 'grid'|'list')}
+                  aria-pressed={view === v}
+                  aria-label={v === 'grid' ? 'نمای شبکه‌ای' : 'نمای لیستی'}
+                  className={'mfr-tb-vbtn' + (view === v ? ' on' : '')}>{icon}</button>
               ))}
             </div>
-            </div>
           </div>
+        </div>
 
+        {/* ─────── BODY ─────── */}
+        <div style={{ maxWidth: 1160, margin: '0 auto', padding: 'clamp(16px,2.6vw,26px) clamp(16px,3vw,32px) 64px' }}>
           {/* ─── GRID / LIST ─── */}
           {filtered.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '64px 0', color: TEXT_MUT }}>
