@@ -10,7 +10,7 @@
    آدم ایستاده و کیو کنارش، عمودی.
    ───────────────────────────────────────────────────────────── */
 
-export type RoleGlyphKind = 'coach' | 'referee'
+export type RoleGlyphKind = 'coach' | 'referee' | 'manufacturer' | 'seller'
 
 /** مربی: نیم‌تنه‌ی آدم + کیو عمودی کنارش */
 function CoachGlyph() {
@@ -40,12 +40,47 @@ function RefereeGlyph() {
   )
 }
 
+/** تولیدکننده: سوله‌ی کارخانه با دودکش — همان نشانی که کارت
+    تولیدکننده از قبل به کار می‌برد، تا دو جا یک زبان داشته باشند. */
+function ManufacturerGlyph() {
+  return (
+    <>
+      <path d="M3 20.5V11l5 3V11l5 3V11l5 3v6.5z" />
+      <path d="M18 8.5V4.2h2.6v9.8" />
+      <path d="M6.6 17.4h1.1" />
+      <path d="M11.2 17.4h1.1" />
+      <path d="M15.8 17.4h1.1" />
+    </>
+  )
+}
+
+/** فروشنده: سایه‌بانِ مغازه با ویترین — نه چرخ‌دستی: این صفحه
+    فروشگاه است، نه سبدِ خرید. */
+function SellerGlyph() {
+  return (
+    <>
+      <path d="M3.6 8.4 5 4.2h14l1.4 4.2" />
+      <path d="M3.6 8.4a2.4 2.4 0 0 0 4.8 0 2.4 2.4 0 0 0 4.8 0 2.4 2.4 0 0 0 4.8 0 2.4 2.4 0 0 0 2.4 0" />
+      <path d="M5 10.6v9.2h14v-9.2" />
+      <path d="M9.6 19.8v-5.2h4.8v5.2" />
+    </>
+  )
+}
+
+const GLYPHS: Record<RoleGlyphKind, () => React.JSX.Element> = {
+  coach: CoachGlyph,
+  referee: RefereeGlyph,
+  manufacturer: ManufacturerGlyph,
+  seller: SellerGlyph,
+}
+
 export default function RoleGlyph({ kind, size = 44 }: { kind: RoleGlyphKind; size?: number | string }) {
+  const Glyph = GLYPHS[kind] ?? CoachGlyph
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none"
       stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"
       aria-hidden focusable="false">
-      {kind === 'coach' ? <CoachGlyph /> : <RefereeGlyph />}
+      <Glyph />
     </svg>
   )
 }

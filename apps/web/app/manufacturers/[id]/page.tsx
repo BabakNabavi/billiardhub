@@ -21,7 +21,7 @@ import { fetchProfileResult } from '../../../lib/profiles/client'
 import { useOwnerEdit } from '../../../lib/profiles/use-owner-edit'
 import { compressImage } from '../../../lib/seller-store'
 import { ask } from '../../../lib/ui/dialogs'
-import VerifiedBadge from '../../../components/VerifiedBadge'
+import ProfileHero from '../../../components/profile/ProfileHero'
 import { Factory } from 'lucide-react'
 import { telPrefix, provinceOfCity } from '../../../lib/iran-geo'
 import { getManufacturer, type MfrProduct } from '../../../lib/manufacturers-data'
@@ -29,42 +29,8 @@ import { getManufacturer, type MfrProduct } from '../../../lib/manufacturers-dat
 const DEFAULT_ID = '1'
 
 /* آیکون کارخانه (لوگوی پیش‌فرض) */
-const FactoryIcon = (
-  <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M2 20a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8l-7 5V8l-7 5V4a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/>
-    <path d="M7 18h.01"/><path d="M12 18h.01"/><path d="M17 18h.01"/>
-  </svg>
-)
 
 /* ─── اسلایدر عکس بنر ─── */
-function ImageSlider({ images }: { images: string[] }) {
-  const [i, setI] = useState(0)
-  const shots = images
-  useEffect(() => {
-    if (shots.length < 2) return
-    const t = setInterval(() => setI(v => (v + 1) % shots.length), 4500)
-    return () => clearInterval(t)
-  }, [shots.length])
-  const active = Math.min(i, shots.length - 1)
-  return (
-    <div style={{ position: 'absolute', inset: 0, overflow: 'hidden' }}>
-      {shots.map((src, k) => (
-        <img loading="lazy" decoding="async" key={k} src={src} alt="" draggable={false}
-          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover',
-            opacity: k === active ? 1 : 0, transition: 'opacity 0.9s ease' }} />
-      ))}
-      {shots.length > 1 && (
-        <div className="hero-dots" style={{ position: 'absolute', bottom: 10, insetInline: 0, zIndex: 2, display: 'flex', justifyContent: 'center', gap: 6 }}>
-          {shots.map((_, k) => (
-            <button key={k} type="button" aria-label={`تصویر ${k + 1}`} onClick={() => setI(k)}
-              style={{ width: k === active ? 18 : 6, height: 6, borderRadius: 3, border: 'none', cursor: 'pointer',
-                background: k === active ? '#fff' : 'rgba(255,255,255,0.55)', transition: 'width .25s, background .25s' }} />
-          ))}
-        </div>
-      )}
-    </div>
-  )
-}
 
 /* ════════ پوسترهای پیش‌فرض — به‌سبک هدر صفحه‌ی فروشگاه (وردمارک «بیلیارد هاب») ════════ */
 const MFR_POSTERS = [
@@ -116,23 +82,6 @@ function MfrPoster({ variant, title, about = false }: { variant: number; title?:
   )
 }
 
-function PosterSlider({ variants, title }: { variants: number[]; title?: string }) {
-  const [active, setActive] = useState(0)
-  useEffect(() => {
-    if (variants.length < 2) return
-    const t = setInterval(() => setActive(a => (a + 1) % variants.length), 4500)
-    return () => clearInterval(t)
-  }, [variants.length])
-  return (
-    <div style={{ position: 'absolute', inset: 0, overflow: 'hidden' }}>
-      {variants.map((v, k) => (
-        <div key={k} style={{ position: 'absolute', inset: 0, opacity: k === active ? 1 : 0, transition: 'opacity 0.9s ease' }}>
-          <MfrPoster variant={v} title={title}/>
-        </div>
-      ))}
-    </div>
-  )
-}
 
 /* ─── دراپ‌داون دسته‌بندی محصولات (از خود محصولات همین تولیدکننده) ─── */
 function CategoryDropdown({
@@ -457,80 +406,54 @@ export default function ManufacturerPage() {
         @media(max-width:700px) { .prod-card-sec1 { aspect-ratio: 1 / 1.5; } }
       `}</style>
 
-      {/* ── breadcrumb ── */}
-      <div className="mx-auto max-w-[1240px] px-4 pt-4 text-[12.5px] text-[#6F6A5C] sm:px-6">
-        <Link href="/" className="transition-colors hover:text-[#14532D]">خانه</Link>
-        <span className="mx-1.5">/</span>
-        <Link href="/manufacturers" className="transition-colors hover:text-[#14532D]">تولیدکنندگان</Link>
-        <span className="mx-1.5">/</span>
-        <span>{mfr.name}</span>
-      </div>
+      {/* ⚠️ بردکرامبِ جدا حذف شد: ProfileHero خودش یکی دارد و دوتا
+          پشتِ هم روی صفحه تکرار دیده می‌شد. */}
 
-      {/* ═══ هدر: بنر اسلایدی + کارت تولیدکننده ═══ */}
+      {/* ═══ هدر — همان کامپوننتِ مشترکِ صفحه‌ی مربی و داور ═══
+          ⚠️ نسخه‌ی قبلی بنرِ سفید با کارتِ تخت بود و کنارِ صفحه‌ی مربی
+          «ساده و معمولی» دیده می‌شد. حالا همان ProfileHero است، نه
+          چیزی شبیهش — پس از فردا هم با آن دو از هم دور نمی‌شوند.
+
+          ⚠️ عمدا بدونِ photo: این پروفایل لوگوی جدا ندارد و بنر
+          تصویرِ کارخانه نیست. نبودنش یعنی نشانِ نقش (سوله) رندر
+          می‌شود — همان چیزی که هدرِ قبلی هم نشان می‌داد.
+
+          «تولیدکننده‌ی رسمی» هم از هدرِ قبلی نگه داشته شد؛ grade
+          همان نشانِ طلاییِ هدرِ مشترک است. */}
+      <ProfileHero
+        name={mfr.name}
+        city={[province, mfr.city].filter(Boolean).join('، ')}
+        cover={mfr.bannerImage || undefined}
+        verified={mfr.verified}
+        grade={mfr.elite ? { label: 'تولیدکننده‌ی رسمی', dots: 0 } : undefined}
+        disciplines={mfr.specialties.map(s => ({ label: s }))}
+        onOpenPhoto={u => openImage(u, { title: mfr.name, alt: mfr.name })}
+        role="manufacturer"
+        backHref="/manufacturers" backLabel="تولیدکنندگان"
+        publicUrl={`billiardhub.net/manufacturers/${mfrId}`}
+        posterBase={undefined}
+        stats={
+          <ul className="ch-stats">
+            {PRODUCTS.length > 0 && (
+              <li><b>{faNum(PRODUCTS.length)}</b><span>محصول</span></li>
+            )}
+            {mfr.since && <li><b>{toFa(mfr.since)}</b><span>سال تأسیس</span></li>}
+            {mfr.employees && <li><b>{toFa(mfr.employees)}</b><span>پرسنل</span></li>}
+            {mfr.totalProduced && <li><b>{toFa(mfr.totalProduced)}</b><span>تولید شده</span></li>}
+          </ul>
+        }
+        actions={
+          phoneDig ? (
+            <a className="ch-hero-cta" href={`tel:${phoneHref}`}>
+              {Icon.phone}<span className={MONO}>{toFa(phoneText)}</span>
+            </a>
+          ) : undefined
+        }
+      />
+
       <div className="mx-auto mt-4 max-w-[1240px] px-4 sm:px-6">
-        <div className="overflow-hidden rounded-2xl border border-[#E7E2D6] bg-white">
-          <div className="relative" style={{ height: 'clamp(150px,24vw,250px)', background: '#0a2f22' }}>
-            {mfr.bannerImage
-              ? <ImageSlider images={[mfr.bannerImage]} />
-              : <PosterSlider variants={[0, 1, 2]} title={mfr.name} />}
-            <div className="pointer-events-none absolute inset-0" style={{ background: 'linear-gradient(180deg,rgba(0,0,0,0.04) 0%,rgba(0,0,0,0.32) 100%)' }} />
-            {/* فقط بنر واقعی؛ پوستر پیش‌فرض تصویر کارخانه نیست و
-                بزرگ‌کردنش چیزی به کاربر نمی‌دهد. */}
-            {mfr.bannerImage && (
-              <button type="button" onClick={() => openImage(mfr.bannerImage ?? '', { title: 'بنر', alt: mfr.name })}
-                aria-label="بزرگ‌نمایی بنر" className="absolute inset-0 cursor-zoom-in" />
-            )}
-          </div>
-
-          <div className="relative px-4 pb-5 sm:px-6 sm:pb-6">
-            {/* لوگوی کارخانه — نیمی روی بنر */}
-            <div
-              className="-mt-12 block shrink-0 rounded-full p-[3px] sm:-mt-14"
-              style={{ background: 'linear-gradient(135deg,#C7A66A,#8F6531)', boxShadow: '0 6px 18px rgba(199,166,106,0.45)', width: 'fit-content' }}
-            >
-              <span className="flex h-[80px] w-[80px] items-center justify-center overflow-hidden rounded-full border-[3px] border-white bg-gradient-to-bl from-[#14532D] to-[#1E6B3C] text-white sm:h-[94px] sm:w-[94px]">
-                {FactoryIcon}
-              </span>
-            </div>
-
-            <div className="mt-3 flex flex-wrap items-center gap-2">
-              <h2 className="text-[17px] font-bold sm:text-[19px]">{mfr.name}{mfr.verified && <VerifiedBadge title="تولیدکننده‌ی تأیید شده" />}</h2>
-              {mfr.elite && (
-                <span className="inline-flex items-center gap-1 rounded-full border border-[rgba(199,166,106,0.4)] bg-[rgba(199,166,106,0.14)] px-2.5 py-0.5 text-[11px] font-bold text-[#8F6531]">
-                  <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-                  تولیدکننده‌ی رسمی
-                </span>
-              )}
-            </div>
-            <div className="mt-1.5 flex flex-wrap items-center justify-between gap-2">
-              <div className="flex items-center gap-1.5 text-[12.5px] text-[#6F6A5C]">
-                <span className="text-[#14532D]">{Icon.pin}</span>{[province, mfr.city].filter(Boolean).join('، ')}
-              </div>
-              {phoneDig && (
-                <a
-                  href={`tel:${phoneHref}`}
-                  className={`inline-flex items-center gap-1.5 rounded-[10px] border border-[rgba(199,166,106,0.34)] bg-[rgba(199,166,106,0.12)] px-3.5 py-2 text-[13px] font-bold text-[#8F6531] transition hover:-translate-y-0.5 ${MONO}`}
-                >
-                  <span>{Icon.phone}</span>{toFa(phoneText)}
-                </a>
-              )}
-            </div>
-            <p className="mt-2 max-w-[720px] text-[13px] leading-relaxed text-[#5B564B]">{mfr.description}</p>
-
-            {/* تخصص‌ها */}
-            {mfr.specialties.length > 0 && (
-              <div className="mt-2.5 flex flex-wrap items-center gap-2">
-                <span className="text-[11.5px] text-[#6F6A5C]">تخصص:</span>
-                {mfr.specialties.map((s, i) => (
-                  <span key={i} className="rounded-full border border-[#E7E2D6] bg-[#FAFAF7] px-2.5 py-1 text-[11.5px] font-semibold text-[#5B564B]">{s}</span>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-
         {/* سرچ */}
-        <div className="relative mt-3">
+        <div className="relative">
           <input
             type="text"
             value={query}
@@ -546,7 +469,7 @@ export default function ManufacturerPage() {
       <div ref={gridRef} className="mx-auto max-w-[1240px] px-4 pb-16 pt-6 sm:px-6" style={{ scrollMarginTop: 80 }}>
         <div className="mb-5 flex flex-wrap items-end justify-between gap-4">
           <div>
-            <h1 className="text-xl font-bold sm:text-2xl">محصولات تولیدکننده</h1>
+            <h1 className="text-xl font-bold sm:text-2xl">محصولات ما</h1>
             <span className="text-[12.5px] text-[#6F6A5C]">{faNum(visible.length)} محصول</span>
           </div>
           <CategoryDropdown value={cat} onChange={setCat} cats={cats} />

@@ -25,6 +25,10 @@ export type PosterTone = RoleGlyphKind
 const TONES: Record<PosterTone, { a: string; b: string }> = {
   coach:   { a: '#C7A66A', b: '#7A4F10' },
   referee: { a: '#8FA6C7', b: '#2E4468' },
+  /* تولیدکننده: سبزِ نمد — کارگاه و میز، نه مدال. */
+  manufacturer: { a: '#6FA98A', b: '#194B35' },
+  /* فروشنده: همان طلاییِ بازار، یک پله گرم‌تر از مربی. */
+  seller:       { a: '#D2B27A', b: '#6B4512' },
 }
 
 export default function CoverPoster({ tone = 'coach' }: { tone?: PosterTone }) {
