@@ -149,13 +149,22 @@ export function profileToManufacturer(p: ManufacturerProfile): MockManufacturer 
        کارت /manufacturers دیده نمی‌شد. */
     verified: p.verified === true,
     elite: false,
-    since: since ? `از ${since}` : '—',
+    /* ⚠️ فقط خودِ سال. نسخه‌ی قبلی «از ۱۳۹۴» برمی‌گرداند و کارت هم
+       جلویش «از» می‌گذاشت ⇒ «از از ۱۳۹۴». واژه‌ی «از» تصمیمِ نمایش
+       است، نه بخشی از داده. */
+    since: since,
     sinceYear: Number.isNaN(yearNum) ? 1400 : yearNum,
     productCount: arr(p.products).length,
     specialties: arr(p.specialties),
-    responseTime: 'چند ساعت',
+    /* ⚠️ «چند ساعت» هاردکد بود — ادعایی درباره‌ی سرعتِ پاسخ‌گویی که
+       هیچ اندازه‌گیری‌ای پشتش نبود و روی کارتِ *همه* می‌نشست.
+       تا وقتی واقعا اندازه گرفته نشود، جایش خالی است. */
+    responseTime: '',
     phone: p.phone ?? '',
-    bannerImage: p.bannerImage || '/images/shop/Pro_table.webp',
+    /* ⚠️ عکسِ قرضی حذف شد: `Pro_table.webp` عکسِ پوشه‌ی فروشگاه بود و
+       روی هدرِ هر تولیدکننده‌ی بی‌بنر می‌نشست. نبودنِ بنر یعنی
+       پوسترِ ساخته‌شده — همان کاری که پروفایل مربی و داور می‌کنند. */
+    bannerImage: p.bannerImage || '',
     gallery: arr(p.gallery),
     description: p.description ?? '',
     tagline: p.tagline || p.description || '',
