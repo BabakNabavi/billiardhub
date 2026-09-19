@@ -38,7 +38,6 @@ import {
 import '@/components/tech/market/market.css'
 /* ⚠️ بعد از market.css بار می‌شود: فقط زبان بصری را عوض می‌کند و
    هیچ کلاسی را جابه‌جا نمی‌کند. */
-import { HeroArt } from '@/components/tech/market/HeroArt'
 import '@/components/tech/market/hero-art.css'
 import '@/components/tech/market/ios.css'
 
@@ -178,11 +177,20 @@ export default function TechnicalServicesPage() {
     <div className="tm">
       {/* ═══════ ۱ — کشف خدمت ═══════ */}
       <section className="tm-hero">
-        {/* ⚠️ عکس جای خود را به پوسترِ طراحی‌شده داد: مالک گفت آن
-            تصویرِ تیره جذاب نیست و هر صفحه باید پوسترِ خودش را
-            داشته باشد. هیچ بایتِ شبکه‌ای اضافه نمی‌کند — SVG
-            درون‌خطی و CSS. */}
-        <HeroArt variant="services" />
+        {/* ── پس‌زمینه‌ی سرلوحه ──
+            ⚠️ اینجا یک‌بار پوسترِ برداری جای عکس را گرفته بود، چون
+            مالک آن تصویرِ تیره را نپسندیده بود. حالا خودش دو عکسِ
+            مشخص داد (کارگاه و ابزار روی میز) و همان‌ها می‌نشینند.
+
+            دو فایل، نه یک فایلِ کِش‌آمده: نسخه‌ی موبایل کادرِ نزدیک‌تری
+            دارد و در قابِ بلندِ گوشی، برشِ دسکتاپ فقط نمدِ سبز نشان
+            می‌داد. */}
+        <div className="tm-hero-photo" aria-hidden>
+          <picture>
+            <source media="(min-width: 760px)" srcSet="/images/services/hero-desktop.jpg" />
+            <img src="/images/services/hero-mobile.jpg" alt="" decoding="async" />
+          </picture>
+        </div>
         <div className="tm-wrap tm-hero-in">
           <div>
             {/* ⚠️ تیتر کوتاه شد و لحنش رسمی: نسخه‌ی قبلی یازده کلمه بود
@@ -220,9 +228,22 @@ export default function TechnicalServicesPage() {
           لکه‌ها با شبه‌المان‌اند نه `div`، چون تزئینِ محض‌اند. */}
       <div className="tm-explore">
         <section className="tm-sec tm-wrap" aria-labelledby="tm-cats-h">
-          <div className="tm-sec-head">
-            <h2 className="tm-h2" id="tm-cats-h">خدمات فنی</h2>
-            <Link className="tm-link" href="#tm-people">مشاهده همه متخصصان</Link>
+          {/* ⚠️ این بخش عمدا راست‌چین است. در طرحِ مرجع، عنوان سمتِ
+              چپ و دکمه سمتِ راست بود — چیدمانِ چپ‌به‌راست. صفحه
+              فارسی است و مالک صریح گفت همین بخش باید راست‌چین شود:
+              عنوان سمتِ راست، دکمه سمتِ چپ. */}
+          <div className="tm-sec-head tm-sec-head--lead">
+            <div className="tm-sec-lead">
+              <span className="tm-eyebrow">BILLIARD EXPERT SERVICES</span>
+              <h2 className="tm-h2 tm-h2--xl" id="tm-cats-h">خدمات فنی</h2>
+              <p className="tm-sec-sub">مشاوره و ارائه خدمات تخصصی بیلیارد از حرفه‌ای‌های معتبر</p>
+            </div>
+            <Link className="tm-pill" href="#tm-people">
+              مشاهده همه متخصصین
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                <line x1="19" y1="12" x2="5" y2="12" /><polyline points="12 19 5 12 12 5" />
+              </svg>
+            </Link>
           </div>
           <ServiceCategoryList
             active={category}
