@@ -88,6 +88,10 @@ export interface ProfileHeroProps {
   /* نامِ پایه‌ی پوسترِ نقش، بدون عرض و پسوند. اگر ندهی، پوسترِ
      برداریِ ساخته‌شده رندر می‌شود. */
   posterBase?: PosterBase
+  /* پوسترِ پیش‌فرضِ اختصاصیِ همین نقش — وقتی نه کاور هست نه
+     `posterBase`. بدون این، همه‌ی نقش‌ها به `CoverPoster` می‌رسند و
+     صحنه‌ی «سه توپ روی نمد» برای کارگاهِ تولیدی حرفی نمی‌زند. */
+  posterNode?: React.ReactNode
 }
 
 /* عنوانِ تیکِ تأیید. پیش‌تر یک سه‌تایی بود («مربی» اگر coach وگرنه
@@ -112,7 +116,7 @@ function cssUrl(u: string): string {
 export default function ProfileHero({
   name, nameLatin, city, sinceYear, photo, cover, coverSlides, story, verified,
   grade, disciplines, onOpenPhoto,
-  role, backHref, backLabel, publicUrl, actions, stats, posterBase,
+  role, backHref, backLabel, publicUrl, actions, stats, posterBase, posterNode,
 }: ProfileHeroProps) {
   const sizes = posterBase ? POSTER_SIZES[posterBase] : POSTER_SIZES.coach
 
@@ -215,7 +219,7 @@ export default function ProfileHero({
                 srcSet={sizes.wide.map(w => `/images/coaches/${posterBase}-wide-${w}.webp ${w}w`).join(', ')} sizes="100vw" />
             </picture>
           )
-          : <CoverPoster tone={role} />}
+          : posterNode ?? <CoverPoster tone={role} />}
       <div className="ch-hero-scrim" data-poster={coverUrl ? undefined : '1'} data-photo={!coverUrl && posterBase ? '1' : undefined} />
 
       {/* نقطه‌های بنر — هم می‌گویند چند بنر هست، هم راهِ ایستاندنِ
