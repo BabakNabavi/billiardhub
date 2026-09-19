@@ -119,3 +119,26 @@ export async function fetchProductsBySeller(sellerId: string): Promise<ShopProdu
   const all = await fetchShopProducts()
   return all.filter(p => p.sellerId === sellerId)
 }
+
+/* ── آگهی‌های یک کاربر، بدون وابستگی به نامک فروشگاه ──
+   `fetchProductsBySeller` روی `storeSlug` فیلتر می‌کند و برای کسی
+   که فروشگاه تأییدشده ندارد — مثلا تولیدکننده‌ای که فقط
+   تولیدی ثبت کرده — همیشه خالی است، چون آگهیاش با
+   `storeSlug` تهی ذخیره شده.
+
+   فیلتر این‌جا سمت سرور است نه روی فهرست کامل: شناسه‌ی مالک
+   اصلا در ستون‌های پاسخ عمومی نیست پس کلاینت نمی‌تواند
+   خودش فیلتر کند. */
+/* ⚠️ برخلاف دو تابع بالا این یکی خطا را می‌بلعد و `[]` نمی‌دهد.
+   «نتوانستم بخوانم» با «آگهی ندارد» یکی نیست: مصرف‌کننده‌ی این تابع
+   بخشِ خالی را اصلا رندر نمی‌کند، پس یک ۵۰۰ یا قطعیِ شبکه باعث
+   می‌شد کلِ ویترین بی‌صدا غیب شود. حالا صفحه خطا را می‌گیرد و
+   «تلاش دوباره» نشان می‌دهد. */
+export async function fetchProductsByOwner(ownerId: string, limit = 200): Promise<ShopProduct[]> {
+  if (!ownerId) return []
+  const r = await fetch(`/api/products?limit=${limit}&owner=${encodeURIComponent(ownerId)}`, { cache: 'no-store' })
+  if (!r.ok) throw new Error(`fetchProductsByOwner: ${r.status}`)
+  const j = await r.json()
+  const rows = Array.isArray(j?.products) ? j.products : []
+  return rows.map((x: Record<string, unknown>) => toShopProduct(x))
+}
