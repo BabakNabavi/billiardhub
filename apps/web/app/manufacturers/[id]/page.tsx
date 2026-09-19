@@ -21,8 +21,10 @@ import { useOwnerEdit } from '../../../lib/profiles/use-owner-edit'
 import { compressImage } from '../../../lib/seller-store'
 import { ask } from '../../../lib/ui/dialogs'
 import ProfileHero from '../../../components/profile/ProfileHero'
+import ManufacturerPoster from '../../../components/profile/ManufacturerPoster'
+import ProductDialog from './ProductDialog'
 import { Factory } from 'lucide-react'
-import { telPrefix, provinceOfCity } from '../../../lib/iran-geo'
+import { iranTel } from '../../../lib/iran-geo'
 import { getManufacturer, type MfrProduct } from '../../../lib/manufacturers-data'
 import OwnerAdsSection from '../../../components/market/OwnerAdsSection'
 import { fetchProductsByOwner, type ShopProduct } from '../../shop/products'
@@ -315,16 +317,17 @@ export default function ManufacturerPage() {
      تولیدکننده‌ای که تازه ثبت‌نام کرده و هنوز ذخیره نشده بود. */
   const mfr = getManufacturer(mfrId) ?? storedMfr
 
-  const province = provinceOfCity(mfr?.city ?? '')
-
-  /* شماره‌ی تماس (شماره‌ها خودشان کد شهر دارند) */
-  const areaCode  = telPrefix(province)
-  /* `mfr` تا پیش از گارد پایین می‌تواند تهی باشد؛ این مقادیر فقط
-     پس از آن گارد رندر می‌شوند، ولی محاسبه‌شان باید بی‌خطر بماند. */
-  const phoneDig  = (mfr?.phone ?? '').replace(/\D/g, '')
-  const withCode  = !!areaCode && !!phoneDig && !phoneDig.startsWith('0')
-  const phoneText = withCode ? `${areaCode}-${phoneDig}` : (mfr?.phone ?? '')
-  const phoneHref = withCode ? `${areaCode}${phoneDig}` : phoneDig
+  /* ── شماره‌ی تماس ──
+     ⚠️ از منبعِ واحد (`iranTel`)، نه منطقِ دست‌سازِ این صفحه. نسخه‌ی
+     قبلی هر شماره‌ی بدونِ صفر را کددار می‌کرد، ولی `iranTel` فقط
+     شماره‌ی ۶ تا ۸ رقمیِ شهری را — یعنی همان تولیدکننده می‌توانست
+     در فهرست و در پروفایل دو شماره‌ی متفاوت بگیرد.
+     `mfr` تا پیش از گاردِ پایین می‌تواند تهی باشد، پس محاسبه باید
+     بی‌خطر بماند. */
+  const tel = iranTel(mfr?.phone, null, mfr?.city)
+  const phoneDig  = tel.digits
+  const phoneText = tel.text
+  const phoneHref = tel.href
 
   /* آرایه‌ی تازه در هر رندر، وابستگی دو useMemo پایین را همیشه
      تغییریافته نشان می‌داد و فیلترها بی‌دلیل دوباره اجرا می‌شدند. */
@@ -334,6 +337,7 @@ export default function ManufacturerPage() {
   const [page, setPage]   = useState(1)
   const [query, setQuery] = useState('')
   const [tab, setTab]     = useState<MfrTab>('about')
+  const [openProd, setOpenProd] = useState<MfrProduct | null>(null)
   const onTabKey = useTabKeys(MFR_TABS.map(x => x.key), tab, setTab, 'mtab-')
 
   /* دسته‌بندی‌ها از خود محصولات */
@@ -433,6 +437,15 @@ export default function ManufacturerPage() {
         .mfr-col { display: flex; flex-direction: column; gap: 14px; }
         .mfr-card { padding: clamp(16px,3vw,24px); }
 
+        /* ── دو عددِ تأکیدیِ نوارِ آمارِ هدر ──
+           نوار سفیدِ یکدست بود و چشم جایی برای نشستن نداشت.
+           ⚠️ انتخابگر باید کاملِ زنجیره را بیاورد: قاعده‌ی شیتِ مشترک
+           سه‌کلاسه است و با یک کلاسِ تنها وزنِ کمتری داشتیم و رنگ
+           نمی‌نشست.
+           (بک‌تیک در این کامنت ممنوع — داخل template literal است) */
+        .ch-hero-stats .ch-stats li.mfr-st--felt b { color: #6FD3AC; }
+        .ch-hero-stats .ch-stats li.mfr-st--gold b { color: var(--gold-light); }
+
         .mfr-h { display: flex; align-items: center; gap: 10px; margin: 0 0 12px; font-size: 17px; font-weight: 800; color: #111111; }
         .mfr-bar { flex-shrink: 0; width: 3px; height: 16px; border-radius: 2px; background: linear-gradient(135deg,#C7A66A,#A07840); }
         .mfr-p { margin: 0; font-size: 15px; line-height: 1.9; color: rgba(0,0,0,0.50); }
@@ -510,10 +523,16 @@ export default function ManufacturerPage() {
         @media (min-width: 900px)  { .mfr-prods { grid-template-columns: repeat(4, minmax(0,1fr)); } }
         @media (min-width: 1120px) { .mfr-prods { grid-template-columns: repeat(5, minmax(0,1fr)); } }
         .mfr-prod { display: flex; flex-direction: column; overflow: hidden; border-radius: 16px;
+          padding: 0; text-align: start; font: inherit; color: inherit; cursor: pointer;
           background: rgba(255,255,255,0.72); border: 1px solid rgba(17,17,16,0.07);
           box-shadow: 0 1px 2px rgba(17,17,16,0.04);
-          transition: transform .28s cubic-bezier(.22,1,.36,1), box-shadow .28s; }
-        .mfr-prod:hover { transform: translateY(-3px); box-shadow: 0 18px 38px -16px rgba(17,17,16,0.26); }
+          transition: transform .28s cubic-bezier(.22,1,.36,1), box-shadow .28s, border-color .28s; }
+        .mfr-prod:hover { transform: translateY(-3px); border-color: rgba(199,166,106,0.42);
+          box-shadow: 0 18px 38px -16px rgba(17,17,16,0.26); }
+        .mfr-prod:focus-visible { outline: 2px solid #14532D; outline-offset: 2px; }
+        .mfr-prod-noimg { position: absolute; inset: 0; display: grid; place-items: center;
+          font-size: 12px; color: rgba(0,0,0,0.30); }
+        .mfr-prod-more { margin-top: 6px; font-size: 11px; font-weight: 700; color: #8F6531; }
         .mfr-prod-img { position: relative; aspect-ratio: 1 / 1; overflow: hidden; background: #F1EFEA; }
         .mfr-prod-img img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
         /* ⚠️ inset-inline-start یعنی راست در RTL — همان جایی که نشانِ
@@ -526,8 +545,11 @@ export default function ManufacturerPage() {
         .mfr-prod-cat { font-size: 11px; font-weight: 800; color: #8F6531; }
         .mfr-prod-name { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
           font-size: 13.5px; font-weight: 600; line-height: 1.5; color: #1C1C1A; }
-        .mfr-prod-spec { margin-top: auto; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-          font-size: 11.5px; color: rgba(0,0,0,0.40); }
+        /* دو خط، نه یک خطِ بریده: حالا توضیحِ محصول این‌جا می‌آید و
+           با nowrap عملا هیچ‌چیز خوانده نمی‌شد. */
+        .mfr-prod-spec { margin-top: 4px; display: -webkit-box; -webkit-line-clamp: 2;
+          -webkit-box-orient: vertical; overflow: hidden;
+          font-size: 11.5px; line-height: 1.65; color: rgba(0,0,0,0.42); }
 
         .mfr-empty { margin: 0; padding: 40px 0; text-align: center; font-size: 13.5px; color: rgba(0,0,0,0.38); }
         .mfr-reset { margin-inline-start: 8px; border: 0; background: none; font: inherit; font-weight: 800;
@@ -557,8 +579,12 @@ export default function ManufacturerPage() {
           همان نشانِ طلاییِ هدرِ مشترک است. */}
       <ProfileHero
         name={mfr.name}
-        city={[province, mfr.city].filter(Boolean).join('، ')}
+        /* ⚠️ فقط شهر. «تهران، تهران» چیزی به کسی نمی‌گفت — استان
+           همان‌جا برای کدِ تلفن استفاده می‌شود، نه برای نمایش. */
+        city={mfr.city}
         cover={mfr.bannerImage || undefined}
+        /* بی‌بنر ⇒ صحنه‌ی کارگاه، نه سه توپ روی نمد */
+        posterNode={<ManufacturerPoster />}
         verified={mfr.verified}
         grade={mfr.elite ? { label: 'تولیدکننده‌ی رسمی', dots: 0 } : undefined}
         disciplines={mfr.specialties.map(s => ({ label: s }))}
@@ -568,19 +594,22 @@ export default function ManufacturerPage() {
         publicUrl={`billiardhub.net/manufacturers/${mfrId}`}
         posterBase={undefined}
         stats={
+          /* ⚠️ دو عددِ اول رنگ می‌گیرند، نه هر چهارتا: وقتی همه رنگی
+             باشند هیچ‌کدام تأکید نیست. تعدادِ محصول سبزِ نمد و سالِ
+             تأسیس طلاییِ سیستم — بقیه سفیدِ خنثی می‌مانند. */
           <ul className="ch-stats">
             {PRODUCTS.length > 0 && (
-              <li><b>{faNum(PRODUCTS.length)}</b><span>محصول</span></li>
+              <li className="mfr-st mfr-st--felt"><b>{faNum(PRODUCTS.length)}</b><span>محصول</span></li>
             )}
-            {mfr.since && <li><b>{toFa(mfr.since)}</b><span>سال تأسیس</span></li>}
-            {mfr.employees && <li><b>{toFa(mfr.employees)}</b><span>پرسنل</span></li>}
-            {mfr.totalProduced && <li><b>{toFa(mfr.totalProduced)}</b><span>تولید شده</span></li>}
+            {mfr.since && <li className="mfr-st mfr-st--gold"><b>{toFa(mfr.since)}</b><span>سال تأسیس</span></li>}
+            {mfr.employees && mfr.employees !== '—' && <li><b>{toFa(mfr.employees)}</b><span>پرسنل</span></li>}
+            {mfr.totalProduced && mfr.totalProduced !== '—' && <li><b>{toFa(mfr.totalProduced)}</b><span>تولید شده</span></li>}
           </ul>
         }
         actions={
           phoneDig ? (
             <a className="ch-hero-cta" href={`tel:${phoneHref}`}>
-              {Icon.phone}<span className={MONO}>{toFa(phoneText)}</span>
+              {Icon.phone}<span dir="ltr" className={MONO}>{toFa(phoneText)}</span>
             </a>
           ) : undefined
         }
@@ -724,18 +753,32 @@ export default function ManufacturerPage() {
               </div>
 
               <div ref={gridRef} className="mfr-prods" style={{ scrollMarginTop: 80 }}>
+                {/* ⚠️ دکمه، نه `article`: کارت حالا باز می‌شود و باید
+                    با کیبورد هم قابلِ رسیدن باشد. */}
                 {paged.map((p: MfrProduct) => (
-                  <article key={p.id} className="mfr-prod group">
+                  <button
+                    key={p.id} type="button" className="mfr-prod group"
+                    onClick={() => setOpenProd(p)}
+                    aria-label={`جزئیات ${p.name}`}
+                  >
                     <div className="mfr-prod-img">
-                      <img src={p.image} alt={p.name} loading="lazy" className="transition-transform duration-500 group-hover:scale-[1.05]" />
+                      {p.image
+                        ? <img src={p.image} alt="" loading="lazy" className="transition-transform duration-500 group-hover:scale-[1.05]" />
+                        : <span className="mfr-prod-noimg">بدون تصویر</span>}
                       {p.badge && <span className="mfr-prod-badge">{p.badge}</span>}
                     </div>
                     <div className="mfr-prod-body">
-                      <span className="mfr-prod-cat">{p.category}</span>
+                      {p.category && <span className="mfr-prod-cat">{p.category}</span>}
                       <span className="mfr-prod-name">{p.name}</span>
-                      {p.specs[0] && <span className="mfr-prod-spec">{p.specs[0]}</span>}
+                      {/* خلاصه‌ی کوتاه؛ باقیِ مشخصات داخلِ پنجره */}
+                      {(p.description || p.specs[0]) && (
+                        <span className="mfr-prod-spec">{p.description || p.specs[0]}</span>
+                      )}
+                      {p.specs.length > 0 && (
+                        <span className="mfr-prod-more">{faNum(p.specs.length)} مشخصه</span>
+                      )}
                     </div>
-                  </article>
+                  </button>
                 ))}
               </div>
 
@@ -822,6 +865,16 @@ export default function ManufacturerPage() {
           </div>
         )}
       </div>
+
+      {openProd && (
+        <ProductDialog
+          product={openProd}
+          maker={mfr.name}
+          telHref={phoneHref || undefined}
+          telText={phoneText ? toFa(phoneText) : undefined}
+          onClose={() => setOpenProd(null)}
+        />
+      )}
 
       {imageViewer}
       {videoViewer}

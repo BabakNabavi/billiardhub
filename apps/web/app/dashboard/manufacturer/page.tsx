@@ -45,7 +45,7 @@ export default function ManufacturerDashboard() {
   const bannerRef = useRef<HTMLInputElement>(null)
   const prodImgRef = useRef<HTMLInputElement>(null)
   const licRef = useRef<HTMLInputElement>(null)
-  const [prod, setProd] = useState({ name: '', category: '', description: '', image: '' })
+  const [prod, setProd] = useState({ name: '', category: '', description: '', specs: '', image: '' })
   const [cert, setCert] = useState({ title: '', issuer: '', year: '' })
 
   const isManufacturer = !!user && [user.primaryRole, ...(user.secondaryRoles ?? [])].includes('manufacturer')
@@ -132,11 +132,17 @@ export default function ManufacturerDashboard() {
     if (!prod.name.trim() || !prod.category.trim()) { setErr('نام و دسته‌ی محصول لازم است.'); return }
     const p: MfrProduct = {
       id: rid(), name: prod.name.trim(), category: prod.category.trim(),
-      description: prod.description.trim(), specs: [],
-      image: prod.image || '/images/shop/Pro_table.webp',
+      description: prod.description.trim(),
+      /* ⚠️ تا امروز `[]` هاردکد بود: فرم اصلا جایی برای مشخصات
+         نداشت، پس صفحه‌ی تولیدکننده هیچ‌وقت چیزی برای نشان‌دادن
+         نداشت. هر خط یک مشخصه. */
+      specs: prod.specs.split('\n').map(s => s.trim()).filter(Boolean).slice(0, 20),
+      /* ⚠️ عکسِ قرضیِ پوشه‌ی فروشگاه حذف شد — محصولِ بی‌عکس، بی‌عکس
+         می‌ماند و کارت خودش حالتِ «بدون تصویر» دارد. */
+      image: prod.image,
     }
     set('products', [...form.products, p])
-    setProd({ name: '', category: '', description: '', image: '' })
+    setProd({ name: '', category: '', description: '', specs: '', image: '' })
   }
 
   const submit = (e: React.FormEvent) => {
@@ -421,6 +427,17 @@ export default function ManufacturerDashboard() {
               <input className={INPUT} value={prod.name} onChange={e => setProd(p => ({ ...p, name: e.target.value }))} placeholder="نام محصول — مثال: میز اسنوکر ۱۲ فوت" />
               <input className={INPUT} value={prod.category} onChange={e => setProd(p => ({ ...p, category: e.target.value }))} placeholder="دسته — مثال: میز اسنوکر" />
               <input className={`${INPUT} sm:col-span-2`} value={prod.description} onChange={e => setProd(p => ({ ...p, description: e.target.value }))} placeholder="توضیح کوتاه محصول…" />
+              {/* مشخصات — هر خط یکی. صفحه‌ی تولیدکننده همین‌ها را
+                  در پنجره‌ی جزئیات محصول فهرست می‌کند. */}
+              <label className="sm:col-span-2">
+                <span className={LABEL}>مشخصات (هر خط یک مورد)</span>
+                <textarea
+                  className={`${INPUT} min-h-[92px] resize-y`}
+                  value={prod.specs}
+                  onChange={e => setProd(p => ({ ...p, specs: e.target.value }))}
+                  placeholder={'ابعاد: ۱۲ فوت\nجنس بدنه: چوب راش\nسنگ: ۳۰ میلی‌متر ایتالیایی\nپارچه: ماهوت درجه یک'}
+                />
+              </label>
               <div className="flex items-center gap-3 sm:col-span-2">
                 <input ref={prodImgRef} type="file" accept="image/*" className="hidden" onChange={pickProdImage} />
                 <button type="button" onClick={() => prodImgRef.current?.click()} className={LQ_BTN} disabled={busy}>
