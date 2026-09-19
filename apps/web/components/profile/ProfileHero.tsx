@@ -21,6 +21,7 @@
    ───────────────────────────────────────────────────────────── */
 
 'use client'
+import { Fragment, useEffect, useState } from 'react'
 import { useCopyUrl } from '@/hooks/use-copy-url'
 import Link from 'next/link'
 import { MapPin, Check, Link2 as LinkIcon } from 'lucide-react'
@@ -51,6 +52,18 @@ export interface ProfileHeroProps {
   sinceYear?: string
   photo?: string
   cover?: string
+  /* ── چند کاور به‌جای یکی ──
+     فروشگاه می‌تواند چند بنر آپلود کند و نسخه‌ی قبلیِ هدرش آن‌ها را
+     می‌چرخاند. با یک `cover` ثابت، بنرهای دوم به بعد بی‌صدا حذف
+     می‌شدند. کمتر از دو تا یعنی همان مسیر تک‌کاور. */
+  coverSlides?: readonly string[]
+  /* ── حلقه‌ی استوری ──
+     وقتی داده شود، حلقه‌ی طلاییِ آواتار جایش را به حلقه‌ی رنگیِ
+     استوری می‌دهد و کلیک روی آواتار به‌جای بزرگ‌نمایی، استوری را
+     باز می‌کند.
+     ⚠️ بر `onOpenPhoto` مقدم است: یک آواتار دو کنش ندارد. حلقه‌ی
+     رنگی استوری را وعده می‌دهد، پس همان باید باز شود. */
+  story?: { onOpen: () => void; label?: string }
   verified: boolean
   /** برچسب درجه و تعداد نقطه‌ها — از `badgeFromGrades` */
   grade?: { label: string; dots: number }
@@ -77,12 +90,69 @@ export interface ProfileHeroProps {
   posterBase?: PosterBase
 }
 
+/* عنوانِ تیکِ تأیید. پیش‌تر یک سه‌تایی بود («مربی» اگر coach وگرنه
+   «داور»)، پس صفحه‌ی تولیدکننده و فروشگاه هم «داور تأیید شده»
+   می‌گرفتند. */
+const ROLE_LABEL: Record<RoleGlyphKind, string> = {
+  coach: 'مربی',
+  referee: 'داور',
+  manufacturer: 'تولیدکننده',
+  seller: 'فروشگاه',
+}
+
+const SLIDE_MS = 5200
+
+/* ⚠️ نشانی از کاربر می‌آید (بنرِ آپلودشده). یک `)` یا `"` در نام
+   فایل، اعلانِ CSS را می‌شکند و در بدترین حالت اجازه‌ی تزریق
+   می‌دهد. نقل‌قول + کدگذاری، هر دو. */
+function cssUrl(u: string): string {
+  return `url("${encodeURI(u).replace(/["\\]/g, c => encodeURIComponent(c))}")`
+}
+
 export default function ProfileHero({
-  name, nameLatin, city, sinceYear, photo, cover, verified,
+  name, nameLatin, city, sinceYear, photo, cover, coverSlides, story, verified,
   grade, disciplines, onOpenPhoto,
   role, backHref, backLabel, publicUrl, actions, stats, posterBase,
 }: ProfileHeroProps) {
   const sizes = posterBase ? POSTER_SIZES[posterBase] : POSTER_SIZES.coach
+
+  /* ⚠️ شرط روی *وجودِ* عکس است نه روی «دو تا به بالا». نسخه‌ی اول
+     `length > 1` می‌گرفت و فروشگاهی که فقط یک بنر دارد — یعنی
+     حالتِ رایج — بنرش را از دست می‌داد و پوسترِ پیش‌فرض می‌گرفت.
+     چیزی که به دو تا نیاز دارد چرخش است، نه نمایش. */
+  const slides = coverSlides && coverSlides.length ? coverSlides : null
+  /* ⚠️ کلیدِ محتوایی، نه شناسه‌ی آرایه: اگر فراخوان آرایه را داخلِ
+     رندر بسازد (`.map()` یا لیترال)، وابستگیِ شناسه‌ای هر رندر
+     تایمر را از نو می‌سازد و اسلاید هیچ‌وقت جلو نمی‌رود. */
+  const slideKey = slides ? slides.join('|') : ''
+  const [slide, setSlide] = useState(0)
+  /* کاربر که خودش بنری را انتخاب کرد، چرخشِ خودکار می‌ایستد
+     (WCAG 2.2.2: محتوای خودکارِ بیش از پنج ثانیه باید مکث داشته
+     باشد). */
+  const [pinned, setPinned] = useState(false)
+
+  /* فهرست که عوض شد، نشانگر هم باید سر جای اول برگردد: وگرنه
+     `slide` از انتهای فهرستِ تازه بیرون می‌ماند. */
+  useEffect(() => { setSlide(0); setPinned(false) }, [slideKey])
+
+  useEffect(() => {
+    const n = slideKey ? slideKey.split('|').length : 0
+    if (n < 2 || pinned) return
+    /* بی‌حرکتی درخواستِ کاربر است نه سلیقه: بدون این، «محوشدنِ
+       خاموش» به پرشِ ناگهانیِ هر ۵ ثانیه تبدیل می‌شد. */
+    if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return
+    const t = window.setInterval(() => setSlide(s => (s + 1) % n), SLIDE_MS)
+    return () => window.clearInterval(t)
+  }, [slideKey, pinned])
+
+  /* ⚠️ همین مقدارِ مهارشده هم به لایه‌ی روشن می‌رود هم به شرط‌های
+     پایین: اگر لایه `slide` خام بگیرد و این `slide % n`، در فاصله‌ی
+     کوتاه‌شدنِ فهرست هیچ لایه‌ای روشن نمی‌ماند و هدر سیاه می‌شود. */
+  const active = slides ? slide % slides.length : 0
+  /* ⚠️ شرط‌های پایین روی این می‌نشینند نه روی `cover` خام: وگرنه
+     صفحه‌ای که فقط `coverSlides` می‌دهد، پرده‌ی «پوستر» را می‌گرفت
+     و کاور واقعی زیرش گم می‌شد. */
+  const coverUrl = slides ? slides[active] : cover
   /* ── آدرس اختصاصی روی هیرو ──
      همان چیزی که در ستون کناری هست، این‌بار جایی که بازدیدکننده
      اول نگاه می‌کند. کپی همان‌جا انجام می‌شود تا کسی مجبور نباشد
@@ -106,13 +176,24 @@ export default function ProfileHero({
   const head  = parts.join(' ')
 
   return (
-    <header className={'ch-hero' + (!cover && posterBase ? ' ch-hero--photo' : '')}>
+    <header className={'ch-hero' + (!coverUrl && posterBase ? ' ch-hero--photo' : '')}>
       {/* کاور واقعی اگر هست، وگرنه پوستر ساخته‌شده — نه عکس قرضی
           یک میز اسنوکر اتفاقی که روی پروفایل همه می‌نشست. */}
-      {cover
+      {slides
+        ? slides.map((u, i) => (
+            /* همه‌ی بنرها روی هم رندر می‌شوند و فقط شفافیتشان عوض
+               می‌شود — محو نرم به‌جای پرشِ ناگهانیِ backgroundImage. */
+            <Fragment key={u}>
+              <div className="ch-hero-fill ch-hero-slide" data-on={i === active ? '1' : undefined}
+                style={{ backgroundImage: cssUrl(u) }} />
+              <div className="ch-hero-img ch-hero-slide" data-on={i === active ? '1' : undefined}
+                style={{ backgroundImage: cssUrl(u) }} />
+            </Fragment>
+          ))
+        : coverUrl
         ? <>
-            <div className="ch-hero-fill" style={{ backgroundImage: `url(${cover})` }} />
-            <div className="ch-hero-img" style={{ backgroundImage: `url(${cover})` }} />
+            <div className="ch-hero-fill" style={{ backgroundImage: cssUrl(coverUrl) }} />
+            <div className="ch-hero-img" style={{ backgroundImage: cssUrl(coverUrl) }} />
           </>
         : posterBase
           ? (
@@ -135,7 +216,23 @@ export default function ProfileHero({
             </picture>
           )
           : <CoverPoster tone={role} />}
-      <div className="ch-hero-scrim" data-poster={cover ? undefined : '1'} data-photo={!cover && posterBase ? '1' : undefined} />
+      <div className="ch-hero-scrim" data-poster={coverUrl ? undefined : '1'} data-photo={!coverUrl && posterBase ? '1' : undefined} />
+
+      {/* نقطه‌های بنر — هم می‌گویند چند بنر هست، هم راهِ ایستاندنِ
+          چرخشِ خودکارند. انتخابِ کاربر تایمر را خاموش می‌کند و
+          دیگر روشن نمی‌شود. */}
+      {slides && slides.length > 1 && (
+        <div className="ch-hero-dots" role="group" aria-label="بنرهای صفحه">
+          {slides.map((u, i) => (
+            <button key={u} type="button"
+              onClick={() => { setSlide(i); setPinned(true) }}
+              aria-current={i === active ? 'true' : undefined}
+              aria-label={`بنر ${toFaDigits(i + 1)} از ${toFaDigits(slides.length)}`}>
+              <i aria-hidden />
+            </button>
+          ))}
+        </div>
+      )}
       {nameLatin && <div className="ch-hero-ghost" aria-hidden>{nameLatin}</div>}
 
       <div className="ch-wrap ch-hero-body">
@@ -152,8 +249,14 @@ export default function ProfileHero({
               گرادیانِ مخروطی را نمی‌شود روی border گذاشت، و اگر
               `background` خودِ دکمه شود، عکس رویش می‌افتد و حلقه
               دیده نمی‌شود. */}
-          <span className="ch-avatar-ring">
-            {photo && onOpenPhoto
+          {/* استوری بر بزرگ‌نمایی مقدم است: وقتی استوری هست، کلیک
+              روی آواتار همان چیزی را باز می‌کند که حلقه‌ی رنگی
+              وعده‌اش را می‌دهد. */}
+          <span className="ch-avatar-ring" data-story={story ? '1' : undefined}>
+            {story
+              ? <button type="button" className="ch-avatar" data-glyph={photo ? undefined : '1'}
+                  onClick={story.onOpen} aria-label={story.label ?? 'مشاهده استوری'}>{avatar}</button>
+              : photo && onOpenPhoto
               ? <button type="button" className="ch-avatar" onClick={() => onOpenPhoto(photo)}
                   aria-label="بزرگ‌نمایی عکس پروفایل">{avatar}</button>
               : <div className="ch-avatar" data-glyph={photo ? undefined : '1'}>{avatar}</div>}
@@ -176,7 +279,7 @@ export default function ProfileHero({
                 {tail}
                 {verified && (
                   <VerifiedBadge
-                    title={`${role === 'coach' ? 'مربی' : 'داور'} تأیید شده`}
+                    title={`${ROLE_LABEL[role]} تأیید شده`}
                     style={{ width: '0.56em', height: '0.56em', marginInlineStart: '0.16em', verticalAlign: '-0.06em' }}
                   />
                 )}
