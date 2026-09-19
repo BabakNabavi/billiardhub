@@ -185,12 +185,7 @@ export default function TechnicalServicesPage() {
             دو فایل، نه یک فایلِ کِش‌آمده: نسخه‌ی موبایل کادرِ نزدیک‌تری
             دارد و در قابِ بلندِ گوشی، برشِ دسکتاپ فقط نمدِ سبز نشان
             می‌داد. */}
-        <div className="tm-hero-photo" aria-hidden>
-          <picture>
-            <source media="(min-width: 760px)" srcSet="/images/services/hero-desktop.jpg" />
-            <img src="/images/services/hero-mobile.jpg" alt="" decoding="async" />
-          </picture>
-        </div>
+        {/* پس‌زمینه‌ی عکس روی خودِ .tm-hero است — ios.css */}
         <div className="tm-wrap tm-hero-in">
           <div>
             {/* ⚠️ تیتر کوتاه شد و لحنش رسمی: نسخه‌ی قبلی یازده کلمه بود
@@ -232,18 +227,24 @@ export default function TechnicalServicesPage() {
               چپ و دکمه سمتِ راست بود — چیدمانِ چپ‌به‌راست. صفحه
               فارسی است و مالک صریح گفت همین بخش باید راست‌چین شود:
               عنوان سمتِ راست، دکمه سمتِ چپ. */}
+          {/* ⚠️ چیدمان عمدی و بر اساس بازخوردِ مالک:
+              • نشانِ لاتین کاملا بالا-چپ (بلوکِ لاتین، پس ltr)
+              • عنوان سمتِ راست — صفحه فارسی است، هرچند در طرحِ مرجع
+                این بخش چپ‌چین بود
+              • دکمه هم‌ردیفِ عنوان، نه زیرِ بلوک: روی موبایل هم
+                روبه‌روی «خدمات فنی» می‌ماند */}
           <div className="tm-sec-head tm-sec-head--lead">
-            <div className="tm-sec-lead">
-              <span className="tm-eyebrow">BILLIARD EXPERT SERVICES</span>
+            <span className="tm-eyebrow">BILLIARD EXPERT SERVICES</span>
+            <div className="tm-sec-row">
               <h2 className="tm-h2 tm-h2--xl" id="tm-cats-h">خدمات فنی</h2>
-              <p className="tm-sec-sub">مشاوره و ارائه خدمات تخصصی بیلیارد از حرفه‌ای‌های معتبر</p>
+              <Link className="tm-pill" href="#tm-people">
+                مشاهده همه متخصصین
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                  <line x1="19" y1="12" x2="5" y2="12" /><polyline points="12 19 5 12 12 5" />
+                </svg>
+              </Link>
             </div>
-            <Link className="tm-pill" href="#tm-people">
-              مشاهده همه متخصصین
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                <line x1="19" y1="12" x2="5" y2="12" /><polyline points="12 19 5 12 12 5" />
-              </svg>
-            </Link>
+            <p className="tm-sec-sub">مشاوره و ارائه خدمات تخصصی بیلیارد از حرفه‌ای‌های معتبر</p>
           </div>
           <ServiceCategoryList
             active={category}

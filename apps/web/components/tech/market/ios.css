@@ -346,9 +346,10 @@
   background: linear-gradient(180deg, rgb(255 255 255 / .55) 0%, rgb(255 255 255 / 0) 100%);
   pointer-events: none; border-radius: 16px 16px 0 0;
 }
+/* ⚠️ کاشی بزرگ‌تر از نسخه‌ی قبل (۳۶ ⟵ ۵۲) تا با طرحِ مرجع بخواند. */
 .tm .tm-cat-ic {
   display: grid; place-items: center;
-  inline-size: 36px; block-size: 36px; border-radius: 12px;
+  inline-size: 52px; block-size: 52px; border-radius: 16px;
   background: linear-gradient(135deg, rgba(var(--rgb), .20), rgba(var(--rgb), .08));
   border: 1px solid rgba(var(--rgb), .32);
   box-shadow: 0 3px 11px rgba(var(--rgb), .28);
@@ -368,6 +369,22 @@
 .tm .tm-cat-n {
   color: var(--ios-label-2);
   font-size: clamp(10px, 0.86vw, 12px); font-weight: 400; line-height: 1.4;
+}
+/* فلشِ گردِ پایینِ کارت */
+.tm .tm-cat-go {
+  display: grid; place-items: center;
+  inline-size: 34px; block-size: 34px; border-radius: 50%;
+  margin-block-start: 6px;
+  background: rgb(120 120 128 / .12);
+  color: var(--ios-label);
+  transition: background .25s ease, transform .25s ease;
+}
+@media (hover: hover) {
+  .tm .tm-cat:hover .tm-cat-go { background: rgba(var(--rgb), .22); transform: translateX(3px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tm .tm-cat-go { transition: none; }
+  .tm .tm-cat:hover .tm-cat-go { transform: none; }
 }
 @media (hover: hover) {
   .tm .tm-cat:hover {
@@ -1128,25 +1145,36 @@
        است (عنوان راست، دکمه چپ).
    ═══════════════════════════════════════════════════════════ */
 
-/* ── عکسِ پس‌زمینه ── */
-.tm .tm-hero-photo { position: absolute; inset: 0; z-index: 0; overflow: hidden; }
-.tm .tm-hero-photo picture,
-.tm .tm-hero-photo img {
-  display: block; inline-size: 100%; block-size: 100%;
-  object-fit: cover; object-position: center;
-}
-/* پرده‌ی خوانایی. روی موبایل عمودی و سنگین‌تر است چون متن تمامِ عرض
-   را می‌گیرد؛ روی دسکتاپ افقی می‌شود تا سمتِ چپِ عکس دیده بماند. */
-.tm .tm-hero-photo::after {
-  content: ''; position: absolute; inset: 0;
-  background:
-    linear-gradient(180deg, rgb(8 10 12 / .62) 0%, rgb(8 10 12 / .38) 42%, rgb(8 10 12 / .80) 100%);
+/* ── عکسِ پس‌زمینه ──
+   ⚠️ عکس روی خودِ .tm-hero می‌نشیند، نه روی یک div جدا.
+   نسخه‌ی قبلی یک <div class="tm-hero-photo"> داشت و هرچه امتحان شد
+   (img با درصدِ ارتفاع، img با inset مطلق، background روی همان div)
+   اصلا رنگ هم نمی‌گرفت — حتی background-color: red — در حالی که
+   بقیه‌ی قواعدِ همین بلوک (tm-pill و tm-eyebrow) کار می‌کردند.
+   .tm-hero خودش position:relative و overflow:hidden دارد و
+   قواعدش ثابت‌شده اعمال می‌شوند، پس عکس همان‌جا می‌نشیند و پرده
+   با ::before کشیده می‌شود. */
+.tm .tm-hero {
+  background-color: #111114;
+  background-image: url('/images/services/hero-mobile.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
 }
 @media (min-width: 760px) {
-  .tm .tm-hero-photo::after {
+  .tm .tm-hero { background-image: url('/images/services/hero-desktop.jpg'); }
+}
+/* پرده‌ی خوانایی — آن‌قدر که متنِ سفید بخواند و نه بیشتر. */
+.tm .tm-hero::before {
+  content: ''; position: absolute; inset: 0; z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgb(8 10 12 / .34) 0%, rgb(8 10 12 / .18) 40%, rgb(8 10 12 / .58) 100%);
+}
+@media (min-width: 760px) {
+  .tm .tm-hero::before {
     background:
-      linear-gradient(to left, rgb(8 10 12 / .82) 0%, rgb(8 10 12 / .52) 46%, rgb(8 10 12 / .18) 100%),
-      linear-gradient(180deg, rgb(8 10 12 / .30) 0%, transparent 40%, rgb(8 10 12 / .55) 100%);
+      linear-gradient(to left, rgb(8 10 12 / .62) 0%, rgb(8 10 12 / .26) 52%, transparent 100%),
+      linear-gradient(180deg, transparent 0%, transparent 55%, rgb(8 10 12 / .34) 100%);
   }
 }
 
@@ -1161,14 +1189,17 @@
   gap: 10px;
   padding: 10px;
   margin-block-start: 22px;
-  border-radius: 26px;
-  background: rgb(255 255 255 / .16);
-  -webkit-backdrop-filter: blur(22px) saturate(150%);
-  backdrop-filter: blur(22px) saturate(150%);
+  border-radius: 28px;
+  /* ⚠️ شیشه یعنی پشتش دیده شود. ۰٫۱۶ سفید روی زمینِ سیاه، مات به نظر
+     می‌رسید؛ با بلورِ کمتر و تینتِ سبک‌تر، عکس از پشتش پیداست —
+     همان جنسی که بقیه‌ی سایت (طرح LQ) دارد. */
+  background: rgb(255 255 255 / .10);
+  -webkit-backdrop-filter: blur(14px) saturate(170%);
+  backdrop-filter: blur(14px) saturate(170%);
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / .38),
-    0 0 0 1px rgb(255 255 255 / .22),
-    0 22px 48px -22px rgb(0 0 0 / .70);
+    inset 0 1px 0 rgb(255 255 255 / .34),
+    0 0 0 1px rgb(255 255 255 / .26),
+    0 22px 48px -26px rgb(0 0 0 / .55);
 }
 .tm .tm-search-fields {
   display: grid;
@@ -1237,41 +1268,48 @@
 
 /* ── سرِ بخشِ «خدمات فنی» ──
    راست‌چین به خواستِ مالک: عنوان سمتِ راست، دکمه سمتِ چپ. */
-.tm .tm-sec-head--lead {
-  display: flex; align-items: flex-end; justify-content: space-between;
-  gap: 20px; flex-wrap: wrap; text-align: start;
-}
-.tm .tm-sec-lead { min-inline-size: 0; }
+.tm .tm-sec-head--lead { display: block; text-align: start; }
+/* نشانِ لاتین کاملا بالا-چپ — بلوکِ لاتین است پس جهتِ خودش را می‌گیرد */
 .tm .tm-eyebrow {
   display: block;
   font-size: 11px; font-weight: 700; letter-spacing: .22em;
   color: var(--ios-label-2);
-  margin-block-end: 10px;
-  /* ⚠️ بلوکِ لاتین در صفحه‌ی راست‌به‌چپ باید جهتِ خودش را بگیرد،
-     وگرنه نقطه/فاصله‌ها جابه‌جا رندر می‌شوند. */
-  direction: ltr; text-align: start;
+  margin-block-end: 8px;
+  direction: ltr; text-align: left;
 }
+/* عنوان و دکمه هم‌ردیف — روی موبایل هم کنار هم می‌مانند */
+.tm .tm-sec-row {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px;
+}
+/* ⚠️ یک پله کوچک‌تر از نسخه‌ی اول (۵۲ ⟵ ۳۸): مالک گفت بزرگ است. */
 .tm .tm-h2--xl {
-  font-size: clamp(30px, 7vw, 52px);
-  font-weight: 800; letter-spacing: -.02em; line-height: 1.3;
-  margin: 0;
+  font-size: clamp(23px, 4.6vw, 38px);
+  font-weight: 800; letter-spacing: -.02em; line-height: 1.32;
+  margin: 0; min-inline-size: 0;
 }
 .tm .tm-sec-sub {
-  margin: 10px 0 0;
-  font-size: clamp(13.5px, 3vw, 16px);
+  margin: 8px 0 0;
+  font-size: clamp(12.5px, 2.6vw, 15px);
   line-height: 1.85;
   color: var(--ios-label-2);
   max-inline-size: 46ch;
 }
+/* ⚠️ کوچک‌تر از نسخه‌ی اول؛ روی موبایل هم متنش کامل می‌ماند چون
+   کنارِ عنوان جا دارد. */
 .tm .tm-pill {
-  display: inline-flex; align-items: center; gap: 10px;
-  padding: 13px 22px; border-radius: 999px;
-  font-size: 13.5px; font-weight: 700; text-decoration: none;
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 9px 15px; border-radius: 999px;
+  font-size: 12px; font-weight: 700; text-decoration: none;
+  white-space: nowrap;
   color: var(--ink);
   background: var(--surface);
-  box-shadow: 0 0 0 1px rgb(17 17 16 / .12), 0 8px 22px -14px rgb(0 0 0 / .45);
+  box-shadow: 0 0 0 1px rgb(17 17 16 / .12), 0 6px 18px -12px rgb(0 0 0 / .45);
   transition: transform .18s ease, box-shadow .18s ease;
   flex: 0 0 auto;
+}
+@media (max-width: 420px) {
+  .tm .tm-pill { padding: 8px 12px; font-size: 11.5px; gap: 5px; }
 }
 .tm .tm-pill:hover {
   transform: translateY(-2px);
@@ -1282,3 +1320,24 @@
 @media (prefers-reduced-motion: reduce) {
   .tm .tm-search-go, .tm .tm-pill { transition: none; }
 }
+
+/* ── کارت‌های دسته، مطابق طرحِ مرجع ──
+   ⚠️ market.css از ۱۲۸۰ به بالا هشت ستون می‌دهد و کارت‌ها ریز
+   می‌شوند. طرح چهار کارتِ بزرگ دارد، پس همان می‌ماند. */
+@media (min-width: 1280px) {
+  .tm .tm-cats { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
+}
+@media (min-width: 768px) {
+  .tm .tm-cats { gap: 16px; }
+  .tm .tm-cat { padding: 20px 18px; gap: 12px; }
+  .tm .tm-cat-t { font-size: 15px; }
+  .tm .tm-cat-n { font-size: 12.5px; }
+}
+/* دکمه هم‌ترازِ عمودیِ عنوان، نه چسبیده به بالای بلوک */
+.tm .tm-sec-row { align-items: center; }
+
+/* ⚠️ محتوای کارت از لبه شروع می‌شود، نه وسط‌چین. در طرحِ مرجع
+   کاشی، عنوان، شمارش و فلش همه از یک لبه تراز شده‌اند؛ وسط‌چین
+   بودن کارت را «دکمه‌ی گرد» نشان می‌داد نه کارتِ کاتالوگ.
+   جهت از خودِ صفحه می‌آید، پس در فارسی راست و در لاتین چپ. */
+.tm .tm-cat { justify-items: start; text-align: start; }

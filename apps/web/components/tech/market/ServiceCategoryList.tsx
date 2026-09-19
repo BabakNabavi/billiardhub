@@ -67,6 +67,14 @@ export function ServiceCategoryList({ active, onPick, counts }: ServiceCategoryL
               </span>
               <span className="tm-cat-t">{cat.title}</span>
               {n > 0 && <span className="tm-cat-n">{toFaDigits(String(n))} متخصص</span>}
+              {/* فلشِ پایینِ کارت — همان چیزی که در طرحِ مرجع هست.
+                  دکمه نیست: خودِ کارت دکمه است و دکمه در دکمه نامعتبر
+                  است. فقط نشانه‌ی بصریِ «برو». */}
+              <span aria-hidden className="tm-cat-go">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="19" y1="12" x2="5" y2="12" /><polyline points="12 19 5 12 12 5" />
+                </svg>
+              </span>
             </button>
           </li>
         )
