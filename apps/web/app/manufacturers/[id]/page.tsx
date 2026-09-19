@@ -12,7 +12,6 @@ import { uploadFile } from '@/lib/supabase'
 import { videoMeta, formatDuration } from '@/lib/video-thumb'
 import { notify } from '@/lib/ui/dialogs'
 import '@/components/profile/profile-page.css'
-import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { toFa, faNum, MONO, Icon, LQ, LQ_NEUTRAL, LQ_FELT_ON } from '../../sellers/[id]/shared'
 import { getManufacturerProfile, profileToManufacturer } from '../../../lib/manufacturer-store'
@@ -27,63 +26,25 @@ import { telPrefix, provinceOfCity } from '../../../lib/iran-geo'
 import { getManufacturer, type MfrProduct } from '../../../lib/manufacturers-data'
 import OwnerAdsSection from '../../../components/market/OwnerAdsSection'
 import { fetchProductsByOwner, type ShopProduct } from '../../shop/products'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { useTabKeys } from '@/hooks/use-tab-keys'
 
 const DEFAULT_ID = '1'
 
-/* آیکون کارخانه (لوگوی پیش‌فرض) */
+/* ⚠️ `MfrPoster` و پوسترهایش حذف شدند: تنها مصرفشان ستونِ تزئینیِ
+   کنارِ «درباره ما» بود — یک‌سومِ عرض را می‌گرفت و هیچ‌چیز درباره‌ی
+   خودِ تولیدکننده نمی‌گفت. */
 
-/* ─── اسلایدر عکس بنر ─── */
-
-/* ════════ پوسترهای پیش‌فرض — به‌سبک هدر صفحه‌ی فروشگاه (وردمارک «بیلیارد هاب») ════════ */
-const MFR_POSTERS = [
-  { bg: 'linear-gradient(115deg,#0c1424 0%,#17253f 55%,#1e2f4d 100%)', sub: 'PROFESSIONAL MANUFACTURER' },
-  { bg: 'linear-gradient(120deg,#07231a 0%,#0e3a2a 55%,#0a2f22 100%)', sub: 'TABLES · CUES · CLOTH'      },
-  { bg: 'linear-gradient(120deg,#141414 0%,#26221d 55%,#17140f 100%)', sub: 'MADE IN IRAN · ساخت ایران'  },
-  { bg: 'linear-gradient(120deg,#101c2b 0%,#14324a 55%,#0d2334 100%)', sub: 'ABOUT US · درباره ما'       },
-]
-
-function MfrPoster({ variant, title, about = false }: { variant: number; title?: string; about?: boolean }) {
-  const p = MFR_POSTERS[variant % MFR_POSTERS.length]!
-  const layers = (
-    <>
-      <div style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.045) 1px, transparent 1px)', backgroundSize: '16px 16px' }}/>
-      <div style={{ position: 'absolute', insetInlineStart: '-6%', top: '-40%', width: '46%', height: '180%', background: 'radial-gradient(ellipse, rgba(199,166,106,0.18) 0%, transparent 66%)', filter: 'blur(18px)', pointerEvents: 'none' }}/>
-      <div style={{ position: 'absolute', top: '-20%', bottom: '-20%', left: '54%', width: '1.5px', background: 'linear-gradient(180deg,transparent,rgba(199,166,106,0.45),transparent)', transform: 'rotate(-10deg)', pointerEvents: 'none' }}/>
-    </>
-  )
-  const subtitleRow = (centered: boolean) => (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-      <span style={{ width: 20, height: '1.5px', background: 'linear-gradient(90deg,transparent,#C7A66A)', display: 'inline-block' }}/>
-      <span dir="auto" style={{ fontSize: 'clamp(8.5px,1.25vw,11.5px)', fontWeight: 800, letterSpacing: '0.2em', color: 'rgba(199,166,106,0.92)', whiteSpace: 'nowrap' }}>{p.sub}</span>
-      {centered && <span style={{ width: 20, height: '1.5px', background: 'linear-gradient(90deg,#C7A66A,transparent)', display: 'inline-block' }}/>}
-    </div>
-  )
-
-  if (about) {
-    return (
-      <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', background: p.bg }}>
-        {layers}
-        <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 'clamp(7px,1.2vw,12px)', padding: 'clamp(12px,2vw,22px) 16px', textAlign: 'center' }}>
-          <img loading="lazy" decoding="async" src="/images/Logo/bh-header-v8.png" alt="بیلیارد هاب" style={{ height: 'clamp(19px,3.2vw,34px)', width: 'auto' }}/>
-          {title && <div style={{ fontSize: 'clamp(14px,2.5vw,23px)', fontWeight: 800, color: '#fff', lineHeight: 1.28, maxWidth: '94%', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{title}</div>}
-          {subtitleRow(true)}
-        </div>
-      </div>
-    )
-  }
-
-  return (
-    <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', background: p.bg }}>
-      {layers}
-      <div style={{ position: 'absolute', top: '50%', insetInlineEnd: 'clamp(22px,5vw,54px)', transform: 'translateY(-50%)', display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 9, maxWidth: 'min(62%,520px)' }}>
-        <img loading="lazy" decoding="async" src="/images/Logo/bh-header-v8.png" alt="بیلیارد هاب" style={{ height: 'clamp(22px,3.3vw,36px)', width: 'auto' }}/>
-        {title && <div style={{ fontSize: 'clamp(15px,2.3vw,24px)', fontWeight: 800, color: '#fff', lineHeight: 1.25, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{title}</div>}
-        {subtitleRow(false)}
-      </div>
-    </div>
-  )
-}
-
+/* ── تب‌ها ──
+   بیرون از کامپوننت، چون هم نوار تب و هم هندلرِ کلیدهای جهت به
+   همین ترتیب نیاز دارند و دو نسخه یعنی یک روز از هم دور می‌شوند. */
+const MFR_TABS = [
+  { key: 'about',    label: 'درباره ما' },
+  { key: 'products', label: 'محصولات ما' },
+  { key: 'ads',      label: 'آگهی‌های ما' },
+  { key: 'gallery',  label: 'گالری' },
+] as const
+type MfrTab = typeof MFR_TABS[number]['key']
 
 /* ─── دراپ‌داون دسته‌بندی محصولات (از خود محصولات همین تولیدکننده) ─── */
 function CategoryDropdown({
@@ -315,7 +276,11 @@ export default function ManufacturerPage() {
      ثبت کرده — چه تولیدیِ خودش باشد چه هر وسیله‌ی دیگری.
 
      ملاک شناسه‌ی مالک است نه نامکِ فروشگاه: تولیدکننده‌ای که
-     فروشگاهِ تأییدشده ندارد، آگهیاش با `storeSlug` تهی ذخیره شده. */
+     فروشگاهِ تأییدشده ندارد، آگهیاش با `storeSlug` تهی ذخیره شده.
+
+     ⚠️ `withoutStore` عمدی است: اگر همین شخص فروشگاه هم داشته
+     باشد، آگهی‌اش جای خودش را در صفحه‌ی فروشگاه دارد و نباید
+     این‌جا دوباره دیده شود. یک آگهی، یک جا. */
   const [ads, setAds] = useState<ShopProduct[]>([])
   const [adsLoading, setAdsLoading] = useState(false)
   const [adsError, setAdsError] = useState(false)
@@ -329,7 +294,7 @@ export default function ManufacturerPage() {
     setAdsError(false)
     void (async () => {
       try {
-        const r = await fetchProductsByOwner(ownerId)
+        const r = await fetchProductsByOwner(ownerId, { withoutStore: true })
         if (alive) setAds(r)
       } catch {
         /* خطا را می‌بلعیم ولی بی‌صدا نه: بخش خودش «تلاش دوباره»
@@ -368,6 +333,8 @@ export default function ManufacturerPage() {
   const [cat, setCat]     = useState<string>('all')
   const [page, setPage]   = useState(1)
   const [query, setQuery] = useState('')
+  const [tab, setTab]     = useState<MfrTab>('about')
+  const onTabKey = useTabKeys(MFR_TABS.map(x => x.key), tab, setTab, 'mtab-')
 
   /* دسته‌بندی‌ها از خود محصولات */
   const cats = useMemo(() => {
@@ -426,19 +393,152 @@ export default function ManufacturerPage() {
     )
   }
 
+  /* ⚠️ واحد فقط به عددِ خالص می‌چسبد. `exportCountries` در داده‌ی
+     واقعی گاهی *فهرستِ نام کشورهاست* نه تعداد، و نسخه‌ی قبلی
+     کورکورانه «کشور» ته آن می‌گذاشت: «عراق، افغانستان، پاکستان
+     کشور». ارقام فارسی هم عدد‌اند — رجکسِ فقط‌لاتین واحدِ «۱۲۰» را
+     بی‌صدا می‌انداخت. */
+  const withUnit = (v: unknown, unit: string) => {
+    const s = String(v ?? '').trim()
+    if (!s) return ''
+    return /^[\d۰-۹٠-٩]+$/.test(s) ? `${toFa(s)} ${unit}` : toFa(s)
+  }
+
+  /* ⚠️ «سال تأسیس / پرسنل / تولید شده / محصول» این‌جا تکرار نمی‌شوند:
+     هر چهارتا همین بالا داخلِ خودِ هدر هستند و کارتِ دومِ کناری فقط
+     همان اعداد را دو بار نشان می‌داد. این‌جا فقط چیزی می‌ماند که
+     هدر جا نداشت. */
+  const FACTS = [
+    { label: 'ظرفیت تولید', value: mfr.productionCapability ? toFa(mfr.productionCapability) : '' },
+    { label: 'صادرات',      value: withUnit(mfr.exportCountries, 'کشور') },
+  ].filter(s => s.value)
+
+  const hasContact = !!(phoneDig || mfr.hours || mfr.whatsapp || mfr.instagram)
+
   return (
     <div dir="rtl" className="min-h-screen bg-[#F7F5F0] font-[Vazirmatn,Tahoma,sans-serif] text-[#1C1B17]">
 
       <style>{`
-        .prod-card-sec1 {
-          aspect-ratio: 1 / 1.55;
-          border-radius: 10px;
-          border: 1.5px solid rgba(28,28,26,0.18);
-          transition: transform .22s cubic-bezier(0.22,1,0.36,1), box-shadow .22s;
+        /* ══ چیدمان — هم‌زبانِ صفحه‌ی باشگاه ══
+           همان عرض (۱۲۰۰)، همان گریدِ «محتوا + ستونِ ۳۰۰ پیکسلی» و
+           همان کارتِ شیشه‌ای. کلاس‌ها پیشوندِ mfr- دارند چون صفحه‌ی
+           باشگاه هم استایلِ سراسری تزریق می‌کند و نامِ مشترک یعنی
+           هرکدام دیرتر بیاید برنده شود.
+           (بک‌تیک در این کامنت ممنوع — داخل template literal است) */
+        .mfr-wrap { max-width: 1200px; margin: 0 auto; padding: clamp(16px,3vw,32px) clamp(12px,3vw,28px) 56px; }
+        .mfr-tabbar { display: flex; justify-content: center; margin-bottom: 24px; }
+        .mfr-grid { display: grid; grid-template-columns: minmax(0,1fr) 300px; gap: 28px; align-items: start; }
+        .mfr-grid--solo { grid-template-columns: minmax(0,1fr); }
+        @media (max-width: 960px) { .mfr-grid { grid-template-columns: minmax(0,1fr); } }
+        .mfr-col { display: flex; flex-direction: column; gap: 14px; }
+        .mfr-card { padding: clamp(16px,3vw,24px); }
+
+        .mfr-h { display: flex; align-items: center; gap: 10px; margin: 0 0 12px; font-size: 17px; font-weight: 800; color: #111111; }
+        .mfr-bar { flex-shrink: 0; width: 3px; height: 16px; border-radius: 2px; background: linear-gradient(135deg,#C7A66A,#A07840); }
+        .mfr-p { margin: 0; font-size: 15px; line-height: 1.9; color: rgba(0,0,0,0.50); }
+        .mfr-sub { display: block; margin-inline-start: 13px; font-size: 12.5px; color: rgba(0,0,0,0.40); }
+        .mfr-none { margin: 0; padding: 26px 0; text-align: center; font-size: 13.5px; color: rgba(0,0,0,0.38); }
+
+        /* دو حقیقتِ کوتاه که در نوارِ آمارِ هدر جا نشدند */
+        .mfr-facts { list-style: none; margin: 16px 0 0; padding: 0;
+          display: grid; grid-template-columns: repeat(auto-fit, minmax(190px,1fr)); gap: 10px; }
+        .mfr-facts li { display: flex; flex-direction: column; gap: 3px; padding: 12px 14px; border-radius: 12px;
+          background: rgba(199,166,106,0.06); border: 1px solid rgba(199,166,106,0.18); }
+        .mfr-facts li > span { font-size: 12px; font-weight: 700; color: #8F6531; }
+        .mfr-facts li > b { font-size: 14px; font-weight: 700; line-height: 1.7; color: rgba(0,0,0,0.55); }
+
+        .mfr-feat { list-style: none; margin: 0; padding: 0;
+          display: grid; grid-template-columns: repeat(auto-fill, minmax(190px,1fr)); gap: 10px; }
+        .mfr-feat li { display: flex; align-items: center; gap: 8px; padding: 10px 14px; border-radius: 12px;
+          font-size: 14px; color: rgba(0,0,0,0.55);
+          background: rgba(20,83,45,0.05); border: 1px solid rgba(20,83,45,0.12); }
+        .mfr-ok { display: inline-flex; flex-shrink: 0; color: #14532D; }
+
+        .mfr-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+        .mfr-chip { display: inline-flex; align-items: center; gap: 6px; padding: 7px 13px; border-radius: 999px;
+          font-size: 12.5px; font-weight: 700; color: rgba(0,0,0,0.55);
+          background: rgba(255,255,255,0.72); border: 1px solid rgba(17,17,16,0.08); }
+
+        .mfr-addr { display: flex; gap: 8px; margin: 0 0 12px; font-size: 14px; line-height: 1.9; color: rgba(0,0,0,0.50); }
+        .mfr-pin { flex-shrink: 0; margin-top: 3px; color: #14532D; }
+        .mfr-map { display: inline-flex; align-items: center; gap: 7px; padding: 9px 16px; border-radius: 12px;
+          font-size: 13px; font-weight: 700; text-decoration: none; color: #8F6531;
+          background: rgba(199,166,106,0.12); border: 1px solid rgba(199,166,106,0.34);
+          transition: transform .2s cubic-bezier(.22,1,.36,1); }
+        .mfr-map:hover { transform: translateY(-2px); }
+
+        .mfr-ct { display: flex; flex-direction: column; gap: 10px; }
+        .mfr-ct > a, .mfr-ct > div { display: flex; align-items: center; gap: 9px;
+          font-size: 13.5px; color: rgba(0,0,0,0.55); text-decoration: none; }
+        .mfr-ct > a:hover { color: #14532D; }
+        .mfr-soc { display: flex; gap: 9px; margin-top: 4px; }
+        .mfr-soc a { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 11px;
+          color: #6F6A5C; background: rgba(26,25,23,0.05); border: 1px solid #E7E2D6;
+          transition: transform .2s, border-color .2s, background .2s, color .2s; }
+        .mfr-soc a:hover { transform: translateY(-2px); border-color: rgba(199,166,106,0.45);
+          background: rgba(199,166,106,0.12); color: #C7A66A; }
+
+        /* ── نوار ابزارِ محصولات ── */
+        .mfr-toolbar { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 14px; margin-bottom: 18px; }
+        .mfr-tools { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+        .mfr-search { position: relative; }
+        .mfr-search input { width: min(260px, 60vw); padding: 11px 14px; border-radius: 12px;
+          font: inherit; font-size: 13.5px; color: #1C1B17;
+          background: rgba(255,255,255,0.78); border: 1px solid rgba(17,17,16,0.10); }
+        .mfr-search input::placeholder { color: rgba(0,0,0,0.34); }
+        .mfr-search input:focus { outline: none; border-color: #14532D; }
+        .mfr-search input:focus-visible { box-shadow: 0 0 0 3px rgba(20,83,45,0.14); }
+        .mfr-search > span { position: absolute; inset-inline-end: 12px; top: 50%; transform: translateY(-50%);
+          pointer-events: none; color: rgba(0,0,0,0.34); }
+        .mfr-search input { padding-inline-end: 38px; }
+
+        .mfr-cat { width: 230px; }
+        .mfr-cat > div { width: 100%; max-width: none; }
+        /* هم‌ارتفاع با سرچ — وگرنه دو کنترلِ کنار هم دو قدِ متفاوت دارند */
+        .mfr-cat > div > button { height: 44px; padding-block: 0; }
+        @media (max-width: 640px) {
+          .mfr-toolbar { align-items: stretch; }
+          .mfr-tools { width: 100%; }
+          .mfr-search { flex: 1 1 auto; }
+          .mfr-search input { width: 100%; }
+          .mfr-cat { width: 100%; }
         }
-        .prod-card-sec1:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(28,28,26,0.12); }
-        .pc-name-sec1 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-        @media(max-width:700px) { .prod-card-sec1 { aspect-ratio: 1 / 1.5; } }
+
+        /* ── کارتِ محصول ── */
+        .mfr-prods { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 12px; }
+        @media (min-width: 640px)  { .mfr-prods { grid-template-columns: repeat(3, minmax(0,1fr)); } }
+        @media (min-width: 900px)  { .mfr-prods { grid-template-columns: repeat(4, minmax(0,1fr)); } }
+        @media (min-width: 1120px) { .mfr-prods { grid-template-columns: repeat(5, minmax(0,1fr)); } }
+        .mfr-prod { display: flex; flex-direction: column; overflow: hidden; border-radius: 16px;
+          background: rgba(255,255,255,0.72); border: 1px solid rgba(17,17,16,0.07);
+          box-shadow: 0 1px 2px rgba(17,17,16,0.04);
+          transition: transform .28s cubic-bezier(.22,1,.36,1), box-shadow .28s; }
+        .mfr-prod:hover { transform: translateY(-3px); box-shadow: 0 18px 38px -16px rgba(17,17,16,0.26); }
+        .mfr-prod-img { position: relative; aspect-ratio: 1 / 1; overflow: hidden; background: #F1EFEA; }
+        .mfr-prod-img img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+        /* ⚠️ inset-inline-start یعنی راست در RTL — همان جایی که نشانِ
+           کارت‌های دیگرِ همین بخش می‌نشیند. با inset-inline-end به چپ
+           می‌پرید و دو قاعده‌ی متفاوت برای یک نشان می‌ساخت.
+           (بک‌تیک در این کامنت ممنوع — داخل template literal است) */
+        .mfr-prod-badge { position: absolute; inset-inline-start: 10px; top: 10px; padding: 4px 10px; border-radius: 999px;
+          font-size: 11px; font-weight: 800; color: #3a2800; background: rgba(199,166,106,0.94); }
+        .mfr-prod-body { display: flex; flex: 1; flex-direction: column; gap: 4px; padding: 13px; }
+        .mfr-prod-cat { font-size: 11px; font-weight: 800; color: #8F6531; }
+        .mfr-prod-name { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+          font-size: 13.5px; font-weight: 600; line-height: 1.5; color: #1C1C1A; }
+        .mfr-prod-spec { margin-top: auto; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+          font-size: 11.5px; color: rgba(0,0,0,0.40); }
+
+        .mfr-empty { margin: 0; padding: 40px 0; text-align: center; font-size: 13.5px; color: rgba(0,0,0,0.38); }
+        .mfr-reset { margin-inline-start: 8px; border: 0; background: none; font: inherit; font-weight: 800;
+          color: #8F6531; cursor: pointer; }
+        .mfr-reset:hover { opacity: .7; }
+        .mfr-pager { display: flex; justify-content: center; gap: 8px; margin-top: 28px; }
+
+        @media (prefers-reduced-motion: reduce) {
+          .mfr-prod, .mfr-map, .mfr-soc a { transition: none; }
+          .mfr-prod:hover, .mfr-map:hover, .mfr-soc a:hover { transform: none; }
+        }
       `}</style>
 
       {/* ⚠️ بردکرامبِ جدا حذف شد: ProfileHero خودش یکی دارد و دوتا
@@ -486,152 +586,225 @@ export default function ManufacturerPage() {
         }
       />
 
-      <div className="mx-auto mt-4 max-w-[1240px] px-4 sm:px-6">
-        {/* سرچ */}
-        <div className="relative">
-          <input
-            type="text"
-            value={query}
-            onChange={e => { setQuery(e.target.value); setPage(1) }}
-            placeholder="جستجو در محصولات این تولیدکننده..."
-            className="w-full rounded-[10px] border border-[#E7E2D6] bg-white px-4 py-2.5 pl-11 text-[13.5px] text-[#1C1B17] placeholder:text-[#6F6A5C] focus:border-[#14532D] focus:outline-none"
-          />
-          <span className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-[#6F6A5C]">{Icon.search}</span>
-        </div>
-      </div>
-
-      {/* ═══ محصولات تولیدکننده ═══ */}
-      <div ref={gridRef} className="mx-auto max-w-[1240px] px-4 pb-16 pt-6 sm:px-6" style={{ scrollMarginTop: 80 }}>
-        <div className="mb-5 flex flex-wrap items-end justify-between gap-4">
-          <div>
-            <h1 className="text-xl font-bold sm:text-2xl">محصولات ما</h1>
-            <span className="text-[12.5px] text-[#6F6A5C]">{faNum(visible.length)} محصول</span>
-          </div>
-          <CategoryDropdown value={cat} onChange={setCat} cats={cats} />
-        </div>
-
-        {/* گرید — ۵ ستون در دسکتاپ */}
-        <div className="grid grid-cols-2 gap-3 sm:gap-4 min-[640px]:grid-cols-3 min-[900px]:grid-cols-4 min-[1120px]:grid-cols-5">
-          {paged.map((p: MfrProduct) => (
-            <article
-              key={p.id}
-              className="prod-card-sec1 group flex flex-col overflow-hidden bg-white"
-            >
-              <div className="relative shrink-0 basis-[58%] overflow-hidden border-b-[1.5px] border-[rgba(28,28,26,0.18)] bg-[#F4F3F1]">
-                <img src={p.image} alt={p.name} loading="lazy" className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.05]"/>
-                {p.badge && (
-                  <span className="absolute right-2.5 top-2.5 rounded-full bg-[rgba(199,166,106,0.94)] px-2.5 py-1 text-[11px] font-bold text-[#3a2800]">{p.badge}</span>
-                )}
-              </div>
-
-              <div className="flex flex-1 flex-col gap-1 p-[13px]">
-                <span className="text-[11px] font-bold text-[#8F6531]">{p.category}</span>
-                <span className="pc-name-sec1 text-[13.5px] font-semibold leading-[1.5] text-[#1C1C1A]">{p.name}</span>
-                {p.specs[0] && <span className="mt-auto truncate text-[11.5px] text-[#6F6A5C]">{p.specs[0]}</span>}
-              </div>
-            </article>
-          ))}
-        </div>
-
-        {visible.length === 0 && (
-          <div className="rounded-2xl border border-[#E7E2D6] bg-white px-6 py-14 text-center text-[13.5px] text-[#6F6A5C]">
-            محصولی در این دسته‌بندی پیدا نشد.
-            {cat !== 'all' && <button onClick={() => setCat('all')} className="mr-2 font-bold text-[#8F6531] transition hover:opacity-70">نمایش همه محصولات</button>}
-          </div>
-        )}
-
-        {/* صفحه‌بندی */}
-        {pageCount > 1 && (
-          <div className="mt-9 flex justify-center gap-2">
-            {Array.from({ length: pageCount }, (_, i) => (
+      {/* ══ تب‌ها و محتوا — همان چیدمانی که صفحه‌ی باشگاه دارد ══
+          پیش‌تر همه‌چیز پشتِ سرِ هم روی یک صفحه‌ی بلند می‌ریخت:
+          محصولات، آگهی‌ها، «درباره ما»ی پوستردار، گالری و یک فوترِ
+          چهارستونی که تماس و نشانی را دوباره تکرار می‌کرد. حالا
+          همان نوارِ تبِ باشگاه، همان گریدِ دوستونی و همان کارت‌های
+          شیشه‌ای (`lqg`) — یک زبانِ طراحی برای هر دو صفحه. */}
+      <div className="mfr-wrap">
+        <div className="mfr-tabbar">
+          <div className="lq-seg lq-seg-fill" role="tablist" aria-label="بخش‌های تولیدکننده" onKeyDown={onTabKey}>
+            {MFR_TABS.map(t => (
               <button
-                key={i}
-                onClick={() => goToPage(i + 1)}
-                aria-current={safePage === i + 1 ? 'page' : undefined}
-                className={`${LQ} flex h-9 w-9 items-center justify-center rounded-xl text-[13px] ${
-                  safePage === i + 1 ? `${LQ_FELT_ON} font-bold` : `${LQ_NEUTRAL} text-[#5B564B]`
-                } ${MONO}`}
+                key={t.key} type="button" role="tab"
+                aria-selected={tab === t.key}
+                id={`mtab-${t.key}`} aria-controls={`mpanel-${t.key}`}
+                tabIndex={tab === t.key ? 0 : -1}
+                onClick={() => setTab(t.key)}
               >
-                {toFa(i + 1)}
+                {t.label}
               </button>
             ))}
-            <button
-              onClick={() => goToPage(Math.min(pageCount, safePage + 1))}
-              disabled={safePage === pageCount}
-              aria-label="صفحه‌ی بعد"
-              className={`${LQ} ${LQ_NEUTRAL} flex h-9 w-9 items-center justify-center rounded-xl text-[13px] text-[#5B564B] disabled:cursor-not-allowed disabled:opacity-40`}
-            >
-              ‹
-            </button>
-          </div>
-        )}
-      </div>
-
-      {/* ═══ آگهی‌های ما — همان ویترینِ صفحه‌ی فروشنده ═══ */}
-      <OwnerAdsSection
-        rows={ads}
-        loading={adsLoading}
-        error={adsError}
-        onRetry={() => setAdsKey(k => k + 1)}
-        title="آگهی‌های ما"
-        searchPlaceholder="جستجو در آگهی‌های این تولیدکننده…"
-      />
-
-      {/* ═══ درباره ما — ۱/۳ پوستر/عکس سمت راست، متن سمت چپ ═══ */}
-      <div className="mx-auto max-w-[1240px] px-4 pb-14 sm:px-6">
-        <div className="grid grid-cols-1 overflow-hidden rounded-2xl border border-[#E7E2D6] bg-white min-[760px]:grid-cols-[1fr_2fr]">
-          <div className="relative min-h-[147px] bg-[#0a2a28] min-[760px]:min-h-[300px]">
-            <MfrPoster variant={3} title={mfr.name} about />
-          </div>
-          <div className="flex flex-col justify-center p-6 sm:p-8">
-            <div className="mb-2 flex items-center gap-2">
-              <span className="h-4 w-[3px] rounded bg-gradient-to-b from-[#C7A66A] to-[#8A6020]" />
-              <h3 className="text-[17px] font-bold sm:text-[19px]">درباره ما</h3>
-            </div>
-            <p className="text-[13.5px] leading-[2] text-[#5B564B]">{mfr.about}</p>
-
-            {/* آمار کلیدی */}
-            <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
-              {[
-                { label: 'سال تأسیس', value: mfr.since },
-                { label: 'پرسنل', value: `${mfr.employees} نفر` },
-                { label: 'تولید شده', value: `${mfr.totalProduced} عدد` },
-                { label: 'صادرات', value: `${mfr.exportCountries} کشور` },
-              ].map(s => (
-                <div key={s.label} className="rounded-xl border border-[#EFEBE1] bg-[#FAFAF7] px-3 py-2.5 text-center">
-                  <div className={`text-[15px] font-bold text-[#1C1B17] ${MONO}`}>{toFa(s.value)}</div>
-                  <div className="mt-0.5 text-[11px] text-[#6F6A5C]">{s.label}</div>
-                </div>
-              ))}
-            </div>
-
-            {/* ظرفیت تولید */}
-            <div className="mt-4 flex items-center gap-2 rounded-xl border border-[rgba(199,166,106,0.28)] bg-[rgba(199,166,106,0.08)] px-4 py-2.5 text-[12.5px] text-[#5B564B]">
-              <span className="text-[#8F6531]">{Icon.truck}</span>
-              <span><span className="font-bold text-[#8F6531]">ظرفیت تولید:</span> {mfr.productionCapability}</span>
-            </div>
-
-            {/* گواهینامه‌ها */}
-            {mfr.certificates.length > 0 && (
-              <div className="mt-4">
-                <div className="mb-2 text-[11px] font-bold tracking-[0.06em] text-[#A69F8E]">گواهینامه‌ها و استانداردها</div>
-                <div className="flex flex-wrap gap-2">
-                  {mfr.certificates.map((c, i) => (
-                    <span key={i} className="inline-flex items-center gap-1.5 rounded-full border border-[#E7E2D6] bg-white px-2.5 py-1 text-[11.5px] font-semibold text-[#5B564B]" title={`${c.issuer} — ${c.year}`}>
-                      <span className="text-[#14532D]">{Icon.check}</span>{c.title}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
           </div>
         </div>
-      </div>
 
-      {/* ═══ گالری تولیدکننده — همان کامپوننت مشترک ═══ */}
-      {((mfr.gallery?.length ?? 0) > 0 || (rawP?.videos?.length ?? 0) > 0 || edit.isOwner) && (
-        <section className="px-4 pb-6 sm:px-6">
-          <div className="mx-auto max-w-[1240px]">
+        {/* ── درباره ما ──
+            بدون کارتِ تماس، ستونِ کناری خالی می‌ماند و روی دسکتاپ ۳۰۰
+            پیکسل فضای سفید می‌گذارد؛ آن‌وقت گرید تک‌ستونی است. */}
+        {tab === 'about' && (
+          <div className={'mfr-grid' + (hasContact ? '' : ' mfr-grid--solo')} id="mpanel-about" role="tabpanel" aria-labelledby="mtab-about">
+            <div className="mfr-col">
+              <section className="lqg lqg-hover mfr-card">
+                <h2 className="mfr-h"><span className="mfr-bar" aria-hidden />درباره ما</h2>
+                <p className="mfr-p">{mfr.about}</p>
+                {FACTS.length > 0 && (
+                  <ul className="mfr-facts">
+                    {FACTS.map(f => (
+                      <li key={f.label}>
+                        <span>{f.label}</span>
+                        <b>{f.value}</b>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </section>
+
+              {mfr.specialties.length > 0 && (
+                <section className="lqg lqg-hover mfr-card">
+                  <h2 className="mfr-h"><span className="mfr-bar" aria-hidden />تخصص‌های تولیدی</h2>
+                  <ul className="mfr-feat">
+                    {mfr.specialties.map(s => (
+                      <li key={s}><span className="mfr-ok" aria-hidden>{Icon.check}</span>{s}</li>
+                    ))}
+                  </ul>
+                </section>
+              )}
+
+              {mfr.certificates.length > 0 && (
+                <section className="lqg lqg-hover mfr-card">
+                  <h2 className="mfr-h"><span className="mfr-bar" aria-hidden />گواهینامه‌ها و استانداردها</h2>
+                  <div className="mfr-chips">
+                    {mfr.certificates.map((c, i) => (
+                      <span key={i} className="mfr-chip" title={`${c.issuer} — ${toFa(c.year)}`}>
+                        <span className="mfr-ok" aria-hidden>{Icon.check}</span>{c.title}
+                      </span>
+                    ))}
+                  </div>
+                </section>
+              )}
+
+              {mfr.address && (
+                <section className="lqg lqg-hover mfr-card">
+                  <h2 className="mfr-h"><span className="mfr-bar" aria-hidden />موقعیت کارخانه</h2>
+                  <p className="mfr-addr"><span className="mfr-pin" aria-hidden>{Icon.pin}</span>{mfr.address}</p>
+                  <a className="mfr-map" target="_blank" rel="noopener noreferrer"
+                    href={`https://maps.google.com/?q=${encodeURIComponent(mfr.address)}`}>
+                    <span aria-hidden>{Icon.pin}</span>مشاهده روی نقشه
+                  </a>
+                </section>
+              )}
+            </div>
+
+            {hasContact && (
+            <div className="mfr-col">
+              <section className="lqg mfr-card">
+                <h2 className="mfr-h"><span className="mfr-bar" aria-hidden />اطلاعات تماس</h2>
+                <div className="mfr-ct">
+                  {phoneDig && (
+                    <a href={`tel:${phoneHref}`}>
+                      <span className="mfr-ok" aria-hidden>{Icon.phone}</span>
+                      <span className={MONO} dir="ltr">{toFa(phoneText)}</span>
+                    </a>
+                  )}
+                  {mfr.hours && (
+                    <div><span className="mfr-ok" aria-hidden>{Icon.clock}</span>{mfr.hours}</div>
+                  )}
+                  {(mfr.whatsapp || mfr.instagram) && (
+                    <div className="mfr-soc">
+                      {mfr.whatsapp && (
+                        <a href={`https://wa.me/${mfr.whatsapp}`} target="_blank" rel="noopener noreferrer" aria-label="واتساپ">{Icon.wa}</a>
+                      )}
+                      {mfr.instagram && (
+                        <a href={`https://instagram.com/${mfr.instagram}`} target="_blank" rel="noopener noreferrer" aria-label="اینستاگرام">{Icon.insta}</a>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </section>
+            </div>
+            )}
+          </div>
+        )}
+
+        {/* ── محصولات ما ── */}
+        {tab === 'products' && (
+          <div id="mpanel-products" role="tabpanel" aria-labelledby="mtab-products">
+            <section className="lqg mfr-card">
+              <div className="mfr-toolbar">
+                <div>
+                  <h2 className="mfr-h"><span className="mfr-bar" aria-hidden />محصولات ما</h2>
+                  <span className="mfr-sub">{faNum(visible.length)} محصول</span>
+                </div>
+                <div className="mfr-tools">
+                  <div className="mfr-search">
+                    <label className="sr-only" htmlFor="mfr-q">جستجو در محصولات این تولیدکننده</label>
+                    <input
+                      id="mfr-q" type="search" value={query}
+                      onChange={e => { setQuery(e.target.value); setPage(1) }}
+                      placeholder="جستجو در محصولات…"
+                    />
+                    <span aria-hidden>{Icon.search}</span>
+                  </div>
+                  {/* ⚠️ پوششِ عرض‌دار لازم است: خودِ دراپ‌داون
+                      `w-full max-w-[300px]` است و بدون این، یک سطرِ
+                      کامل می‌گرفت و زیرِ سرچ می‌افتاد. */}
+                  <div className="mfr-cat"><CategoryDropdown value={cat} onChange={setCat} cats={cats} /></div>
+                </div>
+              </div>
+
+              <div ref={gridRef} className="mfr-prods" style={{ scrollMarginTop: 80 }}>
+                {paged.map((p: MfrProduct) => (
+                  <article key={p.id} className="mfr-prod group">
+                    <div className="mfr-prod-img">
+                      <img src={p.image} alt={p.name} loading="lazy" className="transition-transform duration-500 group-hover:scale-[1.05]" />
+                      {p.badge && <span className="mfr-prod-badge">{p.badge}</span>}
+                    </div>
+                    <div className="mfr-prod-body">
+                      <span className="mfr-prod-cat">{p.category}</span>
+                      <span className="mfr-prod-name">{p.name}</span>
+                      {p.specs[0] && <span className="mfr-prod-spec">{p.specs[0]}</span>}
+                    </div>
+                  </article>
+                ))}
+              </div>
+
+              {/* «هنوز محصولی ثبت نشده» با «فیلترت چیزی پیدا نکرد» یکی
+                  نیست: اولی کارِ کاربر نیست و دکمه‌ی پاک‌کردن هم
+                  نمی‌خواهد. */}
+              {visible.length === 0 && (
+                <p className="mfr-empty">
+                  {PRODUCTS.length === 0
+                    ? 'هنوز محصولی ثبت نشده است.'
+                    : 'محصولی با این فیلتر پیدا نشد.'}
+                  {PRODUCTS.length > 0 && (cat !== 'all' || query) && (
+                    <button type="button" onClick={() => { setCat('all'); setQuery('') }} className="mfr-reset">
+                      نمایش همه محصولات
+                    </button>
+                  )}
+                </p>
+              )}
+
+              {pageCount > 1 && (
+                <nav aria-label="صفحه‌بندی محصولات" className="mfr-pager">
+                  <button type="button" onClick={() => goToPage(Math.max(1, safePage - 1))}
+                    disabled={safePage === 1} aria-label="صفحه‌ی قبل"
+                    className={`${LQ} ${LQ_NEUTRAL} flex h-9 w-9 items-center justify-center rounded-xl text-[#5B564B] disabled:cursor-not-allowed disabled:opacity-40`}>
+                    <ChevronRight size={16} aria-hidden />
+                  </button>
+                  {Array.from({ length: pageCount }, (_, i) => (
+                    <button key={i} type="button" onClick={() => goToPage(i + 1)}
+                      aria-label={`صفحه‌ی ${toFa(i + 1)}`}
+                      aria-current={safePage === i + 1 ? 'page' : undefined}
+                      className={`${LQ} flex h-9 w-9 items-center justify-center rounded-xl text-[13px] ${
+                        safePage === i + 1 ? `${LQ_FELT_ON} font-bold` : `${LQ_NEUTRAL} text-[#5B564B]`
+                      } ${MONO}`}>
+                      {toFa(i + 1)}
+                    </button>
+                  ))}
+                  <button type="button" onClick={() => goToPage(Math.min(pageCount, safePage + 1))}
+                    disabled={safePage === pageCount} aria-label="صفحه‌ی بعد"
+                    className={`${LQ} ${LQ_NEUTRAL} flex h-9 w-9 items-center justify-center rounded-xl text-[#5B564B] disabled:cursor-not-allowed disabled:opacity-40`}>
+                    <ChevronLeft size={16} aria-hidden />
+                  </button>
+                </nav>
+              )}
+            </section>
+          </div>
+        )}
+
+        {/* ── آگهی‌های ما ── */}
+        {tab === 'ads' && (
+          <div id="mpanel-ads" role="tabpanel" aria-labelledby="mtab-ads">
+            <OwnerAdsSection
+              rows={ads}
+              loading={adsLoading}
+              error={adsError}
+              onRetry={() => setAdsKey(k => k + 1)}
+              title="آگهی‌های ما"
+              searchPlaceholder="جستجو در آگهی‌های این تولیدکننده…"
+            />
+            {!adsLoading && !adsError && ads.length === 0 && (
+              <section className="lqg mfr-card">
+                <p className="mfr-none">هنوز آگهی‌ای ثبت نشده است.</p>
+              </section>
+            )}
+          </div>
+        )}
+
+        {/* ── گالری ── */}
+        {tab === 'gallery' && (
+          <div id="mpanel-gallery" role="tabpanel" aria-labelledby="mtab-gallery">
             <ProfileGallery
               images={(mfr.gallery ?? []).map(sh => ({ id: sh.id, url: sh.url, caption: sh.caption ?? '', album: sh.album }))}
               videos={rawP?.videos ?? []}
@@ -647,103 +820,8 @@ export default function ManufacturerPage() {
             />
             {edit.error && <p role="alert" style={{ fontSize: 12, color: '#b91c1c', marginTop: 10 }}>{edit.error}</p>}
           </div>
-        </section>
-      )}
-
-      {/* ═══ FOOTER — کارت اختصاصی تولیدکننده ═══ */}
-      <footer className="px-4 pb-8 pt-2 sm:px-6">
-        <div className="mx-auto max-w-[1240px] overflow-hidden rounded-2xl border border-[#E8E3D6] bg-[#FAFAF7] shadow-[0_4px_20px_rgba(28,27,23,0.05)]">
-          <div className="grid grid-cols-1 gap-x-8 gap-y-[18px] p-[18px] sm:grid-cols-2 sm:gap-y-9 sm:p-8 lg:grid-cols-4">
-
-            {/* برند */}
-            <div>
-              <div className="flex items-center gap-2.5 text-[16px] font-bold">
-                <span className="flex h-[26px] w-[26px] items-center justify-center rounded-full bg-[radial-gradient(circle_at_32%_30%,#2b2b2b,#0a0a0a_70%)]">
-                  <span className="flex h-[13px] w-[13px] items-center justify-center rounded-full bg-white text-[8px] font-bold text-[#111]">۸</span>
-                </span>
-                {mfr.name}
-              </div>
-              <p className="mt-1.5 hidden max-w-[240px] text-[12.5px] leading-relaxed text-[#5B564B] sm:mt-3 sm:block">
-                {mfr.description}
-              </p>
-            </div>
-
-            {/* تخصص‌ها — روی موبایل حذف */}
-            <div className="hidden sm:block">
-              <h4 className="mb-2 text-[10.5px] font-bold tracking-[0.08em] text-[#A69F8E] sm:mb-4">تخصص‌های تولیدی</h4>
-              <ul className="grid grid-cols-1 gap-y-3 text-[13px] text-[#5B564B]">
-                {mfr.specialties.map(s => (
-                  <li key={s} className="flex items-center gap-2">
-                    <span className="text-[#14532D]">{Icon.check}</span>{s}
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* راه‌های ارتباطی */}
-            <div>
-              <h4 className="mb-2 text-[10.5px] font-bold tracking-[0.08em] text-[#A69F8E] sm:mb-4">راه‌های ارتباطی</h4>
-              <ul className="space-y-1.5 text-[13px] text-[#5B564B] sm:space-y-3">
-                <li>
-                  <a href={`tel:${phoneHref}`} className={`flex items-center gap-2 py-0.5 transition-colors hover:text-[#14532D] ${MONO}`}>
-                    <span className="text-[#14532D]">{Icon.phone}</span>{toFa(phoneText)}
-                  </a>
-                </li>
-                <li className="flex items-center gap-2.5 py-0.5">
-                  <span className="text-[#14532D]">{Icon.clock}</span>{mfr.hours}
-                </li>
-                <li className="flex items-center gap-2.5 pt-1.5 sm:pt-3">
-                  <a href={`https://wa.me/${mfr.whatsapp}`} target="_blank" rel="noopener noreferrer" aria-label="واتساپ"
-                    className="flex h-10 w-10 items-center justify-center rounded-[11px] border border-[#E7E2D6] bg-[rgba(26,25,23,0.05)] text-[#6F6A5C] transition-all duration-200 hover:-translate-y-0.5 hover:border-[#C7A66A]/45 hover:bg-[#C7A66A]/[0.12] hover:text-[#C7A66A]">
-                    {Icon.wa}
-                  </a>
-                  <a href={`https://instagram.com/${mfr.instagram}`} target="_blank" rel="noopener noreferrer" aria-label="اینستاگرام"
-                    className="flex h-10 w-10 items-center justify-center rounded-[11px] border border-[#E7E2D6] bg-[rgba(26,25,23,0.05)] text-[#6F6A5C] transition-all duration-200 hover:-translate-y-0.5 hover:border-[#C7A66A]/45 hover:bg-[#C7A66A]/[0.12] hover:text-[#C7A66A]">
-                    {Icon.insta}
-                  </a>
-                </li>
-              </ul>
-            </div>
-
-            {/* موقعیت */}
-            <div>
-              <h4 className="mb-2 text-[10.5px] font-bold tracking-[0.08em] text-[#A69F8E] sm:mb-4">موقعیت کارخانه</h4>
-              <p className="mb-1.5 flex items-start gap-2 text-[13px] leading-relaxed text-[#5B564B] sm:mb-3">
-                <span className="mt-0.5 shrink-0 text-[#14532D]">{Icon.pin}</span>
-                {mfr.address}
-              </p>
-              <a
-                href={`https://maps.google.com/?q=${encodeURIComponent(mfr.address)}`}
-                target="_blank" rel="noopener noreferrer"
-                className="group relative block h-28 overflow-hidden rounded-xl border border-[#E8E3D6] bg-[#F4F1EA]"
-                aria-label="مشاهده روی نقشه"
-              >
-                <svg viewBox="0 0 300 120" preserveAspectRatio="none" className="absolute inset-0 h-full w-full">
-                  {[0,1,2,3].map(i => <line key={`h${i}`} x1="0" y1={i * 40} x2="300" y2={i * 40} stroke="#1C1B17" strokeWidth="0.5" opacity="0.07"/>)}
-                  {[0,1,2,3,4,5,6].map(i => <line key={`v${i}`} x1={i * 50} y1="0" x2={i * 50} y2="120" stroke="#1C1B17" strokeWidth="0.5" opacity="0.07"/>)}
-                  <line x1="0" y1="82" x2="300" y2="82" stroke="#1C1B17" strokeWidth="2" opacity="0.08"/>
-                  <line x1="105" y1="0" x2="105" y2="120" stroke="#1C1B17" strokeWidth="2" opacity="0.08"/>
-                </svg>
-                <span className="absolute left-1/2 top-1/2 flex h-9 w-9 -translate-x-1/2 -translate-y-[70%] items-center justify-center rounded-full bg-[#14532D] text-white shadow-md transition-transform group-hover:scale-110">
-                  {Icon.pin}
-                </span>
-                <span className="absolute bottom-2 right-2 rounded-[10px] border border-[rgba(199,166,106,0.34)] bg-[rgba(199,166,106,0.12)] px-2.5 py-1 text-[11px] font-bold text-[#8F6531] shadow-sm transition hover:-translate-y-0.5">
-                  مشاهده روی نقشه
-                </span>
-              </a>
-            </div>
-          </div>
-
-          <div className="border-t border-[#E8E3D6] px-6 py-4 sm:px-8">
-            <div className="flex flex-wrap items-center justify-between gap-2 text-[11.5px] text-[#6F6A5C]">
-              <span>© {toFa(1405)} {mfr.name} — تمام حقوق محفوظ است</span>
-              {/* نشان پلتفرم — فروشگاه فوتر خودش را دارد، ولی
-                  بازدیدکننده باید بداند این صفحه کجا میزبانی می‌شود. */}
-              <Link href="/" className="transition-colors hover:opacity-80">قدرت‌گرفته از بیلیارد <span className="font-bold text-[#C7A66A]">هاب</span></Link>
-            </div>
-          </div>
-        </div>
-      </footer>
+        )}
+      </div>
 
       {imageViewer}
       {videoViewer}
