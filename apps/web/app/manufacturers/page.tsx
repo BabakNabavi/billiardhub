@@ -8,6 +8,8 @@ import { listApprovedManufacturers, profileToManufacturer } from '../../lib/manu
 import type { ManufacturerProfile } from '../../lib/manufacturer-store'
 import { fetchProfiles } from '../../lib/profiles/client'
 import VerifiedBadge from '../../components/VerifiedBadge'
+import { iranTel } from '../../lib/iran-geo'
+import { toFaDigits } from '../../lib/jalali'
 
 const GOLD     = '#C7A66A'
 const GOLD_D   = '#8F6531'
@@ -226,16 +228,26 @@ function MfrCard({ mfr, view }: { mfr: MockManufacturer; view: 'grid' | 'list' }
     </div>
   ) : null
 
+  /* ── ردیفِ متا، رنگی ──
+     خاکستریِ یکدست بود و هیچ‌چیز از هیچ‌چیز جدا نمی‌شد. هر حقیقت
+     رنگِ خودش را می‌گیرد: سالِ تأسیس سبزِ نمد (قدمت)، تعدادِ محصول
+     آبی (ظرفیت). قرص‌ها کم‌رنگ‌اند تا تأکید بمانند نه سروصدا.
+     ⚠️ «از» فقط این‌جاست: `since` دیگر خودش «از ۱۳۹۴» نیست. */
   const metaRow = (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 14, fontSize: 13, color: TEXT_SEC, flexWrap: 'wrap' }}>
-      <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-        از {mfr.since}
-      </span>
-      <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
-        {mfr.productCount} محصول
-      </span>
+    <div className="mfr-meta" style={{ display: 'flex', alignItems: 'center', gap: 7, flexWrap: 'wrap' }}>
+      {mfr.since && (
+        <span className="badge badge-green">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          از {toFaDigits(mfr.since)}
+        </span>
+      )}
+      {/* «۰ محصول» با رنگِ تأکید، تأکید روی هیچ است */}
+      {mfr.productCount > 0 && (
+        <span className="badge badge-blue">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+          {toFaDigits(mfr.productCount)} محصول
+        </span>
+      )}
     </div>
   )
   const specRow = mfr.specialties.length > 0 && (
@@ -255,13 +267,21 @@ function MfrCard({ mfr, view }: { mfr: MockManufacturer; view: 'grid' | 'list' }
       مشاهده تولیدکننده
     </Link>
   )
-  const callBtn = (
-    <a href={`tel:${mfr.phone}`} onClick={e => e.stopPropagation()} style={{
-      padding: '10px 14px', borderRadius: 12, textDecoration: 'none',
-      border: '1px solid rgba(28,28,26,0.12)', color: TEXT, background: 'rgba(28,28,26,0.04)',
-      display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-    }}>{PhoneIcon}</a>
-  )
+  /* ── دکمه‌ی تماس ──
+     ⚠️ شماره خام بود: «۲۲۸۵۹۵۵۱» بدونِ کدِ شهر، و گوشی با آن جایی
+     را نمی‌گرفت. `iranTel` کدِ استان را از شهر درمی‌آورد و شماره‌ی
+     قابلِ شماره‌گیری می‌سازد. بدونِ شماره هم دکمه اصلا نمی‌آید —
+     پیش‌تر `tel:` تهی رندر می‌شد. */
+  const tel = iranTel(mfr.phone, null, mfr.city)
+  const callBtn = tel.href ? (
+    <a href={`tel:${tel.href}`} onClick={e => e.stopPropagation()}
+      aria-label={`تماس با ${mfr.name}`} title={tel.text}
+      style={{
+        padding: '10px 14px', borderRadius: 12, textDecoration: 'none',
+        border: '1px solid rgba(28,28,26,0.12)', color: TEXT, background: 'rgba(28,28,26,0.04)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+      }}>{PhoneIcon}</a>
+  ) : null
 
   /* ── LIST VIEW ── */
   if (view === 'list') {
@@ -269,7 +289,9 @@ function MfrCard({ mfr, view }: { mfr: MockManufacturer; view: 'grid' | 'list' }
       <div onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)} onClick={() => router.push(`/manufacturers/${mfr.id}`)}
         className="sel-list-card" style={{ ...shell, display: 'flex', alignItems: 'stretch' }}>
         <div className="sel-list-img" style={{ position: 'relative', width: 176, flexShrink: 0, overflow: 'hidden' }}>
-          <img loading="lazy" decoding="async" src={mfr.bannerImage} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.5s', transform: hov ? 'scale(1.05)' : 'scale(1)' }} />
+          {mfr.bannerImage
+            ? <img loading="lazy" decoding="async" src={mfr.bannerImage} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.5s', transform: hov ? 'scale(1.05)' : 'scale(1)' }} />
+            : <MfrPoster variant={mfr.sinceYear} />}
           <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to left, rgba(0,0,0,0.05), rgba(0,0,0,0.35))' }} />
           {mfr.elite && (
             <div style={{ position: 'absolute', top: 10, right: 10, background: 'rgba(199,166,106,0.94)', color: '#3a2800', fontSize: 10.5, fontWeight: 800, borderRadius: 20, padding: '3px 9px', display: 'flex', alignItems: 'center', gap: 4 }}>
@@ -300,7 +322,9 @@ function MfrCard({ mfr, view }: { mfr: MockManufacturer; view: 'grid' | 'list' }
       style={{ ...shell, display: 'flex', flexDirection: 'column', height: '100%' }}>
       {/* banner (ارتفاع +۱۰٪ ⇒ کل کارت بلندتر) */}
       <div style={{ height: 154, position: 'relative', overflow: 'hidden', flexShrink: 0 }}>
-        <img loading="lazy" decoding="async" src={mfr.bannerImage} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.5s', transform: hov ? 'scale(1.05)' : 'scale(1)' }} />
+        {mfr.bannerImage
+            ? <img loading="lazy" decoding="async" src={mfr.bannerImage} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.5s', transform: hov ? 'scale(1.05)' : 'scale(1)' }} />
+            : <MfrPoster variant={mfr.sinceYear} />}
         <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(0,0,0,0.10) 0%, rgba(0,0,0,0.45) 100%)' }} />
         {mfr.elite && (
           <div style={{ position: 'absolute', top: 10, right: 12, background: 'rgba(199,166,106,0.94)', backdropFilter: 'blur(8px)', color: '#3a2800', fontSize: 11, fontWeight: 800, borderRadius: 20, padding: '3px 10px', display: 'flex', alignItems: 'center', gap: 4 }}>
@@ -308,10 +332,6 @@ function MfrCard({ mfr, view }: { mfr: MockManufacturer; view: 'grid' | 'list' }
             تولیدکننده‌ی رسمی
           </div>
         )}
-        <div style={{ position: 'absolute', top: 10, left: 12, background: 'rgba(0,0,0,0.42)', backdropFilter: 'blur(8px)', color: 'rgba(255,255,255,0.92)', fontSize: 11, fontWeight: 600, borderRadius: 20, padding: '3px 10px', display: 'flex', alignItems: 'center', gap: 4 }}>
-          <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-          {mfr.responseTime}
-        </div>
         {cityChip}
       </div>
 
@@ -502,6 +522,13 @@ export default function ManufacturersPage() {
           .dd-btn { min-width: 0 !important; padding: 0 11px !important; }
           .sel-hide-mob { display: none !important; }
         }
+
+        /* ── قرص‌های حقیقتِ کارت ──
+           ردیفِ متا خاکستریِ یکدست بود؛ حالا هر حقیقت رنگِ خودش را
+           دارد. کلاس‌ها از سیستمِ مشترکِ globals می‌آیند
+           (.badge / .badge-green / .badge-blue)، نه نسخه‌ی محلی.
+           فقط nowrap این‌جاست چون کارت باریک است. */
+        .mfr-meta .badge { white-space: nowrap; }
 
         /* ══ نوار ابزار — هم‌شکلِ نوارِ صفحه‌ی باشگاه‌ها ══ */
         .mfr-tb {
