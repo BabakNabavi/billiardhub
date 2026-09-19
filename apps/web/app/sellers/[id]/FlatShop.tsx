@@ -23,7 +23,7 @@ import { fetchProfileResult } from '../../../lib/profiles/client'
 import { useOwnerEdit } from '../../../lib/profiles/use-owner-edit'
 import { compressImage } from '../../../lib/seller-store'
 import { ask } from '../../../lib/ui/dialogs'
-import VerifiedBadge from '../../../components/VerifiedBadge'
+import ProfileHero from '../../../components/profile/ProfileHero'
 import { telPrefix, provinceOfCity } from '../../../lib/iran-geo'
 import { getMockSeller } from '../../../lib/sellers-data'
 import { MARKET_CATEGORIES } from '../../../lib/market/categories'
@@ -119,189 +119,6 @@ function productsForSeller(rows: ShopProduct[]): Product[] {
     img: sp.img,
     imgCount: sp.imgCount,
   }))
-}
-
-/* ─── اسلایدر عکس آپلودشده (بنر هدر + باکس درباره ما) ─── */
-function ImageSlider({ images }: { images: string[] }) {
-  const [i, setI] = useState(0)
-  const shots = images
-  useEffect(() => {
-    if (shots.length < 2) return
-    const t = setInterval(() => setI(v => (v + 1) % shots.length), 4500)
-    return () => clearInterval(t)
-  }, [shots.length])
-  const active = Math.min(i, shots.length - 1)
-  return (
-    <div style={{ position: 'absolute', inset: 0, overflow: 'hidden' }}>
-      {shots.map((src, k) => (
-        <img loading="lazy" decoding="async" 
-          key={k} src={src} alt="" draggable={false}
-          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover',
-            opacity: k === active ? 1 : 0, transition: 'opacity 0.9s ease' }}
-        />
-      ))}
-      {shots.length > 1 && (
-        <div className="hero-dots" style={{ position: 'absolute', bottom: 10, insetInline: 0, zIndex: 2, display: 'flex', justifyContent: 'center', gap: 6 }}>
-          {shots.map((_, k) => (
-            <button key={k} type="button" aria-label={`تصویر ${k + 1}`} onClick={() => setI(k)}
-              style={{ width: k === active ? 18 : 6, height: 6, borderRadius: 3, border: 'none', cursor: 'pointer',
-                background: k === active ? '#fff' : 'rgba(255,255,255,0.55)', transition: 'width .25s, background .25s' }} />
-          ))}
-        </div>
-      )}
-    </div>
-  )
-}
-
-/* ════════ پوسترهای پیش‌فرض — به‌سبک هدر صفحه‌ی مربیان (کامپوننت لایه‌ای، نه عکس) ════════
-   هر پوستر: گرادیان تیره + بافت نقطه‌ای + گلوی طلایی + خطوط اریب چوب + موتیف ظریف خطی طلایی. */
-const STORE_POSTERS = [
-  { bg: 'linear-gradient(115deg,#0c1424 0%,#17253f 55%,#1e2f4d 100%)', sub: 'PROFESSIONAL BILLIARD SHOP' },  // سرمه‌ای (مثل کاور مربی)
-  { bg: 'linear-gradient(120deg,#07231a 0%,#0e3a2a 55%,#0a2f22 100%)', sub: 'CUES · BALLS · TABLES'        },  // نمد سبز
-  { bg: 'linear-gradient(120deg,#141414 0%,#26221d 55%,#17140f 100%)', sub: 'PRO EQUIPMENT · لوازم حرفه‌ای' },  // زغالی-طلایی
-  { bg: 'linear-gradient(120deg,#101c2b 0%,#14324a 55%,#0d2334 100%)', sub: 'ABOUT US · درباره ما'         },  // پوستر «درباره ما»
-]
-
-/* پوستر پیش‌فرض — عینا به سبک کاور صفحه‌ی مربی: زمینه‌ی تیره + بافت نقطه‌ای +
-   گلوی طلایی + خط اریب + وردمارک «بیلیارد هاب» + نام فروشگاه (خودکار) + زیرنویس.
-   about=true ⇒ ترکیب وسط‌چین باکس «درباره ما»؛ وگرنه حالت راست‌چین هدر. */
-function StorePoster({ variant, title, about = false }: { variant: number; title?: string; about?: boolean }) {
-  const p = STORE_POSTERS[variant % STORE_POSTERS.length]!
-  const layers = (
-    <>
-      <div style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.045) 1px, transparent 1px)', backgroundSize: '16px 16px' }}/>
-      <div style={{ position: 'absolute', insetInlineStart: '-6%', top: '-40%', width: '46%', height: '180%', background: 'radial-gradient(ellipse, rgba(199,166,106,0.18) 0%, transparent 66%)', filter: 'blur(18px)', pointerEvents: 'none' }}/>
-      <div style={{ position: 'absolute', top: '-20%', bottom: '-20%', left: '54%', width: '1.5px', background: 'linear-gradient(180deg,transparent,rgba(199,166,106,0.45),transparent)', transform: 'rotate(-10deg)', pointerEvents: 'none' }}/>
-    </>
-  )
-  const subtitleRow = (centered: boolean) => (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-      <span style={{ width: 20, height: '1.5px', background: 'linear-gradient(90deg,transparent,#C7A66A)', display: 'inline-block' }}/>
-      <span dir="auto" style={{ fontSize: 'clamp(8.5px,1.25vw,11.5px)', fontWeight: 800, letterSpacing: '0.2em', color: 'rgba(199,166,106,0.92)', whiteSpace: 'nowrap' }}>{p.sub}</span>
-      {centered && <span style={{ width: 20, height: '1.5px', background: 'linear-gradient(90deg,#C7A66A,transparent)', display: 'inline-block' }}/>}
-    </div>
-  )
-
-  if (about) {
-    return (
-      <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', background: p.bg }}>
-        {layers}
-        <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 'clamp(7px,1.2vw,12px)', padding: 'clamp(12px,2vw,22px) 16px', textAlign: 'center' }}>
-          <img loading="lazy" decoding="async" src="/images/Logo/bh-header-v8.png" alt="بیلیارد هاب" style={{ height: 'clamp(19px,3.2vw,34px)', width: 'auto' }}/>
-          {title && <div style={{ fontSize: 'clamp(14px,2.5vw,23px)', fontWeight: 800, color: '#fff', lineHeight: 1.28, maxWidth: '94%', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{title}</div>}
-          {subtitleRow(true)}
-        </div>
-      </div>
-    )
-  }
-
-  return (
-    <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', background: p.bg }}>
-      {layers}
-      {/* وردمارک BILLIARD HUB + نام فروشگاه + زیرنویس (راست‌چین) */}
-      <div style={{ position: 'absolute', top: '50%', insetInlineEnd: 'clamp(22px,5vw,54px)', transform: 'translateY(-50%)', display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 9, maxWidth: 'min(62%,520px)' }}>
-        <img loading="lazy" decoding="async" src="/images/Logo/bh-header-v8.png" alt="بیلیارد هاب" style={{ height: 'clamp(22px,3.3vw,36px)', width: 'auto' }}/>
-        {title && <div style={{ fontSize: 'clamp(15px,2.3vw,24px)', fontWeight: 800, color: '#fff', lineHeight: 1.25, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{title}</div>}
-        {subtitleRow(false)}
-      </div>
-    </div>
-  )
-}
-
-/* اسلایدر پوسترهای پیش‌فرض — کراس‌فید نرم بین چند پوستر (نام فروشگاه خودکار روی همه) */
-function PosterSlider({ variants, title }: { variants: number[]; title?: string }) {
-  const [active, setActive] = useState(0)
-  useEffect(() => {
-    if (variants.length < 2) return
-    const t = setInterval(() => setActive(a => (a + 1) % variants.length), 4500)
-    return () => clearInterval(t)
-  }, [variants.length])
-  return (
-    <div style={{ position: 'absolute', inset: 0, overflow: 'hidden' }}>
-      {variants.map((v, k) => (
-        <div key={k} style={{ position: 'absolute', inset: 0, opacity: k === active ? 1 : 0, transition: 'opacity 0.9s ease' }}>
-          <StorePoster variant={v} title={title}/>
-        </div>
-      ))}
-      {variants.length > 1 && (
-        <div style={{ position: 'absolute', bottom: 10, insetInline: 0, zIndex: 2, display: 'flex', justifyContent: 'center', gap: 6 }}>
-          {variants.map((_, k) => (
-            <button key={k} type="button" aria-label={`پوستر ${k + 1}`} onClick={() => setActive(k)}
-              style={{ width: k === active ? 18 : 6, height: 6, borderRadius: 3, border: 'none', cursor: 'pointer',
-                background: k === active ? '#fff' : 'rgba(255,255,255,0.5)', transition: 'width .25s, background .25s' }} />
-          ))}
-        </div>
-      )}
-    </div>
-  )
-}
-
-/* ─── دراپ‌داون دسته‌بندی محصولات (مدرن) ─── */
-function CategoryDropdown({
-  value, onChange, counts,
-}: {
-  value: 'all' | CatKey
-  onChange: (v: 'all' | CatKey) => void
-  counts: Record<CatKey, number>
-}) {
-  const [open, setOpen] = useState(false)
-  const ref = useRef<HTMLDivElement>(null)
-  useEffect(() => {
-    const onDoc = (e: MouseEvent) => { if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false) }
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setOpen(false) }
-    document.addEventListener('mousedown', onDoc); document.addEventListener('keydown', onKey)
-    return () => { document.removeEventListener('mousedown', onDoc); document.removeEventListener('keydown', onKey) }
-  }, [])
-
-  const total = Object.values(counts).reduce((s, n) => s + n, 0)
-  const label = value === 'all' ? 'همه محصولات' : CAT_LABEL[value]
-  const items: { key: 'all' | CatKey; label: string; count: number }[] = [
-    { key: 'all', label: 'همه محصولات', count: total },
-    ...BAZAAR_CATS.map(c => ({ key: c.id, label: c.label, count: counts[c.id] ?? 0 })),
-  ]
-
-  return (
-    <div ref={ref} className="relative w-full max-w-[300px]">
-      <button
-        onClick={() => setOpen(o => !o)}
-        aria-haspopup="listbox" aria-expanded={open}
-        className={`flex w-full items-center gap-2.5 rounded-xl border bg-white px-4 py-3 text-right transition ${
-          open ? 'border-[#14532D] shadow-[0_0_0_3px_rgba(20,83,45,0.10)]' : 'border-[#E7E2D6] hover:border-[#14532D]/45'
-        }`}
-      >
-        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[rgba(199,166,106,0.14)] text-[#8F6531]">{Icon.funnel}</span>
-        <span className="flex-1">
-          <span className="block text-[10.5px] text-[#6F6A5C]">دسته‌بندی</span>
-          <span className="block text-[14px] font-bold text-[#1C1B17]">{label}</span>
-        </span>
-        <span className={`text-[#6F6A5C] transition-transform duration-200 ${open ? 'rotate-180' : ''}`}>{Icon.chevron}</span>
-      </button>
-
-      <div
-        role="listbox"
-        className={`absolute start-0 top-full z-40 mt-2 max-h-[340px] w-full origin-top overflow-y-auto rounded-2xl border border-[#E7E2D6] bg-white p-1.5 shadow-[0_20px_44px_rgba(28,27,23,0.16)] transition-all duration-150 ${
-          open ? 'scale-100 opacity-100' : 'pointer-events-none scale-95 opacity-0'
-        }`}
-      >
-        {items.map(it => {
-          const selected = it.key === value
-          return (
-            <button
-              key={it.key} role="option" aria-selected={selected}
-              onClick={() => { onChange(it.key); setOpen(false) }}
-              className={`flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-right text-[13.5px] transition-colors ${
-                selected ? 'bg-[#DCEEE4]/70 font-bold text-[#14532D]' : 'text-[#5B564B] hover:bg-[#F7F5F0]'
-              }${it.key === 'all' ? ' border-b border-[#EFEBE1] mb-1 rounded-b-none' : ''}`}
-            >
-              <span className="flex-1">{it.label}</span>
-              <span className={`text-[11.5px] ${MONO} ${selected ? 'text-[#14532D]' : 'text-[#8F6531]'}`}>{faNum(it.count)}</span>
-              {selected && <span className="text-[#14532D]">{Icon.check}</span>}
-            </button>
-          )
-        })}
-      </div>
-    </div>
-  )
 }
 
 /* ═══ صفحه ═══ */
@@ -527,7 +344,6 @@ export default function FlatShop() {
   const [storyOpen, setStoryOpen] = useState(false)
   const { open: openImage, viewer: imageViewer } = useProfileImageViewer()
   const { open: openVideo, viewer: videoViewer } = useProfileVideoViewer()
-  const [urlCopied, setUrlCopied] = useState(false)
   const catStripRef = useRef<HTMLDivElement>(null)
   useHorizontalScroll(catStripRef)
   /* ── استوری فقط از سیستم واقعی ۲۴ساعته ──
@@ -743,161 +559,52 @@ export default function FlatShop() {
         .scat.on .scat-ct { color: #8F6531; }
         @media (prefers-reduced-motion: reduce) { .scat { transition: none } .scat:hover { transform: none } }
 
-        /* ── نشان برند نمایندگی ──
-           نسخه‌ی قبلی لاکی‌مشکی با متن طلایی بود؛ روی کاغذ روشن صفحه
-           مثل یک وصله‌ی تیره می‌نشست. حالا شیشه‌ی نمدی سبز است — رنگ
-           متضاد زمینه‌ی کرمی — با متن روشن و همان زبان liquid که
-           هدر دارد: بلور، لبه‌ی روشن داخلی، و برقی که با هاور رد
-           می‌شود. */
-        .brand-chip {
-          position: relative; overflow: hidden;
-          display: inline-flex; align-items: center;
-          padding: 6px 14px 5px;
-          border-radius: 999px;
-          background: linear-gradient(135deg, rgba(13,90,63,0.92) 0%, rgba(9,66,47,0.86) 55%, rgba(16,110,76,0.90) 100%);
-          border: 1px solid rgba(255,255,255,0.30);
-          box-shadow:
-            inset 0 1px 0 rgba(255,255,255,0.30),
-            inset 0 -1px 0 rgba(0,0,0,0.18),
-            0 4px 14px rgba(9,66,47,0.28);
-          backdrop-filter: blur(14px) saturate(1.7);
-          -webkit-backdrop-filter: blur(14px) saturate(1.7);
-          transition: transform .22s cubic-bezier(.22,1,.36,1), box-shadow .22s, border-color .22s;
-        }
-        .brand-chip-txt {
-          font-size: 11.5px; font-weight: 800; letter-spacing: 0.04em; white-space: nowrap;
-          color: #F3F8F4;
-          text-shadow: 0 1px 2px rgba(0,0,0,0.28);
-        }
-        .brand-chip::after {
-          content: ''; position: absolute; top: 0; bottom: 0; width: 45%;
-          left: -60%; transform: skewX(-18deg); pointer-events: none;
-          background: linear-gradient(90deg,transparent,rgba(255,255,255,0.26),transparent);
-          transition: left .55s ease;
-        }
-        .brand-chip:hover {
-          transform: translateY(-1.5px);
-          border-color: rgba(255,255,255,0.52);
-          box-shadow: inset 0 1px 0 rgba(255,255,255,0.38), 0 8px 22px rgba(9,66,47,0.36);
-        }
-        .brand-chip:hover::after { left: 115%; }
-        @media (prefers-reduced-motion: reduce) {
-          .brand-chip, .brand-chip::after { transition: none; }
-          .brand-chip:hover { transform: none; }
-        }
-
       `}</style>
 
-      {/* ── breadcrumb ── */}
-      <div className="mx-auto max-w-[1240px] px-4 pt-4 text-[12.5px] text-[#6F6A5C] sm:px-6">
-        <Link href="/" className="transition-colors hover:text-[#14532D]">خانه</Link>
-        <span className="mx-1.5">/</span>
-        <Link href="/sellers" className="transition-colors hover:text-[#14532D]">فروشگاه‌ها</Link>
-        <span className="mx-1.5">/</span>
-        <span>{store.title}</span>
-      </div>
+      {/* ═══ هدر — همان کامپوننتِ مشترکِ مربی، داور و تولیدکننده ═══
+          نسخه‌ی قبلی بنرِ اسلایدی + کارتِ سفید بود و کنارِ صفحه‌ی مربی
+          «ساده و معمولی» دیده می‌شد. حالا همان ProfileHero است، نه
+          چیزی شبیهش، پس از فردا هم از هم دور نمی‌شوند.
 
-      {/* ═══ هدر: بنر اسلایدی + کارت فروشگاه ═══ */}
+          دو چیزِ اختصاصیِ فروشگاه حفظ شد و به خودِ هدرِ مشترک اضافه
+          شد: چرخشِ چند بنر، و حلقه‌ی استوری دورِ لوگو.
+
+          ⚠️ بردکرامبِ جدا حذف شد — ProfileHero خودش یکی دارد.
+
+          برند به‌تنهایی روی چیپ گنگ است؛ «نمایندگی X» همان چیزی را
+          می‌گوید که ردیفِ برچسب‌دارِ قبلی می‌گفت. */}
+      <ProfileHero
+        name={store.title}
+        city={[store.province, store.city].filter(Boolean).join('، ')}
+        photo={store.logo || undefined}
+        coverSlides={store.banners.length ? store.banners : undefined}
+        story={hasStory ? { onOpen: () => { setStoryIdx(0); setStoryOpen(true) }, label: 'مشاهده استوری فروشگاه' } : undefined}
+        verified={store.verified}
+        disciplines={store.brands.map(b => ({ label: `نمایندگی ${b}` }))}
+        onOpenPhoto={u => openImage(u, { title: 'لوگوی فروشگاه', alt: store.title })}
+        role="seller"
+        backHref="/sellers" backLabel="فروشگاه‌ها"
+        publicUrl={`billiardhub.net/sellers/${sellerId}`}
+        posterBase={undefined}
+        stats={
+          PRODUCTS.length > 0 ? (
+            <ul className="ch-stats">
+              <li><b>{faNum(PRODUCTS.length)}</b><span>آگهی</span></li>
+            </ul>
+          ) : undefined
+        }
+        actions={
+          phoneDig ? (
+            <a className="ch-hero-cta" href={`tel:${phoneHref}`}>
+              {Icon.phone}<span className={MONO}>{toFa(phoneText)}</span>
+            </a>
+          ) : undefined
+        }
+      />
       <div className="mx-auto mt-4 max-w-[1240px] px-4 sm:px-6">
-        <div className="shop-head overflow-hidden rounded-[22px]">
-          {/* بنر — اسلایدر عکس آپلودشده؛ اگر چیزی نگذاشته، اسلایدر ۳ پوستر پیش‌فرض */}
-          <div className="relative" style={{ height: 'clamp(150px,24vw,250px)', background: '#0a2f22' }}>
-            {store.banners.length
-              ? <ImageSlider images={store.banners} />
-              : <PosterSlider variants={[0, 1, 2]} title={store.title} />}
-            <div className="pointer-events-none absolute inset-0" style={{ background: 'linear-gradient(180deg,rgba(0,0,0,0.04) 0%,rgba(0,0,0,0.32) 100%)' }} />
-            {/* بزرگ‌نمایی بنر. فقط وقتی بنر واقعی هست — پوستر پیش‌فرض
-                تصویر فروشگاه نیست و بازکردنش چیزی به کاربر نمی‌دهد.
-                نقطه‌های اسلایدر بعد از این می‌آیند و رویش می‌مانند. */}
-            {store.banners.length > 0 && (
-              <button type="button" onClick={() => openImage(store.banners, { title: 'بنر فروشگاه', alt: store.title })}
-                aria-label="بزرگ‌نمایی بنر فروشگاه" className="absolute inset-0 cursor-zoom-in" />
-            )}
-          </div>
-
-          {/* کارت فروشگاه — لوگو نیمی روی بنر، بقیه زیر هم */}
-          <div className="relative px-4 pb-5 sm:px-6 sm:pb-6">
-            {/* لوگو با حلقه‌ی استوری — نیمی روی عکس */}
-            {/* حلقه‌ی رنگی و کلیک فقط وقتی استوری واقعی هست؛ وگرنه
-                لوگوی ساده — بدون وعده‌ی چیزی که وجود ندارد. */}
-            <button
-              type="button" onClick={() => { if (hasStory) { setStoryIdx(0); setStoryOpen(true); return } openImage(store.logo ?? '', { title: 'لوگوی فروشگاه', alt: store.title }) }}
-              aria-label={hasStory ? 'مشاهده استوری فروشگاه' : 'بزرگ‌نمایی لوگوی فروشگاه'}
-              disabled={!hasStory && !store.logo}
-              className={`block shrink-0 rounded-full p-[3px] transition-transform duration-200${hasStory ? ' hover:scale-105 active:scale-95' : ''}`}
-              style={hasStory
-                ? { marginBlockStart: 'calc(clamp(106px,15vw,156px) / -2)', background: 'linear-gradient(135deg,#feda75,#fa7e1e,#d62976,#962fbf,#4f5bd5)', boxShadow: '0 6px 18px rgba(214,41,118,0.30)', width: 'fit-content' }
-                : { marginBlockStart: 'calc(clamp(106px,15vw,156px) / -2)', background: 'rgba(28,28,26,0.10)', width: 'fit-content', cursor: 'default' }}
-            >
-              <span className="flex items-center justify-center overflow-hidden rounded-full border-[3px] border-white bg-gradient-to-bl from-[#14532D] to-[#1E6B3C] text-white" style={{ width: 'clamp(106px,15vw,156px)', height: 'clamp(106px,15vw,156px)' }}>
-                {store.logo
-                  ? <img loading="lazy" decoding="async" src={store.logo} alt={store.title} className="h-full w-full object-cover"/>
-                  : Icon.storefront}
-              </span>
-            </button>
-
-            {/* نام، شهر (با دکمه‌ی تلفن روبه‌رویش سمت چپ)، توضیحات — زیر هم */}
-            <h2 className="mt-3 text-[17px] font-bold text-[#1C1B17] sm:text-[19px]">{store.title}{store.verified && <VerifiedBadge title="فروشگاه تأیید شده" />}</h2>
-            <div className="mt-1.5 flex flex-wrap items-center justify-between gap-2">
-              <div className="flex items-center gap-1.5 text-[12.5px] text-[#6F6A5C]">
-                <span className="text-[#14532D]">{Icon.pin}</span>{[store.province, store.city].filter(Boolean).join('، ')}
-              </div>
-              {phoneDig && (
-                <a
-                  href={`tel:${phoneHref}`}
-                  className={`inline-flex items-center gap-1.5 rounded-[10px] border border-[rgba(199,166,106,0.34)] bg-[rgba(199,166,106,0.12)] px-3.5 py-2 text-[13px] font-bold text-[#8F6531] transition hover:-translate-y-0.5 ${MONO}`}
-                >
-                  <span>{Icon.phone}</span>{toFa(phoneText)}
-                </a>
-              )}
-            </div>
-            <p className="mt-2 max-w-[720px] text-[13px] leading-relaxed text-[#5B564B]">{store.desc}</p>
-
-            {/* برندهای نمایندگی */}
-            {/* ── برندهای نمایندگی ──
-                چیپ‌های خاکستری قبلی مثل برچسب فیلتر بودند، در حالی
-                که این‌ها ادعای اعتبار فروشگاه‌اند. حالا هر برند یک
-                نشان لاکی‌مشکی با متن طلایی گرادیانی و حروف
-                فاصله‌دار است — همان زبانی که برندهای بین‌المللی
-                تجهیزات روی جعبه‌هایشان به کار می‌برند. برق نرمی هم
-                با هاور از رویش رد می‌شود. */}
-            {/* ── نشانی اختصاصی فروشگاه ──
-                فروشنده در پنل نشانی می‌سازد ولی هیچ‌جای خود صفحه دیده
-                نمی‌شد — نه خودش می‌دانست چه شد، نه بازدیدکننده
-                می‌توانست کپی‌اش کند. کره‌ی خطی همان زبان آیکونی بقیه‌ی
-                صفحه است و تینت طلایی سیستم را می‌گیرد. */}
-            <button
-              type="button"
-              onClick={() => {
-                const url = `https://billiardhub.net/sellers/${sellerId}`
-                void navigator.clipboard?.writeText(url).then(
-                  () => { setUrlCopied(true); window.setTimeout(() => setUrlCopied(false), 1800) },
-                  () => { /* مرورگر اجازه نداد — نشانی همچنان خوانا روی صفحه هست */ },
-                )
-              }}
-              title="کپی نشانی فروشگاه"
-              className="mt-2.5 inline-flex max-w-full items-center gap-1.5 rounded-[10px] border border-[rgba(199,166,106,0.34)] bg-[rgba(199,166,106,0.12)] px-3 py-1.5 text-[12px] font-bold text-[#8F6531] transition hover:-translate-y-0.5"
-            >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
-                <circle cx="12" cy="12" r="10" /><path d="M2 12h20" />
-                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
-              </svg>
-              <span dir="ltr" className={`truncate ${MONO}`}>billiardhub.net/sellers/{sellerId}</span>
-              <span className="shrink-0 text-[11px] opacity-70">{urlCopied ? '✓' : '⧉'}</span>
-            </button>
-
-            {store.brands.length > 0 && (
-              <div className="mt-3 flex flex-wrap items-center gap-2">
-                <span className="text-[11.5px] font-bold text-[#5B564B]">نمایندگی :</span>
-                {store.brands.map((b, i) => (
-                  <span key={i} className="brand-chip" dir="auto">
-                    <span className="brand-chip-txt">{b}</span>
-                  </span>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
+        {store.desc && (
+          <p className="max-w-[720px] text-[13px] leading-relaxed text-[#5B564B]">{store.desc}</p>
+        )}
 
         {/* سرچ — زیر باکس فروشگاه */}
         <div className="relative mt-3">
@@ -1173,7 +880,7 @@ export default function FlatShop() {
       {/* ═══ استوری فروشگاه (مثل صفحه‌ی باشگاه) ═══ */}
       {imageViewer}
       {videoViewer}
-      {channelGate}
+      {channelGate}
       {videoEditDialog}
       {storyOpen && hasStory && liveStories[storyIdx] && (
         <ClubStoryModal
