@@ -13,6 +13,7 @@ import {
   type SellerProfile,
   emptySellerProfile, findSellerByOwner, findUnclaimedSeller, newSellerSlug, saveSellerProfile, compressImage,
 } from '../../../lib/seller-store'
+import { ProfileLoadSpinner, ProfileLoadError } from '../../../components/profile/ProfileLoadGate'
 import { fetchMyProfileResult, saveProfileRemote } from '../../../lib/profiles/client'
 import ProvinceCitySelect from '../../../components/ProvinceCitySelect'
 import ClubPicker from '../../../components/ClubPicker'
@@ -61,6 +62,10 @@ export default function SellerDashboard() {
   /* نامکی که واقعا روی سرور ثبت شده. تا وقتی خالی است فیلد نشانی
      باز می‌ماند؛ نامک خودکار فرم نباید قفلش کند. */
   const [savedSlug, setSavedSlug] = useState<string | null>(null)
+  /* خواندنِ نسخه‌ی سرور شکست خورد — فرم باز نمی‌شود، وگرنه کاربر
+     روی داده‌ای کار می‌کند که نمی‌دانیم کاملِ کدام نسخه است. */
+  const [loadErr, setLoadErr] = useState(false)
+  const [reloadKey, setReloadKey] = useState(0)
   const [saved, setSaved]   = useState(false)
   const [err, setErr]       = useState('')
   const [busy, setBusy]     = useState(false)
@@ -90,7 +95,13 @@ export default function SellerDashboard() {
        • وگرنه فرم خالی با اسلاگ *یکتای تازه* (نه «۱») تا روی فروشگاه دیگری ننویسد. */
   useEffect(() => {
     if (!_hydrated) return
-    if (!user) { setLoaded(true); return }
+    /* گاردِ پاسخِ کهنه: خروجِ کاربر یا «تلاش دوباره» وسطِ بارگذاری
+       نباید بگذارد پاسخِ درخواستِ قبلی وضعیتِ تازه را خراب کند. */
+    let alive = true
+    setLoadErr(false)
+    /* ⚠️ بدونِ کاربر چیزی برای خواندن نیست؛ بدونِ این، گاردِ
+       «تا نسخه‌ی سرور نرسیده فرم باز نشود» یک اسپینرِ ابدی می‌شد. */
+    if (!user) { setLoaded(true); setSavedSlug(''); return }
 
     /* اول همان چیزی که در مرورگر هست تا فرم فورا پر شود، بعد نسخه‌ی
        سرور که منبع حقیقت است جایش را می‌گیرد. */
@@ -109,7 +120,8 @@ export default function SellerDashboard() {
     void (async () => {
       const res = await fetchMyProfileResult<SellerProfile>('seller')
       /* خطا ⇒ نمی‌دانیم چیزی ثبت شده یا نه؛ نشانی قفل می‌ماند. */
-      if (res.state === 'error') return
+      if (!alive) return
+      if (res.state === 'error') { setLoadErr(true); return }
       const remote = res.state === 'found' ? res.profile : null
       if (!remote) {
         /* ⚠️ این‌جا قبلا پروفایلِ محلی **بی‌اجازه روی سرور ذخیره
@@ -131,7 +143,8 @@ export default function SellerDashboard() {
       setForm(merged)
       try { saveSellerProfile(merged) } catch { /* کش مرورگر پر است — مهم نیست */ }
     })()
-  }, [_hydrated, user?.id])
+    return () => { alive = false }
+  }, [_hydrated, user?.id, reloadKey])
 
   const set = <K extends keyof SellerProfile>(k: K, v: SellerProfile[K]) => {
     setForm(f => ({ ...f, [k]: v })); setSaved(false); setErr('')
@@ -246,6 +259,8 @@ export default function SellerDashboard() {
   /* تا وقتی auth هیدریت نشده چیزی رندر نمی‌کنیم تا SSR و کلاینت یکی بمانند */
   if (!_hydrated || !loaded) return null
 
+
+
   if (!isSeller) {
     return (
       <div dir="rtl" className="flex min-h-screen items-center justify-center bg-[#F7F5F0] p-6 text-center">
@@ -260,6 +275,18 @@ export default function SellerDashboard() {
       </div>
     )
   }
+
+  /* ── چرا فرم پیش از رسیدنِ نسخه‌ی سرور باز نمی‌شود ──
+     ⚠️ افکتِ بالا اول نسخه‌ی مرورگر را می‌نشاند و بعد، با رسیدنِ
+     پاسخِ سرور، فرم را بازنویسی می‌کند — با نسخه‌ای که از روی همان
+     داده‌ی اولیه ساخته شده، نه از روی چیزی که کاربر در این فاصله
+     وارد کرده. روی شبکه‌ی کند هرچه در این چند ثانیه اضافه شود
+     بی‌صدا پاک می‌شود و ذخیره‌ی بعدی همان نسخه‌ی ناقص را می‌فرستد.
+
+     ⚠️ جایگاهش بعد از کارتِ نقش است: کاربرِ بدونِ این نقش نباید
+     منتظرِ درخواستی بماند که به او ربطی ندارد. */
+  if (savedSlug === null && !loadErr) return <ProfileLoadSpinner />
+  if (loadErr) return <ProfileLoadError onRetry={() => setReloadKey(k => k + 1)} />
 
   return (
     <div dir="rtl" className="min-h-screen bg-[#F7F5F0] pb-24 text-[#1C1B17]">

@@ -24,6 +24,7 @@ import {
   saveTechnicianProfile, TECH_TITLE, type TechnicianProfile,
   // (منبع حقیقت از این پس سرور است؛ این‌ها فقط کش محلی‌اند)
 } from '../../../lib/technician-store'
+import { ProfileLoadSpinner, ProfileLoadError } from '../../../components/profile/ProfileLoadGate'
 import { fetchMyProfileResult, saveProfileRemote } from '../../../lib/profiles/client'
 import { telNumber } from '../../../lib/phone-wa'
 import { INVALID_MOBILE_MESSAGE } from '../../../lib/auth/phone'
@@ -45,6 +46,10 @@ export default function TechnicianDashboard() {
   /* نامکی که واقعا روی سرور ثبت شده. تا وقتی خالی است فیلد نشانی
      باز می‌ماند؛ نامک خودکار فرم نباید قفلش کند. */
   const [savedSlug, setSavedSlug] = useState<string | null>(null)
+  /* خواندنِ نسخه‌ی سرور شکست خورد — فرم باز نمی‌شود، وگرنه کاربر
+     روی داده‌ای کار می‌کند که نمی‌دانیم کاملِ کدام نسخه است. */
+  const [loadErr, setLoadErr] = useState(false)
+  const [reloadKey, setReloadKey] = useState(0)
   const [saved, setSaved]   = useState(false)
   const [err, setErr]       = useState('')
   const [busy, setBusy]     = useState(false)
@@ -63,6 +68,10 @@ export default function TechnicianDashboard() {
 
   useEffect(() => {
     if (!_hydrated) return
+    /* گاردِ پاسخِ کهنه: خروجِ کاربر یا «تلاش دوباره» وسطِ بارگذاری
+       نباید بگذارد پاسخِ درخواستِ قبلی وضعیتِ تازه را خراب کند. */
+    let alive = true
+    setLoadErr(false)
     if (user) {
       const mine = findTechnicianByOwner(user)
       const authName = [user.firstName, user.lastName].filter(Boolean).join(' ')
@@ -78,7 +87,8 @@ export default function TechnicianDashboard() {
       void (async () => {
         const res = await fetchMyProfileResult<TechnicianProfile>('technician')
       /* خطا ⇒ نمی‌دانیم چیزی ثبت شده یا نه؛ نشانی قفل می‌ماند. */
-      if (res.state === 'error') return
+      if (!alive) return
+      if (res.state === 'error') { setLoadErr(true); return }
       const remote = res.state === 'found' ? res.profile : null
         if (!remote) {
           /* ⚠️ این‌جا قبلا پروفایلِ محلی **بی‌اجازه روی سرور ذخیره
@@ -101,7 +111,11 @@ export default function TechnicianDashboard() {
       })()
     }
     setLoaded(true)
-  }, [_hydrated, user?.id])
+    /* ⚠️ بدونِ کاربر چیزی برای خواندن نیست؛ بدونِ این، گاردِ
+       «تا نسخه‌ی سرور نرسیده فرم باز نشود» یک اسپینرِ ابدی می‌شد. */
+    if (!user) setSavedSlug('')
+    return () => { alive = false }
+  }, [_hydrated, user?.id, reloadKey])
 
   const set = <K extends keyof TechnicianProfile>(k: K, v: TechnicianProfile[K]) => {
     setForm(f => ({ ...f, [k]: v })); setSaved(false); setErr('')
@@ -224,6 +238,8 @@ export default function TechnicianDashboard() {
 
   if (!_hydrated || !loaded) return null
 
+
+
   if (!isTechnician) {
     return (
       <div dir="rtl" className="flex min-h-screen items-center justify-center bg-[#F7F5F0] p-6 text-center font-[Vazirmatn,Tahoma,sans-serif]">
@@ -236,6 +252,18 @@ export default function TechnicianDashboard() {
       </div>
     )
   }
+
+  /* ── چرا فرم پیش از رسیدنِ نسخه‌ی سرور باز نمی‌شود ──
+     ⚠️ افکتِ بالا اول نسخه‌ی مرورگر را می‌نشاند و بعد، با رسیدنِ
+     پاسخِ سرور، فرم را بازنویسی می‌کند — با نسخه‌ای که از روی همان
+     داده‌ی اولیه ساخته شده، نه از روی چیزی که کاربر در این فاصله
+     وارد کرده. روی شبکه‌ی کند هرچه در این چند ثانیه اضافه شود
+     بی‌صدا پاک می‌شود و ذخیره‌ی بعدی همان نسخه‌ی ناقص را می‌فرستد.
+
+     ⚠️ جایگاهش بعد از کارتِ نقش است: کاربرِ بدونِ این نقش نباید
+     منتظرِ درخواستی بماند که به او ربطی ندارد. */
+  if (savedSlug === null && !loadErr) return <ProfileLoadSpinner />
+  if (loadErr) return <ProfileLoadError onRetry={() => setReloadKey(k => k + 1)} />
 
   return (
     <div dir="rtl" className="min-h-screen bg-[#F7F5F0] pb-24 text-[#1C1B17] font-[Vazirmatn,Tahoma,sans-serif]">

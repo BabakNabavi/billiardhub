@@ -14,6 +14,7 @@ import ClubInvites from '../../../components/coach/ClubInvites'
 import SessionInbox from '../../../components/coach/SessionInbox'
 import { useAuthStore } from '../../../store/auth.store'
 import { isValidSlug } from '../../../lib/slug'
+import { ProfileLoadSpinner, ProfileLoadError } from '../../../components/profile/ProfileLoadGate'
 import { fetchMyProfileResult, saveProfileRemote } from '../../../lib/profiles/client'
 import ProvinceCitySelect from '../../../components/ProvinceCitySelect'
 import ProfileSlugField from '../../../components/ProfileSlugField'
@@ -165,6 +166,10 @@ function CoachDashboardInner() {
   /* نامکی که واقعا روی سرور ثبت شده. تا وقتی خالی است فیلد نشانی
      باز می‌ماند؛ نامک خودکار فرم نباید قفلش کند. */
   const [savedSlug, setSavedSlug] = useState<string | null>(null)
+  /* خواندنِ نسخه‌ی سرور شکست خورد — فرم باز نمی‌شود، وگرنه کاربر
+     روی داده‌ای کار می‌کند که نمی‌دانیم کاملِ کدام نسخه است. */
+  const [loadErr, setLoadErr] = useState(false)
+  const [reloadKey, setReloadKey] = useState(0)
   const [warnOpen, setWarn]   = useState(false)
   const [submitted, setSubmitted] = useState(false)
 
@@ -175,6 +180,10 @@ function CoachDashboardInner() {
      بی‌صاحب را همین کاربر تصاحب می‌کند تا داده‌اش برگردد. */
   useEffect(() => {
     if (!_hydrated) return
+    /* گاردِ پاسخِ کهنه: خروجِ کاربر یا «تلاش دوباره» وسطِ بارگذاری
+       نباید بگذارد پاسخِ درخواستِ قبلی وضعیتِ تازه را خراب کند. */
+    let alive = true
+    setLoadErr(false)
     let mine = findCoachByOwner(user)
     if (!mine && user) {
       const orphan = findUnclaimedCoach()
@@ -198,7 +207,8 @@ function CoachDashboardInner() {
     void (async () => {
       const res = await fetchMyProfileResult<Record<string, unknown>>('coach')
       /* خطا ⇒ نمی‌دانیم چیزی ثبت شده یا نه؛ نشانی قفل می‌ماند. */
-      if (res.state === 'error') return
+      if (!alive) return
+      if (res.state === 'error') { setLoadErr(true); return }
       const remote = res.state === 'found' ? res.profile : null
       if (!remote) {
         /* ⚠️ این‌جا قبلا پروفایلِ محلی **بی‌اجازه روی سرور ذخیره
@@ -231,7 +241,8 @@ function CoachDashboardInner() {
         slug: remote.slug,
       }))
     })()
-  }, [_hydrated, user])
+    return () => { alive = false }
+  }, [_hydrated, user?.id, reloadKey])
 
 
   /* قفل فقط وقتی که حساب واقعا نام دارد — وگرنه کاربر راهی برای
@@ -469,6 +480,17 @@ function safeRemote(raw: unknown): Partial<FormState> {
 
   const err = (k: string) => errors[k] ? <span style={{ display: 'block', color: '#ef4444', fontSize: 11.5, marginTop: 4 }}>{errors[k]}</span> : null
   const star = <span style={{ color: '#ef4444' }}> *</span>
+
+  /* ── چرا فرم پیش از رسیدنِ نسخه‌ی سرور باز نمی‌شود ──
+     ⚠️ افکتِ بالا وقتی پاسخِ سرور رسید `setForm` می‌زند و کلیدهایی را
+     که سرور فرستاده بازنویسی می‌کند — از جمله چیزی که کاربر در همان
+     چند ثانیه تایپ کرده. روی شبکه‌ی کند این یعنی متنِ نوشته‌شده
+     بی‌صدا برمی‌گردد به نسخه‌ی سرور، و ذخیره‌ی بعدی همان را می‌فرستد.
+     تا وقتی پایه‌ی داده نرسیده، چیزی برای ویرایش وجود ندارد.
+     (همان باگی که در پنلِ تولیدکننده «دو محصول ثبت کردم، یکی ماند»
+     دیده شد.) */
+  if (savedSlug === null && !loadErr) return <ProfileLoadSpinner bg={BG} />
+  if (loadErr) return <ProfileLoadError bg={BG} onRetry={() => setReloadKey(k => k + 1)} />
 
   return (
     <div style={{ direction: 'rtl', fontFamily: "'Vazirmatn',Tahoma,sans-serif", background: BG, minHeight: '100vh', color: TEXT }}>

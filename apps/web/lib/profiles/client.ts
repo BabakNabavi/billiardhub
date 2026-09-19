@@ -55,8 +55,17 @@ export type MyProfileResult<T> =
   | { state: 'none' }
   | { state: 'error' }
 
+/* ⚠️ مهلت لازم است چون پنل‌ها تا رسیدنِ این پاسخ فرم را باز
+   نمی‌کنند. درخواستی که روی شبکه‌ی کند معلق بماند، بدونِ این تا
+   مهلتِ TCP مرورگر (چند دقیقه) صفحه را روی اسپینر نگه می‌دارد.
+   `abort` هم به همان `catch` می‌رسد و «خطا» می‌شود، یعنی کاربر
+   دکمه‌ی «تلاش دوباره» می‌گیرد. */
+const LOAD_TIMEOUT_MS = 15_000
+
 export async function fetchMyProfileResult<T>(kind: ProfileKind): Promise<MyProfileResult<T>> {
-  const r = await apiFetch(`/api/profiles/${kind}?mine=1`).catch(() => null)
+  const r = await apiFetch(`/api/profiles/${kind}?mine=1`, {
+    signal: AbortSignal.timeout(LOAD_TIMEOUT_MS),
+  }).catch(() => null)
   if (!r) return { state: 'error' }
   if (!r.ok) return { state: 'error' }
   const j = await json<{ profile: RemoteProfile<T> | null }>(r)
