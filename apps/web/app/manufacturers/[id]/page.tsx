@@ -25,6 +25,8 @@ import ProfileHero from '../../../components/profile/ProfileHero'
 import { Factory } from 'lucide-react'
 import { telPrefix, provinceOfCity } from '../../../lib/iran-geo'
 import { getManufacturer, type MfrProduct } from '../../../lib/manufacturers-data'
+import OwnerAdsSection from '../../../components/market/OwnerAdsSection'
+import { fetchProductsByOwner, type ShopProduct } from '../../shop/products'
 
 const DEFAULT_ID = '1'
 
@@ -307,6 +309,39 @@ export default function ManufacturerPage() {
     return () => { alive = false }
   }, [mfrId, reloadKey])
 
+  /* ── آگهی‌های خودِ تولیدکننده ──
+     «محصولات ما» بالاتر کاتالوگِ تولیدی است و فروش نیست؛ این
+     فهرست آگهی‌هایی است که همین صاحبِ پروفایل در بیلیارد بازار
+     ثبت کرده — چه تولیدیِ خودش باشد چه هر وسیله‌ی دیگری.
+
+     ملاک شناسه‌ی مالک است نه نامکِ فروشگاه: تولیدکننده‌ای که
+     فروشگاهِ تأییدشده ندارد، آگهیاش با `storeSlug` تهی ذخیره شده. */
+  const [ads, setAds] = useState<ShopProduct[]>([])
+  const [adsLoading, setAdsLoading] = useState(false)
+  const [adsError, setAdsError] = useState(false)
+  /* شمارنده‌ی «تلاش دوباره» — تغییرش افکت را از نو اجرا می‌کند */
+  const [adsKey, setAdsKey] = useState(0)
+
+  useEffect(() => {
+    if (!ownerId) { setAds([]); setAdsLoading(false); setAdsError(false); return }
+    let alive = true
+    setAdsLoading(true)
+    setAdsError(false)
+    void (async () => {
+      try {
+        const r = await fetchProductsByOwner(ownerId)
+        if (alive) setAds(r)
+      } catch {
+        /* خطا را می‌بلعیم ولی بی‌صدا نه: بخش خودش «تلاش دوباره»
+           نشان می‌دهد. رها کردنش یعنی unhandled rejection. */
+        if (alive) { setAds([]); setAdsError(true) }
+      } finally {
+        if (alive) setAdsLoading(false)
+      }
+    })()
+    return () => { alive = false }
+  }, [ownerId, adsKey])
+
   /* ── چرا `MANUFACTURERS[0]!` حذف شد ──
      آن آرایه‌ی نمایشی پیش از رونمایی خالی شد، پس این فالبک از آن روز
      `undefined` برمی‌گرداند و علامت `!` فقط تایپ‌چکر را ساکت می‌کرد.
@@ -532,6 +567,16 @@ export default function ManufacturerPage() {
         )}
       </div>
 
+      {/* ═══ آگهی‌های ما — همان ویترینِ صفحه‌ی فروشنده ═══ */}
+      <OwnerAdsSection
+        rows={ads}
+        loading={adsLoading}
+        error={adsError}
+        onRetry={() => setAdsKey(k => k + 1)}
+        title="آگهی‌های ما"
+        searchPlaceholder="جستجو در آگهی‌های این تولیدکننده…"
+      />
+
       {/* ═══ درباره ما — ۱/۳ پوستر/عکس سمت راست، متن سمت چپ ═══ */}
       <div className="mx-auto max-w-[1240px] px-4 pb-14 sm:px-6">
         <div className="grid grid-cols-1 overflow-hidden rounded-2xl border border-[#E7E2D6] bg-white min-[760px]:grid-cols-[1fr_2fr]">
@@ -695,7 +740,6 @@ export default function ManufacturerPage() {
               {/* نشان پلتفرم — فروشگاه فوتر خودش را دارد، ولی
                   بازدیدکننده باید بداند این صفحه کجا میزبانی می‌شود. */}
               <Link href="/" className="transition-colors hover:opacity-80">قدرت‌گرفته از بیلیارد <span className="font-bold text-[#C7A66A]">هاب</span></Link>
-              <Link href="/" className="transition-colors hover:opacity-80">قدرت‌گرفته از بیلیارد <span className="font-bold text-[#C7A66A]">هاب</span></Link>
             </div>
           </div>
         </div>
@@ -703,7 +747,7 @@ export default function ManufacturerPage() {
 
       {imageViewer}
       {videoViewer}
-      {channelGate}
+      {channelGate}
       {videoEditDialog}
     </div>
   )
