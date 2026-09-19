@@ -134,11 +134,25 @@ export async function fetchProductsBySeller(sellerId: string): Promise<ShopProdu
    بخشِ خالی را اصلا رندر نمی‌کند، پس یک ۵۰۰ یا قطعیِ شبکه باعث
    می‌شد کلِ ویترین بی‌صدا غیب شود. حالا صفحه خطا را می‌گیرد و
    «تلاش دوباره» نشان می‌دهد. */
-export async function fetchProductsByOwner(ownerId: string, limit = 200): Promise<ShopProduct[]> {
+export interface OwnerAdsOptions {
+  limit?: number
+  /** آگهی‌هایی که به فروشگاهِ همین مالک تعلق دارند کنار گذاشته شوند */
+  withoutStore?: boolean
+}
+
+export async function fetchProductsByOwner(ownerId: string, opts: OwnerAdsOptions = {}): Promise<ShopProduct[]> {
   if (!ownerId) return []
+  const { limit = 200, withoutStore = false } = opts
   const r = await fetch(`/api/products?limit=${limit}&owner=${encodeURIComponent(ownerId)}`, { cache: 'no-store' })
   if (!r.ok) throw new Error(`fetchProductsByOwner: ${r.status}`)
   const j = await r.json()
   const rows = Array.isArray(j?.products) ? j.products : []
-  return rows.map((x: Record<string, unknown>) => toShopProduct(x))
+  const all = rows.map((x: Record<string, unknown>) => toShopProduct(x))
+  /* ── چرا آگهیِ فروشگاه‌دار کنار می‌رود ──
+     یک آگهی نباید در چند صفحه تکرار شود؛ جای آگهیِ فروشگاه، صفحه‌ی
+     همان فروشگاه است. کسی که هم فروشگاه دارد هم پروفایلِ دیگری،
+     وگرنه یک فهرست را دو جا می‌دید.
+     `sellerId` این‌جا نامکِ فروشگاه است (نه شناسه‌ی کاربر)، پس تهی
+     بودنش یعنی «این آگهی فروشگاهی ندارد». */
+  return withoutStore ? all.filter((p: ShopProduct) => !p.sellerId) : all
 }
