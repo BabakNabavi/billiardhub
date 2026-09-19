@@ -22,7 +22,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
-import { SlidersHorizontal, X, UserPlus, Send } from 'lucide-react'
+import { SlidersHorizontal, X, UserPlus } from 'lucide-react'
 import { TECH_CATEGORIES, titlesOfCategory } from '@/lib/tech-categories'
 import { TECHNICIANS, faDigits, type Technician } from '@/lib/technicians-data'
 import {
@@ -307,17 +307,6 @@ export default function TechnicalServicesPage() {
               </div>
             )}
 
-            {/* ═══════ ۴ — ثبت درخواست ═══════ */}
-            <div className="tm-cta tm-cta-mt">
-              <div>
-                <h2>متخصص مناسب پیدا نکردی؟</h2>
-                <p>نیازت را برای ما توضیح بده تا درخواستت را برای متخصصان مرتبط ارسال کنیم</p>
-              </div>
-              <Link className="tm-btn tm-btn--gold" href="/support?topic=technical-service">
-                <Send size={16} aria-hidden />
-                ثبت درخواست خدمات
-              </Link>
-            </div>
           </div>
         </div>
       </section>
