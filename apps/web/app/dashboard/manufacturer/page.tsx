@@ -19,6 +19,7 @@ import {
   emptyManufacturerProfile, findManufacturerByOwner, newManufacturerSlug,
   saveManufacturerProfile, type ManufacturerProfile,
 } from '../../../lib/manufacturer-store'
+import { ProfileLoadSpinner, ProfileLoadError } from '../../../components/profile/ProfileLoadGate'
 import { fetchMyProfileResult, saveProfileRemote } from '../../../lib/profiles/client'
 import VerificationBadges from '../../../components/VerificationBadges'
 import { Plus, Trash2, Images, Factory, ArrowLeft } from 'lucide-react'
@@ -38,6 +39,10 @@ export default function ManufacturerDashboard() {
   /* نامکی که واقعا روی سرور ثبت شده. تا وقتی خالی است فیلد نشانی
      باز می‌ماند؛ نامک خودکار فرم نباید قفلش کند. */
   const [savedSlug, setSavedSlug] = useState<string | null>(null)
+  /* خواندنِ نسخه‌ی سرور شکست خورد — فرم باز نمی‌شود، وگرنه کاربر
+     روی داده‌ای کار می‌کند که نمی‌دانیم کاملِ کدام نسخه است. */
+  const [loadErr, setLoadErr] = useState(false)
+  const [reloadKey, setReloadKey] = useState(0)
   const [saved, setSaved]   = useState(false)
   const [err, setErr]       = useState('')
   const [busy, setBusy]     = useState(false)
@@ -52,18 +57,25 @@ export default function ManufacturerDashboard() {
 
   useEffect(() => {
     if (!_hydrated) return
-    if (!user) { setLoaded(true); return }
+    /* گاردِ پاسخِ کهنه: خروجِ کاربر یا «تلاش دوباره» وسطِ بارگذاری
+       نباید بگذارد پاسخِ درخواستِ قبلی وضعیتِ تازه را خراب کند. */
+    let alive = true
+    /* ⚠️ بدونِ کاربر چیزی برای خواندن نیست؛ بدونِ این، گاردِ
+       «تا نسخه‌ی سرور نرسیده فرم باز نشود» یک اسپینرِ ابدی می‌شد. */
+    if (!user) { setLoaded(true); setSavedSlug(''); return }
 
     /* اول نسخه‌ی همین مرورگر تا فرم فورا پر شود، بعد نسخه‌ی سرور */
     const mine = findManufacturerByOwner(user)
     const local = mine ?? emptyManufacturerProfile(newManufacturerSlug(), user.id, user.phone ?? '')
     setForm(local)
     setLoaded(true)
+    setLoadErr(false)
 
     void (async () => {
       const res = await fetchMyProfileResult<ManufacturerProfile>('manufacturer')
       /* خطا ⇒ نمی‌دانیم چیزی ثبت شده یا نه؛ نشانی قفل می‌ماند. */
-      if (res.state === 'error') return
+      if (!alive) return
+      if (res.state === 'error') { setLoadErr(true); return }
       const remote = res.state === 'found' ? res.profile : null
       if (!remote) {
         /* ⚠️ این‌جا قبلا پروفایلِ محلی **بی‌اجازه روی سرور ذخیره
@@ -83,7 +95,8 @@ export default function ManufacturerDashboard() {
       setForm(merged)
       try { saveManufacturerProfile(merged) } catch { /* کش مرورگر پر است */ }
     })()
-  }, [_hydrated, user?.id])
+    return () => { alive = false }
+  }, [_hydrated, user?.id, reloadKey])
 
   const set = <K extends keyof ManufacturerProfile>(k: K, v: ManufacturerProfile[K]) => {
     setForm(f => ({ ...f, [k]: v })); setSaved(false); setErr('')
@@ -145,6 +158,12 @@ export default function ManufacturerDashboard() {
     setProd({ name: '', category: '', description: '', specs: '', image: '' })
   }
 
+  const addCert = () => {
+    if (!cert.title.trim()) { setErr('عنوان گواهینامه لازم است.'); return }
+    set('certificates', [...form.certificates, { title: cert.title.trim(), issuer: cert.issuer.trim(), year: cert.year.trim() }])
+    setCert({ title: '', issuer: '', year: '' })
+  }
+
   const submit = (e: React.FormEvent) => {
     e.preventDefault()
     if (!form.name.trim())        { setErr('نام کارخانه/برند لازم است.'); return }
@@ -190,6 +209,21 @@ export default function ManufacturerDashboard() {
       </div>
     )
   }
+
+  /* ── چرا فرم پیش از رسیدنِ نسخه‌ی سرور باز نمی‌شود ──
+     ⚠️ این ریشه‌ی «دو محصول ثبت کردم، فقط آخری ماند» بود.
+
+     افکتِ بالا اول نسخه‌ی مرورگر را می‌نشاند و بعد، وقتی پاسخِ سرور
+     رسید، `setForm(merged)` می‌زند — و `merged` از روی همان نسخه‌ی
+     اولیه ساخته شده، نه از روی چیزی که کاربر در این فاصله وارد
+     کرده. روی شبکه‌ی کند، کاربر محصول اول را اضافه می‌کرد و چند
+     ثانیه بعد پاسخِ سرور بی‌صدا پاکش می‌کرد؛ بعد محصول دوم را
+     اضافه می‌کرد و ذخیره می‌شد — یعنی فقط آخری می‌ماند.
+
+     راه‌حل، حذفِ خودِ مسابقه است: تا وقتی پایه‌ی داده نرسیده، چیزی
+     برای ویرایش وجود ندارد. */
+  if (savedSlug === null && !loadErr) return <ProfileLoadSpinner />
+  if (loadErr) return <ProfileLoadError onRetry={() => setReloadKey(k => k + 1)} />
 
   return (
     <div dir="rtl" className="min-h-screen bg-[#F7F5F0] pb-24 text-[#1C1B17] font-[Vazirmatn,Tahoma,sans-serif]">
@@ -325,16 +359,22 @@ export default function ManufacturerDashboard() {
                 ))}
               </div>
             )}
-            <div className="flex flex-col gap-2 rounded-xl border border-dashed border-[#D8D2C4] p-4 sm:flex-row">
+            {/* همان تله‌ی زیرفرمِ محصول: Enter این‌جا هم پروفایل را ذخیره
+                می‌کرد و گواهینامه‌ی تایپ‌شده دور ریخته می‌شد. */}
+            <div
+              className="flex flex-col gap-2 rounded-xl border border-dashed border-[#D8D2C4] p-4 sm:flex-row"
+              onKeyDown={e => {
+                if (e.key !== 'Enter') return
+                if ((e.target as HTMLElement).tagName !== 'INPUT') return
+                if ((e.nativeEvent as unknown as { isComposing?: boolean }).isComposing) return
+                e.preventDefault()
+                addCert()
+              }}
+            >
               <input className={INPUT} value={cert.title} onChange={e => setCert(c => ({ ...c, title: e.target.value }))} placeholder="عنوان — مثال: ISO 9001" />
               <input className={INPUT} value={cert.issuer} onChange={e => setCert(c => ({ ...c, issuer: e.target.value }))} placeholder="صادرکننده" />
               <input className={`${INPUT} sm:w-28`} value={cert.year} onChange={e => setCert(c => ({ ...c, year: e.target.value }))} placeholder="سال" />
-              <button type="button" className={`${LQ_BTN} shrink-0`}
-                onClick={() => {
-                  if (!cert.title.trim()) { setErr('عنوان گواهینامه لازم است.'); return }
-                  set('certificates', [...form.certificates, { title: cert.title.trim(), issuer: cert.issuer.trim(), year: cert.year.trim() }])
-                  setCert({ title: '', issuer: '', year: '' })
-                }}>
+              <button type="button" className={`${LQ_BTN} shrink-0`} onClick={addCert}>
                 <Plus size={14} /> افزودن
               </button>
             </div>
@@ -411,7 +451,12 @@ export default function ManufacturerDashboard() {
               <div className="mb-4 space-y-2">
                 {form.products.map(p => (
                   <div key={p.id} className="flex items-center gap-3 rounded-xl border border-[#EFEBE1] bg-[#FAFAF7] p-2.5">
-                    <img loading="lazy" decoding="async" src={p.image} alt="" className="h-12 w-16 rounded-lg border border-[#E7E2D6] object-cover" />
+                    {/* ⚠️ محصول می‌تواند بی‌عکس باشد؛ `src=""` مرورگر را
+                        وامی‌دارد خودِ صفحه را دوباره بگیرد و نشانِ
+                        عکسِ شکسته نشان دهد. */}
+                    {p.image
+                      ? <img loading="lazy" decoding="async" src={p.image} alt="" className="h-12 w-16 rounded-lg border border-[#E7E2D6] object-cover" />
+                      : <span className="h-12 w-16 shrink-0 rounded-lg border border-[#E7E2D6] bg-[#F2EFE7]" aria-hidden />}
                     <div className="min-w-0 flex-1">
                       <div className="truncate text-[13px] font-bold">{p.name}</div>
                       <div className="text-[11px] text-[#6F6A5C]">{p.category}</div>
@@ -423,7 +468,28 @@ export default function ManufacturerDashboard() {
               </div>
             )}
 
-            <div className="grid grid-cols-1 gap-3 rounded-xl border border-dashed border-[#D8D2C4] p-4 sm:grid-cols-2">
+            {/* ⚠️ Enter در این فیلدها نباید فرم را ذخیره کند: کاربر
+                محصول را تایپ می‌کرد، Enter می‌زد، پروفایل ذخیره
+                می‌شد و محصولِ تایپ‌شده — که هنوز «افزودن» نخورده بود —
+                دور ریخته می‌شد. حالا Enter همان «افزودن» است. */}
+            <div
+              className="grid grid-cols-1 gap-3 rounded-xl border border-dashed border-[#D8D2C4] p-4 sm:grid-cols-2"
+              onKeyDown={e => {
+                if (e.key !== 'Enter') return
+                /* ⚠️ فقط فیلدِ تک‌خطی. روی `TEXTAREA` باید خطِ تازه
+                   بزند، و روی `BUTTON` گرفتنِ Enter کلیکِ ساخته‌شده را
+                   لغو می‌کند — یعنی کاربرِ کیبورد روی «عکس محصول»
+                   Enter می‌زد و به‌جای بازشدنِ فایل، محصول اضافه
+                   می‌شد. */
+                if ((e.target as HTMLElement).tagName !== 'INPUT') return
+                /* نیمه‌کاره‌ی IME را ثبت نکن — Enterِ تأییدِ فارسی‌نویسِ
+                   گوشی همین است. */
+                if ((e.nativeEvent as unknown as { isComposing?: boolean }).isComposing) return
+                if (busy) return
+                e.preventDefault()
+                addProduct()
+              }}
+            >
               <input className={INPUT} value={prod.name} onChange={e => setProd(p => ({ ...p, name: e.target.value }))} placeholder="نام محصول — مثال: میز اسنوکر ۱۲ فوت" />
               <input className={INPUT} value={prod.category} onChange={e => setProd(p => ({ ...p, category: e.target.value }))} placeholder="دسته — مثال: میز اسنوکر" />
               <input className={`${INPUT} sm:col-span-2`} value={prod.description} onChange={e => setProd(p => ({ ...p, description: e.target.value }))} placeholder="توضیح کوتاه محصول…" />
