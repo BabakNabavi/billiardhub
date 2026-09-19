@@ -11,24 +11,12 @@ import VerifiedBadge from '../../components/VerifiedBadge'
 
 const GOLD     = '#C7A66A'
 const GOLD_D   = '#8F6531'
-const GOLD_G   = 'linear-gradient(135deg,#7A4F10 0%,#C7A66A 50%,#8A6020 100%)'
 /* هم‌رنگ پایه‌ی صحنه — وگرنه نوار چسبان وصله می‌شود */
 const BG       = '#F4F2EE'
 const TEXT     = '#1C1C1A'
 const TEXT_SEC = 'rgba(28,28,26,0.52)'
 const TEXT_MUT = 'rgba(28,28,26,0.32)'
 
-/* billiard rack — 15 balls in triangle formation (coaches-style hero graphic) */
-const RACK: [number, number][] = [
-  [490,50],[442,133],[538,133],[394,216],[490,216],[586,216],
-  [346,299],[442,299],[538,299],[634,299],
-  [298,382],[394,382],[490,382],[586,382],[682,382],
-]
-const RACK_C = [
-  '#C7A66A','#DC2626','#7C3AED','#DC2626','#C7A66A','#DC2626',
-  '#C7A66A','#DC2626','#C7A66A','#DC2626',
-  '#7C3AED','#DC2626','#C7A66A','#DC2626','#C7A66A',
-]
 
 /* ── Subtle sliding header posters (text-less, behind the hero elements) ── */
 const MFR_POSTERS = [
@@ -102,28 +90,83 @@ function MfrPoster({ variant }: { variant: number }) {
   )
 }
 
-function MfrPosterBg() {
-  const [active, setActive] = useState(0)
-  const [prev, setPrev] = useState<number | null>(null)
+/* ── اسلایدهای هدر ── */
+const MFR_SLIDES = [
+  { title: 'تولیدکنندگان بیلیارد', sub: 'از کارگاه تا میز بازی' },
+  { title: 'ساختِ ایران',          sub: 'میز، چوب و تجهیزات' },
+  { title: 'سفارشِ اختصاصی',       sub: 'با ابعاد و رنگِ دلخواه' },
+  { title: 'کیفیتِ کارگاهی',        sub: 'مستقیم از تولیدکننده' },
+  { title: 'برندهای معتبر',        sub: 'همه در یک جا' },
+]
+
+/* ════════ HERO — همان الگوی صفحه‌ی مربیان ════════
+   هدرِ قبلی روشن بود و پوسترها را با شفافیتِ کم پشتِ متن می‌گذاشت؛
+   کنارِ هدرِ مربیان «ساده و معمولی» دیده می‌شد. */
+function MfrHeroSlider() {
+  const [active, setActive]   = useState(0)
+  const [prevIdx, setPrevIdx] = useState<number | null>(null)
   const activeRef = useRef(0)
+  const fadingRef = useRef(false)
+
+  const advance = (idx: number) => {
+    if (idx === activeRef.current || fadingRef.current) return
+    setPrevIdx(activeRef.current)
+    activeRef.current = idx
+    fadingRef.current = true
+    setActive(idx)
+    setTimeout(() => { setPrevIdx(null); fadingRef.current = false }, 850)
+  }
+
   useEffect(() => {
     const iv = setInterval(() => {
-      const next = (activeRef.current + 1) % MFR_POSTERS.length
-      setPrev(activeRef.current); activeRef.current = next; setActive(next)
-      setTimeout(() => setPrev(null), 900)
+      const next = (activeRef.current + 1) % MFR_SLIDES.length
+      setPrevIdx(activeRef.current)
+      activeRef.current = next
+      fadingRef.current = true
+      setActive(next)
+      setTimeout(() => { setPrevIdx(null); fadingRef.current = false }, 850)
     }, 4500)
     return () => clearInterval(iv)
   }, [])
+
   return (
-    <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', opacity: 0.11, pointerEvents: 'none' }} aria-hidden>
-      {MFR_POSTERS.map((_, i) => (
-        <div key={i} style={{ position: 'absolute', inset: 0, opacity: i === active ? 1 : 0, transition: 'opacity 0.9s ease', zIndex: i === active ? 2 : i === prev ? 1 : 0 }}>
-          <MfrPoster variant={i} />
+    <>
+      <style>{`@keyframes kenBurnsM{0%{transform:scale(1.00) translate(0%,0%)}100%{transform:scale(1.14) translate(-2%,1.5%)}}`}</style>
+      <section style={{ position: 'relative', height: 'clamp(150px,16vw,205px)', overflow: 'hidden', background: '#0a0a0a', direction: 'rtl' }}>
+        {MFR_SLIDES.map((_, i) => (
+          <div key={i} style={{ position: 'absolute', inset: 0, opacity: i === active ? 1 : 0, transition: 'opacity 0.90s ease', zIndex: i === active ? 2 : i === prevIdx ? 1 : 0, animation: 'kenBurnsM 9s ease-in-out infinite alternate', willChange: 'transform' }}>
+            <MfrPoster variant={i} />
+          </div>
+        ))}
+        <div style={{ position: 'absolute', inset: 0, zIndex: 3, background: 'linear-gradient(to right, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.28) 55%, transparent 100%)' }} />
+        <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '55%', zIndex: 3, background: 'linear-gradient(to top, rgba(0,0,0,0.80), transparent)' }} />
+
+        <div style={{ position: 'absolute', inset: 0, zIndex: 4, display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: 'clamp(12px,2.4vw,32px) clamp(24px,6vw,80px)' }}>
+          <div style={{ maxWidth: 1280, width: '100%', margin: '0 auto' }}>
+            <div style={{ textAlign: 'left', marginBottom: 11 }}>
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, background: 'rgba(199,166,106,0.14)', border: '1px solid rgba(199,166,106,0.34)', color: '#D4A843', fontSize: 8.9, fontWeight: 800, borderRadius: 24, padding: '4px 11px', letterSpacing: '0.12em', transform: 'translateY(-13px)', animation: 'softBlink 2.6s .7s ease-in-out infinite' }}>
+                MANUFACTURERS . BILLIARD HUB
+              </div>
+            </div>
+            <h1 style={{ fontSize: 'clamp(25px,4vw,50px)', fontWeight: 900, color: '#fff', margin: '0 0 12px', letterSpacing: '-0.03em', lineHeight: 1.08, transform: 'translateY(-6px)' }}>
+              {MFR_SLIDES[active]?.title}
+            </h1>
+            <p style={{ fontSize: 'clamp(12px,1.35vw,17px)', color: '#D4A843', margin: '7px 0 0', fontWeight: 600, textShadow: '0 0 22px rgba(212,168,67,0.55)' }}>
+              {MFR_SLIDES[active]?.sub}
+            </p>
+          </div>
         </div>
-      ))}
-    </div>
+
+        <div className="hero-dots" style={{ position: 'absolute', bottom: 14, left: 'clamp(24px,6vw,80px)', zIndex: 6, display: 'flex', gap: 7 }}>
+          {MFR_SLIDES.map((_, i) => (
+            <button key={i} onClick={() => advance(i)} aria-label={`اسلاید ${i + 1}`} style={{ width: i === active ? 24 : 7, height: 7, borderRadius: 4, border: 'none', cursor: 'pointer', padding: 0, background: i === active ? '#C7A66A' : 'rgba(255,255,255,0.32)', transition: 'all 0.4s cubic-bezier(0.22,1,0.36,1)' }} />
+          ))}
+        </div>
+      </section>
+    </>
   )
 }
+
 
 const CATEGORY_OPTIONS = [
   { value: 'همه',        label: 'همه تخصص‌ها' },
@@ -474,55 +517,8 @@ export default function ManufacturersPage() {
 
       <div className="lq-stage" style={{ minHeight: '100vh', direction: 'rtl', fontFamily: 'Vazirmatn,Tahoma,sans-serif', color: TEXT }}>
 
-        {/* ─────── HERO — coaches-style animated (light) ─────── */}
-        <section style={{ position: 'relative', minHeight: 'clamp(150px,20vw,210px)', overflow: 'hidden', display: 'flex', alignItems: 'center' }}>
-          <MfrPosterBg />
-
-          <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none' }}>
-            <div style={{ position: 'absolute', right: '-8%', top: '6%', width: 300, height: 300, borderRadius: '50%', background: 'radial-gradient(circle, rgba(199,166,106,0.38) 0%, rgba(199,166,106,0.12) 45%, transparent 70%)', filter: 'blur(58px)', animation: 'blob1 15s ease-in-out infinite' }} />
-            <div style={{ position: 'absolute', left: '-6%', top: '18%', width: 250, height: 250, borderRadius: '50%', background: 'radial-gradient(circle, rgba(124,58,237,0.20) 0%, rgba(124,58,237,0.06) 50%, transparent 72%)', filter: 'blur(54px)', animation: 'blob2 19s ease-in-out infinite' }} />
-            <div style={{ position: 'absolute', left: '38%', top: '48%', width: 150, height: 150, borderRadius: '50%', background: 'radial-gradient(circle, rgba(199,166,106,0.22) 0%, transparent 68%)', filter: 'blur(42px)', animation: 'blob3 12s ease-in-out infinite' }} />
-            <div style={{ position: 'absolute', left: '4%', bottom: '-6%', width: 160, height: 120, borderRadius: '50%', background: 'radial-gradient(circle, rgba(37,99,235,0.13) 0%, transparent 70%)', filter: 'blur(46px)' }} />
-          </div>
-
-          {([
-            { left: '3%',  size: 224, rot: 0,   delay: '0s'  },
-            { left: '25%', size: 198, rot: 140, delay: '6s'  },
-            { left: '45%', size: 168, rot: 55,  delay: '12s' },
-          ] as { left: string; size: number; rot: number; delay: string }[]).map((r, i) => (
-            <svg key={i} style={{ position: 'absolute', left: r.left, top: '50%', width: r.size, height: r.size * 0.93, transform: `translateY(-50%) rotate(${r.rot}deg)`, pointerEvents: 'none', animation: `rackCycle 18s ${r.delay} ease-in-out infinite`, transformOrigin: 'center' }} viewBox="0 0 760 560">
-              {RACK.map(([cx, cy], j) => <circle key={j} cx={cx} cy={cy} r={44} fill="none" stroke={RACK_C[j]} strokeWidth="1.5" />)}
-              <line x1="0" y1="480" x2="700" y2="10" stroke={GOLD} strokeWidth="1" strokeDasharray="14 7" opacity="0.55" />
-            </svg>
-          ))}
-
-          <div style={{ position: 'absolute', top: '32%', left: 0, width: '50%', height: '1.5px', background: 'linear-gradient(to right,transparent,rgba(154,110,56,0.42),transparent)', transform: 'rotate(-5deg)', animation: 'streakA 12s 1s ease-in-out infinite', pointerEvents: 'none' }} />
-          <div style={{ position: 'absolute', top: '56%', left: 0, width: '40%', height: '1px', background: 'linear-gradient(to right,transparent,rgba(154,110,56,0.28),transparent)', transform: 'rotate(-3deg)', animation: 'streakB 16s 5s ease-in-out infinite', pointerEvents: 'none' }} />
-
-          <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 60, background: `linear-gradient(to top, ${BG}, transparent)`, pointerEvents: 'none' }} />
-
-          <div style={{ position: 'relative', zIndex: 5, maxWidth: 1160, width: '100%', margin: '0 auto', padding: '0 clamp(20px,4vw,40px)' }}>
-            <div style={{ textAlign: 'left', marginBottom: 14 }}>
-              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.34)', color: GOLD_D, fontSize: 8.9, fontWeight: 800, borderRadius: 24, padding: '4px 11px', letterSpacing: '0.12em', animation: 'fadeUp .5s .05s ease both, softBlink 2.6s .7s ease-in-out infinite' }}>
-                MANUFACTURERS . BILLIARD HUB
-              </div>
-            </div>
-
-            <div style={{ overflow: 'hidden', paddingBottom: '0.14em' }}>
-              <h1 style={{ fontSize: 'clamp(30px,4.6vw,52px)', fontWeight: 900, lineHeight: 1.05, letterSpacing: '-0.045em', margin: 0, background: GOLD_G, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', animation: 'lineReveal .72s .1s cubic-bezier(.4,0,.2,1) both' }}>
-                تولیدکنندگان تجهیزات بیلیارد
-              </h1>
-            </div>
-
-            <div style={{ transformOrigin: 'right', animation: 'scaleInX .5s .36s ease both' }}>
-              <div style={{ width: 66, height: 2.5, marginTop: 9, borderRadius: 2, background: GOLD_G, boxShadow: '0 0 10px rgba(154,110,56,0.35)' }} />
-            </div>
-
-            <p style={{ fontSize: 'clamp(12.5px,1.4vw,15px)', color: TEXT_SEC, marginTop: 10, maxWidth: 460, animation: 'lineReveal .5s .46s ease both' }}>
-              کارخانه‌ها و کارگاه‌های تخصصی ساخت میز، چوب، پارچه و تجهیزات بیلیارد در ایران
-            </p>
-          </div>
-        </section>
+        {/* ─────── HERO — همان الگوی صفحه‌ی مربیان ─────── */}
+        <MfrHeroSlider />
 
         {/* ─────── BODY ─────── */}
         <div style={{ maxWidth: 1160, margin: '0 auto', padding: '0 clamp(16px,3vw,32px) 64px' }}>
