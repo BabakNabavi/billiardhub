@@ -17,8 +17,9 @@ import { useParams } from 'next/navigation'
 import { toFa, faNum, MONO, Icon, LQ, LQ_NEUTRAL, LQ_FELT_ON } from '../../sellers/[id]/shared'
 import { getManufacturerProfile, profileToManufacturer } from '../../../lib/manufacturer-store'
 import type { ManufacturerProfile } from '../../../lib/manufacturer-store'
-import { fetchProfileResult } from '../../../lib/profiles/client'
+import { fetchProfileResult, fetchProfileByOwner } from '../../../lib/profiles/client'
 import { useOwnerEdit } from '../../../lib/profiles/use-owner-edit'
+import type { SellerProfile } from '../../../lib/seller-store'
 import { compressImage } from '../../../lib/seller-store'
 import { ask } from '../../../lib/ui/dialogs'
 import ProfileHero from '../../../components/profile/ProfileHero'
@@ -150,6 +151,30 @@ export default function ManufacturerPage() {
      به داده‌ی همین کاربر آسیب زد. */
   const [prodErr, setProdErr] = useState('')
 
+  /* ── تعویضِ رسانه‌ی هدر ──
+     ⚠️ پیش‌تر فقط در پنل بود و تولیدکننده نتیجه را نمی‌دید. حالا
+     همان‌جا که عکس دیده می‌شود عوض هم می‌شود. عرض‌ها همان چیزی
+     است که پنل داشت: لوگو داخلِ دایره می‌نشیند پس کوچک، بنر تمامِ
+     عرضِ هدر را می‌گیرد پس بزرگ. */
+  const [mediaBusy, setMediaBusy] = useState(false)
+  const pickHeroImage = async (
+    file: File, key: 'logo' | 'bannerImage', maxW: number, quality: number,
+  ) => {
+    setMediaBusy(true)
+    try {
+      const url = await compressImage(file, maxW, quality)
+      const ok = await edit.apply(d => ({ ...d, [key]: url }))
+      /* ⚠️ apply به چند دلیل false می‌شود و فقط یکی‌اش «فایل بزرگ
+         است»؛ جمله‌ی قطعی درباره‌ی علت کاربر را دنبالِ نخودسیاه
+         می‌فرستد. */
+      if (!ok) notify('ذخیره‌ی عکس انجام نشد. دوباره تلاش کنید؛ اگر باز هم نشد، عکس کوچک‌تری بگذارید.', 'danger')
+    } catch {
+      notify('عکس خوانده نشد.', 'danger')
+    } finally {
+      setMediaBusy(false)
+    }
+  }
+
   const saveProduct = async (p: MfrProduct) => {
     setProdErr('')
     const ok = await edit.apply(d => {
@@ -273,6 +298,10 @@ export default function ManufacturerPage() {
   const [checked, setChecked] = useState(false)
   /* شبکه شکست، نه اینکه پروفایل نباشد */
   const [netFail, setNetFail] = useState(false)
+  /* ── نام مدیر ──
+     مشتق است و سرور از رکوردِ کاربرِ مالک می‌سازدش؛ داخلِ `data`
+     نمی‌نشیند تا کسی نتواند زیرِ نامِ دیگری معرفی شود. */
+  const [managerName, setManagerName] = useState('')
   const [reloadKey, setReloadKey] = useState(0)
   useEffect(() => {
     if (getManufacturer(mfrId)) { setChecked(true); return }
@@ -293,6 +322,7 @@ export default function ManufacturerPage() {
           const raw = { ...m.data, slug: m.slug, verified: m.verified } as ManufacturerProfile
           setRawP(raw); setOwnerId(m.ownerId)
           setMine(r.isMine === true)
+          setManagerName(r.managerName ?? '')
           setStoredMfr(profileToManufacturer(raw))
         } else if (r.state === 'error') {
           setNetFail(true)
@@ -345,6 +375,37 @@ export default function ManufacturerPage() {
     })()
     return () => { alive = false }
   }, [ownerId, adsKey])
+
+  /* ── فروشگاهِ همین مالک ──
+     ⚠️ `fetchProductsByOwner(..., { withoutStore: true })` عمدا
+     آگهی‌هایی را که به فروشگاه وصل‌اند کنار می‌گذارد: یک آگهی یک
+     جا. ولی آن قاعده تبِ آگهی‌ها را برای یک تولیدکننده‌ی
+     فروشگاه‌دار «هنوز آگهی‌ای ثبت نشده» می‌کرد — که دروغ است.
+     به‌جای پیامِ خالی، خودِ فروشگاه معرفی می‌شود. */
+  const [shop, setShop] = useState<{ slug: string; title: string; city: string; logo: string } | null>(null)
+  /* تا پاسخ نرسیده هیچ‌کدام از دو حالت رندر نمی‌شود: وگرنه «هنوز
+     آگهی‌ای ثبت نشده» یک لحظه می‌آید و بعد جایش را به کارتِ
+     فروشگاه می‌دهد — همان پیامی که قرار بود دیده نشود. */
+  const [shopChecked, setShopChecked] = useState(false)
+
+  useEffect(() => {
+    if (!ownerId) { setShop(null); setShopChecked(false); return }
+    let alive = true
+    setShopChecked(false)
+    void (async () => {
+      const r = await fetchProfileByOwner<SellerProfile>('seller', ownerId)
+      if (!alive) return
+      const d = r?.data
+      setShop(r && d ? {
+        slug: r.slug,
+        title: d.title || 'فروشگاه',
+        city: d.city || '',
+        logo: d.logo || '',
+      } : null)
+      setShopChecked(true)
+    })()
+    return () => { alive = false }
+  }, [ownerId])
 
   /* ── چرا `MANUFACTURERS[0]!` حذف شد ──
      آن آرایه‌ی نمایشی پیش از رونمایی خالی شد، پس این فالبک از آن روز
@@ -509,6 +570,34 @@ export default function ManufacturerPage() {
         .mfr-p { margin: 0; font-size: 15px; line-height: 1.9; color: rgba(0,0,0,0.50); }
         .mfr-sub { display: block; margin-inline-start: 13px; font-size: 12.5px; color: rgba(0,0,0,0.40); }
         .mfr-none { margin: 0; padding: 26px 0; text-align: center; font-size: 13.5px; color: rgba(0,0,0,0.38); }
+
+        /* ── کارتِ فروشگاهِ همین مالک ──
+           جایگزینِ «هنوز آگهی‌ای ثبت نشده» وقتی آگهی‌ها به فروشگاه
+           وصل‌اند. در موبایل ستونی می‌شود تا دکمه زیرِ متن بیفتد. */
+        .mfr-shop { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+        .mfr-shop-logo {
+          flex-shrink: 0; width: 64px; height: 64px; border-radius: 16px;
+          object-fit: cover; border: 1px solid rgba(0,0,0,0.07); background: #F4F2EC;
+        }
+        .mfr-shop-logo--none {
+          display: grid; place-items: center; color: #8F6531;
+          background: rgba(199,166,106,0.14); border-color: rgba(199,166,106,0.28);
+        }
+        .mfr-shop-txt { display: flex; flex-direction: column; gap: 4px; min-width: 0; flex: 1; }
+        .mfr-shop-kicker { font-size: 12px; color: rgba(0,0,0,0.40); }
+        .mfr-shop-txt > h2 { margin: 0; font-size: 17px; font-weight: 800; color: #1C1C1A; }
+        .mfr-shop-city { font-size: 12px; color: rgba(0,0,0,0.42); }
+        .mfr-shop-go {
+          display: inline-flex; align-items: center; gap: 8px; flex-shrink: 0;
+          padding: 12px 16px; border-radius: 12px;
+          font-size: 13.5px; font-weight: 800; text-decoration: none;
+          color: #8F6531; background: rgba(199,166,106,0.12);
+          border: 1px solid rgba(199,166,106,0.34);
+          transition: transform .18s ease, background .18s ease;
+        }
+        .mfr-shop-go:hover { transform: translateY(-2px); background: rgba(199,166,106,0.2); }
+        .mfr-shop-go:focus-visible { outline: 2px solid #C7A66A; outline-offset: 2px; }
+        @media (max-width: 560px) { .mfr-shop-go { width: 100%; justify-content: center; } }
 
         /* دو حقیقتِ کوتاه که در نوارِ آمارِ هدر جا نشدند */
         .mfr-facts { list-style: none; margin: 16px 0 0; padding: 0;
@@ -694,8 +783,8 @@ export default function ManufacturerPage() {
         .mfr-pager { display: flex; justify-content: center; gap: 8px; margin-top: 28px; }
 
         @media (prefers-reduced-motion: reduce) {
-          .mfr-prod, .mfr-map, .mfr-soc a { transition: none; }
-          .mfr-prod:hover, .mfr-map:hover, .mfr-soc a:hover { transform: none; }
+          .mfr-prod, .mfr-map, .mfr-soc a, .mfr-shop-go { transition: none; }
+          .mfr-prod:hover, .mfr-map:hover, .mfr-soc a:hover, .mfr-shop-go:hover { transform: none; }
         }
       `}</style>
 
@@ -729,6 +818,13 @@ export default function ManufacturerPage() {
         /* گواهینامه‌ها در خودِ هدر هم دیده می‌شوند — به خواست مالک */
         certs={mfr.certificates.map(c => c.title).filter(Boolean)}
         onOpenPhoto={u => openImage(u, { title: mfr.name, alt: mfr.name })}
+        /* نام مدیر — همان چیزی که هدرِ باشگاه زیرِ نام می‌نویسد */
+        managerName={managerName}
+        /* ⚠️ فقط برای صاحبِ پروفایل. بازدیدکننده نباید دکمه‌ی
+           تعویضِ عکس ببیند. */
+        onPickPhoto={edit.isOwner ? f => pickHeroImage(f, 'logo', 600, 0.78) : undefined}
+        onPickCover={edit.isOwner ? f => pickHeroImage(f, 'bannerImage', 1600, 0.72) : undefined}
+        mediaBusy={mediaBusy}
         role="manufacturer"
         backHref="/manufacturers" backLabel="تولیدکنندگان"
         publicUrl={`billiardhub.net/manufacturers/${mfrId}`}
@@ -840,7 +936,7 @@ export default function ManufacturerPage() {
 
               {(mfr.address || mapQuery) && (
                 <section className="lqg lqg-hover mfr-card">
-                  <h2 className="mfr-h"><span className="mfr-bar" aria-hidden />موقعیت کارخانه</h2>
+                  <h2 className="mfr-h"><span className="mfr-bar" aria-hidden />موقعیت</h2>
                   {mfr.address && (
                     <p className="mfr-addr"><span className="mfr-pin" aria-hidden>{Icon.pin}</span>{mfr.address}</p>
                   )}
@@ -851,10 +947,20 @@ export default function ManufacturerPage() {
                       با جست‌وجوی متنی، گوگل نقطهٔ اشتباه را قاب می‌گیرد */}
                   {hasCoords && (
                     <div className="mfr-mapbox">
+                      {/* ⚠️ مختصات با Number داخلِ نشانی می‌رود نه
+                          رشته‌ی خامِ ذخیره‌شده؛ فیلدِ پروفایل رشته
+                          است و می‌تواند فاصله یا رقمِ فارسی داشته
+                          باشد.
+
+                          اگر maps.google.com بالا نیاید (مخاطبِ اصلی
+                          موبایلِ ایرانی است) این قاب خالی می‌ماند،
+                          ولی متنِ نشانی بالایش و دکمه‌ی «مسیریابی»
+                          زیرش همچنان هست — اطلاعات گم نمی‌شود. */}
                       <iframe
                         title="موقعیت کارگاه روی نقشه"
-                        src={`https://maps.google.com/maps?q=${mfr.latitude},${mfr.longitude}&z=15&output=embed`}
-                        loading="lazy" allowFullScreen referrerPolicy="no-referrer-when-downgrade" />
+                        src={`https://maps.google.com/maps?q=${Number(mfr.latitude)},${Number(mfr.longitude)}&z=15&output=embed`}
+                        loading="lazy" allow="fullscreen" allowFullScreen
+                        referrerPolicy="no-referrer-when-downgrade" />
                     </div>
                   )}
                   {/* ⚠️ وقتی مختصات ثبت شده، نقشه با همان باز می‌شود نه
@@ -864,7 +970,7 @@ export default function ManufacturerPage() {
                     <a className="mfr-map" target="_blank" rel="noopener noreferrer"
                       href={`https://maps.google.com/?q=${encodeURIComponent(mapQuery)}`}>
                       <span aria-hidden>{Icon.pin}</span>
-                      {hasCoords ? 'مسیریابی به کارگاه' : 'مشاهده روی نقشه'}
+                      {hasCoords ? 'مسیریابی' : 'مشاهده روی نقشه'}
                     </a>
                   )}
                 </section>
@@ -1095,10 +1201,30 @@ export default function ManufacturerPage() {
               title="آگهی‌های ما"
               searchPlaceholder="جستجو در آگهی‌های این تولیدکننده…"
             />
-            {!adsLoading && !adsError && ads.length === 0 && (
-              <section className="lqg mfr-card">
-                <p className="mfr-none">هنوز آگهی‌ای ثبت نشده است.</p>
-              </section>
+            {!adsLoading && !adsError && ads.length === 0 && shopChecked && (
+              shop ? (
+                /* ⚠️ آگهی‌های این شخص به فروشگاهش وصل‌اند و همان‌جا
+                   دیده می‌شوند. تکرارشان این‌جا یعنی یک آگهی در دو
+                   جا؛ پس به‌جای تکرار، راه را نشان می‌دهیم. */
+                <section className="lqg mfr-card mfr-shop">
+                  {shop.logo
+                    ? <img className="mfr-shop-logo" src={shop.logo} alt="" loading="lazy" decoding="async" />
+                    : <span className="mfr-shop-logo mfr-shop-logo--none" aria-hidden>{Icon.storefront}</span>}
+                  <div className="mfr-shop-txt">
+                    <span className="mfr-shop-kicker">آگهی‌های این تولیدکننده در فروشگاهش ثبت شده‌اند</span>
+                    <h2>{shop.title}</h2>
+                    {shop.city && <span className="mfr-shop-city">{shop.city}</span>}
+                  </div>
+                  <Link className="mfr-shop-go" href={`/sellers/${shop.slug}`}>
+                    رفتن به فروشگاه
+                    <ChevronLeft size={15} aria-hidden />
+                  </Link>
+                </section>
+              ) : (
+                <section className="lqg mfr-card">
+                  <p className="mfr-none">هنوز آگهی‌ای ثبت نشده است.</p>
+                </section>
+              )
             )}
           </div>
         )}
