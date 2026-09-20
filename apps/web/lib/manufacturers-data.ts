@@ -49,6 +49,8 @@ export interface MockManufacturer {
   phone2: string
   mobile: string
   bannerImage: string
+  /** عکسِ پروفایل (لوگو) — تهی یعنی نشانِ نقش */
+  logo: string
   description: string        // کوتاه — کارت + باکس «درباره ما»
 
   /* ── فقط صفحه‌ی تولیدکننده ── */
