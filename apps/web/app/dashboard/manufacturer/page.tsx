@@ -15,6 +15,7 @@ import ProfileSlugField from '../../../components/ProfileSlugField'
 import ClubPicker from '../../../components/ClubPicker'
 import { compressImage } from '../../../lib/seller-store'
 import { apiFetch } from '../../../lib/http'
+import { alertBox } from '../../../lib/ui/dialogs'
 import {
   emptyManufacturerProfile, findManufacturerByOwner, newManufacturerSlug,
   saveManufacturerProfile, type ManufacturerProfile,
@@ -53,7 +54,6 @@ export default function ManufacturerDashboard() {
   const licRef = useRef<HTMLInputElement>(null)
   const [cert, setCert] = useState({ title: '', issuer: '', year: '', image: '' })
   const certImgRef = useRef<HTMLInputElement>(null)
-  const [certErr, setCertErr] = useState('')
   const [postalBusy, setPostalBusy] = useState(false)
   const [postalMsg, setPostalMsg] = useState<{ ok: boolean; text: string } | null>(null)
   const [geoBusy, setGeoBusy] = useState(false)
@@ -104,6 +104,35 @@ export default function ManufacturerDashboard() {
     return () => { alive = false }
   }, [_hydrated, user?.id, reloadKey])
 
+  /* ── پیامِ مسدودکننده ──
+     ⚠️ مالک گزارش داد که خطای کنارِ فیلد را نمی‌بیند و باید کلِ
+     صفحه را بالا و پایین کند تا بفهمد کجا اشتباه شده. هر خطایی که
+     جلوی ذخیره را می‌گیرد از این‌جا می‌رود: پنجره وسطِ صفحه، تا
+     بسته نشود نمی‌رود. متنِ اینلاین هم می‌ماند ولی نقشش دیگر
+     «اعلام» نیست، «یادآوری» است. */
+  const fail = (title: string, body?: string) => alertBox(title, { body, tone: 'danger' })
+
+  /* نامِ فیلد ⟵ شناسه‌اش روی صفحه */
+  const FIELD_ID: Record<string, string> = {
+    'نام کارخانه / برند': 'mfr-name',
+    'شهر': 'mfr-city',
+    'توضیح کوتاه': 'mfr-desc',
+    'شماره تماس': 'mfr-phone',
+  }
+
+  const focusField = (label: string) => {
+    const el = document.getElementById(FIELD_ID[label] ?? '')
+    if (!el) return
+    el.scrollIntoView({ block: 'center', behavior: 'smooth' })
+    /* ⚠️ «شهر» یک کامپوننتِ مرکب است نه input، و ظرفش فوکوس‌پذیر
+       نیست. پس اول اسکرول — که همیشه کار می‌کند — و بعد فوکوس، فقط
+       اگر چیزی برای فوکوس‌کردن باشد. */
+    const target = el.matches('input, select, textarea')
+      ? el
+      : el.querySelector<HTMLElement>('input, select, textarea')
+    target?.focus({ preventScroll: true })
+  }
+
   const set = <K extends keyof ManufacturerProfile>(k: K, v: ManufacturerProfile[K]) => {
     setForm(f => ({ ...f, [k]: v })); setSaved(false); setErr('')
   }
@@ -127,7 +156,7 @@ export default function ManufacturerDashboard() {
             r.readAsDataURL(f)
           })
       set('licenseFile', { name: f.name, url })
-    } catch { setErr('فایل خوانده نشد.') }
+    } catch { void fail('فایل خوانده نشد', 'فرمتِ دیگری را امتحان کنید (JPG، PNG یا PDF).') }
     finally { setBusy(false); e.target.value = '' }
   }
 
@@ -135,20 +164,20 @@ export default function ManufacturerDashboard() {
      ⚠️ تصویر اجباری است: «ISO 9001» تایپ‌شده بدون مدرک، فقط یک
      ادعاست و روی صفحه‌ی عمومی مثل واقعیت دیده می‌شود. */
   const addCert = () => {
-    if (!cert.title.trim()) { setCertErr('عنوان گواهینامه لازم است.'); return }
-    if (!cert.image) { setCertErr('تصویر گواهینامه لازم است — بدون مدرک، ادعا می‌ماند.'); return }
+    if (!cert.title.trim()) { void fail('عنوان گواهینامه لازم است'); return }
+    if (!cert.image) { void fail('تصویر گواهینامه لازم است', 'برای این گواهینامه یک عکس یا اسکن از خودِ مدرک آپلود کنید.'); return }
     set('certificates', [...form.certificates, {
       title: cert.title.trim(), issuer: cert.issuer.trim(),
       year: cert.year.trim(), image: cert.image,
     }])
-    setCert({ title: '', issuer: '', year: '', image: '' }); setCertErr('')
+    setCert({ title: '', issuer: '', year: '', image: '' })
   }
 
   const pickCertImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0]; if (!f) return
     setBusy(true)
-    try { const url = await compressImage(f, 1400, 0.74); setCert(c => ({ ...c, image: url })); setCertErr('') }
-    catch { setCertErr('عکس خوانده نشد.') }
+    try { const url = await compressImage(f, 1400, 0.74); setCert(c => ({ ...c, image: url })) }
+    catch { void fail('عکس خوانده نشد', 'فرمتِ دیگری را امتحان کنید (JPG یا PNG).') }
     finally { setBusy(false); e.target.value = '' }
   }
 
@@ -176,10 +205,13 @@ export default function ManufacturerDashboard() {
          کاربر متنِ خامِ ارائه‌دهنده را می‌دید. */
       if (j?.found === false) {
         setPostalMsg({ ok: false, text: 'برای این کد پستی نشانی پیدا نشد' })
+        void fail('نشانی پیدا نشد', 'برای این کد پستی نشانی‌ای ثبت نشده. عددش را دوباره چک کنید.')
         return
       }
       if (!r.ok) {
-        setPostalMsg({ ok: false, text: String(j?.message ?? 'استعلام انجام نشد') })
+        const m = String(j?.message ?? 'استعلام انجام نشد')
+        setPostalMsg({ ok: false, text: m })
+        void fail('استعلام انجام نشد', m)
         return
       }
       /* ⚠️ گاردِ پاسخِ کهنه: استعلام ثانیه‌ها طول می‌کشد و کاربر در
@@ -208,6 +240,7 @@ export default function ManufacturerDashboard() {
       setPostalMsg({ ok: true, text: 'نشانی از روی کد پستی ثبت شد' })
     } catch {
       setPostalMsg({ ok: false, text: 'ارتباط با سرور برقرار نشد' })
+      void fail('استعلام انجام نشد', 'ارتباط با سرور برقرار نشد. اینترنت را چک کنید و دوباره بزنید.')
     } finally {
       setPostalBusy(false)
     }
@@ -215,7 +248,10 @@ export default function ManufacturerDashboard() {
 
   /* موقعیت دقیق — همان چیزی که فرم ثبت باشگاه می‌گیرد */
   const getLocation = () => {
-    if (!navigator.geolocation) { setGeoErr('مرورگر موقعیت مکانی را پشتیبانی نمی‌کند'); return }
+    if (!navigator.geolocation) {
+      void fail('موقعیت مکانی در دسترس نیست', 'مرورگرِ شما موقعیت مکانی را پشتیبانی نمی‌کند.')
+      return
+    }
     setGeoBusy(true); setGeoErr('')
     navigator.geolocation.getCurrentPosition(
       pos => {
@@ -227,7 +263,11 @@ export default function ManufacturerDashboard() {
         setSaved(false)
         setGeoBusy(false)
       },
-      () => { setGeoErr('دسترسی به موقعیت مکانی رد شد'); setGeoBusy(false) },
+      () => {
+        setGeoErr('دسترسی به موقعیت مکانی رد شد')
+        void fail('دسترسی به موقعیت رد شد', 'در تنظیماتِ مرورگر اجازه‌ی دسترسی به موقعیت مکانی را برای این سایت روشن کنید.')
+        setGeoBusy(false)
+      },
       { enableHighAccuracy: true, timeout: 15000 },
     )
   }
@@ -241,8 +281,8 @@ export default function ManufacturerDashboard() {
        دور ریخته می‌شد و روی سرور certificates خالی می‌ماند. */
     let certificates = form.certificates
     if (cert.title.trim() || cert.image || cert.issuer.trim() || cert.year.trim()) {
-      if (!cert.title.trim()) { setCertErr('عنوان گواهینامه لازم است.'); return }
-      if (!cert.image) { setCertErr('تصویر گواهینامه لازم است — بدون مدرک، ادعا می‌ماند.'); return }
+      if (!cert.title.trim()) { void fail('عنوان گواهینامه لازم است', 'گواهینامه‌ای که پر کرده‌اید عنوان ندارد. عنوانش را بنویسید یا فیلدها را خالی کنید.'); return }
+      if (!cert.image) { void fail('تصویر گواهینامه لازم است', 'گواهینامه‌ای که پر کرده‌اید عکس ندارد. عکس یا اسکنِ خودِ مدرک را آپلود کنید.'); return }
       certificates = [...certificates, {
         title: cert.title.trim(), issuer: cert.issuer.trim(),
         year: cert.year.trim(), image: cert.image,
@@ -252,7 +292,7 @@ export default function ManufacturerDashboard() {
          هر خطای شبکه می‌توانند برگردند، و آن‌وقت زیرفرمِ پاک‌شده
          یعنی گواهینامه هم از رابط رفته هم هنوز در form نیست. */
       setForm(f => ({ ...f, certificates }))
-      setCert({ title: '', issuer: '', year: '', image: '' }); setCertErr('')
+      setCert({ title: '', issuer: '', year: '', image: '' })
     }
 
     /* همان تله برای تخصصِ تایپ‌شده */
@@ -264,15 +304,32 @@ export default function ManufacturerDashboard() {
       setSpecInput('')
     }
 
-    if (!form.name.trim())        { setErr('نام کارخانه/برند لازم است.'); return }
-    if (!form.city)               { setErr('شهر را انتخاب کنید.'); return }
-    if (!form.description.trim()) { setErr('توضیح کوتاه لازم است.'); return }
-    if (!form.phone.trim())       { setErr('شماره تماس لازم است.'); return }
+    /* ⚠️ همه‌ی کم‌وکسری‌ها یک‌جا، نه یکی‌یکی: چهار بار «ذخیره زدن و
+       پنجره دیدن» بدترین شکلِ همین مشکل است. */
+    const missing = [
+      !form.name.trim() && 'نام کارخانه / برند',
+      !form.city && 'شهر',
+      !form.description.trim() && 'توضیح کوتاه',
+      !form.phone.trim() && 'شماره تماس',
+    ].filter((x): x is string => typeof x === 'string')
+    if (missing.length) {
+      setErr(`${missing.join('، ')} لازم است.`)
+      /* پس از بسته‌شدنِ پنجره، کاربر سرِ همان فیلد می‌نشیند */
+      void fail(
+        missing.length === 1 ? `${missing[0]} را پر کنید` : 'چند فیلدِ لازم خالی مانده',
+        missing.length === 1 ? 'بدونِ این فیلد پروفایل ذخیره نمی‌شود.' : `این‌ها هنوز خالی‌اند: ${missing.join('، ')}`,
+      ).then(() => focusField(missing[0]!))
+      return
+    }
 
     setBusy(true)
     void (async () => {
       /* منبع حقیقت سرور است؛ localStorage فقط کش همین مرورگر می‌ماند */
-      if (savedSlug === null) { setErr('نشانی اختصاصی هنوز خوانده نشده — چند لحظه صبر کنید یا صفحه را تازه کنید'); setBusy(false); return }
+      if (savedSlug === null) {
+        setErr('نشانی اختصاصی هنوز خوانده نشده')
+        void fail('هنوز آماده نیست', 'نشانی اختصاصی شما از سرور خوانده نشده. چند لحظه صبر کنید یا صفحه را تازه کنید.')
+        setBusy(false); return
+      }
 
       /* ── چرا محصولات از سرور خوانده می‌شوند، نه از فرم ──
          ⚠️ `POST` کلِ `data` را جایگزین می‌کند و این فرم دیگر محصول
@@ -282,7 +339,8 @@ export default function ManufacturerDashboard() {
          همان باگی که یک‌بار محصول‌ها را از بین برد. */
       const fresh = await fetchMyProfileResult<ManufacturerProfile>('manufacturer')
       if (fresh.state === 'error') {
-        setErr('ارتباط با سرور برقرار نشد؛ برای اینکه اطلاعات قبلی پاک نشود ذخیره انجام نشد.')
+        setErr('ارتباط با سرور برقرار نشد؛ ذخیره انجام نشد.')
+        void fail('ذخیره انجام نشد', 'ارتباط با سرور برقرار نشد. برای اینکه اطلاعات قبلی‌تان پاک نشود، چیزی ذخیره نشد — اینترنت را چک کنید و دوباره بزنید.')
         setBusy(false); return
       }
       const serverData = fresh.state === 'found' ? fresh.profile.data : null
@@ -307,7 +365,11 @@ export default function ManufacturerDashboard() {
 
       const res = await saveProfileRemote('manufacturer', next.slug, next as unknown as Record<string, unknown>,
         { number: next.licenseNumber, url: next.licenseFile?.url ?? '' })
-      if (!res.ok) { setErr(res.message ?? 'ذخیره روی سرور انجام نشد'); setBusy(false); return }
+      if (!res.ok) {
+        setErr(res.message ?? 'ذخیره روی سرور انجام نشد')
+        void fail('ذخیره روی سرور انجام نشد', res.message ?? 'دوباره تلاش کنید. اگر عکس‌ها بزرگ‌اند، کوچک‌ترشان کنید.')
+        setBusy(false); return
+      }
       /* عکس‌ها روی سرور به نشانی Storage تبدیل شده‌اند */
       if (res.profile?.slug) setSavedSlug(res.profile.slug)
     /* از این لحظه نشانی منتشر شده و قفل می‌شود: هر تغییر بعدی
@@ -389,8 +451,8 @@ export default function ManufacturerDashboard() {
                 نتیجه را می‌بیند، نه در فرمی که پیش‌نمایش ندارد. */}
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
-                <label className={LABEL}>نام کارخانه / برند *</label>
-                <input className={INPUT} value={form.name} onChange={e => set('name', e.target.value)} placeholder="مثال: صنایع بیلیارد آریا" />
+                <label className={LABEL} htmlFor="mfr-name">نام کارخانه / برند *</label>
+                <input id="mfr-name" className={INPUT} value={form.name} onChange={e => set('name', e.target.value)} placeholder="مثال: صنایع بیلیارد آریا" />
               </div>
               <div>
                 <label className={LABEL}>سال تأسیس</label>
@@ -404,7 +466,7 @@ export default function ManufacturerDashboard() {
                   suggestFrom={form.name}
                 />
               </div>
-<div className="sm:col-span-2">
+<div className="sm:col-span-2" id="mfr-city">
                 <ProvinceCitySelect
                   value={{ province: form.province, city: form.city }}
                   onChange={v => { set('province', v.province); set('city', v.city) }}
@@ -433,8 +495,8 @@ export default function ManufacturerDashboard() {
                 )}
               </div>
               <div className="sm:col-span-2">
-                <label className={LABEL}>توضیح کوتاه *</label>
-                <input className={INPUT} value={form.description} onChange={e => set('description', e.target.value)} placeholder="یک جمله درباره‌ی کارخانه و محصولات…" />
+                <label className={LABEL} htmlFor="mfr-desc">توضیح کوتاه *</label>
+                <input id="mfr-desc" className={INPUT} value={form.description} onChange={e => set('description', e.target.value)} placeholder="یک جمله درباره‌ی کارخانه و محصولات…" />
               </div>
               <div className="sm:col-span-2">
                 <label className={LABEL}>شعار / تگ‌لاین</label>
@@ -508,11 +570,10 @@ export default function ManufacturerDashboard() {
                 <Plus size={14} /> افزودن
               </button>
             </div>
-            {/* ⚠️ خطا همین‌جا، نه ته صفحه: پیش‌تر `setErr` سراسری بود و
-                متنش کنارِ دکمه‌ی «ذخیره» — ده‌ها پیکسل پایین‌تر — ظاهر
-                می‌شد. کاربر «افزودن» را می‌زد، هیچ اتفاقی نمی‌دید و
-                فکر می‌کرد گواهینامه ثبت شده. */}
-            {certErr && <p role="alert" className="mt-2 text-[12.5px] font-bold text-[#B23B2E]">{certErr}</p>}
+            {/* ⚠️ این‌جا دیگر متنِ خطا نیست: پیام مسدودکننده در پنجره‌ی
+                وسطِ صفحه می‌آید (`fail()`). متنِ کوچکِ کنارِ دکمه — چه
+                ته صفحه چه همین‌جا — همان چیزی بود که مالک گفت نمی‌بیند
+                و مجبور است کلِ صفحه را بگردد. */}
           </section>
 
           {/* ═══ پروانه‌ی تولید / جواز کسب ═══ */}
@@ -551,8 +612,8 @@ export default function ManufacturerDashboard() {
             <h2 className="mb-4 text-[14.5px] font-bold">راه‌های ارتباطی</h2>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
-                <label className={LABEL}>شماره تماس *</label>
-                <input className={`${INPUT} text-end`} dir="ltr" value={form.phone} onChange={e => set('phone', e.target.value)} placeholder="۰۲۱ - xxxxxxxx" />
+                <label className={LABEL} htmlFor="mfr-phone">شماره تماس *</label>
+                <input id="mfr-phone" className={`${INPUT} text-end`} dir="ltr" value={form.phone} onChange={e => set('phone', e.target.value)} placeholder="۰۲۱ - xxxxxxxx" />
               </div>
               {/* خط دوم — کارگاه معمولا یکی برای فروش دارد و یکی برای دفتر */}
               <div>

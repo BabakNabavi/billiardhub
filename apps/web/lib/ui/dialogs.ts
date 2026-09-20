@@ -29,6 +29,19 @@ export interface AskOptions {
   tone?: Tone
 }
 
+/* پنجره‌ی اطلاع‌رسانی — یک دکمه، بدونِ انتخاب.
+   ⚠️ جدا از `ask` است و نه یک حالتِ آن: پنجره‌ی پرسش دو دکمه دارد
+   («انصراف»/«تأیید») و برای پیامی که چیزی برای تصمیم‌گرفتن ندارد،
+   دکمه‌ی انصراف یعنی «اگر انصراف بدهم چه می‌شود؟» — سوالی که پاسخ
+   ندارد. */
+export interface AlertState {
+  title: string
+  body?: string
+  tone: Tone
+  okLabel: string
+  resolve: () => void
+}
+
 export interface DialogState {
   ask: (AskOptions & { title: string; resolve: (ok: boolean) => void }) | null
   /* پرسش متنی — جایگزین `window.prompt`. `null` یعنی انصراف. */
@@ -40,10 +53,11 @@ export interface DialogState {
     allowEmpty?: boolean; initial?: string; tone?: 'gold' | 'danger'
     resolve: (v: string | null) => void
   } | null
+  alert: AlertState | null
   toast: { msg: string; tone: Tone; id: number } | null
 }
 
-let state: DialogState = { ask: null, text: null, toast: null }
+let state: DialogState = { ask: null, text: null, alert: null, toast: null }
 const listeners = new Set<(s: DialogState) => void>()
 
 function emit(next: Partial<DialogState>) {
@@ -62,6 +76,10 @@ export function ask(title: string, opts: AskOptions = {}): Promise<boolean> {
   /* روی سرور پنجره‌ای در کار نیست؛ «نه» امن‌ترین پاسخ است چون هیچ
      کار برگشت‌ناپذیری بی‌اجازه انجام نمی‌شود. */
   if (typeof window === 'undefined') return Promise.resolve(false)
+  /* ⚠️ پرسشِ باز پیش از جایگزینی تعیین‌تکلیف می‌شود، وگرنه
+     `await ask()`ِ فراخوانِ قبلی تا ابد معلق می‌ماند. «نه» همان
+     پاسخِ امنی است که این تابع روی سرور هم می‌دهد. */
+  state.ask?.resolve(false)
   return new Promise<boolean>(resolve => {
     emit({
       ask: {
@@ -80,6 +98,55 @@ export function resolveAsk(ok: boolean) {
   const cur = state.ask
   emit({ ask: null })
   cur?.resolve(ok)
+}
+
+/* ── پیامِ مسدودکننده ──
+   ⚠️ چرا پنجره و نه `notify`: پیامِ کوتاه پایینِ صفحه می‌نشیند و
+   خودش می‌رود؛ برای «چرا ذخیره نشد» کافی نیست. مالک گزارش داد که
+   خطای کنارِ فیلد را نمی‌بیند و مجبور است کلِ صفحه را بالا و پایین
+   کند تا بفهمد کجا اشتباه شده. این پنجره وسطِ صفحه می‌آید و تا
+   بسته نشود نمی‌رود.
+
+   Promise برمی‌گرداند تا فراخوان بتواند منتظرِ بسته‌شدنش بماند —
+   مثلا پیش از فوکوس‌دادن به فیلدِ ناقص. */
+/* ── صف ──
+   ⚠️ بدونِ صف، پیامِ دوم پیامِ اول را بی‌صدا جایگزین می‌کرد: کاربر
+   اولی را هرگز نمی‌دید و Promiseی که برایش ساخته شده بود تا ابد
+   معلق می‌ماند. روی همین پنل سه منبعِ ناهمگام هست (استعلامِ کد
+   پستی، موقعیت مکانی، و خودِ ذخیره) که می‌توانند روی هم بیفتند —
+   و «گم‌شدنِ پیامِ خطا» دقیقا همان چیزی است که این پنجره برای
+   رفعش ساخته شد. */
+const alertQueue: AlertState[] = []
+
+export function alertBox(
+  title: string,
+  opts: { body?: string; tone?: Tone; okLabel?: string } = {},
+): Promise<void> {
+  if (typeof window === 'undefined') return Promise.resolve()
+  return new Promise<void>(resolve => {
+    const next: AlertState = {
+      title,
+      body: opts.body,
+      tone: opts.tone ?? 'danger',
+      okLabel: opts.okLabel ?? 'باشه',
+      resolve,
+    }
+    /* پیامِ تکراری دو بار نشان داده نمی‌شود — دو مسیر می‌توانند به
+       یک علت برسند. */
+    const same = (a: AlertState) => a.title === next.title && a.body === next.body
+    if (state.alert && same(state.alert)) { resolve(); return }
+    if (alertQueue.some(same)) { resolve(); return }
+    if (state.alert) { alertQueue.push(next); return }
+    emit({ alert: next })
+  })
+}
+
+/** بسته‌شدن — فقط `DialogHost` صدایش می‌زند */
+export function resolveAlert() {
+  const cur = state.alert
+  const next = alertQueue.shift() ?? null
+  emit({ alert: next })
+  cur?.resolve()
 }
 
 let toastId = 0
@@ -104,6 +171,8 @@ export function askText(
   } = {},
 ): Promise<string | null> {
   if (typeof window === 'undefined') return Promise.resolve(null)
+  /* همان دلیلِ `ask`؛ `null` یعنی «انصراف»، پس چیزی ثبت نمی‌شود. */
+  state.text?.resolve(null)
   return new Promise<string | null>(resolve => {
     emit({
       text: {
