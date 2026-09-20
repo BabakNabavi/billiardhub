@@ -24,15 +24,28 @@ export interface ManufacturerProfile {
   exportCountries: string
   totalProduced: string
   employees: string
-  certificates: { title: string; issuer: string; year: string }[]
+  /* ⚠️ `image` اختیاری است تا ردیف‌های موجود بدون مهاجرت کار کنند،
+     ولی فرم از این پس بدونِ تصویر گواهینامه را نمی‌پذیرد: ادعای
+     استاندارد بدون مدرک، ادعاست. */
+  certificates: { title: string; issuer: string; year: string; image?: string }[]
   /* پروانه‌ی تولید / جواز کسب — شماره و فایل */
   licenseNumber: string
   licenseFile: { name: string; url: string } | null
   phone: string
+  /* شماره‌ی دوم — کارگاه معمولا یک خط برای فروش دارد و یکی برای دفتر */
+  phone2?: string
+  /* موبایل، جدا از واتساپ: شماره‌ی واتساپ لزوما شماره‌ی تماس نیست */
+  mobile?: string
   whatsapp: string
   instagram: string
   website: string
   address: string
+  /* ── نشانی دقیق ──
+     همان چیزی که فرم باشگاه دارد: کد پستی برای نشانی رسمی، و
+     مختصات برای «مسیریابی» واقعی به‌جای جست‌وجوی متنِ آدرس. */
+  postalCode?: string
+  latitude?: string
+  longitude?: string
   hours: string
   bannerImage: string
   /* ── گالری تصاویر ──
@@ -62,8 +75,9 @@ export function emptyManufacturerProfile(slug: string, ownerId = '', ownerPhone 
     name: '', city: '', province: '', sinceYear: '', specialties: [],
     description: '', tagline: '', about: '', productionCapability: '',
     exportCountries: '', totalProduced: '', employees: '', certificates: [],
-    licenseNumber: '', licenseFile: null, phone: '', whatsapp: '',
-    instagram: '', website: '', address: '', hours: '', bannerImage: '',
+    licenseNumber: '', licenseFile: null, phone: '', phone2: '', mobile: '',
+    whatsapp: '', instagram: '', website: '', address: '',
+    postalCode: '', latitude: '', longitude: '', hours: '', bannerImage: '',
     products: [],
     status: 'approved', updatedAt: '',
   }
@@ -173,9 +187,14 @@ export function profileToManufacturer(p: ManufacturerProfile): MockManufacturer 
     exportCountries: p.exportCountries || '—',
     totalProduced: p.totalProduced || '—',
     productionCapability: p.productionCapability || '—',
+    phone2: p.phone2 ?? '',
+    mobile: p.mobile ?? '',
     whatsapp: p.whatsapp || String(p.phone ?? '').replace(/^0/, '98'),
     instagram: p.instagram ?? '',
     address: p.address ?? '',
+    postalCode: p.postalCode ?? '',
+    latitude: p.latitude ?? '',
+    longitude: p.longitude ?? '',
     hours: p.hours || '—',
     website: p.website ?? '',
     products: arr(p.products),

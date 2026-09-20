@@ -10,9 +10,21 @@ export interface MfrProduct {
   category: string          // برچسب آزاد دسته (میز اسنوکر، چوب، پارچه، …)
   description: string
   specs: string[]
+  /** عکس نخست — ردیف‌های قدیمی فقط همین را دارند */
   image: string
+  /** تا ۱۰ عکس. اختیاری تا ردیف‌های موجود بدون مهاجرت کار کنند. */
+  images?: string[]
   badge?: string
 }
+
+/** همه‌ی عکس‌های یک محصول، از هر دو شکل — منبع واحد برای صفحه‌ها */
+export function productImages(p: Pick<MfrProduct, 'image' | 'images'>): string[] {
+  const many = Array.isArray(p.images) ? p.images.filter(Boolean) : []
+  if (many.length) return many.slice(0, MAX_PRODUCT_IMAGES)
+  return p.image ? [p.image] : []
+}
+
+export const MAX_PRODUCT_IMAGES = 10
 
 export interface MockManufacturer {
   /* گالری تصاویر — اختیاری تا نمونه‌های قدیمی نشکنند */
@@ -32,6 +44,10 @@ export interface MockManufacturer {
   specialties: string[]     // روی کارت زیر لوکیشن با برچسب «تخصص:»
   responseTime: string
   phone: string
+  /* شماره‌ی دوم و موبایل — کارگاه معمولا بیش از یک خط دارد، و
+     شماره‌ی واتساپ لزوما شماره‌ی تماس نیست. */
+  phone2: string
+  mobile: string
   bannerImage: string
   description: string        // کوتاه — کارت + باکس «درباره ما»
 
@@ -45,10 +61,14 @@ export interface MockManufacturer {
   whatsapp: string
   instagram: string
   address: string
+  /* نشانی دقیق — همان چیزی که فرم باشگاه می‌گیرد */
+  postalCode: string
+  latitude: string
+  longitude: string
   hours: string
   website: string
   products: MfrProduct[]
-  certificates: { title: string; issuer: string; year: string }[]
+  certificates: { title: string; issuer: string; year: string; image?: string }[]
 }
 
 /* ⚠️ عمدا خالی — پیش از رونمایی پاک شد.
