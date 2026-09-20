@@ -1242,3 +1242,55 @@ main.ch-col > section { max-width: 760px; }
   font-size: clamp(13px, 2vw, 15px); font-weight: 500;
   color: rgb(255 255 255 / .55);
 }
+
+/* ── منوی دکمه‌ی دوربین ──
+   ⚠️ پرتال روی `body` است، پس این قاعده‌ها نمی‌توانند فرزندِ
+   `.ch-hero` فرض شوند — رنگ‌ها این‌جا مطلق‌اند نه ارثی. */
+.ch-cam-menu {
+  position: fixed; z-index: 4900;
+  /* عرض محتوامحور است و خودِ کامپوننت پس از رندر اندازه‌اش را
+     می‌سنجد؛ این سقف فقط نمی‌گذارد روی صفحه‌ی باریک از لبه بزند. */
+  min-inline-size: 190px;
+  max-inline-size: calc(100vw - 16px);
+  padding: 6px;
+  border-radius: 14px;
+  background: #fff;
+  border: 1px solid #EAE5DA;
+  box-shadow: 0 1px 2px rgb(20 18 14 / .06), 0 16px 40px rgb(20 18 14 / .22);
+  font-family: var(--font-base);
+  animation: chCamMenuIn .16s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.ch-cam-menu > button {
+  inline-size: 100%;
+  display: flex; align-items: center; gap: 8px;
+  /* ⚠️ ۴۴px ارتفاعِ لمسی — همان قاعده‌ای که خودِ دکمه‌ی دوربین دارد */
+  min-block-size: 44px;
+  padding: 0 12px;
+  border: none; border-radius: 10px;
+  background: transparent;
+  color: #1C1B17; font-family: inherit;
+  font-size: 13.5px; font-weight: 700; text-align: start;
+  cursor: pointer;
+  transition: background .14s ease;
+}
+.ch-cam-menu > button > svg { flex-shrink: 0; color: #8F6531; }
+.ch-cam-menu > button:hover { background: #F4F3F1; }
+.ch-cam-menu > button:focus-visible { outline: 2px solid #C7A66A; outline-offset: -2px; }
+/* ⚠️ با `.ch-cam-menu > button` نوشته می‌شود نه تنها: کلاسِ خالی
+   (۰،۱،۰) به آن قاعده (۰،۲،۰) می‌باخت و سه `!important` لازم
+   می‌شد. */
+.ch-cam-menu > button.ch-cam-menu-danger { color: #B23B2E; }
+.ch-cam-menu > button.ch-cam-menu-danger > svg { color: #B23B2E; }
+.ch-cam-menu > button.ch-cam-menu-danger:hover { background: rgb(178 59 46 / .07); }
+
+@keyframes chCamMenuIn {
+  from { opacity: 0; transform: translateY(-6px) scale(.97); }
+  to   { opacity: 1; transform: none; }
+}
+/* وقتی منو بالای دکمه باز می‌شود، حرکت هم باید از پایین بیاید */
+@keyframes chCamMenuUp {
+  from { opacity: 0; transform: translateY(6px) scale(.97); }
+  to   { opacity: 1; transform: none; }
+}
+.ch-cam-menu[data-flip] { animation-name: chCamMenuUp; }
+@media (prefers-reduced-motion: reduce) { .ch-cam-menu { animation: none; } }

@@ -21,12 +21,13 @@
    ───────────────────────────────────────────────────────────── */
 
 'use client'
-import { Fragment, useEffect, useRef, useState } from 'react'
+import { Fragment, useEffect, useState } from 'react'
 import { useCopyUrl } from '@/hooks/use-copy-url'
 import Link from 'next/link'
-import { MapPin, Check, Link2 as LinkIcon, Camera, Loader2 } from 'lucide-react'
+import { MapPin, Check, Link2 as LinkIcon } from 'lucide-react'
 import VerifiedBadge from '../VerifiedBadge'
 import CoverPoster from './CoverPoster'
+import HeroMediaButton from './HeroMediaButton'
 import RoleGlyph, { type RoleGlyphKind } from './RoleGlyph'
 import { toFaDigits } from '@/lib/jalali'
 import { keepLatinProps } from '@/lib/text-fa'
@@ -100,6 +101,12 @@ export interface ProfileHeroProps {
      — بازدیدکننده نباید دکمه‌ی تعویضِ عکس ببیند. */
   onPickPhoto?: (file: File) => void | Promise<void>
   onPickCover?: (file: File) => void | Promise<void>
+  /* ── برداشتنِ عکس ──
+     ⚠️ بدونِ این‌ها دکمه فقط *تعویض* می‌کرد: صاحبِ پروفایل عکسی را
+     که گذاشته بود نمی‌توانست بردارد. نبودنشان یعنی منوی حذف رندر
+     نشود — نه اینکه دکمه ناکار بماند. */
+  onRemovePhoto?: () => void | Promise<void>
+  onRemoveCover?: () => void | Promise<void>
   /** آپلود در جریان است — هر دو دکمه قفل و اسپینر می‌شوند */
   mediaBusy?: boolean
   /* پوسترِ پیش‌فرضِ اختصاصیِ همین نقش — وقتی نه کاور هست نه
@@ -131,19 +138,8 @@ export default function ProfileHero({
   name, nameLatin, city, sinceYear, photo, cover, coverSlides, story, verified,
   grade, disciplines, certs, onOpenPhoto,
   role, backHref, backLabel, publicUrl, actions, stats, posterBase, posterNode,
-  managerName, onPickPhoto, onPickCover, mediaBusy,
+  managerName, onPickPhoto, onPickCover, onRemovePhoto, onRemoveCover, mediaBusy,
 }: ProfileHeroProps) {
-  const photoInput = useRef<HTMLInputElement>(null)
-  const coverInput = useRef<HTMLInputElement>(null)
-
-  /* ⚠️ `value` پاک می‌شود وگرنه انتخابِ دوباره‌ی *همان* فایل رویداد
-     change نمی‌دهد و کاربر فکر می‌کند دکمه خراب است. */
-  const onFile = (fn?: (f: File) => void | Promise<void>) =>
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const f = e.target.files?.[0]
-      e.target.value = ''
-      if (f && fn) void fn(f)
-    }
   const sizes = posterBase ? POSTER_SIZES[posterBase] : POSTER_SIZES.coach
 
   /* ⚠️ شرط روی *وجودِ* عکس است نه روی «دو تا به بالا». نسخه‌ی اول
@@ -266,15 +262,18 @@ export default function ProfileHero({
       {nameLatin && <div className="ch-hero-ghost" aria-hidden>{nameLatin}</div>}
 
       {onPickCover && (
-        <>
-          <input ref={coverInput} type="file" accept="image/*" className="ch-file"
-            onChange={onFile(onPickCover)} tabIndex={-1} aria-hidden />
-          <button type="button" className="ch-cam ch-cam--cover"
-            onClick={() => coverInput.current?.click()} disabled={mediaBusy}
-            aria-label={cover || coverSlides?.length ? 'تغییر تصویر پس‌زمینه' : 'افزودن تصویر پس‌زمینه'}>
-            {mediaBusy ? <Loader2 size={16} className="ch-spin" aria-hidden /> : <Camera size={16} aria-hidden />}
-          </button>
-        </>
+        <HeroMediaButton
+          variant="cover"
+          noun="تصویر پس‌زمینه"
+          removeBody="پس از حذف، پوسترِ پیش‌فرض دوباره نمایش داده می‌شود."
+          /* ⚠️ با `coverSlides` حذف یک فیلد همه‌ی بنرها را برنمی‌دارد،
+             پس وعده‌ی «پوستر برمی‌گردد» دروغ می‌شد. تا وقتی کسی
+             حذفِ چندبنری را پیاده نکرده، گزینه‌ی حذف نمی‌آید. */
+          hasImage={!!coverUrl && !coverSlides?.length}
+          busy={mediaBusy}
+          onPick={onPickCover}
+          onRemove={onRemoveCover}
+        />
       )}
 
       <div className="ch-wrap ch-hero-body">
@@ -303,15 +302,15 @@ export default function ProfileHero({
                   aria-label="بزرگ‌نمایی عکس پروفایل">{avatar}</button>
               : <div className="ch-avatar" data-glyph={photo ? undefined : '1'}>{avatar}</div>}
             {onPickPhoto && (
-              <>
-                <input ref={photoInput} type="file" accept="image/*" className="ch-file"
-                  onChange={onFile(onPickPhoto)} tabIndex={-1} aria-hidden />
-                <button type="button" className="ch-cam ch-cam--avatar"
-                  onClick={() => photoInput.current?.click()} disabled={mediaBusy}
-                  aria-label={photo ? 'تغییر عکس پروفایل' : 'افزودن عکس پروفایل'}>
-                  {mediaBusy ? <Loader2 size={15} className="ch-spin" aria-hidden /> : <Camera size={15} aria-hidden />}
-                </button>
-              </>
+              <HeroMediaButton
+                variant="avatar"
+                noun="عکس پروفایل"
+                removeBody="پس از حذف، نشانِ پیش‌فرضِ نقش نمایش داده می‌شود."
+                hasImage={!!photo}
+                busy={mediaBusy}
+                onPick={onPickPhoto}
+                onRemove={onRemovePhoto}
+              />
             )}
           </span>
 

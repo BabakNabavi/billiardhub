@@ -157,17 +157,36 @@ export default function ManufacturerPage() {
      است که پنل داشت: لوگو داخلِ دایره می‌نشیند پس کوچک، بنر تمامِ
      عرضِ هدر را می‌گیرد پس بزرگ. */
   const [mediaBusy, setMediaBusy] = useState(false)
+  /* نوشتنِ خالص — پرچمِ busy را دست نمی‌زند */
+  const writeHeroImage = async (key: 'logo' | 'bannerImage', url: string) => {
+    const ok = await edit.apply(d => ({ ...d, [key]: url }))
+    /* ⚠️ apply به چند دلیل false می‌شود و فقط یکی‌اش «فایل بزرگ
+       است»؛ جمله‌ی قطعی درباره‌ی علت کاربر را دنبالِ نخودسیاه
+       می‌فرستد. */
+    if (!ok) {
+      notify(url
+        ? 'ذخیره‌ی عکس انجام نشد. دوباره تلاش کنید؛ اگر باز هم نشد، عکس کوچک‌تری بگذارید.'
+        : 'حذف عکس انجام نشد. دوباره تلاش کنید.', 'danger')
+    }
+  }
+
+  /* ⚠️ پرچم فقط در همین دو تابع و هر کدام با یک try/finally: نسخه‌ی
+     قبلی دو بار پشتِ هم روشن و خاموشش می‌کرد و فقط به لطفِ
+     دسته‌بندیِ React درست کار می‌کرد — یک `await` وسطشان کافی بود
+     تا دکمه‌ها وسطِ کار باز شوند و آپلودِ دوم شروع شود. */
+  const removeHeroImage = async (key: 'logo' | 'bannerImage') => {
+    setMediaBusy(true)
+    try { await writeHeroImage(key, '') }
+    finally { setMediaBusy(false) }
+  }
+
   const pickHeroImage = async (
     file: File, key: 'logo' | 'bannerImage', maxW: number, quality: number,
   ) => {
     setMediaBusy(true)
     try {
       const url = await compressImage(file, maxW, quality)
-      const ok = await edit.apply(d => ({ ...d, [key]: url }))
-      /* ⚠️ apply به چند دلیل false می‌شود و فقط یکی‌اش «فایل بزرگ
-         است»؛ جمله‌ی قطعی درباره‌ی علت کاربر را دنبالِ نخودسیاه
-         می‌فرستد. */
-      if (!ok) notify('ذخیره‌ی عکس انجام نشد. دوباره تلاش کنید؛ اگر باز هم نشد، عکس کوچک‌تری بگذارید.', 'danger')
+      await writeHeroImage(key, url)
     } catch {
       notify('عکس خوانده نشد.', 'danger')
     } finally {
@@ -824,7 +843,11 @@ export default function ManufacturerPage() {
            تعویضِ عکس ببیند. */
         onPickPhoto={edit.isOwner ? f => pickHeroImage(f, 'logo', 600, 0.78) : undefined}
         onPickCover={edit.isOwner ? f => pickHeroImage(f, 'bannerImage', 1600, 0.72) : undefined}
-        mediaBusy={mediaBusy}
+        /* حذف: رشته‌ی خالی یعنی «هیچ» — هدر خودش به نشانِ نقش و
+           پوسترِ پیش‌فرض برمی‌گردد. */
+        onRemovePhoto={edit.isOwner ? () => removeHeroImage('logo') : undefined}
+        onRemoveCover={edit.isOwner ? () => removeHeroImage('bannerImage') : undefined}
+        mediaBusy={mediaBusy || edit.saving}
         role="manufacturer"
         backHref="/manufacturers" backLabel="تولیدکنندگان"
         publicUrl={`billiardhub.net/manufacturers/${mfrId}`}
