@@ -1,113 +1,124 @@
-/* پوستر کاور تولیدکننده — صحنه‌ی کارگاه. جفتِ ManufacturerPoster.tsx */
+/* پوستر کاور تولیدکننده — جنس، نه صحنه. جفتِ ManufacturerPoster.tsx
+
+   ⚠️ دو قیدِ سخت، هر دو از اندازه‌گیریِ خودِ صفحه آمده‌اند:
+
+   ۱) نیمه‌ی راست (شروعِ RTL) باید تیره و خالی بماند؛ نام، شهر و
+      نشانیِ اختصاصی آن‌جا می‌نشینند.
+   ۲) `.ch-hero-scrim[data-poster]` رویِ این پوستر یک گرادیانِ سیاه
+      می‌گذارد که در **پایین** ۱۰۰٪ و در بالا ۰٫۲۶ است. پس هر نوری
+      که در نوارِ پایینی گذاشته شود دیده نمی‌شود — نسخه‌ی اولِ همین
+      فایل دقیقا همین اشتباه را کرد و کاور یک مستطیلِ سیاه شد.
+      همه‌ی نور در نیمه‌ی **بالایی** و سمتِ پایان می‌نشیند. */
 
 .mp {
   position: absolute;
   inset: 0;
   overflow: hidden;
-  background: #0C0F11;
+  background: #07090A;
 }
 
-/* ── زمینه: فلزِ تیره با گرمای کوره از سمتِ شروع ── */
+/* ── پایه: گرافیتِ عمیق با کوره‌ی گرم در بالا-چپ ── */
 .mp-ground {
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(120% 90% at 14% 108%, rgba(199, 122, 42, 0.26), transparent 58%),
-    radial-gradient(90% 80% at 86% -10%, rgba(79, 168, 144, 0.16), transparent 62%),
-    linear-gradient(168deg, #14181B 0%, #0D1113 52%, #080B0C 100%);
+    radial-gradient(78% 110% at 14% 26%, rgba(214, 178, 112, 0.40), transparent 60%),
+    radial-gradient(46% 70% at 40% -6%, rgba(236, 206, 152, 0.18), transparent 66%),
+    linear-gradient(200deg, #1A2024 0%, #101518 44%, #06080A 100%);
 }
 
-/* ── نقشه‌ی مهندسی ──
-   دو شبکه روی هم: ریز برای بافت، درشت برای «کاغذِ نقشه». محو‌شونده
-   به سمتِ پایین تا متنِ هیرو رویش بنشیند. */
-.mp-blueprint {
+/* ── صفحه‌ی مایل ──
+   یک سطحِ بزرگِ کج‌شده با لبه‌ی طلاییِ نازک: ریلِ میز یا لبه‌ی
+   ورقِ فلز — عمدا هیچ‌وقت کاملا مشخص نمی‌شود کدام. همین ابهام
+   کاری می‌کند که «بدکشیده» نباشد؛ یک نقاشیِ میز همیشه بدکشیده است. */
+.mp-plane {
+  position: absolute;
+  inset-block: -30% 8%;
+  /* start=راست، end=چپ. صفحه از سمتِ متن شروع و به سمتِ نور
+     پایین می‌رود؛ لبه‌ی طلایی پایین‌تر از نامِ تولیدکننده می‌افتد،
+     پس عمق می‌دهد بدونِ اینکه از خوانایی بزند. */
+  inset-inline: -14% 34%;
+  transform: rotate(-9deg);
+  transform-origin: 0 100%;
+  background: linear-gradient(190deg, rgba(255, 244, 222, 0.16) 0%, rgba(24, 30, 34, 0.05) 34%, transparent 70%);
+  border-block-end: 1px solid rgba(232, 205, 152, 0.55);
+  box-shadow: 0 10px 46px -6px rgba(199, 166, 106, 0.30);
+}
+
+/* ── هاله‌ی نمد ──
+   سبزِ اسنوکر — تنها رنگِ معناییِ پروژه در این کاور. بدونِ آن، پوستر
+   می‌توانست مالِ هر صنعتی باشد. در نیمه‌ی بالایی تا پرده‌ی هیرو
+   نبلعدش. */
+.mp-felt {
   position: absolute;
   inset: 0;
-  background-image:
-    linear-gradient(rgba(199, 166, 106, 0.09) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(199, 166, 106, 0.09) 1px, transparent 1px),
-    linear-gradient(rgba(199, 166, 106, 0.05) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(199, 166, 106, 0.05) 1px, transparent 1px);
-  background-size: 96px 96px, 96px 96px, 24px 24px, 24px 24px;
-  -webkit-mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.95) 0%, rgba(0, 0, 0, 0.35) 62%, transparent 100%);
-  mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.95) 0%, rgba(0, 0, 0, 0.35) 62%, transparent 100%);
+  background:
+    radial-gradient(52% 78% at 22% 58%, rgba(18, 138, 75, 0.42), transparent 66%),
+    radial-gradient(30% 48% at 3% 30%, rgba(18, 138, 75, 0.20), transparent 72%);
 }
 
-/* ── هاله‌ی نورِ سقفی ── */
-.mp-cone {
-  position: absolute;
-  inset: -24% 18% auto 18%;
-  height: 132%;
-  pointer-events: none;
-  background: radial-gradient(closest-side, rgba(255, 224, 168, 0.16), transparent 72%);
-  filter: blur(26px);
-  animation: mpBreathe 9s ease-in-out infinite alternate;
-}
-
-.mp-art {
+/* ── ساب‌خوردگیِ فلز ──
+   خط‌های یک‌پیکسلی با تناوبِ ۳px. آن‌قدر کم‌رمق که به‌عنوان خط دیده
+   نشود، فقط سطح را از «گرادیانِ صافِ پلاستیکی» دربیاورد. */
+.mp-brush {
   position: absolute;
   inset: 0;
-  width: 100%;
-  height: 100%;
+  background-image: repeating-linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.045) 0px,
+    rgba(255, 255, 255, 0.045) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+  -webkit-mask-image: linear-gradient(255deg, rgba(0, 0, 0, 0.95) 0%, transparent 68%);
+          mask-image: linear-gradient(255deg, rgba(0, 0, 0, 0.95) 0%, transparent 68%);
 }
 
-/* ── حرکت‌ها ──
-   فقط transform و opacity؛ هیچ‌کدام لِی‌اوت را دوباره حساب نمی‌کنند. */
-.mp-table { animation: mpRise 1.1s cubic-bezier(0.22, 1, 0.36, 1) both; }
-.mp-rack  { animation: mpFade 1.3s ease both .1s; }
-.mp-ruler { animation: mpFade 1.3s ease both .3s; }
+/* ── باندِ نورِ مایل ──
+   تنها چیزِ متحرکِ کاور، و هزینه‌اش یک `transform` است. */
+.mp-sweep {
+  position: absolute;
+  inset: -45% -20%;
+  background: linear-gradient(
+    104deg,
+    transparent 26%,
+    rgba(232, 203, 146, 0.20) 40%,
+    rgba(255, 246, 224, 0.36) 47%,
+    rgba(232, 203, 146, 0.16) 55%,
+    transparent 68%
+  );
+  filter: blur(16px);
+  transform: translate3d(-7%, 0, 0);
+  animation: mpSweep 17s ease-in-out infinite alternate;
+  will-change: transform;
+}
 
-/* ⚠️ `transform-box: fill-box` اجباری است: مبدأِ پیش‌فرضِ عناصرِ SVG
-   کلِ artboard است، پس چراغِ سمتِ چپ به‌جای تابِ لولایی، چند پیکسل
-   کنار می‌لغزید. */
-.mp-lamp { transform-box: fill-box; transform-origin: 50% 0; }
-.mp-lamp-a { animation: mpSway 7.5s ease-in-out infinite alternate; }
-.mp-lamp-b { animation: mpSway 9.5s ease-in-out infinite alternate-reverse; }
+@keyframes mpSweep {
+  from { transform: translate3d(-9%, 0, 0); }
+  to   { transform: translate3d(7%, 0, 0); }
+}
 
-.mp-mote   { animation: mpDrift 14s ease-in-out infinite alternate; }
-.mp-mote-1 { animation-duration: 18s; animation-delay: -4s; }
-.mp-mote-2 { animation-duration: 21s; animation-delay: -9s; }
-.mp-mote-3 { animation-duration: 16s; animation-delay: -6s; }
-
-/* برقی که یک‌بار، آرام، از روی صحنه رد می‌شود */
-.mp-sheen {
+/* ── دانه‌ی فیلم ──
+   بدونِ این، گرادیان‌ها روی نمایشگرِ ۸بیتی نوار می‌اندازند. */
+.mp-grain {
   position: absolute;
   inset: 0;
-  pointer-events: none;
-  background: linear-gradient(104deg, transparent 38%, rgba(255, 255, 255, 0.055) 50%, transparent 62%);
-  transform: translateX(-60%);
-  animation: mpSheen 2.4s cubic-bezier(0.22, 1, 0.36, 1) .5s both;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.06) 0.5px, transparent 0.5px);
+  background-size: 3px 3px;
+  opacity: 0.55;
+  mix-blend-mode: overlay;
 }
 
-@keyframes mpRise {
-  from { opacity: 0; transform: translateY(16px) scale(.985); }
-  to   { opacity: 1; transform: none; }
-}
-@keyframes mpFade {
-  from { opacity: 0; }
-}
-@keyframes mpSway {
-  from { transform: rotate(-1.1deg); }
-  to   { transform: rotate(1.1deg); }
-}
-@keyframes mpDrift {
-  from { transform: translate3d(0, 0, 0); opacity: .18; }
-  to   { transform: translate3d(14px, -22px, 0); opacity: .52; }
-}
-/* ⚠️ فقط `opacity`. نسخه‌ی اول `scale` هم داشت و لایه‌ای با
-   `blur(26px)` در ۱۳۲٪ ارتفاعِ هیرو، در هر فریم از نو رستر می‌شد —
-   همان درسی که `.cp-spot` در پوسترِ مربی از قبل ثبت کرده. */
-@keyframes mpBreathe {
-  from { opacity: .72; }
-  to   { opacity: 1; }
-}
-@keyframes mpSheen {
-  to { transform: translateX(60%); }
+/* ── وینیت ──
+   فقط سمتِ متن و گوشه‌ها؛ سمتِ نور دست‌نخورده می‌ماند. */
+.mp-vignette {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(130% 110% at 30% 40%, transparent 46%, rgba(0, 0, 0, 0.48) 100%),
+    linear-gradient(270deg, rgba(0, 0, 0, 0.62) 0%, rgba(0, 0, 0, 0.18) 40%, transparent 68%);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .mp-table, .mp-rack, .mp-ruler, .mp-lamp, .mp-mote, .mp-cone, .mp-sheen {
-    animation: none;
-  }
-  .mp-sheen { opacity: 0; }
+  .mp-sweep { animation: none; transform: none; }
 }
