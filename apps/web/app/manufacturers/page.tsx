@@ -103,48 +103,96 @@ const MFR_SLIDES = [
 /* ════════ HERO — همان الگوی صفحه‌ی مربیان ════════
    هدرِ قبلی روشن بود و پوسترها را با شفافیتِ کم پشتِ متن می‌گذاشت؛
    کنارِ هدرِ مربیان «ساده و معمولی» دیده می‌شد. */
-function MfrHeroSlider() {
-  const [active, setActive]   = useState(0)
-  const [prevIdx, setPrevIdx] = useState<number | null>(null)
-  const activeRef = useRef(0)
-  const fadingRef = useRef(false)
+/* ── عکسِ هدرِ فهرست ──
+   ⚠️ به‌جای پوسترِ برداری، عکسِ واقعی — مالک داد. همان درسی که در
+   `components/tech/market/HeroArt.tsx` ثبت شده: صحنه‌ی SVG هرچقدر
+   هم دقیق کشیده شود، چشم فورا می‌فهمد عکس نیست.
 
+   ⚠️ قیدِ ترکیب‌بندی: سوژه سمتِ چپ است و نیمه‌ی راستِ عکس عمدا تیره
+   و خالی مانده، چون صفحه راست‌به‌چپ است و عنوانِ هیرو آن‌جا
+   می‌نشیند. اگر روزی عکس عوض شد، همین قید باید رعایت شود.
+
+   ⚠️ فایل‌ها از قبل به نسبتِ ۲٫۶:۱ بریده شده‌اند، نه ۳:۲ِ اصلِ عکس.
+   دلیلش دیکد است نه بایت: نوارِ هیرو ۱۵۰ تا ۲۰۵ پیکسل بلند است و
+   `object-fit: cover` روی یک عکسِ ۳:۲ نزدیک دو سومِ هر ردیفِ
+   دیکدشده را دور می‌ریخت — روی اندرویدِ ضعیفِ مخاطبِ ما این وقت و
+   حافظه است. برش (مرکز روی ۵۸٪ ارتفاع، جایی که دست‌ها و خودِ چوب
+   است) همان‌جا در ساخت انجام شده.
+
+   ⚠️ نردبان تا ۱۵۳۶ تمام می‌شود چون عرضِ بومیِ فایل همان است؛ پله‌ی
+   بالاتر یعنی پیکسلِ ساختگی با هزینه‌ی بایت. موبایلِ DPR۲ پله‌ی
+   ۷۶۸ را می‌گیرد: ۱۰ کیلوبایت AVIF. */
+const HERO_W = [768, 1024, 1280, 1536] as const
+const heroSet = (ext: string) =>
+  HERO_W.map(w => `/images/manufacturers/hero-${w}.${ext} ${w}w`).join(', ')
+
+function MfrHeroPhoto() {
+  return (
+    <picture>
+      <source type="image/avif" srcSet={heroSet('avif')} sizes="100vw" />
+      <img
+        src="/images/manufacturers/hero-1024.webp"
+        srcSet={heroSet('webp')}
+        sizes="100vw"
+        width={1536}
+        height={591}
+        alt=""
+        decoding="async"
+        fetchPriority="high"
+        className="absolute inset-0 h-full w-full object-cover"
+      />
+    </picture>
+  )
+}
+
+function MfrHeroSlider() {
+  const [active, setActive] = useState(0)
+  const activeRef = useRef(0)
+  /* ⚠️ لایه‌های محوشونده‌ی پوستر حذف شدند و با آن‌ها `prevIdx` و
+     `fadingRef`: حالا یک عکس پشتِ همه‌ی اسلایدهاست و آنچه عوض
+     می‌شود فقط متن است. نگه‌داشتنِ آن دو یعنی وضعیتی که هیچ‌چیز
+     را کنترل نمی‌کند. */
   const advance = (idx: number) => {
-    if (idx === activeRef.current || fadingRef.current) return
-    setPrevIdx(activeRef.current)
+    if (idx === activeRef.current) return
     activeRef.current = idx
-    fadingRef.current = true
     setActive(idx)
-    setTimeout(() => { setPrevIdx(null); fadingRef.current = false }, 850)
   }
 
   useEffect(() => {
     const iv = setInterval(() => {
       const next = (activeRef.current + 1) % MFR_SLIDES.length
-      setPrevIdx(activeRef.current)
       activeRef.current = next
-      fadingRef.current = true
       setActive(next)
-      setTimeout(() => { setPrevIdx(null); fadingRef.current = false }, 850)
     }, 4500)
     return () => clearInterval(iv)
   }, [])
 
   return (
     <>
-      <style>{`@keyframes kenBurnsM{0%{transform:scale(1.00) translate(0%,0%)}100%{transform:scale(1.14) translate(-2%,1.5%)}}`}</style>
+      <style>{`
+        @keyframes kenBurnsM{0%{transform:scale(1.00) translate(0%,0%)}100%{transform:scale(1.10) translate(1.5%,1%)}}
+        @keyframes mfrSlideIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+        @media (prefers-reduced-motion: reduce){
+          .mfr-hero-ken,.mfr-hero-txt{animation:none !important}
+        }
+      `}</style>
       <section style={{ position: 'relative', height: 'clamp(150px,16vw,205px)', overflow: 'hidden', background: '#0a0a0a', direction: 'rtl' }}>
-        {MFR_SLIDES.map((_, i) => (
-          <div key={i} style={{ position: 'absolute', inset: 0, opacity: i === active ? 1 : 0, transition: 'opacity 0.90s ease', zIndex: i === active ? 2 : i === prevIdx ? 1 : 0, animation: 'kenBurnsM 9s ease-in-out infinite alternate', willChange: 'transform' }}>
-            <MfrPoster variant={i} />
-          </div>
-        ))}
-        <div style={{ position: 'absolute', inset: 0, zIndex: 3, background: 'linear-gradient(to right, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.28) 55%, transparent 100%)' }} />
+        <div className="mfr-hero-ken" style={{ position: 'absolute', inset: 0, zIndex: 1, animation: 'kenBurnsM 14s ease-in-out infinite alternate', willChange: 'transform' }}>
+          <MfrHeroPhoto />
+        </div>
+        {/* ⚠️ پرده سمتِ *راست* را تیره می‌کند نه چپ: عنوانِ فارسی
+            آن‌جا می‌نشیند و سوژه‌ی عکس سمتِ چپ است. نسخه‌ی پوستری
+            برعکس بود و با این عکس روی صورتِ سوژه می‌افتاد. */}
+        <div style={{ position: 'absolute', inset: 0, zIndex: 3, background: 'linear-gradient(to left, rgba(10,10,10,0.86) 0%, rgba(10,10,10,0.58) 34%, rgba(10,10,10,0.16) 70%, transparent 100%)' }} />
         <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '55%', zIndex: 3, background: 'linear-gradient(to top, rgba(0,0,0,0.80), transparent)' }} />
 
         <div style={{ position: 'absolute', inset: 0, zIndex: 4, display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: 'clamp(12px,2.4vw,32px) clamp(24px,6vw,80px)' }}>
-          <div style={{ maxWidth: 1280, width: '100%', margin: '0 auto' }}>
-            <div style={{ textAlign: 'left', marginBottom: 11 }}>
+          <div key={active} className="mfr-hero-txt" style={{ maxWidth: 1280, width: '100%', margin: '0 auto', animation: 'mfrSlideIn .55s cubic-bezier(0.22,1,0.36,1) both' }}>
+            {/* ⚠️ بدونِ `textAlign`: از ظرفِ RTL جهت می‌گیرد و سمتِ
+                شروع (راست) می‌نشیند — همان سمتی که پرده تیره‌اش
+                می‌کند. با `left` روی نیمه‌ی روشنِ عکس می‌افتاد و
+                طلاییِ ۸٫۹ پیکسلی آن‌جا خوانده نمی‌شد. */}
+            <div style={{ marginBottom: 11 }}>
               <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, background: 'rgba(199,166,106,0.14)', border: '1px solid rgba(199,166,106,0.34)', color: '#D4A843', fontSize: 8.9, fontWeight: 800, borderRadius: 24, padding: '4px 11px', letterSpacing: '0.12em', transform: 'translateY(-13px)', animation: 'softBlink 2.6s .7s ease-in-out infinite' }}>
                 MANUFACTURERS . BILLIARD HUB
               </div>
@@ -158,9 +206,12 @@ function MfrHeroSlider() {
           </div>
         </div>
 
-        <div className="hero-dots" style={{ position: 'absolute', bottom: 14, left: 'clamp(24px,6vw,80px)', zIndex: 6, display: 'flex', gap: 7 }}>
+        <div className="hero-dots" style={{ position: 'absolute', bottom: 14, insetInlineStart: 'clamp(24px,6vw,80px)', zIndex: 6, display: 'flex', gap: 7 }}>
           {MFR_SLIDES.map((_, i) => (
-            <button key={i} onClick={() => advance(i)} aria-label={`اسلاید ${i + 1}`} style={{ width: i === active ? 24 : 7, height: 7, borderRadius: 4, border: 'none', cursor: 'pointer', padding: 0, background: i === active ? '#C7A66A' : 'rgba(255,255,255,0.32)', transition: 'all 0.4s cubic-bezier(0.22,1,0.36,1)' }} />
+            <button key={i} type="button" onClick={() => advance(i)}
+              aria-label={`اسلاید ${toFaDigits(String(i + 1))}`}
+              aria-current={i === active ? 'true' : undefined}
+              style={{ width: i === active ? 24 : 7, height: 7, borderRadius: 4, border: 'none', cursor: 'pointer', padding: 0, background: i === active ? '#C7A66A' : 'rgba(255,255,255,0.32)', transition: 'all 0.4s cubic-bezier(0.22,1,0.36,1)' }} />
           ))}
         </div>
       </section>
