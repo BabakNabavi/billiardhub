@@ -50,8 +50,6 @@ export default function ManufacturerDashboard() {
   const [err, setErr]       = useState('')
   const [busy, setBusy]     = useState(false)
 
-  const bannerRef = useRef<HTMLInputElement>(null)
-  const logoRef = useRef<HTMLInputElement>(null)
   const licRef = useRef<HTMLInputElement>(null)
   const [cert, setCert] = useState({ title: '', issuer: '', year: '', image: '' })
   const certImgRef = useRef<HTMLInputElement>(null)
@@ -130,23 +128,6 @@ export default function ManufacturerDashboard() {
           })
       set('licenseFile', { name: f.name, url })
     } catch { setErr('فایل خوانده نشد.') }
-    finally { setBusy(false); e.target.value = '' }
-  }
-
-  const pickLogo = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const f = e.target.files?.[0]; if (!f) return
-    setBusy(true)
-    /* مربع و کوچک — داخلِ دایره‌ی هدر می‌نشیند */
-    try { set('logo', await compressImage(f, 600, 0.78)) }
-    catch { setErr('عکس خوانده نشد.') }
-    finally { setBusy(false); e.target.value = '' }
-  }
-
-  const pickBanner = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const f = e.target.files?.[0]; if (!f) return
-    setBusy(true)
-    try { set('bannerImage', await compressImage(f, 1600, 0.72)) }
-    catch { setErr('عکس خوانده نشد.') }
     finally { setBusy(false); e.target.value = '' }
   }
 
@@ -253,6 +234,36 @@ export default function ManufacturerDashboard() {
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault()
+
+    /* ── گواهینامه‌ی پرشده ولی «افزوده‌نشده» ──
+       ⚠️ مالک عنوان و تصویر را پر کرد و مستقیم «ذخیره» زد؛ «افزودن»
+       را نزد چون از نظرِ او فرم تمام شده بود. آن گواهینامه بی‌صدا
+       دور ریخته می‌شد و روی سرور certificates خالی می‌ماند. */
+    let certificates = form.certificates
+    if (cert.title.trim() || cert.image || cert.issuer.trim() || cert.year.trim()) {
+      if (!cert.title.trim()) { setCertErr('عنوان گواهینامه لازم است.'); return }
+      if (!cert.image) { setCertErr('تصویر گواهینامه لازم است — بدون مدرک، ادعا می‌ماند.'); return }
+      certificates = [...certificates, {
+        title: cert.title.trim(), issuer: cert.issuer.trim(),
+        year: cert.year.trim(), image: cert.image,
+      }]
+      /* ⚠️ همین‌جا به state متعهد می‌شود، نه فقط به متغیرِ محلی:
+         چک‌های پایین‌تر («نام لازم است»، «شهر را انتخاب کنید») و
+         هر خطای شبکه می‌توانند برگردند، و آن‌وقت زیرفرمِ پاک‌شده
+         یعنی گواهینامه هم از رابط رفته هم هنوز در form نیست. */
+      setForm(f => ({ ...f, certificates }))
+      setCert({ title: '', issuer: '', year: '', image: '' }); setCertErr('')
+    }
+
+    /* همان تله برای تخصصِ تایپ‌شده */
+    let specialties = form.specialties
+    const pendingSpec = specInput.trim()
+    if (pendingSpec) {
+      if (!specialties.includes(pendingSpec)) specialties = [...specialties, pendingSpec]
+      setForm(f => ({ ...f, specialties }))
+      setSpecInput('')
+    }
+
     if (!form.name.trim())        { setErr('نام کارخانه/برند لازم است.'); return }
     if (!form.city)               { setErr('شهر را انتخاب کنید.'); return }
     if (!form.description.trim()) { setErr('توضیح کوتاه لازم است.'); return }
@@ -274,11 +285,21 @@ export default function ManufacturerDashboard() {
         setErr('ارتباط با سرور برقرار نشد؛ برای اینکه اطلاعات قبلی پاک نشود ذخیره انجام نشد.')
         setBusy(false); return
       }
-      const serverProducts = fresh.state === 'found' ? (fresh.profile.data.products ?? []) : []
+      const serverData = fresh.state === 'found' ? fresh.profile.data : null
+      const serverProducts = serverData?.products ?? []
 
       const next: ManufacturerProfile = {
         ...form,
+        certificates,
+        specialties,
         products: serverProducts,
+        /* ⚠️ رسانه‌ی هدر دیگر از این فرم نمی‌آید — با دکمه‌ی دوربینِ
+           صفحه‌ی عمومی عوض می‌شود. چون POST کلِ data را جایگزین
+           می‌کند، تبِ پنلی که پیش از تعویضِ عکس باز مانده با ذخیره‌ی
+           بعدی عکس را به نسخه‌ی کهنه برمی‌گرداند. همان تله‌ی
+           محصولات، با یک کلید دیگر. */
+        logo: serverData ? (serverData.logo ?? '') : form.logo,
+        bannerImage: serverData ? (serverData.bannerImage ?? '') : form.bannerImage,
         ownerId: user?.id || form.ownerId,
         ownerPhone: user?.phone || form.ownerPhone,
         status: 'approved',
@@ -362,44 +383,10 @@ export default function ManufacturerDashboard() {
           <section className={CARD}>
             <h2 className="mb-4 text-[14.5px] font-bold">هویت کارخانه / برند</h2>
 
-            {/* ── عکس پروفایل ──
-                تا امروز تولیدکننده جایی برای لوگو نداشت و هدر همیشه
-                نشانِ پیش‌فرضِ سوله را نشان می‌داد؛ مالک پرسید «عکس
-                پروفایلم را از کجا عوض کنم؟» — از این‌جا. */}
-            <div className="mb-6">
-              <label className={LABEL}>عکس پروفایل (لوگوی کارخانه)</label>
-              <div className="flex items-center gap-3">
-                <input ref={logoRef} type="file" accept="image/*" className="hidden" onChange={pickLogo} />
-                <button type="button" onClick={() => logoRef.current?.click()} className={LQ_BTN} disabled={busy}>
-                  <Images size={14} /> {form.logo ? 'تغییر عکس' : 'آپلود عکس'}
-                </button>
-                {form.logo && (
-                  <>
-                    <img loading="lazy" decoding="async" src={form.logo} alt="" className="h-16 w-16 rounded-full border border-[#E7E2D6] object-cover" />
-                    <button type="button" onClick={() => set('logo', '')} className="text-[11.5px] font-bold text-[#B23B2E]">حذف</button>
-                  </>
-                )}
-              </div>
-              <p className="mt-2 text-[11.5px] text-[#6F6A5C]">در هدر صفحه‌ی شما، داخل دایره‌ی کنار نام نمایش داده می‌شود.</p>
-            </div>
-
-            {/* بنر */}
-            <div className="mb-6">
-              <label className={LABEL}>بنر صفحه (عکس کارخانه یا محصولات)</label>
-              <div className="flex items-center gap-3">
-                <input ref={bannerRef} type="file" accept="image/*" className="hidden" onChange={pickBanner} />
-                <button type="button" onClick={() => bannerRef.current?.click()} className={LQ_BTN} disabled={busy}>
-                  <Images size={14} /> {form.bannerImage ? 'تغییر بنر' : 'آپلود بنر'}
-                </button>
-                {form.bannerImage && (
-                  <>
-                    <img loading="lazy" decoding="async" src={form.bannerImage} alt="" className="h-14 w-24 rounded-lg border border-[#E7E2D6] object-cover" />
-                    <button type="button" onClick={() => set('bannerImage', '')} className="text-[11.5px] font-bold text-[#B23B2E]">حذف</button>
-                  </>
-                )}
-              </div>
-            </div>
-
+            {/* ⚠️ باکس‌های آپلودِ «عکس پروفایل» و «بنر» از این‌جا
+                برداشته شدند: هر دو حالا با دکمه‌ی دوربین روی خودِ
+                صفحه‌ی عمومی عوض می‌شوند — همان‌جا که تولیدکننده
+                نتیجه را می‌بیند، نه در فرمی که پیش‌نمایش ندارد. */}
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
                 <label className={LABEL}>نام کارخانه / برند *</label>
