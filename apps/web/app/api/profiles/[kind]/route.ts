@@ -16,6 +16,29 @@ const kindOf = (v: string): ProfileKind | null =>
 
 const str = (v: unknown, max = 200) => String(v ?? '').trim().slice(0, max);
 
+/* ── نام مدیر ────────────────────────────────────────────────────
+   همان قاعده‌ای که مسیر باشگاه دارد: «نام مدیر» باید نام و نام
+   خانوادگیِ احرازشده‌ی صاحبِ حساب باشد، نه یک رشته‌ی آزاد که هرکس
+   می‌تواند هرچه بخواهد در آن بنویسد.
+
+   ⚠️ عمدا هنگام *خواندن* مشتق می‌شود نه هنگام نوشتن: این‌طور
+   ردیف‌های موجود هم بدونِ ذخیره‌ی دوباره نام می‌گیرند، و اگر کاربر
+   نامش را عوض کند صفحه فورا همان را نشان می‌دهد. */
+/* ⚠️ فهرست بسته: بدون این قید، نام حقوقیِ صاحبِ حساب روی هر شش نقش
+   به هر بازدیدکننده‌ای برمی‌گشت و هر بازدیدِ پروفایل یک کوئریِ
+   اضافه می‌گرفت — روی شبکه‌ی کندِ ایران بی‌دلیل. */
+const SHOWS_MANAGER: ProfileKind[] = ['manufacturer'];
+
+async function managerNameOf(kind: ProfileKind, ownerId: string): Promise<string> {
+  if (!ownerId || !SHOWS_MANAGER.includes(kind)) return '';
+  const { data, error } = await sb().from('users')
+    .select('"firstName","lastName"').eq('id', ownerId).maybeSingle();
+  /* خطای گذرا نباید بی‌صدا به «مدیری ثبت نشده» ترجمه شود */
+  if (error) { console.error('[profiles] managerName:', error.message); return ''; }
+  const o = data as { firstName?: string; lastName?: string } | null;
+  return `${o?.firstName ?? ''} ${o?.lastName ?? ''}`.trim();
+}
+
 export async function GET(req: NextRequest, ctx: { params: Promise<{ kind: string }> }) {
   const kind = kindOf((await ctx.params).kind);
   if (!kind) return NextResponse.json({ message: 'نوع پروفایل نامعتبر است' }, { status: 400 });
@@ -38,6 +61,30 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ kind: strin
     }
   }
 
+  const ownerId = searchParams.get('ownerId');
+  if (ownerId) {
+    /* ⚠️ فقط تأییدشده. این مسیر بدونِ ورود هم پاسخ می‌دهد، پس
+       نباید پروفایلِ تأییدنشده‌ی کسی را لو بدهد. */
+    try {
+      /* ⚠️ فقط همان چهار فیلدی که مصرف‌کننده لازم دارد. این شاخه
+         بدونِ ورود پاسخ می‌دهد؛ برگرداندنِ کلِ ردیف یعنی شماره و
+         فایلِ پروانه‌ی کسب هم برای همه باز است. */
+      const p = await getProfileByOwner(kind, ownerId);
+      const d = (p?.data ?? {}) as Record<string, unknown>;
+      const str_ = (v: unknown) => (typeof v === 'string' ? v : '');
+      return NextResponse.json(
+        {
+          profile: p && p.status === 'approved'
+            ? { slug: p.slug, data: { title: str_(d.title), name: str_(d.name), city: str_(d.city), logo: str_(d.logo) } }
+            : null,
+        },
+        { headers: { 'Cache-Control': 'no-store' } },
+      );
+    } catch {
+      return NextResponse.json({ message: 'خواندن پروفایل انجام نشد' }, { status: 500 });
+    }
+  }
+
   if (slug) {
     const p = await getProfileBySlug(kind, slug);
     if (!p) return NextResponse.json({ message: 'پیدا نشد' }, { status: 404 });
@@ -55,7 +102,8 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ kind: strin
        این پرچم از خود کوکی نشست می‌آید: یک منبع، همان منبعی که
        مسیر ذخیره هم با آن تصمیم می‌گیرد. */
     const isMine = !!actor && actor.id === p.ownerId;
-    return NextResponse.json({ profile: p, isMine }, { headers: { 'Cache-Control': 'no-store' } });
+    const managerName = await managerNameOf(kind, p.ownerId);
+    return NextResponse.json({ profile: p, isMine, managerName }, { headers: { 'Cache-Control': 'no-store' } });
   }
 
   /* ── فهرست کامل برای پنل‌ها ──
@@ -104,6 +152,10 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ kind: stri
      می‌شود که هر شکلی باید رعایتش کند: اندازه، عمق و تعداد.
      پاک‌سازی محتوایی (نام آلبوم، رسانه‌ی خراب) سر جای خودش در
      `saveProfile` است. */
+  /* ⚠️ نام مدیر مشتق است؛ اگر مرورگر بفرستدش باید دور ریخته شود،
+     وگرنه همان فیلدِ آزادی می‌شود که قرار بود نباشد. */
+  delete data.managerName;
+
   const bad = checkProfileData(data);
   if (bad) return NextResponse.json({ message: bad }, { status: 400 });
 

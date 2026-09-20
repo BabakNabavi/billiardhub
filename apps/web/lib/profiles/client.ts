@@ -48,10 +48,12 @@ async function json<T>(r: Response): Promise<T | null> {
    ردیف زنده را تغییر نام می‌داد.
 
    قفل باید در ابهام **بسته** بماند، نه باز. */
+/* `managerName` مشتق است و از سرور می‌آید، پس کنارِ پروفایل
+   می‌نشیند نه داخلِ `data`. */
 export type MyProfileResult<T> =
   /* `isMine` را سرور می‌گوید — نه مقایسه‌ی مرورگر. فقط مسیر
      `?slug=` آن را برمی‌گرداند. */
-  | { state: 'found'; profile: RemoteProfile<T>; isMine?: boolean }
+  | { state: 'found'; profile: RemoteProfile<T>; isMine?: boolean; managerName?: string }
   | { state: 'none' }
   | { state: 'error' }
 
@@ -102,7 +104,7 @@ export async function fetchProfileResult<T>(kind: ProfileKind, slug: string): Pr
   if (!r) return { state: 'error' }
   /* ۴۰۴ یعنی واقعا نیست؛ بقیه‌ی کدهای ناموفق خطای سرورند. */
   if (!r.ok) return r.status === 404 ? { state: 'none' } : { state: 'error' }
-  const j = await json<{ profile: RemoteProfile<T> | null; isMine?: boolean }>(r)
+  const j = await json<{ profile: RemoteProfile<T> | null; isMine?: boolean; managerName?: string }>(r)
   if (!j) return { state: 'error' }
   if (!j.profile) return { state: 'none' }
   /* ⚠️ تنها دروازه‌ی خواندن پروفایل در کلاینت همین است، پس تضمین
@@ -112,7 +114,22 @@ export async function fetchProfileResult<T>(kind: ProfileKind, slug: string): Pr
     state: 'found',
     profile: { ...j.profile, data: withMediaArrays((j.profile.data ?? {}) as Record<string, unknown>) as T },
     isMine: j.isMine === true,
+    managerName: j.managerName ?? '',
   }
+}
+
+/** پروفایلِ تأییدشده‌ی یک مالک — «آیا این شخص فروشگاه هم دارد؟»
+ *
+ *  ⚠️ خطا را می‌بلعد و `null` می‌دهد: تنها مصرفش یک بخشِ اختیاری
+ *  روی صفحه است و نبودِ آن بخش بهتر از یک پیامِ خطا برای چیزی است
+ *  که بازدیدکننده اصلا نخواسته. */
+export async function fetchProfileByOwner<T>(kind: ProfileKind, ownerId: string): Promise<RemoteProfile<T> | null> {
+  if (!ownerId) return null
+  const r = await fetch(`/api/profiles/${kind}?ownerId=${encodeURIComponent(ownerId)}`, { cache: 'no-store' }).catch(() => null)
+  if (!r || !r.ok) return null
+  const j = await json<{ profile: RemoteProfile<T> | null }>(r)
+  if (!j?.profile) return null
+  return { ...j.profile, data: withMediaArrays((j.profile.data ?? {}) as Record<string, unknown>) as T }
 }
 
 /** همه‌ی پروفایل‌های تأییدشده‌ی یک نوع */

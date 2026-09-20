@@ -789,9 +789,10 @@ main.ch-col > section { max-width: 760px; }
    «چه چیزی اثبات شده». سبزِ تأیید، با نشانِ تیک. */
 .ch-chip-cert {
   display: inline-flex; align-items: center; gap: 5px;
-  color: #8FE3C0;
-  background: rgb(111 211 172 / .12);
-  border-color: rgb(111 211 172 / .34);
+  color: #7FD4F0;
+  background: rgb(88 190 227 / .14);
+  border-color: rgb(88 190 227 / .38);
+  font-weight: 700;
 }
 .ch-chip-cert svg { flex-shrink: 0; }
 
@@ -1163,4 +1164,81 @@ main.ch-col > section { max-width: 760px; }
 
 @media (prefers-reduced-motion: reduce) {
   .ch-ladder .rf-step { transition: none; }
+}
+
+/* ═══ تعویضِ رسانه از خودِ هدر ═══
+   ⚠️ پیش‌تر آپلودِ لوگو و بنر فقط در پنل بود: تولیدکننده عکس را
+   می‌گذاشت بی‌آنکه ببیند روی صفحه چه می‌شود. حالا همان‌جا که
+   نتیجه دیده می‌شود عوض هم می‌شود. دکمه‌ها فقط برای صاحبِ
+   پروفایل رندر می‌شوند — بازدیدکننده اصلا نمی‌بیندشان. */
+.ch-file { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+
+.ch-cam {
+  z-index: 12;
+  display: grid; place-items: center;
+  border-radius: 999px;
+  color: #fff;
+  background: rgb(10 12 14 / .58);
+  border: 1px solid rgb(255 255 255 / .22);
+  -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px);
+  cursor: pointer;
+  transition: background .18s ease, transform .18s ease, border-color .18s ease;
+}
+.ch-cam:hover:not(:disabled) { background: rgb(10 12 14 / .78); border-color: var(--gold); transform: translateY(-1px); }
+.ch-cam:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+.ch-cam:disabled { cursor: not-allowed; opacity: .6; }
+
+/* بالا، سمتِ پایانِ خط — در RTL یعنی چپ، دور از بردکرامب */
+/* ⚠️ هدفِ لمسی ۴۴px — همان چیزی که نقطه‌های بنر در همین فایل
+   رعایت می‌کنند. بالای هیرو آزاد است: Navbar روی صفحه‌های غیرِ
+   خانه یک فاصله‌گذارِ «۷۲px + safe-area» می‌گذارد، پس این دکمه
+   زیرِ نوار نمی‌افتد. */
+.ch-cam--cover {
+  position: absolute;
+  inset-block-start: clamp(12px, 2vw, 20px);
+  inset-inline-end: clamp(12px, 3vw, 24px);
+  inline-size: 44px; block-size: 44px;
+}
+
+/* گوشه‌ی پایینیِ آواتار — همان جایی که هر اپِ موبایلی می‌گذارد.
+   ⚠️ absolute لازم است: `.ch-avatar-ring` یک inline-grid با
+   place-items:center است و فرزندِ سوم وگرنه ردیفِ تازه می‌ساخت و
+   حلقه را کش می‌داد. */
+.ch-avatar-ring { position: relative; }
+/* ⚠️ ناحیه‌ی لمس ۴۴px ولی دیسکِ دیداری ۳۴px: روی آواتارِ ۱۰۶
+   پیکسلیِ موبایل، یک دایره‌ی ۴۴ پیکسلی چهل درصدِ عکس را می‌پوشاند.
+   پس خودِ دکمه شفاف است و دیسک را شبه‌عنصر می‌کشد. */
+.ch-cam--avatar {
+  position: absolute;
+  inset-block-end: -3px; inset-inline-end: -3px;
+  inline-size: 44px; block-size: 44px;
+  background: transparent; border: none;
+  -webkit-backdrop-filter: none; backdrop-filter: none;
+}
+.ch-cam--avatar::before {
+  content: ''; position: absolute; inset: 5px;
+  border-radius: 999px;
+  background: rgb(10 12 14 / .62);
+  border: 1px solid rgb(255 255 255 / .22);
+  -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px);
+  transition: background .18s ease, border-color .18s ease;
+}
+.ch-cam--avatar > svg { position: relative; }
+.ch-cam--avatar:hover:not(:disabled) { background: transparent; }
+.ch-cam--avatar:hover:not(:disabled)::before {
+  background: rgb(10 12 14 / .82);
+  border-color: var(--gold);
+}
+
+@keyframes chSpin { to { transform: rotate(360deg); } }
+.ch-spin { animation: chSpin 1s linear infinite; }
+@media (prefers-reduced-motion: reduce) { .ch-spin { animation: none; } }
+
+/* ── نام مدیر ──
+   زیرِ نام، دقیقا مثل هدرِ باشگاه. خاکستریِ کم‌رنگ است چون
+   اطلاعاتِ درجه‌دوم است و نباید با خودِ نام رقابت کند. */
+.ch-manager {
+  margin: 4px 0 0;
+  font-size: clamp(13px, 2vw, 15px); font-weight: 500;
+  color: rgb(255 255 255 / .55);
 }
