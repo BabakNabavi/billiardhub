@@ -1,0 +1,128 @@
+/* پنجره‌ی افزودن/ویرایش محصول — جفتِ ProductEditor.tsx
+   ⚠️ z-index باید از نوارِ ناوبری (۲۰۰) بالاتر باشد، وگرنه نوار روی
+   پنجره می‌افتد و دکمه‌ی بستن کلیک‌پذیر نیست. */
+
+.pedit {
+  position: fixed;
+  inset: 0;
+  z-index: 1400;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+  padding-block-start: max(18px, env(safe-area-inset-top));
+  padding-block-end: max(18px, env(safe-area-inset-bottom));
+  background: rgba(12, 11, 9, 0.5);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  animation: peditIn .18s ease both;
+}
+
+.pedit-box {
+  width: min(680px, 100%);
+  max-height: min(90vh, 820px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: 22px;
+  background: #FBFAF7;
+  border: 1px solid rgba(17, 17, 16, 0.08);
+  box-shadow: 0 28px 70px rgba(17, 17, 16, 0.30);
+  animation: peditRise .22s cubic-bezier(.22, 1, .36, 1) both;
+}
+
+.pedit-head {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 16px 20px; border-block-end: 1px solid rgba(17, 17, 16, 0.07);
+}
+.pedit-head h2 { margin: 0; font-size: 16px; font-weight: 800; color: #1C1C1A; }
+.pedit-head button {
+  display: grid; place-items: center; width: 34px; height: 34px;
+  border: 0; border-radius: 999px; cursor: pointer;
+  color: rgba(0, 0, 0, 0.52); background: rgba(17, 17, 16, 0.05);
+  transition: background .2s;
+}
+.pedit-head button:hover { background: rgba(17, 17, 16, 0.10); }
+.pedit-head button:focus-visible { outline: 2px solid #14532D; outline-offset: 2px; }
+
+.pedit-body {
+  flex: 1; overflow: auto; padding: 18px 20px;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 14px;
+}
+@media (max-width: 620px) { .pedit-body { grid-template-columns: 1fr; } }
+.pedit-wide { grid-column: 1 / -1; }
+
+.pedit-body label { display: flex; flex-direction: column; gap: 6px; }
+.pedit-body label > span, .pedit-lbl {
+  font-size: 12.5px; font-weight: 700; color: #5B564B;
+}
+.pedit-lbl { display: block; margin-block-end: 8px; }
+.pedit-body input, .pedit-body textarea {
+  width: 100%; padding: 10px 13px; border-radius: 11px;
+  font: inherit; font-size: 13.5px; color: #1C1B17;
+  background: #FAFAF7; border: 1px solid #E7E2D6; outline: none;
+  transition: border-color .2s, box-shadow .2s;
+}
+.pedit-body textarea { resize: vertical; line-height: 1.9; }
+.pedit-body input::placeholder, .pedit-body textarea::placeholder { color: #A69F8E; font-size: 12px; }
+.pedit-body input:focus, .pedit-body textarea:focus { border-color: #C7A66A; }
+.pedit-body input:focus-visible, .pedit-body textarea:focus-visible { box-shadow: 0 0 0 3px rgba(199, 166, 106, 0.16); }
+
+/* ── عکس‌ها ── */
+.pedit-file { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+.pedit-imgs { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 10px; }
+.pedit-img {
+  position: relative; aspect-ratio: 1 / 1; overflow: hidden; border-radius: 12px;
+  background: #EFECE4; border: 1px solid rgba(17, 17, 16, 0.10);
+}
+.pedit-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.pedit-img > button {
+  position: absolute; inset-block-start: 5px; inset-inline-start: 5px;
+  display: grid; place-items: center; width: 26px; height: 26px;
+  border: 0; border-radius: 999px; cursor: pointer;
+  color: #fff; background: rgba(12, 11, 9, 0.58);
+}
+.pedit-img > button:hover { background: rgba(178, 59, 46, 0.86); }
+.pedit-img > button:focus-visible { outline: 2px solid #fff; outline-offset: -2px; }
+/* عکسِ نخست جلدِ کارت است — کاربر باید بداند کدام */
+.pedit-cover {
+  position: absolute; inset-block-end: 5px; inset-inline-end: 5px;
+  padding: 2px 8px; border-radius: 999px;
+  font-size: 10.5px; font-weight: 800; color: #3a2800; background: rgba(199, 166, 106, 0.94);
+}
+.pedit-add {
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
+  aspect-ratio: 1 / 1; border-radius: 12px; cursor: pointer;
+  font: inherit; font-size: 11.5px; font-weight: 700; color: #8F6531;
+  background: rgba(199, 166, 106, 0.08); border: 1.5px dashed rgba(199, 166, 106, 0.50);
+  transition: background .2s, border-color .2s;
+}
+.pedit-add:hover { background: rgba(199, 166, 106, 0.16); border-color: rgba(199, 166, 106, 0.72); }
+.pedit-add:focus-visible { outline: 2px solid #14532D; outline-offset: 2px; }
+.pedit-add:disabled { cursor: not-allowed; opacity: .55; }
+
+.pedit-err { margin: 0; padding: 0 20px 4px; font-size: 12.5px; font-weight: 700; color: #B23B2E; }
+
+.pedit-foot {
+  display: flex; flex-wrap: wrap; gap: 10px;
+  padding: 14px 20px; border-block-start: 1px solid rgba(17, 17, 16, 0.07);
+}
+.pedit-save, .pedit-cancel {
+  min-height: 44px; padding-inline: 20px; border-radius: 12px; cursor: pointer;
+  font: inherit; font-size: 13.5px; font-weight: 800;
+  transition: transform .2s cubic-bezier(.22, 1, .36, 1), background .2s;
+}
+.pedit-save { color: #8F6531; background: rgba(199, 166, 106, 0.14); border: 1px solid rgba(199, 166, 106, 0.38); }
+.pedit-save:hover:not(:disabled) { transform: translateY(-2px); background: rgba(199, 166, 106, 0.22); }
+.pedit-cancel { color: rgba(0, 0, 0, 0.55); background: rgba(17, 17, 16, 0.04); border: 1px solid rgba(17, 17, 16, 0.10); }
+.pedit-cancel:hover:not(:disabled) { background: rgba(17, 17, 16, 0.08); }
+.pedit-save:disabled, .pedit-cancel:disabled { cursor: not-allowed; opacity: .55; }
+.pedit-save:focus-visible, .pedit-cancel:focus-visible { outline: 2px solid #14532D; outline-offset: 2px; }
+
+@keyframes peditIn   { from { opacity: 0 } }
+@keyframes peditRise { from { opacity: 0; transform: translateY(14px) scale(.985) } }
+
+@media (prefers-reduced-motion: reduce) {
+  .pedit, .pedit-box, .pedit-save, .pedit-cancel, .pedit-add { animation: none; transition: none; }
+  .pedit-save:hover, .pedit-cancel:hover { transform: none; }
+}

@@ -12,6 +12,7 @@ import { uploadFile } from '@/lib/supabase'
 import { videoMeta, formatDuration } from '@/lib/video-thumb'
 import { notify } from '@/lib/ui/dialogs'
 import '@/components/profile/profile-page.css'
+import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { toFa, faNum, MONO, Icon, LQ, LQ_NEUTRAL, LQ_FELT_ON } from '../../sellers/[id]/shared'
 import { getManufacturerProfile, profileToManufacturer } from '../../../lib/manufacturer-store'
@@ -22,14 +23,15 @@ import { compressImage } from '../../../lib/seller-store'
 import { ask } from '../../../lib/ui/dialogs'
 import ProfileHero from '../../../components/profile/ProfileHero'
 import ManufacturerPoster from '../../../components/profile/ManufacturerPoster'
-import ProductDialog from './ProductDialog'
+import ProductEditor from './ProductEditor'
 import { Factory } from 'lucide-react'
 import { iranTel } from '../../../lib/iran-geo'
-import { getManufacturer, type MfrProduct } from '../../../lib/manufacturers-data'
+import { getManufacturer, productImages, type MfrProduct } from '../../../lib/manufacturers-data'
 import OwnerAdsSection from '../../../components/market/OwnerAdsSection'
 import { fetchProductsByOwner, type ShopProduct } from '../../shop/products'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Plus, Pencil, Trash2 } from 'lucide-react'
 import { useTabKeys } from '@/hooks/use-tab-keys'
+import { useCopyUrl } from '@/hooks/use-copy-url'
 
 const DEFAULT_ID = '1'
 
@@ -136,6 +138,40 @@ export default function ManufacturerPage() {
   const [vidBusy, setVidBusy] = useState(false)
   /* انتشار در بیلیارد مدیا — پنجره فقط وقتی باز می‌شود که کانال
      همین نقش نباشد. آپلود گالری هرگز به نتیجه‌اش وابسته نیست. */
+
+  /* ── نوشتنِ محصول روی پروفایل ──
+     ⚠️ همیشه از روی `draft` (نسخه‌ی تازه‌ی خودِ هوک) ساخته می‌شود، نه
+     از روی `mfr` این رندر: وگرنه دو ویرایشِ پشتِ هم، دومی اولی را
+     پاک می‌کرد. */
+  /* ⚠️ شکستِ ذخیره باید *دیده* شود. `edit.error` فقط داخلِ تبِ گالری
+     رندر می‌شد، پس ذخیره‌ی ناموفقِ محصول بی‌صدا بود: پنجره باز
+     می‌ماند و مالک فکر می‌کرد کلیکش گم شده — همان الگویی که دو بار
+     به داده‌ی همین کاربر آسیب زد. */
+  const [prodErr, setProdErr] = useState('')
+
+  const saveProduct = async (p: MfrProduct) => {
+    setProdErr('')
+    const ok = await edit.apply(d => {
+      const list = Array.isArray(d.products) ? d.products : []
+      const at = list.findIndex(x => x.id === p.id)
+      const next = at >= 0 ? list.map((x, i) => (i === at ? p : x)) : [...list, p]
+      return { ...d, products: next }
+    })
+    if (!ok) { setProdErr('ذخیره انجام نشد. اگر عکس‌ها بزرگ‌اند، تعدادشان را کم کنید و دوباره تلاش کنید.'); return }
+    setEditorOpen(false); setEditing(null)
+    /* محصولِ تازه نباید پشتِ فیلتر یا صفحه‌ی بعد گم شود */
+    setCat('all'); setQuery('')
+  }
+
+  const removeProduct = async (p: MfrProduct) => {
+    if (!(await ask(`«${p.name}» حذف شود؟`, { body: 'این کار برگشت‌پذیر نیست.', confirmLabel: 'حذف' }))) return
+    setProdErr('')
+    const ok = await edit.apply(d => ({
+      ...d,
+      products: (Array.isArray(d.products) ? d.products : []).filter(x => x.id !== p.id),
+    }))
+    if (!ok) setProdErr('حذف انجام نشد. دوباره تلاش کنید.')
+  }
 
   const addShots = async (files: File[], album?: string) => {
     const items = await Promise.all(files.map(async fl => ({
@@ -328,6 +364,16 @@ export default function ManufacturerPage() {
   const phoneDig  = tel.digits
   const phoneText = tel.text
   const phoneHref = tel.href
+  /* خط دوم و موبایل — همان منبع واحد، پس هر سه یک‌شکل نوشته می‌شوند */
+  const tel2 = iranTel(mfr?.phone2, null, mfr?.city)
+  const mobileDigits = String(mfr?.mobile ?? '').replace(/\D/g, '')
+
+  /* ⚠️ از هوکِ مشترک، نه نسخه‌ی دست‌ساز: `navigator.clipboard` روی
+     http — همان مسیرِ تستِ گوشی روی شبکه‌ی محلی — وجود ندارد و
+     نسخه‌ی قبلی آن‌جا بی‌صدا هیچ کاری نمی‌کرد. */
+  const { state: urlCopyState, copy: copyUrl } = useCopyUrl(
+    'mfr-url-code', `https://billiardhub.net/manufacturers/${mfrId}`,
+  )
 
   /* آرایه‌ی تازه در هر رندر، وابستگی دو useMemo پایین را همیشه
      تغییریافته نشان می‌داد و فیلترها بی‌دلیل دوباره اجرا می‌شدند. */
@@ -337,7 +383,9 @@ export default function ManufacturerPage() {
   const [page, setPage]   = useState(1)
   const [query, setQuery] = useState('')
   const [tab, setTab]     = useState<MfrTab>('about')
-  const [openProd, setOpenProd] = useState<MfrProduct | null>(null)
+  /* ویرایشگرِ محصول — فقط برای مالک. `editing` تهی یعنی «محصول تازه». */
+  const [editorOpen, setEditorOpen] = useState(false)
+  const [editing, setEditing] = useState<MfrProduct | null>(null)
   const onTabKey = useTabKeys(MFR_TABS.map(x => x.key), tab, setTab, 'mtab-')
 
   /* دسته‌بندی‌ها از خود محصولات */
@@ -417,7 +465,12 @@ export default function ManufacturerPage() {
     { label: 'صادرات',      value: withUnit(mfr.exportCountries, 'کشور') },
   ].filter(s => s.value)
 
-  const hasContact = !!(phoneDig || mfr.hours || mfr.whatsapp || mfr.instagram)
+  const hasContact = !!(phoneDig || tel2.href || mobileDigits || mfr.hours || mfr.whatsapp || mfr.instagram)
+
+  /* مختصات بر نشانیِ متنی مقدم است — مسیریابی به یک نقطه، نه به
+     نتیجه‌ی جست‌وجوی یک رشته. */
+  const hasCoords = !!(Number(mfr.latitude) && Number(mfr.longitude))
+  const mapQuery = hasCoords ? `${mfr.latitude},${mfr.longitude}` : (mfr.address || '')
 
   return (
     <div dir="rtl" className="min-h-screen bg-[#F7F5F0] font-[Vazirmatn,Tahoma,sans-serif] text-[#1C1B17]">
@@ -467,6 +520,22 @@ export default function ManufacturerPage() {
           background: rgba(20,83,45,0.05); border: 1px solid rgba(20,83,45,0.12); }
         .mfr-ok { display: inline-flex; flex-shrink: 0; color: #14532D; }
 
+        /* ── کارتِ گواهینامه ── */
+        .mfr-certs { list-style: none; margin: 0; padding: 0;
+          display: grid; grid-template-columns: repeat(auto-fill, minmax(230px,1fr)); gap: 10px; }
+        .mfr-certs li { display: flex; align-items: center; gap: 11px; padding: 10px;
+          border-radius: 13px; background: rgba(255,255,255,0.72); border: 1px solid rgba(17,17,16,0.08); }
+        .mfr-cert-img { flex-shrink: 0; width: 46px; height: 60px; padding: 0; border-radius: 8px;
+          overflow: hidden; border: 1px solid rgba(17,17,16,0.10); background: #F1EFEA; cursor: zoom-in; }
+        .mfr-cert-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .mfr-cert-img:focus-visible { outline: 2px solid #14532D; outline-offset: 2px; }
+        .mfr-cert-none { cursor: default; }
+        .mfr-cert-txt { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+        .mfr-cert-txt > b { font-size: 13.5px; font-weight: 800; color: #1C1C1A; }
+        .mfr-cert-txt > span { font-size: 11.5px; color: rgba(0,0,0,0.42); }
+        .mfr-post { margin: 0 0 12px; font-size: 13px; color: rgba(0,0,0,0.50); }
+        .mfr-post b { color: #1C1C1A; }
+
         .mfr-chips { display: flex; flex-wrap: wrap; gap: 8px; }
         .mfr-chip { display: inline-flex; align-items: center; gap: 6px; padding: 7px 13px; border-radius: 999px;
           font-size: 12.5px; font-weight: 700; color: rgba(0,0,0,0.55);
@@ -484,6 +553,19 @@ export default function ManufacturerPage() {
         .mfr-ct > a, .mfr-ct > div { display: flex; align-items: center; gap: 9px;
           font-size: 13.5px; color: rgba(0,0,0,0.55); text-decoration: none; }
         .mfr-ct > a:hover { color: #14532D; }
+        /* قرصِ نشانی اختصاصی — همان طلاییِ کارتِ تماسِ باشگاه */
+        .mfr-url {
+          display: inline-flex; align-items: center; gap: 7px; max-width: 100%;
+          padding: 8px 12px; border-radius: 10px; cursor: pointer;
+          font: inherit; font-size: 12px; font-weight: 700; color: #8F6531;
+          background: rgba(199,166,106,0.12); border: 1px solid rgba(199,166,106,0.34);
+          transition: transform .2s cubic-bezier(.22,1,.36,1), background .2s;
+        }
+        .mfr-url:hover { transform: translateY(-2px); background: rgba(199,166,106,0.18); }
+        .mfr-url:focus-visible { outline: 2px solid #14532D; outline-offset: 2px; }
+        .mfr-url > span:nth-child(2) { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .mfr-url-x { flex-shrink: 0; font-size: 11px; opacity: .7; }
+
         .mfr-soc { display: flex; gap: 9px; margin-top: 4px; }
         .mfr-soc a { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 11px;
           color: #6F6A5C; background: rgba(26,25,23,0.05); border: 1px solid #E7E2D6;
@@ -532,6 +614,44 @@ export default function ManufacturerPage() {
         .mfr-prod:focus-visible { outline: 2px solid #14532D; outline-offset: 2px; }
         .mfr-prod-noimg { position: absolute; inset: 0; display: grid; place-items: center;
           font-size: 12px; color: rgba(0,0,0,0.30); }
+        .mfr-prod-err { margin: 16px 0 0; padding: 12px 15px; border-radius: 12px;
+          font-size: 13px; font-weight: 700; color: #B23B2E;
+          background: rgba(178,59,46,0.07); border: 1px solid rgba(178,59,46,0.22); }
+        .mfr-prod-count { position: absolute; inset-block-end: 8px; inset-inline-end: 8px;
+          padding: 2px 9px; border-radius: 999px; font-size: 10.5px; font-weight: 700;
+          color: rgba(255,255,255,0.94); background: rgba(12,11,9,0.52); backdrop-filter: blur(6px); }
+
+        /* ── دکمه‌ی + و ابزارهای مالک ──
+           همان الگوی گالری: کاشیِ خط‌چینِ افزودن، و روی هر کارت دو
+           دکمه‌ی کوچک که فقط مالک می‌بیند. */
+        .mfr-prod-wrap { position: relative; display: flex; }
+        .mfr-prod-wrap > .mfr-prod { flex: 1; }
+        .mfr-prod-tools { position: absolute; inset-block-start: 8px; inset-inline-end: 8px;
+          display: flex; gap: 5px; }
+        .mfr-prod-tools > button {
+          display: grid; place-items: center; width: 28px; height: 28px; border: 0;
+          border-radius: 999px; cursor: pointer; color: #fff; background: rgba(12,11,9,0.55);
+          backdrop-filter: blur(6px); transition: background .2s;
+        }
+        .mfr-prod-tools > button:hover { background: rgba(12,11,9,0.78); }
+        .mfr-prod-tools > button:last-child:hover { background: rgba(178,59,46,0.86); }
+        .mfr-prod-tools > button:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+        .mfr-prod-tools > button:disabled { cursor: not-allowed; opacity: .5; }
+
+        .mfr-prod-add {
+          display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
+          min-height: 190px; border-radius: 16px; cursor: pointer;
+          font: inherit; font-size: 12.5px; font-weight: 800; color: #8F6531;
+          background: rgba(199,166,106,0.07); border: 1.5px dashed rgba(199,166,106,0.50);
+          transition: background .2s, border-color .2s, transform .28s cubic-bezier(.22,1,.36,1);
+        }
+        .mfr-prod-add:hover { transform: translateY(-3px); background: rgba(199,166,106,0.15); border-color: rgba(199,166,106,0.74); }
+        .mfr-prod-add:focus-visible { outline: 2px solid #14532D; outline-offset: 2px; }
+        .mfr-prod-add:disabled { cursor: not-allowed; opacity: .55; }
+        @media (prefers-reduced-motion: reduce) {
+          .mfr-prod-add { transition: none }
+          .mfr-prod-add:hover { transform: none }
+        }
         .mfr-prod-more { margin-top: 6px; font-size: 11px; font-weight: 700; color: #8F6531; }
         .mfr-prod-img { position: relative; aspect-ratio: 1 / 1; overflow: hidden; background: #F1EFEA; }
         .mfr-prod-img img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
@@ -673,24 +793,54 @@ export default function ManufacturerPage() {
               {mfr.certificates.length > 0 && (
                 <section className="lqg lqg-hover mfr-card">
                   <h2 className="mfr-h"><span className="mfr-bar" aria-hidden />گواهینامه‌ها و استانداردها</h2>
-                  <div className="mfr-chips">
+                  {/* ⚠️ تصویر بخشِ خودِ ادعاست، نه تزئین: «ISO 9001»
+                      بدون مدرک فقط یک متنِ تایپ‌شده است. کلیک روی کارت
+                      اصلِ گواهینامه را بزرگ نشان می‌دهد. */}
+                  <ul className="mfr-certs">
                     {mfr.certificates.map((c, i) => (
-                      <span key={i} className="mfr-chip" title={`${c.issuer} — ${toFa(c.year)}`}>
-                        <span className="mfr-ok" aria-hidden>{Icon.check}</span>{c.title}
-                      </span>
+                      <li key={i}>
+                        {c.image ? (
+                          <button
+                            type="button" className="mfr-cert-img"
+                            onClick={() => openImage(c.image!, { title: c.title, alt: c.title })}
+                            aria-label={`بزرگ‌نمایی گواهینامه ${c.title}`}
+                          >
+                            <img src={c.image} alt="" loading="lazy" />
+                          </button>
+                        ) : (
+                          <span className="mfr-cert-img mfr-cert-none" aria-hidden />
+                        )}
+                        <div className="mfr-cert-txt">
+                          <b>{c.title}</b>
+                          {(c.issuer || c.year) && (
+                            <span>{[c.issuer, c.year && toFa(c.year)].filter(Boolean).join(' — ')}</span>
+                          )}
+                        </div>
+                      </li>
                     ))}
-                  </div>
+                  </ul>
                 </section>
               )}
 
-              {mfr.address && (
+              {(mfr.address || mapQuery) && (
                 <section className="lqg lqg-hover mfr-card">
                   <h2 className="mfr-h"><span className="mfr-bar" aria-hidden />موقعیت کارخانه</h2>
-                  <p className="mfr-addr"><span className="mfr-pin" aria-hidden>{Icon.pin}</span>{mfr.address}</p>
-                  <a className="mfr-map" target="_blank" rel="noopener noreferrer"
-                    href={`https://maps.google.com/?q=${encodeURIComponent(mfr.address)}`}>
-                    <span aria-hidden>{Icon.pin}</span>مشاهده روی نقشه
-                  </a>
+                  {mfr.address && (
+                    <p className="mfr-addr"><span className="mfr-pin" aria-hidden>{Icon.pin}</span>{mfr.address}</p>
+                  )}
+                  {mfr.postalCode && (
+                    <p className="mfr-post">کد پستی: <b dir="ltr" className={MONO}>{toFa(mfr.postalCode)}</b></p>
+                  )}
+                  {/* ⚠️ وقتی مختصات ثبت شده، نقشه با همان باز می‌شود نه
+                      با جست‌وجوی متنِ آدرس: «شهرک صنعتی ساوه، فاز ۲» را
+                      گوگل جای دیگری می‌برد. */}
+                  {mapQuery && (
+                    <a className="mfr-map" target="_blank" rel="noopener noreferrer"
+                      href={`https://maps.google.com/?q=${encodeURIComponent(mapQuery)}`}>
+                      <span aria-hidden>{Icon.pin}</span>
+                      {hasCoords ? 'مسیریابی به کارگاه' : 'مشاهده روی نقشه'}
+                    </a>
+                  )}
                 </section>
               )}
             </div>
@@ -706,9 +856,33 @@ export default function ManufacturerPage() {
                       <span className={MONO} dir="ltr">{toFa(phoneText)}</span>
                     </a>
                   )}
+                  {tel2.href && (
+                    <a href={`tel:${tel2.href}`}>
+                      <span className="mfr-ok" aria-hidden>{Icon.phone}</span>
+                      <span className={MONO} dir="ltr">{toFa(tel2.text)}</span>
+                    </a>
+                  )}
+                  {/* موبایل جدا از واتساپ نشان داده می‌شود: شماره‌ی
+                      واتساپ لزوما شماره‌ی تماس نیست. */}
+                  {mobileDigits && (
+                    <a href={`tel:${mobileDigits}`}>
+                      <span className="mfr-ok" aria-hidden>{Icon.phone}</span>
+                      <span className={MONO} dir="ltr">{toFa(mobileDigits)}</span>
+                    </a>
+                  )}
                   {mfr.hours && (
                     <div><span className="mfr-ok" aria-hidden>{Icon.clock}</span>{mfr.hours}</div>
                   )}
+                  {/* نشانی اختصاصی — همان قرصِ طلاییِ کارتِ تماسِ باشگاه */}
+                  <button type="button" onClick={() => void copyUrl()} className="mfr-url" title="کپی نشانی اختصاصی">
+                    <span aria-hidden>{Icon.pin}</span>
+                    <span id="mfr-url-code" dir="ltr" className={MONO}>billiardhub.net/manufacturers/{mfrId}</span>
+                    <span aria-hidden className="mfr-url-x">{urlCopyState === 'ok' ? '✓' : '⧉'}</span>
+                  </button>
+                  <span aria-live="polite" className="sr-only">
+                    {urlCopyState === 'ok' ? 'نشانی در کلیپ‌بورد کپی شد'
+                      : urlCopyState === 'manual' ? 'مرورگر اجازه‌ی کپی نداد؛ نشانی انتخاب شد — با Ctrl+C بردارید' : ''}
+                  </span>
                   {(mfr.whatsapp || mfr.instagram) && (
                     <div className="mfr-soc">
                       {mfr.whatsapp && (
@@ -753,34 +927,78 @@ export default function ManufacturerPage() {
               </div>
 
               <div ref={gridRef} className="mfr-prods" style={{ scrollMarginTop: 80 }}>
-                {/* ⚠️ دکمه، نه `article`: کارت حالا باز می‌شود و باید
-                    با کیبورد هم قابلِ رسیدن باشد. */}
-                {paged.map((p: MfrProduct) => (
+                {/* ── دکمه‌ی + ──
+                    همان الگوی گالری: فقط صاحبِ پروفایل می‌بیندش و
+                    محصول را همان‌جا که نتیجه دیده می‌شود اضافه
+                    می‌کند. «دیدن» تصمیمِ نمایش است؛ اجازه را سرور
+                    دوباره می‌سنجد. */}
+                {edit.isOwner && (
                   <button
-                    key={p.id} type="button" className="mfr-prod group"
-                    onClick={() => setOpenProd(p)}
-                    aria-label={`جزئیات ${p.name}`}
+                    type="button" className="mfr-prod-add"
+                    onClick={() => { setEditing(null); setEditorOpen(true) }}
+                    disabled={edit.saving}
                   >
-                    <div className="mfr-prod-img">
-                      {p.image
-                        ? <img src={p.image} alt="" loading="lazy" className="transition-transform duration-500 group-hover:scale-[1.05]" />
-                        : <span className="mfr-prod-noimg">بدون تصویر</span>}
-                      {p.badge && <span className="mfr-prod-badge">{p.badge}</span>}
-                    </div>
-                    <div className="mfr-prod-body">
-                      {p.category && <span className="mfr-prod-cat">{p.category}</span>}
-                      <span className="mfr-prod-name">{p.name}</span>
-                      {/* خلاصه‌ی کوتاه؛ باقیِ مشخصات داخلِ پنجره */}
-                      {(p.description || p.specs[0]) && (
-                        <span className="mfr-prod-spec">{p.description || p.specs[0]}</span>
-                      )}
-                      {p.specs.length > 0 && (
-                        <span className="mfr-prod-more">{faNum(p.specs.length)} مشخصه</span>
-                      )}
-                    </div>
+                    <Plus size={26} aria-hidden />
+                    <span>افزودن محصول</span>
                   </button>
-                ))}
+                )}
+
+                {/* ⚠️ لینکِ واقعی، نه دکمه: محصول صفحه‌ی خودش را دارد،
+                    پس باید با «بازکردن در تبِ جدید» و کیبورد هم کار
+                    کند و نشانی‌اش قابلِ هم‌رسانی باشد. */}
+                {paged.map((p: MfrProduct) => {
+                  const cover = productImages(p)[0] ?? ''
+                  return (
+                    <div key={p.id} className="mfr-prod-wrap">
+                      <Link
+                        href={`/manufacturers/${mfrId}/products/${p.id}`}
+                        className="mfr-prod group"
+                        aria-label={`جزئیات ${p.name}`}
+                      >
+                        <div className="mfr-prod-img">
+                          {cover
+                            ? <img src={cover} alt="" loading="lazy" className="transition-transform duration-500 group-hover:scale-[1.05]" />
+                            : <span className="mfr-prod-noimg">بدون تصویر</span>}
+                          {p.badge && <span className="mfr-prod-badge">{p.badge}</span>}
+                          {productImages(p).length > 1 && (
+                            <span className="mfr-prod-count">{faNum(productImages(p).length)} عکس</span>
+                          )}
+                        </div>
+                        <div className="mfr-prod-body">
+                          {p.category && <span className="mfr-prod-cat">{p.category}</span>}
+                          <span className="mfr-prod-name">{p.name}</span>
+                          {(p.description || (p.specs ?? [])[0]) && (
+                            <span className="mfr-prod-spec">{p.description || (p.specs ?? [])[0]}</span>
+                          )}
+                          {(p.specs ?? []).length > 0 && (
+                            <span className="mfr-prod-more">{faNum((p.specs ?? []).length)} مشخصه</span>
+                          )}
+                        </div>
+                      </Link>
+
+                      {edit.isOwner && (
+                        <div className="mfr-prod-tools">
+                          <button
+                            type="button" aria-label={`ویرایش ${p.name}`} disabled={edit.saving}
+                            onClick={() => { setEditing(p); setEditorOpen(true) }}
+                          >
+                            <Pencil size={13} aria-hidden />
+                          </button>
+                          <button
+                            type="button" aria-label={`حذف ${p.name}`} disabled={edit.saving}
+                            onClick={() => void removeProduct(p)}
+                          >
+                            <Trash2 size={13} aria-hidden />
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  )
+                })}
               </div>
+
+              {/* شکستِ ذخیره/حذف روی همین تب دیده می‌شود، نه فقط در گالری */}
+              {prodErr && <p role="alert" className="mfr-prod-err">{prodErr}</p>}
 
               {/* «هنوز محصولی ثبت نشده» با «فیلترت چیزی پیدا نکرد» یکی
                   نیست: اولی کارِ کاربر نیست و دکمه‌ی پاک‌کردن هم
@@ -866,13 +1084,16 @@ export default function ManufacturerPage() {
         )}
       </div>
 
-      {openProd && (
-        <ProductDialog
-          product={openProd}
-          maker={mfr.name}
-          telHref={phoneHref || undefined}
-          telText={phoneText ? toFa(phoneText) : undefined}
-          onClose={() => setOpenProd(null)}
+      {editorOpen && (
+        <ProductEditor
+          /* کلید یعنی مقدارهای اولیه‌ی فرم هرگز از محصولی به محصول
+             دیگر سرریز نمی‌کنند */
+          key={editing?.id ?? 'new'}
+          product={editing}
+          busy={edit.saving}
+          error={prodErr}
+          onSave={saveProduct}
+          onClose={() => { if (edit.saving) return; setEditorOpen(false); setEditing(null); setProdErr('') }}
         />
       )}
 

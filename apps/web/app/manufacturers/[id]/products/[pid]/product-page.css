@@ -1,0 +1,102 @@
+/* صفحه‌ی محصولِ تولیدی — جفتِ page.tsx همین پوشه.
+   چیدمان و نسبت‌ها از صفحه‌ی محصولِ بیلیارد بازار می‌آید تا یک
+   محصول در دو جای سایت دو شکل نداشته باشد. */
+
+.mpp {
+  min-height: 100vh;
+  background: #F7F5F0;
+  font-family: Vazirmatn, Tahoma, sans-serif;
+  color: #1C1B17;
+}
+.mpp-wrap { max-width: 1160px; margin: 0 auto; padding: clamp(14px, 2.4vw, 26px) clamp(14px, 3vw, 30px) 64px; }
+
+.mpp-crumb {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 7px;
+  margin-block-end: 18px; font-size: 12.5px; color: rgba(0, 0, 0, 0.42);
+}
+.mpp-crumb a { color: inherit; text-decoration: none; }
+.mpp-crumb a:hover { color: #14532D; }
+.mpp-crumb [aria-current] { font-weight: 700; color: #1C1B17; }
+
+.mpp-grid { display: grid; grid-template-columns: 1.05fr 1fr; gap: clamp(18px, 3vw, 34px); align-items: start; }
+@media (max-width: 820px) { .mpp-grid { grid-template-columns: 1fr; } }
+
+/* ── رسانه ── */
+.mpp-stage {
+  position: relative; aspect-ratio: 1 / 1; overflow: hidden;
+  border-radius: 20px; background: #EFECE4;
+  border: 1px solid rgba(17, 17, 16, 0.08);
+}
+.mpp-zoom { position: absolute; inset: 0; display: block; padding: 0; border: 0; background: none; cursor: zoom-in; }
+.mpp-zoom img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.mpp-zoom:focus-visible { outline: 2px solid #14532D; outline-offset: -4px; }
+.mpp-noimg { position: absolute; inset: 0; display: grid; place-items: center; font-size: 13px; color: rgba(0, 0, 0, 0.32); }
+.mpp-badge {
+  position: absolute; inset-block-start: 12px; inset-inline-start: 12px;
+  padding: 5px 12px; border-radius: 999px;
+  font-size: 12px; font-weight: 800; color: #3a2800; background: rgba(199, 166, 106, 0.94);
+}
+
+.mpp-thumbs { display: flex; gap: 8px; margin-block-start: 12px; overflow-x: auto; padding-block-end: 2px; scrollbar-width: none; }
+.mpp-thumbs::-webkit-scrollbar { display: none; }
+.mpp-thumbs > button {
+  flex: 0 0 auto; width: 62px; height: 62px; padding: 0; border-radius: 12px; overflow: hidden;
+  cursor: pointer; background: #EFEDE9; opacity: .72;
+  border: 1.5px solid rgba(17, 17, 16, 0.10);
+  transition: opacity .2s, border-color .2s;
+}
+.mpp-thumbs > button.on { opacity: 1; border: 2px solid #C7A66A; }
+.mpp-thumbs > button:focus-visible { outline: 2px solid #14532D; outline-offset: 2px; }
+.mpp-thumbs img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+/* ── اطلاعات ── */
+.mpp-cat {
+  display: inline-block; margin-block-end: 9px; padding: 4px 12px; border-radius: 999px;
+  font-size: 11.5px; font-weight: 800; color: #8F6531;
+  background: rgba(199, 166, 106, 0.12); border: 1px solid rgba(199, 166, 106, 0.30);
+}
+.mpp-name { margin: 0; font-size: clamp(19px, 2.4vw, 25px); font-weight: 800; line-height: 1.45; letter-spacing: -0.01em; }
+.mpp-maker {
+  display: inline-flex; align-items: center; gap: 4px; margin-block-start: 8px;
+  font-size: 13px; font-weight: 700; color: #8F6531; text-decoration: none;
+}
+.mpp-maker:hover { opacity: .78; }
+
+.mpp-block { margin-block-start: 26px; }
+.mpp-block > h2 {
+  margin: 0 0 10px; font-size: 14.5px; font-weight: 800; color: #1C1C1A;
+  display: flex; align-items: center; gap: 9px;
+}
+.mpp-block > h2::before {
+  content: ''; width: 3px; height: 15px; border-radius: 2px; flex-shrink: 0;
+  background: linear-gradient(135deg, #C7A66A, #A07840);
+}
+.mpp-block > p { margin: 0; font-size: 14.5px; line-height: 2; color: rgba(0, 0, 0, 0.55); white-space: pre-line; }
+
+.mpp-specs { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.mpp-specs li {
+  position: relative; padding-block: 11px; padding-inline: 26px 14px;
+  border-radius: 11px; font-size: 13.5px; line-height: 1.75; color: rgba(0, 0, 0, 0.58);
+  background: rgba(17, 17, 16, 0.035);
+}
+.mpp-specs li::before {
+  content: ''; position: absolute; inset-inline-start: 11px; inset-block-start: 19px;
+  width: 5px; height: 5px; border-radius: 999px; background: #C7A66A;
+}
+
+.mpp-cta { display: flex; flex-wrap: wrap; gap: 10px; margin-block-start: 28px; }
+.mpp-call, .mpp-wa {
+  display: inline-flex; align-items: center; gap: 9px; min-height: 48px; padding-inline: 20px;
+  border-radius: 13px; font-size: 14px; font-weight: 800; text-decoration: none;
+  transition: transform .2s cubic-bezier(.22, 1, .36, 1), background .2s;
+}
+.mpp-call { color: #8F6531; background: rgba(199, 166, 106, 0.12); border: 1px solid rgba(199, 166, 106, 0.34); }
+.mpp-call:hover { transform: translateY(-2px); background: rgba(199, 166, 106, 0.18); }
+.mpp-wa { color: #0E7A38; background: rgba(37, 211, 102, 0.12); border: 1px solid rgba(37, 211, 102, 0.34); }
+.mpp-wa:hover { transform: translateY(-2px); background: rgba(37, 211, 102, 0.20); }
+.mpp-call:focus-visible, .mpp-wa:focus-visible { outline: 2px solid #14532D; outline-offset: 2px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .mpp-call, .mpp-wa, .mpp-thumbs > button { transition: none; }
+  .mpp-call:hover, .mpp-wa:hover { transform: none; }
+}
