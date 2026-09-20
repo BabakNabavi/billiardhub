@@ -69,6 +69,9 @@ export interface ProfileHeroProps {
   grade?: { label: string; dots: number }
   /** چیپ رشته‌ها. خنثی است: تنها تأکید رنگی هیرو، طلایی درجه است. */
   disciplines: { label: string }[]
+  /* گواهینامه‌ها — چیپِ جدا با نشانِ تأیید. خودِ عنوان کافی است؛
+     تصویرشان جای دیگری (کارتِ گواهینامه) دیده می‌شود. */
+  certs?: string[]
   /** بزرگ‌نمایی عکس پروفایل — نبودنش یعنی آواتار کلیک‌شدنی نباشد */
   onOpenPhoto?: (url: string) => void
   /** نقش صاحب پروفایل: نشان جای‌گزین آواتار و رنگ پوستر */
@@ -115,7 +118,7 @@ function cssUrl(u: string): string {
 
 export default function ProfileHero({
   name, nameLatin, city, sinceYear, photo, cover, coverSlides, story, verified,
-  grade, disciplines, onOpenPhoto,
+  grade, disciplines, certs, onOpenPhoto,
   role, backHref, backLabel, publicUrl, actions, stats, posterBase, posterNode,
 }: ProfileHeroProps) {
   const sizes = posterBase ? POSTER_SIZES[posterBase] : POSTER_SIZES.coach
@@ -307,6 +310,11 @@ export default function ProfileHero({
               )}
               {disciplines.map(d => (
                 <li key={d.label} className="ch-chip">{d.label}</li>
+              ))}
+              {(certs ?? []).map(c => (
+                <li key={`cert-${c}`} className="ch-chip ch-chip-cert">
+                  <Check size={12} aria-hidden />{c}
+                </li>
               ))}
             </ul>
 

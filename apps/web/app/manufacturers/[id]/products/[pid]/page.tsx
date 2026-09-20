@@ -25,6 +25,7 @@ import { fetchProfileResult } from '../../../../../lib/profiles/client'
 import { profileToManufacturer } from '../../../../../lib/manufacturer-store'
 import type { ManufacturerProfile } from '../../../../../lib/manufacturer-store'
 import { productImages, type MfrProduct } from '../../../../../lib/manufacturers-data'
+import { waNumber } from '../../../../../lib/phone-wa'
 import { iranTel } from '../../../../../lib/iran-geo'
 import { toFa, MONO } from '../../../../sellers/[id]/shared'
 import './product-page.css'
@@ -76,6 +77,7 @@ export default function MfrProductPage() {
   useEffect(() => { setShown(0) }, [pid])
 
   const tel = iranTel(mfr?.phone, null, mfr?.city)
+  const wa = waNumber(mfr?.whatsapp)
 
   /* یونیونِ تفکیک‌شده‌ی ProfileMissing یا هر دو پراپ را می‌خواهد یا
      هیچ‌کدام را — پس یک‌جا ساخته و پخش می‌شود. */
@@ -175,8 +177,8 @@ export default function MfrProductPage() {
                   <span dir="ltr" className={MONO}>{toFa(tel.text)}</span>
                 </a>
               )}
-              {mfr.whatsapp && (
-                <a className="mpp-wa" href={`https://wa.me/${mfr.whatsapp}`} target="_blank" rel="noopener noreferrer">
+              {wa && (
+                <a className="mpp-wa" href={`https://wa.me/${wa}`} target="_blank" rel="noopener noreferrer">
                   واتساپ
                 </a>
               )}

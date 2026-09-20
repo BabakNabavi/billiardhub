@@ -14,6 +14,7 @@ import ProvinceCitySelect from '../../../components/ProvinceCitySelect'
 import ProfileSlugField from '../../../components/ProfileSlugField'
 import ClubPicker from '../../../components/ClubPicker'
 import { compressImage } from '../../../lib/seller-store'
+import { apiFetch } from '../../../lib/http'
 import {
   emptyManufacturerProfile, findManufacturerByOwner, newManufacturerSlug,
   saveManufacturerProfile, type ManufacturerProfile,
@@ -24,12 +25,13 @@ import VerificationBadges from '../../../components/VerificationBadges'
 import { Plus, Trash2, Images, Factory, ArrowLeft, MapPin } from 'lucide-react'
 
 const CARD   = 'rounded-2xl border border-[#E7E2D6] bg-white p-5 shadow-[0_2px_10px_rgba(28,27,23,0.05)]'
-const LQ_BTN = 'inline-flex items-center gap-2 rounded-[10px] border border-[rgba(199,166,106,0.34)] bg-[rgba(199,166,106,0.12)] px-4 py-2.5 text-[13px] font-bold text-[#8F6531] transition hover:-translate-y-0.5'
+const LQ_BTN = 'inline-flex items-center gap-2 rounded-[10px] border border-[rgba(199,166,106,0.34)] bg-[rgba(199,166,106,0.12)] px-4 py-2.5 text-[13px] font-bold text-[#8F6531] transition hover:-translate-y-0.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#C7A66A] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0'
 const INPUT  = 'w-full rounded-xl border border-[#E7E2D6] bg-[#FAFAF7] px-3.5 py-2.5 text-[13.5px] text-[#1C1B17] outline-none transition focus:border-[#C7A66A] placeholder:text-[11.5px] placeholder:text-[#A69F8E]'
 const LABEL  = 'mb-1.5 block text-[12.5px] font-bold text-[#5B564B]'
 /* ارقام فارسی به لاتین — کد پستی باید رقمِ خوانا برای سرور بماند */
-const faToEn = (v: string) => v.replace(/[۰-۹]/g, d => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(d)))
-const faNumFa = (n: number) => n.toLocaleString('fa-IR')
+const faToEn = (v: string) =>
+  v.replace(/[۰-۹]/g, d => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(d)))
+   .replace(/[٠-٩]/g, d => String('٠١٢٣٤٥٦٧٨٩'.indexOf(d)))
 
 export default function ManufacturerDashboard() {
   const { user, _hydrated } = useAuthStore()
@@ -49,9 +51,13 @@ export default function ManufacturerDashboard() {
   const [busy, setBusy]     = useState(false)
 
   const bannerRef = useRef<HTMLInputElement>(null)
+  const logoRef = useRef<HTMLInputElement>(null)
   const licRef = useRef<HTMLInputElement>(null)
   const [cert, setCert] = useState({ title: '', issuer: '', year: '', image: '' })
   const certImgRef = useRef<HTMLInputElement>(null)
+  const [certErr, setCertErr] = useState('')
+  const [postalBusy, setPostalBusy] = useState(false)
+  const [postalMsg, setPostalMsg] = useState<{ ok: boolean; text: string } | null>(null)
   const [geoBusy, setGeoBusy] = useState(false)
   const [geoErr, setGeoErr] = useState('')
 
@@ -127,6 +133,15 @@ export default function ManufacturerDashboard() {
     finally { setBusy(false); e.target.value = '' }
   }
 
+  const pickLogo = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0]; if (!f) return
+    setBusy(true)
+    /* مربع و کوچک — داخلِ دایره‌ی هدر می‌نشیند */
+    try { set('logo', await compressImage(f, 600, 0.78)) }
+    catch { setErr('عکس خوانده نشد.') }
+    finally { setBusy(false); e.target.value = '' }
+  }
+
   const pickBanner = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0]; if (!f) return
     setBusy(true)
@@ -139,21 +154,82 @@ export default function ManufacturerDashboard() {
      ⚠️ تصویر اجباری است: «ISO 9001» تایپ‌شده بدون مدرک، فقط یک
      ادعاست و روی صفحه‌ی عمومی مثل واقعیت دیده می‌شود. */
   const addCert = () => {
-    if (!cert.title.trim()) { setErr('عنوان گواهینامه لازم است.'); return }
-    if (!cert.image) { setErr('تصویر گواهینامه لازم است.'); return }
+    if (!cert.title.trim()) { setCertErr('عنوان گواهینامه لازم است.'); return }
+    if (!cert.image) { setCertErr('تصویر گواهینامه لازم است — بدون مدرک، ادعا می‌ماند.'); return }
     set('certificates', [...form.certificates, {
       title: cert.title.trim(), issuer: cert.issuer.trim(),
       year: cert.year.trim(), image: cert.image,
     }])
-    setCert({ title: '', issuer: '', year: '', image: '' })
+    setCert({ title: '', issuer: '', year: '', image: '' }); setCertErr('')
   }
 
   const pickCertImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0]; if (!f) return
     setBusy(true)
-    try { const url = await compressImage(f, 1400, 0.74); setCert(c => ({ ...c, image: url })) }
-    catch { setErr('عکس خوانده نشد.') }
+    try { const url = await compressImage(f, 1400, 0.74); setCert(c => ({ ...c, image: url })); setCertErr('') }
+    catch { setCertErr('عکس خوانده نشد.') }
     finally { setBusy(false); e.target.value = '' }
+  }
+
+  /* ── استعلام کد پستی ──
+     سرور خودش نشانی و مختصات را روی همین پروفایل می‌نویسد (مثل
+     باشگاه)، پس فرم هم همان مقدارها را فورا نشان می‌دهد. */
+  const lookupPostal = async () => {
+    const code = (form.postalCode ?? '').replace(/\D/g, '')
+    if (!/^\d{10}$/.test(code) || !savedSlug) return
+    const snap = {
+      postalCode: form.postalCode ?? '',
+      address: form.address ?? '',
+      province: form.province ?? '',
+      city: form.city ?? '',
+    }
+    setPostalBusy(true); setPostalMsg(null)
+    try {
+      const r = await apiFetch('/api/address/postal-code', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ postalCode: code, profileKind: 'manufacturer', profileSlug: savedSlug }),
+      })
+      const j = await r.json().catch(() => ({}))
+      /* ⚠️ «پیدا نشد» با ۴۰۴ برمی‌گردد، پس باید پیش از شاخه‌ی
+         not-ok بررسی شود؛ وگرنه این پیام هیچ‌وقت اجرا نمی‌شد و
+         کاربر متنِ خامِ ارائه‌دهنده را می‌دید. */
+      if (j?.found === false) {
+        setPostalMsg({ ok: false, text: 'برای این کد پستی نشانی پیدا نشد' })
+        return
+      }
+      if (!r.ok) {
+        setPostalMsg({ ok: false, text: String(j?.message ?? 'استعلام انجام نشد') })
+        return
+      }
+      /* ⚠️ گاردِ پاسخِ کهنه: استعلام ثانیه‌ها طول می‌کشد و کاربر در
+         همین فاصله ممکن است نشانی یا شهر را دستی عوض کرده باشد. هر
+         فیلدی که از لحظه‌ی ارسال تا حالا تغییر کرده دست‌نخورده
+         می‌ماند — همان قاعده‌ای که تله‌ی mount race را بست.
+
+         مختصات هم فقط وقتی نوشته می‌شود که فرم مختصاتی ندارد:
+         دکمه‌ی «موقعیت فعلی» اندازه‌گیریِ واقعیِ داخلِ کارگاه است و
+         نباید با تخمینِ مرکزِ پلاکِ پستی خراب شود. */
+      setForm(f => {
+        const keep = (k: 'address' | 'province' | 'city', next: unknown) =>
+          f[k] !== snap[k] || !next ? f[k] : String(next)
+        const hasCoords = !!Number(f.latitude) && !!Number(f.longitude)
+        return {
+          ...f,
+          postalCode: f.postalCode === snap.postalCode ? code : f.postalCode,
+          address: keep('address', j?.address),
+          province: keep('province', j?.geo?.province),
+          city: keep('city', j?.geo?.city),
+          latitude: hasCoords || !j?.latitude ? f.latitude : String(j.latitude),
+          longitude: hasCoords || !j?.longitude ? f.longitude : String(j.longitude),
+        }
+      })
+      setSaved(false)
+      setPostalMsg({ ok: true, text: 'نشانی از روی کد پستی ثبت شد' })
+    } catch {
+      setPostalMsg({ ok: false, text: 'ارتباط با سرور برقرار نشد' })
+    } finally {
+      setPostalBusy(false)
+    }
   }
 
   /* موقعیت دقیق — همان چیزی که فرم ثبت باشگاه می‌گیرد */
@@ -256,14 +332,24 @@ export default function ManufacturerDashboard() {
     <div dir="rtl" className="min-h-screen bg-[#F7F5F0] pb-24 text-[#1C1B17] font-[Vazirmatn,Tahoma,sans-serif]">
       <div className="mx-auto max-w-[900px] px-4 pt-6 sm:px-6">
 
-        <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+        <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
           <div>
             <h1 className="text-[19px] font-bold">پنل تولیدکننده</h1>
             <p className="mt-1 text-[12.5px] text-[#6F6A5C]">هرچه این‌جا وارد کنید، همان در بخش «تولیدکنندگان» سایت دیده می‌شود.</p>
           </div>
-          <Link href={`/manufacturers/${form.slug}`} className={LQ_BTN}>
-            <ArrowLeft size={14} /> مشاهده‌ی پروفایل
-          </Link>
+          {/* ⚠️ تا نامک روی سرور ثبت نشده این لینک ۴۰۴ می‌دهد:
+              `form.slug` نامکِ خودکارِ پیش‌نویس است و صفحه‌ای پشتش
+              نیست. متن هم می‌گوید محصول کجا اضافه می‌شود — تنها
+              جایی که این را می‌گفت، باکسِ حذف‌شده‌ی «محصولات» بود. */}
+          {savedSlug ? (
+            <Link href={`/manufacturers/${savedSlug}`} className={LQ_BTN}>
+              <ArrowLeft size={14} /> مشاهده‌ی پروفایل و افزودن محصول
+            </Link>
+          ) : (
+            <p className="text-[12px] text-[#6F6A5C]">
+              بعد از اولین ذخیره، صفحه‌ی عمومی شما ساخته می‌شود و محصول‌ها را از همان‌جا اضافه می‌کنید.
+            </p>
+          )}
         </div>
 
         <form onSubmit={submit} className="space-y-5">
@@ -276,8 +362,29 @@ export default function ManufacturerDashboard() {
           <section className={CARD}>
             <h2 className="mb-4 text-[14.5px] font-bold">هویت کارخانه / برند</h2>
 
+            {/* ── عکس پروفایل ──
+                تا امروز تولیدکننده جایی برای لوگو نداشت و هدر همیشه
+                نشانِ پیش‌فرضِ سوله را نشان می‌داد؛ مالک پرسید «عکس
+                پروفایلم را از کجا عوض کنم؟» — از این‌جا. */}
+            <div className="mb-6">
+              <label className={LABEL}>عکس پروفایل (لوگوی کارخانه)</label>
+              <div className="flex items-center gap-3">
+                <input ref={logoRef} type="file" accept="image/*" className="hidden" onChange={pickLogo} />
+                <button type="button" onClick={() => logoRef.current?.click()} className={LQ_BTN} disabled={busy}>
+                  <Images size={14} /> {form.logo ? 'تغییر عکس' : 'آپلود عکس'}
+                </button>
+                {form.logo && (
+                  <>
+                    <img loading="lazy" decoding="async" src={form.logo} alt="" className="h-16 w-16 rounded-full border border-[#E7E2D6] object-cover" />
+                    <button type="button" onClick={() => set('logo', '')} className="text-[11.5px] font-bold text-[#B23B2E]">حذف</button>
+                  </>
+                )}
+              </div>
+              <p className="mt-2 text-[11.5px] text-[#6F6A5C]">در هدر صفحه‌ی شما، داخل دایره‌ی کنار نام نمایش داده می‌شود.</p>
+            </div>
+
             {/* بنر */}
-            <div className="mb-5">
+            <div className="mb-6">
               <label className={LABEL}>بنر صفحه (عکس کارخانه یا محصولات)</label>
               <div className="flex items-center gap-3">
                 <input ref={bannerRef} type="file" accept="image/*" className="hidden" onChange={pickBanner} />
@@ -414,6 +521,11 @@ export default function ManufacturerDashboard() {
                 <Plus size={14} /> افزودن
               </button>
             </div>
+            {/* ⚠️ خطا همین‌جا، نه ته صفحه: پیش‌تر `setErr` سراسری بود و
+                متنش کنارِ دکمه‌ی «ذخیره» — ده‌ها پیکسل پایین‌تر — ظاهر
+                می‌شد. کاربر «افزودن» را می‌زد، هیچ اتفاقی نمی‌دید و
+                فکر می‌کرد گواهینامه ثبت شده. */}
+            {certErr && <p role="alert" className="mt-2 text-[12.5px] font-bold text-[#B23B2E]">{certErr}</p>}
           </section>
 
           {/* ═══ پروانه‌ی تولید / جواز کسب ═══ */}
@@ -425,7 +537,7 @@ export default function ManufacturerDashboard() {
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
                 <label className={LABEL}>شماره‌ی پروانه</label>
-                <input className={INPUT} dir="ltr" style={{ textAlign: 'right' }}
+                <input className={`${INPUT} text-end`} dir="ltr"
                   value={form.licenseNumber}
                   onChange={e => set('licenseNumber', e.target.value.replace(/[^0-9A-Za-z\-/]/g, '').slice(0, 40))}
                   placeholder="مثال: 1234567890" />
@@ -453,45 +565,68 @@ export default function ManufacturerDashboard() {
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
                 <label className={LABEL}>شماره تماس *</label>
-                <input className={INPUT} dir="ltr" style={{ textAlign: 'right' }} value={form.phone} onChange={e => set('phone', e.target.value)} placeholder="۰۲۱ - xxxxxxxx" />
+                <input className={`${INPUT} text-end`} dir="ltr" value={form.phone} onChange={e => set('phone', e.target.value)} placeholder="۰۲۱ - xxxxxxxx" />
               </div>
               {/* خط دوم — کارگاه معمولا یکی برای فروش دارد و یکی برای دفتر */}
               <div>
                 <label className={LABEL}>شماره تماس دوم</label>
-                <input className={INPUT} dir="ltr" style={{ textAlign: 'right' }} value={form.phone2 ?? ''} onChange={e => set('phone2', e.target.value)} placeholder="اختیاری" />
+                <input className={`${INPUT} text-end`} dir="ltr" value={form.phone2 ?? ''} onChange={e => set('phone2', e.target.value)} placeholder="اختیاری" />
               </div>
               {/* موبایل جدا از واتساپ: شماره‌ی واتساپ لزوما شماره‌ی تماس نیست */}
               <div>
                 <label className={LABEL}>موبایل</label>
-                <input className={INPUT} dir="ltr" style={{ textAlign: 'right' }} value={form.mobile ?? ''} onChange={e => set('mobile', e.target.value)} placeholder="09xxxxxxxxx" />
+                <input className={`${INPUT} text-end`} dir="ltr" value={form.mobile ?? ''} onChange={e => set('mobile', e.target.value)} placeholder="09xxxxxxxxx" />
               </div>
               <div>
                 <label className={LABEL}>واتساپ</label>
-                <input className={INPUT} dir="ltr" style={{ textAlign: 'right' }} value={form.whatsapp} onChange={e => set('whatsapp', e.target.value)} placeholder="989xxxxxxxxx" />
+                <input className={`${INPUT} text-end`} dir="ltr" value={form.whatsapp} onChange={e => set('whatsapp', e.target.value)} placeholder="989xxxxxxxxx" />
               </div>
               <div>
                 <label className={LABEL}>اینستاگرام</label>
-                <input className={INPUT} dir="ltr" style={{ textAlign: 'right' }} value={form.instagram} onChange={e => set('instagram', e.target.value)} placeholder="billiard.brand" />
+                <input className={`${INPUT} text-end`} dir="ltr" value={form.instagram} onChange={e => set('instagram', e.target.value)} placeholder="billiard.brand" />
               </div>
               <div>
                 <label className={LABEL}>وب‌سایت</label>
-                <input className={INPUT} dir="ltr" style={{ textAlign: 'right' }} value={form.website} onChange={e => set('website', e.target.value)} placeholder="www.example.com" />
+                <input className={`${INPUT} text-end`} dir="ltr" value={form.website} onChange={e => set('website', e.target.value)} placeholder="www.example.com" />
               </div>
               <div className="sm:col-span-2">
                 <label className={LABEL}>آدرس</label>
                 <input className={INPUT} value={form.address} onChange={e => set('address', e.target.value)} placeholder="شهرک صنعتی…" />
               </div>
-              <div>
+              {/* ── کد پستی و استعلام ──
+                  همان کاری که فرم باشگاه می‌کند: کد پستی می‌گیرد و از
+                  سرویس، نشانی و استان و شهر و مختصات را برمی‌گرداند.
+                  ⚠️ استعلام هزینه دارد، پس تا پروفایل ذخیره نشده و
+                  نامک قطعی نباشد، دکمه خاموش است. */}
+              <div className="sm:col-span-2">
                 <label className={LABEL}>کد پستی</label>
-                <input
-                  className={INPUT} dir="ltr" style={{ textAlign: 'right' }}
-                  inputMode="numeric" maxLength={10}
-                  value={form.postalCode ?? ''}
-                  /* ⚠️ فقط رقم و فقط ده رقم: کد پستی ایران ده‌رقمی است
-                     و ارقام فارسی هم باید پذیرفته شوند. */
-                  onChange={e => set('postalCode', faToEn(e.target.value).replace(/\D/g, '').slice(0, 10))}
-                  placeholder="۱۰ رقم"
-                />
+                <div className="flex flex-wrap items-center gap-2">
+                  <input
+                    className={`${INPUT} sm:w-44 text-end`} dir="ltr"
+                    inputMode="numeric" maxLength={10}
+                    value={form.postalCode ?? ''}
+                    /* ⚠️ فقط رقم و فقط ده رقم: کد پستی ایران ده‌رقمی است
+                       و ارقام فارسی هم باید پذیرفته شوند. */
+                    onChange={e => { set('postalCode', faToEn(e.target.value).replace(/\D/g, '').slice(0, 10)); setPostalMsg(null) }}
+                    placeholder="۱۰ رقم"
+                  />
+                  <button
+                    type="button" onClick={lookupPostal} className={LQ_BTN}
+                    disabled={postalBusy || !savedSlug || !/^\d{10}$/.test(form.postalCode ?? '')}
+                  >
+                    <MapPin size={14} /> {postalBusy ? 'در حال استعلام…' : 'استعلام آدرس'}
+                  </button>
+                </div>
+                {!savedSlug && (
+                  <p className="mt-2 text-[11.5px] text-[#6F6A5C]">برای استعلام، اول پروفایل را ذخیره کنید.</p>
+                )}
+                {/* ⚠️ ظرف همیشه رندر می‌شود: ناحیه‌ی زنده باید پیش از
+                    تغییرِ محتوا در DOM باشد وگرنه screen reader
+                    چیزی اعلام نمی‌کند. */}
+                <p role="status" aria-live="polite"
+                  className={`mt-2 text-[12px] font-bold ${!postalMsg ? 'sr-only' : postalMsg.ok ? 'text-[#0E7A38]' : 'text-[#B23B2E]'}`}>
+                  {postalMsg?.text ?? ''}
+                </p>
               </div>
               {/* ── موقعیت دقیق ──
                   همان دکمه‌ای که فرم ثبت باشگاه دارد. نشانی متنی برای
@@ -514,38 +649,6 @@ export default function ManufacturerDashboard() {
               </div>
             </div>
           </section>
-
-          {/* ═══ محصولات ═══
-              ⚠️ فرمِ افزودن محصول از پنل برداشته شد. محصول حالا
-              روی خودِ صفحه‌ی تولیدکننده و با همان دکمه‌ی + گالری
-              اضافه می‌شود — جایی که نتیجه بی‌درنگ دیده می‌شود و
-              لازم نیست کاربر بین پنل و صفحه رفت‌وبرگشت کند. */}
-          <section className={CARD}>
-            <h2 className="mb-1 text-[14.5px] font-bold">محصولات</h2>
-            <p className="mb-4 text-[12px] leading-relaxed text-[#6F6A5C]">
-              افزودن و ویرایش محصول از خودِ صفحه‌ی تولیدکننده انجام می‌شود —
-              در بخش «محصولات ما» با دکمه‌ی <span className="font-bold text-[#8F6531]">+</span>،
-              همان‌طور که عکس و ویدیو اضافه می‌کنید. این دکمه را فقط شما می‌بینید.
-            </p>
-            {/* ⚠️ تا پروفایل ذخیره نشده، صفحه‌ی عمومی وجود ندارد و این
-                لینک به «تولیدکننده پیدا نشد» می‌رفت — و چون فرمِ
-                محصول هم از این‌جا رفته، تنها راهِ ورود بن‌بست می‌شد. */}
-            {savedSlug ? (
-              <Link href={`/manufacturers/${savedSlug}`} className={LQ_BTN}>
-                <ArrowLeft size={14} /> رفتن به «محصولات ما»
-              </Link>
-            ) : (
-              <p className="text-[12.5px] font-bold text-[#8F6531]">
-                ابتدا پروفایل را ذخیره کنید تا صفحه‌ی اختصاصی‌تان ساخته شود.
-              </p>
-            )}
-            {form.products.length > 0 && (
-              <p className="mt-3 text-[12px] text-[#6F6A5C]">
-                {faNumFa(form.products.length)} محصول ثبت شده است.
-              </p>
-            )}
-          </section>
-
           {/* ═══ ذخیره ═══ */}
           <div className="flex flex-wrap items-center gap-3">
             <button type="submit" className={`${LQ_BTN} px-7 py-3 text-[14px]`} disabled={busy}>

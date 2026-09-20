@@ -24,9 +24,10 @@ import { ask } from '../../../lib/ui/dialogs'
 import ProfileHero from '../../../components/profile/ProfileHero'
 import ManufacturerPoster from '../../../components/profile/ManufacturerPoster'
 import ProductEditor from './ProductEditor'
-import { Factory } from 'lucide-react'
+import { Factory, Globe, Copy, Check } from 'lucide-react'
 import { iranTel } from '../../../lib/iran-geo'
 import { getManufacturer, productImages, type MfrProduct } from '../../../lib/manufacturers-data'
+import { waNumber } from '../../../lib/phone-wa'
 import OwnerAdsSection from '../../../components/market/OwnerAdsSection'
 import { fetchProductsByOwner, type ShopProduct } from '../../shop/products'
 import { ChevronLeft, ChevronRight, Plus, Pencil, Trash2 } from 'lucide-react'
@@ -367,6 +368,8 @@ export default function ManufacturerPage() {
   /* خط دوم و موبایل — همان منبع واحد، پس هر سه یک‌شکل نوشته می‌شوند */
   const tel2 = iranTel(mfr?.phone2, null, mfr?.city)
   const mobileDigits = String(mfr?.mobile ?? '').replace(/\D/g, '')
+  /* شماره‌ی خام به wa.me نمی‌رود — تهی یعنی دکمه اصلا نیاید */
+  const wa = waNumber(mfr?.whatsapp)
 
   /* ⚠️ از هوکِ مشترک، نه نسخه‌ی دست‌ساز: `navigator.clipboard` روی
      http — همان مسیرِ تستِ گوشی روی شبکه‌ی محلی — وجود ندارد و
@@ -465,7 +468,7 @@ export default function ManufacturerPage() {
     { label: 'صادرات',      value: withUnit(mfr.exportCountries, 'کشور') },
   ].filter(s => s.value)
 
-  const hasContact = !!(phoneDig || tel2.href || mobileDigits || mfr.hours || mfr.whatsapp || mfr.instagram)
+  const hasContact = !!(phoneDig || tel2.href || mobileDigits || mfr.hours || wa || mfr.instagram)
 
   /* مختصات بر نشانیِ متنی مقدم است — مسیریابی به یک نقطه، نه به
      نتیجه‌ی جست‌وجوی یک رشته. */
@@ -498,6 +501,8 @@ export default function ManufacturerPage() {
            (بک‌تیک در این کامنت ممنوع — داخل template literal است) */
         .ch-hero-stats .ch-stats li.mfr-st--felt b { color: #6FD3AC; }
         .ch-hero-stats .ch-stats li.mfr-st--gold b { color: var(--gold-light); }
+        .ch-hero-stats .ch-stats li.mfr-st--amber b { color: #F2D06B; }
+        .ch-hero-stats .ch-stats li.mfr-st--violet b { color: #C4A7F5; }
 
         .mfr-h { display: flex; align-items: center; gap: 10px; margin: 0 0 12px; font-size: 17px; font-weight: 800; color: #111111; }
         .mfr-bar { flex-shrink: 0; width: 3px; height: 16px; border-radius: 2px; background: linear-gradient(135deg,#C7A66A,#A07840); }
@@ -543,6 +548,8 @@ export default function ManufacturerPage() {
 
         .mfr-addr { display: flex; gap: 8px; margin: 0 0 12px; font-size: 14px; line-height: 1.9; color: rgba(0,0,0,0.50); }
         .mfr-pin { flex-shrink: 0; margin-top: 3px; color: #14532D; }
+        .mfr-mapbox { margin: 0 0 12px; border-radius: 14px; overflow: hidden; border: 1px solid rgba(0,0,0,0.07); background: #EDEBE4; }
+        .mfr-mapbox iframe { display: block; width: 100%; height: 180px; border: none; }
         .mfr-map { display: inline-flex; align-items: center; gap: 7px; padding: 9px 16px; border-radius: 12px;
           font-size: 13px; font-weight: 700; text-decoration: none; color: #8F6531;
           background: rgba(199,166,106,0.12); border: 1px solid rgba(199,166,106,0.34);
@@ -553,18 +560,27 @@ export default function ManufacturerPage() {
         .mfr-ct > a, .mfr-ct > div { display: flex; align-items: center; gap: 9px;
           font-size: 13.5px; color: rgba(0,0,0,0.55); text-decoration: none; }
         .mfr-ct > a:hover { color: #14532D; }
-        /* قرصِ نشانی اختصاصی — همان طلاییِ کارتِ تماسِ باشگاه */
-        .mfr-url {
-          display: inline-flex; align-items: center; gap: 7px; max-width: 100%;
-          padding: 8px 12px; border-radius: 10px; cursor: pointer;
-          font: inherit; font-size: 12px; font-weight: 700; color: #8F6531;
-          background: rgba(199,166,106,0.12); border: 1px solid rgba(199,166,106,0.34);
-          transition: transform .2s cubic-bezier(.22,1,.36,1), background .2s;
+        /* ── نشانی اختصاصی ──
+           همان ردیفِ کارتِ تماسِ باشگاه: نشانِ کره‌ی بنفش، برچسبِ ریز،
+           و دکمه‌ی کپی. رنگ عمدا با بقیه‌ی کارت فرق دارد چون این یک
+           *نشانی* است نه یک راهِ تماس. */
+        .mfr-slug { display: flex; align-items: flex-start; gap: 10px; font-size: 13px; }
+        .mfr-slug > svg { flex-shrink: 0; margin-top: 3px; color: #8b5cf6; }
+        .mfr-slug > div { min-width: 0; }
+        .mfr-slug-lbl { display: block; margin-block-end: 1px; font-size: 11px; color: rgba(0,0,0,0.35); }
+        .mfr-slug-row { display: flex; align-items: center; gap: 6px; min-width: 0; }
+        .mfr-slug-row > a {
+          overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0;
+          color: #8b5cf6; font-weight: 600; text-decoration: none;
         }
-        .mfr-url:hover { transform: translateY(-2px); background: rgba(199,166,106,0.18); }
-        .mfr-url:focus-visible { outline: 2px solid #14532D; outline-offset: 2px; }
-        .mfr-url > span:nth-child(2) { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        .mfr-url-x { flex-shrink: 0; font-size: 11px; opacity: .7; }
+        .mfr-slug-row > a:hover { text-decoration: underline; }
+        .mfr-slug-row > button {
+          flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center;
+          width: 28px; height: 28px; padding: 0; border-radius: 8px; cursor: pointer;
+          color: #8b5cf6; background: rgba(139,92,246,0.08); border: 1px solid rgba(139,92,246,0.28);
+        }
+        .mfr-slug-row > button:hover { background: rgba(139,92,246,0.16); }
+        .mfr-slug-row > button:focus-visible { outline: 2px solid #8b5cf6; outline-offset: 2px; }
 
         .mfr-soc { display: flex; gap: 9px; margin-top: 4px; }
         .mfr-soc a { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 11px;
@@ -702,12 +718,16 @@ export default function ManufacturerPage() {
         /* ⚠️ فقط شهر. «تهران، تهران» چیزی به کسی نمی‌گفت — استان
            همان‌جا برای کدِ تلفن استفاده می‌شود، نه برای نمایش. */
         city={mfr.city}
+        /* لوگوی آپلودشده؛ نبودنش یعنی نشانِ نقش (سوله) */
+        photo={mfr.logo || undefined}
         cover={mfr.bannerImage || undefined}
         /* بی‌بنر ⇒ صحنه‌ی کارگاه، نه سه توپ روی نمد */
         posterNode={<ManufacturerPoster />}
         verified={mfr.verified}
         grade={mfr.elite ? { label: 'تولیدکننده‌ی رسمی', dots: 0 } : undefined}
         disciplines={mfr.specialties.map(s => ({ label: s }))}
+        /* گواهینامه‌ها در خودِ هدر هم دیده می‌شوند — به خواست مالک */
+        certs={mfr.certificates.map(c => c.title).filter(Boolean)}
         onOpenPhoto={u => openImage(u, { title: mfr.name, alt: mfr.name })}
         role="manufacturer"
         backHref="/manufacturers" backLabel="تولیدکنندگان"
@@ -722,17 +742,13 @@ export default function ManufacturerPage() {
               <li className="mfr-st mfr-st--felt"><b>{faNum(PRODUCTS.length)}</b><span>محصول</span></li>
             )}
             {mfr.since && <li className="mfr-st mfr-st--gold"><b>{toFa(mfr.since)}</b><span>سال تأسیس</span></li>}
-            {mfr.employees && mfr.employees !== '—' && <li><b>{toFa(mfr.employees)}</b><span>پرسنل</span></li>}
-            {mfr.totalProduced && mfr.totalProduced !== '—' && <li><b>{toFa(mfr.totalProduced)}</b><span>تولید شده</span></li>}
+            {mfr.employees && mfr.employees !== '—' && <li className="mfr-st mfr-st--amber"><b>{toFa(mfr.employees)}</b><span>پرسنل</span></li>}
+            {mfr.totalProduced && mfr.totalProduced !== '—' && <li className="mfr-st mfr-st--violet"><b>{toFa(mfr.totalProduced)}</b><span>تولید شده</span></li>}
           </ul>
         }
-        actions={
-          phoneDig ? (
-            <a className="ch-hero-cta" href={`tel:${phoneHref}`}>
-              {Icon.phone}<span dir="ltr" className={MONO}>{toFa(phoneText)}</span>
-            </a>
-          ) : undefined
-        }
+        /* ⚠️ شماره‌ی تماس از هدر برداشته شد — به خواست مالک. جایش
+           کارتِ «اطلاعات تماس» است، همان‌جا که هر سه شماره کنار هم
+           و با برچسب دیده می‌شوند. */
       />
 
       {/* ══ تب‌ها و محتوا — همان چیدمانی که صفحه‌ی باشگاه دارد ══
@@ -831,6 +847,16 @@ export default function ManufacturerPage() {
                   {mfr.postalCode && (
                     <p className="mfr-post">کد پستی: <b dir="ltr" className={MONO}>{toFa(mfr.postalCode)}</b></p>
                   )}
+                  {/* نقشهٔ جاسازی‌شده فقط وقتی مختصات واقعی داریم؛
+                      با جست‌وجوی متنی، گوگل نقطهٔ اشتباه را قاب می‌گیرد */}
+                  {hasCoords && (
+                    <div className="mfr-mapbox">
+                      <iframe
+                        title="موقعیت کارگاه روی نقشه"
+                        src={`https://maps.google.com/maps?q=${mfr.latitude},${mfr.longitude}&z=15&output=embed`}
+                        loading="lazy" allowFullScreen referrerPolicy="no-referrer-when-downgrade" />
+                    </div>
+                  )}
                   {/* ⚠️ وقتی مختصات ثبت شده، نقشه با همان باز می‌شود نه
                       با جست‌وجوی متنِ آدرس: «شهرک صنعتی ساوه، فاز ۲» را
                       گوگل جای دیگری می‌برد. */}
@@ -873,20 +899,34 @@ export default function ManufacturerPage() {
                   {mfr.hours && (
                     <div><span className="mfr-ok" aria-hidden>{Icon.clock}</span>{mfr.hours}</div>
                   )}
-                  {/* نشانی اختصاصی — همان قرصِ طلاییِ کارتِ تماسِ باشگاه */}
-                  <button type="button" onClick={() => void copyUrl()} className="mfr-url" title="کپی نشانی اختصاصی">
-                    <span aria-hidden>{Icon.pin}</span>
-                    <span id="mfr-url-code" dir="ltr" className={MONO}>billiardhub.net/manufacturers/{mfrId}</span>
-                    <span aria-hidden className="mfr-url-x">{urlCopyState === 'ok' ? '✓' : '⧉'}</span>
-                  </button>
+                  {/* ── نشانی اختصاصی ──
+                      عینا همان ردیفی که کارتِ تماسِ باشگاه دارد: نشانِ
+                      کره، برچسبِ ریز، لینکِ بنفش و دکمه‌ی کپی. */}
+                  <div className="mfr-slug">
+                    <Globe size={14} aria-hidden />
+                    <div>
+                      <span className="mfr-slug-lbl">آدرس اختصاصی تولیدکننده</span>
+                      <span className="mfr-slug-row">
+                        <a id="mfr-url-code" href={`/manufacturers/${mfrId}`} dir="ltr">
+                          billiardhub.net/manufacturers/{mfrId}
+                        </a>
+                        <button
+                          type="button" onClick={() => void copyUrl()}
+                          aria-label={urlCopyState === 'ok' ? 'نشانی کپی شد' : 'کپی نشانی تولیدکننده'}
+                        >
+                          {urlCopyState === 'ok' ? <Check size={13} aria-hidden /> : <Copy size={13} aria-hidden />}
+                        </button>
+                      </span>
+                    </div>
+                  </div>
                   <span aria-live="polite" className="sr-only">
                     {urlCopyState === 'ok' ? 'نشانی در کلیپ‌بورد کپی شد'
                       : urlCopyState === 'manual' ? 'مرورگر اجازه‌ی کپی نداد؛ نشانی انتخاب شد — با Ctrl+C بردارید' : ''}
                   </span>
-                  {(mfr.whatsapp || mfr.instagram) && (
+                  {(wa || mfr.instagram) && (
                     <div className="mfr-soc">
-                      {mfr.whatsapp && (
-                        <a href={`https://wa.me/${mfr.whatsapp}`} target="_blank" rel="noopener noreferrer" aria-label="واتساپ">{Icon.wa}</a>
+                      {wa && (
+                        <a href={`https://wa.me/${wa}`} target="_blank" rel="noopener noreferrer" aria-label="واتساپ">{Icon.wa}</a>
                       )}
                       {mfr.instagram && (
                         <a href={`https://instagram.com/${mfr.instagram}`} target="_blank" rel="noopener noreferrer" aria-label="اینستاگرام">{Icon.insta}</a>

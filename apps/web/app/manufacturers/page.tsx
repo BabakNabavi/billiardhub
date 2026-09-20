@@ -248,6 +248,14 @@ function MfrCard({ mfr, view }: { mfr: MockManufacturer; view: 'grid' | 'list' }
           {toFaDigits(mfr.productCount)} محصول
         </span>
       )}
+      {/* گواهینامه روی کارت هم دیده می‌شود — مالک خواست؛ و برای
+          خریدار همان چیزی است که تولیدکننده‌ها را از هم جدا می‌کند. */}
+      {(mfr.certificates?.length ?? 0) > 0 && (
+        <span className="badge badge-gold" title={mfr.certificates.map(c => c.title).join('، ')}>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M20 6 9 17l-5-5"/></svg>
+          {toFaDigits(mfr.certificates.length)} گواهینامه
+        </span>
+      )}
     </div>
   )
   const specRow = mfr.specialties.length > 0 && (

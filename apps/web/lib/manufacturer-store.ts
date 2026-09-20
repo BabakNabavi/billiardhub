@@ -48,6 +48,8 @@ export interface ManufacturerProfile {
   longitude?: string
   hours: string
   bannerImage: string
+  /* عکسِ پروفایل (لوگوی کارخانه). نبودنش یعنی نشانِ نقش رندر شود. */
+  logo?: string
   /* ── گالری تصاویر ──
      تا امروز تولیدکننده فقط یک بنر داشت و هیچ جایی برای نشان‌دادن
      کارگاه، خط تولید یا نمونه‌کار نبود. کلید اختیاری است تا
@@ -77,7 +79,7 @@ export function emptyManufacturerProfile(slug: string, ownerId = '', ownerPhone 
     exportCountries: '', totalProduced: '', employees: '', certificates: [],
     licenseNumber: '', licenseFile: null, phone: '', phone2: '', mobile: '',
     whatsapp: '', instagram: '', website: '', address: '',
-    postalCode: '', latitude: '', longitude: '', hours: '', bannerImage: '',
+    postalCode: '', latitude: '', longitude: '', hours: '', bannerImage: '', logo: '',
     products: [],
     status: 'approved', updatedAt: '',
   }
@@ -179,6 +181,7 @@ export function profileToManufacturer(p: ManufacturerProfile): MockManufacturer 
        روی هدرِ هر تولیدکننده‌ی بی‌بنر می‌نشست. نبودنِ بنر یعنی
        پوسترِ ساخته‌شده — همان کاری که پروفایل مربی و داور می‌کنند. */
     bannerImage: p.bannerImage || '',
+    logo: p.logo ?? '',
     gallery: arr(p.gallery),
     description: p.description ?? '',
     tagline: p.tagline || p.description || '',

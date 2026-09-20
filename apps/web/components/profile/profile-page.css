@@ -784,6 +784,17 @@ main.ch-col > section { max-width: 760px; }
 .ch-hero-dots > button:focus-visible { outline: 2px solid #fff; outline-offset: -6px; }
 @media (prefers-reduced-motion: reduce) { .ch-hero-dots > button > i { transition: none } }
 
+/* ── چیپِ گواهینامه ──
+   با چیپِ رشته یک شکل نیست: آن یکی «چه کاری می‌کند» است، این یکی
+   «چه چیزی اثبات شده». سبزِ تأیید، با نشانِ تیک. */
+.ch-chip-cert {
+  display: inline-flex; align-items: center; gap: 5px;
+  color: #8FE3C0;
+  background: rgb(111 211 172 / .12);
+  border-color: rgb(111 211 172 / .34);
+}
+.ch-chip-cert svg { flex-shrink: 0; }
+
 .ch-avatar-ring {
   display: inline-grid; place-items: center; flex-shrink: 0;
   padding: 3px; border-radius: 50%;

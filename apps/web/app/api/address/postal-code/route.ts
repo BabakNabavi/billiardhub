@@ -5,21 +5,37 @@ import { hitRateLimit, tooMany } from '@/lib/auth/rate-limit';
 import { lookupPostalCode, composeAddress, normalizePostalCode } from '@/lib/address-server';
 import { getProvinceNames, getCities, provinceOfCity } from '@/lib/iran-geo';
 import { lockedResponse, isMissingColumn } from '@/lib/verification-lock';
+import { z } from 'zod';
 
 /* استان و شهر فقط اگر در فهرست رسمی پروژه باشند پذیرفته می‌شوند.
    نام سرویس همیشه با نام ما یکی نیست («تهران» بله، ولی خیلی جاها
    نگارش متفاوت دارند) و اگر خام ذخیره شود، ProvinceCitySelect آن را
    پیدا نمی‌کند و فرم خالی می‌ماند — درست همان تله‌ای که قانون
    «منبع واحد استان و شهر» برای جلوگیری از آن نوشته شده. */
+/* نقش‌هایی که پروفایلشان نشانی دارد. فهرست بسته است تا این مسیر
+   نتواند هر ردیفی از جدولِ پروفایل را بنویسد. */
+const PROFILE_KINDS = ['manufacturer'] as const;
+type ProfileKind = (typeof PROFILE_KINDS)[number];
+
+const Body = z.object({
+  postalCode: z.string().max(40),
+  clubId: z.string().max(64).optional().default(''),
+  profileKind: z.enum(PROFILE_KINDS).optional(),
+  profileSlug: z.string().regex(/^[a-z0-9][a-z0-9-]{0,62}$/i).optional(),
+});
+
 function normalizeGeo(province?: string, city?: string): { province?: string; city?: string } {
   const provinces = getProvinceNames();
   const p = province && provinces.includes(province) ? province : undefined;
 
   if (city) {
-    /* شهر ملاک اصلی است: از روی آن استان هم درمی‌آید */
+    /* ⚠️ استانِ خودِ سرویس مقدم است. `provinceOfCity` برای ۳۰ نامِ
+       تکراری (سردشت در چهار استان، فیروزآباد در سه، …) همیشه
+       «اولین» را برمی‌گرداند؛ اگر مقدم می‌بود، کارگاهِ سردشتِ
+       خوزستان به آذربایجان غربی منتقل می‌شد. */
+    if (p && getCities(p).includes(city)) return { province: p, city };
     const owner = provinceOfCity(city);
     if (owner) return { province: owner, city };
-    if (p && getCities(p).includes(city)) return { province: p, city };
   }
   return { province: p };
 }
@@ -39,17 +55,46 @@ export async function POST(req: NextRequest) {
   const rl = await hitRateLimit(req, { action: 'postal-code', max: 20, windowSec: 600 }, actor.id);
   if (!rl.ok) return tooMany(rl.retryAfterSec);
 
-  const body = await req.json().catch(() => ({}));
-  const postalCode = normalizePostalCode(String(body?.postalCode ?? ''));
-  const clubId = String(body?.clubId ?? '');
+  const parsed = Body.safeParse(await req.json().catch(() => ({})));
+  if (!parsed.success) {
+    return NextResponse.json({ message: 'ورودی نامعتبر است' }, { status: 400 });
+  }
+  const body = parsed.data;
+  const postalCode = normalizePostalCode(body.postalCode);
+  const clubId = body.clubId;
+  /* ── هدفِ دوم: پروفایلِ نقش ──
+     تا امروز این مسیر فقط باشگاه را می‌شناخت. تولیدکننده هم نشانیِ
+     کارگاه دارد و مالک خواست «دقیقا مثل باشگاه» باشد. کلیدِ هدف
+     عوض می‌شود، نه منطقِ استعلام. */
+  const profileKind: ProfileKind | undefined = body.profileKind;
+  const profileSlug = body.profileSlug ?? '';
+  const wantsProfile = !!profileKind && !!profileSlug;
 
   const admin = await isAdmin(actor.id);
 
-  /* بدون clubId این مسیر یک استعلام رایگان بود که هیچ‌جا ذخیره نمی‌شد
-     — یعنی راهی برای سوزاندن اعتبار بدون هیچ اثری. تنها فراخوان
-     واقعی برنامه همیشه clubId می‌فرستد. */
-  if (!clubId && !admin) {
-    return NextResponse.json({ message: 'شناسه‌ی باشگاه لازم است' }, { status: 400 });
+  /* بدون هدف این مسیر یک استعلام رایگان بود که هیچ‌جا ذخیره نمی‌شد
+     — یعنی راهی برای سوزاندن اعتبار بدون هیچ اثری. */
+  if (!clubId && !wantsProfile && !admin) {
+    return NextResponse.json({ message: 'شناسه‌ی باشگاه یا پروفایل لازم است' }, { status: 400 });
+  }
+
+  /* ── مالکیتِ پروفایل، پیش از خرجِ اعتبار ──
+     ⚠️ نتیجه روی پروفایل **نوشته نمی‌شود**. ستونِ `data` یک بلابِ
+     jsonb است و هر نویسنده‌ای کلِ آن را یک‌جا جایگزین می‌کند؛ اگر
+     این مسیر هم می‌نوشت دو نویسنده می‌شدیم و همان باگِ «فقط آخرین
+     محصول ماند» برمی‌گشت — این‌بار بینِ دو تبِ باز، و بینِ خواندنِ
+     ردیف و نوشتنش یک درخواستِ HTTPِ بیرونی فاصله بود. پس فقط
+     برمی‌گردانیم و پنل با مسیرِ ذخیره‌ی همیشگی ثبتش می‌کند.
+     بررسیِ مالکیت می‌ماند، چون همان است که نمی‌گذارد این مسیر یک
+     استعلامِ رایگان روی حسابِ ما باشد. */
+  if (wantsProfile) {
+    const { data: row } = await sb().from('profiles')
+      .select('owner_id').eq('kind', profileKind!).eq('slug', profileSlug).maybeSingle();
+    if (!row) return NextResponse.json({ message: 'پروفایل یافت نشد' }, { status: 404 });
+    const p = row as { owner_id?: string };
+    if (p.owner_id !== actor.id && !admin) {
+      return NextResponse.json({ message: 'دسترسی مجاز نیست' }, { status: 403 });
+    }
   }
 
   if (clubId) {
@@ -81,7 +126,7 @@ export async function POST(req: NextRequest) {
        `providerCode` می‌ماند چون یک عدد است و برای پشتیبانی کافی؛
        متن کامل فقط برای ادمین و در لاگ سرور. */
     const forUser = { ...r };
-    if (!(await isAdmin(actor.id))) delete forUser.providerMessage;
+    if (!admin) delete forUser.providerMessage;
     return NextResponse.json(forUser, { status: r.unavailable ? 503 : 400 });
   }
   if (!r.found) return NextResponse.json(r, { status: 404 });
@@ -137,6 +182,18 @@ export async function POST(req: NextRequest) {
       console.error('[postal-code] update error:', error.message);
       return NextResponse.json({ message: 'ذخیره‌ی آدرس انجام نشد' }, { status: 500 });
     }
+  }
+
+  if (wantsProfile) {
+    /* مختصات هم فقط برگردانده می‌شود؛ پنل خودش تصمیم می‌گیرد که اگر
+       از قبل مختصاتِ دقیق‌ترِ «موقعیت فعلی» را دارد نگهش دارد. */
+    return NextResponse.json({
+      ...r, address, geo,
+      postalCodeStored: false,
+      locked: false,
+      latitude: a.lat !== undefined ? String(a.lat) : undefined,
+      longitude: a.long !== undefined ? String(a.long) : undefined,
+    });
   }
 
   /* `locked: true` یعنی از این پس همین مسیر ۴۰۹ می‌دهد؛ کلاینت با
