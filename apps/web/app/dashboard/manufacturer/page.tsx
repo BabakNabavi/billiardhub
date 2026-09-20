@@ -14,7 +14,6 @@ import ProvinceCitySelect from '../../../components/ProvinceCitySelect'
 import ProfileSlugField from '../../../components/ProfileSlugField'
 import ClubPicker from '../../../components/ClubPicker'
 import { compressImage } from '../../../lib/seller-store'
-import type { MfrProduct } from '../../../lib/manufacturers-data'
 import {
   emptyManufacturerProfile, findManufacturerByOwner, newManufacturerSlug,
   saveManufacturerProfile, type ManufacturerProfile,
@@ -22,13 +21,15 @@ import {
 import { ProfileLoadSpinner, ProfileLoadError } from '../../../components/profile/ProfileLoadGate'
 import { fetchMyProfileResult, saveProfileRemote } from '../../../lib/profiles/client'
 import VerificationBadges from '../../../components/VerificationBadges'
-import { Plus, Trash2, Images, Factory, ArrowLeft } from 'lucide-react'
+import { Plus, Trash2, Images, Factory, ArrowLeft, MapPin } from 'lucide-react'
 
 const CARD   = 'rounded-2xl border border-[#E7E2D6] bg-white p-5 shadow-[0_2px_10px_rgba(28,27,23,0.05)]'
 const LQ_BTN = 'inline-flex items-center gap-2 rounded-[10px] border border-[rgba(199,166,106,0.34)] bg-[rgba(199,166,106,0.12)] px-4 py-2.5 text-[13px] font-bold text-[#8F6531] transition hover:-translate-y-0.5'
 const INPUT  = 'w-full rounded-xl border border-[#E7E2D6] bg-[#FAFAF7] px-3.5 py-2.5 text-[13.5px] text-[#1C1B17] outline-none transition focus:border-[#C7A66A] placeholder:text-[11.5px] placeholder:text-[#A69F8E]'
 const LABEL  = 'mb-1.5 block text-[12.5px] font-bold text-[#5B564B]'
-const rid = () => Math.random().toString(36).slice(2, 9)
+/* ارقام فارسی به لاتین — کد پستی باید رقمِ خوانا برای سرور بماند */
+const faToEn = (v: string) => v.replace(/[۰-۹]/g, d => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(d)))
+const faNumFa = (n: number) => n.toLocaleString('fa-IR')
 
 export default function ManufacturerDashboard() {
   const { user, _hydrated } = useAuthStore()
@@ -48,10 +49,11 @@ export default function ManufacturerDashboard() {
   const [busy, setBusy]     = useState(false)
 
   const bannerRef = useRef<HTMLInputElement>(null)
-  const prodImgRef = useRef<HTMLInputElement>(null)
   const licRef = useRef<HTMLInputElement>(null)
-  const [prod, setProd] = useState({ name: '', category: '', description: '', specs: '', image: '' })
-  const [cert, setCert] = useState({ title: '', issuer: '', year: '' })
+  const [cert, setCert] = useState({ title: '', issuer: '', year: '', image: '' })
+  const certImgRef = useRef<HTMLInputElement>(null)
+  const [geoBusy, setGeoBusy] = useState(false)
+  const [geoErr, setGeoErr] = useState('')
 
   const isManufacturer = !!user && [user.primaryRole, ...(user.secondaryRoles ?? [])].includes('manufacturer')
 
@@ -133,35 +135,44 @@ export default function ManufacturerDashboard() {
     finally { setBusy(false); e.target.value = '' }
   }
 
-  const pickProdImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  /* ── گواهینامه ──
+     ⚠️ تصویر اجباری است: «ISO 9001» تایپ‌شده بدون مدرک، فقط یک
+     ادعاست و روی صفحه‌ی عمومی مثل واقعیت دیده می‌شود. */
+  const addCert = () => {
+    if (!cert.title.trim()) { setErr('عنوان گواهینامه لازم است.'); return }
+    if (!cert.image) { setErr('تصویر گواهینامه لازم است.'); return }
+    set('certificates', [...form.certificates, {
+      title: cert.title.trim(), issuer: cert.issuer.trim(),
+      year: cert.year.trim(), image: cert.image,
+    }])
+    setCert({ title: '', issuer: '', year: '', image: '' })
+  }
+
+  const pickCertImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0]; if (!f) return
     setBusy(true)
-    try { const url = await compressImage(f, 1000, 0.7); setProd(p => ({ ...p, image: url })) }
+    try { const url = await compressImage(f, 1400, 0.74); setCert(c => ({ ...c, image: url })) }
     catch { setErr('عکس خوانده نشد.') }
     finally { setBusy(false); e.target.value = '' }
   }
 
-  const addProduct = () => {
-    if (!prod.name.trim() || !prod.category.trim()) { setErr('نام و دسته‌ی محصول لازم است.'); return }
-    const p: MfrProduct = {
-      id: rid(), name: prod.name.trim(), category: prod.category.trim(),
-      description: prod.description.trim(),
-      /* ⚠️ تا امروز `[]` هاردکد بود: فرم اصلا جایی برای مشخصات
-         نداشت، پس صفحه‌ی تولیدکننده هیچ‌وقت چیزی برای نشان‌دادن
-         نداشت. هر خط یک مشخصه. */
-      specs: prod.specs.split('\n').map(s => s.trim()).filter(Boolean).slice(0, 20),
-      /* ⚠️ عکسِ قرضیِ پوشه‌ی فروشگاه حذف شد — محصولِ بی‌عکس، بی‌عکس
-         می‌ماند و کارت خودش حالتِ «بدون تصویر» دارد. */
-      image: prod.image,
-    }
-    set('products', [...form.products, p])
-    setProd({ name: '', category: '', description: '', specs: '', image: '' })
-  }
-
-  const addCert = () => {
-    if (!cert.title.trim()) { setErr('عنوان گواهینامه لازم است.'); return }
-    set('certificates', [...form.certificates, { title: cert.title.trim(), issuer: cert.issuer.trim(), year: cert.year.trim() }])
-    setCert({ title: '', issuer: '', year: '' })
+  /* موقعیت دقیق — همان چیزی که فرم ثبت باشگاه می‌گیرد */
+  const getLocation = () => {
+    if (!navigator.geolocation) { setGeoErr('مرورگر موقعیت مکانی را پشتیبانی نمی‌کند'); return }
+    setGeoBusy(true); setGeoErr('')
+    navigator.geolocation.getCurrentPosition(
+      pos => {
+        setForm(f => ({
+          ...f,
+          latitude: String(pos.coords.latitude),
+          longitude: String(pos.coords.longitude),
+        }))
+        setSaved(false)
+        setGeoBusy(false)
+      },
+      () => { setGeoErr('دسترسی به موقعیت مکانی رد شد'); setGeoBusy(false) },
+      { enableHighAccuracy: true, timeout: 15000 },
+    )
   }
 
   const submit = (e: React.FormEvent) => {
@@ -171,16 +182,32 @@ export default function ManufacturerDashboard() {
     if (!form.description.trim()) { setErr('توضیح کوتاه لازم است.'); return }
     if (!form.phone.trim())       { setErr('شماره تماس لازم است.'); return }
 
-    const next: ManufacturerProfile = {
-      ...form,
-      ownerId: user?.id || form.ownerId,
-      ownerPhone: user?.phone || form.ownerPhone,
-      status: 'approved',
-    }
     setBusy(true)
     void (async () => {
       /* منبع حقیقت سرور است؛ localStorage فقط کش همین مرورگر می‌ماند */
       if (savedSlug === null) { setErr('نشانی اختصاصی هنوز خوانده نشده — چند لحظه صبر کنید یا صفحه را تازه کنید'); setBusy(false); return }
+
+      /* ── چرا محصولات از سرور خوانده می‌شوند، نه از فرم ──
+         ⚠️ `POST` کلِ `data` را جایگزین می‌کند و این فرم دیگر محصول
+         را ویرایش نمی‌کند (رفته روی صفحه‌ی عمومی). پس اگر همین تب
+         باز مانده باشد و مالک در تبِ دیگری محصولی اضافه کند، ذخیره‌ی
+         این فرم با فهرستِ کهنه‌ی لحظه‌ی بارگذاری آن را پاک می‌کرد —
+         همان باگی که یک‌بار محصول‌ها را از بین برد. */
+      const fresh = await fetchMyProfileResult<ManufacturerProfile>('manufacturer')
+      if (fresh.state === 'error') {
+        setErr('ارتباط با سرور برقرار نشد؛ برای اینکه اطلاعات قبلی پاک نشود ذخیره انجام نشد.')
+        setBusy(false); return
+      }
+      const serverProducts = fresh.state === 'found' ? (fresh.profile.data.products ?? []) : []
+
+      const next: ManufacturerProfile = {
+        ...form,
+        products: serverProducts,
+        ownerId: user?.id || form.ownerId,
+        ownerPhone: user?.phone || form.ownerPhone,
+        status: 'approved',
+      }
+
       const res = await saveProfileRemote('manufacturer', next.slug, next as unknown as Record<string, unknown>,
         { number: next.licenseNumber, url: next.licenseFile?.url ?? '' })
       if (!res.ok) { setErr(res.message ?? 'ذخیره روی سرور انجام نشد'); setBusy(false); return }
@@ -350,6 +377,9 @@ export default function ManufacturerDashboard() {
               <div className="mb-4 space-y-2">
                 {form.certificates.map((c, i) => (
                   <div key={i} className="flex items-center gap-3 rounded-xl border border-[#EFEBE1] bg-[#FAFAF7] px-3 py-2.5">
+                    {c.image
+                      ? <img loading="lazy" decoding="async" src={c.image} alt="" className="h-11 w-8 rounded border border-[#E7E2D6] object-cover" />
+                      : <span className="h-11 w-8 shrink-0 rounded border border-[#E7E2D6] bg-[#F2EFE7]" aria-hidden />}
                     <span className="flex-1 text-[13px] font-bold">{c.title}</span>
                     <span className="text-[11.5px] text-[#6F6A5C]">{c.issuer}</span>
                     <span className="text-[11.5px] text-[#6F6A5C]">{c.year}</span>
@@ -374,6 +404,12 @@ export default function ManufacturerDashboard() {
               <input className={INPUT} value={cert.title} onChange={e => setCert(c => ({ ...c, title: e.target.value }))} placeholder="عنوان — مثال: ISO 9001" />
               <input className={INPUT} value={cert.issuer} onChange={e => setCert(c => ({ ...c, issuer: e.target.value }))} placeholder="صادرکننده" />
               <input className={`${INPUT} sm:w-28`} value={cert.year} onChange={e => setCert(c => ({ ...c, year: e.target.value }))} placeholder="سال" />
+              {/* تصویر گواهینامه اجباری است — بدونِ مدرک فقط یک ادعاست */}
+              <input ref={certImgRef} type="file" accept="image/*" className="hidden" onChange={pickCertImage} />
+              <button type="button" onClick={() => certImgRef.current?.click()} className={`${LQ_BTN} shrink-0`} disabled={busy}>
+                <Images size={14} /> {cert.image ? 'تغییر تصویر' : 'تصویر گواهینامه *'}
+              </button>
+              {cert.image && <img loading="lazy" decoding="async" src={cert.image} alt="" className="h-11 w-8 shrink-0 rounded border border-[#E7E2D6] object-cover" />}
               <button type="button" className={`${LQ_BTN} shrink-0`} onClick={addCert}>
                 <Plus size={14} /> افزودن
               </button>
@@ -417,7 +453,17 @@ export default function ManufacturerDashboard() {
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
                 <label className={LABEL}>شماره تماس *</label>
-                <input className={INPUT} dir="ltr" style={{ textAlign: 'right' }} value={form.phone} onChange={e => set('phone', e.target.value)} placeholder="09xxxxxxxxx" />
+                <input className={INPUT} dir="ltr" style={{ textAlign: 'right' }} value={form.phone} onChange={e => set('phone', e.target.value)} placeholder="۰۲۱ - xxxxxxxx" />
+              </div>
+              {/* خط دوم — کارگاه معمولا یکی برای فروش دارد و یکی برای دفتر */}
+              <div>
+                <label className={LABEL}>شماره تماس دوم</label>
+                <input className={INPUT} dir="ltr" style={{ textAlign: 'right' }} value={form.phone2 ?? ''} onChange={e => set('phone2', e.target.value)} placeholder="اختیاری" />
+              </div>
+              {/* موبایل جدا از واتساپ: شماره‌ی واتساپ لزوما شماره‌ی تماس نیست */}
+              <div>
+                <label className={LABEL}>موبایل</label>
+                <input className={INPUT} dir="ltr" style={{ textAlign: 'right' }} value={form.mobile ?? ''} onChange={e => set('mobile', e.target.value)} placeholder="09xxxxxxxxx" />
               </div>
               <div>
                 <label className={LABEL}>واتساپ</label>
@@ -435,6 +481,33 @@ export default function ManufacturerDashboard() {
                 <label className={LABEL}>آدرس</label>
                 <input className={INPUT} value={form.address} onChange={e => set('address', e.target.value)} placeholder="شهرک صنعتی…" />
               </div>
+              <div>
+                <label className={LABEL}>کد پستی</label>
+                <input
+                  className={INPUT} dir="ltr" style={{ textAlign: 'right' }}
+                  inputMode="numeric" maxLength={10}
+                  value={form.postalCode ?? ''}
+                  /* ⚠️ فقط رقم و فقط ده رقم: کد پستی ایران ده‌رقمی است
+                     و ارقام فارسی هم باید پذیرفته شوند. */
+                  onChange={e => set('postalCode', faToEn(e.target.value).replace(/\D/g, '').slice(0, 10))}
+                  placeholder="۱۰ رقم"
+                />
+              </div>
+              {/* ── موقعیت دقیق ──
+                  همان دکمه‌ای که فرم ثبت باشگاه دارد. نشانی متنی برای
+                  خواندن است؛ مسیریابی به مختصات نیاز دارد. */}
+              <div>
+                <label className={LABEL}>موقعیت کارگاه</label>
+                <button type="button" onClick={getLocation} disabled={geoBusy} className={LQ_BTN}>
+                  <MapPin size={14} /> {geoBusy ? 'در حال دریافت…' : 'دریافت موقعیت فعلی'}
+                </button>
+                {form.latitude && form.longitude && (
+                  <p className="mt-2 text-[12px] font-bold text-[#0E7A38]">
+                    ثبت شد: {Number(form.latitude).toFixed(4)}، {Number(form.longitude).toFixed(4)}
+                  </p>
+                )}
+                {geoErr && <p className="mt-2 text-[12px] font-bold text-[#B23B2E]">{geoErr}</p>}
+              </div>
               <div className="sm:col-span-2">
                 <label className={LABEL}>ساعات کاری</label>
                 <input className={INPUT} value={form.hours} onChange={e => set('hours', e.target.value)} placeholder="مثال: شنبه تا پنجشنبه، ۸ تا ۱۷" />
@@ -442,77 +515,35 @@ export default function ManufacturerDashboard() {
             </div>
           </section>
 
-          {/* ═══ محصولات ═══ */}
+          {/* ═══ محصولات ═══
+              ⚠️ فرمِ افزودن محصول از پنل برداشته شد. محصول حالا
+              روی خودِ صفحه‌ی تولیدکننده و با همان دکمه‌ی + گالری
+              اضافه می‌شود — جایی که نتیجه بی‌درنگ دیده می‌شود و
+              لازم نیست کاربر بین پنل و صفحه رفت‌وبرگشت کند. */}
           <section className={CARD}>
             <h2 className="mb-1 text-[14.5px] font-bold">محصولات</h2>
-            <p className="mb-4 text-[12px] text-[#6F6A5C]">در صفحه‌ی تولیدکننده به‌صورت گالری محصولات نمایش داده می‌شود.</p>
-
-            {form.products.length > 0 && (
-              <div className="mb-4 space-y-2">
-                {form.products.map(p => (
-                  <div key={p.id} className="flex items-center gap-3 rounded-xl border border-[#EFEBE1] bg-[#FAFAF7] p-2.5">
-                    {/* ⚠️ محصول می‌تواند بی‌عکس باشد؛ `src=""` مرورگر را
-                        وامی‌دارد خودِ صفحه را دوباره بگیرد و نشانِ
-                        عکسِ شکسته نشان دهد. */}
-                    {p.image
-                      ? <img loading="lazy" decoding="async" src={p.image} alt="" className="h-12 w-16 rounded-lg border border-[#E7E2D6] object-cover" />
-                      : <span className="h-12 w-16 shrink-0 rounded-lg border border-[#E7E2D6] bg-[#F2EFE7]" aria-hidden />}
-                    <div className="min-w-0 flex-1">
-                      <div className="truncate text-[13px] font-bold">{p.name}</div>
-                      <div className="text-[11px] text-[#6F6A5C]">{p.category}</div>
-                    </div>
-                    <button type="button" onClick={() => set('products', form.products.filter(x => x.id !== p.id))}
-                      className="rounded-lg p-2 text-[#B23B2E] transition hover:bg-[rgba(178,59,46,0.08)]"><Trash2 size={15} /></button>
-                  </div>
-                ))}
-              </div>
+            <p className="mb-4 text-[12px] leading-relaxed text-[#6F6A5C]">
+              افزودن و ویرایش محصول از خودِ صفحه‌ی تولیدکننده انجام می‌شود —
+              در بخش «محصولات ما» با دکمه‌ی <span className="font-bold text-[#8F6531]">+</span>،
+              همان‌طور که عکس و ویدیو اضافه می‌کنید. این دکمه را فقط شما می‌بینید.
+            </p>
+            {/* ⚠️ تا پروفایل ذخیره نشده، صفحه‌ی عمومی وجود ندارد و این
+                لینک به «تولیدکننده پیدا نشد» می‌رفت — و چون فرمِ
+                محصول هم از این‌جا رفته، تنها راهِ ورود بن‌بست می‌شد. */}
+            {savedSlug ? (
+              <Link href={`/manufacturers/${savedSlug}`} className={LQ_BTN}>
+                <ArrowLeft size={14} /> رفتن به «محصولات ما»
+              </Link>
+            ) : (
+              <p className="text-[12.5px] font-bold text-[#8F6531]">
+                ابتدا پروفایل را ذخیره کنید تا صفحه‌ی اختصاصی‌تان ساخته شود.
+              </p>
             )}
-
-            {/* ⚠️ Enter در این فیلدها نباید فرم را ذخیره کند: کاربر
-                محصول را تایپ می‌کرد، Enter می‌زد، پروفایل ذخیره
-                می‌شد و محصولِ تایپ‌شده — که هنوز «افزودن» نخورده بود —
-                دور ریخته می‌شد. حالا Enter همان «افزودن» است. */}
-            <div
-              className="grid grid-cols-1 gap-3 rounded-xl border border-dashed border-[#D8D2C4] p-4 sm:grid-cols-2"
-              onKeyDown={e => {
-                if (e.key !== 'Enter') return
-                /* ⚠️ فقط فیلدِ تک‌خطی. روی `TEXTAREA` باید خطِ تازه
-                   بزند، و روی `BUTTON` گرفتنِ Enter کلیکِ ساخته‌شده را
-                   لغو می‌کند — یعنی کاربرِ کیبورد روی «عکس محصول»
-                   Enter می‌زد و به‌جای بازشدنِ فایل، محصول اضافه
-                   می‌شد. */
-                if ((e.target as HTMLElement).tagName !== 'INPUT') return
-                /* نیمه‌کاره‌ی IME را ثبت نکن — Enterِ تأییدِ فارسی‌نویسِ
-                   گوشی همین است. */
-                if ((e.nativeEvent as unknown as { isComposing?: boolean }).isComposing) return
-                if (busy) return
-                e.preventDefault()
-                addProduct()
-              }}
-            >
-              <input className={INPUT} value={prod.name} onChange={e => setProd(p => ({ ...p, name: e.target.value }))} placeholder="نام محصول — مثال: میز اسنوکر ۱۲ فوت" />
-              <input className={INPUT} value={prod.category} onChange={e => setProd(p => ({ ...p, category: e.target.value }))} placeholder="دسته — مثال: میز اسنوکر" />
-              <input className={`${INPUT} sm:col-span-2`} value={prod.description} onChange={e => setProd(p => ({ ...p, description: e.target.value }))} placeholder="توضیح کوتاه محصول…" />
-              {/* مشخصات — هر خط یکی. صفحه‌ی تولیدکننده همین‌ها را
-                  در پنجره‌ی جزئیات محصول فهرست می‌کند. */}
-              <label className="sm:col-span-2">
-                <span className={LABEL}>مشخصات (هر خط یک مورد)</span>
-                <textarea
-                  className={`${INPUT} min-h-[92px] resize-y`}
-                  value={prod.specs}
-                  onChange={e => setProd(p => ({ ...p, specs: e.target.value }))}
-                  placeholder={'ابعاد: ۱۲ فوت\nجنس بدنه: چوب راش\nسنگ: ۳۰ میلی‌متر ایتالیایی\nپارچه: ماهوت درجه یک'}
-                />
-              </label>
-              <div className="flex items-center gap-3 sm:col-span-2">
-                <input ref={prodImgRef} type="file" accept="image/*" className="hidden" onChange={pickProdImage} />
-                <button type="button" onClick={() => prodImgRef.current?.click()} className={LQ_BTN} disabled={busy}>
-                  <Images size={14} /> {prod.image ? 'تغییر عکس' : 'عکس محصول'}
-                </button>
-                {prod.image && <img loading="lazy" decoding="async" src={prod.image} alt="" className="h-11 w-16 rounded-lg border border-[#E7E2D6] object-cover" />}
-                <button type="button" onClick={addProduct} className={`${LQ_BTN} mr-auto`} disabled={busy}><Plus size={14} /> افزودن محصول</button>
-              </div>
-            </div>
+            {form.products.length > 0 && (
+              <p className="mt-3 text-[12px] text-[#6F6A5C]">
+                {faNumFa(form.products.length)} محصول ثبت شده است.
+              </p>
+            )}
           </section>
 
           {/* ═══ ذخیره ═══ */}
