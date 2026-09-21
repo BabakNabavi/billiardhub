@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState , useRef } from 'react';
+import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import api from '../../../lib/api';
@@ -36,7 +37,14 @@ import FavoriteButton from '../../../components/FavoriteButton';
 import { iranTel } from '../../../lib/iran-geo'
 import { fetchLiveSessions, fetchLiveSession, type LiveSession } from '../../../lib/live/client'
 import GoLive from '../../../components/club/GoLive'
-import LivePlayer from '../../../components/live/LivePlayer'
+/* ⚠️ تنبل، نه ایستا. `LivePlayer` ماژولِ webrtc و با آن
+   `@supabase/supabase-js` را می‌کشد — ۲۰۴ کیلوبایتِ خام. ولی
+   پخش‌کننده فقط داخلِ شرطِ `liveSession || watchedLive` رندر
+   می‌شود، یعنی تقریبا هیچ‌وقت. با ایمپورتِ ایستا، هر بازدیدکننده‌ی
+   هر صفحه‌ی باشگاه آن را دانلود می‌کرد.
+
+   `ssr: false` چون خودِ پخش‌کننده کاملا مرورگری است (WebRTC). */
+const LivePlayer = dynamic(() => import('../../../components/live/LivePlayer'), { ssr: false })
 
 interface Club {
   id: string; name: string; managerName: string; description: string;

@@ -1,6 +1,20 @@
 'use client';
 
-import { startBroadcast, type Broadcaster } from './webrtc';
+/* ── چرا ایمپورتِ این ماژول تنبل است ────────────────────────────
+   ⚠️ اندازه‌گیری‌شده: `./webrtc` ماژولِ `supabase-browser` را
+   می‌کشد و آن `@supabase/supabase-js` را — chunkی با ۲۰۴ کیلوبایتِ
+   خام و ~۵۲ کیلوبایتِ فشرده. و چون `LiveIndicator` در
+   `app/layout.tsx` سوار است و همین فایل را ایمپورت می‌کند، آن روی
+   **هر صفحه‌ی سایت** می‌رفت — برای بازدیدکننده‌ای که هرگز پخشِ زنده
+   باز نمی‌کند. مخاطبِ اصلی موبایلِ ایرانی است.
+
+   ⚠️ این جمله فقط دربارهٔ *همین* ماژول است. `LivePlayer` هم همان
+   chunk را می‌کشد و جداگانه تنبل شده؛ اگر روزی ایستا شود، دوباره
+   روی صفحه‌های باشگاه و پخش می‌آید.
+
+   ⚠️ `import type` کدِ اجرایی تولید نمی‌کند، پس تایپ بی‌هزینه
+   می‌ماند. */
+import type { Broadcaster } from './webrtc';
 import { startLive, beatLive, stopLive, addAngle, type LiveSession } from './client';
 import { MAIN_ANGLE, MAX_ANGLES } from './angles';
 import { presetOf, retuneTrack, DEFAULT_QUALITY, type QualityId } from './quality';
@@ -55,6 +69,20 @@ const EMPTY: BroadcastState = {
 
 let state: BroadcastState = EMPTY;
 const bcs = new Map<string, Broadcaster>();
+
+/* ── چرا لودرِ جدا ──
+   ⚠️ دانلودِ این chunk نباید **بعد از** ساخته‌شدنِ جلسه روی سرور
+   انجام شود: در آن فاصله جلسه در فهرستِ عمومی «زنده» است و هیچ
+   تصویری ندارد — همان تله‌ای که کامنتِ `startSession` توضیحش
+   می‌دهد. روی شبکه‌ی کند این پنجره چند ثانیه است.
+
+   پس `warmBroadcast()` پیش از هر کارِ شبکه‌ای صدا زده می‌شود و
+   نتیجه کش می‌ماند؛ `attach` بعدا همان Promiseِ آماده را می‌گیرد. */
+let webrtcMod: Promise<typeof import('./webrtc')> | null = null;
+const loadWebrtc = () => (webrtcMod ??= import('./webrtc'));
+
+/** پیش‌بارگذاری — از لحظه‌ای که کاربر پنجره‌ی پخش را باز می‌کند */
+export function warmBroadcast(): void { void loadWebrtc().catch(() => { webrtcMod = null }); }
 const subs = new Set<() => void>();
 let ownerKey = '';
 let beatTimer: number | null = null;
@@ -128,10 +156,40 @@ export async function setQuality(q: QualityId): Promise<void> {
   ]));
 }
 
-function attach(
+async function attach(
   sessionId: string, angleId: string, label: string,
   stream: MediaStream, kind: 'camera' | 'screen', deviceId: string,
-): boolean {
+): Promise<boolean> {
+  /* ⚠️ هر دو صداکننده از قبل async بودند (روی `startLive` و
+     `addAngle` منتظر می‌مانند)، پس این تغییر آبشاری نمی‌شود. */
+  /* ⚠️ شکستِ بارگذاری باید مثل شکستِ اتصال رفتار کند، نه استثنا:
+     پیش از این `attach` هیچ‌وقت throw نمی‌کرد و صداکننده‌ها فقط
+     `false` را می‌سنجند.
+
+     ⚠️ پیامِ «نسخه‌ی کهنه» جدا شد: محتمل‌ترین علتِ واقعیِ شکستِ این
+     import، تبی است که پیش از دیپلوی باز مانده و نامِ هش‌دارِ chunk
+     دیگر پیدا نمی‌شود. آن‌جا «اتصال در دسترس نیست» دروغ است و
+     کاربر تا ابد دکمه را دوباره می‌زند؛ تنها درمانش تازه‌کردنِ
+     صفحه است و باید همان را بگوییم. */
+  let startBroadcast: typeof import('./webrtc').startBroadcast;
+  try {
+    ({ startBroadcast } = await loadWebrtc());
+  } catch (e) {
+    const stale = /ChunkLoadError|Failed to fetch dynamically imported|Importing a module script failed/i
+      .test(String((e as Error)?.message ?? e));
+    stopStream(stream);
+    set({ error: stale
+      ? 'نسخه‌ی صفحه به‌روز نیست؛ صفحه را تازه کنید و دوباره شروع کنید.'
+      : 'اتصال بی‌درنگ در دسترس نیست' });
+    return false;
+  }
+
+  /* ⚠️ گاردِ کهنگی: بینِ شروعِ این تابع و این‌جا، کاربر می‌توانست از
+     نوارِ «در حال پخش» (که در کلِ سایت دیده می‌شود) پخش را تمام
+     کرده باشد. بدونِ این، یک فیدِ زامبی با دوربینِ روشن می‌ماند و
+     `afterChange` ضربانِ جلسه‌ی مرده را از نو راه می‌اندازد. */
+  if (state.session?.id !== sessionId) { stopStream(stream); return false; }
+
   const bc = startBroadcast(sessionId, stream, n => {
     set({ feeds: state.feeds.map(f => f.angleId === angleId ? { ...f, viewers: n } : f) });
   }, { angleId, quality: state.quality });
@@ -198,6 +256,8 @@ export async function startSession(opts: {
   stream: MediaStream; deviceId: string; mainLabel: string;
 }): Promise<boolean> {
   ownerKey = opts.ownerKey;
+  /* پیش از ساختِ جلسه روی سرور — دلیلش کنارِ `loadWebrtc` */
+  warmBroadcast();
   const r = await startLive({
     clubId: opts.clubId, clubName: opts.clubName, ownerKey: opts.ownerKey,
     title: opts.title, angleLabel: opts.mainLabel,
@@ -208,7 +268,7 @@ export async function startSession(opts: {
     return false;
   }
   set({ session: r.session, owned: true, error: '' });
-  if (!attach(r.session.id, MAIN_ANGLE, opts.mainLabel, opts.stream, 'camera', opts.deviceId)) {
+  if (!(await attach(r.session.id, MAIN_ANGLE, opts.mainLabel, opts.stream, 'camera', opts.deviceId))) {
     /* جلسه روی سرور ساخته شده ولی هیچ تصویری ندارد؛ اگر رها شود تا
        پایانِ پنجره‌ی کهنگی در فهرستِ عمومی به‌عنوان پخشِ زنده می‌ماند. */
     await stopLive(r.session.id, opts.ownerKey);
@@ -235,13 +295,14 @@ export async function addFeed(opts: {
     set({ error: `بیشتر از ${MAX_ANGLES} دوربین هم‌زمان ممکن نیست` });
     return false;
   }
+  warmBroadcast();
   const a = await addAngle(s.id, opts.label.slice(0, 40));
   if (!a?.ok || !a.angle) {
     stopStream(opts.stream);
     set({ error: a?.message || 'افزودن دوربین ممکن نشد' });
     return false;
   }
-  return attach(s.id, a.angle.id, a.angle.label, opts.stream, opts.kind, opts.deviceId);
+  return await attach(s.id, a.angle.id, a.angle.label, opts.stream, opts.kind, opts.deviceId);
 }
 
 export function removeFeed(angleId: string): void {

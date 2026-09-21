@@ -28,6 +28,7 @@ import {
   startSession, adoptSession, addFeed, removeFeed, toggleMic,
   endLocal, dropLocalFeeds, replaceMain, deadFeeds, reviveNow,
   setQuality as storeSetQuality, setError as storeSetError,
+  warmBroadcast,
 } from '../../lib/live/broadcast-store'
 import { fetchLiveSessions, type LiveSession } from '../../lib/live/client'
 import { MAIN_ANGLE, MAX_ANGLES, defaultAngleLabel } from '../../lib/live/angles'
@@ -150,6 +151,11 @@ export default function GoLive({ clubId, clubName, ownerKey }: { clubId: string;
 
   /* ── پیش‌نمایش ── */
   const openPreview = useCallback(async () => {
+    /* ⚠️ همین‌جا گرم می‌شود، نه موقعِ شروعِ پخش: از لحظه‌ای که
+       کاربر پیش‌نمایشِ دوربین را باز می‌کند تا وقتی دکمه‌ی شروع را
+       بزند چند ثانیه فاصله است، و دانلودِ chunkِ webrtc دقیقا
+       همان‌جا باید انجام شود نه بعد از ساختِ جلسه روی سرور. */
+    warmBroadcast();
     setLocalErr(''); storeSetError('')
     const r = await openCamera(presetOf(st.quality), { deviceId: deviceId || undefined, facing })
     if (!r.stream) { setLocalErr(r.error); return null }
