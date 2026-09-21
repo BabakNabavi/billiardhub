@@ -1,0 +1,81 @@
+# ─────────────────────────────────────────────────────────────
+# دروازه‌ی کیفیت — تا امروز هیچ‌چیز جز حافظه‌ی آدم جلوی رفتنِ کدِ
+# شکسته روی سرور را نمی‌گرفت. `deploy.sh` روی لپ‌تاپ اجرا می‌شود و
+# اگر کسی یادش برود بیلد بگیرد، خطا روی پروداکشن کشف می‌شود.
+#
+# ⚠️ این گردش‌کار **دیپلوی نمی‌کند**. فقط می‌گوید «این کامیت سالم
+# است یا نه». دیپلوی دستی و دستِ مالک می‌ماند — همان قاعده‌ی
+# CLAUDE.md.
+#
+# ⚠️ بیلدِ Next.js بدونِ متغیرهای محیطی هم باید سبز شود. مقادیرِ
+# ساختگیِ زیر فقط برای گذراندنِ زمانِ بیلدند و هیچ‌کدام راز نیستند؛
+# رازهای واقعی روی سرور در `.env.local` می‌مانند و هرگز این‌جا
+# نمی‌آیند.
+# ─────────────────────────────────────────────────────────────
+name: CI
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+  # اجرای دستی، برای وقتی می‌خواهی سلامتِ شاخه را بدون کامیتِ تازه بسنجی
+  workflow_dispatch:
+
+# کامیتِ تازه روی همان شاخه، اجرای قبلی را لغو می‌کند
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+# حداقلِ دسترسی: این گردش‌کار فقط می‌خواند. `npm ci` اسکریپت‌های
+# چرخه‌ی حیاتِ وابستگی‌ها را اجرا می‌کند، پس توکنِ نوشتنی نباید
+# دستش باشد.
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    env:
+      # ⚠️ ساختگی و بی‌ارزش — فقط برای اینکه بیلد سرِ نبودِ متغیر نیفتد
+      NEXT_PUBLIC_SUPABASE_URL: https://example.invalid
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ci-placeholder
+      NEXT_PUBLIC_SITE_URL: https://billiardhub.net
+      SUPABASE_SERVICE_ROLE_KEY: ci-placeholder
+      JWT_SECRET: ci-placeholder-not-a-real-secret-0123456789
+      NEXT_TELEMETRY_DISABLED: '1'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      # `npm ci` نه `npm install`: دقیقا همان چیزی نصب شود که
+      # package-lock می‌گوید، وگرنه CI و لپ‌تاپ دو چیز متفاوت می‌سازند.
+      - name: نصب وابستگی‌ها
+        run: npm ci
+
+      - name: تایپ‌چک
+        run: npm run check-types
+
+      - name: لینت
+        run: npm run lint
+
+      - name: بیلد پروداکشن
+        run: npm run build
+
+      # تست‌های واحد که به شبکه و دیتابیس نیاز ندارند.
+      # ⚠️ بقیه‌ی ۵۸ اسکریپتِ `test:*` عمدا این‌جا نیستند: به سرورِ
+      # زنده یا مرورگر وصل می‌شوند و در CI یا می‌شکنند یا — بدتر —
+      # به داده‌ی واقعی دست می‌زنند.
+      # ⚠️ `test:tel` هم نیست: با `npx --yes tsx` یک بسته‌ی
+      # پین‌نشده از رجیستری می‌کشد، پس نه آفلاین است نه تکرارپذیر.
+      - name: تست‌های واحد
+        working-directory: apps/web
+        run: |
+          npm run test:phone
+          npm run test:wa-link

@@ -34,6 +34,17 @@ export const nextJsConfig = [
       },
     },
   },
+  /* ⚠️ اسکریپت‌های Node (پشتیبان، مهاجرت، تست) در محیط Node اجرا
+     می‌شوند نه مرورگر. بدونِ این بلوک، هر `process` و `console`
+     یک `no-undef` می‌گرفت — ۵۱۵ اخطار که هیچ‌کدام باگ نبودند و
+     دروازه‌ی کیفیت را از روز اول قرمز نگه می‌داشتند. */
+  {
+    files: ["**/scripts/**/*.{js,mjs,cjs}", "*.config.{js,mjs,cjs}", "instrumentation.ts"],
+    /* ⚠️ گلوبالِ مرورگر هم لازم است: اسکریپت‌های تستِ UI قطعه‌کدِ
+       مرورگر را داخل page.evaluate می‌برند، پس document و window در
+       همان فایلِ Node ظاهر می‌شوند. */
+    languageOptions: { globals: { ...globals.node, ...globals.browser } },
+  },
   {
     plugins: {
       "@next/next": pluginNext,
