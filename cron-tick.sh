@@ -79,5 +79,9 @@ run expire-bookings
 run complete-bookings
 run expire-campaigns
 run sweep-roles
+# آخر از همه: پاک‌سازی. اگر شکست بخورد هیچ کارِ مالی‌ای معلق نمی‌ماند،
+# و تا مهاجرت‌های ۰۹۸/۰۹۹ اجرا نشده‌اند خودش می‌گوید «مهاجرت اجرا نشده»
+# بدونِ اینکه خطا بدهد.
+run prune
 
 exit "$FAILED"
