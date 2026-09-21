@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import Navbar from "../components/Navbar";
+import ErrorBeacon from "../components/ErrorBeacon";
 import Footer from "../components/Footer";
 import DialogHost from "../components/ui/DialogHost";
 import FooterGate from "../components/FooterGate";
@@ -208,6 +209,7 @@ export default function RootLayout({
           {/* AppBoot داخل Provider است چون تازه‌سازی اشتراک پوش را به
               پرچم تعاملات گره زده — پوش امروز فقط برای دایرکت است. */}
           <AppBoot />
+          <ErrorBeacon />
           <Navbar />
           <main>{children}</main>
         </FeatureFlagsProvider>

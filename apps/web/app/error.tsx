@@ -5,6 +5,7 @@
    جزئیات داخلی داشته باشد)؛ فقط digest که شناسه‌ی بی‌خطر لاگ است. */
 
 import { useEffect } from 'react'
+import { reportClientError } from '../components/ErrorBeacon'
 
 const LINE = '#E7E2D6'
 const GOLD_D = '#8F6531'
@@ -13,7 +14,13 @@ export default function Error({ error, reset }: {
   error: Error & { digest?: string }
   reset: () => void
 }) {
-  useEffect(() => { console.error(error) }, [error])
+  /* ⚠️ `console.error` فقط در مرورگرِ خودِ کاربر می‌ماند و به ما
+     نمی‌رسد. این خطا همان چیزی است که صفحه را شکسته، پس دقیقا
+     همانی است که باید دیده شود. */
+  useEffect(() => {
+    console.error(error)
+    reportClientError(error, error.digest ? `boundary ${error.digest}` : 'boundary')
+  }, [error])
 
   return (
     <div dir="rtl" style={{

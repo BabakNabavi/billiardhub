@@ -17,7 +17,7 @@ import {
   CheckCircle, TrendingUp, Building2, Star, Megaphone, Scale, Store,
   Clapperboard, Factory, Wrench, ShieldCheck, Wallet,
   CalendarDays, Flag, Package, LifeBuoy, UserPlus, Tag, MessageSquare, Percent,
-  BadgeCheck,
+  BadgeCheck, AlertTriangle,
 } from 'lucide-react';
 
 const GOLD   = '#C7A66A';
@@ -95,6 +95,8 @@ const SECTIONS: AdminSection[] = [
       { title: 'تیک آبی', desc: 'اعطا و پس‌گرفتن تیک تأیید — باشگاه، مربی، داور، بازیکن، متخصص فنی، فروشگاه و تولیدکننده', icon: <BadgeCheck size={20} />, link: '/admin/verified' },
       { title: 'تیکت‌های پشتیبانی', desc: 'پیام‌های تماس با ما و درخواست تغییر کد پستی و اطلاعات بانکی', icon: <LifeBuoy size={20} />, link: '/admin/support' },
       { title: 'دسترسی ادمین', desc: 'دادن یا برداشتن دسترسی ادمین به کاربران', icon: <Crown size={20} />, link: '/admin/access' },
+      /* ژورنال خطا — تا امروز خطای کاربر فقط سرِ خودش می‌افتاد و به ما نمی‌رسید */
+      { title: 'ژورنال خطا', desc: 'خطاهای سرور و مرورگر، تجمیع‌شده بر اساس نوع', icon: <AlertTriangle size={20} />, link: '/admin/errors' },
     ],
   },
   {
