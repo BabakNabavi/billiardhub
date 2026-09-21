@@ -1,4 +1,5 @@
 import 'server-only'
+import { unstable_cache, revalidateTag } from 'next/cache'
 import { getSupabaseServer } from './supabase-server'
 import { listPublicStores, type PublicStore } from './sellers-source'
 import { modernizeType } from './market/title'
@@ -32,7 +33,42 @@ const PRODUCT_IMG = '/images/shop/cue_billiard_1.jpg'
    فقط این مقدار سمت سرور جا مانده بود. */
 const STORE_IMG = '/images/stores/IMG_0974.png'
 
-export async function loadHomeFeatured(): Promise<HomeFeatured> {
+/* ── چرا کش ──
+   اندازه‌گیری شد: صفحه‌ی اصلی در هم‌زمانیِ ۱۵ به p50 ۱۵۹۱ms می‌رسید
+   و روی ~۱۰ req/s اشباع می‌شد، در حالی که `/clubs` همان‌جا ۱۱۹
+   req/s می‌داد. یکی از دو کارِ سرورِ این صفحه همین تابع است: سه
+   کوئری به ازای **هر بازدید**.
+
+   محتوایش کندتغییر است (باشگاه‌های تازه، محصولات تازه، فروشگاه‌ها)؛
+   شصت ثانیه کهنگی برای این سه سکشن بی‌معناست ولی برای سرور یعنی
+   به‌جای سه کوئری در هر بازدید، سه کوئری در دقیقه.
+
+   ⚠️ کارِ *دیگرِ* این صفحه — `buildLivePlacements` — عمدا کش
+   **نمی‌شود**: آن تابع در هر رندر `bh_bump_serves` را صدا می‌زند و
+   چرخشِ عادلانه‌ی آگهی روی همان شمارنده تصمیم می‌گیرد. کش‌کردنش
+   یعنی شمارشِ تحویلِ آگهی دروغ شود. تا وقتی شمارشِ نمایش به سمتِ
+   مرورگر منتقل نشده، کلِ صفحه کش‌شدنی نیست.
+
+   ⚠️ بدونِ صدا زدنِ `revalidateHomeFeatured()`، تغییرِ عمدیِ ادمین
+   (تأییدِ باشگاه، انتشارِ محصول) تا یک دقیقه روی صفحه‌ی اصلی دیده
+   نمی‌شود. تا امروز هیچ مسیری صدایش نمی‌زند — یعنی امروز همان یک
+   دقیقه کهنگی را داریم و این تابع آماده‌ی وصل‌شدن است. */
+export const HOME_FEATURED_TAG = 'home-featured'
+
+/** باطل‌کردنِ فوریِ کشِ صفحه‌ی اصلی — از مسیرهای ادمین صدا زده شود */
+export function revalidateHomeFeatured() {
+  /* ⚠️ در Next 16 پارامتر دوم اجباری است — همان شکلی که
+     `app/api/admin/content/[kind]` برای خبر استفاده می‌کند. */
+  revalidateTag(HOME_FEATURED_TAG, 'max')
+}
+
+export const loadHomeFeatured = unstable_cache(
+  loadHomeFeaturedUncached,
+  ['home-featured'],
+  { revalidate: 60, tags: [HOME_FEATURED_TAG] },
+)
+
+async function loadHomeFeaturedUncached(): Promise<HomeFeatured> {
   const sb = getSupabaseServer()
 
   /* فروشگاه‌ها از همان منبعی که `/api/sellers` می‌خواند — وگرنه
