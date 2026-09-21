@@ -171,10 +171,15 @@ export default async function WatchPage({ params }: Params) {
 
   return (
     <>
+      {/* ⚠️ «<» فرار داده می‌شود. عنوان، توضیح و نامِ سازنده‌ی ویدیو
+          را خودِ کاربر می‌نویسد؛ یک «</script>» داخلشان از این تگ
+          بیرون می‌زد و هر چیزی بعدش اجرا می‌شد — XSSِ ذخیره‌شده روی
+          صفحه‌ی عمومی. صفحه‌ی خبر و پلی‌لیست از قبل همین کار را
+          می‌کردند و فقط این‌جا جا مانده بود. */}
       <script type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(videoLd) }} />
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(videoLd).replace(/</g, '\\u003c') }} />
       <script type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(crumbLd) }} />
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(crumbLd).replace(/</g, '\\u003c') }} />
       {/* ⚠️ شناسه‌ی مالک از همین ردیف سرور می‌آید: صاحب ویدیو حق
           دارد دیدگاه دیگران را پاک کند و رابط باید همان را نشان
           بدهد که سرور اجازه می‌دهد. */}
