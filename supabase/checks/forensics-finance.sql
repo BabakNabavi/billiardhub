@@ -42,7 +42,7 @@ SELECT r.id, r.status, r.created_at,
  LIMIT 50;
 
 \echo ''
-\echo '── ۳) ثبت‌نامِ مسابقه‌ی «پرداخت‌شده» بدونِ ردیفِ پرداخت ──'
+\echo '── ۳) [منسوخ — جوینِ غلط] به forensics-tournaments.sql بروید ──'
 \echo '   (bh_tournament_confirm از بیرون یعنی ثبت‌نامِ رایگان)'
 SELECT tr.id, tr.tournament_id, tr.status, tr.created_at
   FROM public.tournament_registrations tr
