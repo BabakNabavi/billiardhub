@@ -53,6 +53,12 @@ const nextConfig = {
       { source: '/market-new', destination: '/shop', permanent: true },
     ];
   },
+  /* ⚠️ هدرِ `X-Powered-By: Next.js` نسخه‌ی فریم‌ورک را به هر
+     بازدیدکننده‌ای می‌گوید. خودش آسیب‌پذیری نیست، ولی کارِ کسی که
+     دنبالِ آسیب‌پذیریِ شناخته‌شده‌ی همان نسخه می‌گردد را راحت
+     می‌کند. حذفش هیچ هزینه‌ای ندارد. */
+  poweredByHeader: false,
+
   async headers() {
     return [
       {
@@ -151,7 +157,7 @@ const nextConfig = {
                  فوتر. برخلافِ اینماد که فقط یک تصویر است، پی‌پینگ یک
                  اسکریپت می‌دهد که خودش تصویر و لینک را می‌سازد؛ پس
                  هم این‌جا و هم در `img-src` لازم است. */
-              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://statics.payping.ir",
+              "script-src 'self' 'unsafe-inline' https://statics.payping.ir",
               "style-src 'self' 'unsafe-inline'",
               /* `trustseal.enamad.ir` — نشانِ اعتمادِ الکترونیکی در فوتر.
                  تصویرِ نشان مستقیم از سرورِ اینماد می‌آید و بدونِ این
