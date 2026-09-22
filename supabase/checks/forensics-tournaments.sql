@@ -33,10 +33,21 @@ SELECT t.id, t.status,
 \echo ''
 \echo '── ۲) نشانه‌ی واقعیِ سوءاستفاده ──'
 \echo '   پولی + پرداخت‌شده + بدونِ ردیفِ پرداختِ واقعی. باید خالی باشد.'
+-- ⚠️ ثبت‌نامِ «حضوری» استثناست و این را با اجرای واقعی فهمیدیم:
+--    سیزده ردیفِ ۱۷ مرداد مشکوک به نظر می‌رسیدند چون پرداختی پشتشان
+--    نبود، ولی audit_logs نشان داد همه TOURNAMENT_OFFLINE_ADDED اند —
+--    یعنی باشگاه‌دار خودش شرکت‌کننده‌ی حضوری اضافه کرده و پول را نقدی
+--    گرفته. آن‌ها user_id ندارند و هرگز از درگاه رد نمی‌شوند.
+--    بدونِ این استثنا، هر ممیزیِ بعدی همان هشدارِ کاذب را می‌دهد.
 SELECT r.id, r.tournament_id, r.amount, r.status, r.payment_status,
        r.provider, r.provider_ref_id, r.paid_at
   FROM public.tournament_registrations r
  WHERE r.amount > 0
+   AND NOT EXISTS (
+     SELECT 1 FROM public.audit_logs a
+      WHERE a.entity_id = r.id::text
+        AND a.action = 'TOURNAMENT_OFFLINE_ADDED'
+   )
    AND (r.payment_status = 'PAID' OR r.paid_at IS NOT NULL)
    AND NOT EXISTS (
      SELECT 1 FROM public.payments p
