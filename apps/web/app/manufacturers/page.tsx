@@ -100,9 +100,7 @@ const MFR_SLIDES = [
   { title: 'برندهای معتبر',        sub: 'همه در یک جا' },
 ]
 
-/* ════════ HERO — همان الگوی صفحه‌ی مربیان ════════
-   هدرِ قبلی روشن بود و پوسترها را با شفافیتِ کم پشتِ متن می‌گذاشت؛
-   کنارِ هدرِ مربیان «ساده و معمولی» دیده می‌شد. */
+/* ════════ HERO — عکسِ واقعی پشتِ همه‌ی اسلایدها ════════ */
 /* ── عکسِ هدرِ فهرست ──
    ⚠️ به‌جای پوسترِ برداری، عکسِ واقعی — مالک داد. همان درسی که در
    `components/tech/market/HeroArt.tsx` ثبت شده: صحنه‌ی SVG هرچقدر
@@ -116,12 +114,12 @@ const MFR_SLIDES = [
    دلیلش دیکد است نه بایت: نوارِ هیرو ۱۵۰ تا ۲۰۵ پیکسل بلند است و
    `object-fit: cover` روی یک عکسِ ۳:۲ نزدیک دو سومِ هر ردیفِ
    دیکدشده را دور می‌ریخت — روی اندرویدِ ضعیفِ مخاطبِ ما این وقت و
-   حافظه است. برش (مرکز روی ۵۸٪ ارتفاع، جایی که دست‌ها و خودِ چوب
+   حافظه است. برش (مرکز روی ۴۴٪ ارتفاع، جایی که دست‌های کارگر و چوب‌های آماده
    است) همان‌جا در ساخت انجام شده.
 
    ⚠️ نردبان تا ۱۵۳۶ تمام می‌شود چون عرضِ بومیِ فایل همان است؛ پله‌ی
    بالاتر یعنی پیکسلِ ساختگی با هزینه‌ی بایت. موبایلِ DPR۲ پله‌ی
-   ۷۶۸ را می‌گیرد: ۱۰ کیلوبایت AVIF. */
+   ۷۶۸ را می‌گیرد: ۱۲ کیلوبایت AVIF. */
 const HERO_W = [768, 1024, 1280, 1536] as const
 const heroSet = (ext: string) =>
   HERO_W.map(w => `/images/manufacturers/hero-${w}.${ext} ${w}w`).join(', ')
@@ -152,19 +150,38 @@ function MfrHeroSlider() {
      `fadingRef`: حالا یک عکس پشتِ همه‌ی اسلایدهاست و آنچه عوض
      می‌شود فقط متن است. نگه‌داشتنِ آن دو یعنی وضعیتی که هیچ‌چیز
      را کنترل نمی‌کند. */
+  /* ⚠️ کلیکِ روی نشانگر شمارش را از نو شروع می‌کند. بدونِ این، اگر
+     درست پیشِ پایانِ چرخه بزنی، چند میلی‌ثانیه بعد خودکار ردش می‌کند
+     و انتخابت گم می‌شود. */
+  const restartRef = useRef<() => void>(() => {})
+
   const advance = (idx: number) => {
     if (idx === activeRef.current) return
     activeRef.current = idx
     setActive(idx)
+    restartRef.current()
   }
 
   useEffect(() => {
-    const iv = setInterval(() => {
-      const next = (activeRef.current + 1) % MFR_SLIDES.length
-      activeRef.current = next
-      setActive(next)
-    }, 4500)
-    return () => clearInterval(iv)
+    let iv: ReturnType<typeof setInterval> | null = null
+    /* ⚠️ «حرکتِ کم» فقط انیمیشنِ CSS نیست: عوض‌شدنِ خودکارِ عنوان هر
+       ۴٫۵ ثانیه هم حرکت است (WCAG 2.2.2). پرده‌ی reduced-motion پایین
+       فقط ken-burns و ورودِ متن را می‌خواباند، نه این تایمر را. برای
+       کسی که حرکت را خاموش کرده، روی اسلاید اول می‌ماند و نشانگرها
+       همچنان کار می‌کنند. */
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)')
+    const start = () => {
+      if (iv) clearInterval(iv)
+      if (reduced.matches) return
+      iv = setInterval(() => {
+        const next = (activeRef.current + 1) % MFR_SLIDES.length
+        activeRef.current = next
+        setActive(next)
+      }, 4500)
+    }
+    restartRef.current = start
+    start()
+    return () => { if (iv) clearInterval(iv) }
   }, [])
 
   return (
@@ -184,7 +201,7 @@ function MfrHeroSlider() {
             آن‌جا می‌نشیند و سوژه‌ی عکس سمتِ چپ است. نسخه‌ی پوستری
             برعکس بود و با این عکس روی صورتِ سوژه می‌افتاد. */}
         <div style={{ position: 'absolute', inset: 0, zIndex: 3, background: 'linear-gradient(to left, rgba(10,10,10,0.86) 0%, rgba(10,10,10,0.58) 34%, rgba(10,10,10,0.16) 70%, transparent 100%)' }} />
-        <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '55%', zIndex: 3, background: 'linear-gradient(to top, rgba(0,0,0,0.80), transparent)' }} />
+        <div style={{ position: 'absolute', bottom: 0, insetInline: 0, height: '55%', zIndex: 3, background: 'linear-gradient(to top, rgba(0,0,0,0.80), transparent)' }} />
 
         <div style={{ position: 'absolute', inset: 0, zIndex: 4, display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: 'clamp(12px,2.4vw,32px) clamp(24px,6vw,80px)' }}>
           <div key={active} className="mfr-hero-txt" style={{ maxWidth: 1280, width: '100%', margin: '0 auto', animation: 'mfrSlideIn .55s cubic-bezier(0.22,1,0.36,1) both' }}>

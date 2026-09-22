@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useRef, useEffect } from 'react'
 import Link from 'next/link'
+import { toFaDigits } from '../../lib/jalali'
 
 import { listApprovedSellers, type SellerProfile } from '../../lib/seller-store'
 import { fetchProfiles } from '../../lib/profiles/client'
@@ -16,75 +17,54 @@ const TEXT_SEC = 'rgba(28,28,26,0.52)'
 const TEXT_MUT = 'rgba(28,28,26,0.32)'
 
 
-/* ── Subtle sliding header posters (text-less, behind the hero elements) ── */
-const SELLER_POSTERS = [
-  { bg:'linear-gradient(125deg,#0b1322 0%,#17253f 55%,#1e2f4d 100%)', glow:'rgba(199,166,106,0.30)', accent:'rgba(199,166,106,0.55)', motif:'cues'  },
-  { bg:'linear-gradient(130deg,#141414 0%,#272524 55%,#1a1a19 100%)', glow:'rgba(199,166,106,0.30)', accent:'rgba(199,166,106,0.55)', motif:'rack'  },
-  { bg:'linear-gradient(130deg,#07231a 0%,#0e3a2a 55%,#0a2f22 100%)', glow:'rgba(199,166,106,0.26)', accent:'rgba(199,166,106,0.50)', motif:'table' },
-  { bg:'linear-gradient(125deg,#1c0e13 0%,#341826 55%,#230f1a 100%)', glow:'rgba(199,166,106,0.26)', accent:'rgba(199,166,106,0.50)', motif:'eight' },
-  { bg:'linear-gradient(130deg,#08201f 0%,#0d3835 55%,#0a2a28 100%)', glow:'rgba(199,166,106,0.26)', accent:'rgba(199,166,106,0.50)', motif:'aim'   },
-]
+/* ── عکسِ هدرِ فهرست ──
+   ⚠️ پیش از این پنج پوسترِ برداری (گرادیان + موتیفِ SVG) پشتِ متن
+   محو می‌شدند. حالا یک عکسِ واقعی از یک فروشگاهِ بیلیارد — که مالک
+   داد — پشتِ همه‌ی اسلایدها می‌نشیند و آنچه عوض می‌شود فقط متن
+   است. همان درسِ هدرِ تولیدکنندگان: صحنه‌ی SVG هرچقدر هم دقیق
+   کشیده شود، چشم فورا می‌فهمد عکس نیست.
 
-function sellerMotif(motif: string) {
-  const s = 190
-  if (motif === 'rack') {
-    const rows = [[[50,11]],[[41,27],[59,27]],[[32,43],[50,43],[68,43]],[[23,59],[41,59],[59,59],[77,59]],[[14,75],[32,75],[50,75],[68,75],[86,75]]]
-    return (
-      <svg width={s} viewBox="0 0 100 86" fill="none" aria-hidden>
-        {rows.flat().map((pt,i)=>(<circle key={i} cx={pt![0]} cy={pt![1]} r="7.4" stroke={GOLD} strokeWidth="1.3" opacity="0.82"/>))}
-        <circle cx="50" cy="11" r="3" fill={GOLD} opacity="0.6"/>
-      </svg>
-    )
-  }
-  if (motif === 'table') return (
-    <svg width={s} viewBox="0 0 120 72" fill="none" aria-hidden>
-      <rect x="4" y="4" width="112" height="64" rx="10" stroke={GOLD} strokeWidth="1.6" opacity="0.8"/>
-      <rect x="12" y="12" width="96" height="48" rx="4" stroke={GOLD} strokeWidth="1" opacity="0.42"/>
-      {[[10,10],[60,7],[110,10],[10,62],[60,65],[110,62]].map((p,i)=>(<circle key={i} cx={p[0]} cy={p[1]} r="4" fill={GOLD} opacity="0.68"/>))}
-      <line x1="36" y1="12" x2="36" y2="60" stroke={GOLD} strokeWidth="1" opacity="0.4"/>
-      <path d="M36 27 A9 9 0 0 0 36 45" stroke={GOLD} strokeWidth="1" opacity="0.4" fill="none"/>
-      <circle cx="60" cy="36" r="1.8" fill={GOLD} opacity="0.7"/>
-    </svg>
-  )
-  if (motif === 'eight') return (
-    <svg width={s} viewBox="0 0 100 100" fill="none" aria-hidden>
-      <circle cx="50" cy="50" r="38" stroke={GOLD} strokeWidth="1.8" opacity="0.85" fill="rgba(0,0,0,0.18)"/>
-      <circle cx="50" cy="50" r="16" fill={GOLD} opacity="0.9"/>
-      <text x="50" y="51" textAnchor="middle" dominantBaseline="central" fontSize="19" fontWeight="800" fill="#1c0e13">8</text>
-      <ellipse cx="38" cy="36" rx="7" ry="4" fill={GOLD} opacity="0.22" transform="rotate(-30 38 36)"/>
-    </svg>
-  )
-  if (motif === 'aim') return (
-    <svg width={s} viewBox="0 0 100 100" fill="none" aria-hidden>
-      <circle cx="50" cy="50" r="40" stroke={GOLD} strokeWidth="0.8" opacity="0.22"/>
-      <circle cx="50" cy="50" r="28" stroke={GOLD} strokeWidth="1" opacity="0.38"/>
-      <circle cx="50" cy="50" r="16" stroke={GOLD} strokeWidth="1.6" opacity="0.9" fill="rgba(0,0,0,0.18)"/>
-      {[[50,6],[50,94],[6,50],[94,50]].map((pt,i)=>(<rect key={i} x={pt[0]!-3} y={pt[1]!-3} width="6" height="6" fill={GOLD} opacity="0.58" transform={`rotate(45 ${pt[0]} ${pt[1]})`}/>))}
-      <circle cx="44" cy="44" r="3" fill={GOLD} opacity="0.4"/>
-    </svg>
-  )
-  return (
-    <svg width={s} viewBox="0 0 100 100" fill="none" aria-hidden>
-      <g stroke={GOLD} strokeWidth="2.2" strokeLinecap="round" opacity="0.78"><line x1="12" y1="86" x2="88" y2="16"/><line x1="12" y1="16" x2="88" y2="86"/></g>
-      {[[12,86],[88,16],[12,16],[88,86]].map((pt,i)=>(<circle key={i} cx={pt[0]} cy={pt[1]} r="2.4" fill={GOLD} opacity="0.72"/>))}
-      <circle cx="50" cy="51" r="13" fill="rgba(0,0,0,0.35)" stroke={GOLD} strokeWidth="1.6" opacity="0.95"/>
-      <circle cx="45" cy="46" r="3" fill={GOLD} opacity="0.5"/>
-    </svg>
-  )
-}
+   ⚠️ قیدِ ترکیب‌بندی — این‌جا برعکسِ هدرِ تولیدکنندگان است و مهم:
+   صفحه راست‌به‌چپ است و عنوانِ هیرو سمتِ راست می‌نشیند، ولی
+   روشن‌ترین جای این عکس هم همان سمتِ راست است (پنجره و میزِ آبی).
+   پس پرده این‌جا از هدرِ تولیدکنندگان تیره‌تر بسته شده. اگر روزی
+   عکس عوض شد، اول همین را بسنج.
 
-function SellerPoster({ variant }: { variant: number }) {
-  const p = SELLER_POSTERS[variant % SELLER_POSTERS.length]!
+   ⚠️ نسبتِ ۲٫۶:۱ و نردبانِ ۷۶۸…۱۵۳۶ عیناً مثل هدرِ تولیدکنندگان.
+   دلیلش دیکد است نه بایت: نوارِ هیرو ۱۵۰ تا ۲۰۵ پیکسل بلند است و
+   روی موبایلِ ۳۷۵ پیکسلی نسبتِ نمایش ۲٫۵:۱ می‌شود، پس آن‌جا این برش
+   تقریبا هیچ ردیفِ دیکدشده‌ای را دور نمی‌ریزد. ⚠️ روی دسکتاپ این‌طور
+   نیست: نوار به ۲۰۵ پیکسل قفل می‌شود و کادرِ نمایش ۷٫۵:۱ می‌شود،
+   یعنی cover حدودِ دو سومِ ردیف‌ها را دور می‌ریزد. این معامله عمدی
+   است، چون مخاطبِ اصلی موبایل است. برش مرکزِ ۵۲٪
+   ارتفاع است، جایی که دیوارِ چوب‌ها و پیشخوانِ توپ‌ها هر دو در
+   کادر می‌مانند.
+
+   ⚠️ این عکس شلوغ‌تر از هدرِ تولیدکنندگان است (ردیفِ چوب‌ها و
+   توپ‌های رنگی یعنی جزئیاتِ پرفرکانس)، پس با همان کیفیت حدودِ دو
+   برابر بایت می‌گیرد. موبایلِ DPR۲ پله‌ی ۷۶۸ را می‌گیرد: ۱۹
+   کیلوبایت AVIF. پایین‌تر بردنِ کیفیت از این، ردیفِ چوب‌ها را
+   لک می‌کند. */
+const HERO_W = [768, 1024, 1280, 1536] as const
+const heroSet = (ext: string) =>
+  HERO_W.map(w => `/images/sellers/hero-${w}.${ext} ${w}w`).join(', ')
+
+function SellerHeroPhoto() {
   return (
-    <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', background: p.bg }}>
-      <div style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(rgba(255,255,255,0.06) 1px, transparent 1px)', backgroundSize: '18px 18px', opacity: 0.6 }} />
-      <div style={{ position: 'absolute', inset: '-20%', background: `radial-gradient(circle at 30% 40%, ${p.glow}, transparent 55%)` }} />
-      <div style={{ position: 'absolute', top: '-25%', bottom: '-25%', left: '52%', width: 2, background: `linear-gradient(180deg, transparent, ${p.accent}, transparent)`, transform: 'rotate(19deg)', opacity: 0.4 }} />
-      <div style={{ position: 'absolute', top: '-25%', bottom: '-25%', left: '58%', width: 1, background: `linear-gradient(180deg, transparent, ${p.accent}, transparent)`, transform: 'rotate(19deg)', opacity: 0.2 }} />
-      <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', transform: 'translateX(-12%)' }}>
-        <div style={{ display: 'flex' }}>{sellerMotif(p.motif)}</div>
-      </div>
-    </div>
+    <picture>
+      <source type="image/avif" srcSet={heroSet('avif')} sizes="100vw" />
+      <img
+        src="/images/sellers/hero-1024.webp"
+        srcSet={heroSet('webp')}
+        sizes="100vw"
+        width={1536}
+        height={591}
+        alt=""
+        decoding="async"
+        fetchPriority="high"
+        className="absolute inset-0 h-full w-full object-cover"
+      />
+    </picture>
   )
 }
 
@@ -98,53 +78,77 @@ const SELLER_SLIDES = [
   { title: 'نزدیک‌ترین فروشگاه',    sub: 'در شهر خودت پیدا کن' },
 ]
 
-/* ════════ HERO — همان الگوی صفحه‌ی مربیان ════════
-   هدرِ قبلی روشن بود و پوسترها را با شفافیتِ ۰٫۱۱ پشتِ متن می‌گذاشت؛
-   نتیجه‌اش یک نوارِ کم‌رنگ بود که کنارِ هدرِ مربیان «ساده و معمولی»
-   دیده می‌شد. حالا همان پوسترها تمام‌رنگ پس‌زمینه‌اند، با دو پرده‌ی
-   تیره برای خوانایی متن. */
+/* ════════ HERO — همان الگوی صفحه‌ی تولیدکنندگان ════════
+   یک عکس پشتِ همه‌ی اسلایدها، دو پرده‌ی تیره برای خوانایی، و تنها
+   چیزی که با اسلاید عوض می‌شود متن است. شرحِ عکس و برش بالاتر. */
 function SellerHeroSlider() {
-  const [active, setActive]   = useState(0)
-  const [prevIdx, setPrevIdx] = useState<number | null>(null)
+  const [active, setActive] = useState(0)
   const activeRef = useRef(0)
-  const fadingRef = useRef(false)
+  /* ⚠️ لایه‌های محوشونده‌ی پوستر رفتند و با آن‌ها `prevIdx` و
+     `fadingRef`: حالا یک عکس پشتِ همه‌ی اسلایدهاست و آنچه عوض
+     می‌شود فقط متن است. نگه‌داشتنشان یعنی وضعیتی که دیگر هیچ‌چیز
+     را کنترل نمی‌کند. */
+  /* ⚠️ کلیکِ روی نشانگر شمارش را از نو شروع می‌کند. بدونِ این، اگر
+     درست پیشِ پایانِ چرخه بزنی، چند میلی‌ثانیه بعد خودکار ردش می‌کند
+     و انتخابت گم می‌شود. */
+  const restartRef = useRef<() => void>(() => {})
 
   const advance = (idx: number) => {
-    if (idx === activeRef.current || fadingRef.current) return
-    setPrevIdx(activeRef.current)
+    if (idx === activeRef.current) return
     activeRef.current = idx
-    fadingRef.current = true
     setActive(idx)
-    setTimeout(() => { setPrevIdx(null); fadingRef.current = false }, 850)
+    restartRef.current()
   }
 
   useEffect(() => {
-    const iv = setInterval(() => {
-      const next = (activeRef.current + 1) % SELLER_SLIDES.length
-      setPrevIdx(activeRef.current)
-      activeRef.current = next
-      fadingRef.current = true
-      setActive(next)
-      setTimeout(() => { setPrevIdx(null); fadingRef.current = false }, 850)
-    }, 4500)
-    return () => clearInterval(iv)
+    let iv: ReturnType<typeof setInterval> | null = null
+    /* ⚠️ «حرکتِ کم» فقط انیمیشنِ CSS نیست: عوض‌شدنِ خودکارِ عنوان هر
+       ۴٫۵ ثانیه هم حرکت است (WCAG 2.2.2). پرده‌ی reduced-motion پایین
+       فقط ken-burns و ورودِ متن را می‌خواباند، نه این تایمر را. برای
+       کسی که حرکت را خاموش کرده، روی اسلاید اول می‌ماند و نشانگرها
+       همچنان کار می‌کنند. */
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)')
+    const start = () => {
+      if (iv) clearInterval(iv)
+      if (reduced.matches) return
+      iv = setInterval(() => {
+        const next = (activeRef.current + 1) % SELLER_SLIDES.length
+        activeRef.current = next
+        setActive(next)
+      }, 4500)
+    }
+    restartRef.current = start
+    start()
+    return () => { if (iv) clearInterval(iv) }
   }, [])
 
   return (
     <>
-      <style>{`@keyframes kenBurnsS{0%{transform:scale(1.00) translate(0%,0%)}100%{transform:scale(1.14) translate(-2%,1.5%)}}`}</style>
+      <style>{`
+        @keyframes kenBurnsS{0%{transform:scale(1.00) translate(0%,0%)}100%{transform:scale(1.10) translate(-1.5%,1%)}}
+        @keyframes selSlideIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+        @media (prefers-reduced-motion: reduce){
+          .sel-hero-ken,.sel-hero-txt{animation:none !important}
+        }
+      `}</style>
       <section style={{ position: 'relative', height: 'clamp(150px,16vw,205px)', overflow: 'hidden', background: '#0a0a0a', direction: 'rtl' }}>
-        {SELLER_SLIDES.map((_, i) => (
-          <div key={i} style={{ position: 'absolute', inset: 0, opacity: i === active ? 1 : 0, transition: 'opacity 0.90s ease', zIndex: i === active ? 2 : i === prevIdx ? 1 : 0, animation: 'kenBurnsS 9s ease-in-out infinite alternate', willChange: 'transform' }}>
-            <SellerPoster variant={i} />
-          </div>
-        ))}
-        <div style={{ position: 'absolute', inset: 0, zIndex: 3, background: 'linear-gradient(to right, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.28) 55%, transparent 100%)' }} />
-        <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '55%', zIndex: 3, background: 'linear-gradient(to top, rgba(0,0,0,0.80), transparent)' }} />
+        <div className="sel-hero-ken" style={{ position: 'absolute', inset: 0, zIndex: 1, animation: 'kenBurnsS 14s ease-in-out infinite alternate', willChange: 'transform' }}>
+          <SellerHeroPhoto />
+        </div>
+        {/* ⚠️ پرده سمتِ *راست* را تیره می‌کند نه چپ. نسخه‌ی پوستری
+            برعکس بود (`to right`) و چون خودِ پوسترها تیره بودند کسی
+            متوجه نشد؛ با یک عکسِ واقعی، عنوانِ فارسی درست روی
+            روشن‌ترین نقطه می‌افتاد. */}
+        <div style={{ position: 'absolute', inset: 0, zIndex: 3, background: 'linear-gradient(to left, rgba(10,10,10,0.90) 0%, rgba(10,10,10,0.66) 34%, rgba(10,10,10,0.22) 70%, transparent 100%)' }} />
+        <div style={{ position: 'absolute', bottom: 0, insetInline: 0, height: '55%', zIndex: 3, background: 'linear-gradient(to top, rgba(0,0,0,0.80), transparent)' }} />
 
         <div style={{ position: 'absolute', inset: 0, zIndex: 4, display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: 'clamp(12px,2.4vw,32px) clamp(24px,6vw,80px)' }}>
-          <div style={{ maxWidth: 1280, width: '100%', margin: '0 auto' }}>
-            <div style={{ textAlign: 'left', marginBottom: 11 }}>
+          <div key={active} className="sel-hero-txt" style={{ maxWidth: 1280, width: '100%', margin: '0 auto', animation: 'selSlideIn .55s cubic-bezier(0.22,1,0.36,1) both' }}>
+            {/* ⚠️ بدونِ `textAlign:'left'`: نشان از ظرفِ RTL جهت
+                می‌گیرد و کنارِ عنوان سمتِ راست می‌نشیند — همان سمتی
+                که پرده تیره‌اش می‌کند. با `left` روی نیمه‌ی روشن
+                می‌افتاد و طلاییِ ۸٫۹ پیکسلی آن‌جا خوانده نمی‌شد. */}
+            <div style={{ marginBottom: 11 }}>
               <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, background: 'rgba(199,166,106,0.14)', border: '1px solid rgba(199,166,106,0.34)', color: '#D4A843', fontSize: 8.9, fontWeight: 800, borderRadius: 24, padding: '4px 11px', letterSpacing: '0.12em', transform: 'translateY(-13px)', animation: 'softBlink 2.6s .7s ease-in-out infinite' }}>
                 MARKET PLACE . BILLIARD HUB
               </div>
@@ -160,9 +164,12 @@ function SellerHeroSlider() {
 
         {/* نشانگرها از دید پنهان‌اند ولی با فوکوس برمی‌گردند — همان
             رفتارِ هدرِ مربیان، تا کاربر کیبورد از تغییر اسلاید محروم نشود. */}
-        <div className="hero-dots" style={{ position: 'absolute', bottom: 14, left: 'clamp(24px,6vw,80px)', zIndex: 6, display: 'flex', gap: 7 }}>
+        <div className="hero-dots" style={{ position: 'absolute', bottom: 14, insetInlineStart: 'clamp(24px,6vw,80px)', zIndex: 6, display: 'flex', gap: 7 }}>
           {SELLER_SLIDES.map((_, i) => (
-            <button key={i} onClick={() => advance(i)} aria-label={`اسلاید ${i + 1}`} style={{ width: i === active ? 24 : 7, height: 7, borderRadius: 4, border: 'none', cursor: 'pointer', padding: 0, background: i === active ? '#C7A66A' : 'rgba(255,255,255,0.32)', transition: 'all 0.4s cubic-bezier(0.22,1,0.36,1)' }} />
+            <button key={i} type="button" onClick={() => advance(i)}
+              aria-label={`اسلاید ${toFaDigits(String(i + 1))}`}
+              aria-current={i === active ? 'true' : undefined}
+              style={{ width: i === active ? 24 : 7, height: 7, borderRadius: 4, border: 'none', cursor: 'pointer', padding: 0, background: i === active ? '#C7A66A' : 'rgba(255,255,255,0.32)', transition: 'all 0.4s cubic-bezier(0.22,1,0.36,1)' }} />
           ))}
         </div>
       </section>
