@@ -121,15 +121,24 @@ const MFR_SLIDES = [
    بالاتر یعنی پیکسلِ ساختگی با هزینه‌ی بایت. موبایلِ DPR۲ پله‌ی
    ۷۶۸ را می‌گیرد: ۱۲ کیلوبایت AVIF. */
 const HERO_W = [768, 1024, 1280, 1536] as const
+/* ⚠️ `HERO_V` تزئین نیست؛ برداشتنش باگ را برمی‌گرداند.
+   عکس‌ها با `Cache-Control: public, max-age=604800` سرو می‌شوند —
+   هفت روز، به‌اضافه‌ی سی روز `stale-while-revalidate`. بارِ اول که
+   عکسِ هدر عوض شد نامِ فایل همان ماند، پس آدرس عوض نشد و هر مرورگری
+   که صفحه را در آن هفته دیده بود **اصلا درخواست نمی‌داد** و عکسِ
+   قدیمی را نشان می‌داد. سرور درست بود و هشِ بایت‌ها هم یکی بود؛
+   چیزی که فرق داشت فقط کشِ مرورگر بود. مالک همین را گزارش کرد.
+   ⟵ هر بار عکس عوض شد، این عدد هم باید جلو برود. */
+const HERO_V = 'v2'
 const heroSet = (ext: string) =>
-  HERO_W.map(w => `/images/manufacturers/hero-${w}.${ext} ${w}w`).join(', ')
+  HERO_W.map(w => `/images/manufacturers/hero-${w}-${HERO_V}.${ext} ${w}w`).join(', ')
 
 function MfrHeroPhoto() {
   return (
     <picture>
       <source type="image/avif" srcSet={heroSet('avif')} sizes="100vw" />
       <img
-        src="/images/manufacturers/hero-1024.webp"
+        src={`/images/manufacturers/hero-1024-${HERO_V}.webp`}
         srcSet={heroSet('webp')}
         sizes="100vw"
         width={1536}
