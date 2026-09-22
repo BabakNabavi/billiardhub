@@ -1,38 +1,52 @@
 -- ─────────────────────────────────────────────────────────────
--- بررسیِ `profiles_jsonb_backup_20260818` — فقط خواندنی.
+-- بررسیِ جدول‌های اسنپ‌شاتِ بی‌صاحب — فقط خواندنی.
 --
--- ── این جدول چیست ──
--- در هیچ فایلِ مهاجرتی نیست و هیچ‌جای کد به آن ارجاع نمی‌دهد. یک
--- اسنپ‌شاتِ دستی از ستونِ jsonbِ پروفایل‌هاست که روزِ ۲۷ مرداد ۱۴۰۵
--- پیش از یک تغییرِ اسکیما گرفته شده.
+-- ── تاریخچه ──
+-- `profiles_jsonb_backup_20260818` یک اسنپ‌شاتِ دستی از ستونِ jsonbِ
+-- پروفایل‌ها بود که ۲۷ مرداد ۱۴۰۵ پیش از یک تغییرِ اسکیما گرفته شد و
+-- بعد فراموش شد: در هیچ مهاجرتی نبود، هیچ کدی به آن ارجاع نمی‌داد،
+-- و تنها جدولی بود که RLS نداشت. مهاجرتِ ۱۰۰ بستش و مهاجرتِ ۱۰۳
+-- حذفش کرد (۵ ردیف، هر پنج‌تا در `profiles` هم بودند).
 --
--- ── خطرناک است؟ ──
--- نه. بررسیِ دسترسی‌ها نشان داد نقشِ anon هیچ دسترسی‌ای به آن ندارد،
--- پس از اینترنت خوانده نمی‌شود. ولی داده‌ی پروفایلِ کاربران در آن
--- است و بی‌صاحب در اسکیمای public نشسته — و تنها جدولی است که RLS
--- ندارد.
+-- ⚠️ نسخه‌ی قبلیِ این فایل مستقیم از همان جدول SELECT می‌زد. بعد از
+-- حذف، اجرایش با «relation does not exist» می‌مُرد — یعنی دقیقا وقتی
+-- همه‌چیز درست است، بررسی خطا می‌دهد. حالا از کاتالوگ می‌پرسد، پس
+-- چه جدول باشد چه نباشد جواب می‌دهد.
 --
--- ⚠️ این فایل فقط **می‌پرسد**، چیزی را حذف نمی‌کند. تصمیمِ حذف با
--- مالک است و در CLAUDE.md هم همین نوشته شده.
+-- ── چه می‌پرسد ──
+-- ۱) آیا آن جدولِ مشخص برگشته؟
+-- ۲) آیا اسنپ‌شاتِ دستیِ *تازه‌ای* ساخته شده؟ درسِ آن ماجرا یک جدول
+--    نبود، یک عادت بود: کپیِ دستی پیش از تغییرِ اسکیما که بعد کسی
+--    پاکش نمی‌کند.
+--
+-- ⚠️ فهرستِ جدول‌های بدونِ RLS عمدا این‌جا نیست. صاحبش
+-- `anon-grants.sql` است و داشتنِ دو نسخه از یک پرسش یعنی روزی که
+-- یکی به‌روز شود، آن‌یکی بی‌سروصدا جوابِ کهنه می‌دهد.
+--
+-- ⚠️ این فایل فقط می‌پرسد، چیزی را حذف نمی‌کند.
 -- ─────────────────────────────────────────────────────────────
 
-\echo '── چند ردیف، و چقدر جا گرفته ──'
-SELECT
-  (SELECT count(*) FROM public.profiles_jsonb_backup_20260818) AS backup_rows,
-  (SELECT count(*) FROM public.profiles)                       AS live_rows,
-  pg_size_pretty(pg_total_relation_size('public.profiles_jsonb_backup_20260818')) AS backup_size;
+\echo '── ۱) جدولِ حذف‌شده برنگشته باشد (باید 0 باشد) ──'
+SELECT count(*) AS old_backup_table_present
+  FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
+ WHERE n.nspname = 'public'
+   AND c.relname = 'profiles_jsonb_backup_20260818';
 
 \echo ''
-\echo '── ستون‌هایش ──'
-SELECT column_name, data_type
-  FROM information_schema.columns
- WHERE table_schema = 'public'
-   AND table_name = 'profiles_jsonb_backup_20260818'
- ORDER BY ordinal_position;
-
-\echo ''
-\echo '── آیا ردیفی در بکاپ هست که در جدولِ زنده نباشد؟ ──'
-\echo '   (اگر صفر بود، بکاپ چیزی ندارد که از دست برود)'
-SELECT count(*) AS rows_only_in_backup
-  FROM public.profiles_jsonb_backup_20260818 b
- WHERE NOT EXISTS (SELECT 1 FROM public.profiles p WHERE p.id = b.id);
+\echo '── ۲) اسنپ‌شاتِ دستیِ تازه ──'
+\echo '   هر جدولِ public که نامش بوی کپیِ موقت می‌دهد. خالی یعنی تمیز.'
+-- ⚠️ `bak`/`copy`/`old`/`tmp` با مرزِ کلمه، نه زیررشته‌ی آزاد: وگرنه
+--    اولین نامِ مشروعی که تصادفا «bak» تویش باشد هشدارِ کاذب می‌دهد و
+--    بررسی‌ای که کاذب هشدار بدهد، خوانده نمی‌شود.
+-- ⚠️ `m`/`p` هم هست: اسنپ‌شاتِ دستی می‌تواند materialized view باشد.
+--    آن یکی `CREATE TABLE AS` بود (یعنی `r`)، ولی دفعه‌ی بعد لازم
+--    نیست همان شکل باشد.
+SELECT c.relname                                     AS table_name,
+       c.relkind                                     AS kind,
+       pg_size_pretty(pg_total_relation_size(c.oid)) AS size
+  FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
+ WHERE n.nspname = 'public'
+   AND c.relkind IN ('r', 'p', 'm')
+   AND (c.relname ~* '(backup|snapshot|(^|_)(bak|copy|old|tmp|temp)(_|$))'
+        OR c.relname ~ '_[0-9]{8}$')
+ ORDER BY pg_total_relation_size(c.oid) DESC;
