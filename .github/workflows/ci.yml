@@ -79,3 +79,4 @@ jobs:
         run: |
           npm run test:phone
           npm run test:wa-link
+          npm run test:guards

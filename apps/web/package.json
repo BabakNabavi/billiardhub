@@ -72,7 +72,8 @@
     "test:dedupe": "node scripts/test-text-dedupe.mjs",
     "test:wa-link": "node scripts/test-wa-link.mjs",
     "test:edit-image": "node scripts/test-edit-image.mjs",
-    "lint:strict": "eslint --max-warnings 0"
+    "lint:strict": "eslint --max-warnings 0",
+    "test:guards": "node scripts/test-injection-guards.mjs"
   },
   "dependencies": {
     "@fontsource/vazirmatn": "^5.2.8",
