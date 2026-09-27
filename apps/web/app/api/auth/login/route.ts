@@ -69,7 +69,7 @@ export async function POST(req: NextRequest) {
       /* آرگومان سوم: این شماره واقعا حساب دارد ⇒ اگر قفل شد، هشدار
          پیامکی برایش برود. شاخه‌ی بالا (شماره‌ی ناموجود) عمدا `false`
          می‌ماند تا برای کسی که ربطی به ماجرا ندارد پیامک نرود. */
-      await loginFailed(req, String(phone), true);
+      await loginFailed(req, String(phone), true, user.id);
       return NextResponse.json(
         { message: GENERIC_LOGIN_ERROR },
         { status: 401, headers: CORS_HEADERS },

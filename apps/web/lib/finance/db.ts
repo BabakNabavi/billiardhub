@@ -43,14 +43,32 @@ export async function isAdmin(userId: string): Promise<boolean> {
 export async function audit(entry: {
   actorId?: string; actorRole?: string; action: string
   entityType?: string; entityId?: string
-  oldValue?: unknown; newValue?: unknown; ip?: string
+  oldValue?: unknown; newValue?: unknown; ip?: string | null
+  /* ⚠️ برای رویدادِ مالی لازم نبود، برای رویدادِ امنیتی هست: «همین
+     حساب، همین دقیقه، از دو مرورگرِ متفاوت» بدونِ این دیده نمی‌شود.
+     ستونش در مهاجرتِ ۱۰۴ اضافه شد. */
+  userAgent?: string | null
 }) {
+  const row: Record<string, unknown> = {
+    actor_id: entry.actorId ?? null, actor_role: entry.actorRole ?? null,
+    action: entry.action, entity_type: entry.entityType ?? null, entity_id: entry.entityId ?? null,
+    old_value: entry.oldValue ?? null, new_value: entry.newValue ?? null, ip: entry.ip ?? null,
+  }
+  /* ⚠️ `user_agent` فقط وقتی در payload می‌آید که واقعا مقدار دارد.
+     ستونش در مهاجرتِ ۱۰۴ اضافه شد و `deploy.sh` مهاجرت نمی‌برد، پس
+     بینِ دیپلوی و اجرای دستیِ مهاجرت پنجره‌ای هست که ستون وجود ندارد.
+     اگر همیشه فرستاده می‌شد، PostgREST کلِ درج را رد می‌کرد و چون این
+     تابع خطا را می‌بلعد، **هر ۱۳۶ نقطه‌ی ممیزی بی‌صدا خاموش می‌شد**.
+     این‌طوری فراخوانی‌های قدیمی دقیقا همان payloadِ قبلی را می‌فرستند. */
+  if (entry.userAgent != null) row.user_agent = entry.userAgent
   try {
-    await sb().from('audit_logs').insert({
-      actor_id: entry.actorId ?? null, actor_role: entry.actorRole ?? null,
-      action: entry.action, entity_type: entry.entityType ?? null, entity_id: entry.entityId ?? null,
-      old_value: entry.oldValue ?? null, new_value: entry.newValue ?? null, ip: entry.ip ?? null,
-    })
+    const { error } = await sb().from('audit_logs').insert(row)
+    /* ستون هنوز نیست ⇒ همان ردیف بدونِ آن نوشته شود. از دست دادنِ
+       عاملِ کاربر بهتر از گم‌شدنِ خودِ رویدادِ امنیتی است. */
+    if (error && 'user_agent' in row && /user_agent|schema cache|column/i.test(error.message)) {
+      delete row.user_agent
+      await sb().from('audit_logs').insert(row)
+    }
   } catch { /* ثبت ممیزی نباید عملیات را متوقف کند */ }
 }
 

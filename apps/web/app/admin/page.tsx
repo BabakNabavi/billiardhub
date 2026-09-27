@@ -17,8 +17,7 @@ import {
   CheckCircle, TrendingUp, Building2, Star, Megaphone, Scale, Store,
   Clapperboard, Factory, Wrench, ShieldCheck, Wallet,
   CalendarDays, Flag, Package, LifeBuoy, UserPlus, Tag, MessageSquare, Percent,
-  BadgeCheck, AlertTriangle,
-} from 'lucide-react';
+  BadgeCheck, AlertTriangle, ScrollText } from 'lucide-react';
 
 const GOLD   = '#C7A66A';
 const GOLD_D = '#8F6531';
@@ -97,6 +96,8 @@ const SECTIONS: AdminSection[] = [
       { title: 'دسترسی ادمین', desc: 'دادن یا برداشتن دسترسی ادمین به کاربران', icon: <Crown size={20} />, link: '/admin/access' },
       /* ژورنال خطا — تا امروز خطای کاربر فقط سرِ خودش می‌افتاد و به ما نمی‌رسید */
       { title: 'ژورنال خطا', desc: 'خطاهای سرور و مرورگر، تجمیع‌شده بر اساس نوع', icon: <AlertTriangle size={20} />, link: '/admin/errors' },
+      /* ژورنال رویدادها — audit_logs از ۰۰۱ نوشته می‌شد و هیچ‌کس نمی‌خواندش */
+      { title: 'ژورنال رویدادها', desc: 'چه کسی چه کرد، ورودهای ناموفق و نشست‌ها', icon: <ScrollText size={20} />, link: '/admin/logs' },
     ],
   },
   {

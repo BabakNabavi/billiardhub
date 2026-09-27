@@ -2,6 +2,7 @@ export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { rpc, audit } from '@/lib/finance/db';
 import { cronForbidden } from '@/lib/cron-guard';
+import { logHandled } from '@/lib/log-handled';
 
 /* تحویل خدمت — رزروهایی که سانسشان تمام شده COMPLETED می‌شوند و
    همان‌جا سهم باشگاه و کمیسیون پلتفرم در دفتر ثبت می‌شود.
@@ -41,7 +42,10 @@ export async function GET(req: NextRequest) {
       return NextResponse.json(
         { ok: false, message: 'مهاجرت ۰۴۱ اجرا نشده است' }, { status: 503 });
     }
+    /* ⚠️ بی‌صدا ماندنِ این یکی گران‌ترین است: بدونِ تکمیلِ رزروها
+       هیچ CLUB_EARNINGی نوشته نمی‌شود و تسویه غیرممکن می‌ماند. */
     console.error('[cron/complete-bookings]', error.message);
+    void logHandled('cron/complete-bookings', error);
     return NextResponse.json({ ok: false, message: error.message }, { status: 500 });
   }
 

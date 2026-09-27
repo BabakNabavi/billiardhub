@@ -8,6 +8,7 @@
    ───────────────────────────────────────────────────────────── */
 
 import type { NextRequest } from 'next/server'
+import { recordLoginFailure } from './auth-audit'
 import { rpc } from '../finance/db'
 import { ipOf } from './rate-limit'
 
@@ -76,6 +77,9 @@ export async function loginGuard(req: NextRequest, account: string): Promise<Gua
  */
 export async function loginFailed(
   req: NextRequest, account: string, accountExists = false,
+  /* شناسه‌ی کاربر وقتی شماره واقعا حساب دارد. با داشتنش، شماره در
+     ژورنال ذخیره نمی‌شود — `actor_id` هم گویاتر است هم کم‌خطرتر. */
+  userId?: string | null,
 ): Promise<void> {
   try {
     const { data } = await rpc<{ account?: { locked?: boolean; seconds?: number } }>(
@@ -84,6 +88,19 @@ export async function loginFailed(
         p_threshold: LOGIN_THRESHOLD, p_windows: LOGIN_WINDOWS,
         p_ip_threshold: IP_THRESHOLD, p_ip_windows: IP_WINDOWS,
       })
+
+    /* ── ژورنالِ امنیتی ──
+       ⚠️ `void` عمدی است، نه فراموشی: نوشتنِ ژورنال نباید به تأخیرِ
+       پاسخِ ورود اضافه شود، و `audit()` خودش هیچ خطایی بیرون نمی‌دهد.
+       روی این سرور (پروسه‌ی بلندعمرِ `next start`) پرامیسِ شناور تمام
+       می‌شود؛ همان الگوی `void audit({…})`ِ بقیه‌ی مسیرهای auth. */
+    void recordLoginFailure({
+      account,
+      ip: ipOf(req),
+      userAgent: req.headers.get('user-agent'),
+      userId: userId ?? null,
+      locked: !!data?.account?.locked,
+    })
 
     /* ── هشدار امنیتی ──
        این تنها پیامکی است که وقتی می‌رود که کاربر **پشت سایت نیست**.

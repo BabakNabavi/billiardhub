@@ -80,3 +80,4 @@ jobs:
           npm run test:phone
           npm run test:wa-link
           npm run test:guards
+          npm run test:logs

@@ -5,6 +5,7 @@ export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { rpc, audit } from '@/lib/finance/db';
 import { cronForbidden } from '@/lib/cron-guard';
+import { logHandled } from '@/lib/log-handled';
 
 /* تور ایمنی انقضا — رزروهای پرداخت‌نشده‌ای که مهلتشان گذشته آزاد می‌شوند.
    انقضا در دو نقطه‌ی دیگر هم اتفاق می‌افتد (هنگام ساخت رزرو و هنگام دیدن
@@ -40,7 +41,10 @@ export async function GET(req: NextRequest) {
       audit({ actorRole: 'system', action: 'TOURNAMENT_REGS_EXPIRED', newValue: { count: expiredRegs } });
     }
   } catch (e) {
+    /* ⚠️ این شاخه خطا را کاملا می‌بلعد و ۲۰۰ برمی‌گرداند، پس تنها
+       ردش همین ثبت است. */
     console.error('[cron] tournament expire failed:', e);
+    void logHandled('cron/expire-bookings:tournaments', e);
   }
 
   return NextResponse.json(

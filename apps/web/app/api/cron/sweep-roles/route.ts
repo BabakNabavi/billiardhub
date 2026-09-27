@@ -2,6 +2,7 @@ export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { rpc, audit } from '@/lib/finance/db';
 import { cronForbidden } from '@/lib/cron-guard';
+import { logHandled } from '@/lib/log-handled';
 
 /* ═══════════════════════════════════════════════════════════════
    ممیزی نقش‌های رهاشده.
@@ -36,6 +37,7 @@ export async function GET(req: NextRequest) {
 
   if (error) {
     console.error('[cron/sweep-roles]', error.message);
+    void logHandled('cron/sweep-roles', error);
     return NextResponse.json({ ok: false, message: 'ممیزی انجام نشد' }, { status: 500 });
   }
 
