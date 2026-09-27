@@ -25,13 +25,28 @@
 
 /* ⚠️ همان سوپاپِ `instrumentation.ts`: در قطعیِ دیتابیس هر خطا یک
    نوشتنِ تازه به همان دیتابیسِ از کار افتاده می‌سازد. بدونِ این سقف،
-   ابزارِ پایش دقیقا وقتی که سیستم زمین خورده رویش بار می‌گذارد. */
-const MAX_IN_FLIGHT = 4
+   ابزارِ پایش دقیقا وقتی که سیستم زمین خورده رویش بار می‌گذارد.
+
+   ⚠️ دو بودجه‌ی جدا، نه یکی. تا وقتی فقط سه کرونِ روزانه وصل بودند یک
+   سقفِ مشترک بس بود؛ حالا مسیرهای per-request (پیامک و OTP) هم
+   می‌نویسند. `postgrest-js` روی `fetch` مهلت نمی‌گذارد، پس در قطعیِ
+   دیتابیس هر اسلات چند دقیقه اشغال می‌ماند — و آن‌وقت چهار شکستِ
+   هم‌زمانِ OTP می‌توانست شکستِ کرون را ببلعد؛ یعنی دقیقا همان موردی
+   که این فایل برایش نوشته شد. کرون سهمِ جدای خودش را دارد. */
+const MAX_IN_FLIGHT = 16
+const MAX_CRON_IN_FLIGHT = 4
 let inFlight = 0
+let cronInFlight = 0
 
 /** پیامِ کوتاهِ خوانا از هر شکلی که `catch` تحویل می‌دهد. */
 function messageOf(err: unknown): string {
-  if (err instanceof Error) return err.message
+  if (err instanceof Error) {
+    /* ⚠️ بدونِ `cause`، هر شکستِ undici به «fetch failed» فرو می‌ریزد و
+       DNS و TLS و connection-refused و timeout یک ردیف می‌شوند — یعنی
+       همان فیلدی که برای «چرا پیامک نرفت» لازم است گم می‌شود. */
+    const c = (err as { cause?: { code?: unknown } }).cause?.code
+    return c ? `${err.message} (${String(c)})` : err.message
+  }
   if (typeof err === 'string') return err
   if (err && typeof err === 'object') {
     const o = err as { message?: unknown; code?: unknown }
@@ -55,8 +70,14 @@ export async function logHandled(
   err: unknown,
   ctx?: { url?: string | null; userId?: string | null },
 ): Promise<void> {
-  if (inFlight >= MAX_IN_FLIGHT) return
-  inFlight++
+  const isCron = where.startsWith('cron/')
+  if (isCron) {
+    if (cronInFlight >= MAX_CRON_IN_FLIGHT) return
+    cronInFlight++
+  } else {
+    if (inFlight >= MAX_IN_FLIGHT) return
+    inFlight++
+  }
   try {
     /* ⚠️ ایمپورتِ تنبل، همان دلیلِ `instrumentation.ts`: این ماژول
        نباید کلاینتِ دیتابیس را به مسیرِ راه‌اندازی بکشد. */
@@ -86,6 +107,7 @@ export async function logHandled(
   } catch {
     /* بی‌صدا. مسیرِ اصلی از این‌جا آسیب نمی‌بیند. */
   } finally {
-    inFlight--
+    if (isCron) cronInFlight--
+    else inFlight--
   }
 }

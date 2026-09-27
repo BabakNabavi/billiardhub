@@ -49,7 +49,7 @@ const hasPersian = (s: string) => /[؀-ۿ]/.test(s)
 
 /* ⚠️ رنگ این‌جا تزئین نیست: در فهرستی با صدها ردیفِ عادی، چیزی که
    چشم باید فورا پیدا کند رویدادِ امنیتی است. */
-const DANGER = /^(LOGIN_FAILED|LOGIN_LOCKED)$/
+const DANGER = /^(LOGIN_FAILED|LOGIN_LOCKED|PAYMENT_AUTHORITY_MISMATCH|PAYMENT_AMOUNT_MISMATCH)$/
 export const isDanger = (a: string) => DANGER.test(a)
 
 /** عاملِ کاربر بلند است؛ فقط بخشِ گویا نشان داده می‌شود. */

@@ -24,6 +24,7 @@
    ───────────────────────────────────────────────────────────── */
 
 import { sb } from './finance/db'
+import { logHandled } from './log-handled'
 
 const SEND_URL = (key: string) => `https://console.melipayamak.com/api/send/shared/${key}`
 
@@ -217,9 +218,13 @@ export async function sendPattern(
     }
 
     console.error('[sms] ارسال ناموفق:', key, '| recId:', rec, '| status:', j?.status)
+    /* ⚠️ «پیامک نیامد» پرتکرارترین شکایتِ کاربر است و تا امروز تنها
+       ردش یک خطِ کنسول بود. حالا در /admin/errors با شمارنده. */
+    void logHandled(`sms/send:${key}`, { code: String(j?.status ?? ''), message: 'ارسال نشد' }).catch(() => {})
     return { ok: false, message: j?.status || 'ارسال پیامک ناموفق بود' }
-  } catch {
+  } catch (e) {
     console.error('[sms] خطای شبکه:', key)
+    void logHandled(`sms/network:${key}`, e).catch(() => {})
     return { ok: false, message: 'خطا در اتصال به سرویس پیامک' }
   }
 }

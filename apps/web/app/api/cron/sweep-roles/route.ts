@@ -37,7 +37,7 @@ export async function GET(req: NextRequest) {
 
   if (error) {
     console.error('[cron/sweep-roles]', error.message);
-    void logHandled('cron/sweep-roles', error);
+    void logHandled('cron/sweep-roles', error).catch(() => {});
     return NextResponse.json({ ok: false, message: 'ممیزی انجام نشد' }, { status: 500 });
   }
 

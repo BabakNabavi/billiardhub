@@ -44,7 +44,7 @@ export async function GET(req: NextRequest) {
     /* ⚠️ این شاخه خطا را کاملا می‌بلعد و ۲۰۰ برمی‌گرداند، پس تنها
        ردش همین ثبت است. */
     console.error('[cron] tournament expire failed:', e);
-    void logHandled('cron/expire-bookings:tournaments', e);
+    void logHandled('cron/expire-bookings:tournaments', e).catch(() => {});
   }
 
   return NextResponse.json(

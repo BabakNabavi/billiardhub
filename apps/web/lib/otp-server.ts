@@ -2,6 +2,7 @@ import { createHmac } from 'crypto'
 import { inquiryKey } from './inquiry-key'
 import { writeJson, readJsonFresh, safeKey } from './social-server'
 import { rpc } from './finance/db'
+import { logHandled } from './log-handled'
 import { hasAssignedPrefix, INVALID_MOBILE_MESSAGE } from './auth/phone'
 
 /* (ثابت نشانی پروژه از این‌جا برداشته شد: در هیچ‌جای این فایل
@@ -128,6 +129,7 @@ export async function sendOtp(
     )
   } catch (e) {
     console.error('[otp] bh_otp_issue:', e)
+    void logHandled('otp/bh_otp_issue', e).catch(() => {})
     return { ok: false, message: 'سرویس تأیید در دسترس نیست؛ چند لحظه بعد دوباره تلاش کنید' }
   }
   if (issued) {
@@ -229,6 +231,7 @@ export async function verifyOtp(mobile: string, code: string): Promise<{ ok: boo
        غیراتمیک است و یک قطعیِ ساختگی می‌توانست عمدا ما را رویش
        بیندازد تا سقفِ تلاش دور زده شود. بسته می‌مانیم. */
     console.error('[otp] bh_otp_verify:', e)
+    void logHandled('otp/bh_otp_verify', e).catch(() => {})
     return { ok: false, message: 'سرویس تأیید در دسترس نیست؛ چند لحظه بعد دوباره تلاش کنید' }
   }
   if (res) {
@@ -274,6 +277,7 @@ async function otpState(m: string): Promise<OtpState | null> {
        «نه» معنا بدهد. شیءِ خالی برمی‌گردانیم نه `null`، چون `null`
        یعنی «برو سراغ Storage» و آن‌جا هم جوابِ درست را نداریم. */
     console.error('[otp] bh_otp_state:', e)
+    void logHandled('otp/bh_otp_state', e).catch(() => {})
     return { verified_at: null, id_hash: null, id_at: null }
   }
   if (!r) return null
@@ -304,6 +308,7 @@ export async function markIdentityVerified(mobile: string, nationalId: string): 
     if (done) return
   } catch (e) {
     console.error('[otp] bh_otp_mark_identity:', e)
+    void logHandled('otp/bh_otp_mark_identity', e).catch(() => {})
     return
   }
   const rec = await readOtp(m)

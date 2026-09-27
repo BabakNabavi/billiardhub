@@ -43,7 +43,7 @@ SELECT p.proname,
   JOIN pg_namespace n ON n.oid = p.pronamespace
  WHERE n.nspname = 'public'
    AND p.proname IN ('bh_otp_issue', 'bh_otp_verify', 'bh_otp_mark_identity',
-                     'bh_otp_state', 'bh_prune_otp', 'bh_log_error', 'bh_prune_errors')
+                     'bh_otp_state', 'bh_prune_otp', 'bh_log_error', 'bh_prune_errors', 'bh_prune_audit')
  ORDER BY 1;
 
 \echo ''

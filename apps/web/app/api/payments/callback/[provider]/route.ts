@@ -80,6 +80,22 @@ async function handle(req: NextRequest, providerName: string) {
   if (!auth) return fail('شناسه‌ی پرداخت نامعتبر است');
   if (authority && pay.provider_authority && authority !== pay.provider_authority) {
     console.error('[payments/callback] authority mismatch', { paymentId: pay.id });
+    /* ⚠️ این خطا نیست، نشانه است: یا درگاه چیزِ عجیبی برگردانده یا
+       کسی شناسه‌ی پرداختِ دیگری را روی این پرداخت سوار کرده. تا امروز
+       فقط در journald می‌ماند و هیچ‌کس نمی‌دیدش. */
+    /* ⚠️ هر دو مقدار بریده می‌شوند و این تزئین نیست. این مسیر
+       احراز هویت ندارد، `authority` خام از کوئری/فرم می‌آید و nginx
+       تا ۶۰ مگابایت بدنه می‌پذیرد — و چون این شاخه پیش از هر تغییرِ
+       وضعیتی برمی‌گردد، مهاجم می‌تواند بی‌نهایت بار تکرارش کند. بدونِ
+       سقف، هر تکرار یک ردیفِ ۶۰مگابایتی در `audit_logs` و در WAL و
+       در بکاپِ هر شبه می‌نوشت. پیشوند برای تشخیصِ شناسه‌ی جعلی بس است. */
+    audit({ action: 'PAYMENT_AUTHORITY_MISMATCH', entityType: 'payment',
+            entityId: pay.id, ip: clientIp(req),
+            userAgent: req.headers.get('user-agent'),
+            newValue: {
+              expected: pay.provider_authority?.slice(0, 32) ?? null,
+              got: String(authority).slice(0, 64),
+            } });
     return fail('شناسه‌ی پرداخت با درخواست اولیه هم‌خوانی ندارد');
   }
 

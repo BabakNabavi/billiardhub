@@ -45,7 +45,7 @@ export async function GET(req: NextRequest) {
     /* ⚠️ بی‌صدا ماندنِ این یکی گران‌ترین است: بدونِ تکمیلِ رزروها
        هیچ CLUB_EARNINGی نوشته نمی‌شود و تسویه غیرممکن می‌ماند. */
     console.error('[cron/complete-bookings]', error.message);
-    void logHandled('cron/complete-bookings', error);
+    void logHandled('cron/complete-bookings', error).catch(() => {});
     return NextResponse.json({ ok: false, message: error.message }, { status: 500 });
   }
 
