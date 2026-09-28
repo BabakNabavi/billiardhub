@@ -6,7 +6,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { apiFetch } from '../../lib/http'
 import { tehranDay } from '../../lib/finance/range'
-import { toJalali, jalaliToGregorian, faDateLong } from '../../lib/jalali'
+import { faDateLong, gregorianToJalaliInput, jalaliInputToGregorian } from '../../lib/jalali'
 import JalaliDatePicker from '../ui/JalaliDatePicker'
 import {
   Wallet, TrendingUp, Clock3, Landmark, ShieldCheck,
@@ -41,22 +41,11 @@ interface Finance {
 const irDay = tehranDay
 
 /* ── مرزِ میلادی ⟷ شمسی ──
-   API با `YYYY-MM-DD`ِ میلادی کار می‌کند و `JalaliDatePicker` با
-   «۱۴۰۵/۶/۲۵». تبدیل فقط همین‌جا انجام می‌شود تا هیچ‌جای دیگری دو
-   تقویم قاطی نشود. ورودیِ خراب `null` برمی‌گرداند و فراخوان
-   نادیده‌اش می‌گیرد — بازه‌ی نامعتبر بهتر است اصلا اعمال نشود. */
-const gToJ = (g: string): string => {
-  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(g)
-  if (!m) return ''
-  const [jy, jm, jd] = toJalali(Number(m[1]), Number(m[2]), Number(m[3]))
-  return `${jy}/${jm}/${jd}`
-}
-const jToG = (j: string): string | null => {
-  const m = /^(\d{3,4})\/(\d{1,2})\/(\d{1,2})$/.exec(j.trim())
-  if (!m) return null
-  const [gy, gm, gd] = jalaliToGregorian(Number(m[1]), Number(m[2]), Number(m[3]))
-  return `${gy}-${String(gm).padStart(2, '0')}-${String(gd).padStart(2, '0')}`
-}
+   از `lib/jalali` می‌آید. پیش‌تر همین دو تابع این‌جا کپی بودند؛ وقتی
+   صفحه‌ی ژورنالِ ادمین هم به آن‌ها نیاز پیدا کرد، به خانه‌ی مشترک
+   رفتند تا دو نسخه از یک تبدیل در کدبیس نماند. */
+const gToJ = gregorianToJalaliInput
+const jToG = jalaliInputToGregorian
 
 export default function ClubFinance({ clubId, onEditBank }: { clubId: string; onEditBank?: () => void }) {
   const [d, setD] = useState<Finance | null>(null)

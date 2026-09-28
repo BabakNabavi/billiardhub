@@ -153,8 +153,14 @@ export interface JalaliDatePickerProps {
    *
    *  این کامپوننت برای تاریخ تولد نوشته شده بود و آینده را می‌بست.
    *  برای تاریخ برگزاری مسابقه دقیقا برعکس لازم است: گذشته باید
-   *  بسته باشد. با `'future'` امروز و بعدش باز می‌ماند. */
-  direction?: 'past' | 'future'
+   *  بسته باشد. با `'future'` امروز و بعدش باز می‌ماند.
+   *
+   *  `'recent'` برای فیلترِ بازه روی داده‌ی گذشته است (مثلِ ژورنالِ
+   *  رویدادها): مثلِ `'past'` آینده را می‌بندد، ولی نمای آغازینش
+   *  **همین ماه** است نه بیست‌وپنج سال پیش، و کشوی سال فقط پارسال و
+   *  امسال را می‌دهد. با `'past'` ادمین باید بیست‌وپنج سال جلو
+   *  می‌آمد تا به امروز برسد. */
+  direction?: 'past' | 'future' | 'recent'
 }
 
 export default function JalaliDatePicker({
@@ -168,17 +174,24 @@ export default function JalaliDatePicker({
   }, [])
 
   const future = direction === 'future'
+  const recent = direction === 'recent'
   /* برای رویداد، سال گذشته بی‌معناست و صد سال بعد هم. پیش‌فرض دو
      سال — امسال و سال بعد — همان چیزی است که یک باشگاه لازم دارد. */
-  const loYear = minYear ?? (future ? today.y : today.y - 100)
+  /* ⚠️ کفِ `recent` پنج سال است نه یک. این انتخابگر پیمایشِ ماه‌به‌ماه
+     ندارد و فقط کشوی سال/ماه دارد، پس کفِ سال یعنی «دورتر از این
+     اصلا قابلِ انتخاب نیست». ژورنالِ ممیزی هم جز دو کنش هیچ‌چیز را
+     هرس نمی‌کند (مهاجرتِ ۱۰۵)، پس ردیف‌ها از کفِ یک‌ساله عمر می‌کنند. */
+  const loYear = minYear ?? (future ? today.y : recent ? today.y - 5 : today.y - 100)
   const hiYear = maxYear ?? (future ? today.y + 1 : today.y)   // تاریخ تولد آینده بی‌معناست
 
   const sel = parse(value)
   const [open, setOpen] = useState(false)
   const [mounted, setMounted] = useState(false)
   /* نمای آغازین: برای رویداد همین ماه، برای تاریخ تولد ۲۵ سال پیش */
-  const [viewY, setViewY] = useState(sel?.y ?? (direction === 'future' ? today.y : today.y - 25))
-  const [viewM, setViewM] = useState(sel?.m ?? (direction === 'future' ? today.m : 1))
+  /* ⚠️ فقط `'past'` روی گذشته‌ی دور باز می‌شود — آن حالت برای تاریخِ
+     تولد است. بقیه روی همین ماه. */
+  const [viewY, setViewY] = useState(sel?.y ?? (direction === 'past' ? today.y - 25 : today.y))
+  const [viewM, setViewM] = useState(sel?.m ?? (direction === 'past' ? 1 : today.m))
   const [pos, setPos] = useState<{ top: number; left: number } | null>(null)
 
   const btnRef = useRef<HTMLButtonElement>(null)

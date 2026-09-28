@@ -45,7 +45,7 @@ export const RING =
 export const LATIN = 'bh-latin'
 
 /** آیا این رشته حرفِ فارسی/عربی دارد؟ */
-const hasPersian = (s: string) => /[؀-ۿ]/.test(s)
+export const hasPersian = (s: string) => /[؀-ۿ]/.test(s)
 
 /* ⚠️ رنگ این‌جا تزئین نیست: در فهرستی با صدها ردیفِ عادی، چیزی که
    چشم باید فورا پیدا کند رویدادِ امنیتی است. */

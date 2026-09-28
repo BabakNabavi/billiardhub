@@ -1,7 +1,7 @@
 export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { sb, actorFromRequest, isAdmin } from '@/lib/finance/db';
+import { sb, rpc, actorFromRequest, isAdmin } from '@/lib/finance/db';
 
 /* ژورنالِ رویدادها — فقط ادمین.
  *
@@ -41,11 +41,18 @@ const Query = z.object({
   actor: z.string().uuid().optional(),
   user: z.string().uuid().optional(),
   ip: z.string().max(64).optional(),
-  action: z.string().max(64).regex(/^[A-Z0-9_]*$/).optional(),
+  /* ⚠️ `a-z` هم لازم است. ۱۲۵ کنش از ۱۲۷تا بزرگ‌حروف‌اند، ولی
+     `unlock_postal_code` و `unlock_bank_info` (در
+     `api/admin/support`) کوچک‌اند. با رجکسِ فقط-بزرگ، انتخابِ همان دو
+     از دراپ‌داون ۴۰۰ می‌گرفت و صفحه «فیلترِ نامعتبر» نشان می‌داد —
+     باگی که فیلدِ متنیِ قبلی با `.toUpperCase()` می‌پوشاند و
+     دراپ‌داون آشکارش کرد. */
+  action: z.string().max(64).regex(/^[A-Za-z0-9_]*$/).optional(),
   entity: z.string().max(64).optional(),
   from: z.string().datetime().optional(),
   to: z.string().datetime().optional(),
   live: z.enum(['0', '1']).optional(),
+  actions: z.enum(['1']).optional(),
 });
 
 /** نامِ کاربر برای شناسه‌ها — ژورنالی که فقط UUID نشان بدهد خوانده نمی‌شود. */
@@ -70,6 +77,16 @@ export async function GET(req: NextRequest) {
   const parsed = Query.safeParse(Object.fromEntries(new URL(req.url).searchParams));
   if (!parsed.success) return NextResponse.json({ message: 'پارامترِ نامعتبر' }, { status: 400 });
   const q = parsed.data;
+
+  /* ── فهرستِ کنش‌ها برای دراپ‌داونِ فیلتر ──
+     ⚠️ هاردکد نمی‌شود: ۱۲۷ کنش داریم و در حالِ زیادشدن. مهاجرتِ ۱۰۶
+     همان چیزی را می‌دهد که *واقعا در جدول هست*. اگر اجرا نشده باشد
+     فهرستِ خالی برمی‌گردد و کلاینت از ردیف‌های بارگذاری‌شده می‌سازدش. */
+  if (q.actions === '1') {
+    const { data, error } = await rpc<{ action: string }[]>('bh_audit_actions', {});
+    if (error) return NextResponse.json({ actions: [] });
+    return NextResponse.json({ actions: (data ?? []).map(r => r.action).filter(Boolean) });
+  }
 
   /* ── مقدارِ قبل/بعدِ یک ردیف ──
      ⚠️ `old_value`/`new_value` از فهرست بیرون‌اند: jsonbِ آزادند و یک

@@ -4,36 +4,58 @@
    ⚠️ `audit_logs` از مهاجرتِ ۰۰۱ هست و امروز ۱۲۷ نوع رویداد در ۱۳۶
    نقطه در آن نوشته می‌شود — ولی تا پیش از این صفحه **هیچ‌کس
    نمی‌خواندش**. برای «کی ماه پیش کمیسیونِ این باشگاه را عوض کرد؟»
-   باید psql می‌زدی. ردِ ممیزی که خوانده نشود ابزار نیست، یک تیکِ
-   تشریفاتی است. */
+   باید psql می‌زدی. ردِ ممیزی که خوانده نشود ابزار نیست.
 
-import { useCallback, useEffect, useState } from 'react'
-import { RefreshCw, Loader2, AlertCircle, ScrollText, X } from 'lucide-react'
+   کارتِ فیلتر در `components/admin/LogFilters` است تا این فایل از
+   ~۱۵۰ خطِ قاعده‌ی پروژه رد نشود. */
+
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { RefreshCw, Loader2, AlertCircle, ScrollText } from 'lucide-react'
 import { apiFetch } from '../../../lib/http'
 import { toFaDigits, tehranInstant } from '../../../lib/jalali'
 import { AuditTable, type AuditRow, type SessionRow } from '../../../components/admin/LogTable'
 import { SessionTable } from '../../../components/admin/SessionTable'
+import {
+  LogFilters, EMPTY_FILTERS, hasActiveFilter,
+  type Filters, type Tab,
+} from '../../../components/admin/LogFilters'
 
 const CARD = 'rounded-2xl border border-[#E7E2D6] bg-white shadow-[0_2px_10px_rgba(28,27,23,0.05)]'
 const RING = 'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#C7A66A]'
-const INPUT = `w-full rounded-[10px] border border-[#E7E2D6] bg-white px-3 py-2.5 text-[12.5px] text-[#1C1B17] placeholder:text-[#9A968B] focus:border-[#C7A66A] ${RING}`
-const LATIN_INPUT = `${INPUT} bh-latin`
-
-type Tab = 'audit' | 'sessions'
-interface Filters { action: string; actor: string; ip: string; from: string; to: string }
-const EMPTY: Filters = { action: '', actor: '', ip: '', from: '', to: '' }
 
 const TABS = [['audit', 'رویدادها'], ['sessions', 'نشست‌ها']] as const
 
 export default function AdminLogsPage() {
   const [tab, setTab] = useState<Tab>('audit')
-  const [f, setF] = useState<Filters>(EMPTY)
+  const [f, setF] = useState<Filters>(EMPTY_FILTERS)
   const [rows, setRows] = useState<(AuditRow | SessionRow)[]>([])
   const [names, setNames] = useState<Record<string, string>>({})
+  const [actions, setActions] = useState<string[]>([])
   const [loading, setLoading] = useState(true)
   const [err, setErr] = useState('')
   const [pendingTable, setPendingTable] = useState(false)
   const [pendingUA, setPendingUA] = useState(false)
+
+  /* ⚠️ کنترلرِ درخواستِ دستی (دکمه‌ی تازه‌سازی و «دوباره»). بدونِ این،
+     آن دو مسیر لغوناپذیر بودند: کلیک روی تازه‌سازی و بعد تعویضِ تب،
+     پاسخِ قدیمی را وسطِ تبِ جدید می‌نشاند و `SessionTable` آرایه‌ی
+     `AuditRow` می‌گرفت — همان باگی که برای مسیرِ دیباونس بسته شده بود. */
+  const manualCtrl = useRef<AbortController | null>(null)
+
+  /* فهرستِ کنش‌ها یک‌بار گرفته می‌شود، نه با هر فیلتر. اگر مهاجرتِ ۱۰۶
+     اجرا نشده باشد خالی برمی‌گردد و از خودِ ردیف‌ها ساخته می‌شود. */
+  useEffect(() => {
+    let alive = true
+    void (async () => {
+      try {
+        const r = await apiFetch('/api/admin/logs?actions=1', { cache: 'no-store' })
+        if (!r.ok || !alive) return
+        const j = await r.json()
+        if (alive) setActions(Array.isArray(j.actions) ? j.actions : [])
+      } catch { /* بی‌اهمیت؛ از ردیف‌ها ساخته می‌شود */ }
+    })()
+    return () => { alive = false }
+  }, [])
 
   const load = useCallback(async (signal?: AbortSignal) => {
     setLoading(true); setErr('')
@@ -43,6 +65,7 @@ export default function AdminLogsPage() {
     if (f.action) qs.set('action', f.action)
     if (f.actor) qs.set(tab === 'sessions' ? 'user' : 'actor', f.actor)
     if (f.ip) qs.set('ip', f.ip)
+    if (tab === 'sessions' && f.live) qs.set('live', '1')
     /* ⚠️ `new Date('2026-09-27')` نیمه‌شبِ **UTC** است، یعنی ۳:۳۰
        بامدادِ تهران — و ستونِ زمان با ساعتِ تهران نمایش داده می‌شود.
        نسخه‌ی اول همین را می‌فرستاد و `to` هم *ابتدای* روز بود، پس
@@ -57,7 +80,11 @@ export default function AdminLogsPage() {
         return
       }
       const j = await r.json()
-      setRows(j.rows ?? []); setNames(j.names ?? {})
+      setRows(j.rows ?? [])
+      /* ⚠️ ادغام، نه جایگزینی. اگر فیلتری صفر ردیف بدهد، پاسخ
+         `names: {}` دارد و برچسبِ تراشه از «بازیگر: علی رضایی» به
+         UUIDِ خام پس‌رفت می‌کرد. */
+      setNames(p => ({ ...p, ...(j.names ?? {}) }))
       setPendingTable(!!j.pendingTable); setPendingUA(!!j.pendingUA)
     } catch (e) {
       /* لغوِ عمدی خطا نیست — درخواستِ بعدی جایش را گرفته است. */
@@ -68,18 +95,49 @@ export default function AdminLogsPage() {
     }
   }, [tab, f])
 
-  /* ⚠️ هم تأخیر هم لغو. بدونِ تأخیر، تایپ‌کردنِ «LOGIN_FAILED» دوازده
-     درخواستِ ۱۵۰ردیفی می‌فرستاد؛ بدونِ لغو، پاسخِ کندِ قبلی می‌توانست
-     بعد از پاسخِ سریعِ بعدی بنشیند و جدول داده‌ای را نشان بدهد که با
-     کادرِ فیلتر نمی‌خواند — در یک ابزارِ امنیتی، بدترین نوعِ خطا. */
+  /* ⚠️ هم تأخیر هم لغو. بدونِ تأخیر، هر تغییرِ فیلتر یک درخواستِ
+     ۱۵۰ردیفی می‌فرستاد؛ بدونِ لغو، پاسخِ کندِ قبلی می‌توانست بعد از
+     پاسخِ سریعِ بعدی بنشیند و جدول داده‌ای را نشان بدهد که با کادرِ
+     فیلتر نمی‌خواند — در یک ابزارِ امنیتی بدترین نوعِ خطا. */
   useEffect(() => {
     const ctrl = new AbortController()
     const t = setTimeout(() => { void load(ctrl.signal) }, 350)
     return () => { clearTimeout(t); ctrl.abort() }
   }, [load])
 
+  const reload = () => {
+    manualCtrl.current?.abort()
+    const c = new AbortController()
+    manualCtrl.current = c
+    void load(c.signal)
+  }
+
+  /* ⚠️ تعویضِ تب باید ردیف‌ها را هم پاک کند و درخواستِ دستیِ در پرواز
+     را لغو. `tab` فوری عوض می‌شود ولی `rows` تا پایانِ fetch همان قبلی
+     می‌ماند — یعنی `SessionTable` آرایه‌ی `AuditRow` می‌گرفت. */
+  const switchTab = (k: Tab) => {
+    if (k === tab) return
+    manualCtrl.current?.abort()
+    setTab(k); setF(EMPTY_FILTERS); setRows([]); setLoading(true)
+  }
+
   const onFilter = (k: 'actor' | 'ip' | 'action', v: string) => setF(p => ({ ...p, [k]: v }))
-  const dirty = Object.values(f).some(Boolean)
+
+  /* دراپ‌داون: فهرستِ سرور، به‌اضافه‌ی هر کنشی که در ردیف‌های همین
+     صفحه هست (برای وقتی مهاجرتِ ۱۰۶ هنوز اجرا نشده). */
+  const actionOptions = useMemo(() => {
+    const seen = new Set(actions)
+    for (const r of rows) {
+      const a = (r as AuditRow).action
+      if (a) seen.add(a)
+    }
+    /* مقدارِ انتخاب‌شده همیشه باید گزینه داشته باشد، وگرنه `select`ِ
+       کنترل‌شده بی‌صدا خالی می‌شود. */
+    if (f.action) seen.add(f.action)
+    return [...seen].sort()
+  }, [actions, rows, f.action])
+
+  const dirty = hasActiveFilter(f)
 
   return (
     <div className="min-h-screen bg-[#F7F5F0] pb-24 text-[#1C1B17]">
@@ -92,53 +150,29 @@ export default function AdminLogsPage() {
               چه کسی، چه زمانی، از کجا، چه کرد. روی هر بازیگر یا IP بزنید تا فیلتر شود.
             </p>
           </div>
-          <button type="button" onClick={() => void load()} disabled={loading} aria-label="تازه‌سازی"
+          <button type="button" onClick={reload} disabled={loading} aria-label="تازه‌سازی"
             className={`rounded-[10px] border border-[rgba(199,166,106,0.34)] bg-[rgba(199,166,106,0.12)] p-3 text-[#8F6531] transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-50 ${RING}`}>
             {loading ? <Loader2 size={16} className="animate-spin" /> : <RefreshCw size={16} />}
           </button>
         </div>
 
+        {/* ⚠️ بدونِ `tabIndex`ِ چرخشی. نسخه‌ی قبلی تبِ غیرفعال را
+            `tabIndex={-1}` می‌کرد بی‌آنکه کلیدِ جهت‌دار را هندل کند —
+            یعنی کاربرِ کیبورد اصلا نمی‌توانست به آن برسد. دو دکمه‌ی
+            عادیِ tab-pذیر درست‌تر است. */}
         <div className="mb-4 flex gap-2" role="tablist">
           {TABS.map(([k, label]) => (
             <button key={k} type="button" role="tab" id={`logtab-${k}`}
               aria-selected={tab === k} aria-controls="logpanel"
-              tabIndex={tab === k ? 0 : -1}
-              onClick={() => { setTab(k); setF(EMPTY) }}
+              onClick={() => switchTab(k)}
               className={`rounded-[10px] px-4 py-2.5 text-[13px] font-bold transition ${RING} ${
                 tab === k ? 'bg-[#1C1B17] text-white' : 'border border-[#E7E2D6] bg-white text-[#5B564B] hover:border-[#C7A66A]'
               }`}>{label}</button>
           ))}
         </div>
 
-        <div className={`${CARD} mb-4 grid grid-cols-2 gap-3 p-4 sm:grid-cols-4`}>
-          {tab === 'audit' && (
-            <label className="col-span-2 sm:col-span-1">
-              <span className="mb-1 block text-[11.5px] text-[#6F6A5C]">رویداد</span>
-              <input className={LATIN_INPUT} dir="ltr" value={f.action} placeholder="LOGIN_FAILED"
-                onChange={e => setF(p => ({ ...p, action: e.target.value.toUpperCase().replace(/[^A-Z0-9_]/g, '') }))} />
-            </label>
-          )}
-          <label>
-            <span className="mb-1 block text-[11.5px] text-[#6F6A5C]">IP</span>
-            <input className={LATIN_INPUT} dir="ltr" value={f.ip} placeholder="127.0.0.1"
-              onChange={e => setF(p => ({ ...p, ip: e.target.value.trim() }))} />
-          </label>
-          <label>
-            <span className="mb-1 block text-[11.5px] text-[#6F6A5C]">از تاریخ</span>
-            <input type="date" dir="ltr" className={LATIN_INPUT} value={f.from}
-              onChange={e => setF(p => ({ ...p, from: e.target.value }))} />
-          </label>
-          <label>
-            <span className="mb-1 block text-[11.5px] text-[#6F6A5C]">تا تاریخ</span>
-            <input type="date" dir="ltr" className={LATIN_INPUT} value={f.to}
-              onChange={e => setF(p => ({ ...p, to: e.target.value }))} />
-          </label>
-          {dirty && (
-            <button type="button" onClick={() => setF(EMPTY)}
-              className={`col-span-2 self-end rounded-[10px] border border-[#E7E2D6] bg-white px-3 py-2.5 text-[12.5px] font-bold text-[#5B564B] transition hover:border-[#C7A66A] sm:col-span-4 ${RING}`}>
-              <X size={13} className="me-1 inline" aria-hidden />پاک‌کردن فیلترها
-            </button>
-          )}
+        <div className={`${CARD} mb-4 p-4`}>
+          <LogFilters tab={tab} f={f} setF={setF} actionOptions={actionOptions} names={names} />
         </div>
 
         {pendingUA && rows.length > 0 && (
@@ -158,7 +192,7 @@ export default function AdminLogsPage() {
             <div className="p-10 text-center">
               <AlertCircle size={22} className="mx-auto mb-2 text-[#B91C1C]" aria-hidden />
               <p className="text-[13px] font-semibold text-[#B91C1C]">{err}</p>
-              <button type="button" onClick={() => void load()}
+              <button type="button" onClick={reload}
                 className={`mt-3 rounded-[10px] border border-[#E7E2D6] bg-white px-4 py-2.5 text-[12.5px] font-bold text-[#5B564B] ${RING}`}>
                 دوباره
               </button>

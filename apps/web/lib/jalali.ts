@@ -117,6 +117,25 @@ export function faDateTime(input: string | Date | null | undefined): string {
   return `${faDate(d)} — ساعت ${toFaDigits(hm)}`
 }
 
+/* ── مرزِ میلادی ⟷ شمسی برای فیلترهای بازه ──
+   APIها با `YYYY-MM-DD`ِ میلادی کار می‌کنند و `JalaliDatePicker` با
+   «۱۴۰۵/۶/۲۵». این دو تابع تنها نقطه‌ی تبدیل‌اند تا هیچ‌جای دیگری دو
+   تقویم قاطی نشود. ورودیِ خراب رشته‌ی خالی/null می‌دهد و فراخوان
+   نادیده‌اش می‌گیرد — بازه‌ی نامعتبر بهتر است اصلا اعمال نشود. */
+export const gregorianToJalaliInput = (g: string): string => {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(g || '').trim())
+  if (!m) return ''
+  const [jy, jm, jd] = toJalali(Number(m[1]), Number(m[2]), Number(m[3]))
+  return `${jy}/${jm}/${jd}`
+}
+
+export const jalaliInputToGregorian = (j: string): string | null => {
+  const m = /^(\d{3,4})\/(\d{1,2})\/(\d{1,2})$/.exec(String(j || '').trim())
+  if (!m) return null
+  const [gy, gm, gd] = jalaliToGregorian(Number(m[1]), Number(m[2]), Number(m[3]))
+  return `${gy}-${String(gm).padStart(2, '0')}-${String(gd).padStart(2, '0')}`
+}
+
 /** رشته‌ی `datetime-local` ⟵ لحظه‌ی واقعی، با فرض ساعت تهران.
  *
  *  ⚠️ `new Date('2026-08-20T18:00')` را مرورگر با منطقه‌ی *خودش*
