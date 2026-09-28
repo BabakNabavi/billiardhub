@@ -9,7 +9,7 @@
 import { Globe, Monitor } from 'lucide-react'
 import { faDateTime } from '../../lib/jalali'
 import {
-  ActorLink, IpLink, Device, Cell, Th, LATIN,
+  ActorLink, IpLink, Device, Cell, Th,
   type SessionRow, type OnFilter,
 } from './LogAtoms'
 
@@ -54,7 +54,7 @@ export function SessionTable({ rows, names, onFilter }: {
               آخرین استفاده: <LastUsed at={r.last_used_at} />
             </p>
             <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11.5px] text-[#6F6A5C]">
-              <span className={`${LATIN} inline-flex items-center gap-1`}>
+              <span className="inline-flex items-center gap-1">
                 <Globe size={12} className="text-[#9A968B]" aria-hidden />{r.origin ?? '—'}
               </span>
               <IpLink ip={r.ip} onFilter={onFilter} />
@@ -81,7 +81,7 @@ export function SessionTable({ rows, names, onFilter }: {
                 <Cell className="whitespace-nowrap text-[#6F6A5C]">{faDateTime(r.created_at)}</Cell>
                 <Cell><ActorLink id={r.user_id} names={names} onFilter={onFilter} /></Cell>
                 <Cell className="whitespace-nowrap"><LastUsed at={r.last_used_at} /></Cell>
-                <Cell className={`${LATIN} text-[#5B564B]`}>
+                <Cell className="text-[#5B564B]">
                   <Globe size={12} className="me-1 inline text-[#9A968B]" aria-hidden />{r.origin ?? '—'}
                 </Cell>
                 <Cell><IpLink ip={r.ip} onFilter={onFilter} /></Cell>

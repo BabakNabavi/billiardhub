@@ -14,7 +14,9 @@ export const EMPTY_FILTERS: Filters = { action: '', actor: '', ip: '', from: '',
 
 const FIELD = `w-full rounded-[10px] border border-[#E7E2D6] bg-white px-3 py-2.5 text-[12.5px] text-[#1C1B17] focus:border-[#C7A66A] ${RING}`
 
-interface Chip { k: keyof Filters; label: string; value?: string; ltr?: boolean }
+/* ⚠️ `ltr` و `latin` عمدا جدا هستند: نامِ کنش جهتِ لاتین می‌خواهد
+   ولی رقم ندارد پس نباید فونتش عوض شود؛ IP هر دو را می‌خواهد. */
+interface Chip { k: keyof Filters; label: string; value?: string; ltr?: boolean; latin?: boolean }
 
 /* ⚠️ برچسب و مقدار **جدا** برمی‌گردند، نه یک رشته‌ی به‌هم‌چسبیده.
    «رویداد: LOGIN_FAILED» در یک پاراگرافِ RTL، به‌خاطر دونقطه‌ی خنثی
@@ -24,12 +26,13 @@ interface Chip { k: keyof Filters; label: string; value?: string; ltr?: boolean 
    کلمه و بدونِ اسلش، پس ابهامِ دوجهته ندارند. */
 function chipsOf(f: Filters, names: Record<string, string>): Chip[] {
   const out: Chip[] = []
-  if (f.action) out.push({ k: 'action', label: 'رویداد', value: f.action, ltr: true })
+  if (f.action) out.push({ k: 'action', label: 'رویداد', value: f.action, ltr: true })  // بدونِ latin — رقم ندارد
   if (f.actor) {
     const label = names[f.actor] ?? f.actor.slice(0, 8)
-    out.push({ k: 'actor', label: 'بازیگر', value: label, ltr: !hasPersian(label) })
+    /* برچسبِ غیرفارسی یا UUID است یا شماره — هر دو رقم دارند. */
+    out.push({ k: 'actor', label: 'بازیگر', value: label, ltr: !hasPersian(label), latin: /[0-9]/.test(label) })
   }
-  if (f.ip) out.push({ k: 'ip', label: 'IP', value: f.ip, ltr: true })
+  if (f.ip) out.push({ k: 'ip', label: 'IP', value: f.ip, ltr: true, latin: true })
   if (f.from) out.push({ k: 'from', label: 'از', value: faDate(f.from) })
   if (f.to) out.push({ k: 'to', label: 'تا', value: faDate(f.to) })
   if (f.live) out.push({ k: 'live', label: 'فقط نشست‌های فعال' })
@@ -59,7 +62,10 @@ export function LogFilters({ tab, f, setF, actionOptions, names }: {
             <span className="mb-1 block text-[11.5px] text-[#6F6A5C]">رویداد</span>
             {/* ⚠️ دراپ‌داون و نه متنِ آزاد: پرس‌وجو `eq` است، پس یک
                 حرفِ کم یعنی صفر ردیف بدونِ هیچ توضیحی. */}
-            <select className={`${FIELD} ${LATIN}`} dir="ltr" value={f.action}
+            {/* ⚠️ بدونِ `bh-latin`: نامِ کنش رقم ندارد و گزینه‌ی
+                پیش‌فرض فارسی است، پس آن کلاس فقط فونتِ فیلد را از
+                بقیه‌ی سایت جدا می‌کرد. */}
+            <select className={FIELD} dir="ltr" data-no-fa value={f.action}
               aria-label="فیلتر رویداد"
               onChange={e => setF(p => ({ ...p, action: e.target.value }))}>
               <option value="">همه‌ی رویدادها</option>
@@ -111,7 +117,7 @@ export function LogFilters({ tab, f, setF, actionOptions, names }: {
               {c.value && (
                 <>
                   {c.ltr
-                    ? <span dir="ltr" className={LATIN}>{c.value}</span>
+                    ? <span dir="ltr" data-no-fa className={c.latin ? LATIN : undefined}>{c.value}</span>
                     : <span>{c.value}</span>}
                 </>
               )}
