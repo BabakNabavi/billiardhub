@@ -10,6 +10,7 @@ import { fetchMyProfile } from '../../../lib/profiles/client'
 import ProvinceCitySelect from '../../../components/ProvinceCitySelect'
 import { apiFetch } from '../../../lib/http'
 import { uploadFile } from '../../../lib/supabase'
+import { toStoredWhatsapp } from '../../../lib/text-fa'
 import { CATEGORY_OPTIONS, CONDITIONS, conditionLabel } from '../../../lib/market/categories'
 /* تعریف مشخصات فنی از این‌جا رفت به `lib/market/specs.ts` تا صفحه‌ی
    جزئیات محصول هم بتواند برچسب فارسی هر کلید را بخواند. */
@@ -549,7 +550,7 @@ export default function NewProductPage() {
             specs: finalSpecs, images: imgList, section,
             province: form.province, city: form.city, address: form.address.trim(),
             sellerName: form.shopName.trim(), sellerPhone: normalizePhone(form.sellerPhone),
-            sellerWhatsapp: (normalizePhone(form.sellerWhatsapp) || normalizePhone(form.sellerPhone)).replace(/^0/, '98'),
+            sellerWhatsapp: toStoredWhatsapp(normalizePhone(form.sellerWhatsapp) || normalizePhone(form.sellerPhone)),
             storeSlug: storeSlug || undefined,
           }),
         })
@@ -1122,6 +1123,8 @@ export default function NewProductPage() {
                     <div>
                       <Label>آدرس</Label>
                       <textarea className="nf" rows={2} placeholder="خیابان، کوچه، پلاک..." value={form.address} readOnly={geoLocked} onChange={e => !geoLocked && set('address', e.target.value)} style={{ ...inp(undefined, geoLocked), resize: 'vertical', minHeight: 72, lineHeight: 1.7 }} />
+                      {/* صفحه‌ی آگهی آدرس را فقط برای فروشگاه نشان می‌دهد */}
+                      {!geoLocked && <p style={{ fontSize: 11, color: TEXT_SEC, marginTop: 4 }}>روی صفحه‌ی آگهی نمایش داده نمی‌شود؛ خریدار فقط شهر را می‌بیند</p>}
                     </div>
 
                   </div>

@@ -34,6 +34,7 @@ import { uploadFile } from '../../../../lib/supabase'
 import { apiFetch } from '../../../../lib/http'
 import ProvinceCitySelect from '../../../../components/ProvinceCitySelect'
 import { provinceOfCity } from '../../../../lib/iran-geo'
+import { toStoredWhatsapp, fromStoredWhatsapp } from '../../../../lib/text-fa'
 import { compressImage } from '../../../../lib/seller-store'
 import { CATEGORY_OPTIONS, CONDITIONS, normalizeCategory, normalizeCondition } from '../../../../lib/market/categories'
 import { GENERIC_SPECS, CATEGORY_SPECS } from '../../../../lib/market/specs'
@@ -47,8 +48,8 @@ import { brandSearchTerms } from '../../../../lib/market/catalog-rules'
 import CountryFlag from '../../../../components/CountryFlag'
 import {
   GOLD, GOLD_D, TEXT, TEXT_SEC, TEXT_MUT, LQ_BG, LQ_BOR, LQ_SHAD,
-  AD_FORM_CSS, inp, type FancyOption, toAsciiDigits, fmtPrice, FancySelect, Label, ErrMsg, SectionTitle, 
-  AlertDialog,
+  AD_FORM_CSS, inp, type FancyOption, toAsciiDigits, fmtPrice, FancySelect, Label, ErrMsg, SectionTitle,
+  AlertDialog, normalizePhone, isValidPhone,
 } from '../../../../components/market/AdFormFields'
 
 /* کلیدهایی که فرم ثبت داخل specs می‌گذارد ولی بالای فرم فیلد خودشان را دارند */
@@ -80,6 +81,10 @@ export default function EditProductPage() {
     price: '', oldPrice: '', negotiable: false,
     description: '', condition: 'new',
     province: '', city: '',
+    /* تماس و آدرس — در فرمِ ثبت گرفته می‌شدند ولی این‌جا فیلدی نداشتند؛
+       فروشنده‌ای که شماره را اشتباه زده بود راهی جز حذف و ثبتِ دوباره
+       (و سوختنِ یک سهمیه) نداشت. */
+    address: '', sellerName: '', sellerPhone: '', sellerWhatsapp: '',
   })
   const [specs, setSpecs] = useState<Record<string, unknown>>({})
   const [rawSpecs, setRawSpecs] = useState<Record<string, unknown>>({})
@@ -93,6 +98,8 @@ export default function EditProductPage() {
   const [cue, setCue] = useState<CatalogValue>(EMPTY_CATALOG_VALUE)
   const [legacyCue, setLegacyCue] = useState<{ brand: string; model: string } | undefined>(undefined)
 
+  /* آگهیِ فروشگاه: نام و آدرس از پروفایلِ فروشگاه‌اند — همان قفلِ فرمِ ثبت */
+  const [storeLocked, setStoreLocked] = useState(false)
   const [existingImages, setExistingImages] = useState<string[]>([])
   const [newImages, setNewImages] = useState<ImgSlot[]>([])
   const [dragging, setDragging] = useState(false)
@@ -154,7 +161,13 @@ export default function EditProductPage() {
       condition: normalizeCondition(p.condition),
       province: String(p.province ?? p.sellerProvince ?? provinceOfCity(String(p.city ?? p.sellerCity ?? '')) ?? ''),
       city: String(p.city ?? p.sellerCity ?? ''),
+      address: String(p.address ?? ''),
+      sellerName: String(p.sellerName ?? ''),
+      sellerPhone: String(p.sellerPhone ?? ''),
+      /* واتساپ با پیشوندِ 98 ذخیره می‌شود؛ در فرم همان شکلِ ۰۹ */
+      sellerWhatsapp: fromStoredWhatsapp(p.sellerWhatsapp),
     })
+    setStoreLocked(!opts.local && !!p.storeSlug)
 
     /* ── مشخصات فنی ──
        تعریف فیلدها با fetch می‌آید و ممکن است هنوز نرسیده باشد، پس
@@ -464,6 +477,17 @@ export default function EditProductPage() {
     }
     if (!form.province) e.province = 'استان را انتخاب کنید'
     if (!form.city) e.city = 'شهر را انتخاب کنید'
+    /* همان قاعده‌های فرمِ ثبت. آگهیِ قدیمی که شماره ندارد با خالی
+       ماندنش ذخیره می‌شود؛ ولی شماره‌ی واردشده باید معتبر باشد. */
+    if (!isLocal) {
+      if (!storeLocked && !form.sellerName.trim()) e.sellerName = 'نام فروشگاه | فروشنده الزامی است'
+      /* شماره اجباری است، مثلِ فرمِ ثبت — وگرنه ویرایش می‌توانست تنها راهِ
+         تماس را پاک کند. هر ۲۱ آگهیِ زنده (۳۰ سپتامبر) شماره‌ی معتبر دارند. */
+      if (!normalizePhone(form.sellerPhone)) e.sellerPhone = 'شماره تماس الزامی است'
+      else if (!isValidPhone(form.sellerPhone)) e.sellerPhone = 'شماره موبایل معتبر وارد کنید (۰۹xxxxxxxxx)'
+      if (form.sellerWhatsapp.trim() && !isValidPhone(form.sellerWhatsapp))
+        e.sellerWhatsapp = 'شماره‌ی واتساپ معتبر وارد کنید (۰۹xxxxxxxxx)'
+    }
     return e
   }
 
@@ -603,6 +627,13 @@ export default function EditProductPage() {
             modelId: catTypeId && cue.modelId !== '__other__' ? cue.modelId : null,
             tableSizeId: form.category === 'table' && specs.size && specs.size !== '__other__' ? String(specs.size) : null,
             tableSizeCustom: form.category === 'table' && specs.size === '__other__' ? (specOthers.size ?? '').trim() || null : null,
+            /* ⚠️ پارچه هم مثل فرمِ ثبت. نبودنِ این چهار کلید یعنی سرور
+               ستون‌های پارچه‌ی میز را با null بازنویسی می‌کرد — هر ویرایش
+               برند و مدلِ پارچه را پاک می‌کرد. */
+            clothBrandId: form.category === 'table' && specs.clothBrand && specs.clothBrand !== '__other__' ? String(specs.clothBrand) : null,
+            clothBrandCustom: form.category === 'table' && specs.clothBrand === '__other__' ? (specOthers.clothBrand ?? '').trim() || null : null,
+            clothModelId: form.category === 'table' && specs.clothModel && specs.clothModel !== '__other__' ? String(specs.clothModel) : null,
+            clothModelCustom: form.category === 'table' && specs.clothModel === '__other__' ? (specOthers.clothModel ?? '').trim() || null : null,
             price: form.negotiable ? 0 : price,
             old: form.negotiable ? 0 : old,
             negotiable: form.negotiable,
@@ -610,6 +641,11 @@ export default function EditProductPage() {
             specs: buildSpecs(),
             images: [...existingImages, ...uploaded],
             province: form.province, city: form.city,
+            /* آگهیِ فروشگاه: نام و آدرس از پروفایل‌اند و سرور هم نمی‌پذیردشان */
+            ...(storeLocked ? {} : { address: form.address.trim(), sellerName: form.sellerName.trim() }),
+            sellerPhone: normalizePhone(form.sellerPhone),
+            /* همان شکلِ فرمِ ثبت: ۹۸ + شماره، و اگر خالی بود همان تلفن */
+            sellerWhatsapp: toStoredWhatsapp(normalizePhone(form.sellerWhatsapp) || normalizePhone(form.sellerPhone)),
           }),
         })
         if (!r.ok) {
@@ -994,8 +1030,55 @@ export default function EditProductPage() {
                   onChange={v => setForm(f => ({ ...f, province: v.province, city: v.city }))}
                   required provinceError={errors.province} cityError={errors.city}
                 />
+                {!isLocal && (
+                  <div style={{ marginTop: 16 }}>
+                    <Label htmlFor="ad-address">آدرس</Label>
+                    <textarea id="ad-address" className="nf" rows={2} placeholder="خیابان، کوچه، پلاک..." value={form.address}
+                      readOnly={storeLocked} onChange={e => !storeLocked && set('address', e.target.value)}
+                      style={{ ...inp(undefined, storeLocked), resize: 'vertical', minHeight: 72, lineHeight: 1.7 }} />
+                    <p style={{ fontSize: 11, color: TEXT_SEC, marginTop: 4 }}>
+                      {storeLocked ? 'از فروشگاه شما می‌آید و این‌جا تغییر نمی‌کند' : 'روی صفحه‌ی آگهی نمایش داده نمی‌شود؛ خریدار فقط شهر را می‌بیند'}
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
+
+            {/* ── فروشنده و تماس ──
+                در فرمِ ثبت گرفته می‌شدند و این‌جا نبودند. آگهیِ محلیِ قدیمی
+                این ستون‌ها را ندارد، پس فقط برای آگهیِ سرور. */}
+            {!isLocal && (
+              <div style={{ ...card, animation: 'fadeUp 0.53s ease both' }}>
+                <div style={gloss} />
+                <div style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', gap: 16 }}>
+                  <SectionTitle>فروشنده و تماس</SectionTitle>
+                  <div>
+                    <Label htmlFor="ad-seller-name" required>نام فروشگاه | فروشنده</Label>
+                    <input id="ad-seller-name" className="nf" type="text" value={form.sellerName}
+                      readOnly={storeLocked} onChange={e => !storeLocked && set('sellerName', e.target.value)}
+                      aria-invalid={!!errors.sellerName} style={inp(errors.sellerName, storeLocked)} />
+                    {storeLocked && <p style={{ fontSize: 11, color: TEXT_SEC, marginTop: 4 }}>از فروشگاه شما می‌آید و این‌جا تغییر نمی‌کند</p>}
+                    <ErrMsg msg={errors.sellerName} />
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 12 }}>
+                    <div>
+                      <Label htmlFor="ad-seller-phone" required>شماره تماس</Label>
+                      <input id="ad-seller-phone" className="nf" type="tel" dir="ltr" placeholder="09xxxxxxxxx" value={form.sellerPhone}
+                        onChange={e => set('sellerPhone', e.target.value)} aria-invalid={!!errors.sellerPhone}
+                        style={{ ...inp(errors.sellerPhone), textAlign: 'right' }} />
+                      <ErrMsg msg={errors.sellerPhone} />
+                    </div>
+                    <div>
+                      <Label htmlFor="ad-seller-wa" optional>واتساپ</Label>
+                      <input id="ad-seller-wa" className="nf" type="tel" dir="ltr" placeholder="09xxxxxxxxx" value={form.sellerWhatsapp}
+                        onChange={e => set('sellerWhatsapp', e.target.value)} aria-invalid={!!errors.sellerWhatsapp}
+                        style={{ ...inp(errors.sellerWhatsapp), textAlign: 'right' }} />
+                      <ErrMsg msg={errors.sellerWhatsapp} />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* ── قیمت ── */}
             <div style={{ ...card, animation: 'fadeUp 0.52s ease both' }}>

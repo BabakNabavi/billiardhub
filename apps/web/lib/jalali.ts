@@ -92,6 +92,17 @@ export function faBirthDate(input: string | null | undefined): string {
   return faDate(s)
 }
 
+/** زمانِ ستونِ `timestamp` **بی‌منطقه‌ی زمانی** (مثلِ `products.createdAt`)
+ *  که به UTC ذخیره شده. مرورگر رشته‌ی بی‌«Z» را وقتِ محلی می‌خواند، پس
+ *  ثبت‌های بعد از ۲۰:۳۰ یک روز جابه‌جا نشان داده می‌شدند. رشته‌ای که
+ *  منطقه دارد دست نمی‌خورد. نامعتبر ⟵ null. */
+export function parseDbTimestamp(input: unknown): Date | null {
+  const s = String(input ?? '').trim()
+  if (!s) return null
+  const d = new Date(/[zZ]|[+-]\d\d:?\d\d$/.test(s) ? s : `${s.replace(' ', 'T')}Z`)
+  return isNaN(d.getTime()) ? null : d
+}
+
 /** «پنج‌شنبه، ۸ مرداد ۱۴۰۵» */
 export function faDateLong(input: string | Date | null | undefined): string {
   if (!input) return '—'

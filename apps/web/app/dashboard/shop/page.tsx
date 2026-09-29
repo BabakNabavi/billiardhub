@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ask, notify } from '../../../lib/ui/dialogs'
 import PageLoader from '@/components/ui/PageLoader';
 import { useRouter } from 'next/navigation';
@@ -72,8 +72,31 @@ function mapServerAd(a: Record<string, unknown>): Product {
     views: n(a.views),
     requestedVerification: !!a.requestedVerification,
     createdAt: s(a.createdAt) || new Date().toISOString(),
+    expiresAt: s(a.expiresAt),
+    /* دلیلِ رد — فقط در فهرستِ خودِ فروشنده (`mine=1`) می‌آید */
+    adminNote: s(a.adminNote),
+    /* توقف یا رد توسطِ مدیریت (مهاجرتِ ۱۱۱) — فروشنده برش نمی‌گرداند */
+    held: a.moderation_hold === true,
+    server: true,
   };
 }
+
+const pastExpiry = (p: { expiresAt?: string }) => !!p.expiresAt && Date.parse(p.expiresAt) < Date.now();
+
+/* وضعیتِ نمایشی: آگهیِ «فعال» که مهلتش گذشته، در بازار دیده نمی‌شود —
+   پس فروشنده هم باید «منقضی» ببیند، نه «فعال». توقفِ مدیریت هم از
+   توقفِ خودِ فروشنده جداست. */
+const shownStatus = (p: { status: string; expiresAt?: string; held?: boolean }) =>
+  p.held && p.status === 'paused' ? 'held'
+    : p.status === 'active' && pastExpiry(p) ? 'expired' : p.status;
+
+/* تمدید وقتی معنا دارد که منقضی شده یا تا یک هفته‌ی دیگر می‌شود */
+const renewable = (p: { status: string; expiresAt?: string }) => {
+  const st = shownStatus(p);
+  if (st === 'expired') return true;
+  if (!['active', 'paused'].includes(st) || !p.expiresAt) return false;
+  return Date.parse(p.expiresAt) - Date.now() < 7 * 86_400_000;
+};
 
 function loadLocalProducts(owner: { id?: string; phone?: string }): Product[] {
   if (typeof window === 'undefined') return [];
@@ -106,6 +129,11 @@ interface Product {
   views: number;
   requestedVerification: boolean;
   createdAt: string;
+  expiresAt?: string;
+  adminNote?: string;
+  held?: boolean;
+  /* آگهیِ سرور؛ آگهیِ محلیِ قدیمی دکمه‌های وضعیت ندارد */
+  server?: boolean;
 }
 
 /* `categoryLabels` و `conditionLabels` حذف شدند: کارت فهرست دیگر
@@ -116,6 +144,13 @@ const statusLabels: Record<string, { label: string; color: string; icon: any }> 
   active: { label: 'فعال', color: 'bg-green-100 text-green-700', icon: <CheckCircle size={12} /> },
   sold: { label: 'فروخته شده', color: 'bg-gray-100 text-gray-600', icon: <CheckCircle size={12} /> },
   inactive: { label: 'غیرفعال', color: 'bg-red-100 text-red-600', icon: <XCircle size={12} /> },
+  /* تا امروز این چهار برچسب نداشتند و کلمه‌ی انگلیسیِ خام («pending»)
+     روی کارت می‌نشست */
+  pending: { label: 'در انتظار تأیید', color: 'bg-amber-50 text-amber-700', icon: <Clock size={12} /> },
+  rejected: { label: 'رد شده', color: 'bg-red-100 text-red-600', icon: <XCircle size={12} /> },
+  paused: { label: 'متوقف', color: 'bg-gray-100 text-gray-600', icon: <Clock size={12} /> },
+  expired: { label: 'منقضی', color: 'bg-gray-100 text-gray-600', icon: <Clock size={12} /> },
+  held: { label: 'متوقف توسط مدیریت', color: 'bg-red-100 text-red-600', icon: <XCircle size={12} /> },
 };
 
 export default function MyShopPage() {
@@ -129,6 +164,14 @@ export default function MyShopPage() {
   const [boostFor, setBoostFor] = useState<{ id: string; title: string } | null>(null);
   /* پیام بازگشت از درگاه ارتقا — از کوئری نشانی */
   const [boostMsg, setBoostMsg] = useState("");
+  /* همان نوارِ پیامِ ارتقا، برای نتیجه‌ی دکمه‌های وضعیت و حذف. تایمرِ قبلی
+     پاک می‌شود، وگرنه پیامِ تازه با تایمرِ پیامِ قبلی زودتر محو می‌شد. */
+  const flashTimer = useRef<number | undefined>(undefined);
+  const flash = (m: string) => {
+    setBoostMsg(m);
+    window.clearTimeout(flashTimer.current);
+    flashTimer.current = window.setTimeout(() => setBoostMsg(""), 5000);
+  };
 
   /* ── بازگشت از درگاه ارتقا ──
      کالبک به همین صفحه برمی‌گردد با `?boost=...`. بدون این پیام،
@@ -180,20 +223,53 @@ export default function MyShopPage() {
       const next = list.filter(p => String(p.id) !== String(id));
       if (next.length !== list.length) localStorage.setItem('userProducts', JSON.stringify(next));
     } catch { /* ignore */ }
-    try { await apiFetch(`/api/market/ads/${id}`, { method: 'DELETE' }); } catch { /* آگهی فقط‌محلی روی سرور نیست */ }
-    setProducts(products.filter(p => p.id !== id));
+    /* ⚠️ پاسخ خوانده می‌شود. پیش‌تر آگهی در هر حال از فهرست برداشته
+       می‌شد، پس اگر حذف روی سرور شکست می‌خورد (۴۰۳/۵۰۰)، فروشنده خیال
+       می‌کرد حذف شده و آگهی در بازار می‌ماند. */
+    const target = products.find(p => p.id === id);
+    if (target?.server) {
+      const r = await apiFetch(`/api/market/ads/${id}`, { method: 'DELETE' }).catch(() => null);
+      if (!r?.ok) {
+        setDeleting(null);
+        flash('حذف انجام نشد؛ دوباره تلاش کنید');
+        return;
+      }
+    }
+    setProducts(ps => ps.filter(p => p.id !== id));
     setDeleting(null);
   };
 
-  const filtered = activeTab === 'all' ? products :
-    activeTab === 'pending' ? products.filter(p => p.requestedVerification && !p.isVerified) :
-    products.filter(p => p.status === activeTab);
+  /* ── فروخته شد / توقف / فعال‌سازی / تمدید ──
+     مسیرِ سرور (`PATCH /api/market/ads/[id]`) هر چهار را از قبل داشت ولی
+     **هیچ دکمه‌ای در کلِ سایت صدایش نمی‌زد**: فروشنده نمی‌توانست کالای
+     فروخته‌شده را علامت بزند، و آگهیِ ۶۰روزه بعد از انقضا فقط با ساختِ
+     دوباره (و سوختنِ یک سهمیه) برمی‌گشت. */
+  const [acting, setActing] = useState<string | null>(null);
+  const patchAd = async (id: string, body: Record<string, unknown>, ok: string) => {
+    setActing(id);
+    try {
+      const r = await apiFetch(`/api/market/ads/${id}`, {
+        method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body),
+      });
+      const j = await r.json().catch(() => ({})) as { ad?: Record<string, unknown>; message?: string };
+      if (!r.ok || !j.ad) { flash(j.message || 'انجام نشد؛ دوباره تلاش کنید'); return; }
+      const next = mapServerAd(j.ad);
+      /* پاسخِ PATCH ستونِ adminNote را هم دارد، ولی فهرست فقط همان را لازم دارد */
+      setProducts(ps => ps.map(p => (p.id === id ? { ...next, adminNote: next.adminNote || p.adminNote } : p)));
+      flash(ok);
+    } catch { flash('خطا در ارتباط با سرور'); } finally { setActing(null); }
+  };
+
+  const filtered = activeTab === 'all' ? products : products.filter(p => shownStatus(p) === activeTab);
 
   const stats = {
     total: products.length,
-    active: products.filter(p => p.status === 'active').length,
+    active: products.filter(p => shownStatus(p) === 'active').length,
     sold: products.filter(p => p.status === 'sold').length,
-    pending: products.filter(p => p.requestedVerification && !p.isVerified).length,
+    /* «در انتظار تأیید» یعنی منتظرِ بازبینیِ ادمین. پیش‌تر
+       `requestedVerification` را می‌شمرد که هیچ مسیری روشنش نمی‌کند —
+       عدد همیشه صفر بود. */
+    pending: products.filter(p => p.status === 'pending').length,
     totalViews: products.reduce((sum, p) => sum + (p.views || 0), 0),
   };
 
@@ -305,13 +381,20 @@ export default function MyShopPage() {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start justify-between gap-2">
                         <h3 className="font-bold text-gray-800 text-[13.5px] leading-6 truncate">{product.title}</h3>
-                        <span className={`text-[10.5px] px-2 py-0.5 rounded-full flex items-center gap-1 flex-shrink-0 ${statusLabels[product.status]?.color || 'bg-gray-100 text-gray-600'}`}>
-                          {statusLabels[product.status]?.icon}
-                          {statusLabels[product.status]?.label || product.status}
+                        <span className={`text-[10.5px] px-2 py-0.5 rounded-full flex items-center gap-1 flex-shrink-0 ${statusLabels[shownStatus(product)]?.color || 'bg-gray-100 text-gray-600'}`}>
+                          {statusLabels[shownStatus(product)]?.icon}
+                          {statusLabels[shownStatus(product)]?.label || shownStatus(product)}
                         </span>
                       </div>
                       {product.sub && (
                         <div className="text-[12px] text-gray-500 truncate mt-0.5" dir="auto">{product.sub}</div>
+                      )}
+                      {/* دلیلِ رد — بدونِ آن فروشنده نمی‌دانست چه چیزی را درست کند.
+                          ویرایشِ آگهیِ ردشده آن را دوباره به صفِ بازبینی می‌برد. */}
+                      {product.status === 'rejected' && (
+                        <p className="text-[11.5px] text-red-600 mt-1 leading-5">
+                          {product.adminNote ? `دلیل: ${product.adminNote}` : 'این آگهی رد شده است.'} پس از ویرایش دوباره بررسی می‌شود.
+                        </p>
                       )}
                       <div className="mt-1.5">
                         {product.discountPrice ? (
@@ -362,6 +445,47 @@ export default function MyShopPage() {
                       حذف
                     </button>
                   </div>
+
+                  {/* ── وضعیت: فروخته شد / توقف / فعال‌سازی / تمدید ──
+                      فقط کارهایی که برای وضعیتِ فعلی معنا دارند. آگهیِ
+                      «در انتظار تأیید» و «رد شده» این‌جا دکمه‌ای ندارد —
+                      تصمیمش با ادمین است. */}
+                  {product.server && !(product.held && product.status === 'paused') && (() => {
+                    const st = shownStatus(product);
+                    const busy = acting === product.id;
+                    const btn = `${LQ_NEUTRAL} flex items-center justify-center gap-1 py-1.5 text-[11px] font-bold disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C7A66A]`;
+                    /* فعال‌کردنِ آگهیِ تاریخ‌گذشته بدونِ تمدید، آگهیِ «فعال» ولی
+                       نامرئی می‌ساخت؛ پس همان‌جا تمدید هم می‌شود. */
+                    const reactivate = pastExpiry(product) ? { status: 'active', renew: true } : { status: 'active' };
+                    const actions: { label: string; body: Record<string, unknown>; ok: string }[] = [];
+                    if (st === 'active') {
+                      actions.push({ label: 'فروخته شد', body: { status: 'sold' }, ok: 'آگهی «فروخته شده» علامت خورد' });
+                      actions.push({ label: 'توقف موقت', body: { status: 'paused' }, ok: 'آگهی متوقف شد و در بازار دیده نمی‌شود' });
+                    }
+                    if (st === 'paused') actions.push({ label: 'فعال‌سازی', body: reactivate, ok: 'آگهی دوباره فعال شد' });
+                    if (st === 'sold') actions.push({ label: 'فعال‌سازی دوباره', body: reactivate, ok: 'آگهی دوباره فعال شد' });
+                    if (renewable(product) && !(st !== 'active' && st !== 'expired' && pastExpiry(product))) {
+                      actions.push({ label: 'تمدید ۶۰ روزه', body: { renew: true }, ok: 'آگهی برای ۶۰ روزِ دیگر تمدید شد' });
+                    }
+                    if (!actions.length) return null;
+                    return (
+                      <div className="mt-1.5 grid gap-1.5" style={{ gridTemplateColumns: `repeat(${actions.length}, minmax(0, 1fr))` }}>
+                        {actions.map(a => (
+                          <button key={a.label} type="button" disabled={busy} aria-busy={busy}
+                            onClick={() => void patchAd(product.id, a.body, a.ok)} className={btn}>
+                            {a.label}
+                          </button>
+                        ))}
+                      </div>
+                    );
+                  })()}
+                  {/* فقط برای توقف؛ آگهیِ ردشده پیامِ خودش را بالاتر دارد و
+                      آگهیِ ارسال‌شده برای بررسی «در انتظار تأیید» است */}
+                  {product.held && product.status === 'paused' && (
+                    <p className="mt-1.5 text-[11.5px] text-red-600 leading-5">
+                      این آگهی توسط مدیریت متوقف شده است؛ برای بررسی با پشتیبانی تماس بگیرید.
+                    </p>
+                  )}
                 </div>
               ))}
             </div>
@@ -375,8 +499,9 @@ export default function MyShopPage() {
       )}
 
       {boostMsg && (
-        <div style={{
-          position: "fixed", insetInline: 0, bottom: 22, margin: "0 auto", zIndex: 95,
+        <div role="status" aria-live="polite" style={{
+          /* در اپِ نصب‌شده‌ی آیفون، نوارِ خانه روی ۲۲ پیکسلِ پایین می‌نشیند */
+          position: "fixed", insetInline: 0, bottom: "calc(22px + env(safe-area-inset-bottom))", margin: "0 auto", zIndex: 95,
           width: "fit-content", maxWidth: "calc(100% - 32px)",
           background: "#1A1A18", color: "#fff", borderRadius: 12,
           padding: "11px 18px", fontSize: 13, fontWeight: 700,

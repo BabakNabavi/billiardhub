@@ -6,7 +6,7 @@ import { normalizeCategory, normalizeCondition } from '@/lib/market/categories';
 import { validateOnServer, getBrand, TYPE_PREFIX, isAccessoryCategory, isProductCatalog, ACCESSORY_TYPE_OF, type CatalogId } from '@/lib/market/catalog'
 import { hasSpecCatalog, validateSpecsOnServer } from '@/lib/market/spec-catalog'
 import { normalizeAdImages } from '@/lib/market/images';
-import { normalizePhoneFa } from '@/lib/text-fa';
+import { normalizePhoneFa, isIranMobile, toStoredWhatsapp } from '@/lib/text-fa';
 
 /* یک آگهی بیلیارد بازار — خواندن، ویرایش و حذف.
    ویرایش و حذف فقط برای صاحب آگهی یا ادمین. */
@@ -49,13 +49,24 @@ export async function GET(_req: NextRequest, ctx: { params: Promise<{ id: string
      هر کسی که نشانی را داشت، آگهی متوقف‌شده یا ردشده را کامل — با
      شماره‌ی تماس — می‌دید. */
   const PUBLIC = ['active', 'sold', 'expired'];
-  if (!PUBLIC.includes(String(ad.status))) {
-    const actor = actorFromRequest(_req);
-    const owner = actor && String(ad.sellerId) === actor.id;
-    if (!owner && !(actor && await isAdmin(actor.id))) {
-      return NextResponse.json({ message: 'آگهی پیدا نشد' }, { status: 404 });
-    }
+  const actor = actorFromRequest(_req);
+  const isPublic = PUBLIC.includes(String(ad.status));
+  /* پرس‌وجوی ادمین فقط وقتی لازم است که چیزی واقعا پنهان باشد — نه برای
+     هر بازدیدِ آگهیِ عمومی */
+  const needsCheck = !isPublic || ad.adminNote != null;
+  const privileged = !!actor && (String(ad.sellerId) === actor.id
+    || (needsCheck && await isAdmin(actor.id)));
+  if (!isPublic && !privileged) {
+    return NextResponse.json({ message: 'آگهی پیدا نشد' }, { status: 404 });
   }
+  /* ⚠️ یادداشتِ ادمین (مثلا دلیلِ رد) فقط برای صاحبِ آگهی و ادمین.
+     پیش‌تر `select('*')` آن را به هر بازدیدکننده‌ای می‌داد — آگهیِ ردشده
+     که بعد دوباره فعال می‌شد، دلیلِ ردش را روی صفحه‌ی عمومی داشت. */
+  if (!privileged) delete ad.adminNote;
+  /* ⚠️ آدرسِ فروشنده‌ی شخصی داده‌ی خصوصی است (نشانیِ خانه‌اش). صفحه فقط
+     آدرسِ فروشگاه را نشان می‌دهد و فرم همین را به فروشنده می‌گوید؛ پس
+     پاسخِ خامِ API هم نباید آن را به هر کسی بدهد. */
+  if (!privileged && !ad.storeSlug) delete ad.address;
 
   /* ── شمارنده‌ی بازدید ──
      پیش‌تر هر بارگذاری صفحه یکی بالا می‌برد، یعنی فروشنده با ده بار
@@ -83,12 +94,19 @@ export async function PATCH(req: NextRequest, ctx: { params: Promise<{ id: strin
 
   const ad = await load(id);
   if (!ad) return NextResponse.json({ message: 'آگهی پیدا نشد' }, { status: 404 });
-  if (String(ad.sellerId) !== actor.id && !(await isAdmin(actor.id))) {
+  const owner = String(ad.sellerId) === actor.id;
+  const admin = !owner && await isAdmin(actor.id);
+  if (!owner && !admin) {
     return NextResponse.json({ message: 'این آگهی متعلق به شما نیست' }, { status: 403 });
   }
 
   const b = await req.json().catch(() => ({}));
   const patch: Record<string, unknown> = {};
+
+  /* ── فروشگاه: نام و آدرس از پروفایلِ فروشگاه‌اند ──
+     فرمِ ثبت این دو را برای صاحبِ فروشگاه از پروفایل پر و قفل می‌کند. بدونِ
+     همین قفل این‌جا، ویرایش هر نامی را روی آگهیِ «فروشگاهِ رسمی» می‌گذاشت. */
+  const storeLocked = !!ad.storeSlug && !admin;
 
   if (b?.name !== undefined || b?.title !== undefined) patch.title = str(b?.name ?? b?.title, 160);
   if (b?.description !== undefined) patch.description = str(b?.description, 3000);
@@ -96,14 +114,28 @@ export async function PATCH(req: NextRequest, ctx: { params: Promise<{ id: strin
   if (b?.condition !== undefined) patch.condition = normalizeCondition(str(b?.condition, 20));
   if (b?.city !== undefined) patch.city = str(b?.city, 60);
   if (b?.province !== undefined) patch.province = str(b?.province, 60);
-  if (b?.address !== undefined) patch.address = str(b?.address, 300);
+  if (b?.address !== undefined && !storeLocked) patch.address = str(b?.address, 300);
   if (b?.brand !== undefined) patch.brand = str(b?.brand, 80);
   if (b?.model !== undefined) patch.model = str(b?.model, 80);
   if (b?.type !== undefined) patch.type = str(b?.type, 80);
-  if (b?.sellerName !== undefined) patch.sellerName = str(b?.sellerName, 120);
-  if (b?.sellerPhone !== undefined) /* همان یک شکل مسیر ثبت — وگرنه ویرایش شکل دوم را برمی‌گرداند */
-    patch.sellerPhone = normalizePhoneFa(b?.sellerPhone) || str(b?.sellerPhone, 20);
-  if (b?.sellerWhatsapp !== undefined) patch.sellerWhatsapp = str(b?.sellerWhatsapp, 20);
+  if (b?.sellerName !== undefined && !storeLocked) patch.sellerName = str(b?.sellerName, 120);
+  /* ⚠️ شماره‌ها در مرز سنجیده می‌شوند، نه فقط در فرم. این مسیر حالا فرمِ
+     ویرایشِ تماس را پشتیبانی می‌کند و هر رشته‌ی بیست‌نویسه‌ای را
+     می‌پذیرفت. خالی یعنی «بدونِ این شماره». */
+  if (b?.sellerPhone !== undefined) {
+    const raw = str(b?.sellerPhone, 30);
+    if (raw && !isIranMobile(raw)) {
+      return NextResponse.json({ message: 'شماره تماس معتبر نیست (۰۹xxxxxxxxx)', errors: { sellerPhone: 'شماره تماس معتبر نیست' } }, { status: 400 });
+    }
+    patch.sellerPhone = raw ? normalizePhoneFa(raw) : '';
+  }
+  if (b?.sellerWhatsapp !== undefined) {
+    const raw = str(b?.sellerWhatsapp, 30);
+    if (raw && !isIranMobile(raw)) {
+      return NextResponse.json({ message: 'شماره‌ی واتساپ معتبر نیست', errors: { sellerWhatsapp: 'شماره‌ی واتساپ معتبر نیست' } }, { status: 400 });
+    }
+    patch.sellerWhatsapp = raw ? toStoredWhatsapp(raw) : '';
+  }
   if (b?.specs !== undefined) patch.specs = b?.specs && typeof b.specs === 'object' ? b.specs : null;
 
   /* همان ستون‌های ایندکس‌دار مسیر ثبت — وگرنه ویرایش، ستون و
@@ -167,7 +199,13 @@ export async function PATCH(req: NextRequest, ctx: { params: Promise<{ id: strin
     patch.tableSizeId = cat === 'table' ? val.sizeId ?? null : null;
     patch.tableSizeCustom = cat === 'table' ? val.sizeCustom ?? null : null;
 
-    if (cat === 'table') {
+    /* ⚠️ ستون‌های پارچه فقط وقتی دست می‌خورند که درخواست آن‌ها را آورده
+       باشد. فرمِ ویرایش تا امروز این چهار کلید را نمی‌فرستاد و این شاخه
+       با مقدارِ غایب null می‌نوشت — یعنی **هر ویرایشِ آگهیِ میز، برند و
+       مدلِ پارچه‌اش را پاک می‌کرد.** */
+    const clothSent = ['clothBrandId', 'clothBrandCustom', 'clothModelId', 'clothModelCustom']
+      .some(k => b?.[k] !== undefined);
+    if (cat === 'table' && clothSent) {
       const cbId = str(b?.clothBrandId, 80) || null;
       const cmId = str(b?.clothModelId, 80) || null;
       if (cbId) {
@@ -202,7 +240,30 @@ export async function PATCH(req: NextRequest, ctx: { params: Promise<{ id: strin
      `pending`، `rejected` و `deleted` عمدا این‌جا نیستند — آن‌ها
      تصمیم ادمین‌اند و از این مسیر قابل گذاشتن نباشند. */
   const SELLER_STATUSES = ['active', 'paused', 'sold'];
+  /* ⚠️ توقفِ مدیریت (مهاجرتِ ۱۱۱). «توقف موقت»ِ پنلِ ادمین همان `paused`
+     را می‌نویسد؛ بدونِ این پرچم فروشنده با «فعال‌سازی» یا «تمدید» آن را
+     برمی‌گرداند. تا وقتی مهاجرت اجرا نشده ستون نیست و `undefined` است. */
+  const held = ad.moderation_hold === true && !admin;
+  if (held && (b?.status !== undefined || b?.renew === true)) {
+    return NextResponse.json({
+      message: 'این آگهی توسط مدیریت متوقف شده است؛ برای بررسی با پشتیبانی تماس بگیرید',
+    }, { status: 409 });
+  }
   if (b?.status !== undefined && SELLER_STATUSES.includes(String(b.status))) {
+    /* ⚠️ فروشنده فقط **بینِ همین سه** جابه‌جا می‌شود. پیش‌تر هر آگهی‌ای را
+       می‌شد `active` کرد — یعنی آگهیِ `pending` (منتظرِ بازبینیِ ادمین) یا
+       `rejected` (ردشده) با یک درخواست منتشر می‌شد و کلیدِ
+       `market_approval_required` عملا بی‌اثر بود. آگهیِ منقضی هم از راهِ
+       «تمدید» فعال می‌شود، نه با تغییرِ مستقیمِ وضعیت. */
+    const current = String(ad.status);
+    if (!SELLER_STATUSES.includes(current) && !admin) {
+      return NextResponse.json({
+        message: current === 'pending' ? 'این آگهی هنوز در انتظار تأیید است'
+          : current === 'rejected' ? 'این آگهی رد شده است؛ پس از اصلاح، دوباره بررسی می‌شود'
+          : current === 'expired' ? 'مهلت این آگهی تمام شده — تمدیدش کنید'
+          : 'وضعیت این آگهی قابل تغییر نیست',
+      }, { status: 409 });
+    }
     patch.status = String(b.status);
     /* لحظه‌ی فروش ثبت می‌شود و با فعال‌شدن دوباره پاک — وگرنه آگهی
        دوباره‌فعال، تاریخ فروش قدیمی را با خودش می‌کشید. */
@@ -244,8 +305,30 @@ export async function PATCH(req: NextRequest, ctx: { params: Promise<{ id: strin
 
   if (Object.keys(patch).length === 0) return NextResponse.json({ ad });
 
-  const { data, error } = await sb().from('products').update(patch).eq('id', id).select().single();
+  /* آگهیِ ردشده‌ای که صاحبش **محتوایش را** اصلاح می‌کند دوباره به صفِ
+     بازبینی می‌رود. بدونِ این، آگهیِ رد شده بن‌بست بود. فقط تمدید یا
+     تغییرِ وضعیت اصلاح نیست. */
+  const META = new Set(['expiresAt', 'renewedAt', 'status', 'soldAt']);
+  const contentEdit = Object.keys(patch).some(k => !META.has(k));
+  if (String(ad.status) === 'rejected' && owner && contentEdit && patch.status === undefined) {
+    patch.status = 'pending';
+  }
+
+  /* ⚠️ اگر وضعیت عوض می‌شود، فقط روی همان وضعیتی که خواندیم. وگرنه ادمینی
+     که میانِ خواندن و نوشتن آگهی را رد کرده، با `paused`ِ فروشنده
+     بازنویسی می‌شد. */
+  let q = sb().from('products').update(patch).eq('id', id);
+  if (patch.status !== undefined) {
+    q = q.eq('status', String(ad.status));
+    /* همان رقابت برای پرچمِ توقف: ادمینی که میانِ خواندن و نوشتن توقف
+       زده، با فعال‌سازیِ فروشنده دور زده نشود. فقط وقتی ستون هست. */
+    if (!admin && 'moderation_hold' in ad) q = q.eq('moderation_hold', false);
+  }
+  const { data, error } = await q.select().maybeSingle();
   if (error) return NextResponse.json({ message: 'ویرایش انجام نشد' }, { status: 500 });
+  if (!data) {
+    return NextResponse.json({ message: 'وضعیت آگهی همین حالا تغییر کرده؛ صفحه را تازه کنید' }, { status: 409 });
+  }
   return NextResponse.json({ ad: data });
 }
 

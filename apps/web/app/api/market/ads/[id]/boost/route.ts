@@ -131,9 +131,17 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string
     return NextResponse.json({ message: pay.message ?? 'اتصال به درگاه انجام نشد' }, { status: 502 });
   }
 
-  await sb().from('ad_boosts').update({
+  /* ⚠️ اگر شناسه‌ی درگاه ذخیره نشد، کاربر به درگاه نمی‌رود: کالبک فقط
+     همین شناسه‌ی ذخیره‌شده را معتبر می‌داند، پس پرداختی که شناسه‌اش
+     این‌جا ننشسته، پس از کسرِ پول قابلِ تأیید نیست. */
+  const { error: saveErr } = await sb().from('ad_boosts').update({
     provider: provider.name, provider_authority: pay.authority ?? null,
   }).eq('id', orderId);
+  if (saveErr || !pay.authority) {
+    console.error('[boost] authority not saved:', saveErr?.message ?? 'no authority');
+    await sb().from('ad_boosts').update({ status: 'FAILED' }).eq('id', orderId);
+    return NextResponse.json({ message: 'اتصال به درگاه انجام نشد؛ دوباره تلاش کنید' }, { status: 502 });
+  }
 
   void audit({
     actorId: actor.id, actorRole: actor.role, action: 'AD_BOOST_STARTED',

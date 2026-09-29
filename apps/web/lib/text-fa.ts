@@ -83,6 +83,12 @@ export function normalizePhoneFa(v: unknown): string {
 
 export const isIranMobile = (v: unknown): boolean => /^09[0-9]{9}$/.test(normalizePhoneFa(v))
 
+/** واتساپِ آگهی به شکلِ `98…` ذخیره می‌شود (همان که `wa.me` می‌خواهد).
+ *  یک جا، تا فرمِ ثبت و ویرایش و سرور سه شکلِ متفاوت نسازند. */
+export const toStoredWhatsapp = (v: unknown): string => normalizePhoneFa(v).replace(/^0/, '98')
+/** عکسِ بالا: برای نشان‌دادن در فرم به شکلِ `09…` */
+export const fromStoredWhatsapp = (v: unknown): string => normalizePhoneFa(v)
+
 /* ── نویسه‌های کنترل دوجهته ──
    `certificationLines` برچسب و سال را با FSI/PDI جدا می‌کند تا در بند
    راست‌به‌چپ سال وسط برچسب نیفتد. آن نویسه‌ها نامرئی‌اند ولی *کاراکترند*:

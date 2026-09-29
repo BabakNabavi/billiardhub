@@ -121,8 +121,21 @@ async function applyPatch(req: NextRequest, id: string) {
     .select('id,"isVerified","isOfficialStore"').eq('id', id).maybeSingle()
   if (!before) return NextResponse.json({ error: 'محصول پیدا نشد' }, { status: 404 })
 
-  const { data, error } = await supabase.from('products')
-    .update(patch).eq('id', id).select().single()
+  /* ── توقفِ مدیریت (مهاجرتِ ۱۱۱) ──
+     «توقف موقت»ِ این پنل همان `paused`ی را می‌نویسد که فروشنده خودش
+     می‌گذارد؛ بدونِ این پرچم فروشنده با «فعال‌سازی» یا «تمدید» آن را
+     برمی‌گرداند. هر تصمیمِ وضعیتیِ ادمین پرچم را تنظیم می‌کند: فعال ⟵
+     خاموش، بقیه ⟵ روشن. تا وقتی مهاجرت اجرا نشده ستون نیست و بدونِ
+     آن دوباره تلاش می‌شود — پنلِ ادمین نباید به‌خاطرِ آن بشکند. */
+  const withHold = typeof patch.status === 'string'
+    ? { ...patch, moderation_hold: patch.status !== 'active' }
+    : patch
+  let { data, error } = await supabase.from('products')
+    .update(withHold).eq('id', id).select().single()
+  if (error && /moderation_hold/.test(error.message)) {
+    ({ data, error } = await supabase.from('products')
+      .update(patch).eq('id', id).select().single())
+  }
   if (error) {
     console.error('[products/:id] update:', error.message)
     return NextResponse.json({ error: 'خطای سرور' }, { status: 500 })

@@ -62,7 +62,9 @@ const LIST_COLS = [
 
 /* فهرست کامل ستون‌ها فقط برای فهرست خود فروشنده — آگهی خودش را
    با همه‌ی جزئیات می‌بیند. */
-const MINE_COLS = `${LIST_COLS},description,type,specs,address,"sellerName","sellerPhone","sellerWhatsapp","sellerId"`;
+/* `adminNote` برای صاحبِ آگهی است: دلیلِ ردشدن. بدونِ آن فروشنده فقط
+   «رد شد» می‌دید و نمی‌دانست چه چیزی را درست کند. */
+const MINE_COLS = `${LIST_COLS},description,type,specs,address,"sellerName","sellerPhone","sellerWhatsapp","sellerId","adminNote"`;
 
 /* ── فهرست آگهی‌ها ─────────────────────────────────────────────── */
 export async function GET(req: NextRequest) {
@@ -73,34 +75,42 @@ export async function GET(req: NextRequest) {
   /* فقط آگهی‌های فوری — برای نوار بالای بازار */
   const urgentOnly = searchParams.get('urgent') === '1';
 
-  /* ── چرا دو ستون و نه `createdAt` تنها ──
-     «تازه‌سازی» آگهی را مثل آگهی تازه بالا می‌برد؛ اگر مرتب‌سازی
-     فقط تاریخ ثبت باشد، آن ارتقا هیچ اثری ندارد. `bumped_at` تهی
-     یعنی هرگز تازه‌سازی نشده، پس همان تاریخ ثبت ملاک می‌ماند. */
-  let q = sb().from('products')
-    .select(mine ? MINE_COLS : LIST_COLS)
-    .order('bumped_at', { ascending: false, nullsFirst: false })
-    .order('createdAt', { ascending: false })
-    .limit(limit);
+  const sellerId = mine ? actorFromRequest(req)?.id ?? null : null;
+  if (mine && !sellerId) return NextResponse.json({ message: 'احراز هویت الزامی است' }, { status: 401 });
 
-  if (mine) {
-    const actor = actorFromRequest(req);
-    if (!actor) return NextResponse.json({ message: 'احراز هویت الزامی است' }, { status: 401 });
-    q = q.eq('sellerId', actor.id);
-  } else {
+  /* ── ترتیب: `listed_at` (مهاجرتِ ۱۱۱) ──
+     = آخرین لحظه‌ای که آگهی «تازه» شد: تاریخِ تازه‌سازی، وگرنه تاریخِ
+     ثبت. پیش‌تر اول با `bumped_at` و بعد با تاریخِ ثبت مرتب می‌شد؛ چون
+     `bumped_at` فقط برای آگهیِ ارتقایافته پر است، تازه‌سازیِ سه ماه پیش
+     بالای **همه‌ی** آگهی‌های امروز می‌ماند.
+
+     فهرستِ خودِ فروشنده `moderation_hold` را هم می‌خواهد (همان مهاجرت)
+     تا دکمه‌های وضعیت را برای آگهیِ متوقف‌شده توسطِ مدیریت نشان ندهد.
+     تا وقتی مهاجرت اجرا نشده، هر دو ستون نیستند و به رفتارِ قبلی
+     برمی‌گردیم — وگرنه فهرستِ فروشنده خالی می‌شد. */
+  const build = (v111: boolean) => {
+    let q = sb().from('products').select(mine ? (v111 ? `${MINE_COLS},moderation_hold` : MINE_COLS) : LIST_COLS)
+    q = v111
+      ? q.order('listed_at', { ascending: false })
+      : q.order('bumped_at', { ascending: false, nullsFirst: false })
+    q = q.order('createdAt', { ascending: false }).limit(limit)
+
+    if (sellerId) return q.eq('sellerId', sellerId)
     /* فقط آگهی فعال و منقضی‌نشده.
 
        تا امروز فقط `status` فیلتر می‌شد و `expiresAt` — که از مهاجرت
        ۰۰۶ ستونش وجود داشت — هرگز خوانده نمی‌شد. یعنی آگهی دو سال
        پیش هنوز بالای فهرست بود. */
-    q = q.eq('status', 'active').or(`expiresAt.is.null,expiresAt.gt.${new Date().toISOString()}`);
+    q = q.eq('status', 'active').or(`expiresAt.is.null,expiresAt.gt.${new Date().toISOString()}`)
     /* انقضای «فوری» در خواندن سنجیده می‌شود، نه با کرانی که بولینی
        را خاموش کند. تابعی که کسی صدایش نزند، همان چیزی است که چند
        بار در این پروژه بی‌صدا از کار افتاد. */
-    if (urgentOnly) q = q.gt('urgent_until', new Date().toISOString());
+    if (urgentOnly) q = q.gt('urgent_until', new Date().toISOString())
+    return q
   }
 
-  const { data, error } = await q;
+  let { data, error } = await build(true);
+  if (error && /listed_at|moderation_hold/.test(error.message)) ({ data, error } = await build(false));
   if (error) {
     if (/does not exist|schema cache/i.test(error.message)) return NextResponse.json({ ads: [] });
     return NextResponse.json({ message: 'خطا در دریافت آگهی‌ها' }, { status: 500 });

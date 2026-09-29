@@ -3,7 +3,8 @@
 import { useState, useMemo, useEffect } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
-import { ChevronLeft, Store, Phone, Heart, ShieldCheck } from 'lucide-react'
+import { ChevronLeft, Store, Phone, Heart, ShieldCheck, MapPin, CalendarDays, Zap } from 'lucide-react'
+import { faDate, parseDbTimestamp } from '../../../lib/jalali'
 import { CAT_LABELS, type ShopProduct } from '../products'
 import ReportButton from '../../../components/ReportButton'
 import { productTitleParts, productTitle } from '../../../lib/market/title'
@@ -242,6 +243,24 @@ export default function ProductDetailPage() {
   const negotiable = rawAd?.negotiable === true
   const sold = String(rawAd?.status ?? '') === 'sold'
 
+  /* ── محل، تاریخِ ثبت و «فوری» ──
+     هر سه در فرمِ ثبت گرفته یا خریداری می‌شدند و این صفحه هیچ‌کدام را
+     نشان نمی‌داد: آدرس و استان/شهر فقط روی کارتِ فهرست (و آدرس هیچ‌جا)،
+     تاریخ هیچ‌جا، و کسی که «فوری» خریده بود نشانش را روی صفحه‌ی خودِ
+     آگهی نمی‌دید. برای بازارِ دست‌دوم «کجاست» و «کی ثبت شده» جزوِ
+     اولین پرسش‌های خریدار است. */
+  const place = [rawAd?.province, rawAd?.city]
+    .map(v => String(v ?? '').trim()).filter(Boolean)
+    .filter((v, i, a) => a.indexOf(v) === i).join('، ')
+  /* ⚠️ آدرس فقط برای فروشگاه — نشانیِ کسب‌وکار است. فروشنده‌ی شخصی در
+     فرم «خیابان، کوچه، پلاک» می‌نویسد، یعنی نشانیِ خانه‌اش؛ مسیرِ فهرست
+     هم به همین دلیل آدرس را برنمی‌گرداند. برای او همان شهر کافی است. */
+  const address = rawAd?.storeSlug ? String(rawAd?.address ?? '').trim() : ''
+  const createdAt = parseDbTimestamp(rawAd?.createdAt)
+  const posted = createdAt ? faDate(createdAt) : ''
+  const urgentUntil = Date.parse(String(rawAd?.urgent_until ?? ''))
+  const urgent = !sold && Number.isFinite(urgentUntil) && urgentUntil > Date.now()
+
   /* آیا این محصول به یک فروشگاه ثبت‌شده تعلق دارد؟
      محصولات کاتالوگ همیشه فروشگاه دارند؛ آگهی کاربر عادی فقط وقتی
      که خودش فروشگاه داشته باشد sellerId می‌گیرد. بدون آن، دکمه‌ی
@@ -455,6 +474,28 @@ export default function ProductDetailPage() {
                     {titleTail}
                   </span>
                 </div>
+              )}
+              {(urgent || place || posted) && (
+                <div className="mt-3 pt-3 border-t border-dashed border-black/10 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-gray-500">
+                  {urgent && (
+                    <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-amber-50 text-amber-700 font-bold">
+                      <Zap size={12} aria-hidden /> فوری
+                    </span>
+                  )}
+                  {place && (
+                    <span className="inline-flex items-center gap-1">
+                      <MapPin size={12} aria-hidden /> {place}
+                    </span>
+                  )}
+                  {posted && (
+                    <span className="inline-flex items-center gap-1">
+                      <CalendarDays size={12} aria-hidden /> ثبت: {posted}
+                    </span>
+                  )}
+                </div>
+              )}
+              {address && (
+                <p className="mt-2 text-xs text-gray-500 leading-6">آدرس: {address}</p>
               )}
             </div>
 
