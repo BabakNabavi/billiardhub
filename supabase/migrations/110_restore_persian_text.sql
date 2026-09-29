@@ -224,6 +224,15 @@ BEGIN
 END;
 $$;
 
+/* REVOKEِ صریح — قاعده‌ی پروژه (`test:guards`). تریگرِ ۱۰۲ هنگامِ اجرای
+   نخستِ این فایل (۳۰ سپتامبر) همین را خودکار اعمال کرده بود؛ این خط‌ها
+   همان اثر را دارند و اجرای دوباره را هم ایمن نگه می‌دارند. */
+REVOKE ALL ON FUNCTION public.bh_log_error(text, text, text, text, text, text, uuid, text) FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON FUNCTION public.bh_otp_issue(text, text, integer)            FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON FUNCTION public.bh_otp_verify(text, text, integer, integer)  FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON FUNCTION public.bh_lock_new_functions()                      FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON FUNCTION public.bh_prune_audit(integer)                      FROM PUBLIC, anon, authenticated;
+
 -- ─────────────────────────────────────────────────────────────
 -- خودآزمایی — هر پنج تابع باید فارسی داشته باشند و «????» نه.
 -- بازه‌ی فارسی از کدِ نویسه‌ها ساخته می‌شود تا انتقالِ خراب آزمون را
