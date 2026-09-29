@@ -2,7 +2,7 @@ export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { actorOf, ownsClub, UNAUTHENTICATED, FORBIDDEN } from '@/lib/auth/ownership';
 import { sb, audit, clientIp } from '@/lib/finance/db';
-import { getTournament } from '@/lib/tournaments/server';
+import { getTournament, cancelTournament } from '@/lib/tournaments/server';
 import { notifyTournamentCancelled } from '@/lib/notify';
 
 /* یک مسابقه — خواندن، ویرایش، لغو.
@@ -278,22 +278,48 @@ export async function DELETE(req: NextRequest, ctx: { params: Promise<{ id: stri
     return NextResponse.json({ ok: true, deleted: true });
   }
 
-  if (t.status === 'cancelled') {
-    return NextResponse.json({ ok: true, alreadyCancelled: true });
+  /* ثبت‌نام دارد ⇒ فقط لغو، تا رد مالی و سابقه بماند.
+     ⚠️ لغو و بازپرداخت در یک تراکنشِ دیتابیس — پیش‌تر این‌جا فقط وضعیت
+     UPDATE می‌شد و پولِ پرداخت‌کننده‌ها بی‌صدا در حسابِ مرکزی می‌ماند.
+     مسابقه‌ی از قبل لغوشده هم از همین تابع می‌گذرد: اگر با نسخه‌ی قدیم
+     لغو شده باشد، پرداخت‌های آنلاینش هنوز بازپرداخت ندارند و تابع
+     همان‌ها را جارو می‌کند (Idempotent است). */
+  const c = await cancelTournament(id);
+  if (!c.ok) {
+    if (c.reason === 'completed') {
+      return NextResponse.json(
+        { message: 'مسابقه‌ی پایان‌یافته لغو نمی‌شود — سهم باشگاه و کمیسیونش ثبت شده است' },
+        { status: 409 });
+    }
+    return NextResponse.json({
+      message: c.migrationMissing ? 'مایگریشن دیتابیس اجرا نشده است' : 'لغو انجام نشد',
+    }, { status: c.migrationMissing ? 503 : 500 });
+  }
+  if (c.idempotent) {
+    /* جارو پیدا کرد: مسابقه‌ای که با نسخه‌ی قدیم لغو شده بود و حالا
+       بازپرداخت‌هایش ساخته شد — این هم رویدادِ مالی است. */
+    if ((c.refunded ?? 0) > 0) {
+      void audit({
+        actorId: g.actor!.id, actorRole: 'club_owner', action: 'TOURNAMENT_CANCEL_REFUNDS_SWEPT',
+        entityType: 'tournament', entityId: id,
+        newValue: { refunded: c.refunded, refundTotal: c.refundTotal ?? 0 },
+        ip: clientIp(req) ?? undefined,
+      });
+    }
+    return NextResponse.json({ ok: true, alreadyCancelled: true, refunded: c.refunded ?? 0 });
   }
 
-  /* ثبت‌نام دارد ⇒ فقط لغو، تا رد مالی و سابقه بماند.
-     اعلان لغو پیش از هر چیز به ثبت‌نام‌کننده‌ها می‌رود. */
-  const { error } = await sb().from('tournaments')
-    .update({ status: 'cancelled', updated_at: new Date().toISOString() }).eq('id', id);
-  if (error) return NextResponse.json({ message: 'لغو انجام نشد' }, { status: 500 });
-
-  void notifyTournamentCancelled(id).catch(() => { /* بی‌صدا */ });
+  /* اعلان لغو به کسانی که پیش از لغو ثبت‌نامِ قطعی داشتند */
+  void notifyTournamentCancelled(id, c.notify ?? []).catch(() => { /* بی‌صدا */ });
   void audit({
     actorId: g.actor!.id, actorRole: 'club_owner', action: 'TOURNAMENT_CANCELLED',
     entityType: 'tournament', entityId: id,
-    newValue: { registrations: regs ?? 0 }, ip: clientIp(req) ?? undefined,
+    newValue: { registrations: regs ?? 0, refunded: c.refunded ?? 0, refundTotal: c.refundTotal ?? 0 },
+    ip: clientIp(req) ?? undefined,
   });
 
-  return NextResponse.json({ ok: true, cancelled: true, registrations: regs ?? 0 });
+  return NextResponse.json({
+    ok: true, cancelled: true, registrations: regs ?? 0,
+    refunded: c.refunded ?? 0, refundTotal: c.refundTotal ?? 0,
+  });
 }

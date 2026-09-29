@@ -108,10 +108,18 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string
     return NextResponse.json({ message: pay.message ?? 'اتصال به درگاه انجام نشد' }, { status: 502 });
   }
 
-  await sb().from('tournament_registrations').update({
+  /* ⚠️ اگر ذخیره‌ی شناسه‌ی درگاه نشد، کاربر **نباید** به درگاه برود.
+     بازگشت فقط همین شناسه‌ی ذخیره‌شده را معتبر می‌داند؛ پرداختی که
+     شناسه‌اش این‌جا ننشسته، پس از کسرِ پول قابلِ تأیید نیست. پیش‌تر
+     نتیجه‌ی این UPDATE اصلا خوانده نمی‌شد. */
+  const { error: saveErr } = await sb().from('tournament_registrations').update({
     payment_status: 'INITIATED', provider: provider.name,
     provider_authority: pay.authority ?? null, updated_at: new Date().toISOString(),
   }).eq('id', out.registrationId);
+  if (saveErr || !pay.authority) {
+    console.error('[tournaments/register] authority not saved:', saveErr?.message ?? 'no authority');
+    return NextResponse.json({ message: 'اتصال به درگاه انجام نشد؛ دوباره تلاش کنید' }, { status: 502 });
+  }
 
   return NextResponse.json({
     ok: true, registrationId: out.registrationId, amount: out.amount,
@@ -125,11 +133,25 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string 
   if (!UUID.test(id)) return NextResponse.json({ message: 'مسابقه پیدا نشد' }, { status: 404 });
   const t = await getTournament(id);
   if (!t) return NextResponse.json({ message: 'مسابقه پیدا نشد' }, { status: 404 });
+
+  /* وضعیتِ ثبت‌نامِ خودِ کاربر (اگر وارد شده) — صفحه‌ی ثبت‌نام با آن
+     «قبلا ثبت‌نام کرده‌اید» را نشان می‌دهد. پیش‌تر این از فهرستی در
+     localStorage می‌آمد که بعد از انصراف دروغ می‌شد. پاسخ no-store است،
+     پس شخصی‌بودنش مشکلی نمی‌سازد. */
+  const actor = await actorOf(req);
+  let myStatus: string | null = null;
+  if (actor) {
+    const { data: mine } = await sb().from('tournament_registrations')
+      .select('status').eq('tournament_id', id).eq('user_id', actor.id).maybeSingle();
+    myStatus = (mine as { status?: string } | null)?.status ?? null;
+  }
+
   return NextResponse.json({
     seatsLeft: await seatsLeft(id),
     maxPlayers: t.max_players,
     entryFee: t.entry_fee,
     status: t.status,
+    myStatus,
   }, { headers: { 'Cache-Control': 'no-store' } });
 }
 

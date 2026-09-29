@@ -187,14 +187,23 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string
   const target = rows.find(r => r.id === registrationId);
   if (!target) return NextResponse.json({ message: 'ثبت‌نام در این مسابقه پیدا نشد' }, { status: 404 });
 
-  const amount = Math.max(0, Math.min(Math.round(Number(b?.amount) || target.amount), target.amount));
+  /* ⚠️ همیشه کامل. بازپرداختِ جزئی یعنی بخشی از پول نزدِ ما می‌ماند و
+     باید معلوم باشد مالِ کیست (کمیسیون؟ سهمِ باشگاه؟) — قاعده‌ای که
+     هنوز تعریف نشده. هیچ رابطی مبلغ نمی‌فرستاد؛ پذیرفتنش از بدنه فقط
+     راهی بود برای دفتری که جمعش نمی‌خواند. */
+  const amount = target.amount;
   const { data, error } = await rpc<{ ok: boolean; reason?: string; idempotent?: boolean }>(
     'bh_tournament_refund',
     { p_registration: registrationId, p_amount: amount, p_reason: String(b?.reason ?? 'لغو توسط برگزارکننده').slice(0, 300) },
   );
 
   if (error || !data?.ok) {
-    return NextResponse.json({ message: data?.reason === 'not_paid' ? 'این ثبت‌نام پرداخت‌نشده است' : 'بازپرداخت انجام نشد' }, { status: 400 });
+    const message = data?.reason === 'not_paid' ? 'این ثبت‌نام پرداخت‌نشده است'
+      /* سهمِ باشگاه پس از پایان قطعی شده؛ بازپرداخت از این‌جا یعنی
+         باشگاه‌دار خودش درآمد و کمیسیونِ قطعی را برگرداند. */
+      : data?.reason === 'completed' ? 'پس از پایانِ مسابقه بازپرداخت فقط از راهِ پشتیبانی ممکن است'
+      : 'بازپرداخت انجام نشد';
+    return NextResponse.json({ message }, { status: data?.reason === 'completed' ? 409 : 400 });
   }
 
   void audit({

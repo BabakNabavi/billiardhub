@@ -2,7 +2,8 @@ export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { actorOf, ownsClub, UNAUTHENTICATED, FORBIDDEN } from '@/lib/auth/ownership';
 import { sb, rpc, audit, clientIp } from '@/lib/finance/db';
-import { getTournament } from '@/lib/tournaments/server';
+import { getTournament, cancelTournament } from '@/lib/tournaments/server';
+import { notifyTournamentCancelled } from '@/lib/notify';
 
 /* تغییر وضعیت مسابقه توسط برگزارکننده.
 
@@ -64,6 +65,24 @@ export async function PATCH(req: NextRequest, ctx: { params: Promise<{ id: strin
       return NextResponse.json(
         { message: 'ثبتِ مالیِ پایانِ مسابقه انجام نشد؛ وضعیت تغییر نکرد' }, { status: 500 });
     }
+  } else if (next === 'cancelled') {
+    /* ── لغو هم رویدادِ مالی است ──
+       پیش‌تر به شاخه‌ی UPDATEِ ساده می‌رفت: پولِ بازیکن‌های آنلاین در
+       حسابِ مرکزی می‌ماند، درخواستِ بازپرداختی ساخته نمی‌شد و — برخلافِ
+       مسیرِ DELETE — به هیچ بازیکنی هم خبر داده نمی‌شد. */
+    const c = await cancelTournament(id);
+    if (!c.ok) {
+      if (c.reason === 'completed') {
+        return NextResponse.json(
+          { message: 'مسابقه‌ی پایان‌یافته لغو نمی‌شود' }, { status: 409 });
+      }
+      return NextResponse.json({
+        message: c.migrationMissing ? 'مایگریشن دیتابیس اجرا نشده است' : 'لغو انجام نشد؛ وضعیت تغییر نکرد',
+      }, { status: c.migrationMissing ? 503 : 500 });
+    }
+    /* گیرندگان را تابعِ دیتابیس پیش از لغو جمع کرده؛ خواندن از جدول
+       بعد از لغو هیچ‌کس را پیدا نمی‌کرد. */
+    if (!c.idempotent) void notifyTournamentCancelled(id, c.notify ?? []).catch(() => { /* بی‌صدا */ });
   } else {
     const { error } = await sb().from('tournaments')
       .update({ status: next, updated_at: new Date().toISOString() }).eq('id', id);

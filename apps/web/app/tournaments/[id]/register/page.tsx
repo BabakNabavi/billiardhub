@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import {
   ChevronRight, CheckCircle2, AlertCircle, User, CreditCard, Loader2, Download,
@@ -42,7 +42,7 @@ export default function RegisterPage() {
   /* مسابقه‌ی واقعی از سرور — پیش‌تر اگر شناسه پیدا نمی‌شد، اولین
      مسابقه‌ی آرایه‌ی ساختگی نشان داده می‌شد و کاربر برای مسابقه‌ای
      ثبت‌نام می‌کرد که اصلا وجود نداشت. */
-  const [t, setT] = useState<Tournament | null>(null);
+  const [t, setT] = useState<(Tournament & { myStatus?: string | null }) | null>(null);
   const [loadingT, setLoadingT] = useState(true);
   useEffect(() => {
     let alive = true;
@@ -113,41 +113,20 @@ export default function RegisterPage() {
   const [busy, setBusy] = useState(false);
   const [receiptDate]             = useState(nowShamsi);
 
-  const [trackingCode] = useState(
-    () => toFa(14031) + '-' + toFa(Math.floor(10000 + Math.random() * 90000))
-  );
+  /* شماره‌ی ثبت‌نام — شناسه‌ای که سرور ساخته، نه عددی ساختگی.
+     ⚠️ پیش‌تر این‌جا `Math.random()` با پیشوندِ «۱۴۰۳۱» بود و روی رسید
+     به‌عنوانِ «کد پیگیری» چاپ می‌شد؛ کدی که هیچ‌جا وجود نداشت و
+     برگزارکننده نمی‌توانست با آن چیزی پیدا کند. */
+  const [regId, setRegId] = useState('');
+  const regCode = regId ? regId.slice(0, 8).toUpperCase() : '—';
 
-  const registeredRef = useRef(false);
-
-  /* Check for duplicate registration on mount */
-  useEffect(() => {
-    if (!user?.phone) return;
-    try {
-      const existing = JSON.parse(localStorage.getItem(`tournament-regs-${id}`) ?? '[]') as Array<{ phone?: string }>;
-      if (existing.some(r => r.phone === user.phone)) setAlreadyReg(true);
-    } catch {}
-  }, [id, user?.phone]);
-
-  /* Save new registration to localStorage when receipt step is entered */
-  useEffect(() => {
-    if (step !== 'receipt' || registeredRef.current) return;
-    registeredRef.current = true;
-    const newReg = {
-      id: `reg-${Date.now()}`,
-      tournamentId: id,
-      playerName: userName || 'بازیکن مهمان',
-      phone: user?.phone ?? '',
-      playerInfo: '',
-      receiptNote: `کد پیگیری: ${trackingCode}`,
-      status: 'pending' as const,
-      registeredAt: receiptDate,
-    };
-    try {
-      const existing = JSON.parse(localStorage.getItem(`tournament-regs-${id}`) ?? '[]') as Array<{ phone?: string }>;
-      if (existing.some(r => r.phone === user?.phone)) return;
-      localStorage.setItem(`tournament-regs-${id}`, JSON.stringify([...existing, newReg]));
-    } catch {}
-  }, [step, id, userName, trackingCode, receiptDate, user?.phone]);
+  /* ── «قبلا ثبت‌نام کرده‌اید» از سرور، نه از localStorage ──
+     ⚠️ نسخه‌ی قبلی فهرستی در localStorage نگه می‌داشت و هرکه شماره‌اش
+     در آن بود را بیرون نگه می‌داشت. با آمدنِ «انصراف»، این فهرست دروغ
+     شد: کسی که ثبت‌نامش را لغو کرده بود روی همان دستگاه دیگر هرگز
+     نمی‌توانست دوباره ثبت‌نام کند. حالا فقط ثبت‌نامِ قطعیِ واقعی، از
+     همان پاسخی که مسابقه را می‌آورد (`myStatus`). */
+  const registeredAlready = alreadyReg || t?.myStatus === 'CONFIRMED';
 
   /* ثبت‌نام از راه سرور.
 
@@ -169,7 +148,13 @@ export default function RegisterPage() {
       const j = await r.json().catch(() => ({} as Record<string, unknown>));
 
       if (r.status === 401) { setAlert(true); return; }
-      if (r.status === 409) { setAlreadyReg(true); return; }
+      /* ⚠️ ۴۰۹ دو معنا دارد و پیش‌تر هر دو «قبلا ثبت‌نام کرده‌اید» نشان
+         داده می‌شد — کسی که به مسابقه‌ی پر می‌رسید همین را می‌دید. */
+      if (r.status === 409) {
+        if (j.reason === 'already_registered') { setAlreadyReg(true); return; }
+        setPayUnavailable(String(j.message ?? 'ظرفیت مسابقه تکمیل است'));
+        return;
+      }
 
       /* درگاه هنوز فعال نیست — سفارش ساخته شد ولی پرداختی در کار نیست */
       if (r.status === 503 || j.pendingPayment) {
@@ -179,7 +164,11 @@ export default function RegisterPage() {
       if (!r.ok) { setPayUnavailable(String(j.message ?? 'ثبت‌نام انجام نشد')); return; }
 
       /* مسابقه‌ی رایگان ⇒ همان‌جا قطعی شد */
-      if (j.free) { setStep('receipt'); return; }
+      if (j.free) {
+        if (typeof j.registrationId === 'string') setRegId(j.registrationId);
+        setStep('receipt');
+        return;
+      }
 
       if (typeof j.redirectUrl === 'string') { window.location.href = j.redirectUrl; return; }
       setPayUnavailable('اتصال به درگاه انجام نشد');
@@ -250,7 +239,7 @@ export default function RegisterPage() {
       <div class="row"><span class="lbl">پرداخت‌کننده</span><span class="val">${userName}</span></div>
       <div class="row"><span class="lbl">دریافت‌کننده</span><span class="val">${t.clubName}</span></div>
       <div class="row"><span class="lbl">مسابقه</span><span class="val">${t.name}</span></div>
-      <div class="row"><span class="lbl">کد پیگیری</span><span class="val">${trackingCode}</span></div>
+      <div class="row"><span class="lbl">شماره‌ی ثبت‌نام</span><span class="val">${regCode}</span></div>
       <div class="row"><span class="lbl">تاریخ پرداخت</span><span class="val">${receiptDate}</span></div>
       <div class="row"><span class="lbl">وضعیت</span><span class="val g">ثبت‌نام تأیید شد ✓</span></div>
     </div>
@@ -323,7 +312,7 @@ export default function RegisterPage() {
   );
 
   /* ─── Already registered ─────────────────────────────────────── */
-  if (alreadyReg) return (
+  if (registeredAlready) return (
     <div style={{ minHeight: '100vh', background: '#F7F7F5', direction: 'rtl', fontFamily: 'Vazirmatn, sans-serif' }}>
       <Header />
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 'calc(100vh - 62px)', padding: '20px' }}>
@@ -479,7 +468,7 @@ export default function RegisterPage() {
               { label: 'پرداخت‌کننده', value: userName, mono: false },
               { label: 'دریافت‌کننده', value: t.clubName, mono: false },
               { label: 'مسابقه', value: t.name, mono: false },
-              { label: 'کد پیگیری', value: trackingCode, mono: true },
+              { label: 'شماره‌ی ثبت‌نام', value: regCode, mono: true },
               { label: 'تاریخ پرداخت', value: receiptDate, mono: true },
             ].map(row => (
               <div key={row.label} style={{

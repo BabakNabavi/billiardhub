@@ -211,6 +211,53 @@ export async function registerForTournament(
   return (data ?? { ok: false, reason: 'server_error' }) as RegisterOutcome
 }
 
+export interface CancelOutcome {
+  ok: boolean
+  reason?: string
+  refunded?: number
+  refundTotal?: number
+  cancelled?: number
+  idempotent?: boolean
+  /** کاربرانی که **پیش از لغو** ثبت‌نامِ قطعی داشتند — برای پیامکِ لغو.
+   *  بعد از لغو دیگر هیچ ردیفی CONFIRMED نیست و نمی‌شود از جدول خواندشان. */
+  notify?: string[]
+  /** تابعِ دیتابیس هنوز نیست — مهاجرتِ ۱۰۹ اجرا نشده */
+  migrationMissing?: boolean
+}
+
+/** لغوِ مسابقه — اتمیک، با بازپرداختِ پرداخت‌های آنلاین.
+ *
+ *  ⚠️ تنها راهِ لغو. پیش‌تر دو مسیر (`DELETE /tournaments/:id` و
+ *  `PATCH …/status`) هر کدام فقط وضعیت را UPDATE می‌کردند: پولِ
+ *  بازیکن‌ها در حسابِ مرکزی می‌ماند و هیچ درخواستِ بازپرداختی ساخته
+ *  نمی‌شد. قاعده در یک تابعِ دیتابیس است تا دو مسیر دوباره از هم
+ *  جدا نیفتند. */
+export async function cancelTournament(id: string, reason?: string): Promise<CancelOutcome> {
+  const { data, error } = await rpc<CancelOutcome>('bh_tournament_cancel', {
+    p_tournament: id, p_reason: reason ?? null,
+  })
+  if (error) {
+    console.error('[tournaments] cancel:', error.message)
+    /* لغو بدونِ بازپرداخت دیگر هرگز انجام نمی‌شود — حتی اگر مهاجرت
+       جا مانده باشد. بهتر است لغو شکست بخورد تا بی‌صدا پول بماند.
+       تشخیص از کدِ خطا، نه متنِ پیام: PGRST202 = PostgREST تابع را
+       نمی‌شناسد، 42883 = پستگرس. */
+    return { ok: false, reason: 'server_error',
+             migrationMissing: error.code === 'PGRST202' || error.code === '42883' }
+  }
+  return data ?? { ok: false, reason: 'server_error' }
+}
+
+export interface ConfirmOutcome {
+  ok: boolean
+  reason?: string
+  /** کالبکِ تکراری. ۰۴۱ `already` برمی‌گرداند و ۱۰۹ هر دو را — هر دو پذیرفته می‌شوند. */
+  idempotent?: boolean
+  already?: boolean
+  /** پول رسید ولی صندلی نخرید؛ دیتابیس (۱۰۹) درخواستِ بازپرداخت را ساخته */
+  refundPending?: boolean
+}
+
 /** تأیید پرداخت — Idempotent، با بررسی دوباره‌ی مبلغ و ظرفیت */
 export async function confirmRegistrationPayment(args: {
   registrationId: string
@@ -218,8 +265,8 @@ export async function confirmRegistrationPayment(args: {
   paidAmount: number
   provider: string
   refId: string
-}): Promise<{ ok: boolean; reason?: string; idempotent?: boolean }> {
-  const { data, error } = await rpc<{ ok: boolean; reason?: string; idempotent?: boolean }>(
+}): Promise<ConfirmOutcome> {
+  const { data, error } = await rpc<ConfirmOutcome>(
     'bh_tournament_confirm_payment', {
       p_registration: args.registrationId,
       p_expected_amount: args.expectedAmount,
@@ -232,7 +279,8 @@ export async function confirmRegistrationPayment(args: {
     console.error('[tournaments] confirm:', error.message)
     return { ok: false, reason: 'server_error' }
   }
-  return data ?? { ok: false, reason: 'server_error' }
+  if (!data) return { ok: false, reason: 'server_error' }
+  return { ...data, idempotent: !!(data.idempotent || data.already) }
 }
 
 /** ثبت‌نام‌های یک کاربر */

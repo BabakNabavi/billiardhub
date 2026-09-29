@@ -151,7 +151,9 @@ export async function fetchTournaments(clubId?: string): Promise<Tournament[]> {
  *  تک‌مسابقه‌ای برای مالک بازش می‌گذارد.
  *
  *  ظرفیت را همان مسیر برنمی‌گرداند، پس جداگانه پرسیده می‌شود. */
-export async function fetchTournament(id: string): Promise<Tournament | null> {
+export async function fetchTournament(
+  id: string,
+): Promise<(Tournament & { myStatus?: string | null }) | null> {
   try {
     const r = await fetch(`/api/tournaments/${encodeURIComponent(id)}`, { cache: 'no-store' })
     if (!r.ok) return null
@@ -159,13 +161,19 @@ export async function fetchTournament(id: string): Promise<Tournament | null> {
     const row = j?.tournament
     if (!row) return null
     const seats = await fetchSeats(id)
-    return toTournament({ ...row, seatsLeft: seats?.seatsLeft ?? row.max_players })
+    /* `myStatus` وضعیتِ ثبت‌نامِ همین کاربر است (یا null) — از همان
+       درخواستِ ظرفیت می‌آید، بی‌درخواستِ اضافه. */
+    return {
+      ...toTournament({ ...row, seatsLeft: seats?.seatsLeft ?? row.max_players }),
+      myStatus: seats?.myStatus ?? null,
+    }
   } catch { return null }
 }
 
 /** ظرفیت و وضعیت لحظه‌ای — برای صفحه‌ی ثبت‌نام */
 export async function fetchSeats(id: string): Promise<{
   seatsLeft: number; maxPlayers: number; entryFee: number; status: string
+  myStatus?: string | null
 } | null> {
   try {
     const r = await fetch(`/api/tournaments/${id}/register`, { cache: 'no-store' })

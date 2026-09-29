@@ -6,6 +6,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { rpc, audit } from '@/lib/finance/db';
 import { cronForbidden } from '@/lib/cron-guard';
 import { logHandled } from '@/lib/log-handled';
+import { PAYMENT_WINDOW_MINUTES } from '@/lib/tournaments/server';
 
 /* تور ایمنی انقضا — رزروهای پرداخت‌نشده‌ای که مهلتشان گذشته آزاد می‌شوند.
    انقضا در دو نقطه‌ی دیگر هم اتفاق می‌افتد (هنگام ساخت رزرو و هنگام دیدن
@@ -39,18 +40,22 @@ export async function GET(req: NextRequest) {
 
   /* سفارش‌های نیمه‌کاره‌ی ثبت‌نام مسابقه — کاربری که به درگاه رفت و
      برنگشت نباید ظرفیت را برای همیشه نگه دارد. */
+  /* ⚠️ `rpc()` پرتاب نمی‌کند، `{ data, error }` برمی‌گرداند. نسخه‌ی
+     قبلی در try/catch بود و `error` را نمی‌خواند — یعنی شکستِ انقضا
+     کاملا بی‌صدا بود و catch هرگز اجرا نمی‌شد. پنجره هم ۳۰ دقیقه بود
+     در حالی که بقیه‌ی مسیرها ۱۵ می‌سنجند. */
   let expiredRegs = 0;
-  try {
-    const { data: n } = await rpc<number>('bh_tournament_expire_pending', { p_minutes: 30 });
+  const { data: n, error: regErr } = await rpc<number>('bh_tournament_expire_pending', {
+    p_minutes: PAYMENT_WINDOW_MINUTES,
+  });
+  if (regErr) {
+    console.error('[cron] tournament expire failed:', regErr.message);
+    void logHandled('cron/expire-bookings:tournaments', new Error(regErr.message)).catch(() => {});
+  } else {
     expiredRegs = Number(n) || 0;
     if (expiredRegs > 0) {
       audit({ actorRole: 'system', action: 'TOURNAMENT_REGS_EXPIRED', newValue: { count: expiredRegs } });
     }
-  } catch (e) {
-    /* ⚠️ این شاخه خطا را کاملا می‌بلعد و ۲۰۰ برمی‌گرداند، پس تنها
-       ردش همین ثبت است. */
-    console.error('[cron] tournament expire failed:', e);
-    void logHandled('cron/expire-bookings:tournaments', e).catch(() => {});
   }
 
   return NextResponse.json(

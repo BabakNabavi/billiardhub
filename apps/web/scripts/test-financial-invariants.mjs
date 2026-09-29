@@ -89,6 +89,10 @@ const PROBES = [
   /* مهاجرت ۰۹۴ */
   ['bh_finance_totals',         { p_from: null, p_to: null, p_club: NIL, p_with_held: false }],
   ['bh_backfill_completed_ledger', {}],
+  /* ۱۰۹ — با شناسه‌ی تهی: لغو پیش از هر نوشتنی `not_found` برمی‌گرداند و
+     کلیدساز تابعِ خالص است، پس کاوش بی‌خطر است. */
+  ['bh_tournament_cancel',      { p_tournament: NIL, p_reason: 'probe' }],
+  ['bh_treg_key',               { p_id: NIL, p_cycle: 0 }],
 ]
 for (const [fn, args] of PROBES) {
   const r = await rpc(fn, args)

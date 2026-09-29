@@ -25,6 +25,11 @@ export async function GET(req: NextRequest) {
   if (!bookingId && !regId) {
     return NextResponse.json({ message: 'شناسه‌ی رزرو یا ثبت‌نام لازم است' }, { status: 400 });
   }
+  /* شناسه در الگوی LIKE می‌نشیند؛ `%` یا `_` در آن تطبیق را باز می‌کرد. */
+  const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  if ((bookingId && !UUID.test(bookingId)) || (regId && !UUID.test(regId))) {
+    return NextResponse.json({ message: 'شناسه معتبر نیست' }, { status: 400 });
+  }
 
   const events: Ev[] = [];
   let subject: Record<string, unknown> | null = null;
@@ -56,7 +61,10 @@ export async function GET(req: NextRequest) {
   /* دفتر — قلب ماجرا */
   const ledgerQ = bookingId
     ? sb().from('ledger_entries').select('*').eq('booking_id', bookingId)
-    : sb().from('ledger_entries').select('*').like('source_key', `treg:${regId}:%`);
+    /* بدونِ «:» پس از شناسه: از ۱۰۹ کلیدِ دورهای بعد `treg:<id>#N:…` است
+       و الگوی قبلی فقط دورِ اول را نشان می‌داد. شناسه UUIDِ هم‌طول است،
+       پس پیشوند با ثبت‌نامِ دیگری یکی نمی‌شود. */
+    : sb().from('ledger_entries').select('*').like('source_key', `treg:${regId}%`);
   const { data: led } = await ledgerQ.order('created_at');
 
   const LABEL: Record<string, string> = {

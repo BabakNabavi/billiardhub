@@ -231,21 +231,27 @@ export async function notifyTournamentCreated(clubId: string, title: string): Pr
   void title; void phone; void name
 }
 
-/** مسابقه لغو شد — به همه‌ی ثبت‌نام‌کننده‌های قطعی */
-export async function notifyTournamentCancelled(tournamentId: string): Promise<void> {
+/** مسابقه لغو شد — به همه‌ی ثبت‌نام‌کننده‌های قطعی.
+ *
+ *  ⚠️ `userIds` را `bh_tournament_cancel` پیش از تغییرِ وضعیت‌ها جمع
+ *  می‌کند. خواندنِ «ثبت‌نام‌های CONFIRMED» **بعد از** لغو هیچ ردیفی
+ *  برنمی‌گرداند (همه REFUNDED یا CANCELLED شده‌اند) — یعنی بی‌صدا به
+ *  هیچ‌کس خبر نمی‌رسید. خواندن از جدول فقط پشتیبانِ فراخوانِ قدیمی است. */
+export async function notifyTournamentCancelled(tournamentId: string, userIds?: string[]): Promise<void> {
   const { data: t } = await sb().from('tournaments').select('title').eq('id', tournamentId).maybeSingle()
   const title = (t as { title?: string } | null)?.title ?? 'مسابقه'
 
-  const { data: regs } = await sb().from('tournament_registrations')
-    .select('user_id,payment_status').eq('tournament_id', tournamentId).eq('status', 'CONFIRMED')
+  let ids = userIds
+  if (!ids) {
+    const { data: regs } = await sb().from('tournament_registrations')
+      .select('user_id').eq('tournament_id', tournamentId).eq('status', 'CONFIRMED')
+    ids = ((regs ?? []) as { user_id: string | null }[]).map(r => r.user_id).filter((x): x is string => !!x)
+  }
 
-  for (const r of (regs ?? []) as { user_id: string; payment_status: string }[]) {
-    const phone = await phoneOf(r.user_id)
+  for (const uid of new Set(ids)) {
+    const phone = await phoneOf(uid)
     if (!phone) continue
-    const money = r.payment_status === 'PAID'
-      ? '\nمبلغ پرداختی طی روزهای آینده بازگردانده می‌شود.' : ''
-    void money
-    notifyPattern(phone, 'tournament_cancelled', [await nameOf(r.user_id), title])
+    notifyPattern(phone, 'tournament_cancelled', [await nameOf(uid), title])
   }
 }
 

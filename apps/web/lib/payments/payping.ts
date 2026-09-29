@@ -104,7 +104,7 @@ export class PayPingProvider implements PaymentProvider {
       if (r.ok) {
         return {
           ok: true, paid: true,
-          refId: String(j?.paymentRefId ?? refId),
+          refId: String(j?.paymentRefId ?? Number(refId)),
           amount: typeof j?.amount === 'number' ? j.amount : input.amount,
           raw: j,
         }
@@ -113,7 +113,13 @@ export class PayPingProvider implements PaymentProvider {
       /* ۴۰۹ با کد ۱۱۰ یعنی «قبلا تأیید شده». این خطا نیست — پول
          گرفته شده و کالبک تکراری نباید سفارش را ناموفق کند. */
       if (r.status === 409 && j?.metaData?.code === 110) {
-        return { ok: true, paid: true, refId, amount: input.amount, raw: j }
+        /* ⚠️ کدِ پیگیری به شکلِ متعارف برمی‌گردد، نه آن‌طور که در
+           بازگشت تایپ شده. درخواست `Number(refId)` می‌فرستد، پس
+           «000123» و «123» یک پرداخت‌اند؛ ولی اگر رشته‌ی خام ذخیره شود،
+           حفاظِ «یک کدِ پیگیری فقط یک سفارش» (ایندکسِ یکتا روی
+           provider_ref_id) آن دو را دو کد می‌بیند و یک پرداختِ قبلا
+           تأییدشده می‌تواند سفارشِ دومی را هم تأیید کند. */
+        return { ok: true, paid: true, refId: String(Number(refId)), amount: input.amount, raw: j }
       }
 
       /* ۲۰۲ و ۵۰۲ یعنی «در حال پردازش، دوباره تلاش کنید». نه تأیید
