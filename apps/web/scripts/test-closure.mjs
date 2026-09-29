@@ -19,7 +19,7 @@ const load = async rel => import('data:text/javascript;base64,' + Buffer.from(
   }).outputText).toString('base64'))
 
 const { closureState, isDateClosed, closedHours, closureLabel, todayInTehran,
-        activeOption, isOptionDisabled, optionRank } =
+        activeOption, isOptionDisabled, optionRank, lastBookableDate } =
   await load('lib/booking/closure.ts')
 
 let pass = 0, fail = 0
@@ -62,7 +62,8 @@ head('۲) «بستن رزرو امروز» — همان باگِ اصلی')
   t('پس‌فردا هم باز', isDateClosed('2026-08-07', s, NOW), false)
   t('همه‌ی ۲۴ ساعتِ امروز بسته', closedHours(TODAY, s, NOW).length, 24)
   t('هیچ ساعتی از فردا بسته نیست', closedHours(TOMORROW, s, NOW), [])
-  t('برچسب گویا است', closureLabel(s), 'رزرو امروز بسته است — روزهای آینده باز')
+  /* متن در 871b3afd عمدا دقیق‌تر شد («تا ساعت ۱۲ شب»)؛ این تست جا مانده بود */
+  t('برچسب گویا است', closureLabel(s), 'رزرو امروز تا ساعت ۱۲ شب بسته است — روزهای آینده باز')
 }
 
 head('۳) بستن برای ۳ ساعت — فقط همان ساعت‌ها')
@@ -234,7 +235,9 @@ head('۱۰) رفتارِ صفحه‌ها')
   t('روزهای بسته در تقویم غیرفعال‌اند', /isClosedDay=\{d => isDateClosed/.test(bp))
   t('ساعت‌های بسته قرمز می‌شوند', /const isShut  = blockedHours\.includes\(slot\.hour\)/.test(bp))
   t('برچسبِ «بسته» روی ساعت', /بسته<\/span>/.test(bp))
-  t('نوارِ توضیح دارد', /closureLabel\(closure\)/.test(bp))
+  /* نوار در be23ed23 عمدا کوتاه شد و دیگر `closureLabel` را صدا نمی‌زند؛
+     خودِ نوار هنوز هست. متنِ **رندرشونده** سنجیده می‌شود نه کامنت. */
+  t('نوارِ توضیح دارد', /رزروهای این باشگاه برای امروز بسته است\s*<\/span>/.test(bp))
 
   const dash = read('app/dashboard/club/page.tsx')
   /* خودِ کامپوننت به fields.tsx رفت؛ چیزی که این‌جا اهمیت دارد این
@@ -276,6 +279,25 @@ head('۱۰) رفتارِ صفحه‌ها')
   const sql = read('../../supabase/migrations/036_reservation_closure.sql')
   t('ستونِ میز', /ADD COLUMN IF NOT EXISTS "reservationClosed"/.test(sql))
   t('ستونِ باشگاه', /ADD COLUMN IF NOT EXISTS "reserveClosedUntil"/.test(sql))
+}
+
+head('۱۱) افقِ رزرو — از «امروزِ تهران»، نه تاریخِ UTC')
+{
+  /* ⚠️ باگی که این بخش نگهبانش است: `now + 14 روز` با `toISOString()`
+     بریده می‌شد، یعنی تاریخِ UTC. از ۰۰:۰۰ تا ۰۳:۳۰ تهران، UTC هنوز
+     دیروز است و آخرین روز یکی کم می‌آمد؛ تقویم روزِ چهاردهم را باز
+     نشان می‌داد و سرور ردش می‌کرد. */
+  t('۰۰:۱۰ تهران ⇒ امروز + ۱۴', lastBookableDate(new Date('2026-09-29T00:10:00+03:30')), '2026-10-13')
+  t('۰۳:۲۹ تهران ⇒ امروز + ۱۴', lastBookableDate(new Date('2026-09-29T03:29:00+03:30')), '2026-10-13')
+  t('۰۳:۳۱ تهران ⇒ امروز + ۱۴', lastBookableDate(new Date('2026-09-29T03:31:00+03:30')), '2026-10-13')
+  t('۲۳:۵۹ تهران ⇒ امروز + ۱۴', lastBookableDate(new Date('2026-09-29T23:59:00+03:30')), '2026-10-13')
+  t('عبور از ماه', lastBookableDate(new Date('2026-09-20T12:00:00+03:30')), '2026-10-04')
+
+  /* تقویمِ صفحه‌ی رزرو باید از همین تابع بخواند، نه از ساعتِ دستگاه */
+  const page = read('app/booking/[clubId]/page.tsx')
+  t('تقویم از lastBookableDate می‌خواند', /lastBookableDate\(\)\.split/.test(page))
+  t('امروزِ تقویم از تهران است', /todayInTehran\(\)\.split/.test(page))
+  t('تقویم دیگر از ساعتِ دستگاه نمی‌سازد', !/today\.getFullYear\(\)/.test(page))
 }
 
 console.log(`\n${'─'.repeat(52)}\n  نتیجه: ${pass} موفق، ${fail} ناموفق\n`)

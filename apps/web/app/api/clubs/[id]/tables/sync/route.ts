@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseServer } from '@/lib/supabase-server';
 import { sessionFromRequest } from '@/lib/auth/session';
 import { BUCKET } from '@/lib/social-server';
+import { sanitizeDiscountRules } from '@/lib/finance/pricing';
 
 /* ── عکس میز از دیتابیس به Storage منتقل شد ──
 
@@ -116,7 +117,10 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     model: t.model ? String(t.model).slice(0, 80) : null,
     pricePerHour: Math.max(0, Math.min(50_000_000, Math.round(Number(t.pricePerHour) || 0))),
     morningDiscount: Math.max(0, Math.min(100, Math.round(Number(t.morningDiscount) || 0))),
-    discountRules: Array.isArray(t.discountRules) && t.discountRules.length > 0 ? t.discountRules : null,
+    /* ⚠️ تنها ورودیِ مالیِ این مسیر که پاک‌سازی نمی‌شد. بقیه‌ی اعداد
+       (قیمت، تخفیفِ صبحگاهی، درصدِ بازیکن) همین‌جا بریده می‌شوند ولی
+       قواعدِ بازه‌ای خام ذخیره می‌شدند و در محاسبه‌ی مبلغ می‌نشستند. */
+    discountRules: sanitizeDiscountRules(t.discountRules),
     /* نشانی فایل، نه خود فایل — پیش از حلقه در `photoUrls` حل شده */
     photoDataUrl: photoUrls[i] ?? null,
     /* هزینه‌ی بازیکن اضافه در سطح میز. NULL معنادار است: یعنی «تنظیم

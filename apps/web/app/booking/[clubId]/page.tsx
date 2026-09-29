@@ -8,10 +8,19 @@ import { useAuthStore } from '../../../store/auth.store';
 import AuthGuard from '../../../components/AuthGuard';
 import CancellationPolicy from '../../../components/booking/CancellationPolicy';
 import AlertDialog from '../../../components/ui/AlertDialog';
-import { BOOKING_HORIZON_DAYS } from '../../../lib/booking/closure';
-import { surchargeOf, extraPlayers, playerMultiplier } from '../../../lib/finance/pricing';
+import {
+  BOOKING_HORIZON_DAYS, todayInTehran, hourInTehran, lastBookableDate,
+  closureState, isDateClosed, closedHours, closureLabel, type ClosureState,
+} from '../../../lib/booking/closure';
+/* ⚠️ `slotPrice` و `slotDiscountPct` هم از همین‌جا می‌آیند، نه کپیِ
+   محلی. پیش‌تر این صفحه نسخه‌ی خودش را داشت در حالی که از همین ماژول
+   `playerMultiplier` را می‌گرفت — یعنی دو پیاده‌سازی از یک قاعده، و
+   اولین واگرایی یعنی کاربر یک مبلغ می‌بیند و مبلغِ دیگری در درگاه
+   می‌پردازد. (سرور `Math.round(pricePerHour)` می‌گرفت و کلاینت نه.) */
+import {
+  surchargeOf, extraPlayers, playerMultiplier, slotPrice, slotDiscountPct,
+} from '../../../lib/finance/pricing';
 import { sortTables, tableTypeRank } from '../../../lib/tables/order';
-import { closureState, isDateClosed, closedHours, closureLabel, type ClosureState } from '../../../lib/booking/closure';
 import { markPendingHold, peekPendingHold, clearPendingHold } from '../../../lib/bookings/pending-hold';
 import {
   ChevronRight, ChevronLeft, Check, Clock,
@@ -101,11 +110,17 @@ const TYPE_COLOR: Record<string, string> = {
   highball: '#a78bfa', vip_snooker: '#f59e0b', vip_pocket: '#f59e0b',
 };
 
+/* ⚠️ ساعتِ **تهران**، نه ساعتِ دستگاه. نسخه‌ی قبلی `new Date().getHours()`
+   و تاریخِ محلیِ مرورگر را می‌خواند، پس هر کاربری که ساعتِ گوشی‌اش روی
+   منطقه‌ی دیگری بود فهرستِ ساعت‌های اشتباه می‌دید: با ساعتِ عقب،
+   ساعت‌های گذشته باز می‌ماندند و سرور در پایان رد می‌کرد؛ با ساعتِ
+   جلو، ساعت‌های آزاد خاکستری می‌شدند. «امروز» و «آخرین روز»ِ تقویمِ
+   همین صفحه هم از همین هلپرها می‌آیند — اگر تقویم با ساعتِ دستگاه
+   بسازد و این‌جا با ساعتِ تهران، دیروزِ تهران «امروز» دیده می‌شد و
+   هیچ ساعتی‌اش خاکستری نمی‌شد. */
 function applyPastHours(slots: Slot[], isoDate: string): Slot[] {
-  const now = new Date();
-  const todayISO = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
-  if (isoDate !== todayISO) return slots;
-  const ch = now.getHours();
+  if (isoDate !== todayInTehran()) return slots;
+  const ch = hourInTehran();
   return slots.map(s => ({ ...s, isBooked: s.isBooked || s.hour <= ch }));
 }
 /* ساعت‌های کاری پیش‌فرض وقتی سرور فهرست را برنگرداند — همه آزاد فرض
@@ -125,24 +140,6 @@ function buildRange(slots: Slot[], start: number, end: number): { range: number[
   return { range, blocked:false };
 }
 
-function getSlotDiscountPct(hour: number, table: Table): number {
-  const rules = table.discountRules;
-  if (rules && rules.length > 0) {
-    for (const rule of rules) {
-      const sh = parseInt(rule.startTime.split(':')[0] ?? '0', 10);
-      const eh = parseInt(rule.endTime.split(':')[0] ?? '24', 10);
-      if (hour >= sh && hour < eh && rule.percent > 0) return rule.percent;
-    }
-    return 0;
-  }
-  if (hour < 12 && (table.morningDiscount ?? 0) > 0) return table.morningDiscount ?? 0;
-  return 0;
-}
-
-function slotPrice(hour: number, table: Table): number {
-  const disc = getSlotDiscountPct(hour, table);
-  return disc > 0 ? Math.round(table.pricePerHour * (1 - disc / 100)) : table.pricePerHour;
-}
 
 /* ── Jalali calendar with 4-week limit ── */
 function JalaliCalendar({ jYear, jMonth, selectedDay, todayJY, todayJM, todayJD, maxJY, maxJM, maxJD, onSelect, onPrev, onNext, isClosedDay }: {
@@ -242,14 +239,17 @@ function BookingContent() {
   /* #21: player count */
   const [playerCount, setPlayerCount] = useState(1);
 
-  const today = new Date();
-  const [tJY,tJM,tJD] = toJalali(today.getFullYear(), today.getMonth()+1, today.getDate());
+  /* «امروز» به وقتِ تهران، نه تاریخِ دستگاه — همانی که `applyPastHours`
+     و سرور می‌سنجند. */
+  const [tGY,tGM,tGD] = todayInTehran().split('-').map(Number) as [number, number, number];
+  const [tJY,tJM,tJD] = toJalali(tGY, tGM, tGD);
 
-  /* تقویم دقیقا تا همان روزی باز است که سرور می‌پذیرد. پیش‌تر ۲۸ روز
-     نشان می‌داد ولی سرور بیش از ۱۴ را رد می‌کرد — یعنی کاربر روزی را
-     انتخاب می‌کرد که رزروش همان‌جا شکست می‌خورد. */
-  const maxDateG = new Date(today); maxDateG.setDate(today.getDate()+BOOKING_HORIZON_DAYS);
-  const [mJY,mJM,mJD] = toJalali(maxDateG.getFullYear(), maxDateG.getMonth()+1, maxDateG.getDate());
+  /* تقویم دقیقا تا همان روزی باز است که سرور می‌پذیرد — و از **همان
+     تابع** می‌خواند. پیش‌تر ۲۸ روز نشان می‌داد ولی سرور بیش از ۱۴ را رد
+     می‌کرد؛ بعد هر دو ۱۴ شدند ولی هرکدام با ساعتِ خودش، و بینِ ۰۰:۰۰ تا
+     ۰۳:۳۰ یک روز فاصله می‌افتاد. */
+  const [mGY,mGM,mGD] = lastBookableDate().split('-').map(Number) as [number, number, number];
+  const [mJY,mJM,mJD] = toJalali(mGY, mGM, mGD);
 
   const [jYear,  setJYear]  = useState(tJY);
   const [jMonth, setJMonth] = useState(tJM);
@@ -388,7 +388,11 @@ function BookingContent() {
     const startH    = sorted[0]!;
     const endH      = sorted[sorted.length-1]!+1;
     const startTime = new Date(`${isoDate}T${String(startH).padStart(2,'0')}:00:00Z`);
-    const endTime   = new Date(`${isoDate}T${String(endH).padStart(2,'0')}:00:00Z`);
+    /* پایان از **مدت** ساخته می‌شود، نه از رشته‌ی `T24:00:00Z`. برای
+       ساعتِ ۲۳ آن رشته طبقِ استاندارد معتبر است و V8 می‌پذیردش، ولی
+       اطمینانی نیست که موتورِ سافاری هم بپذیرد — و Invalid Date این‌جا
+       یعنی `toISOString()` پیش از ارسال می‌شکند. */
+    const endTime   = new Date(startTime.getTime() + (endH - startH) * 3_600_000);
     setBooking(true); setError('');
     try {
       /* مبلغ روی سرور بازمحاسبه می‌شود؛ pricePerHour فقط پشتیبان میزهای محلی است */
@@ -755,7 +759,7 @@ function BookingContent() {
                     const isStart = rangeStart===slot.hour;
                     const off     = slot.isBooked || isShut;
                     const cls     = off?'slot-btn slot-busy':isStart?'slot-btn slot-start':isSel?'slot-btn slot-range':'slot-btn slot-free';
-                    const discPct = getSlotDiscountPct(slot.hour, selectedTable);
+                    const discPct = slotDiscountPct(slot.hour, selectedTable);
                     const hasDisc = discPct > 0 && !off;
                     return (
                       <button key={slot.hour} className={cls} disabled={off}
@@ -784,7 +788,7 @@ function BookingContent() {
                     <Clock size={14}/> ساعت {toFa(startHour)}:۰۰ تا {toFa(endHour)}:۰۰
                   </div>
                   {(()=>{
-                    const hasAnyDisc = selectedTable && selectedSlots.some(h=>getSlotDiscountPct(h,selectedTable)>0);
+                    const hasAnyDisc = selectedTable && selectedSlots.some(h=>slotDiscountPct(h,selectedTable)>0);
                     return (
                       <div style={{display:'flex',gap:'8px',flexWrap:'wrap'}}>
                         <span style={{fontSize: '14px',color:'rgba(0,0,0,0.45)',background:'rgba(0,0,0,0.05)',padding:'4px 12px',borderRadius:'20px',fontWeight:600}}>{toFa(totalHours)} ساعت</span>

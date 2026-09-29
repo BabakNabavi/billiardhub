@@ -28,8 +28,14 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ ok: false, message: error.message }, { status: 500 });
   }
 
-  const freed = Number(data) || 0;
-  if (freed > 0) audit({ actorRole: 'system', action: 'BOOKINGS_EXPIRED', newValue: { freedSlots: freed } });
+  /* ⚠️ عدد، تعدادِ **رزروِ منقضی‌شده** است نه اسلات. تا مهاجرتِ ۱۰۷،
+     تابعِ دیتابیس ROW_COUNTِ حذفِ اسلات‌ها را برمی‌گرداند، یعنی یک رزروِ
+     سه‌ساعته عدد ۳ می‌داد و نامِ freedSlots درست بود. حالا شمارش از
+     خودِ رزروها می‌آید، پس نام هم باید عوض شود — وگرنه ژورنال عددی
+     با برچسبِ غلط نگه می‌دارد و هرکس بعدا رویش حساب کند اشتباه
+     می‌کند. هیچ مصرف‌کننده‌ی دیگری این فیلد را نمی‌خواند (grep شد). */
+  const expiredBookings = Number(data) || 0;
+  if (expiredBookings > 0) audit({ actorRole: 'system', action: 'BOOKINGS_EXPIRED', newValue: { expiredBookings } });
 
   /* سفارش‌های نیمه‌کاره‌ی ثبت‌نام مسابقه — کاربری که به درگاه رفت و
      برنگشت نباید ظرفیت را برای همیشه نگه دارد. */
@@ -48,7 +54,7 @@ export async function GET(req: NextRequest) {
   }
 
   return NextResponse.json(
-    { ok: true, freedSlots: freed, expiredRegistrations: expiredRegs },
+    { ok: true, expiredBookings, expiredRegistrations: expiredRegs },
     { headers: { 'Cache-Control': 'no-store' } },
   );
 }

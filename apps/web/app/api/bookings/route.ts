@@ -1,9 +1,25 @@
 export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { sb, rpc, actorFromRequest, audit, clientIp } from '@/lib/finance/db';
-import { priceBooking, hoursBetween, bookingReference, surchargeOf, type PricedTable } from '@/lib/finance/pricing';
+import { priceBooking, hoursOfRange, bookingReference, surchargeOf, sanitizeDiscountRules, type PricedTable } from '@/lib/finance/pricing';
 import { bookingStartsAt } from '@/lib/finance/cancellation';
-import { closureState, isDateClosed, closedHours, BOOKING_HORIZON_DAYS } from '@/lib/booking/closure';
+import { closureState, isDateClosed, closedHours, BOOKING_HORIZON_DAYS, lastBookableDate } from '@/lib/booking/closure';
+import { z } from 'zod';
+
+/* ⚠️ Zod روی مرز — قاعده‌ی پروژه. تا امروز این مسیر **هیچ** اعتبارسنجیِ
+   ساختاری نداشت و فقط `!clubId` را چک می‌کرد، در حالی که مسیرِ پول
+   است: `tableId` مستقیم `String()` می‌شد و به تابعِ دیتابیس
+   می‌رفت، و `playerCount` بی‌سقف در ضریبِ مبلغ می‌نشست. */
+const BookingInput = z.object({
+  clubId: z.string().min(1).max(64),
+  tableId: z.union([z.string().min(1).max(64), z.number()]),
+  tableType: z.string().max(40).nullish(),
+  startTime: z.string().min(1).max(40),
+  endTime: z.string().min(1).max(40),
+  /* سقف همان ۸ی است که رابط می‌دهد؛ مقدارِ بیرونِ بازه بریده می‌شود
+     نه رد، تا کلاینتِ قدیمی با مقدارِ غایب نشکند. */
+  playerCount: z.coerce.number().int().catch(1).optional(),
+});
 
 /* رزرو پرداخت‌نشده پس از این مدت آزاد می‌شود.
    ۱۵ دقیقه: کاربر باید فرصتِ رفتن به درگاه، وارد کردن رمز دوم و
@@ -19,19 +35,33 @@ export async function POST(req: NextRequest) {
   const actor = actorFromRequest(req);
   if (!actor) return NextResponse.json({ message: 'احراز هویت الزامی است' }, { status: 401 });
 
-  const body = await req.json().catch(() => ({}));
-  const { clubId, tableId, tableType, startTime, endTime, playerCount } = body ?? {};
-  if (!clubId || !tableId || !startTime || !endTime) {
-    return NextResponse.json({ message: 'clubId، tableId، startTime و endTime الزامی هستند' }, { status: 400 });
+  const parsed = BookingInput.safeParse(await req.json().catch(() => ({})));
+  if (!parsed.success) {
+    return NextResponse.json({ message: 'درخواست رزرو معتبر نیست' }, { status: 400 });
   }
+  const { clubId, tableId, tableType, startTime, endTime, playerCount } = parsed.data;
 
   const start = new Date(startTime), end = new Date(endTime);
   if (isNaN(+start) || isNaN(+end) || end <= start) {
     return NextResponse.json({ message: 'بازه‌ی زمانی معتبر نیست' }, { status: 400 });
   }
   const bookingDate = start.toISOString().slice(0, 10);
-  const hours = hoursBetween(start.getUTCHours(), end.getUTCHours());
-  if (hours.length === 0) return NextResponse.json({ message: 'بازه‌ی زمانی معتبر نیست' }, { status: 400 });
+  /* ⚠️ از **مدت** حساب می‌شود نه از ساعتِ پایان. نسخه‌ی قبلی
+     `hoursBetween(start.getUTCHours(), end.getUTCHours())` بود و برای
+     آخرین اسلاتِ روز می‌شکست: کلاینت برای ساعتِ ۲۳ پایانِ `T24:00:00Z`
+     می‌سازد که به روزِ بعد ۰۰:۰۰ می‌رود، پس `endHour` صفر می‌شد و
+     `for (h = 23; h < 0; h++)` هرگز اجرا نمی‌شد — آرایه‌ی خالی و ۴۰۰.
+     یعنی ساعتِ ۲۳ که `/api/bookings/slots` عمدا پیشنهادش می‌دهد،
+     **هرگز قابلِ رزرو نبود**. */
+  const range = hoursOfRange(start, end);
+  if (!range.ok) {
+    return NextResponse.json({
+      message: range.reason === 'overnight'
+        ? 'رزرو نمی‌تواند از نیمه‌شب عبور کند'
+        : 'بازه‌ی زمانی معتبر نیست',
+    }, { status: 400 });
+  }
+  const hours = range.hours;
   /* ساعت‌ها به وقت ایران تفسیر می‌شوند — همان مبنایی که سیاست لغو با آن کار می‌کند */
   if (bookingStartsAt(bookingDate, hours.join(',')).getTime() < Date.now() - 60_000) {
     return NextResponse.json({ message: 'امکان رزرو در گذشته وجود ندارد' }, { status: 400 });
@@ -44,7 +74,16 @@ export async function POST(req: NextRequest) {
 
      دو هفته با تقویم پنل باشگاه‌دار هم یکی است، پس چیزی که آن‌جا
      دیده می‌شود دقیقا همان چیزی است که قابل رزرو است. */
-  if (bookingStartsAt(bookingDate, hours.join(',')).getTime() > Date.now() + BOOKING_HORIZON_DAYS * 86_400_000) {
+  /* ⚠️ **روز** مقایسه می‌شود نه لحظه. نسخه‌ی قبلی
+     `bookingStartsAt(...) > now + ۱۴ روز` بود، ولی تقویمِ کلاینت کلِ
+     روزِ چهاردهم را باز می‌گذارد. یعنی ساعتِ ۱۲ ظهر، رزروِ ساعتِ ۲۰ی
+     روزِ آخر `now + 14d + 8h` می‌شد و رد می‌گشت — بعد از اینکه کاربر
+     میز و روز و ساعت را انتخاب کرده و دکمه را زده بود. همان کلاسِ
+     باگِ ساعتِ ۲۳: مرزِ روز با مرزِ لحظه سنجیده شده بود.
+     `lastBookableDate()` از «امروزِ تهران» می‌شمارد؛ تقویمِ صفحه‌ی
+     رزرو همین تابع را می‌خواند و پنلِ باشگاه‌دار (`iranDate(14)` در
+     مسیرِ schedule) همان تاریخ را می‌دهد. */
+  if (bookingDate > lastBookableDate()) {
     return NextResponse.json({
       message: `رزرو حداکثر تا ${BOOKING_HORIZON_DAYS} روز آینده ممکن است`,
     }, { status: 400 });
@@ -124,7 +163,11 @@ export async function POST(req: NextRequest) {
   const priced: PricedTable = {
     id: t.id, pricePerHour,
     morningDiscount: t.morningDiscount ?? null,
-    discountRules: Array.isArray(t.discountRules) ? t.discountRules as PricedTable['discountRules'] : null,
+    /* ⚠️ هنگامِ **خواندن** هم پاک‌سازی می‌شود، نه فقط هنگامِ نوشتن:
+       ردیف‌هایی که پیش از این نسخه ذخیره شده‌اند خام‌اند، و یک عنصرِ
+       null در آرایه `slotDiscountPct` را با TypeError می‌شکست. GETِ
+       میزها هم همین را برمی‌گرداند، پس قیمتِ صفحه و سرور یکی می‌ماند. */
+    discountRules: sanitizeDiscountRules(t.discountRules),
   };
 
   /* قواعد تخفیف و تنظیم بازیکن اضافه‌ی باشگاه */
@@ -136,7 +179,13 @@ export async function POST(req: NextRequest) {
 
   /* تنظیم میز مقدم است؛ اگر میز نداشت از باشگاه ارث می‌برد */
   const breakdown = priceBooking(
-    hours, priced, Math.max(1, Number(playerCount) || 1),
+    /* ⚠️ سقف لازم است و باید **همان ۸ی** باشد که رابط می‌دهد
+       (دکمه‌ی + در صفحه‌ی رزرو روی ۸ قفل است). بدونِ سقف، درخواستِ
+       دست‌سازی با تعدادِ بازیکنِ یک‌میلیون ضریبی حدودِ ۱۵۰٬۰۰۰ می‌ساخت
+       و مبلغی نجومی در bookings و ledger_entries و کمیسیون می‌نشست.
+       سرور مبلغ را خودش حساب می‌کند، پس این تنها ورودیِ مالیِ
+       بی‌حدِ این مسیر بود. */
+    hours, priced, Math.min(8, Math.max(1, Number(playerCount) || 1)),
     surchargeOf(t as unknown as Record<string, unknown>, club),
   );
 

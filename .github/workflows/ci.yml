@@ -81,3 +81,5 @@ jobs:
           npm run test:wa-link
           npm run test:guards
           npm run test:logs
+          npm run test:pricing
+          npm run test:closure

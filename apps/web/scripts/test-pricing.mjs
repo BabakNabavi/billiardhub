@@ -18,7 +18,7 @@ const js = ts.transpileModule(src, {
 }).outputText
 const {
   extraPlayers, playerMultiplier, priceBooking, surchargeOf,
-  slotPrice, slotDiscountPct, hoursBetween, DEFAULT_SURCHARGE,
+  slotPrice, slotDiscountPct, hoursBetween, hoursOfRange, sanitizeDiscountRules, DEFAULT_SURCHARGE,
 } = await import('data:text/javascript;base64,' + Buffer.from(js).toString('base64'))
 
 let pass = 0, fail = 0
@@ -104,6 +104,127 @@ head('خواندن تنظیمات از میز و باشگاه')
   t('درصد بیرون از بازه ⇒ پیش‌فرض',
     surchargeOf({ playerSurchargePercent: 500 }).percent, DEFAULT_SURCHARGE.percent)
   t('from بیرون از بازه ⇒ پیش‌فرض', surchargeOf({ playerSurchargeFrom: 99 }).from, DEFAULT_SURCHARGE.from)
+}
+
+/* ── ساعت‌های یک بازه ──────────────────────────────────────────────
+   باگی که این بخش نگهبانش است: `/api/bookings/slots` ساعت‌های ۸ تا
+   ۲۳ را پیشنهاد می‌دهد، ولی **هیچ رزروی که ساعتِ ۲۳ را شامل می‌شد
+   ثبت نمی‌شد** و کاربر «بازه‌ی زمانی معتبر نیست» می‌گرفت.
+
+   ریشه: کلاینت پایان را `آخرین + ۱` می‌سازد، پس برای ۲۳ رشته‌ی
+   `T24:00:00Z` درست می‌شد که به **روزِ بعد ۰۰:۰۰** می‌رود. سرور
+   `hoursBetween(23, 0)` را صدا می‌زد و `for (h = 23; h < 0; h++)`
+   هرگز اجرا نمی‌شد.
+
+   این‌جا عینا همان payloadی ساخته می‌شود که صفحه‌ی رزرو می‌فرستد. */
+{
+  head('ساعت‌های بازه — payloadِ واقعیِ کلاینت')
+
+  /* آینه‌ی apps/web/app/booking/[clubId]/page.tsx */
+  const payload = (isoDate, slots) => {
+    const sorted = [...slots].sort((a, b) => a - b)
+    const startH = sorted[0]
+    const endH = sorted[sorted.length - 1] + 1
+    return [
+      new Date(`${isoDate}T${String(startH).padStart(2, '0')}:00:00Z`),
+      new Date(`${isoDate}T${String(endH).padStart(2, '0')}:00:00Z`),
+    ]
+  }
+  const hoursFor = slots => hoursOfRange(...payload('2026-09-28', slots))
+
+  t('یک ساعتِ صبح', hoursFor([8]), { ok: true, hours: [8] })
+  t('سه ساعتِ پیوسته', hoursFor([18, 19, 20]), { ok: true, hours: [18, 19, 20] })
+  t('ساعت ۲۲', hoursFor([22]), { ok: true, hours: [22] })
+  t('⚠️ ساعت ۲۳ — آخرین اسلاتِ روز', hoursFor([23]), { ok: true, hours: [23] })
+  t('⚠️ ۲۲ و ۲۳', hoursFor([22, 23]), { ok: true, hours: [22, 23] })
+  t('⚠️ چهار ساعتِ پایانی', hoursFor([20, 21, 22, 23]), { ok: true, hours: [20, 21, 22, 23] })
+
+  head('ساعت‌های بازه — ورودیِ نامعتبر')
+  const D = h => new Date(`2026-09-28T${String(h).padStart(2, '0')}:00:00Z`)
+  t('پایان = شروع', hoursOfRange(D(18), D(18)), { ok: false, reason: 'invalid' })
+  t('پایان پیش از شروع', hoursOfRange(D(20), D(18)), { ok: false, reason: 'invalid' })
+  t('عبور از نیمه‌شب', hoursOfRange(D(23), new Date('2026-09-29T02:00:00Z')),
+    { ok: false, reason: 'overnight' })
+  t('تاریخِ نامعتبر', hoursOfRange(new Date('x'), D(18)), { ok: false, reason: 'invalid' })
+
+  head('هیچ ساعتی بیرونِ قیدِ دیتابیس (0..23) برنگردد')
+  {
+    let bad = 0
+    for (let first = 8; first <= 23; first++) {
+      for (let last = first; last <= 23; last++) {
+        const r = hoursFor(Array.from({ length: last - first + 1 }, (_, i) => first + i))
+        if (!r.ok) { bad++; console.log(`      ✗ ${first}..${last} ⟵ ${r.reason}`); continue }
+        if (r.hours.some(h => h < 0 || h > 23)) { bad++; console.log(`      ✗ ${first}..${last} ساعتِ بیرون از بازه`) }
+      }
+    }
+    t('همه‌ی بازه‌های ۸ تا ۲۳ ثبت‌شدنی‌اند', bad, 0)
+  }
+}
+
+/* ── قاعده‌ی تخفیف تا نیمه‌شب ──────────────────────────────────────
+   «۲۰:۰۰ تا ۰۰:۰۰» هیچ ساعتی را پوشش نمی‌داد (`eh = 0`)، و چون ساعتِ ۲۳
+   حالا رزروشدنی است، این تنها راهِ تخفیف دادن به آن است. */
+{
+  head('قاعده‌ی تخفیف — پایانِ نیمه‌شب')
+  const night = { id: 'x', pricePerHour: 100_000, discountRules: [{ startTime: '20:00', endTime: '00:00', percent: 20 }] }
+  t('۲۰ پوشش داده شود', slotDiscountPct(20, night), 20)
+  t('⚠️ ۲۳ پوشش داده شود', slotDiscountPct(23, night), 20)
+  t('۱۹ بیرون بماند', slotDiscountPct(19, night), 0)
+  t('قیمتِ ساعتِ ۲۳', slotPrice(23, night), 80_000)
+
+  /* رفتارِ قاعده‌های سالمِ موجود نباید عوض شود */
+  const day = { id: 'y', pricePerHour: 100_000, discountRules: [{ startTime: '08:00', endTime: '12:00', percent: 30 }] }
+  t('قاعده‌ی روزانه — ۱۱ داخل', slotDiscountPct(11, day), 30)
+  t('قاعده‌ی روزانه — ۱۲ بیرون', slotDiscountPct(12, day), 0)
+  const late = { id: 'z', pricePerHour: 100_000, discountRules: [{ startTime: '20:00', endTime: '23:45', percent: 10 }] }
+  t('۲۳:۴۵ — رفتارِ قبلی حفظ شود (۲۳ بیرون)', slotDiscountPct(23, late), 0)
+}
+
+/* ── بازه‌ی غیرِ تمام‌ساعت ── */
+{
+  head('بازه — فقط ساعتِ کامل')
+  const D = x => new Date(`2026-09-28T${x}:00Z`)
+  t('۱۸:۰۰ تا ۱۸:۳۰ رد شود', hoursOfRange(D('18:00'), D('18:30')), { ok: false, reason: 'invalid' })
+  t('۰۸:۰۰ تا ۱۰:۳۰ رد شود', hoursOfRange(D('08:00'), D('10:30')), { ok: false, reason: 'invalid' })
+  t('۱۸:۰۰ تا ۲۰:۰۰ پذیرفته شود', hoursOfRange(D('18:00'), D('20:00')), { ok: true, hours: [18, 19] })
+  t('شروعِ غیرِ سرِ ساعت رد شود (۱۸:۳۰ تا ۱۹:۳۰)', hoursOfRange(D('18:30'), D('19:30')), { ok: false, reason: 'invalid' })
+}
+
+/* ── پاک‌سازیِ قواعدِ تخفیف ────────────────────────────────────────
+   قواعد پیش‌تر خام در `tables.discountRules` می‌نشستند. `percent: 150`
+   مبلغِ منفی می‌ساخت. */
+{
+  head('پاک‌سازیِ قواعدِ تخفیف')
+  /* هم‌شکلِ ردیفِ واقعی — پنلِ باشگاه `id` و `label` می‌گذارد */
+  const ok = { startTime: '20:00', endTime: '00:00', percent: 20, id: 'd-1785954745279', label: 'شب' }
+  t('قاعده‌ی سالم دست نخورد', sanitizeDiscountRules([ok]), [ok])
+  /* ⚠️ نگهبانِ باگی که بازبینی گرفت: بدونِ `id` حذفِ یک قاعده در پنل
+     همه‌ی قواعدِ میز را پاک می‌کرد. */
+  t('⚠️ id و label بمانند', sanitizeDiscountRules([ok])?.map(r => [r.id, r.label]), [['d-1785954745279', 'شب']])
+  t('قاعده‌ی بی‌id شناسه‌ی پایدار بگیرد',
+    sanitizeDiscountRules([{ startTime: '08:00', endTime: '12:00', percent: 10 }]),
+    [{ startTime: '08:00', endTime: '12:00', percent: 10, id: 'd-0', label: '08:00–12:00' }])
+  t('idِ بلند بریده شود', sanitizeDiscountRules([{ ...ok, id: 'x'.repeat(500) }])?.[0].id.length, 40)
+  t('درصدِ ۱۰۰ انداخته شود (مبلغِ صفر پرداخت‌نشدنی است)', sanitizeDiscountRules([{ ...ok, percent: 100 }]), null)
+  t('⚠️ درصدِ ۱۵۰ انداخته شود (نه بریده)', sanitizeDiscountRules([{ ...ok, percent: 150 }]), null)
+  t('درصدِ منفی انداخته شود', sanitizeDiscountRules([{ ...ok, percent: -5 }]), null)
+  t('درصدِ رشته‌ای عدد شود', sanitizeDiscountRules([{ ...ok, percent: '25' }]), [{ ...ok, percent: 25 }])
+  t('درصدِ صفر نگه داشته شود', sanitizeDiscountRules([{ ...ok, percent: 0 }]), [{ ...ok, percent: 0 }])
+  t('ساعتِ بد انداخته شود', sanitizeDiscountRules([{ ...ok, startTime: '25:00' }]), null)
+  t('ساعتِ غیرِ رشته انداخته شود', sanitizeDiscountRules([{ ...ok, endTime: 20 }]), null)
+  t('ورودیِ غیرِ آرایه', sanitizeDiscountRules('x'), null)
+  t('آرایه‌ی خالی', sanitizeDiscountRules([]), null)
+  t('فیلدِ اضافه حذف شود', sanitizeDiscountRules([{ ...ok, evil: 1 }]), [ok])
+  t('فقط نامعتبرها بیفتند', sanitizeDiscountRules([ok, { ...ok, percent: 999 }, null]), [ok])
+  t('سقفِ ۲۴ قاعده', sanitizeDiscountRules(Array(100).fill(ok)).length, 24)
+
+  /* پس از پاک‌سازی هیچ مبلغی منفی نمی‌شود */
+  let neg = 0
+  for (const p of [-50, 0, 50, 100, 101, 150, 1e9, NaN, '200']) {
+    const rules = sanitizeDiscountRules([{ startTime: '00:00', endTime: '00:00', percent: p }])
+    for (let h = 0; h < 24; h++) if (slotPrice(h, { id: 'n', pricePerHour: 100_000, discountRules: rules }) < 0) neg++
+  }
+  t('هیچ مبلغِ منفی‌ای ساخته نشود', neg, 0)
 }
 
 console.log(`\n${'─'.repeat(50)}\n  نتیجه: ${pass} موفق، ${fail} ناموفق\n`)

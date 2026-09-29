@@ -162,9 +162,15 @@ export function isOptionDisabled(opt: ClosureOption | 'today', s: ClosureState, 
    می‌کند که رزروش رد می‌شود. */
 export const BOOKING_HORIZON_DAYS = 14
 
-/** آخرین تاریخ قابل رزرو — `YYYY-MM-DD` */
+/** آخرین تاریخ قابل رزرو — `YYYY-MM-DD`، از «امروزِ تهران» شمرده.
+ *
+ *  ⚠️ پیش‌تر `now + 14 روز` را با `toISOString()` می‌برید، یعنی تاریخِ
+ *  **UTC**. از ۰۰:۰۰ تا ۰۳:۳۰ به وقتِ تهران، تاریخِ UTC هنوز دیروز است
+ *  و نتیجه یک روز کم می‌آمد: تقویم و پنلِ باشگاه روزِ چهاردهم را باز
+ *  نشان می‌دادند و سرور ردش می‌کرد. */
 export function lastBookableDate(from: Date = new Date()): string {
-  const d = new Date(from.getTime() + BOOKING_HORIZON_DAYS * 86_400_000)
+  const d = new Date(`${todayInTehran(from)}T00:00:00Z`)
+  d.setUTCDate(d.getUTCDate() + BOOKING_HORIZON_DAYS)
   return d.toISOString().slice(0, 10)
 }
 
