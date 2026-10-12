@@ -26,14 +26,24 @@ export interface RateRule {
   windowSec: number
 }
 
-/** IP واقعی کاربر پشت پراکسی Vercel */
+/** IP واقعیِ کاربر پشتِ nginx */
 export function ipOf(req: NextRequest): string {
-  const fwd = req.headers.get('x-forwarded-for') || ''
-  /* اولین مقدار = نزدیک‌ترین کلاینت به لبه؛ بقیه را خود Vercel اضافه
-     می‌کند. هدر ارسالی کاربر جایگزین این نمی‌شود چون Vercel آن را
-     بازنویسی می‌کند. */
-  const first = fwd.split(',')[0]?.trim()
-  return first || req.headers.get('x-real-ip') || 'unknown'
+  /* ⚠️ تا مهرِ ۱۴۰۵ اولین عضوِ `x-forwarded-for` برداشته می‌شد، با این فرض
+     که «Vercel آن را بازنویسی می‌کند». سایت حالا پشتِ nginxِ خودمان است و
+     `nginx-perf.sh` با `$proxy_add_x_forwarded_for` نشانیِ واقعی را به
+     *انتهای* هر چه کلاینت فرستاده می‌چسباند — پس عضوِ اول در اختیارِ مهاجم
+     بود و سقف‌های IP‌محورِ ورود و OTP با یک هدرِ تصادفی دور زده می‌شدند.
+
+     حالا **آخرین** عضو: همان که nginx خودش چسبانده (`$remote_addr`) و تنها
+     عضوی است که کلاینت نمی‌تواند بنویسد — چه nginx بچسباند چه بازنویسی کند.
+     nginx روی هر درخواستِ بیرونی XFF می‌گذارد (`lib/cron-guard.ts` به همین
+     تکیه دارد). `x-real-ip` فقط پشتوانه است: بلوکِ nginxِ خودِ اپ در مخزن
+     نیست و اگر آن هدر را نگذارد، مقدارِ ارسالیِ کلاینت عبور می‌کند.
+     ⚠️ اگر روزی CDN جلوی nginx آمد، آخرین عضو نشانیِ CDN می‌شود. */
+  const parts = (req.headers.get('x-forwarded-for') || '').split(',').map(s => s.trim()).filter(Boolean)
+  const last = parts[parts.length - 1]
+  if (last) return last
+  return req.headers.get('x-real-ip')?.trim() || 'unknown'
 }
 
 export interface RateResult {
