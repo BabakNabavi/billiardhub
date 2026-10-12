@@ -103,10 +103,16 @@ function sameSite(req: NextRequest): boolean {
     const o = new URL(origin)
     const host = req.headers.get('host') ?? ''
     if (o.host === host) return true
-    /* دامنه‌های خودمان (شامل پیش‌نمایش‌های ورسل) */
-    return /(^|\.)billiardhub\.net$/.test(o.hostname)
-      || (o.hostname.endsWith('.vercel.app') && o.hostname.includes('billiardhub'))
-      || o.hostname === 'localhost'
+    if (/(^|\.)billiardhub\.net$/.test(o.hostname)) return true
+    /* ⚠️ تا مهرِ ۱۴۰۵ هر `*.vercel.app`ی که «billiardhub» در نامش بود
+       هم خودی حساب می‌شد — یادگارِ پیش‌نمایش‌های ورسل. سایت دیگر روی
+       ورسل نیست و هر کسی می‌تواند پروژه‌ای به نامِ billiardhub-x بسازد،
+       یعنی صفحه‌ی مهاجم از این بررسی رد می‌شد. برای مسیرهای معاف از
+       توکن (ورود، OTP، …) همین بررسی تنها لایه است.
+
+       localhost هم فقط در توسعه: در پروداکشن مبدأیی به این نام مالِ
+       دستگاهِ خودِ بازدیدکننده است، نه ما. */
+    return process.env.NODE_ENV !== 'production' && o.hostname === 'localhost'
   } catch { return false }
 }
 

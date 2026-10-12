@@ -14,6 +14,15 @@ export async function GET(
   req: NextRequest,
   context: { params: Promise<{ id: string }> }
 ) {
+  /* ⚠️ تا مهرِ ۱۴۰۵ این مسیر بی‌احراز و برای هر وضعیتی `select('*')`
+     برمی‌گرداند — شماره و آدرسِ فروشنده‌ی شخصی و یادداشتِ ادمین، حتی برای
+     آگهیِ حذف‌شده یا ردشده — و `views` را دستی یکی بالا می‌برد (دورزدنِ
+     `count_product_view`). هیچ‌جای سایت صدایش نمی‌زد: صفحه‌ی آگهی از
+     `/api/market/ads/[id]` می‌خواند که فیلدهای خصوصی را برای غیرمالک
+     برمی‌دارد. پس حالا فقط ادمین، و بدونِ شمارشِ بازدید. */
+  const guard = await adminGuard(req)
+  if (guard instanceof NextResponse) return guard
+
   try {
     const { id } = await context.params
     if (!UUID.test(String(id ?? ''))) {
@@ -37,14 +46,7 @@ export async function GET(
       return NextResponse.json({ error: 'محصول پیدا نشد' }, { status: 404 })
     }
 
-    const product = data[0]
-
-    await supabase
-      .from('products')
-      .update({ views: (product.views || 0) + 1 })
-      .eq('id', id)
-
-    return NextResponse.json({ product })
+    return NextResponse.json({ product: data[0] })
   } catch (err) {
     console.error('[products/:id] unexpected:', err)
     return NextResponse.json({ error: 'خطای سرور' }, { status: 500 })
