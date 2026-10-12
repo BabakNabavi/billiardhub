@@ -14,6 +14,9 @@ function buildSha() {
   } catch { return 'dev'; }
 }
 
+/* پوشه‌ی بیلد — deploy.sh روی سرور `.next-build` می‌دهد؛ محلی و CI خالی. */
+const DIST_DIR = process.env.NEXT_DIST_DIR;
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   /* ── چرا مقصدِ build قابل تنظیم است ──
@@ -25,7 +28,7 @@ const nextConfig = {
 
      حالا build در پوشه‌ی دیگری انجام می‌شود و فقط در پایان، با یک
      rename، جایش عوض می‌شود. */
-  distDir: process.env.NEXT_DIST_DIR || '.next',
+  distDir: DIST_DIR || '.next',
   /* ── کشِ دیسکیِ build خاموش ──
      از Next 16.3 پیش‌فرض روشن است و ~۲۰۰ مگابایت در `<distDir>/cache`
      می‌نویسد. `deploy.sh` پیش از هر build پوشه‌ی `.next-build` را پاک
@@ -34,6 +37,16 @@ const nextConfig = {
      می‌شود. خاموش‌بودنش همچنین یعنی build محلی همان چیزی را می‌سازد که
      سرور می‌سازد، نه خروجیِ کشِ کهنه را. */
   experimental: { turbopackFileSystemCacheForBuild: false },
+  /* ── تایپ‌چکِ بیلدِ سرور، بدونِ پوشه‌ی بیلدِ زنده ──
+     `tsconfig.json` صریحاً `.next/types/**` را include می‌کند. روی سرور بیلد در
+     `.next-build` ساخته می‌شود در حالی که `.next`ِ نسخه‌ی زنده هنوز سرِ جایش
+     است — و `types/validator.ts`ِ آن صفحه‌هایی را import می‌کند که همین دیپلوی
+     پاکشان کرده. مهرِ ۱۴۰۵ با حذفِ صفحه‌ی برندها دقیقاً همین شد: «Cannot find
+     module …/shop/brands/page.js» و بیلدِ سرور شکست (محلی و CI سبز، چون آن‌جا
+     `.next`ِ کهنه‌ای نیست). بیلدِ deploy.sh به‌جایش `tsconfig.deploy.json` را
+     می‌خواند که تایپ‌های *همین* بیلد (`.next-build/types`) را می‌سنجد — نام
+     همان‌جا هاردکد است، پس فقط برای همین نام. */
+  ...(DIST_DIR === '.next-build' ? { typescript: { tsconfigPath: 'tsconfig.deploy.json' } } : {}),
   transpilePackages: ["@repo/ui"],
   serverExternalPackages: ["bcrypt"],
   // نسخه‌ی build را به کلاینت هم می‌دهیم تا PWA بتواند کد کهنه را تشخیص و reload کند
