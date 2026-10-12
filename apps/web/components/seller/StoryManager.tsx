@@ -239,7 +239,7 @@ export default function StoryManager({ ownerId }: { ownerId: string }) {
                     : <img loading="lazy" decoding="async" src={story.mediaUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
                   {/* Amber ring (active) */}
                   <div className="absolute inset-0 rounded-xl" style={{ border: '2px solid #f59e0b' }} />
-                  <button
+                  <button aria-label="حذف استوری"
                     type="button"
                     onClick={() => deleteStory(story.id)}
                     className="absolute top-1 right-1 w-5 h-5 rounded-full bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">

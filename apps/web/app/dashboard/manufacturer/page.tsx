@@ -539,7 +539,7 @@ export default function ManufacturerDashboard() {
                     <span className="flex-1 text-[13px] font-bold">{c.title}</span>
                     <span className="text-[11.5px] text-[#6F6A5C]">{c.issuer}</span>
                     <span className="text-[11.5px] text-[#6F6A5C]">{c.year}</span>
-                    <button type="button" onClick={() => set('certificates', form.certificates.filter((_, x) => x !== i))}
+                    <button aria-label="حذف گواهی" type="button" onClick={() => set('certificates', form.certificates.filter((_, x) => x !== i))}
                       className="rounded-lg p-1.5 text-[#B23B2E] transition hover:bg-[rgba(178,59,46,0.08)]"><Trash2 size={14} /></button>
                   </div>
                 ))}
@@ -599,7 +599,7 @@ export default function ManufacturerDashboard() {
                 {form.licenseFile && (
                   <div className="mt-2 flex items-center gap-2 text-[12px] text-[#5B564B]">
                     <span className="truncate" dir="ltr">{form.licenseFile.name}</span>
-                    <button type="button" onClick={() => set('licenseFile', null)}
+                    <button aria-label="حذف فایل مجوز" type="button" onClick={() => set('licenseFile', null)}
                       className="rounded-lg p-1 text-[#B23B2E] transition hover:bg-[rgba(178,59,46,0.08)]"><Trash2 size={13} /></button>
                   </div>
                 )}

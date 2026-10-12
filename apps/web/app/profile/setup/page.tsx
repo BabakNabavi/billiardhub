@@ -107,7 +107,7 @@ function ProfileSetupInner() {
       <div style={{ position: 'relative', zIndex: 1, maxWidth: 520, margin: '0 auto', padding: '24px 16px 100px' }}>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
-          <button onClick={() => router.push('/profile/role')} style={{ background: 'rgba(0,0,0,0.04)', border: '1px solid rgba(0,0,0,0.06)', borderRadius: 10, width: 34, height: 34, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: 'rgba(0,0,0,0.50)' }}>
+          <button aria-label="بازگشت" onClick={() => router.push('/profile/role')} style={{ background: 'rgba(0,0,0,0.04)', border: '1px solid rgba(0,0,0,0.06)', borderRadius: 10, width: 34, height: 34, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: 'rgba(0,0,0,0.50)' }}>
             <Ti name="arrow-right" size={19} />
           </button>
           <div>

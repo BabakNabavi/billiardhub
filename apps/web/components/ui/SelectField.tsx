@@ -115,7 +115,7 @@ export default function SelectField({
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '12px 18px 10px', borderBottom: `1px solid ${LINE}` }}>
                 <span style={{ fontSize: 15, fontWeight: 900, color: INK, flex: 1 }}>{label ?? placeholder}</span>
-                <button type="button" onClick={() => setOpen(false)}
+                <button aria-label="بستن" type="button" onClick={() => setOpen(false)}
                   style={{ background: '#F4F3F1', border: `1px solid ${LINE}`, borderRadius: 10, padding: 7, cursor: 'pointer', color: SEC, display: 'flex' }}><X size={15} /></button>
               </div>
               {list}

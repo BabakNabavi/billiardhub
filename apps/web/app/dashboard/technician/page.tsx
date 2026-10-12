@@ -465,7 +465,7 @@ export default function TechnicianDashboard() {
                       <div className="truncate text-[13px] font-bold">{p.title}</div>
                       <div className="text-[11px] text-[#6F6A5C]">{p.service} · {p.city}{p.club ? ` — ${p.club}` : ''}</div>
                     </div>
-                    <button type="button" onClick={() => set('projects', form.projects.filter(x => x.id !== p.id))}
+                    <button aria-label="حذف نمونه‌کار" type="button" onClick={() => set('projects', form.projects.filter(x => x.id !== p.id))}
                       className="rounded-lg p-2 text-[#B23B2E] transition hover:bg-[rgba(178,59,46,0.08)]"><Trash2 size={15} /></button>
                   </div>
                 ))}

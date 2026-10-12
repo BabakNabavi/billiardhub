@@ -1819,3 +1819,28 @@ select:disabled { opacity: 0.55; cursor: not-allowed; }
   .ch-spin { animation: none; }
   .ch-add-tile { transition: none; }
 }
+
+/* ══════════════════════════════════════════
+   کاهشِ حرکت — قاعده‌ی سراسری
+══════════════════════════════════════════
+   بسیاری از بخش‌ها قاعده‌ی خودشان را دارند (خانه، درباره، تولیدکنندگان…)
+   ولی بیش از ۱۵۰ انیمیشنِ بی‌پایانِ دیگر — پالس، شیمر، مارکی، چرخش —
+   تنظیمِ «کاهش حرکت»ِ سیستم‌عامل را نادیده می‌گرفتند. این قاعده همه را
+   یک‌جا می‌گیرد.
+
+   چرا ۰٫۰۱ میلی‌ثانیه و نه `none`:
+     · عنصری که با انیمیشنِ ورود (`fadeUp … both`) از opacity صفر ظاهر
+       می‌شود، با `none` نامرئی می‌ماند؛ با زمانِ تقریباً صفر در حالتِ
+       نهایی (دیده‌شده) می‌ایستد.
+     · رویدادهای `animationend`/`transitionend` همچنان شلیک می‌شوند و
+       کدی که منتظرشان است گیر نمی‌کند.
+   `!important` لازم است: بیشترِ انیمیشن‌ها اینلاین‌اند و فقط قاعده‌ی
+   important بر استایلِ اینلاینِ معمولی غلبه می‌کند. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

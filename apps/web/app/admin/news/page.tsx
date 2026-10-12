@@ -205,7 +205,7 @@ export default function AdminNewsPage() {
         <div className="bg-white rounded-2xl shadow-sm p-6 mb-6 border-2 border-green-200">
           <div className="flex items-center justify-between mb-5">
             <h2 className="font-bold text-gray-800">{editingId ? 'ویرایش خبر' : 'خبر جدید'}</h2>
-            <button onClick={() => setShowForm(false)} className="text-gray-400 hover:text-gray-600">
+            <button aria-label="بستن فرم" onClick={() => setShowForm(false)} className="text-gray-400 hover:text-gray-600">
               <X size={20} />
             </button>
           </div>

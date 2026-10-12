@@ -266,7 +266,7 @@ export default function AdminRolesPage() {
 
           {/* Header */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24 }}>
-            <button onClick={() => router.push('/dashboard')} style={{
+            <button aria-label="بازگشت" onClick={() => router.push('/dashboard')} style={{
               background: 'rgba(0,0,0,0.04)', border: '1px solid rgba(0,0,0,0.06)',
               borderRadius: 10, width: 36, height: 36, display: 'flex', alignItems: 'center', justifyContent: 'center',
               cursor: 'pointer', color: 'rgba(0,0,0,0.50)',

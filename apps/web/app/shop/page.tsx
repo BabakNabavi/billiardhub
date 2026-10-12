@@ -299,7 +299,7 @@ function CityPicker({ value, onToggle, onClear }: {
           {value.map(c => (
             <span key={c} style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 11.5, fontWeight: 800, color: GOLD_D, background: 'rgba(199,166,106,0.1)', border: '1px solid rgba(199,166,106,0.32)', borderRadius: 999, padding: '4px 10px' }}>
               {c}
-              <button type="button" onClick={() => onToggle(c)}
+              <button aria-label={`حذف ${c}`} type="button" onClick={() => onToggle(c)}
                 style={{ display: 'flex', background: 'none', border: 'none', cursor: 'pointer', color: 'inherit', padding: 0 }}>
                 <X size={11} />
               </button>

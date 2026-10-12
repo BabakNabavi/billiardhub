@@ -666,12 +666,12 @@ function BookingContent() {
                 کم، آن دو از هم دور می‌افتادند و ربطشان گم می‌شد. */}
             <div style={{display:'flex',flexDirection:'column',alignItems:'center',gap:14}}>
               <div style={{display:'flex',alignItems:'center',gap:'16px'}}>
-                <button className="player-btn" disabled={playerCount<=1} onClick={()=>setPlayerCount(p=>Math.max(1,p-1))}><Minus size={14}/></button>
+                <button aria-label="کم‌کردن تعداد بازیکن" className="player-btn" disabled={playerCount<=1} onClick={()=>setPlayerCount(p=>Math.max(1,p-1))}><Minus size={14}/></button>
                 <div style={{textAlign:'center',minWidth:60}}>
                   <div style={{fontSize: '31px',fontWeight:900,color:'#111',lineHeight:1}}>{toFa(playerCount)}</div>
                   <div style={{fontSize: '13px',color:'rgba(0,0,0,0.40)',marginTop:2}}>نفر</div>
                 </div>
-                <button className="player-btn" disabled={playerCount>=8} onClick={()=>setPlayerCount(p=>Math.min(8,p+1))}><Plus size={14}/></button>
+                <button aria-label="افزودن بازیکن" className="player-btn" disabled={playerCount>=8} onClick={()=>setPlayerCount(p=>Math.min(8,p+1))}><Plus size={14}/></button>
               </div>
               {extraPlayerN>0?(
                 <div style={{padding:'10px 16px',background:'rgba(48,197,90,0.07)',border:'1px solid rgba(48,197,90,0.20)',borderRadius:'14px',fontSize: '14px',color:'rgba(0,0,0,0.45)',lineHeight:1.7,textAlign:'center'}}>

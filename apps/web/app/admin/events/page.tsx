@@ -197,7 +197,7 @@ export default function AdminEventsPage() {
         <div className="bg-white rounded-2xl shadow-sm p-6 mb-6 border-2 border-green-200">
           <div className="flex items-center justify-between mb-5">
             <h2 className="font-bold text-gray-800">{editingId ? 'ویرایش مسابقه' : 'مسابقه جدید'}</h2>
-            <button onClick={() => setShowForm(false)} className="text-gray-400 hover:text-gray-600">
+            <button aria-label="بستن فرم" onClick={() => setShowForm(false)} className="text-gray-400 hover:text-gray-600">
               <X size={20} />
             </button>
           </div>
@@ -339,11 +339,11 @@ export default function AdminEventsPage() {
                 </div>
               </div>
               <div className="flex items-center gap-2 flex-shrink-0">
-                <button onClick={() => handleEdit(event)}
+                <button aria-label="ویرایش رویداد" onClick={() => handleEdit(event)}
                   className="p-2 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-xl transition-colors">
                   <Edit size={16} />
                 </button>
-                <button onClick={() => handleDelete(event.id)}
+                <button aria-label="حذف رویداد" onClick={() => handleDelete(event.id)}
                   className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-colors">
                   <Trash2 size={16} />
                 </button>

@@ -307,7 +307,7 @@ export default function MediaUpload({ open, onClose, onUploaded }: { open: boole
               <video ref={vref} src={videoUrl} onLoadedMetadata={onMeta} onSeeked={onSeeked} muted playsInline controls
                 style={{ width: '100%', maxHeight: 240, display: 'block', background: '#000' }} />
               {duration && <span style={{ position: 'absolute', bottom: 8, insetInlineStart: 8, fontSize: 11, fontWeight: 800, color: '#fff', background: 'rgba(20,18,14,0.7)', borderRadius: 7, padding: '2px 8px' }}>{duration}</span>}
-              <button onClick={() => { if (videoUrl) URL.revokeObjectURL(videoUrl); setFile(null); setVideoUrl(''); setThumbFile(null); setThumbPrev('') }}
+              <button aria-label="حذف فایل" onClick={() => { if (videoUrl) URL.revokeObjectURL(videoUrl); setFile(null); setVideoUrl(''); setThumbFile(null); setThumbPrev('') }}
                 style={{ position: 'absolute', top: 8, insetInlineEnd: 8, background: 'rgba(20,18,14,0.6)', border: 'none', borderRadius: 8, padding: 6, cursor: 'pointer', color: '#fff', display: 'flex' }}><X size={15} /></button>
             </div>
           )}

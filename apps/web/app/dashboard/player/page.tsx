@@ -425,7 +425,7 @@ export default function PlayerDashboard() {
                   <div key={i} className="flex items-center gap-3 rounded-xl border border-[#EFEBE1] bg-[#FAFAF7] px-3 py-2.5">
                     <span className="text-[13px] font-black text-[#8F6531]">{h.year}</span>
                     <span className="flex-1 text-[13px] font-bold">{h.title}</span>
-                    <button type="button" onClick={() => set('highlights', form.highlights.filter((_, x) => x !== i))}
+                    <button aria-label={`حذف افتخار ${h.title}`} type="button" onClick={() => set('highlights', form.highlights.filter((_, x) => x !== i))}
                       className="rounded-lg p-1.5 text-[#B23B2E] transition hover:bg-[rgba(178,59,46,0.08)]"><Trash2 size={14} /></button>
                   </div>
                 ))}

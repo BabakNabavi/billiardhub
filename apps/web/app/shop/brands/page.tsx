@@ -301,7 +301,7 @@ export default function BrandsPage() {
               <input className="s-inp" value={search} onChange={e=>setSearch(e.target.value)}
                 onFocus={()=>setSfocus(true)} onBlur={()=>setSfocus(false)}
                 placeholder="جستجو برند، کشور..."/>
-              {search && <button onClick={()=>setSearch('')} style={{ background:'none', border:'none', cursor:'pointer', color:'rgba(0,0,0,0.35)', padding:0, display:'flex' }}><X size={13}/></button>}
+              {search && <button aria-label="پاک‌کردن جست‌وجو" onClick={()=>setSearch('')} style={{ background:'none', border:'none', cursor:'pointer', color:'rgba(0,0,0,0.35)', padding:0, display:'flex' }}><X size={13}/></button>}
             </div>
 
             <div style={{ display:'flex', gap:'7px', overflowX:'auto' }}>

@@ -161,7 +161,7 @@ export default function BrandProfilePage() {
                 <button onClick={()=>setFollowed(f=>!f)} style={{ display:'flex', alignItems:'center', gap:'7px', padding:'11px 22px', borderRadius:'12px', border:'none', background: followed?'rgba(199,166,106,0.15)':'linear-gradient(135deg,#C7A66A,#A07840)', color: followed?'#C7A66A':'#fff', fontSize: '15px', fontWeight:700, cursor:'pointer', fontFamily:'inherit', transition:'all 0.3s', boxShadow: followed?'none':'0 8px 24px rgba(199,166,106,0.3)', ...(followed?{border:'1px solid rgba(199,166,106,0.3)'}:{}) }}>
                   {followed?<><Check size={14}/>دنبال می‌کنید</>:<><Heart size={14}/>دنبال کردن</>}
                 </button>
-                <a href={`https://${brand.website}`} target="_blank" rel="noopener noreferrer" style={{ display:'flex', alignItems:'center', gap:'7px', padding:'11px 18px', borderRadius:'12px', background:'rgba(0,0,0,0.05)', border:'1px solid rgba(0,0,0,0.08)', color:'rgba(255,255,255,0.7)', fontSize: '15px', fontWeight:600, textDecoration:'none', transition:'all 0.3s' }}>
+                <a href={`https://${brand.website}`} target="_blank" rel="noopener noreferrer" aria-label="وب‌سایت برند" style={{ display:'flex', alignItems:'center', gap:'7px', padding:'11px 18px', borderRadius:'12px', background:'rgba(0,0,0,0.05)', border:'1px solid rgba(0,0,0,0.08)', color:'rgba(255,255,255,0.7)', fontSize: '15px', fontWeight:600, textDecoration:'none', transition:'all 0.3s' }}>
                   <ExternalLink size={14}/>
                 </a>
               </div>

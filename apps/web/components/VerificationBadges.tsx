@@ -202,7 +202,7 @@ export default function VerificationBadges({ style }: { style?: React.CSSPropert
               {state.email ? 'ذخیره' : 'ثبت و تأیید'}
             </button>
             {editing && (
-              <button type="button" onClick={() => { setEditing(false); setEmail(state.emailAddress ?? ''); setMsg(null) }}
+              <button aria-label="انصراف" type="button" onClick={() => { setEditing(false); setEmail(state.emailAddress ?? ''); setMsg(null) }}
                 style={{
                   display: 'inline-flex', alignItems: 'center', borderRadius: 10, border: `1px solid ${LINE}`,
                   background: 'rgba(0,0,0,0.03)', color: SEC, fontSize: 12.5, fontWeight: 800,

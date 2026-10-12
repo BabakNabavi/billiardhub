@@ -456,7 +456,7 @@ export default function Navbar() {
                   {/* Header row */}
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 24px 12px', borderBottom: '1px solid rgba(28,28,26,0.06)' }}>
                     <span style={{ fontSize: '10px', color: WORDMARK_GREEN, letterSpacing: '0.28em', fontWeight: 700 }}>EXPLORE BILLIARD HUB</span>
-                    <button onClick={() => setExploreOpen(false)} style={{ background: 'rgba(28,28,26,0.05)', border: '1px solid rgba(28,28,26,0.08)', borderRadius: '8px', cursor: 'pointer', color: 'rgba(28,28,26,0.38)', padding: '5px', display: 'flex', transition: 'all 0.2s' }}>
+                    <button aria-label="بستن منو" onClick={() => setExploreOpen(false)} style={{ background: 'rgba(28,28,26,0.05)', border: '1px solid rgba(28,28,26,0.08)', borderRadius: '8px', cursor: 'pointer', color: 'rgba(28,28,26,0.38)', padding: '5px', display: 'flex', transition: 'all 0.2s' }}>
                       <X size={12} />
                     </button>
                   </div>
@@ -530,7 +530,7 @@ export default function Navbar() {
               <Search size={13} color={TEXT_MUT} />
               <input type="text" value={search} onChange={e => setSearch(e.target.value)} placeholder="جستجو..."
                 style={{ background: 'none', border: 'none', outline: 'none', color: TEXT, fontSize: '15px', width: '100%', fontFamily: 'inherit' }} />
-              {search && <button onClick={() => setSearch('')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: TEXT_MUT, padding: 0, display: 'flex' }}><X size={11} /></button>}
+              {search && <button aria-label="پاک‌کردن جست‌وجو" onClick={() => setSearch('')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: TEXT_MUT, padding: 0, display: 'flex' }}><X size={11} /></button>}
             </div>
           </div>
 
@@ -725,11 +725,11 @@ export default function Navbar() {
               placeholder="جستجو باشگاه، بازیکن، مربی..."
               style={{ flex: 1, background: 'none', border: 'none', outline: 'none', color: '#1C1B17', fontSize: '16px', fontFamily: 'inherit' }} />
             {search && (
-              <button onClick={() => setSearch('')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(28,28,26,0.36)', padding: 0, display: 'flex', flexShrink: 0 }}>
+              <button aria-label="پاک‌کردن جست‌وجو" onClick={() => setSearch('')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(28,28,26,0.36)', padding: 0, display: 'flex', flexShrink: 0 }}>
                 <X size={13} />
               </button>
             )}
-            <button onClick={() => { setSearchOpen(false); setSearch(''); }}
+            <button aria-label="بستن جست‌وجو" onClick={() => { setSearchOpen(false); setSearch(''); }}
               style={{ background: 'rgba(28,28,26,0.05)', border: '1px solid rgba(28,28,26,0.10)', borderRadius: '8px', cursor: 'pointer', color: 'rgba(28,28,26,0.45)', padding: '4px', display: 'flex', flexShrink: 0 }}>
               <X size={13} />
             </button>

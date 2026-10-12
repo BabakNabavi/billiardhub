@@ -199,7 +199,9 @@ export function Feature({ a }: { a: Article }) {
     <section className="nr-feature" aria-labelledby="nr-ft">
       <div className="nr-shell">
         <div className="nr-feature-grid">
-          <Link href={href(a)}>
+          {/* لینکِ تکراریِ عکس: تیتر کنارش همان مقصد را دارد و عکس alt خالی است،
+              پس این یکی از ترتیبِ Tab و صفحه‌خوان بیرون می‌ماند — یک لینک، یک نام. */}
+          <Link href={href(a)} tabIndex={-1} aria-hidden="true">
             <Cover a={a} ratio="3x2" sizes="(min-width: 860px) 52vw, 100vw" />
           </Link>
           <div>
