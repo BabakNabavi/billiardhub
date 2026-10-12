@@ -111,7 +111,7 @@
     "@types/react-dom": "19.2.2",
     "eslint": "^9.39.1",
     "puppeteer-core": "^25.4.0",
-    "sharp": "^0.34.5",
+    "sharp": "^0.35.5",
     "typescript": "5.9.2"
   }
 }
