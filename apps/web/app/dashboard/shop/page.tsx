@@ -12,6 +12,8 @@ import { findSellerByOwner } from '../../../lib/seller-store';
 import { Package, Edit, Trash2, Eye, CheckCircle, Clock, XCircle, Plus, ShoppingBag, ArrowUp, Zap } from 'lucide-react';
 import BoostDialog from '../../../components/market/BoostDialog';
 import { productTitleParts } from '../../../lib/market/title';
+import { AD_LIFETIME_DAYS } from '../../../lib/market/live';
+import { toFaDigits } from '../../../lib/jalali';
 
 /* طرح LQ (تینت طلایی) — همه‌ی دکمه‌های این صفحه از این استفاده می‌کنند */
 const LQ = 'bg-[rgba(199,166,106,0.12)] border border-[rgba(199,166,106,0.34)] text-[#8F6531] rounded-[10px] transition-all duration-200 hover:-translate-y-0.5 hover:bg-[rgba(199,166,106,0.18)]';
@@ -465,7 +467,7 @@ export default function MyShopPage() {
                     if (st === 'paused') actions.push({ label: 'فعال‌سازی', body: reactivate, ok: 'آگهی دوباره فعال شد' });
                     if (st === 'sold') actions.push({ label: 'فعال‌سازی دوباره', body: reactivate, ok: 'آگهی دوباره فعال شد' });
                     if (renewable(product) && !(st !== 'active' && st !== 'expired' && pastExpiry(product))) {
-                      actions.push({ label: 'تمدید ۶۰ روزه', body: { renew: true }, ok: 'آگهی برای ۶۰ روزِ دیگر تمدید شد' });
+                      actions.push({ label: `تمدید ${toFaDigits(AD_LIFETIME_DAYS / 30)} ماهه`, body: { renew: true }, ok: `آگهی برای ${toFaDigits(AD_LIFETIME_DAYS / 30)} ماهِ دیگر تمدید شد` });
                     }
                     if (!actions.length) return null;
                     return (

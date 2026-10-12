@@ -8,7 +8,7 @@ import { hasSpecCatalog, validateSpecsOnServer } from '../../../../lib/market/sp
 import { normalizeAdImages } from '@/lib/market/images';
 import { normalizePhoneFa } from '@/lib/text-fa';
 import { getSetting } from '@/lib/ads/quota';
-import { notExpiredOr } from '@/lib/market/live'
+import { notExpiredOr, AD_LIFETIME_MS } from '@/lib/market/live'
 
 /* آگهی‌های بیلیارد بازار — روی سرور، نه در مرورگر کاربر.
 
@@ -341,6 +341,9 @@ export async function POST(req: NextRequest) {
        کلید در دیتابیس است نه در کد، چون این تصمیم کسب‌وکاری است و
        عوض‌کردنش نباید دیپلوی بخواهد. */
     status: approvalRequired ? 'pending' : 'active',
+    /* عمرِ آگهی صریح، نه پیش‌فرضِ ستون: تا مهاجرتِ ۱۱۲ اجرا نشده پیش‌فرضِ
+       دیتابیس هنوز ۶۰ روز است. یک منبع: `AD_LIFETIME_DAYS`. */
+    expiresAt: new Date(Date.now() + AD_LIFETIME_MS).toISOString(),
     city: str(b?.city, 60),
     province: str(b?.province, 60),
     stock: 1,

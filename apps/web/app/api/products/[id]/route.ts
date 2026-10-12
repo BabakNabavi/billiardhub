@@ -64,6 +64,7 @@ export async function GET(
    `PUT` برای سازگاری با فراخوانی موجود می‌ماند. */
 
 import { actorFromRequest, isAdmin, audit, clientIp } from '@/lib/finance/db'
+import { AD_LIFETIME_MS } from '@/lib/market/live'
 
 /* فقط همین دو پرچم از بیرون قابل تغییرند. فهرست سفید عمدی است:
    با بدنه‌ی خام، ادمین (یا هر باگی) می‌توانست `price` یا `sellerId`
@@ -104,7 +105,7 @@ async function applyPatch(req: NextRequest, id: string) {
     /* تأیید آگهی منقضی‌شده بدون تمدید بی‌فایده است — همان لحظه از
        فهرست بیرون می‌ماند. */
     if (body.status === 'active') {
-      patch.expiresAt = new Date(Date.now() + 60 * 86400_000).toISOString()
+      patch.expiresAt = new Date(Date.now() + AD_LIFETIME_MS).toISOString()
     }
   }
   if (typeof body.adminNote === 'string') {

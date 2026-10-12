@@ -7,7 +7,7 @@ import { validateOnServer, getBrand, TYPE_PREFIX, isAccessoryCategory, isProduct
 import { hasSpecCatalog, validateSpecsOnServer } from '@/lib/market/spec-catalog'
 import { normalizeAdImages } from '@/lib/market/images';
 import { normalizePhoneFa, isIranMobile, toStoredWhatsapp } from '@/lib/text-fa';
-import { PUBLIC_AD_STATUSES } from '@/lib/market/live';
+import { PUBLIC_AD_STATUSES, AD_LIFETIME_MS } from '@/lib/market/live';
 
 /* یک آگهی بیلیارد بازار — خواندن، ویرایش و حذف.
    ویرایش و حذف فقط برای صاحب آگهی یا ادمین. */
@@ -270,12 +270,12 @@ export async function PATCH(req: NextRequest, ctx: { params: Promise<{ id: strin
     patch.soldAt = String(b.status) === 'sold' ? new Date().toISOString() : null;
   }
 
-  /* تمدید: عمر آگهی از همین لحظه شصت روز می‌شود.
+  /* تمدید: عمر آگهی از همین لحظه `AD_LIFETIME_DAYS` روز (شش ماه) می‌شود.
 
      آگهی منقضی هم تمدید می‌شود و به فعال برمی‌گردد؛ نبودن این راه
      یعنی فروشنده باید آگهی را از نو بسازد و یک سهمیه‌ی دیگر بدهد. */
   if (b?.renew === true) {
-    patch.expiresAt = new Date(Date.now() + 60 * 86400_000).toISOString();
+    patch.expiresAt = new Date(Date.now() + AD_LIFETIME_MS).toISOString();
     patch.renewedAt = new Date().toISOString();
     if (['expired', 'paused'].includes(String(ad.status))) patch.status = 'active';
   }

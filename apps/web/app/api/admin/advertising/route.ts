@@ -2,6 +2,7 @@ export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { sb, rpc, actorFromRequest, audit } from '@/lib/finance/db';
 import { can } from '@/lib/admin/permissions';
+import { refreshAdForCampaign } from '@/lib/market/refresh';
 import {
   listPlacements, updatePlacement, getPlacement,
   listCampaigns, createCampaign, updateCampaign, deleteCampaign,
@@ -287,6 +288,8 @@ export async function PATCH(req: NextRequest) {
       const startsAt = b?.startsAt ? new Date(String(b.startsAt)).toISOString() : null;
       const { error } = await rpc('bh_approve_campaign', { p_campaign_id: id, p_start: startsAt });
       if (!error) {
+        /* پنجره از لحظه‌ی تأیید شروع می‌شود ⟵ آگهی هم از همین لحظه تازه */
+        await refreshAdForCampaign(id);
         void audit({
           actorId: g.actor!.id, actorRole: g.actor!.role, action: 'CAMPAIGN_APPROVED',
           entityType: 'campaign', entityId: id, newValue: { startsAt },
