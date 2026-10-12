@@ -8,6 +8,7 @@ import { hasSpecCatalog, validateSpecsOnServer } from '../../../../lib/market/sp
 import { normalizeAdImages } from '@/lib/market/images';
 import { normalizePhoneFa } from '@/lib/text-fa';
 import { getSetting } from '@/lib/ads/quota';
+import { notExpiredOr } from '@/lib/market/live'
 
 /* آگهی‌های بیلیارد بازار — روی سرور، نه در مرورگر کاربر.
 
@@ -101,7 +102,7 @@ export async function GET(req: NextRequest) {
        تا امروز فقط `status` فیلتر می‌شد و `expiresAt` — که از مهاجرت
        ۰۰۶ ستونش وجود داشت — هرگز خوانده نمی‌شد. یعنی آگهی دو سال
        پیش هنوز بالای فهرست بود. */
-    q = q.eq('status', 'active').or(`expiresAt.is.null,expiresAt.gt.${new Date().toISOString()}`)
+    q = q.eq('status', 'active').or(notExpiredOr())
     /* انقضای «فوری» در خواندن سنجیده می‌شود، نه با کرانی که بولینی
        را خاموش کند. تابعی که کسی صدایش نزند، همان چیزی است که چند
        بار در این پروژه بی‌صدا از کار افتاد. */

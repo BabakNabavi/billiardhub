@@ -55,6 +55,12 @@ async function resolveProducts(rawRefs: string[]): Promise<Map<string, EntitySna
     .select('id,title,price,negotiable,"discountPrice","discountPercent",images,brand,model,city,condition,status')
     .in('id', refs)
   for (const r of (data as Record<string, unknown>[] ?? [])) {
+    /* ⚠️ عمداً فقط `status`، نه `isLiveAd` (`lib/market/live`): این‌جا جایگاهِ
+       *خریداری‌شده* است. مسیرِ خرید انقضای آگهی را نه می‌سنجد نه تمدید می‌کند، پس
+       با شرطِ «زنده» کمپینی که هنوز روزهای پولی دارد وسطِ دوره بی‌صدا خاموش
+       می‌شد. سیاستِ درست (رد/هشدار هنگامِ خرید، یا تمدیدِ آگهی تا پایانِ کمپین)
+       تصمیمِ محصول است؛ تا آن روز رفتارِ قبلی می‌ماند. جایگاهِ رایگان
+       (`lib/ads/free`) شرطِ کامل را دارد. */
     if (s(r.status) !== 'active') continue
     /* ── همان قرارداد بقیه‌ی سایت ──
        `price` قیمت فهرست است و `discountPrice` پرداختی. تا امروز

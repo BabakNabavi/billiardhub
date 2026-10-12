@@ -11,6 +11,7 @@
 import { sb } from '../finance/db'
 import type { EntityType } from './core'
 import type { EntitySnapshot } from './resolve'
+import { notExpiredOr } from '@/lib/market/live'
 
 const s = (v: unknown, d = '') => (typeof v === 'string' ? v : d)
 const n = (v: unknown, d = 0) => { const x = Number(v); return Number.isFinite(x) ? x : d }
@@ -19,7 +20,8 @@ const n = (v: unknown, d = 0) => { const x = Number(v); return Number.isFinite(x
 async function freeProducts(limit: number): Promise<EntitySnapshot[]> {
   const { data, error } = await sb().from('products')
     .select('id,title,price,negotiable,"discountPrice","discountPercent",images,brand,model,city,condition,status,"createdAt"')
-    .eq('status', 'active')
+    /* فقط آگهیِ زنده — همان شرطِ فهرستِ بازار (`lib/market/live`) */
+    .eq('status', 'active').or(notExpiredOr())
     .order('createdAt', { ascending: false })
     /* شکست تساوی: داده‌ی seed همه یک زمان ثبت دارند و بدون این کلید،
        ترتیب خروجی بین درخواست‌ها می‌توانست عوض شود و کارت‌ها بپرند */

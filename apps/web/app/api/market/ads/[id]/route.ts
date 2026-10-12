@@ -7,6 +7,7 @@ import { validateOnServer, getBrand, TYPE_PREFIX, isAccessoryCategory, isProduct
 import { hasSpecCatalog, validateSpecsOnServer } from '@/lib/market/spec-catalog'
 import { normalizeAdImages } from '@/lib/market/images';
 import { normalizePhoneFa, isIranMobile, toStoredWhatsapp } from '@/lib/text-fa';
+import { PUBLIC_AD_STATUSES } from '@/lib/market/live';
 
 /* یک آگهی بیلیارد بازار — خواندن، ویرایش و حذف.
    ویرایش و حذف فقط برای صاحب آگهی یا ادمین. */
@@ -48,9 +49,8 @@ export async function GET(_req: NextRequest, ctx: { params: Promise<{ id: string
      ولی `paused`، `pending` و `rejected` نباید عمومی باشند. تا امروز
      هر کسی که نشانی را داشت، آگهی متوقف‌شده یا ردشده را کامل — با
      شماره‌ی تماس — می‌دید. */
-  const PUBLIC = ['active', 'sold', 'expired'];
   const actor = actorFromRequest(_req);
-  const isPublic = PUBLIC.includes(String(ad.status));
+  const isPublic = PUBLIC_AD_STATUSES.includes(String(ad.status));
   /* پرس‌وجوی ادمین فقط وقتی لازم است که چیزی واقعا پنهان باشد — نه برای
      هر بازدیدِ آگهیِ عمومی */
   const needsCheck = !isPublic || ad.adminNote != null;

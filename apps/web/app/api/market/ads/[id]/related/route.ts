@@ -1,6 +1,7 @@
 export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { sb } from '@/lib/finance/db';
+import { notExpiredOr } from '@/lib/market/live';
 
 /* ═══════════════════════════════════════════════════════════════
    محصولات مشابه.
@@ -59,13 +60,12 @@ export async function GET(_req: NextRequest, ctx: { params: Promise<{ id: string
   if (!me) return NextResponse.json({ related: [] });
 
   /* نامزدها: **فقط** هم‌دسته‌ها. هیچ پرکردنی از دسته‌های دیگر نیست. */
-  const now = new Date().toISOString();
   const { data: sameCat } = await sb().from('products')
     .select(COLS)
     .eq('status', 'active')
     .eq('category', me.category)
     .neq('id', id)
-    .or(`expiresAt.is.null,expiresAt.gt.${now}`)
+    .or(notExpiredOr())   // `lib/market/live` — همان تعریفِ «زنده» در همه‌جا
     .limit(60);
   const pool = (sameCat as unknown as Row[]) ?? [];
 

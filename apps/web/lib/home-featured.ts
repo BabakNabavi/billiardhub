@@ -4,6 +4,7 @@ import { getSupabaseServer } from './supabase-server'
 import { listPublicStores, type PublicStore } from './sellers-source'
 import { modernizeType } from './market/title'
 import type { RealClub, RealProduct, RealStore, HomeFeatured } from './home-types'
+import { notExpiredOr } from '@/lib/market/live'
 
 /* ─────────────────────────────────────────────────────────────
    پشتوانه‌ی سه سکشن صفحه‌ی اصلی — خوانده‌شده روی سرور.
@@ -87,7 +88,8 @@ async function loadHomeFeaturedUncached(): Promise<HomeFeatured> {
       .eq('isActive', true).order('createdAt', { ascending: false }).limit(FEATURED_CLUBS_MAX),
     sb.from('products')
       .select('id,title,brand,model,category,images,price,negotiable,discountPrice,discountPercent,city,condition')
-      .eq('status', 'active').order('createdAt', { ascending: false }).limit(FEATURED_PRODUCTS_MAX),
+      /* فقط آگهیِ زنده — همان شرطِ فهرستِ بازار (`lib/market/live`) */
+      .eq('status', 'active').or(notExpiredOr()).order('createdAt', { ascending: false }).limit(FEATURED_PRODUCTS_MAX),
   ])
 
   const storeRows = await storesP
