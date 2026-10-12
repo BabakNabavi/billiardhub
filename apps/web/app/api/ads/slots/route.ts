@@ -1,6 +1,12 @@
 export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { livePlacements, listPlacements, trackCampaign, LEGACY_KEY_MAP } from '@/lib/ads/core';
+import { viewerHash } from '@/lib/ads/preroll';
+import { hitRateLimit, ipOf } from '@/lib/auth/rate-limit';
+
+/* کفِ ضدِتورم، نه شمارشِ اصلی (آن را dedupeِ ساعتیِ هر بیننده می‌کند): گشاد تا
+   کاربرانِ پشتِ یک IPِ مشترکِ اپراتور (CGNAT) نمایشِ واقعی را از دست ندهند. */
+const AD_BEACON_RULE = { action: 'ad_beacon', max: 300, windowSec: 600 };
 
 /* ⚠ سازگاری با نسخه‌ی قدیمی — DEPRECATED.
 
@@ -62,6 +68,13 @@ export async function POST(req: NextRequest) {
   const id = String(b?.id ?? '').trim();
   const kind = b?.kind === 'click' ? 'click' : 'impression';
   /* await عمدی — Promise رهاشده روی سرورلس ممکن است هرگز اجرا نشود */
-  if (/^[0-9a-f-]{36}$/i.test(id)) await trackCampaign(id, kind);
+  /* ⚠️ هر بیننده در ساعت یک بار (مهاجرتِ ۱۱۲) — شناسه از `ipOf` (x-real-ipِ nginx، نه
+     XFFِ دست‌کاری‌پذیر) + مرورگر. چون مرورگر را کلاینت می‌فرستد، سقفِ هر IP هم هست
+     تا عوض‌کردنِ User-Agent در حلقه آمار را باد نکند. بیکن منتظرِ پاسخ نیست، پس
+     درخواستِ سقف‌خورده فقط شمرده نمی‌شود — ۴۲۹ نمی‌گیرد. */
+  if (/^[0-9a-f-]{36}$/i.test(id)) {
+    const rl = await hitRateLimit(req, AD_BEACON_RULE);
+    if (rl.ok) await trackCampaign(id, kind, viewerHash(ipOf(req), req.headers.get('user-agent')));
+  }
   return NextResponse.json({ ok: true });
 }

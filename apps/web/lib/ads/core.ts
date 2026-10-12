@@ -628,9 +628,32 @@ export async function livePlacements(onlyKey?: string): Promise<Record<string, {
   return out
 }
 
-/** شمارش اتمیک — جایگزین read-then-update قبلی */
-export async function trackCampaign(id: string, kind: 'impression' | 'click'): Promise<void> {
-  try { await sb().rpc('bh_track_campaign', { p_campaign_id: id, p_kind: kind }) } catch { /* شمارنده مهم‌تر از صفحه نیست */ }
+/** شمارشِ نمایش/کلیک — هر بیننده در هر ساعت یک بار برای هر کمپین.
+ *
+ *  ⚠️ پیش‌تر هر POSTِ بی‌نام یک واحد اضافه می‌کرد، پس آمارِ تبلیغ‌دهنده با
+ *  یک حلقه‌ی ساده قابلِ تورم بود. `viewer` همان HMACِ IP+مرورگرِ پیش‌نمایش
+ *  است (`lib/ads/preroll: viewerHash`) — IPِ خام ذخیره نمی‌شود. بی‌شناسه
+ *  شمرده نمی‌شود.
+ *
+ *  تا مهاجرتِ ۱۱۲ اجرا نشده تابعِ تازه نیست ⟵ همان شمارشِ قبلی، تا آمار در
+ *  فاصله‌ی دیپلوی و مهاجرت قطع نشود. */
+export async function trackCampaign(
+  id: string, kind: 'impression' | 'click', viewer: string | null,
+): Promise<void> {
+  if (!viewer) return
+  try {
+    const { error } = await sb().rpc('bh_track_campaign_hit', { p_campaign_id: id, p_kind: kind, p_viewer: viewer })
+    if (!error) return
+    if (error.code === 'PGRST202') {
+      const { error: oldErr } = await sb().rpc('bh_track_campaign', { p_campaign_id: id, p_kind: kind })
+      if (oldErr) console.error('[ads] track (legacy):', oldErr.message)
+      return
+    }
+    console.error('[ads] track:', error.message)
+  } catch (e) {
+    /* شمارنده مهم‌تر از صفحه نیست — ولی خاموش هم نه */
+    console.error('[ads] track:', (e as Error).message)
+  }
 }
 
 /** انقضای خودکار: SCHEDULED→ACTIVE و ACTIVE→EXPIRED */
