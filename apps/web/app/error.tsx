@@ -10,9 +10,13 @@ import { reportClientError } from '../components/ErrorBeacon'
 const LINE = '#E7E2D6'
 const GOLD_D = '#8F6531'
 
-export default function Error({ error, reset }: {
+/* ⚠️ دکمه `retry` را صدا می‌زند نه `reset`: `reset` فقط همان دادهٔ سرور را
+   دوباره رندر می‌کند، پس اگر خطا از Server Component آمده بود (مثلا قطعیِ
+   لحظه‌ای دیتابیس) «تلاش دوباره» عیناً همان خطا را برمی‌گرداند. `retry`
+   (Next 16.3) اول مسیر را از سرور تازه می‌گیرد، بعد مرز را باز می‌کند. */
+export default function Error({ error, retry }: {
   error: Error & { digest?: string }
-  reset: () => void
+  retry: () => void
 }) {
   /* ⚠️ `console.error` فقط در مرورگرِ خودِ کاربر می‌ماند و به ما
      نمی‌رسد. این خطا همان چیزی است که صفحه را شکسته، پس دقیقا
@@ -41,7 +45,7 @@ export default function Error({ error, reset }: {
           کمی بعد سر بزنید.
         </p>
         <div style={{ display: 'flex', gap: 9, flexWrap: 'wrap', justifyContent: 'center' }}>
-          <button onClick={reset} style={{
+          <button type="button" onClick={retry} style={{
             padding: '12px 22px', borderRadius: 12, cursor: 'pointer', fontFamily: 'inherit',
             fontSize: 13.5, fontWeight: 800, color: GOLD_D,
             background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.34)',
