@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import {
   ChevronRight, CheckCircle2, AlertCircle, User, CreditCard, Loader2, Download,
@@ -12,6 +12,7 @@ import { fetchTournament } from '../../../../lib/tournaments/client';
 import { useAuthStore } from '../../../../store/auth.store';
 import Link from 'next/link';
 import { apiFetch } from '../../../../lib/http';
+import { ask, alertBox, resolveAsk, resolveAlert } from '../../../../lib/ui/dialogs';
 
 type Step = 'confirm' | 'pay-loading' | 'receipt';
 
@@ -51,6 +52,14 @@ export default function RegisterPage() {
       .catch(() => alive && setLoadingT(false));
     return () => { alive = false; };
   }, [id]);
+  /* بعد از «ظرفیت تکمیل» از سرور: صفحه باید فوراً حالتِ پر (لیستِ انتظار)
+     را نشان دهد، نه فرمِ پرداختی که دیگر کار نمی‌کند. */
+  /* `fetchTournament` پرتاب نمی‌کند و در خطا null می‌دهد — null نباید صفحه را به
+     «این مسابقه پیدا نشد» ببرد، پس فقط پاسخِ واقعی جایگزین می‌شود. */
+  const reloadT = async () => {
+    const row = await fetchTournament(id);
+    if (row) setT(row);
+  };
 
   const { user, _hydrated, authChecked } = useAuthStore();
   const isLoggedIn = !!user;
@@ -70,6 +79,9 @@ export default function RegisterPage() {
   const [wlPosition, setWlPosition] = useState<number | null>(null);
   const [wlBusy, setWlBusy] = useState(false);
   const [wlErr, setWlErr] = useState('');
+  /* تا جایگاهِ کاربر در صف معلوم نشده، پنجره‌ی «ظرفیت تکمیل» باز نمی‌شود —
+     کسی که از قبل در صف است نباید «ثبت در لیست انتظار» ببیند. */
+  const [wlChecked, setWlChecked] = useState(false);
 
   useEffect(() => {
     if (!full || !id || !isLoggedIn) return;
@@ -80,6 +92,7 @@ export default function RegisterPage() {
         const j = await r.json() as { myPosition: number | null };
         setWlPosition(j.myPosition);
       } catch { /* بی‌صدا */ }
+      finally { setWlChecked(true); }
     })();
   }, [full, id, isLoggedIn]);
 
@@ -97,6 +110,36 @@ export default function RegisterPage() {
     } catch { setWlErr('خطا در ارتباط با سرور'); } finally { setWlBusy(false); }
   };
 
+  /* ── «ظرفیت مسابقه تکمیل است» در پنجره‌ی وسطِ صفحه ──
+     ⚠️ پیش‌تر این پیام در همان کادرِ «فعلا امکان پرداخت آنلاین نیست» می‌نشست:
+     هم عنوانش غلط بود، هم پایینِ صفحه و دور از دید. حالا پنجره‌ی مشترکِ سایت
+     (`ask` ⟵ DialogHost) با راهِ بعدی — لیستِ انتظار. در هر بازدید یک بار. */
+  const fullShown = useRef(false);
+  /* پنجره ممکن است پیش از به‌روزشدنِ نشست باز شده باشد؛ تأیید باید نسخه‌ی
+     *تازه‌ی* joinWaitlist را صدا بزند، نه آن‌که هنگامِ باز شدن دیده شد. */
+  const joinRef = useRef(joinWaitlist);
+  joinRef.current = joinWaitlist;
+  /* DialogHost در layoutِ ریشه است و با عوض‌شدنِ صفحه بسته نمی‌شود — با
+     «بازگشت» پنجره روی صفحه‌ی قبلی می‌ماند و تأییدش از آن‌جا ثبت می‌کرد. پس
+     پنجره‌ای که *همین صفحه* باز کرده هنگامِ ترکِ صفحه بسته می‌شود. */
+  const openDialog = useRef<'ask' | 'alert' | null>(null);
+  useEffect(() => () => {
+    if (openDialog.current === 'ask') resolveAsk(false);
+    else if (openDialog.current === 'alert') resolveAlert();
+  }, []);
+  const showFull = async () => {
+    if (fullShown.current) return;
+    fullShown.current = true;
+    openDialog.current = 'ask';
+    const join = await ask('ظرفیت مسابقه تکمیل است', {
+      body: 'همه‌ی صندلی‌های این مسابقه پر شده‌اند. می‌توانید در لیست انتظار ثبت شوید؛ اگر صندلی‌ای آزاد شد، به ترتیبِ صف خبرتان می‌کنیم.',
+      confirmLabel: 'ثبت در لیست انتظار',
+      tone: 'gold',
+    });
+    openDialog.current = null;
+    if (join) await joinRef.current();
+  };
+
   const leaveWaitlist = async () => {
     setWlBusy(true); setWlErr('');
     try {
@@ -111,6 +154,19 @@ export default function RegisterPage() {
   /* پیام سرور وقتی پرداخت ممکن نیست — به‌جای رسید ساختگی */
   const [payUnavailable, setPayUnavailable] = useState('');
   const [busy, setBusy] = useState(false);
+  /* ⚠️ بعد از `location.href = درگاه` صفحه هنوز چند ثانیه (روی گوشیِ کند) باز است.
+     اگر `finally` دکمه را آزاد کند، ضربه‌ی دوم جلسه‌ی پرداختِ تازه می‌سازد و
+     شناسه‌ی ذخیره‌شده را عوض می‌کند — پرداخت در جلسه‌ی اول بعد «ناسازگار» رد
+     می‌شد: پول کم، ثبت‌نام قطعی‌نشده. پس از شروعِ رفتن، دکمه بسته می‌ماند؛ فقط
+     برگشت از حافظه‌ی پشت/جلو (کاربر از درگاه برگشت) آزادش می‌کند. */
+  const leavingRef = useRef(false);
+  useEffect(() => {
+    const onShow = (e: PageTransitionEvent) => {
+      if (e.persisted) { leavingRef.current = false; setBusy(false); }
+    };
+    window.addEventListener('pageshow', onShow);
+    return () => window.removeEventListener('pageshow', onShow);
+  }, []);
   const [receiptDate]             = useState(nowShamsi);
 
   /* شماره‌ی ثبت‌نام — شناسه‌ای که سرور ساخته، نه عددی ساختگی.
@@ -127,6 +183,34 @@ export default function RegisterPage() {
      نمی‌توانست دوباره ثبت‌نام کند. حالا فقط ثبت‌نامِ قطعیِ واقعی، از
      همان پاسخی که مسابقه را می‌آورد (`myStatus`). */
   const registeredAlready = alreadyReg || t?.myStatus === 'CONFIRMED';
+  const deadlinePassed = !!t?.registrationEndsAtMs && t.registrationEndsAtMs <= Date.now();
+
+  /* مسابقه از همان اول پر است ⟵ همان پنجره، بی‌آنکه کاربر اول دکمه بزند.
+     ثبت‌نامِ باز: با پیشنهادِ لیستِ انتظار (پس از دانستنِ جایگاهِ کاربر در
+     صف). بسته به‌خاطرِ ظرفیت: فقط اطلاع — صف برای مسابقه‌ی بسته پذیرفته
+     نمی‌شود (bh_tournament_waitlist_join). برگزارشده/لغوشده: هیچ. */
+  useEffect(() => {
+    /* تا نشست معلوم نشده تصمیم نمی‌گیریم — کاربرِ واردشده ممکن است یک لحظه مهمان
+       دیده شود. صندلیِ در انتظارِ پرداختِ خودِ کاربر هم «پر» حساب می‌شود؛ او
+       نباید «ظرفیت تکمیل است» ببیند. */
+    if (!_hydrated || !authChecked) return;
+    if (!t || !full || registeredAlready || t.myStatus === 'PENDING_PAYMENT' || fullShown.current) return;
+    if (t.status === 'bracket_ready') {   // همان registration_closedِ سرور (lib/tournaments/client)
+      fullShown.current = true;
+      openDialog.current = 'alert';
+      void (async () => {
+        await alertBox('ظرفیت مسابقه تکمیل است', {
+        body: `همه‌ی ${toFa(t.maxPlayers)} صندلیِ این مسابقه پر شده و ثبت‌نام بسته است.`,
+          tone: 'gold',
+        });
+        openDialog.current = null;
+      })();
+      return;
+    }
+    if (closed) return;
+    if (isLoggedIn && (!wlChecked || wlPosition !== null)) return;
+    void showFull();
+  }, [_hydrated, authChecked, t, full, closed, registeredAlready, isLoggedIn, wlChecked, wlPosition]);
 
   /* ثبت‌نام از راه سرور.
 
@@ -138,6 +222,8 @@ export default function RegisterPage() {
      تا فعال‌شدن درگاه، سرور ۵۰۳ می‌دهد و ما همان را صادقانه نشان
      می‌دهیم — نه رسید. */
   const handlePay = async () => {
+    /* دو بار زدن روی گوشیِ کند دو ثبت‌نامِ هم‌زمان می‌ساخت (سرور هم شرط دارد) */
+    if (busy || leavingRef.current) return;
     if (!isLoggedIn) { setAlert(true); return; }
     setAlert(false); setPayUnavailable(''); setBusy(true);
     try {
@@ -152,7 +238,13 @@ export default function RegisterPage() {
          داده می‌شد — کسی که به مسابقه‌ی پر می‌رسید همین را می‌دید. */
       if (r.status === 409) {
         if (j.reason === 'already_registered') { setAlreadyReg(true); return; }
-        setPayUnavailable(String(j.message ?? 'ظرفیت مسابقه تکمیل است'));
+        if (j.reason === 'full') {
+          /* بدونِ await: دکمه‌ی پرداخت نباید تا بسته‌شدنِ پنجره در حالِ بارگذاری بماند */
+          void reloadT();
+          void showFull();
+          return;
+        }
+        setPayUnavailable(String(j.message ?? 'ثبت‌نام انجام نشد'));
         return;
       }
 
@@ -170,11 +262,15 @@ export default function RegisterPage() {
         return;
       }
 
-      if (typeof j.redirectUrl === 'string') { window.location.href = j.redirectUrl; return; }
+      if (typeof j.redirectUrl === 'string') {
+        leavingRef.current = true;
+        window.location.href = j.redirectUrl;
+        return;
+      }
       setPayUnavailable('اتصال به درگاه انجام نشد');
     } catch {
       setPayUnavailable('خطا در ارتباط با سرور');
-    } finally { setBusy(false); }
+    } finally { if (!leavingRef.current) setBusy(false); }
   };
 
   const downloadReceipt = () => {
@@ -693,12 +789,29 @@ export default function RegisterPage() {
               background: 'rgba(239,68,68,0.05)', border: '1px solid rgba(239,68,68,0.18)',
               borderRadius: 16, padding: '20px', textAlign: 'center',
             }}>
+              {/* ⚠️ «بسته» سه دلیل دارد و پیش‌تر همیشه «مهلت تمام شده» نوشته می‌شد —
+                  حتی برای مسابقه‌ای که پر شده و برگزارکننده بسته بود و مهلتش
+                  هنوز نرسیده بود. */}
               <div style={{ fontSize: 15, fontWeight: 800, color: '#111', marginBottom: 8, lineHeight: 1.7 }}>
-                مهلت ثبت‌نام این مسابقه تمام شده است
+                {t.status === 'upcoming' ? 'ثبت‌نام این مسابقه هنوز باز نشده است'
+                  : t.status === 'live' ? 'این مسابقه در حالِ برگزاری است'
+                  : t.status === 'finished' ? 'ثبت‌نام این مسابقه بسته است'
+                  : full ? 'ظرفیت این مسابقه تکمیل است'
+                  : deadlinePassed ? 'مهلت ثبت‌نام این مسابقه تمام شده است'
+                  : 'ثبت‌نام این مسابقه بسته شده است'}
               </div>
               <div style={{ fontSize: 12.5, color: '#6B6B6B', lineHeight: 1.9 }}>
-                مهلت تا {t.registrationDeadline || '—'}
-                {t.registrationDeadlineTime ? ` — ساعت ${toFa(t.registrationDeadlineTime)}` : ''} بود.
+                {t.status === 'upcoming'
+                  ? (t.regOpenDate
+                    ? `ثبت‌نام از ${t.regOpenDate}${t.regOpenTime ? ` — ساعت ${toFa(t.regOpenTime)}` : ''} باز می‌شود.`
+                    : 'زمانِ بازشدنِ ثبت‌نام هنوز اعلام نشده است.')
+                  : t.status === 'live' || t.status === 'finished' ? 'این مسابقه دیگر ثبت‌نام نمی‌پذیرد.'
+                  : full ? `همه‌ی ${toFa(t.maxPlayers)} صندلی پر شده و ثبت‌نام بسته است.`
+                  : deadlinePassed ? <>
+                    مهلت تا {t.registrationDeadline || '—'}
+                    {t.registrationDeadlineTime ? ` — ساعت ${toFa(t.registrationDeadlineTime)}` : ''} بود.
+                  </>
+                  : 'برگزارکننده ثبت‌نام را بسته است.'}
               </div>
               <Link href="/tournaments" style={{
                 display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginTop: 14,
@@ -765,7 +878,7 @@ export default function RegisterPage() {
             </div>
           ) : (
             <>
-              <button onClick={handlePay} style={{
+              <button onClick={handlePay} disabled={busy} aria-busy={busy} style={{
                 position: 'relative', overflow: 'hidden',
                 width: '100%', padding: '16px', borderRadius: 20,
                 background: 'rgba(199,166,106,0.06)',

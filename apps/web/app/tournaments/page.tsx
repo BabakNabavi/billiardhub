@@ -102,16 +102,20 @@ function TournamentCard({ t, i }: { t: Tournament; i: number }) {
           </span>
         </div>
         <div style={{ position: 'absolute', top: 12, left: 12 }}><StatusPill t={t} /></div>
-        <div style={{ position: 'absolute', insetInline: 12, bottom: 10, display: 'flex', alignItems: 'center', gap: 5, fontSize: 11.5, color: 'rgba(255,255,255,0.85)' }}>
-          <MapPin size={11} style={{ color: GOLD }} />
-          {t.clubName}
-        </div>
         <span className="tn-line" />
       </div>
 
       {/* بدنه */}
       <div style={{ padding: '12px 15px 13px', flex: 1, display: 'flex', flexDirection: 'column', gap: 7 }}>
         <h3 className="tn-title">{t.name}</h3>
+        {/* ⚠️ نامِ باشگاهِ برگزارکننده پیش‌تر ۱۱٫۵ پیکسلِ سفیدِ کم‌رنگ روی پوستر
+            بود و روی تصویرِ روشن عملاً خوانده نمی‌شد. حالا در بدنه، درشت‌تر و تیره. */}
+        {t.clubName && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, fontWeight: 800, color: TEXT, minWidth: 0 }}>
+            <MapPin size={13} style={{ color: GOLD_D, flexShrink: 0 }} />
+            <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t.clubName}</span>
+          </div>
+        )}
 
         <div style={{ display: 'flex', alignItems: 'center', gap: 7, fontSize: 12.5, color: SEC }}>
           <Calendar size={13} style={{ color: GOLD_D, flexShrink: 0 }} />
@@ -516,7 +520,7 @@ export default function TournamentsPage() {
                     <div style={{ fontSize: 13.5, fontWeight: 900, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t.name}</div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11.5, color: MUT, marginTop: 4, minWidth: 0 }}>
                       <MapPin size={11} style={{ color: '#14532D', flexShrink: 0 }} />
-                      <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t.clubName}</span>
+                      <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontSize: 12.5, fontWeight: 800, color: TEXT }}>{t.clubName}</span>
                       <span style={{ width: 3.5, height: 3.5, borderRadius: '50%', background: '#D8D2C4', flexShrink: 0 }} />
                       <span style={{ flexShrink: 0 }}>{t.date}</span>
                     </div>

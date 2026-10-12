@@ -24,7 +24,7 @@
    نمی‌افتادند — فهرست خوانده نمی‌شد. گرید ستون‌ها را قفل می‌کند.
    ───────────────────────────────────────────────────────────── */
 
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { UserPlus, Trash2, Phone, RefreshCw, Users, Loader2, AlertTriangle, Check, X } from 'lucide-react'
 import { apiFetch } from '../../../lib/http'
 
@@ -42,6 +42,8 @@ interface Reg {
   source: 'online' | 'offline'
   note: string | null
   createdAt: string
+  /** پایانِ مهلتِ پرداختِ ثبت‌نامِ در انتظار — از سرور (lib/tournaments/server: forOrganizer) */
+  payDeadline?: string | null
 }
 
 interface Payload {
@@ -107,6 +109,37 @@ export default function TournamentRegistrations({ tournamentId, onChanged }: {
   }, [tournamentId])
 
   useEffect(() => { void load() }, [load])
+
+  /* ── شمارشِ معکوسِ مهلتِ پرداخت ──
+     پیش‌تر متنِ ثابتِ «اگر تا ۱۵ دقیقه…» بود، حتی ده دقیقه بعد. حالا از
+     `payDeadline`ِ سرور، هر ۱۵ ثانیه؛ تایمر فقط وقتی ثبت‌نامِ در انتظار هست
+     زنده است. با گذشتنِ مهلتِ نزدیک‌ترین، فهرست یک‌بار تازه می‌شود — مسیرِ
+     خواندن پیش از شمارش آزادش می‌کند و ردیف می‌رود. */
+  const [now, setNow] = useState(() => Date.now())
+  const deadlines = (data?.registrations ?? [])
+    .filter(r => r.status === 'PENDING_PAYMENT' && r.payDeadline)
+    .map(r => Date.parse(r.payDeadline as string))
+    .filter(Number.isFinite)
+  const soonest = deadlines.length ? Math.min(...deadlines) : null
+  useEffect(() => {
+    if (soonest === null) return
+    setNow(Date.now())
+    const timer = setInterval(() => setNow(Date.now()), 15_000)
+    return () => clearInterval(timer)
+  }, [soonest])
+  /* دو تلاش برای هر مهلت: ۵ و ۳۵ ثانیه پس از آن — اگر ساعتِ دستگاه از سرور
+     جلوتر باشد، تلاشِ اول پیش از آزادشدن می‌رسد. کارتِ والد («N از M») هم
+     تازه می‌شود. بیش از دو بار نه، تا حلقه نسازد. */
+  const refreshed = useRef<{ at: number; n: number } | null>(null)
+  useEffect(() => {
+    if (soonest === null || now < soonest + 5_000) return
+    const r = refreshed.current
+    const same = !!r && r.at === soonest
+    if (same && (r!.n >= 2 || now < soonest + 35_000)) return
+    refreshed.current = { at: soonest, n: same ? r!.n + 1 : 1 }
+    void load(true)
+    void onChanged?.()
+  }, [now, soonest, load, onChanged])
 
   /* هر تغییری که ظرفیت را جابه‌جا می‌کند، هم این فهرست و هم کارت
      والد را تازه می‌کند. */
@@ -250,8 +283,14 @@ export default function TournamentRegistrations({ tournamentId, onChanged }: {
           border: '1px solid rgba(245,158,11,0.22)', borderRadius: 10,
           padding: '8px 12px', marginBottom: 10, lineHeight: 1.9,
         }}>
-          {fa(pending)} ثبت‌نام در انتظار پرداخت است. اگر تا ۱۵ دقیقه پرداخت نشود،
-          خودکار منقضی می‌شود و صندلی‌اش آزاد می‌گردد.
+          {(() => {
+            const mins = soonest === null ? null : Math.max(0, Math.ceil((soonest - now) / 60_000))
+            if (mins === 0) return `${fa(pending)} ثبت‌نام در انتظار پرداخت است. مهلتِ پرداخت تمام شد؛ صندلی در حالِ آزادشدن است.`
+            const left = mins === null ? 'پانزده دقیقه' : `${fa(mins)} دقیقه‌ی دیگر`
+            return pending === 1
+              ? `${fa(pending)} ثبت‌نام در انتظار پرداخت است. اگر تا ${left} پرداخت نشود، خودکار منقضی می‌شود و صندلی‌اش آزاد می‌گردد.`
+              : `${fa(pending)} ثبت‌نام در انتظار پرداخت است. هرکدام اگر در مهلتِ خودش پرداخت نشود، خودکار منقضی می‌شود و صندلی‌اش آزاد می‌گردد — نزدیک‌ترین تا ${left}.`
+          })()}
         </div>
       )}
 

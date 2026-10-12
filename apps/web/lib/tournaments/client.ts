@@ -104,6 +104,7 @@ export function toTournament(r: DbTournament): Tournament {
        را ساعت ۱۲ ظهر ببندد ولی بازیکن فقط روز را می‌دید و تا شب
        فرصت خیال می‌کرد. */
     registrationDeadlineTime: r.registration_ends_at ? tehranTime(r.registration_ends_at) : '',
+    registrationEndsAtMs: r.registration_ends_at ? Date.parse(r.registration_ends_at) || undefined : undefined,
     /* «بزودی» بدون تاریخ یعنی هیچ. اگر ثبت‌نام زمان‌بندی شده،
        بازیکن باید بداند کی باید برگردد. */
     regOpenDate: r.registration_starts_at ? faDate(r.registration_starts_at) : '',

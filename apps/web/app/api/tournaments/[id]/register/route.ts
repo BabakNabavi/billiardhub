@@ -30,6 +30,24 @@ const REASON_FA: Record<string, string> = {
   server_error: 'ثبت‌نام انجام نشد',
 };
 
+/* ── آزادکردنِ ثبت‌نامی که هرگز به درگاه نرسید ──
+   همان UPDATEِ شرط‌دارِ کالبک (EXPIRED/FAILED فقط اگر هنوز در انتظار
+   است) با یک قیدِ بیشتر: `provider_authority IS NULL`. ردیفِ تکراریِ همین
+   کاربر ممکن است از تلاشِ قبلی شناسه‌ی درگاه داشته باشد و در تبِ دیگری
+   همین حالا در حالِ پرداخت باشد؛ آن یکی دست نمی‌خورد و مهلتِ عادی‌اش را
+   می‌گذراند. صندلی آزاد شد ⟵ نفرِ اولِ صفِ انتظار. */
+async function releaseUnsent(registrationId: string, tournamentId: string): Promise<boolean> {
+  const { data, error } = await sb().from('tournament_registrations')
+    .update({ status: 'EXPIRED', payment_status: 'FAILED', updated_at: new Date().toISOString() })
+    .eq('id', registrationId).eq('status', 'PENDING_PAYMENT').neq('payment_status', 'PAID')
+    .is('provider_authority', null)
+    .select('id');
+  if (error) { console.error('[tournaments/register] release failed:', error.message); return false; }
+  const released = !!data && data.length > 0;
+  if (released) void promoteWaitlist(tournamentId);
+  return released;
+}
+
 export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string }> }) {
   const { id } = await ctx.params;
   if (!UUID.test(id)) return NextResponse.json({ message: 'مسابقه پیدا نشد' }, { status: 404 });
@@ -105,19 +123,41 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string
   });
 
   if (!pay.ok || !pay.redirectUrl) {
-    return NextResponse.json({ message: pay.message ?? 'اتصال به درگاه انجام نشد' }, { status: 502 });
+    /* ⚠️ کاربر هرگز به درگاه نرفت، ولی ثبت‌نام در PENDING_PAYMENT می‌ماند و
+       صندلی را پانزده دقیقه نگه می‌داشت — پنلِ باشگاه «۲ ثبت‌نام در انتظار
+       پرداخت» نشان می‌داد برای کسانی که اصلاً پرداختی شروع نکرده بودند. */
+    const released = await releaseUnsent(out.registrationId!, id);
+    console.error('[tournaments/register] gateway refused:', pay.message);
+    /* «صندلی نگه داشته نشد» فقط وقتی واقعاً آزاد شد — ردیفی که از تلاشِ قبلی
+       شناسه‌ی درگاه دارد تا پایانِ مهلتِ خودش می‌ماند. */
+    const gw = `درگاه پرداخت درخواست را نپذیرفت${pay.message ? `: «${pay.message}»` : ''}.`;
+    return NextResponse.json({
+      message: released
+        ? `${gw} ثبت‌نامی انجام نشد و صندلی‌ای برایتان نگه داشته نشد؛ کمی بعد دوباره تلاش کنید.`
+        : `${gw} کمی بعد دوباره تلاش کنید.`,
+    }, { status: 502 });
   }
 
   /* ⚠️ اگر ذخیره‌ی شناسه‌ی درگاه نشد، کاربر **نباید** به درگاه برود.
      بازگشت فقط همین شناسه‌ی ذخیره‌شده را معتبر می‌داند؛ پرداختی که
      شناسه‌اش این‌جا ننشسته، پس از کسرِ پول قابلِ تأیید نیست. پیش‌تر
      نتیجه‌ی این UPDATE اصلا خوانده نمی‌شد. */
-  const { error: saveErr } = await sb().from('tournament_registrations').update({
+  /* ⚠️ شرط‌دار: درخواستِ هم‌زمانِ دیگری (دو بار زدنِ دکمه) ممکن است همین ردیف
+     را پس از شکستِ درگاهش آزاد کرده و صندلی را به صفِ انتظار داده باشد.
+     ذخیره‌ی بی‌شرط ردیفِ EXPIRED را دوباره INITIATED می‌کرد و کاربر برای
+     صندلی‌ای که دیگر مالِ او نبود پول می‌داد — و پولش به بازپرداخت می‌افتاد. */
+  const { data: saved, error: saveErr } = await sb().from('tournament_registrations').update({
     payment_status: 'INITIATED', provider: provider.name,
     provider_authority: pay.authority ?? null, updated_at: new Date().toISOString(),
-  }).eq('id', out.registrationId);
+  }).eq('id', out.registrationId).eq('status', 'PENDING_PAYMENT').neq('payment_status', 'PAID')
+    .select('id');
+  if (!saveErr && pay.authority && (!saved || saved.length === 0)) {
+    return NextResponse.json({ message: 'ثبت‌نامِ هم‌زمانِ دیگری در جریان بود؛ صفحه را تازه کنید و دوباره تلاش کنید.', reason: 'concurrent' }, { status: 409 });
+  }
   if (saveErr || !pay.authority) {
     console.error('[tournaments/register] authority not saved:', saveErr?.message ?? 'no authority');
+    /* کاربر به درگاه فرستاده نمی‌شود، پس پولی جابه‌جا نمی‌شود — صندلی آزاد */
+    await releaseUnsent(out.registrationId!, id);
     return NextResponse.json({ message: 'اتصال به درگاه انجام نشد؛ دوباره تلاش کنید' }, { status: 502 });
   }
 

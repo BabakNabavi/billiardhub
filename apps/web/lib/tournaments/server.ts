@@ -57,6 +57,7 @@ export interface RegistrationRow {
   source: 'online' | 'offline'
   note: string | null
   created_at: string
+  updated_at?: string | null
 }
 
 /* وضعیت‌هایی که عمومی دیده می‌شوند */
@@ -322,6 +323,12 @@ export function forOrganizer(r: RegistrationRow) {
     source: r.source ?? 'online',
     note: r.note ?? null,
     createdAt: r.created_at,
+    /* مهلتِ پرداخت — از همان ساعتی که `bh_tournament_expire_pending` می‌سنجد
+       (updated_at، نه created_at: ثبت‌نامِ دوباره روی همان ردیف created_at را
+       دست نمی‌زند). سرور حساب می‌کند تا عددِ ۱۵ فقط یک جا باشد. */
+    payDeadline: r.status === 'PENDING_PAYMENT'
+      ? new Date(Date.parse(r.updated_at ?? r.created_at) + PAYMENT_WINDOW_MINUTES * 60_000).toISOString()
+      : null,
   }
 }
 
