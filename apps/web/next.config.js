@@ -59,6 +59,8 @@ const nextConfig = {
       { source: '/installers/:path*', destination: '/services', permanent: true },
       // نسخه‌ی آزمایشی بازار تأیید و جایگزین /shop شد
       { source: '/market-new', destination: '/shop', permanent: true },
+      // صفحه‌ی برندها یتیم بود (از جایی لینک نمی‌شد) با محتوای هاردکدِ نادرست؛ حذف شد
+      { source: '/shop/brands/:path*', destination: '/shop', permanent: true },
     ];
   },
   /* ⚠️ هدرِ `X-Powered-By: Next.js` نسخه‌ی فریم‌ورک را به هر
