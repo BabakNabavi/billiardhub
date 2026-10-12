@@ -1,15 +1,18 @@
 import type { MetadataRoute } from 'next'
 import { base } from './robots'
 import { NEWS_SECTIONS } from '@/lib/news/sections'
+import { parseDbTimestamp } from '@/lib/jalali'
+import { notExpiredOr } from '@/lib/market/live'
 
 /* ⚠️ نقشه در زمان build ساخته می‌شد، یعنی خبر تازه تا دیپلوی بعدی
    در نقشه نبود. ساعتی یک‌بار بازسازی می‌شود. */
 export const revalidate = 3600
 
-/* نقشه‌ی سایت فقط صفحه‌های عمومی ثابت را می‌دهد. صفحه‌های داینامیک
-   (باشگاه/مربی/محصول) عمدا این‌جا نیستند: برای فهرست‌کردنشان باید در
-   زمان ساخت به دیتابیس وصل شویم و اگر دیتابیس در دسترس نباشد کل build
-   می‌شکند. افزودنشان کار جداگانه‌ای است با ISR و مدیریت خطا. */
+/* نقشه‌ی سایت صفحه‌های عمومی ثابت را می‌دهد، به‌علاوه‌ی صفحه‌های داینامیکی
+   که پشتِ گاردِ `guarded` (پایین‌تر) خوانده می‌شوند. پیش‌تر داینامیک‌ها
+   عمداً این‌جا نبودند: نقشه در زمانِ build هم ساخته می‌شود و شکستِ دیتابیس
+   کلِ build را می‌شکست. گارد همان را می‌بندد — هر خطا و هر تأخیرِ بیش از
+   دو ثانیه یعنی فهرستِ خالیِ همان بخش، نه شکستِ نقشه. */
 
 const ROUTES: { path: string; priority: number; freq: MetadataRoute.Sitemap[number]['changeFrequency'] }[] = [
   { path: '/',              priority: 1.0, freq: 'daily' },
@@ -52,30 +55,100 @@ const MEDIA_CATEGORY_KEYS = [
    عملا ایندکس نمی‌شود. پس استثنا با گارد کامل: هر خطا و هر تأخیر
    بیش از دو ثانیه یعنی فهرست خالی، و نقشه‌ی ایستا سر جایش می‌ماند.
    هیچ مسیری از این تابع نمی‌تواند throw کند. */
-async function newsEntries(root: string): Promise<MetadataRoute.Sitemap> {
+/** هر منبعِ داینامیکِ نقشه از این می‌گذرد: هیچ مسیری throw نمی‌کند. */
+async function guarded(name: string, load: () => Promise<MetadataRoute.Sitemap>): Promise<MetadataRoute.Sitemap> {
+  let timer: ReturnType<typeof setTimeout> | undefined
   try {
-    const { listPublished } = await import('@/lib/news/server')
-    let timer: ReturnType<typeof setTimeout> | undefined
-    const rows = await Promise.race([
-      listPublished(200),
-      new Promise<never[]>(r => { timer = setTimeout(() => r([]), 2000) }),
-    ]).finally(() => { if (timer) clearTimeout(timer) })
-    return rows.map(a => ({
-      url: `${root}/news/${encodeURIComponent(a.id)}`,
-      lastModified: new Date(a.updatedTs ?? a.ts ?? Date.now()),
-      changeFrequency: 'weekly' as const,
-      priority: 0.6,
-    }))
+    return await Promise.race([
+      load(),
+      new Promise<MetadataRoute.Sitemap>(r => { timer = setTimeout(() => r([]), 2000) }),
+    ])
   } catch (e) {
-    /* خاموش نماند: نقشه‌ی خبر همیشه‌خالی دیده نمی‌شود */
-    console.error('[sitemap] news:', (e as Error).message)
+    /* خاموش نماند: بخشی که همیشه خالی است دیده نمی‌شود */
+    console.error(`[sitemap] ${name}:`, (e as Error).message)
     return []
+  } finally {
+    if (timer) clearTimeout(timer)
   }
 }
+
+const newsEntries = (root: string) => guarded('news', async () => {
+  const { listPublished } = await import('@/lib/news/server')
+  const rows = await listPublished(200)
+  return rows.map(a => ({
+    url: `${root}/news/${encodeURIComponent(a.id)}`,
+    lastModified: new Date(a.updatedTs ?? a.ts ?? Date.now()),
+    changeFrequency: 'weekly' as const,
+    priority: 0.6,
+  }))
+})
+
+/* ── باشگاه‌ها، مسابقات، آگهی‌های بازار ──
+   شرطِ عمومی‌بودنِ هرکدام همان شرطی است که layoutِ همان صفحه برای
+   `robots` دارد (یا فهرستِ عمومیِ همان بخش) — صفحه‌ای که noindex است
+   نباید در نقشه بیاید. ستون‌های camelCaseِ `clubs` و `products`
+   timestampِ بی‌منطقه‌اند، پس با `parseDbTimestamp` خوانده می‌شوند. */
+const SITEMAP_LIMIT = 1000
+const lastMod = (v: unknown): Date => parseDbTimestamp(v) ?? new Date()
+
+const clubEntries = (root: string) => guarded('clubs', async () => {
+  const { sb } = await import('@/lib/finance/db')
+  const { data, error } = await sb().from('clubs')
+    .select('id,"updatedAt"')
+    .not('isActive', 'is', false)
+    .in('verificationStatus', ['verified', 'approved'])
+    .limit(SITEMAP_LIMIT)
+  if (error) throw new Error(error.message)
+  return ((data ?? []) as { id: string; updatedAt?: string | null }[]).map(c => ({
+    url: `${root}/clubs/${c.id}`,
+    lastModified: lastMod(c.updatedAt),
+    changeFrequency: 'weekly' as const,
+    priority: 0.7,
+  }))
+})
+
+const tournamentEntries = (root: string) => guarded('tournaments', async () => {
+  const [{ sb }, { PUBLIC_STATUSES }] = await Promise.all([
+    import('@/lib/finance/db'), import('@/lib/tournaments/server'),
+  ])
+  const { data, error } = await sb().from('tournaments')
+    .select('id,updated_at')
+    .in('status', PUBLIC_STATUSES)
+    .order('updated_at', { ascending: false })
+    .limit(SITEMAP_LIMIT)
+  if (error) throw new Error(error.message)
+  return ((data ?? []) as { id: string; updated_at?: string | null }[]).map(t => ({
+    url: `${root}/tournaments/${t.id}`,
+    lastModified: lastMod(t.updated_at),
+    changeFrequency: 'daily' as const,
+    priority: 0.6,
+  }))
+})
+
+/* فقط آگهیِ زنده — `lib/market/live` */
+const marketAdEntries = (root: string) => guarded('market', async () => {
+  const { sb } = await import('@/lib/finance/db')
+  const { data, error } = await sb().from('products')
+    .select('id,"updatedAt"')
+    .eq('status', 'active').or(notExpiredOr())
+    .order('updatedAt', { ascending: false })
+    .limit(SITEMAP_LIMIT)
+  if (error) throw new Error(error.message)
+  return ((data ?? []) as { id: string; updatedAt?: string | null }[]).map(p => ({
+    url: `${root}/shop/${p.id}`,
+    lastModified: lastMod(p.updatedAt),
+    changeFrequency: 'weekly' as const,
+    priority: 0.6,
+  }))
+})
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const root = base()
   const now = new Date()
+  /* هم‌زمان: هر کدام سقفِ دو ثانیه‌ی خودش را دارد */
+  const [news, clubs, tournaments, ads] = await Promise.all([
+    newsEntries(root), clubEntries(root), tournamentEntries(root), marketAdEntries(root),
+  ])
   return [
     /* بخش‌های تحریریه — ثابت، بدون دیتابیس */
     ...NEWS_SECTIONS.map(s => ({
@@ -84,13 +157,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: 'daily' as const,
       priority: 0.5,
     })),
-    ...(await newsEntries(root)),
+    ...news,
     ...ROUTES.map(r => ({
       url: `${root}${r.path}`,
       lastModified: now,
       changeFrequency: r.freq,
       priority: r.priority,
     })),
+    ...clubs,
+    ...tournaments,
+    ...ads,
     ...MEDIA_CATEGORY_KEYS.map(k => ({
       url: `${root}/media?category=${k}`,
       lastModified: now,

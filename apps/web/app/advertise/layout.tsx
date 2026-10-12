@@ -4,7 +4,10 @@ import type { Metadata } from 'next'
    metadata صادر کند، پس این لایه فقط برای SEO اضافه شده و
    چیزی جز children رندر نمی‌کند. */
 export const metadata: Metadata = {
-  title: 'تبلیغات در بیلیارد هاب | بیلیارد هاب',
+  /* `template` عمدی است: لایه‌ای که `title`ِ رشته‌ای دارد قالبِ ریشه را برای
+     فرزندانش قطع می‌کند، پس صفحه‌ی جزئیات (مثلاً آگهی/باشگاه/مسابقه) بی‌نامِ
+     سایت می‌ماند. با `default` عنوانِ خودِ بخش همان قبلی است. */
+  title: { default: 'تبلیغات در بیلیارد هاب', template: '%s | بیلیارد هاب' },
   description: 'جایگاه‌های تبلیغاتی و بسته‌های نمایش در پلتفرم بیلیارد هاب.',
   alternates: { canonical: '/advertise' },
   openGraph: {

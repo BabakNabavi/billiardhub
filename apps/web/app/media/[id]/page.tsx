@@ -42,7 +42,7 @@ async function load(slug: string): Promise<VideoRow | null> {
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { id } = await params
   const v = await load(id)
-  if (!v) return { title: 'ویدیو پیدا نشد | بیلیارد هاب', robots: { index: false, follow: true } }
+  if (!v) return { title: { absolute: 'ویدیو پیدا نشد | بیلیارد هاب' }, robots: { index: false, follow: true } }
 
   const cat = mediaCategoryOf(v.category as MediaCategoryKey)
   const url = absoluteUrl(`/media/${v.slug}`)

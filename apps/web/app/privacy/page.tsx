@@ -3,7 +3,7 @@ import LegalDoc from '../../components/legal/LegalDoc'
 import { PRIVACY } from '../../lib/legal-content'
 
 export const metadata: Metadata = {
-  title: 'حریم خصوصی | بیلیارد هاب',
+  title: 'حریم خصوصی',
   description: 'سیاست حریم خصوصی بیلیارد هاب — اطلاعات دریافتی از کاربران، نحوه استفاده، امنیت، کوکی‌ها و نگهداری اطلاعات.',
 }
 

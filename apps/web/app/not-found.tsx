@@ -5,7 +5,9 @@ import type { Metadata } from 'next'
    وسط یک سایت کاملا فارسی راست‌به‌چپ. */
 
 export const metadata: Metadata = {
-  title: 'صفحه پیدا نشد | بیلیارد هاب',
+  /* `absolute`: ۴۰۴ زیرِ هر لایه‌ای رندر می‌شود و بعضی (مثلاً media) قالبِ عنوان
+     را قطع کرده‌اند — رشته‌ی ساده آن‌جا بی‌نامِ سایت می‌ماند. */
+  title: { absolute: 'صفحه پیدا نشد | بیلیارد هاب' },
   robots: { index: false, follow: true },
 }
 

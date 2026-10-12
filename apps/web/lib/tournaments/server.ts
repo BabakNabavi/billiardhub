@@ -60,7 +60,7 @@ export interface RegistrationRow {
 }
 
 /* وضعیت‌هایی که عمومی دیده می‌شوند */
-const PUBLIC_STATUSES: TournamentStatus[] = [
+export const PUBLIC_STATUSES: TournamentStatus[] = [
   'published', 'registration_open', 'registration_closed', 'ongoing', 'completed',
 ]
 
