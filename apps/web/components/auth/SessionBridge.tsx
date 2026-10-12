@@ -22,6 +22,7 @@
 import { useEffect } from 'react'
 import { useAuthStore } from '../../store/auth.store'
 import { refreshSession, readLastRefresh } from '../../lib/auth/refresh-client'
+import { csrfToken } from '../../lib/http'
 
 const DONE_KEY = 'bh_session_migrated'
 const REFRESH_EVERY_MS = 12 * 60 * 1000   // کوکی ۱۵ دقیقه‌ای، با حاشیه‌ی امن
@@ -103,13 +104,25 @@ export default function SessionBridge() {
         دسکتاپ قدیمی می‌ماند، فقط چون آن یکی دستگاه بعد از تغییر
         دوباره وارد شده بود.
 
-     برای مهمان یک درخواست است که ۴۰۱ می‌گیرد و تمام. */
+     ── مهمانِ واقعی هیچ درخواستی نمی‌فرستد ──
+     تا مهرِ ۱۴۰۵ برای مهمان *دو* درخواست بود: پروفایل ⟵ ۴۰۱ ⟵ تمدید
+     ⟵ ۴۰۱، در هر بارگذاریِ هر صفحه، با دو خطای قرمز در کنسول — یعنی
+     برای بیشترِ بازدیدکننده‌ها، روی شبکه‌ی کندِ موبایل، دو رفت‌وبرگشتِ
+     بی‌فایده.
+
+     `bh_csrf` تنها کوکیِ نشست است که جاوااسکریپت می‌بیند، و همیشه هم‌راه
+     با کوکیِ رفرش ست و پاک می‌شود (`setSessionCookies` /
+     `clearSessionCookies`، با همان عمر). نبودنش یعنی نشستی برای بازسازی
+     وجود ندارد. ⚠️ ولی اگر کاربری در استور مانده یا توکنِ قدیمی هست،
+     مسیرِ کامل عمداً اجرا می‌شود: همان حالت است که باید به `logout`
+     برسد، وگرنه بن‌بستِ «صفحه‌ی سفید» برمی‌گردد. */
   useEffect(() => {
     if (!hydrated) return
     let stopped = false
 
     const sync = async () => {
       try {
+        if (!csrfToken() && !useAuthStore.getState().user && !legacyToken()) return
         let r = await fetch('/api/users/profile', { credentials: 'include', cache: 'no-store' })
         if (stopped) return
 

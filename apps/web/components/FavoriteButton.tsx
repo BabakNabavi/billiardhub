@@ -11,7 +11,7 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import { Heart } from 'lucide-react'
-import { apiFetch } from '../lib/http'
+import { apiFetch, csrfToken } from '../lib/http'
 
 export type FavoriteType = 'club' | 'coach' | 'referee' | 'seller' | 'product'
 
@@ -23,6 +23,10 @@ const listeners = new Set<() => void>()
 
 async function loadFavorites(): Promise<Set<string>> {
   if (cache && Date.now() - cache.at < CACHE_MS) return cache.keys
+  /* مهمان فهرستی ندارد: همان نشانه‌ی `apiFetch` (کوکیِ CSRF فقط همراهِ
+     نشست هست). بدونِ این، هر صفحه‌ای که قلب داشت برای مهمان یک ۴۰۱ و یک
+     خطای کنسول می‌ساخت. عمداً کش نمی‌شود تا بعد از ورود فهرست واقعی بیاید. */
+  if (!csrfToken()) return new Set()
   try {
     const r = await apiFetch('/api/favorites', { cache: 'no-store' })
     if (!r.ok) { cache = { at: Date.now(), keys: new Set() }; return cache.keys }
