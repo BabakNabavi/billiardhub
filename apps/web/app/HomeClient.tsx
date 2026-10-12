@@ -240,13 +240,13 @@ const HERO_SLIDES = [
 ];
 
 const FEATURE_CARDS = [
-  { Icon: Calendar,    title: 'رزرو میز',          caption: 'جستجو و رزرو آنلاین میز در بهترین باشگاهها',          href: '/clubs',         clr: '#4A9EFF', rgb: '74,158,255'   },
+  { Icon: Calendar,    title: 'رزرو میز',          caption: 'جستجو و رزرو آنلاین میز در بهترین باشگاه‌ها',          href: '/clubs',         clr: '#4A9EFF', rgb: '74,158,255'   },
   { Icon: Trophy,      title: 'مسابقات',            caption: 'شرکت در مسابقات و مشاهده نتایج زنده',                 href: '/tournaments',   clr: '#30C55A', rgb: '48,197,90'    },
   { Icon: ShoppingBag, title: 'خرید و فروش',        caption: 'خرید و فروش انواع تجهیزات بیلیارد',                   href: '/shop',          clr: '#B97BFF', rgb: '185,123,255'  },
   { Icon: Users,       title: 'جامعه بیلیارد',      caption: 'ارتباط با همه‌ی صنوف بیلیاردی و اشتراک تجربه‌ها',   href: '/players',       clr: '#FF6B9D', rgb: '255,107,157'  },
   { Icon: Building2,   title: 'تولیدکنندگان',       caption: 'معرفی بهترین تولیدکنندگان تجهیزات',                   href: '/manufacturers', clr: '#06b6d4', rgb: '6,182,212'    },
   { Icon: Wrench,         title: 'خدمات فنی',    caption: 'خدمات نصب و تعمیر تجهیزات بیلیارد',                      href: '/services', clr: 'var(--brand)', rgb: '199,166,106' },
-  { Icon: GraduationCap, title: 'آموزش',         caption: 'آموزش آکادمیک با برترین مربیان و بالاترین سطح',            href: '/coaches',  clr: '#F472B6', rgb: '244,114,182' },
+  { Icon: GraduationCap, title: 'آموزش',         caption: 'آموزش حرفه‌ای با مربیانِ ثبت‌شده‌ی بیلیارد هاب',            href: '/coaches',  clr: '#F472B6', rgb: '244,114,182' },
 ];
 
 /* ═══════════════════════════════════════════════════════════════
@@ -321,10 +321,13 @@ const CLUB_IMG_FALLBACK = [IMG.club1, IMG.club2, IMG.club3, IMG.club4, IMG.club5
 
 /* SERVICES_LIST به components/home/ServicesSection.tsx منتقل شد */
 
+/* ⚠️ «مسابقات سراسری ۱۴۰۴» (سالِ گذشته، و مسابقه‌ها باشگاهی‌اند نه ملی) و
+   «آکادمی آموزش» (آکادمی‌ای وجود ندارد؛ فهرستِ مربیان هست) برداشته شدند.
+   عنوانِ اسلاید فقط چیزی را می‌گوید که پشتِ لینکش واقعاً هست. */
 const BANNER_SLIDES = [
   { img:IMG.wall1,  title:'باشگاه‌های بیلیارد ایران', sub:'باشگاه نزدیکت را پیدا کن و میز رزرو کن',  link:'/clubs',       cta:'رزرو میز',       accent:GRN  },
-  { img:IMG.wall3,  title:'مسابقات سراسری بیلیارد ۱۴۰۴',  sub:'ثبت‌نام و شرکت در رقابت‌های ملی',   link:'/tournaments', cta:'ثبت‌نام',        accent:BLU  },
-  { img:IMG.wall4,  title:'آکادمی آموزش بیلیارد هاب',     sub:'مربیان ثبت‌شده‌ی بیلیارد هاب',           link:'/coaches',     cta:'شروع یادگیری',  accent:PRP  },
+  { img:IMG.wall3,  title:'مسابقات بیلیارد',  sub:'ثبت‌نام آنلاین در مسابقاتِ باشگاه‌ها',   link:'/tournaments', cta:'ثبت‌نام',        accent:BLU  },
+  { img:IMG.wall4,  title:'مربیان بیلیارد',     sub:'مربیان ثبت‌شده‌ی بیلیارد هاب',           link:'/coaches',     cta:'پیدا کردن مربی',  accent:PRP  },
   { img:IMG.wall5,  title:'بازارِ تجهیزات بیلیارد',        sub:'خرید و فروش چوب، میز و لوازم جانبی', link:'/shop',        cta:'خرید کن',        accent:GOLD },
   { img:IMG.wall12, title:'خدمات فنی تخصصی در محل',       sub:'نصب، تعمیر و سرویس حرفه‌ای میزها',   link:'/services',    cta:'درخواست خدمت',  accent:BRN  },
 ];
@@ -716,7 +719,9 @@ function MktBanner({ slides, label, body, cta, accent, href, initialIdx = 0, lqC
       <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(135deg, rgba(0,0,0,0.62) 0%, rgba(0,0,0,0.18) 100%)' }} />
       <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', padding: '0 20px' }}>
         <div>
-          <div style={{ fontSize: '9px', color: accent, fontWeight: 700, letterSpacing: '0.24em', marginBottom: '5px', textShadow: '0 1px 6px rgba(0,0,0,0.9)' }}>{label}</div>
+          {/* ⚠️ برچسب رنگِ accent نمی‌گیرد: accent سبزِ برند است و روی عکسِ ماهوتِ
+              سبز («مستقیم از فروشنده») عملاً دیده نمی‌شد. روشن روی پرده‌ی تیره همه‌جا خواناست. */}
+          <div style={{ fontSize: '9px', color: 'rgba(255,255,255,0.86)', fontWeight: 700, letterSpacing: '0.24em', marginBottom: '5px', textShadow: '0 1px 6px rgba(0,0,0,0.9)' }}>{label}</div>
           <div style={{ fontSize: 'clamp(13px,1.3vw,18px)', fontWeight: 700, color: '#fff', letterSpacing: '-0.03em', lineHeight: 1.2, marginBottom: '10px', textShadow: '0 2px 10px rgba(0,0,0,0.85)' }} dangerouslySetInnerHTML={{ __html: body }} />
           <div style={lqCta
             ? { display: 'inline-flex', alignItems: 'center', gap: '5px', background: 'rgb(var(--c-paper))', border: '1px solid var(--brand-line)', color: CTA_INK, padding: '5px 13px', borderRadius: '10px', fontSize: '11px', fontWeight: 700 }
@@ -1676,6 +1681,9 @@ useEffect(() => {
           .marketplace-hd { padding-left:14px !important; padding-right:14px !important; margin-bottom:22px !important; }
           .mkt-split { display:none !important; }
           .mkt-banners { grid-template-columns:1fr !important; margin:12px 14px 0 !important; }
+          /* همان حاشیه‌ی ۱۴ پیکسلیِ بنرهای قدیمیِ همین سکشن — هم‌ترازی مهم‌تر از پیمانه است؛
+             سکشن در موبایل پدینگِ کناری ندارد */
+          .mkt-empty { margin:0 14px !important; }
           .mkt-desk-btns { display:none !important; }
           .mkt-mobile-slider { display:flex !important; }
         }
@@ -2105,19 +2113,35 @@ useEffect(() => {
               ))}
             </div>
           )}
-          {/* ── Ad banners ── */}
+          {/* ── بازارِ خالی ──
+              وقتی هیچ آگهیِ زنده‌ای نیست (مثلاً همه منقضی شده‌اند) ردیفِ کارت
+              خالی می‌ماند و سکشن شکسته به‌نظر می‌رسید. به‌جایش یک کارتِ کوتاه با
+              راهِ بعدی. ظرف‌های کاروسلِ بالا عمداً سرِ جایشان می‌مانند تا ref و
+              افکتِ حرکتِ خودکار، وقتی آگهی رسید، درست وصل شوند. */}
+          {HOME_PRODUCTS.length === 0 && prodSlot.status !== 'loading' && (
+            <div className="mkt-empty mb-4 rounded-2xl border border-line/10 bg-white p-6 text-center">
+              <p className="mb-2 text-sm font-semibold text-ink">فعلاً آگهیِ فعالی در بازار نیست</p>
+              <p className="mb-4 text-xs leading-loose text-ink/60">میز، چوب یا لوازمِ اضافه داری؟ ثبتِ آگهی رایگان است.</p>
+              <Link prefetch={false} href="/shop/new" className="lq-cta">ثبت آگهی رایگان</Link>
+            </div>
+          )}
+          {/* ── Ad banners ──
+              ⚠️ متنِ این بنرها ادعا نمی‌کند. پیش‌تر «ویژه تابستان ۱۴۰۴ — تا
+              ۳۰٪ تخفیف» و «ارسال رایگان» بود: نه تخفیفی وجود داشت نه ارسالی
+              که پلتفرم بدهد (فروشنده خودش می‌فرستد)، و تاریخش هم گذشته بود.
+              فقط چیزی بنویس که از دیتابیس یا خودِ محصول درست درمی‌آید. */}
           <div className="mkt-banners" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginTop: '4px' }}>
             <MktBanner
               slides={[IMG.snooker, IMG.cue, IMG.ball]}
-              label="ویژه تابستان ۱۴۰۴"
-              body="تا ۳۰٪ تخفیف روی<br/>میزهای حرفه‌ای"
+              label="خرید و فروش"
+              body="میزهای حرفه‌ای<br/>نو و دست‌دوم"
               cta="خرید کن"
               accent={GOLD}
               href="/shop"
             />
             <MktBanner
               slides={[IMG.proTable, IMG.table, IMG.rest]}
-              label="ارسال رایگان"
+              label="مستقیم از فروشنده"
               body="چوب و لوازم<br/>اسنوکر حرفه‌ای"
               cta="مشاهده"
               accent={GRN}
@@ -2220,8 +2244,8 @@ useEffect(() => {
           <div className="mkt-banners" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginTop: '20px' }}>
             <MktBanner
               slides={[IMG.cue, IMG.table, IMG.ball]}
-              label="فروشندگان معتبر"
-              body="بهترین فروشگاه‌های<br/>تجهیزات بیلیارد"
+              label="همه در یک‌جا"
+              body="فروشگاه‌های<br/>تجهیزات بیلیارد"
               cta="فروشگاه‌ها"
               accent={GOLD}
               href="/sellers"
@@ -2229,7 +2253,7 @@ useEffect(() => {
             />
             <MktBanner
               slides={[IMG.snooker, IMG.proTable, IMG.rest]}
-              label="خرید مطمئن"
+              label="نشانِ تأیید"
               body="از فروشندگان<br/>تأییدشده"
               cta="مشاهده"
               accent={GOLD}

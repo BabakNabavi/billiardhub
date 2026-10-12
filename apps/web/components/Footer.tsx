@@ -15,10 +15,14 @@ const DIM     = 'rgba(26,25,23,0.62)';
 const DIM2    = 'rgba(26,25,23,0.62)';
 const BORDER  = 'rgba(26,25,23,0.10)';
 
+/* ── شبکه‌های اجتماعیِ سایت ──
+   ⚠️ هر سه `href: '#'` بودند: آیکونی که در هر صفحه دیده می‌شد و با کلیک
+   فقط صفحه را بالا می‌برد. حالا همان قاعده‌ی صفحه‌ی تماس (`CONTACT`):
+   خالی ⟵ نمایش داده نمی‌شود. برای فعال‌کردن، نشانیِ کامل را همین‌جا بده. */
 const SOCIALS = [
   {
     title: 'اینستاگرام',
-    href: '#',
+    href: '',
     svg: (
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
         <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
@@ -29,7 +33,7 @@ const SOCIALS = [
   },
   {
     title: 'تلگرام',
-    href: '#',
+    href: '',
     svg: (
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
         <path d="M22 2L11 13" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
@@ -39,7 +43,7 @@ const SOCIALS = [
   },
   {
     title: 'واتساپ',
-    href: '#',
+    href: '',
     svg: (
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
         <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
@@ -47,6 +51,11 @@ const SOCIALS = [
     ),
   },
 ];
+const LIVE_SOCIALS = SOCIALS.filter(s => s.href)
+
+/* اینستاگرامِ سازنده، کنارِ اعتبارِ «Designed & Developed by» — همان قاعده:
+   خالی ⟵ آیکون نمایش داده نمی‌شود. */
+const DEV_INSTAGRAM = ''
 
 /* ستون «اطلاعات و قوانین» حذف شد (هم موبایل هم دسکتاپ).
    لینک‌هایش — قوانین، حریم خصوصی، تماس، درباره ما — از نوار پایینی
@@ -224,14 +233,16 @@ export default function Footer() {
               اولین پلتفرم تخصصی بیلیارد ایران
             </p>
 
-            {/* Socials */}
-            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-              {SOCIALS.map(s => (
-                <a key={s.title} href={s.href} className="ft-social" title={s.title} aria-label={s.title}>
-                  {s.svg}
-                </a>
-              ))}
-            </div>
+            {/* Socials — فقط آن‌هایی که نشانیِ واقعی دارند */}
+            {LIVE_SOCIALS.length > 0 && (
+              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                {LIVE_SOCIALS.map(s => (
+                  <a key={s.title} href={s.href} target="_blank" rel="noopener noreferrer" className="ft-social" title={s.title} aria-label={s.title}>
+                    {s.svg}
+                  </a>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Nav columns */}
@@ -275,13 +286,13 @@ export default function Footer() {
                 و روی متن حروف‌کوچک، فاصله‌ی حروف بیش از حد باز می‌افتاد */}
             <span style={{ direction: 'ltr', display: 'inline-flex', alignItems: 'center', gap: '6px', lineHeight: 1, fontSize: '10.5px', fontWeight: 600, letterSpacing: '0.04em', color: 'rgba(26,25,23,0.62)' }}>
               <a href="https://www.babaknabavi.com" target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', color: 'inherit' }}>Designed &amp; Developed by <span style={{ color: GOLD_TXT }}>Babak Nabavi</span></a>
-              <a href="#" aria-label="اینستاگرام" style={{ display: 'inline-flex', color: GOLD, alignSelf: 'center', transform: 'translateY(-2px)' }}>
+              {DEV_INSTAGRAM && <a href={DEV_INSTAGRAM} target="_blank" rel="noopener noreferrer" aria-label="اینستاگرامِ سازنده" style={{ display: 'inline-flex', color: GOLD, alignSelf: 'center', transform: 'translateY(-2px)' }}>
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                   <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
                   <circle cx="12" cy="12" r="4.5"/>
                   <circle cx="17.5" cy="6.5" r="0.5" fill="currentColor" stroke="none"/>
                 </svg>
-              </a>
+              </a>}
             </span>
           </div>
         </div>
@@ -341,13 +352,13 @@ export default function Footer() {
                 و روی متن حروف‌کوچک، فاصله‌ی حروف بیش از حد باز می‌افتاد */}
             <span style={{ direction: 'ltr', display: 'inline-flex', alignItems: 'center', gap: '6px', lineHeight: 1, fontSize: '10.5px', fontWeight: 600, letterSpacing: '0.04em', color: 'rgba(26,25,23,0.62)' }}>
               <a href="https://www.babaknabavi.com" target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', color: 'inherit' }}>Designed &amp; Developed by <span style={{ color: GOLD_TXT }}>Babak Nabavi</span></a>
-              <a href="#" aria-label="اینستاگرام" style={{ display: 'inline-flex', color: GOLD, alignSelf: 'center', transform: 'translateY(-2px)' }}>
+              {DEV_INSTAGRAM && <a href={DEV_INSTAGRAM} target="_blank" rel="noopener noreferrer" aria-label="اینستاگرامِ سازنده" style={{ display: 'inline-flex', color: GOLD, alignSelf: 'center', transform: 'translateY(-2px)' }}>
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                   <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
                   <circle cx="12" cy="12" r="4.5"/>
                   <circle cx="17.5" cy="6.5" r="0.5" fill="currentColor" stroke="none"/>
                 </svg>
-              </a>
+              </a>}
             </span>
           </div>
         </div>

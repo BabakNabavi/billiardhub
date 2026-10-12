@@ -137,13 +137,15 @@ export function saveRankings(data: RankingsStructure) {
 
 /* جدول رنکینگ از سرور. `null` یعنی هنوز چیزی ثبت نشده — با «خالی»
    یکی نیست و صفحه باید فرقشان را بداند. */
-export async function fetchRankingsBoard(): Promise<RankingsStructure | null> {
+/* `updatedAt` هم برمی‌گردد: پانوشتِ صفحه تا مهرِ ۱۴۰۵ فقط «به‌روز شده»
+   بی‌تاریخ می‌گفت — ادعایی که بیننده نمی‌توانست بسنجد. */
+export async function fetchRankingsBoard(): Promise<{ board: RankingsStructure | null; updatedAt: string | null }> {
   try {
     const r = await fetch('/api/rankings', { cache: 'no-store' })
-    if (!r.ok) return null
-    const j = await r.json() as { board?: RankingsStructure | null }
-    return j?.board ? mergeIntoEmpty(j.board) : null
-  } catch { return null }
+    if (!r.ok) return { board: null, updatedAt: null }
+    const j = await r.json() as { board?: RankingsStructure | null; updatedAt?: string | null }
+    return { board: j?.board ? mergeIntoEmpty(j.board) : null, updatedAt: j?.updatedAt ?? null }
+  } catch { return { board: null, updatedAt: null } }
 }
 
 /* بازیکنان واقعا واردشده‌ی یک دسته (نام خالی حذف می‌شود) */

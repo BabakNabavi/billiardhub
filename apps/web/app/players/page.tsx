@@ -213,8 +213,10 @@ export default function PlayersPage() {
 
         /* ═══ هیروی سینمایی ═══ */
         .pl-hero { position: relative; overflow: hidden; background: #0D0C0A; color: #fff; }
-        .pl-hero-img { position: absolute; inset: 0; background: url('/images/hero/hero-lounge.jpg') center 38%/cover;
-          filter: grayscale(0.5) brightness(0.5) contrast(1.08); }
+        /* ⚠️ لایه‌ی عکس «hero-lounge.jpg» برداشته شد: آن فایل از بازطراحیِ
+           برگشت‌خورده‌ی هیروی خانه مانده بود و دیگر وجود ندارد، پس روی سایتِ
+           زنده هر بازدید یک ۴۰۴ و یک خطای کنسول می‌ساخت. ظاهر عوض نمی‌شود —
+           همین زمینه‌ی تیره همانی است که تا امروز دیده می‌شد. */
         .pl-hero-shade { position: absolute; inset: 0;
           background: linear-gradient(100deg, rgba(13,12,10,0.94) 30%, rgba(13,12,10,0.55) 62%, rgba(13,12,10,0.85) 100%); }
         .pl-hero-word { position: absolute; bottom: -6px; inset-inline-start: -6px; font-weight: 900;
@@ -224,7 +226,6 @@ export default function PlayersPage() {
 
       {/* ═══ هیروی سینمایی ═══ */}
       <header className="pl-hero">
-        <div className="pl-hero-img" />
         <div className="pl-hero-shade" />
         <div style={{ position: 'absolute', top: '-20%', bottom: '-20%', left: '38%', width: 1, background: 'linear-gradient(180deg,transparent,rgba(199,166,106,0.5),transparent)', transform: 'rotate(14deg)' }} />
         <div className="pl-hero-word">PLAYERS</div>

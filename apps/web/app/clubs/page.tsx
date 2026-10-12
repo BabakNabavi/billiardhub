@@ -227,7 +227,7 @@ function ClubCard({ club, view, idx = 0, tournaments = [] }: { club: Club; view:
           </div>
           {/* story ring */}
           {club.hasActiveStory && club.storyMediaUrl && (
-            <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); setStoryOpen(true); }} style={{ position: 'absolute', bottom: 8, right: 8, padding: 0, border: 'none', background: 'none', cursor: 'pointer', zIndex: 5 }}>
+            <button aria-label={`استوری ${club.name}`} onClick={(e) => { e.preventDefault(); e.stopPropagation(); setStoryOpen(true); }} style={{ position: 'absolute', bottom: 8, right: 8, padding: 0, border: 'none', background: 'none', cursor: 'pointer', zIndex: 5 }}>
               <div style={{ width: 47, height: 47, borderRadius: '50%', background: 'linear-gradient(45deg,#feda75,#fa7e1e,#d62976,#962fbf,#4f5bd5)', padding: 2.5, boxShadow: '0 0 12px rgba(188,24,136,0.5)' }}>
                 <div style={{ width: '100%', height: '100%', borderRadius: '50%', border: '2px solid rgba(0,0,0,0.7)', background: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', boxSizing: 'border-box' }}>
                   {/* نشان پیش‌فرض به‌جای حرف اول نام */}
@@ -313,9 +313,11 @@ function ClubCard({ club, view, idx = 0, tournaments = [] }: { club: Club; view:
           <div style={{ position: 'absolute', top: 10, left: 10 }}>
             <FavoriteButton type="club" id={club.id} size={15} />
           </div>
-          {/* open/close — same pill style as table type badges */}
+          {/* open/close — same pill style as table type badges.
+              ⚠️ گوشه‌ی مقابلِ دکمه‌ی علاقه‌مندی: هر دو `top/left: 10` بودند و
+              «بسته» دقیقاً روی قلب می‌نشست — نه برچسب خوانا بود نه دکمه. */}
           <div style={{
-            position: 'absolute', top: 10, left: 10,
+            position: 'absolute', top: 10, insetInlineStart: 10,
             fontSize: 12, fontWeight: 700,
             color: club.isOpen ? '#30C55A' : '#ef4444',
             background: club.isOpen ? 'rgba(48,197,90,0.10)' : 'rgba(239,68,68,0.10)',
@@ -344,7 +346,7 @@ function ClubCard({ club, view, idx = 0, tournaments = [] }: { club: Club; view:
           </div>
           {/* story ring */}
           {club.hasActiveStory && club.storyMediaUrl && (
-            <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); setStoryOpen(true); }} style={{ position: 'absolute', bottom: 44, right: 12, padding: 0, border: 'none', background: 'none', cursor: 'pointer', zIndex: 5 }}>
+            <button aria-label={`استوری ${club.name}`} onClick={(e) => { e.preventDefault(); e.stopPropagation(); setStoryOpen(true); }} style={{ position: 'absolute', bottom: 44, right: 12, padding: 0, border: 'none', background: 'none', cursor: 'pointer', zIndex: 5 }}>
               <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'linear-gradient(45deg,#feda75,#fa7e1e,#d62976,#962fbf,#4f5bd5)', padding: 3, boxShadow: '0 0 18px rgba(188,24,136,0.6)' }}>
                 <div style={{ width: '100%', height: '100%', borderRadius: '50%', border: '2px solid rgba(0,0,0,0.75)', background: 'rgba(0,0,0,0.40)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', boxSizing: 'border-box' }}>
                   {/* نشان پیش‌فرض به‌جای حرف اول نام */}
@@ -676,7 +678,7 @@ export default function ClubsPage() {
               <div className="toolbar-search" style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'rgba(255,255,255,0.72)', border: `1px solid ${searchFocus ? 'rgba(199,166,106,0.45)' : 'rgba(28,28,26,0.10)'}`, borderRadius: 12, padding: '0 14px', height: 44, flex: 1, minWidth: 160, maxWidth: 300, transition: 'all 0.3s', boxShadow: searchFocus ? '0 0 0 3px rgba(199,166,106,0.10)' : 'none' }}>
                 <Search size={14} color="rgba(0,0,0,0.30)" />
                 <input className="srch-inp" type="text" value={search} onChange={e => setSearch(e.target.value)} onFocus={() => setSearchFocus(true)} onBlur={() => setSearchFocus(false)} placeholder="جستجو..." />
-                {search && <button onClick={() => setSearch('')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(0,0,0,0.35)', padding: 0, display: 'flex', flexShrink: 0 }}><X size={13} /></button>}
+                {search && <button aria-label="پاک‌کردن جست‌وجو" onClick={() => setSearch('')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(0,0,0,0.35)', padding: 0, display: 'flex', flexShrink: 0 }}><X size={13} /></button>}
               </div>
 
               {/* Near me — order 3, no arrow icon */}
@@ -700,7 +702,7 @@ export default function ClubsPage() {
                       <span style={{ fontSize: 16, fontWeight: 800, color: '#111111' }}>فیلترها</span>
                       <div style={{ display: 'flex', gap: 8 }}>
                         {activeFilters > 0 && <button onClick={clearFilters} style={{ fontSize: 13, color: '#ef4444', background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.18)', borderRadius: 20, padding: '3px 10px', cursor: 'pointer', fontFamily: 'inherit' }}>پاک</button>}
-                        <button onClick={() => setFilterOpen(false)} style={{ background: 'rgba(0,0,0,0.04)', border: '1px solid rgba(0,0,0,0.08)', borderRadius: 8, cursor: 'pointer', color: 'rgba(0,0,0,0.45)', padding: 4, display: 'flex' }}><X size={12} /></button>
+                        <button aria-label="بستن فیلترها" onClick={() => setFilterOpen(false)} style={{ background: 'rgba(0,0,0,0.04)', border: '1px solid rgba(0,0,0,0.08)', borderRadius: 8, cursor: 'pointer', color: 'rgba(0,0,0,0.45)', padding: 4, display: 'flex' }}><X size={12} /></button>
                       </div>
                     </div>
 
@@ -840,8 +842,11 @@ export default function ClubsPage() {
 
           {!loading && (
             <div style={{ marginTop: 40, padding: '28px 24px', background: '#111111', border: 'none', borderRadius: 20, textAlign: 'center' }}>
-              <h3 style={{ fontSize: 19, fontWeight: 900, color: '#FFFFFF', margin: '0 0 6px', animation: 'gentlePulse 2.8s ease-in-out infinite' }}>باشگاه خود را ثبت کنید</h3>
-              <div style={{ fontSize: 15, color: 'rgba(255,255,255,0.50)', margin: '0 0 16px' }}>به هزاران بازیکن دسترسی پیدا کنید</div>
+              {/* تیتر عمداً ثابت است — پالسِ بی‌پایان روی متن خواندن را سخت می‌کرد.
+                  زیرتیتر هم ادعای عددی نمی‌کند («هزاران بازیکن» واقعی نبود)؛ فقط
+                  چیزی را می‌گوید که پنلِ باشگاه واقعاً دارد. */}
+              <h3 style={{ fontSize: 19, fontWeight: 900, color: '#FFFFFF', margin: '0 0 6px' }}>باشگاه خود را ثبت کنید</h3>
+              <div style={{ fontSize: 15, color: 'rgba(255,255,255,0.50)', margin: '0 0 16px' }}>رزرو آنلاین میز و مدیریت سانس‌ها در یک پنل</div>
               <Link href="/clubs/new" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '10px 24px', background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.28)', borderRadius: 20, color: '#C7A66A', fontSize: 15, fontWeight: 700, textDecoration: 'none' }}>
                 ثبت باشگاه ←
               </Link>

@@ -15,6 +15,7 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { Trophy, TrendingUp, TrendingDown, Minus } from 'lucide-react'
 import { fetchRankingsBoard, categoryPlayersOf, categorySize, type RankingsStructure } from '../../lib/rankings-store'
+import { faDate } from '../../lib/jalali'
 
 interface RankingPlayer {
   rank: number
@@ -125,6 +126,7 @@ export default function RankingsPage() {
      دیگری وجود نداشت و صفحه به فهرست نمونه‌ی داخل کد برمی‌گشت — همان
      «داده‌ی فیک قبلی» که دوباره ظاهر می‌شد. */
   const [board, setBoard] = useState<RankingsStructure | null>(null)
+  const [updatedAt, setUpdatedAt] = useState<string | null>(null)
   const [loaded, setLoaded] = useState(false)
 
   useEffect(() => {
@@ -132,7 +134,8 @@ export default function RankingsPage() {
     void (async () => {
       const remote = await fetchRankingsBoard()
       if (!alive) return
-      setBoard(remote)
+      setBoard(remote.board)
+      setUpdatedAt(remote.updatedAt)
       setLoaded(true)
     })()
     return () => { alive = false }
@@ -408,7 +411,8 @@ export default function RankingsPage() {
               <div style={{ marginTop: 22, display: 'flex', alignItems: 'center', gap: 10, background: 'rgba(255,255,255,0.78)', border: `1px solid ${LINE}`, borderRadius: 14, padding: '13px 16px' }}>
                 <span style={{ width: 6, height: 6, borderRadius: '50%', background: GOLD, flexShrink: 0 }} />
                 <span style={{ fontSize: 12.5, color: SEC }}>
-                  رنکینگ رسمی فدراسیون بولینگ و بیلیارد جمهوری اسلامی ایران — به‌روز شده
+                  رنکینگ رسمی فدراسیون بولینگ و بیلیارد جمهوری اسلامی ایران
+                  {updatedAt && <> — به‌روزشده در {faDate(updatedAt)}</>}
                 </span>
               </div>
             </>
