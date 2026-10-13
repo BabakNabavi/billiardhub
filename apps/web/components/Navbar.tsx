@@ -155,6 +155,18 @@ export default function Navbar() {
   const [exploreOpen, setExploreOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [search, setSearch] = useState('');
+  /* ⚠️ تا مهرِ ۱۴۰۵ این کادر تایپ می‌گرفت و هیچ کاری نمی‌کرد. حالا Enter به
+     صفحه‌ی نتیجه می‌رود. فرم خودش هم `action="/search"` دارد، پس پیش از
+     هیدراته‌شدن هم کار می‌کند؛ این فقط ناوبریِ نرم است. */
+  const submitSearch = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const q = search.trim();
+    if (!q) return;
+    /* کیبوردِ گوشی بسته شود و حلقه‌ی فوکوس روی نتیجه نماند */
+    e.currentTarget.querySelector('input')?.blur();
+    setSearchOpen(false);
+    router.push(`/search?q=${encodeURIComponent(q)}`);
+  };
   const [searchOpen, setSearchOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   /* ── چرا `scrollY` دیگر state نیست ──
@@ -285,6 +297,8 @@ export default function Navbar() {
         @keyframes slideUp { from{opacity:0;transform:translateY(100%);}to{opacity:1;transform:translateY(0);} }
         @keyframes fadeIn { from{opacity:0;}to{opacity:1;} }
 
+        /* ورودی‌ها «outline: none»ِ درون‌خطی دارند؛ حلقه روی خودِ قرصِ جست‌وجو می‌نشیند (بک‌تیک این‌جا ممنوع: رشته‌ی قالبی است) */
+        .nav-srch:focus-within { outline: 2px solid var(--gold-deep); outline-offset: 2px; }
         .nav-a {
           position:relative; color:${TEXT_MUT}; font-size:14px; font-weight:500;
           padding:6px 2px; white-space:nowrap; text-decoration:none; transition:color 0.25s;
@@ -538,12 +552,12 @@ export default function Navbar() {
 
           {/* Search bar */}
           <div className="srch-wrap desk" style={{ flex: 1, maxWidth: '240px', marginRight: 'auto' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: SURF, border: `1px solid ${BORDER_C}`, borderRadius: '10px', padding: '8px 12px', transition: 'all 0.3s' }}>
+            <form role="search" method="get" action="/search" onSubmit={submitSearch} className="nav-srch" style={{ display: 'flex', alignItems: 'center', gap: '8px', background: SURF, border: `1px solid ${BORDER_C}`, borderRadius: '10px', padding: '8px 12px', transition: 'all 0.3s' }}>
               <Search size={13} color={TEXT_MUT} />
-              <input type="text" value={search} onChange={e => setSearch(e.target.value)} placeholder="جستجو..."
-                style={{ background: 'none', border: 'none', outline: 'none', color: TEXT, fontSize: '15px', width: '100%', fontFamily: 'inherit' }} />
-              {search && <button aria-label="پاک‌کردن جست‌وجو" onClick={() => setSearch('')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: TEXT_MUT, padding: 0, display: 'flex' }}><X size={11} /></button>}
-            </div>
+              <input type="text" name="q" enterKeyHint="search" aria-label="جست‌وجو در سایت" value={search} onChange={e => setSearch(e.target.value)} placeholder="جستجو..."
+                style={{ background: 'none', border: 'none', outline: 'none', color: TEXT, fontSize: '16px', width: '100%', fontFamily: 'inherit' }} />
+              {search && <button type="button" className="kbd-ring" aria-label="پاک‌کردن جست‌وجو" onClick={() => setSearch('')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: TEXT_MUT, padding: 0, display: 'flex' }}><X size={11} /></button>}
+            </form>
           </div>
 
           {/* Right actions — all icon buttons 44×44px, icon size 22 */}
@@ -722,7 +736,7 @@ export default function Navbar() {
           animation: 'fadeDown 0.32s cubic-bezier(0.22,1,0.36,1) both',
         }}>
           {/* کارت روشن شیشه‌ای — متن سفید قبلی روی صفحات روشن دیده نمی‌شد */}
-          <div style={{
+          <form role="search" method="get" action="/search" onSubmit={submitSearch} className="nav-srch" style={{
             maxWidth: '560px', margin: '0 auto',
             display: 'flex', alignItems: 'center', gap: '10px',
             background: 'rgba(255,255,255,0.92)',
@@ -733,19 +747,19 @@ export default function Navbar() {
             WebkitBackdropFilter: 'blur(48px) saturate(200%)',
           }}>
             <Search size={18} color="rgba(28,28,26,0.38)" style={{ flexShrink: 0 }} />
-            <input autoFocus type="text" value={search} onChange={e => setSearch(e.target.value)}
+            <input autoFocus type="text" name="q" enterKeyHint="search" aria-label="جست‌وجو در سایت" value={search} onChange={e => setSearch(e.target.value)}
               placeholder="جستجو باشگاه، بازیکن، مربی..."
               style={{ flex: 1, background: 'none', border: 'none', outline: 'none', color: '#1C1B17', fontSize: '16px', fontFamily: 'inherit' }} />
             {search && (
-              <button aria-label="پاک‌کردن جست‌وجو" onClick={() => setSearch('')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(28,28,26,0.36)', padding: 0, display: 'flex', flexShrink: 0 }}>
+              <button type="button" className="kbd-ring" aria-label="پاک‌کردن جست‌وجو" onClick={() => setSearch('')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(28,28,26,0.36)', padding: 0, display: 'flex', flexShrink: 0 }}>
                 <X size={13} />
               </button>
             )}
-            <button aria-label="بستن جست‌وجو" onClick={() => { setSearchOpen(false); setSearch(''); }}
+            <button type="button" className="kbd-ring" aria-label="بستن جست‌وجو" onClick={() => { setSearchOpen(false); setSearch(''); }}
               style={{ background: 'rgba(28,28,26,0.05)', border: '1px solid rgba(28,28,26,0.10)', borderRadius: '8px', cursor: 'pointer', color: 'rgba(28,28,26,0.45)', padding: '4px', display: 'flex', flexShrink: 0 }}>
               <X size={13} />
             </button>
-          </div>
+          </form>
         </div>
       )}
 

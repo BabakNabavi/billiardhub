@@ -16,7 +16,7 @@ import { buttonClasses } from '@/components/ui/button-classes'
 const noop = () => () => {}
 /* نویسه‌های کنترلِ جهت (RLE/LRO/… و ایزوله‌ها): متنِ نشانی را هر کسی می‌تواند
    در یک لینک بسازد، و این‌ها می‌توانند ترتیبِ دیدنیِ جمله را برگردانند. */
-const BIDI = /[‪-‮⁦-⁩]/g
+const BIDI = /[\u202A-\u202E\u2066-\u2069]/g
 const MAX = 120
 
 export function RequestedPath() {

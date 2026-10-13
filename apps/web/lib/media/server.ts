@@ -142,6 +142,8 @@ const noColumn = (m?: string) => /does not exist|schema cache|column/i.test(m ??
 const cols = () => (socialCols ? FULL_COLS : BASE_COLS)
 
 export interface ListOpts {
+  /** خطای دیتابیس پرتاب شود به‌جای فهرستِ خالی — برای جست‌وجوی سراسری */
+  throwOnError?: boolean
   category?: string
   q?: string
   handle?: string
@@ -215,7 +217,11 @@ export async function listPublic(o: ListOpts = {}): Promise<{ items: PublicVideo
     const again = await r2.limit(limit + 1)
     data = again.data; error = again.error
   }
-  if (error) { console.error('[media] list:', error.message); return { items: [], nextCursor: null } }
+  if (error) {
+    console.error('[media] list:', error.message)
+    if (o.throwOnError) throw new Error(error.message)
+    return { items: [], nextCursor: null }
+  }
 
   const rows = (data ?? []) as unknown as VideoRow[]
   const hasMore = rows.length > limit

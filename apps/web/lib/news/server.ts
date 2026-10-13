@@ -169,7 +169,9 @@ export const listPublished = async (limit = 120): Promise<Article[]> =>
    سقف ۱۲۰ ردیف دارد و جست‌وجویی که فقط تازه‌ترین‌ها را ببیند
    جست‌وجو نیست. `%` و `_` و `,` کاربر خنثی می‌شوند وگرنه الگوی
    PostgREST را می‌شکنند. */
-export async function searchPublished(q: string, limit = 60): Promise<Article[]> {
+/** `throwOnError`: جست‌وجوی سراسری باید «این بخش جواب نداد» را از «چیزی نبود» جدا کند؛
+ *  پیش‌فرض همان رفتارِ قبلی است (خالی برمی‌گرداند). */
+export async function searchPublished(q: string, limit = 60, opts: { throwOnError?: boolean } = {}): Promise<Article[]> {
   const term = q.trim()
   if (term.length < 2) return []
   const safe = term.replace(/[%_\\]/g, ch => `\\${ch}`).replace(/[(),]/g, ' ')
@@ -183,12 +185,16 @@ export async function searchPublished(q: string, limit = 60): Promise<Article[]>
       .limit(limit)
     if (error || !data) {
       if (error) console.error('[news] search:', error.message)
+      if (error && opts.throwOnError) throw new Error(error.message)
       return []
     }
     const rows = data as Row[]
     const authors = await authorNames(rows.map(r => str(r.author_id)))
     return rows.map(r => toArticle(r, authors)).filter(a => a.id && a.title)
-  } catch { return [] }
+  } catch (e) {
+    if (opts.throwOnError) throw e
+    return []
+  }
 }
 
 /** یک خبر با نامک یا شناسه. */
