@@ -139,10 +139,9 @@ function SR({
 ═══════════════════════════════════════════════════════════════ */
 const GOLD     = 'var(--brand)';
 const GOLD_D   = 'var(--brand)';
-/* رنگ متن دکمه‌های طلایی. GOLD_D روی پس‌زمینه‌ی rgba(199,166,106,0.12)
-   فقط ۳٫۵۵:۱ می‌داد که زیر حد ۴٫۵:۱ است؛ این یکی ۴٫۹۵:۱ می‌دهد.
-   حدس زدن جواب نداد — محاسبه شد. */
-const CTA_INK  = 'rgb(var(--c-em))';
+/* رنگ متن دکمه‌های طلایی. از مهرِ ۱۴۰۵ `--brand` خودش طلاییِ متن است
+   (#7E5828، ۵٫۴:۱ روی تینتِ طلایی) و این نام فقط برای خوانایی مانده. */
+const CTA_INK  = 'var(--brand)';
 const GOLD_DIM = 'var(--brand)';
 const GOLD_BOR = 'var(--border)';
 
@@ -294,6 +293,7 @@ const FEATURED_COUNT = 8
    به گراف سرور از آن‌ها استفاده کند. */
 export type { RealClub, RealProduct, RealStore } from '../lib/home-types';
 import type { RealClub, RealProduct, RealStore } from '../lib/home-types';
+import { tableSummary } from '../lib/clubs/tables';
 
 /* پاسخ خام APIها */
 interface ApiClub {
@@ -710,7 +710,6 @@ function MktBanner({ slides, label, body, cta, accent, href, initialIdx = 0, lqC
     const t = setInterval(() => setIdx(p => (p + 1) % slides.length), 3200);
     return () => clearInterval(t);
   }, [ready, slides.length]);
-  const isDark = accent === GOLD;
   return (
     <Link prefetch={false} href={href} style={{ textDecoration: 'none', display: 'block', position: 'relative', borderRadius: '14px', overflow: 'hidden', height: 'clamp(120px,11vw,160px)', cursor: 'pointer' }}>
       {slides.map((img, i) => (
@@ -725,7 +724,7 @@ function MktBanner({ slides, label, body, cta, accent, href, initialIdx = 0, lqC
           <div style={{ fontSize: 'clamp(13px,1.3vw,18px)', fontWeight: 700, color: '#fff', letterSpacing: '-0.03em', lineHeight: 1.2, marginBottom: '10px', textShadow: '0 2px 10px rgba(0,0,0,0.85)' }} dangerouslySetInnerHTML={{ __html: body }} />
           <div style={lqCta
             ? { display: 'inline-flex', alignItems: 'center', gap: '5px', background: 'rgb(var(--c-paper))', border: '1px solid var(--brand-line)', color: CTA_INK, padding: '5px 13px', borderRadius: '10px', fontSize: '11px', fontWeight: 700 }
-            : { display: 'inline-flex', alignItems: 'center', gap: '5px', background: accent, padding: '4px 12px', borderRadius: '20px', fontSize: '11px', fontWeight: 700, color: isDark ? '#1a1a1a' : '#fff' }
+            : { display: 'inline-flex', alignItems: 'center', gap: '5px', background: accent, padding: '4px 12px', borderRadius: '20px', fontSize: '11px', fontWeight: 700, color: '#fff' }
           }>{cta} <ArrowLeft size={9} /></div>
         </div>
       </div>
@@ -909,13 +908,8 @@ export default function HomeClient({ initialPlacements, initialFeatured, service
          باشد — کارت خودش صفر را نمایش نمی‌دهد. */
       setRealClubs(cl.slice(0, FEATURED_COUNT).map((c, i) => ({
         id: c.id, name: c.name, city: c.city ?? '', dist: '',
-        tables: (c.snookerTables ?? 0) + (c.pocketTables ?? 0) + (c.highballTables ?? 0)
-              + (c.vipSnookerTables ?? 0) + (c.vipPocketTables ?? 0),
-        breakdown: {
-          snooker: (c.snookerTables ?? 0) + (c.vipSnookerTables ?? 0),
-          pocket: (c.pocketTables ?? 0) + (c.vipPocketTables ?? 0),
-          highball: c.highballTables ?? 0,
-        },
+        tables: tableSummary(c).total,
+        breakdown: tableSummary(c),
         rating: 0, reviews: 0, type: 'اسنوکر',
         img: thumbUrl(c.images?.[0], CLUB_W) || CLUB_IMG_FALLBACK[i % CLUB_IMG_FALLBACK.length]!,
         img2: thumbUrl(c.images?.[1], CLUB_W) || CLUB_IMG_FALLBACK[(i + 1) % CLUB_IMG_FALLBACK.length]!,
@@ -2144,7 +2138,7 @@ useEffect(() => {
               label="مستقیم از فروشنده"
               body="چوب و لوازم<br/>اسنوکر حرفه‌ای"
               cta="مشاهده"
-              accent={GRN}
+              accent={GOLD}
               href="/shop"
               initialIdx={1}
             />

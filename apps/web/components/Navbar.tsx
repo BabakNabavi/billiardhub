@@ -26,7 +26,7 @@ import Avatar from './ui/Avatar';
    رنگِ برند فقط روی خودِ نشانِ متنی می‌ماند (lib/brand.ts). */
 const GOLD = 'var(--brand)';
 /* سه‌تاییِ کانالِ برند — هرجا رنگ با شفافیت ترکیب می‌شود */
-const BRAND_CH = '15 91 77';
+const BRAND_CH = '143 101 49';   // طلاییِ تیره (--c-gold-deep) — تنها رنگِ تأکید
 const GOLD_LIGHT = 'var(--brand-tint)';
 const GOLD_BORDER = 'var(--brand-line)';
 
@@ -58,7 +58,7 @@ const exploreMenu = [
       { href: '/news',      label: 'اخبار',    icon: <Newspaper size={14} />,     desc: 'آخرین اخبار' },
       { href: '/media', label: 'بیلیارد مدیا', icon: <Clapperboard size={14} />, desc: 'پلتفرم ویدیویی' },
       { href: '/about',     label: 'درباره ما', icon: <Users size={14} />,         desc: 'داستان بیلیارد هاب' },
-      { href: '/contact',   label: 'تماس با ما',icon: <Bell size={14} />,          desc: 'پشتیبانی ۲۴/۷' },
+      { href: '/contact',   label: 'تماس با ما',icon: <Bell size={14} />,          desc: 'پیام، تلفن و ایمیل' },
     ],
   },
 ];
@@ -76,10 +76,10 @@ const mobileLinks = [
   { href: '/services',      label: 'خدمات فنی',               icon: <Wrench size={17} />,        color: BRAND_CH,      desc: 'متخصصان فنی بیلیارد' },
   { href: '/ranking',       label: 'رنکینگ',                  icon: <Trophy size={17} />,        color: BRAND_CH,      desc: 'جدول رنکینگ' },
   { href: '/media',         label: 'بیلیارد مدیا',            icon: <Clapperboard size={17} />,  color: BRAND_CH,      desc: 'پلتفرم ویدیویی' },
-  { href: '/live',          label: 'پخش زنده',                icon: <Radio size={17} />,         color: '239 68 68', desc: 'پخش زنده مسابقات', live: true },
+  { href: '/live',          label: 'پخش زنده',                icon: <Radio size={17} />,         color: BRAND_CH,      desc: 'پخش زنده مسابقات' },
   { href: '/news',          label: 'اخبار',                   icon: <Newspaper size={17} />,     color: BRAND_CH,      desc: 'آخرین اخبار' },
-  { href: '/about',         label: 'درباره ما',               icon: <Users size={17} />,         color: '140 122 94',  desc: 'داستان ما' },
-  { href: '/contact',       label: 'تماس با ما',              icon: <Bell size={17} />,          color: '140 122 94',  desc: 'پشتیبانی ۲۴/۷' },
+  { href: '/about',         label: 'درباره ما',               icon: <Users size={17} />,         color: BRAND_CH,      desc: 'داستان ما' },
+  { href: '/contact',       label: 'تماس با ما',              icon: <Bell size={17} />,          color: BRAND_CH,      desc: 'پیام، تلفن و ایمیل' },
 ];
 
 export default function Navbar() {
@@ -245,12 +245,14 @@ export default function Navbar() {
     ? scrolled ? 'rgba(247,247,245,0.94)' : 'transparent'
     : 'rgba(247,247,245,0.94)';
 
-  /* ⚠️ تأکید باید با زمینه عوض شود: زمردِ اصلی روی هیروی تیره
-     ۲٫۴۰:۱ است و دیده نمی‌شود؛ پله‌ی روشن ۶٫۶۰:۱ می‌دهد. */
+  /* ⚠️ تأکید باید با زمینه عوض شود: طلاییِ تیره روی هیروی تیره دیده
+     نمی‌شود؛ روی آن پله‌ی روشنِ طلایی می‌نشیند. */
   const ACC       = isLight ? 'var(--brand)' : 'var(--brand-on-dark)';
   /* ⚠️ نشانِ متنی هم روی دو زمینه‌ی متضاد می‌نشیند — جزئیات در lib/brand.ts */
   const WM        = isLight ? WORDMARK_GREEN : WORDMARK_GREEN_ON_DARK;
-  const ACC_CH    = isLight ? '15 91 77' : '79 168 144';
+  /* کانالِ تینت و خطِ زیرِ لینکِ فعال. تا مهرِ ۱۴۰۵ سبز بود و تنها
+     سبزِ نوار (جز نشانِ متنی) را می‌ساخت — همان دوگانگیِ دو تأکید. */
+  const ACC_CH    = isLight ? '199 166 106' : '226 201 140';
   const TEXT      = isLight ? '#1C1C1A' : 'rgba(255,255,255,0.88)';
   const TEXT_MUT  = isLight ? 'rgba(28,28,26,0.48)' : 'rgba(255,255,255,0.48)';
   const BORDER_C  = isLight ? 'rgba(28,28,26,0.08)' : 'rgba(255,255,255,0.18)';
@@ -449,13 +451,11 @@ export default function Navbar() {
                   animation: 'fadeDown 0.22s cubic-bezier(0.22,1,0.36,1) both',
                   overflow: 'hidden',
                 }}>
-                  {/* Top gold sheen */}
-                  <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '1px', background: 'linear-gradient(90deg,transparent,rgb(var(--c-em) / .45),transparent)' }} />
-                  <div style={{ position: 'absolute', top: 0, left: '15%', right: '15%', height: '40px', background: 'linear-gradient(to bottom,var(--brand-tint),transparent)', pointerEvents: 'none' }} />
-
                   {/* Header row */}
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 24px 12px', borderBottom: '1px solid rgba(28,28,26,0.06)' }}>
-                    <span style={{ fontSize: '10px', color: WORDMARK_GREEN, letterSpacing: '0.28em', fontWeight: 700 }}>EXPLORE BILLIARD HUB</span>
+                    {/* برچسبِ انگلیسیِ فاصله‌دار («EXPLORE BILLIARD HUB») بود — تزئینِ قالبی،
+                        روی منوی فارسی. */}
+                    <span style={{ fontSize: '12px', color: 'rgba(28,28,26,0.62)', fontWeight: 700 }}>همه‌ی بخش‌ها</span>
                     <button aria-label="بستن منو" onClick={() => setExploreOpen(false)} style={{ background: 'rgba(28,28,26,0.05)', border: '1px solid rgba(28,28,26,0.08)', borderRadius: '8px', cursor: 'pointer', color: 'rgba(28,28,26,0.38)', padding: '5px', display: 'flex', transition: 'all 0.2s' }}>
                       <X size={12} />
                     </button>
@@ -465,16 +465,17 @@ export default function Navbar() {
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', padding: '4px 0' }}>
                     {exploreMenu.map((section, si) => {
                       /* ⚠️ سه‌تاییِ کانال، نه رشته‌ی رنگ: پایین‌تر با شفافیت ترکیب
-                         می‌شوند و `var()` آن‌جا CSSِ نامعتبر می‌سازد. */
-                      const colCh = si === 0 ? '15 91 77' : si === 1 ? '59 130 196' : '30 122 68';
+                         می‌شوند و `var()` آن‌جا CSSِ نامعتبر می‌سازد.
+                         تا مهرِ ۱۴۰۵ هر ستون رنگِ خودش را داشت (سبز، آبی، سبز) —
+                         یک مقصد در دو منو دو رنگ می‌گرفت. حالا یک تأکید. */
+                      const colCh = section.color;
                       const colColor = `rgb(${colCh})`;
-                      const colColorLight = si === 0 ? 'rgb(46 125 107)' : si === 1 ? '#4A9EFF' : '#30C55A';
                       return (
-                        <div key={si} style={{ borderRight: si < 2 ? '1px solid rgba(28,28,26,0.06)' : 'none', padding: '16px 20px 20px' }}>
+                        <div key={si} style={{ borderInlineEnd: si < 2 ? '1px solid rgba(28,28,26,0.06)' : 'none', padding: '16px 20px 20px' }}>
                           {/* Column header */}
                           <div style={{ display: 'flex', alignItems: 'center', gap: '7px', marginBottom: '10px', paddingBottom: '8px', borderBottom: `1px solid rgb(${colCh} / .09)` }}>
-                            <div style={{ width: '3px', height: '12px', borderRadius: '2px', background: `linear-gradient(180deg,${colColorLight},${colColor})`, flexShrink: 0 }} />
-                            <span style={{ fontSize: '10px', color: `rgb(${colCh} / .73)`, letterSpacing: '0.18em', fontWeight: 700, textTransform: 'uppercase' }}>{section.title}</span>
+                            {/* فاصله‌ی حروف و uppercase روی فارسی کاری نمی‌کرد جز گسستنِ اتصال */}
+                            <span style={{ fontSize: '12px', color: 'rgba(28,28,26,0.62)', fontWeight: 700 }}>{section.title}</span>
                           </div>
                           {section.items.map((item, ii) => (
                             <Link prefetch={false} key={ii} href={item.href} onClick={() => setExploreOpen(false)}
@@ -512,7 +513,7 @@ export default function Navbar() {
                       <div style={{ fontSize: '11px', color: 'rgba(28,28,26,0.36)', marginTop: '2px' }}>اتصال بی واسطه و خانه‌ی دیجیتال جامعه‌ی بیلیارد کشور</div>
                     </div>
                     <Link prefetch={false} href="/register" onClick={() => setExploreOpen(false)} style={{ fontSize: '13px', color: 'var(--brand)', fontWeight: 700, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '5px', background: 'var(--brand-tint)', border: '1px solid var(--border)', borderRadius: '10px', padding: '7px 16px', whiteSpace: 'nowrap', transition: 'transform .25s cubic-bezier(.22,1,.36,1), background .2s' }}
-                      onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.background = 'rgb(var(--c-em) / .14)'; }}
+                      onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.background = 'var(--brand-tint-2)'; }}
                       onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.background = 'var(--brand-tint)'; }}>
                       ثبت‌نام رایگان <ArrowLeft size={10} />
                     </Link>
@@ -574,7 +575,7 @@ export default function Navbar() {
                       ) : notifs.slice(0, 20).map(n => (
                         <Link prefetch={false} key={n.id} href="/direct" onClick={() => setNotifOpen(false)}
                           style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: '11px 16px', textDecoration: 'none', color: 'inherit', borderBottom: '1px solid rgba(28,28,26,0.04)', background: n.read ? 'transparent' : 'var(--brand-tint)' }}>
-                          <span style={{ width: 30, height: 30, borderRadius: '50%', flexShrink: 0, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 600, color: '#fff', background: 'rgb(var(--c-em))' }}>{n.fromName.charAt(0)}</span>
+                          <span style={{ width: 30, height: 30, borderRadius: '50%', flexShrink: 0, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 600, color: '#fff', background: 'var(--brand)' }}>{n.fromName.charAt(0)}</span>
                           <span style={{ minWidth: 0, flex: 1 }}>
                             <span style={{ fontSize: 12.5, color: '#1C1B17', lineHeight: 1.7 }}><b style={{ fontWeight: 600 }}>{n.fromName}</b> {notifText(n)}</span>
                           </span>
@@ -614,7 +615,7 @@ export default function Navbar() {
                 <button className="nav-profile" onClick={() => setProfileOpen(p => !p)} style={{ display: 'flex', alignItems: 'center', gap: '8px', background: SURF, border: `1px solid ${BORDER_C}`, borderRadius: '12px', padding: '6px 12px', color: TEXT_MUT, fontSize: '16px', fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.3s', backdropFilter: 'blur(12px)', height: '44px' }}>
                   {/* عکس پروفایل، وگرنه آدمک — نه حرف اول نام */}
                   <Avatar src={user.avatar} size={30} alt=""
-                    background="rgb(var(--c-em))" iconColor="rgba(255,255,255,0.95)" />
+                    background="var(--brand)" iconColor="rgba(255,255,255,0.95)" />
                   <span className="desk" style={{ alignItems: 'center', color: TEXT }}>{user.firstName}</span>
                   <ChevronDown className="nav-chev" size={13} style={{ transition: 'transform 0.3s', transform: profileOpen ? 'rotate(180deg)' : 'rotate(0)', color: TEXT_MUT, flexShrink: 0 }} />
                 </button>
@@ -790,7 +791,7 @@ export default function Navbar() {
             ) : (
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '14px 16px', background: 'rgba(255,255,255,0.7)', borderRadius: '16px', border: '1px solid rgba(28,28,26,0.08)', boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.9), 0 2px 12px rgba(28,28,26,0.05)' }}>
                 <Avatar src={user.avatar} size={40} alt=""
-                  background="rgb(var(--c-em))" iconColor="rgba(255,255,255,0.95)" />
+                  background="var(--brand)" iconColor="rgba(255,255,255,0.95)" />
 
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ color: '#1C1B17', fontWeight: 700, fontSize: '16px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user.firstName} {user.lastName}</div>
@@ -834,9 +835,8 @@ export default function Navbar() {
                     {item.icon}
                   </div>
                   <span style={{ fontSize: '11.6px', fontWeight: 700, color: 'rgba(28,28,26,0.72)', textAlign: 'center', lineHeight: 1.25 }}>{item.label}</span>
-                  {item.live && (
-                    <span style={{ position: 'absolute', top: '5px', insetInlineStart: '5px', fontSize: '7.5px', color: '#ef4444', background: 'rgba(239,68,68,0.12)', border: '1px solid rgba(239,68,68,0.26)', borderRadius: '20px', padding: '1px 4px', fontWeight: 700 }}>LIVE</span>
-                  )}
+                  {/* ⚠️ نشانِ «LIVE» این‌جا بود و همیشه روشن می‌ماند (live: true ثابت)، چه
+                      پخشی در جریان بود چه نه. ادعای بی‌پشتوانه برداشته شد. */}
                 </Link>
               ))}
             </div>

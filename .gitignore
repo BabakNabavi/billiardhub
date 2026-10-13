@@ -66,3 +66,6 @@ backups/
 # ابزارِ طراحی — ۳٫۵ مگابایت اسکیل و اسکریپتِ وندورشده.
 # با `npx impeccable install` بازساخته می‌شود؛ در مخزن جا ندارد.
 .claude/skills/impeccable/
+
+# کشِ هوکِ impeccable — هر ویرایش بازنویسی می‌شود
+apps/web/.impeccable/hook.cache.json

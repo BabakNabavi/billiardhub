@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState , useRef } from 'react';
+import { distanceKm, faDistance, hasCoords } from '@/lib/clubs/distance';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
@@ -126,14 +127,7 @@ const dayNames: Record<string, string> = {
 function toFa(v: string | number) {
   return String(v).replace(/[0-9]/g, d => '۰۱۲۳۴۵۶۷۸۹'.charAt(Number(d)));
 }
-function calcDistance(lat1: number, lon1: number, lat2: number, lon2: number): string {
-  const R = 6371;
-  const dLat = (lat2 - lat1) * Math.PI / 180;
-  const dLon = (lon2 - lon1) * Math.PI / 180;
-  const a = Math.sin(dLat / 2) ** 2 + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon / 2) ** 2;
-  const d = R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  return d < 1 ? `${Math.round(d * 1000)} متر` : `${d.toFixed(1)} کیلومتر`;
-}
+/* فرمول و شکلِ نوشتنِ فاصله در lib/clubs/distance — همان که فهرستِ باشگاه‌ها می‌خواند */
 function calcIsOpen(todayH: any): boolean {
   if (!todayH || !todayH.isOpen) return false;
   const now  = new Date().getHours();
@@ -155,7 +149,11 @@ export default function ClubProfilePage() {
      می‌خواند، تا هر دو یک چیز بگویند */
   const [bookingStatus, setBookingStatus] = useState<{ always?: boolean; label?: string } | null>(null);
   const [slide, setSlide]             = useState(0);
-  const [distance, setDistance]       = useState<string | null>('۲.۳ کیلومتر');
+  /* ⚠️ تا مهرِ ۱۴۰۵ مقدارِ اولیه «۲.۳ کیلومتر» بود و فاصله تا مختصاتِ ثابتِ
+     مرکزِ تهران (sampleClub) حساب می‌شد، نه تا خودِ باشگاه — یعنی برای هر
+     باشگاه و هر بازدیدکننده عددی ساختگی. حالا خالی تا وقتی فاصله‌ی واقعی
+     معلوم شود. */
+  const [distance, setDistance]       = useState<string | null>(null);
   const [tab, setTab]                 = useState<'info' | 'tournaments' | 'gallery' | 'schedule' | 'live'>('info');
   /* جلسه‌ی پخشِ زنده‌ی همین باشگاه. خالی یعنی پخشی در جریان نیست. */
   const [liveSession, setLiveSession] = useState<LiveSession | null>(null);
@@ -385,12 +383,32 @@ export default function ClubProfilePage() {
       .then(r => { if (r.data?.id) setClub(r.data); else setNotFound(true); })
       .catch(() => setNotFound(true))
       .finally(() => setLoading(false));
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(pos => {
-        setDistance(calcDistance(pos.coords.latitude, pos.coords.longitude, sampleClub.latitude, sampleClub.longitude));
-      });
-    }
   }, [id]);
+
+  /* ── فاصله: فقط مختصاتِ واقعیِ همین باشگاه، فقط با اجازه‌ی قبلی ──
+     پنجره‌ی «اجازه‌ی موقعیت» دیگر با باز شدنِ صفحه نمی‌آید (اجازه را در
+     لحظه‌ی کار می‌خواهند، نه در ورود)؛ اگر کاربر قبلاً — مثلاً در «نزدیکِ
+     من» — اجازه داده، فاصله نشان داده می‌شود. باشگاهِ بی‌مختصات فاصله ندارد. */
+  useEffect(() => {
+    if (loading || notFound) return;
+    const lat = Number(club.latitude), lng = Number(club.longitude);
+    if (!hasCoords(lat, lng)) return;
+    if (!navigator.geolocation || !navigator.permissions?.query) return;
+    let alive = true;
+    void (async () => {
+      try {
+        const st = await navigator.permissions.query({ name: 'geolocation' as PermissionName });
+        if (!alive || st.state !== 'granted') return;
+        navigator.geolocation.getCurrentPosition(pos => {
+          if (alive) setDistance(faDistance(distanceKm(pos.coords.latitude, pos.coords.longitude, lat, lng)));
+        });
+      } catch (e) {
+        /* مرورگری که Permissions API ندارد — فاصله نشان داده نمی‌شود، همین */
+        console.warn('[club] geolocation permission query failed', e);
+      }
+    })();
+    return () => { alive = false; };
+  }, [loading, notFound, club.latitude, club.longitude]);
 
   const images   = club.images?.length ? club.images : ['/images/clubs/club6.jpeg'];
   const todayKey = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'][new Date().getDay()];

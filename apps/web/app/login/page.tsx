@@ -18,8 +18,8 @@ import { passwordHint, capsFrom } from '../../lib/auth/password-hints';
 /* نمایش فارسی ارقام — مقدار ارسالی به سرور همچنان لاتین می‌ماند */
 const toFa = (v: string) => v.replace(/[0-9]/g, d => '۰۱۲۳۴۵۶۷۸۹'[+d] ?? d);
 
-const GOLD   = 'rgb(var(--c-em))';
-const GOLD_D = 'rgb(var(--c-em))';
+const GOLD   = 'var(--brand)';
+const GOLD_D = 'var(--brand)';
 const TEXT   = '#1C1B17';
 const SEC    = '#5B564B';
 const MUT    = '#6F6A5C';
@@ -113,7 +113,7 @@ export default function LoginPage() {
 
   if (!_hydrated) return (
     <div style={{ minHeight:'100vh', background:'#F7F5F0', display:'flex', alignItems:'center', justifyContent:'center' }}>
-      <div style={{ width:36, height:36, border:'2px solid rgb(var(--c-em) / 0.15)', borderTop:`2px solid ${GOLD}`, borderRadius:'50%', animation:'spin 0.8s linear infinite' }} />
+      <div style={{ width:36, height:36, border:'2px solid rgb(var(--c-gold) / 0.15)', borderTop:`2px solid ${GOLD}`, borderRadius:'50%', animation:'spin 0.8s linear infinite' }} />
       <style>{`@keyframes spin{to{transform:rotate(360deg);}}`}</style>
     </div>
   );
@@ -143,11 +143,11 @@ export default function LoginPage() {
           box-shadow: 0 18px 60px rgba(28,27,23,0.08);
           animation: auUp .55s cubic-bezier(.22,1,.36,1) both; position: relative; overflow: hidden; }
         .au-card::before { content: ''; position: absolute; top: 0; inset-inline: 0; height: 3px;
-          background: rgb(var(--c-em)); }
+          background: var(--brand); }
 
         .au-wrap { display: flex; align-items: center; background: #FAFAF7; border: 1px solid ${LINE};
           border-radius: 13px; transition: border-color .25s, box-shadow .25s; min-width: 0; }
-        .au-wrap.on { border-color: rgb(var(--c-em) / 0.65); box-shadow: 0 0 0 3px rgb(var(--c-em) / 0.14); background: #fff; }
+        .au-wrap.on { border-color: rgb(var(--c-gold) / 0.65); box-shadow: 0 0 0 3px rgb(var(--c-gold) / 0.14); background: #fff; }
         .au-wrap.err { border-color: rgba(178,59,46,0.55); box-shadow: 0 0 0 3px rgba(178,59,46,0.10); }
         .au-ic { padding: 0 14px 0 0; color: ${MUT}; display: flex; align-items: center; flex-shrink: 0; transition: color .25s; }
         .au-wrap.on .au-ic { color: ${GOLD_D}; }
@@ -157,7 +157,7 @@ export default function LoginPage() {
 
         .au-btn { width: 100%; padding: 15px; border: none; border-radius: 13px; cursor: pointer;
           font-family: inherit; font-size: 15px; font-weight: 600; color: #fff;
-          background: rgb(var(--c-em));
+          background: var(--brand);
           box-shadow: 0 4px 14px rgb(var(--c-ink) / .12);
           display: flex; align-items: center; justify-content: center; gap: 10px;
           transition: transform .25s cubic-bezier(.22,1,.36,1), background-color .2s, box-shadow .25s, opacity .2s; }
@@ -167,7 +167,7 @@ export default function LoginPage() {
         .au-btn:disabled { opacity: .65; cursor: not-allowed; }
 
         .au-forgot { font-size: 12px; font-weight: 700; color: ${GOLD_D}; text-decoration: none;
-          border-bottom: 1px solid rgb(var(--c-em) / 0.45); padding-bottom: 1px; transition: border-color .2s, color .2s; }
+          border-bottom: 1px solid rgb(var(--c-gold) / 0.45); padding-bottom: 1px; transition: border-color .2s, color .2s; }
         .au-forgot:hover { color: var(--brand-dark); border-bottom-color: var(--brand-dark); }
 
         /* ── خطای مرکزی: وسط صفحه، جلوی چشم کاربر ── */
@@ -204,7 +204,7 @@ export default function LoginPage() {
 
       <div className="au-card">
         <h1 style={{ fontSize: 23, fontWeight: 900, color: TEXT, margin: '0 0 6px', letterSpacing: '-0.02em' }}>ورود به حساب</h1>
-        <div style={{ width: 46, height: 3, borderRadius: 2, background: `rgb(var(--c-em))`, transformOrigin: 'right', animation: 'auX .5s .2s ease both', marginBottom: 10 }} />
+        <div style={{ width: 46, height: 3, borderRadius: 2, background: `var(--brand)`, transformOrigin: 'right', animation: 'auX .5s .2s ease both', marginBottom: 10 }} />
         <p style={{ fontSize: 13, color: MUT, margin: '0 0 24px', lineHeight: 1.8 }}>با شماره موبایل خود وارد شوید</p>
 
         <div style={{ marginBottom: 14 }}>
@@ -268,10 +268,10 @@ export default function LoginPage() {
             <div style={{
               display: 'flex', alignItems: 'flex-start', gap: 7, marginTop: 9,
               padding: '9px 11px', borderRadius: 10, lineHeight: 1.9,
-              background: hint.persian ? 'rgba(178,59,46,0.07)' : 'rgb(var(--c-em) / 0.10)',
-              border: `1px solid ${hint.persian ? 'rgba(178,59,46,0.28)' : 'rgb(var(--c-em) / 0.32)'}`,
+              background: hint.persian ? 'rgba(178,59,46,0.07)' : 'rgb(var(--c-gold) / 0.10)',
+              border: `1px solid ${hint.persian ? 'rgba(178,59,46,0.28)' : 'rgb(var(--c-gold) / 0.32)'}`,
               fontSize: 12, fontWeight: 700,
-              color: hint.persian ? '#B23B2E' : 'rgb(var(--c-em))',
+              color: hint.persian ? '#B23B2E' : 'var(--brand)',
             }}>
               <AlertCircle size={14} style={{ flexShrink: 0, marginTop: 2 }} />
               <span>{hint.message}</span>
@@ -294,7 +294,7 @@ export default function LoginPage() {
           <div style={{ flex: 1, height: 1, background: LINE }} />
         </div>
 
-        <Link href="/register" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, width: '100%', boxSizing: 'border-box', padding: '13px', borderRadius: 13, textDecoration: 'none', fontSize: 14, fontWeight: 800, color: GOLD_D, background: 'rgb(var(--c-em) / 0.10)', border: '1px solid rgb(var(--c-em) / 0.32)', transition: 'background .2s' }}>
+        <Link href="/register" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, width: '100%', boxSizing: 'border-box', padding: '13px', borderRadius: 13, textDecoration: 'none', fontSize: 14, fontWeight: 800, color: GOLD_D, background: 'rgb(var(--c-gold) / 0.10)', border: '1px solid rgb(var(--c-gold) / 0.32)', transition: 'background .2s' }}>
           ساخت حساب جدید
         </Link>
 

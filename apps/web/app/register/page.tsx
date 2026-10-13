@@ -63,8 +63,8 @@ function isValidNationalId(v: string): boolean {
   return sum < 2 ? check === sum : check === 11 - sum;
 }
 
-const GOLD   = 'rgb(var(--c-em))';
-const GOLD_D = 'rgb(var(--c-em))';
+const GOLD   = 'var(--brand)';
+const GOLD_D = 'var(--brand)';
 const TEXT   = '#1C1B17';
 const SEC    = '#5B564B';
 const MUT    = '#6F6A5C';
@@ -353,11 +353,11 @@ export default function RegisterPage() {
           box-shadow: 0 18px 60px rgba(28,27,23,0.08);
           animation: auUp .55s cubic-bezier(.22,1,.36,1) both; position: relative; overflow: hidden; }
         .au-card::before { content: ''; position: absolute; top: 0; inset-inline: 0; height: 3px;
-          background: rgb(var(--c-em)); }
+          background: var(--brand); }
 
         .au-wrap { display: flex; align-items: center; background: #fff; border: 1px solid ${LINE};
           border-radius: 13px; transition: border-color .25s, box-shadow .25s; }
-        .au-wrap.on { border-color: rgb(var(--c-em) / 0.65); box-shadow: 0 0 0 3px rgb(var(--c-em) / 0.14); }
+        .au-wrap.on { border-color: rgb(var(--c-gold) / 0.65); box-shadow: 0 0 0 3px rgb(var(--c-gold) / 0.14); }
         .au-ic { padding: 0 14px 0 0; color: ${MUT}; display: flex; align-items: center; flex-shrink: 0; transition: color .25s; }
         .au-wrap.on .au-ic { color: ${GOLD_D}; }
         .au-inp { flex: 1; min-width: 0; background: transparent; border: none; outline: none;
@@ -366,7 +366,7 @@ export default function RegisterPage() {
 
         .au-btn { width: 100%; padding: 15px; border: none; border-radius: 13px; cursor: pointer;
           font-family: inherit; font-size: 15px; font-weight: 600; color: #fff;
-          background: rgb(var(--c-em));
+          background: var(--brand);
           box-shadow: 0 4px 14px rgb(var(--c-ink) / .12);
           display: flex; align-items: center; justify-content: center; gap: 10px;
           transition: transform .25s cubic-bezier(.22,1,.36,1), background-color .2s, box-shadow .25s, opacity .2s; }
@@ -382,7 +382,7 @@ export default function RegisterPage() {
         .au-step .n { width: 21px; height: 21px; border-radius: 50%; display: inline-flex; align-items: center;
           justify-content: center; font-size: 11px; font-weight: 900; transition: all .3s; }
         .au-step .b { height: 3px; border-radius: 2px; background: ${LINE}; overflow: hidden; }
-        .au-step .b i { display: block; height: 100%; background: rgb(var(--c-em));
+        .au-step .b i { display: block; height: 100%; background: var(--brand);
           transition: width .45s cubic-bezier(.22,1,.36,1); }
 
         .au-row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
@@ -434,9 +434,9 @@ export default function RegisterPage() {
                 <div key={s.n} className="au-step">
                   <div className="t" style={{ color: active || done ? GOLD_D : MUT }}>
                     <span className="n" style={{
-                      background: done ? `rgb(var(--c-em))` : active ? 'rgb(var(--c-em) / 0.14)' : '#EFEBE1',
+                      background: done ? `var(--brand)` : active ? 'rgb(var(--c-gold) / 0.14)' : '#EFEBE1',
                       color: done ? '#fff' : active ? GOLD_D : MUT,
-                      border: active ? '1px solid rgb(var(--c-em) / 0.5)' : '1px solid transparent',
+                      border: active ? '1px solid rgb(var(--c-gold) / 0.5)' : '1px solid transparent',
                     }}>
                       {done ? <Check size={11} /> : s.n}
                     </span>
@@ -451,7 +451,7 @@ export default function RegisterPage() {
           <h1 style={{ fontSize: 22, fontWeight: 900, color: TEXT, margin: '0 0 6px', letterSpacing: '-0.02em' }}>
             {otpOpen ? 'تأیید شماره موبایل' : step === 1 ? 'ساخت حساب جدید' : 'تکمیل اطلاعات حساب'}
           </h1>
-          <div style={{ width: 46, height: 3, borderRadius: 2, background: `rgb(var(--c-em))`, transformOrigin: 'right', animation: 'auX .5s .2s ease both', marginBottom: 10 }} />
+          <div style={{ width: 46, height: 3, borderRadius: 2, background: `var(--brand)`, transformOrigin: 'right', animation: 'auX .5s .2s ease both', marginBottom: 10 }} />
           <p style={{ fontSize: 13, color: MUT, margin: '0 0 22px', lineHeight: 1.8 }}>
             {otpOpen ? `کد ۵ رقمی به شماره ${toFa(form.phone)} پیامک شد` : step === 1 ? 'ابتدا شماره موبایل خود را وارد کنید' : `کاربر گرامی ${toFa(form.phone)} اکنون اطلاعات حساب را کامل کنید`}
           </p>
@@ -466,13 +466,13 @@ export default function RegisterPage() {
               </p>
               {/* شماره از قبل حساب دارد ⇒ به‌جای ارسال پیامک، مسیر ورود */}
               {phoneTaken && (
-                <div style={{ background: 'rgb(var(--c-em) / 0.09)', border: '1px solid rgb(var(--c-em) / 0.34)', borderRadius: 14, padding: '14px 16px', marginBottom: 16 }}>
+                <div style={{ background: 'rgb(var(--c-gold) / 0.09)', border: '1px solid rgb(var(--c-gold) / 0.34)', borderRadius: 14, padding: '14px 16px', marginBottom: 16 }}>
                   <div style={{ fontSize: 13, fontWeight: 800, color: TEXT, marginBottom: 6 }}>این شماره قبلا ثبت‌نام کرده است</div>
                   <p style={{ fontSize: 12.5, color: MUT, margin: '0 0 12px', lineHeight: 2 }}>
                     برای ادامه وارد حساب خود شوید. اگر رمز عبورتان را فراموش کرده‌اید، از گزینه‌ی بازیابی استفاده کنید.
                   </p>
                   <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                    <Link href="/login" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '9px 18px', borderRadius: 11, textDecoration: 'none', fontSize: 12.5, fontWeight: 800, background: 'rgb(var(--c-em) / 0.16)', border: '1px solid rgb(var(--c-em) / 0.45)', color: GOLD_D }}>
+                    <Link href="/login" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '9px 18px', borderRadius: 11, textDecoration: 'none', fontSize: 12.5, fontWeight: 800, background: 'rgb(var(--c-gold) / 0.16)', border: '1px solid rgb(var(--c-gold) / 0.45)', color: GOLD_D }}>
                       ورود به حساب <ArrowLeft size={13} />
                     </Link>
                     <button type="button" onClick={() => { setPhoneTaken(false); setError(''); setForm(f => ({ ...f, phone: '' })); }}
@@ -493,7 +493,7 @@ export default function RegisterPage() {
           {step === 1 && otpOpen && (
             <div key="otp" style={{ animation: 'auUp .4s ease both' }}>
               <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 16 }}>
-                <span style={{ display: 'inline-flex', width: 52, height: 52, borderRadius: 16, background: 'rgb(var(--c-em) / 0.12)', border: '1px solid rgb(var(--c-em) / 0.32)', color: GOLD_D, alignItems: 'center', justifyContent: 'center' }}><MessageSquare size={24} /></span>
+                <span style={{ display: 'inline-flex', width: 52, height: 52, borderRadius: 16, background: 'rgb(var(--c-gold) / 0.12)', border: '1px solid rgb(var(--c-gold) / 0.32)', color: GOLD_D, alignItems: 'center', justifyContent: 'center' }}><MessageSquare size={24} /></span>
               </div>
               <input
                 className="au-inp" value={otp} inputMode="numeric" maxLength={6} autoFocus
@@ -523,9 +523,9 @@ export default function RegisterPage() {
               {/* سرویس پیامک برای هر شماره‌ای «موفق» می‌گوید و گزارش تحویل
                   نمی‌دهد، پس نرسیدن کد از سمت ما قابل تشخیص نیست. تنها
                   کاری که می‌شود کرد این است که کاربر بی‌خبر نماند. */}
-              <div style={{ marginTop: 14, padding: '11px 13px', borderRadius: 12, background: 'rgb(var(--c-em) / 0.07)', border: '1px solid rgb(var(--c-em) / 0.22)' }}>
-                <div style={{ fontSize: 12.5, fontWeight: 800, color: 'rgb(var(--c-em))', marginBottom: 6 }}>کد به دستتان نرسید؟</div>
-                <ul style={{ margin: 0, paddingInlineStart: 16, fontSize: 12, lineHeight: 2, color: 'rgb(var(--c-em))' }}>
+              <div style={{ marginTop: 14, padding: '11px 13px', borderRadius: 12, background: 'rgb(var(--c-gold) / 0.07)', border: '1px solid rgb(var(--c-gold) / 0.22)' }}>
+                <div style={{ fontSize: 12.5, fontWeight: 800, color: 'var(--brand)', marginBottom: 6 }}>کد به دستتان نرسید؟</div>
+                <ul style={{ margin: 0, paddingInlineStart: 16, fontSize: 12, lineHeight: 2, color: 'var(--brand)' }}>
                   <li>چند دقیقه صبر کنید و «ارسال مجدد» را بزنید.</li>
                   <li>پوشه‌ی پیام‌های مسدودشده یا فیلترشده‌ی گوشی را ببینید.</li>
                   <li>اگر باز هم نرسید، شماره‌ی دیگری امتحان کنید یا با پشتیبانی تماس بگیرید.</li>
@@ -665,7 +665,7 @@ export default function RegisterPage() {
             <span style={{ fontSize: 12, color: MUT }}>حساب دارید؟</span>
             <div style={{ flex: 1, height: 1, background: LINE }} />
           </div>
-          <Link href="/login" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, width: '100%', boxSizing: 'border-box', padding: '13px', borderRadius: 13, textDecoration: 'none', fontSize: 14, fontWeight: 800, color: GOLD_D, background: 'rgb(var(--c-em) / 0.10)', border: '1px solid rgb(var(--c-em) / 0.32)' }}>
+          <Link href="/login" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, width: '100%', boxSizing: 'border-box', padding: '13px', borderRadius: 13, textDecoration: 'none', fontSize: 14, fontWeight: 800, color: GOLD_D, background: 'rgb(var(--c-gold) / 0.10)', border: '1px solid rgb(var(--c-gold) / 0.32)' }}>
             ورود به حساب
           </Link>
 

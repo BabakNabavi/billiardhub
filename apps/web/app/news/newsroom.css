@@ -52,8 +52,8 @@
   --rule-strong: #C9C5BC;
 
   /* ── لهجه ── */
-  --gold: var(--brand, #0F5B4D);
-  --gold-ink: var(--brand, #0F5B4D);
+  --gold: var(--brand, #7E5828);
+  --gold-ink: var(--brand, #7E5828);
   /* قرمز فوری — عمدا کدر و روزنامه‌ای، نه قرمز هشدار نرم‌افزار */
   --urgent: #A8281E;
 

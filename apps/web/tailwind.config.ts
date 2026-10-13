@@ -44,8 +44,17 @@ const config: Config = {
           deep: ch('--c-gold-deep'),
           dark: ch('--c-gold-dark'),
           light: ch('--c-gold-light'),
+          /* متنِ طلایی روی سطحِ روشن — ۶٫۳:۱ روی سفید. `gold` خودش ۲٫۳:۱ است
+             و فقط برای حاشیه و تینت. */
+          text: ch('--c-gold-text'),
         },
         line: ch('--c-line'),
+        /* وضعیت — معنا دارند، تأکید نیستند */
+        danger: {
+          DEFAULT: ch('--c-danger'),
+          ink: ch('--c-danger-ink'),
+        },
+        success: ch('--c-success'),
       },
 
       /* ── فاصله ──
@@ -100,6 +109,9 @@ const config: Config = {
          Tailwind فشرده می‌شود. */
       fontSize: {
         'display': ['clamp(1.75rem, 1.2rem + 2.4vw, 2.75rem)', { lineHeight: '1.35', letterSpacing: '-0.01em', fontWeight: '800' }],
+        /* تیترِ صفحه‌های داخلی — ۲۴ تا ۳۲ پیکسل. `display` (تا ۴۴) مالِ صفحه‌ی
+           اصلی است؛ سربرگِ جمع‌وجور تیترِ کوچک‌تری می‌خواهد. */
+        'page': ['clamp(1.5rem, 1.25rem + 1vw, 2rem)', { lineHeight: '1.4', fontWeight: '800' }],
         'title': ['clamp(1.25rem, 1.05rem + 0.9vw, 1.6rem)', { lineHeight: '1.5', letterSpacing: '-0.005em', fontWeight: '800' }],
         'section': ['1.0625rem', { lineHeight: '1.6', fontWeight: '800' }],
         'body': ['0.9375rem', { lineHeight: '1.9' }],

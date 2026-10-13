@@ -91,7 +91,7 @@ export const viewport: Viewport = {
   /* عمدا بدون interactive-widget: می‌خواهیم کیبورد فقط «روی» محتوا بیاید
      (مثل اینستاگرام)، نه اینکه کل صفحه را جمع/بلرزاند. چیدمان استوری و دایرکت
      خودشان با VisualViewport نوار پاسخ را بالای کیبورد نگه می‌دارند. */
-  themeColor: '#0F5B4D',
+  themeColor: '#F7F6F2',   // زمینه‌ی روشنِ سایت — سبزِ زمردی دیگر رنگِ رابط نیست
 };
 
 export default function RootLayout({

@@ -662,7 +662,7 @@ export default function Stories() {
           userAvatar: c.name?.[0] ?? '؟',
           logoUrl: c.logo || undefined,
           userRole: 'club',
-          roleColor: '#0F5B4D',
+          roleColor: '#8F6531',
           roleLabel: 'باشگاه',
           allSeen: false,
           stories: stories.map((s: any) => ({

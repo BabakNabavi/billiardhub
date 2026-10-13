@@ -44,9 +44,11 @@ html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; overflow-x:
   --c-ink-2:   103 108 105;   /* #676C69 خاکستریِ آرام */
   --c-ink-3:   103 108 105;   /* هم‌مقدار با بالا — پله‌ی سوم حذف شد */
 
-  /* ── زمرد: تنها رنگِ تأکیدِ رابط ──
-     ⚠️ سهمِ دیداری ۵ تا ۱۰ درصد. اگر سایت «سبز» دیده شد یعنی
-     این‌ها جایی نشسته‌اند که باید خنثی می‌ماندند. */
+  /* ── زمرد: فقط رنگِ نشانه‌ی برند (لوگو) ──
+     ⚠️ تا مهرِ ۱۴۰۵ «تنها رنگِ تأکیدِ رابط» بود و همزمان طلاییِ LQ در
+     صفحه‌های داخلی هم تأکید بود — دو رنگِ تأکید که نقدِ ۲۱ مهر بزرگ‌ترین
+     نشانه‌ی «وایب‌کد» یافت. مالک طلایی را برگزید؛ این‌ها فقط برای لوگو و
+     رنگِ معناییِ نادر می‌مانند، نه دکمه و تأکید. */
   --c-em:        15  91  77;  /* #0F5B4D اصلی — ۸٫۰۰:۱ روی سفید */
   --c-em-dark:    8  63  54;  /* #083F36 تیره — هاور، فوتر */
   --c-em-accent: 46 125 107;  /* #2E7D6B تأکیدِ کنترل‌شده — ۴٫۹۳:۱ */
@@ -60,6 +62,10 @@ html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; overflow-x:
      دست‌کاریِ --gold-deep که جاهای دیگر هم می‌نشیند. */
   --c-gold-text: 126 88 40;
   --c-line:      0   0   0;   /* خطوط: مشکی کم‌شفاف */
+  /* وضعیت — معنا، نه تأکید. فقط برای خطا/برگشت‌ناپذیر و «باز است». */
+  --c-danger:  178  59  46;   /* #B23B2E — ۵٫۹:۱ روی سفید */
+  --c-danger-ink: 156 50 38;  /* #9C3226 — متنِ خطا روی سطحِ روشن */
+  --c-success:  31 138  76;   /* #1F8A4C */
 
   /* ── Surfaces ── */
   --bg-primary:    rgb(var(--c-paper));
@@ -76,25 +82,32 @@ html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; overflow-x:
   --text-on-dark:   rgba(255,255,255,0.92);
   --text-on-dark-2: rgba(255,255,255,0.58);
 
-  /* ═══ تأکیدِ برند — زمرد ═══
-     نامِ توکن‌ها عمدا عوض *نشد*: ۱۱۷ مصرف‌کننده در ده فایلِ CSS دارند
-     و همه‌شان جای «تأکید»اند — حلقه‌ی فوکوس، دکمه‌ی اصلی، برچسبِ بخش.
-     دقیقا همان‌ها باید زمرد شوند. عوض‌کردنِ نام یعنی ۱۱۷ ویرایشِ
-     بی‌حاصل و ریسکِ جاافتادن. نامِ تازه برای کدِ جدید است. */
-  --brand:        rgb(var(--c-em));
-  --brand-dark:   rgb(var(--c-em-dark));
-  --brand-accent: rgb(var(--c-em-accent));
-  --brand-tint:   rgb(var(--c-em) / .07);
-  --brand-tint-2: rgb(var(--c-em) / .14);
-  /* ⚠️ روی زمینه‌ی تیره، زمردِ اصلی ۲٫۴۰:۱ می‌دهد و دیده نمی‌شود.
-     این پله ۶٫۶۰:۱ می‌دهد و فقط همان‌جا استفاده می‌شود. */
-  --brand-on-dark: #4FA890;
-  /* کانالِ برند — برای جاهایی که شفافیتِ دلخواه می‌خواهند */
-  --gold-ch: var(--c-em);
-  --brand-ch: var(--c-em);
-  --brand-line:   rgb(var(--c-em) / .22);
+  /* ═══ تأکیدِ برند — طلاییِ LQ (تصمیمِ مالک، ۲۱ مهر ۱۴۰۵) ═══
+     نامِ توکن‌ها عمدا عوض *نشد*: صدها مصرف‌کننده جای «تأکید»اند — حلقه‌ی
+     فوکوس، دکمه‌ی اصلی، برچسبِ بخش — و همه با همین یک تعویض طلایی شدند.
 
-  /* مترادف‌های قدیمی — همگی حالا زمردند، نه طلایی */
+     دو پله، دو کار، چون طلاییِ روشن (#C7A66A) روی سفید فقط ۲٫۳:۱ است:
+       --brand        #8F6531  متن، آیکون، پرِ دکمه با متنِ سفید (۵٫۱:۱)
+       --brand-accent #C7A66A  حاشیه، تینت، زیرخط، تزئین — هرگز متنِ ریز
+     تینت و خطِ LQ همان مشخصاتِ ثبت‌شده است: ۰٫۱۲ / ۰٫۳۴. */
+  /* ⚠️ `--brand` متنِ طلایی است و روی تینتِ خودش هم می‌نشیند. با gold-deep
+     (#8F6531) روی تینت ۴٫۳۹:۱ و روی mist ۴٫۳۶:۱ می‌داد — زیرِ ۴٫۵. gold-text
+     (#7E5828) روی همان‌ها ۵٫۴ و ۵٫۰ است و سفید رویش ۶٫۳. gold-deep برای حلقه
+     و آیکون می‌ماند. */
+  --brand:        rgb(var(--c-gold-text));
+  /* هاورِ زمینه‌ی پُر — یک پله تیره‌تر از --brand */
+  --brand-dark:   rgb(104 72 32);
+  --brand-accent: rgb(var(--c-gold));
+  --brand-tint:   rgb(var(--c-gold) / .12);
+  --brand-tint-2: rgb(var(--c-gold) / .20);
+  /* روی زمینه‌ی تیره طلاییِ روشن خواناست (~۱۰:۱ روی #111) */
+  --brand-on-dark: rgb(var(--c-gold-light));
+  /* کانالِ برند — برای جاهایی که شفافیتِ دلخواه می‌خواهند */
+  --gold-ch: var(--c-gold);
+  --brand-ch: var(--c-gold);
+  --brand-line:   rgb(var(--c-gold) / .34);
+
+  /* مترادف‌های قدیمی — همه به همان دو پله‌ی طلایی */
   --gold:        var(--brand);
   --gold-deep:   var(--brand);
   --gold-dark:   var(--brand);
@@ -106,10 +119,9 @@ html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; overflow-x:
   --accent:        var(--brand);
   --accent-light:  var(--brand-accent);
   --accent-dim:    var(--brand-tint);
-  --accent-glow:   rgb(var(--c-em) / .18);
+  --accent-glow:   rgb(var(--c-gold) / .18);
 
-  /* ⚠️ تنها جایی که طلایی می‌ماند: نشانِ متنیِ برند.
-     بندِ ۲۱ — لوگو می‌تواند طلایی بماند، رابط نه. */
+  /* ⚠️ برعکسِ قبل: حالا رابط طلایی است و فقط لوگو سبز می‌ماند. */
 
   /* ── Borders ──
      ⚠️ --c-line مشکیِ کم‌شفاف می‌ماند چون ده‌ها جا مستقیم با شفافیتِ
@@ -140,6 +152,13 @@ html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; overflow-x:
   --ad-unit:     9px;     --ad-unit-w:  500;
   --ad-pct:      12px;    --ad-pct-w:   600;
 
+  /* ── ارتفاعِ نوارِ بالا ──
+     نوار ۷۲ پیکسل است به‌اضافه‌ی ناحیه‌ی امنِ بالای آیفون در حالتِ
+     standalone. نوارهای چسبانِ صفحه‌ها `top`شان را از همین می‌گیرند؛
+     عددِ ۶۲ که چند صفحه داشتند ۱۰ پیکسل زیرِ نوار می‌رفت و ناحیه‌ی امن
+     را هم نمی‌شمرد. */
+  --nav-offset: calc(72px + env(safe-area-inset-top));
+
   /* ── Radii ── */
   --r1: 6px;
   --r2: 10px;
@@ -149,7 +168,7 @@ html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; overflow-x:
   --r6: 32px;
 
   /* ── Category Tints (very subtle) ── */
-  --tint-tournament: rgb(var(--c-em) / .04);
+  --tint-tournament: rgb(var(--c-gold) / .05);
   --tint-news:       rgba(59,130,246,0.05);
   --tint-clubs:      rgba(34,197,94,0.05);
   --tint-market:     rgba(245,158,11,0.05);
@@ -221,8 +240,17 @@ body {
 ══════════════════════════════════════════ */
 ::-webkit-scrollbar { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track { background: rgba(0,0,0,0.03); }
-::-webkit-scrollbar-thumb { background: var(--brand-tint); border-radius: 99px; }
-::-webkit-scrollbar-thumb:hover { background: var(--brand); }
+/* خنثی، نه طلایی: تینتِ ۱۲٪ طلایی روی زمینه‌ی عاج تقریباً دیده نمی‌شد و
+   هاورش یک‌باره طلاییِ پُر می‌شد. نوارِ اسکرول ابزار است، تأکید نیست. */
+::-webkit-scrollbar-thumb { background: rgb(var(--c-ink) / .18); border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: rgb(var(--c-ink) / .32); }
+
+/* سطح‌های مرورگر هم مالِ طرح‌اند: انتخابِ متن از پالت می‌آید، نه آبیِ
+   پیش‌فرضِ سیستم.
+   ⚠️ رنگِ نشانگرِ تایپ عمداً سراسری نشد: ورودیِ پاسخِ استوری متنِ سفید روی
+   رسانه‌ی تیره است و نشانگرِ طلاییِ تیره آن‌جا ۳٫۷:۱ می‌شد. پیش‌فرضِ مرورگر
+   (رنگِ خودِ متن) همه‌جا درست است. */
+::selection { background: rgb(var(--c-gold) / .30); color: inherit; }
 
 /* ══════════════════════════════════════════
    CARD SYSTEM — Apple / Linear inspired
@@ -687,7 +715,7 @@ body {
   border-color: var(--brand);
   box-shadow:
     inset 0 1.5px 0 rgba(255,255,255,0.95),
-    0 0 0 3px rgb(var(--c-em) / .18),
+    0 0 0 3px rgb(var(--c-gold) / .24),
     0 6px 20px rgba(28,28,26,0.07);
 }
 
@@ -1138,7 +1166,7 @@ select:hover { border-color: var(--brand-line) !important; }
 select:focus {
   outline: none;
   border-color: var(--brand) !important;
-  box-shadow: 0 0 0 3px rgb(var(--c-em) / .18);
+  box-shadow: 0 0 0 3px rgb(var(--c-gold) / .24);
 }
 select:disabled { opacity: 0.55; cursor: not-allowed; }
 
@@ -1428,7 +1456,8 @@ select:disabled { opacity: 0.55; cursor: not-allowed; }
     /* rgba(154,110,56) = #9A6E38 به دهدهی. تزئین محض پس‌زمینه
        است و کنتراست ندارد، پس عمدا دست‌نخورده ماند. */
     radial-gradient(34rem 30rem at 92% 78%,  rgba(154,110,56,0.22),  transparent 66%),
-    radial-gradient(30rem 24rem at 22% 104%, rgba(34,197,94,0.15),   transparent 62%),
+    /* سبز بود (rgba(34,197,94)) — مهرِ ۱۴۰۵: سبز فقط در نشانِ برند */
+    radial-gradient(30rem 24rem at 22% 104%, rgb(var(--c-gold) / .14), transparent 62%),
     linear-gradient(#F4F2EE, #F4F2EE);
   /* بدون `filter: blur` — گرادیان‌های شعاعی از قبل نرم‌اند و تارکردن یک
      لایه‌ی هم‌اندازه‌ی صفحه روی CPUهای ضعیف هر فریم هزینه دارد. */
@@ -1484,8 +1513,11 @@ select:disabled { opacity: 0.55; cursor: not-allowed; }
   from { opacity: 0; transform: translateY(14px) scale(.985); }
   to   { opacity: 1; transform: none; }
 }
+/* ⚠️ `backwards` نه `both`: با `both` فریمِ آخر (`transform: none`) بعد از
+   پایانِ حرکت هم روی عنصر می‌ماند و بر `transform`ِ هاور و فشردنِ کارت
+   (`.lq-pcard:hover`) برنده می‌شد — کارت هیچ‌وقت بالا نمی‌آمد. */
 .lq-rise {
-  animation: lqRise .62s cubic-bezier(.22,1,.36,1) both;
+  animation: lqRise .62s cubic-bezier(.22,1,.36,1) backwards;
   animation-delay: calc(var(--lq-i, 0) * 70ms);
 }
 

@@ -21,9 +21,10 @@
   /* ⚠️ زمردِ اصلی روی این زمینه ۲٫۴۰:۱ است. هر چیزی که این‌جا
      var(--gold) می‌خواند باید پله‌ی روشن را بگیرد — یک جا، نه
      شانزده قاعده‌ی جداگانه. */
-  --gold: var(--brand-on-dark, #4FA890);
-  --gold-ch: 79 168 144;
-  --gold-light: var(--brand-on-dark, #4FA890);
+  /* سبزِ روشن بود (79 168 144) — مهرِ ۱۴۰۵: سبز فقط در نشانِ برند */
+  --gold: var(--brand-on-dark, #E2C98C);
+  --gold-ch: var(--c-gold-light);
+  --gold-light: var(--brand-on-dark, #E2C98C);
   position: relative;
   isolation: isolate;
   background: var(--bg-dark, #111111);

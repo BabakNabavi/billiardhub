@@ -12,6 +12,7 @@ import { sb } from '../finance/db'
 import type { EntityType } from './core'
 import type { EntitySnapshot } from './resolve'
 import { notExpiredOr } from '@/lib/market/live'
+import { tableSummary } from '@/lib/clubs/tables'
 
 const s = (v: unknown, d = '') => (typeof v === 'string' ? v : d)
 const n = (v: unknown, d = 0) => { const x = Number(v); return Number.isFinite(x) ? x : d }
@@ -88,10 +89,7 @@ async function freeClubs(limit: number): Promise<EntitySnapshot[]> {
     /* تفکیک واقعی میزها (میز VIP هم از جنس همان نوع است).
        ایرهاکی عمدا بیرون است: میز بیلیارد نیست و کارت هم فقط سه
        نوع اسنوکر/پاکت/هی‌بال را نشان می‌دهد. */
-    const snooker = n(r.snookerTables) + n(r.vipSnookerTables)
-    const pocket = n(r.pocketTables) + n(r.vipPocketTables)
-    const highball = n(r.highballTables)
-    const tables = snooker + pocket + highball
+    const { snooker, pocket, highball, total: tables } = tableSummary(r)
     return {
       entityType: 'club' as const, ref: s(r.id),
       title: s(r.name, 'باشگاه'),

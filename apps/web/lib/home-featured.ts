@@ -5,6 +5,7 @@ import { listPublicStores, type PublicStore } from './sellers-source'
 import { modernizeType } from './market/title'
 import type { RealClub, RealProduct, RealStore, HomeFeatured } from './home-types'
 import { notExpiredOr } from '@/lib/market/live'
+import { tableSummary } from '@/lib/clubs/tables'
 
 /* ─────────────────────────────────────────────────────────────
    پشتوانه‌ی سه سکشن صفحه‌ی اصلی — خوانده‌شده روی سرور.
@@ -119,13 +120,8 @@ async function loadHomeFeaturedUncached(): Promise<HomeFeatured> {
     name: c.name,
     city: c.city ?? '',
     dist: '',
-    tables: n(c.snookerTables) + n(c.pocketTables) + n(c.highballTables)
-          + n(c.vipSnookerTables) + n(c.vipPocketTables),
-    breakdown: {
-      snooker: n(c.snookerTables) + n(c.vipSnookerTables),
-      pocket: n(c.pocketTables) + n(c.vipPocketTables),
-      highball: n(c.highballTables),
-    },
+    tables: tableSummary(c).total,
+    breakdown: tableSummary(c),
     rating: 0, reviews: 0, type: 'اسنوکر',
     img: c.images?.[0] || CLUB_IMG[i % CLUB_IMG.length]!,
     img2: c.images?.[1] || CLUB_IMG[(i + 1) % CLUB_IMG.length]!,

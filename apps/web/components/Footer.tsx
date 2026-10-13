@@ -6,7 +6,10 @@ import PayPingSeal from './PayPingSeal';
 
 const GOLD    = 'var(--brand)';
 /* طلاییِ نشانِ متنی — دقیقا همان که نوار دارد. */
-const GOLD_TXT = WORDMARK_GREEN;   /* فوتر همیشه روشن است */
+const GOLD_TXT = WORDMARK_GREEN;   /* فوتر همیشه روشن است — فقط روی نشانِ متنی */
+/* هاورِ لینک‌ها و نامِ سازنده: طلاییِ متن (۶٫۶:۱)، نه سبزِ لوگو.
+   تصمیمِ ۲۱ مهرِ ۱۴۰۵: سبز فقط در خودِ نشانِ برند. */
+const ACCENT_TXT = 'rgb(var(--c-gold-text))';
 const TEXT    = '#1A1917';
 /* آلفا از ۰٫۵۲ به ۰٫۶۲: روی پس‌زمینه‌ی فوتر ۳٫۴۷:۱ می‌داد (محاسبه‌شده) */
 const DIM     = 'rgba(26,25,23,0.62)';
@@ -99,9 +102,6 @@ export default function Footer() {
   return (
     <footer style={{ background: 'rgb(var(--c-mist))', borderTop: `1px solid ${BORDER}`, position: 'relative', overflow: 'hidden', direction: 'rtl' }}>
 
-      {/* Subtle top gold line */}
-      <div style={{ position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)', width: '320px', height: '1px', background: `linear-gradient(90deg,transparent,rgb(var(--c-em) / .31),transparent)` }} />
-
       <style>{`
         .ft-link {
           color: ${DIM};
@@ -117,11 +117,11 @@ export default function Footer() {
           transition: color 0.22s ease;
           line-height: 1.45;
         }
-        .ft-link:hover { color: ${GOLD_TXT}; }
+        .ft-link:hover { color: ${ACCENT_TXT}; }
         /* هاور لینک‌های حقوقی — پیش‌تر با رویداد JS بود و همین دو خط
            کل فوتر را کلاینتی می‌کرد */
         .ft-legal { font-size:13px; color:${DIM2}; text-decoration:none; transition:color .22s ease; min-height:24px; display:inline-flex; align-items:center; }
-        .ft-legal:hover { color:${GOLD_TXT}; }
+        .ft-legal:hover { color:${ACCENT_TXT}; }
         .ft-link svg { opacity: 0; transition: opacity 0.22s ease; flex-shrink: 0; }
         .ft-link:hover svg { opacity: 1; }
         .ft-social {
@@ -285,7 +285,7 @@ export default function Footer() {
             {/* letterSpacing از ۰.۱۴ به ۰.۰۴ کم شد: آن مقدار برای متن تمام‌بزرگ تنظیم شده بود
                 و روی متن حروف‌کوچک، فاصله‌ی حروف بیش از حد باز می‌افتاد */}
             <span style={{ direction: 'ltr', display: 'inline-flex', alignItems: 'center', gap: '6px', lineHeight: 1, fontSize: '10.5px', fontWeight: 600, letterSpacing: '0.04em', color: 'rgba(26,25,23,0.62)' }}>
-              <a href="https://www.babaknabavi.com" target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', color: 'inherit' }}>Designed &amp; Developed by <span style={{ color: GOLD_TXT }}>Babak Nabavi</span></a>
+              <a href="https://www.babaknabavi.com" target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', color: 'inherit' }}>Designed &amp; Developed by <span style={{ color: ACCENT_TXT }}>Babak Nabavi</span></a>
               {DEV_INSTAGRAM && <a href={DEV_INSTAGRAM} target="_blank" rel="noopener noreferrer" aria-label="اینستاگرامِ سازنده" style={{ display: 'inline-flex', color: GOLD, alignSelf: 'center', transform: 'translateY(-2px)' }}>
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                   <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
@@ -351,7 +351,7 @@ export default function Footer() {
             {/* letterSpacing از ۰.۱۴ به ۰.۰۴ کم شد: آن مقدار برای متن تمام‌بزرگ تنظیم شده بود
                 و روی متن حروف‌کوچک، فاصله‌ی حروف بیش از حد باز می‌افتاد */}
             <span style={{ direction: 'ltr', display: 'inline-flex', alignItems: 'center', gap: '6px', lineHeight: 1, fontSize: '10.5px', fontWeight: 600, letterSpacing: '0.04em', color: 'rgba(26,25,23,0.62)' }}>
-              <a href="https://www.babaknabavi.com" target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', color: 'inherit' }}>Designed &amp; Developed by <span style={{ color: GOLD_TXT }}>Babak Nabavi</span></a>
+              <a href="https://www.babaknabavi.com" target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', color: 'inherit' }}>Designed &amp; Developed by <span style={{ color: ACCENT_TXT }}>Babak Nabavi</span></a>
               {DEV_INSTAGRAM && <a href={DEV_INSTAGRAM} target="_blank" rel="noopener noreferrer" aria-label="اینستاگرامِ سازنده" style={{ display: 'inline-flex', color: GOLD, alignSelf: 'center', transform: 'translateY(-2px)' }}>
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                   <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>

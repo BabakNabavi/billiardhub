@@ -49,7 +49,7 @@ const NEW_BADGE_MS = 24 * 60 * 60 * 1000
    می‌شود و جایگاهی که فروشنده پولش را داده بی‌ارزش می‌شود. */
 const URGENT_MAX = 12
 
-const GOLD_D = 'rgb(var(--c-em))'  /* تأکیدِ رابط */
+const GOLD_D = 'var(--brand)'  /* تأکیدِ رابط */
 const TEXT   = '#1C1B17'
 const SEC    = '#5B564B'
 const MUT    = '#6F6A5C'

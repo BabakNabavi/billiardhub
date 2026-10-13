@@ -28,8 +28,8 @@
   --soft-2: #EDEBE6;
   --line: #E4E1DB;
   --line-2: #CFCBC3;
-  --gold: var(--brand, #0F5B4D);
-  --gold-ink: var(--brand, #0F5B4D);
+  --gold: var(--brand, #7E5828);
+  --gold-ink: var(--brand, #7E5828);
   /* ⚠️ نوار پیشرفت تماشا با طلایی همین صفحه، نه یک قرمز دوم:
      قاعده‌ی پروژه یک رنگ تأکید در هر صفحه است. */
   --live: #C7A66A;

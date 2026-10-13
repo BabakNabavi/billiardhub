@@ -7,7 +7,7 @@
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#F2EFE9",
-  "theme_color": "#0F5B4D",
+  "theme_color": "#F7F6F2",
   "icons": [
     {
       "src": "/images/Logo/bh-icon-192-v8.png",

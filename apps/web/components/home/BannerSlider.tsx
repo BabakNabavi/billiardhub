@@ -75,7 +75,7 @@ export default function BannerSlider({ slides }: { slides: readonly BannerSlide[
                 <h3 style={{ fontSize: 'clamp(22px,3.2vw,42px)', fontWeight: 700, color: '#fff', letterSpacing: '-0.025em', lineHeight: 1.12, marginBottom: '10px' }}>{slide.title}</h3>
                 <p style={{ fontSize: 'clamp(13px,1.4vw,17px)', color: 'rgba(255,255,255,0.86)', marginBottom: '22px', lineHeight: 1.6 }}>{slide.sub}</p>
                 <Link href={slide.link} style={{ textDecoration: 'none' }}>
-                  <button className="banner-cta-btn" style={{ background: 'rgb(var(--c-em))', color: '#fff', border: 'none', borderRadius: '10px', padding: '11px 24px', fontSize: '13px', fontWeight: 600, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                  <button className="banner-cta-btn" style={{ background: 'var(--brand)', color: '#fff', border: 'none', borderRadius: '10px', padding: '11px 24px', fontSize: '13px', fontWeight: 600, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
                     {slide.cta} <ArrowLeft size={12} />
                   </button>
                 </Link>
