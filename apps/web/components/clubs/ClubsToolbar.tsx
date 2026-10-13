@@ -28,10 +28,9 @@ import { SORT_LABEL, countFilters, type ClubFilters, type SortKey } from '@/lib/
 import { useDismissable } from '@/hooks/use-dismissable'
 import { ClubsFilterPanel } from './ClubsFilterPanel'
 
-/** `square`: دکمه‌ی فقط‌آیکون، ۴۴×۴۴ */
-const ctl = (on: boolean, square = false) => [
-  'inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-field border text-sub font-bold',
-  square ? 'w-11' : 'px-4',
+/** کنترل‌ها قرصی‌اند، مثلِ تراشه‌های فیلترِ فروشگاهِ اپل */
+const ctl = (on: boolean) => [
+  'inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-full border px-4 text-sub font-bold',
   'transition-colors duration-fast ease-smooth disabled:cursor-progress',
   'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-deep focus-visible:ring-offset-2 focus-visible:ring-offset-paper',
   on ? 'border-gold/[.34] bg-gold/[.12] text-gold-text' : 'border-line/10 bg-surface text-ink hover:border-line/20',
@@ -74,9 +73,13 @@ export function ClubsToolbar(p: ToolbarProps) {
       <div className="mx-auto flex max-w-screen-xl flex-wrap items-center gap-2 px-4 py-3 sm:flex-nowrap sm:px-6 lg:px-8">
         {/* ⚠️ `<div>` نه `<label>`: برچسب فقط کنترلِ خودش را می‌پذیرد، و دکمه‌ی
             پاک‌کردن داخلش نامِ دسترس‌پذیرِ ورودی را «… پاک‌کردنِ جست‌وجو» می‌کرد. */}
-        <div className="flex h-11 w-full min-w-0 items-center gap-2 rounded-field border border-line/10 bg-surface px-3
-                        transition-colors duration-fast focus-within:border-gold-deep/50 focus-within:ring-2 focus-within:ring-gold/20
-                        sm:w-auto sm:max-w-xs sm:flex-1">
+        {/* فیلدِ جست‌وجوی خاکستریِ قرصی — بی‌حاشیه، مثلِ جست‌وجوی سیستمِ اپل */}
+        {/* ⚠️ حلقه‌ی فوکوس تمام‌رنگ: فیلد حاشیه ندارد، پس حلقه تنها نشانه‌ی
+            فوکوس است و با ۴۰٪ شفافیت ۱٫۷:۱ می‌شد (کف ۳:۱). شیار ۴٪ نه ۵٪ تا
+            متنِ راهنما بالای ۴٫۵:۱ بماند. */}
+        <div className="flex h-11 min-w-0 flex-1 items-center gap-2 rounded-full bg-line/[.04] px-4
+                        transition-[background-color,box-shadow] duration-fast focus-within:bg-surface focus-within:ring-2 focus-within:ring-gold-deep
+                        sm:max-w-xs">
           <Search size={16} aria-hidden className="shrink-0 text-ink-2" />
           <label htmlFor="clubs-q" className="sr-only">جست‌وجوی باشگاه</label>
           <input id="clubs-q" type="search" enterKeyHint="search" value={p.search} onChange={e => p.onSearch(e.target.value)}
@@ -85,12 +88,17 @@ export function ClubsToolbar(p: ToolbarProps) {
                        [&::-webkit-search-cancel-button]:appearance-none" />
           {p.search && (
             <button type="button" aria-label="پاک‌کردنِ جست‌وجو" onClick={() => p.onSearch('')}
-              className="-me-2 flex size-11 shrink-0 items-center justify-center rounded-field text-ink-2 hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-deep">
+              className="-me-3 flex size-11 shrink-0 items-center justify-center rounded-full text-ink-2 hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-deep">
               <X size={16} aria-hidden />
             </button>
           )}
         </div>
 
+        {/* روی گوشی پنج کنترل در ۳۴۳ پیکسل جا نمی‌شوند (~۳۶۰): جست‌وجو و نما
+            ردیفِ اول، این سه ردیفِ دوم. از تبلت `contents` بسته‌بندی را حذف
+            می‌کند و همه یک ردیف‌اند. (جداکننده‌ی `basis-full` پیشین خودش یک
+            ردیفِ صفرارتفاع می‌ساخت و فاصله‌ی دو ردیف دوبرابر می‌شد.) */}
+        <div className="order-last flex basis-full gap-2 sm:order-none sm:contents">
         <div ref={filter.ref} className="relative">
           <button type="button" aria-expanded={filter.open} aria-controls="clubs-filter" aria-haspopup="dialog"
             onClick={() => { filter.setOpen(o => !o); sortMenu.setOpen(false) }} className={ctl(filter.open || nFilters > 0)}>
@@ -118,11 +126,11 @@ export function ClubsToolbar(p: ToolbarProps) {
           </button>
           {sortMenu.open && (
             <div id="clubs-sort" role="group" aria-label="ترتیب"
-              className="absolute end-0 top-full z-50 mt-2 flex min-w-44 flex-col rounded-card border border-line/10 bg-surface p-1 shadow-e3 sm:end-auto sm:start-0">
+              className="absolute end-0 top-full z-50 mt-2 flex min-w-44 flex-col rounded-panel bg-surface p-2 shadow-e3 ring-1 ring-line/[.06] sm:end-auto sm:start-0">
               {p.sorts.map(k => (
                 <button key={k} type="button" aria-pressed={p.sort === k}
                   onClick={() => { p.onSort(k); sortMenu.setOpen(false) }}
-                  className={['flex min-h-11 items-center justify-between gap-3 rounded-field px-3 text-start text-sub',
+                  className={['flex min-h-11 items-center justify-between gap-3 rounded-card px-3 text-start text-sub',
                     'hover:bg-line/[.04] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-deep',
                     p.sort === k ? 'font-bold text-gold-text' : 'text-ink'].join(' ')}>
                   {SORT_LABEL[k]}
@@ -132,11 +140,21 @@ export function ClubsToolbar(p: ToolbarProps) {
             </div>
           )}
         </div>
+        </div>
 
-        <button type="button" onClick={() => p.onView(p.view === 'grid' ? 'list' : 'grid')}
-          aria-label={p.view === 'grid' ? 'نمایشِ فهرستی' : 'نمایشِ شبکه‌ای'} className={ctl(false, true)}>
-          {p.view === 'grid' ? <List size={18} aria-hidden /> : <LayoutGrid size={18} aria-hidden />}
-        </button>
+        {/* کنترلِ بخش‌بندی‌شده: شیارِ خاکستری با بخشِ انتخاب‌شده‌ی سفیدِ برجسته.
+            هر بخش ۳۶ پیکسل دیده می‌شود؛ شبه‌عنصر هدفِ لمس را به ۴۴ می‌رساند. */}
+        <div role="group" aria-label="نما" className="inline-flex h-11 shrink-0 items-center gap-1 rounded-full bg-line/[.04] p-1">
+          {([['grid', 'شبکه‌ای', LayoutGrid], ['list', 'فهرستی', List]] as const).map(([v, label, Icon]) => (
+            <button key={v} type="button" aria-pressed={p.view === v} aria-label={`نمایشِ ${label}`} onClick={() => p.onView(v)}
+              className={['relative flex h-9 w-11 items-center justify-center rounded-full transition-[background-color,box-shadow,color] duration-base ease-smooth',
+                "after:absolute after:-inset-y-1 after:inset-x-0 after:content-['']",
+                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-deep',
+                p.view === v ? 'bg-surface text-gold-text shadow-e1' : 'text-ink-2 hover:text-ink'].join(' ')}>
+              <Icon size={18} aria-hidden />
+            </button>
+          ))}
+        </div>
       </div>
 
       {p.locError && (

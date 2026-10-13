@@ -45,9 +45,9 @@ export function ClubMedia({ club, logoSize }: { club: Club; logoSize: number }) 
     )
   }
   return (
-    <img src={src} alt="" loading="lazy" decoding="async"
-      className="h-full w-full object-cover transition-transform duration-slow ease-smooth
-                 group-hover:scale-[1.03] motion-reduce:transition-none motion-reduce:group-hover:scale-100" />
+    /* بزرگ‌نماییِ عکس در هاور رفت: خودِ کارت بالا می‌آید، دو حرکت روی هم
+       شلوغی است. */
+    <img src={src} alt="" loading="lazy" decoding="async" className="h-full w-full object-cover" />
   )
 }
 
@@ -66,24 +66,19 @@ export function StatusPill({ club, overlay = false, className = '' }: { club: Cl
   )
 }
 
-/* ── میزها ── */
+/* ── میزها و امکانات: متن، نه چیپ ──
+   نسخه‌ی اول هر نوعِ میز را یک چیپِ خاکستری می‌کرد و هر امکان را یک
+   آیکون+برچسب؛ کارت شبیهِ فرمِ فیلتر می‌شد. حالا یک خط متن با «،» —
+   همان کاری که فهرست‌های اپل با مشخصات می‌کنند. */
 
-export function TableChips({ club }: { club: Club }) {
+/* ⚠️ «،» نه «·»: نقطه‌ی میانی کنارِ رقمِ فارسی همان صفرِ فارسی (۰) دیده
+   می‌شود — «۲ · پاکت» روی صفحه «۲۰ پاکت» خوانده شد. */
+const SEP = '، '
+
+export function tableLine(club: Club): string {
   const sum = tableSummary(club)
-  const kinds = TABLE_KINDS.filter(k => sum[k.key] > 0)
-  if (kinds.length === 0) return null
-  return (
-    <ul className="m-0 flex list-none flex-wrap gap-2 p-0" aria-label="میزها">
-      {kinds.map(k => (
-        <li key={k.key} className="rounded-chip bg-line/[.05] px-2 py-1 text-sub font-bold text-ink">
-          {faNum(sum[k.key])} {k.label}
-        </li>
-      ))}
-    </ul>
-  )
+  return TABLE_KINDS.filter(k => sum[k.key] > 0).map(k => `${faNum(sum[k.key])} ${k.label}`).join(SEP)
 }
-
-/* ── امکانات ── */
 
 export const AMENITIES: { key: AmenityKey; label: string; icon: ReactNode }[] = [
   { key: 'hasCafe', label: 'کافه', icon: <Coffee size={14} aria-hidden /> },
@@ -94,16 +89,8 @@ export const AMENITIES: { key: AmenityKey; label: string; icon: ReactNode }[] = 
 ]
 
 /** فقط آنچه باشگاه دارد. کاشیِ خاکستریِ «ندارد» اطلاعات نبود، شلوغی بود. */
-export function Amenities({ club }: { club: Club }) {
-  const have = AMENITIES.filter(a => hasAmenity(club, a.key))
-  if (have.length === 0) return null
-  return (
-    <ul className="m-0 flex list-none flex-wrap gap-x-3 gap-y-1 p-0 text-sub text-ink-2" aria-label="امکانات">
-      {have.map(a => (
-        <li key={a.key} className="inline-flex items-center gap-1">{a.icon}{a.label}</li>
-      ))}
-    </ul>
-  )
+export function amenityLine(club: Club): string {
+  return AMENITIES.filter(a => hasAmenity(club, a.key)).map(a => a.label).join(SEP)
 }
 
 /* ── مسابقه ── */
@@ -114,7 +101,7 @@ const TOURNAMENT_TAG = {
   upcoming: { label: 'مسابقه به‌زودی', tone: 'bg-line/[.05] text-ink' },
 } as const
 
-export function TournamentTag({ tournaments }: { tournaments: Tournament[] }) {
+export function TournamentTag({ tournaments, className = '' }: { tournaments: Tournament[]; className?: string }) {
   /* اولویت با چیزی است که الان کاری از بازدیدکننده می‌خواهد */
   const t = tournaments.find(x => x.status === 'live')
     ?? tournaments.find(x => x.status === 'registration_open')
@@ -122,7 +109,7 @@ export function TournamentTag({ tournaments }: { tournaments: Tournament[] }) {
   if (!t || !(t.status in TOURNAMENT_TAG)) return null
   const tag = TOURNAMENT_TAG[t.status as keyof typeof TOURNAMENT_TAG]
   return (
-    <span className={['inline-flex w-fit items-center gap-1 rounded-chip px-2 py-1 text-sub font-bold', tag.tone].join(' ')}>
+    <span className={['inline-flex w-fit items-center gap-1 rounded-full px-3 py-1 text-sub font-bold', tag.tone, className].join(' ')}>
       <Trophy size={14} aria-hidden />{tag.label}
     </span>
   )

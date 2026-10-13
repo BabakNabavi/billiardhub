@@ -129,14 +129,10 @@ export default function ClubsPage() {
   const retry = () => { setPhase('loading'); setReload(n => n + 1); };
 
   return (
-    <div className="lq-stage min-h-screen pb-24">
-      <PageHeader
-        title="باشگاه‌های بیلیارد"
-        sub="باشگاهِ نزدیکتان را پیدا کنید و میزتان را آنلاین رزرو کنید."
-        aside={phase === 'ready' && (
-          <p aria-live="polite" className="m-0 text-sub text-ink-2">{faNum(shown.length)} باشگاه</p>
-        )}
-      />
+    /* زمینه‌ی صاف، بدونِ لکه‌های رنگیِ `lq-stage`: در صفحه‌های اپل رنگ از
+       عکس‌ها می‌آید، نه از پس‌زمینه. */
+    <div className="min-h-screen bg-paper pb-24">
+      <PageHeader title="باشگاه‌های بیلیارد." tagline="میزِ بعدی‌تان را پیدا کنید و آنلاین رزرو کنید." />
 
       <ClubsToolbar
         search={search} onSearch={setSearch}
@@ -147,9 +143,15 @@ export default function ClubsPage() {
         view={view} onView={setView}
       />
 
-      <section aria-labelledby="clubs-list-title" className="mx-auto max-w-screen-xl px-4 py-6 sm:px-6 lg:px-8">
-        {/* ترتیبِ تیترها: h1 سربرگ → این h2 → h3ِ کارت‌ها */}
-        <h2 id="clubs-list-title" className="sr-only">فهرستِ باشگاه‌ها</h2>
+      <section aria-labelledby="clubs-list-title" className="mx-auto max-w-screen-xl px-4 pt-8 sm:px-6 sm:pt-12 lg:px-8">
+        {/* ترتیبِ تیترها: h1 سربرگ → این h2 → h3ِ کارت‌ها. همان تیترِ دورنگ،
+            یک پله کوچک‌تر؛ شمارِ واقعی بخشِ خاکستریِ همین جمله است. */}
+        <h2 id="clubs-list-title" className="m-0 mb-6 text-balance text-tile">
+          <span className="text-ink">{!filtering ? 'همه‌ی باشگاه‌ها.' : search.trim() ? 'نتیجه‌ی جست‌وجو.' : 'باشگاه‌های فیلترشده.'}</span>
+          {phase === 'ready' && (
+            <span aria-live="polite" className="text-ink-2"> {faNum(shown.length)} باشگاه{filtering ? ' با این شرایط.' : ' ثبت‌شده.'}</span>
+          )}
+        </h2>
         {phase === 'loading' ? (
           <ClubsSkeleton view={view} />
         ) : phase === 'error' ? (
@@ -157,7 +159,7 @@ export default function ClubsPage() {
         ) : shown.length === 0 ? (
           <ClubsEmpty filtering={filtering} onClear={clearAll} />
         ) : (
-          <ul className={[view === 'grid' ? CLUBS_GRID : 'flex flex-col gap-3', 'm-0 list-none p-0'].join(' ')}>
+          <ul className={[view === 'grid' ? CLUBS_GRID : 'flex flex-col gap-4', 'm-0 list-none p-0'].join(' ')}>
             {shown.map((club, i) => (
               <li key={club.id}>
                 {view === 'grid'

@@ -16,27 +16,25 @@
 
 import Link from 'next/link'
 import type { ReactNode } from 'react'
-import { AlertCircle, Plus, SearchX } from 'lucide-react'
+import { AlertCircle, ChevronLeft, Plus, SearchX } from 'lucide-react'
 import { buttonClasses } from '@/components/ui/button-classes'
+import { TILE_SURFACE } from './tile-classes'
 
 /** شبکه‌ی فهرست — ۱ ستون روی گوشی، ۲ از ۶۴۰، ۳ از ۱۰۲۴، ۴ از ۱۵۳۶ */
-export const CLUBS_GRID = 'grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4'
+export const CLUBS_GRID = 'grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4'
 
 export function ClubsSkeleton({ view }: { view: 'grid' | 'list' }) {
   const n = view === 'grid' ? 6 : 4
   return (
-    <div role="status" aria-label="در حالِ بارگذاریِ باشگاه‌ها" className={view === 'grid' ? CLUBS_GRID : 'flex flex-col gap-3'}>
+    <div role="status" aria-label="در حالِ بارگذاریِ باشگاه‌ها" className={view === 'grid' ? CLUBS_GRID : 'flex flex-col gap-4'}>
       {Array.from({ length: n }, (_, i) => (
         <div key={i} aria-hidden
-          className={['lq-pcard overflow-hidden motion-safe:animate-pulse', view === 'list' ? 'flex' : ''].join(' ')}>
-          <div className={view === 'grid' ? 'aspect-video bg-line/[.05]' : 'min-h-28 w-28 shrink-0 bg-line/[.05] sm:w-40'} />
-          <div className="flex flex-1 flex-col gap-3 p-4">
-            <div className="h-4 w-1/2 rounded-chip bg-line/[.07]" />
-            <div className="h-3 w-1/3 rounded-chip bg-line/[.05]" />
-            <div className="flex gap-2">
-              <div className="h-6 w-16 rounded-chip bg-line/[.05]" />
-              <div className="h-6 w-16 rounded-chip bg-line/[.05]" />
-            </div>
+          className={[TILE_SURFACE, 'motion-safe:animate-pulse', view === 'list' ? 'flex' : ''].join(' ')}>
+          <div className={view === 'grid' ? 'aspect-[3/2] bg-line/[.05]' : 'min-h-32 w-28 shrink-0 bg-line/[.05] sm:w-48'} />
+          <div className="flex flex-1 flex-col gap-3 p-6">
+            <div className="h-5 w-1/2 rounded-full bg-line/[.07]" />
+            <div className="h-3 w-1/3 rounded-full bg-line/[.05]" />
+            <div className="mt-2 h-3 w-2/3 rounded-full bg-line/[.05]" />
           </div>
         </div>
       ))}
@@ -50,7 +48,7 @@ function StateBlock({ icon, title, body, action }: {
   return (
     <div className="mx-auto flex max-w-md flex-col items-center gap-3 px-6 py-16 text-center">
       <span className="flex size-12 items-center justify-center rounded-full bg-line/[.05] text-ink-2">{icon}</span>
-      <h2 className="m-0 text-section text-ink">{title}</h2>
+      <h3 className="m-0 text-tile text-ink">{title}</h3>
       <p className="m-0 text-sub text-ink-2">{body}</p>
       <div className="mt-2">{action}</div>
     </div>
@@ -83,16 +81,26 @@ export function ClubsEmpty({ filtering, onClear }: { filtering: boolean; onClear
   )
 }
 
+/** کاشیِ کمک به روشِ اپل («Need help? …»): سطحِ خاکستریِ روشن، نه حاشیه‌ی
+ *  خط‌چین — خط‌چین می‌گوید «این‌جا چیزی کم است». پیوند متنی است با «›»،
+ *  نه دکمه‌ی دوم: تنها دکمه‌ی قرصیِ صفحه مالِ کارتِ باشگاه است. */
 export function RegisterClubTile({ view }: { view: 'grid' | 'list' }) {
   return (
-    <aside className={['flex gap-4 rounded-card border border-dashed border-line/15 p-6',
+    <aside className={['flex gap-4 rounded-panel bg-line/[.04] p-6',
       view === 'grid' ? 'h-full flex-col items-start justify-center' : 'flex-col items-start sm:flex-row sm:items-center sm:justify-between'].join(' ')}>
-      <div className="flex flex-col gap-1">
-        <h3 className="m-0 text-section text-ink">باشگاهتان این‌جا نیست؟</h3>
+      <span aria-hidden className="flex size-12 shrink-0 items-center justify-center rounded-full bg-gold/[.14] text-gold-text">
+        <Plus size={22} />
+      </span>
+      <div className="flex flex-1 flex-col gap-1">
+        <h3 className="m-0 text-tile text-ink">باشگاهتان این‌جا نیست؟</h3>
         <p className="m-0 text-sub text-ink-2">ثبتش کنید تا بازیکن‌ها پیدایش کنند و میز را آنلاین رزرو کنند.</p>
       </div>
-      <Link href="/clubs/new" className={buttonClasses({ size: 'sm', className: 'shrink-0' })}>
-        <Plus size={16} aria-hidden />ثبتِ باشگاه
+      <Link href="/clubs/new"
+        className="-mx-2 inline-flex min-h-11 shrink-0 items-center gap-1 rounded-full px-2 text-sub font-bold text-gold-text no-underline
+                   hover:underline hover:underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-deep">
+        ثبتِ باشگاه
+        {/* ⚠️ در RTL «جلو» سمتِ چپ است */}
+        <ChevronLeft size={16} aria-hidden />
       </Link>
     </aside>
   )

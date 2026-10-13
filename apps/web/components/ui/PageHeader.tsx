@@ -1,5 +1,5 @@
 /* ─────────────────────────────────────────────────────────────
-   سربرگِ صفحه‌های داخلی — روشن و جمع‌وجور.
+   سربرگِ صفحه‌های داخلی — روشن، جمع‌وجور، تیترِ دورنگ.
 
    ── چرا ──
    تا مهرِ ۱۴۰۵ هر فهرست سربرگِ خودش را می‌ساخت: نوارِ تیره‌ی تمام‌عرض
@@ -8,30 +8,37 @@
    مالک ۲۱ مهر تصمیم گرفت: فقط هیروی صفحه‌ی اصلی تیره و سینمایی است؛
    سربرگِ صفحه‌های داخلی روشن و کوتاه.
 
-   ── قاعده ──
-   · یک h1 ثابت که بگوید صفحه چیست. بدونِ کیکر، بدونِ برچسبِ بالای تیتر.
-   · حداکثر یک جمله زیرش — فقط وقتی تیتر به‌تنهایی کافی نیست.
-   · `aside` کنارِ تیتر می‌نشیند (شمارش، یک اقدام)، نه زیرِ آن.
+   ── تیترِ دورنگ ──
+   الگوی صفحه‌های اپل («Store. The best way to buy…»): نامِ صفحه سیاه،
+   و پشتش یک جمله‌ی خاکستری در همان اندازه که می‌گوید این‌جا به چه کار
+   می‌آید. یک h1 است، نه تیتر + زیرتیتر: صفحه‌خوان یک جمله می‌شنود.
+   نسخه‌ی اول (۲۲ مهر) تیترِ ۳۲ پیکسلی + زیرتیترِ ۱۳ پیکسلی بود — مالک
+   گفت «هیچ نمایی از اپل نمی‌بینم»، و درست می‌گفت.
+
+   · بدونِ کیکر و برچسبِ بالای تیتر.
+   · `aside` کنارِ تیتر می‌نشیند (یک اقدامِ کوچک)، نه زیرِ آن.
    · Server Component است؛ هیچ JSای همراهش نمی‌رود.
    ───────────────────────────────────────────────────────────── */
 
 import type { ReactNode } from 'react'
 
-export function PageHeader({ title, sub, aside, className = '' }: {
+export function PageHeader({ title, tagline, aside, className = '' }: {
+  /** نامِ صفحه — سیاه */
   title: string
-  sub?: ReactNode
-  /** سمتِ مقابلِ تیتر: شمارش، یک دکمه */
+  /** ادامه‌ی همان جمله — خاکستری، هم‌اندازه */
+  tagline?: string
+  /** سمتِ مقابلِ تیتر: یک اقدامِ کوچک */
   aside?: ReactNode
   className?: string
 }) {
   return (
-    <header className={['mx-auto w-full max-w-screen-xl px-4 pb-4 pt-6 sm:px-6 sm:pt-8 lg:px-8', className].join(' ')}>
-      <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-3">
-        <div className="min-w-0">
-          <h1 className="m-0 text-balance text-page text-ink">{title}</h1>
-          {sub && <p className="m-0 mt-1 max-w-prose text-pretty text-sub text-ink-2">{sub}</p>}
-        </div>
-        {aside && <div className="flex shrink-0 items-center gap-3">{aside}</div>}
+    <header className={['mx-auto w-full max-w-screen-xl px-4 pb-8 pt-8 sm:px-6 sm:pt-12 lg:px-8', className].join(' ')}>
+      <div className="flex flex-wrap items-end justify-between gap-x-12 gap-y-4">
+        <h1 className="m-0 max-w-3xl text-balance text-page">
+          <span className="text-ink">{title}</span>
+          {tagline && <span className="text-ink-2"> {tagline}</span>}
+        </h1>
+        {aside && <div className="shrink-0 pb-2">{aside}</div>}
       </div>
     </header>
   )
