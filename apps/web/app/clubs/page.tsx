@@ -1,859 +1,174 @@
-﻿'use client';
+'use client';
 
-import { PIN_GREEN } from '@/lib/profile-cards'
-import { useEffect, useState, useRef } from 'react';
-import Link from 'next/link';
+/* ─────────────────────────────────────────────────────────────
+   فهرستِ باشگاه‌ها — صفحه‌ی نمونه‌ی بازطراحیِ مهرِ ۱۴۰۵.
+
+   ── چه رفت ──
+   · هیروی اسلایدیِ تیره با پوسترهای گرافیکی، برچسبِ «DISCOVER CLUBS»
+     و h1ای که هر ۴٫۵ ثانیه عوض می‌شد (گاهی «مربیان»). جایش سربرگِ
+     روشن با یک تیترِ ثابت و شمارِ واقعی.
+   · نوارِ تیره‌ی «باشگاه خود را ثبت کنید» پایینِ صفحه — حالا آخرین
+     خانه‌ی همان شبکه است (`RegisterClubTile`).
+   · ۸۶۷ خط استایلِ درون‌خطی؛ کارت، ابزار و حالت‌ها در
+     `components/clubs/` و منطقِ فیلتر در `lib/clubs/filters`.
+
+   ── چه ماند ──
+   فیلترها همچنان به سرور می‌روند (نه دانلودِ کلِ جدول)، جست‌وجو با
+   تأخیرِ کوتاه، و مسابقات یک‌بار برای کلِ فهرست.
+
+   ⚠️ فچ هنوز در `useEffect` است، برخلافِ قاعده‌ی «فچِ اولیه در Server
+   Component». فیلترها و مکان‌یابی حالتِ کلاینت‌اند و جابه‌جاییِ فچ کارِ
+   جداگانه‌ای است، نه بخشی از بازطراحیِ ظاهر.
+   ───────────────────────────────────────────────────────────── */
+
+import { useEffect, useMemo, useState } from 'react';
 import api from '../../lib/api';
-import ClubStoryModal from '../../components/ClubStoryModal';
-import FavoriteButton from '../../components/FavoriteButton';
-import ClubLogo from '../../components/club/ClubLogo';
-import VerifiedBadge from '../../components/VerifiedBadge';
-import {
-  Search, MapPin, Star, Wifi, Car, Coffee, Trophy,
-  X, SlidersHorizontal, Users, Navigation,
-  ChevronDown, Grid3X3, AlignJustify, Gamepad2,
-} from 'lucide-react';
-import { type Club } from '../../lib/clubs-data';
+import type { Club } from '../../lib/clubs-data';
 import { fetchTournaments } from '../../lib/tournaments/client';
 import type { Tournament } from '../../lib/mock-tournaments';
+import { distanceKm, hasCoords } from '../../lib/clubs/distance';
+import { faNum } from '../../lib/jalali';
+import {
+  NO_FILTERS, availableSorts, countFilters, filterClubs, sortClubs,
+  type ClubFilters, type SortKey,
+} from '../../lib/clubs/filters';
+import { PageHeader } from '../../components/ui/PageHeader';
+import { ClubCard } from '../../components/clubs/ClubCard';
+import { ClubRow } from '../../components/clubs/ClubRow';
+import { ClubsToolbar } from '../../components/clubs/ClubsToolbar';
+import { CLUBS_GRID, ClubsEmpty, ClubsError, ClubsSkeleton, RegisterClubTile } from '../../components/clubs/ClubsStates';
 
-const TABLE_TYPES = [
-  { key:'snookerTables',    label:'اسنوکر',     color:'#30C55A' },
-  { key:'pocketTables',     label:'پاکت',        color:'#3b82f6' },
-  { key:'highballTables',   label:'هی‌بال',      color:'#8b5cf6' },
-  { key:'vipSnookerTables', label:'VIP',         color:'#f59e0b' },
-];
-const AMENITIES = [
-  { key:'hasCafe',              label:'کافه',           icon: <Coffee size={13}/> },
-  { key:'hasParking',           label:'پارکینگ',        icon: <Car size={13}/> },
-  { key:'hasWifi',              label:'WiFi',           icon: <Wifi size={13}/> },
-  { key:'hasProfessionalCoach', label:'مربی',           icon: <Trophy size={13}/> },
-  { key:'playstations',         label:'پلی استیشن',     icon: <Gamepad2 size={13}/> },
-];
-const SORT_OPTIONS = [
-  { value:'rating',   label:'بهترین امتیاز' },
-  { value:'distance', label:'نزدیک‌ترین' },
-  { value:'members',  label:'بیشترین عضو' },
-  { value:'tables',   label:'بیشترین میز' },
-];
-
-function toFa(v: string | number) {
-  return String(v).replace(/[0-9]/g, d => '۰۱۲۳۴۵۶۷۸۹'.charAt(Number(d)));
-}
-function calcDistance(lat1: number, lon1: number, lat2: number, lon2: number) {
-  const R = 6371, dLat = (lat2-lat1)*Math.PI/180, dLon = (lon2-lon1)*Math.PI/180;
-  const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;
-  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-}
-
-/* ══════════════════════════════════════════════
-   CLUB POSTERS — designed (no raster), billiard-themed.
-   5 varied elegant variants sized to the card image area.
-══════════════════════════════════════════════ */
-const GOLD_M = '#C7A66A';
-
-const CLUB_POSTERS = [
-  { bg:'linear-gradient(125deg,#0b1322 0%,#17253f 55%,#1e2f4d 100%)', glow:'rgba(199,166,106,0.30)', glowPos:'20% 24%', accent:'rgba(199,166,106,0.55)', motif:'rack',  eyebrow:'SNOOKER CLUB' },
-  { bg:'linear-gradient(130deg,#07231a 0%,#0e3a2a 55%,#0a2f22 100%)', glow:'rgba(199,166,106,0.26)', glowPos:'80% 20%', accent:'rgba(199,166,106,0.50)', motif:'table', eyebrow:'BILLIARD CLUB' },
-  { bg:'linear-gradient(125deg,#141414 0%,#272524 55%,#1a1a19 100%)', glow:'rgba(199,166,106,0.30)', glowPos:'50% 20%', accent:'rgba(199,166,106,0.55)', motif:'cues',  eyebrow:'CUE SPORTS' },
-  { bg:'linear-gradient(125deg,#1c0e13 0%,#341826 55%,#230f1a 100%)', glow:'rgba(199,166,106,0.26)', glowPos:'22% 26%', accent:'rgba(199,166,106,0.50)', motif:'eight', eyebrow:'POOL CLUB' },
-  { bg:'linear-gradient(130deg,#08201f 0%,#0d3835 55%,#0a2a28 100%)', glow:'rgba(199,166,106,0.26)', glowPos:'78% 22%', accent:'rgba(199,166,106,0.50)', motif:'aim',   eyebrow:'GAME ROOM' },
-];
-
-/* ── SVG motifs (elegant gold line-art watermarks) ── */
-function motifRack(size: number) {
-  const rows = [[[50,11]],[[41,27],[59,27]],[[32,43],[50,43],[68,43]],[[23,59],[41,59],[59,59],[77,59]],[[14,75],[32,75],[50,75],[68,75],[86,75]]];
-  return (
-    <svg width={size} viewBox="0 0 100 86" fill="none" aria-hidden>
-      {rows.flat().map((p, i) => (
-        <circle key={i} cx={p![0]} cy={p![1]} r="7.4" stroke={GOLD_M} strokeWidth="1.3" opacity="0.82" />
-      ))}
-      <circle cx="50" cy="11" r="3" fill={GOLD_M} opacity="0.6" />
-    </svg>
-  );
-}
-function motifTable(size: number) {
-  return (
-    <svg width={size} viewBox="0 0 120 72" fill="none" aria-hidden>
-      <rect x="4" y="4" width="112" height="64" rx="10" stroke={GOLD_M} strokeWidth="1.6" opacity="0.8" />
-      <rect x="12" y="12" width="96" height="48" rx="4" stroke={GOLD_M} strokeWidth="1" opacity="0.42" />
-      {[[10,10],[60,7],[110,10],[10,62],[60,65],[110,62]].map((p, i) => (
-        <circle key={i} cx={p[0]} cy={p[1]} r="4" fill={GOLD_M} opacity="0.68" />
-      ))}
-      <line x1="36" y1="12" x2="36" y2="60" stroke={GOLD_M} strokeWidth="1" opacity="0.4" />
-      <path d="M36 27 A9 9 0 0 0 36 45" stroke={GOLD_M} strokeWidth="1" opacity="0.4" fill="none" />
-      <circle cx="60" cy="36" r="1.8" fill={GOLD_M} opacity="0.7" />
-    </svg>
-  );
-}
-function motifCues(size: number) {
-  return (
-    <svg width={size} viewBox="0 0 100 100" fill="none" aria-hidden>
-      <g stroke={GOLD_M} strokeWidth="2.2" strokeLinecap="round" opacity="0.78">
-        <line x1="12" y1="86" x2="88" y2="16" />
-        <line x1="12" y1="16" x2="88" y2="86" />
-      </g>
-      {[[12,86],[88,16],[12,16],[88,86]].map((p, i) => (
-        <circle key={i} cx={p[0]} cy={p[1]} r="2.4" fill={GOLD_M} opacity="0.72" />
-      ))}
-      <circle cx="50" cy="51" r="13" fill="rgba(0,0,0,0.35)" stroke={GOLD_M} strokeWidth="1.6" opacity="0.95" />
-      <circle cx="45" cy="46" r="3" fill={GOLD_M} opacity="0.5" />
-    </svg>
-  );
-}
-function motifEight(size: number) {
-  return (
-    <svg width={size} viewBox="0 0 100 100" fill="none" aria-hidden>
-      <circle cx="50" cy="50" r="38" stroke={GOLD_M} strokeWidth="1.8" opacity="0.85" fill="rgba(0,0,0,0.18)" />
-      <circle cx="50" cy="50" r="16" fill={GOLD_M} opacity="0.9" />
-      <text x="50" y="51" textAnchor="middle" dominantBaseline="central" fontSize="19" fontWeight="800" fill="#1c0e13">8</text>
-      <ellipse cx="38" cy="36" rx="7" ry="4" fill={GOLD_M} opacity="0.22" transform="rotate(-30 38 36)" />
-    </svg>
-  );
-}
-function motifAim(size: number) {
-  return (
-    <svg width={size} viewBox="0 0 100 100" fill="none" aria-hidden>
-      <circle cx="50" cy="50" r="40" stroke={GOLD_M} strokeWidth="0.8" opacity="0.22" />
-      <circle cx="50" cy="50" r="28" stroke={GOLD_M} strokeWidth="1" opacity="0.38" />
-      <circle cx="50" cy="50" r="16" stroke={GOLD_M} strokeWidth="1.6" opacity="0.9" fill="rgba(0,0,0,0.18)" />
-      {[[50,6],[50,94],[6,50],[94,50]].map((p, i) => (
-        <rect key={i} x={p[0]!-3} y={p[1]!-3} width="6" height="6" fill={GOLD_M} opacity="0.58" transform={`rotate(45 ${p[0]} ${p[1]})`} />
-      ))}
-      <circle cx="44" cy="44" r="3" fill={GOLD_M} opacity="0.4" />
-    </svg>
-  );
-}
-function renderMotif(motif: string, view: 'grid' | 'list' | 'hero') {
-  const pick = (hero: number, grid: number, list: number) =>
-    view === 'hero' ? hero : view === 'grid' ? grid : list;
-  switch (motif) {
-    case 'rack':  return motifRack(pick(168, 82, 46));
-    case 'table': return motifTable(pick(210, 104, 60));
-    case 'cues':  return motifCues(pick(168, 82, 48));
-    case 'eight': return motifEight(pick(150, 80, 46));
-    default:      return motifAim(pick(162, 84, 48));
-  }
-}
-
-function ClubPoster({ variant, view, hov }: { variant: number; view: 'grid' | 'list' | 'hero'; hov: boolean }) {
-  const p = CLUB_POSTERS[variant % CLUB_POSTERS.length]!;
-  const isHero = view === 'hero';
-  return (
-    <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', background: p.bg }}>
-      {/* dot texture */}
-      <div style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(rgba(255,255,255,0.05) 1px, transparent 1px)', backgroundSize: isHero ? '18px 18px' : '13px 13px', opacity: 0.6 }} />
-      {/* gold glow */}
-      <div style={{ position: 'absolute', inset: '-20%', background: `radial-gradient(circle at ${isHero ? '30% 40%' : p.glowPos}, ${p.glow}, transparent 55%)`, transition: 'transform 500ms ease', transform: hov ? 'scale(1.12)' : 'scale(1)' }} />
-      {/* diagonal cue accents */}
-      <div style={{ position: 'absolute', top: '-25%', bottom: '-25%', left: isHero ? '52%' : '60%', width: 2, background: `linear-gradient(180deg, transparent, ${p.accent}, transparent)`, transform: 'rotate(19deg)', opacity: isHero ? 0.4 : 0.6 }} />
-      <div style={{ position: 'absolute', top: '-25%', bottom: '-25%', left: isHero ? '58%' : '66%', width: 1, background: `linear-gradient(180deg, transparent, ${p.accent}, transparent)`, transform: 'rotate(19deg)', opacity: isHero ? 0.2 : 0.28 }} />
-
-      {/* motif (+ eyebrow on grid). hero → left-side emblem, cleared from RTL text */}
-      <div style={{
-        position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column',
-        alignItems: 'center', justifyContent: 'center',
-        gap: view === 'grid' ? 9 : 0,
-        transition: 'transform 450ms cubic-bezier(0.25,0.46,0.45,0.94)',
-        transform: isHero ? 'translateX(-15%)' : (hov ? 'scale(1.06)' : 'scale(1)'),
-        opacity: isHero ? 0.6 : 1,
-      }}>
-        <div style={{ display: 'flex', filter: 'drop-shadow(0 5px 18px rgba(0,0,0,0.45))' }}>{renderMotif(p.motif, view)}</div>
-        {view === 'grid' && (
-          <div style={{ direction: 'ltr', fontSize: 10.5, letterSpacing: '0.30em', fontWeight: 700, color: 'rgba(199,166,106,0.92)', textShadow: '0 1px 8px rgba(0,0,0,0.5)' }}>{p.eyebrow}</div>
-        )}
-      </div>
-
-      {/* bottom gold hairline */}
-      {!isHero && <div style={{ position: 'absolute', left: 0, right: 0, bottom: 0, height: 2, background: `linear-gradient(90deg, transparent, ${p.accent}, transparent)`, opacity: 0.7 }} />}
-    </div>
-  );
-}
-
-const CLUB_IMG_POOL = [
-  '/images/clubs/club6.jpeg',
-  '/images/clubs/club7.jpeg',
-  '/images/clubs/club8.jpg',
-  '/images/clubs/club9.jpeg',
-  '/images/clubs/club4.png',
-  '/images/clubs/club1.png',
-  '/images/clubs/club2.jpg',
-  '/images/clubs/club3.jpg',
-];
-
-/* ── CARD ── */
-function ClubCard({ club, view, idx = 0, tournaments = [] }: { club: Club; view: 'grid' | 'list'; idx?: number; tournaments?: Tournament[] }) {
-  const [hov, setHov] = useState(false);
-  const [storyOpen, setStoryOpen] = useState(false);
-  const poolImg = CLUB_IMG_POOL[idx % CLUB_IMG_POOL.length]!;
-  const apiImg  = club.images?.[0];
-  const img     = (apiImg && apiImg.trim() !== '' && !apiImg.includes('billiadr-club-1') && !apiImg.includes('default')) ? apiImg : poolImg;
-  const activeTables = TABLE_TYPES.filter(t => (club as any)[t.key] > 0);
-
-  /* نشان مسابقه از مسابقات واقعی همین باشگاه می‌آید — نه از آرایه‌ی
-     نمونه که با نام باشگاه تطبیق داده می‌شد. */
-  const activeTournament = tournaments.find(
-    t => t.status === 'registration_open' || t.status === 'live' || t.status === 'upcoming'
-  );
-  const tournBadge = activeTournament ? ({
-    registration_open: { label: '● در حال ثبت‌نام مسابقه', color: '#C7A66A', bg: 'rgba(199,166,106,0.10)', border: 'rgba(199,166,106,0.30)', pulse: true  },
-    live:              { label: '● مسابقه زنده',         color: '#ef4444', bg: 'rgba(239,68,68,0.10)',   border: 'rgba(239,68,68,0.30)',   pulse: true  },
-    upcoming:          { label: 'مسابقه به زودی',        color: '#8b5cf6', bg: 'rgba(139,92,246,0.10)', border: 'rgba(139,92,246,0.28)', pulse: false },
-    bracket_ready:     { label: 'براکت آماده',           color: '#f59e0b', bg: 'rgba(245,158,11,0.10)', border: 'rgba(245,158,11,0.28)', pulse: false },
-    finished:          { label: 'پایان یافته',           color: '#999',    bg: 'rgba(0,0,0,0.04)',      border: 'rgba(0,0,0,0.10)',      pulse: false },
-  } as const)[activeTournament.status] : null;
-
-  if (view === 'list') return (
-    <Link href={`/clubs/${club.slug || club.id}`} style={{ textDecoration: 'none', display: 'block' }}>
-      <div
-        onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)}
-        /* همان سطح کارت گرید — دو ماده‌ی متفاوت در دو نمای یک فهرست
-           یعنی سوییچ نما ظاهر صفحه را عوض می‌کند. */
-        className="lq-pcard"
-        style={{
-          display: 'flex', alignItems: 'stretch', overflow: 'hidden',
-          borderColor: hov ? 'rgba(199,166,106,0.50)' : undefined,
-        }}
-      >
-        {/* thumbnail */}
-        <div style={{ width: 'clamp(70px,18vw,140px)', flexShrink: 0, position: 'relative', overflow: 'hidden' }}>
-          <img loading="lazy" decoding="async" src={img} alt={club.name} style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.75)' }}
-            onError={e => { const el = e.target as HTMLImageElement; el.onerror = null; el.src = poolImg; }} />
-          {/* تیک تأیید این‌جا نیست — کنار نام است. روی گوشه‌ی عکس،
-              معلوم نبود به چه چیزی تعلق دارد. */}
-          {/* open badge روی تصویر — same pill style as table type badges */}
-          <div style={{ position: 'absolute', bottom: 8, left: 8, fontSize: 10, fontWeight: 700, color: club.isOpen ? '#30C55A' : '#ef4444', background: club.isOpen ? 'rgba(48,197,90,0.10)' : 'rgba(239,68,68,0.10)', border: `1px solid ${club.isOpen ? 'rgba(48,197,90,0.22)' : 'rgba(239,68,68,0.22)'}`, borderRadius: 20, padding: '2px 7px' }}>
-            {club.isOpen ? 'باز' : 'بسته'}
-          </div>
-          {/* story ring */}
-          {club.hasActiveStory && club.storyMediaUrl && (
-            <button aria-label={`استوری ${club.name}`} onClick={(e) => { e.preventDefault(); e.stopPropagation(); setStoryOpen(true); }} style={{ position: 'absolute', bottom: 8, right: 8, padding: 0, border: 'none', background: 'none', cursor: 'pointer', zIndex: 5 }}>
-              <div style={{ width: 47, height: 47, borderRadius: '50%', background: 'linear-gradient(45deg,#feda75,#fa7e1e,#d62976,#962fbf,#4f5bd5)', padding: 2.5, boxShadow: '0 0 12px rgba(188,24,136,0.5)' }}>
-                <div style={{ width: '100%', height: '100%', borderRadius: '50%', border: '2px solid rgba(0,0,0,0.7)', background: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', boxSizing: 'border-box' }}>
-                  {/* نشان پیش‌فرض به‌جای حرف اول نام */}
-                  <ClubLogo src={club.logo} name={club.name} size={40} tone="dark" />
-                </div>
-              </div>
-            </button>
-          )}
-        </div>
-
-        {/* content */}
-        <div style={{ flex: 1, padding: '14px 16px', minWidth: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: 6 }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, flexWrap: 'wrap', maxWidth: '100%' }}>
-            {/* تیک بیرون h3 است: نام بلند با ellipsis بریده می‌شود و
-                تیک داخل h3 هم با آن حذف می‌شد. */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 4, minWidth: 0 }}>
-              <h3 style={{ fontSize: 16, fontWeight: 800, color: '#111111', margin: 0, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{club.name}</h3>
-              {club.isVerified && <VerifiedBadge title="باشگاه تأیید شده" style={{ marginInlineStart: 0 }} />}
-            </div>
-            {club.rating && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: 3, flexShrink: 0, background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.2)', borderRadius: 20, padding: '3px 8px' }}>
-                <Star size={10} style={{ color: '#f59e0b', fill: '#f59e0b' }} />
-                <span style={{ fontSize: 14, fontWeight: 800, color: '#f59e0b' }}>{toFa(club.rating)}</span>
-              </div>
-            )}
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, fontSize: 13, color: 'rgba(0,0,0,0.45)' }}>
-            <MapPin size={10} color={PIN_GREEN} />{club.city}
-            {club.distance !== undefined && <span style={{ color: '#A07840' }}>· {toFa(club.distance.toFixed(1))} km</span>}
-          </div>
-          <div style={{ display: 'flex', justifyContent: 'center', gap: 5, flexWrap: 'wrap', alignItems: 'center', marginTop: 'auto' }}>
-            {activeTables.slice(0, 3).map(t => (
-              <span key={t.key} style={{ fontSize: 12, color: t.color, background: `${t.color}12`, border: `1px solid ${t.color}22`, borderRadius: 20, padding: '2px 8px', fontWeight: 700 }}>
-                {toFa((club as any)[t.key])} {t.label}
-              </span>
-            ))}
-            {/* دکمه رزرو — same pill style as table type badges */}
-            <span style={{ fontSize: 12, color: '#C7A66A', background: 'rgba(199,166,106,0.10)', border: '1px solid rgba(199,166,106,0.22)', borderRadius: 20, padding: '2px 8px', fontWeight: 700, marginRight: 'auto', flexShrink: 0, display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-              رزرو <span style={{ lineHeight: 1 }}>←</span>
-            </span>
-          </div>
-          {tournBadge && (
-            <div style={{ marginTop: 6, display: 'flex', justifyContent: 'center' }}>
-              <span style={{ fontSize: 11, fontWeight: 800, color: tournBadge.color, background: tournBadge.bg, border: `1px solid ${tournBadge.border}`, borderRadius: 20, padding: '3px 10px', animation: tournBadge.pulse ? 'gentlePulse 1.8s ease-in-out infinite' : 'none', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-                <Trophy size={9} /> {tournBadge.label}
-              </span>
-            </div>
-          )}
-        </div>
-      </div>
-      {storyOpen && club.hasActiveStory && club.storyMediaUrl && (
-        <ClubStoryModal club={{ name: club.name, logo: club.logo, storyMediaUrl: club.storyMediaUrl, storyType: club.storyType, storyText: club.storyText }} onClose={() => setStoryOpen(false)} />
-      )}
-    </Link>
-  );
-
-  /* GRID CARD */
-  return (
-    <Link href={`/clubs/${club.slug || club.id}`} style={{ textDecoration: 'none', display: 'block', height: '100%' }}>
-      <div
-        onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)}
-        /* سطح از lq-pcard؛ فقط حلقه‌ی طلایی hover این‌جا می‌ماند */
-        className="lq-pcard"
-        style={{
-          overflow: 'hidden',
-          borderColor: hov ? 'rgba(199,166,106,0.50)' : undefined,
-          /* درخشش لبه‌ی شیشه باید بماند، وگرنه کارت دقیقا موقع hover
-             جنسش را از دست می‌دهد. */
-          boxShadow: hov ? 'inset 0 1px 0 rgba(255,255,255,0.95), 0 0 0 3px rgba(199,166,106,0.10), 0 20px 44px -18px rgba(199,166,106,0.30)' : undefined,
-          height: '100%', display: 'flex', flexDirection: 'column',
-        }}
-      >
-        {/* image */}
-        <div style={{ height: 'clamp(140px,22vw,190px)', position: 'relative', overflow: 'hidden', flexShrink: 0 }}>
-          <img loading="lazy" decoding="async" src={img} alt={club.name}
-            style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.80)', transition: 'transform 400ms cubic-bezier(0.25,0.46,0.45,0.94)', transform: hov ? 'scale(1.06)' : 'scale(1.00)', willChange: 'transform' }}
-            onError={e => { const el = e.target as HTMLImageElement; el.onerror = null; el.src = poolImg; }} />
-          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, transparent 40%, rgba(6,13,10,0.88) 100%)' }} />
-
-          {/* تیک تأیید کنار نام است، نه روی عکس. */}
-          {/* علاقه‌مندی — خودش کلیک را متوقف می‌کند وگرنه کارت باز
-              می‌شود. */}
-          <div style={{ position: 'absolute', top: 10, left: 10 }}>
-            <FavoriteButton type="club" id={club.id} size={15} />
-          </div>
-          {/* open/close — same pill style as table type badges.
-              ⚠️ گوشه‌ی مقابلِ دکمه‌ی علاقه‌مندی: هر دو `top/left: 10` بودند و
-              «بسته» دقیقاً روی قلب می‌نشست — نه برچسب خوانا بود نه دکمه. */}
-          <div style={{
-            position: 'absolute', top: 10, insetInlineStart: 10,
-            fontSize: 12, fontWeight: 700,
-            color: club.isOpen ? '#30C55A' : '#ef4444',
-            background: club.isOpen ? 'rgba(48,197,90,0.10)' : 'rgba(239,68,68,0.10)',
-            border: `1px solid ${club.isOpen ? 'rgba(48,197,90,0.22)' : 'rgba(239,68,68,0.22)'}`,
-            borderRadius: 20, padding: '2px 8px',
-            display: 'flex', alignItems: 'center', gap: 4,
-          }}>
-            <span style={{ width: 5, height: 5, borderRadius: '50%', background: club.isOpen ? '#30C55A' : '#ef4444', display: 'inline-block', animation: club.isOpen ? 'gentlePulse 2.8s ease-in-out infinite' : 'none' }} />
-            {club.isOpen ? `تا ${club.closeTime}` : 'بسته'}
-          </div>
-
-          {/* رزرو badge — same pill style as table type badges (gold) */}
-          <div style={{
-            position: 'absolute', bottom: 10, left: 10,
-            fontSize: 12, fontWeight: 700,
-            color: '#C7A66A',
-            background: 'rgba(199,166,106,0.10)',
-            border: '1px solid rgba(199,166,106,0.22)',
-            borderRadius: 20, padding: '2px 8px',
-          }}>
-            رزرو آنلاین
-          </div>
-
-          <div style={{ position: 'absolute', bottom: 10, right: 10, background: 'rgba(0,0,0,0.50)', borderRadius: 20, padding: '3px 9px', fontSize: 13, color: 'rgba(255,255,255,0.88)', display: 'flex', alignItems: 'center', gap: 3 }}>
-            <MapPin size={9} color={PIN_GREEN} />{club.city}
-          </div>
-          {/* story ring */}
-          {club.hasActiveStory && club.storyMediaUrl && (
-            <button aria-label={`استوری ${club.name}`} onClick={(e) => { e.preventDefault(); e.stopPropagation(); setStoryOpen(true); }} style={{ position: 'absolute', bottom: 44, right: 12, padding: 0, border: 'none', background: 'none', cursor: 'pointer', zIndex: 5 }}>
-              <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'linear-gradient(45deg,#feda75,#fa7e1e,#d62976,#962fbf,#4f5bd5)', padding: 3, boxShadow: '0 0 18px rgba(188,24,136,0.6)' }}>
-                <div style={{ width: '100%', height: '100%', borderRadius: '50%', border: '2px solid rgba(0,0,0,0.75)', background: 'rgba(0,0,0,0.40)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', boxSizing: 'border-box' }}>
-                  {/* نشان پیش‌فرض به‌جای حرف اول نام */}
-                  <ClubLogo src={club.logo} name={club.name} size={48} tone="dark" />
-                </div>
-              </div>
-            </button>
-          )}
-        </div>
-
-        {/* body */}
-        <div style={{ padding: '14px 14px 0', flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: 8 }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, flexWrap: 'wrap' }}>
-            {/* این عنوان می‌پیچد، پس تیک داخل h3 می‌آید تا دنبال
-                آخرین کلمه بماند و تنها به خط بعد نیفتد. */}
-            <h3 style={{ fontSize: 16, fontWeight: 800, color: '#111111', margin: 0, lineHeight: 1.25 }}>
-              {club.name}{club.isVerified && <VerifiedBadge title="باشگاه تأیید شده" />}
-            </h3>
-            {club.rating && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: 2, flexShrink: 0 }}>
-                <Star size={10} style={{ color: '#f59e0b', fill: '#f59e0b' }} />
-                <span style={{ fontSize: 14, fontWeight: 800, color: '#f59e0b' }}>{toFa(club.rating)}</span>
-              </div>
-            )}
-          </div>
-
-          <div style={{ fontSize: 14, color: 'rgba(0,0,0,0.48)', lineHeight: 1.6, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-            {club.description}
-          </div>
-
-          {/* table type pills */}
-          <div style={{ display: 'flex', justifyContent: 'center', gap: 4, flexWrap: 'wrap' }}>
-            {activeTables.slice(0, 3).map(t => (
-              <span key={t.key} style={{ fontSize: 12, color: t.color, background: `${t.color}10`, border: `1px solid ${t.color}22`, borderRadius: 20, padding: '2px 8px', fontWeight: 700 }}>
-                {toFa((club as any)[t.key])} {t.label}
-              </span>
-            ))}
-          </div>
-
-          {/* amenity icons */}
-          <div style={{ display: 'flex', justifyContent: 'center', gap: 5 }}>
-            {AMENITIES.map(a => (
-              <div key={a.key} title={a.label} style={{ width: 28, height: 28, borderRadius: 8, background: (club as any)[a.key] ? 'rgba(199,166,106,0.10)' : 'rgba(0,0,0,0.03)', border: `1px solid ${(club as any)[a.key] ? 'rgba(199,166,106,0.28)' : 'rgba(0,0,0,0.06)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: (club as any)[a.key] ? '#A07840' : 'rgba(0,0,0,0.18)' }}>
-                {a.icon}
-              </div>
-            ))}
-          </div>
-
-          {/* tournament badge */}
-          {tournBadge && (
-            <div style={{ paddingTop: 4 }}>
-              <span style={{ fontSize: 11, fontWeight: 800, color: tournBadge.color, background: tournBadge.bg, border: `1px solid ${tournBadge.border}`, borderRadius: 20, padding: '4px 12px', animation: tournBadge.pulse ? 'gentlePulse 1.8s ease-in-out infinite' : 'none', display: 'inline-flex', alignItems: 'center', gap: 5 }}>
-                <Trophy size={9} /> {tournBadge.label}
-              </span>
-            </div>
-          )}
-        </div>
-
-        {/* footer */}
-        <div style={{ padding: '10px 14px 14px', marginTop: 'auto' }}>
-          <div style={{ height: 1, background: 'rgba(0,0,0,0.06)', marginBottom: 10 }} />
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, flexWrap: 'wrap' }}>
-            <span style={{ fontSize: 13, color: 'rgba(0,0,0,0.38)', display: 'flex', alignItems: 'center', gap: 3 }}>
-              <Users size={10} />{toFa(club.memberCount ?? 0)} عضو
-            </span>
-            {club.distance !== undefined && (
-              <span style={{ fontSize: 13, color: '#A07840' }}>📍 {toFa(club.distance.toFixed(1))} km</span>
-            )}
-          </div>
-        </div>
-      </div>
-      {storyOpen && club.hasActiveStory && club.storyMediaUrl && (
-        <ClubStoryModal club={{ name: club.name, logo: club.logo, storyMediaUrl: club.storyMediaUrl, storyType: club.storyType, storyText: club.storyText }} onClose={() => setStoryOpen(false)} />
-      )}
-    </Link>
-  );
-}
-
-/* ══════════════════════════════════════════════
-   PAGE
-══════════════════════════════════════════════ */
-const SLIDER_IMAGES = [
-  { src: '/images/clubs/club1.png',  title: 'باشگاه‌های حرفه‌ای', sub: 'تجربه بازی در بهترین محیط‌ها' },
-  { src: '/images/clubs/club2.jpg',  title: 'رزرو آنلاین میز',     sub: 'در هر زمان، از هر کجا' },
-  { src: '/images/clubs/club3.jpg',  title: 'مربیان',               sub: 'یادگیری با بهترین‌ها' },
-  /* ⚠️ این‌جا «۵۴۸ باشگاه» بود — عددی ساختگی که با تعداد واقعیِ
-     باشگاه‌های ثبت‌شده هیچ نسبتی نداشت و با رشدِ سایت هم عوض نمی‌شد.
-     جایش یک ویژگیِ واقعی نشست. */
-  { src: '/images/clubs/club4.png',  title: 'کافه بیلیارد',         sub: 'در سراسر ایران' },
-  { src: '/images/clubs/club4.png',  title: 'جامعه بیلیارد',        sub: 'بیلیارد هاب، اتصال همه' },
-];
-
-
-function HeroSliderFull() {
-  const [active, setActive] = useState(0);
-  const [prevIdx, setPrevIdx] = useState<number | null>(null);
-  const activeRef = useRef(0);
-  const fadingRef = useRef(false);
-
-  const advance = (idx: number) => {
-    if (idx === activeRef.current || fadingRef.current) return;
-    setPrevIdx(activeRef.current);
-    activeRef.current = idx;
-    fadingRef.current = true;
-    setActive(idx);
-    setTimeout(() => { setPrevIdx(null); fadingRef.current = false; }, 850);
-  };
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      const next = (activeRef.current + 1) % SLIDER_IMAGES.length;
-      setPrevIdx(activeRef.current);
-      activeRef.current = next;
-      fadingRef.current = true;
-      setActive(next);
-      setTimeout(() => { setPrevIdx(null); fadingRef.current = false; }, 850);
-    }, 4500);
-    return () => clearInterval(interval);
-  }, []);
-
-  return (
-    <>
-      <style>{`
-        @keyframes kenBurns {
-          0%   { transform: scale(1.00) translate(0%, 0%); }
-          100% { transform: scale(1.14) translate(-2%, 1.5%); }
-        }
-      `}</style>
-    <div style={{ position: 'relative', height: 'clamp(160px,17vw,200px)', overflow: 'hidden', background: '#0a0a0a' }}>
-      {SLIDER_IMAGES.map((_, i) => (
-        <div key={i} style={{
-          position: 'absolute', inset: 0,
-          opacity: i === active ? 1 : 0,
-          transition: 'opacity 0.90s ease',
-          zIndex: i === active ? 2 : i === prevIdx ? 1 : 0,
-          animation: 'kenBurns 9s ease-in-out infinite alternate',
-          willChange: 'transform',
-        }}>
-          <ClubPoster variant={i} view="hero" hov={false} />
-        </div>
-      ))}
-      <div style={{ position: 'absolute', inset: 0, zIndex: 3, background: 'linear-gradient(to right, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.3) 55%, transparent 100%)' }} />
-      <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '50%', zIndex: 3, background: 'linear-gradient(to top, rgba(0,0,0,0.82), transparent)' }} />
-
-      {/* text */}
-      <div style={{ position: 'absolute', top: 0, bottom: 0, left: 0, right: 0, zIndex: 4, display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: 'clamp(14px,2.5vw,36px)', direction: 'rtl' }}>
-        <div style={{ fontSize: 11, color: 'rgba(199,166,106,0.85)', letterSpacing: '0.26em', fontWeight: 700, marginBottom: 8 }}>DISCOVER CLUBS</div>
-        <h1 style={{ fontSize: 'clamp(23px, 4.1vw, 51px)', fontWeight: 900, color: '#fff', margin: '0 0 9px', letterSpacing: '-0.03em', lineHeight: 1.08 }}>
-          {SLIDER_IMAGES[active]?.title}
-        </h1>
-        <p style={{ fontSize: 'clamp(13px, 1.35vw, 18px)', color: '#D4A843', margin: 0, fontWeight: 600, textShadow: '0 0 22px rgba(212,168,67,0.55)' }}>
-          {SLIDER_IMAGES[active]?.sub}
-        </p>
-      </div>
-
-      {/* dots */}
-      <div style={{ position: 'absolute', bottom: 16, right: 'clamp(14px,2.5vw,36px)', zIndex: 6, display: 'flex', gap: 7 }}>
-        {SLIDER_IMAGES.map((_, i) => (
-          <button key={i} onClick={() => advance(i)} style={{
-            width: i === active ? 24 : 7, height: 7, borderRadius: 4, border: 'none', cursor: 'pointer', padding: 0,
-            background: i === active ? '#C7A66A' : 'rgba(255,255,255,0.32)',
-            transition: 'all 0.4s cubic-bezier(0.22,1,0.36,1)',
-          }} />
-        ))}
-      </div>
-    </div>
-    </>
-  );
-}
+type Phase = 'loading' | 'ready' | 'error';
 
 export default function ClubsPage() {
-  const [clubs, setClubs]           = useState<Club[]>([]);
-  const [loading, setLoading]       = useState(true);
-  const [view, setView]             = useState<'grid' | 'list'>('grid');
-  const [search, setSearch]         = useState('');
-  const [searchFocus, setSearchFocus] = useState(false);
-  const [city, setCity]             = useState('همه شهرها');
-  const [sortBy, setSortBy]         = useState('rating');
-  const [sortOpen, setSortOpen]     = useState(false);
-  const [filterOpen, setFilterOpen] = useState(false);
-  const [selectedTypes, setTypes]   = useState<string[]>([]);
-  const [selectedAmens, setAmens]   = useState<string[]>([]);
-  const [onlyOpen, setOnlyOpen]         = useState(false);
-  const [onlyVerified, setOnlyVer]      = useState(false);
-  const [onlyTournament, setOnlyTourn]  = useState(false);
-  const [userLoc, setUserLoc]       = useState<{ lat: number; lon: number } | null>(null);
-  const [locLoading, setLocLoading] = useState(false);
-  const [locError, setLocError]     = useState(false);
-  const filterRef = useRef<HTMLDivElement>(null);
-  const sortRef   = useRef<HTMLDivElement>(null);
+  const [clubs, setClubs] = useState<Club[]>([]);
+  const [phase, setPhase] = useState<Phase>('loading');
+  const [reload, setReload] = useState(0);
+  const [view, setView] = useState<'grid' | 'list'>('grid');
+  const [search, setSearch] = useState('');
+  const [filters, setFilters] = useState<ClubFilters>(NO_FILTERS);
+  const [sort, setSort] = useState<SortKey>('members');
+  const [userLoc, setUserLoc] = useState<{ lat: number; lon: number } | null>(null);
+  const [locating, setLocating] = useState(false);
+  const [locError, setLocError] = useState(false);
+  const [tournByClub, setTournByClub] = useState<Map<string, Tournament[]>>(new Map());
 
-  /* فقط باشگاه‌های واقعی.
-
-     پیش‌تر شش باشگاه نمونه همیشه اول فهرست بودند و باشگاه‌های واقعی
-     هم‌نام با آن‌ها **حذف** می‌شدند. یعنی صاحب «باشگاه المپیک مشهد»
-     که واقعا ثبت‌نام کرده بود، نسخه‌ی ساختگی به‌جای باشگاهش نمایش
-     داده می‌شد و صفحه‌ی خودش اصلا دیده نمی‌شد. */
-  /* فیلترها به سرور می‌روند، نه اینکه کل جدول دانلود و در مرورگر فیلتر
-     شود. جستجو با تأخیر کوتاه فرستاده می‌شود تا هر حرف تایپ‌شده یک
-     درخواست نسازد. */
+  /* فیلترها به سرور می‌روند. جست‌وجو با تأخیرِ کوتاه تا هر حرف یک
+     درخواست نسازد. درخواستِ یک فیلترِ قدیمی لغو می‌شود، نه فقط پاسخش
+     نادیده گرفته شود: روی شبکه‌ی کند، دانلودِ بی‌مصرف جای پاسخِ تازه را
+     می‌گیرد. */
   useEffect(() => {
     const p = new URLSearchParams();
-    if (city !== 'همه شهرها') p.set('city', city);
-    if (search.trim()) p.set('q', search.trim());
-    for (const t of selectedTypes) p.set(t, '1');
-    for (const a of selectedAmens) p.set(a, '1');
+    const q = search.trim();
+    if (q) p.set('q', q);
+    for (const t of filters.types) p.set(t, '1');
+    for (const a of filters.amens) p.set(a, '1');
+    const qs = p.toString();
 
-    const t = setTimeout(() => {
-      api.get(`/clubs${p.toString() ? `?${p}` : ''}`)
-        .then(r => { setClubs(Array.isArray(r.data) ? r.data : []); setLoading(false); })
-        .catch(() => { setClubs([]); setLoading(false); });
-    }, search.trim() ? 300 : 0);
-    return () => clearTimeout(t);
-  }, [city, search, selectedTypes, selectedAmens]);
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => {
+      void (async () => {
+        try {
+          const r = await api.get(`/clubs${qs ? `?${qs}` : ''}`, { signal: ctrl.signal });
+          if (ctrl.signal.aborted) return;
+          setClubs(Array.isArray(r.data) ? r.data : []);
+          setPhase('ready');
+        } catch (e) {
+          if (ctrl.signal.aborted) return;
+          console.warn('[clubs] list fetch failed', e);
+          setPhase('error');
+        }
+      })();
+    }, q ? 300 : 0);
+    return () => { ctrl.abort(); clearTimeout(timer); };
+  }, [search, filters.types, filters.amens, reload]);
 
-  /* مسابقات عمومی، یک‌بار برای کل فهرست — تا هر کارت جداگانه
-     درخواست نفرستد. کلید `club_id` است، نه نام باشگاه. */
-  const [tournByClub, setTournByClub] = useState<Map<string, Tournament[]>>(new Map());
+  /* مسابقات عمومی، یک‌بار برای کلِ فهرست. کلید `club_id` است، نه نام. */
   useEffect(() => {
+    let alive = true;
     void (async () => {
-      const all = await fetchTournaments();
-      const m = new Map<string, Tournament[]>();
-      for (const t of all) {
-        const list = m.get(t.clubId) ?? [];
-        list.push(t);
-        m.set(t.clubId, list);
+      try {
+        const all = await fetchTournaments();
+        if (!alive) return;
+        const m = new Map<string, Tournament[]>();
+        for (const t of all) m.set(t.clubId, [...(m.get(t.clubId) ?? []), t]);
+        setTournByClub(m);
+      } catch (e) {
+        /* نشانِ مسابقه تزئینیِ کارت است؛ نبودنش فهرست را نمی‌شکند */
+        console.warn('[clubs] tournaments fetch failed', e);
       }
-      setTournByClub(m);
     })();
+    return () => { alive = false; };
   }, []);
 
-  useEffect(() => {
-    const fn = (e: MouseEvent) => {
-      if (filterRef.current && !filterRef.current.contains(e.target as Node)) setFilterOpen(false);
-      if (sortRef.current   && !sortRef.current.contains(e.target as Node))   setSortOpen(false);
-    };
-    document.addEventListener('mousedown', fn);
-    return () => document.removeEventListener('mousedown', fn);
-  }, []);
-
-  const getLocation = () => {
+  const locate = () => {
     if (!navigator.geolocation) { setLocError(true); return; }
-    setLocLoading(true);
+    setLocating(true);
     setLocError(false);
     navigator.geolocation.getCurrentPosition(
-      pos => { setUserLoc({ lat: pos.coords.latitude, lon: pos.coords.longitude }); setSortBy('distance'); setLocLoading(false); },
-      () => { setLocLoading(false); setLocError(true); },
+      pos => { setUserLoc({ lat: pos.coords.latitude, lon: pos.coords.longitude }); setSort('distance'); setLocating(false); },
+      () => { setLocating(false); setLocError(true); },
       { timeout: 8000, enableHighAccuracy: false },
     );
   };
 
-  const toggleType = (k: string) => setTypes(p => p.includes(k) ? p.filter(x => x !== k) : [...p, k]);
-  const toggleAmen = (k: string) => setAmens(p => p.includes(k) ? p.filter(x => x !== k) : [...p, k]);
-  const activeFilters = selectedTypes.length + selectedAmens.length + (onlyOpen ? 1 : 0) + (onlyVerified ? 1 : 0) + (onlyTournament ? 1 : 0);
-  const clearFilters  = () => { setTypes([]); setAmens([]); setOnlyOpen(false); setOnlyVer(false); setOnlyTourn(false); setCity('همه شهرها'); setSearch(''); };
+  const withDistance = useMemo(() => {
+    if (!userLoc) return clubs;
+    return clubs.map(c => hasCoords(c.latitude, c.longitude)
+      ? { ...c, distance: distanceKm(userLoc.lat, userLoc.lon, Number(c.latitude), Number(c.longitude)) }
+      : c);
+  }, [clubs, userLoc]);
 
-  const withDist = clubs.map(c => userLoc && c.latitude && c.longitude
-    ? { ...c, distance: calcDistance(userLoc.lat, userLoc.lon, c.latitude, c.longitude) }
-    : c,
-  );
+  const shown = useMemo(() => {
+    const open = (id: string) => (tournByClub.get(id) ?? []).some(t => t.status === 'registration_open');
+    return sortClubs(filterClubs(withDistance, filters, search, open), sort);
+  }, [withDistance, filters, search, sort, tournByClub]);
 
-  const filtered = withDist.filter(c => {
-    if (search && !c.name.includes(search) && !c.city.includes(search) && !c.address.includes(search)) return false;
-    if (city !== 'همه شهرها' && c.city !== city) return false;
-    if (onlyOpen && !c.isOpen) return false;
-    if (onlyVerified && !c.isVerified) return false;
-    if (onlyTournament && !(tournByClub.get(c.id) ?? []).some(t => t.status === 'registration_open')) return false;
-    if (selectedTypes.length > 0 && !selectedTypes.every(t => (c as any)[t] > 0)) return false;
-    if (selectedAmens.length > 0 && !selectedAmens.every(a => (c as any)[a])) return false;
-    return true;
-  }).sort((a, b) => {
-    if (sortBy === 'distance' && a.distance !== undefined && b.distance !== undefined) return a.distance - b.distance;
-    if (sortBy === 'rating')  return (b.rating ?? 0)      - (a.rating ?? 0);
-    if (sortBy === 'members') return (b.memberCount ?? 0) - (a.memberCount ?? 0);
-    if (sortBy === 'tables')  return (b.totalTables ?? 0) - (a.totalTables ?? 0);
-    return 0;
-  });
-
-  const currentSort  = SORT_OPTIONS.find(o => o.value === sortBy) ?? SORT_OPTIONS[0]!;
-  const availSorts   = SORT_OPTIONS.filter(o => o.value !== 'distance' || userLoc);
+  const filtering = search.trim() !== '' || countFilters(filters) > 0;
+  const clearAll = () => { setFilters(NO_FILTERS); setSearch(''); };
+  const retry = () => { setPhase('loading'); setReload(n => n + 1); };
 
   return (
-    <>
-      <style>{`
-        @keyframes fadeUp      { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
-        @keyframes spin        { to{transform:rotate(360deg)} }
-        @keyframes gentlePulse { 0%,100%{opacity:1} 50%{opacity:0.25} }
-        .srch-inp { background:transparent;border:none;outline:none;color:#111111;font-size:14px;font-family:inherit;width:100% }
-        .srch-inp::placeholder { color:rgba(0,0,0,0.28) }
-        .city-scroll::-webkit-scrollbar { height:0 }
-        .dd-item:hover { background:rgba(199,166,106,0.08)!important;color:#A07840!important }
+    <div className="lq-stage min-h-screen pb-24">
+      <PageHeader
+        title="باشگاه‌های بیلیارد"
+        sub="باشگاهِ نزدیکتان را پیدا کنید و میزتان را آنلاین رزرو کنید."
+        aside={phase === 'ready' && (
+          <p aria-live="polite" className="m-0 text-sub text-ink-2">{faNum(shown.length)} باشگاه</p>
+        )}
+      />
 
-        /* grid — ۴ ستون روی نمایشگر بزرگ (پیش‌تر ۳ بود) */
-        .clubs-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:16px }
+      <ClubsToolbar
+        search={search} onSearch={setSearch}
+        filters={filters} onFilters={setFilters}
+        canFilterOpen={clubs.some(c => typeof c.isOpen === 'boolean')}
+        sort={sort} sorts={availableSorts(clubs, !!userLoc)} onSort={setSort}
+        nearActive={sort === 'distance' && !!userLoc} locating={locating} locError={locError} onNear={locate}
+        view={view} onView={setView}
+      />
 
-        /* ۳ ستون در بازه‌ی میانی، تا کارت‌ها روی لپ‌تاپ باریک نشوند */
-        @media(max-width:1500px) { .clubs-grid { grid-template-columns:repeat(3,1fr); gap:15px } }
-
-        /* 14-inch / small laptop ≤1366px → 2 columns */
-        @media(max-width:1100px) { .clubs-grid { grid-template-columns:repeat(2,1fr); gap:14px } }
-
-        /* mobile — 1 ستون */
-        @media(max-width:560px)  {
-          .clubs-grid { grid-template-columns:1fr; gap:12px }
-          .toolbar-row { flex-wrap:wrap; gap:6px }
-          .toolbar-search { min-width:100%!important; order:-1 }
-          .tb-count { display:none!important }
-          .tb-ctl { height:40px!important; padding:0 11px!important; font-size:13px!important }
-        }
-      `}</style>
-
-      {/* رنگ پایه داخل lq-stage است */}
-      <div className="lq-stage" style={{ minHeight: '100vh', paddingBottom: 80, direction: 'rtl' }}>
-
-        {/* ══ HERO SLIDER ══ */}
-        <div style={{ position: 'relative', overflow: 'hidden' }}>
-          <HeroSliderFull />
-        </div>
-
-        {/* ══ STICKY TOOLBAR ══ */}
-        {/* نوار چسبان نیمه‌شفاف می‌ماند تا لکه‌های پشت شیشه از زیرش
-            دیده شوند؛ نسخه‌ی قبلی تقریبا مات بود و یک نوار سفید وسط
-            صفحه می‌کشید. */}
-        <div style={{ background: 'rgba(250,249,246,0.62)', borderBottom: '1px solid rgba(28,28,26,0.07)', padding: '10px clamp(16px,4vw,40px)', position: 'sticky', top: 62, zIndex: 90, backdropFilter: 'blur(24px) saturate(1.6)', WebkitBackdropFilter: 'blur(24px) saturate(1.6)' }}>
-          <div style={{ maxWidth: 1280, margin: '0 auto' }}>
-            <div className="toolbar-row" style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-
-              {/* Search */}
-              <div className="toolbar-search" style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'rgba(255,255,255,0.72)', border: `1px solid ${searchFocus ? 'rgba(199,166,106,0.45)' : 'rgba(28,28,26,0.10)'}`, borderRadius: 12, padding: '0 14px', height: 44, flex: 1, minWidth: 160, maxWidth: 300, transition: 'all 0.3s', boxShadow: searchFocus ? '0 0 0 3px rgba(199,166,106,0.10)' : 'none' }}>
-                <Search size={14} color="rgba(0,0,0,0.30)" />
-                <input className="srch-inp" type="text" value={search} onChange={e => setSearch(e.target.value)} onFocus={() => setSearchFocus(true)} onBlur={() => setSearchFocus(false)} placeholder="جستجو..." />
-                {search && <button aria-label="پاک‌کردن جست‌وجو" onClick={() => setSearch('')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(0,0,0,0.35)', padding: 0, display: 'flex', flexShrink: 0 }}><X size={13} /></button>}
-              </div>
-
-              {/* Near me — order 3, no arrow icon */}
-              <button className="tb-ctl" onClick={getLocation} title="نزدیک‌ترین باشگاه‌ها" style={{ order: 3, height: 44, borderRadius: 12, padding: '0 16px', border: `1px solid ${sortBy === 'distance' ? 'rgba(199,166,106,0.40)' : 'rgba(0,0,0,0.09)'}`, background: sortBy === 'distance' ? 'rgba(199,166,106,0.10)' : '#FFFFFF', color: sortBy === 'distance' ? '#A07840' : 'rgba(0,0,0,0.55)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 7, justifyContent: 'center', flexShrink: 0, transition: 'all 0.2s', fontFamily: 'inherit', fontSize: 14, fontWeight: 700, whiteSpace: 'nowrap' }}>
-                {locLoading
-                  ? <div style={{ width: 14, height: 14, border: '2px solid rgba(199,166,106,0.3)', borderTop: '2px solid #C7A66A', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
-                  : <Navigation size={15} />}
-                نزدیک من
-              </button>
-
-              {/* Filter — order 1 */}
-              <div ref={filterRef} style={{ position: 'relative', flexShrink: 0, order: 1 }}>
-                <button className="tb-ctl" onClick={() => { setFilterOpen(p => !p); setSortOpen(false); }} style={{ height: 44, display: 'flex', alignItems: 'center', gap: 6, padding: '0 14px', borderRadius: 12, border: `1px solid ${filterOpen || activeFilters > 0 ? 'rgba(199,166,106,0.40)' : 'rgba(0,0,0,0.09)'}`, background: filterOpen || activeFilters > 0 ? 'rgba(199,166,106,0.10)' : '#FFFFFF', color: filterOpen || activeFilters > 0 ? '#A07840' : 'rgba(0,0,0,0.55)', fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.2s' }}>
-                  <SlidersHorizontal size={13} /> فیلتر
-                  {activeFilters > 0 && <span style={{ width: 16, height: 16, borderRadius: '50%', background: '#C7A66A', color: '#fff', fontSize: 10, fontWeight: 900, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{toFa(activeFilters)}</span>}
-                </button>
-
-                {filterOpen && (
-                  <div style={{ position: 'absolute', top: 'calc(100% + 10px)', right: 0, width: 300, background: 'rgba(255,255,255,0.985)', border: '1px solid rgba(0,0,0,0.10)', borderRadius: 18, padding: 18, zIndex: 9999, boxShadow: '0 24px 70px rgba(0,0,0,0.22)', backdropFilter: 'blur(28px) saturate(1.4)', WebkitBackdropFilter: 'blur(28px) saturate(1.4)', animation: 'fadeUp 0.2s ease both' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
-                      <span style={{ fontSize: 16, fontWeight: 800, color: '#111111' }}>فیلترها</span>
-                      <div style={{ display: 'flex', gap: 8 }}>
-                        {activeFilters > 0 && <button onClick={clearFilters} style={{ fontSize: 13, color: '#ef4444', background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.18)', borderRadius: 20, padding: '3px 10px', cursor: 'pointer', fontFamily: 'inherit' }}>پاک</button>}
-                        <button aria-label="بستن فیلترها" onClick={() => setFilterOpen(false)} style={{ background: 'rgba(0,0,0,0.04)', border: '1px solid rgba(0,0,0,0.08)', borderRadius: 8, cursor: 'pointer', color: 'rgba(0,0,0,0.45)', padding: 4, display: 'flex' }}><X size={12} /></button>
-                      </div>
-                    </div>
-
-                    <div style={{ marginBottom: 14 }}>
-                      <div style={{ fontSize: 12, color: 'rgba(0,0,0,0.62)', fontWeight: 700, marginBottom: 8 }}>نوع میز</div>
-                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-                        {TABLE_TYPES.map(t => (
-                          <button key={t.key} onClick={() => toggleType(t.key)} style={{ padding: '5px 12px', borderRadius: 20, fontSize: 13, fontWeight: 600, border: `1px solid ${selectedTypes.includes(t.key) ? `${t.color}40` : 'rgba(0,0,0,0.09)'}`, background: selectedTypes.includes(t.key) ? `${t.color}14` : 'transparent', color: selectedTypes.includes(t.key) ? t.color : 'rgba(0,0,0,0.66)', cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.2s' }}>
-                            {t.label}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div style={{ marginBottom: 14 }}>
-                      <div style={{ fontSize: 12, color: 'rgba(0,0,0,0.62)', fontWeight: 700, marginBottom: 8 }}>امکانات</div>
-                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-                        {AMENITIES.map(a => (
-                          <button key={a.key} onClick={() => toggleAmen(a.key)} style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '5px 10px', borderRadius: 20, fontSize: 13, fontWeight: 600, border: `1px solid ${selectedAmens.includes(a.key) ? 'rgba(199,166,106,0.40)' : 'rgba(0,0,0,0.09)'}`, background: selectedAmens.includes(a.key) ? 'rgba(199,166,106,0.10)' : 'transparent', color: selectedAmens.includes(a.key) ? '#A07840' : 'rgba(0,0,0,0.66)', cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.2s' }}>
-                            {a.icon}{a.label}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 6, paddingTop: 12, borderTop: '1px solid rgba(0,0,0,0.06)' }}>
-                      {[
-                        { label: 'باشگاه‌های باز',                   val: onlyOpen,       set: setOnlyOpen    },
-                        { label: 'تأیید شده‌ها',                     val: onlyVerified,   set: setOnlyVer     },
-                        { label: 'در حال ثبت‌نام مسابقه',            val: onlyTournament, set: setOnlyTourn   },
-                      ].map((tog, i) => (
-                        <div key={i} onClick={() => tog.set((p: boolean) => !p)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer', padding: '6px 0' }}>
-                          <span style={{ fontSize: 15, color: 'rgba(0,0,0,0.70)', fontWeight: 500 }}>{tog.label}</span>
-                          <div style={{ width: 36, height: 20, borderRadius: 10, background: tog.val ? '#C7A66A' : 'rgba(0,0,0,0.12)', position: 'relative', transition: 'all 0.3s', flexShrink: 0 }}>
-                            <div style={{ position: 'absolute', top: 3, width: 14, height: 14, borderRadius: '50%', background: '#fff', transition: 'all 0.3s', left: tog.val ? 19 : 3, boxShadow: '0 2px 4px rgba(0,0,0,0.20)' }} />
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Sort — order 2 */}
-              <div ref={sortRef} style={{ position: 'relative', flexShrink: 0, order: 2 }}>
-                <button className="tb-ctl" onClick={() => { setSortOpen(p => !p); setFilterOpen(false); }} style={{ height: 44, display: 'flex', alignItems: 'center', gap: 7, padding: '0 14px', borderRadius: 12, border: `1px solid ${sortOpen ? 'rgba(199,166,106,0.40)' : 'rgba(0,0,0,0.09)'}`, background: sortOpen ? 'rgba(199,166,106,0.08)' : '#FFFFFF', color: 'rgba(0,0,0,0.65)', fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.2s', whiteSpace: 'nowrap' }}>
-                  {currentSort.label}
-                  <ChevronDown size={11} style={{ transition: 'transform 0.3s', transform: sortOpen ? 'rotate(180deg)' : 'none', color: 'rgba(0,0,0,0.35)' }} />
-                </button>
-                {sortOpen && (
-                  <div style={{ position: 'absolute', top: 'calc(100% + 10px)', right: 0, minWidth: 170, background: 'rgba(255,255,255,0.985)', border: '1px solid rgba(0,0,0,0.10)', borderRadius: 14, padding: 6, zIndex: 9999, boxShadow: '0 24px 70px rgba(0,0,0,0.20)', backdropFilter: 'blur(28px) saturate(1.4)', WebkitBackdropFilter: 'blur(28px) saturate(1.4)', animation: 'fadeUp 0.2s ease both' }}>
-                    {availSorts.map(opt => (
-                      <button key={opt.value} className="dd-item" onClick={() => { setSortBy(opt.value); setSortOpen(false); }}
-                        style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 10, padding: '9px 12px', borderRadius: 9, border: 'none', background: sortBy === opt.value ? 'rgba(199,166,106,0.10)' : 'transparent', color: sortBy === opt.value ? '#A07840' : 'rgba(0,0,0,0.65)', fontSize: 15, fontWeight: sortBy === opt.value ? 700 : 500, cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.15s', textAlign: 'right' }}>
-                        {opt.label}
-                        {sortBy === opt.value && <span style={{ marginRight: 'auto', width: 6, height: 6, borderRadius: '50%', background: '#C7A66A' }} />}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              {/* View toggle — order 4, beside نزدیک من */}
-              <div style={{ display: 'flex', gap: 4, order: 4, flexShrink: 0 }}>
-                {([['grid', <Grid3X3 size={14} />], ['list', <AlignJustify size={14} />]] as const).map(([v, icon]) => (
-                  <button key={v} onClick={() => setView(v as any)} style={{ width: 36, height: 36, borderRadius: 9, border: `1px solid ${view === v ? 'rgba(199,166,106,0.35)' : 'rgba(0,0,0,0.09)'}`, background: view === v ? 'rgba(199,166,106,0.10)' : '#FFFFFF', color: view === v ? '#A07840' : 'rgba(0,0,0,0.40)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s' }}>
-                    {icon}
-                  </button>
-                ))}
-              </div>
-
-              <div className="tb-count" style={{ order: 5, marginRight: 'auto', fontSize: 14, color: 'rgba(0,0,0,0.40)', whiteSpace: 'nowrap' }}>باشگاه‌ها</div>
-            </div>
-
-            {/* location hint */}
-            {!userLoc && (
-              <div
-                onClick={locError ? undefined : getLocation}
-                style={{ marginTop: 8, display: 'flex', alignItems: 'center', gap: 8, padding: '7px 12px', background: locError ? 'rgba(239,68,68,0.06)' : 'rgba(199,166,106,0.06)', border: `1px solid ${locError ? 'rgba(239,68,68,0.22)' : 'rgba(199,166,106,0.18)'}`, borderRadius: 10, cursor: locError ? 'default' : 'pointer' }}
-              >
-                <Navigation size={12} color={locError ? '#ef4444' : '#C7A66A'} />
-                <span style={{ fontSize: 13, color: locError ? '#ef4444' : '#A07840' }}>
-                  {locError ? 'دسترسی به موقعیت مکانی رد شد — تنظیمات مرورگر را بررسی کنید' : 'برای نمایش نزدیک‌ترین باشگاه‌ها، مکان‌یابی را فعال کنید'}
-                </span>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* ══ CONTENT ══ */}
-        <div style={{ maxWidth: 1280, margin: '0 auto', padding: 'clamp(20px,3vw,36px) clamp(16px,3vw,32px)' }}>
-          {loading ? (
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, padding: '80px', color: 'rgba(0,0,0,0.40)', fontSize: 16 }}>
-              <div style={{ width: 22, height: 22, border: '2px solid rgba(199,166,106,0.20)', borderTop: '2px solid #C7A66A', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
-              در حال بارگذاری...
-            </div>
-          ) : filtered.length === 0 ? (
-            /* «هیچ باشگاهی ثبت نشده» با «فیلتر چیزی پیدا نکرد» فرق دارد؛
-               پیشنهاد «فیلترها را پاک کنید» وقتی فیلتری فعال نیست بی‌معنی است. */
-            <div style={{ textAlign: 'center', padding: '80px 24px' }}>
-              <div style={{ fontSize: 44, opacity: 0.15, marginBottom: 14 }}>🎱</div>
-              {clubs.length === 0 ? (
-                <>
-                  <h3 style={{ fontSize: 19, fontWeight: 800, color: '#111111', margin: '0 0 8px' }}>هنوز باشگاهی ثبت نشده</h3>
-                  <div style={{ fontSize: 15, color: 'rgba(0,0,0,0.40)', margin: '0 0 20px', lineHeight: 2 }}>
-                    اگر باشگاه دارید، می‌توانید همین حالا ثبتش کنید.
-                  </div>
-                  <Link href="/dashboard/club" style={{ display: 'inline-block', padding: '10px 24px', background: 'linear-gradient(135deg,#C7A66A,#A07840)', borderRadius: 12, color: '#fff', fontSize: 15, fontWeight: 700, textDecoration: 'none' }}>
-                    ثبت باشگاه
-                  </Link>
-                </>
-              ) : (
-                <>
-                  <h3 style={{ fontSize: 19, fontWeight: 800, color: '#111111', margin: '0 0 8px' }}>باشگاهی یافت نشد</h3>
-                  <div style={{ fontSize: 15, color: 'rgba(0,0,0,0.40)', margin: '0 0 20px' }}>فیلترها یا جستجو را تغییر دهید</div>
-                  <button onClick={clearFilters} style={{ padding: '10px 24px', background: 'linear-gradient(135deg,#C7A66A,#A07840)', borderRadius: 12, color: '#fff', fontSize: 15, fontWeight: 700, border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}>پاک کردن فیلترها</button>
-                </>
-              )}
-            </div>
-          ) : view === 'grid' ? (
-            <div className="clubs-grid">
-              {filtered.map((club, i) => (
-                <div key={club.id} style={{ animation: `fadeUp 0.5s ease ${i * 0.05}s both` }}>
-                  <ClubCard club={club} view="grid" idx={i} tournaments={tournByClub.get(club.id) ?? []} />
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-              {filtered.map((club, i) => (
-                <div key={club.id} style={{ animation: `fadeUp 0.4s ease ${i * 0.04}s both` }}>
-                  <ClubCard club={club} view="list" idx={i} tournaments={tournByClub.get(club.id) ?? []} />
-                </div>
-              ))}
-            </div>
-          )}
-
-          {!loading && (
-            <div style={{ marginTop: 40, padding: '28px 24px', background: '#111111', border: 'none', borderRadius: 20, textAlign: 'center' }}>
-              {/* تیتر عمداً ثابت است — پالسِ بی‌پایان روی متن خواندن را سخت می‌کرد.
-                  زیرتیتر هم ادعای عددی نمی‌کند («هزاران بازیکن» واقعی نبود)؛ فقط
-                  چیزی را می‌گوید که پنلِ باشگاه واقعاً دارد. */}
-              <h3 style={{ fontSize: 19, fontWeight: 900, color: '#FFFFFF', margin: '0 0 6px' }}>باشگاه خود را ثبت کنید</h3>
-              <div style={{ fontSize: 15, color: 'rgba(255,255,255,0.50)', margin: '0 0 16px' }}>رزرو آنلاین میز و مدیریت سانس‌ها در یک پنل</div>
-              <Link href="/clubs/new" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '10px 24px', background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.28)', borderRadius: 20, color: '#C7A66A', fontSize: 15, fontWeight: 700, textDecoration: 'none' }}>
-                ثبت باشگاه ←
-              </Link>
-            </div>
-          )}
-        </div>
-      </div>
-    </>
+      <section aria-labelledby="clubs-list-title" className="mx-auto max-w-screen-xl px-4 py-6 sm:px-6 lg:px-8">
+        {/* ترتیبِ تیترها: h1 سربرگ → این h2 → h3ِ کارت‌ها */}
+        <h2 id="clubs-list-title" className="sr-only">فهرستِ باشگاه‌ها</h2>
+        {phase === 'loading' ? (
+          <ClubsSkeleton view={view} />
+        ) : phase === 'error' ? (
+          <ClubsError onRetry={retry} />
+        ) : shown.length === 0 ? (
+          <ClubsEmpty filtering={filtering} onClear={clearAll} />
+        ) : (
+          <ul className={[view === 'grid' ? CLUBS_GRID : 'flex flex-col gap-3', 'm-0 list-none p-0'].join(' ')}>
+            {shown.map((club, i) => (
+              <li key={club.id}>
+                {view === 'grid'
+                  ? <ClubCard club={club} index={i} tournaments={tournByClub.get(club.id) ?? []} />
+                  : <ClubRow club={club} index={i} tournaments={tournByClub.get(club.id) ?? []} />}
+              </li>
+            ))}
+            <li><RegisterClubTile view={view} /></li>
+          </ul>
+        )}
+      </section>
+    </div>
   );
 }

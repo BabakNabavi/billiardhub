@@ -69,6 +69,11 @@ export async function GET(req: NextRequest) {
        نبودنش یعنی `undefined`، نه خطا. */
     const PUBLIC_COLUMNS = [
       'id', 'slug', 'name', 'city', 'province', 'address', 'logo', 'images',
+      /* ⚠️ بدونِ این دو، «نزدیکِ من» در فهرست اجازه‌ی مکان را می‌گرفت، دکمه
+         طلایی می‌شد و ترتیب «نزدیک‌ترین» نوشته می‌شد — ولی هیچ فاصله‌ای
+         ساخته نمی‌شد. مختصات همان است که صفحه‌ی باشگاه روی نقشه نشان
+         می‌دهد، پس چیزِ خصوصی‌ای بیرون نمی‌رود. */
+      'latitude', 'longitude',
       'snookerTables', 'pocketTables', 'highballTables', 'vipSnookerTables', 'vipPocketTables',
       'playstations', 'hasCafe', 'hasParking', 'hasWifi', 'hasProfessionalCoach',
       /* ⚠️ `hasActiveStory` ستونی است که هیچ‌کس نمی‌نویسدش و دو خط
