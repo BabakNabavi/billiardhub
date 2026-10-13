@@ -12,6 +12,7 @@
    ───────────────────────────────────────────────────────────── */
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { faNum } from '@/lib/jalali'
 import { MessageSquare, Loader2, Send, Users, AlertCircle, Info, Check, X } from 'lucide-react'
 import JalaliDatePicker from '../ui/JalaliDatePicker'
 import { apiFetch } from '../../lib/http'
@@ -21,7 +22,8 @@ import type { ClubTemplate } from '../../lib/sms/club-templates'
 const INK = '#1C1B17', SEC = '#5B564B', MUT = '#6F6A5C', LINE = '#EAE5DA'
 const GOLD_D = '#8F6531', FELT = '#0E7A38', RED = '#B23B2E'
 
-const fa = (n: unknown) => toFaDigits(Math.round(Number(n) || 0).toLocaleString('en-US'))
+/* همان `faNum`ِ مشترک — ارقامِ فارسی با جداکننده‌ی «٬» */
+const fa = faNum
 
 interface Estimate {
   recipients: number; unitPrice: number; setupFee: number

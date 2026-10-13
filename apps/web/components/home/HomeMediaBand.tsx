@@ -209,7 +209,7 @@ export default function HomeMediaBand() {
           آموزش‌های حرفه‌ای، هایلایت مسابقات و مصاحبه‌های اختصاصی — در پلتفرم ویدیویی بیلیارد هاب
         </p>
         <div className="hm-feat hm-anim" style={{ animationDelay: '160ms' }}>
-          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 9.5, fontWeight: 600, letterSpacing: '0.18em', color: 'rgba(255,255,255,0.72)', flexShrink: 0 }}><span className="hm-nsdot" /> NOW SHOWING</span>
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 11, fontWeight: 600, color: 'rgba(255,255,255,0.72)', flexShrink: 0 }}><span className="hm-nsdot" /> در حالِ پخش</span>
           <span className="hm-featdot" style={{ width: 4, height: 4, borderRadius: '50%', background: 'rgba(255,255,255,0.35)', flexShrink: 0 }} />
           <p className="hm-feat-title">{feat.title}</p>
           <span className="hm-views" style={{ fontSize: 11, color: 'rgba(242,239,233,0.45)', flexShrink: 0 }}>{compactViews(feat.views)} بازدید</span>

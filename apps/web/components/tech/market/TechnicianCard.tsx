@@ -23,7 +23,7 @@
 import Link from 'next/link'
 import { MapPin, Star, Home, Wrench } from 'lucide-react'
 import VerifiedBadge from '../../VerifiedBadge'
-import { toFaDigits } from '@/lib/jalali'
+import { toFaDigits, faDec } from '@/lib/jalali'
 import type { Technician } from '@/lib/technicians-data'
 
 /** حداکثر تخصصی که روی کارت می‌آید — بقیه «+n» می‌شوند */
@@ -69,7 +69,7 @@ export function TechnicianCard({ tech, ratingAvg = 0, ratingCount = 0 }: Technic
           {ratingCount > 0 && (
             <span className="tm-rate">
               <i className="tm-ic tm-ic--star"><Star size={13} aria-hidden fill="currentColor" /></i>
-              {toFaDigits(ratingAvg.toFixed(1))}
+              {faDec(ratingAvg, 1)}
               <small>({toFaDigits(String(ratingCount))} نظر)</small>
             </span>
           )}

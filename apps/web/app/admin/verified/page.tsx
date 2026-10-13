@@ -249,7 +249,7 @@ export default function AdminVerifiedPage() {
 
         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap', marginBottom: 18 }}>
           <div>
-            <span style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.24em', color: MUT }}>VERIFIED BADGE</span>
+            <span style={{ fontSize: 11, fontWeight: 800, color: MUT }}>نشانِ تأیید</span>
             <h1 style={{ fontSize: 'clamp(18px,2.4vw,22px)', fontWeight: 900, margin: '4px 0 0', display: 'flex', alignItems: 'center', gap: 6 }}>
               تیک آبی <VerifiedBadge title="" style={{ marginInlineStart: 0 }} />
             </h1>

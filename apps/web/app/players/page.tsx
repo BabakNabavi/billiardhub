@@ -16,7 +16,7 @@ import {
   type Player,
 } from '../../lib/players-data'
 import { listApprovedPlayers, profileToPlayer, type PlayerProfile } from '../../lib/player-store'
-import { fetchProfiles } from '../../lib/profiles/client'
+import { fetchProfilesResult } from '../../lib/profiles/client'
 import VerifiedBadge from '../../components/VerifiedBadge'
 
 const GOLD   = '#C7A66A'
@@ -85,17 +85,22 @@ export default function PlayersPage() {
 
   /* بازیکنان ثبت‌نامی (پنل ⇒ localStorage) بعد از mount خوانده و اول لیست می‌نشینند */
   const [registered, setRegistered] = useState<Player[]>([])
+  const [loadFailed, setLoadFailed] = useState(false)
 
   /* اول حافظه‌ی همین مرورگر (فوری)، بعد فهرست سرور — وگرنه بازیکنی
      که ثبت می‌شود فقط روی همان دستگاه دیده می‌شود. */
   useEffect(() => {
     setRegistered(listApprovedPlayers().map(profileToPlayer))
-    void fetchProfiles<PlayerProfile>('player').then(rows => {
-      const remote = rows
+    /* ⚠️ `fetchProfilesResult` نه `fetchProfiles`: دومی خطا را می‌بلعید و []
+     می‌داد، پس قطعیِ شبکه روی صفحه «پیدا نشد» می‌گفت. */
+    void (async () => {
+      const res = await fetchProfilesResult<PlayerProfile>('player')
+      if (res.state === 'error') { setLoadFailed(true); return }
+      const remote = res.profiles
         .filter(r => r.status === 'approved')
         .map(r => profileToPlayer({ ...r.data, slug: r.slug, verified: r.verified } as PlayerProfile))
       if (remote.length) setRegistered(remote)
-    }).catch(() => { /* شبکه قطع بود ⇒ فهرست محلی می‌ماند */ })
+    })().catch(err => { console.error('[profiles] list load failed', err); setLoadFailed(true) })
   }, [])
 
   const ALL = useMemo(() => {
@@ -235,15 +240,11 @@ export default function PlayersPage() {
           <span style={{
             position: 'absolute', top: 'clamp(14px,2vw,22px)', insetInlineEnd: 'clamp(16px,3vw,28px)',
             display: 'inline-flex', alignItems: 'center', gap: 8,
-            fontSize: 8.5, fontWeight: 800, letterSpacing: '0.26em', color: GOLD,
+            fontSize: 11, fontWeight: 800, color: GOLD,
             border: '1px solid rgba(199,166,106,0.4)', background: 'rgba(199,166,106,0.10)',
             borderRadius: 999, padding: '4px 11px',
           }}>
-            {/* پوسته در RTL می‌ماند و فقط متن ltr می‌شود: با `direction`
-                روی خود عنصر abspos، مرورگرها سر اینکه `insetInlineEnd`
-                نسبت به کدام جهت حل شود اختلاف دارند و برچسب می‌تواند
-                سر راست بنشیند. */}
-            <span dir="ltr">BILLIARD HUB · ELITE</span>
+            بیلیارد هاب · نخبگان
           </span>
           <h1 style={{ fontSize: 'clamp(30px,5vw,56px)', fontWeight: 900, margin: 0, lineHeight: 1.2, letterSpacing: '-0.02em' }}>
             ستارگان <span style={{ background: `linear-gradient(135deg,#E8CE96,${GOLD} 50%,#8A6020)`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>بیلیارد</span> ایران
@@ -259,7 +260,7 @@ export default function PlayersPage() {
       </header>
 
       {/* ═══ نوار سگمنت + جستجو ═══ */}
-      <div style={{ position: 'sticky', top: 62, zIndex: 40, background: 'rgba(247,247,245,0.92)', backdropFilter: 'blur(18px) saturate(1.6)', WebkitBackdropFilter: 'blur(18px) saturate(1.6)', borderBottom: `1px solid ${LINE}` }}>
+      <div style={{ position: 'sticky', top: 'var(--nav-offset)', zIndex: 40, background: 'rgba(247,247,245,0.92)', backdropFilter: 'blur(18px) saturate(1.6)', WebkitBackdropFilter: 'blur(18px) saturate(1.6)', borderBottom: `1px solid ${LINE}` }}>
         <div className="plx-wrap" style={{ padding: '10px clamp(16px,3vw,28px)', display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
           <div className="pl-segs" style={{ flex: '1 1 420px', minWidth: 0 }}>
             {SEGMENTS.map(([k, l]) => (
@@ -313,8 +314,8 @@ export default function PlayersPage() {
           {gridItems.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '64px 20px', background: 'rgba(255,255,255,0.78)', border: `1px solid ${LINE}`, borderRadius: 18 }}>
               <Search size={36} style={{ color: MUT, opacity: 0.45, marginBottom: 12 }} />
-              <p style={{ fontSize: 15, fontWeight: 800, margin: '0 0 6px' }}>بازیکنی پیدا نشد</p>
-              <p style={{ fontSize: 12.5, color: MUT, margin: '0 0 18px' }}>عبارت دیگری جستجو کنید یا فیلتر را تغییر دهید.</p>
+              <p style={{ fontSize: 15, fontWeight: 800, margin: '0 0 6px' }}>{loadFailed ? 'فهرست بارگذاری نشد' : 'بازیکنی پیدا نشد'}</p>
+              <p style={{ fontSize: 12.5, color: MUT, margin: '0 0 18px' }}>{loadFailed ? 'اتصالِ اینترنت را بررسی کنید و صفحه را دوباره باز کنید.' : 'عبارت دیگری جستجو کنید یا فیلتر را تغییر دهید.'}</p>
               <button onClick={() => { setQuery(''); setSeg('all') }}
                 style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '9px 18px', borderRadius: 10, cursor: 'pointer', fontFamily: 'inherit', fontSize: 13, fontWeight: 700, background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.34)', color: GOLD_D }}>
                 نمایش همه بازیکنان

@@ -142,7 +142,7 @@ const isUrl = (s: string) => /^(https?:)?\/\//i.test(s) || /^[\w./-]+\/[\w.-]+\.
 function show(v: unknown): string {
   if (v === null || v === undefined || v === '') return '—'
   if (typeof v === 'boolean') return v ? 'بله' : 'خیر'
-  if (typeof v === 'number') return toFaDigits(v.toLocaleString('en-US'))
+  if (typeof v === 'number') return toFaDigits(v.toLocaleString('fa-IR'))
   if (Array.isArray(v)) {
     if (!v.length) return '—'
     return v.map(x => (x && typeof x === 'object'

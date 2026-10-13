@@ -5,12 +5,13 @@
    می‌آید تا با آنچه ادمین می‌بیند یکی باشد. */
 
 import { useCallback, useEffect, useState } from 'react'
+import { faNum } from '@/lib/jalali'
 import Link from 'next/link'
 import {
   Megaphone, Loader2, AlertCircle, Eye, MousePointerClick, Wallet, Plus, ArrowLeft,
 } from 'lucide-react'
 import { apiFetch } from '../../../lib/http'
-import { toFaDigits, faDate } from '../../../lib/jalali'
+import { toFaDigits, faDate, faDec } from '../../../lib/jalali'
 
 const INK = '#1C1B17', SEC = '#5B564B', MUT = '#6F6A5C', LINE = '#EAE5DA'
 const GOLD_D = '#8F6531', FELT = '#0E7A38', RED = '#B23B2E'
@@ -48,7 +49,8 @@ interface Totals {
   rejected: number; cancelled: number; impressions: number; clicks: number; ctr: number; spent: number
 }
 
-const fa = (n: number) => toFaDigits(n.toLocaleString('en-US'))
+/* همان `faNum`ِ مشترک — ارقامِ فارسی با جداکننده‌ی «٬» */
+const fa = faNum
 
 export default function AdvertiserDashboard() {
   const [campaigns, setCampaigns] = useState<Campaign[] | null>(null)
@@ -117,7 +119,7 @@ export default function AdvertiserDashboard() {
               {[
                 { icon: <Megaphone size={14} />, label: 'کمپین فعال', value: fa(totals.active), color: FELT },
                 { icon: <Eye size={14} />, label: 'نمایش', value: fa(totals.impressions) },
-                { icon: <MousePointerClick size={14} />, label: 'کلیک', value: fa(totals.clicks), hint: `نرخ کلیک ${toFaDigits(totals.ctr.toFixed(2))}٪` },
+                { icon: <MousePointerClick size={14} />, label: 'کلیک', value: fa(totals.clicks), hint: `نرخ کلیک ${faDec(totals.ctr, 2)}٪` },
                 { icon: <Wallet size={14} />, label: 'هزینه‌ی پرداخت‌شده', value: `${fa(totals.spent)} تومان`, color: GOLD_D },
               ].map(k => (
                 <div key={k.label} style={{ border: `1px solid ${LINE}`, borderRadius: 14, padding: '13px 15px', background: '#FAFAF7' }}>
@@ -188,7 +190,7 @@ export default function AdvertiserDashboard() {
                       <div><span style={{ color: MUT }}>پایان: </span>{faDate(c.endsAt)}</div>
                       <div style={{ fontVariantNumeric: 'tabular-nums' }}><span style={{ color: MUT }}>نمایش: </span>{fa(c.impressions)}</div>
                       <div style={{ fontVariantNumeric: 'tabular-nums' }}><span style={{ color: MUT }}>کلیک: </span>{fa(c.clicks)}</div>
-                      <div style={{ fontVariantNumeric: 'tabular-nums' }}><span style={{ color: MUT }}>CTR: </span>{toFaDigits(c.ctr.toFixed(2))}٪</div>
+                      <div style={{ fontVariantNumeric: 'tabular-nums' }}><span style={{ color: MUT }}>CTR: </span>{faDec(c.ctr, 2)}٪</div>
 
                       {/* فقط برای تبلیغ ویدیویی معنا دارد؛ برای بنر
                           همیشه صفر است و نشان‌دادنش گمراه‌کننده. */}
@@ -201,7 +203,7 @@ export default function AdvertiserDashboard() {
                             <span style={{ color: MUT }}>رد شده: </span>{fa(c.skippedViews)}
                           </div>
                           <div style={{ fontVariantNumeric: 'tabular-nums' }}>
-                            <span style={{ color: MUT }}>نرخ رد کردن: </span>{toFaDigits(c.skipRate.toFixed(1))}٪
+                            <span style={{ color: MUT }}>نرخ رد کردن: </span>{faDec(c.skipRate, 1)}٪
                           </div>
                         </>
                       )}

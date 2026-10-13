@@ -153,7 +153,7 @@ function TournamentCard({ t, i }: { t: Tournament; i: number }) {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
               <span style={{ fontSize: 11.5, color: MUT, display: 'inline-flex', alignItems: 'center', gap: 5 }}><Users size={11} /> ظرفیت</span>
               <span style={{ fontSize: 12, fontWeight: 800, color: full ? '#B23B2E' : TEXT, fontVariantNumeric: 'tabular-nums' }}>
-                {toFa(t.registeredCount)} / {toFa(t.maxPlayers)}
+                {toFa(t.registeredCount)} از {toFa(t.maxPlayers)}
               </span>
             </div>
             {/* ── نوار ظرفیت ──
@@ -365,8 +365,8 @@ export default function TournamentsPage() {
         <div className="tn-hero-word">CHAMPIONSHIP</div>
         <div className="tn-wrap" style={{ position: 'relative', padding: 'clamp(36px,5.4vw,70px) clamp(16px,3vw,28px) clamp(30px,4.6vw,54px)', display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: '20px 32px', flexWrap: 'wrap' }}>
           <div style={{ minWidth: 0 }}>
-            <span style={{ position: 'absolute', top: 'clamp(14px,2vw,24px)', insetInlineEnd: 'clamp(16px,3vw,28px)', display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 8, fontWeight: 800, letterSpacing: '0.24em', color: GOLD, border: '1px solid rgba(199,166,106,0.4)', background: 'rgba(199,166,106,0.10)', borderRadius: 999, padding: '4px 11px', }}>
-              <Trophy size={9} /> OFFICIAL TOURNAMENTS
+            <span style={{ position: 'absolute', top: 'clamp(14px,2vw,24px)', insetInlineEnd: 'clamp(16px,3vw,28px)', display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 11, fontWeight: 800, color: GOLD, border: '1px solid rgba(199,166,106,0.4)', background: 'rgba(199,166,106,0.10)', borderRadius: 999, padding: '4px 11px', }}>
+              <Trophy size={9} /> رویدادهای رسمی
             </span>
             <h1 style={{ fontSize: 'clamp(30px,5vw,54px)', fontWeight: 900, margin: 0, lineHeight: 1.2, letterSpacing: '-0.02em' }}>
               مسابقات <span style={{ background: `linear-gradient(135deg,#E8CE96,${GOLD} 50%,#8A6020)`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>بیلیارد</span>
@@ -395,7 +395,7 @@ export default function TournamentsPage() {
       </header>
 
       {/* ═══ نوار ابزار چسبان: تب‌ها + جستجو ═══ */}
-      <div style={{ position: 'sticky', top: 62, zIndex: 40, background: 'rgba(247,247,245,0.92)', backdropFilter: 'blur(18px) saturate(1.6)', WebkitBackdropFilter: 'blur(18px) saturate(1.6)', borderBottom: `1px solid ${LINE}` }}>
+      <div style={{ position: 'sticky', top: 'var(--nav-offset)', zIndex: 40, background: 'rgba(247,247,245,0.92)', backdropFilter: 'blur(18px) saturate(1.6)', WebkitBackdropFilter: 'blur(18px) saturate(1.6)', borderBottom: `1px solid ${LINE}` }}>
         <div className="tn-wrap" style={{ padding: '10px clamp(16px,3vw,28px)', display: 'flex', flexDirection: 'column', gap: 10 }}>
           <div className="tn-tabs" style={{ minWidth: 0 }}>
             {TABS.map(t => (

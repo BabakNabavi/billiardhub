@@ -103,7 +103,7 @@ export default function AdminRefereesPage() {
       <div style={{ maxWidth: 940, margin: '0 auto', padding: '28px clamp(16px,4vw,32px) 80px' }}>
 
         <div style={{ marginBottom: 22 }}>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, background: 'rgba(8,145,178,0.10)', border: '1px solid rgba(8,145,178,0.28)', color: '#0e7490', fontSize: 11, fontWeight: 800, borderRadius: 20, padding: '4px 12px', letterSpacing: '0.08em', marginBottom: 10 }}>ADMIN · REFEREES</div>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, background: 'rgba(8,145,178,0.10)', border: '1px solid rgba(8,145,178,0.28)', color: '#0e7490', fontSize: 11, fontWeight: 800, borderRadius: 20, padding: '4px 12px', marginBottom: 10 }}>مدیریت · داوران</div>
           <h1 style={{ fontSize: 'clamp(21px,3vw,27px)', fontWeight: 900, letterSpacing: '-0.02em' }}>تایید داوران</h1>
           <p style={{ fontSize: 13.5, color: TEXT_S, marginTop: 6 }}>
             درخواست‌های ثبت‌شده‌ی داوران را بررسی کنید. آپلود مدرک داوری برای داوران الزامی است؛ پس از تایید مدرک، می‌توانید پروفایل را با تیک آبی منتشر کنید.

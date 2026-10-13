@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { faNum } from '@/lib/jalali'
 import Link from 'next/link';
 import { useAuthStore } from '../../store/auth.store';
 import AuthGuard from '../../components/AuthGuard';
@@ -51,7 +52,8 @@ interface Product {
 type Filter = 'all' | 'active' | 'inactive' | 'low';
 
 const toFa = (v: string | number) => String(v).replace(/[0-9]/g, d => '۰۱۲۳۴۵۶۷۸۹'.charAt(Number(d)));
-const money = (n: number) => toFa(n.toLocaleString('en-US'));
+/* همان `faNum`ِ مشترک — ارقامِ فارسی با جداکننده‌ی «٬» */
+const money = faNum
 
 const STATUS_FA: Record<string, { label: string; color: string; bg: string }> = {
   active:   { label: 'فعال',          color: '#0E7A38', bg: 'rgba(14,122,56,0.10)' },

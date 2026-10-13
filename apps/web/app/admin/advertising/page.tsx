@@ -13,7 +13,7 @@ import {
   BarChart3, Eye, MousePointerClick, Wallet, RotateCw, Check,
 } from 'lucide-react'
 import { apiFetch } from '../../../lib/http'
-import { toFaDigits, faDateTime, faDate } from '../../../lib/jalali'
+import { toFaDigits, faDateTime, faDate, faDec } from '../../../lib/jalali'
 import Select from '../../../components/ui/Select'
 
 const INK = '#1C1B17', SEC = '#5B564B', MUT = '#6F6A5C', LINE = '#EAE5DA'
@@ -282,7 +282,7 @@ function StatsSection({ s }: { s: Stats }) {
           hint={`${fa(s.campaigns.rejected + s.campaigns.cancelled)} رد/لغو`} />
         <KPI icon={<Eye size={14} />} label="نمایش" value={fa(s.impressions)} />
         <KPI icon={<MousePointerClick size={14} />} label="کلیک" value={fa(s.clicks)}
-          hint={`نرخ کلیک ${toFaDigits(s.ctr.toFixed(2))}٪`} />
+          hint={`نرخ کلیک ${faDec(s.ctr, 2)}٪`} />
         <KPI icon={<Wallet size={14} />} label="درآمد (تومان)" value={fa(s.revenue.total)} color={GOLD_D}
           hint={s.revenue.orders > 0
             ? `${fa(s.revenue.orders)} سفارش پرداخت‌شده`
@@ -306,7 +306,7 @@ function StatsSection({ s }: { s: Stats }) {
                   <td style={{ padding: '9px 12px', textAlign: 'center', color: b.active > 0 ? FELT : MUT, fontWeight: 800, borderBottom: `1px solid ${LINE}` }}>{fa(b.active)}</td>
                   <td style={{ padding: '9px 12px', textAlign: 'center', color: SEC, fontVariantNumeric: 'tabular-nums', borderBottom: `1px solid ${LINE}` }}>{fa(b.impressions)}</td>
                   <td style={{ padding: '9px 12px', textAlign: 'center', color: SEC, fontVariantNumeric: 'tabular-nums', borderBottom: `1px solid ${LINE}` }}>{fa(b.clicks)}</td>
-                  <td style={{ padding: '9px 12px', textAlign: 'center', color: SEC, fontVariantNumeric: 'tabular-nums', borderBottom: `1px solid ${LINE}` }}>{toFaDigits(b.ctr.toFixed(2))}٪</td>
+                  <td style={{ padding: '9px 12px', textAlign: 'center', color: SEC, fontVariantNumeric: 'tabular-nums', borderBottom: `1px solid ${LINE}` }}>{faDec(b.ctr, 2)}٪</td>
                 </tr>
               ))}
             </tbody>

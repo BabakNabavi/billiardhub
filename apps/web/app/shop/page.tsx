@@ -1016,7 +1016,11 @@ export default function MarketNewPage() {
       </div>
 
       {/* ═══ بدنه ═══ */}
-      <main className="mk-main" style={{ maxWidth: 1300, margin: '0 auto', padding: '30px clamp(16px,3vw,32px) calc(96px + env(safe-area-inset-bottom))' }}>
+      {/* ⚠️ `div` نه `main`: لایه‌ی ریشه خودش `<main>` دارد و دو `main`ِ تو‌در‌تو
+          نامعتبر است. صفحه h1 هم نداشت — برای موتورِ جست‌وجو و صفحه‌خوان،
+          پنهان از چشم تا ظاهر عوض نشود. */}
+      <div className="mk-main" style={{ maxWidth: 1300, margin: '0 auto', padding: '30px clamp(16px,3vw,32px) calc(96px + env(safe-area-inset-bottom))' }}>
+        <h1 className="sr-only">بیلیارد بازار — خرید و فروشِ تجهیزاتِ بیلیارد</h1>
 
         {/* گرید دسته‌ها — موبایل: ۳ ردیف ۵تایی */}
         <div className="mk-mcats">
@@ -1134,7 +1138,7 @@ export default function MarketNewPage() {
             </Link>
           </section>
         </div>
-      </main>
+      </div>
 
       {/* ═══ نوار پایین موبایل ═══ */}
       <nav className="mk-bottomnav">

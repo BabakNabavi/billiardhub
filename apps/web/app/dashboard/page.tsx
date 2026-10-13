@@ -387,7 +387,7 @@ export default function DashboardPage() {
       <div style={{ minHeight: '100vh', background: '#F7F7F5', paddingBottom: '80px' }}>
 
         {/* ══════════ DASHBOARD HEADER ══════════ */}
-        <div style={{ background: 'rgba(247,247,245,0.97)', borderBottom: '1px solid rgba(0,0,0,0.07)', padding: '0 clamp(16px,4vw,40px)', position: 'sticky', top: '62px', zIndex: 90, backdropFilter: 'blur(24px)' }}>
+        <div style={{ background: 'rgba(247,247,245,0.97)', borderBottom: '1px solid rgba(0,0,0,0.07)', padding: '0 clamp(16px,4vw,40px)', position: 'sticky', top: 'var(--nav-offset)', zIndex: 90, backdropFilter: 'blur(24px)' }}>
           <div style={{ maxWidth: '1280px', margin: '0 auto', height: '56px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px' }}>
 
             {/* Left — greeting */}

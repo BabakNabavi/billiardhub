@@ -9,7 +9,7 @@ import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { CheckCircle2, XCircle, Loader2, ArrowLeft } from 'lucide-react'
 import { apiFetch } from '../../../lib/http'
-import { toFaDigits, faDate } from '../../../lib/jalali'
+import { faDate, faNum } from '../../../lib/jalali'
 
 const INK = '#1C1B17', SEC = '#5B564B', MUT = '#6F6A5C', LINE = '#E7E2D6'
 const GOLD_D = '#8F6531', FELT = '#0E7A38', RED = '#B23B2E'
@@ -25,7 +25,8 @@ interface Quota {
   planName: string | null; planExpiresAt: string | null
 }
 const PERIOD_FA = { day: 'روز', week: 'هفته', month: 'ماه' } as const
-const fa = (n: number) => toFaDigits(n.toLocaleString('en-US'))
+/* همان `faNum`ِ مشترک — ارقامِ فارسی با جداکننده‌ی «٬» */
+const fa = faNum
 
 function Result() {
   const sp = useSearchParams()

@@ -855,14 +855,14 @@ export default function Stories() {
       <div className="st-strip">
         {/* Add story button — فقط نقش‌های واجد استوری (کاربر عادی نمی‌بیند) */}
         {user && canPost && (
-          <div className="st-item" onClick={() => { setPostErr(''); setPosting(true); }} role="button">
+          <button type="button" className="st-item" onClick={() => { setPostErr(''); setPosting(true); }} aria-label="استوریِ جدید">
             <div className="st-ring" style={{ background: 'var(--brand-tint-2)', border: '1.5px dashed var(--brand)' }}>
               <div className="st-inner" style={{ background: 'var(--brand-tint)', border: 'none' }}>
                 <Plus size={18} style={{ color: 'var(--brand)' }} />
               </div>
             </div>
             <span className="st-name" style={{ color: 'var(--brand)' }}>جدید</span>
-          </div>
+          </button>
         )}
 
         {groups.map((g, i) => {

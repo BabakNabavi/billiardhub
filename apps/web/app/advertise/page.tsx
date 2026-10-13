@@ -401,7 +401,7 @@ export default function AdvertisePage() {
                               {t.badge ? <span style={{ color: '#8F6531' }}> · {t.badge}</span> : ''}
                             </div>
                             <div style={{ fontSize: 13.5, fontWeight: 900, color: '#8F6531', marginTop: 3, fontVariantNumeric: 'tabular-nums' }}>
-                              {toFa(t.price.toLocaleString('en-US'))} تومان
+                              {toFa(t.price.toLocaleString('fa-IR'))} تومان
                             </div>
                           </div>
                         ))}

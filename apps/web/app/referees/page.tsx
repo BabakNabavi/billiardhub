@@ -1,8 +1,9 @@
 'use client'
 import { useState, useEffect, useRef } from 'react'
+import { prefersReducedMotion } from '@/lib/ui/reduced-motion'
 import Link from 'next/link'
 import { listRefereeProfiles, badgeFromGrades, type RefereeProfile } from '../../lib/referee-store'
-import { fetchProfiles } from '../../lib/profiles/client'
+import { fetchProfilesResult } from '../../lib/profiles/client'
 import VerifiedBadge from '../../components/VerifiedBadge'
 import RoleAvatar from '../../components/profile/RoleAvatar'
 
@@ -170,6 +171,7 @@ function RefereeHeroSlider() {
   }
 
   useEffect(() => {
+    if (prefersReducedMotion()) return
     const interval = setInterval(() => {
       const next = (activeRef.current + 1) % REFEREE_SLIDES.length
       setPrevIdx(activeRef.current)
@@ -195,9 +197,10 @@ function RefereeHeroSlider() {
 
         <div style={{ position:'absolute', inset:0, zIndex:4, display:'flex', flexDirection:'column', justifyContent:'center', padding:'clamp(12px,2.4vw,32px) clamp(24px,6vw,80px)' }}>
           <div style={{ maxWidth:1280, width:'100%', margin:'0 auto' }}>
-            <div style={{ textAlign:'left', marginBottom:11 }}>
-              <div style={{ display:'inline-flex', alignItems:'center', gap:7, background:'rgba(199,166,106,0.14)', border:'1px solid rgba(199,166,106,0.34)', color:'#D4A843', fontSize:8.9, fontWeight:800, borderRadius:24, padding:'4px 11px', letterSpacing:'0.12em', transform:'translateY(-13px)', animation:'softBlink 2.6s .7s ease-in-out infinite' }}>
-                KNOW THE REFEREES . BILLIARD HUB
+            {/* `end` در RTL همان چپِ پیشین است */}
+            <div style={{ textAlign:'end', marginBottom:11 }}>
+              <div style={{ display:'inline-flex', alignItems:'center', gap:7, background:'rgba(199,166,106,0.14)', border:'1px solid rgba(199,166,106,0.34)', color:'#D4A843', fontSize:11, fontWeight:800, borderRadius:24, padding:'4px 11px', transform:'translateY(-13px)', animation:'softBlink 2.6s .7s ease-in-out infinite' }}>
+                داورانِ رسمی را بشناس · بیلیارد هاب
               </div>
             </div>
             <h1 style={{ fontSize:'clamp(25px,4vw,50px)', fontWeight:900, color:'#fff', margin:'0 0 12px', letterSpacing:'-0.03em', lineHeight:1.08, transform:'translateY(-6px)' }}>
@@ -324,18 +327,23 @@ export default function RefereesPage() {
   const [search,    setSearch]    = useState('')
   const [view,      setView]      = useState<'grid' | 'list'>('grid')
   const [localRefs, setLocalRefs] = useState<Referee[]>([])
+  const [loadFailed, setLoadFailed] = useState(false)
 
   /* همان ایراد صفحه‌ی مربیان: این فهرست فقط از localStorage می‌آمد،
      پس داوری که ثبت می‌شد برای هیچ بازدیدکننده‌ی دیگری دیده نمی‌شد.
      اول حافظه‌ی همین مرورگر، بعد فهرست سرور. */
   useEffect(() => {
     setLocalRefs(listRefereeProfiles().filter(p => p.status === 'approved').map(mapProfileToListReferee))
-    void fetchProfiles<RefereeProfile>('referee').then(rows => {
-      const remote = rows
+    /* ⚠️ `fetchProfilesResult` نه `fetchProfiles`: دومی خطا را می‌بلعید و []
+     می‌داد، پس قطعیِ شبکه روی صفحه «پیدا نشد» می‌گفت. */
+    void (async () => {
+      const res = await fetchProfilesResult<RefereeProfile>('referee')
+      if (res.state === 'error') { setLoadFailed(true); return }
+      const remote = res.profiles
         .filter(r => r.status === 'approved')
         .map(r => mapProfileToListReferee({ ...r.data, slug: r.slug, verified: r.verified } as RefereeProfile))
       if (remote.length) setLocalRefs(remote)
-    }).catch(() => { /* شبکه قطع بود ⇒ فهرست محلی می‌ماند */ })
+    })().catch(err => { console.error('[profiles] list load failed', err); setLoadFailed(true) })
   }, [])
   const q = search.trim()
   const referees = [...localRefs, ...REFEREES].filter(r =>
@@ -400,7 +408,7 @@ export default function RefereesPage() {
 
         {/* ══════════════ FILTER ══════════════ */}
         <div id="referees" style={{
-          position:'sticky', top:72, zIndex:50,
+          position:'sticky', top:'var(--nav-offset)', zIndex:50,
           background:'rgba(246,244,240,0.90)',
           backdropFilter:'blur(20px)', WebkitBackdropFilter:'blur(20px)',
           borderBottom:'1px solid rgba(17,17,16,0.08)',
@@ -495,7 +503,7 @@ export default function RefereesPage() {
             )
           ) : (
             <div style={{ textAlign:'center', padding:'60px 0', color:TEXT_M, fontSize:14 }}>
-              هیچ داوری با این فیلتر پیدا نشد
+              {loadFailed ? 'فهرست بارگذاری نشد — اتصالِ اینترنت را بررسی کنید و صفحه را دوباره باز کنید' : 'هیچ داوری با این فیلتر پیدا نشد'}
             </div>
           )}
         </div>

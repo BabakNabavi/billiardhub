@@ -78,8 +78,8 @@ export default function ExploreStrip() {
 
       <div style={{ maxWidth: 1340, margin: '0 auto', position: 'relative', zIndex: 1 }}>
         <div style={{ textAlign: 'center', marginBottom: 'clamp(20px,2.4vw,32px)' }}>
-          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 7, fontSize: 9.5, fontWeight: 800, letterSpacing: '0.28em', color: GOLD_D, border: '1px solid rgba(199,166,106,0.4)', borderRadius: 999, padding: '5px 13px', marginBottom: 10 }}>
-            DISCOVER MORE
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 7, fontSize: 11, fontWeight: 800, color: GOLD_D, border: '1px solid rgba(199,166,106,0.4)', borderRadius: 999, padding: '5px 13px', marginBottom: 10 }}>
+            بیشتر ببینید
           </span>
           <h3 style={{ fontSize: 'clamp(17px,1.9vw,24px)', fontWeight: 800, color: TEXT, letterSpacing: '-0.03em', margin: 0 }}>
             بیشتر در بیلیارد هاب کاوش کن

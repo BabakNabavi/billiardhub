@@ -20,6 +20,7 @@
    ───────────────────────────────────────────────────────────── */
 
 import { useEffect, useMemo, useState } from 'react'
+import { faNum } from '@/lib/jalali'
 import { Loader2, Upload, Check, ShoppingCart, AlertCircle, Film, Image as ImageIcon } from 'lucide-react'
 import Select from '../ui/Select'
 import { apiFetch } from '../../lib/http'
@@ -38,7 +39,8 @@ const LABEL: React.CSSProperties = {
 }
 
 const toFa = (v: string | number) => String(v).replace(/[0-9]/g, d => '۰۱۲۳۴۵۶۷۸۹'[+d] ?? d)
-const money = (n: number) => toFa(n.toLocaleString('en-US'))
+/* همان `faNum`ِ مشترک — ارقامِ فارسی با جداکننده‌ی «٬» */
+const money = faNum
 
 interface Plan { id: string; name: string; description: string | null; price: number; durationDays: number; badge: string | null }
 interface Option {

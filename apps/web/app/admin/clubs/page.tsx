@@ -129,7 +129,7 @@ export default function AdminClubsPage() {
   return (
     <div style={{ maxWidth: 900, margin: '0 auto', padding: '32px 16px', fontFamily: 'var(--font-base)', direction: 'rtl' }}>
       <div style={{ marginBottom: 28 }}>
-        <div style={{ fontSize: 12, color: GOLD, fontWeight: 700, letterSpacing: '0.2em', marginBottom: 6 }}>ADMIN</div>
+        <div style={{ fontSize: 12, color: GOLD, fontWeight: 700, marginBottom: 6 }}>مدیریت</div>
         <h1 style={{ fontSize: 24, fontWeight: 900, color: '#111', margin: 0 }}>تأیید باشگاه‌ها</h1>
         <p style={{ fontSize: 13, color: '#6b7280', marginTop: 4 }}>
           هر دو «تأیید» باشگاه را در سایت منتشر می‌کنند؛ تفاوتشان فقط تیک آبی است. رد یعنی برداشتن از فهرست.

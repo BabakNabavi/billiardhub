@@ -16,6 +16,7 @@
    ───────────────────────────────────────────────────────────── */
 
 import { useEffect, useRef, useState } from 'react'
+import { prefersReducedMotion } from '@/lib/ui/reduced-motion'
 import Link from 'next/link'
 import { ArrowLeft, ArrowRight } from 'lucide-react'
 
@@ -32,6 +33,7 @@ export default function BannerSlider({ slides }: { slides: readonly BannerSlide[
   const startBannerTimer = () => {
     if (bannerTimerRef.current) clearInterval(bannerTimerRef.current)
     if (document.hidden) return
+    if (prefersReducedMotion()) return
     bannerTimerRef.current = setInterval(() => setActiveBanner(p => (p + 1) % slides.length), 4500)
   }
 

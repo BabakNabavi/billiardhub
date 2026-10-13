@@ -211,8 +211,19 @@ export default function Navbar() {
       if (profileRef.current && !profileRef.current.contains(e.target as Node)) setProfileOpen(false);
       if (exploreRef.current && !exploreRef.current.contains(e.target as Node)) setExploreOpen(false);
     };
+    /* Esc هم می‌بندد — منوی «بیشتر» با کیبورد راهِ بیرون نداشت */
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape') return;
+      /* اگر فوکوس داخلِ منو بود، با بسته‌شدنش روی `<body>` می‌افتاد */
+      for (const r of [exploreRef, profileRef]) {
+        if (r.current?.contains(document.activeElement)) r.current.querySelector<HTMLElement>('button')?.focus();
+      }
+      setProfileOpen(false);
+      setExploreOpen(false);
+    };
     document.addEventListener('mousedown', fn);
-    return () => document.removeEventListener('mousedown', fn);
+    document.addEventListener('keydown', onKey);
+    return () => { document.removeEventListener('mousedown', fn); document.removeEventListener('keydown', onKey); };
   }, []);
 
   useEffect(() => {
@@ -432,7 +443,7 @@ export default function Navbar() {
             <Link prefetch={false} href="/tournaments" className={`nav-a ${pathname.startsWith('/tournaments') ? 'active' : ''}`}>مسابقات</Link>
 
             <div ref={exploreRef} style={{ position: 'relative' }}>
-              <button className="exp-btn" onClick={() => setExploreOpen(p => !p)}>
+              <button className="exp-btn" aria-expanded={exploreOpen} onClick={() => setExploreOpen(p => !p)}>
                 بیشتر
                 <ChevronDown size={12} style={{ transition: 'transform 0.3s', transform: exploreOpen ? 'rotate(180deg)' : 'rotate(0)' }} />
               </button>
@@ -612,7 +623,7 @@ export default function Navbar() {
               </Link>
             ) : (
               <div ref={profileRef} style={{ position: 'relative' }}>
-                <button className="nav-profile" onClick={() => setProfileOpen(p => !p)} style={{ display: 'flex', alignItems: 'center', gap: '8px', background: SURF, border: `1px solid ${BORDER_C}`, borderRadius: '12px', padding: '6px 12px', color: TEXT_MUT, fontSize: '16px', fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.3s', backdropFilter: 'blur(12px)', height: '44px' }}>
+                <button className="nav-profile" aria-expanded={profileOpen} onClick={() => setProfileOpen(p => !p)} style={{ display: 'flex', alignItems: 'center', gap: '8px', background: SURF, border: `1px solid ${BORDER_C}`, borderRadius: '12px', padding: '6px 12px', color: TEXT_MUT, fontSize: '16px', fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.3s', backdropFilter: 'blur(12px)', height: '44px' }}>
                   {/* عکس پروفایل، وگرنه آدمک — نه حرف اول نام */}
                   <Avatar src={user.avatar} size={30} alt=""
                     background="var(--brand)" iconColor="rgba(255,255,255,0.95)" />

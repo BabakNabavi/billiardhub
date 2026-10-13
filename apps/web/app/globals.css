@@ -596,6 +596,11 @@ body {
    بی‌صدا حاشیه‌ی هاور را از کار می‌انداخت. */
 .btn.is-open { border-color: var(--brand-line); color: var(--gold-deep); }
 
+/* کنترل‌های `pressable` با `outline: none`ِ درون‌خطی (مثلِ انتخاب‌گرهای تاریخ و
+   ساعت): حلقه‌ی فوکوسِ کیبورد. `!important` لازم است، وگرنه درون‌خطی برنده است.
+   روی ماوس دیده نمی‌شود. */
+.kbd-ring:focus-visible { outline: 2px solid var(--gold-deep) !important; outline-offset: 2px; }
+
 .btn:focus-visible {
   outline: 2px solid var(--gold-deep);
   outline-offset: 2px;

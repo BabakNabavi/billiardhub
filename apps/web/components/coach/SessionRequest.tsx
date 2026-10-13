@@ -180,7 +180,7 @@ export default function SessionRequest({ coachSlug, price, minutes }: {
 
       <p style={{ fontSize: 12, color: MUT, lineHeight: 1.9, margin: '10px 0 0' }}>
         مدت جلسه {fa(minutes)} دقیقه ، مبلغ{' '}
-        {price > 0 ? `${fa(price.toLocaleString('en-US'))} تومان` : 'توافقی'}
+        {price > 0 ? `${fa(price.toLocaleString('fa-IR'))} تومان` : 'توافقی'}
         {' '}و پرداخت حضوری است و از طریق پلتفرم انجام نمی‌شود
       </p>
 

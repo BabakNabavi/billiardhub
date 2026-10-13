@@ -14,6 +14,7 @@
    ───────────────────────────────────────────────────────────── */
 
 import { useCallback, useEffect, useState } from 'react'
+import { faDec } from '@/lib/jalali'
 import { ask } from '../../lib/ui/dialogs'
 import { Star, Loader2, Trash2, Pencil } from 'lucide-react'
 import { apiFetch } from '../../lib/http'
@@ -115,7 +116,7 @@ export default function Reviews({ endpoint, subject, cannotReviewNote }: {
         {summary.count > 0 && (
           <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 13, color: MUT }}>
             <Star size={13} style={{ color: '#F5A623', fill: '#F5A623' }} />
-            <b style={{ color: INK }}>{fa(summary.avg.toFixed(1))}</b>
+            <b style={{ color: INK }}>{faDec(summary.avg, 1)}</b>
             <span>از {fa(summary.count)} نظر</span>
           </span>
         )}

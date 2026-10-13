@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation'
 import { MANUFACTURERS, type MockManufacturer } from '../../lib/manufacturers-data'
 import { listApprovedManufacturers, profileToManufacturer } from '../../lib/manufacturer-store'
 import type { ManufacturerProfile } from '../../lib/manufacturer-store'
-import { fetchProfiles } from '../../lib/profiles/client'
+import { fetchProfilesResult } from '../../lib/profiles/client'
 import VerifiedBadge from '../../components/VerifiedBadge'
 import { iranTel } from '../../lib/iran-geo'
 import { toFaDigits } from '../../lib/jalali'
@@ -219,8 +219,8 @@ function MfrHeroSlider() {
                 می‌کند. با `left` روی نیمه‌ی روشنِ عکس می‌افتاد و
                 طلاییِ ۸٫۹ پیکسلی آن‌جا خوانده نمی‌شد. */}
             <div style={{ marginBottom: 11 }}>
-              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, background: 'rgba(199,166,106,0.14)', border: '1px solid rgba(199,166,106,0.34)', color: '#D4A843', fontSize: 8.9, fontWeight: 800, borderRadius: 24, padding: '4px 11px', letterSpacing: '0.12em', transform: 'translateY(-13px)', animation: 'softBlink 2.6s .7s ease-in-out infinite' }}>
-                MANUFACTURERS . BILLIARD HUB
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, background: 'rgba(199,166,106,0.14)', border: '1px solid rgba(199,166,106,0.34)', color: '#D4A843', fontSize: 11, fontWeight: 800, borderRadius: 24, padding: '4px 11px', transform: 'translateY(-13px)', animation: 'softBlink 2.6s .7s ease-in-out infinite' }}>
+                سازندگانِ تجهیزات · بیلیارد هاب
               </div>
             </div>
             <h1 style={{ fontSize: 'clamp(25px,4vw,50px)', fontWeight: 900, color: '#fff', margin: '0 0 12px', letterSpacing: '-0.03em', lineHeight: 1.08, transform: 'translateY(-6px)' }}>
@@ -542,13 +542,18 @@ export default function ManufacturersPage() {
 
   /* null یعنی هنوز از سرور نیامده — تا آن‌موقع نسخه‌ی مرورگر نمایش داده می‌شود */
   const [remoteMfrs, setRemoteMfrs] = useState<ManufacturerProfile[] | null>(null)
+  const [loadFailed, setLoadFailed] = useState(false)
   useEffect(() => {
-    void fetchProfiles<ManufacturerProfile>('manufacturer').then(rows => {
-      setRemoteMfrs(rows.filter(r => r.status === 'approved')
+    /* ⚠️ `fetchProfilesResult` نه `fetchProfiles`: دومی خطا را می‌بلعید و []
+     می‌داد، پس قطعیِ شبکه روی صفحه «پیدا نشد» می‌گفت. */
+    void (async () => {
+      const res = await fetchProfilesResult<ManufacturerProfile>('manufacturer')
+      if (res.state === 'error') { setLoadFailed(true); return }
+      setRemoteMfrs(res.profiles.filter(r => r.status === 'approved')
         /* `verified` ستون جدول `profiles` است، نه داخل jsonb —
            بدون این، تیک ادمین به کارت نمی‌رسید. */
         .map(r => ({ ...r.data, slug: r.slug, verified: r.verified } as ManufacturerProfile)))
-    })
+    })().catch(err => { console.error('[profiles] list load failed', err); setLoadFailed(true) })
   }, [])
 
   const matchCat = (m: MockManufacturer, term: string) =>
@@ -617,7 +622,7 @@ export default function ManufacturersPage() {
 
         /* ══ نوار ابزار — هم‌شکلِ نوارِ صفحه‌ی باشگاه‌ها ══ */
         .mfr-tb {
-          position: sticky; top: 62px; z-index: 90;
+          position: sticky; top: var(--nav-offset); z-index: 90;
           padding: 10px clamp(16px,4vw,40px);
           background: rgba(250,249,246,0.62);
           border-block-end: 1px solid rgba(28,28,26,0.07);
@@ -765,8 +770,8 @@ export default function ManufacturersPage() {
           {filtered.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '64px 0', color: TEXT_MUT }}>
               <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" style={{ margin: '0 auto 16px', display: 'block', opacity: 0.4 }}><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-              <p style={{ fontSize: 17, fontWeight: 700, color: TEXT_SEC }}>تولیدکننده‌ای یافت نشد</p>
-              <p style={{ fontSize: 14 }}>فیلترها را تغییر دهید یا جستجو را پاک کنید</p>
+              <p style={{ fontSize: 17, fontWeight: 700, color: TEXT_SEC }}>{loadFailed ? 'فهرست بارگذاری نشد' : 'تولیدکننده‌ای یافت نشد'}</p>
+              <p style={{ fontSize: 14 }}>{loadFailed ? 'اتصالِ اینترنت را بررسی کنید و صفحه را دوباره باز کنید' : 'فیلترها را تغییر دهید یا جستجو را پاک کنید'}</p>
             </div>
           ) : view === 'grid' ? (
             <div className="sel-grid" style={{ marginBottom: 56 }}>

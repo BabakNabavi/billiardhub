@@ -1,6 +1,9 @@
 'use client';
 
 import { useEffect, useState , useRef } from 'react';
+import { pressable } from '@/lib/ui/pressable';
+import { prefersReducedMotion } from '@/lib/ui/reduced-motion';
+import { faDec } from '@/lib/jalali';
 import { distanceKm, faDistance, hasCoords } from '@/lib/clubs/distance';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
@@ -418,6 +421,7 @@ export default function ClubProfilePage() {
 
   useEffect(() => {
     if (images.length <= 1) return;
+    if (prefersReducedMotion()) return;
     const t = setInterval(() => setSlide(s => (s + 1) % images.length), 4500);
     return () => clearInterval(t);
   }, [images.length]);
@@ -439,7 +443,7 @@ export default function ClubProfilePage() {
   /* امتیاز فقط وقتی نظری ثبت شده باشد */
   const coachRating = (c: CoachEntry): string => {
     const i = coachOf(c);
-    return i && i.ratingCount > 0 ? toFa(i.ratingAvg.toFixed(1)) : '';
+    return i && i.ratingCount > 0 ? faDec(i.ratingAvg, 1) : '';
   };
   /* سابقه از سال اولین مدرک؛ نبودش یعنی همان متن دستی باشگاه */
   const coachExp = (c: CoachEntry): string => {
@@ -813,7 +817,9 @@ export default function ClubProfilePage() {
 
         .book-fixed {
           position:fixed;bottom:0;left:0;right:0;
-          padding:12px 16px 16px;
+          /* ⚠️ ناحیه‌ی امنِ پایینِ آیفون در حالتِ نصب‌شده: بدونِ آن، دکمه‌ی
+             رزرو زیرِ نوارِ خانه می‌رفت. روی مرورگرِ عادی صفر است. */
+          padding:12px 16px calc(16px + env(safe-area-inset-bottom));
           z-index:200;
           background:#ffffff;
           box-shadow:0 -1px 0 rgba(0,0,0,0.07);
@@ -839,7 +845,7 @@ export default function ClubProfilePage() {
 
       {/* همان لایه‌ی لیکویید صفحه‌ی مربی. رنگ پایه داخل `.lq-stage` است؛
           پس‌زمینه‌ی مات خود عنصر لکه‌ها را می‌پوشاند. */}
-      <div className="lq-stage" style={{ minHeight: '100vh', direction: 'rtl', fontFamily: 'Vazirmatn, sans-serif', paddingBottom: 90 }}>
+      <div className="lq-stage" style={{ minHeight: '100vh', direction: 'rtl', fontFamily: 'Vazirmatn, sans-serif', paddingBottom: 'calc(90px + env(safe-area-inset-bottom))' }}>
 
         {/* ══ HERO ══ */}
         <div className="lq-enter-sheen" style={{ position: 'relative', height: 'min(clamp(320px,44vw,510px),65vh)', overflow: 'hidden', background: '#0A0806' }}>
@@ -1360,7 +1366,7 @@ export default function ClubProfilePage() {
                   const statusColor = STATUS_COLORS[t.status];
                   const statusLabel = STATUS_LABELS[t.status];
                   return (
-                  <div key={t.id} className="tourn-card" onClick={() => router.push(`/tournaments/${t.id}`)}
+                  <div key={t.id} className="tourn-card" {...pressable(() => router.push(`/tournaments/${t.id}`), 'link')}
                     style={{ cursor: 'pointer' }}>
                     <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16, flexWrap: 'wrap' }}>
                       <div style={{ width: 48, height: 48, borderRadius: 14, background: `${statusColor}12`, border: `1px solid ${statusColor}25`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
@@ -1433,7 +1439,7 @@ export default function ClubProfilePage() {
                       return (
                         <div key={album.tournamentId} className="lqg" style={{ overflow: 'hidden' }}>
                           {/* Album header */}
-                          <div onClick={() => setOpenAlbumId(isOpen ? null : album.tournamentId)}
+                          <div {...pressable(() => setOpenAlbumId(isOpen ? null : album.tournamentId))} aria-expanded={isOpen}
                             style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '14px 18px', cursor: 'pointer' }}>
                             <div style={{ width: 56, height: 56, borderRadius: 12, overflow: 'hidden', flexShrink: 0, background: 'rgba(199,166,106,0.08)', border: '1px solid rgba(199,166,106,0.20)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24 }}>
                               {album.items.find(i => i.type === 'image')

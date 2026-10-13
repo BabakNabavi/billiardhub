@@ -58,7 +58,7 @@ export default function LivePage() {
           <div style={{ position: 'relative' }}>
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '6px 16px', borderRadius: 999, marginBottom: 16, background: 'rgba(239,68,68,0.10)', border: '1px solid rgba(239,68,68,0.25)' }}>
               <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#ef4444', display: 'inline-block', animation: 'pulse 1.5s infinite' }} />
-              <span style={{ fontSize: 13, fontWeight: 700, letterSpacing: '0.15em', color: '#ef4444' }}>LIVE NOW</span>
+              <span style={{ fontSize: 13, fontWeight: 700, color: '#ef4444' }}>پخشِ زنده</span>
             </div>
             <h1 style={{ fontSize: 'clamp(31px, 5.5vw, 46px)', fontWeight: 900, margin: '0 0 10px', backgroundImage: 'linear-gradient(135deg,#FFFFFF 40%,#ef4444)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', letterSpacing: '-0.03em' }}>
               پخش زنده
@@ -102,7 +102,7 @@ export default function LivePage() {
                   <div style={{ padding: 18 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12, flexWrap: 'wrap' }}>
                       <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#ef4444', display: 'inline-block', animation: 'pulse 1.5s infinite' }} />
-                      <span style={{ fontSize: 13, fontWeight: 700, color: '#ef4444' }}>LIVE</span>
+                      <span style={{ fontSize: 13, fontWeight: 700, color: '#ef4444' }}>زنده</span>
                       <span style={{ marginRight: 'auto', display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 13, color: 'rgba(0,0,0,0.40)' }}>
                         <Users size={13} /> {fa(s.viewers)}
                       </span>

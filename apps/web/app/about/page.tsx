@@ -240,7 +240,7 @@ export default function AboutPage() {
       <section style={{ position: 'relative', padding: 'clamp(80px,12vw,150px) clamp(20px,4vw,32px)', overflow: 'hidden' }}>
         <div aria-hidden style={{ position: 'absolute', top: '-30%', bottom: '-30%', left: '18%', width: 1, background: 'linear-gradient(180deg,transparent,rgba(199,166,106,0.3),transparent)', transform: 'rotate(14deg)' }} />
         <div style={{ maxWidth: 900, margin: '0 auto', textAlign: 'center' }}>
-          <span className="ab-rev" style={{ display: 'inline-block', fontSize: 9.5, fontWeight: 800, letterSpacing: '0.3em', color: MUT, marginBottom: 26 }}>THE IDEA</span>
+          <span className="ab-rev" style={{ display: 'inline-block', fontSize: 11, fontWeight: 800, color: MUT, marginBottom: 26 }}>ایده</span>
           <h2 style={{ fontSize: 'clamp(24px,4.6vw,52px)', fontWeight: 900, lineHeight: 1.75, letterSpacing: '-0.015em', margin: 0 }}>
             <span className="ab-rev" style={{ display: 'block' }}>بیلیارد هاب فقط یک پلتفرم نیست؛</span>
             <span className="ab-rev d2" style={{ display: 'block', color: GOLD_D }}>
@@ -259,7 +259,7 @@ export default function AboutPage() {
       <section style={{ background: '#fff', borderTop: `1px solid ${LINE}`, borderBottom: `1px solid ${LINE}`, padding: 'clamp(64px,9vw,120px) clamp(20px,4vw,32px)' }}>
         <div className="ab-plat-grid" style={{ maxWidth: 1080, margin: '0 auto', display: 'grid', gridTemplateColumns: 'minmax(0,5fr) minmax(0,7fr)', gap: 'clamp(28px,6vw,90px)', alignItems: 'start' }}>
           <div className="ab-rev">
-            <span style={{ fontSize: 9.5, fontWeight: 800, letterSpacing: '0.3em', color: MUT }}>THE PLATFORM</span>
+            <span style={{ fontSize: 11, fontWeight: 800, color: MUT }}>زیرساخت</span>
             <h2 style={{ fontSize: 'clamp(22px,3vw,34px)', fontWeight: 900, lineHeight: 1.5, margin: '14px 0 0' }}>
               پلتفرم تخصصی<br />جامعه‌ی بیلیارد
             </h2>
@@ -339,7 +339,7 @@ export default function AboutPage() {
         <div aria-hidden style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(rgba(28,27,23,0.03) 1px, transparent 1px)', backgroundSize: '22px 22px', pointerEvents: 'none' }} />
         <div style={{ maxWidth: 1080, margin: '0 auto', position: 'relative' }}>
           <div className="ab-rev" style={{ textAlign: 'center', marginBottom: 'clamp(36px,6vw,64px)' }}>
-            <span style={{ fontSize: 9.5, fontWeight: 800, letterSpacing: '0.3em', color: MUT }}>ONE ECOSYSTEM</span>
+            <span style={{ fontSize: 11, fontWeight: 800, color: MUT }}>یک اکوسیستم</span>
             <h2 style={{ fontSize: 'clamp(22px,3.4vw,38px)', fontWeight: 900, margin: '12px 0 0' }}>
               همه‌ی دنیای بیلیارد، <span style={{ color: GOLD_D }}>گرد یک هاب</span>
             </h2>

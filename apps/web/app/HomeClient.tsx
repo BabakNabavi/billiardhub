@@ -1,6 +1,7 @@
 ﻿'use client';
 
 import { useEffect, useLayoutEffect, useRef, useState, useCallback, useMemo } from 'react';
+import { prefersReducedMotion } from '@/lib/ui/reduced-motion';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 
@@ -707,6 +708,7 @@ function MktBanner({ slides, label, body, cta, accent, href, initialIdx = 0, lqC
   const ready = useDeferredStart();
   useEffect(() => {
     if (!ready) return;
+    if (prefersReducedMotion()) return;
     const t = setInterval(() => setIdx(p => (p + 1) % slides.length), 3200);
     return () => clearInterval(t);
   }, [ready, slides.length]);
@@ -1323,6 +1325,7 @@ export default function HomeClient({ initialPlacements, initialFeatured, service
 useEffect(() => {
     if (!spin) return;
     if (!playing) { if (timerRef.current) clearInterval(timerRef.current); return; }
+    if (prefersReducedMotion()) return;
     timerRef.current = setInterval(next, 7000);
     return () => { if (timerRef.current) clearInterval(timerRef.current); };
   }, [spin, playing, next]);

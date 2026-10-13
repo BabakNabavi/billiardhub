@@ -234,7 +234,7 @@ export default function TechnicalServicesPage() {
               • دکمه هم‌ردیفِ عنوان، نه زیرِ بلوک: روی موبایل هم
                 روبه‌روی «خدمات فنی» می‌ماند */}
           <div className="tm-sec-head tm-sec-head--lead">
-            <span className="tm-eyebrow">BILLIARD EXPERT SERVICES</span>
+            <span className="tm-eyebrow">خدماتِ تخصصیِ بیلیارد</span>
             <div className="tm-sec-row">
               <h2 className="tm-h2 tm-h2--xl" id="tm-cats-h">خدمات فنی</h2>
               <Link className="tm-pill" href="#tm-people">

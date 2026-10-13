@@ -13,6 +13,7 @@
        رزرو روی خود رزرو ثبت می‌شود. */
 
 import { useCallback, useEffect, useState } from 'react'
+import { faNum } from '@/lib/jalali'
 import { Percent, Loader2, AlertCircle, Save, History, Info } from 'lucide-react'
 import { apiFetch } from '../../../lib/http'
 import { toFaDigits, faDate } from '../../../lib/jalali'
@@ -31,7 +32,8 @@ const CONTEXT_FA: Record<string, string> = {
   RESERVATION: 'رزرو باشگاه',
   TOURNAMENT: 'ثبت‌نام مسابقه',
 }
-const fa = (n: unknown) => toFaDigits(Math.round(Number(n) || 0).toLocaleString('en-US'))
+/* همان `faNum`ِ مشترک — ارقامِ فارسی با جداکننده‌ی «٬» */
+const fa = faNum
 
 export default function AdminCommission() {
   const [rules, setRules] = useState<Rule[]>([])

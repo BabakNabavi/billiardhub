@@ -1269,13 +1269,14 @@
 /* ── سرِ بخشِ «خدمات فنی» ──
    راست‌چین به خواستِ مالک: عنوان سمتِ راست، دکمه سمتِ چپ. */
 .tm .tm-sec-head--lead { display: block; text-align: start; }
-/* نشانِ لاتین کاملا بالا-چپ — بلوکِ لاتین است پس جهتِ خودش را می‌گیرد */
+/* نشان کاملا بالا-چپ (`end` در RTL). تا مهرِ ۱۴۰۵ لاتین بود و `direction: ltr`
+   داشت؛ حالا فارسی است، پس فاصله‌ی حروف هم رفت — اتصال را می‌شکست. */
 .tm .tm-eyebrow {
   display: block;
-  font-size: 11px; font-weight: 700; letter-spacing: .22em;
+  font-size: 11px; font-weight: 700;
   color: var(--ios-label-2);
   margin-block-end: 8px;
-  direction: ltr; text-align: left;
+  text-align: end;
 }
 /* عنوان و دکمه هم‌ردیف — روی موبایل هم کنار هم می‌مانند */
 .tm .tm-sec-row {

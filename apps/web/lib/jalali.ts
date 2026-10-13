@@ -14,6 +14,11 @@ export const toFaDigits = (v: string | number): string =>
 /** عدد با جداکننده‌ی هزارگان و ارقام فارسی */
 export const faNum = (n: unknown): string => Math.round(Number(n) || 0).toLocaleString('fa-IR')
 
+/** اعشار با ممیزِ فارسی («۴٫۵»). جای `toFaDigits(x.toFixed(n))` که ارقام را
+ *  فارسی ولی ممیز را نقطه‌ی لاتین می‌گذاشت. */
+export const faDec = (n: unknown, digits = 1): string =>
+  (Number(n) || 0).toLocaleString('fa-IR', { minimumFractionDigits: digits, maximumFractionDigits: digits })
+
 /** میلادی → شمسی */
 export function toJalali(gy: number, gm: number, gd: number): [number, number, number] {
   const g_d_m = [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334]

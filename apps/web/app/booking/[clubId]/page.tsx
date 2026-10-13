@@ -1,6 +1,8 @@
 'use client';
 
 import { useEffect, useState, useCallback, useRef } from 'react';
+import { pressable } from '@/lib/ui/pressable';
+import { faNum } from '@/lib/jalali';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import api from '../../../lib/api';
@@ -544,13 +546,13 @@ function BookingContent() {
       <div className="lq-stage" style={{minHeight:'100vh',paddingBottom:'80px'}}>
 
         {/* #18: Sticky header — back button with LQ style */}
-        <div style={{background:'rgba(250,249,246,0.70)',borderBottom:'1px solid rgba(0,0,0,0.06)',padding:'0 clamp(16px,4vw,40px)',position:'sticky',top:'62px',zIndex:90,backdropFilter:'blur(24px)'}}>
+        <div style={{background:'rgba(250,249,246,0.70)',borderBottom:'1px solid rgba(0,0,0,0.06)',padding:'0 clamp(16px,4vw,40px)',position:'sticky',top:'var(--nav-offset)',zIndex:90,backdropFilter:'blur(24px)'}}>
           <div style={{maxWidth:'720px',margin:'0 auto',height:'54px',display:'flex',alignItems:'center',gap:'14px'}}>
             <Link href={`/clubs/${clubId}`} style={{display:'flex',alignItems:'center',gap:'6px',color:'#C7A66A',fontSize: '14px',textDecoration:'none',background:'rgba(199,166,106,0.10)',border:'1px solid rgba(199,166,106,0.28)',borderRadius:'20px',padding:'7px 16px',flexShrink:0,fontWeight:800}}>
               <ChevronRight size={13}/> برگشت به باشگاه
             </Link>
             <div style={{flex:1,minWidth:0}}>
-              <div style={{fontSize: '10px',color:'rgba(199,166,106,0.55)',letterSpacing:'0.2em',fontWeight:700}}>ONLINE BOOKING</div>
+              <div style={{fontSize: '11px',color:'rgba(199,166,106,0.55)',fontWeight:700}}>رزروِ آنلاین</div>
               <div style={{fontSize: '16px',fontWeight:800,color:'#111111',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{club?.name??'رزرو میز'}</div>
             </div>
           </div>
@@ -621,7 +623,7 @@ function BookingContent() {
                 const isSel = selectedTable?.id===table.id;
                 const disc  = table.morningDiscount??0;
                 return (
-                  <div key={table.id} className="tbl-card" onClick={()=>handleTableSelect(table)}
+                  <div key={table.id} className="tbl-card" {...pressable(()=>handleTableSelect(table))} aria-current={isSel || undefined}
                     style={{borderColor:isSel?`${color}45`:'rgba(0,0,0,0.06)',background:isSel?`${color}0d`:'rgba(0,0,0,0.03)',boxShadow:isSel?`0 0 0 1px ${color}20,0 8px 24px rgba(0,0,0,0.06)`:'none',transform:isSel?'translateY(-1px)':'none'}}>
                     {table.photoDataUrl
                       ? <img loading="lazy" decoding="async" src={table.photoDataUrl} alt="" style={{width:52,height:42,objectFit:'cover',borderRadius:10,flexShrink:0,border:`1.5px solid ${color}33`}}/>
@@ -643,7 +645,7 @@ function BookingContent() {
                       {(table.brand||table.model)&&<div style={{fontSize: '13px',color:'rgba(0,0,0,0.35)',fontFamily:'monospace'}}>{table.brand} {table.model}</div>}
                     </div>
                     <div style={{textAlign:'left',flexShrink:0}}>
-                      <div style={{fontSize: '17px',fontWeight:900,color}}>{toFa(table.pricePerHour.toLocaleString())}</div>
+                      <div style={{fontSize: '17px',fontWeight:900,color}}>{faNum(table.pricePerHour)}</div>
                       <div style={{fontSize: '12px',color:'rgba(0,0,0,0.35)'}}>تومان / ساعت</div>
                     </div>
                     {isSel&&<div style={{width:'26px',height:'26px',borderRadius:'50%',background:color,display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}><Check size={13} style={{color:'#fff'}}/></div>}
@@ -798,7 +800,7 @@ function BookingContent() {
                             می‌کرد، برچسبی نمی‌دید ولی مبلغ بالا می‌رفت. */}
                         {extraPlayerN>0&&<span style={{fontSize: '14px',color:'#f59e0b',background:'rgba(245,158,11,0.08)',padding:'4px 12px',borderRadius:'20px',fontWeight:700}}>{toFa(playerCount)} نفر +{toFa(extraPlayerN*surcharge.percent)}٪</span>}
                         {hasAnyDisc&&<span style={{fontSize: '14px',color:SEL_COLOR,background:`rgba(${SEL_RGB},0.08)`,border:`1px solid rgba(${SEL_RGB},0.25)`,padding:'4px 12px',borderRadius:'20px',fontWeight:700}}>تخفیف اعمال شد ✓</span>}
-                        <span style={{fontSize: '14px',color:SEL_COLOR,fontWeight:800,background:`rgba(${SEL_RGB},0.10)`,padding:'4px 12px',borderRadius:'20px'}}>{toFa(totalPrice.toLocaleString())} تومان</span>
+                        <span style={{fontSize: '14px',color:SEL_COLOR,fontWeight:800,background:`rgba(${SEL_RGB},0.10)`,padding:'4px 12px',borderRadius:'20px'}}>{faNum(totalPrice)} تومان</span>
                       </div>
                     );
                   })()}
@@ -824,7 +826,7 @@ function BookingContent() {
                   {l:'پایان',          v:endHour!==undefined?`${toFa(endHour)}:۰۰`:''},
                   {l:'مدت',            v:`${toFa(totalHours)} ساعت`},
                   {l:'تعداد بازیکنان', v:`${toFa(playerCount)} نفر${extraPlayerN>0?' (+'+toFa(extraPlayerN*surcharge.percent)+'٪)':''}`},
-                  {l:'نرخ ساعتی',      v:`${toFa((selectedTable?.pricePerHour??0).toLocaleString())} تومان`},
+                  {l:'نرخ ساعتی',      v:`${faNum(selectedTable?.pricePerHour ?? 0)} تومان`},
                 ].map((r,i)=>(
                   <div key={i} style={{display:'flex',justifyContent:'space-between',padding:'10px 0',borderBottom:'1px solid rgba(0,0,0,0.04)'}}>
                     <span style={{fontSize: '15px',color:'rgba(0,0,0,0.42)'}}>{r.l}</span>
@@ -834,7 +836,7 @@ function BookingContent() {
                 <div style={{display:'flex',justifyContent:'space-between',padding:'14px 0 0'}}>
                   <span style={{fontSize: '17px',fontWeight:800,color:'#111111'}}>مبلغ کل</span>
                   <span style={{fontSize: '22px',fontWeight:900,color:accentColor,letterSpacing:'-0.025em'}}>
-                    {toFa(totalPrice.toLocaleString())} <span style={{fontSize: '14px',opacity:0.7}}>تومان</span>
+                    {faNum(totalPrice)} <span style={{fontSize: '14px',opacity:0.7}}>تومان</span>
                   </span>
                 </div>
               </div>

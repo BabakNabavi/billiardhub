@@ -189,7 +189,7 @@ export default function TournamentPublicPage() {
                   marginBottom: 8 }}>
                   <span style={{ color: '#777' }}>تعداد ثبت‌نام‌شده</span>
                   <span style={{ fontWeight: 800, color: full ? '#ef4444' : '#111' }}>
-                    {toFa(t.registeredCount)} / {toFa(t.maxPlayers)} نفر
+                    {toFa(t.registeredCount)} از {toFa(t.maxPlayers)} نفر
                   </span>
                 </div>
                 <div style={{ height: 8, background: 'rgba(0,0,0,0.06)', borderRadius: 99, overflow: 'hidden' }}>

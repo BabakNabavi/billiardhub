@@ -22,7 +22,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Package, Check, Loader2, Sparkles, ArrowLeft } from 'lucide-react'
 import { apiFetch } from '../../lib/http'
-import { toFaDigits, faDate } from '../../lib/jalali'
+import { faDate, faNum } from '../../lib/jalali'
 import { useAuthStore } from '../../store/auth.store'
 
 const INK = '#1C1B17', SEC = '#5B564B', MUT = '#6F6A5C', LINE = '#E7E2D6'
@@ -41,7 +41,8 @@ interface Quota {
   period: Period; planName: string | null; planExpiresAt: string | null
 }
 
-const fa = (n: number) => toFaDigits(n.toLocaleString('en-US'))
+/* همان `faNum`ِ مشترک — ارقامِ فارسی با جداکننده‌ی «٬» */
+const fa = faNum
 
 export default function AdPackages({ backTo = '/plans' }: { backTo?: string }) {
   const router = useRouter()

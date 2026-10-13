@@ -1,8 +1,9 @@
 'use client'
 import { useState, useEffect, useRef } from 'react'
+import { prefersReducedMotion } from '@/lib/ui/reduced-motion'
 import Link from 'next/link'
 import { listCoachProfiles, type CoachProfile } from '@/lib/coach-store'
-import { fetchProfiles } from '@/lib/profiles/client'
+import { fetchProfilesResult } from '@/lib/profiles/client'
 import VerifiedBadge from '@/components/VerifiedBadge'
 import RoleAvatar from '@/components/profile/RoleAvatar'
 
@@ -142,6 +143,7 @@ function CoachHeroSlider() {
   }
 
   useEffect(() => {
+    if (prefersReducedMotion()) return
     const interval = setInterval(() => {
       const next = (activeRef.current + 1) % COACH_SLIDES.length
       setPrevIdx(activeRef.current)
@@ -167,9 +169,10 @@ function CoachHeroSlider() {
 
         <div style={{ position:'absolute', inset:0, zIndex:4, display:'flex', flexDirection:'column', justifyContent:'center', padding:'clamp(12px,2.4vw,32px) clamp(24px,6vw,80px)' }}>
           <div style={{ maxWidth:1280, width:'100%', margin:'0 auto' }}>
-            <div style={{ textAlign:'left', marginBottom:11 }}>
-              <div style={{ display:'inline-flex', alignItems:'center', gap:7, background:'rgba(199,166,106,0.14)', border:'1px solid rgba(199,166,106,0.34)', color:'#D4A843', fontSize:8.9, fontWeight:800, borderRadius:24, padding:'4px 11px', letterSpacing:'0.12em', transform:'translateY(-13px)', animation:'softBlink 2.6s .7s ease-in-out infinite' }}>
-                FIND YOUR COACH . BILLIARD HUB
+            {/* `end` در RTL همان چپِ پیشین است */}
+            <div style={{ textAlign:'end', marginBottom:11 }}>
+              <div style={{ display:'inline-flex', alignItems:'center', gap:7, background:'rgba(199,166,106,0.14)', border:'1px solid rgba(199,166,106,0.34)', color:'#D4A843', fontSize:11, fontWeight:800, borderRadius:24, padding:'4px 11px', transform:'translateY(-13px)', animation:'softBlink 2.6s .7s ease-in-out infinite' }}>
+                مربیِ خودت را پیدا کن · بیلیارد هاب
               </div>
             </div>
             <h1 style={{ fontSize:'clamp(25px,4vw,50px)', fontWeight:900, color:'#fff', margin:'0 0 12px', letterSpacing:'-0.03em', lineHeight:1.08, transform:'translateY(-6px)' }}>
@@ -302,6 +305,7 @@ export default function CoachesPage() {
   const [search,    setSearch]    = useState('')
   const [view,      setView]      = useState<'grid' | 'list'>('grid')
   const [localCoaches, setLocalCoaches] = useState<Coach[]>([])
+  const [loadFailed, setLoadFailed] = useState(false)
 
   /* ── چرا این‌جا هم از سرور خوانده می‌شود ──
 
@@ -317,12 +321,17 @@ export default function CoachesPage() {
      و بعد فهرست سرور که جای آن را می‌گیرد. */
   useEffect(() => {
     setLocalCoaches(listCoachProfiles().filter(p => p.status === 'approved').map(mapProfileToListCoach))
-    void fetchProfiles<CoachProfile>('coach').then(rows => {
-      const remote = rows
+    /* ⚠️ `fetchProfilesResult` نه `fetchProfiles`: دومی خطا را می‌بلعید و []
+     می‌داد، پس قطعیِ شبکه روی صفحه «پیدا نشد» می‌گفت. */
+    void (async () => {
+      const res = await fetchProfilesResult<CoachProfile>('coach')
+      /* شبکه قطع بود ⇒ همان فهرست محلی می‌ماند، ولی صفحه می‌داند چرا */
+      if (res.state === 'error') { setLoadFailed(true); return }
+      const remote = res.profiles
         .filter(r => r.status === 'approved')
         .map(r => mapProfileToListCoach({ ...r.data, slug: r.slug, verified: r.verified } as CoachProfile))
       if (remote.length) setLocalCoaches(remote)
-    }).catch(() => { /* شبکه قطع بود ⇒ همان فهرست محلی می‌ماند */ })
+    })().catch(err => { console.error('[profiles] list load failed', err); setLoadFailed(true) })
   }, [])
   const q = search.trim()
   const coaches = [...localCoaches, ...COACHES].filter(c =>
@@ -451,7 +460,7 @@ export default function CoachesPage() {
 
         {/* ══════════════ FILTER ══════════════ */}
         <div id="coaches" style={{
-          position:'sticky', top:72, zIndex:50,
+          position:'sticky', top:'var(--nav-offset)', zIndex:50,
           background:'rgba(246,244,240,0.90)',
           backdropFilter:'blur(20px)', WebkitBackdropFilter:'blur(20px)',
           borderBottom:'1px solid rgba(17,17,16,0.08)',
@@ -546,7 +555,7 @@ export default function CoachesPage() {
             )
           ) : (
             <div style={{ textAlign:'center', padding:'60px 0', color:TEXT_M, fontSize:14 }}>
-              هیچ مربی با این فیلتر پیدا نشد
+              {loadFailed ? 'فهرست بارگذاری نشد — اتصالِ اینترنت را بررسی کنید و صفحه را دوباره باز کنید' : 'هیچ مربی با این فیلتر پیدا نشد'}
             </div>
           )}
         </div>
@@ -571,8 +580,8 @@ export default function CoachesPage() {
             padding:'48px clamp(24px,6vw,80px)',
             display:'flex', alignItems:'center', justifyContent:'space-between', gap:24 }}>
             <div>
-              <p style={{ fontSize:10.5, fontWeight:700, color:GOLD, letterSpacing:'0.25em', marginBottom:10, textTransform:'uppercase' }}>
-                Free Consultation
+              <p style={{ fontSize:11, fontWeight:700, color:GOLD, marginBottom:10 }}>
+                مشاوره‌ی رایگان
               </p>
               <h3 style={{ fontSize:'clamp(18px,2.8vw,28px)', fontWeight:800, color:'#F2EDE4',
                 letterSpacing:'-0.03em', lineHeight:1.2 }}>

@@ -11,6 +11,7 @@
    ───────────────────────────────────────────────────────────── */
 
 import { useEffect, useRef, useState } from 'react'
+import { prefersReducedMotion } from '@/lib/ui/reduced-motion'
 
 /* تایپ‌ها و `toPlacementState` به `lib/ads/placement-state` منتقل شدند.
 
@@ -130,6 +131,11 @@ export default function AdSlot({ slot, className, style, intervalMs = 5000 }: {
          می‌چرخد. (تکرار وزنی قبلی حذف شد: هم کار سرور را دوباره
          می‌کرد، هم اسلایدهای تکراری پشت‌هم می‌ساخت.) */
       setBanners(list)
+      /* ⚠️ زیرِ «کاهشِ حرکت» چرخش خاموش است؛ اگر همیشه از صفر شروع کند،
+         این گروه فقط تبلیغِ اول را می‌بیند و کمپین‌های بعدی از آن‌ها هیچ
+         نمایشی نمی‌گیرند (نقطه‌ها هم کلیک‌پذیر نیستند). پس یک شروعِ تصادفی
+         در هر بار سوارشدن — بی‌حرکت، ولی منصفانه. */
+      if (prefersReducedMotion() && list.length > 1) setActive(Math.floor(Math.random() * list.length))
     })
     return () => { alive = false }
   }, [slot])
@@ -137,6 +143,7 @@ export default function AdSlot({ slot, className, style, intervalMs = 5000 }: {
   /* چرخش خودکار */
   useEffect(() => {
     if (!banners || banners.length <= 1) return
+    if (prefersReducedMotion()) return
     const t = setInterval(() => setActive(a => (a + 1) % banners.length), intervalMs)
     return () => clearInterval(t)
   }, [banners, intervalMs])

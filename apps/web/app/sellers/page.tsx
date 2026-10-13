@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { toFaDigits } from '../../lib/jalali'
 
 import { listApprovedSellers, type SellerProfile } from '../../lib/seller-store'
-import { fetchProfiles } from '../../lib/profiles/client'
+import { fetchProfilesResult } from '../../lib/profiles/client'
 import VerifiedBadge from '../../components/VerifiedBadge'
 import type { MockSeller } from '../../lib/sellers-data'
 
@@ -160,8 +160,8 @@ function SellerHeroSlider() {
                 که پرده تیره‌اش می‌کند. با `left` روی نیمه‌ی روشن
                 می‌افتاد و طلاییِ ۸٫۹ پیکسلی آن‌جا خوانده نمی‌شد. */}
             <div style={{ marginBottom: 11 }}>
-              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, background: 'rgba(199,166,106,0.14)', border: '1px solid rgba(199,166,106,0.34)', color: '#D4A843', fontSize: 8.9, fontWeight: 800, borderRadius: 24, padding: '4px 11px', letterSpacing: '0.12em', transform: 'translateY(-13px)', animation: 'softBlink 2.6s .7s ease-in-out infinite' }}>
-                MARKET PLACE . BILLIARD HUB
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, background: 'rgba(199,166,106,0.14)', border: '1px solid rgba(199,166,106,0.34)', color: '#D4A843', fontSize: 11, fontWeight: 800, borderRadius: 24, padding: '4px 11px', transform: 'translateY(-13px)', animation: 'softBlink 2.6s .7s ease-in-out infinite' }}>
+                بازارِ تجهیزات · بیلیارد هاب
               </div>
             </div>
             <h1 style={{ fontSize: 'clamp(25px,4vw,50px)', fontWeight: 900, color: '#fff', margin: '0 0 12px', letterSpacing: '-0.03em', lineHeight: 1.08, transform: 'translateY(-6px)' }}>
@@ -540,15 +540,20 @@ export default function SellersPage() {
   /* فروشگاه‌های تاییدشده‌ی ذخیره‌شده. مقدار اولیه = SELLERS تا SSR و اولین رندر کلاینت یکی باشند؛
      بعد از mount، فروشگاه‌های approved از localStorage خوانده و اضافه می‌شوند. */
   const [stores, setStores] = useState<typeof SELLERS>(SELLERS)
+  const [loadFailed, setLoadFailed] = useState(false)
   useEffect(() => {
     /* فورا هرچه در همین مرورگر هست، بعد فهرست سرور که همه‌ی
        فروشگاه‌ها را دارد نه فقط فروشگاه خود بیننده. */
     setStores(mergeStores(SELLERS, listApprovedSellers()))
-    void fetchProfiles<SellerProfile>('seller').then(rows => {
-      const remote = rows.filter(r => r.status === 'approved')
+    /* ⚠️ `fetchProfilesResult` نه `fetchProfiles`: دومی خطا را می‌بلعید و []
+     می‌داد، پس قطعیِ شبکه روی صفحه «پیدا نشد» می‌گفت. */
+    void (async () => {
+      const res = await fetchProfilesResult<SellerProfile>('seller')
+      if (res.state === 'error') { setLoadFailed(true); return }
+      const remote = res.profiles.filter(r => r.status === 'approved')
         .map(r => ({ ...r.data, slug: r.slug, verified: r.verified } as SellerProfile))
       if (remote.length) setStores(mergeStores(SELLERS, remote))
-    })
+    })().catch(err => { console.error('[profiles] list load failed', err); setLoadFailed(true) })
   }, [])
 
   const getLocation = () => {
@@ -670,7 +675,7 @@ export default function SellersPage() {
         <div style={{ maxWidth: 1160, margin: '0 auto', padding: '0 clamp(16px,3vw,32px) 64px' }}>
 
           {/* ─── STICKY: search + filter, stacked under the navbar ─── */}
-          <div style={{ position: 'sticky', top: 72, zIndex: 50, background: 'rgba(250,249,246,0.72)', backdropFilter: 'blur(24px) saturate(1.6)', WebkitBackdropFilter: 'blur(24px) saturate(1.6)', paddingTop: 14, paddingBottom: 12, marginBottom: 12, display: 'flex', flexDirection: 'column', gap: 10 }}>
+          <div style={{ position: 'sticky', top: 'var(--nav-offset)', zIndex: 50, background: 'rgba(250,249,246,0.72)', backdropFilter: 'blur(24px) saturate(1.6)', WebkitBackdropFilter: 'blur(24px) saturate(1.6)', paddingTop: 14, paddingBottom: 12, marginBottom: 12, display: 'flex', flexDirection: 'column', gap: 10 }}>
 
             {/* search box */}
             <div style={{ position: 'relative' }}>
@@ -727,8 +732,8 @@ export default function SellersPage() {
           {filtered.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '64px 0', color: TEXT_MUT }}>
               <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" style={{ margin: '0 auto 16px', display: 'block', opacity: 0.4 }}><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-              <p style={{ fontSize: 17, fontWeight: 700, color: TEXT_SEC }}>فروشگاهی یافت نشد</p>
-              <p style={{ fontSize: 14 }}>فیلترها را تغییر دهید یا جستجو را پاک کنید</p>
+              <p style={{ fontSize: 17, fontWeight: 700, color: TEXT_SEC }}>{loadFailed ? 'فهرست بارگذاری نشد' : 'فروشگاهی یافت نشد'}</p>
+              <p style={{ fontSize: 14 }}>{loadFailed ? 'اتصالِ اینترنت را بررسی کنید و صفحه را دوباره باز کنید' : 'فیلترها را تغییر دهید یا جستجو را پاک کنید'}</p>
             </div>
           ) : view === 'grid' ? (
             <div className="sel-grid" style={{ marginBottom: 56 }}>

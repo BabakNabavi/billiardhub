@@ -266,7 +266,7 @@ function DirectInner() {
             <ArrowRight size={17} />
           </button>
           <div style={{ minWidth: 0 }}>
-            <span style={{ fontSize: 9.5, fontWeight: 800, letterSpacing: '0.24em', color: MUT }}>STORY DIRECT</span>
+            <span style={{ fontSize: 11, fontWeight: 800, color: MUT }}>پیام‌های استوری</span>
             <h1 style={{ fontSize: 17.5, fontWeight: 900, margin: '2px 0 0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {active ? active.otherName : 'دایرکت'}
             </h1>

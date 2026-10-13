@@ -98,7 +98,7 @@ export default function AdminCoachesPage() {
       <div style={{ maxWidth: 940, margin: '0 auto', padding: '28px clamp(16px,4vw,32px) 80px' }}>
 
         <div style={{ marginBottom: 22 }}>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.30)', color: GOLD_D, fontSize: 11, fontWeight: 800, borderRadius: 20, padding: '4px 12px', letterSpacing: '0.08em', marginBottom: 10 }}>ADMIN · COACHES</div>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.30)', color: GOLD_D, fontSize: 11, fontWeight: 800, borderRadius: 20, padding: '4px 12px', marginBottom: 10 }}>مدیریت · مربیان</div>
           <h1 style={{ fontSize: 'clamp(21px,3vw,27px)', fontWeight: 900, letterSpacing: '-0.02em' }}>تایید مربیان</h1>
           <p style={{ fontSize: 13.5, color: TEXT_S, marginTop: 6 }}>
             درخواست‌های ثبت‌شده‌ی مربیان را بررسی کنید. تایید به معنی اجازه‌ی داشتن پروفایل در سایت است؛ در صورت آپلود مدرک می‌توانید تیک آبی بدهید، در غیر این صورت مربی «آزاد» معرفی می‌شود.

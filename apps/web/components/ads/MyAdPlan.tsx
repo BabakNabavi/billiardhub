@@ -10,7 +10,7 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { Package, Loader2, ArrowLeft, Check } from 'lucide-react'
 import { apiFetch } from '../../lib/http'
-import { toFaDigits, faDate } from '../../lib/jalali'
+import { faDate, faNum } from '../../lib/jalali'
 
 const INK = '#1C1B17', SEC = '#5B564B', MUT = '#6F6A5C', LINE = '#E7E2D6'
 const GOLD = '#C7A66A', GOLD_D = '#8F6531', FELT = '#0E7A38'
@@ -31,7 +31,8 @@ interface Order {
   snapshot: { name?: string } | null
 }
 
-const fa = (n: number) => toFaDigits(n.toLocaleString('en-US'))
+/* همان `faNum`ِ مشترک — ارقامِ فارسی با جداکننده‌ی «٬» */
+const fa = faNum
 
 export default function MyAdPlan({ compact = false }: { compact?: boolean }) {
   const [quota, setQuota] = useState<Quota | null>(null)

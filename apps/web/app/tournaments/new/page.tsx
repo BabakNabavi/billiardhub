@@ -1,6 +1,7 @@
 ﻿'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import { pressable } from '@/lib/ui/pressable';
 import { useRouter } from 'next/navigation';
 import {
   Trophy, ChevronRight, ChevronLeft, Check,
@@ -237,7 +238,9 @@ function DatePicker({ value, onChange, label, required }: {
 
       <div ref={ref} style={{ position: 'relative' }}>
         {/* Trigger */}
-        <div onClick={() => setOpen(v => !v)} style={{
+        {/* پنجره‌ی ماه شبکه‌ای از دکمه است، نه فهرست ⟵ `dialog`.
+            `kbd-ring`: حلقه‌ی فوکوسِ کیبورد — `inputStyle` خودش `outline: none` دارد. */}
+        <div className="kbd-ring" {...pressable(() => setOpen(v => !v))} aria-expanded={open} aria-haspopup="dialog" style={{
           ...inputStyle, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10,
           borderColor: open ? 'rgba(199,166,106,0.55)' : 'rgba(0,0,0,0.10)',
           userSelect: 'none',
@@ -331,6 +334,9 @@ function TimePicker({ value, onChange, label, required }: {
 }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+  /* بعد از انتخاب، فهرست بسته می‌شود؛ بدونِ برگرداندنِ فوکوس، کاربرِ کیبورد
+     به ابتدای صفحه پرت می‌شد. */
+  const triggerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -348,7 +354,7 @@ function TimePicker({ value, onChange, label, required }: {
         </label>
       )}
       <div ref={ref} style={{ position: 'relative' }}>
-        <div onClick={() => setOpen(v => !v)} style={{
+        <div ref={triggerRef} className="kbd-ring" {...pressable(() => setOpen(v => !v))} aria-expanded={open} aria-haspopup="listbox" style={{
           ...inputStyle, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10,
           borderColor: open ? 'rgba(199,166,106,0.55)' : 'rgba(0,0,0,0.10)',
           userSelect: 'none',
@@ -361,7 +367,7 @@ function TimePicker({ value, onChange, label, required }: {
           <span style={{ fontSize: 10, color: '#ccc' }}>{open ? '▲' : '▼'}</span>
         </div>
         {open && (
-          <div style={{
+          <div role="listbox" aria-label={label || 'ساعت'} style={{
             position: 'absolute', top: 'calc(100% + 6px)', right: 0, zIndex: 300,
             background: '#fff', borderRadius: 16, overflow: 'hidden',
             border: '1px solid rgba(0,0,0,0.10)',
@@ -369,7 +375,7 @@ function TimePicker({ value, onChange, label, required }: {
             maxHeight: 280, overflowY: 'auto',
           }}>
             {TIME_OPTIONS.map(t => (
-              <div key={t} onClick={() => { onChange(t); setOpen(false); }} style={{
+              <div key={t} {...pressable(() => { onChange(t); setOpen(false); triggerRef.current?.focus(); })} role="option" aria-selected={value === t} style={{
                 padding: '10px 16px', cursor: 'pointer', fontSize: 15,
                 fontWeight: value === t ? 800 : 500,
                 color: value === t ? '#C7A66A' : '#333',

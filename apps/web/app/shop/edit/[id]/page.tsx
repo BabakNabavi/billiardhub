@@ -26,6 +26,7 @@
    ═══════════════════════════════════════════════════════════════ */
 
 import { useMemo, useState, useEffect, useRef, useCallback } from 'react'
+import { pressable } from '@/lib/ui/pressable'
 import { useRouter, useParams } from 'next/navigation'
 import Link from 'next/link'
 import { ChevronRight } from 'lucide-react'
@@ -1007,7 +1008,7 @@ export default function EditProductPage() {
                 )}
 
                 {totalImages < 5 && (
-                  <div className="drop-area" onClick={() => fileRef.current?.click()}
+                  <div className="drop-area" {...pressable(() => fileRef.current?.click())}
                     onDragOver={e => { e.preventDefault(); setDragging(true) }}
                     onDragLeave={() => setDragging(false)}
                     onDrop={e => { e.preventDefault(); setDragging(false); handleFiles(e.dataTransfer.files) }}
