@@ -87,9 +87,6 @@ const config: Config = {
            و برنده می‌شد — یعنی سایه‌ی دکمه طلایی تمام‌شفافیت می‌شد،
            نه سایه‌ی ملایم تیره. */
         cta: '0 10px 24px -8px rgb(var(--c-gold-deep) / .45)',
-        /* کارتِ محتوا: سطحِ سفیدِ بی‌حاشیه، جدایی فقط با سایه‌ی نرم */
-        tile: '0 2px 4px rgb(0 0 0 / .04), 0 8px 24px rgb(0 0 0 / .06)',
-        'tile-hover': '0 4px 8px rgb(0 0 0 / .05), 0 16px 40px rgb(0 0 0 / .10)',
       },
 
       /* عدد این‌جا هم تکرار نمی‌شود */
@@ -112,14 +109,6 @@ const config: Config = {
          Tailwind فشرده می‌شود. */
       fontSize: {
         'display': ['clamp(1.75rem, 1.2rem + 2.4vw, 2.75rem)', { lineHeight: '1.35', letterSpacing: '-0.01em', fontWeight: '800' }],
-        /* تیترِ دورنگِ صفحه‌های داخلی، به روشِ اپل («Store. The best way…»):
-           کلمه‌ی اول سیاه، باقیِ جمله خاکستری، هم‌اندازه. ۲۸ تا ۴۸ پیکسل —
-           زیرِ سقفِ ۵۶ که مالک گذاشته. ⚠️ tracking منفی ندارد: روی فارسی
-           اتصالِ حروف را می‌شکند. */
-        /* ارتفاعِ خط ۱٫۳ نه ۱٫۲۵: کسره‌ی «میزِ» روی تیترِ دوخطی نباید به خطِ بعد برسد */
-        'page': ['clamp(1.75rem, 1.1rem + 2.6vw, 3rem)', { lineHeight: '1.3', fontWeight: '800' }],
-        /* نامِ روی کارت — ۲۰ پیکسل */
-        'tile': ['1.25rem', { lineHeight: '1.45', fontWeight: '800' }],
         'title': ['clamp(1.25rem, 1.05rem + 0.9vw, 1.6rem)', { lineHeight: '1.5', letterSpacing: '-0.005em', fontWeight: '800' }],
         'section': ['1.0625rem', { lineHeight: '1.6', fontWeight: '800' }],
         'body': ['0.9375rem', { lineHeight: '1.9' }],

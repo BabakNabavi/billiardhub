@@ -30,9 +30,7 @@ const VARIANT: Record<ButtonVariant, string> = {
 }
 
 const BASE = [
-  /* قرص، نه گوشه‌ی ۱۰ پیکسلی — دکمه‌ی اپل همیشه تمام‌گرد است و کارت‌های
-     گوشه‌گرد را از دکمه جدا می‌کند. (طرحِ LQ پیشین شعاعِ ۱۰ داشت.) */
-  'inline-flex items-center justify-center gap-2 rounded-full',
+  'inline-flex items-center justify-center gap-2 rounded-field',
   'font-bold leading-none whitespace-nowrap no-underline select-none',
   'transition-[background-color,border-color,color,transform] duration-base ease-smooth',
   /* بازخورد روی فشردن، نه روی رهاکردن — فشردگیِ کوچک، بدونِ پرش */

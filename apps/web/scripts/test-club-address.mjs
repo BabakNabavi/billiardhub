@@ -88,13 +88,9 @@ head('۴) موقعیت مکانی — از داشبورد')
   t('لینکِ دیدن روی نقشه', /maps\.google\.com/.test(dash))
 
   /* قابلیتِ «نزدیک‌ترین» که این مختصات به آن خوراک می‌دهد */
-  /* مهرِ ۱۴۰۵: منطقِ مرتب‌سازی به lib/clubs/filters و فرمولِ فاصله به
-     lib/clubs/distance رفت؛ صفحه فقط آن‌ها را صدا می‌زند. */
   const clubs = read('app/clubs/page.tsx')
-  const clubFilters = read('lib/clubs/filters.ts')
-  t('فهرست باشگاه‌ها مرتب‌سازی بر اساس فاصله دارد',
-    /distance: 'نزدیک‌ترین'/.test(clubFilters) && /keys\.unshift\('distance'\)/.test(clubFilters))
-  t('فاصله محاسبه می‌شود', /distanceKm\(userLoc\.lat, userLoc\.lon/.test(clubs))
+  t('فهرست باشگاه‌ها مرتب‌سازی بر اساس فاصله دارد', /value:'distance'/.test(clubs))
+  t('فاصله محاسبه می‌شود', /calcDistance\(userLoc\.lat, userLoc\.lon/.test(clubs))
   t('موقعیتِ کاربر گرفته می‌شود', /navigator\.geolocation\.getCurrentPosition/.test(clubs))
 }
 

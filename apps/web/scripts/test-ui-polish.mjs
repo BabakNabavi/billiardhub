@@ -290,9 +290,7 @@ head('۱۰) پنل باشگاه — دسترسی سریع، دیالوگ، و ب
   head('نشانِ باشگاه')
   const logo = read('components/club/ClubLogo.tsx')
   const club = read('app/clubs/[id]/page.tsx')
-  /* کارتِ فهرست از مهرِ ۱۴۰۵ در components/clubs است: یک‌بار جای عکسِ
-     نداشته، یک‌بار در حلقه‌ی استوری — همان دو جای پیشین. */
-  const list = read('components/clubs/ClubCardParts.tsx')
+  const list = read('app/clubs/page.tsx')
   const dash = read('app/dashboard/club/page.tsx')
 
   t('کامپوننتِ مشترک ساخته شد', /export default function ClubLogo/.test(logo))

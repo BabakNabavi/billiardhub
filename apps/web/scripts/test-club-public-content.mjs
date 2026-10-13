@@ -33,8 +33,7 @@ const clubsApi     = read('app/api/clubs/route.ts');
 const clubApi      = read('app/api/clubs/[id]/route.ts');
 const storiesApi   = read('app/api/clubs/[id]/stories/route.ts');
 const publicPage   = read('app/clubs/[id]/page.tsx');
-/* کارتِ فهرست از مهرِ ۱۴۰۵ در components/clubs است، نه داخلِ صفحه */
-const listPage     = read('app/clubs/page.tsx') + read('components/clubs/ClubCard.tsx') + read('components/clubs/ClubCardParts.tsx');
+const listPage     = read('app/clubs/page.tsx');
 const storiesBar   = read('components/Stories.tsx');
 const gallery      = read('components/dashboard/club/GalleryTab.tsx');
 const panel        = read('app/dashboard/club/page.tsx');
