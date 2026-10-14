@@ -58,7 +58,7 @@ const LIVE_SOCIALS = SOCIALS.filter(s => s.href)
 
 /* اینستاگرامِ سازنده، کنارِ اعتبارِ «Designed & Developed by» — همان قاعده:
    خالی ⟵ آیکون نمایش داده نمی‌شود. */
-const DEV_INSTAGRAM = ''
+const DEV_INSTAGRAM = 'https://www.instagram.com/babaknabavi/'
 
 /* ستون «اطلاعات و قوانین» حذف شد (هم موبایل هم دسکتاپ).
    لینک‌هایش — قوانین، حریم خصوصی، تماس، درباره ما — از نوار پایینی
@@ -141,6 +141,11 @@ export default function Footer() {
           transform: translateY(-2px);
           box-shadow: 0 4px 14px rgb(var(--c-ink) / 0.068);
         }
+        /* رنگِ آیکون اینلاین است و این‌جا عوض نمی‌شود؛ هاور با کدرشدن.
+           حلقه‌ی فوکوس داخلِ جعبه‌ی ۲۵ پیکسلی تا روی نامِ کنارش نیفتد. */
+        .ft-dev-ig { border-radius: 6px; transition: opacity .2s ease; }
+        .ft-dev-ig:hover { opacity: .7; }
+        .ft-dev-ig:focus-visible { outline: 2px solid var(--gold-deep); outline-offset: -2px; }
         .ft-dev-mob { display: none; }
         .ft-copy-short { display: none; }
         /* سه ستون PLATFORM/EXPLORE/ACCOUNT در یک سطر می‌مانند. با دو
@@ -185,11 +190,11 @@ export default function Footer() {
           .ft-dev-desk { display: none !important; }
           /* اعتبار توسعه‌دهنده و نوار حقوقی نزدیک هم بمانند */
           .ft-dev-mob { display: block !important; flex-basis: 100% !important; margin-top: 0; }
-          /* در موبایل نشان‌ها وسط می‌نشینند و کمی بالاتر. فاصله‌ی
+          /* در موبایل نشان‌ها کمی بالاتر می‌نشینند. فاصله‌ی
              پایینشان همان چیزی است که نوار حقوقی را از نشان جدا
              نگه می‌دارد — بدون آن، نوار به نشان می‌چسبد و نشان به
              خط بالای خودش. */
-          .ft-seals { justify-content: center !important; margin-top: -38px !important; padding-bottom: 14px !important; }
+          .ft-seals { margin-top: -38px !important; padding-bottom: 14px !important; }
           .ft-link { font-size: 12px !important; padding: 4px 0 !important; min-height: 24px !important; }
           .ft-link svg { display: none; }
 
@@ -286,7 +291,8 @@ export default function Footer() {
                 و روی متن حروف‌کوچک، فاصله‌ی حروف بیش از حد باز می‌افتاد */}
             <span style={{ direction: 'ltr', display: 'inline-flex', alignItems: 'center', gap: '6px', lineHeight: 1, fontSize: '10.5px', fontWeight: 600, letterSpacing: '0.04em', color: 'rgba(26,25,23,0.62)' }}>
               <a href="https://www.babaknabavi.com" target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', color: 'inherit' }}>Designed &amp; Developed by <span style={{ color: ACCENT_TXT }}>Babak Nabavi</span></a>
-              {DEV_INSTAGRAM && <a href={DEV_INSTAGRAM} target="_blank" rel="noopener noreferrer" aria-label="اینستاگرامِ سازنده" style={{ display: 'inline-flex', color: GOLD, alignSelf: 'center', transform: 'translateY(-2px)' }}>
+              {/* padding/margin برابر و مخالف: هدفِ لمسی ۲۵px، جای دیدنی همان ۱۵px */}
+              {DEV_INSTAGRAM && <a href={DEV_INSTAGRAM} target="_blank" rel="noopener noreferrer" aria-label="اینستاگرامِ سازنده" className="ft-dev-ig" title="instagram.com/babaknabavi" style={{ display: 'inline-flex', color: GOLD, alignSelf: 'center', transform: 'translateY(-2px)', padding: '5px', margin: '-5px' }}>
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                   <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
                   <circle cx="12" cy="12" r="4.5"/>
@@ -301,16 +307,20 @@ export default function Footer() {
             جای متعارفش همین‌جاست: پایین صفحه، پیش از نوار حقوقی.
             در فوتر عمومی است تا شرط اینماد — دیده‌شدن بدون ورود به
             حساب — برقرار بماند. */}
-        {/* `flex-end` در چیدمان راست‌به‌چپ یعنی سمت چپ — همان‌جایی که
-            نشان‌های اعتماد در سایت‌های فارسی می‌نشینند.
+        {/* وسطِ فوتر، در دسکتاپ هم مثلِ موبایل (خواستِ مالک، مهرِ ۱۴۰۵) —
+            پیش‌تر `flex-end` بود، یعنی سمتِ چپ.
+
+            وسط‌بودن با مقیاسِ زیر دقیق می‌ماند: مبدأِ مقیاسِ پی‌پینگ پایین‌راست
+            و اینماد پایین‌چپ است، پس فضای خالیِ هر دو *بینِ* آن‌دو جمع می‌شود
+            و لبه‌های بیرونیِ دیدنی همان لبه‌های جعبه‌اند.
 
             دو نشان از پایین هم‌تراز می‌شوند نه از وسط: قدشان یکی نیست
             (پی‌پینگ ۱۷۳ و اینماد کوتاه‌تر) و هم‌ترازی وسط باعث می‌شد
             کوتاه‌تری معلق به نظر برسد. `align-items: flex-end` هر دو
             را روی یک خط کف می‌نشاند.
 
-            `gap: 20px` — کمتر از آن دو نشان به هم می‌چسبند و مثل یک
-            تصویر دیده می‌شوند؛ بیشتر از آن ربطشان به هم گم می‌شود. */}
+            `gap: 8px` کم به نظر می‌رسد ولی فاصله‌ی دیدنی حدودِ ۵۷px است:
+            فضای خالیِ مقیاسِ هر دو نشان هم میانِ آن‌ها می‌افتد. */}
         {/* ── جبران فضای خالی scale ──
             `scale(0.8)` جعبه‌ی عنصر را کوچک نمی‌کند، پس ۲۰٪ فضای
             خالی می‌ماند. `transform-origin` روی *پایین* است، یعنی
@@ -319,7 +329,7 @@ export default function Footer() {
             پس جبران باید بالا باشد نه پایین. حاشیه‌ی منفی پایین
             (تلاش قبلی) نشان‌ها را روی نوار زیرشان می‌نشاند. */}
         <div className="ft-seals" style={{
-          display: 'flex', justifyContent: 'flex-end', alignItems: 'flex-end',
+          display: 'flex', justifyContent: 'center', alignItems: 'flex-end',
           gap: '8px', flexWrap: 'wrap',
           marginTop: '-30px', paddingBottom: '4px',
         }}>
@@ -352,7 +362,8 @@ export default function Footer() {
                 و روی متن حروف‌کوچک، فاصله‌ی حروف بیش از حد باز می‌افتاد */}
             <span style={{ direction: 'ltr', display: 'inline-flex', alignItems: 'center', gap: '6px', lineHeight: 1, fontSize: '10.5px', fontWeight: 600, letterSpacing: '0.04em', color: 'rgba(26,25,23,0.62)' }}>
               <a href="https://www.babaknabavi.com" target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', color: 'inherit' }}>Designed &amp; Developed by <span style={{ color: ACCENT_TXT }}>Babak Nabavi</span></a>
-              {DEV_INSTAGRAM && <a href={DEV_INSTAGRAM} target="_blank" rel="noopener noreferrer" aria-label="اینستاگرامِ سازنده" style={{ display: 'inline-flex', color: GOLD, alignSelf: 'center', transform: 'translateY(-2px)' }}>
+              {/* padding/margin برابر و مخالف: هدفِ لمسی ۲۵px، جای دیدنی همان ۱۵px */}
+              {DEV_INSTAGRAM && <a href={DEV_INSTAGRAM} target="_blank" rel="noopener noreferrer" aria-label="اینستاگرامِ سازنده" className="ft-dev-ig" title="instagram.com/babaknabavi" style={{ display: 'inline-flex', color: GOLD, alignSelf: 'center', transform: 'translateY(-2px)', padding: '5px', margin: '-5px' }}>
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                   <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
                   <circle cx="12" cy="12" r="4.5"/>
