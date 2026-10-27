@@ -96,16 +96,16 @@ const nav = [
   },
 ];
 
-/* اعتبارِ سازنده — در سه جا (نوارِ تماسِ تبلت، ردیفِ پایینِ موبایل، ردیفِ
-   پایینِ دسکتاپ). یک تعریف، تا هر سه یکی بمانند.
+/* اعتبارِ سازنده — در سه جا (نوارِ تماسِ تبلت، ردیفِ پایینِ موبایل، نوارِ
+   کپی‌رایتِ دسکتاپ). یک تعریف، تا هر سه یکی بمانند.
    letterSpacing ۰٫۰۴ نه ۰٫۱۴: آن مقدار برای متنِ تمام‌بزرگ بود. */
-function DevCredit({ large = false }: { large?: boolean }) {
-  const icon = large ? 18 : 15
+function DevCredit() {
+  const icon = 15
   return (
-    <span style={{ direction: 'ltr', display: 'inline-flex', alignItems: 'center', gap: large ? '10px' : '6px', lineHeight: 1, fontSize: large ? '13.5px' : '10.5px', fontWeight: 600, letterSpacing: '0.04em', color: 'rgba(26,25,23,0.62)' }}>
+    <span style={{ direction: 'ltr', display: 'inline-flex', alignItems: 'center', gap: '6px', lineHeight: 1, fontSize: '10.5px', fontWeight: 600, letterSpacing: '0.04em', color: 'rgba(26,25,23,0.62)' }}>
       <a href="https://www.babaknabavi.com" target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', color: 'inherit' }}>Designed &amp; Developed by <span style={{ color: ACCENT_TXT }}>Babak Nabavi</span></a>
       {/* padding/margin برابر و مخالف: هدفِ لمسیِ بزرگ‌تر، جای دیدنی همان آیکون */}
-      {DEV_INSTAGRAM && <a href={DEV_INSTAGRAM} target="_blank" rel="noopener noreferrer" aria-label="اینستاگرامِ سازنده" className="ft-dev-ig" title="instagram.com/babaknabavi" style={{ display: 'inline-flex', color: GOLD, alignSelf: 'center', transform: large ? undefined : 'translateY(-2px)', padding: '5px', margin: '-5px' }}>
+      {DEV_INSTAGRAM && <a href={DEV_INSTAGRAM} target="_blank" rel="noopener noreferrer" aria-label="اینستاگرامِ سازنده" className="ft-dev-ig" title="instagram.com/babaknabavi" style={{ display: 'inline-flex', color: GOLD, alignSelf: 'center', transform: 'translateY(-2px)', padding: '5px', margin: '-5px' }}>
         <svg width={icon} height={icon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
           <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
           <circle cx="12" cy="12" r="4.5"/>
@@ -183,13 +183,13 @@ export default function Footer() {
            پایین نبود): این عناصر پنهان‌اند و ft-lower
            بی‌اثر (contents)، پس موبایل و تبلت همان قبلی‌اند. نُه لینکِ
            ستون‌ها هم عمداً همان‌اند. */
-        .ft-contact-desk, .ft-legal-desk, .ft-dev-lower, .ft-band { display: none; }
+        .ft-contact-desk, .ft-legal-desk, .ft-band { display: none; }
         .ft-lower { display: contents; }
         @media (min-width: 1024px) {
           .ft-logo { width: 56px !important; height: 56px !important; border-radius: 12px !important; }
           .ft-word { font-size: 28px !important; }
           .ft-word-en { font-size: 12px !important; margin-top: 4px !important; }
-          .ft-tagline { font-size: 15px !important; max-width: none !important; margin-top: 0 !important; margin-bottom: 10px !important; }
+          .ft-tagline { font-size: 15px !important; max-width: none !important; margin-top: -6px !important; margin-bottom: 10px !important; }
           /* ستونِ برند به اندازه‌ی ردیفِ تماس (یک‌خطی)، سه ستونِ لینک بقیه را تقسیم می‌کنند */
           .ft-grid { align-items: start; margin-bottom: 0 !important; grid-template-columns: minmax(max-content, 1.5fr) repeat(3, minmax(0, 1fr)) !important; }
           .ft-brand { border-inline-end: 1px solid ${BORDER}; padding-inline-end: 40px; margin-inline-end: 20px; padding-block: 0; }
@@ -197,7 +197,8 @@ export default function Footer() {
           .ft-contact-item { display: inline-flex; align-items: center; gap: 8px; color: ${DIM}; font-size: 14px; white-space: nowrap; }
           .ft-contact-item + .ft-contact-item { border-inline-start: 1px solid ${BORDER}; margin-inline-start: 16px; padding-inline-start: 16px; }
           .ft-contact { display: none !important; }
-          /* ستون‌های کناری دست‌کم به اندازه‌ی محتوایشان — در ۱۰۲۴ نامِ سازنده دوخطی می‌شد */
+          /* ستون‌های کناری دست‌کم به اندازه‌ی محتوایشان؛ ستونِ سوم خالی می‌ماند تا نشان‌ها وسط بمانند
+             (سازنده آبانِ ۱۴۰۵ به نوارِ کپی‌رایت رفت) */
           .ft-lower { display: grid; grid-template-columns: minmax(max-content, 1fr) auto minmax(max-content, 1fr); align-items: center;
             border-top: 1px solid ${BORDER}; margin-top: 18px; padding-top: 4px; }
           .ft-legal-desk { display: flex; align-items: center; gap: 18px; justify-self: start;
@@ -205,8 +206,6 @@ export default function Footer() {
           .ft-legal-desk .ft-legal { font-size: 14.5px; color: ${DIM}; }
           .ft-sep { width: 1px; height: 18px; background: ${BORDER}; }
           .ft-seals { margin-top: -18px !important; padding-bottom: 0 !important; padding-inline: clamp(24px, 3vw, 48px); gap: clamp(24px, 2.6vw, 40px) !important; flex-wrap: nowrap !important; }
-          .ft-dev-lower { display: flex; align-items: center; justify-self: end;
-            min-height: 56px; padding-inline-start: clamp(24px, 3vw, 48px); border-inline-start: 1px solid ${BORDER}; white-space: nowrap; }
           .ft-bottom { display: none !important; }
           .ft-band { display: block; background: rgba(26,25,23,0.045); border-top: 1px solid ${BORDER};
             font-size: 13px; color: ${DIM2}; }
@@ -238,7 +237,8 @@ export default function Footer() {
           .ft-inner { padding: 26px 18px 12px !important; }
           /* نوار آدرس/تلفن: gap ۲۴ برای چیدمان یک‌سطری دسکتاپ بود. در موبایل آیتم‌ها می‌شکنند و
              همان عدد به فاصله‌ی عمودی بین سطرها تبدیل می‌شد — سطری ۲۴px. حالا عمودی ۴، افقی ۱۶. */
-          .ft-contact { gap: 4px 16px !important; padding: 9px 0 !important; margin-bottom: 8px !important; }
+          /* وسط‌چین (خواستِ مالک) */
+          .ft-contact { gap: 4px 16px !important; padding: 9px 0 !important; margin-bottom: 8px !important; justify-content: center !important; }
           /* ── نوار آخر در موبایل: یک خط، نه سه ──
              پیش‌تر ستونی بود و کپی‌رایت، «قوانین» و «حریم خصوصی» هر
              کدام یک سطر می‌گرفتند — سه سطر برای سه عبارت کوتاه، که
@@ -283,7 +283,7 @@ export default function Footer() {
             {/* Logo + wordmark */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '14px' }}>
               <img
-                src="/images/Logo/bh-mark-256-v8.webp"
+                src="/images/Logo/bh-mark-256-v9.webp"
                 loading="lazy" decoding="async"
                 alt="بیلیارد هاب" className="ft-logo"
                 style={{ width: '40px', height: '40px', objectFit: 'contain', flexShrink: 0, borderRadius: '10px' }}
@@ -304,7 +304,7 @@ export default function Footer() {
             {/* `marginTop` منفی‌تر: شعار باید زیر لوگو بنشیند نه جدا از
                 آن. line-height پیش‌فرض فاصله‌ی نامرئی می‌سازد و همان
                 باعث می‌شد دو خط مرتبط، دو بلوک جدا به نظر برسند. */}
-            <p className="ft-tagline" style={{ color: DIM, fontSize: '13.5px', lineHeight: 1.65, marginBottom: '14px', maxWidth: '260px', marginTop: '-8px' }}>
+            <p className="ft-tagline" style={{ color: DIM, fontSize: '13.5px', lineHeight: 1.65, marginBottom: '14px', maxWidth: '260px', marginTop: '-12px' }}>
               اولین پلتفرم تخصصی بیلیارد ایران
             </p>
 
@@ -396,7 +396,7 @@ export default function Footer() {
 
             پس جبران باید بالا باشد نه پایین. حاشیه‌ی منفی پایین
             (تلاش قبلی) نشان‌ها را روی نوار زیرشان می‌نشاند. */}
-        {/* ردیفِ پایینِ دسکتاپ: حقوقی | نشان‌ها | سازنده. نشان‌ها یک نمونه‌اند
+        {/* ردیفِ پایینِ دسکتاپ: حقوقی | نشان‌ها (سازنده در نوارِ کپی‌رایت است). نشان‌ها یک نمونه‌اند
             (پی‌پینگ با id="PPTrust" دو نمونه برنمی‌دارد)، پس جابه‌جا نمی‌شوند و
             فقط دو همسایه‌ی دسکتاپی می‌گیرند. زیرِ ۱۰۲۴ این ظرف display: contents است. */}
         <div className="ft-lower">
@@ -416,7 +416,6 @@ export default function Footer() {
           <PayPingSeal />
           <EnamadSeal />
         </div>
-        <div className="ft-dev-lower"><DevCredit large /></div>
         </div>
 
         {/* ── Bottom bar ────────────────────────────── */}
@@ -443,7 +442,11 @@ export default function Footer() {
       </div>
 
       <div className="ft-band">
-        <div className="ft-band-in" style={{ maxWidth: '1280px', margin: '0 auto', padding: '14px 7%' }}>{COPYRIGHT}</div>
+        {/* کپی‌رایت راست، سازنده روبه‌رویش چپ (خواستِ مالک) */}
+        <div className="ft-band-in" style={{ maxWidth: '1280px', margin: '0 auto', padding: '14px 7%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '24px' }}>
+          <span>{COPYRIGHT}</span>
+          <DevCredit />
+        </div>
       </div>
     </footer>
   );
