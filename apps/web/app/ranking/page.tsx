@@ -16,6 +16,7 @@ import Link from 'next/link'
 import { Trophy, TrendingUp, TrendingDown, Minus } from 'lucide-react'
 import { fetchRankingsBoard, categoryPlayersOf, categorySize, categoryStagesOf, type RankingsStructure, type RankingStagesMap } from '../../lib/rankings-store'
 import { StageCells, StageHead } from '../../components/ranking/StageColumns'
+import { FullTableDialog } from '../../components/ranking/FullTableDialog'
 import { faDate } from '../../lib/jalali'
 
 interface RankingPlayer {
@@ -175,6 +176,20 @@ export default function RankingsPage() {
            و در ۳۶۰ تا ۳۹۰ ردیف دو سطر می‌شد. گروه‌ها خودشان جمع
            می‌شوند، پس نیازی به شکستن سطر نیست. */
         .rk-row1 { display: flex; gap: 10px; align-items: center; flex-wrap: nowrap; }
+        /* دسکتاپ: دسته‌ها در همان خطِ رشته و جنسیت — یک ردیف کمتر در نوارِ
+           چسبان (خواستِ مالک). زیرِ ۱۰۲۴ دو خط می‌ماند چون جا نیست. */
+        .rk-ctrls { display: flex; flex-direction: column; gap: 10px; }
+        @media (min-width: 1024px) {
+          .rk-ctrls { flex-direction: row; align-items: center; }
+          .rk-ctrls > .rk-cats { flex: 0 1 auto; }
+        }
+        /* موبایل: سربرگِ تیره حذف (خواستِ مالک) — تیترِ صفحه برای
+           صفحه‌خوان در h1ِ پنهانِ زیر می‌ماند */
+        .rk-h1-mob { display: none; }
+        @media (max-width: 640px) {
+          .rk-hero { display: none; }
+          .rk-h1-mob { display: block; }
+        }
         .rk-sports { flex: 0 1 auto; min-width: 0; }
         .rk-genders { flex: 0 0 auto; }
         .rk-cats { display: flex; max-width: 100%; overflow-x: auto; scrollbar-width: none; }
@@ -273,14 +288,27 @@ export default function RankingsPage() {
             font-variant-numeric: tabular-nums; }
           .rk-stg.is-zero { color: rgba(28,27,23,0.32); font-weight: 600; }
           .rk-grid.has-stages .rk-pts { min-width: 88px; text-align: center; }
-          .rk-head { display: flex; align-items: flex-end; gap: 14px; padding-block-end: 8px; padding-inline-end: 23px; }
-          .rk-head-lbl { flex: 1; padding-inline-start: 4px; font-size: 11px; font-weight: 800; color: ${MUT}; }
-          .rk-stg-h { flex-direction: column; gap: 2px; padding-bottom: 2px; border-inline-start-color: transparent;
-            text-align: center; line-height: 1.35; }
-          .rk-stg-t { font-size: 11px; font-weight: 800; color: ${SEC}; }
-          .rk-stg-c { font-size: 11px; font-weight: 700; color: ${GOLD_D}; white-space: nowrap; }
-          .rk-stg-d { font-size: 11px; font-weight: 500; color: ${MUT}; }
-          .rk-head-total { width: 88px; flex-shrink: 0; text-align: center; font-size: 11px; font-weight: 800; color: ${GOLD_D}; }
+          /* سرستون: نوارِ تیره‌ی هم‌خانواده‌ی سربرگ، نه سه خطِ متنِ رها روی زمینه
+             (خواستِ مالک). حاشیه‌ی ۱ + padding ۲۲ = همان ۱ + ۱۸ + ۴ِ ردیف. */
+          .rk-head { display: flex; align-items: stretch; gap: 14px; margin-bottom: 12px; min-height: 68px;
+            padding-inline-end: 22px; position: relative; overflow: hidden;
+            background: linear-gradient(180deg, #1C1A16, #0D0C0A); border: 1px solid #0D0C0A; border-radius: 16px;
+            box-shadow: 0 12px 26px rgba(13,12,10,0.16), inset 0 1px 0 rgba(255,255,255,0.07); }
+          .rk-head::before { content: ''; position: absolute; inset: 0; pointer-events: none;
+            background: radial-gradient(60% 140% at 88% 0%, rgba(199,166,106,0.16), transparent 60%); }
+          .rk-head > * { position: relative; }
+          .rk-head-lbl { flex: 1; display: flex; align-items: center; gap: 8px; padding-inline-start: 18px;
+            font-size: 12px; font-weight: 800; color: rgba(255,255,255,0.74); }
+          .rk-head-lbl::before { content: ''; width: 3px; height: 16px; border-radius: 2px; background: linear-gradient(180deg, ${GOLD}, #8A6020); }
+          .rk-stg-h { flex-direction: column; gap: 2px; text-align: center; line-height: 1.35;
+            border-inline-start: 1px solid rgba(255,255,255,0.09); }
+          .rk-stg-t { font-size: 12px; font-weight: 800; color: #fff; }
+          .rk-stg-c { font-size: 11px; font-weight: 700; color: ${GOLD}; white-space: nowrap; }
+          .rk-stg-d { font-size: 11px; font-weight: 500; color: rgba(255,255,255,0.52); }
+          /* هم‌شکلِ تبِ امتیازِ ردیف‌ها، روی تیره */
+          .rk-head-total { width: 88px; flex-shrink: 0; align-self: center; display: flex; align-items: center; justify-content: center;
+            min-height: 40px; border-radius: 10px; font-size: 12px; font-weight: 900; color: #E8CE96;
+            background: rgba(199,166,106,0.16); border: 1px solid rgba(199,166,106,0.42); }
         }
         /* دو بازیکن در هر سطر یعنی هر کارت نصف عرض است — بلوک نام و
            فاصله‌ی شهر باید جمع شوند وگرنه تب امتیاز از لبه بیرون می‌زند
@@ -305,6 +333,7 @@ export default function RankingsPage() {
         }
       `}</style>
 
+      <h1 className="sr-only rk-h1-mob">رنکینگ بازیکنان</h1>
       {/* ═══ هدر رسمی ═══ */}
       <header className="rk-hero">
         <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(circle at 82% 10%, rgba(199,166,106,0.16), transparent 52%)' }} />
@@ -328,7 +357,7 @@ export default function RankingsPage() {
 
       {/* ═══ کنترل‌ها (همان منطق قبلی، پوسته‌ی جدید) ═══ */}
       <div style={{ position: 'sticky', top: 'var(--nav-offset)', zIndex: 40, background: 'rgba(247,247,245,0.92)', backdropFilter: 'blur(18px) saturate(1.6)', WebkitBackdropFilter: 'blur(18px) saturate(1.6)', borderBottom: `1px solid ${LINE}` }}>
-        <div className="rk-wrap" style={{ padding: '10px clamp(16px,3vw,28px)', display: 'flex', flexDirection: 'column', gap: 10 }}>
+        <div className="rk-wrap rk-ctrls" style={{ padding: '10px clamp(16px,3vw,28px)' }}>
           {/* دو گروه جدا در یک ردیف: هرکدام قاب شیشه‌ای خودش را دارد،
               پس با اینکه کنار هم‌اند پیداست که به هم ربطی ندارند. */}
           <div className="rk-row1">
@@ -440,6 +469,14 @@ export default function RankingsPage() {
                   )
                 })}
               </section>
+
+              {/* موبایل و تبلت: جدولِ کاملِ دسکتاپ، مثلِ یک عکس */}
+              {withStages && (
+                <FullTableDialog
+                  title={`رنکینگ ${sports.find(x => x.value === sport)?.label ?? ''} ${gender} — ${category}`}
+                  stages={stages} players={players}
+                  updatedLabel={updatedAt ? `رنکینگ رسمی فدراسیون بولینگ و بیلیارد — به‌روزشده در ${faDate(updatedAt)}` : undefined} />
+              )}
 
               {/* پانوشت — همان متن قبلی */}
               <div style={{ marginTop: 22, display: 'flex', alignItems: 'center', gap: 10, background: 'rgba(255,255,255,0.78)', border: `1px solid ${LINE}`, borderRadius: 14, padding: '13px 16px' }}>
