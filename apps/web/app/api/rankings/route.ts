@@ -1,5 +1,6 @@
 export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
+import { z } from 'zod';
 import { sb } from '@/lib/finance/db';
 
 /* جدول رنکینگ برای همه — بدون ورود.
@@ -12,15 +13,26 @@ import { sb } from '@/lib/finance/db';
    نوشتن همچنان فقط از /api/admin/settings و فقط با ادمین ممکن است؛
    این مسیر صرفا خواندنی است. */
 
+/* سرستونِ مرحله‌ها (`rankings_stages`) — sport → gender → category → مرحله[].
+   شکلِ نادرست ⟵ `{}`: صفحه بی‌ستونِ مرحله نشان داده می‌شود، نه شکسته. */
+const StageZ = z.object({ title: z.string(), city: z.string(), date: z.string() });
+/* سقفِ شش: خانه‌ها عرضِ ثابت دارند و بیشتر از آن در ۱۰۲۴ نام را می‌برد */
+const StagesZ = z.record(z.string(), z.record(z.string(), z.record(z.string(), z.array(StageZ).max(6))));
+
 export async function GET() {
   const { data, error } = await sb()
-    .from('app_settings').select('value,updated_at').eq('key', 'rankings_board').maybeSingle();
+    .from('app_settings').select('key,value,updated_at').in('key', ['rankings_board', 'rankings_stages']);
 
-  if (error) return NextResponse.json({ board: null, updatedAt: null }, { status: 200 });
+  if (error) return NextResponse.json({ board: null, stages: {}, updatedAt: null }, { status: 200 });
 
-  const row = data as { value?: unknown; updated_at?: string } | null;
+  const rows = (data ?? []) as { key: string; value?: unknown; updated_at?: string }[];
+  const board = rows.find(r => r.key === 'rankings_board');
+  const st = rows.find(r => r.key === 'rankings_stages');
+  const stages = StagesZ.safeParse(st?.value ?? {});
+  /* تاریخِ پانوشت: تازه‌ترینِ دو کلید — عوض‌شدنِ فقط سرستون هم به‌روزرسانی است */
+  const updatedAt = [board?.updated_at, st?.updated_at].filter((v): v is string => !!v).sort().at(-1) ?? null;
   return NextResponse.json(
-    { board: row?.value ?? null, updatedAt: row?.updated_at ?? null },
+    { board: board?.value ?? null, stages: stages.success ? stages.data : {}, updatedAt },
     /* یک دقیقه کش، با اجازه‌ی سرو کردن نسخه‌ی کهنه هنگام بازاعتبارسنجی —
        رنکینگ روزی چند بار هم عوض نمی‌شود. */
     { headers: { 'Cache-Control': 'public, max-age=60, stale-while-revalidate=300' } },

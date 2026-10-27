@@ -14,7 +14,8 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { Trophy, TrendingUp, TrendingDown, Minus } from 'lucide-react'
-import { fetchRankingsBoard, categoryPlayersOf, categorySize, type RankingsStructure } from '../../lib/rankings-store'
+import { fetchRankingsBoard, categoryPlayersOf, categorySize, categoryStagesOf, type RankingsStructure, type RankingStagesMap } from '../../lib/rankings-store'
+import { StageCells, StageHead } from '../../components/ranking/StageColumns'
 import { faDate } from '../../lib/jalali'
 
 interface RankingPlayer {
@@ -127,6 +128,7 @@ export default function RankingsPage() {
      «داده‌ی فیک قبلی» که دوباره ظاهر می‌شد. */
   const [board, setBoard] = useState<RankingsStructure | null>(null)
   const [updatedAt, setUpdatedAt] = useState<string | null>(null)
+  const [stagesMap, setStagesMap] = useState<RankingStagesMap>({})
   const [loaded, setLoaded] = useState(false)
 
   useEffect(() => {
@@ -135,6 +137,7 @@ export default function RankingsPage() {
       const remote = await fetchRankingsBoard()
       if (!alive) return
       setBoard(remote.board)
+      setStagesMap(remote.stages)
       setUpdatedAt(remote.updatedAt)
       setLoaded(true)
     })()
@@ -146,6 +149,9 @@ export default function RankingsPage() {
     ? categoryPlayersOf(board, sport, gender, category)
     : []
   const capacity = categorySize(sport, category)
+  /* مرحله‌ها فقط برای دسته‌ای که سرستون دارد — بقیه همان چیدمانِ دوستونی */
+  const stages = sport !== 'highball' ? categoryStagesOf(stagesMap, sport, gender, category) : []
+  const withStages = stages.length > 0
 
   return (
     <div className="lq-stage" dir="rtl" style={{ minHeight: '100vh', color: TEXT, fontFamily: 'Vazirmatn,Tahoma,sans-serif' }}>
@@ -237,7 +243,8 @@ export default function RankingsPage() {
         .rk-row .rk-spacer { order: 2 }
         .rk-city { order: 3 }
         .rk-row .rk-trend { order: 4 }
-        .rk-row .rk-pts { order: 5 }
+        .rk-row .rk-stgs { order: 5 }
+        .rk-row .rk-pts { order: 6 }
         .rk-name { flex: 0 999 auto; min-width: 72px; padding: 11px 0;
           /* تشدید «لله» با ZWJ حل شد نه با font-feature-settings —
              شرحش در lib/fa-ligature. خاموش‌کردن ویژگی یا بی‌اثر بود یا
@@ -251,6 +258,30 @@ export default function RankingsPage() {
         /* دو بازیکن در هر سطر: رتبه‌ی ۱ راست، ۲ چپ، ۳ زیر ۱ … */
         .rk-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
         @media (max-width: 900px) { .rk-grid { grid-template-columns: minmax(0, 1fr); } }
+
+        /* ── ستون‌های مرحله (دسکتاپ) — به خواستِ مالک، آبانِ ۱۴۰۵ ──
+           همان جدولِ فدراسیون: پنج مرحله + جمع، پس یک بازیکن در هر سطر.
+           زیرِ ۱۰۲۴ جا نیست؛ ردیف همان ردیفِ موبایل می‌ماند (فقط جمع).
+           عرض‌ها ثابت‌اند تا سرستون و ۳۲ ردیف روی هم بیفتند. ⚠️ فاصله‌ی
+           inline-endِ سرستون (چپ) = padding-left ۱۸ + margin-left ۴ِ تبِ امتیاز + حاشیه‌ی ۱ِ کارت. */
+        .rk-stgs, .rk-head { display: none; }
+        @media (min-width: 1024px) {
+          .rk-grid.has-stages { grid-template-columns: minmax(0, 1fr); }
+          .rk-stgs { display: flex; flex-shrink: 0; align-self: stretch; }
+          .rk-stg { width: 76px; display: flex; align-items: center; justify-content: center;
+            border-inline-start: 1px solid ${LINE}; font-size: 14px; font-weight: 700; color: ${SEC};
+            font-variant-numeric: tabular-nums; }
+          .rk-stg.is-zero { color: rgba(28,27,23,0.32); font-weight: 600; }
+          .rk-grid.has-stages .rk-pts { min-width: 88px; text-align: center; }
+          .rk-head { display: flex; align-items: flex-end; gap: 14px; padding-block-end: 8px; padding-inline-end: 23px; }
+          .rk-head-lbl { flex: 1; padding-inline-start: 4px; font-size: 11px; font-weight: 800; color: ${MUT}; }
+          .rk-stg-h { flex-direction: column; gap: 2px; padding-bottom: 2px; border-inline-start-color: transparent;
+            text-align: center; line-height: 1.35; }
+          .rk-stg-t { font-size: 11px; font-weight: 800; color: ${SEC}; }
+          .rk-stg-c { font-size: 11px; font-weight: 700; color: ${GOLD_D}; white-space: nowrap; }
+          .rk-stg-d { font-size: 11px; font-weight: 500; color: ${MUT}; }
+          .rk-head-total { width: 88px; flex-shrink: 0; text-align: center; font-size: 11px; font-weight: 800; color: ${GOLD_D}; }
+        }
         /* دو بازیکن در هر سطر یعنی هر کارت نصف عرض است — بلوک نام و
            فاصله‌ی شهر باید جمع شوند وگرنه تب امتیاز از لبه بیرون می‌زند
            و کارت می‌بردش. */
@@ -372,7 +403,8 @@ export default function RankingsPage() {
               </div>
 
               {/* ═══ جدول کامل — مربع رنگی رتبه با عدد سفید ═══ */}
-              <section className="rk-grid">
+              {withStages && <StageHead stages={stages} />}
+              <section className={`rk-grid${withStages ? ' has-stages' : ''}`}>
                 {players.map((p, i) => {
                   const diff = p.previousRank ? p.previousRank - p.rank : 0
                   /* فیلدهای صریح ادمین مقدم‌اند؛ نبودشان یعنی قاعده‌ی
@@ -398,7 +430,9 @@ export default function RankingsPage() {
                         <span className="rk-city">{p.city || '—'}</span>
                         <span className="rk-spacer" style={{ flex: 1 }} aria-hidden />
                         <span className="rk-trend" style={{ display: 'inline-flex', flexShrink: 0 }}><TrendChip diff={diff} /></span>
+                        {withStages && <StageCells stages={stages} values={p.stages} />}
                         <span className="rk-pts" style={{ fontSize: 14, fontWeight: 900, color: GOLD_D, fontVariantNumeric: 'tabular-nums', background: 'rgba(199,166,106,0.09)', border: '1px solid rgba(199,166,106,0.24)', borderRadius: 10, padding: '5px 13px', whiteSpace: 'nowrap', marginLeft: 4, flexShrink: 0 }}>
+                          {withStages && <span className="sr-only">جمع امتیازات: </span>}
                           {p.points.toLocaleString('fa-IR')}
                         </span>
                       </Link>

@@ -28,9 +28,24 @@ export interface RankingPlayer {
   /* عکس بازیکن — از پنل ادمین آپلود می‌شود. نبودش یعنی آیکون
      پیش‌فرض، نه حرف اول نام. */
   avatar?: string
+  /* امتیازِ هر مرحله، هم‌ترتیب با `RankingStage[]`ِ همان دسته.
+     `points` جدا می‌ماند و همان «جمع امتیازات»ِ جدولِ فدراسیون است:
+     در جدولِ مهرِ ۱۴۰۵ برای ده بازیکن برابرِ جمعِ پنج مرحله نیست،
+     پس جمع این‌جا ساخته نمی‌شود. */
+  stages?: (number | null)[]
 }
 
 export type RankingsStructure = Record<string, Record<string, Record<string, RankingPlayer[]>>>
+
+/* سرستونِ هر مرحله — در `app_settings.rankings_stages`، جدا از جدول تا
+   ساختارِ `rankings_board` (که پنل ادمین همان‌طور برمی‌گرداند) دست نخورد. */
+export interface RankingStage {
+  title: string
+  city: string
+  /* شمسی با ارقامِ لاتین، مثلِ «1405/08/03» — فارسی‌شدن هنگامِ نمایش */
+  date: string
+}
+export type RankingStagesMap = Record<string, Record<string, Record<string, RankingStage[]>>>
 
 const KEY = 'bh_rankings'
 
@@ -139,13 +154,18 @@ export function saveRankings(data: RankingsStructure) {
    یکی نیست و صفحه باید فرقشان را بداند. */
 /* `updatedAt` هم برمی‌گردد: پانوشتِ صفحه تا مهرِ ۱۴۰۵ فقط «به‌روز شده»
    بی‌تاریخ می‌گفت — ادعایی که بیننده نمی‌توانست بسنجد. */
-export async function fetchRankingsBoard(): Promise<{ board: RankingsStructure | null; updatedAt: string | null }> {
+export async function fetchRankingsBoard(): Promise<{ board: RankingsStructure | null; stages: RankingStagesMap; updatedAt: string | null }> {
   try {
     const r = await fetch('/api/rankings', { cache: 'no-store' })
-    if (!r.ok) return { board: null, updatedAt: null }
-    const j = await r.json() as { board?: RankingsStructure | null; updatedAt?: string | null }
-    return { board: j?.board ? mergeIntoEmpty(j.board) : null, updatedAt: j?.updatedAt ?? null }
-  } catch { return { board: null, updatedAt: null } }
+    if (!r.ok) return { board: null, stages: {}, updatedAt: null }
+    /* `stages` در خودِ مسیرِ API با Zod سنجیده می‌شود — Zod به باندلِ کلاینت نمی‌آید */
+    const j = await r.json() as { board?: RankingsStructure | null; stages?: RankingStagesMap; updatedAt?: string | null }
+    return { board: j?.board ? mergeIntoEmpty(j.board) : null, stages: j?.stages ?? {}, updatedAt: j?.updatedAt ?? null }
+  } catch { return { board: null, stages: {}, updatedAt: null } }
+}
+
+export function categoryStagesOf(all: RankingStagesMap, sport: string, gender: string, category: string): RankingStage[] {
+  return all[sport]?.[gender]?.[category] ?? []
 }
 
 /* بازیکنان واقعا واردشده‌ی یک دسته (نام خالی حذف می‌شود) */
