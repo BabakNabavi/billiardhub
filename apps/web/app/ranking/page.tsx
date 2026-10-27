@@ -288,6 +288,16 @@ export default function RankingsPage() {
             font-variant-numeric: tabular-nums; }
           .rk-stg.is-zero { color: rgba(28,27,23,0.32); font-weight: 600; }
           .rk-grid.has-stages .rk-pts { min-width: 88px; text-align: center; }
+          /* نام و فامیل در یک خط، وسط‌چین، هم‌قلم (خواستِ مالک) — جا هست.
+             شهر و چیپِ صعود/نزول عرضِ ثابت دارند تا شهرها دقیقاً زیرِ هم
+             بیفتند؛ پیش‌تر جای شهر به پهنای نام و چیپ بستگی داشت. */
+          .rk-grid.has-stages .rk-name { flex: 1 1 auto; min-width: 0; display: flex; justify-content: center;
+            align-items: baseline; gap: 6px; white-space: nowrap; overflow: hidden; }
+          .rk-grid.has-stages .rk-fn { font-size: 15.5px !important; font-weight: 900 !important; color: ${TEXT} !important; }
+          .rk-grid.has-stages .rk-ln { margin-top: 0 !important; }
+          .rk-grid.has-stages .rk-spacer { display: none; }
+          .rk-grid.has-stages .rk-city { flex: 0 0 84px; width: 84px; margin-inline-end: 0; text-align: center; }
+          .rk-grid.has-stages .rk-trend { width: 56px; justify-content: center; }
           /* سرستون: نوارِ تیره‌ی هم‌خانواده‌ی سربرگ، نه سه خطِ متنِ رها روی زمینه
              (خواستِ مالک). حاشیه‌ی ۱ + padding ۲۲ = همان ۱ + ۱۸ + ۴ِ ردیف. */
           .rk-head { display: flex; align-items: stretch; gap: 14px; margin-bottom: 12px; min-height: 68px;
@@ -449,8 +459,8 @@ export default function RankingsPage() {
                         <div className="rk-name">
                           {lastName ? (
                             <>
-                              <div style={{ fontSize: 11.5, fontWeight: 700, color: GOLD_D, whiteSpace: 'nowrap' }}>{firstName}</div>
-                              <div style={{ fontSize: 15.5, fontWeight: 900, marginTop: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{lastName}</div>
+                              <div className="rk-fn" style={{ fontSize: 11.5, fontWeight: 700, color: GOLD_D, whiteSpace: 'nowrap' }}>{firstName}</div>
+                              <div className="rk-ln" style={{ fontSize: 15.5, fontWeight: 900, marginTop: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{lastName}</div>
                             </>
                           ) : (
                             <div style={{ fontSize: 15.5, fontWeight: 900, whiteSpace: 'nowrap' }}>{firstName}</div>
