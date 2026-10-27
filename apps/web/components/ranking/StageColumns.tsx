@@ -18,7 +18,7 @@ export function StageHead({ stages }: { stages: RankingStage[] }) {
       <span className="rk-head-rank">رتبه</span>
       <span className="rk-head-gap rk-head-portrait" />
       <span className="rk-head-lbl">بازیکن</span>
-      <span className="rk-head-gap rk-head-city" />
+      <span className="rk-head-city">شهر</span>
       <span className="rk-head-gap rk-head-trend" />
       <span className="rk-stgs">
         {stages.map((s, i) => (

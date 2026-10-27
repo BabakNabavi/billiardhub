@@ -307,15 +307,15 @@ export default function RankingsPage() {
           .rk-head::before { content: ''; position: absolute; inset: 0; pointer-events: none;
             background: radial-gradient(60% 140% at 88% 0%, rgba(199,166,106,0.16), transparent 60%); }
           .rk-head > * { position: relative; }
-          /* عرض‌ها = ردیف: چیپ ۴۲، عکس ۴۶، نام flex، شهر ۸۴، صعود ۵۶ — «رتبه» و
-             «بازیکن» دقیقاً بالای ستونِ خودشان (خواستِ مالک؛ خطِ طلایی حذف شد) */
-          .rk-head-rank, .rk-head-lbl { display: flex; align-items: center; justify-content: center;
+          /* عرض‌ها = ردیف: چیپ ۴۲، عکس ۴۶، نام flex، شهر ۸۴، صعود ۵۶ — «رتبه»،
+             «بازیکن» و «شهر» دقیقاً بالای ستونِ خودشان (خواستِ مالک؛ خطِ طلایی حذف شد) */
+          .rk-head-rank, .rk-head-lbl, .rk-head-city { display: flex; align-items: center; justify-content: center;
             font-size: 12px; font-weight: 800; color: rgba(255,255,255,0.74); }
           .rk-head-rank { width: 42px; flex-shrink: 0; }
           .rk-head-lbl { flex: 1 1 auto; min-width: 0; }
           .rk-head-gap { flex-shrink: 0; }
           .rk-head-portrait { width: 46px; }
-          .rk-head-city { width: 84px; }
+          .rk-head-city { width: 84px; flex-shrink: 0; }
           .rk-head-trend { width: 56px; }
           .rk-stg-h { flex-direction: column; gap: 2px; text-align: center; line-height: 1.35;
             border-inline-start: 1px solid rgba(255,255,255,0.09); }
