@@ -96,6 +96,37 @@ const nav = [
   },
 ];
 
+/* اعتبارِ سازنده — در سه جا (نوارِ تماسِ تبلت، ردیفِ پایینِ موبایل، ردیفِ
+   پایینِ دسکتاپ). یک تعریف، تا هر سه یکی بمانند.
+   letterSpacing ۰٫۰۴ نه ۰٫۱۴: آن مقدار برای متنِ تمام‌بزرگ بود. */
+function DevCredit({ large = false }: { large?: boolean }) {
+  const icon = large ? 18 : 15
+  return (
+    <span style={{ direction: 'ltr', display: 'inline-flex', alignItems: 'center', gap: large ? '10px' : '6px', lineHeight: 1, fontSize: large ? '13.5px' : '10.5px', fontWeight: 600, letterSpacing: '0.04em', color: 'rgba(26,25,23,0.62)' }}>
+      <a href="https://www.babaknabavi.com" target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', color: 'inherit' }}>Designed &amp; Developed by <span style={{ color: ACCENT_TXT }}>Babak Nabavi</span></a>
+      {/* padding/margin برابر و مخالف: هدفِ لمسیِ بزرگ‌تر، جای دیدنی همان آیکون */}
+      {DEV_INSTAGRAM && <a href={DEV_INSTAGRAM} target="_blank" rel="noopener noreferrer" aria-label="اینستاگرامِ سازنده" className="ft-dev-ig" title="instagram.com/babaknabavi" style={{ display: 'inline-flex', color: GOLD, alignSelf: 'center', transform: large ? undefined : 'translateY(-2px)', padding: '5px', margin: '-5px' }}>
+        <svg width={icon} height={icon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+          <circle cx="12" cy="12" r="4.5"/>
+          <circle cx="17.5" cy="6.5" r="0.5" fill="currentColor" stroke="none"/>
+        </svg>
+      </a>}
+    </span>
+  )
+}
+
+const CONTACT = [
+  { Icon: Phone, text: '۰۲۱-۲۲۸۵۹۵۵۱', ltr: true },
+  { Icon: Mail, text: 'info@billiardhub.net', ltr: true },
+  { Icon: MapPin, text: 'تهران', ltr: false },
+]
+const COPYRIGHT = '© ۱۴۰۵ تمامی حقوق برای بیلیارد هاب محفوظ است'
+const LEGAL = [
+  { label: 'قوانین و مقررات', href: '/terms' },
+  { label: 'حریم خصوصی', href: '/privacy' },
+]
+
 export default function Footer() {
   /* صفحات ورود/ثبت‌نام فوتر ندارند */
   /* بازار اپ‌شل است و دایرکت تمام‌صفحه — فوتر ندارند */
@@ -147,6 +178,44 @@ export default function Footer() {
         .ft-dev-ig:hover { opacity: .7; }
         .ft-dev-ig:focus-visible { outline: 2px solid var(--gold-deep); outline-offset: -2px; }
         .ft-dev-mob { display: none; }
+        /* ── چیدمانِ دسکتاپ (خواستِ مالک، آبانِ ۱۴۰۵، طبقِ عکسِ او) ──
+           زیرِ ۱۰۲۴ هیچ‌چیز عوض نشده (بینِ ۹۰۰ و ۱۰۲۴ جای ستون‌ها و ردیفِ
+           پایین نبود): این عناصر پنهان‌اند و ft-lower
+           بی‌اثر (contents)، پس موبایل و تبلت همان قبلی‌اند. نُه لینکِ
+           ستون‌ها هم عمداً همان‌اند. */
+        .ft-contact-desk, .ft-legal-desk, .ft-dev-lower, .ft-band { display: none; }
+        .ft-lower { display: contents; }
+        @media (min-width: 1024px) {
+          .ft-logo { width: 56px !important; height: 56px !important; border-radius: 12px !important; }
+          .ft-word { font-size: 28px !important; }
+          .ft-word-en { font-size: 12px !important; margin-top: 4px !important; }
+          .ft-tagline { font-size: 15px !important; max-width: none !important; margin-top: 2px !important; margin-bottom: 18px !important; }
+          /* ستونِ برند به اندازه‌ی ردیفِ تماس (یک‌خطی)، سه ستونِ لینک بقیه را تقسیم می‌کنند */
+          .ft-grid { align-items: start; margin-bottom: 0 !important; grid-template-columns: minmax(max-content, 1.5fr) repeat(3, minmax(0, 1fr)) !important; }
+          .ft-brand { border-inline-end: 1px solid ${BORDER}; padding-inline-end: 40px; margin-inline-end: 20px; padding-block: 4px 8px; }
+          .ft-contact-desk { display: flex; flex-wrap: nowrap; align-items: center; }
+          .ft-contact-item { display: inline-flex; align-items: center; gap: 8px; color: ${DIM}; font-size: 14px; white-space: nowrap; }
+          .ft-contact-item + .ft-contact-item { border-inline-start: 1px solid ${BORDER}; margin-inline-start: 16px; padding-inline-start: 16px; }
+          .ft-contact { display: none !important; }
+          /* ستون‌های کناری دست‌کم به اندازه‌ی محتوایشان — در ۱۰۲۴ نامِ سازنده دوخطی می‌شد */
+          .ft-lower { display: grid; grid-template-columns: minmax(max-content, 1fr) auto minmax(max-content, 1fr); align-items: center;
+            border-top: 1px solid ${BORDER}; margin-top: 32px; padding-top: 22px; }
+          .ft-legal-desk { display: flex; align-items: center; gap: 18px; justify-self: start;
+            min-height: 72px; padding-inline-end: clamp(24px, 3vw, 48px); border-inline-end: 1px solid ${BORDER}; white-space: nowrap; }
+          .ft-legal-desk .ft-legal { font-size: 14.5px; color: ${DIM}; }
+          .ft-sep { width: 1px; height: 18px; background: ${BORDER}; }
+          .ft-seals { margin-top: 0 !important; padding-bottom: 0 !important; padding-inline: clamp(24px, 3vw, 48px); gap: clamp(24px, 2.6vw, 40px) !important; flex-wrap: nowrap !important; }
+          .ft-dev-lower { display: flex; align-items: center; justify-self: end;
+            min-height: 72px; padding-inline-start: clamp(24px, 3vw, 48px); border-inline-start: 1px solid ${BORDER}; white-space: nowrap; }
+          .ft-bottom { display: none !important; }
+          .ft-band { display: block; background: rgba(26,25,23,0.045); border-top: 1px solid ${BORDER};
+            font-size: 13px; color: ${DIM2}; }
+          .ft-inner { padding-bottom: 20px !important; }
+        }
+        /* ۱۰۲۴ تا ۱۲۸۰: حاشیه‌ی ۷٪ جای سه بخشِ ردیفِ پایین را می‌گرفت */
+        @media (min-width: 1024px) and (max-width: 1279.98px) {
+          .ft-inner, .ft-band-in { padding-left: 4% !important; padding-right: 4% !important; }
+        }
         .ft-copy-short { display: none; }
         /* سه ستون PLATFORM/EXPLORE/ACCOUNT در یک سطر می‌مانند. با دو
            ستون، ستون سوم به سطر بعد می‌افتاد و فوتر بی‌دلیل بلند
@@ -215,15 +284,15 @@ export default function Footer() {
               <img
                 src="/images/Logo/bh-mark-256-v8.webp"
                 loading="lazy" decoding="async"
-                alt="بیلیارد هاب"
+                alt="بیلیارد هاب" className="ft-logo"
                 style={{ width: '40px', height: '40px', objectFit: 'contain', flexShrink: 0, borderRadius: '10px' }}
               />
               <div>
-                <div style={{ fontWeight: 700, fontSize: '20px', letterSpacing: '-0.02em', lineHeight: 1.1 }}>
+                <div className="ft-word" style={{ fontWeight: 700, fontSize: '20px', letterSpacing: '-0.02em', lineHeight: 1.1 }}>
                   <span style={{ color: TEXT }}>بیلیارد </span>
                   <span style={{ color: GOLD_TXT }}>هاب</span>
                 </div>
-                <div dir="ltr" style={{ fontSize: '10px', letterSpacing: '0.16em', marginTop: '2px', fontWeight: 600 }}>
+                <div dir="ltr" className="ft-word-en" style={{ fontSize: '10px', letterSpacing: '0.16em', marginTop: '2px', fontWeight: 600 }}>
                   <span style={{ color: DIM2 }}>BILLIARD </span>
                   <span style={{ color: GOLD_TXT }}>HUB</span>
                   <span style={{ color: DIM2 }}> | IRAN</span>
@@ -237,6 +306,16 @@ export default function Footer() {
             <p className="ft-tagline" style={{ color: DIM, fontSize: '13.5px', lineHeight: 1.65, marginBottom: '14px', maxWidth: '260px', marginTop: '-8px' }}>
               اولین پلتفرم تخصصی بیلیارد ایران
             </p>
+
+            {/* تماس زیرِ برند — فقط دسکتاپ (زیرِ ۱۰۲۴ همان نوارِ تماسِ پایین می‌ماند) */}
+            <div className="ft-contact-desk">
+              {CONTACT.map(({ Icon, text, ltr }) => (
+                <span key={text} className="ft-contact-item">
+                  <Icon size={17} aria-hidden style={{ color: GOLD, flexShrink: 0 }} />
+                  <span dir={ltr ? 'ltr' : undefined}>{text}</span>
+                </span>
+              ))}
+            </div>
 
             {/* Socials — فقط آن‌هایی که نشانیِ واقعی دارند */}
             {LIVE_SOCIALS.length > 0 && (
@@ -287,19 +366,7 @@ export default function Footer() {
           ))}
           {/* اعتبار توسعه‌دهنده — دسکتاپ: سمت چپ روبروی ایمیل */}
           <div className="ft-dev-desk" style={{ marginInlineStart: 'auto', display: 'flex', alignItems: 'center' }}>
-            {/* letterSpacing از ۰.۱۴ به ۰.۰۴ کم شد: آن مقدار برای متن تمام‌بزرگ تنظیم شده بود
-                و روی متن حروف‌کوچک، فاصله‌ی حروف بیش از حد باز می‌افتاد */}
-            <span style={{ direction: 'ltr', display: 'inline-flex', alignItems: 'center', gap: '6px', lineHeight: 1, fontSize: '10.5px', fontWeight: 600, letterSpacing: '0.04em', color: 'rgba(26,25,23,0.62)' }}>
-              <a href="https://www.babaknabavi.com" target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', color: 'inherit' }}>Designed &amp; Developed by <span style={{ color: ACCENT_TXT }}>Babak Nabavi</span></a>
-              {/* padding/margin برابر و مخالف: هدفِ لمسی ۲۵px، جای دیدنی همان ۱۵px */}
-              {DEV_INSTAGRAM && <a href={DEV_INSTAGRAM} target="_blank" rel="noopener noreferrer" aria-label="اینستاگرامِ سازنده" className="ft-dev-ig" title="instagram.com/babaknabavi" style={{ display: 'inline-flex', color: GOLD, alignSelf: 'center', transform: 'translateY(-2px)', padding: '5px', margin: '-5px' }}>
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                  <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
-                  <circle cx="12" cy="12" r="4.5"/>
-                  <circle cx="17.5" cy="6.5" r="0.5" fill="currentColor" stroke="none"/>
-                </svg>
-              </a>}
-            </span>
+            <DevCredit />
           </div>
         </div>
 
@@ -328,6 +395,18 @@ export default function Footer() {
 
             پس جبران باید بالا باشد نه پایین. حاشیه‌ی منفی پایین
             (تلاش قبلی) نشان‌ها را روی نوار زیرشان می‌نشاند. */}
+        {/* ردیفِ پایینِ دسکتاپ: حقوقی | نشان‌ها | سازنده. نشان‌ها یک نمونه‌اند
+            (پی‌پینگ با id="PPTrust" دو نمونه برنمی‌دارد)، پس جابه‌جا نمی‌شوند و
+            فقط دو همسایه‌ی دسکتاپی می‌گیرند. زیرِ ۱۰۲۴ این ظرف display: contents است. */}
+        <div className="ft-lower">
+        <nav className="ft-legal-desk" aria-label="قوانین">
+          {LEGAL.map((item, i) => (
+            <span key={item.href} style={{ display: 'contents' }}>
+              {i > 0 && <span className="ft-sep" aria-hidden />}
+              <Link prefetch={false} href={item.href} className="ft-legal">{item.label}</Link>
+            </span>
+          ))}
+        </nav>
         <div className="ft-seals" style={{
           display: 'flex', justifyContent: 'center', alignItems: 'flex-end',
           gap: '8px', flexWrap: 'wrap',
@@ -336,21 +415,20 @@ export default function Footer() {
           <PayPingSeal />
           <EnamadSeal />
         </div>
+        <div className="ft-dev-lower"><DevCredit large /></div>
+        </div>
 
         {/* ── Bottom bar ────────────────────────────── */}
         <div className="ft-bottom" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
           {/* دسکتاپ جا دارد و جمله‌ی کامل رسمی‌تر است؛ موبایل جا ندارد
               و باید در همان یک سطر با دو لینک حقوقی بماند. */}
           <div style={{ fontSize: '13px', color: DIM2, whiteSpace: 'nowrap' }}>
-            <span className="ft-copy-long">© ۱۴۰۵ تمامی حقوق برای بیلیارد هاب محفوظ است</span>
+            <span className="ft-copy-long">{COPYRIGHT}</span>
             <span className="ft-copy-short">© ۱۴۰۵ بیلیارد هاب</span>
           </div>
           <div className="ft-bottom-links" style={{ display: 'flex', gap: '22px', flexWrap: 'wrap' }}>
             {/* لینک‌های حقوقی — «درباره ما / تماس با ما» در ستون «اطلاعات و قوانین» بالا هستند */}
-            {[
-              { label: 'قوانین و مقررات', href: '/terms' },
-              { label: 'حریم خصوصی', href: '/privacy' },
-            ].map(item => (
+            {LEGAL.map(item => (
               <Link prefetch={false} key={item.href} href={item.href} className="ft-legal">
                 {item.label}
               </Link>
@@ -358,21 +436,13 @@ export default function Footer() {
           </div>
           {/* اعتبار توسعه‌دهنده — موبایل: زیر لینک‌ها */}
           <div className="ft-dev-mob">
-            {/* letterSpacing از ۰.۱۴ به ۰.۰۴ کم شد: آن مقدار برای متن تمام‌بزرگ تنظیم شده بود
-                و روی متن حروف‌کوچک، فاصله‌ی حروف بیش از حد باز می‌افتاد */}
-            <span style={{ direction: 'ltr', display: 'inline-flex', alignItems: 'center', gap: '6px', lineHeight: 1, fontSize: '10.5px', fontWeight: 600, letterSpacing: '0.04em', color: 'rgba(26,25,23,0.62)' }}>
-              <a href="https://www.babaknabavi.com" target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', color: 'inherit' }}>Designed &amp; Developed by <span style={{ color: ACCENT_TXT }}>Babak Nabavi</span></a>
-              {/* padding/margin برابر و مخالف: هدفِ لمسی ۲۵px، جای دیدنی همان ۱۵px */}
-              {DEV_INSTAGRAM && <a href={DEV_INSTAGRAM} target="_blank" rel="noopener noreferrer" aria-label="اینستاگرامِ سازنده" className="ft-dev-ig" title="instagram.com/babaknabavi" style={{ display: 'inline-flex', color: GOLD, alignSelf: 'center', transform: 'translateY(-2px)', padding: '5px', margin: '-5px' }}>
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                  <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
-                  <circle cx="12" cy="12" r="4.5"/>
-                  <circle cx="17.5" cy="6.5" r="0.5" fill="currentColor" stroke="none"/>
-                </svg>
-              </a>}
-            </span>
+            <DevCredit />
           </div>
         </div>
+      </div>
+
+      <div className="ft-band">
+        <div className="ft-band-in" style={{ maxWidth: '1280px', margin: '0 auto', padding: '14px 7%' }}>{COPYRIGHT}</div>
       </div>
     </footer>
   );
