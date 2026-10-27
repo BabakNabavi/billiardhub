@@ -766,7 +766,9 @@ export default function MarketNewPage() {
            گوشی ناچ‌دار در حالت PWA این عدد بزرگ است. برداشتنش
            یعنی رفتن فیلد زیر ساعت و باتری. */
         .mk-msearch { display: none; position: sticky; top: 0; z-index: 150; padding: calc(2px + env(safe-area-inset-top)) 14px 6px;
-          background: rgba(247,245,240,0.94); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+          /* پُر، نه ۰٫۹۴: سافاریِ iOS 26 رنگِ پُرِ نوارِ چسبیده به بالا را زیرِ نوارِ مرورگر
+             ادامه می‌دهد و محوشدگیِ سفید روی جست‌وجو نمی‌کشد (شرح در Navbar کنارِ navBg) */
+          background: rgb(247,245,240); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
           border-bottom: 1px solid ${LINE}; }
 
         /* ── گرید دسته‌های موبایل: ۳ ردیف ۵تایی ── */
@@ -936,7 +938,7 @@ export default function MarketNewPage() {
           {/* برند */}
           <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 9, textDecoration: 'none', flexShrink: 0 }}>
             <span style={{ width: 36, height: 36, borderRadius: 10, overflow: 'hidden', flexShrink: 0, boxShadow: '0 2px 10px rgb(var(--c-ink) / .10)' }}>
-              <img loading="lazy" decoding="async" src="/images/Logo/bh-mark-256-v8.webp" alt="بیلیارد هاب" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              <img loading="lazy" decoding="async" src="/images/Logo/bh-mark-256-v9.webp" alt="بیلیارد هاب" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             </span>
             <span style={{ fontWeight: 900, fontSize: 17.5, letterSpacing: '-0.02em', color: TEXT, whiteSpace: 'nowrap' }}>
               بیلیارد <span style={{ color: GOLD }}>هاب</span>

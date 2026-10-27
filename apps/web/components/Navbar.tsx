@@ -264,9 +264,15 @@ export default function Navbar() {
   // Adaptive theme: over dark hero = transparent/white-text, else = warm glass/dark-text
   const isLight = scrolled || !isHomePage;
 
+  /* ⚠️ پُر، نه نیمه‌شفاف (آبانِ ۱۴۰۵). سافاریِ iOS 26 بالای صفحه را زیرِ نوارِ
+     مرورگر می‌برد و رویش محوشدگیِ نرم با رنگِ روشنِ صفحه می‌کشد — مالک آن را
+     «سایه‌ی سفید روی لوگو و ورود/عضویت در همه‌ی صفحه‌ها» دید. اگر عنصرِ ثابتِ
+     چسبیده به بالا رنگِ پُر داشته باشد، سافاری همان رنگ را بالا ادامه می‌دهد
+     (WebKit bug 301756). ۰٫۹۴ در برابرِ ۱ با چشم فرقی ندارد. روی هیروی صفحه‌ی
+     اول در موبایل همان #04020Aِ پس‌زمینه‌ی هیرو (کلاسِ nav-over-hero). */
   const navBg = isHomePage
-    ? scrolled ? 'rgba(247,247,245,0.94)' : 'transparent'
-    : 'rgba(247,247,245,0.94)';
+    ? scrolled ? 'rgb(247,247,245)' : 'transparent'
+    : 'rgb(247,247,245)';
 
   /* ⚠️ تأکید باید با زمینه عوض شود: طلاییِ تیره روی هیروی تیره دیده
      نمی‌شود؛ روی آن پله‌ی روشنِ طلایی می‌نشیند. */
@@ -280,6 +286,11 @@ export default function Navbar() {
   const TEXT_MUT  = isLight ? 'rgba(28,28,26,0.48)' : 'rgba(255,255,255,0.48)';
   const BORDER_C  = isLight ? 'rgba(28,28,26,0.08)' : 'rgba(255,255,255,0.18)';
   const SURF      = isLight ? 'rgba(28,28,26,0.05)' : 'rgba(255,255,255,0.10)';
+  /* «ورود | عضویت» هم‌خانواده‌ی ذره‌بین، کادرِ جست‌وجو و منو (خواستِ مالک —
+     تینتِ طلایی‌اش زیادی به چشم می‌آمد). متن کمی پررنگ‌تر از آیکون‌ها تا
+     خوانا بماند (۰٫۴۸ برای متن کم است). */
+  const LOGIN_TXT = isLight ? 'rgba(28,28,26,0.74)' : 'rgba(255,255,255,0.86)';
+  const SURF_HOV  = isLight ? 'rgba(28,28,26,0.09)' : 'rgba(255,255,255,0.16)';
 
   if (isShopPage) return null;
   /* دایرکت تجربه‌ی تمام‌صفحه‌ی خودش را دارد (هدر + دکمه‌ی بازگشت) */
@@ -408,13 +419,15 @@ export default function Navbar() {
         }
         /* باریک‌ترین حالت (گلکسی فولد و…): فقط نشان لوگو می‌ماند */
         @media(max-width:330px) { .nav-brand { display:none !important; } }
+        /* موبایل، روی هیروی تیره: رنگِ پُرِ همان هیرو تا سافاریِ iOS 26 آن را بالا ادامه دهد (توضیح کنارِ navBg) */
+        @media(max-width:900px) { .nav-over-hero { background: #04020A !important; } }
 
         .mob-link-item { transition: background 0.15s, color 0.15s; }
         .mob-link-item:hover { background: var(--brand-tint) !important; }
       `}</style>
 
       {/* ── NAV ── */}
-      <nav style={{
+      <nav className={isHomePage && !scrolled ? 'nav-over-hero' : undefined} style={{
         position: 'fixed', top: 0, left: 0, right: 0, zIndex: 200,
         /* PWA اپل (Add to Home Screen): نوبار نباید زیر ساعت/آنتن برود */
         paddingTop: 'env(safe-area-inset-top)',
@@ -436,7 +449,7 @@ export default function Navbar() {
             <div style={{ position: 'relative', width: '40px', height: '40px', borderRadius: '12px', overflow: 'hidden', flexShrink: 0,
               boxShadow: isLight ? 'none' : '0 1px 2px rgba(28,27,23,0.12), 0 4px 9px rgb(var(--c-ink) / 0.05)' }}>
                 <img loading="eager" decoding="async"
-                  src={isLight ? '/images/Logo/bh-mark-256-v8.webp' : '/images/Logo/bh-nav-256-v8.webp'}
+                  src={isLight ? '/images/Logo/bh-mark-256-v9.webp' : '/images/Logo/bh-nav-256-v9.webp'}
                   alt="" style={{ width: '100%', height: '100%', objectFit: isLight ? 'contain' : 'cover' }} />
                 {!isLight && (
                   <span aria-hidden style={{ position: 'absolute', inset: 0, borderRadius: '12px', pointerEvents: 'none',
@@ -629,9 +642,9 @@ export default function Navbar() {
 
             {!user ? (
               <Link prefetch={false} href="/login">
-                <button className="nav-login-btn" style={{ display: 'flex', alignItems: 'center', gap: '6px', background: `rgb(${ACC_CH} / .10)`, border: `1px solid rgb(${ACC_CH} / .30)`, borderRadius: '12px', padding: '9px 16px', color: ACC, fontSize: '14px', fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap', fontFamily: 'inherit', transition: 'all 0.3s', backdropFilter: 'blur(12px)', height: '40px' }}
-                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = `rgb(${ACC_CH} / .20)` }}
-                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = `rgb(${ACC_CH} / .10)` }}>
+                <button className="nav-login-btn" style={{ display: 'flex', alignItems: 'center', gap: '6px', background: SURF, border: `1px solid ${BORDER_C}`, borderRadius: '12px', padding: '9px 16px', color: LOGIN_TXT, fontSize: '14px', fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap', fontFamily: 'inherit', transition: 'all 0.3s', backdropFilter: 'blur(12px)', height: '40px' }}
+                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = SURF_HOV }}
+                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = SURF }}>
                   <User size={16} /> ورود | عضویت
                 </button>
               </Link>
