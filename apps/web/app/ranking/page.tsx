@@ -307,9 +307,16 @@ export default function RankingsPage() {
           .rk-head::before { content: ''; position: absolute; inset: 0; pointer-events: none;
             background: radial-gradient(60% 140% at 88% 0%, rgba(199,166,106,0.16), transparent 60%); }
           .rk-head > * { position: relative; }
-          .rk-head-lbl { flex: 1; display: flex; align-items: center; gap: 8px; padding-inline-start: 18px;
+          /* عرض‌ها = ردیف: چیپ ۴۲، عکس ۴۶، نام flex، شهر ۸۴، صعود ۵۶ — «رتبه» و
+             «بازیکن» دقیقاً بالای ستونِ خودشان (خواستِ مالک؛ خطِ طلایی حذف شد) */
+          .rk-head-rank, .rk-head-lbl { display: flex; align-items: center; justify-content: center;
             font-size: 12px; font-weight: 800; color: rgba(255,255,255,0.74); }
-          .rk-head-lbl::before { content: ''; width: 3px; height: 16px; border-radius: 2px; background: linear-gradient(180deg, ${GOLD}, #8A6020); }
+          .rk-head-rank { width: 42px; flex-shrink: 0; }
+          .rk-head-lbl { flex: 1 1 auto; min-width: 0; }
+          .rk-head-gap { flex-shrink: 0; }
+          .rk-head-portrait { width: 46px; }
+          .rk-head-city { width: 84px; }
+          .rk-head-trend { width: 56px; }
           .rk-stg-h { flex-direction: column; gap: 2px; text-align: center; line-height: 1.35;
             border-inline-start: 1px solid rgba(255,255,255,0.09); }
           .rk-stg-t { font-size: 12px; font-weight: 800; color: #fff; }
@@ -328,11 +335,20 @@ export default function RankingsPage() {
         }
         @media (max-width: 640px) {
           /* جای تب امتیاز در لبه‌ی چپ رزرو می‌شود — چیپ صعود/نزول چسبیده به تب */
-          .rk-row { gap: 8px; padding-left: 70px; min-height: 64px; }
+          .rk-row { gap: 6px; padding-left: 70px; min-height: 64px; }
           .rk-row .chip { width: 32px; font-size: 13px; }
 
           /* فقط اندازه — ترتیب در قاعده‌ی پایه است */
-          .rk-city { margin-inline-end: 8px; font-size: 10.5px; max-width: 66px; }
+          /* شهرها زیرِ هم (خواستِ مالک): جای شهر به پهنای چیپِ صعود بستگی
+             داشت — حالا هر دو عرضِ ثابت (سنجیده: پهن‌ترین شهر ۳۲ تا ۳۶،
+             چیپِ فشرده ۴۰ — هیچ‌کدام بریده نمی‌شوند) */
+          .rk-row .rk-trend { flex: 0 0 40px; width: 40px; justify-content: center; }
+          .rk-row .rk-trend > span { font-size: 10.5px !important; padding: 2px 6px !important; gap: 2px !important; }
+          .rk-city { flex: 0 0 36px; width: 36px; margin-inline-end: 4px; font-size: 10.5px; text-align: center; }
+          /* جبرانِ دو خانه‌ی ثابت: بدونِ این، چهار نام در ۳۷۵ با «…» بریده می‌شد
+             (پیش‌تر یکی) — فاصله‌ی ردیف ۶ (بالا) و عکس ۴۰ پیکسل */
+          .rk-row .rk-portrait > span { width: 40px !important; height: 40px !important; }
+          .rk-row .rk-ln { font-size: 14.5px !important; }
           /* امتیاز = تب چسبیده به لبه‌ی چپ کارت — ضلع چپش دیده نمی‌شود،
              فقط گوشه‌های راست گرد است */
           .rk-row .rk-pts { position: absolute; left: 0; top: 50%; transform: translateY(-50%);

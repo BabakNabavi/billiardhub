@@ -189,28 +189,29 @@ export default function Footer() {
           .ft-logo { width: 56px !important; height: 56px !important; border-radius: 12px !important; }
           .ft-word { font-size: 28px !important; }
           .ft-word-en { font-size: 12px !important; margin-top: 4px !important; }
-          .ft-tagline { font-size: 15px !important; max-width: none !important; margin-top: 2px !important; margin-bottom: 18px !important; }
+          .ft-tagline { font-size: 15px !important; max-width: none !important; margin-top: 0 !important; margin-bottom: 10px !important; }
           /* ستونِ برند به اندازه‌ی ردیفِ تماس (یک‌خطی)، سه ستونِ لینک بقیه را تقسیم می‌کنند */
           .ft-grid { align-items: start; margin-bottom: 0 !important; grid-template-columns: minmax(max-content, 1.5fr) repeat(3, minmax(0, 1fr)) !important; }
-          .ft-brand { border-inline-end: 1px solid ${BORDER}; padding-inline-end: 40px; margin-inline-end: 20px; padding-block: 4px 8px; }
+          .ft-brand { border-inline-end: 1px solid ${BORDER}; padding-inline-end: 40px; margin-inline-end: 20px; padding-block: 0; }
           .ft-contact-desk { display: flex; flex-wrap: nowrap; align-items: center; }
           .ft-contact-item { display: inline-flex; align-items: center; gap: 8px; color: ${DIM}; font-size: 14px; white-space: nowrap; }
           .ft-contact-item + .ft-contact-item { border-inline-start: 1px solid ${BORDER}; margin-inline-start: 16px; padding-inline-start: 16px; }
           .ft-contact { display: none !important; }
           /* ستون‌های کناری دست‌کم به اندازه‌ی محتوایشان — در ۱۰۲۴ نامِ سازنده دوخطی می‌شد */
           .ft-lower { display: grid; grid-template-columns: minmax(max-content, 1fr) auto minmax(max-content, 1fr); align-items: center;
-            border-top: 1px solid ${BORDER}; margin-top: 32px; padding-top: 22px; }
+            border-top: 1px solid ${BORDER}; margin-top: 18px; padding-top: 4px; }
           .ft-legal-desk { display: flex; align-items: center; gap: 18px; justify-self: start;
-            min-height: 72px; padding-inline-end: clamp(24px, 3vw, 48px); border-inline-end: 1px solid ${BORDER}; white-space: nowrap; }
+            min-height: 56px; padding-inline-end: clamp(24px, 3vw, 48px); border-inline-end: 1px solid ${BORDER}; white-space: nowrap; }
           .ft-legal-desk .ft-legal { font-size: 14.5px; color: ${DIM}; }
           .ft-sep { width: 1px; height: 18px; background: ${BORDER}; }
-          .ft-seals { margin-top: 0 !important; padding-bottom: 0 !important; padding-inline: clamp(24px, 3vw, 48px); gap: clamp(24px, 2.6vw, 40px) !important; flex-wrap: nowrap !important; }
+          .ft-seals { margin-top: -18px !important; padding-bottom: 0 !important; padding-inline: clamp(24px, 3vw, 48px); gap: clamp(24px, 2.6vw, 40px) !important; flex-wrap: nowrap !important; }
           .ft-dev-lower { display: flex; align-items: center; justify-self: end;
-            min-height: 72px; padding-inline-start: clamp(24px, 3vw, 48px); border-inline-start: 1px solid ${BORDER}; white-space: nowrap; }
+            min-height: 56px; padding-inline-start: clamp(24px, 3vw, 48px); border-inline-start: 1px solid ${BORDER}; white-space: nowrap; }
           .ft-bottom { display: none !important; }
           .ft-band { display: block; background: rgba(26,25,23,0.045); border-top: 1px solid ${BORDER};
             font-size: 13px; color: ${DIM2}; }
-          .ft-inner { padding-bottom: 20px !important; }
+          .ft-inner { padding-top: 28px !important; padding-bottom: 10px !important; }
+          .ft-band-in { padding-top: 10px !important; padding-bottom: 10px !important; }
         }
         /* ۱۰۲۴ تا ۱۲۸۰: حاشیه‌ی ۷٪ جای سه بخشِ ردیفِ پایین را می‌گرفت */
         @media (min-width: 1024px) and (max-width: 1279.98px) {

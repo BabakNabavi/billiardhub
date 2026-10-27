@@ -14,7 +14,12 @@ import { toFaDigits } from '@/lib/jalali'
 export function StageHead({ stages }: { stages: RankingStage[] }) {
   return (
     <div className="rk-head" aria-hidden>
-      <span className="rk-head-lbl">رتبه و بازیکن</span>
+      {/* همان خانه‌های ردیف با همان عرض‌ها: چیپِ رتبه، عکس، نام، شهر، چیپِ صعود */}
+      <span className="rk-head-rank">رتبه</span>
+      <span className="rk-head-gap rk-head-portrait" />
+      <span className="rk-head-lbl">بازیکن</span>
+      <span className="rk-head-gap rk-head-city" />
+      <span className="rk-head-gap rk-head-trend" />
       <span className="rk-stgs">
         {stages.map((s, i) => (
           <span key={i} className="rk-stg rk-stg-h">
