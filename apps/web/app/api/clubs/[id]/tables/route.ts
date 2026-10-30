@@ -2,6 +2,7 @@ export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseServer } from '@/lib/supabase-server';
 import { sessionFromRequest } from '@/lib/auth/session';
+import { isAdmin } from '@/lib/finance/db';
 import { z } from 'zod';
 import { sanitizeDiscountRules } from '@/lib/finance/pricing';
 
@@ -76,7 +77,9 @@ export async function POST(
 
   // verify ownership or admin
   const { data: club } = await sb.from('clubs').select('ownerId').eq('id', id).single();
-  if (!club || (club.ownerId !== payload.id && payload.role !== 'admin')) {
+  /* ادمین‌بودن از دیتابیس، نه از نقشِ داخلِ توکن — توکنِ قدیمیِ هفت‌روزه‌ی
+     ادمینی که دسترسی‌اش گرفته شده هنوز role=admin دارد */
+  if (!club || (club.ownerId !== payload.id && !(await isAdmin(payload.id)))) {
     return NextResponse.json({ message: 'Forbidden' }, { status: 403 });
   }
 

@@ -2,6 +2,7 @@ export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseServer } from '@/lib/supabase-server';
 import { sessionFromRequest } from '@/lib/auth/session';
+import { isAdmin } from '@/lib/finance/db';
 import { BUCKET } from '@/lib/social-server';
 import { sanitizeDiscountRules } from '@/lib/finance/pricing';
 
@@ -86,7 +87,8 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   const sb = getSupabaseServer();
   const { data: club } = await sb.from('clubs').select('"ownerId"').eq('id', clubId).maybeSingle();
   if (!club) return NextResponse.json({ message: 'باشگاه یافت نشد' }, { status: 404 });
-  if ((club as { ownerId?: string }).ownerId !== payload.id && payload.role !== 'admin') {
+  /* ادمین‌بودن از دیتابیس، نه از توکن (شرح در ../route.ts) */
+  if ((club as { ownerId?: string }).ownerId !== payload.id && !(await isAdmin(payload.id))) {
     return NextResponse.json({ message: 'دسترسی مجاز نیست' }, { status: 403 });
   }
 

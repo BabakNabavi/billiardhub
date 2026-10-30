@@ -85,6 +85,18 @@ export function verifyToken(token: string, expect?: 'at' | 'rt'): SessionUser | 
   } catch { return null }
 }
 
+/** فقط توکنِ نسلِ قدیم (بی‌typ) — برای /api/auth/adopt.
+ *  ⚠️ بی‌این، adopt توکنِ تازه‌سازیِ یک نشستِ باطل‌شده (یا توکنِ دسترسیِ
+ *  پانزده‌دقیقه‌ای) را می‌گرفت و از آن نشستِ سی‌روزه‌ی تازه می‌ساخت —
+ *  خروج و ابطال را دور می‌زد. */
+export function verifyLegacyToken(token: string): SessionUser | null {
+  try {
+    const c = jwt.verify(token, secret()) as Claims
+    if (!c?.sub || c.typ) return null
+    return toUser(c)
+  } catch { return null }
+}
+
 /** تأیید توکن در محیط Edge (middleware). خطا ⇒ null */
 export async function verifyTokenEdge(token: string, expect?: 'at' | 'rt'): Promise<SessionUser | null> {
   try {
@@ -113,5 +125,9 @@ export function sessionFromRequest(
   req: { headers: Headers; cookies?: { get(n: string): { value: string } | undefined } },
 ): SessionUser | null {
   const t = readToken(req)
-  return t ? verifyToken(t) : null
+  /* ⚠️ 'at' نه هرچیز (آبانِ ۱۴۰۵): بی‌این، توکنِ تازه‌سازیِ سی‌روزه هم در هدرِ
+     Authorization هویت می‌داد — حتی پس از خروج یا باطل‌شدنِ نشست، چون
+     باطل‌شدن فقط در /api/auth/refresh سنجیده می‌شود. توکن‌های نسلِ قدیمِ
+     بی‌typ در دوره‌ی گذار همچنان پذیرفته‌اند (verifyToken). */
+  return t ? verifyToken(t, 'at') : null
 }
