@@ -2,6 +2,8 @@ export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { sb, actorFromRequest, audit, clientIp } from '@/lib/finance/db';
 import { can } from '@/lib/admin/permissions';
+import { ownerTargetGuard, isPlatformOwner } from '@/lib/enforcement/server';
+import { effectiveStatus, type AccountStatus } from '@/lib/enforcement/policy';
 
 /* فهرست کاربران برای پنل ادمین.
 
@@ -167,6 +169,9 @@ export async function PATCH(req: NextRequest) {
   const b = await req.json().catch(() => ({})) as Record<string, unknown>;
   const userId = String(b.userId ?? '');
   if (!userId) return NextResponse.json({ message: 'کاربر مشخص نیست' }, { status: 400 });
+  /* مشخصات و احرازِ مالک را هیچ ادمینِ دیگری عوض نمی‌کند */
+  const denied = await ownerTargetGuard(actor.id, userId, clientIp(req));
+  if (denied) return denied;
 
   /* ── شاخه‌ی ویرایش مشخصات ──
      جدا از تغییر وضعیت احراز نگه داشته شده تا هیچ‌کدام به‌طور جانبی
@@ -212,6 +217,21 @@ export async function PATCH(req: NextRequest) {
        بگذاریم، نشان «تأییدشده» درباره‌ی هویتی حرف می‌زند که هرگز
        استعلام نشده. اصلاح نام یا تاریخ این را باطل نمی‌کند —
        آن‌ها تصحیح نگارشی‌اند، نه ادعای هویت دیگر. */
+    /* کد ملیِ حسابِ محدودشده فقط با مالک: عوض‌کردنش یا هویتِ مسدود را برای
+       حسابِ تازه آزاد می‌کرد (nationalIdBlocked دیگر نمی‌یافتش) یا کد ملیِ آدمِ
+       دیگری را روی حسابِ مسدود می‌نشاند و او را از ثبت‌نام بازمی‌داشت. */
+    /* مستقیم از دیتابیس و «رد در صورتِ خطا» — accountStateOf هنگامِ خطا فعال
+       فرض می‌کند و این‌جا آن پیش‌فرض دری باز می‌گذاشت */
+    const nidLocked = 'national_id' in changed && await (async () => {
+      const { data: st, error: stErr } = await sb().from('users')
+        .select('account_status,status_expires_at,is_platform_owner').eq('id', userId).maybeSingle();
+      if (stErr) return !/account_status|column/i.test(stErr.message);   // پیش از مهاجرت: قفلی نیست
+      const r = st as { account_status: string; status_expires_at: string | null; is_platform_owner: boolean } | null;
+      return !!r && effectiveStatus({ status: r.account_status as AccountStatus, expiresAt: r.status_expires_at, isOwner: r.is_platform_owner }) !== 'active';
+    })();
+    if (nidLocked && !(await isPlatformOwner(actor.id))) {
+      return NextResponse.json({ message: 'کد ملیِ حسابِ محدودشده را فقط مالکِ پلتفرم می‌تواند تغییر دهد' }, { status: 403 });
+    }
     if ('national_id' in changed) patch.national_id_verified = false;
 
     patch.updatedAt = new Date().toISOString();

@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { sb, actorFromRequest, audit, clientIp } from '@/lib/finance/db';
 import { notifyRoleApproved, notifyRoleRejected } from '@/lib/notify';
 import { can } from '@/lib/admin/permissions';
+import { ownerTargetGuard } from '@/lib/enforcement/server';
 
 /* بررسی درخواست‌های نقش توسط ادمین.
 
@@ -106,6 +107,8 @@ export async function PATCH(req: NextRequest) {
     .select('id,user_id,role,status').eq('id', id).maybeSingle();
   if (!reqRow) return NextResponse.json({ message: 'درخواست پیدا نشد' }, { status: 404 });
   const rr = reqRow as { id: string; user_id: string; role: string; status: string };
+  const denied = await ownerTargetGuard(actor.id, rr.user_id, clientIp(req));
+  if (denied) return denied;
 
   if (rr.status !== 'pending') {
     return NextResponse.json(

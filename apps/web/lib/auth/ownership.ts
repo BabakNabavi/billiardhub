@@ -13,6 +13,8 @@
 import type { NextRequest } from 'next/server'
 import { sessionFromRequest } from './session'
 import { getSupabaseServer } from '../supabase-server'
+import { accountStateOf } from '../enforcement/server'
+import { canSignIn } from '../enforcement/policy'
 
 const sb = () => getSupabaseServer()
 
@@ -41,6 +43,9 @@ export async function actorOf(req: NextRequest): Promise<Actor | null> {
 
   const row = (data ?? null) as { id: string; phone: string | null; primaryRole: string | null } | null
   if (!row) return null
+
+  /* لایه‌ی دوم پس از proxy.ts: حسابِ مسدود هیچ هویتی نمی‌گیرد */
+  if (!canSignIn(await accountStateOf(row.id))) return null
 
   return {
     id: row.id,

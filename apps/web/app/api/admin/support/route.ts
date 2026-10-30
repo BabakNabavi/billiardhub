@@ -2,6 +2,7 @@ export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { sb, actorFromRequest, audit } from '@/lib/finance/db';
 import { can } from '@/lib/admin/permissions';
+import { ownerTargetGuard } from '@/lib/enforcement/server';
 
 /* تیکت‌های پشتیبانی برای ادمین — خواندن و رسیدگی.
 
@@ -98,6 +99,8 @@ export async function PATCH(req: NextRequest) {
     /* هر دو قفل بانکی با هم باز می‌شوند: کاربر ممکن است هم کارت
        شخصی و هم حساب باشگاه را عوض کند و دو تیکت جدا برای یک
        درخواست، هم برای او و هم برای ادمین اضافه‌کاری است. */
+    const denied = await ownerTargetGuard(actor.id, ticket.user_id);
+    if (denied) return denied;
     const { error } = await sb().from('users')
       .update({ bank_card_verified: false, bank_card_verified_at: null })
       .eq('id', ticket.user_id);

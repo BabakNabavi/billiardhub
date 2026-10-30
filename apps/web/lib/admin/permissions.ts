@@ -1,4 +1,5 @@
 import { sb } from '../finance/db'
+import { accountStateOf } from '../enforcement/server'
 
 /* ─────────────────────────────────────────────────────────────
    دسترسی‌های تفکیک‌شده‌ی پنل ادمین
@@ -127,6 +128,11 @@ async function ensureTable(): Promise<boolean> {
 /* دسترسی‌های یک کاربر.
    خروجی `['*']` یعنی سوپرادمین، `[]` یعنی هیچ. */
 export async function permissionsOf(userId: string): Promise<string[]> {
+  /* مالکِ پلتفرم بالای همه‌ی ادمین‌هاست و هیچ مجوزی از او گرفتنی نیست.
+     پرسشِ جدا (نه ستونی در select پایین): پیش از مهاجرتِ ۱۱۳ آن ستون
+     نیست و نباید دسترسیِ همه‌ی ادمین‌ها را بشکند. */
+  /* از کشِ وضعیت (پنج‌ثانیه‌ای) — can() در هر مسیرِ ادمین صدا زده می‌شود */
+  if ((await accountStateOf(userId)).isOwner) return [ALL]
   const { data: u } = await sb().from('users')
     .select('primaryRole,secondaryRoles').eq('id', userId).maybeSingle()
   const uu = u as { primaryRole?: string; secondaryRoles?: string[] } | null

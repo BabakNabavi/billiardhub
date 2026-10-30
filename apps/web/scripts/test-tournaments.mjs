@@ -4215,8 +4215,12 @@ console.log('\n― استوری: یک منبع، با انقضا ―');
        چرخشِ رفرش‌توکن یکی شود، دو hash نوشته و یکی از دو کوکی «استفاده‌ی
        دوباره» تشخیص داده می‌شود و نشستِ سالم باطل. */
     {
+      /* lib/enforcement/policy.ts مسیر را صدا نمی‌زند — فقط در فهرستِ مسیرهای
+         مجاز برای حسابِ «فقط‌خواندنی» نامش را می‌آورد (بی‌آن، چنین حسابی پس از
+         ۱۵ دقیقه بیرون می‌افتاد). صدا زدن یعنی fetch، که آن‌جا نیست. */
       const offenders = [...walk('app'), ...walk('components'), ...walk('lib')].filter(p =>
-        p !== 'lib/auth/refresh-client.ts' && strip(read(p)).includes("'/api/auth/refresh'"));
+        p !== 'lib/auth/refresh-client.ts' && strip(read(p)).includes("'/api/auth/refresh'")
+        && !(p === 'lib/enforcement/policy.ts' && !/fetch\(/.test(read(p))));
       t('تمدیدِ نشست فقط از refresh-client می‌گذرد',
         offenders.length === 0,
         'تمدیدِ موازی می‌تواند نشستِ سالم را باطل کند: ' + offenders.join('، '));

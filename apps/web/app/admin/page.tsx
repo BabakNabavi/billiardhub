@@ -17,7 +17,7 @@ import {
   CheckCircle, TrendingUp, Building2, Star, Megaphone, Scale, Store,
   Clapperboard, Factory, Wrench, ShieldCheck, Wallet,
   CalendarDays, Flag, Package, LifeBuoy, UserPlus, Tag, MessageSquare, Percent,
-  BadgeCheck, AlertTriangle, ScrollText } from 'lucide-react';
+  BadgeCheck, AlertTriangle, ScrollText, Gavel } from 'lucide-react';
 
 const GOLD   = '#C7A66A';
 const GOLD_D = '#8F6531';
@@ -82,6 +82,8 @@ const SECTIONS: AdminSection[] = [
   {
     title: 'کاربران و دسترسی', en: 'USERS & ACCESS', dot: '#1D4ED8',
     items: [
+      /* فقط مالکِ پلتفرم می‌بیند (allowed پایین)؛ امنیتِ واقعی در خودِ /api/owner است */
+      { title: 'اعمالِ وضعیتِ حساب', desc: 'تعلیق، مسدودسازی، محدودسازی، حذف و بازگرداندنِ حساب‌ها — با تاریخچه‌ی کامل', icon: <Gavel size={20} />, link: '/admin/enforcement' },
       { title: 'مدیریت کاربران', desc: 'مشاهده، ویرایش و مسدودسازی کاربران', icon: <Users size={20} />, link: '/admin/users' },
       /* کارت «مدیریت نقش‌ها» برداشته شد. آن صف تصمیمی بود که هیچ
          اثری نداشت: نقش هنگام انتخاب داده می‌شود و «رد کردن» هیچ‌وقت
@@ -236,7 +238,19 @@ export default function AdminPage() {
     commission: 'finance',
     ads: 'advertising', 'ad-slots': 'advertising',
   };
+  /* کارتِ مالک — از سرور، نه از نقشِ داخلِ توکن */
+  const [isOwner, setIsOwner] = useState(false);
+  useEffect(() => {
+    void (async () => {
+      try {
+        const r = await apiFetch('/api/account/status', { cache: 'no-store' });
+        const j = r.ok ? await r.json() as { isOwner?: boolean } : null;
+        setIsOwner(j?.isOwner === true);
+      } catch { setIsOwner(false); }
+    })();
+  }, []);
   const allowed = (link: string) => {
+    if (link === '/admin/enforcement') return isOwner;
     if (!perms) return false;
     if (perms.includes('*')) return true;
     const seg = link.replace('/admin/', '');

@@ -74,7 +74,9 @@
     "test:edit-image": "node scripts/test-edit-image.mjs",
     "lint:strict": "eslint --max-warnings 0",
     "test:guards": "node scripts/test-injection-guards.mjs",
-    "test:logs": "node scripts/test-log-helpers.mjs"
+    "test:logs": "node scripts/test-log-helpers.mjs",
+    "test:enforcement": "node scripts/test-enforcement.mjs",
+    "test:enforcement:live": "node scripts/test-enforcement-live.mjs"
   },
   "dependencies": {
     "@fontsource/vazirmatn": "^5.2.8",

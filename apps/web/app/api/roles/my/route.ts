@@ -1,6 +1,7 @@
 export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { sb, actorFromRequest, audit, clientIp } from '@/lib/finance/db';
+import { isPlatformOwner } from '@/lib/enforcement/server';
 
 /* درخواست‌های نقش خود کاربر.
 
@@ -65,6 +66,12 @@ export async function PUT(req: NextRequest) {
     return NextResponse.json({ message: 'نقش ادمین نقش نمایشی نیست' }, { status: 400 });
   }
   if (cur.primaryRole === role) return NextResponse.json({ ok: true, primaryRole: role });
+  /* ⚠️ مالک: نقشِ نمایشی ادمین را به فهرستِ دوم می‌برد، توکنِ بعدی نقشِ
+     دیگری می‌گیرد و proxy همه‌ی /admin — از جمله پنلِ اعمال — را می‌بندد؛ و
+     این مسیر نقشِ admin را برنمی‌گرداند. راهِ بازگشت فقط دیتابیس بود. */
+  if (cur.primaryRole === 'admin' && await isPlatformOwner(actor.id)) {
+    return NextResponse.json({ message: 'مالکِ پلتفرم نقشِ اصلیِ ادمین را نگه می‌دارد — نقشِ نمایشی برای او عوض نمی‌شود' }, { status: 400 });
+  }
 
   /* نقش قبلی گم نمی‌شود — به فهرست دوم می‌رود */
   const nextSecondary = Array.from(new Set([

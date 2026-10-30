@@ -2,6 +2,7 @@ export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { sb, actorFromRequest, audit, clientIp } from '@/lib/finance/db';
 import { isSuperAdmin } from '@/lib/admin/permissions';
+import { ownerTargetGuard } from '@/lib/enforcement/server';
 
 /* اعطا و لغو دسترسی ادمین.
 
@@ -71,6 +72,9 @@ export async function POST(req: NextRequest) {
   const userId = String(b.userId ?? '');
   const grant = b.grant !== false;
   if (!userId) return NextResponse.json({ message: 'کاربر را انتخاب کنید' }, { status: 400 });
+
+  const denied = await ownerTargetGuard(actor.id, userId, clientIp(req));
+  if (denied) return denied;
 
   const { data: target } = await sb().from('users')
     .select('id,phone,"firstName","lastName","primaryRole","secondaryRoles"')

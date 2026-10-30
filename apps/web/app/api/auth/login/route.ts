@@ -4,6 +4,8 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { getSupabaseServer } from '@/lib/supabase-server';
 import { issueSession } from '@/lib/auth/store';
+import { accountStateOf } from '@/lib/enforcement/server';
+import { canSignIn, userMessage } from '@/lib/enforcement/policy';
 import { hitRateLimit, tooMany, RULES } from '@/lib/auth/rate-limit';
 import { normalizePhone } from '@/lib/auth/phone';
 import { loginGuard, loginFailed, loginSucceeded, lockMessage, GENERIC_LOGIN_ERROR } from '@/lib/auth/login-guard';
@@ -78,6 +80,16 @@ export async function POST(req: NextRequest) {
 
     /* ورود موفق ⇒ شمارنده‌ی همین حساب پاک می‌شود */
     await loginSucceeded(String(phone));
+
+    /* حسابِ مسدود/تعلیق/غیرفعال/حذف‌شده نشست نمی‌گیرد. فقط پس از رمزِ
+       درست گفته می‌شود — وگرنه کسی بی‌رمز می‌فهمید کدام شماره مسدود است. */
+    const state = await accountStateOf(user.id);
+    if (!canSignIn(state)) {
+      return NextResponse.json(
+        { code: 'ACCOUNT_BLOCKED', status: state.status, until: state.expiresAt, message: userMessage(state.status, state.expiresAt) },
+        { status: 403, headers: CORS_HEADERS },
+      );
+    }
 
     /* توکن قدیمی هنوز در body برمی‌گردد تا کلاینت‌های فعلی نشکنند؛
        در مرحله‌ی «د» حذف می‌شود. منبع اصلی از حالا کوکی httpOnly است. */

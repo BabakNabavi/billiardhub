@@ -2,7 +2,9 @@ export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseServer } from '@/lib/supabase-server';
 import { REFRESH_COOKIE, ACCESS_COOKIE, ACCESS_TTL_SEC, verifyToken, signAccessToken, signRefreshToken } from '@/lib/auth/session';
-import { checkRefresh, setSessionRefresh, setSessionCookies, clearSessionCookies, shouldRotate } from '@/lib/auth/store';
+import { checkRefresh, setSessionRefresh, setSessionCookies, clearSessionCookies, shouldRotate, revokeSession } from '@/lib/auth/store';
+import { accountStateOf } from '@/lib/enforcement/server';
+import { canSignIn, userMessage } from '@/lib/enforcement/policy';
 
 const CORS_HEADERS = {
   'Vary': 'Origin',
@@ -53,6 +55,19 @@ export async function POST(req: NextRequest) {
   const u = data as { id: string; phone?: string; primaryRole?: string } | null;
   if (!u) {
     const res = NextResponse.json({ ok: false, message: 'کاربر یافت نشد' }, { status: 401, headers: CORS_HEADERS });
+    return clearSessionCookies(res);
+  }
+
+  /* حسابِ مسدود/تعلیق/غیرفعال/حذف‌شده تمدید نمی‌گیرد؛ نشستش همین‌جا
+     باطل و کوکی‌ها پاک می‌شوند (اقدامِ مالک هم همه را باطل کرده بود؛ این
+     برای وقتی است که آن لحظه نشست هنوز ثبت نشده بود). */
+  const state = await accountStateOf(u.id);
+  if (!canSignIn(state)) {
+    await revokeSession(claims.sid, 'enforcement:refresh');
+    const res = NextResponse.json(
+      { ok: false, code: 'ACCOUNT_BLOCKED', status: state.status, message: userMessage(state.status, state.expiresAt) },
+      { status: 403, headers: CORS_HEADERS },
+    );
     return clearSessionCookies(res);
   }
 

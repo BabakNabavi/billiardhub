@@ -1,7 +1,9 @@
 export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseServer } from '@/lib/supabase-server';
-import { ACCESS_COOKIE, verifyToken } from '@/lib/auth/session';
+import { ACCESS_COOKIE, verifyLegacyToken } from '@/lib/auth/session';
+import { accountStateOf } from '@/lib/enforcement/server';
+import { canSignIn, userMessage } from '@/lib/enforcement/policy';
 import { issueSession } from '@/lib/auth/store';
 
 const CORS_HEADERS = {
@@ -33,7 +35,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: false, message: 'توکن ارسال نشد' }, { status: 400, headers: CORS_HEADERS });
   }
 
-  const claims = verifyToken(token);
+  /* فقط توکنِ نسلِ قدیم — نه توکنِ تازه‌سازی یا دسترسیِ نسلِ جدید (شرح در verifyLegacyToken) */
+  const claims = verifyLegacyToken(token);
   if (!claims) {
     return NextResponse.json({ ok: false, message: 'توکن معتبر نیست' }, { status: 401, headers: CORS_HEADERS });
   }
@@ -44,6 +47,15 @@ export async function POST(req: NextRequest) {
   const u = data as { id: string; phone?: string; primaryRole?: string } | null;
   if (!u) {
     return NextResponse.json({ ok: false, message: 'کاربر یافت نشد' }, { status: 401, headers: CORS_HEADERS });
+  }
+
+  /* حسابِ مسدود از راهِ توکنِ قدیمی هم نشستِ تازه نمی‌گیرد */
+  const state = await accountStateOf(u.id);
+  if (!canSignIn(state)) {
+    return NextResponse.json(
+      { ok: false, code: 'ACCOUNT_BLOCKED', status: state.status, message: userMessage(state.status, state.expiresAt) },
+      { status: 403, headers: CORS_HEADERS },
+    );
   }
 
   const res = NextResponse.json({ ok: true }, { headers: CORS_HEADERS });

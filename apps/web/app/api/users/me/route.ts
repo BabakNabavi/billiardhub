@@ -2,6 +2,7 @@ export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseServer } from '@/lib/supabase-server';
 import { sessionFromRequest } from '@/lib/auth/session';
+import { isPlatformOwner } from '@/lib/enforcement/server';
 
 const CORS_HEADERS = {
   'Vary': 'Origin',
@@ -37,6 +38,11 @@ export async function PATCH(req: NextRequest) {
         { message: 'نقش انتخابی معتبر نیست' },
         { status: 400, headers: CORS_HEADERS },
       );
+    }
+
+    /* مالک نقشِ اصلیِ ادمین را از این‌جا از دست نمی‌دهد (شرح در /api/roles/my) */
+    if (await isPlatformOwner(userId)) {
+      return NextResponse.json({ message: 'مالکِ پلتفرم نقشِ اصلیِ ادمین را نگه می‌دارد — نقشِ نمایشی برای او عوض نمی‌شود' }, { status: 400, headers: CORS_HEADERS });
     }
 
     const { data: user, error } = await getSupabaseServer()

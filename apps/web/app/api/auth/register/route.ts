@@ -8,6 +8,7 @@ import { hitRateLimit, tooMany, RULES } from '@/lib/auth/rate-limit';
 import { normalizePhone, hasAssignedPrefix, INVALID_MOBILE_MESSAGE } from '@/lib/auth/phone';
 import { wasIdentityVerified } from '@/lib/otp-server';
 import { ensurePersonForUser } from '@/lib/identity';
+import { nationalIdBlocked } from '@/lib/enforcement/server';
 
 const CORS_HEADERS = {
   'Vary': 'Origin',
@@ -70,6 +71,17 @@ export async function POST(req: NextRequest) {
        این مسیر، کد ملی دلخواه را «تأییدشده» جا بزند. */
     const nid = String(nationalId ?? '').replace(/[^0-9]/g, '');
     const idVerified = nid.length === 10 && await wasIdentityVerified(phone, nid);
+
+    /* حسابِ جایگزین (خواستِ مالک، آبانِ ۱۴۰۵): کد ملیِ تأییدشده‌ای که مالِ
+       حسابی مسدود، تعلیق یا حذف‌شده است، حسابِ تازه نمی‌سازد. ⚠️ عمداً فقط
+       همین — قانونِ کلیِ «هر کد ملی یک حساب» هنوز خاموش است (مالک با چند
+       سیم‌کارت آزمون می‌کند). */
+    if (idVerified && await nationalIdBlocked(nid)) {
+      return NextResponse.json(
+        { code: 'IDENTITY_BLOCKED', message: 'با این کد ملی امکانِ ساختِ حسابِ تازه نیست. برای پیگیری با پشتیبانی تماس بگیرید.' },
+        { status: 403, headers: CORS_HEADERS },
+      );
+    }
 
     const { data: user, error } = await getSupabaseServer()
       .from('users')

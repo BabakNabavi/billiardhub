@@ -83,3 +83,4 @@ jobs:
           npm run test:logs
           npm run test:pricing
           npm run test:closure
+          npm run test:enforcement

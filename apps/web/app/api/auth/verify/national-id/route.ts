@@ -4,6 +4,8 @@ import { getSupabaseServer } from '@/lib/supabase-server'
 import { sessionFromRequest } from '@/lib/auth/session'
 import { verifyIdentity, verifyPerson } from '@/lib/shahkar-server'
 import { ensurePersonForUser } from '@/lib/identity'
+import { nationalIdBlocked } from '@/lib/enforcement/server'
+import { audit, clientIp } from '@/lib/finance/db'
 
 /* احراز هویت کاربر فعلی — برای حساب‌هایی که پیش از راه‌اندازی استعلام
    ساخته شده‌اند و کد ملی‌شان ثبت نشده است.
@@ -86,6 +88,20 @@ export async function POST(req: NextRequest) {
       )
     }
     nameChecked = !!(person.ok && person.match)
+  }
+
+  /* حسابِ جایگزین: شاهکار همین حالا گفت این کد ملی مالِ همین آدم است؛
+     اگر همان آدم حسابِ مسدود/تعلیق/حذف‌شده دارد، این حساب راهِ دورزدنِ آن است.
+     هویت ثبت نمی‌شود و تلاش برای مالک در ممیزی می‌ماند. */
+  if (await nationalIdBlocked(nationalId)) {
+    void audit({
+      actorId: session.id, actorRole: 'user', action: 'ENFORCEMENT_EVASION_BLOCKED',
+      entityType: 'user', entityId: session.id, newValue: { via: 'verify/national-id' }, ip: clientIp(req),
+    })
+    return NextResponse.json(
+      { code: 'IDENTITY_BLOCKED', message: 'این هویت قابلِ ثبت روی این حساب نیست. برای پیگیری با پشتیبانی تماس بگیرید.' },
+      { status: 403, headers: CORS_HEADERS },
+    )
   }
 
   await supabase.from('users').update({

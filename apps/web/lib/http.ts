@@ -39,6 +39,12 @@ export async function apiFetch(input: string, init: RequestInit = {}): Promise<R
 
   const send = () => fetch(input, { ...init, method, headers, credentials: 'include' })
   const r = await send()
+  /* حسابِ مسدود/تعلیق/حذف‌شده (proxy.ts): هر درخواست ۴۰۳ با این کد می‌گیرد.
+     به‌جای خطاهای پراکنده در هر صفحه، یک‌بار به صفحه‌ی وضعیت می‌رود. */
+  if (r.status === 403 && typeof window !== 'undefined' && window.location.pathname !== '/account-status') {
+    const j = await r.clone().json().catch(() => null) as { code?: string } | null
+    if (j?.code === 'ACCOUNT_BLOCKED') window.location.assign('/account-status')
+  }
 
   /* ── ۴۰۱ ⟵ یک‌بار تازه‌سازی و تلاش دوباره ──
      ⚠️ توکن دسترسی ۱۵ دقیقه عمر دارد. تا امروز هیچ‌جا روی ۴۰۱
@@ -61,6 +67,11 @@ export async function apiFetch(input: string, init: RequestInit = {}): Promise<R
   if (typeof ReadableStream !== 'undefined' && init.body instanceof ReadableStream) return r
 
   const rf = await refreshSession()
+  /* ۴۰۳ از تمدید فقط یعنی حسابِ مسدود (refresh/route) — بی‌این، کاربرِ
+     مسدودی که توکنش منقضی شده بود بی‌هیچ پیامی «بیرون افتاده» به نظر می‌رسید */
+  if (!rf.ok && rf.status === 403 && typeof window !== 'undefined' && window.location.pathname !== '/account-status') {
+    window.location.assign('/account-status')
+  }
   if (!rf.ok) return r
 
   /* در چرخش دوازده‌ساعته کوکی CSRF هم از نو صادر می‌شود (نه در هر

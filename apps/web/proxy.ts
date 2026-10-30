@@ -9,11 +9,14 @@
      ۱) مسیرهای محافظت‌شده بدون نشست معتبر باز نمی‌شوند
      ۲) درخواست‌های تغییردهنده‌ی /api از دامنه‌ی بیگانه رد می‌شوند (CSRF)
 
-   روی Edge اجرا می‌شود ⇒ فقط jose، هیچ ماژول نودی.
+   در Next 16 روی Node اجرا می‌شود (نه Edge). از آبانِ ۱۴۰۵ وضعیتِ حساب را
+   هم از دیتابیس می‌خواند (lib/enforcement) — کار سوم، پایین‌تر.
    ───────────────────────────────────────────────────────────── */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { verifyEdge } from './lib/auth/edge'
+import { verifyEdge, type EdgeClaims } from './lib/auth/edge'
+import { decide, canSignIn, userMessage } from './lib/enforcement/policy'
+import { accountStateOf } from './lib/enforcement/server'
 import {
   ACCESS_COOKIE, REFRESH_COOKIE, CSRF_COOKIE, CSRF_HEADER,
   PROTECTED_PREFIXES, ADMIN_PREFIXES,
@@ -116,6 +119,22 @@ function sameSite(req: NextRequest): boolean {
   } catch { return false }
 }
 
+/* ── وضعیتِ حساب (مهاجرتِ ۱۱۳) ──────────────────────────────────
+   گلوگاهِ همه‌ی مسیرهای API و صفحه‌های محافظت‌شده: حسابِ مسدود، تعلیق،
+   غیرفعال یا حذف‌شده هیچ APIای جز خروج و خواندنِ وضعیتِ خودش را صدا
+   نمی‌زند؛ restricted فقط می‌خواند؛ limited قابلیت‌های بسته را تغییر
+   نمی‌دهد. وضعیت هر بار از دیتابیس می‌آید (کشِ ده‌ثانیه‌ای)، نه از توکن
+   یا کوکی — پس دستکاریِ کلاینت، نشستِ تازه، شناسه‌ی دیگر در بدنه یا توکنِ
+   قدیمیِ بی‌typ در هدرِ Authorization دورش نمی‌زند. منطق در
+   lib/enforcement/policy است. */
+async function claimsOf(req: NextRequest): Promise<EdgeClaims | null> {
+  const fromCookie = req.cookies.get(ACCESS_COOKIE)?.value
+  const h = req.headers.get('authorization')
+  const fromHeader = h?.startsWith('Bearer ') ? h.slice(7) : undefined
+  /* هر دو: کوکیِ خراب + هدرِ معتبر هم شناخته شود */
+  return (await verifyEdge(fromCookie)) ?? (await verifyEdge(fromHeader))
+}
+
 export default async function proxy(req: NextRequest) {
   const { pathname, search } = req.nextUrl
 
@@ -150,6 +169,23 @@ export default async function proxy(req: NextRequest) {
         }
       }
     }
+
+    /* ── وضعیتِ حساب ──
+       ⚠️ بازگشتِ درگاه معاف است: کاربری که بینِ پرداخت و بازگشت مسدود شد
+       پولش رفته؛ بی‌این معافیت verify هرگز اجرا نمی‌شد و رزرو/ثبت‌نامی که
+       پولش داده شده ثبت نمی‌شد. آن مسیرها پرداخت را خودشان از درگاه
+       verify می‌کنند و هیچ دسترسیِ دیگری نمی‌دهند. */
+    const who = fromGateway ? null : await claimsOf(req)
+    if (who) {
+      const state = await accountStateOf(who.id)
+      const d = decide(state, req.method, pathname)
+      if (!d.allow) {
+        return NextResponse.json({
+          code: d.code, status: d.status, feature: d.feature ?? null,
+          until: state.expiresAt, message: userMessage(d.status, state.expiresAt),
+        }, { status: 403 })
+      }
+    }
     return NextResponse.next()
   }
 
@@ -167,6 +203,14 @@ export default async function proxy(req: NextRequest) {
     const url = req.nextUrl.clone()
     url.pathname = '/login'
     url.search = `?next=${encodeURIComponent(pathname + search)}`
+    return NextResponse.redirect(url)
+  }
+
+  /* حسابِ مسدود صفحه‌ی محافظت‌شده نمی‌بیند — پیامِ وضعیتش را می‌بیند */
+  if (!canSignIn(await accountStateOf(session.id))) {
+    const url = req.nextUrl.clone()
+    url.pathname = '/account-status'
+    url.search = ''
     return NextResponse.redirect(url)
   }
 
