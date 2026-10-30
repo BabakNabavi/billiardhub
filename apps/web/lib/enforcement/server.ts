@@ -5,10 +5,10 @@ import 'server-only'
 
    دو کار:
      ۱) خواندنِ وضعیتِ حساب برای هر درخواست (proxy.ts، login، refresh،
-        actorOf). کشِ پنج‌ثانیه‌ای در حافظه. ⚠️ proxy.ts باندلِ جدایی
-        دارد و کشِ خودش را؛ invalidate() فقط کشِ مسیرهای API را پاک
-        می‌کند، پس اقدامِ مالک در proxy تا پنج ثانیه بعد اثر می‌کند.
-        نشست‌ها اما همان لحظه باطل می‌شوند.
+        actorOf). کشِ پنج‌ثانیه‌ای و مشترک (globalThis) بینِ proxy.ts و
+        مسیرهای API، پس invalidate() پس از اقدامِ مالک هر دو را پاک
+        می‌کند و اقدام همان لحظه اثر دارد.
+        نشست‌ها هم همان لحظه باطل می‌شوند.
      ۲) اجرای اقدام‌های مالک با اثرهای جانبی و ثبت در تاریخچه.
 
    ⚠️ هویتِ مالک فقط از دیتابیس (`users.is_platform_owner`) می‌آید —
@@ -31,7 +31,13 @@ const sb = () => getSupabaseServer()
 
 const TTL_MS = 5_000
 let lastError = ''
-const cache = new Map<string, { at: number; state: AccountState }>()
+/* ⚠️ کشِ مشترک روی globalThis، نه Map ماژول: proxy.ts باندلِ جدایی دارد و
+   نمونه‌ی خودش از این ماژول را می‌سازد. با Mapِ ماژول، invalidate() پس از
+   اقدامِ مالک فقط کشِ مسیرهای API را پاک می‌کرد و proxy تا پنج ثانیه حسابِ
+   تازه‌مسدود را «فعال» می‌دید — آزمونِ زنده (آبانِ ۱۴۰۵) همین را گرفت. هر دو
+   در یک فرایندِ سرورند، پس globalThis مشترک است. */
+const G = globalThis as unknown as { __bhAccountState?: Map<string, { at: number; state: AccountState }> }
+const cache = (G.__bhAccountState ??= new Map())
 const ACTIVE: AccountState = { status: 'active', expiresAt: null, restrictions: [], isOwner: false }
 
 const STATE_COLUMNS = 'id,account_status,status_expires_at,feature_restrictions,is_platform_owner'

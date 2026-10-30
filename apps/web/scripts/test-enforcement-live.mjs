@@ -64,6 +64,15 @@ const gate = r => r.status === 403 && ['ACCOUNT_BLOCKED', 'ACCOUNT_RESTRICTED', 
 
 head('ورود')
 const O = await login(OWNER); t('مالک وارد شد', O.r.status === 200, `status ${O.r.status}`)
+/* اجرای دوباره: پایانِ هر اجرا حساب‌های آزمایشی را «حذفِ نرم» می‌کند؛ پیش از
+   شروع، مالک فقط همین سه حسابِ بازه‌ی ۰۹۰۰ را برمی‌گرداند. */
+{
+  const list = await O.c.req('GET', '/api/owner/enforcement?q=0900000010')
+  for (const u of (list.json?.users ?? []).filter(x => /^0900000010[1-3]$/.test(x.phone) && x.account_status !== 'active')) {
+    const r = await act(O, u.id, 'restore', { reason: 'other', note: 'آزمونِ نفوذِ خودکار — آماده‌سازی' })
+    t(`آماده‌سازی: بازگرداندنِ ${u.phone}`, r.status === 200, `status ${r.status}`)
+  }
+}
 let a = await login(A); t('A وارد شد', a.r.status === 200, `status ${a.r.status}`)
 const b = await login(B); t('B وارد شد', b.r.status === 200, `status ${b.r.status}`)
 const c = await login(C); t('C (ادمینِ محدود) وارد شد', c.r.status === 200, `status ${c.r.status}`)
