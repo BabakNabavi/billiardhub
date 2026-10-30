@@ -38,7 +38,8 @@ function client() {
   const cookieHeader = () => [...jar].map(([k, v]) => `${k}=${v}`).join('; ')
   async function req(method, path, body, extraHeaders = {}) {
     const h = { Origin: BASE, ...extraHeaders }
-    if (jar.size) h.Cookie = cookieHeader()
+    /* کوکیِ دستیِ آزمون (جعلی) بر ظرفِ کوکی مقدم است — وگرنه رونویسی می‌شد و آزمون چیزی نمی‌سنجید */
+    if (jar.size && !extraHeaders.Cookie) h.Cookie = cookieHeader()
     if (!['GET', 'HEAD'].includes(method) && jar.get('bh_csrf')) h['x-csrf-token'] = decodeURIComponent(jar.get('bh_csrf'))
     if (body !== undefined) h['Content-Type'] = 'application/json'
     const r = await fetch(BASE + path, { method, headers: h, body: body === undefined ? undefined : JSON.stringify(body), redirect: 'manual' })
@@ -73,7 +74,7 @@ head('ارتقای دسترسی — غیرِمالک به پنلِ مالک نم
 t('A: GET پنل ⟵ ۴۰۳', (await a.c.req('GET', '/api/owner/enforcement')).status === 403)
 t('A: اقدام روی B ⟵ ۴۰۳', (await act(a, b.id, 'ban', { reason: 'spam' })).status === 403)
 t('A: با هدرها/کوکی‌های جعلی (x-user-id، role=admin) ⟵ ۴۰۳',
-  (await a.c.req('GET', '/api/owner/enforcement', undefined, { 'x-user-id': ownerId, 'x-role': 'owner', Cookie: `${[...a.jar].map(([k, v]) => `${k}=${v}`).join('; ')}; role=admin; is_owner=1` })).status === 403)
+  (await a.c.req('GET', '/api/owner/enforcement', undefined, { 'x-user-id': ownerId, 'x-role': 'owner', Cookie: `${[...a.c.jar].map(([k, v]) => `${k}=${v}`).join('; ')}; role=admin; is_owner=1` })).status === 403)
 t('A: توکنِ جعل‌شده با نقشِ admin (امضای نادرست) ⟵ بی‌هویت',
   [401, 403].includes((await client().req('GET', '/api/owner/enforcement', undefined, { Authorization: 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwicm9sZSI6ImFkbWluIn0.x' })).status))
 t('C (ادمین): GET پنلِ مالک ⟵ ۴۰۳', (await c.c.req('GET', '/api/owner/enforcement')).status === 403)
@@ -86,7 +87,7 @@ const until = new Date(Date.now() + 864e5).toISOString()
 const sus = await act(O, a.id, 'suspend', { expiresAt: until, reason: 'spam' })
 t('مالک A را تعلیق کرد', sus.status === 200, JSON.stringify(sus.json))
 /* کوکیِ دسترسی پیش از آزمونِ تمدید (که کوکی‌ها را پاک می‌کند) نگه داشته می‌شود */
-const aAt = a.jar.get('bh_at') ?? ''
+const aAt = a.c.jar.get('bh_at') ?? ''
 t('A: GET عمومی با کوکی ⟵ ۴۰۳ ACCOUNT_BLOCKED', gate(await a.c.req('GET', '/api/clubs')))
 t('A: توکنِ قدیمیِ هفت‌روزه در هدر ⟵ ۴۰۳', gate(await client().req('GET', '/api/clubs', undefined, { Authorization: `Bearer ${a.legacy}` })))
 t('A: تمدیدِ نشست ⟵ ۴۰۳ یا ۴۰۱ (نشست باطل شده)', [401, 403].includes((await a.c.req('POST', '/api/auth/refresh')).status))
