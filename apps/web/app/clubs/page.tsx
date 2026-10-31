@@ -19,6 +19,8 @@ import { fetchTournaments } from '../../lib/tournaments/client';
 import type { Tournament } from '../../lib/mock-tournaments';
 import { tableSummary, TABLE_KINDS } from '../../lib/clubs/tables';
 import { faDistance } from '../../lib/clubs/distance';
+import { makeMatcher } from '@/lib/search/filter'
+import { SearchSuggest } from '@/components/search/SearchSuggest'
 
 const TABLE_TYPES = [
   { key:'snookerTables',    label:'اسنوکر',     color:'#30C55A' },
@@ -659,8 +661,9 @@ export default function ClubsPage() {
     : c,
   );
 
+  const hit = makeMatcher(search);
   const filtered = withDist.filter(c => {
-    if (search && !c.name.includes(search) && !c.city.includes(search) && !c.address.includes(search)) return false;
+    if (search && !hit(c.name, c.city, c.address)) return false;
     if (city !== 'همه شهرها' && c.city !== city) return false;
     if (onlyOpen && !c.isOpen) return false;
     if (onlyVerified && !c.isVerified) return false;
@@ -727,10 +730,12 @@ export default function ClubsPage() {
             <div className="toolbar-row" style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
 
               {/* Search */}
-              <div className="toolbar-search" style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'rgba(255,255,255,0.72)', border: `1px solid ${searchFocus ? 'rgba(199,166,106,0.45)' : 'rgba(28,28,26,0.10)'}`, borderRadius: 12, padding: '0 14px', height: 44, flex: 1, minWidth: 160, maxWidth: 300, transition: 'all 0.3s', boxShadow: searchFocus ? '0 0 0 3px rgba(199,166,106,0.10)' : 'none' }}>
+              <div className="toolbar-search" data-suggest-box style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: 8, background: 'rgba(255,255,255,0.72)', border: `1px solid ${searchFocus ? 'rgba(199,166,106,0.45)' : 'rgba(28,28,26,0.10)'}`, borderRadius: 12, padding: '0 14px', height: 44, flex: 1, minWidth: 160, maxWidth: 300, transition: 'all 0.3s', boxShadow: searchFocus ? '0 0 0 3px rgba(199,166,106,0.10)' : 'none' }}>
                 <Search size={14} color="rgba(0,0,0,0.30)" />
-                <input className="srch-inp" type="text" value={search} onChange={e => setSearch(e.target.value)} onFocus={() => setSearchFocus(true)} onBlur={() => setSearchFocus(false)} placeholder="جستجو..." />
+                <input className="srch-inp" type="text" aria-label="جست‌وجوی باشگاه" aria-controls="sx-cl" aria-autocomplete="list" value={search} onChange={e => setSearch(e.target.value)} onFocus={() => setSearchFocus(true)} onBlur={() => setSearchFocus(false)} placeholder="جستجو..." />
                 {search && <button aria-label="پاک‌کردن جست‌وجو" onClick={() => setSearch('')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(0,0,0,0.35)', padding: 0, display: 'flex', flexShrink: 0 }}><X size={13} /></button>}
+                {/* پیشنهادِ زنده‌ی سراسری — همان «سوپر سرچ»ِ نوارِ بالا */}
+                <SearchSuggest hideEmpty q={search} onPick={() => setSearch('')} id="sx-cl" className="start-0 w-72 sm:w-96" />
               </div>
 
               {/* Near me — order 3, no arrow icon */}

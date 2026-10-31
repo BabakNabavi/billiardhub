@@ -20,6 +20,7 @@ import { channelsFrom, type ShelfChannel } from '../../../lib/media/shelf'
 import { NavOffset, TopBar, Rail, BottomNav, useRailState } from '../../../components/media/shell'
 import { ChannelCard } from '../../../components/media/cards'
 import '../media.css'
+import { makeMatcher } from '@/lib/search/filter'
 
 export default function ChannelsPage() {
   const router = useRouter()
@@ -42,9 +43,9 @@ export default function ChannelsPage() {
   }, [])
 
   const rows = useMemo(() => {
-    const t = q.trim().toLowerCase()
-    if (!t) return all
-    return all.filter(c => c.name.toLowerCase().includes(t) || c.handle.toLowerCase().includes(t))
+    if (!q.trim()) return all
+    const hit = makeMatcher(q)
+    return all.filter(c => hit(c.name, c.handle))
   }, [all, q])
 
   return (

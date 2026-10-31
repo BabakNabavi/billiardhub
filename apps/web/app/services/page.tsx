@@ -40,6 +40,7 @@ import '@/components/tech/market/market.css'
    هیچ کلاسی را جابه‌جا نمی‌کند. */
 import '@/components/tech/market/hero-art.css'
 import '@/components/tech/market/ios.css'
+import { makeMatcher } from '@/lib/search/filter'
 
 /** امتیاز تجمیعی هر متخصص — از ستون ردیف، نه jsonb */
 type Rating = { avg: number; count: number }
@@ -119,6 +120,7 @@ export default function TechnicalServicesPage() {
 
   const results = useMemo(() => {
     const q = query.trim()
+    const hit = makeMatcher(q)
     const catTitles = category ? new Set(titlesOfCategory(category)) : null
     return ALL.filter(t => {
       if (filters.city !== 'all' && t.city !== filters.city) return false
@@ -130,10 +132,8 @@ export default function TechnicalServicesPage() {
         if (!r || r.avg < filters.minRating) return false
       }
       if (catTitles && !t.services.some(s => catTitles.has(s))) return false
-      if (q
-        && !t.name.includes(q) && !t.title.includes(q)
-        && !t.services.some(s => s.includes(q))
-        && !(t.club ?? '').includes(q)) return false
+      /* همان موتورِ جست‌وجوی سراسری (lib/search/filter) */
+      if (q && !hit(t.name, t.title, t.club, ...t.services)) return false
       return true
     })
   }, [ALL, query, category, filters, ratings])

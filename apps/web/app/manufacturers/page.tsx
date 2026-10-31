@@ -10,6 +10,8 @@ import { fetchProfilesResult } from '../../lib/profiles/client'
 import VerifiedBadge from '../../components/VerifiedBadge'
 import { iranTel } from '../../lib/iran-geo'
 import { toFaDigits } from '../../lib/jalali'
+import { makeMatcher } from '@/lib/search/filter'
+import { SearchSuggest } from '@/components/search/SearchSuggest'
 
 const GOLD     = '#C7A66A'
 const GOLD_D   = '#8F6531'
@@ -568,8 +570,10 @@ export default function ManufacturersPage() {
        پاسخ از همین مرورگر */
     const registered = (remoteMfrs ?? listApprovedManufacturers()).map(profileToManufacturer)
     const ALL = [...registered, ...MANUFACTURERS.filter(m => !registered.some(r => r.id === m.id))]
+    /* همان موتورِ جست‌وجوی سراسری (lib/search/filter) — نه includesِ خام */
+    const hit = makeMatcher(search)
     const list = ALL
-      .filter(m => !search.trim() || m.name.includes(search.trim()) || m.city.includes(search.trim()) || m.specialties.some(sp => sp.includes(search.trim())))
+      .filter(m => hit(m.name, m.city, m.description, ...m.specialties))
       .filter(m => category === 'همه' || matchCat(m, category))
       .filter(m => status === 'همه' || (status === 'verified' && m.verified) || (status === 'elite' && m.elite))
     return [...list].sort((a, b) => {
@@ -636,7 +640,7 @@ export default function ManufacturersPage() {
         .mfr-tb-in .dd-btn { height: 44px; }
 
         .mfr-tb-srch {
-          display: flex; align-items: center; gap: 8px;
+          position: relative; display: flex; align-items: center; gap: 8px;
           height: 44px; padding-inline: 14px; border-radius: 12px;
           flex: 1 1 160px; min-width: 150px; max-width: 300px;
           background: rgba(255,255,255,0.72);
@@ -705,12 +709,12 @@ export default function ManufacturersPage() {
             نیمه‌شفاف و همان ارتفاعِ ۴۴ که صفحه‌ی باشگاه‌ها دارد. */}
         <div className="mfr-tb">
           <div className="mfr-tb-in">
-            <div className="mfr-tb-srch">
+            <div className="mfr-tb-srch" data-suggest-box>
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" aria-hidden>
                 <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
               </svg>
               <input
-                type="search" aria-label="جستجوی تولیدکننده"
+                type="search" aria-label="جستجوی تولیدکننده" aria-controls="sx-mfr" aria-autocomplete="list"
                 placeholder="جستجوی تولیدکننده، شهر یا تخصص..."
                 value={search} onChange={e => setSearch(e.target.value)}
               />
@@ -721,6 +725,8 @@ export default function ManufacturersPage() {
                   </svg>
                 </button>
               )}
+              {/* پیشنهادِ زنده‌ی سراسری — همان «سوپر سرچ»ِ نوارِ بالا */}
+              <SearchSuggest hideEmpty q={search} onPick={() => setSearch('')} id="sx-mfr" className="start-0 w-72 sm:w-96" />
             </div>
 
             <span className="sel-hide-mob" style={{ display: 'contents' }}>

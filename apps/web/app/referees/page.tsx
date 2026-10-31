@@ -22,6 +22,8 @@ const TEXT_M  = 'rgba(17,17,16,0.28)'
    بود: آن واژه روی صفحه‌ی داوران تکراری است و نقطه‌ها بینِ
    عبارت‌های دوکلمه‌ای گم می‌شدند. */
 import { SPEC_SEP, PIN_GREEN } from '@/lib/profile-cards'
+import { makeMatcher } from '@/lib/search/filter'
+import { SearchSuggest } from '@/components/search/SearchSuggest'
 
 const SPECS: Record<string, { label: string; color: string; glow: string }> = {
   snooker:  { label: 'اسنوکر',       color: '#7C3AED', glow: 'rgba(124,58,237,0.30)' },
@@ -345,12 +347,12 @@ export default function RefereesPage() {
       if (remote.length) setLocalRefs(remote)
     })().catch(err => { console.error('[profiles] list load failed', err); setLoadFailed(true) })
   }, [])
-  const q = search.trim()
+  const hit = makeMatcher(search)
   const referees = [...localRefs, ...REFEREES].filter(r =>
     /* فیلتر هم روی همه‌ی رشته‌ها: با `specialty` تنها، داور
        سه‌رشته‌ای فقط زیر رشته‌ی اولش پیدا می‌شد. */
     (filter === 'all' || (r.disciplines?.length ? r.disciplines.includes(filter) : r.specialty === filter)) &&
-    (q === '' || r.name.includes(q) || r.city.includes(q))
+    hit(r.name, r.city)
   )
 
   return (
@@ -435,7 +437,7 @@ export default function RefereesPage() {
             {/* search + toggles — own row under the pills on mobile, right-aligned */}
             <div className="coach-search-group" style={{ marginInlineStart:'auto', display:'flex', alignItems:'center', gap:8 }}>
               {/* search — right */}
-              <div style={{ display:'flex', alignItems:'center', gap:8,
+              <div data-suggest-box style={{ position:'relative', display:'flex', alignItems:'center', gap:8,
                 background:'rgba(255,255,255,0.82)', border:'1px solid rgba(17,17,16,0.10)',
                 borderRadius:11, padding:'8px 14px', flex:'0 1 280px', minWidth:140,
                 boxShadow:'inset 0 1px 0 rgba(255,255,255,0.9)' }}>
@@ -443,7 +445,7 @@ export default function RefereesPage() {
                   <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
                 </svg>
                 <input type="text" value={search} onChange={e => setSearch(e.target.value)}
-                  aria-label="جستجوی نام داور یا شهر"
+                  aria-label="جستجوی نام داور یا شهر" aria-controls="sx-rf" aria-autocomplete="list"
                   placeholder="جستجوی نام داور یا شهر..."
                   style={{ flex:1, minWidth:0, background:'none', border:'none', outline:'none',
                     fontSize:13, color:TEXT, fontFamily:"'Vazirmatn',Tahoma,sans-serif" }}/>
@@ -453,6 +455,8 @@ export default function RefereesPage() {
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                   </button>
                 )}
+                {/* پیشنهادِ زنده‌ی سراسری — همان «سوپر سرچ»ِ نوارِ بالا */}
+                <SearchSuggest hideEmpty q={search} onPick={() => setSearch('')} id="sx-rf" className="start-0 w-72 sm:w-96" />
               </div>
 
               {/* view toggles — beside search */}

@@ -18,6 +18,8 @@ import {
 import { listApprovedPlayers, profileToPlayer, type PlayerProfile } from '../../lib/player-store'
 import { fetchProfilesResult } from '../../lib/profiles/client'
 import VerifiedBadge from '../../components/VerifiedBadge'
+import { makeMatcher } from '@/lib/search/filter'
+import { SearchSuggest } from '@/components/search/SearchSuggest'
 
 const GOLD   = '#C7A66A'
 const GOLD_D = '#8F6531'
@@ -110,13 +112,14 @@ export default function PlayersPage() {
 
   const filtered = useMemo(() => {
     const q = query.trim()
+    const hit = makeMatcher(q)
     return ALL.filter(p => {
       /* بازیکن می‌تواند چند رشته داشته باشد؛ فیلتر باید همه را ببیند */
       const plays = (d: string) => p.discipline === d || (p.disciplines ?? []).some(e => e.discipline === d)
       if (seg === 'snooker' && !plays('snooker')) return false
       if (seg === 'pool' && !plays('pool')) return false
       if (seg === 'women' && p.gender !== 'f') return false
-      if (q && !p.name.includes(q) && !p.nameEn.toLowerCase().includes(q.toLowerCase()) && !p.city.includes(q) && !p.country.includes(q) && !DISCIPLINE_LABEL[p.discipline].fa.includes(q)) return false
+      if (q && !hit(p.name, p.nameEn, p.city, p.country, DISCIPLINE_LABEL[p.discipline].fa)) return false
       return true
       /* مرتب‌سازی بر اساس رنکینگ برداشته شد: آن فیلد را هیچ مسیری
          دیگر پر نمی‌کند، پس همه ۹۹ می‌شدند و ترتیب تصادفی بود. */
@@ -267,15 +270,17 @@ export default function PlayersPage() {
               <button key={k} className={`pl-seg${seg === k ? ' on' : ''}`} onClick={() => setSeg(k)}>{l}</button>
             ))}
           </div>
-          <div style={{ position: 'relative', flex: '1 1 220px', minWidth: 200 }}>
+          <div style={{ position: 'relative', flex: '1 1 220px', minWidth: 200 }} data-suggest-box>
             <input
-              className="input input-glass input-sm input-icon-start" type="search" aria-label="جستجو در بازیکنان"
+              className="input input-glass input-sm input-icon-start" type="search" aria-label="جستجو در بازیکنان" aria-controls="sx-pl" aria-autocomplete="list"
               value={query}
               onChange={e => setQuery(e.target.value)}
               placeholder="جستجوی نام، شهر یا رشته…"
               
             />
             <Search size={15} style={{ position: 'absolute', insetInlineStart: 13, top: '50%', transform: 'translateY(-50%)', color: GOLD_D, pointerEvents: 'none' }} />
+            {/* پیشنهادِ زنده‌ی سراسری — همان «سوپر سرچ»ِ نوارِ بالا */}
+            <SearchSuggest hideEmpty q={query} onPick={() => setQuery('')} id="sx-pl" className="inset-x-0" />
           </div>
         </div>
       </div>

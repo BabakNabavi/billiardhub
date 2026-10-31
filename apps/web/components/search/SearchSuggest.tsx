@@ -33,9 +33,11 @@ interface Props {
   /** شناسه‌ی فهرست — کادرِ نوار با `aria-controls` به آن اشاره می‌کند */
   id: string
   className?: string
+  /** کادرِ بخش‌ها: «چیزی پیدا نشد» روی فهرستِ فیلترشده‌ی خودِ صفحه ننشیند */
+  hideEmpty?: boolean
 }
 
-export function SearchSuggest({ q, onPick, id, className = '' }: Props) {
+export function SearchSuggest({ q, onPick, id, className = '', hideEmpty = false }: Props) {
   const term = q.trim()
   const [state, setState] = useState<State>({ kind: 'idle' })
   /* بسته‌شدن برای *همین* عبارت — تایپِ بعدی خودبه‌خود دوباره باز می‌کند */
@@ -78,7 +80,7 @@ export function SearchSuggest({ q, onPick, id, className = '' }: Props) {
       const links = [...(rootRef.current?.querySelectorAll<HTMLAnchorElement>('a') ?? [])]
       if (links.length === 0) return
       const i = links.indexOf(document.activeElement as HTMLAnchorElement)
-      const input = box.querySelector<HTMLInputElement>('input[name="q"]')
+      const input = box.querySelector<HTMLInputElement>('input[name="q"]') ?? box.querySelector<HTMLInputElement>('input')
       e.preventDefault()
       if (e.key === 'ArrowDown') links[Math.min(i + 1, links.length - 1)]?.focus()
       else if (i <= 0) input?.focus()
@@ -95,6 +97,7 @@ export function SearchSuggest({ q, onPick, id, className = '' }: Props) {
   }, [state.kind, dismissed, term])
 
   const open = state.kind !== 'idle' && !dismissed
+    && !(hideEmpty && (state.kind === 'error' || (state.kind === 'done' && state.hits.length === 0)))
   /* اعلامِ صفحه‌خوان — همیشه سوار، تا تغییرِ متن خوانده شود */
   const announce = !open ? ''
     : state.kind === 'done' ? (state.hits.length ? `${faNum(state.hits.length)} پیشنهاد؛ با کلیدِ پایین بروید` : 'پیشنهادی پیدا نشد')
@@ -120,7 +123,7 @@ export function SearchSuggest({ q, onPick, id, className = '' }: Props) {
       )}
 
       {state.kind === 'error' && (
-        <p className="m-0 p-4 text-sub text-danger-ink">جست‌وجو الان جواب نداد. Enter را بزنید تا صفحه‌ی نتیجه باز شود.</p>
+        <p className="m-0 p-4 text-sub text-danger-ink">پیشنهادها الان نیامدند — «همه‌ی نتیجه‌ها» را بزنید.</p>
       )}
 
       {state.kind === 'done' && state.hits.length === 0 && (

@@ -8,6 +8,8 @@ import { listApprovedSellers, type SellerProfile } from '../../lib/seller-store'
 import { fetchProfilesResult } from '../../lib/profiles/client'
 import VerifiedBadge from '../../components/VerifiedBadge'
 import type { MockSeller } from '../../lib/sellers-data'
+import { makeMatcher } from '@/lib/search/filter'
+import { SearchSuggest } from '@/components/search/SearchSuggest'
 
 const GOLD     = '#C7A66A'
 const GOLD_D   = '#8F6531'
@@ -575,8 +577,10 @@ export default function SellersPage() {
   }
 
   const filtered = useMemo(() => {
+    /* همان موتورِ جست‌وجوی سراسری (lib/search/filter) */
+    const hit = makeMatcher(search)
     const list = stores
-      .filter(s => !search.trim() || s.name.includes(search.trim()) || s.city.includes(search.trim()) || s.brands.some(b => b.toLowerCase().includes(search.toLowerCase())) || s.specialties.some(sp => sp.includes(search.trim())))
+      .filter(s => hit(s.name, s.city, ...s.brands, ...s.specialties))
       .filter(s => category === 'همه' || matchSpec(s, category))
       .filter(s => status === 'همه' || (status === 'verified' && s.verified) || (status === 'elite' && s.elite) || (status === 'top' && s.rating >= 4.7))
     return [...list].sort((a, b) => {
@@ -678,15 +682,17 @@ export default function SellersPage() {
           <div style={{ position: 'sticky', top: 'var(--nav-offset)', zIndex: 50, background: 'rgba(250,249,246,0.72)', backdropFilter: 'blur(24px) saturate(1.6)', WebkitBackdropFilter: 'blur(24px) saturate(1.6)', paddingTop: 14, paddingBottom: 12, marginBottom: 12, display: 'flex', flexDirection: 'column', gap: 10 }}>
 
             {/* search box */}
-            <div style={{ position: 'relative' }}>
+            <div style={{ position: 'relative' }} data-suggest-box>
               <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke={GOLD_D} strokeWidth="2.2" style={{ position: 'absolute', insetInlineStart: 16, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', zIndex: 2 }}>
                 <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
               </svg>
               <input
-                className="input input-glass input-icon-start-lg" type="search" aria-label="جستجوی فروشگاه"
+                className="input input-glass input-icon-start-lg" type="search" aria-label="جستجوی فروشگاه" aria-controls="sx-sel" aria-autocomplete="list"
                 placeholder="جستجوی فروشنده، شهر یا برند..."
                 value={search} onChange={e => setSearch(e.target.value)}
               />
+              {/* پیشنهادِ زنده‌ی سراسری — همان «سوپر سرچ»ِ نوارِ بالا */}
+              <SearchSuggest hideEmpty q={search} onPick={() => setSearch('')} id="sx-sel" className="inset-x-0" />
             </div>
 
             {/* filter box */}

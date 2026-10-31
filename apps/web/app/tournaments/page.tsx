@@ -20,6 +20,8 @@ import {
   type Tournament, type TournamentStatus,
 } from '../../lib/mock-tournaments'
 import { fetchTournaments } from '../../lib/tournaments/client'
+import { makeMatcher } from '@/lib/search/filter'
+import { SearchSuggest } from '@/components/search/SearchSuggest'
 
 const GOLD   = '#C7A66A'
 const GOLD_D = '#8F6531'
@@ -201,9 +203,10 @@ export default function TournamentsPage() {
   useEffect(() => { void fetchTournaments().then(setRows) }, [])
   const all = rows ?? []
 
+  const hit = makeMatcher(search)
   const filtered = all.filter(t => {
     const matchTab    = tab === 'all' || t.status === tab
-    const matchSearch = !search || t.name.includes(search) || t.clubName.includes(search)
+    const matchSearch = hit(t.name, t.clubName)
     return matchTab && matchSearch
   })
 
@@ -414,15 +417,17 @@ export default function TournamentsPage() {
           </div>
           {/* سطر دوم: سرچ (راست) + سوییچ گرید/لیست روبرویش (چپ) */}
           <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-            <div className="tn-sbox" style={{ position: 'relative', flex: 1, minWidth: 0 }}>
+            <div className="tn-sbox" style={{ position: 'relative', flex: 1, minWidth: 0 }} data-suggest-box>
               <input
-                className="input input-glass input-sm input-icon-start" type="search" aria-label="جستجو در مسابقات"
+                className="input input-glass input-sm input-icon-start" type="search" aria-label="جستجو در مسابقات" aria-controls="sx-tn" aria-autocomplete="list"
                 value={search}
                 onChange={e => setSearch(e.target.value)}
                 placeholder="جستجو در مسابقات…"
                 
               />
               <Search size={15} style={{ position: 'absolute', insetInlineStart: 13, top: '50%', transform: 'translateY(-50%)', color: GOLD_D, pointerEvents: 'none' }} />
+              {/* پیشنهادِ زنده‌ی سراسری — همان «سوپر سرچ»ِ نوارِ بالا */}
+              <SearchSuggest hideEmpty q={search} onPick={() => setSearch('')} id="sx-tn" className="start-0 w-72 sm:w-96" />
             </div>
             <div className="tn-view" role="group" aria-label="حالت نمایش">
               <button className={view === 'grid' ? 'on' : ''} onClick={() => setView('grid')} aria-label="نمایش کارتی"><LayoutGrid size={16} /></button>
