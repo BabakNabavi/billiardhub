@@ -283,7 +283,7 @@ export default function Footer() {
             {/* Logo + wordmark */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '14px' }}>
               <img
-                src="/images/Logo/bh-mark-256-v9.webp"
+                src="/images/Logo/bh-mark-256-v10.webp"
                 loading="lazy" decoding="async"
                 alt="بیلیارد هاب" className="ft-logo"
                 style={{ width: '40px', height: '40px', objectFit: 'contain', flexShrink: 0, borderRadius: '10px' }}
