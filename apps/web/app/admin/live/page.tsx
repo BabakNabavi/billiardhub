@@ -16,9 +16,10 @@ import { faDec, faNum } from '@/lib/jalali'
 import type { AdminAction, AdminState } from '@/lib/streaming/admin-types'
 import { ClubLiveCard } from '@/components/admin/live/ClubLiveCard'
 import { ReasonDialog } from '@/components/admin/live/ReasonDialog'
+import { ManualAttachForm } from '@/components/admin/live/ManualAttachForm'
 
 const keyOf = (a: AdminAction) =>
-  `${a.action}:${'channelId' in a ? a.channelId : 'clubId' in a ? a.clubId : a.broadcastId}`
+  a.action === 'attach-manual' ? 'attach-manual' : `${a.action}:${'channelId' in a ? a.channelId : 'clubId' in a ? a.clubId : a.broadcastId}`
 
 export default function AdminLivePage() {
   const [state, setState] = useState<AdminState | null>(null)
@@ -60,7 +61,7 @@ export default function AdminLivePage() {
         <h1 className="flex items-center gap-2 text-title text-ink"><RadioTower className="h-6 w-6 text-gold-text" aria-hidden /> پخش زنده</h1>
         {state && (
           <p className="text-meta text-ink-3">
-            سرویسِ پخش: {state.connected ? `وصل (${state.provider})` : 'هنوز وصل نشده — باشگاه‌ها فعلاً کانال نمی‌سازند'}
+            سرویسِ پخش: {state.connected ? `وصل (${state.provider})` : 'API وصل نیست — کانال‌ها فعلاً با «وصلِ کانالِ آروان» دستی اضافه می‌شوند'}
             {state.month ? ` · ۳۰ روز: ${faNum(state.month.count)} پخش، ${faDec(state.month.hours)} ساعت، ${faDec(state.month.viewerHours)} ساعت‌-بیننده` : ''}
           </p>
         )}
@@ -79,6 +80,8 @@ export default function AdminLivePage() {
 
       {state?.ready && (
         <>
+          <ManualAttachForm clubs={state.allClubs ?? []} busy={busy === 'attach-manual'} run={run} />
+
           {others.length > 0 && (
             <div className="flex flex-wrap items-end gap-2 rounded-panel bg-ink/[.03] p-4">
               <label className="flex min-w-0 flex-1 flex-col gap-1 text-meta text-ink-3">

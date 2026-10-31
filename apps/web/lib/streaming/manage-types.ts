@@ -20,6 +20,8 @@ export interface OwnerChannel {
   streamKey: string | null
   createdAt: string
   viewers: number
+  /** کانالِ وصل‌شده‌ی دستی (پنلِ آروان) — شروع/پایان بی‌سرویس هم کار می‌کند؛ کلید از پنلِ آروان */
+  manual: boolean
   month: MonthSummary
 }
 

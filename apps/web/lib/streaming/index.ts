@@ -1,6 +1,7 @@
 import 'server-only'
 import type { StreamProvider } from './provider'
 import { MockStreamProvider } from './mock'
+import { ManualStreamProvider } from './manual'
 
 /* رجیستریِ سرویس‌های پخش — افزودنِ آروان/میزبان فقط همین‌جا ثبت می‌شود.
    انتخاب با env: STREAM_PROVIDER=mock | arvan | mizban
@@ -28,6 +29,14 @@ export function getStreamProvider(name = streamProviderName()): StreamProvider |
     console.error('[streaming] provider init failed', e)
     return null
   }
+}
+
+/** سرویسِ **همین کانال** — کانالِ دستی همیشه، بقیه فقط اگر سرویسِ فعال همان باشد
+ *  (کانالی که با سرویسِ دیگری ساخته شده، با کلیدِ API این یکی کنترل نمی‌شود). */
+export function providerForChannel(name: string): StreamProvider | null {
+  if (name === 'manual') return new ManualStreamProvider()
+  const p = getStreamProvider()
+  return p && p.name === name ? p : null
 }
 
 export type { StreamProvider } from './provider'

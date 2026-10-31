@@ -6,7 +6,7 @@ import { can } from '@/lib/admin/permissions'
 import { getStreamProvider, streamProviderName } from '@/lib/streaming'
 import { channelLimitOf, MAX_CHANNEL_LIMIT, summarize } from '@/lib/streaming/policy'
 import { LiveError, broadcastsOf, channelById, clubNames, must, tablesReady, toChannel } from '@/lib/streaming/repo'
-import { setChannelBlocked, setClubSettings, stopBroadcast } from '@/lib/streaming/service'
+import { archiveChannel, attachManualChannel, setChannelBlocked, setClubSettings, stopBroadcast } from '@/lib/streaming/service'
 import { countOf } from '@/lib/streaming/viewers'
 
 /* ─────────────────────────────────────────────────────────────
@@ -32,6 +32,16 @@ const Action = z.discriminatedUnion('action', [
     channelLimit: z.number().int().min(2).max(MAX_CHANNEL_LIMIT).optional(),
   }),
   z.object({ action: z.enum(['hide-recording', 'show-recording']), broadcastId: uuid }),
+  z.object({ action: z.literal('archive-channel'), channelId: uuid }),
+  /* کانالی که در پنلِ آروان ساخته شده — نشانی‌ها از همان پنل کپی می‌شوند */
+  z.object({
+    action: z.literal('attach-manual'), clubId: uuid, kind: z.enum(['club', 'table']),
+    title: z.string().trim().min(2).max(90), tableLabel: z.string().trim().max(40).optional(),
+    access: z.enum(['public', 'members']).default('public'),
+    ingestUrl: z.string().trim().regex(/^(rtmps?|srt):\/\/\S{6,300}$/, 'نشانیِ ورودی باید با rtmp:// شروع شود'),
+    streamKey: z.string().trim().min(4).max(200),
+    playbackUrl: z.string().trim().url().regex(/^https:\/\/\S+\.m3u8(\?\S*)?$/, 'نشانیِ تماشا باید https و .m3u8 باشد'),
+  }),
 ])
 
 async function guard(req: NextRequest) {
@@ -73,7 +83,7 @@ export async function GET(req: NextRequest) {
         month: summarize(past.filter(b => b.clubId === clubId)),
         channels: mine.map(c => ({
           id: c.id, kind: c.kind, title: c.title, tableLabel: c.tableLabel, access: c.access,
-          isLive: c.isLive, viewers: c.isLive ? countOf(c.id) : 0,
+          isLive: c.isLive, viewers: c.isLive ? countOf(c.id) : 0, manual: c.provider === 'manual',
           adminBlocked: c.adminBlocked, blockReason: c.blockReason,
           month: summarize(past.filter(b => b.channelId === c.id)),
           recent: past.filter(b => b.channelId === c.id).slice(0, 5),
@@ -95,7 +105,10 @@ export async function POST(req: NextRequest) {
   const g = await guard(req)
   if ('res' in g) return g.res
   const parsed = Action.safeParse(await req.json().catch(() => ({})))
-  if (!parsed.success) return NextResponse.json({ message: 'درخواست نامعتبر — دلیلِ مسدودسازی دست‌کم ۳ حرف' }, { status: 400 })
+  if (!parsed.success) {
+    const first = parsed.error.issues[0]?.message
+    return NextResponse.json({ message: first && /[؀-ۿ]/.test(first) ? first : 'اطلاعات کامل یا معتبر نیست (دلیلِ مسدودسازی دست‌کم ۳ حرف)' }, { status: 400 })
+  }
   const b = parsed.data
   if (!(await tablesReady())) return NextResponse.json({ message: 'مهاجرتِ ۱۱۴ هنوز اجرا نشده است' }, { status: 503 })
 
@@ -106,17 +119,22 @@ export async function POST(req: NextRequest) {
       await setClubSettings(b.clubId, { tier: b.tier, channelLimit: b.channelLimit }, g.actor.id)
     } else if (b.action === 'hide-recording' || b.action === 'show-recording') {
       must(await sb().from('live_broadcasts').update({ recording_hidden: b.action === 'hide-recording' }).eq('id', b.broadcastId), 'recording')
+    } else if (b.action === 'attach-manual') {
+      /* «حرفه‌ای کن» و این، تنها راه‌های ساختِ ردیفِ تنظیم/کانال برای باشگاهِ تازه‌اند */
+      await attachManualChannel({ ...b, actorId: g.actor.id })
     } else if ('channelId' in b) {
       const ch = await channelById(b.channelId)
       if (!ch) return NextResponse.json({ message: 'کانال یافت نشد' }, { status: 404 })
       /* بی‌شرط: اگر پخشِ بازی بی‌کانالِ «زنده» مانده باشد هم بسته می‌شود؛ وگرنه بی‌اثر */
       if (b.action === 'force-stop') await stopBroadcast(ch, 'admin')
+      else if (b.action === 'archive-channel') await archiveChannel(ch, { byAdmin: true })
       else await setChannelBlocked(ch, b.action === 'block-channel', 'reason' in b ? b.reason : null, g.actor.id)
     }
     audit({
       actorId: g.actor.id, actorRole: 'admin', action: `LIVE_ADMIN_${b.action.toUpperCase().replace(/-/g, '_')}`,
       entityType: 'live', entityId: 'channelId' in b ? b.channelId : 'clubId' in b ? b.clubId : b.broadcastId,
-      newValue: b, ip: clientIp(req) ?? undefined,
+      /* کلیدِ استریم در لاگِ ممیزی ننشیند */
+      newValue: 'streamKey' in b ? { ...b, streamKey: '***' } : b, ip: clientIp(req) ?? undefined,
     })
     return NextResponse.json({ ok: true })
   } catch (e) {

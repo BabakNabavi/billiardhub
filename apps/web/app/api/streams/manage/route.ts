@@ -82,7 +82,7 @@ export async function GET(req: NextRequest) {
           id: c.id, kind: c.kind, title: c.title, tableLabel: c.tableLabel, tournamentId: c.tournamentId,
           access: c.access, record: c.record, isLive: c.isLive, adminBlocked: c.adminBlocked,
           blockReason: c.blockReason, ingestUrl: c.ingestUrl, streamKey: g.owner ? key : null, createdAt: c.createdAt,
-          viewers: c.isLive ? countOf(c.id) : 0,
+          viewers: c.isLive ? countOf(c.id) : 0, manual: c.provider === 'manual',
           month: summarize(past.filter(b => b.channelId === c.id)),
         }
       }),

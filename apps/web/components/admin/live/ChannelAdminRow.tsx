@@ -4,7 +4,7 @@
    (پنهان/نمایشِ ضبط در آرشیوِ عمومی). */
 
 import Link from 'next/link'
-import { Ban, CircleCheck, EyeOff, Eye, Square } from 'lucide-react'
+import { Ban, CircleCheck, EyeOff, Eye, Square, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { faDateTime, faDec, faNum } from '@/lib/jalali'
 import { KIND_LABEL } from '@/lib/streaming/policy'
@@ -22,6 +22,7 @@ export function ChannelAdminRow({ ch, busy, run, onBlock }: {
         <span className="text-meta text-ink-3">{KIND_LABEL[ch.kind]}{ch.tableLabel ? ` — ${ch.tableLabel}` : ''} · {ch.access === 'public' ? 'عمومی' : 'اعضا'}</span>
         {ch.isLive && <span className="rounded-chip bg-danger/10 px-2 py-1 text-meta font-bold text-danger">● زنده · {faNum(ch.viewers)}</span>}
         {ch.adminBlocked && <span className="rounded-chip bg-danger/10 px-2 py-1 text-meta font-bold text-danger">مسدود</span>}
+        {ch.manual && <span className="rounded-chip bg-ink/[.05] px-2 py-1 text-meta text-ink-3">وصلِ دستی</span>}
       </div>
       {ch.adminBlocked && ch.blockReason && <p className="text-meta text-danger">دلیل: {ch.blockReason}</p>}
       <p className="text-meta text-ink-3">
@@ -38,6 +39,8 @@ export function ChannelAdminRow({ ch, busy, run, onBlock }: {
         ) : (
           <Button variant="danger-ghost" size="sm" icon={<Ban className="h-4 w-4" aria-hidden />} onClick={onBlock}>مسدودِ کانال</Button>
         )}
+        <Button variant="danger-ghost" size="sm" loading={b(`archive-channel:${ch.id}`)} icon={<Trash2 className="h-4 w-4" aria-hidden />}
+          onClick={() => { if (window.confirm(`کانالِ «${ch.title}» از سایت حذف شود؟`)) void run({ action: 'archive-channel', channelId: ch.id }) }}>حذف</Button>
       </div>
       {ch.recent.length > 0 && (
         <ul className="flex flex-col gap-1 border-t border-line/10 pt-2">

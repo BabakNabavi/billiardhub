@@ -82,7 +82,7 @@ export function LiveChannelsPanel({ clubId }: { clubId: string }) {
         پخش را از همان‌جا شروع کنید و این‌جا «شروعِ پخش» را بزنید تا در سایت نمایش داده شود.
       </Intro>
 
-      {!s.connected && (
+      {!s.connected && channels.some(c => !c.manual) && (
         <p className="rounded-card bg-ink/[.04] p-3 text-sub text-ink-2">سرویسِ پخش فعلاً در دسترس نیست؛ شروعِ پخش و ساختِ کلید موقتاً خاموش است.</p>
       )}
 

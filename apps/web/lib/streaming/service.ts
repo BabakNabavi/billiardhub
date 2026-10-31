@@ -1,6 +1,6 @@
 import 'server-only'
 import { sb } from '../finance/db'
-import { getStreamProvider, StreamProviderError, type StreamProvider } from './index'
+import { getStreamProvider, providerForChannel, StreamProviderError, type StreamProvider } from './index'
 import {
   canCreateChannel, canGoLive, channelLimitOf, isStale, PRO_DEFAULT_LIMIT,
   type ChannelAccess, type ChannelKind, type ClubTier,
@@ -20,6 +20,12 @@ import { finishTally, reset } from './viewers'
 function provider(): StreamProvider {
   const p = getStreamProvider()
   if (!p) throw new LiveError('سرویسِ پخش زنده هنوز وصل نشده است', 503)
+  return p
+}
+
+function providerOf(ch: Channel): StreamProvider {
+  const p = providerForChannel(ch.provider)
+  if (!p) throw new LiveError('سرویسِ پخشِ این کانال در دسترس نیست', 503)
   return p
 }
 
@@ -82,6 +88,23 @@ export async function createChannel(n: NewChannel): Promise<Channel> {
   return (await channelById(id))!
 }
 
+export interface ManualChannel {
+  clubId: string; kind: 'club' | 'table'; title: string; tableLabel?: string | null
+  access: ChannelAccess; ingestUrl: string; streamKey: string; playbackUrl: string; actorId: string
+}
+
+/** وصلِ دستیِ کانالی که در پنلِ سرویس ساخته شده — فقط مدیرِ سایت.
+ *  سقفِ کانالِ باشگاه را دور می‌زند (تصمیمِ مدیر است)، مسدودیِ باشگاه را نه. */
+export async function attachManualChannel(m: ManualChannel): Promise<Channel> {
+  if ((await clubSettings(m.clubId)).blocked) throw new LiveError('پخشِ این باشگاه مسدود است', 409)
+  const r = await sb().from('live_channels').insert({
+    club_id: m.clubId, kind: m.kind, title: m.title, table_label: m.kind === 'table' ? (m.tableLabel || null) : null,
+    access: m.access, record: false, provider: 'manual', provider_channel_id: `manual-${Date.now()}`,
+    ingest_url: m.ingestUrl, stream_key_enc: seal(m.streamKey), playback_url: m.playbackUrl, created_by: m.actorId,
+  }).select('id').single()
+  return (await channelById(String((must(r, 'attach manual') as { id: string }).id)))!
+}
+
 export async function updateChannel(ch: Channel, patch: { title?: string; access?: ChannelAccess; record?: boolean; tableLabel?: string | null }) {
   const row: Record<string, unknown> = {}
   if (patch.title !== undefined) row.title = patch.title
@@ -92,7 +115,7 @@ export async function updateChannel(ch: Channel, patch: { title?: string; access
 }
 
 export async function rotateKey(ch: Channel): Promise<void> {
-  const p = provider()
+  const p = providerOf(ch)
   const k = await viaProvider('rotate', () => p.rotateKey(ch.providerChannelId))
   await patchChannel(ch.id, { stream_key_enc: seal(k.streamKey), ...(k.ingestUrl ? { ingest_url: k.ingestUrl } : {}) })
 }
@@ -103,7 +126,7 @@ export async function startBroadcast(ch: Channel, actorId: string, title?: strin
   const rank = siblings.filter(c => c.kind !== 'tournament').findIndex(c => c.id === ch.id)
   const v = canGoLive({ adminBlocked: ch.adminBlocked, archived: !!ch.archivedAt, isLive: ch.isLive, kind: ch.kind, rank: Math.max(0, rank) }, settings)
   if (!v.ok) throw new LiveError(v.reason, 409)
-  const p = provider()
+  const p = providerOf(ch)
   await viaProvider('enable', () => p.setEnabled(ch.providerChannelId, true))
   const r = await sb().from('live_broadcasts').insert({
     channel_id: ch.id, club_id: ch.clubId, title: (title || ch.title).slice(0, 120), started_by: actorId,
@@ -132,7 +155,7 @@ export async function stopBroadcast(ch: Channel, reason: EndReason): Promise<voi
     const b = toBroadcast(open)
     const t = finishTally(b.id)
     let recordingUrl: string | null = null
-    const p = getStreamProvider()
+    const p = providerForChannel(ch.provider)
     if (ch.record && p) {
       const recs = await p.recordings(ch.providerChannelId, new Date(b.startedAt)).catch(() => [])
       recordingUrl = recs[0]?.url ?? null
@@ -147,15 +170,15 @@ export async function stopBroadcast(ch: Channel, reason: EndReason): Promise<voi
   await patchChannel(ch.id, { is_live: false, current_broadcast_id: null })
   reset(ch.id)
   /* بستنِ ورودیِ سرویس؛ شکستش پایانِ پخش روی سایت را برنمی‌گرداند */
-  await getStreamProvider()?.setEnabled(ch.providerChannelId, false)
+  await providerForChannel(ch.provider)?.setEnabled(ch.providerChannelId, false)
     .catch(e => console.error('[streaming] disable after stop failed', e))
 }
 
-export async function archiveChannel(ch: Channel): Promise<void> {
-  /* وگرنه حذف + ساختِ دوباره، مسدودیِ مدیریت را دور می‌زد */
-  if (ch.adminBlocked) throw new LiveError('کانالِ مسدود را نمی‌توان حذف کرد؛ با پشتیبانی تماس بگیرید', 409)
+export async function archiveChannel(ch: Channel, opts: { byAdmin?: boolean } = {}): Promise<void> {
+  /* وگرنه حذف + ساختِ دوباره، مسدودیِ مدیریت را دور می‌زد (مدیر خودش می‌تواند) */
+  if (ch.adminBlocked && !opts.byAdmin) throw new LiveError('کانالِ مسدود را نمی‌توان حذف کرد؛ با پشتیبانی تماس بگیرید', 409)
   if (ch.isLive) await stopBroadcast(ch, 'owner')
-  await getStreamProvider()?.deleteChannel(ch.providerChannelId)
+  await providerForChannel(ch.provider)?.deleteChannel(ch.providerChannelId)
     .catch(e => console.error('[streaming] provider delete failed', e))
   await patchChannel(ch.id, { archived_at: new Date().toISOString(), is_live: false })
 }

@@ -55,6 +55,14 @@ export function HlsPlayer({ src, live = true, title }: { src: string; live?: boo
     return () => { cancelled = true; destroy?.() }
   }, [src, live, attempt])
 
+  /* پخشِ زنده: باشگاه «شروع» را زده ولی دوربین هنوز وصل نشده (یا لحظه‌ای قطع شد) —
+     به‌جای خطا، هر ۱۰ ثانیه خودش دوباره امتحان می‌کند */
+  useEffect(() => {
+    if (!live || state !== 'error') return
+    const t = window.setTimeout(() => setAttempt(a => a + 1), 10_000)
+    return () => window.clearTimeout(t)
+  }, [live, state])
+
   return (
     <div className="relative aspect-video w-full overflow-hidden rounded-panel bg-black">
       <video
@@ -78,7 +86,7 @@ export function HlsPlayer({ src, live = true, title }: { src: string; live?: boo
       {state === 'error' && (
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-black/80 px-6 text-center text-white">
           <WifiOff className="h-8 w-8 text-white/70" aria-hidden />
-          <p className="text-sub">تصویر فعلاً نمی‌رسد. ممکن است پخش لحظه‌ای قطع شده باشد.</p>
+          <p className="text-sub">{live ? 'در انتظارِ تصویر از باشگاه… خودکار دوباره وصل می‌شود.' : 'این ضبط فعلاً پخش نمی‌شود.'}</p>
           <button
             type="button"
             onClick={() => setAttempt(a => a + 1)}

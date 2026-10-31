@@ -46,7 +46,7 @@ export function ChannelCard({ ch, busy, run, connected = true }: { ch: OwnerChan
           <Button variant="danger" loading={isBusy('stop')} onClick={() => void run({ action: 'stop', channelId: ch.id })}
             icon={<Square className="h-4 w-4" aria-hidden />}>پایانِ پخش</Button>
         ) : (
-          <Button loading={isBusy('start')} disabled={ch.adminBlocked || !connected} onClick={() => void run({ action: 'start', channelId: ch.id })}
+          <Button loading={isBusy('start')} disabled={ch.adminBlocked || (!connected && !ch.manual)} onClick={() => void run({ action: 'start', channelId: ch.id })}
             icon={<Play className="h-4 w-4" aria-hidden />}>شروعِ پخش</Button>
         )}
         <Link href={`/live/c/${ch.id}`} target="_blank"
@@ -65,7 +65,7 @@ export function ChannelCard({ ch, busy, run, connected = true }: { ch: OwnerChan
 
       {open && (
         <div className="flex flex-col gap-4">
-          <IngestInfo ingestUrl={ch.ingestUrl} streamKey={ch.streamKey} busy={isBusy('rotate-key')} canRotate={connected} onRotate={() => setConfirm('rotate')} />
+          <IngestInfo ingestUrl={ch.ingestUrl} streamKey={ch.streamKey} busy={isBusy('rotate-key')} canRotate={connected && !ch.manual} onRotate={() => setConfirm('rotate')} />
           <div className="flex flex-wrap items-center gap-6">
             <label className="inline-flex min-h-11 cursor-pointer items-center gap-2 text-sub text-ink">
               <input type="checkbox" className="h-4 w-4 accent-gold" checked={ch.access === 'members'} disabled={isBusy('update')}

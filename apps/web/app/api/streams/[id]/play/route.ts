@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { sessionFromRequest } from '@/lib/auth/session'
 import { ipOf } from '@/lib/auth/rate-limit'
-import { getStreamProvider } from '@/lib/streaming'
+import { providerForChannel } from '@/lib/streaming'
 import { canWatch } from '@/lib/streaming/policy'
 import { channelById, clubSettings, tablesReady } from '@/lib/streaming/repo'
 import { viewerBeat } from '@/lib/streaming/public'
@@ -34,7 +34,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     const viewers = await viewerBeat(ch, body.data.viewerId, ipOf(req))
     let url: string | null = null
     if (body.data.url) {
-      url = await getStreamProvider()?.playbackUrl(ch, { ip: ipOf(req) }).catch(e => {
+      url = await providerForChannel(ch.provider)?.playbackUrl(ch, { ip: ipOf(req) }).catch(e => {
         console.error('[streams] playback url', e); return null
       }) ?? null
     }
