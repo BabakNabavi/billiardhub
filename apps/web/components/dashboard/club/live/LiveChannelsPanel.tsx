@@ -77,9 +77,11 @@ export function LiveChannelsPanel({ clubId }: { clubId: string }) {
 
   return (
     <div className="flex flex-col gap-4">
+      {/* باشگاه‌دارِ بی‌سوادِ کامپیوتری فقط یک جمله ببیند؛ نشانی و کلید ته‌ی «اتصال و تنظیمات» است */}
       <Intro>
-        هر کانال یک «نشانیِ سرور» و یک «کلیدِ استریم» دارد. آن‌ها را در OBS یا اپِ Larix وارد کنید،
-        پخش را از همان‌جا شروع کنید و این‌جا «شروعِ پخش» را بزنید تا در سایت نمایش داده شود.
+        {channels.some(c => c.browser)
+          ? 'گوشی یا لپ‌تاپ را رو به میز بگذارید و «پخش با دوربینِ همین دستگاه» را بزنید. برای تمام‌کردن، «پایانِ پخش».'
+          : 'هر کانال یک «نشانیِ سرور» و یک «کلیدِ استریم» دارد. آن‌ها را در OBS یا دوربینِ سالن وارد کنید، پخش را از همان‌جا شروع کنید و این‌جا «شروعِ پخش» را بزنید تا در سایت نمایش داده شود.'}
       </Intro>
 
       {!s.connected && channels.some(c => !c.manual) && (
@@ -109,7 +111,7 @@ export function LiveChannelsPanel({ clubId }: { clubId: string }) {
 
       {channels.length === 0 && !adding
         ? <p className="rounded-panel bg-ink/[.03] px-4 py-8 text-center text-sub text-ink-3">هنوز کانالی نساخته‌اید. با «کانالِ تازه» شروع کنید.</p>
-        : channels.map(ch => <ChannelCard key={ch.id} ch={ch} busy={busy} run={run} connected={s.connected} />)}
+        : channels.map(ch => <ChannelCard key={ch.id} ch={ch} clubId={clubId} busy={busy} run={run} connected={s.connected} />)}
     </div>
   )
 }

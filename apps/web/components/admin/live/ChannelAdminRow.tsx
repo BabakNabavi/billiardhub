@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/Button'
 import { faDateTime, faDec, faNum } from '@/lib/jalali'
 import { KIND_LABEL } from '@/lib/streaming/policy'
 import type { AdminAction, AdminChannel } from '@/lib/streaming/admin-types'
+import { WhipForm } from './WhipForm'
 
 export function ChannelAdminRow({ ch, busy, run, onBlock }: {
   ch: AdminChannel; busy: string | null
@@ -44,6 +45,7 @@ export function ChannelAdminRow({ ch, busy, run, onBlock }: {
             ? `کانالِ «${ch.title}» از سایت حذف شود؟ (خودِ کانال در پنلِ آروان می‌ماند)`
             : `کانالِ «${ch.title}» از سایت و از سرویسِ پخش حذف شود؟ این کار برگشت ندارد.`)) void run({ action: 'archive-channel', channelId: ch.id }) }}>حذف</Button>
       </div>
+      <WhipForm channelId={ch.id} current={ch.whipUrl} busy={b(`set-whip:${ch.id}`)} run={run} />
       {ch.recent.length > 0 && (
         <ul className="flex flex-col gap-1 border-t border-line/10 pt-2">
           {ch.recent.map(r => (

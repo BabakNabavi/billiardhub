@@ -3,7 +3,7 @@
 /* یک کانالِ پخش در پنلِ باشگاه: وضعیت، شروع/پایان، اطلاعاتِ اتصال،
    دسترسی و ضبط، و حذف. هر کارِ برگشت‌ناپذیر (کلیدِ تازه، حذف) تأیید می‌خواهد. */
 
-import { useState } from 'react'
+import { useState, useSyncExternalStore } from 'react'
 import Link from 'next/link'
 import { ChevronDown, ExternalLink, Play, ShieldAlert, Square, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
@@ -12,13 +12,25 @@ import { faDec, faNum } from '@/lib/jalali'
 import { KIND_LABEL } from '@/lib/streaming/policy'
 import type { ManageAction, OwnerChannel } from '@/lib/streaming/manage-types'
 import { IngestInfo } from './IngestInfo'
+import { BrowserGoLive } from './BrowserGoLive'
+import { getServerSnapshot, getSnapshot, subscribe } from '@/lib/live/browser-publish'
 
 type Run = (a: ManageAction) => Promise<boolean>
+const isBusyOf = (busy: string | null, a: string, id: string) => busy === `${a}:${id}`
 
-export function ChannelCard({ ch, busy, run, connected = true }: { ch: OwnerChannel; busy: string | null; run: Run; connected?: boolean }) {
+export function ChannelCard({ ch, clubId, busy, run, connected = true }: { ch: OwnerChannel; clubId: string; busy: string | null; run: Run; connected?: boolean }) {
   const [open, setOpen] = useState(false)
+  const pub = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot)
+  /* پخش از همین دستگاه: دکمه‌ی پایانش در BrowserGoLive است، نه این‌جا */
+  const publishingHere = pub.channelId === ch.id && (pub.phase === 'live' || pub.phase === 'connecting')
+  const externalStart = (
+    <Button variant={ch.browser ? 'secondary' : 'primary'} loading={isBusyOf(busy, 'start', ch.id)} disabled={ch.adminBlocked || (!connected && !ch.manual)}
+      onClick={() => void run({ action: 'start', channelId: ch.id })} icon={<Play className="h-4 w-4" aria-hidden />}>
+      {ch.browser ? 'شروع با دوربینِ جدا (OBS، دوربینِ سالن)' : 'شروعِ پخش'}
+    </Button>
+  )
   const [confirm, setConfirm] = useState<'rotate' | 'archive' | null>(null)
-  const isBusy = (a: string) => busy === `${a}:${ch.id}`
+  const isBusy = (a: string) => isBusyOf(busy, a, ch.id)
 
   return (
     <article className="flex flex-col gap-4 rounded-panel border border-line/10 bg-surface p-4 shadow-e0">
@@ -41,14 +53,13 @@ export function ChannelCard({ ch, busy, run, connected = true }: { ch: OwnerChan
         </p>
       )}
 
+      {ch.browser && <BrowserGoLive ch={ch} clubId={clubId} run={run} />}
+
       <div className="flex flex-wrap items-center gap-2">
-        {ch.isLive ? (
+        {ch.isLive && !publishingHere ? (
           <Button variant="danger" loading={isBusy('stop')} onClick={() => void run({ action: 'stop', channelId: ch.id })}
             icon={<Square className="h-4 w-4" aria-hidden />}>پایانِ پخش</Button>
-        ) : (
-          <Button loading={isBusy('start')} disabled={ch.adminBlocked || (!connected && !ch.manual)} onClick={() => void run({ action: 'start', channelId: ch.id })}
-            icon={<Play className="h-4 w-4" aria-hidden />}>شروعِ پخش</Button>
-        )}
+        ) : !ch.isLive && !ch.browser ? externalStart : null}
         <Link href={`/live/c/${ch.id}`} target="_blank"
           className="inline-flex min-h-11 items-center gap-1 rounded-field px-4 text-sub text-ink-2 hover:bg-line/[.04] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-deep">
           <ExternalLink className="h-4 w-4" aria-hidden /> صفحه‌ی تماشا
@@ -65,6 +76,7 @@ export function ChannelCard({ ch, busy, run, connected = true }: { ch: OwnerChan
 
       {open && (
         <div className="flex flex-col gap-4">
+          {ch.browser && !ch.isLive && <div>{externalStart}</div>}
           <IngestInfo ingestUrl={ch.ingestUrl} streamKey={ch.streamKey} busy={isBusy('rotate-key')} canRotate={connected && !ch.manual} onRotate={() => setConfirm('rotate')} />
           <div className="flex flex-wrap items-center gap-6">
             {!ch.manual && <>

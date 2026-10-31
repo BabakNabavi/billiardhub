@@ -208,7 +208,7 @@ const nextConfig = {
               "media-src 'self' data: blob: https://billiardhub.net https://*.arvanlive.ir",
               "font-src 'self' data:",
               /* آمار: ارسالِ رویدادهای GA4 و Clarity */
-              "connect-src 'self' https://billiardhub.net wss://billiardhub.net https://*.arvanlive.ir https://*.google-analytics.com https://*.analytics.google.com https://www.googletagmanager.com https://stats.g.doubleclick.net https://www.google.com https://*.clarity.ms https://c.bing.com",
+              "connect-src 'self' https://billiardhub.net wss://billiardhub.net https://*.arvanlive.ir https://*.arvancloud.ir https://*.google-analytics.com https://*.analytics.google.com https://www.googletagmanager.com https://stats.g.doubleclick.net https://www.google.com https://*.clarity.ms https://c.bing.com",
               /* ── نقشه‌ی باشگاه ──
                  صفحه‌ی باشگاه نقشه را در یک iframe از گوگل می‌آورد.
                  `frame-src` تعریف نشده بود، پس `default-src 'self'`

@@ -9,9 +9,10 @@ import { channelLimitOf, summarize } from '@/lib/streaming/policy'
 import { LiveError, broadcastsOf, channelById, clubChannels, clubSettings, tablesReady } from '@/lib/streaming/repo'
 import { open } from '@/lib/streaming/secret'
 import {
-  archiveChannel, createChannel, rotateKey, startBroadcast, stopBroadcast, updateChannel,
+  archiveChannel, createChannel, goLiveVerdict, rotateKey, startBroadcast, stopBroadcast, updateChannel,
 } from '@/lib/streaming/service'
 import { countOf } from '@/lib/streaming/viewers'
+import { browserModeOf, browserSession } from '@/lib/streaming/browser'
 
 /* ─────────────────────────────────────────────────────────────
    مدیریتِ کانال‌های پخشِ یک باشگاه — فقط مالکِ همان باشگاه (یا ادمین).
@@ -35,7 +36,7 @@ const Action = z.discriminatedUnion('action', [
     access: z.enum(['public', 'members']).optional(), record: z.boolean().optional(),
   }),
   z.object({ action: z.literal('start'), clubId: uuid, channelId: uuid, title: z.string().trim().max(120).optional() }),
-  z.object({ action: z.enum(['stop', 'rotate-key', 'archive']), clubId: uuid, channelId: uuid }),
+  z.object({ action: z.enum(['stop', 'rotate-key', 'archive', 'browser-session']), clubId: uuid, channelId: uuid }),
 ])
 
 /* فقط **مالکِ واقعیِ** باشگاه (clubs.ownerId) — کلیدِ استریم مالِ اوست.
@@ -83,6 +84,8 @@ export async function GET(req: NextRequest) {
           access: c.access, record: c.record, isLive: c.isLive, adminBlocked: c.adminBlocked,
           blockReason: c.blockReason, ingestUrl: c.ingestUrl, streamKey: g.owner ? key : null, createdAt: c.createdAt,
           viewers: c.isLive ? countOf(c.id) : 0, manual: c.provider === 'manual',
+          /* دکمه‌ی دوربین فقط برای مالک — ادمین توکن نمی‌گیرد */
+          browser: g.owner ? browserModeOf(c) : null,
           month: summarize(past.filter(b => b.channelId === c.id)),
         }
       }),
@@ -108,6 +111,17 @@ export async function POST(req: NextRequest) {
       /* کانالِ باشگاهِ دیگر = «یافت نشد»، نه «ممنوع» — وجودش لو نرود */
       if (!ch || ch.clubId !== b.clubId || ch.archivedAt) return NextResponse.json({ message: 'کانال یافت نشد' }, { status: 404 })
       entityId = ch.id
+      if (b.action === 'browser-session') {
+        /* دوربینِ همین دستگاه: فقط مالکِ واقعی (توکن مقصدِ RTMP با کلید را دارد) */
+        if (!g.owner) return NextResponse.json(FORBIDDEN, { status: 403 })
+        /* همان قاعده‌ی «شروع»: کانالی که از OBS/دوربینِ سالن زنده است، توکنِ رقیب نمی‌گیرد */
+        const v = await goLiveVerdict(ch)
+        if (!v.ok) return NextResponse.json({ message: ch.isLive ? 'این کانال هم‌اکنون از دستگاهِ دیگری پخش می‌شود؛ اول «پایانِ پخش» را بزنید' : v.reason }, { status: 409 })
+        const sess = browserSession(ch)
+        if (!sess) return NextResponse.json({ message: 'پخش از مرورگر برای این کانال هنوز فعال نیست' }, { status: 503 })
+        audit({ actorId: g.actor.id, actorRole: g.actor.role, action: 'LIVE_BROWSER_SESSION', entityType: 'live_channel', entityId: ch.id, newValue: { mode: sess.mode }, ip: clientIp(req) ?? undefined })
+        return NextResponse.json({ ok: true, ...sess }, { headers: NO_STORE })
+      }
       if (b.action === 'update') await updateChannel(ch, b)
       else if (b.action === 'start') await startBroadcast(ch, g.actor.id, b.title)
       else if (b.action === 'stop') await stopBroadcast(ch, 'owner')

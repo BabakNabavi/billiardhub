@@ -31,8 +31,11 @@ export function open(sealed: string | null | undefined): string | null {
   const parts = String(sealed ?? '').split('.')
   if (parts.length !== 4 || parts[0] !== V) return null
   try {
-    const d = createDecipheriv('aes-256-gcm', key(), Buffer.from(parts[1]!, 'base64url'))
-    d.setAuthTag(Buffer.from(parts[2]!, 'base64url'))
+    const iv = Buffer.from(parts[1]!, 'base64url'), tag = Buffer.from(parts[2]!, 'base64url')
+    /* برچسبِ کوتاه‌شده‌ی GCM پذیرفته نشود (DEP0182) */
+    if (iv.length !== 12 || tag.length !== 16) return null
+    const d = createDecipheriv('aes-256-gcm', key(), iv, { authTagLength: 16 })
+    d.setAuthTag(tag)
     return Buffer.concat([d.update(Buffer.from(parts[3]!, 'base64url')), d.final()]).toString('utf8')
   } catch {
     /* راز عوض شده یا داده دست‌کاری شده — هر دو «کلید نامعتبر» */

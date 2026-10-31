@@ -22,6 +22,8 @@ export interface OwnerChannel {
   viewers: number
   /** کانالِ وصل‌شده‌ی دستی (پنلِ آروان) — شروع/پایان بی‌سرویس هم کار می‌کند؛ کلید از پنلِ آروان */
   manual: boolean
+  /** پخش با دوربینِ همین دستگاه: whip (مستقیم به سرویس) | relay (از راهِ رله‌ی سایت) | null */
+  browser: 'whip' | 'relay' | null
   month: MonthSummary
 }
 
@@ -40,3 +42,4 @@ export type ManageAction =
   | { action: 'update'; channelId: string; title?: string; access?: ChannelAccess; record?: boolean; tableLabel?: string | null }
   | { action: 'start'; channelId: string; title?: string }
   | { action: 'stop' | 'rotate-key' | 'archive'; channelId: string }
+  | { action: 'browser-session'; channelId: string }

@@ -8,6 +8,7 @@ import { channelLimitOf, MAX_CHANNEL_LIMIT, summarize } from '@/lib/streaming/po
 import { LiveError, broadcastsOf, channelById, clubNames, must, tablesReady, toChannel } from '@/lib/streaming/repo'
 import { archiveChannel, attachManualChannel, setChannelBlocked, setClubSettings, stopBroadcast } from '@/lib/streaming/service'
 import { countOf } from '@/lib/streaming/viewers'
+import { seal } from '@/lib/streaming/secret'
 
 /* ─────────────────────────────────────────────────────────────
    پنلِ مدیریتِ پخش زنده — کلیدِ دسترسیِ «live».
@@ -34,6 +35,12 @@ const Action = z.discriminatedUnion('action', [
   }),
   z.object({ action: z.enum(['hide-recording', 'show-recording']), broadcastId: uuid }),
   z.object({ action: z.literal('archive-channel'), channelId: uuid }),
+  /* ورودیِ WebRTCِ سرویس (اگر آروان بدهد) — خالی = برداشتن */
+  z.object({
+    action: z.literal('set-whip'), channelId: uuid,
+    whipUrl: z.union([z.literal(''), z.string().trim().url().regex(/^https:\/\/[a-z0-9.-]+\.(arvanlive|arvancloud)\.ir\//i,'نشانیِ WHIP باید از دامنه‌ی آروان باشد')]),
+    whipToken: z.string().trim().max(500).optional(),
+  }),
   /* کانالی که در پنلِ آروان ساخته شده — نشانی‌ها از همان پنل کپی می‌شوند */
   z.object({
     action: z.literal('attach-manual'), clubId: uuid, kind: z.enum(['club', 'table']),
@@ -88,7 +95,7 @@ export async function GET(req: NextRequest) {
         month: summarize(past.filter(b => b.clubId === clubId)),
         channels: mine.map(c => ({
           id: c.id, kind: c.kind, title: c.title, tableLabel: c.tableLabel, access: c.access,
-          isLive: c.isLive, viewers: c.isLive ? countOf(c.id) : 0, manual: c.provider === 'manual',
+          isLive: c.isLive, viewers: c.isLive ? countOf(c.id) : 0, manual: c.provider === 'manual', whipUrl: c.whipUrl,
           adminBlocked: c.adminBlocked, blockReason: c.blockReason,
           month: summarize(past.filter(b => b.channelId === c.id)),
           recent: past.filter(b => b.channelId === c.id).slice(0, 5),
@@ -132,6 +139,18 @@ export async function POST(req: NextRequest) {
       /* بی‌شرط: اگر پخشِ بازی بی‌کانالِ «زنده» مانده باشد هم بسته می‌شود؛ وگرنه بی‌اثر */
       if (b.action === 'force-stop') await stopBroadcast(ch, 'admin')
       else if (b.action === 'archive-channel') await archiveChannel(ch, { byAdmin: true })
+      else if (b.action === 'set-whip') {
+        /* توکن فقط وقتی عوض می‌شود که تازه وارد شده یا نشانی پاک شده —
+           ویرایشِ نشانی بی‌توکن، توکنِ ذخیره‌شده را پاک نکند */
+        const row: Record<string, unknown> = { whip_url: b.whipUrl || null }
+        if (!b.whipUrl) row.whip_token_enc = null
+        else if (b.whipToken) row.whip_token_enc = seal(b.whipToken)
+        const r = await sb().from('live_channels').update(row).eq('id', ch.id)
+        if (r.error) {
+          if (/whip_url|column|schema cache/i.test(r.error.message)) return NextResponse.json({ message: 'مهاجرتِ ۱۱۵ هنوز اجرا نشده است' }, { status: 503 })
+          must(r, 'set whip')
+        }
+      }
       else await setChannelBlocked(ch, b.action === 'block-channel', 'reason' in b ? b.reason : null, g.actor.id)
     }
     audit({
@@ -139,7 +158,8 @@ export async function POST(req: NextRequest) {
       entityType: 'live', entityId: 'channelId' in b ? b.channelId : 'clubId' in b ? b.clubId : b.broadcastId,
       /* کلیدِ استریم در لاگِ ممیزی ننشیند */
       /* کلید ممکن است در نشانیِ ورودی هم باشد (rtmp://…/key یا srt://…?streamid=) — فقط میزبان */
-      newValue: 'streamKey' in b ? { ...b, streamKey: '***', ingestUrl: hostOf(b.ingestUrl) } : b, ip: clientIp(req) ?? undefined,
+      newValue: 'streamKey' in b ? { ...b, streamKey: '***', ingestUrl: hostOf(b.ingestUrl) }
+        : b.action === 'set-whip' ? { action: b.action, channelId: b.channelId, whipHost: b.whipUrl ? hostOf(b.whipUrl) : null, token: b.whipToken ? 'set' : 'kept' } : b, ip: clientIp(req) ?? undefined,
     })
     return NextResponse.json({ ok: true })
   } catch (e) {

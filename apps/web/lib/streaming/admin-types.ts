@@ -10,7 +10,7 @@ export interface AdminBroadcast {
 
 export interface AdminChannel {
   id: string; kind: ChannelKind; title: string; tableLabel: string | null; access: ChannelAccess
-  isLive: boolean; viewers: number; manual: boolean; adminBlocked: boolean; blockReason: string | null
+  isLive: boolean; viewers: number; manual: boolean; whipUrl: string | null; adminBlocked: boolean; blockReason: string | null
   month: MonthSummary; recent: AdminBroadcast[]
 }
 
@@ -35,5 +35,6 @@ export type AdminAction =
   | { action: 'set-tier'; clubId: string; tier: 'standard' | 'pro'; channelLimit?: number }
   | { action: 'hide-recording' | 'show-recording'; broadcastId: string }
   | { action: 'archive-channel'; channelId: string }
+  | { action: 'set-whip'; channelId: string; whipUrl: string; whipToken?: string }
   | { action: 'attach-manual'; clubId: string; kind: 'club' | 'table'; title: string; tableLabel?: string
       access: 'public' | 'members'; ingestUrl: string; streamKey: string; playbackUrl: string }

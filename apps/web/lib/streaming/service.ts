@@ -122,10 +122,15 @@ export async function rotateKey(ch: Channel): Promise<void> {
 }
 
 /** «شروعِ پخش»: کانال روی سایت زنده می‌شود و ورودیِ سرویس باز */
-export async function startBroadcast(ch: Channel, actorId: string, title?: string): Promise<void> {
+/** همان سنجشِ «شروعِ پخش» — برای دادنِ توکنِ پخش از مرورگر هم (یک قاعده، نه دو) */
+export async function goLiveVerdict(ch: Channel) {
   const [settings, siblings] = await Promise.all([clubSettings(ch.clubId), clubChannels(ch.clubId)])
   const rank = siblings.filter(c => c.kind !== 'tournament').findIndex(c => c.id === ch.id)
-  const v = canGoLive({ adminBlocked: ch.adminBlocked, archived: !!ch.archivedAt, isLive: ch.isLive, kind: ch.kind, rank: Math.max(0, rank), adminAttached: ch.provider === 'manual' }, settings)
+  return canGoLive({ adminBlocked: ch.adminBlocked, archived: !!ch.archivedAt, isLive: ch.isLive, kind: ch.kind, rank: Math.max(0, rank), adminAttached: ch.provider === 'manual' }, settings)
+}
+
+export async function startBroadcast(ch: Channel, actorId: string, title?: string): Promise<void> {
+  const v = await goLiveVerdict(ch)
   if (!v.ok) throw new LiveError(v.reason, 409)
   const p = providerOf(ch)
   await viaProvider('enable', () => p.setEnabled(ch.providerChannelId, true))

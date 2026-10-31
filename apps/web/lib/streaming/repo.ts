@@ -34,6 +34,9 @@ export interface Channel {
   blockReason: string | null
   createdAt: string
   archivedAt: string | null
+  /** ورودیِ WebRTCِ سرویس (مهاجرتِ ۱۱۵) — اگر باشد، مرورگر بی‌رله وصل می‌شود */
+  whipUrl: string | null
+  whipTokenEnc: string | null
 }
 
 export interface Broadcast {
@@ -62,6 +65,7 @@ export const toChannel = (r: Row): Channel => ({
   playbackUrl: s(r.playback_url), isLive: r.is_live === true,
   currentBroadcastId: s(r.current_broadcast_id), adminBlocked: r.admin_blocked === true,
   blockReason: s(r.block_reason), createdAt: String(r.created_at ?? ''), archivedAt: s(r.archived_at),
+  whipUrl: s(r.whip_url), whipTokenEnc: s(r.whip_token_enc),
 })
 
 export const toBroadcast = (r: Row): Broadcast => ({
