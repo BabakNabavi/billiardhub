@@ -94,13 +94,15 @@ const lastMod = (v: unknown): Date => parseDbTimestamp(v) ?? new Date()
 const clubEntries = (root: string) => guarded('clubs', async () => {
   const { sb } = await import('@/lib/finance/db')
   const { data, error } = await sb().from('clubs')
-    .select('id,"updatedAt"')
+    /* نامک: لینک‌های سایت با نامکِ اختصاصی‌اند و canonicalِ صفحه هم همان است —
+       نشانیِ UUID در نقشه یعنی دو نشانی برای یک باشگاه */
+    .select('id,slug,"updatedAt"')
     .not('isActive', 'is', false)
     .in('verificationStatus', ['verified', 'approved'])
     .limit(SITEMAP_LIMIT)
   if (error) throw new Error(error.message)
-  return ((data ?? []) as { id: string; updatedAt?: string | null }[]).map(c => ({
-    url: `${root}/clubs/${c.id}`,
+  return ((data ?? []) as { id: string; slug?: string | null; updatedAt?: string | null }[]).map(c => ({
+    url: `${root}/clubs/${encodeURIComponent(c.slug || c.id)}`,
     lastModified: lastMod(c.updatedAt),
     changeFrequency: 'weekly' as const,
     priority: 0.7,
@@ -142,12 +144,38 @@ const marketAdEntries = (root: string) => guarded('market', async () => {
   }))
 })
 
+/* ── پروفایل‌ها (آبانِ ۱۴۰۵) ──
+   تا امروز هیچ پروفایلی — بازیکن، مربی، داور، فروشگاه، تولیدکننده، متخصص —
+   در نقشه نبود. فقط تأییدشده‌ها (همان شرطِ robotsِ layoutِ هر پروفایل). */
+const PROFILE_PATHS = {
+  player: '/players', coach: '/coaches', referee: '/referees',
+  seller: '/sellers', manufacturer: '/manufacturers', technician: '/services',
+} as const
+const profileEntries = (root: string) => guarded('profiles', async () => {
+  const { sb } = await import('@/lib/finance/db')
+  const { data, error } = await sb().from('profiles')
+    .select('kind,slug,updated_at')
+    .eq('status', 'approved')
+    .in('kind', Object.keys(PROFILE_PATHS))
+    .order('updated_at', { ascending: false })
+    .limit(SITEMAP_LIMIT)
+  if (error) throw new Error(error.message)
+  return ((data ?? []) as { kind: keyof typeof PROFILE_PATHS; slug: string; updated_at?: string | null }[])
+    .filter(p => p.slug && PROFILE_PATHS[p.kind])
+    .map(p => ({
+      url: `${root}${PROFILE_PATHS[p.kind]}/${encodeURIComponent(p.slug)}`,
+      lastModified: lastMod(p.updated_at),
+      changeFrequency: 'weekly' as const,
+      priority: 0.6,
+    }))
+})
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const root = base()
   const now = new Date()
   /* هم‌زمان: هر کدام سقفِ دو ثانیه‌ی خودش را دارد */
-  const [news, clubs, tournaments, ads] = await Promise.all([
-    newsEntries(root), clubEntries(root), tournamentEntries(root), marketAdEntries(root),
+  const [news, clubs, tournaments, ads, profiles] = await Promise.all([
+    newsEntries(root), clubEntries(root), tournamentEntries(root), marketAdEntries(root), profileEntries(root),
   ])
   return [
     /* بخش‌های تحریریه — ثابت، بدون دیتابیس */
@@ -165,6 +193,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: r.priority,
     })),
     ...clubs,
+    ...profiles,
     ...tournaments,
     ...ads,
     ...MEDIA_CATEGORY_KEYS.map(k => ({

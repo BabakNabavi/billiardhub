@@ -8,6 +8,8 @@ import ExploreStrip from '../components/home/ExploreStrip'
 /* از ماژول مشترک، نه از AdSlot که 'use client' است — صداکردن تابع
    یک فایل کلاینت از Server Component همان چیزی بود که صفحه را ۵۰۰ کرد */
 import { toPlacementState, type PlacementKey, type PlacementState, type PlacementPayload } from '../lib/ads/placement-state'
+import { JsonLd } from '@/components/seo/JsonLd'
+import { SITE_URL } from '@/lib/site-url'
 
 /* ─────────────────────────────────────────────────────────────
    پوسته‌ی سرور صفحه‌ی اصلی.
@@ -58,6 +60,24 @@ export const metadata: Metadata = {
   alternates: { canonical: '/' },
 }
 
+const SITE_JSONLD = [
+  {
+    '@context': 'https://schema.org', '@type': 'Organization',
+    name: 'بیلیارد هاب', alternateName: 'Billiard Hub', url: SITE_URL,
+    logo: `${SITE_URL}/images/Logo/bh-icon-512-v12.png`,
+    /* sameAs (صفحه‌های رسمی در شبکه‌های اجتماعی) وقتی حسابِ رسمی ثبت شد اضافه شود */
+  },
+  {
+    '@context': 'https://schema.org', '@type': 'WebSite',
+    name: 'بیلیارد هاب', alternateName: 'Billiard Hub', url: SITE_URL, inLanguage: 'fa-IR',
+    potentialAction: {
+      '@type': 'SearchAction',
+      target: { '@type': 'EntryPoint', urlTemplate: `${SITE_URL}/search?q={search_term_string}` },
+      'query-input': 'required name=search_term_string',
+    },
+  },
+]
+
 const KEYS: PlacementKey[] = [
   'market_featured_products_homepage',
   'featured_clubs_homepage',
@@ -86,6 +106,10 @@ export default async function HomePage() {
 
   return (
     <>
+      {/* داده‌ی ساخت‌یافته‌ی سایت: سازمان (نام، لوگو، شبکه‌ها) و وب‌سایت با جعبه‌ی
+          جست‌وجو — گوگل از این برای نامِ سایت، لوگو در نتایج و Sitelinks Search
+          Box استفاده می‌کند. فقط در صفحه‌ی اصلی، طبقِ توصیه‌ی گوگل. */}
+      <JsonLd data={SITE_JSONLD} />
       {/* تصویر هیرو LCP صفحه است ولی داخل کامپوننت کلاینتی قرار دارد،
           پس مرورگر تا پارس‌شدن آن عمق پیدایش نمی‌کند — همان چیزی که
           PageSpeed «LCP request discovery» می‌نامد.

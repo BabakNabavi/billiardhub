@@ -1,4 +1,9 @@
+import { cache } from 'react'
 import type { Metadata } from 'next'
+import { AsyncJsonLd } from '@/components/seo/AsyncJsonLd'
+import { TIMED_OUT, withTimeout } from '@/lib/seo/timeout'
+import { normalizeCondition } from '@/lib/market/categories'
+import { SITE_URL } from '@/lib/site-url'
 import { sb } from '@/lib/finance/db'
 import { productTitle } from '@/lib/market/title'
 import { conditionLabel } from '@/lib/market/categories'
@@ -20,8 +25,18 @@ type AdRow = {
   title?: string; brand?: string; model?: string
   price?: number | string | null; discountPrice?: number | string | null; negotiable?: boolean | null
   condition?: string | null; city?: string | null
-  status?: string | null; expiresAt?: string | null; images?: unknown
+  status?: string | null; expiresAt?: string | null; images?: unknown; description?: string | null
 }
+
+/* یک خواندن برای متادیتا و JSON-LD (همان درخواست) */
+const loadAd = cache(async (id: string): Promise<AdRow | null> => {
+  const res = await withTimeout(sb().from('products')
+    .select('title,brand,model,price,"discountPrice",negotiable,condition,city,status,"expiresAt",images,description')
+    .eq('id', id).maybeSingle())
+  if (res === TIMED_OUT) return null
+  if (res.error) throw new Error(res.error.message)
+  return res.data as AdRow | null
+})
 
 export async function generateMetadata(
   { params }: { params: Promise<{ id: string }> },
@@ -30,14 +45,7 @@ export async function generateMetadata(
   if (!UUID.test(id)) return {}
 
   try {
-    const { data, error } = await sb().from('products')
-      .select('title,brand,model,price,"discountPrice",negotiable,condition,city,status,"expiresAt",images')
-      .eq('id', id).maybeSingle()
-    if (error) {
-      console.error('[shop/[id] metadata] read error:', error.message)
-      return {}
-    }
-    const p = data as AdRow | null
+    const p = await loadAd(id)
     if (!p?.title) return {}
 
     /* ⚠️ همان مرزِ `/api/market/ads/[id]`: آگهیِ ردشده، حذف‌شده، متوقف یا در
@@ -91,6 +99,50 @@ export async function generateMetadata(
   }
 }
 
-export default function MarketAdLayout({ children }: { children: React.ReactNode }) {
-  return <>{children}</>
+/* ── داده‌ی ساخت‌یافته‌ی محصول ──
+   فقط آگهیِ زنده. قیمت به *ریال* (ISO 4217: IRR) — بازار تومان ذخیره می‌کند،
+   پس ضربدر ده. آگهیِ توافقی/بی‌قیمت offerِ قیمت‌دار نمی‌گیرد (ادعای ساختگی نه). */
+async function adJsonLd(id: string) {
+  if (!UUID.test(id)) return null
+  try {
+    const p = await loadAd(id)
+    if (!p?.title || !PUBLIC_AD_STATUSES.includes(String(p.status)) || !isLiveAd(p)) return null
+    const name = productTitle(p)
+    if (!name) return null
+    const listed = Number(p.price) || 0
+    const paid = Number(p.discountPrice) || 0
+    const final = paid > 0 && paid < listed ? paid : listed
+    /* Product بی‌offer برای گوگل نامعتبر است — آگهیِ توافقی/بی‌قیمت JSON-LD نمی‌گیرد */
+    if (p.negotiable === true || final <= 0) return null
+    const cond = normalizeCondition(p.condition)
+    const until = Date.parse(String(p.expiresAt ?? ''))
+    const images = (Array.isArray(p.images) ? p.images : [])
+      .filter((x): x is string => typeof x === 'string' && !!x && !x.startsWith('data:'))
+      .slice(0, 4).map(u => thumbUrl(u, 1200, 80))
+    const url = `${SITE_URL}/shop/${id}`
+    return {
+      '@context': 'https://schema.org', '@type': 'Product',
+      name, url,
+      ...(images.length ? { image: images } : {}),
+      ...(p.brand ? { brand: { '@type': 'Brand', name: p.brand } } : {}),
+      ...(p.model ? { model: p.model } : {}),
+      ...(p.description ? { description: String(p.description).replace(/\s+/g, ' ').slice(0, 500) } : {}),
+      offers: {
+        '@type': 'Offer', url, priceCurrency: 'IRR', price: final * 10,
+        availability: 'https://schema.org/InStock',
+        /* همان قاعده‌ی برچسبِ صفحه (normalizeCondition): بی‌مقدار = نو */
+        itemCondition: cond === 'new' ? 'https://schema.org/NewCondition'
+          : cond === 'needs_repair' ? 'https://schema.org/DamagedCondition' : 'https://schema.org/UsedCondition',
+        ...(Number.isFinite(until) ? { priceValidUntil: new Date(until).toISOString().slice(0, 10) } : {}),
+        ...(p.city ? { areaServed: p.city } : {}),
+      },
+    }
+  } catch { return null }
+}
+
+export default async function MarketAdLayout(
+  { children, params }: { children: React.ReactNode; params: Promise<{ id: string }> },
+) {
+  const { id } = await params
+  return <><AsyncJsonLd data={adJsonLd(id)} />{children}</>
 }

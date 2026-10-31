@@ -192,7 +192,9 @@ const nextConfig = {
                  فوتر. برخلافِ اینماد که فقط یک تصویر است، پی‌پینگ یک
                  اسکریپت می‌دهد که خودش تصویر و لینک را می‌سازد؛ پس
                  هم این‌جا و هم در `img-src` لازم است. */
-              "script-src 'self' 'unsafe-inline' https://statics.payping.ir",
+              /* GA4 و Clarity (components/seo/Analytics) — فقط وقتی شناسه‌شان در
+                 lib/seo/config پر باشد بار می‌شوند؛ اجازه‌ی CSP بی‌شناسه بی‌اثر است. */
+              "script-src 'self' 'unsafe-inline' https://statics.payping.ir https://www.googletagmanager.com https://www.clarity.ms https://scripts.clarity.ms",
               "style-src 'self' 'unsafe-inline'",
               /* `trustseal.enamad.ir` — نشانِ اعتمادِ الکترونیکی در فوتر.
                  تصویرِ نشان مستقیم از سرورِ اینماد می‌آید و بدونِ این
@@ -200,10 +202,11 @@ const nextConfig = {
                  دیده می‌شود — یعنی نشان باطل می‌شود، چون اینماد دوره‌ای
                  وجودش را بررسی می‌کند. میزبانیِ محلیِ تصویر هم مجاز
                  نیست؛ باید از دامنه‌ی خودشان بیاید. */
-              "img-src 'self' data: blob: https://billiardhub.net https://trustseal.enamad.ir https://statics.payping.ir",
+              "img-src 'self' data: blob: https://billiardhub.net https://trustseal.enamad.ir https://statics.payping.ir https://www.googletagmanager.com https://*.google-analytics.com https://stats.g.doubleclick.net https://www.google.com https://*.clarity.ms https://c.bing.com",
               "media-src 'self' data: blob: https://billiardhub.net",
               "font-src 'self' data:",
-              "connect-src 'self' https://billiardhub.net wss://billiardhub.net",
+              /* آمار: ارسالِ رویدادهای GA4 و Clarity */
+              "connect-src 'self' https://billiardhub.net wss://billiardhub.net https://*.google-analytics.com https://*.analytics.google.com https://www.googletagmanager.com https://stats.g.doubleclick.net https://www.google.com https://*.clarity.ms https://c.bing.com",
               /* ── نقشه‌ی باشگاه ──
                  صفحه‌ی باشگاه نقشه را در یک iframe از گوگل می‌آورد.
                  `frame-src` تعریف نشده بود، پس `default-src 'self'`

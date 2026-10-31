@@ -1,4 +1,8 @@
+import { cache } from 'react'
 import type { Metadata } from 'next'
+import { AsyncJsonLd } from '@/components/seo/AsyncJsonLd'
+import { TIMED_OUT, withTimeout } from '@/lib/seo/timeout'
+import { SITE_URL } from '@/lib/site-url'
 import { getArticle } from '@/lib/news/server'
 import { sectionOf } from '@/lib/news/sections'
 import { iso } from '@/lib/news/format'
@@ -18,6 +22,14 @@ import { iso } from '@/lib/news/format'
    مرورگر و عنوان داخل صفحه می‌توانستند از هم جدا بیفتند.
    ───────────────────────────────────────────────────────────── */
 
+/* یک خواندن برای متادیتا و JSON-LD، با مهلت (متادیتا رندر را بلاک می‌کند) */
+const loadArticle = cache(async (id: string) => {
+  try {
+    const a = await withTimeout(getArticle(id))
+    return a === TIMED_OUT ? null : a
+  } catch { return null }
+})
+
 export async function generateMetadata(
   { params }: { params: Promise<{ id: string }> },
 ): Promise<Metadata> {
@@ -27,13 +39,11 @@ export async function generateMetadata(
   /* ⚠️ متادیتا رندر صفحه را بلاک می‌کند؛ اگر خواندن دیتابیس معلق
      بماند کاربر هیچ چیز نمی‌بیند، حتی حالت خطا. پس علاوه بر
      `catch`، یک مهلت زمانی هم لازم است. */
-  const withTimeout = async <T,>(p: Promise<T>, ms: number): Promise<T | null> =>
-    Promise.race([p, new Promise<null>(r => setTimeout(() => r(null), ms))])
 
   /* ⚠️ رمزگشایی دوم این‌جا بدتر بود: *پیش* از ساخت promise اجرا
      می‌شد، پس catch پایین خط اصلا نمی‌دیدش و generateMetadata
      رد می‌شد. Next پارامتر را از قبل رمزگشایی کرده. */
-  const a = await withTimeout(getArticle(id), 2500).catch(() => null)
+  const a = await loadArticle(id)
   if (!a) return {}
 
   const sec = sectionOf(a.section)
@@ -62,6 +72,28 @@ export async function generateMetadata(
   }
 }
 
-export default function NewsArticleLayout({ children }: { children: React.ReactNode }) {
-  return <>{children}</>
+/* داده‌ی ساخت‌یافته: NewsArticle — تیتر، تاریخ‌ها، تصویر، ناشر با لوگو */
+async function articleJsonLd(id: string) {
+  const a = id ? await loadArticle(id) : null
+  if (!a) return null
+  const logo = { '@type': 'ImageObject', url: `${SITE_URL}/images/Logo/bh-icon-512-v12.png` }
+  return {
+    '@context': 'https://schema.org', '@type': 'NewsArticle',
+    headline: a.title.slice(0, 110),
+    url: `${SITE_URL}/news/${encodeURIComponent(a.id)}`,
+    ...(a.excerpt ? { description: a.excerpt } : {}),
+    ...(a.cover ? { image: [a.cover] } : {}),
+    ...(a.ts ? { datePublished: iso(a.ts) } : {}),
+    ...(a.updatedTs ? { dateModified: iso(a.updatedTs) } : a.ts ? { dateModified: iso(a.ts) } : {}),
+    inLanguage: 'fa-IR',
+    author: { '@type': 'Organization', name: 'بیلیارد هاب', url: SITE_URL },
+    publisher: { '@type': 'Organization', name: 'بیلیارد هاب', logo },
+  }
+}
+
+export default async function NewsArticleLayout(
+  { children, params }: { children: React.ReactNode; params: Promise<{ id: string }> },
+) {
+  const { id } = await params
+  return <><AsyncJsonLd data={articleJsonLd(id)} />{children}</>
 }

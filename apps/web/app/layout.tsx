@@ -14,7 +14,14 @@ import AddToHomeScreenGate from '../components/pwa/AddToHomeScreenGate';
 import LiveIndicator from '../components/live/LiveIndicator';
 import { FeatureFlagsProvider } from '../components/features/FeatureFlags';
 import { SITE_URL } from '../lib/site-url';
+import { SEO_IDS } from '../lib/seo/config';
+import { Analytics } from '../components/seo/Analytics';
 
+
+/* Bing و Ahrefs متاتگِ استانداردِ Next ندارند — فقط اگر شناسه‌شان پر باشد */
+const OTHER_META: Record<string, string> = { enamad: '48195948' }
+if (SEO_IDS.bingVerification) OTHER_META['msvalidate.01'] = SEO_IDS.bingVerification
+if (SEO_IDS.ahrefsVerification) OTHER_META['ahrefs-site-verification'] = SEO_IDS.ahrefsVerification
 
 export const metadata: Metadata = {
   /* بدون metadataBase، نشانی‌های نسبی canonical و og:url ناقص می‌مانند.
@@ -27,7 +34,9 @@ export const metadata: Metadata = {
     template: '%s | بیلیارد هاب',
   },
   description: "اتصال بی‌واسطه بازیکنان، باشگاه‌ها، مربیان، داوران و برترین تولیدکنندگان تجهیزات بیلیارد در ایران و جهان.",
-  alternates: { canonical: '/' },
+  /* ⚠️ canonicalِ پیش‌فرضِ '/' برداشته شد (آبانِ ۱۴۰۵): ارثی است، پس هر صفحه‌ای
+     که خودش canonical نمی‌داد (حریمِ خصوصی، قوانین…) به گوگل می‌گفت «من کپیِ
+     صفحه‌ی اصلی‌ام» و از نتایج بیرون می‌افتاد. صفحه‌ی اصلی canonicalِ خودش را دارد. */
   /* احراز مالکیت دامنه برای اینماد.
 
      احراز در نهایت با **روش ایمیل** انجام شد: کد به info@billiardhub.net
@@ -42,7 +51,8 @@ export const metadata: Metadata = {
      ⚠️ متاتگ و آن فایل عمدا می‌مانند: نامرئی‌اند، هزینه‌ای ندارند، و
      اگر اینماد روزی دستی بررسی کرد باید سر جایشان باشند.
      خود نشان در فوتر است — `components/EnamadSeal.tsx`. */
-  other: { enamad: '48195948' },
+  other: OTHER_META,
+  ...(SEO_IDS.googleVerification ? { verification: { google: SEO_IDS.googleVerification } } : {}),
   openGraph: {
     title: 'بیلیارد هاب | پلتفرم جامع و تخصصی بیلیارد',
     description: 'اتصال بی‌واسطه بازیکنان، باشگاه‌ها، مربیان، داوران و تولیدکنندگان تجهیزات بیلیارد.',
@@ -232,6 +242,8 @@ export default function RootLayout({
         {/* راهنمای «افزودن به صفحه‌ی اصلی» — فقط iOS/Safari و فقط وقتی
             هنوز نصب نشده. گیت سبک است؛ خود شیت lazy بارگذاری می‌شود. */}
         <AddToHomeScreenGate />
+        {/* GA4 و Clarity — بی‌شناسه در lib/seo/config چیزی بار نمی‌شود */}
+        <Analytics />
       </body>
     </html>
   );

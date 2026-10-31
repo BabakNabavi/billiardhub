@@ -1,88 +1,14 @@
-import type { Metadata } from 'next'
-import { getProfileBySlug } from '@/lib/profiles/server'
+import { AsyncJsonLd } from '@/components/seo/AsyncJsonLd'
+import { profileJsonLd, profileMetadata } from '@/lib/seo/profile-seo'
 
-/* ─────────────────────────────────────────────────────────────
-   متادیتای پروفایل متخصص.
+/* SEOِ صفحه‌ی پروفایل — صفحه 'use client' است و متادیتا نمی‌دهد؛ بی‌این لایه
+   عنوان و canonicalِ فهرستِ والد (/services) را ارث می‌برد و ایندکس نمی‌شد.
+   JSON-LD در Suspense است: رندرِ صفحه منتظرِ دیتابیس نمی‌ماند. */
+export const generateMetadata = profileMetadata('technician')
 
-   ── چرا این فایل لازم بود ──
-   ⚠️ `app/services/layout.tsx` مقدار `alternates.canonical = '/services'`
-   دارد و متادیتای Next ارثی است: بدون این لایه، **هر پروفایل
-   متخصص خودش را به دایرکتوری canonical می‌کرد** — یعنی به گوگل
-   می‌گفت «من صفحه‌ی اصلی نیستم، آن یکی را ایندکس کن». هر صفحه‌ی
-   متخصص از فهرست ایندکس بیرون می‌افتاد.
-
-   ⚠️ خود صفحه `'use client'` است و کامپوننت کلاینت نمی‌تواند
-   `metadata` صادر کند؛ پس این لایه‌ی سرور فقط برای همین است.
-
-   ⚠️ نام مستقیم از دیتابیس خوانده می‌شود (`getProfileBySlug`)، نه با
-   یک درخواست HTTP به API خودمان — یک رفت‌وبرگشت اضافه در مسیر
-   رندر سرور.
-   ───────────────────────────────────────────────────────────── */
-
-/* ⚠️ بدون پسوند — قالب لایه‌ی ریشه ('%s | بیلیارد هاب') آن را
-   می‌چسباند و پسوند دستی عنوان را دوبار تمام می‌کرد. */
-const BASE = 'خدمات فنی بیلیارد'
-
-export async function generateMetadata(
-  { params }: { params: Promise<{ id: string }> },
-): Promise<Metadata> {
+export default async function TechnicianProfileLayout(
+  { children, params }: { children: React.ReactNode; params: Promise<{ id: string }> },
+) {
   const { id } = await params
-
-  /* ⚠️ متادیتا هرگز نباید رندر را بشکند — و «نشکستن» فقط یعنی
-     نگرفتن استثنا نیست. `generateMetadata` رندر صفحه را *بلاک*
-     می‌کند: اگر خواندن دیتابیس معلق بماند (نه خطا بدهد)، کاربر هیچ
-     چیز نمی‌بیند، حتی حالت خطا. اندازه‌گیری‌شده: بدون این مهلت،
-     صفحه در محیط بی‌دیتابیس بعد از ۹۰ ثانیه هم رندر نشد.
-     پس علاوه بر `catch`، یک مسابقه‌ی زمانی هم لازم است. */
-  const withTimeout = async <T,>(p: Promise<T>, ms: number): Promise<T | null> =>
-    Promise.race([p, new Promise<null>(r => setTimeout(() => r(null), ms))])
-
-  let name = ''
-  let intro = ''
-  let approved = false
-  try {
-    const p = await withTimeout(getProfileBySlug('technician', id), 2500)
-    if (p) {
-      approved = p.status === 'approved'
-      const d = p.data as { name?: unknown; brand?: unknown; title?: unknown; intro?: unknown }
-      /* برند اگر ثبت شده نامِ نمایشی است — همان قاعده‌ی profileToTechnician */
-      const brand = typeof d.brand === 'string' ? d.brand.trim() : ''
-      name = brand || (typeof d.name === 'string' ? d.name.trim() : '')
-      const i = typeof d.intro === 'string' ? d.intro.trim() : ''
-      /* ⚠️ «i || t» بود. حالا که عنوان برای همه ثابتِ «خدمات فنی»
-         است، هر متخصصِ بدون معرفی همان یک جمله را به‌عنوان توضیحِ
-         متا می‌گرفت — چند صفحه با توضیحِ یکسان و بی‌ارزش. نبودنش
-         بهتر است: توضیحِ عمومیِ پایین جایش را می‌گیرد. */
-      intro = i
-    }
-  } catch { /* دیتابیس در دسترس نبود — عنوان عمومی */ }
-
-  const title = name ? `${name} | متخصص خدمات فنی بیلیارد` : BASE
-  const description = intro
-    || 'پروفایل متخصص خدمات فنی بیلیارد: تخصص‌ها، نمونه‌کارها و راه ارتباطی.'
-  const url = `/services/${id}`
-
-  return {
-    /* ⚠️ `absolute` نه رشته‌ی ساده. قالب `'%s | بیلیارد هاب'` لایه‌ی
-       ریشه را لایه‌ی میانی `services/layout.tsx` مصرف می‌کند (چون
-       `title` را به‌صورت رشته می‌دهد و قالب تازه‌ای نمی‌سازد)، پس
-       این نوه هیچ قالبی به ارث نمی‌برد. روی سایت زنده دیده شد:
-       دایرکتوری پسوند داشت، پروفایل نه. `absolute` نتیجه را قطعی
-       می‌کند و به رفتار ارث وابسته نیست. */
-    title: { absolute: `${title} | بیلیارد هاب` },
-    description,
-    alternates: { canonical: url },
-    /* ⚠️ پروفایل تأییدنشده نباید ایندکس شود: هنوز عمومی نیست. */
-    ...(approved ? {} : { robots: { index: false, follow: false } }),
-    openGraph: {
-      /* OG قالب نمی‌گیرد، پس پسوند این‌جا دستی می‌آید */
-      title: `${title} | بیلیارد هاب`, description, url,
-      siteName: 'بیلیارد هاب', locale: 'fa_IR', type: 'profile',
-    },
-    twitter: { card: 'summary', title: `${title} | بیلیارد هاب`, description },
-  }
-}
-
-export default function TechnicianProfileLayout({ children }: { children: React.ReactNode }) {
-  return <>{children}</>
+  return <><AsyncJsonLd data={profileJsonLd('technician', id)} />{children}</>
 }

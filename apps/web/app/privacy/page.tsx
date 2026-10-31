@@ -4,6 +4,7 @@ import { PRIVACY } from '../../lib/legal-content'
 
 export const metadata: Metadata = {
   title: 'حریم خصوصی',
+  alternates: { canonical: '/privacy' },
   description: 'سیاست حریم خصوصی بیلیارد هاب — اطلاعات دریافتی از کاربران، نحوه استفاده، امنیت، کوکی‌ها و نگهداری اطلاعات.',
 }
 
