@@ -2768,10 +2768,10 @@ console.log('\n― گچ ―');
 /* ── آیکونِ iOS ── */
 {
   t('نشانیِ آیکون عوض شد',
-    read('app/layout.tsx').includes('bh-apple-180-v10.png')
+    read('app/layout.tsx').includes('bh-apple-180-v12.png')
     && !read('public/manifest.json').includes('-v4') && !read('public/manifest.json').includes('-v8'),
     'iOS آیکونِ نصب‌شده را به‌روز نمی‌کند؛ فقط نشانیِ تازه جواب می‌دهد');
-  for (const f of ['bh-apple-180-v10.png', 'bh-icon-192-v10.png', 'bh-icon-512-v10.png']) {
+  for (const f of ['bh-apple-180-v12.png', 'bh-icon-192-v12.png', 'bh-icon-512-v12.png']) {
     t('فایلِ ' + f + ' هست', existsSync(join(ROOT, 'public/images/Logo/' + f)));
   }
   t('فایل‌های v4 برداشته شدند',

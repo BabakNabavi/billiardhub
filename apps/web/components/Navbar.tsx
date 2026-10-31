@@ -457,7 +457,7 @@ export default function Navbar() {
             <div style={{ position: 'relative', width: '40px', height: '40px', borderRadius: '12px', overflow: 'hidden', flexShrink: 0,
               boxShadow: isLight ? 'none' : '0 1px 2px rgba(28,27,23,0.12), 0 4px 9px rgb(var(--c-ink) / 0.05)' }}>
                 <img loading="eager" decoding="async"
-                  src={isLight ? '/images/Logo/bh-mark-256-v10.webp' : '/images/Logo/bh-nav-256-v10.webp'}
+                  src={isLight ? '/images/Logo/bh-mark-256-v12.webp' : '/images/Logo/bh-nav-256-v12.webp'}
                   alt="" style={{ width: '100%', height: '100%', objectFit: isLight ? 'contain' : 'cover' }} />
                 {!isLight && (
                   <span aria-hidden style={{ position: 'absolute', inset: 0, borderRadius: '12px', pointerEvents: 'none',
