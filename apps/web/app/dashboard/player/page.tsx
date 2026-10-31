@@ -159,27 +159,48 @@ export default function PlayerDashboard() {
      فقط `gallery` و `albums` روی *نسخه‌ی سرور* عوض و ذخیره می‌شوند —
      بقیه‌ی ویرایش‌های ذخیره‌نشده‌ی فرم بی‌اجازه نمی‌روند. پروفایلِ تازه
      (هنوز ذخیره نشده) همان رفتارِ قبلی را دارد: با «ذخیره» می‌رود. */
-  const persistMedia = async (gallery: PlayerProfile['gallery'], albums: string[]) => {
-    if (!savedSlug) return true
-    const cur = await fetchMyProfileResult<PlayerProfile>('player')
-    if (cur.state !== 'found') { setErr('ذخیره‌ی گالری انجام نشد — اتصال را بررسی کنید و دوباره امتحان کنید.'); return false }
-    const res = await saveProfileRemote('player', cur.profile.slug,
-      { ...cur.profile.data, gallery, albums } as unknown as Record<string, unknown>)
-    if (!res.ok) { setErr(res.message ?? 'ذخیره‌ی گالری انجام نشد'); return false }
-    /* نشانیِ Storage جای data:URL — وگرنه پنل تا بازخوانی base64 نگه می‌دارد */
-    const saved = res.profile?.data as Partial<PlayerProfile> | undefined
-    if (saved) setForm(f => ({ ...f, gallery: saved.gallery ?? gallery, albums: saved.albums ?? albums }))
-    return true
+  /* ⚠️ «عملیات»، نه «آرایه‌ی نهایی»: هر تغییر (افزودن/حذف/برچسب) روی
+     *نسخه‌ی تازه‌ی سرور* اعمال می‌شود، نه روی گالریِ حافظه‌ی پنل — وگرنه
+     عکسی که از صفحه‌ی عمومی اضافه شده بود با اولین تغییرِ پنل پاک می‌شد.
+     و پشتِ‌سرِ‌هم (صف): دو ذخیره‌ی هم‌زمان ترتیبِ رسیدن را تضمین نمی‌کنند
+     و حذفِ وسطِ آپلود عکس را برمی‌گرداند. شکست ⟵ فرم به حقیقتِ سرور برمی‌گردد. */
+  type Media = { gallery: PlayerProfile['gallery']; albums: string[] }
+  const mediaQ = useRef<Promise<unknown>>(Promise.resolve())
+  const [mediaBusy, setMediaBusy] = useState(0)
+  const mutateMedia = (op: (m: Media) => Media): Promise<boolean> => {
+    /* خوش‌بینانه در فرم — با تابعِ به‌روزکننده، نه بستارِ کهنه */
+    setForm(f => ({ ...f, ...op({ gallery: f.gallery, albums: f.albums }) }))
+    setSaved(false); setErr('')
+    if (!savedSlug) return Promise.resolve(true)   // پروفایلِ تازه: با «ذخیره»ی اصلی می‌رود
+    const run = async (): Promise<boolean> => {
+      const cur = await fetchMyProfileResult<PlayerProfile>('player')
+      if (cur.state !== 'found') { setErr('ذخیره‌ی گالری انجام نشد — اتصال را بررسی کنید و دوباره امتحان کنید.'); return false }
+      const base = normalizePlayerMedia(cur.profile.data)
+      const next = op({ gallery: base.gallery, albums: base.albums })
+      const res = await saveProfileRemote('player', cur.profile.slug,
+        { ...cur.profile.data, gallery: next.gallery, albums: next.albums } as unknown as Record<string, unknown>)
+      if (!res.ok) {
+        setErr(res.message ?? 'ذخیره‌ی گالری انجام نشد')
+        setForm(f => ({ ...f, gallery: base.gallery, albums: base.albums }))
+        return false
+      }
+      /* نشانیِ Storage جای data:URL — وگرنه ذخیره‌ی بعدی دوباره آپلود می‌کرد */
+      const saved = res.profile?.data ? normalizePlayerMedia(res.profile.data as Record<string, unknown>) : next
+      setForm(f => ({ ...f, gallery: saved.gallery, albums: saved.albums }))
+      return true
+    }
+    setMediaBusy(n => n + 1)
+    const p = mediaQ.current.then(run, run).finally(() => setMediaBusy(n => n - 1))
+    mediaQ.current = p
+    return p
   }
 
-  const addAlbum = async () => {
+  const addAlbum = () => {
     const n = albTitle.trim()
     if (!n) { setErr('نام آلبوم لازم است.'); return }
     if (form.albums.some(x => x.trim() === n)) { setErr('آلبومی با همین نام هست.'); return }
-    const albums = [...form.albums, n]
-    set('albums', albums); setAlbTitle('')
-    setBusy(true)
-    try { await persistMedia(form.gallery, albums) } finally { setBusy(false) }
+    setAlbTitle('')
+    void mutateMedia(m => (m.albums.includes(n) ? m : { ...m, albums: [...m.albums, n] }))
   }
   const addAlbumPhotos = async (album: string, files: FileList | null) => {
     if (!files?.length) return
@@ -191,26 +212,19 @@ export default function PlayerDashboard() {
         caption: '',
         ...(album ? { album } : {}),
       })))
-      const gallery = [...form.gallery, ...items]
-      set('gallery', gallery)
-      await persistMedia(gallery, form.albums)
+      void mutateMedia(m => ({ ...m, gallery: [...m.gallery, ...items] }))
     } catch { setErr('آپلود نشد. دوباره تلاش کنید.') }
     finally { setBusy(false) }
   }
-  const removeGalleryItem = async (id: string) => {
-    const gallery = form.gallery.filter(g => g.id !== id)
-    set('gallery', gallery)
-    setBusy(true)
-    try { await persistMedia(gallery, form.albums) } finally { setBusy(false) }
+  const removeGalleryItem = (id: string) => {
+    void mutateMedia(m => ({ ...m, gallery: m.gallery.filter(g => g.id !== id) }))
   }
   /* حذف آلبوم فقط برچسب را برمی‌دارد؛ عکس در گالری می‌ماند */
-  const removeAlbum = async (name: string) => {
-    const albums = form.albums.filter(x => x !== name)
-    const gallery = form.gallery.map(g => (g.album === name ? { ...g, album: undefined } : g))
-    set('albums', albums)
-    set('gallery', gallery)
-    setBusy(true)
-    try { await persistMedia(gallery, albums) } finally { setBusy(false) }
+  const removeAlbum = (name: string) => {
+    void mutateMedia(m => ({
+      albums: m.albums.filter(x => x !== name),
+      gallery: m.gallery.map(g => (g.album === name ? { ...g, album: undefined } : g)),
+    }))
   }
 
   const submit = async (e: React.FormEvent) => {
@@ -489,10 +503,10 @@ export default function PlayerDashboard() {
                     <div className="flex items-center gap-2">
                       <input ref={el => { albImgRefs.current[name] = el }} type="file" accept="image/*" multiple className="hidden"
                         onChange={e => { void addAlbumPhotos(name, e.target.files); e.target.value = '' }} />
-                      <button type="button" onClick={() => albImgRefs.current[name]?.click()} className={LQ_BTN} disabled={busy}>
+                      <button type="button" onClick={() => albImgRefs.current[name]?.click()} className={LQ_BTN} disabled={busy || mediaBusy > 0}>
                         <Plus size={13} /> عکس
                       </button>
-                      <button type="button" onClick={() => removeAlbum(name)} aria-label={`حذف آلبوم ${name}`}
+                      <button type="button" disabled={busy || mediaBusy > 0} onClick={() => removeAlbum(name)} aria-label={`حذف آلبوم ${name}`}
                         className="rounded-lg p-2 text-[#B23B2E] transition hover:bg-[rgba(178,59,46,0.08)]"><Trash2 size={15} /></button>
                     </div>
                   </div>
@@ -501,7 +515,7 @@ export default function PlayerDashboard() {
                       {photos.map(g => (
                         <span key={g.id} className="relative">
                           <img loading="lazy" decoding="async" src={g.url} alt="" className="h-16 w-24 rounded-lg border border-[#E7E2D6] object-cover" />
-                          <button type="button" onClick={() => removeGalleryItem(g.id)} aria-label="حذف تصویر"
+                          <button type="button" disabled={busy || mediaBusy > 0} onClick={() => removeGalleryItem(g.id)} aria-label="حذف تصویر"
                             className="absolute -left-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-[#B23B2E] text-[11px] text-white">×</button>
                         </span>
                       ))}
@@ -519,7 +533,7 @@ export default function PlayerDashboard() {
                   {form.gallery.filter(g => !(g.album ?? '').trim()).map(g => (
                     <span key={g.id} className="relative">
                       <img loading="lazy" decoding="async" src={g.url} alt="" className="h-16 w-24 rounded-lg border border-[#E7E2D6] object-cover" />
-                      <button type="button" onClick={() => removeGalleryItem(g.id)} aria-label="حذف تصویر"
+                      <button type="button" disabled={busy || mediaBusy > 0} onClick={() => removeGalleryItem(g.id)} aria-label="حذف تصویر"
                         className="absolute -left-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-[#B23B2E] text-[11px] text-white">×</button>
                     </span>
                   ))}
@@ -528,7 +542,7 @@ export default function PlayerDashboard() {
             )}
             <div className="flex flex-col gap-2 rounded-xl border border-dashed border-[#D8D2C4] p-4 sm:flex-row">
               <input className={INPUT} value={albTitle} onChange={e => setAlbTitle(e.target.value)} placeholder="نام آلبوم — مثال: آلبوم مسابقات" />
-              <button type="button" onClick={addAlbum} className={`${LQ_BTN} shrink-0`}><Plus size={14} /> ساخت آلبوم</button>
+              <button type="button" onClick={addAlbum} disabled={busy || mediaBusy > 0} className={`${LQ_BTN} shrink-0`}><Plus size={14} /> ساخت آلبوم</button>
             </div>
           </section>
 

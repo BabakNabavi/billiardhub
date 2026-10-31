@@ -413,7 +413,7 @@ export default function PlayerProfilePage() {
 
             {latin && <div className="ath-lat" dir="ltr">{latin}</div>}
             {/* نشانیِ اختصاصی — مثلِ هدرِ فروشگاه، دیدنی و کپی‌شدنی (خواستِ مالک) */}
-            <div style={{ marginTop: 12 }}><CopyAddress path={`/players/${id}`} codeId="ath-url" /></div>
+            <div className="mt-3"><CopyAddress path={`/players/${id}`} codeId="ath-url" /></div>
           </div>
         </div>
       </header>

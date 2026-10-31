@@ -52,6 +52,6 @@ export function profileHit(r: ProfileSearchRow): { hit: SearchHit; hay: string }
       verified: !!r.verified,
     },
     /* نقش هم جست‌وجوپذیر است: «مربی تهران» */
-    hay: haystackOf(title, r.fnEn, r.lnEn, r.nameEn, r.brand, r.title, r.city, role.label),
+    hay: haystackOf(title, r.name, r.fnEn, r.lnEn, r.nameEn, r.brand, r.title, r.city, role.label),
   }
 }

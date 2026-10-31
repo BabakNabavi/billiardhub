@@ -248,11 +248,19 @@ export default function FlatShop() {
      تلفن و آدرس ساختگی. یعنی سایت فروشگاهی را تبلیغ می‌کرد که وجود
      خارجی ندارد. حالا صریح می‌گوید پیدا نشد. */
   const [missing, setMissing] = useState(false)
+  /* خطای شبکه با «پیدا نشد» یکی نیست: روی اینترنتِ ناپایدار فروشگاهِ واقعی
+     نباید ناموجود اعلام شود */
+  const [loadErr, setLoadErr] = useState(false)
+  const [reloadKey, setReloadKey] = useState(0)
   useEffect(() => {
+    let alive = true
     setProfile(getSellerProfile(sellerId))
     setMissing(false)
+    setLoadErr(false)
     /* منبع حقیقت سرور است — فروشگاه کاربران دیگر فقط از این‌جا می‌آید */
     void fetchProfileResult<SellerProfile>('seller', sellerId).then(r => {
+      if (!alive) return
+      if (r.state === 'error') { if (!getSellerProfile(sellerId)) setLoadErr(true); return }
       const p = r.state === 'found' ? r.profile : null
       /* پرچم قطعی سرور — مقایسه‌ی مرورگر بی‌صدا شکست می‌خورد */
       if (r.state === 'found') setMine(r.isMine === true)
@@ -262,7 +270,8 @@ export default function FlatShop() {
       if (p) setProfile({ ...p.data, slug: p.slug, ownerId: p.ownerId, verified: p.verified } as SellerProfile)
       else if (!getSellerProfile(sellerId)) setMissing(true)
     })
-  }, [sellerId])
+    return () => { alive = false }
+  }, [sellerId, reloadKey])
 
   /* محصولات همین فروشگاه؛ فروشگاه نمونه که محصول اختصاصی ندارد، کاتالوگ دمو را نشان می‌دهد
      تا storefront خالی نماند. */
@@ -400,6 +409,21 @@ export default function FlatShop() {
   }
 
   /* هنوز نه پروفایل آمده نه «پیدا نشد» — اسکلت، نه فروشگاهِ خالی/پیش‌فرض */
+  if (!profile && loadErr) {
+    return (
+      <div dir="rtl" className="shop-shell flex min-h-screen items-center justify-center px-4 text-[#1C1B17]">
+        <div className="w-full max-w-[420px] rounded-2xl border border-[#E7E2D6] bg-white px-6 py-12 text-center">
+          <h1 className="text-[17px] font-bold">فروشگاه بارگذاری نشد</h1>
+          <p className="mt-2 text-[13px] leading-[2] text-[#6F6A5C]">اتصالِ اینترنت را بررسی کنید و دوباره امتحان کنید.</p>
+          <button type="button" onClick={() => setReloadKey(k => k + 1)}
+            className="mt-5 rounded-[10px] border border-[rgba(199,166,106,0.34)] bg-[rgba(199,166,106,0.12)] px-5 py-2.5 text-[13px] font-bold text-[#8F6531] transition hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C7A66A]">
+            تلاش دوباره
+          </button>
+        </div>
+      </div>
+    )
+  }
+
   if (!profile && !missing) {
     return (
       <div dir="rtl" className="shop-shell min-h-screen px-4 pt-6" aria-busy="true" aria-label="در حال بارگذاری فروشگاه">
@@ -817,7 +841,8 @@ export default function FlatShop() {
               </ul>
             </div>
 
-            {/* راه‌های ارتباطی */}
+            {/* راه‌های ارتباطی — بی‌هیچ راهی، بی‌ستون (سرتیترِ خالی نماند) */}
+            {(store.phones.length > 0 || !!store.hours || !!smsHref || !!store.instagram) && (
             <div>
               <h4 className="mb-2 text-[10.5px] font-bold tracking-[0.08em] text-[#8F6531] sm:mb-4">راه‌های ارتباطی</h4>
               <ul className="space-y-1.5 text-[13px] text-[#5B564B] sm:space-y-3">
@@ -855,6 +880,7 @@ export default function FlatShop() {
                 )}
               </ul>
             </div>
+            )}
 
             {/* موقعیت فروشگاه — فقط وقتی نشانی ثبت شده */}
             {store.address && (

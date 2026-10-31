@@ -271,8 +271,10 @@ export default function ProductDetailPage() {
      می‌رفت — صفحه‌ای که فروشگاهی ندارد (و تا آبانِ ۱۴۰۵ فروشگاهِ ساختگیِ
      «بابی» را لحظه‌ای نشان می‌داد). دکمه فقط وقتی هست که پروفایلِ
      فروشگاه واقعاً پیدا شود. */
-  const [storeFound, setStoreFound] = useState(false)
-  const hasStore = !!staticProduct || storeFound
+  /* null = هنوز معلوم نیست — نه دکمه، نه هشدارِ «آگهیِ شخصی»؛ تا جابه‌جاییِ چیدمان نباشد */
+  const [storeFound, setStoreFound] = useState<boolean | null>(null)
+  const hasStore = !!staticProduct || storeFound === true
+  const storeKnown = !!staticProduct || storeFound !== null
 
   /* ── نشان سبز «فروشگاه» فقط برای فروشگاه تأییدشده ──
      تا امروز هر آگهی‌ای که به فروشگاهی وصل بود این نشان را می‌گرفت،
@@ -281,7 +283,10 @@ export default function ProductDetailPage() {
   const [storeVerified, setStoreVerified] = useState(false)
   useEffect(() => {
     const slug = String(userProduct?.sellerId ?? '').trim()
-    if (!slug) { setStoreVerified(false); setStoreFound(false); return }
+    /* نتیجه‌ی آگهیِ قبلی نماند — دکمه‌ی کهنه به فروشگاهِ دیگری نرود */
+    setStoreVerified(false)
+    if (!slug) { setStoreFound(false); return }
+    setStoreFound(null)
     let alive = true
     void fetchProfile<Record<string, unknown>>('seller', slug)
       .then(pr => { if (alive) { setStoreFound(!!pr); setStoreVerified(pr?.verified === true) } })
@@ -347,7 +352,9 @@ export default function ProductDetailPage() {
   const shown = Math.min(imgIdx, gallery.length - 1)
 
   /* پیامک جای واتساپ (در ایران فیلتر است) — به موبایلِ آگهی‌دهنده، با متنِ آماده */
-  const smsHref = smsLink(product.sellerPhone, `سلام، درباره «${fullName}» در بیلیارد بازار سوال داشتم`)
+  const smsText = `سلام، درباره «${fullName}» در بیلیارد بازار سوال داشتم`
+  /* تلفنِ ثابت پیامک نمی‌گیرد — شماره‌ی واتساپِ قدیمیِ آگهی (موبایل) جایگزین */
+  const smsHref = smsLink(product.sellerPhone, smsText) || smsLink(product.sellerWhatsapp, smsText)
 
   return (
     /* رنگ پایه داخل lq-stage است؛ پس‌زمینه‌ی مات خود عنصر لکه‌های
@@ -697,7 +704,7 @@ export default function ProductDetailPage() {
 
               {/* آگهی کاربر عادی فروشگاهی ندارد ⇒ فقط راه‌های تماس.
                   نشان «فروشگاه» هم نباید روی آگهی شخصی دیده شود. */}
-              {!hasStore && (
+              {storeKnown && !hasStore && (
                 <p style={{ fontSize: 11.5, color: TMUT, lineHeight: 1.95, margin: '0 0 12px' }}>
                   بیلیارد هاب طرف معامله نیست؛ پیش از پرداخت، کالا را کامل بررسی و
                   از صحت اطلاعات مطمئن شوید.
@@ -715,7 +722,7 @@ export default function ProductDetailPage() {
                   <MessageSquare size={15} strokeWidth={2.2} aria-hidden /> پیامک
                 </a>
                 )}
-                <a href={`tel:${product.sellerPhone}`} className="lq-lift" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6, padding: '11px', borderRadius: 10, ...lqGold, fontSize: 12.5, textDecoration: 'none' }}>
+                <a href={`tel:${product.sellerPhone}`} className="lq-lift" style={{ gridColumn: smsHref ? undefined : '1 / -1', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6, padding: '11px', borderRadius: 10, ...lqGold, fontSize: 12.5, textDecoration: 'none' }}>
                   <Phone size={15} strokeWidth={2.2} /> تماس
                 </a>
                 <ReportButton variant="button" targetId={product.id} targetTitle={fullName}

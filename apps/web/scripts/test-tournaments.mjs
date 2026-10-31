@@ -4314,8 +4314,7 @@ console.log('\n― استوری: یک منبع، با انقضا ―');
         'ردیفِ پیش از مهاجرت یا صفحه را می‌شکند یا با اولین ذخیره خالی می‌شود');
       t('پنلِ بازیکن همان شکلی را می‌نویسد که می‌خواند',
         /* آبانِ ۱۴۰۵: گالری همان لحظه روی سرور می‌رود (persistMedia) — شکلِ نوشتن همان آرایه‌ی gallery است */
-        strip(read('app/dashboard/player/page.tsx')).includes("const gallery = [...form.gallery, ...items]")
-        && strip(read('app/dashboard/player/page.tsx')).includes('await persistMedia(gallery, form.albums)'),
+        strip(read('app/dashboard/player/page.tsx')).includes('mutateMedia(m => ({ ...m, gallery: [...m.gallery, ...items] }))'),
         'با دو مدلِ جدا، عکسِ اضافه‌شده از صفحه‌ی عمومی در پنل دیده نمی‌شد');
     }
 
