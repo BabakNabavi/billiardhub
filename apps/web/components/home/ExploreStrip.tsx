@@ -14,7 +14,6 @@
 import { ExploreCards } from './ExploreCards'
 
 const TEXT = '#1A1917'
-const GOLD_D = '#A07840'
 
 export default function ExploreStrip() {
   return (
@@ -32,11 +31,9 @@ export default function ExploreStrip() {
 
       <div style={{ maxWidth: 1340, margin: '0 auto', position: 'relative', zIndex: 1 }}>
         <div style={{ textAlign: 'center', marginBottom: 'clamp(20px,2.4vw,32px)' }}>
-          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 7, fontSize: 11, fontWeight: 800, color: GOLD_D, border: '1px solid rgba(199,166,106,0.4)', borderRadius: 999, padding: '5px 13px', marginBottom: 10 }}>
-            بیشتر ببینید
-          </span>
+          {/* خواستِ مالک (آبانِ ۱۴۰۵): برچسبِ «بیشتر ببینید» و «… کاوش کن» رفتند */}
           <h3 style={{ fontSize: 'clamp(17px,1.9vw,24px)', fontWeight: 800, color: TEXT, letterSpacing: '-0.03em', margin: 0 }}>
-            بیشتر در بیلیارد هاب کاوش کن
+            بیلیارد هاب در یک نگاه
           </h3>
         </div>
 
