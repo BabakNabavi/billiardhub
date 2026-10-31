@@ -10,28 +10,36 @@
 import { createRequire } from 'node:module'
 import fs from 'node:fs'
 import path from 'node:path'
-const req = createRequire(path.resolve('package.json'))
+import { fileURLToPath } from 'node:url'
+/* مسیرها نسبت به خودِ apps/web — اجرا از هر پوشه‌ای */
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
+const req = createRequire(path.join(ROOT, 'package.json'))
 const sharp = req('sharp')
 
-const SRC = process.argv[2] ?? 'F:/logo new/4/2.jpeg'
+/* منبع داخلِ مخزن (نسخه‌ی «سبز روی سفید»ِ لوگوی مالک)؛ مسیرِ دیگر با آرگومان */
+const SRC = process.argv[2] ?? path.join(ROOT, 'scripts/assets/logo-hb-src.jpeg')
+if (!fs.existsSync(SRC)) { console.error(`منبع پیدا نشد: ${SRC}`); process.exit(1) }
 const GREEN = { r: 0x1B, g: 0x62, b: 0x36 }
 const OG_BG = { r: 0xF7, g: 0xF7, b: 0xF5 }
-const DIR = 'public/images/Logo/'
+const DIR = path.join(ROOT, 'public/images/Logo') + path.sep
 const V = '-v12'
 
 /* ── ماسکِ حروف: روشنایی ⟵ آلفا، لبه‌ها نرم، نویزِ زمینه صفر ── */
-const { data, info } = await sharp(SRC).removeAlpha().raw().toBuffer({ resolveWithObject: true })
+const { data, info } = await sharp(SRC).toColourspace('srgb').removeAlpha().raw().toBuffer({ resolveWithObject: true })
 const W = info.width, H = info.height
+const C = info.channels
 const lum = i => 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2]
 const BG_L = 246, FG_L = 72
 const mask = Buffer.alloc(W * H)
 let x0 = W, y0 = H, x1 = 0, y1 = 0
 for (let p = 0; p < W * H; p++) {
-  let a = (BG_L - lum(p * 3)) / (BG_L - FG_L)
+  let a = (BG_L - lum(p * C)) / (BG_L - FG_L)
   a = a < 0.1 ? 0 : a > 0.9 ? 1 : (a - 0.1) / 0.8
   mask[p] = Math.round(a * 255)
   if (a > 0.5) { const x = p % W, y = (p / W) | 0; if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y }
 }
+/* لبه‌ی نرمِ بیرونِ قاب (a<0.5) بریده نشود */
+x0 = Math.max(0, x0 - 2); y0 = Math.max(0, y0 - 2); x1 = Math.min(W - 1, x1 + 2); y1 = Math.min(H - 1, y1 + 2)
 const bw = x1 - x0 + 1, bh = y1 - y0 + 1
 console.log(`حروف: ${bw}×${bh} در (${x0},${y0})`)
 const letters = await sharp(mask, { raw: { width: W, height: H, channels: 1 } })
@@ -102,5 +110,5 @@ sizes.forEach((s, i) => {
   head.writeUInt32LE(pngs[i].length, o + 8); head.writeUInt32LE(off, o + 12)
   off += pngs[i].length
 })
-fs.writeFileSync('app/favicon.ico', Buffer.concat([head, ...pngs]))
+fs.writeFileSync(path.join(ROOT, 'app/favicon.ico'), Buffer.concat([head, ...pngs]))
 console.log('app/favicon.ico', sizes.join('/'))
