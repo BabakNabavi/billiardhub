@@ -40,6 +40,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ message: 'درخواست رزرو معتبر نیست' }, { status: 400 });
   }
   const { clubId, tableId, tableType, startTime, endTime, playerCount } = parsed.data;
+  /* زمان‌سنجی: «انتقال به درگاه دیر است» — اندازه در لاگِ سرور */
+  const t0 = Date.now();
 
   const start = new Date(startTime), end = new Date(endTime);
   if (isNaN(+start) || isNaN(+end) || end <= start) {
@@ -93,8 +95,14 @@ export async function POST(req: NextRequest) {
      باشگاه‌دار می‌تواند فقط روز جاری را ببندد و روزهای آینده باز
      بمانند. «امروز» به وقت تهران حساب می‌شود؛ با UTC از ۲۰:۳۰ به بعد
      «فردا»ی سرور شروع می‌شد و قفل پیش از نیمه‌شب محلی برداشته می‌شد. */
-  const { data: clubFlags } = await sb().from('clubs')
-    .select('*').eq('id', clubId).maybeSingle();
+  /* باشگاه و میز مستقل‌اند — هم‌زمان خوانده می‌شوند، نه پشتِ‌هم (کندیِ «رفتن به درگاه») */
+  const [{ data: clubFlags }, { data: tableRow }] = await Promise.all([
+    sb().from('clubs').select('*').eq('id', clubId).maybeSingle(),
+    /* ستون‌ها با * خوانده می‌شوند نه با نام: تا وقتی مهاجرت ۰۳۶ اجرا
+       نشده، نام‌بردن از reservationClosed کل کوئری را خطا می‌کرد و
+       نتیجه‌اش «این میز ثبت نشده» بود — یعنی هیچ رزروی انجام نمی‌شد. */
+    sb().from('tables').select('*').eq('id', tableId).maybeSingle(),
+  ]);
   const flags = (clubFlags ?? {}) as { closeTodayReservations?: boolean; reserveClosedUntil?: string | null };
   const closure = closureState({
     closeToday: flags.closeTodayReservations,
@@ -129,13 +137,6 @@ export async function POST(req: NextRequest) {
   }
 
   /* ── قیمت‌گذاری سروری: میز باید واقعا در همین باشگاه ثبت شده باشد ── */
-  const { data: tableRow } = await sb().from('tables')
-    /* ستون‌ها با * خوانده می‌شوند نه با نام: تا وقتی مهاجرت ۰۳۶ اجرا
-       نشده، نام‌بردن از reservationClosed کل کوئری را خطا می‌کرد و
-       نتیجه‌اش «این میز ثبت نشده» بود — یعنی هیچ رزروی انجام نمی‌شد. */
-    .select('*')
-    .eq('id', tableId).maybeSingle();
-
   const t = tableRow as {
     id: string; clubId: string; pricePerHour: number | string; isActive?: boolean;
     reservationClosed?: boolean;
@@ -171,8 +172,9 @@ export async function POST(req: NextRequest) {
   };
 
   /* قواعد تخفیف و تنظیم بازیکن اضافه‌ی باشگاه */
-  const { data: clubRow } = await sb().from('clubs').select('*').eq('id', clubId).maybeSingle();
-  const club = (clubRow ?? null) as Record<string, unknown> | null;
+  /* همان ردیفِ `clubFlags` (همان پرس‌وجو، همان درخواست) — خواندنِ دوباره
+     فقط یک رفت‌وبرگشتِ دیگر به دیتابیس پیش از رفتن به درگاه بود */
+  const club = (clubFlags ?? null) as Record<string, unknown> | null;
   if (!priced.discountRules && Array.isArray(club?.discountRules)) {
     priced.discountRules = club!.discountRules as PricedTable['discountRules'];
   }
@@ -189,6 +191,7 @@ export async function POST(req: NextRequest) {
     surchargeOf(t as unknown as Record<string, unknown>, club),
   );
 
+  const tRead = Date.now();
   /* ── ساخت اتمیک: اگر یکی از ساعت‌ها گرفته شده باشد، کل تراکنش برمی‌گردد ── */
   const { data, error } = await rpc<Record<string, unknown>>('bh_create_booking', {
     p_user_id: actor.id, p_club_id: clubId, p_table_id: String(tableId),
@@ -210,6 +213,7 @@ export async function POST(req: NextRequest) {
   }
 
   const booking = (data ?? {}) as Record<string, unknown>;
+  console.info(`[timing] booking.create read=${tRead - t0}ms rpc=${Date.now() - tRead}ms total=${Date.now() - t0}ms`);
   audit({
     actorId: actor.id, actorRole: actor.role, action: 'BOOKING_CREATED',
     entityType: 'booking', entityId: String(booking.id ?? ''),

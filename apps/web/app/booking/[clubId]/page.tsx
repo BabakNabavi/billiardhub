@@ -95,7 +95,9 @@ interface Table {
   type: string; brand: string; model: string; pricePerHour: number;
   morningDiscount?: number; photoDataUrl?: string; discountRules?: DiscountRule[];
 }
-interface Slot { hour: number; isBooked: boolean; }
+/* `isPast`: ساعتِ گذشته‌ی امروز — مثلِ رزروشده انتخاب‌نشدنی است (isBooked می‌ماند
+   تا بازه از رویش رد نشود)، ولی «مشغول» نیست: «غیرقابل رزرو» نمایش داده می‌شود. */
+interface Slot { hour: number; isBooked: boolean; isPast?: boolean; }
 interface Club {
   id: string; name: string; city?: string; managerName?: string; phone?: string;
   bankCard?: string; bankCardOwner?: string; bankName?: string;
@@ -123,7 +125,7 @@ const TYPE_COLOR: Record<string, string> = {
 function applyPastHours(slots: Slot[], isoDate: string): Slot[] {
   if (isoDate !== todayInTehran()) return slots;
   const ch = hourInTehran();
-  return slots.map(s => ({ ...s, isBooked: s.isBooked || s.hour <= ch }));
+  return slots.map(s => ({ ...s, isPast: s.hour <= ch, isBooked: s.isBooked || s.hour <= ch }));
 }
 /* ساعت‌های کاری پیش‌فرض وقتی سرور فهرست را برنگرداند — همه آزاد فرض
    نمی‌شوند تا هیچ ساعتی الکی «رزروشده» یا «آزاد» نمایش داده نشود. */
@@ -483,8 +485,13 @@ function BookingContent() {
     </div>
   );
 
-  /* ── انتقال به درگاه پرداخت ── */
-  if(redirecting) return (
+  /* ── انتقال به درگاه پرداخت ──
+     از لحظه‌ی کلیک (`booking`)، نه پس از پاسخِ دو درخواست: پیش‌تر کاربر
+     تا ساختِ رزرو و پرداخت فقط دکمه‌ی کم‌رنگ می‌دید و «دیر» حسش می‌کرد.
+     در حالِ `booking` لایه‌ی ثابت روی فرم است، نه جایگزینِ آن: فرم سوار
+     می‌ماند تا اگر نشد (مثلاً ۴۰۹ «این ساعت رزرو شد») کاربر همان‌جای
+     صفحه با همان انتخاب‌ها و خطا برگردد، نه بالای صفحه. */
+  const gatewayWait = (
     <div className="lq-stage" style={{minHeight:'100vh',direction:'rtl',fontFamily:'var(--font-base)',display:'flex',alignItems:'center',justifyContent:'center',padding:24}}>
       <div style={{textAlign:'center'}}>
         <div style={{width:52,height:52,border:'2px solid rgba(199,166,106,0.16)',borderTop:'2px solid #C7A66A',borderRadius:'50%',margin:'0 auto 18px',animation:'spin 0.85s linear infinite'}}/>
@@ -494,6 +501,7 @@ function BookingContent() {
       <style>{`@keyframes spin{to{transform:rotate(360deg);}}`}</style>
     </div>
   );
+  if(redirecting) return gatewayWait;
 
 
   /* ── رزرو آنلاین *همیشه* بسته است ──
@@ -523,6 +531,7 @@ function BookingContent() {
   /* ── Main booking form ── */
   return (
     <>
+      {booking && <div style={{position:'fixed',inset:0,zIndex:60,background:'#F4F2EE',overflow:'hidden'}}>{gatewayWait}</div>}
       <style>{`
         @keyframes spin   { to{transform:rotate(360deg);} }
         @keyframes fadeUp { from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);} }
@@ -725,6 +734,8 @@ function BookingContent() {
                     {bg:'rgba(0,0,0,0.05)',bc:'rgba(0,0,0,0.08)',l:'آزاد'},
                     {bg:`rgba(${SEL_RGB},0.12)`,bc:`rgba(${SEL_RGB},0.40)`,l:'انتخاب'},
                     {bg:'rgba(239,68,68,0.05)',bc:'rgba(239,68,68,0.15)',l:'مشغول'},
+                    /* ساعتِ گذشته فقط امروز هست */
+                    ...(isoDate===todayInTehran()?[{bg:'rgba(0,0,0,0.06)',bc:'rgba(0,0,0,0.10)',l:'غیرقابل رزرو'}]:[]),
                   ].map((x,i)=>(
                     <span key={i} style={{display:'flex',alignItems:'center',gap:'5px'}}>
                       <span style={{width:'11px',height:'11px',borderRadius:'3px',background:x.bg,border:`1px solid ${x.bc}`,display:'inline-block'}}/>
@@ -757,6 +768,8 @@ function BookingContent() {
                        غیرفعال می‌شود — جدا از «مشغول»، چون علتش فرق دارد
                        و کاربر باید بفهمد باشگاه بسته، نه اینکه پر شده. */
                     const isShut  = blockedHours.includes(slot.hour);
+                    /* گذشته (و نه رزروِ واقعی) — خاکستریِ خنثی، نه قرمزِ «مشغول» */
+                    const isGone  = !isShut && !!slot.isPast;
                     const isSel   = selectedSlots.includes(slot.hour);
                     const isStart = rangeStart===slot.hour;
                     const off     = slot.isBooked || isShut;
@@ -765,17 +778,18 @@ function BookingContent() {
                     const hasDisc = discPct > 0 && !off;
                     return (
                       <button key={slot.hour} className={cls} disabled={off}
-                        title={isShut?'باشگاه رزرو این ساعت را بسته است':undefined}
+                        title={isShut?'باشگاه رزرو این ساعت را بسته است':isGone?'این ساعت گذشته است':undefined}
                         onClick={()=>{ if(!isShut) handleSlotClick(slot.hour,slot.isBooked); }}
                         style={{
-                          borderColor:isShut?'rgba(220,38,38,0.30)':slot.isBooked?'rgba(239,68,68,0.14)':isStart?`rgba(${SEL_RGB},0.60)`:isSel?`rgba(${SEL_RGB},0.45)`:'rgba(0,0,0,0.07)',
-                          background:isShut?'rgba(220,38,38,0.09)':slot.isBooked?'rgba(239,68,68,0.04)':isStart?`rgba(${SEL_RGB},0.18)`:isSel?`rgba(${SEL_RGB},0.12)`:hasDisc?`rgba(${SEL_RGB},0.04)`:'rgba(0,0,0,0.03)',
-                          color:isShut?'rgba(185,28,28,0.85)':slot.isBooked?'rgba(239,68,68,0.3)':(isStart||isSel)?SEL_COLOR:'rgba(0,0,0,0.48)',
+                          borderColor:isShut?'rgba(220,38,38,0.30)':isGone?'rgba(0,0,0,0.06)':slot.isBooked?'rgba(239,68,68,0.14)':isStart?`rgba(${SEL_RGB},0.60)`:isSel?`rgba(${SEL_RGB},0.45)`:'rgba(0,0,0,0.07)',
+                          background:isShut?'rgba(220,38,38,0.09)':isGone?'rgba(0,0,0,0.05)':slot.isBooked?'rgba(239,68,68,0.04)':isStart?`rgba(${SEL_RGB},0.18)`:isSel?`rgba(${SEL_RGB},0.12)`:hasDisc?`rgba(${SEL_RGB},0.04)`:'rgba(0,0,0,0.03)',
+                          color:isShut?'rgba(185,28,28,0.85)':isGone?'rgba(0,0,0,0.28)':slot.isBooked?'rgba(239,68,68,0.3)':(isStart||isSel)?SEL_COLOR:'rgba(0,0,0,0.48)',
                           boxShadow:isStart?`0 0 16px rgba(${SEL_RGB},0.35)`:isSel?`0 0 10px rgba(${SEL_RGB},0.18)`:'none',
                         }}>
                         <span style={{fontSize: '15px'}}>{toFa(slot.hour)}:۰۰</span>
                         {isShut&&<span style={{fontSize: '9px',fontWeight:800,opacity:0.85}}>بسته</span>}
-                        {!isShut&&slot.isBooked&&<span style={{fontSize: '9px',opacity:0.6}}>مشغول</span>}
+                        {isGone&&<span style={{fontSize: '9px',opacity:0.8,whiteSpace:'nowrap'}}>غیرقابل رزرو</span>}
+                        {!isShut&&!isGone&&slot.isBooked&&<span style={{fontSize: '9px',opacity:0.6}}>مشغول</span>}
                         {!off&&hasDisc&&<span style={{fontSize: '9px',color:SEL_COLOR,opacity:0.9}}>−{toFa(discPct)}٪</span>}
                         {!off&&!hasDisc&&isStart&&<span style={{fontSize: '9px',opacity:0.8}}>شروع</span>}
                       </button>

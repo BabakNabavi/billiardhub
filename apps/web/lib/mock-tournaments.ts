@@ -42,6 +42,8 @@ export interface Tournament {
   gameType: GameType;
   date: string;
   startTime: string;
+  /* شروعِ مسابقه به میلی‌ثانیه — برای مرتب‌سازی (تاریخِ شمسیِ نمایشی مرتب‌شدنی نیست) */
+  startsAtMs?: number;
   registrationDeadline: string;
   /* ساعت بسته‌شدن ثبت‌نام. تا امروز فقط روزش نگه داشته می‌شد، پس
      بازیکن نمی‌فهمید ثبت‌نام ظهر بسته می‌شود یا نیمه‌شب. */

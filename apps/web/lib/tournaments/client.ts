@@ -98,6 +98,7 @@ export function toTournament(r: DbTournament): Tournament {
     description: r.description ?? '',
     gameType: normalizeDiscipline(r.discipline),
     date: r.starts_at ? faDate(r.starts_at) : '',
+    startsAtMs: r.starts_at ? Date.parse(r.starts_at) || undefined : undefined,
     startTime: r.starts_at ? tehranTime(r.starts_at) : '',
     registrationDeadline: r.registration_ends_at ? faDate(r.registration_ends_at) : '',
     /* ساعت مهلت پیش‌تر هیچ‌جا نمی‌آمد. باشگاه‌دار می‌توانست ثبت‌نام

@@ -224,7 +224,12 @@ export default function ClubProfilePage() {
   const [clubTournaments, setClubTournaments] = useState<Tournament[] | null>(null);
   useEffect(() => {
     if (!id) return;
-    void (async () => setClubTournaments(await fetchTournaments(id)))();
+    /* تازه‌ترین اول (خواستِ مالک): مسابقه‌ی در جریان و پیشِ‌رو بالا، تمام‌شده‌های
+       قدیمی پایین — پیش‌تر به ترتیبِ سرور بود و مسابقه‌ی جاری ته فهرست می‌رفت */
+    void (async () => {
+      const list = await fetchTournaments(id);
+      setClubTournaments([...list].sort((a, b) => (b.startsAtMs ?? 0) - (a.startsAtMs ?? 0)));
+    })();
   }, [id]);
 
   /* آلبوم عکس مسابقات — بر پایه‌ی همان مسابقات واقعی، نه اسکن کور

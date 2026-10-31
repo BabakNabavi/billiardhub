@@ -104,6 +104,9 @@ const GAME_TYPES = [
   { key: 'snooker' as GameType, label: 'اسنوکر', color: '#C7A66A', rgb: '199,166,106' },
   { key: 'other'   as GameType, label: 'سایر',   color: '#8b5cf6', rgb: '139,92,246'  },
 ];
+/* فعلاً فقط اسنوکر — قوانین و شرایطِ بقیه هنوز نوشته نشده (آبان ۱۴۰۵).
+   روشن‌کردنِ هر نوع = افزودنِ کلیدش به همین فهرست. */
+const ENABLED_GAME_TYPES: readonly GameType[] = ['snooker'];
 const MAX_PLAYERS = [8, 16, 24, 32, 64];
 const FORMATS = [
   { key: 'bo3',  label: 'Best of 3',  wins: 2 },
@@ -552,18 +555,28 @@ export default function NewTournamentPage() {
 
               <FormField label="نوع بازی" required>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 10 }}>
-                  {GAME_TYPES.map(g => (
-                    <button key={g.key} onClick={() => setGameType(g.key)} style={{
-                      padding: '12px 8px', borderRadius: 20, cursor: 'pointer',
-                      border: `1px solid rgba(${g.rgb},${gameType === g.key ? '0.35' : '0.12'})`,
-                      background: `rgba(${g.rgb},${gameType === g.key ? '0.12' : '0.04'})`,
-                      fontFamily: 'inherit', fontSize: 14, fontWeight: 800,
-                      color: gameType === g.key ? g.color : '#999',
-                      transition: 'all 0.18s',
-                    }}>
-                      {g.label}
-                    </button>
-                  ))}
+                  {GAME_TYPES.map(g => {
+                    const off = !ENABLED_GAME_TYPES.includes(g.key);
+                    return (
+                      <button key={g.key} type="button" disabled={off}
+                        onClick={() => setGameType(g.key)}
+                        title={off ? 'به‌زودی' : undefined}
+                        style={off ? {
+                          padding: '12px 8px', borderRadius: 20, cursor: 'not-allowed',
+                          border: '1px solid rgba(0,0,0,0.06)', background: 'rgba(0,0,0,0.03)',
+                          fontFamily: 'inherit', fontSize: 14, fontWeight: 800, color: '#C4C4C4',
+                        } : {
+                          padding: '12px 8px', borderRadius: 20, cursor: 'pointer',
+                          border: `1px solid rgba(${g.rgb},${gameType === g.key ? '0.35' : '0.12'})`,
+                          background: `rgba(${g.rgb},${gameType === g.key ? '0.12' : '0.04'})`,
+                          fontFamily: 'inherit', fontSize: 14, fontWeight: 800,
+                          color: gameType === g.key ? g.color : '#999',
+                          transition: 'all 0.18s',
+                        }}>
+                        {g.label}
+                      </button>
+                    );
+                  })}
                 </div>
               </FormField>
             </div>

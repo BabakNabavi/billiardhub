@@ -1,6 +1,7 @@
 export const dynamic = 'force-dynamic';
 import { callbackOrigin } from '@/lib/site-url';
 import { NextRequest, NextResponse } from 'next/server';
+import { z } from 'zod';
 import { sb, actorFromRequest, audit, clientIp } from '@/lib/finance/db';
 import { getPaymentProvider, hasRealGateway } from '@/lib/payments';
 
@@ -10,12 +11,24 @@ export async function POST(req: NextRequest) {
   const actor = actorFromRequest(req);
   if (!actor) return NextResponse.json({ message: 'احراز هویت الزامی است' }, { status: 401 });
 
-  const { bookingId } = await req.json().catch(() => ({}));
-  if (!bookingId) return NextResponse.json({ message: 'bookingId الزامی است' }, { status: 400 });
+  /* شناسه مستقیم در دو پرس‌وجو می‌رود — در مرز اعتبارسنجی می‌شود */
+  const parsed = z.object({ bookingId: z.string().min(1).max(64) })
+    .safeParse(await req.json().catch(() => ({})));
+  if (!parsed.success) return NextResponse.json({ message: 'bookingId الزامی است' }, { status: 400 });
+  const { bookingId } = parsed.data;
 
-  const { data: bRow, error: bErr } = await sb().from('bookings')
-    .select('id,"userId","clubId",final_amount,booking_status,payment_status,expires_at,booking_reference')
-    .eq('id', bookingId).maybeSingle();
+  /* زمان‌سنجی: «انتقال به درگاه دیر است» — هر مرحله در لاگ، تا از اندازه تصمیم گرفته شود */
+  const t0 = Date.now();
+  /* رزرو و پرداختِ بازِ قبلی مستقل‌اند — هم‌زمان، نه پشتِ‌هم */
+  const [{ data: bRow, error: bErr }, { data: openRow }] = await Promise.all([
+    sb().from('bookings')
+      .select('id,"userId","clubId",final_amount,booking_status,payment_status,expires_at,booking_reference')
+      .eq('id', bookingId).maybeSingle(),
+    sb().from('payments')
+      .select('id,provider,provider_authority,amount,status')
+      .eq('booking_id', bookingId).in('status', ['INITIATED', 'PENDING']).maybeSingle(),
+  ]);
+  const tRead = Date.now();
 
   if (bErr || !bRow) return NextResponse.json({ message: 'رزرو یافت نشد' }, { status: 404 });
   const b = bRow as {
@@ -50,10 +63,8 @@ export async function POST(req: NextRequest) {
 
   const provider = getPaymentProvider();
 
-  /* اگر پرداخت باز قبلی برای همین رزرو هست، همان ادامه یابد (ضد پرداخت تکراری) */
-  const { data: openRow } = await sb().from('payments')
-    .select('id,provider,provider_authority,amount,status')
-    .eq('booking_id', b.id).in('status', ['INITIATED', 'PENDING']).maybeSingle();
+  /* اگر پرداخت باز قبلی برای همین رزرو هست، همان ادامه یابد (ضد پرداخت تکراری) —
+     بالاتر هم‌زمان با رزرو خوانده شد */
 
   let paymentId: string;
   if (openRow && (openRow as { provider: string }).provider === provider.name
@@ -74,6 +85,7 @@ export async function POST(req: NextRequest) {
     paymentId = (created as { id: string }).id;
   }
 
+  const tRow = Date.now();
   const origin = callbackOrigin();
   const callbackUrl = `${origin}/api/payments/callback/${provider.name}?payment=${paymentId}`;
   const res = await provider.createPayment({
@@ -82,6 +94,7 @@ export async function POST(req: NextRequest) {
     callbackUrl,
   });
 
+  const tGateway = Date.now();
   if (!res.ok || !res.redirectUrl) {
     await sb().from('payments').update({ status: 'FAILED', raw_response: res.raw ?? { message: res.message }, updated_at: new Date().toISOString() }).eq('id', paymentId);
     return NextResponse.json({ message: res.message || 'ایجاد پرداخت ناموفق بود' }, { status: 502 });
@@ -91,6 +104,8 @@ export async function POST(req: NextRequest) {
     status: 'PENDING', provider_authority: res.authority ?? null,
     raw_response: res.raw ?? null, updated_at: new Date().toISOString(),
   }).eq('id', paymentId);
+
+  console.info(`[timing] payment.create read=${tRead - t0}ms row=${tRow - tRead}ms gateway=${tGateway - tRow}ms save=${Date.now() - tGateway}ms total=${Date.now() - t0}ms`);
 
   audit({ actorId: actor.id, actorRole: actor.role, action: 'PAYMENT_CREATED',
           entityType: 'payment', entityId: paymentId,

@@ -90,9 +90,10 @@ export default function TournamentRegistrations({ tournamentId, onChanged }: {
      کاربر مطمئن نیست کار او بود یا اشتباهی رخ داد. */
   const [toast, setToast] = useState('')
 
-  const load = useCallback(async (spin = false) => {
+  const load = useCallback(async (spin = false, silent = false) => {
     if (spin) setRefreshing(true)
-    setErr('')
+    /* بی‌صدا (برگشت به تب): خطای قبلیِ افزودن/حذف پاک نشود */
+    if (!silent) setErr('')
     try {
       const r = await apiFetch(`/api/tournaments/${tournamentId}/registrations`, { cache: 'no-store' })
       if (!r.ok) {
@@ -109,6 +110,18 @@ export default function TournamentRegistrations({ tournamentId, onChanged }: {
   }, [tournamentId])
 
   useEffect(() => { void load() }, [load])
+
+  /* لغوِ خودِ بازیکن از جای دیگری می‌آید و این پنل از آن خبر ندارد؛ با
+     برگشتن به تب فهرست تازه می‌شود تا ظرفیت (و دکمه‌ی حضوری) درست بماند. */
+  useEffect(() => {
+    const onVisible = () => {
+      if (document.visibilityState !== 'visible') return
+      void load(false, true)
+      void onChanged?.()
+    }
+    document.addEventListener('visibilitychange', onVisible)
+    return () => document.removeEventListener('visibilitychange', onVisible)
+  }, [load, onChanged])
 
   /* ── شمارشِ معکوسِ مهلتِ پرداخت ──
      پیش‌تر متنِ ثابتِ «اگر تا ۱۵ دقیقه…» بود، حتی ده دقیقه بعد. حالا از
@@ -197,6 +210,10 @@ export default function TournamentRegistrations({ tournamentId, onChanged }: {
   const taken = active.length
   const max = data?.tournament.maxPlayers ?? 0
   const pending = active.filter(r => r.status === 'PENDING_PAYMENT').length
+  /* ظرفیت پر ⟵ «ثبت‌نام حضوری» خاموش. با حذفِ بازیکن (reloadAll) یا لغو/انقضای
+     ثبت‌نام (تازه‌سازی) `taken` پایین می‌آید و دکمه خودبه‌خود دوباره روشن است.
+     سرور هم جدا ظرفیت را می‌سنجد — این فقط رابط است. */
+  const full = max > 0 && taken >= max
 
   return (
     <div style={{ marginTop: 14, borderTop: '1px solid rgba(0,0,0,0.07)', paddingTop: 14 }}>
@@ -262,9 +279,12 @@ export default function TournamentRegistrations({ tournamentId, onChanged }: {
             {refreshing ? 'در حال خواندن…' : 'تازه‌سازی'}
           </button>
 
-          <button type="button" onClick={() => setShowAdd(v => !v)} disabled={busy}
-            style={{ ...actionBtn, border: `1px solid ${GOLD}`, background: '#FFFBF0', color: '#A07840' }}>
-            <UserPlus size={13} /> ثبت‌نام حضوری
+          <button type="button" onClick={() => setShowAdd(v => !v)} disabled={busy || full}
+            title={full ? 'ظرفیتِ مسابقه تکمیل است' : undefined}
+            style={full
+              ? { ...actionBtn, border: '1px solid rgba(0,0,0,0.08)', background: 'rgba(0,0,0,0.04)', color: '#9CA3AF', cursor: 'not-allowed' }
+              : { ...actionBtn, border: `1px solid ${GOLD}`, background: '#FFFBF0', color: '#A07840' }}>
+            <UserPlus size={13} /> {full ? 'ظرفیت تکمیل' : 'ثبت‌نام حضوری'}
           </button>
         </span>
       </div>
@@ -294,7 +314,7 @@ export default function TournamentRegistrations({ tournamentId, onChanged }: {
         </div>
       )}
 
-      {showAdd && (
+      {showAdd && !full && (
         <div style={{
           background: '#FAFAF8', border: '1px solid rgba(0,0,0,0.07)',
           borderRadius: 14, padding: 14, marginBottom: 12,
