@@ -7,6 +7,7 @@ import {
   MAIN_ANGLE, MAX_ANGLES, activeAngles, newAngleId, defaultAngleLabel,
   type LiveAngle,
 } from '@/lib/live/angles'
+import { liveChannelCount } from '@/lib/streaming/public'
 
 /* جلسات پخش زنده — هر جلسه یک فایل مستقل (بدون کلوبر هنگام تپش همزمان).
    جلسه‌ای که ۴۵ ثانیه تپش نفرستد، پایان‌یافته حساب می‌شود.
@@ -111,8 +112,13 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ count: probeCache.count }, { headers: { ...CORS, 'Cache-Control': 'no-store' } })
     }
     try {
-      probeInflight ??= liveSessions()
-        .then(list => { probeCache = { at: Date.now(), count: list.length }; return list.length })
+      /* پخشِ گوشی‌به‌گوشی + کانال‌های سرویسِ پخش؛ شکستِ دومی نشان را خاموش نکند */
+      probeInflight ??= (async () => {
+        const [list, n] = await Promise.all([liveSessions(), liveChannelCount().catch(() => 0)])
+        const c = list.length + n
+        probeCache = { at: Date.now(), count: c }
+        return c
+      })()
         .finally(() => { probeInflight = null })
       const count = await probeInflight
       return NextResponse.json({ count }, { headers: { ...CORS, 'Cache-Control': 'no-store' } })

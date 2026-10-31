@@ -41,6 +41,7 @@ import FavoriteButton from '../../../components/FavoriteButton';
 import { iranTel } from '../../../lib/iran-geo'
 import { fetchLiveSessions, fetchLiveSession, type LiveSession } from '../../../lib/live/client'
 import GoLive from '../../../components/club/GoLive'
+import { LiveChannelsGrid } from '../../../components/live/LiveChannelsGrid';
 /* ⚠️ تنبل، نه ایستا. `LivePlayer` ماژولِ webrtc و با آن
    `@supabase/supabase-js` را می‌کشد — ۲۰۴ کیلوبایتِ خام. ولی
    پخش‌کننده فقط داخلِ شرطِ `liveSession || watchedLive` رندر
@@ -1611,6 +1612,11 @@ export default function ClubProfilePage() {
 
               خودِ پخش در استورِ سراسری زندگی می‌کند، پس عوض‌کردنِ تب
               قطعش نمی‌کند. */}
+          {/* کانال‌های سرویسِ پخش (دوربین/OBS) — در هر تب، فقط وقتی زنده‌اند */}
+          <div className="mb-6 empty:hidden">
+            <LiveChannelsGrid clubId={club.id} hideEmpty heading="پخش زنده‌ی باشگاه" />
+          </div>
+
           {tab === 'live' && (
             <div id="cpanel-live" role="tabpanel" aria-labelledby="ctab-live"
               style={{ animation: 'fadeUp 0.4s ease both', maxWidth: 820, margin: '0 auto' }}>
@@ -1625,6 +1631,11 @@ export default function ClubProfilePage() {
                     مسابقات خود را مستقیم از گوشی یا دوربین فیلم‌برداری پخش کنید. پخش شما در صفحه‌ی «پخش زنده» سایت دیده می‌شود.
                   </p>
                   <GoLive clubId={club.id} clubName={club.name} ownerKey={user?.phone || user?.id || 'owner'} />
+                  <p className="mt-4 text-sub text-ink-3">
+                    برای پخش با دوربینِ حرفه‌ای، OBS یا اپِ Larix و تماشاگرِ زیاد، از{' '}
+                    <Link href="/dashboard/club" className="rounded font-bold text-gold-text hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-deep">داشبوردِ باشگاه ← پخش زنده</Link>{' '}
+                    کانال بسازید.
+                  </p>
                 </div>
               ) : liveSession || watchedLive.current ? (
                 <>

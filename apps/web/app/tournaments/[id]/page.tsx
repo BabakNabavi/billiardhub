@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
+import { LiveChannelsGrid } from '../../../components/live/LiveChannelsGrid';
 import {
   ChevronRight, Star, ClipboardList,
 } from 'lucide-react';
@@ -295,6 +296,11 @@ export default function TournamentPublicPage() {
                   </button>
                 </Link>
               )}
+
+              {/* کانالِ اختصاصیِ پخشِ این مسابقه — فقط وقتی زنده است دیده می‌شود */}
+              <div className="mt-4">
+                <LiveChannelsGrid tournamentId={t.id} hideEmpty heading="پخش زنده‌ی مسابقه" />
+              </div>
 
             </div>
 

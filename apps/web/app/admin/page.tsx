@@ -146,6 +146,7 @@ const SECTIONS: AdminSection[] = [
       { title: 'بسته‌های آگهی', desc: 'ساخت و قیمت‌گذاری بسته‌های فروش آگهی', icon: <Package size={20} />, link: '/admin/ad-plans' },
       { title: 'بسته‌های استوری', desc: 'سهمیهٔ استوری هر نقش و بسته‌های فروش', icon: <Clapperboard size={20} />, link: '/admin/story-plans' },
       { title: 'بیلیارد مدیا', desc: 'مدیریت ویدیوها و کانال‌ها', icon: <Clapperboard size={20} />, link: '/admin/media' },
+      { title: 'پخش زنده', desc: 'کانال‌های باشگاه‌ها، سطحِ عادی/حرفه‌ای، ساعتِ پخش و بیننده، و مسدودسازی', icon: <Clapperboard size={20} />, link: '/admin/live' },
       { title: 'گزارش‌های تخلف', desc: 'بررسی گزارش کاربران درباره آگهی‌ها و محتوا', icon: <Flag size={20} />, link: '/admin/reports' },
       { title: 'قابلیت‌های پلتفرم', desc: 'روشن/خاموش کردن تعاملات اجتماعی — لایک، ری‌اکشن، پاسخ استوری و پیام خصوصی', icon: <ShieldCheck size={20} />, link: '/admin/features' },
       /* تا پیش از این، کد متن هر الگو فقط با نوشتن مستقیم در

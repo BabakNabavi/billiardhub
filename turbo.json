@@ -14,6 +14,8 @@
         "CRON_SECRET",
         "PAYMENT_PROVIDER",
         "PAYPING_TOKEN",
+        "STREAM_PROVIDER",
+        "STREAM_MOCK_HLS_URL",
         "PAYPING_REVERSIBLE",
         "ZARINPAL_MERCHANT_ID",
         "SETTLEMENT_PROVIDER",

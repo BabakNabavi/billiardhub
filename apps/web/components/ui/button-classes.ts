@@ -3,7 +3,7 @@
    است و صدا زدنش خطا می‌دهد؛ `<Link>`های دکمه‌شکلِ صفحه‌های سرور هم
    باید همین کلاس‌ها را بگیرند. نقش‌ها و دلیلشان: `Button.tsx`. */
 
-export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger'
+export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger' | 'danger-ghost'
 export type ButtonSize = 'sm' | 'md' | 'lg'
 
 /* ⚠️ هدف لمس ۴۴ پیکسل حتی در اندازه‌ی کوچک: `CLAUDE.md` این را
@@ -27,6 +27,10 @@ const VARIANT: Record<ButtonVariant, string> = {
     'text-ink-2 hover:text-ink hover:bg-line/[.04]',
   danger:
     'bg-danger text-white hover:bg-danger-ink',
+  /* کارِ برگشت‌ناپذیرِ کم‌تکرار (حذف، مسدودسازی) که نباید پررنگ‌ترین چیزِ
+     کارت باشد. `ghost` + `text-danger` نمی‌شد: رنگِ ghost در CSS دیرتر می‌آید و برنده است. */
+  'danger-ghost':
+    'text-danger hover:bg-danger/[.06]',
 }
 
 const BASE = [

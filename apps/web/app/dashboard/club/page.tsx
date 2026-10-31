@@ -11,7 +11,7 @@ import {
   LayoutDashboard, FileText, Grid3X3, Clock, CalendarDays, Trophy,
   Camera, GraduationCap, AlertTriangle, Trash2, Building2, Phone,
   Plus, Pencil, Eye, Upload, CheckCircle, XCircle, ImageIcon, Settings,
-  Loader2, Wallet, MapPin, MessageSquare, CalendarClock,
+  Loader2, Wallet, MapPin, MessageSquare, CalendarClock, RadioTower,
 } from 'lucide-react';
 import ClubFinance from '../../../components/club/ClubFinance';
 import SmsToMembers from '../../../components/club/SmsToMembers';
@@ -35,6 +35,7 @@ import { Card, SectionTitle, InputField, SelectField, TimeField, ClosedToggle, S
 import HoursTab from '../../../components/dashboard/club/HoursTab';
 import GalleryTab from '../../../components/dashboard/club/GalleryTab';
 import TournamentRegistrations from '../../../components/dashboard/club/TournamentRegistrations';
+import { LiveChannelsPanel } from '../../../components/dashboard/club/live/LiveChannelsPanel';
 import TournamentPoster from '../../../components/dashboard/club/TournamentPoster';
 import ConfirmDialog from '../../../components/ui/ConfirmDialog';
 import JalaliDatePicker from '../../../components/ui/JalaliDatePicker';
@@ -1967,6 +1968,7 @@ export default function ClubDashboardPage() {
     { key: 'schedule',    label: 'تقویم و گزارش', Icon: CalendarClock, badge: tomorrowCount || undefined },
     { key: 'finance',     label: 'مالی',       Icon: Wallet },
     { key: 'tournaments', label: 'مسابقات',    Icon: Trophy },
+    { key: 'live',        label: 'پخش زنده',   Icon: RadioTower },
     { key: 'gallery',     label: 'گالری',      Icon: ImageIcon },
     { key: 'coaches',     label: 'مربیان',     Icon: GraduationCap },
     { key: 'sms',         label: 'پیامک به اعضا', Icon: MessageSquare },
@@ -3551,6 +3553,9 @@ export default function ClubDashboardPage() {
           </div>
         </div>
       )}
+
+      {/* ════ Tab: Live (سرویسِ پخش) ════ */}
+      {activeTab === 'live' && selectedClub && <LiveChannelsPanel clubId={selectedClub.id} />}
 
       {/* ════ Tab: Tournaments ════ */}
       {activeTab === 'tournaments' && (

@@ -7,6 +7,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Radio, Users, Clock3, Building2, Loader2 } from 'lucide-react';
 import { fetchLiveSessions, type LiveSession } from '../../lib/live/client';
+import { LiveChannelsGrid } from '../../components/live/LiveChannelsGrid';
 
 const fa = (n: number) => Number(n || 0).toLocaleString('fa-IR');
 
@@ -21,6 +22,7 @@ const since = (ts: number) => {
 export default function LivePage() {
   const router = useRouter();
   const [rows, setRows] = useState<LiveSession[] | null>(null);
+  const [channelCount, setChannelCount] = useState(0);
 
   useEffect(() => {
     let alive = true;
@@ -64,7 +66,7 @@ export default function LivePage() {
               پخش زنده
             </h1>
             <p style={{ fontSize: 15, color: 'rgba(255,255,255,0.40)', margin: 0 }}>
-              {rows === null ? 'در حال بارگذاری…' : `${fa(liveNow.length)} پخش فعال`}
+              {rows === null ? 'در حال بارگذاری…' : `${fa(liveNow.length + channelCount)} پخش فعال`}
             </p>
           </div>
         </div>
@@ -72,11 +74,16 @@ export default function LivePage() {
         {/* Content */}
         <div style={{ maxWidth: 720, margin: '0 auto', padding: '28px 16px 60px' }}>
 
+          {/* کانال‌های سرویسِ پخش (HLS) — جدا از پخشِ مستقیمِ گوشی‌به‌گوشیِ پایین */}
+          <div className={channelCount > 0 ? 'mb-6' : ''}>
+            <LiveChannelsGrid hideEmpty heading="کانال‌های زنده‌ی باشگاه‌ها" onCount={setChannelCount} />
+          </div>
+
           {rows === null ? (
             <div style={{ textAlign: 'center', padding: 60, color: 'rgba(0,0,0,0.35)' }}>
               <Loader2 size={26} style={{ animation: 'lvspin 1s linear infinite' }} />
             </div>
-          ) : liveNow.length === 0 ? (
+          ) : liveNow.length === 0 && channelCount > 0 ? null : liveNow.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '56px 24px', background: 'rgba(255,255,255,0.78)', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 20 }}>
               <span style={{ display: 'inline-flex', width: 62, height: 62, borderRadius: 20, background: 'rgba(239,68,68,0.08)', color: '#ef4444', alignItems: 'center', justifyContent: 'center', marginBottom: 14 }}>
                 <Radio size={28} />
