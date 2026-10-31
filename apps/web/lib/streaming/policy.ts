@@ -67,13 +67,16 @@ export function canCreateChannel(
  *  اگر مدیریت سطح را پایین آورد، کانال‌های اضافه و کانالِ میز دیگر پخش نمی‌کنند —
  *  نه اینکه فقط ساختنِ کانالِ تازه بسته شود. */
 export function canGoLive(
-  ch: { adminBlocked: boolean; archived: boolean; isLive: boolean; kind: ChannelKind; rank: number },
+  /** `adminAttached`: کانالی که مدیرِ سایت دستی وصل کرده — تصمیمِ خودِ مدیر است،
+   *  پس سقف و سطحِ باشگاه جلویش را نمی‌گیرد (مسدودی چرا) */
+  ch: { adminBlocked: boolean; archived: boolean; isLive: boolean; kind: ChannelKind; rank: number; adminAttached?: boolean },
   s: ClubLiveSettings,
 ): Verdict {
   if (ch.archived) return no('این کانال حذف شده است')
   if (s.blocked) return no('پخش زنده‌ی این باشگاه توسط مدیریت بیلیارد هاب مسدود شده است')
   if (ch.adminBlocked) return no('این کانال توسط مدیریت بیلیارد هاب مسدود شده است')
   if (ch.isLive) return no('این کانال هم‌اکنون در حالِ پخش است')
+  if (ch.adminAttached) return { ok: true }
   if (ch.kind === 'table' && s.tier !== 'pro') return no('کانالِ میز مخصوصِ باشگاه‌های حرفه‌ای است')
   if (ch.kind !== 'tournament' && ch.rank >= channelLimitOf(s)) {
     return no(`این کانال بیرون از سقفِ فعلیِ باشگاه (${channelLimitOf(s)}) است`)

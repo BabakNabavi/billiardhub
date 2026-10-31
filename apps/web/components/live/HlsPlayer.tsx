@@ -13,7 +13,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Loader2, WifiOff } from 'lucide-react'
 
-type State = 'loading' | 'playing' | 'error'
+type State = 'loading' | 'playing' | 'error' | 'unsupported'
 const isHls = (u: string) => /\.m3u8(\?|$)/i.test(u)
 
 export function HlsPlayer({ src, live = true, title }: { src: string; live?: boolean; title: string }) {
@@ -36,7 +36,7 @@ export function HlsPlayer({ src, live = true, title }: { src: string; live?: boo
       void (async () => {
         const { default: Hls } = await import('hls.js')
         if (cancelled) return
-        if (!Hls.isSupported()) { setState('error'); return }
+        if (!Hls.isSupported()) { setState('unsupported'); return }
         const hls = new Hls({ lowLatencyMode: live, backBufferLength: live ? 30 : 90 })
         let retries = 0
         hls.on(Hls.Events.ERROR, (_e, data) => {
@@ -59,7 +59,8 @@ export function HlsPlayer({ src, live = true, title }: { src: string; live?: boo
      به‌جای خطا، هر ۱۰ ثانیه خودش دوباره امتحان می‌کند */
   useEffect(() => {
     if (!live || state !== 'error') return
-    const t = window.setTimeout(() => setAttempt(a => a + 1), 10_000)
+    /* تبِ پنهان دوباره نمی‌پرسد؛ با برگشتن، تلاشِ بعدی */
+    const t = window.setTimeout(() => { if (document.visibilityState === 'visible') setAttempt(a => a + 1) }, 10_000)
     return () => window.clearTimeout(t)
   }, [live, state])
 
@@ -81,6 +82,11 @@ export function HlsPlayer({ src, live = true, title }: { src: string; live?: boo
         <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
           <Loader2 className="h-8 w-8 animate-spin text-white/70" aria-hidden />
           <span className="sr-only">در حالِ بارگذاریِ تصویر</span>
+        </div>
+      )}
+      {state === 'unsupported' && (
+        <div className="absolute inset-0 flex items-center justify-center bg-black/80 px-6 text-center text-sub text-white">
+          این مرورگر پخشِ زنده را پشتیبانی نمی‌کند. با کروم یا سافاریِ به‌روز باز کنید.
         </div>
       )}
       {state === 'error' && (

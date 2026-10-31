@@ -67,6 +67,7 @@ export function ChannelCard({ ch, busy, run, connected = true }: { ch: OwnerChan
         <div className="flex flex-col gap-4">
           <IngestInfo ingestUrl={ch.ingestUrl} streamKey={ch.streamKey} busy={isBusy('rotate-key')} canRotate={connected && !ch.manual} onRotate={() => setConfirm('rotate')} />
           <div className="flex flex-wrap items-center gap-6">
+            {!ch.manual && <>
             <label className="inline-flex min-h-11 cursor-pointer items-center gap-2 text-sub text-ink">
               <input type="checkbox" className="h-4 w-4 accent-gold" checked={ch.access === 'members'} disabled={isBusy('update')}
                 onChange={e => void run({ action: 'update', channelId: ch.id, access: e.target.checked ? 'members' : 'public' })} />
@@ -77,6 +78,7 @@ export function ChannelCard({ ch, busy, run, connected = true }: { ch: OwnerChan
                 onChange={e => void run({ action: 'update', channelId: ch.id, record: e.target.checked })} />
               ضبط برای آرشیو
             </label>
+            </>}
             <Button variant="danger-ghost" size="sm" className="ms-auto" disabled={ch.adminBlocked} onClick={() => setConfirm('archive')}
               icon={<Trash2 className="h-4 w-4" aria-hidden />}>حذفِ کانال</Button>
           </div>

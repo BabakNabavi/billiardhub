@@ -60,6 +60,8 @@ t('کانالِ در حالِ پخش: شروعِ دوباره رد', P.canGoLive
 t('تنزل به عادی: کانالِ میز دیگر پخش نمی‌کند', P.canGoLive({ ...chan, kind: 'table' }, std).ok, false)
 t('تنزل به عادی: کانالِ دوم بیرون از سقف', P.canGoLive({ ...chan, rank: 1 }, std).ok, false)
 t('کانالِ مسابقه رتبه نمی‌خواهد', P.canGoLive({ ...chan, kind: 'tournament', rank: 9 }, std).ok, true)
+t('کانالِ دستیِ مدیر: بیرون از سقف هم شروع می‌شود', P.canGoLive({ ...chan, rank: 3, adminAttached: true }, std).ok, true)
+t('کانالِ دستیِ مدیر: مسدودی را دور نمی‌زند', P.canGoLive({ ...chan, adminAttached: true }, blocked).ok, false)
 t('حرفه‌ای: کانالِ سوم داخلِ سقف', P.canGoLive({ ...chan, kind: 'table', rank: 2 }, pro).ok, true)
 
 console.log('\n── دسترسیِ تماشا ──')

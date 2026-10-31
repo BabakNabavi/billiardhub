@@ -13,7 +13,8 @@ import { countOf } from '@/lib/streaming/viewers'
    پنلِ مدیریتِ پخش زنده — کلیدِ دسترسیِ «live».
    GET   همه‌ی باشگاه‌های دارای کانال/تنظیم + آمارِ ۳۰ روز
    POST  block-channel | unblock-channel | block-club | unblock-club |
-         set-tier | force-stop | hide-recording | show-recording
+         set-tier | force-stop | hide-recording | show-recording |
+         archive-channel | attach-manual (کانالِ ساخته‌شده در پنلِ آروان)
    ⚠️ کلیدِ استریم هرگز به پنلِ مدیر نمی‌رود — لازمش ندارد.
    ───────────────────────────────────────────────────────────── */
 
@@ -36,13 +37,17 @@ const Action = z.discriminatedUnion('action', [
   /* کانالی که در پنلِ آروان ساخته شده — نشانی‌ها از همان پنل کپی می‌شوند */
   z.object({
     action: z.literal('attach-manual'), clubId: uuid, kind: z.enum(['club', 'table']),
-    title: z.string().trim().min(2).max(90), tableLabel: z.string().trim().max(40).optional(),
+    title: z.string().trim().min(2, 'نامِ کانال دست‌کم ۲ حرف').max(90, 'نامِ کانال حداکثر ۹۰ حرف'), tableLabel: z.string().trim().max(40).optional(),
     access: z.enum(['public', 'members']).default('public'),
-    ingestUrl: z.string().trim().regex(/^(rtmps?|srt):\/\/\S{6,300}$/, 'نشانیِ ورودی باید با rtmp:// شروع شود'),
-    streamKey: z.string().trim().min(4).max(200),
-    playbackUrl: z.string().trim().url().regex(/^https:\/\/\S+\.m3u8(\?\S*)?$/, 'نشانیِ تماشا باید https و .m3u8 باشد'),
+    ingestUrl: z.string().trim().regex(/^(rtmps?|srt):\/\/\S{6,300}$/, 'نشانیِ ورودی باید با rtmp:// یا srt:// شروع شود'),
+    streamKey: z.string().trim().min(4, 'کلیدِ پخش کوتاه است').max(200, 'کلیدِ پخش بیش از حد بلند است'),
+    /* فقط دامنه‌ای که CSP اجازه داده — وگرنه ذخیره می‌شد و مرورگر بی‌صدا می‌بستش */
+    playbackUrl: z.string().trim().url()
+      .regex(/^https:\/\/[a-z0-9-]+(\.[a-z0-9-]+)*\.arvanlive\.ir\/\S+\.m3u8(\?\S*)?$/i, 'نشانیِ تماشا باید از arvanlive.ir و با .m3u8 باشد'),
   }),
 ])
+
+const hostOf = (u: string) => { try { return new URL(u).host } catch { return '?' } }
 
 async function guard(req: NextRequest) {
   const actor = actorFromRequest(req)
@@ -120,11 +125,10 @@ export async function POST(req: NextRequest) {
     } else if (b.action === 'hide-recording' || b.action === 'show-recording') {
       must(await sb().from('live_broadcasts').update({ recording_hidden: b.action === 'hide-recording' }).eq('id', b.broadcastId), 'recording')
     } else if (b.action === 'attach-manual') {
-      /* «حرفه‌ای کن» و این، تنها راه‌های ساختِ ردیفِ تنظیم/کانال برای باشگاهِ تازه‌اند */
       await attachManualChannel({ ...b, actorId: g.actor.id })
     } else if ('channelId' in b) {
       const ch = await channelById(b.channelId)
-      if (!ch) return NextResponse.json({ message: 'کانال یافت نشد' }, { status: 404 })
+      if (!ch || (b.action === 'archive-channel' && ch.archivedAt)) return NextResponse.json({ message: 'کانال یافت نشد' }, { status: 404 })
       /* بی‌شرط: اگر پخشِ بازی بی‌کانالِ «زنده» مانده باشد هم بسته می‌شود؛ وگرنه بی‌اثر */
       if (b.action === 'force-stop') await stopBroadcast(ch, 'admin')
       else if (b.action === 'archive-channel') await archiveChannel(ch, { byAdmin: true })
@@ -134,7 +138,8 @@ export async function POST(req: NextRequest) {
       actorId: g.actor.id, actorRole: 'admin', action: `LIVE_ADMIN_${b.action.toUpperCase().replace(/-/g, '_')}`,
       entityType: 'live', entityId: 'channelId' in b ? b.channelId : 'clubId' in b ? b.clubId : b.broadcastId,
       /* کلیدِ استریم در لاگِ ممیزی ننشیند */
-      newValue: 'streamKey' in b ? { ...b, streamKey: '***' } : b, ip: clientIp(req) ?? undefined,
+      /* کلید ممکن است در نشانیِ ورودی هم باشد (rtmp://…/key یا srt://…?streamid=) — فقط میزبان */
+      newValue: 'streamKey' in b ? { ...b, streamKey: '***', ingestUrl: hostOf(b.ingestUrl) } : b, ip: clientIp(req) ?? undefined,
     })
     return NextResponse.json({ ok: true })
   } catch (e) {

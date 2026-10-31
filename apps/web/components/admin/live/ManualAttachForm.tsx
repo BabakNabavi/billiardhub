@@ -21,7 +21,6 @@ export function ManualAttachForm({ clubs, busy, run }: {
   const [ingestUrl, setIngest] = useState('')
   const [streamKey, setKey] = useState('')
   const [playbackUrl, setPlay] = useState('')
-  const [members, setMembers] = useState(false)
 
   if (!open) return (
     <Button variant="secondary" size="sm" className="self-start" icon={<Link2 className="h-4 w-4" aria-hidden />} onClick={() => setOpen(true)}>
@@ -32,7 +31,7 @@ export function ManualAttachForm({ clubs, busy, run }: {
   const submit = async (e: React.FormEvent) => {
     e.preventDefault()
     const ok = await run({
-      action: 'attach-manual', clubId, kind: 'club', title: title.trim(), access: members ? 'members' : 'public',
+      action: 'attach-manual', clubId, kind: 'club', title: title.trim(), access: 'public',
       ingestUrl: ingestUrl.trim(), streamKey: streamKey.trim(), playbackUrl: playbackUrl.trim(),
     })
     if (ok) { setOpen(false); setTitle(''); setIngest(''); setKey(''); setPlay('') }
@@ -64,10 +63,8 @@ export function ManualAttachForm({ clubs, busy, run }: {
         نشانیِ تماشا (.m3u8)
         <input className={field} dir="ltr" value={playbackUrl} onChange={e => setPlay(e.target.value)} required placeholder="https://…arvanlive.ir/hls/…/….m3u8" />
       </label>
-      <label className="inline-flex min-h-11 cursor-pointer items-center gap-2 text-sub text-ink">
-        <input type="checkbox" className="h-4 w-4 accent-gold" checked={members} onChange={e => setMembers(e.target.checked)} />
-        فقط کاربرانِ عضو ببینند
-      </label>
+      {/* «فقط اعضا» برای کانالِ دستی نیست: نشانیِ m3u8 ثابت و بی‌امضاست و هر کس
+          داشته باشد می‌بیند — گزینه‌ای که قفل نمی‌کند، وعده‌ی دروغ است */}
       <div className="flex gap-2">
         <Button type="submit" loading={busy}>وصل کن</Button>
         <Button variant="ghost" onClick={() => setOpen(false)}>انصراف</Button>

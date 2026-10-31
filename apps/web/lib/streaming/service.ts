@@ -94,7 +94,8 @@ export interface ManualChannel {
 }
 
 /** وصلِ دستیِ کانالی که در پنلِ سرویس ساخته شده — فقط مدیرِ سایت.
- *  سقفِ کانالِ باشگاه را دور می‌زند (تصمیمِ مدیر است)، مسدودیِ باشگاه را نه. */
+ *  نه در ساخت و نه در «شروع» به سقف و سطحِ باشگاه بند نیست (canGoLive با
+ *  adminAttached)؛ مسدودیِ باشگاه و کانال اما همچنان اعمال می‌شود. */
 export async function attachManualChannel(m: ManualChannel): Promise<Channel> {
   if ((await clubSettings(m.clubId)).blocked) throw new LiveError('پخشِ این باشگاه مسدود است', 409)
   const r = await sb().from('live_channels').insert({
@@ -124,7 +125,7 @@ export async function rotateKey(ch: Channel): Promise<void> {
 export async function startBroadcast(ch: Channel, actorId: string, title?: string): Promise<void> {
   const [settings, siblings] = await Promise.all([clubSettings(ch.clubId), clubChannels(ch.clubId)])
   const rank = siblings.filter(c => c.kind !== 'tournament').findIndex(c => c.id === ch.id)
-  const v = canGoLive({ adminBlocked: ch.adminBlocked, archived: !!ch.archivedAt, isLive: ch.isLive, kind: ch.kind, rank: Math.max(0, rank) }, settings)
+  const v = canGoLive({ adminBlocked: ch.adminBlocked, archived: !!ch.archivedAt, isLive: ch.isLive, kind: ch.kind, rank: Math.max(0, rank), adminAttached: ch.provider === 'manual' }, settings)
   if (!v.ok) throw new LiveError(v.reason, 409)
   const p = providerOf(ch)
   await viaProvider('enable', () => p.setEnabled(ch.providerChannelId, true))
@@ -177,7 +178,7 @@ export async function stopBroadcast(ch: Channel, reason: EndReason): Promise<voi
 export async function archiveChannel(ch: Channel, opts: { byAdmin?: boolean } = {}): Promise<void> {
   /* وگرنه حذف + ساختِ دوباره، مسدودیِ مدیریت را دور می‌زد (مدیر خودش می‌تواند) */
   if (ch.adminBlocked && !opts.byAdmin) throw new LiveError('کانالِ مسدود را نمی‌توان حذف کرد؛ با پشتیبانی تماس بگیرید', 409)
-  if (ch.isLive) await stopBroadcast(ch, 'owner')
+  if (ch.isLive) await stopBroadcast(ch, opts.byAdmin ? 'admin' : 'owner')
   await providerForChannel(ch.provider)?.deleteChannel(ch.providerChannelId)
     .catch(e => console.error('[streaming] provider delete failed', e))
   await patchChannel(ch.id, { archived_at: new Date().toISOString(), is_live: false })

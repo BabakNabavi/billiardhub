@@ -40,7 +40,9 @@ export function ChannelAdminRow({ ch, busy, run, onBlock }: {
           <Button variant="danger-ghost" size="sm" icon={<Ban className="h-4 w-4" aria-hidden />} onClick={onBlock}>مسدودِ کانال</Button>
         )}
         <Button variant="danger-ghost" size="sm" loading={b(`archive-channel:${ch.id}`)} icon={<Trash2 className="h-4 w-4" aria-hidden />}
-          onClick={() => { if (window.confirm(`کانالِ «${ch.title}» از سایت حذف شود؟`)) void run({ action: 'archive-channel', channelId: ch.id }) }}>حذف</Button>
+          onClick={() => { if (window.confirm(ch.manual
+            ? `کانالِ «${ch.title}» از سایت حذف شود؟ (خودِ کانال در پنلِ آروان می‌ماند)`
+            : `کانالِ «${ch.title}» از سایت و از سرویسِ پخش حذف شود؟ این کار برگشت ندارد.`)) void run({ action: 'archive-channel', channelId: ch.id }) }}>حذف</Button>
       </div>
       {ch.recent.length > 0 && (
         <ul className="flex flex-col gap-1 border-t border-line/10 pt-2">
