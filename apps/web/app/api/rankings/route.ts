@@ -18,21 +18,26 @@ import { sb } from '@/lib/finance/db';
 const StageZ = z.object({ title: z.string(), city: z.string(), date: z.string() });
 /* سقفِ شش: خانه‌ها عرضِ ثابت دارند و بیشتر از آن در ۱۰۲۴ نام را می‌برد */
 const StagesZ = z.record(z.string(), z.record(z.string(), z.record(z.string(), z.array(StageZ).max(6))));
+/* مبنای صعود/نزول (`rankings_trend_note`) — sport → gender → category → متن.
+   وقتی رتبه‌ی قبلی از جدولِ رسمیِ قبلی نیامده و از امتیازِ مرحله‌ها
+   ساخته شده، بیننده باید بداند علامت نسبت به چیست. */
+const TrendNotesZ = z.record(z.string(), z.record(z.string(), z.record(z.string(), z.string().max(80))));
 
 export async function GET() {
   const { data, error } = await sb()
-    .from('app_settings').select('key,value,updated_at').in('key', ['rankings_board', 'rankings_stages']);
+    .from('app_settings').select('key,value,updated_at').in('key', ['rankings_board', 'rankings_stages', 'rankings_trend_note']);
 
-  if (error) return NextResponse.json({ board: null, stages: {}, updatedAt: null }, { status: 200 });
+  if (error) return NextResponse.json({ board: null, stages: {}, trendNotes: {}, updatedAt: null }, { status: 200 });
 
   const rows = (data ?? []) as { key: string; value?: unknown; updated_at?: string }[];
   const board = rows.find(r => r.key === 'rankings_board');
   const st = rows.find(r => r.key === 'rankings_stages');
   const stages = StagesZ.safeParse(st?.value ?? {});
+  const notes = TrendNotesZ.safeParse(rows.find(r => r.key === 'rankings_trend_note')?.value ?? {});
   /* تاریخِ پانوشت: تازه‌ترینِ دو کلید — عوض‌شدنِ فقط سرستون هم به‌روزرسانی است */
   const updatedAt = [board?.updated_at, st?.updated_at].filter((v): v is string => !!v).sort().at(-1) ?? null;
   return NextResponse.json(
-    { board: board?.value ?? null, stages: stages.success ? stages.data : {}, updatedAt },
+    { board: board?.value ?? null, stages: stages.success ? stages.data : {}, trendNotes: notes.success ? notes.data : {}, updatedAt },
     /* یک دقیقه کش، با اجازه‌ی سرو کردن نسخه‌ی کهنه هنگام بازاعتبارسنجی —
        رنکینگ روزی چند بار هم عوض نمی‌شود. */
     { headers: { 'Cache-Control': 'public, max-age=60, stale-while-revalidate=300' } },

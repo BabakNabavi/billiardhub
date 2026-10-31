@@ -2,7 +2,7 @@
    Rankings store — پل بین پنل ادمین (/admin/rankings) و
    صفحه‌ی رنکینگ سایت (/ranking). localStorage، ساختار:
    sport → gender → category → RankingPlayer[]
-   ظرفیت‌ها: اسنوکر دسته برتر ۳۲ (بانوان ۶۴)، دسته یک ۵۱۲؛ پاکت ۳۲.
+   ظرفیت‌ها: اسنوکر دسته برتر ۳۲ (آقایان ۱۲۸، بانوان ۶۴)، دسته یک ۵۱۲؛ پاکت ۳۲.
    ───────────────────────────────────────────────────────────── */
 
 import { provinceOfCity } from './iran-geo'
@@ -58,8 +58,10 @@ export const CATEGORY_SIZES: Record<string, Record<string, number>> = {
   pocket:  { 'دسته برتر': 32, 'دسته یک': 32,  'زیر ۲۱ سال': 32, 'پیشکسوتان': 32 },
 }
 
-/* ظرفیتِ ویژه‌ی یک جنس — دسته برترِ آقایان ۳۲ می‌ماند، بانوان بیشتر */
+/* ظرفیتِ ویژه‌ی یک جنس. دسته برترِ آقایان از ۱۴۰۵ کامل ۶۶ نفر است (جدولِ
+   پیشینِ ۳۲نفره ناقص بود) — ۱۲۸ برای جا؛ ردیفِ بیرون از ظرفیت دور ریخته می‌شود. */
 const GENDER_SIZES: Record<string, number> = {
+  'snooker|آقایان|دسته برتر': 128,
   'snooker|بانوان|دسته برتر': 64,
 }
 
@@ -166,14 +168,16 @@ export function saveRankings(data: RankingsStructure) {
    یکی نیست و صفحه باید فرقشان را بداند. */
 /* `updatedAt` هم برمی‌گردد: پانوشتِ صفحه تا مهرِ ۱۴۰۵ فقط «به‌روز شده»
    بی‌تاریخ می‌گفت — ادعایی که بیننده نمی‌توانست بسنجد. */
-export async function fetchRankingsBoard(): Promise<{ board: RankingsStructure | null; stages: RankingStagesMap; updatedAt: string | null }> {
+export type TrendNotesMap = Record<string, Record<string, Record<string, string>>>
+
+export async function fetchRankingsBoard(): Promise<{ board: RankingsStructure | null; stages: RankingStagesMap; trendNotes: TrendNotesMap; updatedAt: string | null }> {
   try {
     const r = await fetch('/api/rankings', { cache: 'no-store' })
-    if (!r.ok) return { board: null, stages: {}, updatedAt: null }
+    if (!r.ok) return { board: null, stages: {}, trendNotes: {}, updatedAt: null }
     /* `stages` در خودِ مسیرِ API با Zod سنجیده می‌شود — Zod به باندلِ کلاینت نمی‌آید */
-    const j = await r.json() as { board?: RankingsStructure | null; stages?: RankingStagesMap; updatedAt?: string | null }
-    return { board: j?.board ? mergeIntoEmpty(j.board) : null, stages: j?.stages ?? {}, updatedAt: j?.updatedAt ?? null }
-  } catch { return { board: null, stages: {}, updatedAt: null } }
+    const j = await r.json() as { board?: RankingsStructure | null; stages?: RankingStagesMap; trendNotes?: TrendNotesMap; updatedAt?: string | null }
+    return { board: j?.board ? mergeIntoEmpty(j.board) : null, stages: j?.stages ?? {}, trendNotes: j?.trendNotes ?? {}, updatedAt: j?.updatedAt ?? null }
+  } catch { return { board: null, stages: {}, trendNotes: {}, updatedAt: null } }
 }
 
 export function categoryStagesOf(all: RankingStagesMap, sport: string, gender: string, category: string): RankingStage[] {

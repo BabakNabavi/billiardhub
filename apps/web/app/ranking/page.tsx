@@ -16,7 +16,7 @@ import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { rankColor } from '../../lib/ranking-color'
 import { Trophy, TrendingUp, TrendingDown, Minus } from 'lucide-react'
-import { fetchRankingsBoard, categoryPlayersOf, categoryStagesOf, type RankingsStructure, type RankingStagesMap } from '../../lib/rankings-store'
+import { fetchRankingsBoard, categoryPlayersOf, categoryStagesOf, type RankingsStructure, type RankingStagesMap, type TrendNotesMap } from '../../lib/rankings-store'
 import { StageCells, StageHead } from '../../components/ranking/StageColumns'
 import { FullTableDialog } from '../../components/ranking/FullTableDialog'
 import { faDate } from '../../lib/jalali'
@@ -145,6 +145,7 @@ export default function RankingsPage() {
   const [board, setBoard] = useState<RankingsStructure | null>(null)
   const [updatedAt, setUpdatedAt] = useState<string | null>(null)
   const [stagesMap, setStagesMap] = useState<RankingStagesMap>({})
+  const [trendNotes, setTrendNotes] = useState<TrendNotesMap>({})
   const [loaded, setLoaded] = useState(false)
   /* ردیفی که از جست‌وجو آمده — تا وسطِ صفحه اسکرول و چند ثانیه برجسته */
   const [focus, setFocus] = useState<{ name: string; rank: number } | null>(null)
@@ -161,6 +162,7 @@ export default function RankingsPage() {
       if (!alive) return
       setBoard(remote.board)
       setStagesMap(remote.stages)
+      setTrendNotes(remote.trendNotes)
       setUpdatedAt(remote.updatedAt)
       setLoaded(true)
     })()
@@ -174,6 +176,7 @@ export default function RankingsPage() {
   /* مرحله‌ها فقط برای دسته‌ای که سرستون دارد — بقیه همان چیدمانِ دوستونی */
   const stages = sport !== 'highball' ? categoryStagesOf(stagesMap, sport, gender, category) : []
   const withStages = stages.length > 0
+  const trendNote = sport !== 'highball' ? trendNotes[sport]?.[gender]?.[category] ?? '' : ''
 
   /* پیوندِ جست‌وجو: بازیکن با *نام* پیدا می‌شود، رتبه فقط وقتی نام نیامده —
      نمایه‌ی جست‌وجو تا یک دقیقه کش است و اگر ادمین ترتیب را عوض کرده باشد،
@@ -536,6 +539,8 @@ export default function RankingsPage() {
                 <span style={{ display: 'inline-flex', alignItems: 'center', gap: 12, fontSize: 11, color: MUT }}>
                   <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><TrendingUp size={11} style={{ color: '#22B45A' }} /> صعود</span>
                   <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><TrendingDown size={11} style={{ color: '#E05252' }} /> نزول</span>
+                  {/* مبنای علامت، وقتی از جدولِ رسمیِ قبلی نیامده — بی‌ادعای «رسمی» */}
+                  {trendNote && <span style={{ fontSize: 10.5 }}>({trendNote})</span>}
                 </span>
               </div>
 
