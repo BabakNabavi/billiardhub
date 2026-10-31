@@ -11,8 +11,10 @@
    فیلترها و منطق صعود-نزول همان قبلی است.
    ───────────────────────────────────────────────────────────── */
 
-import { useEffect, useState } from 'react'
+import { Suspense, useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { rankColor } from '../../lib/ranking-color'
 import { Trophy, TrendingUp, TrendingDown, Minus } from 'lucide-react'
 import { fetchRankingsBoard, categoryPlayersOf, categoryStagesOf, type RankingsStructure, type RankingStagesMap } from '../../lib/rankings-store'
 import { StageCells, StageHead } from '../../components/ranking/StageColumns'
@@ -66,15 +68,6 @@ import { splitFaName } from '../../lib/fa-name'
 
 const faDigits = (v: string | number) => String(v).replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[+d] ?? d)
 
-/* رنگ‌بندی رتبه‌ها — به سبک جدول رنکینگ فدراسیون جهانی:
-   ۱ مشکی، ۲–۸ صورتی، ۹–۱۶ آبی، ۱۷–۳۲ قهوه‌ای، ۳۳–۶۴ سبز (دسته یک)، بقیه خاکستری */
-const rankColor = (r: number): string =>
-  r === 1 ? '#111111'
-  : r <= 8 ? '#F06EAE'
-  : r <= 16 ? '#3D63E6'
-  : r <= 32 ? '#A9613F'
-  : r <= 64 ? '#229A47'
-  : '#6F6A5C'
 
 /* چیپ تغییر رتبه — همان منطق قبلی (previousRank - rank) */
 function TrendChip({ diff, onDark = false }: { diff: number; onDark?: boolean }) {
@@ -118,6 +111,28 @@ function Portrait({ p, size, onDark = false }: { p: RankingPlayer; size: number;
   )
 }
 
+/* ── پیوندِ مستقیم به یک بازیکن (از جست‌وجو) ──
+   `/ranking?sport=…&gender=…&cat=…&name=…&rank=…`. جدا و داخلِ Suspense: `useSearchParams`
+   در خودِ صفحه کلِ آن را از پیش‌رندرِ ایستا بیرون می‌کشید.
+   مقدارِ ناشناخته (رشته/دسته‌ای که در فهرست نیست) نادیده گرفته می‌شود.
+   ⚠️ بعد از خواندن، نشانی به `/ranking` برمی‌گردد: وگرنه انتخابِ دوباره‌ی همان
+   بازیکن از جست‌وجو (پس از عوض‌کردنِ دستیِ تب) همان `?` بود و هیچ اتفاقی نمی‌افتاد. */
+type DeepLinkTarget = { sport: string; gender: string; category: string; name: string; rank: number }
+function DeepLink({ onLink }: { onLink: (t: DeepLinkTarget) => void }) {
+  const qs = useSearchParams().toString()
+  const router = useRouter()
+  useEffect(() => {
+    if (!qs) return
+    const p = new URLSearchParams(qs)
+    const sport = p.get('sport') ?? '', gender = p.get('gender') ?? '', category = p.get('cat') ?? ''
+    const rank = Number(p.get('rank'))
+    if (!categories[sport]?.[gender]?.includes(category)) return
+    onLink({ sport, gender, category, name: (p.get('name') ?? '').trim(), rank: Number.isInteger(rank) && rank > 0 ? rank : 0 })
+    router.replace('/ranking', { scroll: false })
+  }, [qs, onLink, router])
+  return null
+}
+
 export default function RankingsPage() {
   const [sport, setSport]       = useState('snooker')
   const [gender, setGender]     = useState('آقایان')
@@ -131,6 +146,13 @@ export default function RankingsPage() {
   const [updatedAt, setUpdatedAt] = useState<string | null>(null)
   const [stagesMap, setStagesMap] = useState<RankingStagesMap>({})
   const [loaded, setLoaded] = useState(false)
+  /* ردیفی که از جست‌وجو آمده — تا وسطِ صفحه اسکرول و چند ثانیه برجسته */
+  const [focus, setFocus] = useState<{ name: string; rank: number } | null>(null)
+  const [flashRank, setFlashRank] = useState(0)
+  const onLink = useCallback((t: DeepLinkTarget) => {
+    setSport(t.sport); setGender(t.gender); setCategory(t.category)
+    setFocus(t.name || t.rank ? { name: t.name, rank: t.rank } : null)
+  }, [])
 
   useEffect(() => {
     let alive = true
@@ -153,17 +175,72 @@ export default function RankingsPage() {
   const stages = sport !== 'highball' ? categoryStagesOf(stagesMap, sport, gender, category) : []
   const withStages = stages.length > 0
 
+  /* پیوندِ جست‌وجو: بازیکن با *نام* پیدا می‌شود، رتبه فقط وقتی نام نیامده —
+     نمایه‌ی جست‌وجو تا یک دقیقه کش است و اگر ادمین ترتیب را عوض کرده باشد،
+     رتبه‌ی کهنه نفرِ دیگری را برجسته می‌کرد. پیدا نشد ⟵ بی‌اسکرول. */
+  const focusRow = focus
+    ? players.find(p => (focus.name ? p.name.trim() === focus.name : p.rank === focus.rank)) ?? null
+    : null
+  const focusRowRank = focusRow?.rank ?? 0
+  useEffect(() => {
+    if (!focus || !loaded) return
+    setFocus(null)
+    if (!focusRowRank) return
+    const r = focusRowRank
+    setFlashRank(r)
+    /* scrollIntoView یک‌باره کافی نبود: ردیف‌های بالاتر (content-visibility) تا
+       رندر نشوند اندازه‌ی تخمینی دارند و ردیف زیرِ نوارِ چسبانِ فیلترها می‌ماند.
+       پس اندازه می‌گیرد و اصلاح می‌کند تا دو بارِ پشتِ‌هم وسط باشد؛ اسکرول یا
+       لمسِ کاربر حلقه را همان لحظه می‌بُرد تا او را عقب نکشد. */
+    let n = 0, settled = 0, stop = false, timer = 0
+    const EVS = ['wheel', 'touchstart', 'keydown'] as const
+    const off = () => { for (const ev of EVS) removeEventListener(ev, cancel) }
+    const cancel = () => { stop = true; clearTimeout(timer); off() }
+    for (const ev of EVS) addEventListener(ev, cancel, { passive: true })
+    const go = () => {
+      if (stop) return
+      const el = document.getElementById(`rk-r-${r}`)
+      if (!el) return off()
+      const box = el.getBoundingClientRect()
+      const bar = document.querySelector('.rk-ctrls')?.getBoundingClientRect().bottom ?? 0
+      const target = bar + (innerHeight - bar - box.height) / 2
+      if (Math.abs(box.top - target) > 16) { settled = 0; window.scrollBy({ top: box.top - target }) }
+      else settled++
+      if (settled >= 2 || ++n >= 10) return off()
+      timer = window.setTimeout(go, 140)
+    }
+    requestAnimationFrame(go)
+  }, [focus, loaded, focusRowRank])
+  useEffect(() => {
+    if (!flashRank) return
+    const t = setTimeout(() => setFlashRank(0), 3600)
+    return () => clearTimeout(t)
+  }, [flashRank])
+
   return (
     <div className="lq-stage" dir="rtl" style={{ minHeight: '100vh', color: TEXT, fontFamily: 'Vazirmatn,Tahoma,sans-serif' }}>
       <style>{`
         @keyframes rkFadeUp { from { opacity:0; transform: translateY(16px); } to { opacity:1; transform:none; } }
         .rk-wrap { max-width: 1080px; margin: 0 auto; padding: 0 clamp(16px,3vw,28px); }
 
-        /* هدر رسمی تیره */
-        .rk-hero { position: relative; overflow: hidden; background: #0D0C0A; color: #fff; }
-        .rk-hero-word { position: absolute; bottom: -8px; inset-inline-start: -4px; font-weight: 900;
-          font-size: clamp(56px, 10vw, 128px); line-height: 1; letter-spacing: .02em;
-          color: transparent; -webkit-text-stroke: 1px rgba(255,255,255,0.07); user-select: none; pointer-events: none; direction: ltr; }
+        /* هدر رسمی — پوسترِ جام و نقشه (آبانِ ۱۴۰۵). متن سمتِ راست است، پس
+           پرده‌ی تیره از راست می‌آید و جام و توپ‌ها در چپ دیده می‌مانند. */
+        .rk-hero { position: relative; overflow: hidden; background: #0D0C0A; color: #fff;
+          min-height: clamp(220px, 21vw, 300px); display: flex; align-items: center; }
+        .rk-hero > .rk-wrap { flex: 1; }
+        .rk-hero-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 42%; }
+        .rk-hero-veil { position: absolute; inset: 0;
+          background: linear-gradient(to left, rgba(10,9,7,0.86) 0%, rgba(10,9,7,0.62) 34%, rgba(10,9,7,0.12) 68%, rgba(10,9,7,0) 100%),
+                      linear-gradient(to top, rgba(10,9,7,0.45), transparent 45%); }
+        /* موبایل: نواری باریک — حداکثر یک‌دهمِ صفحه (خواستِ مالک)؛ فقط تیتر */
+        @media (max-width: 640px) {
+          .rk-hero { min-height: 0; height: clamp(64px, 10svh, 92px); }
+          .rk-hero-img { object-position: 50% 55%; }
+          .rk-hero-veil { background: linear-gradient(to left, rgba(10,9,7,0.82) 0%, rgba(10,9,7,0.5) 45%, rgba(10,9,7,0.08) 80%); }
+          .rk-hero .rk-badge-row, .rk-hero p { display: none; }
+          .rk-hero h1 { font-size: 21px !important; }
+          .rk-hero > .rk-wrap { padding-top: 0 !important; padding-bottom: 0 !important; }
+        }
 
         /* سگمنت‌ها */
         /* ⚠️ کنترل‌ها دیگر پوسته‌ی محلی ندارند: همان .lq-seg مشترک
@@ -181,13 +258,6 @@ export default function RankingsPage() {
         @media (min-width: 1024px) {
           .rk-ctrls { flex-direction: row; align-items: center; }
           .rk-ctrls > .rk-cats { flex: 0 1 auto; }
-        }
-        /* موبایل: سربرگِ تیره حذف (خواستِ مالک) — تیترِ صفحه برای
-           صفحه‌خوان در h1ِ پنهانِ زیر می‌ماند */
-        .rk-h1-mob { display: none; }
-        @media (max-width: 640px) {
-          .rk-hero { display: none; }
-          .rk-h1-mob { display: block; }
         }
         .rk-sports { flex: 0 1 auto; min-width: 0; }
         .rk-genders { flex: 0 0 auto; }
@@ -228,6 +298,10 @@ export default function RankingsPage() {
           filter: drop-shadow(0 1px 2px rgba(28,27,23,0.05));
           transition: transform .28s cubic-bezier(.22,1,.36,1), filter .28s; }
         .rk-rowwrap:hover { transform: translateY(-3px); filter: drop-shadow(0 12px 20px rgba(28,27,23,0.13)); }
+        /* ردیفِ آمده از جست‌وجو — حلقه‌ی داخلی (بیرونی را content-visibility می‌بُرد) */
+        @keyframes rkHit { from, 60% { box-shadow: inset 0 0 0 2px ${GOLD}; background-color: rgba(199,166,106,0.18); } }
+        .rk-hit .rk-row { animation: rkHit 3.4s ease both; }
+        @media (prefers-reduced-motion: reduce) { .rk-hit .rk-row { animation-duration: 0s; box-shadow: inset 0 0 0 2px ${GOLD}; } }
         .rk-row { position: relative; display: flex; align-items: center; gap: 14px;
           background: rgba(255,255,255,0.78); border: 1px solid ${LINE}; border-radius: 16px 16px 16px 0; overflow: hidden;
           padding: 0 0 0 18px; min-height: 74px; text-decoration: none; color: inherit;
@@ -361,12 +435,17 @@ export default function RankingsPage() {
         }
       `}</style>
 
-      <h1 className="sr-only rk-h1-mob">رنکینگ بازیکنان</h1>
+      <Suspense fallback={null}><DeepLink onLink={onLink} /></Suspense>
       {/* ═══ هدر رسمی ═══ */}
       <header className="rk-hero">
-        <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(circle at 82% 10%, rgba(199,166,106,0.16), transparent 52%)' }} />
-        <div style={{ position: 'absolute', top: '-20%', bottom: '-20%', left: '32%', width: 1, background: 'linear-gradient(180deg,transparent,rgba(199,166,106,0.45),transparent)', transform: 'rotate(14deg)' }} />
-        <div className="rk-hero-word">RANKINGS</div>
+        {/* تزئینی (alt خالی). در موبایل زیرِ پرده‌ی تیره نسخه‌ی ۷۶۸ (۳۴ کیلوبایت) بس است،
+            حتی در DPR3. next/image نه: صفحه کلاینتی است و این سه اندازه از پیش
+            ساخته شده‌اند (public/images/ranking). */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img className="rk-hero-img" alt="" src="/images/ranking/poster-1280.webp"
+          srcSet="/images/ranking/poster-768.webp 768w, /images/ranking/poster-1280.webp 1280w, /images/ranking/poster-2048.webp 2048w"
+          sizes="(max-width: 640px) 60vw, 100vw" fetchPriority="high" decoding="async" />
+        <div className="rk-hero-veil" aria-hidden />
         <div className="rk-wrap" style={{ position: 'relative', padding: 'clamp(32px,5vw,58px) clamp(16px,3vw,28px) clamp(26px,4vw,44px)' }}>
           {/* بالا و سمت چپ — `insetInlineEnd` در راست‌به‌چپ یعنی چپ */}
           <div className="rk-badge-row">
@@ -471,7 +550,7 @@ export default function RankingsPage() {
                   const firstName = breakAllahLigature(p.firstName?.trim() || guess.firstName)
                   const lastName = breakAllahLigature(p.lastName?.trim() || guess.lastName)
                   return (
-                    <div key={p.rank} className="rk-rowwrap" style={{ animationDelay: `${Math.min(i, 10) * 45}ms` }}>
+                    <div key={p.rank} id={`rk-r-${p.rank}`} className={`rk-rowwrap${flashRank === p.rank ? ' rk-hit' : ''}`} style={{ animationDelay: `${Math.min(i, 10) * 45}ms` }}>
                       <Link href={p.userId ? `/players/${p.userId}` : '#'} className="rk-row">
                         <span className="chip" style={{ backgroundColor: rankColor(p.rank) }}>{faDigits(p.rank)}</span>
                         <span className="rk-portrait" style={{ display: 'inline-flex', flexShrink: 0 }}><Portrait p={p} size={46} /></span>

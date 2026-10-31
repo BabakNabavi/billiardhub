@@ -17,6 +17,7 @@ import LiveNavBadge from './live/LiveNavBadge';
 import { subscribeDM } from '../lib/realtime';
 import Stories from './Stories';
 import Avatar from './ui/Avatar';
+import { SearchSuggest } from './search/SearchSuggest';
 
 /* ⚠️ طلاییِ نشانِ متنی از lib/brand می‌آید و با فوتر یکی است.
    دلیلِ عددش همان‌جا نوشته شده — مخصوصا اینکه همین کلمه در نوار
@@ -165,9 +166,13 @@ export default function Navbar() {
     /* کیبوردِ گوشی بسته شود و حلقه‌ی فوکوس روی نتیجه نماند */
     e.currentTarget.querySelector('input')?.blur();
     setSearchOpen(false);
+    /* خالی ⟵ پیشنهادِ زنده هم بسته؛ کادرِ صفحه‌ی نتیجه خودش عبارت را دارد */
+    setSearch('');
     router.push(`/search?q=${encodeURIComponent(q)}`);
   };
   const [searchOpen, setSearchOpen] = useState(false);
+  const searchOpenRef = useRef(false);
+  useEffect(() => { searchOpenRef.current = searchOpen; }, [searchOpen]);
   const [scrolled, setScrolled] = useState(false);
   /* ── چرا `scrollY` دیگر state نیست ──
      این مقدار فقط محوشدن نوار استوری را می‌راند، ولی چون state بود،
@@ -203,7 +208,10 @@ export default function Navbar() {
           const y = window.scrollY;
           /* فقط وقتی مرز ۵۰ رد شود، نه در هر فریم */
           setScrolled(prev => (prev === y > 50 ? prev : y > 50));
-          if (y > 30) setSearchOpen(false);
+          /* بستنِ پیلِ موبایل با عبارتش: وگرنه نمونه‌ی دسکتاپیِ پیشنهاد (پنهان در
+             موبایل) سوار می‌شد و بی‌دلیل درخواست می‌زد. فقط وقتی پیل باز است —
+             کادرِ دسکتاپ با اسکرول پاک نشود. */
+          if (y > 30 && searchOpenRef.current) { setSearchOpen(false); setSearch(''); }
           const bar = barRef.current;
           if (bar) {
             bar.style.opacity = String(Math.max(0, 1 - y / 700));
@@ -449,7 +457,7 @@ export default function Navbar() {
             <div style={{ position: 'relative', width: '40px', height: '40px', borderRadius: '12px', overflow: 'hidden', flexShrink: 0,
               boxShadow: isLight ? 'none' : '0 1px 2px rgba(28,27,23,0.12), 0 4px 9px rgb(var(--c-ink) / 0.05)' }}>
                 <img loading="eager" decoding="async"
-                  src={isLight ? '/images/Logo/bh-mark-256-v9.webp' : '/images/Logo/bh-nav-256-v9.webp'}
+                  src={isLight ? '/images/Logo/bh-mark-256-v10.webp' : '/images/Logo/bh-nav-256-v10.webp'}
                   alt="" style={{ width: '100%', height: '100%', objectFit: isLight ? 'contain' : 'cover' }} />
                 {!isLight && (
                   <span aria-hidden style={{ position: 'absolute', inset: 0, borderRadius: '12px', pointerEvents: 'none',
@@ -564,13 +572,15 @@ export default function Navbar() {
           </div>
 
           {/* Search bar */}
-          <div className="srch-wrap desk" style={{ flex: 1, maxWidth: '240px', marginRight: 'auto' }}>
+          <div data-suggest-box className="srch-wrap desk" style={{ position: 'relative', flex: 1, maxWidth: '240px', marginInlineStart: 'auto' }}>
             <form role="search" method="get" action="/search" onSubmit={submitSearch} className="nav-srch" style={{ display: 'flex', alignItems: 'center', gap: '8px', background: SURF, border: `1px solid ${BORDER_C}`, borderRadius: '10px', padding: '8px 12px', transition: 'all 0.3s' }}>
               <Search size={13} color={TEXT_MUT} />
-              <input type="text" name="q" enterKeyHint="search" aria-label="جست‌وجو در سایت" value={search} onChange={e => setSearch(e.target.value)} placeholder="جستجو..."
+              <input type="text" name="q" enterKeyHint="search" aria-label="جست‌وجو در سایت" aria-controls="nav-suggest-d" aria-autocomplete="list" value={search} onChange={e => setSearch(e.target.value)} placeholder="جستجو..."
                 style={{ background: 'none', border: 'none', outline: 'none', color: TEXT, fontSize: '16px', width: '100%', fontFamily: 'inherit' }} />
               {search && <button type="button" className="kbd-ring" aria-label="پاک‌کردن جست‌وجو" onClick={() => setSearch('')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: TEXT_MUT, padding: 0, display: 'flex' }}><X size={11} /></button>}
             </form>
+            {/* فقط وقتی پیلِ موبایل بسته است — وگرنه دو نمونه هم‌زمان درخواست می‌زدند */}
+            {!searchOpen && <SearchSuggest q={search} onPick={() => setSearch('')} id="nav-suggest-d" className="end-0 w-96" />}
           </div>
 
           {/* Right actions — all icon buttons 44×44px, icon size 22 */}
@@ -743,7 +753,7 @@ export default function Navbar() {
 
       {/* Search pill — floats below navbar, no dark backdrop */}
       {searchOpen && (
-        <div ref={searchRef} style={{
+        <div ref={searchRef} data-suggest-box style={{
           position: 'fixed', top: 'calc(72px + env(safe-area-inset-top))', left: 0, right: 0, zIndex: 180,
           padding: '8px clamp(16px,3vw,32px) 0',
           animation: 'fadeDown 0.32s cubic-bezier(0.22,1,0.36,1) both',
@@ -760,7 +770,7 @@ export default function Navbar() {
             WebkitBackdropFilter: 'blur(48px) saturate(200%)',
           }}>
             <Search size={18} color="rgba(28,28,26,0.38)" style={{ flexShrink: 0 }} />
-            <input autoFocus type="text" name="q" enterKeyHint="search" aria-label="جست‌وجو در سایت" value={search} onChange={e => setSearch(e.target.value)}
+            <input autoFocus type="text" name="q" enterKeyHint="search" aria-label="جست‌وجو در سایت" aria-controls="nav-suggest-m" aria-autocomplete="list" value={search} onChange={e => setSearch(e.target.value)}
               placeholder="جستجو باشگاه، بازیکن، مربی..."
               style={{ flex: 1, background: 'none', border: 'none', outline: 'none', color: '#1C1B17', fontSize: '16px', fontFamily: 'inherit' }} />
             {search && (
@@ -773,6 +783,9 @@ export default function Navbar() {
               <X size={13} />
             </button>
           </form>
+          <div style={{ position: 'relative', maxWidth: '560px', margin: '0 auto' }}>
+            <SearchSuggest q={search} onPick={() => { setSearch(''); setSearchOpen(false); }} id="nav-suggest-m" className="inset-x-0 mt-2" />
+          </div>
         </div>
       )}
 

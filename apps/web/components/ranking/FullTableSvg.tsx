@@ -12,6 +12,7 @@
    ───────────────────────────────────────────────────────────── */
 
 import type { RankingPlayer, RankingStage } from '@/lib/rankings-store'
+import { rankColor } from '@/lib/ranking-color'
 import { toFaDigits } from '@/lib/jalali'
 import { breakAllahLigature } from '@/lib/fa-ligature'
 
@@ -27,9 +28,6 @@ const RANK_W = 56, NAME_W = 230, CITY_W = 110, TOTAL_W = 104
    بیرون می‌زند و فشرده می‌شود. کمترش نه — textLength متنِ کوتاه را می‌کشد. */
 const NAME_FIT = 26
 
-/* همان رنگ‌های چیپِ رتبه در صفحه */
-export const rankColor = (r: number): string =>
-  r === 1 ? '#111111' : r <= 8 ? '#F06EAE' : r <= 16 ? '#3D63E6' : r <= 32 ? '#A9613F' : r <= 64 ? '#229A47' : '#6F6A5C'
 
 interface Props { title: string; stages: RankingStage[]; players: RankingPlayer[]; updatedLabel?: string }
 

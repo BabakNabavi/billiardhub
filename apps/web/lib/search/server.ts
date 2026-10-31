@@ -34,7 +34,9 @@ import { listPublic } from '../media/server'
 import { PUBLIC_STATUSES } from '../tournaments/server'
 import { haystackOf, longestToken, matchesAll, scoreOf, tokensOf } from './match'
 import { profileHit, type ProfileSearchRow } from './profile-hit'
-import type { GroupKey, SearchGroup, SearchHit } from './types'
+import { categoryPlayersOf, mergeIntoEmpty, type RankingsStructure } from '../rankings-store'
+import { faNum } from '../jalali'
+import type { GroupKey, SearchGroup, SearchHit, SuggestHit } from './types'
 
 const PER_GROUP = 12
 const sb = () => getSupabaseServer()
@@ -89,6 +91,35 @@ const loadTournaments = unstable_cache(async () => {
   }))
 }, ['search:tournaments'], { revalidate: 60 })
 
+/* رنکینگ: بازیکن‌ها در جدولِ `rankings_board`اند نه در `profiles` — ۴۵۱ نفرِ
+   دسته‌یک هیچ پروفایلی ندارند. از همان `mergeIntoEmpty`ِ صفحه رد می‌شود تا
+   ردیفی که صفحه نشان نمی‌دهد (بیرون از ظرفیت) این‌جا هم نیاید. */
+const SPORT_FA: Record<string, string> = { snooker: 'اسنوکر', pocket: 'پاکت بیلیارد' }
+const loadRankings = unstable_cache(async () => {
+  const { data, error } = await sb().from('app_settings').select('value').eq('key', 'rankings_board').maybeSingle()
+  if (error) throw new Error(error.message)
+  const board = mergeIntoEmpty((data?.value ?? null) as RankingsStructure | null)
+  const out: { hay: string; hit: SearchHit }[] = []
+  for (const [sport, genders] of Object.entries(board)) {
+    for (const [gender, cats] of Object.entries(genders)) {
+      for (const cat of Object.keys(cats)) {
+        for (const p of categoryPlayersOf(board, sport, gender, cat)) {
+          /* نام هم می‌رود: صفحه با نام پیدا می‌کند — رتبه‌ی این کش ممکن است کهنه باشد */
+          const q = new URLSearchParams({ sport, gender, cat, name: p.name.trim(), rank: String(p.rank) })
+          out.push({
+            hay: haystackOf(p.name, p.city),
+            hit: {
+              href: `/ranking?${q}`, title: p.name.trim(), rank: p.rank,
+              sub: [`${SPORT_FA[sport] ?? sport} ${gender} · ${cat}`, `رتبه ${faNum(p.rank)}`, `${faNum(p.points)} امتیاز`, p.city].filter(Boolean).join(' · '),
+            },
+          })
+        }
+      }
+    }
+  }
+  return out
+}, ['search:rankings'], { revalidate: 60 })
+
 const fromCorpus = (rows: { hay: string; hit: SearchHit }[], t: string[]): Found => ({
   rows: rows.filter(r => matchesAll(r.hay, t)).map(r => ({ ...r.hit, s: scoreOf(r.hit.title, t) })),
 })
@@ -134,16 +165,44 @@ async function videos(t: string[]): Promise<Found> {
 const SOURCES: [GroupKey, (t: string[]) => Promise<Found>][] = [
   ['clubs', async t => fromCorpus(await loadClubs(), t)],
   ['people', async t => fromCorpus(await loadPeople(), t)],
+  ['rankings', async t => fromCorpus(await loadRankings(), t)],
   ['tournaments', async t => fromCorpus(await loadTournaments(), t)],
   ['market', market], ['news', news], ['videos', videos],
 ]
+
+/* پیشنهادِ زنده فقط از منابعِ کش‌شده: هر کلید در نوار یک درخواست است و
+   آگهی/خبر/ویدیو هرکدام پرس‌وجوی دیتابیس می‌زدند. همه‌ی گروه‌ها در صفحه‌ی
+   `/search` (با Enter) می‌آیند. ترتیب = اولویت هنگامِ امتیازِ برابر. */
+const QUICK: [GroupKey, () => Promise<{ hay: string; hit: SearchHit }[]>][] = [
+  ['rankings', loadRankings], ['people', loadPeople], ['clubs', loadClubs], ['tournaments', loadTournaments],
+]
+const SUGGEST_MAX = 8
+
+/** پیشنهادهای کادرِ نوار؛ عبارتِ کوتاه‌تر از دو نویسه ⟵ `null` */
+export async function quickSearch(raw: unknown): Promise<SuggestHit[] | null> {
+  const t = tokensOf(raw)
+  if (t.length === 0) return null
+  const settled = await Promise.allSettled(QUICK.map(([, load]) => load()))
+  const all: (SuggestHit & { s: number; o: number })[] = []
+  settled.forEach((r, o) => {
+    const key = QUICK[o]![0]
+    if (r.status === 'rejected') { console.error(`[suggest] ${key} failed:`, r.reason); return }
+    for (const row of r.value) {
+      if (matchesAll(row.hay, t)) all.push({ ...row.hit, key, s: scoreOf(row.hit.title, t), o })
+    }
+  })
+  return all
+    .sort((a, b) => b.s - a.s || a.o - b.o || (a.rank ?? 0) - (b.rank ?? 0))
+    .slice(0, SUGGEST_MAX)
+    .map(h => ({ key: h.key, href: h.href, title: h.title, sub: h.sub, image: h.image, verified: h.verified, rank: h.rank }))
+}
 
 function toGroup(key: GroupKey, f: Found): SearchGroup {
   const sorted = [...f.rows].sort((a, b) => b.s - a.s)
   return {
     key, total: sorted.length,
     capped: f.capped ?? (f.limit !== undefined && f.fetched === f.limit),
-    hits: sorted.slice(0, PER_GROUP).map(h => ({ href: h.href, title: h.title, sub: h.sub, image: h.image, verified: h.verified })),
+    hits: sorted.slice(0, PER_GROUP).map(h => ({ href: h.href, title: h.title, sub: h.sub, image: h.image, verified: h.verified, rank: h.rank })),
   }
 }
 

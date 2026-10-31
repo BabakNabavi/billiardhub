@@ -7,9 +7,11 @@ export interface SearchHit {
   sub?: string
   image?: string | null
   verified?: boolean
+  /** رتبه‌ی رنکینگ — جای تصویر، عدد در مربعِ رنگیِ همان رتبه */
+  rank?: number
 }
 
-export type GroupKey = 'clubs' | 'people' | 'tournaments' | 'market' | 'news' | 'videos'
+export type GroupKey = 'clubs' | 'people' | 'rankings' | 'tournaments' | 'market' | 'news' | 'videos'
 
 export interface SearchGroup {
   key: GroupKey
@@ -20,4 +22,9 @@ export interface SearchGroup {
   capped?: boolean
   /** این بخش جواب نداد */
   failed?: boolean
+}
+
+/** پیشنهادِ زنده‌ی کادرِ نوار — فقط از منابعِ کش‌شده، بی‌پرس‌وجو در هر کلید */
+export interface SuggestHit extends SearchHit {
+  key: GroupKey
 }

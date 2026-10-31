@@ -8,8 +8,9 @@
 
 import Link from 'next/link'
 import type { CSSProperties } from 'react'
-import { ArrowLeft, Building2, Clapperboard, Newspaper, ShoppingBag, Trophy, Users, type LucideIcon } from 'lucide-react'
+import { ArrowLeft, Building2, Clapperboard, Medal, Newspaper, ShoppingBag, Trophy, Users, type LucideIcon } from 'lucide-react'
 import { faNum } from '@/lib/jalali'
+import { rankColor } from '@/lib/ranking-color'
 import VerifiedBadge from '@/components/VerifiedBadge'
 import type { GroupKey, SearchGroup } from '@/lib/search/types'
 
@@ -17,13 +18,23 @@ export const GROUP_META: Record<GroupKey, { label: string; Icon: LucideIcon; rgb
   clubs: { label: 'باشگاه‌ها', Icon: Building2, rgb: '199,166,106' },
   /* مربی، داور، بازیکن، فروشگاه، تولیدکننده و خدماتِ فنی */
   people: { label: 'افراد و کسب‌وکارها', Icon: Users, rgb: '244,114,182' },
+  /* بازیکنانِ جدولِ رسمی — نام، رده و رتبه */
+  rankings: { label: 'رنکینگ', Icon: Medal, rgb: '154,110,56' },
   tournaments: { label: 'مسابقات', Icon: Trophy, rgb: '74,158,255' },
   market: { label: 'بیلیارد بازار', Icon: ShoppingBag, rgb: '199,166,106' },
   news: { label: 'اخبار', Icon: Newspaper, rgb: '6,182,212' },
   videos: { label: 'بیلیارد مدیا', Icon: Clapperboard, rgb: '48,197,90' },
 }
 
-function Thumb({ image, Icon }: { image?: string | null; Icon: LucideIcon }) {
+export function Thumb({ image, Icon, rank }: { image?: string | null; Icon: LucideIcon; rank?: number }) {
+  /* رتبه جای تصویر: همان مربعِ رنگیِ جدول، تا رکورد از همین‌جا خوانده شود */
+  if (rank) {
+    return (
+      <span className="flex size-12 shrink-0 items-center justify-center rounded-card text-sub font-black text-white" style={{ backgroundColor: rankColor(rank) }}>
+        <span className="sr-only">رتبه </span>{faNum(rank)}
+      </span>
+    )
+  }
   if (image) {
     /* تصویرِ کاربر از Storage با ابعادِ نامعلوم؛ next/image این‌جا ابعادِ ثابت و remotePatterns می‌خواهد */
     // eslint-disable-next-line @next/next/no-img-element
@@ -75,7 +86,7 @@ export function SearchResults({ groups, q }: { groups: SearchGroup[]; q: string 
                   <Link href={h.href} prefetch={false}
                     className="lq-pcard flex items-center gap-3 p-3 text-inherit no-underline
                                focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-deep">
-                    <Thumb image={h.image} Icon={meta.Icon} />
+                    <Thumb image={h.image} Icon={meta.Icon} rank={h.rank} />
                     <span className="flex min-w-0 flex-col gap-1">
                       <span className="flex min-w-0 items-center gap-1 text-body font-bold text-ink">
                         <span className="truncate">{h.title}</span>
