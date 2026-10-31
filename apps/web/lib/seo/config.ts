@@ -14,7 +14,7 @@
 
 export const SEO_IDS = {
   /** Google Analytics 4 — «Measurement ID» به شکلِ G-XXXXXXXXXX */
-  ga4: '',
+  ga4: 'G-KHMCV0C4Y8',
   /** Microsoft Clarity — «Project ID» (حدود ۱۰ نویسه) */
   clarity: 'z6ghz1hhv2',
   /** Google Search Console — مقدارِ content در متاتگِ google-site-verification */
