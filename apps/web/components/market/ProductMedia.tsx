@@ -23,6 +23,13 @@ import type { ReactNode } from 'react'
 import { useEffect, useRef, useState } from 'react'
 import { Bookmark, Images, Check } from 'lucide-react'
 import { toFaDigits } from '../../lib/jalali'
+import { thumbUrl } from '../../lib/media/thumb'
+
+/* ── بندانگشتی ──
+   کارت حدودِ ۲۱۰ پیکسل پهنا دارد؛ ۴۲۰ برای صفحه‌ی دوچگالی. تا آبانِ ۱۴۰۵
+   فقط صفحه‌ی اصلی بندانگشتی می‌گرفت و /shop و فروشگاه‌ها عکسِ خامِ ۱۸۰ تا
+   ۳۰۰ کیلوبایتی می‌کشیدند. نشانیِ از قبل بندانگشتی دست نمی‌خورد. */
+const CARD_W = 420
 
 /* ── چرا آیکونِ دستی به‌جای `Share2`ی lucide ──
    ⚠️ `Share2` سه گرهِ نامتقارن دارد؛ کادرش وسط است (اندازه گرفتم:
@@ -63,9 +70,10 @@ export default function ProductMedia({
   const savedTxt = saveLabel ?? { on: 'برداشتن نشان', off: 'نشان کردن' }
   return (
     <div className={'bh-pm' + (className ? ' ' + className : '')}>
-      <img src={src} alt={alt} loading="lazy" decoding="async"
+      <img src={thumbUrl(src, CARD_W)} alt={alt} loading="lazy" decoding="async"
         className={'bh-pm-img' + (imgClassName ? ' ' + imgClassName : '')}
-        onError={e => { (e.target as HTMLImageElement).style.visibility = 'hidden' }} />
+        /* بندانگشتی جواب نداد ⟵ یک بار خودِ عکس؛ بعد پنهان */
+        onError={e => { const el = e.currentTarget; if (src && el.src !== new URL(src, location.href).href) { el.src = src; return } el.style.visibility = 'hidden' }} />
 
       {/* ستونِ چپ‌بالا — فعلا یک نشان دارد، ولی ستون می‌ماند:
           پرچمِ گزارش این‌جا بود و اگر روزی نشانِ دیگری اضافه شود

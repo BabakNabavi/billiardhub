@@ -1,6 +1,7 @@
 ﻿'use client';
 
 import { PIN_GREEN } from '@/lib/profile-cards'
+import { thumbUrl } from '@/lib/media/thumb'
 import { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
 import api from '../../lib/api';
@@ -196,7 +197,16 @@ function ClubCard({ club, view, idx = 0, tournaments = [] }: { club: Club; view:
   const [storyOpen, setStoryOpen] = useState(false);
   const poolImg = CLUB_IMG_POOL[idx % CLUB_IMG_POOL.length]!;
   const apiImg  = club.images?.[0];
-  const img     = (apiImg && apiImg.trim() !== '' && !apiImg.includes('billiadr-club-1') && !apiImg.includes('default')) ? apiImg : poolImg;
+  /* بندانگشتیِ ۹۶۰: کارتِ شبکه در موبایل تمام‌عرض (~۳۴۰–۵۳۰px) است. عکسِ خامِ
+     باشگاه تا ۲٫۳ مگابایت بود؛ این ~۶۰ کیلوبایت. */
+  const apiOk   = !!apiImg && apiImg.trim() !== '' && !apiImg.includes('billiadr-club-1') && !apiImg.includes('default');
+  const img     = apiOk ? thumbUrl(apiImg, 960) : poolImg;
+  /* خطا: اول خودِ عکسِ اصلی (شاید فقط سرویسِ بندانگشتی جواب نداد)، بعد عکسِ پیش‌فرض */
+  const onImgError = (e: React.SyntheticEvent<HTMLImageElement>) => {
+    const el = e.currentTarget;
+    if (apiOk && apiImg && el.src !== apiImg) { el.src = apiImg; return; }
+    el.onerror = null; el.src = poolImg;
+  };
   /* شمارش از همان منبعِ صفحه‌ی اصلی (lib/clubs/tables): میزِ VIP داخلِ نوعِ
      خودش. پیش‌تر این‌جا ستونِ خام می‌آمد — «۲ اسنوکر»، در حالی که صفحه‌ی اصلی
      همان باشگاه را «۳ اسنوکر» می‌گفت. */
@@ -233,7 +243,7 @@ function ClubCard({ club, view, idx = 0, tournaments = [] }: { club: Club; view:
         {/* thumbnail */}
         <div style={{ width: 'clamp(70px,18vw,140px)', flexShrink: 0, position: 'relative', overflow: 'hidden' }}>
           <img loading="lazy" decoding="async" src={img} alt={club.name} style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.75)' }}
-            onError={e => { const el = e.target as HTMLImageElement; el.onerror = null; el.src = poolImg; }} />
+            onError={onImgError} />
           {/* تیک تأیید این‌جا نیست — کنار نام است. روی گوشه‌ی عکس،
               معلوم نبود به چه چیزی تعلق دارد. */}
           {/* open badge روی تصویر — same pill style as table type badges.
@@ -321,7 +331,7 @@ function ClubCard({ club, view, idx = 0, tournaments = [] }: { club: Club; view:
         <div style={{ height: 'clamp(140px,22vw,190px)', position: 'relative', overflow: 'hidden', flexShrink: 0 }}>
           <img loading="lazy" decoding="async" src={img} alt={club.name}
             style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.80)', transition: 'transform 400ms cubic-bezier(0.25,0.46,0.45,0.94)', transform: hov ? 'scale(1.06)' : 'scale(1.00)', willChange: 'transform' }}
-            onError={e => { const el = e.target as HTMLImageElement; el.onerror = null; el.src = poolImg; }} />
+            onError={onImgError} />
           <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, transparent 40%, rgba(6,13,10,0.88) 100%)' }} />
 
           {/* تیک تأیید کنار نام است، نه روی عکس. */}
