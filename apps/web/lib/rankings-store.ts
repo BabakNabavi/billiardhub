@@ -2,7 +2,7 @@
    Rankings store — پل بین پنل ادمین (/admin/rankings) و
    صفحه‌ی رنکینگ سایت (/ranking). localStorage، ساختار:
    sport → gender → category → RankingPlayer[]
-   ظرفیت‌ها: اسنوکر دسته برتر ۳۲، دسته یک ۱۲۸؛ پاکت ۳۲.
+   ظرفیت‌ها: اسنوکر دسته برتر ۳۲ (بانوان ۶۴)، دسته یک ۵۱۲؛ پاکت ۳۲.
    ───────────────────────────────────────────────────────────── */
 
 import { provinceOfCity } from './iran-geo'
@@ -50,12 +50,24 @@ export type RankingStagesMap = Record<string, Record<string, Record<string, Rank
 const KEY = 'bh_rankings'
 
 /* ظرفیت هر دسته */
+/* ⚠️ ظرفیت سقفِ ردیف‌هاست: ردیفِ بیرون از آن در mergeIntoEmpty دور ریخته می‌شود.
+   جدولِ آبانِ ۱۴۰۵ دسته‌یکِ آقایان ۴۵۱ نفر و دسته برترِ بانوان ۴۳ نفر بود —
+   با ۱۲۸ و ۳۲ِ قبلی بیشترشان ناپدید می‌شدند. */
 export const CATEGORY_SIZES: Record<string, Record<string, number>> = {
-  snooker: { 'دسته برتر': 32, 'دسته یک': 128, 'زیر ۲۱ سال': 32, 'پیشکسوتان': 32 },
+  snooker: { 'دسته برتر': 32, 'دسته یک': 512, 'زیر ۲۱ سال': 32, 'پیشکسوتان': 32 },
   pocket:  { 'دسته برتر': 32, 'دسته یک': 32,  'زیر ۲۱ سال': 32, 'پیشکسوتان': 32 },
 }
 
-export function categorySize(sport: string, category: string): number {
+/* ظرفیتِ ویژه‌ی یک جنس — دسته برترِ آقایان ۳۲ می‌ماند، بانوان بیشتر */
+const GENDER_SIZES: Record<string, number> = {
+  'snooker|بانوان|دسته برتر': 64,
+}
+
+export function categorySize(sport: string, category: string, gender?: string): number {
+  if (gender) {
+    const g = GENDER_SIZES[`${sport}|${gender}|${category}`]
+    if (g) return g
+  }
   return CATEGORY_SIZES[sport]?.[category] ?? 32
 }
 
@@ -70,8 +82,8 @@ const CATS: Record<string, Record<string, string[]>> = {
   },
 }
 
-function emptyRows(sport: string, category: string): RankingPlayer[] {
-  return Array.from({ length: categorySize(sport, category) }, (_, i) => ({ rank: i + 1, name: '', city: '', points: 0 }))
+function emptyRows(sport: string, category: string, gender?: string): RankingPlayer[] {
+  return Array.from({ length: categorySize(sport, category, gender) }, (_, i) => ({ rank: i + 1, name: '', city: '', points: 0 }))
 }
 
 export function buildEmptyRankings(): RankingsStructure {
@@ -80,7 +92,7 @@ export function buildEmptyRankings(): RankingsStructure {
     out[sport] = {}
     for (const [gender, cats] of Object.entries(genders)) {
       out[sport][gender] = {}
-      for (const cat of cats) out[sport][gender][cat] = emptyRows(sport, cat)
+      for (const cat of cats) out[sport][gender][cat] = emptyRows(sport, cat, gender)
     }
   }
   return out
@@ -122,7 +134,7 @@ export function mergeIntoEmpty(raw: RankingsStructure | null | undefined): Ranki
         for (const cat of Object.keys(cats)) {
           const stored = raw[sport]?.[gender]?.[cat]
           if (Array.isArray(stored)) {
-            const size = categorySize(sport, cat)
+            const size = categorySize(sport, cat, gender)
             const rows = cats[cat]!
             for (let i = 0; i < size; i++) {
               const s = stored[i]

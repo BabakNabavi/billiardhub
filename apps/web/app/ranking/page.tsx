@@ -14,7 +14,7 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { Trophy, TrendingUp, TrendingDown, Minus } from 'lucide-react'
-import { fetchRankingsBoard, categoryPlayersOf, categorySize, categoryStagesOf, type RankingsStructure, type RankingStagesMap } from '../../lib/rankings-store'
+import { fetchRankingsBoard, categoryPlayersOf, categoryStagesOf, type RankingsStructure, type RankingStagesMap } from '../../lib/rankings-store'
 import { StageCells, StageHead } from '../../components/ranking/StageColumns'
 import { FullTableDialog } from '../../components/ranking/FullTableDialog'
 import { faDate } from '../../lib/jalali'
@@ -149,7 +149,6 @@ export default function RankingsPage() {
   const players = sport !== 'highball' && board
     ? categoryPlayersOf(board, sport, gender, category)
     : []
-  const capacity = categorySize(sport, category)
   /* مرحله‌ها فقط برای دسته‌ای که سرستون دارد — بقیه همان چیدمانِ دوستونی */
   const stages = sport !== 'highball' ? categoryStagesOf(stagesMap, sport, gender, category) : []
   const withStages = stages.length > 0
@@ -222,7 +221,10 @@ export default function RankingsPage() {
 
         /* ردیف‌های جدول — به سبک جدول فدراسیون جهانی:
            مربع رنگی رتبه چسبیده به لبه‌ی راست + پخ برش‌خورده در گوشه‌ی پایین-چپ */
+        /* content-visibility: دسته‌یکِ آقایان ۴۵۱ ردیف است؛ ردیفِ بیرون از دید
+           با فیلتر و انیمیشنش روی موبایلِ ضعیف رندر نمی‌شود */
         .rk-rowwrap { animation: rkFadeUp .5s ease both;
+          content-visibility: auto; contain-intrinsic-size: auto 74px;
           filter: drop-shadow(0 1px 2px rgba(28,27,23,0.05));
           transition: transform .28s cubic-bezier(.22,1,.36,1), filter .28s; }
         .rk-rowwrap:hover { transform: translateY(-3px); filter: drop-shadow(0 12px 20px rgba(28,27,23,0.13)); }
@@ -449,7 +451,8 @@ export default function RankingsPage() {
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 18, flexWrap: 'wrap' }}>
                 <span style={{ width: 3, height: 18, borderRadius: 2, background: `linear-gradient(180deg,${GOLD},#8A6020)` }} />
                 <h2 style={{ fontSize: 16.5, fontWeight: 900, margin: 0 }}>{gender} — {category}</h2>
-                <span style={{ fontSize: 12, color: MUT }}>{faDigits(players.length)} از {faDigits(capacity)} بازیکن</span>
+                <span style={{ fontSize: 12, color: MUT }}>{/* بدونِ «از N»: ظرفیت (۵۱۲ / ۶۴) جای خالیِ ذخیره است، نه اندازه‌ی جدول */}
+                  {faDigits(players.length)} بازیکن</span>
                 <span style={{ flex: 1, height: 1, background: LINE }} />
                 <span style={{ display: 'inline-flex', alignItems: 'center', gap: 12, fontSize: 11, color: MUT }}>
                   <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><TrendingUp size={11} style={{ color: '#22B45A' }} /> صعود</span>

@@ -9,7 +9,7 @@ import { compressAvatar } from '../../../lib/images/compress-avatar';
 import { notify } from '../../../lib/ui/dialogs';
 import ProvinceCitySelect from '../../../components/ProvinceCitySelect';
 import {
-  buildEmptyRankings, getStoredRankings, saveRankings, categorySize,
+  buildEmptyRankings, getStoredRankings, saveRankings, categorySize, mergeIntoEmpty,
   type RankingPlayer, type RankingsStructure,
 } from '../../../lib/rankings-store';
 import { apiFetch } from '../../../lib/http';
@@ -29,7 +29,7 @@ function AvatarCell({ value, name, onChange }: { value?: string; name: string; o
       /* نام فایل تصادفی است، نه نام کاربر: مسیر عمومی می‌شود و
          `upsert` روشن است، پس دو ادمین با یک نام فایل همدیگر را
          بازنویسی می‌کردند. */
-      /* فشرده‌سازی پیش از آپلود: این عکس در فهرستی تا ۱۲۸ ردیفی و در
+      /* فشرده‌سازی پیش از آپلود: این عکس در فهرستی تا ۵۱۲ ردیفی و در
          اندازه‌ی ۴۶ پیکسل دیده می‌شود. فرستادن فایل خام دوربین هم
          پهنای‌باند کاربر ایرانی را می‌سوزاند هم فضا را. خروجی همیشه
          JPEG است، پس پسوند هم ثابت. */
@@ -92,12 +92,13 @@ export default function AdminRankingsPage() {
     void (async () => {
       try {
         const r = await apiFetch('/api/admin/settings', { cache: 'no-store' });
-        if (!r.ok) return;
+        if (!r.ok) { setErr(`جدولِ سرور خوانده نشد (کد ${r.status}) — تا بارگذاریِ دوباره ذخیره غیرفعال است`); return; }
         const j = await r.json().catch(() => null) as { settings?: Record<string, unknown> } | null;
         const board = j?.settings?.rankings_board;
-        if (board && typeof board === 'object') { setRankings(board as RankingsStructure); setOnServer(true); }
+        /* از همان مسیرِ صفحه‌ی عمومی: ظرفیتِ تازه (۵۱۲/۶۴) و بک‌فیلِ استان */
+        if (board && typeof board === 'object') { setRankings(mergeIntoEmpty(board as RankingsStructure)); setOnServer(true); }
         else setOnServer(false);
-      } catch { /* کش محلی می‌ماند */ }
+      } catch { setErr('خطا در ارتباط با سرور — تا بارگذاریِ دوباره ذخیره غیرفعال است'); }
     })();
   }, []);
 
@@ -152,7 +153,11 @@ export default function AdminRankingsPage() {
      بود و اگر سرور رد می‌کرد، ادمین همچنان تغییرش را روی مرورگر خودش
      می‌دید و فکر می‌کرد ذخیره شده — در حالی که برای بقیه هیچ اتفاقی
      نیفتاده بود. */
+  /* ⚠️ تا جدولِ سرور خوانده نشده، ذخیره ممنوع: کشِ محلیِ کهنه (مثلاً
+     دسته‌یکِ ۱۲۸ردیفیِ پیش از آبانِ ۱۴۰۵) با PATCH جدولِ زنده را
+     بازنویسی می‌کرد و صدها ردیف می‌رفت. */
   const handleSave = async () => {
+    if (onServer === null) return;
     setErr('');
     try {
       const r = await apiFetch('/api/admin/settings', {
@@ -181,8 +186,8 @@ export default function AdminRankingsPage() {
           <Trophy size={24} className="text-amber-500" />
           مدیریت رنکینگ
         </h1>
-        <button onClick={handleSave}
-          className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm transition-all ${saved ? 'bg-green-100 text-green-700' : 'bg-green-700 text-white hover:bg-green-800'}`}>
+        <button onClick={handleSave} disabled={onServer === null}
+          className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed ${saved ? 'bg-green-100 text-green-700' : 'bg-green-700 text-white hover:bg-green-800'}`}>
           <Save size={16} />
           {saved ? '✅ ذخیره شد' : 'ذخیره'}
         </button>
@@ -274,7 +279,7 @@ export default function AdminRankingsPage() {
         <div className="flex-1 bg-white rounded-2xl shadow-sm overflow-hidden">
           <div className="bg-green-700 text-white px-5 py-3 flex items-center justify-between">
             <span className="font-bold">{gender} — {category}</span>
-            <span className="text-sm opacity-80">{toFa(categorySize(sport, category))} نفر</span>
+            <span className="text-sm opacity-80">{toFa(categorySize(sport, category, gender))} نفر</span>
           </div>
 
           {/* هدر — فقط دسکتاپ */}
@@ -346,7 +351,7 @@ export default function AdminRankingsPage() {
                     provinceLabel="استان"
                     cityLabel="شهر"
                     /* استان در `mergeIntoEmpty` یک‌بار بک‌فیل شده؛
-                       محاسبه‌ی این‌جا روی ۱۲۸ ردیف در هر کلید فشرده
+                       محاسبه‌ی این‌جا روی ۵۱۲ ردیف در هر کلید فشرده
                        تکرار می‌شد. */
                     value={{ province: player.province ?? '', city: player.city || '' }}
                     onChange={v => updateCity(index, v.province, v.city)}
