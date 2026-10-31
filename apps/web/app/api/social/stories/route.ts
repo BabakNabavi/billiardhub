@@ -1,5 +1,6 @@
 export const dynamic = 'force-dynamic'
 import { NextRequest, NextResponse } from 'next/server'
+import { z } from 'zod'
 import { CORS, DAY, P, readJson, writeJson, removeStoryMedia } from '@/lib/social-server'
 import { actorFromRequest } from '@/lib/finance/db'
 import { getStoryQuotaState } from '@/lib/stories/quota'
@@ -20,6 +21,19 @@ interface SStory {
   roleKey: string; roleLabel: string; roleColor: string
   avatar: string; logoUrl?: string; mediaUrl: string; caption: string; createdAt: number
 }
+
+/* بدنه‌ی انتشار در مرز: فقط فیلدهایی که خوانده می‌شوند. کپشن بر حسبِ
+   *نویسه* بریده می‌شود نه واحدِ UTF-16 — وگرنه نیمه‌ی یک ایموجی می‌ماند. */
+const CAPTION_MAX = 500
+const PostZ = z.object({
+  /* بی‌سقفِ طول: کلاینتِ قدیمی گاهی عکس/آواتار را data URL می‌فرستد */
+  mediaUrl: z.string().min(1),
+  caption: z.string().optional().transform(v => Array.from(v ?? '').slice(0, CAPTION_MAX).join('')),
+  ownerKey: z.string().max(200).optional(),
+  userName: z.string().max(200).optional(),
+  avatar: z.string().max(16).optional(),
+  logoUrl: z.string().optional(),
+})
 
 export function OPTIONS() { return new NextResponse(null, { status: 204, headers: CORS }) }
 
@@ -125,8 +139,9 @@ export async function POST(req: NextRequest) {
   const actor = actorFromRequest(req)
   if (!actor) return NextResponse.json({ message: 'برای انتشار استوری وارد شوید' }, { status: 401, headers: CORS })
 
-  const s = (await req.json()) as Partial<SStory>
-  if (!s.mediaUrl) return NextResponse.json({ message: 'داده ناقص' }, { status: 400, headers: CORS })
+  const parsed = PostZ.safeParse(await req.json().catch(() => null))
+  if (!parsed.success) return NextResponse.json({ message: 'داده ناقص' }, { status: 400, headers: CORS })
+  const s = parsed.data
 
   const ownerKey = actor.id
 
@@ -173,7 +188,10 @@ export async function POST(req: NextRequest) {
     roleKey: roleMeta?.value ?? 'player',
     roleLabel: roleMeta?.label ?? 'بازیکن',
     roleColor: roleMeta?.color ?? '#06b6d4',
-    avatar: s.avatar || 'ک', logoUrl: s.logoUrl, mediaUrl: s.mediaUrl, caption: s.caption || '', createdAt: now,
+    avatar: s.avatar || 'ک', logoUrl: s.logoUrl, mediaUrl: s.mediaUrl,
+    /* کپشن متنِ آزاد است و لینک‌هایش در نمایش ساخته می‌شوند (فقط http/https)؛
+       سقفِ طول در PostZ — فرم ۳۰۰ می‌گذارد، ۵۰۰ برای کلاینت‌های قدیمی */
+    caption: s.caption, createdAt: now,
   }
   live.unshift(story)
   await writeJson(P.stories, live)

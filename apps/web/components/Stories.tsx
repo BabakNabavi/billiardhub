@@ -14,6 +14,7 @@ import { uploadFile } from '../lib/supabase';
 import { fetchStories, postStory, sendDM, fetchSeen, markSeen, type SStory } from '../lib/social';
 import { useVisualViewport } from '../lib/useVisualViewport';
 import { sharedJson } from '../lib/shared-fetch';
+import { StoryCaption } from './stories/StoryCaption';
 
 interface StoryItem {
   id: string;
@@ -174,7 +175,7 @@ function compressStory(file: File): Promise<string> {
 }
 
 /* ── Story viewer ── */
-function StoryViewer({ groups, activeGroup, activeStory, liked, showEmojis, comment, sentReaction, paused, replySent, canReply, interactionsOn, onClose, onNext, onPrev, onLike, onReaction, onToggleEmojis, onComment, onSendComment, onReplyFocus, onReplyBlur }: any) {
+function StoryViewer({ groups, activeGroup, activeStory, liked, showEmojis, comment, sentReaction, paused, replySent, canReply, interactionsOn, onClose, onNext, onPrev, onLike, onReaction, onToggleEmojis, onComment, onSendComment, onReplyFocus, onReplyBlur, onLinkHold }: any) {
   const currentGroup = groups[activeGroup];
   const currentStory = currentGroup?.stories[activeStory];
 
@@ -322,13 +323,14 @@ function StoryViewer({ groups, activeGroup, activeStory, liked, showEmojis, comm
           </div>
 
           {/* نواحی لمس قبلی/بعدی */}
-          <button onClick={onNext} style={{ position:'absolute',right:0,top:'80px',bottom:'70px',width:'38%',background:'transparent',border:'none',cursor:'pointer',zIndex:10 }} />
-          <button onClick={onPrev} style={{ position:'absolute',left:0,top:'80px',bottom:'70px',width:'38%',background:'transparent',border:'none',cursor:'pointer',zIndex:10 }} />
+          <button aria-label="استوری بعدی" onClick={onNext} style={{ position:'absolute',right:0,top:'80px',bottom:'70px',width:'38%',background:'transparent',border:'none',cursor:'pointer',zIndex:10 }} />
+          <button aria-label="استوری قبلی" onClick={onPrev} style={{ position:'absolute',left:0,top:'80px',bottom:'70px',width:'38%',background:'transparent',border:'none',cursor:'pointer',zIndex:10 }} />
 
           {currentStory.caption && (
             <div style={{ position:'absolute',bottom:'calc(env(safe-area-inset-bottom) + 92px)',left:'14px',right:'14px',zIndex:20 }}>
               <div style={{ background:'rgba(0,0,0,0.42)',borderRadius:'16px',padding:'12px 16px',backdropFilter:'blur(14px)' }}>
-                <p style={{ color:'#fff',fontSize:'15.5px',margin:0,lineHeight:1.8,fontWeight:500,direction:'rtl' }}>{currentStory.caption}</p>
+                {/* لینک‌های کپشن لمس‌شدنی‌اند (`StoryCaption`) */}
+                <StoryCaption text={currentStory.caption} onInternal={onClose} onHold={onLinkHold} />
               </div>
             </div>
           )}
@@ -754,8 +756,26 @@ export default function Stories() {
     markGroupSeen(groups[index]);
   };
 
+  /* لینکِ بیرونیِ کپشن باز شد — استوری می‌ایستد تا بیننده به این زبانه برگردد؛
+     وگرنه در بازگشت استوریِ بعدی (یا بسته‌شدنِ نوار) را می‌دید. */
+  const [linkHold, setLinkHold] = useState(false);
+  useEffect(() => { setLinkHold(false); }, [activeGroup, activeStory]);
+  /* اگر صفحه واقعاً پنهان نشد (زبانه‌ی پس‌زمینه، پنجره‌ی جدا، پاپ‌آپِ مسدود)، بعد
+     از ۱٫۵ ثانیه رها می‌شود — وگرنه نوارِ پیشرفت تا لمسِ بعدی یخ می‌زد. */
+  useEffect(() => {
+    if (!linkHold) return;
+    let left = false;
+    const t = setTimeout(() => { if (!left) setLinkHold(false); }, 1500);
+    const onVis = () => {
+      if (document.visibilityState === 'hidden') left = true;
+      else if (left) setLinkHold(false);
+    };
+    document.addEventListener('visibilitychange', onVis);
+    return () => { clearTimeout(t); document.removeEventListener('visibilitychange', onVis); };
+  }, [linkHold]);
+
   /* استوری هنگام نوشتن ریپلای، تمرکز روی فیلد یا بازبودن استیکرها متوقف می‌شود */
-  const storyPaused = showEmojis || replyFocus || comment.trim().length > 0;
+  const storyPaused = showEmojis || replyFocus || linkHold || comment.trim().length > 0;
   useEffect(() => {
     if (activeGroup === null || storyPaused) return;
     const timer = setTimeout(() => { nextStory(); }, STORY_DURATION);
@@ -919,6 +939,7 @@ export default function Stories() {
           onReaction={handleReaction} onToggleEmojis={() => setShowEmojis(p => !p)}
           onComment={setComment} onSendComment={handleSendComment}
           onReplyFocus={() => setReplyFocus(true)} onReplyBlur={() => setReplyFocus(false)}
+          onLinkHold={() => setLinkHold(true)}
         />
       )}
 
@@ -958,7 +979,7 @@ export default function Stories() {
                 <input type="file" accept="image/*" hidden onChange={e => onStoryFile(e.target.files?.[0])} />
               </label>
             )}
-            <input value={storyCaption} onChange={e => setStoryCaption(e.target.value)} placeholder="کپشن (اختیاری)..." style={{ width:'100%', padding:'10px 13px', border:'1px solid rgba(17,17,16,0.14)', borderRadius:10, fontSize:14, fontFamily:'inherit', outline:'none', marginBottom:16, direction:'rtl' }} />
+            <input value={storyCaption} onChange={e => setStoryCaption(e.target.value)} placeholder="کپشن (اختیاری) — لینک هم بگذارید، مثلاً instagram.com/…" aria-label="کپشنِ استوری" maxLength={300} style={{ width:'100%', padding:'10px 13px', border:'1px solid rgba(17,17,16,0.14)', borderRadius:10, fontSize:14, fontFamily:'inherit', outline:'none', marginBottom:16, direction:'rtl' }} />
             <button onClick={publishStory} disabled={!storyImg || publishing} style={{ width:'100%', padding:'12px', borderRadius:10, border:'1px solid var(--border)', background: (storyImg && !publishing) ? 'var(--brand-tint)' : 'rgba(17,17,16,0.05)', color: (storyImg && !publishing) ? 'var(--brand)' : '#aaa', fontWeight: 600, fontSize:14, cursor: (storyImg && !publishing) ? 'pointer' : 'not-allowed', fontFamily:'inherit' }}>{publishing ? 'در حال انتشار…' : 'انتشار استوری'}</button>
           </div>
         </div>,
