@@ -21,6 +21,7 @@
    ───────────────────────────────────────────────────────────── */
 
 import Link from 'next/link'
+import { smsLink } from '@/lib/phone-wa'
 import { MapPin, Star, Home, Wrench } from 'lucide-react'
 import VerifiedBadge from '../../VerifiedBadge'
 import { toFaDigits, faDec } from '@/lib/jalali'
@@ -41,6 +42,8 @@ export function TechnicianCard({ tech, ratingAvg = 0, ratingCount = 0 }: Technic
   const chips = tech.services.slice(0, MAX_CHIPS)
   const rest = tech.services.length - chips.length
   const hasCity = Boolean(tech.city && tech.city !== '—')
+  const requestMsg = `سلام ${tech.person || tech.name} عزیز، از طریق بیلیارد هاب درخواست خدمت دارم`
+  const requestHref = smsLink(tech.phone, requestMsg) || smsLink(tech.whatsapp, requestMsg) || `tel:${tech.phone}`
 
   return (
     <article className="tm-card">
@@ -97,8 +100,9 @@ export function TechnicianCard({ tech, ratingAvg = 0, ratingCount = 0 }: Technic
 
       <div className="tm-card-act">
         <Link className="tm-btn tm-btn--outline tm-btn--sm" href={href}>مشاهده پروفایل</Link>
+        {/* پیامکِ آماده (نه تماس) — موبایل ندارد ⟵ همان تماس */}
         {tech.phone && (
-          <a className="tm-btn tm-btn--gold tm-btn--sm" href={`tel:${tech.phone}`}>درخواست خدمت</a>
+          <a className="tm-btn tm-btn--gold tm-btn--sm" href={requestHref}>درخواست خدمت</a>
         )}
       </div>
     </article>

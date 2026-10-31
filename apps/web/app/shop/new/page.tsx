@@ -62,6 +62,17 @@ export default function NewProductPage() {
     province: '', city: '', address: '',
   })
   const [storeSlug, setStoreSlug] = useState('')
+  /* ── به نامِ فروشگاه یا شخصی (آبانِ ۱۴۰۵) ──
+     تا امروز هر آگهیِ صاحبِ فروشگاه خودکار در فروشگاهش می‌نشست — حتی آگهی‌ای
+     که به نامِ خودش و شخصی می‌گذاشت — و زیرِ آن «رفتن به صفحه فروشگاه» می‌آمد. */
+  const [postAs, setPostAs] = useState<'store' | 'personal'>('store')
+  const [storeTitle, setStoreTitle] = useState('')
+  const [personalName, setPersonalName] = useState('')
+  const pickPostAs = (v: 'store' | 'personal') => {
+    setPostAs(v)
+    const n = v === 'store' ? storeTitle : personalName
+    if (n) setForm(f => ({ ...f, shopName: n }))
+  }
   const [geoLocked, setGeoLocked] = useState(false)       // استان/شهر/آدرس از فروشگاه ⇒ قفل
   const [images,   setImages]   = useState<ImgSlot[]>([])
   const [dragging, setDragging] = useState(false)
@@ -88,6 +99,7 @@ export default function NewProductPage() {
     if (!user) return
     const u = user as any
     const authName = [u.firstName || '', u.lastName || ''].filter(Boolean).join(' ') || u.name || ''
+    setPersonalName(authName)
     /* ── فروشگاه از سرور، نه از localStorage ──
        `findSellerByOwner()` حافظه‌ی همین مرورگر را می‌خواند، ولی
        فروشگاه‌ها مدت‌هاست در جدول `profiles` هستند. پس این تابع
@@ -102,6 +114,7 @@ export default function NewProductPage() {
       const p = mine?.data
       if (!p) return
       setStoreSlug(mine.slug || '')
+      if (p.title) setStoreTitle(String(p.title))
       if (p.title) { setForm(f => ({ ...f, shopName: String(p.title) })); setShopNameLocked(true) }
       if (p.ownerName) { setForm(f => ({ ...f, ownerName: String(p.ownerName) })); setOwnerNameLocked(true) }
       setGeoLocked(!!(p.province || p.city || p.address))
@@ -552,7 +565,9 @@ export default function NewProductPage() {
             province: form.province, city: form.city, address: form.address.trim(),
             sellerName: form.shopName.trim(), sellerPhone: normalizePhone(form.sellerPhone),
             sellerWhatsapp: toStoredWhatsapp(normalizePhone(form.sellerWhatsapp) || normalizePhone(form.sellerPhone)),
-            storeSlug: storeSlug || undefined,
+            /* سرور فروشگاه را خودش پیدا می‌کند؛ «شخصی» صریح می‌گوید وصل نکن */
+            storeSlug: storeSlug && postAs === 'store' ? storeSlug : undefined,
+            asStore: storeSlug ? postAs === 'store' : undefined,
           }),
         })
         const j = await r.json().catch(() => ({}))
@@ -1081,6 +1096,26 @@ export default function NewProductPage() {
 
                     «اطلاعات تماس» جدا می‌ماند، چون شماره‌ی تماس واقعا
                     قابل تغییر است. */}
+                {storeSlug && (
+                <fieldset style={{ background: LQ_BG, backdropFilter: 'blur(40px) saturate(220%)', WebkitBackdropFilter: 'blur(40px) saturate(220%)', border: LQ_BOR, borderRadius: 20, boxShadow: LQ_SHAD, padding: '20px 24px', margin: 0 }}>
+                  <legend style={{ float: 'right', width: '100%', padding: 0, marginBottom: 12, fontSize: 14, fontWeight: 800 }}>این آگهی به نامِ</legend>
+                  <div role="radiogroup" aria-label="ثبتِ آگهی به نامِ" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                    {([['store', `فروشگاه${storeTitle ? ` «${storeTitle}»` : ''}`], ['personal', `شخصی${personalName ? ` (${personalName})` : ''}`]] as const).map(([v, label]) => (
+                      <button key={v} type="button" role="radio" aria-checked={postAs === v} onClick={() => pickPostAs(v)}
+                        style={{ padding: '11px 12px', borderRadius: 12, fontFamily: 'inherit', fontSize: 13, fontWeight: 700, cursor: 'pointer',
+                          border: postAs === v ? '1px solid rgba(199,166,106,0.55)' : '1px solid rgba(28,27,23,0.12)',
+                          background: postAs === v ? 'rgba(199,166,106,0.14)' : 'rgba(255,255,255,0.7)',
+                          color: postAs === v ? GOLD_D : '#5B564B' }}>
+                        {label}
+                      </button>
+                    ))}
+                  </div>
+                  <p style={{ margin: '10px 0 0', fontSize: 11.5, color: '#6F6A5C', lineHeight: 1.9 }}>
+                    {postAs === 'store' ? 'آگهی در ویترینِ فروشگاه هم دیده می‌شود و «رفتن به صفحه فروشگاه» دارد.' : 'آگهیِ شخصی — به فروشگاه وصل نمی‌شود.'}
+                  </p>
+                </fieldset>
+                )}
+
                 {!sellerLocked && (
                 <div style={{ background: LQ_BG, backdropFilter: 'blur(40px) saturate(220%)', WebkitBackdropFilter: 'blur(40px) saturate(220%)', border: LQ_BOR, borderRadius: 20, boxShadow: LQ_SHAD, padding: '24px', position: 'relative', overflow: 'hidden', animation: 'fadeUp 0.5s ease both' }}>
                   <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '46%', background: 'linear-gradient(180deg,rgba(255,255,255,0.55) 0%,transparent 100%)', pointerEvents: 'none' }} />

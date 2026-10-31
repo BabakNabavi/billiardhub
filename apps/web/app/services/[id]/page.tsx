@@ -24,7 +24,7 @@ import { applyImagePatch } from '@/lib/profiles/edit-image'
 import { useChannelPublish, type PublishVideo } from '@/components/media/useChannelPublish'
 import { toFaDigits } from '@/lib/jalali'
 import { norm, keepLongest } from '@/lib/text-dedupe'
-import { telNumber, waLink } from '@/lib/phone-wa'
+import { telNumber, smsLink } from '@/lib/phone-wa'
 import { resolveServices } from '@/lib/tech-services'
 import { useVideoEdit } from '@/components/media/useVideoEdit'
 import { detailTitle, type VideoDetail } from '@/lib/media/video-details'
@@ -49,7 +49,7 @@ import { useParams } from 'next/navigation'
 /* ⚠️ آیکون تزئینی نداریم: هر آیکونی که این‌جا می‌ماند یا ناوبری
    است یا کنش. `MapPin` و `Clock` با بازطراحی حذف شدند — شهر و
    ساعت، *متن*اند و آیکون چیزی به آن‌ها اضافه نمی‌کرد. */
-import { Wrench, Phone, MapPin, Home, ClipboardList, Building2, Map, Clock, Check, ChevronLeft, TextCursorInput, Link2 } from 'lucide-react'
+import { Wrench, Phone, MapPin, Home, ClipboardList, Building2, Map, Clock, Check, ChevronLeft, TextCursorInput, Link2, MessageSquareText } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { getTechnician } from '../../../lib/technicians-data'
 import { useOwnerEdit } from '../../../lib/profiles/use-owner-edit'
@@ -63,14 +63,9 @@ import VerifiedBadge from '../../../components/VerifiedBadge'
 import PendingNotice from '../../../components/profile/PendingNotice'
 import type { Technician } from '../../../lib/technicians-data'
 
-/* آیکون واتساپ. `lucide` نشانِ برند ندارد و این گلیف سه جای همین
-   فایل لازم می‌شود، پس یک‌بار این‌جا تعریف می‌شود نه سه‌بار inline. */
-function WaGlyph({ size = 16 }: { size?: number }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden focusable="false">
-      <path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.46 1.32 4.96L2 22l5.25-1.38a9.9 9.9 0 0 0 4.79 1.22h.01c5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0 0 12.04 2zm0 18.13a8.23 8.23 0 0 1-4.2-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.2 8.2 0 0 1-1.26-4.36c0-4.54 3.7-8.23 8.25-8.23 2.2 0 4.27.86 5.83 2.42a8.18 8.18 0 0 1 2.41 5.82c0 4.54-3.7 8.21-8.24 8.21zm4.52-6.16c-.25-.12-1.47-.72-1.69-.81-.23-.08-.39-.12-.56.12-.17.25-.64.81-.79.98-.14.17-.29.19-.54.06-.25-.12-1.05-.39-1.99-1.23-.74-.66-1.23-1.47-1.38-1.72-.14-.25-.01-.38.11-.5.11-.11.25-.29.37-.43.12-.14.17-.25.25-.41.08-.17.04-.31-.02-.43-.06-.12-.56-1.34-.76-1.84-.2-.48-.4-.42-.56-.43h-.47c-.17 0-.43.06-.66.31-.23.25-.86.85-.86 2.07 0 1.22.89 2.4 1.01 2.56.12.17 1.75 2.67 4.23 3.74.59.26 1.05.41 1.41.52.59.19 1.13.16 1.56.1.48-.07 1.47-.6 1.67-1.18.21-.58.21-1.07.14-1.18-.06-.11-.22-.17-.47-.29z" />
-    </svg>
-  )
+/* آیکونِ پیامک — جای گلیفِ واتساپ (در ایران فیلتر است؛ خواستِ مالک، آبانِ ۱۴۰۵) */
+function SmsGlyph({ size = 16 }: { size?: number }) {
+  return <MessageSquareText size={size} aria-hidden focusable="false" />
 }
 
 /* ⚠️ عدد ثابت ننویس: نوار بالا `paddingTop: env(safe-area-inset-top)`
@@ -477,7 +472,8 @@ export default function TechnicianProfilePage() {
   })()
 
   const waCount = picked.length > 0 ? ` (${toFaDigits(String(picked.length))})` : ''
-  const waText = waLink(tech.whatsapp, waMsg) || waLink(tech.phone, waMsg)
+  /* پیامکِ آماده به موبایلِ متخصص — تلفنِ ثابت پیامک نمی‌گیرد، پس شماره‌ی واتساپِ قدیمی پس‌افت است */
+  const waText = smsLink(tech.phone, waMsg) || smsLink(tech.whatsapp, waMsg)
 
   /* تب‌ها فقط لنگرند، نه روتر: محتوا کوتاه است و صفحه‌ی جدا برای
      هر تب یعنی سه رفت‌وبرگشت اضافه روی شبکه‌ی کند. */
@@ -567,8 +563,8 @@ export default function TechnicianProfilePage() {
                 </a>
               )}
               {waText && (
-                <a className="tm-btn tm-btn--outline" href={waText} target="_blank" rel="noopener noreferrer">
-                  <WaGlyph />درخواست خدمت{waCount}
+                <a className="tm-btn tm-btn--outline" href={waText}>
+                  <SmsGlyph />درخواست خدمت{waCount}
                 </a>
               )}
             </div>
@@ -715,15 +711,15 @@ export default function TechnicianProfilePage() {
                 )}
                 {waText && (
                   <li>
-                    <a className="tmp-ct-row" href={waText} target="_blank" rel="noopener noreferrer">
-                      <span className="tmp-ct-ic tmp-ct-ic--wa" aria-hidden><WaGlyph size={19} /></span>
+                    <a className="tmp-ct-row" href={waText}>
+                      <span className="tmp-ct-ic tmp-ct-ic--wa" aria-hidden><SmsGlyph size={19} /></span>
                       <span className="tmp-ct-b">
                         {picked.length > 0 && (
                           <span className="tmp-ct-k">
                             {`${toFaDigits(String(picked.length))} خدمت انتخاب شده`}
                           </span>
                         )}
-                        <span className="tmp-ct-v">درخواست خدمت در واتساپ</span>
+                        <span className="tmp-ct-v">درخواست خدمت با پیامک</span>
                       </span>
                       <span className="tmp-ct-go" aria-hidden><ChevronLeft size={18} /></span>
                     </a>
@@ -755,8 +751,8 @@ export default function TechnicianProfilePage() {
             </a>
           )}
           {waText && (
-            <a className="tm-btn tm-btn--outline" href={waText} target="_blank" rel="noopener noreferrer">
-              <WaGlyph />درخواست خدمت{waCount}
+            <a className="tm-btn tm-btn--outline" href={waText}>
+              <SmsGlyph />درخواست خدمت{waCount}
             </a>
           )}
           {hours && <p className="tmp-panel-note">ساعت کاری: {hours}</p>}
@@ -772,9 +768,9 @@ export default function TechnicianProfilePage() {
             </a>
           )}
           {waText && (
-            <a className="tm-btn tm-btn--outline" href={waText} target="_blank" rel="noopener noreferrer"
+            <a className="tm-btn tm-btn--outline" href={waText}
               tabIndex={dock ? 0 : -1}>
-              <WaGlyph />درخواست خدمت{waCount}
+              <SmsGlyph />درخواست خدمت{waCount}
             </a>
           )}
         </div>

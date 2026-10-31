@@ -314,7 +314,8 @@ export async function POST(req: NextRequest) {
      کسی می‌توانست نامک فروشگاه دیگری را بفرستد و آگهی‌اش را داخل
      ویترین او بنشاند. */
   let storeSlug: string | null = null;
-  try {
+  /* «شخصی» صریح (`asStore: false`) ⟵ به فروشگاه وصل نشود (آبانِ ۱۴۰۵) */
+  if (b?.asStore !== false) try {
     const { data: shop } = await sb().from('profiles')
       .select('slug').eq('kind', 'seller').eq('owner_id', actor.id)
       .eq('status', 'approved').maybeSingle();
