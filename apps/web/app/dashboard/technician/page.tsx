@@ -210,6 +210,7 @@ export default function TechnicianDashboard() {
       ...form,
       /* ⚠️ ثابت، نه ورودیِ کاربر — فیلدش از فرم برداشته شد */
       title: TECH_TITLE,
+      brand: (form.brand ?? '').trim(),
       /* شماره‌ها به شکل متعارف ذخیره می‌شوند، نه همان‌طور که تایپ شدند */
       phone: telOk,
       whatsapp: form.whatsapp.trim() ? telNumber(form.whatsapp) : '',
@@ -331,6 +332,18 @@ export default function TechnicianDashboard() {
                   placeholder="از حساب کاربری" />
                 <p className="mt-1 text-[11px] text-[#8A8577]">
                   از حساب کاربری‌تان می‌آید. برای تغییر، به تنظیمات حساب بروید.
+                </p>
+              </div>
+              {/* نامِ برند/تیم — مثلِ نامِ فروشگاه: اگر پر شود، روی کارت و صفحه
+                  جای نامِ شخص می‌نشیند و نامِ شخص زیرش می‌آید */}
+              <div>
+                <label className="mb-1.5 block text-[12.5px] font-bold text-[#5B564B]" htmlFor="tech-brand">نام برند / تیم / کارگاه <span className="font-normal text-[#8A8577]">(اختیاری)</span></label>
+                <input
+                  id="tech-brand" className={INPUT} maxLength={60}
+                  value={form.brand ?? ''} onChange={e => set('brand', e.target.value)}
+                  placeholder="مثال: Arta Team" />
+                <p className="mt-1 text-[11px] text-[#8A8577]">
+                  به‌جای نامِ شما نمایش داده می‌شود؛ نامِ شما زیرش می‌آید.
                 </p>
               </div>
               {/* ⚠️ «عنوان تخصصی» حذف شد: این صفحه فقط یک نوع پروفایل

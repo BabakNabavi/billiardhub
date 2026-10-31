@@ -1387,3 +1387,19 @@
   .tm .tm-cat-go { inline-size: 26px; block-size: 26px; margin-block-start: 0; }
   .tm .tm-cat-t { font-size: 11.5px; line-height: 1.25; }
 }
+
+/* ═══════ اصلاحاتِ دورِ سوم — بازخوردِ مالک (آبانِ ۱۴۰۵) ═══════ */
+
+/* فلشِ «همه شهرها» کمی به راست و با فاصله از نشانِ مکان — در همه‌ی حالت‌ها.
+   فلش آخرین فرزندِ دکمه است (لبه‌ی پایانی = چپ در RTL)؛ margin-inline-end
+   آن را به سمتِ متن هل می‌دهد. */
+.tm .tm-search .tm-citybtn > svg { margin-inline-end: 8px; flex: 0 0 auto; }
+
+@media (max-width: 559px) {
+  /* موبایل: فیلدها زیرِ هم‌اند، پس ذره‌بین هم‌ترازِ ردیفِ «چه خدماتی نیاز
+     دارید؟» می‌نشیند نه وسطِ کلِ کادر. ۴ پیکسل = مرکزِ ردیفِ اول (۶۵ پیکسل)
+     منهای نیمِ دکمه (۲۸). */
+  .tm .tm-search-go { align-self: start; margin-block-start: 4px; }
+  /* نشانِ مکان کمی پایین‌تر — هم‌خطِ پایه‌ی متنِ «همه شهرها» */
+  .tm .tm-search-pin { transform: translateY(3px); }
+}

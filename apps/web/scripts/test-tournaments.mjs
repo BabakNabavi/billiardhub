@@ -4313,7 +4313,9 @@ console.log('\n― استوری: یک منبع، با انقضا ―');
         && strip(read('app/dashboard/player/page.tsx')).includes('normalizePlayerMedia(remote.data)'),
         'ردیفِ پیش از مهاجرت یا صفحه را می‌شکند یا با اولین ذخیره خالی می‌شود');
       t('پنلِ بازیکن همان شکلی را می‌نویسد که می‌خواند',
-        strip(read('app/dashboard/player/page.tsx')).includes("set('gallery', [...form.gallery, ...items])"),
+        /* آبانِ ۱۴۰۵: گالری همان لحظه روی سرور می‌رود (persistMedia) — شکلِ نوشتن همان آرایه‌ی gallery است */
+        strip(read('app/dashboard/player/page.tsx')).includes("const gallery = [...form.gallery, ...items]")
+        && strip(read('app/dashboard/player/page.tsx')).includes('await persistMedia(gallery, form.albums)'),
         'با دو مدلِ جدا، عکسِ اضافه‌شده از صفحه‌ی عمومی در پنل دیده نمی‌شد');
     }
 
@@ -5071,7 +5073,8 @@ console.log('\n― دکمه و فیلد روی سیستمِ موجود ―');
     && !css.includes('.input-icon-end'),
     'راست/چپِ فیزیکی در چیدمانِ راست‌به‌چپ ممنوع است');
 
-  const pages = ['app/tournaments/page.tsx', 'app/news/page.tsx', 'app/players/page.tsx', 'app/services/page.tsx'];
+  /* بازیکنان کادرِ جست‌وجو ندارد — به خواستِ مالک حذف شد (آبانِ ۱۴۰۵) */
+  const pages = ['app/tournaments/page.tsx', 'app/news/page.tsx', 'app/services/page.tsx'];
   for (const p of pages) {
     t(`فیلدِ مشترک در ${p.split('/')[1]}`, /className="input input-glass input-sm/.test(read(p)));
   }

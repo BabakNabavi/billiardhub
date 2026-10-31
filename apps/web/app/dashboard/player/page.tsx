@@ -152,11 +152,34 @@ export default function PlayerDashboard() {
      همان مدل بقیه‌ی نقش‌ها: نام‌ها در `albums` و خود عکس در
      `gallery` با برچسب نام آلبوم. با دو مدل جدا، عکسی که از
      صفحه‌ی عمومی اضافه می‌شد در پنل دیده نمی‌شد. */
-  const addAlbum = () => {
+  /* ── رسانه همان لحظه ذخیره می‌شود (آبانِ ۱۴۰۵) ──
+     تا امروز عکسِ آلبوم فقط در فرم می‌ماند تا «ذخیره»ی پایینِ صفحه — و اگر
+     زده نمی‌شد یا اعتبارسنجیِ فیلدِ دیگری (نام لاتین، معرفی…) ردش می‌کرد،
+     آلبوم روی صفحه‌ی عمومی خالی می‌ماند. حالا وقتی پروفایل روی سرور هست،
+     فقط `gallery` و `albums` روی *نسخه‌ی سرور* عوض و ذخیره می‌شوند —
+     بقیه‌ی ویرایش‌های ذخیره‌نشده‌ی فرم بی‌اجازه نمی‌روند. پروفایلِ تازه
+     (هنوز ذخیره نشده) همان رفتارِ قبلی را دارد: با «ذخیره» می‌رود. */
+  const persistMedia = async (gallery: PlayerProfile['gallery'], albums: string[]) => {
+    if (!savedSlug) return true
+    const cur = await fetchMyProfileResult<PlayerProfile>('player')
+    if (cur.state !== 'found') { setErr('ذخیره‌ی گالری انجام نشد — اتصال را بررسی کنید و دوباره امتحان کنید.'); return false }
+    const res = await saveProfileRemote('player', cur.profile.slug,
+      { ...cur.profile.data, gallery, albums } as unknown as Record<string, unknown>)
+    if (!res.ok) { setErr(res.message ?? 'ذخیره‌ی گالری انجام نشد'); return false }
+    /* نشانیِ Storage جای data:URL — وگرنه پنل تا بازخوانی base64 نگه می‌دارد */
+    const saved = res.profile?.data as Partial<PlayerProfile> | undefined
+    if (saved) setForm(f => ({ ...f, gallery: saved.gallery ?? gallery, albums: saved.albums ?? albums }))
+    return true
+  }
+
+  const addAlbum = async () => {
     const n = albTitle.trim()
     if (!n) { setErr('نام آلبوم لازم است.'); return }
     if (form.albums.some(x => x.trim() === n)) { setErr('آلبومی با همین نام هست.'); return }
-    set('albums', [...form.albums, n]); setAlbTitle('')
+    const albums = [...form.albums, n]
+    set('albums', albums); setAlbTitle('')
+    setBusy(true)
+    try { await persistMedia(form.gallery, albums) } finally { setBusy(false) }
   }
   const addAlbumPhotos = async (album: string, files: FileList | null) => {
     if (!files?.length) return
@@ -168,15 +191,26 @@ export default function PlayerDashboard() {
         caption: '',
         ...(album ? { album } : {}),
       })))
-      set('gallery', [...form.gallery, ...items])
+      const gallery = [...form.gallery, ...items]
+      set('gallery', gallery)
+      await persistMedia(gallery, form.albums)
     } catch { setErr('آپلود نشد. دوباره تلاش کنید.') }
     finally { setBusy(false) }
   }
-  const removeGalleryItem = (id: string) => set('gallery', form.gallery.filter(g => g.id !== id))
+  const removeGalleryItem = async (id: string) => {
+    const gallery = form.gallery.filter(g => g.id !== id)
+    set('gallery', gallery)
+    setBusy(true)
+    try { await persistMedia(gallery, form.albums) } finally { setBusy(false) }
+  }
   /* حذف آلبوم فقط برچسب را برمی‌دارد؛ عکس در گالری می‌ماند */
-  const removeAlbum = (name: string) => {
-    set('albums', form.albums.filter(x => x !== name))
-    set('gallery', form.gallery.map(g => (g.album === name ? { ...g, album: undefined } : g)))
+  const removeAlbum = async (name: string) => {
+    const albums = form.albums.filter(x => x !== name)
+    const gallery = form.gallery.map(g => (g.album === name ? { ...g, album: undefined } : g))
+    set('albums', albums)
+    set('gallery', gallery)
+    setBusy(true)
+    try { await persistMedia(gallery, albums) } finally { setBusy(false) }
   }
 
   const submit = async (e: React.FormEvent) => {

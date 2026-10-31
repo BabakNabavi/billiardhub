@@ -44,8 +44,10 @@ export async function generateMetadata(
     const p = await withTimeout(getProfileBySlug('technician', id), 2500)
     if (p) {
       approved = p.status === 'approved'
-      const d = p.data as { name?: unknown; title?: unknown; intro?: unknown }
-      name = typeof d.name === 'string' ? d.name.trim() : ''
+      const d = p.data as { name?: unknown; brand?: unknown; title?: unknown; intro?: unknown }
+      /* برند اگر ثبت شده نامِ نمایشی است — همان قاعده‌ی profileToTechnician */
+      const brand = typeof d.brand === 'string' ? d.brand.trim() : ''
+      name = brand || (typeof d.name === 'string' ? d.name.trim() : '')
       const i = typeof d.intro === 'string' ? d.intro.trim() : ''
       /* ⚠️ «i || t» بود. حالا که عنوان برای همه ثابتِ «خدمات فنی»
          است، هر متخصصِ بدون معرفی همان یک جمله را به‌عنوان توضیحِ

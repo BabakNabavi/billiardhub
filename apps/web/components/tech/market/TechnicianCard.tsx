@@ -59,7 +59,8 @@ export function TechnicianCard({ tech, ratingAvg = 0, ratingCount = 0 }: Technic
           {tech.verified && <VerifiedBadge title="متخصص تأیید شده" />}
         </h3>
 
-        {tech.title && <p className="tm-card-title">{tech.title}</p>}
+        {/* با برند: نامِ شخص جای «خدمات فنی» */}
+        {(tech.person || tech.title) && <p className="tm-card-title">{tech.person || tech.title}</p>}
 
         {/* ⚠️ هر نشان رنگ معنادار خودش را دارد، نه رنگ تزئینی:
             سبز = می‌آید سر کار، بنفش = کارگاه دارد، آبی = مکان،

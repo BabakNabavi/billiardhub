@@ -18,6 +18,9 @@ export interface TechnicianProfile {
   ownerId: string
   ownerPhone: string
   name: string
+  /** نامِ برند / تیم / کارگاه (اختیاری) — اگر باشد، نامِ نمایشی همین است و
+   *  نامِ شخص زیرش می‌نشیند؛ مثلِ نامِ فروشگاه (خواستِ مالک، آبانِ ۱۴۰۵). */
+  brand?: string
   photo: string
   title: string
   province: string
@@ -135,7 +138,9 @@ export function profileToTechnician(p: TechnicianProfile): Technician {
     id: p.slug,
     /* ⚠️ جانشینِ *نام* با جانشینِ *عنوان* یکی نیست — یک جایگزینیِ
        سراسری این دو را قاطی کرده بود. */
-    name: p.name || 'متخصص خدمات فنی',
+    name: String(p.brand ?? '').trim() || p.name || 'متخصص خدمات فنی',
+    /* نامِ شخص فقط وقتی جدا نشان داده می‌شود که برند جایش نشسته باشد */
+    person: String(p.brand ?? '').trim() ? (p.name || '') : '',
     photo: p.photo || undefined,
     title: p.title || TECH_TITLE,
     city: p.city || '—',

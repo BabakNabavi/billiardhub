@@ -74,7 +74,10 @@ const write = async (img, name) => { await img.toFile(DIR + name); console.log(n
 
 await write(await mark(256), `bh-mark-256${V}.png`)
 await write(await mark(512), `bh-header${V}.png`)
-await write(await tile(256, 0.58), `bh-nav-256${V}.png`)
+/* کاشیِ نوار ۷۸٪ (نه ۵۸٪): در همان قابِ ۴۰ پیکسلی کنارِ مارکِ ۸۸٪ِ نوارِ روشن
+   حروف هم‌اندازه دیده شوند — با اسکرول لوگو کوچک و بزرگ نشود (خواستِ مالک).
+   نامِ `-v12b`: فایل یک هفته کش می‌شود و نامِ قبلی نسخه‌ی کوچک را نگه می‌داشت. */
+await write(await tile(256, 0.78), `bh-nav-256${V}b.png`)
 await write(await tile(192, 0.62), `bh-icon-192${V}.png`)
 await write(await tile(512, 0.62), `bh-icon-512${V}.png`)
 /* maskable: لانچرها تا ۲۰٪ِ لبه را می‌بُرند — حروف داخلِ دایره‌ی امن */
@@ -84,9 +87,9 @@ await write(await tile(180, 0.62), `bh-apple-180${V}.png`)
 await write(await tile(96, 0.68), `bh-favicon-96${V}.png`)
 await write(await tile(32, 0.74), `bh-favicon-32${V}.png`)
 await write(await tile(16, 0.8), `bh-favicon-16${V}.png`)
-for (const n of ['bh-mark-256', 'bh-nav-256']) {
-  await sharp(DIR + n + V + '.png').webp({ quality: 92, alphaQuality: 100 }).toFile(DIR + n + V + '.webp')
-  console.log(n + V + '.webp')
+for (const n of ['bh-mark-256' + V, 'bh-nav-256' + V + 'b']) {
+  await sharp(DIR + n + '.png').webp({ quality: 92, alphaQuality: 100 }).toFile(DIR + n + '.webp')
+  console.log(n + '.webp')
 }
 
 /* تصویرِ اشتراک‌گذاری ۱۲۰۰×۶۳۰: زمینه‌ی روشنِ سایت، مارک وسط */

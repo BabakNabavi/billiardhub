@@ -3,7 +3,8 @@
 import { useState, useMemo, useEffect } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
-import { ChevronLeft, Store, Phone, Heart, ShieldCheck, MapPin, CalendarDays, Zap } from 'lucide-react'
+import { ChevronLeft, Store, Phone, Heart, ShieldCheck, MapPin, CalendarDays, Zap, MessageSquare } from 'lucide-react'
+import { smsLink } from '../../../lib/phone-wa'
 import { faDate, parseDbTimestamp } from '../../../lib/jalali'
 import { CAT_LABELS, type ShopProduct } from '../products'
 import ReportButton from '../../../components/ReportButton'
@@ -265,7 +266,13 @@ export default function ProductDetailPage() {
      محصولات کاتالوگ همیشه فروشگاه دارند؛ آگهی کاربر عادی فقط وقتی
      که خودش فروشگاه داشته باشد sellerId می‌گیرد. بدون آن، دکمه‌ی
      «رفتن به فروشگاه» به صفحه‌ی خالی می‌رسید. */
-  const hasStore = !!staticProduct || !!(userProduct && String(userProduct.sellerId ?? '').trim())
+  /* ⚠️ شناسه به‌تنهایی کافی نیست: برای آگهی‌ای که `storeSlug` ندارد،
+     `sellerId` به شناسه‌ی *کاربر* برمی‌گشت و دکمه به /sellers/<کاربر>
+     می‌رفت — صفحه‌ای که فروشگاهی ندارد (و تا آبانِ ۱۴۰۵ فروشگاهِ ساختگیِ
+     «بابی» را لحظه‌ای نشان می‌داد). دکمه فقط وقتی هست که پروفایلِ
+     فروشگاه واقعاً پیدا شود. */
+  const [storeFound, setStoreFound] = useState(false)
+  const hasStore = !!staticProduct || storeFound
 
   /* ── نشان سبز «فروشگاه» فقط برای فروشگاه تأییدشده ──
      تا امروز هر آگهی‌ای که به فروشگاهی وصل بود این نشان را می‌گرفت،
@@ -274,11 +281,11 @@ export default function ProductDetailPage() {
   const [storeVerified, setStoreVerified] = useState(false)
   useEffect(() => {
     const slug = String(userProduct?.sellerId ?? '').trim()
-    if (!slug) { setStoreVerified(false); return }
+    if (!slug) { setStoreVerified(false); setStoreFound(false); return }
     let alive = true
     void fetchProfile<Record<string, unknown>>('seller', slug)
-      .then(pr => { if (alive) setStoreVerified(pr?.verified === true) })
-      .catch(() => { if (alive) setStoreVerified(false) })
+      .then(pr => { if (alive) { setStoreFound(!!pr); setStoreVerified(pr?.verified === true) } })
+      .catch(() => { if (alive) { setStoreFound(false); setStoreVerified(false) } })
     return () => { alive = false }
   }, [userProduct?.sellerId])
 
@@ -339,7 +346,8 @@ export default function ProductDetailPage() {
   const gallery = product.images && product.images.length > 0 ? product.images : [product.img]
   const shown = Math.min(imgIdx, gallery.length - 1)
 
-  const waLink = `https://wa.me/${product.sellerWhatsapp}?text=${encodeURIComponent(`سلام، درباره «${fullName}» در بیلیارد بازار سوال داشتم`)}`
+  /* پیامک جای واتساپ (در ایران فیلتر است) — به موبایلِ آگهی‌دهنده، با متنِ آماده */
+  const smsHref = smsLink(product.sellerPhone, `سلام، درباره «${fullName}» در بیلیارد بازار سوال داشتم`)
 
   return (
     /* رنگ پایه داخل lq-stage است؛ پس‌زمینه‌ی مات خود عنصر لکه‌های
@@ -702,10 +710,11 @@ export default function ProductDetailPage() {
                     <Store size={16} strokeWidth={2.2} /> رفتن به صفحه فروشگاه
                   </Link>
                 )}
-                <a href={waLink} target="_blank" rel="noopener noreferrer" className="lq-lift" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6, padding: '11px', borderRadius: 12, ...lqGreen, fontSize: 12.5, textDecoration: 'none' }}>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.77.46 3.45 1.28 4.9L2 22l5.32-1.39a9.9 9.9 0 004.72 1.2h.01c5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.13-2.9-7A9.82 9.82 0 0012.04 2z"/></svg>
-                  واتساپ
+                {smsHref && (
+                <a href={smsHref} className="lq-lift" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6, padding: '11px', borderRadius: 12, ...lqGreen, fontSize: 12.5, textDecoration: 'none' }}>
+                  <MessageSquare size={15} strokeWidth={2.2} aria-hidden /> پیامک
                 </a>
+                )}
                 <a href={`tel:${product.sellerPhone}`} className="lq-lift" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6, padding: '11px', borderRadius: 10, ...lqGold, fontSize: 12.5, textDecoration: 'none' }}>
                   <Phone size={15} strokeWidth={2.2} /> تماس
                 </a>

@@ -421,6 +421,8 @@ export default function TechnicianProfilePage() {
   const hasProse = rest.length > 1 || (rest[0]?.length ?? 0) >= 90
   const about = hasProse ? rest : []
   const claim = hasProse ? second : (second || rest[0] || '')
+  /* با برند: نامِ شخص جای خطِ نقش («خدمات فنی بیلیارد») */
+  const roleLine = tech.person || lede
 
   /* ⚠️ همه‌جا `norm`: مقدار فقط‌فاصله در JS صادق است. */
   const club = norm(tech.club)
@@ -467,7 +469,7 @@ export default function TechnicianProfilePage() {
   /* ⚠️ «خدمت» یا «خدمات» بسته به تعداد، و آخرین قلم با «و» وصل
      می‌شود نه با ویرگول — وگرنه جمله فارسیِ درست نیست. */
   const waMsg = (() => {
-    const base = `سلام ${tech.name} عزیز، از طریق بیلیارد هاب به شما پیام می‌دهم`
+    const base = `سلام ${tech.person || tech.name} عزیز، از طریق بیلیارد هاب به شما پیام می‌دهم`
     if (picked.length === 0) return base
     const q = picked.map(t => `«${t}»`)
     const list = q.length === 1 ? q[0] : `${q.slice(0, -1).join('، ')} و ${q[q.length - 1]}`
@@ -523,7 +525,7 @@ export default function TechnicianProfilePage() {
                 {tech.name}
                 {tech.verified && <VerifiedBadge title="متخصص تأیید شده" />}
               </h1>
-              {lede && <p className="tmp-role">{lede}</p>}
+              {roleLine && <p className="tmp-role">{roleLine}</p>}
               {/* ⚠️ آیکون‌ها داخل نشانِ رنگی می‌روند — همان زبانی که
                   کارت متخصص در دایرکتوری دارد. پیش‌تر خطی و هم‌رنگِ
                   متنِ کم‌رنگِ سربرگ بودند و عملا دیده نمی‌شدند. */}
@@ -746,7 +748,7 @@ export default function TechnicianProfilePage() {
         {/* ── پنل تماس چسبان (دسکتاپ) ── */}
         <aside className="tmp-panel" aria-label="تماس با متخصص">
           <h2>{tech.name}</h2>
-          {lede && <p className="tmp-role">{lede}</p>}
+          {roleLine && <p className="tmp-role">{roleLine}</p>}
           {phone && (
             <a className="tm-btn tm-btn--gold" href={`tel:${phone}`}>
               <Phone size={16} aria-hidden />تماس

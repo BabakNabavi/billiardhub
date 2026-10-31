@@ -18,8 +18,6 @@ import {
 import { listApprovedPlayers, profileToPlayer, type PlayerProfile } from '../../lib/player-store'
 import { fetchProfilesResult } from '../../lib/profiles/client'
 import VerifiedBadge from '../../components/VerifiedBadge'
-import { makeMatcher } from '@/lib/search/filter'
-import { SearchSuggest } from '@/components/search/SearchSuggest'
 
 const GOLD   = '#C7A66A'
 const GOLD_D = '#8F6531'
@@ -32,13 +30,21 @@ const LINE   = '#E7E2D6'
 /* «ملی‌پوشان»، «رنکینگ» و «جوانان» حذف شدند: هر سه به فیلدهای
    خوداظهار حذف‌شده تکیه داشتند، پس از این پس هیچ بازیکنی با آن‌ها
    جور در نمی‌آمد و هر سه تب برای همیشه خالی می‌ماندند. */
-type Seg = 'all' | 'snooker' | 'pool' | 'women'
+/* «هی‌بال» و «آقایان» (آبانِ ۱۴۰۵): فرمِ ثبتِ بازیکن هی‌بال را می‌گیرد
+   (کلیدِ `highball` در `disciplines`) ولی صفحه راهی برای دیدنش نداشت. */
+type Seg = 'all' | 'snooker' | 'pool' | 'heyball' | 'men' | 'women'
 const SEGMENTS: [Seg, string][] = [
   ['all', 'همه'],
   ['snooker', 'اسنوکر'],
   ['pool', 'پاکت بیلیارد'],
+  ['heyball', 'هی‌بال'],
+  ['men', 'آقایان'],
   ['women', 'بانوان'],
 ]
+
+/* صفحه‌بندی: با صدها پروفایل، همه با هم یعنی ده‌ها هزار پیکسل اسکرول و
+   صدها تصویرِ پس‌زمینه روی گوشیِ ضعیف */
+const PAGE = 24
 
 /* ── کارت پرتره‌ی سینمایی — تایپوگرافی + رنکینگ مونومنتال روی دوتون ── */
 function PlayerCard({ p, i, size = 'std' }: { p: Player; i: number; size?: 'std' | 'xl' | 'row' }) {
@@ -83,7 +89,8 @@ function PlayerCard({ p, i, size = 'std' }: { p: Player; i: number; size?: 'std'
 
 export default function PlayersPage() {
   const [seg, setSeg]     = useState<Seg>('all')
-  const [query, setQuery] = useState('')
+  const [shown, setShown] = useState(PAGE)
+  const pickSeg = (k: Seg) => { setSeg(k); setShown(PAGE) }
 
   /* بازیکنان ثبت‌نامی (پنل ⇒ localStorage) بعد از mount خوانده و اول لیست می‌نشینند */
   const [registered, setRegistered] = useState<Player[]>([])
@@ -111,22 +118,21 @@ export default function PlayersPage() {
   }, [registered])
 
   const filtered = useMemo(() => {
-    const q = query.trim()
-    const hit = makeMatcher(q)
     return ALL.filter(p => {
       /* بازیکن می‌تواند چند رشته داشته باشد؛ فیلتر باید همه را ببیند */
       const plays = (d: string) => p.discipline === d || (p.disciplines ?? []).some(e => e.discipline === d)
       if (seg === 'snooker' && !plays('snooker')) return false
       if (seg === 'pool' && !plays('pool')) return false
+      if (seg === 'heyball' && !plays('highball')) return false
+      if (seg === 'men' && p.gender !== 'm') return false
       if (seg === 'women' && p.gender !== 'f') return false
-      if (q && !hit(p.name, p.nameEn, p.city, p.country, DISCIPLINE_LABEL[p.discipline].fa)) return false
       return true
       /* مرتب‌سازی بر اساس رنکینگ برداشته شد: آن فیلد را هیچ مسیری
          دیگر پر نمی‌کند، پس همه ۹۹ می‌شدند و ترتیب تصادفی بود. */
     })
-  }, [ALL, seg, query])
+  }, [ALL, seg])
 
-  const isBrowsing = seg === 'all' && !query.trim()
+  const isBrowsing = seg === 'all'
   const featured   = PLAYERS.filter(p => p.featured).slice(0, 3)
   const gridItems  = isBrowsing ? filtered.filter(p => !featured.some(f => f.id === p.id)) : filtered
 
@@ -196,14 +202,34 @@ export default function PlayersPage() {
         /* ═══ چیدمان ═══ */
         .pl-featured { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); gap: 18px; }
         .pl-fside { display: grid; grid-template-rows: 1fr 1fr; gap: 18px; }
-        .pl-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; }
-        @media (max-width: 1060px) { .pl-grid { grid-template-columns: repeat(3, 1fr); } }
+        /* ── گریدِ فشرده (آبانِ ۱۴۰۵) ──
+           کارت‌ها در موبایل تک‌ستونه و ~۴۷۰ پیکسل بودند: سیصد بازیکن یعنی صدوچهل
+           هزار پیکسل اسکرول. حالا ستون‌ها از عرض ساخته می‌شوند (دسکتاپ تا ۶ ستون،
+           موبایل ۲) و فهرست ۲۴تا۲۴تا می‌آید. */
+        .pl-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(176px, 1fr)); gap: 16px; }
+        .pl-grid .pl-card { content-visibility: auto; contain-intrinsic-size: auto 260px; }
+        .pl-more { border: 1px solid rgba(199,166,106,0.34); background: rgba(199,166,106,0.12); color: ${GOLD_D};
+          font-family: inherit; font-size: 13px; font-weight: 800; padding: 11px 22px; border-radius: 12px; cursor: pointer;
+          transition: transform .2s, background .2s; }
+        .pl-more:hover { background: rgba(199,166,106,0.18); transform: translateY(-2px); }
+        .pl-more:focus-visible { outline: 2px solid ${GOLD}; outline-offset: 2px; }
         @media (max-width: 820px)  { .pl-featured { grid-template-columns: 1fr; } .pl-fside { grid-template-rows: none; grid-template-columns: 1fr 1fr; } .pl-xl { aspect-ratio: 3/3.4; } }
-        @media (max-width: 760px)  { .pl-grid { grid-template-columns: repeat(2, 1fr); gap: 14px; } }
+        @media (max-width: 760px)  { .pl-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; } }
+        /* موبایل: دو ستونِ کوتاه — نام و شهر؛ معرفی و «مشاهده» در صفحه‌ی خودِ بازیکن */
+        @media (max-width: 760px) {
+          .pl-grid .pl-std { aspect-ratio: 3/3.7; border-radius: 16px; }
+          .pl-grid .pl-frame { inset: 6px; border-radius: 11px; }
+          .pl-grid .pl-body { padding: 12px 11px 11px; }
+          .pl-grid .pl-name { font-size: 14.5px; line-height: 1.45; }
+          .pl-grid .pl-name-en { font-size: 8px; letter-spacing: .22em; }
+          .pl-grid .pl-meta { font-size: 10.5px; margin-top: 6px; gap: 4px; }
+          .pl-grid .pl-reveal { display: none; }
+          .pl-grid .pl-top { top: 10px; inset-inline-end: 10px; }
+          .pl-grid .pl-dis { font-size: 8px; letter-spacing: .18em; padding: 3px 8px 2px; }
+        }
         @media (max-width: 480px)  {
-          .pl-grid { grid-template-columns: 1fr; }
           .pl-fside { grid-template-columns: 1fr; }
-          .pl-std, .pl-xl { aspect-ratio: 3/3.6; }
+          .pl-xl { aspect-ratio: 3/3.6; }
         }
 
         /* ═══ سگمنت‌ها ═══ */
@@ -257,30 +283,18 @@ export default function PlayersPage() {
             {/* «ملی‌پوشان» و «رنکینگ» از متن رفتند چون هر دو فیلد
                 خوداظهار بودند و حذف شدند؛ متنی که به چیزی اشاره کند
                 که صفحه دیگر ندارد، وعده‌ی توخالی است. */}
-            چهره‌های شاخص اسنوکر و پاکت بیلیارد — حرفه‌ای‌های میز را این‌جا بشناسید.
+            چهره‌های شاخص و نخبگان بیلیارد ایران
           </p>
         </div>
       </header>
 
-      {/* ═══ نوار سگمنت + جستجو ═══ */}
+      {/* ═══ نوار سگمنت — جست‌وجو به خواستِ مالک حذف شد (نوارِ بالا هست) ═══ */}
       <div style={{ position: 'sticky', top: 'var(--nav-offset)', zIndex: 40, background: 'rgba(247,247,245,0.92)', backdropFilter: 'blur(18px) saturate(1.6)', WebkitBackdropFilter: 'blur(18px) saturate(1.6)', borderBottom: `1px solid ${LINE}` }}>
         <div className="plx-wrap" style={{ padding: '10px clamp(16px,3vw,28px)', display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
-          <div className="pl-segs" style={{ flex: '1 1 420px', minWidth: 0 }}>
+          <div className="pl-segs" role="group" aria-label="دسته‌ی بازیکنان" style={{ flex: '1 1 420px', minWidth: 0 }}>
             {SEGMENTS.map(([k, l]) => (
-              <button key={k} className={`pl-seg${seg === k ? ' on' : ''}`} onClick={() => setSeg(k)}>{l}</button>
+              <button key={k} type="button" aria-pressed={seg === k} className={`pl-seg${seg === k ? ' on' : ''}`} onClick={() => pickSeg(k)}>{l}</button>
             ))}
-          </div>
-          <div style={{ position: 'relative', flex: '1 1 220px', minWidth: 200 }} data-suggest-box>
-            <input
-              className="input input-glass input-sm input-icon-start" type="search" aria-label="جستجو در بازیکنان" aria-controls="sx-pl" aria-autocomplete="list"
-              value={query}
-              onChange={e => setQuery(e.target.value)}
-              placeholder="جستجوی نام، شهر یا رشته…"
-              
-            />
-            <Search size={15} style={{ position: 'absolute', insetInlineStart: 13, top: '50%', transform: 'translateY(-50%)', color: GOLD_D, pointerEvents: 'none' }} />
-            {/* پیشنهادِ زنده‌ی سراسری — همان «سوپر سرچ»ِ نوارِ بالا */}
-            <SearchSuggest hideEmpty q={query} onPick={() => setQuery('')} id="sx-pl" className="inset-x-0" />
           </div>
         </div>
       </div>
@@ -320,16 +334,25 @@ export default function PlayersPage() {
             <div style={{ textAlign: 'center', padding: '64px 20px', background: 'rgba(255,255,255,0.78)', border: `1px solid ${LINE}`, borderRadius: 18 }}>
               <Search size={36} style={{ color: MUT, opacity: 0.45, marginBottom: 12 }} />
               <p style={{ fontSize: 15, fontWeight: 800, margin: '0 0 6px' }}>{loadFailed ? 'فهرست بارگذاری نشد' : 'بازیکنی پیدا نشد'}</p>
-              <p style={{ fontSize: 12.5, color: MUT, margin: '0 0 18px' }}>{loadFailed ? 'اتصالِ اینترنت را بررسی کنید و صفحه را دوباره باز کنید.' : 'عبارت دیگری جستجو کنید یا فیلتر را تغییر دهید.'}</p>
-              <button onClick={() => { setQuery(''); setSeg('all') }}
+              <p style={{ fontSize: 12.5, color: MUT, margin: '0 0 18px' }}>{loadFailed ? 'اتصالِ اینترنت را بررسی کنید و صفحه را دوباره باز کنید.' : 'دسته‌ی دیگری را انتخاب کنید.'}</p>
+              <button type="button" onClick={() => pickSeg('all')}
                 style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '9px 18px', borderRadius: 10, cursor: 'pointer', fontFamily: 'inherit', fontSize: 13, fontWeight: 700, background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.34)', color: GOLD_D }}>
                 نمایش همه بازیکنان
               </button>
             </div>
           ) : (
-            <div className="pl-grid">
-              {gridItems.map((p, i) => <PlayerCard key={p.id} p={p} i={i} />)}
-            </div>
+            <>
+              <div className="pl-grid">
+                {gridItems.slice(0, shown).map((p, i) => <PlayerCard key={p.id} p={p} i={i % PAGE} />)}
+              </div>
+              {gridItems.length > shown && (
+                <div style={{ display: 'flex', justifyContent: 'center', marginTop: 24 }}>
+                  <button type="button" className="pl-more" onClick={() => setShown(n => n + PAGE)}>
+                    نمایش بیشتر · {faDigits(gridItems.length - shown)} بازیکنِ دیگر
+                  </button>
+                </div>
+              )}
+            </>
           )}
         </section>
       </main>

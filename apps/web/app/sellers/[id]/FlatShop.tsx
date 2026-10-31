@@ -7,6 +7,7 @@ import { useState, useMemo, useRef, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter, useParams } from 'next/navigation'
 import { toFa, faNum, MONO, toggleSet, Icon, LQ, LQ_NEUTRAL, LQ_FELT_ON } from './shared'
+import { smsLink } from '../../../lib/phone-wa'
 import { fetchProductsBySeller, type ShopProduct } from '../../shop/products'
 import ClubStoryModal from '../../../components/ClubStoryModal'
 /* همان تایپی که پنل فروشگاه می‌نویسد — نسخه‌ی محلی سوم نمی‌سازیم */
@@ -25,7 +26,6 @@ import { compressImage } from '../../../lib/seller-store'
 import { ask } from '../../../lib/ui/dialogs'
 import ProfileHero from '../../../components/profile/ProfileHero'
 import { telPrefix, provinceOfCity } from '../../../lib/iran-geo'
-import { getMockSeller } from '../../../lib/sellers-data'
 import { MARKET_CATEGORIES } from '../../../lib/market/categories'
 import ProductTitle from '../../../components/market/ProductTitle'
 import { CardMeta, CardPrice } from '../../../components/market/CardFacts'
@@ -74,28 +74,25 @@ interface Product {
 
 const DEFAULT_SLUG = '1'
 
-/* پیش‌فرض‌ها — تا وقتی صاحب فروشگاه در /dashboard/seller چیزی ذخیره نکرده،
-   صفحه با همین‌ها نمایش داده می‌شود. هر فیلد ذخیره‌شده جای همتای خودش را می‌گیرد. */
+/* ── پیش‌فرض‌ها خالی‌اند (آبانِ ۱۴۰۵) ──
+   تا امروز این‌جا فروشگاهِ ساختگیِ «فروشگاه تجهیزات بیلیارد بابی» بود با
+   تلفن، نشانیِ ولیعصر، واتساپ، اینستاگرام و امتیازِ ۴٫۸ از ۳۱۲ نظرِ ساختگی.
+   دو اثر داشت: هنگامِ بارگذاری همان فروشگاه لحظه‌ای دیده می‌شد، و هر فیلدی
+   که فروشگاهِ *واقعی* پر نکرده بود با مقدارِ ساختگی پر می‌شد. حالا فیلدِ
+   خالی خالی می‌ماند و بخشش در صفحه نمایش داده نمی‌شود. */
 const STORE = {
-  id: DEFAULT_SLUG, brand: 'پروکیو', title: 'فروشگاه تجهیزات بیلیارد بابی', logoText: 'پک',
-  province: 'تهران', city: 'تهران',
-  desc: 'عرضه‌ی مستقیم چوب، میز، توپ و لوازم جانبی حرفه‌ای',
-  contactPhone: '66554433',
-  /* لوگوی آپلودشده‌ی فروشگاه؛ تا وقتی null است آیکون پیش‌فرض نشان داده می‌شود */
+  id: DEFAULT_SLUG, brand: '', title: '', logoText: '',
+  province: '', city: '',
+  desc: '',
+  contactPhone: '',
   logo: null as string | null,
   banners: [] as string[],
   brands: [] as string[],
   aboutImages: [] as string[],
-  /* ⚠️ `false` عمدی است. تا امروز `true` بود و چون `store` با
-     `...STORE` ساخته می‌شود، **هر** فروشگاهی تیک آبی می‌گرفت —
-     حتی آن‌که ادمین تأییدش نکرده بود. تیک از `profile.verified`
-     می‌آید و بس. */
-  verified: false, rating: 4.8, reviews: 312, memberSince: 1402,
-  whatsapp: '989121234567', phones: ['021-88221100', '0912-123-4567'], instagram: 'procue.ir',
-  address: 'تهران، خیابان ولیعصر، بالاتر از پارک ملت، پلاک ۴۵',
-  hours: 'شنبه تا پنج‌شنبه، ۹ تا ۲۰',
-  shipping: 'تحویل حضوری هم در فروشگاه امکان‌پذیر است',
-
+  verified: false,
+  whatsapp: '', phones: [] as string[], instagram: '',
+  address: '',
+  hours: '',
 }
 
 /* محصولات یک فروشنده (به شکل کارت) — بر اساس id همان فروشگاه */
@@ -263,7 +260,7 @@ export default function FlatShop() {
          مسیر استوری روی ردیف‌هایی که آن را داخل data ندارند خالی
          می‌ماند و همان ناهماهنگی قبلی برعکس تکرار می‌شود. */
       if (p) setProfile({ ...p.data, slug: p.slug, ownerId: p.ownerId, verified: p.verified } as SellerProfile)
-      else if (!getSellerProfile(sellerId) && !getMockSeller(sellerId)) setMissing(true)
+      else if (!getSellerProfile(sellerId)) setMissing(true)
     })
   }, [sellerId])
 
@@ -284,19 +281,7 @@ export default function FlatShop() {
 
   /* فقط فیلدهای پرشده جای پیش‌فرض را می‌گیرند — یک فیلد خالی نباید صفحه را خالی کند */
   const store = useMemo(() => {
-    if (!profile) {
-      /* پروفایل واقعی نیست ⇒ اگر این id یکی از فروشگاه‌های نمونه است، اطلاعات همان را نشان بده
-         (نه پیش‌فرض «بابی»). این باعث می‌شود هر کارت، فروشگاه خودش را باز کند. */
-      const m = getMockSeller(sellerId)
-      if (m) return {
-        ...STORE, id: sellerId,
-        title: m.name, brand: m.name,
-        province: provinceOfCity(m.city), city: m.city,
-        desc: m.description, contactPhone: m.phone,
-        brands: m.brands, banners: [m.bannerImage], verified: m.verified,
-      }
-      return { ...STORE, id: sellerId }
-    }
+    if (!profile) return { ...STORE, id: sellerId }
     const pick = (v: string | undefined, fallback: string) => (v && v.trim() ? v : fallback)
     const phones = profile.phones.filter(p => p.trim())
     return {
@@ -326,6 +311,9 @@ export default function FlatShop() {
       phones:       phones.length ? phones : STORE.phones,
     }
   }, [profile, sellerId])
+
+  /* پیامک: اولین شماره‌ی موبایلِ فروشگاه (تلفن‌ها، تماس، بعد شماره‌ی واتساپِ قدیمی) */
+  const smsHref = [...store.phones, store.contactPhone, store.whatsapp].map(p => smsLink(p)).find(Boolean) ?? ''
 
   /* شماره‌ی تماس با کد شهر (استان) — مثلا ۰۲۱-۶۶۵۵۴۴۳۳ */
   const areaCode  = telPrefix(store.province)
@@ -409,6 +397,27 @@ export default function FlatShop() {
   const goToPage = (n: number) => {
     setPage(n)
     requestAnimationFrame(() => gridRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }))
+  }
+
+  /* هنوز نه پروفایل آمده نه «پیدا نشد» — اسکلت، نه فروشگاهِ خالی/پیش‌فرض */
+  if (!profile && !missing) {
+    return (
+      <div dir="rtl" className="shop-shell min-h-screen px-4 pt-6" aria-busy="true" aria-label="در حال بارگذاری فروشگاه">
+        <div className="mx-auto max-w-[1180px] animate-pulse">
+          <div className="h-40 rounded-2xl bg-[#ECE8DF] sm:h-56" />
+          <div className="mt-4 flex items-center gap-3">
+            <div className="h-16 w-16 rounded-2xl bg-[#ECE8DF]" />
+            <div className="flex-1 space-y-2">
+              <div className="h-4 w-1/3 rounded bg-[#ECE8DF]" />
+              <div className="h-3 w-1/4 rounded bg-[#ECE8DF]" />
+            </div>
+          </div>
+          <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
+            {[0, 1, 2, 3].map(i => <div key={i} className="h-48 rounded-xl bg-[#ECE8DF]" />)}
+          </div>
+        </div>
+      </div>
+    )
   }
 
   if (missing) {
@@ -812,6 +821,7 @@ export default function FlatShop() {
             <div>
               <h4 className="mb-2 text-[10.5px] font-bold tracking-[0.08em] text-[#8F6531] sm:mb-4">راه‌های ارتباطی</h4>
               <ul className="space-y-1.5 text-[13px] text-[#5B564B] sm:space-y-3">
+                {store.phones.length > 0 && (
                 <li className="flex flex-wrap items-center gap-x-5 gap-y-1.5">
                   {store.phones.map(ph => (
                     <a key={ph} href={`tel:${ph.replace(/-/g, '')}`} className={`flex items-center gap-2 py-0.5 transition-colors hover:text-[#14532D] ${MONO}`}>
@@ -819,24 +829,35 @@ export default function FlatShop() {
                     </a>
                   ))}
                 </li>
+                )}
+                {store.hours && (
                 <li className="flex items-center gap-2.5 py-0.5">
                   <span className="text-[#14532D]">{Icon.clock}</span>{store.hours}
                 </li>
+                )}
                 {/* آیکون‌های شبکه اجتماعی — مثل فوتر اصلی سایت (مربع گرد خنثی، هاور طلایی) */}
+                {/* پیامک جای واتساپ (فیلتر است) — به اولین موبایلِ فروشگاه */}
+                {(smsHref || store.instagram) && (
                 <li className="flex items-center gap-2.5 pt-1.5 sm:pt-3">
-                  <a href={`https://wa.me/${store.whatsapp}`} target="_blank" rel="noopener noreferrer" aria-label="واتساپ"
+                  {smsHref && (
+                  <a href={smsHref} aria-label="پیامک به فروشگاه"
                     className="flex h-10 w-10 items-center justify-center rounded-[11px] border border-[#E7E2D6] bg-[rgba(26,25,23,0.05)] text-[#6F6A5C] transition-all duration-200 hover:-translate-y-0.5 hover:border-[#C7A66A]/45 hover:bg-[#C7A66A]/[0.12] hover:text-[#C7A66A]">
-                    {Icon.wa}
+                    {Icon.sms}
                   </a>
+                  )}
+                  {store.instagram && (
                   <a href={`https://instagram.com/${store.instagram}`} target="_blank" rel="noopener noreferrer" aria-label="اینستاگرام"
                     className="flex h-10 w-10 items-center justify-center rounded-[11px] border border-[#E7E2D6] bg-[rgba(26,25,23,0.05)] text-[#6F6A5C] transition-all duration-200 hover:-translate-y-0.5 hover:border-[#C7A66A]/45 hover:bg-[#C7A66A]/[0.12] hover:text-[#C7A66A]">
                     {Icon.insta}
                   </a>
+                  )}
                 </li>
+                )}
               </ul>
             </div>
 
-            {/* موقعیت فروشگاه */}
+            {/* موقعیت فروشگاه — فقط وقتی نشانی ثبت شده */}
+            {store.address && (
             <div>
               <h4 className="mb-2 text-[10.5px] font-bold tracking-[0.08em] text-[#8F6531] sm:mb-4">موقعیت فروشگاه</h4>
               <p className="mb-1.5 flex items-start gap-2 text-[13px] leading-relaxed text-[#5B564B] sm:mb-3">
@@ -863,6 +884,7 @@ export default function FlatShop() {
                 </span>
               </a>
             </div>
+            )}
           </div>
 
           {/* نوار پایین */}

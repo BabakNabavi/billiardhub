@@ -133,7 +133,7 @@ export default function TechnicalServicesPage() {
       }
       if (catTitles && !t.services.some(s => catTitles.has(s))) return false
       /* همان موتورِ جست‌وجوی سراسری (lib/search/filter) */
-      if (q && !hit(t.name, t.title, t.club, ...t.services)) return false
+      if (q && !hit(t.name, t.person, t.title, t.club, ...t.services)) return false
       return true
     })
   }, [ALL, query, category, filters, ratings])

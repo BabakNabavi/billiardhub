@@ -55,7 +55,10 @@ export interface TechAlbumLegacy {
 
 export interface Technician {
   id: string
+  /** نامِ نمایشی — برند/تیم اگر ثبت شده، وگرنه نامِ شخص */
   name: string
+  /** نامِ شخص وقتی `name` برند است؛ جای «خدمات فنی» در کارت و هیرو */
+  person?: string
   /** عکس پروفایل (اختیاری) — نبودش ⇒ مونوگرام لوکس */
   photo?: string
   /** عنوان تخصصی — زیر نام */

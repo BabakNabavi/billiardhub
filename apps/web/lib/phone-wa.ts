@@ -60,3 +60,16 @@ export function waLink(raw: unknown, text?: string): string {
   const t = (text ?? '').trim()
   return `https://wa.me/${n}${t ? `?text=${encodeURIComponent(t)}` : ''}`
 }
+
+/**
+ * پیامکِ مستقیم به موبایل — جایگزینِ واتساپ (در ایران فیلتر است؛ خواستِ
+ * مالک، آبانِ ۱۴۰۵). فقط موبایل (`09…`): پیامک به خطِ ثابت نمی‌رسد.
+ * `?&body=` عمدی است: iOS قدیم `&body` و اندروید `?body` می‌خواند و این
+ * شکل در هر دو کار می‌کند. شماره نامعتبر ⟵ `''` و دکمه ساخته نمی‌شود.
+ */
+export function smsLink(raw: unknown, text?: string): string {
+  const n = normalizePhone(raw)
+  if (!n) return ''
+  const t = (text ?? '').trim()
+  return `sms:${n}${t ? `?&body=${encodeURIComponent(t)}` : ''}`
+}

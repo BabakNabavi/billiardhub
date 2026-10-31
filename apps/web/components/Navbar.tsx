@@ -457,8 +457,10 @@ export default function Navbar() {
             <div style={{ position: 'relative', width: '40px', height: '40px', borderRadius: '12px', overflow: 'hidden', flexShrink: 0,
               boxShadow: isLight ? 'none' : '0 1px 2px rgba(28,27,23,0.12), 0 4px 9px rgb(var(--c-ink) / 0.05)' }}>
                 <img loading="eager" decoding="async"
-                  src={isLight ? '/images/Logo/bh-mark-256-v12.webp' : '/images/Logo/bh-nav-256-v12.webp'}
-                  alt="" style={{ width: '100%', height: '100%', objectFit: isLight ? 'contain' : 'cover' }} />
+                  src={isLight ? '/images/Logo/bh-mark-256-v12.webp' : '/images/Logo/bh-nav-256-v12b.webp'}
+                  /* حروف در هر دو حالت ~۳۱ پیکسل: مارک ۸۸٪ با ۲ پیکسل حاشیه، کاشی ۷۸٪ —
+                     پیش‌تر کاشی ۵۸٪ بود و با اسکرول لوگو کوچک‌تر می‌شد */
+                  alt="" style={{ width: '100%', height: '100%', objectFit: isLight ? 'contain' : 'cover', padding: isLight ? 2 : 0, boxSizing: 'border-box' }} />
                 {!isLight && (
                   <span aria-hidden style={{ position: 'absolute', inset: 0, borderRadius: '12px', pointerEvents: 'none',
                     boxShadow: 'inset 0 1px 1px rgba(255,255,255,0.26), inset 0 -1px 2px rgba(0,0,0,0.18)' }} />

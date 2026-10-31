@@ -40,6 +40,7 @@ export function profileHit(r: ProfileSearchRow): { hit: SearchHit; hay: string }
   const title =
     r.kind === 'coach' || r.kind === 'referee' ? join(r.fn, r.ln) || join(r.fnEn, r.lnEn)
     : r.kind === 'seller' ? (r.title || r.brand || '')
+    : r.kind === 'technician' ? (r.brand || r.name || '')
     : (r.name || r.title || r.nameEn || '')
   if (!title) return null
   return {

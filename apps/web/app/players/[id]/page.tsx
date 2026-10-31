@@ -28,6 +28,7 @@ import { ask, notify } from '../../../lib/ui/dialogs'
 import { useProfileImageViewer } from '@/components/ProfileImageViewer'
 import { useProfileVideoViewer } from '@/components/profile/ProfileVideoViewer'
 import ProfileGallery from '@/components/profile/ProfileGallery'
+import { CopyAddress } from '@/components/profile/CopyAddress'
 import { uploadFile } from '../../../lib/supabase'
 import { videoMeta, formatDuration } from '../../../lib/video-thumb'
 import '@/components/profile/profile-page.css'
@@ -411,6 +412,8 @@ export default function PlayerProfilePage() {
             </h1>
 
             {latin && <div className="ath-lat" dir="ltr">{latin}</div>}
+            {/* نشانیِ اختصاصی — مثلِ هدرِ فروشگاه، دیدنی و کپی‌شدنی (خواستِ مالک) */}
+            <div style={{ marginTop: 12 }}><CopyAddress path={`/players/${id}`} codeId="ath-url" /></div>
           </div>
         </div>
       </header>
