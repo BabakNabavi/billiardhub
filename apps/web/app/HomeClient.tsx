@@ -30,9 +30,8 @@ const BannerSlider = dynamic(() => import('../components/home/BannerSlider'), { 
 const BANNER_SLIDER_HEIGHT = 320;
 import {
   Search, ChevronDown, ArrowLeft, ArrowRight,
-  MapPin, Star, Heart, Trophy, Users,
-  ShoppingBag, Building2, Wrench, GraduationCap,
-  Eye, X, Calendar,
+  MapPin, Star, Heart,
+  Eye, X,
   Hammer, Scissors, Settings, Truck, Radio, Scale, Play, Clapperboard,
 } from 'lucide-react';
 import AdSlot, { usePlacementState, type EntitySnapshot, type PlacementKey, type PlacementState } from '../components/ads/AdSlot';
@@ -222,32 +221,6 @@ const IMG = {
   // Manufactures
   mfr2: '/images/manufactures/IMG_0966.png',
 };
-
-/* ═══════════════════════════════════════════════════════════════
-   HERO SLIDES — all 5 wallpapers, each with an accent colour
-═══════════════════════════════════════════════════════════════ */
-const HERO_SLIDES = [
-  { bg: '/images/hero/1.webp',   accent: GRN,  label: 'باشگاه‌ها' },
-  /* اسلاید دوم عوض شد و پسوندش هم از png به jpg تغییر کرد؛ مسیر قبلی
-     دیگر وجود نداشت و ۴۰۴ می‌داد. */
-  /* ?v=2 — تصویر با همان نام عوض شد. چون تصاویر یک هفته کش می‌شوند،
-     بدون این پارامتر مرورگر بازدیدکننده‌های قبلی تا هفته‌ی بعد نسخه‌ی
-     قدیمی را نشان می‌داد. هر بار که این فایل عوض شد، عدد را جلو ببرید. */
-  { bg: '/images/hero/2.webp?v=2', accent: GOLD, label: 'تجهیزات'   },
-  { bg: '/images/hero/3.webp',   accent: BLU,  label: 'مربیان'    },
-  /* ?v=2 — فایل هم‌نام عوض شده؛ بدون ورژن، کش CDN/مرورگر عکس قبلی را می‌داد */
-  { bg: '/images/hero/4.webp', accent: BRN, label: 'رقابت' },
-];
-
-const FEATURE_CARDS = [
-  { Icon: Calendar,    title: 'رزرو میز',          caption: 'جستجو و رزرو آنلاین میز در بهترین باشگاه‌ها',          href: '/clubs',         clr: '#4A9EFF', rgb: '74,158,255'   },
-  { Icon: Trophy,      title: 'مسابقات',            caption: 'شرکت در مسابقات و مشاهده نتایج زنده',                 href: '/tournaments',   clr: '#30C55A', rgb: '48,197,90'    },
-  { Icon: ShoppingBag, title: 'خرید و فروش',        caption: 'خرید و فروش انواع تجهیزات بیلیارد',                   href: '/shop',          clr: '#B97BFF', rgb: '185,123,255'  },
-  { Icon: Users,       title: 'جامعه بیلیارد',      caption: 'ارتباط با همه‌ی صنوف بیلیاردی و اشتراک تجربه‌ها',   href: '/players',       clr: '#FF6B9D', rgb: '255,107,157'  },
-  { Icon: Building2,   title: 'تولیدکنندگان',       caption: 'معرفی بهترین تولیدکنندگان تجهیزات',                   href: '/manufacturers', clr: '#06b6d4', rgb: '6,182,212'    },
-  { Icon: Wrench,         title: 'خدمات فنی',    caption: 'خدمات نصب و تعمیر تجهیزات بیلیارد',                      href: '/services', clr: 'var(--brand)', rgb: '199,166,106' },
-  { Icon: GraduationCap, title: 'آموزش',         caption: 'آموزش حرفه‌ای با مربیانِ ثبت‌شده‌ی بیلیارد هاب',            href: '/coaches',  clr: '#F472B6', rgb: '244,114,182' },
-];
 
 /* ═══════════════════════════════════════════════════════════════
    DISCOVER TABS + FILTER DATA
@@ -767,7 +740,7 @@ const MEDIA_MINIS = MEDIA_FEAT
    PAGE
 ═══════════════════════════════════════════════════════════════ */
 
-export default function HomeClient({ initialPlacements, initialFeatured, servicesSlot, exploreSlot }: {
+export default function HomeClient({ initialPlacements, initialFeatured, servicesSlot, exploreSlot, heroSlot }: {
   initialPlacements?: Partial<Record<PlacementKey, PlacementState>>
   /* باشگاه/محصول/فروشگاه واقعی، خوانده‌شده روی سرور — تا کارت‌ها در
      HTML اولیه باشند و صفحه هنگام لود نپرد. */
@@ -775,11 +748,11 @@ export default function HomeClient({ initialPlacements, initialFeatured, service
   /* Server Component که این‌جا فقط رندر می‌شود — هیچ JSای همراهش نیست */
   servicesSlot?: React.ReactNode
   exploreSlot?: React.ReactNode
+  /* هیرو — Server Component (components/home/hero)، بی‌جاوااسکریپت جز کجیِ کارت‌ها */
+  heroSlot?: React.ReactNode
 }) {
-  const [slide, setSlide]     = useState(0);
   /* `scrollY` دیگر state نیست — دیدن آن در state یعنی هر فریم
-     اسکرول یک رندر کامل. جزئیات کنار همان useEffect. */
-  const [playing, setPlaying] = useState(true);
+     اسکرول یک رندر کامل. */
   const [isMobile, setIsMobile] = useState(false);
 
   /* ── چرخش‌های خودکار ──
@@ -792,29 +765,7 @@ export default function HomeClient({ initialPlacements, initialFeatured, service
      نمی‌بیند. بالای همه‌ی افکت‌ها اعلام می‌شود چون چند تای آن‌ها
      پیش از این نقطه در بدنه‌ی کامپوننت‌اند. */
   const spin = useDeferredStart();
-  const rafRef   = useRef<number>(0);
-  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const videoRef = useRef<HTMLVideoElement>(null);
 
-  /* منبع ویدیو بعد از آرام‌شدن مرورگر به DOM اضافه می‌شود، ولی
-     افزودن `<source>` به یک `<video>` که یک‌بار رندر شده هیچ
-     بارگذاری‌ای شروع نمی‌کند — مرورگر فقط موقع ساخت عنصر منبع‌ها را
-     می‌خواند. بدون این فراخوانی، ویدیو هیچ‌وقت پخش نمی‌شد. */
-  useEffect(() => {
-    if (!spin) return;
-    const v = videoRef.current;
-    if (!v || v.currentSrc) return;
-    v.load();
-    /* بعضی مرورگرها پس از load دوباره خودکار پخش نمی‌کنند */
-    void v.play().catch(() => { /* سیاست پخش خودکار — پوستر می‌ماند */ });
-  }, [spin]);
-
-  const next = useCallback(() => setSlide(s => (s + 1) % HERO_SLIDES.length), []);
-  const prev = useCallback(() => setSlide(s => (s - 1 + HERO_SLIDES.length) % HERO_SLIDES.length), []);
-
-  const sliderRef      = useRef<HTMLDivElement>(null);
-  const [activeCard, setActiveCard] = useState(0);
-  const activeCardRef  = useRef(0);
 
   const clubsSliderRef = useRef<HTMLDivElement>(null);
   const clubsDeskRef = useRef<HTMLDivElement>(null);
@@ -1121,75 +1072,6 @@ export default function HomeClient({ initialPlacements, initialFeatured, service
      نه تایمری هست نه رندری. */
 
 
-  /* تشخیص کارت وسط با rAF (به‌جای رویداد اسکرول) — چون در دسکتاپ ترک با
-     انیمیشن CSS می‌چرخد و اسکرول رخ نمی‌دهد. کارت نزدیک به مرکز نرم بزرگ می‌شود
-     و activeCard همیشه اندیس منطقی ۰..۶ است (محتوا برای حلقه ×۲ رندر می‌شود). */
-  useEffect(() => {
-    const slider = sliderRef.current;
-    if (!slider) return;
-
-    /* این حلقه بزرگ‌ترین هزینه‌ی نخ اصلی صفحه بود.
-
-       نسخه‌ی قبلی بی‌قیدوشرط هر فریم اجرا می‌شد و برای هر کارت
-       `getBoundingClientRect()` می‌خواند — یعنی Forced Reflow در هر
-       فریم، برای همیشه، حتی وقتی سکشن اصلا روی صفحه نبود یا کاربر
-       تب دیگری باز کرده بود. در Lighthouse این می‌شد
-       Style & Layout ≈ ۱۰ ثانیه.
-
-       سه شرط اضافه شد:
-         • فقط وقتی سکشن در دید است (IntersectionObserver)
-         • فقط وقتی تب فعال است (visibilitychange)
-         • اگر کاربر «کاهش حرکت» خواسته، اصلا اجرا نمی‌شود
-
-       نوشتن transform هم فقط وقتی مقدار واقعا عوض شده انجام می‌شود؛
-       نوشتن تکراری همان مقدار، لایه را بی‌دلیل باطل می‌کرد. */
-    const reduced = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
-    if (reduced) return;
-
-    let raf = 0;
-    let visible = false;
-    const lastScale = new WeakMap<HTMLElement, string>();
-
-    const loop = () => {
-      if (!visible || document.hidden) { raf = 0; return; }   // حلقه می‌ایستد، نه اینکه بی‌کار بچرخد
-      const rect = slider.getBoundingClientRect();
-      const centerX = rect.left + rect.width / 2;
-      const cards = slider.querySelectorAll<HTMLElement>('.feat-card');
-      let minDist = Infinity, newActive = 0;
-      cards.forEach((card, i) => {
-        const r = card.getBoundingClientRect();
-        if (r.width === 0) return;                       // کپی مخفی موبایل
-        const dist = Math.abs(r.left + r.width / 2 - centerX);
-        const t = Math.max(0, 1 - dist / (rect.width * 0.55));
-        const next = `scale(${(1 + t * 0.15).toFixed(3)})`;
-        if (lastScale.get(card) !== next) { card.style.transform = next; lastScale.set(card, next); }
-        if (dist < minDist) { minDist = dist; newActive = i; }
-      });
-      const feat = newActive % FEATURE_CARDS.length;
-      if (feat !== activeCardRef.current) { activeCardRef.current = feat; setActiveCard(feat); }
-      raf = requestAnimationFrame(loop);
-    };
-
-    const start = () => { if (!raf && visible && !document.hidden) raf = requestAnimationFrame(loop); };
-    const stop = () => { if (raf) { cancelAnimationFrame(raf); raf = 0; } };
-
-    const io = new IntersectionObserver(
-      ([e]) => {
-        visible = !!e?.isIntersecting;
-        /* همین کلاس، انیمیشن CSS مارکی و `will-change` را هم
-           روشن/خاموش می‌کند (پایین‌تر در استایل). */
-        slider.classList.toggle('in-view', visible);
-        visible ? start() : stop();
-      },
-      { threshold: 0 },
-    );
-    io.observe(slider);
-
-    const onVis = () => (document.hidden ? stop() : start());
-    document.addEventListener('visibilitychange', onVis);
-
-    return () => { io.disconnect(); document.removeEventListener('visibilitychange', onVis); stop(); };
-  }, []);
 
   const clubsRafRef = useRef<number>(0);
   const handleClubsScroll = useCallback(() => {
@@ -1269,66 +1151,6 @@ export default function HomeClient({ initialPlacements, initialFeatured, service
     return () => slider.removeEventListener('scroll', handleMktScroll);
   }, [handleMktScroll]);
 
-  /* ── چرا اسکرول از React رد نمی‌شود ──
-     پیش‌تر این‌جا `setScrollY(window.scrollY)` بود. یعنی هر فریم
-     اسکرول یک state تازه می‌شد و **کل این کامپوننت دوهزارخطی** از
-     نو رندر می‌گرفت. rAF جلوی تعداد فراخوانی را می‌گرفت ولی نه
-     هزینه‌ی هر فراخوانی را — و همان هزینه از بودجه‌ی ۱۶ میلی‌ثانیه‌ای
-     هر فریم بیشتر می‌شد. نتیجه‌اش همان لرزش اسکرول بود.
-
-     مقدارهایی که به اسکرول وابسته‌اند همه استایل محض‌اند (شفافیت و
-     جابه‌جایی). این‌ها را می‌شود مستقیم روی گره نوشت؛ آن‌وقت هزینه‌ی
-     هر فریم دو نوشتن استایل است، نه یک آشتی‌دهی کامل درخت. */
-  const heroVideoRef = useRef<HTMLVideoElement | null>(null);
-  const heroContentRef = useRef<HTMLDivElement | null>(null);
-
-  useEffect(() => {
-    const apply = () => {
-      const y = window.scrollY;
-      const v = heroVideoRef.current;
-      const c = heroContentRef.current;
-      if (v) {
-        v.style.transform = `scale(${1 + y * 0.00013})`;
-        /* `will-change` فقط در همان بازه‌ای که واقعا حرکت هست روشن
-           می‌ماند؛ دائمی‌بودنش یک لایه‌ی کامپوزیت همیشگی می‌سازد. */
-        v.style.willChange = y > 0 && y < 700 ? 'transform' : 'auto';
-      }
-      const fade = String(Math.max(0, 1 - y / 700));
-      if (c) {
-        c.style.opacity = fade;
-        c.style.transform = `translateY(${y * 0.055}px)`;
-      }
-      /* تصویرهای پس‌زمینه و فلش‌ها هم به همان اسکرول وابسته‌اند.
-         با کوئری‌سلکتور نوشته می‌شوند نه با ref، چون چندتایند و
-         تعدادشان با اسلایدها عوض می‌شود. */
-      const root = c?.parentElement ?? document;
-      root.querySelectorAll<HTMLElement>('.hero-parallax')
-        .forEach(el => { el.style.transform = `scale(${(1 + y * 0.00013) * 1.02})` });
-    };
-
-    const fn = () => {
-      cancelAnimationFrame(rafRef.current);
-      rafRef.current = requestAnimationFrame(apply);
-    };
-    apply();
-    window.addEventListener('scroll', fn, { passive: true });
-    return () => { window.removeEventListener('scroll', fn); cancelAnimationFrame(rafRef.current); };
-  }, []);
-
-
-/* چرخش هیرو هم منتظر آرام‌شدن مرورگر می‌ماند. اسلاید اول همان
-   لحظه دیده می‌شود؛ فقط *رفتن به بعدی* عقب می‌افتد. */
-useEffect(() => {
-    if (!spin) return;
-    if (!playing) { if (timerRef.current) clearInterval(timerRef.current); return; }
-    if (prefersReducedMotion()) return;
-    timerRef.current = setInterval(next, 7000);
-    return () => { if (timerRef.current) clearInterval(timerRef.current); };
-  }, [spin, playing, next]);
-
-  /* heroO و heroS حذف شدند — مقدارهایشان مستقیم در rAF روی گره‌ها
-     نوشته می‌شوند تا اسکرول رندر دوباره‌ی React نخواهد. */
-  const sl    = HERO_SLIDES[slide]!;
 
   return (
     <>
@@ -1342,7 +1164,6 @@ useEffect(() => {
             • دو `preconnect` به دامنه‌ای که هرگز استفاده نمی‌شد، فقط
               اتصال بی‌مصرف باز می‌کرد */}
       <style>{`
-        :root { --hero-bottom-gap: 5px; }
         /* ── چرا blur از این کی‌فریم برداشته شد ──
            حالت شروع filter:blur(5px) داشت. یعنی در تمام مدت ورود،
            تیتر و زیرنویس مه‌آلود بودند — و چون تایم‌لاین کند بود، کاربر
@@ -1357,29 +1178,9 @@ useEffect(() => {
         @keyframes fadeTagIn   { from{opacity:0;transform:translateY(-5px);}to{opacity:1;transform:none;} }
         @keyframes pulse2      { 0%,100%{opacity:1;}50%{opacity:0.20;} }
         @keyframes slideBar    { from{width:0;}to{width:100%;} }
-        @keyframes floatOrb    { 0%,100%{transform:translate(0,0);}38%{transform:translate(22px,-16px);}70%{transform:translate(-16px,12px);} }
         @keyframes dropUp      { from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;} }
         @keyframes gentlePulse { 0%,100%{opacity:1;}50%{opacity:0.25;} }
 
-        /* Hero entrance — runs ONCE on mount. No key prop = no replay on slide change.
-
-           ── چرا تایم‌لاین کوتاه شد ──
-           نسخه‌ی قبلی تا ۱٫۷ ثانیه طول می‌کشید (hf. = ۰٫۹۰ تأخیر +
-           ۰٫۸ اجرا). واژه‌ی both یعنی هر عنصر در طول تأخیرش کاملا نامرئی
-           است، پس کاربر روی اتصال سریع هم صفحه‌ای می‌دید که تکه‌تکه و
-           کند جا می‌افتاد — شبیه کندی سایت، در حالی که سرور در ۰٫۲
-           ثانیه جواب داده بود.
-
-           انیمیشنی که بیش از نیم‌ثانیه طول بکشد دیگر «ورود» خوانده
-           نمی‌شود؛ «تأخیر» خوانده می‌شود. حالا کل زنجیره زیر
-           ۰٫۷ ثانیه تمام می‌شود و پلکان بینشان هم تنگ‌تر شده تا
-           به‌جای شش موج جدا، یک موج دیده شود. */
-        .ha { animation:fadeUp 0.52s cubic-bezier(0.22,1,0.36,1) 0.00s both; }
-        .hb { animation:fadeUp 0.52s cubic-bezier(0.22,1,0.36,1) 0.04s both; }
-        .hc { animation:fadeUp 0.48s cubic-bezier(0.22,1,0.36,1) 0.10s both; }
-        .hd { animation:fadeUp 0.46s cubic-bezier(0.22,1,0.36,1) 0.16s both; }
-        .he { animation:fadeUp 0.44s cubic-bezier(0.22,1,0.36,1) 0.22s both; }
-        .hf { animation:fadeUp 0.42s cubic-bezier(0.22,1,0.36,1) 0.28s both; }
 
         /* ══ LQ (Liquid Quality) Buttons — pill style ══ */
         .btn-primary,.btn-green,.btn-outline,.btn-ghost-dark {
@@ -1437,9 +1238,6 @@ useEffect(() => {
         /* روی سکشن‌های تیره متن طلایی روشن‌تر تا خوانا بماند */
         .see-all-lq.on-dark { color:${GOLD}; border-color:var(--brand-line); }
 
-        /* ظرف محتوای هیرو کلیک را رد می‌کند (توضیحش کنار خودش)، ولی
-           هرچه داخلش است باید کلیک‌پذیر بماند. */
-        .hero-content > * { pointer-events: auto; }
 
         /* نشان سکشن بازار کمی بالاتر می‌نشیند؛ در موبایل ۱۰٪ کوچک‌تر */
         /* ── چرا content-visibility برداشته شد ──
@@ -1507,7 +1305,6 @@ useEffect(() => {
 
         .dp-tabs { grid-template-columns:repeat(4,1fr)!important; }
         .trust-strip { display:flex;gap:10px;flex-wrap:wrap;justify-content:center; }
-        .hero-arrows { position:absolute;bottom:36px;right:28px;display:flex;gap:6px;z-index:10; }
 
         /* ══ TABLET ≤1100px ══ */
         @media(max-width:1100px){
@@ -1531,24 +1328,11 @@ useEffect(() => {
 
         /* ══ MOBILE ≤600px ══ */
         @media(max-width:600px){
-          /* horizontal padding removed from hero-content; applied per-element below */
-          /* env(safe-area-inset-top): در PWA اپل نوبار/استوری پایین می‌آیند، محتوا هم باید بیاید */
-          .hero-content  { padding-top:calc(220px + env(safe-area-inset-top)) !important; padding-left:0 !important; padding-right:0 !important; padding-bottom:var(--hero-bottom-gap) !important; }
-          .hero-h1       { font-size:clamp(23px,7.2vw,34px) !important; margin-bottom:12px !important; padding:0 16px !important; width:100% !important; box-sizing:border-box !important; }
-          .hero-subtitle { padding:0 16px !important; width:100% !important; box-sizing:border-box !important; }
-          .hero-ctas     { flex-direction:row !important; flex-wrap:nowrap !important; justify-content:center !important; padding:0 16px !important; width:100% !important; box-sizing:border-box !important; }
-          .hero-cta-link { width:auto !important; }
-          .hero-desc    { display:none !important; }
-          .hero-sub     { display:none !important; }
-          .hero-eyebrow { display:none !important; }
-          .hero-actions { display:none !important; }
-          .hero-arrows  { display:none !important; }
           .trust-strip  { display:flex !important; flex-wrap:nowrap !important; gap:6px !important; }
           .trust-box    { margin-top:43px !important; width:100% !important; box-sizing:border-box !important; padding:0 16px !important; display:flex !important; justify-content:center !important; overflow:visible !important; }
           .trust-grid   { zoom:0.43 !important; }
           .trust-label  { font-size:9.9px !important; }
           .trust-sub    { font-size:8.1px !important; }
-          .feat-slider  { justify-content:flex-start !important; }
           .dp-tabs      { grid-template-columns:repeat(2,1fr) !important; }
           .dp-cta       { width:100% !important; }
           .comm-grid    { grid-template-columns:1fr 1fr !important; gap:12px !important; }
@@ -1559,25 +1343,14 @@ useEffect(() => {
            سقف از ۸۰۰ به ۹۰۰ رفت تا لپ‌تاپ‌های ۱۵ اینچ (ویوپورت ~۸۶۴) هم بگیرند */
         @media(max-height:900px) and (min-width:601px){
           .hero-stories-bar { zoom:0.90; }
-          /* کل بلوک کمی پایین‌تر (+۱۲px) */
-          .hero-content { padding-top:calc(clamp(177px,24.5vh,217px) + 60px + env(safe-area-inset-top)) !important; zoom:0.90; }
-          .hero-h1      { zoom:0.95; margin-bottom:16px !important; }
-          .hero-desc    { display:none !important; }
-        }
-        @media(max-height:680px) and (min-width:601px){
-          .hero-content { padding-top:calc(clamp(157px,26vh,188px) + 54px + env(safe-area-inset-top)) !important; zoom:0.90; }
-          .hero-sub     { display:none !important; }
         }
 
         /* ══ MOBILE — keep content just below stories bar ══ */
         @media(max-width:600px){
-          /* گوشی‌های معمولی جا دارند ⇒ محتوا کمی پایین‌تر */
-          .hero-content { padding-top:calc(252px + env(safe-area-inset-top)) !important; }
           .trust-strip  { margin-top:16px !important; }
         }
         /* گوشی‌های کوتاه (iPhone SE): جمع‌تر تا باکس اعتماد کامل در صفحه‌ی اول دیده شود */
         @media(max-width:600px) and (max-height:700px){
-          .hero-content { padding-top:calc(196px + env(safe-area-inset-top)) !important; }
           .trust-box    { margin-top:16px !important; }
         }
 
@@ -1585,38 +1358,6 @@ useEffect(() => {
         @media(max-width:400px){
           .comm-grid { grid-template-columns:1fr !important; }
         }
-        .feat-slider::-webkit-scrollbar { display: none; }
-        .feat-card { transition: transform 0.22s ease; transform-origin: center; position: relative; }
-        /* ── چرخش بی‌نهایت نرم کارت‌ها (فقط دسکتاپ) ──
-           مارکی transform: محتوا دوبار رندر می‌شود و ترک ۵۰٪ جابه‌جا می‌شود ⇒ حلقه‌ی بی‌درز.
-           gap صفر است و فاصله با margin-left هر کارت ساخته می‌شود تا نقطه‌ی ۵۰٪ دقیقا
-           هم‌ارز یک کپی کامل باشد (وگرنه هر دور یک پرش نیم‌gap دیده می‌شد). */
-        @keyframes heroLoop { from { transform: translateX(0); } to { transform: translateX(50%); } }
-        /* «باکس» کارت‌ها: ۷ کارت دائم داخل یک پنجره‌ی محدود می‌چرخند (دسکتاپ ~۶ کارت پیدا)
-           ⇒ چون پنجره از تعداد کارت‌ها کوچک‌تر است، هیچ کارت تکراری هم‌زمان دیده نمی‌شود.
-           لبه‌های باکس با ماسک محو می‌شوند تا ورود/خروج کارت‌ها نرم و شیک باشد. */
-        .feat-slider {
-          overflow:hidden !important; scroll-snap-type:none !important; justify-content:flex-start !important;
-          -webkit-mask-image: linear-gradient(to right, transparent 0, black 7%, black 93%, transparent 100%);
-          mask-image: linear-gradient(to right, transparent 0, black 7%, black 93%, transparent 100%);
-        }
-        /* «will-change: transform» دائمی نیست: یک لایه‌ی کامپوزیت را
-           برای همیشه زنده نگه می‌داشت حتی وقتی سکشن دیده نمی‌شد.
-           حالا فقط وقتی انیمیشن واقعا در جریان است اعمال می‌شود. */
-        .feat-track { display:flex; gap:0; width:max-content; align-items:stretch; animation: heroLoop 44s linear infinite; }
-        .feat-slider.in-view .feat-track { will-change: transform; }
-        /* خارج از دید، انیمیشن متوقف می‌شود — مرورگر برای اسلایدری که
-           کسی نمی‌بیند هر فریم کامپوزیت نمی‌کند. */
-        .feat-slider:not(.in-view) .feat-track { animation-play-state: paused; }
-        .feat-track .feat-card { margin-left:18px; }
-        .feat-slider:hover .feat-track, .feat-slider:active .feat-track { animation-play-state: paused; }
-        @media(min-width:901px){
-          .feat-slider { max-width:860px; margin:0 auto; }   /* ≈ ۶ کارت */
-        }
-        @media(max-width:900px){
-          .feat-track { animation-duration: 30s; }           /* موبایل هم همان چرخش نرم */
-        }
-        @media (prefers-reduced-motion: reduce){ .feat-track { animation:none !important; } }
         .clubs-mobile-slider { display:none; gap:10px; overflow-x:auto; scrollbar-width:none; padding:2px 18px 16px; scroll-snap-type:x proximity; }
         .clubs-mobile-slider::-webkit-scrollbar { display:none; }
         .club-mob-card { transform-origin:center; position:relative; }
@@ -1725,294 +1466,11 @@ useEffect(() => {
       `}</style>
 
       {/* ╔══════════════════════════════════════════════════════╗
-          ║  HERO — cinematic  video + wallpaper crossfade      ║
-          ╚══════════════════════════════════════════════════════╝ */}
-      {/* تصویر اسلاید اول روی خود ظرف می‌نشیند، نه فقط به‌عنوان
-          `poster` ویدیو. دلیلش پایین‌تر، کنار محوشدن ویدیو. */}
-      <div style={{
-        /* ── چرا svh و نه dvh ──
-           `dvh` یعنی «ارتفاع *پویا*ی کادر دید». در مرورگر موبایل
-           نوار نشانی هنگام اسکرول جمع و باز می‌شود و همان لحظه مقدار
-           dvh هم عوض می‌شود — یعنی **قد هیرو حین اسکرول تغییر
-           می‌کند**، و چون همه‌ی بخش‌های بعدی زیر آن‌اند، کل صفحه بالا
-           و پایین می‌پرد. همان لرزشی که دیده می‌شد.
-
-           `svh` ارتفاع کادر دید را در حالت *کوچک* می‌گیرد و ثابت
-           می‌ماند؛ نوار باز باشد یا بسته، عدد عوض نمی‌شود. */
-        position: 'relative', height: isMobile ? 'auto' : '100svh',
-        minHeight: isMobile ? '100svh' : '640px', overflow: 'hidden',
-        background: '#04020A',
-        backgroundImage: 'url(/images/hero/1.webp)',
-        backgroundSize: 'cover', backgroundPosition: 'center',
-      }}>
-
-        {/* ── Layer 1: video (continuous motion background) ──
-
-            سه هزینه‌ی این ویدیو اندازه‌گیری و کم شد:
-
-            ۱) `preload="auto"` کل ۱٫۴ مگابایت را پیش از هر چیز دیگری
-               دانلود می‌کرد و با تصویر هیرو (که LCP است) رقابت می‌کرد.
-               حالا `metadata` است: مرورگر خودش هنگام پخش می‌گیردش.
-            ۲) `poster` گذاشته شد تا تا آمدن ویدیو، همان تصویر سبک
-               WebP دیده شود — نه پس‌زمینه‌ی مشکی.
-            ۳) `willChange:'transform'` دائمی یک لایه‌ی کامپوزیت
-               تمام‌صفحه را همیشه زنده نگه می‌داشت. حالا فقط وقتی
-               اسکرول واقعا هیرو را تغییر می‌دهد اعمال می‌شود. */}
-        {/* ── چرا ویدیو محو می‌شود، نه اینکه یک‌باره بیاید ──
-            پوستر و اسلاید اول یک تصویرند، ولی فریم اول ویدیو صحنه‌ی
-            دیگری است. تا امروز لحظه‌ی آماده‌شدن ویدیو، آن تصویر ثابت
-            **یک‌باره** جایش را به ویدیو می‌داد — و همان پرشی بود که
-            دیده می‌شد.
-
-            حالا تصویر روی خود ظرف است و ویدیو از شفافیت صفر روی آن
-            محو می‌شود. عوض‌شدن همچنان همان لحظه است، ولی به‌جای پرش،
-            یک گذار نرم دیده می‌شود.
-
-            `poster` برداشته شد چون کارش را پس‌زمینه‌ی ظرف می‌کند؛
-            نگه‌داشتنش یعنی همان تصویر دو بار کشیده شود. */}
-        <video ref={el => { videoRef.current = el; heroVideoRef.current = el }}
-          autoPlay muted loop playsInline preload="metadata"
-          aria-hidden="true"
-          onPlaying={e => { e.currentTarget.style.opacity = '1' }}
-          style={{
-            position: 'absolute', inset: 0, width: '100%', height: '100%',
-            objectFit: 'cover', zIndex: 1,
-            /* فیلتر برداشته شد و جایش یک پرده‌ی تیره‌ی ثابت آمد
-               (لایه‌ی ۲٫۵). دو دلیل:
-
-               ۱) `filter` روی ویدیوی تمام‌صفحه یعنی مرورگر **هر فریم
-                  ویدیو** را دوباره فیلتر می‌کند. یک پرده‌ی رنگی ثابت
-                  فقط یک‌بار کامپوزیت می‌شود.
-
-               ۲) مهم‌تر: تا وقتی ویدیو یا پوستر نیامده بود، هیچ
-                  تیرگی‌ای وجود نداشت و متن سفید روی صحنه‌ی روشن
-                  ناخوانا می‌ماند — همان حالت یک‌ونیم ثانیه‌ای. پرده از
-                  فریم اول آن‌جاست، پس آن پنجره اصلا پیش نمی‌آید. */
-            opacity: 0, transition: 'opacity 0.9s ease',
-            /* مقدار اولیه؛ از این به بعد مستقیم روی گره نوشته می‌شود
-               تا اسکرول رندر دوباره‌ی React نخواهد. */
-            transform: 'scale(1)', transformOrigin: 'center',
-            willChange: 'auto',
-          }}>
-          {/* منبع ویدیو تا آرام‌شدن مرورگر گذاشته نمی‌شود.
-
-              `preload="metadata"` این‌جا کاری نمی‌کرد: `autoPlay` به
-              مرورگر می‌گوید پخش کن، و برای پخش باید همه‌اش را بگیرد.
-              اندازه‌گیری نشان داد کل فایل در همان پنجره‌ای می‌آمد که
-              مرورگر باید متن و تصویر LCP را می‌کشید.
-
-              پوستر همان تصویر اسلاید اول است و از قبل روی صفحه
-              نشسته، پس این یک ثانیه تأخیر چیزی را خالی نمی‌گذارد —
-              فقط ویدیو کمی دیرتر جان می‌گیرد. */}
-          {spin && <source src="/images/video/hero.mp4" type="video/mp4" />}
-        </video>
-
-        {/* ── Layer 2: wallpaper slides crossfading over video ── */}
-        {HERO_SLIDES.map((s, i) => (
-          <div key={i} style={{
-            position: 'absolute', inset: 0, zIndex: 2,
-            opacity: i === slide ? 0.56 : 0,
-            transition: 'opacity 3.6s cubic-bezier(0.33,0,0.15,1)',
-            pointerEvents: 'none',
-          }}>
-            {/* اسلاید اول LCP است ⇒ اولویت صریح.
-
-                بقیه تا آرام‌شدن مرورگر اصلا در DOM نمی‌آیند.
-
-                تا امروز این‌جا `loading="lazy"` بود با این توضیح که
-                «تا نوبتشان نرسد درخواست نمی‌شوند» — ولی این‌طور نبود.
-                هر چهار قاب `position:absolute; inset:0` هستند، یعنی از
-                نظر مرورگر داخل کادر دید. `opacity:0` عنصر را از کادر
-                دید بیرون نمی‌برد، پس lazy هیچ چیزی را عقب نمی‌انداخت و
-                هر چهار عکس در همان بارگذاری اول می‌آمدند — اندازه‌گیری
-                وزن صفحه دقیقا همین را نشان داد.
-
-                تنها چیزی که واقعا درخواست را عقب می‌اندازد، نبودن
-                خود عنصر است. سه اسلاید بعدی بعد از بی‌کارشدن مرورگر
-                سوار می‌شوند — خیلی زودتر از نخستین چرخش کاروسل، پس
-                محوشدن تصویرها هیچ فرقی نمی‌کند. */}
-            {(i === 0 || spin || i === slide) && (
-              <img src={s.bg} alt=""
-                loading={i === 0 ? 'eager' : 'lazy'}
-                fetchPriority={i === 0 ? 'high' : 'low'}
-                decoding="async"
-                className="hero-parallax"
-                /* روشنایی/اشباع/کنتراست برداشته شدند — کارشان را
-                   پرده‌ی لایه‌ی ۲٫۵ می‌کند. `blur` مانده چون بخشی از
-                   ظاهر است و روی یک تصویر ثابت فقط یک‌بار محاسبه
-                   می‌شود، برخلاف ویدیو که هر فریم بود. */
-                style={{ width: '100%', height: '100%', objectFit: 'cover',
-                  filter: 'blur(1.5px)',
-                  transform: 'scale(1.02)', transformOrigin: 'center' }}
-                onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
-            )}
-          </div>
-        ))}
-
-        {/* ── Layer 2.5: پرده‌ی تیره ──
-            جانشین `filter: brightness(...)` که روی ویدیو و تصویرها
-            بود. یک رنگ ثابت روی همه‌ی لایه‌های پس‌زمینه.
-
-            چرا این‌جا و نه در همان گرادیان‌های لایه‌ی ۳: آن‌ها عمدا
-            وسط کادر را شفاف می‌گذارند (بین ۲۶٪ و ۴۴٪ ارتفاع، و مرکز
-            بیضی) تا تصویر دیده شود. ولی تیتر هیرو دقیقا همان‌جاست —
-            یعنی خوانایی متن هیچ پشتوانه‌ای جز فیلتر ویدیو نداشت، و
-            تا آمدن ویدیو اصلا پشتوانه‌ای نبود.
-
-            رنگ نزدیک به همان `brightness(0.52)` قبلی است. اشباع و
-            کنتراست دقیقا بازسازی نمی‌شوند — ولی نتیجه یکدست‌تر است،
-            چون پیش‌تر ویدیو (۰٫۵۲) و تصویرها (۰٫۷۸) دو تیرگی متفاوت
-            داشتند و روی هم می‌افتادند. */}
-        <div style={{
-          position: 'absolute', inset: 0, zIndex: 2, pointerEvents: 'none',
-          background: 'rgba(4,2,10,0.5)',
-        }} />
-
-        {/* ── Layer 3: cinematic gradients ── */}
-        <div style={{ position: 'absolute', inset: 0, zIndex: 3, pointerEvents: 'none',
-          background: 'linear-gradient(to bottom,rgba(4,2,10,0.78) 0%,rgba(4,2,10,0) 26%,rgba(4,2,10,0) 44%,rgba(4,2,10,0.97) 100%)' }} />
-        <div style={{ position: 'absolute', inset: 0, zIndex: 3, pointerEvents: 'none',
-          background: 'radial-gradient(ellipse 90% 82% at 50% 40%,transparent 22%,rgba(4,2,10,0.62) 100%)' }} />
-
-        {/* ── Ambient accent orb — colour shifts with slide ── */}
-        <div style={{
-          position: 'absolute', top: '42%', left: '50%',
-          transform: 'translate(-50%,-50%)',
-          width: 'min(920px,130vw)', height: 'min(720px,90vh)',
-          background: `radial-gradient(ellipse,${sl.accent}0A 0%,transparent 65%)`,
-          filter: 'blur(90px)', zIndex: 3, pointerEvents: 'none',
-          transition: 'background 3.2s ease',
-          animation: 'floatOrb 28s ease-in-out infinite',
-        }} />
-
-        {/* Story bar is handled by Navbar → Stories.tsx */}
-
-        {/* ── CONTENT — no key prop → animates exactly ONCE on page load ── */}
-        <div className="hero-content" ref={heroContentRef} style={{
-          position: isMobile ? 'relative' : 'absolute',
-          inset: isMobile ? undefined : 0,
-          minHeight: isMobile ? '100svh' : undefined,
-          zIndex: 10,
-          display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start',
-          /* +60px جای eyebrow حذف‌شده — وگرنه تیتر می‌رفت زیر نوار استوری */
-          padding: 'calc(clamp(189px,25vh,236px) + 60px + env(safe-area-inset-top)) clamp(16px,5%,80px) 0',
-          /* ── چرا pointerEvents اینجاست ──
-             در دسکتاپ این لایه `position:absolute; inset:0` است و
-             کل هیرو را می‌پوشاند، با zIndex ۱۰. یعنی هر چیزی زیرش
-             کلیک‌ناپذیر می‌شود، حتی جایی که هیچ متنی نیست.
-
-             ظرف کلیک نمی‌خواهد؛ فقط فرزندانش (دکمه‌ها و لینک‌ها)
-             می‌خواهند. پس ظرف شفاف کلیک می‌شود و بچه‌ها دوباره
-             فعال. */
-          pointerEvents: 'none',
-          /* مقدار اولیه؛ اسکرول مستقیم روی گره می‌نویسد */
-          opacity: 1, transform: 'translateY(0)',
-        }}>
-          {/* Headline — رنگی با spans */}
-          <h1 className="hb hero-h1" style={{
-            fontSize: 'clamp(29px, 4.6vw, 66px)', fontWeight: 700, lineHeight: 1.08,
-            margin: '0 0 22px', letterSpacing: '-0.03em', textAlign: 'center', whiteSpace: 'nowrap',
-          }}>
-            <span style={{ color: '#ffffff', textShadow: '0 2px 28px rgba(0,0,0,0.55)' }}>پلتفرم جامع و تخصصی </span>
-            <span style={{ color: '#ffffff', textShadow: '0 2px 28px rgba(0,0,0,0.55)' }}>بیلیارد</span>
-          </h1>
-
-          {/* Subtitle — نقطه‌ی اتصال؛ عمدا کم‌وزن‌تر از تیتر */}
-          {/* letter-spacing حذف شد: روی متن فارسی اتصال حروف چسبان (مثل «اتصال») را باز می‌کرد */}
-          <p className="hc hero-subtitle" style={{
-            fontSize: 'clamp(14px, 1.9vw, 21px)', fontWeight: 500,
-            margin: '0 0 24px', textAlign: 'center', lineHeight: 1.7,
-            color: 'rgba(255,255,255,0.66)', letterSpacing: 'normal',
-            textShadow: '0 1px 16px rgba(0,0,0,0.45)',
-          }}>
-            اتصال بی‌واسطه؛ خانه‌ی دیجیتال جامعه‌ی بیلیارد{' '}
-            {/* «ایران» با گرادیان عمودی پرچم: سبز → سفید → قرمز */}
-            <span style={{
-              fontWeight: 600,
-              background: 'linear-gradient(180deg, #2EAD4F 0%, #2EAD4F 34%, #FFFFFF 44%, #FFFFFF 56%, #E03C31 66%, #E03C31 100%)',
-              WebkitBackgroundClip: 'text', backgroundClip: 'text',
-              WebkitTextFillColor: 'transparent', color: 'transparent',
-            }}>ایران</span>
-          </p>
-
-          {/* Feature card slider — 7 cards */}
-          <div className="hd" style={{ width: '100%', marginTop: '16px', flexGrow: isMobile ? 1 : 0 }}>
-            <div ref={sliderRef} className="feat-slider" style={{
-              display: 'flex', overflowX: 'auto',
-              scrollbarWidth: 'none', padding: '20px 22px 38px',
-              justifyContent: 'center', alignItems: 'stretch',
-              scrollSnapType: 'x mandatory',
-            }}>
-              {/* ترک حلقه — دسکتاپ: محتوا ×۲ + مارکی CSS؛ موبایل: کپی دوم مخفی و سوایپ عادی */}
-              <div className="feat-track">
-                {[...FEATURE_CARDS, ...FEATURE_CARDS].map((card, i) => {
-                  const isDup  = i >= FEATURE_CARDS.length;
-                  const active = i % FEATURE_CARDS.length === activeCard;
-                  return (
-                    <Link prefetch={false} key={i} href={card.href} className={`feat-card${isDup ? ' feat-dup' : ''}`} style={{ textDecoration: 'none', flexShrink: 0, display: 'flex', scrollSnapAlign: 'center' }}>
-                      <div style={{
-                        width: '118px', padding: '18px 10px 16px',
-                        background: `linear-gradient(180deg, rgba(${card.rgb},0.11) 0%, rgba(10,9,14,0.34) 40%, rgba(10,9,14,0.42) 100%)`,
-                        backdropFilter: 'blur(26px) saturate(160%)',
-                        WebkitBackdropFilter: 'blur(26px) saturate(160%)',
-                        border: `1px solid ${active ? 'rgba(199,166,106,0.52)' : 'rgba(255,255,255,0.13)'}`,
-                        borderRadius: '20px',
-                        display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px',
-                        textAlign: 'center', flex: 1,
-                        boxShadow: active
-                          ? 'inset 0 1px 0 rgba(255,255,255,0.14), 0 12px 32px rgba(0,0,0,0.42), 0 0 24px rgba(199,166,106,0.14)'
-                          : 'inset 0 1px 0 rgba(255,255,255,0.08), 0 8px 22px rgba(0,0,0,0.30)',
-                        cursor: 'pointer',
-                        transition: 'box-shadow 0.35s ease, border-color 0.35s ease',
-                      }}>
-                        <div style={{
-                          width: '46px', height: '46px', borderRadius: '14px',
-                          background: `rgba(${card.rgb},0.12)`,
-                          border: `1px solid rgba(${card.rgb},0.24)`,
-                          display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-                          boxShadow: `0 0 14px rgba(${card.rgb},0.18), inset 0 1px 0 rgba(255,255,255,0.10)`,
-                          marginBottom: '32px',
-                        }}>
-                          <card.Icon size={22} color={card.clr}
-                            style={{ filter: `drop-shadow(0 0 5px rgba(${card.rgb},0.40))` }} />
-                        </div>
-                        <div style={{ fontSize: '14px', fontWeight: 800, color: '#fff', lineHeight: 1.3 }}>
-                          {card.title}
-                        </div>
-                        <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.42)', lineHeight: 1.65, flex: 1 }}>
-                          {card.caption}
-                        </div>
-                      </div>
-                    </Link>
-                  );
-                })}
-              </div>
-            </div>
-            {/* نقطه‌های کاروسل — همیشه دقیقا ۷ تا، یکنواخت (بدون محو فاصله‌ای که «سوراخ» می‌ساخت) */}
-            <div style={{ display: 'flex', justifyContent: 'center', gap: '6px', marginTop: '18px' }}>
-              {FEATURE_CARDS.map((_, i) => (
-                <div key={i} style={{
-                  height: '5px',
-                  width: i === activeCard ? '20px' : '5px',
-                  borderRadius: '3px', flexShrink: 0,
-                  background: i === activeCard ? GOLD : 'rgba(255,255,255,0.25)',
-                  boxShadow: i === activeCard ? '0 0 8px rgb(var(--c-ink) / 0.19)' : 'none',
-                  transition: 'all 0.35s cubic-bezier(0.22,1,0.36,1)',
-                }} />
-              ))}
-            </div>
-          </div>
-
-
-        </div>
-
-
-        {/* ── Prev/next arrows — hidden on mobile ── */}
-        {/* فلش‌های چپ/راست گوشه‌ی هیرو برداشته شدند. کاروسل خودش
-            هر هفت ثانیه می‌چرخد و آن دو دکمه فقط گوشه‌ی تصویر را
-            شلوغ می‌کردند. */}
-
-      </div>
+          ║  HERO — Server Component از page.tsx (components/home/hero) ║
+          ╚══════════════════════════════════════════════════════╝
+          ویدیو، اسلایدها و کاروسلِ هفت‌کارتی از این‌جا رفتند. نوارِ
+          استوری همچنان در Navbar است و روی هیرو می‌نشیند. */}
+      {heroSlot}
 
       {/* §2 CLUB DISCOVERY ══════════════════════════════════════
           جایگاه featured_clubs_homepage غیرفعال ⇒ کل سکشن حذف */}

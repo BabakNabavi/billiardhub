@@ -5,6 +5,8 @@ import { loadHomeFeatured } from '../lib/home-featured'
 import { EMPTY_FEATURED } from '../lib/home-types'
 import ServicesSection from '../components/home/ServicesSection'
 import ExploreStrip from '../components/home/ExploreStrip'
+import { HomeHero } from '../components/home/hero/HomeHero'
+import { loadHeroData, EMPTY_HERO } from '../lib/home-hero'
 /* از ماژول مشترک، نه از AdSlot که 'use client' است — صداکردن تابع
    یک فایل کلاینت از Server Component همان چیزی بود که صفحه را ۵۰۰ کرد */
 import { toPlacementState, type PlacementKey, type PlacementState, type PlacementPayload } from '../lib/ads/placement-state'
@@ -92,10 +94,12 @@ export default async function HomePage() {
      وقتی این داده را با useEffect گرفتم، کارت‌ها از HTML اولیه بیرون
      افتادند و همان مشکلی که این لایه حل کرده بود برگشت — خزنده چیزی
      نمی‌دید و کاربر یک پرش چیدمان داشت. */
-  const [placements, featured] = await Promise.allSettled([
+  const [placements, featured, hero] = await Promise.allSettled([
     buildLivePlacements(),
     loadHomeFeatured(),
+    loadHeroData(),
   ])
+  const featuredData = featured.status === 'fulfilled' ? featured.value : EMPTY_FEATURED
 
   if (placements.status === 'fulfilled') {
     const live = placements.value
@@ -110,13 +114,13 @@ export default async function HomePage() {
           جست‌وجو — گوگل از این برای نامِ سایت، لوگو در نتایج و Sitelinks Search
           Box استفاده می‌کند. فقط در صفحه‌ی اصلی، طبقِ توصیه‌ی گوگل. */}
       <JsonLd data={SITE_JSONLD} />
-      {/* تصویر هیرو LCP صفحه است ولی داخل کامپوننت کلاینتی قرار دارد،
-          پس مرورگر تا پارس‌شدن آن عمق پیدایش نمی‌کند — همان چیزی که
-          PageSpeed «LCP request discovery» می‌نامد.
+      {/* تصویر هیرو در HTMLِ سرور هست، ولی پس از بلوکِ بزرگِ <style>ِ
+          HomeClient — یعنی اسکنرِ مرورگر دیر به آن می‌رسد. preload آن را
+          به همان ابتدای <head> می‌آورد («LCP request discovery»).
 
           این preload در <head> می‌نشیند و دانلود همان اولین لحظه شروع
           می‌شود. `fetchPriority=high` هم می‌گوید از بقیه‌ی منابع جلو
-          بیفتد. عکس همان است که پوستر ویدیو و اسلاید اول هیروست. */}
+          بیفتد. عکس همان پس‌زمینه‌ی هیروست (components/home/hero). */}
       <link
         rel="preload"
         as="image"
@@ -146,7 +150,8 @@ export default async function HomePage() {
       />
       <HomeClient
         initialPlacements={initialPlacements}
-        initialFeatured={featured.status === 'fulfilled' ? featured.value : EMPTY_FEATURED}
+        initialFeatured={featuredData}
+        heroSlot={<HomeHero data={hero.status === 'fulfilled' ? hero.value : EMPTY_HERO} newestClub={featuredData.clubs[0] ?? null} />}
         servicesSlot={<ServicesSection />}
         exploreSlot={<ExploreStrip />}
       />

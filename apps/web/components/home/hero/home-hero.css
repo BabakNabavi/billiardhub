@@ -1,0 +1,130 @@
+/* ─────────────────────────────────────────────────────────────
+   هیروی صفحه‌ی اصلی — فقط چیزهایی که Tailwind نمی‌سازد:
+   پرسپکتیو و کجیِ کارت‌ها، شیشه، نورِ طلایی، و حرکت‌ها.
+
+   ⚠️ هر حرکت فقط transform/opacity است (کامپوزیتور، نه چیدمان).
+   شیشه (backdrop-filter) فقط در دسکتاپ: در گوشیِ ضعیف، شیشه‌ی
+   متحرک یعنی بلورِ دوباره در هر فریم.
+   ───────────────────────────────────────────────────────────── */
+
+.hh {
+  background: #04020A;
+  /* جای نوارِ بالا (۷۲) + نوارِ استوری (~۱۰۰) — استوری روی هیرو ثابت
+     می‌نشیند و محتوا باید زیرش شروع شود */
+  padding-top: calc(184px + env(safe-area-inset-top));
+}
+
+/* گوشی و تبلت: نوارِ استوری تا ~۱۸۷px پایین می‌آید (اندازه‌گیری‌شده از ۳۲۰ تا ۸۲۰) */
+@media (max-width: 900px) { .hh { padding-top: calc(200px + env(safe-area-inset-top)) } }
+/* گوشیِ ۳۲۰ (SE نسلِ اول، اندرویدِ کوچک): در اندازه‌ی پیش‌فرض تیتر سه‌خطی می‌شد */
+@media (max-width: 359px) { #hh-title { font-size: 1.5rem } }
+
+/* پرده: سمتِ متن (راست) تیره، سمتِ کارت‌ها بازتر تا عکس دیده شود */
+.hh-veil {
+  background:
+    linear-gradient(270deg, rgb(4 2 10 / .94) 28%, rgb(4 2 10 / .72) 58%, rgb(4 2 10 / .45)),
+    linear-gradient(180deg, rgb(4 2 10 / .55) 0, transparent 30%, transparent 70%, rgb(4 2 10 / .9));
+}
+@media (max-width: 900px) {
+  .hh-veil {
+    background: linear-gradient(180deg, rgb(4 2 10 / .78) 0, rgb(4 2 10 / .72) 45%, rgb(4 2 10 / .94));
+  }
+}
+
+/* نورِ طلاییِ اریب — آرام از چپ به راست می‌لغزد */
+.hh-streak {
+  background: linear-gradient(115deg, transparent 38%, rgb(217 188 134 / .11) 47%, rgb(217 188 134 / .04) 52%, transparent 60%);
+  animation: hhStreak 18s ease-in-out infinite alternate;
+}
+@keyframes hhStreak { from { transform: translateX(-12%) } to { transform: translateX(12%) } }
+
+/* تیتر فقط بالا می‌آید و شفافیتش دست نمی‌خورد — LCP منتظر ورود نماند */
+.hh-rise { animation: hhRise .6s cubic-bezier(.22,1,.36,1) both }
+.hh-in   { animation: hhIn .55s cubic-bezier(.22,1,.36,1) both }
+.hh-d1 { animation-delay: .08s } .hh-d2 { animation-delay: .14s } .hh-d3 { animation-delay: .2s } .hh-d4 { animation-delay: .3s }
+@keyframes hhRise { from { transform: translateY(12px) } to { transform: none } }
+@keyframes hhIn   { from { opacity: 0; transform: translateY(14px) } to { opacity: 1; transform: none } }
+
+/* ── کارت‌ها ── */
+.hh-card {
+  background: rgb(18 16 22 / .82);
+  border: 1px solid rgb(255 255 255 / .14);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / .08), 0 24px 48px -12px rgb(0 0 0 / .6);
+  transition: border-color .25s ease, background-color .25s ease;
+}
+.hh-card:hover { border-color: rgb(199 166 106 / .5) }
+.hh-card:focus-visible { outline: 2px solid rgb(var(--c-gold-light)); outline-offset: 3px }
+
+@media (min-width: 901px) {
+  .hh-stage { perspective: 1100px }
+  .hh-stack { height: 400px }
+  /* کجیِ کلِ دسته با حرکتِ موس — HeroTilt دو متغیر را می‌نویسد */
+  .hh-stack {
+    transform: rotateX(var(--hh-rx, 0deg)) rotateY(var(--hh-ry, 0deg));
+    transform-style: preserve-3d;
+    transition: transform .5s cubic-bezier(.22,1,.36,1);
+  }
+  .hh-card {
+    position: absolute;
+    background: rgb(255 255 255 / .07);
+    backdrop-filter: blur(16px) saturate(140%);
+    -webkit-backdrop-filter: blur(16px) saturate(140%);
+  }
+  .hh-float { animation: hhIn .6s cubic-bezier(.22,1,.36,1) both, hhFloat 7s ease-in-out infinite }
+  .hh-float:hover { animation-play-state: running, paused }
+
+  /* جای هر کارت در دسته — منطقی (inset-inline-end = سمتِ چپ در RTL) */
+  .hh-p1 { top: 0;     inset-inline-end: 22%; width: min(300px, 62%); z-index: 1 }
+  .hh-p2 { top: 196px; inset-inline-end: 0;   width: min(280px, 56%); z-index: 2 }
+  .hh-p3 { top: 236px; inset-inline-end: 50%; width: min(270px, 50%); z-index: 3 }
+  .hh-p2.hh-float { animation-delay: .12s, -2.3s }
+  .hh-p3.hh-float { animation-delay: .24s, -4.6s }
+}
+/* کجیِ پایه داخلِ کی‌فریم است، چون انیمیشن transform را کامل می‌نویسد */
+@keyframes hhFloat {
+  0%, 100% { transform: rotateY(-12deg) rotateX(4deg) translateY(0) }
+  50%      { transform: rotateY(-12deg) rotateX(4deg) translateY(-8px) }
+}
+
+/* موبایل: ردیفِ افقیِ سوایپی، بی‌کجی و بی‌شیشه */
+@media (max-width: 900px) {
+  .hh-stack {
+    display: flex; gap: 12px; overflow-x: auto; scroll-snap-type: x mandatory;
+    scrollbar-width: none; padding-inline: 16px; margin-inline: -16px;
+    /* overflow-x عمودی هم می‌بُرد — بی این، حلقه‌ی فوکوسِ کارت نصفه دیده می‌شد */
+    padding-block: 8px; margin-block: -8px;
+    overscroll-behavior-x: contain;
+  }
+  .hh-stack::-webkit-scrollbar { display: none }
+  .hh-card { flex: 0 0 78%; max-width: 320px; scroll-snap-align: center }
+}
+/* تبلت: سه کارت کنارِ هم جا می‌شوند — سوایپِ بی‌دلیل نه */
+@media (min-width: 601px) and (max-width: 900px) {
+  .hh-stack { overflow: visible; margin-inline: 0; padding-inline: 0 }
+  .hh-card { flex: 1 1 0; min-width: 0; max-width: none }
+}
+
+.hh-live-thumb { background: url(/images/hero/1.webp) center / cover }   /* همان عکسِ پس‌زمینه — از کش، بی‌درخواستِ تازه */
+
+/* رنگِ هر بخش — همان رنگ‌های کاروسلِ قبلی، کمی روشن‌تر برای زمینه‌ی تیره */
+.hh-c-blue { color: #7DB8FF } .hh-c-green { color: #5FD37F } .hh-c-violet { color: #C89BFF }
+.hh-c-pink { color: #FF8DB5 } .hh-c-cyan { color: #4FD1E5 } .hh-c-rose { color: #F59AC9 }
+
+.hh-links { scrollbar-width: none }
+.hh-links::-webkit-scrollbar { display: none }
+
+/* بیرونِ دید (HeroTilt کلاس را می‌گذارد): نور و شناوری هر فریم کامپوزیت نشوند */
+.hh-off .hh-streak, .hh-off .hh-float { animation-play-state: paused }
+
+/* جست‌وجوی موبایلِ نوارِ بالا باز است ⟵ نوارِ استوری ~۵۸px پایین می‌آید
+   (Navbar کلاس را روی <html> می‌گذارد). تیتر هم همان‌قدر پایین می‌رود. */
+@media (max-width: 900px) {
+  .hh { transition: padding-top .38s cubic-bezier(.22,1,.36,1) }
+  html.bh-search-open .hh { padding-top: calc(258px + env(safe-area-inset-top)) }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hh-streak, .hh-rise, .hh-in, .hh-float { animation: none !important }
+  .hh { transition: none }
+  .hh-stack { transition: none }
+}

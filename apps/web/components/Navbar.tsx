@@ -200,6 +200,14 @@ export default function Navbar() {
   const isHomePage   = pathname === '/';
   const isShopPage   = pathname.startsWith('/shop');
 
+  /* جست‌وجوی باز نوارِ استوری را پایین می‌برد؛ هیروی خانه (Server Component،
+     بی‌دسترسی به این state) با همین کلاس تیترش را همان‌قدر پایین می‌برد */
+  useEffect(() => {
+    const on = isHomePage && searchOpen;
+    document.documentElement.classList.toggle('bh-search-open', on);
+    return () => document.documentElement.classList.remove('bh-search-open');
+  }, [isHomePage, searchOpen]);
+
   useEffect(() => {
     let ticking = false;
     const fn = () => {
@@ -214,8 +222,10 @@ export default function Navbar() {
           if (y > 30 && searchOpenRef.current) { setSearchOpen(false); setSearch(''); }
           const bar = barRef.current;
           if (bar) {
-            bar.style.opacity = String(Math.max(0, 1 - y / 700));
-            bar.style.pointerEvents = y > 560 ? 'none' : 'auto';
+            /* هیرو جمع‌وجور شد (~۶۸۰px، نه تمام‌صفحه): با ۷۰۰ِ قبلی نوارِ
+               استوری نیمه‌شفاف روی سکشنِ روشنِ بعدی می‌ماند */
+            bar.style.opacity = String(Math.max(0, 1 - y / 420));
+            bar.style.pointerEvents = y > 320 ? 'none' : 'auto';
           }
           ticking = false;
         });
