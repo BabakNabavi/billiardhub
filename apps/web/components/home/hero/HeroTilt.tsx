@@ -28,21 +28,29 @@ export function HeroTilt({ children, className }: { children: React.ReactNode; c
       return () => io.disconnect()
     }
 
+    /* ── نرمی ──
+       پیش‌تر هر pointermove یک transition تازه روی دسته شروع می‌کرد؛ هر
+       رویداد ترنزیشنِ قبلی را وسطِ راه می‌برید و حرکت تکه‌تکه می‌شد.
+       حالا هدف ذخیره می‌شود و یک حلقه‌ی rAF هر فریم ۱۲٪ به آن نزدیک
+       می‌شود — و وقتی رسید، خودش می‌ایستد. */
     let raf = 0
-    const set = (rx: number, ry: number) => {
-      el.style.setProperty('--hh-rx', `${rx.toFixed(2)}deg`)
-      el.style.setProperty('--hh-ry', `${ry.toFixed(2)}deg`)
+    let tx = 0, ty = 0, cx = 0, cy = 0
+    const tick = () => {
+      cx += (tx - cx) * 0.12
+      cy += (ty - cy) * 0.12
+      el.style.setProperty('--hh-rx', `${cx.toFixed(3)}deg`)
+      el.style.setProperty('--hh-ry', `${cy.toFixed(3)}deg`)
+      raf = Math.abs(tx - cx) + Math.abs(ty - cy) > 0.01 ? requestAnimationFrame(tick) : 0
+    }
+    const aim = (x: number, y: number) => {
+      tx = x; ty = y
+      if (!raf) raf = requestAnimationFrame(tick)
     }
     const onMove = (e: PointerEvent) => {
-      cancelAnimationFrame(raf)
-      raf = requestAnimationFrame(() => {
-        const r = area.getBoundingClientRect()
-        const x = (e.clientX - r.left) / r.width - 0.5
-        const y = (e.clientY - r.top) / r.height - 0.5
-        set(-y * MAX_DEG, x * MAX_DEG)
-      })
+      const r = area.getBoundingClientRect()
+      aim(-((e.clientY - r.top) / r.height - 0.5) * MAX_DEG, ((e.clientX - r.left) / r.width - 0.5) * MAX_DEG)
     }
-    const onLeave = () => { cancelAnimationFrame(raf); set(0, 0) }
+    const onLeave = () => aim(0, 0)
 
     area.addEventListener('pointermove', onMove, { passive: true })
     area.addEventListener('pointerleave', onLeave)

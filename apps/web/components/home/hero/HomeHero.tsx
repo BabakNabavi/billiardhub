@@ -48,12 +48,12 @@ export function HomeHero({ data, newestClub }: { data: HeroData; newestClub: Rea
         {/* ── متن ── */}
         <div className="min-w-0">
           <h1 id="hh-title" className="hh-rise text-display font-extrabold">
-            هرچه از بیلیارد می‌خواهی،
+            هرچی از بیلیارد می‌خوای
             <br />
-            <span className="text-gold-light">همین‌جاست.</span>
+            <span className="text-gold-light">همین‌جاست</span>
           </h1>
           <p className="hh-in mt-3 max-w-prose text-sub text-white/70 hh-d1">
-            پلتفرم جامع بیلیارد ایران: باشگاه‌ها، مسابقه‌ها، بازار و بازی‌های زنده‌ی امروز، یک‌جا.
+            پلتفرم جامع و تخصصی بیلیارد ایران: باشگاه‌ها، مسابقه‌ها، بازار و بازی‌های زنده‌ی امروز، یک‌جا.
           </p>
 
           {/* فرمِ معمولی: بی‌جاوااسکریپت هم کار می‌کند و همان نشانیِ /search?q= */}

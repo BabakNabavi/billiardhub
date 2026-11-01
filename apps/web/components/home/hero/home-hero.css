@@ -3,8 +3,8 @@
    پرسپکتیو و کجیِ کارت‌ها، شیشه، نورِ طلایی، و حرکت‌ها.
 
    ⚠️ هر حرکت فقط transform/opacity است (کامپوزیتور، نه چیدمان).
-   شیشه (backdrop-filter) فقط در دسکتاپ: در گوشیِ ضعیف، شیشه‌ی
-   متحرک یعنی بلورِ دوباره در هر فریم.
+   شیشه و شناوری در گوشی هم هست (خواستِ مالک). هزینه‌اش محدود است:
+   سه کارتِ کوچک، شناوریِ ۶ پیکسلی، و بیرونِ دید همه‌چیز می‌ایستد.
    ───────────────────────────────────────────────────────────── */
 
 .hh {
@@ -45,54 +45,71 @@
 @keyframes hhRise { from { transform: translateY(12px) } to { transform: none } }
 @keyframes hhIn   { from { opacity: 0; transform: translateY(14px) } to { opacity: 1; transform: none } }
 
-/* ── کارت‌ها ── */
+/* ── کارت‌ها: شیشه در همه‌ی اندازه‌ها ── */
 .hh-card {
-  background: rgb(18 16 22 / .82);
-  border: 1px solid rgb(255 255 255 / .14);
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / .08), 0 24px 48px -12px rgb(0 0 0 / .6);
+  background: rgb(255 255 255 / .07);
+  /* فقط شکلِ استاندارد: کامپایلر خودش -webkit- را می‌سازد. نوشتنِ هر دو
+     باعث شد شکلِ استاندارد حذف شود و کروم اصلاً شیشه نشان ندهد */
+  backdrop-filter: blur(14px) saturate(140%);
+  border: 1px solid rgb(255 255 255 / .16);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / .1), 0 24px 48px -12px rgb(0 0 0 / .6);
   transition: border-color .25s ease, background-color .25s ease;
+}
+/* مرورگرِ بی‌شیشه: پسِ‌زمینه‌ی تیره‌ی پُر تا متن خوانا بماند */
+@supports not (backdrop-filter: blur(1px)) {
+  .hh-card { background: rgb(18 16 22 / .82) }
 }
 .hh-card:hover { border-color: rgb(199 166 106 / .5) }
 .hh-card:focus-visible { outline: 2px solid rgb(var(--c-gold-light)); outline-offset: 3px }
 
+/* ── شناوری ──
+   ⚠️ «سکته» از همین‌جا بود: کارت ۸ پیکسل را در ۳٫۵ ثانیه می‌رفت (~۲px در
+   ثانیه). بی لایه‌ی کامپوزیتِ جدا، مرورگر جابه‌جاییِ زیرِپیکسلی را گرد
+   می‌کند ⟵ کارت هر نیم‌ثانیه یک پیکسل «می‌پرید». will-change لایه می‌سازد
+   تا حرکت پیوسته کشیده شود؛ translate3d هم همان را تضمین می‌کند. فقط سه
+   کارتِ کوچک‌اند، و بیرونِ دید (.hh-off) می‌ایستند. */
+.hh-float {
+  will-change: transform;
+  animation: hhIn .6s cubic-bezier(.22,1,.36,1) both, hhFloat 6s ease-in-out infinite;
+}
+.hh-float:hover { animation-play-state: running, paused }
+.hh-p2.hh-float { animation-delay: .12s, -2s }
+.hh-p3.hh-float { animation-delay: .24s, -4s }
+/* گوشی: فقط بالا و پایین، بی‌کجی */
+@keyframes hhFloat {
+  0%, 100% { transform: translate3d(0, 0, 0) }
+  50%      { transform: translate3d(0, -6px, 0) }
+}
+
 @media (min-width: 901px) {
   .hh-stage { perspective: 1100px }
-  .hh-stack { height: 400px }
-  /* کجیِ کلِ دسته با حرکتِ موس — HeroTilt دو متغیر را می‌نویسد */
+  /* کجیِ کلِ دسته با حرکتِ موس — HeroTilt دو متغیر را نرم (lerp) می‌نویسد */
   .hh-stack {
+    height: 400px;
     transform: rotateX(var(--hh-rx, 0deg)) rotateY(var(--hh-ry, 0deg));
     transform-style: preserve-3d;
-    transition: transform .5s cubic-bezier(.22,1,.36,1);
   }
-  .hh-card {
-    position: absolute;
-    background: rgb(255 255 255 / .07);
-    backdrop-filter: blur(16px) saturate(140%);
-    -webkit-backdrop-filter: blur(16px) saturate(140%);
-  }
-  .hh-float { animation: hhIn .6s cubic-bezier(.22,1,.36,1) both, hhFloat 7s ease-in-out infinite }
-  .hh-float:hover { animation-play-state: running, paused }
+  .hh-card { position: absolute }
+  .hh-float { animation-name: hhIn, hhFloat3d }
 
   /* جای هر کارت در دسته — منطقی (inset-inline-end = سمتِ چپ در RTL) */
   .hh-p1 { top: 0;     inset-inline-end: 22%; width: min(300px, 62%); z-index: 1 }
   .hh-p2 { top: 196px; inset-inline-end: 0;   width: min(280px, 56%); z-index: 2 }
   .hh-p3 { top: 236px; inset-inline-end: 50%; width: min(270px, 50%); z-index: 3 }
-  .hh-p2.hh-float { animation-delay: .12s, -2.3s }
-  .hh-p3.hh-float { animation-delay: .24s, -4.6s }
 }
 /* کجیِ پایه داخلِ کی‌فریم است، چون انیمیشن transform را کامل می‌نویسد */
-@keyframes hhFloat {
-  0%, 100% { transform: rotateY(-12deg) rotateX(4deg) translateY(0) }
-  50%      { transform: rotateY(-12deg) rotateX(4deg) translateY(-8px) }
+@keyframes hhFloat3d {
+  0%, 100% { transform: rotateY(-12deg) rotateX(4deg) translate3d(0, 0, 0) }
+  50%      { transform: rotateY(-12deg) rotateX(4deg) translate3d(0, -10px, 0) }
 }
 
-/* موبایل: ردیفِ افقیِ سوایپی، بی‌کجی و بی‌شیشه */
+/* موبایل: ردیفِ افقیِ سوایپی */
 @media (max-width: 900px) {
   .hh-stack {
     display: flex; gap: 12px; overflow-x: auto; scroll-snap-type: x mandatory;
     scrollbar-width: none; padding-inline: 16px; margin-inline: -16px;
-    /* overflow-x عمودی هم می‌بُرد — بی این، حلقه‌ی فوکوسِ کارت نصفه دیده می‌شد */
-    padding-block: 8px; margin-block: -8px;
+    /* overflow-x عمودی هم می‌بُرد — جای شناوری (۶px) و حلقه‌ی فوکوس */
+    padding-block: 12px; margin-block: -12px;
     overscroll-behavior-x: contain;
   }
   .hh-stack::-webkit-scrollbar { display: none }
@@ -126,5 +143,4 @@
 @media (prefers-reduced-motion: reduce) {
   .hh-streak, .hh-rise, .hh-in, .hh-float { animation: none !important }
   .hh { transition: none }
-  .hh-stack { transition: none }
 }
