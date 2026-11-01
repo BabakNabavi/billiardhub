@@ -214,9 +214,13 @@ fi
 if [ -d .next ]; then mv .next .next-old; fi
 mv .next-build .next
 systemctl restart billiardhub
+# رله‌ی پخش زنده (apps/live-relay) هم کدِ تازه را بگیرد — فقط اگر نصب شده
+# (live-relay-setup.sh). پخشِ از مرورگرِ در جریان چند ثانیه قطع و خودکار تمام می‌شود.
+if systemctl is-enabled billiardhub-relay >/dev/null 2>&1; then systemctl restart billiardhub-relay; fi
 rm -rf .next-old
 sleep 12
 echo "سرویس: $(systemctl is-active billiardhub)"
+if systemctl is-enabled billiardhub-relay >/dev/null 2>&1; then echo "رله‌ی پخش: $(systemctl is-active billiardhub-relay)"; fi
 curl -s -o /dev/null -w "پاسخ محلی: HTTP %{http_code}\n" --max-time 60 http://127.0.0.1:3000/
 REMOTE
 
