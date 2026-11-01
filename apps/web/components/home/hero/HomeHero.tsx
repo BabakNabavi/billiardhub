@@ -3,7 +3,7 @@ import {
   Building2, Calendar, GraduationCap, Radio, Search, ShoppingBag, Trophy, Users, Wrench,
 } from 'lucide-react'
 import type { HeroData } from '@/lib/home-hero'
-import type { RealClub } from '@/lib/home-types'
+import type { RealClub, RealProduct } from '@/lib/home-types'
 import { HeroCards } from './HeroCards'
 import './home-hero.css'
 
@@ -32,9 +32,11 @@ const QUICK = [
 
 const FOCUS = 'outline-none focus-visible:ring-2 focus-visible:ring-gold-light focus-visible:ring-offset-2 focus-visible:ring-offset-black'
 
-export function HomeHero({ data, newestClub }: { data: HeroData; newestClub: RealClub | null }) {
+export function HomeHero({ data, newestClub, newestProducts }: {
+  data: HeroData; newestClub: RealClub | null; newestProducts: RealProduct[]
+}) {
   /* بی‌کارت ⟵ یک ستون؛ وگرنه نیمه‌ی چپِ دسکتاپ خالی می‌ماند */
-  const hasCards = !!(data.live || newestClub || data.tournament || data.ranking)
+  const hasCards = !!(data.live || newestClub || data.tournament || newestProducts.length || data.ranking.length)
   return (
     <section aria-labelledby="hh-title" className="hh relative overflow-hidden text-white">
       {/* پس‌زمینه: همان عکسی که page.tsx پیش‌بارگذاری می‌کند */}
@@ -77,10 +79,11 @@ export function HomeHero({ data, newestClub }: { data: HeroData; newestClub: Rea
               <Calendar size={16} aria-hidden />
               رزرو میز
             </Link>
+            {/* پخشی زنده است ⟵ دکمه قرمزِ چشمک‌زن (hh-live-on)؛ وگرنه شیشه‌ایِ آرام */}
             <Link prefetch={false} href="/live"
-              className={`inline-flex items-center gap-2 rounded-field border border-white/20 bg-white/5 px-6 py-3 text-sub font-bold text-white/90 transition-[transform,background-color] duration-base ease-smooth hover:-translate-y-0.5 hover:bg-white/10 ${FOCUS}`}>
+              className={`inline-flex items-center gap-2 rounded-field border px-6 py-3 text-sub font-bold transition-transform duration-base ease-smooth hover:-translate-y-0.5 ${data.live ? 'hh-live-on text-white' : 'border-white/20 bg-white/5 text-white/90 hover:bg-white/10'} ${FOCUS}`}>
               {data.live
-                ? <span aria-hidden className="h-2 w-2 rounded-full bg-danger motion-safe:animate-pulse" />
+                ? <span aria-hidden className="hh-live-dot h-2 w-2 rounded-full bg-white" />
                 : <Radio size={16} aria-hidden />}
               تماشای زنده
             </Link>
@@ -88,7 +91,7 @@ export function HomeHero({ data, newestClub }: { data: HeroData; newestClub: Rea
         </div>
 
         {/* ── کارت‌ها ── */}
-        <HeroCards data={data} newestClub={newestClub} />
+        <HeroCards data={data} newestClub={newestClub} newestProducts={newestProducts} />
       </div>
 
       {/* ── میان‌برِ بخش‌ها ── */}

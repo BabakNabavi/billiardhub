@@ -3,16 +3,17 @@ import { Eye, MapPin, Play, Trophy } from 'lucide-react'
 import { faNum } from '@/lib/jalali'
 import { thumbUrl } from '@/lib/media/thumb'
 import type { HeroData } from '@/lib/home-hero'
-import type { RealClub } from '@/lib/home-types'
+import type { RealClub, RealProduct } from '@/lib/home-types'
 import { HeroTilt } from './HeroTilt'
+import { HeroAdsCard } from './HeroAdsCard'
+import { HeroRankingCard } from './HeroRankingCard'
+import { CARD, LABEL } from './hero-classes'
 
 /* ─────────────────────────────────────────────────────────────
    سه کارتِ شیشه‌ای کنارِ تیتر — داده‌ی واقعیِ همین لحظه.
+   (آگهی‌ها: HeroAdsCard · رنکینگِ چرخان: HeroRankingCard)
    کارتی که داده ندارد اصلاً ساخته نمی‌شود؛ جایش عددِ ساختگی نمی‌نشیند.
    ───────────────────────────────────────────────────────────── */
-
-const CARD = 'hh-card hh-float group block rounded-panel p-3 text-white no-underline outline-none'
-const LABEL = 'text-meta text-white/60'
 
 function LiveCard({ live, pos }: { live: NonNullable<HeroData['live']>; pos: string }) {
   return (
@@ -58,7 +59,7 @@ function ClubCard({ club, pos }: { club: RealClub; pos: string }) {
 }
 
 const PHASE_LABEL: Record<NonNullable<HeroData['tournament']>['phase'], string> = {
-  open: 'مسابقه‌ی پیشِ رو', upcoming: 'مسابقه‌ی پیشِ رو', ongoing: 'مسابقه‌ی در جریان', done: 'آخرین مسابقه',
+  open: 'مسابقه‌ی پیشِ رو', upcoming: 'مسابقه‌ی پیشِ رو', ongoing: 'مسابقه‌ی در جریان',
 }
 
 function TournamentCard({ t, pos }: { t: NonNullable<HeroData['tournament']>; pos: string }) {
@@ -75,7 +76,7 @@ function TournamentCard({ t, pos }: { t: NonNullable<HeroData['tournament']>; po
       <p className={LABEL}>
         {ahead
           ? `${t.daysLeft === 0 ? 'امروز' : `${faNum(t.daysLeft)} روز مانده`}${t.taken !== null ? `، ${faNum(t.taken)} از ${faNum(t.max)} جا پر` : ''}`
-          : `${t.phase === 'ongoing' ? 'در حال برگزاری' : 'برگزار شد'}${t.taken !== null ? `، ${faNum(t.taken)} بازیکن` : ''}`}
+          : `در حال برگزاری${t.taken !== null ? `، ${faNum(t.taken)} بازیکن` : ''}`}
       </p>
       {ahead && pct !== null && (
         <div className="mt-2 h-1 overflow-hidden rounded-full bg-white/10" aria-hidden>
@@ -86,28 +87,20 @@ function TournamentCard({ t, pos }: { t: NonNullable<HeroData['tournament']>; po
   )
 }
 
-function RankingCard({ r, pos }: { r: NonNullable<HeroData['ranking']>; pos: string }) {
-  return (
-    <Link prefetch={false} href="/ranking" className={`${CARD} ${pos}`}>
-      <p className={LABEL}>{r.label}</p>
-      <ol className="mt-1">
-        {r.players.map(p => (
-          <li key={`${p.rank}-${p.name}`} className="flex items-center justify-between gap-2 border-b border-white/10 py-1 text-sub last:border-0">
-            <span className="truncate"><span className="text-white/50">{faNum(p.rank)}.</span> {p.name}</span>
-            <b className="shrink-0 text-gold-light">{faNum(p.points)}</b>
-          </li>
-        ))}
-      </ol>
-    </Link>
-  )
-}
+/** تا سه آگهی — بیشتر از آن کارت از دسته بلندتر می‌شود */
+const ADS = 3
 
-export function HeroCards({ data, newestClub }: { data: HeroData; newestClub: RealClub | null }) {
+export function HeroCards({ data, newestClub, newestProducts }: {
+  data: HeroData; newestClub: RealClub | null; newestProducts: RealProduct[]
+}) {
   const cards: ((pos: string) => React.ReactNode)[] = []
   if (data.live) { const l = data.live; cards.push(pos => <LiveCard key="live" live={l} pos={pos} />) }
   else if (newestClub) cards.push(pos => <ClubCard key="club" club={newestClub} pos={pos} />)
+  /* مسابقه‌ی پیشِ رو/در جریان اولویت دارد؛ نبود ⟵ آگهی‌های تازه‌ی بازار */
+  const ads = newestProducts.slice(0, ADS)
   if (data.tournament) { const t = data.tournament; cards.push(pos => <TournamentCard key="t" t={t} pos={pos} />) }
-  if (data.ranking) { const r = data.ranking; cards.push(pos => <RankingCard key="r" r={r} pos={pos} />) }
+  else if (ads.length) cards.push(pos => <HeroAdsCard key="ads" products={ads} pos={pos} />)
+  if (data.ranking.length) { const r = data.ranking; cards.push(pos => <HeroRankingCard key="r" boards={r} pos={pos} />) }
   if (cards.length === 0) return null
 
   return (

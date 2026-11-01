@@ -28,7 +28,8 @@ const CLUB_IMG = [
   '/images/clubs/club6.jpeg', '/images/clubs/club7.jpeg', '/images/clubs/club8.jpg',
   '/images/clubs/club9.jpeg', '/images/clubs/club5.jpeg', '/images/clubs/club4.png',
 ]
-const PRODUCT_IMG = '/images/shop/cue_billiard_1.jpg'
+/* ⚠️ cue_billiard_1.jpg وجود نداشت (۴۰۴) ⟵ آگهیِ بی‌عکس، عکسِ شکسته نشان می‌داد */
+export const PRODUCT_IMG = '/images/shop/cue_billiard.webp'
 /* ── این فایل وجود نداشت ──
    کارت فروشگاه در صفحه‌ی اصلی بی‌عکس می‌ماند چون نشانی فالبک ۴۰۴
    می‌داد و onError عکس را پنهان می‌کرد. کلاینت نشانی درست را داشت و

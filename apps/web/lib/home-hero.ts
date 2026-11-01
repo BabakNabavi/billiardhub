@@ -9,8 +9,8 @@ import type { RankingsStructure } from './rankings-store'
 
    هر کارت داده‌ی واقعیِ همین لحظه است، نه متنِ تبلیغاتی:
      ۱) پخشِ زنده‌ی پربیننده (اگر نبود ⟵ تازه‌ترین باشگاه، از page.tsx)
-     ۲) نزدیک‌ترین مسابقه‌ای که هنوز شروع نشده
-     ۳) سرِ جدولِ رنکینگ
+     ۲) مسابقه‌ی پیشِ رو یا در جریان (اگر نبود ⟵ تازه‌ترین آگهی‌های بازار، از page.tsx)
+     ۳) چهار نفرِ اولِ چهار جدولِ رنکینگ — کارت بینشان می‌چرخد
 
    نبودِ هرکدام یعنی همان کارت نمی‌آید — هیچ عددِ ساختگی‌ای جایش
    نمی‌نشیند. خطای یکی هم بقیه را نمی‌برد (allSettled).
@@ -37,11 +37,15 @@ export interface HeroTournament {
   /** null یعنی شمارِ جا خوانده نشد — کارت بی‌عدد می‌آید، نه «پر» */
   taken: number | null
   max: number
-  /** open: ثبت‌نامِ باز · upcoming: پیشِ رو · ongoing: در جریان · done: آخرین برگزارشده */
-  phase: 'open' | 'upcoming' | 'ongoing' | 'done'
+  /** open: ثبت‌نامِ باز · upcoming: پیشِ رو · ongoing: در جریان */
+  phase: 'open' | 'upcoming' | 'ongoing'
 }
 
-export interface HeroRanking {
+export interface HeroRankingBoard {
+  /** کلیدهای پیوندِ مستقیم: /ranking?sport=&gender=&cat= */
+  sport: string
+  gender: string
+  category: string
   label: string
   players: { rank: number; name: string; points: number }[]
 }
@@ -49,10 +53,11 @@ export interface HeroRanking {
 export interface HeroData {
   live: HeroLive | null
   tournament: HeroTournament | null
-  ranking: HeroRanking | null
+  /** خالی یعنی کارتِ رنکینگ نمی‌آید */
+  ranking: HeroRankingBoard[]
 }
 
-export const EMPTY_HERO: HeroData = { live: null, tournament: null, ranking: null }
+export const EMPTY_HERO: HeroData = { live: null, tournament: null, ranking: [] }
 
 async function loadLive(): Promise<HeroLive | null> {
   /* فهرست از قبل بر اساسِ بیننده مرتب است و فقط کانالی که تصویرش واقعاً
@@ -74,14 +79,14 @@ async function loadTournament(now = Date.now()): Promise<HeroTournament | null> 
   const iso = new Date(now).toISOString()
   type Row = { id: string; title: string; status: string; max_players: number; starts_at: string }
   const cols = 'id,title,status,max_players,starts_at'
+  /* «آخرین برگزارشده» عمداً نیست (خواستِ مالک): کارتی که «برگزار شد» می‌گوید
+     خبرِ کهنه است؛ جایش آگهی‌های تازه‌ی بازار می‌آید */
   const [ahead, recent] = await Promise.all([
     sb().from('tournaments').select(cols)
       .in('status', ['registration_open', 'published', 'registration_closed'])
       .gte('starts_at', iso).order('starts_at', { ascending: true }).limit(6),
-    /* وقتی هیچ مسابقه‌ای در راه نیست، در جریان یا آخرین برگزارشده —
-       داده‌ی واقعی، نه کارتِ خالی */
     sb().from('tournaments').select(cols)
-      .in('status', ['ongoing', 'completed'])
+      .eq('status', 'ongoing')
       .lte('starts_at', iso).order('starts_at', { ascending: false }).limit(4),
   ])
   if (ahead.error || recent.error) {
@@ -92,15 +97,14 @@ async function loadTournament(now = Date.now()): Promise<HeroTournament | null> 
   const past = (recent.data ?? []) as Row[]
   /* ثبت‌نامِ باز اول — کاری که بازدیدکننده همین حالا می‌تواند بکند */
   const pick = up.find(r => r.status === 'registration_open') ?? up[0]
-    ?? past.find(r => r.status === 'ongoing') ?? past[0]
+    ?? past[0]
   if (!pick) return null
   const seats = await rpc<number>('bh_tournament_seats_left', { p_tournament: pick.id })
   const left = seats.error || seats.data == null ? null : Number(seats.data)
   if (left === null) console.error('[home-hero] seats:', seats.error?.message ?? 'no data')
   const phase: HeroTournament['phase'] =
     pick.status === 'registration_open' ? 'open'
-      : pick.status === 'ongoing' ? 'ongoing'
-        : pick.status === 'completed' ? 'done' : 'upcoming'
+      : pick.status === 'ongoing' ? 'ongoing' : 'upcoming'
   return {
     id: pick.id,
     title: pick.title,
@@ -111,31 +115,38 @@ async function loadTournament(now = Date.now()): Promise<HeroTournament | null> 
   }
 }
 
-/* ترتیبِ ترجیح — همان پیش‌فرضِ صفحه‌ی /ranking */
+/* ترتیبِ چرخش (خواستِ مالک): اسنوکر آقایان ⟵ اسنوکر بانوان ⟵ (دسته یکِ آقایان) ⟵ پاکت آقایان ⟵ پاکت بانوان.
+   جدولِ خالی از چرخه بیرون می‌ماند. */
 const BOARDS: [sport: string, sportLabel: string, gender: string, category: string][] = [
   ['snooker', 'اسنوکر', 'آقایان', 'دسته برتر'],
   ['snooker', 'اسنوکر', 'بانوان', 'دسته برتر'],
-  ['pocket', 'پاکت', 'آقایان', 'دسته برتر'],
+  /* پاکت هنوز داده ندارد (آبانِ ۱۴۰۵) — دسته یکِ اسنوکر چرخه را تا آن روز پُر نگه می‌دارد */
+  ['snooker', 'اسنوکر', 'آقایان', 'دسته یک'],
+  ['pocket', 'پاکت بیلیارد', 'آقایان', 'دسته برتر'],
+  ['pocket', 'پاکت بیلیارد', 'بانوان', 'دسته برتر'],
 ]
+const TOP = 4
 
-async function loadRanking(): Promise<HeroRanking | null> {
+async function loadRanking(): Promise<HeroRankingBoard[]> {
   const { data, error } = await sb().from('app_settings').select('value').eq('key', 'rankings_board').maybeSingle()
-  if (error) { console.error('[home-hero] ranking:', error.message); return null }
+  if (error) { console.error('[home-hero] ranking:', error.message); return [] }
   const board = (data?.value ?? null) as RankingsStructure | null
-  if (!board) return null
+  if (!board) return []
+  const out: HeroRankingBoard[] = []
   for (const [sport, sportLabel, gender, category] of BOARDS) {
     const rows = (board[sport]?.[gender]?.[category] ?? [])
       .filter(p => p.name?.trim() && Number(p.points) > 0)
       .sort((a, b) => a.rank - b.rank)
-      .slice(0, 3)
+      .slice(0, TOP)
     if (rows.length) {
-      return {
-        label: `رنکینگِ ${sportLabel}، ${gender} — ${category}`,
+      out.push({
+        sport, gender, category,
+        label: `${sportLabel}، ${gender} — ${category}`,
         players: rows.map(p => ({ rank: p.rank, name: p.name.trim(), points: Number(p.points) })),
-      }
+      })
     }
   }
-  return null
+  return out
 }
 
 async function loadHeroDataUncached(): Promise<HeroData> {
@@ -145,7 +156,7 @@ async function loadHeroDataUncached(): Promise<HeroData> {
     console.error('[home-hero]', r.reason)
     return null
   }
-  return { live: val(live), tournament: val(tournament), ranking: val(ranking) }
+  return { live: val(live), tournament: val(tournament), ranking: val(ranking) ?? [] }
 }
 
 /* ۳۰ ثانیه: پخشِ زنده تندتر از بقیه عوض می‌شود، ولی صفحه خودش ۶۰
