@@ -1,0 +1,177 @@
+/* ─────────────────────────────────────────────────────────────
+   پوسته‌ی مشترکِ ورود، ثبت‌نام و بازیابیِ رمز.
+
+   تا آبانِ ۱۴۰۵ هر سه صفحه همین قاعده‌ها را در <style>ِ خودشان تکرار
+   می‌کردند (با اختلاف‌های ناخواسته: زمینه‌ی فیلد در یکی سفید، در دوتای
+   دیگر کرم) و فونتِ Vazirmatn را روی فونتِ پروژه می‌نشاندند. حالا یک
+   منبع، و فقط قاعده‌های خاصِ هر صفحه (پله‌ها، کدِ پیامکی، شرط‌های رمز)
+   در خودِ صفحه می‌مانند.
+
+   ⚠️ فقط `backdrop-filter`ِ استاندارد — با پیشوند، کامپایلر نسخه‌ی
+   استاندارد را حذف می‌کند و کروم شیشه را نمی‌کشد.
+   ───────────────────────────────────────────────────────────── */
+
+@keyframes spin   { to { transform: rotate(360deg); } }
+@keyframes auUp   { from { opacity: 0; transform: translateY(16px) scale(.985); } to { opacity: 1; transform: none; } }
+@keyframes auFade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes auPop  { from { opacity: 0; transform: scale(.92) translateY(12px); } to { opacity: 1; transform: none; } }
+@keyframes auDrift {
+  0%   { transform: translate3d(0, 0, 0) scale(1); }
+  50%  { transform: translate3d(4%, 6%, 0) scale(1.08); }
+  100% { transform: translate3d(-3%, 2%, 0) scale(.96); }
+}
+@keyframes auRack { 0%, 100% { opacity: .55; } 50% { opacity: 1; } }
+@keyframes auSheen {
+  from { opacity: 1; transform: translateX(-150%) skewX(-18deg); }
+  to   { opacity: 1; transform: translateX(300%) skewX(-18deg); }
+}
+
+/* ═══ زمینه ═══ */
+.au-root {
+  position: relative; isolation: isolate; overflow: hidden;
+  min-height: calc(100vh - 72px); min-height: calc(100dvh - 72px);
+  display: flex; align-items: flex-start; justify-content: center;
+  padding: clamp(24px, 6vh, 64px) 16px 48px;
+  background: #F6F4EF; color: #1C1B17;
+}
+.au-bg { position: absolute; inset: 0; z-index: -1; pointer-events: none; overflow: hidden; }
+.au-blob { position: absolute; border-radius: 50%; filter: blur(64px); will-change: transform;
+  animation: auDrift 22s ease-in-out infinite alternate; }
+.au-blob.a { width: 520px; height: 520px; top: -180px; inset-inline-end: -120px;
+  background: radial-gradient(circle, rgba(199,166,106,.42), rgba(199,166,106,0) 70%); }
+.au-blob.b { width: 460px; height: 460px; bottom: -200px; inset-inline-start: -140px;
+  background: radial-gradient(circle, rgba(14,122,56,.20), rgba(14,122,56,0) 70%);
+  animation-duration: 28s; animation-delay: -9s; }
+.au-blob.c { width: 300px; height: 300px; top: 38%; inset-inline-start: 58%;
+  background: radial-gradient(circle, rgba(255,255,255,.9), rgba(255,255,255,0) 70%);
+  animation-duration: 18s; animation-delay: -4s; }
+/* رکِ پانزده‌توپیِ خطی — همان نقشِ صفحه‌ی مربیان، این‌جا آرام و کم‌رنگ */
+.au-rack { position: absolute; width: 300px; bottom: 6%; inset-inline-start: 4%;
+  color: rgba(143,101,49,.16); transform: rotate(-12deg); animation: auRack 9s ease-in-out infinite; }
+.au-rack.r2 { width: 150px; top: 9%; bottom: auto; inset-inline-start: auto; inset-inline-end: 6%;
+  transform: rotate(24deg); animation-delay: -4.5s; }
+
+/* ═══ کارت ═══ */
+.au-card {
+  position: relative; width: 100%; max-width: 420px;
+  border-radius: 24px; padding: clamp(24px, 5vw, 32px);
+  background: rgba(255,255,255,.72);
+  backdrop-filter: blur(22px) saturate(1.5);
+  border: 1px solid rgba(255,255,255,.9);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.95),
+    0 0 0 1px rgba(28,27,23,.05),
+    0 2px 6px rgba(28,27,23,.04),
+    0 28px 64px -16px rgba(28,27,23,.18);
+  animation: auUp .6s cubic-bezier(.22,1,.36,1) both;
+}
+.au-card.wide { max-width: 460px; }
+
+/* سرِ کارت: نشان، تب‌ها، عنوان */
+.au-brand { display: flex; justify-content: center; margin-bottom: 16px; }
+.au-brand a { display: inline-flex; width: 56px; height: 56px; border-radius: 16px; align-items: center; justify-content: center;
+  background: #fff; box-shadow: 0 0 0 1px rgba(28,27,23,.06), 0 8px 20px -6px rgba(143,101,49,.35);
+  transition: transform .3s cubic-bezier(.22,1,.36,1); outline: none; }
+.au-brand a:hover { transform: translateY(-2px) rotate(-4deg); }
+.au-brand a:focus-visible { box-shadow: 0 0 0 3px rgb(var(--c-gold) / .55); }
+.au-brand img { width: 38px; height: 38px; object-fit: contain; }
+
+.au-tabs { position: relative; display: grid; grid-template-columns: 1fr 1fr; padding: 4px; margin: 0 0 24px;
+  border-radius: 14px; background: rgba(28,27,23,.045); box-shadow: inset 0 0 0 1px rgba(28,27,23,.04); }
+.au-tabs a { position: relative; z-index: 1; display: flex; align-items: center; justify-content: center; min-height: 40px;
+  border-radius: 11px; font-size: 13.5px; font-weight: 700; color: #6F6A5C; text-decoration: none;
+  transition: color .25s; outline: none; }
+.au-tabs a:hover { color: #1C1B17; }
+.au-tabs a:focus-visible { box-shadow: 0 0 0 2px rgb(var(--c-gold) / .6); }
+.au-tabs a[aria-current='page'] { color: #8F6531; background: #fff;
+  box-shadow: 0 0 0 1px rgba(199,166,106,.34), 0 4px 12px -4px rgba(28,27,23,.14); }
+
+.au-title { margin: 0 0 4px; font-size: 22px; font-weight: 800; line-height: 1.5; text-align: center; color: #1C1B17; letter-spacing: -.01em; }
+.au-sub { margin: 0 0 24px; font-size: 13px; line-height: 1.9; text-align: center; color: #6F6A5C; }
+
+/* ═══ فیلد ═══ */
+.au-root label { color: #5B564B; }
+.au-wrap { display: flex; align-items: center; min-width: 0;
+  background: rgba(255,255,255,.88); border: 1px solid #E4DFD3; border-radius: 14px;
+  transition: border-color .2s, box-shadow .2s, background-color .2s; }
+.au-wrap:hover { border-color: #D3CBB8; }
+.au-wrap.on, .au-wrap:focus-within { border-color: rgb(var(--c-gold) / .75); background: #fff;
+  box-shadow: 0 0 0 4px rgb(var(--c-gold) / .16); }
+.au-wrap.err { border-color: rgba(178,59,46,.55); box-shadow: 0 0 0 4px rgba(178,59,46,.10); }
+.au-ic { padding-inline-start: 14px; color: #8A8474; display: flex; align-items: center; flex-shrink: 0; transition: color .2s; }
+.au-wrap.on .au-ic, .au-wrap:focus-within .au-ic { color: #8F6531; }
+/* ۱۶px نه ۱۴٫۵: زیرِ ۱۶، سافاریِ آیفون با فوکوس صفحه را زوم می‌کند */
+.au-inp { flex: 1; min-width: 0; background: transparent; border: none; outline: none;
+  padding: 14px; font-size: 16px; color: #1C1B17; font-family: inherit; direction: ltr; text-align: right; }
+.au-inp::placeholder { color: #ADA694; direction: rtl; font-size: 13px; }
+.au-reveal { display: flex; align-items: center; flex-shrink: 0; padding: 0 12px; align-self: stretch;
+  background: none; border: none; border-radius: 10px; cursor: pointer; color: #8A8474; transition: color .2s; }
+.au-reveal:hover { color: #1C1B17; }
+.au-reveal:focus-visible { outline: 2px solid rgb(var(--c-gold) / .7); outline-offset: -4px; }
+
+/* ═══ دکمه‌ها ═══ */
+.au-btn { position: relative; overflow: hidden; width: 100%; min-height: 52px; padding: 14px; border: none; border-radius: 14px;
+  cursor: pointer; font-family: inherit; font-size: 15px; font-weight: 700; color: #fff;
+  background: linear-gradient(180deg, rgba(255,255,255,.14), rgba(255,255,255,0) 60%), var(--brand);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.22), 0 8px 20px -8px rgba(104,72,32,.55);
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  transition: transform .25s cubic-bezier(.22,1,.36,1), background-color .2s, box-shadow .25s, opacity .2s; }
+/* درخشش فقط هنگامِ هاور؛ در حالتِ عادی بیرون از دکمه و نامرئی (در RTL جای
+   ایستای عنصرِ مطلق سمتِ راست است، پس `left` صریح است) */
+.au-btn::after { content: ''; position: absolute; top: 0; bottom: 0; left: 0; width: 40%; pointer-events: none; opacity: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.28), transparent); transform: translateX(-150%) skewX(-18deg); }
+.au-btn:not(:disabled):hover { transform: translateY(-2px); background-color: var(--brand-dark);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.22), 0 14px 28px -10px rgba(104,72,32,.6); }
+.au-btn:not(:disabled):hover::after { animation: auSheen .9s cubic-bezier(.4,0,.2,1); }
+.au-btn:not(:disabled):active { transform: scale(.985); }
+.au-btn:focus-visible { outline: 2px solid var(--brand-dark); outline-offset: 3px; }
+.au-btn:disabled { opacity: .65; cursor: not-allowed; }
+
+/* دکمه‌ی دوم به طرحِ LQ */
+.au-lq { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; min-height: 48px; padding: 12px;
+  border-radius: 14px; font-family: inherit; font-size: 14px; font-weight: 700; text-decoration: none; cursor: pointer;
+  color: #8F6531; background: rgba(199,166,106,.12); border: 1px solid rgba(199,166,106,.34);
+  transition: transform .3s cubic-bezier(.22,1,.36,1), background-color .2s; }
+.au-lq:hover { transform: translateY(-2px); background: rgba(199,166,106,.18); }
+.au-lq:focus-visible { outline: 2px solid rgb(var(--c-gold) / .7); outline-offset: 3px; }
+
+.au-forgot { font-size: 12px; font-weight: 700; color: #8F6531; text-decoration: none; border-radius: 6px;
+  transition: color .2s; }
+.au-forgot:hover { color: var(--brand-dark); }
+.au-forgot:focus-visible { outline: 2px solid rgb(var(--c-gold) / .7); outline-offset: 2px; }
+
+.au-home { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; color: #6F6A5C; text-decoration: none;
+  border-radius: 6px; transition: color .2s; }
+.au-home:hover { color: #1C1B17; }
+.au-home:focus-visible { outline: 2px solid rgb(var(--c-gold) / .7); outline-offset: 2px; }
+
+/* ═══ خطای مرکزی ═══ */
+.au-erlay { position: fixed; inset: 0; z-index: 1000; display: flex; align-items: center; justify-content: center;
+  padding: 24px; background: rgba(15,14,11,.42); backdrop-filter: blur(6px); animation: auFade .22s ease both; }
+.au-erbox { position: relative; width: 100%; max-width: 350px; background: #fff; border: 1px solid rgba(178,59,46,.22);
+  border-radius: 20px; padding: 24px 20px 20px; text-align: center;
+  box-shadow: 0 26px 80px rgba(15,14,11,.4); animation: auPop .3s cubic-bezier(.22,1,.36,1) both; }
+.au-erbox .eric { width: 52px; height: 52px; border-radius: 50%; margin: 0 auto 4px;
+  display: flex; align-items: center; justify-content: center; color: #B23B2E;
+  background: rgba(178,59,46,.08); border: 1px solid rgba(178,59,46,.2); }
+.au-erbox p { font-size: 13.5px; font-weight: 700; color: #1C1B17; line-height: 2; margin: 12px 0 16px; }
+.au-erbox button { width: 100%; min-height: 44px; padding: 11px; border-radius: 12px; cursor: pointer; font-family: inherit;
+  font-size: 13px; font-weight: 800; color: #B23B2E; background: rgba(178,59,46,.06);
+  border: 1px solid rgba(178,59,46,.3); transition: background .2s; }
+.au-erbox button:hover { background: rgba(178,59,46,.11); }
+.au-erbox button:focus-visible { outline: 2px solid #B23B2E; outline-offset: 2px; }
+
+@media (max-width: 480px) {
+  .au-root { padding-top: 24px; }
+  .au-card { padding: 24px 20px; border-radius: 22px; background: rgba(255,255,255,.8); }
+  .au-rack { width: 200px; bottom: 2%; }
+  .au-rack.r2 { width: 110px; }
+  .au-blob.a { width: 360px; height: 360px; }
+  .au-blob.b { width: 320px; height: 320px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .au-blob, .au-rack, .au-card, .au-erlay, .au-erbox { animation: none; }
+  .au-btn:not(:disabled):hover::after { animation: none; }
+  .au-btn:not(:disabled):hover, .au-lq:hover, .au-brand a:hover { transform: none; }
+}

@@ -24,7 +24,8 @@ export interface PasswordCheck { ok: boolean; message?: string }
 export function checkPassword(pw: unknown): PasswordCheck {
   const s = typeof pw === 'string' ? pw : ''
   if (s.length < PASSWORD_MIN) return { ok: false, message: `رمز عبور باید حداقل ${PASSWORD_MIN} نویسه باشد` }
-  if (Buffer.byteLength(s, 'utf8') > PASSWORD_MAX) return { ok: false, message: 'رمز عبور بیش از حد بلند است' }
+  /* TextEncoder نه Buffer: همین تابع در صفحه‌ی ثبت‌نام هم اجرا می‌شود */
+  if (new TextEncoder().encode(s).length > PASSWORD_MAX) return { ok: false, message: 'رمز عبور بیش از حد بلند است' }
   if (!/[a-z]/.test(s)) return { ok: false, message: 'رمز عبور باید حرف کوچک انگلیسی داشته باشد' }
   if (!/[A-Z]/.test(s)) return { ok: false, message: 'رمز عبور باید حرف بزرگ انگلیسی داشته باشد' }
   if (!/[0-9]/.test(s)) return { ok: false, message: 'رمز عبور باید عدد داشته باشد' }

@@ -11,13 +11,12 @@ import { useRouter } from 'next/navigation';
 import { Phone, Lock, ShieldCheck, Eye, EyeOff, AlertCircle, CheckCircle2, ArrowLeft, Check } from 'lucide-react';
 import { apiFetch } from '../../lib/http';
 import { passwordHint, capsFrom } from '../../lib/auth/password-hints';
+import { AuthBackdrop, AuthBrand } from '../../components/auth/AuthChrome';
 
 const toFa    = (v: string) => v.replace(/[0-9]/g, d => '۰۱۲۳۴۵۶۷۸۹'[+d] ?? d);
 const toLatin = (v: string) => v.replace(/[۰-۹]/g, ch => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(ch))).replace(/[^0-9]/g, '');
 
-const GOLD   = 'var(--brand)';
 const GOLD_D = 'var(--brand)';
-const TEXT   = '#1C1B17';
 const SEC    = '#5B564B';
 const MUT    = '#6F6A5C';
 const LINE   = '#E7E2D6';
@@ -111,7 +110,12 @@ export default function ForgotPasswordPage() {
     setLoading(true); setError('');
     try {
       const j = await call({ step: 'reset', password: pass });
-      if (!j.ok) { setError(j.message || 'تغییر رمز انجام نشد'); return; }
+      if (!j.ok) {
+        /* ۴۰۳ = اثباتِ کدِ پیامکی منقضی شده ⟵ از گامِ اول */
+        if (j.status === 403) setStep('phone');
+        setError(j.message || 'تغییر رمز انجام نشد');
+        return;
+      }
       setStep('done');
     } catch {
       setError('ارتباط با سرور برقرار نشد، اتصالتان را بررسی کنید و دوباره تلاش کنید');
@@ -141,31 +145,8 @@ export default function ForgotPasswordPage() {
 
   return (
     <div dir="rtl" className="au-root">
+      <AuthBackdrop />
       <style>{`
-        @keyframes spin { to { transform: rotate(360deg); } }
-        @keyframes auUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
-        @keyframes auX  { from { opacity: 0; transform: scaleX(0); } to { opacity: 1; transform: scaleX(1); } }
-        @keyframes auFade { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes auPop  { from { opacity: 0; transform: scale(.9) translateY(12px); } to { opacity: 1; transform: none; } }
-
-        .au-root { min-height: calc(100vh - 72px); background: #F7F5F0;
-          display: flex; align-items: flex-start; justify-content: center;
-          padding: clamp(24px,6vh,64px) 20px 48px; font-family: Vazirmatn, Tahoma, sans-serif; }
-        .au-card { width: 100%; max-width: 420px; background: #fff; border: 1px solid ${LINE};
-          border-radius: 22px; padding: clamp(24px,4vw,34px);
-          box-shadow: 0 18px 60px rgba(28,27,23,0.08);
-          animation: auUp .55s cubic-bezier(.22,1,.36,1) both; position: relative; overflow: hidden; }
-        .au-card::before { content: ''; position: absolute; top: 0; inset-inline: 0; height: 3px;
-          background: var(--brand); }
-
-        .au-wrap { display: flex; align-items: center; background: #FAFAF7; border: 1px solid ${LINE};
-          border-radius: 13px; transition: border-color .25s, box-shadow .25s; min-width: 0; }
-        .au-wrap.on { border-color: rgb(var(--c-gold) / 0.65); box-shadow: 0 0 0 3px rgb(var(--c-gold) / 0.14); background: #fff; }
-        .au-ic { padding: 0 14px 0 0; color: ${MUT}; display: flex; align-items: center; flex-shrink: 0; transition: color .25s; }
-        .au-wrap.on .au-ic { color: ${GOLD_D}; }
-        .au-inp { flex: 1; min-width: 0; background: transparent; border: none; outline: none;
-          padding: 14px 14px; font-size: 14.5px; color: ${TEXT}; font-family: inherit; direction: ltr; text-align: right; }
-        .au-inp::placeholder { color: #B7B0A0; direction: rtl; font-size: 12.5px; letter-spacing: normal; }
         /* ── وسط‌چین واقعی ──
            CSS بعد از *هر* نویسه — از جمله آخری — فاصله می‌گذارد، پس
            جعبه‌ی متن به اندازه‌ی یک letter-spacing از خود نوشته
@@ -180,17 +161,6 @@ export default function ForgotPasswordPage() {
            letter-spacing را normal می‌کند و خط‌تیره‌ها با تورفتگی
            جبران‌نشده کج می‌نشینند. */
         .au-inp.otp::placeholder { letter-spacing: inherit; font-size: inherit; direction: ltr; }
-
-        .au-btn { width: 100%; padding: 15px; border: none; border-radius: 13px; cursor: pointer;
-          font-family: inherit; font-size: 15px; font-weight: 600; color: #fff;
-          background: var(--brand);
-          box-shadow: 0 4px 14px rgb(var(--c-ink) / .12);
-          display: flex; align-items: center; justify-content: center; gap: 10px;
-          transition: transform .25s cubic-bezier(.22,1,.36,1), background-color .2s, box-shadow .25s, opacity .2s; }
-        .au-btn:not(:disabled):hover { transform: translateY(-2px); background: var(--brand-dark); box-shadow: 0 8px 22px rgb(var(--c-ink) / .16); }
-        .au-btn:not(:disabled):active { transform: scale(0.985); }
-        .au-btn:focus-visible { outline: 2px solid var(--brand-dark); outline-offset: 3px; }
-        .au-btn:disabled { opacity: .65; cursor: not-allowed; }
 
         .au-ghost { width: 100%; margin-top: 10px; padding: 12px; border-radius: 12px; cursor: pointer;
           font-family: inherit; font-size: 13px; font-weight: 700; color: ${SEC};
@@ -211,23 +181,6 @@ export default function ForgotPasswordPage() {
           display: flex; align-items: center; justify-content: center;
           border: 1px solid ${LINE}; background: #FAFAF7; transition: background .2s, border-color .2s; }
         .au-rules li.ok span { background: rgba(14,122,56,0.09); border-color: rgba(14,122,56,0.35); }
-
-        .au-erlay { position: fixed; inset: 0; z-index: 1000; display: flex; align-items: center; justify-content: center;
-          padding: 24px; background: rgba(15,14,11,0.42); backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px);
-          animation: auFade .22s ease both; }
-        .au-erbox { position: relative; width: 100%; max-width: 350px; background: #fff; border: 1px solid rgba(178,59,46,0.28);
-          border-radius: 18px; padding: 26px 22px 20px; text-align: center; overflow: hidden;
-          box-shadow: 0 26px 80px rgba(15,14,11,0.4); animation: auPop .3s cubic-bezier(.22,1,.36,1) both; }
-        .au-erbox::before { content: ''; position: absolute; top: 0; inset-inline: 0; height: 3px;
-          background: linear-gradient(90deg, #7E241A, #B23B2E, #7E241A); }
-        .au-erbox .eric { width: 50px; height: 50px; border-radius: 50%; margin: 0 auto 4px;
-          display: flex; align-items: center; justify-content: center; color: #B23B2E;
-          background: rgba(178,59,46,0.08); border: 1px solid rgba(178,59,46,0.22); }
-        .au-erbox p { font-size: 13.5px; font-weight: 700; color: ${TEXT}; line-height: 2; margin: 12px 0 16px; }
-        .au-erbox button { width: 100%; padding: 11px; border-radius: 11px; cursor: pointer; font-family: inherit;
-          font-size: 13px; font-weight: 800; color: #B23B2E; background: rgba(178,59,46,0.06);
-          border: 1px solid rgba(178,59,46,0.3); transition: background .2s; }
-        .au-erbox button:hover { background: rgba(178,59,46,0.11); }
       `}</style>
 
       {error && (
@@ -241,8 +194,9 @@ export default function ForgotPasswordPage() {
       )}
 
       <div className="au-card">
-        <h1 style={{ fontSize: 23, fontWeight: 900, color: TEXT, margin: '0 0 6px', letterSpacing: '-0.02em' }}>{title}</h1>
-        <p style={{ fontSize: 13, color: MUT, margin: '0 0 22px', lineHeight: 1.95 }}>{lead}</p>
+        <AuthBrand />
+        <h1 className="au-title">{title}</h1>
+        <p className="au-sub">{lead}</p>
 
         {step !== 'done' && (
           <div className="au-steps" aria-hidden="true">
@@ -255,10 +209,10 @@ export default function ForgotPasswordPage() {
         {/* ── گام ۱: شماره موبایل ── */}
         {step === 'phone' && (
           <div style={{ marginBottom: 22 }}>
-            <label style={{ display: 'block', fontSize: 12.5, fontWeight: 700, color: SEC, marginBottom: 8 }}>شماره موبایل</label>
+            <label htmlFor="fp-phone" style={{ display: 'block', fontSize: 12.5, fontWeight: 700, marginBottom: 8 }}>شماره موبایل</label>
             <div className={`au-wrap${focus === 'phone' ? ' on' : ''}`}>
               <span className="au-ic"><Phone size={16} /></span>
-              <input
+              <input id="fp-phone"
                 type="tel"
                 inputMode="numeric"
                 className="au-inp"
@@ -283,10 +237,10 @@ export default function ForgotPasswordPage() {
         {/* ── گام ۲: کد تأیید ── */}
         {step === 'code' && (
           <div style={{ marginBottom: 22 }}>
-            <label style={{ display: 'block', fontSize: 12.5, fontWeight: 700, color: SEC, marginBottom: 8 }}>کد تأیید</label>
+            <label htmlFor="fp-code" style={{ display: 'block', fontSize: 12.5, fontWeight: 700, marginBottom: 8 }}>کد تأیید</label>
             <div className={`au-wrap${focus === 'code' ? ' on' : ''}`}>
               <span className="au-ic"><ShieldCheck size={16} /></span>
-              <input
+              <input id="fp-code"
                 type="text"
                 inputMode="numeric"
                 className="au-inp otp"
@@ -341,10 +295,10 @@ export default function ForgotPasswordPage() {
         {/* ── گام ۳: رمز جدید ── */}
         {step === 'password' && (
           <div style={{ marginBottom: 6 }}>
-            <label style={{ display: 'block', fontSize: 12.5, fontWeight: 700, color: SEC, marginBottom: 8 }}>رمز جدید</label>
+            <label htmlFor="fp-p1" style={{ display: 'block', fontSize: 12.5, fontWeight: 700, marginBottom: 8 }}>رمز جدید</label>
             <div className={`au-wrap${focus === 'p1' ? ' on' : ''}`}>
               <span className="au-ic"><Lock size={16} /></span>
-              <input
+              <input id="fp-p1"
                 type={showPass ? 'text' : 'password'}
                 className="au-inp"
                 value={pass}
@@ -359,17 +313,18 @@ export default function ForgotPasswordPage() {
               />
               <button
                 type="button"
+                className="au-reveal"
                 onClick={() => setShowPass(p => !p)}
                 aria-label={showPass ? 'پنهان کردن رمز' : 'نمایش رمز'}
-                style={{ padding: '0 12px 0 14px', background: 'none', border: 'none', cursor: 'pointer', color: MUT, display: 'flex', alignItems: 'center', flexShrink: 0 }}>
-                {showPass ? <EyeOff size={15} /> : <Eye size={15} />}
+                aria-pressed={showPass}>
+                {showPass ? <EyeOff size={16} aria-hidden /> : <Eye size={16} aria-hidden />}
               </button>
             </div>
 
-            <label style={{ display: 'block', fontSize: 12.5, fontWeight: 700, color: SEC, margin: '14px 0 8px' }}>تکرار رمز جدید</label>
+            <label htmlFor="fp-p2" style={{ display: 'block', fontSize: 12.5, fontWeight: 700, margin: '14px 0 8px' }}>تکرار رمز جدید</label>
             <div className={`au-wrap${focus === 'p2' ? ' on' : ''}`}>
               <span className="au-ic"><Lock size={16} /></span>
-              <input
+              <input id="fp-p2"
                 type={showPass ? 'text' : 'password'}
                 className="au-inp"
                 value={pass2}
@@ -434,8 +389,8 @@ export default function ForgotPasswordPage() {
         </button>
 
         <div style={{ textAlign: 'center', marginTop: 22 }}>
-          <Link href="/login" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12.5, color: MUT, textDecoration: 'none' }}>
-            <ArrowLeft size={12} /> بازگشت به صفحه ورود
+          <Link href="/login" className="au-home">
+            <ArrowLeft size={12} aria-hidden /> بازگشت به صفحه ورود
           </Link>
         </div>
       </div>

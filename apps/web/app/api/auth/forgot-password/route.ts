@@ -6,6 +6,7 @@ import { sendOtp, verifyOtp, wasOtpVerified } from '@/lib/otp-server';
 import { hitRateLimit, tooMany, RULES } from '@/lib/auth/rate-limit';
 import { revokeAllSessions } from '@/lib/auth/store';
 import { checkPassword } from '@/lib/auth/password';
+import { issueOtpProof, hasOtpProof, clearOtpProof } from '@/lib/auth/otp-proof';
 import { normalizePhone, hasAssignedPrefix, INVALID_MOBILE_MESSAGE } from '@/lib/auth/phone';
 
 /* بازیابی رمز عبور — روی همان زیرساخت OTP موجود، بدون ساختن سیستم
@@ -106,7 +107,9 @@ export async function POST(req: NextRequest) {
     const code = String(b?.code ?? '').trim();
     const v = await verifyOtp(phone, code);
     if (!v.ok) return NextResponse.json({ ok: false, message: v.message ?? 'کد نادرست است' }, { status: 400 });
-    return NextResponse.json({ ok: true });
+    const res = NextResponse.json({ ok: true });
+    issueOtpProof(res, phone);
+    return res;
   }
 
   /* ── گام ۳: تعیین رمز جدید ── */
@@ -114,8 +117,10 @@ export async function POST(req: NextRequest) {
     const rl = await hitRateLimit(req, RULES.otpVerify, phone);
     if (!rl.ok) return tooMany(rl.retryAfterSec);
 
-    /* اثبات تأیید: همان شماره باید همین‌الان OTP را پاس کرده باشد */
-    if (!(await wasOtpVerified(phone))) {
+    /* اثبات تأیید: همان شماره باید همین‌الان OTP را پاس کرده باشد — و در
+       همین مرورگر. بی‌کوکی، هر کسی که شماره را می‌دانست در پنجره‌ی ۳۰
+       دقیقه‌ای پس از تأییدِ صاحبش رمز را عوض می‌کرد (lib/auth/otp-proof). */
+    if (!hasOtpProof(req, phone) || !(await wasOtpVerified(phone))) {
       return NextResponse.json({ ok: false, message: 'ابتدا کد تأیید را وارد کنید' }, { status: 403 });
     }
 
@@ -147,7 +152,9 @@ export async function POST(req: NextRequest) {
       ip: clientIp(req) ?? undefined,
     });
 
-    return NextResponse.json({ ok: true, message: 'رمز عبور تغییر کرد؛ حالا وارد شوید' });
+    const done = NextResponse.json({ ok: true, message: 'رمز عبور تغییر کرد؛ حالا وارد شوید' });
+    clearOtpProof(done);
+    return done;
   }
 
   return NextResponse.json({ ok: false, message: 'درخواست نامعتبر' }, { status: 400 });

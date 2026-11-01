@@ -1,14 +1,17 @@
 export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
 import { getSupabaseServer } from '@/lib/supabase-server';
 import { issueSession } from '@/lib/auth/store';
 import { accountStateOf } from '@/lib/enforcement/server';
 import { canSignIn, userMessage } from '@/lib/enforcement/policy';
-import { hitRateLimit, tooMany, RULES } from '@/lib/auth/rate-limit';
+import { hitRateLimit, tooMany, RULES, ipOf } from '@/lib/auth/rate-limit';
 import { normalizePhone } from '@/lib/auth/phone';
 import { loginGuard, loginFailed, loginSucceeded, lockMessage, GENERIC_LOGIN_ERROR } from '@/lib/auth/login-guard';
+
+/* هشِ رمزی که هیچ‌کس نمی‌داند — فقط برای اینکه مسیرِ «شماره نیست» همان
+   هزینه‌ی bcrypt را بپردازد (همان cost=10ِ ثبت‌نام) */
+const DUMMY_HASH = '$2b$10$GBG2hulJaMri5/rVf0ylHewCwtxNDEYyEzByCoWhltJXEMSrcWLJu';
 
 const CORS_HEADERS = {
   'Vary': 'Origin',
@@ -22,8 +25,10 @@ export async function OPTIONS() {
 
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json();
-    const { phone: rawPhone, password } = body;
+    const body = await req.json().catch(() => null) as { phone?: unknown; password?: unknown } | null;
+    const rawPhone = body?.phone;
+    /* رشته‌ی کوتاه — شیء یا آرایه پیش‌تر به bcrypt می‌رسید و ۵۰۰ می‌داد */
+    const password = typeof body?.password === 'string' && body.password.length <= 256 ? body.password : '';
 
     /* شماره پیش از هر کاری به قالب واحد می‌آید. تا امروز خام جستجو
        می‌شد، پس +98 یا ارقام فارسی «کاربر پیدا نشد» می‌گرفت و کاربر
@@ -59,6 +64,10 @@ export async function POST(req: NextRequest) {
     /* پیام یکسان برای «شماره وجود ندارد» و «رمز غلط» — وگرنه مهاجم با
        همین تفاوت می‌فهمد کدام شماره‌ها در سایت حساب دارند. */
     if (error || !user) {
+      /* ⚠️ هم‌زمانی: بی‌این مقایسه‌ی ساختگی، شماره‌ی ناموجود ~۷۰ میلی‌ثانیه
+         زودتر جواب می‌گرفت (bcrypt اجرا نمی‌شد) و همان پیامِ یکسانِ پایین
+         با زمانِ پاسخ لو می‌رفت. */
+      await bcrypt.compare(password, DUMMY_HASH);
       await loginFailed(req, String(phone));
       return NextResponse.json(
         { message: GENERIC_LOGIN_ERROR },
@@ -66,7 +75,10 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const passwordMatch = await bcrypt.compare(password, user.password);
+    /* حسابِ بی‌رمز (ساخته‌شده از پنل یا مهاجرت) با رمز وارد نمی‌شود */
+    const hasHash = typeof user.password === 'string' && user.password !== '';
+    const compared = await bcrypt.compare(password, hasHash ? user.password : DUMMY_HASH);
+    const passwordMatch = hasHash && compared;
     if (!passwordMatch) {
       /* آرگومان سوم: این شماره واقعا حساب دارد ⇒ اگر قفل شد، هشدار
          پیامکی برایش برود. شاخه‌ی بالا (شماره‌ی ناموجود) عمدا `false`
@@ -91,23 +103,19 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    /* توکن قدیمی هنوز در body برمی‌گردد تا کلاینت‌های فعلی نشکنند؛
-       در مرحله‌ی «د» حذف می‌شود. منبع اصلی از حالا کوکی httpOnly است. */
-    const token = jwt.sign(
-      { sub: user.id, phone: user.phone, role: user.primaryRole },
-      process.env.JWT_SECRET!,
-      { expiresIn: '7d' },
-    );
-
+    /* مرحله‌ی «د» (آبانِ ۱۴۰۵): توکنِ نسلِ قدیم (هفت‌روزه، بی‌typ، باطل‌نشدنی
+       با خروج) دیگر در body برنمی‌گردد. استور ذخیره‌اش نمی‌کرد و هیچ
+       درخواستی آن را نمی‌فرستاد — فقط در دسترسِ اسکریپتِ تزریقی بود.
+       نشست فقط کوکیِ httpOnly است. */
     const { password: _pwd, ...userWithoutPassword } = user;
 
     const res = NextResponse.json(
-      { token, user: userWithoutPassword },
+      { user: userWithoutPassword },
       { status: 200, headers: CORS_HEADERS },
     );
     await issueSession(res, { id: user.id, role: user.primaryRole, phone: user.phone }, {
       userAgent: req.headers.get('user-agent'),
-      ip: req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? null,
+      ip: ipOf(req),
       origin: 'login',
     });
     return res;

@@ -4,6 +4,7 @@ import { CORS } from '@/lib/social-server'
 import { sendOtp, verifyOtp } from '@/lib/otp-server'
 import { hitRateLimit, tooMany, RULES } from '@/lib/auth/rate-limit'
 import { getSupabaseServer } from '@/lib/supabase-server'
+import { issueOtpProof } from '@/lib/auth/otp-proof'
 
 export function OPTIONS() { return new NextResponse(null, { status: 204, headers: CORS }) }
 
@@ -32,7 +33,10 @@ export async function POST(req: NextRequest) {
     if (!rl.ok) return tooMany(rl.retryAfterSec)
 
     const r = await verifyOtp(mobile, String(b?.code || ''))
-    return NextResponse.json(r, { status: r.ok ? 200 : 400, headers: CORS })
+    const res = NextResponse.json(r, { status: r.ok ? 200 : 400, headers: CORS })
+    /* ثبت‌نام و شاهکار این اثبات را می‌خواهند، نه فقط نشانِ سرور */
+    if (r.ok) issueOtpProof(res, mobile)
+    return res
   }
 
   /* ارسال کد — سطل مستقل */

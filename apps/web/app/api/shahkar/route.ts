@@ -4,6 +4,7 @@ import { CORS } from '@/lib/social-server'
 import { verifyIdentity, verifyPerson } from '@/lib/shahkar-server'
 import { markIdentityVerified } from '@/lib/otp-server'
 import { hitRateLimit, tooMany, RULES } from '@/lib/auth/rate-limit'
+import { hasOtpProof } from '@/lib/auth/otp-proof'
 
 export function OPTIONS() { return new NextResponse(null, { status: 204, headers: CORS }) }
 
@@ -23,6 +24,13 @@ export async function POST(req: NextRequest) {
      می‌سوزاند و هم اجازه می‌دهد کسی جفت «کد ملی ↔ شماره» را انبوه استعلام کند. */
   const rl = await hitRateLimit(req, RULES.shahkar, mobile)
   if (!rl.ok) return tooMany(rl.retryAfterSec)
+
+  /* کسی که فقط شماره را می‌داند نباید در پنجره‌ی تأییدِ صاحبش استعلامِ پولی
+     بزند یا هویتی را به آن شماره ببندد — lib/auth/otp-proof */
+  if (!hasOtpProof(req, mobile)) {
+    return NextResponse.json({ ok: false, code: 'OTP_REQUIRED', message: 'مهلت تأیید شماره تمام شده است، دوباره کد پیامکی بگیرید' },
+      { status: 403, headers: CORS })
+  }
 
   const shahkar = await verifyIdentity(mobile, nc)
   if (!shahkar.ok || !shahkar.match) return NextResponse.json(shahkar, { status: shahkar.ok ? 200 : 400, headers: CORS })

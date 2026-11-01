@@ -7,6 +7,8 @@ export const ACCESS_COOKIE  = 'bh_at'
 export const REFRESH_COOKIE = 'bh_rt'
 export const CSRF_COOKIE    = 'bh_csrf'
 export const CSRF_HEADER    = 'x-csrf-token'
+/* اثباتِ تأییدِ پیامکی در همین مرورگر — lib/auth/otp-proof */
+export const OTP_PROOF_COOKIE = 'bh_otp_proof'
 
 export const ACCESS_TTL_SEC  = 15 * 60             // ۱۵ دقیقه
 export const REFRESH_TTL_SEC = 30 * 24 * 60 * 60   // ۳۰ روز

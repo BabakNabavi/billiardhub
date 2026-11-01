@@ -1,4 +1,4 @@
-import { createHmac } from 'crypto'
+import { createHmac, randomInt } from 'crypto'
 import { inquiryKey } from './inquiry-key'
 import { writeJson, readJsonFresh, safeKey } from './social-server'
 import { rpc } from './finance/db'
@@ -117,7 +117,8 @@ export async function sendOtp(
 
   if (!hasAssignedPrefix(m)) return { ok: false, message: INVALID_MOBILE_MESSAGE }
 
-  const code = String(Math.floor(10000 + Math.random() * 90000))   // ۵ رقمی
+  /* randomInt نه Math.random: کدِ تأیید باید غیرقابل‌پیش‌بینی باشد */
+  const code = String(randomInt(10000, 100000))   // ۵ رقمی
   const hash = hashCode(code)
 
   /* مسیرِ دیتابیس: گاردِ ارسالِ مجدد و نوشتنِ کد در یک تراکنش، پس

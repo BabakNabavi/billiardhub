@@ -19,6 +19,8 @@ import { toAuthError } from '../../lib/auth/error-message';
 import { apiFetch } from '@/lib/http';
 import { passwordHint } from '@/lib/auth/password-hints';
 import ClubPicker, { type ClubPickerValue } from '@/components/ClubPicker';
+import { AuthBackdrop, AuthBrand, AuthTabs } from '@/components/auth/AuthChrome';
+import { checkPassword } from '@/lib/auth/password';
 
 type Step = 1 | 2;
 
@@ -239,6 +241,10 @@ export default function RegisterPage() {
       setError('رمز عبور باید حداقل ۸ کاراکتر و شامل حروف بزرگ و کوچک انگلیسی، عدد و کاراکتر ویژه (مثل ! یا @) باشد');
       return;
     }
+    /* همان سیاستِ سرور (رمزهای رایج، سقفِ طول) پیش از استعلامِ پولیِ
+       شاهکار — وگرنه رمزِ ردشده یک استعلام را هدر می‌داد */
+    const pwCheck = checkPassword(form.password);
+    if (!pwCheck.ok) { setError(pwCheck.message ?? 'رمز عبور پذیرفته نشد'); return; }
     if (form.password !== form.confirmPassword) {
       setError('رمز عبور و تکرار آن یکسان نیستند');
       return;
@@ -257,6 +263,8 @@ export default function RegisterPage() {
       const idv = await apiVerifyIdentity(form.phone, form.nationalId.trim(), {
         birthDate: form.birthDate.trim(), firstName: form.firstName.trim(), lastName: form.lastName.trim(),
       });
+      /* اثباتِ تأییدِ پیامکی ۳۰ دقیقه می‌ماند — پس از آن از نو کد بگیرد */
+      if (idv.code === 'OTP_REQUIRED') { setLoading(false); setBusyStep(''); setStep(1); setError(idv.message || 'دوباره کد پیامکی بگیرید'); return; }
       if (!idv.ok) { setLoading(false); setBusyStep(''); setError(idv.message || 'استعلام احراز هویت ناموفق بود؛ دوباره تلاش کنید'); return; }
       if (!idv.match) { setLoading(false); setBusyStep(''); setError(idv.message || 'اطلاعات هویتی با کد ملی مطابقت ندارد'); return; }
 
@@ -271,7 +279,7 @@ export default function RegisterPage() {
       });
 
       /* شماره در مرحله‌ی OTP تأیید شده ⇒ کاربر verified است */
-      setAuth({ ...data.user, verified: true }, data.token);
+      setAuth({ ...data.user, verified: true }, '');
 
       /* عضویت در باشگاه نمی‌تواند همراه فرم برود: پیش از این لحظه
          حسابی وجود ندارد که عضو شود. پس انتخاب نگه داشته می‌شود و
@@ -291,6 +299,8 @@ export default function RegisterPage() {
     } catch (err: any) {
       /* خطای شبکه دیگر «خطا در ثبت‌نام» گزارش نمی‌شود؛ کاربر می‌فهمد
          مشکل از اتصال بوده نه از اطلاعاتی که وارد کرده. */
+      /* اثباتِ پیامکی بینِ شاهکار و ساختِ حساب منقضی شد ⟵ از نو کد بگیرد */
+      if (err?.response?.data?.code === 'OTP_REQUIRED') setStep(1);
       setError(toAuthError(err, 'خطا در ثبت‌نام، دوباره تلاش کنید').message);
     } finally {
       setLoading(false);
@@ -307,10 +317,11 @@ export default function RegisterPage() {
       reveal?: { shown: boolean; toggle: () => void } },
   ) => (
     <div style={{ marginBottom: 14 }}>
-      <label style={{ display: 'block', fontSize: 12.5, fontWeight: 700, color: SEC, marginBottom: 8 }}>{label}</label>
+      <label htmlFor={`au-${k}`} style={{ display: 'block', fontSize: 12.5, fontWeight: 700, marginBottom: 8 }}>{label}</label>
       <div className={`au-wrap${focusKey === k ? ' on' : ''}`}>
-        <span className="au-ic">{icon}</span>
+        <span className="au-ic" aria-hidden>{icon}</span>
         <input
+          id={`au-${k}`}
           className="au-inp"
           style={opts.ltr ? undefined : { direction: 'rtl', textAlign: 'right' }}
           type={opts.reveal ? (opts.reveal.shown ? 'text' : 'password') : (opts.type ?? 'text')}
@@ -323,10 +334,9 @@ export default function RegisterPage() {
           maxLength={opts.maxLength}
         />
         {opts.reveal && (
-          <button type="button" onClick={opts.reveal.toggle}
-              aria-label="نمایش رمز" aria-pressed={opts.reveal.shown}
-            style={{ padding: '0 12px 0 14px', background: 'none', border: 'none', cursor: 'pointer', color: MUT, display: 'flex', alignItems: 'center', flexShrink: 0 }}>
-            {opts.reveal.shown ? <EyeOff size={15} /> : <Eye size={15} />}
+          <button type="button" className="au-reveal" onClick={opts.reveal.toggle}
+            aria-label={opts.reveal.shown ? 'پنهان کردن رمز' : 'نمایش رمز'} aria-pressed={opts.reveal.shown}>
+            {opts.reveal.shown ? <EyeOff size={16} aria-hidden /> : <Eye size={16} aria-hidden />}
           </button>
         )}
       </div>
@@ -340,41 +350,8 @@ export default function RegisterPage() {
 
   return (
     <div dir="rtl" className="au-root">
+      <AuthBackdrop />
       <style>{`
-        @keyframes spin { to { transform: rotate(360deg); } }
-        @keyframes auUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
-        @keyframes auX  { from { opacity: 0; transform: scaleX(0); } to { opacity: 1; transform: scaleX(1); } }
-
-        .au-root { min-height: calc(100vh - 72px); background: #F7F5F0;
-          display: flex; align-items: flex-start; justify-content: center;
-          padding: clamp(24px,5vh,56px) 20px 48px; font-family: Vazirmatn, Tahoma, sans-serif; }
-        .au-card { width: 100%; max-width: 460px; background: #fff; border: 1px solid ${LINE};
-          border-radius: 22px; padding: clamp(24px,4vw,34px);
-          box-shadow: 0 18px 60px rgba(28,27,23,0.08);
-          animation: auUp .55s cubic-bezier(.22,1,.36,1) both; position: relative; overflow: hidden; }
-        .au-card::before { content: ''; position: absolute; top: 0; inset-inline: 0; height: 3px;
-          background: var(--brand); }
-
-        .au-wrap { display: flex; align-items: center; background: #fff; border: 1px solid ${LINE};
-          border-radius: 13px; transition: border-color .25s, box-shadow .25s; }
-        .au-wrap.on { border-color: rgb(var(--c-gold) / 0.65); box-shadow: 0 0 0 3px rgb(var(--c-gold) / 0.14); }
-        .au-ic { padding: 0 14px 0 0; color: ${MUT}; display: flex; align-items: center; flex-shrink: 0; transition: color .25s; }
-        .au-wrap.on .au-ic { color: ${GOLD_D}; }
-        .au-inp { flex: 1; min-width: 0; background: transparent; border: none; outline: none;
-          padding: 14px 14px; font-size: 14.5px; color: ${TEXT}; font-family: inherit; direction: ltr; text-align: right; }
-        .au-inp::placeholder { color: #B7B0A0; direction: rtl; font-size: 12.5px; }
-
-        .au-btn { width: 100%; padding: 15px; border: none; border-radius: 13px; cursor: pointer;
-          font-family: inherit; font-size: 15px; font-weight: 600; color: #fff;
-          background: var(--brand);
-          box-shadow: 0 4px 14px rgb(var(--c-ink) / .12);
-          display: flex; align-items: center; justify-content: center; gap: 10px;
-          transition: transform .25s cubic-bezier(.22,1,.36,1), background-color .2s, box-shadow .25s, opacity .2s; }
-        .au-btn:not(:disabled):hover { transform: translateY(-2px); background: var(--brand-dark); box-shadow: 0 8px 22px rgb(var(--c-ink) / .16); }
-        .au-btn:not(:disabled):active { transform: scale(0.985); }
-        .au-btn:focus-visible { outline: 2px solid var(--brand-dark); outline-offset: 3px; }
-        .au-btn:disabled { opacity: .65; cursor: not-allowed; }
-
         /* استپر سگمنتی */
         .au-steps { display: flex; align-items: center; gap: 10px; margin-bottom: 24px; }
         .au-step { flex: 1; }
@@ -388,28 +365,7 @@ export default function RegisterPage() {
         .au-row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
         /* آیتم‌های گرید باید بتوانند از عرض ذاتی input کوچک‌تر شوند */
         .au-row2 > div { min-width: 0; }
-        .au-wrap { min-width: 0; }
         @media (max-width: 420px) { .au-row2 { grid-template-columns: 1fr; } }
-
-        /* ── خطای مرکزی: وسط صفحه، جلوی چشم کاربر ── */
-        @keyframes auFade { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes auPop  { from { opacity: 0; transform: scale(.9) translateY(12px); } to { opacity: 1; transform: none; } }
-        .au-erlay { position: fixed; inset: 0; z-index: 1000; display: flex; align-items: center; justify-content: center;
-          padding: 24px; background: rgba(15,14,11,0.42); backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px);
-          animation: auFade .22s ease both; }
-        .au-erbox { position: relative; width: 100%; max-width: 350px; background: #fff; border: 1px solid rgba(178,59,46,0.28);
-          border-radius: 18px; padding: 26px 22px 20px; text-align: center; overflow: hidden;
-          box-shadow: 0 26px 80px rgba(15,14,11,0.4); animation: auPop .3s cubic-bezier(.22,1,.36,1) both; }
-        .au-erbox::before { content: ''; position: absolute; top: 0; inset-inline: 0; height: 3px;
-          background: linear-gradient(90deg, #7E241A, #B23B2E, #7E241A); }
-        .au-erbox .eric { width: 50px; height: 50px; border-radius: 50%; margin: 0 auto 4px;
-          display: flex; align-items: center; justify-content: center; color: #B23B2E;
-          background: rgba(178,59,46,0.08); border: 1px solid rgba(178,59,46,0.22); }
-        .au-erbox p { font-size: 13.5px; font-weight: 700; color: ${TEXT}; line-height: 2; margin: 12px 0 16px; }
-        .au-erbox button { width: 100%; padding: 11px; border-radius: 11px; cursor: pointer; font-family: inherit;
-          font-size: 13px; font-weight: 800; color: #B23B2E; background: rgba(178,59,46,0.06);
-          border: 1px solid rgba(178,59,46,0.3); transition: background .2s; }
-        .au-erbox button:hover { background: rgba(178,59,46,0.11); }
       `}</style>
 
       {/* خطا — وسط صفحه */}
@@ -423,7 +379,9 @@ export default function RegisterPage() {
         </div>
       )}
 
-      <div className="au-card">
+      <div className="au-card wide">
+          <AuthBrand />
+          <AuthTabs active="register" />
 
           {/* استپر */}
           <div className="au-steps">
@@ -448,10 +406,10 @@ export default function RegisterPage() {
             })}
           </div>
 
-          <h1 style={{ fontSize: 22, fontWeight: 900, color: TEXT, margin: '0 0 6px', letterSpacing: '-0.02em' }}>
+          <h1 className="au-title">
             {otpOpen ? 'تأیید شماره موبایل' : step === 1 ? 'ساخت حساب جدید' : 'تکمیل اطلاعات حساب'}
           </h1>
-          <p style={{ fontSize: 13, color: MUT, margin: '0 0 22px', lineHeight: 1.8 }}>
+          <p className="au-sub">
             {otpOpen ? `کد ۵ رقمی به شماره ${toFa(form.phone)} پیامک شد` : step === 1 ? 'ابتدا شماره موبایل خود را وارد کنید' : `کاربر گرامی ${toFa(form.phone)} اکنون اطلاعات حساب را کامل کنید`}
           </p>
 
@@ -537,8 +495,8 @@ export default function RegisterPage() {
           {step === 2 && (
             <div key="s2" style={{ animation: 'auUp .4s ease both' }}>
               <div className="au-row2">
-                {field('firstName', 'نام', <User size={16} />, { placeholder: 'نام' })}
-                {field('lastName', 'نام خانوادگی', <User size={16} />, { placeholder: 'نام خانوادگی' })}
+                {field('firstName', 'نام', <User size={16} />, { placeholder: 'نام', maxLength: 40 })}
+                {field('lastName', 'نام خانوادگی', <User size={16} />, { placeholder: 'نام خانوادگی', maxLength: 40 })}
               </div>
               <div className="au-row2">
                 {field('nationalId', 'کد ملی', <Fingerprint size={16} />, { type: 'tel', placeholder: 'کد ملی (۱۰ رقمی)', inputMode: 'numeric', maxLength: 10, ltr: true, faDigits: true })}
@@ -658,17 +616,9 @@ export default function RegisterPage() {
             </div>
           )}
 
-          {/* ورود */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, margin: '20px 0' }}>
-            <span style={{ fontSize: 12, color: MUT }}>حساب دارید؟</span>
-          </div>
-          <Link href="/login" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, width: '100%', boxSizing: 'border-box', padding: '13px', borderRadius: 13, textDecoration: 'none', fontSize: 14, fontWeight: 800, color: GOLD_D, background: 'rgb(var(--c-gold) / 0.10)', border: '1px solid rgb(var(--c-gold) / 0.32)' }}>
-            ورود به حساب
-          </Link>
-
-          <div style={{ textAlign: 'center', marginTop: 22 }}>
-            <Link href="/" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12.5, color: MUT, textDecoration: 'none' }}>
-              <ArrowLeft size={12} /> بازگشت به صفحه اصلی
+          <div style={{ textAlign: 'center', marginTop: 20 }}>
+            <Link href="/" className="au-home">
+              <ArrowLeft size={12} aria-hidden /> بازگشت به صفحه اصلی
             </Link>
           </div>
       </div>

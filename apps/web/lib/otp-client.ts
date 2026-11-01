@@ -24,7 +24,7 @@ export async function verifyOtp(mobile: string, code: string): Promise<OtpResult
 export async function verifyIdentity(
   mobile: string, nationalCode: string,
   extra?: { birthDate?: string; firstName?: string; lastName?: string },
-): Promise<{ ok: boolean; match?: boolean; message?: string }> {
+): Promise<{ ok: boolean; match?: boolean; message?: string; code?: string }> {
   try {
     const r = await fetch('/api/shahkar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ mobile, nationalCode, ...(extra || {}) }) })
     return await r.json()

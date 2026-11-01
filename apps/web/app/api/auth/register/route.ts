@@ -1,7 +1,6 @@
 export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
 import { getSupabaseServer } from '@/lib/supabase-server';
 import { issueSession } from '@/lib/auth/store';
 import { hitRateLimit, tooMany, RULES } from '@/lib/auth/rate-limit';
@@ -9,6 +8,23 @@ import { normalizePhone, hasAssignedPrefix, INVALID_MOBILE_MESSAGE } from '@/lib
 import { wasIdentityVerified } from '@/lib/otp-server';
 import { ensurePersonForUser } from '@/lib/identity';
 import { nationalIdBlocked } from '@/lib/enforcement/server';
+import { z } from 'zod';
+import { checkPassword } from '@/lib/auth/password';
+import { hasOtpProof, clearOtpProof } from '@/lib/auth/otp-proof';
+import { ipOf } from '@/lib/auth/rate-limit';
+import { wasOtpVerified } from '@/lib/otp-server';
+
+/* نام: رشته‌ی کوتاهِ بی‌نویسه‌ی کنترلی. پیش‌تر هر چیزی — شیء، آرایه، متنِ
+   ده‌هزارنویسه‌ای — مستقیم در ستونِ users می‌نشست. */
+const Name = z.string().trim().min(1).max(40).regex(/^[^\p{Cc}<>]+$/u);
+const Body = z.object({
+  firstName: Name,
+  lastName: Name,
+  phone: z.unknown(),
+  password: z.string(),
+  nationalId: z.unknown().optional(),
+  birthDate: z.unknown().optional(),
+});
 
 const CORS_HEADERS = {
   'Vary': 'Origin',
@@ -22,17 +38,31 @@ export async function OPTIONS() {
 
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json();
-    const { firstName, lastName, phone: rawPhone, password, nationalId, birthDate } = body;
+    const parsed = Body.safeParse(await req.json().catch(() => null));
+    if (!parsed.success) {
+      const badName = parsed.error.issues.some(i => i.path[0] === 'firstName' || i.path[0] === 'lastName');
+      return NextResponse.json(
+        { message: badName ? 'نام و نام خانوادگی را درست و حداکثر ۴۰ حرف وارد کنید' : 'همه فیلدها الزامی هستند' },
+        { status: 400, headers: CORS_HEADERS },
+      );
+    }
+    const { firstName, lastName, phone: rawPhone, password, nationalId, birthDate } = parsed.data;
     /* همان قالب واحد ورود — وگرنه کاربری که با +98 ثبت‌نام کند
        دیگر هرگز نمی‌تواند با 09 وارد شود. */
     const phone = normalizePhone(rawPhone);
 
-    if (!firstName || !lastName || !phone || !password) {
+    if (!phone || !password) {
       return NextResponse.json(
         { message: 'همه فیلدها الزامی هستند' },
         { status: 400, headers: CORS_HEADERS },
       );
+    }
+
+    /* ⚠️ سیاستِ رمز تا آبانِ ۱۴۰۵ فقط در رابط بود: فراخوانِ مستقیمِ این
+       مسیر رمزِ «1» را می‌پذیرفت. همان منبعِ بازیابی و تغییرِ رمز. */
+    const pw = checkPassword(password);
+    if (!pw.ok) {
+      return NextResponse.json({ message: pw.message }, { status: 400, headers: CORS_HEADERS });
     }
 
     /* پیشوند باید به اپراتور واقعی تعلق داشته باشد.
@@ -49,6 +79,18 @@ export async function POST(req: NextRequest) {
     /* سقف ساخت حساب — جلوی ساخت انبوه خودکار را می‌گیرد */
     const rl = await hitRateLimit(req, RULES.register, String(phone));
     if (!rl.ok) return tooMany(rl.retryAfterSec);
+
+    /* ⚠️ پایینِ همین فایل `phone_verified: true` نوشته می‌شود، ولی تا آبانِ
+       ۱۴۰۵ هیچ‌جا سنجیده نمی‌شد که کد پیامکی واقعاً وارد شده — هر کسی با
+       یک درخواستِ مستقیم روی شماره‌ی دیگری حساب می‌ساخت و صاحبِ واقعی
+       دیگر نمی‌توانست ثبت‌نام کند. حالا هم نشانِ سرور لازم است و هم
+       اثباتِ همین مرورگر (lib/auth/otp-proof). */
+    if (!hasOtpProof(req, phone) || !(await wasOtpVerified(phone))) {
+      return NextResponse.json(
+        { code: 'OTP_REQUIRED', message: 'مهلت تأیید شماره تمام شده است، دوباره کد پیامکی بگیرید' },
+        { status: 403, headers: CORS_HEADERS },
+      );
+    }
 
     const { data: existing } = await getSupabaseServer()
       .from('users')
@@ -108,8 +150,10 @@ export async function POST(req: NextRequest) {
       .single();
 
     if (error || !user) {
+      /* متنِ خطای دیتابیس (نامِ ستون و قید) به کاربر نمی‌رسد، فقط به لاگ */
+      console.error('[register] insert failed:', error?.message ?? 'unknown');
       return NextResponse.json(
-        { message: 'خطا در ثبت‌نام: ' + (error?.message ?? 'unknown') },
+        { message: 'خطا در ثبت‌نام، دوباره تلاش کنید' },
         { status: 500, headers: CORS_HEADERS },
       );
     }
@@ -119,24 +163,22 @@ export async function POST(req: NextRequest) {
        رایگان بین همه‌ی حساب‌های یک شخص مشترک است. */
     if (idVerified) await ensurePersonForUser(user.id);
 
-    /* مثل login: توکن در body برای سازگاری، نشست واقعی روی کوکی */
-    const token = jwt.sign(
-      { sub: user.id, phone: user.phone, role: user.primaryRole },
-      process.env.JWT_SECRET!,
-      { expiresIn: '7d' },
-    );
-
+    /* ⚠️ توکنِ نسلِ قدیم (هفت‌روزه، بی‌typ) دیگر در body برنمی‌گردد — مثلِ
+       login. هیچ کلاینتی آن را نمی‌خواند (استور ذخیره‌اش نمی‌کند) و تنها
+       اثرش این بود که هر اسکریپتِ تزریقی یک توکنِ باطل‌نشدنی بردارد.
+       نشست فقط روی کوکیِ httpOnly است. */
     const { password: _pwd, ...userWithoutPassword } = user;
 
     const res = NextResponse.json(
-      { token, user: userWithoutPassword },
+      { user: userWithoutPassword },
       { status: 201, headers: CORS_HEADERS },
     );
     await issueSession(res, { id: user.id, role: user.primaryRole, phone: user.phone }, {
       userAgent: req.headers.get('user-agent'),
-      ip: req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? null,
+      ip: ipOf(req),
       origin: 'register',
     });
+    clearOtpProof(res);
     return res;
   } catch {
     return NextResponse.json(
