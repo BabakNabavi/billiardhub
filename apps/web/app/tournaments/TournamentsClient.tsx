@@ -246,6 +246,7 @@ export function TournamentsClient({ initialRows }: { initialRows?: Tournament[] 
 
   const liveCount = all.filter(t => t.status === 'live').length
   const openCount = all.filter(t => t.status === 'registration_open').length
+  const doneCount = all.filter(t => t.status === 'finished').length
 
   return (
     <div className="lq-stage" dir="rtl" style={{ minHeight: '100vh', color: TEXT, fontFamily: 'Vazirmatn,Tahoma,sans-serif' }}>
@@ -278,13 +279,13 @@ export function TournamentsClient({ initialRows }: { initialRows?: Tournament[] 
           font-size: clamp(58px, 10.5vw, 140px); line-height: 1; letter-spacing: .02em;
           color: transparent; -webkit-text-stroke: 1px rgba(255,255,255,0.08); user-select: none; pointer-events: none; direction: ltr; }
         .tn-stat { text-align: center; }
-        .tn-stat b { display: block; font-size: clamp(19px,2.2vw,26px); font-weight: 900; color: #fff; font-variant-numeric: tabular-nums; }
-        .tn-stat span { font-size: 10.5px; color: rgba(255,255,255,0.55); font-weight: 700; }
+        .tn-stat b { display: block; font-size: clamp(21px,2.4vw,28.5px); font-weight: 900; color: #fff; font-variant-numeric: tabular-nums; }
+        .tn-stat span { font-size: 11.5px; color: rgba(255,255,255,0.55); font-weight: 700; }
         .tn-stat-sep { width: 1px; align-self: stretch; background: linear-gradient(180deg,transparent,rgba(199,166,106,0.4),transparent); }
         @keyframes tnBlink { 0%,100% { opacity: 1; } 50% { opacity: .2; } }
 
         /* سوییچ نمایش: گرید / لیست */
-        .tn-view { display: flex; gap: 4px; padding: 4px; background: rgba(255,255,255,0.78); border: 1px solid ${LINE}; border-radius: 12px; flex-shrink: 0; }
+        .tn-view { display: flex; gap: 2px; flex-shrink: 0; }
         .tn-view button { width: 34px; height: 34px; border-radius: 9px; border: none; background: transparent;
           color: ${SEC}; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .2s; }
         .tn-view button.on { background: rgba(199,166,106,0.14); color: ${GOLD_D}; box-shadow: inset 0 0 0 1px rgba(199,166,106,0.36); }
@@ -300,13 +301,16 @@ export function TournamentsClient({ initialRows }: { initialRows?: Tournament[] 
         .lr-thumb img { width: 100%; height: 100%; object-fit: cover; filter: brightness(0.78); }
 
         /* ═══ نوار ابزار ═══ */
-        .tn-tabs { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; padding: 4px;
+        .tn-bar { display: flex; align-items: center; gap: 6px; padding: 4px;
           background: rgba(255,255,255,0.78); border: 1px solid ${LINE}; border-radius: 14px; }
+        .tn-tabs { flex: 1; min-width: 0; display: flex; gap: 2px; overflow-x: auto; scrollbar-width: none; }
         .tn-tabs::-webkit-scrollbar { display: none; }
         .tn-tab { flex-shrink: 0; display: inline-flex; align-items: center; gap: 7px; border: none; cursor: pointer;
           font-family: inherit; font-size: 12.5px; font-weight: 700; color: ${SEC}; background: transparent;
-          padding: 9px 15px; border-radius: 10px; transition: all .22s ease; white-space: nowrap; }
+          padding: 9px 11px; border-radius: 10px; transition: all .22s ease; white-space: nowrap; }
         .tn-tab:hover { color: ${GOLD_D}; }
+        /* داخلِ ظرفِ اسکرولی حلقه‌ی بیرونی بریده می‌شود — حلقه داخلِ دکمه */
+        .tn-tab:focus-visible { outline: 2px solid ${GOLD_D}; outline-offset: -2px; }
         .tn-tab.on { background: linear-gradient(135deg, rgba(199,166,106,0.16), rgba(199,166,106,0.10));
           color: ${GOLD_D}; box-shadow: inset 0 0 0 1px rgba(199,166,106,0.36); }
         /* حالت فوکوس از کلاس مشترک lq-field می‌آید */
@@ -362,7 +366,6 @@ export function TournamentsClient({ initialRows }: { initialRows?: Tournament[] 
         @media (max-width: 640px)  {
           .tn-grid { grid-template-columns: 1fr; gap: 16px; }
           .tn-hide-mob { display: none !important; }
-          .tn-view { padding: 3px; }
           .tn-view button { width: 30px; height: 30px; }
           .tn-sbox input { padding: 9px 34px 9px 10px !important; font-size: 12px !important; }
           .lr-thumb { width: 46px; aspect-ratio: 1; border-radius: 12px; }
@@ -398,6 +401,8 @@ export function TournamentsClient({ initialRows }: { initialRows?: Tournament[] 
             <div className="tn-stat"><b style={{ color: '#7ED9A0' }}>{toFa(openCount)}</b><span>ثبت‌نام باز</span></div>
             <div className="tn-stat-sep" />
             <div className="tn-stat"><b style={{ color: '#FF8A80' }}>{toFa(liveCount)}</b><span>در حال برگزاری</span></div>
+            <div className="tn-stat-sep" />
+            <div className="tn-stat"><b style={{ color: '#E8CE96' }}>{toFa(doneCount)}</b><span>پایان یافته</span></div>
           </div>
         </div>
         {/* نوار سه‌رنگ پایانی */}
@@ -410,24 +415,24 @@ export function TournamentsClient({ initialRows }: { initialRows?: Tournament[] 
 
       {/* ═══ نوار ابزار چسبان: تب‌ها + جستجو ═══ */}
       <div style={{ position: 'sticky', top: 'var(--nav-offset)', zIndex: 40, background: 'rgba(247,247,245,0.92)', backdropFilter: 'blur(18px) saturate(1.6)', WebkitBackdropFilter: 'blur(18px) saturate(1.6)', borderBottom: `1px solid ${LINE}` }}>
-        <div className="tn-wrap" style={{ padding: '10px clamp(16px,3vw,28px)', display: 'flex', flexDirection: 'column', gap: 10 }}>
-          <div className="tn-tabs" style={{ minWidth: 0 }}>
-            {TABS.map(t => (
-              <button key={t.key} className={`tn-tab${tab === t.key ? ' on' : ''}`} onClick={() => setTab(t.key)}>
-                {t.pulse && (
-                  <span style={{ width: 6, height: 6, borderRadius: '50%', flexShrink: 0, background: t.key === 'live' ? '#ef4444' : '#30C55A', boxShadow: t.key === 'live' ? '0 0 6px rgba(239,68,68,0.6)' : '0 0 6px rgba(48,197,90,0.6)', animation: 'tnBlink 1.5s ease-in-out infinite' }} />
-                )}
-                {t.label}
-                {t.key !== 'all' && (
-                  <span style={{ fontSize: 10.5, fontWeight: 800, color: tab === t.key ? GOLD_D : MUT, fontVariantNumeric: 'tabular-nums' }}>
-                    {toFa(all.filter(x => x.status === t.key).length)}
-                  </span>
-                )}
-              </button>
-            ))}
-          </div>
-          {/* سطر دوم: سرچ (راست) + سوییچ گرید/لیست روبرویش (چپ) */}
-          <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+        <div className="tn-wrap" style={{ padding: '10px clamp(16px,3vw,28px)' }}>
+          {/* یک نوار: تب‌ها اسکرول می‌خورند، سوییچ گرید/لیست سمت چپ ثابت می‌ماند */}
+          <div className="tn-bar">
+            <div className="tn-tabs">
+              {TABS.map(t => (
+                <button key={t.key} className={`tn-tab${tab === t.key ? ' on' : ''}`} onClick={() => setTab(t.key)}>
+                  {t.pulse && (
+                    <span style={{ width: 6, height: 6, borderRadius: '50%', flexShrink: 0, background: t.key === 'live' ? '#ef4444' : '#30C55A', boxShadow: t.key === 'live' ? '0 0 6px rgba(239,68,68,0.6)' : '0 0 6px rgba(48,197,90,0.6)', animation: 'tnBlink 1.5s ease-in-out infinite' }} />
+                  )}
+                  {t.label}
+                  {t.key !== 'all' && (
+                    <span style={{ fontSize: 10.5, fontWeight: 800, color: tab === t.key ? GOLD_D : MUT, fontVariantNumeric: 'tabular-nums' }}>
+                      {toFa(all.filter(x => x.status === t.key).length)}
+                    </span>
+                  )}
+                </button>
+              ))}
+            </div>
             <div className="tn-view" role="group" aria-label="حالت نمایش">
               <button className={view === 'grid' ? 'on' : ''} onClick={() => setView('grid')} aria-label="نمایش کارتی"><LayoutGrid size={16} /></button>
               <button className={view === 'list' ? 'on' : ''} onClick={() => setView('list')} aria-label="نمایش لیستی"><List size={17} /></button>
