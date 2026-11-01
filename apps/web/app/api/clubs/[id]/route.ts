@@ -1,5 +1,6 @@
 export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
+import { revalidateTag } from 'next/cache';
 import { getSupabaseServer } from '@/lib/supabase-server';
 import { sessionFromRequest } from '@/lib/auth/session';
 import { notifyClubApproved, notifyClubRejected } from '@/lib/notify';
@@ -7,7 +8,7 @@ import { audit, clientIp } from '@/lib/finance/db';
 import { can } from '@/lib/admin/permissions';
 import { checkProfileData } from '@/lib/profiles/validate';
 import { isUUID, isValidSlug } from '@/lib/slug';
-import { stripClubPrivate } from '@/lib/clubs/private-fields';
+import { shapeClub } from '@/lib/clubs/public-club';
 
 const CORS = {
   'Vary': 'Origin',
@@ -23,7 +24,11 @@ export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const { id } = await params;
+  const { id: rawId } = await params;
+  /* نامک همیشه با حروفِ کوچک است (isValidSlug)؛ همان نرمال‌سازیِ رندرِ سرور
+     (lib/clubs/public-club) — وگرنه /clubs/ArtaClub روی سرور پیدا و در
+     مرورگر «پیدا نشد» می‌شد */
+  const id = isUUID(rawId) ? rawId : rawId.trim().toLowerCase();
   const supabase = getSupabaseServer();
   const { data, error } = isUUID(id)
     ? await supabase.from('clubs').select('*').eq('id', id).single()
@@ -53,26 +58,9 @@ export async function GET(
      پس فیلدهای حساس فقط برای مالک و ادمین می‌مانند. صفحه‌ی عمومی
      هیچ‌کدامشان را نمی‌خواند. */
   const isAdminReq = !!actor && (await can(actor.id, 'clubs'));
-  let safe: Record<string, unknown> = { ...row };
-  if (!isMine && !isAdminReq) {
-    safe = stripClubPrivate(safe);
-    /* ── دعوت پذیرفته‌نشده عمومی نیست ──
-       افزودن مربی حالا دعوت است. تا وقتی مربی نپذیرفته، نه نامش
-       باید در صفحه‌ی باشگاه بیاید و نه اینکه «این باشگاه ادعا کرده و
-       او رد کرده» به بیرون درز کند. صفحه هم همین فیلتر را دارد؛ این
-       تور سمت سرور است. */
-    if (Array.isArray(safe.coaches)) {
-      safe.coaches = (safe.coaches as { status?: unknown }[])
-        .filter(c => (typeof c?.status === 'string' ? c.status : 'accepted') === 'accepted');
-    }
-  }
-
-  return NextResponse.json({
-    ...safe,
-    isMine,
-    isVerified: row.verificationStatus === 'verified',
-    hasActiveStory: !!row.storyExpiresAt && new Date(String(row.storyExpiresAt)).getTime() > Date.now(),
-  }, { headers: CORS });
+  /* حذفِ فیلدهای حساس، فیلترِ دعوت‌های پذیرفته‌نشده و پرچم‌ها — همان تابعی
+     که رندرِ سرورِ صفحه‌ی باشگاه هم می‌خواند (lib/clubs/public-club) */
+  return NextResponse.json(shapeClub(row, { isMine, privileged: isMine || isAdminReq }), { headers: CORS });
 }
 
 export async function PUT(
@@ -407,6 +395,8 @@ export async function PUT(
     });
   }
 
+  /* HTMLِ سرورِ صفحه‌ی باشگاه از کشِ ۶۰ثانیه‌ای می‌آید (lib/clubs/public-club) */
+  revalidateTag('clubs', 'max');
   return NextResponse.json({ ...updated, resubmitted }, { headers: CORS });
 }
 
@@ -438,5 +428,6 @@ export async function DELETE(
     return NextResponse.json({ message: 'حذف باشگاه انجام نشد' }, { status: 500, headers: CORS });
   }
 
+  revalidateTag('clubs', 'max');
   return NextResponse.json({ success: true }, { headers: CORS });
 }
