@@ -226,23 +226,19 @@ export default function RankingsPage() {
         @keyframes rkFadeUp { from { opacity:0; transform: translateY(16px); } to { opacity:1; transform:none; } }
         .rk-wrap { max-width: 1080px; margin: 0 auto; padding: 0 clamp(16px,3vw,28px); }
 
-        /* هدر رسمی — پوسترِ جام و نقشه (آبانِ ۱۴۰۵). متن سمتِ راست است، پس
-           پرده‌ی تیره از راست می‌آید و جام و توپ‌ها در چپ دیده می‌مانند. */
-        .rk-hero { position: relative; overflow: hidden; background: #0D0C0A; color: #fff;
-          min-height: clamp(220px, 21vw, 300px); display: flex; align-items: center; }
-        .rk-hero > .rk-wrap { flex: 1; }
-        .rk-hero-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 42%; }
-        .rk-hero-veil { position: absolute; inset: 0;
-          background: linear-gradient(to left, rgba(10,9,7,0.86) 0%, rgba(10,9,7,0.62) 34%, rgba(10,9,7,0.12) 68%, rgba(10,9,7,0) 100%),
-                      linear-gradient(to top, rgba(10,9,7,0.45), transparent 45%); }
-        /* موبایل: نواری باریک — حداکثر یک‌دهمِ صفحه (خواستِ مالک)؛ فقط تیتر */
+        /* هدر رسمی — بنرِ «رنکینگ بیلیارد» (طرحِ مالک، ۱۰ آبانِ ۱۴۰۵). متن داخلِ
+           خودِ تصویر است، پس روی آن چیزی نمی‌نشیند و h1 فقط برای خزنده و
+           صفحه‌خوان است (sr-only).
+           دسکتاپ: تمام‌عرض با سقفِ ارتفاع؛ cover با مرکزِ ۳۵٪ عمودی تا تاج
+           و زیرنویس در کادر بمانند. موبایل: برشِ جدا (متن + توپ‌ها، ۵:۲) که
+           کامل و بی‌برش دیده می‌شود — متنِ بنرِ پهن در عرضِ ۳۹۰ ریز می‌شد. */
+        .rk-hero { position: relative; overflow: hidden; background: #0D0C0A;
+          /* سقفِ ۴۸۰: با ۴۰۰ در ۲۵۶۰px تاج و زیرنویس از کادر بیرون می‌افتادند */
+          height: clamp(240px, 26vw, 480px); }
+        .rk-hero-img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: 50% 35%; }
         @media (max-width: 640px) {
-          .rk-hero { min-height: 0; height: clamp(64px, 10svh, 92px); }
-          .rk-hero-img { object-position: 50% 55%; }
-          .rk-hero-veil { background: linear-gradient(to left, rgba(10,9,7,0.82) 0%, rgba(10,9,7,0.5) 45%, rgba(10,9,7,0.08) 80%); }
-          .rk-hero .rk-badge-row, .rk-hero p { display: none; }
-          .rk-hero h1 { font-size: 21px !important; }
-          .rk-hero > .rk-wrap { padding-top: 0 !important; padding-bottom: 0 !important; }
+          .rk-hero { height: auto; aspect-ratio: 5 / 2; }
+          .rk-hero-img { object-position: 50% 50%; }
         }
 
         /* سگمنت‌ها */
@@ -266,15 +262,6 @@ export default function RankingsPage() {
         .rk-genders { flex: 0 0 auto; }
         .rk-cats { display: flex; max-width: 100%; overflow-x: auto; scrollbar-width: none; }
         .rk-cats::-webkit-scrollbar { display: none; }
-        /* ⚠️ این قواعد با حذف بلوک استایل قدیمی از دست رفته بودند:
-           نشان بی‌فاصله به عنوان می‌چسبید و جای دسکتاپش را هم نداشت. */
-        .rk-badge-row { display: flex; justify-content: flex-end; }
-        .rk-badge { margin-bottom: 14px; }
-        @media (min-width: 900.02px) {
-          .rk-badge-row { display: contents; }
-          .rk-badge { position: absolute; top: clamp(14px,2.4vw,22px);
-            inset-inline-end: clamp(16px,3vw,28px); margin-bottom: 0; }
-        }
         .rk-lbl-short { display: none; }
         .rk-row1 button { white-space: nowrap; }
         @media (max-width: 620px) {
@@ -441,28 +428,18 @@ export default function RankingsPage() {
       <Suspense fallback={null}><DeepLink onLink={onLink} /></Suspense>
       {/* ═══ هدر رسمی ═══ */}
       <header className="rk-hero">
-        {/* تزئینی (alt خالی). در موبایل زیرِ پرده‌ی تیره نسخه‌ی ۷۶۸ (۳۴ کیلوبایت) بس است،
-            حتی در DPR3. next/image نه: صفحه کلاینتی است و این سه اندازه از پیش
-            ساخته شده‌اند (public/images/ranking). */}
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img className="rk-hero-img" alt="" src="/images/ranking/poster-1280.webp"
-          srcSet="/images/ranking/poster-768.webp 768w, /images/ranking/poster-1280.webp 1280w, /images/ranking/poster-2048.webp 2048w"
-          sizes="(max-width: 640px) 60vw, 100vw" fetchPriority="high" decoding="async" />
-        <div className="rk-hero-veil" aria-hidden />
-        <div className="rk-wrap" style={{ position: 'relative', padding: 'clamp(32px,5vw,58px) clamp(16px,3vw,28px) clamp(26px,4vw,44px)' }}>
-          {/* بالا و سمت چپ — `insetInlineEnd` در راست‌به‌چپ یعنی چپ */}
-          <div className="rk-badge-row">
-          <span className="rk-badge" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, fontSize: 11, fontWeight: 800, color: GOLD, border: '1px solid rgba(199,166,106,0.4)', background: 'rgba(199,166,106,0.10)', borderRadius: 999, padding: '5px 14px' }}>
-            <Trophy size={10} /> جدولِ رسمی
-          </span>
-          </div>
-          <h1 style={{ fontSize: 'clamp(26px,4.4vw,46px)', fontWeight: 900, margin: 0, lineHeight: 1.25, letterSpacing: '-0.02em' }}>
-            رنکینگ <span style={{ background: `linear-gradient(135deg,#E8CE96,${GOLD} 50%,#8A6020)`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>بازیکنان</span>
-          </h1>
-          <p style={{ margin: '14px 0 0', fontSize: 'clamp(12px,1.4vw,14px)', color: 'rgba(255,255,255,0.6)', lineHeight: 1.9 }}>
-            جدول امتیازات رسمی فدراسیون بولینگ و بیلیارد جمهوری اسلامی ایران
-          </p>
-        </div>
+        {/* متنِ «رنکینگ بیلیارد — بهترین بازیکنان، در یک نگاه» داخلِ تصویر است. next/image نه: صفحه کلاینتی است و اندازه‌ها از
+            پیش ساخته شده‌اند (public/images/ranking/header-*). */}
+        <picture>
+          <source media="(max-width: 640px)" sizes="100vw" width={1170} height={468}
+            srcSet="/images/ranking/header-m-780.webp 780w, /images/ranking/header-m-1170.webp 1170w" />
+          {/* alt خالی: همان معنا را h1ِ پایین می‌گوید؛ دوباره‌خوانی نه */}
+          <img className="rk-hero-img" alt=""
+            src="/images/ranking/header-1280.webp"
+            srcSet="/images/ranking/header-768.webp 768w, /images/ranking/header-1280.webp 1280w, /images/ranking/header-2048.webp 2048w"
+            sizes="100vw" width={2048} height={768} fetchPriority="high" decoding="async" />
+        </picture>
+        <h1 className="sr-only">رنکینگ بازیکنان بیلیارد — جدول امتیازات رسمی فدراسیون بولینگ و بیلیارد</h1>
       </header>
 
       {/* ═══ کنترل‌ها (همان منطق قبلی، پوسته‌ی جدید) ═══ */}

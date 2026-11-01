@@ -2,7 +2,6 @@
 
 import { useState, useMemo, useRef, useEffect } from 'react'
 import Link from 'next/link'
-import { toFaDigits } from '../../lib/jalali'
 
 import { listApprovedSellers, type SellerProfile } from '../../lib/seller-store'
 import { fetchProfilesResult } from '../../lib/profiles/client'
@@ -19,176 +18,9 @@ const TEXT_SEC = 'rgba(28,28,26,0.52)'
 const TEXT_MUT = 'rgba(28,28,26,0.32)'
 
 
-/* ── عکسِ هدرِ فهرست ──
-   ⚠️ پیش از این پنج پوسترِ برداری (گرادیان + موتیفِ SVG) پشتِ متن
-   محو می‌شدند. حالا یک عکسِ واقعی از یک فروشگاهِ بیلیارد — که مالک
-   داد — پشتِ همه‌ی اسلایدها می‌نشیند و آنچه عوض می‌شود فقط متن
-   است. همان درسِ هدرِ تولیدکنندگان: صحنه‌ی SVG هرچقدر هم دقیق
-   کشیده شود، چشم فورا می‌فهمد عکس نیست.
-
-   ⚠️ قیدِ ترکیب‌بندی — این‌جا برعکسِ هدرِ تولیدکنندگان است و مهم:
-   صفحه راست‌به‌چپ است و عنوانِ هیرو سمتِ راست می‌نشیند، ولی
-   روشن‌ترین جای این عکس هم همان سمتِ راست است (پنجره و میزِ آبی).
-   پس پرده این‌جا از هدرِ تولیدکنندگان تیره‌تر بسته شده. اگر روزی
-   عکس عوض شد، اول همین را بسنج.
-
-   ⚠️ نسبتِ ۲٫۶:۱ و نردبانِ ۷۶۸…۱۵۳۶ عیناً مثل هدرِ تولیدکنندگان.
-   دلیلش دیکد است نه بایت: نوارِ هیرو ۱۵۰ تا ۲۰۵ پیکسل بلند است و
-   روی موبایلِ ۳۷۵ پیکسلی نسبتِ نمایش ۲٫۵:۱ می‌شود، پس آن‌جا این برش
-   تقریبا هیچ ردیفِ دیکدشده‌ای را دور نمی‌ریزد. ⚠️ روی دسکتاپ این‌طور
-   نیست: نوار به ۲۰۵ پیکسل قفل می‌شود و کادرِ نمایش ۷٫۵:۱ می‌شود،
-   یعنی cover حدودِ دو سومِ ردیف‌ها را دور می‌ریزد. این معامله عمدی
-   است، چون مخاطبِ اصلی موبایل است. برش مرکزِ ۵۲٪
-   ارتفاع است، جایی که دیوارِ چوب‌ها و پیشخوانِ توپ‌ها هر دو در
-   کادر می‌مانند.
-
-   ⚠️ این عکس شلوغ‌تر از هدرِ تولیدکنندگان است (ردیفِ چوب‌ها و
-   توپ‌های رنگی یعنی جزئیاتِ پرفرکانس)، پس با همان کیفیت حدودِ دو
-   برابر بایت می‌گیرد. موبایلِ DPR۲ پله‌ی ۷۶۸ را می‌گیرد: ۱۹
-   کیلوبایت AVIF. پایین‌تر بردنِ کیفیت از این، ردیفِ چوب‌ها را
-   لک می‌کند. */
-const HERO_W = [768, 1024, 1280, 1536] as const
-/* ⚠️ `HERO_V` تزئین نیست؛ برداشتنش باگ را برمی‌گرداند.
-   عکس‌ها با `Cache-Control: public, max-age=604800` سرو می‌شوند —
-   هفت روز، به‌اضافه‌ی سی روز `stale-while-revalidate`. بارِ اول که
-   عکسِ هدر عوض شد نامِ فایل همان ماند، پس آدرس عوض نشد و هر مرورگری
-   که صفحه را در آن هفته دیده بود **اصلا درخواست نمی‌داد** و عکسِ
-   قدیمی را نشان می‌داد. سرور درست بود و هشِ بایت‌ها هم یکی بود؛
-   چیزی که فرق داشت فقط کشِ مرورگر بود. مالک همین را گزارش کرد.
-   ⟵ هر بار عکس عوض شد، این عدد هم باید جلو برود. */
-const HERO_V = 'v1'
-const heroSet = (ext: string) =>
-  HERO_W.map(w => `/images/sellers/hero-${w}-${HERO_V}.${ext} ${w}w`).join(', ')
-
-function SellerHeroPhoto() {
-  return (
-    <picture>
-      <source type="image/avif" srcSet={heroSet('avif')} sizes="100vw" />
-      <img
-        src={`/images/sellers/hero-1024-${HERO_V}.webp`}
-        srcSet={heroSet('webp')}
-        sizes="100vw"
-        width={1536}
-        height={591}
-        alt=""
-        decoding="async"
-        fetchPriority="high"
-        className="absolute inset-0 h-full w-full object-cover"
-      />
-    </picture>
-  )
-}
-
-/* ── اسلایدهای هدر ──
-   متنِ هر اسلاید کوتاه است چون روی موبایل کنارِ تصویر جا باید بماند. */
-const SELLER_SLIDES = [
-  { title: 'فروشگاه‌های بیلیارد',  sub: 'چوب، میز، توپ و لوازم جانبی' },
-  /* پیش‌تر «از معتبرترین فروشندگان — خرید مطمئن»: نه رتبه‌بندی‌ای پشتش بود نه
-     ضمانتی. نشانِ تأیید اما واقعی است (`verified` روی کارتِ فروشگاه). */
-  { title: 'فروشگاه‌های تأییدشده', sub: 'نشانِ تأیید روی کارتِ فروشگاه' },
-  { title: 'همه‌ی برندها، یک‌جا',   sub: 'مقایسه کن و انتخاب کن' },
-  { title: 'تجهیز باشگاه و خانه',   sub: 'هر چه برای بازی لازم داری' },
-  { title: 'نزدیک‌ترین فروشگاه',    sub: 'در شهر خودت پیدا کن' },
-]
-
-/* ════════ HERO — همان الگوی صفحه‌ی تولیدکنندگان ════════
-   یک عکس پشتِ همه‌ی اسلایدها، دو پرده‌ی تیره برای خوانایی، و تنها
-   چیزی که با اسلاید عوض می‌شود متن است. شرحِ عکس و برش بالاتر. */
-function SellerHeroSlider() {
-  const [active, setActive] = useState(0)
-  const activeRef = useRef(0)
-  /* ⚠️ لایه‌های محوشونده‌ی پوستر رفتند و با آن‌ها `prevIdx` و
-     `fadingRef`: حالا یک عکس پشتِ همه‌ی اسلایدهاست و آنچه عوض
-     می‌شود فقط متن است. نگه‌داشتنشان یعنی وضعیتی که دیگر هیچ‌چیز
-     را کنترل نمی‌کند. */
-  /* ⚠️ کلیکِ روی نشانگر شمارش را از نو شروع می‌کند. بدونِ این، اگر
-     درست پیشِ پایانِ چرخه بزنی، چند میلی‌ثانیه بعد خودکار ردش می‌کند
-     و انتخابت گم می‌شود. */
-  const restartRef = useRef<() => void>(() => {})
-
-  const advance = (idx: number) => {
-    if (idx === activeRef.current) return
-    activeRef.current = idx
-    setActive(idx)
-    restartRef.current()
-  }
-
-  useEffect(() => {
-    let iv: ReturnType<typeof setInterval> | null = null
-    /* ⚠️ «حرکتِ کم» فقط انیمیشنِ CSS نیست: عوض‌شدنِ خودکارِ عنوان هر
-       ۴٫۵ ثانیه هم حرکت است (WCAG 2.2.2). پرده‌ی reduced-motion پایین
-       فقط ken-burns و ورودِ متن را می‌خواباند، نه این تایمر را. برای
-       کسی که حرکت را خاموش کرده، روی اسلاید اول می‌ماند و نشانگرها
-       همچنان کار می‌کنند. */
-    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)')
-    const start = () => {
-      if (iv) clearInterval(iv)
-      if (reduced.matches) return
-      iv = setInterval(() => {
-        const next = (activeRef.current + 1) % SELLER_SLIDES.length
-        activeRef.current = next
-        setActive(next)
-      }, 4500)
-    }
-    restartRef.current = start
-    start()
-    return () => { if (iv) clearInterval(iv) }
-  }, [])
-
-  return (
-    <>
-      <style>{`
-        @keyframes kenBurnsS{0%{transform:scale(1.00) translate(0%,0%)}100%{transform:scale(1.10) translate(-1.5%,1%)}}
-        @keyframes selSlideIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
-        @media (prefers-reduced-motion: reduce){
-          .sel-hero-ken,.sel-hero-txt{animation:none !important}
-        }
-      `}</style>
-      <section style={{ position: 'relative', height: 'clamp(150px,16vw,205px)', overflow: 'hidden', background: '#0a0a0a', direction: 'rtl' }}>
-        <div className="sel-hero-ken" style={{ position: 'absolute', inset: 0, zIndex: 1, animation: 'kenBurnsS 14s ease-in-out infinite alternate', willChange: 'transform' }}>
-          <SellerHeroPhoto />
-        </div>
-        {/* ⚠️ پرده سمتِ *راست* را تیره می‌کند نه چپ. نسخه‌ی پوستری
-            برعکس بود (`to right`) و چون خودِ پوسترها تیره بودند کسی
-            متوجه نشد؛ با یک عکسِ واقعی، عنوانِ فارسی درست روی
-            روشن‌ترین نقطه می‌افتاد. */}
-        <div style={{ position: 'absolute', inset: 0, zIndex: 3, background: 'linear-gradient(to left, rgba(10,10,10,0.90) 0%, rgba(10,10,10,0.66) 34%, rgba(10,10,10,0.22) 70%, transparent 100%)' }} />
-        <div style={{ position: 'absolute', bottom: 0, insetInline: 0, height: '55%', zIndex: 3, background: 'linear-gradient(to top, rgba(0,0,0,0.80), transparent)' }} />
-
-        <div style={{ position: 'absolute', inset: 0, zIndex: 4, display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: 'clamp(12px,2.4vw,32px) clamp(24px,6vw,80px)' }}>
-          <div key={active} className="sel-hero-txt" style={{ maxWidth: 1280, width: '100%', margin: '0 auto', animation: 'selSlideIn .55s cubic-bezier(0.22,1,0.36,1) both' }}>
-            {/* ⚠️ بدونِ `textAlign:'left'`: نشان از ظرفِ RTL جهت
-                می‌گیرد و کنارِ عنوان سمتِ راست می‌نشیند — همان سمتی
-                که پرده تیره‌اش می‌کند. با `left` روی نیمه‌ی روشن
-                می‌افتاد و طلاییِ ۸٫۹ پیکسلی آن‌جا خوانده نمی‌شد. */}
-            <div style={{ marginBottom: 11 }}>
-              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, background: 'rgba(199,166,106,0.14)', border: '1px solid rgba(199,166,106,0.34)', color: '#D4A843', fontSize: 11, fontWeight: 800, borderRadius: 24, padding: '4px 11px', transform: 'translateY(-13px)', animation: 'softBlink 2.6s .7s ease-in-out infinite' }}>
-                بازارِ تجهیزات · بیلیارد هاب
-              </div>
-            </div>
-            <h1 style={{ fontSize: 'clamp(25px,4vw,50px)', fontWeight: 900, color: '#fff', margin: '0 0 12px', letterSpacing: '-0.03em', lineHeight: 1.08, transform: 'translateY(-6px)' }}>
-              {SELLER_SLIDES[active]?.title}
-            </h1>
-            <p style={{ fontSize: 'clamp(12px,1.35vw,17px)', color: '#D4A843', margin: '7px 0 0', fontWeight: 600, textShadow: '0 0 22px rgba(212,168,67,0.55)' }}>
-              {SELLER_SLIDES[active]?.sub}
-            </p>
-          </div>
-        </div>
-
-        {/* نشانگرها از دید پنهان‌اند ولی با فوکوس برمی‌گردند — همان
-            رفتارِ هدرِ مربیان، تا کاربر کیبورد از تغییر اسلاید محروم نشود. */}
-        <div className="hero-dots" style={{ position: 'absolute', bottom: 14, insetInlineStart: 'clamp(24px,6vw,80px)', zIndex: 6, display: 'flex', gap: 7 }}>
-          {SELLER_SLIDES.map((_, i) => (
-            <button key={i} type="button" onClick={() => advance(i)}
-              aria-label={`اسلاید ${toFaDigits(String(i + 1))}`}
-              aria-current={i === active ? 'true' : undefined}
-              style={{ width: i === active ? 24 : 7, height: 7, borderRadius: 4, border: 'none', cursor: 'pointer', padding: 0, background: i === active ? '#C7A66A' : 'rgba(255,255,255,0.32)', transition: 'all 0.4s cubic-bezier(0.22,1,0.36,1)' }} />
-          ))}
-        </div>
-      </section>
-    </>
-  )
-}
+/* هدرِ اسلایدیِ فروشگاه‌ها برداشته شد (خواستِ مالک، ۱۰ آبانِ ۱۴۰۵): صفحه مستقیم
+   با جست‌وجو و فهرست شروع می‌شود. h1 به‌صورتِ sr-only ماند — تنها تیترِ
+   صفحه بود و خزنده و صفحه‌خوان هنوز لازمش دارند. */
 
 
 /* ── فقط فروشگاه‌های واقعی ────────────────────────────────────────
@@ -676,8 +508,7 @@ export default function SellersPage() {
           لکه‌های پشت شیشه را می‌پوشاند. */}
       <div className="lq-stage" style={{ minHeight: '100vh', direction: 'rtl', fontFamily: 'Vazirmatn,Tahoma,sans-serif', color: TEXT }}>
 
-        {/* ─────── HERO — همان الگوی صفحه‌ی مربیان ─────── */}
-        <SellerHeroSlider />
+        <h1 className="sr-only">فروشگاه‌های تجهیزات بیلیارد</h1>
 
         {/* ─────── BODY ─────── */}
         <div style={{ maxWidth: 1160, margin: '0 auto', padding: '0 clamp(16px,3vw,32px) 64px' }}>

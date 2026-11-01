@@ -1,6 +1,5 @@
 'use client'
-import { useState, useEffect, useRef } from 'react'
-import { prefersReducedMotion } from '@/lib/ui/reduced-motion'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { listCoachProfiles, type CoachProfile } from '@/lib/coach-store'
 import { fetchProfilesResult } from '@/lib/profiles/client'
@@ -49,158 +48,9 @@ interface Coach {
    امضای ماژول و مصرف‌کننده‌هایش دست‌نخورده بمانند. */
 const COACHES: Coach[] = []
 
-/* ════════ HERO POSTERS — dark, billiard/coach themed (slider) ════════ */
-const COACH_POSTERS = [
-  { bg:'linear-gradient(125deg,#0b1322 0%,#17253f 55%,#1e2f4d 100%)', glow:'rgba(199,166,106,0.30)', accent:'rgba(199,166,106,0.55)', motif:'trophy' },
-  { bg:'linear-gradient(130deg,#141414 0%,#272524 55%,#1a1a19 100%)', glow:'rgba(199,166,106,0.30)', accent:'rgba(199,166,106,0.55)', motif:'aim'    },
-  { bg:'linear-gradient(130deg,#07231a 0%,#0e3a2a 55%,#0a2f22 100%)', glow:'rgba(199,166,106,0.26)', accent:'rgba(199,166,106,0.50)', motif:'cues'   },
-  { bg:'linear-gradient(125deg,#1c0e13 0%,#341826 55%,#230f1a 100%)', glow:'rgba(199,166,106,0.26)', accent:'rgba(199,166,106,0.50)', motif:'rack'   },
-  { bg:'linear-gradient(130deg,#08201f 0%,#0d3835 55%,#0a2a28 100%)', glow:'rgba(199,166,106,0.26)', accent:'rgba(199,166,106,0.50)', motif:'eight'  },
-]
-
-const COACH_SLIDES = [
-  { title:'مربیان حرفه‌ای',       sub:'آموزش با بهترین‌ها' },
-  { title:'از مبتدی تا حرفه‌ای',  sub:'مسیر پیشرفت تو' },
-  { title:'قهرمان بساز',           sub:'با مربیان ملی‌پوش' },
-  { title:'جلسات خصوصی',           sub:'برنامه‌ی تمرینی اختصاصی' },
-  { title:'جامعه‌ی مربیان',        sub:'بیلیارد هاب، کنار تو' },
-]
-
-function coachMotif(motif: string) {
-  const s = 168
-  if (motif === 'trophy') return (
-    <svg width={s} viewBox="0 0 100 104" fill="none" aria-hidden>
-      <path d="M32 20 H68 V34 C68 48 60 56 50 56 C40 56 32 48 32 34 Z" stroke={GOLD} strokeWidth="1.8" opacity="0.85"/>
-      <path d="M32 24 H22 A9 9 0 0 0 33 41" stroke={GOLD} strokeWidth="1.6" opacity="0.7"/>
-      <path d="M68 24 H78 A9 9 0 0 1 67 41" stroke={GOLD} strokeWidth="1.6" opacity="0.7"/>
-      <rect x="46" y="56" width="8" height="12" stroke={GOLD} strokeWidth="1.4" opacity="0.7"/>
-      <path d="M36 68 H64 L60 80 H40 Z" stroke={GOLD} strokeWidth="1.6" opacity="0.8"/>
-      <path d="M50 27 l2.6 5.3 5.8 0.8 -4.2 4.1 1 5.8 -5.2 -2.7 -5.2 2.7 1 -5.8 -4.2 -4.1 5.8 -0.8 Z" fill={GOLD} opacity="0.6"/>
-    </svg>
-  )
-  if (motif === 'aim') return (
-    <svg width={s} viewBox="0 0 100 100" fill="none" aria-hidden>
-      <circle cx="50" cy="50" r="40" stroke={GOLD} strokeWidth="0.8" opacity="0.22"/>
-      <circle cx="50" cy="50" r="28" stroke={GOLD} strokeWidth="1" opacity="0.38"/>
-      <circle cx="50" cy="50" r="16" stroke={GOLD} strokeWidth="1.6" opacity="0.9" fill="rgba(0,0,0,0.18)"/>
-      {[[50,6],[50,94],[6,50],[94,50]].map((pt,i)=>(<rect key={i} x={pt[0]!-3} y={pt[1]!-3} width="6" height="6" fill={GOLD} opacity="0.58" transform={`rotate(45 ${pt[0]} ${pt[1]})`}/>))}
-      <circle cx="44" cy="44" r="3" fill={GOLD} opacity="0.4"/>
-    </svg>
-  )
-  if (motif === 'cues') return (
-    <svg width={s} viewBox="0 0 100 100" fill="none" aria-hidden>
-      <g stroke={GOLD} strokeWidth="2.2" strokeLinecap="round" opacity="0.78"><line x1="12" y1="86" x2="88" y2="16"/><line x1="12" y1="16" x2="88" y2="86"/></g>
-      {[[12,86],[88,16],[12,16],[88,86]].map((pt,i)=>(<circle key={i} cx={pt[0]} cy={pt[1]} r="2.4" fill={GOLD} opacity="0.72"/>))}
-      <circle cx="50" cy="51" r="13" fill="rgba(0,0,0,0.35)" stroke={GOLD} strokeWidth="1.6" opacity="0.95"/>
-      <circle cx="45" cy="46" r="3" fill={GOLD} opacity="0.5"/>
-    </svg>
-  )
-  if (motif === 'rack') {
-    const rows = [[[50,11]],[[41,27],[59,27]],[[32,43],[50,43],[68,43]],[[23,59],[41,59],[59,59],[77,59]],[[14,75],[32,75],[50,75],[68,75],[86,75]]]
-    return (
-      <svg width={s} viewBox="0 0 100 86" fill="none" aria-hidden>
-        {rows.flat().map((pt,i)=>(<circle key={i} cx={pt![0]} cy={pt![1]} r="7.4" stroke={GOLD} strokeWidth="1.3" opacity="0.82"/>))}
-        <circle cx="50" cy="11" r="3" fill={GOLD} opacity="0.6"/>
-      </svg>
-    )
-  }
-  return (
-    <svg width={s} viewBox="0 0 100 100" fill="none" aria-hidden>
-      <circle cx="50" cy="50" r="38" stroke={GOLD} strokeWidth="1.8" opacity="0.85" fill="rgba(0,0,0,0.18)"/>
-      <circle cx="50" cy="50" r="16" fill={GOLD} opacity="0.9"/>
-      <text x="50" y="51" textAnchor="middle" dominantBaseline="central" fontSize="19" fontWeight="800" fill="#1c0e13">8</text>
-      <ellipse cx="38" cy="36" rx="7" ry="4" fill={GOLD} opacity="0.22" transform="rotate(-30 38 36)"/>
-    </svg>
-  )
-}
-
-function CoachPoster({ variant }: { variant: number }) {
-  const p = COACH_POSTERS[variant % COACH_POSTERS.length]!
-  return (
-    <div style={{ position:'absolute', inset:0, overflow:'hidden', background:p.bg }}>
-      <div style={{ position:'absolute', inset:0, backgroundImage:'radial-gradient(rgba(255,255,255,0.05) 1px, transparent 1px)', backgroundSize:'18px 18px', opacity:0.6 }}/>
-      <div style={{ position:'absolute', inset:'-20%', background:`radial-gradient(circle at 30% 40%, ${p.glow}, transparent 55%)` }}/>
-      <div style={{ position:'absolute', top:'-25%', bottom:'-25%', left:'52%', width:2, background:`linear-gradient(180deg, transparent, ${p.accent}, transparent)`, transform:'rotate(19deg)', opacity:0.4 }}/>
-      <div style={{ position:'absolute', top:'-25%', bottom:'-25%', left:'58%', width:1, background:`linear-gradient(180deg, transparent, ${p.accent}, transparent)`, transform:'rotate(19deg)', opacity:0.2 }}/>
-      <div style={{ position:'absolute', inset:0, display:'flex', alignItems:'center', justifyContent:'center', transform:'translateX(-15%)', opacity:0.6 }}>
-        <div style={{ display:'flex', filter:'drop-shadow(0 5px 18px rgba(0,0,0,0.45))' }}>{coachMotif(p.motif)}</div>
-      </div>
-    </div>
-  )
-}
-
-function CoachHeroSlider() {
-  const [active, setActive]   = useState(0)
-  const [prevIdx, setPrevIdx] = useState<number | null>(null)
-  const activeRef = useRef(0)
-  const fadingRef = useRef(false)
-
-  const advance = (idx: number) => {
-    if (idx === activeRef.current || fadingRef.current) return
-    setPrevIdx(activeRef.current)
-    activeRef.current = idx
-    fadingRef.current = true
-    setActive(idx)
-    setTimeout(() => { setPrevIdx(null); fadingRef.current = false }, 850)
-  }
-
-  useEffect(() => {
-    if (prefersReducedMotion()) return
-    const interval = setInterval(() => {
-      const next = (activeRef.current + 1) % COACH_SLIDES.length
-      setPrevIdx(activeRef.current)
-      activeRef.current = next
-      fadingRef.current = true
-      setActive(next)
-      setTimeout(() => { setPrevIdx(null); fadingRef.current = false }, 850)
-    }, 4500)
-    return () => clearInterval(interval)
-  }, [])
-
-  return (
-    <>
-      <style>{`@keyframes kenBurnsC{0%{transform:scale(1.00) translate(0%,0%)}100%{transform:scale(1.14) translate(-2%,1.5%)}}`}</style>
-      <section style={{ position:'relative', height:'clamp(150px,16vw,205px)', overflow:'hidden', background:'#0a0a0a', direction:'rtl' }}>
-        {COACH_SLIDES.map((_, i) => (
-          <div key={i} style={{ position:'absolute', inset:0, opacity: i===active?1:0, transition:'opacity 0.90s ease', zIndex: i===active?2:i===prevIdx?1:0, animation:'kenBurnsC 9s ease-in-out infinite alternate', willChange:'transform' }}>
-            <CoachPoster variant={i}/>
-          </div>
-        ))}
-        <div style={{ position:'absolute', inset:0, zIndex:3, background:'linear-gradient(to right, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.28) 55%, transparent 100%)' }}/>
-        <div style={{ position:'absolute', bottom:0, left:0, right:0, height:'55%', zIndex:3, background:'linear-gradient(to top, rgba(0,0,0,0.80), transparent)' }}/>
-
-        <div style={{ position:'absolute', inset:0, zIndex:4, display:'flex', flexDirection:'column', justifyContent:'center', padding:'clamp(12px,2.4vw,32px) clamp(24px,6vw,80px)' }}>
-          <div style={{ maxWidth:1280, width:'100%', margin:'0 auto' }}>
-            {/* `end` در RTL همان چپِ پیشین است */}
-            <div style={{ textAlign:'end', marginBottom:11 }}>
-              <div style={{ display:'inline-flex', alignItems:'center', gap:7, background:'rgba(199,166,106,0.14)', border:'1px solid rgba(199,166,106,0.34)', color:'#D4A843', fontSize:11, fontWeight:800, borderRadius:24, padding:'4px 11px', transform:'translateY(-13px)', animation:'softBlink 2.6s .7s ease-in-out infinite' }}>
-                مربیِ خودت را پیدا کن · بیلیارد هاب
-              </div>
-            </div>
-            <h1 style={{ fontSize:'clamp(25px,4vw,50px)', fontWeight:900, color:'#fff', margin:'0 0 12px', letterSpacing:'-0.03em', lineHeight:1.08, transform:'translateY(-6px)' }}>
-              {COACH_SLIDES[active]?.title}
-            </h1>
-            <p style={{ fontSize:'clamp(12px,1.35vw,17px)', color:'#D4A843', margin:'7px 0 0', fontWeight:600, textShadow:'0 0 22px rgba(212,168,67,0.55)' }}>
-              {COACH_SLIDES[active]?.sub}
-            </p>
-          </div>
-        </div>
-
-        {/* ── نشانگر اسلاید دیده نمی‌شود ──
-            آن دایره‌های ریز گوشه‌ی تصویر روی هدر شلوغی می‌کردند و
-            هیچ‌کس رویشان کلیک نمی‌کرد؛ اسلایدر خودش می‌چرخد. حذف
-            کاملشان ولی کاربر کیبورد و صفحه‌خوان را از تغییر اسلاید
-            محروم می‌کرد، پس فقط از دید پنهان شده‌اند و با فوکوس
-            دوباره ظاهر می‌شوند. */}
-        <div className="hero-dots" style={{ position:'absolute', bottom:14, left:'clamp(24px,6vw,80px)', zIndex:6, display:'flex', gap:7 }}>
-          {COACH_SLIDES.map((_, i) => (
-            <button key={i} onClick={() => advance(i)} aria-label={`اسلاید ${i+1}`} style={{ width: i===active?24:7, height:7, borderRadius:4, border:'none', cursor:'pointer', padding:0, background: i===active?'#C7A66A':'rgba(255,255,255,0.32)', transition:'all 0.4s cubic-bezier(0.22,1,0.36,1)' }}/>
-          ))}
-        </div>
-      </section>
-    </>
-  )
-}
+/* هدرِ اسلایدیِ مربیان برداشته شد (خواستِ مالک، ۱۰ آبانِ ۱۴۰۵): صفحه مستقیم
+   با جست‌وجو و فهرست شروع می‌شود. h1 به‌صورتِ sr-only ماند — تنها تیترِ
+   صفحه بود و خزنده و صفحه‌خوان هنوز لازمش دارند. */
 
 /* ── آواتار با حلقه‌ی طلایی ──
    پیش‌تر این‌جا حلقه‌ی رنگی استوری بود که رسانه‌اش عکس پروفایل خود
@@ -457,8 +307,7 @@ export default function CoachesPage() {
 
       <div className="lq-stage" style={{ direction:'rtl', fontFamily:"'Vazirmatn',Tahoma,sans-serif", minHeight:'100vh', color:TEXT }}>
 
-        {/* ══════════════ HERO — poster slider ══════════════ */}
-        <CoachHeroSlider />
+        <h1 className="sr-only">مربیان بیلیارد</h1>
 
         {/* ══════════════ FILTER ══════════════ */}
         <div id="coaches" style={{

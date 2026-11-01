@@ -58,130 +58,6 @@ function calcDistance(lat1: number, lon1: number, lat2: number, lon2: number) {
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
 }
 
-/* ══════════════════════════════════════════════
-   CLUB POSTERS — designed (no raster), billiard-themed.
-   5 varied elegant variants sized to the card image area.
-══════════════════════════════════════════════ */
-const GOLD_M = '#C7A66A';
-
-const CLUB_POSTERS = [
-  { bg:'linear-gradient(125deg,#0b1322 0%,#17253f 55%,#1e2f4d 100%)', glow:'rgba(199,166,106,0.30)', glowPos:'20% 24%', accent:'rgba(199,166,106,0.55)', motif:'rack',  eyebrow:'SNOOKER CLUB' },
-  { bg:'linear-gradient(130deg,#07231a 0%,#0e3a2a 55%,#0a2f22 100%)', glow:'rgba(199,166,106,0.26)', glowPos:'80% 20%', accent:'rgba(199,166,106,0.50)', motif:'table', eyebrow:'BILLIARD CLUB' },
-  { bg:'linear-gradient(125deg,#141414 0%,#272524 55%,#1a1a19 100%)', glow:'rgba(199,166,106,0.30)', glowPos:'50% 20%', accent:'rgba(199,166,106,0.55)', motif:'cues',  eyebrow:'CUE SPORTS' },
-  { bg:'linear-gradient(125deg,#1c0e13 0%,#341826 55%,#230f1a 100%)', glow:'rgba(199,166,106,0.26)', glowPos:'22% 26%', accent:'rgba(199,166,106,0.50)', motif:'eight', eyebrow:'POOL CLUB' },
-  { bg:'linear-gradient(130deg,#08201f 0%,#0d3835 55%,#0a2a28 100%)', glow:'rgba(199,166,106,0.26)', glowPos:'78% 22%', accent:'rgba(199,166,106,0.50)', motif:'aim',   eyebrow:'GAME ROOM' },
-];
-
-/* ── SVG motifs (elegant gold line-art watermarks) ── */
-function motifRack(size: number) {
-  const rows = [[[50,11]],[[41,27],[59,27]],[[32,43],[50,43],[68,43]],[[23,59],[41,59],[59,59],[77,59]],[[14,75],[32,75],[50,75],[68,75],[86,75]]];
-  return (
-    <svg width={size} viewBox="0 0 100 86" fill="none" aria-hidden>
-      {rows.flat().map((p, i) => (
-        <circle key={i} cx={p![0]} cy={p![1]} r="7.4" stroke={GOLD_M} strokeWidth="1.3" opacity="0.82" />
-      ))}
-      <circle cx="50" cy="11" r="3" fill={GOLD_M} opacity="0.6" />
-    </svg>
-  );
-}
-function motifTable(size: number) {
-  return (
-    <svg width={size} viewBox="0 0 120 72" fill="none" aria-hidden>
-      <rect x="4" y="4" width="112" height="64" rx="10" stroke={GOLD_M} strokeWidth="1.6" opacity="0.8" />
-      <rect x="12" y="12" width="96" height="48" rx="4" stroke={GOLD_M} strokeWidth="1" opacity="0.42" />
-      {[[10,10],[60,7],[110,10],[10,62],[60,65],[110,62]].map((p, i) => (
-        <circle key={i} cx={p[0]} cy={p[1]} r="4" fill={GOLD_M} opacity="0.68" />
-      ))}
-      <line x1="36" y1="12" x2="36" y2="60" stroke={GOLD_M} strokeWidth="1" opacity="0.4" />
-      <path d="M36 27 A9 9 0 0 0 36 45" stroke={GOLD_M} strokeWidth="1" opacity="0.4" fill="none" />
-      <circle cx="60" cy="36" r="1.8" fill={GOLD_M} opacity="0.7" />
-    </svg>
-  );
-}
-function motifCues(size: number) {
-  return (
-    <svg width={size} viewBox="0 0 100 100" fill="none" aria-hidden>
-      <g stroke={GOLD_M} strokeWidth="2.2" strokeLinecap="round" opacity="0.78">
-        <line x1="12" y1="86" x2="88" y2="16" />
-        <line x1="12" y1="16" x2="88" y2="86" />
-      </g>
-      {[[12,86],[88,16],[12,16],[88,86]].map((p, i) => (
-        <circle key={i} cx={p[0]} cy={p[1]} r="2.4" fill={GOLD_M} opacity="0.72" />
-      ))}
-      <circle cx="50" cy="51" r="13" fill="rgba(0,0,0,0.35)" stroke={GOLD_M} strokeWidth="1.6" opacity="0.95" />
-      <circle cx="45" cy="46" r="3" fill={GOLD_M} opacity="0.5" />
-    </svg>
-  );
-}
-function motifEight(size: number) {
-  return (
-    <svg width={size} viewBox="0 0 100 100" fill="none" aria-hidden>
-      <circle cx="50" cy="50" r="38" stroke={GOLD_M} strokeWidth="1.8" opacity="0.85" fill="rgba(0,0,0,0.18)" />
-      <circle cx="50" cy="50" r="16" fill={GOLD_M} opacity="0.9" />
-      <text x="50" y="51" textAnchor="middle" dominantBaseline="central" fontSize="19" fontWeight="800" fill="#1c0e13">8</text>
-      <ellipse cx="38" cy="36" rx="7" ry="4" fill={GOLD_M} opacity="0.22" transform="rotate(-30 38 36)" />
-    </svg>
-  );
-}
-function motifAim(size: number) {
-  return (
-    <svg width={size} viewBox="0 0 100 100" fill="none" aria-hidden>
-      <circle cx="50" cy="50" r="40" stroke={GOLD_M} strokeWidth="0.8" opacity="0.22" />
-      <circle cx="50" cy="50" r="28" stroke={GOLD_M} strokeWidth="1" opacity="0.38" />
-      <circle cx="50" cy="50" r="16" stroke={GOLD_M} strokeWidth="1.6" opacity="0.9" fill="rgba(0,0,0,0.18)" />
-      {[[50,6],[50,94],[6,50],[94,50]].map((p, i) => (
-        <rect key={i} x={p[0]!-3} y={p[1]!-3} width="6" height="6" fill={GOLD_M} opacity="0.58" transform={`rotate(45 ${p[0]} ${p[1]})`} />
-      ))}
-      <circle cx="44" cy="44" r="3" fill={GOLD_M} opacity="0.4" />
-    </svg>
-  );
-}
-function renderMotif(motif: string, view: 'grid' | 'list' | 'hero') {
-  const pick = (hero: number, grid: number, list: number) =>
-    view === 'hero' ? hero : view === 'grid' ? grid : list;
-  switch (motif) {
-    case 'rack':  return motifRack(pick(168, 82, 46));
-    case 'table': return motifTable(pick(210, 104, 60));
-    case 'cues':  return motifCues(pick(168, 82, 48));
-    case 'eight': return motifEight(pick(150, 80, 46));
-    default:      return motifAim(pick(162, 84, 48));
-  }
-}
-
-function ClubPoster({ variant, view, hov }: { variant: number; view: 'grid' | 'list' | 'hero'; hov: boolean }) {
-  const p = CLUB_POSTERS[variant % CLUB_POSTERS.length]!;
-  const isHero = view === 'hero';
-  return (
-    <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', background: p.bg }}>
-      {/* dot texture */}
-      <div style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(rgba(255,255,255,0.05) 1px, transparent 1px)', backgroundSize: isHero ? '18px 18px' : '13px 13px', opacity: 0.6 }} />
-      {/* gold glow */}
-      <div style={{ position: 'absolute', inset: '-20%', background: `radial-gradient(circle at ${isHero ? '30% 40%' : p.glowPos}, ${p.glow}, transparent 55%)`, transition: 'transform 500ms ease', transform: hov ? 'scale(1.12)' : 'scale(1)' }} />
-      {/* diagonal cue accents */}
-      <div style={{ position: 'absolute', top: '-25%', bottom: '-25%', left: isHero ? '52%' : '60%', width: 2, background: `linear-gradient(180deg, transparent, ${p.accent}, transparent)`, transform: 'rotate(19deg)', opacity: isHero ? 0.4 : 0.6 }} />
-      <div style={{ position: 'absolute', top: '-25%', bottom: '-25%', left: isHero ? '58%' : '66%', width: 1, background: `linear-gradient(180deg, transparent, ${p.accent}, transparent)`, transform: 'rotate(19deg)', opacity: isHero ? 0.2 : 0.28 }} />
-
-      {/* motif (+ eyebrow on grid). hero → left-side emblem, cleared from RTL text */}
-      <div style={{
-        position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column',
-        alignItems: 'center', justifyContent: 'center',
-        gap: view === 'grid' ? 9 : 0,
-        transition: 'transform 450ms cubic-bezier(0.25,0.46,0.45,0.94)',
-        transform: isHero ? 'translateX(-15%)' : (hov ? 'scale(1.06)' : 'scale(1)'),
-        opacity: isHero ? 0.6 : 1,
-      }}>
-        <div style={{ display: 'flex', filter: 'drop-shadow(0 5px 18px rgba(0,0,0,0.45))' }}>{renderMotif(p.motif, view)}</div>
-        {view === 'grid' && (
-          <div style={{ direction: 'ltr', fontSize: 10.5, letterSpacing: '0.30em', fontWeight: 700, color: 'rgba(199,166,106,0.92)', textShadow: '0 1px 8px rgba(0,0,0,0.5)' }}>{p.eyebrow}</div>
-        )}
-      </div>
-
-      {/* bottom gold hairline */}
-      {!isHero && <div style={{ position: 'absolute', left: 0, right: 0, bottom: 0, height: 2, background: `linear-gradient(90deg, transparent, ${p.accent}, transparent)`, opacity: 0.7 }} />}
-    </div>
-  );
-}
-
 const CLUB_IMG_POOL = [
   '/images/clubs/club6.jpeg',
   '/images/clubs/club7.jpeg',
@@ -458,101 +334,9 @@ function ClubCard({ club, view, idx = 0, tournaments = [] }: { club: Club; view:
 /* ══════════════════════════════════════════════
    PAGE
 ══════════════════════════════════════════════ */
-const SLIDER_IMAGES = [
-  { src: '/images/clubs/club1.png',  title: 'باشگاه‌های حرفه‌ای', sub: 'تجربه بازی در بهترین محیط‌ها' },
-  { src: '/images/clubs/club2.jpg',  title: 'رزرو آنلاین میز',     sub: 'در هر زمان، از هر کجا' },
-  { src: '/images/clubs/club3.jpg',  title: 'مربیان',               sub: 'یادگیری با بهترین‌ها' },
-  /* ⚠️ این‌جا «۵۴۸ باشگاه» بود — عددی ساختگی که با تعداد واقعیِ
-     باشگاه‌های ثبت‌شده هیچ نسبتی نداشت و با رشدِ سایت هم عوض نمی‌شد.
-     جایش یک ویژگیِ واقعی نشست. */
-  { src: '/images/clubs/club4.png',  title: 'کافه بیلیارد',         sub: 'در سراسر ایران' },
-  { src: '/images/clubs/club4.png',  title: 'جامعه بیلیارد',        sub: 'بیلیارد هاب، اتصال همه' },
-];
-
-
-function HeroSliderFull() {
-  const [active, setActive] = useState(0);
-  const [prevIdx, setPrevIdx] = useState<number | null>(null);
-  const activeRef = useRef(0);
-  const fadingRef = useRef(false);
-
-  const advance = (idx: number) => {
-    if (idx === activeRef.current || fadingRef.current) return;
-    setPrevIdx(activeRef.current);
-    activeRef.current = idx;
-    fadingRef.current = true;
-    setActive(idx);
-    setTimeout(() => { setPrevIdx(null); fadingRef.current = false; }, 850);
-  };
-
-  useEffect(() => {
-    /* «کاهشِ حرکت»ِ سیستم: نه چرخشِ خودکار. نقطه‌ها همچنان کار می‌کنند. */
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    const interval = setInterval(() => {
-      const next = (activeRef.current + 1) % SLIDER_IMAGES.length;
-      setPrevIdx(activeRef.current);
-      activeRef.current = next;
-      fadingRef.current = true;
-      setActive(next);
-      setTimeout(() => { setPrevIdx(null); fadingRef.current = false; }, 850);
-    }, 4500);
-    return () => clearInterval(interval);
-  }, []);
-
-  return (
-    <>
-      <style>{`
-        @keyframes kenBurns {
-          0%   { transform: scale(1.00) translate(0%, 0%); }
-          100% { transform: scale(1.14) translate(-2%, 1.5%); }
-        }
-      `}</style>
-    <div style={{ position: 'relative', height: 'clamp(160px,17vw,200px)', overflow: 'hidden', background: '#0a0a0a' }}>
-      {SLIDER_IMAGES.map((_, i) => (
-        <div key={i} style={{
-          position: 'absolute', inset: 0,
-          opacity: i === active ? 1 : 0,
-          transition: 'opacity 0.90s ease',
-          zIndex: i === active ? 2 : i === prevIdx ? 1 : 0,
-          animation: 'kenBurns 9s ease-in-out infinite alternate',
-          willChange: 'transform',
-        }}>
-          <ClubPoster variant={i} view="hero" hov={false} />
-        </div>
-      ))}
-      <div style={{ position: 'absolute', inset: 0, zIndex: 3, background: 'linear-gradient(to right, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.3) 55%, transparent 100%)' }} />
-      <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '50%', zIndex: 3, background: 'linear-gradient(to top, rgba(0,0,0,0.82), transparent)' }} />
-
-      {/* text */}
-      <div style={{ position: 'absolute', top: 0, bottom: 0, left: 0, right: 0, zIndex: 4, display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: 'clamp(14px,2.5vw,36px)', direction: 'rtl' }}>
-        {/* ⚠️ «DISCOVER CLUBS» بود: برچسبِ انگلیسیِ فاصله‌دار روی صفحه‌ی فارسی.
-            حالا همین جایگاه h1ِ ثابتِ صفحه است. تیترِ بزرگِ زیرش هر ۴٫۵ ثانیه
-            عوض می‌شود، پس h1 بودنش یعنی موتورِ جست‌وجو و صفحه‌خوان هر بار
-            عنوانِ دیگری (گاهی «مربیان») می‌گرفتند. فاصله‌ی حروفِ ۰٫۲۶em هم
-            رفت: روی فارسی اتصالِ حروف را می‌شکند. */}
-        <h1 style={{ fontSize: 13, color: 'rgba(199,166,106,0.92)', fontWeight: 700, margin: '0 0 8px' }}>باشگاه‌های بیلیارد</h1>
-        <p aria-hidden="true" style={{ fontSize: 'clamp(23px, 4.1vw, 51px)', fontWeight: 900, color: '#fff', margin: '0 0 9px', letterSpacing: '-0.03em', lineHeight: 1.08 }}>
-          {SLIDER_IMAGES[active]?.title}
-        </p>
-        <p aria-hidden="true" style={{ fontSize: 'clamp(13px, 1.35vw, 18px)', color: '#D4A843', margin: 0, fontWeight: 600, textShadow: '0 0 22px rgba(212,168,67,0.55)' }}>
-          {SLIDER_IMAGES[active]?.sub}
-        </p>
-      </div>
-
-      {/* dots */}
-      <div style={{ position: 'absolute', bottom: 16, right: 'clamp(14px,2.5vw,36px)', zIndex: 6, display: 'flex', gap: 7 }}>
-        {SLIDER_IMAGES.map((_, i) => (
-          <button key={i} type="button" aria-label={`اسلایدِ ${toFa(i + 1)}`} aria-current={i === active || undefined} onClick={() => advance(i)} style={{
-            width: i === active ? 24 : 7, height: 7, borderRadius: 4, border: 'none', cursor: 'pointer', padding: 0,
-            background: i === active ? '#C7A66A' : 'rgba(255,255,255,0.32)',
-            transition: 'all 0.4s cubic-bezier(0.22,1,0.36,1)',
-          }} />
-        ))}
-      </div>
-    </div>
-    </>
-  );
-}
+/* هدرِ اسلایدیِ باشگاه‌ها برداشته شد (خواستِ مالک، ۱۰ آبانِ ۱۴۰۵): صفحه مستقیم
+   با جست‌وجو و فهرست شروع می‌شود. h1 به‌صورتِ sr-only ماند — تنها تیترِ
+   صفحه بود و خزنده و صفحه‌خوان هنوز لازمش دارند. */
 
 export default function ClubsPage() {
   const [clubs, setClubs]           = useState<Club[]>([]);
@@ -716,10 +500,7 @@ export default function ClubsPage() {
       {/* رنگ پایه داخل lq-stage است */}
       <div className="lq-stage" style={{ minHeight: '100vh', paddingBottom: 80, direction: 'rtl' }}>
 
-        {/* ══ HERO SLIDER ══ */}
-        <div style={{ position: 'relative', overflow: 'hidden' }}>
-          <HeroSliderFull />
-        </div>
+        <h1 className="sr-only">باشگاه‌های بیلیارد</h1>
 
         {/* ══ STICKY TOOLBAR ══ */}
         {/* نوار چسبان نیمه‌شفاف می‌ماند تا لکه‌های پشت شیشه از زیرش
