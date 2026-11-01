@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import {
-  Calendar, Radio, Search,
+  Building2, Calendar, GraduationCap, Radio, Search, ShoppingBag, Trophy, Users, Wrench,
 } from 'lucide-react'
 import type { HeroData } from '@/lib/home-hero'
 import type { RealClub, RealProduct, RealStore } from '@/lib/home-types'
@@ -18,6 +18,17 @@ import './home-hero.css'
    ⚠️ نوارِ استوری این‌جا نیست — در Navbar ثابت روی هیرو می‌نشیند و
    فاصله‌ی بالای `.hh` جای آن است.
    ───────────────────────────────────────────────────────────── */
+
+/* میان‌برهای بخش‌ها — همان هفت بخشِ کاروسلِ قبلی، با رنگِ هر بخش */
+const QUICK = [
+  { Icon: Calendar, label: 'رزرو میز', href: '/clubs', clr: 'hh-c-blue' },
+  { Icon: Trophy, label: 'مسابقات', href: '/tournaments', clr: 'hh-c-green' },
+  { Icon: ShoppingBag, label: 'خرید و فروش', href: '/shop', clr: 'hh-c-violet' },
+  { Icon: Users, label: 'جامعه بیلیارد', href: '/players', clr: 'hh-c-pink' },
+  { Icon: Building2, label: 'تولیدکنندگان', href: '/manufacturers', clr: 'hh-c-cyan' },
+  { Icon: Wrench, label: 'خدمات فنی', href: '/services', clr: 'text-gold-light' },
+  { Icon: GraduationCap, label: 'آموزش', href: '/coaches', clr: 'hh-c-rose' },
+] as const
 
 const FOCUS = 'outline-none focus-visible:ring-2 focus-visible:ring-gold-light focus-visible:ring-offset-2 focus-visible:ring-offset-black'
 
@@ -85,7 +96,20 @@ export function HomeHero({ data, newestClubs, newestProducts, stores }: {
         <HeroCards data={data} newestClubs={newestClubs} newestProducts={newestProducts} stores={stores} />
       </div>
 
-      {/* ردیفِ هفت میان‌بر برداشته شد (خواستِ مالک، ۱۰ آبانِ ۱۴۰۵): همان بخش‌ها در «بیلیارد هاب در یک نگاه» هست و هیرو خلوت‌تر شد */}
+      {/* ── میان‌برِ بخش‌ها ── */}
+      <nav aria-label="بخش‌های سایت" className="relative mx-auto max-w-screen-xl px-4 pb-6 md:px-8">
+        <ul className="hh-links hh-in flex gap-2 overflow-x-auto py-1 hh-d4 min-[901px]:justify-center">
+          {QUICK.map(({ Icon, label, href, clr }) => (
+            <li key={href} className="shrink-0">
+              <Link prefetch={false} href={href}
+                className={`flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sub font-bold text-white/85 transition-colors duration-base hover:border-white/25 hover:bg-white/10 ${FOCUS}`}>
+                <Icon size={16} aria-hidden className={clr} />
+                {label}
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </nav>
     </section>
   )
 }
