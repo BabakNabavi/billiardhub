@@ -229,17 +229,14 @@ export default function RankingsPage() {
         /* هدر رسمی — بنرِ «رنکینگ بیلیارد» (طرحِ مالک، ۱۰ آبانِ ۱۴۰۵). متن داخلِ
            خودِ تصویر است، پس روی آن چیزی نمی‌نشیند و h1 فقط برای خزنده و
            صفحه‌خوان است (sr-only).
-           دسکتاپ: تمام‌عرض با سقفِ ارتفاع؛ cover با مرکزِ ۳۵٪ عمودی تا تاج
-           و زیرنویس در کادر بمانند. موبایل: برشِ جدا (متن + توپ‌ها، ۵:۲) که
-           کامل و بی‌برش دیده می‌شود — متنِ بنرِ پهن در عرضِ ۳۹۰ ریز می‌شد. */
-        .rk-hero { position: relative; overflow: hidden; background: #0D0C0A;
-          /* سقفِ ۴۸۰: با ۴۰۰ در ۲۵۶۰px تاج و زیرنویس از کادر بیرون می‌افتادند */
-          height: clamp(240px, 26vw, 480px); }
-        .rk-hero-img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: 50% 35%; }
-        @media (max-width: 640px) {
-          .rk-hero { height: auto; aspect-ratio: 5 / 2; }
-          .rk-hero-img { object-position: 50% 50%; }
-        }
+           ⚠️ کامل و بی‌برش، هم‌عرضِ جدول (خواستِ مالک): نسخه‌ی قبلی در دسکتاپ
+           cover بود (بزرگ‌نمایی + بریدنِ بالا و پایین) و در موبایل برشِ نیمه‌ی
+           راست (جام و نیمه‌ی چپ دیده نمی‌شد). حالا همان تصویرِ ۸:۳ با
+           height:auto — هیچ‌جا بریده یا بزرگ نمی‌شود. */
+        .rk-hero { padding-top: clamp(12px, 2vw, 24px); padding-bottom: clamp(12px, 1.6vw, 16px); }
+        .rk-hero-img { display: block; width: 100%; height: auto; aspect-ratio: 2048 / 768;
+          border-radius: clamp(12px, 1.6vw, 18px); background: #0D0C0A;
+          box-shadow: 0 12px 32px -12px rgb(0 0 0 / .35); }
 
         /* سگمنت‌ها */
         /* ⚠️ کنترل‌ها دیگر پوسته‌ی محلی ندارند: همان .lq-seg مشترک
@@ -427,18 +424,16 @@ export default function RankingsPage() {
 
       <Suspense fallback={null}><DeepLink onLink={onLink} /></Suspense>
       {/* ═══ هدر رسمی ═══ */}
-      <header className="rk-hero">
+      <header className="rk-hero rk-wrap">
         {/* متنِ «رنکینگ بیلیارد — بهترین بازیکنان، در یک نگاه» داخلِ تصویر است. next/image نه: صفحه کلاینتی است و اندازه‌ها از
-            پیش ساخته شده‌اند (public/images/ranking/header-*). */}
-        <picture>
-          <source media="(max-width: 640px)" sizes="100vw" width={1170} height={468}
-            srcSet="/images/ranking/header-m-780.webp 780w, /images/ranking/header-m-1170.webp 1170w" />
-          {/* alt خالی: همان معنا را h1ِ پایین می‌گوید؛ دوباره‌خوانی نه */}
-          <img className="rk-hero-img" alt=""
-            src="/images/ranking/header-1280.webp"
-            srcSet="/images/ranking/header-768.webp 768w, /images/ranking/header-1280.webp 1280w, /images/ranking/header-2048.webp 2048w"
-            sizes="100vw" width={2048} height={768} fetchPriority="high" decoding="async" />
-        </picture>
+            پیش ساخته شده‌اند (public/images/ranking/header-*).
+            alt خالی: همان معنا را h1ِ پایین می‌گوید؛ دوباره‌خوانی نه.
+            sizes: هم‌عرضِ .rk-wrap (سقفِ ۱۰۸۰px منهای حاشیه) */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img className="rk-hero-img" alt=""
+          src="/images/ranking/header-1280.webp"
+          srcSet="/images/ranking/header-768.webp 768w, /images/ranking/header-1280.webp 1280w, /images/ranking/header-2048.webp 2048w"
+          sizes="(max-width: 1080px) 100vw, 1024px" width={2048} height={768} fetchPriority="high" decoding="async" />
         <h1 className="sr-only">رنکینگ بازیکنان بیلیارد — جدول امتیازات رسمی فدراسیون بولینگ و بیلیارد</h1>
       </header>
 
