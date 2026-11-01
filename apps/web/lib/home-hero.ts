@@ -3,6 +3,11 @@ import { unstable_cache } from 'next/cache'
 import { sb, rpc } from './finance/db'
 import { liveChannels } from './streaming/public'
 import type { RankingsStructure } from './rankings-store'
+/* شکلش در hero-types (کنارِ کارتِ کلاینتی که می‌خواندش)، تا هیچ فایلِ
+   کلاینتی حتی برای type به این ماژولِ server-only وابسته نباشد */
+import type { HeroRankingBoard } from '@/components/home/hero/hero-types'
+
+export type { HeroRankingBoard }
 
 /* ─────────────────────────────────────────────────────────────
    داده‌ی سه کارتِ هیروی صفحه‌ی اصلی — خوانده‌شده روی سرور.
@@ -41,14 +46,6 @@ export interface HeroTournament {
   phase: 'open' | 'upcoming' | 'ongoing'
 }
 
-export interface HeroRankingBoard {
-  /** کلیدهای پیوندِ مستقیم: /ranking?sport=&gender=&cat= */
-  sport: string
-  gender: string
-  category: string
-  label: string
-  players: { rank: number; name: string; points: number }[]
-}
 
 export interface HeroData {
   live: HeroLive | null

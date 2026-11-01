@@ -22,7 +22,7 @@ const EVERY_MS = 5500
 export function HeroAdsCard({ ads, pos }: { ads: HeroAdItem[]; pos: string }) {
   const ref = useRef<HTMLDivElement>(null)
   const pages = Math.ceil(ads.length / PER_PAGE)
-  const page = useHeroRotation(pages, EVERY_MS, ref)
+  const { i: page, leaving } = useHeroRotation(pages, EVERY_MS, ref)
   const shown = Array.from({ length: Math.min(PER_PAGE, ads.length) }, (_, n) => ads[(page * PER_PAGE + n) % ads.length]!)
 
   return (
@@ -32,7 +32,7 @@ export function HeroAdsCard({ ads, pos }: { ads: HeroAdItem[]; pos: string }) {
         تازه‌ترین آگهی‌های بازار
         <span className="ms-auto font-bold text-gold-light">همه</span>
       </Link>
-      <ul key={page} className="hh-swap hh-ads mt-1">
+      <ul key={page} className={`hh-swap hh-ads mt-1${leaving ? ' hh-leaving' : ''}`}>
         {shown.map(p => (
           <li key={p.id}>
             <Link prefetch={false} href={`/shop/${p.id}`} className={`${ROW_LINK} -mx-1 flex items-center gap-2 px-1 py-1`}>

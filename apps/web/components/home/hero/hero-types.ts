@@ -18,3 +18,12 @@ export interface HeroAdItem {
   /** null ⟵ آگهیِ بی‌عکس: آیکونِ خنثی */
   img: string | null
 }
+
+export interface HeroRankingBoard {
+  /** کلیدهای پیوندِ مستقیم: /ranking?sport=&gender=&cat= */
+  sport: string
+  gender: string
+  category: string
+  label: string
+  players: { rank: number; name: string; points: number }[]
+}

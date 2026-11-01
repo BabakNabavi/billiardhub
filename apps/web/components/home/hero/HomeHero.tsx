@@ -50,10 +50,10 @@ export function HomeHero({ data, newestClubs, newestProducts }: {
         {/* ── متن ── */}
         <div className="min-w-0">
           {/* همان تیتر و زیرنویسِ هیروی قبلی (خواستِ مالک) — کلیدواژه‌ی اصلیِ سئو هم همین است */}
-          <h1 id="hh-title" className="hh-rise text-display font-extrabold">
+          <h1 id="hh-title" className="hh-rise text-display font-extrabold max-[900px]:text-center">
             پلتفرم جامع و تخصصی <span className="text-gold-light">بیلیارد</span>
           </h1>
-          <p className="hh-in mt-3 max-w-prose text-sub text-white/70 hh-d1">
+          <p className="hh-in mt-3 max-w-prose text-sub text-white/70 hh-d1 max-[900px]:mx-auto max-[900px]:text-center">
             اتصال بی‌واسطه؛ خانه‌ی دیجیتال جامعه‌ی بیلیارد{' '}
             {/* «ایران» با گرادیانِ عمودیِ پرچم: سبز، سفید، قرمز */}
             <span className="hh-iran font-bold">ایران</span>
@@ -65,15 +65,16 @@ export function HomeHero({ data, newestClubs, newestProducts }: {
             {/* زیرِ ۴۰۰px ذره‌بین روی دکمه می‌رود تا کادر جا داشته باشد (۳۲۰ ⟵ ۱۴۶px بود) */}
             <Search size={18} aria-hidden className="shrink-0 text-white/60 max-[399px]:hidden" />
             <input id="hh-q" name="q" type="search" required maxLength={80} enterKeyHint="search"
-              placeholder="باشگاه، بازیکن، مسابقه یا تجهیزات…"
-              className="min-w-0 flex-1 bg-transparent py-3 text-sub text-white placeholder:text-white/50 outline-none" />
+              placeholder="باشگاه، تجهیزات، مربی، مسابقه…"
+              className="min-w-0 flex-1 bg-transparent py-3 text-sub text-white placeholder:text-meta placeholder:text-white/50 outline-none" />
             <button type="submit" className={`shrink-0 rounded-field bg-gold/20 px-4 py-2 max-[399px]:p-3 text-sub font-bold text-gold-light transition-colors duration-base hover:bg-gold/30 ${FOCUS}`}>
               <Search size={18} aria-hidden className="min-[400px]:hidden" />
               <span className="max-[399px]:sr-only">جست‌وجو</span>
             </button>
           </form>
 
-          <div className="hh-in mt-4 flex flex-wrap gap-3 hh-d3">
+          {/* موبایل: هم‌راستا با تیترِ وسط‌چین */}
+          <div className="hh-in mt-4 flex flex-wrap gap-3 hh-d3 max-[900px]:justify-center">
             {/* طرحِ LQ روی زمینه‌ی تیره: تینتِ طلایی، متنِ طلاییِ روشن */}
             <Link prefetch={false} href="/clubs"
               className={`inline-flex items-center gap-2 rounded-field border border-gold/40 bg-gold/15 px-6 py-3 text-sub font-bold text-gold-light transition-[transform,background-color] duration-base ease-smooth hover:-translate-y-0.5 hover:bg-gold/25 ${FOCUS}`}>

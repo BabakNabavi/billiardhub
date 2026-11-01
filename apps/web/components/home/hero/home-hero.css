@@ -75,11 +75,11 @@
 .hh-float:hover { animation-play-state: running, paused }
 .hh-p2.hh-float { animation-delay: .12s, -2s }
 .hh-p3.hh-float { animation-delay: .24s, -4s }
-/* گوشی: همان کجیِ دسکتاپ، ملایم‌تر (خواستِ مالک). perspective داخلِ خودِ
+/* گوشی: همان کجیِ دسکتاپ (۱۲°/۴°؛ خواستِ مالک). perspective داخلِ خودِ
    transform است چون کارت‌ها در ردیفِ اسکرولی‌اند و والدِ سه‌بعدی ندارند */
 @keyframes hhFloat {
-  0%, 100% { transform: perspective(900px) rotateY(-9deg) rotateX(3deg) translate3d(0, 0, 0) }
-  50%      { transform: perspective(900px) rotateY(-9deg) rotateX(3deg) translate3d(0, -6px, 0) }
+  0%, 100% { transform: perspective(900px) rotateY(-12deg) rotateX(4deg) translate3d(0, 0, 0) }
+  50%      { transform: perspective(900px) rotateY(-12deg) rotateX(4deg) translate3d(0, -6px, 0) }
 }
 
 @media (min-width: 901px) {
@@ -136,7 +136,8 @@
   background: rgb(239 68 68 / .2);
   animation: hhBlink 1.3s ease-in-out infinite;
 }
-.hh-live-on:hover { background: rgb(239 68 68 / .45) }
+/* انیمیشن هر فریم background را می‌نویسد؛ هاور بی خاموش‌کردنش اثری نداشت */
+.hh-live-on:hover { animation: none; background: rgb(239 68 68 / .5) }
 .hh-live-dot { animation: hhDot 1.3s ease-in-out infinite }
 @keyframes hhBlink {
   0%, 100% { background-color: rgb(239 68 68 / .18); box-shadow: 0 0 0 0 rgb(239 68 68 / 0) }
@@ -144,8 +145,17 @@
 }
 @keyframes hhDot { 0%, 100% { opacity: 1 } 50% { opacity: .25 } }
 
-/* ورودِ جدولِ تازه در کارتِ رنکینگِ چرخان */
-.hh-swap { animation: hhIn .45s cubic-bezier(.22,1,.36,1) both }
+/* چرخشِ کارت‌ها: محتوای فعلی آرام محو می‌شود (hh-leaving، ۳۲۰ms — همان
+   LEAVE_MS در use-hero-rotation)، بعد تازه با جابه‌جاییِ کوچک وارد می‌شود.
+   فقط opacity/transform؛ بلور نه — حروفِ چسبانِ فارسی در بلور به هم می‌ریزند */
+/* ⚠️ بی fill-mode: با both فریمِ آخرِ انیمیشن (opacity:1) همیشه می‌ماند و
+   در آبشارِ CSS بر .hh-leaving برنده می‌شد ⟵ محوشدن اصلاً دیده نمی‌شد */
+.hh-swap {
+  animation: hhSwapIn .6s cubic-bezier(.22,1,.36,1);
+  transition: opacity .32s ease, transform .32s ease;
+}
+.hh-leaving { opacity: 0; transform: translateY(-4px) }
+@keyframes hhSwapIn { from { opacity: 0; transform: translateY(6px) } to { opacity: 1; transform: none } }
 
 /* «ایران» سه‌رنگ — همان گرادیانِ هیروی قبلی */
 .hh-iran {
