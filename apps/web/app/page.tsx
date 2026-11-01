@@ -151,7 +151,7 @@ export default async function HomePage() {
       <HomeClient
         initialPlacements={initialPlacements}
         initialFeatured={featuredData}
-        heroSlot={<HomeHero data={hero.status === 'fulfilled' ? hero.value : EMPTY_HERO} newestClub={featuredData.clubs[0] ?? null} newestProducts={featuredData.products} />}
+        heroSlot={<HomeHero data={hero.status === 'fulfilled' ? hero.value : EMPTY_HERO} newestClubs={featuredData.clubs} newestProducts={featuredData.products} />}
         servicesSlot={<ServicesSection />}
         exploreSlot={<ExploreStrip />}
       />

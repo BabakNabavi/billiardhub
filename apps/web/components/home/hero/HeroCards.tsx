@@ -1,17 +1,20 @@
 import Link from 'next/link'
-import { Eye, MapPin, Play, Trophy } from 'lucide-react'
+import { Eye, Play, Trophy } from 'lucide-react'
 import { faNum } from '@/lib/jalali'
 import { thumbUrl } from '@/lib/media/thumb'
 import type { HeroData } from '@/lib/home-hero'
 import type { RealClub, RealProduct } from '@/lib/home-types'
+import { PRODUCT_IMG } from '@/lib/home-featured'
 import { HeroTilt } from './HeroTilt'
 import { HeroAdsCard } from './HeroAdsCard'
+import { HeroClubCard } from './HeroClubCard'
 import { HeroRankingCard } from './HeroRankingCard'
 import { CARD, LABEL } from './hero-classes'
+import type { HeroAdItem, HeroClubItem } from './hero-types'
 
 /* ─────────────────────────────────────────────────────────────
    سه کارتِ شیشه‌ای کنارِ تیتر — داده‌ی واقعیِ همین لحظه.
-   (آگهی‌ها: HeroAdsCard · رنکینگِ چرخان: HeroRankingCard)
+   چرخان‌ها (کلاینت): HeroClubCard · HeroAdsCard · HeroRankingCard
    کارتی که داده ندارد اصلاً ساخته نمی‌شود؛ جایش عددِ ساختگی نمی‌نشیند.
    ───────────────────────────────────────────────────────────── */
 
@@ -41,21 +44,28 @@ function LiveCard({ live, pos }: { live: NonNullable<HeroData['live']>; pos: str
   )
 }
 
-function ClubCard({ club, pos }: { club: RealClub; pos: string }) {
-  return (
-    <Link prefetch={false} href={`/clubs/${club.id}`} className={`${CARD} ${pos}`}>
-      {/* eslint-disable-next-line @next/next/no-img-element -- بهینه‌ساز تصویرِ Next خاموش است؛ thumbUrl اندازه را از Storage می‌گیرد */}
-      <img src={thumbUrl(club.img, 600)} alt="" width={300} height={96} loading="lazy" decoding="async"
-        className="h-24 w-full rounded-card object-cover" />
-      <p className={`${LABEL} mt-3`}>تازه‌ترین باشگاه</p>
-      <p className="truncate text-sub font-bold">{club.name}</p>
-      <p className={`${LABEL} flex items-center gap-1`}>
-        {club.city && <><MapPin size={12} aria-hidden />{club.city}</>}
-        {club.city && club.tables > 0 && '، '}
-        {club.tables > 0 && `${faNum(club.tables)} میز`}
-      </p>
-    </Link>
-  )
+/* داده‌ی سبکِ کارت‌های چرخان — این‌جا روی سرور، تا فقط همین به مرورگر برود */
+const CLUBS = 5
+const ADS = 10
+
+function clubItems(clubs: RealClub[]): HeroClubItem[] {
+  return clubs.slice(0, CLUBS).map(c => ({
+    id: c.id, name: c.name, img: thumbUrl(c.img, 600),
+    meta: [c.city, c.tables > 0 ? `${faNum(c.tables)} میز` : ''].filter(Boolean).join('، '),
+  }))
+}
+
+function adItems(products: RealProduct[]): HeroAdItem[] {
+  return products.slice(0, ADS).map(p => {
+    const v = p.sale > 0 ? p.sale : p.price
+    const price = p.negotiable ? 'توافقی' : v > 0 ? `${faNum(v)} تومان` : ''
+    return {
+      id: p.id, name: p.name,
+      /* عکسِ جانشینِ «چوب» برای آگهیِ بی‌عکس ⟵ null: کارت آیکونِ خنثی می‌گذارد */
+      img: p.img === PRODUCT_IMG ? null : thumbUrl(p.img, 96),
+      meta: [price, p.city].filter(Boolean).join('، '),
+    }
+  })
 }
 
 const PHASE_LABEL: Record<NonNullable<HeroData['tournament']>['phase'], string> = {
@@ -87,19 +97,17 @@ function TournamentCard({ t, pos }: { t: NonNullable<HeroData['tournament']>; po
   )
 }
 
-/** تا سه آگهی — بیشتر از آن کارت از دسته بلندتر می‌شود */
-const ADS = 3
-
-export function HeroCards({ data, newestClub, newestProducts }: {
-  data: HeroData; newestClub: RealClub | null; newestProducts: RealProduct[]
+export function HeroCards({ data, newestClubs, newestProducts }: {
+  data: HeroData; newestClubs: RealClub[]; newestProducts: RealProduct[]
 }) {
+  const clubs = clubItems(newestClubs)
+  const ads = adItems(newestProducts)
   const cards: ((pos: string) => React.ReactNode)[] = []
   if (data.live) { const l = data.live; cards.push(pos => <LiveCard key="live" live={l} pos={pos} />) }
-  else if (newestClub) cards.push(pos => <ClubCard key="club" club={newestClub} pos={pos} />)
+  else if (clubs.length) cards.push(pos => <HeroClubCard key="club" clubs={clubs} pos={pos} />)
   /* مسابقه‌ی پیشِ رو/در جریان اولویت دارد؛ نبود ⟵ آگهی‌های تازه‌ی بازار */
-  const ads = newestProducts.slice(0, ADS)
   if (data.tournament) { const t = data.tournament; cards.push(pos => <TournamentCard key="t" t={t} pos={pos} />) }
-  else if (ads.length) cards.push(pos => <HeroAdsCard key="ads" products={ads} pos={pos} />)
+  else if (ads.length) cards.push(pos => <HeroAdsCard key="ads" ads={ads} pos={pos} />)
   if (data.ranking.length) { const r = data.ranking; cards.push(pos => <HeroRankingCard key="r" boards={r} pos={pos} />) }
   if (cards.length === 0) return null
 

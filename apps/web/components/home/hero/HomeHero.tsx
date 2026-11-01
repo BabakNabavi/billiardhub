@@ -32,11 +32,11 @@ const QUICK = [
 
 const FOCUS = 'outline-none focus-visible:ring-2 focus-visible:ring-gold-light focus-visible:ring-offset-2 focus-visible:ring-offset-black'
 
-export function HomeHero({ data, newestClub, newestProducts }: {
-  data: HeroData; newestClub: RealClub | null; newestProducts: RealProduct[]
+export function HomeHero({ data, newestClubs, newestProducts }: {
+  data: HeroData; newestClubs: RealClub[]; newestProducts: RealProduct[]
 }) {
   /* بی‌کارت ⟵ یک ستون؛ وگرنه نیمه‌ی چپِ دسکتاپ خالی می‌ماند */
-  const hasCards = !!(data.live || newestClub || data.tournament || newestProducts.length || data.ranking.length)
+  const hasCards = !!(data.live || newestClubs.length || data.tournament || newestProducts.length || data.ranking.length)
   return (
     <section aria-labelledby="hh-title" className="hh relative overflow-hidden text-white">
       {/* پس‌زمینه: همان عکسی که page.tsx پیش‌بارگذاری می‌کند */}
@@ -49,13 +49,14 @@ export function HomeHero({ data, newestClub, newestProducts }: {
       <div className={`relative mx-auto grid max-w-screen-xl grid-cols-1 items-center gap-8 px-4 pb-8 md:px-8 ${hasCards ? 'min-[901px]:grid-cols-2' : ''} min-[901px]:gap-12`}>
         {/* ── متن ── */}
         <div className="min-w-0">
+          {/* همان تیتر و زیرنویسِ هیروی قبلی (خواستِ مالک) — کلیدواژه‌ی اصلیِ سئو هم همین است */}
           <h1 id="hh-title" className="hh-rise text-display font-extrabold">
-            هرچی از بیلیارد می‌خوای
-            <br />
-            <span className="text-gold-light">همین‌جاست</span>
+            پلتفرم جامع و تخصصی <span className="text-gold-light">بیلیارد</span>
           </h1>
           <p className="hh-in mt-3 max-w-prose text-sub text-white/70 hh-d1">
-            پلتفرم جامع و تخصصی بیلیارد ایران: باشگاه‌ها، مسابقه‌ها، بازار و بازی‌های زنده‌ی امروز، یک‌جا.
+            اتصال بی‌واسطه؛ خانه‌ی دیجیتال جامعه‌ی بیلیارد{' '}
+            {/* «ایران» با گرادیانِ عمودیِ پرچم: سبز، سفید، قرمز */}
+            <span className="hh-iran font-bold">ایران</span>
           </p>
 
           {/* فرمِ معمولی: بی‌جاوااسکریپت هم کار می‌کند و همان نشانیِ /search?q= */}
@@ -91,7 +92,7 @@ export function HomeHero({ data, newestClub, newestProducts }: {
         </div>
 
         {/* ── کارت‌ها ── */}
-        <HeroCards data={data} newestClub={newestClub} newestProducts={newestProducts} />
+        <HeroCards data={data} newestClubs={newestClubs} newestProducts={newestProducts} />
       </div>
 
       {/* ── میان‌برِ بخش‌ها ── */}
