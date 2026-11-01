@@ -289,6 +289,9 @@ export default function GoLive({ clubId, clubName, ownerKey }: { clubId: string;
   const mainFeed = st.feeds.find(f => f.angleId === MAIN_ANGLE)
   const extras = st.feeds.filter(f => f.angleId !== MAIN_ANGLE)
   const camOptions = cams.filter(c => c.deviceId).map(c => ({ value: c.deviceId, label: c.label }))
+  /* «واید / اولترا واید / دوال واید» باشگاه‌دار را گیج می‌کرد. دوربینِ اصلیِ پشت
+     پیش‌فرض است؛ فهرست فقط وقتی دیده می‌شود که دوربینِ بیرونی (کارتِ کپچر) وصل باشد. */
+  const hasExternalCam = cams.some(c => !c.builtIn && c.deviceId)
   const totalViewers = st.feeds.reduce((n, f) => n + f.viewers, 0)
 
   if (otherClub) {
@@ -371,7 +374,7 @@ export default function GoLive({ clubId, clubName, ownerKey }: { clubId: string;
         </>
       )}
 
-      {camOptions.length > 1 && (!broadcasting || mainFeed) && (
+      {hasExternalCam && camOptions.length > 1 && (!broadcasting || mainFeed) && (
         <SelectField
           label={mainFeed ? 'دوربین اصلی' : 'دوربین'}
           value={(mainFeed ? mainFeed.deviceId : deviceId) || camOptions[0]?.value || ''}
@@ -439,9 +442,9 @@ export default function GoLive({ clubId, clubName, ownerKey }: { clubId: string;
         </>
       ) : (
         <>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'rgba(14,122,56,0.07)', border: '1px solid rgba(14,122,56,0.2)', borderRadius: 14, padding: '12px 14px', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, background: 'rgba(14,122,56,0.07)', border: '1px solid rgba(14,122,56,0.2)', borderRadius: 14, padding: '12px 14px', flexWrap: 'wrap' }}>
             <span style={{ width: 9, height: 9, borderRadius: '50%', background: FELT, animation: 'glPulse 1.4s infinite', flexShrink: 0 }} />
-            <span style={{ fontSize: 13, fontWeight: 800, color: INK, flex: 1 }}>
+            <span style={{ fontSize: 13, fontWeight: 800, color: INK }}>
               در حال پخش{st.feeds.length > 1 && ` · ${fa(st.feeds.length)} دوربین`}
             </span>
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 12, fontWeight: 700, color: SEC }}>
@@ -476,8 +479,9 @@ export default function GoLive({ clubId, clubName, ownerKey }: { clubId: string;
                 </button>
                 {canShare && (
                   <button type="button" onClick={() => void addScreen()} disabled={adding}
+                    title="صفحه‌ی همین لپ‌تاپ (مثلاً نرم‌افزارِ تابلوی امتیاز) به‌عنوان یک تصویرِ جدا کنارِ دوربین پخش می‌شود"
                     style={{ ...btn, flex: 1, background: '#fff', border: `1px solid ${LINE}`, color: INK, opacity: adding ? .7 : 1 }}>
-                    <MonitorUp size={16} aria-hidden /> تابلوی امتیاز
+                    <MonitorUp size={16} aria-hidden /> پخشِ صفحه‌ی لپ‌تاپ
                   </button>
                 )}
               </div>

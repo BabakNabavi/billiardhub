@@ -25,9 +25,13 @@ export interface PublishState {
   error: string
   /** شبکه کُند است (صفِ ارسال پر می‌شود) — فقط هشدار */
   slow: boolean
+  /** لحظه‌ی زنده‌شدن (ms) — ساعتِ استودیو پس از بازکردنِ دوباره از همین می‌شمارد */
+  liveSince: number | null
 }
 
-const EMPTY: PublishState = { phase: 'idle', channelId: null, stream: null, facing: 'environment', error: '', slow: false }
+const EMPTY: PublishState = { phase: 'idle', channelId: null, stream: null, facing: 'environment', error: '', slow: false, liveSince: null }
+/* رله «live» را نفرستاد (ffmpeg به آروان نرسید) ⟵ بیش از این در «اتصال» نماند */
+const CONNECT_TIMEOUT_MS = 25_000
 let state: PublishState = EMPTY
 const subs = new Set<() => void>()
 const set = (p: Partial<PublishState>) => { state = { ...state, ...p }; subs.forEach(f => f()) }
@@ -151,7 +155,7 @@ function fail(msg: string) {
   teardown?.(); teardown = null
   releaseAwake()
   const ended = onEndedCb; onEndedCb = null
-  set({ phase: 'error', error: msg, slow: false })
+  set({ phase: 'error', error: msg, slow: false, liveSince: null })
   /* زنده شده بود ⟵ کانال روی سایت هم خاموش شود */
   ended?.(false)
 }
@@ -178,7 +182,7 @@ export async function startPublish(
     if (announced || my !== gen) return
     announced = true
     onEndedCb = onEnded
-    set({ phase: 'live' })
+    set({ phase: 'live', liveSince: Date.now() })
     void onLive().catch(() => fail('پخش به سرویس رسید ولی روی سایت ثبت نشد؛ دوباره «پخش» را بزنید.'))
   }
   /* دوربین وسطِ پخش قطع شد (قفلِ صفحه، تماس، برداشتنِ اجازه) */
@@ -189,6 +193,9 @@ export async function startPublish(
     const down = sess.mode === 'whip' ? await startWhip(sess, stream, live) : startRelay(sess, stream, live)
     if (my !== gen) { down(); return }
     teardown = down
+    window.setTimeout(() => {
+      if (my === gen && state.phase === 'connecting') fail('تصویر به سرویسِ پخش نرسید. اینترنت را بررسی کنید و دوباره شروع کنید.')
+    }, CONNECT_TIMEOUT_MS)
     await keepAwake()
   } catch (e) {
     if (my !== gen) return

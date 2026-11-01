@@ -3,7 +3,9 @@
 /* یک کانال در پنلِ مدیر: وضعیت، آمار، توقفِ اجباری، مسدودسازی، و پخش‌های اخیر
    (پنهان/نمایشِ ضبط در آرشیوِ عمومی). */
 
+import { useState } from 'react'
 import Link from 'next/link'
+import ConfirmDialog from '@/components/ui/ConfirmDialog'
 import { Ban, CircleCheck, EyeOff, Eye, Square, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { faDateTime, faDec, faNum } from '@/lib/jalali'
@@ -16,6 +18,7 @@ export function ChannelAdminRow({ ch, busy, run, onBlock }: {
   run: (a: AdminAction) => Promise<boolean>; onBlock: () => void
 }) {
   const b = (k: string) => busy === k
+  const [ask, setAsk] = useState(false)
   return (
     <li className="flex flex-col gap-3 rounded-card border border-line/10 p-3">
       <div className="flex flex-wrap items-center gap-2">
@@ -41,10 +44,14 @@ export function ChannelAdminRow({ ch, busy, run, onBlock }: {
           <Button variant="danger-ghost" size="sm" icon={<Ban className="h-4 w-4" aria-hidden />} onClick={onBlock}>مسدودِ کانال</Button>
         )}
         <Button variant="danger-ghost" size="sm" loading={b(`archive-channel:${ch.id}`)} icon={<Trash2 className="h-4 w-4" aria-hidden />}
-          onClick={() => { if (window.confirm(ch.manual
-            ? `کانالِ «${ch.title}» از سایت حذف شود؟ (خودِ کانال در پنلِ آروان می‌ماند)`
-            : `کانالِ «${ch.title}» از سایت و از سرویسِ پخش حذف شود؟ این کار برگشت ندارد.`)) void run({ action: 'archive-channel', channelId: ch.id }) }}>حذف</Button>
+          onClick={() => setAsk(true)}>حذف</Button>
       </div>
+      {/* پنجره‌ی خودِ سایت، نه confirm()ِ مرورگر (انگلیسی، چپ‌به‌راست، با نشانیِ سایت بالایش) */}
+      <ConfirmDialog open={ask} tone="danger" title={`حذفِ کانالِ «${ch.title}»؟`}
+        body={ch.manual ? 'کانال از سایت حذف می‌شود؛ خودِ کانال در پنلِ آروان می‌ماند.' : 'کانال از سایت و از سرویسِ پخش حذف می‌شود. این کار برگشت ندارد.'}
+        confirmLabel="حذف" busy={b(`archive-channel:${ch.id}`)}
+        onCancel={() => setAsk(false)}
+        onConfirm={async () => { if (await run({ action: 'archive-channel', channelId: ch.id })) setAsk(false) }} />
       <WhipForm channelId={ch.id} current={ch.whipUrl} busy={b(`set-whip:${ch.id}`)} run={run} />
       {ch.recent.length > 0 && (
         <ul className="flex flex-col gap-1 border-t border-line/10 pt-2">

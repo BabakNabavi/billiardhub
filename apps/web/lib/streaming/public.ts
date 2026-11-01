@@ -3,6 +3,7 @@ import { sb } from '../finance/db'
 import { broadcastsOf, channelById, clubNames, clubSettings, must, tablesReady, toChannel, type Channel } from './repo'
 import { sweepStale } from './service'
 import { admit, beat, countOf, tally } from './viewers'
+import { hasPicture } from './probe'
 import { canWatch } from './policy'
 import type { ArchiveItem, PublicChannel } from './public-types'
 
@@ -12,12 +13,10 @@ import type { ArchiveItem, PublicChannel } from './public-types'
    ───────────────────────────────────────────────────────────── */
 
 export type { PublicChannel, ArchiveItem } from './public-types'
-/** فقط شمار — برای نشانِ «زنده» در نوارِ بالای همه‌ی صفحه‌ها (سبک: بی ردیف) */
+/** فقط شمار — برای نشانِ «زنده»ی نوارِ بالا؛ همان قاعده‌ی فهرست (تصویر باید برسد) */
 export async function liveChannelCount(): Promise<number> {
   if (!(await tablesReady())) return 0
-  const { count, error } = await sb().from('live_channels').select('id', { count: 'exact', head: true })
-    .eq('is_live', true).eq('admin_blocked', false).is('archived_at', null)
-  return error ? 0 : count ?? 0
+  return (await livePictured()).length
 }
 
 
@@ -38,8 +37,8 @@ function shape(ch: Channel, club: PublicChannel['club'], startedAt: string | nul
   }
 }
 
-/** همه‌ی کانال‌های زنده‌ی سایت؛ با tournamentId فقط کانالِ همان مسابقه */
-export async function liveChannels(filter: { tournamentId?: string; clubId?: string } = {}): Promise<PublicChannel[]> {
+/** کانال‌های زنده‌ای که واقعاً تصویر دارند (بی نام و شروع — برای شمار هم) */
+async function livePictured(filter: { tournamentId?: string; clubId?: string } = {}): Promise<Channel[]> {
   await sweepStale().catch(e => console.error('[streaming] sweep', e))
   let q = sb().from('live_channels').select('*').eq('is_live', true).eq('admin_blocked', false).is('archived_at', null)
   if (filter.tournamentId) q = q.eq('tournament_id', filter.tournamentId)
@@ -52,7 +51,14 @@ export async function liveChannels(filter: { tournamentId?: string; clubId?: str
     const r = await sb().from('live_club_settings').select('club_id').eq('blocked', true).in('club_id', [...new Set(all.map(c => c.clubId))])
     for (const row of (must(r, 'blocked clubs') as { club_id: string }[])) blocked.add(String(row.club_id))
   }
-  const chans = all.filter(c => !blocked.has(c.clubId))
+  /* فقط کانالی که تصویرش واقعاً می‌رسد — دکمه‌ی «شروع» بی‌دوربین، کارتِ سیاه نسازد */
+  const pictured = await Promise.all(all.map(c => (blocked.has(c.clubId) ? Promise.resolve(false) : hasPicture(c.playbackUrl))))
+  return all.filter((_, i) => pictured[i])
+}
+
+/** همه‌ی کانال‌های زنده‌ی سایت؛ با tournamentId فقط کانالِ همان مسابقه */
+export async function liveChannels(filter: { tournamentId?: string; clubId?: string } = {}): Promise<PublicChannel[]> {
+  const chans = await livePictured(filter)
   const [clubs, starts] = await Promise.all([clubNames(chans.map(c => c.clubId)), openStarts(chans.map(c => c.id))])
   return chans
     .map(ch => shape(ch, { id: ch.clubId, ...(clubs.get(ch.clubId) ?? { name: 'باشگاه', slug: null, logo: null }) }, starts.get(ch.id) ?? null))

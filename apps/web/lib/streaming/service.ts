@@ -6,11 +6,12 @@ import {
   type ChannelAccess, type ChannelKind, type ClubTier,
 } from './policy'
 import {
-  LiveError, must, channelById, clubChannels, clubSettings, patchChannel, toBroadcast,
+  LiveError, must, channelById, clubChannels, clubSettings, patchChannel, toBroadcast, toChannel,
   type Channel,
 } from './repo'
 import { seal } from './secret'
 import { finishTally, reset } from './viewers'
+import { hasPicture, NO_PICTURE_GRACE_MS } from './probe'
 
 /* ─────────────────────────────────────────────────────────────
    عملیاتِ پخش زنده — هر تغییرِ وضعیت فقط از این‌جا.
@@ -226,9 +227,19 @@ export async function sweepStale(now = Date.now()): Promise<void> {
   lastSweep = now
   const r = await sb().from('live_broadcasts').select('channel_id,started_at').is('ended_at', null)
   if (r.error) { console.error('[streaming] sweep read', r.error.message); return }
-  for (const b of (r.data ?? []) as { channel_id: string; started_at: string }[]) {
-    if (!isStale(Date.parse(b.started_at), now)) continue
-    const ch = await channelById(b.channel_id)
-    if (ch) await stopBroadcast(ch, 'timeout').catch(e => console.error('[streaming] sweep failed', e))
+  /* «شروع» زده شد ولی چند دقیقه است تصویری به سرویس نرسیده — دوربینی وصل
+     نیست یا پخش بی‌خبر قطع شد. بیننده نباید کانالِ سیاه را «زنده» ببیند. */
+  const due = ((r.data ?? []) as { channel_id: string; started_at: string }[])
+    .filter(b => now - Date.parse(b.started_at) >= NO_PICTURE_GRACE_MS)
+  if (due.length === 0) return
+  const cr = await sb().from('live_channels').select('*').in('id', due.map(b => b.channel_id))
+  if (cr.error) { console.error('[streaming] sweep channels', cr.error.message); return }
+  const byId = new Map((cr.data as Record<string, unknown>[]).map(row => [String(row.id), toChannel(row)]))
+  for (const b of due) {
+    const stale = isStale(Date.parse(b.started_at), now)
+    const ch = byId.get(b.channel_id)
+    if (!ch) continue
+    if (!stale && await hasPicture(ch.playbackUrl)) continue
+    await stopBroadcast(ch, 'timeout').catch(e => console.error('[streaming] sweep failed', e))
   }
 }

@@ -42,6 +42,7 @@ import { iranTel } from '../../../lib/iran-geo'
 import { fetchLiveSessions, fetchLiveSession, type LiveSession } from '../../../lib/live/client'
 import GoLive from '../../../components/club/GoLive'
 import { LiveChannelsGrid } from '../../../components/live/LiveChannelsGrid';
+import { LiveStudioLauncher } from '../../../components/live/studio/StudioLauncher';
 /* ⚠️ تنبل، نه ایستا. `LivePlayer` ماژولِ webrtc و با آن
    `@supabase/supabase-js` را می‌کشد — ۲۰۴ کیلوبایتِ خام. ولی
    پخش‌کننده فقط داخلِ شرطِ `liveSession || watchedLive` رندر
@@ -1630,12 +1631,9 @@ export default function ClubProfilePage() {
                   <p style={{ fontSize: 13, color: 'rgba(0,0,0,0.45)', lineHeight: 1.9, margin: '0 0 18px' }}>
                     مسابقات خود را مستقیم از گوشی یا دوربین فیلم‌برداری پخش کنید. پخش شما در صفحه‌ی «پخش زنده» سایت دیده می‌شود.
                   </p>
-                  <GoLive clubId={club.id} clubName={club.name} ownerKey={user?.phone || user?.id || 'owner'} />
-                  <p className="mt-4 text-sub text-ink-3">
-                    برای پخش با دوربینِ حرفه‌ای، OBS یا اپِ Larix و تماشاگرِ زیاد، از{' '}
-                    <Link href="/dashboard/club" className="rounded font-bold text-gold-text hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-deep">داشبوردِ باشگاه ← پخش زنده</Link>{' '}
-                    کانال بسازید.
-                  </p>
+                  {/* باشگاهِ دارای کانالِ آروان ⟵ استودیو (تماشاگرِ نامحدود)؛ وگرنه پخشِ قدیمیِ گوشی‌به‌گوشی */}
+                  <LiveStudioLauncher clubId={club.id}
+                    fallback={<GoLive clubId={club.id} clubName={club.name} ownerKey={user?.phone || user?.id || 'owner'} />} />
                 </div>
               ) : liveSession || watchedLive.current ? (
                 <>
@@ -1665,8 +1663,9 @@ export default function ClubProfilePage() {
           )}
         </div>
 
-        {/* Sticky mobile reserve button */}
-        <div className="book-fixed">
+        {/* Sticky mobile reserve button — نه در تبِ «پخش زنده»: روی دکمه‌های پخش
+            و پیش‌نمایشِ دوربین می‌افتاد */}
+        {tab !== 'live' && <div className="book-fixed">
           <button onClick={goBook} disabled={bookingClosed}
             title={bookingClosed ? 'این باشگاه رزروها را تا اطلاع بعدی بسته است' : undefined}
             style={{ width: '100%', padding: '14px', border: `1px solid ${bookingClosed ? 'rgba(220,38,38,0.28)' : 'rgba(199,166,106,0.35)'}`, borderRadius: 20, background: bookingClosed ? 'rgba(220,38,38,0.08)' : 'rgba(199,166,106,0.14)', color: bookingClosed ? '#B91C1C' : '#C7A66A', fontSize: bookingClosed ? 13.5 : 17, fontWeight: 800, cursor: bookingClosed ? 'not-allowed' : 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, lineHeight: 1.7 }}>
@@ -1674,7 +1673,7 @@ export default function ClubProfilePage() {
             ? <>رزروهای این باشگاه تا اطلاع بعدی بسته است</>
             : <><Calendar size={16} /> رزرو آنلاین میز</>}
           </button>
-        </div>
+        </div>}
       </div>
 
       {/* ── #7: Coach popup — click outside (backdrop) to close ── */}

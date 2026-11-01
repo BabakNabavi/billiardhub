@@ -12,16 +12,18 @@ import { faDec, faNum } from '@/lib/jalali'
 import { KIND_LABEL } from '@/lib/streaming/policy'
 import type { ManageAction, OwnerChannel } from '@/lib/streaming/manage-types'
 import { IngestInfo } from './IngestInfo'
-import { BrowserGoLive } from './BrowserGoLive'
+import { StudioLaunchButton } from '@/components/live/studio/StudioLauncher'
 import { getServerSnapshot, getSnapshot, subscribe } from '@/lib/live/browser-publish'
 
 type Run = (a: ManageAction) => Promise<boolean>
 const isBusyOf = (busy: string | null, a: string, id: string) => busy === `${a}:${id}`
 
-export function ChannelCard({ ch, clubId, busy, run, connected = true }: { ch: OwnerChannel; clubId: string; busy: string | null; run: Run; connected?: boolean }) {
+export function ChannelCard({ ch, clubId, busy, run, connected = true, onChanged }: {
+  ch: OwnerChannel; clubId: string; busy: string | null; run: Run; connected?: boolean; onChanged?: () => void
+}) {
   const [open, setOpen] = useState(false)
   const pub = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot)
-  /* پخش از همین دستگاه: دکمه‌ی پایانش در BrowserGoLive است، نه این‌جا */
+  /* پخش از همین دستگاه: دکمه‌ی پایانش در استودیو (LiveStudio) است، نه این‌جا */
   const publishingHere = pub.channelId === ch.id && (pub.phase === 'live' || pub.phase === 'connecting')
   const externalStart = (
     <Button variant={ch.browser ? 'secondary' : 'primary'} loading={isBusyOf(busy, 'start', ch.id)} disabled={ch.adminBlocked || (!connected && !ch.manual)}
@@ -53,7 +55,7 @@ export function ChannelCard({ ch, clubId, busy, run, connected = true }: { ch: O
         </p>
       )}
 
-      {ch.browser && <BrowserGoLive ch={ch} clubId={clubId} run={run} />}
+      {ch.browser && <StudioLaunchButton clubId={clubId} channelId={ch.id} disabled={ch.adminBlocked || (ch.isLive && !publishingHere)} onClosed={onChanged} />}
 
       <div className="flex flex-wrap items-center gap-2">
         {ch.isLive && !publishingHere ? (
