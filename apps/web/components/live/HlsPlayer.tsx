@@ -37,7 +37,10 @@ export function HlsPlayer({ src, live = true, title }: { src: string; live?: boo
         const { default: Hls } = await import('hls.js')
         if (cancelled) return
         if (!Hls.isSupported()) { setState('unsupported'); return }
-        const hls = new Hls({ lowLatencyMode: live, backBufferLength: live ? 30 : 90 })
+        /* زنده: ۲ تکه از لبه (پیش‌فرض ۳) و اگر عقب افتاد کمی تندتر تا برسد — چند ثانیه تأخیرِ کمتر */
+        const hls = new Hls(live
+          ? { lowLatencyMode: true, backBufferLength: 30, liveSyncDurationCount: 2, liveMaxLatencyDurationCount: 6, maxLiveSyncPlaybackRate: 1.1 }
+          : { backBufferLength: 90 })
         let retries = 0
         hls.on(Hls.Events.ERROR, (_e, data) => {
           if (!data.fatal) return

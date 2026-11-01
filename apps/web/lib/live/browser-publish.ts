@@ -76,8 +76,9 @@ function pickMime(): string {
 
 function startRelay(sess: Extract<Session, { mode: 'relay' }>, stream: MediaStream, onLive: () => void): () => void {
   const mime = pickMime()
-  /* ۱٫۵ مگابیت: برای ۷۲۰ کافی و روی اینترنتِ همراهِ ایران شدنی */
-  const rec = new MediaRecorder(stream, { ...(mime ? { mimeType: mime } : {}), videoBitsPerSecond: 1_500_000, audioBitsPerSecond: 96_000 })
+  /* ۲٫۵ مگابیت: تصویر دو بار فشرده می‌شود (این‌جا و در رله)؛ با ۱٫۵ کیفیت «معمولی»
+     بود (تستِ آرتا، ۱ نوامبر ۲۰۲۶). روی ۴Gِ معمولی هنوز جا دارد؛ اگر نه، هشدارِ «کند» می‌آید */
+  const rec = new MediaRecorder(stream, { ...(mime ? { mimeType: mime } : {}), videoBitsPerSecond: 2_500_000, audioBitsPerSecond: 128_000 })
   const ws = new WebSocket(`${sess.url}?t=${encodeURIComponent(sess.token)}`)
   ws.binaryType = 'arraybuffer'
   let closedByUs = false

@@ -58,7 +58,8 @@ function ffmpegArgs(rtmp) {
     '-c:v', 'libx264', '-preset', 'veryfast', '-tune', 'zerolatency', '-profile:v', 'main',
     '-pix_fmt', 'yuv420p', '-vf', 'scale=-2:min(720\\,ih)', '-r', '30',
     '-g', '60', '-keyint_min', '60', '-sc_threshold', '0',
-    '-b:v', '2500k', '-maxrate', '3000k', '-bufsize', '6000k', '-threads', '2',
+    /* ۳ مگابیت برای ۷۲۰ — با ۲٫۵ کیفیت «معمولی» بود (تستِ آرتا) */
+    '-b:v', '3000k', '-maxrate', '3500k', '-bufsize', '7000k', '-threads', '2',
     '-c:a', 'aac', '-b:a', '128k', '-ar', '44100', '-ac', '2',
     '-f', 'flv', rtmp,
   ]
