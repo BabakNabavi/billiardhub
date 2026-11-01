@@ -4,7 +4,7 @@ import { useEffect, useState, type RefObject } from 'react'
 import { prefersReducedMotion } from '@/lib/ui/reduced-motion'
 
 /* ─────────────────────────────────────────────────────────────
-   چرخشِ خودکارِ کارت‌های هیرو (باشگاه، آگهی، رنکینگ) — یک منطق.
+   چرخشِ خودکارِ کارت‌های هیرو (باشگاه، فروشگاه، آگهی، رنکینگ) — یک منطق.
 
    می‌ایستد وقتی: موس روی کارت است یا فوکوس داخلش، تب پنهان است، یا
    هیرو بیرونِ دید است (.hh-off را HeroTilt می‌گذارد). لمس هم ۸ ثانیه
@@ -16,10 +16,11 @@ import { prefersReducedMotion } from '@/lib/ui/reduced-motion'
    دو گام: اول `leaving` محتوای فعلی را محو می‌کند (CSS: .hh-leaving)،
    بعد از LEAVE_MS اندیس عوض می‌شود و محتوای تازه با hh-swap وارد می‌شود.
    شرط‌های مکث در گامِ دوم دوباره سنجیده می‌شوند: لمس/فوکوس در همان
-   ۳۲۰ms نباید ردیفِ زیرِ انگشت را عوض کند.
+   ۴۵۰ms نباید ردیفِ زیرِ انگشت را عوض کند.
    ───────────────────────────────────────────────────────────── */
 
-const LEAVE_MS = 320
+/* همان مدتِ transitionِ .hh-swap در home-hero.css */
+const LEAVE_MS = 450
 const TOUCH_HOLD_MS = 8000
 
 export function useHeroRotation(count: number, everyMs: number, ref: RefObject<HTMLElement | null>): { i: number; leaving: boolean } {
@@ -33,7 +34,9 @@ export function useHeroRotation(count: number, everyMs: number, ref: RefObject<H
     let heldUntil = 0
     const hold = () => { heldUntil = Date.now() + TOUCH_HOLD_MS }
     const paused = () =>
+      /* getClientRects خالی ⟵ کارت display:none است (فروشگاه‌ها در تبلت/دسکتاپ) */
       document.hidden || !!hero?.classList.contains('hh-off') || Date.now() < heldUntil
+      || el.getClientRects().length === 0
       || el.matches(':hover') || el.contains(document.activeElement)
 
     let swap: ReturnType<typeof setTimeout> | undefined

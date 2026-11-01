@@ -3,18 +3,18 @@ import { Eye, Play, Trophy } from 'lucide-react'
 import { faNum } from '@/lib/jalali'
 import { thumbUrl } from '@/lib/media/thumb'
 import type { HeroData } from '@/lib/home-hero'
-import type { RealClub, RealProduct } from '@/lib/home-types'
+import type { RealClub, RealProduct, RealStore } from '@/lib/home-types'
 import { PRODUCT_IMG } from '@/lib/home-featured'
 import { HeroTilt } from './HeroTilt'
 import { HeroAdsCard } from './HeroAdsCard'
-import { HeroClubCard } from './HeroClubCard'
+import { HeroSpotCard } from './HeroSpotCard'
 import { HeroRankingCard } from './HeroRankingCard'
 import { CARD, LABEL } from './hero-classes'
-import type { HeroAdItem, HeroClubItem } from './hero-types'
+import type { HeroAdItem, HeroSpotItem } from './hero-types'
 
 /* ─────────────────────────────────────────────────────────────
    سه کارتِ شیشه‌ای کنارِ تیتر — داده‌ی واقعیِ همین لحظه.
-   چرخان‌ها (کلاینت): HeroClubCard · HeroAdsCard · HeroRankingCard
+   چرخان‌ها (کلاینت): HeroSpotCard (باشگاه، فروشگاه) · HeroAdsCard · HeroRankingCard
    کارتی که داده ندارد اصلاً ساخته نمی‌شود؛ جایش عددِ ساختگی نمی‌نشیند.
    ───────────────────────────────────────────────────────────── */
 
@@ -47,11 +47,29 @@ function LiveCard({ live, pos }: { live: NonNullable<HeroData['live']>; pos: str
 /* داده‌ی سبکِ کارت‌های چرخان — این‌جا روی سرور، تا فقط همین به مرورگر برود */
 const CLUBS = 5
 const ADS = 10
+const STORES = 6
 
-function clubItems(clubs: RealClub[]): HeroClubItem[] {
+function clubItems(clubs: RealClub[]): HeroSpotItem[] {
   return clubs.slice(0, CLUBS).map(c => ({
     id: c.id, name: c.name, img: thumbUrl(c.img, 600),
     meta: [c.city, c.tables > 0 ? `${faNum(c.tables)} میز` : ''].filter(Boolean).join('، '),
+    pin: !!c.city,
+  }))
+}
+
+/* فروشگاه‌ها به ترتیبِ تصادفی (خواستِ مالک) — در هر بازسازیِ ISR (هر
+   دقیقه) ترتیبِ تازه؛ هیدریشن مشکلی ندارد چون کلاینت همان فهرستِ سرور را می‌گیرد */
+function storeItems(stores: RealStore[]): HeroSpotItem[] {
+  const s = [...stores]
+  for (let k = s.length - 1; k > 0; k--) {
+    const j = Math.floor(Math.random() * (k + 1));
+    [s[k], s[j]] = [s[j]!, s[k]!]
+  }
+  return s.slice(0, STORES).map(x => ({
+    id: x.id, name: x.name, img: x.img ? thumbUrl(x.img, 128) : '',
+    /* شهر اول تا نشانِ مکان فقط کنارِ شهر بنشیند، نه کنارِ تخصص */
+    meta: [x.city, x.specialty].filter(Boolean).join('، '),
+    pin: !!x.city,
   }))
 }
 
@@ -97,22 +115,35 @@ function TournamentCard({ t, pos }: { t: NonNullable<HeroData['tournament']>; po
   )
 }
 
-export function HeroCards({ data, newestClubs, newestProducts }: {
-  data: HeroData; newestClubs: RealClub[]; newestProducts: RealProduct[]
+export function HeroCards({ data, newestClubs, newestProducts, stores: allStores }: {
+  data: HeroData; newestClubs: RealClub[]; newestProducts: RealProduct[]; stores: RealStore[]
 }) {
   const clubs = clubItems(newestClubs)
   const ads = adItems(newestProducts)
+  const stores = storeItems(allStores)
   const cards: ((pos: string) => React.ReactNode)[] = []
   if (data.live) { const l = data.live; cards.push(pos => <LiveCard key="live" live={l} pos={pos} />) }
-  else if (clubs.length) cards.push(pos => <HeroClubCard key="club" clubs={clubs} pos={pos} />)
+  else if (clubs.length) cards.push(pos => (
+    <HeroSpotCard key="club" items={clubs} pos={pos} hrefBase="/clubs" fit="cover" everyMs={5000}
+      label={['تازه‌ترین باشگاه', 'تازه‌ترین باشگاه‌ها']} />
+  ))
   /* مسابقه‌ی پیشِ رو/در جریان اولویت دارد؛ نبود ⟵ آگهی‌های تازه‌ی بازار */
   if (data.tournament) { const t = data.tournament; cards.push(pos => <TournamentCard key="t" t={t} pos={pos} />) }
   else if (ads.length) cards.push(pos => <HeroAdsCard key="ads" ads={ads} pos={pos} />)
   if (data.ranking.length) { const r = data.ranking; cards.push(pos => <HeroRankingCard key="r" boards={r} pos={pos} />) }
+  /* فروشگاه‌ها فقط در گوشی (خواستِ مالک): ردیفِ سوایپی جای کارتِ چهارم دارد؛
+     دسته‌ی سه‌کارتیِ دسکتاپ و ردیفِ سه‌تاییِ تبلت نه */
+  if (stores.length) cards.push(pos => (
+    <HeroSpotCard key="stores" items={stores} pos={pos} hrefBase="/sellers" fit="logo" everyMs={6000}
+      label={['فروشگاهِ تجهیزات', 'فروشگاه‌های تجهیزات']} className="min-[601px]:hidden" />
+  ))
   if (cards.length === 0) return null
+  /* فقط فروشگاه مانده (در تبلت/دسکتاپ پنهان) ⟵ صحنه هم در آن اندازه‌ها پنهان،
+     وگرنه .hh-stack{height:400px} بلوکِ خالی زیرِ تیتر می‌گذاشت */
+  const onlyMobile = cards.length === 1 && stores.length > 0
 
   return (
-    <div className="hh-stage relative min-w-0">
+    <div className={`hh-stage relative min-w-0${onlyMobile ? ' min-[601px]:hidden' : ''}`}>
       <HeroTilt className="hh-stack relative">
         {cards.map((c, i) => c(`hh-p${i + 1}`))}
       </HeroTilt>

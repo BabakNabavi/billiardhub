@@ -3,7 +3,7 @@ import {
   Building2, Calendar, GraduationCap, Radio, Search, ShoppingBag, Trophy, Users, Wrench,
 } from 'lucide-react'
 import type { HeroData } from '@/lib/home-hero'
-import type { RealClub, RealProduct } from '@/lib/home-types'
+import type { RealClub, RealProduct, RealStore } from '@/lib/home-types'
 import { HeroCards } from './HeroCards'
 import './home-hero.css'
 
@@ -32,8 +32,8 @@ const QUICK = [
 
 const FOCUS = 'outline-none focus-visible:ring-2 focus-visible:ring-gold-light focus-visible:ring-offset-2 focus-visible:ring-offset-black'
 
-export function HomeHero({ data, newestClubs, newestProducts }: {
-  data: HeroData; newestClubs: RealClub[]; newestProducts: RealProduct[]
+export function HomeHero({ data, newestClubs, newestProducts, stores }: {
+  data: HeroData; newestClubs: RealClub[]; newestProducts: RealProduct[]; stores: RealStore[]
 }) {
   /* بی‌کارت ⟵ یک ستون؛ وگرنه نیمه‌ی چپِ دسکتاپ خالی می‌ماند */
   const hasCards = !!(data.live || newestClubs.length || data.tournament || newestProducts.length || data.ranking.length)
@@ -93,7 +93,7 @@ export function HomeHero({ data, newestClubs, newestProducts }: {
         </div>
 
         {/* ── کارت‌ها ── */}
-        <HeroCards data={data} newestClubs={newestClubs} newestProducts={newestProducts} />
+        <HeroCards data={data} newestClubs={newestClubs} newestProducts={newestProducts} stores={stores} />
       </div>
 
       {/* ── میان‌برِ بخش‌ها ── */}

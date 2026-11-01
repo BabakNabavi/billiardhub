@@ -75,6 +75,7 @@
 .hh-float:hover { animation-play-state: running, paused }
 .hh-p2.hh-float { animation-delay: .12s, -2s }
 .hh-p3.hh-float { animation-delay: .24s, -4s }
+.hh-p4.hh-float { animation-delay: .36s, -1s }
 /* گوشی: همان کجیِ دسکتاپ (۱۲°/۴°؛ خواستِ مالک). perspective داخلِ خودِ
    transform است چون کارت‌ها در ردیفِ اسکرولی‌اند و والدِ سه‌بعدی ندارند */
 @keyframes hhFloat {
@@ -145,17 +146,19 @@
 }
 @keyframes hhDot { 0%, 100% { opacity: 1 } 50% { opacity: .25 } }
 
-/* چرخشِ کارت‌ها: محتوای فعلی آرام محو می‌شود (hh-leaving، ۳۲۰ms — همان
+/* چرخشِ کارت‌ها: محتوای فعلی آرام محو می‌شود (hh-leaving، ۴۵۰ms — همان
    LEAVE_MS در use-hero-rotation)، بعد تازه با جابه‌جاییِ کوچک وارد می‌شود.
    فقط opacity/transform؛ بلور نه — حروفِ چسبانِ فارسی در بلور به هم می‌ریزند */
 /* ⚠️ بی fill-mode: با both فریمِ آخرِ انیمیشن (opacity:1) همیشه می‌ماند و
    در آبشارِ CSS بر .hh-leaving برنده می‌شد ⟵ محوشدن اصلاً دیده نمی‌شد */
 .hh-swap {
-  animation: hhSwapIn .6s cubic-bezier(.22,1,.36,1);
-  transition: opacity .32s ease, transform .32s ease;
+  animation: hhSwapIn .85s cubic-bezier(.33,0,.2,1);
+  transition: opacity .45s cubic-bezier(.4,0,.2,1), transform .45s cubic-bezier(.4,0,.2,1);
 }
-.hh-leaving { opacity: 0; transform: translateY(-4px) }
-@keyframes hhSwapIn { from { opacity: 0; transform: translateY(6px) } to { opacity: 1; transform: none } }
+/* «نرم‌تر» (خواستِ مالک): خروج و ورودِ آهسته‌تر با منحنیِ نرم و جابه‌جاییِ ۳px —
+   حرکتِ کمتر، حسِ «جاری‌شدن» به‌جای «پریدن» */
+.hh-leaving { opacity: 0; transform: translateY(-3px) }
+@keyframes hhSwapIn { from { opacity: 0; transform: translateY(3px) } to { opacity: 1; transform: none } }
 
 /* «ایران» سه‌رنگ — همان گرادیانِ هیروی قبلی */
 .hh-iran {
