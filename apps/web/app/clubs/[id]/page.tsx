@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation'
-import ClubProfilePage, { type Club } from './ClubProfileClient'
+import { ClubProfileClient, type Club } from './ClubProfileClient'
 import { loadPublicClub } from '@/lib/clubs/public-club'
 
 /* ─────────────────────────────────────────────────────────────
@@ -25,5 +25,5 @@ export default async function ClubPage({ params }: { params: Promise<{ id: strin
   }
   if (club === null) notFound()
   /* شکلِ پاسخ همان /api/clubs/[id] است که صفحه از قبل می‌خواند */
-  return <ClubProfilePage initialClub={(club ?? null) as Club | null} />
+  return <ClubProfileClient initialClub={(club ?? null) as Club | null} />
 }

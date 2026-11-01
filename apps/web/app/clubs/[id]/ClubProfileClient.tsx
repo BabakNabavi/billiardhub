@@ -158,7 +158,7 @@ function calcIsOpen(todayH: any): boolean {
 /* `initialClub` از page.tsx (رندرِ سرور) می‌آید تا HTMLِ اول خودِ باشگاه
    باشد، نه چرخنده‌ی «در حال بارگذاری». نبودش (باشگاهِ پیدانشده/خطا) یعنی
    همان رفتارِ قبلی: مرورگر خودش می‌خواند. */
-export default function ClubProfilePage({ initialClub }: { initialClub?: Club | null }) {
+export function ClubProfileClient({ initialClub }: { initialClub?: Club | null }) {
   const params   = useParams();
   const id       = params.id as string;
   const router   = useRouter();
