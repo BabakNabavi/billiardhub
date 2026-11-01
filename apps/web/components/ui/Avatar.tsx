@@ -1,5 +1,7 @@
 'use client'
 
+import { thumbUrl } from '../../lib/media/thumb'
+
 /* ─────────────────────────────────────────────────────────────
    آواتار واحد پروژه.
 
@@ -65,8 +67,10 @@ export default function Avatar({
   return (
     <span className={className} style={box}>
       {src
+        /* اندازه‌ی واقعیِ کادر (دو برابر برای رتینا) از بهینه‌ساز — حبابِ استوری
+           ۶۳ پیکسلی عکسِ خامِ ۴۲۰ پیکسلی می‌گرفت */
         /* eslint-disable-next-line @next/next/no-img-element */
-        ? <img src={src} alt={alt} width={size} height={size}
+        ? <img src={thumbUrl(src, size * 2)} alt={alt} width={size} height={size}
                loading="lazy" decoding="async"
                style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
         : <PersonIcon size={Math.round(size * 0.58)} color={iconColor} />}

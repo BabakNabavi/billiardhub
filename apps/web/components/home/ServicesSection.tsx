@@ -65,7 +65,6 @@ export default function ServicesSection() {
       `}</style>
 
       <div aria-hidden className="sec-hair" style={{ left: '30%', background: 'linear-gradient(180deg,transparent,rgba(199,166,106,0.45),transparent)' }} />
-      <div aria-hidden className="sec-word" style={{ ['--wc' as never]: 'rgba(255,255,255,0.055)' }}>SERVICE</div>
       <div aria-hidden style={{ position: 'absolute', bottom: 0, insetInline: 0, height: 3, display: 'flex' }}>
         <i style={{ flex: 2.6, background: 'linear-gradient(90deg,#8A6020,#C7A66A)' }} />
         <i style={{ flex: 1, background: '#B23B2E' }} />

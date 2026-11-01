@@ -11,6 +11,8 @@
    فونت وابسته نیست.
    ───────────────────────────────────────────────────────────── */
 
+import { thumbUrl } from '../../lib/media/thumb'
+
 const GOLD = '#C7A66A'
 
 export default function ClubLogo({ src, name, size = 62, rounded = '50%', tone = 'light' }: {
@@ -33,7 +35,9 @@ export default function ClubLogo({ src, name, size = 62, rounded = '50%', tone =
   if (src) {
     return (
       <span style={wrap} data-club-logo="img">
-        <img src={src} alt={name ?? 'باشگاه'} loading="lazy" decoding="async"
+        {/* اندازه‌ی واقعیِ کادر از بهینه‌ساز — لوگوی آرتا خام ۱٫۳ مگابایت بود برای
+            دایره‌ی ۱۵۶ پیکسلی. عدد ⟵ دو برابر (صفحه‌ی رتینا)؛ clamp/درصد ⟵ ۳۲۰ */}
+        <img src={thumbUrl(src, typeof size === 'number' ? size * 2 : 320)} alt={name ?? 'باشگاه'} loading="lazy" decoding="async"
           style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
       </span>
     )

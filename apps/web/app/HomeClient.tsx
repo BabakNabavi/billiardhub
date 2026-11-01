@@ -1495,7 +1495,6 @@ useEffect(() => {
         .sec-title{font-size:clamp(24px,3.2vw,40px);font-weight:700;letter-spacing:-0.022em;line-height:1.16;margin:0 0 8px;}
         .sec-rule {height:3px;width:64px;border-radius:2px;margin-top:14px;background:linear-gradient(90deg,currentColor,transparent);}
         /* وردمارک outline پس‌زمینه‌ی هر سکشن — امضای هویت جدید */
-        .sec-word{position:absolute;top:2px;inset-inline-end:-6px;font-weight:900;font-size:clamp(56px,9vw,120px);line-height:1;letter-spacing:0.03em;color:transparent;-webkit-text-stroke:1px var(--wc,rgba(28,27,23,0.06));user-select:none;pointer-events:none;direction:ltr;}
         /* خط مویی اریب — امضای برند */
         .sec-hair{position:absolute;top:-25%;bottom:-25%;width:1px;transform:rotate(14deg);pointer-events:none;}
         /* لبه‌های محو مارکی فروشندگان */
@@ -2019,7 +2018,6 @@ useEffect(() => {
           جایگاه featured_clubs_homepage غیرفعال ⇒ کل سکشن حذف */}
       {showClubs && (
       <section className="clubs-section" style={{ position: 'relative', overflow: 'hidden', background: 'rgb(var(--c-surface))', padding: 'clamp(36px,3.5vw,52px) clamp(16px,5%,80px) clamp(56px,5.5vw,80px)' }}>
-        <div aria-hidden className="sec-word" style={{ ['--wc' as never]: 'rgba(20,83,45,0.07)' }}>CLUBS</div>
         <div aria-hidden style={{ position: 'absolute', top: '-18%', right: '-6%', width: 'min(520px,50vw)', height: 420, borderRadius: '50%', background: 'radial-gradient(circle, rgba(20,83,45,0.10) 0%, transparent 62%)', filter: 'blur(52px)', pointerEvents: 'none' }} />
         <div style={{ maxWidth: '1340px', margin: '0 auto', position: 'relative', zIndex: 1 }}>
           <SR>
@@ -2067,7 +2065,6 @@ useEffect(() => {
           جایگاه market_featured_products_homepage غیرفعال ⇒ حذف سکشن */}
       {showProducts && (
       <section className="marketplace-section" style={{ position: 'relative', overflow: 'hidden', background: 'rgb(var(--c-paper))', padding: 'clamp(36px,3.5vw,52px) clamp(16px,5%,80px) clamp(20px,2vw,32px)' }}>
-        <div aria-hidden className="sec-word" style={{ ['--wc' as never]: 'rgba(160,120,64,0.09)' }}>BAZAAR</div>
         <div aria-hidden style={{ position: 'absolute', top: '-16%', left: '-5%', width: 'min(480px,46vw)', height: 400, borderRadius: '50%', background: 'radial-gradient(circle, rgba(160,120,64,0.09) 0%, transparent 62%)', filter: 'blur(50px)', pointerEvents: 'none' }} />
         <div aria-hidden style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(rgba(28,27,23,0.035) 1px, transparent 1px)', backgroundSize: '20px 20px', WebkitMaskImage: 'linear-gradient(100deg, transparent 55%, black 90%)', maskImage: 'linear-gradient(100deg, transparent 55%, black 90%)', pointerEvents: 'none' }} />
         <div style={{ maxWidth: '1340px', margin: '0 auto', position: 'relative', zIndex: 1 }}>
@@ -2174,7 +2171,6 @@ useEffect(() => {
           محتوایی دارد رندر می‌شود — هر سه جایگاه مستقل‌اند. */}
       {showSellersSection && (
       <section className="sellers-section" style={{ position: 'relative', overflow: 'hidden', background: 'rgb(var(--c-surface))', padding: 'clamp(36px,3.5vw,52px) clamp(16px,5%,80px) clamp(20px,2vw,32px)' }}>
-        <div aria-hidden className="sec-word" style={{ ['--wc' as never]: 'rgba(154,110,56,0.08)' }}>SELLERS</div>
         <div aria-hidden style={{ position: 'absolute', top: '-20%', right: '10%', width: 'min(500px,48vw)', height: 400, borderRadius: '50%', background: 'radial-gradient(circle, var(--brand-tint) 0%, transparent 62%)', filter: 'blur(52px)', pointerEvents: 'none' }} />
         <div style={{ maxWidth: '1340px', margin: '0 auto', position: 'relative', zIndex: 1 }}>
           {/* عنوان فقط وقتی فهرستی زیرش هست — اگر جایگاه فروشگاه‌ها
