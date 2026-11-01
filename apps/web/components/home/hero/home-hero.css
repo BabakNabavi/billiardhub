@@ -169,12 +169,6 @@
 
 .hh-live-thumb { background: url(/images/hero/1.webp) center / cover }   /* همان عکسِ پس‌زمینه — از کش، بی‌درخواستِ تازه */
 
-/* رنگِ هر بخش — همان رنگ‌های کاروسلِ قبلی، کمی روشن‌تر برای زمینه‌ی تیره */
-.hh-c-blue { color: #7DB8FF } .hh-c-green { color: #5FD37F } .hh-c-violet { color: #C89BFF }
-.hh-c-pink { color: #FF8DB5 } .hh-c-cyan { color: #4FD1E5 } .hh-c-rose { color: #F59AC9 }
-
-.hh-links { scrollbar-width: none }
-.hh-links::-webkit-scrollbar { display: none }
 
 /* بیرونِ دید (HeroTilt کلاس را می‌گذارد): نور و شناوری هر فریم کامپوزیت نشوند */
 .hh-off .hh-streak, .hh-off .hh-float, .hh-off .hh-live-on, .hh-off .hh-live-dot { animation-play-state: paused }
@@ -192,3 +186,6 @@
   .hh-live-on { animation: none !important; background: rgb(239 68 68 / .4) }
   .hh { transition: none }
 }
+
+/* رنگِ آیکونِ کارتِ آگهی‌ها */
+.hh-c-violet { color: #C89BFF }

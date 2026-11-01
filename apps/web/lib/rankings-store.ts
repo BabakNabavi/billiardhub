@@ -63,6 +63,10 @@ export const CATEGORY_SIZES: Record<string, Record<string, number>> = {
 const GENDER_SIZES: Record<string, number> = {
   'snooker|آقایان|دسته برتر': 128,
   'snooker|بانوان|دسته برتر': 64,
+  /* ۱۰ آبانِ ۱۴۰۵: پیشکسوتانِ آقایان ۱۹۰ نفر و پاکتِ بانوان ۵۱ نفر — با ۳۲ِ پیش‌فرض
+     بیشترشان دور ریخته می‌شدند */
+  'snooker|آقایان|پیشکسوتان': 256,
+  'pocket|بانوان|دسته برتر': 64,
 }
 
 export function categorySize(sport: string, category: string, gender?: string): number {
