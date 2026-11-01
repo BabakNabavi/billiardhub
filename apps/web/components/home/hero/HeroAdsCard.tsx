@@ -32,7 +32,7 @@ export function HeroAdsCard({ ads, pos }: { ads: HeroAdItem[]; pos: string }) {
         تازه‌ترین آگهی‌های بازار
         <span className="ms-auto font-bold text-gold-light">همه</span>
       </Link>
-      <ul key={page} className="hh-swap mt-1">
+      <ul key={page} className="hh-swap hh-ads mt-1">
         {shown.map(p => (
           <li key={p.id}>
             <Link prefetch={false} href={`/shop/${p.id}`} className={`${ROW_LINK} -mx-1 flex items-center gap-2 px-1 py-1`}>

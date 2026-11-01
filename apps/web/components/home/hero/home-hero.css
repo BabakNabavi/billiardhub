@@ -75,10 +75,11 @@
 .hh-float:hover { animation-play-state: running, paused }
 .hh-p2.hh-float { animation-delay: .12s, -2s }
 .hh-p3.hh-float { animation-delay: .24s, -4s }
-/* گوشی: فقط بالا و پایین، بی‌کجی */
+/* گوشی: همان کجیِ دسکتاپ، ملایم‌تر (خواستِ مالک). perspective داخلِ خودِ
+   transform است چون کارت‌ها در ردیفِ اسکرولی‌اند و والدِ سه‌بعدی ندارند */
 @keyframes hhFloat {
-  0%, 100% { transform: translate3d(0, 0, 0) }
-  50%      { transform: translate3d(0, -6px, 0) }
+  0%, 100% { transform: perspective(900px) rotateY(-9deg) rotateX(3deg) translate3d(0, 0, 0) }
+  50%      { transform: perspective(900px) rotateY(-9deg) rotateX(3deg) translate3d(0, -6px, 0) }
 }
 
 @media (min-width: 901px) {
@@ -117,6 +118,8 @@
   .hh-stack::-webkit-scrollbar { display: none }
   /* ۷۸٪ ⟵ ۷۰٪: کارتِ کوچک‌تر و لبه‌ی کارتِ بعدی پیدا (نشانِ «بکش») */
   /* min-width:0 — بی آن اسمِ بلندِ رنکینگ کارت را از ۷۰٪ پهن‌تر می‌کرد */
+  /* آگهی‌ها در موبایل ۵٪ کوچک‌تر (خواستِ مالک) */
+  .hh-ads { zoom: .95 }
   .hh-card { flex: 0 0 70%; min-width: 0; max-width: 290px; scroll-snap-align: center }
 }
 /* تبلت: سه کارت کنارِ هم جا می‌شوند — سوایپِ بی‌دلیل نه */
