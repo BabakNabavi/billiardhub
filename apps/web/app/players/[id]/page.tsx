@@ -220,7 +220,7 @@ export default function PlayerProfilePage() {
   }
 
   const deleteImage = async (mid: string) => {
-    if (!(await ask('این تصویر حذف شود؟', { body: 'این کار برگشت‌پذیر نیست.', confirmLabel: 'حذف' }))) return
+    if (!(await ask('این تصویر حذف شود؟', { body: 'این کار برگشت‌پذیر نیست', confirmLabel: 'حذف' }))) return
     await edit.apply(d => ({ ...d, gallery: (d.gallery ?? []).filter(g => g.id !== mid) }))
   }
   /* ── ویرایش عنوان ویدیو ──
@@ -246,7 +246,7 @@ export default function PlayerProfilePage() {
   )
 
   const deleteVideo = async (vid: string) => {
-    if (!(await ask('این ویدیو حذف شود؟', { body: 'این کار برگشت‌پذیر نیست.', confirmLabel: 'حذف' }))) return
+    if (!(await ask('این ویدیو حذف شود؟', { body: 'این کار برگشت‌پذیر نیست', confirmLabel: 'حذف' }))) return
     await edit.apply(d => ({ ...d, videos: (d.videos ?? []).filter(v => v.id !== vid) }))
   }
 
@@ -276,7 +276,7 @@ export default function PlayerProfilePage() {
       <ProfileMissing
         icon={<Trophy size={34} />}
         title="بازیکن پیدا نشد"
-        message="ممکن است این پروفایل حذف شده یا نشانی تغییر کرده باشد."
+        message="ممکن است این پروفایل حذف شده یا نشانی تغییر کرده باشد"
         backHref="/players" backLabel="بازگشت به بازیکنان"
         {...retryProps}
       />
@@ -634,7 +634,7 @@ export default function PlayerProfilePage() {
         {shown.length === 0 && (
           <section className="ath-sec ath-sec--last">
             <div className="ath-glass ath-empty">
-              <p>این پروفایل هنوز تکمیل نشده است.</p>
+              <p>این پروفایل هنوز تکمیل نشده است</p>
               {edit.isOwner && (
                 <Link href="/dashboard/player" className="ath-empty-cta">تکمیل پروفایل</Link>
               )}

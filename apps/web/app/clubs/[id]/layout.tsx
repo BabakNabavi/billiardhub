@@ -53,7 +53,7 @@ export async function generateMetadata(
   const title = `${c.name} | باشگاه بیلیارد${c.city ? ` در ${c.city}` : ''} | بیلیارد هاب`
   const description = [
     `${c.name}${where ? ` در ${where}` : ''}${c.address ? ` — ${c.address}` : ''}.`,
-    'میزهای اسنوکر و پاکت، ساعات کاری، تصاویر و رزرو آنلاین میز در بیلیارد هاب.',
+    'میزهای اسنوکر و پاکت، ساعات کاری، تصاویر و رزرو آنلاین میز در بیلیارد هاب',
   ].join(' ')
   const url = pathOf(c)
   const image = imageOf(c)

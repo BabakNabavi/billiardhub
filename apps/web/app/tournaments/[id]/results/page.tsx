@@ -68,8 +68,8 @@ export default function ResultsPage() {
           </p>
           <p style={{ fontSize: 12.5, color: MUT, margin: '0 0 16px', lineHeight: 2 }}>
             {b.matches.length === 0
-              ? 'نتایج پس از برگزاری بازی‌ها اینجا اعلام می‌شود.'
-              : `${faDigits(played.length)} از ${faDigits(b.matches.length)} بازی انجام شده است.`}
+              ? 'نتایج پس از برگزاری بازی‌ها اینجا اعلام می‌شود'
+              : `${faDigits(played.length)} از ${faDigits(b.matches.length)} بازی انجام شده است`}
           </p>
           {b.matches.length > 0 && (
             <Link href={`/tournaments/${id}/bracket`} style={btnGhost}><GitBranch size={14} /> دیدن براکت</Link>
@@ -88,8 +88,8 @@ export default function ResultsPage() {
 
           {semiLosers.length === 2 && (
             <p style={{ fontSize: 11.5, color: MUT, margin: '-10px 0 22px', lineHeight: 2 }}>
-              در جدول حذفی یک‌طرفه، هر دو بازنده‌ی نیمه‌نهایی هم‌رده‌اند. تعیین نفر سوم
-              نیازمند بازی رده‌بندی است که در این مسابقه برگزار نشده.
+              در جدول حذفی یک‌طرفه، هر دو بازنده‌ی نیمه‌نهایی هم‌رده‌اند، تعیین نفر سوم
+              نیازمند بازی رده‌بندی است که در این مسابقه برگزار نشده
             </p>
           )}
 

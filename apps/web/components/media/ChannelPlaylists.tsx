@@ -138,14 +138,14 @@ export default function ChannelPlaylists({
       {state === 'error' ? (
         <div className="mx-empty">
           <h2>لیست‌ها بارگذاری نشد</h2>
-          <p>این یک خطای موقت است.</p>
+          <p>این یک خطای موقت است</p>
           <div className="mx-empty-act">
             <button className="mx-iconbtn" type="button" onClick={() => void load()}><span>تلاش دوباره</span></button>
           </div>
         </div>
       ) : rows.length === 0 ? (
         <p className="mx-by">
-          {canEdit ? 'هنوز لیستی نساخته‌اید.' : 'این کانال هنوز لیست پخشی ندارد.'}
+          {canEdit ? 'هنوز لیستی نساخته‌اید' : 'این کانال هنوز لیست پخشی ندارد'}
         </p>
       ) : (
         <div className="mx-grid">

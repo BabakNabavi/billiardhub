@@ -95,7 +95,7 @@ export default function AdminBookings() {
 
       {pending && (
         <div style={{ padding: '12px 15px', borderRadius: 13, background: 'rgba(199,166,106,0.10)', border: '1px solid rgba(199,166,106,0.30)', color: GOLD_D, fontSize: 12.5, fontWeight: 700, marginBottom: 14, lineHeight: 1.9 }}>
-          جدول رزروها هنوز در دیتابیس ساخته نشده است (مایگریشن اجرا نشده).
+          جدول رزروها هنوز در دیتابیس ساخته نشده است (مایگریشن اجرا نشده)
         </div>
       )}
 
@@ -197,12 +197,12 @@ export default function AdminBookings() {
                 </div>
                 {!confirm.inCancelWindow && (
                   <div style={{ fontSize: 11, color: GOLD_D, marginTop: 8, fontWeight: 700, lineHeight: 1.9 }}>
-                    مهلت لغو کاربر گذشته است؛ این لغو با اختیار ادمین انجام می‌شود.
+                    مهلت لغو کاربر گذشته است؛ این لغو با اختیار ادمین انجام می‌شود
                   </div>
                 )}
               </div>
             ) : (
-              <p style={{ fontSize: 12, color: MUT, margin: '0 0 12px' }}>این رزرو پرداخت نشده است؛ مبلغی بازگردانده نمی‌شود.</p>
+              <p style={{ fontSize: 12, color: MUT, margin: '0 0 12px' }}>این رزرو پرداخت نشده است؛ مبلغی بازگردانده نمی‌شود</p>
             )}
 
             <input value={reason} onChange={e => setReason(e.target.value)} placeholder="دلیل لغو (اختیاری)"

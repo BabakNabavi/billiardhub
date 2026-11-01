@@ -120,7 +120,7 @@ export async function PATCH(req: NextRequest, ctx: { params: Promise<{ id: strin
         .eq('tournament_id', id).neq('status', 'CANCELLED');
       if ((count ?? 0) > 0) {
         return NextResponse.json({
-          message: `این مسابقه ${count} ثبت‌نام دارد و به پیش‌نویس برنمی‌گردد. برای توقف، آن را لغو کنید.`,
+          message: `این مسابقه ${count} ثبت‌نام دارد و به پیش‌نویس برنمی‌گردد، برای توقف، آن را لغو کنید`,
         }, { status: 409 });
       }
     }

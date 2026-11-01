@@ -4,7 +4,7 @@
 
 export function SearchSkeleton() {
   return (
-    <div role="status" aria-label="در حالِ جست‌وجو">
+    <div role="status" aria-label="در حال جست‌وجو">
       <div aria-hidden className="mt-4 h-4 w-40 rounded-chip bg-line/[.05] motion-safe:animate-pulse" />
       <div aria-hidden className="mt-8 flex flex-col gap-8">
         {[0, 1].map(g => (

@@ -117,7 +117,7 @@ export default function PayoutOrders({ onChanged }: { onChanged?: () => void }) 
       </div>
 
       {nothing && (
-        <Note tone="ok">همه‌چیز تسویه است — هیچ پرداخت باز‌ی وجود ندارد.</Note>
+        <Note tone="ok">همه‌چیز تسویه است — هیچ پرداخت باز‌ی وجود ندارد</Note>
       )}
 
       {/* ── به باشگاه‌ها ── */}
@@ -156,7 +156,7 @@ export default function PayoutOrders({ onChanged }: { onChanged?: () => void }) 
                       {busy === c.id ? '…' : 'ایجاد دستور تسویه'}
                     </button>
                     <span style={{ fontSize: 11.5, color: MUT, lineHeight: 1.8 }}>
-                      پیش از واریز باید تسویه ثبت شود تا مبلغ در دفتر قفل شود.
+                      پیش از واریز باید تسویه ثبت شود تا مبلغ در دفتر قفل شود
                     </span>
                   </>
                 ) : (
@@ -483,8 +483,8 @@ function RefModal({ amount, to, onClose, onSubmit }: {
           شماره پیگیری بانک
         </label>
         <p style={{ fontSize: 11.5, color: MUT, margin: '0 0 8px', lineHeight: 1.9 }}>
-          از رسید همان انتقال. این عدد استعلام نمی‌شود؛ به‌عنوان سند
-          واریز با نام و زمان شما ثبت می‌شود.
+          از رسید همان انتقال، این عدد استعلام نمی‌شود؛ به‌عنوان سند
+          واریز با نام و زمان شما ثبت می‌شود
         </p>
         <input value={ref} onChange={e => setRef(e.target.value)} autoFocus
           placeholder="مثلا ۱۲۳۴۵۶۷۸"

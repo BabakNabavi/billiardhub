@@ -156,7 +156,7 @@ export async function GET(req: NextRequest) {
        است، نه صفحه‌ی سفید. */
     if (error && /PGRST200|relationship|schema cache/i.test(
       `${(error as { code?: string }).code ?? ''} ${error.message}`)) {
-      console.warn('[clubs] شمارشِ اعضا در دسترس نیست — بدونِ آن ادامه:', error.message);
+      console.warn('[clubs] شمارش اعضا در دسترس نیست — بدون آن ادامه:', error.message);
       ({ data: clubs, error } = await withFilters(build(false)));
     }
 

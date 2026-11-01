@@ -212,8 +212,8 @@ export default function CoachProfilePage() {
         <div className="lqg ch-notfound-card">
           <h1>{netFail ? 'بارگذاری نشد' : 'این مربی پیدا نشد'}</h1>
           <p>{netFail
-            ? 'ارتباط با سرور برقرار نشد. اتصال اینترنت را بررسی کنید و دوباره تلاش کنید.'
-            : 'ممکن است نشانی اشتباه باشد یا پروفایل هنوز تأیید نشده باشد.'}</p>
+            ? 'ارتباط با سرور برقرار نشد، اتصال اینترنت را بررسی کنید و دوباره تلاش کنید'
+            : 'ممکن است نشانی اشتباه باشد یا پروفایل هنوز تأیید نشده باشد'}</p>
           {/* راه بازگشت در حالت خطا هم می‌ماند — شاید شبکه برنگردد.
               `min-height` صریح چون `btn-sm` حدود ۳۶px است. */}
           <div style={{ display: 'flex', gap: 8, justifyContent: 'center', flexWrap: 'wrap' }}>
@@ -345,7 +345,7 @@ export default function CoachProfilePage() {
   }
 
   const deleteVideo = async (id: string) => {
-    if (!(await ask('این ویدیو حذف شود؟', { body: 'این کار برگشت‌پذیر نیست.', confirmLabel: 'حذف' }))) return
+    if (!(await ask('این ویدیو حذف شود؟', { body: 'این کار برگشت‌پذیر نیست', confirmLabel: 'حذف' }))) return
     await edit.apply(d => ({ ...d, videos: d.videos.filter(v => v.id !== id) }))
   }
   const editImage = async (id: string, patch: { caption: string; album: string }) => {
@@ -356,7 +356,7 @@ export default function CoachProfilePage() {
      برمی‌گشت و این فیلتر روی کل گالری بود — یعنی حذف از داخل آلبوم
      عکس دیگری را می‌برد. */
   const deleteImage = async (id: string) => {
-    if (!(await ask('این تصویر حذف شود؟', { body: 'این کار برگشت‌پذیر نیست.', confirmLabel: 'حذف' }))) return
+    if (!(await ask('این تصویر حذف شود؟', { body: 'این کار برگشت‌پذیر نیست', confirmLabel: 'حذف' }))) return
     await edit.apply(d => ({ ...d, gallery: d.gallery.filter(g => g.id !== id) }))
   }
 
@@ -469,7 +469,7 @@ export default function CoachProfilePage() {
                 <section className="ch-book ch-rv" aria-labelledby="ch-sess-h">
                   <div className="ch-book-t">
                     <h2 id="ch-sess-h">جلسه‌ی خصوصی با {coach.name}</h2>
-                    <p>زمان و مکان را با خودِ مربی هماهنگ می‌کنید</p>
+                    <p>زمان و مکان را با خود مربی هماهنگ می‌کنید</p>
                   </div>
                   <SessionRequest coachSlug={id} price={sessionPrice} minutes={sessionMin} />
                 </section>
@@ -489,8 +489,8 @@ export default function CoachProfilePage() {
                 <div className="ch-card ch-ladder">
                   <GradeLadder grades={GRADES} earned={earned} verified={coach.verified}
                     emptyText={localP?.freeCoach
-                      ? 'این مربی به‌عنوان مربی آزاد فعالیت می‌کند و مدرک فدراسیونی ثبت نکرده است.'
-                      : 'هنوز درجه‌ای ثبت نشده است.'} />
+                      ? 'این مربی به‌عنوان مربی آزاد فعالیت می‌کند و مدرک فدراسیونی ثبت نکرده است'
+                      : 'هنوز درجه‌ای ثبت نشده است'} />
                 </div>
               </section>
             </div>
@@ -520,7 +520,7 @@ export default function CoachProfilePage() {
               <span className="rule" aria-hidden />
             </div>
             <Reviews endpoint={`/api/profiles/coach/${encodeURIComponent(id)}/reviews`} subject="این مربی"
-              cannotReviewNote="برای ثبت نظر باید در باشگاهی که این مربی در آن ثبت شده، رزرو قطعی داشته باشید." />
+              cannotReviewNote="برای ثبت نظر باید در باشگاهی که این مربی در آن ثبت شده، رزرو قطعی داشته باشید" />
           </section>
 
         </div>

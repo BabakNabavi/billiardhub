@@ -92,7 +92,7 @@ export default function ClubFinance({ clubId, onEditBank }: { clubId: string; on
           دعوا درست می‌کند. فروشِ ناخالص جداگانه در بخشِ تفکیک می‌آید. */}
       <section>
         <Head icon={<TrendingUp size={17} style={{ color: FELT }} />} title="سهم شما"
-          desc="سهم خودتان از رزروها و مسابقات برگزارشده، پس از کسر کمیسیون. مبلغ در لحظه‌ی برگزاری ثبت می‌شود، نه لحظه‌ی پرداخت." />
+          desc="سهم خودتان از رزروها و مسابقات برگزارشده، پس از کسر کمیسیون، مبلغ در لحظه‌ی برگزاری ثبت می‌شود، نه لحظه‌ی پرداخت" />
         <div className="cf-grid">
           <Stat label="امروز" value={d.revenue.today} tone="felt" hint="از نیمه‌شب امروز به وقت تهران" />
           <Stat label="۷ روز اخیر" value={d.revenue.week} hint="امروز و شش روز پیش از آن" />
@@ -107,7 +107,7 @@ export default function ClubFinance({ clubId, onEditBank }: { clubId: string; on
       {d.range && (
         <section>
           <Head icon={<Receipt size={17} style={{ color: GOLD_D }} />} title="گزارش بازه‌ای"
-            desc="هر بازه‌ای که بخواهید — هر دو سر شامل همان روز است." />
+            desc="هر بازه‌ای که بخواهید — هر دو سر شامل همان روز است" />
           {/* ⚠️ `<input type="date">` برداشته شد: تقویمِ بومیِ مرورگر
               میلادی است و باشگاه‌دار باید تاریخ شمسی را در ذهنش تبدیل
               می‌کرد. `JalaliDatePicker` همان کامپوننتی است که بقیه‌ی
@@ -194,7 +194,7 @@ export default function ClubFinance({ clubId, onEditBank }: { clubId: string; on
           </div>
 
           {d.range.entries === 0 && (
-            <p style={{ fontSize: 12, color: MUT, marginTop: 8 }}>در این بازه رویداد مالی‌ای ثبت نشده است.</p>
+            <p style={{ fontSize: 12, color: MUT, marginTop: 8 }}>در این بازه رویداد مالی‌ای ثبت نشده است</p>
           )}
         </section>
       )}
@@ -202,7 +202,7 @@ export default function ClubFinance({ clubId, onEditBank }: { clubId: string; on
       {/* ── موجودی ── */}
       <section>
         <Head icon={<Wallet size={17} style={{ color: GOLD_D }} />} title="گردش مالی"
-          desc="سهم شما از هر رزرو، و سهم پلتفرم که به‌صورت کمیسیون کسر می‌شود." />
+          desc="سهم شما از هر رزرو، و سهم پلتفرم که به‌صورت کمیسیون کسر می‌شود" />
         {/* برچسب «در جریان» پیش‌تر یعنی «رزروهای هنوز برگزارنشده» بود.
             با مدل تازه، سهم باشگاه اصلا پیش از برگزاری ساخته نمی‌شود؛
             پس آن ستون حالا معنای دیگری دارد: تسویه‌ای که تأیید شده و
@@ -235,7 +235,7 @@ export default function ClubFinance({ clubId, onEditBank }: { clubId: string; on
       {/* ── رزروها ── */}
       <section>
         <Head icon={<Clock3 size={17} style={{ color: SEC }} />} title="رزروها"
-          desc="تعداد رزرو — نه مبلغ." />
+          desc="تعداد رزرو — نه مبلغ" />
         <div className="cf-grid">
           <Stat label="امروز" value={d.bookings.today} count unit="رزرو" />
           <Stat label="پیش‌رو" value={d.bookings.upcoming} count unit="رزرو" />
@@ -256,7 +256,7 @@ export default function ClubFinance({ clubId, onEditBank }: { clubId: string; on
           {!bank ? (
             <p style={{ fontSize: 13, color: MUT, margin: 0, lineHeight: 2 }}>
               برای دریافت تسویه، شماره شبای خود را در تب <b style={{ color: GOLD_D }}>اطلاعات</b> ثبت
-              و با استعلام بانکی تأیید کنید. حساب باید به نام خود صاحب باشگاه باشد.
+              و با استعلام بانکی تأیید کنید، حساب باید به نام خود صاحب باشگاه باشد
             </p>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -281,7 +281,7 @@ export default function ClubFinance({ clubId, onEditBank }: { clubId: string; on
       <section>
         <Head icon={<ArrowDownToLine size={17} style={{ color: FELT }} />} title="تسویه‌ها" />
         {d.settlements.length === 0 ? (
-          <Empty icon={<Receipt size={24} />} title="هنوز تسویه‌ای انجام نشده" desc="پس از تأیید حساب بانکی، تسویه‌ها اینجا نمایش داده می‌شوند." />
+          <Empty icon={<Receipt size={24} />} title="هنوز تسویه‌ای انجام نشده" desc="پس از تأیید حساب بانکی، تسویه‌ها اینجا نمایش داده می‌شوند" />
         ) : (
           <div style={{ ...card, padding: 0, overflow: 'hidden' }}>
             {d.settlements.map((s, i) => (
@@ -319,7 +319,7 @@ export default function ClubFinance({ clubId, onEditBank }: { clubId: string; on
         .cf-print:hover { opacity: .88; }
         .cf-print:focus-visible { outline: 2px solid ${GOLD_D}; outline-offset: 2px; }
 
-        /* جدولِ تفکیک — روی صفحه هم مفید است، روی کاغذ لازم */
+        /* جدول تفکیک — روی صفحه هم مفید است، روی کاغذ لازم */
         .cf-tbl { width: 100%; border-collapse: collapse; margin-top: 12px;
           font-size: 12.5px; border: 1px solid ${LINE}; border-radius: 12px; overflow: hidden; }
         .cf-tbl th { text-align: start; font-weight: 700; color: ${SEC};
@@ -332,14 +332,14 @@ export default function ClubFinance({ clubId, onEditBank }: { clubId: string; on
         .print-only { display: none; }
 
         /* ── چاپ ──
-           بدونِ این، دستورِ چاپ کلِ داشبورد را می‌گیرد: منو، تب‌ها،
-           دکمه‌ها و بقیه‌ی بخش‌ها. باشگاه‌دار می‌خواهد همین یک گزارش
-           را روی کاغذ داشته باشد، نه عکسِ صفحه. */
+           بدون این، دستور چاپ کل داشبورد را می‌گیرد: منو، تب‌ها،
+           دکمه‌ها و بقیه‌ی بخش‌ها، باشگاه‌دار می‌خواهد همین یک گزارش
+           را روی کاغذ داشته باشد، نه عکس صفحه. */
         @media print {
           .print-only { display: block; }
           .no-print { display: none !important; }
-          /* هرچیزی که جدِ ورق نیست پنهان می‌شود — ولی پنهان‌کردن کافی
-             نیست: ورق باید از جریانِ صفحه بیرون بیاید و برود بالای
+          /* هرچیزی که جد ورق نیست پنهان می‌شود — ولی پنهان‌کردن کافی
+             نیست: ورق باید از جریان صفحه بیرون بیاید و برود بالای
              کاغذ، وگرنه فضایی که بقیه اشغال کرده‌اند به‌صورت صفحه‌ی
              سفید چاپ می‌شود. */
           body * { visibility: hidden; }

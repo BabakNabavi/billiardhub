@@ -190,7 +190,7 @@ export default function LegalDoc({ doc, icon = 'terms' }: { doc: LegalDocument; 
               border: `1px solid ${LINE}`, borderRadius: 20, padding: 'clamp(20px,2.6vw,28px)', textAlign: 'center' }}>
               <p style={{ fontSize: 14.5, fontWeight: 800, color: INK, margin: '0 0 8px' }}>پرسشی دارید؟</p>
               <p style={{ fontSize: 13, color: SEC, margin: '0 0 16px', lineHeight: 2 }}>
-                برای دریافت پشتیبانی، ارسال درخواست یا گزارش تخلف با ما در ارتباط باشید.
+                برای دریافت پشتیبانی، ارسال درخواست یا گزارش تخلف با ما در ارتباط باشید
               </p>
               <Link href="/contact" style={{ display: 'inline-flex', alignItems: 'center', gap: 7, padding: '11px 24px',
                 borderRadius: 12, textDecoration: 'none', fontSize: 13.5, fontWeight: 800, background: GOLD, color: '#241B08' }}>
@@ -221,7 +221,7 @@ export default function LegalDoc({ doc, icon = 'terms' }: { doc: LegalDocument; 
         }}>
           <div style={{ maxWidth: 1180, margin: '0 auto', display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
             <span style={{ flex: '1 1 200px', minWidth: 0, fontSize: 12.5, color: SEC, lineHeight: 1.9 }}>
-              پس از مطالعه، تأیید کنید تا به فرم ثبت‌نام بازگردید.
+              پس از مطالعه، تأیید کنید تا به فرم ثبت‌نام بازگردید
             </span>
             <button onClick={acceptTerms} disabled={accepted}
               style={{

@@ -33,7 +33,7 @@ export interface QualityPreset {
 export const QUALITY_PRESETS: QualityPreset[] = [
   { id: '720p30',  label: 'HD ۷۲۰p',        hint: 'کم‌مصرف — مناسب اینترنت موبایل',      width: 1280, height: 720,  fps: 30, bitrate: 2_500_000 },
   { id: '1080p30', label: 'Full HD ۱۰۸۰p',  hint: 'پیشنهادی برای پخش مسابقه',            width: 1920, height: 1080, fps: 30, bitrate: 4_500_000 },
-  { id: '1080p60', label: 'Full HD ۶۰ فریم', hint: 'حرکتِ نرم‌تر — اینترنت پرسرعت لازم',  width: 1920, height: 1080, fps: 60, bitrate: 6_000_000 },
+  { id: '1080p60', label: 'Full HD ۶۰ فریم', hint: 'حرکت نرم‌تر — اینترنت پرسرعت لازم',  width: 1920, height: 1080, fps: 60, bitrate: 6_000_000 },
   { id: '1440p30', label: '2K ۱۴۴۰p',       hint: 'دوربین حرفه‌ای با کارت کپچر',          width: 2560, height: 1440, fps: 30, bitrate: 8_500_000 },
   { id: '2160p30', label: '4K ۲۱۶۰p',       hint: 'بالاترین کیفیت — پهنای باند زیاد',     width: 3840, height: 2160, fps: 30, bitrate: 14_000_000 },
 ];

@@ -24,7 +24,7 @@ export function ManualAttachForm({ clubs, busy, run }: {
 
   if (!open) return (
     <Button variant="secondary" size="sm" className="self-start" icon={<Link2 className="h-4 w-4" aria-hidden />} onClick={() => setOpen(true)}>
-      وصلِ کانالِ آروان به یک باشگاه
+      وصل کانال آروان به یک باشگاه
     </Button>
   )
 
@@ -39,28 +39,28 @@ export function ManualAttachForm({ clubs, busy, run }: {
 
   return (
     <form onSubmit={e => void submit(e)} className="flex flex-col gap-4 rounded-panel border border-gold/30 bg-gold/[.04] p-4">
-      <p className="text-sub text-ink-2">این سه مورد را از صفحه‌ی کانال در پنلِ آروان کپی کنید.</p>
+      <p className="text-sub text-ink-2">این سه مورد را از صفحه‌ی کانال در پنل آروان کپی کنید</p>
       <label className="flex flex-col gap-1 text-sub text-ink">
         باشگاه
         <select className={field} value={clubId} onChange={e => setClubId(e.target.value)} required>
-          <option value="">انتخابِ باشگاه…</option>
+          <option value="">انتخاب باشگاه…</option>
           {clubs.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
         </select>
       </label>
       <label className="flex flex-col gap-1 text-sub text-ink">
-        نامِ کانال در سایت
-        <input className={field} value={title} onChange={e => setTitle(e.target.value)} required minLength={2} maxLength={90} placeholder="مثلاً پخشِ زنده‌ی آرتا کلاب" />
+        نام کانال در سایت
+        <input className={field} value={title} onChange={e => setTitle(e.target.value)} required minLength={2} maxLength={90} placeholder="مثلا پخش زنده‌ی آرتا کلاب" />
       </label>
       <label className="flex flex-col gap-1 text-sub text-ink">
-        لینکِ ورودیِ پخش
+        لینک ورودی پخش
         <input className={field} dir="ltr" value={ingestUrl} onChange={e => setIngest(e.target.value)} required placeholder="rtmp://push…arvanlive.ir:1935/…" />
       </label>
       <label className="flex flex-col gap-1 text-sub text-ink">
-        کلیدِ پخش زنده
+        کلید پخش زنده
         <input className={field} dir="ltr" value={streamKey} onChange={e => setKey(e.target.value)} required autoComplete="off" />
       </label>
       <label className="flex flex-col gap-1 text-sub text-ink">
-        نشانیِ تماشا (.m3u8)
+        نشانی تماشا (.m3u8)
         <input className={field} dir="ltr" value={playbackUrl} onChange={e => setPlay(e.target.value)} required placeholder="https://…arvanlive.ir/hls/…/….m3u8" />
       </label>
       {/* «فقط اعضا» برای کانالِ دستی نیست: نشانیِ m3u8 ثابت و بی‌امضاست و هر کس

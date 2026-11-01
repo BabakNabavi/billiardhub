@@ -68,7 +68,7 @@ export default function SessionInbox() {
   if (failed) {
     return (
       <p style={{ fontSize: 13, color: MUT, margin: 0 }}>
-        جلسه‌ها بارگذاری نشد.{' '}
+        جلسه‌ها بارگذاری نشد{' '}
         <button onClick={() => { setFailed(false); void load() }}
           style={{ background: 'none', border: 'none', padding: 0, color: GOLD_D, fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit', fontSize: 13 }}>
           تلاش دوباره
@@ -87,8 +87,8 @@ export default function SessionInbox() {
         جلسه‌ها
       </h2>
       <p style={{ fontSize: 12.5, color: MUT, lineHeight: 1.9, margin: '0 0 14px' }}>
-        جلسه‌ای که تأیید کنید، پس از گذشتن زمانش به شاگرد اجازه‌ی ثبت نظر می‌دهد.
-        پرداخت حضوری است.
+        جلسه‌ای که تأیید کنید، پس از گذشتن زمانش به شاگرد اجازه‌ی ثبت نظر می‌دهد
+        پرداخت حضوری است
       </p>
 
       {err && <p role="alert" style={{ fontSize: 12.5, color: RED, fontWeight: 700, margin: '0 0 10px' }}>{err}</p>}

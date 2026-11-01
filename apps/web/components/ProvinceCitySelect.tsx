@@ -60,7 +60,7 @@ const CSS = `
   --pcs-opt-hover: rgba(199,166,106,0.18);
   --pcs-shadow: 0 14px 36px rgba(0,0,0,0.5);
 }
-/* ── حالتِ جعبه‌ای ── */
+/* ── حالت جعبه‌ای ── */
 .pcs-boxw { position: relative; }
 .pcs-box-in {
   display: flex; align-items: center; gap: 8px;
@@ -97,14 +97,14 @@ const CSS = `
   text-align: start; cursor: pointer;
 }
 .pcs-box-opt:hover, .pcs-box-opt.on, .pcs-box-opt.hl { background: var(--pcs-opt-hover); }
-/* ⚠️ خودِ ورودی outline ندارد و گزینه‌ها دکمه‌ی واقعی‌اند؛ بدون این
-   قاعده، کاربر کیبورد هیچ نشانه‌ای نمی‌بیند.
+/* ⚠️ خود ورودی outline ندارد و گزینه‌ها دکمه‌ی واقعی‌اند؛ بدون این
+   قاعده، کاربر کیبورد هیچ نشانه‌ای نمی‌بیند
    ⚠️ این متن داخل یک template literal است — بک‌تیک ننویس. */
 .pcs-box-opt:focus-visible, .pcs-box-clear:focus-visible {
   outline: 2px solid var(--pcs-gold); outline-offset: -2px;
   background: var(--pcs-opt-hover);
 }
-/* ⚠️ استان کم‌رنگ و سمتِ پایانی — همان چیدمانی که فیلترِ شهرِ
+/* ⚠️ استان کم‌رنگ و سمت پایانی — همان چیدمانی که فیلتر شهر
    «خدمات فنی» و «شهرهای تحت پوشش» دارند. */
 .pcs-box-prov { font-size: 11px; color: var(--pcs-mut); flex-shrink: 0; }
 .pcs-box-empty { padding: 18px 12px; text-align: center; font-size: 12.5px; color: var(--pcs-mut); }
@@ -130,10 +130,10 @@ const CSS = `
 .pcs-btn.open .pcs-chev { transform: rotate(180deg); color: var(--pcs-gold-d); }
 /* ── چرا fixed و از راه Portal ──
    پنل تا امروز absolute بود و داخل همان کارتی می‌ماند که فیلد در
-   آن است. هر کارتی که overflow:hidden داشت (یا با backdrop-filter
+   آن است، هر کارتی که overflow:hidden داشت (یا با backdrop-filter
    — بک‌تیک این‌جا ممنوع است، این متن داخل template literal است —
    بافت چینش خودش را می‌ساخت) لیست را می‌برید — کاربر باکس را باز
-   می‌کرد و فهرست زیر لبه‌ی کارت گم می‌شد.
+   می‌کرد و فهرست زیر لبه‌ی کارت گم می‌شد
 
    حالا روی body رندر می‌شود و جای واقعی‌اش هر بار اندازه گرفته
    می‌شود؛ اگر پایین صفحه جا نبود، رو به بالا باز می‌شود. */

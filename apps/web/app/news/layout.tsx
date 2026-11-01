@@ -15,7 +15,7 @@ import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: 'اخبار بیلیارد هاب',
-  description: 'اتاق خبر بیلیارد هاب: اسنوکر، پول، کاروم، مسابقات، بازیکنان و صنعت بیلیارد.',
+  description: 'اتاق خبر بیلیارد هاب: اسنوکر، پول، کاروم، مسابقات، بازیکنان و صنعت بیلیارد',
   alternates: { canonical: '/news' },
 }
 

@@ -15,7 +15,7 @@ export function ArchiveList({ items }: { items: ArchiveEntry[] }) {
 
   if (items.length === 0) return (
     <p className="flex items-center gap-2 rounded-card bg-ink/[.03] px-4 py-6 text-sub text-ink-3">
-      <Film className="h-4 w-4" aria-hidden /> هنوز ضبطی از این کانال در آرشیو نیست.
+      <Film className="h-4 w-4" aria-hidden /> هنوز ضبطی از این کانال در آرشیو نیست
     </p>
   )
 

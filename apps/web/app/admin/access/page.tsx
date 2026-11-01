@@ -104,9 +104,9 @@ export default function AdminAccess() {
         <h1 style={{ fontSize: 21, fontWeight: 900, color: INK, margin: 0 }}>دسترسی ادمین</h1>
       </div>
       <p style={{ fontSize: 12.5, color: SEC, lineHeight: 2, margin: '0 0 16px' }}>
-        ادمین به همه‌ی داده‌های مالی، تسویه‌ها و اطلاعات کاربران دسترسی دارد.
-        <b style={{ color: INK }}> این دسترسی را فقط به کسی بدهید که کاملا به او اطمینان دارید.</b>
-        {' '}هر اعطا و لغو در گزارش ممیزی ثبت می‌شود.
+        ادمین به همه‌ی داده‌های مالی، تسویه‌ها و اطلاعات کاربران دسترسی دارد
+        <b style={{ color: INK }}> این دسترسی را فقط به کسی بدهید که کاملا به او اطمینان دارید</b>
+        {' '}هر اعطا و لغو در گزارش ممیزی ثبت می‌شود
       </p>
 
       {msg && (
@@ -138,7 +138,7 @@ export default function AdminAccess() {
 
       {q.length > 0 && q.length < 3 && (
         <div style={{ fontSize: 12, color: MUT, marginBottom: 12 }}>
-          دست‌کم سه نویسه بنویسید.
+          دست‌کم سه نویسه بنویسید
         </div>
       )}
 
@@ -250,8 +250,8 @@ export default function AdminAccess() {
           fontSize: 12.5, color: GOLD_D, fontWeight: 700, lineHeight: 1.9,
         }}>
           <AlertCircle size={15} style={{ flexShrink: 0, marginTop: 2 }} />
-          تنها ادمین سامانه شمایید. تا وقتی ادمین دومی نباشد، دسترسی شما قابل برداشتن نیست —
-          این عمدی است تا سامانه بی‌ادمین نماند.
+          تنها ادمین سامانه شمایید، تا وقتی ادمین دومی نباشد، دسترسی شما قابل برداشتن نیست —
+          این عمدی است تا سامانه بی‌ادمین نماند
         </div>
       )}
     </div>

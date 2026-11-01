@@ -16,7 +16,7 @@ const V = 'v1'
 
 function key(): Buffer {
   const s = process.env.JWT_SECRET
-  if (!s) throw new Error('JWT_SECRET تنظیم نشده — رمزِ کلیدِ استریم ممکن نیست')
+  if (!s) throw new Error('JWT_SECRET تنظیم نشده — رمز کلید استریم ممکن نیست')
   return Buffer.from(hkdfSync('sha256', s, 'billiardhub', 'live-stream-key/v1', 32))
 }
 

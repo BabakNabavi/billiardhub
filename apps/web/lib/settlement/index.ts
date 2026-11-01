@@ -75,7 +75,7 @@ function translate(e: { message?: string }): string {
   if (m.includes('bank_account_not_verified')) return 'حساب بانکی باشگاه تأیید نشده است'
   if (m.includes('account_not_found')) return 'حساب مالی باشگاه یافت نشد'
   if (m.includes('settlement_not_found')) return 'تسویه یافت نشد'
-  if (m.includes('amount_exceeds_payable')) return 'مبلغ از بدهیِ قابلِ پرداخت بیشتر است'
+  if (m.includes('amount_exceeds_payable')) return 'مبلغ از بدهی قابل پرداخت بیشتر است'
   /* کلیدِ ضدِتکرار خورده ⇒ همین دستور قبلا ساخته شده (دابل‌کلیک) */
   if (/duplicate key|settlements_idem_uidx/i.test(m)) return 'این دستور پرداخت پیش‌تر ساخته شده است'
   return m || 'خطای نامشخص'

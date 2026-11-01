@@ -79,7 +79,7 @@ export default function CancellationPolicy({ compact = false }: { compact?: bool
       )}
 
       <div style={{ fontSize: compact ? 10.5 : 11.5, color: MUT, marginTop: compact ? 8 : 11, lineHeight: 1.9 }}>
-        مبلغ قابل بازگشت هنگام لغو، بر اساس زمان باقی‌مانده تا شروع رزرو محاسبه و پیش از تأیید به شما نمایش داده می‌شود.
+        مبلغ قابل بازگشت هنگام لغو، بر اساس زمان باقی‌مانده تا شروع رزرو محاسبه و پیش از تأیید به شما نمایش داده می‌شود
       </div>
     </div>
   )

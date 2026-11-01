@@ -22,7 +22,7 @@ export async function requireOwner(req: NextRequest): Promise<{ actor: Actor } |
       actorId: actor.id, actorRole: actor.role, action: 'OWNER_ENDPOINT_DENIED',
       entityType: 'endpoint', entityId: req.nextUrl.pathname, ip: clientIp(req),
     })
-    return { res: Response.json({ message: 'این بخش فقط برای مالکِ پلتفرم است' }, { status: 403 }) }
+    return { res: Response.json({ message: 'این بخش فقط برای مالک پلتفرم است' }, { status: 403 }) }
   }
   return { actor }
 }

@@ -384,7 +384,7 @@ export default function CatalogSelector({
             {dupBrand && (
               <button type="button" onClick={() => pickBrand(dupBrand.id)}
                 style={{ marginTop: 6, width: '100%', textAlign: 'start', padding: '9px 12px', borderRadius: 10, cursor: 'pointer', fontFamily: 'Vazirmatn,Tahoma,sans-serif', fontSize: 12.5, color: GOLD_D, background: 'rgba(199,166,106,0.10)', border: '1px solid rgba(199,166,106,0.32)' }}>
-                منظورتان <b>{dupBrand.name_en}</b> است؟ برای انتخاب از فهرست بزنید.
+                منظورتان <b>{dupBrand.name_en}</b> است؟ برای انتخاب از فهرست بزنید
               </button>
             )}
           </>

@@ -85,7 +85,7 @@ export default function CartPage() {
                 <Ti name="shopping-cart-off" size={48} color={'rgba(0,0,0,0.30)'} />
               </div>
               <h2 style={{ fontSize: 22, fontWeight: 800, color: '#111111', margin: '0 0 10px' }}>سبد خرید خالی است</h2>
-              <p style={{ fontSize: 16, color: 'rgba(0,0,0,0.45)', margin: '0 0 32px', lineHeight: 1.7 }}>هنوز محصولی به سبد اضافه نکرده‌اید.<br/>به فروشگاه بروید و بهترین تجهیزات را انتخاب کنید.</p>
+              <p style={{ fontSize: 16, color: 'rgba(0,0,0,0.45)', margin: '0 0 32px', lineHeight: 1.7 }}>هنوز محصولی به سبد اضافه نکرده‌اید<br/>به فروشگاه بروید و بهترین تجهیزات را انتخاب کنید</p>
               <Link href="/shop" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'linear-gradient(135deg,#C7A66A,#A07840)', color: '#fff', padding: '14px 28px', borderRadius: 14, textDecoration: 'none', fontWeight: 800, fontSize: 17, boxShadow: '0 8px 28px rgba(199,166,106,0.35)' }}>
                 <Ti name="shopping-bag" size={20} />
                 رفتن به فروشگاه

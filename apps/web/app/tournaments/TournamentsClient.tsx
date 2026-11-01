@@ -11,7 +11,7 @@
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import {
-  Trophy, Calendar, Search, ChevronLeft, MapPin, Crown, Users, ArrowLeft,
+  Trophy, Calendar, ChevronLeft, MapPin, Crown, Users, ArrowLeft,
   LayoutGrid, List,
 } from 'lucide-react'
 import {
@@ -21,7 +21,6 @@ import {
 } from '../../lib/mock-tournaments'
 import { fetchTournaments } from '../../lib/tournaments/client'
 import { makeMatcher } from '@/lib/search/filter'
-import { SearchSuggest } from '@/components/search/SearchSuggest'
 
 const GOLD   = '#C7A66A'
 const GOLD_D = '#8F6531'
@@ -261,10 +260,10 @@ export function TournamentsClient({ initialRows }: { initialRows?: Tournament[] 
         .tn-hero { position: relative; overflow: hidden; color: #fff; background: #0B0A08; }
         /* ── چرا تصویر اختصاصی ──
            پیش‌تر عکس Pro_table.webp پوشه‌ی shop بود — عکس محصول
-           صفحه‌ی فروشگاه. ربطی به مسابقات نداشت، در دو صفحه‌ی
+           صفحه‌ی فروشگاه، ربطی به مسابقات نداشت، در دو صفحه‌ی
            متفاوت تکرار می‌شد، و چون عکس واقعی بود متن روی آن هر
            بار روی جزئیات متفاوتی می‌افتاد و خوانایی تیتر قابل
-           پیش‌بینی نبود. حالا رکی است که عمدا سمت چپ چیده شده تا
+           پیش‌بینی نبود، حالا رکی است که عمدا سمت چپ چیده شده تا
            سمت راست — جایی که تیتر و جستجو می‌نشینند — آرام بماند. */
         .tn-hero-img { position: absolute; inset: 0; background: url('/images/tournaments/hero.svg') center/cover;
           filter: grayscale(0.35) brightness(0.5) contrast(1.1) saturate(1.15); transform: scale(1.04); }
@@ -387,9 +386,8 @@ export function TournamentsClient({ initialRows }: { initialRows?: Tournament[] 
             <h1 style={{ fontSize: 'clamp(30px,5vw,54px)', fontWeight: 900, margin: 0, lineHeight: 1.2, letterSpacing: '-0.02em' }}>
               مسابقات <span style={{ background: `linear-gradient(135deg,#E8CE96,${GOLD} 50%,#8A6020)`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>بیلیارد</span>
             </h1>
-            <div style={{ display: 'none', width: 70, height: 3, borderRadius: 2, marginTop: 14, background: `linear-gradient(90deg,${GOLD},#8A6020)`, transformOrigin: 'right', animation: 'tnScaleX .55s .3s ease both' }} />
             <p style={{ margin: '14px 0 0', fontSize: 'clamp(12px,1.4vw,14px)', color: 'rgba(255,255,255,0.6)', maxWidth: 470, lineHeight: 2, animation: 'tnFadeUp .5s .35s ease both' }}>
-              از لیگ‌های باشگاهی تا جام‌های قهرمانی ، رویدادها را در پلتفرم بیلیارد هاب را دنبال کنید.
+              از لیگ‌های باشگاهی تا جام‌های قهرمانی ، رویدادها را در پلتفرم بیلیارد هاب را دنبال کنید
             </p>
           </div>
 
@@ -430,18 +428,6 @@ export function TournamentsClient({ initialRows }: { initialRows?: Tournament[] 
           </div>
           {/* سطر دوم: سرچ (راست) + سوییچ گرید/لیست روبرویش (چپ) */}
           <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-            <div className="tn-sbox" style={{ position: 'relative', flex: 1, minWidth: 0 }} data-suggest-box>
-              <input
-                className="input input-glass input-sm input-icon-start" type="search" aria-label="جستجو در مسابقات" aria-controls="sx-tn" aria-autocomplete="list"
-                value={search}
-                onChange={e => setSearch(e.target.value)}
-                placeholder="جستجو در مسابقات…"
-                
-              />
-              <Search size={15} style={{ position: 'absolute', insetInlineStart: 13, top: '50%', transform: 'translateY(-50%)', color: GOLD_D, pointerEvents: 'none' }} />
-              {/* پیشنهادِ زنده‌ی سراسری — همان «سوپر سرچ»ِ نوارِ بالا */}
-              <SearchSuggest hideEmpty q={search} onPick={() => setSearch('')} id="sx-tn" className="start-0 w-72 sm:w-96" />
-            </div>
             <div className="tn-view" role="group" aria-label="حالت نمایش">
               <button className={view === 'grid' ? 'on' : ''} onClick={() => setView('grid')} aria-label="نمایش کارتی"><LayoutGrid size={16} /></button>
               <button className={view === 'list' ? 'on' : ''} onClick={() => setView('list')} aria-label="نمایش لیستی"><List size={17} /></button>
@@ -456,10 +442,8 @@ export function TournamentsClient({ initialRows }: { initialRows?: Tournament[] 
         {isBrowsing && mainEvent && (
           <section style={{ marginBottom: 'clamp(26px,3.8vw,40px)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
-              <span style={{ width: 3, height: 18, borderRadius: 2, background: `linear-gradient(180deg,${GOLD},#8A6020)` }} />
               <h2 style={{ fontSize: 16.5, fontWeight: 900, margin: 0 }}>رویداد اصلی</h2>
               <span style={{ fontSize: 9.5, fontWeight: 800, letterSpacing: '0.24em', color: MUT }}>MAIN EVENT</span>
-              <span style={{ flex: 1, height: 1, background: LINE }} />
             </div>
             <Link href={`/tournaments/${mainEvent.id}`} className="tn-main">
               <div className="tn-main-body">
@@ -498,19 +482,17 @@ export function TournamentsClient({ initialRows }: { initialRows?: Tournament[] 
         {/* ═══ گرید مسابقات ═══ */}
         <section>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
-            <span style={{ width: 3, height: 18, borderRadius: 2, background: `linear-gradient(180deg,${GOLD},#8A6020)` }} />
             <h2 style={{ fontSize: 16.5, fontWeight: 900, margin: 0 }}>
               {tab === 'all' ? (search ? 'نتایج جستجو' : 'همه‌ی رویدادها') : TABS.find(x => x.key === tab)?.label}
             </h2>
             <span style={{ fontSize: 12, color: MUT }}>{toFa(gridItems.length)} رویداد</span>
-            <span style={{ flex: 1, height: 1, background: LINE }} />
           </div>
 
           {gridItems.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '70px 20px', background: 'rgba(255,255,255,0.78)', border: `1px solid ${LINE}`, borderRadius: 18 }}>
               <Trophy size={38} style={{ color: MUT, opacity: 0.4, marginBottom: 12 }} />
               <p style={{ fontSize: 15, fontWeight: 800, margin: '0 0 6px' }}>مسابقه‌ای یافت نشد</p>
-              <p style={{ fontSize: 12.5, color: MUT, margin: '0 0 18px' }}>عبارت دیگری جستجو کنید یا وضعیت را تغییر دهید.</p>
+              <p style={{ fontSize: 12.5, color: MUT, margin: '0 0 18px' }}>عبارت دیگری جستجو کنید یا وضعیت را تغییر دهید</p>
               <button onClick={() => { setSearch(''); setTab('all') }}
                 style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '9px 18px', borderRadius: 10, cursor: 'pointer', fontFamily: 'inherit', fontSize: 13, fontWeight: 700, background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.34)', color: GOLD_D }}>
                 نمایش همه مسابقات

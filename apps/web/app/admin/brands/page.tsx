@@ -125,9 +125,9 @@ export default function AdminBrandsPage() {
         )}
       </div>
       <p style={{ fontSize: 12.5, color: SEC, lineHeight: 2, margin: '0 0 18px' }}>
-        فروشنده می‌تواند برندی بنویسد که در فهرست نیست؛ آن برند این‌جا «پیشنهاد تازه» می‌شود.
+        فروشنده می‌تواند برندی بنویسد که در فهرست نیست؛ آن برند این‌جا «پیشنهاد تازه» می‌شود
         تا وقتی فعالش نکنید، در کشوی ثبت آگهی به کسی نشان داده نمی‌شود — ولی آگهی ثبت‌شده
-        برندش را از دست نمی‌دهد.
+        برندش را از دست نمی‌دهد
       </p>
 
       {err && (
@@ -171,7 +171,7 @@ export default function AdminBrandsPage() {
               برندهای فعال ({toFaDigits(active.length)})
             </h2>
             {active.length === 0 ? (
-              <p style={{ fontSize: 13, color: MUT, margin: 0 }}>هنوز برندی فعال نیست.</p>
+              <p style={{ fontSize: 13, color: MUT, margin: 0 }}>هنوز برندی فعال نیست</p>
             ) : (
               <div style={{ display: 'grid', gap: 8 }}>
                 {active.map(b => (

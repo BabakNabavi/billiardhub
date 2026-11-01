@@ -658,7 +658,7 @@ export function ClubProfileClient({ initialClub }: { initialClub?: Club | null }
   );
 
   const deleteClubVideo = async (vid: string) => {
-    if (!(await ask('این ویدیو حذف شود؟', { body: 'این کار برگشت‌پذیر نیست.', confirmLabel: 'حذف' }))) return;
+    if (!(await ask('این ویدیو حذف شود؟', { body: 'این کار برگشت‌پذیر نیست', confirmLabel: 'حذف' }))) return;
     await saveClubVideos(clubVideos.filter(v => v.id !== vid));
   };
 
@@ -688,7 +688,7 @@ export function ClubProfileClient({ initialClub }: { initialClub?: Club | null }
   const deleteClubPhoto = async (key: string) => {
     const [albumId, itemId] = key.split('/');
     if (!albumId || !itemId) return;
-    if (!(await ask('این تصویر حذف شود؟', { body: 'این کار برگشت‌پذیر نیست.', confirmLabel: 'حذف' }))) return;
+    if (!(await ask('این تصویر حذف شود؟', { body: 'این کار برگشت‌پذیر نیست', confirmLabel: 'حذف' }))) return;
     await saveAlbums(clubAlbums.map(a =>
       a.id === albumId ? { ...a, items: a.items.filter(it => it.id !== itemId) } : a));
   };
@@ -735,7 +735,7 @@ export function ClubProfileClient({ initialClub }: { initialClub?: Club | null }
       <div style={{ fontSize: 44, opacity: 0.15 }}>🎱</div>
       <h1 style={{ fontSize: 19, fontWeight: 800, color: '#111', margin: 0 }}>این باشگاه پیدا نشد</h1>
       <p style={{ fontSize: 14.5, color: 'rgba(0,0,0,0.42)', margin: 0, lineHeight: 2 }}>
-        ممکن است حذف شده باشد یا نشانی اشتباه باشد.
+        ممکن است حذف شده باشد یا نشانی اشتباه باشد
       </p>
       <Link href="/clubs" style={{ marginTop: 6, padding: '10px 24px', background: 'linear-gradient(135deg,#C7A66A,#A07840)', borderRadius: 12, color: '#fff', fontSize: 15, fontWeight: 700, textDecoration: 'none' }}>
         فهرست باشگاه‌ها
@@ -751,19 +751,19 @@ export function ClubProfileClient({ initialClub }: { initialClub?: Club | null }
         @keyframes fadeIn    { from{opacity:0;transform:translate(-50%,-48%) scale(0.94)} to{opacity:1;transform:translate(-50%,-50%) scale(1)} }
         @keyframes pulse     { 0%,100%{opacity:1} 50%{opacity:0.4} }
 
-        /* تبِ پخش زنده — قرمز، با نقطه‌ای که فقط هنگامِ پخشِ واقعی
-           چشمک می‌زند. رنگ باید در حالتِ انتخاب‌نشده هم دیده شود،
+        /* تب پخش زنده — قرمز، با نقطه‌ای که فقط هنگام پخش واقعی
+           چشمک می‌زند، رنگ باید در حالت انتخاب‌نشده هم دیده شود،
            چون همان نشانه‌ی «این‌جا خبری هست» است. */
-        /* ⚠️ متنِ #ef4444 روی پس‌زمینه‌ی روشن ۳٫۷۶:۱ است و از حدِ ۴٫۵:۱
-           رد نمی‌شود؛ #dc2626 می‌شود ۴٫۸۳:۱. قرمزِ روشن فقط برای نقطه. */
+        /* ⚠️ متن #ef4444 روی پس‌زمینه‌ی روشن ۳٫۷۶:۱ است و از حد ۴٫۵:۱
+           رد نمی‌شود؛ #dc2626 می‌شود ۴٫۸۳:۱. قرمز روشن فقط برای نقطه. */
         .ctab-live { color:#dc2626 !important; font-weight:800; display:inline-flex; align-items:center; justify-content:center; gap:6px }
         .ctab-live[aria-selected="true"] { color:#dc2626 !important }
         .ctab-dot { width:7px; height:7px; border-radius:50%; background:rgba(239,68,68,0.35); flex-shrink:0 }
         .ctab-dot--on { background:#ef4444; animation:pulse 1.4s infinite }
         @media (prefers-reduced-motion: reduce) { .ctab-dot--on { animation:none } }
 
-        /* ⚠️ با تبِ پنجم، هر ستون روی ۳۷۵ پیکسل حدود ۵۴ پیکسل جا دارد و
-           «ساعت کاری» و «پخش زنده» دو خطی می‌شدند و ارتفاعِ نوار دو
+        /* ⚠️ با تب پنجم، هر ستون روی ۳۷۵ پیکسل حدود ۵۴ پیکسل جا دارد و
+           «ساعت کاری» و «پخش زنده» دو خطی می‌شدند و ارتفاع نوار دو
            برابر می‌شد. */
         @media(max-width:600px) {
           .lq-seg-fill > button { font-size:11.5px; white-space:nowrap; padding-inline:4px }
@@ -772,9 +772,9 @@ export function ClubProfileClient({ initialClub }: { initialClub?: Club | null }
         }
 
         /* ── نشانی اختصاصی روی هدر ──
-           آینه‌ی کلاسِ ch-addr در components/profile/profile-page.css
-           (صفحه‌ی داور و مربی) تا هر سه پروفایل یک شکل باشند.
-           ⚠️ بک‌تیک در این بلوک ننویس: کلِ CSS داخلِ یک template
+           آینه‌ی کلاس ch-addr در components/profile/profile-page.css
+           (صفحه‌ی داور و مربی) تا هر سه پروفایل یک شکل باشند
+           ⚠️ بک‌تیک در این بلوک ننویس: کل CSS داخل یک template
            literal است و بک‌تیک همان‌جا می‌بنددش. */
         .cp-addr {
           display: inline-flex; align-items: center; gap: 7px;
@@ -797,8 +797,8 @@ export function ClubProfileClient({ initialClub }: { initialClub?: Club | null }
         @media (prefers-reduced-motion: reduce) { .cp-addr { transition: none; } }
 
         /* ── شماره‌ی تماس ──
-           لینک بود ولی دقیقا شبیه متنِ ساده‌ی قبلی: کسی نمی‌فهمید
-           زدنی است. حالا تینتِ طلاییِ CTA دارد و حلقه‌ی فوکوس. */
+           لینک بود ولی دقیقا شبیه متن ساده‌ی قبلی: کسی نمی‌فهمید
+           زدنی است، حالا تینت طلایی CTA دارد و حلقه‌ی فوکوس. */
         .cp-tel {
           color: #8F6531; text-decoration: none; font-weight: 700;
           border-block-end: 1px dashed rgba(199,166,106,0.55);
@@ -811,12 +811,12 @@ export function ClubProfileClient({ initialClub }: { initialClub?: Club | null }
 
         /* ── تب‌های جعبه‌ای با خط رنگی بالا ──
            تب‌ها به هم چسبیده‌اند و یک نوار یکپارچه می‌سازند؛ تب فعال
-           سفید است با یک خط بنفش نازک بالای خودش.
+           سفید است با یک خط بنفش نازک بالای خودش
 
            خط جداکننده فقط روی تب‌های دوم به بعد گذاشته می‌شود،
            وگرنه حاشیه‌ی دو تب همسایه کنار هم می‌نشیند و جداکننده
            دو برابر ضخیم دیده می‌شود. */
-        /* نوار تب همان کنترل بخش‌بندی‌شده‌ی مشترک است (globals.css).
+        /* نوار تب همان کنترل بخش‌بندی‌شده‌ی مشترک است (globals.css)
            نسخه‌ی محلی چهار عرض متفاوت می‌ساخت و رنگ تأکیدش بنفش بود،
            در حالی که تأکید این صفحه طلایی است. */
 
@@ -841,7 +841,7 @@ export function ClubProfileClient({ initialClub }: { initialClub?: Club | null }
         .album-scroll { display:flex;gap:14px;overflow-x:auto;padding-bottom:8px;scrollbar-width:none }
         .album-scroll::-webkit-scrollbar { display:none }
 
-        /* هشت عکس در هر ردیف. با ۴ ستون، هر خانه بزرگ بود و فهرست
+        /* هشت عکس در هر ردیف، با ۴ ستون، هر خانه بزرگ بود و فهرست
            بی‌جهت بلند می‌شد؛ گالری برای مرور است نه تماشای تک‌تک. */
         .gallery-grid { display:grid;grid-template-columns:repeat(8,1fr);gap:6px }
         @media(max-width:900px){ .gallery-grid{grid-template-columns:repeat(6,1fr)} }
@@ -860,8 +860,8 @@ export function ClubProfileClient({ initialClub }: { initialClub?: Club | null }
 
         .book-fixed {
           position:fixed;bottom:0;left:0;right:0;
-          /* ⚠️ ناحیه‌ی امنِ پایینِ آیفون در حالتِ نصب‌شده: بدونِ آن، دکمه‌ی
-             رزرو زیرِ نوارِ خانه می‌رفت. روی مرورگرِ عادی صفر است. */
+          /* ⚠️ ناحیه‌ی امن پایین آیفون در حالت نصب‌شده: بدون آن، دکمه‌ی
+             رزرو زیر نوار خانه می‌رفت، روی مرورگر عادی صفر است. */
           padding:12px 16px calc(16px + env(safe-area-inset-bottom));
           z-index:200;
           background:#ffffff;
@@ -879,7 +879,7 @@ export function ClubProfileClient({ initialClub }: { initialClub?: Club | null }
 
         .hero-top-btn { top: 32px }
         @media(min-width:961px){ .hero-top-btn { top: 36px } }
-        /* ۱۰٪ کوچک‌تر. اندازه‌ها اینلاین‌اند و بدون important
+        /* ۱۰٪ کوچک‌تر، اندازه‌ها اینلاین‌اند و بدون important
            بازنویسی نمی‌شوند — همان تله‌ای که در این پروژه بارها
            پیش آمده. */
         .hero-top-btn { font-size: 13.5px !important; padding: 7px 14px !important; }
@@ -1038,7 +1038,6 @@ export function ClubProfileClient({ initialClub }: { initialClub?: Club | null }
                 {/* About */}
                 <div className="lqg lqg-hover" style={{ padding: 'clamp(16px,3vw,24px)' }}>
                   <h2 style={{ fontSize: 17, fontWeight: 800, color: '#111111', margin: '0 0 12px', display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <span style={{ width: 3, height: 16, background: 'linear-gradient(135deg,#C7A66A,#A07840)', borderRadius: 2, display: 'inline-block', flexShrink: 0 }} />
                     درباره باشگاه
                   </h2>
                   <p style={{ fontSize: 15, color: 'rgba(0,0,0,0.50)', lineHeight: 1.9, margin: 0 }}>{club.description}</p>
@@ -1055,7 +1054,6 @@ export function ClubProfileClient({ initialClub }: { initialClub?: Club | null }
                 {/* Amenities */}
                 <div className="lqg lqg-hover" style={{ padding: 'clamp(16px,3vw,24px)' }}>
                   <h2 style={{ fontSize: 17, fontWeight: 800, color: '#111111', margin: '0 0 14px', display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <span style={{ width: 3, height: 16, background: 'linear-gradient(180deg,#06b6d4,#a78bfa)', borderRadius: 2, display: 'inline-block', flexShrink: 0 }} />
                     امکانات
                   </h2>
                   <div className="amenity-grid">
@@ -1119,7 +1117,6 @@ export function ClubProfileClient({ initialClub }: { initialClub?: Club | null }
                 {/* ── #7: Coaches — clickable, popup on click/touch ── */}
                 <div className="lqg lqg-hover" style={{ padding: 'clamp(16px,3vw,24px)' }}>
                   <h2 style={{ fontSize: 17, fontWeight: 800, color: '#111111', margin: '0 0 14px', display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <span style={{ width: 3, height: 16, background: 'linear-gradient(180deg,#a78bfa,#C7A66A)', borderRadius: 2, display: 'inline-block', flexShrink: 0 }} />
                     مربیان باشگاه
                   </h2>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -1165,7 +1162,6 @@ export function ClubProfileClient({ initialClub }: { initialClub?: Club | null }
                 <div className="mobile-only">
                   <div className="lqg lqg-hover" style={{ padding: 18 }}>
                     <div style={{ fontSize: 15, fontWeight: 700, color: '#111111', marginBottom: 14, display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <span style={{ width: 3, height: 14, background: 'linear-gradient(180deg,#06b6d4,transparent)', borderRadius: 2, display: 'inline-block' }} />
                       اطلاعات تماس
                     </div>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -1218,7 +1214,6 @@ export function ClubProfileClient({ initialClub }: { initialClub?: Club | null }
                   </div>
                   <div className="lqg lqg-hover" style={{ padding: 18 }}>
                     <div style={{ fontSize: 15, fontWeight: 700, color: '#111111', marginBottom: 14, display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <span style={{ width: 3, height: 14, background: 'linear-gradient(180deg,#a78bfa,transparent)', borderRadius: 2, display: 'inline-block' }} />
                       آمار باشگاه
                     </div>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
@@ -1236,7 +1231,6 @@ export function ClubProfileClient({ initialClub }: { initialClub?: Club | null }
                 <div className="lqg" style={{ overflow: 'hidden' }}>
                   <div style={{ padding: '16px 18px 0' }}>
                     <h2 style={{ fontSize: 17, fontWeight: 800, color: '#111111', margin: '0 0 12px', display: 'flex', alignItems: 'center', gap: 10 }}>
-                      <span style={{ width: 3, height: 16, background: 'linear-gradient(180deg,#ef4444,#f59e0b)', borderRadius: 2, display: 'inline-block', flexShrink: 0 }} />
                       موقعیت مکانی
                     </h2>
                   </div>
@@ -1315,7 +1309,6 @@ export function ClubProfileClient({ initialClub }: { initialClub?: Club | null }
 
                 <div className="lqg lqg-hover" style={{ padding: 18 }}>
                   <div style={{ fontSize: 15, fontWeight: 700, color: '#111111', marginBottom: 14, display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <span style={{ width: 3, height: 14, background: 'linear-gradient(180deg,#06b6d4,transparent)', borderRadius: 2, display: 'inline-block' }} />
                     اطلاعات تماس
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -1352,7 +1345,6 @@ export function ClubProfileClient({ initialClub }: { initialClub?: Club | null }
 
                 <div className="lqg lqg-hover" style={{ padding: 18 }}>
                   <div style={{ fontSize: 15, fontWeight: 700, color: '#111111', marginBottom: 14, display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <span style={{ width: 3, height: 14, background: 'linear-gradient(180deg,#a78bfa,transparent)', borderRadius: 2, display: 'inline-block' }} />
                     آمار باشگاه
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
@@ -1383,7 +1375,7 @@ export function ClubProfileClient({ initialClub }: { initialClub?: Club | null }
                 <Trophy size={32} style={{ color: 'rgba(0,0,0,0.18)', marginBottom: 12 }} />
                 <p style={{ fontSize: 16, fontWeight: 800, color: '#111', margin: '0 0 6px' }}>هنوز مسابقه‌ای برگزار نشده</p>
                 <p style={{ fontSize: 13.5, color: 'rgba(0,0,0,0.42)', margin: '0 0 18px', lineHeight: 2 }}>
-                  مسابقات این باشگاه پس از ثبت توسط مدیر باشگاه اینجا نمایش داده می‌شود.
+                  مسابقات این باشگاه پس از ثبت توسط مدیر باشگاه اینجا نمایش داده می‌شود
                 </p>
                 <button onClick={() => router.push('/tournaments')} style={{ padding: '11px 20px', background: 'rgba(0,0,0,0.03)', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 14, fontSize: 14, fontWeight: 700, color: 'rgba(0,0,0,0.45)', cursor: 'pointer', fontFamily: 'inherit', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
                   <Trophy size={13} /> مشاهده همه مسابقات
@@ -1475,7 +1467,6 @@ export function ClubProfileClient({ initialClub }: { initialClub?: Club | null }
               {tournAlbums.length > 0 && (
                 <div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
-                    <span style={{ width: 3, height: 16, background: 'linear-gradient(135deg,#C7A66A,#A07840)', borderRadius: 2, display: 'inline-block' }} />
                     <h3 style={{ fontSize: 17, fontWeight: 800, color: '#111111', margin: 0 }}>آلبوم‌های مسابقات</h3>
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
@@ -1617,7 +1608,6 @@ export function ClubProfileClient({ initialClub }: { initialClub?: Club | null }
             <div id="cpanel-schedule" role="tabpanel" aria-labelledby="ctab-schedule" style={{ animation: 'fadeUp 0.4s ease both', maxWidth: 400, margin: '0 auto' }}>
               <div className="lqg" style={{ padding: '14px 16px' }}>
                 <div style={{ fontSize: 15, fontWeight: 800, color: '#111111', marginBottom: 10, display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <span style={{ width: 3, height: 14, background: 'linear-gradient(135deg,#C7A66A,#A07840)', borderRadius: 2, display: 'inline-block' }} />
                   ساعات کاری هفتگی
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
@@ -1665,11 +1655,10 @@ export function ClubProfileClient({ initialClub }: { initialClub?: Club | null }
               {isClubOwner ? (
                 <div className="lqg" style={{ padding: 'clamp(16px,3vw,24px)' }}>
                   <h2 style={{ fontSize: 17, fontWeight: 800, color: '#111111', margin: '0 0 6px', display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <span style={{ width: 3, height: 16, background: '#ef4444', borderRadius: 2, display: 'inline-block', flexShrink: 0 }} />
                     پخش زنده باشگاه
                   </h2>
                   <p style={{ fontSize: 13, color: 'rgba(0,0,0,0.45)', lineHeight: 1.9, margin: '0 0 18px' }}>
-                    مسابقات خود را مستقیم از گوشی یا دوربین فیلم‌برداری پخش کنید. پخش شما در صفحه‌ی «پخش زنده» سایت دیده می‌شود.
+                    مسابقات خود را مستقیم از گوشی یا دوربین فیلم‌برداری پخش کنید، پخش شما در صفحه‌ی «پخش زنده» سایت دیده می‌شود
                   </p>
                   {/* باشگاهِ دارای کانالِ آروان ⟵ استودیو (تماشاگرِ نامحدود)؛ وگرنه پخشِ قدیمیِ گوشی‌به‌گوشی */}
                   <LiveStudioLauncher clubId={club.id}
@@ -1695,7 +1684,7 @@ export function ClubProfileClient({ initialClub }: { initialClub?: Club | null }
                     این باشگاه در حال حاضر پخش زنده‌ای ندارد
                   </p>
                   <p style={{ fontSize: 13.5, color: 'rgba(0,0,0,0.42)', margin: 0, lineHeight: 2 }}>
-                    هر وقت پخشی شروع شود، همین‌جا نمایش داده می‌شود.
+                    هر وقت پخشی شروع شود، همین‌جا نمایش داده می‌شود
                   </p>
                 </div>
               )}

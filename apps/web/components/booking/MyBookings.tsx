@@ -160,7 +160,7 @@ export default function MyBookings() {
                 )}
               </div>
             ) : (
-              <p style={{ fontSize: 12, color: MUT, margin: '0 0 12px' }}>این رزرو پرداخت نشده است؛ مبلغی بازگردانده نمی‌شود.</p>
+              <p style={{ fontSize: 12, color: MUT, margin: '0 0 12px' }}>این رزرو پرداخت نشده است؛ مبلغی بازگردانده نمی‌شود</p>
             )}
 
             <div style={{ marginBottom: 16, textAlign: 'right' }}>

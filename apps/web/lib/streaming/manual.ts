@@ -14,10 +14,10 @@ export class ManualStreamProvider implements StreamProvider {
   isConfigured() { return true }
 
   async createChannel(): Promise<ProvisionedChannel> {
-    throw new StreamProviderError('کانالِ دستی فقط از پنلِ مدیریت وصل می‌شود', 409)
+    throw new StreamProviderError('کانال دستی فقط از پنل مدیریت وصل می‌شود', 409)
   }
   async rotateKey(): Promise<{ streamKey: string }> {
-    throw new StreamProviderError('کلیدِ این کانال از پنلِ سرویسِ پخش (آروان) عوض می‌شود', 409)
+    throw new StreamProviderError('کلید این کانال از پنل سرویس پخش (آروان) عوض می‌شود', 409)
   }
   async setEnabled() { /* بی API: فقط نمایش در سایت */ }
   async deleteChannel() { /* کانال در پنلِ سرویس می‌ماند */ }

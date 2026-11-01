@@ -97,7 +97,7 @@ export default function AdvertiserDashboard() {
         </Link>
       </div>
       <p style={{ fontSize: 13, color: MUT, margin: '0 0 18px', lineHeight: 1.95 }}>
-        وضعیت هر کمپین، مدت نمایش و آمار واقعی آن — همان اعدادی که در پنل مدیریت ثبت شده است.
+        وضعیت هر کمپین، مدت نمایش و آمار واقعی آن — همان اعدادی که در پنل مدیریت ثبت شده است
       </p>
 
       {err && (
@@ -154,7 +154,7 @@ export default function AdvertiserDashboard() {
           {campaigns.length === 0 ? (
             <div style={{ ...CARD, textAlign: 'center', padding: 34 }}>
               <p style={{ fontSize: 13.5, color: SEC, margin: '0 0 14px', lineHeight: 2 }}>
-                هنوز تبلیغی ثبت نکرده‌اید. جایگاه‌های قابل خرید و تعرفه‌هایشان را ببینید.
+                هنوز تبلیغی ثبت نکرده‌اید، جایگاه‌های قابل خرید و تعرفه‌هایشان را ببینید
               </p>
               <Link href="/advertise" style={{
                 display: 'inline-flex', alignItems: 'center', gap: 6, textDecoration: 'none',
@@ -165,7 +165,7 @@ export default function AdvertiserDashboard() {
               </Link>
             </div>
           ) : shown.length === 0 ? (
-            <p style={{ fontSize: 13, color: MUT, textAlign: 'center', padding: 24 }}>در این وضعیت کمپینی ندارید.</p>
+            <p style={{ fontSize: 13, color: MUT, textAlign: 'center', padding: 24 }}>در این وضعیت کمپینی ندارید</p>
           ) : (
             <div style={{ display: 'grid', gap: 11 }}>
               {shown.map(c => {

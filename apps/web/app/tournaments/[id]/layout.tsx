@@ -48,7 +48,7 @@ export async function generateMetadata(
       x.title,
       x.city ? `در ${x.city}` : '',
       when ? `· ${when}` : '',
-      '— ثبت‌نام و جزئیات در بیلیارد هاب.',
+      '— ثبت‌نام و جزئیات در بیلیارد هاب',
     ].filter(Boolean).join(' ')
 
     return {
@@ -79,7 +79,7 @@ async function tournamentJsonLd(id: string) {
     return {
       '@context': 'https://schema.org', '@type': 'SportsEvent',
       name: x.title, url,
-      description: `${x.title}${x.city ? ` در ${x.city}` : ''} — ثبت‌نام و جزئیات در بیلیارد هاب.`,
+      description: `${x.title}${x.city ? ` در ${x.city}` : ''} — ثبت‌نام و جزئیات در بیلیارد هاب`,
       startDate: new Date(x.starts_at).toISOString(),
       eventStatus: x.status === 'cancelled' ? 'https://schema.org/EventCancelled' : 'https://schema.org/EventScheduled',
       eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',

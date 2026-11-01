@@ -86,7 +86,7 @@ export default function ForgotPasswordPage() {
       setWait(j.wait ?? 60);
       setStep('code');
     } catch {
-      setError('ارتباط با سرور برقرار نشد. اتصالتان را بررسی کنید و دوباره تلاش کنید.');
+      setError('ارتباط با سرور برقرار نشد، اتصالتان را بررسی کنید و دوباره تلاش کنید');
     } finally { setLoading(false); }
   };
 
@@ -98,14 +98,14 @@ export default function ForgotPasswordPage() {
       if (!j.ok) { setError(j.message || 'کد وارد‌شده درست نیست'); return; }
       setStep('password');
     } catch {
-      setError('ارتباط با سرور برقرار نشد. اتصالتان را بررسی کنید و دوباره تلاش کنید.');
+      setError('ارتباط با سرور برقرار نشد، اتصالتان را بررسی کنید و دوباره تلاش کنید');
     } finally { setLoading(false); }
   };
 
   const resetPass = async () => {
     /* رمزی که با کیبورد فارسی ساخته شود، بعدا هم فقط با همان چیدمان
        تایپ می‌شود — یعنی کاربر خودش را از حسابش بیرون می‌کند. */
-    if (hint.persian) { setError('کیبورد روی فارسی است — رمز را با حروف انگلیسی بنویسید.'); return; }
+    if (hint.persian) { setError('کیبورد روی فارسی است — رمز را با حروف انگلیسی بنویسید'); return; }
     if (!RULES.every(r => r.ok(pass))) { setError('رمز عبور همه‌ی شرط‌های زیر را ندارد'); return; }
     if (pass !== pass2) { setError('رمز جدید و تکرارش یکی نیستند'); return; }
     setLoading(true); setError('');
@@ -114,7 +114,7 @@ export default function ForgotPasswordPage() {
       if (!j.ok) { setError(j.message || 'تغییر رمز انجام نشد'); return; }
       setStep('done');
     } catch {
-      setError('ارتباط با سرور برقرار نشد. اتصالتان را بررسی کنید و دوباره تلاش کنید.');
+      setError('ارتباط با سرور برقرار نشد، اتصالتان را بررسی کنید و دوباره تلاش کنید');
     } finally { setLoading(false); }
   };
 
@@ -131,7 +131,7 @@ export default function ForgotPasswordPage() {
     step === 'phone'    ? 'شماره موبایل حسابتان را وارد کنید تا کد تأیید بفرستیم' :
     step === 'code'     ? (note || 'کد تأیید پیامک‌شده را وارد کنید') :
     step === 'password' ? 'رمز جدیدی برای حسابتان انتخاب کنید' :
-                          'همه‌ی دستگاه‌های دیگر از حساب خارج شدند. با رمز جدید وارد شوید.';
+                          'همه‌ی دستگاه‌های دیگر از حساب خارج شدند، با رمز جدید وارد شوید';
 
   const btnLabel =
     step === 'phone'    ? 'ارسال کد تأیید' :
@@ -167,12 +167,12 @@ export default function ForgotPasswordPage() {
           padding: 14px 14px; font-size: 14.5px; color: ${TEXT}; font-family: inherit; direction: ltr; text-align: right; }
         .au-inp::placeholder { color: #B7B0A0; direction: rtl; font-size: 12.5px; letter-spacing: normal; }
         /* ── وسط‌چین واقعی ──
-           CSS بعد از *هر* نویسه — از جمله آخری — فاصله می‌گذارد. پس
+           CSS بعد از *هر* نویسه — از جمله آخری — فاصله می‌گذارد، پس
            جعبه‌ی متن به اندازه‌ی یک letter-spacing از خود نوشته
            پهن‌تر است و وسط‌چین‌کردن جعبه، نوشته را نصف آن فاصله به چپ
-           می‌اندازد.
+           می‌اندازد
 
-           جبرانش **نصف** letter-spacing است، نه تمامش. مقدار قبلی
+           جبرانش **نصف** letter-spacing است، نه تمامش، مقدار قبلی
            تمام ۸px بود، یعنی ۴px به سمت دیگر کج می‌کرد — همان کجی که
            دیده می‌شد. */
         .au-inp.otp { text-align: center; letter-spacing: 8px; text-indent: 4px; font-size: 19px; font-weight: 800; padding-inline: 8px; }
@@ -242,7 +242,6 @@ export default function ForgotPasswordPage() {
 
       <div className="au-card">
         <h1 style={{ fontSize: 23, fontWeight: 900, color: TEXT, margin: '0 0 6px', letterSpacing: '-0.02em' }}>{title}</h1>
-        <div style={{ width: 46, height: 3, borderRadius: 2, background: `var(--brand)`, transformOrigin: 'right', animation: 'auX .5s .2s ease both', marginBottom: 10 }} />
         <p style={{ fontSize: 13, color: MUT, margin: '0 0 22px', lineHeight: 1.95 }}>{lead}</p>
 
         {step !== 'done' && (
@@ -325,9 +324,9 @@ export default function ForgotPasswordPage() {
                 کد به دستتان نرسید؟
               </div>
               <ul style={{ margin: 0, paddingInlineStart: 16, fontSize: 12, lineHeight: 2, color: 'var(--brand)' }}>
-                <li>چند دقیقه صبر کنید و «ارسال دوباره» را بزنید.</li>
-                <li>پوشه‌ی پیام‌های مسدودشده یا فیلترشده‌ی گوشی را ببینید.</li>
-                <li>اگر باز هم نرسید، ممکن است اپراتور آن شماره پیامک ما را تحویل ندهد.</li>
+                <li>چند دقیقه صبر کنید و «ارسال دوباره» را بزنید</li>
+                <li>پوشه‌ی پیام‌های مسدودشده یا فیلترشده‌ی گوشی را ببینید</li>
+                <li>اگر باز هم نرسید، ممکن است اپراتور آن شماره پیامک ما را تحویل ندهد</li>
               </ul>
               <Link href="/contact" style={{
                 display: 'inline-flex', alignItems: 'center', gap: 6, marginTop: 9,

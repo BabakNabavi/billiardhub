@@ -129,7 +129,7 @@ export async function lookupPostalCode(raw: string): Promise<PostalCodeResult> {
       console.error('PostalCodePro upstream down:', j.message)
       return {
         ok: false, unavailable: true,
-        message: 'سرویس استعلام کد پستی موقتا پاسخ نمی‌دهد. کمی بعد دوباره تلاش کنید — کد پستی شما مشکلی ندارد.',
+        message: 'سرویس استعلام کد پستی موقتا پاسخ نمی‌دهد، کمی بعد دوباره تلاش کنید — کد پستی شما مشکلی ندارد',
         providerCode: j.code ?? undefined, providerMessage: j.message ?? undefined,
       }
     }
@@ -142,7 +142,7 @@ export async function lookupPostalCode(raw: string): Promise<PostalCodeResult> {
   const d = j.data
   /* success=true ولی data خالی ⇒ پاسخ منفی واقعی */
   if (!d || typeof d !== 'object') {
-    return { ok: true, found: false, message: 'برای این کد پستی آدرسی یافت نشد. کد را بررسی کنید.' }
+    return { ok: true, found: false, message: 'برای این کد پستی آدرسی یافت نشد، کد را بررسی کنید' }
   }
 
   const data: PostalAddress = {
@@ -156,7 +156,7 @@ export async function lookupPostalCode(raw: string): Promise<PostalCodeResult> {
   /* اگر هیچ فیلد معناداری برنگشت، همان «پیدا نشد» است. `address` تنها
      ملاک نیست: بعضی رکوردها فقط اجزا دارند و آدرس سرهم‌شده ندارند. */
   if (!data.address && !data.province && !data.city && !data.street) {
-    return { ok: true, found: false, message: 'برای این کد پستی آدرسی یافت نشد. کد را بررسی کنید.' }
+    return { ok: true, found: false, message: 'برای این کد پستی آدرسی یافت نشد، کد را بررسی کنید' }
   }
 
   return { ok: true, found: true, data }

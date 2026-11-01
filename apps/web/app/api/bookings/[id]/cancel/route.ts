@@ -49,8 +49,8 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string
     if (hoursLeft < OWNER_CANCEL_HOURS) {
       return NextResponse.json({
         message: hoursLeft < 0
-          ? 'زمان این رزرو گذشته است و دیگر قابل لغو نیست.'
-          : 'لغو از سوی باشگاه تنها تا ۴ ساعت پیش از شروع رزرو ممکن است. برای موارد اضطراری با پشتیبانی تماس بگیرید.',
+          ? 'زمان این رزرو گذشته است و دیگر قابل لغو نیست'
+          : 'لغو از سوی باشگاه تنها تا ۴ ساعت پیش از شروع رزرو ممکن است، برای موارد اضطراری با پشتیبانی تماس بگیرید',
       }, { status: 409 });
     }
   }

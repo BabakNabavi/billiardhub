@@ -181,8 +181,8 @@ export default function AdminStoryPlans() {
         </Link>
       </div>
       <p style={{ fontSize: 13, color: MUT, margin: '0 0 20px', lineHeight: 1.95 }}>
-        هر بسته را خودتان می‌سازید: چند استوری، در چه بازه‌ای، چند روز اعتبار و چه قیمتی.
-        قیمت و تعداد را هر وقت بخواهید عوض کنید — سفارش‌های قبلی دست‌نخورده می‌مانند.
+        هر بسته را خودتان می‌سازید: چند استوری، در چه بازه‌ای، چند روز اعتبار و چه قیمتی
+        قیمت و تعداد را هر وقت بخواهید عوض کنید — سفارش‌های قبلی دست‌نخورده می‌مانند
       </p>
 
       {err && (
@@ -198,8 +198,8 @@ export default function AdminStoryPlans() {
           <div style={{ minWidth: 250, flex: 1 }}>
             <div style={{ fontSize: 15, fontWeight: 900, color: INK, marginBottom: 5 }}>فروش بسته‌ی استوری</div>
             <p style={{ fontSize: 12.5, color: MUT, margin: 0, lineHeight: 1.95 }}>
-              سهمیه‌ی رایگان هر نقش همیشه اعمال می‌شود. این کلید تعیین می‌کند که وقتی
-              سهمیه تمام شد، به کاربر پیشنهاد خرید بسته داده شود یا فقط پیام «سقف پر شد».
+              سهمیه‌ی رایگان هر نقش همیشه اعمال می‌شود، این کلید تعیین می‌کند که وقتی
+              سهمیه تمام شد، به کاربر پیشنهاد خرید بسته داده شود یا فقط پیام «سقف پر شد»
             </p>
           </div>
           <button
@@ -221,8 +221,8 @@ export default function AdminStoryPlans() {
             <h2 style={{ fontSize: 14, fontWeight: 900, color: INK, margin: 0 }}>سهمیه‌ی رایگان، به تفکیک نقش</h2>
           </div>
           <p style={{ fontSize: 12.5, color: MUT, margin: '0 0 16px', lineHeight: 1.95 }}>
-            عدد صفر یعنی آن نقش اصلا حق استوری ندارد. کاربری که چند نقش دارد، سخاوتمندانه‌ترین سهمیه را می‌گیرد —
-            گرفتن نقش تازه نباید کسی را محدودتر کند.
+            عدد صفر یعنی آن نقش اصلا حق استوری ندارد، کاربری که چند نقش دارد، سخاوتمندانه‌ترین سهمیه را می‌گیرد —
+            گرفتن نقش تازه نباید کسی را محدودتر کند
           </p>
 
           <div style={{ display: 'grid', gap: 12, gridTemplateColumns: 'repeat(auto-fit,minmax(258px,1fr))' }}>
@@ -296,7 +296,7 @@ export default function AdminStoryPlans() {
         </div>
       ) : plans.length === 0 ? (
         <div style={{ ...CARD, textAlign: 'center', color: MUT, fontSize: 13, padding: 34 }}>
-          هنوز بسته‌ای نساخته‌اید. اولین بسته را از فرم بالا بسازید.
+          هنوز بسته‌ای نساخته‌اید، اولین بسته را از فرم بالا بسازید
         </div>
       ) : (
         <div style={{ display: 'grid', gap: 14 }}>

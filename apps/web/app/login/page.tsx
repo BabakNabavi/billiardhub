@@ -85,7 +85,7 @@ export default function LoginPage() {
     if (!password.trim()) { setError('لطفا رمز عبور را وارد کنید'); return; }
     /* جلوی درخواست محکوم‌به‌شکست را می‌گیریم — وگرنه یکی از پنج تلاش
        مجاز برای چیزی می‌سوزد که همین‌جا معلوم است اشتباه است. */
-    if (hint.persian) { setError('کیبورد روی فارسی است — رمز را با حروف انگلیسی بنویسید.'); return; }
+    if (hint.persian) { setError('کیبورد روی فارسی است — رمز را با حروف انگلیسی بنویسید'); return; }
 
     setLoading(true); setError(''); setErrIsCred(true);
     try {
@@ -204,7 +204,6 @@ export default function LoginPage() {
 
       <div className="au-card">
         <h1 style={{ fontSize: 23, fontWeight: 900, color: TEXT, margin: '0 0 6px', letterSpacing: '-0.02em' }}>ورود به حساب</h1>
-        <div style={{ width: 46, height: 3, borderRadius: 2, background: `var(--brand)`, transformOrigin: 'right', animation: 'auX .5s .2s ease both', marginBottom: 10 }} />
         <p style={{ fontSize: 13, color: MUT, margin: '0 0 24px', lineHeight: 1.8 }}>با شماره موبایل خود وارد شوید</p>
 
         <div style={{ marginBottom: 14 }}>
@@ -289,9 +288,7 @@ export default function LoginPage() {
         </button>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, margin: '20px 0' }}>
-          <div style={{ flex: 1, height: 1, background: LINE }} />
           <span style={{ fontSize: 12, color: MUT }}>حساب ندارید؟</span>
-          <div style={{ flex: 1, height: 1, background: LINE }} />
         </div>
 
         <Link href="/register" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, width: '100%', boxSizing: 'border-box', padding: '13px', borderRadius: 13, textDecoration: 'none', fontSize: 14, fontWeight: 800, color: GOLD_D, background: 'rgb(var(--c-gold) / 0.10)', border: '1px solid rgb(var(--c-gold) / 0.32)', transition: 'background .2s' }}>

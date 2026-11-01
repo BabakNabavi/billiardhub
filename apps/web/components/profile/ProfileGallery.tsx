@@ -180,7 +180,7 @@ export default function ProfileGallery({
       {canEdit && onEditImage && (
         <button type="button" className="ch-gal-edit" disabled={busy || working}
           onClick={() => void editImage(g)}
-          aria-label={`ویرایش کپشن و آلبومِ ${g.caption || 'این تصویر'}`} title="کپشن و آلبوم">
+          aria-label={`ویرایش کپشن و آلبوم ${g.caption || 'این تصویر'}`} title="کپشن و آلبوم">
           <Pencil size={14} aria-hidden />
         </button>
       )}
@@ -319,15 +319,15 @@ export default function ProfileGallery({
   const editImage = async (g: GalleryImage) => {
     const caption = await askText('کپشن تصویر', {
       allowEmpty: true, initial: g.caption, tone: 'gold',
-      body: 'این متن `alt` تصویر و عنوانِ نمای تمام‌صفحه می‌شود. خالی هم مجاز است.',
+      body: 'این متن `alt` تصویر و عنوان نمای تمام‌صفحه می‌شود، خالی هم مجاز است',
       placeholder: g.caption || 'مثلا: تمرین ضربه‌ی کششی',
     })
     if (caption === null) return
     const album = await askText('آلبوم تصویر', {
       allowEmpty: true, initial: g.album ?? '', tone: 'gold',
       body: albumNames.length
-        ? `آلبوم‌های موجود: ${albumNames.join('، ')} — خالی یعنی بدون آلبوم.`
-        : 'نام آلبوم؛ خالی یعنی بدون آلبوم.',
+        ? `آلبوم‌های موجود: ${albumNames.join('، ')} — خالی یعنی بدون آلبوم`
+        : 'نام آلبوم؛ خالی یعنی بدون آلبوم',
       placeholder: g.album || 'نام آلبوم',
     })
     if (album === null) return

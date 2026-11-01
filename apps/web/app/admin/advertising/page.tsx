@@ -161,8 +161,8 @@ export default function AdminAdvertising() {
         )}
       </div>
       <p style={{ fontSize: 13, color: MUT, margin: '0 0 20px', lineHeight: 1.95 }}>
-        شش جایگاه مستقل. هر جایگاه فعال/غیرفعال و حالت خودش (رایگان، دستی، پولی) را جدا دارد —
-        هیچ کلید سراسری‌ای وجود ندارد.
+        شش جایگاه مستقل، هر جایگاه فعال/غیرفعال و حالت خودش (رایگان، دستی، پولی) را جدا دارد —
+        هیچ کلید سراسری‌ای وجود ندارد
       </p>
 
       {err && (
@@ -212,7 +212,7 @@ export default function AdminAdvertising() {
           <h2 style={{ fontSize: 15, fontWeight: 900, color: INK, margin: 0 }}>درخواست‌های تبلیغ</h2>
         </div>
         {requests.length === 0 ? (
-          <p style={{ fontSize: 13, color: MUT, margin: 0, textAlign: 'center', padding: 20 }}>هنوز درخواستی ثبت نشده است.</p>
+          <p style={{ fontSize: 13, color: MUT, margin: 0, textAlign: 'center', padding: 20 }}>هنوز درخواستی ثبت نشده است</p>
         ) : (
           <div style={{ display: 'grid', gap: 10 }}>
             {requests.map(r => (
@@ -465,7 +465,7 @@ function NewPlacement({ onDone, flash, call }: {
         </div>
         {roles.length === 0 && (
           <div style={{ fontSize: 10.5, color: '#B7791F', marginTop: 5, lineHeight: 1.7 }}>
-            بدون نقش، این جایگاه برای هیچ‌کس قابل خرید نیست — فقط خودتان می‌توانید رویش کمپین بگذارید.
+            بدون نقش، این جایگاه برای هیچ‌کس قابل خرید نیست — فقط خودتان می‌توانید رویش کمپین بگذارید
           </div>
         )}
       </div>
@@ -557,7 +557,7 @@ function PlacementRow({ p, busy, campaignCount, onPatch }: {
             onChange={e => setCap(digits(e.target.value))} />
           {Number(cap) === 0 && (
             <div style={{ fontSize: 10.5, color: RED, marginTop: 4, lineHeight: 1.6 }}>
-              با ظرفیت صفر چیزی نمایش داده نمی‌شود.
+              با ظرفیت صفر چیزی نمایش داده نمی‌شود
             </div>
           )}
         </div>
@@ -567,7 +567,7 @@ function PlacementRow({ p, busy, campaignCount, onPatch }: {
             onChange={e => setShown(digits(e.target.value))} title="۰ = به‌اندازه‌ی ظرفیت" />
           {Number(shown) > Number(cap) && Number(cap) >= 0 && (
             <div style={{ fontSize: 10.5, color: '#B7791F', marginTop: 4, lineHeight: 1.6 }}>
-              بیش از ظرفیت است؛ عملا {fa(cap)} نمایش داده می‌شود.
+              بیش از ظرفیت است؛ عملا {fa(cap)} نمایش داده می‌شود
             </div>
           )}
         </div>
@@ -600,7 +600,7 @@ function PlacementRow({ p, busy, campaignCount, onPatch }: {
                 onChange={e => setSkip(digits(e.target.value))} title="خالی = بیننده اصلا نمی‌تواند رد کند" />
               {skip.trim() !== '' && maxDur.trim() !== '' && Number(skip) >= Number(maxDur) && (
                 <div style={{ fontSize: 10.5, color: '#B7791F', marginTop: 4, lineHeight: 1.6 }}>
-                  از سقف مدت بیشتر است؛ دکمه‌ی رد کردن هرگز فعال نمی‌شود.
+                  از سقف مدت بیشتر است؛ دکمه‌ی رد کردن هرگز فعال نمی‌شود
                 </div>
               )}
             </div>
@@ -624,7 +624,7 @@ function PlacementRow({ p, busy, campaignCount, onPatch }: {
 
       {p.mode === 'paid' && (
         <div style={{ marginTop: 10, fontSize: 11.5, color: FELT, background: 'rgba(14,122,56,0.07)', borderRadius: 9, padding: '7px 11px', lineHeight: 1.8 }}>
-          این جایگاه در صفحه‌ی «درخواست تبلیغات» قابل خرید است. پله‌های قیمتش را در بخش پلن‌ها تنظیم کنید.
+          این جایگاه در صفحه‌ی «درخواست تبلیغات» قابل خرید است، پله‌های قیمتش را در بخش پلن‌ها تنظیم کنید
         </div>
       )}
     </div>
@@ -647,8 +647,8 @@ function CampaignsSection({ placements, campaigns, orders, onChanged, flash, cal
     const reason = await askText(
       `بازگرداندن ${fa(order.amount)} تومان و لغو کمپین`,
       {
-        body: 'دلیل بازپرداخت در گزارش مالی ثبت می‌شود و برگشت‌پذیر نیست.',
-        placeholder: 'مثال: کمپین به‌درخواست خود تبلیغ‌دهنده لغو شد.',
+        body: 'دلیل بازپرداخت در گزارش مالی ثبت می‌شود و برگشت‌پذیر نیست',
+        placeholder: 'مثال: کمپین به‌درخواست خود تبلیغ‌دهنده لغو شد',
         confirmLabel: 'بازپرداخت',
       },
     )
@@ -746,7 +746,7 @@ function CampaignsSection({ placements, campaigns, orders, onChanged, flash, cal
 
       {/* فهرست */}
       {campaigns.length === 0 ? (
-        <p style={{ fontSize: 13, color: MUT, margin: 0, textAlign: 'center', padding: 14 }}>هنوز کمپینی ساخته نشده است.</p>
+        <p style={{ fontSize: 13, color: MUT, margin: 0, textAlign: 'center', padding: 14 }}>هنوز کمپینی ساخته نشده است</p>
       ) : (
         <div style={{ display: 'grid', gap: 9 }}>
           {campaigns.map(c => {
@@ -874,8 +874,8 @@ function PlansSection({ plans, placements, onChanged, flash, call }: {
         </button>
       </div>
       <p style={{ fontSize: 12.5, color: MUT, margin: '0 0 14px', lineHeight: 1.95 }}>
-        قیمت‌ها از دیتابیس خوانده می‌شوند، نه از کد. هر جایگاه می‌تواند چند پله‌ی مدت داشته باشد
-        (مثلا ۷ روزه، ۳۰ روزه، ۳ ماهه). پلنی که سفارش ثبت‌شده دارد حذف نمی‌شود و فقط غیرفعال می‌گردد.
+        قیمت‌ها از دیتابیس خوانده می‌شوند، نه از کد، هر جایگاه می‌تواند چند پله‌ی مدت داشته باشد
+        (مثلا ۷ روزه، ۳۰ روزه، ۳ ماهه)، پلنی که سفارش ثبت‌شده دارد حذف نمی‌شود و فقط غیرفعال می‌گردد
       </p>
 
       {open && (
@@ -919,7 +919,7 @@ function PlansSection({ plans, placements, onChanged, flash, call }: {
       )}
 
       {groups.length === 0 ? (
-        <p style={{ fontSize: 13, color: MUT, margin: 0, textAlign: 'center', padding: 14 }}>هنوز پلنی تعریف نشده است.</p>
+        <p style={{ fontSize: 13, color: MUT, margin: 0, textAlign: 'center', padding: 14 }}>هنوز پلنی تعریف نشده است</p>
       ) : groups.map(g => (
         <div key={g.key || 'general'} style={{ marginBottom: 16 }}>
           <div style={{ fontSize: 12.5, fontWeight: 900, color: SEC, marginBottom: 8 }}>{g.title}</div>
@@ -960,7 +960,7 @@ function PlanRow({ p, placements, onChanged, flash, call }: {
   }
 
   const remove = async () => {
-    if (!(await ask(`پلن «${p.name}» حذف شود؟`, { body: 'اگر سفارشی داشته باشد فقط غیرفعال می‌شود.' }))) return
+    if (!(await ask(`پلن «${p.name}» حذف شود؟`, { body: 'اگر سفارشی داشته باشد فقط غیرفعال می‌شود' }))) return
     setBusy(true)
     try {
       const r = await call('DELETE', undefined, `?plan=${p.id}`)

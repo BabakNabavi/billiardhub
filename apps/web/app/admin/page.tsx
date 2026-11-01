@@ -83,7 +83,7 @@ const SECTIONS: AdminSection[] = [
     title: 'کاربران و دسترسی', en: 'USERS & ACCESS', dot: '#1D4ED8',
     items: [
       /* فقط مالکِ پلتفرم می‌بیند (allowed پایین)؛ امنیتِ واقعی در خودِ /api/owner است */
-      { title: 'اعمالِ وضعیتِ حساب', desc: 'تعلیق، مسدودسازی، محدودسازی، حذف و بازگرداندنِ حساب‌ها — با تاریخچه‌ی کامل', icon: <Gavel size={20} />, link: '/admin/enforcement' },
+      { title: 'اعمال وضعیت حساب', desc: 'تعلیق، مسدودسازی، محدودسازی، حذف و بازگرداندن حساب‌ها — با تاریخچه‌ی کامل', icon: <Gavel size={20} />, link: '/admin/enforcement' },
       { title: 'مدیریت کاربران', desc: 'مشاهده، ویرایش و مسدودسازی کاربران', icon: <Users size={20} />, link: '/admin/users' },
       /* کارت «مدیریت نقش‌ها» برداشته شد. آن صف تصمیمی بود که هیچ
          اثری نداشت: نقش هنگام انتخاب داده می‌شود و «رد کردن» هیچ‌وقت
@@ -146,7 +146,7 @@ const SECTIONS: AdminSection[] = [
       { title: 'بسته‌های آگهی', desc: 'ساخت و قیمت‌گذاری بسته‌های فروش آگهی', icon: <Package size={20} />, link: '/admin/ad-plans' },
       { title: 'بسته‌های استوری', desc: 'سهمیهٔ استوری هر نقش و بسته‌های فروش', icon: <Clapperboard size={20} />, link: '/admin/story-plans' },
       { title: 'بیلیارد مدیا', desc: 'مدیریت ویدیوها و کانال‌ها', icon: <Clapperboard size={20} />, link: '/admin/media' },
-      { title: 'پخش زنده', desc: 'کانال‌های باشگاه‌ها، سطحِ عادی/حرفه‌ای، ساعتِ پخش و بیننده، و مسدودسازی', icon: <Clapperboard size={20} />, link: '/admin/live' },
+      { title: 'پخش زنده', desc: 'کانال‌های باشگاه‌ها، سطح عادی/حرفه‌ای، ساعت پخش و بیننده، و مسدودسازی', icon: <Clapperboard size={20} />, link: '/admin/live' },
       { title: 'گزارش‌های تخلف', desc: 'بررسی گزارش کاربران درباره آگهی‌ها و محتوا', icon: <Flag size={20} />, link: '/admin/reports' },
       { title: 'قابلیت‌های پلتفرم', desc: 'روشن/خاموش کردن تعاملات اجتماعی — لایک، ری‌اکشن، پاسخ استوری و پیام خصوصی', icon: <ShieldCheck size={20} />, link: '/admin/features' },
       /* تا پیش از این، کد متن هر الگو فقط با نوشتن مستقیم در
@@ -397,11 +397,9 @@ export default function AdminPage() {
           .map((sec, si) => (
           <section key={sec.en} style={{ marginBottom: 26 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
-              <span style={{ width: 3, height: 16, borderRadius: 2, background: `linear-gradient(180deg,${GOLD},#8A6020)` }} />
               <h2 style={{ fontSize: 15, fontWeight: 900, margin: 0 }}>{sec.title}</h2>
               <span style={{ width: 7, height: 7, borderRadius: '50%', background: sec.dot }} />
               <span style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.22em', color: MUT }}>{sec.en}</span>
-              <span style={{ flex: 1, height: 1, background: LINE }} />
             </div>
             <div className="ad-grid">
               {sec.items.map((item, i) => {
@@ -448,7 +446,7 @@ export default function AdminPage() {
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, background: '#fff', border: `1px solid ${LINE}`, borderRadius: 14, padding: '12px 16px' }}>
           <CheckCircle size={15} style={{ color: '#0E7A38', flexShrink: 0 }} />
           <span style={{ fontSize: 12, color: SEC }}>
-            مدیریت روزانه‌ی هر باشگاه (میزها، رزروها) در پنل خود باشگاه‌دار انجام می‌شود؛ این پنل مخصوص نظارت و تأییدهای سراسری است.
+            مدیریت روزانه‌ی هر باشگاه (میزها، رزروها) در پنل خود باشگاه‌دار انجام می‌شود؛ این پنل مخصوص نظارت و تأییدهای سراسری است
           </span>
         </div>
       </div>

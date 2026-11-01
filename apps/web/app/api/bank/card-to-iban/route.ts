@@ -45,7 +45,7 @@ export async function POST(req: NextRequest) {
 
   if (!u.national_id || !u.national_id_verified || !u.birth_date) {
     return NextResponse.json({
-      message: 'برای ثبت حساب بانکی، ابتدا باید کد ملی و تاریخ تولدتان تأیید شود.',
+      message: 'برای ثبت حساب بانکی، ابتدا باید کد ملی و تاریخ تولدتان تأیید شود',
       needsIdentity: true,
     }, { status: 409 });
   }
@@ -56,7 +56,7 @@ export async function POST(req: NextRequest) {
   if (!cm.match) {
     return NextResponse.json({
       ok: true, match: false,
-      message: 'این کارت بانکی به نام شما نیست. حساب باید متعلق به خود صاحب باشگاه باشد.',
+      message: 'این کارت بانکی به نام شما نیست، حساب باید متعلق به خود صاحب باشگاه باشد',
     }, { status: 422 });
   }
 
@@ -71,7 +71,7 @@ export async function POST(req: NextRequest) {
   if (!im.match) {
     return NextResponse.json({
       ok: true, match: false,
-      message: 'شبای این کارت به نام شما ثبت نشده است.',
+      message: 'شبای این کارت به نام شما ثبت نشده است',
     }, { status: 422 });
   }
 

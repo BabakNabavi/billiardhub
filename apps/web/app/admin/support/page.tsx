@@ -118,9 +118,9 @@ export default function AdminSupportPage() {
         <h1 style={{ fontSize: 20, fontWeight: 900, color: DARK, margin: 0 }}>تیکت‌های پشتیبانی</h1>
       </div>
       <p style={{ fontSize: 12.5, color: '#6B7280', lineHeight: 2, marginTop: 0, marginBottom: 18 }}>
-        کد پستی و اطلاعات بانکی پس از استعلام موفق قفل می‌شوند. با «باز کردن قفل»،
+        کد پستی و اطلاعات بانکی پس از استعلام موفق قفل می‌شوند، با «باز کردن قفل»،
         کاربر می‌تواند یک بار دیگر استعلام بگیرد — مقدار را خودتان وارد نکنید تا
-        استعلام واقعا انجام شود.
+        استعلام واقعا انجام شود
       </p>
 
 <TabStrip value={tab} onChange={setTab}
@@ -140,7 +140,7 @@ export default function AdminSupportPage() {
         </div>
       ) : shown.length === 0 ? (
         <div style={{ ...card, textAlign: 'center', color: '#9CA3AF', fontSize: 13 }}>
-          تیکتی در این وضعیت نیست.
+          تیکتی در این وضعیت نیست
         </div>
       ) : (
         <ScrollList count={shown.length} min={4}>

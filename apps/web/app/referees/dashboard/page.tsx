@@ -331,7 +331,7 @@ function safeRemote(raw: unknown): Partial<FormState> {
     else if (slugTaken())         e.slug        = 'این نشانی قبلا استفاده شده است'
     if (form.disciplines.length === 0) e.disciplines = 'حداقل یک رشته را انتخاب کنید'
     if (!form.fullBio.trim())     e.fullBio     = 'الزامی'
-    if (!form.certificate)        e.certificate = 'آپلود مدرک داوری الزامی است — بدون مدرک امکان ثبت پروفایل وجود ندارد.'
+    if (!form.certificate)        e.certificate = 'آپلود مدرک داوری الزامی است — بدون مدرک امکان ثبت پروفایل وجود ندارد'
     setErrors(e)
     const keys = Object.keys(e)
     if (keys.length) {
@@ -437,10 +437,10 @@ function safeRemote(raw: unknown): Partial<FormState> {
           </div>
           <h1 style={{ fontSize: 20, fontWeight: 800, marginBottom: 10 }}>اطلاعات شما ثبت شد</h1>
           <p style={{ fontSize: 13.5, color: TEXT_S, lineHeight: 1.9, marginBottom: 8 }}>
-            پروفایل شما همراه با مدرک داوری برای بررسی و تایید به ادمین سیستم ارسال شد.
+            پروفایل شما همراه با مدرک داوری برای بررسی و تایید به ادمین سیستم ارسال شد
           </p>
           <p style={{ fontSize: 12.5, color: TEXT_M, lineHeight: 1.9, marginBottom: 22 }}>
-            پس از تایید مدرک توسط ادمین، پروفایل شما با تیک آبی تایید در صفحه‌ی داوران منتشر می‌شود.
+            پس از تایید مدرک توسط ادمین، پروفایل شما با تیک آبی تایید در صفحه‌ی داوران منتشر می‌شود
           </p>
           <div style={{ display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap' }}>
             <Link href={`/referees/${form.slug}`} style={lqBtn}>مشاهده پیش‌نمایش پروفایل</Link>
@@ -465,7 +465,7 @@ function safeRemote(raw: unknown): Partial<FormState> {
             REFEREE DASHBOARD
           </div>
           <h1 style={{ fontSize: 'clamp(22px,3vw,28px)', fontWeight: 900, letterSpacing: '-0.02em' }}>داشبورد داور</h1>
-          <p style={{ fontSize: 13.5, color: TEXT_S, marginTop: 6 }}>اطلاعات زیر را تکمیل کنید تا صفحه‌ی پروفایل داوری شما ساخته شود. آپلود مدرک داوری الزامی است.</p>
+          <p style={{ fontSize: 13.5, color: TEXT_S, marginTop: 6 }}>اطلاعات زیر را تکمیل کنید تا صفحه‌ی پروفایل داوری شما ساخته شود، آپلود مدرک داوری الزامی است</p>
         </div>
 
 
@@ -505,8 +505,8 @@ function safeRemote(raw: unknown): Partial<FormState> {
                 data-field="lastNameFa" />{err('lastNameFa')}</div>
               <div style={{ gridColumn: '1 / -1', fontSize: 11.5, color: TEXT_M, marginTop: -6 }}>
                 {firstLocked && lastLocked
-                  ? 'نام و نام خانوادگی از اطلاعات حساب کاربری شما گرفته شده و قابل تغییر نیست.'
-                  : 'حساب شما نام ثبت‌شده ندارد؛ همین‌جا وارد کنید.'}
+                  ? 'نام و نام خانوادگی از اطلاعات حساب کاربری شما گرفته شده و قابل تغییر نیست'
+                  : 'حساب شما نام ثبت‌شده ندارد؛ همین‌جا وارد کنید'}
               </div>
               <div><label style={lblLtr}>Last name (English){star}</label><input data-field="lastNameEn" style={{ ...(errors.lastNameEn ? inpErr : inp), direction: 'ltr', textAlign: 'left' }} value={form.lastNameEn} onChange={e => set('lastNameEn', e.target.value)} />{err('lastNameEn')}</div>
               <div><label style={lblLtr}>First name (English){star}</label><input data-field="firstNameEn" style={{ ...(errors.firstNameEn ? inpErr : inp), direction: 'ltr', textAlign: 'left' }} value={form.firstNameEn} onChange={e => set('firstNameEn', e.target.value)} />{err('firstNameEn')}</div>
@@ -603,7 +603,7 @@ function safeRemote(raw: unknown): Partial<FormState> {
           <div style={card}>
             {sectionTitle('درجه داوری', 3)}
             <div style={{ background: 'rgba(199,166,106,0.08)', border: '1px solid rgba(199,166,106,0.22)', borderRadius: 10, padding: '10px 14px', fontSize: 12.5, color: GOLD_D, lineHeight: 1.8, marginBottom: 14 }}>
-              مدارکی که دریافت کرده‌اید را به‌ترتیب انتخاب کنید و سال دریافت هر کدام را وارد نمایید.
+              مدارکی که دریافت کرده‌اید را به‌ترتیب انتخاب کنید و سال دریافت هر کدام را وارد نمایید
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               {GRADES.map((g, idx) => {
@@ -639,7 +639,7 @@ function safeRemote(raw: unknown): Partial<FormState> {
           {/* 4 — Contact */}
           <div style={card}>
             {sectionTitle('راه‌های ارتباطی', 4)}
-            <p style={{ fontSize: 12.5, color: TEXT_M, marginBottom: 14 }}>هر کدام را که پر کنید، آیکونش در بخش «راه‌های ارتباطی» پروفایل نمایش داده می‌شود.</p>
+            <p style={{ fontSize: 12.5, color: TEXT_M, marginBottom: 14 }}>هر کدام را که پر کنید، آیکونش در بخش «راه‌های ارتباطی» پروفایل نمایش داده می‌شود</p>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2,1fr)', gap: 14 }}>
               {/* دو قالب متفاوت — دلیلش کنار همین بلوک در پنل مربی */}
               <div>
@@ -660,7 +660,7 @@ function safeRemote(raw: unknown): Partial<FormState> {
           {/* 5 — Certificate (MANDATORY) */}
           <div data-field="certificate" style={{ ...card, border: errors.certificate ? '1px solid rgba(239,68,68,0.45)' : CBOR }}>
             {sectionTitle('آپلود مدرک داوری (الزامی)', 5)}
-            <p style={{ fontSize: 12.5, color: TEXT_M, marginBottom: 14, lineHeight: 1.8 }}>آپلود مدرک داوری برای ثبت پروفایل <b style={{ color: '#b91c1c' }}>الزامی</b> است. این مدرک توسط ادمین سیستم بررسی می‌شود؛ در صورت تایید، پروفایل شما با تیک آبی تایید منتشر می‌شود.</p>
+            <p style={{ fontSize: 12.5, color: TEXT_M, marginBottom: 14, lineHeight: 1.8 }}>آپلود مدرک داوری برای ثبت پروفایل <b style={{ color: '#b91c1c' }}>الزامی</b> است، این مدرک توسط ادمین سیستم بررسی می‌شود؛ در صورت تایید، پروفایل شما با تیک آبی تایید منتشر می‌شود</p>
             {form.certificate && (
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, border: '1px solid rgba(5,118,66,0.25)', background: 'rgba(5,118,66,0.06)', borderRadius: 10, padding: '11px 14px', marginBottom: 10 }}>
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#057642" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /></svg>

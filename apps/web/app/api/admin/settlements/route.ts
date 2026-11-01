@@ -79,8 +79,8 @@ export async function POST(req: NextRequest) {
     const dup = await findDuplicateReference(reference, { table: 'settlements', id: String(b.id) });
     if (dup) {
       return NextResponse.json({
-        message: `این شماره پیگیری قبلا برای «${dup.where}» ثبت شده است.`
-          + ' اگر واریز تازه‌ای انجام داده‌اید، شماره پیگیری همان تراکنش را وارد کنید.',
+        message: `این شماره پیگیری قبلا برای «${dup.where}» ثبت شده است`
+          + ' اگر واریز تازه‌ای انجام داده‌اید، شماره پیگیری همان تراکنش را وارد کنید',
       }, { status: 409 });
     }
 

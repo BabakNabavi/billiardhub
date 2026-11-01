@@ -175,8 +175,8 @@ export default function BankCardVerify({ clubId, value, onChange }: {
               borderRadius: 10, padding: '9px 11px', fontSize: 12, color: '#B7791F', lineHeight: 1.9,
             }}>
               <AlertCircle size={13} style={{ flexShrink: 0, marginTop: 2 }} />
-              نام صاحب کارت با نام حساب شما («{accountName}») یکسان نوشته نشده است.
-              کد ملی تطبیق داده شده، ولی اگر این کارت مال شما نیست همین‌جا اصلاحش کنید.
+              نام صاحب کارت با نام حساب شما («{accountName}») یکسان نوشته نشده است
+              کد ملی تطبیق داده شده، ولی اگر این کارت مال شما نیست همین‌جا اصلاحش کنید
             </div>
           )}
           <div style={box}>
@@ -200,7 +200,7 @@ export default function BankCardVerify({ clubId, value, onChange }: {
               onChange={e => onChange({ ...value, confirmed: e.target.checked })}
               style={{ width: 16, height: 16, accentColor: '#C7A66A', flexShrink: 0, marginTop: 1 }} />
             <span style={{ fontSize: 12.5, color: INK, lineHeight: 1.9 }}>
-              اطلاعات بانکی بالا را بررسی کردم و درست است. تسویه‌ی درآمد رزروها به همین شبا انجام شود.
+              اطلاعات بانکی بالا را بررسی کردم و درست است، تسویه‌ی درآمد رزروها به همین شبا انجام شود
             </span>
           </label>
         </div>
@@ -208,8 +208,8 @@ export default function BankCardVerify({ clubId, value, onChange }: {
 
       {!verified && !err && (
         <p style={{ fontSize: 11.5, color: MUT, marginTop: 8, lineHeight: 1.9 }}>
-          کارت باید به نام خودتان باشد. پس از استعلام، نام صاحب حساب و شبا خودکار
-          پر می‌شوند و قابل تغییر نیستند.
+          کارت باید به نام خودتان باشد، پس از استعلام، نام صاحب حساب و شبا خودکار
+          پر می‌شوند و قابل تغییر نیستند
         </p>
       )}
     </div>

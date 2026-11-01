@@ -47,8 +47,8 @@ export function ProfileLoadError({ onRetry, bg = '#F7F5F0' }: { onRetry: () => v
       <div style={{ maxWidth: 420 }}>
         <h1 style={{ fontSize: 16, fontWeight: 800, margin: 0, color: '#111110' }}>پروفایل خوانده نشد</h1>
         <p style={{ fontSize: 13, lineHeight: 2, color: 'rgba(17,17,16,0.52)', marginTop: 8 }}>
-          ارتباط با سرور برقرار نشد. تا وقتی نسخه‌ی ثبت‌شده خوانده نشود فرم باز نمی‌شود،
-          وگرنه ذخیره‌ی بعدی می‌تواند اطلاعات قبلی را پاک کند.
+          ارتباط با سرور برقرار نشد، تا وقتی نسخه‌ی ثبت‌شده خوانده نشود فرم باز نمی‌شود،
+          وگرنه ذخیره‌ی بعدی می‌تواند اطلاعات قبلی را پاک کند
         </p>
         <button
           type="button" onClick={onRetry}

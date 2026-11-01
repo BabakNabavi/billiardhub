@@ -35,7 +35,7 @@ export async function GET(req: NextRequest) {
   if (error) {
     const pending = /account_status|column/i.test(error.message);
     return NextResponse.json(
-      { message: pending ? 'مهاجرتِ ۱۱۳ هنوز روی دیتابیس اجرا نشده است' : 'جست‌وجو انجام نشد' },
+      { message: pending ? 'مهاجرت ۱۱۳ هنوز روی دیتابیس اجرا نشده است' : 'جست‌وجو انجام نشد' },
       { status: pending ? 503 : 500 },
     );
   }

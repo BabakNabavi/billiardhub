@@ -74,7 +74,7 @@ export async function POST(req: NextRequest) {
        برای رفعش نوشته شد. */
     console.error('[contact] insert error:', error.message);
     return NextResponse.json(
-      { message: 'ثبت پیام انجام نشد. لطفا دوباره تلاش کنید یا با info@billiardhub.net تماس بگیرید.' },
+      { message: 'ثبت پیام انجام نشد، لطفا دوباره تلاش کنید یا با info@billiardhub.net تماس بگیرید' },
       { status: 503 },
     );
   }

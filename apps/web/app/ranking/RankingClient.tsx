@@ -69,6 +69,13 @@ import { splitFaName } from '../../lib/fa-name'
 const faDigits = (v: string | number) => String(v).replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[+d] ?? d)
 
 
+/* ⚠️ صعود/نزول خاموش است (۱۰ آبانِ ۱۴۰۵). previousRankِ ذخیره‌شده از جمعِ مرحله‌های
+   ۲۵ تا ۲۸ ساخته شده بود، ولی جدولِ رسمیِ قبلیِ فدراسیون مرحله‌های ۲۴ تا ۲۸ بود
+   (پنجره‌ی چرخان) — نمونه‌ی مالک: تیرداد آزادی‌پور رسمی ۴ یا ۵ بود، این‌جا ۸.
+   بی امتیازِ مرحله‌ی ۲۴ عددِ درست ساختنی نیست؛ علامتِ غلط روی جدولِ رسمی از
+   نبودنش بدتر است. با رسیدنِ جدولِ رسمیِ قبلی و واردکردنش در پنلِ ادمین ⟵ true */
+const TRENDS_ENABLED = false
+
 /* چیپ تغییر رتبه — همان منطق قبلی (previousRank - rank) */
 function TrendChip({ diff, onDark = false }: { diff: number; onDark?: boolean }) {
   if (diff > 0) return (
@@ -233,30 +240,38 @@ export function RankingClient({ initial }: { initial?: { board: RankingsStructur
         @keyframes rkFadeUp { from { opacity:0; transform: translateY(16px); } to { opacity:1; transform:none; } }
         .rk-wrap { max-width: 1080px; margin: 0 auto; padding: 0 clamp(16px,3vw,28px); }
 
-        /* هدر رسمی — بنرِ «رنکینگ بیلیارد» (طرحِ مالک، ۱۰ آبانِ ۱۴۰۵). متن داخلِ
-           خودِ تصویر است، پس روی آن چیزی نمی‌نشیند و h1 فقط برای خزنده و
-           صفحه‌خوان است (sr-only).
-           ⚠️ کامل و بی‌برش، هم‌عرضِ جدول (خواستِ مالک): نسخه‌ی قبلی در دسکتاپ
-           cover بود (بزرگ‌نمایی + بریدنِ بالا و پایین) و در موبایل برشِ نیمه‌ی
-           راست (جام و نیمه‌ی چپ دیده نمی‌شد). حالا همان تصویرِ ۸:۳ با
+        /* هدر رسمی — بنر «رنکینگ بیلیارد» (طرح مالک، ۱۰ آبان ۱۴۰۵)، متن داخل
+           خود تصویر است، پس روی آن چیزی نمی‌نشیند و h1 فقط برای خزنده و
+           صفحه‌خوان است (sr-only)
+           ⚠️ کامل و بی‌برش، هم‌عرض جدول (خواست مالک): نسخه‌ی قبلی در دسکتاپ
+           cover بود (بزرگ‌نمایی + بریدن بالا و پایین) و در موبایل برش نیمه‌ی
+           راست (جام و نیمه‌ی چپ دیده نمی‌شد)، حالا همان تصویر ۸:۳ با
            height:auto — هیچ‌جا بریده یا بزرگ نمی‌شود. */
-        .rk-hero { padding-top: clamp(12px, 2vw, 24px); padding-bottom: clamp(12px, 1.6vw, 16px); }
+        /* نوار تمام‌عرض (خواست مالک): خود بنر همان اندازه‌ی هم‌عرض جدول می‌ماند —
+           بزرگ و پهن نمی‌شود — و دو طرف با ادامه‌ی محو رنگ‌های خود تصویر پر می‌شود
+           (نسخه‌ی کوچک ۷۶۸ با بلور زیاد، یک‌بار رسم می‌شود)، لبه‌های بنر با ماسک در
+           همان زمینه حل می‌شوند تا مرز تصویر دیده نشود. */
+        .rk-hero { position: relative; overflow: hidden; background: #0B0A08; isolation: isolate; }
+        .rk-hero::before { content: ''; position: absolute; inset: -48px; z-index: -1;
+          background: url(/images/ranking/header-768.webp) center / cover;
+          filter: blur(44px) saturate(1.15) brightness(.62); }
+        .rk-hero::after { content: ''; position: absolute; inset: 0; z-index: -1;
+          background: linear-gradient(to bottom, rgb(11 10 8 / .25), rgb(11 10 8 / .55)); }
         .rk-hero-img { display: block; width: 100%; height: auto; aspect-ratio: 2048 / 768;
-          border-radius: clamp(12px, 1.6vw, 18px); background: #0D0C0A;
-          box-shadow: 0 12px 32px -12px rgb(0 0 0 / .35); }
+          mask-image: linear-gradient(90deg, transparent 0, #000 7%, #000 93%, transparent 100%); }
 
         /* سگمنت‌ها */
         /* ⚠️ کنترل‌ها دیگر پوسته‌ی محلی ندارند: همان .lq-seg مشترک
-           را می‌گیرند. این‌جا فقط چیدمان تنظیم می‌شود.
+           را می‌گیرند، این‌جا فقط چیدمان تنظیم می‌شود
            در موبایل هر پنج دکمه (سه رشته + دو جنسیت) باید در یک ردیف
            جا شوند، پس عرض کف ۸۴ پیکسلی .lq-seg > button برداشته
            می‌شود — همان کاری که صفحه‌ی مربی هم می‌کند. */
         /* nowrap در خود قاعده‌ی پایه: در مدیاکوئری گذاشتنش اثر نمی‌کرد
-           و در ۳۶۰ تا ۳۹۰ ردیف دو سطر می‌شد. گروه‌ها خودشان جمع
+           و در ۳۶۰ تا ۳۹۰ ردیف دو سطر می‌شد، گروه‌ها خودشان جمع
            می‌شوند، پس نیازی به شکستن سطر نیست. */
         .rk-row1 { display: flex; gap: 10px; align-items: center; flex-wrap: nowrap; }
-        /* دسکتاپ: دسته‌ها در همان خطِ رشته و جنسیت — یک ردیف کمتر در نوارِ
-           چسبان (خواستِ مالک). زیرِ ۱۰۲۴ دو خط می‌ماند چون جا نیست. */
+        /* دسکتاپ: دسته‌ها در همان خط رشته و جنسیت — یک ردیف کمتر در نوار
+           چسبان (خواست مالک)، زیر ۱۰۲۴ دو خط می‌ماند چون جا نیست. */
         .rk-ctrls { display: flex; flex-direction: column; gap: 10px; }
         @media (min-width: 1024px) {
           .rk-ctrls { flex-direction: row; align-items: center; }
@@ -270,29 +285,29 @@ export function RankingClient({ initial }: { initial?: { board: RankingsStructur
         .rk-row1 button { white-space: nowrap; }
         @media (max-width: 620px) {
           .rk-row1 > .lq-seg > button { min-width: 0; padding: 7px 6px; font-size: 11.5px; flex: 1; }
-          /* ⚠️ هر دو گروه باید بتوانند جمع شوند. با flex:0 0 auto روی
+          /* ⚠️ هر دو گروه باید بتوانند جمع شوند، با flex:0 0 auto روی
              جنسیت، تمام فشار روی رشته می‌افتاد و آن گروه تا ۸ پیکسل
-             — یعنی فقط padding — جمع می‌شد. سهم به نسبت تعداد دکمه. */
+             — یعنی فقط padding — جمع می‌شد، سهم به نسبت تعداد دکمه. */
           .rk-sports { flex: 3 1 0; min-width: 0; }
           .rk-genders { flex: 2 1 0; min-width: 0; }
           .rk-cats > button { min-width: 0; flex: 1; padding: 7px 6px; font-size: 11.5px; }
-          /* ⚠️ بدون :has(). روی سافاری قدیمی‌تر آن قاعده کنار می‌رفت
+          /* ⚠️ بدون :has()، روی سافاری قدیمی‌تر آن قاعده کنار می‌رفت
              ولی قاعده‌ی برچسب کوتاه می‌ماند و *هر دو* دیده می‌شدند:
-             «پاکت بیلیاردپاکت». حالا کلاس روی خود عنصر است. */
+             «پاکت بیلیاردپاکت»، حالا کلاس روی خود عنصر است. */
           .rk-sports .rk-lbl-full.has-short { display: none; }
           .rk-sports .rk-lbl-short { display: inline; }
         }
 
         /* ردیف‌های جدول — به سبک جدول فدراسیون جهانی:
            مربع رنگی رتبه چسبیده به لبه‌ی راست + پخ برش‌خورده در گوشه‌ی پایین-چپ */
-        /* content-visibility: دسته‌یکِ آقایان ۴۵۱ ردیف است؛ ردیفِ بیرون از دید
-           با فیلتر و انیمیشنش روی موبایلِ ضعیف رندر نمی‌شود */
+        /* content-visibility: دسته‌یک آقایان ۴۵۱ ردیف است؛ ردیف بیرون از دید
+           با فیلتر و انیمیشنش روی موبایل ضعیف رندر نمی‌شود */
         .rk-rowwrap { animation: rkFadeUp .5s ease both;
           content-visibility: auto; contain-intrinsic-size: auto 74px;
           filter: drop-shadow(0 1px 2px rgba(28,27,23,0.05));
           transition: transform .28s cubic-bezier(.22,1,.36,1), filter .28s; }
         .rk-rowwrap:hover { transform: translateY(-3px); filter: drop-shadow(0 12px 20px rgba(28,27,23,0.13)); }
-        /* ردیفِ آمده از جست‌وجو — حلقه‌ی داخلی (بیرونی را content-visibility می‌بُرد) */
+        /* ردیف آمده از جست‌وجو — حلقه‌ی داخلی (بیرونی را content-visibility می‌برد) */
         @keyframes rkHit { from, 60% { box-shadow: inset 0 0 0 2px ${GOLD}; background-color: rgba(199,166,106,0.18); } }
         .rk-hit .rk-row { animation: rkHit 3.4s ease both; }
         @media (prefers-reduced-motion: reduce) { .rk-hit .rk-row { animation-duration: 0s; box-shadow: inset 0 0 0 2px ${GOLD}; } }
@@ -313,14 +328,14 @@ export function RankingClient({ initial }: { initial?: { board: RankingsStructur
         /* بلوک نام عرض ثابت دارد تا ستون شهرها در همه‌ی ردیف‌ها دقیقا هم‌راستا بماند */
         /* ── ترتیب و اولویت جمع‌شدن، یک‌جا برای همه‌ی عرض‌ها ──
            پیش‌تر این قواعد در دو مدیاکوئری ≤۶۴۰ و ≥۹۰۰ تکرار شده
-           بودند و بازه‌ی ۶۴۰ تا ۹۰۰ چیدمان قدیمی را نگه می‌داشت.
+           بودند و بازه‌ی ۶۴۰ تا ۹۰۰ چیدمان قدیمی را نگه می‌داشت
 
            ⚠️ order روی همه‌ی فرزندها لازم است: پیش‌فرض ۰ یعنی هر
-           چیزی که ترتیب نگرفته، *جلوتر* از همه می‌افتد. یک بار امتیاز
-           بی‌ترتیب ماند و در دسکتاپ پیش از نام رندر شد.
+           چیزی که ترتیب نگرفته، *جلوتر* از همه می‌افتد، یک بار امتیاز
+           بی‌ترتیب ماند و در دسکتاپ پیش از نام رندر شد
 
            نام با ضریب ۹۹۹ اول جمع می‌شود (تا کف ۷۲ و بعد سه‌نقطه)،
-           شهر فقط در تنگنای واقعی. هیچ‌کدام flex-shrink صفر نیستند
+           شهر فقط در تنگنای واقعی، هیچ‌کدام flex-shrink صفر نیستند
            وگرنه ردیف زیر overflow:hidden بریده می‌شود. */
         .rk-row .chip { order: 0 }
         .rk-row .rk-portrait { order: 0 }
@@ -344,11 +359,11 @@ export function RankingClient({ initial }: { initial?: { board: RankingsStructur
         .rk-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
         @media (max-width: 900px) { .rk-grid { grid-template-columns: minmax(0, 1fr); } }
 
-        /* ── ستون‌های مرحله (دسکتاپ) — به خواستِ مالک، آبانِ ۱۴۰۵ ──
-           همان جدولِ فدراسیون: پنج مرحله + جمع، پس یک بازیکن در هر سطر.
-           زیرِ ۱۰۲۴ جا نیست؛ ردیف همان ردیفِ موبایل می‌ماند (فقط جمع).
+        /* ── ستون‌های مرحله (دسکتاپ) — به خواست مالک، آبان ۱۴۰۵ ──
+           همان جدول فدراسیون: پنج مرحله + جمع، پس یک بازیکن در هر سطر
+           زیر ۱۰۲۴ جا نیست؛ ردیف همان ردیف موبایل می‌ماند (فقط جمع)
            عرض‌ها ثابت‌اند تا سرستون و ۳۲ ردیف روی هم بیفتند. ⚠️ فاصله‌ی
-           inline-endِ سرستون (چپ) = padding-left ۱۸ + margin-left ۴ِ تبِ امتیاز + حاشیه‌ی ۱ِ کارت. */
+           inline-end سرستون (چپ) = padding-left ۱۸ + margin-left ۴ تب امتیاز + حاشیه‌ی ۱ کارت. */
         .rk-stgs, .rk-head { display: none; }
         @media (min-width: 1024px) {
           .rk-grid.has-stages { grid-template-columns: minmax(0, 1fr); }
@@ -358,8 +373,8 @@ export function RankingClient({ initial }: { initial?: { board: RankingsStructur
             font-variant-numeric: tabular-nums; }
           .rk-stg.is-zero { color: rgba(28,27,23,0.32); font-weight: 600; }
           .rk-grid.has-stages .rk-pts { min-width: 88px; text-align: center; }
-          /* نام و فامیل در یک خط، وسط‌چین، هم‌قلم (خواستِ مالک) — جا هست.
-             شهر و چیپِ صعود/نزول عرضِ ثابت دارند تا شهرها دقیقاً زیرِ هم
+          /* نام و فامیل در یک خط، وسط‌چین، هم‌قلم (خواست مالک) — جا هست
+             شهر و چیپ صعود/نزول عرض ثابت دارند تا شهرها دقیقا زیر هم
              بیفتند؛ پیش‌تر جای شهر به پهنای نام و چیپ بستگی داشت. */
           .rk-grid.has-stages .rk-name { flex: 1 1 auto; min-width: 0; display: flex; justify-content: center;
             align-items: baseline; gap: 6px; white-space: nowrap; overflow: hidden; }
@@ -368,8 +383,8 @@ export function RankingClient({ initial }: { initial?: { board: RankingsStructur
           .rk-grid.has-stages .rk-spacer { display: none; }
           .rk-grid.has-stages .rk-city { flex: 0 0 84px; width: 84px; margin-inline-end: 0; text-align: center; }
           .rk-grid.has-stages .rk-trend { width: 56px; justify-content: center; }
-          /* سرستون: نوارِ تیره‌ی هم‌خانواده‌ی سربرگ، نه سه خطِ متنِ رها روی زمینه
-             (خواستِ مالک). حاشیه‌ی ۱ + padding ۲۲ = همان ۱ + ۱۸ + ۴ِ ردیف. */
+          /* سرستون: نوار تیره‌ی هم‌خانواده‌ی سربرگ، نه سه خط متن رها روی زمینه
+             (خواست مالک)، حاشیه‌ی ۱ + padding ۲۲ = همان ۱ + ۱۸ + ۴ ردیف. */
           .rk-head { display: flex; align-items: stretch; gap: 14px; margin-bottom: 12px; min-height: 68px;
             padding-inline-end: 22px; position: relative; overflow: hidden;
             background: linear-gradient(180deg, #1C1A16, #0D0C0A); border: 1px solid #0D0C0A; border-radius: 16px;
@@ -378,7 +393,7 @@ export function RankingClient({ initial }: { initial?: { board: RankingsStructur
             background: radial-gradient(60% 140% at 88% 0%, rgba(199,166,106,0.16), transparent 60%); }
           .rk-head > * { position: relative; }
           /* عرض‌ها = ردیف: چیپ ۴۲، عکس ۴۶، نام flex، شهر ۸۴، صعود ۵۶ — «رتبه»،
-             «بازیکن» و «شهر» دقیقاً بالای ستونِ خودشان (خواستِ مالک؛ خطِ طلایی حذف شد) */
+             «بازیکن» و «شهر» دقیقا بالای ستون خودشان (خواست مالک؛ خط طلایی حذف شد) */
           .rk-head-rank, .rk-head-lbl, .rk-head-city { display: flex; align-items: center; justify-content: center;
             font-size: 12px; font-weight: 800; color: rgba(255,255,255,0.74); }
           .rk-head-rank { width: 42px; flex-shrink: 0; }
@@ -387,12 +402,13 @@ export function RankingClient({ initial }: { initial?: { board: RankingsStructur
           .rk-head-portrait { width: 46px; }
           .rk-head-city { width: 84px; flex-shrink: 0; }
           .rk-head-trend { width: 56px; }
+          ${TRENDS_ENABLED ? '' : '.rk-head-trend { display: none; }'}
           .rk-stg-h { flex-direction: column; gap: 2px; text-align: center; line-height: 1.35;
             border-inline-start: 1px solid rgba(255,255,255,0.09); }
           .rk-stg-t { font-size: 12px; font-weight: 800; color: #fff; }
           .rk-stg-c { font-size: 11px; font-weight: 700; color: ${GOLD}; white-space: nowrap; }
           .rk-stg-d { font-size: 11px; font-weight: 500; color: rgba(255,255,255,0.52); }
-          /* هم‌شکلِ تبِ امتیازِ ردیف‌ها، روی تیره */
+          /* هم‌شکل تب امتیاز ردیف‌ها، روی تیره */
           .rk-head-total { width: 88px; flex-shrink: 0; align-self: center; display: flex; align-items: center; justify-content: center;
             min-height: 40px; border-radius: 10px; font-size: 12px; font-weight: 900; color: #E8CE96;
             background: rgba(199,166,106,0.16); border: 1px solid rgba(199,166,106,0.42); }
@@ -409,13 +425,13 @@ export function RankingClient({ initial }: { initial?: { board: RankingsStructur
           .rk-row .chip { width: 32px; font-size: 13px; }
 
           /* فقط اندازه — ترتیب در قاعده‌ی پایه است */
-          /* شهرها زیرِ هم (خواستِ مالک): جای شهر به پهنای چیپِ صعود بستگی
-             داشت — حالا هر دو عرضِ ثابت (سنجیده: پهن‌ترین شهر ۳۲ تا ۳۶،
-             چیپِ فشرده ۴۰ — هیچ‌کدام بریده نمی‌شوند) */
+          /* شهرها زیر هم (خواست مالک): جای شهر به پهنای چیپ صعود بستگی
+             داشت — حالا هر دو عرض ثابت (سنجیده: پهن‌ترین شهر ۳۲ تا ۳۶،
+             چیپ فشرده ۴۰ — هیچ‌کدام بریده نمی‌شوند) */
           .rk-row .rk-trend { flex: 0 0 40px; width: 40px; justify-content: center; }
           .rk-row .rk-trend > span { font-size: 10.5px !important; padding: 2px 6px !important; gap: 2px !important; }
           .rk-city { flex: 0 0 36px; width: 36px; margin-inline-end: 4px; font-size: 10.5px; text-align: center; }
-          /* جبرانِ دو خانه‌ی ثابت: بدونِ این، چهار نام در ۳۷۵ با «…» بریده می‌شد
+          /* جبران دو خانه‌ی ثابت: بدون این، چهار نام در ۳۷۵ با «…» بریده می‌شد
              (پیش‌تر یکی) — فاصله‌ی ردیف ۶ (بالا) و عکس ۴۰ پیکسل */
           .rk-row .rk-portrait > span { width: 40px !important; height: 40px !important; }
           .rk-row .rk-ln { font-size: 14.5px !important; }
@@ -431,7 +447,7 @@ export function RankingClient({ initial }: { initial?: { board: RankingsStructur
 
       <Suspense fallback={null}><DeepLink onLink={onLink} /></Suspense>
       {/* ═══ هدر رسمی ═══ */}
-      <header className="rk-hero rk-wrap">
+      <header className="rk-hero"><div className="rk-wrap">
         {/* متنِ «رنکینگ بیلیارد — بهترین بازیکنان، در یک نگاه» داخلِ تصویر است. next/image نه: صفحه کلاینتی است و اندازه‌ها از
             پیش ساخته شده‌اند (public/images/ranking/header-*).
             alt خالی: همان معنا را h1ِ پایین می‌گوید؛ دوباره‌خوانی نه.
@@ -442,7 +458,7 @@ export function RankingClient({ initial }: { initial?: { board: RankingsStructur
           srcSet="/images/ranking/header-768.webp 768w, /images/ranking/header-1280.webp 1280w, /images/ranking/header-2048.webp 2048w"
           sizes="(max-width: 1080px) 100vw, 1024px" width={2048} height={768} fetchPriority="high" decoding="async" />
         <h1 className="sr-only">رنکینگ بازیکنان بیلیارد — جدول امتیازات رسمی فدراسیون بولینگ و بیلیارد</h1>
-      </header>
+      </div></header>
 
       {/* ═══ کنترل‌ها (همان منطق قبلی، پوسته‌ی جدید) ═══ */}
       <div style={{ position: 'sticky', top: 'var(--nav-offset)', zIndex: 40, background: 'rgba(247,247,245,0.92)', backdropFilter: 'blur(18px) saturate(1.6)', WebkitBackdropFilter: 'blur(18px) saturate(1.6)', borderBottom: `1px solid ${LINE}` }}>
@@ -510,24 +526,24 @@ export function RankingClient({ initial }: { initial?: { board: RankingsStructur
             <>
               {/* سربرگ لیست + راهنما */}
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 18, flexWrap: 'wrap' }}>
-                <span style={{ width: 3, height: 18, borderRadius: 2, background: `linear-gradient(180deg,${GOLD},#8A6020)` }} />
                 <h2 style={{ fontSize: 16.5, fontWeight: 900, margin: 0 }}>{gender} — {category}</h2>
                 <span style={{ fontSize: 12, color: MUT }}>{/* بدونِ «از N»: ظرفیت (۵۱۲ / ۶۴) جای خالیِ ذخیره است، نه اندازه‌ی جدول */}
                   {faDigits(players.length)} بازیکن</span>
-                <span style={{ flex: 1, height: 1, background: LINE }} />
-                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 12, fontSize: 11, color: MUT }}>
+                {TRENDS_ENABLED && (
+                <span style={{ marginInlineStart: 'auto', display: 'inline-flex', alignItems: 'center', gap: 12, fontSize: 11, color: MUT }}>
                   <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><TrendingUp size={11} style={{ color: '#22B45A' }} /> صعود</span>
                   <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><TrendingDown size={11} style={{ color: '#E05252' }} /> نزول</span>
                   {/* مبنای علامت، وقتی از جدولِ رسمیِ قبلی نیامده — بی‌ادعای «رسمی» */}
                   {trendNote && <span style={{ fontSize: 10.5 }}>({trendNote})</span>}
                 </span>
+                )}
               </div>
 
               {/* ═══ جدول کامل — مربع رنگی رتبه با عدد سفید ═══ */}
               {withStages && <StageHead stages={stages} />}
               <section className={`rk-grid${withStages ? ' has-stages' : ''}`}>
                 {players.map((p, i) => {
-                  const diff = p.previousRank ? p.previousRank - p.rank : 0
+                  const diff = TRENDS_ENABLED && p.previousRank ? p.previousRank - p.rank : 0
                   /* فیلدهای صریح ادمین مقدم‌اند؛ نبودشان یعنی قاعده‌ی
                      `lib/fa-name` (پیشوند احترام + پسوند بسته). */
                   const guess = splitFaName(p.name)
@@ -550,7 +566,7 @@ export function RankingClient({ initial }: { initial?: { board: RankingsStructur
                         </div>
                         <span className="rk-city">{p.city || '—'}</span>
                         <span className="rk-spacer" style={{ flex: 1 }} aria-hidden />
-                        <span className="rk-trend" style={{ display: 'inline-flex', flexShrink: 0 }}><TrendChip diff={diff} /></span>
+                        {TRENDS_ENABLED && <span className="rk-trend" style={{ display: 'inline-flex', flexShrink: 0 }}><TrendChip diff={diff} /></span>}
                         {withStages && <StageCells stages={stages} values={p.stages} />}
                         <span className="rk-pts" style={{ fontSize: 14, fontWeight: 900, color: GOLD_D, fontVariantNumeric: 'tabular-nums', background: 'rgba(199,166,106,0.09)', border: '1px solid rgba(199,166,106,0.24)', borderRadius: 10, padding: '5px 13px', whiteSpace: 'nowrap', marginLeft: 4, flexShrink: 0 }}>
                           {withStages && <span className="sr-only">جمع امتیازات: </span>}

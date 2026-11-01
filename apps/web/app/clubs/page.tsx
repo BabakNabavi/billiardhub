@@ -10,7 +10,7 @@ import FavoriteButton from '../../components/FavoriteButton';
 import ClubLogo from '../../components/club/ClubLogo';
 import VerifiedBadge from '../../components/VerifiedBadge';
 import {
-  Search, MapPin, Star, Wifi, Car, Coffee, Trophy,
+  MapPin, Star, Wifi, Car, Coffee, Trophy,
   X, SlidersHorizontal, Users, Navigation,
   ChevronDown, Grid3X3, AlignJustify, Gamepad2,
 } from 'lucide-react';
@@ -20,7 +20,6 @@ import type { Tournament } from '../../lib/mock-tournaments';
 import { tableSummary, TABLE_KINDS } from '../../lib/clubs/tables';
 import { faDistance } from '../../lib/clubs/distance';
 import { makeMatcher } from '@/lib/search/filter'
-import { SearchSuggest } from '@/components/search/SearchSuggest'
 
 const TABLE_TYPES = [
   { key:'snookerTables',    label:'اسنوکر',     color:'#30C55A' },
@@ -345,7 +344,6 @@ export default function ClubsPage() {
   const [reloadKey, setReloadKey]   = useState(0);
   const [view, setView]             = useState<'grid' | 'list'>('grid');
   const [search, setSearch]         = useState('');
-  const [searchFocus, setSearchFocus] = useState(false);
   const [city, setCity]             = useState('همه شهرها');
   const [sortBy, setSortBy]         = useState('rating');
   const [sortOpen, setSortOpen]     = useState(false);
@@ -510,14 +508,6 @@ export default function ClubsPage() {
           <div style={{ maxWidth: 1280, margin: '0 auto' }}>
             <div className="toolbar-row" style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
 
-              {/* Search */}
-              <div className="toolbar-search" data-suggest-box style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: 8, background: 'rgba(255,255,255,0.72)', border: `1px solid ${searchFocus ? 'rgba(199,166,106,0.45)' : 'rgba(28,28,26,0.10)'}`, borderRadius: 12, padding: '0 14px', height: 44, flex: 1, minWidth: 160, maxWidth: 300, transition: 'all 0.3s', boxShadow: searchFocus ? '0 0 0 3px rgba(199,166,106,0.10)' : 'none' }}>
-                <Search size={14} color="rgba(0,0,0,0.30)" />
-                <input className="srch-inp" type="text" aria-label="جست‌وجوی باشگاه" aria-controls="sx-cl" aria-autocomplete="list" value={search} onChange={e => setSearch(e.target.value)} onFocus={() => setSearchFocus(true)} onBlur={() => setSearchFocus(false)} placeholder="جستجو..." />
-                {search && <button aria-label="پاک‌کردن جست‌وجو" onClick={() => setSearch('')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(0,0,0,0.35)', padding: 0, display: 'flex', flexShrink: 0 }}><X size={13} /></button>}
-                {/* پیشنهادِ زنده‌ی سراسری — همان «سوپر سرچ»ِ نوارِ بالا */}
-                <SearchSuggest hideEmpty q={search} onPick={() => setSearch('')} id="sx-cl" className="start-0 w-72 sm:w-96" />
-              </div>
 
               {/* Near me — order 3, no arrow icon */}
               <button className="tb-ctl" onClick={getLocation} title="نزدیک‌ترین باشگاه‌ها" style={{ order: 3, height: 44, borderRadius: 12, padding: '0 16px', border: `1px solid ${sortBy === 'distance' ? 'rgba(199,166,106,0.40)' : 'rgba(0,0,0,0.09)'}`, background: sortBy === 'distance' ? 'rgba(199,166,106,0.10)' : '#FFFFFF', color: sortBy === 'distance' ? '#A07840' : 'rgba(0,0,0,0.55)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 7, justifyContent: 'center', flexShrink: 0, transition: 'all 0.2s', fontFamily: 'inherit', fontSize: 14, fontWeight: 700, whiteSpace: 'nowrap' }}>
@@ -609,7 +599,7 @@ export default function ClubsPage() {
               {/* View toggle — order 4, beside نزدیک من */}
               <div style={{ display: 'flex', gap: 4, order: 4, flexShrink: 0 }}>
                 {([['grid', <Grid3X3 size={14} />], ['list', <AlignJustify size={14} />]] as const).map(([v, icon]) => (
-                  <button key={v} type="button" aria-label={v === 'grid' ? 'نمایشِ شبکه‌ای' : 'نمایشِ فهرستی'} aria-pressed={view === v} onClick={() => setView(v)} style={{ width: 36, height: 36, borderRadius: 9, border: `1px solid ${view === v ? 'rgba(199,166,106,0.35)' : 'rgba(0,0,0,0.09)'}`, background: view === v ? 'rgba(199,166,106,0.10)' : '#FFFFFF', color: view === v ? '#A07840' : 'rgba(0,0,0,0.40)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s' }}>
+                  <button key={v} type="button" aria-label={v === 'grid' ? 'نمایش شبکه‌ای' : 'نمایش فهرستی'} aria-pressed={view === v} onClick={() => setView(v)} style={{ width: 36, height: 36, borderRadius: 9, border: `1px solid ${view === v ? 'rgba(199,166,106,0.35)' : 'rgba(0,0,0,0.09)'}`, background: view === v ? 'rgba(199,166,106,0.10)' : '#FFFFFF', color: view === v ? '#A07840' : 'rgba(0,0,0,0.40)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s' }}>
                     {icon}
                   </button>
                 ))}
@@ -645,9 +635,9 @@ export default function ClubsPage() {
             </div>
           ) : loadError ? (
             <div style={{ textAlign: 'center', padding: '80px 24px' }}>
-              <h3 style={{ fontSize: 19, fontWeight: 800, color: '#111111', margin: '0 0 8px' }}>فهرستِ باشگاه‌ها بارگذاری نشد</h3>
-              <div style={{ fontSize: 15, color: 'rgba(0,0,0,0.55)', margin: '0 0 20px' }}>اتصالِ اینترنت را بررسی کنید و دوباره امتحان کنید.</div>
-              <button type="button" onClick={() => { setLoading(true); setReloadKey(n => n + 1); }} style={{ padding: '10px 24px', background: 'linear-gradient(135deg,#C7A66A,#A07840)', borderRadius: 12, color: '#fff', fontSize: 15, fontWeight: 700, border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}>تلاشِ دوباره</button>
+              <h3 style={{ fontSize: 19, fontWeight: 800, color: '#111111', margin: '0 0 8px' }}>فهرست باشگاه‌ها بارگذاری نشد</h3>
+              <div style={{ fontSize: 15, color: 'rgba(0,0,0,0.55)', margin: '0 0 20px' }}>اتصال اینترنت را بررسی کنید و دوباره امتحان کنید</div>
+              <button type="button" onClick={() => { setLoading(true); setReloadKey(n => n + 1); }} style={{ padding: '10px 24px', background: 'linear-gradient(135deg,#C7A66A,#A07840)', borderRadius: 12, color: '#fff', fontSize: 15, fontWeight: 700, border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}>تلاش دوباره</button>
             </div>
           ) : filtered.length === 0 ? (
             /* «هیچ باشگاهی ثبت نشده» با «فیلتر چیزی پیدا نکرد» فرق دارد؛
@@ -658,7 +648,7 @@ export default function ClubsPage() {
                 <>
                   <h3 style={{ fontSize: 19, fontWeight: 800, color: '#111111', margin: '0 0 8px' }}>هنوز باشگاهی ثبت نشده</h3>
                   <div style={{ fontSize: 15, color: 'rgba(0,0,0,0.40)', margin: '0 0 20px', lineHeight: 2 }}>
-                    اگر باشگاه دارید، می‌توانید همین حالا ثبتش کنید.
+                    اگر باشگاه دارید، می‌توانید همین حالا ثبتش کنید
                   </div>
                   <Link href="/dashboard/club" style={{ display: 'inline-block', padding: '10px 24px', background: 'linear-gradient(135deg,#C7A66A,#A07840)', borderRadius: 12, color: '#fff', fontSize: 15, fontWeight: 700, textDecoration: 'none' }}>
                     ثبت باشگاه
@@ -690,18 +680,7 @@ export default function ClubsPage() {
             </div>
           )}
 
-          {!loading && (
-            <div style={{ marginTop: 40, padding: '28px 24px', background: '#111111', border: 'none', borderRadius: 20, textAlign: 'center' }}>
-              {/* تیتر عمداً ثابت است — پالسِ بی‌پایان روی متن خواندن را سخت می‌کرد.
-                  زیرتیتر هم ادعای عددی نمی‌کند («هزاران بازیکن» واقعی نبود)؛ فقط
-                  چیزی را می‌گوید که پنلِ باشگاه واقعاً دارد. */}
-              <h3 style={{ fontSize: 19, fontWeight: 900, color: '#FFFFFF', margin: '0 0 6px' }}>باشگاه خود را ثبت کنید</h3>
-              <div style={{ fontSize: 15, color: 'rgba(255,255,255,0.50)', margin: '0 0 16px' }}>رزرو آنلاین میز و مدیریت سانس‌ها در یک پنل</div>
-              <Link href="/clubs/new" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '10px 24px', background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.28)', borderRadius: 20, color: '#C7A66A', fontSize: 15, fontWeight: 700, textDecoration: 'none' }}>
-                ثبت باشگاه ←
-              </Link>
-            </div>
-          )}
+          {/* کارتِ تبلیغیِ «باشگاه خود را ثبت کنید» برداشته شد (خواستِ مالک، ۱۰ آبانِ ۱۴۰۵) */}
         </div>
       </div>
     </>

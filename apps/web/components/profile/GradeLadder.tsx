@@ -80,7 +80,7 @@ export default function GradeLadder({ grades, earned, verified, emptyText }: Gra
                 </span>
                 {has
                   ? <span className="rf-step-year">{year ? toFaDigits(year) : 'ثبت‌شده'}</span>
-                  : <span className="rf-step-next">پیشِ رو</span>}
+                  : <span className="rf-step-next">پیش رو</span>}
                 {isTop && verified && (
                   <span className="rf-step-badge">
                     <ShieldCheck size={13} aria-hidden />

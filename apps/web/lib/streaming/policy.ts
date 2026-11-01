@@ -31,7 +31,7 @@ export const MAX_CHANNEL_LIMIT = 16
 export const MAX_BROADCAST_MS = 12 * 60 * 60 * 1000
 
 export const KIND_LABEL: Record<ChannelKind, string> = {
-  club: 'کانالِ باشگاه', table: 'کانالِ میز', tournament: 'کانالِ مسابقه',
+  club: 'کانال باشگاه', table: 'کانال میز', tournament: 'کانال مسابقه',
 }
 
 /** سقفِ مؤثرِ کانال‌های غیرِ مسابقه */
@@ -52,14 +52,14 @@ export function canCreateChannel(
 ): Verdict {
   if (s.blocked) return no('پخش زنده‌ی این باشگاه توسط مدیریت بیلیارد هاب مسدود شده است')
   if (kind === 'tournament') {
-    return opts.tournamentHasChannel ? no('این مسابقه از قبل کانالِ پخش دارد') : { ok: true }
+    return opts.tournamentHasChannel ? no('این مسابقه از قبل کانال پخش دارد') : { ok: true }
   }
   if (kind === 'table' && s.tier !== 'pro') {
-    return no('کانالِ جداگانه برای هر میز مخصوصِ باشگاه‌های حرفه‌ای است')
+    return no('کانال جداگانه برای هر میز مخصوص باشگاه‌های حرفه‌ای است')
   }
   const used = existing.filter(c => c.kind !== 'tournament').length
   const limit = channelLimitOf(s)
-  if (used >= limit) return no(`سقفِ کانال‌های این باشگاه (${limit}) پر است`)
+  if (used >= limit) return no(`سقف کانال‌های این باشگاه (${limit}) پر است`)
   return { ok: true }
 }
 
@@ -75,11 +75,11 @@ export function canGoLive(
   if (ch.archived) return no('این کانال حذف شده است')
   if (s.blocked) return no('پخش زنده‌ی این باشگاه توسط مدیریت بیلیارد هاب مسدود شده است')
   if (ch.adminBlocked) return no('این کانال توسط مدیریت بیلیارد هاب مسدود شده است')
-  if (ch.isLive) return no('این کانال هم‌اکنون در حالِ پخش است')
+  if (ch.isLive) return no('این کانال هم‌اکنون در حال پخش است')
   if (ch.adminAttached) return { ok: true }
-  if (ch.kind === 'table' && s.tier !== 'pro') return no('کانالِ میز مخصوصِ باشگاه‌های حرفه‌ای است')
+  if (ch.kind === 'table' && s.tier !== 'pro') return no('کانال میز مخصوص باشگاه‌های حرفه‌ای است')
   if (ch.kind !== 'tournament' && ch.rank >= channelLimitOf(s)) {
-    return no(`این کانال بیرون از سقفِ فعلیِ باشگاه (${channelLimitOf(s)}) است`)
+    return no(`این کانال بیرون از سقف فعلی باشگاه (${channelLimitOf(s)}) است`)
   }
   return { ok: true }
 }

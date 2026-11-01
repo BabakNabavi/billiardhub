@@ -22,7 +22,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
-import { SlidersHorizontal, X, UserPlus } from 'lucide-react'
+import { SlidersHorizontal, X } from 'lucide-react'
 import { TECH_CATEGORIES, titlesOfCategory } from '@/lib/tech-categories'
 import { TECHNICIANS, faDigits, type Technician } from '@/lib/technicians-data'
 import {
@@ -30,7 +30,6 @@ import {
 } from '@/lib/technician-store'
 import { fetchProfilesResult } from '@/lib/profiles/client'
 import { TechnicianCard, TechnicianCardSkeleton } from '@/components/tech/market/TechnicianCard'
-import { ServiceSearch } from '@/components/tech/market/ServiceSearch'
 import { ServiceCategoryList } from '@/components/tech/market/ServiceCategoryList'
 import {
   ServiceFilters, EMPTY_FILTERS, countActive, type FilterState,
@@ -206,11 +205,7 @@ export default function TechnicalServicesPage() {
             <p className="tm-hero-sub">
               تعمیر، رگلاژ، تعویض و نصب قطعات را از متخصصان ثبت‌شده بخواهید
             </p>
-            <ServiceSearch
-              query={query} onQuery={setQuery}
-              city={filters.city} onCity={c => setFilters(f => ({ ...f, city: c }))}
-              cities={cities} onSubmit={scrollToResults}
-            />
+            {/* جعبه‌ی جست‌وجوی صفحه برداشته شد (خواستِ مالک، ۱۰ آبانِ ۱۴۰۵) — جست‌وجو از نوارِ بالاست؛ شهر در پنلِ فیلترها هست */}
           </div>
 
         </div>
@@ -234,7 +229,7 @@ export default function TechnicalServicesPage() {
               • دکمه هم‌ردیفِ عنوان، نه زیرِ بلوک: روی موبایل هم
                 روبه‌روی «خدمات فنی» می‌ماند */}
           <div className="tm-sec-head tm-sec-head--lead">
-            <span className="tm-eyebrow">خدماتِ تخصصیِ بیلیارد</span>
+            <span className="tm-eyebrow">خدمات تخصصی بیلیارد</span>
             <div className="tm-sec-row">
               <h2 className="tm-h2 tm-h2--xl" id="tm-cats-h">خدمات فنی</h2>
               <Link className="tm-pill" href="#tm-people">
@@ -297,7 +292,7 @@ export default function TechnicalServicesPage() {
             ) : failed && ALL.length === 0 ? (
               <div className="tm-empty" role="alert">
                 <h3>فهرست متخصصان بارگذاری نشد</h3>
-                <p>ارتباط با سرور برقرار نشد. اتصال اینترنت را بررسی کن و دوباره تلاش کن</p>
+                <p>ارتباط با سرور برقرار نشد، اتصال اینترنت را بررسی کن و دوباره تلاش کن</p>
                 <button className="tm-btn tm-btn--outline" type="button"
                   onClick={() => window.location.reload()}>تلاش دوباره</button>
               </div>
@@ -333,19 +328,7 @@ export default function TechnicalServicesPage() {
         </div>
       </section>
 
-      {/* ═══════ ۵ — ثبت‌نام متخصص ═══════ */}
-      <section className="tm-sec tm-wrap">
-        <div className="tm-cta tm-cta--dark">
-          <div>
-            <h2>خدمات فنی ارائه می‌دهی؟</h2>
-            <p>پروفایل حرفه‌ای خودت را در بیلیارد هاب بساز و خدماتت را به مشتریان جدید معرفی کن</p>
-          </div>
-          <Link className="tm-btn tm-btn--gold" href="/dashboard/technician">
-            <UserPlus size={16} aria-hidden />
-            ثبت‌نام به عنوان متخصص
-          </Link>
-        </div>
-      </section>
+      {/* کارتِ «خدمات فنی ارائه می‌دهی؟» برداشته شد (خواستِ مالک، ۱۰ آبانِ ۱۴۰۵) */}
 
       {/* ═══════ شیت فیلتر موبایل ═══════ */}
       {sheet && (

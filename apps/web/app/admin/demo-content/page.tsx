@@ -236,9 +236,9 @@ export default function DemoContentPage() {
         <h1 style={{ fontSize: 19, fontWeight: 900, color: INK, margin: 0 }}>محتوای نمایشی</h1>
       </div>
       <p style={{ fontSize: 12.5, color: SEC, lineHeight: 2, margin: '0 0 18px' }}>
-        این‌ها فهرست‌های عمومی را پر می‌کنند تا سایت خالی دیده نشود. همه با نشان «نمایشی» ذخیره
-        می‌شوند و از داده‌ی واقعی جدا می‌مانند — هر وقت کسب‌وکار واقعی جایش را گرفت، یکی را حذف کن.
-        تیک «تأییدشده» روی این‌ها نمی‌آید.
+        این‌ها فهرست‌های عمومی را پر می‌کنند تا سایت خالی دیده نشود، همه با نشان «نمایشی» ذخیره
+        می‌شوند و از داده‌ی واقعی جدا می‌مانند — هر وقت کسب‌وکار واقعی جایش را گرفت، یکی را حذف کن
+        تیک «تأییدشده» روی این‌ها نمی‌آید
       </p>
 
       {/* انتخاب نوع */}
@@ -366,7 +366,7 @@ export default function DemoContentPage() {
             style={{ fontSize: 12, color: SEC, fontFamily: 'inherit' }} />
           {photo && <img src={photo} alt="" loading="lazy" decoding="async" style={{ marginTop: 8, width: 74, height: 74, objectFit: 'cover', borderRadius: 10, border: `1px solid ${LINE}` }} />}
           <div style={{ fontSize: 10.5, color: MUT, marginTop: 5 }}>
-            از عکس چهره‌ی اشخاص واقعی استفاده نکن — عکس میز، باشگاه یا تصویر بدون چهره امن است.
+            از عکس چهره‌ی اشخاص واقعی استفاده نکن — عکس میز، باشگاه یا تصویر بدون چهره امن است
           </div>
         </div>
 
@@ -399,7 +399,7 @@ export default function DemoContentPage() {
         </div>
       ) : rows.length === 0 ? (
         <div style={{ fontSize: 12.5, color: MUT, padding: '16px 0', lineHeight: 2 }}>
-          هنوز {cur.fa} نمایشی‌ای ساخته نشده.
+          هنوز {cur.fa} نمایشی‌ای ساخته نشده
         </div>
       ) : (
         <ScrollList count={rows.length} min={8} gap={0} style={{ border: `1px solid ${LINE}`, borderRadius: 12, overflow: rows.length > 8 ? undefined : "hidden" }}>

@@ -43,7 +43,7 @@ export async function POST(req: NextRequest) {
   if (b?.purpose === 'register' && /^09\d{9}$/.test(mobile) && await phoneTaken(mobile)) {
     return NextResponse.json({
       ok: false, exists: true,
-      message: 'این شماره قبلا در بیلیارد هاب ثبت‌نام کرده است. وارد شوید یا رمز عبورتان را بازیابی کنید.',
+      message: 'این شماره قبلا در بیلیارد هاب ثبت‌نام کرده است، وارد شوید یا رمز عبورتان را بازیابی کنید',
     }, { status: 409, headers: CORS })
   }
 

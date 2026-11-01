@@ -35,7 +35,7 @@ export const AD_FORM_CSS = `
   /* ── حلقه‌ی focus روی دکمه‌های شبیه فیلد ──
      چیپ‌های مقدار، تاگل بله/خیر و چیپ‌های چندانتخابی همه دکمه‌اند
      و مرورگر حلقه‌ی پیش‌فرض را با outline:none  ریست از دست داده
-     بود. بدون این، پیمایش با کیبورد نامرئی است. */
+     بود، بدون این، پیمایش با کیبورد نامرئی است. */
   .fchip:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(199,166,106,0.30); border-color: ${GOLD} !important; }
   .fchip:hover:not(:disabled) { border-color: rgba(199,166,106,0.45); }
   .fchip:disabled { opacity: .5; cursor: not-allowed; }
@@ -52,18 +52,18 @@ export const AD_FORM_CSS = `
   /* استایل اینلاین دو ستون می‌گذارد؛ بدون important بی‌اثر است */
   @media(min-width:1100px) { .span-cols .spec-grid { grid-template-columns: 1fr 1fr 1fr !important; } }
   /* ── مشخصات فنی روی دسکتاپ سه‌ستونه ──
-     این کارت ردیف خودش را دارد و کل عرض را می‌گیرد. با دو ستون،
-     ۳۳ فیلد میز ۱۷ ردیف می‌شد؛ با سه ستون ۱۱ ردیف. زیر ۱۱۰۰
+     این کارت ردیف خودش را دارد و کل عرض را می‌گیرد، با دو ستون،
+     ۳۳ فیلد میز ۱۷ ردیف می‌شد؛ با سه ستون ۱۱ ردیف، زیر ۱۱۰۰
      پیکسل به دو و زیر ۸۲۰ به یک ستون برمی‌گردد. */
   /* ── چیدمان دسکتاپ: دو ستون متعادل ──
-     یک ستون، صفحه را ۴۵۴۰ پیکسل دراز می‌کرد. دو ستون دستی هم
+     یک ستون، صفحه را ۴۵۴۰ پیکسل دراز می‌کرد، دو ستون دستی هم
      جواب نداد: کارت مشخصات با ۳۳ فیلد ۲۶۱۲ پیکسل است و هر تقسیم
      ثابتی یک طرف را تا پایین می‌برد و طرف دیگر را از وسط خالی
-     می‌گذاشت.
+     می‌گذاشت
 
      پس تقسیم به خود مرورگر سپرده شد: «column-count» ارتفاع را
      متعادل می‌کند و «break-inside: avoid» نمی‌گذارد کارتی وسطش
-     بشکند. ساختار DOM دست‌نخورده می‌ماند — همان یک ستون موبایل،
+     بشکند، ساختار DOM دست‌نخورده می‌ماند — همان یک ستون موبایل،
      فقط با یک قاعده‌ی CSS. (تلاش قبلی JSX را جابه‌جا کرد و
      تودرتویی را بی‌صدا شکست؛ نه tsc دید نه تست.)
 
@@ -75,7 +75,7 @@ export const AD_FORM_CSS = `
     .ad-cols > * { break-inside: avoid; margin-bottom: 20px; }
     .ad-cols > .span-all { column-span: all; }
     /* کارت مشخصات کل عرض را می‌گیرد: ۳۳ فیلد در یک ستون ۵۵۰
-       پیکسلی ۲۹۷۸ پیکسل بود و هیچ تعادلی ممکن نمی‌شد. تمام‌عرض،
+       پیکسلی ۲۹۷۸ پیکسل بود و هیچ تعادلی ممکن نمی‌شد، تمام‌عرض،
        شبکه‌ی داخلی‌اش سه‌ستونه می‌شود و به ~۱۱۰۰ می‌رسد. */
     .ad-cols > .span-cols { column-span: all; }
     /* کارت تمام‌عرض نباید تنک شود: چهار فیلدش دو ستون می‌شوند */
@@ -296,7 +296,6 @@ export function ErrMsg({ msg }: { msg?: string }) {
 export function SectionTitle({ children }: { children: React.ReactNode }) {
   return (
     <h2 style={{ fontSize: 15, fontWeight: 800, color: TEXT, margin: '0 0 22px', display: 'flex', alignItems: 'center', gap: 9, position: 'relative', zIndex: 1 }}>
-      <span style={{ width: 3, height: 17, background: `linear-gradient(180deg,${GOLD},#A07840)`, borderRadius: 2, flexShrink: 0, display: 'inline-block' }} />
       {children}
     </h2>
   )

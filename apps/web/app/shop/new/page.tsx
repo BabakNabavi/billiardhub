@@ -440,7 +440,7 @@ export default function NewProductPage() {
        بدون آن، حلقه‌ی سریال‌سازی روی آرایه‌ی خالی می‌چرخد و آگهی
        بدون هیچ مشخصه‌ای ذخیره می‌شود. روی موبایل کند نادر نیست. */
     if (specsLoading) {
-      showAlert('لحظه‌ای صبر کنید', ['فهرست مشخصات فنی هنوز بارگذاری نشده است.'], 'warn')
+      showAlert('لحظه‌ای صبر کنید', ['فهرست مشخصات فنی هنوز بارگذاری نشده است'], 'warn')
       return
     }
     e.preventDefault()
@@ -526,7 +526,7 @@ export default function NewProductPage() {
           /* یک عکس بالا نرفته، آگهی را بی‌صدا بی‌عکس نمی‌کند:
              فروشنده باید بداند و دوباره تلاش کند. */
           if (!url) {
-            showAlert('بارگذاری تصویر انجام نشد', [`تصویر ${i + 1} بالا نرفت؛ دوباره تلاش کنید.`])
+            showAlert('بارگذاری تصویر انجام نشد', [`تصویر ${i + 1} بالا نرفت؛ دوباره تلاش کنید`])
             setSubmitting(false)
             return
           }
@@ -602,7 +602,7 @@ export default function NewProductPage() {
            لحظه دو راه پیش رویش است. */
         setSuccess(true)
       } catch {
-        showAlert('خطا در ارتباط با سرور', ['ارتباط برقرار نشد؛ دوباره تلاش کنید.'])
+        showAlert('خطا در ارتباط با سرور', ['ارتباط برقرار نشد؛ دوباره تلاش کنید'])
         setSubmitting(false)
       }
     })()
@@ -619,7 +619,7 @@ export default function NewProductPage() {
         </div>
         <h2 style={{ fontSize: 24, fontWeight: 900, color: TEXT, marginBottom: 10 }}>آگهی شما ثبت شد!</h2>
         <p style={{ fontSize: 14.5, color: TEXT_SEC, marginBottom: 22, lineHeight: 1.9 }}>
-          ویرایش، حذف و ارتقای آگهی از «آگهی‌های من» انجام می‌شود.
+          ویرایش، حذف و ارتقای آگهی از «آگهی‌های من» انجام می‌شود
         </p>
         <div style={{ display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap' }}>
           <Link href="/dashboard/shop" style={{
@@ -1098,8 +1098,8 @@ export default function NewProductPage() {
                     قابل تغییر است. */}
                 {storeSlug && (
                 <fieldset style={{ background: LQ_BG, backdropFilter: 'blur(40px) saturate(220%)', WebkitBackdropFilter: 'blur(40px) saturate(220%)', border: LQ_BOR, borderRadius: 20, boxShadow: LQ_SHAD, padding: '20px 24px', margin: 0 }}>
-                  <legend style={{ float: 'right', width: '100%', padding: 0, marginBottom: 12, fontSize: 14, fontWeight: 800 }}>این آگهی به نامِ</legend>
-                  <div role="radiogroup" aria-label="ثبتِ آگهی به نامِ" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                  <legend style={{ float: 'right', width: '100%', padding: 0, marginBottom: 12, fontSize: 14, fontWeight: 800 }}>این آگهی به نام</legend>
+                  <div role="radiogroup" aria-label="ثبت آگهی به نام" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
                     {([['store', `فروشگاه${storeTitle ? ` «${storeTitle}»` : ''}`], ['personal', `شخصی${personalName ? ` (${personalName})` : ''}`]] as const).map(([v, label]) => (
                       <button key={v} type="button" role="radio" aria-checked={postAs === v} onClick={() => pickPostAs(v)}
                         style={{ padding: '11px 12px', borderRadius: 12, fontFamily: 'inherit', fontSize: 13, fontWeight: 700, cursor: 'pointer',
@@ -1111,7 +1111,7 @@ export default function NewProductPage() {
                     ))}
                   </div>
                   <p style={{ margin: '10px 0 0', fontSize: 11.5, color: '#6F6A5C', lineHeight: 1.9 }}>
-                    {postAs === 'store' ? 'آگهی در ویترینِ فروشگاه هم دیده می‌شود و «رفتن به صفحه فروشگاه» دارد.' : 'آگهیِ شخصی — به فروشگاه وصل نمی‌شود.'}
+                    {postAs === 'store' ? 'آگهی در ویترین فروشگاه هم دیده می‌شود و «رفتن به صفحه فروشگاه» دارد' : 'آگهی شخصی — به فروشگاه وصل نمی‌شود'}
                   </p>
                 </fieldset>
                 )}
@@ -1207,7 +1207,7 @@ export default function NewProductPage() {
                       <line x1="12" y1="16" x2="12.01" y2="16" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"/>
                     </svg>
                     <p style={{ fontSize: 13, color: TEXT_SEC, lineHeight: 1.75, margin: 0 }}>
-                      اطلاعات تماس شما مستقیما به خریداران نمایش داده می‌شود ، خریدار مستقیم با شما تماس می‌گیرد.
+                      اطلاعات تماس شما مستقیما به خریداران نمایش داده می‌شود ، خریدار مستقیم با شما تماس می‌گیرد
                     </p>
                   </div>
                 </div>
@@ -1264,7 +1264,7 @@ export default function NewProductPage() {
                   <a href="/terms#market" target="_blank" rel="noopener noreferrer" style={{ color: GOLD_D, fontWeight: 800, textDecoration: 'none' }}>
                     قوانین و مقررات بیلیارد بازار
                   </a>
-                  {' '}را مطالعه و می‌پذیرم.
+                  {' '}را مطالعه و می‌پذیرم
                 </span>
               </label>
               {errors.acceptRules && (

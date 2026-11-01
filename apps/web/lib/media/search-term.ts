@@ -31,8 +31,15 @@ export function sanitizeIlike(raw: unknown, max = 60): string {
    نیست («İ» یعنی U+0130 به دو نویسه باز می‌شود). هرجا کوچک‌کردن
    لازم است، `foldCase` پایین را صدا بزن؛ برای الگوی `ilike` اصلا
    لازم نیست چون خودش به بزرگی و کوچکی حساس نیست. */
+/* ⚠️ «آ/أ/إ/ٱ ⟵ ا» و «ة/ۀ ⟵ ه» اضافه شد (۱۰ آبانِ ۱۴۰۵، گزارشِ مالک): جست‌وجوی
+   «ارتا» «آرتا کلاب» را پیدا نمی‌کرد و برعکس. همه یک‌نویسه‌به‌یک‌نویسه‌اند،
+   پس طولِ رشته هنوز ثابت می‌ماند. */
 export const foldFa = (s: string): string =>
-  s.replace(/[يى]/g, 'ی').replace(/ك/g, 'ک')
+  s.replace(/[يى]/g, 'ی').replace(/ك/g, 'ک').replace(/[آأإٱ]/g, 'ا').replace(/[ةۀ]/g, 'ه')
+
+/* اعراب (فتحه تا سکون، الفِ کوتاه) و کشیده — فقط در مقایسه حذف می‌شوند؛ این‌ها طول را
+   عوض می‌کنند، پس در foldFa (که طول‌ثابت است) نیستند */
+const MARKS = /[\u064B-\u0652\u0670\u0640]/g
 
 /**
  * تای فارسی + کوچک‌کردن، برای *مقایسه* (نه برای برش‌زدن).
@@ -40,16 +47,32 @@ export const foldFa = (s: string): string =>
  * ⚠️ اگر جایی می‌خواهی با نتیجه‌ی این تابع روی رشته‌ی اصلی `slice`
  * بزنی، اول طول‌ها را بسنج — همان تله‌ی «İ».
  */
-export const foldCase = (s: string): string => foldFa(s).toLowerCase()
+export const foldCase = (s: string): string => foldFa(s).replace(MARKS, '').toLowerCase()
 
 /** همان تا، در جهتِ عکس — برای ردیف‌هایی که با صفحه‌کلید عربی ذخیره شده‌اند. */
 const toArabic = (s: string): string =>
   s.replace(/[یى]/g, 'ي').replace(/ک/g, 'ك')
 
-/** دو صورتِ متعارفِ یک عبارت: همه‌فارسی و همه‌عربی. */
+/* «ا» در دیتابیس ممکن است «آ» ذخیره شده باشد و برعکس — ilike این دو را یکی نمی‌بیند.
+   پس برای هر «ا»ی عبارت هر دو صورت ساخته می‌شود؛ سقفِ ۳ جایگاه (۸ ترکیب) تا
+   شرطِ OR بی‌حد بزرگ نشود. */
+const ALEF_SLOTS = 3
+function alefVariants(s: string): string[] {
+  const at: number[] = []
+  for (let i = 0; i < s.length && at.length < ALEF_SLOTS; i++) if (s[i] === 'ا') at.push(i)
+  const out: string[] = []
+  for (let m = 0; m < 1 << at.length; m++) {
+    const c = [...s]
+    at.forEach((p, k) => { if (m & (1 << k)) c[p] = 'آ' })
+    out.push(c.join(''))
+  }
+  return out
+}
+
+/** صورت‌های متعارفِ یک عبارت: همه‌فارسی و همه‌عربی، هرکدام با «ا/آ»ی جایگزین. */
 export function faVariants(term: string): string[] {
-  const fa = foldFa(term)
-  return [...new Set([fa, toArabic(fa)])]
+  const fa = foldFa(term).replace(MARKS, '')
+  return [...new Set(alefVariants(fa).flatMap(v => [v, toArabic(v)]))]
 }
 
 /**

@@ -532,7 +532,7 @@ export default function EditProductPage() {
        بدون آن، حلقه‌ی سریال‌سازی روی آرایه‌ی خالی می‌چرخد و آگهی
        بدون هیچ مشخصه‌ای ذخیره می‌شود. روی موبایل کند نادر نیست. */
     if (specsLoading) {
-      setAlert({ title: 'لحظه‌ای صبر کنید', lines: ['فهرست مشخصات فنی هنوز بارگذاری نشده است.'] })
+      setAlert({ title: 'لحظه‌ای صبر کنید', lines: ['فهرست مشخصات فنی هنوز بارگذاری نشده است'] })
       return
     }
     ev.preventDefault()
@@ -604,7 +604,7 @@ export default function EditProductPage() {
         for (let i = 0; i < newImages.length; i++) {
           const url = await uploadFile('club-media', newImages[i]!.file, `products/${stamp}-${i}`)
           if (!url) {
-            setAlert({ title: 'بارگذاری تصویر انجام نشد', lines: [`تصویر ${i + 1} بالا نرفت؛ دوباره تلاش کنید.`] })
+            setAlert({ title: 'بارگذاری تصویر انجام نشد', lines: [`تصویر ${i + 1} بالا نرفت؛ دوباره تلاش کنید`] })
             setSubmitting(false); return
           }
           uploaded.push(url)
@@ -664,7 +664,7 @@ export default function EditProductPage() {
         }
         setSaved(true)
       } catch {
-        setAlert({ title: 'خطا در ارتباط با سرور', lines: ['ارتباط برقرار نشد؛ دوباره تلاش کنید.'] })
+        setAlert({ title: 'خطا در ارتباط با سرور', lines: ['ارتباط برقرار نشد؛ دوباره تلاش کنید'] })
         setSubmitting(false)
       }
     })()
@@ -679,7 +679,7 @@ export default function EditProductPage() {
 
   if (notFound) return (
     <div style={{ minHeight: '60vh', display: 'flex', flexDirection: 'column', gap: 14, alignItems: 'center', justifyContent: 'center', fontFamily: 'Vazirmatn,Tahoma,sans-serif', direction: 'rtl' }}>
-      <p style={{ color: TEXT_SEC, margin: 0 }}>این آگهی پیدا نشد یا حذف شده است.</p>
+      <p style={{ color: TEXT_SEC, margin: 0 }}>این آگهی پیدا نشد یا حذف شده است</p>
       <Link href="/dashboard/shop" style={{ padding: '10px 18px', borderRadius: 12, fontSize: 13.5, fontWeight: 700, textDecoration: 'none', color: GOLD_D, background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.34)' }}>آگهی‌های من</Link>
     </div>
   )

@@ -202,9 +202,9 @@ export default function PlayersPage() {
         /* ═══ چیدمان ═══ */
         .pl-featured { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); gap: 18px; }
         .pl-fside { display: grid; grid-template-rows: 1fr 1fr; gap: 18px; }
-        /* ── گریدِ فشرده (آبانِ ۱۴۰۵) ──
+        /* ── گرید فشرده (آبان ۱۴۰۵) ──
            کارت‌ها در موبایل تک‌ستونه و ~۴۷۰ پیکسل بودند: سیصد بازیکن یعنی صدوچهل
-           هزار پیکسل اسکرول. حالا ستون‌ها از عرض ساخته می‌شوند (دسکتاپ تا ۶ ستون،
+           هزار پیکسل اسکرول، حالا ستون‌ها از عرض ساخته می‌شوند (دسکتاپ تا ۶ ستون،
            موبایل ۲) و فهرست ۲۴تا۲۴تا می‌آید. */
         .pl-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(176px, 1fr)); gap: 16px; }
         .pl-grid .pl-card { content-visibility: auto; contain-intrinsic-size: auto 260px; }
@@ -215,7 +215,7 @@ export default function PlayersPage() {
         .pl-more:focus-visible { outline: 2px solid ${GOLD}; outline-offset: 2px; }
         @media (max-width: 820px)  { .pl-featured { grid-template-columns: 1fr; } .pl-fside { grid-template-rows: none; grid-template-columns: 1fr 1fr; } .pl-xl { aspect-ratio: 3/3.4; } }
         @media (max-width: 760px)  { .pl-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; } }
-        /* موبایل: دو ستونِ کوتاه — نام و شهر؛ معرفی و «مشاهده» در صفحه‌ی خودِ بازیکن */
+        /* موبایل: دو ستون کوتاه — نام و شهر؛ معرفی و «مشاهده» در صفحه‌ی خود بازیکن */
         @media (max-width: 760px) {
           .pl-grid .pl-std { aspect-ratio: 3/3.7; border-radius: 16px; }
           .pl-grid .pl-frame { inset: 6px; border-radius: 11px; }
@@ -247,9 +247,9 @@ export default function PlayersPage() {
 
         /* ═══ هیروی سینمایی ═══ */
         .pl-hero { position: relative; overflow: hidden; background: #0D0C0A; color: #fff; }
-        /* ⚠️ لایه‌ی عکس «hero-lounge.jpg» برداشته شد: آن فایل از بازطراحیِ
-           برگشت‌خورده‌ی هیروی خانه مانده بود و دیگر وجود ندارد، پس روی سایتِ
-           زنده هر بازدید یک ۴۰۴ و یک خطای کنسول می‌ساخت. ظاهر عوض نمی‌شود —
+        /* ⚠️ لایه‌ی عکس «hero-lounge.jpg» برداشته شد: آن فایل از بازطراحی
+           برگشت‌خورده‌ی هیروی خانه مانده بود و دیگر وجود ندارد، پس روی سایت
+           زنده هر بازدید یک ۴۰۴ و یک خطای کنسول می‌ساخت، ظاهر عوض نمی‌شود —
            همین زمینه‌ی تیره همانی است که تا امروز دیده می‌شد. */
         .pl-hero-shade { position: absolute; inset: 0;
           background: linear-gradient(100deg, rgba(13,12,10,0.94) 30%, rgba(13,12,10,0.55) 62%, rgba(13,12,10,0.85) 100%); }
@@ -278,7 +278,6 @@ export default function PlayersPage() {
           <h1 style={{ fontSize: 'clamp(30px,5vw,56px)', fontWeight: 900, margin: 0, lineHeight: 1.2, letterSpacing: '-0.02em' }}>
             ستارگان <span style={{ background: `linear-gradient(135deg,#E8CE96,${GOLD} 50%,#8A6020)`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>بیلیارد</span> ایران
           </h1>
-          <div style={{ width: 70, height: 3, borderRadius: 2, marginTop: 14, background: `linear-gradient(90deg,${GOLD},#8A6020)`, transformOrigin: 'right', animation: 'plScaleX .55s .3s ease both' }} />
           <p style={{ margin: '14px 0 0', fontSize: 'clamp(12.5px,1.5vw,14.5px)', color: 'rgba(255,255,255,0.62)', maxWidth: 520, lineHeight: 2, animation: 'plFadeUp .5s .35s ease both' }}>
             {/* «ملی‌پوشان» و «رنکینگ» از متن رفتند چون هر دو فیلد
                 خوداظهار بودند و حذف شدند؛ متنی که به چیزی اشاره کند
@@ -305,10 +304,8 @@ export default function PlayersPage() {
         {isBrowsing && featured.length > 0 && (
           <section style={{ marginBottom: 'clamp(30px,4.4vw,48px)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
-              <span style={{ width: 3, height: 18, borderRadius: 2, background: `linear-gradient(180deg,${GOLD},#8A6020)` }} />
               <h2 style={{ fontSize: 16.5, fontWeight: 900, margin: 0 }}>چهره‌های ویژه</h2>
               <span style={{ fontSize: 9.5, fontWeight: 800, letterSpacing: '0.24em', color: MUT }}>FEATURED</span>
-              <span style={{ flex: 1, height: 1, background: LINE }} />
             </div>
             <div className="pl-featured">
               {featured[0] && <PlayerCard p={featured[0]} i={0} size="xl" />}
@@ -322,19 +319,17 @@ export default function PlayersPage() {
         {/* ═══ گرید بازیکنان ═══ */}
         <section>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
-            <span style={{ width: 3, height: 18, borderRadius: 2, background: `linear-gradient(180deg,${GOLD},#8A6020)` }} />
             <h2 style={{ fontSize: 16.5, fontWeight: 900, margin: 0 }}>
               {isBrowsing ? 'همه‌ی بازیکنان' : SEGMENTS.find(s => s[0] === seg)?.[1] ?? 'نتایج'}
             </h2>
             <span style={{ fontSize: 12, color: MUT }}>{faDigits(gridItems.length)} بازیکن</span>
-            <span style={{ flex: 1, height: 1, background: LINE }} />
           </div>
 
           {gridItems.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '64px 20px', background: 'rgba(255,255,255,0.78)', border: `1px solid ${LINE}`, borderRadius: 18 }}>
               <Search size={36} style={{ color: MUT, opacity: 0.45, marginBottom: 12 }} />
               <p style={{ fontSize: 15, fontWeight: 800, margin: '0 0 6px' }}>{loadFailed ? 'فهرست بارگذاری نشد' : 'بازیکنی پیدا نشد'}</p>
-              <p style={{ fontSize: 12.5, color: MUT, margin: '0 0 18px' }}>{loadFailed ? 'اتصالِ اینترنت را بررسی کنید و صفحه را دوباره باز کنید.' : 'دسته‌ی دیگری را انتخاب کنید.'}</p>
+              <p style={{ fontSize: 12.5, color: MUT, margin: '0 0 18px' }}>{loadFailed ? 'اتصال اینترنت را بررسی کنید و صفحه را دوباره باز کنید' : 'دسته‌ی دیگری را انتخاب کنید'}</p>
               <button type="button" onClick={() => pickSeg('all')}
                 style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '9px 18px', borderRadius: 10, cursor: 'pointer', fontFamily: 'inherit', fontSize: 13, fontWeight: 700, background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.34)', color: GOLD_D }}>
                 نمایش همه بازیکنان
@@ -348,7 +343,7 @@ export default function PlayersPage() {
               {gridItems.length > shown && (
                 <div style={{ display: 'flex', justifyContent: 'center', marginTop: 24 }}>
                   <button type="button" className="pl-more" onClick={() => setShown(n => n + PAGE)}>
-                    نمایش بیشتر · {faDigits(gridItems.length - shown)} بازیکنِ دیگر
+                    نمایش بیشتر · {faDigits(gridItems.length - shown)} بازیکن دیگر
                   </button>
                 </div>
               )}

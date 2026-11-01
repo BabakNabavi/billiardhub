@@ -347,8 +347,8 @@ export async function notifyWaitlistPromoted(registrationId: string, needsPaymen
   /* پیام پولی حتما باید فوریت را برساند: صندلی نگه داشته شده ولی
      تا پرداخت‌نشدن قطعی نیست. */
   const body = needsPayment
-    ? `جا در «${title}» برای شما باز شد.\nبرای قطعی‌شدن، هزینه‌ی ثبت‌نام را از داشبورد پرداخت کنید.`
-    : `جا در «${title}» برای شما باز شد و ثبت‌نامتان قطعی شد.`
+    ? `جا در «${title}» برای شما باز شد.\nبرای قطعی‌شدن، هزینه‌ی ثبت‌نام را از داشبورد پرداخت کنید`
+    : `جا در «${title}» برای شما باز شد و ثبت‌نامتان قطعی شد`
 
   void body
   notifyPattern(phone, 'waitlist_promoted', [await nameOf(reg.user_id), title])

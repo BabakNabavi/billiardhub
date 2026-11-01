@@ -72,7 +72,7 @@ function facts(kind: ProfileKind, p: ProfileRow) {
   const image = first(d.photo, d.logo, d.scene)
   const url = `${k.base}/${p.slug}`
   const role = `${k.label}${city ? ` در ${city}` : ''}`
-  const description = clip(about ? `${name} — ${role}. ${about.replace(/\s+/g, ' ')}` : `${name} — ${role}. پروفایل، سوابق و راه ارتباطی در بیلیارد هاب.`, 158)
+  const description = clip(about ? `${name} — ${role}. ${about.replace(/\s+/g, ' ')}` : `${name} — ${role}. پروفایل، سوابق و راه ارتباطی در بیلیارد هاب`, 158)
   return { name, city, province: str(d.province), image, url, role, description, nameEn: first(d.nameEn) }
 }
 

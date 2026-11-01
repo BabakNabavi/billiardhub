@@ -114,8 +114,8 @@ export default function AdPackages({ backTo = '/plans' }: { backTo?: string }) {
           background: 'rgba(14,122,56,0.06)', border: '1px solid rgba(14,122,56,0.22)', borderRadius: 14,
           padding: '13px 17px', marginBottom: 20, fontSize: 13, color: '#14532D', lineHeight: 2,
         }}>
-          در حال حاضر محدودیتی برای تعداد آگهی اعمال نمی‌شود و همه می‌توانند آزادانه آگهی ثبت کنند.
-          خرید بسته فعلا لازم نیست — این بخش برای وقتی است که محدودیت فعال شود.
+          در حال حاضر محدودیتی برای تعداد آگهی اعمال نمی‌شود و همه می‌توانند آزادانه آگهی ثبت کنند
+          خرید بسته فعلا لازم نیست — این بخش برای وقتی است که محدودیت فعال شود
         </div>
       )}
 
@@ -125,9 +125,9 @@ export default function AdPackages({ backTo = '/plans' }: { backTo?: string }) {
           padding: '13px 17px', marginBottom: 20, fontSize: 13, color: GOLD_D, lineHeight: 2,
         }}>
           {mine
-            ? `سهمیه‌ی رایگان شما ${fa(mine.limit)} آگهی در هر ${PERIOD_FA[mine.period]} است.`
-            : 'سهمیه‌ی رایگان هر کاربر بسته به نقشش متفاوت است.'}
-          {' '}برای بیشتر از آن، یکی از بسته‌های زیر را تهیه کنید.
+            ? `سهمیه‌ی رایگان شما ${fa(mine.limit)} آگهی در هر ${PERIOD_FA[mine.period]} است`
+            : 'سهمیه‌ی رایگان هر کاربر بسته به نقشش متفاوت است'}
+          {' '}برای بیشتر از آن، یکی از بسته‌های زیر را تهیه کنید
         </div>
       )}
 
@@ -148,7 +148,7 @@ export default function AdPackages({ backTo = '/plans' }: { backTo?: string }) {
           <Package size={28} style={{ color: MUT, opacity: 0.6, marginBottom: 10 }} />
           <p style={{ fontSize: 14.5, fontWeight: 800, margin: '0 0 8px' }}>هنوز بسته‌ای برای فروش تعریف نشده است</p>
           <p style={{ fontSize: 13, color: MUT, margin: 0, lineHeight: 2 }}>
-            تا آن موقع، ثبت آگهی در بیلیارد بازار برای شما آزاد است.
+            تا آن موقع، ثبت آگهی در بیلیارد بازار برای شما آزاد است
           </p>
           <Link href="/shop/new" style={{
             display: 'inline-flex', alignItems: 'center', gap: 6, marginTop: 16, textDecoration: 'none',

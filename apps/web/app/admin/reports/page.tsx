@@ -141,7 +141,7 @@ export default function AdminReports() {
         )}
         {!alertPhone && (
           <span style={{ fontSize: 11, color: MUT, lineHeight: 1.8 }}>
-            الان فقط نشان داشبورد کار می‌کند.
+            الان فقط نشان داشبورد کار می‌کند
           </span>
         )}
       </div>
@@ -151,7 +151,7 @@ export default function AdminReports() {
 
       {pending && (
         <div style={{ padding: '12px 15px', borderRadius: 13, background: 'rgba(199,166,106,0.10)', border: '1px solid rgba(199,166,106,0.30)', color: GOLD_D, fontSize: 12.5, fontWeight: 700, marginBottom: 14, lineHeight: 1.9 }}>
-          جدول گزارش‌ها هنوز در دیتابیس ساخته نشده است (مایگریشن ۰۰۳ اجرا نشده).
+          جدول گزارش‌ها هنوز در دیتابیس ساخته نشده است (مایگریشن ۰۰۳ اجرا نشده)
         </div>
       )}
 

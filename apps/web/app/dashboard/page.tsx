@@ -302,9 +302,7 @@ export default function DashboardPage() {
           letter-spacing: 0;
           color: rgba(0,0,0,0.45); margin-bottom: 14px;
           display: flex; align-items: center; gap: 8px;
-        }
-        .card-label span { width:3px; height:12px; border-radius:2px; display:inline-block; flex-shrink:0; }
-
+        }
         .quick-action {
           display: flex; flex-direction: column; align-items: center; gap: 10px;
           padding: 18px 12px;
@@ -519,9 +517,7 @@ export default function DashboardPage() {
               {/* Quick Actions */}
               <ScrollReveal>
                 <div className="dash-card">
-                  <div className="card-label">
-                    <span style={{ background: 'linear-gradient(135deg,#C7A66A,#A07840)' }} />
-                    دسترسی سریع
+                  <div className="card-label">                    دسترسی سریع
                   </div>
                   <div className="actions-row" style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: '10px' }}>
                     {[
@@ -547,7 +543,6 @@ export default function DashboardPage() {
                   <div className="dash-card">
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '18px' }}>
                       <div className="card-label" style={{ margin: 0 }}>
-                        <span style={{ width: '3px', height: '12px', background: 'linear-gradient(135deg,#f59e0b,#C7A66A)', borderRadius: '2px', display: 'inline-block', flexShrink: 0 }} />
                         وضعیت ثبت‌نام مسابقات
                       </div>
                       <ClipboardList size={14} style={{ color: '#f59e0b', opacity: 0.7 }} />
@@ -598,7 +593,6 @@ export default function DashboardPage() {
                 <div className="dash-card">
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '18px' }}>
                     <div className="card-label" style={{ margin: 0 }}>
-                      <span style={{ width: '3px', height: '12px', background: 'linear-gradient(135deg,#C7A66A,#A07840)', borderRadius: '2px', display: 'inline-block', flexShrink: 0 }} />
                       رزروهای شما
                     </div>
                     <Link href="/booking" style={{ fontSize: '14px', color: '#C7A66A', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '4px', opacity: 0.7, transition: 'opacity 0.2s' }}>
@@ -635,12 +629,10 @@ export default function DashboardPage() {
               {ADS_LAUNCHED && (
               <ScrollReveal>
                 <div className="dash-card">
-                  <div className="card-label">
-                    <span style={{ background: 'linear-gradient(180deg,#C7A66A,#A07840)' }} />
-                    تبلیغات
+                  <div className="card-label">                    تبلیغات
                   </div>
                   <p style={{ fontSize: '14px', color: 'rgba(0,0,0,0.45)', lineHeight: 2, margin: '0 0 14px' }}>
-                    جایگاه‌های تبلیغاتی سایت، کمپین‌های فعال و گزارش نمایش و کلیک.
+                    جایگاه‌های تبلیغاتی سایت، کمپین‌های فعال و گزارش نمایش و کلیک
                   </p>
                   <Link href="/advertise/dashboard" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '12px', background: 'rgba(199,166,106,0.10)', border: '1px solid rgba(199,166,106,0.28)', borderRadius: '12px', color: '#A07840', fontSize: '15px', fontWeight: 700, textDecoration: 'none' }}>
                     پنل تبلیغات من
@@ -666,9 +658,7 @@ export default function DashboardPage() {
                   از روی خودشان شمرده می‌شود. */}
               <ScrollReveal>
                 <div className="dash-card">
-                  <div className="card-label">
-                    <span style={{ background: 'linear-gradient(135deg,#C7A66A,#A07840)' }} />
-                    تکمیل پروفایل
+                  <div className="card-label">                    تکمیل پروفایل
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '9px' }}>
                     <Ring value={profilePct} size={52} stroke={5} color="#C7A66A" label />
@@ -704,8 +694,8 @@ export default function DashboardPage() {
         open={!!cancelReg}
         title="انصراف از مسابقه"
         body={<>ثبت‌نام شما در <b style={{ color: '#1A1A18' }}>{cancelReg?.tournamentName}</b> لغو
-          می‌شود و مبلغ پرداختی طی روزهای آینده بازگردانده می‌شود. جای شما به نفر بعدی
-          صف انتظار داده می‌شود.</>}
+          می‌شود و مبلغ پرداختی طی روزهای آینده بازگردانده می‌شود، جای شما به نفر بعدی
+          صف انتظار داده می‌شود</>}
         confirmLabel="بله، انصراف می‌دهم"
         busy={cancelBusy}
         onConfirm={() => void doCancel()}

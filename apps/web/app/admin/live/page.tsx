@@ -61,20 +61,20 @@ export default function AdminLivePage() {
         <h1 className="flex items-center gap-2 text-title text-ink"><RadioTower className="h-6 w-6 text-gold-text" aria-hidden /> پخش زنده</h1>
         {state && (
           <p className="text-meta text-ink-3">
-            سرویسِ پخش: {state.connected ? `وصل (${state.provider})` : 'API وصل نیست — کانال‌ها فعلاً با «وصلِ کانالِ آروان» دستی اضافه می‌شوند'}
+            سرویس پخش: {state.connected ? `وصل (${state.provider})` : 'API وصل نیست — کانال‌ها فعلا با «وصل کانال آروان» دستی اضافه می‌شوند'}
             {state.month ? ` · ۳۰ روز: ${faNum(state.month.count)} پخش، ${faDec(state.month.hours)} ساعت، ${faDec(state.month.viewerHours)} ساعت‌-بیننده` : ''}
           </p>
         )}
       </header>
 
-      {!state && !loadErr && <div className="h-40 animate-pulse rounded-panel bg-ink/[.05]" aria-label="در حالِ بارگذاری" />}
+      {!state && !loadErr && <div className="h-40 animate-pulse rounded-panel bg-ink/[.05]" aria-label="در حال بارگذاری" />}
       {loadErr && (
         <div className="flex flex-col items-start gap-3 rounded-panel bg-danger/[.05] p-4 text-sub text-danger">
-          {loadErr}<Button variant="secondary" size="sm" onClick={() => void load()}>تلاشِ دوباره</Button>
+          {loadErr}<Button variant="secondary" size="sm" onClick={() => void load()}>تلاش دوباره</Button>
         </div>
       )}
       {state && !state.ready && (
-        <p className="rounded-panel bg-ink/[.03] p-4 text-sub text-ink-2">جدول‌های پخش زنده هنوز ساخته نشده‌اند (مهاجرتِ ۱۱۴ روی سرور اجرا نشده).</p>
+        <p className="rounded-panel bg-ink/[.03] p-4 text-sub text-ink-2">جدول‌های پخش زنده هنوز ساخته نشده‌اند (مهاجرت ۱۱۴ روی سرور اجرا نشده)</p>
       )}
       {err && <p role="alert" className="rounded-card bg-danger/[.06] p-3 text-sub text-danger">{err}</p>}
 
@@ -85,10 +85,10 @@ export default function AdminLivePage() {
           {others.length > 0 && (
             <div className="flex flex-wrap items-end gap-2 rounded-panel bg-ink/[.03] p-4">
               <label className="flex min-w-0 flex-1 flex-col gap-1 text-meta text-ink-3">
-                باشگاهِ حرفه‌ای (چند کانال) کنید
+                باشگاه حرفه‌ای (چند کانال) کنید
                 <select value={pick} onChange={e => setPick(e.target.value)}
                   className="min-h-11 rounded-field border border-line/10 bg-paper px-3 text-sub focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-deep">
-                  <option value="">انتخابِ باشگاه…</option>
+                  <option value="">انتخاب باشگاه…</option>
                   {others.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                 </select>
               </label>
@@ -99,7 +99,7 @@ export default function AdminLivePage() {
           )}
 
           {state.clubs.length === 0
-            ? <p className="rounded-panel bg-ink/[.03] px-4 py-8 text-center text-sub text-ink-3">هنوز هیچ باشگاهی کانالِ پخش ندارد.</p>
+            ? <p className="rounded-panel bg-ink/[.03] px-4 py-8 text-center text-sub text-ink-3">هنوز هیچ باشگاهی کانال پخش ندارد</p>
             : state.clubs.map(c => (
                 <ClubLiveCard key={c.clubId} club={c} busy={busy} run={run} askReason={(title, act) => setAsk({ title, act })} />
               ))}

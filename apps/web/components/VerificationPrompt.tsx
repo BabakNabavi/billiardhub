@@ -25,8 +25,8 @@ export const DOC_REQUIRED: Record<VerifiableRole, boolean> = {
 
 export function verificationText(role: VerifiableRole): string {
   return DOC_REQUIRED[role]
-    ? `برای ثبت پروفایل، آپلود ${DOC_LABEL[role]} الزامی است.`
-    : `برای درخواست تیک تأیید و افزایش اعتبار پروفایل، لطفا ${DOC_LABEL[role]} را آپلود نمایید.`
+    ? `برای ثبت پروفایل، آپلود ${DOC_LABEL[role]} الزامی است`
+    : `برای درخواست تیک تأیید و افزایش اعتبار پروفایل، لطفا ${DOC_LABEL[role]} را آپلود نمایید`
 }
 
 const GOLD_D = '#8F6531', FELT = '#0E7A38', LINE = '#EAE5DA'
@@ -54,7 +54,7 @@ export default function VerificationPrompt({
       fontSize: compact ? 12 : 12.5, fontWeight: 700, color: FELT, lineHeight: 1.9, ...style,
     }}>
       <ShieldCheck size={16} style={{ flexShrink: 0 }} />
-      مدرک شما تأیید شد و تیک تأیید روی پروفایل‌تان قرار گرفت.
+      مدرک شما تأیید شد و تیک تأیید روی پروفایل‌تان قرار گرفت
     </div>
   )
 
@@ -66,7 +66,7 @@ export default function VerificationPrompt({
       fontSize: compact ? 12 : 12.5, fontWeight: 700, color: GOLD_D, lineHeight: 1.9, ...style,
     }}>
       <ShieldCheck size={16} style={{ flexShrink: 0 }} />
-      مدرک شما ثبت شد و در انتظار بررسی کارشناسان است. تیک تأیید پس از تأیید آن‌ها می‌آید.
+      مدرک شما ثبت شد و در انتظار بررسی کارشناسان است، تیک تأیید پس از تأیید آن‌ها می‌آید
     </div>
   )
 

@@ -120,7 +120,7 @@ export default function BoostDialog({ productId, title, onClose }: {
           </div>
         ) : !pricing.enabled ? (
           <div style={{ fontSize: 13, color: MUT, lineHeight: 2, padding: '10px 2px' }}>
-            ارتقای آگهی فعلا غیرفعال است.
+            ارتقای آگهی فعلا غیرفعال است
           </div>
         ) : (
           <div style={{ display: 'grid', gap: 12, gridTemplateColumns: 'repeat(auto-fit,minmax(210px,1fr))' }}>
@@ -130,8 +130,8 @@ export default function BoostDialog({ productId, title, onClose }: {
               icon={<ArrowUp size={18} color={GOLD_D} />}
               tint="rgba(199,166,106,0.10)" edge="rgba(199,166,106,0.34)"
               name="تازه‌سازی آگهی"
-              what="آگهی مثل آگهی تازه به بالای فهرست می‌رود."
-              note="آگهی‌های تازه‌ی بعدی دوباره پایینش می‌برند."
+              what="آگهی مثل آگهی تازه به بالای فهرست می‌رود"
+              note="آگهی‌های تازه‌ی بعدی دوباره پایینش می‌برند"
               price={pricing.bump.price}
               extra={null}
               disabled={!!blocked || (state ? !state.canBump : false)}
@@ -147,8 +147,8 @@ export default function BoostDialog({ productId, title, onClose }: {
               icon={<Zap size={18} color={RED} />}
               tint="rgba(178,59,46,0.07)" edge="rgba(178,59,46,0.30)"
               name="آگهی فوری"
-              what="آگهی در نوار «فوری» بالای بازار می‌نشیند و پایین نمی‌آید."
-              note="نشان قرمز هم می‌گیرد و در فیلتر فوری می‌آید."
+              what="آگهی در نوار «فوری» بالای بازار می‌نشیند و پایین نمی‌آید"
+              note="نشان قرمز هم می‌گیرد و در فیلتر فوری می‌آید"
               price={pricing.urgent.price}
               extra={`${fa(pricing.urgent.days)} روز`}
               disabled={!!blocked}
@@ -163,8 +163,8 @@ export default function BoostDialog({ productId, title, onClose }: {
         )}
 
         <p style={{ fontSize: 11, color: MUT, margin: '16px 0 0', lineHeight: 1.9 }}>
-          پرداخت از درگاه بانکی انجام می‌شود و ارتقا بلافاصله پس از بازگشت اعمال می‌شود.
-          تازه‌سازی پس از اعمال بازگشت‌پذیر نیست.
+          پرداخت از درگاه بانکی انجام می‌شود و ارتقا بلافاصله پس از بازگشت اعمال می‌شود
+          تازه‌سازی پس از اعمال بازگشت‌پذیر نیست
         </p>
         <style>{`@keyframes bdspin{to{transform:rotate(360deg)}}`}</style>
       </div>

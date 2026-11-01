@@ -132,7 +132,7 @@ export async function getStoryQuotaState(
   if (limit <= 0) {
     return {
       ...base, allowed: false,
-      message: 'نقش شما سهمیه‌ی رایگان استوری ندارد؛ برای انتشار استوری یکی از بسته‌ها را تهیه کنید.',
+      message: 'نقش شما سهمیه‌ی رایگان استوری ندارد؛ برای انتشار استوری یکی از بسته‌ها را تهیه کنید',
     }
   }
 
@@ -140,8 +140,8 @@ export async function getStoryQuotaState(
     return {
       ...base, allowed: false,
       message: plan
-        ? `سهمیه‌ی استوری بسته‌ی «${plan.name}» شما در این ${PERIOD_FA[period]} تمام شده است.`
-        : `سقف استوری این ${PERIOD_FA[period]} شما پر شده است. برای بیشتر، یکی از بسته‌های استوری را تهیه کنید.`,
+        ? `سهمیه‌ی استوری بسته‌ی «${plan.name}» شما در این ${PERIOD_FA[period]} تمام شده است`
+        : `سقف استوری این ${PERIOD_FA[period]} شما پر شده است، برای بیشتر، یکی از بسته‌های استوری را تهیه کنید`,
     }
   }
 

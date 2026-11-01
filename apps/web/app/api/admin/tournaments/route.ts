@@ -177,7 +177,7 @@ export async function DELETE(req: NextRequest) {
     .eq('tournament_id', id).eq('payment_status', 'PAID');
   if ((paid ?? 0) > 0) {
     return NextResponse.json({
-      message: `این مسابقه ${paid} ثبت‌نام پرداخت‌شده دارد و حذف نمی‌شود — سابقه‌ی مالی باید بماند. به‌جایش لغوش کنید.`,
+      message: `این مسابقه ${paid} ثبت‌نام پرداخت‌شده دارد و حذف نمی‌شود — سابقه‌ی مالی باید بماند، به‌جایش لغوش کنید`,
     }, { status: 409 });
   }
 
@@ -224,7 +224,7 @@ export async function PATCH(req: NextRequest) {
       .eq('tournament_id', id).eq('payment_status', 'PAID');
     if ((count ?? 0) > 0) {
       return NextResponse.json({
-        message: `این مسابقه ${count} ثبت‌نام پرداخت‌شده دارد و به پیش‌نویس برنمی‌گردد. آن را لغو کنید.`,
+        message: `این مسابقه ${count} ثبت‌نام پرداخت‌شده دارد و به پیش‌نویس برنمی‌گردد، آن را لغو کنید`,
       }, { status: 409 });
     }
   }

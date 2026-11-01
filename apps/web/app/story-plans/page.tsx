@@ -90,8 +90,8 @@ export default function StoryPlansPage() {
             بیشتر استوری بگذارید، بیشتر دیده شوید
           </h1>
           <p style={{ fontSize: 14, color: SEC, lineHeight: 2, margin: 0, maxWidth: 560, marginInline: 'auto' }}>
-            هر بسته یک سهمیه‌ی مشخص برای انتشار استوری در بیلیارد هاب می‌دهد.
-            بسته را انتخاب کنید، از درگاه پرداخت کنید، و بلافاصله فعال می‌شود.
+            هر بسته یک سهمیه‌ی مشخص برای انتشار استوری در بیلیارد هاب می‌دهد
+            بسته را انتخاب کنید، از درگاه پرداخت کنید، و بلافاصله فعال می‌شود
           </p>
         </div>
 
@@ -124,8 +124,8 @@ export default function StoryPlansPage() {
             background: 'rgba(14,122,56,0.06)', border: '1px solid rgba(14,122,56,0.22)', borderRadius: 14,
             padding: '13px 17px', marginBottom: 20, fontSize: 13, color: '#14532D', lineHeight: 2,
           }}>
-            فروش بسته‌ی استوری هنوز فعال نشده است. سهمیه‌ی رایگان نقشتان سر جایش است
-            و خرید بسته فعلا لازم نیست.
+            فروش بسته‌ی استوری هنوز فعال نشده است، سهمیه‌ی رایگان نقشتان سر جایش است
+            و خرید بسته فعلا لازم نیست
           </div>
         )}
 
@@ -135,9 +135,9 @@ export default function StoryPlansPage() {
             padding: '13px 17px', marginBottom: 20, fontSize: 13, color: GOLD_D, lineHeight: 2,
           }}>
             {mine
-              ? `سهمیه‌ی رایگان شما ${fa(mine.limit)} استوری در هر ${PERIOD_FA[mine.period]} است.`
-              : 'سهمیه‌ی رایگان استوری بسته به نقش شما متفاوت است.'}
-            {' '}برای بیشتر از آن، یکی از بسته‌های زیر را تهیه کنید.
+              ? `سهمیه‌ی رایگان شما ${fa(mine.limit)} استوری در هر ${PERIOD_FA[mine.period]} است`
+              : 'سهمیه‌ی رایگان استوری بسته به نقش شما متفاوت است'}
+            {' '}برای بیشتر از آن، یکی از بسته‌های زیر را تهیه کنید
           </div>
         )}
 
@@ -158,7 +158,7 @@ export default function StoryPlansPage() {
             <Package size={28} style={{ color: MUT, opacity: 0.6, marginBottom: 10 }} />
             <p style={{ fontSize: 14.5, fontWeight: 800, margin: '0 0 8px' }}>هنوز بسته‌ای برای فروش تعریف نشده است</p>
             <p style={{ fontSize: 13, color: MUT, margin: 0, lineHeight: 2 }}>
-              تا آن موقع، سهمیه‌ی رایگان نقشتان برقرار است.
+              تا آن موقع، سهمیه‌ی رایگان نقشتان برقرار است
             </p>
             <Link href="/dashboard" style={{
               display: 'inline-flex', alignItems: 'center', gap: 6, marginTop: 16, textDecoration: 'none',
@@ -232,7 +232,7 @@ export default function StoryPlansPage() {
             <div style={{ fontSize: 14.5, fontWeight: 900, marginBottom: 5 }}>بسته‌های آگهی بیلیارد بازار</div>
             <p style={{ fontSize: 12.5, color: MUT, margin: 0, lineHeight: 2 }}>
               اگر می‌خواهید تعداد بیشتری آگهی در بیلیارد بازار ثبت کنید،
-              بسته‌های آگهی را ببینید.
+              بسته‌های آگهی را ببینید
             </p>
           </div>
           <Link href="/plans" style={{

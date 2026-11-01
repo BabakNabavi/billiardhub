@@ -230,7 +230,7 @@ export async function PATCH(req: NextRequest) {
       return !!r && effectiveStatus({ status: r.account_status as AccountStatus, expiresAt: r.status_expires_at, isOwner: r.is_platform_owner }) !== 'active';
     })();
     if (nidLocked && !(await isPlatformOwner(actor.id))) {
-      return NextResponse.json({ message: 'کد ملیِ حسابِ محدودشده را فقط مالکِ پلتفرم می‌تواند تغییر دهد' }, { status: 403 });
+      return NextResponse.json({ message: 'کد ملی حساب محدودشده را فقط مالک پلتفرم می‌تواند تغییر دهد' }, { status: 403 });
     }
     if ('national_id' in changed) patch.national_id_verified = false;
 

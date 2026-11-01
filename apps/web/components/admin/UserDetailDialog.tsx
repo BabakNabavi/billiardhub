@@ -275,8 +275,8 @@ export default function UserDetailDialog({ userId, onClose }: { userId: string; 
           {u && editing && (
             <>
               <div style={{ fontSize: 11.5, color: SEC, lineHeight: 1.9, padding: '4px 0 8px' }}>
-                شماره‌ی موبایل، نقش‌ها و وضعیت احراز از این‌جا عوض نمی‌شوند.
-                هر تغییری در گزارش ممیزی ثبت می‌شود.
+                شماره‌ی موبایل، نقش‌ها و وضعیت احراز از این‌جا عوض نمی‌شوند
+                هر تغییری در گزارش ممیزی ثبت می‌شود
               </div>
               {EDIT_FIELDS.map(f => (
                 <EditRow key={f.key} f={f} value={form[f.key] ?? ''}

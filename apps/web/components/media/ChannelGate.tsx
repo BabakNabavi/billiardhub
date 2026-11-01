@@ -128,16 +128,16 @@ export default function ChannelGate({ role, suggestName, channels, onPick, onSki
         </h2>
         {!made && <p className="cg-sub">
           {channels.length === 0
-            ? 'ویدیوی شما در گالری پروفایل می‌ماند؛ با ساختن کانال، در بیلیارد مدیا هم دیده می‌شود.'
-            : `شما با نقش‌های دیگری کانال ساخته‌اید. می‌توانید در یکی از آن‌ها منتشر کنید یا کانالی برای «${ROLE_FA[role]}» بسازید.`}
+            ? 'ویدیوی شما در گالری پروفایل می‌ماند؛ با ساختن کانال، در بیلیارد مدیا هم دیده می‌شود'
+            : `شما با نقش‌های دیگری کانال ساخته‌اید، می‌توانید در یکی از آن‌ها منتشر کنید یا کانالی برای «${ROLE_FA[role]}» بسازید`}
         </p>}
 
         {made ? (
           /* گام پایانی ساخت — یک کلیک تازه برای بازکردن انتخابگر فایل */
           <div className="cg-form">
             <p className="cg-done" role="status">
-              کانال «{made.name}» ساخته شد. حالا ویدیو را انتخاب کنید تا هم در
-              گالری بماند و هم در بیلیارد مدیا منتشر شود.
+              کانال «{made.name}» ساخته شد، حالا ویدیو را انتخاب کنید تا هم در
+              گالری بماند و هم در بیلیارد مدیا منتشر شود
             </p>
             <div className="cg-actions">
               <button type="button" className="cg-go" ref={doneRef} disabled={going}
@@ -183,7 +183,7 @@ export default function ChannelGate({ role, suggestName, channels, onPick, onSki
                 placeholder="mychannel"
                 onChange={e => { setHandle(norm(e.target.value)); setErr('') }} />
             </div>
-            <p className="cg-hint">حروف و عدد انگلیسی، دست‌کم ۳ نویسه.</p>
+            <p className="cg-hint">حروف و عدد انگلیسی، دست‌کم ۳ نویسه</p>
 
             {err && <p role="alert" className="cg-err">{err}</p>}
 

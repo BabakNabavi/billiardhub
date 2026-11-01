@@ -90,7 +90,7 @@ export const PERMISSION_GROUPS: PermissionGroup[] = [
       { key: 'tournaments', label: 'مسابقات باشگاه‌ها' },
       { key: 'events', label: 'رویدادهای رسمی' },
       { key: 'media', label: 'بیلیارد مدیا' },
-      { key: 'live', label: 'پخش زنده', hint: 'کانال‌های باشگاه‌ها، سقفِ کانال، آمارِ بیننده و ساعتِ پخش، و مسدودسازی' },
+      { key: 'live', label: 'پخش زنده', hint: 'کانال‌های باشگاه‌ها، سقف کانال، آمار بیننده و ساعت پخش، و مسدودسازی' },
       { key: 'advertising', label: 'سیستم تبلیغات' },
       { key: 'ad-plans', label: 'بسته‌های آگهی' },
       { key: 'story-plans', label: 'بسته‌های استوری' },

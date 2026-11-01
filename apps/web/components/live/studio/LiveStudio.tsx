@@ -89,7 +89,7 @@ export function LiveStudio({ clubId, channelId, onClose }: { clubId: string; cha
   const start = () => startPublish(channelId,
     async () => {
       const parsed = Session.safeParse(await call('browser-session'))
-      if (!parsed.success) throw new Error('پاسخِ سرور برای اتصالِ پخش نامعتبر بود.')
+      if (!parsed.success) throw new Error('پاسخ سرور برای اتصال پخش نامعتبر بود')
       return parsed.data
     },
     async () => { startP.current = call('start'); await startP.current },
@@ -108,7 +108,7 @@ export function LiveStudio({ clubId, channelId, onClose }: { clubId: string; cha
       onClose()
     } catch (e) {
       console.error('[studio] stop', e)
-      say('پایانِ پخش روی سایت ثبت نشد؛ دوباره «پایان» را بزنید.', 6000)
+      say('پایان پخش روی سایت ثبت نشد؛ دوباره «پایان» را بزنید', 6000)
       setStopping(false)
     }
   }
@@ -127,7 +127,7 @@ export function LiveStudio({ clubId, channelId, onClose }: { clubId: string; cha
         className={`absolute inset-0 h-full w-full object-cover ${st.facing === 'user' ? '-scale-x-100' : ''}`} />
       {!st.stream && st.phase !== 'error' && (
         <div className="absolute inset-0 flex items-center justify-center" role="status">
-          <Loader2 className="h-8 w-8 animate-spin text-white/60" aria-hidden /><span className="sr-only">روشن‌شدنِ دوربین</span>
+          <Loader2 className="h-8 w-8 animate-spin text-white/60" aria-hidden /><span className="sr-only">روشن‌شدن دوربین</span>
         </div>
       )}
 
@@ -140,7 +140,7 @@ export function LiveStudio({ clubId, channelId, onClose }: { clubId: string; cha
             <span className="h-2 w-2 animate-pulse rounded-full bg-danger" aria-hidden />
             زنده <span dir="ltr" className="tabular-nums">{toFaDigits(clock)}</span>
             <span className="inline-flex items-center gap-1 text-white/80"><Eye className="h-4 w-4" aria-hidden />{faNum(viewers)}</span>
-          </>) : connecting || starting ? (<><Loader2 className="h-4 w-4 animate-spin" aria-hidden /> در حالِ اتصال…</>) : 'آماده‌ی پخش'}
+          </>) : connecting || starting ? (<><Loader2 className="h-4 w-4 animate-spin" aria-hidden /> در حال اتصال…</>) : 'آماده‌ی پخش'}
         </div>
         <StudioButton label="بی‌صدا" pressed={muted} onClick={() => setMuted(m => !m)}>
           {muted ? <MicOff className="h-5 w-5" /> : <Mic className="h-5 w-5" />}
@@ -151,7 +151,7 @@ export function LiveStudio({ clubId, channelId, onClose }: { clubId: string; cha
       {(st.phase === 'error' || hint || (portrait && !live)) && (
         <div className="absolute inset-x-4 top-1/2 flex -translate-y-1/2 justify-center">
           <p role={st.phase === 'error' ? 'alert' : 'status'} className="max-w-sm rounded-card bg-black/70 px-4 py-3 text-center text-sub backdrop-blur">
-            {hint || (st.phase === 'error' ? st.error : 'برای تصویرِ بهتر، گوشی را افقی بگیرید')}
+            {hint || (st.phase === 'error' ? st.error : 'برای تصویر بهتر، گوشی را افقی بگیرید')}
           </p>
         </div>
       )}
@@ -159,18 +159,18 @@ export function LiveStudio({ clubId, channelId, onClose }: { clubId: string; cha
       {/* پایین */}
       <div className="absolute inset-x-0 bottom-0 flex items-center justify-center gap-8 bg-gradient-to-t from-black/60 to-transparent px-4 pt-12"
         style={{ paddingBottom: 'max(20px, env(safe-area-inset-bottom))' }}>
-        <StudioButton label="چرخاندنِ دوربین (جلو/پشت)" disabled={live || connecting || busy}
+        <StudioButton label="چرخاندن دوربین (جلو/پشت)" disabled={live || connecting || busy}
           onClick={() => void openCamera(st.facing === 'user' ? 'environment' : 'user')}><RefreshCcw className="h-5 w-5" /></StudioButton>
         {/* در «اتصال» هم پایان‌پذیر — هرگز گیر نمی‌کند */}
         <button type="button" data-autofocus onClick={() => void (live || connecting ? stop() : start())}
           disabled={busy || (!live && !connecting && !st.stream)}
-          aria-label={live || connecting ? 'پایانِ پخش' : 'شروعِ پخش'}
+          aria-label={live || connecting ? 'پایان پخش' : 'شروع پخش'}
           className="flex h-20 w-20 items-center justify-center rounded-full border-4 border-white/90 transition-transform active:scale-95 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/60 disabled:opacity-50">
           {busy ? <Loader2 className="h-8 w-8 animate-spin" aria-hidden />
             : live || connecting ? <span className="h-8 w-8 rounded-field bg-danger" aria-hidden />
             : <span className="h-14 w-14 rounded-full bg-danger" aria-hidden />}
         </button>
-        <StudioButton label="حالتِ افقی" onClick={async () => { if (!(await lockLandscape())) say('گوشی را بچرخانید تا افقی شود') }}>
+        <StudioButton label="حالت افقی" onClick={async () => { if (!(await lockLandscape())) say('گوشی را بچرخانید تا افقی شود') }}>
           <RotateCw className="h-5 w-5" />
         </StudioButton>
       </div>

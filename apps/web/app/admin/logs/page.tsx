@@ -76,7 +76,7 @@ export default function AdminLogsPage() {
     try {
       const r = await apiFetch(`/api/admin/logs?${qs}`, { cache: 'no-store', signal })
       if (!r.ok) {
-        setErr(r.status === 403 ? 'دسترسی مجاز نیست' : r.status === 400 ? 'فیلترِ نامعتبر' : 'خواندن ژورنال انجام نشد')
+        setErr(r.status === 403 ? 'دسترسی مجاز نیست' : r.status === 400 ? 'فیلتر نامعتبر' : 'خواندن ژورنال انجام نشد')
         return
       }
       const j = await r.json()
@@ -147,7 +147,7 @@ export default function AdminLogsPage() {
           <div>
             <h1 className="text-[19px] font-bold">ژورنال رویدادها</h1>
             <p className="mt-1 text-[12.5px] text-[#6F6A5C]">
-              چه کسی، چه زمانی، از کجا، چه کرد. روی هر بازیگر یا IP بزنید تا فیلتر شود.
+              چه کسی، چه زمانی، از کجا، چه کرد، روی هر بازیگر یا IP بزنید تا فیلتر شود
             </p>
           </div>
           <button type="button" onClick={reload} disabled={loading} aria-label="تازه‌سازی"
@@ -177,7 +177,7 @@ export default function AdminLogsPage() {
 
         {pendingUA && rows.length > 0 && (
           <p className="mb-3 rounded-[10px] bg-[rgba(199,166,106,0.12)] px-3 py-2 text-[11.5px] text-[#8F6531]">
-            ستون «دستگاه» خالی است چون مهاجرت ۱۰۴ هنوز اجرا نشده. بقیه‌ی ردیف‌ها درست‌اند.
+            ستون «دستگاه» خالی است چون مهاجرت ۱۰۴ هنوز اجرا نشده، بقیه‌ی ردیف‌ها درست‌اند
           </p>
         )}
 
@@ -202,8 +202,8 @@ export default function AdminLogsPage() {
               <ScrollText size={22} className="mx-auto mb-2 text-[#9A968B]" aria-hidden />
               <p className="text-[13px] text-[#6F6A5C]">
                 {pendingTable
-                  ? 'این جدول هنوز در دیتابیس نیست.'
-                  : dirty ? 'با این فیلترها چیزی پیدا نشد.' : 'هنوز رویدادی ثبت نشده.'}
+                  ? 'این جدول هنوز در دیتابیس نیست'
+                  : dirty ? 'با این فیلترها چیزی پیدا نشد' : 'هنوز رویدادی ثبت نشده'}
               </p>
             </div>
           ) : tab === 'audit'
@@ -213,7 +213,7 @@ export default function AdminLogsPage() {
 
         {!loading && !err && rows.length > 0 && (
           <p className="mt-3 text-center text-[11.5px] text-[#9A968B]">
-            {toFaDigits(String(rows.length))} ردیف{rows.length >= 150 && ' — سقفِ هر صفحه؛ بازه‌ی تاریخ را تنگ‌تر کنید'}
+            {toFaDigits(String(rows.length))} ردیف{rows.length >= 150 && ' — سقف هر صفحه؛ بازه‌ی تاریخ را تنگ‌تر کنید'}
           </p>
         )}
       </div>

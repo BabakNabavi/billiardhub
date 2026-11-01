@@ -42,7 +42,7 @@ export async function PATCH(req: NextRequest) {
 
     /* مالک نقشِ اصلیِ ادمین را از این‌جا از دست نمی‌دهد (شرح در /api/roles/my) */
     if (await isPlatformOwner(userId)) {
-      return NextResponse.json({ message: 'مالکِ پلتفرم نقشِ اصلیِ ادمین را نگه می‌دارد — نقشِ نمایشی برای او عوض نمی‌شود' }, { status: 400, headers: CORS_HEADERS });
+      return NextResponse.json({ message: 'مالک پلتفرم نقش اصلی ادمین را نگه می‌دارد — نقش نمایشی برای او عوض نمی‌شود' }, { status: 400, headers: CORS_HEADERS });
     }
 
     const { data: user, error } = await getSupabaseServer()

@@ -572,7 +572,7 @@ export default function ClubDashboardPage() {
       if (selectedClubRef.current === cid && Array.isArray(res?.data?.coaches)) {
         setCoaches(res.data.coaches as CoachEntry[]);
       }
-      setCoachesError(res?.data?.message ?? 'ذخیره‌ی مربیان روی سرور انجام نشد؛ دوباره تلاش کنید.');
+      setCoachesError(res?.data?.message ?? 'ذخیره‌ی مربیان روی سرور انجام نشد؛ دوباره تلاش کنید');
     } finally { setCoachBusyId(''); }
   }, [lsKey, selectedClub]);
 
@@ -591,7 +591,7 @@ export default function ClubDashboardPage() {
       try { localStorage.removeItem(lsKey('tables')); } catch {}
     } catch (e: unknown) {
       const msg = (e as { response?: { data?: { message?: string } } })?.response?.data?.message;
-      setTablesError(msg || 'ذخیره‌ی میزها روی سرور انجام نشد؛ دوباره تلاش کنید.');
+      setTablesError(msg || 'ذخیره‌ی میزها روی سرور انجام نشد؛ دوباره تلاش کنید');
       try { localStorage.setItem(lsKey('tables'), JSON.stringify(next)); } catch {}
     } finally { setTablesSaving(false); }
   }, [lsKey, selectedClub]);
@@ -709,7 +709,7 @@ export default function ClubDashboardPage() {
       /* ⚠️ بدون این، شکست فچ فهرست مربیان را برای همیشه روی
          «در حال خواندن…» نگه می‌داشت — نه محتوا، نه خطا. */
       setCoachesReady(true);
-      setCoachesError('خواندن اطلاعات باشگاه انجام نشد؛ صفحه را تازه کنید.');
+      setCoachesError('خواندن اطلاعات باشگاه انجام نشد؛ صفحه را تازه کنید');
     });
 
     /* آمار شمردنی از سرور. شکستش کارت را خالی نمی‌کند — `null` می‌ماند
@@ -786,7 +786,7 @@ export default function ClubDashboardPage() {
       .catch((e: unknown) => {
         console.error('[dashboard/club] دریافت رزروها ناموفق:', e);
         setBookings([]);
-        setBookingsError('دریافت رزروها انجام نشد؛ صفحه را تازه کنید.');
+        setBookingsError('دریافت رزروها انجام نشد؛ صفحه را تازه کنید');
       });
   }, [selectedClub, verifiedManagerName]);
 
@@ -838,7 +838,7 @@ export default function ClubDashboardPage() {
      انجام می‌شود. */
   const cancelBookingByOwner = async (b: Booking) => {
     if (!canOwnerCancel(b)) {
-      notify('لغو از سوی باشگاه تنها تا ۴ ساعت پیش از شروع رزرو ممکن است.');
+      notify('لغو از سوی باشگاه تنها تا ۴ ساعت پیش از شروع رزرو ممکن است');
       return;
     }
     const paid = Number((b as Booking & { final_amount?: number }).final_amount ?? b.totalPrice ?? 0);
@@ -853,8 +853,8 @@ export default function ClubDashboardPage() {
        جمله همان را می‌گوید تا وعده‌ای داده نشود که انجام نمی‌شود. */
     const reason = await askText('لغو رزرو توسط باشگاه', {
       body: back > 0
-        ? `مبلغ ${back.toLocaleString('fa-IR')} تومان به‌طور کامل به مشتری بازگردانده می‌شود، و پیامک لغو با همین مبلغ برایش می‌رود.`
-        : 'این رزرو پرداختی نداشته و مبلغی بازگردانده نمی‌شود. پیامک لغو برای مشتری فرستاده می‌شود.',
+        ? `مبلغ ${back.toLocaleString('fa-IR')} تومان به‌طور کامل به مشتری بازگردانده می‌شود، و پیامک لغو با همین مبلغ برایش می‌رود`
+        : 'این رزرو پرداختی نداشته و مبلغی بازگردانده نمی‌شود، پیامک لغو برای مشتری فرستاده می‌شود',
       placeholder: 'دلیل لغو — در سابقه‌ی رزرو ثبت می‌شود',
       confirmLabel: 'لغو رزرو',
     });
@@ -870,8 +870,8 @@ export default function ClubDashboardPage() {
       if (!r.ok) throw new Error((j as { message?: string })?.message || 'لغو رزرو انجام نشد');
       setBookings(bs => bs.map(x => x.id === b.id ? { ...x, status: 'cancelled' } : x));
       notify(back > 0
-        ? `رزرو لغو شد. ${back.toLocaleString('fa-IR')} تومان در دستور پرداخت ادمین ثبت شد.`
-        : 'رزرو لغو شد.', 'ok');
+        ? `رزرو لغو شد ${back.toLocaleString('fa-IR')} تومان در دستور پرداخت ادمین ثبت شد`
+        : 'رزرو لغو شد', 'ok');
     } catch (e: unknown) {
       const msg = (e as { message?: string })?.message;
       setBookingsError(msg || 'لغو رزرو انجام نشد');
@@ -916,7 +916,7 @@ export default function ClubDashboardPage() {
     const typeLabel = TABLE_TYPE_LABELS[tableForm.type] || tableForm.type;
 
     if (capacity === 0) {
-      setTableFormError(`شما هیچ میز ${typeLabel} در اطلاعات باشگاه تعریف نکرده‌اید. ابتدا در تب «اطلاعات» تعداد میزها را وارد کنید`);
+      setTableFormError(`شما هیچ میز ${typeLabel} در اطلاعات باشگاه تعریف نکرده‌اید، ابتدا در تب «اطلاعات» تعداد میزها را وارد کنید`);
       return;
     }
     if (existing >= capacity) {
@@ -1071,7 +1071,7 @@ export default function ClubDashboardPage() {
       setInfoMsg({
         ok: false,
         text: missingColumn
-          ? 'این فیلد هنوز در دیتابیس ساخته نشده است (مهاجرت ۰۶۶ اجرا نشده).'
+          ? 'این فیلد هنوز در دیتابیس ساخته نشده است (مهاجرت ۰۶۶ اجرا نشده)'
           : /slug|duplicate|unique|23505/i.test(raw)
             ? 'این آدرس اختصاصی قبلا رزرو شده — نام دیگری بگذارید'
             : (r?.data?.message || 'ذخیره انجام نشد؛ دوباره تلاش کنید'),
@@ -1161,7 +1161,7 @@ export default function ClubDashboardPage() {
         ok: true,
         text: j.postalCodeStored === false
           ? 'آدرس یافت شد و ثبت شد (کد پستی پس از اجرای مهاجرت ذخیره می‌شود)'
-          : 'آدرس از کد پستی خوانده و ثبت شد. کد پستی از این پس قفل است؛ برای تغییر آن به پشتیبانی تیکت بزنید.',
+          : 'آدرس از کد پستی خوانده و ثبت شد، کد پستی از این پس قفل است؛ برای تغییر آن به پشتیبانی تیکت بزنید',
       });
     } catch {
       setPostalMsg({ ok: false, text: 'خطا در ارتباط با سرور' });
@@ -1195,7 +1195,7 @@ export default function ClubDashboardPage() {
           setGeoBusy(false);
           setGeoMsg({
             ok: false,
-            text: `دقت موقعیت پایین است (±${faDigit(String(acc))} متر) و ذخیره نشد. از تلفن همراه و داخل باشگاه دوباره تلاش کنید — یا از استعلام کد پستی استفاده کنید.`,
+            text: `دقت موقعیت پایین است (±${faDigit(String(acc))} متر) و ذخیره نشد، از تلفن همراه و داخل باشگاه دوباره تلاش کنید — یا از استعلام کد پستی استفاده کنید`,
           });
           return;
         }
@@ -1275,8 +1275,8 @@ export default function ClubDashboardPage() {
     } catch (e: unknown) {
       const raw = (e as { response?: { data?: { message?: string } } })?.response?.data?.message ?? '';
       setSurchargeError(/column|does not exist|schema cache/i.test(raw)
-        ? 'این تنظیم هنوز در دیتابیس ساخته نشده است (مایگریشن ۰۰۳ اجرا نشده).'
-        : raw || 'ذخیره‌ی تنظیمات انجام نشد؛ دوباره تلاش کنید.');
+        ? 'این تنظیم هنوز در دیتابیس ساخته نشده است (مایگریشن ۰۰۳ اجرا نشده)'
+        : raw || 'ذخیره‌ی تنظیمات انجام نشد؛ دوباره تلاش کنید');
     }
     finally { setSurchargeSaving(false); }
   };
@@ -1292,7 +1292,7 @@ export default function ClubDashboardPage() {
       try { localStorage.removeItem(`club-stats-${selectedClub.id}`); } catch { /* ignore */ }
       setStatsMsg({ ok: true, text: 'آمار باشگاه ذخیره شد' });
     } catch {
-      setStatsMsg({ ok: false, text: 'ذخیره‌ی آمار انجام نشد؛ دوباره تلاش کنید.' });
+      setStatsMsg({ ok: false, text: 'ذخیره‌ی آمار انجام نشد؛ دوباره تلاش کنید' });
     } finally { setStatsSaving(false); }
   };
 
@@ -1542,7 +1542,7 @@ export default function ClubDashboardPage() {
     setDelTournBusy(true);
     try {
       await deleteTournament(delTourn.id);
-      setDelTournMsg(`«${delTourn.name}» از فهرست مسابقات حذف شد.`);
+      setDelTournMsg(`«${delTourn.name}» از فهرست مسابقات حذف شد`);
       setDelTourn(null);
       window.setTimeout(() => setDelTournMsg(''), 6000);
     } finally { setDelTournBusy(false); }
@@ -1579,7 +1579,7 @@ export default function ClubDashboardPage() {
       if (!r.ok) { setTError(String(j.message ?? 'تغییر وضعیت انجام نشد')); return; }
       if (selectedClub) await loadTournaments(selectedClub.id);
     } catch {
-      setTError('ارتباط با سرور برقرار نشد؛ دوباره تلاش کنید.');
+      setTError('ارتباط با سرور برقرار نشد؛ دوباره تلاش کنید');
     } finally { setTStatusBusy(''); }
   };
 
@@ -1647,7 +1647,7 @@ export default function ClubDashboardPage() {
         cardNumber: '', cardHolder: '', bankName: '',
       });
     } catch {
-      setTError('ارتباط با سرور برقرار نشد؛ دوباره تلاش کنید.');
+      setTError('ارتباط با سرور برقرار نشد؛ دوباره تلاش کنید');
     } finally { setTLoading(false); }
   };
 
@@ -1723,7 +1723,7 @@ export default function ClubDashboardPage() {
       setTournamentTab('list');
       resetTForm();
     } catch {
-      setTError('ارتباط با سرور برقرار نشد؛ دوباره تلاش کنید.');
+      setTError('ارتباط با سرور برقرار نشد؛ دوباره تلاش کنید');
     } finally { setTLoading(false); }
   };
 
@@ -1816,7 +1816,7 @@ export default function ClubDashboardPage() {
       <Card>
         <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 14 }}><Building2 size={52} color="#D1D5DB" strokeWidth={1.1} /></div>
         <h2 style={{ fontSize: 20, fontWeight: 700, color: DARK, margin: '0 0 8px' }}>هنوز باشگاهی ثبت نکردی</h2>
-        <p style={{ color: '#6B7280', fontSize: 14, marginBottom: 24 }}>برای مدیریت باشگاه، ابتدا یک باشگاه ثبت کن.</p>
+        <p style={{ color: '#6B7280', fontSize: 14, marginBottom: 24 }}>برای مدیریت باشگاه، ابتدا یک باشگاه ثبت کن</p>
         <Link href="/clubs/new" style={{
           display: 'inline-flex', alignItems: 'center', gap: 6,
           background: 'rgba(199,166,106,0.14)', color: '#A07840',
@@ -2116,7 +2116,7 @@ export default function ClubDashboardPage() {
         }}>
           {selectedClub.verificationStatus === 'rejected' ? (
             <>
-              <b>ثبت این باشگاه تأیید نشد.</b>
+              <b>ثبت این باشگاه تأیید نشد</b>
               {selectedClub.rejectionReason && (
                 <div style={{ marginTop: 4, color: '#1C1B17', fontWeight: 500 }}>
                   {/* ادمین از فهرست بسته انتخاب می‌کند و کد انگلیسی
@@ -2125,14 +2125,14 @@ export default function ClubDashboardPage() {
                 </div>
               )}
               <div style={{ marginTop: 6, color: 'rgba(0,0,0,0.55)', fontWeight: 500 }}>
-                پس از اصلاح، همین‌جا ذخیره کنید — باشگاه خودکار دوباره به صف بررسی می‌رود.
+                پس از اصلاح، همین‌جا ذخیره کنید — باشگاه خودکار دوباره به صف بررسی می‌رود
               </div>
             </>
           ) : (
             <>
-              <b>باشگاه در انتظار بررسی کارشناسان است.</b>
+              <b>باشگاه در انتظار بررسی کارشناسان است</b>
               <div style={{ marginTop: 4, color: 'rgba(0,0,0,0.55)', fontWeight: 500 }}>
-                تا تأیید، در فهرست عمومی سایت نمایش داده نمی‌شود. اطلاعات و مدارک را کامل کنید تا بررسی سریع‌تر انجام شود.
+                تا تأیید، در فهرست عمومی سایت نمایش داده نمی‌شود، اطلاعات و مدارک را کامل کنید تا بررسی سریع‌تر انجام شود
               </div>
             </>
           )}
@@ -2280,8 +2280,8 @@ export default function ClubDashboardPage() {
               <span style={{ fontSize: 14, fontWeight: 700, color: '#991B1B' }}>منطقه خطرناک</span>
             </div>
             <p style={{ margin: '0 0 16px', fontSize: 13, color: '#6B7280', lineHeight: 1.7 }}>
-              حذف باشگاه <strong style={{ color: DARK }}>{selectedClub?.name}</strong> غیرقابل بازگشت است.
-              تمام اطلاعات، میزها و رزروها پاک می‌شوند.
+              حذف باشگاه <strong style={{ color: DARK }}>{selectedClub?.name}</strong> غیرقابل بازگشت است
+              تمام اطلاعات، میزها و رزروها پاک می‌شوند
             </p>
             {!deleteConfirm ? (
               <button onClick={() => setDeleteConfirm(true)} style={{
@@ -2296,7 +2296,7 @@ export default function ClubDashboardPage() {
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                 <div style={{ padding: '12px 16px', background: 'rgba(239,68,68,0.06)', borderRadius: 12, border: '1px solid rgba(239,68,68,0.25)', fontSize: 13, color: '#991B1B', fontWeight: 600 }}>
-                  آیا مطمئن هستید؟ این عمل قابل بازگشت نیست.
+                  آیا مطمئن هستید؟ این عمل قابل بازگشت نیست
                 </div>
                 <div style={{ display: 'flex', gap: 8 }}>
                   <button onClick={deleteClub} disabled={deleteLoading} style={{
@@ -2410,7 +2410,7 @@ export default function ClubDashboardPage() {
                     فیلد خاکستری فقط شبیه باگ به‌نظر می‌رسد. */}
                 {postalLocked ? (
                   <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 5, lineHeight: 1.9 }}>
-                    کد پستی استعلام و ثبت شده و قابل تغییر نیست. برای تغییر آن{' '}
+                    کد پستی استعلام و ثبت شده و قابل تغییر نیست، برای تغییر آن{' '}
                     <a href={`/contact?subject=${encodeURIComponent('درخواست تغییر کد پستی')}${selectedClub ? `&clubId=${selectedClub.id}` : ''}`}
                       style={{ color: '#A07840', fontWeight: 800, textDecoration: 'underline' }}>
                       به پشتیبانی تیکت بزنید
@@ -2418,8 +2418,8 @@ export default function ClubDashboardPage() {
                   </div>
                 ) : (
                   <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 5, lineHeight: 1.9 }}>
-                    با استعلام کد پستی، آدرس و موقعیت باشگاه خودکار پر می‌شود.
-                    استعلام فقط یک بار ممکن است، پس کد پستی را با دقت وارد کنید.
+                    با استعلام کد پستی، آدرس و موقعیت باشگاه خودکار پر می‌شود
+                    استعلام فقط یک بار ممکن است، پس کد پستی را با دقت وارد کنید
                   </div>
                 )}
               </div>
@@ -2442,7 +2442,7 @@ export default function ClubDashboardPage() {
                   {clubInfo.address || 'با استعلام کد پستی پر می‌شود'}
                 </div>
                 <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 4, lineHeight: 1.9 }}>
-                  از استعلام کد پستی — قابل تغییر نیست. توضیح‌های تکمیلی را در فیلد زیر بنویسید.
+                  از استعلام کد پستی — قابل تغییر نیست، توضیح‌های تکمیلی را در فیلد زیر بنویسید
                 </div>
               </div>
 
@@ -2503,8 +2503,8 @@ export default function ClubDashboardPage() {
                     </div>
                   )}
                   <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 7, lineHeight: 1.95 }}>
-                    کاربران می‌توانند باشگاه‌ها را بر اساس نزدیکی مرتب کنند؛ بدون موقعیت، باشگاه شما در آن فهرست نمی‌آید.
-                    استعلام کد پستی هم موقعیت را ثبت می‌کند، ولی اگر داخل باشگاه هستید این دکمه دقیق‌تر است.
+                    کاربران می‌توانند باشگاه‌ها را بر اساس نزدیکی مرتب کنند؛ بدون موقعیت، باشگاه شما در آن فهرست نمی‌آید
+                    استعلام کد پستی هم موقعیت را ثبت می‌کند، ولی اگر داخل باشگاه هستید این دکمه دقیق‌تر است
                   </div>
                 </div>
               </div>
@@ -2517,8 +2517,8 @@ export default function ClubDashboardPage() {
               <InputField label="تلفن"         value={clubInfo.phone}       onChange={v => setClubInfo(p => ({...p, phone: v}))}
                 placeholder="۲۲۸۵۹۵۵۱"
                 hint={telPrefix(clubInfo.province)
-                  ? `کد شهر ${telPrefix(clubInfo.province)} خودکار اضافه می‌شود — فقط شماره‌ی محلی را وارد کنید.`
-                  : 'استان را انتخاب کنید تا کد شهر تعیین شود.'} />
+                  ? `کد شهر ${telPrefix(clubInfo.province)} خودکار اضافه می‌شود — فقط شماره‌ی محلی را وارد کنید`
+                  : 'استان را انتخاب کنید تا کد شهر تعیین شود'} />
               <InputField label="وبسایت"       value={clubInfo.website}     onChange={v => setClubInfo(p => ({...p, website: v}))} placeholder="https://..." />
               <div style={{ gridColumn: '1 / -1' }}>
                 {/* ── جواز کسب ──
@@ -2568,7 +2568,7 @@ export default function ClubDashboardPage() {
                     </div>
                   )}
                   <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 6, lineHeight: 1.9 }}>
-                    عکس یا PDF، تا ۸ مگابایت. این مدرک خصوصی است و فقط شما و بررسی‌کننده‌ی سایت می‌بینیدش.
+                    عکس یا PDF، تا ۸ مگابایت، این مدرک خصوصی است و فقط شما و بررسی‌کننده‌ی سایت می‌بینیدش
                   </div>
                 </div>
               </div>
@@ -2666,14 +2666,14 @@ export default function ClubDashboardPage() {
           <Card style={{ border: '1px solid rgba(59,130,246,0.25)', background: 'rgba(59,130,246,0.02)' }}>
             <SectionTitle>💳 اطلاعات بانکی — دریافت وجه رزرو</SectionTitle>
             <p style={{ fontSize: 12, color: '#6B7280', margin: '0 0 16px', lineHeight: 1.7 }}>
-              کاربران از طریق <strong>درگاه بانکی امن</strong> پرداخت می‌کنند. درآمد رزروها پس از کسر کارمزد سیستم، در دوره‌های تسویه به حساب بانکی شما واریز می‌شود.
+              کاربران از طریق <strong>درگاه بانکی امن</strong> پرداخت می‌کنند، درآمد رزروها پس از کسر کارمزد سیستم، در دوره‌های تسویه به حساب بانکی شما واریز می‌شود
             </p>
 
             {needsIdentity && (
               <div style={{ marginBottom: 16, padding: '13px 15px', borderRadius: 13, background: 'rgba(199,166,106,0.10)', border: '1px solid rgba(199,166,106,0.34)' }}>
                 <div style={{ fontSize: 13, fontWeight: 800, color: '#A07840', marginBottom: 6 }}>ابتدا هویت خود را تأیید کنید</div>
                 <p style={{ fontSize: 12, color: '#6B7280', margin: '0 0 11px', lineHeight: 1.95 }}>
-                  حساب بانکی باید به نام خود صاحب باشگاه باشد. برای این بررسی، کد ملی و تاریخ تولد تأییدشده لازم است.
+                  حساب بانکی باید به نام خود صاحب باشگاه باشد، برای این بررسی، کد ملی و تاریخ تولد تأییدشده لازم است
                 </p>
                 <Link href="/profile/verify"
                   style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '8px 16px', borderRadius: 10, textDecoration: 'none', fontSize: 12.5, fontWeight: 800, background: 'rgba(199,166,106,0.16)', border: '1px solid rgba(199,166,106,0.45)', color: '#A07840' }}>
@@ -2731,7 +2731,7 @@ export default function ClubDashboardPage() {
                     color: bankLocked ? '#6B7280' : inputStyle.color,
                     border: cardBad ? '1px solid rgba(178,59,46,0.5)' : inputStyle.border }}
                 />
-                {cardBad && <div style={{ fontSize: 11.5, color: '#B23B2E', fontWeight: 700, marginTop: 5 }}>شماره کارت معتبر نیست — ۱۶ رقم را دوباره بررسی کنید.</div>}
+                {cardBad && <div style={{ fontSize: 11.5, color: '#B23B2E', fontWeight: 700, marginTop: 5 }}>شماره کارت معتبر نیست — ۱۶ رقم را دوباره بررسی کنید</div>}
               </div>
 
               <div>
@@ -2780,8 +2780,8 @@ export default function ClubDashboardPage() {
           <Card>
             <SectionTitle>آمار باشگاه</SectionTitle>
             <p style={{ fontSize: 12, color: '#9CA3AF', margin: '0 0 16px' }}>
-              این اعداد روی صفحه عمومی باشگاه نمایش داده می‌شوند. دو مورد اول
-              خودکار شمرده می‌شوند و قابل تغییر نیستند.
+              این اعداد روی صفحه عمومی باشگاه نمایش داده می‌شوند، دو مورد اول
+              خودکار شمرده می‌شوند و قابل تغییر نیستند
             </p>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(145px, 1fr))', gap: 14, marginBottom: 20 }}>
               {/* اعضا و مسابقات شمرده می‌شوند: هر کاربری که این باشگاه را
@@ -2836,7 +2836,7 @@ export default function ClubDashboardPage() {
           )}
 
           <div style={{ marginBottom: 14, padding: '11px 14px', borderRadius: 12, background: 'rgba(0,0,0,0.03)', fontSize: 12.5, lineHeight: 2, color: '#6B7280' }}>
-            فقط میزهایی که در این بخش ثبت می‌کنید در صفحه‌ی رزرو نمایش داده می‌شوند و قابل رزرو هستند.
+            فقط میزهایی که در این بخش ثبت می‌کنید در صفحه‌ی رزرو نمایش داده می‌شوند و قابل رزرو هستند
           </div>
 
           {showTableForm && (
@@ -2969,7 +2969,7 @@ export default function ClubDashboardPage() {
               <div style={{ borderTop: '1px solid #F0EDE8', marginTop: 4, paddingTop: 18 }}>
                 <SectionTitle>تخفیف‌های زمانی میزها</SectionTitle>
                 <p style={{ fontSize: 12, color: '#9CA3AF', marginBottom: 14, lineHeight: 1.7 }}>
-                  تخفیف زمانی فقط روی قیمت همین میز اعمال می‌شود (مثلا صبح‌ها تا ساعت ۱۲، ۲۰٪ تخفیف).
+                  تخفیف زمانی فقط روی قیمت همین میز اعمال می‌شود (مثلا صبح‌ها تا ساعت ۱۲، ۲۰٪ تخفیف)
                 </p>
                 {/* چیدمان قبلی flex-wrap با `flex: 1 1 110px` بود؛ کشوهای
                     ساعت پهن‌ترند و در موبایل روی هم می‌افتادند. حالا شبکه‌ای
@@ -3036,7 +3036,7 @@ export default function ClubDashboardPage() {
               <div style={{ borderTop: '1px solid #F0EDE8', marginTop: 4, paddingTop: 18 }}>
                 <SectionTitle>هزینه‌ی بازیکن اضافه — برای این میز</SectionTitle>
                 <p style={{ fontSize: 12, color: '#9CA3AF', marginBottom: 14, lineHeight: 1.7 }}>
-                  اگر خالی بماند، تنظیم عمومی باشگاه روی این میز اعمال می‌شود.
+                  اگر خالی بماند، تنظیم عمومی باشگاه روی این میز اعمال می‌شود
                 </p>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, alignItems: 'flex-end' }}>
                   <div style={{ flex: '1 1 120px', minWidth: 110 }}>
@@ -3058,7 +3058,7 @@ export default function ClubDashboardPage() {
                 {(tableForm.surchargeFrom || tableForm.surchargePercent) && (
                   <p style={{ fontSize: 12.5, color: '#6B7280', lineHeight: 2, marginTop: 10, marginBottom: 0 }}>
                     تا <b style={{ color: DARK }}>{faDigit(tableForm.surchargeFrom || '2')}</b> نفر بدون افزایش؛
-                    از نفر بعد، هر نفر <b style={{ color: DARK }}>{faDigit(tableForm.surchargePercent || '0')}٪</b> به مبلغ رزرو همین میز اضافه می‌شود.
+                    از نفر بعد، هر نفر <b style={{ color: DARK }}>{faDigit(tableForm.surchargePercent || '0')}٪</b> به مبلغ رزرو همین میز اضافه می‌شود
                   </p>
                 )}
               </div>
@@ -3261,7 +3261,7 @@ export default function ClubDashboardPage() {
                       <div style={{ borderTop: '1px solid #F0EDE8', marginTop: 4, paddingTop: 14, marginBottom: 14 }}>
                         <div style={{ fontSize: 12, color: '#6B7280', fontWeight: 700, marginBottom: 4 }}>هزینه‌ی بازیکن اضافه</div>
                         <p style={{ fontSize: 11, color: '#9CA3AF', margin: '0 0 10px', lineHeight: 1.7 }}>
-                          خالی بماند یعنی تنظیم عمومی باشگاه روی این میز اعمال می‌شود.
+                          خالی بماند یعنی تنظیم عمومی باشگاه روی این میز اعمال می‌شود
                         </p>
                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'flex-end' }}>
                           <div style={{ flex: '1 1 120px', minWidth: 110 }}>
@@ -3282,7 +3282,7 @@ export default function ClubDashboardPage() {
                         {(editForm.surchargeFrom || editForm.surchargePercent) && (
                           <p style={{ fontSize: 12, color: '#6B7280', lineHeight: 1.9, marginTop: 8, marginBottom: 0 }}>
                             تا <b style={{ color: DARK }}>{faDigit(editForm.surchargeFrom || '2')}</b> نفر بدون افزایش؛
-                            از نفر بعد، هر نفر <b style={{ color: DARK }}>{faDigit(editForm.surchargePercent || '0')}٪</b> به مبلغ رزرو همین میز اضافه می‌شود.
+                            از نفر بعد، هر نفر <b style={{ color: DARK }}>{faDigit(editForm.surchargePercent || '0')}٪</b> به مبلغ رزرو همین میز اضافه می‌شود
                           </p>
                         )}
                       </div>
@@ -3341,7 +3341,7 @@ export default function ClubDashboardPage() {
                 </span>
                 <span style={{ display: 'block', fontSize: 12, color: '#6B7280', lineHeight: 1.95, marginTop: 4 }}>
                   با فعال کردن این گزینه، به‌صورت دایمی امکان رزرو میز برای روز جاری غیرفعال
-                  می‌شود ولی رزرو برای روزهای آینده همچنان فعال خواهد بود.
+                  می‌شود ولی رزرو برای روزهای آینده همچنان فعال خواهد بود
                 </span>
               </span>
             </label>
@@ -3357,7 +3357,7 @@ export default function ClubDashboardPage() {
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10, flexWrap: 'wrap' }}>
               <span style={{ width: 9, height: 9, borderRadius: '50%', background: isReserveClosed ? '#DC2626' : '#16A34A', flexShrink: 0 }} />
               <span style={{ fontSize: 13.5, fontWeight: 800, color: '#1C1C1A' }}>{reserveClosedLabel}</span>
-              <span style={{ fontSize: 12, color: '#6B7280' }}>— وقتی بسته باشد، کسی نمی‌تواند از سایت رزرو کند.</span>
+              <span style={{ fontSize: 12, color: '#6B7280' }}>— وقتی بسته باشد، کسی نمی‌تواند از سایت رزرو کند</span>
             </div>
             {/* «یک روز» حذف شد چون همان کاری را می‌کرد که تیک «بستن رزرو
                 امروز» — دو راه برای یک نتیجه، با دو ذخیره‌گاه متفاوت.
@@ -3407,8 +3407,8 @@ export default function ClubDashboardPage() {
                 شماره‌ی دریافت پیامک‌ها
               </div>
               <p style={{ fontSize: 12, color: '#6B7280', lineHeight: 1.95, margin: '0 0 10px' }}>
-                پیامک رزروها و اطلاع‌رسانی‌ها به این شماره فرستاده می‌شود.
-                اگر خالی بماند، به شماره‌ی خود شما می‌رود.
+                پیامک رزروها و اطلاع‌رسانی‌ها به این شماره فرستاده می‌شود
+                اگر خالی بماند، به شماره‌ی خود شما می‌رود
               </p>
               <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
                 <input
@@ -3701,7 +3701,7 @@ export default function ClubDashboardPage() {
                 }}>
                   اگر کسی ثبت‌نام کرده باشد، مبلغ ورودی و ظرفیت محدود می‌شوند:
                   مبلغ فقط تا پیش از اولین پرداخت قابل تغییر است و ظرفیت را نمی‌شود
-                  کمتر از تعداد ثبت‌نام‌های فعلی گذاشت.
+                  کمتر از تعداد ثبت‌نام‌های فعلی گذاشت
                 </div>
               )}
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 20 }}>
@@ -3800,7 +3800,7 @@ export default function ClubDashboardPage() {
                       </div>
                       <div style={{ fontSize: 11.5, color: '#9CA3AF', lineHeight: 1.9 }}>
                         مسابقه تا آن لحظه در تب «بزودی» دیده می‌شود و سر همان ساعت
-                        خودکار به «در حال ثبت‌نام» می‌رود.
+                        خودکار به «در حال ثبت‌نام» می‌رود
                       </div>
                     </>
                   )}
@@ -4169,8 +4169,8 @@ export default function ClubDashboardPage() {
         open={!!delTourn}
         title="حذف مسابقه"
         body={<>مسابقه‌ی <b style={{ color: '#1A1A18' }}>{delTourn?.name}</b> از فهرست برداشته
-          می‌شود. ثبت‌نام‌ها و سابقه‌ی مالی‌اش برای حسابرسی می‌ماند، ولی دیگر در سایت
-          دیده نمی‌شود.</>}
+          می‌شود، ثبت‌نام‌ها و سابقه‌ی مالی‌اش برای حسابرسی می‌ماند، ولی دیگر در سایت
+          دیده نمی‌شود</>}
         confirmLabel="بله، حذف کن"
         busy={delTournBusy}
         onConfirm={() => void confirmDeleteTournament()}

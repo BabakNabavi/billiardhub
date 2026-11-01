@@ -63,7 +63,7 @@ export async function PATCH(req: NextRequest, ctx: { params: Promise<{ id: strin
     if (finErr) {
       console.error('[tournaments/status] bh_tournament_complete:', finErr.message);
       return NextResponse.json(
-        { message: 'ثبتِ مالیِ پایانِ مسابقه انجام نشد؛ وضعیت تغییر نکرد' }, { status: 500 });
+        { message: 'ثبت مالی پایان مسابقه انجام نشد؛ وضعیت تغییر نکرد' }, { status: 500 });
     }
   } else if (next === 'cancelled') {
     /* ── لغو هم رویدادِ مالی است ──

@@ -78,7 +78,7 @@ export async function POST(req: NextRequest) {
        سیم‌کارت آزمون می‌کند). */
     if (idVerified && await nationalIdBlocked(nid)) {
       return NextResponse.json(
-        { code: 'IDENTITY_BLOCKED', message: 'با این کد ملی امکانِ ساختِ حسابِ تازه نیست. برای پیگیری با پشتیبانی تماس بگیرید.' },
+        { code: 'IDENTITY_BLOCKED', message: 'با این کد ملی امکان ساخت حساب تازه نیست، برای پیگیری با پشتیبانی تماس بگیرید' },
         { status: 403, headers: CORS_HEADERS },
       );
     }

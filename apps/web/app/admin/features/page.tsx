@@ -106,8 +106,8 @@ export default function AdminFeaturesPage() {
           <ShieldCheck size={20} style={{ color: GOLD_D }} /> قابلیت‌های پلتفرم
         </h1>
         <p style={{ margin: 0, fontSize: 13, lineHeight: 1.9, color: SEC }}>
-          روشن یا خاموش کردن قابلیت‌ها بدون حذف داده. خاموش‌کردن فقط رابط را پنهان نمی‌کند —
-          سرور هم درخواست‌های مربوط را رد می‌کند.
+          روشن یا خاموش کردن قابلیت‌ها بدون حذف داده، خاموش‌کردن فقط رابط را پنهان نمی‌کند —
+          سرور هم درخواست‌های مربوط را رد می‌کند
         </p>
       </header>
 
@@ -172,9 +172,9 @@ export default function AdminFeaturesPage() {
             <p style={{ display: 'flex', gap: 8, alignItems: 'flex-start', margin: '15px 0 0', padding: '10px 12px', background: 'rgba(199,166,106,0.07)', border: '1px solid rgba(199,166,106,0.22)', borderRadius: 10, fontSize: 12, lineHeight: 1.9, color: '#6B5225' }}>
               <Info size={14} style={{ flexShrink: 0, marginTop: 3 }} />
               <span>
-                خاموش‌کردن هیچ داده‌ای را حذف نمی‌کند. گفتگوها، پاسخ‌ها و اعلان‌های قبلی
-                دست‌نخورده می‌مانند و با روشن‌کردن دوباره سر جای خودشان‌اند.
-                تغییر بلافاصله برای همه اعمال می‌شود.
+                خاموش‌کردن هیچ داده‌ای را حذف نمی‌کند، گفتگوها، پاسخ‌ها و اعلان‌های قبلی
+                دست‌نخورده می‌مانند و با روشن‌کردن دوباره سر جای خودشان‌اند
+                تغییر بلافاصله برای همه اعمال می‌شود
               </span>
             </p>
           </section>

@@ -117,7 +117,7 @@ async function handle(req: NextRequest, providerName: string) {
         action: 'AD_BOOST_REF_REUSED', entityType: 'ad_boost', entityId: o.id,
         newValue: { refId: String(v.refId).slice(0, 64) }, ip: clientIp(req) ?? undefined,
       });
-      return fail('این پرداخت قبلا برای سفارشِ دیگری ثبت شده است');
+      return fail('این پرداخت قبلا برای سفارش دیگری ثبت شده است');
     }
   }
 
@@ -142,7 +142,7 @@ async function handle(req: NextRequest, providerName: string) {
       ip: clientIp(req) ?? undefined,
     });
     /* پرداختی که قبلا سفارشِ دیگری را اعمال کرده، پولِ تازه نیست */
-    if (reused) return fail('این پرداخت قبلا برای سفارشِ دیگری ثبت شده است');
+    if (reused) return fail('این پرداخت قبلا برای سفارش دیگری ثبت شده است');
     return fail('پرداخت انجام شد ولی ارتقا اعمال نشد — با پشتیبانی تماس بگیرید');
   }
 

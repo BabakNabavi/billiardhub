@@ -44,10 +44,10 @@ export function LiveChannelsGrid({ clubId, tournamentId, hideEmpty = false, head
   }, [clubId, tournamentId, onCount])
 
   if (rows === null && !failed) {
-    return hideEmpty ? null : <div className="h-24 animate-pulse rounded-card bg-ink/[.05]" aria-label="در حالِ بارگذاری" />
+    return hideEmpty ? null : <div className="h-24 animate-pulse rounded-card bg-ink/[.05]" aria-label="در حال بارگذاری" />
   }
-  if (failed && !rows) return hideEmpty ? null : <p className="text-sub text-ink-3">فهرستِ پخش‌ها فعلاً در دسترس نیست.</p>
-  if (!rows || rows.length === 0) return hideEmpty ? null : <p className="text-sub text-ink-3">الان هیچ کانالی پخشِ زنده ندارد.</p>
+  if (failed && !rows) return hideEmpty ? null : <p className="text-sub text-ink-3">فهرست پخش‌ها فعلا در دسترس نیست</p>
+  if (!rows || rows.length === 0) return hideEmpty ? null : <p className="text-sub text-ink-3">الان هیچ کانالی پخش زنده ندارد</p>
 
   return (
     <section className="flex flex-col gap-3" aria-label={heading ?? 'کانال‌های زنده'}>

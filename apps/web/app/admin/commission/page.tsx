@@ -100,7 +100,7 @@ export default function AdminCommission() {
         <h1 style={{ fontSize: 21, fontWeight: 900, color: INK, margin: 0 }}>نرخ کمیسیون</h1>
       </div>
       <p style={{ fontSize: 12.5, color: SEC, lineHeight: 2, margin: '0 0 16px', maxWidth: 700 }}>
-        سهم پلتفرم از هر رزرو یا ثبت‌نام مسابقه. نرخ اختصاصی یک باشگاه بر نرخ سراسری اولویت دارد.
+        سهم پلتفرم از هر رزرو یا ثبت‌نام مسابقه، نرخ اختصاصی یک باشگاه بر نرخ سراسری اولویت دارد
       </p>
 
       {/* ── نرخ‌های فعال ── */}
@@ -110,7 +110,7 @@ export default function AdminCommission() {
             border: `1px solid rgba(178,59,46,0.3)`, background: 'rgba(178,59,46,0.05)',
             borderRadius: 14, padding: '13px 16px', fontSize: 12.5, color: RED, lineHeight: 1.95,
           }}>
-            هیچ نرخی فعال نیست — یعنی کمیسیون <b>صفر</b> است و کل مبلغ به باشگاه می‌رسد.
+            هیچ نرخی فعال نیست — یعنی کمیسیون <b>صفر</b> است و کل مبلغ به باشگاه می‌رسد
           </div>
         ) : rules.map(r => (
           <div key={r.id} style={{
@@ -202,9 +202,9 @@ export default function AdminCommission() {
           borderTop: `1px solid ${LINE}`, fontSize: 11.5, color: MUT, lineHeight: 2,
         }}>
           <Info size={14} style={{ flexShrink: 0, marginTop: 4 }} />
-          نرخ تازه فقط روی رزروهای <b style={{ color: SEC }}>بعدی</b> اثر دارد. کمیسیون هر رزرو
-          همان لحظه روی خودش ثبت می‌شود، پس گزارش‌های مالی گذشته دست‌نخورده می‌مانند.
-          نرخ قبلی هم پاک نمی‌شود؛ به تاریخچه می‌رود.
+          نرخ تازه فقط روی رزروهای <b style={{ color: SEC }}>بعدی</b> اثر دارد، کمیسیون هر رزرو
+          همان لحظه روی خودش ثبت می‌شود، پس گزارش‌های مالی گذشته دست‌نخورده می‌مانند
+          نرخ قبلی هم پاک نمی‌شود؛ به تاریخچه می‌رود
         </p>
       </div>
 

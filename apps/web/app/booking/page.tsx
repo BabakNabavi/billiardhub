@@ -27,7 +27,7 @@ export default function MyBookingsPage() {
             </h1>
           </div>
           <p style={{ fontSize: 13, color: MUT, margin: '0 0 22px', lineHeight: 2 }}>
-            رزروهای گذشته و پیش‌رو، وضعیت پرداخت و امکان لغو.
+            رزروهای گذشته و پیش‌رو، وضعیت پرداخت و امکان لغو
           </p>
 
           <div style={{ background: '#fff', border: `1px solid ${LINE}`, borderRadius: 18, padding: 'clamp(14px,3vw,20px)' }}>

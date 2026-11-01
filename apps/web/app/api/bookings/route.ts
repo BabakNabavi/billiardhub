@@ -111,13 +111,13 @@ export async function POST(req: NextRequest) {
 
   if (closure.always) {
     return NextResponse.json(
-      { message: 'رزرو آنلاین این باشگاه بسته است. لطفا مستقیم با باشگاه تماس بگیرید.' },
+      { message: 'رزرو آنلاین این باشگاه بسته است، لطفا مستقیم با باشگاه تماس بگیرید' },
       { status: 409 },
     );
   }
   if (isDateClosed(bookingDate, closure)) {
     return NextResponse.json(
-      { message: 'رزرو آنلاین این باشگاه برای این تاریخ بسته است. لطفا روز دیگری انتخاب کنید.' },
+      { message: 'رزرو آنلاین این باشگاه برای این تاریخ بسته است، لطفا روز دیگری انتخاب کنید' },
       { status: 409 },
     );
   }
@@ -130,7 +130,7 @@ export async function POST(req: NextRequest) {
     const clash = hours.filter(h => blockedHours.includes(h));
     if (clash.length > 0) {
       return NextResponse.json(
-        { message: 'بعضی از ساعت‌های انتخابی در بازه‌ای هستند که باشگاه رزرو را بسته است.' },
+        { message: 'بعضی از ساعت‌های انتخابی در بازه‌ای هستند که باشگاه رزرو را بسته است' },
         { status: 409 },
       );
     }

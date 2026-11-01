@@ -48,7 +48,7 @@ export default async function SearchPage({ searchParams }: { searchParams: SP })
         <h1 className="m-0 text-title text-ink">جست‌وجو در بیلیارد هاب</h1>
 
         <Form action="/search" role="search" className="mt-4 flex max-w-2xl items-center gap-2">
-          <label htmlFor="sq" className="sr-only">عبارتِ جست‌وجو</label>
+          <label htmlFor="sq" className="sr-only">عبارت جست‌وجو</label>
           <div className="flex h-12 min-w-0 flex-1 items-center gap-2 rounded-field border border-line/10 bg-surface px-4
                           focus-within:border-gold-deep focus-within:ring-2 focus-within:ring-gold/25">
             <Search size={18} aria-hidden className="shrink-0 text-ink-2" />
@@ -83,11 +83,11 @@ async function Results({ q }: { q: string }) {
   return (
     <>
       {q && groups === null && (
-        <p className="m-0 mt-4 text-body text-ink-2">دست‌کم دو حرف بنویسید.</p>
+        <p className="m-0 mt-4 text-body text-ink-2">دست‌کم دو حرف بنویسید</p>
       )}
       {groups && (
         <p aria-live="polite" className="m-0 mt-4 text-body text-ink-2">
-          {total > 0 ? `${faNum(total)} نتیجه برای «${q}»` : `برای «${q}» چیزی پیدا نشد.`}
+          {total > 0 ? `${faNum(total)} نتیجه برای «${q}»` : `برای «${q}» چیزی پیدا نشد`}
         </p>
       )}
       {failed.length > 0 && (
@@ -100,7 +100,7 @@ async function Results({ q }: { q: string }) {
 
       {(!groups || total === 0) && (
         <div className="mt-12">
-          <h2 className="m-0 mb-6 text-section text-ink">{groups ? 'شاید دنبالِ یکی از این‌ها بودید' : 'یا از بخش‌ها شروع کنید'}</h2>
+          <h2 className="m-0 mb-6 text-section text-ink">{groups ? 'شاید دنبال یکی از این‌ها بودید' : 'یا از بخش‌ها شروع کنید'}</h2>
           <ExploreCards items={EXPLORE_ITEMS.slice(0, 6)} className="grid grid-cols-3 gap-3 sm:grid-cols-6 sm:gap-4" />
         </div>
       )}

@@ -179,7 +179,7 @@ async function attach(
       .test(String((e as Error)?.message ?? e));
     stopStream(stream);
     set({ error: stale
-      ? 'نسخه‌ی صفحه به‌روز نیست؛ صفحه را تازه کنید و دوباره شروع کنید.'
+      ? 'نسخه‌ی صفحه به‌روز نیست؛ صفحه را تازه کنید و دوباره شروع کنید'
       : 'اتصال بی‌درنگ در دسترس نیست' });
     return false;
   }
@@ -357,7 +357,7 @@ async function reviveOnce(): Promise<void> {
       const n = (tries.get(f.angleId) ?? 0) + 1;
       tries.set(f.angleId, n);
       if (n > MAX_REVIVE) {
-        set({ error: 'دوربین وصل نشد. دوربین دیگری انتخاب کنید یا پخش را دوباره شروع کنید.' });
+        set({ error: 'دوربین وصل نشد، دوربین دیگری انتخاب کنید یا پخش را دوباره شروع کنید' });
         continue;
       }
       const r = await openCamera(presetOf(state.quality), {
@@ -374,7 +374,7 @@ async function reviveOnce(): Promise<void> {
       /* ⚠️ اگر وصل‌کردنِ این یکی، دیگری را کشت، دستگاه بیش از یک
          دوربینِ هم‌زمان نمی‌دهد. ادامه دادن یعنی پینگ‌پنگِ بی‌پایان. */
       if (deadFeeds().some(x => x.angleId !== f.angleId)) {
-        set({ error: 'این دستگاه فقط یک دوربین را هم‌زمان باز می‌کند.' });
+        set({ error: 'این دستگاه فقط یک دوربین را هم‌زمان باز می‌کند' });
         break;
       }
     }
@@ -463,7 +463,7 @@ export async function endLocal(): Promise<void> {
      داشته می‌شود تا دکمه‌ی «پایان پخش» دوباره قابلِ زدن باشد. */
   const r = await stopLive(s.id, ownerKey) as { ok?: boolean };
   if (r?.ok) set({ session: null, owned: false });
-  else set({ error: 'پایان پخش روی سرور ثبت نشد؛ دوباره تلاش کنید.' });
+  else set({ error: 'پایان پخش روی سرور ثبت نشد؛ دوباره تلاش کنید' });
 }
 
 /** فقط برای وقتی سرور می‌گوید پخش تمام شده و ما مهمان بودیم. */

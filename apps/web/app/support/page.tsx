@@ -75,7 +75,7 @@ export default function MyTicketsPage() {
             تیکت‌های من
           </h1>
           <p style={{ fontSize: 13.5, color: SEC, marginTop: 6, lineHeight: 2 }}>
-            پیام‌هایی که به پشتیبانی فرستاده‌اید و پاسخشان.
+            پیام‌هایی که به پشتیبانی فرستاده‌اید و پاسخشان
           </p>
           <Link href="/contact" style={{
             display: 'inline-flex', alignItems: 'center', gap: 6, marginTop: 12,
@@ -92,9 +92,9 @@ export default function MyTicketsPage() {
             <Loader2 size={22} style={{ animation: 'spin 1s linear infinite' }} />
           </div>
         ) : needsLogin ? (
-          <Empty text="برای دیدن تیکت‌هایتان وارد شوید." href="/login" cta="ورود" />
+          <Empty text="برای دیدن تیکت‌هایتان وارد شوید" href="/login" cta="ورود" />
         ) : tickets.length === 0 ? (
-          <Empty text="هنوز پیامی به پشتیبانی نفرستاده‌اید." href="/contact" cta="ارسال پیام" />
+          <Empty text="هنوز پیامی به پشتیبانی نفرستاده‌اید" href="/contact" cta="ارسال پیام" />
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             {tickets.map(t => {
@@ -138,7 +138,7 @@ export default function MyTicketsPage() {
                     </div>
                   ) : (
                     <div style={{ marginTop: 10, fontSize: 12, color: MUT, lineHeight: 2 }}>
-                      هنوز پاسخی ثبت نشده است.
+                      هنوز پاسخی ثبت نشده است
                     </div>
                   )}
                 </div>

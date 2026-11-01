@@ -142,7 +142,7 @@ export default function AdminProductsPage() {
   };
 
   const handleDelete = async (productId: string) => {
-    if (!(await ask('این آگهی برای همیشه حذف شود؟', { body: 'برگشت‌پذیر نیست. اگر فقط می‌خواهید از سایت برداشته شود، «رد کردن» یا «توقف موقت» را بزنید.' }))) return;
+    if (!(await ask('این آگهی برای همیشه حذف شود؟', { body: 'برگشت‌پذیر نیست، اگر فقط می‌خواهید از سایت برداشته شود، «رد کردن» یا «توقف موقت» را بزنید' }))) return;
     setErr('');
     try {
       await api.delete(`/products/${productId}`);
@@ -200,8 +200,8 @@ export default function AdminProductsPage() {
         </button>
         <span className="text-xs leading-7" style={{ color: '#5B564B' }}>
           {approvalOn
-            ? 'هر آگهی تازه تا تأیید شما منتشر نمی‌شود.'
-            : 'آگهی‌ها بی‌درنگ منتشر می‌شوند و شما بعدا می‌توانید ردشان کنید.'}
+            ? 'هر آگهی تازه تا تأیید شما منتشر نمی‌شود'
+            : 'آگهی‌ها بی‌درنگ منتشر می‌شوند و شما بعدا می‌توانید ردشان کنید'}
         </span>
       </div>
 
@@ -406,11 +406,11 @@ export default function AdminProductsPage() {
               رد کردن آگهی
             </h3>
             <p style={{ fontSize: 12.5, color: '#6F6A5C', margin: '0 0 16px', lineHeight: 1.95 }}>
-              دلیل را بنویسید — همین متن به فروشنده نشان داده می‌شود. رد کردن بی‌دلیل
-              یعنی همان آگهی دوباره فرستاده می‌شود و وقت هر دو طرف تلف می‌شود.
+              دلیل را بنویسید — همین متن به فروشنده نشان داده می‌شود، رد کردن بی‌دلیل
+              یعنی همان آگهی دوباره فرستاده می‌شود و وقت هر دو طرف تلف می‌شود
             </p>
             <textarea value={rejectNote} onChange={e => setRejectNote(e.target.value)} rows={4}
-              placeholder="مثال: تصویر محصول با عنوان آگهی نمی‌خواند."
+              placeholder="مثال: تصویر محصول با عنوان آگهی نمی‌خواند"
               style={{
                 width: '100%', boxSizing: 'border-box', padding: '12px 14px', borderRadius: 12,
                 border: '1px solid #EAE5DA', fontSize: 13, fontFamily: 'inherit',

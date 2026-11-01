@@ -32,7 +32,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   const title = `${d.channel.title} — ${d.channel.club.name} | پخش زنده بیلیارد هاب`
   return {
     title: { absolute: title },
-    description: `پخش زنده و آرشیوِ ${d.channel.title} از ${d.channel.club.name} در بیلیارد هاب.`,
+    description: `پخش زنده و آرشیو ${d.channel.title} از ${d.channel.club.name} در بیلیارد هاب`,
     alternates: { canonical: `/live/c/${id}` },
   }
 }
@@ -62,14 +62,14 @@ export default async function ChannelPage({ params }: { params: Promise<{ id: st
       <ChannelWatch channelId={ch.id} title={ch.title} initialLive={ch.isLive} />
 
       <section className="flex flex-col gap-3" aria-labelledby="archive-h">
-        <h2 id="archive-h" className="text-section text-ink">آرشیوِ پخش‌ها</h2>
+        <h2 id="archive-h" className="text-section text-ink">آرشیو پخش‌ها</h2>
         {archiveLock === 'login' ? (
           <p className="rounded-card bg-ink/[.03] px-4 py-6 text-sub text-ink-3">
-            ضبط‌های این کانال فقط برای کاربرانِ عضو است.{' '}
+            ضبط‌های این کانال فقط برای کاربران عضو است{' '}
             <Link href={`/login?next=/live/c/${ch.id}`} className="rounded font-bold text-gold-text hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-deep">ورود</Link>
           </p>
         ) : archiveLock === 'blocked'
-          ? <p className="rounded-card bg-ink/[.03] px-4 py-6 text-sub text-ink-3">آرشیوِ این کانال در دسترس نیست.</p>
+          ? <p className="rounded-card bg-ink/[.03] px-4 py-6 text-sub text-ink-3">آرشیو این کانال در دسترس نیست</p>
           : <ArchiveList items={archive} />}
       </section>
     </main>

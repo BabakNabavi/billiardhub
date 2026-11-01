@@ -124,7 +124,7 @@ export default function PlayerDashboard() {
     const f = e.target.files?.[0]; if (!f) return
     setBusy(true)
     try { set('photo', await compressImage(f, 600, 0.72)) }
-    catch { setErr('عکس خوانده نشد.') }
+    catch { setErr('عکس خوانده نشد') }
     finally { setBusy(false); e.target.value = '' }
   }
 
@@ -132,7 +132,7 @@ export default function PlayerDashboard() {
     const f = e.target.files?.[0]; if (!f) return
     setBusy(true)
     try { set('scene', await compressImage(f, 1600, 0.7)) }
-    catch { setErr('عکس خوانده نشد.') }
+    catch { setErr('عکس خوانده نشد') }
     finally { setBusy(false); e.target.value = '' }
   }
 
@@ -143,7 +143,7 @@ export default function PlayerDashboard() {
   }
 
   const addHighlight = () => {
-    if (!hl.year.trim() || !hl.title.trim()) { setErr('سال و عنوان افتخار لازم است.'); return }
+    if (!hl.year.trim() || !hl.title.trim()) { setErr('سال و عنوان افتخار لازم است'); return }
     const item: PlayerHighlight = { year: hl.year.trim(), title: hl.title.trim() }
     set('highlights', [...form.highlights, item]); setHl({ year: '', title: '' })
   }
@@ -174,7 +174,7 @@ export default function PlayerDashboard() {
     if (!savedSlug) return Promise.resolve(true)   // پروفایلِ تازه: با «ذخیره»ی اصلی می‌رود
     const run = async (): Promise<boolean> => {
       const cur = await fetchMyProfileResult<PlayerProfile>('player')
-      if (cur.state !== 'found') { setErr('ذخیره‌ی گالری انجام نشد — اتصال را بررسی کنید و دوباره امتحان کنید.'); return false }
+      if (cur.state !== 'found') { setErr('ذخیره‌ی گالری انجام نشد — اتصال را بررسی کنید و دوباره امتحان کنید'); return false }
       const base = normalizePlayerMedia(cur.profile.data)
       const next = op({ gallery: base.gallery, albums: base.albums })
       const res = await saveProfileRemote('player', cur.profile.slug,
@@ -197,8 +197,8 @@ export default function PlayerDashboard() {
 
   const addAlbum = () => {
     const n = albTitle.trim()
-    if (!n) { setErr('نام آلبوم لازم است.'); return }
-    if (form.albums.some(x => x.trim() === n)) { setErr('آلبومی با همین نام هست.'); return }
+    if (!n) { setErr('نام آلبوم لازم است'); return }
+    if (form.albums.some(x => x.trim() === n)) { setErr('آلبومی با همین نام هست'); return }
     setAlbTitle('')
     void mutateMedia(m => (m.albums.includes(n) ? m : { ...m, albums: [...m.albums, n] }))
   }
@@ -213,7 +213,7 @@ export default function PlayerDashboard() {
         ...(album ? { album } : {}),
       })))
       void mutateMedia(m => ({ ...m, gallery: [...m.gallery, ...items] }))
-    } catch { setErr('آپلود نشد. دوباره تلاش کنید.') }
+    } catch { setErr('آپلود نشد، دوباره تلاش کنید') }
     finally { setBusy(false) }
   }
   const removeGalleryItem = (id: string) => {
@@ -229,11 +229,11 @@ export default function PlayerDashboard() {
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!form.name.trim())   { setErr('نام و نام‌خانوادگی لازم است.'); return }
-    if (!form.nameEn.trim()) { setErr('نام لاتین لازم است.'); return }
-    if (!form.city)          { setErr('شهر را انتخاب کنید.'); return }
-    if (form.disciplines.length === 0) { setErr('حداقل یک رشته را انتخاب کنید.'); return }
-    if (!form.intro.trim())  { setErr('معرفی کوتاه لازم است.'); return }
+    if (!form.name.trim())   { setErr('نام و نام‌خانوادگی لازم است'); return }
+    if (!form.nameEn.trim()) { setErr('نام لاتین لازم است'); return }
+    if (!form.city)          { setErr('شهر را انتخاب کنید'); return }
+    if (form.disciplines.length === 0) { setErr('حداقل یک رشته را انتخاب کنید'); return }
+    if (!form.intro.trim())  { setErr('معرفی کوتاه لازم است'); return }
 
     const profile = {
       ...form,
@@ -270,7 +270,7 @@ export default function PlayerDashboard() {
         <div className={`${CARD} max-w-[420px]`}>
           <Trophy size={26} className="mx-auto mb-3 text-[#6F6A5C]" />
           <h1 className="text-[16px] font-bold">این صفحه مخصوص بازیکنان است</h1>
-          <p className="mt-2 text-[13px] leading-relaxed text-[#5B564B]">برای ساختن پروفایل بازیکن، اول باید نقش «بازیکن» را بگیرید.</p>
+          <p className="mt-2 text-[13px] leading-relaxed text-[#5B564B]">برای ساختن پروفایل بازیکن، اول باید نقش «بازیکن» را بگیرید</p>
           <Link href="/profile/role" className={`${LQ_BTN} mt-4`}>انتخاب نقش</Link>
         </div>
       </div>
@@ -296,7 +296,7 @@ export default function PlayerDashboard() {
         <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
           <div>
             <h1 className="text-[19px] font-bold">پنل بازیکن</h1>
-            <p className="mt-1 text-[12.5px] text-[#6F6A5C]">هرچه این‌جا وارد کنید، همان در پروفایل عمومی شما در بخش «بازیکنان» دیده می‌شود.</p>
+            <p className="mt-1 text-[12.5px] text-[#6F6A5C]">هرچه این‌جا وارد کنید، همان در پروفایل عمومی شما در بخش «بازیکنان» دیده می‌شود</p>
           </div>
           <Link href={`/players/${form.slug}`} className={LQ_BTN}>
             <ArrowLeft size={14} /> مشاهده‌ی پروفایل
@@ -386,7 +386,7 @@ export default function PlayerDashboard() {
           {/* ═══ ظاهر کارت ═══ */}
           <section className={CARD}>
             <h2 className="mb-1 text-[14.5px] font-bold">ظاهر کارت و پس‌زمینه</h2>
-            <p className="mb-4 text-[12px] text-[#6F6A5C]">تم رنگی کارت و تصویر پس‌زمینه‌ی سینمایی پروفایل شما.</p>
+            <p className="mb-4 text-[12px] text-[#6F6A5C]">تم رنگی کارت و تصویر پس‌زمینه‌ی سینمایی پروفایل شما</p>
             <div className="mb-4 flex flex-wrap gap-2">
               {(Object.keys(TONES) as (keyof typeof TONES)[]).map(k => {
                 const t = TONES[k]
@@ -466,7 +466,7 @@ export default function PlayerDashboard() {
           {/* ═══ افتخارات ═══ */}
           <section className={CARD}>
             <h2 className="mb-1 text-[14.5px] font-bold">افتخارات و دستاوردها</h2>
-            <p className="mb-4 text-[12px] text-[#6F6A5C]">به‌شکل تایم‌لاین در پروفایل نمایش داده می‌شود.</p>
+            <p className="mb-4 text-[12px] text-[#6F6A5C]">به‌شکل تایم‌لاین در پروفایل نمایش داده می‌شود</p>
             {form.highlights.length > 0 && (
               <div className="mb-4 space-y-2">
                 {form.highlights.map((h, i) => (
@@ -520,7 +520,7 @@ export default function PlayerDashboard() {
                         </span>
                       ))}
                     </div>
-                  ) : <p className="text-[11.5px] text-[#A69F8E]">هنوز عکسی ندارد.</p>}
+                  ) : <p className="text-[11.5px] text-[#A69F8E]">هنوز عکسی ندارد</p>}
                 </div>
               )
             })}
@@ -556,7 +556,7 @@ export default function PlayerDashboard() {
               disabled={busy}>
               ذخیره و انتشار پروفایل
             </button>
-            {saved && <span className="text-[12.5px] font-bold text-[#0E7A38]">ذخیره و منتشر شد ✓ — در بخش «بازیکنان» نمایش داده می‌شود.</span>}
+            {saved && <span className="text-[12.5px] font-bold text-[#0E7A38]">ذخیره و منتشر شد ✓ — در بخش «بازیکنان» نمایش داده می‌شود</span>}
             {err && <span className="text-[12.5px] font-bold text-[#B23B2E]">{err}</span>}
           </div>
         </form>

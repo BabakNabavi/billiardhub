@@ -29,7 +29,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     if (!ch || ch.archivedAt) return NextResponse.json({ message: 'کانال یافت نشد' }, { status: 404 })
     if (!ch.isLive || ch.adminBlocked || (await clubSettings(ch.clubId)).blocked) return NextResponse.json({ live: false, viewers: 0 })
     if (!canWatch(ch.access, !!sessionFromRequest(req))) {
-      return NextResponse.json({ message: 'تماشای این پخش فقط برای کاربرانِ عضو است', needLogin: true }, { status: 401 })
+      return NextResponse.json({ message: 'تماشای این پخش فقط برای کاربران عضو است', needLogin: true }, { status: 401 })
     }
     const viewers = await viewerBeat(ch, body.data.viewerId, ipOf(req))
     let url: string | null = null

@@ -121,7 +121,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ id: st
             ) : (
               /* ⚠️ خبری که فقط تیتر و چکیده دارد واقعا همین است؛
                  متن ساختگی جایش نمی‌گذاریم. */
-              <p className="nr-nobody">متن کامل این خبر هنوز منتشر نشده است.</p>
+              <p className="nr-nobody">متن کامل این خبر هنوز منتشر نشده است</p>
             )}
 
             {a.tags.length > 0 && (

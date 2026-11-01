@@ -133,12 +133,12 @@ export default function SiteAddressField({
       )}
       {!loading && locked && (
         <p style={{ fontSize: 11.5, color: '#8F6531', background: 'rgba(199,166,106,0.10)', border: '1px solid rgba(199,166,106,0.26)', borderRadius: 9, padding: '7px 10px', margin: 0, lineHeight: 1.9 }}>
-          این نشانی ثبت شده و دیگر قابل تغییر نیست — نشانی اینترنتی دائمی شماست.
+          این نشانی ثبت شده و دیگر قابل تغییر نیست — نشانی اینترنتی دائمی شماست
         </p>
       )}
       {!loading && !locked && (
         <p style={{ fontSize: 11.5, color: 'rgba(0,0,0,0.50)', margin: 0, lineHeight: 1.9 }}>
-          در انتخاب نام دقت کنید: پس از ذخیره <b style={{ color: '#B23B2E' }}>غیرقابل تغییر</b> است و نشانی اینترنتی دائمی شما می‌شود.
+          در انتخاب نام دقت کنید: پس از ذخیره <b style={{ color: '#B23B2E' }}>غیرقابل تغییر</b> است و نشانی اینترنتی دائمی شما می‌شود
         </p>
       )}
 

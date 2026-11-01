@@ -461,12 +461,12 @@ function safeRemote(raw: unknown): Partial<FormState> {
           </div>
           <h1 style={{ fontSize: 20, fontWeight: 800, marginBottom: 10 }}>اطلاعات شما ثبت شد</h1>
           <p style={{ fontSize: 13.5, color: TEXT_S, lineHeight: 1.9, marginBottom: 8 }}>
-            پروفایل شما برای بررسی و تایید به ادمین سیستم ارسال شد.
+            پروفایل شما برای بررسی و تایید به ادمین سیستم ارسال شد
           </p>
           <p style={{ fontSize: 12.5, color: TEXT_M, lineHeight: 1.9, marginBottom: 22 }}>
             {form.certificate
-              ? 'پس از تایید مدرک توسط ادمین، پروفایل شما تیک آبی تایید دریافت می‌کند.'
-              : 'چون مدرکی آپلود نکرده‌اید، پس از تایید ادمین به‌عنوان «مربی آزاد» (بدون تیک آبی) نمایش داده می‌شوید.'}
+              ? 'پس از تایید مدرک توسط ادمین، پروفایل شما تیک آبی تایید دریافت می‌کند'
+              : 'چون مدرکی آپلود نکرده‌اید، پس از تایید ادمین به‌عنوان «مربی آزاد» (بدون تیک آبی) نمایش داده می‌شوید'}
           </p>
           <div style={{ display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap' }}>
             <Link href={`/coaches/${form.slug}`} style={lqBtn}>مشاهده پیش‌نمایش پروفایل</Link>
@@ -502,7 +502,7 @@ function safeRemote(raw: unknown): Partial<FormState> {
             COACH DASHBOARD
           </div>
           <h1 style={{ fontSize: 'clamp(22px,3vw,28px)', fontWeight: 900, letterSpacing: '-0.02em' }}>داشبورد مربی</h1>
-          <p style={{ fontSize: 13.5, color: TEXT_S, marginTop: 6 }}>اطلاعات زیر را تکمیل کنید تا صفحه‌ی پروفایل مربی شما ساخته شود.</p>
+          <p style={{ fontSize: 13.5, color: TEXT_S, marginTop: 6 }}>اطلاعات زیر را تکمیل کنید تا صفحه‌ی پروفایل مربی شما ساخته شود</p>
         </div>
 
 
@@ -546,8 +546,8 @@ function safeRemote(raw: unknown): Partial<FormState> {
                 data-field="lastNameFa" />{err('lastNameFa')}</div>
               <div style={{ gridColumn: '1 / -1', fontSize: 11.5, color: TEXT_M, marginTop: -6 }}>
                 {firstLocked && lastLocked
-                  ? 'نام و نام خانوادگی از اطلاعات حساب کاربری شما گرفته شده و قابل تغییر نیست.'
-                  : 'حساب شما نام ثبت‌شده ندارد؛ همین‌جا وارد کنید.'}
+                  ? 'نام و نام خانوادگی از اطلاعات حساب کاربری شما گرفته شده و قابل تغییر نیست'
+                  : 'حساب شما نام ثبت‌شده ندارد؛ همین‌جا وارد کنید'}
               </div>
               <div><label style={lblLtr}>Last name (English){star}</label><input data-field="lastNameEn" style={{ ...(errors.lastNameEn ? inpErr : inp), direction: 'ltr', textAlign: 'left' }} value={form.lastNameEn} onChange={e => set('lastNameEn', e.target.value)} />{err('lastNameEn')}</div>
               <div><label style={lblLtr}>First name (English){star}</label><input data-field="firstNameEn" style={{ ...(errors.firstNameEn ? inpErr : inp), direction: 'ltr', textAlign: 'left' }} value={form.firstNameEn} onChange={e => set('firstNameEn', e.target.value)} />{err('firstNameEn')}</div>
@@ -644,7 +644,7 @@ function safeRemote(raw: unknown): Partial<FormState> {
           <div style={card}>
             {sectionTitle('درجه مربیگری', 3)}
             <div style={{ background: 'rgba(199,166,106,0.08)', border: '1px solid rgba(199,166,106,0.22)', borderRadius: 10, padding: '10px 14px', fontSize: 12.5, color: GOLD_D, lineHeight: 1.8, marginBottom: 14 }}>
-              مدارکی که دریافت کرده‌اید را به‌ترتیب انتخاب کنید و سال دریافت هر کدام را وارد نمایید.
+              مدارکی که دریافت کرده‌اید را به‌ترتیب انتخاب کنید و سال دریافت هر کدام را وارد نمایید
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               {GRADES.map((g, idx) => {
@@ -702,15 +702,15 @@ function safeRemote(raw: unknown): Partial<FormState> {
               </div>
             </div>
             <p style={{ fontSize: 12, color: TEXT_S, lineHeight: 1.9, margin: '10px 0 0' }}>
-              شاگرد از صفحه‌ی شما درخواست جلسه می‌فرستد و شما تأیید می‌کنید.
-              پرداخت فعلا حضوری است. مبلغ صفر یعنی «توافقی».
+              شاگرد از صفحه‌ی شما درخواست جلسه می‌فرستد و شما تأیید می‌کنید
+              پرداخت فعلا حضوری است، مبلغ صفر یعنی «توافقی»
             </p>
           </div>
 
           {/* 5 — Contact */}
           <div style={card}>
             {sectionTitle('راه‌های ارتباطی', 5)}
-            <p style={{ fontSize: 12.5, color: TEXT_M, marginBottom: 14 }}>هر کدام را که پر کنید، آیکونش در بخش «راه‌های ارتباطی» پروفایل نمایش داده می‌شود.</p>
+            <p style={{ fontSize: 12.5, color: TEXT_M, marginBottom: 14 }}>هر کدام را که پر کنید، آیکونش در بخش «راه‌های ارتباطی» پروفایل نمایش داده می‌شود</p>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2,1fr)', gap: 14 }}>
               {/* ── چرا این دو راهنما ──
                   دو فیلد دو قالب متفاوت می‌خواهند و از روی برچسبشان
@@ -765,7 +765,7 @@ function safeRemote(raw: unknown): Partial<FormState> {
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" strokeWidth="2.2"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" /><line x1="12" y1="9" x2="12" y2="13" /><line x1="12" y1="17" x2="12.01" y2="17" /></svg>
             </div>
             <h3 style={{ fontSize: 16, fontWeight: 800, marginBottom: 10 }}>مدرک مربیگری آپلود نشده است</h3>
-            <p style={{ fontSize: 13.5, color: TEXT_S, lineHeight: 2 }}>در صورت آپلود نکردن مدرک مربیگری پروفایل شما تیک آبی تایید دریافت نخواهد کرد و عنوان «مربی آزاد» را خواهید داشت.</p>
+            <p style={{ fontSize: 13.5, color: TEXT_S, lineHeight: 2 }}>در صورت آپلود نکردن مدرک مربیگری پروفایل شما تیک آبی تایید دریافت نخواهد کرد و عنوان «مربی آزاد» را خواهید داشت</p>
             <div style={{ display: 'flex', gap: 10, marginTop: 22, justifyContent: 'flex-end', flexWrap: 'wrap' }}>
               <button onClick={() => setWarn(false)} style={{ ...lqBtn, background: 'transparent', border: '1px solid rgba(17,17,16,0.14)', color: TEXT_S }}>انصراف و آپلود مدرک</button>
               <button onClick={() => void doSubmit()} style={lqBtn}>ثبت به‌عنوان مربی آزاد</button>

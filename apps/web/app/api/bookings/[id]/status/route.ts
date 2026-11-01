@@ -60,12 +60,12 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
   if (ALLOWED[next] === 'COMPLETED') {
     if (b.payment_status !== 'PAID') {
       return NextResponse.json(
-        { message: 'رزروِ پرداخت‌نشده تکمیل نمی‌شود' }, { status: 409 });
+        { message: 'رزرو پرداخت‌نشده تکمیل نمی‌شود' }, { status: 409 });
     }
     const { error: finErr } = await rpc('bh_complete_booking', { p_booking_id: id });
     if (finErr) {
       console.error('[bookings/:id/status] bh_complete_booking:', finErr.message);
-      return NextResponse.json({ message: 'تکمیلِ رزرو انجام نشد' }, { status: 500 });
+      return NextResponse.json({ message: 'تکمیل رزرو انجام نشد' }, { status: 500 });
     }
     void audit({
       actorId: actor.id, actorRole: 'club_owner', action: 'BOOKING_COMPLETED',

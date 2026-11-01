@@ -112,15 +112,15 @@ export interface OpenResult {
 function describe(e: unknown): string {
   const name = (e as { name?: string } | null)?.name ?? '';
   if (name === 'NotAllowedError' || name === 'SecurityError') {
-    return 'اجازه‌ی دوربین یا میکروفون داده نشد. از تنظیمات مرورگر اجازه را بدهید.';
+    return 'اجازه‌ی دوربین یا میکروفون داده نشد، از تنظیمات مرورگر اجازه را بدهید';
   }
   if (name === 'NotFoundError' || name === 'OverconstrainedError') {
-    return 'دوربینی با این مشخصات پیدا نشد. دوربین یا کیفیت دیگری را انتخاب کنید.';
+    return 'دوربینی با این مشخصات پیدا نشد، دوربین یا کیفیت دیگری را انتخاب کنید';
   }
   if (name === 'NotReadableError' || name === 'TrackStartError') {
-    return 'دوربین در اختیار برنامه‌ی دیگری است. آن برنامه را ببندید و دوباره تلاش کنید.';
+    return 'دوربین در اختیار برنامه‌ی دیگری است، آن برنامه را ببندید و دوباره تلاش کنید';
   }
-  return 'دسترسی به دوربین ممکن نشد.';
+  return 'دسترسی به دوربین ممکن نشد';
 }
 
 export async function openCamera(
@@ -128,7 +128,7 @@ export async function openCamera(
   opts: { deviceId?: string; facing?: 'user' | 'environment'; audio?: boolean } = {},
 ): Promise<OpenResult> {
   if (typeof navigator === 'undefined' || !navigator.mediaDevices?.getUserMedia) {
-    return { stream: null, error: 'مرورگر شما از پخش زنده پشتیبانی نمی‌کند.' };
+    return { stream: null, error: 'مرورگر شما از پخش زنده پشتیبانی نمی‌کند' };
   }
   try {
     const stream = await navigator.mediaDevices.getUserMedia({
@@ -163,7 +163,7 @@ export function screenShareSupported(): boolean {
 
 export async function openScreen(preset: QualityPreset): Promise<OpenResult> {
   if (!screenShareSupported()) {
-    return { stream: null, error: 'اشتراک صفحه روی این دستگاه پشتیبانی نمی‌شود.' };
+    return { stream: null, error: 'اشتراک صفحه روی این دستگاه پشتیبانی نمی‌شود' };
   }
   try {
     const stream = await navigator.mediaDevices.getDisplayMedia({
@@ -175,7 +175,7 @@ export async function openScreen(preset: QualityPreset): Promise<OpenResult> {
     const name = (e as { name?: string } | null)?.name ?? '';
     /* کاربر پنجره‌ی انتخاب را بست — این خطا نیست و نباید پیامِ قرمز بدهد. */
     if (name === 'NotAllowedError' || name === 'AbortError') return { stream: null, error: '' };
-    return { stream: null, error: 'اشتراک صفحه ممکن نشد.' };
+    return { stream: null, error: 'اشتراک صفحه ممکن نشد' };
   }
 }
 

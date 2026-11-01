@@ -130,14 +130,14 @@ const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 export async function applyAction(actorId: string, input: ActionInput, ip: string | null): Promise<ActionResult> {
   const { targetId, action } = input
   if (!UUID.test(targetId)) return { ok: false, status: 400, message: 'شناسه‌ی کاربر نامعتبر است' }
-  if (targetId === actorId) return { ok: false, status: 400, message: 'اقدام روی حسابِ خودِ مالک ممکن نیست' }
+  if (targetId === actorId) return { ok: false, status: 400, message: 'اقدام روی حساب خود مالک ممکن نیست' }
 
   const { data: row, error } = await sb().from('users')
     .select(STATE_COLUMNS + ',"isActive"').eq('id', targetId).maybeSingle()
-  if (error) return { ok: false, status: 500, message: 'خواندنِ حساب انجام نشد' }
+  if (error) return { ok: false, status: 500, message: 'خواندن حساب انجام نشد' }
   if (!row) return { ok: false, status: 404, message: 'کاربر پیدا نشد' }
   const cur = toState(row as unknown as StateRow)
-  if (cur.isOwner) return { ok: false, status: 403, message: 'مالکِ پلتفرم هدفِ هیچ اقدامی نیست' }
+  if (cur.isOwner) return { ok: false, status: 403, message: 'مالک پلتفرم هدف هیچ اقدامی نیست' }
   /* تعلیقِ منقضی‌شده در عمل «فعال» است؛ تاریخچه هم همین را ثبت کند */
   const fromStatus = effectiveStatus(cur)
 
@@ -155,10 +155,10 @@ export async function applyAction(actorId: string, input: ActionInput, ip: strin
       return { ok: false, status: 400, message: 'دست‌کم یک قابلیت را برای بستن انتخاب کنید' }
     }
     if (to === 'suspended' && !input.expiresAt) {
-      return { ok: false, status: 400, message: 'تعلیق باید تاریخِ پایان داشته باشد (برای همیشه: مسدودِ دائم)' }
+      return { ok: false, status: 400, message: 'تعلیق باید تاریخ پایان داشته باشد (برای همیشه: مسدود دائم)' }
     }
     if (input.expiresAt && Date.parse(input.expiresAt) <= Date.now()) {
-      return { ok: false, status: 400, message: 'تاریخِ پایان باید در آینده باشد' }
+      return { ok: false, status: 400, message: 'تاریخ پایان باید در آینده باشد' }
     }
     const { error: uErr } = await sb().from('users').update({
       account_status: to,
@@ -216,7 +216,7 @@ export async function applyAction(actorId: string, input: ActionInput, ip: strin
   }).select('id').single()
   if (hErr || !ins) {
     console.error('[enforcement] history insert failed', hErr?.message)
-    return { ok: false, status: 500, message: 'اقدام انجام شد ولی ثبتِ تاریخچه شکست خورد — دوباره بررسی کنید' }
+    return { ok: false, status: 500, message: 'اقدام انجام شد ولی ثبت تاریخچه شکست خورد — دوباره بررسی کنید' }
   }
   void audit({
     actorId, actorRole: 'platform_owner', action: 'ACCOUNT_ENFORCEMENT_' + action.toUpperCase(),
@@ -308,13 +308,13 @@ async function removeContent(userId: string, type: 'listing' | 'video', id: stri
     ? { table: 'products', owner: 'sellerId', to: 'deleted' }
     : { table: 'videos', owner: 'owner_id', to: 'hidden' }
   const { data, error } = await sb().from(t.table).select('id,status,' + `"${t.owner}"`).eq('id', id).maybeSingle()
-  if (error) return { ok: false, status: 500, message: 'خواندنِ محتوا انجام نشد' }
+  if (error) return { ok: false, status: 500, message: 'خواندن محتوا انجام نشد' }
   const r = data as Record<string, unknown> | null
   if (!r) return { ok: false, status: 404, message: 'محتوا پیدا نشد' }
   /* فقط محتوای همین کاربر — اقدام روی حسابِ یک نفر محتوای دیگری را پاک نمی‌کند */
-  if (String(r[t.owner] ?? '') !== userId) return { ok: false, status: 400, message: 'این محتوا مالِ این کاربر نیست' }
+  if (String(r[t.owner] ?? '') !== userId) return { ok: false, status: 400, message: 'این محتوا مال این کاربر نیست' }
   const { data: done, error: uErr } = await sb().from(t.table).update({ status: t.to }).eq('id', id).neq('status', t.to).select('id')
-  if (uErr) return { ok: false, status: 500, message: 'حذفِ محتوا انجام نشد' }
+  if (uErr) return { ok: false, status: 500, message: 'حذف محتوا انجام نشد' }
   /* هیچ ردیفی عوض نشد (از پیش حذف/پنهان، یا هم‌زمان تغییر کرد) ⟵ ثبتِ «حذف شد» دروغ بود */
   if (!idsOf(done).size) return { ok: false, status: 409, message: 'این محتوا از قبل حذف یا پنهان شده است' }
   return { ok: true, previous: String(r.status ?? '') }
@@ -339,5 +339,5 @@ export async function ownerTargetGuard(actorId: string, targetId: string, ip?: s
     actorId, actorRole: 'admin', action: 'OWNER_MODIFICATION_DENIED',
     entityType: 'user', entityId: targetId, ip: ip ?? null,
   })
-  return Response.json({ message: 'حسابِ مالکِ پلتفرم را هیچ ادمینی نمی‌تواند تغییر دهد' }, { status: 403 })
+  return Response.json({ message: 'حساب مالک پلتفرم را هیچ ادمینی نمی‌تواند تغییر دهد' }, { status: 403 })
 }

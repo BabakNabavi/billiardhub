@@ -205,7 +205,7 @@ export default function AdminVerifiedPage() {
     try {
       const { rows: r, partial } = await loadRows()
       setRows(r)
-      setErr(partial ? 'بخشی از فهرست خوانده نشد — ممکن است مواردی این‌جا نباشند.' : '')
+      setErr(partial ? 'بخشی از فهرست خوانده نشد — ممکن است مواردی این‌جا نباشند' : '')
     } catch { setRows([]); setErr('خواندن فهرست انجام نشد') }
   }, [])
 
@@ -249,13 +249,13 @@ export default function AdminVerifiedPage() {
 
         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap', marginBottom: 18 }}>
           <div>
-            <span style={{ fontSize: 11, fontWeight: 800, color: MUT }}>نشانِ تأیید</span>
+            <span style={{ fontSize: 11, fontWeight: 800, color: MUT }}>نشان تأیید</span>
             <h1 style={{ fontSize: 'clamp(18px,2.4vw,22px)', fontWeight: 900, margin: '4px 0 0', display: 'flex', alignItems: 'center', gap: 6 }}>
               تیک آبی <VerifiedBadge title="" style={{ marginInlineStart: 0 }} />
             </h1>
             <p style={{ fontSize: 12.5, color: MUT, margin: '6px 0 0', lineHeight: 1.9, maxWidth: 560 }}>
-              اعطا و پس‌گرفتن تیک برای هر هفت نقش. تیک یعنی «مدرکش دیده و تأیید شده»؛
-              برداشتنش پروفایل را از سایت حذف نمی‌کند.
+              اعطا و پس‌گرفتن تیک برای هر هفت نقش، تیک یعنی «مدرکش دیده و تأیید شده»؛
+              برداشتنش پروفایل را از سایت حذف نمی‌کند
             </p>
           </div>
           <Link href="/admin" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '9px 16px', borderRadius: 10, textDecoration: 'none', fontSize: 12.5, fontWeight: 700, background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.34)', color: GOLD_D }}>
@@ -306,8 +306,8 @@ export default function AdminVerifiedPage() {
             </p>
             <p style={{ fontSize: 12.5, color: MUT, margin: 0, lineHeight: 1.9 }}>
               {tab === 'waiting'
-                ? 'وقتی کسی مدرکش را آپلود کند، همین‌جا ظاهر می‌شود.'
-                : 'با تب دیگری یا نقش دیگری امتحان کنید.'}
+                ? 'وقتی کسی مدرکش را آپلود کند، همین‌جا ظاهر می‌شود'
+                : 'با تب دیگری یا نقش دیگری امتحان کنید'}
             </p>
           </div>
         ) : (

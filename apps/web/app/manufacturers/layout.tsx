@@ -8,17 +8,17 @@ export const metadata: Metadata = {
      فرزندانش قطع می‌کند، پس صفحه‌ی جزئیات (مثلاً آگهی/باشگاه/مسابقه) بی‌نامِ
      سایت می‌ماند. با `default` عنوانِ خودِ بخش همان قبلی است. */
   title: { default: 'تولیدکنندگان تجهیزات', template: '%s | بیلیارد هاب' },
-  description: 'تولیدکنندگان میز و لوازم بیلیارد ایران.',
+  description: 'تولیدکنندگان میز و لوازم بیلیارد ایران',
   alternates: { canonical: '/manufacturers' },
   openGraph: {
     title: 'تولیدکنندگان تجهیزات | بیلیارد هاب',
-    description: 'تولیدکنندگان میز و لوازم بیلیارد ایران.',
+    description: 'تولیدکنندگان میز و لوازم بیلیارد ایران',
     url: '/manufacturers',
     siteName: 'بیلیارد هاب',
     locale: 'fa_IR',
     type: 'website',
   },
-  twitter: { card: 'summary_large_image', title: 'تولیدکنندگان تجهیزات | بیلیارد هاب', description: 'تولیدکنندگان میز و لوازم بیلیارد ایران.' },
+  twitter: { card: 'summary_large_image', title: 'تولیدکنندگان تجهیزات | بیلیارد هاب', description: 'تولیدکنندگان میز و لوازم بیلیارد ایران' },
 }
 
 export default function SegmentLayout({ children }: { children: React.ReactNode }) {

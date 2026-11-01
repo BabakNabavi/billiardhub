@@ -159,7 +159,7 @@ export default function SellerDashboard() {
     if (!file) return
     setBusy(true); setErr('')
     try { apply(await compressImage(file, maxDim)) }
-    catch { setErr('عکس خوانده نشد. دوباره تلاش کنید.') }
+    catch { setErr('عکس خوانده نشد، دوباره تلاش کنید') }
     finally { setBusy(false); e.target.value = '' }
   }
 
@@ -171,10 +171,10 @@ export default function SellerDashboard() {
     try {
       const cur = form[key]
       const room = max - cur.length
-      if (room <= 0) { setErr(`حداکثر ${toFa(max)} عکس.`); return }
+      if (room <= 0) { setErr(`حداکثر ${toFa(max)} عکس`); return }
       const urls = await Promise.all(files.slice(0, room).map(f => compressImage(f, 1600)))
       set(key, [...cur, ...urls])
-    } catch { setErr('آپلود نشد. دوباره تلاش کنید.') }
+    } catch { setErr('آپلود نشد، دوباره تلاش کنید') }
     finally { setBusy(false); e.target.value = '' }
   }
 
@@ -185,10 +185,10 @@ export default function SellerDashboard() {
     setBusy(true); setErr('')
     try {
       const room = 12 - form.gallery.length
-      if (room <= 0) { setErr('حداکثر ۱۲ عکس.'); return }
+      if (room <= 0) { setErr('حداکثر ۱۲ عکس'); return }
       const urls = await Promise.all(files.slice(0, room).map(f => compressImage(f, 1400, 0.72)))
       set('gallery', [...form.gallery, ...urls.map(u => ({ id: Math.random().toString(36).slice(2, 9), url: u }))])
-    } catch { setErr('آپلود نشد. دوباره تلاش کنید.') }
+    } catch { setErr('آپلود نشد، دوباره تلاش کنید') }
     finally { setBusy(false); e.target.value = '' }
   }
 
@@ -200,7 +200,7 @@ export default function SellerDashboard() {
     try {
       const url = file.type.startsWith('image/') ? await compressImage(file, 1400, 0.75) : await readAsDataUrl(file)
       set('certificate', { name: file.name, url })
-    } catch { setErr('فایل خوانده نشد. دوباره تلاش کنید.') }
+    } catch { setErr('فایل خوانده نشد، دوباره تلاش کنید') }
     finally { setBusy(false); e.target.value = '' }
   }
 
@@ -242,17 +242,17 @@ export default function SellerDashboard() {
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault()
-    if (!form.title.trim()) { setErr('نام فروشگاه لازم است.'); return }
+    if (!form.title.trim()) { setErr('نام فروشگاه لازم است'); return }
     /* نشانی تکراری یا نامعتبر را نگذار به سرور برسد — آن‌جا فقط یک
        ۴۰۹ می‌گیرد و کاربر نمی‌فهمد کدام فیلد مقصر بوده. */
-    if (slugStatus === 'taken')   { setErr('این نشانی قبلا گرفته شده است؛ یکی دیگر انتخاب کنید.'); return }
-    if (slugStatus === 'invalid') { setErr('نشانی نامعتبر است — فقط حروف انگلیسی، عدد و خط تیره.'); return }
+    if (slugStatus === 'taken')   { setErr('این نشانی قبلا گرفته شده است؛ یکی دیگر انتخاب کنید'); return }
+    if (slugStatus === 'invalid') { setErr('نشانی نامعتبر است — فقط حروف انگلیسی، عدد و خط تیره'); return }
     /* جواز کسب اجباری نیست (فقط داور مدرکش الزامی است) — یک‌بار یادآوری
        می‌شود و اگر کاربر ادامه بدهد، فروشگاه بدون تیک تأیید ثبت می‌شود. */
     if (!form.certificate && !warnAck) { setWarn(true); return }
     setBusy(true)
     void persist()
-      .catch(() => setErr('ذخیره انجام نشد؛ دوباره تلاش کنید.'))
+      .catch(() => setErr('ذخیره انجام نشد؛ دوباره تلاش کنید'))
       .finally(() => setBusy(false))
   }
 
@@ -268,7 +268,7 @@ export default function SellerDashboard() {
           <div className="mx-auto mb-3 w-fit text-[#6F6A5C]">{Icon.store}</div>
           <h1 className="text-[16px] font-bold">این صفحه مخصوص فروشندگان است</h1>
           <p className="mt-2 text-[13px] leading-relaxed text-[#5B564B]">
-            برای ساختن فروشگاه، اول باید نقش «فروشنده» را بگیرید.
+            برای ساختن فروشگاه، اول باید نقش «فروشنده» را بگیرید
           </p>
           <Link href="/profile/role" className={`${LQ_BTN} mt-4`}>انتخاب نقش</Link>
         </div>
@@ -297,7 +297,7 @@ export default function SellerDashboard() {
           <div>
             <h1 className="text-[19px] font-bold">پنل فروشگاه</h1>
             <p className="mt-1 text-[12.5px] text-[#6F6A5C]">
-              هرچه اینجا وارد کنید، همان روی صفحه‌ی فروشگاه شما دیده می‌شود.
+              هرچه اینجا وارد کنید، همان روی صفحه‌ی فروشگاه شما دیده می‌شود
             </p>
           </div>
           <Link href={`/sellers/${form.slug}`} className={LQ_BTN}>
@@ -335,7 +335,7 @@ export default function SellerDashboard() {
                     </button>
                   )}
                 </div>
-                <p className={HINT}>تا وقتی لوگو آپلود نشود، آیکون پیش‌فرض فروشگاه نمایش داده می‌شود.</p>
+                <p className={HINT}>تا وقتی لوگو آپلود نشود، آیکون پیش‌فرض فروشگاه نمایش داده می‌شود</p>
                 <input ref={logoRef} type="file" accept="image/*" className="hidden"
                   onChange={e => pickImage(e, url => set('logo', url), 400)}/>
               </div>
@@ -346,7 +346,7 @@ export default function SellerDashboard() {
                 <label className={LABEL} htmlFor="f-title">نام فروشگاه *</label>
                 <input id="f-title" className={INPUT} value={form.title}
                   onChange={e => set('title', e.target.value)}/>
-                <p className={HINT}>تیتر اصلی بالای صفحه‌ی فروشگاه.</p>
+                <p className={HINT}>تیتر اصلی بالای صفحه‌ی فروشگاه</p>
               </div>
               {/* فیلد «نام کوتاه (برند)» حذف شد — تنها مصرفش فوتر
                   فروشگاه بود و فوتر حالا نام کامل فروشگاه را نشان
@@ -366,7 +366,7 @@ export default function SellerDashboard() {
                   value={{ province: form.province, city: form.city }}
                   onChange={v => setForm(f => ({ ...f, province: v.province, city: v.city }))}
                 />
-                <p className={HINT}>شهر کنار آیکون لوکیشن، زیر نام فروشگاه نمایش داده می‌شود.</p>
+                <p className={HINT}>شهر کنار آیکون لوکیشن، زیر نام فروشگاه نمایش داده می‌شود</p>
               </div>
               <div className="sm:col-span-2">
                 <ClubPicker />
@@ -375,7 +375,7 @@ export default function SellerDashboard() {
                 <label className={LABEL} htmlFor="f-phone">شماره تماس</label>
                 <input id="f-phone" className={INPUT} inputMode="tel" value={form.contactPhone}
                   onChange={e => set('contactPhone', e.target.value)} placeholder="66554433"/>
-                <p className={HINT}>کنار آیکون تلفن در بالای صفحه.</p>
+                <p className={HINT}>کنار آیکون تلفن در بالای صفحه</p>
               </div>
             </div>
 
@@ -384,7 +384,7 @@ export default function SellerDashboard() {
               <textarea id="f-desc" rows={3} className={`${INPUT} resize-y leading-relaxed`} value={form.desc}
                 onChange={e => set('desc', e.target.value)}
                 placeholder="عرضه‌ی مستقیم چوب، میز، توپ و لوازم جانبی حرفه‌ای"/>
-              <p className={HINT}>هم زیر نام فروشگاه و هم در باکس «درباره ما» نمایش داده می‌شود.</p>
+              <p className={HINT}>هم زیر نام فروشگاه و هم در باکس «درباره ما» نمایش داده می‌شود</p>
             </div>
           </section>
 
@@ -427,7 +427,7 @@ export default function SellerDashboard() {
           <section className={CARD}>
             <h2 className="text-[14.5px] font-bold">برندهای نمایندگی</h2>
             <p className="mb-3 mt-1 text-[12px] leading-relaxed text-[#5B564B]">
-              اگر نماینده‌ی برند یا برندهایی هستید، اینجا اضافه کنید؛ زیر نام فروشگاه به‌صورت برچسب نمایش داده می‌شوند.
+              اگر نماینده‌ی برند یا برندهایی هستید، اینجا اضافه کنید؛ زیر نام فروشگاه به‌صورت برچسب نمایش داده می‌شوند
             </p>
             {form.brands.length > 0 && (
               <div className="mb-3 flex flex-wrap gap-2">
@@ -455,7 +455,7 @@ export default function SellerDashboard() {
           {/* ═══ راه‌های ارتباطی ═══ */}
           <section className={CARD}>
             <h2 className="mb-1 text-[14.5px] font-bold">راه‌های ارتباطی</h2>
-            <p className="mb-4 text-[12px] text-[#6F6A5C]">این‌ها در فوتر فروشگاه دیده می‌شوند.</p>
+            <p className="mb-4 text-[12px] text-[#6F6A5C]">این‌ها در فوتر فروشگاه دیده می‌شوند</p>
 
             <div className="mb-4">
               <span className={LABEL}>تلفن‌های فروشگاه</span>
@@ -510,7 +510,7 @@ export default function SellerDashboard() {
                 <label className={LABEL} htmlFor="f-addr">آدرس</label>
                 <input id="f-addr" className={INPUT} value={form.address}
                   onChange={e => set('address', e.target.value)} placeholder="تهران، خیابان ولیعصر، پلاک ۴۵"/>
-                <p className={HINT}>لینک نقشه‌ی فوتر هم از همین ساخته می‌شود.</p>
+                <p className={HINT}>لینک نقشه‌ی فوتر هم از همین ساخته می‌شود</p>
               </div>
             </div>
           </section>
@@ -616,7 +616,7 @@ export default function SellerDashboard() {
           <section className={CARD}>
             <h2 className="text-[14.5px] font-bold">محصولات</h2>
             <p className="mt-1 text-[12.5px] leading-relaxed text-[#5B564B]">
-              محصولات، قیمت‌ها و تخفیف‌ها در «فروشگاه من» مدیریت می‌شوند و همان‌ها روی صفحه‌ی فروشگاه می‌آیند.
+              محصولات، قیمت‌ها و تخفیف‌ها در «فروشگاه من» مدیریت می‌شوند و همان‌ها روی صفحه‌ی فروشگاه می‌آیند
             </p>
             <Link href="/dashboard/shop" className={`${LQ_BTN} mt-3`}>{Icon.back} مدیریت محصولات</Link>
           </section>
@@ -684,12 +684,12 @@ export default function SellerDashboard() {
               </div>
               <h3 className="text-[16px] font-bold">جواز کسب آپلود نشده</h3>
               <p className="mt-2 text-[13px] leading-relaxed text-[#5B564B]">
-                برای درخواست تیک تأیید و افزایش اعتبار پروفایل، لطفا جواز کسب فروشگاه خود را آپلود نمایید.
-                آپلود آن اختیاری است و می‌توانید فروشگاه را بدون آن هم ثبت کنید.
+                برای درخواست تیک تأیید و افزایش اعتبار پروفایل، لطفا جواز کسب فروشگاه خود را آپلود نمایید
+                آپلود آن اختیاری است و می‌توانید فروشگاه را بدون آن هم ثبت کنید
               </p>
               <div className="mt-4 flex flex-wrap justify-center gap-2">
                 <button onClick={() => { setWarn(false); certRef.current?.click() }} className={LQ_BTN}>{Icon.upload} آپلود جواز کسب</button>
-                <button onClick={() => { setWarnAck(true); setWarn(false); try { persist() } catch { setErr('حافظه‌ی مرورگر پر است — چند عکس از گالری حذف کنید و دوباره ذخیره کنید.') } }}
+                <button onClick={() => { setWarnAck(true); setWarn(false); try { persist() } catch { setErr('حافظه‌ی مرورگر پر است — چند عکس از گالری حذف کنید و دوباره ذخیره کنید') } }}
                   className="rounded-[10px] border border-[#E7E2D6] px-4 py-2.5 text-[13px] text-[#5B564B] transition hover:text-[#1C1B17]">ثبت بدون جواز کسب</button>
               </div>
             </div>

@@ -10,17 +10,17 @@ import type { Metadata } from 'next'
    هاب» دیده می‌شد. همان تله‌ای که در خدمات فنی و اخبار هم بود. */
 export const metadata: Metadata = {
   title: { absolute: 'بیلیارد مدیا | بیلیارد هاب' },
-  description: 'ویدیوهای آموزشی، مسابقات و کلیپ‌های بیلیارد و اسنوکر.',
+  description: 'ویدیوهای آموزشی، مسابقات و کلیپ‌های بیلیارد و اسنوکر',
   alternates: { canonical: '/media' },
   openGraph: {
     title: 'بیلیارد مدیا | بیلیارد هاب',
-    description: 'ویدیوهای آموزشی، مسابقات و کلیپ‌های بیلیارد و اسنوکر.',
+    description: 'ویدیوهای آموزشی، مسابقات و کلیپ‌های بیلیارد و اسنوکر',
     url: '/media',
     siteName: 'بیلیارد هاب',
     locale: 'fa_IR',
     type: 'website',
   },
-  twitter: { card: 'summary_large_image', title: 'بیلیارد مدیا | بیلیارد هاب', description: 'ویدیوهای آموزشی، مسابقات و کلیپ‌های بیلیارد و اسنوکر.' },
+  twitter: { card: 'summary_large_image', title: 'بیلیارد مدیا | بیلیارد هاب', description: 'ویدیوهای آموزشی، مسابقات و کلیپ‌های بیلیارد و اسنوکر' },
 }
 
 export default function SegmentLayout({ children }: { children: React.ReactNode }) {

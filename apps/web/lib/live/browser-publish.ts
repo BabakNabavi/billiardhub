@@ -62,7 +62,7 @@ export async function openCamera(facing: 'environment' | 'user' = state.facing):
     return stream
   } catch (e) {
     const denied = e instanceof DOMException && (e.name === 'NotAllowedError' || e.name === 'SecurityError')
-    set({ phase: 'error', stream: null, error: denied ? 'اجازه‌ی دوربین داده نشد. از تنظیماتِ مرورگر اجازه دهید و دوباره بزنید.' : 'دوربین باز نشد.' })
+    set({ phase: 'error', stream: null, error: denied ? 'اجازه‌ی دوربین داده نشد، از تنظیمات مرورگر اجازه دهید و دوباره بزنید' : 'دوربین باز نشد' })
     return null
   }
 }
@@ -89,8 +89,8 @@ function startRelay(sess: Extract<Session, { mode: 'relay' }>, stream: MediaStre
     if (slow !== state.slow) set({ slow })
     ws.send(ev.data)
   }
-  rec.onerror = () => { if (!closedByUs) fail('ضبطِ دوربین متوقف شد؛ پخش قطع شد.') }
-  rec.onstop = () => { if (!closedByUs) fail('دوربین قطع شد (قفلِ صفحه یا تماس)؛ پخش قطع شد.') }
+  rec.onerror = () => { if (!closedByUs) fail('ضبط دوربین متوقف شد؛ پخش قطع شد') }
+  rec.onstop = () => { if (!closedByUs) fail('دوربین قطع شد (قفل صفحه یا تماس)؛ پخش قطع شد') }
   ws.onmessage = ev => {
     try {
       const m = JSON.parse(String(ev.data)) as { type?: string; message?: string }
@@ -98,7 +98,7 @@ function startRelay(sess: Extract<Session, { mode: 'relay' }>, stream: MediaStre
       if (m.type === 'error') { closedByUs = true; fail(m.message || 'پخش قطع شد') }
     } catch { /* پیامِ ناشناخته */ }
   }
-  ws.onclose = () => { if (!closedByUs) fail('اتصالِ پخش قطع شد. اینترنت را بررسی کنید و دوباره «پخش» را بزنید.') }
+  ws.onclose = () => { if (!closedByUs) fail('اتصال پخش قطع شد، اینترنت را بررسی کنید و دوباره «پخش» را بزنید') }
   return () => {
     closedByUs = true
     try { if (rec.state !== 'inactive') rec.stop() } catch { /* ضبط از قبل بسته */ }
@@ -136,9 +136,9 @@ async function startWhip(sess: Extract<Session, { mode: 'whip' }>, stream: Media
   pc.onconnectionstatechange = () => {
     window.clearTimeout(dropTimer)
     if (pc.connectionState === 'connected') onLive()
-    else if (pc.connectionState === 'failed' || pc.connectionState === 'closed') fail('اتصالِ مستقیم به سرویسِ پخش قطع شد.')
+    else if (pc.connectionState === 'failed' || pc.connectionState === 'closed') fail('اتصال مستقیم به سرویس پخش قطع شد')
     /* قطعیِ لحظه‌ای: ۱۰ ثانیه فرصت برای برگشتن */
-    else if (pc.connectionState === 'disconnected') dropTimer = window.setTimeout(() => fail('اتصالِ مستقیم به سرویسِ پخش قطع شد.'), 10_000)
+    else if (pc.connectionState === 'disconnected') dropTimer = window.setTimeout(() => fail('اتصال مستقیم به سرویس پخش قطع شد'), 10_000)
   }
   return close
 }
@@ -184,10 +184,10 @@ export async function startPublish(
     announced = true
     onEndedCb = onEnded
     set({ phase: 'live', liveSince: Date.now() })
-    void onLive().catch(() => fail('پخش به سرویس رسید ولی روی سایت ثبت نشد؛ دوباره «پخش» را بزنید.'))
+    void onLive().catch(() => fail('پخش به سرویس رسید ولی روی سایت ثبت نشد؛ دوباره «پخش» را بزنید'))
   }
   /* دوربین وسطِ پخش قطع شد (قفلِ صفحه، تماس، برداشتنِ اجازه) */
-  stream.getTracks().forEach(t => { t.onended = () => { if (my === gen && isPublishing()) fail('دوربین قطع شد؛ پخش قطع شد.') } })
+  stream.getTracks().forEach(t => { t.onended = () => { if (my === gen && isPublishing()) fail('دوربین قطع شد؛ پخش قطع شد') } })
   try {
     const sess = await getSession()
     if (my !== gen) return
@@ -195,12 +195,12 @@ export async function startPublish(
     if (my !== gen) { down(); return }
     teardown = down
     window.setTimeout(() => {
-      if (my === gen && state.phase === 'connecting') fail('تصویر به سرویسِ پخش نرسید. اینترنت را بررسی کنید و دوباره شروع کنید.')
+      if (my === gen && state.phase === 'connecting') fail('تصویر به سرویس پخش نرسید، اینترنت را بررسی کنید و دوباره شروع کنید')
     }, CONNECT_TIMEOUT_MS)
     await keepAwake()
   } catch (e) {
     if (my !== gen) return
-    fail(e instanceof Error && /[؀-ۿ]/.test(e.message) ? e.message : 'اتصال به سرویسِ پخش ممکن نشد.')
+    fail(e instanceof Error && /[؀-ۿ]/.test(e.message) ? e.message : 'اتصال به سرویس پخش ممکن نشد')
   }
 }
 

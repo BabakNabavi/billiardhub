@@ -376,7 +376,7 @@ function BookingContent() {
     if(hour===rangeStart){ setRangeStart(null); setSelectedSlots([hour]); return; }
     if(hour<rangeStart){ setRangeStart(hour); setSelectedSlots([hour]); setRangeError('ابتدا ساعت شروع، سپس ساعت پایان را انتخاب کنید'); return; }
     const {range,blocked} = buildRange(slots,rangeStart,hour);
-    if(blocked){ setRangeError('این بازه شامل ساعات رزرو شده است. لطفا بازه دیگری انتخاب کنید'); return; }
+    if(blocked){ setRangeError('این بازه شامل ساعات رزرو شده است، لطفا بازه دیگری انتخاب کنید'); return; }
     setSelectedSlots(range); setRangeStart(null);
   },[rangeStart,slots]);
 
@@ -387,7 +387,7 @@ function BookingContent() {
 
   const handleConfirm = async ()=>{
     if(!selectedTable||selectedSlots.length===0||!isoDate) return;
-    if(!acceptTerms){ setError('برای ادامه، قوانین رزرو و شرایط لغو را بپذیرید.'); return; }
+    if(!acceptTerms){ setError('برای ادامه، قوانین رزرو و شرایط لغو را بپذیرید'); return; }
     const sorted    = [...selectedSlots].sort((a,b)=>a-b);
     const startH    = sorted[0]!;
     const endH      = sorted[sorted.length-1]!+1;
@@ -426,7 +426,7 @@ function BookingContent() {
           await api.post(`/bookings/${bookingId}/abandon`, undefined, { timeout: 8000 })
             .catch(e=>console.error('[booking] abandon failed', e));
         }
-        setError(prev=>prev||'اتصال به درگاه پرداخت ممکن نشد؛ رزروی ثبت نشد. لطفا دوباره تلاش کنید.');
+        setError(prev=>prev||'اتصال به درگاه پرداخت ممکن نشد؛ رزروی ثبت نشد، لطفا دوباره تلاش کنید');
         setSlotsKey(k=>k+1);
         return;
       }
@@ -441,7 +441,7 @@ function BookingContent() {
       setRedirecting(true);
       window.location.href = paymentUrl;
     } catch(e:any){
-      setError(e?.response?.data?.message||'خطا در ثبت رزرو. لطفا دوباره تلاش کنید.');
+      setError(e?.response?.data?.message||'خطا در ثبت رزرو، لطفا دوباره تلاش کنید');
     } finally { setBooking(false); }
   };
 
@@ -519,7 +519,7 @@ function BookingContent() {
             «موقتا» به کاربر می‌گفت کمی بعد دوباره سر بزند. */}
         <h1 style={{fontSize:19,fontWeight:900,color:'#111',margin:'0 0 10px'}}>رزروها تا اطلاع بعدی بسته است</h1>
         <p style={{fontSize:14,color:'rgba(0,0,0,0.55)',lineHeight:1.8,margin:'0 0 22px'}}>
-          {club?.name ?? 'این باشگاه'} رزرو اینترنتی را تا اطلاع بعدی غیرفعال کرده است. برای رزرو، مستقیم با باشگاه تماس بگیرید.
+          {club?.name ?? 'این باشگاه'} رزرو اینترنتی را تا اطلاع بعدی غیرفعال کرده است، برای رزرو، مستقیم با باشگاه تماس بگیرید
         </p>
         <Link href={`/clubs/${clubId}`} style={{display:'inline-flex',alignItems:'center',gap:6,color:'#8F6531',fontSize:14,fontWeight:800,textDecoration:'none',background:'rgba(199,166,106,0.12)',border:'1px solid rgba(199,166,106,0.34)',borderRadius:12,padding:'11px 20px'}}>
           بازگشت به صفحه‌ی باشگاه
@@ -561,7 +561,7 @@ function BookingContent() {
               <ChevronRight size={13}/> برگشت به باشگاه
             </Link>
             <div style={{flex:1,minWidth:0}}>
-              <div style={{fontSize: '11px',color:'rgba(199,166,106,0.55)',fontWeight:700}}>رزروِ آنلاین</div>
+              <div style={{fontSize: '11px',color:'rgba(199,166,106,0.55)',fontWeight:700}}>رزرو آنلاین</div>
               <div style={{fontSize: '16px',fontWeight:800,color:'#111111',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{club?.name??'رزرو میز'}</div>
             </div>
           </div>
@@ -594,7 +594,6 @@ function BookingContent() {
           {/* TABLE SELECTION */}
           <div style={{background:'#FFFFFF',border:'1px solid rgba(0,0,0,0.07)',borderRadius:'20px',padding:'clamp(18px,3vw,26px)',marginBottom:'14px'}}>
             <div style={{fontSize: '14px',fontWeight:700,color:'rgba(0,0,0,0.45)',marginBottom:'16px',display:'flex',alignItems:'center',gap:'8px'}}>
-              <span style={{width:'3px',height:'13px',background:'linear-gradient(135deg,#C7A66A,#A07840)',borderRadius:'2px',display:'inline-block',flexShrink:0}}/>
               انتخاب میز
             </div>
             {tables.length===0 && (
@@ -602,7 +601,7 @@ function BookingContent() {
                 <div style={{fontSize:30,marginBottom:10,opacity:0.35}}>🎱</div>
                 <div style={{fontSize:15,fontWeight:800,color:'#111',marginBottom:6}}>هنوز میزی برای رزرو ثبت نشده است</div>
                 <div style={{fontSize:13,color:'rgba(0,0,0,0.42)',lineHeight:2}}>
-                  این باشگاه میزهایش را در سیستم ثبت نکرده است. برای هماهنگی، مستقیم با باشگاه تماس بگیرید.
+                  این باشگاه میزهایش را در سیستم ثبت نکرده است، برای هماهنگی، مستقیم با باشگاه تماس بگیرید
                 </div>
                 {club?.phone && (
                   <a href={`tel:${club.phone}`} style={{display:'inline-flex',marginTop:14,padding:'10px 22px',borderRadius:12,textDecoration:'none',fontSize:13.5,fontWeight:800,background:'rgba(199,166,106,0.14)',border:'1px solid rgba(199,166,106,0.4)',color:'#8F6531'}}>
@@ -669,7 +668,6 @@ function BookingContent() {
           {/* #21: PLAYER COUNT */}
           <div style={{background:'#FFFFFF',border:'1px solid rgba(0,0,0,0.07)',borderRadius:'20px',padding:'clamp(16px,3vw,22px)',marginBottom:'14px'}}>
             <div style={{fontSize: '14px',fontWeight:700,color:'rgba(0,0,0,0.45)',marginBottom:'14px',display:'flex',alignItems:'center',gap:'8px'}}>
-              <span style={{width:'3px',height:'13px',background:'linear-gradient(135deg,#06b6d4,#a78bfa)',borderRadius:'2px',display:'inline-block',flexShrink:0}}/>
               تعداد بازیکنان
             </div>
             {/* شمارنده وسط باکس، و هر توضیح یا محاسبه‌ای زیر آن.
@@ -702,7 +700,6 @@ function BookingContent() {
           {/* DATE SELECTION */}
           <div style={{background:'#FFFFFF',border:'1px solid rgba(0,0,0,0.07)',borderRadius:'20px',padding:'clamp(18px,3vw,26px)',marginBottom:'14px'}}>
             <div style={{fontSize: '14px',fontWeight:700,color:'rgba(0,0,0,0.45)',marginBottom:'18px',display:'flex',alignItems:'center',gap:'8px'}}>
-              <span style={{width:'3px',height:'13px',background:'linear-gradient(135deg,#C7A66A,#A07840)',borderRadius:'2px',display:'inline-block',flexShrink:0}}/>
               انتخاب تاریخ
             </div>
             <JalaliCalendar
@@ -726,7 +723,6 @@ function BookingContent() {
             <div ref={slotsRef} style={{background:'#FFFFFF',border:'1px solid rgba(0,0,0,0.07)',borderRadius:'20px',padding:'clamp(18px,3vw,26px)',marginBottom:'14px',transformOrigin:'top',animation:'expand 0.4s cubic-bezier(0.22,1,0.36,1) both'}}>
               <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:'16px',flexWrap:'wrap',gap:'10px'}}>
                 <div style={{fontSize: '14px',fontWeight:700,color:'rgba(0,0,0,0.45)',display:'flex',alignItems:'center',gap:'8px'}}>
-                  <span style={{width:'3px',height:'13px',background:`linear-gradient(180deg,${SEL_COLOR},transparent)`,borderRadius:'2px',display:'inline-block',flexShrink:0}}/>
                   انتخاب ساعت
                 </div>
                 <div style={{display:'flex',gap:'12px',fontSize: '12px',color:'rgba(0,0,0,0.35)'}}>
@@ -870,7 +866,7 @@ function BookingContent() {
                     <Link href="/terms#cancellation" target="_blank" style={{color:'#8F6531',fontWeight:800,textDecoration:'none'}}>
                       قوانین رزرو و شرایط لغو و بازگشت وجه
                     </Link>
-                    {' '}را مطالعه و می‌پذیرم.
+                    {' '}را مطالعه و می‌پذیرم
                   </span>
                 </label>
                 {/* لینک دوم «مشاهده قوانین رزرو و لغو رزرو» حذف شد —

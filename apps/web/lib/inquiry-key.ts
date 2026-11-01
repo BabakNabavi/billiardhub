@@ -33,9 +33,9 @@ export function inquiryKey(): string {
   if (!k) return ''
   if (looksLikeMelipayamak(k)) {
     console.error(
-      '[inquiry] کلید ملی‌پیامک در SMS_API_KEY نشسته است. ' +
-      'سرویس‌های استعلام (کد ورود، شاهکار، بانک، جواز، کد پستی) کار نمی‌کنند. ' +
-      'کلید s.api.ir را در SAPIR_API_KEY بگذارید.')
+      '[inquiry] کلید ملی‌پیامک در SMS_API_KEY نشسته است ' +
+      'سرویس‌های استعلام (کد ورود، شاهکار، بانک، جواز، کد پستی) کار نمی‌کنند ' +
+      'کلید s.api.ir را در SAPIR_API_KEY بگذارید')
     return ''
   }
   return k

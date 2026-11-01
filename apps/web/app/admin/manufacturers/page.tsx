@@ -13,8 +13,8 @@ export default function AdminManufacturersPage() {
     <ProfileAdmin
       title="تولیدکنندگان"
       en="MANUFACTURERS · SUPER ADMIN"
-      desc="مدیریت پروفایل تولیدکنندگان — انتشار یا تعلیق."
-      panelHint="تولیدکنندگان از «داشبورد ← پنل تولیدکننده» پروفایل می‌سازند و این‌جا برای شما فهرست می‌شوند."
+      desc="مدیریت پروفایل تولیدکنندگان — انتشار یا تعلیق"
+      panelHint="تولیدکنندگان از «داشبورد ← پنل تولیدکننده» پروفایل می‌سازند و این‌جا برای شما فهرست می‌شوند"
       load={src.load}
       toggle={src.toggle}
       remove={src.remove}

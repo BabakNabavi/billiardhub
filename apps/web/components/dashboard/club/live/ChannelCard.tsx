@@ -28,7 +28,7 @@ export function ChannelCard({ ch, clubId, busy, run, connected = true, onChanged
   const externalStart = (
     <Button variant={ch.browser ? 'secondary' : 'primary'} loading={isBusyOf(busy, 'start', ch.id)} disabled={ch.adminBlocked || (!connected && !ch.manual)}
       onClick={() => void run({ action: 'start', channelId: ch.id })} icon={<Play className="h-4 w-4" aria-hidden />}>
-      {ch.browser ? 'شروع با دوربینِ جدا (OBS، دوربینِ سالن)' : 'شروعِ پخش'}
+      {ch.browser ? 'شروع با دوربین جدا (OBS، دوربین سالن)' : 'شروع پخش'}
     </Button>
   )
   const [confirm, setConfirm] = useState<'rotate' | 'archive' | null>(null)
@@ -40,7 +40,7 @@ export function ChannelCard({ ch, clubId, busy, run, connected = true, onChanged
         <div className="min-w-0">
           <h3 className="truncate text-section text-ink">{ch.title}</h3>
           <p className="text-meta text-ink-3">
-            {KIND_LABEL[ch.kind]}{ch.tableLabel ? ` — ${ch.tableLabel}` : ''} · {ch.access === 'public' ? 'تماشا برای همه' : 'فقط کاربرانِ عضو'}{ch.record ? ' · ضبط روشن' : ''}
+            {KIND_LABEL[ch.kind]}{ch.tableLabel ? ` — ${ch.tableLabel}` : ''} · {ch.access === 'public' ? 'تماشا برای همه' : 'فقط کاربران عضو'}{ch.record ? ' · ضبط روشن' : ''}
           </p>
         </div>
         {ch.isLive
@@ -51,7 +51,7 @@ export function ChannelCard({ ch, clubId, busy, run, connected = true, onChanged
       {ch.adminBlocked && (
         <p className="flex items-start gap-2 rounded-card bg-danger/[.06] p-3 text-sub text-danger">
           <ShieldAlert className="mt-1 h-4 w-4 shrink-0" aria-hidden />
-          این کانال توسط مدیریت بیلیارد هاب مسدود شده است{ch.blockReason ? `: ${ch.blockReason}` : ''}. برای پیگیری با پشتیبانی تماس بگیرید.
+          این کانال توسط مدیریت بیلیارد هاب مسدود شده است{ch.blockReason ? `: ${ch.blockReason}` : ''}. برای پیگیری با پشتیبانی تماس بگیرید
         </p>
       )}
 
@@ -60,7 +60,7 @@ export function ChannelCard({ ch, clubId, busy, run, connected = true, onChanged
       <div className="flex flex-wrap items-center gap-2">
         {ch.isLive && !publishingHere ? (
           <Button variant="danger" loading={isBusy('stop')} onClick={() => void run({ action: 'stop', channelId: ch.id })}
-            icon={<Square className="h-4 w-4" aria-hidden />}>پایانِ پخش</Button>
+            icon={<Square className="h-4 w-4" aria-hidden />}>پایان پخش</Button>
         ) : !ch.isLive && !ch.browser ? externalStart : null}
         <Link href={`/live/c/${ch.id}`} target="_blank"
           className="inline-flex min-h-11 items-center gap-1 rounded-field px-4 text-sub text-ink-2 hover:bg-line/[.04] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-deep">
@@ -73,7 +73,7 @@ export function ChannelCard({ ch, clubId, busy, run, connected = true, onChanged
       </div>
 
       <p className="text-meta text-ink-3">
-        ۳۰ روزِ اخیر: {faNum(ch.month.count)} پخش · {faDec(ch.month.hours)} ساعت · اوجِ {faNum(ch.month.peakViewers)} بیننده
+        ۳۰ روز اخیر: {faNum(ch.month.count)} پخش · {faDec(ch.month.hours)} ساعت · اوج {faNum(ch.month.peakViewers)} بیننده
       </p>
 
       {open && (
@@ -85,7 +85,7 @@ export function ChannelCard({ ch, clubId, busy, run, connected = true, onChanged
             <label className="inline-flex min-h-11 cursor-pointer items-center gap-2 text-sub text-ink">
               <input type="checkbox" className="h-4 w-4 accent-gold" checked={ch.access === 'members'} disabled={isBusy('update')}
                 onChange={e => void run({ action: 'update', channelId: ch.id, access: e.target.checked ? 'members' : 'public' })} />
-              فقط کاربرانِ عضو ببینند
+              فقط کاربران عضو ببینند
             </label>
             <label className="inline-flex min-h-11 cursor-pointer items-center gap-2 text-sub text-ink">
               <input type="checkbox" className="h-4 w-4 accent-gold" checked={ch.record} disabled={isBusy('update')}
@@ -94,7 +94,7 @@ export function ChannelCard({ ch, clubId, busy, run, connected = true, onChanged
             </label>
             </>}
             <Button variant="danger-ghost" size="sm" className="ms-auto" disabled={ch.adminBlocked} onClick={() => setConfirm('archive')}
-              icon={<Trash2 className="h-4 w-4" aria-hidden />}>حذفِ کانال</Button>
+              icon={<Trash2 className="h-4 w-4" aria-hidden />}>حذف کانال</Button>
           </div>
         </div>
       )}
@@ -102,11 +102,11 @@ export function ChannelCard({ ch, clubId, busy, run, connected = true, onChanged
       <ConfirmDialog
         open={confirm !== null}
         tone={confirm === 'archive' ? 'danger' : 'gold'}
-        title={confirm === 'archive' ? 'حذفِ این کانال؟' : 'ساختِ کلیدِ تازه؟'}
+        title={confirm === 'archive' ? 'حذف این کانال؟' : 'ساخت کلید تازه؟'}
         body={confirm === 'archive'
-          ? 'کانال و نشانیِ تماشایش حذف می‌شود و کلیدِ استریمش دیگر کار نمی‌کند. ضبط‌های قبلی در آرشیوِ سایت دیده نمی‌شوند.'
-          : 'کلیدِ فعلی بلافاصله از کار می‌افتد و باید کلیدِ تازه را در OBS یا Larix وارد کنید. اگر کلید لو رفته، همین کار را بکنید.'}
-        confirmLabel={confirm === 'archive' ? 'حذف' : 'کلیدِ تازه'}
+          ? 'کانال و نشانی تماشایش حذف می‌شود و کلید استریمش دیگر کار نمی‌کند، ضبط‌های قبلی در آرشیو سایت دیده نمی‌شوند'
+          : 'کلید فعلی بلافاصله از کار می‌افتد و باید کلید تازه را در OBS یا Larix وارد کنید، اگر کلید لو رفته، همین کار را بکنید'}
+        confirmLabel={confirm === 'archive' ? 'حذف' : 'کلید تازه'}
         busy={isBusy('archive') || isBusy('rotate-key')}
         onCancel={() => setConfirm(null)}
         onConfirm={async () => {

@@ -83,7 +83,7 @@ export default function PlayerDisciplines({
       {entries.length > 0 && (
         <div className="flex flex-col gap-3">
           <p className="text-[12px] text-[#6F6A5C]">
-            برای هر رشته، رده‌ی سنی و دسته را مشخص کنید — همان دسته‌بندی‌های بخش رنکینگ.
+            برای هر رشته، رده‌ی سنی و دسته را مشخص کنید — همان دسته‌بندی‌های بخش رنکینگ
           </p>
           {entries.map(e => (
             <div key={e.discipline} className="rounded-xl border border-[#E7E2D6] bg-[#FAFAF7] p-3.5">
@@ -116,7 +116,7 @@ export default function PlayerDisciplines({
               </div>
               {!isRanked(e.discipline) && (
                 <p className="mt-2.5 text-[11.5px] text-[#A69F8E]">
-                  هی‌بال هنوز جدول رنکینگ ملی ندارد؛ این دسته‌بندی فقط روی پروفایل شما نمایش داده می‌شود.
+                  هی‌بال هنوز جدول رنکینگ ملی ندارد؛ این دسته‌بندی فقط روی پروفایل شما نمایش داده می‌شود
                 </p>
               )}
             </div>

@@ -144,7 +144,7 @@ export async function PUT(
     const current = String((club as { slug?: string | null }).slug ?? '').trim().toLowerCase();
     if (!isAdmin && current && raw !== current) {
       return NextResponse.json(
-        { message: 'آدرس اختصاصی پس از ثبت اولیه قابل تغییر نیست. برای اصلاح با پشتیبانی تماس بگیرید.' },
+        { message: 'آدرس اختصاصی پس از ثبت اولیه قابل تغییر نیست، برای اصلاح با پشتیبانی تماس بگیرید' },
         { status: 409, headers: CORS });
     }
 

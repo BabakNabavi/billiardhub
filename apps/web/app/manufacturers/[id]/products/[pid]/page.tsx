@@ -91,7 +91,7 @@ export default function MfrProductPage() {
       <ProfileMissing
         icon={<MapPin size={34} />}
         title="محصول پیدا نشد"
-        message="ممکن است این محصول حذف شده باشد یا نشانی تغییر کرده باشد."
+        message="ممکن است این محصول حذف شده باشد یا نشانی تغییر کرده باشد"
         backHref={`/manufacturers/${mfrId}`} backLabel="بازگشت به تولیدکننده"
         {...retryProps}
       />
@@ -147,7 +147,7 @@ export default function MfrProductPage() {
             {product.category && <span className="mpp-cat">{product.category}</span>}
             <h1 className="mpp-name">{product.name}</h1>
             <Link href={`/manufacturers/${mfrId}`} className="mpp-maker">
-              ساختِ {mfr.name}
+              ساخت {mfr.name}
               <ChevronLeft size={14} aria-hidden />
             </Link>
 

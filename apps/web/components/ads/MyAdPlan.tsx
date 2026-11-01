@@ -98,7 +98,7 @@ export default function MyAdPlan({ compact = false }: { compact?: boolean }) {
 
       {!quota.enabled && (
         <p style={{ fontSize: 12, color: MUT, lineHeight: 1.9, margin: '0 0 12px' }}>
-          در حال حاضر محدودیتی اعمال نمی‌شود؛ این عدد فقط برای اطلاع شماست.
+          در حال حاضر محدودیتی اعمال نمی‌شود؛ این عدد فقط برای اطلاع شماست
         </p>
       )}
 
@@ -107,7 +107,7 @@ export default function MyAdPlan({ compact = false }: { compact?: boolean }) {
           سهمیه‌ی رایگان به هویت تأییدشده تعلق می‌گیرد؛ برای فعال‌شدنش،
           کد ملی خود را از{' '}
           <Link href="/profile/verify" style={{ color: GOLD_D, textDecoration: 'underline' }}>بخش احراز هویت</Link>
-          {' '}تأیید کنید.
+          {' '}تأیید کنید
         </p>
       )}
 

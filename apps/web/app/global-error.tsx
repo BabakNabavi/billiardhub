@@ -47,8 +47,8 @@ export default function GlobalError({ error, retry }: {
               مشکلی پیش آمد
             </h1>
             <p style={{ fontSize: 13, color: '#6F6A5C', margin: '0 0 24px', lineHeight: 2 }}>
-              سایت موقتاً بالا نیامد. یک‌بار دیگر تلاش کنید؛ اگر باز هم تکرار شد
-              چند دقیقه بعد سر بزنید.
+              سایت موقتا بالا نیامد، یک‌بار دیگر تلاش کنید؛ اگر باز هم تکرار شد
+              چند دقیقه بعد سر بزنید
             </p>
             <div style={{ display: 'flex', gap: 9, flexWrap: 'wrap', justifyContent: 'center' }}>
               <button type="button" onClick={retry} style={{

@@ -79,12 +79,12 @@ export default function ChannelPage() {
             ) : failed ? (
               <div className="mx-empty">
                 <h1>ویدیوهای این کانال بارگذاری نشد</h1>
-                <p>این یک خطای موقت است، نه نبود ویدیو.</p>
+                <p>این یک خطای موقت است، نه نبود ویدیو</p>
               </div>
             ) : rows.length === 0 ? (
               <div className="mx-empty">
                 <h1>این کانال ویدیویی ندارد</h1>
-                <p>ممکن است هندل اشتباه باشد یا هنوز چیزی منتشر نشده باشد.</p>
+                <p>ممکن است هندل اشتباه باشد یا هنوز چیزی منتشر نشده باشد</p>
                 <div className="mx-empty-act">
                   <Link className="mx-iconbtn" href="/media/channels"><span>همه‌ی کانال‌ها</span></Link>
                 </div>

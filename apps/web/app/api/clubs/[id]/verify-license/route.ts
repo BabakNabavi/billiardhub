@@ -38,7 +38,7 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string
 
   if (!u.national_id || !u.national_id_verified) {
     return NextResponse.json({
-      message: 'برای استعلام جواز کسب، ابتدا باید کد ملی شما تأیید شود.',
+      message: 'برای استعلام جواز کسب، ابتدا باید کد ملی شما تأیید شود',
       needsIdentity: true,
     }, { status: 409 });
   }
@@ -51,7 +51,7 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string
   if (holder && holder !== u.national_id) {
     return NextResponse.json({
       ok: true, match: false,
-      message: 'این جواز کسب به نام شما نیست. جواز باید متعلق به خود صاحب باشگاه باشد.',
+      message: 'این جواز کسب به نام شما نیست، جواز باید متعلق به خود صاحب باشگاه باشد',
     }, { status: 422 });
   }
 
@@ -65,7 +65,7 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string
 
     return NextResponse.json({
       ok: true, match: true, expired: true, data: r.data,
-      message: `اعتبار این مجوز در تاریخ ${r.data?.expireDate} به پایان رسیده است.`,
+      message: `اعتبار این مجوز در تاریخ ${r.data?.expireDate} به پایان رسیده است`,
     }, { status: 422 });
   }
 

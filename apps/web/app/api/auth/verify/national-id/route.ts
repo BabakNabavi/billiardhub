@@ -99,7 +99,7 @@ export async function POST(req: NextRequest) {
       entityType: 'user', entityId: session.id, newValue: { via: 'verify/national-id' }, ip: clientIp(req),
     })
     return NextResponse.json(
-      { code: 'IDENTITY_BLOCKED', message: 'این هویت قابلِ ثبت روی این حساب نیست. برای پیگیری با پشتیبانی تماس بگیرید.' },
+      { code: 'IDENTITY_BLOCKED', message: 'این هویت قابل ثبت روی این حساب نیست، برای پیگیری با پشتیبانی تماس بگیرید' },
       { status: 403, headers: CORS_HEADERS },
     )
   }

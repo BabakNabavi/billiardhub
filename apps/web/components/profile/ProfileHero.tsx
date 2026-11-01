@@ -265,7 +265,7 @@ export default function ProfileHero({
         <HeroMediaButton
           variant="cover"
           noun="تصویر پس‌زمینه"
-          removeBody="پس از حذف، پوسترِ پیش‌فرض دوباره نمایش داده می‌شود."
+          removeBody="پس از حذف، پوستر پیش‌فرض دوباره نمایش داده می‌شود"
           /* ⚠️ با `coverSlides` حذف یک فیلد همه‌ی بنرها را برنمی‌دارد،
              پس وعده‌ی «پوستر برمی‌گردد» دروغ می‌شد. تا وقتی کسی
              حذفِ چندبنری را پیاده نکرده، گزینه‌ی حذف نمی‌آید. */
@@ -305,7 +305,7 @@ export default function ProfileHero({
               <HeroMediaButton
                 variant="avatar"
                 noun="عکس پروفایل"
-                removeBody="پس از حذف، نشانِ پیش‌فرضِ نقش نمایش داده می‌شود."
+                removeBody="پس از حذف، نشان پیش‌فرض نقش نمایش داده می‌شود"
                 hasImage={!!photo}
                 busy={mediaBusy}
                 onPick={onPickPhoto}

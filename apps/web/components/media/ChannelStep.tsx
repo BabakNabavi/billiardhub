@@ -117,7 +117,7 @@ export function ChannelCreate({
   if (failed) {
     return (
       <div role="alert" style={{ padding: 20, textAlign: 'center', display: 'flex', flexDirection: 'column', gap: 12 }}>
-        <span style={{ fontSize: 13, color: INK, fontWeight: 700 }}>{err || 'فهرست کانال‌ها خوانده نشد.'}</span>
+        <span style={{ fontSize: 13, color: INK, fontWeight: 700 }}>{err || 'فهرست کانال‌ها خوانده نشد'}</span>
         <button type="button" onClick={onRetry}
           style={{ alignSelf: 'center', minHeight: 44, padding: '0 18px', borderRadius: 11, cursor: 'pointer', fontFamily: 'inherit', fontSize: 13, fontWeight: 800, background: GOLD, color: '#241B08', border: 'none' }}>
           تلاش دوباره
@@ -180,7 +180,7 @@ export function ChannelCreate({
       <p style={{ fontSize: 11, color: MUT, textAlign: 'center', margin: 0, lineHeight: 1.9 }}>
         {/* ⚠️ متن قبلی می‌گفت «کانال یک‌بار ساخته می‌شود» — از وقتی هر
             نقش کانال خودش را دارد، این دیگر درست نیست. */}
-        می‌توانید برای هر نقش خود کانال جدا داشته باشید؛ هنگام آپلود انتخاب می‌کنید.
+        می‌توانید برای هر نقش خود کانال جدا داشته باشید؛ هنگام آپلود انتخاب می‌کنید
       </p>
     </div>
   )

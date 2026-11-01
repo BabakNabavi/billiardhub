@@ -95,7 +95,7 @@ export default function MyStoryPlan({ compact = false }: { compact?: boolean }) 
 
       {!quota.enabled && (
         <p style={{ fontSize: 12, color: MUT, lineHeight: 1.9, margin: '0 0 12px' }}>
-          فروش بسته‌ی استوری هنوز فعال نشده؛ سهمیه‌ی رایگان نقشتان برقرار است.
+          فروش بسته‌ی استوری هنوز فعال نشده؛ سهمیه‌ی رایگان نقشتان برقرار است
         </p>
       )}
 

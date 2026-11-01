@@ -143,11 +143,11 @@ export default function TechnicianDashboard() {
     const file = e.target.files?.[0]; if (!file) return
     setBusy(true)
     try { setPrj(p => ({ ...p, image: '' })); const url = await compressImage(file, 1200, 0.7); setPrj(p => ({ ...p, image: url })) }
-    catch { setErr('عکس خوانده نشد.') }
+    catch { setErr('عکس خوانده نشد') }
     finally { setBusy(false); e.target.value = '' }
   }
   const addProject = () => {
-    if (!prj.title.trim() || !prj.service) { setErr('عنوان و نوع خدمات پروژه لازم است.'); return }
+    if (!prj.title.trim() || !prj.service) { setErr('عنوان و نوع خدمات پروژه لازم است'); return }
     const p: TechProject = {
       id: rid(), title: prj.title.trim(), desc: prj.desc.trim(),
       city: prj.city.trim() || form.city, club: prj.club.trim() || undefined,
@@ -165,8 +165,8 @@ export default function TechnicianDashboard() {
      مدل جدا، عکسی که از صفحه‌ی عمومی اضافه می‌شد در پنل دیده نمی‌شد. */
   const addAlbum = () => {
     const n = albTitle.trim()
-    if (!n) { setErr('نام آلبوم لازم است.'); return }
-    if (form.albums.some(x => x.trim() === n)) { setErr('آلبومی با همین نام هست.'); return }
+    if (!n) { setErr('نام آلبوم لازم است'); return }
+    if (form.albums.some(x => x.trim() === n)) { setErr('آلبومی با همین نام هست'); return }
     set('albums', [...form.albums, n]); setAlbTitle('')
   }
   const addAlbumPhotos = async (album: string, files: FileList | null) => {
@@ -180,7 +180,7 @@ export default function TechnicianDashboard() {
         ...(album ? { album } : {}),
       })))
       set('gallery', [...form.gallery, ...items])
-    } catch { setErr('آپلود نشد. دوباره تلاش کنید.') }
+    } catch { setErr('آپلود نشد، دوباره تلاش کنید') }
     finally { setBusy(false) }
   }
   const removeGalleryItem = (id: string) => set('gallery', form.gallery.filter(g => g.id !== id))
@@ -194,16 +194,16 @@ export default function TechnicianDashboard() {
   /* ── ذخیره = انتشار ── */
   const submit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!form.name.trim())  { setErr('نام و نام‌خانوادگی لازم است.'); return }
-    if (!form.city)         { setErr('شهر را انتخاب کنید.'); return }
-    if (!form.services.length) { setErr('حداقل یک نوع خدمات را انتخاب کنید.'); return }
-    if (!form.phone.trim()) { setErr('شماره تماس لازم است.'); return }
+    if (!form.name.trim())  { setErr('نام و نام‌خانوادگی لازم است'); return }
+    if (!form.city)         { setErr('شهر را انتخاب کنید'); return }
+    if (!form.services.length) { setErr('حداقل یک نوع خدمات را انتخاب کنید'); return }
+    if (!form.phone.trim()) { setErr('شماره تماس لازم است'); return }
     /* ⚠️ بدون این، شماره‌ی خراب ذخیره می‌شد و صفحه‌ی عمومی بی‌صدا
        هیچ دکمه‌ی تماسی نمی‌ساخت. */
     const telOk = telNumber(form.phone)
     if (!telOk) { setErr(INVALID_MOBILE_MESSAGE); return }
     if (form.whatsapp.trim() && !telNumber(form.whatsapp)) {
-      setErr('شماره واتساپ معتبر نیست.'); return
+      setErr('شماره واتساپ معتبر نیست'); return
     }
 
     const profile = {
@@ -247,7 +247,7 @@ export default function TechnicianDashboard() {
         <div className={`${CARD} max-w-[420px]`}>
           <Wrench size={26} className="mx-auto mb-3 text-[#6F6A5C]" />
           <h1 className="text-[16px] font-bold">این صفحه مخصوص متخصصان خدمات فنی است</h1>
-          <p className="mt-2 text-[13px] leading-relaxed text-[#5B564B]">برای ساختن پروفایل، اول باید نقش «خدمات فنی» را بگیرید.</p>
+          <p className="mt-2 text-[13px] leading-relaxed text-[#5B564B]">برای ساختن پروفایل، اول باید نقش «خدمات فنی» را بگیرید</p>
           <Link href="/profile/role" className={`${LQ_BTN} mt-4`}>انتخاب نقش</Link>
         </div>
       </div>
@@ -274,7 +274,7 @@ export default function TechnicianDashboard() {
         <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
           <div>
             <h1 className="text-[19px] font-bold">پنل متخصص خدمات فنی</h1>
-            <p className="mt-1 text-[12.5px] text-[#6F6A5C]">هرچه این‌جا وارد کنید، همان در دایرکتوری و پروفایل عمومی شما دیده می‌شود.</p>
+            <p className="mt-1 text-[12.5px] text-[#6F6A5C]">هرچه این‌جا وارد کنید، همان در دایرکتوری و پروفایل عمومی شما دیده می‌شود</p>
           </div>
           <Link href={`/services/${form.slug}`} className={LQ_BTN}>
             <ArrowLeft size={14} /> مشاهده‌ی پروفایل
@@ -304,7 +304,7 @@ export default function TechnicianDashboard() {
                     const f = e.target.files?.[0]; if (!f) return
                     setBusy(true)
                     try { set('photo', await compressImage(f, 480, 0.82)) }
-                    catch { setErr('عکس خوانده نشد.') }
+                    catch { setErr('عکس خوانده نشد') }
                     finally { setBusy(false); e.target.value = '' }
                   }} />
                 <button type="button" onClick={() => photoRef.current?.click()} className={LQ_BTN} disabled={busy}>
@@ -331,7 +331,7 @@ export default function TechnicianDashboard() {
                   value={form.name} readOnly aria-readonly="true"
                   placeholder="از حساب کاربری" />
                 <p className="mt-1 text-[11px] text-[#8A8577]">
-                  از حساب کاربری‌تان می‌آید. برای تغییر، به تنظیمات حساب بروید.
+                  از حساب کاربری‌تان می‌آید، برای تغییر، به تنظیمات حساب بروید
                 </p>
               </div>
               {/* نامِ برند/تیم — مثلِ نامِ فروشگاه: اگر پر شود، روی کارت و صفحه
@@ -343,7 +343,7 @@ export default function TechnicianDashboard() {
                   value={form.brand ?? ''} onChange={e => set('brand', e.target.value)}
                   placeholder="مثال: Arta Team" />
                 <p className="mt-1 text-[11px] text-[#8A8577]">
-                  به‌جای نامِ شما نمایش داده می‌شود؛ نامِ شما زیرش می‌آید.
+                  به‌جای نام شما نمایش داده می‌شود؛ نام شما زیرش می‌آید
                 </p>
               </div>
               {/* ⚠️ «عنوان تخصصی» حذف شد: این صفحه فقط یک نوع پروفایل
@@ -419,7 +419,7 @@ export default function TechnicianDashboard() {
                   onChange={e => set('hours', e.target.value)}
                   placeholder="مثال: شنبه تا چهارشنبه، ۱۰ تا ۲۰ — پنجشنبه تا ۱۴" />
                 <p id="tech-hours-help" className="mt-1.5 text-[11.5px] leading-[1.9] text-[#6F6A5C]">
-                  خالی بگذارید اگر ساعت ثابتی ندارید؛ در این حالت اصلا نمایش داده نمی‌شود.
+                  خالی بگذارید اگر ساعت ثابتی ندارید؛ در این حالت اصلا نمایش داده نمی‌شود
                 </p>
               </div>
               <div className="sm:col-span-2">
@@ -441,7 +441,7 @@ export default function TechnicianDashboard() {
             <h2 className="mb-1 text-[14.5px] font-bold">خدمات فنی من *</h2>
             <p className="mb-4 text-[12.5px] leading-[1.9] text-[#6F6A5C]">
               فقط چیزهایی را انتخاب کنید که واقعا انجام می‌دهید؛ همین‌ها در صفحه‌ی
-              عمومی شما دیده می‌شوند.
+              عمومی شما دیده می‌شوند
             </p>
             <ServicePicker
               selected={pickedIds} onChange={onPickServices}
@@ -467,7 +467,7 @@ export default function TechnicianDashboard() {
           {/* ═══ پروژه‌ها ═══ */}
           <section className={CARD}>
             <h2 className="mb-1 text-[14.5px] font-bold">پروژه‌ها و کارهای انجام‌شده</h2>
-            <p className="mb-4 text-[12px] text-[#6F6A5C]">به‌شکل پرتفولیو در پروفایل شما نمایش داده می‌شود.</p>
+            <p className="mb-4 text-[12px] text-[#6F6A5C]">به‌شکل پرتفولیو در پروفایل شما نمایش داده می‌شود</p>
 
             {form.projects.length > 0 && (
               <div className="mb-4 space-y-2">
@@ -520,7 +520,7 @@ export default function TechnicianDashboard() {
           {/* ═══ گالری / آلبوم‌ها ═══ */}
           <section className={CARD}>
             <h2 className="mb-1 text-[14.5px] font-bold">گالری تصاویر — آلبوم‌ها</h2>
-            <p className="mb-4 text-[12px] text-[#6F6A5C]">آلبوم بسازید و عکس‌های هر آلبوم را اضافه کنید.</p>
+            <p className="mb-4 text-[12px] text-[#6F6A5C]">آلبوم بسازید و عکس‌های هر آلبوم را اضافه کنید</p>
 
             {form.albums.map(name => {
               const photos = form.gallery.filter(g => (g.album ?? '') === name)
@@ -548,7 +548,7 @@ export default function TechnicianDashboard() {
                         </span>
                       ))}
                     </div>
-                  ) : <p className="text-[11.5px] text-[#A69F8E]">هنوز عکسی ندارد.</p>}
+                  ) : <p className="text-[11.5px] text-[#A69F8E]">هنوز عکسی ندارد</p>}
                 </div>
               )
             })}
@@ -580,7 +580,7 @@ export default function TechnicianDashboard() {
             <button type="submit" className={`${LQ_BTN} px-7 py-3 text-[14px]`} disabled={busy}>
               ذخیره و انتشار پروفایل
             </button>
-            {saved && <span className="text-[12.5px] font-bold text-[#0E7A38]">ذخیره و منتشر شد ✓ — در «خدمات فنی» نمایش داده می‌شود.</span>}
+            {saved && <span className="text-[12.5px] font-bold text-[#0E7A38]">ذخیره و منتشر شد ✓ — در «خدمات فنی» نمایش داده می‌شود</span>}
             {err && <span className="text-[12.5px] font-bold text-[#B23B2E]">{err}</span>}
           </div>
         </form>

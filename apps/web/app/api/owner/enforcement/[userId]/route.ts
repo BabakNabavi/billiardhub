@@ -19,7 +19,7 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ userId: str
     'id,phone,"firstName","lastName","primaryRole","secondaryRoles","createdAt",national_id_verified,' +
     'account_status,status_expires_at,feature_restrictions,status_changed_at,is_platform_owner',
   ).eq('id', userId).maybeSingle();
-  if (error) return NextResponse.json({ message: 'خواندنِ کاربر انجام نشد' }, { status: 500 });
+  if (error) return NextResponse.json({ message: 'خواندن کاربر انجام نشد' }, { status: 500 });
   if (!user) return NextResponse.json({ message: 'کاربر پیدا نشد' }, { status: 404 });
 
   const [products, clubs, profiles, videos, history] = await Promise.all([

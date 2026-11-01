@@ -45,8 +45,8 @@ export async function POST(req: NextRequest) {
     const dup = await findDuplicateReference(reference, { table: 'refunds', id });
     if (dup) {
       return NextResponse.json({
-        message: `این شماره پیگیری قبلا برای «${dup.where}» ثبت شده است.`
-          + ' اگر واریز تازه‌ای انجام داده‌اید، شماره پیگیری همان تراکنش را وارد کنید.',
+        message: `این شماره پیگیری قبلا برای «${dup.where}» ثبت شده است`
+          + ' اگر واریز تازه‌ای انجام داده‌اید، شماره پیگیری همان تراکنش را وارد کنید',
       }, { status: 409 });
     }
 
@@ -82,8 +82,8 @@ export async function POST(req: NextRequest) {
     const dup = await findDuplicateReference(reference, { table: 'campaign_orders', id });
     if (dup) {
       return NextResponse.json({
-        message: `این شماره پیگیری قبلا برای «${dup.where}» ثبت شده است.`
-          + ' اگر واریز تازه‌ای انجام داده‌اید، شماره پیگیری همان تراکنش را وارد کنید.',
+        message: `این شماره پیگیری قبلا برای «${dup.where}» ثبت شده است`
+          + ' اگر واریز تازه‌ای انجام داده‌اید، شماره پیگیری همان تراکنش را وارد کنید',
       }, { status: 409 });
     }
 
@@ -96,7 +96,7 @@ export async function POST(req: NextRequest) {
       console.error('[admin/refunds] ad complete error:', error.message);
       return NextResponse.json({
         message: /does not exist|schema cache|PGRST204/i.test(error.message ?? '')
-          ? 'این قابلیت هنوز در دیتابیس ساخته نشده است (مهاجرت ۰۶۷ اجرا نشده).'
+          ? 'این قابلیت هنوز در دیتابیس ساخته نشده است (مهاجرت ۰۶۷ اجرا نشده)'
           : 'ثبت واریز انجام نشد',
       }, { status: 400 });
     }

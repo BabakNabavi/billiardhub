@@ -238,7 +238,7 @@ async function ledgerUsed(personId: string, period: Period, limit: number)
   } catch { return { used: 0, freeSlotAt: null } }
 }
 
-const IDENTITY_MSG = 'برای استفاده از سهمیه‌ی رایگان آگهی، ابتدا هویت خود (کد ملی) را از بخش پروفایل تأیید کنید.'
+const IDENTITY_MSG = 'برای استفاده از سهمیه‌ی رایگان آگهی، ابتدا هویت خود (کد ملی) را از بخش پروفایل تأیید کنید'
 const SYSTEM_MSG = 'سیستم سهمیه موقتا در دسترس نیست؛ چند لحظه بعد دوباره تلاش کنید'
 
 /** وضعیت کامل سهمیه — هم برای اجازه‌دادن، هم برای نمایش در پنل */
@@ -265,7 +265,7 @@ export async function getQuotaState(userId: string): Promise<QuotaState> {
     return {
       ...base,
       allowed: false,
-      message: `سهمیه‌ی آگهی پلن «${plan.name}» شما در این ${PERIOD_FA[plan.period]} تمام شده است. برای ثبت آگهی بیشتر، پلن خود را ارتقا دهید.`,
+      message: `سهمیه‌ی آگهی پلن «${plan.name}» شما در این ${PERIOD_FA[plan.period]} تمام شده است، برای ثبت آگهی بیشتر، پلن خود را ارتقا دهید`,
     }
   }
 
@@ -321,7 +321,7 @@ export async function getQuotaState(userId: string): Promise<QuotaState> {
     return {
       ...base,
       allowed: false,
-      message: `سهمیه‌ی رایگان شما در این ${PERIOD_FA[period]} تمام شده است. حذف آگهی سهمیه را برنمی‌گرداند؛ برای ثبت آگهی بیشتر، یکی از بسته‌های آگهی را تهیه کنید.`,
+      message: `سهمیه‌ی رایگان شما در این ${PERIOD_FA[period]} تمام شده است، حذف آگهی سهمیه را برنمی‌گرداند؛ برای ثبت آگهی بیشتر، یکی از بسته‌های آگهی را تهیه کنید`,
     }
   }
   return { ...base, allowed: true }
@@ -413,7 +413,7 @@ export async function consumeAdQuota(userId: string, refId?: string | null): Pro
       status: 429,
       body: {
         message: state.message
-          ?? `سهمیه‌ی رایگان شما در این ${PERIOD_FA[state.period]} تمام شده است. حذف آگهی سهمیه را برنمی‌گرداند؛ برای ثبت آگهی بیشتر، یکی از بسته‌های آگهی را تهیه کنید.`,
+          ?? `سهمیه‌ی رایگان شما در این ${PERIOD_FA[state.period]} تمام شده است، حذف آگهی سهمیه را برنمی‌گرداند؛ برای ثبت آگهی بیشتر، یکی از بسته‌های آگهی را تهیه کنید`,
         quotaExceeded: true,
         quota: { used, limit, period: state.period, resetAt: state.resetAt },
       },

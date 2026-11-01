@@ -105,7 +105,7 @@ function DevCredit() {
     <span style={{ direction: 'ltr', display: 'inline-flex', alignItems: 'center', gap: '6px', lineHeight: 1, fontSize: '10.5px', fontWeight: 600, letterSpacing: '0.04em', color: 'rgba(26,25,23,0.62)' }}>
       <a href="https://www.babaknabavi.com" target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', color: 'inherit' }}>Designed &amp; Developed by <span style={{ color: ACCENT_TXT }}>Babak Nabavi</span></a>
       {/* padding/margin برابر و مخالف: هدفِ لمسیِ بزرگ‌تر، جای دیدنی همان آیکون */}
-      {DEV_INSTAGRAM && <a href={DEV_INSTAGRAM} target="_blank" rel="noopener noreferrer" aria-label="اینستاگرامِ سازنده" className="ft-dev-ig" title="instagram.com/babaknabavi" style={{ display: 'inline-flex', color: GOLD, alignSelf: 'center', transform: 'translateY(-2px)', padding: '5px', margin: '-5px' }}>
+      {DEV_INSTAGRAM && <a href={DEV_INSTAGRAM} target="_blank" rel="noopener noreferrer" aria-label="اینستاگرام سازنده" className="ft-dev-ig" title="instagram.com/babaknabavi" style={{ display: 'inline-flex', color: GOLD, alignSelf: 'center', transform: 'translateY(-2px)', padding: '5px', margin: '-5px' }}>
         <svg width={icon} height={icon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
           <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
           <circle cx="12" cy="12" r="4.5"/>
@@ -172,17 +172,17 @@ export default function Footer() {
           transform: translateY(-2px);
           box-shadow: 0 4px 14px rgb(var(--c-ink) / 0.068);
         }
-        /* رنگِ آیکون اینلاین است و این‌جا عوض نمی‌شود؛ هاور با کدرشدن.
-           حلقه‌ی فوکوس داخلِ جعبه‌ی ۲۵ پیکسلی تا روی نامِ کنارش نیفتد. */
+        /* رنگ آیکون اینلاین است و این‌جا عوض نمی‌شود؛ هاور با کدرشدن
+           حلقه‌ی فوکوس داخل جعبه‌ی ۲۵ پیکسلی تا روی نام کنارش نیفتد. */
         .ft-dev-ig { border-radius: 6px; transition: opacity .2s ease; }
         .ft-dev-ig:hover { opacity: .7; }
         .ft-dev-ig:focus-visible { outline: 2px solid var(--gold-deep); outline-offset: -2px; }
         .ft-dev-mob { display: none; }
-        /* ── چیدمانِ دسکتاپ (خواستِ مالک، آبانِ ۱۴۰۵، طبقِ عکسِ او) ──
-           زیرِ ۱۰۲۴ هیچ‌چیز عوض نشده (بینِ ۹۰۰ و ۱۰۲۴ جای ستون‌ها و ردیفِ
+        /* ── چیدمان دسکتاپ (خواست مالک، آبان ۱۴۰۵، طبق عکس او) ──
+           زیر ۱۰۲۴ هیچ‌چیز عوض نشده (بین ۹۰۰ و ۱۰۲۴ جای ستون‌ها و ردیف
            پایین نبود): این عناصر پنهان‌اند و ft-lower
-           بی‌اثر (contents)، پس موبایل و تبلت همان قبلی‌اند. نُه لینکِ
-           ستون‌ها هم عمداً همان‌اند. */
+           بی‌اثر (contents)، پس موبایل و تبلت همان قبلی‌اند، نه لینک
+           ستون‌ها هم عمدا همان‌اند. */
         .ft-contact-desk, .ft-legal-desk, .ft-band { display: none; }
         .ft-lower { display: contents; }
         @media (min-width: 1024px) {
@@ -190,15 +190,15 @@ export default function Footer() {
           .ft-word { font-size: 28px !important; }
           .ft-word-en { font-size: 12px !important; margin-top: 4px !important; }
           .ft-tagline { font-size: 15px !important; max-width: none !important; margin-top: -6px !important; margin-bottom: 10px !important; }
-          /* ستونِ برند به اندازه‌ی ردیفِ تماس (یک‌خطی)، سه ستونِ لینک بقیه را تقسیم می‌کنند */
+          /* ستون برند به اندازه‌ی ردیف تماس (یک‌خطی)، سه ستون لینک بقیه را تقسیم می‌کنند */
           .ft-grid { align-items: start; margin-bottom: 0 !important; grid-template-columns: minmax(max-content, 1.5fr) repeat(3, minmax(0, 1fr)) !important; }
           .ft-brand { border-inline-end: 1px solid ${BORDER}; padding-inline-end: 40px; margin-inline-end: 20px; padding-block: 0; }
           .ft-contact-desk { display: flex; flex-wrap: nowrap; align-items: center; }
           .ft-contact-item { display: inline-flex; align-items: center; gap: 8px; color: ${DIM}; font-size: 14px; white-space: nowrap; }
           .ft-contact-item + .ft-contact-item { border-inline-start: 1px solid ${BORDER}; margin-inline-start: 16px; padding-inline-start: 16px; }
           .ft-contact { display: none !important; }
-          /* ستون‌های کناری دست‌کم به اندازه‌ی محتوایشان؛ ستونِ سوم خالی می‌ماند تا نشان‌ها وسط بمانند
-             (سازنده آبانِ ۱۴۰۵ به نوارِ کپی‌رایت رفت) */
+          /* ستون‌های کناری دست‌کم به اندازه‌ی محتوایشان؛ ستون سوم خالی می‌ماند تا نشان‌ها وسط بمانند
+             (سازنده آبان ۱۴۰۵ به نوار کپی‌رایت رفت) */
           .ft-lower { display: grid; grid-template-columns: minmax(max-content, 1fr) auto minmax(max-content, 1fr); align-items: center;
             border-top: 1px solid ${BORDER}; margin-top: 18px; padding-top: 4px; }
           .ft-legal-desk { display: flex; align-items: center; gap: 18px; justify-self: start;
@@ -212,12 +212,12 @@ export default function Footer() {
           .ft-inner { padding-top: 28px !important; padding-bottom: 10px !important; }
           .ft-band-in { padding-top: 10px !important; padding-bottom: 10px !important; }
         }
-        /* ۱۰۲۴ تا ۱۲۸۰: حاشیه‌ی ۷٪ جای سه بخشِ ردیفِ پایین را می‌گرفت */
+        /* ۱۰۲۴ تا ۱۲۸۰: حاشیه‌ی ۷٪ جای سه بخش ردیف پایین را می‌گرفت */
         @media (min-width: 1024px) and (max-width: 1279.98px) {
           .ft-inner, .ft-band-in { padding-left: 4% !important; padding-right: 4% !important; }
         }
         .ft-copy-short { display: none; }
-        /* سه ستون PLATFORM/EXPLORE/ACCOUNT در یک سطر می‌مانند. با دو
+        /* سه ستون PLATFORM/EXPLORE/ACCOUNT در یک سطر می‌مانند، با دو
            ستون، ستون سوم به سطر بعد می‌افتاد و فوتر بی‌دلیل بلند
            می‌شد — در حالی که برچسب‌ها کوتاه‌اند و جا هست. */
         @media (max-width: 900px) {
@@ -235,14 +235,14 @@ export default function Footer() {
 
           .ft-tagline { margin-bottom: 10px !important; }
           .ft-inner { padding: 26px 18px 12px !important; }
-          /* نوار آدرس/تلفن: gap ۲۴ برای چیدمان یک‌سطری دسکتاپ بود. در موبایل آیتم‌ها می‌شکنند و
+          /* نوار آدرس/تلفن: gap ۲۴ برای چیدمان یک‌سطری دسکتاپ بود، در موبایل آیتم‌ها می‌شکنند و
              همان عدد به فاصله‌ی عمودی بین سطرها تبدیل می‌شد — سطری ۲۴px. حالا عمودی ۴، افقی ۱۶. */
-          /* وسط‌چین (خواستِ مالک) */
+          /* وسط‌چین (خواست مالک) */
           .ft-contact { gap: 4px 16px !important; padding: 9px 0 !important; margin-bottom: 8px !important; justify-content: center !important; }
           /* ── نوار آخر در موبایل: یک خط، نه سه ──
              پیش‌تر ستونی بود و کپی‌رایت، «قوانین» و «حریم خصوصی» هر
              کدام یک سطر می‌گرفتند — سه سطر برای سه عبارت کوتاه، که
-             فوتر را بی‌دلیل بلند می‌کرد.
+             فوتر را بی‌دلیل بلند می‌کرد
 
              هر سه کوتاه‌اند و روی صفحه‌ی ۳۲۰ پیکسلی هم در یک خط جا
              می‌شوند؛ فونت کمی کوچک‌تر و فاصله‌ی کمتر کافی است. */
@@ -260,7 +260,7 @@ export default function Footer() {
           .ft-dev-desk { display: none !important; }
           /* اعتبار توسعه‌دهنده و نوار حقوقی نزدیک هم بمانند */
           .ft-dev-mob { display: block !important; flex-basis: 100% !important; margin-top: 0; }
-          /* در موبایل نشان‌ها کمی بالاتر می‌نشینند. فاصله‌ی
+          /* در موبایل نشان‌ها کمی بالاتر می‌نشینند، فاصله‌ی
              پایینشان همان چیزی است که نوار حقوقی را از نشان جدا
              نگه می‌دارد — بدون آن، نوار به نشان می‌چسبد و نشان به
              خط بالای خودش. */

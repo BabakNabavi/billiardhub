@@ -70,7 +70,7 @@ export async function PUT(req: NextRequest) {
      دیگری می‌گیرد و proxy همه‌ی /admin — از جمله پنلِ اعمال — را می‌بندد؛ و
      این مسیر نقشِ admin را برنمی‌گرداند. راهِ بازگشت فقط دیتابیس بود. */
   if (cur.primaryRole === 'admin' && await isPlatformOwner(actor.id)) {
-    return NextResponse.json({ message: 'مالکِ پلتفرم نقشِ اصلیِ ادمین را نگه می‌دارد — نقشِ نمایشی برای او عوض نمی‌شود' }, { status: 400 });
+    return NextResponse.json({ message: 'مالک پلتفرم نقش اصلی ادمین را نگه می‌دارد — نقش نمایشی برای او عوض نمی‌شود' }, { status: 400 });
   }
 
   /* نقش قبلی گم نمی‌شود — به فهرست دوم می‌رود */
@@ -134,7 +134,7 @@ export async function DELETE(req: NextRequest) {
       .select('id', { count: 'exact', head: true }).eq('ownerId', actor.id);
     if ((count ?? 0) > 0) {
       return NextResponse.json({
-        message: `شما ${count} باشگاه ثبت‌شده دارید و تا وقتی صاحب باشگاه هستید نقش «باشگاه‌دار» برداشته نمی‌شود.`,
+        message: `شما ${count} باشگاه ثبت‌شده دارید و تا وقتی صاحب باشگاه هستید نقش «باشگاه‌دار» برداشته نمی‌شود`,
       }, { status: 409 });
     }
   }

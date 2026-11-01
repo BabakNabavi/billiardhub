@@ -20,7 +20,6 @@ import { usePathname } from 'next/navigation'
 import {
   Menu, Home, Clapperboard, Users2, Trophy, Newspaper, UploadCloud, User,
 } from 'lucide-react'
-import SearchBox from './SearchBox'
 
 /* ── هم‌ترازی با نوار ثابت سایت ──
    ⚠️ همان تله‌ی صفحه‌ی خدمات فنی: عدد ثابت در حالت نصب‌شده‌ی iOS
@@ -59,7 +58,7 @@ export interface TopBarProps {
   onUpload?: () => void
 }
 
-export function TopBar({ q, onQ, onSubmit, onToggleRail, onUpload, railMini = false }: TopBarProps) {
+export function TopBar({ onToggleRail, onUpload, railMini = false }: TopBarProps) {
   return (
     <div className="mx-top">
       <div className="mx-top-in">
@@ -76,10 +75,8 @@ export function TopBar({ q, onQ, onSubmit, onToggleRail, onUpload, railMini = fa
           <span>بیلیارد مدیا</span>
         </Link>
 
-        {/* ⚠️ جست‌وجو کامپوننت خودش را دارد: با هر حرف پیشنهاد
-            می‌آورد و خودش ناوبری می‌کند، پس نوار بالا دیگر لازم
-            نیست q را نگه دارد. */}
-        <SearchBox initial={q} />
+        {/* جعبه‌ی جست‌وجوی صفحه برداشته شد (خواستِ مالک، ۱۰ آبانِ ۱۴۰۵) — جست‌وجو از نوارِ بالاست */}
+        <span className="flex-1" aria-hidden />
 
         <div className="mx-top-act">
           {/* ⚠️ دکمه‌ی انتشار فقط برای کسی که واقعا کانال دارد. یک

@@ -16,7 +16,7 @@ export default function PendingNotice({ what = 'این صفحه' }: { what?: str
       className="mx-auto flex max-w-[1120px] items-start gap-2 px-4 pt-3 text-[12.5px] leading-8 sm:px-6"
     >
       <span className="w-full rounded-xl border border-[rgba(245,158,11,0.32)] bg-[rgba(245,158,11,0.10)] px-4 py-2 font-bold text-[#92600A]">
-        {what} هنوز تأیید نشده و فقط شما آن را می‌بینید — نشانی‌اش را برای دیگران نفرستید.
+        {what} هنوز تأیید نشده و فقط شما آن را می‌بینید — نشانی‌اش را برای دیگران نفرستید
       </span>
     </div>
   )

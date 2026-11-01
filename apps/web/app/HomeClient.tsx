@@ -300,9 +300,9 @@ const CLUB_IMG_FALLBACK = [IMG.club1, IMG.club2, IMG.club3, IMG.club4, IMG.club5
    عنوانِ اسلاید فقط چیزی را می‌گوید که پشتِ لینکش واقعاً هست. */
 const BANNER_SLIDES = [
   { img:IMG.wall1,  title:'باشگاه‌های بیلیارد ایران', sub:'باشگاه نزدیکت را پیدا کن و میز رزرو کن',  link:'/clubs',       cta:'رزرو میز',       accent:GRN  },
-  { img:IMG.wall3,  title:'مسابقات بیلیارد',  sub:'ثبت‌نام آنلاین در مسابقاتِ باشگاه‌ها',   link:'/tournaments', cta:'ثبت‌نام',        accent:BLU  },
+  { img:IMG.wall3,  title:'مسابقات بیلیارد',  sub:'ثبت‌نام آنلاین در مسابقات باشگاه‌ها',   link:'/tournaments', cta:'ثبت‌نام',        accent:BLU  },
   { img:IMG.wall4,  title:'مربیان بیلیارد',     sub:'مربیان ثبت‌شده‌ی بیلیارد هاب',           link:'/coaches',     cta:'پیدا کردن مربی',  accent:PRP  },
-  { img:IMG.wall5,  title:'بازارِ تجهیزات بیلیارد',        sub:'خرید و فروش چوب، میز و لوازم جانبی', link:'/shop',        cta:'خرید کن',        accent:GOLD },
+  { img:IMG.wall5,  title:'بازار تجهیزات بیلیارد',        sub:'خرید و فروش چوب، میز و لوازم جانبی', link:'/shop',        cta:'خرید کن',        accent:GOLD },
   { img:IMG.wall12, title:'خدمات فنی تخصصی در محل',       sub:'نصب، تعمیر و سرویس حرفه‌ای میزها',   link:'/services',    cta:'درخواست خدمت',  accent:BRN  },
 ];
 
@@ -512,7 +512,7 @@ function ClubCard({ club, h = '360px', featured = false }: { club: RealClub; h?:
    می‌تواند کشش کند. فقط چیزی که واقعا از داده می‌آید اینلاین ماند. */
 const BAZAAR_CSS = `
   /* جنس سطح از .lq-pcard (globals.css) — همان کارتی که بازار و
-     صفحه‌ی فروشگاه نشان می‌دهند. این‌جا فقط چیدمان می‌ماند. */
+     صفحه‌ی فروشگاه نشان می‌دهند، این‌جا فقط چیدمان می‌ماند. */
   .bz-card { text-decoration:none; overflow:hidden;
     display:flex; flex-direction:column; flex-shrink:0; }
   .bz-body { padding:9px 8px 8px; flex:1; display:flex; flex-direction:column;
@@ -520,7 +520,7 @@ const BAZAAR_CSS = `
   /* ── تیتر دوتکه، هم‌شکل کارت «بیلیارد بازار» ──
      تا امروز کل تیتر یک رشته بود («چوب اسنوکر — Predator») با وزن
      معمولی، پس دسته‌بندی و نوع هیچ برجستگی‌ای نداشتند و چشم مجبور بود
-     کل خط را بخواند. حالا سر تیتر بولد است و برند/مدل زیرش با وزن
+     کل خط را بخواند، حالا سر تیتر بولد است و برند/مدل زیرش با وزن
      عادی — دقیقا همان چیزی که در فهرست بازار هست. */
   .bz-name { font-size:var(--ad-title); color:#1C1B17; line-height:var(--ad-title-lh); display:block; overflow:hidden; }
   .bz-h { display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;
@@ -1165,13 +1165,13 @@ export default function HomeClient({ initialPlacements, initialFeatured, service
               اتصال بی‌مصرف باز می‌کرد */}
       <style>{`
         /* ── چرا blur از این کی‌فریم برداشته شد ──
-           حالت شروع filter:blur(5px) داشت. یعنی در تمام مدت ورود،
+           حالت شروع filter:blur(5px) داشت، یعنی در تمام مدت ورود،
            تیتر و زیرنویس مه‌آلود بودند — و چون تایم‌لاین کند بود، کاربر
            یک ثانیه‌ی کامل متن ناخوانا می‌دید و فکر می‌کرد صفحه گیر
-           کرده. روی متن فارسی بدتر هم هست: حروف چسبان در بلور به هم
-           می‌ریزند.
+           کرده، روی متن فارسی بدتر هم هست: حروف چسبان در بلور به هم
+           می‌ریزند
 
-           جابه‌جایی هم از ۳۰ به ۱۴ پیکسل و مقیاس از ۰٫۹۷ به ۰٫۹۹ آمد.
+           جابه‌جایی هم از ۳۰ به ۱۴ پیکسل و مقیاس از ۰٫۹۷ به ۰٫۹۹ آمد
            حس ورود می‌ماند، ولی به‌جای «چیزی دارد می‌آید» می‌شود «چیزی
            همین‌جا بود». */
         @keyframes fadeUp      { from{opacity:0;transform:translateY(14px) scale(0.99);}to{opacity:1;transform:none;} }
@@ -1241,23 +1241,23 @@ export default function HomeClient({ initialPlacements, initialFeatured, service
 
         /* نشان سکشن بازار کمی بالاتر می‌نشیند؛ در موبایل ۱۰٪ کوچک‌تر */
         /* ── چرا content-visibility برداشته شد ──
-           هدفش درست بود: مرورگر محتوای بیرون دید را چیدمان نکند.
-           ولی هزینه‌اش در عمل بیشتر از سودش درآمد.
+           هدفش درست بود: مرورگر محتوای بیرون دید را چیدمان نکند
+           ولی هزینه‌اش در عمل بیشتر از سودش درآمد
 
            contain-intrinsic-size یعنی «فعلا فرض کن ۷۰۰ پیکسل
-           است». وقتی بخش وارد کادر دید می‌شود، مرورگر
+           است»، وقتی بخش وارد کادر دید می‌شود، مرورگر
            واقعا چیدمانش می‌کند و ارتفاع واقعی معمولا ۷۰۰ نیست —
            پس ارتفاع کل صفحه همان لحظه عوض می‌شود و موقعیت اسکرول
-           می‌پرد. در اسکرول تند، چند بخش پشت‌سر هم این کار را
+           می‌پرد، در اسکرول تند، چند بخش پشت‌سر هم این کار را
            می‌کنند و اسکرول عملا قفل می‌شود؛ و لحظه‌ای که بخش هنوز
            چیده نشده، جای خالی‌اش تیره دیده می‌شود — همان «صفحه‌ی
-           سیاهی که چند صدم ثانیه می‌آید و می‌رود».
+           سیاهی که چند صدم ثانیه می‌آید و می‌رود»
 
-           این هزینه برای صفحه‌ای با چند بخش متوسط نمی‌ارزد. اگر روزی
+           این هزینه برای صفحه‌ای با چند بخش متوسط نمی‌ارزد، اگر روزی
            لازم شد، باید با ارتفاع واقعی هر بخش برگردد، نه یک عدد
            حدسی مشترک. */
 
-        /* احترام به «کاهش حرکت» — تنظیم سیستمی کاربر، نه سلیقه‌ی ما.
+        /* احترام به «کاهش حرکت» — تنظیم سیستمی کاربر، نه سلیقه‌ی ما
            همه‌ی حلقه‌های بی‌پایان خاموش می‌شوند. */
         @media (prefers-reduced-motion: reduce) {
           *, *::before, *::after {
@@ -1270,9 +1270,9 @@ export default function HomeClient({ initialPlacements, initialFeatured, service
 
         ${BAZAAR_CSS}
         /* دکمه‌ی «مشاهده و رزرو» — هشت بار روی صفحه تکرار می‌شد و هر بار
-           رشته‌ی کامل استایل در HTML می‌آمد. هاورش از کارت والد می‌آید. */
+           رشته‌ی کامل استایل در HTML می‌آمد، هاورش از کارت والد می‌آید. */
         .cta-lq {
-          /* ۴۱ → ۳۴: بزرگ‌ترین تک‌آیتمِ پنل بود. */
+          /* ۴۱ → ۳۴: بزرگ‌ترین تک‌آیتم پنل بود. */
           width:90%; text-align:center; padding:7px 0;
           background:var(--brand-tint);
           border:1px solid ${GOLD_BOR};
@@ -1291,7 +1291,6 @@ export default function HomeClient({ initialPlacements, initialFeatured, service
           .club-card-x:hover .cta-lq-sm { box-shadow:0 6px 16px rgb(var(--c-ink) / 0.122); }
         }
         .sec-title{font-size:clamp(24px,3.2vw,40px);font-weight:700;letter-spacing:-0.022em;line-height:1.16;margin:0 0 8px;}
-        .sec-rule {height:3px;width:64px;border-radius:2px;margin-top:14px;background:linear-gradient(90deg,currentColor,transparent);}
         /* وردمارک outline پس‌زمینه‌ی هر سکشن — امضای هویت جدید */
         /* خط مویی اریب — امضای برند */
         .sec-hair{position:absolute;top:-25%;bottom:-25%;width:1px;transform:rotate(14deg);pointer-events:none;}
@@ -1394,11 +1393,11 @@ export default function HomeClient({ initialPlacements, initialFeatured, service
         @media(max-width:600px){
           .club-desk-panel { display:none !important; }
           .club-mob-panel  { display:flex !important; }
-          /* پنل جا کم داشت و دکمه به کف می‌چسبید ⇒ عکس ۵۲٪، پنل ۴۸٪.
+          /* پنل جا کم داشت و دکمه به کف می‌چسبید ⇒ عکس ۵۲٪، پنل ۴۸٪
              اندازه‌گیری شد: با ۴۴٪ ارتفاع پنل ۱۲۹px بود و مجموع محتوا
              (تیتر + چیپ‌های میز + شهر + دکمه) با پدینگ کافی در آن جا
              نمی‌شد؛ دکمه ۸px از کف پنل بیرون می‌زد و overflow:hidden
-             پایینش را می‌برید. حالا پنل بلندتر است تا پدینگ ۲۰px واقعا
+             پایینش را می‌برید، حالا پنل بلندتر است تا پدینگ ۲۰px واقعا
              دکمه را بالا بیاورد، نه اینکه از کادر بیرونش کند. */
           .club-img-x      { flex:0 0 48% !important; }
           .club-mob-panel  { flex:0 0 52% !important; }
@@ -1407,24 +1406,24 @@ export default function HomeClient({ initialPlacements, initialFeatured, service
           .clubs-nav       { display:none !important; }
           .clubs-mobile-slider { display:flex !important; }
           /* padding-bottom در موبایل از clamp دسکتاپ ۵۶px می‌گرفت و با ۱۶px پدینگ خود اسلایدر
-             ⇒ ۷۲px فضای خالی ته سکشن. حالا ۱۶+۲۴ = ۴۰px. */
+             ⇒ ۷۲px فضای خالی ته سکشن، حالا ۱۶+۲۴ = ۴۰px. */
           .clubs-section { padding-top:36px !important; padding-bottom:24px !important; padding-left:0 !important; padding-right:0 !important; }
           .clubs-hd { padding-left:14px !important; padding-right:14px !important; flex-wrap:nowrap !important; align-items:flex-end !important; margin-bottom:22px !important; }
           .marketplace-section { padding-left:0 !important; padding-right:0 !important; }
           .marketplace-hd { padding-left:14px !important; padding-right:14px !important; margin-bottom:22px !important; }
           .mkt-split { display:none !important; }
           .mkt-banners { grid-template-columns:1fr !important; margin:12px 14px 0 !important; }
-          /* همان حاشیه‌ی ۱۴ پیکسلیِ بنرهای قدیمیِ همین سکشن — هم‌ترازی مهم‌تر از پیمانه است؛
-             سکشن در موبایل پدینگِ کناری ندارد */
+          /* همان حاشیه‌ی ۱۴ پیکسلی بنرهای قدیمی همین سکشن — هم‌ترازی مهم‌تر از پیمانه است؛
+             سکشن در موبایل پدینگ کناری ندارد */
           .mkt-empty { margin:0 14px !important; }
           .mkt-desk-btns { display:none !important; }
           .mkt-mobile-slider { display:flex !important; }
         }
 
         /* ── Sellers ── */
-        /* D1: راست / محتوای اصلی / چپ.
+        /* D1: راست / محتوای اصلی / چپ
            gap عمدا صفر است و فاصله روی ستون «پر» می‌نشیند — وگرنه دو گپ
-           ۱۴px حتی با ستون‌های خالی می‌ماند و چیدمان امروز جابه‌جا می‌شد.
+           ۱۴px حتی با ستون‌های خالی می‌ماند و چیدمان امروز جابه‌جا می‌شد
            فقط :empty (بدون :has): سلکتور ناشناخته در لیست، کل قاعده را
            در مرورگرهای قدیمی باطل می‌کرد. AdSlot در حالت خالی null
            برمی‌گرداند پس div واقعا :empty است. */
@@ -1568,8 +1567,8 @@ export default function HomeClient({ initialPlacements, initialFeatured, service
               افکتِ حرکتِ خودکار، وقتی آگهی رسید، درست وصل شوند. */}
           {HOME_PRODUCTS.length === 0 && prodSlot.status !== 'loading' && (
             <div className="mkt-empty mb-4 rounded-2xl border border-line/10 bg-white p-6 text-center">
-              <p className="mb-2 text-sm font-semibold text-ink">فعلاً آگهیِ فعالی در بازار نیست</p>
-              <p className="mb-4 text-xs leading-loose text-ink/60">میز، چوب یا لوازمِ اضافه داری؟ ثبتِ آگهی رایگان است.</p>
+              <p className="mb-2 text-sm font-semibold text-ink">فعلا آگهی فعالی در بازار نیست</p>
+              <p className="mb-4 text-xs leading-loose text-ink/60">میز، چوب یا لوازم اضافه داری؟ ثبت آگهی رایگان است</p>
               <Link prefetch={false} href="/shop/new" className="lq-cta">ثبت آگهی رایگان</Link>
             </div>
           )}
@@ -1700,7 +1699,7 @@ export default function HomeClient({ initialPlacements, initialFeatured, service
             />
             <MktBanner
               slides={[IMG.snooker, IMG.proTable, IMG.rest]}
-              label="نشانِ تأیید"
+              label="نشان تأیید"
               body="از فروشندگان<br/>تأییدشده"
               cta="مشاهده"
               accent={GOLD}

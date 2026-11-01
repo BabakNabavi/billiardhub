@@ -64,7 +64,7 @@ export async function PUT(req: NextRequest) {
 
   if (!u.national_id || !u.national_id_verified || !u.birth_date) {
     return NextResponse.json({
-      message: 'برای ثبت کارت بانکی، ابتدا باید کد ملی و تاریخ تولدتان تأیید شود.',
+      message: 'برای ثبت کارت بانکی، ابتدا باید کد ملی و تاریخ تولدتان تأیید شود',
       needsIdentity: true,
     }, { status: 409 });
   }
@@ -79,7 +79,7 @@ export async function PUT(req: NextRequest) {
   if (!cm.match) {
     return NextResponse.json({
       match: false,
-      message: 'این کارت بانکی به نام شما نیست. کارت باید متعلق به خودتان باشد.',
+      message: 'این کارت بانکی به نام شما نیست، کارت باید متعلق به خودتان باشد',
     }, { status: 422 });
   }
 

@@ -24,9 +24,9 @@ export const TEMPORARY_OK: ReadonlySet<AccountStatus> = new Set(['restricted', '
 export const STATUS_LABEL: Record<AccountStatus, string> = {
   active: 'فعال',
   restricted: 'محدود (فقط خواندن)',
-  limited: 'محدودیتِ بخشی',
+  limited: 'محدودیت بخشی',
   suspended: 'تعلیق',
-  banned: 'مسدودِ دائم',
+  banned: 'مسدود دائم',
   deactivated: 'غیرفعال',
   deleted: 'حذف‌شده',
 }
@@ -37,13 +37,13 @@ export const STATUS_LABEL: Record<AccountStatus, string> = {
    خواندن آزاد است. */
 export const FEATURES = {
   market:      { label: 'بیلیارد بازار (آگهی و ارتقا)', prefixes: ['/api/market', '/api/products'] },
-  social:      { label: 'پیام، استوری، نظر و تعاملِ اجتماعی', prefixes: ['/api/social', '/api/stories', '/api/favorites', '/api/media/social'] },
-  media:       { label: 'بیلیارد مدیا و پخشِ زنده', prefixes: ['/api/media', '/api/live'] },
-  bookings:    { label: 'رزروِ میز', prefixes: ['/api/bookings'] },
-  tournaments: { label: 'ثبت‌نامِ مسابقه', prefixes: ['/api/tournaments'] },
-  business:    { label: 'باشگاه، فروشگاه و پروفایلِ تخصصی', prefixes: ['/api/clubs', '/api/sellers', '/api/profiles', '/api/coach', '/api/roles', '/api/catalog', '/api/specs'] },
+  social:      { label: 'پیام، استوری، نظر و تعامل اجتماعی', prefixes: ['/api/social', '/api/stories', '/api/favorites', '/api/media/social'] },
+  media:       { label: 'بیلیارد مدیا و پخش زنده', prefixes: ['/api/media', '/api/live'] },
+  bookings:    { label: 'رزرو میز', prefixes: ['/api/bookings'] },
+  tournaments: { label: 'ثبت‌نام مسابقه', prefixes: ['/api/tournaments'] },
+  business:    { label: 'باشگاه، فروشگاه و پروفایل تخصصی', prefixes: ['/api/clubs', '/api/sellers', '/api/profiles', '/api/coach', '/api/roles', '/api/catalog', '/api/specs'] },
   ads:         { label: 'تبلیغات', prefixes: ['/api/ads'] },
-  uploads:     { label: 'بارگذاریِ فایل', prefixes: ['/api/upload'] },
+  uploads:     { label: 'بارگذاری فایل', prefixes: ['/api/upload'] },
   reports:     { label: 'گزارش و پشتیبانی', prefixes: ['/api/reports', '/api/support', '/api/contact'] },
 } as const
 export type FeatureKey = keyof typeof FEATURES
@@ -142,38 +142,38 @@ export function canSignIn(state: AccountState, now = Date.now()): boolean {
 
 export const ACTIONS = {
   restrict:          { label: 'محدودسازی (فقط خواندن)', to: 'restricted' },
-  limit:             { label: 'بستنِ قابلیت‌های مشخص', to: 'limited' },
-  suspend:           { label: 'تعلیقِ موقت', to: 'suspended' },
-  ban:               { label: 'مسدودِ دائم', to: 'banned' },
+  limit:             { label: 'بستن قابلیت‌های مشخص', to: 'limited' },
+  suspend:           { label: 'تعلیق موقت', to: 'suspended' },
+  ban:               { label: 'مسدود دائم', to: 'banned' },
   deactivate:        { label: 'غیرفعال‌کردن', to: 'deactivated' },
-  delete:            { label: 'حذفِ حساب (برگشت‌پذیر)', to: 'deleted' },
+  delete:            { label: 'حذف حساب (برگشت‌پذیر)', to: 'deleted' },
   restore:           { label: 'بازگرداندن به فعال', to: 'active' },
-  reactivate:        { label: 'فعال‌سازیِ دوباره', to: 'active' },
-  remove_listings:   { label: 'حذفِ همه‌ی آگهی‌های بازار', to: null },
-  remove_content:    { label: 'حذفِ یک محتوای مشخص', to: null },
-  disable_business:  { label: 'غیرفعال‌کردنِ باشگاه/فروشگاه/پروفایل‌ها', to: null },
-  restore_business:  { label: 'بازگرداندنِ باشگاه/فروشگاه/پروفایل‌ها', to: null },
-  restore_listings:  { label: 'بازگرداندنِ آگهی‌های حذف‌شده', to: null },
+  reactivate:        { label: 'فعال‌سازی دوباره', to: 'active' },
+  remove_listings:   { label: 'حذف همه‌ی آگهی‌های بازار', to: null },
+  remove_content:    { label: 'حذف یک محتوای مشخص', to: null },
+  disable_business:  { label: 'غیرفعال‌کردن باشگاه/فروشگاه/پروفایل‌ها', to: null },
+  restore_business:  { label: 'بازگرداندن باشگاه/فروشگاه/پروفایل‌ها', to: null },
+  restore_listings:  { label: 'بازگرداندن آگهی‌های حذف‌شده', to: null },
 } as const satisfies Record<string, { label: string; to: AccountStatus | null }>
 export type ActionKey = keyof typeof ACTIONS
 export const ACTION_KEYS = Object.keys(ACTIONS) as ActionKey[]
 
 export const REASONS = {
-  spam:            'اسپم یا تبلیغِ ناخواسته',
+  spam:            'اسپم یا تبلیغ ناخواسته',
   fraud:           'کلاهبرداری یا معامله‌ی جعلی',
   harassment:      'آزار، تهدید یا توهین',
-  impersonation:   'جعلِ هویت',
-  fake_identity:   'اطلاعاتِ هویتیِ نادرست',
+  impersonation:   'جعل هویت',
+  fake_identity:   'اطلاعات هویتی نادرست',
   prohibited:      'محتوا یا کالای ممنوع',
   payment_abuse:   'سوءاستفاده از پرداخت یا بازپرداخت',
-  ban_evasion:     'دورزدنِ محدودیت با حسابِ دیگر',
-  offplatform:     'رفتارِ خارج از سایت (طبقِ قوانین)',
-  legal:           'درخواستِ قانونی',
-  security:        'حسابِ نفوذشده / امنیتی',
-  user_request:    'درخواستِ خودِ کاربر',
+  ban_evasion:     'دورزدن محدودیت با حساب دیگر',
+  offplatform:     'رفتار خارج از سایت (طبق قوانین)',
+  legal:           'درخواست قانونی',
+  security:        'حساب نفوذشده / امنیتی',
+  user_request:    'درخواست خود کاربر',
   other:           'دیگر',
-  appeal_accepted: 'پذیرشِ اعتراض',
-  mistake:         'اصلاحِ اقدامِ اشتباه',
+  appeal_accepted: 'پذیرش اعتراض',
+  mistake:         'اصلاح اقدام اشتباه',
 } as const
 export type ReasonCode = keyof typeof REASONS
 export const REASON_KEYS = Object.keys(REASONS) as ReasonCode[]
@@ -182,13 +182,13 @@ export const REASON_KEYS = Object.keys(REASONS) as ReasonCode[]
 export function userMessage(status: AccountStatus, expiresAt: string | null): string {
   switch (status) {
     case 'suspended': return expiresAt
-      ? 'حسابِ شما موقتاً تعلیق شده است و پس از پایانِ مدت خودبه‌خود باز می‌شود.'
-      : 'حسابِ شما تعلیق شده است.'
-    case 'banned': return 'حسابِ شما به‌دلیلِ نقضِ قوانینِ بیلیارد هاب مسدود شده است.'
-    case 'deactivated': return 'حسابِ شما غیرفعال شده است.'
-    case 'deleted': return 'این حساب حذف شده است.'
-    case 'restricted': return 'حسابِ شما محدود شده است و فعلاً فقط می‌توانید محتوا را ببینید.'
-    case 'limited': return 'دسترسیِ حسابِ شما به این بخش محدود شده است.'
+      ? 'حساب شما موقتا تعلیق شده است و پس از پایان مدت خودبه‌خود باز می‌شود'
+      : 'حساب شما تعلیق شده است'
+    case 'banned': return 'حساب شما به‌دلیل نقض قوانین بیلیارد هاب مسدود شده است'
+    case 'deactivated': return 'حساب شما غیرفعال شده است'
+    case 'deleted': return 'این حساب حذف شده است'
+    case 'restricted': return 'حساب شما محدود شده است و فعلا فقط می‌توانید محتوا را ببینید'
+    case 'limited': return 'دسترسی حساب شما به این بخش محدود شده است'
     default: return ''
   }
 }

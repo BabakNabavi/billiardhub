@@ -132,7 +132,7 @@ export default function RegisterPage() {
     fullShown.current = true;
     openDialog.current = 'ask';
     const join = await ask('ظرفیت مسابقه تکمیل است', {
-      body: 'همه‌ی صندلی‌های این مسابقه پر شده‌اند. می‌توانید در لیست انتظار ثبت شوید؛ اگر صندلی‌ای آزاد شد، به ترتیبِ صف خبرتان می‌کنیم.',
+      body: 'همه‌ی صندلی‌های این مسابقه پر شده‌اند، می‌توانید در لیست انتظار ثبت شوید؛ اگر صندلی‌ای آزاد شد، به ترتیب صف خبرتان می‌کنیم',
       confirmLabel: 'ثبت در لیست انتظار',
       tone: 'gold',
     });
@@ -200,7 +200,7 @@ export default function RegisterPage() {
       openDialog.current = 'alert';
       void (async () => {
         await alertBox('ظرفیت مسابقه تکمیل است', {
-        body: `همه‌ی ${toFa(t.maxPlayers)} صندلیِ این مسابقه پر شده و ثبت‌نام بسته است.`,
+        body: `همه‌ی ${toFa(t.maxPlayers)} صندلی این مسابقه پر شده و ثبت‌نام بسته است`,
           tone: 'gold',
         });
         openDialog.current = null;
@@ -283,8 +283,8 @@ export default function RegisterPage() {
   <title>فیش واریزی — بیلیارد هاب</title>
   <style>
     /* ── چرا فونت محلی، نه Google Fonts ──
-       تنها جای سایت بود که به دامنه‌ی خارجی وصل می‌شد. کل بقیه از
-       IRANSansX محلی (public/fonts) استفاده می‌کند.
+       تنها جای سایت بود که به دامنه‌ی خارجی وصل می‌شد، کل بقیه از
+       IRANSansX محلی (public/fonts) استفاده می‌کند
 
        دو ایراد داشت: در ایران کند یا بلاک است، و اگر اینترنت بین‌الملل
        قطع باشد فیش بدون فونت باز می‌شود — دقیقا همان لحظه‌ای که کاربر
@@ -373,7 +373,7 @@ export default function RegisterPage() {
       fontFamily: 'Vazirmatn, Tahoma, sans-serif' }}>
       <div style={{ fontSize: 19, fontWeight: 900, color: '#1C1B17' }}>این مسابقه پیدا نشد</div>
       <p style={{ fontSize: 13.5, color: '#6F6A5C', margin: 0, lineHeight: 2 }}>
-        ممکن است برگزار شده باشد یا برگزارکننده آن را برداشته باشد.
+        ممکن است برگزار شده باشد یا برگزارکننده آن را برداشته باشد
       </p>
       <Link href="/tournaments" style={{ padding: '11px 22px', borderRadius: 12, textDecoration: 'none',
         fontSize: 13.5, fontWeight: 800, background: 'rgba(199,166,106,0.12)',
@@ -418,8 +418,8 @@ export default function RegisterPage() {
           </div>
           <div style={{ fontSize: 20, fontWeight: 900, color: '#111', marginBottom: 10 }}>قبلا ثبت‌نام کرده‌اید</div>
           <div style={{ fontSize: 14, color: '#888', lineHeight: 1.8, marginBottom: 28 }}>
-            شماره موبایل شما قبلا در این مسابقه ثبت‌نام شده است.<br />
-            وضعیت ثبت‌نام را در پنل کاربری دنبال کنید.
+            شماره موبایل شما قبلا در این مسابقه ثبت‌نام شده است<br />
+            وضعیت ثبت‌نام را در پنل کاربری دنبال کنید
           </div>
           <div style={{ display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap' }}>
             <button onClick={() => router.push('/dashboard')} style={{
@@ -698,7 +698,7 @@ export default function RegisterPage() {
                 ابتدا وارد سایت شوید
               </div>
               <div style={{ fontSize: 14, color: '#777', lineHeight: 1.7, marginBottom: 14 }}>
-                برای ثبت‌نام در مسابقه باید عضو بیلیارد هاب باشید.
+                برای ثبت‌نام در مسابقه باید عضو بیلیارد هاب باشید
               </div>
               <div style={{ display: 'flex', gap: 10 }}>
                 <Link href="/login" style={{ textDecoration: 'none' }}>
@@ -794,7 +794,7 @@ export default function RegisterPage() {
                   هنوز نرسیده بود. */}
               <div style={{ fontSize: 15, fontWeight: 800, color: '#111', marginBottom: 8, lineHeight: 1.7 }}>
                 {t.status === 'upcoming' ? 'ثبت‌نام این مسابقه هنوز باز نشده است'
-                  : t.status === 'live' ? 'این مسابقه در حالِ برگزاری است'
+                  : t.status === 'live' ? 'این مسابقه در حال برگزاری است'
                   : t.status === 'finished' ? 'ثبت‌نام این مسابقه بسته است'
                   : full ? 'ظرفیت این مسابقه تکمیل است'
                   : deadlinePassed ? 'مهلت ثبت‌نام این مسابقه تمام شده است'
@@ -803,15 +803,15 @@ export default function RegisterPage() {
               <div style={{ fontSize: 12.5, color: '#6B6B6B', lineHeight: 1.9 }}>
                 {t.status === 'upcoming'
                   ? (t.regOpenDate
-                    ? `ثبت‌نام از ${t.regOpenDate}${t.regOpenTime ? ` — ساعت ${toFa(t.regOpenTime)}` : ''} باز می‌شود.`
-                    : 'زمانِ بازشدنِ ثبت‌نام هنوز اعلام نشده است.')
-                  : t.status === 'live' || t.status === 'finished' ? 'این مسابقه دیگر ثبت‌نام نمی‌پذیرد.'
-                  : full ? `همه‌ی ${toFa(t.maxPlayers)} صندلی پر شده و ثبت‌نام بسته است.`
+                    ? `ثبت‌نام از ${t.regOpenDate}${t.regOpenTime ? ` — ساعت ${toFa(t.regOpenTime)}` : ''} باز می‌شود`
+                    : 'زمان بازشدن ثبت‌نام هنوز اعلام نشده است')
+                  : t.status === 'live' || t.status === 'finished' ? 'این مسابقه دیگر ثبت‌نام نمی‌پذیرد'
+                  : full ? `همه‌ی ${toFa(t.maxPlayers)} صندلی پر شده و ثبت‌نام بسته است`
                   : deadlinePassed ? <>
                     مهلت تا {t.registrationDeadline || '—'}
-                    {t.registrationDeadlineTime ? ` — ساعت ${toFa(t.registrationDeadlineTime)}` : ''} بود.
+                    {t.registrationDeadlineTime ? ` — ساعت ${toFa(t.registrationDeadlineTime)}` : ''} بود
                   </>
-                  : 'برگزارکننده ثبت‌نام را بسته است.'}
+                  : 'برگزارکننده ثبت‌نام را بسته است'}
               </div>
               <Link href="/tournaments" style={{
                 display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginTop: 14,
@@ -836,7 +836,7 @@ export default function RegisterPage() {
                     شما در لیست انتظار هستید — نفر {toFa(wlPosition)}
                   </div>
                   <div style={{ fontSize: 13, color: '#777', marginBottom: 16, lineHeight: 1.8 }}>
-                    اگر جا باز شود، پیامک می‌شود و صندلی برایتان نگه داشته می‌شود.
+                    اگر جا باز شود، پیامک می‌شود و صندلی برایتان نگه داشته می‌شود
                   </div>
                   <button onClick={leaveWaitlist} disabled={wlBusy} style={{
                     padding: '10px 24px', borderRadius: 12,
@@ -850,7 +850,7 @@ export default function RegisterPage() {
               ) : (
                 <>
                   <div style={{ fontSize: 14, color: '#777', marginBottom: 18, lineHeight: 1.8 }}>
-                    می‌توانید در لیست انتظار بنشینید — اگر کسی انصراف دهد، نوبت به شما می‌رسد.
+                    می‌توانید در لیست انتظار بنشینید — اگر کسی انصراف دهد، نوبت به شما می‌رسد
                   </div>
                   {wlErr && (
                     <div style={{ fontSize: 13, color: '#B23B2E', fontWeight: 700, marginBottom: 12 }}>{wlErr}</div>

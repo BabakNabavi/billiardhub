@@ -35,9 +35,9 @@ export function passwordHint(value: string, caps = false): PasswordHint {
   return {
     persian, caps,
     message: persian
-      ? 'کیبورد روی فارسی است — رمز باید با حروف انگلیسی نوشته شود.'
+      ? 'کیبورد روی فارسی است — رمز باید با حروف انگلیسی نوشته شود'
       : caps
-        ? 'کلید Caps Lock روشن است — حروف بزرگ و کوچک در رمز فرق دارند.'
+        ? 'کلید Caps Lock روشن است — حروف بزرگ و کوچک در رمز فرق دارند'
         : null,
   }
 }

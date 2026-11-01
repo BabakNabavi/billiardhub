@@ -27,19 +27,19 @@ export function ClubLiveCard({ club, busy, run, askReason }: {
         <div>
           <Link href={`/clubs/${club.slug || club.clubId}`} target="_blank" className="rounded text-section text-ink hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-deep">{club.name}</Link>
           <p className="text-meta text-ink-3">
-            {s.tier === 'pro' ? 'حرفه‌ای' : 'عادی'} · {faNum(club.channels.length)} کانال از سقفِ {faNum(club.limit)} ·
-            ۳۰ روز: {faDec(club.month.hours)} ساعت، اوجِ {faNum(club.month.peakViewers)} بیننده
+            {s.tier === 'pro' ? 'حرفه‌ای' : 'عادی'} · {faNum(club.channels.length)} کانال از سقف {faNum(club.limit)} ·
+            ۳۰ روز: {faDec(club.month.hours)} ساعت، اوج {faNum(club.month.peakViewers)} بیننده
           </p>
         </div>
         {s.blocked
           ? <Button variant="secondary" size="sm" loading={busy === `unblock-club:${club.clubId}`} icon={<CircleCheck className="h-4 w-4" aria-hidden />}
-              onClick={() => void run({ action: 'unblock-club', clubId: club.clubId })}>رفعِ مسدودیِ باشگاه</Button>
+              onClick={() => void run({ action: 'unblock-club', clubId: club.clubId })}>رفع مسدودی باشگاه</Button>
           : <Button variant="danger-ghost" size="sm" icon={<Ban className="h-4 w-4" aria-hidden />}
-              onClick={() => askReason(`مسدودکردنِ پخشِ «${club.name}»`, reason => ({ action: 'block-club', clubId: club.clubId, reason }))}>
-              مسدودِ کلِ پخشِ باشگاه</Button>}
+              onClick={() => askReason(`مسدودکردن پخش «${club.name}»`, reason => ({ action: 'block-club', clubId: club.clubId, reason }))}>
+              مسدود کل پخش باشگاه</Button>}
       </header>
 
-      {s.blocked && <p className="rounded-card bg-danger/[.06] p-3 text-sub text-danger">پخشِ این باشگاه مسدود است{s.blockReason ? `: ${s.blockReason}` : ''}.</p>}
+      {s.blocked && <p className="rounded-card bg-danger/[.06] p-3 text-sub text-danger">پخش این باشگاه مسدود است{s.blockReason ? `: ${s.blockReason}` : ''}.</p>}
 
       <div className="flex flex-wrap items-end gap-2">
         <label className="flex flex-col gap-1 text-meta text-ink-3">
@@ -53,7 +53,7 @@ export function ClubLiveCard({ club, busy, run, askReason }: {
         {s.tier === 'pro' && (
           <>
             <label className="flex flex-col gap-1 text-meta text-ink-3">
-              سقفِ کانال
+              سقف کانال
               <input type="number" dir="ltr" min={2} max={MAX_CHANNEL_LIMIT} className={`${field} w-24`} value={limit}
                 onChange={e => setLimit(Math.max(2, Math.min(MAX_CHANNEL_LIMIT, Number(e.target.value) || 2)))} />
             </label>
@@ -67,10 +67,10 @@ export function ClubLiveCard({ club, busy, run, askReason }: {
         ? <ul className="flex flex-col gap-2">
             {club.channels.map(ch => (
               <ChannelAdminRow key={ch.id} ch={ch} busy={busy} run={run}
-                onBlock={() => askReason(`مسدودکردنِ کانالِ «${ch.title}»`, reason => ({ action: 'block-channel', channelId: ch.id, reason }))} />
+                onBlock={() => askReason(`مسدودکردن کانال «${ch.title}»`, reason => ({ action: 'block-channel', channelId: ch.id, reason }))} />
             ))}
           </ul>
-        : <p className="text-meta text-ink-3">این باشگاه هنوز کانالی نساخته است.</p>}
+        : <p className="text-meta text-ink-3">این باشگاه هنوز کانالی نساخته است</p>}
     </article>
   )
 }

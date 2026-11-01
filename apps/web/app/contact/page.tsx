@@ -253,13 +253,13 @@ export default function ContactPage() {
       const j = await res.json().catch(() => ({}))
       setLoading(false)
       if (!res.ok) {
-        setErrors({ submit: j?.message || 'ارسال پیام انجام نشد. دوباره تلاش کنید.' })
+        setErrors({ submit: j?.message || 'ارسال پیام انجام نشد، دوباره تلاش کنید' })
         return
       }
       setSent(true)
     } catch {
       setLoading(false)
-      setErrors({ submit: 'ارتباط با سرور برقرار نشد. اتصال اینترنت را بررسی کنید.' })
+      setErrors({ submit: 'ارتباط با سرور برقرار نشد، اتصال اینترنت را بررسی کنید' })
     }
   }
 
@@ -502,9 +502,9 @@ export default function ContactPage() {
                   {/* بدون این خط، کاربر نمی‌داند پاسخ کجا می‌آید و منتظر
                       پیامک یا ایمیلی می‌ماند که هیچ‌وقت نمی‌رسد. */}
                   <p style={{ fontSize: 13, color: SEC, lineHeight: 2, margin: '0 0 22px' }}>
-                    ممنون که با بیلیارد هاب در ارتباطی — تیم ما پیامت را بررسی می‌کند.
+                    ممنون که با بیلیارد هاب در ارتباطی — تیم ما پیامت را بررسی می‌کند
                     <br />
-                    پاسخ را در <a href="/support" style={{ color: GOLD_D, fontWeight: 800 }}>تیکت‌های من</a> می‌بینی.
+                    پاسخ را در <a href="/support" style={{ color: GOLD_D, fontWeight: 800 }}>تیکت‌های من</a> می‌بینی
                   </p>
                   <button type="button" onClick={() => { setSent(false); setForm({ name: '', email: '', phone: '', subject: '', message: '' }) }}
                     style={{ padding: '11px 24px', borderRadius: 11, cursor: 'pointer', fontFamily: 'inherit', fontSize: 13.5, fontWeight: 800, color: GOLD_D, background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.34)' }}>

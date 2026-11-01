@@ -25,12 +25,12 @@ function CopyField({ label, value, secret = false }: { label: string; value: str
           {shown ? value : '•'.repeat(Math.min(24, value.length))}
         </code>
         {secret && (
-          <button type="button" onClick={() => setShown(v => !v)} aria-label={shown ? 'پنهان کردنِ کلید' : 'نمایشِ کلید'}
+          <button type="button" onClick={() => setShown(v => !v)} aria-label={shown ? 'پنهان کردن کلید' : 'نمایش کلید'}
             className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-field text-ink-2 hover:bg-line/[.06] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-deep">
             {shown ? <EyeOff className="h-4 w-4" aria-hidden /> : <Eye className="h-4 w-4" aria-hidden />}
           </button>
         )}
-        <button type="button" onClick={() => void copy()} aria-label={`کپیِ ${label}`}
+        <button type="button" onClick={() => void copy()} aria-label={`کپی ${label}`}
           className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-field text-ink-2 hover:bg-line/[.06] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-deep">
           {copied ? <Check className="h-4 w-4 text-success" aria-hidden /> : <Copy className="h-4 w-4" aria-hidden />}
         </button>
@@ -44,16 +44,16 @@ export function IngestInfo({ ingestUrl, streamKey, busy, canRotate = true, onRot
 }) {
   return (
     <div className="flex flex-col gap-3 rounded-card bg-ink/[.03] p-4">
-      <CopyField label="نشانیِ سرور (Server URL)" value={ingestUrl} />
+      <CopyField label="نشانی سرور (Server URL)" value={ingestUrl} />
       {streamKey
-        ? <CopyField label="کلیدِ استریم (Stream Key) — به کسی ندهید" value={streamKey} secret />
-        : <p className="text-sub text-ink-3">کلیدِ استریم فقط به مالکِ باشگاه نشان داده می‌شود. اگر مالک هستید و این را می‌بینید، «ساختِ کلیدِ تازه» را بزنید.</p>}
+        ? <CopyField label="کلید استریم (Stream Key) — به کسی ندهید" value={streamKey} secret />
+        : <p className="text-sub text-ink-3">کلید استریم فقط به مالک باشگاه نشان داده می‌شود، اگر مالک هستید و این را می‌بینید، «ساخت کلید تازه» را بزنید</p>}
       <div className="flex flex-wrap items-center justify-between gap-2">
         <p className="text-meta text-ink-3">
-          در OBS: تنظیمات ← Stream ← Custom. در Larix: نشانیِ سرور و کلید را در یک اتصالِ RTMP وارد کنید.
+          در OBS: تنظیمات ← Stream ← Custom. در Larix: نشانی سرور و کلید را در یک اتصال RTMP وارد کنید
         </p>
         <Button variant="secondary" size="sm" loading={busy} disabled={!canRotate} onClick={onRotate} icon={<RefreshCw className="h-4 w-4" aria-hidden />}>
-          ساختِ کلیدِ تازه
+          ساخت کلید تازه
         </Button>
       </div>
     </div>

@@ -292,10 +292,10 @@ function DocUploadStep({
           آپلود مدرک تأیید هویت
         </div>
         <p style={{ fontSize: 14, color: 'rgba(0,0,0,0.45)', lineHeight: 1.7 }}>
-          برای نقش‌هایی که نیاز به مدرک دارند، فایل خود را آپلود کنید.
+          برای نقش‌هایی که نیاز به مدرک دارند، فایل خود را آپلود کنید
           <br />
           <span style={{ fontSize: 13, color: 'rgba(0,0,0,0.38)' }}>
-            مدارک توسط ادمین بررسی و تأیید خواهند شد.
+            مدارک توسط ادمین بررسی و تأیید خواهند شد
           </span>
         </p>
       </div>
@@ -355,7 +355,7 @@ function DocUploadStep({
           }}>
             <Ti name="info-circle" size={20} color={'#C7A66A'} />
             <span style={{ fontSize: 14, color: 'rgba(0,0,0,0.50)' }}>
-              {rolesNoDoc.map(r => ROLE_MAP[r].label).join('، ')} نیازی به مدرک ندارند و سریع‌تر تأیید می‌شوند.
+              {rolesNoDoc.map(r => ROLE_MAP[r].label).join('، ')} نیازی به مدرک ندارند و سریع‌تر تأیید می‌شوند
             </span>
           </div>
         )}
@@ -570,7 +570,7 @@ export default function RolePage() {
                   <div style={{ background: '#fff', border: '1px solid rgba(199,166,106,0.34)', borderRadius: 16, padding: '14px 16px', marginBottom: 16, boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
                     <div style={{ fontSize: 12.5, fontWeight: 800, color: '#8F6531', marginBottom: 4 }}>نقش اصلی شما</div>
                     <p style={{ fontSize: 12, color: 'rgba(0,0,0,0.45)', margin: '0 0 10px', lineHeight: 1.9 }}>
-                      آگهی و استوری شما با نشان همین نقش منتشر می‌شود.
+                      آگهی و استوری شما با نشان همین نقش منتشر می‌شود
                     </p>
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
                       {uniq.map(r => {
@@ -727,7 +727,7 @@ export default function RolePage() {
                     <span style={{ fontSize: 14, fontWeight: 700, color: '#111111' }}>مشخصات بازیکن</span>
                   </div>
                   <p style={{ fontSize: 12.5, color: 'rgba(0,0,0,0.45)', lineHeight: 1.7, marginBottom: 14 }}>
-                    این‌ها تعیین می‌کنند در کدام جدول رنکینگ قرار بگیرید.
+                    این‌ها تعیین می‌کنند در کدام جدول رنکینگ قرار بگیرید
                   </p>
                   <PlayerDisciplines
                     value={playerInfo}

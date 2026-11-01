@@ -165,8 +165,8 @@ export default function ManufacturerPage() {
        می‌فرستد. */
     if (!ok) {
       notify(url
-        ? 'ذخیره‌ی عکس انجام نشد. دوباره تلاش کنید؛ اگر باز هم نشد، عکس کوچک‌تری بگذارید.'
-        : 'حذف عکس انجام نشد. دوباره تلاش کنید.', 'danger')
+        ? 'ذخیره‌ی عکس انجام نشد، دوباره تلاش کنید؛ اگر باز هم نشد، عکس کوچک‌تری بگذارید'
+        : 'حذف عکس انجام نشد، دوباره تلاش کنید', 'danger')
     }
   }
 
@@ -188,7 +188,7 @@ export default function ManufacturerPage() {
       const url = await compressImage(file, maxW, quality)
       await writeHeroImage(key, url)
     } catch {
-      notify('عکس خوانده نشد.', 'danger')
+      notify('عکس خوانده نشد', 'danger')
     } finally {
       setMediaBusy(false)
     }
@@ -202,20 +202,20 @@ export default function ManufacturerPage() {
       const next = at >= 0 ? list.map((x, i) => (i === at ? p : x)) : [...list, p]
       return { ...d, products: next }
     })
-    if (!ok) { setProdErr('ذخیره انجام نشد. اگر عکس‌ها بزرگ‌اند، تعدادشان را کم کنید و دوباره تلاش کنید.'); return }
+    if (!ok) { setProdErr('ذخیره انجام نشد، اگر عکس‌ها بزرگ‌اند، تعدادشان را کم کنید و دوباره تلاش کنید'); return }
     setEditorOpen(false); setEditing(null)
     /* محصولِ تازه نباید پشتِ فیلتر یا صفحه‌ی بعد گم شود */
     setCat('all'); setQuery('')
   }
 
   const removeProduct = async (p: MfrProduct) => {
-    if (!(await ask(`«${p.name}» حذف شود؟`, { body: 'این کار برگشت‌پذیر نیست.', confirmLabel: 'حذف' }))) return
+    if (!(await ask(`«${p.name}» حذف شود؟`, { body: 'این کار برگشت‌پذیر نیست', confirmLabel: 'حذف' }))) return
     setProdErr('')
     const ok = await edit.apply(d => ({
       ...d,
       products: (Array.isArray(d.products) ? d.products : []).filter(x => x.id !== p.id),
     }))
-    if (!ok) setProdErr('حذف انجام نشد. دوباره تلاش کنید.')
+    if (!ok) setProdErr('حذف انجام نشد، دوباره تلاش کنید')
   }
 
   const addShots = async (files: File[], album?: string) => {
@@ -282,7 +282,7 @@ export default function ManufacturerPage() {
   }
 
   const deleteShot = async (mid: string) => {
-    if (!(await ask('این تصویر حذف شود؟', { body: 'این کار برگشت‌پذیر نیست.', confirmLabel: 'حذف' }))) return
+    if (!(await ask('این تصویر حذف شود؟', { body: 'این کار برگشت‌پذیر نیست', confirmLabel: 'حذف' }))) return
     await edit.apply(d => ({ ...d, gallery: (d.gallery ?? []).filter(g => g.id !== mid) }))
   }
   /* ── ویرایش عنوان ویدیو ──
@@ -308,7 +308,7 @@ export default function ManufacturerPage() {
   )
 
   const deleteVideo = async (vid: string) => {
-    if (!(await ask('این ویدیو حذف شود؟', { body: 'این کار برگشت‌پذیر نیست.', confirmLabel: 'حذف' }))) return
+    if (!(await ask('این ویدیو حذف شود؟', { body: 'این کار برگشت‌پذیر نیست', confirmLabel: 'حذف' }))) return
     await edit.apply(d => ({ ...d, videos: (d.videos ?? []).filter(v => v.id !== vid) }))
   }
 
@@ -521,7 +521,7 @@ export default function ManufacturerPage() {
       <ProfileMissing
         icon={<Factory size={34} />}
         title="تولیدکننده پیدا نشد"
-        message="ممکن است این پروفایل هنوز ذخیره نشده، حذف شده، یا نشانی تغییر کرده باشد."
+        message="ممکن است این پروفایل هنوز ذخیره نشده، حذف شده، یا نشانی تغییر کرده باشد"
         backHref="/manufacturers" backLabel="بازگشت به تولیدکنندگان"
         {...retryProps}
       />
@@ -559,11 +559,11 @@ export default function ManufacturerPage() {
     <div dir="rtl" className="min-h-screen bg-[#F7F5F0] font-[Vazirmatn,Tahoma,sans-serif] text-[#1C1B17]">
 
       <style>{`
-        /* ══ چیدمان — هم‌زبانِ صفحه‌ی باشگاه ══
-           همان عرض (۱۲۰۰)، همان گریدِ «محتوا + ستونِ ۳۰۰ پیکسلی» و
-           همان کارتِ شیشه‌ای. کلاس‌ها پیشوندِ mfr- دارند چون صفحه‌ی
-           باشگاه هم استایلِ سراسری تزریق می‌کند و نامِ مشترک یعنی
-           هرکدام دیرتر بیاید برنده شود.
+        /* ══ چیدمان — هم‌زبان صفحه‌ی باشگاه ══
+           همان عرض (۱۲۰۰)، همان گرید «محتوا + ستون ۳۰۰ پیکسلی» و
+           همان کارت شیشه‌ای، کلاس‌ها پیشوند mfr- دارند چون صفحه‌ی
+           باشگاه هم استایل سراسری تزریق می‌کند و نام مشترک یعنی
+           هرکدام دیرتر بیاید برنده شود
            (بک‌تیک در این کامنت ممنوع — داخل template literal است) */
         .mfr-wrap { max-width: 1200px; margin: 0 auto; padding: clamp(16px,3vw,32px) clamp(12px,3vw,28px) 56px; }
         .mfr-tabbar { display: flex; justify-content: center; margin-bottom: 24px; }
@@ -573,11 +573,11 @@ export default function ManufacturerPage() {
         .mfr-col { display: flex; flex-direction: column; gap: 14px; }
         .mfr-card { padding: clamp(16px,3vw,24px); }
 
-        /* ── دو عددِ تأکیدیِ نوارِ آمارِ هدر ──
-           نوار سفیدِ یکدست بود و چشم جایی برای نشستن نداشت.
-           ⚠️ انتخابگر باید کاملِ زنجیره را بیاورد: قاعده‌ی شیتِ مشترک
-           سه‌کلاسه است و با یک کلاسِ تنها وزنِ کمتری داشتیم و رنگ
-           نمی‌نشست.
+        /* ── دو عدد تأکیدی نوار آمار هدر ──
+           نوار سفید یکدست بود و چشم جایی برای نشستن نداشت
+           ⚠️ انتخابگر باید کامل زنجیره را بیاورد: قاعده‌ی شیت مشترک
+           سه‌کلاسه است و با یک کلاس تنها وزن کمتری داشتیم و رنگ
+           نمی‌نشست
            (بک‌تیک در این کامنت ممنوع — داخل template literal است) */
         .ch-hero-stats .ch-stats li.mfr-st--felt b { color: #6FD3AC; }
         .ch-hero-stats .ch-stats li.mfr-st--gold b { color: var(--gold-light); }
@@ -585,14 +585,13 @@ export default function ManufacturerPage() {
         .ch-hero-stats .ch-stats li.mfr-st--violet b { color: #C4A7F5; }
 
         .mfr-h { display: flex; align-items: center; gap: 10px; margin: 0 0 12px; font-size: 17px; font-weight: 800; color: #111111; }
-        .mfr-bar { flex-shrink: 0; width: 3px; height: 16px; border-radius: 2px; background: linear-gradient(135deg,#C7A66A,#A07840); }
         .mfr-p { margin: 0; font-size: 15px; line-height: 1.9; color: rgba(0,0,0,0.50); }
         .mfr-sub { display: block; margin-inline-start: 13px; font-size: 12.5px; color: rgba(0,0,0,0.40); }
         .mfr-none { margin: 0; padding: 26px 0; text-align: center; font-size: 13.5px; color: rgba(0,0,0,0.38); }
 
-        /* ── کارتِ فروشگاهِ همین مالک ──
-           جایگزینِ «هنوز آگهی‌ای ثبت نشده» وقتی آگهی‌ها به فروشگاه
-           وصل‌اند. در موبایل ستونی می‌شود تا دکمه زیرِ متن بیفتد. */
+        /* ── کارت فروشگاه همین مالک ──
+           جایگزین «هنوز آگهی‌ای ثبت نشده» وقتی آگهی‌ها به فروشگاه
+           وصل‌اند، در موبایل ستونی می‌شود تا دکمه زیر متن بیفتد. */
         .mfr-shop { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
         .mfr-shop-logo {
           flex-shrink: 0; width: 64px; height: 64px; border-radius: 16px;
@@ -618,7 +617,7 @@ export default function ManufacturerPage() {
         .mfr-shop-go:focus-visible { outline: 2px solid #C7A66A; outline-offset: 2px; }
         @media (max-width: 560px) { .mfr-shop-go { width: 100%; justify-content: center; } }
 
-        /* دو حقیقتِ کوتاه که در نوارِ آمارِ هدر جا نشدند */
+        /* دو حقیقت کوتاه که در نوار آمار هدر جا نشدند */
         .mfr-facts { list-style: none; margin: 16px 0 0; padding: 0;
           display: grid; grid-template-columns: repeat(auto-fit, minmax(190px,1fr)); gap: 10px; }
         .mfr-facts li { display: flex; flex-direction: column; gap: 3px; padding: 12px 14px; border-radius: 12px;
@@ -633,7 +632,7 @@ export default function ManufacturerPage() {
           background: rgba(20,83,45,0.05); border: 1px solid rgba(20,83,45,0.12); }
         .mfr-ok { display: inline-flex; flex-shrink: 0; color: #14532D; }
 
-        /* ── کارتِ گواهینامه ── */
+        /* ── کارت گواهینامه ── */
         .mfr-certs { list-style: none; margin: 0; padding: 0;
           display: grid; grid-template-columns: repeat(auto-fill, minmax(230px,1fr)); gap: 10px; }
         .mfr-certs li { display: flex; align-items: center; gap: 11px; padding: 10px;
@@ -669,9 +668,9 @@ export default function ManufacturerPage() {
           font-size: 13.5px; color: rgba(0,0,0,0.55); text-decoration: none; }
         .mfr-ct > a:hover { color: #14532D; }
         /* ── نشانی اختصاصی ──
-           همان ردیفِ کارتِ تماسِ باشگاه: نشانِ کره‌ی بنفش، برچسبِ ریز،
-           و دکمه‌ی کپی. رنگ عمدا با بقیه‌ی کارت فرق دارد چون این یک
-           *نشانی* است نه یک راهِ تماس. */
+           همان ردیف کارت تماس باشگاه: نشان کره‌ی بنفش، برچسب ریز،
+           و دکمه‌ی کپی، رنگ عمدا با بقیه‌ی کارت فرق دارد چون این یک
+           *نشانی* است نه یک راه تماس. */
         .mfr-slug { display: flex; align-items: flex-start; gap: 10px; font-size: 13px; }
         .mfr-slug > svg { flex-shrink: 0; margin-top: 3px; color: #8b5cf6; }
         .mfr-slug > div { min-width: 0; }
@@ -697,7 +696,7 @@ export default function ManufacturerPage() {
         .mfr-soc a:hover { transform: translateY(-2px); border-color: rgba(199,166,106,0.45);
           background: rgba(199,166,106,0.12); color: #C7A66A; }
 
-        /* ── نوار ابزارِ محصولات ── */
+        /* ── نوار ابزار محصولات ── */
         .mfr-toolbar { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 14px; margin-bottom: 18px; }
         .mfr-tools { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
         .mfr-search { position: relative; }
@@ -713,7 +712,7 @@ export default function ManufacturerPage() {
 
         .mfr-cat { width: 230px; }
         .mfr-cat > div { width: 100%; max-width: none; }
-        /* هم‌ارتفاع با سرچ — وگرنه دو کنترلِ کنار هم دو قدِ متفاوت دارند */
+        /* هم‌ارتفاع با سرچ — وگرنه دو کنترل کنار هم دو قد متفاوت دارند */
         .mfr-cat > div > button { height: 44px; padding-block: 0; }
         @media (max-width: 640px) {
           .mfr-toolbar { align-items: stretch; }
@@ -723,7 +722,7 @@ export default function ManufacturerPage() {
           .mfr-cat { width: 100%; }
         }
 
-        /* ── کارتِ محصول ── */
+        /* ── کارت محصول ── */
         .mfr-prods { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 12px; }
         @media (min-width: 640px)  { .mfr-prods { grid-template-columns: repeat(3, minmax(0,1fr)); } }
         @media (min-width: 900px)  { .mfr-prods { grid-template-columns: repeat(4, minmax(0,1fr)); } }
@@ -746,7 +745,7 @@ export default function ManufacturerPage() {
           color: rgba(255,255,255,0.94); background: rgba(12,11,9,0.52); backdrop-filter: blur(6px); }
 
         /* ── دکمه‌ی + و ابزارهای مالک ──
-           همان الگوی گالری: کاشیِ خط‌چینِ افزودن، و روی هر کارت دو
+           همان الگوی گالری: کاشی خط‌چین افزودن، و روی هر کارت دو
            دکمه‌ی کوچک که فقط مالک می‌بیند. */
         .mfr-prod-wrap { position: relative; display: flex; }
         .mfr-prod-wrap > .mfr-prod { flex: 1; }
@@ -779,9 +778,9 @@ export default function ManufacturerPage() {
         .mfr-prod-more { margin-top: 6px; font-size: 11px; font-weight: 700; color: #8F6531; }
         .mfr-prod-img { position: relative; aspect-ratio: 1 / 1; overflow: hidden; background: #F1EFEA; }
         .mfr-prod-img img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-        /* ⚠️ inset-inline-start یعنی راست در RTL — همان جایی که نشانِ
-           کارت‌های دیگرِ همین بخش می‌نشیند. با inset-inline-end به چپ
-           می‌پرید و دو قاعده‌ی متفاوت برای یک نشان می‌ساخت.
+        /* ⚠️ inset-inline-start یعنی راست در RTL — همان جایی که نشان
+           کارت‌های دیگر همین بخش می‌نشیند، با inset-inline-end به چپ
+           می‌پرید و دو قاعده‌ی متفاوت برای یک نشان می‌ساخت
            (بک‌تیک در این کامنت ممنوع — داخل template literal است) */
         .mfr-prod-badge { position: absolute; inset-inline-start: 10px; top: 10px; padding: 4px 10px; border-radius: 999px;
           font-size: 11px; font-weight: 800; color: #3a2800; background: rgba(199,166,106,0.94); }
@@ -789,7 +788,7 @@ export default function ManufacturerPage() {
         .mfr-prod-cat { font-size: 11px; font-weight: 800; color: #8F6531; }
         .mfr-prod-name { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
           font-size: 13.5px; font-weight: 600; line-height: 1.5; color: #1C1C1A; }
-        /* دو خط، نه یک خطِ بریده: حالا توضیحِ محصول این‌جا می‌آید و
+        /* دو خط، نه یک خط بریده: حالا توضیح محصول این‌جا می‌آید و
            با nowrap عملا هیچ‌چیز خوانده نمی‌شد. */
         .mfr-prod-spec { margin-top: 4px; display: -webkit-box; -webkit-line-clamp: 2;
           -webkit-box-orient: vertical; overflow: hidden;
@@ -900,7 +899,7 @@ export default function ManufacturerPage() {
           <div className={'mfr-grid' + (hasContact ? '' : ' mfr-grid--solo')} id="mpanel-about" role="tabpanel" aria-labelledby="mtab-about">
             <div className="mfr-col">
               <section className="lqg lqg-hover mfr-card">
-                <h2 className="mfr-h"><span className="mfr-bar" aria-hidden />درباره ما</h2>
+                <h2 className="mfr-h">درباره ما</h2>
                 <p className="mfr-p">{mfr.about}</p>
                 {FACTS.length > 0 && (
                   <ul className="mfr-facts">
@@ -916,7 +915,7 @@ export default function ManufacturerPage() {
 
               {mfr.specialties.length > 0 && (
                 <section className="lqg lqg-hover mfr-card">
-                  <h2 className="mfr-h"><span className="mfr-bar" aria-hidden />تخصص‌های تولیدی</h2>
+                  <h2 className="mfr-h">تخصص‌های تولیدی</h2>
                   <ul className="mfr-feat">
                     {mfr.specialties.map(s => (
                       <li key={s}><span className="mfr-ok" aria-hidden>{Icon.check}</span>{s}</li>
@@ -927,7 +926,7 @@ export default function ManufacturerPage() {
 
               {mfr.certificates.length > 0 && (
                 <section className="lqg lqg-hover mfr-card">
-                  <h2 className="mfr-h"><span className="mfr-bar" aria-hidden />گواهینامه‌ها و استانداردها</h2>
+                  <h2 className="mfr-h">گواهینامه‌ها و استانداردها</h2>
                   {/* ⚠️ تصویر بخشِ خودِ ادعاست، نه تزئین: «ISO 9001»
                       بدون مدرک فقط یک متنِ تایپ‌شده است. کلیک روی کارت
                       اصلِ گواهینامه را بزرگ نشان می‌دهد. */}
@@ -959,7 +958,7 @@ export default function ManufacturerPage() {
 
               {(mfr.address || mapQuery) && (
                 <section className="lqg lqg-hover mfr-card">
-                  <h2 className="mfr-h"><span className="mfr-bar" aria-hidden />موقعیت</h2>
+                  <h2 className="mfr-h">موقعیت</h2>
                   {mfr.address && (
                     <p className="mfr-addr"><span className="mfr-pin" aria-hidden>{Icon.pin}</span>{mfr.address}</p>
                   )}
@@ -1003,7 +1002,7 @@ export default function ManufacturerPage() {
             {hasContact && (
             <div className="mfr-col">
               <section className="lqg mfr-card">
-                <h2 className="mfr-h"><span className="mfr-bar" aria-hidden />اطلاعات تماس</h2>
+                <h2 className="mfr-h">اطلاعات تماس</h2>
                 <div className="mfr-ct">
                   {phoneDig && (
                     <a href={`tel:${phoneHref}`}>
@@ -1075,19 +1074,10 @@ export default function ManufacturerPage() {
             <section className="lqg mfr-card">
               <div className="mfr-toolbar">
                 <div>
-                  <h2 className="mfr-h"><span className="mfr-bar" aria-hidden />محصولات ما</h2>
+                  <h2 className="mfr-h">محصولات ما</h2>
                   <span className="mfr-sub">{faNum(visible.length)} محصول</span>
                 </div>
                 <div className="mfr-tools">
-                  <div className="mfr-search">
-                    <label className="sr-only" htmlFor="mfr-q">جستجو در محصولات این تولیدکننده</label>
-                    <input
-                      id="mfr-q" type="search" value={query}
-                      onChange={e => { setQuery(e.target.value); setPage(1) }}
-                      placeholder="جستجو در محصولات…"
-                    />
-                    <span aria-hidden>{Icon.search}</span>
-                  </div>
                   {/* ⚠️ پوششِ عرض‌دار لازم است: خودِ دراپ‌داون
                       `w-full max-w-[300px]` است و بدون این، یک سطرِ
                       کامل می‌گرفت و زیرِ سرچ می‌افتاد. */}
@@ -1175,8 +1165,8 @@ export default function ManufacturerPage() {
               {visible.length === 0 && (
                 <p className="mfr-empty">
                   {PRODUCTS.length === 0
-                    ? 'هنوز محصولی ثبت نشده است.'
-                    : 'محصولی با این فیلتر پیدا نشد.'}
+                    ? 'هنوز محصولی ثبت نشده است'
+                    : 'محصولی با این فیلتر پیدا نشد'}
                   {PRODUCTS.length > 0 && (cat !== 'all' || query) && (
                     <button type="button" onClick={() => { setCat('all'); setQuery('') }} className="mfr-reset">
                       نمایش همه محصولات
@@ -1245,7 +1235,7 @@ export default function ManufacturerPage() {
                 </section>
               ) : (
                 <section className="lqg mfr-card">
-                  <p className="mfr-none">هنوز آگهی‌ای ثبت نشده است.</p>
+                  <p className="mfr-none">هنوز آگهی‌ای ثبت نشده است</p>
                 </section>
               )
             )}

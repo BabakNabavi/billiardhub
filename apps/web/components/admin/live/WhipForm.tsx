@@ -20,7 +20,7 @@ export function WhipForm({ channelId, current, busy, run }: {
   if (!open) return (
     <button type="button" onClick={() => { setUrl(current ?? ''); setToken(''); setOpen(true) }}
       className="self-start rounded text-meta text-ink-3 underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-deep">
-      ورودیِ مرورگر (WHIP): {current ? 'تنظیم شده' : 'از راهِ رله'} — ویرایش
+      ورودی مرورگر (WHIP): {current ? 'تنظیم شده' : 'از راه رله'} — ویرایش
     </button>
   )
 
@@ -30,11 +30,11 @@ export function WhipForm({ channelId, current, busy, run }: {
       if (await run({ action: 'set-whip', channelId, whipUrl: url.trim(), ...(token.trim() ? { whipToken: token.trim() } : {}) })) setOpen(false)
     }}>
       <label className="flex flex-col gap-1 text-meta text-ink-3">
-        نشانیِ WHIP (خالی = رله)
+        نشانی WHIP (خالی = رله)
         <input className={field} dir="ltr" value={url} onChange={e => setUrl(e.target.value)} placeholder="https://….arvanlive.ir/…/whip" />
       </label>
       <label className="flex flex-col gap-1 text-meta text-ink-3">
-        توکنِ WHIP (اگر آروان داده؛ خالی = توکنِ قبلی می‌ماند)
+        توکن WHIP (اگر آروان داده؛ خالی = توکن قبلی می‌ماند)
         <input className={field} dir="ltr" value={token} onChange={e => setToken(e.target.value)} autoComplete="off" />
       </label>
       <div className="flex gap-2">

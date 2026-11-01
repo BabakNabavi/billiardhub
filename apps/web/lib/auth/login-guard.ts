@@ -126,7 +126,7 @@ export async function loginSucceeded(account: string): Promise<void> {
 }
 
 /** پیام عمومی — هرگز نگوید حساب هست یا نیست */
-export const GENERIC_LOGIN_ERROR = 'اطلاعات ورود صحیح نیست.'
+export const GENERIC_LOGIN_ERROR = 'اطلاعات ورود صحیح نیست'
 
 /** «۲ ساعت» / «۱۵ دقیقه» / «۱ روز» — با ارقام فارسی */
 function faDuration(sec: number): string {
@@ -141,7 +141,7 @@ function faDuration(sec: number): string {
 export function lockMessage(retryAfterSec: number): string {
   /* راه خروج هم گفته می‌شود: بازیابی رمز قفل نمی‌شود، پس کاربری که
      واقعا رمزش را فراموش کرده لازم نیست منتظر بماند. */
-  return `به دلیل چند تلاش ناموفق پیاپی، ورود به این حساب موقتا محدود شده است.`
+  return `به دلیل چند تلاش ناموفق پیاپی، ورود به این حساب موقتا محدود شده است`
     + ` حدود ${faDuration(retryAfterSec)} دیگر دوباره تلاش کنید،`
-    + ` یا همین حالا از «فراموشی رمز عبور؟» رمزتان را عوض کنید.`
+    + ` یا همین حالا از «فراموشی رمز عبور؟» رمزتان را عوض کنید`
 }

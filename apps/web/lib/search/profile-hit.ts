@@ -29,7 +29,7 @@ const ROLE: Record<ProfileSearchRow['kind'], { path: string; label: string }> = 
   player: { path: '/players', label: 'بازیکن' },
   seller: { path: '/sellers', label: 'فروشگاه' },
   manufacturer: { path: '/manufacturers', label: 'تولیدکننده' },
-  technician: { path: '/services', label: 'خدماتِ فنی' },
+  technician: { path: '/services', label: 'خدمات فنی' },
 }
 
 const join = (...p: (string | null)[]) => p.filter(Boolean).join(' ').trim()

@@ -111,11 +111,11 @@ export default function CheckoutPage() {
           </div>
           <h1 style={{ fontSize: 29, fontWeight: 900, color: '#111111', margin: '0 0 12px' }}>سفارش ثبت شد!</h1>
           <p style={{ fontSize: 16, color: 'rgba(0,0,0,0.45)', lineHeight: 1.7, margin: '0 0 24px' }}>
-            سفارش شما با موفقیت ثبت شد.<br />
+            سفارش شما با موفقیت ثبت شد<br />
             کد پیگیری: <strong style={{ color: '#C7A66A', fontSize: 18 }}>{orderNum}</strong>
           </p>
           <p style={{ fontSize: 15, color: 'rgba(0,0,0,0.38)', margin: '0 0 32px', background: 'rgba(199,166,106,0.06)', border: '1px solid rgba(199,166,106,0.12)', borderRadius: 12, padding: '12px 16px' }}>
-            پس از تأیید پرداخت، کالا در سریع‌ترین زمان ممکن ارسال خواهد شد.
+            پس از تأیید پرداخت، کالا در سریع‌ترین زمان ممکن ارسال خواهد شد
           </p>
           <div style={{ display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap' }}>
             <Link href="/shop" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'linear-gradient(135deg,#C7A66A,#A07840)', color: '#fff', padding: '13px 24px', borderRadius: 14, textDecoration: 'none', fontWeight: 800, fontSize: 16, boxShadow: '0 8px 24px rgba(199,166,106,0.35)' }}>
@@ -282,7 +282,7 @@ export default function CheckoutPage() {
                       <div style={{ marginTop: 16, padding: '16px', background: 'rgba(0,0,0,0.02)', border: '1px solid rgba(0,0,0,0.05)', borderRadius: 14 }}>
                         <p style={{ fontSize: 14, color: 'rgba(0,0,0,0.45)', margin: '0 0 14px', display: 'flex', alignItems: 'center', gap: 6 }}>
                           <Ti name="info-circle" size={16} color={'#C7A66A'} />
-                          شماره کارت فروشنده پس از تأیید سفارش برای شما ارسال می‌شود.
+                          شماره کارت فروشنده پس از تأیید سفارش برای شما ارسال می‌شود
                         </p>
                       </div>
                     )}

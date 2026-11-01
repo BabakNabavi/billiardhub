@@ -70,19 +70,19 @@ export function ChannelWatch({ channelId, title, initialLive }: { channelId: str
   }, [beat, idle])
 
   if (phase === 'login') return (
-    <Notice icon={<Lock className="h-7 w-7" aria-hidden />} text="تماشای این پخش فقط برای کاربرانِ عضوِ بیلیارد هاب است.">
+    <Notice icon={<Lock className="h-7 w-7" aria-hidden />} text="تماشای این پخش فقط برای کاربران عضو بیلیارد هاب است">
       <Link href={`/login?next=/live/c/${channelId}`} className="lq-cta">ورود و تماشا</Link>
     </Notice>
   )
-  if (phase === 'ended') return <Notice icon={<RadioTower className="h-7 w-7" aria-hidden />} text="این کانال الان پخش زنده ندارد. ضبط‌های قبلی (اگر باشد) پایینِ صفحه است." />
+  if (phase === 'ended') return <Notice icon={<RadioTower className="h-7 w-7" aria-hidden />} text="این کانال الان پخش زنده ندارد، ضبط‌های قبلی (اگر باشد) پایین صفحه است" />
   if (phase === 'error') return <Notice icon={<RadioTower className="h-7 w-7" aria-hidden />} text={msg} />
-  if (phase === 'connecting') return <div className="aspect-video w-full animate-pulse rounded-panel bg-ink/10" aria-label="در حالِ اتصال" />
+  if (phase === 'connecting') return <div className="aspect-video w-full animate-pulse rounded-panel bg-ink/10" aria-label="در حال اتصال" />
 
   return (
     <div className="flex flex-col gap-3">
       {url
         ? <HlsPlayer src={url} title={title} />
-        : <Notice icon={<RadioTower className="h-7 w-7" aria-hidden />} text="پخش شروع شده ولی تصویر هنوز از باشگاه به سرویسِ پخش نرسیده است. چند لحظه بعد صفحه را تازه کنید." />}
+        : <Notice icon={<RadioTower className="h-7 w-7" aria-hidden />} text="پخش شروع شده ولی تصویر هنوز از باشگاه به سرویس پخش نرسیده است، چند لحظه بعد صفحه را تازه کنید" />}
       <p className="flex items-center gap-2 text-meta text-ink-3">
         <span className="inline-flex items-center gap-1 rounded-chip bg-danger/10 px-2 py-1 font-bold text-danger">● زنده</span>
         <Eye className="h-4 w-4" aria-hidden /> {faNum(viewers)} بیننده

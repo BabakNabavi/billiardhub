@@ -22,7 +22,6 @@ const TEXT_M  = 'rgba(17,17,16,0.28)'
    عبارت‌های دوکلمه‌ای گم می‌شدند. */
 import { SPEC_SEP, PIN_GREEN } from '@/lib/profile-cards'
 import { makeMatcher } from '@/lib/search/filter'
-import { SearchSuggest } from '@/components/search/SearchSuggest'
 
 const SPECS: Record<string, { label: string; color: string; glow: string }> = {
   snooker:  { label: 'اسنوکر',       color: '#7C3AED', glow: 'rgba(124,58,237,0.30)' },
@@ -154,7 +153,9 @@ function mapProfileToListCoach(p: CoachProfile): Coach {
 /* ════════════════ PAGE ════════════════ */
 export default function CoachesPage() {
   const [filter,    setFilter]    = useState('all')
-  const [search,    setSearch]    = useState('')
+  /* جعبه‌ی جست‌وجوی صفحه برداشته شد (خواستِ مالک، ۱۰ آبانِ ۱۴۰۵) — جست‌وجو از نوارِ بالاست.
+       فیلترِ متنی همان‌جا می‌ماند، با عبارتِ خالی بی‌اثر است */
+  const search = ''
   const [view,      setView]      = useState<'grid' | 'list'>('grid')
   const [localCoaches, setLocalCoaches] = useState<Coach[]>([])
   const [loadFailed, setLoadFailed] = useState(false)
@@ -286,13 +287,13 @@ export default function CoachesPage() {
         /* flex-basis:100% روی یک آیتم فلکس، «۱۰۰٪» را نسبت به فضای
            موجود حساب می‌کند و با فاصله‌ی ردیف از آن بیرون می‌زد: روی
            صفحه‌ی ۳۲۰ این گروه ۳۳۲ پیکسل می‌شد و کل صفحه به پهلو کشیده
-           می‌شد. سقف صریح و اجازه‌ی شکستن، هر دو لازم است.
+           می‌شد، سقف صریح و اجازه‌ی شکستن، هر دو لازم است
            (این بلوک داخل یک template literal است — بک‌تیک ممنوع.) */
-        /* ⚠️ این قاعده دو بار عوض شد. یک‌بار margin-inline-start:auto
+        /* ⚠️ این قاعده دو بار عوض شد، یک‌بار margin-inline-start:auto
            شد تا «خط اضافه» نگیرد، ولی نتیجه‌اش این بود که گروه سرچ
-           به لبه‌ی مقابل چسبید و دیگر با تب بالای خودش هم‌تراز نبود.
+           به لبه‌ی مقابل چسبید و دیگر با تب بالای خودش هم‌تراز نبود
            صفحه‌ی داوران از اول درست بود: یک ردیف کامل که از همان
-           لبه‌ای شروع می‌شود که تب‌ها شروع می‌شوند. حالا هر دو صفحه
+           لبه‌ای شروع می‌شود که تب‌ها شروع می‌شوند، حالا هر دو صفحه
            عینا یک قاعده دارند. */
         /* ⚠️ min-width:0 لازم است: این گروه خودش یک آیتم فلکس است و با
            min-width:auto کف min-content می‌گیرد — روی ۳۲۰px ۳۳۲ پیکسل
@@ -337,28 +338,6 @@ export default function CoachesPage() {
 
             {/* search + toggles — own row under the pills on mobile, right-aligned */}
             <div className="coach-search-group" style={{ marginInlineStart:'auto', display:'flex', alignItems:'center', gap:8 }}>
-              {/* search — right */}
-              <div data-suggest-box style={{ position:'relative', display:'flex', alignItems:'center', gap:8,
-                background:'rgba(255,255,255,0.82)', border:'1px solid rgba(17,17,16,0.10)',
-                borderRadius:11, padding:'8px 14px', flex:'0 1 280px', minWidth:140,
-                boxShadow:'inset 0 1px 0 rgba(255,255,255,0.9)' }}>
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={GOLD_D} strokeWidth="2.2" style={{ flexShrink:0 }}>
-                  <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-                </svg>
-                <input type="text" value={search} onChange={e => setSearch(e.target.value)}
-                  aria-label="جستجوی نام مربی یا شهر" aria-controls="sx-co" aria-autocomplete="list"
-                  placeholder="جستجوی نام مربی یا شهر..."
-                  style={{ flex:1, minWidth:0, background:'none', border:'none', outline:'none',
-                    fontSize:13, color:TEXT, fontFamily:"'Vazirmatn',Tahoma,sans-serif" }}/>
-                {search && (
-                  <button onClick={() => setSearch('')} aria-label="پاک کردن جستجو"
-                    style={{ background:'none', border:'none', cursor:'pointer', color:TEXT_M, padding:0, display:'flex', flexShrink:0 }}>
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-                  </button>
-                )}
-                {/* پیشنهادِ زنده‌ی سراسری — همان «سوپر سرچ»ِ نوارِ بالا */}
-                <SearchSuggest hideEmpty q={search} onPick={() => setSearch('')} id="sx-co" className="start-0 w-72 sm:w-96" />
-              </div>
 
               {/* view toggles — beside search */}
               <div style={{ display:'flex', gap:6, flexShrink:0 }}>
@@ -382,11 +361,9 @@ export default function CoachesPage() {
         {/* ── Divider ── */}
         <div style={{ maxWidth:1280, margin:'22px auto 20px', padding:'0 clamp(24px,6vw,80px)' }}>
           <div style={{ display:'flex', alignItems:'center', gap:18 }}>
-            <div style={{ flex:1, height:'1px', background:'linear-gradient(to left,transparent,rgba(154,110,56,0.28))' }}/>
             <span style={{ fontSize:11, fontWeight:800, color:'rgba(154,110,56,0.72)', whiteSpace:'nowrap' }}>
               مربیان فعال
             </span>
-            <div style={{ flex:1, height:'1px', background:'linear-gradient(to right,transparent,rgba(154,110,56,0.28))' }}/>
           </div>
         </div>
 
@@ -408,57 +385,12 @@ export default function CoachesPage() {
             )
           ) : (
             <div style={{ textAlign:'center', padding:'60px 0', color:TEXT_M, fontSize:14 }}>
-              {loadFailed ? 'فهرست بارگذاری نشد — اتصالِ اینترنت را بررسی کنید و صفحه را دوباره باز کنید' : 'هیچ مربی با این فیلتر پیدا نشد'}
+              {loadFailed ? 'فهرست بارگذاری نشد — اتصال اینترنت را بررسی کنید و صفحه را دوباره باز کنید' : 'هیچ مربی با این فیلتر پیدا نشد'}
             </div>
           )}
         </div>
 
-        {/* ══════════════ BANNER — dark accent section ══════════════ */}
-        <div style={{ position:'relative', overflow:'hidden', borderTop:`1px solid rgba(17,17,16,0.06)` }}>
-          <div style={{ position:'absolute', inset:0, background:'linear-gradient(135deg,#111110 0%,#0A0908 100%)' }}/>
-          <div style={{ position:'absolute', left:'10%', top:'50%', transform:'translateY(-50%)',
-            width:480, height:240, borderRadius:'50%',
-            background:'radial-gradient(ellipse, rgba(199,166,106,0.07) 0%, transparent 70%)',
-            filter:'blur(40px)', pointerEvents:'none' }}/>
-          <svg style={{ position:'absolute', inset:0, width:'100%', height:'100%', opacity:0.04, pointerEvents:'none' }}>
-            <defs>
-              <pattern id="bd" width="28" height="28" patternUnits="userSpaceOnUse">
-                <circle cx="3" cy="3" r="1.2" fill={GOLD}/>
-              </pattern>
-            </defs>
-            <rect width="100%" height="100%" fill="url(#bd)"/>
-          </svg>
-
-          <div style={{ position:'relative', zIndex:5, maxWidth:1280, margin:'0 auto',
-            padding:'48px clamp(24px,6vw,80px)',
-            display:'flex', alignItems:'center', justifyContent:'space-between', gap:24 }}>
-            <div>
-              <p style={{ fontSize:11, fontWeight:700, color:GOLD, marginBottom:10 }}>
-                مشاوره‌ی رایگان
-              </p>
-              <h3 style={{ fontSize:'clamp(18px,2.8vw,28px)', fontWeight:800, color:'#F2EDE4',
-                letterSpacing:'-0.03em', lineHeight:1.2 }}>
-                هنوز مربی مناسب پیدا نکردی؟
-              </h3>
-              <p style={{ fontSize:13.5, color:'rgba(242,237,228,0.50)', marginTop:8, maxWidth:360 }}>
-                {/* ادعای «تیمِ متخصص» برداشته شد: دکمه به فرمِ تماس می‌رود، نه
-                    سرویسِ انتخابِ مربی. همان پیشنهادِ کمک، بی‌اغراق. */}
-                سطح و هدفت را بگو تا در انتخاب مربی راهنمایی‌ات کنیم
-              </p>
-            </div>
-            <Link href="/contact" className="btnBanner" style={{
-              textDecoration:'none', display:'inline-flex', alignItems:'center', gap:10,
-              padding:'14px 28px', background:GOLD, color:'#ffffff',
-              borderRadius:9, fontSize:14, fontWeight:800, whiteSpace:'nowrap', flexShrink:0,
-              boxShadow:'0 4px 18px rgba(199,166,106,0.22)',
-            }}>
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 1.18h3a2 2 0 0 1 2 1.72 12.05 12.05 0 0 0 .64 2.57 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.05 12.05 0 0 0 2.57.64A2 2 0 0 1 22 16.92z"/>
-              </svg>
-              مشاوره رایگان
-            </Link>
-          </div>
-        </div>
+        {/* بنرِ «هنوز مربی مناسب پیدا نکردی؟» برداشته شد (خواستِ مالک، ۱۰ آبانِ ۱۴۰۵) */}
 
       </div>
 

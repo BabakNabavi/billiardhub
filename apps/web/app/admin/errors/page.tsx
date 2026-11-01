@@ -107,7 +107,7 @@ export default function AdminErrorsPage() {
           <div>
             <h1 className="text-[19px] font-bold">ژورنال خطا</h1>
             <p className="mt-1 text-[12.5px] text-[#6F6A5C]">
-              خطاهای سرور و مرورگر، تجمیع‌شده بر اساس نوع. هر ردیف یک باگ است، نه یک رخداد.
+              خطاهای سرور و مرورگر، تجمیع‌شده بر اساس نوع، هر ردیف یک باگ است، نه یک رخداد
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -125,7 +125,7 @@ export default function AdminErrorsPage() {
 
         {pending && (
           <div className={`${CARD} mb-4 p-4 text-[13px] text-[#8F6531]`}>
-            جدول ژورنال هنوز ساخته نشده — مهاجرت ۰۹۸ اجرا نشده است.
+            جدول ژورنال هنوز ساخته نشده — مهاجرت ۰۹۸ اجرا نشده است
           </div>
         )}
 
@@ -151,8 +151,8 @@ export default function AdminErrorsPage() {
         {!loading && !err && rows.length === 0 && (
           <div className={`${CARD} p-10 text-center`}>
             <Check size={26} className="mx-auto mb-3 text-[#0E7A38]" aria-hidden />
-            <p className="text-[13.5px] font-bold">هیچ خطای رسیدگی‌نشده‌ای نیست.</p>
-            <p className="mt-1 text-[12px] text-[#6F6A5C]">اگر تازه راه افتاده، چند ساعت طول می‌کشد تا چیزی جمع شود.</p>
+            <p className="text-[13.5px] font-bold">هیچ خطای رسیدگی‌نشده‌ای نیست</p>
+            <p className="mt-1 text-[12px] text-[#6F6A5C]">اگر تازه راه افتاده، چند ساعت طول می‌کشد تا چیزی جمع شود</p>
           </div>
         )}
 
@@ -213,7 +213,7 @@ export default function AdminErrorsPage() {
         {!loading && !err && rows.length > 0 && (
           <p className="mt-4 flex items-center justify-center gap-2 text-[11.5px] text-[#6F6A5C]">
             <AlertTriangle size={13} aria-hidden />
-            پرتکرارترین‌ها را اول ببین؛ عددِ «بار» یعنی چند کاربر به آن خورده‌اند.
+            پرتکرارترین‌ها را اول ببین؛ عدد «بار» یعنی چند کاربر به آن خورده‌اند
           </p>
         )}
       </div>

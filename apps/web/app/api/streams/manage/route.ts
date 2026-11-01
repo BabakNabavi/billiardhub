@@ -95,7 +95,7 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   const parsed = Action.safeParse(await req.json().catch(() => ({})))
-  if (!parsed.success) return NextResponse.json({ message: 'اطلاعاتِ فرم کامل یا معتبر نیست' }, { status: 400 })
+  if (!parsed.success) return NextResponse.json({ message: 'اطلاعات فرم کامل یا معتبر نیست' }, { status: 400 })
   const b = parsed.data
   const g = await guard(req, b.clubId)
   if ('res' in g) return g.res
@@ -116,7 +116,7 @@ export async function POST(req: NextRequest) {
         if (!g.owner) return NextResponse.json(FORBIDDEN, { status: 403 })
         /* همان قاعده‌ی «شروع»: کانالی که از OBS/دوربینِ سالن زنده است، توکنِ رقیب نمی‌گیرد */
         const v = await goLiveVerdict(ch)
-        if (!v.ok) return NextResponse.json({ message: ch.isLive ? 'این کانال هم‌اکنون از دستگاهِ دیگری پخش می‌شود؛ اول «پایانِ پخش» را بزنید' : v.reason }, { status: 409 })
+        if (!v.ok) return NextResponse.json({ message: ch.isLive ? 'این کانال هم‌اکنون از دستگاه دیگری پخش می‌شود؛ اول «پایان پخش» را بزنید' : v.reason }, { status: 409 })
         const sess = browserSession(ch)
         if (!sess) return NextResponse.json({ message: 'پخش از مرورگر برای این کانال هنوز فعال نیست' }, { status: 503 })
         audit({ actorId: g.actor.id, actorRole: g.actor.role, action: 'LIVE_BROWSER_SESSION', entityType: 'live_channel', entityId: ch.id, newValue: { mode: sess.mode }, ip: clientIp(req) ?? undefined })

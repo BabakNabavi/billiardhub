@@ -182,7 +182,7 @@ export default function AdvertisePage() {
           <Check size={38} style={{ color: FELT, marginBottom: 12 }} />
           <h1 style={{ fontSize: 19, fontWeight: 900, color: INK, margin: '0 0 10px' }}>درخواستتان ثبت شد</h1>
           <p style={{ fontSize: 13.5, color: SEC, lineHeight: 2, margin: '0 0 20px' }}>
-            تعرفه‌ی تبلیغات برای شما ارسال خواهد شد.
+            تعرفه‌ی تبلیغات برای شما ارسال خواهد شد
           </p>
           <Link href="/" style={{
             display: 'inline-flex', alignItems: 'center', gap: 6, textDecoration: 'none',
@@ -210,8 +210,8 @@ export default function AdvertisePage() {
             در بیلیارد هاب تبلیغ کنید
           </h1>
           <p style={{ fontSize: 14, color: SEC, lineHeight: 2, margin: 0, maxWidth: 560, marginInline: 'auto' }}>
-            مخاطب ما دقیقا همان‌هایی هستند که دنبال بیلیاردند: بازیکن، باشگاه‌دار، مربی و خریدار تجهیزات.
-            تعرفه را همین‌جا ببینید و مستقیم پرداخت کنید.
+            مخاطب ما دقیقا همان‌هایی هستند که دنبال بیلیاردند: بازیکن، باشگاه‌دار، مربی و خریدار تجهیزات
+            تعرفه را همین‌جا ببینید و مستقیم پرداخت کنید
           </p>
 
           {/* کاربر واردشده کمپین‌های خودش را همین‌جا دنبال می‌کند */}
@@ -254,7 +254,7 @@ export default function AdvertisePage() {
         {tab === 'placements' && (
           <section style={{ marginBottom: 26 }}>
             <p style={{ fontSize: 12.5, color: MUT, lineHeight: 2, margin: '0 0 14px', textAlign: 'center' }}>
-              فضای تبلیغ در صفحه‌های سایت — بنر، یا ویدیوی پیش‌پخش بیلیارد مدیا.
+              فضای تبلیغ در صفحه‌های سایت — بنر، یا ویدیوی پیش‌پخش بیلیارد مدیا
             </p>
             {user
               ? <BuyPlacement userId={user.id} />
@@ -262,7 +262,7 @@ export default function AdvertisePage() {
                 <div style={{ ...CARD, fontSize: 13, color: SEC, lineHeight: 2 }}>
                   برای دیدن تعرفه‌ها و خرید مستقیم جایگاه،{' '}
                   <Link href="/login?next=/advertise" style={{ color: GOLD_D, fontWeight: 800 }}>وارد شوید</Link>.
-                  بدون ورود هم می‌توانید درخواست تبلیغ سفارشی ثبت کنید.
+                  بدون ورود هم می‌توانید درخواست تبلیغ سفارشی ثبت کنید
                 </div>
               )}
           </section>
@@ -271,7 +271,7 @@ export default function AdvertisePage() {
         {tab === 'packages' && (
           <section style={{ marginBottom: 26 }}>
             <p style={{ fontSize: 12.5, color: MUT, lineHeight: 2, margin: '0 0 14px', textAlign: 'center' }}>
-              سهمیه‌ی ثبت آگهی در بیلیارد بازار — این با خرید جایگاه تبلیغاتی فرق دارد.
+              سهمیه‌ی ثبت آگهی در بیلیارد بازار — این با خرید جایگاه تبلیغاتی فرق دارد
             </p>
             <AdPackages backTo="/advertise" />
           </section>
@@ -280,7 +280,7 @@ export default function AdvertisePage() {
         <form onSubmit={submit} style={{ ...CARD, display: tab === 'custom' ? 'block' : 'none' }}>
           <h2 style={{ fontSize: 15, fontWeight: 900, margin: '0 0 6px' }}>درخواست تبلیغ سفارشی</h2>
           <p style={{ fontSize: 12.5, color: MUT, lineHeight: 1.95, margin: '0 0 16px' }}>
-            برای اسپانسری، کمپین ویژه یا تبلیغی خارج از جایگاه‌های استاندارد. تعرفه پس از بررسی برایتان فرستاده می‌شود.
+            برای اسپانسری، کمپین ویژه یا تبلیغی خارج از جایگاه‌های استاندارد، تعرفه پس از بررسی برایتان فرستاده می‌شود
           </p>
 
           <div style={{ display: 'grid', gap: 14, gridTemplateColumns: 'repeat(auto-fit,minmax(200px,1fr))' }}>
@@ -322,8 +322,8 @@ export default function AdvertisePage() {
                   fontSize: 12, color: MUT, lineHeight: 1.95, margin: 0,
                   border: `1px dashed ${LINE}`, borderRadius: 12, padding: '11px 14px',
                 }}>
-                  در حال حاضر جایگاه آماده‌ی فروشی روی سایت تعریف نشده است. درخواستتان را ثبت کنید؛
-                  به‌محض فعال‌شدن جایگاه‌ها، تعرفه‌ها برای شما فرستاده می‌شود.
+                  در حال حاضر جایگاه آماده‌ی فروشی روی سایت تعریف نشده است، درخواستتان را ثبت کنید؛
+                  به‌محض فعال‌شدن جایگاه‌ها، تعرفه‌ها برای شما فرستاده می‌شود
                 </p>
               ) : (
               <Select
@@ -347,7 +347,7 @@ export default function AdvertisePage() {
                       ? ` و پس از ${toFa(String(videoSlot.skipAfterSec))} ثانیه بیننده می‌تواند آن را رد کند`
                       : ''}.
                     {videoSlot.maxDurationSec
-                      ? ` حداکثر مدت مجاز: ${toFa(String(videoSlot.maxDurationSec))} ثانیه.`
+                      ? ` حداکثر مدت مجاز: ${toFa(String(videoSlot.maxDurationSec))} ثانیه`
                       : ''}
                   </p>
 
@@ -359,7 +359,7 @@ export default function AdvertisePage() {
 
                   {!user && (
                     <p style={{ fontSize: 11.5, color: MUT, margin: '7px 0 0' }}>
-                      برای بارگذاری ویدیو ابتدا وارد شوید.
+                      برای بارگذاری ویدیو ابتدا وارد شوید
                     </p>
                   )}
                   {upBusy && (

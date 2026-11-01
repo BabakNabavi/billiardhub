@@ -156,7 +156,7 @@ export default function ManufacturerDashboard() {
             r.readAsDataURL(f)
           })
       set('licenseFile', { name: f.name, url })
-    } catch { void fail('فایل خوانده نشد', 'فرمتِ دیگری را امتحان کنید (JPG، PNG یا PDF).') }
+    } catch { void fail('فایل خوانده نشد', 'فرمت دیگری را امتحان کنید (JPG، PNG یا PDF)') }
     finally { setBusy(false); e.target.value = '' }
   }
 
@@ -165,7 +165,7 @@ export default function ManufacturerDashboard() {
      ادعاست و روی صفحه‌ی عمومی مثل واقعیت دیده می‌شود. */
   const addCert = () => {
     if (!cert.title.trim()) { void fail('عنوان گواهینامه لازم است'); return }
-    if (!cert.image) { void fail('تصویر گواهینامه لازم است', 'برای این گواهینامه یک عکس یا اسکن از خودِ مدرک آپلود کنید.'); return }
+    if (!cert.image) { void fail('تصویر گواهینامه لازم است', 'برای این گواهینامه یک عکس یا اسکن از خود مدرک آپلود کنید'); return }
     set('certificates', [...form.certificates, {
       title: cert.title.trim(), issuer: cert.issuer.trim(),
       year: cert.year.trim(), image: cert.image,
@@ -177,7 +177,7 @@ export default function ManufacturerDashboard() {
     const f = e.target.files?.[0]; if (!f) return
     setBusy(true)
     try { const url = await compressImage(f, 1400, 0.74); setCert(c => ({ ...c, image: url })) }
-    catch { void fail('عکس خوانده نشد', 'فرمتِ دیگری را امتحان کنید (JPG یا PNG).') }
+    catch { void fail('عکس خوانده نشد', 'فرمت دیگری را امتحان کنید (JPG یا PNG)') }
     finally { setBusy(false); e.target.value = '' }
   }
 
@@ -205,7 +205,7 @@ export default function ManufacturerDashboard() {
          کاربر متنِ خامِ ارائه‌دهنده را می‌دید. */
       if (j?.found === false) {
         setPostalMsg({ ok: false, text: 'برای این کد پستی نشانی پیدا نشد' })
-        void fail('نشانی پیدا نشد', 'برای این کد پستی نشانی‌ای ثبت نشده. عددش را دوباره چک کنید.')
+        void fail('نشانی پیدا نشد', 'برای این کد پستی نشانی‌ای ثبت نشده، عددش را دوباره چک کنید')
         return
       }
       if (!r.ok) {
@@ -240,7 +240,7 @@ export default function ManufacturerDashboard() {
       setPostalMsg({ ok: true, text: 'نشانی از روی کد پستی ثبت شد' })
     } catch {
       setPostalMsg({ ok: false, text: 'ارتباط با سرور برقرار نشد' })
-      void fail('استعلام انجام نشد', 'ارتباط با سرور برقرار نشد. اینترنت را چک کنید و دوباره بزنید.')
+      void fail('استعلام انجام نشد', 'ارتباط با سرور برقرار نشد، اینترنت را چک کنید و دوباره بزنید')
     } finally {
       setPostalBusy(false)
     }
@@ -249,7 +249,7 @@ export default function ManufacturerDashboard() {
   /* موقعیت دقیق — همان چیزی که فرم ثبت باشگاه می‌گیرد */
   const getLocation = () => {
     if (!navigator.geolocation) {
-      void fail('موقعیت مکانی در دسترس نیست', 'مرورگرِ شما موقعیت مکانی را پشتیبانی نمی‌کند.')
+      void fail('موقعیت مکانی در دسترس نیست', 'مرورگر شما موقعیت مکانی را پشتیبانی نمی‌کند')
       return
     }
     setGeoBusy(true); setGeoErr('')
@@ -265,7 +265,7 @@ export default function ManufacturerDashboard() {
       },
       () => {
         setGeoErr('دسترسی به موقعیت مکانی رد شد')
-        void fail('دسترسی به موقعیت رد شد', 'در تنظیماتِ مرورگر اجازه‌ی دسترسی به موقعیت مکانی را برای این سایت روشن کنید.')
+        void fail('دسترسی به موقعیت رد شد', 'در تنظیمات مرورگر اجازه‌ی دسترسی به موقعیت مکانی را برای این سایت روشن کنید')
         setGeoBusy(false)
       },
       { enableHighAccuracy: true, timeout: 15000 },
@@ -281,8 +281,8 @@ export default function ManufacturerDashboard() {
        دور ریخته می‌شد و روی سرور certificates خالی می‌ماند. */
     let certificates = form.certificates
     if (cert.title.trim() || cert.image || cert.issuer.trim() || cert.year.trim()) {
-      if (!cert.title.trim()) { void fail('عنوان گواهینامه لازم است', 'گواهینامه‌ای که پر کرده‌اید عنوان ندارد. عنوانش را بنویسید یا فیلدها را خالی کنید.'); return }
-      if (!cert.image) { void fail('تصویر گواهینامه لازم است', 'گواهینامه‌ای که پر کرده‌اید عکس ندارد. عکس یا اسکنِ خودِ مدرک را آپلود کنید.'); return }
+      if (!cert.title.trim()) { void fail('عنوان گواهینامه لازم است', 'گواهینامه‌ای که پر کرده‌اید عنوان ندارد، عنوانش را بنویسید یا فیلدها را خالی کنید'); return }
+      if (!cert.image) { void fail('تصویر گواهینامه لازم است', 'گواهینامه‌ای که پر کرده‌اید عکس ندارد، عکس یا اسکن خود مدرک را آپلود کنید'); return }
       certificates = [...certificates, {
         title: cert.title.trim(), issuer: cert.issuer.trim(),
         year: cert.year.trim(), image: cert.image,
@@ -313,11 +313,11 @@ export default function ManufacturerDashboard() {
       !form.phone.trim() && 'شماره تماس',
     ].filter((x): x is string => typeof x === 'string')
     if (missing.length) {
-      setErr(`${missing.join('، ')} لازم است.`)
+      setErr(`${missing.join('، ')} لازم است`)
       /* پس از بسته‌شدنِ پنجره، کاربر سرِ همان فیلد می‌نشیند */
       void fail(
-        missing.length === 1 ? `${missing[0]} را پر کنید` : 'چند فیلدِ لازم خالی مانده',
-        missing.length === 1 ? 'بدونِ این فیلد پروفایل ذخیره نمی‌شود.' : `این‌ها هنوز خالی‌اند: ${missing.join('، ')}`,
+        missing.length === 1 ? `${missing[0]} را پر کنید` : 'چند فیلد لازم خالی مانده',
+        missing.length === 1 ? 'بدون این فیلد پروفایل ذخیره نمی‌شود' : `این‌ها هنوز خالی‌اند: ${missing.join('، ')}`,
       ).then(() => focusField(missing[0]!))
       return
     }
@@ -327,7 +327,7 @@ export default function ManufacturerDashboard() {
       /* منبع حقیقت سرور است؛ localStorage فقط کش همین مرورگر می‌ماند */
       if (savedSlug === null) {
         setErr('نشانی اختصاصی هنوز خوانده نشده')
-        void fail('هنوز آماده نیست', 'نشانی اختصاصی شما از سرور خوانده نشده. چند لحظه صبر کنید یا صفحه را تازه کنید.')
+        void fail('هنوز آماده نیست', 'نشانی اختصاصی شما از سرور خوانده نشده، چند لحظه صبر کنید یا صفحه را تازه کنید')
         setBusy(false); return
       }
 
@@ -339,8 +339,8 @@ export default function ManufacturerDashboard() {
          همان باگی که یک‌بار محصول‌ها را از بین برد. */
       const fresh = await fetchMyProfileResult<ManufacturerProfile>('manufacturer')
       if (fresh.state === 'error') {
-        setErr('ارتباط با سرور برقرار نشد؛ ذخیره انجام نشد.')
-        void fail('ذخیره انجام نشد', 'ارتباط با سرور برقرار نشد. برای اینکه اطلاعات قبلی‌تان پاک نشود، چیزی ذخیره نشد — اینترنت را چک کنید و دوباره بزنید.')
+        setErr('ارتباط با سرور برقرار نشد؛ ذخیره انجام نشد')
+        void fail('ذخیره انجام نشد', 'ارتباط با سرور برقرار نشد، برای اینکه اطلاعات قبلی‌تان پاک نشود، چیزی ذخیره نشد — اینترنت را چک کنید و دوباره بزنید')
         setBusy(false); return
       }
       const serverData = fresh.state === 'found' ? fresh.profile.data : null
@@ -367,7 +367,7 @@ export default function ManufacturerDashboard() {
         { number: next.licenseNumber, url: next.licenseFile?.url ?? '' })
       if (!res.ok) {
         setErr(res.message ?? 'ذخیره روی سرور انجام نشد')
-        void fail('ذخیره روی سرور انجام نشد', res.message ?? 'دوباره تلاش کنید. اگر عکس‌ها بزرگ‌اند، کوچک‌ترشان کنید.')
+        void fail('ذخیره روی سرور انجام نشد', res.message ?? 'دوباره تلاش کنید، اگر عکس‌ها بزرگ‌اند، کوچک‌ترشان کنید')
         setBusy(false); return
       }
       /* عکس‌ها روی سرور به نشانی Storage تبدیل شده‌اند */
@@ -389,7 +389,7 @@ export default function ManufacturerDashboard() {
         <div className={`${CARD} max-w-[420px]`}>
           <Factory size={26} className="mx-auto mb-3 text-[#6F6A5C]" />
           <h1 className="text-[16px] font-bold">این صفحه مخصوص تولیدکنندگان است</h1>
-          <p className="mt-2 text-[13px] leading-relaxed text-[#5B564B]">برای ساختن پروفایل، اول باید نقش «تولیدکننده» را بگیرید.</p>
+          <p className="mt-2 text-[13px] leading-relaxed text-[#5B564B]">برای ساختن پروفایل، اول باید نقش «تولیدکننده» را بگیرید</p>
           <Link href="/profile/role" className={`${LQ_BTN} mt-4`}>انتخاب نقش</Link>
         </div>
       </div>
@@ -418,7 +418,7 @@ export default function ManufacturerDashboard() {
         <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
           <div>
             <h1 className="text-[19px] font-bold">پنل تولیدکننده</h1>
-            <p className="mt-1 text-[12.5px] text-[#6F6A5C]">هرچه این‌جا وارد کنید، همان در بخش «تولیدکنندگان» سایت دیده می‌شود.</p>
+            <p className="mt-1 text-[12.5px] text-[#6F6A5C]">هرچه این‌جا وارد کنید، همان در بخش «تولیدکنندگان» سایت دیده می‌شود</p>
           </div>
           {/* ⚠️ تا نامک روی سرور ثبت نشده این لینک ۴۰۴ می‌دهد:
               `form.slug` نامکِ خودکارِ پیش‌نویس است و صفحه‌ای پشتش
@@ -430,7 +430,7 @@ export default function ManufacturerDashboard() {
             </Link>
           ) : (
             <p className="text-[12px] text-[#6F6A5C]">
-              بعد از اولین ذخیره، صفحه‌ی عمومی شما ساخته می‌شود و محصول‌ها را از همان‌جا اضافه می‌کنید.
+              بعد از اولین ذخیره، صفحه‌ی عمومی شما ساخته می‌شود و محصول‌ها را از همان‌جا اضافه می‌کنید
             </p>
           )}
         </div>
@@ -528,7 +528,7 @@ export default function ManufacturerDashboard() {
           {/* ═══ گواهینامه‌ها و استانداردها ═══ */}
           <section className={CARD}>
             <h2 className="mb-1 text-[14.5px] font-bold">گواهینامه‌ها و استانداردها</h2>
-            <p className="mb-4 text-[12px] text-[#6F6A5C]">در صفحه‌ی تولیدکننده نمایش داده می‌شوند.</p>
+            <p className="mb-4 text-[12px] text-[#6F6A5C]">در صفحه‌ی تولیدکننده نمایش داده می‌شوند</p>
             {form.certificates.length > 0 && (
               <div className="mb-4 space-y-2">
                 {form.certificates.map((c, i) => (
@@ -580,7 +580,7 @@ export default function ManufacturerDashboard() {
           <section className={CARD}>
             <h2 className="mb-1 text-[14.5px] font-bold">پروانه‌ی تولید / جواز کسب</h2>
             <p className="mb-4 text-[12px] text-[#6F6A5C]">
-              برای گرفتن تیک تأیید لازم است. ادمین شماره را با فایل آپلودشده تطبیق می‌دهد.
+              برای گرفتن تیک تأیید لازم است، ادمین شماره را با فایل آپلودشده تطبیق می‌دهد
             </p>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
@@ -666,7 +666,7 @@ export default function ManufacturerDashboard() {
                   </button>
                 </div>
                 {!savedSlug && (
-                  <p className="mt-2 text-[11.5px] text-[#6F6A5C]">برای استعلام، اول پروفایل را ذخیره کنید.</p>
+                  <p className="mt-2 text-[11.5px] text-[#6F6A5C]">برای استعلام، اول پروفایل را ذخیره کنید</p>
                 )}
                 {/* ⚠️ ظرف همیشه رندر می‌شود: ناحیه‌ی زنده باید پیش از
                     تغییرِ محتوا در DOM باشد وگرنه screen reader
@@ -702,7 +702,7 @@ export default function ManufacturerDashboard() {
             <button type="submit" className={`${LQ_BTN} px-7 py-3 text-[14px]`} disabled={busy}>
               ذخیره و انتشار پروفایل
             </button>
-            {saved && <span className="text-[12.5px] font-bold text-[#0E7A38]">ذخیره و منتشر شد ✓ — در «تولیدکنندگان» نمایش داده می‌شود.</span>}
+            {saved && <span className="text-[12.5px] font-bold text-[#0E7A38]">ذخیره و منتشر شد ✓ — در «تولیدکنندگان» نمایش داده می‌شود</span>}
             {err && <span className="text-[12.5px] font-bold text-[#B23B2E]">{err}</span>}
           </div>
         </form>

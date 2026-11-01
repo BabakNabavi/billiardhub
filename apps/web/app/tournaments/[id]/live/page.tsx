@@ -89,8 +89,8 @@ export default function LivePage() {
           <p style={{ fontSize: 15, fontWeight: 800, color: INK, margin: '0 0 6px' }}>الان بازی زنده‌ای نیست</p>
           <p style={{ fontSize: 12.5, color: MUT, margin: 0, lineHeight: 2 }}>
             {b.matches.length === 0
-              ? 'هنوز قرعه‌کشی نشده است.'
-              : 'وقتی برگزارکننده بازی‌ای را شروع کند، همین‌جا نمایش داده می‌شود.'}
+              ? 'هنوز قرعه‌کشی نشده است'
+              : 'وقتی برگزارکننده بازی‌ای را شروع کند، همین‌جا نمایش داده می‌شود'}
           </p>
         </div>
       )}

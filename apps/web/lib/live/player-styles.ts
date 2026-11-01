@@ -20,23 +20,23 @@ export const PLAYER_CSS = `
   outline: none;
   -webkit-tap-highlight-color: transparent;
   box-shadow: 0 20px 50px rgba(0,0,0,0.22);
-  /* ⚠️ سقفِ ارتفاع. با فقط aspect-ratio، در حالتِ افقیِ موبایل
-     ۱۶:۹ از عرضِ کامل بلندتر از خودِ ویوپورت می‌شد: تصویر از صفحه
-     می‌زد بیرون و کنترل‌ها دستِ‌نیافتنی می‌شدند.
+  /* ⚠️ سقف ارتفاع، با فقط aspect-ratio، در حالت افقی موبایل
+     ۱۶:۹ از عرض کامل بلندتر از خود ویوپورت می‌شد: تصویر از صفحه
+     می‌زد بیرون و کنترل‌ها دست‌نیافتنی می‌شدند
 
      max-width هم لازم است، نه فقط max-height: با width:100% و
-     aspect-ratio، سقفِ ارتفاع فقط ارتفاع را می‌برد و عرض سرِ جایش
-     می‌ماند — نتیجه‌اش یک جعبه‌ی سیاهِ تمام‌عرض با تصویرِ کوچک در وسط
-     و کنترل‌هایی چسبیده به دو لبه‌ی دور بود.
+     aspect-ratio، سقف ارتفاع فقط ارتفاع را می‌برد و عرض سر جایش
+     می‌ماند — نتیجه‌اش یک جعبه‌ی سیاه تمام‌عرض با تصویر کوچک در وسط
+     و کنترل‌هایی چسبیده به دو لبه‌ی دور بود
 
-     78vh پیش از 78dvh: iOS 15.0 تا 15.3 خطِ dvh را کلا می‌اندازد. */
+     78vh پیش از 78dvh: iOS 15.0 تا 15.3 خط dvh را کلا می‌اندازد. */
   max-height: 78vh;
   max-height: 78dvh;
   max-width: calc(78vh * 16 / 9);
   max-width: calc(78dvh * 16 / 9);
   margin-inline: auto;
 }
-/* در افقیِ گوشی جای عمودی خیلی کم است؛ کمی بیشتر سخت‌گیری. */
+/* در افقی گوشی جای عمودی خیلی کم است؛ کمی بیشتر سخت‌گیری. */
 @media (orientation: landscape) and (max-height: 520px) {
   .bpv {
     max-height: 72vh;
@@ -55,8 +55,8 @@ export const PLAYER_CSS = `
 }
 
 /* ── تمام‌صفحه ──
-   حالتِ بومی و حالتِ جایگزینِ CSS هر دو باید گوشه‌ها را صاف کنند و
-   نسبتِ ثابت را رها کنند، وگرنه وسطِ صفحه یک مستطیلِ گرد می‌ماند. */
+   حالت بومی و حالت جایگزین CSS هر دو باید گوشه‌ها را صاف کنند و
+   نسبت ثابت را رها کنند، وگرنه وسط صفحه یک مستطیل گرد می‌ماند. */
 .bpv:fullscreen,
 .bpv:-webkit-full-screen,
 .bpv[data-cssfs="1"] {
@@ -75,8 +75,8 @@ export const PLAYER_CSS = `
   height: 100dvh;
 }
 
-/* پرده‌ی تیره پشتِ کنترل‌ها. بدونِ این، آیکونِ سفید روی تصویرِ روشنِ
-   نمدِ سبز یا پیراهنِ سفیدِ بازیکن کاملا گم می‌شود. */
+/* پرده‌ی تیره پشت کنترل‌ها، بدون این، آیکون سفید روی تصویر روشن
+   نمد سبز یا پیراهن سفید بازیکن کاملا گم می‌شود. */
 .bpv-scrim {
   position: absolute; inset-inline: 0; bottom: 0; height: 42%;
   background: linear-gradient(to top, rgba(0,0,0,0.82) 0%, rgba(0,0,0,0.45) 45%, rgba(0,0,0,0) 100%);
@@ -107,7 +107,7 @@ export const PLAYER_CSS = `
 }
 .bpv[data-ui="1"] .bpv-bar { opacity: 1; transform: none; pointer-events: auto; }
 
-/* دکمه‌ها — هدفِ لمسی ۴۴ پیکسل، همان حداقلی که بقیه‌ی سایت رعایت می‌کند */
+/* دکمه‌ها — هدف لمسی ۴۴ پیکسل، همان حداقلی که بقیه‌ی سایت رعایت می‌کند */
 .bpv-btn {
   width: 44px; height: 44px;
   flex: 0 0 auto;
@@ -126,7 +126,7 @@ export const PLAYER_CSS = `
 .bpv-spacer { flex: 1 1 auto; }
 
 /* ── صدا ──
-   لغزنده تا وقتی با موس نزدیک نشده‌ای جمع است — همان رفتارِ یوتیوب.
+   لغزنده تا وقتی با موس نزدیک نشده‌ای جمع است — همان رفتار یوتیوب
    روی لمسی اصلا باز نمی‌شود چون hover ندارد؛ آن‌جا دکمه‌ی قطع/وصل
    کافی است. */
 .bpv-vol { display: flex; align-items: center; }
@@ -143,7 +143,7 @@ export const PLAYER_CSS = `
   }
 }
 
-/* نشانِ زنده */
+/* نشان زنده */
 .bpv-live {
   display: inline-flex; align-items: center; gap: 6px;
   background: #ef4444; color: #fff;
@@ -167,7 +167,7 @@ export const PLAYER_CSS = `
   font-variant-numeric: tabular-nums;
 }
 
-/* ── وسطِ تصویر ── */
+/* ── وسط تصویر ── */
 .bpv-center {
   position: absolute; inset: 0;
   display: flex; flex-direction: column;
@@ -196,8 +196,8 @@ export const PLAYER_CSS = `
 .bpv-spin { animation: bpvSpin 1s linear infinite; }
 @keyframes bpvSpin { to { transform: rotate(360deg) } }
 
-/* ── دکمه‌ی صدا، وقتی مرورگر پخشِ خودکار با صدا را نبسته ──
-   این شرطِ اولِ هر پخش‌کننده‌ی زنده است: مرورگر ویدیو را بی‌صدا شروع
+/* ── دکمه‌ی صدا، وقتی مرورگر پخش خودکار با صدا را نبسته ──
+   این شرط اول هر پخش‌کننده‌ی زنده است: مرورگر ویدیو را بی‌صدا شروع
    می‌کند و بیننده فکر می‌کند صدا ندارد. */
 .bpv-unmute {
   display: inline-flex; align-items: center; gap: 7px;
@@ -268,7 +268,7 @@ export const PLAYER_CSS = `
 .bpv-row--on { color: #C7A66A; }
 
 /* ── آمار ──
-   عددها لاتین و چپ‌به‌راست‌اند؛ این یک بلاکِ فنی است نه متنِ فارسی. */
+   عددها لاتین و چپ‌به‌راست‌اند؛ این یک بلاک فنی است نه متن فارسی. */
 .bpv-stats {
   position: absolute; top: 56px; inset-inline-start: 12px;
   direction: ltr; text-align: left;
@@ -294,7 +294,7 @@ export const PLAYER_CSS = `
   color: rgba(255,255,255,0.92);
 }
 
-/* موبایل: چند کنترلِ کم‌اهمیت‌تر جا ندارند */
+/* موبایل: چند کنترل کم‌اهمیت‌تر جا ندارند */
 @media (max-width: 480px) {
   .bpv-btn { width: 40px; height: 40px; }
   .bpv-title { display: none; }

@@ -14,8 +14,8 @@ export default function AdminPlayersPage() {
     <ProfileAdmin
       title="بازیکنان شاخص"
       en="PLAYERS · SUPER ADMIN"
-      desc="مدیریت پروفایل بازیکنان بخش «ستارگان بیلیارد» — انتشار یا تعلیق."
-      panelHint="بازیکنان از «داشبورد ← پروفایل بازیکن» پروفایل می‌سازند و این‌جا برای شما فهرست می‌شوند."
+      desc="مدیریت پروفایل بازیکنان بخش «ستارگان بیلیارد» — انتشار یا تعلیق"
+      panelHint="بازیکنان از «داشبورد ← پروفایل بازیکن» پروفایل می‌سازند و این‌جا برای شما فهرست می‌شوند"
       load={src.load}
       toggle={src.toggle}
       remove={src.remove}

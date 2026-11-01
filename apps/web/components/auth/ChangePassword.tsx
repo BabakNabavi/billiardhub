@@ -107,7 +107,7 @@ export default function ChangePassword({ onChanged }: { onChanged?: () => void }
 
   const submit = async () => {
     if (hasPassword && !current.trim()) { setMsg({ text: 'رمز فعلی را وارد کنید', bad: true }); return }
-    if (hint.persian)                   { setMsg({ text: 'کیبورد روی فارسی است — رمز را با حروف انگلیسی بنویسید.', bad: true }); return }
+    if (hint.persian)                   { setMsg({ text: 'کیبورد روی فارسی است — رمز را با حروف انگلیسی بنویسید', bad: true }); return }
     if (!RULES.every(r => r.ok(next)))  { setMsg({ text: 'رمز جدید همه‌ی شرط‌های زیر را ندارد', bad: true }); return }
     if (next !== confirm)               { setMsg({ text: 'رمز جدید و تکرارش یکی نیستند', bad: true }); return }
 
@@ -128,7 +128,7 @@ export default function ChangePassword({ onChanged }: { onChanged?: () => void }
       }
 
       setCurrent(''); setNext(''); setConfirm('')
-      setMsg({ text: String(j.message ?? 'رمز عبور تغییر کرد؛ دوباره وارد شوید.'), bad: false })
+      setMsg({ text: String(j.message ?? 'رمز عبور تغییر کرد؛ دوباره وارد شوید'), bad: false })
       onChanged?.()
     } catch {
       setMsg({ text: 'خطا در ارتباط با سرور', bad: true })
@@ -142,7 +142,7 @@ export default function ChangePassword({ onChanged }: { onChanged?: () => void }
   const logoutAll = async () => {
     /* `confirm` این‌جا نام فیلد «تکرار رمز» است و تابع مرورگر را
        سایه می‌اندازد؛ پس صریح از window خوانده می‌شود. */
-    if (!(await ask('از همه‌ی دستگاه‌ها خارج می‌شوید؟', { body: 'باید دوباره وارد شوید.', confirmLabel: 'خروج از همه' }))) return
+    if (!(await ask('از همه‌ی دستگاه‌ها خارج می‌شوید؟', { body: 'باید دوباره وارد شوید', confirmLabel: 'خروج از همه' }))) return
     setBusy(true)
     try {
       const r = await apiFetch('/api/auth/logout', {
@@ -150,7 +150,7 @@ export default function ChangePassword({ onChanged }: { onChanged?: () => void }
         body: JSON.stringify({ all: true }),
       })
       if (!r.ok) { setMsg({ text: 'انجام نشد', bad: true }); return }
-      setMsg({ text: 'از همه‌ی دستگاه‌ها خارج شدید.', bad: false })
+      setMsg({ text: 'از همه‌ی دستگاه‌ها خارج شدید', bad: false })
       onChanged?.()
     } catch {
       setMsg({ text: 'خطا در ارتباط با سرور', bad: true })
@@ -204,8 +204,8 @@ export default function ChangePassword({ onChanged }: { onChanged?: () => void }
       </div>
       <p style={{ fontSize: 12, color: MUT, margin: '0 0 12px', lineHeight: 1.95 }}>
         {hasPassword === false
-          ? 'حسابتان با کد پیامکی ساخته شده و هنوز رمزی ندارد. با تعیین رمز می‌توانید بدون پیامک هم وارد شوید.'
-          : 'پس از تغییر رمز، همه‌ی دستگاه‌ها — از جمله همین دستگاه — از حساب خارج می‌شوند و باید دوباره وارد شوید.'}
+          ? 'حسابتان با کد پیامکی ساخته شده و هنوز رمزی ندارد، با تعیین رمز می‌توانید بدون پیامک هم وارد شوید'
+          : 'پس از تغییر رمز، همه‌ی دستگاه‌ها — از جمله همین دستگاه — از حساب خارج می‌شوند و باید دوباره وارد شوید'}
       </p>
 
       <div style={{ display: 'grid', gap: 10 }}>

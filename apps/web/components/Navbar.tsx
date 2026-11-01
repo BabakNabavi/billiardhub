@@ -38,7 +38,7 @@ const exploreMenu = [
     items: [
       { href: '/coaches',      label: 'مربیان',         icon: <Star size={14} />,     desc: 'مربیان مجاز' },
       { href: '/referees',     label: 'داوران',          icon: <Trophy size={14} />,   desc: 'داوران رسمی' },
-      { href: '/players',      label: 'بازیکنان',        icon: <Users size={14} />,    desc: 'بازیکنانِ ثبت‌شده' },
+      { href: '/players',      label: 'بازیکنان',        icon: <Users size={14} />,    desc: 'بازیکنان ثبت‌شده' },
       { href: '/ranking',      label: 'رنکینگ',          icon: <Trophy size={14} />,   desc: 'جدول رنکینگ' },
     ],
   },
@@ -326,7 +326,7 @@ export default function Navbar() {
         @keyframes slideUp { from{opacity:0;transform:translateY(100%);}to{opacity:1;transform:translateY(0);} }
         @keyframes fadeIn { from{opacity:0;}to{opacity:1;} }
 
-        /* ورودی‌ها «outline: none»ِ درون‌خطی دارند؛ حلقه روی خودِ قرصِ جست‌وجو می‌نشیند (بک‌تیک این‌جا ممنوع: رشته‌ی قالبی است) */
+        /* ورودی‌ها «outline: none» درون‌خطی دارند؛ حلقه روی خود قرص جست‌وجو می‌نشیند (بک‌تیک این‌جا ممنوع: رشته‌ی قالبی است) */
         .nav-srch:focus-within { outline: 2px solid var(--gold-deep); outline-offset: 2px; }
         .nav-a {
           position:relative; color:${TEXT_MUT}; font-size:14px; font-weight:500;
@@ -366,13 +366,13 @@ export default function Navbar() {
         .mob  { display:none  !important; }
         @media(max-width:900px) { .desk{display:none!important;} .mob{display:flex!important;} }
 
-        /* ── نشانِ پخش زنده ──
-           استایلش این‌جاست نه در خودِ کامپوننت: آن کامپوننت دو بار
-           mount می‌شود (دسکتاپ و موبایل) و بلوکِ استایلِ داخلی‌اش دو
-           بار تزریق می‌شد.
+        /* ── نشان پخش زنده ──
+           استایلش این‌جاست نه در خود کامپوننت: آن کامپوننت دو بار
+           mount می‌شود (دسکتاپ و موبایل) و بلوک استایل داخلی‌اش دو
+           بار تزریق می‌شد
 
-           ⚠️ متنِ قرمز #ef4444 روی پس‌زمینه‌ی روشن ۳٫۷۶:۱ است و از حدِ
-           ۴٫۵:۱ رد نمی‌شود. متن #dc2626 می‌گیرد (۴٫۸۳:۱) و #ef4444
+           ⚠️ متن قرمز #ef4444 روی پس‌زمینه‌ی روشن ۳٫۷۶:۱ است و از حد
+           ۴٫۵:۱ رد نمی‌شود، متن #dc2626 می‌گیرد (۴٫۸۳:۱) و #ef4444
            فقط برای نقطه و حاشیه می‌ماند. */
         .lnb {
           display:inline-flex; align-items:center; gap:6px;
@@ -392,10 +392,10 @@ export default function Navbar() {
         }
         @keyframes lnbPulse { 0%,100%{opacity:1} 50%{opacity:.25} }
 
-        /* ⚠️ روی موبایل نوار تنگ است. با متن، ردیف در ۳۷۵ پیکسل سرریز
-           می‌کرد (همه‌ی آیتم‌ها flex-shrink:0 هستند). پس از ۴۳۰ به
-           پایین فقط نقطه می‌ماند، هم‌اندازه‌ی بقیه‌ی دکمه‌های آیکونی.
-           نامِ کامل در aria-label حفظ شده. */
+        /* ⚠️ روی موبایل نوار تنگ است، با متن، ردیف در ۳۷۵ پیکسل سرریز
+           می‌کرد (همه‌ی آیتم‌ها flex-shrink:0 هستند)، پس از ۴۳۰ به
+           پایین فقط نقطه می‌ماند، هم‌اندازه‌ی بقیه‌ی دکمه‌های آیکونی
+           نام کامل در aria-label حفظ شده. */
         .lnb--mob { font-size:12.5px; padding:6px 10px; gap:5px; min-height:40px }
         @media(max-width:430px) {
           .lnb--mob .lnb-txt { display:none }
@@ -414,7 +414,7 @@ export default function Navbar() {
             width:min(700px, 94vw) !important; }
         }
         @media(max-width:480px) { .srch-wrap{display:none!important;} }
-        /* عرض‌های باریک (iPhone SE 375 / 12 Pro 390): نوبار نباید از کادر بزند بیرون.
+        /* عرض‌های باریک (iPhone SE 375 / 12 Pro 390): نوبار نباید از کادر بزند بیرون
            ردیف کاربر لاگین‌شده (جستجو + پیام + پروفایل + منو) از لوگو پهن‌تر است،
            پس هرچه صفحه باریک‌تر می‌شود، همین ردیف پله‌پله جمع‌تر می‌شود. */
         @media(max-width:430px) {
@@ -437,7 +437,7 @@ export default function Navbar() {
         }
         /* باریک‌ترین حالت (گلکسی فولد و…): فقط نشان لوگو می‌ماند */
         @media(max-width:330px) { .nav-brand { display:none !important; } }
-        /* موبایل، روی هیروی تیره: رنگِ پُرِ همان هیرو تا سافاریِ iOS 26 آن را بالا ادامه دهد (توضیح کنارِ navBg) */
+        /* موبایل، روی هیروی تیره: رنگ پر همان هیرو تا سافاری iOS 26 آن را بالا ادامه دهد (توضیح کنار navBg) */
         @media(max-width:900px) { .nav-over-hero { background: #04020A !important; } }
 
         .mob-link-item { transition: background 0.15s, color 0.15s; }

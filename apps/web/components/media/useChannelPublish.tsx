@@ -162,8 +162,8 @@ export function useChannelPublish(
       } catch { errs.push('ارتباط با سرور برقرار نشد') }
     }
     if (notify) {
-      if (errs.length) notify(`انتشار در بیلیارد مدیا انجام نشد: ${[...new Set(errs)].join('، ')} — ویدیو در گالری هست.`)
-      else if (done) notify(`${done === 1 ? 'ویدیو' : `${done} ویدیو`} در کانال «${c.name}» منتشر شد.`, 'ok')
+      if (errs.length) notify(`انتشار در بیلیارد مدیا انجام نشد: ${[...new Set(errs)].join('، ')} — ویدیو در گالری هست`)
+      else if (done) notify(`${done === 1 ? 'ویدیو' : `${done} ویدیو`} در کانال «${c.name}» منتشر شد`, 'ok')
     }
   }, [notify])
 
@@ -175,7 +175,7 @@ export function useChannelPublish(
     /* ⚠️ نسخه‌ی اول `r.ok` را نمی‌خواند: ۴۰۴/۴۰۹/۴۰۰ همه بی‌صدا
        «موفق» شمرده می‌شدند، نقش ذخیره نمی‌شد، و پنجره دفعه‌ی بعد
        دوباره باز می‌شد — تا ابد. */
-    const miss = () => { notify?.('کانال به این نقش وصل نشد؛ دفعه‌ی بعد دوباره پرسیده می‌شود.'); return { c, ok: false } }
+    const miss = () => { notify?.('کانال به این نقش وصل نشد؛ دفعه‌ی بعد دوباره پرسیده می‌شود'); return { c, ok: false } }
     try {
       /* نام و هندل عمدا فرستاده نمی‌شوند: نسخه‌ی کش این صفحه ممکن
          است کهنه باشد و نامی را که در تب دیگر عوض شده برگرداند. */
@@ -220,19 +220,19 @@ export function useChannelPublish(
     if (!items.length || !isOwner) return
     /* ⚠️ کلید مالک گاهی از سرور نمی‌آید (ستون خالی). سکوت یعنی
        کاربر ویدیو را بالا می‌برد و هرگز نمی‌فهمد در مدیا منتشر نشد. */
-    if (!ownerKey) { notify?.('کانال شما شناسایی نشد؛ ویدیو فقط در گالری ماند.'); return }
+    if (!ownerKey) { notify?.('کانال شما شناسایی نشد؛ ویدیو فقط در گالری ماند'); return }
     setSuggest(suggestName)
     /* پیش از آپلود پرسیده شد ⇒ همان انتخاب، حتی اگر مهر نقش نگرفت */
     const chosen = picked.current ?? session.current
     if (chosen) { await send(chosen, items, suggestName); return }
     /* پیش از آپلود پرسیده شد و کاربر رد کرد — دوباره نپرس، ولی
        ساکت هم نمان. */
-    if (skipped.current) { notify?.('ویدیو فقط در گالری ماند.'); return }
+    if (skipped.current) { notify?.('ویدیو فقط در گالری ماند'); return }
 
     const mine = await loadMyChannels(ownerKey)
     /* `null` یعنی نتوانستیم بخوانیم — نه «ندارد». پنجره‌ی «کانال
        بساز» در آن حالت دروغ می‌گفت. */
-    if (mine === null) { notify?.('فهرست کانال‌ها خوانده نشد؛ ویدیو در گالری هست.'); return }
+    if (mine === null) { notify?.('فهرست کانال‌ها خوانده نشد؛ ویدیو در گالری هست'); return }
     cache.current = mine
 
     const same = mine.find(c => servesRole(c, role))
@@ -287,7 +287,7 @@ export function useChannelPublish(
             session.current = st.c
             picked.current = st.ok ? st.c : null
             if (q) await send(st.c, q, suggest)
-          })().catch(() => notify?.('انتشار در بیلیارد مدیا انجام نشد؛ ویدیو در گالری هست.'))
+          })().catch(() => notify?.('انتشار در بیلیارد مدیا انجام نشد؛ ویدیو در گالری هست'))
         }}
         onSkip={onSkip}
         onClose={onClose}

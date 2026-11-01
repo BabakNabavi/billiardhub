@@ -70,7 +70,7 @@ function MockGateway() {
             انصراف از پرداخت
           </button>
           <p style={{ fontSize: 11, color: MUT, textAlign: 'center', marginTop: 14, lineHeight: 1.9 }}>
-            پس از بازگشت، پرداخت <b style={{ color: SEC }}>سمت سرور</b> تأیید و رزرو نهایی می‌شود.
+            پس از بازگشت، پرداخت <b style={{ color: SEC }}>سمت سرور</b> تأیید و رزرو نهایی می‌شود
           </p>
           <style>{`@keyframes mspin { to { transform: rotate(360deg); } }`}</style>
         </div>

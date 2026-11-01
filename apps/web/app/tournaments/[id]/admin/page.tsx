@@ -219,7 +219,7 @@ export default function TournamentAdminPage() {
               <div style={{ minWidth: 0, flex: 1 }}>
                 <div style={{ fontSize: 13, fontWeight: 800, color: INK }}>پایان مسابقه</div>
                 <div style={{ fontSize: 11.5, color: MUT, lineHeight: 1.9, marginTop: 2 }}>
-                  مسابقه به تب «پایان یافته» می‌رود و نتایج نهایی می‌شوند.
+                  مسابقه به تب «پایان یافته» می‌رود و نتایج نهایی می‌شوند
                   {!b?.champion && ' هنوز قهرمان مشخص نشده — مطمئنید؟'}
                 </div>
               </div>
@@ -238,7 +238,7 @@ export default function TournamentAdminPage() {
             <>
               <h3 style={h3}>قرعه‌کشی براکت</h3>
               <p style={pStyle}>
-                {faDigits(confirmed.length)} بازیکن تأییدشده وارد براکت می‌شوند.
+                {faDigits(confirmed.length)} بازیکن تأییدشده وارد براکت می‌شوند
                 {confirmed.length >= 2 && (() => {
                   let size = 2; while (size < confirmed.length) size *= 2;
                   const byes = size - confirmed.length;
@@ -246,11 +246,11 @@ export default function TournamentAdminPage() {
                 })()}
               </p>
               <p style={{ ...pStyle, color: RED }}>
-                قرعه‌کشی یک‌بار انجام می‌شود. برای تکرارش باید کل براکت و نتایج پاک شود.
+                قرعه‌کشی یک‌بار انجام می‌شود، برای تکرارش باید کل براکت و نتایج پاک شود
               </p>
               {pending.length > 0 && (
                 <p style={{ ...pStyle, color: GOLD_D }}>
-                  {faDigits(pending.length)} ثبت‌نام هنوز پرداخت نشده و وارد براکت نمی‌شود.
+                  {faDigits(pending.length)} ثبت‌نام هنوز پرداخت نشده و وارد براکت نمی‌شود
                 </p>
               )}
               {/* ── دو راه ساخت جدول ──
@@ -268,15 +268,15 @@ export default function TournamentAdminPage() {
                 </button>
               </div>
               {confirmed.length < 2 && (
-                <p style={{ ...pStyle, marginTop: 10 }}>حداقل دو ثبت‌نام تأییدشده لازم است.</p>
+                <p style={{ ...pStyle, marginTop: 10 }}>حداقل دو ثبت‌نام تأییدشده لازم است</p>
               )}
             </>
           ) : (
             <>
               <h3 style={h3}>براکت ساخته شده است</h3>
               <p style={pStyle}>
-                {faDigits(b!.totalRounds)} دور، {faDigits(b!.matches.length)} بازی.
-                نتایج را از تب «بازی‌ها» ثبت کنید.
+                {faDigits(b!.totalRounds)} دور، {faDigits(b!.matches.length)} بازی
+                نتایج را از تب «بازی‌ها» ثبت کنید
               </p>
               <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 12 }}>
                 <Link href={`/tournaments/${id}/bracket`} style={btnGhostLink}>
@@ -329,7 +329,7 @@ export default function TournamentAdminPage() {
           </>
         ) : (
           <div style={{ ...card, textAlign: 'center', padding: '40px 20px', color: MUT, fontSize: 13 }}>
-            هنوز قرعه‌کشی نشده — از تب «قرعه‌کشی» شروع کنید.
+            هنوز قرعه‌کشی نشده — از تب «قرعه‌کشی» شروع کنید
           </div>
         )
       )}
@@ -340,14 +340,13 @@ export default function TournamentAdminPage() {
           <div style={{ ...card, textAlign: 'center', padding: '50px 20px' }}>
             <GitBranch size={30} style={{ color: MUT, opacity: 0.4, marginBottom: 10 }} />
             <p style={{ fontSize: 14.5, fontWeight: 800, margin: '0 0 6px', color: INK }}>هنوز براکتی ساخته نشده</p>
-            <p style={{ ...pStyle, margin: 0 }}>از تب «قرعه‌کشی» شروع کنید.</p>
+            <p style={{ ...pStyle, margin: 0 }}>از تب «قرعه‌کشی» شروع کنید</p>
           </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
             {b!.rounds.map(r => (
               <section key={r.round}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
-                  <span style={{ width: 3, height: 16, borderRadius: 2, background: GOLD }} />
                   <h3 style={{ fontSize: 14.5, fontWeight: 900, color: INK, margin: 0 }}>{r.label}</h3>
                   <span style={{ fontSize: 11.5, color: MUT }}>
                     {faDigits(r.matches.filter(m => m.winner).length)} از {faDigits(r.matches.length)} انجام‌شده
@@ -371,7 +370,7 @@ export default function TournamentAdminPage() {
         open={askReset}
         title="حذف براکت"
         body={<>کل براکت و <b style={{ color: '#1A1A18' }}>همه‌ی نتایج ثبت‌شده</b> پاک
-          می‌شوند و مسابقه به پیش از قرعه‌کشی برمی‌گردد. این کار برگشت‌پذیر نیست.</>}
+          می‌شوند و مسابقه به پیش از قرعه‌کشی برمی‌گردد، این کار برگشت‌پذیر نیست</>}
         confirmLabel="حذف و قرعه‌کشی دوباره"
         busy={busy}
         onConfirm={() => void doReset()}
@@ -384,7 +383,7 @@ export default function TournamentAdminPage() {
         icon={<Trophy size={24} color="#A07840" />}
         title="اعلام پایان مسابقه"
         body={<>مسابقه به وضعیت <b style={{ color: '#1A1A18' }}>پایان یافته</b> می‌رود و
-          در همان تب دیده می‌شود. پس از این، نتیجه‌ای ثبت یا اصلاح نمی‌شود.</>}
+          در همان تب دیده می‌شود، پس از این، نتیجه‌ای ثبت یا اصلاح نمی‌شود</>}
         confirmLabel="بله، تمام شد"
         busy={busy}
         onConfirm={() => void doFinish()}

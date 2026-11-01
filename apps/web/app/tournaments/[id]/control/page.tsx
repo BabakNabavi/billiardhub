@@ -194,8 +194,8 @@ export default function LiveControlPage() {
 
         {playable.length === 0 ? (
           <div style={{ fontSize: 12.5, color: MUT, lineHeight: 2, padding: '10px 2px' }}>
-            بازی آماده‌ای نیست. تا نتیجه‌ی دور قبل ثبت نشود، حریف دور بعد
-            مشخص نمی‌شود.
+            بازی آماده‌ای نیست، تا نتیجه‌ی دور قبل ثبت نشود، حریف دور بعد
+            مشخص نمی‌شود
           </div>
         ) : playable.map(m => {
           const [a, c] = get(m);

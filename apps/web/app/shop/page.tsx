@@ -639,26 +639,26 @@ export default function MarketNewPage() {
         /* ── کارت — همان فرمت عمودی کارت‌های /shop ── */
         /* جنس سطح از کلاس «lq-pcard» می‌آید (globals.css) تا همین
            محصول در صفحه‌ی اصلی و صفحه‌ی فروشگاه هم یک‌شکل باشد؛ این‌جا
-           فقط چیدمان می‌ماند.
+           فقط چیدمان می‌ماند
            (بک‌تیک در این کامنت ممنوع — داخل template literal است) */
         .mk-card { display: flex; flex-direction: column; overflow: hidden;
           text-decoration: none; color: inherit;
           animation: mkUp .5s cubic-bezier(.22,1,.36,1) both; }
-        /* قاب و نشان‌های عکس از product-media.css می‌آیند — این‌جا فقط بزرگ‌نماییِ هاور */
+        /* قاب و نشان‌های عکس از product-media.css می‌آیند — این‌جا فقط بزرگ‌نمایی هاور */
         .mk-card:hover .mk-zoom { transform: scale(1.045); }
         .mk-new { position: absolute; bottom: 8px; left: 8px; z-index: 2; display: inline-flex; align-items: center; gap: 3px;
           font-size: 9px; font-weight: 800; color: #fff; background: rgba(27,122,75,0.92); border-radius: 999px; padding: 3px 8px; }
         /* نوار فوری: افقی و کشیدنی، تا تعداد زیاد آن را نشکند */
         /* ── نوار فوری ──
-           افقی و کشیدنی. سه چیز این‌جا حیاتی است و یک‌بار با
+           افقی و کشیدنی، سه چیز این‌جا حیاتی است و یک‌بار با
            دست‌کاری بی‌دقت شکست:
 
-             ۱) min-width صفر روی خود نوار. بدون آن، ستون گرید
+             ۱) min-width صفر روی خود نوار، بدون آن، ستون گرید
                 والد به عرض *محتوا* باز می‌شود (پیش‌فرض آیتم گرید
                 auto است) و کل صفحه‌ی موبایل به‌جای نوار اسکرول افقی
                 می‌گیرد — کارت افقی و نوار قوانین از لبه می‌زدند
-                بیرون. (بک‌تیک این‌جا ممنوع — داخل template literal است)
-             ۲) عرض ثابت سلول، نه درصد ویوپورت.
+                بیرون، (بک‌تیک این‌جا ممنوع — داخل template literal است)
+             ۲) عرض ثابت سلول، نه درصد ویوپورت
              ۳) کشش عمودی تا کارت یک‌خطی و دوخطی هم‌ارتفاع بمانند. */
         .mk-urgrow { display: block;
           min-width: 0; max-width: 100%;
@@ -683,12 +683,12 @@ export default function MarketNewPage() {
         .mk-name { font-size: var(--ad-title); color: ${TEXT}; line-height: var(--ad-title-lh); min-height: 39px; }
         /* ── دو خط عنوان ──
            خط اول دسته‌بندی و نوع، بولد — همان چیزی که چشم اول دنبالش
-           می‌گردد. خط دوم برند و مدل با وزن معمولی.
+           می‌گردد، خط دوم برند و مدل با وزن معمولی
 
            کلامپ روی خود mk-name نیست (بکتیک این‌جا رشته‌ی style را
            می‌بندد): با آن، خط دوم عنوان قربانی
            محدودیت دو خط می‌شد و برند و مدل — که تازه اضافه شده‌اند —
-           دوباره ناپدید می‌شدند. هر خط کلامپ خودش را دارد. */
+           دوباره ناپدید می‌شدند، هر خط کلامپ خودش را دارد. */
         .mk-h { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
           overflow: hidden; font-size: var(--ad-title); font-weight: var(--ad-title-w); }
         .mk-t { display: block; margin-top: 3px; font-size: var(--ad-sub); font-weight: var(--ad-sub-w); color: ${MUT};
@@ -756,18 +756,18 @@ export default function MarketNewPage() {
           border-bottom: 1px solid ${LINE}; }
         /* ── فاصله‌ی بالای سرچ‌بار ──
            نوار سایت روی این صفحه اصلا رندر نمی‌شود، پس سرچ‌بار
-           نخستین چیز صفحه است. فاصله از ۱۶ به ۴ و حالا به ۲ رسید،
+           نخستین چیز صفحه است، فاصله از ۱۶ به ۴ و حالا به ۲ رسید،
            ارتفاع خود فیلد هم از ۱۲ به ۱۰ کم شد و فاصله‌ی پایین از
-           ۸ به ۶ — یعنی همه‌ی المان‌های زیرش هم بالا می‌آیند.
+           ۸ به ۶ — یعنی همه‌ی المان‌های زیرش هم بالا می‌آیند
 
            آنچه از این پایین‌تر نمی‌رود همان inset ایمن گوشی است
            (بک‌تیک این‌جا ممنوع — داخل template literal است):
            چون layout با viewport-fit=cover کار می‌کند، روی
-           گوشی ناچ‌دار در حالت PWA این عدد بزرگ است. برداشتنش
+           گوشی ناچ‌دار در حالت PWA این عدد بزرگ است، برداشتنش
            یعنی رفتن فیلد زیر ساعت و باتری. */
         .mk-msearch { display: none; position: sticky; top: 0; z-index: 150; padding: calc(2px + env(safe-area-inset-top)) 14px 6px;
-          /* پُر، نه ۰٫۹۴: سافاریِ iOS 26 رنگِ پُرِ نوارِ چسبیده به بالا را زیرِ نوارِ مرورگر
-             ادامه می‌دهد و محوشدگیِ سفید روی جست‌وجو نمی‌کشد (شرح در Navbar کنارِ navBg) */
+          /* پر، نه ۰٫۹۴: سافاری iOS 26 رنگ پر نوار چسبیده به بالا را زیر نوار مرورگر
+             ادامه می‌دهد و محوشدگی سفید روی جست‌وجو نمی‌کشد (شرح در Navbar کنار navBg) */
           background: rgb(247,245,240); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
           border-bottom: 1px solid ${LINE}; }
 
@@ -778,7 +778,7 @@ export default function MarketNewPage() {
         /* ۵٪+۵٪ بزرگ‌تر (۵۲ ⇒ ۵۸) */
         /* عرض ثابت ۵۸ در پنج ستون روی صفحه‌ی ۳۲۰ جا نمی‌شد:
            ۵×۵۸ + چهار فاصله‌ی ۶ + حاشیه = ۳۲۲ پیکسل، یعنی کل صفحه
-           به پهلو کشیده می‌شد. حالا آیکن ستون خودش را پر می‌کند و از
+           به پهلو کشیده می‌شد، حالا آیکن ستون خودش را پر می‌کند و از
            ۵۸ بزرگ‌تر نمی‌شود، پس روی صفحه‌های بزرگ‌تر همان قبلی است. */
         .mk-mcat .ic { width: 100%; max-width: 58px; aspect-ratio: 1; border-radius: 17px; background: #fff; border: 1px solid ${LINE};
           display: flex; align-items: center; justify-content: center; overflow: hidden; transition: all .25s cubic-bezier(.22,1,.36,1); }
@@ -810,35 +810,35 @@ export default function MarketNewPage() {
           white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
         .mk-row .prc i { font-style: normal; font-size: var(--ad-unit); font-weight: var(--ad-unit-w); color: ${MUT}; }
         .mk-row .cty { font-size: var(--ad-meta); color: ${MUT}; display: flex; align-items: center; gap: 4px; margin-top: auto; }
-        /* ── قابِ عکسِ ردیف ──
-           ⚠️ ردیفِ موبایل مربع است، نه نسبتِ کارت؛ کلاسِ bh-pm--sq
-           نسبت را می‌شکند ولی نشان‌ها همان اندازه و جنس می‌مانند.
+        /* ── قاب عکس ردیف ──
+           ⚠️ ردیف موبایل مربع است، نه نسبت کارت؛ کلاس bh-pm--sq
+           نسبت را می‌شکند ولی نشان‌ها همان اندازه و جنس می‌مانند
 
-           ⚠️ ارتفاعِ خودِ ردیف را همین عکس تعیین می‌کند. با ۱۴۴ و
+           ⚠️ ارتفاع خود ردیف را همین عکس تعیین می‌کند، با ۱۴۴ و
            حاشیه‌ی ۱۱، ردیف از ۱۵۵ به ۱۶۸ می‌رفت — یعنی *کارت* هم
-           بزرگ می‌شد، که خواسته نبود. عکس اندازه شد تا ارتفاع
-           همان بماند: ۱۳۷ + ۱۶ + ۲ (بوردرِ lq-pcard) = ۱۵۵. حاشیه در
-           هر چهار طرف ۸ است تا قابِ عکس متوازن دیده شود.
+           بزرگ می‌شد، که خواسته نبود، عکس اندازه شد تا ارتفاع
+           همان بماند: ۱۳۷ + ۱۶ + ۲ (بوردر lq-pcard) = ۱۵۵. حاشیه در
+           هر چهار طرف ۸ است تا قاب عکس متوازن دیده شود
 
            ⚠️ align-self وسط، وگرنه عکس بالای ردیف می‌چسبد و زیرش
            خالی می‌ماند — همان چیزی که «وسط نیست» دیده می‌شد. */
-        /* ⚠️ ارتفاع از ردیف می‌آید، نه از مربعِ ثابت. با اندازه‌ی
-           ثابت، ردیفِ بلندتر عکس را وسط می‌گذاشت و فاصله‌ی بالا/پایین
-           از چپ بیشتر می‌شد (سنجیده: ردیفِ ۱۹۲، بالا ۳۰ در برابر ۹).
-           با stretch حاشیه همیشه همان ۸ است. برش را object-fit
-           می‌گیرد، پس غیرمربع‌شدنِ قاب دیده نمی‌شود. */
+        /* ⚠️ ارتفاع از ردیف می‌آید، نه از مربع ثابت، با اندازه‌ی
+           ثابت، ردیف بلندتر عکس را وسط می‌گذاشت و فاصله‌ی بالا/پایین
+           از چپ بیشتر می‌شد (سنجیده: ردیف ۱۹۲، بالا ۳۰ در برابر ۹)
+           با stretch حاشیه همیشه همان ۸ است، برش را object-fit
+           می‌گیرد، پس غیرمربع‌شدن قاب دیده نمی‌شود. */
         .mk-row .bh-pm--sq { width: 137px; height: auto; aspect-ratio: auto; border-radius: 13px;
           align-self: stretch; border: 1px solid rgba(28,28,26,0.08); border-bottom-width: 1px; }
-        /* نشان‌ها: هم‌رسانی چپ‌بالا، نشان‌کردن راست‌بالا، شمارِ عکس
-           راست‌پایین. ۵ برای دکمه‌ها چون سطحِ رنگ‌شده‌شان ۳ داخل‌تر
+        /* نشان‌ها: هم‌رسانی چپ‌بالا، نشان‌کردن راست‌بالا، شمار عکس
+           راست‌پایین. ۵ برای دکمه‌ها چون سطح رنگ‌شده‌شان ۳ داخل‌تر
            است؛ شمارنده تورفتگی ندارد و روی ۸ می‌ماند. */
         .mk-row .bh-pm--sq .bh-pm-bk { top: 5px; right: 5px; }
         .mk-row .bh-pm--sq .bh-pm-cnt { bottom: 8px; right: 8px; height: 22px; padding-inline: 6px; font-size: 10.5px; }
         .mk-row .bh-pm--sq .bh-pm-col { top: 5px; left: 5px; gap: 5px; }
-        /* ⚠️ زیرِ ۳۶۰ عکس کوچک‌تر می‌شود چون ستونِ متن تنگ می‌شود،
-           ولی ۱۳۱ (نه کمتر) تا ارتفاعِ ردیف را پر کند و حاشیه‌ی
-           بالا/پایین با چپ یکی بماند. اندازه‌گیری در ۳۲۰: ستونِ
-           متن ۱۲۷ پیکسل، بدونِ سرریزِ قیمت. */
+        /* ⚠️ زیر ۳۶۰ عکس کوچک‌تر می‌شود چون ستون متن تنگ می‌شود،
+           ولی ۱۳۱ (نه کمتر) تا ارتفاع ردیف را پر کند و حاشیه‌ی
+           بالا/پایین با چپ یکی بماند، اندازه‌گیری در ۳۲۰: ستون
+           متن ۱۲۷ پیکسل، بدون سرریز قیمت. */
         @media (max-width: 360px) {
           .mk-row { min-height: 149px; }
           .mk-row .bh-pm--sq { width: 131px; }
@@ -848,7 +848,7 @@ export default function MarketNewPage() {
         .mk-row .oldp { font-size: var(--ad-old); color: ${MUT}; text-decoration: line-through;
           white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
           font-variant-numeric: tabular-nums; margin-top: -2px; }
-        /* نشان‌کردن و گزارش تخلف حالا داخلِ ProductMedia اند */
+        /* نشان‌کردن و گزارش تخلف حالا داخل ProductMedia اند */
 
         /* ── نوار پایین موبایل ── */
         /* left/right صریح — insetInline در CSS معتبر نیست و نوار جمع می‌شد */
@@ -859,7 +859,7 @@ export default function MarketNewPage() {
         /* ── چرا خانه‌ی ثابت ۲۴ برای آیکون ──
            سه گزینه آیکون ۲۲ داشتند و «ثبت آگهی» یک دایره‌ی ۲۸. یعنی
            بلندی آیکون‌ها یکی نبود و برچسب‌ها روی یک خط نمی‌نشستند —
-           همان چیزی که «یک اندازه نیستند» دیده می‌شد. حالا هر چهارتا
+           همان چیزی که «یک اندازه نیستند» دیده می‌شد، حالا هر چهارتا
            در خانه‌ای با ارتفاع ثابت می‌نشینند. */
         .mk-bnav { display: flex; flex-direction: column; align-items: center; gap: 3px; background: none; border: none;
           cursor: pointer; font-family: inherit; text-decoration: none; padding: 2px 0; color: ${MUT}; }
@@ -889,7 +889,7 @@ export default function MarketNewPage() {
         /* ── لی‌آوت ── */
         .mk-layout { display: grid; grid-template-columns: 272px minmax(0, 1fr); gap: 22px; align-items: start; }
         /* باکس فیلترها کاملا fixed است و با هیچ اسکرولی تکان نمی‌خورد؛
-           ستون گرید (.mk-sidebar) فقط جای ۲۷۲px را رزرو می‌کند.
+           ستون گرید (.mk-sidebar) فقط جای ۲۷۲px را رزرو می‌کند
            right با %‏ (نه vw) حساب می‌شود تا عرض اسکرول‌بار محاسبه را به‌هم نزند. */
         .mk-sidebar { min-width: 0; }
         .mk-sidebar-inner { position: fixed; top: 106px; width: 272px;
@@ -960,17 +960,6 @@ export default function MarketNewPage() {
             )}
           </div>
 
-          {/* سرچ — پلیس‌هولدر با «بازار» طلایی */}
-          <div style={{ position: 'relative', flex: 1, minWidth: 0, maxWidth: 520 }}>
-            <Search size={14} style={{ position: 'absolute', right: 13, top: '50%', transform: 'translateY(-50%)', color: MUT, pointerEvents: 'none' }} />
-            <input value={q} onChange={e => setQ(e.target.value)} aria-label="جستجو در بیلیارد بازار"
-              style={{ width: '100%', boxSizing: 'border-box', padding: '10px 36px 10px 14px', borderRadius: 12, border: `1px solid ${LINE}`, background: '#FAFAF7', fontSize: 13, fontFamily: 'inherit', outline: 'none', color: TEXT }} />
-            {!q && (
-              <span aria-hidden className="mk-ph" style={{ position: 'absolute', right: 36, top: 0, bottom: 0, fontSize: 12.5, color: MUT, pointerEvents: 'none', whiteSpace: 'nowrap' }}>
-                جستجو در بیلیارد <span className="mk-rollwrap"><b className="mk-roll">بازار</b></span>
-              </span>
-            )}
-          </div>
 
           <span style={{ flex: 1 }} />
 
@@ -993,16 +982,8 @@ export default function MarketNewPage() {
       {/* ═══ سرچ‌بار موبایل — لوکیشن داخل خود باکس ═══ */}
       <div className="mk-msearch" ref={mCityRef}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 0, background: '#FAFAF7', border: `1px solid ${LINE}`, borderRadius: 14, overflow: 'visible', position: 'relative' }}>
-          <Search size={15} style={{ color: MUT, flexShrink: 0, margin: '0 12px 0 4px' }} />
-          <div style={{ position: 'relative', flex: 1, minWidth: 0 }}>
-            <input value={q} onChange={e => setQ(e.target.value)} aria-label="جستجو در بیلیارد بازار"
-              style={{ width: '100%', boxSizing: 'border-box', padding: '10px 0', background: 'none', border: 'none', outline: 'none', fontSize: 13.5, fontFamily: 'inherit', color: TEXT }} />
-            {!q && (
-              <span aria-hidden className="mk-ph" style={{ position: 'absolute', right: 0, top: 0, bottom: 0, fontSize: 12.5, color: MUT, pointerEvents: 'none', whiteSpace: 'nowrap' }}>
-                جستجو در بیلیارد <span className="mk-rollwrap"><b className="mk-roll">بازار</b></span>
-              </span>
-            )}
-          </div>
+          {/* جست‌وجوی بازار برداشته شد (خواستِ مالک، ۱۰ آبانِ ۱۴۰۵) — فقط انتخابِ شهر ماند */}
+          <span style={{ flex: 1 }} />
           {/* لوکیشن — سمت چپ باکس */}
           <button type="button" onClick={() => setCityOpen(p => !p)}
             style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '8px 12px', margin: '4px 6px 4px 4px', borderRadius: 10, borderInlineStart: `1px solid ${LINE}`, background: 'none', borderTop: 'none', borderBottom: 'none', borderInlineEnd: 'none', cursor: 'pointer', fontFamily: 'inherit', fontSize: 12, fontWeight: 800, color: cities.length ? GOLD_D : SEC, flexShrink: 0 }}>
@@ -1022,7 +1003,7 @@ export default function MarketNewPage() {
           نامعتبر است. صفحه h1 هم نداشت — برای موتورِ جست‌وجو و صفحه‌خوان،
           پنهان از چشم تا ظاهر عوض نشود. */}
       <div className="mk-main" style={{ maxWidth: 1300, margin: '0 auto', padding: '30px clamp(16px,3vw,32px) calc(96px + env(safe-area-inset-bottom))' }}>
-        <h1 className="sr-only">بیلیارد بازار — خرید و فروشِ تجهیزاتِ بیلیارد</h1>
+        <h1 className="sr-only">بیلیارد بازار — خرید و فروش تجهیزات بیلیارد</h1>
 
         {/* گرید دسته‌ها — موبایل: ۳ ردیف ۵تایی */}
         <div className="mk-mcats">
@@ -1134,7 +1115,7 @@ export default function MarketNewPage() {
               <span className="ic"><ScrollText size={17} /></span>
               <span className="tx">
                 <b>قوانین ثبت آگهی و معاملات در بیلیارد بازار</b>
-                <i>پیش از ثبت آگهی یا انجام معامله، شرایط و مسئولیت‌های طرفین را بخوانید.</i>
+                <i>پیش از ثبت آگهی یا انجام معامله، شرایط و مسئولیت‌های طرفین را بخوانید</i>
               </span>
               <ArrowLeft size={16} className="ar" />
             </Link>

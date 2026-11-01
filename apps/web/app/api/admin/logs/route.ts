@@ -75,7 +75,7 @@ export async function GET(req: NextRequest) {
   if (!(await isAdmin(actor.id))) return NextResponse.json({ message: 'دسترسی مجاز نیست' }, { status: 403 });
 
   const parsed = Query.safeParse(Object.fromEntries(new URL(req.url).searchParams));
-  if (!parsed.success) return NextResponse.json({ message: 'پارامترِ نامعتبر' }, { status: 400 });
+  if (!parsed.success) return NextResponse.json({ message: 'پارامتر نامعتبر' }, { status: 400 });
   const q = parsed.data;
 
   /* ── فهرستِ کنش‌ها برای دراپ‌داونِ فیلتر ──

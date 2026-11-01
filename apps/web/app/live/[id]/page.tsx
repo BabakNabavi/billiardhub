@@ -75,7 +75,7 @@ export default function LiveWatchPage() {
               </div>
             </>
           ) : (
-            <p style={{ fontSize: 14, color: 'rgba(0,0,0,0.45)', margin: 0 }}>این پخش دیگر در دسترس نیست.</p>
+            <p style={{ fontSize: 14, color: 'rgba(0,0,0,0.45)', margin: 0 }}>این پخش دیگر در دسترس نیست</p>
           )}
         </div>
       </div>

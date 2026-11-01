@@ -42,7 +42,7 @@ const preview = (kind: string, text: string) =>
 export default function DirectPage() {
   return useSocialInteractions()
     ? <DirectInner />
-    : <FeatureDisabled title="پیام خصوصی موقتا غیرفعال است" note="گفتگوهای شما محفوظ‌اند و با فعال‌شدن دوباره‌ی این بخش در دسترس خواهند بود." />
+    : <FeatureDisabled title="پیام خصوصی موقتا غیرفعال است" note="گفتگوهای شما محفوظ‌اند و با فعال‌شدن دوباره‌ی این بخش در دسترس خواهند بود" />
 }
 
 function DirectInner() {
@@ -309,7 +309,7 @@ function DirectInner() {
                 </span>
                 <p style={{ fontSize: 15.5, fontWeight: 800, margin: '0 0 6px' }}>هنوز گفتگویی ندارید</p>
                 <p style={{ fontSize: 13, color: MUT, lineHeight: 2, margin: 0 }}>
-                  وقتی کسی به استوری شما پاسخ بدهد، گفتگو اینجا ساخته می‌شود و می‌توانید جواب بدهید.
+                  وقتی کسی به استوری شما پاسخ بدهد، گفتگو اینجا ساخته می‌شود و می‌توانید جواب بدهید
                 </p>
               </div>
             ) : (
@@ -409,7 +409,7 @@ function DirectInner() {
             </span>
             <h3 style={{ fontSize: 16.5, fontWeight: 900, margin: '0 0 7px', color: TEXT }}>حذف گفتگو</h3>
             <p style={{ fontSize: 13, color: MUT, lineHeight: 2, margin: '0 0 20px' }}>
-              این گفتگو فقط برای شما پاک می‌شود؛ برای طرف مقابل باقی می‌ماند.
+              این گفتگو فقط برای شما پاک می‌شود؛ برای طرف مقابل باقی می‌ماند
             </p>
             <div style={{ display: 'flex', gap: 10 }}>
               <button onClick={() => setConfirmDel(false)}

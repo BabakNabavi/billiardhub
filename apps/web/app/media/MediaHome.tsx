@@ -443,8 +443,8 @@ function Browse({
         <h2>{term ? 'نتیجه‌ای پیدا نشد' : 'در این دسته هنوز ویدیویی نیست'}</h2>
         <p>
           {term
-            ? 'عبارت دیگری را امتحان کنید یا دسته را روی «همه» بگذارید.'
-            : 'به‌محض انتشار اولین ویدیوی این دسته، همین‌جا دیده می‌شود.'}
+            ? 'عبارت دیگری را امتحان کنید یا دسته را روی «همه» بگذارید'
+            : 'به‌محض انتشار اولین ویدیوی این دسته، همین‌جا دیده می‌شود'}
         </p>
         <div className="mx-empty-act">
           <button className="mx-iconbtn" type="button" onClick={onClear}>
@@ -469,7 +469,7 @@ function Browse({
     return (
       <section className="mx-sec">
         {split.shorts.length === 0
-          ? <p className="mx-by">در نتایج این جست‌وجو ویدیوی کوتاهی نیست.</p>
+          ? <p className="mx-by">در نتایج این جست‌وجو ویدیوی کوتاهی نیست</p>
           : (
             <div className="mx-grid">
               {split.shorts.map((v, i) => <ShortCard key={v.id} v={v} onOpen={() => onOpenShort(i)} />)}
@@ -498,7 +498,7 @@ function Failed({ onRetry }: { onRetry: () => void }) {
   return (
     <div className="mx-empty">
       <h2>ویدیوها در دسترس نیستند</h2>
-      <p>دریافت فهرست از سرور ناموفق بود. این یک خطای موقت است، نه نبود ویدیو.</p>
+      <p>دریافت فهرست از سرور ناموفق بود، این یک خطای موقت است، نه نبود ویدیو</p>
       <div className="mx-empty-act">
         <button className="mx-iconbtn" type="button" onClick={onRetry}><span>تلاش دوباره</span></button>
       </div>
@@ -513,9 +513,9 @@ function Empty({ canUpload, onUpload }: { canUpload: boolean; onUpload?: () => v
       <h2>هنوز ویدیویی منتشر نشده است</h2>
       <p>
         بیلیارد مدیا خانه‌ی ویدیوی جامعه‌ی بیلیارد است: هایلایت مسابقات،
-        آموزش، بررسی تجهیزات، مصاحبه و ویدیوهای کوتاه.
+        آموزش، بررسی تجهیزات، مصاحبه و ویدیوهای کوتاه
       </p>
-      <p>این صفحه عمدا خالی است؛ تا ویدیوی واقعی نداریم، ویدیوی نمونه نمی‌گذاریم.</p>
+      <p>این صفحه عمدا خالی است؛ تا ویدیوی واقعی نداریم، ویدیوی نمونه نمی‌گذاریم</p>
       <div className="mx-empty-act">
         {canUpload && onUpload && (
           <button className="mx-iconbtn" type="button" onClick={onUpload}>

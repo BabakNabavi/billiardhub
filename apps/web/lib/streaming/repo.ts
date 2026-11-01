@@ -95,7 +95,7 @@ export async function tablesReady(): Promise<boolean> {
 export function must<T>(res: { data: T | null; error: { message: string } | null }, what: string): T {
   if (res.error) {
     console.error(`[streaming] ${what}:`, res.error.message)
-    throw new LiveError('خطای پایگاه داده در بخشِ پخش زنده', 500)
+    throw new LiveError('خطای پایگاه داده در بخش پخش زنده', 500)
   }
   return res.data as T
 }

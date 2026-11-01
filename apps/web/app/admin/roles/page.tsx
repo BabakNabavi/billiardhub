@@ -289,7 +289,7 @@ export default function AdminRolesPage() {
           {/* سرویس در دسترس نیست */}
           {svcDown && !loading && (
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'rgba(178,59,46,0.06)', border: '1px solid rgba(178,59,46,0.22)', borderRadius: 12, padding: '12px 16px', marginBottom: 14, fontSize: 13, color: '#A03428' }}>
-              سرویس درخواست‌های نقش فعلا در دسترس نیست — بعدا دوباره تلاش کنید. (تأیید/لغو نقش‌ها به بک‌اند متصل است)
+              سرویس درخواست‌های نقش فعلا در دسترس نیست — بعدا دوباره تلاش کنید، (تأیید/لغو نقش‌ها به بک‌اند متصل است)
             </div>
           )}
 

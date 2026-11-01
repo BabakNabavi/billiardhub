@@ -40,7 +40,7 @@ export function ActionForm({ userId, products, videos, onDone }: {
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault(); setErr('')
-    if (needsConfirm && !confirm) { setErr('برای این اقدام تیکِ تأیید را بزنید'); return }
+    if (needsConfirm && !confirm) { setErr('برای این اقدام تیک تأیید را بزنید'); return }
     const [ctype, cid] = content.split(':')
     setBusy(true)
     try {
@@ -65,7 +65,7 @@ export function ActionForm({ userId, products, videos, onDone }: {
   }
 
   return (
-    <form onSubmit={submit} className="flex flex-col gap-4" aria-label="اقدامِ تازه">
+    <form onSubmit={submit} className="flex flex-col gap-4" aria-label="اقدام تازه">
       <div className="grid gap-4 sm:grid-cols-2">
         <label className="flex flex-col gap-1 text-xs text-ink-2">اقدام
           <select className={field} value={action} onChange={e => { setAction(e.target.value as ActionKey); setConfirm(false) }}>
@@ -81,7 +81,7 @@ export function ActionForm({ userId, products, videos, onDone }: {
 
       {timed && (
         <fieldset className="m-0 flex flex-wrap gap-2 border-0 p-0">
-          <legend className="mb-2 text-xs text-ink-2">مدت {to === 'suspended' ? '(الزامی)' : '(خالی = تا بازگرداندنِ دستی)'}</legend>
+          <legend className="mb-2 text-xs text-ink-2">مدت {to === 'suspended' ? '(الزامی)' : '(خالی = تا بازگرداندن دستی)'}</legend>
           {to !== 'suspended' && <Chip on={days === 0} onClick={() => setDays(0)}>بی‌پایان</Chip>}
           {DURATIONS.map(x => <Chip key={x.d} on={days === x.d} onClick={() => setDays(x.d)}>{x.label}</Chip>)}
         </fieldset>
@@ -117,7 +117,7 @@ export function ActionForm({ userId, products, videos, onDone }: {
         </label>
       )}
 
-      <label className="flex flex-col gap-1 text-xs text-ink-2">یادداشتِ داخلی (کاربر نمی‌بیند)
+      <label className="flex flex-col gap-1 text-xs text-ink-2">یادداشت داخلی (کاربر نمی‌بیند)
         <textarea value={note} onChange={e => setNote(e.target.value)} maxLength={2000} rows={3}
           className="w-full rounded-field border border-line/15 bg-surface p-3 text-base text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-deep" />
       </label>
@@ -135,7 +135,7 @@ export function ActionForm({ userId, products, videos, onDone }: {
       <button type="submit" disabled={busy || (to === 'suspended' && !days)}
         className={buttonClasses({ size: 'lg', variant: needsConfirm ? 'danger' : 'primary', className: 'self-start' })}>
         {busy && <Loader2 size={16} className="motion-safe:animate-spin" aria-hidden />}
-        ثبتِ اقدام
+        ثبت اقدام
       </button>
     </form>
   )

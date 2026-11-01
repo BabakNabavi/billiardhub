@@ -84,7 +84,7 @@ function DetailRow({ i, target, preview, needCat, value, err, showErr, onChange,
 
       <label className="cg-lab" htmlFor={`vd-d-${i}`}>توضیح (اختیاری)</label>
       <textarea id={`vd-d-${i}`} className="cg-in vd-area" value={value.description} rows={2} maxLength={600}
-        placeholder="در این ویدیو چه چیزی نشان می‌دهید؟ چند جمله به دیده‌شدنش کمک می‌کند."
+        placeholder="در این ویدیو چه چیزی نشان می‌دهید؟ چند جمله به دیده‌شدنش کمک می‌کند"
         onChange={e => onChange({ description: e.target.value.slice(0, 600) })} />
 
       {bad && <p id={eid} role="alert" className="cg-err">{err}</p>}
@@ -195,8 +195,8 @@ export default function VideoDetailsDialog({
         </h2>
         <p className="cg-sub">
           {mode === 'edit'
-            ? 'عنوان تازه هم در گالری و هم در بیلیارد مدیا می‌نشیند. نشانی قبلی هم کار می‌کند.'
-            : 'عنوان همان چیزی است که بیننده و گوگل می‌بینند. نام فایل عنوان نیست.'}
+            ? 'عنوان تازه هم در گالری و هم در بیلیارد مدیا می‌نشیند، نشانی قبلی هم کار می‌کند'
+            : 'عنوان همان چیزی است که بیننده و گوگل می‌بینند، نام فایل عنوان نیست'}
         </p>
 
         <form onSubmit={e => { e.preventDefault(); if (ready && !busy) onDone(kept(true)) }}>

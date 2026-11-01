@@ -120,7 +120,7 @@ export default function SessionRequest({ coachSlug, price, minutes }: {
   if (done) {
     return (
       <p style={{ fontSize: 13, color: GREEN, fontWeight: 700, margin: 0, display: 'flex', alignItems: 'center', gap: 6 }}>
-        <Check size={15} /> درخواست ثبت شد؛ منتظر تأیید مربی بمانید.
+        <Check size={15} /> درخواست ثبت شد؛ منتظر تأیید مربی بمانید
       </p>
     )
   }

@@ -29,7 +29,7 @@ export function LiveChannelsPanel({ clubId }: { clubId: string }) {
     try {
       const r = await apiFetch(`/api/streams/manage?clubId=${clubId}`, { cache: 'no-store' })
       const j = await r.json().catch(() => ({})) as ManageState & { message?: string }
-      if (!r.ok) { setLoadErr(j.message ?? 'اطلاعاتِ پخش خوانده نشد'); return }
+      if (!r.ok) { setLoadErr(j.message ?? 'اطلاعات پخش خوانده نشد'); return }
       setState(j); setLoadErr('')
     } catch { setLoadErr('ارتباط با سرور برقرار نشد') }
   }, [clubId])
@@ -51,22 +51,22 @@ export function LiveChannelsPanel({ clubId }: { clubId: string }) {
   }, [clubId, load])
 
   if (!state && !loadErr) return (
-    <div className="flex flex-col gap-3" aria-label="در حالِ بارگذاری">
+    <div className="flex flex-col gap-3" aria-label="در حال بارگذاری">
       {[0, 1].map(i => <div key={i} className="h-32 animate-pulse rounded-panel bg-ink/[.05]" />)}
     </div>
   )
   if (loadErr) return (
     <div className="flex flex-col items-start gap-3 rounded-panel bg-danger/[.05] p-4 text-sub text-danger">
       {loadErr}
-      <Button variant="secondary" size="sm" onClick={() => { setLoadErr(''); void load() }}>تلاشِ دوباره</Button>
+      <Button variant="secondary" size="sm" onClick={() => { setLoadErr(''); void load() }}>تلاش دوباره</Button>
     </div>
   )
   /* سرویس قطع ولی کانال هست ⟵ کارت‌ها می‌مانند (دکمه‌ی «پایانِ پخش» سرویس نمی‌خواهد)؛
      فقط ساخت/شروع/کلید خاموش است */
   if (!state!.ready || (!state!.connected && (state!.channels ?? []).length === 0)) return (
     <Intro>
-      پخش زنده‌ی حرفه‌ای (دوربینِ IP، OBS یا اپِ Larix، تماشاگرِ نامحدود، ضبط و آرشیو) به‌زودی فعال می‌شود.
-      تا آن روز، پخشِ مستقیم از گوشی از تبِ «پخش زنده»ی صفحه‌ی باشگاه در دسترس است.
+      پخش زنده‌ی حرفه‌ای (دوربین IP، OBS یا اپ Larix، تماشاگر نامحدود، ضبط و آرشیو) به‌زودی فعال می‌شود
+      تا آن روز، پخش مستقیم از گوشی از تب «پخش زنده»ی صفحه‌ی باشگاه در دسترس است
     </Intro>
   )
 
@@ -80,12 +80,12 @@ export function LiveChannelsPanel({ clubId }: { clubId: string }) {
       {/* باشگاه‌دارِ بی‌سوادِ کامپیوتری فقط یک جمله ببیند؛ نشانی و کلید ته‌ی «اتصال و تنظیمات» است */}
       <Intro>
         {channels.some(c => c.browser)
-          ? '«شروعِ پخش زنده» را بزنید؛ دوربین تمام‌صفحه باز می‌شود. گوشی را افقی رو به میز بگذارید و دکمه‌ی قرمزِ وسط را بزنید.'
-          : 'هر کانال یک «نشانیِ سرور» و یک «کلیدِ استریم» دارد. آن‌ها را در OBS یا دوربینِ سالن وارد کنید، پخش را از همان‌جا شروع کنید و این‌جا «شروعِ پخش» را بزنید تا در سایت نمایش داده شود.'}
+          ? '«شروع پخش زنده» را بزنید؛ دوربین تمام‌صفحه باز می‌شود، گوشی را افقی رو به میز بگذارید و دکمه‌ی قرمز وسط را بزنید'
+          : 'هر کانال یک «نشانی سرور» و یک «کلید استریم» دارد، آن‌ها را در OBS یا دوربین سالن وارد کنید، پخش را از همان‌جا شروع کنید و این‌جا «شروع پخش» را بزنید تا در سایت نمایش داده شود'}
       </Intro>
 
       {!s.connected && channels.some(c => !c.manual) && (
-        <p className="rounded-card bg-ink/[.04] p-3 text-sub text-ink-2">سرویسِ پخش فعلاً در دسترس نیست؛ شروعِ پخش و ساختِ کلید موقتاً خاموش است.</p>
+        <p className="rounded-card bg-ink/[.04] p-3 text-sub text-ink-2">سرویس پخش فعلا در دسترس نیست؛ شروع پخش و ساخت کلید موقتا خاموش است</p>
       )}
 
       {s.settings?.blocked && (
@@ -97,11 +97,11 @@ export function LiveChannelsPanel({ clubId }: { clubId: string }) {
 
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="text-meta text-ink-3">
-          {s.settings?.tier === 'pro' ? 'باشگاهِ حرفه‌ای' : 'باشگاهِ عادی'} · {faNum(used)} از {faNum(s.limit ?? 1)} کانال
-          {s.month ? ` · ۳۰ روزِ اخیر: ${faDec(s.month.hours)} ساعت پخش، اوجِ ${faNum(s.month.peakViewers)} بیننده` : ''}
+          {s.settings?.tier === 'pro' ? 'باشگاه حرفه‌ای' : 'باشگاه عادی'} · {faNum(used)} از {faNum(s.limit ?? 1)} کانال
+          {s.month ? ` · ۳۰ روز اخیر: ${faDec(s.month.hours)} ساعت پخش، اوج ${faNum(s.month.peakViewers)} بیننده` : ''}
         </p>
         {!adding && !s.settings?.blocked && s.connected && (
-          <Button size="sm" onClick={() => setAdding(true)} icon={<Plus className="h-4 w-4" aria-hidden />}>کانالِ تازه</Button>
+          <Button size="sm" onClick={() => setAdding(true)} icon={<Plus className="h-4 w-4" aria-hidden />}>کانال تازه</Button>
         )}
       </div>
 
@@ -110,7 +110,7 @@ export function LiveChannelsPanel({ clubId }: { clubId: string }) {
       {adding && <NewChannelForm state={s} slotsLeft={slotsLeft} busy={busy === 'create:new'} run={run} onDone={() => setAdding(false)} />}
 
       {channels.length === 0 && !adding
-        ? <p className="rounded-panel bg-ink/[.03] px-4 py-8 text-center text-sub text-ink-3">هنوز کانالی نساخته‌اید. با «کانالِ تازه» شروع کنید.</p>
+        ? <p className="rounded-panel bg-ink/[.03] px-4 py-8 text-center text-sub text-ink-3">هنوز کانالی نساخته‌اید، با «کانال تازه» شروع کنید</p>
         : channels.map(ch => <ChannelCard key={ch.id} ch={ch} clubId={clubId} busy={busy} run={run} connected={s.connected} onChanged={() => void load()} />)}
     </div>
   )

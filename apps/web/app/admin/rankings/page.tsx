@@ -22,8 +22,8 @@ function AvatarCell({ value, name, onChange }: { value?: string; name: string; o
 
   const pick = async (file: File | undefined) => {
     if (!file) return
-    if (!file.type.startsWith('image/')) { notify('فقط فایل تصویری پذیرفته می‌شود.'); return }
-    if (file.size > 8 * 1024 * 1024) { notify('حجم عکس نباید بیشتر از ۸ مگابایت باشد.'); return }
+    if (!file.type.startsWith('image/')) { notify('فقط فایل تصویری پذیرفته می‌شود'); return }
+    if (file.size > 8 * 1024 * 1024) { notify('حجم عکس نباید بیشتر از ۸ مگابایت باشد'); return }
     setBusy(true)
     try {
       /* نام فایل تصادفی است، نه نام کاربر: مسیر عمومی می‌شود و
@@ -36,13 +36,13 @@ function AvatarCell({ value, name, onChange }: { value?: string; name: string; o
       const squared = await compressAvatar(file, 'player.jpg')
       const url = await uploadFile('club-media', squared, `rankings/${crypto.randomUUID()}.jpg`)
       /* شکست آپلود باید دیده شود، نه اینکه بی‌صدا هیچ‌چیز عوض نشود */
-      if (!url) { notify("آپلود عکس انجام نشد — دوباره تلاش کنید."); return }
+      if (!url) { notify("آپلود عکس انجام نشد — دوباره تلاش کنید"); return }
       onChange(url)
     } catch {
       /* `compressAvatar` روی فایلی که مرورگر نمی‌تواند رمزگشایی کند
          (HEIC بیرون سافاری، فایل خراب) پرتاب می‌کند. بدون این، فقط
          چرخنده می‌ایستاد و هیچ پیامی نمی‌آمد. */
-      notify('خواندن این عکس ممکن نشد — فرمت دیگری امتحان کنید.')
+      notify('خواندن این عکس ممکن نشد — فرمت دیگری امتحان کنید')
     } finally { setBusy(false) }
   }
 
@@ -92,13 +92,13 @@ export default function AdminRankingsPage() {
     void (async () => {
       try {
         const r = await apiFetch('/api/admin/settings', { cache: 'no-store' });
-        if (!r.ok) { setErr(`جدولِ سرور خوانده نشد (کد ${r.status}) — تا بارگذاریِ دوباره ذخیره غیرفعال است`); return; }
+        if (!r.ok) { setErr(`جدول سرور خوانده نشد (کد ${r.status}) — تا بارگذاری دوباره ذخیره غیرفعال است`); return; }
         const j = await r.json().catch(() => null) as { settings?: Record<string, unknown> } | null;
         const board = j?.settings?.rankings_board;
         /* از همان مسیرِ صفحه‌ی عمومی: ظرفیتِ تازه (۵۱۲/۶۴) و بک‌فیلِ استان */
         if (board && typeof board === 'object') { setRankings(mergeIntoEmpty(board as RankingsStructure)); setOnServer(true); }
         else setOnServer(false);
-      } catch { setErr('خطا در ارتباط با سرور — تا بارگذاریِ دوباره ذخیره غیرفعال است'); }
+      } catch { setErr('خطا در ارتباط با سرور — تا بارگذاری دوباره ذخیره غیرفعال است'); }
     })();
   }, []);
 
@@ -210,8 +210,8 @@ export default function AdminRankingsPage() {
         <div className="mb-5 rounded-xl border px-4 py-3 text-sm font-bold leading-7"
           style={{ background: 'rgba(199,166,106,0.10)', borderColor: 'rgba(199,166,106,0.34)', color: '#8F6531' }}>
           این جدول هنوز روی سرور ذخیره نشده و فقط روی همین مرورگر است —
-          پس در صفحه‌ی رنکینگ سایت چیزی دیده نمی‌شود.
-          برای انتشار، یک‌بار دکمه‌ی «ذخیره» را بزنید.
+          پس در صفحه‌ی رنکینگ سایت چیزی دیده نمی‌شود
+          برای انتشار، یک‌بار دکمه‌ی «ذخیره» را بزنید
         </div>
       )}
 

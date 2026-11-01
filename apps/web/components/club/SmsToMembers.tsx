@@ -136,8 +136,8 @@ export default function SmsToMembers({ clubId }: { clubId: string }) {
         fontSize: 12.5, color: SEC, lineHeight: 2,
       }}>
         <Info size={16} style={{ color: MUT, flexShrink: 0, marginTop: 3 }} />
-        ارسال پیامک به اعضا هنوز فعال نشده است. پس از فعال‌سازی توسط مدیریت سایت،
-        از همین‌جا می‌توانید به اعضای باشگاه خود پیامک بفرستید.
+        ارسال پیامک به اعضا هنوز فعال نشده است، پس از فعال‌سازی توسط مدیریت سایت،
+        از همین‌جا می‌توانید به اعضای باشگاه خود پیامک بفرستید
       </div>
     )
   }
@@ -149,9 +149,9 @@ export default function SmsToMembers({ clubId }: { clubId: string }) {
         <h3 style={{ fontSize: 15.5, fontWeight: 900, color: INK, margin: 0 }}>پیامک به اعضا</h3>
       </div>
       <p style={{ fontSize: 12, color: MUT, lineHeight: 2, margin: '0 0 16px', maxWidth: 640 }}>
-        پیامک با نام هر عضو، به شماره‌ی ثبت‌شده در پروفایل خودش فرستاده می‌شود.
+        پیامک با نام هر عضو، به شماره‌ی ثبت‌شده در پروفایل خودش فرستاده می‌شود
         اعضایی که دریافت پیامک باشگاه را خاموش کرده‌اند در فهرست نمی‌آیند و
-        هزینه‌ای هم بابتشان حساب نمی‌شود.
+        هزینه‌ای هم بابتشان حساب نمی‌شود
       </p>
 
       {/* ── انتخاب متن ── */}
@@ -282,14 +282,14 @@ export default function SmsToMembers({ clubId }: { clubId: string }) {
                   }}>
                     <Info size={13} style={{ flexShrink: 0, marginTop: 3 }} />
                     این متن روی گوشی در {toFaDigits(ok.maxParts)} بخش دریافت می‌شود؛
-                    هزینه‌ای که پرداخت می‌کنید تغییری نمی‌کند.
+                    هزینه‌ای که پرداخت می‌کنید تغییری نمی‌کند
                   </p>
                 ) : null}
               </div>
             </>
           ) : (
             <div style={{ padding: '18px 15px', fontSize: 12.5, color: MUT, lineHeight: 1.9 }}>
-              مقدارها را پر کنید تا متن و هزینه‌ی دقیق را ببینید.
+              مقدارها را پر کنید تا متن و هزینه‌ی دقیق را ببینید
             </div>
           )}
         </div>
@@ -345,10 +345,10 @@ export default function SmsToMembers({ clubId }: { clubId: string }) {
 
             <p style={{ fontSize: 13, color: SEC, lineHeight: 2.1, margin: '0 0 16px' }}>
               پیامک به <b style={{ color: INK }}>{toFaDigits(ok.recipients)} عضو</b> باشگاه فرستاده می‌شود
-              و مبلغ <b style={{ color: INK }}>{fa(ok.total)} تومان</b> از شما دریافت می‌گردد.
+              و مبلغ <b style={{ color: INK }}>{fa(ok.total)} تومان</b> از شما دریافت می‌گردد
               <br />
               <span style={{ fontSize: 11.5, color: MUT }}>
-                پس از ارسال، امکان بازگشت یا لغو وجود ندارد.
+                پس از ارسال، امکان بازگشت یا لغو وجود ندارد
               </span>
             </p>
 

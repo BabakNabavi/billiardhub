@@ -73,7 +73,7 @@ export async function generateMetadata(
       p.condition ? `(${conditionLabel(p.condition)})` : '',
       p.city ? `در ${p.city}` : '',
       priceText ? `· ${priceText}` : '',
-      '— آگهی در بیلیارد بازار، بیلیارد هاب.',
+      '— آگهی در بیلیارد بازار، بیلیارد هاب',
     ].filter(Boolean).join(' ')
 
     const first = Array.isArray(p.images) ? p.images.find((x): x is string => typeof x === 'string' && !!x) : undefined

@@ -100,7 +100,7 @@ export function SearchSuggest({ q, onPick, id, className = '', hideEmpty = false
     && !(hideEmpty && (state.kind === 'error' || (state.kind === 'done' && state.hits.length === 0)))
   /* اعلامِ صفحه‌خوان — همیشه سوار، تا تغییرِ متن خوانده شود */
   const announce = !open ? ''
-    : state.kind === 'done' ? (state.hits.length ? `${faNum(state.hits.length)} پیشنهاد؛ با کلیدِ پایین بروید` : 'پیشنهادی پیدا نشد')
+    : state.kind === 'done' ? (state.hits.length ? `${faNum(state.hits.length)} پیشنهاد؛ با کلید پایین بروید` : 'پیشنهادی پیدا نشد')
     : state.kind === 'error' ? 'جست‌وجو جواب نداد' : ''
 
   return (
@@ -123,11 +123,11 @@ export function SearchSuggest({ q, onPick, id, className = '', hideEmpty = false
       )}
 
       {state.kind === 'error' && (
-        <p className="m-0 p-4 text-sub text-danger-ink">پیشنهادها الان نیامدند — «همه‌ی نتیجه‌ها» را بزنید.</p>
+        <p className="m-0 p-4 text-sub text-danger-ink">پیشنهادها الان نیامدند — «همه‌ی نتیجه‌ها» را بزنید</p>
       )}
 
       {state.kind === 'done' && state.hits.length === 0 && (
-        <p className="m-0 p-4 text-sub text-ink-2">برای «{state.q}» در بازیکنان، افراد و باشگاه‌ها چیزی پیدا نشد.</p>
+        <p className="m-0 p-4 text-sub text-ink-2">برای «{state.q}» در بازیکنان، افراد و باشگاه‌ها چیزی پیدا نشد</p>
       )}
 
       {state.kind === 'done' && state.hits.length > 0 && (

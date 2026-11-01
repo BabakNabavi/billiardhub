@@ -100,7 +100,7 @@ export default function ClubSchedule({ clubId }: { clubId: string }) {
 
         {!tomorrow || tomorrow.count === 0 ? (
           <p style={{ fontSize: 12.5, color: SEC, margin: 0, lineHeight: 2 }}>
-            برای فردا هیچ رزروی ثبت نشده است.
+            برای فردا هیچ رزروی ثبت نشده است
           </p>
         ) : (
           <>
@@ -175,7 +175,7 @@ export default function ClubSchedule({ clubId }: { clubId: string }) {
 
           {selected.count === 0 ? (
             <p style={{ fontSize: 12.5, color: MUT, margin: 0, lineHeight: 2 }}>
-              این روز هیچ رزروی ندارد.
+              این روز هیچ رزروی ندارد
             </p>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>

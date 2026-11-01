@@ -93,7 +93,7 @@ export async function hitRateLimit(
 /** پاسخ استاندارد ۴۲۹ با هدر Retry-After */
 export function tooMany(retryAfterSec: number) {
   return new Response(
-    JSON.stringify({ message: `تلاش بیش از حد. ${retryAfterSec} ثانیه دیگر دوباره تلاش کنید.`, retryAfter: retryAfterSec }),
+    JSON.stringify({ message: `تلاش بیش از حد ${retryAfterSec} ثانیه دیگر دوباره تلاش کنید`, retryAfter: retryAfterSec }),
     { status: 429, headers: { 'Content-Type': 'application/json', 'Retry-After': String(retryAfterSec) } },
   )
 }

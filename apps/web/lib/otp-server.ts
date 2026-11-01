@@ -85,7 +85,7 @@ async function otpRpc<T>(fn: string, args: Record<string, unknown>): Promise<{ d
     if (error.code === MISSING) {
       if (!warnedMissing) {
         warnedMissing = true
-        console.warn('[otp] توابعِ bh_otp_* روی دیتابیس نیستند — مهاجرتِ ۰۹۹ اجرا نشده. مسیرِ غیراتمیکِ Storage فعال است.')
+        console.warn('[otp] توابع bh_otp_* روی دیتابیس نیستند — مهاجرت ۰۹۹ اجرا نشده، مسیر غیراتمیک Storage فعال است')
       }
       return null
     }
@@ -176,7 +176,7 @@ export async function sendOtp(
 
        حالت آزمایشی محلی همچنان کار می‌کند (کد در لاگ سرور می‌آید تا
        بشود بدون پیامک تست کرد)، ولی وضعیت صادقانه گزارش می‌شود. */
-    console.warn('[otp] SMS_API_KEY تنظیم نشده — کد ساخته شد ولی ارسال نشد. کد آزمایشی:', code)
+    console.warn('[otp] SMS_API_KEY تنظیم نشده — کد ساخته شد ولی ارسال نشد، کد آزمایشی:', code)
     return { ok: false, message: 'سرویس پیامک پیکربندی نشده است' }
   }
 

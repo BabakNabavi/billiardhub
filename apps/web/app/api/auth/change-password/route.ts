@@ -74,6 +74,6 @@ export async function POST(req: NextRequest) {
 
   /* کوکی‌های همین مرورگر هم پاک می‌شوند تا نشست مرده پشت سر نماند */
   return clearSessionCookies(
-    NextResponse.json({ ok: true, message: 'رمز عبور تغییر کرد؛ دوباره وارد شوید.' }),
+    NextResponse.json({ ok: true, message: 'رمز عبور تغییر کرد؛ دوباره وارد شوید' }),
   );
 }

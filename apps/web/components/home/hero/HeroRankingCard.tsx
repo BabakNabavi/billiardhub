@@ -33,7 +33,7 @@ export function HeroRankingCard({ boards, pos }: { boards: HeroRankingBoard[]; p
     <Link ref={ref} prefetch={false} href={href} className={`${CARD} ${pos}`}>
       <p className={`${LABEL} flex items-center gap-1`}>
         <Trophy size={12} aria-hidden className="text-gold-light" />
-        <span key={b.label} className={`hh-swap truncate${fade}`}>رنکینگِ {b.label}</span>
+        <span key={b.label} className={`hh-swap truncate${fade}`}>رنکینگ {b.label}</span>
         {boards.length > 1 && (
           <span aria-hidden className="ms-auto flex shrink-0 gap-1">
             {boards.map((x, n) => (

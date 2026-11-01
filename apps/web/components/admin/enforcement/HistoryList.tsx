@@ -17,7 +17,7 @@ const label = <T extends string>(map: Record<T, string | { label: string }>, k: 
 }
 
 export function HistoryList({ rows, actors }: { rows: HistoryRow[]; actors: ActorRow[] }) {
-  if (!rows.length) return <p className="m-0 text-sm text-ink-2">هنوز اقدامی برای این کاربر ثبت نشده است.</p>
+  if (!rows.length) return <p className="m-0 text-sm text-ink-2">هنوز اقدامی برای این کاربر ثبت نشده است</p>
   const nameOf = (id: string) => {
     const a = actors.find(x => x.id === id)
     return a ? [a.firstName, a.lastName].filter(Boolean).join(' ') || toFaDigits(a.phone ?? '') : id.slice(0, 8)

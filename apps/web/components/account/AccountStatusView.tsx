@@ -38,10 +38,10 @@ export function AccountStatusView() {
     window.location.assign('/')
   }
 
-  if (failed) return <p className="mt-6 text-sm text-danger-ink" role="alert">وضعیت خوانده نشد. صفحه را تازه کنید.</p>
+  if (failed) return <p className="mt-6 text-sm text-danger-ink" role="alert">وضعیت خوانده نشد، صفحه را تازه کنید</p>
   if (!s) return (
     <p className="mt-6 flex items-center gap-2 text-sm text-ink-2" role="status">
-      <Loader2 size={16} className="motion-safe:animate-spin" aria-hidden /> در حالِ بررسی…
+      <Loader2 size={16} className="motion-safe:animate-spin" aria-hidden /> در حال بررسی…
     </p>
   )
 
@@ -49,7 +49,7 @@ export function AccountStatusView() {
      می‌گیرد، و پیامِ «فعال» برایش دروغ بود. */
   if (!s.signedIn) return (
     <section className="lq-pcard mt-6 flex flex-col gap-4 p-6">
-      <p className="m-0 text-sm text-ink">برای دیدنِ وضعیتِ حساب وارد شوید. اگر حسابتان محدود شده باشد، پیامش پس از ورود نشان داده می‌شود.</p>
+      <p className="m-0 text-sm text-ink">برای دیدن وضعیت حساب وارد شوید، اگر حسابتان محدود شده باشد، پیامش پس از ورود نشان داده می‌شود</p>
       <div className="flex flex-wrap gap-2">
         <Link href="/login" className={buttonClasses({ size: 'md' })}>ورود</Link>
         <Link href="/contact" className={buttonClasses({ size: 'md', variant: 'secondary' })}>تماس با پشتیبانی</Link>
@@ -65,12 +65,12 @@ export function AccountStatusView() {
           ? <ShieldCheck size={28} className="text-success" aria-hidden />
           : <ShieldAlert size={28} className="text-danger-ink" aria-hidden />}
         <p className="m-0 text-xl font-semibold text-ink">
-          {active ? 'حسابِ شما فعال است' : s.label}
+          {active ? 'حساب شما فعال است' : s.label}
         </p>
       </div>
       {!active && s.message && <p className="m-0 text-sm text-ink">{s.message}</p>}
       {!active && s.until && (
-        <p className="m-0 text-sm text-ink-2">پایانِ محدودیت: {faDateTime(s.until)}</p>
+        <p className="m-0 text-sm text-ink-2">پایان محدودیت: {faDateTime(s.until)}</p>
       )}
       {!!s.restrictions?.length && (
         <ul className="m-0 flex list-disc flex-col gap-1 ps-6 text-sm text-ink-2">
@@ -78,7 +78,7 @@ export function AccountStatusView() {
         </ul>
       )}
       {!active && (
-        <p className="m-0 text-xs text-ink-2">اگر فکر می‌کنید اشتباهی رخ داده، از راهِ پشتیبانی اعتراض ثبت کنید.</p>
+        <p className="m-0 text-xs text-ink-2">اگر فکر می‌کنید اشتباهی رخ داده، از راه پشتیبانی اعتراض ثبت کنید</p>
       )}
       <div className="flex flex-wrap gap-2">
         {active

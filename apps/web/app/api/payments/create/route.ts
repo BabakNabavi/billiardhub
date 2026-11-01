@@ -56,7 +56,7 @@ export async function POST(req: NextRequest) {
      پیش‌فرض خاموش. */
   if (!hasRealGateway() && process.env.BH_ALLOW_MOCK_PAYMENTS !== '1') {
     return NextResponse.json({
-      message: 'پرداخت آنلاین هنوز فعال نیست. لطفا بعدا تلاش کنید یا با باشگاه تماس بگیرید.',
+      message: 'پرداخت آنلاین هنوز فعال نیست، لطفا بعدا تلاش کنید یا با باشگاه تماس بگیرید',
       gatewayDisabled: true,
     }, { status: 503 });
   }

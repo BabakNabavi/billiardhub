@@ -26,7 +26,7 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const p = await playlistBySlug(slug).catch(() => null)
   if (!p) return {}
   const url = `/media/playlist/${encodeURIComponent(p.slug)}`
-  const description = p.description || `${p.title} — لیست پخش در بیلیارد مدیا.`
+  const description = p.description || `${p.title} — لیست پخش در بیلیارد مدیا`
   return {
     title: { absolute: `${p.title} | بیلیارد مدیا` },
     description,

@@ -114,18 +114,18 @@ export default function ProductEditor({ product, busy = false, error = '', onSav
         next.push(url)
       }
       if (next.length) setImages(prev => [...prev, ...next].slice(0, MAX_PRODUCT_IMAGES))
-      if (tooBig) setErr(`${faNum(tooBig)} عکس بیش از حد بزرگ بود و اضافه نشد. عکس کوچک‌تری انتخاب کنید.`)
-      else if (files.length > room) setErr(`فقط ${faNum(room)} عکس جا داشت؛ بقیه اضافه نشد.`)
+      if (tooBig) setErr(`${faNum(tooBig)} عکس بیش از حد بزرگ بود و اضافه نشد، عکس کوچک‌تری انتخاب کنید`)
+      else if (files.length > room) setErr(`فقط ${faNum(room)} عکس جا داشت؛ بقیه اضافه نشد`)
     } catch {
-      setErr('عکس خوانده نشد.')
+      setErr('عکس خوانده نشد')
     } finally {
       setReading(false)
     }
   }
 
   const submit = () => {
-    if (!name.trim()) { setErr('نام محصول لازم است.'); return }
-    if (!category.trim()) { setErr('دسته‌ی محصول لازم است.'); return }
+    if (!name.trim()) { setErr('نام محصول لازم است'); return }
+    if (!category.trim()) { setErr('دسته‌ی محصول لازم است'); return }
     const list = specs.split('\n').map(s => s.trim()).filter(Boolean).slice(0, MAX_SPECS)
     void onSave({
       id: product?.id ?? rid(),

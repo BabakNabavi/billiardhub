@@ -93,7 +93,7 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string
     void notifyOrganizerOfRegistration(out.registrationId!).catch(() => { /* بی‌صدا */ });
     return NextResponse.json({
       ok: true, free: true, registrationId: out.registrationId,
-      message: 'ثبت‌نام شما قطعی شد.',
+      message: 'ثبت‌نام شما قطعی شد',
     });
   }
 
@@ -108,7 +108,7 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string
     return NextResponse.json({
       ok: false, pendingPayment: true, registrationId: out.registrationId,
       amount: out.amount,
-      message: 'پرداخت آنلاین هنوز فعال نشده است. ثبت‌نام شما در انتظار پرداخت ثبت شد؛ برای هماهنگی با باشگاه تماس بگیرید.',
+      message: 'پرداخت آنلاین هنوز فعال نشده است، ثبت‌نام شما در انتظار پرداخت ثبت شد؛ برای هماهنگی با باشگاه تماس بگیرید',
     }, { status: 503 });
   }
 
@@ -133,8 +133,8 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string
     const gw = `درگاه پرداخت درخواست را نپذیرفت${pay.message ? `: «${pay.message}»` : ''}.`;
     return NextResponse.json({
       message: released
-        ? `${gw} ثبت‌نامی انجام نشد و صندلی‌ای برایتان نگه داشته نشد؛ کمی بعد دوباره تلاش کنید.`
-        : `${gw} کمی بعد دوباره تلاش کنید.`,
+        ? `${gw} ثبت‌نامی انجام نشد و صندلی‌ای برایتان نگه داشته نشد؛ کمی بعد دوباره تلاش کنید`
+        : `${gw} کمی بعد دوباره تلاش کنید`,
     }, { status: 502 });
   }
 
@@ -152,7 +152,7 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string
   }).eq('id', out.registrationId).eq('status', 'PENDING_PAYMENT').neq('payment_status', 'PAID')
     .select('id');
   if (!saveErr && pay.authority && (!saved || saved.length === 0)) {
-    return NextResponse.json({ message: 'ثبت‌نامِ هم‌زمانِ دیگری در جریان بود؛ صفحه را تازه کنید و دوباره تلاش کنید.', reason: 'concurrent' }, { status: 409 });
+    return NextResponse.json({ message: 'ثبت‌نام هم‌زمان دیگری در جریان بود؛ صفحه را تازه کنید و دوباره تلاش کنید', reason: 'concurrent' }, { status: 409 });
   }
   if (saveErr || !pay.authority) {
     console.error('[tournaments/register] authority not saved:', saveErr?.message ?? 'no authority');
@@ -239,7 +239,7 @@ export async function DELETE(req: NextRequest, ctx: { params: Promise<{ id: stri
   return NextResponse.json({
     ok: true, refunded: data.refunded ?? 0, promoted,
     message: (data.refunded ?? 0) > 0
-      ? 'ثبت‌نام لغو شد. مبلغ طی روزهای آینده بازگردانده می‌شود.'
-      : 'ثبت‌نام لغو شد.',
+      ? 'ثبت‌نام لغو شد، مبلغ طی روزهای آینده بازگردانده می‌شود'
+      : 'ثبت‌نام لغو شد',
   });
 }

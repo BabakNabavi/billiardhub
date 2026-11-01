@@ -8,17 +8,17 @@ export const metadata: Metadata = {
      فرزندانش قطع می‌کند، پس صفحه‌ی جزئیات (مثلاً آگهی/باشگاه/مسابقه) بی‌نامِ
      سایت می‌ماند. با `default` عنوانِ خودِ بخش همان قبلی است. */
   title: { default: 'مسابقات بیلیارد', template: '%s | بیلیارد هاب' },
-  description: 'مسابقات و لیگ‌های بیلیارد و اسنوکر ایران — ثبت‌نام و نتایج.',
+  description: 'مسابقات و لیگ‌های بیلیارد و اسنوکر ایران — ثبت‌نام و نتایج',
   alternates: { canonical: '/tournaments' },
   openGraph: {
     title: 'مسابقات بیلیارد | بیلیارد هاب',
-    description: 'مسابقات و لیگ‌های بیلیارد و اسنوکر ایران — ثبت‌نام و نتایج.',
+    description: 'مسابقات و لیگ‌های بیلیارد و اسنوکر ایران — ثبت‌نام و نتایج',
     url: '/tournaments',
     siteName: 'بیلیارد هاب',
     locale: 'fa_IR',
     type: 'website',
   },
-  twitter: { card: 'summary_large_image', title: 'مسابقات بیلیارد | بیلیارد هاب', description: 'مسابقات و لیگ‌های بیلیارد و اسنوکر ایران — ثبت‌نام و نتایج.' },
+  twitter: { card: 'summary_large_image', title: 'مسابقات بیلیارد | بیلیارد هاب', description: 'مسابقات و لیگ‌های بیلیارد و اسنوکر ایران — ثبت‌نام و نتایج' },
 }
 
 export default function SegmentLayout({ children }: { children: React.ReactNode }) {

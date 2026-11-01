@@ -306,7 +306,7 @@ export default function ReviewDetails({ type, id }: { type: ReviewType; id: stri
       ) : (
         <Box title="صاحب حساب">
           <p style={{ fontSize: 12.5, color: RED, margin: 0, lineHeight: 1.9 }}>
-            حساب صاحب این مورد پیدا نشد — ممکن است کاربر حذف شده باشد.
+            حساب صاحب این مورد پیدا نشد — ممکن است کاربر حذف شده باشد
           </p>
         </Box>
       )}
@@ -326,7 +326,7 @@ export default function ReviewDetails({ type, id }: { type: ReviewType; id: stri
           </button>
         ) : (
           <p style={{ fontSize: 12.5, color: MUT, margin: 0, lineHeight: 1.9 }}>
-            مدرکی بارگذاری نشده. <span style={{ color: SEC }}>تأیید همچنان ممکن است — فقط نشان تأیید داده نمی‌شود.</span>
+            مدرکی بارگذاری نشده <span style={{ color: SEC }}>تأیید همچنان ممکن است — فقط نشان تأیید داده نمی‌شود</span>
           </p>
         )}
         {docErr ? (
@@ -405,7 +405,7 @@ export default function ReviewDetails({ type, id }: { type: ReviewType; id: stri
           </Grid>
           {(data.counts.tables ?? 0) === 0 ? (
             <p style={{ fontSize: 11.5, color: '#B7791F', margin: '9px 0 0', lineHeight: 1.9 }}>
-              هنوز میزی ثبت نشده — باشگاه بدون میز قابل رزرو نیست.
+              هنوز میزی ثبت نشده — باشگاه بدون میز قابل رزرو نیست
             </p>
           ) : null}
         </Box>
@@ -415,7 +415,7 @@ export default function ReviewDetails({ type, id }: { type: ReviewType; id: stri
       <Box title="اطلاعات ثبت‌شده">
         {Object.keys(fields).length === 0 ? (
           <p style={{ fontSize: 12.5, color: '#B7791F', margin: 0, lineHeight: 1.9 }}>
-            هیچ اطلاعاتی ثبت نشده — این درخواست خالی است.
+            هیچ اطلاعاتی ثبت نشده — این درخواست خالی است
           </p>
         ) : (
           <Grid>

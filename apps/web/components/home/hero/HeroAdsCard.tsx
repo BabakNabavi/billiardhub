@@ -29,7 +29,7 @@ export function HeroAdsCard({ ads, pos }: { ads: HeroAdItem[]; pos: string }) {
     <div ref={ref} className={`${CARD} ${pos}`}>
       <Link prefetch={false} href="/shop" className={`${LABEL} ${ROW_LINK} -mx-1 flex items-center gap-1 px-1`}>
         <ShoppingBag size={12} aria-hidden className="hh-c-violet" />
-        تازه‌ترین آگهی‌های بازار
+        تازه‌ترین آگهی‌های بیلیارد بازار
         <span className="ms-auto font-bold text-gold-light">همه</span>
       </Link>
       <ul key={page} className={`hh-swap hh-ads mt-1${leaving ? ' hh-leaving' : ''}`}>

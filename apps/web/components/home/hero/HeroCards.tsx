@@ -87,7 +87,7 @@ function adItems(products: RealProduct[]): HeroAdItem[] {
 }
 
 const PHASE_LABEL: Record<NonNullable<HeroData['tournament']>['phase'], string> = {
-  open: 'مسابقه‌ی پیشِ رو', upcoming: 'مسابقه‌ی پیشِ رو', ongoing: 'مسابقه‌ی در جریان',
+  open: 'مسابقه‌ی پیش رو', upcoming: 'مسابقه‌ی پیش رو', ongoing: 'مسابقه‌ی در جریان',
 }
 
 function TournamentCard({ t, pos }: { t: NonNullable<HeroData['tournament']>; pos: string }) {
@@ -135,7 +135,7 @@ export function HeroCards({ data, newestClubs, newestProducts, stores: allStores
      دسته‌ی سه‌کارتیِ دسکتاپ و ردیفِ سه‌تاییِ تبلت نه */
   if (stores.length) cards.push(pos => (
     <HeroSpotCard key="stores" items={stores} pos={pos} hrefBase="/sellers" fit="logo" everyMs={6000}
-      label={['فروشگاهِ تجهیزات', 'فروشگاه‌های تجهیزات']} className="min-[601px]:hidden" />
+      label={['فروشگاه تجهیزات', 'فروشگاه‌های تجهیزات']} className="min-[601px]:hidden" />
   ))
   if (cards.length === 0) return null
   /* فقط فروشگاه مانده (در تبلت/دسکتاپ پنهان) ⟵ صحنه هم در آن اندازه‌ها پنهان،

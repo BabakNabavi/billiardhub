@@ -24,7 +24,7 @@ import { normalizePhone, hasAssignedPrefix, INVALID_MOBILE_MESSAGE } from '@/lib
       سرورساید OTP است که فقط هش کد را نگه می‌دارد. کد نه در پاسخ
       برمی‌گردد و نه لاگ می‌شود. */
 
-const GENERIC = 'اگر این شماره در سیستم ثبت شده باشد، کد بازیابی برای آن ارسال می‌شود.';
+const GENERIC = 'اگر این شماره در سیستم ثبت شده باشد، کد بازیابی برای آن ارسال می‌شود';
 /* `isPhone` حذف شد: شرط سخت‌گیرانه‌ی `^09\d{9}$` روی ورودی خام هر
    شکل دیگری را رد می‌کرد و کاربر پیام «کد ارسال شد» می‌گرفت بدون
    اینکه پیامکی فرستاده شود. حالا `normalizePhone` جایش را گرفته. */
@@ -91,7 +91,7 @@ export async function POST(req: NextRequest) {
         });
         return NextResponse.json({
           ok: false,
-          message: 'ارسال پیامک انجام نشد. چند لحظه بعد دوباره تلاش کنید یا با پشتیبانی تماس بگیرید.',
+          message: 'ارسال پیامک انجام نشد، چند لحظه بعد دوباره تلاش کنید یا با پشتیبانی تماس بگیرید',
         }, { status: 502 });
       }
     }
@@ -147,7 +147,7 @@ export async function POST(req: NextRequest) {
       ip: clientIp(req) ?? undefined,
     });
 
-    return NextResponse.json({ ok: true, message: 'رمز عبور تغییر کرد؛ حالا وارد شوید.' });
+    return NextResponse.json({ ok: true, message: 'رمز عبور تغییر کرد؛ حالا وارد شوید' });
   }
 
   return NextResponse.json({ ok: false, message: 'درخواست نامعتبر' }, { status: 400 });

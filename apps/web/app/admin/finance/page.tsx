@@ -165,8 +165,8 @@ export default function AdminFinance() {
               باشگاه است. نمایش ناخالص به‌عنوان درآمد، هم گزارش
               مالیاتی را غلط می‌کند هم تصمیم‌های کسب‌وکار را. */}
           <div style={{ fontSize: 12, color: SEC, marginBottom: 10, lineHeight: 1.9 }}>
-            «وجوه دریافتی» پولی است که به حساب مرکزی آمده — درآمد پلتفرم نیست.
-            درآمد واقعی ما کمیسیون، جریمه‌ی لغو و فروش تبلیغات است.
+            «وجوه دریافتی» پولی است که به حساب مرکزی آمده — درآمد پلتفرم نیست
+            درآمد واقعی ما کمیسیون، جریمه‌ی لغو و فروش تبلیغات است
           </div>
 
           <div className="af-grid">
@@ -209,10 +209,10 @@ export default function AdminFinance() {
               background: 'rgba(239,68,68,0.06)', border: '1px solid rgba(239,68,68,0.28)',
               fontSize: 12.5, fontWeight: 700, color: '#991B1B', lineHeight: 1.9,
             }}>
-              ⚠ ناترازی دفتر: {fa(o.balanceCheck)} تومان.
+              ⚠ ناترازی دفتر: {fa(o.balanceCheck)} تومان
               وجوه دریافتی منهای بازپرداخت‌ها باید برابر «درآمد پلتفرم + سهم باشگاه‌ها
-              + پول نگه‌داشته‌شده‌ی رزروهای برگزارنشده» باشد.
-              این اختلاف یعنی رویدادی در دفتر ثبت نشده — پیش از هر تسویه‌ای بررسی شود.
+              + پول نگه‌داشته‌شده‌ی رزروهای برگزارنشده» باشد
+              این اختلاف یعنی رویدادی در دفتر ثبت نشده — پیش از هر تسویه‌ای بررسی شود
             </div>
           )}
         </>
@@ -394,7 +394,7 @@ function RefModal({ amount, onClose, onSubmit }: { amount: number; onClose: () =
           <button type="button" aria-label="بستن" onClick={onClose} style={{ background: '#F4F3F1', border: `1px solid ${LINE}`, borderRadius: 9, padding: 6, cursor: 'pointer', color: SEC, display: 'flex' }}><X size={15} /></button>
         </div>
         <p style={{ fontSize: 13, color: SEC, margin: '0 0 14px', lineHeight: 1.9 }}>
-          مبلغ <b style={{ color: INK }}>{fa(amount)} تومان</b> واریز شد؟ شماره‌ی پیگیری بانکی را وارد کنید.
+          مبلغ <b style={{ color: INK }}>{fa(amount)} تومان</b> واریز شد؟ شماره‌ی پیگیری بانکی را وارد کنید
         </p>
         <input value={ref} onChange={e => setRef(e.target.value)} placeholder="شماره‌ی پیگیری"
           style={{ width: '100%', boxSizing: 'border-box', padding: '11px 13px', borderRadius: 11, border: `1px solid ${LINE}`, background: GROUND, fontSize: 13.5, fontFamily: 'inherit', color: INK, outline: 'none', direction: 'ltr', textAlign: 'left' }} />

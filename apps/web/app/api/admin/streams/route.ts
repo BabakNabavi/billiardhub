@@ -38,19 +38,19 @@ const Action = z.discriminatedUnion('action', [
   /* ورودیِ WebRTCِ سرویس (اگر آروان بدهد) — خالی = برداشتن */
   z.object({
     action: z.literal('set-whip'), channelId: uuid,
-    whipUrl: z.union([z.literal(''), z.string().trim().url().regex(/^https:\/\/[a-z0-9.-]+\.(arvanlive|arvancloud)\.ir\//i,'نشانیِ WHIP باید از دامنه‌ی آروان باشد')]),
+    whipUrl: z.union([z.literal(''), z.string().trim().url().regex(/^https:\/\/[a-z0-9.-]+\.(arvanlive|arvancloud)\.ir\//i,'نشانی WHIP باید از دامنه‌ی آروان باشد')]),
     whipToken: z.string().trim().max(500).optional(),
   }),
   /* کانالی که در پنلِ آروان ساخته شده — نشانی‌ها از همان پنل کپی می‌شوند */
   z.object({
     action: z.literal('attach-manual'), clubId: uuid, kind: z.enum(['club', 'table']),
-    title: z.string().trim().min(2, 'نامِ کانال دست‌کم ۲ حرف').max(90, 'نامِ کانال حداکثر ۹۰ حرف'), tableLabel: z.string().trim().max(40).optional(),
+    title: z.string().trim().min(2, 'نام کانال دست‌کم ۲ حرف').max(90, 'نام کانال حداکثر ۹۰ حرف'), tableLabel: z.string().trim().max(40).optional(),
     access: z.enum(['public', 'members']).default('public'),
-    ingestUrl: z.string().trim().regex(/^(rtmps?|srt):\/\/\S{6,300}$/, 'نشانیِ ورودی باید با rtmp:// یا srt:// شروع شود'),
-    streamKey: z.string().trim().min(4, 'کلیدِ پخش کوتاه است').max(200, 'کلیدِ پخش بیش از حد بلند است'),
+    ingestUrl: z.string().trim().regex(/^(rtmps?|srt):\/\/\S{6,300}$/, 'نشانی ورودی باید با rtmp:// یا srt:// شروع شود'),
+    streamKey: z.string().trim().min(4, 'کلید پخش کوتاه است').max(200, 'کلید پخش بیش از حد بلند است'),
     /* فقط دامنه‌ای که CSP اجازه داده — وگرنه ذخیره می‌شد و مرورگر بی‌صدا می‌بستش */
     playbackUrl: z.string().trim().url()
-      .regex(/^https:\/\/[a-z0-9-]+(\.[a-z0-9-]+)*\.arvanlive\.ir\/\S+\.m3u8(\?\S*)?$/i, 'نشانیِ تماشا باید از arvanlive.ir و با .m3u8 باشد'),
+      .regex(/^https:\/\/[a-z0-9-]+(\.[a-z0-9-]+)*\.arvanlive\.ir\/\S+\.m3u8(\?\S*)?$/i, 'نشانی تماشا باید از arvanlive.ir و با .m3u8 باشد'),
   }),
 ])
 
@@ -109,7 +109,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ ready: true, ...meta, clubs, allClubs, month: summarize(past) }, { headers: NO_STORE })
   } catch (e) {
     console.error('[admin/streams]', e)
-    return NextResponse.json({ message: 'خواندنِ اطلاعاتِ پخش ممکن نشد' }, { status: 500 })
+    return NextResponse.json({ message: 'خواندن اطلاعات پخش ممکن نشد' }, { status: 500 })
   }
 }
 
@@ -119,10 +119,10 @@ export async function POST(req: NextRequest) {
   const parsed = Action.safeParse(await req.json().catch(() => ({})))
   if (!parsed.success) {
     const first = parsed.error.issues[0]?.message
-    return NextResponse.json({ message: first && /[؀-ۿ]/.test(first) ? first : 'اطلاعات کامل یا معتبر نیست (دلیلِ مسدودسازی دست‌کم ۳ حرف)' }, { status: 400 })
+    return NextResponse.json({ message: first && /[؀-ۿ]/.test(first) ? first : 'اطلاعات کامل یا معتبر نیست (دلیل مسدودسازی دست‌کم ۳ حرف)' }, { status: 400 })
   }
   const b = parsed.data
-  if (!(await tablesReady())) return NextResponse.json({ message: 'مهاجرتِ ۱۱۴ هنوز اجرا نشده است' }, { status: 503 })
+  if (!(await tablesReady())) return NextResponse.json({ message: 'مهاجرت ۱۱۴ هنوز اجرا نشده است' }, { status: 503 })
 
   try {
     if (b.action === 'block-club' || b.action === 'unblock-club') {
@@ -147,7 +147,7 @@ export async function POST(req: NextRequest) {
         else if (b.whipToken) row.whip_token_enc = seal(b.whipToken)
         const r = await sb().from('live_channels').update(row).eq('id', ch.id)
         if (r.error) {
-          if (/whip_url|column|schema cache/i.test(r.error.message)) return NextResponse.json({ message: 'مهاجرتِ ۱۱۵ هنوز اجرا نشده است' }, { status: 503 })
+          if (/whip_url|column|schema cache/i.test(r.error.message)) return NextResponse.json({ message: 'مهاجرت ۱۱۵ هنوز اجرا نشده است' }, { status: 503 })
           must(r, 'set whip')
         }
       }

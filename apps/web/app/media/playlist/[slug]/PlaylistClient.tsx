@@ -66,7 +66,7 @@ export default function PlaylistClient({ playlist }: { playlist: PlaylistView })
 
             <section className="mx-sec">
               {items.length === 0 ? (
-                <p className="mx-by">این لیست هنوز ویدیویی ندارد.</p>
+                <p className="mx-by">این لیست هنوز ویدیویی ندارد</p>
               ) : (
                 <ol className="mx-plitems">
                   {items.map((v, i) => (

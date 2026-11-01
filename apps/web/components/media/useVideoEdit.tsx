@@ -76,7 +76,7 @@ export function useVideoEdit(
       /* اول گالری: اگر این نشد، مدیا هم نباید عوض شود — دو عنوان
          متفاوت برای یک ویدیو بدتر از عنوان بد است. */
       if (!(await saveToGallery(target, detail))) {
-        setErr('ذخیره‌ی عنوان در گالری انجام نشد؛ چیزی عوض نشد.')
+        setErr('ذخیره‌ی عنوان در گالری انجام نشد؛ چیزی عوض نشد')
         return
       }
       const r = await apiFetch('/api/media', {
@@ -87,17 +87,17 @@ export function useVideoEdit(
           ...(detail.description ? { description: detail.description } : {}),
         }),
       })
-      if (r.ok) { done('عنوان به‌روز شد.'); return }
+      if (r.ok) { done('عنوان به‌روز شد'); return }
       const j = await r.json().catch(() => ({})) as { message?: string; code?: string }
       /* ⚠️ فقط `code` قابل اعتماد است: ۴۰۴ زمانی «چند ردیف هم‌نشانی»
          و «خطای خواندن» را هم می‌گرفت و به کاربر می‌گفت «منتشر نشده». */
       if (j.code === 'no-media-row') {
-        done('عنوان در گالری به‌روز شد. این ویدیو در بیلیارد مدیا منتشر نشده است.', 'ok')
+        done('عنوان در گالری به‌روز شد، این ویدیو در بیلیارد مدیا منتشر نشده است', 'ok')
         return
       }
       setErr(`عنوان در گالری عوض شد ولی در بیلیارد مدیا نه: ${j.message ?? `خطای ${r.status}`}`)
     } catch {
-      setErr('عنوان در گالری عوض شد ولی ارتباط با بیلیارد مدیا برقرار نشد.')
+      setErr('عنوان در گالری عوض شد ولی ارتباط با بیلیارد مدیا برقرار نشد')
     } finally { busy.current = false; setSaving(false) }
   }, [open, saveToGallery, notify])
 

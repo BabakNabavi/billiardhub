@@ -53,7 +53,7 @@ export async function POST(req: NextRequest) {
 
   return NextResponse.json({
     ok: true, email, emailVerified: true,
-    message: 'ایمیل شما بررسی و تأیید شد.',
+    message: 'ایمیل شما بررسی و تأیید شد',
   });
 }
 

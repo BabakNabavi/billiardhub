@@ -11,7 +11,7 @@ import { ArrowRight, Clock } from 'lucide-react'
    عمدا هیچ جزئیاتی از دلیل فنی، نام پرچم یا زمان‌بندی نمی‌گوید. */
 export default function FeatureDisabled({
   title = 'این بخش موقتا غیرفعال است',
-  note = 'این قابلیت در حال به‌روزرسانی است و به‌زودی باز می‌گردد.',
+  note = 'این قابلیت در حال به‌روزرسانی است و به‌زودی باز می‌گردد',
 }: { title?: string; note?: string }) {
   return (
     <div style={{

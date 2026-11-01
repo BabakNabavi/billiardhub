@@ -364,8 +364,8 @@ export default function NewClubPage() {
                 </div>
                 <p id="club-phone-h" style={{ fontSize: 11.5, color: 'rgba(255,255,255,0.45)', marginTop: 6 }}>
                   {phoneArea
-                    ? `کد ${phoneArea} از استان انتخابی گرفته شد — فقط شماره‌ی محلی را وارد کنید.`
-                    : 'ابتدا استان را انتخاب کنید تا کد شهر تعیین شود.'}
+                    ? `کد ${phoneArea} از استان انتخابی گرفته شد — فقط شماره‌ی محلی را وارد کنید`
+                    : 'ابتدا استان را انتخاب کنید تا کد شهر تعیین شود'}
                 </p>
               </div>
               <div>
@@ -557,13 +557,13 @@ export default function NewClubPage() {
           <div style={sectionStyle}>
             <h2 style={headingStyle}>اطلاعات بانکی — تسویه حساب</h2>
             <p style={{ fontSize: '13px', color: '#5B564B', lineHeight: 1.9, marginBottom: 16 }}>
-              کاربران از راه درگاه بانکی امن پرداخت می‌کنند. درآمد رزروها پس از کسر کارمزد،
-              در دوره‌های تسویه به همین حساب واریز می‌شود.
+              کاربران از راه درگاه بانکی امن پرداخت می‌کنند، درآمد رزروها پس از کسر کارمزد،
+              در دوره‌های تسویه به همین حساب واریز می‌شود
             </p>
             <BankCardVerify value={bank} onChange={setBank} />
             {!bank && (
               <p style={{ fontSize: 12, color: '#6F6A5C', marginTop: 10 }}>
-                می‌توانید اطلاعات بانکی را بعدا از داشبورد باشگاه تکمیل کنید.
+                می‌توانید اطلاعات بانکی را بعدا از داشبورد باشگاه تکمیل کنید
               </p>
             )}
           </div>

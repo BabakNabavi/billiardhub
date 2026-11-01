@@ -131,7 +131,7 @@ export default function Comments({ slug, ownerId }: { slug: string; ownerId?: st
       {state === 'error' ? (
         <div className="mx-empty">
           <h2>دیدگاه‌ها بارگذاری نشد</h2>
-          <p>این یک خطای موقت است.</p>
+          <p>این یک خطای موقت است</p>
           <div className="mx-empty-act">
             <button className="mx-iconbtn" type="button" onClick={() => void load()}>
               <span>تلاش دوباره</span>
@@ -160,13 +160,13 @@ export default function Comments({ slug, ownerId }: { slug: string; ownerId?: st
               </div>
             </div>
           ) : (
-            <p className="mx-by">برای گذاشتن دیدگاه وارد شوید.</p>
+            <p className="mx-by">برای گذاشتن دیدگاه وارد شوید</p>
           )}
 
           {err && <p className="mx-err" role="alert">{err}</p>}
 
           {items.length === 0
-            ? <p className="mx-by">هنوز دیدگاهی ثبت نشده است.</p>
+            ? <p className="mx-by">هنوز دیدگاهی ثبت نشده است</p>
             : (
               <ul className="mx-cm-list">
                 {items.map(c => (

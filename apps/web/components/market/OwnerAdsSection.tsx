@@ -264,7 +264,7 @@ export default function OwnerAdsSection({
           </div>
         ) : error ? (
           <div role="alert" className="rounded-2xl border border-[#E7E2D6] bg-white px-6 py-14 text-center text-[13.5px] text-[#6F6A5C]">
-            آگهی‌ها بارگذاری نشد.
+            آگهی‌ها بارگذاری نشد
             {onRetry && (
               <button
                 type="button"
@@ -315,7 +315,7 @@ export default function OwnerAdsSection({
 
         {!loading && !error && visible.length === 0 && (
           <div className="rounded-2xl border border-[#E7E2D6] bg-white px-6 py-14 text-center text-[13.5px] text-[#6F6A5C]">
-            آگهی‌ای با این فیلتر پیدا نشد.
+            آگهی‌ای با این فیلتر پیدا نشد
             {(cat !== 'all' || query) && (
               <button
                 type="button"

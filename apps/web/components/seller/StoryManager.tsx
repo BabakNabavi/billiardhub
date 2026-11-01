@@ -97,7 +97,7 @@ export default function StoryManager({ ownerId }: { ownerId: string }) {
       URL.revokeObjectURL(storyDraft.previewUrl);
       setStoryDraft(null);
     } catch {
-      notify('آپلود استوری انجام نشد — دوباره تلاش کنید.');
+      notify('آپلود استوری انجام نشد — دوباره تلاش کنید');
     } finally {
       setUploadingStory(false);
     }

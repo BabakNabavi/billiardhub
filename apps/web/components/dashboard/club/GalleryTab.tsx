@@ -107,7 +107,7 @@ export default function GalleryTab({ club, onLogoChange }: {
       await api.put(`/clubs/${club.id}`, { logo: url });
       onLogoChange(url);
     } catch {
-      setStoryError('ذخیره‌ی لوگو انجام نشد؛ دوباره تلاش کنید.');
+      setStoryError('ذخیره‌ی لوگو انجام نشد؛ دوباره تلاش کنید');
     }
     setLogoUploading(false);
   };
@@ -162,7 +162,7 @@ export default function GalleryTab({ club, onLogoChange }: {
       setStoryTextAlign('center');
       setStoryTextPos('bottom');
     } catch (e) {
-      setStoryError(e instanceof Error && e.message ? e.message : 'انتشار استوری انجام نشد؛ دوباره تلاش کنید.');
+      setStoryError(e instanceof Error && e.message ? e.message : 'انتشار استوری انجام نشد؛ دوباره تلاش کنید');
     }
     setStoryUploading(false);
   };
@@ -179,7 +179,7 @@ export default function GalleryTab({ club, onLogoChange }: {
       /* حذف روی سرور نشد ⇒ فهرست را برگردان، وگرنه استوری در پنل نیست
          ولی روی سایت هست. */
       setStoryList(before);
-      setStoryError('حذف استوری انجام نشد؛ دوباره تلاش کنید.');
+      setStoryError('حذف استوری انجام نشد؛ دوباره تلاش کنید');
     }
   };
 

@@ -23,7 +23,6 @@ const TEXT_M  = 'rgba(17,17,16,0.28)'
    عبارت‌های دوکلمه‌ای گم می‌شدند. */
 import { SPEC_SEP, PIN_GREEN } from '@/lib/profile-cards'
 import { makeMatcher } from '@/lib/search/filter'
-import { SearchSuggest } from '@/components/search/SearchSuggest'
 
 const SPECS: Record<string, { label: string; color: string; glow: string }> = {
   snooker:  { label: 'اسنوکر',       color: '#7C3AED', glow: 'rgba(124,58,237,0.30)' },
@@ -202,7 +201,7 @@ function RefereeHeroSlider() {
             {/* `end` در RTL همان چپِ پیشین است */}
             <div style={{ textAlign:'end', marginBottom:11 }}>
               <div style={{ display:'inline-flex', alignItems:'center', gap:7, background:'rgba(199,166,106,0.14)', border:'1px solid rgba(199,166,106,0.34)', color:'#D4A843', fontSize:11, fontWeight:800, borderRadius:24, padding:'4px 11px', transform:'translateY(-13px)', animation:'softBlink 2.6s .7s ease-in-out infinite' }}>
-                داورانِ رسمی را بشناس · بیلیارد هاب
+                داوران رسمی را بشناس · بیلیارد هاب
               </div>
             </div>
             <h1 style={{ fontSize:'clamp(25px,4vw,50px)', fontWeight:900, color:'#fff', margin:'0 0 12px', letterSpacing:'-0.03em', lineHeight:1.08, transform:'translateY(-6px)' }}>
@@ -326,7 +325,9 @@ function RefereeCard({ referee, view, idx }: { referee: Referee; view: 'grid' | 
 /* ════════════════ PAGE ════════════════ */
 export default function RefereesPage() {
   const [filter,    setFilter]    = useState('all')
-  const [search,    setSearch]    = useState('')
+  /* جعبه‌ی جست‌وجوی صفحه برداشته شد (خواستِ مالک، ۱۰ آبانِ ۱۴۰۵) — جست‌وجو از نوارِ بالاست.
+       فیلترِ متنی همان‌جا می‌ماند، با عبارتِ خالی بی‌اثر است */
+  const search = ''
   const [view,      setView]      = useState<'grid' | 'list'>('grid')
   const [localRefs, setLocalRefs] = useState<Referee[]>([])
   const [loadFailed, setLoadFailed] = useState(false)
@@ -436,28 +437,6 @@ export default function RefereesPage() {
 
             {/* search + toggles — own row under the pills on mobile, right-aligned */}
             <div className="coach-search-group" style={{ marginInlineStart:'auto', display:'flex', alignItems:'center', gap:8 }}>
-              {/* search — right */}
-              <div data-suggest-box style={{ position:'relative', display:'flex', alignItems:'center', gap:8,
-                background:'rgba(255,255,255,0.82)', border:'1px solid rgba(17,17,16,0.10)',
-                borderRadius:11, padding:'8px 14px', flex:'0 1 280px', minWidth:140,
-                boxShadow:'inset 0 1px 0 rgba(255,255,255,0.9)' }}>
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={GOLD_D} strokeWidth="2.2" style={{ flexShrink:0 }}>
-                  <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-                </svg>
-                <input type="text" value={search} onChange={e => setSearch(e.target.value)}
-                  aria-label="جستجوی نام داور یا شهر" aria-controls="sx-rf" aria-autocomplete="list"
-                  placeholder="جستجوی نام داور یا شهر..."
-                  style={{ flex:1, minWidth:0, background:'none', border:'none', outline:'none',
-                    fontSize:13, color:TEXT, fontFamily:"'Vazirmatn',Tahoma,sans-serif" }}/>
-                {search && (
-                  <button onClick={() => setSearch('')} aria-label="پاک کردن جستجو"
-                    style={{ background:'none', border:'none', cursor:'pointer', color:TEXT_M, padding:0, display:'flex', flexShrink:0 }}>
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-                  </button>
-                )}
-                {/* پیشنهادِ زنده‌ی سراسری — همان «سوپر سرچ»ِ نوارِ بالا */}
-                <SearchSuggest hideEmpty q={search} onPick={() => setSearch('')} id="sx-rf" className="start-0 w-72 sm:w-96" />
-              </div>
 
               {/* view toggles — beside search */}
               <div style={{ display:'flex', gap:6, flexShrink:0 }}>
@@ -481,11 +460,9 @@ export default function RefereesPage() {
         {/* ── Divider ── */}
         <div style={{ maxWidth:1280, margin:'22px auto 20px', padding:'0 clamp(24px,6vw,80px)' }}>
           <div style={{ display:'flex', alignItems:'center', gap:18 }}>
-            <div style={{ flex:1, height:'1px', background:'linear-gradient(to left,transparent,rgba(154,110,56,0.28))' }}/>
             <span style={{ fontSize:11, fontWeight:800, color:'rgba(154,110,56,0.72)', whiteSpace:'nowrap' }}>
               داوران فعال
             </span>
-            <div style={{ flex:1, height:'1px', background:'linear-gradient(to right,transparent,rgba(154,110,56,0.28))' }}/>
           </div>
         </div>
 
@@ -507,7 +484,7 @@ export default function RefereesPage() {
             )
           ) : (
             <div style={{ textAlign:'center', padding:'60px 0', color:TEXT_M, fontSize:14 }}>
-              {loadFailed ? 'فهرست بارگذاری نشد — اتصالِ اینترنت را بررسی کنید و صفحه را دوباره باز کنید' : 'هیچ داوری با این فیلتر پیدا نشد'}
+              {loadFailed ? 'فهرست بارگذاری نشد — اتصال اینترنت را بررسی کنید و صفحه را دوباره باز کنید' : 'هیچ داوری با این فیلتر پیدا نشد'}
             </div>
           )}
         </div>

@@ -132,7 +132,7 @@ export default function AdminClubsPage() {
         <div style={{ fontSize: 12, color: GOLD, fontWeight: 700, marginBottom: 6 }}>مدیریت</div>
         <h1 style={{ fontSize: 24, fontWeight: 900, color: '#111', margin: 0 }}>تأیید باشگاه‌ها</h1>
         <p style={{ fontSize: 13, color: '#6b7280', marginTop: 4 }}>
-          هر دو «تأیید» باشگاه را در سایت منتشر می‌کنند؛ تفاوتشان فقط تیک آبی است. رد یعنی برداشتن از فهرست.
+          هر دو «تأیید» باشگاه را در سایت منتشر می‌کنند؛ تفاوتشان فقط تیک آبی است، رد یعنی برداشتن از فهرست
         </p>
       </div>
 
@@ -297,7 +297,7 @@ export default function AdminClubsPage() {
               <span style={{ fontSize: 15, fontWeight: 900, color: '#1C1B17' }}>رد ثبت باشگاه</span>
             </div>
             <p style={{ fontSize: 12, color: '#6F6A5C', lineHeight: 1.95, margin: '0 0 14px' }}>
-              علت برای مالک باشگاه پیامک می‌شود تا بداند چه را اصلاح کند.
+              علت برای مالک باشگاه پیامک می‌شود تا بداند چه را اصلاح کند
             </p>
 
             <select

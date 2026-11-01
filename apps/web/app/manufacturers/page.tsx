@@ -11,7 +11,6 @@ import VerifiedBadge from '../../components/VerifiedBadge'
 import { iranTel } from '../../lib/iran-geo'
 import { toFaDigits } from '../../lib/jalali'
 import { makeMatcher } from '@/lib/search/filter'
-import { SearchSuggest } from '@/components/search/SearchSuggest'
 
 const GOLD     = '#C7A66A'
 const GOLD_D   = '#8F6531'
@@ -96,8 +95,8 @@ function MfrPoster({ variant }: { variant: number }) {
 /* ── اسلایدهای هدر ── */
 const MFR_SLIDES = [
   { title: 'تولیدکنندگان تجهیزات بیلیارد', sub: 'از کارگاه تا میز بازی' },
-  { title: 'ساختِ ایران',          sub: 'میز، چوب و تجهیزات' },
-  { title: 'سفارشِ اختصاصی',       sub: 'با ابعاد و رنگِ دلخواه' },
+  { title: 'ساخت ایران',          sub: 'میز، چوب و تجهیزات' },
+  { title: 'سفارش اختصاصی',       sub: 'با ابعاد و رنگ دلخواه' },
   { title: 'کیفیت جهانی',          sub: 'مستقیم از تولیدکننده' },
   { title: 'برندهای معتبر',        sub: 'همه در یک جا' },
 ]
@@ -222,7 +221,7 @@ function MfrHeroSlider() {
                 طلاییِ ۸٫۹ پیکسلی آن‌جا خوانده نمی‌شد. */}
             <div style={{ marginBottom: 11 }}>
               <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, background: 'rgba(199,166,106,0.14)', border: '1px solid rgba(199,166,106,0.34)', color: '#D4A843', fontSize: 11, fontWeight: 800, borderRadius: 24, padding: '4px 11px', transform: 'translateY(-13px)', animation: 'softBlink 2.6s .7s ease-in-out infinite' }}>
-                سازندگانِ تجهیزات · بیلیارد هاب
+                سازندگان تجهیزات · بیلیارد هاب
               </div>
             </div>
             <h1 style={{ fontSize: 'clamp(25px,4vw,50px)', fontWeight: 900, color: '#fff', margin: '0 0 12px', letterSpacing: '-0.03em', lineHeight: 1.08, transform: 'translateY(-6px)' }}>
@@ -519,7 +518,9 @@ function Dropdown({ label, options, value, onChange, minWidth = 150 }: {
 
 // ── Main Page ─────────────────────────────────────────────────
 export default function ManufacturersPage() {
-  const [search,   setSearch]   = useState('')
+  /* جعبه‌ی جست‌وجوی صفحه برداشته شد (خواستِ مالک، ۱۰ آبانِ ۱۴۰۵) — جست‌وجو از نوارِ بالاست.
+       فیلترِ متنی همان‌جا می‌ماند، با عبارتِ خالی بی‌اثر است */
+  const search = ''
   const [category, setCategory] = useState('همه')
   const [status,   setStatus]   = useState('همه')
   const [sort,     setSort]     = useState<SortKey>('experience')
@@ -617,14 +618,14 @@ export default function ManufacturersPage() {
           .sel-hide-mob { display: none !important; }
         }
 
-        /* ── قرص‌های حقیقتِ کارت ──
-           ردیفِ متا خاکستریِ یکدست بود؛ حالا هر حقیقت رنگِ خودش را
-           دارد. کلاس‌ها از سیستمِ مشترکِ globals می‌آیند
-           (.badge / .badge-green / .badge-blue)، نه نسخه‌ی محلی.
+        /* ── قرص‌های حقیقت کارت ──
+           ردیف متا خاکستری یکدست بود؛ حالا هر حقیقت رنگ خودش را
+           دارد، کلاس‌ها از سیستم مشترک globals می‌آیند
+           (.badge / .badge-green / .badge-blue)، نه نسخه‌ی محلی
            فقط nowrap این‌جاست چون کارت باریک است. */
         .mfr-meta .badge { white-space: nowrap; }
 
-        /* ══ نوار ابزار — هم‌شکلِ نوارِ صفحه‌ی باشگاه‌ها ══ */
+        /* ══ نوار ابزار — هم‌شکل نوار صفحه‌ی باشگاه‌ها ══ */
         .mfr-tb {
           position: sticky; top: var(--nav-offset); z-index: 90;
           padding: 10px clamp(16px,4vw,40px);
@@ -634,8 +635,8 @@ export default function ManufacturersPage() {
           -webkit-backdrop-filter: blur(24px) saturate(1.6);
         }
         .mfr-tb-in { max-width: 1280px; margin: 0 auto; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-        /* همه‌ی کنترل‌ها یک ارتفاع: ردیفِ ناهم‌ارتفاع همان چیزی است که
-           نوار را «بهم‌ریخته» نشان می‌داد.
+        /* همه‌ی کنترل‌ها یک ارتفاع: ردیف ناهم‌ارتفاع همان چیزی است که
+           نوار را «بهم‌ریخته» نشان می‌داد
            (padding این‌جا نیاید — اینلاین است و بدون !important بازنده) */
         .mfr-tb-in .dd-btn { height: 44px; }
 
@@ -709,25 +710,6 @@ export default function ManufacturersPage() {
             نیمه‌شفاف و همان ارتفاعِ ۴۴ که صفحه‌ی باشگاه‌ها دارد. */}
         <div className="mfr-tb">
           <div className="mfr-tb-in">
-            <div className="mfr-tb-srch" data-suggest-box>
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" aria-hidden>
-                <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
-              </svg>
-              <input
-                type="search" aria-label="جستجوی تولیدکننده" aria-controls="sx-mfr" aria-autocomplete="list"
-                placeholder="جستجوی تولیدکننده، شهر یا تخصص..."
-                value={search} onChange={e => setSearch(e.target.value)}
-              />
-              {search && (
-                <button type="button" onClick={() => setSearch('')} aria-label="پاک‌کردن جستجو">
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" aria-hidden>
-                    <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
-                  </svg>
-                </button>
-              )}
-              {/* پیشنهادِ زنده‌ی سراسری — همان «سوپر سرچ»ِ نوارِ بالا */}
-              <SearchSuggest hideEmpty q={search} onPick={() => setSearch('')} id="sx-mfr" className="start-0 w-72 sm:w-96" />
-            </div>
 
             <span className="sel-hide-mob" style={{ display: 'contents' }}>
               <Dropdown label="تخصص:" options={CATEGORY_OPTIONS} value={category} onChange={setCategory} minWidth={150} />
@@ -777,7 +759,7 @@ export default function ManufacturersPage() {
             <div style={{ textAlign: 'center', padding: '64px 0', color: TEXT_MUT }}>
               <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" style={{ margin: '0 auto 16px', display: 'block', opacity: 0.4 }}><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
               <p style={{ fontSize: 17, fontWeight: 700, color: TEXT_SEC }}>{loadFailed ? 'فهرست بارگذاری نشد' : 'تولیدکننده‌ای یافت نشد'}</p>
-              <p style={{ fontSize: 14 }}>{loadFailed ? 'اتصالِ اینترنت را بررسی کنید و صفحه را دوباره باز کنید' : 'فیلترها را تغییر دهید یا جستجو را پاک کنید'}</p>
+              <p style={{ fontSize: 14 }}>{loadFailed ? 'اتصال اینترنت را بررسی کنید و صفحه را دوباره باز کنید' : 'فیلترها را تغییر دهید یا جستجو را پاک کنید'}</p>
             </div>
           ) : view === 'grid' ? (
             <div className="sel-grid" style={{ marginBottom: 56 }}>

@@ -186,14 +186,14 @@ export default function MyShopPage() {
     const kind = q.get("kind");
     setBoostMsg(
       st === "ok"
-        ? (kind === "urgent" ? "آگهی شما فوری شد و در نوار فوری بازار نشسته است."
-                             : "آگهی شما تازه‌سازی شد و به بالای فهرست رفت.")
-      : st === "cancelled" ? "پرداخت لغو شد — مبلغی کم نشده است."
+        ? (kind === "urgent" ? "آگهی شما فوری شد و در نوار فوری بازار نشسته است"
+                             : "آگهی شما تازه‌سازی شد و به بالای فهرست رفت")
+      : st === "cancelled" ? "پرداخت لغو شد — مبلغی کم نشده است"
       /* بازکردن نشانی کالبک بدون داده‌ی درگاه: نه موفق است نه
          ناموفق. گفتن «انجام نشد» به کسی که شاید پول داده، دروغ
          نگران‌کننده‌ای است. */
-      : st === "pending" ? "نتیجه‌ی این پرداخت هنوز قطعی نشده — اگر مبلغی کم شده، تا دقایقی دیگر اعمال می‌شود."
-      : (q.get("reason") || "ارتقای آگهی انجام نشد."),
+      : st === "pending" ? "نتیجه‌ی این پرداخت هنوز قطعی نشده — اگر مبلغی کم شده، تا دقایقی دیگر اعمال می‌شود"
+      : (q.get("reason") || "ارتقای آگهی انجام نشد"),
     );
     /* نشانی تمیز می‌شود تا رفرش دوباره همین پیام را نیاورد */
     window.history.replaceState({}, "", window.location.pathname);
@@ -217,7 +217,7 @@ export default function MyShopPage() {
   }, [user]);
 
   const handleDelete = async (id: string) => {
-    if (!(await ask('این آگهی حذف شود؟', { body: 'آگهی از بیلیارد بازار برداشته می‌شود و برنمی‌گردد.' }))) return;
+    if (!(await ask('این آگهی حذف شود؟', { body: 'آگهی از بیلیارد بازار برداشته می‌شود و برنمی‌گردد' }))) return;
     setDeleting(id);
     /* آگهی قدیمی باقی‌مانده در همین مرورگر را هم پاک کن */
     try {
@@ -395,7 +395,7 @@ export default function MyShopPage() {
                           ویرایشِ آگهیِ ردشده آن را دوباره به صفِ بازبینی می‌برد. */}
                       {product.status === 'rejected' && (
                         <p className="text-[11.5px] text-red-600 mt-1 leading-5">
-                          {product.adminNote ? `دلیل: ${product.adminNote}` : 'این آگهی رد شده است.'} پس از ویرایش دوباره بررسی می‌شود.
+                          {product.adminNote ? `دلیل: ${product.adminNote}` : 'این آگهی رد شده است'} پس از ویرایش دوباره بررسی می‌شود
                         </p>
                       )}
                       <div className="mt-1.5">
@@ -467,7 +467,7 @@ export default function MyShopPage() {
                     if (st === 'paused') actions.push({ label: 'فعال‌سازی', body: reactivate, ok: 'آگهی دوباره فعال شد' });
                     if (st === 'sold') actions.push({ label: 'فعال‌سازی دوباره', body: reactivate, ok: 'آگهی دوباره فعال شد' });
                     if (renewable(product) && !(st !== 'active' && st !== 'expired' && pastExpiry(product))) {
-                      actions.push({ label: `تمدید ${toFaDigits(AD_LIFETIME_DAYS / 30)} ماهه`, body: { renew: true }, ok: `آگهی برای ${toFaDigits(AD_LIFETIME_DAYS / 30)} ماهِ دیگر تمدید شد` });
+                      actions.push({ label: `تمدید ${toFaDigits(AD_LIFETIME_DAYS / 30)} ماهه`, body: { renew: true }, ok: `آگهی برای ${toFaDigits(AD_LIFETIME_DAYS / 30)} ماه دیگر تمدید شد` });
                     }
                     if (!actions.length) return null;
                     return (
@@ -485,7 +485,7 @@ export default function MyShopPage() {
                       آگهیِ ارسال‌شده برای بررسی «در انتظار تأیید» است */}
                   {product.held && product.status === 'paused' && (
                     <p className="mt-1.5 text-[11.5px] text-red-600 leading-5">
-                      این آگهی توسط مدیریت متوقف شده است؛ برای بررسی با پشتیبانی تماس بگیرید.
+                      این آگهی توسط مدیریت متوقف شده است؛ برای بررسی با پشتیبانی تماس بگیرید
                     </p>
                   )}
                 </div>

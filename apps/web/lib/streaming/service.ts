@@ -20,13 +20,13 @@ import { hasPicture, NO_PICTURE_GRACE_MS } from './probe'
 
 function provider(): StreamProvider {
   const p = getStreamProvider()
-  if (!p) throw new LiveError('سرویسِ پخش زنده هنوز وصل نشده است', 503)
+  if (!p) throw new LiveError('سرویس پخش زنده هنوز وصل نشده است', 503)
   return p
 }
 
 function providerOf(ch: Channel): StreamProvider {
   const p = providerForChannel(ch.provider)
-  if (!p) throw new LiveError('سرویسِ پخشِ این کانال در دسترس نیست', 503)
+  if (!p) throw new LiveError('سرویس پخش این کانال در دسترس نیست', 503)
   return p
 }
 
@@ -35,7 +35,7 @@ async function viaProvider<T>(what: string, fn: () => Promise<T>): Promise<T> {
   try { return await fn() } catch (e) {
     if (e instanceof StreamProviderError) throw new LiveError(e.message, e.status)
     console.error(`[streaming] provider ${what} failed`, e)
-    throw new LiveError('ارتباط با سرویسِ پخش برقرار نشد؛ کمی بعد دوباره تلاش کنید', 502)
+    throw new LiveError('ارتباط با سرویس پخش برقرار نشد؛ کمی بعد دوباره تلاش کنید', 502)
   }
 }
 
@@ -53,7 +53,7 @@ export async function createChannel(n: NewChannel): Promise<Channel> {
       .eq('id', n.tournamentId).maybeSingle(), 'tournament') as { club_id?: string; status?: string } | null
     if (!t || String(t.club_id) !== n.clubId) throw new LiveError('این مسابقه متعلق به این باشگاه نیست', 403)
     /* همان فیلترِ فهرستِ پنل: پیش‌نویس، تمام‌شده و لغوشده کانال نمی‌گیرند */
-    if (['cancelled', 'completed', 'draft'].includes(String(t.status))) throw new LiveError('برای این مسابقه نمی‌شود کانالِ پخش ساخت')
+    if (['cancelled', 'completed', 'draft'].includes(String(t.status))) throw new LiveError('برای این مسابقه نمی‌شود کانال پخش ساخت')
     tournamentHasChannel = existing.some(c => c.tournamentId === n.tournamentId)
   }
   const v = canCreateChannel(settings, existing, n.kind, { tournamentHasChannel })
@@ -71,7 +71,7 @@ export async function createChannel(n: NewChannel): Promise<Channel> {
   if (r.error) {
     /* ردیف نشست ⇒ کانالِ سرویس یتیم نماند */
     await p.deleteChannel(made.providerChannelId).catch(() => undefined)
-    if (/duplicate|unique/i.test(r.error.message)) throw new LiveError('این مسابقه از قبل کانالِ پخش دارد', 409)
+    if (/duplicate|unique/i.test(r.error.message)) throw new LiveError('این مسابقه از قبل کانال پخش دارد', 409)
     must(r, 'insert channel')
   }
   const id = String((r.data as { id: string }).id)
@@ -83,7 +83,7 @@ export async function createChannel(n: NewChannel): Promise<Channel> {
     if (rank >= channelLimitOf(settings)) {
       await sb().from('live_channels').delete().eq('id', id)
       await p.deleteChannel(made.providerChannelId).catch(() => undefined)
-      throw new LiveError(`سقفِ کانال‌های این باشگاه (${channelLimitOf(settings)}) پر است`, 409)
+      throw new LiveError(`سقف کانال‌های این باشگاه (${channelLimitOf(settings)}) پر است`, 409)
     }
   }
   return (await channelById(id))!
@@ -98,7 +98,7 @@ export interface ManualChannel {
  *  نه در ساخت و نه در «شروع» به سقف و سطحِ باشگاه بند نیست (canGoLive با
  *  adminAttached)؛ مسدودیِ باشگاه و کانال اما همچنان اعمال می‌شود. */
 export async function attachManualChannel(m: ManualChannel): Promise<Channel> {
-  if ((await clubSettings(m.clubId)).blocked) throw new LiveError('پخشِ این باشگاه مسدود است', 409)
+  if ((await clubSettings(m.clubId)).blocked) throw new LiveError('پخش این باشگاه مسدود است', 409)
   const r = await sb().from('live_channels').insert({
     club_id: m.clubId, kind: m.kind, title: m.title, table_label: m.kind === 'table' ? (m.tableLabel || null) : null,
     access: m.access, record: false, provider: 'manual', provider_channel_id: `manual-${Date.now()}`,
@@ -183,7 +183,7 @@ export async function stopBroadcast(ch: Channel, reason: EndReason): Promise<voi
 
 export async function archiveChannel(ch: Channel, opts: { byAdmin?: boolean } = {}): Promise<void> {
   /* وگرنه حذف + ساختِ دوباره، مسدودیِ مدیریت را دور می‌زد (مدیر خودش می‌تواند) */
-  if (ch.adminBlocked && !opts.byAdmin) throw new LiveError('کانالِ مسدود را نمی‌توان حذف کرد؛ با پشتیبانی تماس بگیرید', 409)
+  if (ch.adminBlocked && !opts.byAdmin) throw new LiveError('کانال مسدود را نمی‌توان حذف کرد؛ با پشتیبانی تماس بگیرید', 409)
   if (ch.isLive) await stopBroadcast(ch, opts.byAdmin ? 'admin' : 'owner')
   await providerForChannel(ch.provider)?.deleteChannel(ch.providerChannelId)
     .catch(e => console.error('[streaming] provider delete failed', e))

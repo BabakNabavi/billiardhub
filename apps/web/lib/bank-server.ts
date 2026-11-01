@@ -74,7 +74,7 @@ export async function cardToIban(card: string): Promise<CardToIbanResult> {
   const iban = formatIban(String(j.data?.iban ?? ''))
   /* success=true ولی بدون شبا ⇒ کارت پیدا نشد (پاسخ منفی واقعی) */
   if (!iban) {
-    return { ok: true, found: false, message: 'برای این شماره کارت، شبایی یافت نشد. شماره را بررسی کنید.' }
+    return { ok: true, found: false, message: 'برای این شماره کارت، شبایی یافت نشد، شماره را بررسی کنید' }
   }
   if (!isValidIban(iban)) {
     console.error('CardToIban returned a malformed iban:', j.data?.iban)

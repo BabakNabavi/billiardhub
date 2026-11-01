@@ -60,7 +60,7 @@ export default function LivePage() {
           <div style={{ position: 'relative' }}>
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '6px 16px', borderRadius: 999, marginBottom: 16, background: 'rgba(239,68,68,0.10)', border: '1px solid rgba(239,68,68,0.25)' }}>
               <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#ef4444', display: 'inline-block', animation: 'pulse 1.5s infinite' }} />
-              <span style={{ fontSize: 13, fontWeight: 700, color: '#ef4444' }}>پخشِ زنده</span>
+              <span style={{ fontSize: 13, fontWeight: 700, color: '#ef4444' }}>پخش زنده</span>
             </div>
             <h1 style={{ fontSize: 'clamp(31px, 5.5vw, 46px)', fontWeight: 900, margin: '0 0 10px', backgroundImage: 'linear-gradient(135deg,#FFFFFF 40%,#ef4444)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', letterSpacing: '-0.03em' }}>
               پخش زنده
@@ -90,7 +90,7 @@ export default function LivePage() {
               </span>
               <p style={{ fontSize: 16, fontWeight: 800, margin: '0 0 8px' }}>در حال حاضر پخش زنده‌ای نیست</p>
               <p style={{ fontSize: 13.5, color: 'rgba(0,0,0,0.42)', margin: '0 0 20px', lineHeight: 2 }}>
-                باشگاه‌ها می‌توانند مسابقات خود را مستقیم از طریق گوشی و یا دوربین فیلمبرداری پخش کنند.<br />هر وقت پخشی شروع شود، همین‌جا نمایش داده می‌شود.
+                باشگاه‌ها می‌توانند مسابقات خود را مستقیم از طریق گوشی و یا دوربین فیلمبرداری پخش کنند<br />هر وقت پخشی شروع شود، همین‌جا نمایش داده می‌شود
               </p>
             </div>
           ) : (

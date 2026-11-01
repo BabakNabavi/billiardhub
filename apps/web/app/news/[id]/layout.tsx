@@ -48,7 +48,7 @@ export async function generateMetadata(
 
   const sec = sectionOf(a.section)
   const description = a.excerpt
-    || `${a.title} — اخبار بیلیارد در بیلیارد هاب.`
+    || `${a.title} — اخبار بیلیارد در بیلیارد هاب`
   const url = `/news/${encodeURIComponent(a.id)}`
 
   return {

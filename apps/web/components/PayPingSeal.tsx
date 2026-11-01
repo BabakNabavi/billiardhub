@@ -55,7 +55,7 @@ export default function PayPingSeal() {
       style={{ display: 'inline-flex', alignItems: 'flex-end' }}>
       <style>{`
         /* اسکریپت اندازه را اینلاین روی تصویر می‌گذارد و بدون
-           important نمی‌شود عوضش کرد؛ پس مقیاس روی خود عنصر.
+           important نمی‌شود عوضش کرد؛ پس مقیاس روی خود عنصر
            ۲۰٪ کوچک‌تر، هم‌اندازه‌ی اینماد. */
         .bh-payping img { max-width: 100%; height: auto; display: block;
                           transform: scale(0.8); transform-origin: bottom right; }

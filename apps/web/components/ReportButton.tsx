@@ -142,7 +142,7 @@ export default function ReportButton({
                 </span>
                 <h3 style={{ fontSize: 16, fontWeight: 900, color: INK, margin: '0 0 8px' }}>گزارش شما ثبت شد</h3>
                 <p style={{ fontSize: 12.5, color: MUT, margin: 0, lineHeight: 2 }}>
-                  کارشناسان بیلیارد هاب این مورد را بررسی می‌کنند. از همراهی شما ممنونیم.
+                  کارشناسان بیلیارد هاب این مورد را بررسی می‌کنند، از همراهی شما ممنونیم
                 </p>
               </div>
             ) : (
@@ -197,7 +197,7 @@ export default function ReportButton({
                 )}
 
                 <div style={{ fontSize: 11, color: MUT, lineHeight: 1.95, marginBottom: 14 }}>
-                  گزارش‌های نادرست و تکراری بررسی نمی‌شوند. بیلیارد هاب طرف معامله نیست و صحت آگهی‌ها بر عهده‌ی آگهی‌دهنده است.
+                  گزارش‌های نادرست و تکراری بررسی نمی‌شوند، بیلیارد هاب طرف معامله نیست و صحت آگهی‌ها بر عهده‌ی آگهی‌دهنده است
                 </div>
 
                 <div style={{ display: 'flex', gap: 10 }}>

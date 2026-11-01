@@ -106,7 +106,7 @@ export default function AdminMediaPage() {
   };
 
   const remove = async (v: AdminVideo) => {
-    if (!(await ask(`«${v.title}» حذف شود؟`, { body: 'ویدیو و همه‌ی فایل‌هایش برای همیشه پاک می‌شوند.' }))) return;
+    if (!(await ask(`«${v.title}» حذف شود؟`, { body: 'ویدیو و همه‌ی فایل‌هایش برای همیشه پاک می‌شوند' }))) return;
     setBusy(v.id);
     try {
       const r = await apiFetch(`/api/admin/videos?id=${encodeURIComponent(v.id)}`, { method: 'DELETE' });
@@ -135,8 +135,8 @@ export default function AdminMediaPage() {
         <h1 style={{ fontSize: 19, fontWeight: 900, color: TEXT, margin: 0 }}>مدیریت بیلیارد مدیا</h1>
       </div>
       <p style={{ fontSize: 12.5, color: SEC, lineHeight: 2, margin: '0 0 16px' }}>
-        هر تغییری همین‌جا روی صفحه‌ی عمومی، فهرست و نقشه‌ی سایت اثر می‌گذارد.
-        ویدیوی «مخفی» یا «ردشده» برای بازدیدکننده باز نمی‌شود و در نقشه‌ی سایت نمی‌آید.
+        هر تغییری همین‌جا روی صفحه‌ی عمومی، فهرست و نقشه‌ی سایت اثر می‌گذارد
+        ویدیوی «مخفی» یا «ردشده» برای بازدیدکننده باز نمی‌شود و در نقشه‌ی سایت نمی‌آید
       </p>
 
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 12 }}>
@@ -166,7 +166,7 @@ export default function AdminMediaPage() {
         </div>
       ) : videos.length === 0 ? (
         <div style={{ fontSize: 12.5, color: MUT, padding: '22px 0', lineHeight: 2 }}>
-          {q || filter ? 'ویدیویی با این شرط پیدا نشد.' : 'هنوز ویدیویی منتشر نشده است.'}
+          {q || filter ? 'ویدیویی با این شرط پیدا نشد' : 'هنوز ویدیویی منتشر نشده است'}
         </div>
       ) : (
         <div style={{ border: `1px solid ${LINE}`, borderRadius: 12, overflow: 'hidden' }}>

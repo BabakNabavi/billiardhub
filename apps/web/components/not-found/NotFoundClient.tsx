@@ -41,7 +41,7 @@ export function RequestedPath() {
     <p className="m-0 mt-4 flex min-h-8 flex-wrap items-center gap-2 text-body text-ink-2">
       {raw && raw !== '/' && (
         <>
-          نشانیِ واردشده:
+          نشانی واردشده:
           <code dir="ltr" className="bh-latin max-w-full truncate rounded-chip bg-line/[.05] px-2 py-1 text-sub text-ink">{shown}</code>
         </>
       )}

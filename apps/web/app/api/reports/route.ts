@@ -55,7 +55,7 @@ export async function POST(req: NextRequest) {
   if (error) {
     const m = error.message || '';
     if (/duplicate key|reports_one_open_per_user/i.test(m)) {
-      return NextResponse.json({ message: 'شما قبلا این مورد را گزارش کرده‌اید؛ در حال بررسی است.' }, { status: 409 });
+      return NextResponse.json({ message: 'شما قبلا این مورد را گزارش کرده‌اید؛ در حال بررسی است' }, { status: 409 });
     }
     if (/does not exist|schema cache/i.test(m)) {
       return NextResponse.json({ message: 'سامانه‌ی گزارش تخلف هنوز راه‌اندازی نشده است' }, { status: 503 });
@@ -72,5 +72,5 @@ export async function POST(req: NextRequest) {
     reasonLabel: reason.label,
   });
 
-  return NextResponse.json({ ok: true, message: 'گزارش شما ثبت شد و بررسی خواهد شد.' }, { status: 201 });
+  return NextResponse.json({ ok: true, message: 'گزارش شما ثبت شد و بررسی خواهد شد' }, { status: 201 });
 }

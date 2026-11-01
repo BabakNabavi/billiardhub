@@ -17,6 +17,6 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
     return NextResponse.json(data, { headers: { 'Cache-Control': 'no-store' } })
   } catch (e) {
     console.error('[streams] channel', e)
-    return NextResponse.json({ message: 'خواندنِ کانال ممکن نشد' }, { status: 500 })
+    return NextResponse.json({ message: 'خواندن کانال ممکن نشد' }, { status: 500 })
   }
 }

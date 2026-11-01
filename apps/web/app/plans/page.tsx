@@ -33,8 +33,8 @@ export default function PlansPage() {
             بیشتر آگهی بگذارید، بیشتر دیده شوید
           </h1>
           <p style={{ fontSize: 14, color: SEC, lineHeight: 2, margin: 0, maxWidth: 560, marginInline: 'auto' }}>
-            هر بسته یک سهمیه‌ی مشخص برای ثبت آگهی در بیلیارد بازار می‌دهد.
-            بسته را انتخاب کنید، از درگاه پرداخت کنید، و بلافاصله فعال می‌شود.
+            هر بسته یک سهمیه‌ی مشخص برای ثبت آگهی در بیلیارد بازار می‌دهد
+            بسته را انتخاب کنید، از درگاه پرداخت کنید، و بلافاصله فعال می‌شود
           </p>
         </div>
 
@@ -50,7 +50,7 @@ export default function PlansPage() {
             <div style={{ fontSize: 14.5, fontWeight: 900, marginBottom: 5 }}>تبلیغ در بیلیارد هاب</div>
             <p style={{ fontSize: 12.5, color: MUT, margin: 0, lineHeight: 2 }}>
               اگر به‌جای آگهی، دنبال بنر تبلیغاتی در صفحه‌ی اصلی یا بیلیارد بازار هستید،
-              جایگاه‌ها را در مرکز تبلیغات ببینید و مستقیم بخرید.
+              جایگاه‌ها را در مرکز تبلیغات ببینید و مستقیم بخرید
             </p>
           </div>
           <Link href="/advertise" style={{

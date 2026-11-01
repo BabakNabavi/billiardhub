@@ -533,7 +533,7 @@ export default function ProductDetailPage() {
                 background: 'rgba(178,59,46,0.06)', border: '1px solid rgba(178,59,46,0.24)',
                 fontSize: 13, fontWeight: 800, color: '#B23B2E',
               }}>
-                این کالا فروخته شده است.
+                این کالا فروخته شده است
               </div>
             )}
 
@@ -547,7 +547,6 @@ export default function ProductDetailPage() {
               <div style={{ ...glassPanel, borderRadius: 20, padding: '16px 18px 18px', marginBottom: 20, position: 'relative', overflow: 'hidden' }}>
                 <span aria-hidden style={{ position: 'absolute', top: -18, insetInlineStart: 10, fontSize: 96, lineHeight: 1, color: 'rgba(199,166,106,0.13)', fontWeight: 900, pointerEvents: 'none', userSelect: 'none' }}>”</span>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 9, marginBottom: 11, position: 'relative' }}>
-                  <span style={{ width: 3, height: 18, borderRadius: 2, background: `linear-gradient(180deg,${GOLD},${GOLDD})` }} />
                   <h2 style={{ fontSize: 14.5, fontWeight: 800, color: TEXT, margin: 0 }}>توضیحات محصول</h2>
                 </div>
                 <p style={{ fontSize: 14, lineHeight: 2.1, color: 'rgba(28,28,26,0.72)', margin: 0, position: 'relative', whiteSpace: 'pre-line' }}>
@@ -571,7 +570,6 @@ export default function ProductDetailPage() {
             {specRows_.length > 0 && (
               <div style={{ ...glassPanel, borderRadius: 20, padding: '18px 18px 8px', marginBottom: 20 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 9, marginBottom: 14 }}>
-                  <span style={{ width: 3, height: 18, borderRadius: 2, background: `linear-gradient(180deg,${GOLD},${GOLDD})` }} />
                   <h2 style={{ fontSize: 14.5, fontWeight: 800, color: TEXT, margin: 0 }}>مشخصات فنی</h2>
                   <span style={{ fontSize: 11, fontWeight: 700, color: GOLDD, background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.30)', borderRadius: 999, padding: '2px 9px' }}>
                     {specRows_.length.toLocaleString('fa-IR')} مورد
@@ -630,7 +628,6 @@ export default function ProductDetailPage() {
               return (
                 <div style={{ ...glassPanel, borderRadius: 20, padding: '16px 18px', marginBottom: 20 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 9, marginBottom: 12 }}>
-                    <span style={{ width: 3, height: 18, borderRadius: 2, background: `linear-gradient(180deg,${GOLD},${GOLDD})` }} />
                     <h2 style={{ fontSize: 14.5, fontWeight: 800, color: TEXT, margin: 0 }}>وضعیت کالا</h2>
                   </div>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
@@ -707,7 +704,7 @@ export default function ProductDetailPage() {
               {storeKnown && !hasStore && (
                 <p style={{ fontSize: 11.5, color: TMUT, lineHeight: 1.95, margin: '0 0 12px' }}>
                   بیلیارد هاب طرف معامله نیست؛ پیش از پرداخت، کالا را کامل بررسی و
-                  از صحت اطلاعات مطمئن شوید.
+                  از صحت اطلاعات مطمئن شوید
                 </p>
               )}
 

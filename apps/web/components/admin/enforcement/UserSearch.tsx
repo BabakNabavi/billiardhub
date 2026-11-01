@@ -62,7 +62,7 @@ export function UserSearch({ selected, onSelect, refreshKey }: {
           {[0, 1, 2, 3].map(i => <li key={i} className="h-14 rounded-card bg-line/[.06] motion-safe:animate-pulse" />)}
         </ul>
       ) : rows.length === 0 && !err ? (
-        <p className="m-0 text-sm text-ink-2">کاربری پیدا نشد.</p>
+        <p className="m-0 text-sm text-ink-2">کاربری پیدا نشد</p>
       ) : (
         <ul className="m-0 flex list-none flex-col gap-2 p-0">
           {rows.map(u => (
@@ -71,7 +71,7 @@ export function UserSearch({ selected, onSelect, refreshKey }: {
                 className={`flex w-full items-center gap-3 rounded-card border p-3 text-start hover:bg-paper focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-deep ${selected === u.id ? 'border-gold-deep bg-gold/[.06]' : 'border-line/10 bg-surface'}`}>
                 <span className="flex min-w-0 flex-1 flex-col gap-1">
                   <span className="flex items-center gap-1 truncate text-sm font-bold text-ink">
-                    {u.is_platform_owner && <Crown size={14} className="text-gold-text" aria-label="مالکِ پلتفرم" />}
+                    {u.is_platform_owner && <Crown size={14} className="text-gold-text" aria-label="مالک پلتفرم" />}
                     {[u.firstName, u.lastName].filter(Boolean).join(' ') || 'بی‌نام'}
                   </span>
                   <span dir="ltr" className="text-start text-xs text-ink-2">{toFaDigits(u.phone ?? '')}</span>

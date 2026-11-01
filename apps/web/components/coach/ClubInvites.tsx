@@ -74,8 +74,8 @@ export default function ClubInvites() {
         باشگاه‌ها
       </h2>
       <p style={{ fontSize: 12.5, color: MUT, lineHeight: 1.9, margin: '0 0 14px' }}>
-        این باشگاه‌ها شما را در فهرست مربیانشان گذاشته‌اند. تا وقتی نپذیرید،
-        نامتان در صفحه‌ی آن باشگاه دیده نمی‌شود.
+        این باشگاه‌ها شما را در فهرست مربیانشان گذاشته‌اند، تا وقتی نپذیرید،
+        نامتان در صفحه‌ی آن باشگاه دیده نمی‌شود
       </p>
 
       {err && <p role="alert" style={{ fontSize: 12.5, color: RED, fontWeight: 700, margin: '0 0 10px' }}>{err}</p>}

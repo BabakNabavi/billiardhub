@@ -227,7 +227,7 @@ export default function TournamentRegistrations({ tournamentId, onChanged }: {
         /* ── چرا برچسب‌ها و مبلغ یک ستون شدند ──
            پیش‌تر هرکدام ستون خودش را داشت و در گوشی زیر هم می‌رفتند،
            یعنی هر ردیف سه سطر ارتفاع می‌گرفت و فهرست ده‌نفره کارت را
-           بی‌دلیل بلند می‌کرد. حالا «حضوری/قطعی» و مبلغ در یک ستون
+           بی‌دلیل بلند می‌کرد، حالا «حضوری/قطعی» و مبلغ در یک ستون
            راست‌چین کنار هم می‌نشینند — یک سطر، و چشم هم همه‌ی
            اطلاعات مالی ردیف را یک‌جا می‌بیند. */
         .treg-meta{
@@ -237,10 +237,10 @@ export default function TournamentRegistrations({ tournamentId, onChanged }: {
         /* ── موبایل ──
            ستون شماره ۲۶ پیکسل بود و با گپ ۱۰ یعنی ۳۶ پیکسل فاصله تا
            نام — روی صفحه‌ی باریک این یک‌ششم عرض است و نام را هل
-           می‌داد. حالا شماره ۱۶ و گپ ۶. */
+           می‌داد، حالا شماره ۱۶ و گپ ۶. */
         /* ── موبایل ──
            ستون شماره ۲۶ پیکسل بود و با گپ ۱۰ یعنی ۳۶ پیکسل فاصله تا
-           نام؛ روی صفحه‌ی باریک یک‌ششم عرض. حالا ۱۶ و ۶.
+           نام؛ روی صفحه‌ی باریک یک‌ششم عرض، حالا ۱۶ و ۶.
 
            دکمه‌ی حذف کنار ردیف می‌ماند و کوچک: یک‌بار تمام‌عرضش
            کردم و بیش از حد به چشم می‌آمد — عملی که به‌ندرت لازم
@@ -280,7 +280,7 @@ export default function TournamentRegistrations({ tournamentId, onChanged }: {
           </button>
 
           <button type="button" onClick={() => setShowAdd(v => !v)} disabled={busy || full}
-            title={full ? 'ظرفیتِ مسابقه تکمیل است' : undefined}
+            title={full ? 'ظرفیت مسابقه تکمیل است' : undefined}
             style={full
               ? { ...actionBtn, border: '1px solid rgba(0,0,0,0.08)', background: 'rgba(0,0,0,0.04)', color: '#9CA3AF', cursor: 'not-allowed' }
               : { ...actionBtn, border: `1px solid ${GOLD}`, background: '#FFFBF0', color: '#A07840' }}>
@@ -305,11 +305,11 @@ export default function TournamentRegistrations({ tournamentId, onChanged }: {
         }}>
           {(() => {
             const mins = soonest === null ? null : Math.max(0, Math.ceil((soonest - now) / 60_000))
-            if (mins === 0) return `${fa(pending)} ثبت‌نام در انتظار پرداخت است. مهلتِ پرداخت تمام شد؛ صندلی در حالِ آزادشدن است.`
+            if (mins === 0) return `${fa(pending)} ثبت‌نام در انتظار پرداخت است، مهلت پرداخت تمام شد؛ صندلی در حال آزادشدن است`
             const left = mins === null ? 'پانزده دقیقه' : `${fa(mins)} دقیقه‌ی دیگر`
             return pending === 1
-              ? `${fa(pending)} ثبت‌نام در انتظار پرداخت است. اگر تا ${left} پرداخت نشود، خودکار منقضی می‌شود و صندلی‌اش آزاد می‌گردد.`
-              : `${fa(pending)} ثبت‌نام در انتظار پرداخت است. هرکدام اگر در مهلتِ خودش پرداخت نشود، خودکار منقضی می‌شود و صندلی‌اش آزاد می‌گردد — نزدیک‌ترین تا ${left}.`
+              ? `${fa(pending)} ثبت‌نام در انتظار پرداخت است، اگر تا ${left} پرداخت نشود، خودکار منقضی می‌شود و صندلی‌اش آزاد می‌گردد`
+              : `${fa(pending)} ثبت‌نام در انتظار پرداخت است، هرکدام اگر در مهلت خودش پرداخت نشود، خودکار منقضی می‌شود و صندلی‌اش آزاد می‌گردد — نزدیک‌ترین تا ${left}.`
           })()}
         </div>
       )}
@@ -320,8 +320,8 @@ export default function TournamentRegistrations({ tournamentId, onChanged }: {
           borderRadius: 14, padding: 14, marginBottom: 12,
         }}>
           <div style={{ fontSize: 12, color: '#6B7280', marginBottom: 10, lineHeight: 1.9 }}>
-            برای کسی که تلفنی یا حضوری ثبت‌نام کرده. این نفر یک صندلی می‌گیرد و
-            در شمارش ظرفیت و قرعه‌کشی حساب می‌شود.
+            برای کسی که تلفنی یا حضوری ثبت‌نام کرده، این نفر یک صندلی می‌گیرد و
+            در شمارش ظرفیت و قرعه‌کشی حساب می‌شود
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(150px,1fr))', gap: 10 }}>
             {([
@@ -359,7 +359,7 @@ export default function TournamentRegistrations({ tournamentId, onChanged }: {
 
       {regs.length === 0 ? (
         <div style={{ fontSize: 12.5, color: '#9CA3AF', padding: '14px 2px' }}>
-          هنوز کسی ثبت‌نام نکرده است.
+          هنوز کسی ثبت‌نام نکرده است
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
@@ -473,7 +473,7 @@ export default function TournamentRegistrations({ tournamentId, onChanged }: {
             </div>
             <div style={{ fontSize: 13.5, color: '#6B7280', lineHeight: 2.05, marginBottom: 20 }}>
               ثبت‌نام <b style={{ color: DARK }}>{pendingDelete.playerName || 'بی‌نام'}</b> از
-              این مسابقه حذف شود؟ صندلی‌اش آزاد می‌شود و این کار برگشت‌پذیر نیست.
+              این مسابقه حذف شود؟ صندلی‌اش آزاد می‌شود و این کار برگشت‌پذیر نیست
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 9 }}>

@@ -8,7 +8,6 @@ import { fetchProfilesResult } from '../../lib/profiles/client'
 import VerifiedBadge from '../../components/VerifiedBadge'
 import type { MockSeller } from '../../lib/sellers-data'
 import { makeMatcher } from '@/lib/search/filter'
-import { SearchSuggest } from '@/components/search/SearchSuggest'
 
 const GOLD     = '#C7A66A'
 const GOLD_D   = '#8F6531'
@@ -363,7 +362,9 @@ function Dropdown({ label, options, value, onChange, minWidth = 150 }: {
 
 // ── Main Page ─────────────────────────────────────────────────
 export default function SellersPage() {
-  const [search,   setSearch]   = useState('')
+  /* جعبه‌ی جست‌وجوی صفحه برداشته شد (خواستِ مالک، ۱۰ آبانِ ۱۴۰۵) — جست‌وجو از نوارِ بالاست.
+       فیلترِ متنی همان‌جا می‌ماند، با عبارتِ خالی بی‌اثر است */
+  const search = ''
   const [category, setCategory] = useState('همه')
   const [status,   setStatus]   = useState('همه')
   const [sort,     setSort]     = useState<SortKey>('rating')
@@ -435,13 +436,13 @@ export default function SellersPage() {
         /* ── روکش لینک کارت فروشگاه ──
            لینک روی نام فروشگاه است و شبه‌عنصرش کل کارت را می‌پوشاند:
            کلیک روی هرجای کارت، ولی برای صفحه‌خوان یک لینک واقعی با
-           نام همان فروشگاه. دکمه‌های داخلی (تماس، مشاهده فروشگاه) با
-           z-index بالاتر رویش می‌مانند تا کار خودشان را بکنند.
+           نام همان فروشگاه، دکمه‌های داخلی (تماس، مشاهده فروشگاه) با
+           z-index بالاتر رویش می‌مانند تا کار خودشان را بکنند
            (بک‌تیک در این کامنت ممنوع — داخل template literal است) */
         .sel-card { position: relative; }
         .sel-card-link { color: inherit; text-decoration: none; }
         .sel-card-link::after { content: ''; position: absolute; inset: 0; z-index: 1; }
-        /* ⚠️ حلقه روی خود روکش کشیده می‌شود، نه با ':has' روی کارت.
+        /* ⚠️ حلقه روی خود روکش کشیده می‌شود، نه با ':has' روی کارت
            آن نسخه روی موتوری که ':has' ندارد هیچ نشانه‌ی فوکوسی نمی‌داد
            — و این خرابی بی‌صداست، چون فقط با کیبورد دیده می‌شود. */
         .sel-card-link:focus-visible { outline: none; }
@@ -516,19 +517,6 @@ export default function SellersPage() {
           {/* ─── STICKY: search + filter, stacked under the navbar ─── */}
           <div style={{ position: 'sticky', top: 'var(--nav-offset)', zIndex: 50, background: 'rgba(250,249,246,0.72)', backdropFilter: 'blur(24px) saturate(1.6)', WebkitBackdropFilter: 'blur(24px) saturate(1.6)', paddingTop: 14, paddingBottom: 12, marginBottom: 12, display: 'flex', flexDirection: 'column', gap: 10 }}>
 
-            {/* search box */}
-            <div style={{ position: 'relative' }} data-suggest-box>
-              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke={GOLD_D} strokeWidth="2.2" style={{ position: 'absolute', insetInlineStart: 16, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', zIndex: 2 }}>
-                <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
-              </svg>
-              <input
-                className="input input-glass input-icon-start-lg" type="search" aria-label="جستجوی فروشگاه" aria-controls="sx-sel" aria-autocomplete="list"
-                placeholder="جستجوی فروشنده، شهر یا برند..."
-                value={search} onChange={e => setSearch(e.target.value)}
-              />
-              {/* پیشنهادِ زنده‌ی سراسری — همان «سوپر سرچ»ِ نوارِ بالا */}
-              <SearchSuggest hideEmpty q={search} onPick={() => setSearch('')} id="sx-sel" className="inset-x-0" />
-            </div>
 
             {/* filter box */}
             <div className="sel-filterbar" style={{ background: 'rgba(255,255,255,0.9)', backdropFilter: 'blur(28px) saturate(190%)', WebkitBackdropFilter: 'blur(28px) saturate(190%)', border: '1px solid rgba(255,255,255,0.8)', borderRadius: 16, boxShadow: 'inset 0 1.5px 0 rgba(255,255,255,0.95), 0 8px 26px rgba(28,28,26,0.08)', padding: 10, display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
@@ -574,7 +562,7 @@ export default function SellersPage() {
             <div style={{ textAlign: 'center', padding: '64px 0', color: TEXT_MUT }}>
               <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" style={{ margin: '0 auto 16px', display: 'block', opacity: 0.4 }}><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
               <p style={{ fontSize: 17, fontWeight: 700, color: TEXT_SEC }}>{loadFailed ? 'فهرست بارگذاری نشد' : 'فروشگاهی یافت نشد'}</p>
-              <p style={{ fontSize: 14 }}>{loadFailed ? 'اتصالِ اینترنت را بررسی کنید و صفحه را دوباره باز کنید' : 'فیلترها را تغییر دهید یا جستجو را پاک کنید'}</p>
+              <p style={{ fontSize: 14 }}>{loadFailed ? 'اتصال اینترنت را بررسی کنید و صفحه را دوباره باز کنید' : 'فیلترها را تغییر دهید یا جستجو را پاک کنید'}</p>
             </div>
           ) : view === 'grid' ? (
             <div className="sel-grid" style={{ marginBottom: 56 }}>

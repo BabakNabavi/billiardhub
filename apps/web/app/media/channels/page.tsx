@@ -26,7 +26,8 @@ export default function ChannelsPage() {
   const router = useRouter()
   const { mini, toggle } = useRailState()
 
-  const [q, setQ] = useState('')
+  /* جست‌وجوی کانال برداشته شد (خواستِ مالک، ۱۰ آبانِ ۱۴۰۵) */
+  const q = ''
   const [all, setAll] = useState<ShelfChannel[]>([])
   const [loading, setLoading] = useState(true)
   const [failed, setFailed] = useState(false)
@@ -68,14 +69,6 @@ export default function ChannelsPage() {
               <p>سازندگانی که در بیلیارد مدیا ویدیو منتشر کرده‌اند</p>
             </div>
 
-            <div className="mx-search-row mx-filter">
-              <label className="mx-sr-only" htmlFor="mx-ch-q">جست‌وجوی کانال</label>
-              <input
-                id="mx-ch-q" className="mx-search-in" type="search" value={q}
-                onChange={e => setQ(e.target.value)} placeholder="نام یا هندل کانال…"
-                autoComplete="off"
-              />
-            </div>
 
             {loading ? (
               <div className="mx-grid">
@@ -84,15 +77,15 @@ export default function ChannelsPage() {
             ) : failed ? (
               <div className="mx-empty">
                 <h2>کانال‌ها در دسترس نیستند</h2>
-                <p>دریافت فهرست از سرور ناموفق بود. این یک خطای موقت است.</p>
+                <p>دریافت فهرست از سرور ناموفق بود، این یک خطای موقت است</p>
               </div>
             ) : rows.length === 0 ? (
               <div className="mx-empty">
                 <h2>{q ? 'کانالی با این نام پیدا نشد' : 'هنوز کانالی ویدیو منتشر نکرده است'}</h2>
                 <p>
                   {q
-                    ? 'نام یا هندل دیگری را امتحان کنید.'
-                    : 'به‌محض انتشار اولین ویدیو، کانال سازنده‌اش همین‌جا دیده می‌شود.'}
+                    ? 'نام یا هندل دیگری را امتحان کنید'
+                    : 'به‌محض انتشار اولین ویدیو، کانال سازنده‌اش همین‌جا دیده می‌شود'}
                 </p>
               </div>
             ) : (

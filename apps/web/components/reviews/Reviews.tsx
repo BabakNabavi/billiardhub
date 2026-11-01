@@ -96,7 +96,7 @@ export default function Reviews({ endpoint, subject, cannotReviewNote }: {
   if (state === 'error' || !d) {
     return (
       <p style={{ fontSize: 13, color: MUT, margin: 0 }}>
-        نظرها بارگذاری نشد.{' '}
+        نظرها بارگذاری نشد{' '}
         <button onClick={() => { setState('loading'); void load() }}
           style={{ background: 'none', border: 'none', padding: 0, color: GOLD_D, fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit', fontSize: 13 }}>
           تلاش دوباره
@@ -111,7 +111,6 @@ export default function Reviews({ endpoint, subject, cannotReviewNote }: {
   return (
     <section style={{ marginTop: 8 }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14, flexWrap: 'wrap' }}>
-        <span style={{ width: 3, height: 17, borderRadius: 2, background: `linear-gradient(180deg,${GOLD},#8A6020)` }} />
         <h3 style={{ fontSize: 17, fontWeight: 800, color: INK, margin: 0 }}>امتیاز و نظرها</h3>
         {summary.count > 0 && (
           <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 13, color: MUT }}>
@@ -182,13 +181,13 @@ export default function Reviews({ endpoint, subject, cannotReviewNote }: {
         )
       ) : (
         <p style={{ fontSize: 12.5, color: MUT, lineHeight: 2, margin: '0 0 14px' }}>
-          {cannotReviewNote ?? 'برای ثبت نظر باید حداقل یک رزرو قطعی در این باشگاه داشته باشید.'}
+          {cannotReviewNote ?? 'برای ثبت نظر باید حداقل یک رزرو قطعی در این باشگاه داشته باشید'}
         </p>
       )}
 
       {/* فهرست نظرها */}
       {d.reviews.length === 0 ? (
-        <p style={{ fontSize: 13, color: MUT, margin: 0 }}>هنوز نظری ثبت نشده است.</p>
+        <p style={{ fontSize: 13, color: MUT, margin: 0 }}>هنوز نظری ثبت نشده است</p>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           {d.reviews.map(r => (

@@ -56,9 +56,9 @@ export function FullTableDialog(props: Props) {
             <div className="flex items-center gap-3 px-4 py-3">
               <div className="min-w-0 flex-1">
                 <p className="m-0 truncate text-sm font-bold">{props.title}</p>
-                <p className="m-0 text-xs text-white/60">{zoom ? 'برای دیدنِ کل جدول، دوباره روی آن بزنید' : 'برای بزرگ‌نمایی روی جدول بزنید'}</p>
+                <p className="m-0 text-xs text-white/60">{zoom ? 'برای دیدن کل جدول، دوباره روی آن بزنید' : 'برای بزرگ‌نمایی روی جدول بزنید'}</p>
               </div>
-              <button type="button" onClick={close} aria-label="بستنِ جدول"
+              <button type="button" onClick={close} aria-label="بستن جدول"
                 className="flex size-11 shrink-0 items-center justify-center rounded-full bg-white/10 text-white transition-colors hover:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold">
                 <X size={20} aria-hidden />
               </button>

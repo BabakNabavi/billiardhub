@@ -105,7 +105,7 @@ export default function VerificationBadges({ style }: { style?: React.CSSPropert
       setState({
         identity: !!j.nationalIdVerified || !!j.nationalId,
         documents: (d?.state as DocState) ?? 'missing',
-        documentsNote: d?.message ?? 'وضعیت مدارک در دسترس نیست.',
+        documentsNote: d?.message ?? 'وضعیت مدارک در دسترس نیست',
         email: !!j.emailVerified,
         emailAddress: j.email || '',
       })
@@ -158,8 +158,8 @@ export default function VerificationBadges({ style }: { style?: React.CSSPropert
         title="اطلاعات هویتی"
         done={state.identity}
         note={state.identity
-          ? 'مشخصات هویتی شما تأیید شده است.'
-          : 'اطلاعات هویتی شما هنوز استعلام نشده است.'}
+          ? 'مشخصات هویتی شما تأیید شده است'
+          : 'اطلاعات هویتی شما هنوز استعلام نشده است'}
       />
 
       {/* سبز فقط وقتی مدرک واقعا آپلود و تأیید شده. متن هم از سرور
@@ -177,8 +177,8 @@ export default function VerificationBadges({ style }: { style?: React.CSSPropert
         title="تأیید ایمیل"
         done={state.email}
         note={state.email
-          ? `نشانی ${state.emailAddress} ثبت و اعتبارسنجی شده است.`
-          : 'نشانی ایمیلتان را ثبت کنید تا اطلاع‌رسانی‌های مهم به دستتان برسد.'}
+          ? `نشانی ${state.emailAddress} ثبت و اعتبارسنجی شده است`
+          : 'نشانی ایمیلتان را ثبت کنید تا اطلاع‌رسانی‌های مهم به دستتان برسد'}
       >
         {(!state.email || editing) ? (
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 9 }}>

@@ -18,7 +18,7 @@ export async function generateMetadata({ searchParams }: { searchParams: Search 
   const cat = MEDIA_CATEGORIES.find(c => c.key === raw)
   if (!cat) return {}
   const title = `${cat.label} | بیلیارد مدیا | بیلیارد هاب`
-  const description = `ویدیوهای ${cat.label} در بیلیارد مدیا؛ آموزش، مسابقه و کلیپ‌های بیلیارد و اسنوکر.`
+  const description = `ویدیوهای ${cat.label} در بیلیارد مدیا؛ آموزش، مسابقه و کلیپ‌های بیلیارد و اسنوکر`
   const url = `/media?category=${cat.key}`
   return {
     title: { absolute: title },

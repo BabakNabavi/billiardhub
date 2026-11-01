@@ -875,7 +875,7 @@ export default function Stories() {
       <div className="st-strip">
         {/* Add story button — فقط نقش‌های واجد استوری (کاربر عادی نمی‌بیند) */}
         {user && canPost && (
-          <button type="button" className="st-item" onClick={() => { setPostErr(''); setPosting(true); }} aria-label="استوریِ جدید">
+          <button type="button" className="st-item" onClick={() => { setPostErr(''); setPosting(true); }} aria-label="استوری جدید">
             <div className="st-ring" style={{ background: 'var(--brand-tint-2)', border: '1.5px dashed var(--brand)' }}>
               <div className="st-inner" style={{ background: 'var(--brand-tint)', border: 'none' }}>
                 <Plus size={18} style={{ color: 'var(--brand)' }} />
@@ -953,7 +953,7 @@ export default function Stories() {
               <h3 style={{ fontSize:16, fontWeight: 600, color:'#111110', margin:0 }}>افزودن استوری</h3>
               <button onClick={() => setPosting(false)} aria-label="بستن" style={{ background:'none', border:'none', cursor:'pointer', color:'#888', display:'flex' }}><X size={18} /></button>
             </div>
-            <div style={{ fontSize:12.5, color:'#777', marginBottom:12 }}>به‌عنوان <span style={{ color:roleInfo.color, fontWeight: 600 }}>{roleInfo.label}</span> منتشر می‌شود و ۲۴ ساعت در نوار استوری صفحه‌ی اول نمایش داده می‌شود.</div>
+            <div style={{ fontSize:12.5, color:'#777', marginBottom:12 }}>به‌عنوان <span style={{ color:roleInfo.color, fontWeight: 600 }}>{roleInfo.label}</span> منتشر می‌شود و ۲۴ ساعت در نوار استوری صفحه‌ی اول نمایش داده می‌شود</div>
             {/* شمارنده‌ی سقف روزانه */}
             <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:14, padding:'8px 12px', borderRadius:10, background:'var(--brand-tint)', border:'1px solid var(--border)' }}>
               <span style={{ fontSize:11.5, fontWeight:700, color:'var(--brand)' }}>سقف امروز:</span>
@@ -979,7 +979,7 @@ export default function Stories() {
                 <input type="file" accept="image/*" hidden onChange={e => onStoryFile(e.target.files?.[0])} />
               </label>
             )}
-            <input value={storyCaption} onChange={e => setStoryCaption(e.target.value)} placeholder="کپشن (اختیاری) — لینک هم بگذارید، مثلاً instagram.com/…" aria-label="کپشنِ استوری" maxLength={300} style={{ width:'100%', padding:'10px 13px', border:'1px solid rgba(17,17,16,0.14)', borderRadius:10, fontSize:14, fontFamily:'inherit', outline:'none', marginBottom:16, direction:'rtl' }} />
+            <input value={storyCaption} onChange={e => setStoryCaption(e.target.value)} placeholder="کپشن (اختیاری) — لینک هم بگذارید، مثلا instagram.com/…" aria-label="کپشن استوری" maxLength={300} style={{ width:'100%', padding:'10px 13px', border:'1px solid rgba(17,17,16,0.14)', borderRadius:10, fontSize:14, fontFamily:'inherit', outline:'none', marginBottom:16, direction:'rtl' }} />
             <button onClick={publishStory} disabled={!storyImg || publishing} style={{ width:'100%', padding:'12px', borderRadius:10, border:'1px solid var(--border)', background: (storyImg && !publishing) ? 'var(--brand-tint)' : 'rgba(17,17,16,0.05)', color: (storyImg && !publishing) ? 'var(--brand)' : '#aaa', fontWeight: 600, fontSize:14, cursor: (storyImg && !publishing) ? 'pointer' : 'not-allowed', fontFamily:'inherit' }}>{publishing ? 'در حال انتشار…' : 'انتشار استوری'}</button>
           </div>
         </div>,

@@ -241,14 +241,14 @@ export default function AdminNewsPage() {
                 <input id="news-cover" type="url" dir="ltr" value={form.cover} onChange={e => setForm({ ...form, cover: e.target.value })}
                   className="w-full border border-gray-200 rounded-xl px-4 py-3 text-start focus:outline-none focus:ring-2 focus:ring-green-500"
                   placeholder="https://…" />
-                <p className="mt-1 text-xs text-gray-400">بدون تصویر، خبر به‌شکل متنی نمایش داده می‌شود.</p>
+                <p className="mt-1 text-xs text-gray-400">بدون تصویر، خبر به‌شکل متنی نمایش داده می‌شود</p>
               </div>
               <div>
                 <label htmlFor="news-slug" className="block text-sm font-medium text-gray-700 mb-1">نامک (slug)</label>
                 <input id="news-slug" type="text" dir="ltr" value={form.slug} onChange={e => setForm({ ...form, slug: e.target.value })}
                   className="w-full border border-gray-200 rounded-xl px-4 py-3 text-start focus:outline-none focus:ring-2 focus:ring-green-500"
                   placeholder="asia-championship-final" />
-                <p className="mt-1 text-xs text-gray-400">خالی بگذارید تا نشانی از شناسه ساخته شود.</p>
+                <p className="mt-1 text-xs text-gray-400">خالی بگذارید تا نشانی از شناسه ساخته شود</p>
               </div>
             </div>
 
@@ -297,7 +297,7 @@ export default function AdminNewsPage() {
                 <span className="text-sm font-medium text-gray-700">
                   انتشار روی سایت
                   <span className="block text-xs font-normal text-gray-400">
-                    تا وقتی این تیک نخورده باشد، خبر پیش‌نویس می‌ماند و در /news دیده نمی‌شود.
+                    تا وقتی این تیک نخورده باشد، خبر پیش‌نویس می‌ماند و در /news دیده نمی‌شود
                   </span>
                 </span>
               </label>
@@ -330,7 +330,7 @@ export default function AdminNewsPage() {
               فقط سطر عنوان‌ها دیده می‌شد. */}
           {news.length === 0 && (
             <div className="px-5 py-12 text-center text-sm text-gray-400">
-              هنوز خبری ثبت نشده است.
+              هنوز خبری ثبت نشده است
             </div>
           )}
           {news.map(item => (

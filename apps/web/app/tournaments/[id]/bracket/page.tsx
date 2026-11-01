@@ -97,7 +97,7 @@ export default function BracketPage() {
           <GitBranch size={34} style={{ color: MUT, opacity: 0.4, marginBottom: 12 }} />
           <p style={{ fontSize: 15, fontWeight: 800, color: INK, margin: '0 0 6px' }}>هنوز قرعه‌کشی نشده</p>
           <p style={{ fontSize: 12.5, color: MUT, margin: 0, lineHeight: 2 }}>
-            براکت پس از بسته‌شدن ثبت‌نام و قرعه‌کشی برگزارکننده اینجا نمایش داده می‌شود.
+            براکت پس از بسته‌شدن ثبت‌نام و قرعه‌کشی برگزارکننده اینجا نمایش داده می‌شود
           </p>
         </div>
       ) : (

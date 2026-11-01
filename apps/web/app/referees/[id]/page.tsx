@@ -211,8 +211,8 @@ export default function RefereeProfilePage() {
         <div className="lqg ch-notfound-card">
           <h1>{netFail ? 'بارگذاری نشد' : 'این داور پیدا نشد'}</h1>
           <p>{netFail
-            ? 'ارتباط با سرور برقرار نشد. اتصال اینترنت را بررسی کنید و دوباره تلاش کنید.'
-            : 'ممکن است نشانی اشتباه باشد یا پروفایل هنوز تأیید نشده باشد.'}</p>
+            ? 'ارتباط با سرور برقرار نشد، اتصال اینترنت را بررسی کنید و دوباره تلاش کنید'
+            : 'ممکن است نشانی اشتباه باشد یا پروفایل هنوز تأیید نشده باشد'}</p>
           {/* راه بازگشت در حالت خطا هم می‌ماند — شاید شبکه برنگردد. */}
           <div style={{ display: 'flex', gap: 8, justifyContent: 'center', flexWrap: 'wrap' }}>
             {netFail && (
@@ -336,7 +336,7 @@ export default function RefereeProfilePage() {
   }
 
   const deleteVideo = async (id: string) => {
-    if (!(await ask('این ویدیو حذف شود؟', { body: 'این کار برگشت‌پذیر نیست.', confirmLabel: 'حذف' }))) return
+    if (!(await ask('این ویدیو حذف شود؟', { body: 'این کار برگشت‌پذیر نیست', confirmLabel: 'حذف' }))) return
     await edit.apply(d => ({ ...d, videos: d.videos.filter(v => v.id !== id) }))
   }
   const editImage = async (id: string, patch: { caption: string; album: string }) => {
@@ -347,7 +347,7 @@ export default function RefereeProfilePage() {
      برمی‌گشت و این فیلتر روی کل گالری بود — یعنی حذف از داخل آلبوم
      عکس دیگری را می‌برد. */
   const deleteImage = async (id: string) => {
-    if (!(await ask('این تصویر حذف شود؟', { body: 'این کار برگشت‌پذیر نیست.', confirmLabel: 'حذف' }))) return
+    if (!(await ask('این تصویر حذف شود؟', { body: 'این کار برگشت‌پذیر نیست', confirmLabel: 'حذف' }))) return
     await edit.apply(d => ({ ...d, gallery: d.gallery.filter(g => g.id !== id) }))
   }
 
@@ -436,7 +436,7 @@ export default function RefereeProfilePage() {
               </div>
               <div className="ch-card rf-contact">
                 <p className="rf-contact-note">
-                  برای دعوت به داوریِ مسابقه یا هماهنگیِ حضور، از این راه‌ها تماس بگیرید
+                  برای دعوت به داوری مسابقه یا هماهنگی حضور، از این راه‌ها تماس بگیرید
                 </p>
                 <ProfileContactLinks
                   phone={referee.phone} whatsapp={referee.whatsapp}

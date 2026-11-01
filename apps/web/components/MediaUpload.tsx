@@ -119,7 +119,7 @@ export default function MediaUpload({ open, onClose, onUploaded }: { open: boole
        دفعه‌ی قبل دیده می‌شوند. */
     if (list === null) {
       setChannels([]); setChannel(null); setChLoaded(true); setChFailed(true)
-      setErr('فهرست کانال‌ها خوانده نشد.')
+      setErr('فهرست کانال‌ها خوانده نشد')
       return
     }
     setChannels(list)

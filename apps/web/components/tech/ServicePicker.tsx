@@ -114,7 +114,7 @@ export function ServicePicker({ selected, onChange, legacy = [], onLegacyChange 
           </div>
           <p className="tsp-note">
             این‌ها را پیش از دسته‌بندی تازه ثبت کرده بودید و همچنان در صفحه‌ی
-            عمومی شما دیده می‌شوند. اگر دیگر انجامشان نمی‌دهید، برداریدشان.
+            عمومی شما دیده می‌شوند، اگر دیگر انجامشان نمی‌دهید، برداریدشان
           </p>
           <ul className="tsp-list">
             {legacy.map(t => (
@@ -151,7 +151,7 @@ export function ServicePicker({ selected, onChange, legacy = [], onLegacyChange 
         </div>
 
         {total === 0
-          ? <p className="tsp-note">هنوز تخصصی انتخاب نشده است. از فهرست بالا، خدماتی را که واقعا ارائه می‌دهید انتخاب کنید — همین‌ها در صفحه‌ی عمومی شما نشان داده می‌شوند.</p>
+          ? <p className="tsp-note">هنوز تخصصی انتخاب نشده است، از فهرست بالا، خدماتی را که واقعا ارائه می‌دهید انتخاب کنید — همین‌ها در صفحه‌ی عمومی شما نشان داده می‌شوند</p>
           : (
             <>
               {picked.map(c => (

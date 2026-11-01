@@ -72,14 +72,14 @@ export async function POST(req: NextRequest) {
   if (!ownerNid || !owner.national_id_verified) {
     return NextResponse.json({
       ok: true, match: null, data: r.data,
-      message: `کد ملی ${ownerName} تأیید نشده، پس تطبیق ممکن نیست. اطلاعات جواز را با مدرک بسنجید.`,
+      message: `کد ملی ${ownerName} تأیید نشده، پس تطبیق ممکن نیست، اطلاعات جواز را با مدرک بسنجید`,
     });
   }
 
   if (holder && holder !== ownerNid) {
     return NextResponse.json({
       ok: true, match: false, data: r.data,
-      message: `این جواز به نام ${ownerName} نیست؛ به نام شخص دیگری ثبت شده است.`,
+      message: `این جواز به نام ${ownerName} نیست؛ به نام شخص دیگری ثبت شده است`,
     });
   }
 
@@ -107,7 +107,7 @@ export async function POST(req: NextRequest) {
   return NextResponse.json({
     ok: true, match: true, expired, data: r.data,
     message: expired
-      ? `جواز به نام ${ownerName} است ولی اعتبارش در ${r.data?.expireDate} تمام شده.`
-      : `تأیید شد — جواز معتبر و به نام ${ownerName} است.`,
+      ? `جواز به نام ${ownerName} است ولی اعتبارش در ${r.data?.expireDate} تمام شده`
+      : `تأیید شد — جواز معتبر و به نام ${ownerName} است`,
   });
 }

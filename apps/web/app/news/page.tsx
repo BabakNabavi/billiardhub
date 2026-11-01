@@ -26,7 +26,6 @@ import {
   BreakingBar, Lead, Secondary, Stream, MostRead, Band, Feature, Talks,
 } from '@/components/news/blocks'
 import { Cover, Meta, Kicker } from '@/components/news/bits'
-import { SearchBar } from '@/components/news/SearchBar'
 import './newsroom.css'
 
 /* ⚠️ `revalidate` روی این صفحه بی‌اثر است، چون `searchParams`
@@ -46,8 +45,8 @@ export async function generateMetadata({ searchParams }: { searchParams: SP }): 
   const sec = sectionOf(s ?? null)
   const title = q ? `جست‌وجو: ${q}` : sec ? `${sec.label} — اخبار` : 'اخبار بیلیارد هاب'
   const description = q
-    ? `نتایج جست‌وجوی «${q}» در اخبار بیلیارد هاب.`
-    : sec?.blurb ?? 'اتاق خبر بیلیارد هاب: اسنوکر، پول، کاروم، مسابقات، بازیکنان و صنعت بیلیارد.'
+    ? `نتایج جست‌وجوی «${q}» در اخبار بیلیارد هاب`
+    : sec?.blurb ?? 'اتاق خبر بیلیارد هاب: اسنوکر، پول، کاروم، مسابقات، بازیکنان و صنعت بیلیارد'
   return {
     /* ⚠️ `absolute`: قالب ریشه ('%s | بیلیارد هاب') را لایه‌ی
        میانی news/layout.tsx مصرف نمی‌کند، پس رشته‌ی ساده پسوند
@@ -68,12 +67,6 @@ export async function generateMetadata({ searchParams }: { searchParams: SP }): 
 }
 
 /* ── بازه‌ی زمانی ── */
-const RANGES = [
-  { key: 'all',   label: 'همه' },
-  { key: '24h',   label: '۲۴ ساعت' },
-  { key: 'week',  label: 'هفته' },
-  { key: 'month', label: 'ماه' },
-] as const
 const RANGE_MS: Record<string, number> = {
   '24h': 86_400_000, week: 7 * 86_400_000, month: 30 * 86_400_000,
 }
@@ -118,9 +111,7 @@ export default async function NewsPage({ searchParams }: { searchParams: SP }) {
 
       <SecNav active={sectionKey} />
 
-      <div className="nr-shell">
-        <SearchBar q={q} section={sectionKey} range={range} ranges={RANGES} slim={!filtering} />
-      </div>
+      {/* جعبه‌ی جست‌وجوی صفحه برداشته شد (خواستِ مالک، ۱۰ آبانِ ۱۴۰۵) — جست‌وجو از نوارِ بالاست */}
 
       {/* ⚠️ «خالی» و «خطا» دو چیزند: فهرست خالی به‌خاطر خطای
           دیتابیس نباید «هنوز خبری منتشر نشده» نشان بدهد. */}
@@ -194,8 +185,8 @@ function Results({ rows, q, sectionKey }: { rows: Article[]; q: string; sectionK
           <h2>{q ? 'نتیجه‌ای پیدا نشد' : 'هنوز خبری در این بخش منتشر نشده'}</h2>
           <p>
             {q
-              ? 'عبارت دیگری را امتحان کنید، یا بازه‌ی زمانی را روی «همه» بگذارید.'
-              : 'به‌محض انتشار اولین خبر این بخش، همین‌جا دیده می‌شود.'}
+              ? 'عبارت دیگری را امتحان کنید، یا بازه‌ی زمانی را روی «همه» بگذارید'
+              : 'به‌محض انتشار اولین خبر این بخش، همین‌جا دیده می‌شود'}
           </p>
           <div className="nr-empty-act">
             <Link className="nr-btn" href="/news">همه‌ی اخبار</Link>
@@ -237,7 +228,7 @@ function Failed() {
     <div className="nr-shell">
       <div className="nr-empty">
         <h2>اخبار در دسترس نیست</h2>
-        <p>خواندن اخبار از سرور ناموفق بود. این یک خطای موقت است، نه نبود خبر.</p>
+        <p>خواندن اخبار از سرور ناموفق بود، این یک خطای موقت است، نه نبود خبر</p>
         <div className="nr-empty-act">
           <Link className="nr-btn" href="/news">تلاش دوباره</Link>
         </div>
@@ -256,12 +247,12 @@ function Empty() {
       <div className="nr-empty">
         <h2>اتاق خبر بیلیارد هاب به‌زودی منتشر می‌کند</h2>
         <p>
-          هنوز خبری منتشر نشده است. این صفحه عمدا خالی است: تا وقتی خبر
-          واقعی نداریم، خبر نمونه نمی‌گذاریم.
+          هنوز خبری منتشر نشده است، این صفحه عمدا خالی است: تا وقتی خبر
+          واقعی نداریم، خبر نمونه نمی‌گذاریم
         </p>
         <p>
           پوشش ما اسنوکر، پول، کاروم، مسابقات، بازیکنان، تجهیزات و
-          باشگاه‌های ایران و جهان خواهد بود.
+          باشگاه‌های ایران و جهان خواهد بود
         </p>
         <div className="nr-empty-act">
           <Link className="nr-btn" href="/media">بیلیارد مدیا</Link>

@@ -128,7 +128,7 @@ export default function GoLive({ clubId, clubName, ownerKey }: { clubId: string;
         missesRef.current += 1
         if (missesRef.current >= 2) {
           missesRef.current = 0
-          dropLocalFeeds('پخش توسط باشگاه پایان یافت؛ دوربین این دستگاه بسته شد.')
+          dropLocalFeeds('پخش توسط باشگاه پایان یافت؛ دوربین این دستگاه بسته شد')
         }
       } else if (hit) {
         missesRef.current = 0
@@ -224,7 +224,7 @@ export default function GoLive({ clubId, clubName, ownerKey }: { clubId: string;
       stopStream(r.stream)
       await reviveNow()
       setSingleCam(true)
-      setLocalErr('این دستگاه نمی‌تواند دو دوربین را هم‌زمان باز کند. برای میز بعدی، پنل را روی گوشی یا لپ‌تاپ دیگری با همین حساب باز کنید.')
+      setLocalErr('این دستگاه نمی‌تواند دو دوربین را هم‌زمان باز کند، برای میز بعدی، پنل را روی گوشی یا لپ‌تاپ دیگری با همین حساب باز کنید')
       setShowAdd(false)
       setAdding(false)
       return
@@ -299,7 +299,7 @@ export default function GoLive({ clubId, clubName, ownerKey }: { clubId: string;
       <div role="status" style={{ display: 'flex', alignItems: 'flex-start', gap: 10, background: 'rgba(199,166,106,0.10)', border: '1px solid rgba(199,166,106,0.32)', borderRadius: 14, padding: '14px 16px' }}>
         <Radio size={16} style={{ color: GOLD_D, flexShrink: 0, marginTop: 2 }} aria-hidden />
         <span style={{ fontSize: 12.5, fontWeight: 700, color: INK, flex: 1, lineHeight: 1.9 }}>
-          هم‌اکنون پخشِ باشگاه دیگری روی این دستگاه در جریان است. برای شروعِ پخش این باشگاه، اول آن را پایان دهید.
+          هم‌اکنون پخش باشگاه دیگری روی این دستگاه در جریان است، برای شروع پخش این باشگاه، اول آن را پایان دهید
         </span>
       </div>
     )
@@ -353,7 +353,7 @@ export default function GoLive({ clubId, clubName, ownerKey }: { clubId: string;
         <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, background: 'rgba(199,166,106,0.10)', border: '1px solid rgba(199,166,106,0.32)', borderRadius: 14, padding: '12px 14px' }}>
           <Radio size={16} style={{ color: GOLD_D, flexShrink: 0, marginTop: 2 }} aria-hidden />
           <span style={{ fontSize: 12.5, fontWeight: 700, color: INK, flex: 1, lineHeight: 1.9 }}>
-            «{joinable.title}» هم‌اکنون در حال پخش است. دوربین این دستگاه را به‌عنوان یک میز دیگر به همان پخش اضافه کنید.
+            «{joinable.title}» هم‌اکنون در حال پخش است، دوربین این دستگاه را به‌عنوان یک میز دیگر به همان پخش اضافه کنید
           </span>
         </div>
       )}
@@ -393,7 +393,7 @@ export default function GoLive({ clubId, clubName, ownerKey }: { clubId: string;
       {!broadcasting && (
         <p style={{ display: 'flex', alignItems: 'flex-start', gap: 7, fontSize: 11.5, color: MUT, margin: 0, lineHeight: 1.9 }}>
           <Settings2 size={14} style={{ flexShrink: 0, marginTop: 3 }} aria-hidden />
-          برای پخش با دوربین فیلم‌برداری، آن را با کارت کپچر HDMI به لپ‌تاپ وصل کنید؛ در فهرست دوربین‌ها ظاهر می‌شود.
+          برای پخش با دوربین فیلم‌برداری، آن را با کارت کپچر HDMI به لپ‌تاپ وصل کنید؛ در فهرست دوربین‌ها ظاهر می‌شود
         </p>
       )}
 
@@ -437,7 +437,7 @@ export default function GoLive({ clubId, clubName, ownerKey }: { clubId: string;
             </button>
           )}
           <p style={{ fontSize: 11.5, color: MUT, textAlign: 'center', margin: 0, lineHeight: 1.9 }}>
-            برای پخش هم‌زمانِ چند میز، همین صفحه را روی گوشی یا لپ‌تاپ دیگری با همین حساب باز کنید و از آن‌جا دوربین اضافه کنید — تا {fa(MAX_ANGLES)} دوربین.
+            برای پخش هم‌زمان چند میز، همین صفحه را روی گوشی یا لپ‌تاپ دیگری با همین حساب باز کنید و از آن‌جا دوربین اضافه کنید — تا {fa(MAX_ANGLES)} دوربین
           </p>
         </>
       ) : (
@@ -479,9 +479,9 @@ export default function GoLive({ clubId, clubName, ownerKey }: { clubId: string;
                 </button>
                 {canShare && (
                   <button type="button" onClick={() => void addScreen()} disabled={adding}
-                    title="صفحه‌ی همین لپ‌تاپ (مثلاً نرم‌افزارِ تابلوی امتیاز) به‌عنوان یک تصویرِ جدا کنارِ دوربین پخش می‌شود"
+                    title="صفحه‌ی همین لپ‌تاپ (مثلا نرم‌افزار تابلوی امتیاز) به‌عنوان یک تصویر جدا کنار دوربین پخش می‌شود"
                     style={{ ...btn, flex: 1, background: '#fff', border: `1px solid ${LINE}`, color: INK, opacity: adding ? .7 : 1 }}>
-                    <MonitorUp size={16} aria-hidden /> پخشِ صفحه‌ی لپ‌تاپ
+                    <MonitorUp size={16} aria-hidden /> پخش صفحه‌ی لپ‌تاپ
                   </button>
                 )}
               </div>
@@ -495,7 +495,7 @@ export default function GoLive({ clubId, clubName, ownerKey }: { clubId: string;
           </button>
 
           <p style={{ fontSize: 11.5, color: MUT, textAlign: 'center', margin: 0, lineHeight: 1.9 }}>
-            می‌توانید به تب‌های دیگر پنل بروید؛ پخش تا وقتی این صفحه باز است ادامه دارد.
+            می‌توانید به تب‌های دیگر پنل بروید؛ پخش تا وقتی این صفحه باز است ادامه دارد
           </p>
         </>
       )}

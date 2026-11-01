@@ -8,17 +8,17 @@ export const metadata: Metadata = {
      فرزندانش قطع می‌کند، پس صفحه‌ی جزئیات (مثلاً آگهی/باشگاه/مسابقه) بی‌نامِ
      سایت می‌ماند. با `default` عنوانِ خودِ بخش همان قبلی است. */
   title: { default: 'داوران بیلیارد', template: '%s | بیلیارد هاب' },
-  description: 'داوران رسمی بیلیارد و اسنوکر ایران با درجه و مدرک معتبر.',
+  description: 'داوران رسمی بیلیارد و اسنوکر ایران با درجه و مدرک معتبر',
   alternates: { canonical: '/referees' },
   openGraph: {
     title: 'داوران بیلیارد | بیلیارد هاب',
-    description: 'داوران رسمی بیلیارد و اسنوکر ایران با درجه و مدرک معتبر.',
+    description: 'داوران رسمی بیلیارد و اسنوکر ایران با درجه و مدرک معتبر',
     url: '/referees',
     siteName: 'بیلیارد هاب',
     locale: 'fa_IR',
     type: 'website',
   },
-  twitter: { card: 'summary_large_image', title: 'داوران بیلیارد | بیلیارد هاب', description: 'داوران رسمی بیلیارد و اسنوکر ایران با درجه و مدرک معتبر.' },
+  twitter: { card: 'summary_large_image', title: 'داوران بیلیارد | بیلیارد هاب', description: 'داوران رسمی بیلیارد و اسنوکر ایران با درجه و مدرک معتبر' },
 }
 
 export default function SegmentLayout({ children }: { children: React.ReactNode }) {

@@ -155,8 +155,8 @@ export default function AdminTournaments() {
         <h1 style={{ fontSize: 21, fontWeight: 900, color: INK, margin: 0 }}>مسابقات باشگاه‌ها</h1>
       </div>
       <p style={{ fontSize: 12.5, color: SEC, lineHeight: 2, margin: '0 0 16px' }}>
-        مسابقاتی که باشگاه‌ها ساخته‌اند — با ثبت‌نام و پول واقعی.
-        این با «رویدادها» فرق دارد؛ آن‌ها محتوای دستی خود شماست.
+        مسابقاتی که باشگاه‌ها ساخته‌اند — با ثبت‌نام و پول واقعی
+        این با «رویدادها» فرق دارد؛ آن‌ها محتوای دستی خود شماست
       </p>
 
       <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 12 }}>
@@ -255,7 +255,7 @@ export default function AdminTournaments() {
         </div>
       ) : rows.length === 0 ? (
         <div style={{ ...card, textAlign: 'center', color: MUT, fontSize: 13, padding: 36 }}>
-          مسابقه‌ای در این وضعیت نیست.
+          مسابقه‌ای در این وضعیت نیست
         </div>
       ) : rows.map(t => (
         <div key={t.id} style={card}>

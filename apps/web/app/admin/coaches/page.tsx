@@ -84,7 +84,7 @@ export default function AdminCoachesPage() {
       <div style={{ direction: 'rtl', fontFamily: "'Vazirmatn',Tahoma,sans-serif", background: BG, minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24, color: TEXT }}>
         <div style={{ ...card, padding: '32px 28px', textAlign: 'center', maxWidth: 380 }}>
           <p style={{ fontSize: 17, fontWeight: 800, marginBottom: 8 }}>دسترسی محدود</p>
-          <p style={{ fontSize: 13.5, color: TEXT_S, lineHeight: 1.9, marginBottom: 18 }}>این صفحه فقط برای ادمین سیستم قابل دسترسی است.</p>
+          <p style={{ fontSize: 13.5, color: TEXT_S, lineHeight: 1.9, marginBottom: 18 }}>این صفحه فقط برای ادمین سیستم قابل دسترسی است</p>
           <Link href="/" style={{ color: GOLD_D, fontWeight: 700, fontSize: 14 }}>بازگشت به خانه ←</Link>
         </div>
       </div>
@@ -101,7 +101,7 @@ export default function AdminCoachesPage() {
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.30)', color: GOLD_D, fontSize: 11, fontWeight: 800, borderRadius: 20, padding: '4px 12px', marginBottom: 10 }}>مدیریت · مربیان</div>
           <h1 style={{ fontSize: 'clamp(21px,3vw,27px)', fontWeight: 900, letterSpacing: '-0.02em' }}>تایید مربیان</h1>
           <p style={{ fontSize: 13.5, color: TEXT_S, marginTop: 6 }}>
-            درخواست‌های ثبت‌شده‌ی مربیان را بررسی کنید. تایید به معنی اجازه‌ی داشتن پروفایل در سایت است؛ در صورت آپلود مدرک می‌توانید تیک آبی بدهید، در غیر این صورت مربی «آزاد» معرفی می‌شود.
+            درخواست‌های ثبت‌شده‌ی مربیان را بررسی کنید، تایید به معنی اجازه‌ی داشتن پروفایل در سایت است؛ در صورت آپلود مدرک می‌توانید تیک آبی بدهید، در غیر این صورت مربی «آزاد» معرفی می‌شود
           </p>
           <div style={{ display: 'flex', gap: 10, marginTop: 14, flexWrap: 'wrap' }}>
             <span style={{ ...btn('rgba(245,158,11,0.10)', '#B45309', '1px solid rgba(245,158,11,0.22)'), cursor: 'default' }}>در انتظار: {pending.length}</span>
@@ -118,7 +118,7 @@ export default function AdminCoachesPage() {
         )}
 
         {list.length === 0 ? (
-          <div style={{ ...card, padding: '48px 24px', textAlign: 'center', color: TEXT_M, fontSize: 14 }}>هنوز درخواستی ثبت نشده است.</div>
+          <div style={{ ...card, padding: '48px 24px', textAlign: 'center', color: TEXT_M, fontSize: 14 }}>هنوز درخواستی ثبت نشده است</div>
         ) : (
           <ScrollList count={list.length} min={5} gap={12}>
             {list.map(c => {

@@ -34,14 +34,14 @@ export function toAuthError(err: unknown, fallback = 'انجام نشد'): AuthE
     const code = ax.code
     if (code === 'ECONNABORTED' || code === 'ETIMEDOUT') {
       return {
-        message: 'پاسخی از سرور نیامد. اتصالتان را بررسی کنید و دوباره تلاش کنید.',
+        message: 'پاسخی از سرور نیامد، اتصالتان را بررسی کنید و دوباره تلاش کنید',
         isCredentialError: false,
       }
     }
     return {
       message: navigator?.onLine === false
-        ? 'اتصال اینترنت قطع است.'
-        : 'ارتباط با سرور برقرار نشد. اگر VPN روشن است، یک‌بار خاموش/روشنش کنید و دوباره تلاش کنید.',
+        ? 'اتصال اینترنت قطع است'
+        : 'ارتباط با سرور برقرار نشد، اگر VPN روشن است، یک‌بار خاموش/روشنش کنید و دوباره تلاش کنید',
       isCredentialError: false,
     }
   }
@@ -52,7 +52,7 @@ export function toAuthError(err: unknown, fallback = 'انجام نشد'): AuthE
   /* خطای سمت سرور ⇒ تقصیر کاربر نیست و نباید پیام «رمز اشتباه» بگیرد */
   if (status && status >= 500) {
     return {
-      message: serverMsg || 'خطایی در سرور رخ داد. چند لحظه بعد دوباره تلاش کنید.',
+      message: serverMsg || 'خطایی در سرور رخ داد، چند لحظه بعد دوباره تلاش کنید',
       isCredentialError: false,
     }
   }
@@ -60,7 +60,7 @@ export function toAuthError(err: unknown, fallback = 'انجام نشد'): AuthE
   /* قفل موقت یا محدودیت نرخ */
   if (status === 429) {
     return {
-      message: serverMsg || 'تلاش بیش از حد. کمی صبر کنید.',
+      message: serverMsg || 'تلاش بیش از حد، کمی صبر کنید',
       isCredentialError: false,
       retryAfter: ax?.response?.data?.retryAfter,
     }

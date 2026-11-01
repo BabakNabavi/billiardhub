@@ -403,8 +403,8 @@ export async function POST(req: NextRequest) {
     ad: data,
     pending: approvalRequired,
     message: approvalRequired
-      ? 'آگهی شما ثبت شد و پس از بررسی منتشر می‌شود.'
-      : 'آگهی شما منتشر شد.',
+      ? 'آگهی شما ثبت شد و پس از بررسی منتشر می‌شود'
+      : 'آگهی شما منتشر شد',
     quota: { used: gate.used, limit: gate.limit },
   }, { status: 201 });
 }

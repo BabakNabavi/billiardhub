@@ -473,7 +473,7 @@ export default function NewTournamentPage() {
           مسابقه با موفقیت ایجاد شد!
         </h2>
         <p style={{ fontSize: 15, color: '#777', margin: '0 0 28px', lineHeight: 1.7 }}>
-          مسابقه «{name}» ثبت شد و بازیکنان می‌توانند ثبت‌نام کنند.
+          مسابقه «{name}» ثبت شد و بازیکنان می‌توانند ثبت‌نام کنند
         </p>
         <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
           <button onClick={() => router.push('/tournaments/t1/admin')} style={lqBtn(true)}>

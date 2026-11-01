@@ -33,7 +33,7 @@ const MOTION_CSS = `
     68%  { transform: translateX(3px); }
     100% { transform: translateX(-10px); }
   }
-  /* به سمتِ پاکت، کمی جلوتر از لبه، و برگشتنِ کوتاه — لرزشِ لبه */
+  /* به سمت پاکت، کمی جلوتر از لبه، و برگشتن کوتاه — لرزش لبه */
   @keyframes nfRoll {
     0%   { transform: translate(0, 0); }
     78%  { transform: translate(232.5px, -147.4px); }
@@ -58,7 +58,7 @@ export function MissedShot() {
     <div>
       <style>{MOTION_CSS}</style>
       <svg viewBox="0 0 440 260" className="block h-auto w-full drop-shadow-[0_18px_28px_rgba(28,20,12,0.22)]" role="img"
-        aria-label="میزِ اسنوکر از بالا؛ توپِ سفید تا لبه‌ی پاکت رفته و داخلش نیفتاده است">
+        aria-label="میز اسنوکر از بالا؛ توپ سفید تا لبه‌ی پاکت رفته و داخلش نیفتاده است">
         <TableDefs />
         <SnookerTable />
 

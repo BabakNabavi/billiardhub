@@ -50,12 +50,12 @@ const isCloudHost = (u: string): boolean => {
 if (!RAW || isCloudHost(RAW)) {
   throw new Error(
     RAW
-      ? `NEXT_PUBLIC_SUPABASE_URL روی «${RAW}» تنظیم شده که پروژه‌ی ابری Supabase است. ` +
+      ? `NEXT_PUBLIC_SUPABASE_URL روی «${RAW}» تنظیم شده که پروژه‌ی ابری Supabase است ` +
         'این پروژه از Supabase خودمیزبان استفاده می‌کند؛ نشانی درست را ' +
-        '(مثلا https://billiardhub.net) در apps/web/.env.local بگذارید.'
-      : 'NEXT_PUBLIC_SUPABASE_URL تنظیم نشده است. ' +
-        'نشانی Supabase خودمیزبان (مثلا https://billiardhub.net) را در apps/web/.env.local بگذارید. ' +
-        'بدون آن هیچ تصویر، ویدیو یا فایلی بارگذاری نمی‌شود.',
+        '(مثلا https://billiardhub.net) در apps/web/.env.local بگذارید'
+      : 'NEXT_PUBLIC_SUPABASE_URL تنظیم نشده است ' +
+        'نشانی Supabase خودمیزبان (مثلا https://billiardhub.net) را در apps/web/.env.local بگذارید ' +
+        'بدون آن هیچ تصویر، ویدیو یا فایلی بارگذاری نمی‌شود',
   )
 }
 

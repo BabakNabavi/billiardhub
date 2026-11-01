@@ -228,7 +228,6 @@ export default function AboutPage() {
             بیلیارد هاب، پلتفرم تخصصی جامعه‌ی بیلیارد — جایی که بازیکنان، باشگاه‌ها،
             مسابقات و بازار تجهیزات در یک خانه‌ی دیجیتال به هم می‌رسند
           </p>
-          <div style={{ width: 64, height: 3, borderRadius: 2, marginTop: 24, background: `linear-gradient(90deg,${GOLD},#8A6020)` }} />
           <div style={{ marginTop: 'clamp(36px,6vh,64px)', display: 'inline-flex', alignItems: 'center', gap: 8, color: 'rgba(255,255,255,0.4)', fontSize: 11.5, fontWeight: 700, letterSpacing: '0.14em' }}>
             <ChevronDown size={14} style={{ animation: 'abFloat 2.4s ease-in-out infinite' }} /> اسکرول کنید
           </div>
@@ -263,7 +262,6 @@ export default function AboutPage() {
             <h2 style={{ fontSize: 'clamp(22px,3vw,34px)', fontWeight: 900, lineHeight: 1.5, margin: '14px 0 0' }}>
               پلتفرم تخصصی<br />جامعه‌ی بیلیارد
             </h2>
-            <div style={{ width: 52, height: 3, borderRadius: 2, marginTop: 16, background: `linear-gradient(90deg,${GOLD},#8A6020)` }} />
             <p style={{ fontSize: 14.5, color: SEC, lineHeight: 2.2, margin: '18px 0 0' }}>
               فضایی برای جستجو، ارتباط و تجربه‌ی بهتر دنیای اسنوکر و پاکت بیلیارد
             </p>

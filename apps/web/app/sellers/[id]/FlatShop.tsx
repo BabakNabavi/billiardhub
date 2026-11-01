@@ -212,7 +212,7 @@ export default function FlatShop() {
   }
 
   const deleteShot = async (mid: string) => {
-    if (!(await ask('این تصویر حذف شود؟', { body: 'این کار برگشت‌پذیر نیست.', confirmLabel: 'حذف' }))) return
+    if (!(await ask('این تصویر حذف شود؟', { body: 'این کار برگشت‌پذیر نیست', confirmLabel: 'حذف' }))) return
     await edit.apply(d => ({ ...d, gallery: (d.gallery ?? []).filter(g => g.id !== mid) }))
   }
   /* ── ویرایش عنوان ویدیو ──
@@ -238,7 +238,7 @@ export default function FlatShop() {
   )
 
   const deleteVideo = async (vid: string) => {
-    if (!(await ask('این ویدیو حذف شود؟', { body: 'این کار برگشت‌پذیر نیست.', confirmLabel: 'حذف' }))) return
+    if (!(await ask('این ویدیو حذف شود؟', { body: 'این کار برگشت‌پذیر نیست', confirmLabel: 'حذف' }))) return
     await edit.apply(d => ({ ...d, videos: (d.videos ?? []).filter(v => v.id !== vid) }))
   }
 
@@ -334,7 +334,8 @@ export default function FlatShop() {
   /* دسته‌بندی انتخاب‌شده در دراپ‌داون + جستجو + صفحه */
   const [cat, setCat]     = useState<'all' | CatKey>('all')
   const [page, setPage]   = useState(1)
-  const [query, setQuery] = useState('')
+  /* جست‌وجوی محصولاتِ فروشگاه برداشته شد (خواستِ مالک، ۱۰ آبانِ ۱۴۰۵) */
+  const query = ''
 
   /* wishlist + story */
   const [wish, setWish] = useState<Set<string>>(new Set())
@@ -414,7 +415,7 @@ export default function FlatShop() {
       <div dir="rtl" className="shop-shell flex min-h-screen items-center justify-center px-4 text-[#1C1B17]">
         <div className="w-full max-w-[420px] rounded-2xl border border-[#E7E2D6] bg-white px-6 py-12 text-center">
           <h1 className="text-[17px] font-bold">فروشگاه بارگذاری نشد</h1>
-          <p className="mt-2 text-[13px] leading-[2] text-[#6F6A5C]">اتصالِ اینترنت را بررسی کنید و دوباره امتحان کنید.</p>
+          <p className="mt-2 text-[13px] leading-[2] text-[#6F6A5C]">اتصال اینترنت را بررسی کنید و دوباره امتحان کنید</p>
           <button type="button" onClick={() => setReloadKey(k => k + 1)}
             className="mt-5 rounded-[10px] border border-[rgba(199,166,106,0.34)] bg-[rgba(199,166,106,0.12)] px-5 py-2.5 text-[13px] font-bold text-[#8F6531] transition hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C7A66A]">
             تلاش دوباره
@@ -453,8 +454,8 @@ export default function FlatShop() {
           </div>
           <h1 className="text-[17px] font-bold">این فروشگاه پیدا نشد</h1>
           <p className="mt-2 text-[13px] leading-[2] text-[#6F6A5C]">
-            نشانی <span dir="ltr" className={MONO}>/sellers/{sellerId}</span> به فروشگاهی وصل نیست.
-            ممکن است نشانی اشتباه تایپ شده باشد.
+            نشانی <span dir="ltr" className={MONO}>/sellers/{sellerId}</span> به فروشگاهی وصل نیست
+            ممکن است نشانی اشتباه تایپ شده باشد
           </p>
           <Link href="/sellers" className="mt-5 inline-flex items-center justify-center rounded-[10px] border border-[rgba(199,166,106,0.34)] bg-[rgba(199,166,106,0.12)] px-4 py-2.5 text-[13px] font-bold text-[#8F6531] transition hover:-translate-y-0.5">
             فهرست فروشگاه‌ها
@@ -468,20 +469,20 @@ export default function FlatShop() {
     <div dir="rtl" className="shop-shell min-h-screen font-[Vazirmatn,Tahoma,sans-serif] text-[#1C1B17]">
 
       <style>{`
-        /* کارت محصول — هم‌فرم کارت sec1 در صفحه‌ی بیلیارد بازار.
+        /* کارت محصول — هم‌فرم کارت sec1 در صفحه‌ی بیلیارد بازار
            عرض را گرید تعیین می‌کند (برخلاف sec1 که کاروسل با عرض ثابت است)، ولی نسبت،
            سهم عکس، گردی، بوردر و فونت‌ها عینا همان‌اند. */
         /* جنس سطح از .lq-pcard در globals.css می‌آید — همان کارتی که
-           بازار و صفحه‌ی اصلی هم نشان می‌دهند. این‌جا فقط نسبت و چیدمان. */
+           بازار و صفحه‌ی اصلی هم نشان می‌دهند، این‌جا فقط نسبت و چیدمان. */
         .prod-card-sec1 {
-          /* ⚠️ نسبتِ ثابتِ کارت برداشته شد. قابِ عکس حالا نسبتِ خودش
-             را دارد (فرمولِ واحدِ سایت) و بدنه هم محتوای خودش را
-             می‌خواهد؛ با ارتفاعِ ثابت مجموعشان بیشتر می‌شد و
-             overflow hidden ردیفِ قیمت را می‌برید. گرید خودش
+          /* ⚠️ نسبت ثابت کارت برداشته شد، قاب عکس حالا نسبت خودش
+             را دارد (فرمول واحد سایت) و بدنه هم محتوای خودش را
+             می‌خواهد؛ با ارتفاع ثابت مجموعشان بیشتر می‌شد و
+             overflow hidden ردیف قیمت را می‌برید، گرید خودش
              کارت‌های یک ردیف را هم‌ارتفاع می‌کند. */
           /* کوچک‌شدن حالا کار خود گرید است (شش ستون در دسکتاپ)، پس
              محدودکردن عرض کارت داخل سلول لازم نیست و فقط فاصله‌ی
-             بصری را زیاد می‌کرد.
+             بصری را زیاد می‌کرد
              (بک‌تیک در این کامنت ممنوع — داخل template literal است) */
           width: 100%;
         }
@@ -495,21 +496,21 @@ export default function FlatShop() {
           display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
           font-size: var(--ad-title); line-height: var(--ad-title-lh); color: #1C1C1A;
         }
-        /* قیمت و پیلِ درصد — همان توکنِ دو کارتِ دیگر */
+        /* قیمت و پیل درصد — همان توکن دو کارت دیگر */
         .pc-pct  { font-size: var(--ad-pct);   font-weight: var(--ad-pct-w); }
         .pc-old  { font-size: var(--ad-old); }
         .pc-now  { font-size: var(--ad-price); font-weight: var(--ad-price-w); }
         .pc-unit { font-size: var(--ad-unit);  font-weight: var(--ad-unit-w); }
         @media(max-width:700px) {
           .pc-body-sec1 { padding: 14px 7px 7px; }
-          /* ⚠️ رنگِ خاکستریِ موبایل در تبدیل گم شده بود */
+          /* ⚠️ رنگ خاکستری موبایل در تبدیل گم شده بود */
           .pc-name-sec1 { line-height: 1.35; color: #666; }
         }
         /* ══ پوسته‌ی صفحه ══
            پس‌زمینه خاکستری تخت #F7F5F0 بود و همه‌چیز رویش سفید
            بی‌سایه؛ صفحه «خشک» دیده می‌شد چون هیچ عمق و هیچ رنگی
-           نداشت. سه هاله‌ی نرم — طلایی، نمد سبز، و کرم گرم — بدون
-           اینکه خوانایی را کم کنند به صفحه عمق می‌دهند. ثابت‌اند و با
+           نداشت، سه هاله‌ی نرم — طلایی، نمد سبز، و کرم گرم — بدون
+           اینکه خوانایی را کم کنند به صفحه عمق می‌دهند، ثابت‌اند و با
            اسکرول حرکت نمی‌کنند، پس هزینه‌ی رندر ندارند. */
         .shop-shell {
           position: relative;
@@ -524,7 +525,7 @@ export default function FlatShop() {
         /* ══ هدر گلس ══
            کارت سفید بوردردار جای خودش را به یک سطح شیشه‌ای می‌دهد:
            بلور اشباع‌شده، لبه‌ی روشن داخلی، و یک هالهٔ طلایی نرم که
-           از گوشه رد می‌شود (حالت «liquid»). زیر بنر می‌نشیند و
+           از گوشه رد می‌شود (حالت «liquid»)، زیر بنر می‌نشیند و
            عکس بنر از پشتش کمی پیدا می‌شود. */
         .shop-head {
           position: relative;
@@ -639,17 +640,6 @@ export default function FlatShop() {
           <p className="max-w-[720px] text-[13px] leading-relaxed text-[#5B564B]">{store.desc}</p>
         )}
 
-        {/* سرچ — زیر باکس فروشگاه */}
-        <div className="relative mt-3">
-          <input
-            type="text"
-            value={query}
-            onChange={e => { setQuery(e.target.value); setPage(1) }}
-            placeholder="جستجو در محصولات این فروشگاه..."
-            className="w-full rounded-[10px] border border-[#E7E2D6] bg-white px-4 py-2.5 pl-11 text-[13.5px] text-[#1C1B17] placeholder:text-[#6F6A5C] focus:border-[#14532D] focus:outline-none"
-          />
-          <span className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-[#6F6A5C]">{Icon.search}</span>
-        </div>
 
         {/* ── نوار دسته‌بندی ──
             همان آیکون‌ها و همان ترتیب صفحه‌ی «بیلیارد بازار»
@@ -747,7 +737,7 @@ export default function FlatShop() {
 
         {visible.length === 0 && (
           <div className="shop-head rounded-[22px] px-6 py-14 text-center text-[13.5px] text-[#6F6A5C]">
-            محصولی در این دسته‌بندی پیدا نشد.
+            محصولی در این دسته‌بندی پیدا نشد
             {cat !== 'all' && <button onClick={() => setCat('all')} className="mr-2 font-bold text-[#8F6531] transition hover:opacity-70">نمایش همه محصولات</button>}
           </div>
         )}

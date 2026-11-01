@@ -84,24 +84,24 @@ export function HlsPlayer({ src, live = true, title }: { src: string; live?: boo
       {state === 'loading' && (
         <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
           <Loader2 className="h-8 w-8 animate-spin text-white/70" aria-hidden />
-          <span className="sr-only">در حالِ بارگذاریِ تصویر</span>
+          <span className="sr-only">در حال بارگذاری تصویر</span>
         </div>
       )}
       {state === 'unsupported' && (
         <div className="absolute inset-0 flex items-center justify-center bg-black/80 px-6 text-center text-sub text-white">
-          این مرورگر پخشِ زنده را پشتیبانی نمی‌کند. با کروم یا سافاریِ به‌روز باز کنید.
+          این مرورگر پخش زنده را پشتیبانی نمی‌کند، با کروم یا سافاری به‌روز باز کنید
         </div>
       )}
       {state === 'error' && (
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-black/80 px-6 text-center text-white">
           <WifiOff className="h-8 w-8 text-white/70" aria-hidden />
-          <p className="text-sub">{live ? 'در انتظارِ تصویر از باشگاه… خودکار دوباره وصل می‌شود.' : 'این ضبط فعلاً پخش نمی‌شود.'}</p>
+          <p className="text-sub">{live ? 'در انتظار تصویر از باشگاه… خودکار دوباره وصل می‌شود' : 'این ضبط فعلا پخش نمی‌شود'}</p>
           <button
             type="button"
             onClick={() => setAttempt(a => a + 1)}
             className="min-h-11 rounded-field border border-white/30 px-6 text-sub font-bold hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
           >
-            تلاشِ دوباره
+            تلاش دوباره
           </button>
         </div>
       )}

@@ -451,7 +451,6 @@ export default function RegisterPage() {
           <h1 style={{ fontSize: 22, fontWeight: 900, color: TEXT, margin: '0 0 6px', letterSpacing: '-0.02em' }}>
             {otpOpen ? 'تأیید شماره موبایل' : step === 1 ? 'ساخت حساب جدید' : 'تکمیل اطلاعات حساب'}
           </h1>
-          <div style={{ width: 46, height: 3, borderRadius: 2, background: `var(--brand)`, transformOrigin: 'right', animation: 'auX .5s .2s ease both', marginBottom: 10 }} />
           <p style={{ fontSize: 13, color: MUT, margin: '0 0 22px', lineHeight: 1.8 }}>
             {otpOpen ? `کد ۵ رقمی به شماره ${toFa(form.phone)} پیامک شد` : step === 1 ? 'ابتدا شماره موبایل خود را وارد کنید' : `کاربر گرامی ${toFa(form.phone)} اکنون اطلاعات حساب را کامل کنید`}
           </p>
@@ -469,7 +468,7 @@ export default function RegisterPage() {
                 <div style={{ background: 'rgb(var(--c-gold) / 0.09)', border: '1px solid rgb(var(--c-gold) / 0.34)', borderRadius: 14, padding: '14px 16px', marginBottom: 16 }}>
                   <div style={{ fontSize: 13, fontWeight: 800, color: TEXT, marginBottom: 6 }}>این شماره قبلا ثبت‌نام کرده است</div>
                   <p style={{ fontSize: 12.5, color: MUT, margin: '0 0 12px', lineHeight: 2 }}>
-                    برای ادامه وارد حساب خود شوید. اگر رمز عبورتان را فراموش کرده‌اید، از گزینه‌ی بازیابی استفاده کنید.
+                    برای ادامه وارد حساب خود شوید، اگر رمز عبورتان را فراموش کرده‌اید، از گزینه‌ی بازیابی استفاده کنید
                   </p>
                   <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                     <Link href="/login" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '9px 18px', borderRadius: 11, textDecoration: 'none', fontSize: 12.5, fontWeight: 800, background: 'rgb(var(--c-gold) / 0.16)', border: '1px solid rgb(var(--c-gold) / 0.45)', color: GOLD_D }}>
@@ -526,9 +525,9 @@ export default function RegisterPage() {
               <div style={{ marginTop: 14, padding: '11px 13px', borderRadius: 12, background: 'rgb(var(--c-gold) / 0.07)', border: '1px solid rgb(var(--c-gold) / 0.22)' }}>
                 <div style={{ fontSize: 12.5, fontWeight: 800, color: 'var(--brand)', marginBottom: 6 }}>کد به دستتان نرسید؟</div>
                 <ul style={{ margin: 0, paddingInlineStart: 16, fontSize: 12, lineHeight: 2, color: 'var(--brand)' }}>
-                  <li>چند دقیقه صبر کنید و «ارسال مجدد» را بزنید.</li>
-                  <li>پوشه‌ی پیام‌های مسدودشده یا فیلترشده‌ی گوشی را ببینید.</li>
-                  <li>اگر باز هم نرسید، شماره‌ی دیگری امتحان کنید یا با پشتیبانی تماس بگیرید.</li>
+                  <li>چند دقیقه صبر کنید و «ارسال مجدد» را بزنید</li>
+                  <li>پوشه‌ی پیام‌های مسدودشده یا فیلترشده‌ی گوشی را ببینید</li>
+                  <li>اگر باز هم نرسید، شماره‌ی دیگری امتحان کنید یا با پشتیبانی تماس بگیرید</li>
                 </ul>
               </div>
             </div>
@@ -558,7 +557,7 @@ export default function RegisterPage() {
               </div>
               <p style={{ fontSize: 11.5, color: MUT, margin: '-6px 0 14px', display: 'flex', alignItems: 'flex-start', gap: 6, lineHeight: 1.8 }}>
                 <span style={{ width: 5, height: 5, borderRadius: '50%', background: GOLD, flexShrink: 0, marginTop: 7 }} />
-                نام، نام خانوادگی، کد ملی، تاریخ تولد و شماره موبایل باید متعلق به یک نفر باشد.
+                نام، نام خانوادگی، کد ملی، تاریخ تولد و شماره موبایل باید متعلق به یک نفر باشد
               </p>
 
               {/* باشگاه — اختیاری و بدون ذخیره‌ی آنی: هنوز حسابی وجود
@@ -568,14 +567,14 @@ export default function RegisterPage() {
                 <ClubPicker
                   value={club} onChange={setClub} autoSave={false}
                   label="باشگاهی که در آن فعالیت می‌کنید (اختیاری)"
-                  hint="می‌توانید بعدا از پروفایلتان انتخاب یا تغییرش دهید."
+                  hint="می‌توانید بعدا از پروفایلتان انتخاب یا تغییرش دهید"
                 />
               </div>
               {field('password', 'رمز عبور', <Lock size={16} />, { placeholder: 'حداقل ۸ کاراکتر', reveal: { shown: showPw, toggle: () => setShowPw(p => !p) } })}
               {pwWarn && (
                 <p style={{ fontSize: 11.5, fontWeight: 700, color: '#B23B2E', margin: '-6px 0 12px', display: 'flex', alignItems: 'center', gap: 6, lineHeight: 1.8 }}>
                   <AlertCircle size={13} style={{ flexShrink: 0 }} />
-                  کیبورد شما فارسی است — لطفا زبان کیبورد را انگلیسی کنید.
+                  کیبورد شما فارسی است — لطفا زبان کیبورد را انگلیسی کنید
                 </p>
               )}
               {/* شرط‌های رمز — حین تایپ سبز می‌شوند تا کاربر بعد از زدن دکمه غافلگیر نشود */}
@@ -611,13 +610,13 @@ export default function RegisterPage() {
               {form.confirmPassword.length > 0 && form.password !== form.confirmPassword && (
                 <p style={{ fontSize: 11.5, fontWeight: 700, color: '#B23B2E', margin: '-6px 0 12px', display: 'flex', alignItems: 'center', gap: 6, lineHeight: 1.8 }}>
                   <AlertCircle size={13} style={{ flexShrink: 0 }} />
-                  رمز عبور و تکرار آن یکسان نیستند.
+                  رمز عبور و تکرار آن یکسان نیستند
                 </p>
               )}
               {form.confirmPassword.length > 0 && form.password === form.confirmPassword && pwOk(form.password) && (
                 <p style={{ fontSize: 11.5, fontWeight: 800, color: '#0E7A38', margin: '-6px 0 12px', display: 'flex', alignItems: 'center', gap: 6, lineHeight: 1.8 }}>
                   <Check size={13} strokeWidth={3} style={{ flexShrink: 0 }} />
-                  رمز عبور تأیید شد.
+                  رمز عبور تأیید شد
                 </p>
               )}
 
@@ -638,7 +637,7 @@ export default function RegisterPage() {
                   <button type="button" onClick={() => goToLegal('/privacy')} style={legalLink}>
                     سیاست‌نامهٔ حریم خصوصی
                   </button>
-                  {' '}را می‌پذیرم.
+                  {' '}را می‌پذیرم
                 </span>
               </label>
 
@@ -661,9 +660,7 @@ export default function RegisterPage() {
 
           {/* ورود */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, margin: '20px 0' }}>
-            <div style={{ flex: 1, height: 1, background: LINE }} />
             <span style={{ fontSize: 12, color: MUT }}>حساب دارید؟</span>
-            <div style={{ flex: 1, height: 1, background: LINE }} />
           </div>
           <Link href="/login" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, width: '100%', boxSizing: 'border-box', padding: '13px', borderRadius: 13, textDecoration: 'none', fontSize: 14, fontWeight: 800, color: GOLD_D, background: 'rgb(var(--c-gold) / 0.10)', border: '1px solid rgb(var(--c-gold) / 0.32)' }}>
             ورود به حساب

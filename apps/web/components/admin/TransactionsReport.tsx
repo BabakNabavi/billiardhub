@@ -104,7 +104,7 @@ export default function TransactionsReport({ from, to }: { from: string; to: str
       const r = await apiFetch(`/api/admin/finance/transactions?${qs({ format: 'csv' })}`, { cache: 'no-store' })
       if (!r.ok) { setNote('خروجی ساخته نشد'); return }
       setNote(r.headers.get('X-Truncated') === '1'
-        ? `خروجی روی ${Number(r.headers.get('X-Rows-Exported') || 0).toLocaleString('fa-IR')} ردیف بسته شد؛ بازه را کوچک‌تر کنید.`
+        ? `خروجی روی ${Number(r.headers.get('X-Rows-Exported') || 0).toLocaleString('fa-IR')} ردیف بسته شد؛ بازه را کوچک‌تر کنید`
         : '')
       const blob = await r.blob()
       const url = URL.createObjectURL(blob)
@@ -148,7 +148,7 @@ export default function TransactionsReport({ from, to }: { from: string; to: str
         <Sum label="درآمد پلتفرم" v={totals.platformRevenue} tone="gold" />
         <Sum label="سهم باشگاه‌ها" v={totals.clubShare} tone="felt" />
         <Sum label="بازپرداخت" v={totals.refunded} muted />
-        <span className="tr-sums-n">جمعِ این صفحه است، نه کل بازه</span>
+        <span className="tr-sums-n">جمع این صفحه است، نه کل بازه</span>
       </div>
 
       {loading ? (

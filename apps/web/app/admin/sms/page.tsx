@@ -65,21 +65,21 @@ interface State {
    است و از بیرون یکی به نظر می‌رسند. طول کلید هر سه را از هم جدا
    می‌کند — بدون این‌که حتی یک کاراکتر از کلید نشان داده شود. */
 function keyDiagnosis(k: KeyInfo): { tone: 'ok' | 'bad'; text: string } | null {
-  if (k.quoted) return { tone: 'bad', text: 'کلید داخل گیومه است. در Vercel گیومه بخشی از مقدار می‌شود — بدون گیومه ذخیره کنید.' }
-  if (k.len === 0) return { tone: 'bad', text: 'مقدار کلید تهی است.' }
+  if (k.quoted) return { tone: 'bad', text: 'کلید داخل گیومه است، در Vercel گیومه بخشی از مقدار می‌شود — بدون گیومه ذخیره کنید' }
+  if (k.len === 0) return { tone: 'bad', text: 'مقدار کلید تهی است' }
   if (k.guid) {
     return {
       tone: 'ok',
-      text: 'شکل کلید درست است (۳۲ حرف). اگر باز هم «کلید کنسول معتبر نیست» می‌آید، یعنی خود کلید در پنل ملی‌پیامک باطل یا غیرفعال است — نه اشتباه تایپی.',
+      text: 'شکل کلید درست است (۳۲ حرف)، اگر باز هم «کلید کنسول معتبر نیست» می‌آید، یعنی خود کلید در پنل ملی‌پیامک باطل یا غیرفعال است — نه اشتباه تایپی',
     }
   }
   if (k.len > 40) {
     return {
       tone: 'bad',
-      text: `کلید ${toFaDigits(k.len)} کاراکتر است، ولی کلید ملی‌پیامک ۳۲ کاراکتر است. به احتمال زیاد کلید سرویس قبلی هنوز آن‌جاست — یا مقدار عوض شده ولی هنوز ری‌دیپلوی نشده.`,
+      text: `کلید ${toFaDigits(k.len)} کاراکتر است، ولی کلید ملی‌پیامک ۳۲ کاراکتر است، به احتمال زیاد کلید سرویس قبلی هنوز آن‌جاست — یا مقدار عوض شده ولی هنوز ری‌دیپلوی نشده`,
     }
   }
-  return { tone: 'bad', text: `کلید ${toFaDigits(k.len)} کاراکتر است، ولی باید ۳۲ کاراکتر حروف‌وعدد باشد.` }
+  return { tone: 'bad', text: `کلید ${toFaDigits(k.len)} کاراکتر است، ولی باید ۳۲ کاراکتر حروف‌وعدد باشد` }
 }
 
 export default function AdminSms() {
@@ -159,10 +159,10 @@ export default function AdminSms() {
       </div>
 
       <p style={{ fontSize: 12.5, color: SEC, lineHeight: 2, margin: '0 0 16px', maxWidth: 780 }}>
-        هر متن یک‌بار در پنل ملی‌پیامک ثبت و تأیید می‌شود و کدی می‌گیرد. آن کد را این‌جا
-        بگذارید و ذخیره کنید. متن آماده‌ی هر پانزده الگو در فایل <code style={{
+        هر متن یک‌بار در پنل ملی‌پیامک ثبت و تأیید می‌شود و کدی می‌گیرد، آن کد را این‌جا
+        بگذارید و ذخیره کنید، متن آماده‌ی هر پانزده الگو در فایل <code style={{
           background: '#F6F4EE', borderRadius: 5, padding: '1px 6px', fontSize: 11.5,
-        }}>docs/sms-patterns.md</code> هست.
+        }}>docs/sms-patterns.md</code> هست
       </p>
 
       {/* ── وضعیت سرویس ──
@@ -215,7 +215,7 @@ export default function AdminSms() {
             textAlign: 'center', letterSpacing: 1, color: INK, background: '#fff',
           }} />
         <span style={{ fontSize: 11.5, color: MUT, lineHeight: 1.8 }}>
-          مقدارها ساختگی‌اند («کاربر آزمایشی»، «باشگاه نمونه») — هیچ داده‌ی واقعی فرستاده نمی‌شود.
+          مقدارها ساختگی‌اند («کاربر آزمایشی»، «باشگاه نمونه») — هیچ داده‌ی واقعی فرستاده نمی‌شود
         </span>
       </div>
 
@@ -234,11 +234,11 @@ export default function AdminSms() {
             <AlertCircle size={16} /> سرویس‌های استعلام کار نمی‌کنند
           </div>
           {st.inquiry.wrongKey
-            ? <>کلید ملی‌پیامک در <code>SMS_API_KEY</code> نشسته است. آن متغیر مال سرویس
-              استعلام (s.api.ir) است، نه پیامک.<br />
+            ? <>کلید ملی‌پیامک در <code>SMS_API_KEY</code> نشسته است، آن متغیر مال سرویس
+              استعلام (s.api.ir) است، نه پیامک<br />
               کلید s.api.ir را در <code>SAPIR_API_KEY</code> بگذارید و
               کلید ملی‌پیامک را در <code>MELIPAYAMAK_KEY</code>.</>
-            : <>کلید سرویس استعلام تنظیم نشده. آن را در <code>SAPIR_API_KEY</code> بگذارید.</>}
+            : <>کلید سرویس استعلام تنظیم نشده، آن را در <code>SAPIR_API_KEY</code> بگذارید</>}
           <div style={{ marginTop: 6, fontWeight: 800 }}>
             تا آن موقع این‌ها کار نمی‌کنند: کد ورود و ثبت‌نام · احراز هویت (شاهکار) ·
             استعلام بانکی · جواز کسب · کد پستی · اعتبارسنجی ایمیل

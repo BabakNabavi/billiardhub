@@ -201,7 +201,7 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string
     const message = data?.reason === 'not_paid' ? 'این ثبت‌نام پرداخت‌نشده است'
       /* سهمِ باشگاه پس از پایان قطعی شده؛ بازپرداخت از این‌جا یعنی
          باشگاه‌دار خودش درآمد و کمیسیونِ قطعی را برگرداند. */
-      : data?.reason === 'completed' ? 'پس از پایانِ مسابقه بازپرداخت فقط از راهِ پشتیبانی ممکن است'
+      : data?.reason === 'completed' ? 'پس از پایان مسابقه بازپرداخت فقط از راه پشتیبانی ممکن است'
       : 'بازپرداخت انجام نشد';
     return NextResponse.json({ message }, { status: data?.reason === 'completed' ? 409 : 400 });
   }
@@ -219,6 +219,6 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string
   return NextResponse.json({
     ok: true, idempotent: data.idempotent ?? false,
     promoted,
-    message: 'وضعیت بازپرداخت ثبت شد. انتقال وجه پس از فعال‌شدن درگاه انجام می‌شود.',
+    message: 'وضعیت بازپرداخت ثبت شد، انتقال وجه پس از فعال‌شدن درگاه انجام می‌شود',
   });
 }

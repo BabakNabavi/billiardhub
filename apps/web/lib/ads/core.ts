@@ -766,7 +766,7 @@ export async function deletePricingPlan(id: string): Promise<{ ok: boolean; deac
   if (used.error || credited.error) {
     const plan = await updatePricingPlan(id, { isActive: false })
     return plan
-      ? { ok: true, deactivated: true, message: 'بررسی سفارش‌ها ممکن نشد؛ برای احتیاط پلن فقط غیرفعال شد.' }
+      ? { ok: true, deactivated: true, message: 'بررسی سفارش‌ها ممکن نشد؛ برای احتیاط پلن فقط غیرفعال شد' }
       : { ok: false, message: 'انجام نشد' }
   }
 
@@ -775,7 +775,7 @@ export async function deletePricingPlan(id: string): Promise<{ ok: boolean; deac
   if (refCount > 0) {
     const plan = await updatePricingPlan(id, { isActive: false })
     return plan
-      ? { ok: true, deactivated: true, message: 'این پلن سفارش ثبت‌شده دارد؛ به‌جای حذف، غیرفعال شد.' }
+      ? { ok: true, deactivated: true, message: 'این پلن سفارش ثبت‌شده دارد؛ به‌جای حذف، غیرفعال شد' }
       : { ok: false, message: 'غیرفعال‌سازی انجام نشد' }
   }
 

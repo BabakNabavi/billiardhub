@@ -165,7 +165,7 @@ export default function BracketSeeding({ tournamentId, onChanged }: {
 
   if (!b || !round1.length) return (
     <div style={{ ...card, textAlign: 'center', padding: '40px 20px', color: MUT, fontSize: 13 }}>
-      اول براکت را بسازید؛ بعد می‌توانید جایگاه‌ها را دستی بچینید.
+      اول براکت را بسازید؛ بعد می‌توانید جایگاه‌ها را دستی بچینید
     </div>
   )
 
@@ -209,7 +209,7 @@ export default function BracketSeeding({ tournamentId, onChanged }: {
 
         /* ── فهرست چیده‌نشده‌ها ──
            تک‌ستونه بود و با ۱۶ بازیکن آن‌قدر بلند می‌شد که در گوشی
-           باید تا انتهایش اسکرول می‌کردی تا به خود جدول برسی. دو
+           باید تا انتهایش اسکرول می‌کردی تا به خود جدول برسی، دو
            ستون همان فهرست را نصف می‌کند. */
         .bs-pool{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:6px }
         @media (min-width: 781px){ .bs-pool{ grid-template-columns:1fr } }
@@ -217,7 +217,7 @@ export default function BracketSeeding({ tournamentId, onChanged }: {
 
       {started && (
         <div style={{ ...notice, borderColor: 'rgba(178,59,46,0.28)', background: 'rgba(178,59,46,0.06)', color: '#8A2A20' }}>
-          <Info size={14} /> نتیجه‌ای ثبت شده — جایگاه‌ها دیگر قابل جابه‌جایی نیستند.
+          <Info size={14} /> نتیجه‌ای ثبت شده — جایگاه‌ها دیگر قابل جابه‌جایی نیستند
         </div>
       )}
 
@@ -225,9 +225,9 @@ export default function BracketSeeding({ tournamentId, onChanged }: {
         <div style={notice}>
           <Info size={14} />
           <span>
-            بازیکن را از فهرست بکشید روی جایگاه، یا دو جایگاه را روی هم بیندازید تا جابه‌جا شوند.
-            در گوشی: یک‌بار روی بازیکن بزنید، بعد روی جایگاه.
-            تراشه‌ی قرمز <b>Bye</b> هم مثل بازیکن گذاشته می‌شود؛ زدن روی جایگاه بای پسش می‌گیرد.
+            بازیکن را از فهرست بکشید روی جایگاه، یا دو جایگاه را روی هم بیندازید تا جابه‌جا شوند
+            در گوشی: یک‌بار روی بازیکن بزنید، بعد روی جایگاه
+            تراشه‌ی قرمز <b>Bye</b> هم مثل بازیکن گذاشته می‌شود؛ زدن روی جایگاه بای پسش می‌گیرد
           </span>
         </div>
       )}
@@ -268,7 +268,7 @@ export default function BracketSeeding({ tournamentId, onChanged }: {
 
       {(pool.length > 0 || byeCount > 0) && !started && (
         <div style={{ fontSize: 11.5, color: MUT, marginBottom: 12, lineHeight: 1.9 }}>
-          تا وقتی چیزی در فهرست «چیده‌نشده» مانده — بازیکن یا بای — چیدمان تأیید نمی‌شود.
+          تا وقتی چیزی در فهرست «چیده‌نشده» مانده — بازیکن یا بای — چیدمان تأیید نمی‌شود
         </div>
       )}
 
@@ -296,7 +296,7 @@ export default function BracketSeeding({ tournamentId, onChanged }: {
 
           {pool.length === 0 && byeCount === 0 ? (
             <div style={{ fontSize: 11.5, color: MUT, lineHeight: 1.9 }}>
-              همه‌ی جایگاه‌ها پر شده‌اند.
+              همه‌ی جایگاه‌ها پر شده‌اند
             </div>
           ) : (
             <div className="bs-pool">

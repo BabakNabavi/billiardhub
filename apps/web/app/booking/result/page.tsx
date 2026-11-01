@@ -67,7 +67,7 @@ function BookingResult() {
           <>
             <span style={{ display: 'inline-flex', width: 68, height: 68, borderRadius: 22, background: 'rgba(14,122,56,0.1)', color: FELT, alignItems: 'center', justifyContent: 'center', marginBottom: 16 }}><CheckCircle2 size={34} /></span>
             <h1 style={{ fontSize: 20, fontWeight: 900, color: INK, margin: '0 0 8px' }}>رزرو شما قطعی شد</h1>
-            <p style={{ fontSize: 13, color: MUT, margin: '0 0 20px', lineHeight: 1.9 }}>پرداخت با موفقیت تأیید و زمان شما رزرو شد.</p>
+            <p style={{ fontSize: 13, color: MUT, margin: '0 0 20px', lineHeight: 1.9 }}>پرداخت با موفقیت تأیید و زمان شما رزرو شد</p>
 
             <div style={{ background: '#FAF8F3', border: `1px solid ${LINE}`, borderRadius: 16, padding: 16, textAlign: 'right', display: 'flex', flexDirection: 'column', gap: 10 }}>
               {b?.booking_reference && <Row label="کد پیگیری" value={b.booking_reference} mono />}
@@ -85,7 +85,7 @@ function BookingResult() {
             <span style={{ display: 'inline-flex', width: 68, height: 68, borderRadius: 22, background: 'rgba(178,59,46,0.09)', color: '#B23B2E', alignItems: 'center', justifyContent: 'center', marginBottom: 16 }}><XCircle size={34} /></span>
             <h1 style={{ fontSize: 20, fontWeight: 900, color: INK, margin: '0 0 8px' }}>پرداخت انجام نشد</h1>
             <p style={{ fontSize: 13, color: MUT, margin: '0 0 20px', lineHeight: 1.9 }}>
-              {reason || 'پرداخت تأیید نشد. اگر مبلغی کسر شده، طی ۷۲ ساعت به‌صورت خودکار بازمی‌گردد.'}
+              {reason || 'پرداخت تأیید نشد، اگر مبلغی کسر شده، طی ۷۲ ساعت به‌صورت خودکار بازمی‌گردد'}
             </p>
           </>
         )}

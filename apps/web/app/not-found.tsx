@@ -67,7 +67,7 @@ export default function NotFound() {
             <span className="sr-only">خطای ۴۰۴ — </span>این ضربه به پاکت نرسید
           </h1>
           <p className="m-0 mt-3 max-w-md text-pretty text-body text-ink-2">
-            صفحه‌ای که دنبالش بودید این‌جا نیست. شاید نشانی اشتباه تایپ شده، یا این صفحه برداشته شده است.
+            صفحه‌ای که دنبالش بودید این‌جا نیست، شاید نشانی اشتباه تایپ شده، یا این صفحه برداشته شده است
           </p>
           <RequestedPath />
 
@@ -88,7 +88,7 @@ export default function NotFound() {
       </div>
 
       <div className="relative mx-auto max-w-screen-xl px-4 pb-16 sm:px-6 lg:px-8">
-        <h2 className="m-0 mb-6 text-section text-ink">شاید دنبالِ یکی از این‌ها بودید</h2>
+        <h2 className="m-0 mb-6 text-section text-ink">شاید دنبال یکی از این‌ها بودید</h2>
         <ExploreCards items={EXPLORE_ITEMS.slice(0, 6)} className="grid grid-cols-3 gap-3 sm:grid-cols-6 sm:gap-4" />
       </div>
     </section>
