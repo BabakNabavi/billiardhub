@@ -69,3 +69,5 @@ backups/
 
 # کشِ هوکِ impeccable — هر ویرایش بازنویسی می‌شود
 apps/web/.impeccable/hook.cache.json
+# Playwright CLI output (may contain credentials)
+.playwright-cli/
