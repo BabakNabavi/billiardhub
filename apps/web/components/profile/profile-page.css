@@ -245,7 +245,8 @@ main.ch-col > section { max-width: 760px; }
 /* ⚠️ `90deg` فیزیکی است و در RTL خط از سر اشتباه محو می‌شد: طلایی
    ته صفحه می‌ماند و کنار عنوان — جایی که باید به آن وصل شود —
    شفاف بود. `to left` منطقی است و در هر دو جهت درست می‌نشیند. */
-.ch-sec-head .rule { flex: 1; height: 1px; background: linear-gradient(to left, rgb(var(--gold-ch) / 0.42), transparent); }
+/* خطِ کنارِ عنوان برداشته شد (خواستِ مالک، ۱۰ آبانِ ۱۴۰۵) — فقط فاصله‌پرکن می‌ماند */
+.ch-sec-head .rule { flex: 1; }
 
 .ch-card { background: var(--bg-surface, #fff); border: 1px solid #E7E2D6; border-radius: 18px; padding: clamp(18px, 2.6vw, 26px); }
 .ch-empty { font-size: 13px; color: var(--text-tertiary, #6E6E6E); line-height: 2; margin: 0; }

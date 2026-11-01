@@ -912,11 +912,9 @@ export default function MarketNewPage() {
         @media (max-width: 900px) {
           .mk-topbar { display: none; }
           .mk-msearch { display: block; }
-          /* «همه‌ی آگهی‌ها» — جداسازی حرفه‌ای: فاصله‌ی بیشتر + نیم‌خط طلایی محوشونده */
+          /* «همه‌ی آگهی‌ها»: فاصله‌ی بیشتر؛ خطِ کنارِ عنوان برداشته شد (خواستِ مالک) */
           .mk-statusbar { margin: 26px 2px 18px !important; }
           .mk-stitle { font-size: 14.5px !important; font-weight: 900 !important; }
-          .mk-hr { align-self: center; height: 1px;
-            background: linear-gradient(to left, rgba(154,110,56,0.38), rgba(154,110,56,0.03)); }
           .mk-mcats { display: grid; }
           .mk-layout { grid-template-columns: minmax(0,1fr); }
           .mk-sidebar { display: none; }
@@ -961,6 +959,18 @@ export default function MarketNewPage() {
           </div>
 
 
+          {/* سرچ — پلیس‌هولدر با «بازار» طلایی */}
+          <div style={{ position: 'relative', flex: 1, minWidth: 0, maxWidth: 520 }}>
+            <Search size={14} style={{ position: 'absolute', right: 13, top: '50%', transform: 'translateY(-50%)', color: MUT, pointerEvents: 'none' }} />
+            <input value={q} onChange={e => setQ(e.target.value)} aria-label="جستجو در بیلیارد بازار"
+              style={{ width: '100%', boxSizing: 'border-box', padding: '10px 36px 10px 14px', borderRadius: 12, border: `1px solid ${LINE}`, background: '#FAFAF7', fontSize: 13, fontFamily: 'inherit', outline: 'none', color: TEXT }} />
+            {!q && (
+              <span aria-hidden className="mk-ph" style={{ position: 'absolute', right: 36, top: 0, bottom: 0, fontSize: 12.5, color: MUT, pointerEvents: 'none', whiteSpace: 'nowrap' }}>
+                جستجو در بیلیارد <span className="mk-rollwrap"><b className="mk-roll">بازار</b></span>
+              </span>
+            )}
+          </div>
+
           <span style={{ flex: 1 }} />
 
           {/* نشان‌ها */}
@@ -982,8 +992,16 @@ export default function MarketNewPage() {
       {/* ═══ سرچ‌بار موبایل — لوکیشن داخل خود باکس ═══ */}
       <div className="mk-msearch" ref={mCityRef}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 0, background: '#FAFAF7', border: `1px solid ${LINE}`, borderRadius: 14, overflow: 'visible', position: 'relative' }}>
-          {/* جست‌وجوی بازار برداشته شد (خواستِ مالک، ۱۰ آبانِ ۱۴۰۵) — فقط انتخابِ شهر ماند */}
-          <span style={{ flex: 1 }} />
+          <Search size={15} style={{ color: MUT, flexShrink: 0, margin: '0 12px 0 4px' }} />
+          <div style={{ position: 'relative', flex: 1, minWidth: 0 }}>
+            <input value={q} onChange={e => setQ(e.target.value)} aria-label="جستجو در بیلیارد بازار"
+              style={{ width: '100%', boxSizing: 'border-box', padding: '10px 0', background: 'none', border: 'none', outline: 'none', fontSize: 13.5, fontFamily: 'inherit', color: TEXT }} />
+            {!q && (
+              <span aria-hidden className="mk-ph" style={{ position: 'absolute', right: 0, top: 0, bottom: 0, fontSize: 12.5, color: MUT, pointerEvents: 'none', whiteSpace: 'nowrap' }}>
+                جستجو در بیلیارد <span className="mk-rollwrap"><b className="mk-roll">بازار</b></span>
+              </span>
+            )}
+          </div>
           {/* لوکیشن — سمت چپ باکس */}
           <button type="button" onClick={() => setCityOpen(p => !p)}
             style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '8px 12px', margin: '4px 6px 4px 4px', borderRadius: 10, borderInlineStart: `1px solid ${LINE}`, background: 'none', borderTop: 'none', borderBottom: 'none', borderInlineEnd: 'none', cursor: 'pointer', fontFamily: 'inherit', fontSize: 12, fontWeight: 800, color: cities.length ? GOLD_D : SEC, flexShrink: 0 }}>
