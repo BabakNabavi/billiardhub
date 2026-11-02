@@ -11,6 +11,7 @@
    ───────────────────────────────────────────────────────────── */
 
 import { sb } from '../finance/db'
+import { canPostStory } from '../story-store'
 import {
   getSetting, normalizeFreeQuota, pickRoleQuota,
   QUOTA_ROLES, ROLE_FA, type FreeQuotaSetting, type Period,
@@ -41,8 +42,14 @@ export const DEFAULT_STORY_QUOTA: FreeQuotaSetting = {
   },
 }
 
+/** حقِ استوری از کجا آمد: نقشِ واجد (یا حسابِ رسمی)، بسته، یا سهمیه‌ی رایگانی که ادمین به کاربرِ عادی داده */
+export type StoryVia = 'role' | 'plan' | 'free'
+
 export interface StoryQuotaState {
   enabled: boolean          // فروش بسته فعال است؟
+  /** اصلا حقِ استوری دارد؟ (نقشِ واجد یا بسته) — جدا از پر شدنِ سقف */
+  eligible: boolean
+  via: StoryVia
   allowed: boolean
   used: number
   limit: number             // ۰ = نامحدود
@@ -98,12 +105,12 @@ export async function getStoryQuotaState(
   const free = normalizeFreeQuota(await getSetting<unknown>('stories_free_quota', DEFAULT_STORY_QUOTA))
 
   let period: Period, limit: number, role: string | undefined
+  const roles = roleHint ? [roleHint] : await rolesOf(userId)
 
   if (plan) {
     period = plan.period
     limit = plan.quota
   } else {
-    const roles = roleHint ? [roleHint] : await rolesOf(userId)
     /* در استوری، صفر یعنی «این نقش سهمیه ندارد» — نه نامحدود؛ وگرنه
        نقش صفر «کاربر عادی» سهمیه‌ی نقش واقعی را می‌بلعید و مثلا
        بازیکن هم بدون استوری می‌ماند. */
@@ -115,26 +122,40 @@ export async function getStoryQuotaState(
 
   const used = await countUsed(period)
 
+  /* حقِ استوری: بسته‌ی خریداری‌شده، یا نقشِ واجد. وقتی سهمیه در پنلِ ادمین
+     روشن است، خودِ تنظیمِ ادمین (سهمیه‌ی هر نقش، از جمله کاربرِ عادی) تصمیم
+     می‌گیرد؛ خاموش یعنی «سقفِ تعداد نیست»، نه «همه حقِ استوری دارند».
+     ⚠️ تا آبانِ ۱۴۰۵ خاموش‌بودن همه را آزاد می‌کرد و کاربرِ عادی هم استوری
+     می‌گذاشت (گزارشِ مالک). */
+  /* حسابِ رسمی همیشه — `pickRoleQuota` نقشِ admin را نمی‌شناسد و با سهمیه‌ی
+     روشن او را به سهمیه‌ی پیش‌فرض (معمولا صفر) می‌انداخت */
+  const official = !plan && roles.includes('admin')
+  const eligible = !!plan || official || (enabled ? limit > 0 : canPostStory(roles))
+  /* از چه راهی حق دارد — روی استوری می‌نشیند تا پنهان‌سازیِ GET استوریِ
+     پولی یا رایگانِ ادمین‌داده را با «نقش رفت» اشتباه نگیرد */
+  const via: StoryVia = plan ? 'plan' : official || canPostStory(roles) ? 'role' : 'free'
+
   const base = {
-    enabled, used, limit, period,
+    enabled, eligible, via, used, limit, period,
     resetAt: new Date(Date.now() + PERIOD_MS[period]).toISOString(),
     planName: plan?.name ?? null,
     planExpiresAt: plan?.expiresAt ?? null,
     ...(role ? { role } : {}),
   }
 
-  /* خاموش ⇒ هیچ محدودیتی نیست */
-  if (!enabled) return { ...base, allowed: true }
-  /* سهمیه‌ی صفر بسته یعنی نامحدود */
-  if (limit <= 0 && plan) return { ...base, allowed: true }
-
-  /* نقشی که اصلا حق استوری ندارد */
-  if (limit <= 0) {
+  if (!eligible) {
     return {
       ...base, allowed: false,
-      message: 'نقش شما سهمیه‌ی رایگان استوری ندارد؛ برای انتشار استوری یکی از بسته‌ها را تهیه کنید',
+      message: enabled
+        ? 'نقش شما سهمیه‌ی رایگان استوری ندارد؛ برای انتشار استوری یکی از بسته‌ها را تهیه کنید'
+        : 'انتشار استوری برای حساب‌هایی است که نقش فعالی در سایت دارند (بازیکن، مربی، داور، باشگاه، فروشگاه و…)',
     }
   }
+
+  /* خاموش ⇒ سقفِ تعداد نیست. حسابِ رسمی هم سقف ندارد (STORY_DAILY_LIMIT) */
+  if (!enabled || official) return { ...base, allowed: true }
+  /* سهمیه‌ی صفر بسته یعنی نامحدود (بی‌بسته، صفر همان «واجد نیست» بالاست) */
+  if (limit <= 0) return { ...base, allowed: true }
 
   if (used >= limit) {
     return {
@@ -146,4 +167,28 @@ export async function getStoryQuotaState(
   }
 
   return { ...base, allowed: true }
+}
+
+/** کاربرِ عادی (فقط `user`) با تنظیمِ فعلیِ ادمین حقِ استوریِ رایگان دارد؟
+ *  فقط وقتی سهمیه روشن است و ادمین برای «کاربر عادی» عددی گذاشته. */
+export async function plainUsersMayPost(): Promise<boolean> {
+  if (!(await getSetting<boolean>('stories_quota_enabled', false))) return false
+  const free = normalizeFreeQuota(await getSetting<unknown>('stories_free_quota', DEFAULT_STORY_QUOTA))
+  /* همان انتخابی که انتشار می‌کند — نبودِ کلیدِ user یعنی پیش‌فرض، نه صفر */
+  return pickRoleQuota(free, ['user'], { zeroMeansNone: true }).quota.quota > 0
+}
+
+/** از میانِ این شناسه‌ها، کدام‌ها بسته‌ی استوریِ فعال دارند؛ null یعنی خواندن نشد */
+export async function usersWithStoryPlan(userIds: string[]): Promise<Set<string> | null> {
+  if (!userIds.length) return new Set()
+  try {
+    const { data, error } = await sb()
+      .from('user_story_plans')
+      .select('user_id')
+      .in('user_id', userIds)
+      .eq('status', 'ACTIVE')
+      .gt('expires_at', new Date().toISOString())
+    if (error) return null
+    return new Set(((data ?? []) as { user_id: string }[]).map(r => r.user_id))
+  } catch { return null }
 }

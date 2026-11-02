@@ -54,10 +54,23 @@ export const OFFICIAL_DISPLAY_NAME = 'Billiard Hub'
    بیرون می‌آمد. */
 const ROLE_PRIORITY = ['admin', 'coach', 'referee', 'club_owner', 'seller', 'manufacturer', 'technician', 'player']
 
+/* کاربرِ بی‌نقش — فقط برای برچسبِ پاسخ به استوری و استوریِ با بسته‌ی خریداری‌شده؛
+   در STORY_ROLES نیست تا هیچ‌جا «نقشِ استوری» شمرده نشود */
+const PLAIN_USER = { key: 'user', label: 'کاربر', color: '#94a3b8' }
+
 export function pickStoryRole(roles: string[]): { key: string; label: string; color: string } {
-  const key = ROLE_PRIORITY.find(r => roles.includes(r)) ?? 'player'
-  const meta = STORY_ROLES[key] ?? STORY_ROLES.player!
-  return { key, label: meta.label, color: meta.color }
+  /* ⚠️ تا آبانِ ۱۴۰۵ پیش‌فرض «بازیکن» بود: کاربرِ عادی هم برچسب و حلقه‌ی
+     بازیکن می‌گرفت — هم روی استوری و هم روی پاسخش به استوری دیگران */
+  const key = ROLE_PRIORITY.find(r => roles.includes(r))
+  const meta = key ? STORY_ROLES[key] : undefined
+  return key && meta ? { key, label: meta.label, color: meta.color } : PLAIN_USER
+}
+
+/** حقِ استوری از خودِ نقش: کاربرِ عادی (فقط `user`) استوری نمی‌گذارد، حتی
+ *  وقتی سهمیه‌ی تعداد در پنلِ ادمین خاموش است. سرور و نوارِ استوری هر دو
+ *  از همین می‌خوانند. */
+export function canPostStory(roles: (string | null | undefined)[]): boolean {
+  return storyRoleOf(roles.filter((r): r is string => !!r)) !== null
 }
 
 /* ── سقف روزانه‌ی استوری بر اساس نقش ──

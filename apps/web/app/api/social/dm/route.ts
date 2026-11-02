@@ -10,6 +10,9 @@ import {
 import { sendPush } from '@/lib/push-server'
 import { actorOf, UNAUTHENTICATED, FORBIDDEN } from '@/lib/auth/ownership'
 import { guardSocialInteractions } from '@/lib/features'
+import { sb } from '@/lib/finance/db'
+import { publicDisplayName, type NameSource } from '@/lib/public-name'
+import { pickStoryRole } from '@/lib/story-store'
 
 export function OPTIONS() { return new NextResponse(null, { status: 204, headers: CORS }) }
 
@@ -95,13 +98,18 @@ export async function POST(req: NextRequest) {
   const kind: string = b?.kind || 'text'
   if (!to?.key || !text) return NextResponse.json({ message: 'داده ناقص' }, { status: 400, headers: CORS })
 
-  /* فرستنده همیشه خود صاحب نشست است. نام و نقش نمایشی می‌تواند از
-     بدنه بیاید (فقط تزئین رابط)، ولی «کلید» — که مالکیت پیام با آن
-     تعیین می‌شود — جعل‌شدنی نیست. */
+  /* فرستنده همیشه خود صاحب نشست است — کلید، نام و نشانِ نقش هر سه از
+     رکوردِ کاربر. ⚠️ تا آبانِ ۱۴۰۵ نام و نقش از بدنه می‌آمد («فقط تزئین»):
+     هر کسی می‌توانست با نامِ «Billiard Hub» یا نشانِ «باشگاه» پیام و پاسخِ
+     استوری بفرستد، و کاربرِ عادی در پاسخ به استوری «بازیکن» نشان داده می‌شد. */
+  const { data: meRow, error: meErr } = await sb().from('users')
+    .select('"firstName","lastName","primaryRole","secondaryRoles"').eq('id', actor.id).maybeSingle()
+  if (meErr) console.error('[social/dm] sender lookup:', meErr.message)   // پیام با «کاربر» می‌رود، نه با نامِ بدنه
+  const me = (meRow ?? {}) as NameSource
   const from = {
     key: actor.dmKey,
-    name: String(b?.from?.name ?? '').slice(0, 80),
-    role: String(b?.from?.role ?? actor.role).slice(0, 40),
+    name: publicDisplayName(me).slice(0, 80),
+    role: pickStoryRole([me.primaryRole, ...(me.secondaryRoles ?? [])].filter(Boolean) as string[]).label,
   }
   if (!from.key) return deny(403, FORBIDDEN)
 

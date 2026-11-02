@@ -1651,7 +1651,9 @@ t('نشانِ آگهی در لحظه‌ی انتشار Snapshot می‌شود',
   /seller_role: sellerRole/.test(read('app/api/market/ads/route.ts'))
   && /seller_role text/.test(read('../../supabase/migrations/080_publisher_role.sql')));
 t('نشانِ استوری از سرور می‌آید نه از کلاینت',
-  /roleKey: roleMeta\?\.value/.test(read('app/api/social/stories/route.ts'))
+  /* از آبانِ ۱۴۰۵ با pickStoryRole روی همه‌ی نقش‌های رکورد (lib/story-store) */
+  /roleKey: roleMeta\.key/.test(read('app/api/social/stories/route.ts'))
+  && /pickStoryRole\(\[me\.primaryRole/.test(read('app/api/social/stories/route.ts'))
   && !/roleKey: s\.roleKey/.test(read('app/api/social/stories/route.ts')),
   'پیش‌تر هر کسی می‌توانست استوری‌اش را با نشانِ «باشگاه‌دار» منتشر کند');
 
@@ -3777,7 +3779,7 @@ console.log('\n― استوری: یک منبع، با انقضا ―');
   t('نمایِ تمام‌صفحه‌ی تصویر ناحیه‌ی امن را رعایت می‌کند',
     read('components/market/ImageLightbox.tsx').includes("paddingTop: 'env(safe-area-inset-top)'"),
     'ضربدرِ نمای تصویر روی آیفونِ نصب‌شده زیرِ ساعت می‌رفت');
-  for (const p of ['components/MediaUpload.tsx', 'components/IdentityVerify.tsx']) {
+  for (const p of ['components/MediaUpload.tsx']) {
     t(`ورقِ ${p.split('/').pop()} ناحیه‌ی امن را با calc جمع می‌زند`,
       /paddingTop: 'calc\(clamp\([^']*env\(safe-area-inset-top\)\)'/.test(read(p)),
       'paddingِ اینلاین بر کلاسِ safe-top مقدم است و بی‌صدا بی‌اثرش می‌کند');

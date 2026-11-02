@@ -3,12 +3,12 @@ import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { CORS, DAY, P, readJson, writeJson, removeStoryMedia } from '@/lib/social-server'
 import { actorFromRequest } from '@/lib/finance/db'
-import { getStoryQuotaState } from '@/lib/stories/quota'
+import { getStoryQuotaState, plainUsersMayPost, usersWithStoryPlan, type StoryVia } from '@/lib/stories/quota'
+import { hideLiveStory } from '@/lib/stories/visibility'
 import { redactList } from '@/lib/privacy'
 import { getSupabaseServer } from '@/lib/supabase-server'
-import { pickStoryRole } from '@/lib/story-store'
+import { pickStoryRole, canPostStory } from '@/lib/story-store'
 import { publicDisplayName } from '@/lib/public-name'
-import { ROLE_MAP, type RoleValue } from '@/lib/roles'
 import { sb } from '@/lib/finance/db'
 
 /* سقف استوری دیگر هاردکد نیست — از تنظیمات ادمین (به تفکیک نقش) و
@@ -20,6 +20,8 @@ interface SStory {
   id: string; ownerKey: string; userName: string
   roleKey: string; roleLabel: string; roleColor: string
   avatar: string; logoUrl?: string; mediaUrl: string; caption: string; createdAt: number
+  /** از چه راهی حقِ انتشار داشت (lib/stories/visibility) — استوریِ پیش از آبانِ ۱۴۰۵ ندارد */
+  via?: StoryVia
 }
 
 /* بدنه‌ی انتشار در مرز: فقط فیلدهایی که خوانده می‌شوند. کپشن بر حسبِ
@@ -81,7 +83,7 @@ export async function GET() {
      که کلید خام در دست است همین‌جاست (در پاسخ عمومی هش می‌شود)، پس
      همین‌جا حل می‌شود — و برای همه‌ی بیننده‌ها، نه فقط صاحب استوری. */
   const keys = [...new Set(live.map(s => s.ownerKey).filter(Boolean))]
-  interface LiveIdentity { avatar?: string; name?: string; role?: { key: string; label: string; color: string } }
+  interface LiveIdentity { userId?: string; eligible?: boolean; avatar?: string; name?: string; role?: { key: string; label: string; color: string } }
   const idOf = new Map<string, LiveIdentity>()
   if (keys.length) {
     try {
@@ -102,6 +104,7 @@ export async function GET() {
         if (!key) return
         const roles = [u.primaryRole, ...(u.secondaryRoles ?? [])].filter(Boolean) as string[]
         idOf.set(key, {
+          userId: u.id, eligible: canPostStory(roles),
           avatar: u.avatar,
           name: publicDisplayName(u, '') || undefined,
           role: pickStoryRole(roles),
@@ -112,7 +115,25 @@ export async function GET() {
     } catch { /* خواندن کاربر شکست خورد ⇒ همان مقدار ذخیره‌شده */ }
   }
 
-  const withAvatar = live.map(s => {
+  /* استوریِ حسابی که حقِ استوری‌اش رفته دیده نمی‌شود — قاعده در
+     lib/stories/visibility. فقط وقتی هویت واقعا خوانده شد؛ خطای خواندن
+     چیزی را پنهان نمی‌کند. بسته و تنظیم فقط وقتی خوانده می‌شوند که
+     استوریِ بی‌نقشِ بی‌via (پیش از این قاعده) در کار باشد. */
+  const roleless = live.filter(s => !s.via && idOf.get(s.ownerKey)?.eligible === false)
+  const planIds = roleless.length
+    ? await usersWithStoryPlan([...new Set(roleless.map(s => idOf.get(s.ownerKey)!.userId!).filter(Boolean))])
+    : new Set<string>()
+  const plainMay = roleless.length ? await plainUsersMayPost() : false
+  const visible = live.filter(s => {
+    const me = idOf.get(s.ownerKey)
+    if (!me || me.eligible === undefined) return true
+    return !hideLiveStory(s.via, {
+      hasStoryRole: me.eligible,
+      hasPlan: planIds ? planIds.has(me.userId ?? '') : null,
+    }, plainMay)
+  })
+
+  const withAvatar = visible.map(s => {
     const me = idOf.get(s.ownerKey)
     return {
       ...s,
@@ -168,30 +189,34 @@ export async function POST(req: NextRequest) {
   if (!quota.allowed) {
     return NextResponse.json(
       { message: quota.message ?? 'سقف استوری شما پر شده است', quotaExceeded: true },
-      { status: quota.limit <= 0 ? 403 : 429, headers: CORS },
+      { status: quota.eligible ? 429 : 403, headers: CORS },
     )
   }
 
-  /* نقش اصلی کاربر — همان نشانی که روی استوری می‌نشیند */
+  /* نشانِ نقش — همان `pickStoryRole`ی که GET برای نمایش به کار می‌برد.
+     پیش‌تر این‌جا فقط `primaryRole` خوانده می‌شد (برچسبِ «کاربر عادی» یا
+     «بازیکن رنکینگی») و GET روی همه‌ی نقش‌ها چیز دیگری نشان می‌داد. */
   const { data: meRow } = await sb().from('users')
-    .select('"primaryRole"').eq('id', ownerKey).maybeSingle()
-  const myRole = (meRow as { primaryRole?: string } | null)?.primaryRole ?? ''
-  const roleMeta = myRole ? ROLE_MAP[myRole as RoleValue] : undefined
+    .select('"firstName","lastName","primaryRole","secondaryRoles"').eq('id', ownerKey).maybeSingle()
+  const me = (meRow ?? {}) as { firstName?: string; lastName?: string; primaryRole?: string; secondaryRoles?: string[] }
+  const roleMeta = pickStoryRole([me.primaryRole, ...(me.secondaryRoles ?? [])].filter(Boolean) as string[])
 
   const story: SStory = {
     id: `st-${Date.now()}-${Math.floor(Math.random() * 1e4)}`,
-    ownerKey, userName: s.userName || 'کاربر',
+    /* نام هم از رکورد، نه از بدنه — وگرنه «Billiard Hub» جعل‌شدنی بود */
+    ownerKey, userName: publicDisplayName(me),
     /* ── نشان نقش از سرور، نه از کلاینت ──
        تا امروز این سه هرچه مرورگر می‌فرستاد پذیرفته می‌شد — یعنی هر
        کسی می‌توانست استوری‌اش را با نشان «باشگاه‌دار» منتشر کند.
        حالا از نقش اصلی خود کاربر خوانده می‌شود. */
-    roleKey: roleMeta?.value ?? 'player',
-    roleLabel: roleMeta?.label ?? 'بازیکن',
-    roleColor: roleMeta?.color ?? '#06b6d4',
+    roleKey: roleMeta.key,
+    roleLabel: roleMeta.label,
+    roleColor: roleMeta.color,
     avatar: s.avatar || 'ک', logoUrl: s.logoUrl, mediaUrl: s.mediaUrl,
     /* کپشن متنِ آزاد است و لینک‌هایش در نمایش ساخته می‌شوند (فقط http/https)؛
        سقفِ طول در PostZ — فرم ۳۰۰ می‌گذارد، ۵۰۰ برای کلاینت‌های قدیمی */
     caption: s.caption, createdAt: now,
+    via: quota.via,
   }
   live.unshift(story)
   await writeJson(P.stories, live)

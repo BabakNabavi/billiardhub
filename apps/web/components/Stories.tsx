@@ -5,7 +5,7 @@ import { createPortal } from 'react-dom';
 import { X, Plus, Heart, Send, Check, Smile } from 'lucide-react';
 import { useAuthStore } from '../store/auth.store';
 import api from '../lib/api';
-import { getStoredStories, addStoredStory, pickStoryRole, storyLimitFor, countTodayStories, type StoredStory } from '../lib/story-store';
+import { getStoredStories, addStoredStory, pickStoryRole, storyLimitFor, canPostStory, countTodayStories, type StoredStory } from '../lib/story-store';
 import { publicDisplayName } from '../lib/public-name';
 import { addStoryReply } from '../lib/story-inbox';
 import { useSocialInteractions } from './features/FeatureFlags';
@@ -438,15 +438,16 @@ export default function Stories() {
      دستگاه تازه از صفر شروع می‌شد و با پاک‌کردن حافظه‌ی مرورگر ریست
      می‌شد — کاربر «۰ از ۲» می‌دید در حالی که سرور چیز دیگری می‌دانست.
      منبع حقیقت همان چیزی است که موقع انتشار سنجیده می‌شود. */
-  const [quota, setQuota] = useState<{ used: number; limit: number; allowed: boolean; enabled: boolean } | null>(null);
+  const [quota, setQuota] = useState<{ used: number; limit: number; allowed: boolean; enabled: boolean; eligible?: boolean } | null>(null);
   const dailyLimit = quota ? quota.limit : localLimit;
   const usedToday = quota ? quota.used : countTodayStories(ownerKey);
-  /* ⚠️ محدودیتِ استوری فقط از سرور (کلیدِ stories_quota_enabled در پنلِ ادمین).
-     تا آبانِ ۱۴۰۵ این‌جا سقفِ نقش (`storyLimitFor`) هم اعمال می‌شد: کاربرِ عادی
-     دکمه‌ی افزودن را اصلاً نمی‌دید و بقیه شمارنده‌ی «سقف امروز» می‌دیدند، با
-     اینکه سهمیه‌ی سرور خاموش بود. خواستِ مالک: محدودیت برداشته شود. */
+  /* سقفِ تعداد فقط از سرور (کلیدِ stories_quota_enabled در پنلِ ادمین) — خواستِ
+     مالک، ۱۱ آبانِ ۱۴۰۵: «محدودیت استوری گذاشتن برداشته بشه».
+     ⚠️ ولی «حقِ» استوری سر جایش است: کاربرِ عادی دکمه‌ی افزودن را نمی‌بیند. همان
+     روز با سقف، این شرط هم برداشته شده بود و کاربرِ عادی استوری می‌گذاشت.
+     تا پاسخِ سرور برسد، از نقش‌های نشست حدس زده می‌شود؛ تصمیمِ نهایی با سرور. */
   const quotaOn = !!quota?.enabled;
-  const canPost = !quota || !quota.enabled || quota.limit > 0;
+  const canPost = quota ? quota.eligible !== false : canPostStory(myRoles);
   /* یک‌بار که نوار نشان داده شد، دیگر پنهان نمی‌شود — جزئیاتش کنار
      خود شرط پایین فایل. */
   const shownOnceRef = useRef(false);
@@ -461,11 +462,18 @@ export default function Stories() {
     try {
       const r = await fetch('/api/stories/quota', { cache: 'no-store', credentials: 'include' });
       if (!r.ok) return;
-      const j = await r.json() as { quota?: { used: number; limit: number; allowed: boolean; enabled: boolean } };
+      const j = await r.json() as { quota?: { used: number; limit: number; allowed: boolean; enabled: boolean; eligible?: boolean } };
       if (j?.quota) setQuota(j.quota);
     } catch { /* آفلاین ⇒ همان عدد محلی نشان داده می‌شود */ }
   };
   useEffect(() => { if (posting) void refreshQuota(); }, [posting]);   // eslint-disable-line react-hooks/exhaustive-deps
+  /* با عوضِ حساب، پاسخِ حسابِ قبلی نماند. و فقط برای کاربرِ بی‌نقش یک‌بار از
+     سرور بپرس — تنها حالتی که حدسِ محلی غلط است (بسته خریده). بقیه همان
+     حدس را دارند و پرسشِ سنگینِ سهمیه در هر بازدیدِ صفحه‌ی اول لازم نیست. */
+  useEffect(() => {
+    setQuota(null);
+    if (user && !canPostStory(myRoles)) void refreshQuota();
+  }, [user?.id]);   // eslint-disable-line react-hooks/exhaustive-deps
 
   const reloadLocal = () => {
     setLocalGroups(buildLocalGroups(getStoredStories()));
