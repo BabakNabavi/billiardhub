@@ -37,6 +37,8 @@ export interface Tournament {
   name: string;
   clubId: string;
   clubName: string;
+  /* استان و شهرِ برگزاری — برای جست‌وجوی شهر در فهرست */
+  city?: string;
   banner: string;
   description: string;
   gameType: GameType;

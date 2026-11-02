@@ -22,6 +22,7 @@ const TEXT_M  = 'rgba(17,17,16,0.28)'
    عبارت‌های دوکلمه‌ای گم می‌شدند. */
 import { SPEC_SEP, PIN_GREEN } from '@/lib/profile-cards'
 import { makeMatcher } from '@/lib/search/filter'
+import { ListSearch } from '@/components/ui/ListSearch'
 
 const SPECS: Record<string, { label: string; color: string; glow: string }> = {
   snooker:  { label: 'اسنوکر',       color: '#7C3AED', glow: 'rgba(124,58,237,0.30)' },
@@ -153,9 +154,8 @@ function mapProfileToListCoach(p: CoachProfile): Coach {
 /* ════════════════ PAGE ════════════════ */
 export default function CoachesPage() {
   const [filter,    setFilter]    = useState('all')
-  /* جعبه‌ی جست‌وجوی صفحه برداشته شد (خواستِ مالک، ۱۰ آبانِ ۱۴۰۵) — جست‌وجو از نوارِ بالاست.
-       فیلترِ متنی همان‌جا می‌ماند، با عبارتِ خالی بی‌اثر است */
-  const search = ''
+  /* جست‌وجوی نام یا شهر برگشت (خواستِ مالک، ۱۲ آبانِ ۱۴۰۵) — makeMatcher پایین‌تر */
+  const [search, setSearch] = useState('')
   const [view,      setView]      = useState<'grid' | 'list'>('grid')
   const [localCoaches, setLocalCoaches] = useState<Coach[]>([])
   const [loadFailed, setLoadFailed] = useState(false)
@@ -338,7 +338,7 @@ export default function CoachesPage() {
 
             {/* search + toggles — own row under the pills on mobile, right-aligned */}
             <div className="coach-search-group" style={{ marginInlineStart:'auto', display:'flex', alignItems:'center', gap:8 }}>
-
+              <ListSearch value={search} onChange={setSearch} placeholder="جست‌وجوی مربی یا شهر" className="flex-1 sm:w-64" />
               {/* view toggles — beside search */}
               <div style={{ display:'flex', gap:6, flexShrink:0 }}>
                 {([['grid', <svg key="g" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>], ['list', <svg key="l" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><circle cx="3.5" cy="6" r="1.5" fill="currentColor" stroke="none"/><circle cx="3.5" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="3.5" cy="18" r="1.5" fill="currentColor" stroke="none"/></svg>]] as const).map(([v, icon]) => {

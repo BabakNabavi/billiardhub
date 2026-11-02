@@ -56,6 +56,8 @@ export interface ProfileRow {
   /* مبلغ و مدت جلسه‌ی خصوصی (مهاجرت ۰۹۱) */
   sessionPrice: number
   sessionMin: number
+  /* ردیفِ نمایشی که ادمین ساخته — نامِ مالک (خودِ ادمین) هیچ‌جا نشان داده نمی‌شود */
+  isDemo: boolean
 }
 
 /* ستون‌های دیتابیس snake_case‌اند؛ بقیه‌ی برنامه camelCase */
@@ -68,6 +70,7 @@ type DbRow = {
   created_at: string; updated_at: string
   rating_avg?: number | string | null; rating_count?: number | null
   session_price?: number | null; session_min?: number | null
+  is_demo?: boolean | null
 }
 
 export function toProfile(r: DbRow): ProfileRow {
@@ -83,6 +86,7 @@ export function toProfile(r: DbRow): ProfileRow {
     ratingCount: Number(r.rating_count ?? 0),
     sessionPrice: Number(r.session_price ?? 0),
     sessionMin: Number(r.session_min ?? 60),
+    isDemo: r.is_demo === true,
   }
 }
 

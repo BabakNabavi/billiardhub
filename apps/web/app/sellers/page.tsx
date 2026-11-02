@@ -8,6 +8,7 @@ import { fetchProfilesResult } from '../../lib/profiles/client'
 import VerifiedBadge from '../../components/VerifiedBadge'
 import type { MockSeller } from '../../lib/sellers-data'
 import { makeMatcher } from '@/lib/search/filter'
+import { ListSearch } from '@/components/ui/ListSearch'
 
 const GOLD     = '#C7A66A'
 const GOLD_D   = '#8F6531'
@@ -362,9 +363,8 @@ function Dropdown({ label, options, value, onChange, minWidth = 150 }: {
 
 // ── Main Page ─────────────────────────────────────────────────
 export default function SellersPage() {
-  /* جعبه‌ی جست‌وجوی صفحه برداشته شد (خواستِ مالک، ۱۰ آبانِ ۱۴۰۵) — جست‌وجو از نوارِ بالاست.
-       فیلترِ متنی همان‌جا می‌ماند، با عبارتِ خالی بی‌اثر است */
-  const search = ''
+  /* جست‌وجوی نام یا شهر برگشت (خواستِ مالک، ۱۲ آبانِ ۱۴۰۵) — makeMatcher پایین‌تر */
+  const [search, setSearch] = useState('')
   const [category, setCategory] = useState('همه')
   const [status,   setStatus]   = useState('همه')
   const [sort,     setSort]     = useState<SortKey>('rating')
@@ -516,7 +516,7 @@ export default function SellersPage() {
 
           {/* ─── STICKY: search + filter, stacked under the navbar ─── */}
           <div style={{ position: 'sticky', top: 'var(--nav-offset)', zIndex: 50, background: 'rgba(250,249,246,0.72)', backdropFilter: 'blur(24px) saturate(1.6)', WebkitBackdropFilter: 'blur(24px) saturate(1.6)', paddingTop: 14, paddingBottom: 12, marginBottom: 12, display: 'flex', flexDirection: 'column', gap: 10 }}>
-
+            <ListSearch value={search} onChange={setSearch} placeholder="جست‌وجوی فروشگاه، برند یا شهر" />
 
             {/* filter box */}
             <div className="sel-filterbar" style={{ background: 'rgba(255,255,255,0.9)', backdropFilter: 'blur(28px) saturate(190%)', WebkitBackdropFilter: 'blur(28px) saturate(190%)', border: '1px solid rgba(255,255,255,0.8)', borderRadius: 16, boxShadow: 'inset 0 1.5px 0 rgba(255,255,255,0.95), 0 8px 26px rgba(28,28,26,0.08)', padding: 10, display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>

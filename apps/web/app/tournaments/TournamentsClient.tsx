@@ -21,6 +21,7 @@ import {
 } from '../../lib/mock-tournaments'
 import { fetchTournaments } from '../../lib/tournaments/client'
 import { makeMatcher } from '@/lib/search/filter'
+import { ListSearch } from '@/components/ui/ListSearch'
 
 const GOLD   = '#C7A66A'
 const GOLD_D = '#8F6531'
@@ -218,7 +219,7 @@ export function TournamentsClient({ initialRows }: { initialRows?: Tournament[] 
   const hit = makeMatcher(search)
   const filtered = all.filter(t => {
     const matchTab    = tab === 'all' || t.status === tab
-    const matchSearch = hit(t.name, t.clubName)
+    const matchSearch = hit(t.name, t.clubName, t.city)
     return matchTab && matchSearch
   })
 
@@ -415,9 +416,10 @@ export function TournamentsClient({ initialRows }: { initialRows?: Tournament[] 
 
       {/* ═══ نوار ابزار چسبان: تب‌ها + جستجو ═══ */}
       <div style={{ position: 'sticky', top: 'var(--nav-offset)', zIndex: 40, background: 'rgba(247,247,245,0.92)', backdropFilter: 'blur(18px) saturate(1.6)', WebkitBackdropFilter: 'blur(18px) saturate(1.6)', borderBottom: `1px solid ${LINE}` }}>
-        <div className="tn-wrap" style={{ padding: '10px clamp(16px,3vw,28px)' }}>
+        {/* دسکتاپ: تب‌ها و جست‌وجو در یک ردیف؛ موبایل: جست‌وجو زیرِ تب‌ها */}
+        <div className="tn-wrap flex flex-col gap-2 min-[900px]:flex-row min-[900px]:items-center" style={{ padding: '10px clamp(16px,3vw,28px)' }}>
           {/* یک نوار: تب‌ها اسکرول می‌خورند، سوییچ گرید/لیست سمت چپ ثابت می‌ماند */}
-          <div className="tn-bar">
+          <div className="tn-bar min-w-0 flex-1">
             <div className="tn-tabs">
               {TABS.map(t => (
                 <button key={t.key} className={`tn-tab${tab === t.key ? ' on' : ''}`} onClick={() => setTab(t.key)}>
@@ -438,6 +440,7 @@ export function TournamentsClient({ initialRows }: { initialRows?: Tournament[] 
               <button className={view === 'list' ? 'on' : ''} onClick={() => setView('list')} aria-label="نمایش لیستی"><List size={17} /></button>
             </div>
           </div>
+          <ListSearch value={search} onChange={setSearch} placeholder="جست‌وجوی مسابقه، باشگاه یا شهر" className="min-[900px]:w-72 min-[900px]:shrink-0" />
         </div>
       </div>
 

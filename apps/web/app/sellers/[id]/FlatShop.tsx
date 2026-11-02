@@ -624,6 +624,8 @@ export default function FlatShop() {
           PRODUCTS.length > 0 ? (
             <ul className="ch-stats">
               <li><b>{faNum(PRODUCTS.length)}</b><span>آگهی</span></li>
+              {/* در چند دسته (چوب، گچ، تیپ…) محصول دارد — خواستِ مالک، ۱۲ آبانِ ۱۴۰۵ */}
+              <li><b>{faNum(new Set(PRODUCTS.map(p => p.cat).filter(Boolean)).size)}</b><span>دسته‌بندی</span></li>
             </ul>
           ) : undefined
         }

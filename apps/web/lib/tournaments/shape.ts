@@ -86,6 +86,7 @@ export function toTournament(r: DbTournament): Tournament {
     id: r.id,
     clubId: r.club_id,
     clubName: r.venue ?? '',
+    city: [r.province, r.city].filter(Boolean).join(' '),
     /* بی‌پوستر ⇒ پوستر همان بازی، نه عکس یک باشگاه نمونه */
     banner: r.cover_url || posterFor(normalizeDiscipline(r.discipline)),
     name: r.title,

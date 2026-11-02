@@ -107,8 +107,11 @@ export async function createDemoClub(input: DemoClubInput): Promise<DemoClubRow>
     hasProfessionalCoach: !!input.hasProfessionalCoach,
     /* دیده شود — کار این ردیف دقیقا همین است */
     isActive: true,
-    /* ولی تیک تأیید نگیرد */
-    verificationStatus: 'pending',
+    /* دیده شود ولی تیک تأیید نگیرد — `approved` دقیقاً همین است.
+       ⚠️ تا آبانِ ۱۴۰۵ این‌جا 'pending' بود و فهرستِ عمومی فقط verified/approved
+       را نشان می‌داد: ادمینِ واردشده باشگاه را می‌دید (درخواستِ ادمین همه را
+       می‌گیرد) و پس از خروج «حذف‌شده» به نظر می‌رسید. */
+    verificationStatus: 'approved',
     is_demo: true,
   }).select('id,name,city,province,address,images,"isActive","createdAt"').single()
 

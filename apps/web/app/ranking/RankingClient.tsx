@@ -345,6 +345,9 @@ export function RankingClient({ initial }: { initial?: { board: RankingsStructur
         .rk-row .rk-trend { order: 4 }
         .rk-row .rk-stgs { order: 5 }
         .rk-row .rk-pts { order: 6 }
+        /* حلقه‌ی دورِ عکس ۵px بیرون می‌زند — بی‌این حاشیه رتبه، عکس و نام به هم
+           چسبیده دیده می‌شدند (خواستِ مالک، ۱۲ آبانِ ۱۴۰۵). سرستون همین را دارد. */
+        .rk-row .rk-portrait, .rk-head-portrait { margin-inline: 6px 8px; }
         .rk-name { flex: 0 999 auto; min-width: 72px; padding: 11px 0;
           /* تشدید «لله» با ZWJ حل شد نه با font-feature-settings —
              شرحش در lib/fa-ligature. خاموش‌کردن ویژگی یا بی‌اثر بود یا
@@ -434,6 +437,7 @@ export function RankingClient({ initial }: { initial?: { board: RankingsStructur
           /* جبران دو خانه‌ی ثابت: بدون این، چهار نام در ۳۷۵ با «…» بریده می‌شد
              (پیش‌تر یکی) — فاصله‌ی ردیف ۶ (بالا) و عکس ۴۰ پیکسل */
           .rk-row .rk-portrait > span { width: 40px !important; height: 40px !important; }
+          .rk-row .rk-portrait { margin-inline: 7px 7px; }
           .rk-row .rk-ln { font-size: 14.5px !important; }
           /* امتیاز = تب چسبیده به لبه‌ی چپ کارت — ضلع چپش دیده نمی‌شود،
              فقط گوشه‌های راست گرد است */

@@ -20,7 +20,7 @@ const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 interface ClubSeo {
   id: string; slug?: string | null; name?: string; city?: string; province?: string; address?: string
   logo?: string | null; images?: unknown; latitude?: number | null; longitude?: number | null
-  verificationStatus?: string; isActive?: boolean
+  verificationStatus?: string; isActive?: boolean; is_demo?: boolean | null
 }
 
 const loadClub = cache(async (raw: string): Promise<ClubSeo | null> => {
@@ -30,14 +30,15 @@ const loadClub = cache(async (raw: string): Promise<ClubSeo | null> => {
   if (!/^[0-9a-z-]{1,64}$/.test(id)) return null
   try {
     const q = sb().from('clubs')
-      .select('id,slug,name,city,province,address,logo,images,latitude,longitude,"verificationStatus","isActive"')
+      .select('id,slug,name,city,province,address,logo,images,latitude,longitude,"verificationStatus","isActive",is_demo')
     const res = await withTimeout(UUID.test(id) ? q.eq('id', id).maybeSingle() : q.eq('slug', id).maybeSingle())
     if (res === TIMED_OUT) return null
     return (res.data as ClubSeo | null) ?? null
   } catch { return null }
 })
 
-const isPublished = (c: ClubSeo) => c.isActive !== false &&
+/* نمایشی: در فهرست دیده می‌شود ولی ایندکس نمی‌شود (هم‌راستا با sitemap) */
+const isPublished = (c: ClubSeo) => c.isActive !== false && c.is_demo !== true &&
   (c.verificationStatus === 'verified' || c.verificationStatus === 'approved')
 const imageOf = (c: ClubSeo) => c.logo || (Array.isArray(c.images) ? (c.images as unknown[]).find((x): x is string => typeof x === 'string' && !!x) : undefined)
 const pathOf = (c: ClubSeo) => `/clubs/${c.slug || c.id}`

@@ -29,6 +29,8 @@ export function shapeClub(
         .filter(c => (typeof c?.status === 'string' ? c.status : 'accepted') === 'accepted')
     }
   }
+  /* باشگاهِ نمایشی را ادمین ساخته — نامِ او «مدیر» نیست (خواستِ مالک) */
+  if (row.is_demo === true) safe.managerName = ''
   return {
     ...safe,
     isMine,

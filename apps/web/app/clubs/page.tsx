@@ -20,6 +20,7 @@ import type { Tournament } from '../../lib/mock-tournaments';
 import { tableSummary, TABLE_KINDS } from '../../lib/clubs/tables';
 import { faDistance } from '../../lib/clubs/distance';
 import { makeMatcher } from '@/lib/search/filter'
+import { ListSearch } from '@/components/ui/ListSearch'
 
 const TABLE_TYPES = [
   { key:'snookerTables',    label:'اسنوکر',     color:'#30C55A' },
@@ -371,7 +372,9 @@ export default function ClubsPage() {
   useEffect(() => {
     const p = new URLSearchParams();
     if (city !== 'همه شهرها') p.set('city', city);
-    if (search.trim()) p.set('q', search.trim());
+    /* جست‌وجو عمداً به سرور نمی‌رود: ilikeِ خام «امل» را با «آمل» یکی نمی‌داند.
+       فهرست (سقفِ ۵۰۰) یک‌بار می‌آید و makeMatcher پایین‌تر با تا‌کردنِ آ/ا،
+       ی/ک و اعراب روی نام، شهر و نشانی می‌گردد. */
     for (const t of selectedTypes) p.set(t, '1');
     for (const a of selectedAmens) p.set(a, '1');
 
@@ -393,9 +396,9 @@ export default function ClubsPage() {
         }
         setLoading(false);
       })();
-    }, search.trim() ? 300 : 0);
+    }, 0);
     return () => { ctrl.abort(); clearTimeout(t); };
-  }, [city, search, selectedTypes, selectedAmens, reloadKey]);
+  }, [city, selectedTypes, selectedAmens, reloadKey]);
 
   /* مسابقات عمومی، یک‌بار برای کل فهرست — تا هر کارت جداگانه
      درخواست نفرستد. کلید `club_id` است، نه نام باشگاه. */
@@ -507,7 +510,10 @@ export default function ClubsPage() {
         <div style={{ background: 'rgba(250,249,246,0.62)', borderBottom: '1px solid rgba(28,28,26,0.07)', padding: '10px clamp(16px,4vw,40px)', position: 'sticky', top: 'var(--nav-offset)', zIndex: 90, backdropFilter: 'blur(24px) saturate(1.6)', WebkitBackdropFilter: 'blur(24px) saturate(1.6)' }}>
           <div style={{ maxWidth: 1280, margin: '0 auto' }}>
             <div className="toolbar-row" style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-
+              {/* جست‌وجوی نام یا شهر — موبایل ردیفِ خودش (‎.toolbar-search) */}
+              <div className="toolbar-search" style={{ order: 0, flex: '1 1 240px', minWidth: 0 }}>
+                <ListSearch value={search} onChange={setSearch} placeholder="جست‌وجوی باشگاه یا شهر" />
+              </div>
 
               {/* Near me — order 3, no arrow icon */}
               <button className="tb-ctl" onClick={getLocation} title="نزدیک‌ترین باشگاه‌ها" style={{ order: 3, height: 44, borderRadius: 12, padding: '0 16px', border: `1px solid ${sortBy === 'distance' ? 'rgba(199,166,106,0.40)' : 'rgba(0,0,0,0.09)'}`, background: sortBy === 'distance' ? 'rgba(199,166,106,0.10)' : '#FFFFFF', color: sortBy === 'distance' ? '#A07840' : 'rgba(0,0,0,0.55)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 7, justifyContent: 'center', flexShrink: 0, transition: 'all 0.2s', fontFamily: 'inherit', fontSize: 14, fontWeight: 700, whiteSpace: 'nowrap' }}>

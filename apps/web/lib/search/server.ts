@@ -51,7 +51,7 @@ type Found = { rows: Scored[]; limit?: number; fetched?: number; capped?: boolea
 const loadClubs = unstable_cache(async () => {
   const { data, error } = await sb().from('clubs')
     .select('id,slug,name,city,province,address,logo,images,verificationStatus')
-    .eq('isActive', true).in('verificationStatus', ['verified', 'approved'])
+    .eq('isActive', true).or('verificationStatus.in.(verified,approved),is_demo.eq.true')
     .order('createdAt', { ascending: false }).limit(500)
   if (error) throw new Error(error.message)
   return (data ?? []).map(c => ({

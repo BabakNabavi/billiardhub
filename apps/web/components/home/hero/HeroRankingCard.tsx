@@ -33,14 +33,8 @@ export function HeroRankingCard({ boards, pos }: { boards: HeroRankingBoard[]; p
     <Link ref={ref} prefetch={false} href={href} className={`${CARD} ${pos}`}>
       <p className={`${LABEL} flex items-center gap-1`}>
         <Trophy size={12} aria-hidden className="text-gold-light" />
+        {/* نقطه‌های شمارنده‌ی جدول‌ها عمداً نیست (خواستِ مالک، ۱۲ آبانِ ۱۴۰۵) */}
         <span key={b.label} className={`hh-swap truncate${fade}`}>رنکینگ {b.label}</span>
-        {boards.length > 1 && (
-          <span aria-hidden className="ms-auto flex shrink-0 gap-1">
-            {boards.map((x, n) => (
-              <span key={`${x.sport}-${x.gender}-${x.category}`} className={`h-1 rounded-full transition-[width,background-color] duration-slow ${n === i ? 'w-3 bg-gold-light' : 'w-1 bg-white/30'}`} />
-            ))}
-          </span>
-        )}
       </p>
       {/* key با جدول عوض می‌شود ⟵ ورودِ نرمِ ردیف‌ها (hh-swap) */}
       <ol key={`${b.sport}-${b.gender}-${b.category}`} className={`hh-swap mt-1${fade}`}>

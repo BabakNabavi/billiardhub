@@ -80,7 +80,7 @@ export async function PUT(
      برداشته شده تا پایان عمر توکن هنوز `role:'admin'` دارد. */
   const isAdmin = await can(userId, 'clubs');
 
-  const { data: club } = await getSupabaseServer().from('clubs').select('ownerId,slug').eq('id', id).single();
+  const { data: club } = await getSupabaseServer().from('clubs').select('ownerId,slug,is_demo').eq('id', id).single();
   if (!club) return NextResponse.json({ message: 'باشگاه یافت نشد' }, { status: 404, headers: CORS });
 
   if (!isAdmin && club.ownerId !== userId) {
@@ -187,7 +187,9 @@ export async function PUT(
     const verified = `${o?.firstName ?? ''} ${o?.lastName ?? ''}`.trim();
     /* اگر کاربر هنوز نام ثبت نکرده، مقدار قبلی دست‌نخورده می‌ماند —
        بازنویسی با رشته‌ی خالی یعنی پاک کردن داده‌ی درست. */
-    if (verified) (body as Record<string, unknown>).managerName = verified;
+    /* باشگاهِ نمایشی: مالک خودِ ادمین است — نامش روی باشگاه نوشته نمی‌شود */
+    if ((club as { is_demo?: boolean }).is_demo === true) (body as Record<string, unknown>).managerName = '';
+    else if (verified) (body as Record<string, unknown>).managerName = verified;
   }
 
   /* تأیید ادمین = انتشار. رد کردن = برداشتن از فهرست عمومی.

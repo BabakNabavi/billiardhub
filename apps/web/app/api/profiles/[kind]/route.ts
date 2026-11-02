@@ -102,7 +102,8 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ kind: strin
        این پرچم از خود کوکی نشست می‌آید: یک منبع، همان منبعی که
        مسیر ذخیره هم با آن تصمیم می‌گیرد. */
     const isMine = !!actor && actor.id === p.ownerId;
-    const managerName = await managerNameOf(kind, p.ownerId);
+    /* پروفایلِ نمایشی را ادمین ساخته — نامِ او «مدیر» نیست (خواستِ مالک) */
+    const managerName = p.isDemo ? '' : await managerNameOf(kind, p.ownerId);
     return NextResponse.json({ profile: p, isMine, managerName }, { headers: { 'Cache-Control': 'no-store' } });
   }
 

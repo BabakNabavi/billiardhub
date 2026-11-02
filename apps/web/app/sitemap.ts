@@ -99,6 +99,8 @@ const clubEntries = (root: string) => guarded('clubs', async () => {
     .select('id,slug,"updatedAt"')
     .not('isActive', 'is', false)
     .in('verificationStatus', ['verified', 'approved'])
+    /* باشگاهِ نمایشی دیده می‌شود ولی ایندکس نمی‌شود (همان layoutِ /clubs/[id]) */
+    .not('is_demo', 'is', true)
     .limit(SITEMAP_LIMIT)
   if (error) throw new Error(error.message)
   return ((data ?? []) as { id: string; slug?: string | null; updatedAt?: string | null }[]).map(c => ({

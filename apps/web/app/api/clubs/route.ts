@@ -120,7 +120,9 @@ export async function GET(req: NextRequest) {
          بدون تیک). این دو عمدا از هم جدا شده‌اند: پیش‌تر یک مقدار هم
          «دیده شو» بود هم «تیک بگیر»، و باشگاه بی‌مدرک راهی جز یکی از
          این دو انتها نداشت. */
-      q = q.eq('isActive', true).in('verificationStatus', ['verified', 'approved']);
+      /* باشگاهِ نمایشی (is_demo) هم دیده می‌شود — ردیف‌های قدیمی‌اش با
+         pending ساخته شده بودند (lib/clubs/demo) */
+      q = q.eq('isActive', true).or('verificationStatus.in.(verified,approved),is_demo.eq.true');
 
       /* ── فیلترهای سمت سرور ──
          پیش‌تر همه‌ی فیلترها روی کلاینت بودند: کل جدول دانلود می‌شد و

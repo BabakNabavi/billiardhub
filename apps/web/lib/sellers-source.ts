@@ -58,7 +58,7 @@ export async function listPublicStores(limit = 24): Promise<PublicStore[]> {
 
   const { data, error } = await sb
     .from('profiles')
-    .select('slug,owner_id,data,verified')
+    .select('slug,owner_id,data,verified,is_demo')
     .eq('kind', 'seller')
     .eq('status', 'approved')
     .order('updated_at', { ascending: false })
@@ -66,7 +66,7 @@ export async function listPublicStores(limit = 24): Promise<PublicStore[]> {
 
   if (error || !Array.isArray(data)) return []
 
-  type Row = { slug: string; owner_id: string; data: Record<string, unknown> | null; verified?: boolean | null }
+  type Row = { slug: string; owner_id: string; data: Record<string, unknown> | null; verified?: boolean | null; is_demo?: boolean | null }
   const rows = data as Row[]
 
   /* نام و عکس مالک در یک درخواست، نه یکی به‌ازای هر فروشگاه */
@@ -80,7 +80,8 @@ export async function listPublicStores(limit = 24): Promise<PublicStore[]> {
 
   return rows.map(r => {
     const d = r.data ?? {}
-    const u = byOwner.get(r.owner_id) ?? ({} as U)
+    /* فروشگاهِ نمایشی را ادمین ساخته — نام و عکسِ او نشان داده نمی‌شود */
+    const u = r.is_demo ? ({} as U) : (byOwner.get(r.owner_id) ?? ({} as U))
     const brands = Array.isArray(d.brands) ? (d.brands as unknown[]).map(s).filter(Boolean) : []
     return {
       id: s(r.slug),

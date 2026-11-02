@@ -441,7 +441,12 @@ export default function Stories() {
   const [quota, setQuota] = useState<{ used: number; limit: number; allowed: boolean; enabled: boolean } | null>(null);
   const dailyLimit = quota ? quota.limit : localLimit;
   const usedToday = quota ? quota.used : countTodayStories(ownerKey);
-  const canPost = quota ? (quota.limit > 0 || !quota.enabled) : localLimit > 0;
+  /* ⚠️ محدودیتِ استوری فقط از سرور (کلیدِ stories_quota_enabled در پنلِ ادمین).
+     تا آبانِ ۱۴۰۵ این‌جا سقفِ نقش (`storyLimitFor`) هم اعمال می‌شد: کاربرِ عادی
+     دکمه‌ی افزودن را اصلاً نمی‌دید و بقیه شمارنده‌ی «سقف امروز» می‌دیدند، با
+     اینکه سهمیه‌ی سرور خاموش بود. خواستِ مالک: محدودیت برداشته شود. */
+  const quotaOn = !!quota?.enabled;
+  const canPost = !quota || !quota.enabled || quota.limit > 0;
   /* یک‌بار که نوار نشان داده شد، دیگر پنهان نمی‌شود — جزئیاتش کنار
      خود شرط پایین فایل. */
   const shownOnceRef = useRef(false);
@@ -588,7 +593,7 @@ export default function Stories() {
       setPosting(false); setStoryImg(''); setStoryCaption('');
     } catch {
       /* آفلاین ⇒ ذخیره‌ی محلی (تک‌دستگاهی) */
-      if (countTodayStories(ownerKey) >= dailyLimit) { setPostErr(`سقف استوری امروز شما (${dailyLimit.toLocaleString('fa-IR')}) پر شده است`); setPublishing(false); return; }
+      if (quotaOn && countTodayStories(ownerKey) >= dailyLimit) { setPostErr(`سقف استوری امروز شما (${dailyLimit.toLocaleString('fa-IR')}) پر شده است`); setPublishing(false); return; }
       addStoredStory({
         id: `st-${Date.now()}-${Math.floor(Math.random() * 1e4)}`, ownerKey,
         userName: meName(), roleKey: roleInfo.key, roleLabel: roleInfo.label, roleColor: roleInfo.color,
@@ -954,8 +959,8 @@ export default function Stories() {
               <button onClick={() => setPosting(false)} aria-label="بستن" style={{ background:'none', border:'none', cursor:'pointer', color:'#888', display:'flex' }}><X size={18} /></button>
             </div>
             <div style={{ fontSize:12.5, color:'#777', marginBottom:12 }}>به‌عنوان <span style={{ color:roleInfo.color, fontWeight: 600 }}>{roleInfo.label}</span> منتشر می‌شود و ۲۴ ساعت در نوار استوری صفحه‌ی اول نمایش داده می‌شود</div>
-            {/* شمارنده‌ی سقف روزانه */}
-            <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:14, padding:'8px 12px', borderRadius:10, background:'var(--brand-tint)', border:'1px solid var(--border)' }}>
+            {/* شمارنده‌ی سقف روزانه — فقط وقتی سهمیه در پنلِ ادمین روشن است */}
+            {quotaOn && dailyLimit > 0 && <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:14, padding:'8px 12px', borderRadius:10, background:'var(--brand-tint)', border:'1px solid var(--border)' }}>
               <span style={{ fontSize:11.5, fontWeight:700, color:'var(--brand)' }}>سقف امروز:</span>
               <span style={{ fontSize:12, fontWeight: 600, color:'#1C1B17' }}>{usedToday.toLocaleString('fa-IR')} از {dailyLimit.toLocaleString('fa-IR')}</span>
               <span style={{ marginInlineStart:'auto', display:'flex', gap:4 }}>
@@ -963,7 +968,7 @@ export default function Stories() {
                   <span key={i} style={{ width:8, height:8, borderRadius:'50%', background: i < usedToday ? 'var(--brand)' : 'var(--brand-tint)' }} />
                 ))}
               </span>
-            </div>
+            </div>}
             {postErr && (
               <div style={{ fontSize:12, fontWeight:700, color:'#B23B2E', background:'rgba(178,59,46,0.07)', border:'1px solid rgba(178,59,46,0.25)', borderRadius:10, padding:'9px 12px', marginBottom:14 }}>{postErr}</div>
             )}

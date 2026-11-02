@@ -1,6 +1,8 @@
 import 'server-only'
 import { z } from 'zod'
+import { unstable_cache } from 'next/cache'
 import { sb } from '@/lib/finance/db'
+import { publicRoot } from '@/lib/supabase-config'
 import { mergeIntoEmpty, type RankingsStructure, type RankingStagesMap, type TrendNotesMap } from '@/lib/rankings-store'
 
 /* ─────────────────────────────────────────────────────────────
@@ -31,6 +33,61 @@ export interface RankingsPayload {
 
 export const EMPTY_RANKINGS: RankingsPayload = { board: null, stages: {}, trendNotes: {}, updatedAt: null }
 
+/* «صادق حسینی» = «صادق  حسيني» = «صادق‌حسینی» — بی‌فاصله، بی‌نیم‌فاصله، ی/ک فارسی */
+const nameKey = (s: string) => s.replace(/[يى]/g, 'ی').replace(/ك/g, 'ک').replace(/[\s‌‏‎]+/g, '')
+
+/* ── عکسِ پروفایلِ عضو روی آواتارِ رنکینگ (خواستِ مالک، ۱۲ آبانِ ۱۴۰۵) ──
+   ردیفِ رنکینگ به حساب وصل نیست، پس تطبیق با نامِ کامل است — و فقط با
+   حساب‌هایی که نامشان از ثبت‌احوال تأیید شده (national_id_verified). وگرنه
+   هر کسی با ثبت‌نام به نامِ «صادق حسینی» عکسِ خودش را روی ردیفِ او می‌گذاشت.
+   دو حسابِ تأییدشده با یک نام ⟵ هیچ‌کدام (نمی‌دانیم کدام است). آواتاری که
+   ادمین گذاشته همیشه مقدم است. خطا ⟵ جدول بی‌تغییر. */
+/* ⚠️ users.avatar متنِ آزاد است — فقط عکسِ انبارِ خودمان (یا مسیرِ نسبیِ همین
+   دامنه) روی صفحه‌ی عمومی می‌نشیند، نه هر نشانیِ بیرونی (پیکسلِ ردیاب) */
+const ownImage = (url: string) => url.startsWith(publicRoot()) || /^\/(?!\/)/.test(url)
+
+/* [کلیدِ نام، نشانی] — کش ۵ دقیقه: هر خواندنِ رنکینگ (API، ISR، آمار) جدولِ
+   کاربران را نمی‌خواند. نامِ تکراری ⟵ null. */
+const memberAvatars = unstable_cache(async (): Promise<[string, string | null][]> => {
+  const { data, error } = await sb().from('users')
+    .select('firstName,lastName,avatar')
+    .eq('national_id_verified', true)
+    .not('avatar', 'is', null)
+  if (error) throw new Error(`[rankings] member avatars: ${error.message}`)
+  const byName = new Map<string, string | null>()
+  for (const u of (data ?? []) as { firstName?: string | null; lastName?: string | null; avatar?: string | null }[]) {
+    const url = (u.avatar ?? '').trim()
+    if (!ownImage(url)) continue
+    const k = nameKey(`${u.firstName ?? ''}${u.lastName ?? ''}`)
+    if (!k) continue
+    byName.set(k, byName.has(k) ? null : url)
+  }
+  return [...byName]
+}, ['ranking-member-avatars'], { revalidate: 300, tags: ['member-avatars'] })
+
+async function withMemberAvatars(board: RankingsStructure): Promise<RankingsStructure> {
+  let byName: Map<string, string | null>
+  try { byName = new Map(await memberAvatars()) }
+  catch (e) { console.error(e); return board }
+  if (!byName.size) return board
+
+  const out: RankingsStructure = {}
+  for (const [sport, genders] of Object.entries(board ?? {})) {
+    out[sport] = {}
+    for (const [gender, cats] of Object.entries(genders ?? {})) {
+      out[sport][gender] = {}
+      for (const [cat, rows] of Object.entries(cats ?? {})) {
+        out[sport][gender][cat] = Array.isArray(rows) ? rows.map(p => {
+          if (!p || p.avatar || !p.name?.trim()) return p
+          const url = byName.get(nameKey(p.name))
+          return url ? { ...p, avatar: url } : p
+        }) : rows
+      }
+    }
+  }
+  return out
+}
+
 /** null ⟵ خطای دیتابیس (مسیر همان پاسخِ خالیِ ۲۰۰ِ قبلی را می‌دهد) */
 export async function readRankings(): Promise<RankingsPayload | null> {
   const { data, error } = await sb()
@@ -44,8 +101,9 @@ export async function readRankings(): Promise<RankingsPayload | null> {
   const notes = TrendNotesZ.safeParse(rows.find(r => r.key === 'rankings_trend_note')?.value ?? {})
   /* تاریخِ پانوشت: تازه‌ترینِ دو کلید — عوض‌شدنِ فقط سرستون هم به‌روزرسانی است */
   const updatedAt = [board?.updated_at, st?.updated_at].filter((v): v is string => !!v).sort().at(-1) ?? null
+  const raw = (board?.value ?? null) as RankingsStructure | null
   return {
-    board: (board?.value ?? null) as RankingsStructure | null,
+    board: raw ? await withMemberAvatars(raw) : null,
     stages: stages.success ? stages.data : {},
     trendNotes: notes.success ? notes.data : {},
     updatedAt,

@@ -47,7 +47,8 @@ const METRICS: Metric[] = [
      آقایان ۲۵ تا ۲۹) و بزرگ‌ترین عدد ادعای نادرستی می‌ساخت */
   {
     key: 'clubs', label: 'باشگاه فعال', href: '/clubs', min: 10,
-    read: () => count('clubs', q => q.eq('isActive', true).in('verificationStatus', ['verified', 'approved'])),
+    /* نمایشی‌ها (is_demo) در آمار شمرده نمی‌شوند — عددِ واقعی */
+    read: () => count('clubs', q => q.eq('isActive', true).in('verificationStatus', ['verified', 'approved']).not('is_demo', 'is', true)),
   },
   {
     key: 'tournaments', label: 'مسابقه برگزارشده و پیش رو', href: '/tournaments', min: 10,

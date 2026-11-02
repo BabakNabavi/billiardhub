@@ -11,6 +11,7 @@ import VerifiedBadge from '../../components/VerifiedBadge'
 import { iranTel } from '../../lib/iran-geo'
 import { toFaDigits } from '../../lib/jalali'
 import { makeMatcher } from '@/lib/search/filter'
+import { ListSearch } from '@/components/ui/ListSearch'
 
 const GOLD     = '#C7A66A'
 const GOLD_D   = '#8F6531'
@@ -518,9 +519,8 @@ function Dropdown({ label, options, value, onChange, minWidth = 150 }: {
 
 // ── Main Page ─────────────────────────────────────────────────
 export default function ManufacturersPage() {
-  /* جعبه‌ی جست‌وجوی صفحه برداشته شد (خواستِ مالک، ۱۰ آبانِ ۱۴۰۵) — جست‌وجو از نوارِ بالاست.
-       فیلترِ متنی همان‌جا می‌ماند، با عبارتِ خالی بی‌اثر است */
-  const search = ''
+  /* جست‌وجوی نام یا شهر برگشت (خواستِ مالک، ۱۲ آبانِ ۱۴۰۵) — makeMatcher پایین‌تر */
+  const [search, setSearch] = useState('')
   const [category, setCategory] = useState('همه')
   const [status,   setStatus]   = useState('همه')
   const [sort,     setSort]     = useState<SortKey>('experience')
@@ -710,7 +710,7 @@ export default function ManufacturersPage() {
             نیمه‌شفاف و همان ارتفاعِ ۴۴ که صفحه‌ی باشگاه‌ها دارد. */}
         <div className="mfr-tb">
           <div className="mfr-tb-in">
-
+            <ListSearch value={search} onChange={setSearch} placeholder="جست‌وجوی تولیدکننده یا شهر" className="min-w-48 flex-1" />
             <span className="sel-hide-mob" style={{ display: 'contents' }}>
               <Dropdown label="تخصص:" options={CATEGORY_OPTIONS} value={category} onChange={setCategory} minWidth={150} />
             </span>
