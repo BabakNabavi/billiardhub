@@ -57,6 +57,27 @@ export function jalaliToGregorian(jy: number, jm: number, jd: number): [number, 
   return [gy, gm, gd]
 }
 
+/** تاریخ تولد شمسی ⟵ قالب واحد `1370/05/12`، یا null اگر تاریخ واقعی نیست.
+ *
+ *  ⚠️ پیش‌تر هر رشته‌ای به شکل «عدد/عدد/عدد» تاریخ تولد پذیرفته می‌شد —
+ *  ماه ۱۳، ۳۱ مهر، ۳۰ اسفندِ سال غیرکبیسه، روز آینده — و همان در حساب
+ *  می‌نشست. رفت‌وبرگشت با میلادی تاریخ‌های ناموجود را می‌گیرد. */
+export function canonicalBirthDate(raw: unknown): string | null {
+  const s = String(raw ?? '')
+    .replace(/[۰-۹]/g, d => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(d)))
+    .replace(/[٠-٩]/g, d => String('٠١٢٣٤٥٦٧٨٩'.indexOf(d)))
+    .trim()
+  const m = /^(\d{4})[/-](\d{1,2})[/-](\d{1,2})$/.exec(s)
+  if (!m) return null
+  const [y, mo, d] = [Number(m[1]), Number(m[2]), Number(m[3])]
+  if (y < 1300 || mo < 1 || mo > 12 || d < 1 || d > (mo <= 6 ? 31 : 30)) return null
+  const [gy, gm, gd] = jalaliToGregorian(y, mo, d)
+  const [ry, rm, rd] = toJalali(gy, gm, gd)
+  if (ry !== y || rm !== mo || rd !== d) return null
+  if (Date.UTC(gy, gm - 1, gd) > Date.now()) return null
+  return `${y}/${String(mo).padStart(2, '0')}/${String(d).padStart(2, '0')}`
+}
+
 /** «۸ مرداد ۱۴۰۵» از یک تاریخ ISO یا Date */
 /* همه‌ی تاریخ‌ها با ساعت تهران خوانده می‌شوند، نه ساعت دستگاه */
 const TEHRAN = 'Asia/Tehran'

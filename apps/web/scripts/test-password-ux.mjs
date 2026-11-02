@@ -23,7 +23,7 @@ const login   = read('app/login/page.tsx');
 const forgot  = read('app/forgot-password/page.tsx');
 const change  = read('components/auth/ChangePassword.tsx');
 const register = read('app/register/page.tsx');
-const identity = read('components/IdentityVerify.tsx');
+/* مودالِ IdentityVerify (هیچ‌جا import نمی‌شد) آبانِ ۱۴۰۵ حذف شد */
 const guard   = read('lib/auth/login-guard.ts');
 
 // ───────────────────────────────────────────────────────────────────────────
@@ -54,12 +54,12 @@ t('جای‌نگهدارِ کد قاعده‌ی خودش را دارد',
   /\.au-inp\.otp::placeholder/.test(forgot),
   'قاعده‌ی عمومی letter-spacing را خنثی می‌کند و جبران بی‌اثر می‌ماند');
 
-for (const [label, src] of [['ثبت‌نام', register], ['احراز هویت', identity]]) {
+for (const [label, src] of [['ثبت‌نام', register]]) {
   t(`${label}: تورفتگی 0.25em برای letter-spacing 0.5em`,
     /letterSpacing: '0\.5em', textIndent: '0\.25em'/.test(src));
 }
 t('جای‌نگهدارها فاصله‌ی دستی ندارند',
-  ![login, forgot, register, identity].some(s => s.includes('"- - - - -"')),
+  ![login, forgot, register].some(s => s.includes('"- - - - -"')),
   'پنج خط‌تیره با فاصله می‌شود نُه نویسه و با پنج رقم هم‌تراز نمی‌ماند');
 
 // ───────────────────────────────────────────────────────────────────────────

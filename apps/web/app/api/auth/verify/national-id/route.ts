@@ -6,6 +6,10 @@ import { verifyIdentity, verifyPerson } from '@/lib/shahkar-server'
 import { ensurePersonForUser } from '@/lib/identity'
 import { nationalIdBlocked } from '@/lib/enforcement/server'
 import { audit, clientIp } from '@/lib/finance/db'
+import { canonicalBirthDate } from '@/lib/jalali'
+import { PersonName } from '@/lib/auth/person-name'
+import { z } from 'zod'
+import { hitRateLimit, tooMany, RULES } from '@/lib/auth/rate-limit'
 
 /* احراز هویت کاربر فعلی — برای حساب‌هایی که پیش از راه‌اندازی استعلام
    ساخته شده‌اند و کد ملی‌شان ثبت نشده است.
@@ -22,6 +26,13 @@ const CORS_HEADERS = {
   'Access-Control-Allow-Headers': 'Content-Type, X-CSRF-Token',
 }
 
+const Body = z.object({
+  nationalId: z.string().transform(v => v.replace(/[^0-9]/g, '')).pipe(z.string().length(10)),
+  firstName: PersonName,
+  lastName: PersonName,
+  birthDate: z.unknown(),
+})
+
 export async function OPTIONS() {
   return new NextResponse(null, { status: 204, headers: CORS_HEADERS })
 }
@@ -32,12 +43,21 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ message: 'وارد نشده‌اید' }, { status: 401, headers: CORS_HEADERS })
   }
 
-  const body = await req.json().catch(() => ({}))
-  const nationalId = String(body?.nationalId ?? '').replace(/[^0-9]/g, '')
-  const birthDate = String(body?.birthDate ?? '').trim()
-
-  if (nationalId.length !== 10) {
-    return NextResponse.json({ message: 'کد ملی باید ۱۰ رقم باشد' }, { status: 400, headers: CORS_HEADERS })
+  const parsed = Body.safeParse(await req.json().catch(() => null))
+  if (!parsed.success) {
+    const bad = parsed.error.issues[0]?.path[0]
+    return NextResponse.json(
+      { message: bad === 'nationalId' ? 'کد ملی باید ۱۰ رقم باشد' : 'نام و نام خانوادگی را درست و حداکثر ۴۰ حرف وارد کنید' },
+      { status: 400, headers: CORS_HEADERS },
+    )
+  }
+  const { nationalId, firstName, lastName } = parsed.data
+  /* ⚠️ پیش‌تر تاریخ تولد اختیاری بود و حتی وقتی ثبت‌احوال تأییدش نمی‌کرد
+     (سرویس در دسترس نبود) همان تاریخِ تایپ‌شده در حساب می‌نشست — و استعلام
+     کارت و شبا بعدا روی همان تکیه می‌کنند. حالا اجباری و تأییدشده است. */
+  const birthDate = canonicalBirthDate(parsed.data.birthDate)
+  if (!birthDate) {
+    return NextResponse.json({ message: 'تاریخ تولد معتبر نیست، آن را از تقویم انتخاب کنید' }, { status: 400, headers: CORS_HEADERS })
   }
 
   const supabase = getSupabaseServer()
@@ -59,6 +79,11 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ message: 'ابتدا شماره موبایل خود را ثبت کنید' }, { status: 400, headers: CORS_HEADERS })
   }
 
+  /* دو استعلامِ پولی پشتِ این مسیر است؛ بی‌سقف، اوراکلِ «این کد ملی و
+     این تاریخ مال کیست» می‌شد. پس از «قبلا تأیید شده» تا آن سهمیه نسوزاند. */
+  const rl = await hitRateLimit(req, RULES.shahkar, session.id)
+  if (!rl.ok) return tooMany(rl.retryAfterSec)
+
   /* گام ۱ — شاهکار: این کد ملی به همین شماره تعلق دارد؟
      کاربر با رمز خودش وارد شده و شماره‌اش در حسابش ثبت است، پس نیازی به
      کد پیامکی دوباره نیست. */
@@ -73,21 +98,26 @@ export async function POST(req: NextRequest) {
     )
   }
 
-  /* گام ۲ — ثبت‌احوال: نام و تاریخ تولد هم بخوانند (اگر تاریخ داده شده) */
-  let nameChecked = false
-  if (birthDate) {
-    const person = await verifyPerson(
-      user.phone, nationalId, birthDate,
-      user.firstName ?? '', user.lastName ?? '',
-      { requireOtp: false },
+  /* گام ۲ — ثبت‌احوال: تاریخ تولد و نامِ واردشده با کد ملی بخوانند.
+     فقط «بله»ی صریح پذیرفته است؛ «سرویس در دسترس نیست» یعنی بعدا.
+     نامِ فرم سنجیده می‌شود نه نامِ ذخیره‌شده: حساب‌های قدیمی نامِ آزاد
+     دارند و فرم همین را می‌پرسید ولی نادیده می‌گرفت — کسی که نامِ درستش
+     را می‌زد برای همیشه «مغایرت» می‌گرفت. پس از تأیید، همان نام می‌نشیند. */
+  const person = await verifyPerson(
+    user.phone, nationalId, birthDate, firstName, lastName,
+    { requireOtp: false },
+  )
+  if (!person.ok) {
+    return NextResponse.json(
+      { message: person.message ?? 'استعلام ثبت‌احوال ناموفق بود' },
+      { status: person.unavailable ? 503 : 400, headers: CORS_HEADERS },
     )
-    if (person.ok && person.match === false) {
-      return NextResponse.json(
-        { message: person.message ?? 'مشخصات با کد ملی مطابقت ندارد' },
-        { status: 422, headers: CORS_HEADERS },
-      )
-    }
-    nameChecked = !!(person.ok && person.match)
+  }
+  if (!person.match) {
+    return NextResponse.json(
+      { message: person.message ?? 'مشخصات با کد ملی مطابقت ندارد' },
+      { status: 422, headers: CORS_HEADERS },
+    )
   }
 
   /* حسابِ جایگزین: شاهکار همین حالا گفت این کد ملی مالِ همین آدم است؛
@@ -104,18 +134,25 @@ export async function POST(req: NextRequest) {
     )
   }
 
-  await supabase.from('users').update({
+  const { error: saveErr } = await supabase.from('users').update({
+    firstName,
+    lastName,
     national_id: nationalId,
     national_id_verified: true,
-    ...(birthDate ? { birth_date: birthDate.slice(0, 12) } : {}),
+    birth_date: birthDate,
     verificationStatus: 'verified',
   }).eq('id', session.id)
+  /* پیش‌تر نتیجه خوانده نمی‌شد: نوشتنِ ناموفق «تأیید شد» می‌گفت و هیچ‌چیز نمی‌نشست */
+  if (saveErr) {
+    console.error('[verify/national-id] save failed:', saveErr.message)
+    return NextResponse.json({ message: 'ثبت نتیجه انجام نشد، دوباره تلاش کنید' }, { status: 500, headers: CORS_HEADERS })
+  }
 
   /* هویت (فاز ۳): اتصال به «شخص» — سهمیه‌ی رایگان از این به بعد شخص‌محور است */
   await ensurePersonForUser(session.id)
 
   return NextResponse.json(
-    { success: true, nameChecked, message: 'کد ملی شما با موفقیت تأیید شد' },
+    { success: true, nameChecked: true, message: 'کد ملی شما با موفقیت تأیید شد' },
     { headers: CORS_HEADERS },
   )
 }

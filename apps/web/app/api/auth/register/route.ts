@@ -6,17 +6,19 @@ import { issueSession } from '@/lib/auth/store';
 import { hitRateLimit, tooMany, RULES } from '@/lib/auth/rate-limit';
 import { normalizePhone, hasAssignedPrefix, INVALID_MOBILE_MESSAGE } from '@/lib/auth/phone';
 import { wasIdentityVerified } from '@/lib/otp-server';
+import { identitySubject } from '@/lib/shahkar-server';
+import { canonicalBirthDate } from '@/lib/jalali';
 import { ensurePersonForUser } from '@/lib/identity';
 import { nationalIdBlocked } from '@/lib/enforcement/server';
 import { z } from 'zod';
+import { PersonName } from '@/lib/auth/person-name';
 import { checkPassword } from '@/lib/auth/password';
 import { hasOtpProof, clearOtpProof } from '@/lib/auth/otp-proof';
 import { ipOf } from '@/lib/auth/rate-limit';
 import { wasOtpVerified } from '@/lib/otp-server';
 
-/* نام: رشته‌ی کوتاهِ بی‌نویسه‌ی کنترلی. پیش‌تر هر چیزی — شیء، آرایه، متنِ
-   ده‌هزارنویسه‌ای — مستقیم در ستونِ users می‌نشست. */
-const Name = z.string().trim().min(1).max(40).regex(/^[^\p{Cc}<>]+$/u);
+/* نام: lib/auth/person-name — همان تعریفی که استعلامِ هویت با آن سنجیده شد */
+const Name = PersonName;
 const Body = z.object({
   firstName: Name,
   lastName: Name,
@@ -107,18 +109,29 @@ export async function POST(req: NextRequest) {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    /* هویت فقط وقتی ذخیره می‌شود که خود سرور استعلامش کرده باشد.
-       مسیر /api/shahkar پس از تأیید شاهکار/ثبت‌احوال نشانه‌ای می‌گذارد و
-       این‌جا فقط همان بررسی می‌شود؛ پس کسی نمی‌تواند با صدا زدن مستقیم
-       این مسیر، کد ملی دلخواه را «تأییدشده» جا بزند. */
+    /* هویت فقط وقتی پذیرفته می‌شود که خود سرور استعلامش کرده باشد.
+       مسیر /api/shahkar پس از «بله»ی صریحِ شاهکار و ثبت‌احوال نشانه‌ای
+       روی کد ملی + تاریخ تولد + نام می‌گذارد و این‌جا همان سنجیده می‌شود.
+
+       ⚠️ تا آبانِ ۱۴۰۵ نشانه فقط روی کد ملی بود و نبودنش هم مانع نبود:
+       حساب «تأییدنشده» ساخته می‌شد و تاریخ تولد و نام هرچه در درخواست
+       آمده بود می‌نشست. حالا بی‌هویتِ تأییدشده حسابی ساخته نمی‌شود. */
     const nid = String(nationalId ?? '').replace(/[^0-9]/g, '');
-    const idVerified = nid.length === 10 && await wasIdentityVerified(phone, nid);
+    const bd = canonicalBirthDate(birthDate);
+    const idVerified = nid.length === 10 && !!bd
+      && await wasIdentityVerified(phone, identitySubject(nid, bd, firstName, lastName));
+    if (!idVerified) {
+      return NextResponse.json(
+        { code: 'IDENTITY_REQUIRED', message: 'کد ملی، تاریخ تولد و نام باید پیش از ساخت حساب تأیید شوند، دوباره «ثبت نام» را بزنید' },
+        { status: 403, headers: CORS_HEADERS },
+      );
+    }
 
     /* حسابِ جایگزین (خواستِ مالک، آبانِ ۱۴۰۵): کد ملیِ تأییدشده‌ای که مالِ
        حسابی مسدود، تعلیق یا حذف‌شده است، حسابِ تازه نمی‌سازد. ⚠️ عمداً فقط
        همین — قانونِ کلیِ «هر کد ملی یک حساب» هنوز خاموش است (مالک با چند
        سیم‌کارت آزمون می‌کند). */
-    if (idVerified && await nationalIdBlocked(nid)) {
+    if (await nationalIdBlocked(nid)) {
       return NextResponse.json(
         { code: 'IDENTITY_BLOCKED', message: 'با این کد ملی امکان ساخت حساب تازه نیست، برای پیگیری با پشتیبانی تماس بگیرید' },
         { status: 403, headers: CORS_HEADERS },
@@ -134,17 +147,16 @@ export async function POST(req: NextRequest) {
         password: hashedPassword,
         primaryRole: 'user',
         secondaryRoles: [],
-        verificationStatus: idVerified ? 'verified' : 'unverified',
+        verificationStatus: 'verified',
         isProfileComplete: false,
         isActive: true,
         language: 'fa',
         documents: [],
         phone_verified: true,   // ثبت‌نام فقط با تأیید کد پیامکی ممکن است
-        ...(idVerified ? {
-          national_id: nid,
-          national_id_verified: true,
-          birth_date: String(birthDate ?? '').slice(0, 12) || null,
-        } : {}),
+        national_id: nid,
+        national_id_verified: true,
+        /* همان تاریخی که ثبت‌احوال تأیید کرد، در قالبِ واحد */
+        birth_date: bd,
       })
       .select()
       .single();
@@ -161,7 +173,7 @@ export async function POST(req: NextRequest) {
     /* هویت (فاز ۳): حساب به «شخص» وصل می‌شود — اگر همین کد ملی قبلا
        شخص دارد (حساب دیگری از همین فرد)، به همان وصل می‌شود؛ سهمیه‌ی
        رایگان بین همه‌ی حساب‌های یک شخص مشترک است. */
-    if (idVerified) await ensurePersonForUser(user.id);
+    await ensurePersonForUser(user.id);
 
     /* ⚠️ توکنِ نسلِ قدیم (هفت‌روزه، بی‌typ) دیگر در body برنمی‌گردد — مثلِ
        login. هیچ کلاینتی آن را نمی‌خواند (استور ذخیره‌اش نمی‌کند) و تنها

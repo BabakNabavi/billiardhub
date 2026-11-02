@@ -21,6 +21,7 @@ import { passwordHint } from '@/lib/auth/password-hints';
 import ClubPicker, { type ClubPickerValue } from '@/components/ClubPicker';
 import { AuthBackdrop, AuthBrand, AuthTabs } from '@/components/auth/AuthChrome';
 import { checkPassword } from '@/lib/auth/password';
+import { canonicalBirthDate } from '@/lib/jalali';
 
 type Step = 1 | 2;
 
@@ -233,8 +234,9 @@ export default function RegisterPage() {
       setError('کد ملی معتبر نیست');
       return;
     }
-    if (!/^1[23]\d{2}\/\d{1,2}\/\d{1,2}$/.test(form.birthDate.trim())) {
-      setError('تاریخ تولد را کامل و به‌صورت ۱۳۷۰/۰۵/۱۲ وارد کنید');
+    /* همان سنجه‌ی سرور: ماه و روزِ ناموجود یا روزِ آینده تاریخ تولد نیست */
+    if (!canonicalBirthDate(form.birthDate)) {
+      setError('تاریخ تولد را از تقویم انتخاب کنید');
       return;
     }
     if (!pwOk(form.password)) {

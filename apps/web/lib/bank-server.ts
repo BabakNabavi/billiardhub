@@ -10,6 +10,7 @@
 
 import { digitsOnly, isValidCard, formatIban, isValidIban, bankOfIban } from './bank'
 import { inquiryKey } from './inquiry-key'
+import { canonicalBirthDate } from './jalali'
 
 const CARD_TO_IBAN_URL = 'https://s.api.ir/api/sw1/CardToIban'
 const CARD_MATCH_URL   = 'https://s.api.ir/api/sw1/CardMatch'
@@ -138,19 +139,37 @@ async function callMatch(url: string, body: Record<string, string>, what: string
   return { ok: true, match: j.data === true }
 }
 
+/* قالبِ تاریخِ این سرویس‌ها مستند نیست. `birth_date` حساب‌ها دو شکل دارد —
+   `1370/5/12` (تقویم) و `1370/05/12` (فرمِ تایپی، و از آبانِ ۱۴۰۵ قالبِ واحدِ
+   ذخیره). اول همان ذخیره‌شده، و اگر «نمی‌خواند» آمد شکلِ دیگر؛ وگرنه یک
+   قالبِ اشتباه کارتِ درست را «مال شما نیست» می‌کرد. */
+async function matchWithDateVariants(
+  birthDate: string, call: (bd: string) => Promise<MatchResult>,
+): Promise<MatchResult> {
+  const first = await call(birthDate)
+  /* «اطلاعات معتبر نیست» (۴۰۰) هم شکلِ محتملِ قالبِ اشتباه است؛ فقط
+     «سرویس در دسترس نیست» و «می‌خواند» تکرار نمی‌شوند */
+  if (first.match || first.unavailable) return first
+  const padded = canonicalBirthDate(birthDate)
+  const other = padded === birthDate ? padded?.replace(/\/0/g, '/') : padded
+  return other && other !== birthDate ? call(other) : first
+}
+
 /** آیا این شماره کارت به همین کد ملی و تاریخ تولد تعلق دارد؟ */
 export async function matchCard(nationalCode: string, birthDate: string, card: string): Promise<MatchResult> {
   const cardNumber = digitsOnly(card)
   if (cardNumber.length !== 16) return { ok: false, message: 'شماره کارت باید ۱۶ رقم باشد' }
   if (!isValidCard(cardNumber)) return { ok: false, message: 'شماره کارت معتبر نیست' }
-  return callMatch(CARD_MATCH_URL, { nationalCode: digitsOnly(nationalCode), birthDate, cardNumber }, 'CardMatch')
+  return matchWithDateVariants(birthDate, bd =>
+    callMatch(CARD_MATCH_URL, { nationalCode: digitsOnly(nationalCode), birthDate: bd, cardNumber }, 'CardMatch'))
 }
 
 /** آیا این شبا به همین کد ملی و تاریخ تولد تعلق دارد؟ */
 export async function matchIban(nationalCode: string, birthDate: string, rawIban: string): Promise<MatchResult> {
   const iban = formatIban(rawIban)
   if (!isValidIban(iban)) return { ok: false, message: 'شماره شبا معتبر نیست' }
-  return callMatch(IBAN_MATCH_URL, { nationalCode: digitsOnly(nationalCode), birthDate, iban }, 'IbanMatch')
+  return matchWithDateVariants(birthDate, bd =>
+    callMatch(IBAN_MATCH_URL, { nationalCode: digitsOnly(nationalCode), birthDate: bd, iban }, 'IbanMatch'))
 }
 
 /* ─────────────────────────────────────────────────────────────

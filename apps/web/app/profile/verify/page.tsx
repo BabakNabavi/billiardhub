@@ -5,6 +5,8 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { csrfToken } from '../../../lib/http';
 import Ti from '../../../components/ui/Ti'
+import JalaliDatePicker from '../../../components/ui/JalaliDatePicker'
+import { canonicalBirthDate } from '../../../lib/jalali'
 
 // ─── Helpers ──────────────────────────────────────────────────
 function toFa(v: string | number) {
@@ -124,6 +126,7 @@ export default function VerifyPage() {
   const [nationalId, setNationalId] = useState('')
   const [firstName, setFirstName]   = useState('')
   const [lastName, setLastName]     = useState('')
+  const [birthDate, setBirthDate]   = useState('')
 
   // Step 2
   const [otp, setOtp]           = useState('')
@@ -158,13 +161,14 @@ export default function VerifyPage() {
     const enId = toEn(nationalId)
     if (enId.length !== 10) { setError('کد ملی باید ۱۰ رقم باشد'); return }
     if (!firstName.trim() || !lastName.trim()) { setError('نام و نام خانوادگی الزامی است'); return }
+    if (!canonicalBirthDate(birthDate)) { setError('تاریخ تولد را از تقویم انتخاب کنید'); return }
 
     setLoading(true); setError(null)
     try {
       const res = await apiFetch('/api/auth/verify/national-id', {
         method: 'POST',
         headers: { ...authHeader(), 'Content-Type': 'application/json' },
-        body: JSON.stringify({ nationalId: enId, firstName, lastName }),
+        body: JSON.stringify({ nationalId: enId, firstName, lastName, birthDate }),
       })
       const j = await res.json()
       if (!res.ok) throw new Error(j.message ?? 'خطا در تأیید کد ملی')
@@ -299,6 +303,15 @@ export default function VerifyPage() {
                     {toFa(nationalId.length)}/۱۰ رقم
                   </p>
                 </div>
+
+                {/* ثبت‌احوال کد ملی را با تاریخ تولد استعلام می‌کند */}
+                <JalaliDatePicker
+                  id="verify-birthDate"
+                  label="تاریخ تولد"
+                  value={birthDate}
+                  onChange={v => { setBirthDate(v); setError(null) }}
+                  placeholder="انتخاب از تقویم"
+                />
               </div>
 
               {error && <ErrorBox msg={error} />}

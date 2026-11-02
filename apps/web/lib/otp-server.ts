@@ -294,33 +294,40 @@ async function otpState(m: string): Promise<OtpState | null> {
 
    خود کد ملی ذخیره نمی‌شود، فقط هش HMACش — چون این باکت عمومی است و
    کد ملی داده‌ی هویتی است. برای تطبیق هم همان هش کافی است. */
-export async function markIdentityVerified(mobile: string, nationalId: string): Promise<void> {
+/* `subject` از `identitySubject` (lib/shahkar-server) می‌آید: کد ملی +
+   تاریخ تولد + نام. ⚠️ تا آبانِ ۱۴۰۵ فقط کد ملی هش می‌شد، پس ساختِ حساب
+   تاریخ تولد و نامِ دلخواه می‌پذیرفت؛ هر دو طرف باید همان تابع را صدا
+   بزنند تا هش‌ها بخوانند. */
+const identityHash = (subject: string) => hashCode(`identity:${subject}`)
+
+/** `true` فقط وقتی نشان واقعا نشست — با خواندنِ دوباره سنجیده می‌شود.
+ *
+ *  ⚠️ این تابع **بعد از** پرداختِ استعلام صدا زده می‌شود و throw نمی‌کند،
+ *  ولی شکستش دیگر بی‌صدا نیست: تا وقتی ساختِ حساب بی‌نشان هم پیش می‌رفت،
+ *  نشانِ گم‌شده فقط حسابِ «تأییدنشده» می‌ساخت؛ حالا ساختِ حساب را می‌بندد،
+ *  پس فراخوان باید بداند و بگوید «دوباره تلاش کنید». */
+export async function markIdentityVerified(mobile: string, subject: string): Promise<boolean> {
   const m = normMobile(mobile)
-  /* ⚠️ همان نرمال‌سازیِ `wasIdentityVerified`. بدونِ آن، کد ملیِ
-     قالب‌دار هشی می‌نوشت که هیچ‌وقت با خواندن نمی‌خواند و کاربر
-     بی‌صدا «تأییدنشده» می‌ماند. */
-  const idHash = hashCode(String(nationalId).replace(/[^0-9]/g, ''))
-  /* ⚠️ این تابع **بعد از** پرداختِ استعلامِ شاهکار صدا زده می‌شود
-     (app/api/shahkar/route.ts). اگر خطا پرتاب کند، یک استعلامِ
-     موفق و حساب‌شده به ۵۰۰ تبدیل می‌شود و کاربر باید دوباره
-     پولش را بدهد. پس شکست این‌جا فقط لاگ می‌شود. */
+  const idHash = identityHash(subject)
   try {
     const done = await otpRpc('bh_otp_mark_identity', { p_mobile: m, p_id_hash: idHash })
-    if (done) return
+    if (!done) {
+      const rec = await readOtp(m)
+      if (!rec) return false
+      await writeJson(otpPath(m), { ...rec, idHash, idAt: Date.now() })
+    }
   } catch (e) {
     console.error('[otp] bh_otp_mark_identity:', e)
     void logHandled('otp/bh_otp_mark_identity', e).catch(() => {})
-    return
+    return false
   }
-  const rec = await readOtp(m)
-  if (!rec) return
-  await writeJson(otpPath(m), { ...rec, idHash, idAt: Date.now() })
+  return wasIdentityVerified(m, subject)
 }
 
-/** آیا همین کد ملی برای همین شماره اخیرا استعلام شده؟ */
-export async function wasIdentityVerified(mobile: string, nationalId: string): Promise<boolean> {
+/** آیا همین هویت (کد ملی + تاریخ تولد + نام) برای همین شماره اخیرا استعلام شده؟ */
+export async function wasIdentityVerified(mobile: string, subject: string): Promise<boolean> {
   const m = normMobile(mobile)
-  const want = hashCode(String(nationalId).replace(/[^0-9]/g, ''))
+  const want = identityHash(subject)
 
   const st = await otpState(m)
   if (st) {

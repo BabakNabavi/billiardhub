@@ -77,6 +77,7 @@
     "test:guards": "node scripts/test-injection-guards.mjs",
     "test:logs": "node scripts/test-log-helpers.mjs",
     "test:enforcement": "node scripts/test-enforcement.mjs",
+    "test:identity": "npx --yes tsx scripts/test-identity-verify.mjs",
     "test:enforcement:live": "node scripts/test-enforcement-live.mjs"
   },
   "dependencies": {
