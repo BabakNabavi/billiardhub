@@ -21,7 +21,7 @@
 
 import { useEffect } from 'react'
 import { useAuthStore } from '../../store/auth.store'
-import { refreshSession, readLastRefresh } from '../../lib/auth/refresh-client'
+import { refreshSession, readLastRefresh, trackSync } from '../../lib/auth/refresh-client'
 import { csrfToken } from '../../lib/http'
 
 const DONE_KEY = 'bh_session_migrated'
@@ -210,7 +210,7 @@ export default function SessionBridge() {
       }
     }
 
-    void sync()
+    void trackSync(sync())
 
     /* ── تب دیگر حساب را عوض کرد ──
        `storage` فقط در *سایر* تب‌ها شلیک می‌شود؛ یعنی دقیقا همان تبی
@@ -228,14 +228,30 @@ export default function SessionBridge() {
        نمی‌شود. اگر بین رفتن و برگشتن حساب عوض شده باشد، دقیقا همان
        صفحه‌ی حساب قبلی برمی‌گردد. همین بود که با زدن «بازگشت» دیده
        شد. */
-    const onShow = (e: PageTransitionEvent) => { if (e.persisted) void sync() }
+    const onShow = (e: PageTransitionEvent) => { if (e.persisted) void trackSync(sync()) }
+
+    /* ── برگشت به اپِ نصب‌شده از پس‌زمینه ──
+       نه ناوبری است نه pageshow، پس نقش‌ها همان می‌ماندند که ساعت‌ها پیش
+       بود. گزارشِ مالک (آبانِ ۱۴۰۵): کاربر باشگاه ساخت و سرور نقشِ
+       «باشگاه‌دار» داد، ولی اپِ نصب‌شده (حافظه‌ی جدا از سافاری) هنوز
+       «کاربر» می‌دید و بخشِ باشگاه را نشان نمی‌داد. */
+    let lastVisibleSync = 0
+    const onVisible = () => {
+      if (document.visibilityState !== 'visible') return
+      /* بیش از یک بار در نیم دقیقه نه — جابه‌جاییِ تب در دسکتاپ هر بار یک درخواستِ پروفایل نمی‌سازد */
+      if (Date.now() - lastVisibleSync < 30_000) return
+      lastVisibleSync = Date.now()
+      void trackSync(sync())
+    }
 
     window.addEventListener('storage', onStorage)
     window.addEventListener('pageshow', onShow)
+    document.addEventListener('visibilitychange', onVisible)
     return () => {
       stopped = true
       window.removeEventListener('storage', onStorage)
       window.removeEventListener('pageshow', onShow)
+      document.removeEventListener('visibilitychange', onVisible)
     }
     /* عمدا فقط به `hydrated` وابسته است: افزودن `user` این افکت را
        بعد از هر به‌روزرسانی دوباره اجرا می‌کرد و حلقه می‌ساخت.

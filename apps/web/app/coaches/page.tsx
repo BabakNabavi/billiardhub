@@ -183,7 +183,10 @@ export default function CoachesPage() {
       const remote = res.profiles
         .filter(r => r.status === 'approved')
         .map(r => mapProfileToListCoach({ ...r.data, slug: r.slug, verified: r.verified } as CoachProfile))
-      if (remote.length) setLocalCoaches(remote)
+      /* پاسخِ سرور، حتی خالی، حقیقت است. شرطِ `remote.length` نسخه‌ی
+         همین مرورگر را نگه می‌داشت و فهرست بینِ دستگاه‌ها فرق می‌کرد
+         (سافاری می‌دید، اپِ نصب‌شده با حافظه‌ی جدا نه). */
+      setLocalCoaches(remote)
     })().catch(err => { console.error('[profiles] list load failed', err); setLoadFailed(true) })
   }, [])
   const hit = makeMatcher(search)

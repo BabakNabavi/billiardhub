@@ -345,7 +345,8 @@ export default function RefereesPage() {
       const remote = res.profiles
         .filter(r => r.status === 'approved')
         .map(r => mapProfileToListReferee({ ...r.data, slug: r.slug, verified: r.verified } as RefereeProfile))
-      if (remote.length) setLocalRefs(remote)
+      /* پاسخِ سرور، حتی خالی، حقیقت است — همان دلیلِ app/coaches */
+      setLocalRefs(remote)
     })().catch(err => { console.error('[profiles] list load failed', err); setLoadFailed(true) })
   }, [])
   const hit = makeMatcher(search)

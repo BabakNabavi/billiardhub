@@ -187,13 +187,19 @@ export async function getProfileByOwner(kind: ProfileKind, ownerId: string): Pro
   return toProfile(data as DbRow)
 }
 
-export async function listProfiles(kind: ProfileKind, opts: { status?: string; limit?: number } = {}): Promise<ProfileRow[]> {
+export async function listProfiles(
+  kind: ProfileKind,
+  /* `strict`: جدولِ ناپیدا هم خطاست، نه فهرستِ خالی. فهرستِ عمومی پاسخِ
+     سرور را حقیقت می‌گیرد (حتی خالی)، پس بازخوانیِ کوتاهِ schema cacheِ
+     PostgREST پس از یک مهاجرت نباید به‌شکلِ «هیچ مربی‌ای نیست» برسد. */
+  opts: { status?: string; limit?: number; strict?: boolean } = {},
+): Promise<ProfileRow[]> {
   let q = sb().from('profiles').select('*').eq('kind', kind)
     .order('updated_at', { ascending: false }).limit(Math.min(500, opts.limit ?? 200))
   if (opts.status) q = q.eq('status', opts.status)
   const { data, error } = await q
   if (error) {
-    if (missing(error.message)) return []
+    if (missing(error.message) && !opts.strict) return []
     throw new Error(error.message)
   }
   return (data as DbRow[] ?? []).map(toProfile)

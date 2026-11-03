@@ -128,7 +128,7 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ kind: strin
   }
 
   try {
-    const all = await listProfiles(kind, { status: 'approved' });
+    const all = await listProfiles(kind, { status: 'approved', strict: true });
     return NextResponse.json({ profiles: all }, { headers: { 'Cache-Control': 'no-store' } });
   } catch {
     return NextResponse.json({ message: 'خطا در دریافت پروفایل‌ها' }, { status: 500 });

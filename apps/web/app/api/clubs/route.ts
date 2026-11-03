@@ -7,6 +7,7 @@ import { sessionFromRequest } from '@/lib/auth/session';
 import { cardToIban, matchCard, matchIban } from '@/lib/bank-server';
 import { actorFromRequest, isAdmin } from '@/lib/finance/db';
 import { isUUID, isValidSlug } from '@/lib/slug';
+import { revalidateHomeFeatured } from '@/lib/home-featured';
 
 const CORS_HEADERS = {
   'Vary': 'Origin',
@@ -387,6 +388,9 @@ export async function POST(req: NextRequest) {
       console.error('[clubs] role submit failed:', e);
     }
 
+    /* باشگاهِ تازه همان لحظه «تأییدشده» است؛ بی‌این، صفحه‌ی اصلی تا پایانِ
+       کشِ ۶۰ثانیه‌ایِ ISR و یک بازدیدِ دیگر نشانش نمی‌داد (lib/home-featured) */
+    revalidateHomeFeatured();
     return NextResponse.json(club, { status: 201, headers: CORS_HEADERS });
   } catch {
     return NextResponse.json(

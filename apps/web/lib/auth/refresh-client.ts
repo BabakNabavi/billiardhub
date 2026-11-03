@@ -31,6 +31,27 @@ export const writeLastRefresh = (t: number) => {
   try { localStorage.setItem(LAST_REFRESH_KEY, String(t)) } catch { /* ignore */ }
 }
 
+/** تا تمدیدِ در جریان تمام شود. پیش از هر `location.reload()` صدا زده
+ *  شود: بازبارگذاری درخواستِ در راه را می‌بُرد، سرور `refresh_hash`ِ تازه
+ *  را نوشته ولی `Set-Cookie` به مرورگر نرسیده، و تمدیدِ بعدی «استفاده‌ی
+ *  دوباره از توکن» دیده می‌شود ⟵ خروجِ کاربر (components/AppBoot). */
+export async function refreshIdle(): Promise<void> {
+  /* هم تمدیدِ در جریان، هم همگام‌سازیِ SessionBridge که ممکن است *بعد از*
+     پاسخِ ۴۰۱ِ پروفایل تمدید را شروع کند. تا وقتی هیچ‌کدام در راه نیست. */
+  for (let i = 0; i < 5 && (inflight || pendingSync); i++) {
+    await Promise.allSettled([inflight, pendingSync])
+  }
+}
+
+let pendingSync: Promise<unknown> | null = null
+/** SessionBridge کارِ همگام‌سازی‌اش را این‌جا ثبت می‌کند تا refreshIdle منتظرش بماند */
+export function trackSync<T>(p: Promise<T>): Promise<T> {
+  pendingSync = p
+  const clear = () => { if (pendingSync === p) pendingSync = null }
+  p.then(clear, clear)
+  return p
+}
+
 /** `status: 0` یعنی درخواست اصلا نرسید (آفلاین) — نه رد سرور. */
 export function refreshSession(): Promise<{ ok: boolean; status: number }> {
   if (inflight) return inflight

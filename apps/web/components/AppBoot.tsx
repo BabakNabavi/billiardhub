@@ -1,6 +1,7 @@
 'use client'
 import { useEffect } from 'react'
 import { useAuthStore } from '../store/auth.store'
+import { refreshIdle } from '../lib/auth/refresh-client'
 import { enablePush, pushPermission } from '../lib/push-client'
 import { useSocialInteractions } from './features/FeatureFlags'
 
@@ -83,24 +84,86 @@ export default function AppBoot() {
     if (el?.isContentEditable) return true
     /* فرمی که کاربر شروع به پرکردنش کرده — حتی اگر همین حالا فوکوس
        جای دیگری باشد.  و  حساب نمی‌شوند چون
-       مقدار پیش‌فرض دارند. */
+       مقدار پیش‌فرض دارند.
+       ⚠️ نه فقط داخلِ <form>: نوشتنِ دایرکت (app/direct) ورودیِ بی‌فرم
+       است و با بازبارگذاری پس از برگشت به اپ پیش‌نویسش می‌رفت. */
     const filled = document.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>(
-      'form input:not([type=hidden]):not([type=checkbox]):not([type=radio]), form textarea',
+      /* range/color/file همیشه مقدار دارند (نوارِ صدای پخشِ زنده) و «وسطِ کار» نیستند */
+      'input:not([type=hidden]):not([type=checkbox]):not([type=radio]):not([type=search]):not([type=range]):not([type=color]):not([type=file]):not([readonly]):not([disabled]):not([data-volatile]), textarea:not([readonly]):not([disabled]):not([data-volatile])',
     )
     for (const f of filled) if (f.value && f.value.trim()) return true
     return false
   }
 
-  // آپدیت خودکار: هر بار اپ visible/focus شد، نسخه‌ی سرور را چک کن؛ اگر فرق داشت reload
+  /* ── داده‌ی تازه پس از برگشت به اپ ──
+     گزارشِ مالک (آبانِ ۱۴۰۵): کاربری باشگاه ساخت؛ در کروم و سافاری دیده
+     می‌شد، در اپِ نصب‌شده روی صفحه‌ی اصلی نه.
+
+     اپِ نصب‌شده بسته نمی‌شود، فقط به پس‌زمینه می‌رود. برگشتن به آن
+     ناوبری نیست: همان صفحه با همان داده‌ای که ساعت‌ها پیش گرفته بود
+     دوباره دیده می‌شود. فهرست‌ها داده را در mount می‌گیرند و صفحه‌ی
+     اصلی داده را از HTMLِ سرور دارد، پس هیچ‌کدام خودبه‌خود تازه
+     نمی‌شوند. در مرورگر، تایپِ نشانی بارگذاریِ تازه است و همین تفاوت
+     را می‌سازد.
+
+     یک قاعده برای همه‌ی صفحه‌ها، نه وصله در هر فهرست: پس از سه دقیقه
+     غیبت اپِ نصب‌شده، و سی دقیقه غیبتِ تبِ مرورگر، صفحه بازبارگذاری
+     می‌شود. (`router.refresh` کافی نبود: فهرست‌ها کلاینتی‌اند و
+     HomeClient دادهٔ سرور را در state کپی می‌کند، پس چیزی عوض نمی‌شد.)
+
+     هر بازبارگذاری — این یا نسخه‌ی تازه — از یک مسیر می‌گذرد:
+       · فقط پس از پاسخِ موفقِ `/api/version`. بی‌شبکه، اپِ نصب‌شده
+         صفحه‌ی «باز نمی‌شود» می‌گیرد، بی‌نوارِ مرورگر و بی‌راهِ برگشت —
+         صفحه‌ی کهنه از آن بهتر است.
+       · پس از پایانِ تمدیدِ نشست (`refreshIdle`). SessionBridge روی همین
+         visibilitychange تمدید می‌کند؛ بریدنِ آن درخواست کاربر را بیرون
+         می‌اندازد (lib/auth/refresh-client).
+       · فرمِ نیمه‌پر و ویدیویی که پیش از رفتن پخش می‌شد (iOS در
+         پس‌زمینه مکثش می‌کند، پس لحظه‌ی رفتن سنجیده می‌شود) دست نمی‌خورند.
+       · حداکثر یک بار برای هر برگشت. */
   useEffect(() => {
+    const STANDALONE_AWAY_MS = 3 * 60_000
+    const TAB_AWAY_MS = 30 * 60_000
+    const standalone = () =>
+      window.matchMedia?.('(display-mode: standalone)').matches === true
+      || (navigator as Navigator & { standalone?: boolean }).standalone === true
+    const playing = () =>
+      Array.from(document.querySelectorAll<HTMLMediaElement>('video, audio')).some(m => !m.paused && !m.ended)
+
+    /* اجرای سردِ اپِ نصب‌شده: صفحه‌ی اصلی ISR است و سرآیندش
+       `stale-while-revalidate`ِ یک‌ساله دارد که WebKit ممکن است در کشِ
+       خودش هم اعمال کند — سندِ کهنه بی‌تماس با سرور. `transferSize === 0`
+       همین را می‌گوید. ⚠️ نمی‌دانم WebKit این عدد را در حالتِ نصب‌شده
+       درست پر می‌کند یا نه: اگر نکند این شرط هیچ‌وقت روشن نمی‌شود، و اگر
+       همیشه ۰ بدهد هر اجرای سرد یک بازبارگذاریِ ۳۰۴ِ ارزان دارد. نوعِ
+       reload دوباره روشنش نمی‌کند، پس حلقه ممکن نیست. */
+    const nav = performance.getEntriesByType?.('navigation')[0] as PerformanceNavigationTiming | undefined
+    let coldStale = standalone() && !!nav && nav.type !== 'reload'
+      && nav.transferSize === 0 && nav.decodedBodySize > 0
+
+    let hiddenAt = 0, wasPlaying = false, busy = false
+
     const check = async () => {
-      if (typeof document === 'undefined' || document.visibilityState !== 'visible') return
+      if (typeof document === 'undefined' || document.visibilityState !== 'visible' || busy) return
+      busy = true
+      const away = hiddenAt ? Date.now() - hiddenAt : 0
+      const played = wasPlaying
       try {
         const r = await fetch('/api/version', { cache: 'no-store' })
-        const { sha } = await r.json()
+        if (!r.ok) return
+        /* غیبت فقط پس از پاسخِ موفق پاک می‌شود — بی‌شبکه، focus یا برگشتِ
+           بعدی دوباره امتحان می‌کند */
+        hiddenAt = 0; wasPlaying = false
+        const { sha } = await r.json() as { sha?: string }
         const mine = process.env.NEXT_PUBLIC_BUILD_SHA
-        if (!sha || !mine || sha === 'dev' || mine === 'dev' || sha === mine) return
-        if (sessionStorage.getItem('bh-reloaded-for') === sha) return   // فقط یک‌بار برای هر نسخه
+        let seen: string | null = null
+        try { seen = sessionStorage.getItem('bh-reloaded-for') } catch { /* حافظه‌ی نشست در دسترس نیست */ }
+        const newBuild = !!sha && !!mine && sha !== 'dev' && mine !== 'dev' && sha !== mine
+          && seen !== sha   // فقط یک‌بار برای هر نسخه
+        const stale = coldStale
+          || (!played && away >= (standalone() ? STANDALONE_AWAY_MS : TAB_AWAY_MS))
+        coldStale = false
+        if (!newBuild && !stale) return
 
         /* ── چرا وسط کار بازبارگذاری نمی‌کنیم ──
            این بازبارگذاری برای رفع صفحه‌ی سفید است، ولی خودش می‌تواند
@@ -112,15 +175,25 @@ export default function AppBoot() {
            می‌آید و هیچ‌چیز از دست نمی‌رود. */
         if (isMidTask()) return
 
-        sessionStorage.setItem('bh-reloaded-for', sha)
+        /* تمدید و همگام‌سازیِ SessionBridge روی همین رویداد شروع شده‌اند
+           (پیش از رفت‌وبرگشتِ /api/version)؛ تا پایانشان */
+        await refreshIdle()
+        if (isMidTask()) return
+        if (newBuild && sha) {
+          try { sessionStorage.setItem('bh-reloaded-for', sha) } catch { /* حافظه‌ی نشست در دسترس نیست */ }
+        }
         location.reload()
-      } catch { /* آفلاین ⇒ بی‌خیال */ }
+      } catch { /* آفلاین ⇒ بی‌خیال، صفحه‌ی فعلی می‌ماند */ } finally { busy = false }
     }
-    check()
-    document.addEventListener('visibilitychange', check)
+    const onVis = () => {
+      if (document.visibilityState === 'hidden') { hiddenAt = Date.now(); wasPlaying = playing(); return }
+      void check()
+    }
+    void check()
+    document.addEventListener('visibilitychange', onVis)
     window.addEventListener('focus', check)
     return () => {
-      document.removeEventListener('visibilitychange', check)
+      document.removeEventListener('visibilitychange', onVis)
       window.removeEventListener('focus', check)
     }
   }, [])

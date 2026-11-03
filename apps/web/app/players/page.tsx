@@ -108,7 +108,8 @@ export default function PlayersPage() {
       const remote = res.profiles
         .filter(r => r.status === 'approved')
         .map(r => profileToPlayer({ ...r.data, slug: r.slug, verified: r.verified } as PlayerProfile))
-      if (remote.length) setRegistered(remote)
+      /* پاسخِ سرور، حتی خالی، حقیقت است — همان دلیلِ app/coaches */
+      setRegistered(remote)
     })().catch(err => { console.error('[profiles] list load failed', err); setLoadFailed(true) })
   }, [])
 

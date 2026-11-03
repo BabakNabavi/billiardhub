@@ -391,7 +391,8 @@ export default function SellersPage() {
       if (res.state === 'error') { setLoadFailed(true); return }
       const remote = res.profiles.filter(r => r.status === 'approved')
         .map(r => ({ ...r.data, slug: r.slug, verified: r.verified } as SellerProfile))
-      if (remote.length) setStores(mergeStores(SELLERS, remote))
+      /* پاسخِ سرور، حتی خالی، حقیقت است — همان دلیلِ app/coaches */
+      setStores(mergeStores(SELLERS, remote))
     })().catch(err => { console.error('[profiles] list load failed', err); setLoadFailed(true) })
   }, [])
 

@@ -9,6 +9,7 @@ import { can } from '@/lib/admin/permissions';
 import { checkProfileData } from '@/lib/profiles/validate';
 import { isUUID, isValidSlug } from '@/lib/slug';
 import { shapeClub } from '@/lib/clubs/public-club';
+import { revalidateHomeFeatured } from '@/lib/home-featured';
 
 const CORS = {
   'Vary': 'Origin',
@@ -399,6 +400,7 @@ export async function PUT(
 
   /* HTMLِ سرورِ صفحه‌ی باشگاه از کشِ ۶۰ثانیه‌ای می‌آید (lib/clubs/public-club) */
   revalidateTag('clubs', 'max');
+  revalidateHomeFeatured();
   return NextResponse.json({ ...updated, resubmitted }, { headers: CORS });
 }
 
@@ -431,5 +433,6 @@ export async function DELETE(
   }
 
   revalidateTag('clubs', 'max');
+  revalidateHomeFeatured();
   return NextResponse.json({ success: true }, { headers: CORS });
 }
