@@ -535,7 +535,7 @@ export default function RegisterPage() {
             padding: '22px 28px', textAlign: 'center' }}>
             <div style={{ fontSize: 13, fontWeight: 900, color: '#C7A66A',
               letterSpacing: '0.12em', marginBottom: 4 }}>BILLIARD HUB</div>
-            <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.40)', marginBottom: 6 }}>فیش پرداخت آنلاین</div>
+            <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.40)', marginBottom: 6 }}>رسید ثبت‌نام</div>
             <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.65)', fontWeight: 700 }}>{t.name}</div>
           </div>
 
@@ -587,13 +587,14 @@ export default function RegisterPage() {
             }}>
               <span style={{ color: '#aaa' }}>وضعیت ثبت‌نام</span>
               <span style={{
-                fontWeight: 700, color: '#f59e0b',
-                background: 'rgba(245,158,11,0.08)',
+                fontWeight: 700, color: '#15803D',
+                background: 'rgba(48,197,90,0.08)',
                 padding: '4px 10px', borderRadius: 20,
-                border: '1px solid rgba(245,158,11,0.25)',
+                border: '1px solid rgba(48,197,90,0.25)',
                 fontSize: 13,
               }}>
-                ⏳ در انتظار تأیید
+                {/* این مرحله فقط از شاخه‌ی رایگان می‌آید که سرور قطعی‌اش کرده */}
+                قطعی شد
               </span>
             </div>
           </div>

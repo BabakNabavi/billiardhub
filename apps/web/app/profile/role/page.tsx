@@ -448,7 +448,9 @@ export default function RolePage() {
   const handleDone = () => {
     showToast('نقش‌های شما فعال شد')
     const currentSecondary = user?.secondaryRoles ?? []
-    const newRoles = queuedArr.filter(r => !currentSecondary.includes(r))
+    /* «کاربر عادی» نقش نیست و سرور هم ثبتش نمی‌کند؛ نوشتنش این‌جا کاربر را
+       تا همگام‌سازیِ بعدی «نقش‌دار» نشان می‌داد */
+    const newRoles = queuedArr.filter(r => r !== 'user' && !currentSecondary.includes(r))
     if (newRoles.length > 0) {
       updateUser({ secondaryRoles: [...currentSecondary, ...newRoles] })
     }

@@ -302,7 +302,7 @@ export default function DashboardPage() {
           letter-spacing: 0;
           color: rgba(0,0,0,0.45); margin-bottom: 14px;
           display: flex; align-items: center; gap: 8px;
-        }
+        }
         .quick-action {
           display: flex; flex-direction: column; align-items: center; gap: 10px;
           padding: 18px 12px;
@@ -447,20 +447,22 @@ export default function DashboardPage() {
         {/* ══════════ MAIN CONTENT ══════════ */}
         <div style={{ maxWidth: '1280px', margin: '0 auto', padding: 'clamp(24px,4vw,40px) clamp(16px,3vw,32px)' }}>
 
-          {/* ── هشدار انتخاب نقش ── */}
+          {/* ── افزودن نقش — اختیاری ──
+              هشدارِ زرد بود و می‌گفت «برای دسترسی کامل» نقش تعیین کنید، در حالی که
+              حسابِ عادی از لحظه‌ی ثبت‌نام کامل و فعال است و تأییدی نمی‌خواهد. */}
           {isBasicUser && (
-            <div style={{ marginBottom: '28px', padding: '28px 24px', background: 'rgba(245,158,11,0.04)', border: '1px solid rgba(245,158,11,0.15)', borderRadius: '20px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '14px', textAlign: 'center', animation: 'fadeUp 0.5s ease both' }}>
-              <ShieldCheck size={32} color="#f59e0b" />
+            <div style={{ marginBottom: '28px', padding: '28px 24px', background: 'rgba(199,166,106,0.06)', border: '1px solid rgba(199,166,106,0.22)', borderRadius: '20px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '14px', textAlign: 'center', animation: 'fadeUp 0.5s ease both' }}>
+              <ShieldCheck size={32} color="var(--gold-text)" />
               <div>
                 <div style={{ fontSize: '17px', fontWeight: 700, color: '#111111', marginBottom: '8px' }}>
-                  برای دسترسی کامل به تمام امکانات سایت، نقش خود را تعیین کنید
+                  نقش تخصصی دارید؟
                 </div>
                 <div style={{ fontSize: '15px', color: 'rgba(0,0,0,0.42)', lineHeight: 1.7 }}>
-                  باشگاه‌دار، بازیکن، مربی یا سایر نقش‌ها را انتخاب کنید
+                  اگر باشگاه‌دار، بازیکن یا مربی هستید، می‌توانید نقش خود را اضافه کنید
                 </div>
               </div>
-              <Link href="/profile/role" style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '11px 28px', background: 'linear-gradient(135deg,rgba(245,158,11,0.15),rgba(245,158,11,0.08))', border: '1px solid rgba(245,158,11,0.3)', borderRadius: '12px', color: '#f59e0b', fontSize: '16px', fontWeight: 700, textDecoration: 'none' }}>
-                انتخاب نقش ←
+              <Link href="/profile/role" style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '11px 28px', background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.34)', borderRadius: '10px', color: 'var(--gold-text)', fontSize: '16px', fontWeight: 700, textDecoration: 'none' }}>
+                افزودن نقش ←
               </Link>
             </div>
           )}
@@ -550,7 +552,8 @@ export default function DashboardPage() {
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                       {myRegs.map(reg => {
                         const statusCfg = {
-                          pending:  { label: 'در انتظار تأیید', color: '#f59e0b', bg: 'rgba(245,158,11,0.08)', border: 'rgba(245,158,11,0.22)' },
+                          /* تنها منبعش PENDING_PAYMENT است: کسی منتظرِ ادمین نیست، پرداخت مانده */
+                          pending:  { label: 'در انتظار پرداخت', color: '#f59e0b', bg: 'rgba(245,158,11,0.08)', border: 'rgba(245,158,11,0.22)' },
                           approved: { label: 'تأیید شده',      color: '#30C55A', bg: 'rgba(48,197,90,0.08)',  border: 'rgba(48,197,90,0.22)'  },
                           rejected: { label: 'رد شده',         color: '#ef4444', bg: 'rgba(239,68,68,0.08)',  border: 'rgba(239,68,68,0.22)'  },
                         }[reg.status];

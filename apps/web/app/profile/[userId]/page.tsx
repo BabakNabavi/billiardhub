@@ -345,6 +345,15 @@ function ProfileSetupInner() {
     setTimeout(() => setToast(null), 2500)
   }
 
+  /* ⚠️ همزادِ جامانده‌ی /profile/setup: آن‌جا `data.filter` روی پاسخِ
+     `{ requests, current }` درست شد و این‌جا نه، پس این صفحه به *همه* می‌گفت
+     «منتظر تأیید ادمین بمانید» — حتی کاربرِ عادی که چیزی برای تأیید ندارد.
+     پاسخ را درست نخواندم چون RoleForm به مسیری ذخیره می‌کند که وجود ندارد؛
+     کاربر به تابلوی راهنمای واقعی می‌رود. */
+  useEffect(() => {
+    if (!loading && userRoles.length === 0) router.replace('/profile/setup')
+  }, [loading, userRoles.length, router])
+
   if (loading) return (
     <div style={{ minHeight: '100vh', background: '#F7F7F5', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Vazirmatn, Tahoma, sans-serif' }}>
       <div style={{ textAlign: 'center', color: 'rgba(0,0,0,0.45)', fontSize: 15 }}>
@@ -354,18 +363,7 @@ function ProfileSetupInner() {
     </div>
   )
 
-  if (userRoles.length === 0) return (
-    <div style={{ minHeight: '100vh', background: '#F7F7F5', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Vazirmatn, Tahoma, sans-serif', direction: 'rtl' }}>
-      <div style={{ textAlign: 'center', padding: 32 }}>
-        <Ti name="lock" size={44} color={'rgba(0,0,0,0.35)'} style={{ display: 'block', marginBottom: 16 }} />
-        <div style={{ color: '#111111', fontSize: 18, fontWeight: 700, marginBottom: 8 }}>هنوز نقشی تأیید نشده</div>
-        <div style={{ color: 'rgba(0,0,0,0.45)', fontSize: 15, marginBottom: 24, lineHeight: 1.7 }}>ابتدا نقش درخواست بدید و منتظر تأیید ادمین بمانید</div>
-        <button onClick={() => router.push('/profile/role')} style={{ background: '#C7A66A', color: '#FFFFFF', border: 'none', borderRadius: 12, padding: '12px 24px', fontSize: 15, fontWeight: 700, fontFamily: 'inherit', cursor: 'pointer' }}>
-          درخواست نقش
-        </button>
-      </div>
-    </div>
-  )
+  if (userRoles.length === 0) return null
 
   const activeMeta = activeTab ? ROLE_MAP[activeTab] : null
 

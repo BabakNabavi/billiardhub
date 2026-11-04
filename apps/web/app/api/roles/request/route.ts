@@ -34,6 +34,11 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ message: 'این نقش قابل درخواست نیست' }, { status: 400 });
   }
 
+  /* «کاربر عادی» نقش نیست، حالت نداشتن نقش است و هر حسابی از لحظه‌ی ثبت‌نام
+     همین حالت را دارد. پس نه ردیفی می‌خواهد و نه تأییدی؛ ردیفش فقط ۷۲ ساعت
+     می‌ماند تا نگهبان پاکش کند. */
+  if (role === 'user') return NextResponse.json({ ok: true });
+
   /* مدرک باید از مسیر آپلود خودمان آمده باشد. پذیرفتن هر URLای یعنی
      می‌شد نشانی دلخواه — حتی یک سایت بیرونی — را به‌عنوان مدرک ثبت
      کرد و ادمین رویش کلیک می‌کرد. */
@@ -79,18 +84,16 @@ export async function POST(req: NextRequest) {
      `primaryRole` فقط وقتی جابه‌جا می‌شود که کاربر هنوز نقش معناداری
      ندارد؛ وگرنه انتخاب «داور» برای یک باشگاه‌دار، باشگاهش را از
      دستش درمی‌آورد. */
-  if (role !== 'user') {
-    const { data: u } = await sb().from('users')
-      .select('"primaryRole","secondaryRoles"').eq('id', actor.id).maybeSingle();
-    const cur = (u ?? {}) as { primaryRole?: string; secondaryRoles?: string[] };
-    const roles = [...new Set([...(cur.secondaryRoles ?? []), role])].filter(Boolean);
-    const promote = !cur.primaryRole || cur.primaryRole === 'user';
-    await sb().from('users').update({
-      secondaryRoles: roles,
-      ...(promote ? { primaryRole: role } : {}),
-      updatedAt: new Date().toISOString(),
-    }).eq('id', actor.id);
-  }
+  const { data: u } = await sb().from('users')
+    .select('"primaryRole","secondaryRoles"').eq('id', actor.id).maybeSingle();
+  const cur = (u ?? {}) as { primaryRole?: string; secondaryRoles?: string[] };
+  const roles = [...new Set([...(cur.secondaryRoles ?? []), role])].filter(Boolean);
+  const promote = !cur.primaryRole || cur.primaryRole === 'user';
+  await sb().from('users').update({
+    secondaryRoles: roles,
+    ...(promote ? { primaryRole: role } : {}),
+    updatedAt: new Date().toISOString(),
+  }).eq('id', actor.id);
 
   void audit({
     actorId: actor.id, actorRole: actor.role, action: 'ROLE_SELECTED',
