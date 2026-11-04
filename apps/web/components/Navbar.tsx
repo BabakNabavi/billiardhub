@@ -292,6 +292,22 @@ export default function Navbar() {
     ? scrolled ? 'rgb(247,247,245)' : 'transparent'
     : 'rgb(247,247,245)';
 
+  /* ⚠️ اپِ نصب‌شده با سافاری فرق دارد: زیرِ نوارِ وضعیت چیزی نقاشی نمی‌شود و
+     iOS رنگِ آن نوار را از *رنگِ صفحه* می‌گیرد (پاسخِ WebKit در bug 317153)،
+     نه از نوبارِ پُر. پس روی هیروی تیره ساعت مشکی می‌شد و نوارِ روشن در نوبارِ
+     تیره محو — مالک آن را «هاله‌ی سفید» دید. رنگِ صفحه را کلاسِ nav-over-hero
+     در CSS عوض می‌کند؛ این‌جا فقط theme-color، چون گزارش‌ها درباره‌ی اثرش در
+     حالتِ نصب‌شده یکی نیستند. */
+  const overHero = isHomePage && !scrolled && !mobileOpen; // کشوی باز کرم است، نه تیره
+  useEffect(() => {
+    if (!overHero) return;
+    const meta = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
+    if (!meta) return;
+    const base = meta.content;
+    meta.content = '#04020A';
+    return () => { meta.content = base; };
+  }, [overHero]);
+
   /* ⚠️ تأکید باید با زمینه عوض شود: طلاییِ تیره روی هیروی تیره دیده
      نمی‌شود؛ روی آن پله‌ی روشنِ طلایی می‌نشیند. */
   const ACC       = isLight ? 'var(--brand)' : 'var(--brand-on-dark)';
@@ -438,14 +454,21 @@ export default function Navbar() {
         /* باریک‌ترین حالت (گلکسی فولد و…): فقط نشان لوگو می‌ماند */
         @media(max-width:330px) { .nav-brand { display:none !important; } }
         /* موبایل، روی هیروی تیره: رنگ پر همان هیرو تا سافاری iOS 26 آن را بالا ادامه دهد (توضیح کنار navBg) */
-        @media(max-width:900px) { .nav-over-hero { background: #04020A !important; } }
+        @media(max-width:900px) {
+          .nav-over-hero { background: #04020A !important; }
+          /* رنگِ نوارِ وضعیتِ اپِ نصب‌شده از همین می‌آید (توضیح کنارِ افکتِ theme-color).
+             body هم لازم است: WebKit آن را روی html می‌نشاند، و important چون
+             رنگِ body در layout اینلاین است. لایه‌ی ثابتِ #04020A در app/page.tsx
+             از قبل پشتِ همه‌ی سکشن‌هاست، پس این‌ها رنگِ تازه‌ای نشان نمی‌دهند. */
+          html:has(.nav-over-hero), html:has(.nav-over-hero) body { background-color: #04020A !important; }
+        }
 
         .mob-link-item { transition: background 0.15s, color 0.15s; }
         .mob-link-item:hover { background: var(--brand-tint) !important; }
       `}</style>
 
       {/* ── NAV ── */}
-      <nav className={isHomePage && !scrolled ? 'nav-over-hero' : undefined} style={{
+      <nav className={overHero ? 'nav-over-hero' : undefined} style={{
         position: 'fixed', top: 0, left: 0, right: 0, zIndex: 200,
         /* PWA اپل (Add to Home Screen): نوبار نباید زیر ساعت/آنتن برود */
         paddingTop: 'env(safe-area-inset-top)',

@@ -860,9 +860,12 @@ export function ClubProfileClient({ initialClub }: { initialClub?: Club | null }
 
         .book-fixed {
           position:fixed;bottom:0;left:0;right:0;
-          /* ⚠️ ناحیه‌ی امن پایین آیفون در حالت نصب‌شده: بدون آن، دکمه‌ی
-             رزرو زیر نوار خانه می‌رفت، روی مرورگر عادی صفر است. */
-          padding:12px 16px calc(16px + env(safe-area-inset-bottom));
+          /* ⚠️ ناحیه‌ی امن پایین آیفون: بدون آن دکمه‌ی رزرو زیر نوار خانه
+             می‌رفت. ولی ۳۴ پیکسلِ کاملش حاشیه‌ی خودِ سیستم هم هست و خط خانه
+             فقط ۱۳ پیکسلِ پایین را می‌گیرد؛ با ۱۶ پیکسلِ قبلی روی آن، نوار
+             ۱۲۰ پیکسل از صفحه را می‌خورد و مالک فاصله‌ی زیر دکمه را دید.
+             حالا ۲۰ پیکسل روی آیفون و ۸ جایی که ناحیه‌ی امن صفر است. */
+          padding:8px 16px max(8px, calc(env(safe-area-inset-bottom) - 14px));
           z-index:200;
           background:#ffffff;
           box-shadow:0 -1px 0 rgba(0,0,0,0.07);
@@ -888,7 +891,7 @@ export function ClubProfileClient({ initialClub }: { initialClub?: Club | null }
 
       {/* همان لایه‌ی لیکویید صفحه‌ی مربی. رنگ پایه داخل `.lq-stage` است؛
           پس‌زمینه‌ی مات خود عنصر لکه‌ها را می‌پوشاند. */}
-      <div className="lq-stage" style={{ minHeight: '100vh', direction: 'rtl', fontFamily: 'Vazirmatn, sans-serif', paddingBottom: 'calc(90px + env(safe-area-inset-bottom))' }}>
+      <div className="lq-stage" style={{ minHeight: '100vh', direction: 'rtl', fontFamily: 'Vazirmatn, sans-serif', paddingBottom: 'calc(72px + env(safe-area-inset-bottom))' }}>
 
         {/* ══ HERO ══ */}
         <div className="lq-enter-sheen" style={{ position: 'relative', height: 'min(clamp(320px,44vw,510px),65vh)', overflow: 'hidden', background: '#0A0806' }}>
@@ -1697,7 +1700,7 @@ export function ClubProfileClient({ initialClub }: { initialClub?: Club | null }
         {tab !== 'live' && <div className="book-fixed">
           <button onClick={goBook} disabled={bookingClosed}
             title={bookingClosed ? 'این باشگاه رزروها را تا اطلاع بعدی بسته است' : undefined}
-            style={{ width: '100%', padding: '14px', border: `1px solid ${bookingClosed ? 'rgba(220,38,38,0.28)' : 'rgba(199,166,106,0.35)'}`, borderRadius: 20, background: bookingClosed ? 'rgba(220,38,38,0.08)' : 'rgba(199,166,106,0.14)', color: bookingClosed ? '#B91C1C' : '#C7A66A', fontSize: bookingClosed ? 13.5 : 17, fontWeight: 800, cursor: bookingClosed ? 'not-allowed' : 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, lineHeight: 1.7 }}>
+            style={{ width: '100%', padding: '10px 14px', border: `1px solid ${bookingClosed ? 'rgba(220,38,38,0.28)' : 'rgba(199,166,106,0.35)'}`, borderRadius: 16, background: bookingClosed ? 'rgba(220,38,38,0.08)' : 'rgba(199,166,106,0.14)', color: bookingClosed ? '#B91C1C' : '#C7A66A', fontSize: bookingClosed ? 13.5 : 15, fontWeight: 800, cursor: bookingClosed ? 'not-allowed' : 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, lineHeight: 1.7 }}>
           {bookingClosed
             ? <>رزروهای این باشگاه تا اطلاع بعدی بسته است</>
             : <><Calendar size={16} /> رزرو آنلاین میز</>}
