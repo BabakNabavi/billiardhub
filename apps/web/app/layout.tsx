@@ -131,29 +131,30 @@ export default function RootLayout({
             لازم است. با `preload` همان اول شروع می‌شود و معمولا
             پیش از اولین رنگ‌آمیزی حاضر است.
 
-            فقط سه وزنی که واقعا بالای صفحه‌اند: متن عادی، تیترها،
-            و تیتر درشت هیرو. پیش‌بارگذاری هر یازده وزن، پهنای باند
-            اول صفحه را می‌خورد و خودش کند می‌کند. */}
+            ── فونت دانا (نسخه‌ی متغیر) ──
+            یک فایل ۷۲ کیلوبایتی همه‌ی وزن‌ها را از ۱۰ تا ۹۹۰ دارد. پیش‌تر
+            هر وزن یک فایل جدا بود و فقط برای سه وزن بالای صفحه حدود ۱۰۷
+            کیلوبایت پیش‌بارگذاری می‌شد. حالا یک درخواست همه را می‌آورد.
+            پشتیبانِ ایستا لازم نیست: هر مرورگری که Next 16 را اجرا کند
+            فونت متغیر را هم می‌شناسد.
+
+            ⚠️ اعداد: فونت با رقمِ لاتین، لاتین می‌کشد و `ss02` آن را فارسی
+            می‌کند. این‌جا عمدا روشن نیست: PersianDigits متن را فارسی
+            می‌کند و ورودی و کد باید لاتین بمانند (CLAUDE.md).
+            ⚠️ فایل‌ها کامیت نمی‌شوند، دلیلش در .gitignore است. */}
         <link rel="preload" as="font" type="font/woff2" crossOrigin="anonymous"
-          href="/fonts/IranSans/IRANSansX-Regular.woff2" />
-        <link rel="preload" as="font" type="font/woff2" crossOrigin="anonymous"
-          href="/fonts/IranSans/IRANSansX-Bold.woff2" />
-        <link rel="preload" as="font" type="font/woff2" crossOrigin="anonymous"
-          href="/fonts/IranSans/IRANSansX-Black.woff2" />
+          href="/fonts/Dana/DanaVF.woff2" />
 
         <style>{`
-          @font-face { font-family:'IRANSansX'; src:url('/fonts/IranSans/IRANSansX-Thin.woff2') format('woff2'); font-weight:100; font-style:normal; font-display:swap; }
-          @font-face { font-family:'IRANSansX'; src:url('/fonts/IranSans/IRANSansX-UltraLight.woff2') format('woff2'); font-weight:200; font-style:normal; font-display:swap; }
-          @font-face { font-family:'IRANSansX'; src:url('/fonts/IranSans/IRANSansX-Light.woff2') format('woff2'); font-weight:300; font-style:normal; font-display:swap; }
-          @font-face { font-family:'IRANSansX'; src:url('/fonts/IranSans/IRANSansX-Regular.woff2') format('woff2'); font-weight:400; font-style:normal; font-display:swap; }
-          @font-face { font-family:'IRANSansX'; src:url('/fonts/IranSans/IRANSansX-Medium.woff2') format('woff2'); font-weight:500; font-style:normal; font-display:swap; }
-          @font-face { font-family:'IRANSansX'; src:url('/fonts/IranSans/IRANSansX-DemiBold.woff2') format('woff2'); font-weight:600; font-style:normal; font-display:swap; }
-          @font-face { font-family:'IRANSansX'; src:url('/fonts/IranSans/IRANSansX-Bold.woff2') format('woff2'); font-weight:700; font-style:normal; font-display:swap; }
-          @font-face { font-family:'IRANSansX'; src:url('/fonts/IranSans/IRANSansX-ExtraBold.woff2') format('woff2'); font-weight:800; font-style:normal; font-display:swap; }
-          /* وزن ۹۰۰ همه‌جا استفاده می‌شود — بدون فایل واقعی، مرورگر faux-bold کدر می‌سازد */
-          @font-face { font-family:'IRANSansX'; src:url('/fonts/IranSans/IRANSansX-Black.woff2') format('woff2'); font-weight:900; font-style:normal; font-display:swap; }
-          /* از ساختن وزن/ایتالیک مصنوعی جلوگیری کن — اگر وزنی فایل نداشت، نزدیک‌ترین فایل استفاده شود */
+          @font-face { font-family:'Dana'; src:url('/fonts/Dana/DanaVF.woff2') format('woff2'); font-weight:10 990; font-style:normal; font-display:swap; }
+          /* از ساختن وزن/ایتالیک مصنوعی جلوگیری کن */
           * { font-synthesis-weight: none; font-synthesis-style: none; }
+          /* ── اعداد هم‌عرض ──
+             دانا tnum ندارد، پس tabular-nums روی آن بی‌اثر است و رقم‌های
+             شمارنده و جدول هنگام تغییر جابه‌جا می‌شوند. معادلش در دانا
+             ss03 است. این قاعده کلاس و استایل اینلاین را می‌گیرد و فایل‌های
+             CSS خودشان ss03 را کنار همان اعلان دارند. */
+          [class*="tabular-nums"], [style*="tabular-nums"] { font-feature-settings: 'ss03'; }
           * { font-family: var(--font-base) !important; box-sizing:border-box; }
           input, select, textarea, button { font-family: var(--font-base) !important; }
           .bh-latin, .bh-latin * { font-family: Arial, Tahoma, sans-serif !important; }

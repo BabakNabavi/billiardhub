@@ -533,9 +533,9 @@ const BAZAAR_CSS = `
     display:inline-flex; align-items:center; justify-content:center; flex-shrink:0; }
   .bz-prices { margin-inline-start:auto; text-align:right; }
   .bz-old { font-size:var(--ad-old); color:#6E695C; text-decoration:line-through;
-    line-height:1.1; font-variant-numeric:tabular-nums; white-space:nowrap; }
+    line-height:1.1; font-variant-numeric:tabular-nums; font-feature-settings:'ss03'; white-space:nowrap; }
   .bz-new { font-size:var(--ad-price); font-weight:var(--ad-price-w); color:#1C1B17;
-    font-variant-numeric:tabular-nums; white-space:nowrap; }
+    font-variant-numeric:tabular-nums; font-feature-settings:'ss03'; white-space:nowrap; }
   .bz-unit { font-size:var(--ad-unit); font-weight:var(--ad-unit-w); }
 `;
 

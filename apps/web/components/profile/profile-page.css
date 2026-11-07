@@ -294,7 +294,7 @@ main.ch-col > section { max-width: 760px; }
 .ch-gal-n {
   margin-inline-start: 6px; font-size: 11px; font-weight: 800;
   color: var(--gold-deep, #8F6531); background: var(--gold-dim, rgb(var(--gold-ch) / 0.12));
-  border-radius: 999px; padding: 1px 6px; font-variant-numeric: tabular-nums;
+  border-radius: 999px; padding: 1px 6px; font-variant-numeric: tabular-nums; font-feature-settings: 'ss03';
 }
 
 /* ⚠️ «تصویر نخست دو برابر» برداشته شد. با خانه‌ی ۲۳۲ پیکسلی منطق
@@ -1140,7 +1140,7 @@ main.ch-col > section { max-width: 760px; }
 .ch-ladder .rf-step-year {
   font-size: 12.5px; font-weight: 800; line-height: 1.5;
   color: color-mix(in srgb, var(--c) 62%, #16150F);
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: tabular-nums; font-feature-settings: 'ss03';
 }
 /* ⚠️ «پیشِ رو» باید *کم‌رنگ‌تر از متن* باشد ولی از کفِ ۴٫۵ نیفتد؛
    `--text-tertiary` روی سفید ۵٫۱:۱ می‌دهد. */

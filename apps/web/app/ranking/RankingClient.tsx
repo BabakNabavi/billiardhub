@@ -318,7 +318,7 @@ export function RankingClient({ initial }: { initial?: { board: RankingsStructur
         /* مربع رتبه — لیکویید گلس کریستالی (iOS): هایلایت شیشه‌ای + عدد نورانی */
         .rk-row .chip { align-self: stretch; width: 42px; flex-shrink: 0; position: relative;
           display: flex; align-items: center; justify-content: center; gap: 1px; direction: ltr;
-          color: #fff; font-weight: 900; font-size: 16.5px; font-variant-numeric: tabular-nums;
+          color: #fff; font-weight: 900; font-size: 16.5px; font-variant-numeric: tabular-nums; font-feature-settings: 'ss03';
           background-image:
             radial-gradient(130% 62% at 50% 0%, rgba(255,255,255,0.34), transparent 62%),
             linear-gradient(160deg, rgba(255,255,255,0.38), rgba(255,255,255,0.08) 40%, rgba(255,255,255,0) 58%, rgba(0,0,0,0.14));
@@ -373,7 +373,7 @@ export function RankingClient({ initial }: { initial?: { board: RankingsStructur
           .rk-stgs { display: flex; flex-shrink: 0; align-self: stretch; }
           .rk-stg { width: 76px; display: flex; align-items: center; justify-content: center;
             border-inline-start: 1px solid ${LINE}; font-size: 14px; font-weight: 700; color: ${SEC};
-            font-variant-numeric: tabular-nums; }
+            font-variant-numeric: tabular-nums; font-feature-settings: 'ss03'; }
           .rk-stg.is-zero { color: rgba(28,27,23,0.32); font-weight: 600; }
           .rk-grid.has-stages .rk-pts { min-width: 88px; text-align: center; }
           /* نام و فامیل در یک خط، وسط‌چین، هم‌قلم (خواست مالک) — جا هست

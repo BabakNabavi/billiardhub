@@ -99,7 +99,7 @@ const config: Config = {
 
       fontFamily: {
         /* یک خانواده. فونت دوم اضافه نمی‌شود. */
-        sans: ['IRANSansX', 'Tahoma', 'system-ui', 'sans-serif'],
+        sans: ['Dana', 'Tahoma', 'system-ui', 'sans-serif'],
       },
 
       /* ── مقیاس تایپوگرافی ──

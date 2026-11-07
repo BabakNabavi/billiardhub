@@ -99,7 +99,7 @@ export default function HomeMediaBand() {
           animation: hmDot 1.6s ease-in-out infinite; }
         .hm-dur { position: absolute; z-index: 5; bottom: 16px; left: 16px; font-size: 11px; font-weight: 600;
           color: #F2EFE9; background: rgba(8,7,5,0.8); border: 1px solid rgba(255,255,255,0.14);
-          border-radius: 7px; padding: 2px 9px; font-variant-numeric: tabular-nums; letter-spacing: .04em; }
+          border-radius: 7px; padding: 2px 9px; font-variant-numeric: tabular-nums; font-feature-settings: 'ss03'; letter-spacing: .04em; }
         .hm-wrap { position: relative; z-index: 4; max-width: 1340px; margin: 0 auto;
           padding: clamp(26px,3vw,38px) clamp(16px,5%,80px);
           display: flex; flex-direction: column; gap: 12px; align-items: flex-start;
@@ -136,7 +136,7 @@ export default function HomeMediaBand() {
         .hm-mini img { width: 100%; height: 100%; object-fit: cover; filter: brightness(0.8); }
         .hm-mini i { position: absolute; bottom: 4px; inset-inline-start: 5px; font-size: 9px; font-weight: 600;
           font-style: normal; color: #F2EFE9; background: rgba(8,7,5,0.8); border-radius: 5px; padding: 1px 6px;
-          font-variant-numeric: tabular-nums; }
+          font-variant-numeric: tabular-nums; font-feature-settings: 'ss03'; }
         .hm-anim { animation: hmIn .6s cubic-bezier(.22,1,.36,1) both; }
         @media (max-width: 760px) {
           /* صحنه‌ی بنفش تمام‌پهنا؛ دوربین پایین، زیر پرتوی نور */

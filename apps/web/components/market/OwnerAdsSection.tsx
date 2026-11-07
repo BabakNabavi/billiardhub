@@ -183,7 +183,7 @@ export default function OwnerAdsSection({
         .oa-all { color: #8F6531; background: radial-gradient(circle at 34% 28%, #FFF6E4, #F3E6CB); }
         .oa-lb { font-size: 11px; font-weight: 700; color: #3E3A32; white-space: nowrap; }
         .oa-chip.on .oa-lb { color: #7A5626; }
-        .oa-ct { font-size: 10px; font-weight: 700; color: #A69F8E; font-variant-numeric: tabular-nums; }
+        .oa-ct { font-size: 10px; font-weight: 700; color: #A69F8E; font-variant-numeric: tabular-nums; font-feature-settings: 'ss03'; }
         .oa-chip.on .oa-ct { color: #8F6531; }
         .oa-ct-0 { opacity: .65; }
 

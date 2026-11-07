@@ -164,7 +164,7 @@ export const PLAYER_CSS = `
   backdrop-filter: blur(8px);
   border-radius: 999px; padding: 5px 11px;
   font-size: 11.5px; font-weight: 700;
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: tabular-nums; font-feature-settings: 'ss03';
 }
 
 /* ── وسط تصویر ── */

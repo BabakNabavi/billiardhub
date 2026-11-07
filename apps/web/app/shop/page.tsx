@@ -698,8 +698,8 @@ export default function MarketNewPage() {
         .mk-priceline { margin-top: auto; display: flex; align-items: center; gap: 5px; }
         .mk-pct { background: #b400ae; color: #fff; font-size: var(--ad-pct); font-weight: var(--ad-pct-w); border-radius: 999px;
           padding: 3px 8px 1px; line-height: 1; }
-        .mk-old { font-size: var(--ad-old); color: ${MUT}; text-decoration: line-through; font-variant-numeric: tabular-nums; }
-        .mk-price { font-size: var(--ad-price); font-weight: var(--ad-price-w); color: ${TEXT}; font-variant-numeric: tabular-nums; white-space: nowrap; }
+        .mk-old { font-size: var(--ad-old); color: ${MUT}; text-decoration: line-through; font-variant-numeric: tabular-nums; font-feature-settings: 'ss03'; }
+        .mk-price { font-size: var(--ad-price); font-weight: var(--ad-price-w); color: ${TEXT}; font-variant-numeric: tabular-nums; font-feature-settings: 'ss03'; white-space: nowrap; }
         .mk-price i { font-style: normal; font-size: var(--ad-unit); font-weight: var(--ad-unit-w); color: ${MUT}; }
         /* ظرف دو خط قیمت و واژه‌ی «تومان» — پیش‌تر اینلاین بودند و
            با انتقال قیمت به کامپوننت مشترک کلاس خودشان را گرفتند */
@@ -717,7 +717,7 @@ export default function MarketNewPage() {
         .mk-catrow .ic img { width: 100%; height: 100%; object-fit: contain; }
         .mk-catrow .lb { font-size: 12.5px; font-weight: 700; color: ${SEC}; flex: 1; }
         .mk-catrow.on .lb { color: ${GOLD_D}; font-weight: 800; }
-        .mk-catrow .ct { font-size: 10.5px; color: ${MUT}; font-variant-numeric: tabular-nums; }
+        .mk-catrow .ct { font-size: 10.5px; color: ${MUT}; font-variant-numeric: tabular-nums; font-feature-settings: 'ss03'; }
         .mk-cityopt:hover { background: rgba(199,166,106,0.07) !important; }
         .mk-pricein { flex: 1; min-width: 0; box-sizing: border-box; padding: 9px 10px; border-radius: 10px;
           border: 1px solid ${LINE}; background: #FAFAF7; font-size: 12.5px; font-family: inherit; outline: none;
@@ -806,7 +806,7 @@ export default function MarketNewPage() {
         .mk-row .ttl .mk-t { margin-top: 3px; font-size: var(--ad-sub); font-weight: var(--ad-sub-w); color: ${MUT};
           display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .mk-row .cnd { font-size: var(--ad-meta); color: ${MUT}; }
-        .mk-row .prc { font-size: var(--ad-price); font-weight: var(--ad-price-w); color: ${TEXT}; font-variant-numeric: tabular-nums;
+        .mk-row .prc { font-size: var(--ad-price); font-weight: var(--ad-price-w); color: ${TEXT}; font-variant-numeric: tabular-nums; font-feature-settings: 'ss03';
           white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
         .mk-row .prc i { font-style: normal; font-size: var(--ad-unit); font-weight: var(--ad-unit-w); color: ${MUT}; }
         .mk-row .cty { font-size: var(--ad-meta); color: ${MUT}; display: flex; align-items: center; gap: 4px; margin-top: auto; }
@@ -847,7 +847,7 @@ export default function MarketNewPage() {
           border-radius: 999px; padding: 2px 7px 1px; line-height: 1.4; flex-shrink: 0; }
         .mk-row .oldp { font-size: var(--ad-old); color: ${MUT}; text-decoration: line-through;
           white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-          font-variant-numeric: tabular-nums; margin-top: -2px; }
+          font-variant-numeric: tabular-nums; font-feature-settings: 'ss03'; margin-top: -2px; }
         /* نشان‌کردن و گزارش تخلف حالا داخل ProductMedia اند */
 
         /* ── نوار پایین موبایل ── */

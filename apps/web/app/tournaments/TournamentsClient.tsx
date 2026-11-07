@@ -280,7 +280,7 @@ export function TournamentsClient({ initialRows }: { initialRows?: Tournament[] 
           font-size: clamp(58px, 10.5vw, 140px); line-height: 1; letter-spacing: .02em;
           color: transparent; -webkit-text-stroke: 1px rgba(255,255,255,0.08); user-select: none; pointer-events: none; direction: ltr; }
         .tn-stat { text-align: center; }
-        .tn-stat b { display: block; font-size: clamp(21px,2.4vw,28.5px); font-weight: 900; color: #fff; font-variant-numeric: tabular-nums; }
+        .tn-stat b { display: block; font-size: clamp(21px,2.4vw,28.5px); font-weight: 900; color: #fff; font-variant-numeric: tabular-nums; font-feature-settings: 'ss03'; }
         .tn-stat span { font-size: 11.5px; color: rgba(255,255,255,0.55); font-weight: 700; }
         .tn-stat-sep { width: 1px; align-self: stretch; background: linear-gradient(180deg,transparent,rgba(199,166,106,0.4),transparent); }
         @keyframes tnBlink { 0%,100% { opacity: 1; } 50% { opacity: .2; } }

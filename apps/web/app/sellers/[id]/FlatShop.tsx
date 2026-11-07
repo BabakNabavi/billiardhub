@@ -589,7 +589,7 @@ export default function FlatShop() {
         .scat-all { color: #8F6531; background: radial-gradient(circle at 34% 28%, #FFF6E4, #F3E6CB); }
         .scat-lb { font-size: 11px; font-weight: 700; color: #3E3A32; white-space: nowrap; }
         .scat.on .scat-lb { color: #7A5626; }
-        .scat-ct { font-size: 10px; font-weight: 700; color: #A69F8E; font-variant-numeric: tabular-nums; }
+        .scat-ct { font-size: 10px; font-weight: 700; color: #A69F8E; font-variant-numeric: tabular-nums; font-feature-settings: 'ss03'; }
         .scat.on .scat-ct { color: #8F6531; }
         @media (prefers-reduced-motion: reduce) { .scat { transition: none } .scat:hover { transform: none } }
 

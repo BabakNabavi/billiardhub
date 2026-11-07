@@ -21,18 +21,9 @@
    لاتین «ظریف» است این‌جا متن را خراب می‌کند.
    ───────────────────────────────────────────────────────────── */
 
-/* فونت تیتر تحریریه — فقط در همین بخش بار می‌شود.
-   ⚠️ نسخهٔ اول format(woff2-variations) نوشته بود؛ آن شکل
-   منسوخ است و کروم امروزی کل منبع را رد می‌کند —
-   اندازه‌گیری‌شده در مرورگر: تیترها بی‌صدا روی IRANSansX
-   می‌افتادند. */
-@font-face {
-  font-family: 'Estedad';
-  src: url('/fonts/Estedad/Estedad-Variable.woff2') format('woff2');
-  font-weight: 100 900;
-  font-style: normal;
-  font-display: swap;
-}
+/* فونت تیتر تحریریه همان دانای کل سایت است (app/layout). پیش‌تر
+   Estedad جدا بار می‌شد. دانا هم متغیر است، پس چهار پله‌ی وزن تیتر
+   همچنان چهار وزن واقعی‌اند. */
 
 .nr {
   /* ── زمین ──
@@ -62,16 +53,17 @@
 
   background: var(--paper);
   color: var(--ink);
-  font-family: 'IRANSansX', 'Vazirmatn', Tahoma, sans-serif;
-  /* ⚠️ ارقام فارسی در متن خبری خواناترند؛ فونت هر دو را دارد. */
-  font-feature-settings: 'ss01';
+  font-family: 'Dana', Tahoma, sans-serif;
+  /* ⚠️ ارقام فارسی در متن خبری خواناترند. در دانا این کار ss02 است
+     (ss01 مال فونت قبلی بود و دانا آن را ندارد). */
+  font-feature-settings: 'ss02';
 }
 
 .nr-shell { max-width: var(--shell); margin-inline: auto; padding-inline: var(--gut); }
 
-/* ⚠️ تیترها با Estedad ست می‌شوند: وزن متغیر دارد، پس چهار پله‌ی
+/* ⚠️ تیترها جدا ست می‌شوند: فونت وزن متغیر دارد، پس چهار پله‌ی
    سلسله‌مراتب واقعا چهار وزن متفاوت‌اند نه یک وزن چاق در چهار
-   اندازه. فونت فقط در همین بخش بار می‌شود.
+   اندازه.
 
    ⚠️ !important لازم است و تزئینی نیست: app/layout.tsx یک قاعده‌ی
    سراسری «* { font-family: var(--font-base) !important }» دارد که
@@ -82,7 +74,7 @@
    .bh-wordmark در همان فایل دارند. */
 .nr h1, .nr h2, .nr h3, .nr h4,
 .nr .nr-stream-t, .nr .nr-rank, .nr .nr-hd {
-  font-family: 'Estedad', 'IRANSansX', Tahoma, sans-serif !important;
+  font-family: 'Dana', Tahoma, sans-serif !important;
 }
 .nr h1, .nr h2, .nr h3, .nr .nr-hd { margin: 0; text-wrap: balance; }
 
@@ -182,7 +174,7 @@
 .nr-kicker {
   display: inline-flex; align-items: center; gap: 6px;
   font-size: 11.5px; font-weight: 800; color: var(--gold-ink);
-  font-family: 'IRANSansX', Tahoma, sans-serif;
+  font-family: 'Dana', Tahoma, sans-serif;
 }
 .nr-kicker::before {
   content: ''; inline-size: 3px; block-size: 12px; background: var(--gold);
@@ -197,7 +189,7 @@
   display: inline-flex; align-items: center; gap: 4px;
   font-size: 10.5px; font-weight: 800;
   padding: 2px 7px; border: 1px solid var(--rule-strong); color: var(--ink-2);
-  font-family: 'IRANSansX', Tahoma, sans-serif;
+  font-family: 'Dana', Tahoma, sans-serif;
 }
 .nr-flag--gold { border-color: rgb(199 166 106 / .55); color: var(--gold-ink); }
 
@@ -205,7 +197,7 @@
 .nr-meta {
   display: flex; align-items: center; flex-wrap: wrap; gap: 4px 10px;
   font-size: 12px; color: var(--ink-3);
-  font-family: 'IRANSansX', Tahoma, sans-serif;
+  font-family: 'Dana', Tahoma, sans-serif;
 }
 .nr-meta > * + *::before {
   content: '·'; margin-inline-end: 10px; color: var(--rule-strong);
@@ -302,7 +294,7 @@ a:hover > .nr-fig img, a:hover .nr-fig img { transform: scale(1.028); }
 .nr-blockhd h2, .nr-blockhd h3 { font-size: 15px; font-weight: 800; line-height: 1.4; }
 .nr-blockhd .nr-more {
   margin-inline-start: auto; font-size: 12.5px; font-weight: 700; color: var(--gold-ink);
-  white-space: nowrap; font-family: 'IRANSansX', Tahoma, sans-serif;
+  white-space: nowrap; font-family: 'Dana', Tahoma, sans-serif;
 }
 .nr-blockhd .nr-more:hover { text-decoration: underline; text-underline-offset: 3px; }
 /* گونه‌ی سبک‌تر برای بلوک‌های فرعی */
@@ -314,11 +306,11 @@ a:hover > .nr-fig img, a:hover .nr-fig img { transform: scale(1.028); }
 .nr-stream a { display: grid; grid-template-columns: 52px minmax(0, 1fr); gap: 12px; padding-block: 11px; }
 .nr-stream time {
   font-size: 12.5px; font-weight: 700; color: var(--ink-3); padding-block-start: 2px;
-  font-family: 'IRANSansX', Tahoma, sans-serif; font-variant-numeric: tabular-nums;
+  font-family: 'Dana', Tahoma, sans-serif; font-variant-numeric: tabular-nums; font-feature-settings: 'ss02', 'ss03';
 }
 .nr-stream .nr-stream-t {
   font-size: 14px; font-weight: 600; line-height: 1.62; color: var(--ink);
-  font-family: 'Estedad', 'IRANSansX', Tahoma, sans-serif;
+  font-family: 'Dana', Tahoma, sans-serif;
 }
 .nr-stream a:hover .nr-stream-t { text-decoration: underline; text-underline-offset: 3px; }
 .nr-stream .nr-stream-s { display: block; font-size: 11px; font-weight: 700; color: var(--gold-ink); margin-block-end: 3px; }
@@ -329,7 +321,7 @@ a:hover > .nr-fig img, a:hover .nr-fig img { transform: scale(1.028); }
 .nr-ranked a { display: grid; grid-template-columns: 34px minmax(0, 1fr); gap: 12px; padding-block: 13px; align-items: start; }
 .nr-ranked .nr-rank {
   font-size: 19px; font-weight: 800; line-height: 1.1; color: var(--rule-strong);
-  font-family: 'Estedad', 'IRANSansX', Tahoma, sans-serif; font-variant-numeric: tabular-nums;
+  font-family: 'Dana', Tahoma, sans-serif; font-variant-numeric: tabular-nums; font-feature-settings: 'ss02', 'ss03';
 }
 .nr-ranked a:hover .nr-rank { color: var(--gold); }
 .nr-ranked h3 { font-size: 14px; font-weight: 700; line-height: 1.6; }
@@ -360,7 +352,7 @@ a:hover > .nr-fig img, a:hover .nr-fig img { transform: scale(1.028); }
 .nr-sec-list a { display: grid; grid-template-columns: minmax(0, 1fr) 86px; gap: 12px; padding-block: 13px; align-items: start; }
 .nr-sec-list a:first-child { padding-block-start: 0; }
 .nr-sec-list :is(h3, h4) { font-size: 14.5px; font-weight: 700; line-height: 1.6; margin: 0 0 6px;
-  font-family: 'Estedad', 'IRANSansX', Tahoma, sans-serif; }
+  font-family: 'Dana', Tahoma, sans-serif; }
 .nr-sec-list a:hover :is(h3, h4) { text-decoration: underline; text-underline-offset: 3px; }
 /* آیتم بی‌عکس نباید ستون خالی جا بگذارد */
 .nr-sec-list a.nr-noimg { grid-template-columns: minmax(0, 1fr); }
@@ -435,7 +427,7 @@ a:hover > .nr-fig img, a:hover .nr-fig img { transform: scale(1.028); }
   display: inline-flex; align-items: center; gap: 6px; min-block-size: 44px;
   padding-inline: 18px; font-size: 13.5px; font-weight: 700;
   border: 1px solid var(--ink); color: var(--ink); background: transparent;
-  font-family: 'IRANSansX', Tahoma, sans-serif; cursor: pointer;
+  font-family: 'Dana', Tahoma, sans-serif; cursor: pointer;
 }
 .nr-btn:hover { background: var(--ink); color: #fff; }
 .nr-btn--ghost { border-color: var(--rule-strong); color: var(--ink-2); }
@@ -553,7 +545,7 @@ a:hover > .nr-fig img, a:hover .nr-fig img { transform: scale(1.028); }
 .nr-results h3 {
   font-size: clamp(16.5px, 1.9vw, 20px); font-weight: 700; line-height: 1.5;
   margin-block: 7px 8px;
-  font-family: 'Estedad', 'IRANSansX', Tahoma, sans-serif;
+  font-family: 'Dana', Tahoma, sans-serif;
 }
 .nr-results a:hover h3 { text-decoration: underline; text-underline-offset: 3px; }
 .nr-results p {

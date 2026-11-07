@@ -20,7 +20,7 @@ html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; overflow-x:
 ══════════════════════════════════════════ */
 :root {
   /* ── Base font ── */
-  --font-base: 'IRANSansX', Tahoma, system-ui, sans-serif;
+  --font-base: 'Dana', Tahoma, system-ui, sans-serif;
 
   /* ── سه‌تایی کانال: تنها منبع عدد رنگ ──
      ⚠️ چرا این شکل: Tailwind برای پیمانه‌ی شفافیت (`bg-gold/12`) به
@@ -382,7 +382,7 @@ body {
   letter-spacing: -0.04em;
   color: var(--text-primary);
   line-height: 1;
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: tabular-nums; font-feature-settings: 'ss03';
 }
 .stats-label {
   font-size: 14px;
@@ -434,7 +434,7 @@ body {
   font-weight: 800;
   /* رتبه متن است نه تزئین؛ --gold روی زمینه‌ی روشن ۲.۰۷:۱ می‌داد */
   color: var(--gold-deep);
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: tabular-nums; font-feature-settings: 'ss03';
 }
 
 /* ══════════════════════════════════════════

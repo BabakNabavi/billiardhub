@@ -170,7 +170,7 @@ export default function PlayersPage() {
         .pl-rank { position: absolute; top: 2px; inset-inline-start: 12px; z-index: 1;
           font-weight: 900; font-size: clamp(64px, 7.2vw, 96px); line-height: 1;
           color: transparent; -webkit-text-stroke: 1.5px rgba(255,255,255,0.22);
-          letter-spacing: -0.04em; font-variant-numeric: tabular-nums;
+          letter-spacing: -0.04em; font-variant-numeric: tabular-nums; font-feature-settings: 'ss03';
           transition: -webkit-text-stroke-color .35s, color .35s; user-select: none; direction: ltr; }
         .pl-card:hover .pl-rank { -webkit-text-stroke-color: rgba(199,166,106,0.65); }
         .pl-rank-hash { font-size: .42em; vertical-align: 1.05em; -webkit-text-stroke: 1px rgba(255,255,255,0.2); }
