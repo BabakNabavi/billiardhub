@@ -1,6 +1,12 @@
 export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
-import { sb, actorFromRequest, isAdmin } from '@/lib/finance/db';
+import { sb, actorFromRequest } from '@/lib/finance/db';
+import { can, canAny, REVIEW_KEYS, PROFILE_KIND_KEY } from '@/lib/admin/permissions';
+
+/* ⚠️ دروازه‌ی بالای GET فقط «یکی از کلیدهای بررسی» است. پس از خواندن هر ردیف،
+   کلید همان نوع سنجیده می‌شود: بی‌این، ادمینی با کلید «بازیکنان» ردیف کامل
+   باشگاه (شبا، کارت بانکی، مدرک) و کد ملی صاحبش را می‌گرفت. */
+const FORBIDDEN_REVIEW = () => NextResponse.json({ message: 'دسترسی مجاز نیست' }, { status: 403 });
 
 /* همه‌ی اطلاعات لازم برای یک تصمیم تأیید/رد — در یک مسیر.
 
@@ -62,7 +68,7 @@ async function ownerCard(userId: string | null | undefined): Promise<OwnerCard |
 export async function GET(req: NextRequest) {
   const actor = actorFromRequest(req);
   if (!actor) return NextResponse.json({ message: 'ابتدا وارد شوید' }, { status: 401 });
-  if (!(await isAdmin(actor.id))) return NextResponse.json({ message: 'دسترسی مجاز نیست' }, { status: 403 });
+  if (!(await canAny(actor.id, REVIEW_KEYS))) return NextResponse.json({ message: 'دسترسی مجاز نیست' }, { status: 403 });
 
   const sp = req.nextUrl.searchParams;
   const type = sp.get('type') ?? '';
@@ -77,6 +83,8 @@ export async function GET(req: NextRequest) {
       .eq('id', id).maybeSingle();
     if (!data) return NextResponse.json({ message: 'پروفایل یافت نشد' }, { status: 404 });
     const p = data as unknown as Record<string, unknown>;
+    const kindKey = PROFILE_KIND_KEY[String(p.kind ?? '')];
+    if (!kindKey || !(await canAny(actor.id, [kindKey, 'roles']))) return FORBIDDEN_REVIEW();
     return NextResponse.json({
       type, id,
       kind: p.kind, slug: p.slug, status: p.status, verified: p.verified,
@@ -92,6 +100,7 @@ export async function GET(req: NextRequest) {
 
   /* ── باشگاه ── */
   if (type === 'club') {
+    if (!(await canAny(actor.id, ['clubs', 'roles']))) return FORBIDDEN_REVIEW();
     const { data } = await sb().from('clubs').select('*').eq('id', id).maybeSingle();
     if (!data) return NextResponse.json({ message: 'باشگاه یافت نشد' }, { status: 404 });
     const c = data as Record<string, unknown>;
@@ -132,6 +141,8 @@ export async function GET(req: NextRequest) {
     const { data } = await sb().from('role_requests').select('*').eq('id', id).maybeSingle();
     if (!data) return NextResponse.json({ message: 'درخواست یافت نشد' }, { status: 404 });
     const r = data as Record<string, unknown>;
+    const roleKey = PROFILE_KIND_KEY[String(r.role ?? '')];
+    if (!(await can(actor.id, 'roles')) && !(roleKey && await can(actor.id, roleKey))) return FORBIDDEN_REVIEW();
 
     /* پروفایلی که کاربر برای همین نقش ساخته — همان چیزی که ادمین
        باید ببیند تا بداند درخواست پشتوانه‌ای دارد یا خالی است. */

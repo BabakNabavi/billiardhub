@@ -75,6 +75,7 @@
     "test:edit-image": "node scripts/test-edit-image.mjs",
     "lint:strict": "eslint --max-warnings 0",
     "test:guards": "node scripts/test-injection-guards.mjs",
+    "test:admin-perms": "node scripts/test-admin-permissions.mjs",
     "test:logs": "node scripts/test-log-helpers.mjs",
     "test:enforcement": "node scripts/test-enforcement.mjs",
     "test:identity": "npx --yes tsx scripts/test-identity-verify.mjs",

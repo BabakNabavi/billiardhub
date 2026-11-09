@@ -1,6 +1,7 @@
 export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
-import { sb, actorFromRequest, isAdmin } from '@/lib/finance/db';
+import { sb, actorFromRequest } from '@/lib/finance/db';
+import { can } from '@/lib/admin/permissions';
 import { withPublicName } from '@/lib/public-name';
 
 /* پروفایل عمومی یک کاربر.
@@ -51,7 +52,7 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string 
      وگرنه بررسی همان حسابی که تعلیق کرده ممکن نیست. */
   if (u.isActive === false) {
     const actor = actorFromRequest(req);
-    if (!actor || !(await isAdmin(actor.id))) {
+    if (!actor || !(await can(actor.id, 'users'))) {
       return NextResponse.json({ message: 'کاربر پیدا نشد' }, { status: 404 });
     }
   }

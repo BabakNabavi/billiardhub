@@ -1,6 +1,7 @@
 export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
-import { sb, actorFromRequest, isAdmin } from '@/lib/finance/db';
+import { sb, actorFromRequest } from '@/lib/finance/db';
+import { canAny } from '@/lib/admin/permissions';
 import { cardToIban, matchCard, matchIban, syncClubSettlementAccount } from '@/lib/bank-server';
 import { lockedResponse } from '@/lib/verification-lock';
 
@@ -23,7 +24,7 @@ export async function POST(req: NextRequest) {
   const clubId = String(body?.clubId || '');
 
   if (clubId) {
-    const admin = await isAdmin(actor.id);
+    const admin = await canAny(actor.id, ['finance', 'support']);
     const { data: club } = await sb().from('clubs')
       .select('"ownerId","ibanVerified"').eq('id', clubId).maybeSingle();
     if (!club) return NextResponse.json({ message: 'باشگاه یافت نشد' }, { status: 404 });

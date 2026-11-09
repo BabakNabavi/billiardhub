@@ -1,6 +1,7 @@
 export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
-import { sb, actorFromRequest, isAdmin } from '@/lib/finance/db';
+import { sb, actorFromRequest } from '@/lib/finance/db';
+import { can, PROFILE_KIND_KEY } from '@/lib/admin/permissions';
 import { checkProfileData } from '@/lib/profiles/validate';
 import {
   PROFILE_KINDS, getProfileByOwner, getProfileBySlug, listProfiles, saveProfile,
@@ -91,7 +92,7 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ kind: strin
     const actor = actorFromRequest(req);
     /* پروفایل تأییدنشده را فقط صاحبش و ادمین می‌بینند */
     if (p.status !== 'approved') {
-      const allowed = !!actor && (actor.id === p.ownerId || (await isAdmin(actor.id)));
+      const allowed = !!actor && (actor.id === p.ownerId || (await can(actor.id, PROFILE_KIND_KEY[kind] ?? 'access')));
       if (!allowed) return NextResponse.json({ message: 'پیدا نشد' }, { status: 404 });
     }
     /* ── چرا سرور «مالک بودن» را می‌گوید ──

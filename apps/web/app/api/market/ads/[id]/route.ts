@@ -1,6 +1,7 @@
 export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
-import { sb, rpc, actorFromRequest, isAdmin, clientIp } from '@/lib/finance/db';
+import { sb, rpc, actorFromRequest, clientIp } from '@/lib/finance/db';
+import { can } from '@/lib/admin/permissions';
 import { viewerHash } from '@/lib/ads/preroll';
 import { normalizeCategory, normalizeCondition } from '@/lib/market/categories';
 import { validateOnServer, getBrand, TYPE_PREFIX, isAccessoryCategory, isProductCatalog, ACCESSORY_TYPE_OF, type CatalogId } from '@/lib/market/catalog'
@@ -55,7 +56,7 @@ export async function GET(_req: NextRequest, ctx: { params: Promise<{ id: string
      هر بازدیدِ آگهیِ عمومی */
   const needsCheck = !isPublic || ad.adminNote != null;
   const privileged = !!actor && (String(ad.sellerId) === actor.id
-    || (needsCheck && await isAdmin(actor.id)));
+    || (needsCheck && await can(actor.id, 'products')));
   if (!isPublic && !privileged) {
     return NextResponse.json({ message: 'آگهی پیدا نشد' }, { status: 404 });
   }
@@ -95,7 +96,7 @@ export async function PATCH(req: NextRequest, ctx: { params: Promise<{ id: strin
   const ad = await load(id);
   if (!ad) return NextResponse.json({ message: 'آگهی پیدا نشد' }, { status: 404 });
   const owner = String(ad.sellerId) === actor.id;
-  const admin = !owner && await isAdmin(actor.id);
+  const admin = !owner && await can(actor.id, 'products');
   if (!owner && !admin) {
     return NextResponse.json({ message: 'این آگهی متعلق به شما نیست' }, { status: 403 });
   }
@@ -340,7 +341,7 @@ export async function DELETE(req: NextRequest, ctx: { params: Promise<{ id: stri
 
   const ad = await load(id);
   if (!ad) return NextResponse.json({ ok: true });
-  if (String(ad.sellerId) !== actor.id && !(await isAdmin(actor.id))) {
+  if (String(ad.sellerId) !== actor.id && !(await can(actor.id, 'products'))) {
     return NextResponse.json({ message: 'این آگهی متعلق به شما نیست' }, { status: 403 });
   }
 

@@ -1,7 +1,8 @@
 export const dynamic = 'force-dynamic';
 import { callbackOrigin } from '@/lib/site-url';
 import { NextRequest, NextResponse } from 'next/server';
-import { actorFromRequest, isAdmin, audit } from '@/lib/finance/db';
+import { actorFromRequest, audit } from '@/lib/finance/db';
+import { can } from '@/lib/admin/permissions';
 import { getPaymentProvider, hasRealGateway } from '@/lib/payments';
 
 /* سلامت درگاه پرداخت.
@@ -33,7 +34,7 @@ const PROBE_LADDER = [1_000, 2_000, 5_000, 10_000, 50_000, 100_000];
 export async function GET(req: NextRequest) {
   const actor = actorFromRequest(req);
   if (!actor) return NextResponse.json({ message: 'ابتدا وارد شوید' }, { status: 401 });
-  if (!(await isAdmin(actor.id))) return NextResponse.json({ message: 'دسترسی مجاز نیست' }, { status: 403 });
+  if (!(await can(actor.id, 'finance'))) return NextResponse.json({ message: 'دسترسی مجاز نیست' }, { status: 403 });
 
   const provider = getPaymentProvider();
   const selected = (process.env.PAYMENT_PROVIDER || 'mock').toLowerCase();

@@ -224,7 +224,7 @@ export async function PATCH(req: NextRequest) {
      مالک واقعی برای همیشه ۴۰۴ می‌گرفت. با محدودکردن به خود کاربر،
      ردیف غریبه اصلا وارد نتیجه نمی‌شود. */
   sel = id ? sel.eq('id', id) : slug ? sel.eq('slug', slug) : sel.eq('src', src)
-  if (src && !id && !slug && !actor.isAdmin) sel = sel.eq('owner_id', actor.id)
+  if (src && !id && !slug && !(actor.isAdmin && await can(actor.id, 'media'))) sel = sel.eq('owner_id', actor.id)
   const { data, error: findErr } = await sel.maybeSingle()
   /* ⚠️ خطا را نبلع: «چند ردیف» و «خطای دیتابیس» هر دو این‌جا می‌نشستند
      و به کاربر «ویدیو پیدا نشد» گفته می‌شد. */
@@ -239,7 +239,7 @@ export async function PATCH(req: NextRequest) {
       { status: 404, headers: CORS })
   }
 
-  if (prev.owner_id !== actor.id && !actor.isAdmin) {
+  if (prev.owner_id !== actor.id && !(actor.isAdmin && await can(actor.id, 'media'))) {
     return NextResponse.json(FORBIDDEN, { status: 403, headers: CORS })
   }
 
@@ -286,7 +286,7 @@ export async function DELETE(req: NextRequest) {
   } | null
   if (!target) return NextResponse.json({ ok: true }, { headers: CORS })   // چیزی برای حذف نیست
 
-  if (target.owner_id !== actor.id && !actor.isAdmin) {
+  if (target.owner_id !== actor.id && !(actor.isAdmin && await can(actor.id, 'media'))) {
     return NextResponse.json(FORBIDDEN, { status: 403, headers: CORS })
   }
 

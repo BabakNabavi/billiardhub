@@ -1,7 +1,8 @@
 export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { actorOf, UNAUTHENTICATED } from '@/lib/auth/ownership';
-import { sb, isAdmin, audit, clientIp } from '@/lib/finance/db';
+import { sb, audit, clientIp } from '@/lib/finance/db';
+import { can } from '@/lib/admin/permissions';
 import { publicDisplayName } from '@/lib/public-name';
 import { isValidSlug } from '@/lib/slug';
 
@@ -172,7 +173,7 @@ export async function DELETE(req: NextRequest, ctx: { params: Promise<{ id: stri
   if (!actor) return NextResponse.json(UNAUTHENTICATED, { status: 401 });
 
   const target = req.nextUrl.searchParams.get('reviewId');
-  const admin = await isAdmin(actor.id);
+  const admin = await can(actor.id, 'clubs');
 
   let q = sb().from('club_reviews').delete().eq('club_id', clubId);
   if (admin && target && UUID.test(target)) q = q.eq('id', target);

@@ -93,7 +93,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
 async function guardOwner(req: NextRequest, clubId: string) {
   const actor = await actorOf(req);
   if (!actor) return NextResponse.json(UNAUTHENTICATED, { status: 401, headers: CORS });
-  if (!(await ownsClub(actor, clubId))) return NextResponse.json(FORBIDDEN, { status: 403, headers: CORS });
+  if (!(await ownsClub(actor, clubId, 'clubs'))) return NextResponse.json(FORBIDDEN, { status: 403, headers: CORS });
   return null;
 }
 

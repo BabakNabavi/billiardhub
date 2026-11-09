@@ -34,7 +34,7 @@ export async function PATCH(req: NextRequest, ctx: { params: Promise<{ id: strin
 
   const t = await getTournament(id);
   if (!t) return NextResponse.json({ message: 'مسابقه پیدا نشد' }, { status: 404 });
-  if (!(await ownsClub(actor, t.club_id))) return NextResponse.json(FORBIDDEN, { status: 403 });
+  if (!(await ownsClub(actor, t.club_id, 'tournaments'))) return NextResponse.json(FORBIDDEN, { status: 403 });
 
   const b = await req.json().catch(() => ({}));
   const next = String(b?.status ?? '');

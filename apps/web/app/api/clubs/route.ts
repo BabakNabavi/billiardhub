@@ -1,11 +1,11 @@
 export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
-import { can } from '@/lib/admin/permissions';
+import { can, canAny } from '@/lib/admin/permissions';
 import { stripClubPrivate } from '@/lib/clubs/private-fields';
 import { getSupabaseServer } from '@/lib/supabase-server';
 import { sessionFromRequest } from '@/lib/auth/session';
 import { cardToIban, matchCard, matchIban } from '@/lib/bank-server';
-import { actorFromRequest, isAdmin } from '@/lib/finance/db';
+import { actorFromRequest } from '@/lib/finance/db';
 import { isUUID, isValidSlug } from '@/lib/slug';
 import { revalidateHomeFeatured } from '@/lib/home-featured';
 
@@ -39,7 +39,8 @@ export async function GET(req: NextRequest) {
     let isAdminReq = false, canSeePrivate = false;
     if (wantsAll) {
       const actor = actorFromRequest(req);
-      isAdminReq = !!actor && (await isAdmin(actor.id));
+      /* «تیک آبی» هم فهرست را لازم دارد (نشان باشگاه منتشرشده)؛ داده‌ی خصوصی فقط با clubs */
+      isAdminReq = !!actor && (await canAny(actor.id, ['clubs', 'verified']));
       if (!isAdminReq) {
         return NextResponse.json({ message: 'دسترسی مجاز نیست' }, { status: 403, headers: CORS_HEADERS });
       }

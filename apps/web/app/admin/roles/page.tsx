@@ -234,17 +234,31 @@ export default function AdminRolesPage() {
 
   useEffect(() => { load(filter) }, [filter])
 
+  /* ⚠️ تا آبان ۱۴۰۵ پاسخ سرور خوانده نمی‌شد و «نقش تأیید شد» همیشه نشان داده
+     می‌شد، حتی وقتی سرور با ۴۰۳ (نبود کلید «نقش‌ها» یا «تیک آبی») یا ۵۰۰ رد
+     کرده بود. حالا پیام موفقیت فقط بعد از پاسخ موفق است. */
   const handleAction = async (id: string, action: 'approve' | 'reject', note?: string, verified?: boolean) => {
-    await apiFetch('/api/admin/roles', {
-      method: 'PATCH',
-      headers: {
-        ...(authHeader() as Record<string, string>),
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ id, action, note, verified }),
-    })
-    setToast(action === 'reject' ? 'نقش رد شد' : verified ? 'تأیید شد و تیک آبی گرفت' : 'نقش تأیید شد')
-    setTimeout(() => setToast(null), 2000)
+    let msg: string
+    try {
+      const r = await apiFetch('/api/admin/roles', {
+        method: 'PATCH',
+        headers: {
+          ...(authHeader() as Record<string, string>),
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ id, action, note, verified }),
+      })
+      if (r.ok) {
+        msg = action === 'reject' ? 'نقش رد شد' : verified ? 'تأیید شد و تیک آبی گرفت' : 'نقش تأیید شد'
+      } else {
+        const j = await r.json().catch(() => null) as { message?: string } | null
+        msg = j?.message || 'انجام نشد'
+      }
+    } catch {
+      msg = 'خطا در ارتباط با سرور'
+    }
+    setToast(msg)
+    setTimeout(() => setToast(null), 2500)
     load(filter)
   }
 

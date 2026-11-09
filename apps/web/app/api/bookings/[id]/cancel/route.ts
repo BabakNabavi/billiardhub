@@ -1,6 +1,7 @@
 export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
-import { sb, rpc, actorFromRequest, isAdmin, ownsClub, audit, clientIp } from '@/lib/finance/db';
+import { sb, rpc, actorFromRequest, ownsClub, audit, clientIp } from '@/lib/finance/db';
+import { can } from '@/lib/admin/permissions';
 import { computeRefund, bookingStartsAt, canCancelAt } from '@/lib/finance/cancellation';
 import { getPaymentProvider } from '@/lib/payments';
 import { notifyBookingCancelled } from '@/lib/notify';
@@ -22,7 +23,7 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string
     final_amount: number; payment_status: string; booking_status: string;
   };
 
-  const admin = await isAdmin(actor.id);
+  const admin = await can(actor.id, 'bookings');
   const owner = await ownsClub(actor.id, b.clubId);
   if (b.userId !== actor.id && !owner && !admin) {
     return NextResponse.json({ message: 'دسترسی مجاز نیست' }, { status: 403 });
@@ -115,12 +116,20 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string
 }
 
 /* پیش‌نمایش سیاست کنسلی بدون اجرای آن */
-export async function GET(_req: NextRequest, ctx: { params: Promise<{ id: string }> }) {
+/* ⚠️ تا آبان ۱۴۰۵ این پیش‌نمایش هیچ احراز هویتی نداشت: با شناسه‌ی هر رزرو،
+   مبلغ و درصد بازپرداختش برای هر کسی خوانده می‌شد. حالا همان سه نفری که لغو
+   می‌توانند، و بقیه ۴۰۴ می‌گیرند تا وجود رزرو هم لو نرود. */
+export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string }> }) {
   const { id } = await ctx.params;
+  const actor = actorFromRequest(req);
+  if (!actor) return NextResponse.json({ message: 'احراز هویت الزامی است' }, { status: 401 });
   const { data } = await sb().from('bookings')
-    .select('"bookingDate","timeSlots",final_amount,payment_status').eq('id', id).maybeSingle();
+    .select('"userId","clubId","bookingDate","timeSlots",final_amount,payment_status').eq('id', id).maybeSingle();
   if (!data) return NextResponse.json({ message: 'رزرو یافت نشد' }, { status: 404 });
-  const b = data as { bookingDate: string; timeSlots: string | null; final_amount: number; payment_status: string };
+  const b = data as { userId: string; clubId: string; bookingDate: string; timeSlots: string | null; final_amount: number; payment_status: string };
+  if (b.userId !== actor.id && !(await ownsClub(actor.id, b.clubId)) && !(await can(actor.id, 'bookings'))) {
+    return NextResponse.json({ message: 'رزرو یافت نشد' }, { status: 404 });
+  }
   if (b.payment_status !== 'PAID') return NextResponse.json({ refundAmount: 0, refundPercent: 0, label: 'رزرو پرداخت نشده است' });
   return NextResponse.json(computeRefund(b.final_amount, bookingStartsAt(b.bookingDate, b.timeSlots)));
 }

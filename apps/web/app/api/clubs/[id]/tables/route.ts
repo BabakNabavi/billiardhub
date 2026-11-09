@@ -2,7 +2,7 @@ export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseServer } from '@/lib/supabase-server';
 import { sessionFromRequest } from '@/lib/auth/session';
-import { isAdmin } from '@/lib/finance/db';
+import { can } from '@/lib/admin/permissions';
 import { z } from 'zod';
 import { sanitizeDiscountRules } from '@/lib/finance/pricing';
 
@@ -79,7 +79,7 @@ export async function POST(
   const { data: club } = await sb.from('clubs').select('ownerId').eq('id', id).single();
   /* ادمین‌بودن از دیتابیس، نه از نقشِ داخلِ توکن — توکنِ قدیمیِ هفت‌روزه‌ی
      ادمینی که دسترسی‌اش گرفته شده هنوز role=admin دارد */
-  if (!club || (club.ownerId !== payload.id && !(await isAdmin(payload.id)))) {
+  if (!club || (club.ownerId !== payload.id && !(await can(payload.id, 'clubs')))) {
     return NextResponse.json({ message: 'Forbidden' }, { status: 403 });
   }
 

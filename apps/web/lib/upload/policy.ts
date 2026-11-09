@@ -1,6 +1,6 @@
 import type { NextRequest } from 'next/server'
 import { getSupabaseServer } from '../supabase-server'
-import { isAdmin as isAdminUser } from '../finance/db'
+import { can } from '../admin/permissions'
 import { bucketFor } from '../social-server'
 
 /* ─────────────────────────────────────────────────────────────
@@ -129,7 +129,7 @@ export async function resolvePath(rawPath: string, actorId: string): Promise<Pat
      لنگرزدن خود regex چاره نیست: `documents/clubs/<id>/…` به
      بی‌لنگر بودنش تکیه دارد. */
   if (cleaned.startsWith('rankings/')) {
-    if (!(await isAdminUser(actorId))) {
+    if (!(await can(actorId, 'rankings'))) {
       return { ok: false, status: 403, message: 'فقط ادمین می‌تواند عکس رنکینگ بگذارد' }
     }
     return { ok: true, path: cleaned, bucket: bucketFor(cleaned), ownerChecked: true }
@@ -142,7 +142,7 @@ export async function resolvePath(rawPath: string, actorId: string): Promise<Pat
     const { data: club } = await getSupabaseServer()
       .from('clubs').select('"ownerId"').eq('id', clubInPath).maybeSingle()
     const owner = (club as { ownerId?: string } | null)?.ownerId
-    if (!club || (owner !== actorId && !(await isAdminUser(actorId)))) {
+    if (!club || (owner !== actorId && !(await can(actorId, 'clubs')))) {
       return { ok: false, status: 403, message: 'دسترسی به این باشگاه مجاز نیست' }
     }
     ownerChecked = true

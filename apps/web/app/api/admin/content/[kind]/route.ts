@@ -1,6 +1,7 @@
 export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
-import { sb, actorFromRequest, isAdmin, audit, clientIp } from '@/lib/finance/db';
+import { sb, actorFromRequest, audit, clientIp } from '@/lib/finance/db';
+import { can } from '@/lib/admin/permissions';
 import { CONTENT, isContentKind, sanitize } from '@/lib/admin/content';
 import { revalidateTag } from 'next/cache';
 
@@ -19,10 +20,11 @@ const bust = (kind: string) => { if (kind === 'news') revalidateTag('news', 'max
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-async function guard(req: NextRequest) {
+async function guard(req: NextRequest, kind: string) {
   const actor = actorFromRequest(req);
   if (!actor) return { error: NextResponse.json({ message: 'ابتدا وارد شوید' }, { status: 401 }) };
-  if (!(await isAdmin(actor.id))) {
+  /* کلید هر نوع همان نام نوع است: news، events، rankings، media */
+  if (!(await can(actor.id, kind))) {
     return { error: NextResponse.json({ message: 'دسترسی به این بخش مجاز نیست' }, { status: 403 }) };
   }
   return { actor };
@@ -32,7 +34,7 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ kind: strin
   const { kind } = await ctx.params;
   if (!isContentKind(kind)) return NextResponse.json({ message: 'نوع نامعتبر' }, { status: 404 });
 
-  const g = await guard(req);
+  const g = await guard(req, kind);
   if (g.error) return g.error;
 
   const spec = CONTENT[kind];
@@ -52,7 +54,7 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ kind: stri
   const { kind } = await ctx.params;
   if (!isContentKind(kind)) return NextResponse.json({ message: 'نوع نامعتبر' }, { status: 404 });
 
-  const g = await guard(req);
+  const g = await guard(req, kind);
   if (g.error) return g.error;
 
   const body = await req.json().catch(() => ({}));
@@ -89,7 +91,7 @@ export async function PATCH(req: NextRequest, ctx: { params: Promise<{ kind: str
   const { kind } = await ctx.params;
   if (!isContentKind(kind)) return NextResponse.json({ message: 'نوع نامعتبر' }, { status: 404 });
 
-  const g = await guard(req);
+  const g = await guard(req, kind);
   if (g.error) return g.error;
 
   const body = await req.json().catch(() => ({})) as Record<string, unknown>;
@@ -122,7 +124,7 @@ export async function DELETE(req: NextRequest, ctx: { params: Promise<{ kind: st
   const { kind } = await ctx.params;
   if (!isContentKind(kind)) return NextResponse.json({ message: 'نوع نامعتبر' }, { status: 404 });
 
-  const g = await guard(req);
+  const g = await guard(req, kind);
   if (g.error) return g.error;
 
   const id = new URL(req.url).searchParams.get('id') ?? '';

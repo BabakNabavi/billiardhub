@@ -40,7 +40,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
   const { data: row } = await sb().from('bookings').select('"clubId",status,booking_status,payment_status').eq('id', id).maybeSingle();
   const b = row as { clubId?: string; status?: string; booking_status?: string; payment_status?: string } | null;
   if (!b) return NextResponse.json({ message: 'رزرو یافت نشد' }, { status: 404 });
-  if (!(await ownsClub(actor, String(b.clubId)))) return NextResponse.json(FORBIDDEN, { status: 403 });
+  if (!(await ownsClub(actor, String(b.clubId), 'bookings'))) return NextResponse.json(FORBIDDEN, { status: 403 });
 
   /* رزرو لغوشده دوباره فعال نمی‌شود — پول برگشته و ساعتش آزاد شده. */
   if (b.booking_status === 'CANCELLED' || b.status === 'cancelled') {

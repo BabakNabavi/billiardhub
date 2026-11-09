@@ -1,20 +1,34 @@
 export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
-import { actorFromRequest, isAdmin, audit } from '@/lib/finance/db';
+import { sb, actorFromRequest, audit } from '@/lib/finance/db';
 import { PROFILE_KINDS, listProfiles, reviewProfile, type ProfileKind } from '@/lib/profiles/server';
-import { can } from '@/lib/admin/permissions';
+import { can, canAny, PROFILE_KIND_KEY } from '@/lib/admin/permissions';
 
-/* بررسی پروفایل‌ها توسط ادمین — تأیید/رد، تیک آبی و تأیید جواز کسب */
+/* بررسی پروفایل‌ها توسط ادمین — تأیید/رد، تیک آبی و تأیید جواز کسب
+
+   ⚠️ هر نوع پروفایل صفحه و کلید خودش را دارد (coach ⟵ coaches، …). تا آبان
+   ۱۴۰۵ این مسیر فقط «ادمین بودن» را می‌پرسید و ادمینی با کلید «اخبار» هم
+   می‌توانست مربی و داور تأیید یا رد کند. صفحه‌ی «تیک آبی» همه‌ی نوع‌ها را
+   می‌خواند و «نقش‌ها» هم پروفایل را بررسی می‌کند. */
+const VIEW_EXTRA = ['verified', 'roles'] as const;
 
 export async function GET(req: NextRequest) {
   const actor = actorFromRequest(req);
   if (!actor) return NextResponse.json({ message: 'ابتدا وارد شوید' }, { status: 401 });
-  if (!(await isAdmin(actor.id))) return NextResponse.json({ message: 'دسترسی مجاز نیست' }, { status: 403 });
 
   const kindParam = new URL(req.url).searchParams.get('kind');
-  const kinds = kindParam && (PROFILE_KINDS as string[]).includes(kindParam)
+  const asked = kindParam && (PROFILE_KINDS as string[]).includes(kindParam)
     ? [kindParam as ProfileKind]
     : PROFILE_KINDS;
+  /* «تیک آبی» و «نقش‌ها» همه‌ی نوع‌ها را لازم دارند؛ بقیه فقط نوع‌هایی که کلیدشان را
+     دارند — وگرنه کلید «مربیان» فهرست کامل فروشگاه‌ها و بازیکنان را هم با جواز می‌داد. */
+  const kinds = (await canAny(actor.id, VIEW_EXTRA))
+    ? asked
+    : (await Promise.all(asked.map(async k => ((await can(actor.id, PROFILE_KIND_KEY[k] ?? 'access')) ? k : null))))
+        .filter((k): k is ProfileKind => k !== null);
+  if (kinds.length === 0) {
+    return NextResponse.json({ message: 'دسترسی مجاز نیست' }, { status: 403 });
+  }
 
   const out: Record<string, unknown[]> = {};
   for (const k of kinds) {
@@ -26,7 +40,9 @@ export async function GET(req: NextRequest) {
 export async function PATCH(req: NextRequest) {
   const actor = actorFromRequest(req);
   if (!actor) return NextResponse.json({ message: 'ابتدا وارد شوید' }, { status: 401 });
-  if (!(await isAdmin(actor.id))) return NextResponse.json({ message: 'دسترسی مجاز نیست' }, { status: 403 });
+  if (!(await canAny(actor.id, [...Object.values(PROFILE_KIND_KEY), ...VIEW_EXTRA]))) {
+    return NextResponse.json({ message: 'دسترسی مجاز نیست' }, { status: 403 });
+  }
 
   const b = await req.json().catch(() => ({}));
   const id = String(b?.id ?? '').trim();
@@ -48,6 +64,17 @@ export async function PATCH(req: NextRequest) {
   }
   if (typeof b?.licenseVerified === 'boolean') patch.licenseVerified = b.licenseVerified;
   if (b?.licenseNote !== undefined) patch.licenseNote = String(b.licenseNote ?? '').slice(0, 500);
+
+  /* تأیید، رد و جواز کار صفحه‌ی همان نوع (یا «نقش‌ها») است. نوع از دیتابیس
+     خوانده می‌شود، نه از بدنه: درخواست دستکاری‌شده نمی‌تواند نوع دیگری بگوید. */
+  if (patch.status !== undefined || patch.licenseVerified !== undefined || patch.licenseNote !== undefined) {
+    const { data: row } = await sb().from('profiles').select('kind').eq('id', id).maybeSingle();
+    const kindKey = PROFILE_KIND_KEY[String((row as { kind?: string } | null)?.kind ?? '')];
+    if (!kindKey) return NextResponse.json({ message: 'پروفایل یافت نشد' }, { status: 404 });
+    if (!(await canAny(actor.id, [kindKey, 'roles']))) {
+      return NextResponse.json({ message: 'دسترسی به این بخش مجاز نیست' }, { status: 403 });
+    }
+  }
 
   const saved = await reviewProfile(id, patch);
   if (!saved) return NextResponse.json({ message: 'به‌روزرسانی انجام نشد' }, { status: 500 });

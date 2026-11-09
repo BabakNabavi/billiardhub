@@ -53,7 +53,8 @@ const head = s => console.log(`\n■ ${s}`)
   t('استعلامِ موفق فلگ را می‌نویسد', /postalCodeVerified: true/.test(r))
   /* مسیرِ بی‌clubId یک استعلامِ رایگان بود که هیچ‌جا ذخیره نمی‌شد */
   t('بدونِ شناسه‌ی باشگاه رد می‌شود', /if \(!clubId && !admin\)/.test(r))
-  t('ادمین مستثناست', /const admin = await isAdmin\(actor\.id\)/.test(r))
+  /* از آبان ۱۴۰۵ استثنا کلیدِ بخش می‌خواهد (canAny)، نه فقط «ادمین بودن» */
+  t('ادمین مستثناست', /const admin = await (?:isAdmin\(actor\.id\)|canAny\(actor\.id,)/.test(r))
   t('نبودِ ستون استعلام را نمی‌شکند', /isMissingColumn\(clubErr\.message\)/.test(r))
 
   /* مسیرِ دومِ استعلام که هیچ فراخوانی نداشت و فقط اعتبار می‌سوزاند */
@@ -286,6 +287,15 @@ const head = s => console.log(`\n■ ${s}`)
     }
     return out
   }
+  /* کلیدِ پویا (نامِ نوع، کلیدِ تنظیم، نوعِ پروفایل، AdminKey) این‌جا خواندنی نیست؛
+     همه‌ی مقدارهای ممکنش در scripts/test-admin-permissions.mjs با همین فهرست سنجیده می‌شوند. */
+  const DYNAMIC = new Set([
+    'app/api/admin/content/[kind]/route.ts', 'app/api/admin/settings/route.ts',
+    'app/api/profiles/[kind]/route.ts', 'app/api/profiles/[kind]/[slug]/reviews/route.ts',
+    'lib/auth/ownership.ts',
+    /* کلید نوع پروفایل/نقش از PROFILE_KIND_KEY */
+    'app/api/admin/profiles/route.ts', 'app/api/admin/review/route.ts',
+  ])
   const bad = [], unparsed = []
   for (const p of [...walk('app'), ...walk('lib'), ...walk('components'), ...walk('hooks')]) {
     /* خودِ تعریفِ can() این‌جا نیست که سنجیده شود */
@@ -301,7 +311,7 @@ const head = s => console.log(`\n■ ${s}`)
        درمی‌رفت — یعنی کلیدِ نامعتبر بی‌صدا رد می‌شد. پس شمارشِ خامِ
        `can(` باید با شمارشِ الگو یکی باشد. */
     const raw = (src.match(/\bcan\(/g) ?? []).length
-    if (raw !== hits.length) unparsed.push(`${p} (${raw} فراخوان، ${hits.length} خوانده‌شده)`)
+    if (raw !== hits.length && !DYNAMIC.has(p)) unparsed.push(`${p} (${raw} فراخوان، ${hits.length} خوانده‌شده)`)
   }
   t('هیچ can() با کلیدِ ناموجود نمانده', bad.length === 0, bad.join(' · '))
   t('هر can() برای گارد خوانا است', unparsed.length === 0, unparsed.join(' · '))
@@ -499,7 +509,7 @@ const head = s => console.log(`\n■ ${s}`)
      نمی‌زد. حالا صاحبِ ویدیو خودش می‌تواند عوضش کند. */
   const ve = code('components/media/useVideoEdit.tsx')
   t('مسیرِ ویرایشِ ویدیوی خودی وجود دارد',
-    /export async function PATCH/.test(media) && /prev\.owner_id !== actor\.id && !actor\.isAdmin/.test(media))
+    /export async function PATCH/.test(media) && /prev\.owner_id !== actor\.id && !(?:actor\.isAdmin|\(actor\.isAdmin && await can\(actor\.id, 'media'\)\))/.test(media))
   t('ویرایش همان قاعده‌ی عنوان را اعمال می‌کند',
     /const weak = weakTitle\(title\)/.test(media))
   /* نشانیِ قبلی نباید ۴۰۴ شود */
@@ -511,7 +521,7 @@ const head = s => console.log(`\n■ ${s}`)
   /* ⚠️ `src` یکتا نیست: دو ردیفِ هم‌نشانی `maybeSingle` را `null`
      می‌کرد و مالکِ واقعی برای همیشه ۴۰۴ می‌گرفت. */
   t('یافتن با src به خودِ کاربر محدود است',
-    /if \(src && !id && !slug && !actor\.isAdmin\) sel = sel\.eq\('owner_id', actor\.id\)/.test(media))
+    /if \(src && !id && !slug && !(?:actor\.isAdmin|\(actor\.isAdmin && await can\(actor\.id, 'media'\)\))\) sel = sel\.eq\('owner_id', actor\.id\)/.test(media))
   t('خطای خواندن بلعیده نمی‌شود',
     /error: findErr/.test(media) && /خواندن ویدیو انجام نشد/.test(media))
   /* «منتشر نشده» باید از «خطا» جدا بماند */

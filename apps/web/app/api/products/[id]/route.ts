@@ -63,7 +63,8 @@ export async function GET(
    `PATCH` هم پذیرفته می‌شود چون فعل درست‌تر برای تغییر جزئی است؛
    `PUT` برای سازگاری با فراخوانی موجود می‌ماند. */
 
-import { actorFromRequest, isAdmin, audit, clientIp } from '@/lib/finance/db'
+import { actorFromRequest, audit, clientIp } from '@/lib/finance/db'
+import { can } from '@/lib/admin/permissions'
 import { AD_LIFETIME_MS } from '@/lib/market/live'
 
 /* فقط همین دو پرچم از بیرون قابل تغییرند. فهرست سفید عمدی است:
@@ -74,7 +75,7 @@ const ADMIN_FIELDS = ['isVerified', 'isOfficialStore'] as const
 async function adminGuard(req: NextRequest) {
   const actor = actorFromRequest(req)
   if (!actor) return NextResponse.json({ error: 'ابتدا وارد شوید' }, { status: 401 })
-  if (!(await isAdmin(actor.id))) {
+  if (!(await can(actor.id, 'products'))) {
     return NextResponse.json({ error: 'دسترسی مجاز نیست' }, { status: 403 })
   }
   return actor

@@ -27,7 +27,7 @@ async function guard(req: NextRequest, tournamentId: string) {
   const t = await getTournament(tournamentId);
   if (!t) return { error: NextResponse.json({ message: 'مسابقه پیدا نشد' }, { status: 404 }) };
 
-  if (!(await ownsClub(actor, t.club_id))) {
+  if (!(await ownsClub(actor, t.club_id, 'tournaments'))) {
     return { error: NextResponse.json(FORBIDDEN, { status: 403 }) };
   }
   return { actor, tournament: t };

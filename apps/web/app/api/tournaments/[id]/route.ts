@@ -53,7 +53,7 @@ async function guard(req: NextRequest, id: string) {
   if (!actor) return { err: NextResponse.json(UNAUTHENTICATED, { status: 401 }) };
   const t = await getTournament(id);
   if (!t) return { err: NextResponse.json({ message: 'مسابقه یافت نشد' }, { status: 404 }) };
-  if (!(await ownsClub(actor, t.club_id))) return { err: NextResponse.json(FORBIDDEN, { status: 403 }) };
+  if (!(await ownsClub(actor, t.club_id, 'tournaments'))) return { err: NextResponse.json(FORBIDDEN, { status: 403 }) };
   return { actor, t };
 }
 
@@ -78,7 +78,7 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string 
      وجود دارد. */
   if (!PUBLIC_STATUSES.has(t.status)) {
     const actor = await actorOf(req);
-    const allowed = !!actor && (actor.role === 'admin' || await ownsClub(actor, t.club_id));
+    const allowed = !!actor && await ownsClub(actor, t.club_id, 'tournaments');
     if (!allowed) return NextResponse.json({ message: 'مسابقه یافت نشد' }, { status: 404 });
   }
 

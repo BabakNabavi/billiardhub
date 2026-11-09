@@ -1,6 +1,7 @@
 export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
-import { sb, actorFromRequest, isAdmin, audit } from '@/lib/finance/db';
+import { sb, actorFromRequest, audit } from '@/lib/finance/db';
+import { can } from '@/lib/admin/permissions';
 import { PATTERNS, sendPattern, invalidateSmsCache, type PatternKey } from '@/lib/sms-server';
 import { inquiryKeyState } from '@/lib/inquiry-key';
 
@@ -49,7 +50,7 @@ const SAMPLE: Record<PatternKey, string[]> = {
 export async function POST(req: NextRequest) {
   const actor = actorFromRequest(req);
   if (!actor) return NextResponse.json({ message: 'ابتدا وارد شوید' }, { status: 401 });
-  if (!(await isAdmin(actor.id))) return NextResponse.json({ message: 'دسترسی مجاز نیست' }, { status: 403 });
+  if (!(await can(actor.id, 'sms'))) return NextResponse.json({ message: 'دسترسی مجاز نیست' }, { status: 403 });
 
   const b = await req.json().catch(() => ({})) as { key?: string; phone?: string };
   const key = String(b.key ?? '') as PatternKey;
@@ -91,7 +92,7 @@ export async function POST(req: NextRequest) {
 export async function GET(req: NextRequest) {
   const actor = actorFromRequest(req);
   if (!actor) return NextResponse.json({ message: 'ابتدا وارد شوید' }, { status: 401 });
-  if (!(await isAdmin(actor.id))) return NextResponse.json({ message: 'دسترسی مجاز نیست' }, { status: 403 });
+  if (!(await can(actor.id, 'sms'))) return NextResponse.json({ message: 'دسترسی مجاز نیست' }, { status: 403 });
 
   const { data } = await sb().from('app_settings')
     .select('value').eq('key', 'sms_body_ids').maybeSingle();

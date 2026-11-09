@@ -162,6 +162,27 @@ export async function can(userId: string, key: string): Promise<boolean> {
   return p.includes(key)
 }
 
+/* آیا دست‌کم یکی از این بخش‌ها را دارد؟ برای مسیرهایی که چند صفحه از آن‌ها
+   استفاده می‌کنند (مثلا مدرک جواز را هم «تأیید باشگاه‌ها» می‌بیند هم «نقش‌ها»). */
+export async function canAny(userId: string, keys: readonly string[]): Promise<boolean> {
+  const p = await permissionsOf(userId)
+  if (isSuper(p)) return true
+  return keys.some(k => k !== SUPER_ONLY && p.includes(k))
+}
+
+/* ── کلید هر نوع پروفایل ──
+   ⚠️ تا آبان ۱۴۰۵ بیشتر مسیرهای قدیمی‌تر فقط `isAdmin` می‌پرسیدند، یعنی ادمینی
+   که فقط «اخبار» داشت می‌توانست مربی تأیید کند، رزرو با بازپرداخت لغو کند یا
+   تنظیمات پلتفرم را عوض کند: تیک‌های صفحه‌ی «دسترسی ادمین» روی سرور اثری
+   نداشتند. هر مسیر حالا کلید صفحه‌ی خودش را می‌خواهد. */
+export const PROFILE_KIND_KEY: Record<string, string> = {
+  coach: 'coaches', referee: 'referees', seller: 'sellers',
+  manufacturer: 'manufacturers', technician: 'technicians', player: 'players',
+}
+
+/* صفحه‌هایی که مدرک و جواز بررسی می‌کنند */
+export const REVIEW_KEYS: readonly string[] = ['roles', 'clubs', ...Object.values(PROFILE_KIND_KEY)]
+
 /* نوشتن دسترسی — فقط از مسیر ادمین و پس از بررسی سوپربودن کننده. */
 export async function setPermissions(userId: string, keys: string[], byUserId: string) {
   const clean = [...new Set(keys.filter(k => ALL_KEYS.includes(k)))]

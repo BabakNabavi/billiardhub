@@ -1,6 +1,7 @@
 export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
-import { sb, actorFromRequest, isAdmin } from '@/lib/finance/db';
+import { sb, actorFromRequest } from '@/lib/finance/db';
+import { can } from '@/lib/admin/permissions';
 import { lookupLicense } from '@/lib/license-server';
 
 /* استعلام جواز کسب باشگاه و صدور تیک تأیید.
@@ -23,7 +24,7 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string
      ⚠️ این مسیر بازمانده است؛ نسخه‌ی تازه `/api/admin/license-check`
      است که هر دو نوع باشگاه و پروفایل را می‌پذیرد و کد ملی را با
      صاحب همان کسب‌وکار می‌سنجد، نه با فراخواننده. */
-  if (!(await isAdmin(actor.id))) {
+  if (!(await can(actor.id, 'clubs'))) {
     return NextResponse.json({ message: 'استعلام جواز فقط توسط مدیریت انجام می‌شود' }, { status: 403 });
   }
   const { data: clubRow } = await sb().from('clubs').select('"ownerId"').eq('id', clubId).maybeSingle();

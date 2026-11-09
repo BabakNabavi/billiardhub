@@ -36,7 +36,7 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string 
 
   /* مالک باشگاه کل صف را می‌بیند تا بداند چند نفر منتظرند */
   let queue: { position: number; name: string | null }[] | undefined;
-  if (await ownsClub(actor, t.club_id)) {
+  if (await ownsClub(actor, t.club_id, 'tournaments')) {
     const { data: all } = await sb().from('tournament_registrations')
       .select('player_name,waitlist_position')
       .eq('tournament_id', id).eq('status', 'WAITLIST')

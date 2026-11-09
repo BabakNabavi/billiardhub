@@ -341,6 +341,8 @@ export default function ClubDashboardPage() {
   const [clubs, setClubs] = useState<Club[]>([]);
   const [selectedClub, setSelectedClub] = useState<Club | null>(null);
   const [loading, setLoading] = useState(true);
+  /* خطای خواندن فهرست باشگاه‌ها با «هنوز باشگاهی ثبت نکردی» یکی نیست */
+  const [clubsError, setClubsError] = useState(false);
   const [activeTab, setActiveTab] = useState<TabKey>('dashboard');
   const [clubDropdownOpen, setClubDropdownOpen] = useState(false);
 
@@ -598,16 +600,33 @@ export default function ClubDashboardPage() {
 
   // ── Effects ───────────────────────────────────────────────────────────────
 
+  /* ⚠️ ادمین تا آبان ۱۴۰۵ همیشه فهرست همه‌ی باشگاه‌ها را می‌گرفت و اولی انتخاب
+     می‌شد: ادمینی که خودش باشگاه داشت روی باشگاه کس دیگری فرود می‌آمد. از وقتی
+     سرور برای دست زدن به باشگاه دیگران کلید «clubs» می‌خواهد، این یعنی تب‌های
+     ۴۰۳. حالا اول باشگاه‌های خودش؛ فقط اگر نداشت فهرست همه. */
   useEffect(() => {
     if (!user) return;
     const isAdmin = user.primaryRole === 'admin';
-    const endpoint = isAdmin ? '/clubs' : '/clubs/my-clubs';
-    api.get(endpoint).then(res => {
-      const list: Club[] = Array.isArray(res.data) ? res.data : res.data?.data ?? [];
-      setClubs(list);
-      if (list.length > 0) setSelectedClub(list[0] as Club);
-      setLoading(false);
-    }).catch(() => setLoading(false));
+    const toList = (data: unknown): Club[] =>
+      Array.isArray(data) ? data as Club[] : ((data as { data?: Club[] } | null)?.data ?? []);
+    const load = async () => {
+      setClubsError(false);
+      try {
+        let list: Club[] = [];
+        try {
+          list = toList((await api.get('/clubs/my-clubs')).data);
+        } catch (e) {
+          /* ادمین هنوز می‌تواند فهرست همه را ببیند؛ برای بقیه همان خطاست */
+          if (!isAdmin) throw e;
+        }
+        if (isAdmin && list.length === 0) list = toList((await api.get('/clubs')).data);
+        setClubs(list);
+        if (list.length > 0) setSelectedClub(list[0] ?? null);
+      } catch {
+        setClubsError(true);
+      } finally { setLoading(false); }
+    };
+    void load();
   }, [user]);
 
   useEffect(() => {
@@ -1808,6 +1827,21 @@ export default function ClubDashboardPage() {
   if (loading) return (
     <div style={{ textAlign: 'center', padding: '80px 20px', color: '#6B7280', fontFamily: 'var(--font-base)' }}>
       در حال بارگذاری...
+    </div>
+  );
+
+  if (clubsError && clubs.length === 0) return (
+    <div role="alert" style={{ maxWidth: 440, margin: '60px auto', padding: '0 16px', textAlign: 'center', fontFamily: 'var(--font-base)' }}>
+      <Card>
+        <h2 style={{ fontSize: 18, fontWeight: 700, color: DARK, margin: '0 0 8px' }}>فهرست باشگاه‌ها خوانده نشد</h2>
+        <p style={{ color: '#6B7280', fontSize: 14, marginBottom: 20 }}>اتصال را بررسی کنید و دوباره تلاش کنید</p>
+        <button type="button" onClick={() => window.location.reload()} style={{
+          background: 'rgba(199,166,106,0.14)', color: '#A07840', border: '1px solid rgba(199,166,106,0.42)',
+          padding: '10px 28px', borderRadius: 20, fontWeight: 700, fontSize: 14, cursor: 'pointer',
+        }}>
+          تلاش دوباره
+        </button>
+      </Card>
     </div>
   );
 

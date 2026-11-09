@@ -23,7 +23,7 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string 
   const { id } = await ctx.params;
   const actor = await actorOf(req);
   if (!actor) return NextResponse.json(UNAUTHENTICATED, { status: 401 });
-  if (!(await ownsClub(actor, id))) return NextResponse.json(FORBIDDEN, { status: 403 });
+  if (!(await ownsClub(actor, id, 'clubs'))) return NextResponse.json(FORBIDDEN, { status: 403 });
 
   const { data } = await sb().from('clubs')
     .select('*').eq('id', id).maybeSingle();
@@ -44,7 +44,7 @@ export async function PATCH(req: NextRequest, ctx: { params: Promise<{ id: strin
   const { id } = await ctx.params;
   const actor = await actorOf(req);
   if (!actor) return NextResponse.json(UNAUTHENTICATED, { status: 401 });
-  if (!(await ownsClub(actor, id))) return NextResponse.json(FORBIDDEN, { status: 403 });
+  if (!(await ownsClub(actor, id, 'clubs'))) return NextResponse.json(FORBIDDEN, { status: 403 });
 
   const b = (await req.json().catch(() => ({}))) as Body;
   const patch: Record<string, unknown> = {};

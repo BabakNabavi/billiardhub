@@ -1,6 +1,7 @@
 export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
-import { sb, actorFromRequest, isAdmin, ownsClub } from '@/lib/finance/db';
+import { sb, actorFromRequest, ownsClub } from '@/lib/finance/db';
+import { can } from '@/lib/admin/permissions';
 import { BOOKING_HORIZON_DAYS } from '@/lib/booking/closure';
 import { isVisibleBooking } from '@/lib/bookings/visibility';
 
@@ -33,7 +34,7 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string 
   const actor = actorFromRequest(req);
   if (!actor) return NextResponse.json({ message: 'ابتدا وارد شوید' }, { status: 401 });
   if (!UUID.test(id)) return NextResponse.json({ message: 'باشگاه نامعتبر است' }, { status: 400 });
-  if (!(await ownsClub(actor.id, id)) && !(await isAdmin(actor.id))) {
+  if (!(await ownsClub(actor.id, id)) && !(await can(actor.id, 'clubs'))) {
     return NextResponse.json({ message: 'دسترسی مجاز نیست' }, { status: 403 });
   }
 

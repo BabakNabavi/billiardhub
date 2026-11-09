@@ -68,8 +68,11 @@ export default function AdminReports() {
         method: 'PATCH', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ report_alert_phone: phoneDraft.trim() }),
       })
-      if (!r.ok) { setErr('ذخیره‌ی شماره انجام نشد'); return }
-      setAlertPhone(phoneDraft.trim())
+      const j = await r.json().catch(() => null) as { message?: string; settings?: { report_alert_phone?: unknown } } | null
+      if (!r.ok) { setErr(j?.message || 'ذخیره‌ی شماره انجام نشد'); return }
+      /* شماره‌ی یکدست‌شده‌ی سرور (۰۹… با ارقام لاتین)، نه همان چیزی که تایپ شد */
+      const saved = typeof j?.settings?.report_alert_phone === 'string' ? j.settings.report_alert_phone : phoneDraft.trim()
+      setAlertPhone(saved); setPhoneDraft(saved)
     } catch { setErr('خطا در ارتباط با سرور') } finally { setSavingPhone(false) }
   }
 

@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { CORS, BUCKET, safeKey, readJsonFresh, writeJson } from '@/lib/social-server'
 import { getSupabaseServer } from '@/lib/supabase-server'
 import { actorOf, ownsClub, UNAUTHENTICATED, FORBIDDEN } from '@/lib/auth/ownership'
+import { can } from '@/lib/admin/permissions'
 import {
   MAIN_ANGLE, MAX_ANGLES, activeAngles, newAngleId, defaultAngleLabel,
   type LiveAngle,
@@ -159,7 +160,7 @@ export async function POST(req: NextRequest) {
     const clubId = String(b?.clubId || '')
     const ownerKey = actor.dmKey || actor.id
     if (!clubId) return NextResponse.json({ ok: false, message: 'داده ناقص' }, { status: 400, headers: CORS })
-    if (!(await ownsClub(actor, clubId))) return NextResponse.json(FORBIDDEN, { status: 403, headers: CORS })
+    if (!(await ownsClub(actor, clubId, 'live'))) return NextResponse.json(FORBIDDEN, { status: 403, headers: CORS })
     const id = `lv-${Date.now()}-${Math.floor(Math.random() * 1e4)}`
     const now = Date.now()
     const s: LiveSession = {
@@ -188,7 +189,7 @@ export async function POST(req: NextRequest) {
      شرط قبلی به `b.ownerKey` نگاه می‌کرد و با **حذف** آن از بدنه
      کاملا دور زده می‌شد؛ حالا مبنا نشست است. */
   const me = actor.dmKey || actor.id
-  if (s.ownerKey !== me && !actor.isAdmin) {
+  if (s.ownerKey !== me && !(actor.isAdmin && await can(actor.id, 'live'))) {
     return NextResponse.json(FORBIDDEN, { status: 403, headers: CORS })
   }
 

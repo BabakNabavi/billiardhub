@@ -1,6 +1,7 @@
 export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
-import { sb, actorFromRequest, isAdmin } from '@/lib/finance/db';
+import { sb, actorFromRequest } from '@/lib/finance/db';
+import { canAny } from '@/lib/admin/permissions';
 import { hitRateLimit, tooMany } from '@/lib/auth/rate-limit';
 import { lookupPostalCode, composeAddress, normalizePostalCode } from '@/lib/address-server';
 import { getProvinceNames, getCities, provinceOfCity } from '@/lib/iran-geo';
@@ -70,7 +71,7 @@ export async function POST(req: NextRequest) {
   const profileSlug = body.profileSlug ?? '';
   const wantsProfile = !!profileKind && !!profileSlug;
 
-  const admin = await isAdmin(actor.id);
+  const admin = await canAny(actor.id, ['support', 'clubs', 'manufacturers']);
 
   /* بدون هدف این مسیر یک استعلام رایگان بود که هیچ‌جا ذخیره نمی‌شد
      — یعنی راهی برای سوزاندن اعتبار بدون هیچ اثری. */

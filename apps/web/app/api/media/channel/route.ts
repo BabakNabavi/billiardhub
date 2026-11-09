@@ -4,6 +4,7 @@ import { CORS, readJson, readJsonFresh, writeJson } from '@/lib/social-server'
 import { z } from 'zod'
 import { asRole, normHandle, channelKey, CHANNEL_ROLES, type UserChannel, type ChannelRole } from '@/lib/media/channel'
 import { actorOf, UNAUTHENTICATED } from '@/lib/auth/ownership'
+import { can } from '@/lib/admin/permissions'
 import { redactList } from '@/lib/privacy'
 
 /* کانال‌های کاربران — مثل یوتیوب، برای انتشار ویدیو داشتن کانال لازم است و
@@ -44,7 +45,7 @@ export async function GET(req: NextRequest) {
      بررسی می‌شود تا کسی با شماره‌ی دیگری کانال او را نخواند. */
   if (owner) {
     const actor = await actorOf(req).catch(() => null)
-    if (!actor || (actor.dmKey !== owner && actor.id !== owner && !actor.isAdmin)) {
+    if (!actor || (actor.dmKey !== owner && actor.id !== owner && !(actor.isAdmin && await can(actor.id, 'media')))) {
       return NextResponse.json(null, { status: 403, headers: CORS })
     }
     /* ⚠️ کلید ذخیره‌شده `dmKey` است (غالبا شماره)، ولی کلاینت

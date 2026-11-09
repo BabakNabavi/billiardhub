@@ -1,7 +1,8 @@
 export const dynamic = 'force-dynamic';
 import { callbackOrigin } from '@/lib/site-url';
 import { NextRequest, NextResponse } from 'next/server';
-import { sb, actorFromRequest, isAdmin, ownsClub, audit, clientIp } from '@/lib/finance/db';
+import { sb, actorFromRequest, ownsClub, audit, clientIp } from '@/lib/finance/db';
+import { can } from '@/lib/admin/permissions';
 import { getPaymentProvider } from '@/lib/payments';
 import { CLUB_TEMPLATES, clubTemplate, faJalali } from '@/lib/sms/club-templates';
 import { pricing, quote } from '@/lib/sms/club-campaign';
@@ -20,7 +21,7 @@ async function guard(req: NextRequest, clubId: string) {
   const actor = actorFromRequest(req);
   if (!actor) return { err: NextResponse.json({ message: 'ابتدا وارد شوید' }, { status: 401 }) };
   if (!UUID.test(clubId)) return { err: NextResponse.json({ message: 'باشگاه نامعتبر است' }, { status: 400 }) };
-  if (!(await ownsClub(actor.id, clubId)) && !(await isAdmin(actor.id))) {
+  if (!(await ownsClub(actor.id, clubId)) && !(await can(actor.id, 'clubs'))) {
     return { err: NextResponse.json({ message: 'دسترسی مجاز نیست' }, { status: 403 }) };
   }
   const { data: club } = await sb().from('clubs').select('id,name').eq('id', clubId).maybeSingle();

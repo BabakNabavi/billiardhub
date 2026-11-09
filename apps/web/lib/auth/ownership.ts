@@ -15,6 +15,7 @@ import { sessionFromRequest } from './session'
 import { getSupabaseServer } from '../supabase-server'
 import { accountStateOf } from '../enforcement/server'
 import { canSignIn } from '../enforcement/policy'
+import { can } from '../admin/permissions'
 
 const sb = () => getSupabaseServer()
 
@@ -56,9 +57,18 @@ export async function actorOf(req: NextRequest): Promise<Actor | null> {
   }
 }
 
-/** آیا این کاربر مالک همین باشگاه است؟ (ادمین همیشه مجاز) */
-export async function ownsClub(actor: Actor, clubId: string): Promise<boolean> {
-  if (actor.isAdmin) return true
+/* ── ادمین به‌جای مالک ──
+   ⚠️ تا آبان ۱۴۰۵ «ادمین همیشه مجاز» بود: هر ادمینی، حتی ادمینی که فقط کلید
+   «اخبار» داشت، از راه مسیرهای مالک باشگاه می‌توانست هر مسابقه‌ای را ویرایش،
+   حذف یا لغو کند (یعنی بازپرداخت راه بیندازد) یا رزرو و پخش زنده‌ی هر باشگاهی
+   را دست بزند. حالا کلید بخش اجباری است تا هیچ فراخوانی بی‌آن کامپایل نشود. */
+export type AdminKey = 'clubs' | 'tournaments' | 'bookings' | 'live' | 'sellers'
+
+const adminMay = async (actor: Actor, key: AdminKey) => actor.isAdmin && can(actor.id, key)
+
+/** آیا این کاربر مالک همین باشگاه است؟ ادمین فقط با کلید همان بخش. */
+export async function ownsClub(actor: Actor, clubId: string, adminKey: AdminKey): Promise<boolean> {
+  if (await adminMay(actor, adminKey)) return true
   if (!clubId) return false
   const { data, error } = await sb().from('clubs')
     .select('"ownerId"').eq('id', clubId).maybeSingle()
@@ -74,8 +84,8 @@ export async function ownsClub(actor: Actor, clubId: string): Promise<boolean> {
  */
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
-export async function ownsSeller(actor: Actor, sellerId: string): Promise<boolean> {
-  if (actor.isAdmin) return true
+export async function ownsSeller(actor: Actor, sellerId: string, adminKey: AdminKey = 'sellers'): Promise<boolean> {
+  if (await adminMay(actor, adminKey)) return true
   if (!sellerId) return false
 
   /* شناسه فقط وقتی با ستون uuid مقایسه می‌شود که واقعا uuid باشد؛

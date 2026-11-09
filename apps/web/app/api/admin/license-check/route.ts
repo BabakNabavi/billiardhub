@@ -1,6 +1,7 @@
 export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
-import { sb, actorFromRequest, isAdmin, audit } from '@/lib/finance/db';
+import { sb, actorFromRequest, audit } from '@/lib/finance/db';
+import { canAny, REVIEW_KEYS, PROFILE_KIND_KEY } from '@/lib/admin/permissions';
 import { lookupLicense } from '@/lib/license-server';
 
 /* استعلام جواز کسب — توسط ادمین.
@@ -25,7 +26,7 @@ const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 export async function POST(req: NextRequest) {
   const actor = actorFromRequest(req);
   if (!actor) return NextResponse.json({ message: 'ابتدا وارد شوید' }, { status: 401 });
-  if (!(await isAdmin(actor.id))) return NextResponse.json({ message: 'دسترسی مجاز نیست' }, { status: 403 });
+  if (!(await canAny(actor.id, REVIEW_KEYS))) return NextResponse.json({ message: 'دسترسی مجاز نیست' }, { status: 403 });
 
   const b = await req.json().catch(() => ({})) as { type?: string; id?: string; trackingCode?: string };
   const type = String(b.type ?? '');
@@ -44,10 +45,19 @@ export async function POST(req: NextRequest) {
     const { data } = await sb().from('clubs').select('"ownerId"').eq('id', id).maybeSingle();
     if (!data) return NextResponse.json({ message: 'باشگاه یافت نشد' }, { status: 404 });
     ownerId = (data as { ownerId?: string }).ownerId ?? null;
+    /* این مسیر جواز را «تأییدشده» می‌نویسد و استعلام پولی است: همان کلید صفحه‌ی
+       تأیید باشگاه، نه هر کلید بررسی */
+    if (!(await canAny(actor.id, ['clubs', 'roles']))) {
+      return NextResponse.json({ message: 'دسترسی مجاز نیست' }, { status: 403 });
+    }
   } else {
-    const { data } = await sb().from('profiles').select('owner_id').eq('id', id).maybeSingle();
+    const { data } = await sb().from('profiles').select('owner_id,kind').eq('id', id).maybeSingle();
     if (!data) return NextResponse.json({ message: 'پروفایل یافت نشد' }, { status: 404 });
     ownerId = (data as { owner_id?: string }).owner_id ?? null;
+    const kindKey = PROFILE_KIND_KEY[String((data as { kind?: string }).kind ?? '')];
+    if (!kindKey || !(await canAny(actor.id, [kindKey, 'roles']))) {
+      return NextResponse.json({ message: 'دسترسی مجاز نیست' }, { status: 403 });
+    }
   }
   if (!ownerId) return NextResponse.json({ message: 'صاحب این مورد پیدا نشد' }, { status: 404 });
 

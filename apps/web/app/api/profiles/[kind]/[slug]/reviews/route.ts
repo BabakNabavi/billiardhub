@@ -1,7 +1,8 @@
 export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { actorOf, UNAUTHENTICATED } from '@/lib/auth/ownership';
-import { sb, isAdmin, audit, clientIp } from '@/lib/finance/db';
+import { sb, audit, clientIp } from '@/lib/finance/db';
+import { can, PROFILE_KIND_KEY } from '@/lib/admin/permissions';
 import { publicDisplayName } from '@/lib/public-name';
 
 /* امتیاز و نظر پروفایل — فعلا مربی.
@@ -242,7 +243,7 @@ export async function DELETE(req: NextRequest, ctx: { params: Promise<{ kind: st
      هر نظری را برمی‌دارد؛ بدونش هرکس فقط نظر خودش را. */
   const reviewId = req.nextUrl.searchParams.get('reviewId');
   if (reviewId) {
-    if (!(await isAdmin(actor.id))) {
+    if (!(await can(actor.id, PROFILE_KIND_KEY[kind] ?? 'access'))) {
       return NextResponse.json({ message: 'دسترسی ندارید' }, { status: 403 });
     }
     const { error } = await sb().from('profile_reviews')

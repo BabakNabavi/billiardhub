@@ -1,6 +1,7 @@
 export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
-import { sb, actorFromRequest, isAdmin, audit } from '@/lib/finance/db';
+import { sb, actorFromRequest, audit } from '@/lib/finance/db';
+import { can } from '@/lib/admin/permissions';
 
 /* ═══════════════════════════════════════════════════════════════
    برندهای بیلیارد بازار.
@@ -34,7 +35,7 @@ export async function GET(req: NextRequest) {
   /* فهرست کامل — شامل برندهای تأییدنشده — فقط برای ادمین */
   if (all) {
     const actor = actorFromRequest(req);
-    if (!actor || !(await isAdmin(actor.id))) {
+    if (!actor || !(await can(actor.id, 'brands'))) {
       return NextResponse.json({ message: 'دسترسی مجاز نیست' }, { status: 403 });
     }
   }
@@ -66,7 +67,7 @@ export async function POST(req: NextRequest) {
   const name = String(b?.name ?? '').trim().slice(0, 80);
   if (name.length < 2) return NextResponse.json({ message: 'نام برند کوتاه است' }, { status: 400 });
 
-  const admin = await isAdmin(actor.id);
+  const admin = await can(actor.id, 'brands');
   const slug = brandSlug(name);
   /* برند کاملا غیرلاتین slug نمی‌سازد؛ کلید پایدار از روی نام */
   const key = slug || `b-${Buffer.from(name).toString('hex').slice(0, 24)}`;
@@ -96,7 +97,7 @@ export async function POST(req: NextRequest) {
 /* ── ویرایش/فعال‌سازی — فقط ادمین ── */
 export async function PATCH(req: NextRequest) {
   const actor = actorFromRequest(req);
-  if (!actor || !(await isAdmin(actor.id))) {
+  if (!actor || !(await can(actor.id, 'brands'))) {
     return NextResponse.json({ message: 'دسترسی مجاز نیست' }, { status: 403 });
   }
 

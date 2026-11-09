@@ -22,7 +22,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ club
 
   const actor = await actorOf(req);
   if (!actor) return NextResponse.json(UNAUTHENTICATED, { status: 401 });
-  if (!(await ownsClub(actor, clubId))) return NextResponse.json(FORBIDDEN, { status: 403 });
+  if (!(await ownsClub(actor, clubId, 'bookings'))) return NextResponse.json(FORBIDDEN, { status: 403 });
 
   /* ⚠️ پیش‌فیلترِ SQL لازم است، نه فقط غربالِ حافظه: `limit(200)` پیش
      از فیلتر اجرا می‌شود، پس تلاش‌های ناتمامِ پرداخت سهمیه‌ی ردیف را

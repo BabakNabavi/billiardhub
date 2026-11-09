@@ -1,6 +1,7 @@
 export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
-import { sb, actorFromRequest, isAdmin, ownsClub, audit, clientIp } from '@/lib/finance/db';
+import { sb, actorFromRequest, ownsClub, audit, clientIp } from '@/lib/finance/db';
+import { can } from '@/lib/admin/permissions';
 
 /* حساب بانکی باشگاه — ثبت/تغییر توسط مالک، تأیید توسط ادمین.
    هر تغییر، حساب را به وضعیت «در انتظار تأیید» می‌برد و تا تأیید، تسویه ممکن نیست. */
@@ -13,7 +14,7 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string
   const { id: clubId } = await ctx.params;
   const actor = actorFromRequest(req);
   if (!actor) return NextResponse.json({ message: 'احراز هویت الزامی است' }, { status: 401 });
-  const admin = await isAdmin(actor.id);
+  const admin = await can(actor.id, 'finance');
   if (!(await ownsClub(actor.id, clubId)) && !admin) {
     return NextResponse.json({ message: 'دسترسی مجاز نیست' }, { status: 403 });
   }
@@ -55,7 +56,7 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string
 export async function PATCH(req: NextRequest, ctx: { params: Promise<{ id: string }> }) {
   const { id: clubId } = await ctx.params;
   const actor = actorFromRequest(req);
-  if (!actor || !(await isAdmin(actor.id))) return NextResponse.json({ message: 'دسترسی مجاز نیست' }, { status: 403 });
+  if (!actor || !(await can(actor.id, 'finance'))) return NextResponse.json({ message: 'دسترسی مجاز نیست' }, { status: 403 });
 
   const b = await req.json().catch(() => ({}));
   const status = String(b?.status || '');

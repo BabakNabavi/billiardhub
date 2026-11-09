@@ -61,7 +61,7 @@ export async function GET(req: NextRequest) {
   if (mine && clubId && UUID.test(clubId)) {
     const actor = await actorOf(req);
     if (!actor) return NextResponse.json(UNAUTHENTICATED, { status: 401 });
-    if (!(await ownsClub(actor, clubId))) return NextResponse.json(FORBIDDEN, { status: 403 });
+    if (!(await ownsClub(actor, clubId, 'tournaments'))) return NextResponse.json(FORBIDDEN, { status: 403 });
 
     const rows = await listClubTournaments(clubId);
     const withSeats = await Promise.all(rows.map(async t => ({
@@ -86,7 +86,7 @@ export async function POST(req: NextRequest) {
   if (!UUID.test(clubId)) return NextResponse.json({ message: 'باشگاه معتبر نیست' }, { status: 400 });
 
   /* مالکیت از دیتابیس، نه از ادعای کلاینت */
-  if (!(await ownsClub(actor, clubId))) return NextResponse.json(FORBIDDEN, { status: 403 });
+  if (!(await ownsClub(actor, clubId, 'tournaments'))) return NextResponse.json(FORBIDDEN, { status: 403 });
 
   const title = String(b?.title ?? '').trim();
   if (!title) return NextResponse.json({ message: 'عنوان مسابقه الزامی است' }, { status: 400 });

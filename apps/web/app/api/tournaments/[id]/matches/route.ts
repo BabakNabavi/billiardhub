@@ -18,7 +18,7 @@ async function ownerGuard(req: NextRequest, tournamentId: string) {
   if (!actor) return { err: NextResponse.json(UNAUTHENTICATED, { status: 401 }) };
   const t = await getTournament(tournamentId);
   if (!t) return { err: NextResponse.json({ message: 'مسابقه یافت نشد' }, { status: 404 }) };
-  if (!(await ownsClub(actor, t.club_id))) return { err: NextResponse.json(FORBIDDEN, { status: 403 }) };
+  if (!(await ownsClub(actor, t.club_id, 'tournaments'))) return { err: NextResponse.json(FORBIDDEN, { status: 403 }) };
   return { actor, tournament: t };
 }
 

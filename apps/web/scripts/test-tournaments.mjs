@@ -4890,7 +4890,7 @@ console.log('\n― امتیازِ واقعیِ مربی ―');
     api.includes('publicOrOwn(p,'),
     'هم وجودش لو می‌رفت هم امتیاز رویش جمع می‌شد');
   t('ادمین می‌تواند نظرِ توهین‌آمیز را بردارد',
-    api.includes("searchParams.get('reviewId')") && api.includes('isAdmin(actor.id)'),
+    api.includes("searchParams.get('reviewId')") && (api.includes('isAdmin(actor.id)') || api.includes('can(actor.id, PROFILE_KIND_KEY[kind]')),
     'وگرنه پاک‌کردنِ یک نظر فقط با psql ممکن بود');
   t('نظرها در خطا «خالی» نشان داده نمی‌شوند',
     strip(read('components/reviews/Reviews.tsx')).includes("useState<'loading' | 'ready' | 'error'>"),

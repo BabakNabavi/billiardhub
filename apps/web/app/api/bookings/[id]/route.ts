@@ -45,7 +45,7 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string 
   if (!actor) return NextResponse.json({ message: 'ابتدا وارد شوید' }, { status: 401 });
 
   const isOwner = String(userId ?? '') === actor.id;
-  const isClub = await ownsClub(actor, String(row.clubId ?? ''));
+  const isClub = await ownsClub(actor, String(row.clubId ?? ''), 'bookings');
   if (!isOwner && !isClub) {
     return NextResponse.json({ message: 'دسترسی به این رزرو مجاز نیست' }, { status: 403 });
   }

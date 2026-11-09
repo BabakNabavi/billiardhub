@@ -1,6 +1,7 @@
 export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
-import { sb, rpc, actorFromRequest, isAdmin, ownsClub } from '@/lib/finance/db';
+import { sb, rpc, actorFromRequest, ownsClub } from '@/lib/finance/db';
+import { can } from '@/lib/admin/permissions';
 import { bankOfIban } from '@/lib/bank';
 import { tehranDayStart, tehranToday, resolveRange } from '@/lib/finance/range';
 import { isVisibleBooking } from '@/lib/bookings/visibility';
@@ -19,7 +20,7 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string 
   const { id: clubId } = await ctx.params;
   const actor = actorFromRequest(req);
   if (!actor) return NextResponse.json({ message: 'احراز هویت الزامی است' }, { status: 401 });
-  if (!(await ownsClub(actor.id, clubId)) && !(await isAdmin(actor.id))) {
+  if (!(await ownsClub(actor.id, clubId)) && !(await can(actor.id, 'finance'))) {
     return NextResponse.json({ message: 'دسترسی مجاز نیست' }, { status: 403 });
   }
 
