@@ -40,9 +40,9 @@ export async function generateMetadata(
      بماند کاربر هیچ چیز نمی‌بیند، حتی حالت خطا. پس علاوه بر
      `catch`، یک مهلت زمانی هم لازم است. */
 
-  /* ⚠️ رمزگشایی دوم این‌جا بدتر بود: *پیش* از ساخت promise اجرا
-     می‌شد، پس catch پایین خط اصلا نمی‌دیدش و generateMetadata
-     رد می‌شد. Next پارامتر را از قبل رمزگشایی کرده. */
+  /* رمزگشایی نامک این‌جا نیست، در خود `getArticle` و داخل try است: Next
+     فاصله و حروف فارسی را رمزشده می‌دهد، و رمزگشایی بیرون از try با «%»
+     تنها پیش از ساخت promise خطا می‌داد و generateMetadata رد می‌شد. */
   const a = await loadArticle(id)
   if (!a) return {}
 

@@ -199,7 +199,13 @@ export async function searchPublished(q: string, limit = 60, opts: { throwOnErro
 
 /** یک خبر با نامک یا شناسه. */
 export async function getArticle(idOrSlug: string): Promise<Article | null> {
-  const key = idOrSlug.trim()
+  /* ⚠️ Next 16 پارامتر مسیر را فقط برای حروف ساده رمزگشایی می‌کند: فاصله و
+     حروف فارسی رمزشده می‌رسند (سنجیده: «british%20open» با طول ۱۴). بدون
+     این، خبری با نامک فاصله‌دار یا فارسی ۴۰۴ می‌داد در حالی که فهرست و
+     نقشه‌ی سایت به آن لینک می‌دادند. نشانی خراب مثل «%» تنها همان رشته‌ی
+     خام می‌ماند و به «پیدا نشد» می‌رسد، نه خطای ۵۰۰. */
+  let key = idOrSlug.trim()
+  try { key = decodeURIComponent(key).trim() } catch { /* درصد نامعتبر: همان رشته‌ی خام */ }
   if (!key) return null
   const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(key)
   try {

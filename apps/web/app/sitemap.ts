@@ -42,7 +42,8 @@ const ROUTES: { path: string; priority: number; freq: MetadataRoute.Sitemap[numb
    لینک هم به آن‌ها برسد، نه فقط از راه نقشه. این صفحه‌ها همان پل
    میانی‌اند: از `/media` به دسته، و از دسته به صفحه‌ی هر ویدیو.
 
-   فهرست ثابت است و به دیتابیس دست نمی‌زند — همان قاعده‌ی بالای فایل. */
+   کلیدها ثابت‌اند؛ اینکه کدام در نقشه بیاید با `mediaCategoryEntries`
+   از روی ویدیوهای واقعی تعیین می‌شود. */
 const MEDIA_CATEGORY_KEYS = [
   'snooker-training', 'pool-training', 'highball-training', 'techniques',
   'trick-shots', 'referee-rules', 'highlights', 'interviews',
@@ -72,14 +73,44 @@ async function guarded(name: string, load: () => Promise<MetadataRoute.Sitemap>)
   }
 }
 
+/* ⚠️ بخش‌های تحریریه فقط وقتی در نقشه می‌آیند که دست‌کم یک خبر داشته باشند.
+   پیش‌تر هر ۱۳ بخش ثابت این‌جا بود در حالی که کل سایت یک خبر داشت، یعنی
+   دوازده صفحه‌ی «هنوز خبری در این بخش منتشر نشده» به گوگل معرفی می‌شد و
+   Search Console آن‌ها را «Crawled/Discovered – not indexed» گزارش کرد.
+   بخش هر خبر همان `normalizeSection` است که فیلتر صفحه‌ی بخش هم با آن کار می‌کند. */
 const newsEntries = (root: string) => guarded('news', async () => {
   const { listPublished } = await import('@/lib/news/server')
   const rows = await listPublished(200)
-  return rows.map(a => ({
-    url: `${root}/news/${encodeURIComponent(a.id)}`,
-    lastModified: new Date(a.updatedTs ?? a.ts ?? Date.now()),
+  const withNews = new Set(rows.map(a => a.section).filter(Boolean))
+  return [
+    ...NEWS_SECTIONS.filter(s => withNews.has(s.key)).map(s => ({
+      url: `${root}/news?s=${s.key}`,
+      lastModified: new Date(),
+      changeFrequency: 'daily' as const,
+      priority: 0.5,
+    })),
+    ...rows.map(a => ({
+      url: `${root}/news/${encodeURIComponent(a.id)}`,
+      lastModified: new Date(a.updatedTs ?? a.ts ?? Date.now()),
+      changeFrequency: 'weekly' as const,
+      priority: 0.6,
+    })),
+  ]
+})
+
+/* همان قاعده برای دسته‌های مدیا: فقط دسته‌ای که ویدیوی منتشرشده‌ی عمومی دارد.
+   شرط همان `listPublic` و `/video-sitemap.xml` است. */
+const mediaCategoryEntries = (root: string) => guarded('media', async () => {
+  const { sb } = await import('@/lib/finance/db')
+  const { data, error } = await sb().from('videos').select('category')
+    .eq('status', 'published').eq('visibility', 'public').limit(5000)
+  if (error) throw new Error(error.message)
+  const used = new Set((data ?? []).map(r => String((r as { category?: unknown }).category ?? '')))
+  return MEDIA_CATEGORY_KEYS.filter(k => used.has(k)).map(k => ({
+    url: `${root}/media?category=${k}`,
+    lastModified: new Date(),
     changeFrequency: 'weekly' as const,
-    priority: 0.6,
+    priority: 0.5,
   }))
 })
 
@@ -176,17 +207,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const root = base()
   const now = new Date()
   /* هم‌زمان: هر کدام سقفِ دو ثانیه‌ی خودش را دارد */
-  const [news, clubs, tournaments, ads, profiles] = await Promise.all([
+  const [news, clubs, tournaments, ads, profiles, mediaCats] = await Promise.all([
     newsEntries(root), clubEntries(root), tournamentEntries(root), marketAdEntries(root), profileEntries(root),
+    mediaCategoryEntries(root),
   ])
   return [
-    /* بخش‌های تحریریه — ثابت، بدون دیتابیس */
-    ...NEWS_SECTIONS.map(s => ({
-      url: `${root}/news?s=${s.key}`,
-      lastModified: now,
-      changeFrequency: 'daily' as const,
-      priority: 0.5,
-    })),
+    /* بخش‌های تحریریه و خود خبرها — فقط بخش دارای خبر */
     ...news,
     ...ROUTES.map(r => ({
       url: `${root}${r.path}`,
@@ -198,11 +224,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...profiles,
     ...tournaments,
     ...ads,
-    ...MEDIA_CATEGORY_KEYS.map(k => ({
-      url: `${root}/media?category=${k}`,
-      lastModified: now,
-      changeFrequency: 'weekly' as const,
-      priority: 0.5,
-    })),
+    ...mediaCats,
   ]
 }

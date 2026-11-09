@@ -26,10 +26,8 @@ export const revalidate = 60
 
 export default async function ArticlePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
-  /* ⚠️ Next خودش پارامتر مسیر را رمزگشایی کرده. رمزگشایی دوم روی
-     هر نشانی حاوی «%» تنها (مثلا /news/50%-off یا کاوش یک
-     خزنده) URIError پرتاب می‌کند — و چون پیش از notFound اتفاق
-     می‌افتد، بازدیدکننده ۵۰۰ می‌گیرد نه صفحه‌ی «پیدا نشد». */
+  /* رمزگشایی نامک در خود `getArticle` است، داخل try: Next فاصله و حروف
+     فارسی را رمزشده می‌دهد، و نشانی‌ای با «%» تنها نباید ۵۰۰ بدهد. */
   const a = await getArticle(id)
   if (!a) notFound()
 
