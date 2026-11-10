@@ -66,7 +66,9 @@ function storeItems(stores: RealStore[]): HeroSpotItem[] {
     [s[k], s[j]] = [s[j]!, s[k]!]
   }
   return s.slice(0, STORES).map(x => ({
-    id: x.id, name: x.name, img: x.img ? thumbUrl(x.img, 128) : '',
+    /* بی‌لوگو ⟵ عکسِ پهن (بنر/استوری) به‌شکلِ کاور، با عرضِ کافی برای همان کادر */
+    id: x.id, name: x.name, img: x.img ? thumbUrl(x.img, x.isLogo === false ? 600 : 128) : '',
+    cover: x.isLogo === false,
     /* شهر اول تا نشانِ مکان فقط کنارِ شهر بنشیند، نه کنارِ تخصص */
     meta: [x.city, x.specialty].filter(Boolean).join('، '),
     pin: !!x.city,

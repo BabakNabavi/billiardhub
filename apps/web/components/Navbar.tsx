@@ -18,6 +18,7 @@ import { subscribeDM } from '../lib/realtime';
 import Stories from './Stories';
 import Avatar from './ui/Avatar';
 import { SearchSuggest } from './search/SearchSuggest';
+import { isClosedSection, CLOSED_STYLE, closedLinkProps, blockClick } from '../lib/nav-gates';
 
 /* ⚠️ طلاییِ نشانِ متنی از lib/brand می‌آید و با فوتر یکی است.
    دلیلِ عددش همان‌جا نوشته شده — مخصوصا اینکه همین کلمه در نوار
@@ -559,8 +560,10 @@ export default function Navbar() {
                             <span style={{ fontSize: '12px', color: 'rgba(28,28,26,0.62)', fontWeight: 700 }}>{section.title}</span>
                           </div>
                           {section.items.map((item, ii) => (
-                            <Link prefetch={false} key={ii} href={item.href} onClick={() => setExploreOpen(false)}
-                              style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 10px', borderRadius: '12px', textDecoration: 'none', marginBottom: '2px', border: '1px solid transparent', transition: 'background 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease' }}
+                            <Link prefetch={false} key={ii} href={item.href}
+                              onClick={isClosedSection(item.href) ? blockClick : () => setExploreOpen(false)}
+                              {...(isClosedSection(item.href) ? closedLinkProps : {})}
+                              style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 10px', borderRadius: '12px', textDecoration: 'none', marginBottom: '2px', border: '1px solid transparent', transition: 'background 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease', ...(isClosedSection(item.href) ? CLOSED_STYLE : {}) }}
                               onMouseEnter={e => {
                                 const el = e.currentTarget as HTMLElement;
                                 el.style.background = `rgb(${colCh} / .05)`;
@@ -895,7 +898,9 @@ export default function Navbar() {
           <div style={{ padding: '0 16px 8px' }}>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '8px' }}>
               {mobileLinks.map((item, i) => (
-                <Link prefetch={false} key={i} href={item.href} onClick={() => setMobileOpen(false)}
+                <Link prefetch={false} key={i} href={item.href}
+                  onClick={isClosedSection(item.href) ? blockClick : () => setMobileOpen(false)}
+                  {...(isClosedSection(item.href) ? closedLinkProps : {})}
                   style={{
                     display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '7px',
                     padding: '12px 5px', borderRadius: '14px',
@@ -904,6 +909,7 @@ export default function Navbar() {
                     boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.9), 0 2px 10px rgba(28,28,26,0.04)',
                     textDecoration: 'none', position: 'relative', overflow: 'hidden',
                     transition: 'background 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease',
+                    ...(isClosedSection(item.href) ? CLOSED_STYLE : {}),
                   }}
                   onMouseEnter={e => {
                     const el = e.currentTarget as HTMLElement;

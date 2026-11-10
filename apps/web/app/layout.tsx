@@ -84,7 +84,15 @@ export const metadata: Metadata = {
   },
   appleWebApp: {
     capable: true,
-    statusBarStyle: 'black-translucent',
+    /* ⚠️ «هاله‌ی سفید» بالای همه‌ی صفحه‌ها در اپِ نصب‌شده (آبانِ ۱۴۰۵).
+       از iOS 26.1 سیستم روی نوارِ وضعیتِ black-translucent یک گرادیان (scrim)
+       می‌کشد که از داخلِ صفحه خاموش‌شدنی نیست (autobrr/qui#2520؛ WebKit
+       301994 و 317153). با 'default' نوار پُر است، رنگش از theme-color
+       (همان کرمِ سایت) می‌آید و صفحه *زیرِ* آن شروع می‌شود؛ پس
+       env(safe-area-inset-top) صفر می‌شود و پدینگِ نوبار خودبه‌خود جمع می‌شود.
+       ⚠️ iOS این را فقط هنگامِ نصب می‌خواند: میان‌برِ قبلی باید حذف و دوباره
+       اضافه شود تا اثر کند. */
+    statusBarStyle: 'default',
     title: 'بیلیارد هاب',
   },
 };

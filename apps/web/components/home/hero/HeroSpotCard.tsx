@@ -42,9 +42,11 @@ export function HeroSpotCard({ items, pos, label, hrefBase, fit, everyMs, classN
     <Link ref={ref} prefetch={false} href={`${hrefBase}/${c.id}`} className={`${CARD} ${pos} ${className}`}>
       {/* عکس و نام محو و عوض می‌شوند؛ برچسب و نقطه‌ها ثابت می‌مانند */}
       <div key={c.id} className={`hh-swap${fade}`}>
-        {fit === 'cover' && c.img ? (
+        {(fit === 'cover' || c.cover) && c.img ? (
+          /* عکسِ پهنِ فروشگاهِ بی‌لوگو هم همین‌جا: مثلِ باشگاه کادر را پر می‌کند.
+             lazy فقط برای کارتِ فروشگاه که در تبلت/دسکتاپ پنهان است */
           /* eslint-disable-next-line @next/next/no-img-element -- بهینه‌ساز تصویرِ Next خاموش است؛ thumbUrl اندازه را از Storage می‌گیرد */
-          <img src={c.img} alt="" width={300} height={96} decoding="async"
+          <img src={c.img} alt="" width={300} height={96} decoding="async" loading={fit === 'logo' ? 'lazy' : undefined}
             className="h-24 w-full rounded-card bg-white/10 object-cover max-[900px]:h-20" />
         ) : (
           <div className="flex h-24 w-full items-center justify-center rounded-card bg-white/10 max-[900px]:h-20">

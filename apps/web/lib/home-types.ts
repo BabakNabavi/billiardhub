@@ -65,7 +65,10 @@ export interface RealStore {
   specialty: string
   rating: number
   reviews: number
+  /** بهترین عکسِ موجود: لوگو، وگرنه عکسِ پهن، وگرنه عکسِ صاحب؛ خالی ⟵ پوسترِ پیش‌فرض */
   img: string
+  /** img لوگو یا عکسِ مربعی است (وسط‌چین، contain)؛ false ⟵ عکسِ پهن (cover) */
+  isLogo?: boolean
   badge: string | null
 }
 

@@ -11,6 +11,7 @@
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { ArrowLeft, ChevronDown } from 'lucide-react'
+import { isClosedSection, CLOSED_STYLE, closedLinkProps, blockClick } from '../../lib/nav-gates'
 
 const GOLD   = '#C7A66A'
 const GOLD_D = '#8F6531'
@@ -360,7 +361,8 @@ export default function AboutPage() {
               const x = 50 + Math.cos(a) * 40, y = 50 + Math.sin(a) * 40
               return (
                 <Link key={n.en} href={n.href} className="ab-node"
-                  style={{ left: `${x}%`, top: `${y}%`, ['--nc' as never]: n.clr }}>
+                  {...(isClosedSection(n.href) ? { ...closedLinkProps, onClick: blockClick } : {})}
+                  style={{ left: `${x}%`, top: `${y}%`, ['--nc' as never]: n.clr, ...(isClosedSection(n.href) ? CLOSED_STYLE : {}) }}>
                   <span className="dot"><i style={{ background: n.clr }} /></span>
                   <span className="lb">{n.label}</span>
                   <span className="en">{n.en}</span>

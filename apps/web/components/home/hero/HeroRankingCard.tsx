@@ -12,7 +12,8 @@ import { CARD, LABEL } from './hero-classes'
    رنکینگِ چرخان — هر ۶٫۵ ثانیه جدولِ بعدی (خواستِ مالک):
    اسنوکر آقایان ⟵ اسنوکر بانوان ⟵ … (ترتیب در lib/home-hero).
 
-   دسکتاپ چهار نفر، موبایل سه نفر (ردیفِ چهارم پنهان، تا کارت کوتاه بماند).
+   دسکتاپ و موبایل هر دو چهار نفر (خواستِ مالک، ۱۹ آبانِ ۱۴۰۵؛ پیش‌تر موبایل
+   سه نفر بود تا کارت کوتاه بماند).
    ارتفاع ثابت است: جدولِ کم‌نفر با جای خالی پر می‌شود تا کارت با هر
    چرخش بالا و پایین نپرد.
    ───────────────────────────────────────────────────────────── */
@@ -41,7 +42,7 @@ export function HeroRankingCard({ boards, pos }: { boards: HeroRankingBoard[]; p
         {Array.from({ length: rows }, (_, n) => {
           const p = b.players[n]
           return (
-            <li key={n} aria-hidden={p ? undefined : true} className={`flex items-center justify-between gap-2 border-b border-white/10 py-1 text-sub last:border-0 ${n >= 3 ? 'max-[900px]:hidden' : ''} max-[900px]:[&:nth-child(3)]:border-0`}>
+            <li key={n} aria-hidden={p ? undefined : true} className="flex items-center justify-between gap-2 border-b border-white/10 py-1 text-sub last:border-0">
               {p ? (
                 <>
                   <span className="min-w-0 truncate"><span aria-hidden className="text-white/50">{faNum(p.rank)}.</span> {p.name}</span>

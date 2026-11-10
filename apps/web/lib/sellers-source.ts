@@ -44,6 +44,10 @@ export interface PublicStore {
   lastName: string
   avatar: string
   sellerProfile: { storeName: string; city: string; logo: string; specialty: string }
+  /** عکسِ پهنِ فروشگاه وقتی لوگو ندارد — اولین بنر، گالری، عکسِ «درباره» یا استوری.
+      ⚠️ آبانِ ۱۴۰۵ هیچ فروشگاهِ زنده‌ای لوگو نداشت و کارتِ هیرو فقط آیکون نشان می‌داد،
+      در حالی که هر کدام بنر یا عکسِ استوری داشتند. */
+  cover: string
   /** استوری تک‌عکسی پنل فروشگاه (جدا از فهرست چنداستوری Storage) */
   storyImage: string
   storyText: string
@@ -95,6 +99,12 @@ export async function listPublicStores(limit = 24): Promise<PublicStore[]> {
         logo: s(d.logo),
         specialty: brands[0] || 'تجهیزات بیلیارد',
       },
+      cover: [d.banners, d.gallery, d.aboutImages]
+        /* بنر و عکسِ «درباره» رشته‌اند، گالری شیءِ { url } (lib/seller-store) */
+        .map(v => (Array.isArray(v)
+          ? s((v as unknown[]).map(x => (typeof x === 'string' ? x : (x && typeof x === 'object' ? (x as { url?: unknown }).url : ''))).find(x => s(x)))
+          : ''))
+        .find(Boolean) || s(d.storyImage),
       storyImage: s(d.storyImage),
       storyText: s(d.storyText),
       verified: r.verified === true,

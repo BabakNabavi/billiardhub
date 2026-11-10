@@ -9,6 +9,7 @@
    ───────────────────────────────────────────────────────────── */
 
 import { applyImagePatch } from '@/lib/profiles/edit-image'
+import { isClosedSection } from '@/lib/nav-gates'
 import { useChannelPublish, type PublishVideo } from '@/components/media/useChannelPublish'
 import { useVideoEdit } from '@/components/media/useVideoEdit'
 import { detailTitle, type VideoDetail } from '@/lib/media/video-details'
@@ -277,7 +278,9 @@ export default function PlayerProfilePage() {
         icon={<Trophy size={34} />}
         title="بازیکن پیدا نشد"
         message="ممکن است این پروفایل حذف شده یا نشانی تغییر کرده باشد"
-        backHref="/players" backLabel="بازگشت به بازیکنان"
+        /* فهرستِ بازیکنان موقتاً بسته است (lib/nav-gates) ⟵ بازگشت به رنکینگ */
+        backHref={isClosedSection('/players') ? '/ranking' : '/players'}
+        backLabel={isClosedSection('/players') ? 'بازگشت به رنکینگ' : 'بازگشت به بازیکنان'}
         {...retryProps}
       />
     )
@@ -385,7 +388,7 @@ export default function PlayerProfilePage() {
         <nav className="ath-wrap ath-crumb" aria-label="مسیر صفحه">
           <Link href="/">خانه</Link>
           <ChevronLeft size={12} aria-hidden />
-          <Link href="/players">بازیکنان</Link>
+          {isClosedSection('/players') ? <span>بازیکنان</span> : <Link href="/players">بازیکنان</Link>}
         </nav>
 
         <div className="ath-wrap ath-hero-in">

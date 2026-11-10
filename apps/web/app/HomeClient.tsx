@@ -286,6 +286,8 @@ interface ApiProduct {
 interface ApiStore {
   id: string; firstName?: string; lastName?: string; avatar?: string
   sellerProfile?: { storeName?: string; city?: string; logo?: string; specialty?: string } | null
+  /** عکسِ پهن وقتی لوگو نیست (lib/sellers-source) */
+  cover?: string
   verified?: boolean
 }
 
@@ -901,8 +903,9 @@ export default function HomeClient({ initialPlacements, initialFeatured, service
           city: sp.city ?? '',
           specialty: sp.specialty || 'تجهیزات بیلیارد',
           rating: 0, reviews: 0,
-          /* خالی یعنی «لوگو ندارد» ⇒ کارت پوستر پیش‌فرض می‌سازد */
-          img: thumbUrl(sp.logo || s.avatar, LOGO_W),
+          /* لوگو ⟵ عکسِ پهن ⟵ عکسِ صاحب؛ خالی ⇒ پوسترِ پیش‌فرض (همان ترتیبِ lib/home-featured) */
+          img: sp.logo ? thumbUrl(sp.logo, LOGO_W) : s.cover ? thumbUrl(s.cover, 600) : thumbUrl(s.avatar, LOGO_W),
+          isLogo: !!sp.logo || !s.cover,
           badge: null as string | null,
         };
       }));
@@ -959,7 +962,11 @@ export default function HomeClient({ initialPlacements, initialFeatured, service
 
   const HOME_SELLERS = useMemo(() => {
     const snaps = uniqByRef((featStores ?? []).map(c => c.entity).filter((e): e is EntitySnapshot => !!e));
-    if (!snaps.length) return demoOk(storeSlot) ? realStores : [];
+    /* عکسِ پهنِ فروشگاهِ بی‌لوگو (بنر/استوری) از سرور خام می‌آید؛ بی‌thumbUrl کارت‌های
+       پایین (تا ۱۲ تا، در نوارِ چرخان دوبرابر) بنرِ کامل دانلود می‌کردند */
+    if (!snaps.length) return demoOk(storeSlot)
+      ? realStores.map(s => ({ ...s, img: s.img ? thumbUrl(s.img, s.isLogo === false ? 600 : LOGO_W) : '' }))
+      : [];
     /* امتیاز ۵ برای فروشگاه واقعی جعل اطلاعات بود — تا نداشتن سیستم
        نظر، امتیاز صفر می‌ماند و کارت اصلا نشانش نمی‌دهد */
     return snaps.map(e => ({

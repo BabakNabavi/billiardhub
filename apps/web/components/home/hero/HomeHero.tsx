@@ -5,6 +5,7 @@ import {
 import type { HeroData } from '@/lib/home-hero'
 import type { RealClub, RealProduct, RealStore } from '@/lib/home-types'
 import { HeroCards } from './HeroCards'
+import { isClosedSection } from '@/lib/nav-gates'
 import './home-hero.css'
 
 /* ─────────────────────────────────────────────────────────────
@@ -101,11 +102,20 @@ export function HomeHero({ data, newestClubs, newestProducts, stores }: {
         <ul className="hh-links hh-in flex gap-2 overflow-x-auto py-1 hh-d4 min-[901px]:justify-center">
           {QUICK.map(({ Icon, label, href, clr }) => (
             <li key={href} className="shrink-0">
-              <Link prefetch={false} href={href}
-                className={`flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sub font-bold text-white/85 transition-colors duration-base hover:border-white/25 hover:bg-white/10 ${FOCUS}`}>
-                <Icon size={16} aria-hidden className={clr} />
-                {label}
-              </Link>
+              {isClosedSection(href) ? (
+                /* بخشِ موقتاً بسته (lib/nav-gates): دکمه می‌ماند ولی لینک نیست */
+                <span role="link" aria-disabled="true"
+                  className="flex cursor-default items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sub font-bold text-white/85 opacity-40">
+                  <Icon size={16} aria-hidden className={clr} />
+                  {label}
+                </span>
+              ) : (
+                <Link prefetch={false} href={href}
+                  className={`flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sub font-bold text-white/85 transition-colors duration-base hover:border-white/25 hover:bg-white/10 ${FOCUS}`}>
+                  <Icon size={16} aria-hidden className={clr} />
+                  {label}
+                </Link>
+              )}
             </li>
           ))}
         </ul>

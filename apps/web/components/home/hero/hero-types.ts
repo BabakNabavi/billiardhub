@@ -10,6 +10,8 @@ export interface HeroSpotItem {
   pin: boolean
   /** نشانیِ کوچک‌شده (thumbUrl)؛ خالی ⟵ آیکونِ خنثی */
   img: string
+  /** در کارتِ لوگو (فروشگاه)، این عکس پهن است نه لوگو ⟵ مثلِ کارتِ باشگاه پر کند */
+  cover?: boolean
 }
 
 export interface HeroAdItem {

@@ -160,8 +160,9 @@ async function loadHomeFeaturedUncached(): Promise<HomeFeatured> {
       city: p.city,
       specialty: p.specialty,
       rating: 0, reviews: 0,
-      /* خالی یعنی «لوگو ندارد» ⇒ کارت پوستر پیش‌فرض می‌سازد */
-      img: p.logo || s.avatar || '',
+      /* لوگو ⟵ عکسِ پهن (بنر/گالری/استوری) ⟵ عکسِ صاحب؛ خالی ⇒ پوسترِ پیش‌فرض */
+      img: p.logo || s.cover || s.avatar || '',
+      isLogo: !!p.logo || !s.cover,
       badge: null,
       verified: s.verified === true,
     }
