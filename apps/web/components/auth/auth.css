@@ -74,7 +74,8 @@
   transition: transform .3s cubic-bezier(.22,1,.36,1); outline: none; }
 .au-brand a:hover { transform: translateY(-2px) rotate(-4deg); }
 .au-brand a:focus-visible { box-shadow: 0 0 0 3px rgb(var(--c-gold) / .55); }
-.au-brand img { width: 38px; height: 38px; object-fit: contain; }
+/* لوگوی v13 کاشیِ سبزِ تمام‌قاب است (همان آیکونِ اپ) — کلِ نشانِ ۵۶ پیکسلی را پر می‌کند */
+.au-brand img { width: 56px; height: 56px; border-radius: 16px; object-fit: cover; }
 
 .au-tabs { position: relative; display: grid; grid-template-columns: 1fr 1fr; padding: 4px; margin: 0 0 24px;
   border-radius: 14px; background: rgba(28,27,23,.045); box-shadow: inset 0 0 0 1px rgba(28,27,23,.04); }

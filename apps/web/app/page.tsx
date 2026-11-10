@@ -66,7 +66,7 @@ const SITE_JSONLD = [
   {
     '@context': 'https://schema.org', '@type': 'Organization',
     name: 'بیلیارد هاب', alternateName: 'Billiard Hub', url: SITE_URL,
-    logo: `${SITE_URL}/images/Logo/bh-icon-512-v12.png`,
+    logo: `${SITE_URL}/images/Logo/bh-icon-512-v13.png`,
     /* sameAs (صفحه‌های رسمی در شبکه‌های اجتماعی) وقتی حسابِ رسمی ثبت شد اضافه شود */
   },
   {

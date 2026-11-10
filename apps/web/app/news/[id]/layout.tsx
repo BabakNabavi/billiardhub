@@ -76,7 +76,7 @@ export async function generateMetadata(
 async function articleJsonLd(id: string) {
   const a = id ? await loadArticle(id) : null
   if (!a) return null
-  const logo = { '@type': 'ImageObject', url: `${SITE_URL}/images/Logo/bh-icon-512-v12.png` }
+  const logo = { '@type': 'ImageObject', url: `${SITE_URL}/images/Logo/bh-icon-512-v13.png` }
   return {
     '@context': 'https://schema.org', '@type': 'NewsArticle',
     headline: a.title.slice(0, 110),

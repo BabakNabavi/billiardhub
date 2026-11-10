@@ -483,22 +483,16 @@ export default function Navbar() {
 
           {/* Logo */}
           <Link prefetch={false} href="/" onClick={e => { if (pathname === '/') { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); } }} style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none', flexShrink: 0 }}>
-            {/* ⚠️ نشان با زمینه عوض می‌شود:
-                  هیروی تیره → کاشیِ پُرِ سبز، با قاب و بِوِل
-                  نوارِ روشن → همان نشانِ فوتر، بدونِ قاب
-                بِوِل و سایه برای کاشیِ پُر ساخته شده‌اند؛ روی نشانِ
-                شفاف یک جعبه‌ی برجسته‌ی خالی می‌سازند. */}
+            {/* لوگوی v13 (آبانِ ۱۴۰۵): نشانِ تازه افقی است (۲٫۴:۱)، پس در این قابِ مربعی
+                همیشه کاشیِ سبز با نشانِ سفید می‌نشیند — همان آیکونِ اپ — روی هر دو زمینه.
+                بِوِل و سایه مالِ همین کاشیِ پُرند. */}
             <div style={{ position: 'relative', width: '40px', height: '40px', borderRadius: '12px', overflow: 'hidden', flexShrink: 0,
-              boxShadow: isLight ? 'none' : '0 1px 2px rgba(28,27,23,0.12), 0 4px 9px rgb(var(--c-ink) / 0.05)' }}>
+              boxShadow: '0 1px 2px rgba(28,27,23,0.12), 0 4px 9px rgb(var(--c-ink) / 0.05)' }}>
                 <img loading="eager" decoding="async"
-                  src={isLight ? '/images/Logo/bh-mark-256-v12.webp' : '/images/Logo/bh-nav-256-v12b.webp'}
-                  /* حروف در هر دو حالت ~۳۱ پیکسل: مارک ۸۸٪ با ۲ پیکسل حاشیه، کاشی ۷۸٪ —
-                     پیش‌تر کاشی ۵۸٪ بود و با اسکرول لوگو کوچک‌تر می‌شد */
-                  alt="" style={{ width: '100%', height: '100%', objectFit: isLight ? 'contain' : 'cover', padding: isLight ? 2 : 0, boxSizing: 'border-box' }} />
-                {!isLight && (
-                  <span aria-hidden style={{ position: 'absolute', inset: 0, borderRadius: '12px', pointerEvents: 'none',
-                    boxShadow: 'inset 0 1px 1px rgba(255,255,255,0.26), inset 0 -1px 2px rgba(0,0,0,0.18)' }} />
-                )}
+                  src="/images/Logo/bh-tile-256-v13.webp"
+                  alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', boxSizing: 'border-box' }} />
+                <span aria-hidden style={{ position: 'absolute', inset: 0, borderRadius: '12px', pointerEvents: 'none',
+                  boxShadow: 'inset 0 1px 1px rgba(255,255,255,0.26), inset 0 -1px 2px rgba(0,0,0,0.18)' }} />
               </div>
             <span className="nav-brand" style={{ fontWeight: 700, fontSize: '20px', letterSpacing: '-0.03em', whiteSpace: 'nowrap', transition: 'color 0.4s' }}>
               <span style={{ color: isLight ? '#000000' : '#ffffff' }}>بیلیارد</span>{' '}

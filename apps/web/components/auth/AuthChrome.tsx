@@ -39,7 +39,7 @@ export function AuthBrand() {
     <div className="au-brand">
       <Link href="/" aria-label="بیلیارد هاب، صفحه اصلی">
         {/* eslint-disable-next-line @next/next/no-img-element -- نشانِ ۲۵۶پیکسلیِ ثابت؛ next/image فقط لایه اضافه می‌کند */}
-        <img src="/images/Logo/bh-mark-256-v12.webp" alt="" width={38} height={38} decoding="async" />
+        <img src="/images/Logo/bh-tile-256-v13.webp" alt="" width={56} height={56} decoding="async" />
       </Link>
     </div>
   )
