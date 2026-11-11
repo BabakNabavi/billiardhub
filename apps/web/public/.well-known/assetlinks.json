@@ -8,5 +8,12 @@
         "A4:1D:A9:8A:79:78:B7:55:64:2E:84:3B:26:E5:03:D6:E9:09:BF:18:93:C1:5A:2F:B1:99:44:6D:F2:8D:01:3A"
       ]
     }
+  },
+  {
+    "relation": ["check_validation"],
+    "target": {
+      "namespace": "cafebazaar_twa",
+      "package_name": "net.billiardhub.app"
+    }
   }
 ]

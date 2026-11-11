@@ -40,6 +40,10 @@
 curl -s https://billiardhub.net/.well-known/assetlinks.json
 ```
 
+⚠️ **کافه‌بازار** یک عبارتِ دوم هم در همین فایل می‌خواهد (namespace `cafebazaar_twa`، relation
+`check_validation`، بی اثرِ انگشت) — بدونِ آن آپلودِ APK با «فضای نام اجباری cafebazaar_twa …
+تعریف نشده است» رد می‌شود. منبع: developers.cafebazaar.ir → Publishing Trusted Web Application on Bazaar.
+
 ## ساخت (Windows)
 
 ابزارها بیرون از مخزن‌اند، در `%USERPROFILE%\.bubblewrap-sdk`:
