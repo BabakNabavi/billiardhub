@@ -1,0 +1,36 @@
+/* ─────────────────────────────────────────────────────────────
+   حرکتِ مشترکِ صفحه‌های درباره‌ی ما و تماس با ما — CSS خالص.
+
+   .ab-in      ورودِ پلکانیِ فرزندانِ سربرگ
+   .ab-reveal  ظاهرشدن با اسکرول (animation-timeline: view)؛ جایی که
+               پشتیبانی نشود محتوا از اول دیده می‌شود، نه پنهان
+   .ab-card    بلندشدنِ نرمِ کارت در هاور
+   ⚠️ ab-reveal و ab-card را روی یک عنصر نگذار: حالتِ پایانیِ انیمیشنِ
+   ظاهرشدن (transform: none) هاورِ کارت را می‌پوشاند. ab-reveal روی والد.
+   با prefers-reduced-motion همه خاموش‌اند.
+   ───────────────────────────────────────────────────────────── */
+
+@keyframes abRise { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
+
+@media (prefers-reduced-motion: no-preference) {
+  .ab-in > * { animation: abRise .8s cubic-bezier(.22,.61,.36,1) both; }
+  .ab-in > :nth-child(2) { animation-delay: .08s; }
+  .ab-in > :nth-child(3) { animation-delay: .16s; }
+  .ab-in > :nth-child(4) { animation-delay: .24s; }
+}
+
+/* ظاهرشدن با اسکرول — بدونِ پشتیبانی، محتوا از ابتدا دیده می‌شود */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .ab-reveal {
+      animation: abRise linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 45%;
+    }
+  }
+}
+
+.ab-card { transition: transform .34s cubic-bezier(.22,.61,.36,1), box-shadow .34s cubic-bezier(.22,.61,.36,1); }
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .ab-card:hover { transform: translateY(-4px); }
+}

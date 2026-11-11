@@ -1,0 +1,64 @@
+/* ─────────────────────────────────────────────────────────────
+   حرکتِ صفحه‌ی درباره‌ی ما — همه CSS، بی کتابخانه و بی جاوااسکریپت.
+
+   ۲) «بریک» روی میز: مسیرِ ضربه، حرکتِ سفید، پخش‌شدنِ قرمزها، یک گل
+   (ورودِ پلکانی، ظاهرشدن با اسکرول و هاورِ کارت در styles/reveal.css است)
+   با prefers-reduced-motion همه خاموش است و میز چیده‌شده می‌ماند.
+   ───────────────────────────────────────────────────────────── */
+
+@media (prefers-reduced-motion: no-preference) {
+  .ab-table-wrap { animation: abRise 1s .1s cubic-bezier(.22,.61,.36,1) both; }
+
+  /* مسیرِ ضربه: کشیده می‌شود، تا لحظه‌ی برخورد می‌ماند، بعد محو */
+  .ab-aim { stroke-dashoffset: 210; animation: abAim 1.3s .35s ease-out both; }
+  @keyframes abAim {
+    0%   { opacity: 0; stroke-dashoffset: 210; }
+    35%  { opacity: 1; stroke-dashoffset: 0; }
+    62%  { opacity: 1; }
+    100% { opacity: 0; stroke-dashoffset: 0; }
+  }
+
+  /* سفید: تا راسِ پک، بعد کمانه به میانه‌ی میز */
+  .ab-cue { animation: abCue 1.9s .75s both; }
+  @keyframes abCue {
+    0%   { transform: translate(0, 0); animation-timing-function: cubic-bezier(.5,0,.9,.6); }
+    30%  { transform: translate(-202px, 6px); animation-timing-function: cubic-bezier(.1,.7,.3,1); }
+    100% { transform: translate(-68px, 42px); }
+  }
+
+  /* قرمزها درست در لحظه‌ی برخورد (۰٫۷۵ + ۰٫۵۷ ثانیه) راه می‌افتند */
+  .ab-red { animation: abScatter 1.5s calc(1.32s + var(--d, 0ms)) cubic-bezier(.12,.75,.25,1) both; }
+  @keyframes abScatter { from { transform: translate(0, 0); } to { transform: translate(var(--dx), var(--dy)); } }
+
+  .ab-pot { animation-name: abPot; animation-duration: 1.2s; }
+  @keyframes abPot {
+    0%   { transform: translate(0, 0); opacity: 1; }
+    85%  { transform: translate(calc(var(--dx) * .96), calc(var(--dy) * .96)); opacity: 1; }
+    100% { transform: translate(var(--dx), var(--dy)); opacity: 0; }
+  }
+}
+
+/* توپِ کارت‌های دنیا: چرخشِ کوچک در هاور */
+.ab-card .ab-ball { transition: transform .5s cubic-bezier(.22,.61,.36,1); }
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .ab-card:hover .ab-ball { transform: translateX(-6px) rotate(-24deg); }
+}
+
+/* توپِ بیلیارد به‌عنوانِ نشانِ هر دنیا — درخششِ بالا-راست + سایه‌ی زیر */
+.ab-ball {
+  background:
+    radial-gradient(circle at 34% 28%, rgba(255,255,255,.7), rgba(255,255,255,0) 38%),
+    radial-gradient(circle at 50% 120%, rgba(0,0,0,.28), rgba(0,0,0,0) 60%),
+    var(--ball);
+  box-shadow: 0 6px 14px -6px rgba(23,26,25,.45);
+}
+
+/* کارتِ پایانی: نورِ سبزِ پارچه از گوشه روی زغالی */
+.ab-felt {
+  background:
+    radial-gradient(120% 140% at 85% 0%, rgba(35,132,90,.35), rgba(35,132,90,0) 55%),
+    rgb(var(--c-ink));
+}
+
+/* سایه‌ی میز روی خودِ قاب — فیلترِ SVG ناحیه‌ی مستطیلیِ روشنی دورِ میز می‌ساخت */
+.ab-table { filter: drop-shadow(0 12px 18px rgba(23,26,25,.22)); }

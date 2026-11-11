@@ -1,526 +1,133 @@
-'use client'
+import Link from 'next/link'
+import type { ReactNode } from 'react'
+import { Mail, Phone, MapPin, ChevronDown, Megaphone, ArrowLeft } from 'lucide-react'
+import { ContactForm } from '@/components/contact/ContactForm'
+import { CopyEmailButton } from '@/components/contact/CopyEmailButton'
+import '@/styles/reveal.css'
 
 /* ─────────────────────────────────────────────────────────────
-   تماس با ما — تجربه‌ی ارتباط دیجیتال Billiard Hub (بازطراحی ۱۴۰۵)
-   هیروی سینمایی با میز مینیمال SVG → کامپوزیشن واحد:
-   کانال‌های تعاملی (کپی ایمیل، میان‌بر موضوع) + فرم فلوتینگ‌لیبل
-   با ولیدیشن، لودینگ و انیمیشن موفقیت. فرم به `/api/contact` می‌رود
-   و تیکت واقعی می‌سازد؛ در شکست، خطا نشان می‌دهد نه موفقیت دروغین.
+   تماس با ما — بازطراحیِ آبانِ ۱۴۰۵.
+
+   به‌جای هیروی تیره و برچسب‌های انگلیسیِ نسخه‌ی قبل: سربرگِ روشن و
+   جمع‌وجور، سه راهِ مستقیمِ ارتباط در اولین نما، بعد فرم کنارِ پاسخِ
+   پرسش‌های پرتکرار (تا خیلی‌ها اصلاً لازم نباشد بنویسند).
+   صفحه Server Component است؛ فقط فرم و دکمه‌ی کپی کلاینتی‌اند.
+   حرکتِ ورود و ظاهرشدن با اسکرول از styles/reveal.css می‌آید (کلاس‌های ab-).
    ───────────────────────────────────────────────────────────── */
 
-import { useEffect, useId, useRef, useState } from 'react'
-import { Mail, MapPin, Handshake, Headphones, Check, Copy, Send, ArrowLeft, Megaphone } from 'lucide-react'
-import Link from 'next/link'
-import { apiFetch } from '../../lib/http'
+const EMAIL = 'info@billiardhub.net'
+const PHONE = '۰۲۱-۲۲۸۵۹۵۵۱'
+const PHONE_DIAL = '02122859551'
+const ADDRESS = 'تهران، پاسداران، خیابان شهید محمود گل نبی، پلاک ۳۶'
+const MAP_URL = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(ADDRESS)}`
 
-const GOLD   = '#C7A66A'
-const GOLD_D = '#8F6531'
-const TEXT   = '#1C1B17'
-const SEC    = '#5B564B'
-const MUT    = '#6F6A5C'
-const LINE   = '#E7E2D6'
-/* نمایش فارسی ارقام — مقدار لینک tel: لاتین می‌ماند */
-const toFaDigits = (v: string) => v.replace(/[0-9]/g, d => '۰۱۲۳۴۵۶۷۸۹'[+d] ?? d)
-
-const BALLS = { red: '#C43D2E', green: '#1B7A4B', blue: '#3D63E6', pink: '#F06EAE', yellow: '#E8B93A', gold: '#C7A66A' }
-
-/* ── اطلاعات تماس رسمی ──
-   ایمیل همان است که در فوتر سایت استفاده می‌شود.
-   فیلدهای خالی «placeholder» هستند: تا وقتی مقدار واقعی نگیرند
-   در صفحه نمایش داده نمی‌شوند — برای فعال‌کردن فقط همین‌جا مقدار بده. */
-const CONTACT = {
-  email: 'info@billiardhub.net',
-  phone: '021-22859551',
-  phoneDial: '02122859551',   // برای لینک tel:
-  city: 'تهران',
-  address: 'تهران، پاسداران، خیابان شهید محمود گل نبی، پلاک ۳۶',
-  instagram: '',    // TODO: آدرس کامل پروفایل — فعلا نمایش داده نمی‌شود
-  telegram: '',     // TODO: آدرس کامل کانال — فعلا نمایش داده نمی‌شود
-}
-
-/* «تبلیغات» این‌جا نیست — فرم خودش را در /advertise دارد */
-/* دو موضوع آخر تنها راه تغییر کد پستی و اطلاعات بانکی‌اند: آن دو
-   پس از یک استعلام موفق قفل می‌شوند، چون هر استعلام برای ما هزینه
-   دارد. ترتیب عمدی است — این دو بالاتر از «سایر» می‌آیند تا کاربری
-   که از پیام قفل به این‌جا آمده، سریع پیدایشان کند. */
-const SUBJECTS = [
-  'پشتیبانی', 'مشاوره', 'همکاری', 'پیشنهاد و انتقاد',
-  'درخواست تغییر کد پستی', 'درخواست ویرایش اطلاعات بانکی',
-  'سایر',
+const FAQ = [
+  {
+    q: 'پاسخ پیام من کجا می‌آید؟',
+    a: <>هر پیام یک تیکت می‌سازد؛ اگر هنگام ارسال وارد حساب باشید پاسخ در بخش <Link href="/support" className="font-bold text-gold-text underline-offset-4 hover:underline">تیکت‌های من</Link> ثبت می‌شود و در غیر این صورت از راه ایمیل یا شماره‌ای که نوشته‌اید پیگیری می‌شود</>,
+  },
+  {
+    q: 'کد پستی یا اطلاعات بانکی‌ام قفل شده، چطور تغییرش بدهم؟',
+    a: <>این دو بعد از استعلام قفل می‌شوند؛ در فرم همین صفحه موضوع «درخواست تغییر کد پستی» یا «درخواست ویرایش اطلاعات بانکی» را انتخاب کنید</>,
+  },
+  {
+    q: 'برای تبلیغات در سایت با چه کسی صحبت کنم؟',
+    a: <>جایگاه‌های تبلیغاتی و تعرفه‌ها در صفحه <Link href="/advertise" className="font-bold text-gold-text underline-offset-4 hover:underline">تبلیغات</Link> است و درخواست از همان‌جا ثبت می‌شود</>,
+  },
+  {
+    q: 'چطور باشگاه یا پروفایل حرفه‌ای‌ام را ثبت کنم؟',
+    a: <><Link href="/register" className="font-bold text-gold-text underline-offset-4 hover:underline">حساب بسازید</Link> و از داشبورد، پروفایل باشگاه، مربی، داور یا فروشگاه خود را بسازید تا بعد از بررسی منتشر شود</>,
+  },
 ]
 
-function useReveal() {
-  useEffect(() => {
-    const els = Array.from(document.querySelectorAll('.ct-rev'))
-    const io = new IntersectionObserver(
-      entries => entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('on'); io.unobserve(e.target) } }),
-      { threshold: 0.15 },
-    )
-    els.forEach(el => io.observe(el))
-    return () => io.disconnect()
-  }, [])
-}
+const WRAP = 'mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8'
+const CARD = 'flex flex-col gap-4 rounded-panel bg-surface p-6 shadow-e1'
+const LINK = 'inline-flex min-h-11 items-center gap-2 rounded-full px-3 text-body font-bold text-gold-text transition-colors duration-base hover:bg-gold/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-deep'
 
-/* دراپ‌داون سفارشی موضوع — پنل شیشه‌ای با انیمیشن، هماهنگ با فرم */
-function SubjectSelect({ value, onChange, options, error }: {
-  value: string; onChange: (v: string) => void; options: string[]; error?: string
-}) {
-  const [open, setOpen] = useState(false)
-  const ref = useRef<HTMLDivElement>(null)
-  useEffect(() => {
-    /* `pointerdown` و نه `mousedown`: روی لمس، `mousedown` شبیه‌سازی‌شده
-       با تأخیر می‌آید و گاهی اصلا نمی‌آید، پس پنل باز می‌ماند. */
-    const fn = (e: Event) => { if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false) }
-    const esc = (e: KeyboardEvent) => { if (e.key === 'Escape') setOpen(false) }
-    document.addEventListener('pointerdown', fn)
-    document.addEventListener('keydown', esc)
-    return () => {
-      document.removeEventListener('pointerdown', fn)
-      document.removeEventListener('keydown', esc)
-    }
-  }, [])
-  return (
-    <div ref={ref} style={{ position: 'relative' }}>
-      <button type="button" onClick={() => setOpen(p => !p)}
-        aria-haspopup="listbox" aria-expanded={open} aria-controls="ct-subject-list"
-        style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10,
-          padding: '12px 16px', borderRadius: 12, cursor: 'pointer', fontFamily: 'inherit', fontSize: 14, fontWeight: 700,
-          color: value ? TEXT : MUT, textAlign: 'right',
-          background: '#fff', border: `1px solid ${error ? 'rgba(178,59,46,0.5)' : open ? 'rgba(199,166,106,0.6)' : LINE}`,
-          boxShadow: open ? '0 0 0 3px rgba(199,166,106,0.13)' : 'none',
-          transition: 'border-color .25s, box-shadow .25s' }}>
-        {value || 'انتخاب موضوع…'}
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={open ? GOLD_D : MUT} strokeWidth="2.4"
-          strokeLinecap="round" strokeLinejoin="round"
-          style={{ flexShrink: 0, transform: open ? 'rotate(180deg)' : 'none', transition: 'transform .3s cubic-bezier(.22,1,.36,1)' }}>
-          <path d="m6 9 6 6 6-6" />
-        </svg>
-      </button>
-      {open && (
-        /* ── چرا ارتفاع و اسکرولِ داخلی ──
-           پنل `overflow: hidden` بود و هیچ سقفِ ارتفاعی نداشت. با هفت
-           گزینه روی موبایل از پایینِ صفحه بیرون می‌زد و چون خودش
-           اسکرول نداشت، کشیدن با انگشت هیچ کاری نمی‌کرد — کاربر فقط
-           چند مورد اول را می‌دید و لیست «قفل» به‌نظر می‌رسید.
-
-           `overscrollBehavior: contain` هم لازم است: بدونش وقتی به ته
-           فهرست می‌رسی، حرکت به صفحه‌ی پشت سرایت می‌کند و پنل زیرِ
-           انگشت جابه‌جا می‌شود. همان الگوی `JalaliDatePicker`. */
-        <div id="ct-subject-list" role="listbox" aria-label="موضوع پیام"
-          style={{ position: 'absolute', top: 'calc(100% + 6px)', insetInline: 0, zIndex: 40,
-          background: 'rgba(255,255,255,0.96)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
-          border: `1px solid ${LINE}`, borderRadius: 14,
-          maxHeight: 'min(52vh, 280px)', overflowY: 'auto', overscrollBehavior: 'contain',
-          WebkitOverflowScrolling: 'touch',
-          boxShadow: '0 18px 46px rgba(28,27,23,0.14)', animation: 'ctEnter .28s cubic-bezier(.22,1,.36,1) both' }}>
-          {options.map(o => (
-            <button key={o} type="button" role="option" aria-selected={value === o}
-              onClick={() => { onChange(o); setOpen(false) }}
-              onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(199,166,106,0.09)' }}
-              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent' }}
-              style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10,
-                padding: '11px 16px', border: 'none', cursor: 'pointer', fontFamily: 'inherit', fontSize: 13.5,
-                fontWeight: value === o ? 800 : 600, color: value === o ? GOLD_D : SEC,
-                background: 'transparent', textAlign: 'right', transition: 'background .2s' }}>
-              {o}
-              {value === o && <Check size={14} style={{ color: GOLD_D, flexShrink: 0 }} />}
-            </button>
-          ))}
-        </div>
-      )}
-    </div>
-  )
-}
-
-/* فیلد فلوتینگ‌لیبل با خط زیرین انیمیت‌شونده */
-function FloatField({ label, value, onChange, type = 'text', ltr = false, textarea = false, error, inputMode, maxLength }: {
-  label: string; value: string; onChange: (v: string) => void; type?: string; ltr?: boolean
-  textarea?: boolean; error?: string; inputMode?: 'numeric' | 'email'; maxLength?: number
-}) {
-  const [focus, setFocus] = useState(false)
-  const fid = useId()
-  const up = focus || value.length > 0
-  return (
-    <div style={{ position: 'relative', paddingTop: 18 }}>
-      <label htmlFor={fid} style={{
-        position: 'absolute', right: 0, top: up ? 0 : textarea ? 26 : 30,
-        fontSize: up ? 10.5 : 14, fontWeight: 700,
-        color: error ? '#B23B2E' : up ? (focus ? GOLD_D : MUT) : MUT,
-        transition: 'all .28s cubic-bezier(.22,1,.36,1)', pointerEvents: 'none',
-      }}>{label}</label>
-      {textarea ? (
-        <textarea id={fid} value={value} onChange={e => onChange(e.target.value)} rows={4}
-          onFocus={() => setFocus(true)} onBlur={() => setFocus(false)}
-          style={{ width: '100%', minWidth: 0, boxSizing: 'border-box', background: 'transparent', border: 'none', outline: 'none',
-            padding: '10px 0 8px', fontSize: 14.5, color: TEXT, fontFamily: 'inherit', resize: 'vertical', minHeight: 96, lineHeight: 2 }} />
-      ) : (
-        <input id={fid} type={type} value={value} onChange={e => onChange(e.target.value)}
-          onFocus={() => setFocus(true)} onBlur={() => setFocus(false)}
-          inputMode={inputMode === 'numeric' ? 'numeric' : undefined} maxLength={maxLength}
-          style={{ width: '100%', minWidth: 0, boxSizing: 'border-box', background: 'transparent', border: 'none', outline: 'none',
-            padding: '10px 0 8px', fontSize: 14.5, color: TEXT, fontFamily: 'inherit',
-            direction: ltr ? 'ltr' : 'rtl', textAlign: ltr ? 'end' : 'start' }} />
-      )}
-      <div style={{ position: 'relative', height: 1.5, background: error ? 'rgba(178,59,46,0.4)' : LINE, borderRadius: 2, overflow: 'hidden' }}>
-        <span style={{ position: 'absolute', inset: 0, transformOrigin: 'right',
-          transform: focus ? 'scaleX(1)' : 'scaleX(0)', transition: 'transform .45s cubic-bezier(.22,1,.36,1)',
-          background: `linear-gradient(90deg,#8A6020,${GOLD})` }} />
-      </div>
-      {error && <div style={{ fontSize: 11, fontWeight: 700, color: '#B23B2E', marginTop: 6 }}>{error}</div>}
-    </div>
-  )
+function ChannelIcon({ children }: { children: ReactNode }) {
+  return <span aria-hidden className="flex h-12 w-12 items-center justify-center rounded-card bg-gold/[.12] text-gold-text">{children}</span>
 }
 
 export default function ContactPage() {
-  useReveal()
-  const [form, setForm] = useState({ name: '', email: '', phone: '', subject: '', message: '' })
-  const [errors, setErrors] = useState<Record<string, string>>({})
-  const [loading, setLoading] = useState(false)
-  const [sent, setSent] = useState(false)
-  const [copied, setCopied] = useState(false)
-  const formRef = useRef<HTMLDivElement>(null)
-  /* باشگاهی که تیکت درباره‌ی آن است — از لینک پیام قفل می‌آید تا
-     ادمین بداند دقیقا کدام قفل را باید باز کند. */
-  const [clubId, setClubId] = useState('')
-
-  /* پیام قفل کاربر را با ?subject=… به این‌جا می‌فرستد. بدون این،
-     کاربر قفل‌شده باید موضوع را از فهرست پیدا می‌کرد — و اگر اشتباه
-     انتخاب می‌کرد، تیکت در صف درستی نمی‌نشست. */
-  useEffect(() => {
-    const q = new URLSearchParams(window.location.search)
-    const s = q.get('subject') ?? ''
-    if (SUBJECTS.includes(s)) {
-      setForm(f => ({ ...f, subject: s }))
-      /* کمی صبر تا لی‌اوت بنشیند، وگرنه اسکرول به جای اشتباه می‌رود */
-      setTimeout(() => formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 350)
-    }
-    const c = q.get('clubId') ?? ''
-    if (c) setClubId(c)
-  }, [])
-
-  const set = (k: keyof typeof form) => (v: string) => {
-    if (k === 'phone') v = v.replace(/[۰-۹]/g, d => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(d))).replace(/[^0-9]/g, '').slice(0, 11)
-    setForm(f => ({ ...f, [k]: v }))
-    setErrors(e => ({ ...e, [k]: '' }))
-  }
-
-  const copyEmail = async () => {
-    try { await navigator.clipboard.writeText(CONTACT.email) } catch {
-      const ta = document.createElement('textarea')
-      ta.value = CONTACT.email; document.body.appendChild(ta); ta.select()
-      try { document.execCommand('copy') } catch {}
-      ta.remove()
-    }
-    setCopied(true); setTimeout(() => setCopied(false), 2200)
-  }
-
-  const jumpToForm = (subject: string) => {
-    setForm(f => ({ ...f, subject }))
-    formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
-  }
-
-  const validate = () => {
-    const e: Record<string, string> = {}
-    if (!form.name.trim()) e.name = 'نام و نام خانوادگی الزامی است'
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) e.email = 'ایمیل معتبر نیست'
-    if (form.phone && !/^09\d{9}$/.test(form.phone)) e.phone = 'شماره باید ۱۱ رقم و با ۰۹ شروع شود'
-    if (!form.subject) e.subject = 'موضوع را انتخاب کنید'
-    if (form.message.trim().length < 10) e.message = 'پیام باید حداقل ۱۰ کاراکتر باشد'
-    setErrors(e)
-    return Object.keys(e).length === 0
-  }
-
-  const submit = async (ev: React.FormEvent) => {
-    ev.preventDefault()
-    if (!validate()) return
-    setLoading(true)
-    /* پیش‌تر این‌جا به بک‌اند مرده‌ی NestJS پست می‌شد و در شکست، پیام
-       در localStorageی خود کاربر می‌نشست و باز هم «ارسال شد» نشان
-       داده می‌شد — یعنی هیچ تیکتی هرگز به دست کسی نمی‌رسید. حالا که
-       تغییر کد پستی و اطلاعات بانکی فقط از همین راه ممکن است، آن
-       دروغ کاربر را به بن‌بست می‌برد. */
-    try {
-      /* `apiFetch` هدر CSRF را از کوکی خواندنی برمی‌دارد و می‌گذارد.
-         با `fetch` خام، کاربر *واردشده* همیشه ۴۰۳ می‌گرفت:
-         «توکن امنیتی درخواست معتبر نیست». مهمان مشکلی نداشت چون
-         بررسی CSRF فقط وقتی نشست هست اعمال می‌شود — برای همین در
-         تست مهمان دیده نشد. */
-      const res = await apiFetch('/api/contact', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...form, clubId: clubId || undefined }),
-      })
-      const j = await res.json().catch(() => ({}))
-      setLoading(false)
-      if (!res.ok) {
-        setErrors({ submit: j?.message || 'ارسال پیام انجام نشد، دوباره تلاش کنید' })
-        return
-      }
-      setSent(true)
-    } catch {
-      setLoading(false)
-      setErrors({ submit: 'ارتباط با سرور برقرار نشد، اتصال اینترنت را بررسی کنید' })
-    }
-  }
-
   return (
-    <div dir="rtl" style={{ background: '#F7F7F5', color: TEXT, fontFamily: 'Vazirmatn,Tahoma,sans-serif', overflowX: 'clip' }}>
-      <style>{`
-        .ct-rev { opacity: 0; transform: translateY(24px); transition: opacity .8s cubic-bezier(.22,1,.36,1), transform .8s cubic-bezier(.22,1,.36,1); }
-        .ct-rev.on { opacity: 1; transform: none; }
-        .ct-rev.d1 { transition-delay: .08s; } .ct-rev.d2 { transition-delay: .18s; } .ct-rev.d3 { transition-delay: .3s; }
-
-        @keyframes ctEnter { from { opacity: 0; transform: translateY(26px); } to { opacity: 1; transform: none; } }
-        @keyframes ctPulse { 0%,100% { opacity: .45; } 50% { opacity: 1; } }
-        @keyframes ctDash { to { stroke-dashoffset: 0; } }
-        @keyframes ctSpin { to { transform: rotate(360deg); } }
-        @keyframes ctPop { 0% { transform: scale(.6); opacity: 0; } 60% { transform: scale(1.06); } 100% { transform: scale(1); opacity: 1; } }
-        .ct-hero-in > * { animation: ctEnter .8s cubic-bezier(.22,1,.36,1) both; }
-        .ct-hero-in > *:nth-child(2) { animation-delay: .12s; }
-        .ct-hero-in > *:nth-child(3) { animation-delay: .24s; }
-
-        /* ردیف‌های کانال — تعاملی */
-        .ct-ch { display: flex; align-items: center; gap: 14px; padding: 17px 6px; cursor: pointer;
-          border-bottom: 1px solid ${LINE}; background: transparent; width: 100%; text-align: right;
-          font-family: inherit; border-inline: none; border-top: none; text-decoration: none;
-          transition: background .3s, transform .3s cubic-bezier(.22,1,.36,1); position: relative; }
-        .ct-ch:hover { transform: translateX(-5px); }
-        .ct-ch .ic { width: 44px; height: 44px; border-radius: 13px; flex-shrink: 0;
-          display: flex; align-items: center; justify-content: center;
-          background: #fff; border: 1px solid ${LINE}; color: var(--cc);
-          transition: box-shadow .3s, border-color .3s, transform .3s; }
-        .ct-ch:hover .ic { border-color: var(--cc); transform: scale(1.07); box-shadow: 0 8px 20px rgba(28,27,23,0.1); }
-        .ct-ch .hint { margin-inline-start: auto; font-size: 10.5px; font-weight: 800; color: ${MUT};
-          display: inline-flex; align-items: center; gap: 4px; opacity: 0; transform: translateX(5px);
-          transition: opacity .3s, transform .3s; white-space: nowrap; }
-        .ct-ch:hover .hint { opacity: 1; transform: none; }
-
-        .ct-submit { width: 100%; padding: 15px; border: none; border-radius: 13px; cursor: pointer;
-          font-family: inherit; font-size: 15px; font-weight: 800; color: #241B08;
-          background: linear-gradient(135deg, #E8CE96, ${GOLD} 55%, #A8853F);
-          box-shadow: 0 10px 26px rgba(199,166,106,0.3);
-          display: flex; align-items: center; justify-content: center; gap: 10px;
-          transition: transform .3s cubic-bezier(.22,1,.36,1), box-shadow .3s, opacity .2s; }
-        .ct-submit:not(:disabled):hover { transform: translateY(-2px); box-shadow: 0 16px 38px rgba(199,166,106,0.42); }
-        .ct-submit:disabled { opacity: .65; cursor: not-allowed; }
-
-        .ct-grid { display: grid; grid-template-columns: minmax(0,5fr) minmax(0,7fr); }
-        @media (max-width: 860px) { .ct-grid { grid-template-columns: minmax(0, 1fr); } .ct-side { border-inline-start: none !important; border-top: 1px solid ${LINE}; } }
-
-        /* نام و ایمیل کنار هم فقط وقتی جا هست */
-        .ct-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 22px; }
-        @media (max-width: 560px) { .ct-fields { grid-template-columns: minmax(0, 1fr); } }
-        @media (prefers-reduced-motion: reduce) {
-          .ct-rev { opacity: 1 !important; transform: none !important; transition: none !important; }
-          .ct-hero-in > * { animation: none !important; }
-        }
-      `}</style>
-
-      {/* ═══ HERO — کوتاه و سینمایی با میز مینیمال ═══ */}
-      <section style={{ position: 'relative', background: '#0B0A08', color: '#fff', overflow: 'hidden' }}>
-        <div aria-hidden style={{ position: 'absolute', inset: 0, background: 'radial-gradient(circle at 80% 14%, rgba(199,166,106,0.15), transparent 46%)' }} />
-        <div aria-hidden style={{ position: 'absolute', top: '-20%', bottom: '-20%', left: '30%', width: 1, background: 'linear-gradient(180deg,transparent,rgba(199,166,106,0.4),transparent)', transform: 'rotate(14deg)' }} />
-        <div aria-hidden style={{ position: 'absolute', bottom: '-1vw', insetInlineStart: -8, fontWeight: 900, fontSize: 'clamp(56px,11vw,150px)', lineHeight: .9, direction: 'ltr', color: 'transparent', WebkitTextStroke: '1px rgba(255,255,255,0.06)', userSelect: 'none', pointerEvents: 'none' }}>CONTACT</div>
-
-        {/* میز مینیمال — پاکت‌ها نقاط ارتباط */}
-        <svg aria-hidden viewBox="0 0 520 300" style={{ position: 'absolute', top: '50%', left: 'clamp(-60px,2vw,60px)', transform: 'translateY(-50%)', width: 'min(46vw, 520px)', opacity: 0.55, pointerEvents: 'none' }}>
-          <rect x="20" y="30" width="480" height="240" rx="18" fill="none" stroke="rgba(199,166,106,0.4)" strokeWidth="1.4" />
-          <rect x="44" y="54" width="432" height="192" rx="8" fill="none" stroke="rgba(199,166,106,0.16)" strokeWidth="1" />
-          {[[20, 30], [260, 22], [500, 30], [20, 270], [260, 278], [500, 270]].map((p, i) => (
-            <circle key={i} cx={p[0]} cy={p[1]} r="7" fill="rgba(199,166,106,0.55)" style={{ animation: `ctPulse 3.2s ${i * 0.4}s ease-in-out infinite` }} />
-          ))}
-          <path d="M 130 210 L 300 110 L 452 168" fill="none" stroke="rgba(255,255,255,0.35)" strokeWidth="1" strokeDasharray="420" strokeDashoffset="420" style={{ animation: 'ctDash 2.4s .6s cubic-bezier(.4,0,.2,1) forwards' }} />
-          <circle cx="130" cy="210" r="9" fill="url(#ctCue)" />
-          <defs>
-            <radialGradient id="ctCue" cx="0.35" cy="0.3" r="1">
-              <stop offset="0" stopColor="#fff" /><stop offset="1" stopColor="#BDB8AC" />
-            </radialGradient>
-          </defs>
-        </svg>
-
-        <div className="ct-hero-in" style={{ position: 'relative', zIndex: 1, maxWidth: 1080, margin: '0 auto', padding: 'clamp(68px,10vh,110px) clamp(20px,4vw,32px) clamp(60px,9vh,96px)' }}>
-          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, fontSize: 9.5, fontWeight: 800, letterSpacing: '0.28em', color: GOLD, border: '1px solid rgba(199,166,106,0.4)', background: 'rgba(199,166,106,0.10)', borderRadius: 999, padding: '5px 14px' }}>
-            CONTACT · BILLIARD HUB
-          </span>
-          <h1 style={{ fontSize: 'clamp(30px,5.4vw,58px)', fontWeight: 900, lineHeight: 1.3, letterSpacing: '-0.02em', margin: '16px 0 0' }}>
-            با ما <span style={{ background: `linear-gradient(135deg,#E8CE96,${GOLD} 55%,#8A6020)`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>در ارتباط باشید</span>
+    <div className="overflow-x-clip bg-paper text-ink">
+      {/* ═══ سربرگ + سه راهِ ارتباط ═══ */}
+      <section className={`${WRAP} pb-12 pt-8 lg:pb-16 lg:pt-16`}>
+        <div className="ab-in flex max-w-3xl flex-col gap-4">
+          <p className="text-body font-bold text-gold-text">تماس با ما</p>
+          <h1 className="text-display">
+            با ما در ارتباط باشید
+            <span className="block text-ink-2">هر پیام به دست تیم ما می‌رسد</span>
           </h1>
-          <p style={{ fontSize: 'clamp(13px,1.5vw,15.5px)', color: 'rgba(255,255,255,0.6)', lineHeight: 2.1, margin: '14px 0 0', maxWidth: 480 }}>
-            برای ارتباط با تیم Billiard Hub، همکاری، پیشنهاد یا هرگونه پرسش، با ما در تماس باشید
-          </p>
         </div>
+
+        <ul className="mt-8 grid gap-4 md:grid-cols-3 lg:mt-12">
+          <li className={`ab-reveal ${CARD}`}>
+            <ChannelIcon><Mail size={24} /></ChannelIcon>
+            <div className="flex flex-col gap-1">
+              <h2 className="text-section">ایمیل</h2>
+              <a href={`mailto:${EMAIL}`} dir="ltr" className="self-start rounded-field text-body text-ink-2 underline-offset-4 hover:text-ink hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-deep">{EMAIL}</a>
+            </div>
+            <div className="-ms-3 mt-auto"><CopyEmailButton email={EMAIL} /></div>
+          </li>
+          <li className={`ab-reveal ${CARD}`}>
+            <ChannelIcon><Phone size={24} /></ChannelIcon>
+            <div className="flex flex-col gap-1">
+              <h2 className="text-section">تلفن</h2>
+              <span dir="ltr" className="self-start text-body text-ink-2">{PHONE}</span>
+            </div>
+            <a href={`tel:${PHONE_DIAL}`} className={`${LINK} -ms-3 mt-auto self-start`}>تماس مستقیم</a>
+          </li>
+          <li className={`ab-reveal ${CARD}`}>
+            <ChannelIcon><MapPin size={24} /></ChannelIcon>
+            <div className="flex flex-col gap-1">
+              <h2 className="text-section">دفتر</h2>
+              <address className="text-body not-italic text-ink-2">{ADDRESS}</address>
+            </div>
+            <a href={MAP_URL} target="_blank" rel="noopener noreferrer" className={`${LINK} -ms-3 mt-auto self-start`}>مسیریابی در نقشه<span className="sr-only"> (در پنجره جدید)</span></a>
+          </li>
+        </ul>
       </section>
 
-      {/* ═══ کامپوزیشن واحد: کانال‌ها + فرم ═══ */}
-      <section style={{ padding: 'clamp(40px,7vw,90px) clamp(16px,4vw,32px) clamp(70px,9vw,120px)' }}>
-        <div className="ct-rev" style={{
-          maxWidth: 1080, margin: '0 auto', position: 'relative',
-          background: 'linear-gradient(180deg, rgba(255,255,255,0.9), rgba(255,255,255,0.78))',
-          backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
-          border: `1px solid ${LINE}`, borderRadius: 26, overflow: 'hidden',
-          boxShadow: '0 28px 80px rgba(28,27,23,0.09)',
-        }}>
-          <div aria-hidden style={{ position: 'absolute', top: 0, insetInline: 0, height: 3, background: `linear-gradient(90deg,#8A6020,${GOLD},#8A6020)` }} />
-
-          <div className="ct-grid">
-            {/* ── کانال‌های ارتباطی ── */}
-            <div style={{ padding: 'clamp(26px,4vw,44px)' }}>
-              <span style={{ fontSize: 9.5, fontWeight: 800, letterSpacing: '0.3em', color: MUT }}>CHANNELS</span>
-              <h2 style={{ fontSize: 'clamp(19px,2.4vw,25px)', fontWeight: 900, margin: '10px 0 18px' }}>کانال‌های ارتباطی</h2>
-
-              {/* ایمیل — کلیک = کپی */}
-              <button type="button" className="ct-ch" onClick={copyEmail} style={{ ['--cc' as never]: BALLS.blue }}>
-                <span className="ic"><Mail size={18} /></span>
-                <span style={{ minWidth: 0 }}>
-                  <span style={{ display: 'block', fontSize: 14, fontWeight: 800, color: TEXT }}>ایمیل</span>
-                  <span dir="ltr" style={{ fontSize: 12.5, color: SEC, fontWeight: 600 }}>{CONTACT.email}</span>
-                </span>
-                <span className="hint" style={copied ? { opacity: 1, transform: 'none', color: '#1B7A4B' } : undefined}>
-                  {copied ? <><Check size={12} /> کپی شد</> : <><Copy size={12} /> برای کپی کلیک کن</>}
-                </span>
-              </button>
-
-              {/* تلفن */}
-              {CONTACT.phone && (
-                <a className="ct-ch" href={`tel:${CONTACT.phoneDial}`} style={{ ['--cc' as never]: BALLS.green }}>
-                  <span className="ic"><Headphones size={18} /></span>
-                  <span style={{ minWidth: 0 }}>
-                    <span style={{ display: 'block', fontSize: 14, fontWeight: 800, color: TEXT }}>تلفن</span>
-                    <span dir="ltr" style={{ fontSize: 12.5, color: SEC, fontWeight: 600, fontVariantNumeric: 'tabular-nums' }}>{toFaDigits(CONTACT.phone)}</span>
-                  </span>
-                  <span className="hint">تماس مستقیم</span>
-                </a>
-              )}
-
-              {/* نشانی */}
-              <div className="ct-ch" style={{ ['--cc' as never]: BALLS.red, cursor: 'default', alignItems: 'flex-start' }}>
-                <span className="ic"><MapPin size={18} /></span>
-                <span style={{ minWidth: 0 }}>
-                  <span style={{ display: 'block', fontSize: 14, fontWeight: 800, color: TEXT }}>نشانی دفتر</span>
-                  <span style={{ fontSize: 12.5, color: SEC, fontWeight: 600, lineHeight: 2, display: 'block' }}>{CONTACT.address}</span>
-                </span>
-              </div>
-
-              {/* میان‌برهای موضوع — می‌پرد به فرم با موضوع ازپیش‌انتخاب‌شده */}
-              <button type="button" className="ct-ch" onClick={() => jumpToForm('همکاری')} style={{ ['--cc' as never]: BALLS.yellow }}>
-                <span className="ic"><Handshake size={18} /></span>
-                <span style={{ minWidth: 0 }}>
-                  <span style={{ display: 'block', fontSize: 14, fontWeight: 800, color: TEXT }}>همکاری با ما</span>
-                  <span style={{ fontSize: 12.5, color: SEC, fontWeight: 600 }}>پیشنهاد همکاری و مشارکت</span>
-                </span>
-                <span className="hint"><ArrowLeft size={12} /> برو به فرم</span>
-              </button>
-              <button type="button" className="ct-ch" onClick={() => jumpToForm('پشتیبانی')} style={{ ['--cc' as never]: BALLS.pink }}>
-                <span className="ic"><Headphones size={18} /></span>
-                <span style={{ minWidth: 0 }}>
-                  <span style={{ display: 'block', fontSize: 14, fontWeight: 800, color: TEXT }}>پشتیبانی</span>
-                  <span style={{ fontSize: 12.5, color: SEC, fontWeight: 600 }}>سؤال درباره‌ی حساب و امکانات</span>
-                </span>
-                <span className="hint"><ArrowLeft size={12} /> برو به فرم</span>
-              </button>
-              {/* تبلیغات فرم خودش را دارد (جایگاه و تعرفه)، پس به /advertise می‌رود نه به فرم عمومی */}
-              <Link href="/advertise" className="ct-ch" style={{ ['--cc' as never]: BALLS.gold, borderBottom: 'none', textDecoration: 'none' }}>
-                <span className="ic"><Megaphone size={18} /></span>
-                <span style={{ minWidth: 0 }}>
-                  <span style={{ display: 'block', fontSize: 14, fontWeight: 800, color: TEXT }}>تبلیغات در بیلیارد هاب</span>
-                  <span style={{ fontSize: 12.5, color: SEC, fontWeight: 600 }}>جایگاه‌های بنری، تعرفه و درخواست</span>
-                </span>
-                <span className="hint"><ArrowLeft size={12} /> جایگاه‌ها</span>
-              </Link>
-
-              {/* شبکه‌های اجتماعی — فقط وقتی آدرس واقعی ثبت شده باشد */}
-              {(CONTACT.instagram || CONTACT.telegram) && (
-                <div style={{ display: 'flex', gap: 10, marginTop: 18 }}>
-                  {CONTACT.instagram && (
-                    <a href={CONTACT.instagram} target="_blank" rel="noopener noreferrer"
-                      style={{ fontSize: 12.5, fontWeight: 800, color: GOLD_D, textDecoration: 'none', padding: '8px 16px', borderRadius: 10, background: 'rgba(199,166,106,0.1)', border: '1px solid rgba(199,166,106,0.3)' }}>
-                      اینستاگرام
-                    </a>
-                  )}
-                  {CONTACT.telegram && (
-                    <a href={CONTACT.telegram} target="_blank" rel="noopener noreferrer"
-                      style={{ fontSize: 12.5, fontWeight: 800, color: GOLD_D, textDecoration: 'none', padding: '8px 16px', borderRadius: 10, background: 'rgba(199,166,106,0.1)', border: '1px solid rgba(199,166,106,0.3)' }}>
-                      تلگرام
-                    </a>
-                  )}
-                </div>
-              )}
-            </div>
-
-            {/* ── فرم ── */}
-            <div ref={formRef} className="ct-side" style={{ padding: 'clamp(26px,4vw,44px)', borderInlineStart: `1px solid ${LINE}`, background: 'rgba(250,250,247,0.6)' }}>
-              {!sent ? (
-                <form onSubmit={submit} noValidate>
-                  <span style={{ fontSize: 9.5, fontWeight: 800, letterSpacing: '0.3em', color: MUT }}>MESSAGE</span>
-                  <h2 style={{ fontSize: 'clamp(19px,2.4vw,25px)', fontWeight: 900, margin: '10px 0 18px' }}>پیام بگذارید</h2>
-
-                  <div className="ct-fields">
-                    <div style={{ gridColumn: '1 / -1' }}>
-                      <FloatField label="نام و نام خانوادگی" value={form.name} onChange={set('name')} error={errors.name} />
-                    </div>
-                    <FloatField label="ایمیل" value={form.email} onChange={set('email')} type="email" ltr inputMode="email" error={errors.email} />
-                    <FloatField label="شماره تماس (اختیاری)" value={form.phone} onChange={set('phone')} type="tel" ltr inputMode="numeric" maxLength={11} error={errors.phone} />
-                  </div>
-
-                  <div style={{ marginTop: 18 }}>
-                    <label style={{ display: 'block', fontSize: 10.5, fontWeight: 700, color: errors.subject ? '#B23B2E' : MUT, marginBottom: 8 }}>موضوع</label>
-                    <SubjectSelect value={form.subject} onChange={set('subject')} options={SUBJECTS} error={errors.subject} />
-                    {errors.subject && <div style={{ fontSize: 11, fontWeight: 700, color: '#B23B2E', marginTop: 6 }}>{errors.subject}</div>}
-                  </div>
-
-                  <div style={{ marginTop: 6 }}>
-                    <FloatField label="پیام شما" value={form.message} onChange={set('message')} textarea error={errors.message} />
-                  </div>
-
-                  <button type="submit" className="ct-submit" disabled={loading} style={{ marginTop: 24 }}>
-                    {loading ? (
-                      <>
-                        <span style={{ width: 17, height: 17, border: '2px solid rgba(36,27,8,0.25)', borderTop: '2px solid #241B08', borderRadius: '50%', animation: 'ctSpin .7s linear infinite', display: 'inline-block' }} />
-                        در حال ارسال…
-                      </>
-                    ) : (<>ارسال پیام <Send size={15} /></>)}
-                  </button>
-
-                  {/* شکست ارسال باید دیده شود — پیش‌تر بی‌صدا رد می‌شد
-                      و کاربر «ارسال شد» می‌دید. */}
-                  {errors.submit && (
-                    <div style={{ marginTop: 12, padding: '10px 12px', borderRadius: 10, background: 'rgba(178,59,46,0.08)', border: '1px solid rgba(178,59,46,0.22)', fontSize: 12.5, fontWeight: 700, color: '#B23B2E', lineHeight: 1.7 }}>
-                      {errors.submit}
-                    </div>
-                  )}
-                </form>
-              ) : (
-                /* ── انیمیشن موفقیت ── */
-                <div style={{ textAlign: 'center', padding: 'clamp(30px,5vw,60px) 10px', animation: 'ctPop .5s cubic-bezier(.22,1,.36,1) both' }}>
-                  <svg width="86" height="86" viewBox="0 0 86 86" style={{ margin: '0 auto 18px', display: 'block' }}>
-                    <circle cx="43" cy="43" r="40" fill="rgba(27,122,75,0.07)" stroke="rgba(27,122,75,0.35)" strokeWidth="1.5"
-                      strokeDasharray="252" strokeDashoffset="252" style={{ animation: 'ctDash 1s .1s cubic-bezier(.4,0,.2,1) forwards' }} />
-                    <path d="M 27 44 L 39 56 L 60 32" fill="none" stroke="#1B7A4B" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"
-                      strokeDasharray="60" strokeDashoffset="60" style={{ animation: 'ctDash .6s .7s cubic-bezier(.4,0,.2,1) forwards' }} />
-                  </svg>
-                  <h3 style={{ fontSize: 20, fontWeight: 900, margin: '0 0 8px' }}>پیام شما ثبت شد</h3>
-                  {/* بدون این خط، کاربر نمی‌داند پاسخ کجا می‌آید و منتظر
-                      پیامک یا ایمیلی می‌ماند که هیچ‌وقت نمی‌رسد. */}
-                  <p style={{ fontSize: 13, color: SEC, lineHeight: 2, margin: '0 0 22px' }}>
-                    ممنون که با بیلیارد هاب در ارتباطی — تیم ما پیامت را بررسی می‌کند
-                    <br />
-                    پاسخ را در <a href="/support" style={{ color: GOLD_D, fontWeight: 800 }}>تیکت‌های من</a> می‌بینی
-                  </p>
-                  <button type="button" onClick={() => { setSent(false); setForm({ name: '', email: '', phone: '', subject: '', message: '' }) }}
-                    style={{ padding: '11px 24px', borderRadius: 11, cursor: 'pointer', fontFamily: 'inherit', fontSize: 13.5, fontWeight: 800, color: GOLD_D, background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.34)' }}>
-                    ارسال پیام جدید
-                  </button>
-                </div>
-              )}
-            </div>
+      {/* ═══ فرم + پرسش‌های پرتکرار ═══ */}
+      <section className="bg-mist py-12 lg:py-24">
+        <div className={`${WRAP} grid gap-8 lg:grid-cols-12 lg:gap-12`}>
+          <div className="ab-reveal rounded-hero bg-surface p-6 shadow-e2 sm:p-8 lg:col-span-7 lg:p-12">
+            <h2 className="text-display">پیام بگذارید</h2>
+            <p className="mb-8 mt-2 text-body text-ink-2">برای دیدن پاسخ در تیکت‌های من، پیش از ارسال وارد حساب شوید</p>
+            <ContactForm />
           </div>
-        </div>
 
-        {/* لینک به درباره ما */}
-        <div className="ct-rev d2" style={{ maxWidth: 1080, margin: '22px auto 0', textAlign: 'center' }}>
-          <Link href="/about" style={{ display: 'inline-flex', alignItems: 'center', gap: 7, fontSize: 13, fontWeight: 700, color: MUT, textDecoration: 'none' }}>
-            بیشتر درباره‌ی بیلیارد هاب بدانید <ArrowLeft size={13} />
-          </Link>
+          <aside className="flex flex-col gap-6 lg:col-span-5" aria-labelledby="ct-faq">
+            <h2 id="ct-faq" className="ab-reveal text-section">پیش از نوشتن، شاید جوابتان اینجا باشد</h2>
+            <div className="flex flex-col gap-3">
+              {FAQ.map(item => (
+                <details key={item.q} className="ab-reveal group rounded-panel bg-surface shadow-e0 open:shadow-e1">
+                  <summary className="flex min-h-12 cursor-pointer list-none items-center justify-between gap-4 rounded-panel px-6 py-4 text-body font-bold text-ink transition-colors duration-base hover:bg-paper focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-deep [&::-webkit-details-marker]:hidden">
+                    {item.q}
+                    <ChevronDown size={18} aria-hidden className="shrink-0 text-ink-2 transition-transform duration-base group-open:rotate-180" />
+                  </summary>
+                  <p className="px-6 pb-6 text-body text-ink-2">{item.a}</p>
+                </details>
+              ))}
+            </div>
+
+            <div className="ab-reveal mt-2">
+            <Link href="/advertise" prefetch={false}
+              className="ab-card group flex items-center gap-4 rounded-panel bg-ink p-6 text-surface shadow-e2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-deep focus-visible:ring-offset-2 focus-visible:ring-offset-mist">
+              <span aria-hidden className="flex h-12 w-12 shrink-0 items-center justify-center rounded-card bg-gold/20 text-gold-light"><Megaphone size={24} /></span>
+              <span className="flex flex-1 flex-col gap-1">
+                <span className="text-section">تبلیغات در بیلیارد هاب</span>
+                <span className="text-body text-surface/70">جایگاه‌ها، تعرفه و ثبت درخواست</span>
+              </span>
+              <ArrowLeft size={20} aria-hidden className="shrink-0 text-gold-light transition-transform duration-base group-hover:-translate-x-1" />
+            </Link>
+            </div>
+
+            <Link href="/about" prefetch={false} className={`${LINK} ab-reveal -ms-3 self-start`}>
+              بیشتر درباره بیلیارد هاب بدانید <ArrowLeft size={16} aria-hidden />
+            </Link>
+          </aside>
         </div>
       </section>
     </div>

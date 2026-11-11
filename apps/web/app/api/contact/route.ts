@@ -2,7 +2,7 @@ export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { sb, actorFromRequest } from '@/lib/finance/db';
 import { hitRateLimit, tooMany } from '@/lib/auth/rate-limit';
-import { LOCK_SUBJECTS } from '@/lib/verification-lock';
+import { CONTACT_SUBJECTS } from '@/lib/contact-subjects';
 
 /* تیکت پشتیبانی — مقصد واقعی فرم «تماس با ما».
 
@@ -18,12 +18,9 @@ import { LOCK_SUBJECTS } from '@/lib/verification-lock';
 const MAX = { name: 80, email: 120, phone: 20, subject: 60, message: 2000 };
 const str = (v: unknown, max: number) => String(v ?? '').trim().slice(0, max);
 
-/* موضوع‌های مجاز — با فهرست صفحه‌ی تماس یکی است. متن آزاد پذیرفته
-   نمی‌شود تا صفحه‌ی ادمین بتواند رویشان فیلتر بگذارد. */
-const SUBJECTS = [
-  'پشتیبانی', 'همکاری', 'پیشنهاد و انتقاد', 'سایر',
-  LOCK_SUBJECTS.postal, LOCK_SUBJECTS.bank,
-];
+/* موضوع‌های مجاز — همان فهرستِ فرم (lib/contact-subjects). متن آزاد
+   پذیرفته نمی‌شود تا صفحه‌ی ادمین بتواند رویشان فیلتر بگذارد. */
+const SUBJECTS: readonly string[] = CONTACT_SUBJECTS;
 
 export async function POST(req: NextRequest) {
   const actor = actorFromRequest(req);

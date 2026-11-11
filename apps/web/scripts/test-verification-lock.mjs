@@ -29,7 +29,9 @@ const head = s => console.log(`\n■ ${s}`)
 /* ── منبعِ واحدِ قفل ── */
 {
   head('کتابخانه‌ی قفل')
-  const lock = read('lib/verification-lock.ts')
+  /* موضوع‌ها در lib/contact-subjects تعریف و از verification-lock بازصادر می‌شوند
+     (تا فرمِ کلاینتی هم بی next/server همان را بخواند) */
+  const lock = read('lib/verification-lock.ts') + read('lib/contact-subjects.ts')
   t('پاسخِ استاندارد وجود دارد', /export function lockedResponse/.test(lock))
   /* ۴۰۹ نه ۴۰۳: مشکل دسترسیِ کاربر نیست، وضعیتِ منبع است */
   t('کدِ وضعیت ۴۰۹ است', /status: 409/.test(lock))
@@ -117,7 +119,10 @@ const head = s => console.log(`\n■ ${s}`)
 /* ── تماس با ما ── */
 {
   head('تماس با ما')
-  const page = code('app/contact/page.tsx')
+  /* بازطراحیِ آبانِ ۱۴۰۵: صفحه Server Component شد و فرم و فهرستِ موضوع به
+     components/contact و lib/contact-subjects رفتند */
+  const page = ['app/contact/page.tsx', 'components/contact/ContactForm.tsx',
+    'components/contact/fields.tsx', 'lib/contact-subjects.ts'].map(code).join(' ')
   const api = code('app/api/contact/route.ts')
 
   t('موضوعِ تغییر کد پستی اضافه شد', /'درخواست تغییر کد پستی'/.test(page))
