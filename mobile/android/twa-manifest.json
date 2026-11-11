@@ -1,0 +1,52 @@
+{
+  "packageId": "net.billiardhub.app",
+  "host": "billiardhub.net",
+  "name": "بیلیارد هاب",
+  "launcherName": "بیلیارد هاب",
+  "display": "standalone",
+  "themeColor": "#F7F6F2",
+  "themeColorDark": "#F7F6F2",
+  "navigationColor": "#F7F6F2",
+  "navigationColorDark": "#F7F6F2",
+  "navigationDividerColor": "#F2EFE9",
+  "navigationDividerColorDark": "#F2EFE9",
+  "backgroundColor": "#F2EFE9",
+  "enableNotifications": true,
+  "startUrl": "/",
+  "iconUrl": "https://billiardhub.net/images/Logo/bh-icon-512-v13.png",
+  "maskableIconUrl": "https://billiardhub.net/images/Logo/bh-maskable-512-v13.png",
+  "splashScreenFadeOutDuration": 300,
+  "signingKey": {
+    "path": "../../../../Billiardhub/android-signing/billiardhub-release.jks",
+    "alias": "billiardhub"
+  },
+  "appVersionName": "1.0.0",
+  "appVersionCode": 1,
+  "shortcuts": [],
+  "generatorApp": "bubblewrap-core-1.27.0",
+  "webManifestUrl": "https://billiardhub.net/manifest.json",
+  "fallbackType": "customtabs",
+  "features": {},
+  "alphaDependencies": {
+    "enabled": false
+  },
+  "enableSiteSettingsShortcut": false,
+  "isChromeOSOnly": false,
+  "isMetaQuest": false,
+  "fullScopeUrl": "https://billiardhub.net/",
+  "minSdkVersion": 24,
+  "orientation": "portrait",
+  "fingerprints": [
+    {
+      "name": "release (I:/Billiardhub/android-signing)",
+      "value": "A4:1D:A9:8A:79:78:B7:55:64:2E:84:3B:26:E5:03:D6:E9:09:BF:18:93:C1:5A:2F:B1:99:44:6D:F2:8D:01:3A"
+    }
+  ],
+  "additionalTrustedOrigins": [],
+  "retainedBundles": [],
+  "protocolHandlers": [],
+  "fileHandlers": [],
+  "launchHandlerClientMode": "",
+  "displayOverride": [],
+  "appVersion": "1.0.0"
+}

@@ -79,3 +79,10 @@ backups/
 apps/web/.impeccable/hook.cache.json
 # Playwright CLI output (may contain credentials)
 .playwright-cli/
+
+# کلیدِ امضای اندروید — هر جای مخزن (مخزن عمومی است)
+*.jks
+*.keystore
+*.p12
+*.pk8
+*.pepk

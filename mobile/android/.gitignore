@@ -1,0 +1,23 @@
+# خروجیِ ساخت و کشِ Gradle
+.gradle/
+build/
+app/build/
+local.properties
+.idea/
+*.iml
+captures/
+
+# ⚠️ کلید و رمزِ امضا هرگز در مخزن (مخزن عمومی است)
+keystore.properties
+*.jks
+*.keystore
+
+# بسته‌های ساخته‌شده — فقط روی لپ‌تاپ و برای آپلود در فروشگاه
+*.apk
+*.aab
+*.idsig
+
+# فایل‌های کلید با پسوندهای دیگر
+*.p12
+*.pk8
+*.pepk
