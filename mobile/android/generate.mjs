@@ -10,11 +10,13 @@ m.packageId = "net.billiardhub.app";
 m.name = "بیلیارد هاب";
 m.launcherName = "بیلیارد هاب";
 m.enableNotifications = true;
-m.enableSiteSettingsShortcut = false;
+// ⚠️ false نکن: قالب ManageDataLauncherActivity را حذف می‌کند ولی androidbrowserhelper 2.7.4
+// در onCreate آن را تغییر وضعیت می‌دهد و اپ هنگامِ شروع کرش می‌کند (نسخه‌ی ۱.۰.۰)
+m.enableSiteSettingsShortcut = true;
 m.fallbackType = "customtabs";
 m.minSdkVersion = 24; // androidbrowserhelper 2.7.4 کمینه‌ی ۲۴ می‌خواهد
-m.appVersionCode = 1;
-m.appVersionName = "1.0.0";
+m.appVersionCode = 2;
+m.appVersionName = "1.0.1";
 m.signingKey = {
   path: "../../../../Billiardhub/android-signing/billiardhub-release.jks",
   alias: "billiardhub",

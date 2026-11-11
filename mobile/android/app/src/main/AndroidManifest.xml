@@ -37,6 +37,7 @@
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/appName"
+        android:manageSpaceActivity="com.google.androidbrowserhelper.trusted.ManageDataLauncherActivity"
         
         android:supportsRtl="true"
         android:theme="@android:style/Theme.Translucent.NoTitleBar">
@@ -60,6 +61,22 @@
         
 
         
+
+        <!-- ⚠️ باید باشد: androidbrowserhelper 2.7.4 در onCreate این کامپوننت را روشن/خاموش
+             می‌کند و اگر در مانیفست نباشد اپ همان لحظه‌ی شروع کرش می‌کند. قالبِ bubblewrap
+             با enableSiteSettingsShortcut=false آن را حذف می‌کرد (نسخه‌ی ۱.۰.۰ همین کرش را داشت) -->
+        <activity android:name="com.google.androidbrowserhelper.trusted.ManageDataLauncherActivity"
+            android:exported="false"
+            android:enabled="true"
+            android:excludeFromRecents="true">
+            <meta-data
+                android:name="android.support.customtabs.trusted.MANAGE_SPACE_URL"
+                android:value="@string/launchUrl" />
+            <intent-filter>
+                <action android:name="android.intent.action.APPLICATION_PREFERENCES" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
 
         <activity android:name="LauncherActivity"
             android:alwaysRetainTaskState="true"
