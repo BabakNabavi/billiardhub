@@ -67,16 +67,18 @@ const STEPS = [
   { n: '۳', text: TEXT.steps[2], Icon: CheckIcon },
 ]
 
-export default function AddToHomeScreenSheet({ onClose }: { onClose: () => void }) {
+/* `persist`: فقط گیتِ خودکار وضعیتِ «بستن/متوجه شدم» را ذخیره می‌کند. بازکردنِ
+   دستی (دکمه‌ی فوتر) نباید سکوتِ دو روزه‌ی قبلی را با «dismiss» بی‌مهلت پاک کند */
+export default function AddToHomeScreenSheet({ onClose, persist = true }: { onClose: () => void; persist?: boolean }) {
   const sheetRef = useRef<HTMLDivElement>(null)
   /* فوکوس باید بعد از بسته‌شدن به همان‌جایی برگردد که بود — وگرنه کاربر
      صفحه‌خوان/کیبورد به ابتدای صفحه پرت می‌شود. */
   const restoreTo = useRef<HTMLElement | null>(null)
 
   const dismiss = useCallback((action: A2hsAction) => {
-    persistDismissal(action)
+    if (persist) persistDismissal(action)
     onClose()
-  }, [onClose])
+  }, [onClose, persist])
 
   useEffect(() => {
     restoreTo.current = document.activeElement as HTMLElement | null

@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { MapPin, Phone, Mail, ChevronLeft } from 'lucide-react';
 import EnamadSeal from './EnamadSeal';
 import PayPingSeal from './PayPingSeal';
+import { AppDownload } from './footer/AppDownload';
 
 const GOLD    = 'var(--brand)';
 /* طلاییِ نشانِ متنی — دقیقا همان که نوار دارد. */
@@ -328,6 +329,9 @@ export default function Footer() {
                 ))}
               </div>
             )}
+
+            {/* کافه‌بازار، مایکت، وب‌اپ آیفون (خواستِ مالک، آبانِ ۱۴۰۵) */}
+            <AppDownload />
           </div>
 
           {/* Nav columns */}
