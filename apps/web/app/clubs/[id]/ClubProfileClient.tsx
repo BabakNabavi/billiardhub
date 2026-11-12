@@ -229,7 +229,7 @@ export function ClubProfileClient({ initialClub }: { initialClub?: Club | null }
   const [clubStats, setClubStats]     = useState<ClubStats>(DEFAULT_STATS);
   /* شمرده‌شده‌ها جدا از آمار دستی نگه داشته می‌شوند تا با مقدار
      localStorage قاطی نشوند. `null` یعنی هنوز از سرور نیامده. */
-  const [liveStats, setLiveStats]     = useState<{ members: number; tournaments: number } | null>(null);
+  const [liveStats, setLiveStats]     = useState<{ members: number; tournaments: number; bookings: number } | null>(null);
   const [storyViewer, setStoryViewer] = useState(false);
   const { open: openImage, viewer: imageViewer } = useProfileImageViewer()
   const { open: openVideo, viewer: videoViewer } = useProfileVideoViewer()
@@ -352,7 +352,7 @@ export function ClubProfileClient({ initialClub }: { initialClub?: Club | null }
        هر بازدیدکننده‌ی دیگری جای آن‌ها را خالی می‌دید. */
     fetch(`/api/clubs/${id}/stats`, { cache: 'no-store' })
       .then(r => r.ok ? r.json() : null)
-      .then(j => { if (j) setLiveStats({ members: Number(j.members) || 0, tournaments: Number(j.tournaments) || 0 }); })
+      .then(j => { if (j) setLiveStats({ members: Number(j.members) || 0, tournaments: Number(j.tournaments) || 0, bookings: Number(j.bookings) || 0 }); })
       .catch(() => { /* بی‌صدا — کارت آمار بدون این دو هم رندر می‌شود */ });
   }, [id]);
 
@@ -718,6 +718,8 @@ export function ClubProfileClient({ initialClub }: { initialClub?: Club | null }
   const statsRows = [
     { label: 'اعضای فعال',  v: liveStats ? liveStats.members.toLocaleString('fa-IR') : null,     color: '#C7A66A' },
     { label: 'مسابقات',      v: liveStats ? liveStats.tournaments.toLocaleString('fa-IR') : null, color: '#f59e0b' },
+    /* رزروِ پرداخت‌شده یا بازی‌شده — شمرده از bookings، نه اظهارِ باشگاه‌دار */
+    { label: 'رزرو موفق',   v: liveStats ? liveStats.bookings.toLocaleString('fa-IR') : null,    color: '#30C55A' },
     { label: 'سال‌ها سابقه', v: clubStats.yearsActive   || null, color: '#a78bfa' },
     { label: 'ظرفیت روزانه', v: clubStats.dailyCapacity || null, color: '#06b6d4' },
   ];

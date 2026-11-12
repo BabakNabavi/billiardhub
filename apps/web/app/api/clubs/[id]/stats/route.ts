@@ -17,11 +17,14 @@ import { sb } from '@/lib/finance/db';
 
    شمارش به‌جای شمارنده‌ی دستی: انتخاب دوباره‌ی همان باشگاه عدد را بالا
    نمی‌برد، ترک باشگاه خودبه‌خود کم می‌کند، و حذف مسابقه هم همین‌طور.
-   هر دو از صفر شروع می‌شوند و راهی برای دست‌کاری‌شان وجود ندارد. */
+   هر دو از صفر شروع می‌شوند و راهی برای دست‌کاری‌شان وجود ندارد.
+
+   سومی (آبانِ ۱۴۰۵): رزرو موفق = رزروهای CONFIRMED یا COMPLETED همین باشگاه —
+   توضیحش پایین‌تر، کنارِ کوئری. */
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-const EMPTY = { members: 0, tournaments: 0 };
+const EMPTY = { members: 0, tournaments: 0, bookings: 0 };
 
 export async function GET(_req: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id: raw } = await params;
@@ -48,7 +51,22 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
     return error ? 0 : (n ?? 0);
   };
 
-  const [members, tournaments] = await Promise.all([count('club_members'), count('tournaments')]);
+  /* ── رزرو موفق ──
+     رزروِ پرداخت‌شده‌ی این باشگاه: CONFIRMED (پرداخت شد) یا COMPLETED (بازی شد و
+     کرونِ سرور بست). PENDING_PAYMENT (پرداخت‌نشده/منقضی) و CANCELLED (لغو/مسترد)
+     شمرده نمی‌شوند. ستونِ باشگاه در `bookings` به شکلِ camelCase یعنی "clubId" است
+     (مهاجرتِ ۰۰۱)، نه club_id ِ دو جدولِ بالا. خطا ⟵ ۰، مثلِ آن دو. */
+  const successfulBookings = async () => {
+    const { count: n, error } = await sb()
+      .from('bookings').select('id', { count: 'exact', head: true })
+      .eq('clubId', id).in('booking_status', ['CONFIRMED', 'COMPLETED']);
+    if (error) console.error('[clubs/:id/stats] bookings count failed:', error.message);
+    return error ? 0 : (n ?? 0);
+  };
 
-  return NextResponse.json({ members, tournaments }, { headers: { 'Cache-Control': 'no-store' } });
+  const [members, tournaments, bookings] = await Promise.all([
+    count('club_members'), count('tournaments'), successfulBookings(),
+  ]);
+
+  return NextResponse.json({ members, tournaments, bookings }, { headers: { 'Cache-Control': 'no-store' } });
 }

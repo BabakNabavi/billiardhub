@@ -456,7 +456,7 @@ export default function ClubDashboardPage() {
   /* اعضا و مسابقات شمرده می‌شوند، نه تایپ — از /api/clubs/:id/stats.
      `null` یعنی هنوز نیامده، که با صفر فرق دارد: نباید لحظه‌ای «۰ عضو»
      نشان بدهیم و بعد عدد واقعی بپرد. */
-  const [liveStats, setLiveStats] = useState<{ members: number; tournaments: number } | null>(null);
+  const [liveStats, setLiveStats] = useState<{ members: number; tournaments: number; bookings: number } | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
   /* حذف مسابقه — تأیید در پنجره‌ی خود پنل، نه `confirm` مرورگر */
@@ -736,7 +736,7 @@ export default function ClubDashboardPage() {
     setLiveStats(null);
     void apiFetch(`/api/clubs/${selectedClub.id}/stats`, { cache: 'no-store' })
       .then(r => r.ok ? r.json() : null)
-      .then(j => { if (j) setLiveStats({ members: Number(j.members) || 0, tournaments: Number(j.tournaments) || 0 }); })
+      .then(j => { if (j) setLiveStats({ members: Number(j.members) || 0, tournaments: Number(j.tournaments) || 0, bookings: Number(j.bookings) || 0 }); })
       .catch(() => { /* بی‌صدا */ });
 
 
@@ -2814,7 +2814,7 @@ export default function ClubDashboardPage() {
           <Card>
             <SectionTitle>آمار باشگاه</SectionTitle>
             <p style={{ fontSize: 12, color: '#9CA3AF', margin: '0 0 16px' }}>
-              این اعداد روی صفحه عمومی باشگاه نمایش داده می‌شوند، دو مورد اول
+              این اعداد روی صفحه عمومی باشگاه نمایش داده می‌شوند، سه مورد اول
               خودکار شمرده می‌شوند و قابل تغییر نیستند
             </p>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(145px, 1fr))', gap: 14, marginBottom: 20 }}>
@@ -2828,6 +2828,11 @@ export default function ClubDashboardPage() {
               <InputField label="مسابقات" readOnly
                 hint="مسابقاتی که برای این باشگاه ثبت شده"
                 value={liveStats ? liveStats.tournaments.toLocaleString('fa-IR') : '—'}
+                onChange={() => { /* شمرده می‌شود */ }} />
+              {/* رزروِ پرداخت‌شده (CONFIRMED) یا بازی‌شده (COMPLETED) — از جدولِ bookings، /api/clubs/[id]/stats */}
+              <InputField label="رزرو موفق" readOnly
+                hint="رزروهای پرداخت‌شده‌ی این باشگاه، بدون لغوشده‌ها"
+                value={liveStats ? liveStats.bookings.toLocaleString('fa-IR') : '—'}
                 onChange={() => { /* شمرده می‌شود */ }} />
               <InputField label="سال‌ها سابقه"  value={clubStats.yearsActive}   onChange={v => setClubStats(p => ({...p, yearsActive: v}))}   placeholder="مثال: ۱۵" />
               <InputField label="ظرفیت روزانه"  value={clubStats.dailyCapacity} onChange={v => setClubStats(p => ({...p, dailyCapacity: v}))} placeholder="مثال: ۸۰ نفر" />
