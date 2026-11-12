@@ -31,10 +31,10 @@ function Label({ top, name }: { top: string; name: string }) {
 export function AppDownload() {
   return (
     <div role="group" aria-labelledby="ft-app-title" className="mt-4 [@media(display-mode:standalone)]:hidden">
-      <h2 id="ft-app-title" className="mb-2 text-xs font-semibold text-ink-2">
+      <h2 id="ft-app-title" className="mb-2 text-xs font-semibold text-ink-2 max-lg:text-center">
         دریافت اپلیکیشن بیلیارد هاب
       </h2>
-      <ul className="flex flex-wrap gap-2">
+      <ul className="flex flex-wrap gap-2 max-lg:justify-center">
         {APP_STORES.map(store => {
           const icon = (
             // eslint-disable-next-line @next/next/no-img-element -- آیکونِ ثابتِ ۲ کیلوبایتی؛ next/image سودی ندارد

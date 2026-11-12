@@ -601,8 +601,10 @@ export default function ManufacturersPage() {
         @keyframes lineReveal{from{clip-path:inset(0 0 105% 0);transform:translateY(14px);opacity:0;}to{clip-path:inset(0 0 -25% 0);transform:none;opacity:1;}}
         @keyframes scaleInX{from{opacity:0;transform:scaleX(0)}to{opacity:1;transform:scaleX(1)}}
         * { box-sizing: border-box; }
-        .sel-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 20px; grid-auto-rows: 1fr; }
-        @media(max-width:1000px) { .sel-grid { grid-template-columns: repeat(2,1fr) !important; } }
+        .sel-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; grid-auto-rows: 1fr; }
+        /* استانداردِ دسکتاپ مشترک با باشگاه‌ها: ۴ ستون تا ۱۱۸۰، بعد ۳، زیرِ ۹۰۰ دو */
+        @media(max-width:1179px) { .sel-grid { grid-template-columns: repeat(3,1fr) !important; } }
+        @media(max-width:899px) { .sel-grid { grid-template-columns: repeat(2,1fr) !important; } }
         @media(max-width:600px)  { .sel-grid { grid-template-columns: 1fr !important; } }
         /* حالت فوکوس از سیستم مشترک .input می‌آید */
         @media(max-width:640px){
@@ -753,7 +755,7 @@ export default function ManufacturersPage() {
         </div>
 
         {/* ─────── BODY ─────── */}
-        <div style={{ maxWidth: 1160, margin: '0 auto', padding: 'clamp(16px,2.6vw,26px) clamp(16px,3vw,32px) 64px' }}>
+        <div style={{ maxWidth: 1280, margin: '0 auto', padding: 'clamp(16px,2.6vw,26px) clamp(16px,3vw,32px) 64px' }}>
           {/* ─── GRID / LIST ─── */}
           {filtered.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '64px 0', color: TEXT_MUT }}>

@@ -13,7 +13,7 @@
 import Link from 'next/link'
 import type { CSSProperties } from 'react'
 import {
-  GraduationCap, Trophy, ShoppingBag, Eye, Star, Scale, Radio, Building2, ArrowLeft,
+  GraduationCap, ShoppingBag, Star, Scale, Building2, Store, Clapperboard, Factory, ArrowLeft,
   type LucideIcon,
 } from 'lucide-react'
 
@@ -29,15 +29,17 @@ export interface ExploreItem {
   rgb: string
 }
 
+/* ترتیب و فهرست: خواستِ مالک، آبانِ ۱۴۰۵. رنگِ باشگاه‌ها همان سبزِ آمارِ «باشگاه»
+   زیرِ کارت‌هاست؛ مدیا به قرمزِ نمایش رفت تا دو سبز کنارِ هم نباشند. */
 export const EXPLORE_ITEMS: ExploreItem[] = [
-  { Icon: GraduationCap, label: 'مربیان حرفه‌ای', desc: 'برترین مربیان کشور',   href: '/coaches',       color: '#F472B6', rgb: '244,114,182' },
-  { Icon: Trophy,        label: 'مسابقات',        desc: 'تورنمنت‌های بیلیارد',  href: '/tournaments',   color: '#4A9EFF', rgb: '74,158,255'  },
-  { Icon: ShoppingBag,   label: 'تجهیزات اصل',    desc: 'محصولات معتبر برند',    href: '/shop',          color: '#C7A66A', rgb: '199,166,106' },
-  { Icon: Eye,           label: 'بیلیارد مدیا',   desc: 'پلتفرم ویدیویی',        href: '/media',         color: '#30C55A', rgb: '48,197,90'   },
-  { Icon: Star,          label: 'رنکینگ',         desc: 'جدول رتبه‌بندی ملی',    href: '/ranking',       color: '#B97BFF', rgb: '185,123,255' },
+  { Icon: Building2,     label: 'باشگاه‌ها',      desc: 'رزرو آنلاین میز',        href: '/clubs',         color: '#30C55A', rgb: '48,197,90'   },
+  { Icon: Store,         label: 'فروشگاه‌ها',     desc: 'فروشگاه‌های تخصصی',     href: '/sellers',       color: '#06b6d4', rgb: '6,182,212'   },
+  { Icon: ShoppingBag,   label: 'بیلیارد بازار',  desc: 'خرید و فروش تجهیزات',   href: '/shop',          color: '#C7A66A', rgb: '199,166,106' },
+  { Icon: Clapperboard,  label: 'بیلیارد مدیا',   desc: 'پلتفرم ویدیویی',        href: '/media',         color: '#ef4444', rgb: '239,68,68'   },
+  { Icon: Factory,       label: 'تولیدکنندگان',   desc: 'سازندگان تجهیزات',      href: '/manufacturers', color: '#6366F1', rgb: '99,102,241'  },
+  { Icon: GraduationCap, label: 'مربیان',         desc: 'مربیان بیلیارد',         href: '/coaches',       color: '#F472B6', rgb: '244,114,182' },
   { Icon: Scale,         label: 'داوران',         desc: 'داوران رسمی مسابقات',   href: '/referees',      color: '#fb923c', rgb: '251,146,60'  },
-  { Icon: Radio,         label: 'پخش زنده',       desc: 'استریم مسابقات',        href: '/live',          color: '#ef4444', rgb: '239,68,68'   },
-  { Icon: Building2,     label: 'تولیدکنندگان',   desc: 'سازندگان تجهیزات',      href: '/manufacturers', color: '#06b6d4', rgb: '6,182,212'   },
+  { Icon: Star,          label: 'رنکینگ',         desc: 'جدول رتبه‌بندی ملی',    href: '/ranking',       color: '#B97BFF', rgb: '185,123,255' },
 ]
 
 const CARD_CSS = `

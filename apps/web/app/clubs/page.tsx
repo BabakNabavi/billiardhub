@@ -59,14 +59,14 @@ function calcDistance(lat1: number, lon1: number, lat2: number, lon2: number) {
 }
 
 const CLUB_IMG_POOL = [
-  '/images/clubs/club6.jpeg',
-  '/images/clubs/club7.jpeg',
-  '/images/clubs/club8.jpg',
-  '/images/clubs/club9.jpeg',
-  '/images/clubs/club4.png',
-  '/images/clubs/club1.png',
-  '/images/clubs/club2.jpg',
-  '/images/clubs/club3.jpg',
+  '/images/clubs/club6.webp',
+  '/images/clubs/club7.webp',
+  '/images/clubs/club8.webp',
+  '/images/clubs/club9.webp',
+  '/images/clubs/club4.webp',
+  '/images/clubs/club1.webp',
+  '/images/clubs/club2.webp',
+  '/images/clubs/club3.webp',
 ];
 
 /* ── CARD ── */
@@ -483,10 +483,11 @@ export default function ClubsPage() {
         .clubs-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:16px }
 
         /* ۳ ستون در بازه‌ی میانی، تا کارت‌ها روی لپ‌تاپ باریک نشوند */
-        @media(max-width:1500px) { .clubs-grid { grid-template-columns:repeat(3,1fr); gap:15px } }
+        /* استانداردِ دسکتاپ (آبانِ ۱۴۰۵، با فروشگاه‌ها و تولیدکنندگان یکی): ظرفِ ۱۲۸۰، ۴ ستون تا ۱۱۸۰، بعد ۳، زیرِ ۹۰۰ دو */
+        @media(max-width:1179px) { .clubs-grid { grid-template-columns:repeat(3,1fr); gap:15px } }
 
         /* 14-inch / small laptop ≤1366px → 2 columns */
-        @media(max-width:1100px) { .clubs-grid { grid-template-columns:repeat(2,1fr); gap:14px } }
+        @media(max-width:899px) { .clubs-grid { grid-template-columns:repeat(2,1fr); gap:14px } }
 
         /* mobile — 1 ستون */
         @media(max-width:560px)  {

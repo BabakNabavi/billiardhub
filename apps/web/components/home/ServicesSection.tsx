@@ -94,9 +94,11 @@ export default function ServicesSection() {
                 width: 46, height: 46, borderRadius: 14,
                 background: `linear-gradient(135deg, ${s.color}35 0%, ${s.color}10 100%)`,
                 border: `1px solid ${s.color}40`,
+                /* همان سایه‌ی رنگیِ آیکون‌های «بیلیارد هاب در یک نگاه» (xp-ic) — خواستِ مالک */
+                boxShadow: `0 4px 14px ${s.color}47`,
                 display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
               }}>
-                <s.Icon size={20} color={s.color} />
+                <s.Icon size={20} color={s.color} style={{ filter: `drop-shadow(0 0 5px ${s.color}99)` }} />
               </span>
               <span style={{ fontSize: 'clamp(12px,1.1vw,15px)', fontWeight: 800, color: '#FFFFFF', letterSpacing: '-0.02em', lineHeight: 1.3 }}>
                 {s.title}

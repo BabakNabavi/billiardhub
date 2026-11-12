@@ -192,7 +192,6 @@ export default function Footer() {
           .ft-word-en { font-size: 12px !important; margin-top: 4px !important; }
           .ft-tagline { font-size: 15px !important; max-width: none !important; margin-top: -6px !important; margin-bottom: 10px !important; }
           /* ستون برند به اندازه‌ی ردیف تماس (یک‌خطی)، سه ستون لینک بقیه را تقسیم می‌کنند */
-          .ft-grid { align-items: start; margin-bottom: 0 !important; grid-template-columns: minmax(max-content, 1.5fr) repeat(3, minmax(0, 1fr)) !important; }
           .ft-brand { border-inline-end: 1px solid ${BORDER}; padding-inline-end: 40px; margin-inline-end: 20px; padding-block: 0; }
           .ft-contact-desk { display: flex; flex-wrap: nowrap; align-items: center; }
           .ft-contact-item { display: inline-flex; align-items: center; gap: 8px; color: ${DIM}; font-size: 14px; white-space: nowrap; }
@@ -200,13 +199,22 @@ export default function Footer() {
           .ft-contact { display: none !important; }
           /* ستون‌های کناری دست‌کم به اندازه‌ی محتوایشان؛ ستون سوم خالی می‌ماند تا نشان‌ها وسط بمانند
              (سازنده آبان ۱۴۰۵ به نوار کپی‌رایت رفت) */
-          .ft-lower { display: grid; grid-template-columns: minmax(max-content, 1fr) auto minmax(max-content, 1fr); align-items: center;
-            border-top: 1px solid ${BORDER}; margin-top: 18px; padding-top: 4px; }
-          .ft-legal-desk { display: flex; align-items: center; gap: 18px; justify-self: start;
-            min-height: 56px; padding-inline-end: clamp(24px, 3vw, 48px); border-inline-end: 1px solid ${BORDER}; white-space: nowrap; }
+          /* ── حقوقی و نشان‌ها زیرِ ستون‌های لینک (خواستِ مالک، آبانِ ۱۴۰۵) ──
+             ستونِ برند (با دریافتِ اپ) بلند است و زیرِ سه ستونِ لینک ~۱۳۰ پیکسل خالی
+             می‌ماند، در حالی که حقوقی و نشان‌ها ردیفِ جدایی زیرِ همه می‌گرفتند. حالا
+             ft-inner خودش شبکه است و ft-grid «contents»: برند دو ردیف می‌گیرد و
+             ردیفِ دوم زیرِ لینک‌ها مالِ ft-lower است. ساختارِ HTML دست نخورد (پی‌پینگ
+             یک نمونه بیشتر برنمی‌دارد) و زیرِ ۱۰۲۴ همان چیدمانِ قبلی است. */
+          /* auto 1fr: ارتفاعِ اضافه‌ی ستونِ برند فقط به ردیفِ دوم می‌رود، تا خطِ بالای حقوقی درست زیرِ لینک‌ها بماند */
+          .ft-inner { display: grid !important; grid-template-columns: minmax(max-content, 1.5fr) repeat(3, minmax(0, 1fr)); grid-template-rows: auto 1fr; column-gap: 30px; align-items: start; }
+          .ft-grid { display: contents !important; }
+          .ft-brand { grid-column: 1; grid-row: 1 / span 2; }
+          .ft-lower { grid-column: 2 / -1; grid-row: 2; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px 24px;
+            border-top: 1px solid ${BORDER}; margin-top: 20px; padding-top: 16px; }
+          .ft-legal-desk { display: flex; align-items: center; gap: 18px; white-space: nowrap; }
           .ft-legal-desk .ft-legal { font-size: 14.5px; color: ${DIM}; }
           .ft-sep { width: 1px; height: 18px; background: ${BORDER}; }
-          .ft-seals { margin-top: -18px !important; padding-bottom: 0 !important; padding-inline: clamp(24px, 3vw, 48px); gap: clamp(24px, 2.6vw, 40px) !important; flex-wrap: nowrap !important; }
+          .ft-seals { margin-top: 0 !important; padding: 0 !important; gap: clamp(16px, 2vw, 32px) !important; flex-wrap: nowrap !important; }
           .ft-bottom { display: none !important; }
           .ft-band { display: block; background: rgba(26,25,23,0.045); border-top: 1px solid ${BORDER};
             font-size: 13px; color: ${DIM2}; }
