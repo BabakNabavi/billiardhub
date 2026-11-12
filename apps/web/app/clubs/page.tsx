@@ -112,14 +112,14 @@ function ClubCard({ club, view, idx = 0, tournaments = [] }: { club: Club; view:
         onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)}
         /* همان سطح کارت گرید — دو ماده‌ی متفاوت در دو نمای یک فهرست
            یعنی سوییچ نما ظاهر صفحه را عوض می‌کند. */
-        className="lq-pcard"
+        className="lq-pcard lc-list"
         style={{
           display: 'flex', alignItems: 'stretch', overflow: 'hidden',
           borderColor: hov ? 'rgba(199,166,106,0.50)' : undefined,
         }}
       >
         {/* thumbnail */}
-        <div style={{ width: 'clamp(70px,18vw,140px)', flexShrink: 0, position: 'relative', overflow: 'hidden' }}>
+        <div className="lc-list-img" style={{ flexShrink: 0, position: 'relative', overflow: 'hidden' }}>
           <img loading="lazy" decoding="async" src={img} alt={club.name} style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.75)' }}
             onError={onImgError} />
           {/* تیک تأیید این‌جا نیست — کنار نام است. روی گوشه‌ی عکس،
@@ -144,12 +144,12 @@ function ClubCard({ club, view, idx = 0, tournaments = [] }: { club: Club; view:
         </div>
 
         {/* content */}
-        <div style={{ flex: 1, padding: '14px 16px', minWidth: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: 6 }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, flexWrap: 'wrap', maxWidth: '100%' }}>
+        <div className="lc-list-body" style={{ flex: 1, padding: '16px 18px', minWidth: 0, display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', maxWidth: '100%' }}>
             {/* تیک بیرون h3 است: نام بلند با ellipsis بریده می‌شود و
                 تیک داخل h3 هم با آن حذف می‌شد. */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 4, minWidth: 0 }}>
-              <h3 style={{ fontSize: 16, fontWeight: 800, color: '#111111', margin: 0, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{club.name}</h3>
+              <h3 className="lc-title" style={{ fontSize: 16, fontWeight: 800, color: '#111111', margin: 0, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{club.name}</h3>
               {club.isVerified && <VerifiedBadge title="باشگاه تأیید شده" style={{ marginInlineStart: 0 }} />}
             </div>
             {club.rating && (
@@ -159,23 +159,27 @@ function ClubCard({ club, view, idx = 0, tournaments = [] }: { club: Club; view:
               </div>
             )}
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, fontSize: 13, color: 'rgba(0,0,0,0.45)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: 'rgba(0,0,0,0.45)' }}>
             <MapPin size={10} color={PIN_GREEN} />{club.city}
             {club.distance !== undefined && <span style={{ color: '#A07840' }}>· {faDistance(club.distance)}</span>}
           </div>
-          <div style={{ display: 'flex', justifyContent: 'center', gap: 5, flexWrap: 'wrap', alignItems: 'center', marginTop: 'auto' }}>
+          {/* توضیح مثلِ ردیفِ فروشگاه و تولیدکننده — فقط دسکتاپ */}
+          {club.description && (
+            <p className="lc-hide-sm" style={{ fontSize: 12.5, color: 'rgba(0,0,0,0.48)', margin: 0, lineHeight: 1.6, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{club.description}</p>
+          )}
+          <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap', alignItems: 'center' }}>
             {activeTables.slice(0, 3).map(t => (
               <span key={t.key} style={{ fontSize: 12, color: t.color, background: `${t.color}12`, border: `1px solid ${t.color}22`, borderRadius: 20, padding: '2px 8px', fontWeight: 700 }}>
                 {toFa(t.n)} {t.label}
               </span>
             ))}
             {/* دکمه رزرو — same pill style as table type badges */}
-            <span style={{ fontSize: 12, color: '#C7A66A', background: 'rgba(199,166,106,0.10)', border: '1px solid rgba(199,166,106,0.22)', borderRadius: 20, padding: '2px 8px', fontWeight: 700, marginRight: 'auto', flexShrink: 0, display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+            <span className="lc-hide-sm" style={{ fontSize: 12, color: '#C7A66A', background: 'rgba(199,166,106,0.10)', border: '1px solid rgba(199,166,106,0.22)', borderRadius: 20, padding: '2px 8px', fontWeight: 700, flexShrink: 0, display: 'inline-flex', alignItems: 'center', gap: 4 }}>
               رزرو <span style={{ lineHeight: 1 }}>←</span>
             </span>
           </div>
           {tournBadge && (
-            <div style={{ marginTop: 6, display: 'flex', justifyContent: 'center' }}>
+            <div style={{ display: 'flex' }}>
               <span style={{ fontSize: 11, fontWeight: 800, color: tournBadge.color, background: tournBadge.bg, border: `1px solid ${tournBadge.border}`, borderRadius: 20, padding: '3px 10px', animation: tournBadge.pulse ? 'gentlePulse 1.8s ease-in-out infinite' : 'none', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
                 <Trophy size={9} /> {tournBadge.label}
               </span>
@@ -206,7 +210,7 @@ function ClubCard({ club, view, idx = 0, tournaments = [] }: { club: Club; view:
         }}
       >
         {/* image */}
-        <div style={{ height: 'clamp(140px,22vw,190px)', position: 'relative', overflow: 'hidden', flexShrink: 0 }}>
+        <div className="lc-media" style={{ position: 'relative', overflow: 'hidden', flexShrink: 0 }}>
           <img loading="lazy" decoding="async" src={img} alt={club.name}
             style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.80)', transition: 'transform 400ms cubic-bezier(0.25,0.46,0.45,0.94)', transform: hov ? 'scale(1.06)' : 'scale(1.00)', willChange: 'transform' }}
             onError={onImgError} />
@@ -236,8 +240,8 @@ function ClubCard({ club, view, idx = 0, tournaments = [] }: { club: Club; view:
           </div>}
 
           {/* رزرو badge — same pill style as table type badges (gold) */}
-          <div style={{
-            position: 'absolute', bottom: 10, left: 10,
+          <div className="lc-hide-sm" style={{
+            position: 'absolute', bottom: 10, insetInlineEnd: 10,
             fontSize: 12, fontWeight: 700,
             color: '#C7A66A',
             background: 'rgba(199,166,106,0.10)',
@@ -264,11 +268,11 @@ function ClubCard({ club, view, idx = 0, tournaments = [] }: { club: Club; view:
         </div>
 
         {/* body */}
-        <div style={{ padding: '14px 14px 0', flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: 8 }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, flexWrap: 'wrap' }}>
+        <div className="lc-body" style={{ padding: '16px 18px 0', flex: 1, display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
             {/* این عنوان می‌پیچد، پس تیک داخل h3 می‌آید تا دنبال
                 آخرین کلمه بماند و تنها به خط بعد نیفتد. */}
-            <h3 style={{ fontSize: 16, fontWeight: 800, color: '#111111', margin: 0, lineHeight: 1.25 }}>
+            <h3 className="lc-title" style={{ fontSize: 16, fontWeight: 800, color: '#111111', margin: 0, lineHeight: 1.35 }}>
               {club.name}{club.isVerified && <VerifiedBadge title="باشگاه تأیید شده" />}
             </h3>
             {club.rating && (
@@ -279,12 +283,12 @@ function ClubCard({ club, view, idx = 0, tournaments = [] }: { club: Club; view:
             )}
           </div>
 
-          <div style={{ fontSize: 14, color: 'rgba(0,0,0,0.48)', lineHeight: 1.6, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+          <div className="lc-hide-sm" style={{ fontSize: 13, color: 'rgba(0,0,0,0.48)', lineHeight: 1.6, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
             {club.description}
           </div>
 
           {/* table type pills */}
-          <div style={{ display: 'flex', justifyContent: 'center', gap: 4, flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
             {activeTables.slice(0, 3).map(t => (
               <span key={t.key} style={{ fontSize: 12, color: t.color, background: `${t.color}10`, border: `1px solid ${t.color}22`, borderRadius: 20, padding: '2px 8px', fontWeight: 700 }}>
                 {toFa(t.n)} {t.label}
@@ -293,7 +297,7 @@ function ClubCard({ club, view, idx = 0, tournaments = [] }: { club: Club; view:
           </div>
 
           {/* amenity icons */}
-          <div style={{ display: 'flex', justifyContent: 'center', gap: 5 }}>
+          <div className="lc-hide-sm" style={{ display: 'flex', gap: 5 }}>
             {AMENITIES.map(a => (
               <div key={a.key} title={a.label} style={{ width: 28, height: 28, borderRadius: 8, background: (num(club, a.key) > 0) ? 'rgba(199,166,106,0.10)' : 'rgba(0,0,0,0.03)', border: `1px solid ${(num(club, a.key) > 0) ? 'rgba(199,166,106,0.28)' : 'rgba(0,0,0,0.06)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: (num(club, a.key) > 0) ? '#A07840' : 'rgba(0,0,0,0.18)' }}>
                 {a.icon}
@@ -312,9 +316,9 @@ function ClubCard({ club, view, idx = 0, tournaments = [] }: { club: Club; view:
         </div>
 
         {/* footer */}
-        <div style={{ padding: '10px 14px 14px', marginTop: 'auto' }}>
+        <div style={{ padding: '10px 18px 16px', marginTop: 'auto' }}>
           <div style={{ height: 1, background: 'rgba(0,0,0,0.06)', marginBottom: 10 }} />
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
             <span style={{ fontSize: 13, color: 'rgba(0,0,0,0.38)', display: 'flex', alignItems: 'center', gap: 3 }}>
               <Users size={10} />{toFa(club.memberCount ?? 0)} عضو
             </span>
@@ -479,19 +483,8 @@ export default function ClubsPage() {
         .city-scroll::-webkit-scrollbar { height:0 }
         .dd-item:hover { background:rgba(199,166,106,0.08)!important;color:#A07840!important }
 
-        /* grid — ۴ ستون روی نمایشگر بزرگ (پیش‌تر ۳ بود) */
-        .clubs-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:16px }
-
-        /* ۳ ستون در بازه‌ی میانی، تا کارت‌ها روی لپ‌تاپ باریک نشوند */
-        /* استانداردِ دسکتاپ (آبانِ ۱۴۰۵، با فروشگاه‌ها و تولیدکنندگان یکی): ظرفِ ۱۲۸۰، ۴ ستون تا ۱۱۸۰، بعد ۳، زیرِ ۹۰۰ دو */
-        @media(max-width:1179px) { .clubs-grid { grid-template-columns:repeat(3,1fr); gap:15px } }
-
-        /* 14-inch / small laptop ≤1366px → 2 columns */
-        @media(max-width:899px) { .clubs-grid { grid-template-columns:repeat(2,1fr); gap:14px } }
-
-        /* mobile — 1 ستون */
+        /* شبکه و ابعادِ کارت: استانداردِ مشترکِ lc-* در globals.css (با فروشگاه‌ها و تولیدکنندگان یکی) */
         @media(max-width:560px)  {
-          .clubs-grid { grid-template-columns:1fr; gap:12px }
           .toolbar-row { flex-wrap:wrap; gap:6px }
           .toolbar-search { min-width:100%!important; order:-1 }
           .tb-count { display:none!important }
@@ -670,7 +663,7 @@ export default function ClubsPage() {
               )}
             </div>
           ) : view === 'grid' ? (
-            <div className="clubs-grid">
+            <div className="lc-grid">
               {filtered.map((club, i) => (
                 <div key={club.id} style={{ animation: `fadeUp 0.5s ease ${i * 0.05}s both` }}>
                   <ClubCard club={club} view="grid" idx={i} tournaments={tournByClub.get(club.id) ?? []} />

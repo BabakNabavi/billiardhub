@@ -162,10 +162,13 @@ function SellerCard({ seller, view }: { seller: typeof SELLERS[0]; view: 'grid' 
         از {seller.since}
       </span>
       )}
+      {/* «۰ محصول» نشان داده نمی‌شود — نه هنگامِ بارگذاری، نه برای فروشگاهِ بی‌آگهی */}
+      {seller.productCount > 0 && (
       <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
-        {seller.productCount} محصول
+        {seller.productCount.toLocaleString('fa-IR')} محصول
       </span>
+      )}
     </div>
   )
   const brandsRow = seller.brands.length > 0 && (
@@ -206,9 +209,9 @@ function SellerCard({ seller, view }: { seller: typeof SELLERS[0]; view: 'grid' 
          یک لینک واقعی با نام درست برای صفحه‌خوان، کلیک روی هرجای
          کارت، و دکمه‌های داخلی که با z-index رویش می‌مانند. */
       <div onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)}
-        className="sel-list-card sel-card lq-pcard" style={{ ...shell, display: 'flex', alignItems: 'stretch', minHeight: 158 }}>
+        className="sel-list-card sel-card lq-pcard lc-list" style={{ ...shell, display: 'flex', alignItems: 'stretch' }}>
         {/* image */}
-        <div className="sel-list-img" style={{ position: 'relative', width: 176, flexShrink: 0, overflow: 'hidden' }}>
+        <div className="sel-list-img lc-list-img" style={{ position: 'relative', flexShrink: 0, overflow: 'hidden' }}>
           <img loading="lazy" decoding="async" src={seller.bannerImage} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.5s', transform: hov ? 'scale(1.05)' : 'scale(1)' }} />
           <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to left, rgba(0,0,0,0.05), rgba(0,0,0,0.35))' }} />
           {seller.elite && (
@@ -219,7 +222,7 @@ function SellerCard({ seller, view }: { seller: typeof SELLERS[0]; view: 'grid' 
           )}
         </div>
         {/* info */}
-        <div className="sel-list-body" style={{ flex: 1, minWidth: 0, padding: '16px 18px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+        <div className="sel-list-body lc-list-body" style={{ flex: 1, minWidth: 0, padding: '16px 18px', display: 'flex', flexDirection: 'column', gap: 8 }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
             <h3 style={{ fontSize: 16, fontWeight: 800, color: TEXT, margin: 0 }}>
               <Link href={`/sellers/${seller.id}`} className="sel-card-link">{seller.name}</Link>
@@ -245,7 +248,7 @@ function SellerCard({ seller, view }: { seller: typeof SELLERS[0]; view: 'grid' 
     <div onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)}
       className="sel-card lq-pcard" style={{ ...shell, display: 'flex', flexDirection: 'column', height: '100%' }}>
       {/* banner (ارتفاع +۱۰٪ ⇒ کل کارت بلندتر) */}
-      <div style={{ height: 154, position: 'relative', overflow: 'hidden', flexShrink: 0 }}>
+      <div className="lc-media" style={{ position: 'relative', overflow: 'hidden', flexShrink: 0 }}>
         <img loading="lazy" decoding="async" src={seller.bannerImage} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.5s', transform: hov ? 'scale(1.05)' : 'scale(1)' }} />
         <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(0,0,0,0.10) 0%, rgba(0,0,0,0.45) 100%)' }} />
         {seller.elite && (
@@ -261,31 +264,31 @@ function SellerCard({ seller, view }: { seller: typeof SELLERS[0]; view: 'grid' 
       </div>
 
       {/* body — flex تا کارت پر شود و دکمه‌ها ته کارت بچسبند ⇒ همه‌ی کارت‌ها یک‌اندازه */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: '0 18px 18px' }}>
+      <div className="lc-body" style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: '0 18px 18px' }}>
         {/* logo fully visible (no badge overlap on image) */}
         {/* بدون z-index: لوگو تعاملی نیست و اگر بالای روکش بنشیند،
             کلیک روی همان ناحیه هیچ‌کاری نمی‌کند. ترتیب DOM برای
             دیده‌شدنش روی بنر کافی است. */}
-        <div style={{ marginTop: -32, marginBottom: 12, position: 'relative' }}>
+        <div className="lc-logo" style={{ marginTop: -32, marginBottom: 12, position: 'relative' }}>
           <SellerLogo name={seller.name} size={62} />
         </div>
 
         {/* name */}
         <div style={{ margin: '0 0 5px' }}>
-          <h3 style={{ fontSize: 16, fontWeight: 800, color: TEXT, margin: 0, lineHeight: 1.35 }}>
+          <h3 className="lc-title" style={{ fontSize: 16, fontWeight: 800, color: TEXT, margin: 0, lineHeight: 1.35 }}>
             <Link href={`/sellers/${seller.id}`} className="sel-card-link">{seller.name}</Link>
             {seller.verified && <VerifiedBadge title="فروشگاه تأیید شده" />}
           </h3>
         </div>
 
         {/* توضیحات — همیشه فضای ۲ خط را می‌گیرد تا ارتفاع کارت‌ها یکسان بماند */}
-        <p style={{ fontSize: 12.5, color: TEXT_SEC, margin: '0 0 12px', lineHeight: 1.6, minHeight: 40, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{seller.description}</p>
+        <p className="lc-hide-sm" style={{ fontSize: 12.5, color: TEXT_SEC, margin: '0 0 12px', lineHeight: 1.6, minHeight: 40, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{seller.description}</p>
 
         <div style={{ marginBottom: 12 }}>{metaRow}</div>
-        <div style={{ marginBottom: 16, minHeight: 26 }}>{brandsRow}</div>
+        <div className="lc-hide-sm" style={{ marginBottom: 16, minHeight: 26 }}>{brandsRow}</div>
 
         {/* action buttons — به ته کارت چسبیده */}
-        <div style={{ marginTop: 'auto', display: 'flex', gap: 8, borderTop: '1px solid rgba(28,28,26,0.06)', paddingTop: 14 }}>
+        <div className="lc-hide-sm" style={{ marginTop: 'auto', display: 'flex', gap: 8, borderTop: '1px solid rgba(28,28,26,0.06)', paddingTop: 14 }}>
           <div style={{ flex: 1 }}>
             <Link href={`/sellers/${seller.id}`} style={{
               display: 'block', padding: '10px 0', borderRadius: 10, textAlign: 'center', textDecoration: 'none',
@@ -380,6 +383,8 @@ export default function SellersPage() {
      بعد از mount، فروشگاه‌های approved از localStorage خوانده و اضافه می‌شوند. */
   const [stores, setStores] = useState<typeof SELLERS>(SELLERS)
   const [loadFailed, setLoadFailed] = useState(false)
+  /* شمارِ آگهیِ هر فروشگاه — null یعنی «هنوز نیامده یا نمی‌دانیم» ⟵ عدد نشان داده نمی‌شود */
+  const [counts, setCounts] = useState<Map<string, number> | null>(null)
   useEffect(() => {
     /* فورا هرچه در همین مرورگر هست، بعد فهرست سرور که همه‌ی
        فروشگاه‌ها را دارد نه فقط فروشگاه خود بیننده. */
@@ -394,7 +399,28 @@ export default function SellersPage() {
       /* پاسخِ سرور، حتی خالی، حقیقت است — همان دلیلِ app/coaches */
       setStores(mergeStores(SELLERS, remote))
     })().catch(err => { console.error('[profiles] list load failed', err); setLoadFailed(true) })
+
+    /* ── شمارِ واقعیِ محصول ──
+       پیش‌تر productCount همیشه ۰ بود و «آرتا تجهیزات بیلیارد» با ۱۳ آگهی «۰ محصول»
+       نشان می‌داد. شمارش سمتِ سرور است (/api/products/counts، کلید = نامکِ فروشگاه،
+       همان storeSlug که صفحه‌ی فروشگاه با آن فیلتر می‌کند): یک درخواستِ سبک برای همه،
+       بی سقفِ ۲۰۰ ردیف. شکست ⟵ counts همان null می‌ماند و عددی نشان داده نمی‌شود. */
+    void (async () => {
+      try {
+        const r = await fetch('/api/products/counts')
+        if (!r.ok) throw new Error('HTTP ' + r.status)
+        const j = (await r.json()) as Record<string, unknown>
+        const bySlug = new Map<string, number>()
+        for (const [slug, n] of Object.entries(j)) if (typeof n === 'number') bySlug.set(slug, n)
+        setCounts(bySlug)
+      } catch (err) { console.error('[sellers] product counts failed', err) }
+    })()
   }, [])
+  /* شمارِ محصول روی همان فهرست — تا رسیدنِ عدد، null یعنی «نشان نده» */
+  const storesWithCounts = useMemo(
+    () => (counts ? stores.map(st => ({ ...st, productCount: counts.get(st.id) ?? 0 })) : stores),
+    [stores, counts],
+  )
 
   const getLocation = () => {
     if (nearMe) { setNearMe(false); return }
@@ -417,7 +443,7 @@ export default function SellersPage() {
   const filtered = useMemo(() => {
     /* همان موتورِ جست‌وجوی سراسری (lib/search/filter) */
     const hit = makeMatcher(search)
-    const list = stores
+    const list = storesWithCounts
       .filter(s => hit(s.name, s.city, ...s.brands, ...s.specialties))
       .filter(s => category === 'همه' || matchSpec(s, category))
       .filter(s => status === 'همه' || (status === 'verified' && s.verified) || (status === 'elite' && s.elite) || (status === 'top' && s.rating >= 4.7))
@@ -429,7 +455,7 @@ export default function SellersPage() {
       return b.sinceYear - a.sinceYear
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [stores, search, category, status, sort, nearMe, userLoc])
+  }, [storesWithCounts, search, category, status, sort, nearMe, userLoc])
 
   return (
     <>
@@ -466,22 +492,16 @@ export default function SellersPage() {
         @keyframes lineReveal{from{clip-path:inset(0 0 105% 0);transform:translateY(14px);opacity:0;}to{clip-path:inset(0 0 -25% 0);transform:none;opacity:1;}}
         @keyframes scaleInX{from{opacity:0;transform:scaleX(0)}to{opacity:1;transform:scaleX(1)}}
         * { box-sizing: border-box; }
-        .sel-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; grid-auto-rows: 1fr; }
-        /* استانداردِ دسکتاپ مشترک با باشگاه‌ها: ۴ ستون تا ۱۱۸۰، بعد ۳، زیرِ ۹۰۰ دو */
-        @media(max-width:1179px) { .sel-grid { grid-template-columns: repeat(3,1fr) !important; } }
-        @media(max-width:899px) { .sel-grid { grid-template-columns: repeat(2,1fr) !important; } }
-        @media(max-width:600px)  { .sel-grid { grid-template-columns: 1fr !important; } }
+        /* شبکه و ابعادِ کارت: استانداردِ مشترکِ lc-* در globals.css (با باشگاه‌ها یکی) */
         .sel-list { display: flex; flex-direction: column; gap: 14px; }
         .s-chip { transition: all 0.18s; }
         .s-chip:hover { opacity: 0.85; }
         /* حالت فوکوس از سیستم مشترک .input می‌آید */
         @media(max-width:640px){
           /* لیست موبایل: افقی و جمع‌وجور مثل باشگاه‌ها (نه ستونی) */
-          .sel-list-img { width: clamp(96px,28vw,128px) !important; }
           .sel-list-actions { display: none !important; }
           .sel-list-brands { display: none !important; }
           .sel-list-desc { display: none !important; }
-          .sel-list-body { padding: 12px 14px !important; gap: 7px !important; }
         }
         .filt-scroll { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; }
         .filt-scroll::-webkit-scrollbar { display: none; }
@@ -568,7 +588,7 @@ export default function SellersPage() {
               <p style={{ fontSize: 14 }}>{loadFailed ? 'اتصال اینترنت را بررسی کنید و صفحه را دوباره باز کنید' : 'فیلترها را تغییر دهید یا جستجو را پاک کنید'}</p>
             </div>
           ) : view === 'grid' ? (
-            <div className="sel-grid" style={{ marginBottom: 56 }}>
+            <div className="lc-grid" style={{ marginBottom: 56 }}>
               {filtered.map((s, i) => (
                 <div key={s.id} style={{ animation: `fadeUp ${0.3 + i * 0.05}s ease both` }}>
                   <SellerCard seller={s} view="grid" />

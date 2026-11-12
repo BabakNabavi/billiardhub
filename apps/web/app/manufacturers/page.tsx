@@ -2,7 +2,6 @@
 
 import { useState, useMemo, useRef, useEffect } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
 import { MANUFACTURERS, type MockManufacturer } from '../../lib/manufacturers-data'
 import { listApprovedManufacturers, profileToManufacturer } from '../../lib/manufacturer-store'
 import type { ManufacturerProfile } from '../../lib/manufacturer-store'
@@ -286,14 +285,11 @@ const PhoneIcon =<svg width="16" height="16" viewBox="0 0 24 24" fill="none" str
 // ── Manufacturer Card — grid + list, modern gold theme ──────────
 function MfrCard({ mfr, view }: { mfr: MockManufacturer; view: 'grid' | 'list' }) {
   const [hov, setHov] = useState(false)
-  const router = useRouter()
 
+  /* جنسِ سطح از lq-pcard، مثلِ باشگاه و فروشگاه — سه کارتِ هم‌خانواده یک ماده دارند */
   const shell: React.CSSProperties = {
-    background: 'rgba(255,255,255,0.78)', borderRadius: 14, overflow: 'hidden',
-    border: `1.5px solid ${hov ? 'rgba(199,166,106,0.5)' : 'rgba(28,28,26,0.09)'}`,
-    boxShadow: hov ? '0 18px 46px rgba(28,28,26,0.13), 0 4px 14px rgba(199,166,106,0.12)' : '0 2px 12px rgba(28,28,26,0.06)',
-    transform: hov ? 'translateY(-5px)' : 'none',
-    transition: 'all 0.28s cubic-bezier(0.22,1,0.36,1)', cursor: 'pointer',
+    overflow: 'hidden', cursor: 'pointer',
+    borderColor: hov ? 'rgba(199,166,106,0.55)' : undefined,
   }
 
   /* ⚠️ شهر این‌جا نیست: روی خودِ بنر نشسته، همان‌جا که کارتِ باشگاه
@@ -373,9 +369,9 @@ function MfrCard({ mfr, view }: { mfr: MockManufacturer; view: 'grid' | 'list' }
   /* ── LIST VIEW ── */
   if (view === 'list') {
     return (
-      <div onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)} onClick={() => router.push(`/manufacturers/${mfr.id}`)}
-        className="sel-list-card" style={{ ...shell, display: 'flex', alignItems: 'stretch' }}>
-        <div className="sel-list-img" style={{ position: 'relative', width: 176, flexShrink: 0, overflow: 'hidden' }}>
+      <div onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)}
+        className="sel-list-card sel-card lq-pcard lc-list" style={{ ...shell, display: 'flex', alignItems: 'stretch' }}>
+        <div className="sel-list-img lc-list-img" style={{ position: 'relative', flexShrink: 0, overflow: 'hidden' }}>
           {mfr.bannerImage
             ? <img loading="lazy" decoding="async" src={mfr.bannerImage} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.5s', transform: hov ? 'scale(1.05)' : 'scale(1)' }} />
             : <MfrPoster variant={mfr.sinceYear} />}
@@ -388,9 +384,9 @@ function MfrCard({ mfr, view }: { mfr: MockManufacturer; view: 'grid' | 'list' }
           )}
           {cityChip}
         </div>
-        <div className="sel-list-body" style={{ flex: 1, minWidth: 0, padding: '16px 18px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+        <div className="sel-list-body lc-list-body" style={{ flex: 1, minWidth: 0, padding: '16px 18px', display: 'flex', flexDirection: 'column', gap: 8 }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
-            <h3 style={{ fontSize: 16, fontWeight: 800, color: TEXT, margin: 0 }}>{mfr.name}{mfr.verified && <VerifiedBadge title="تولیدکننده‌ی تأیید شده" />}</h3>
+            <h3 className="lc-title" style={{ fontSize: 16, fontWeight: 800, color: TEXT, margin: 0 }}><Link href={`/manufacturers/${mfr.id}`} className="sel-card-link">{mfr.name}</Link>{mfr.verified && <VerifiedBadge title="تولیدکننده‌ی تأیید شده" />}</h3>
           </div>
           <p className="sel-list-desc" style={{ fontSize: 12.5, color: TEXT_SEC, margin: 0, lineHeight: 1.6, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{mfr.description}</p>
           <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>{metaRow}</div>
@@ -405,10 +401,10 @@ function MfrCard({ mfr, view }: { mfr: MockManufacturer; view: 'grid' | 'list' }
 
   /* ── GRID VIEW ── */
   return (
-    <div onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)} onClick={() => router.push(`/manufacturers/${mfr.id}`)}
-      style={{ ...shell, display: 'flex', flexDirection: 'column', height: '100%' }}>
+    <div onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)}
+      className="sel-card lq-pcard" style={{ ...shell, display: 'flex', flexDirection: 'column', height: '100%' }}>
       {/* banner (ارتفاع +۱۰٪ ⇒ کل کارت بلندتر) */}
-      <div style={{ height: 154, position: 'relative', overflow: 'hidden', flexShrink: 0 }}>
+      <div className="lc-media" style={{ position: 'relative', overflow: 'hidden', flexShrink: 0 }}>
         {mfr.bannerImage
             ? <img loading="lazy" decoding="async" src={mfr.bannerImage} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.5s', transform: hov ? 'scale(1.05)' : 'scale(1)' }} />
             : <MfrPoster variant={mfr.sinceYear} />}
@@ -427,21 +423,21 @@ function MfrCard({ mfr, view }: { mfr: MockManufacturer; view: 'grid' | 'list' }
           (از نام ساخته می‌شد، نه لوگوی واقعی) که نصفش روی عکس
           می‌افتاد و همان چیزی بود که کارت را «بهم‌ریخته» نشان می‌داد.
           کارتِ باشگاه هم چنین چیزی ندارد. */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: '16px 18px 18px' }}>
+      <div className="lc-body" style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: '16px 18px 18px' }}>
         <div style={{ margin: '0 0 5px' }}>
-          <h3 style={{ fontSize: 16, fontWeight: 800, color: TEXT, margin: 0, lineHeight: 1.35 }}>{mfr.name}{mfr.verified && <VerifiedBadge title="تولیدکننده‌ی تأیید شده" />}</h3>
+          <h3 className="lc-title" style={{ fontSize: 16, fontWeight: 800, color: TEXT, margin: 0, lineHeight: 1.35 }}><Link href={`/manufacturers/${mfr.id}`} className="sel-card-link">{mfr.name}</Link>{mfr.verified && <VerifiedBadge title="تولیدکننده‌ی تأیید شده" />}</h3>
         </div>
 
         {mfr.description && (
-          <p style={{ fontSize: 12.5, color: TEXT_SEC, margin: '0 0 12px', lineHeight: 1.6, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{mfr.description}</p>
+          <p className="lc-hide-sm" style={{ fontSize: 12.5, color: TEXT_SEC, margin: '0 0 12px', lineHeight: 1.6, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{mfr.description}</p>
         )}
 
         <div style={{ marginBottom: 12 }}>{metaRow}</div>
         {/* ⚠️ `minHeight` ثابت برداشته شد: تولیدکننده‌ای که تخصصی ثبت
             نکرده، یک نوارِ خالیِ ۲۶ پیکسلی وسطِ کارتش می‌ماند. */}
-        {specRow && <div style={{ marginBottom: 16 }}>{specRow}</div>}
+        {specRow && <div className="lc-hide-sm" style={{ marginBottom: 16 }}>{specRow}</div>}
 
-        <div style={{ marginTop: 'auto', display: 'flex', gap: 8, borderTop: '1px solid rgba(28,28,26,0.06)', paddingTop: 14 }}>
+        <div className="lc-hide-sm" style={{ marginTop: 'auto', display: 'flex', gap: 8, borderTop: '1px solid rgba(28,28,26,0.06)', paddingTop: 14 }}>
           <div style={{ flex: 1 }}>
             <Link href={`/manufacturers/${mfr.id}`} onClick={e => e.stopPropagation()} style={{
               display: 'block', padding: '10px 0', borderRadius: 10, textAlign: 'center', textDecoration: 'none',
@@ -601,19 +597,23 @@ export default function ManufacturersPage() {
         @keyframes lineReveal{from{clip-path:inset(0 0 105% 0);transform:translateY(14px);opacity:0;}to{clip-path:inset(0 0 -25% 0);transform:none;opacity:1;}}
         @keyframes scaleInX{from{opacity:0;transform:scaleX(0)}to{opacity:1;transform:scaleX(1)}}
         * { box-sizing: border-box; }
-        .sel-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; grid-auto-rows: 1fr; }
-        /* استانداردِ دسکتاپ مشترک با باشگاه‌ها: ۴ ستون تا ۱۱۸۰، بعد ۳، زیرِ ۹۰۰ دو */
-        @media(max-width:1179px) { .sel-grid { grid-template-columns: repeat(3,1fr) !important; } }
-        @media(max-width:899px) { .sel-grid { grid-template-columns: repeat(2,1fr) !important; } }
-        @media(max-width:600px)  { .sel-grid { grid-template-columns: 1fr !important; } }
+        /* شبکه و ابعادِ کارت: استانداردِ مشترکِ lc-* در globals.css (با باشگاه‌ها یکی) */
         /* حالت فوکوس از سیستم مشترک .input می‌آید */
         @media(max-width:640px){
-          .sel-list-img { width: clamp(96px,28vw,128px) !important; }
           .sel-list-actions { display: none !important; }
           .sel-list-brands { display: none !important; }
           .sel-list-desc { display: none !important; }
-          .sel-list-body { padding: 12px 14px !important; gap: 7px !important; }
         }
+        /* ── روکش لینک کارت — همان الگوی صفحه‌ی فروشگاه‌ها ──
+           کارت قبلا div با onClick بود: نه کیبورد، نه صفحه‌خوان، و در موبایل که
+           دکمه‌ها پنهان‌اند هیچ لینکِ واقعی نمی‌ماند. حالا نام لینک است و
+           شبه‌عنصرش کلِ کارت را می‌پوشاند (بک‌تیک در این کامنت ممنوع) */
+        .sel-card { position: relative; }
+        .sel-card-link { color: inherit; text-decoration: none; }
+        .sel-card-link::after { content: ''; position: absolute; inset: 0; z-index: 1; }
+        .sel-card-link:focus-visible { outline: none; }
+        .sel-card-link:focus-visible::after { outline: 2px solid #8F6531; outline-offset: -3px; border-radius: 14px; }
+        .sel-card a:not(.sel-card-link), .sel-card button { position: relative; z-index: 2; }
         @media(max-width:640px){
           .dd-label { display: none !important; }
           .dd-btn { min-width: 0 !important; padding: 0 11px !important; }
@@ -764,7 +764,7 @@ export default function ManufacturersPage() {
               <p style={{ fontSize: 14 }}>{loadFailed ? 'اتصال اینترنت را بررسی کنید و صفحه را دوباره باز کنید' : 'فیلترها را تغییر دهید یا جستجو را پاک کنید'}</p>
             </div>
           ) : view === 'grid' ? (
-            <div className="sel-grid" style={{ marginBottom: 56 }}>
+            <div className="lc-grid" style={{ marginBottom: 56 }}>
               {filtered.map((m, i) => (
                 <div key={m.id} style={{ animation: `fadeUp ${0.3 + i * 0.05}s ease both` }}>
                   <MfrCard mfr={m} view="grid" />

@@ -1888,3 +1888,36 @@ select:disabled { opacity: 0.55; cursor: not-allowed; }
 @media (min-width: 1024px) {
   .list-2col { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
 }
+
+/* ── استانداردِ کارتِ فهرست: باشگاه، فروشگاه، تولیدکننده ──
+   خواستِ مالک (آبانِ ۱۴۰۵): سه صفحه یک اندازه و یک فرم، در شبکه و فهرست،
+   دسکتاپ و موبایل. هر سه کارت این کلاس‌ها را می‌گیرند؛ اندازه فقط این‌جاست.
+   ⚠️ !important لازم است: بخشی از ابعاد هنوز style اینلاینِ خودِ کارت است و
+   قاعده‌ی بی‌!important از اینلاین می‌بازد.
+   موبایل: کارتِ تمام‌عرض (هر کارت یک صفحه) جایش را به دو ستونِ جمع‌وجور می‌دهد؛
+   توضیح، امکانات، برندها و دکمه‌ها پنهان می‌شوند — کلِ کارت خودش لینک است. */
+.lc-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; grid-auto-rows: 1fr; }
+@media (max-width: 1179px) { .lc-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 899px)  { .lc-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.lc-media { height: 160px !important; }
+.lc-body { text-align: start; align-items: stretch !important; }
+.lc-list { min-height: 184px !important; }
+/* ارتفاع‌های ثابت (کفِ کارت ۴۳۲، ردیفِ فهرست ۱۸۴ و ۱۰۴) عمدی‌اند: بلندترین کارتِ واقعیِ
+   امروز (فروشگاه با لوگو و توضیح و برند) همین است، و هدف هم‌قدیِ سه صفحه است، نه محتوا.
+   ارتفاعِ کفِ کارتِ شبکه در دسکتاپ — کارتِ کم‌محتوا (بی‌توضیح) کوتاه‌تر از همسایه‌ی صفحه‌ی دیگر نماند */
+@media (min-width: 601px) { .lc-grid > * { min-height: 432px; } }
+.lc-list-img { width: 176px !important; }
+.lc-list-body { text-align: start; align-items: stretch !important; justify-content: center; }
+@media (max-width: 600px) {
+  .lc-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  .lc-media { height: 112px !important; }
+  .lc-body { padding: 12px !important; gap: 6px !important; }
+  .lc-title { font-size: 14px !important; line-height: 1.4 !important; }
+  .lc-hide-sm { display: none !important; }
+  .lc-logo { margin-top: -24px !important; margin-bottom: 8px !important; }
+  .lc-logo > div { width: 44px !important; height: 44px !important; padding: 2px !important; }
+  .lc-logo svg { width: 22px; height: 22px; }
+  .lc-list { min-height: 104px !important; }
+  .lc-list-img { width: 104px !important; }
+  .lc-list-body { padding: 12px !important; gap: 6px !important; }
+}
