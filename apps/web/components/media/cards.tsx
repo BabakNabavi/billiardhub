@@ -16,8 +16,8 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { Play } from 'lucide-react'
 import { compactViews, type MediaVideo } from '../../lib/media-data'
-import { ThumbsUp, MessageCircle, Eye } from 'lucide-react'
 import { faDate, toFaDigits } from '../../lib/jalali'
+import { timeAgo } from '../../lib/media/time-ago'
 import type { ShelfChannel } from '../../lib/media/shelf'
 
 const href = (v: MediaVideo) => `/media/${encodeURIComponent(v.id)}`
@@ -64,18 +64,19 @@ export function Avatar({ name, src }: { name: string; src?: string }) {
   )
 }
 
-/* متادیتای زیر عنوان — هر تکه فقط اگر واقعی باشد.
+/* متادیتای زیر عنوان، به سبکِ یوتیوب: «۱۲ هزار بازدید • ۳ روز پیش» در یک خط.
 
-   ⚠️ صفر نمایش داده نمی‌شود. ویدیویی که کسی ندیده «۰ بازدید»
-   نمی‌گیرد؛ جای خالی صادق‌تر از صفر است. */
+   ⚠️ پیش‌تر بازدید، لایک و دیدگاه هرکدام با آیکن کنارِ هم می‌آمدند و در
+   ستونِ باریک به چند خط می‌شکستند. لایک و دیدگاه در صفحه‌ی ویدیوست.
+   ⚠️ صفر نمایش داده نمی‌شود؛ جای خالی صادق‌تر از «۰ بازدید» است. */
 export function SubMeta({ v }: { v: MediaVideo }) {
-  const bits: React.ReactNode[] = []
-  if (v.views > 0) bits.push(<><Eye size={12} aria-hidden /> {compactViews(v.views)}</>)
-  if (v.likes > 0) bits.push(<><ThumbsUp size={12} aria-hidden /> {compactViews(v.likes)}</>)
-  if (v.comments > 0) bits.push(<><MessageCircle size={12} aria-hidden /> {compactViews(v.comments)}</>)
-  if (v.ts > 0) bits.push(faDate(new Date(v.ts)))
+  const bits: string[] = []
+  if (v.views > 0) bits.push(`${compactViews(v.views)} بازدید`)
+  if (v.ts > 0) bits.push(timeAgo(v.ts))
   if (bits.length === 0) return null
-  return <div className="mx-sub">{bits.map((b, i) => <span key={i}>{b}</span>)}</div>
+  /* زمانِ نسبی به «اکنون» بسته است و سرور و مرورگر چند ثانیه اختلاف دارند
+     («همین حالا» ⟵ «۱ دقیقه پیش»)؛ این اختلاف بی‌خطر است */
+  return <div className="mx-sub" suppressHydrationWarning title={v.ts > 0 ? faDate(new Date(v.ts)) : undefined}>{bits.join(' • ')}</div>
 }
 
 /* ═══ کارت استاندارد ویدیو ═══ */

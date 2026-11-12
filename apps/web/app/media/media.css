@@ -294,11 +294,13 @@
 }
 .mx-by { font-size: 12.5px; color: var(--ink-3); line-height: 1.6; }
 .mx-by a:hover { color: var(--ink); }
+/* «۱۲ هزار بازدید • ۳ روز پیش» — یک خط، مثلِ یوتیوب؛ اضافه با «…» بریده می‌شود */
 .mx-sub {
-  display: flex; flex-wrap: wrap; gap: 2px 8px;
-  font-size: 12px; color: var(--ink-3);
+  font-size: 12px; color: var(--ink-3); line-height: 1.6;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
-.mx-sub > * + *::before { content: '·'; margin-inline-end: 8px; }
+/* جاهایی که تکه‌ها جدا (span) می‌آیند — همان جداکننده‌ی «•» */
+.mx-sub > span + span::before { content: ' • '; }
 
 /* ═══════════════ کارت Shorts ═══════════════ */
 .mx-short { display: block; min-inline-size: 0; }
@@ -503,6 +505,8 @@
 }
 .mx-desc p { margin: 0 0 10px; }
 .mx-desc p:last-child { margin: 0; }
+/* سرِ جعبه‌ی توضیحات، مثلِ یوتیوب: بازدید و تاریخ پررنگ */
+.mx-desc .mx-desc-hd { font-weight: 800; color: var(--ink); }
 .mx-upnext { display: grid; gap: 12px; align-content: start; }
 
 /* ═══════════════ سربرگ کانال ═══════════════ */
@@ -748,3 +752,9 @@
 }
 .mx-sg-clear:hover { background: var(--soft); }
 @media (max-width: 1023px) { .mx-sg { min-block-size: 46px; } }
+
+/* ═══════════════ «شما» ═══════════════ */
+.mx-you-h { margin: 18px 0 8px; font-size: 22px; font-weight: 800; color: var(--ink); }
+.mx-you-links { display: flex; flex-wrap: wrap; gap: 8px; margin-block-end: 8px; }
+.mx-sec-hd h2 { display: inline-flex; align-items: center; gap: 8px; }
+button.mx-all { background: none; border: 0; cursor: pointer; font: inherit; display: inline-flex; align-items: center; gap: 4px; }

@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useRef } from 'react';
 import PageLoader from '@/components/ui/PageLoader';
+import { buttonClasses } from '@/components/ui/button-classes';
 import ConfirmDialog from '@/components/ui/ConfirmDialog';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -231,8 +232,22 @@ export default function DashboardPage() {
 
      صفحه‌ی خالی برای کاربر یعنی «خراب است»، نه «صبر کن». */
   if (!_hydrated || !authChecked) return <PageLoader />;
-  if (!user) return null;
-  if (user.primaryRole === 'admin') return null;
+  /* ⚠️ هر دو پیش‌تر `return null` بودند — یعنی صفحه‌ی کاملاً سفید: برای ادمینِ
+     پلتفرم تا رسیدنِ /admin، و برای نشستِ ناهماهنگ تا ابد (گزارشِ مالک از دکمه‌ی
+     «پروفایل»ِ بیلیارد مدیا). حالا لودر، تا انتقال به /admin یا /login انجام شود. */
+  /* ⚠️ انتقالِ خودکار به /login نه: authChecked روی خطای شبکه یا ۵۰۳ِ تمدید هم
+     true می‌شود و آن «بیرون» نیست. پس پیامِ روشن با «تلاش دوباره» و «ورود». */
+  if (!user) return (
+    <div dir="rtl" style={{ minHeight: '60vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 16, padding: 24, textAlign: 'center' }}>
+      <p style={{ fontSize: 15, fontWeight: 700, margin: 0 }}>اطلاعات حساب بارگذاری نشد</p>
+      <p style={{ fontSize: 13, color: 'rgba(28,27,23,0.62)', margin: 0 }}>اتصال را بررسی کنید و دوباره تلاش کنید، یا دوباره وارد شوید</p>
+      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', justifyContent: 'center' }}>
+        <button type="button" onClick={() => window.location.reload()} className={buttonClasses({ variant: 'secondary' })}>تلاش دوباره</button>
+        <a href="/login?next=%2Fdashboard" className={buttonClasses()}>ورود</a>
+      </div>
+    </div>
+  );
+  if (user.primaryRole === 'admin') return <PageLoader />;
   const isBasicUser = user.primaryRole === 'user' && (user.secondaryRoles ?? []).length === 0;
   const userRoles = [user.primaryRole, ...(user.secondaryRoles ?? [])];
   const isClubOwner = userRoles.includes('club_owner');

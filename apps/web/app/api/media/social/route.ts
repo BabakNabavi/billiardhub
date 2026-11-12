@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { actorFromRequest } from '@/lib/finance/db'
 import { hitRateLimit, tooMany } from '@/lib/auth/rate-limit'
 import {
-  channelSubState, toggleSubscription,
+  channelSubState, toggleSubscription, mySubscriptions,
   likeState, toggleLike,
   listComments, addComment, deleteComment, commentOwner, videoOwner, videoIdBySlug,
 } from '@/lib/media/social'
@@ -35,6 +35,15 @@ export async function GET(req: NextRequest) {
   const u = new URL(req.url)
   const actor = actorFromRequest(req)
   const me = actor?.id
+
+  /* کانال‌های دنبال‌شده‌ی خودِ کاربر — فقط با نشست؛ مهمان فهرستِ خالی می‌گیرد */
+  if (u.searchParams.get('mine') === 'subscriptions') {
+    /* ۴۰۱ نه آرایه‌ی خالی: کلاینت فقط با کاربرِ واردشده می‌پرسد، پس نبودِ نشست یعنی
+       کوکیِ ۱۵ دقیقه‌ایِ دسترسی منقضی شده — apiFetch تمدید می‌کند و دوباره می‌پرسد */
+    const NO_STORE = { 'Cache-Control': 'private, no-store' }
+    if (!me) return NextResponse.json({ message: 'ورود لازم است' }, { status: 401, headers: NO_STORE })
+    return NextResponse.json(await mySubscriptions(me), { headers: NO_STORE })
+  }
 
   const handle = s(u.searchParams.get('channel'), 30)
   if (handle) return NextResponse.json(await channelSubState(handle, me))

@@ -28,18 +28,20 @@
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
-import { Play, X } from 'lucide-react'
+import { X } from 'lucide-react'
 import {
   MEDIA_CATEGORIES, type MediaVideo, type MediaCategoryKey,
 } from '../../lib/media-data'
 import { fetchVideos } from '../../lib/media-user'
 import { splitShorts, channelsFrom, type ShelfChannel } from '../../lib/media/shelf'
 import { inProgress, ratioOf, type WatchMark } from '../../lib/media/watch-progress'
+import { rankFeed } from '../../lib/media/recommend'
+import { useTaste } from '../../lib/media/useTaste'
 import { useAuthStore } from '../../store/auth.store'
 import MediaUpload from '../../components/MediaUpload'
 import { NavOffset, TopBar, Rail, BottomNav, useRailState } from '../../components/media/shell'
 import {
-  VideoCard, MiniCard, ShortCard, ChannelCard, GridSkeleton,
+  VideoCard, ShortCard, ChannelCard, GridSkeleton,
 } from '../../components/media/cards'
 import ShortsViewer from '../../components/media/ShortsViewer'
 import LiveShelf from '../../components/media/LiveShelf'
@@ -75,6 +77,8 @@ function MediaBoot() {
 function MediaHome() {
   const { user } = useAuthStore()
   const { mini, toggle } = useRailState()
+  /* سلیقه‌ی بیننده (تاریخچه‌ی همین دستگاه + کانال‌های دنبال‌شده) — lib/media/recommend */
+  const { taste, ready: tasteReady } = useTaste(user?.id)
 
   /* ── وضعیت از نشانی خوانده می‌شود، نه از state ──
      ⚠️ نسخه‌ی اول نشانی را فقط یک‌بار هنگام mount می‌خواند. چون
@@ -119,6 +123,8 @@ function MediaHome() {
      نشده» نشان می‌داد — یعنی روی شبکه‌ی قطع‌ووصل موبایل به کاربر
      دروغ گفته می‌شد. */
   const [failed, setFailed] = useState(false)
+  /* شناسه‌های استخرِ اولیه‌ی خانه — فقط این‌ها رتبه می‌گیرند (پایین‌تر) */
+  const [baseIds, setBaseIds] = useState<Set<string>>(new Set())
   const [more, setMore] = useState(false)
   const [upOpen, setUpOpen] = useState(false)
   const [svAt, setSvAt] = useState<number | null>(null)
@@ -128,7 +134,12 @@ function MediaHome() {
      خواندنش در رندر اول ناهماهنگی hydration می‌سازد. */
   const [marks, setMarks] = useState<WatchMark[]>([])
   useEffect(() => { setMarks(inProgress()) }, [])
-  const [resume, setResume] = useState<MediaVideo[]>([])
+  /* ⚠️ پیش‌تر `resume` state بود و هیچ‌جا پر نمی‌شد — «ادامه تماشا» هرگز دیده نمی‌شد.
+     حالا از استخرِ خانه و نشانه‌های همین دستگاه ساخته می‌شود، به ترتیبِ آخرین تماشا. */
+  const resume = useMemo(() => {
+    const byId = new Map([...recent, ...popular].map(v => [v.id, v]))
+    return marks.map(m => byId.get(m.slug)).filter((v): v is MediaVideo => !!v)
+  }, [marks, recent, popular])
 
   /* ⚠️ نگهبان کهنگی: تایپ سریع در جست‌وجو یا عوض‌کردن پیاپی دسته
      می‌تواند پاسخ قدیمی را *بعد* از پاسخ تازه برساند و فهرست را
@@ -141,17 +152,22 @@ function MediaHome() {
   const loadHome = useCallback(async () => {
     const id = ++reqId.current
     setLoading(true); setFailed(false)
+    /* استخرِ الگوریتم: تازه‌ترین‌ها + پربازدیدها؛ ترتیبِ نهایی را rankFeed می‌دهد */
     const [feat, latest, pop] = await Promise.all([
       fetchVideos({ featured: true, limit: 1 }),
-      fetchVideos({ limit: 36 }),
-      fetchVideos({ sort: 'popular', limit: 12 }),
+      fetchVideos({ limit: 48 }),
+      fetchVideos({ sort: 'popular', limit: 24 }),
     ])
     if (id !== reqId.current) return
     const pool = latest.items
     const top = feat.items[0] ?? pool[0] ?? null
     setFeatured(top)
-    setRecent(pool.filter(v => v.id !== top?.id))
-    setPopular(pop.items.filter(v => v.views > 0 && v.id !== top?.id))
+    const ids = new Set(pool.map(v => v.id))
+    const recentPool = top && !ids.has(top.id) ? [top, ...pool] : pool
+    const popPool = pop.items.filter(v => !ids.has(v.id))
+    setRecent(recentPool)
+    setPopular(popPool)
+    setBaseIds(new Set([...recentPool, ...popPool].map(v => v.id)))
     setShorts(splitShorts(pool).shorts)
     setChannels(channelsFrom(pool))
     setCursor(latest.nextCursor)
@@ -201,6 +217,18 @@ function MediaHome() {
 
   const browseSplit = useMemo(() => splitShorts(rows), [rows])
   const browseChannels = useMemo(() => channelsFrom(rows), [rows])
+
+  /* خوراکِ خانه: ویدیوهای غیرِ Shorts، مرتب‌شده با الگوریتمِ پیشنهاد.
+     ⚠️ فقط استخرِ اولیه رتبه می‌گیرد؛ صفحه‌های «ویدیوهای بیشتر» به ته اضافه می‌شوند،
+     تا کارت‌هایی که کاربر از کنارشان گذشته جابه‌جا نشوند. تکراری‌ها (id) حذف. */
+  const ranked = useMemo(() => {
+    const seen = new Set<string>()
+    const all = [...recent, ...popular].filter(v => (seen.has(v.id) ? false : (seen.add(v.id), true)))
+    const vids = splitShorts(all).videos
+    const base = vids.filter(v => baseIds.has(v.id))
+    const extra = vids.filter(v => !baseIds.has(v.id))
+    return [...rankFeed(base, taste), ...extra]
+  }, [recent, popular, taste, baseIds])
 
   const canUpload = Boolean(user)
   const openUpload = canUpload ? () => setUpOpen(true) : undefined
@@ -256,7 +284,7 @@ function MediaHome() {
               </div>
             )}
 
-            {loading ? (
+            {loading || (!browsing && !tasteReady) ? (
               <div className="mx-sec"><GridSkeleton /></div>
             ) : failed ? (
               <Failed onRetry={() => void (browsing ? loadBrowse() : loadHome())} />
@@ -267,10 +295,9 @@ function MediaHome() {
                 onOpenShort={i => setSvAt(i)}
                 onClear={() => { setQ(''); nav({ q: '', category: '', t: '' }) }}
               />
-            ) : featured ? (
+            ) : ranked.length > 0 || shorts.length > 0 ? (
               <Home
-                featured={featured} recent={recent} popular={popular}
-                shorts={shorts} channels={channels} resume={resume} marks={marks}
+                ranked={ranked} shorts={shorts} channels={channels} resume={resume} marks={marks}
                 onOpenShort={i => setSvAt(i)}
               />
             ) : (
@@ -310,15 +337,20 @@ function MediaHome() {
 
 /* ═══════════════ خانه ═══════════════ */
 function Home({
-  featured, recent, popular, shorts, channels, resume, marks, onOpenShort,
+  ranked, shorts, channels, resume, marks, onOpenShort,
 }: {
-  featured: MediaVideo; recent: MediaVideo[]; popular: MediaVideo[]
+  ranked: MediaVideo[]
   shorts: MediaVideo[]; channels: ShelfChannel[]
   resume: MediaVideo[]; marks: WatchMark[]
   onOpenShort: (i: number) => void
 }) {
-  const side = recent.slice(0, 3)
-  const feed = recent.filter(v => !side.includes(v) && !shorts.includes(v))
+  /* ── چیدمانِ یوتیوب ──
+     شبکه‌ی یکدستِ ویدیو به ترتیبِ الگوریتم؛ دو ردیفِ اول، بعد قفسه‌ی Shorts،
+     بعد بقیه. «ویدیوی شاخص»ِ بزرگِ قبلی رفت: یوتیوب هم بنرِ قهرمان ندارد و
+     ویدیوی شاخص فقط امتیازِ بیشتری در همان ترتیب می‌گیرد. */
+  const FIRST = 8
+  const head = ranked.slice(0, FIRST)
+  const tail = ranked.slice(FIRST)
   const ratio = (slug: string) => {
     const m = marks.find(x => x.slug === slug)
     return m ? ratioOf(m) : undefined
@@ -326,68 +358,41 @@ function Home({
 
   return (
     <>
-      {/* ── محتوای شاخص ── */}
-      <section className="mx-feat" aria-label="ویدیوی شاخص">
-        <Link className="mx-feat-main" href={`/media/${encodeURIComponent(featured.id)}`}>
-          <FeatThumb v={featured} />
-          <h2>{featured.title}</h2>
-          {featured.description[0] && <p>{featured.description[0]}</p>}
-          <span className="mx-watch"><Play size={16} aria-hidden /> تماشا</span>
-        </Link>
-        {side.length > 0 && (
-          <div className="mx-side">
-            {side.map(v => <MiniCard key={v.id} v={v} progress={ratio(v.id)} />)}
-          </div>
-        )}
-      </section>
-
-      {/* ── ادامه تماشا ── */}
       {resume.length > 0 && (
         <Shelf title="ادامه تماشا">
           <div className="mx-shelf mx-shelf--h">
-            {resume.map(v => (
-              <VideoCard key={v.id} v={v} progress={ratio(v.id)} flat />
-            ))}
+            {resume.map(v => <VideoCard key={v.id} v={v} progress={ratio(v.id)} flat />)}
           </div>
         </Shelf>
       )}
 
-      {/* ── پخش زنده ──
-          ⚠️ از سیستم زنده‌ی موجود می‌آید و اگر جلسه‌ای نباشد اصلا
-          رندر نمی‌شود. */}
-      <LiveShelf />
+      {head.length > 0 && (
+        <section className="mx-sec" aria-label="پیشنهاد برای شما">
+          <div className="mx-grid">
+            {head.map((v, i) => <VideoCard key={v.id} v={v} priority={i < 4} progress={ratio(v.id)} />)}
+          </div>
+        </section>
+      )}
 
-      {/* ── Shorts ── */}
       {shorts.length > 0 && (
-        <Shelf title="Shorts" note="ویدیوهای کوتاه و عمودی">
+        <Shelf title="Shorts">
           <div className="mx-shelf mx-shelf--v">
             {shorts.map((v, i) => <ShortCard key={v.id} v={v} onOpen={() => onOpenShort(i)} />)}
           </div>
         </Shelf>
       )}
 
-      {/* ── پیشنهادها ── */}
-      {feed.length > 0 && (
-        <Shelf title="پیشنهاد برای تماشا">
+      {/* پخش زنده از سیستمِ زنده‌ی موجود؛ بی جلسه رندر نمی‌شود */}
+      <LiveShelf />
+
+      {tail.length > 0 && (
+        <section className="mx-sec" aria-label="ویدیوهای بیشتر">
           <div className="mx-grid">
-            {feed.map((v, i) => (
-              <VideoCard key={v.id} v={v} priority={i < 4} progress={ratio(v.id)} />
-            ))}
+            {tail.map(v => <VideoCard key={v.id} v={v} progress={ratio(v.id)} />)}
           </div>
-        </Shelf>
+        </section>
       )}
 
-      {/* ── پربازدیدها ──
-          ⚠️ فقط وقتی شمارش واقعی بالای صفر باشد. */}
-      {popular.length > 0 && (
-        <Shelf title="پربازدیدترین‌ها">
-          <div className="mx-shelf mx-shelf--h">
-            {popular.map(v => <VideoCard key={v.id} v={v} flat />)}
-          </div>
-        </Shelf>
-      )}
-
-      {/* ── کانال‌ها ── */}
       {channels.length > 0 && (
         <Shelf title="کانال‌ها" href="/media/channels">
           <div className="mx-shelf mx-shelf--h">
@@ -396,18 +401,6 @@ function Home({
         </Shelf>
       )}
     </>
-  )
-}
-
-function FeatThumb({ v }: { v: MediaVideo }) {
-  return (
-    <div className="mx-tn">
-      {v.thumb
-        ? <img src={v.thumb} alt="" loading="eager" fetchPriority="high" decoding="async"
-            sizes="(min-width: 900px) 62vw, 100vw" />
-        : <span className="mx-tn-none" aria-hidden><Play size={26} /></span>}
-      {v.duration && <span className="mx-dur">{v.duration}</span>}
-    </div>
   )
 }
 

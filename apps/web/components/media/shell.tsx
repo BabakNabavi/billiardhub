@@ -18,7 +18,7 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
-  Menu, Home, Clapperboard, Users2, Trophy, Newspaper, UploadCloud, User,
+  Menu, Home, Clapperboard, Users2, Trophy, Newspaper, UploadCloud, User, History,
 } from 'lucide-react'
 
 /* ── هم‌ترازی با نوار ثابت سایت ──
@@ -123,6 +123,12 @@ export function Rail({ tab }: { tab?: string }) {
         ))}
       </div>
       <div className="mx-rail-g">
+        <p className="mx-rail-t">شما</p>
+        <Link href="/media/you" aria-current={path.startsWith('/media/you') ? 'page' : undefined}>
+          <History size={19} /><span>تاریخچه و اشتراک‌ها</span>
+        </Link>
+      </div>
+      <div className="mx-rail-g">
         <p className="mx-rail-t">بیلیارد هاب</p>
         <Link href="/tournaments"><Trophy size={19} /><span>مسابقات</span></Link>
         <Link href="/news"><Newspaper size={19} /><span>اخبار</span></Link>
@@ -151,8 +157,10 @@ export function BottomNav({ tab, onUpload }: { tab?: string; onUpload?: () => vo
       <Link href="/media/channels" aria-current={path.startsWith('/media/channel') ? 'page' : undefined}>
         <Users2 size={20} /><span>کانال‌ها</span>
       </Link>
-      <Link href="/dashboard">
-        <User size={20} /><span>پروفایل</span>
+      {/* ⚠️ پیش‌تر مستقیم /dashboard بود و برای بعضی حساب‌ها صفحه‌ی سفید می‌داد.
+          «شما» مثلِ یوتیوب: تاریخچه، اشتراک‌ها و لینکِ داشبورد */}
+      <Link href="/media/you" aria-current={path.startsWith('/media/you') ? 'page' : undefined}>
+        <User size={20} /><span>شما</span>
       </Link>
     </nav>
   )

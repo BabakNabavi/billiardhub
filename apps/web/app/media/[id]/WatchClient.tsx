@@ -29,7 +29,10 @@ import { compactViews, type MediaVideo } from '../../../lib/media-data'
 import { absoluteUrl } from '../../../lib/site-url'
 import { faDate } from '../../../lib/jalali'
 import { mark, resumeAt } from '../../../lib/media/watch-progress'
-import { upNext } from '../../../lib/media/shelf'
+import { rankUpNext } from '../../../lib/media/recommend'
+import { recordPlay } from '../../../lib/media/history'
+import { useTaste } from '../../../lib/media/useTaste'
+import { useAuthStore } from '../../../store/auth.store'
 import { NavOffset } from '../../../components/media/shell'
 import { MiniCard, Avatar } from '../../../components/media/cards'
 import { SubscribeButton, LikeButton } from '../../../components/media/social'
@@ -43,6 +46,10 @@ export default function WatchClient(
   { video, related, ownerId }: { video: MediaVideo; related: MediaVideo[]; ownerId?: string | null },
 ) {
   const mainRef = useRef<HTMLVideoElement>(null)
+  const { user } = useAuthStore()
+  /* سلیقه برای «بعدی برای تماشا» و ثبتِ یک‌باره‌ی پخش در تاریخچه (lib/media/history) */
+  const { taste } = useTaste(user?.id)
+  const recorded = useRef(false)
 
   /* ── تبلیغ پیش‌پخش ──
      ترتیب عمدی است: تبلیغ پیش از اولین پخش گرفته می‌شود ولی نمایش
@@ -141,7 +148,8 @@ export default function WatchClient(
     } catch { /* اجازه‌ی کلیپ‌بورد نبود */ }
   }
 
-  const queue = useMemo(() => upNext(video, related), [video, related])
+  /* ربط به همین ویدیو وزنِ اصلی است؛ سلیقه و محبوبیت تساوی‌شکن (lib/media/recommend) */
+  const queue = useMemo(() => rankUpNext(video, related, taste), [video, related, taste])
 
   return (
     <div className="mx" dir="rtl">
@@ -179,6 +187,7 @@ export default function WatchClient(
                   if (gateAd()) { e.currentTarget.pause(); return }
                   applyResume()
                   countView()
+                  if (!recorded.current) { recorded.current = true; recordPlay(video) }
                 }}
                 onTimeUpdate={onTime}
               />
@@ -192,10 +201,8 @@ export default function WatchClient(
                 <Link className="mx-by" href={`/media/channel/${encodeURIComponent(video.creator.handle)}`}>
                   <strong>{video.creator.name || <span dir="ltr">@{video.creator.handle}</span>}</strong>
                 </Link>
-                <div className="mx-sub">
-                  {video.views > 0 && <span>{compactViews(video.views)} بازدید</span>}
-                  {video.ts > 0 && <span>{faDate(new Date(video.ts))}</span>}
-                </div>
+                {/* بازدید و تاریخ در سرِ جعبه‌ی توضیحات‌اند (مثلِ یوتیوب)؛ این‌جا فقط مدتِ ویدیو */}
+                {video.duration && <div className="mx-sub">{video.duration}</div>}
               </div>
 
               {/* ⚠️ فقط وقتی جدول اشتراک روی سرور باشد رندر می‌شود */}
@@ -222,8 +229,14 @@ export default function WatchClient(
               </div>
             </div>
 
-            {video.description.length > 0 && (
+            {(video.description.length > 0 || video.views > 0 || video.ts > 0) && (
               <div className="mx-desc">
+                {(video.views > 0 || video.ts > 0) && (
+                  <p className="mx-desc-hd">
+                    {[video.views > 0 ? `${compactViews(video.views)} بازدید` : '', video.ts > 0 ? faDate(new Date(video.ts)) : '']
+                      .filter(Boolean).join(' • ')}
+                  </p>
+                )}
                 {video.description.map((p, i) => <p key={i}>{p}</p>)}
               </div>
             )}

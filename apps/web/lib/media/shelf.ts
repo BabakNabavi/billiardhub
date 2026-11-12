@@ -67,23 +67,7 @@ export function channelsFrom(items: MediaVideo[]): ShelfChannel[] {
   return [...map.values()].sort((a, b) => b.videoCount - a.videoCount)
 }
 
-/* ── بعدی برای تماشا ──
-   ⚠️ ترتیب معنا دارد و تصادفی نیست: هم‌کانال، بعد هم‌برچسب،
-   بعد هم‌دسته. یک صفحه‌ی تماشا که پیشنهادهای بی‌ربط می‌دهد، همان
-   شبکه‌ی کارت معمولی است با نام دیگر. */
-export function upNext(current: MediaVideo, pool: MediaVideo[], count = 12): MediaVideo[] {
-  const rest = pool.filter(v => v.id !== current.id)
-  const tags = new Set(current.tags)
-  const score = (v: MediaVideo) => {
-    let s = 0
-    if (v.creator.handle && v.creator.handle === current.creator.handle) s += 100
-    s += v.tags.filter(t => tags.has(t)).length * 25
-    if (v.category === current.category) s += 40
-    /* تازگی فقط شکننده‌ی تساوی است، نه معیار اصلی */
-    return s + Math.min(9, v.ts / 1e12)
-  }
-  return [...rest].sort((a, b) => score(b) - score(a)).slice(0, count)
-}
+/* «بعدی برای تماشا» به lib/media/recommend (rankUpNext) رفت — همان ربط + سلیقه‌ی بیننده */
 
 /** «۱۲ هزار بازدید» — و برای صفر، هیچ. */
 export const viewsLabel = (n: number, fa: (v: number) => string) =>

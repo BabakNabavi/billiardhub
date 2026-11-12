@@ -57,6 +57,23 @@ export async function channelSubState(handle: string, userId?: string): Promise<
   }
 }
 
+/** کانال‌هایی که این کاربر دنبال می‌کند — برای منوی «اشتراک‌ها» و الگوریتمِ پیشنهاد */
+export async function mySubscriptions(userId: string): Promise<{ available: boolean; handles: string[] }> {
+  try {
+    const { data, error } = await sb().from('channel_subscriptions')
+      .select('channel_handle').eq('user_id', userId).limit(200)
+    if (error) {
+      if (missing(error.message)) return { available: false, handles: [] }
+      throw new Error(error.message)
+    }
+    const rows = (data ?? []) as Array<{ channel_handle: string | null }>
+    return { available: true, handles: rows.map(r => String(r.channel_handle ?? '')).filter(Boolean) }
+  } catch (e) {
+    console.error('[media/social] mySubscriptions:', (e as Error).message)
+    return { available: false, handles: [] }
+  }
+}
+
 /* ⚠️ «جدول نیست» و «خطا خورد» دو چیزند و رابط باید تفکیکشان کند:
    نسخه‌ی اول هر دو را `null` می‌کرد و مسیر ۵۰۳ «این قابلیت هنوز
    فعال نیست» می‌داد — یعنی یک خطای گذرای شبکه به کاربر می‌گفت
