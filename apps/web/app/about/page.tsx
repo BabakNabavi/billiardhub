@@ -1,151 +1,115 @@
 import Link from 'next/link'
-import { ShieldCheck, BadgeCheck, Smartphone, Globe } from 'lucide-react'
 import { buttonClasses } from '@/components/ui/button-classes'
-import { BreakTable } from '@/components/about/BreakTable'
-import { WorldGrid } from '@/components/about/WorldGrid'
-import { faNum } from '@/lib/jalali'
-import '@/styles/reveal.css'
+import { HeroPlate } from '@/components/about/HeroPlate'
+import { StoryGather } from '@/components/about/StoryGather'
+import { Ecosystem } from '@/components/about/Ecosystem'
+import { Principles } from '@/components/about/Principles'
+import { Ownership } from '@/components/about/Ownership'
 import './about.css'
 
 /* ─────────────────────────────────────────────────────────────
-   درباره‌ی ما — بازطراحیِ آبانِ ۱۴۰۵.
+   درباره ما — بازطراحیِ آبانِ ۱۴۰۵ (دورِ دوم)
 
-   ایده: «همه‌ی دنیای بیلیارد ایران، روی یک میز». به‌جای هیروی تیره،
-   مدار و برچسب‌های انگلیسیِ نسخه‌ی قبل، صفحه مثلِ یک بریک پیش می‌رود:
-   میز چیده می‌شود و پخش می‌شود (هیرو)، چرا ساخته شد (مانیفست)، چه
-   چیزهایی روی میز است (دنیاها)، با چه قاعده‌ای (اصول)، مالِ کیست
-   (شرکت)، و دعوت به بازی (پایان).
+   THESIS: بیلیارد هاب زیرساختِ یک جامعه است، نه فهرستِ باشگاه؛ صفحه این را با
+   «وصل شدن» نشان می‌دهد — نقش‌های پراکنده که دورِ یک هاب جمع می‌شوند — نه با
+   سرتیتر و کارت.
+   OWN-WORLD: زمینه‌ی عاجِ گرم، جوهرِ زغالی، زمردِ پارچه به‌عنوانِ امضا (پارچه‌ی
+   میز، پیوندهای فعال، نامِ اصل‌ها)، شامپاینی فقط در خالِ لوزیِ لبه‌ی میز، خطِ
+   ریل و دکمه‌ی LQ. خطوطِ مو، بی کارت، بی شیشه.
+   STORY: میزِ روشن زیرِ چراغ ⟵ چرا ساخته شد (پراکنده ⟵ یکپارچه) ⟵ شبکه‌ی هشت
+   نقش ⟵ سه اصل روی ریل ⟵ پلاکِ مالکیت ⟵ دعوت
+   FIRST VIEWPORT: دسکتاپ دوستونه؛ راست تیترِ ≤۵۶px و یک دکمه، چپ قابِ سینماییِ
+   میز که چراغش هنگامِ ورود روشن می‌شود. موبایل: متن، بعد قاب ۴:۳
+   FORM: صحنه‌ی میز + نمودارِ شبکه، جهتِ تعیین‌شده در بریفِ مالک (بی قرعه)
+   FINISH: unreviewed and undocumented is unfinished; this build ends with the
+   finish review, the verdict, DESIGN.md, and every shipping raster carrying its provenance
 
-   Server Component است؛ همه‌ی حرکت CSS است (about.css). هیچ آمار،
-   تیم یا تاریخچه‌ی ساختگی — قاعده‌ی مالک.
+   Server Component است؛ همه‌ی حرکت CSS است (about.css)
    ───────────────────────────────────────────────────────────── */
-
-const PRINCIPLES = [
-  {
-    Icon: BadgeCheck, title: 'هویت تأییدشده',
-    text: 'نشان تأیید باشگاه، مربی و داور فقط بعد از بررسی مدرک داده می‌شود، نه با ادعای خود پروفایل',
-  },
-  {
-    Icon: ShieldCheck, title: 'بدون داده ساختگی',
-    text: 'هیچ آمار، نظر یا کاربر ساختگی نمی‌سازیم؛ جای خالی را خالی نشان می‌دهیم، نه پر از عدد تزئینی',
-  },
-  {
-    Icon: Smartphone, title: 'ساخته شده برای موبایل',
-    text: 'برای گوشی و اینترنت واقعی کاربران ایرانی بهینه شده و مثل یک اپ روی صفحه اصلی گوشی نصب می‌شود',
-  },
-]
 
 const WRAP = 'mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8'
 
 export default function AboutPage() {
   return (
-    <div className="overflow-x-clip bg-paper text-ink">
-      {/* ═══ هیرو: روشن و جمع‌وجور، میز در حالِ بریک ═══ */}
-      <section className={`${WRAP} grid items-center gap-8 pb-16 pt-8 lg:grid-cols-2 lg:gap-16 lg:pb-24 lg:pt-16`}>
-        <div className="ab-in flex flex-col items-start gap-6">
-          <p className="text-body font-bold text-gold-text">درباره بیلیارد هاب</p>
-          <h1 className="text-display">
-            بیلیارد هاب
-            <span className="block text-ink-2">همه دنیای بیلیارد ایران، روی یک میز</span>
+    <div className="ab-page overflow-x-clip text-ink">
+      {/* ═══ هیرو ═══ */}
+      <section className={`${WRAP} grid items-center gap-8 pb-16 pt-8 lg:grid-cols-12 lg:gap-12 lg:pb-24 lg:pt-16`}>
+        <div className="ab-hero-copy flex flex-col items-start gap-6 lg:col-span-5">
+          <h1 className="ab-h1">
+            <span className="ab-line block">بیلیارد هاب</span>{' '}
+            <span className="ab-line block text-ink-2">همه دنیای بیلیارد ایران، روی یک میز</span>
           </h1>
-          <p className="max-w-prose text-body text-ink-2">
-            باشگاه‌ها، مربیان و داوران، فروشگاه‌ها، مسابقات و رسانه؛ هرچه یک علاقه‌مند بیلیارد لازم دارد،
+          <p className="ab-line max-w-prose text-body text-ink-2">
+            زیرساخت دیجیتال جامعه بیلیارد ایران؛ باشگاه‌ها، بازیکنان، مربیان و داوران، فروشگاه‌ها و تولیدکنندگان
             در یک پلتفرم تخصصی که پروفایل‌هایش تأیید می‌شوند
           </p>
-          <div className="flex flex-wrap gap-3">
+          <div className="ab-line flex flex-wrap items-center gap-3">
             <Link href="/clubs" prefetch={false} className={buttonClasses({ size: 'lg' })}>باشگاه‌ها را ببینید</Link>
-            <Link href="/contact" prefetch={false} className={buttonClasses({ variant: 'secondary', size: 'lg' })}>تماس با ما</Link>
+            <Link href="/contact" prefetch={false} className={buttonClasses({ variant: 'ghost', size: 'lg' })}>تماس با ما</Link>
           </div>
         </div>
-        <div className="ab-table-wrap mx-auto w-full max-w-xl">
-          <BreakTable />
+        <div className="ab-plate relative aspect-[4/3] w-full overflow-hidden lg:col-span-7">
+          <HeroPlate />
         </div>
       </section>
 
-      {/* ═══ مانیفست ═══ */}
-      <section className="bg-surface py-16 lg:py-24">
-        <div className={`${WRAP} max-w-4xl text-center`}>
-          <p className="ab-reveal text-display text-ink">بیلیارد در ایران بازیکن دارد، باشگاه دارد، مربی و داور دارد، فروشگاه و متخصص فنی هم دارد</p>
-          <p className="ab-reveal mt-4 text-display text-ink-2">
-            چیزی که نداشت یک جای مشترک بود؛ جایی که همه همدیگر را پیدا کنند و به هم اعتماد کنند
-          </p>
-          <p className="ab-reveal mt-6 text-display text-gold-text">بیلیارد هاب برای همین ساخته شد</p>
+      {/* ═══ روایت: پراکنده ⟵ یکپارچه ═══ */}
+      <section className="ab-story bg-surface py-16 lg:py-24" aria-labelledby="ab-story">
+        <div className={`${WRAP} grid gap-12 lg:grid-cols-12`}>
+          <div className="lg:col-span-5">
+            <div className="mx-auto max-w-sm lg:sticky lg:top-24">
+              <StoryGather />
+            </div>
+          </div>
+          <div className="flex flex-col gap-12 lg:col-span-7 lg:gap-16 lg:py-12">
+            <h2 id="ab-story" className="text-display">
+              بیلیارد در ایران بازیکن دارد، باشگاه دارد، مربی و داور دارد، فروشگاه و متخصص فنی هم دارد
+            </h2>
+            <p className="ab-story-line text-display text-ink-2">
+              اما هرکدام جدا از دیگری کار می‌کرد؛ چیزی که نداشت یک جای مشترک بود، جایی که همه همدیگر را پیدا کنند و به هم اعتماد کنند
+            </p>
+            <p className="ab-story-line text-display">
+              <span className="ab-em">بیلیارد هاب برای همین ساخته شد</span>{' '}
+              <span className="mt-4 block text-body text-ink-2">
+                تا این بخش‌های جدا در یک اکوسیستم حرفه‌ای به هم وصل شوند، و صنعت بیلیارد ایران با ابزار امروزی رشد کند
+              </span>
+            </p>
+          </div>
         </div>
       </section>
 
-      {/* ═══ دنیاها ═══ */}
-      <section className={`${WRAP} py-16 lg:py-24`} aria-labelledby="ab-worlds">
-        <div className="ab-reveal mb-8 flex flex-col gap-2 lg:mb-12">
-          <h2 id="ab-worlds" className="text-display">روی این میز چه پیدا می‌کنید</h2>
-          <p className="text-body text-ink-2">هر بخش رنگ یکی از توپ‌های اسنوکر را دارد؛ از هرکدام وارد شوید</p>
+      {/* ═══ اکوسیستم ═══ */}
+      <section className={`${WRAP} py-16 lg:py-24`} aria-labelledby="ab-eco">
+        <div className="mb-12 flex max-w-2xl flex-col gap-4">
+          <h2 id="ab-eco" className="text-display">یک شبکه، هشت نقش</h2>
+          <p className="text-body text-ink-2">هر نقش به هاب و به نقش‌های دیگر وصل است</p>
         </div>
-        <WorldGrid />
+        <Ecosystem />
       </section>
 
       {/* ═══ اصول ═══ */}
       <section className="bg-mist py-16 lg:py-24" aria-labelledby="ab-principles">
         <div className={WRAP}>
-          <h2 id="ab-principles" className="ab-reveal mb-8 text-display lg:mb-12">سه قاعده که هیچ‌وقت کنار نمی‌گذاریم</h2>
-          <ol className="grid gap-4 md:grid-cols-3">
-            {PRINCIPLES.map(({ Icon, title, text }, i) => (
-              <li key={title} className="ab-reveal flex flex-col gap-4 rounded-panel bg-surface p-6 shadow-e0 sm:p-8">
-                <span className="flex items-center justify-between">
-                  <Icon size={24} aria-hidden className="text-gold-text" />
-                  <span aria-hidden className="text-display text-ink/10">{faNum(i + 1)}</span>
-                </span>
-                <h3 className="text-section">{title}</h3>
-                <span className="text-body text-ink-2">{text}</span>
-              </li>
-            ))}
-          </ol>
+          <h2 id="ab-principles" className="mb-8 text-display lg:mb-12">سه اصل که کنار نمی‌گذاریم</h2>
+          <Principles />
         </div>
       </section>
 
-      {/* ═══ شرکت و برند ═══ */}
+      {/* ═══ مالکیت ═══ */}
       <section className={`${WRAP} py-16 lg:py-24`} aria-labelledby="ab-company">
-        <div className="ab-reveal mx-auto flex max-w-3xl flex-col items-center gap-6 rounded-hero bg-surface p-8 text-center shadow-e1 sm:p-12">
-          <div className="flex items-center gap-6">
-            {/* eslint-disable-next-line @next/next/no-img-element -- لوگوی برداری و ثابت */}
-            <img src="/images/Logo/bh-tile-256-v13.webp" alt="بیلیارد هاب" width={56} height={56} loading="lazy" decoding="async" className="h-12 w-12 rounded-card sm:h-16 sm:w-16" />
-            <span aria-hidden className="h-8 w-px bg-line/10" />
-            {/* eslint-disable-next-line @next/next/no-img-element -- لوگوی برداری و ثابت */}
-            <img src="/images/Logo/Arta.svg" alt="شرکت بازرگانی آرتا تجارت بین‌الملل آپادانا" width={56} height={56} loading="lazy" decoding="async" className="h-12 w-12 object-cover object-left sm:h-16 sm:w-16" />
-          </div>
-          <h2 id="ab-company" className="text-section text-ink-2">مالکیت و برند</h2>
-          <p className="text-display">
-            بیلیارد هاب متعلق به
-            <span className="block text-gold-text">شرکت بازرگانی آرتا تجارت بین‌الملل آپادانا میباشد</span>
-          </p>
-          <p className="text-body text-ink-2">
-            <span dir="ltr">Billiard Hub</span> برند ثبت‌شده این شرکت است و همه خدمات پلتفرم با همین برند ارائه می‌شود
-          </p>
-          {/* وب‌سایتِ شرکتِ مالک — زیرِ نامِ شرکت، جایی که بازدیدکننده دنبالِ شناختنش است */}
-          <a href="https://www.artaintl.com" target="_blank" rel="noopener noreferrer"
-            className={buttonClasses({ variant: 'secondary' })}>
-            <Globe size={16} aria-hidden />
-            وب‌سایت آرتا تجارت
-            <span dir="ltr" className="text-ink-2">www.artaintl.com</span>
-            <span className="sr-only">(در پنجره جدید)</span>
-          </a>
-        </div>
+        <Ownership />
       </section>
 
-      {/* ═══ پایان: کارتِ تیره‌ی جمع‌وجور روی پارچه ═══ */}
+      {/* ═══ پایان ═══ */}
       <section className={`${WRAP} pb-16 lg:pb-24`}>
-        <div className="ab-reveal ab-felt flex flex-col items-start gap-6 rounded-hero p-8 text-surface sm:p-12 lg:flex-row lg:items-center lg:justify-between">
+        <div className="flex flex-col items-start gap-6 border-t border-line/10 pt-12 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex flex-col gap-2">
             <h2 className="text-display">نوبت شماست</h2>
-            <p className="text-body text-surface/70">حساب بسازید، باشگاه یا مربی پیدا کنید، یا پروفایل حرفه‌ای خودتان را بسازید</p>
+            <p className="text-body text-ink-2">حساب بسازید، باشگاه یا مربی پیدا کنید، یا پروفایل حرفه‌ای خودتان را بسازید</p>
           </div>
           <div className="flex flex-wrap gap-3">
-            <Link href="/register" prefetch={false}
-              className={buttonClasses({ size: 'lg', className: '!bg-gold/20 !text-gold-light !border-gold/50 hover:!bg-gold/30 focus-visible:ring-offset-ink' })}>
-              ساخت حساب
-            </Link>
-            <Link href="/contact" prefetch={false}
-              className={buttonClasses({ variant: 'ghost', size: 'lg', className: '!text-surface/80 hover:!text-surface hover:!bg-surface/10 focus-visible:ring-offset-ink' })}>
-              تماس با ما
-            </Link>
+            <Link href="/register" prefetch={false} className={buttonClasses({ size: 'lg' })}>ساخت حساب</Link>
+            <Link href="/contact" prefetch={false} className={buttonClasses({ variant: 'secondary', size: 'lg' })}>تماس با ما</Link>
           </div>
         </div>
       </section>

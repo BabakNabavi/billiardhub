@@ -1,64 +1,149 @@
 /* ─────────────────────────────────────────────────────────────
-   حرکتِ صفحه‌ی درباره‌ی ما — همه CSS، بی کتابخانه و بی جاوااسکریپت.
+   درباره ما — جهانِ بصری و حرکت. همه CSS، بی کتابخانه و بی جاوااسکریپت.
 
-   ۲) «بریک» روی میز: مسیرِ ضربه، حرکتِ سفید، پخش‌شدنِ قرمزها، یک گل
-   (ورودِ پلکانی، ظاهرشدن با اسکرول و هاورِ کارت در styles/reveal.css است)
-   با prefers-reduced-motion همه خاموش است و میز چیده‌شده می‌ماند.
+   رنگ‌ها: زمردِ پارچه امضاست (پیوندِ فعال، نامِ اصل‌ها، تأکیدِ روایت)؛
+   شامپاینی فقط در خالِ لوزی، ریل و قابِ پلاک. هیچ سطحِ بزرگِ سبز.
+   حرکت‌ها، هرکدام یک بار:
+     ۱) روشن شدنِ چراغِ میز و ورودِ خط‌به‌خطِ متنِ هیرو
+     ۲) جمع شدنِ نقش‌های پراکنده دورِ هاب، با اسکرول (view timeline)
+     ۳) کشیده شدنِ پیوندهای شبکه و ریلِ اصل‌ها هنگامِ دیده شدن
+   بدونِ پشتیبانیِ animation-timeline یا با کاهشِ حرکت: حالتِ پایانی، از اول
    ───────────────────────────────────────────────────────────── */
 
+.ab-page {
+  --ab-emerald: 14 92 62;      /* #0E5C3E — متن و خطِ زمردی روی عاج، ۸:۱ */
+  --ab-emerald-2: 31 138 91;   /* #1F8A5B — پیوندِ فعال در نمودار */
+  background: rgb(var(--c-paper));
+}
+.ab-page ::selection { background: rgb(var(--ab-emerald) / .16); color: rgb(var(--c-ink)); }
+
+/* تیترِ هیرو — سقفِ ۵۶px (خواستِ مالک)، تنها اندازه‌ی بیرون از مقیاس */
+.ab-h1 {
+  font-size: clamp(2rem, 1.35rem + 2.8vw, 3.5rem);
+  line-height: 1.3; letter-spacing: -0.02em; font-weight: 800; text-wrap: balance;
+}
+.ab-em { color: rgb(var(--ab-emerald)); }
+
+/* قابِ صحنه — سایه‌ی تماسِ نزدیک + سایه‌ی نرمِ دور، نورِ از بالا */
+.ab-plate {
+  border-radius: var(--r4);
+  box-shadow: 0 1px 2px rgb(10 20 15 / .18), 0 24px 48px -24px rgb(10 30 20 / .5);
+}
+
+/* ═══ روایت ═══ */
+.ab-gather { container-type: inline-size; color: rgb(var(--ab-emerald)); }
+.ab-gather-word {
+  transform: translate(-50%, -50%);
+  color: rgb(var(--c-ink));
+  /* زمینه‌ی خودِ برچسب تا حلقه از زیرِ نوشته رد نشود */
+  background: rgb(var(--c-surface)); padding: 0 8px; border-radius: var(--r1);
+}
+.ab-gather-ring { stroke-dasharray: 100; stroke-dashoffset: 0; opacity: .5; }
+
+/* ═══ شبکه ═══ */
+.ab-spoke, .ab-edge { stroke: rgb(var(--c-ink)); vector-effect: non-scaling-stroke; transition: stroke .3s, stroke-width .3s, opacity .3s; }
+.ab-spoke { stroke-opacity: .12; stroke-width: 1; stroke-dasharray: 1.2 1.6; }
+.ab-edge { stroke-opacity: .22; stroke-width: 1; }
+.ab-hub-ring { fill: none; stroke: rgb(var(--c-gold)); stroke-width: 1; vector-effect: non-scaling-stroke; }
+
+/* خالِ لوزی — نشانگرِ لبه‌ی میز، در کلِ صفحه یک شکل */
+.ab-sight, .ab-rail-sight {
+  display: block; width: 8px; height: 8px; transform: rotate(45deg);
+  background: rgb(var(--c-gold));
+  box-shadow: 0 1px 2px rgb(var(--c-gold-deep) / .45);
+  transition: background .3s, transform .3s;
+}
+.ab-node { color: rgb(var(--c-ink)); transition: color .3s, opacity .3s; }
+.ab-node > span:last-child { background: rgb(var(--c-paper)); padding: 0 6px; border-radius: var(--r1); }
+
+.ab-eco-list > li + li { border-top: 1px solid rgb(var(--c-line) / .1); }
+.ab-eco-row { border-radius: var(--r2); transition: color .25s; }
+.ab-eco-row:focus-visible { outline: 2px solid transparent; outline-offset: 2px; box-shadow: 0 0 0 2px rgb(var(--c-paper)), 0 0 0 4px rgb(var(--ab-emerald)); }
+.ab-eco-row:hover h3, .ab-eco-row:focus-visible h3 { color: rgb(var(--ab-emerald)); }
+.ab-eco-arrow { transition: transform .3s cubic-bezier(.22,.61,.36,1), color .3s; }
+.ab-eco-row:hover .ab-eco-arrow, .ab-eco-row:focus-visible .ab-eco-arrow { transform: translateX(-4px); color: rgb(var(--ab-emerald)); }
+
+/* ردیفِ فهرست ⟵ گره و پیوندهایش در نمودار. بقیه کم‌رنگ می‌شوند */
+.ab-eco:has(.ab-eco-row:is(:hover, :focus-visible)) .ab-node { opacity: .35; }
+.ab-eco:has(.ab-eco-row:is(:hover, :focus-visible)) :is(.ab-spoke, .ab-edge) { opacity: .35; }
+.ab-eco:has(li[data-k="clubs"] .ab-eco-row:is(:hover, :focus-visible)) :is([data-n="clubs"], [data-e~="clubs"]),
+.ab-eco:has(li[data-k="players"] .ab-eco-row:is(:hover, :focus-visible)) :is([data-n="players"], [data-e~="players"]),
+.ab-eco:has(li[data-k="coaches"] .ab-eco-row:is(:hover, :focus-visible)) :is([data-n="coaches"], [data-e~="coaches"]),
+.ab-eco:has(li[data-k="referees"] .ab-eco-row:is(:hover, :focus-visible)) :is([data-n="referees"], [data-e~="referees"]),
+.ab-eco:has(li[data-k="tournaments"] .ab-eco-row:is(:hover, :focus-visible)) :is([data-n="tournaments"], [data-e~="tournaments"]),
+.ab-eco:has(li[data-k="services"] .ab-eco-row:is(:hover, :focus-visible)) :is([data-n="services"], [data-e~="services"]),
+.ab-eco:has(li[data-k="manufacturers"] .ab-eco-row:is(:hover, :focus-visible)) :is([data-n="manufacturers"], [data-e~="manufacturers"]),
+.ab-eco:has(li[data-k="sellers"] .ab-eco-row:is(:hover, :focus-visible)) :is([data-n="sellers"], [data-e~="sellers"]) {
+  opacity: 1; color: rgb(var(--ab-emerald)); stroke: rgb(var(--ab-emerald-2)); stroke-opacity: 1; stroke-width: 2;
+}
+
+/* ═══ اصول: ریل ═══ */
+.ab-rail-row { position: relative; }
+.ab-rail {
+  position: absolute; inset-inline: 0; top: 0; height: 1px;
+  /* right عمدی است: سمتِ شروع در RTL (dir روی html ثابت است)؛ transform-origin معادلِ منطقی ندارد */
+  background: rgb(var(--c-ink) / .14); transform-origin: right;
+}
+/* خال هم‌سطحِ ریل است نه فرزندش، تا scaleXِ ریل لهش نکند */
+.ab-rail-row > .ab-rail-sight { position: absolute; inset-inline-start: 0; top: -4px; }
+.ab-principle { color: rgb(var(--ab-emerald)); }
+
+/* ═══ پلاک ═══ */
+.ab-plaque {
+  position: relative; background: rgb(var(--c-surface));
+  border: 1px solid rgb(var(--c-gold) / .55); border-radius: var(--r2);
+  outline: 1px solid rgb(var(--c-gold) / .35); outline-offset: -8px;
+  box-shadow: 0 1px 2px rgb(23 26 25 / .06), 0 18px 40px -28px rgb(23 26 25 / .35);
+}
+.ab-plaque-link { position: relative; display: block; width: 64px; height: 1px; background: rgb(var(--c-gold) / .7); }
+.ab-plaque-link .ab-rail-sight { position: absolute; inset-inline-start: 28px; top: -4px; }
+
+/* ═══ حرکت ═══ */
+@keyframes abUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
+@keyframes abFade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes abSlide { from { transform: translateY(14px); } to { transform: none; } }
+@keyframes abLampOn { 0% { opacity: 0; } 30% { opacity: .55; } 38% { opacity: .2; } 100% { opacity: 1; } }
+@keyframes abDraw { from { stroke-dashoffset: 100; } to { stroke-dashoffset: 0; } }
+
 @media (prefers-reduced-motion: no-preference) {
-  .ab-table-wrap { animation: abRise 1s .1s cubic-bezier(.22,.61,.36,1) both; }
+  /* ۱) چراغ روشن می‌شود؛ متن خط‌به‌خط.
+     ⚠️ تیتر و قاب با opacity صفر شروع نمی‌شوند: Chrome عنصرِ شفاف را نامزدِ LCP
+     نمی‌شمارد و اولین نقاشیِ معنادار حدود یک ثانیه عقب می‌افتاد (همان تله‌ی HomeClient).
+     تیتر فقط جابه‌جا می‌شود؛ پاراگراف و دکمه‌ها محو هم می‌شوند.
+     ⚠️ لایه‌های روشن‌شونده هیچ فیلترِ SVG ندارند، تا هر فریمِ انیمیشن فیلتر دوباره اجرا نشود */
+  .ab-cone, .ab-pool, .ab-lamp-strip { animation: abLampOn 1.6s .2s cubic-bezier(.22,.61,.36,1) both; }
+  .ab-h1 .ab-line { animation: abSlide .8s cubic-bezier(.16,1,.3,1) both; }
+  .ab-h1 .ab-line:nth-child(2) { animation-delay: .1s; }
+  .ab-hero-copy > p.ab-line { animation: abUp .8s .2s cubic-bezier(.16,1,.3,1) both; }
+  .ab-hero-copy > div.ab-line { animation: abUp .8s .3s cubic-bezier(.16,1,.3,1) both; }
 
-  /* مسیرِ ضربه: کشیده می‌شود، تا لحظه‌ی برخورد می‌ماند، بعد محو */
-  .ab-aim { stroke-dashoffset: 210; animation: abAim 1.3s .35s ease-out both; }
-  @keyframes abAim {
-    0%   { opacity: 0; stroke-dashoffset: 210; }
-    35%  { opacity: 1; stroke-dashoffset: 0; }
-    62%  { opacity: 1; }
-    100% { opacity: 0; stroke-dashoffset: 0; }
-  }
+  @supports (animation-timeline: view()) {
+    /* ۲) نقش‌ها از حالتِ پراکنده سرِ جایشان می‌نشینند */
+    .ab-story { view-timeline-name: --ab-story; }
+    .ab-gather-word {
+      animation: abGather linear both; animation-timeline: --ab-story;
+      animation-range: entry 40% contain 35%;
+    }
+    .ab-gather-ring, .ab-gather-hub {
+      animation: abDraw linear both, abFade linear both; animation-timeline: --ab-story, --ab-story;
+      animation-range: contain 15% contain 40%, contain 15% contain 40%;
+    }
+    .ab-story-line { animation: abUp linear both; animation-timeline: view(); animation-range: entry 0% entry 50%; }
 
-  /* سفید: تا راسِ پک، بعد کمانه به میانه‌ی میز */
-  .ab-cue { animation: abCue 1.9s .75s both; }
-  @keyframes abCue {
-    0%   { transform: translate(0, 0); animation-timing-function: cubic-bezier(.5,0,.9,.6); }
-    30%  { transform: translate(-202px, 6px); animation-timing-function: cubic-bezier(.1,.7,.3,1); }
-    100% { transform: translate(-68px, 42px); }
-  }
-
-  /* قرمزها درست در لحظه‌ی برخورد (۰٫۷۵ + ۰٫۵۷ ثانیه) راه می‌افتند */
-  .ab-red { animation: abScatter 1.5s calc(1.32s + var(--d, 0ms)) cubic-bezier(.12,.75,.25,1) both; }
-  @keyframes abScatter { from { transform: translate(0, 0); } to { transform: translate(var(--dx), var(--dy)); } }
-
-  .ab-pot { animation-name: abPot; animation-duration: 1.2s; }
-  @keyframes abPot {
-    0%   { transform: translate(0, 0); opacity: 1; }
-    85%  { transform: translate(calc(var(--dx) * .96), calc(var(--dy) * .96)); opacity: 1; }
-    100% { transform: translate(var(--dx), var(--dy)); opacity: 0; }
+    /* ۳) پیوندها و ریل هنگامِ دیده شدن کشیده می‌شوند */
+    /* خطِ SVG جعبه‌ی CSS ندارد (خطِ افقی ارتفاعِ صفر)، پس view() رویش کار نمی‌کند — تایم‌لاینِ نام‌دارِ خودِ نقشه */
+    .ab-eco-map { view-timeline-name: --ab-eco; }
+    .ab-edge { stroke-dasharray: 100; animation: abDraw linear both; animation-timeline: --ab-eco; animation-range: entry 10% cover 45%; }
+    .ab-rail { animation: abRail linear both; animation-timeline: view(); animation-range: entry 0% entry 80%; }
   }
 }
+@keyframes abGather {
+  from { translate: calc(var(--dx) * 1cqw) calc(var(--dy) * 1cqw); rotate: var(--r); color: rgb(var(--c-ink-2) / .7); }
+  to { translate: 0 0; rotate: 0deg; color: rgb(var(--c-ink)); }
+}
+@keyframes abRail { from { transform: scaleX(0); } to { transform: scaleX(1); } }
 
-/* توپِ کارت‌های دنیا: چرخشِ کوچک در هاور */
-.ab-card .ab-ball { transition: transform .5s cubic-bezier(.22,.61,.36,1); }
 @media (hover: hover) and (prefers-reduced-motion: no-preference) {
-  .ab-card:hover .ab-ball { transform: translateX(-6px) rotate(-24deg); }
+  .ab-cueball { transition: transform 1.2s cubic-bezier(.16,1,.3,1); }
+  .ab-plate:hover .ab-cueball { transform: translate(-6px, -10px); }
 }
-
-/* توپِ بیلیارد به‌عنوانِ نشانِ هر دنیا — درخششِ بالا-راست + سایه‌ی زیر */
-.ab-ball {
-  background:
-    radial-gradient(circle at 34% 28%, rgba(255,255,255,.7), rgba(255,255,255,0) 38%),
-    radial-gradient(circle at 50% 120%, rgba(0,0,0,.28), rgba(0,0,0,0) 60%),
-    var(--ball);
-  box-shadow: 0 6px 14px -6px rgba(23,26,25,.45);
-}
-
-/* کارتِ پایانی: نورِ سبزِ پارچه از گوشه روی زغالی */
-.ab-felt {
-  background:
-    radial-gradient(120% 140% at 85% 0%, rgba(35,132,90,.35), rgba(35,132,90,0) 55%),
-    rgb(var(--c-ink));
-}
-
-/* سایه‌ی میز روی خودِ قاب — فیلترِ SVG ناحیه‌ی مستطیلیِ روشنی دورِ میز می‌ساخت */
-.ab-table { filter: drop-shadow(0 12px 18px rgba(23,26,25,.22)); }
