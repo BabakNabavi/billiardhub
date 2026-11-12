@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { ShieldCheck, BadgeCheck, Smartphone } from 'lucide-react'
+import { ShieldCheck, BadgeCheck, Smartphone, Globe } from 'lucide-react'
 import { buttonClasses } from '@/components/ui/button-classes'
 import { BreakTable } from '@/components/about/BreakTable'
 import { WorldGrid } from '@/components/about/WorldGrid'
@@ -65,7 +65,7 @@ export default function AboutPage() {
       {/* ═══ مانیفست ═══ */}
       <section className="bg-surface py-16 lg:py-24">
         <div className={`${WRAP} max-w-4xl text-center`}>
-          <p className="ab-reveal text-display text-ink">بیلیارد در ایران بازیکن دارد، باشگاه دارد، مربی و داور دارد</p>
+          <p className="ab-reveal text-display text-ink">بیلیارد در ایران بازیکن دارد، باشگاه دارد، مربی و داور دارد، فروشگاه و متخصص فنی هم دارد</p>
           <p className="ab-reveal mt-4 text-display text-ink-2">
             چیزی که نداشت یک جای مشترک بود؛ جایی که همه همدیگر را پیدا کنند و به هم اعتماد کنند
           </p>
@@ -114,11 +114,19 @@ export default function AboutPage() {
           <h2 id="ab-company" className="text-section text-ink-2">مالکیت و برند</h2>
           <p className="text-display">
             بیلیارد هاب متعلق به
-            <span className="block text-gold-text">شرکت بازرگانی آرتا تجارت بین‌الملل آپادانا</span>
+            <span className="block text-gold-text">شرکت بازرگانی آرتا تجارت بین‌الملل آپادانا میباشد</span>
           </p>
           <p className="text-body text-ink-2">
             <span dir="ltr">Billiard Hub</span> برند ثبت‌شده این شرکت است و همه خدمات پلتفرم با همین برند ارائه می‌شود
           </p>
+          {/* وب‌سایتِ شرکتِ مالک — زیرِ نامِ شرکت، جایی که بازدیدکننده دنبالِ شناختنش است */}
+          <a href="https://www.artaintl.com" target="_blank" rel="noopener noreferrer"
+            className={buttonClasses({ variant: 'secondary' })}>
+            <Globe size={16} aria-hidden />
+            وب‌سایت آرتا تجارت
+            <span dir="ltr" className="text-ink-2">www.artaintl.com</span>
+            <span className="sr-only">(در پنجره جدید)</span>
+          </a>
         </div>
       </section>
 
