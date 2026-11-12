@@ -1,149 +1,242 @@
 /* ─────────────────────────────────────────────────────────────
-   درباره ما — جهانِ بصری و حرکت. همه CSS، بی کتابخانه و بی جاوااسکریپت.
+   درباره ما — «عکس‌ها در اندازه‌های ناهمسان». همه CSS، بی کتابخانه.
 
-   رنگ‌ها: زمردِ پارچه امضاست (پیوندِ فعال، نامِ اصل‌ها، تأکیدِ روایت)؛
-   شامپاینی فقط در خالِ لوزی، ریل و قابِ پلاک. هیچ سطحِ بزرگِ سبز.
-   حرکت‌ها، هرکدام یک بار:
-     ۱) روشن شدنِ چراغِ میز و ورودِ خط‌به‌خطِ متنِ هیرو
-     ۲) جمع شدنِ نقش‌های پراکنده دورِ هاب، با اسکرول (view timeline)
-     ۳) کشیده شدنِ پیوندهای شبکه و ریلِ اصل‌ها هنگامِ دیده شدن
-   بدونِ پشتیبانیِ animation-timeline یا با کاهشِ حرکت: حالتِ پایانی، از اول
+   گرید: ۱۲ ستون با حاشیه‌های برابر؛ در RTL ستونِ ۱ راست‌ترین است، پس
+   grid-column خودش منطقی است. هر لبه‌ی عکس روی یک خطِ ستون می‌نشیند.
+   فاصله‌ها فقط از مقیاسِ پروژه (۴ ۸ ۱۲ ۱۶ ۲۴ ۳۲ ۴۸ ۶۴ ۹۶).
+   حروف، چهار اندازه: تیترِ صفحه، تیترِ بخش (همه‌ی بخش‌ها یکی)، متن، ریز.
+   رنگ: زمینه و جوهر از توکن‌های پروژه. سه رنگِ ویژه‌ی همین صفحه، چون پالتِ
+   پروژه سبزِ پارچه و فلزی ندارد: --ab-felt (میدانِ بخشِ اصول)، --ab-metal
+   (فقط واژه‌های اصول)، --ab-emerald (لینک و تأکیدِ روایت).
+   بی خطِ مو، بی سایه روی چیزِ ساکن، بی گرادیان.
+   ⚠️ نام‌ها: کلاسِ ab-reveal مالِ styles/reveal.css (صفحه‌ی تماس) است؛ CSSِ صفحه‌ها
+   در Next بعد از جابه‌جایی در سند می‌ماند، پس این‌جا ab-curtain است — نامِ
+   هم‌سان یعنی انیمیشنِ یکی روی دیگری.
+   حرکت: (۱) تیتر سطر به سطر از پشتِ خطِ کرسی (۲) ورودِ اجزا با اسکرول
+   (۳) پرده‌کنار رفتنِ عکس‌ها (۴) نشستنِ آرامِ عکسِ هیرو با اسکرول.
+   هیچ چیز کاملاً پنهان شروع نمی‌شود (متن ۳۵٪، عکس ۷۰٪)؛ بدونِ پشتیبانی یا با
+   کاهشِ حرکت همه از اول دیده می‌شود
    ───────────────────────────────────────────────────────────── */
 
 .ab-page {
-  --ab-emerald: 14 92 62;      /* #0E5C3E — متن و خطِ زمردی روی عاج، ۸:۱ */
-  --ab-emerald-2: 31 138 91;   /* #1F8A5B — پیوندِ فعال در نمودار */
+  --ab-m: clamp(16px, 5vw, 88px);
+  --ab-gap: clamp(12px, 1.6vw, 24px);
+  --ab-ink: rgb(var(--c-ink));
+  --ab-soft: rgb(var(--c-ink-2));
+  --ab-ivory: rgb(var(--c-paper));
+  --ab-felt: #0F3D2E;
+  --ab-metal: #D9C39A;   /* ۸:۱ روی سبز */
+  --ab-emerald: #0E5C3E; /* ۸:۱ روی عاج */
+  --ab-t-h1: clamp(2.75rem, 1.4rem + 4vw, 4rem);
+  --ab-t-display: clamp(1.625rem, 1.2rem + 1.5vw, 2.5rem);
+  --ab-t-body: 1.0625rem;
+  --ab-t-small: 0.875rem;
   background: rgb(var(--c-paper));
+  color: var(--ab-ink);
+  overflow-x: clip;
 }
-.ab-page ::selection { background: rgb(var(--ab-emerald) / .16); color: rgb(var(--c-ink)); }
+.ab-page ::selection { background: var(--ab-felt); color: var(--ab-ivory); }
 
-/* تیترِ هیرو — سقفِ ۵۶px (خواستِ مالک)، تنها اندازه‌ی بیرون از مقیاس */
-.ab-h1 {
-  font-size: clamp(2rem, 1.35rem + 2.8vw, 3.5rem);
-  line-height: 1.3; letter-spacing: -0.02em; font-weight: 800; text-wrap: balance;
+.ab-grid {
+  display: grid; grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: var(--ab-gap); padding-inline: var(--ab-m);
 }
-.ab-em { color: rgb(var(--ab-emerald)); }
+.ab-grid > * { grid-column: 1 / -1; }
 
-/* قابِ صحنه — سایه‌ی تماسِ نزدیک + سایه‌ی نرمِ دور، نورِ از بالا */
-.ab-plate {
-  border-radius: var(--r4);
-  box-shadow: 0 1px 2px rgb(10 20 15 / .18), 0 24px 48px -24px rgb(10 30 20 / .5);
+/* :where صفرِ اختصاصیت دارد تا کلاس‌های اندازه برنده شوند */
+.ab-page :where(p, li, dd) { font-size: var(--ab-t-body); }
+.ab-h1 { font-size: var(--ab-t-h1); line-height: 1.12; font-weight: 800; letter-spacing: -0.025em; }
+.ab-display { font-size: var(--ab-t-display); line-height: 1.45; font-weight: 800; letter-spacing: -0.01em; text-wrap: balance; }
+.ab-lead { font-size: var(--ab-t-body); line-height: 1.9; max-width: 40ch; text-wrap: pretty; }
+
+.ab-link {
+  display: inline-flex; align-items: center; gap: 8px; color: var(--ab-ink); font-weight: 700;
+  text-decoration: underline; text-decoration-color: rgb(var(--c-ink) / .25); text-underline-offset: 6px;
+  transition: text-decoration-color .25s, color .25s;
+}
+.ab-link:hover { color: var(--ab-emerald); text-decoration-color: currentColor; }
+.ab-link:focus-visible, .ab-role-link:focus-visible { outline: 2px solid var(--ab-emerald); outline-offset: 4px; border-radius: 2px; }
+
+/* ⚠️ قابِ عکس‌ها overflow: clip نه hidden: hidden قاب را «ظرفِ اسکرول» می‌کند و view()ِ
+   عکسِ داخلش به همان قابِ بی‌حرکت می‌چسبد — انیمیشنِ اسکرولِ هیرو هیچ‌وقت اجرا نمی‌شد */
+/* min-height: 0 هم لازم است: با clip (برخلافِ hidden) «حداقلِ خودکارِ» aspect-ratio برمی‌گردد و
+   ارتفاعِ طبیعیِ عکس قاب را کش می‌دهد — قابِ ۱۶:۱۰ دوباره ۴:۵ می‌شد */
+.ab-hero-big, .ab-frame-pic, .ab-role-pic, .ab-prin-pic { overflow: clip; min-height: 0; }
+
+/* ═══ هیرو ═══ */
+.ab-hero { padding-top: 32px; }
+.ab-hero-band { row-gap: 24px; }
+.ab-mask { display: block; overflow: hidden; padding-block: .04em .14em; }
+.ab-mask > span { display: inline-block; }
+.ab-hero-copy { display: flex; flex-direction: column; align-items: flex-start; gap: 24px; }
+.ab-hero-big { margin-top: 48px; aspect-ratio: 4 / 5; }
+.ab-hero-big img { object-position: 50% 62%; }
+
+@media (min-width: 1024px) {
+  .ab-h1 { grid-column: 1 / 8; grid-row: 1; }
+  .ab-hero-copy { grid-column: 8 / 13; grid-row: 1; align-self: end; padding-bottom: 12px; }
+  /* عکس از حدودِ ۲۸۰px شروع می‌شود و تا پایینِ صفحه‌ی اول می‌رود */
+  .ab-hero-big { width: 100%; aspect-ratio: auto; height: clamp(440px, calc(100svh - 300px), 820px); }
+  .ab-hero-big img { object-position: 50% 60%; }
 }
 
 /* ═══ روایت ═══ */
-.ab-gather { container-type: inline-size; color: rgb(var(--ab-emerald)); }
-.ab-gather-word {
-  transform: translate(-50%, -50%);
-  color: rgb(var(--c-ink));
-  /* زمینه‌ی خودِ برچسب تا حلقه از زیرِ نوشته رد نشود */
-  background: rgb(var(--c-surface)); padding: 0 8px; border-radius: var(--r1);
+.ab-story { padding-block: 96px 64px; }
+.ab-run { display: grid; grid-template-columns: 1fr 1fr; gap: 24px 12px; padding-inline: var(--ab-m); margin-top: 48px; }
+.ab-frame-lifted { grid-column: 1 / -1; order: -1; }
+.ab-frame:first-child { grid-column: 1 / -1; }
+.ab-cap { display: flex; flex-direction: column; gap: 4px; text-wrap: pretty; padding-top: 8px; font-size: var(--ab-t-small); color: var(--ab-soft); }
+.ab-cap span:first-child { color: var(--ab-ink); font-weight: 800; font-size: var(--ab-t-body); }
+.ab-story-notes { margin-top: 48px; row-gap: 24px; }
+.ab-story-notes p { line-height: 1.95; max-width: 40ch; text-wrap: pretty; }
+.ab-story-notes strong { font-weight: 800; color: var(--ab-emerald); }
+
+@media (max-width: 1023px) {
+  /* جیب و گچ کنارِ هم با یک نسبت تا زیرنویس‌ها هم‌تراز بمانند */
+  .ab-frame:nth-child(3) .ab-frame-pic, .ab-frame:nth-child(4) .ab-frame-pic { aspect-ratio: 1 / 1 !important; }
 }
-.ab-gather-ring { stroke-dasharray: 100; stroke-dashoffset: 0; opacity: .5; }
-
-/* ═══ شبکه ═══ */
-.ab-spoke, .ab-edge { stroke: rgb(var(--c-ink)); vector-effect: non-scaling-stroke; transition: stroke .3s, stroke-width .3s, opacity .3s; }
-.ab-spoke { stroke-opacity: .12; stroke-width: 1; stroke-dasharray: 1.2 1.6; }
-.ab-edge { stroke-opacity: .22; stroke-width: 1; }
-.ab-hub-ring { fill: none; stroke: rgb(var(--c-gold)); stroke-width: 1; vector-effect: non-scaling-stroke; }
-
-/* خالِ لوزی — نشانگرِ لبه‌ی میز، در کلِ صفحه یک شکل */
-.ab-sight, .ab-rail-sight {
-  display: block; width: 8px; height: 8px; transform: rotate(45deg);
-  background: rgb(var(--c-gold));
-  box-shadow: 0 1px 2px rgb(var(--c-gold-deep) / .45);
-  transition: background .3s, transform .3s;
-}
-.ab-node { color: rgb(var(--c-ink)); transition: color .3s, opacity .3s; }
-.ab-node > span:last-child { background: rgb(var(--c-paper)); padding: 0 6px; border-radius: var(--r1); }
-
-.ab-eco-list > li + li { border-top: 1px solid rgb(var(--c-line) / .1); }
-.ab-eco-row { border-radius: var(--r2); transition: color .25s; }
-.ab-eco-row:focus-visible { outline: 2px solid transparent; outline-offset: 2px; box-shadow: 0 0 0 2px rgb(var(--c-paper)), 0 0 0 4px rgb(var(--ab-emerald)); }
-.ab-eco-row:hover h3, .ab-eco-row:focus-visible h3 { color: rgb(var(--ab-emerald)); }
-.ab-eco-arrow { transition: transform .3s cubic-bezier(.22,.61,.36,1), color .3s; }
-.ab-eco-row:hover .ab-eco-arrow, .ab-eco-row:focus-visible .ab-eco-arrow { transform: translateX(-4px); color: rgb(var(--ab-emerald)); }
-
-/* ردیفِ فهرست ⟵ گره و پیوندهایش در نمودار. بقیه کم‌رنگ می‌شوند */
-.ab-eco:has(.ab-eco-row:is(:hover, :focus-visible)) .ab-node { opacity: .35; }
-.ab-eco:has(.ab-eco-row:is(:hover, :focus-visible)) :is(.ab-spoke, .ab-edge) { opacity: .35; }
-.ab-eco:has(li[data-k="clubs"] .ab-eco-row:is(:hover, :focus-visible)) :is([data-n="clubs"], [data-e~="clubs"]),
-.ab-eco:has(li[data-k="players"] .ab-eco-row:is(:hover, :focus-visible)) :is([data-n="players"], [data-e~="players"]),
-.ab-eco:has(li[data-k="coaches"] .ab-eco-row:is(:hover, :focus-visible)) :is([data-n="coaches"], [data-e~="coaches"]),
-.ab-eco:has(li[data-k="referees"] .ab-eco-row:is(:hover, :focus-visible)) :is([data-n="referees"], [data-e~="referees"]),
-.ab-eco:has(li[data-k="tournaments"] .ab-eco-row:is(:hover, :focus-visible)) :is([data-n="tournaments"], [data-e~="tournaments"]),
-.ab-eco:has(li[data-k="services"] .ab-eco-row:is(:hover, :focus-visible)) :is([data-n="services"], [data-e~="services"]),
-.ab-eco:has(li[data-k="manufacturers"] .ab-eco-row:is(:hover, :focus-visible)) :is([data-n="manufacturers"], [data-e~="manufacturers"]),
-.ab-eco:has(li[data-k="sellers"] .ab-eco-row:is(:hover, :focus-visible)) :is([data-n="sellers"], [data-e~="sellers"]) {
-  opacity: 1; color: rgb(var(--ab-emerald)); stroke: rgb(var(--ab-emerald-2)); stroke-opacity: 1; stroke-width: 2;
+@media (min-width: 1024px) {
+  .ab-story { padding-block: 96px; }
+  .ab-story-h { grid-column: 1 / 11; }
+  /* چهار قاب در تمامِ عرض، عرضِ هرکدام به نسبتِ عکسش، ارتفاع‌ها برابر و کف‌ها هم‌تراز */
+  .ab-run { display: flex; align-items: flex-end; gap: var(--ab-gap); margin-top: 64px; }
+  .ab-frame { flex: var(--ab-ratio) 1 0; min-width: 0; }
+  .ab-frame-lifted { order: 0; }
+  .ab-cap { flex-direction: row; justify-content: space-between; }
+  .ab-story-notes { margin-top: 48px; }
+  .ab-story-notes p:first-child { grid-column: 1 / 6; }
+  .ab-story-notes p:last-child { grid-column: 7 / 12; grid-row: 1; }
 }
 
-/* ═══ اصول: ریل ═══ */
-.ab-rail-row { position: relative; }
-.ab-rail {
-  position: absolute; inset-inline: 0; top: 0; height: 1px;
-  /* right عمدی است: سمتِ شروع در RTL (dir روی html ثابت است)؛ transform-origin معادلِ منطقی ندارد */
-  background: rgb(var(--c-ink) / .14); transform-origin: right;
+/* ═══ هشت نقش: دیوارِ گالری ═══ */
+.ab-roles { padding-block: 64px 96px; }
+/* موبایل: نقش‌های عمودی دوتایی کنارِ هم، سه نقشِ عریض تمام‌عرض — نصفِ اسکرولِ ستونِ زیگزاگ */
+.ab-wall { display: grid; grid-template-columns: 1fr 1fr; gap: 40px 12px; margin-top: 48px; align-items: start; }
+.ab-role-clubs, .ab-role-tournaments, .ab-role-services, .ab-role-manufacturers { grid-column: 1 / -1; }
+.ab-role-link { display: flex; flex-direction: column; color: inherit; }
+.ab-role-pic { aspect-ratio: 4 / 5; }
+.ab-role-clubs .ab-role-pic, .ab-role-tournaments .ab-role-pic, .ab-role-services .ab-role-pic { aspect-ratio: 16 / 10; }
+.ab-role-manufacturers .ab-role-pic { aspect-ratio: 16 / 10; }
+@media (min-width: 1024px) {
+  .ab-role-referees .ab-role-pic, .ab-role-manufacturers .ab-role-pic { aspect-ratio: 1 / 1; }
+  .ab-role-services .ab-role-pic { aspect-ratio: 21 / 9; }
 }
-/* خال هم‌سطحِ ریل است نه فرزندش، تا scaleXِ ریل لهش نکند */
-.ab-rail-row > .ab-rail-sight { position: absolute; inset-inline-start: 0; top: -4px; }
-.ab-principle { color: rgb(var(--ab-emerald)); }
+.ab-role-clubs img { object-position: 50% 58%; }
+.ab-role-referees img { object-position: 50% 62%; }
+.ab-role-manufacturers img { object-position: 50% 45%; }
+.ab-role-tournaments img { object-position: 50% 42%; }
+.ab-role-services img { object-position: 50% 40%; }
+.ab-role-name { font-size: var(--ab-t-body); font-weight: 800; margin-top: 16px; transition: color .25s; }
+.ab-role-line { font-size: var(--ab-t-small) !important; color: var(--ab-soft); line-height: 1.8; margin-top: 4px; text-wrap: pretty; }
+.ab-role-link:hover .ab-role-name, .ab-role-link:focus-visible .ab-role-name { color: var(--ab-emerald); }
+.ab-zoom { transition: transform .9s cubic-bezier(.16,1,.3,1); }
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .ab-role-link:hover .ab-zoom { transform: scale(1.04); }
+}
 
-/* ═══ پلاک ═══ */
-.ab-plaque {
-  position: relative; background: rgb(var(--c-surface));
-  border: 1px solid rgb(var(--c-gold) / .55); border-radius: var(--r2);
-  outline: 1px solid rgb(var(--c-gold) / .35); outline-offset: -8px;
-  box-shadow: 0 1px 2px rgb(23 26 25 / .06), 0 18px 40px -28px rgb(23 26 25 / .35);
+@media (min-width: 1024px) {
+  .ab-roles { padding-block: 96px; }
+  .ab-roles-h { grid-column: 1 / 7; }
+  /* جای هر نقش صریح است؛ جابه‌جاییِ عمودی با padding-top، پس هیچ تصویری روی زیرنویسِ دیگری نمی‌افتد */
+  .ab-wall {
+    display: grid; grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: var(--ab-gap); row-gap: 96px; margin-top: 64px; align-items: start;
+  }
+  .ab-role-clubs { grid-column: 1 / 8; grid-row: 1; }
+  .ab-role-players { grid-column: 9 / 13; grid-row: 1; padding-top: 96px; }
+  .ab-role-coaches { grid-column: 1 / 5; grid-row: 2; }
+  .ab-role-referees { grid-column: 6 / 9; grid-row: 2; padding-top: 96px; }
+  .ab-role-sellers { grid-column: 10 / 13; grid-row: 2; padding-top: 48px; }
+  .ab-role-manufacturers { grid-column: 1 / 5; grid-row: 3; padding-top: 64px; }
+  .ab-role-tournaments { grid-column: 6 / 13; grid-row: 3; }
+  /* پایانِ دیوار: خدمات فنی تمام‌عرض ۲۱:۹ */
+  .ab-role-services { grid-column: 1 / 13; grid-row: 4; }
 }
-.ab-plaque-link { position: relative; display: block; width: 64px; height: 1px; background: rgb(var(--c-gold) / .7); }
-.ab-plaque-link .ab-rail-sight { position: absolute; inset-inline-start: 28px; top: -4px; }
+
+/* ═══ اصول: میدانِ سبز ═══ */
+.ab-field { background: var(--ab-felt); color: var(--ab-ivory); padding-block: 64px 96px; }
+.ab-field-h { color: var(--ab-ivory); }
+.ab-prin-list { display: flex; flex-direction: column; gap: 64px; margin-top: 48px; }
+.ab-prin { row-gap: 16px; align-items: start; }
+.ab-prin-word { font-size: var(--ab-t-display); line-height: 1.3; font-weight: 800; color: var(--ab-metal); }
+.ab-prin-line { font-weight: 800; color: var(--ab-ivory); line-height: 1.8; }
+.ab-prin-items { display: flex; flex-direction: column; gap: 8px; margin-top: 16px; }
+.ab-prin-items li { color: rgb(var(--c-paper) / .78); line-height: 1.7; text-wrap: pretty; }
+.ab-prin-pic { margin-top: 16px; width: 72%; aspect-ratio: 4 / 5; }
+.ab-prin-2 .ab-prin-pic { margin-inline-start: auto; width: 62%; aspect-ratio: 1 / 1; }
+.ab-prin-3 .ab-prin-pic { width: 100%; aspect-ratio: 16 / 10; }
+
+@media (min-width: 1024px) {
+  .ab-field { padding-block: 96px; }
+  .ab-field-h { grid-column: 1 / 8; }
+  .ab-prin-list { gap: 96px; margin-top: 96px; }
+  .ab-prin .ab-prin-pic { width: auto; margin: 0; }
+  /* واژه، جمله و فهرست یک واحدند؛ فقط طرفِ تصویر آینه می‌شود، و هر سه تصویر پنج ستون عرض دارند */
+  .ab-prin { align-content: start; }
+  .ab-prin .ab-prin-word { grid-row: 1; align-self: end; }
+  .ab-prin .ab-prin-text { grid-row: 2; }
+  .ab-prin .ab-prin-pic { grid-row: 1 / span 2; }
+  .ab-prin-1 .ab-prin-word, .ab-prin-1 .ab-prin-text, .ab-prin-3 .ab-prin-word, .ab-prin-3 .ab-prin-text { grid-column: 1 / 7; }
+  .ab-prin-1 .ab-prin-pic, .ab-prin-3 .ab-prin-pic { grid-column: 8 / 13; }
+  .ab-prin-2 .ab-prin-pic { grid-column: 1 / 6; }
+  .ab-prin-2 .ab-prin-word, .ab-prin-2 .ab-prin-text { grid-column: 7 / 13; }
+}
+
+/* ═══ مالکیت ═══ */
+.ab-own { padding-block: 96px 64px; }
+.ab-own-body { margin-top: 48px; row-gap: 48px; }
+.ab-own-marks { display: flex; align-items: center; gap: 16px; }
+.ab-own-tile { display: grid; place-items: center; width: 96px; height: 96px; background: rgb(var(--c-surface)); border-radius: var(--r3); }
+.ab-own-tile img { width: 64px; height: 64px; border-radius: var(--r2); }
+.ab-own-tile .ab-own-arta { object-fit: cover; object-position: left; border-radius: 0; }
+.ab-own-table { display: flex; flex-direction: column; gap: 24px; }
+.ab-own-row { display: grid; grid-template-columns: 8rem 1fr; gap: 16px; align-items: baseline; }
+.ab-own-row:nth-child(4) { margin-top: 24px; }
+.ab-own-row dt { font-size: var(--ab-t-small); color: var(--ab-soft); }
+.ab-own-row dd { font-weight: 700; text-wrap: pretty; }
+
+@media (min-width: 1024px) {
+  .ab-own { padding-block: 96px; }
+  .ab-own-h { grid-column: 1 / 10; }
+  .ab-own-body { margin-top: 64px; }
+  .ab-own-marks { grid-column: 1 / 5; align-self: start; }
+  .ab-own-tile { width: 128px; height: 128px; }
+  .ab-own-tile img { width: 96px; height: 96px; }
+  .ab-own-table { grid-column: 5 / 12; }
+}
+
+/* ═══ پایان ═══ */
+.ab-close { padding-block: 64px 96px; }
+.ab-close .ab-grid { row-gap: 32px; }
+.ab-close-text { display: flex; flex-direction: column; gap: 16px; }
+.ab-close-links { display: flex; flex-direction: column; align-items: flex-start; gap: 16px; }
+.ab-close-meta { font-size: var(--ab-t-small) !important; color: var(--ab-soft); }
+
+@media (min-width: 1024px) {
+  .ab-close { padding-block: 96px; }
+  .ab-close-text { grid-column: 1 / 7; grid-row: 1; }
+  .ab-close-links { grid-column: 8 / 13; grid-row: 1; align-self: end; }
+}
 
 /* ═══ حرکت ═══ */
-@keyframes abUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
-@keyframes abFade { from { opacity: 0; } to { opacity: 1; } }
-@keyframes abSlide { from { transform: translateY(14px); } to { transform: none; } }
-@keyframes abLampOn { 0% { opacity: 0; } 30% { opacity: .55; } 38% { opacity: .2; } 100% { opacity: 1; } }
-@keyframes abDraw { from { stroke-dashoffset: 100; } to { stroke-dashoffset: 0; } }
+@keyframes abLine { from { transform: translateY(108%); } to { transform: none; } }
+@keyframes abUp { from { opacity: .35; transform: translateY(24px); } to { opacity: 1; transform: none; } }
+@keyframes abCurtain { from { clip-path: inset(30% 0 0 0); } to { clip-path: inset(0 0 0 0); } }
+@keyframes abSettle { from { transform: scale(1.1); } to { transform: scale(1); } }
 
 @media (prefers-reduced-motion: no-preference) {
-  /* ۱) چراغ روشن می‌شود؛ متن خط‌به‌خط.
-     ⚠️ تیتر و قاب با opacity صفر شروع نمی‌شوند: Chrome عنصرِ شفاف را نامزدِ LCP
-     نمی‌شمارد و اولین نقاشیِ معنادار حدود یک ثانیه عقب می‌افتاد (همان تله‌ی HomeClient).
-     تیتر فقط جابه‌جا می‌شود؛ پاراگراف و دکمه‌ها محو هم می‌شوند.
-     ⚠️ لایه‌های روشن‌شونده هیچ فیلترِ SVG ندارند، تا هر فریمِ انیمیشن فیلتر دوباره اجرا نشود */
-  .ab-cone, .ab-pool, .ab-lamp-strip { animation: abLampOn 1.6s .2s cubic-bezier(.22,.61,.36,1) both; }
-  .ab-h1 .ab-line { animation: abSlide .8s cubic-bezier(.16,1,.3,1) both; }
-  .ab-h1 .ab-line:nth-child(2) { animation-delay: .1s; }
-  .ab-hero-copy > p.ab-line { animation: abUp .8s .2s cubic-bezier(.16,1,.3,1) both; }
-  .ab-hero-copy > div.ab-line { animation: abUp .8s .3s cubic-bezier(.16,1,.3,1) both; }
+  /* ۱) حرکتِ امضا: هر سطر از پشتِ خطِ کرسیِ خودش */
+  .ab-mask > span { animation: abLine .9s cubic-bezier(.16,1,.3,1) both; }
+  .ab-mask-2 > span { animation-delay: .11s; }
+  .ab-hero-copy { animation: abUp .8s .3s cubic-bezier(.16,1,.3,1) both; }
 
   @supports (animation-timeline: view()) {
-    /* ۲) نقش‌ها از حالتِ پراکنده سرِ جایشان می‌نشینند */
-    .ab-story { view-timeline-name: --ab-story; }
-    .ab-gather-word {
-      animation: abGather linear both; animation-timeline: --ab-story;
-      animation-range: entry 40% contain 35%;
-    }
-    .ab-gather-ring, .ab-gather-hub {
-      animation: abDraw linear both, abFade linear both; animation-timeline: --ab-story, --ab-story;
-      animation-range: contain 15% contain 40%, contain 15% contain 40%;
-    }
-    .ab-story-line { animation: abUp linear both; animation-timeline: view(); animation-range: entry 0% entry 50%; }
-
-    /* ۳) پیوندها و ریل هنگامِ دیده شدن کشیده می‌شوند */
-    /* خطِ SVG جعبه‌ی CSS ندارد (خطِ افقی ارتفاعِ صفر)، پس view() رویش کار نمی‌کند — تایم‌لاینِ نام‌دارِ خودِ نقشه */
-    .ab-eco-map { view-timeline-name: --ab-eco; }
-    .ab-edge { stroke-dasharray: 100; animation: abDraw linear both; animation-timeline: --ab-eco; animation-range: entry 10% cover 45%; }
-    .ab-rail { animation: abRail linear both; animation-timeline: view(); animation-range: entry 0% entry 80%; }
+    /* ۲) ورودِ اجزای هر بخش، هر جزء با بازه‌ی خودش تا پله‌ای دیده شوند */
+    .ab-rise { animation: abUp linear both; animation-timeline: view(); animation-range: entry 0% entry 55%; }
+    .ab-story-notes p:last-child, .ab-prin-text { animation-range: entry 10% entry 65%; }
+    /* ۳) پرده: عکس از پایین باز می‌شود */
+    .ab-curtain { animation: abCurtain linear both; animation-timeline: view(); animation-range: entry 0% entry 70%; }
+    /* ۴) عکسِ هیرو با اسکرول آرام سرِ جایش می‌نشیند */
+    .ab-parallax { animation: abSettle linear both; animation-timeline: view(); animation-range: cover 0% cover 70%; }
   }
-}
-@keyframes abGather {
-  from { translate: calc(var(--dx) * 1cqw) calc(var(--dy) * 1cqw); rotate: var(--r); color: rgb(var(--c-ink-2) / .7); }
-  to { translate: 0 0; rotate: 0deg; color: rgb(var(--c-ink)); }
-}
-@keyframes abRail { from { transform: scaleX(0); } to { transform: scaleX(1); } }
-
-@media (hover: hover) and (prefers-reduced-motion: no-preference) {
-  .ab-cueball { transition: transform 1.2s cubic-bezier(.16,1,.3,1); }
-  .ab-plate:hover .ab-cueball { transform: translate(-6px, -10px); }
 }
