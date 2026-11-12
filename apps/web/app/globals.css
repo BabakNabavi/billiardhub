@@ -1881,3 +1881,10 @@ select:disabled { opacity: 0.55; cursor: not-allowed; }
     scroll-behavior: auto !important;
   }
 }
+
+/* نمای «لیست» در باشگاه‌ها، فروشگاه‌ها و تولیدکنندگان — خواستِ مالک (آبانِ ۱۴۰۵):
+   در دسکتاپ یک کارتِ تمام‌عرض فضای خالیِ زیادی می‌ساخت؛ از ۱۰۲۴ دو ستون، زیرش همان یک ستون */
+.list-2col { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
+@media (min-width: 1024px) {
+  .list-2col { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+}

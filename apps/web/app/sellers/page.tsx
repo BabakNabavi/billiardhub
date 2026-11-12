@@ -576,7 +576,7 @@ export default function SellersPage() {
               ))}
             </div>
           ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 56 }}>
+            <div className="list-2col" style={{ marginBottom: 56 }}>
               {filtered.map((s, i) => (
                 <div key={s.id} style={{ animation: `fadeUp ${0.28 + i * 0.04}s ease both` }}>
                   <SellerCard seller={s} view="list" />

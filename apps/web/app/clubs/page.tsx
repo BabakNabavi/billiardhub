@@ -678,7 +678,7 @@ export default function ClubsPage() {
               ))}
             </div>
           ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            <div className="list-2col">
               {filtered.map((club, i) => (
                 <div key={club.id} style={{ animation: `fadeUp 0.4s ease ${i * 0.04}s both` }}>
                   <ClubCard club={club} view="list" idx={i} tournaments={tournByClub.get(club.id) ?? []} />

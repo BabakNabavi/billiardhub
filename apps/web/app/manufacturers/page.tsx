@@ -772,7 +772,7 @@ export default function ManufacturersPage() {
               ))}
             </div>
           ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 56 }}>
+            <div className="list-2col" style={{ marginBottom: 56 }}>
               {filtered.map((m, i) => (
                 <div key={m.id} style={{ animation: `fadeUp ${0.28 + i * 0.04}s ease both` }}>
                   <MfrCard mfr={m} view="list" />
