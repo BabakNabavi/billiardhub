@@ -232,7 +232,13 @@ export default function Footer() {
         .ft-copy-short { display: none; }
         /* تبلت و موبایل: همان فضای پایین + ناحیه‌ی امن (توضیح در بلوکِ ≤۵۲۰ پایین‌تر) */
         @media (max-width: 1023.98px) {
-          .ft-inner { padding-bottom: calc(32px + env(safe-area-inset-bottom)) !important; }
+          /* مرورگر (سافاری/کرومِ آیفون): نوارِ شناورِ پایین ~۷۰–۸۰px روی صفحه است و iOS آن را
+             در safe-area گزارش نمی‌کند ⟵ فضای ثابتِ کافی. اپِ نصب‌شده: فقط نشانگرِ خانه (env). */
+          .ft-inner { padding-bottom: calc(96px + env(safe-area-inset-bottom)) !important; }
+        }
+        /* اپِ نصب‌شده (هوم‌اسکرین): نوارِ مرورگر نیست، فقط نشانگرِ خانه که در env می‌آید */
+        @media (max-width: 1023.98px) and (display-mode: standalone) {
+          footer .ft-inner { padding-bottom: calc(28px + env(safe-area-inset-bottom)) !important; }
         }
         /* سه ستون PLATFORM/EXPLORE/ACCOUNT در یک سطر می‌مانند، با دو
            ستون، ستون سوم به سطر بعد می‌افتاد و فوتر بی‌دلیل بلند
@@ -254,7 +260,7 @@ export default function Footer() {
           /* ⚠️ فضای پایین + ناحیه‌ی امن: نوارِ شناورِ پایینِ سافاری/کرومِ آیفون (iOS 26) و
              نشانگرِ خانه‌ی اپِ نصب‌شده روی همین آخرین خط می‌نشستند و کپی‌رایت و اعتبارِ
              سازنده روی گوشیِ واقعی اصلاً دیده نمی‌شد (گزارشِ مالک، آبانِ ۱۴۰۵) */
-          .ft-inner { padding: 26px 18px calc(40px + env(safe-area-inset-bottom)) !important; }
+          .ft-inner { padding: 26px 18px calc(96px + env(safe-area-inset-bottom)) !important; }
           /* نوار آدرس/تلفن: gap ۲۴ برای چیدمان یک‌سطری دسکتاپ بود، در موبایل آیتم‌ها می‌شکنند و
              همان عدد به فاصله‌ی عمودی بین سطرها تبدیل می‌شد — سطری ۲۴px. حالا عمودی ۴، افقی ۱۶. */
           /* وسط‌چین (خواست مالک) */
