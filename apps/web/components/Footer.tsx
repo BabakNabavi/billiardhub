@@ -230,6 +230,10 @@ export default function Footer() {
           .ft-inner, .ft-band-in { padding-left: 4% !important; padding-right: 4% !important; }
         }
         .ft-copy-short { display: none; }
+        /* تبلت و موبایل: همان فضای پایین + ناحیه‌ی امن (توضیح در بلوکِ ≤۵۲۰ پایین‌تر) */
+        @media (max-width: 1023.98px) {
+          .ft-inner { padding-bottom: calc(32px + env(safe-area-inset-bottom)) !important; }
+        }
         /* سه ستون PLATFORM/EXPLORE/ACCOUNT در یک سطر می‌مانند، با دو
            ستون، ستون سوم به سطر بعد می‌افتاد و فوتر بی‌دلیل بلند
            می‌شد — در حالی که برچسب‌ها کوتاه‌اند و جا هست. */
@@ -247,7 +251,10 @@ export default function Footer() {
           .ft-grid a { font-size: 13px !important; white-space: nowrap; }
 
           .ft-tagline { margin-bottom: 10px !important; }
-          .ft-inner { padding: 26px 18px 12px !important; }
+          /* ⚠️ فضای پایین + ناحیه‌ی امن: نوارِ شناورِ پایینِ سافاری/کرومِ آیفون (iOS 26) و
+             نشانگرِ خانه‌ی اپِ نصب‌شده روی همین آخرین خط می‌نشستند و کپی‌رایت و اعتبارِ
+             سازنده روی گوشیِ واقعی اصلاً دیده نمی‌شد (گزارشِ مالک، آبانِ ۱۴۰۵) */
+          .ft-inner { padding: 26px 18px calc(40px + env(safe-area-inset-bottom)) !important; }
           /* نوار آدرس/تلفن: gap ۲۴ برای چیدمان یک‌سطری دسکتاپ بود، در موبایل آیتم‌ها می‌شکنند و
              همان عدد به فاصله‌ی عمودی بین سطرها تبدیل می‌شد — سطری ۲۴px. حالا عمودی ۴، افقی ۱۶. */
           /* وسط‌چین (خواست مالک) */
@@ -268,8 +275,10 @@ export default function Footer() {
           .ft-bottom-links { justify-content: center !important; gap: 12px !important; flex-wrap: nowrap !important; }
           .ft-bottom, .ft-bottom .ft-legal { font-size: 11.5px !important; }
           .ft-bottom > div:first-child { font-size: 11.5px !important; }
-          .ft-copy-long { display: none !important; }
-          .ft-copy-short { display: inline !important; }
+          /* متنِ کاملِ کپی‌رایت در موبایل هم (خواستِ مالک)؛ در خطِ خودش، زیرِ لینک‌های حقوقی */
+          .ft-bottom > div:first-child { order: 2; flex-basis: 100%; white-space: normal !important; }
+          .ft-bottom-links { order: 1; }
+          .ft-dev-mob { order: 3; }
           .ft-dev-desk { display: none !important; }
           /* اعتبار توسعه‌دهنده و نوار حقوقی نزدیک هم بمانند */
           .ft-dev-mob { display: block !important; flex-basis: 100% !important; margin-top: 0; }
