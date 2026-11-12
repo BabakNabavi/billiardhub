@@ -214,7 +214,11 @@ export default function Footer() {
           .ft-legal-desk { display: flex; align-items: center; gap: 18px; white-space: nowrap; }
           .ft-legal-desk .ft-legal { font-size: 14.5px; color: ${DIM}; }
           .ft-sep { width: 1px; height: 18px; background: ${BORDER}; }
-          .ft-seals { margin-top: 0 !important; padding: 0 !important; gap: clamp(16px, 2vw, 32px) !important; flex-wrap: nowrap !important; }
+          .ft-seals { margin-top: 0 !important; padding: 0 !important; gap: clamp(16px, 2vw, 32px) !important; flex-wrap: nowrap !important; align-items: center !important; }
+          /* نشان‌ها با scale از لبه‌ی پایین کوچک می‌شوند (برای ردیفِ موبایل)، پس فضای خالی بالایشان
+             جمع می‌شد و در دسکتاپ «چسبیده به ته» دیده می‌شدند. این‌جا از مرکز، تا با متنِ حقوقی هم‌راستا بمانند. */
+          .ft-seals .bh-payping img, .ft-seals .bh-enamad img { transform-origin: center !important; }
+          .ft-lower { padding-bottom: 12px; }
           .ft-bottom { display: none !important; }
           .ft-band { display: block; background: rgba(26,25,23,0.045); border-top: 1px solid ${BORDER};
             font-size: 13px; color: ${DIM2}; }
