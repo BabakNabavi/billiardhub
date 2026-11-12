@@ -2022,8 +2022,9 @@ t('مقدارِ اولیه‌ی سرور هم از همان منبع است',
 t('کارتِ فروشگاه به نامک لینک می‌دهد نه شناسه‌ی کاربر',
   /id: s\(r\.slug\)/.test(read('lib/sellers-source.ts')),
   '`/sellers/<id>` با نامک کار می‌کند؛ با شناسه‌ی کاربر به «پیدا نشد» می‌رسید');
+/* آبانِ ۱۴۰۵: آبشارِ مرورگر به lib/story-feed (سرور) رفت — همان قاعده آن‌جا */
 t('استوریِ فروشگاه با شناسه‌ی مالک پرسیده می‌شود',
-  /\/api\/sellers\/\$\{s\.ownerId\}\/stories/.test(storiesBar),
+  /readActive\('seller-media', 'sellers', s\.ownerId/.test(read('lib/story-feed.ts')),
   'پنلِ فروشگاه با user.id ذخیره می‌کند؛ با نامک پاسخ همیشه خالی است');
 t('نوارِ استوری دیگر از لوکال‌استوریج فروشگاه نمی‌خواند',
   !/listSellerProfiles/.test(storiesBar.replace(/\/\*[\s\S]*?\*\//g, '')),
@@ -3467,7 +3468,8 @@ console.log('\n― استوری: یک منبع، با انقضا ―');
 
   /* هر سه مسیرِ استوری باید منقضی کنند */
   t('استوریِ عمومی منقضی می‌شود',
-    /now - s\.createdAt < DAY/.test(read('app/api/social/stories/route.ts')));
+    /* بدنه‌ی GET به lib/stories/public-social رفت (صفحه‌ی اصلی هم جاسازی‌اش می‌کند) */
+    /now - s\.createdAt < DAY/.test(read('app/api/social/stories/route.ts') + read('lib/stories/public-social.ts')));
   /* فقط هندلرِ GET سنجیده می‌شود — همان که نمایش به آن بند است.
      ادعای فایل‌محور با سه occurrence، شکستنِ یکی‌شان را ساکت رد می‌کرد. */
   const sellerStories = read('app/api/sellers/[id]/stories/route.ts');
@@ -4604,7 +4606,8 @@ console.log('\n― استوری فقط با انتشارِ صریح ―');
     !stories.includes('store-story-') && !/:\s*s\.storyImage\s*$/m.test(stories),
     'فیلدِ داخلِ فرم انتشار نیست');
   t('استوریِ منتشرشده هنوز نمایش داده می‌شود',
-    stories.includes('sellerResults') && stories.includes('st.expiresAt'),
+    /* فهرستِ منتشرشده حالا در lib/story-feed خوانده می‌شود و نوار نگاشتش می‌کند */
+    /'seller-media', 'sellers'/.test(read('lib/story-feed.ts')) && stories.includes('st.expiresAt'),
     'فقط فالبک برداشته شد، نه خودِ مسیر');
 }
 

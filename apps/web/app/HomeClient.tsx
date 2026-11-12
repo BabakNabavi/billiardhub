@@ -173,24 +173,24 @@ const PRP = '#4A2D8A';
 const IMG = {
   // Hero wallpapers — now in /images/clubs/
   wall1: '/images/clubs/wallpaper1.webp',
-  wall2: '/images/clubs/wallpaper2.jpeg',
+  wall2: '/images/clubs/wallpaper2.webp',
   wall3: '/images/clubs/wallpaper3.webp',
   wall4:  '/images/clubs/wallpaper4.webp',
   wall5:  '/images/clubs/wallpaper5.webp',
   wall12: '/images/clubs/wallpaper12.webp',
   wall6: '/images/clubs/wallpaper12.webp',
-  wall7: '/images/clubs/wallpaper21.jpg',
+  wall7: '/images/clubs/wallpaper21.webp',
 
   // Real club photos — filenames match current /public/images/clubs/
-  club1: '/images/clubs/club6.jpeg',
-  club2: '/images/clubs/club7.jpeg',
-  club3: '/images/clubs/club8.jpg',
-  club4: '/images/clubs/club9.jpeg',
-  club5: '/images/clubs/club5.jpeg',
-  club6: '/images/clubs/club4.png',
-  clubA: '/images/clubs/club1.png',
-  clubB: '/images/clubs/club2.jpg',
-  clubC: '/images/clubs/billiadr-club-3.jpg',
+  club1: '/images/clubs/club6.webp',
+  club2: '/images/clubs/club7.webp',
+  club3: '/images/clubs/club8.webp',
+  club4: '/images/clubs/club9.webp',
+  club5: '/images/clubs/club5.webp',
+  club6: '/images/clubs/club4.webp',
+  clubA: '/images/clubs/club1.webp',
+  clubB: '/images/clubs/club2.webp',
+  clubC: '/images/clubs/billiadr-club-3.webp',
 
   // Equipment / shop
   table:    '/images/shop/Home_table.webp',
@@ -355,7 +355,7 @@ function ClubCard({ club, h = '360px', featured = false }: { club: RealClub; h?:
           {/* ── Image: top 60% ── */}
           <div className="club-img-x" style={{ flex: '1 1 auto', minHeight: 0, position: 'relative', overflow: 'hidden', borderRadius: `${rad} ${rad} 0 0` }}>
             <img loading="lazy" decoding="async" src={club.img} alt={club.name}
-              onError={e => { const el = e.target as HTMLImageElement; el.onerror = null; el.src = '/images/clubs/club3.jpg'; }}
+              onError={e => { const el = e.target as HTMLImageElement; el.onerror = null; el.src = '/images/clubs/club3.webp'; }}
               style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover',
                 filter: hov ? 'brightness(0.65) saturate(0.82)' : 'brightness(0.82) saturate(0.88)',
                 transition: 'filter 0.7s ease, transform 0.8s cubic-bezier(0.4,0,0.2,1)',

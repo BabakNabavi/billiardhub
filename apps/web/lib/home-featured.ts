@@ -25,8 +25,8 @@ const FEATURED_STORES_MAX = 12
 /* عکس عمومی بیلیارد وقتی موجودیت عکس ندارد — نه عکس یک باشگاه
    دیگر که القا کند مال همین باشگاه است */
 const CLUB_IMG = [
-  '/images/clubs/club6.jpeg', '/images/clubs/club7.jpeg', '/images/clubs/club8.jpg',
-  '/images/clubs/club9.jpeg', '/images/clubs/club5.jpeg', '/images/clubs/club4.png',
+  '/images/clubs/club6.webp', '/images/clubs/club7.webp', '/images/clubs/club8.webp',
+  '/images/clubs/club9.webp', '/images/clubs/club5.webp', '/images/clubs/club4.webp',
 ]
 /* ⚠️ cue_billiard_1.jpg وجود نداشت (۴۰۴) ⟵ آگهیِ بی‌عکس، عکسِ شکسته نشان می‌داد */
 export const PRODUCT_IMG = '/images/shop/cue_billiard.webp'

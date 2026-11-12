@@ -13,7 +13,7 @@ import Avatar from './ui/Avatar';
 import { uploadFile } from '../lib/supabase';
 import { fetchStories, postStory, sendDM, fetchSeen, markSeen, type SStory } from '../lib/social';
 import { useVisualViewport } from '../lib/useVisualViewport';
-import { sharedJson } from '../lib/shared-fetch';
+import { readEmbeddedFeed, fetchStoryFeed, readEmbeddedSocial, type FeedGroup } from '../lib/story-feed-client';
 import { StoryCaption } from './stories/StoryCaption';
 
 interface StoryItem {
@@ -59,15 +59,6 @@ const bgGradients: Record<string,string> = {
   manufacturer: 'linear-gradient(160deg,#04140d 0%,#06281c 50%,#047857 100%)',
   technician:   'linear-gradient(160deg,#0a0a1a 0%,#141433 50%,#3730a3 100%)',
 };
-/* شکل ردیفی که مسیر استوری فروشگاه برمی‌گرداند */
-interface SellerStory {
-  id: string;
-  text?: string;
-  expiresAt: string;
-  mediaUrl: string;
-  mediaType?: 'image' | 'video';
-}
-
 const STORY_DURATION = 15000;
 
 function relativeTime(expiresAt: string): string {
@@ -484,7 +475,10 @@ export default function Stories() {
   };
 
   useEffect(() => {
-    setMounted(true); reloadLocal(); reloadServer();
+    setMounted(true); reloadLocal();
+    /* صفحه‌ی اصلی همین فهرست را در HTML جاسازی کرده ⟵ نمایشِ اول بی درخواست */
+    const embedded = readEmbeddedSocial<SStory>();
+    if (embedded) setServerGroups(buildServerGroups(embedded)); else void reloadServer();
     /* تازه‌سازی دوره‌ای تا استوری دستگاه‌های دیگر هم بیاید */
     const iv = setInterval(reloadServer, 25000);
     return () => clearInterval(iv);
@@ -613,126 +607,60 @@ export default function Stories() {
     } finally { setPublishing(false); }
   };
 
-  // Fetch real clubs + sellers with active stories and prepend to groups
+  /* ── استوری‌های باشگاه‌ها و فروشگاه‌ها ──
+     پیش‌تر این‌جا یک آبشارِ سه‌لایه بود: کلِ /api/clubs و /api/sellers، بعد
+     یک درخواستِ جدا برای هر فروشگاه و هر باشگاهِ دارای استوری — همه بعد از
+     hydration. روی اینترنتِ موبایل استوری‌ها چند ثانیه دیرتر از صفحه می‌رسیدند.
+
+     حالا سرور همه را یک‌جا جمع می‌کند (lib/story-feed):
+       ۱) صفحه‌ی اصلی فید را در HTML جاسازی کرده ⟵ بی هیچ درخواستی
+       ۲) نبودِ آن (مثلاً ناوبریِ نرم) ⟵ یک درخواست به /api/stories/feed
+
+     نگاشتِ گروه‌ها همان قبلی است (نقش، رنگ، برچسب، گیرنده‌ی دایرکت). */
   useEffect(() => {
-    const fetchAllStories = async () => {
-      /* همان دو مسیر را `HomeClient` هم می‌گیرد و هر دو در بارگذاری
-         اول اجرا می‌شوند — اندازه‌گیری هرکدام را دو بار نشان داد.
-         `sharedJson` یک درخواست می‌زند و به هر دو می‌دهد. */
-      const [clubsRes, sellersRes] = await Promise.allSettled([
-        sharedJson<any[]>('/api/clubs'),
-        sharedJson<any[]>('/api/sellers'),
-      ]);
-
-      const allClubs: any[] = clubsRes.status === 'fulfilled' ? (clubsRes.value || []) : [];
-      const sellers: any[] = sellersRes.status === 'fulfilled' ? (sellersRes.value || []) : [];
-
-      /* ── آبشار N+1 ──
-         پیش‌تر برای *هر* باشگاه و *هر* فروشگاه یک درخواست استوری
-         جدا می‌رفت، حتی وقتی معلوم بود استوری ندارد. با ده باشگاه
-         یعنی ده درخواست اضافه در همان لحظه‌ی حساس بارگذاری.
-
-         خود رکورد باشگاه پرچم `hasActiveStory` دارد، پس فقط از
-         همان‌ها پرسیده می‌شود. فروشگاه چنین پرچمی ندارد و دست‌نخورده
-         می‌ماند تا رفتار عوض نشود. */
-      const clubs = allClubs.filter((c: any) => c?.hasActiveStory);
-
-      const [clubResults, sellerResults] = await Promise.all([
-        Promise.all(
-          clubs.filter((c: any) => c.id).map((c: any) =>
-            fetch(`/api/clubs/${c.id}/stories`)
-              .then(r => r.json())
-              .then((stories: any[]) => ({ c, stories: Array.isArray(stories) ? stories : [] }))
-              .catch(() => ({ c, stories: [] as any[] }))
-          )
-        ),
-        /* ── چرا `ownerId` و نه `id` ──
-           `id` نامک فروشگاه است (مقصد `/sellers/<slug>`)، ولی پنل
-           فروشگاه استوری را با **شناسه‌ی کاربر** ذخیره می‌کند
-           (`/api/sellers/<user.id>/stories`). با نامک، پاسخ همیشه
-           خالی برمی‌گشت.
-
-           ⚠️ یک زمانی این‌جا شرط `!s.storyImage` هم بود: فروشگاهی که
-           عکس داخل فرم داشت اصلا پرسیده نمی‌شد، چون آن عکس به‌عنوان
-           استوری نشان داده می‌شد. حالا که آن فالبک برداشته شده، همان
-           شرط یعنی فروشگاهی که عکس فرم دارد استوری *واقعی*‌اش هم
-           هرگز به نوار نمی‌رسد — دقیقا برعکس چیزی که می‌خواستیم. */
-        Promise.all(
-          sellers.map((s: any) =>
-            s.ownerId
-              ? fetch(`/api/sellers/${s.ownerId}/stories`)
-                  .then(r => r.json())
-                  .then((stories: any[]) => ({ s, stories: Array.isArray(stories) ? stories : [] }))
-                  .catch(() => ({ s, stories: [] as any[] }))
-              : Promise.resolve({ s, stories: [] as any[] })
-          )
-        ),
-      ]);
-
-      const clubGroups: StoryGroup[] = clubResults
-        .filter(({ stories }) => stories.length > 0)
-        .map(({ c, stories }): StoryGroup => ({
-          userId: `api-club-${c.id}`,
-          userName: c.name,
-          userAvatar: c.name?.[0] ?? '؟',
-          logoUrl: c.logo || undefined,
+    const toGroups = (feed: FeedGroup[]): StoryGroup[] => feed.map((g): StoryGroup => {
+      const stories: StoryItem[] = g.stories.map(st => ({
+        id: st.id,
+        caption: st.text || undefined,
+        createdAt: relativeTime(st.expiresAt),
+        mediaUrl: st.mediaUrl,
+        mediaType: st.mediaType || 'image',
+      }))
+      return g.kind === 'club'
+        ? {
+          userId: `api-club-${g.id}`,
+          userName: g.name,
+          userAvatar: g.name?.[0] ?? '؟',
+          logoUrl: g.logo,
           userRole: 'club',
           roleColor: '#8F6531',
           roleLabel: 'باشگاه',
           allSeen: false,
-          stories: stories.map((s: any) => ({
-            id: s.id,
-            caption: s.text || undefined,
-            createdAt: relativeTime(s.expiresAt),
-            mediaUrl: s.mediaUrl,
-            mediaType: s.mediaType || 'image',
-          })),
-        }));
+          stories,
+        }
+        : {
+          userId: `api-seller-${g.id}`,
+          /* پاسخ به استوری فروشگاه باید به دایرکت **مالک** برسد، نه نامک */
+          ownerKey: g.ownerKey,
+          userName: g.name,
+          userAvatar: g.name[0] ?? 'ف',
+          logoUrl: g.logo,
+          userRole: 'shop',
+          roleColor: '#f59e0b',
+          roleLabel: 'فروشگاه',
+          allSeen: false,
+          stories,
+        }
+    })
 
-      /* ── فقط استوری *منتشرشده* ──
-         یک زمانی این‌جا فالبکی بود که اگر فروشگاه استوری واقعی نداشت،
-         فیلد `storyImage` فرم ثبت فروشگاه را به‌جایش نشان می‌داد.
-         نتیجه‌اش این بود که صاحب فروشگاه بدون اینکه هیچ‌وقت دکمه‌ی
-         «انتشار استوری» را زده باشد، عکسش روی صفحه‌ی اصلی با حلقه‌ی
-         استوری ظاهر می‌شد — و چون فیلد فرم است، نه ۲۴ ساعته منقضی
-         می‌شد و نه راهی برای برداشتنش بود جز پاک‌کردن خود فیلد.
+    const embedded = readEmbeddedFeed()
+    if (embedded) { setApiGroups(toGroups(embedded)); return }
 
-         یک عکس داخل فرم، انتشار نیست. حالا فقط چیزی می‌آید که از
-         مسیر استوری منتشر شده باشد و تاریخ انقضا دارد. */
-      const sellerGroups: StoryGroup[] = sellerResults
-        .map(({ s, stories }): StoryGroup | null => {
-          const items: StoryItem[] = (stories as SellerStory[]).map(st => ({
-            id: st.id,
-            caption: st.text || undefined,
-            createdAt: relativeTime(st.expiresAt),
-            mediaUrl: st.mediaUrl,
-            mediaType: st.mediaType || 'image',
-          }));
-          if (!items.length) return null;
-          const shopName = s.sellerProfile?.storeName || `${s.firstName || ''} ${s.lastName || ''}`.trim() || 'فروشگاه';
-          return {
-            userId: `api-seller-${s.id}`,
-            /* پاسخ به استوری فروشگاه باید به دایرکت **مالک** برسد.
-               بدون این، کلید گیرنده از `userId` ساخته می‌شد و نامک
-               فروشگاه بود — یعنی پیام به هیچ‌کس نمی‌رسید. */
-            ownerKey: s.ownerId || undefined,
-            userName: shopName,
-            userAvatar: shopName[0] ?? 'ف',
-            logoUrl: s.sellerProfile?.logo || s.avatar || undefined,
-            userRole: 'shop',
-            roleColor: '#f59e0b',
-            roleLabel: 'فروشگاه',
-            allSeen: false,
-            stories: items,
-          };
-        })
-        .filter((g): g is StoryGroup => g !== null);
-
-      const allApiGroups = [...clubGroups, ...sellerGroups];
-      setApiGroups(allApiGroups);
-    };
-
-    fetchAllStories().catch(() => {});
+    let alive = true
+    fetchStoryFeed()
+      .then(feed => { if (alive) setApiGroups(toGroups(feed)) })
+      .catch(() => {})
+    return () => { alive = false }
   }, []);
 
   const closeStory = () => { setActiveGroup(null); setShowEmojis(false); setComment(''); };

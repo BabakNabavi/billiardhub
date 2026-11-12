@@ -448,7 +448,7 @@ export function ClubProfileClient({ initialClub }: { initialClub?: Club | null }
     return () => { alive = false; };
   }, [loading, notFound, club.latitude, club.longitude]);
 
-  const images   = club.images?.length ? club.images : ['/images/clubs/club6.jpeg'];
+  const images   = club.images?.length ? club.images : ['/images/clubs/club6.webp'];
   const todayKey = tehranNow().day;
   const todayH   = (club.workingHours ?? {})?.[todayKey as string] as any;
   const isOpen   = calcIsOpen(todayH);
@@ -1475,7 +1475,7 @@ export function ClubProfileClient({ initialClub }: { initialClub?: Club | null }
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                     {tournAlbums.map(album => {
                       const isOpen = openAlbumId === album.tournamentId;
-                      const cover = album.items.find(i => i.type === 'image')?.dataUrl ?? '/images/clubs/club6.jpeg';
+                      const cover = album.items.find(i => i.type === 'image')?.dataUrl ?? '/images/clubs/club6.webp';
                       const createdDate = album.createdAt ? new Date(album.createdAt).toLocaleDateString('fa-IR') : '';
                       return (
                         <div key={album.tournamentId} className="lqg" style={{ overflow: 'hidden' }}>

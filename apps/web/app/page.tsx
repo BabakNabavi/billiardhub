@@ -7,6 +7,9 @@ import ServicesSection from '../components/home/ServicesSection'
 import ExploreStrip from '../components/home/ExploreStrip'
 import { HomeHero } from '../components/home/hero/HomeHero'
 import { loadHeroData, EMPTY_HERO } from '../lib/home-hero'
+import { loadStoryFeed } from '../lib/story-feed'
+import { STORY_FEED_ID, SOCIAL_FEED_ID } from '../lib/story-feed-client'
+import { listPublicSocialStories } from '../lib/stories/public-social'
 /* از ماژول مشترک، نه از AdSlot که 'use client' است — صداکردن تابع
    یک فایل کلاینت از Server Component همان چیزی بود که صفحه را ۵۰۰ کرد */
 import { toPlacementState, type PlacementKey, type PlacementState, type PlacementPayload } from '../lib/ads/placement-state'
@@ -94,11 +97,15 @@ export default async function HomePage() {
      وقتی این داده را با useEffect گرفتم، کارت‌ها از HTML اولیه بیرون
      افتادند و همان مشکلی که این لایه حل کرده بود برگشت — خزنده چیزی
      نمی‌دید و کاربر یک پرش چیدمان داشت. */
-  const [placements, featured, hero] = await Promise.allSettled([
+  const [placements, featured, hero, storyFeed, socialStories] = await Promise.allSettled([
     buildLivePlacements(),
     loadHomeFeatured(),
     loadHeroData(),
+    loadStoryFeed(),
+    listPublicSocialStories({ purge: false }),
   ])
+  /* JSON داخلِ <script>: «<» فرار داده می‌شود تا «</script>» در متنِ کاربر تگ را نبندد */
+  const embedJson = (v: unknown) => JSON.stringify(v).replace(/</g, '\\u003c')
   const featuredData = featured.status === 'fulfilled' ? featured.value : EMPTY_FEATURED
 
   if (placements.status === 'fulfilled') {
@@ -114,6 +121,27 @@ export default async function HomePage() {
           جست‌وجو — گوگل از این برای نامِ سایت، لوگو در نتایج و Sitelinks Search
           Box استفاده می‌کند. فقط در صفحه‌ی اصلی، طبقِ توصیه‌ی گوگل. */}
       <JsonLd data={SITE_JSONLD} />
+      {/* استوری‌های باشگاه‌ها و فروشگاه‌ها، جاسازی‌شده در همین HTML.
+          نوارِ استوری (داخلِ Navbar) آن را هنگامِ mount می‌خواند — پیش‌تر
+          بعد از hydration یک آبشارِ چندلایه‌ی درخواست می‌زد و استوری‌ها چند
+          ثانیه دیرتر از صفحه می‌رسیدند (lib/story-feed). */}
+      {/* شکست یعنی نبودِ تگ ⟵ نوار خودش از /api/stories/feed می‌پرسد (نه «هیچ استوری‌ای») */}
+      {storyFeed.status === 'fulfilled' && (
+        <script
+          id={STORY_FEED_ID}
+          type="application/json"
+          dangerouslySetInnerHTML={{ __html: embedJson(storyFeed.value) }}
+        />
+      )}
+      {/* استوری‌های اجتماعی — همان پاسخِ عمومیِ /api/social/stories؛ شکست یعنی
+          نبودِ تگ، تا نوار به همان درخواستِ قبلی برگردد (نه «هیچ استوری‌ای») */}
+      {socialStories.status === 'fulfilled' && (
+        <script
+          id={SOCIAL_FEED_ID}
+          type="application/json"
+          dangerouslySetInnerHTML={{ __html: embedJson(socialStories.value) }}
+        />
+      )}
       {/* تصویر هیرو در HTMLِ سرور هست، ولی پس از بلوکِ بزرگِ <style>ِ
           HomeClient — یعنی اسکنرِ مرورگر دیر به آن می‌رسد. preload آن را
           به همان ابتدای <head> می‌آورد («LCP request discovery»).
