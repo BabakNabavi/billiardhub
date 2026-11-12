@@ -1,35 +1,32 @@
 import { AboutHero } from '@/components/about/AboutHero'
-import { StoryFrames } from '@/components/about/StoryFrames'
-import { RolesPass } from '@/components/about/RolesPass'
-import { PrinciplesField } from '@/components/about/PrinciplesField'
+import { StoryChapters } from '@/components/about/StoryChapters'
+import { RolesIndex } from '@/components/about/RolesIndex'
+import { PrinciplesPosters } from '@/components/about/PrinciplesPosters'
 import { OwnershipTable } from '@/components/about/OwnershipTable'
 import { ClosingBand } from '@/components/about/ClosingBand'
 import './about.css'
 
 /* ─────────────────────────────────────────────────────────────
-   درباره ما — بازطراحیِ سوم (آبانِ ۱۴۰۵)، تصویرمحور.
+   درباره ما — بازطراحیِ چهارم (آبانِ ۱۴۰۵): سینمایی و تعاملی.
 
-   جهت: «عکس‌ها در اندازه‌های ناهمسان» (tasteskill، seed 1078978074) — مثلِ
-   چاپ‌هایی روی دیوارِ گالری، هرکدام با اندازه و جای خودش، روی یک گریدِ
-   ۱۲ستونه که حس می‌شود. رنگ و فونت از برند: زمینه‌ی عاج، جوهرِ زغالی،
-   سبزِ پارچه به‌عنوانِ تنها میدانِ رنگی (بخشِ اصول)، دکمه‌ی طلاییِ LQ.
-
-   ایده: «در این صفحه، اجزای یک فریمِ اسنوکر — بریک، تماس، جیب، گچ — و هشت
-   نقشِ بیلیارد ایران، دیوارِ گالریِ یک جامعه می‌شوند»
-   ترتیبِ استدلال: چه هست (هیرو) ⟵ چرا ساخته شد (روایت) ⟵ چه کسانی (هشت نقش)
-   ⟵ با چه قاعده‌ای (اصول) ⟵ مالِ کیست (مالکیت) ⟵ از کجا شروع کنید (پایان)
-
-   همه‌ی تصویرها تولیدشده‌اند؛ منشأ و دستورِ هرکدام در components/about/imagery.ts.
-   Server Component است؛ حرکت فقط CSS (about.css)
+   جهت: «ورزشیِ ادیتوریال × صحنه‌ی سه‌بعدیِ سینمایی × روایتِ تعاملی».
+   ۱) هیرو: صحنه‌ی زنده‌ی WebGL از میزِ زیرِ چراغ (شیدرِ raymarching، بی کتابخانه)
+      روی عکسِ SSR؛ دوربین با نشانگر و اسکرول حرکت می‌کند
+   ۲) روایت: سه فصل در صحنه‌ی ثابت — قاب‌های پراکنده که با اسکرول یکپارچه می‌شوند (GSAP)
+   ۳) اکوسیستم: فهرستِ هشت دنیا با یک صحنه‌ی تصویرِ ثابت که با هر نام عوض می‌شود
+   ۴) اصول: سه پوستر، واژه‌ی بزرگِ پرشده با عکس، روی صحنه‌ی زغالی
+   ۵) مالکیت: پلاکِ سبزِ دو نشان + جدولِ حقیقت‌ها   ۶) دعوت
+   رنگ: زمینه‌ی روشنِ عاج غالب است؛ دو صحنه‌ی تیره (هیرو، اصول) عمدی‌اند.
+   تصویرها همه تولیدشده‌اند؛ منشأ در components/about/imagery.ts
    ───────────────────────────────────────────────────────────── */
 
 export default function AboutPage() {
   return (
     <div className="ab-page">
       <AboutHero />
-      <StoryFrames />
-      <RolesPass />
-      <PrinciplesField />
+      <StoryChapters />
+      <RolesIndex />
+      <PrinciplesPosters />
       <OwnershipTable />
       <ClosingBand />
     </div>

@@ -1,33 +1,32 @@
 /* ─────────────────────────────────────────────────────────────
-   درباره ما — «عکس‌ها در اندازه‌های ناهمسان». همه CSS، بی کتابخانه.
+   درباره ما — سینمایی و تعاملی (بازطراحیِ چهارم).
 
-   گرید: ۱۲ ستون با حاشیه‌های برابر؛ در RTL ستونِ ۱ راست‌ترین است، پس
-   grid-column خودش منطقی است. هر لبه‌ی عکس روی یک خطِ ستون می‌نشیند.
-   فاصله‌ها فقط از مقیاسِ پروژه (۴ ۸ ۱۲ ۱۶ ۲۴ ۳۲ ۴۸ ۶۴ ۹۶).
-   حروف، چهار اندازه: تیترِ صفحه، تیترِ بخش (همه‌ی بخش‌ها یکی)، متن، ریز.
-   رنگ: زمینه و جوهر از توکن‌های پروژه. سه رنگِ ویژه‌ی همین صفحه، چون پالتِ
-   پروژه سبزِ پارچه و فلزی ندارد: --ab-felt (میدانِ بخشِ اصول)، --ab-metal
-   (فقط واژه‌های اصول)، --ab-emerald (لینک و تأکیدِ روایت).
-   بی خطِ مو، بی سایه روی چیزِ ساکن، بی گرادیان.
-   ⚠️ نام‌ها: کلاسِ ab-reveal مالِ styles/reveal.css (صفحه‌ی تماس) است؛ CSSِ صفحه‌ها
-   در Next بعد از جابه‌جایی در سند می‌ماند، پس این‌جا ab-curtain است — نامِ
-   هم‌سان یعنی انیمیشنِ یکی روی دیگری.
-   حرکت: (۱) تیتر سطر به سطر از پشتِ خطِ کرسی (۲) ورودِ اجزا با اسکرول
-   (۳) پرده‌کنار رفتنِ عکس‌ها (۴) نشستنِ آرامِ عکسِ هیرو با اسکرول.
-   هیچ چیز کاملاً پنهان شروع نمی‌شود (متن ۳۵٪، عکس ۷۰٪)؛ بدونِ پشتیبانی یا با
-   کاهشِ حرکت همه از اول دیده می‌شود
+   گرید: ۱۲ ستون با حاشیه‌های برابر؛ در RTL ستونِ ۱ راست‌ترین است.
+   حروف (دانا): تیترِ هیرو، واژه‌ی پوستر، نامِ فهرست، تیترِ بخش، متن، ریز.
+   رنگ: عاجِ گرم غالب؛ دو صحنه‌ی تیره‌ی عمدی — هیرو (اتاقِ میز) و اصول (زغالی).
+   سبزِ پارچه امضاست؛ فلزیِ آرام فقط روی واژه‌های اصول و خطِ پیوندِ مالکیت.
+   ⚠️ نام‌ها: ab-reveal مالِ styles/reveal.css (صفحه‌ی تماس) است و CSSِ صفحه‌ها بعد از
+   جابه‌جایی در سند می‌ماند؛ این‌جا هیچ کلاسی با آن هم‌نام نیست.
+   ⚠️ قابِ عکس‌ها overflow: clip + min-height: 0 — hidden قاب را ظرفِ اسکرول می‌کند
+   (view() به آن می‌چسبد) و clip بی min-height حداقلِ خودکارِ aspect-ratio را برمی‌گرداند.
+   حرکت: صحنه‌ی WebGL و فصل‌های روایت با جاوااسکریپت (HeroScene، StoryMotion)؛
+   بقیه CSS. هیچ چیز کاملاً پنهان شروع نمی‌شود؛ کاهشِ حرکت همه را خاموش می‌کند
    ───────────────────────────────────────────────────────────── */
 
 .ab-page {
   --ab-m: clamp(16px, 5vw, 88px);
   --ab-gap: clamp(12px, 1.6vw, 24px);
+  --ab-head: var(--nav-offset);   /* ۷۲px + safe-area — اپِ نصب‌شده‌ی iOS */
   --ab-ink: rgb(var(--c-ink));
   --ab-soft: rgb(var(--c-ink-2));
   --ab-ivory: rgb(var(--c-paper));
   --ab-felt: #0F3D2E;
-  --ab-metal: #D9C39A;   /* ۸:۱ روی سبز */
+  --ab-coal: #101412;
+  --ab-metal: #D9C39A;   /* ۹:۱ روی زغالی */
   --ab-emerald: #0E5C3E; /* ۸:۱ روی عاج */
-  --ab-t-h1: clamp(2.75rem, 1.4rem + 4vw, 4rem);
+  --ab-t-h1: clamp(3rem, 1.6rem + 4.6vw, 5.5rem);
+  --ab-t-poster: clamp(3.5rem, 1rem + 12vw, 11rem);
+  --ab-t-name: clamp(1.75rem, 1rem + 2.4vw, 3.25rem);
   --ab-t-display: clamp(1.625rem, 1.2rem + 1.5vw, 2.5rem);
   --ab-t-body: 1.0625rem;
   --ab-t-small: 0.875rem;
@@ -36,207 +35,228 @@
   overflow-x: clip;
 }
 .ab-page ::selection { background: var(--ab-felt); color: var(--ab-ivory); }
-
-.ab-grid {
-  display: grid; grid-template-columns: repeat(12, minmax(0, 1fr));
-  column-gap: var(--ab-gap); padding-inline: var(--ab-m);
-}
+.ab-grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: var(--ab-gap); padding-inline: var(--ab-m); }
 .ab-grid > * { grid-column: 1 / -1; }
-
-/* :where صفرِ اختصاصیت دارد تا کلاس‌های اندازه برنده شوند */
 .ab-page :where(p, li, dd) { font-size: var(--ab-t-body); }
-.ab-h1 { font-size: var(--ab-t-h1); line-height: 1.12; font-weight: 800; letter-spacing: -0.025em; }
 .ab-display { font-size: var(--ab-t-display); line-height: 1.45; font-weight: 800; letter-spacing: -0.01em; text-wrap: balance; }
-.ab-lead { font-size: var(--ab-t-body); line-height: 1.9; max-width: 40ch; text-wrap: pretty; }
-
+.ab-lead { font-size: var(--ab-t-body); line-height: 1.9; max-width: 42ch; text-wrap: pretty; color: var(--ab-ink); }
 .ab-link {
   display: inline-flex; align-items: center; gap: 8px; color: var(--ab-ink); font-weight: 700;
   text-decoration: underline; text-decoration-color: rgb(var(--c-ink) / .25); text-underline-offset: 6px;
   transition: text-decoration-color .25s, color .25s;
 }
 .ab-link:hover { color: var(--ab-emerald); text-decoration-color: currentColor; }
-.ab-link:focus-visible, .ab-role-link:focus-visible { outline: 2px solid var(--ab-emerald); outline-offset: 4px; border-radius: 2px; }
+/* دکمه‌ها از buttonClasses (ساختار و حالت‌ها)؛ این‌جا فقط رنگ روی سطحِ تیره عوض می‌شود */
+.ab-page .ab-on-dark-metal { background: var(--ab-metal); color: var(--ab-coal); border-color: var(--ab-metal); }
+.ab-page .ab-on-dark-metal:hover { background: #E6D3AE; }
+.ab-page .ab-on-dark-felt { background: var(--ab-emerald); color: var(--ab-ivory); border-color: var(--ab-emerald); }
+.ab-page .ab-on-dark-felt:hover { background: #127048; }
+.ab-page .ab-on-dark-ghost { color: var(--ab-ivory); border: 1px solid rgb(var(--c-paper) / .45); }
+.ab-page .ab-on-dark-ghost:hover { color: var(--ab-ivory); background: rgb(var(--c-paper) / .08); }
+.ab-page :is(.ab-on-dark-metal, .ab-on-dark-felt, .ab-on-dark-ghost):focus-visible { outline: 2px solid var(--ab-metal); outline-offset: 3px; }
+.ab-link-inv { color: var(--ab-ivory); text-decoration-color: rgb(var(--c-paper) / .35); }
+.ab-link-inv:hover { color: var(--ab-metal); }
+.ab-link-inv:focus-visible { outline-color: var(--ab-metal); }
+.ab-link:focus-visible, .ab-idx-link:focus-visible { outline: 2px solid var(--ab-emerald); outline-offset: 4px; border-radius: 2px; }
 
-/* ⚠️ قابِ عکس‌ها overflow: clip نه hidden: hidden قاب را «ظرفِ اسکرول» می‌کند و view()ِ
-   عکسِ داخلش به همان قابِ بی‌حرکت می‌چسبد — انیمیشنِ اسکرولِ هیرو هیچ‌وقت اجرا نمی‌شد */
-/* min-height: 0 هم لازم است: با clip (برخلافِ hidden) «حداقلِ خودکارِ» aspect-ratio برمی‌گردد و
-   ارتفاعِ طبیعیِ عکس قاب را کش می‌دهد — قابِ ۱۶:۱۰ دوباره ۴:۵ می‌شد */
-.ab-hero-big, .ab-frame-pic, .ab-role-pic, .ab-prin-pic { overflow: clip; min-height: 0; }
-
-/* ═══ هیرو ═══ */
-.ab-hero { padding-top: 32px; }
-.ab-hero-band { row-gap: 24px; }
+/* ═══ هیرو: صحنه‌ی تمام‌صفحه ═══ */
+.ab-hero {
+  position: relative; overflow: clip; background: #0A0E0C; color: var(--ab-ivory);
+  height: calc(100svh - var(--ab-head)); min-height: 560px; max-height: 1000px;
+}
+.ab-hero-media { position: absolute; inset: 0; }
+.ab-hero-photo { position: absolute; inset: 0; object-position: 50% 58%; }
+.ab-scene { position: absolute; inset: 0; opacity: 0; transition: opacity 1.4s cubic-bezier(.16,1,.3,1); }
+.ab-scene-canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.ab-scene.is-ready { opacity: 1; }
+/* بعد از محو شدنِ صحنه، عکس کنار می‌رود تا هیچ چیزی از زیرِ بوم پیدا نباشد */
+.ab-hero-media:has(.ab-scene.is-ready) .ab-hero-photo { opacity: 0; transition: opacity 0s 1.5s; }
+/* پرده‌ی خنثی فقط زیرِ متن (تنها جای مجازِ گرادیان) */
+.ab-hero-scrim { position: absolute; inset: 0; background: linear-gradient(to top, rgb(6 9 8 / .94) 0%, rgb(6 9 8 / .78) 30%, rgb(6 9 8 / 0) 56%); }
+.ab-hero-copy {
+  position: relative; z-index: 1; height: 100%;
+  display: flex; flex-direction: column; justify-content: flex-end; align-items: flex-start; gap: 24px;
+  padding: 0 var(--ab-m) 48px;
+}
+.ab-h1 { font-size: var(--ab-t-h1); line-height: 1.1; font-weight: 900; letter-spacing: -0.025em; color: var(--ab-ivory); }
+.ab-h1-sub { display: inline-block; text-wrap: balance; font-size: var(--ab-t-display); line-height: 1.5; font-weight: 700; letter-spacing: 0; color: rgb(var(--c-paper) / .82); margin-top: 8px; }
 .ab-mask { display: block; overflow: hidden; padding-block: .04em .14em; }
 .ab-mask > span { display: inline-block; }
-.ab-hero-copy { display: flex; flex-direction: column; align-items: flex-start; gap: 24px; }
-.ab-hero-big { margin-top: 48px; aspect-ratio: 4 / 5; }
-.ab-hero-big img { object-position: 50% 62%; }
+.ab-hero-lead { max-width: 44ch; line-height: 1.9; color: rgb(var(--c-paper) / .8); text-wrap: pretty; }
 
 @media (min-width: 1024px) {
-  .ab-h1 { grid-column: 1 / 8; grid-row: 1; }
-  .ab-hero-copy { grid-column: 8 / 13; grid-row: 1; align-self: end; padding-bottom: 12px; }
-  /* عکس از حدودِ ۲۸۰px شروع می‌شود و تا پایینِ صفحه‌ی اول می‌رود */
-  .ab-hero-big { width: 100%; aspect-ratio: auto; height: clamp(440px, calc(100svh - 300px), 820px); }
-  .ab-hero-big img { object-position: 50% 60%; }
+  .ab-hero-scrim { background: linear-gradient(to left, rgb(6 9 8 / .8) 0%, rgb(6 9 8 / .45) 30%, rgb(6 9 8 / 0) 55%); }
+  /* متن در دیوارِ تاریکِ بالای میز، نه روی پک و توپ‌ها */
+  .ab-hero-copy { justify-content: flex-start; padding-top: clamp(48px, 9vh, 96px); padding-bottom: 0; max-width: 46rem; }
 }
 
-/* ═══ روایت ═══ */
-.ab-story { padding-block: 96px 64px; }
-.ab-run { display: grid; grid-template-columns: 1fr 1fr; gap: 24px 12px; padding-inline: var(--ab-m); margin-top: 48px; }
-.ab-frame-lifted { grid-column: 1 / -1; order: -1; }
-.ab-frame:first-child { grid-column: 1 / -1; }
-.ab-cap { display: flex; flex-direction: column; gap: 4px; text-wrap: pretty; padding-top: 8px; font-size: var(--ab-t-small); color: var(--ab-soft); }
-.ab-cap span:first-child { color: var(--ab-ink); font-weight: 800; font-size: var(--ab-t-body); }
-.ab-story-notes { margin-top: 48px; row-gap: 24px; }
-.ab-story-notes p { line-height: 1.95; max-width: 40ch; text-wrap: pretty; }
-.ab-story-notes strong { font-weight: 800; color: var(--ab-emerald); }
+/* ═══ روایت: سه فصل ═══ */
+.ab-chap-stage { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: var(--ab-gap); row-gap: 48px; padding: 96px var(--ab-m); }
+.ab-chap-texts { grid-column: 1 / -1; display: flex; flex-direction: column; gap: 32px; }
+.ab-chap-lead { font-size: clamp(1.25rem, 1rem + 0.9vw, 1.75rem); line-height: 1.75; font-weight: 600; max-width: 30ch; text-wrap: pretty; }
+.ab-chap-payoff { display: block; font-size: var(--ab-t-display); line-height: 1.4; font-weight: 900; color: var(--ab-emerald); margin-bottom: 12px; }
+.ab-chap-texts { position: relative; z-index: 2; }
+.ab-chap-mosaic {
+  grid-column: 1 / -1; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); grid-template-rows: repeat(6, minmax(0, 1fr));
+  gap: 8px; aspect-ratio: 1.08; width: 100%;
+}
+.ab-tile { overflow: clip; min-height: 0; will-change: transform; }
+.ab-tile-rack { grid-column: 1 / 5; grid-row: 1 / 4; }
+.ab-tile-kiss { grid-column: 5 / 7; grid-row: 1 / 5; }
+.ab-tile-pocket { grid-column: 1 / 3; grid-row: 4 / 7; }
+.ab-tile-chalk { grid-column: 3 / 5; grid-row: 4 / 7; }
+.ab-tile-break { grid-column: 5 / 7; grid-row: 5 / 7; }
 
-@media (max-width: 1023px) {
-  /* جیب و گچ کنارِ هم با یک نسبت تا زیرنویس‌ها هم‌تراز بمانند */
-  .ab-frame:nth-child(3) .ab-frame-pic, .ab-frame:nth-child(4) .ab-frame-pic { aspect-ratio: 1 / 1 !important; }
-}
-@media (min-width: 1024px) {
-  .ab-story { padding-block: 96px; }
-  .ab-story-h { grid-column: 1 / 11; }
-  /* چهار قاب در تمامِ عرض، عرضِ هرکدام به نسبتِ عکسش، ارتفاع‌ها برابر و کف‌ها هم‌تراز */
-  .ab-run { display: flex; align-items: flex-end; gap: var(--ab-gap); margin-top: 64px; }
-  .ab-frame { flex: var(--ab-ratio) 1 0; min-width: 0; }
-  .ab-frame-lifted { order: 0; }
-  .ab-cap { flex-direction: row; justify-content: space-between; }
-  .ab-story-notes { margin-top: 48px; }
-  .ab-story-notes p:first-child { grid-column: 1 / 6; }
-  .ab-story-notes p:last-child { grid-column: 7 / 12; grid-row: 1; }
-}
-
-/* ═══ هشت نقش: دیوارِ گالری ═══ */
-.ab-roles { padding-block: 64px 96px; }
-/* موبایل: نقش‌های عمودی دوتایی کنارِ هم، سه نقشِ عریض تمام‌عرض — نصفِ اسکرولِ ستونِ زیگزاگ */
-.ab-wall { display: grid; grid-template-columns: 1fr 1fr; gap: 40px 12px; margin-top: 48px; align-items: start; }
-.ab-role-clubs, .ab-role-tournaments, .ab-role-services, .ab-role-manufacturers { grid-column: 1 / -1; }
-.ab-role-link { display: flex; flex-direction: column; color: inherit; }
-.ab-role-pic { aspect-ratio: 4 / 5; }
-.ab-role-clubs .ab-role-pic, .ab-role-tournaments .ab-role-pic, .ab-role-services .ab-role-pic { aspect-ratio: 16 / 10; }
-.ab-role-manufacturers .ab-role-pic { aspect-ratio: 16 / 10; }
-@media (min-width: 1024px) {
-  .ab-role-referees .ab-role-pic, .ab-role-manufacturers .ab-role-pic { aspect-ratio: 1 / 1; }
-  .ab-role-services .ab-role-pic { aspect-ratio: 21 / 9; }
-}
-.ab-role-clubs img { object-position: 50% 58%; }
-.ab-role-referees img { object-position: 50% 62%; }
-.ab-role-manufacturers img { object-position: 50% 45%; }
-.ab-role-tournaments img { object-position: 50% 42%; }
-.ab-role-services img { object-position: 50% 40%; }
-.ab-role-name { font-size: var(--ab-t-body); font-weight: 800; margin-top: 16px; transition: color .25s; }
-.ab-role-line { font-size: var(--ab-t-small) !important; color: var(--ab-soft); line-height: 1.8; margin-top: 4px; text-wrap: pretty; }
-.ab-role-link:hover .ab-role-name, .ab-role-link:focus-visible .ab-role-name { color: var(--ab-emerald); }
-.ab-zoom { transition: transform .9s cubic-bezier(.16,1,.3,1); }
-@media (hover: hover) and (prefers-reduced-motion: no-preference) {
-  .ab-role-link:hover .ab-zoom { transform: scale(1.04); }
-}
+/* حالتِ اسکرولی (فقط وقتی GSAP بار شد): صحنه‌ی ثابت، فصل‌ها روی هم */
+.ab-chap.is-scrub .ab-chap-stage { height: 100svh; padding-top: calc(var(--ab-head) + 24px); padding-bottom: 24px; align-content: start; row-gap: 24px; }
+.ab-chap.is-scrub .ab-chap-texts { min-height: 15rem; }
+.ab-chap.is-scrub .ab-chap-text { position: absolute; inset-inline: 0; top: 0; }
+.ab-chap.is-scrub .ab-chap-mosaic { aspect-ratio: auto; height: calc(100svh - var(--ab-head) - 15rem - 72px); max-height: 54svh; }
 
 @media (min-width: 1024px) {
-  .ab-roles { padding-block: 96px; }
-  .ab-roles-h { grid-column: 1 / 7; }
-  /* جای هر نقش صریح است؛ جابه‌جاییِ عمودی با padding-top، پس هیچ تصویری روی زیرنویسِ دیگری نمی‌افتد */
-  .ab-wall {
-    display: grid; grid-template-columns: repeat(12, minmax(0, 1fr));
-    column-gap: var(--ab-gap); row-gap: 96px; margin-top: 64px; align-items: start;
+  .ab-chap-stage { padding-block: 96px; align-items: center; }
+  .ab-chap-texts { grid-column: 1 / 6; }
+  .ab-chap-mosaic { grid-column: 6 / 13; }
+  .ab-chap.is-scrub .ab-chap-stage { align-content: center; }
+  .ab-chap.is-scrub .ab-chap-texts { min-height: 20rem; align-self: center; }
+  .ab-chap.is-scrub .ab-chap-text { top: 50%; translate: 0 -50%; }
+  .ab-chap.is-scrub .ab-chap-mosaic { height: min(78svh, 52vw); max-height: none; }
+}
+
+/* ═══ اکوسیستم: فهرست و صحنه ═══ */
+.ab-idx { padding-block: 64px; }
+.ab-idx-head { row-gap: 16px; }
+.ab-idx-body { margin-top: 32px; }
+.ab-idx-stage { display: none; }
+.ab-idx-list { display: flex; flex-direction: column; gap: 48px; }
+.ab-idx-link { display: flex; flex-direction: column; gap: 8px; color: var(--ab-ink); }
+.ab-idx-thumb { display: block; aspect-ratio: 16 / 10; overflow: clip; min-height: 0; margin-bottom: 8px; }
+.ab-idx-name { font-size: var(--ab-t-name); line-height: 1.25; font-weight: 900; letter-spacing: -0.015em; transition: color .4s; }
+.ab-idx-line { font-size: var(--ab-t-small); line-height: 1.8; max-width: 40ch; color: var(--ab-soft); }
+.ab-idx-link:hover .ab-idx-name, .ab-idx-link:focus-visible .ab-idx-name { color: var(--ab-emerald); }
+.ab-shot-clubs img { object-position: 50% 58%; }
+.ab-shot-tournaments img { object-position: 50% 42%; }
+.ab-shot-services img { object-position: 50% 40%; }
+
+@media (min-width: 1024px) {
+  .ab-idx { padding-block: 96px 48px; }
+  .ab-idx-head .ab-display, .ab-idx-head .ab-lead { grid-column: 1 / 7; }
+  .ab-idx-body { margin-top: 48px; align-items: start; }
+  .ab-idx-thumb { display: none; }
+  .ab-idx-list { grid-column: 1 / 6; grid-row: 1; gap: 0; padding-block: 14svh 42svh; }
+  .ab-idx-list > li { min-height: 19svh; display: flex; align-items: center; }
+  .ab-idx-link { color: rgb(var(--c-ink) / .5); transition: color .45s; }
+  .ab-idx-name { font-weight: 700; }
+  .ab-idx-list > li.is-on .ab-idx-link, .ab-idx-link:hover, .ab-idx-link:focus-visible { color: var(--ab-ink); }
+  .ab-idx-list > li.is-on .ab-idx-name { color: var(--ab-emerald); font-weight: 900; }
+  .ab-idx-stage {
+    display: block; position: sticky; grid-column: 7 / 13; grid-row: 1; overflow: clip; min-height: 0; background: var(--ab-coal);
+    top: calc(var(--ab-head) + 6svh); height: calc(88svh - var(--ab-head));
   }
-  .ab-role-clubs { grid-column: 1 / 8; grid-row: 1; }
-  .ab-role-players { grid-column: 9 / 13; grid-row: 1; padding-top: 96px; }
-  .ab-role-coaches { grid-column: 1 / 5; grid-row: 2; }
-  .ab-role-referees { grid-column: 6 / 9; grid-row: 2; padding-top: 96px; }
-  .ab-role-sellers { grid-column: 10 / 13; grid-row: 2; padding-top: 48px; }
-  .ab-role-manufacturers { grid-column: 1 / 5; grid-row: 3; padding-top: 64px; }
-  .ab-role-tournaments { grid-column: 6 / 13; grid-row: 3; }
-  /* پایانِ دیوار: خدمات فنی تمام‌عرض ۲۱:۹ */
-  .ab-role-services { grid-column: 1 / 13; grid-row: 4; }
+  .ab-idx-shot { position: absolute; inset: 0; clip-path: inset(100% 0 0 0); transition: clip-path .9s cubic-bezier(.7,0,.2,1); }
+  .ab-idx-shot img { transform: scale(1.08); transition: transform 1.6s cubic-bezier(.16,1,.3,1); }
+  .ab-idx-shot.was-on { clip-path: inset(0); z-index: 1; }
+  .ab-idx-shot.is-on { clip-path: inset(0); z-index: 2; }
+  .ab-idx-shot.is-on img { transform: none; }
 }
 
-/* ═══ اصول: میدانِ سبز ═══ */
-.ab-field { background: var(--ab-felt); color: var(--ab-ivory); padding-block: 64px 96px; }
-.ab-field-h { color: var(--ab-ivory); }
-.ab-prin-list { display: flex; flex-direction: column; gap: 64px; margin-top: 48px; }
-.ab-prin { row-gap: 16px; align-items: start; }
-.ab-prin-word { font-size: var(--ab-t-display); line-height: 1.3; font-weight: 800; color: var(--ab-metal); }
-.ab-prin-line { font-weight: 800; color: var(--ab-ivory); line-height: 1.8; }
-.ab-prin-items { display: flex; flex-direction: column; gap: 8px; margin-top: 16px; }
-.ab-prin-items li { color: rgb(var(--c-paper) / .78); line-height: 1.7; text-wrap: pretty; }
-.ab-prin-pic { margin-top: 16px; width: 72%; aspect-ratio: 4 / 5; }
-.ab-prin-2 .ab-prin-pic { margin-inline-start: auto; width: 62%; aspect-ratio: 1 / 1; }
-.ab-prin-3 .ab-prin-pic { width: 100%; aspect-ratio: 16 / 10; }
+/* ═══ اصول: پوسترها روی زغالی ═══ */
+.ab-posters { background: var(--ab-coal); color: var(--ab-ivory); padding-block: 96px; }
+.ab-posters-h { color: var(--ab-ivory); }
+.ab-poster-list { display: flex; flex-direction: column; gap: 64px; margin-top: 48px; }
+.ab-poster { row-gap: 16px; align-items: end; }
+.ab-poster-word {
+  font-size: var(--ab-t-poster); line-height: 1.15; font-weight: 900; letter-spacing: -0.02em; color: var(--ab-metal);
+  padding-block: .04em;
+}
+@supports ((-webkit-background-clip: text) or (background-clip: text)) {
+  .ab-poster-word {
+    color: transparent; -webkit-text-fill-color: transparent;
+    -webkit-background-clip: text; background-clip: text;
+    background-size: cover; background-position: 50% 50%; background-color: var(--ab-metal);
+  }
+  /* لایه‌ی روشنِ خنثی روی عکس: حروف روشن‌تر از زمینه می‌مانند */
+  .ab-poster-1 .ab-poster-word { background-image: linear-gradient(rgb(255 248 235 / .32), rgb(255 248 235 / .32)), url(/images/about/v2/handshake-960.webp); }
+  .ab-poster-2 .ab-poster-word { background-image: linear-gradient(rgb(255 248 235 / .26), rgb(255 248 235 / .26)), url(/images/about/v2/brush-960.webp); }
+  .ab-poster-3 .ab-poster-word { background-image: linear-gradient(rgb(255 248 235 / .22), rgb(255 248 235 / .22)), url(/images/about/v2/break-1536.webp); }
+}
+@media (max-width: 1023px) {
+  .ab-poster-1 .ab-poster-word { background-image: linear-gradient(rgb(255 248 235 / .32), rgb(255 248 235 / .32)), url(/images/about/v2/handshake-560.webp); }
+  .ab-poster-2 .ab-poster-word { background-image: linear-gradient(rgb(255 248 235 / .26), rgb(255 248 235 / .26)), url(/images/about/v2/brush-560.webp); }
+  .ab-poster-3 .ab-poster-word { background-image: linear-gradient(rgb(255 248 235 / .22), rgb(255 248 235 / .22)), url(/images/about/v2/break-960.webp); }
+}
+/* موبایل: هر واژه تقریباً تمامِ عرض را می‌گیرد */
+.ab-poster-1 .ab-poster-word { font-size: 30vw; }
+.ab-poster-2 .ab-poster-word { font-size: 15vw; }
+.ab-poster-3 .ab-poster-word { font-size: 24vw; }
+.ab-poster-line { font-weight: 800; color: var(--ab-ivory); line-height: 1.8; }
+.ab-poster-items { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
+.ab-poster-items li { color: rgb(var(--c-paper) / .76); line-height: 1.7; text-wrap: pretty; }
 
 @media (min-width: 1024px) {
-  .ab-field { padding-block: 96px; }
-  .ab-field-h { grid-column: 1 / 8; }
-  .ab-prin-list { gap: 96px; margin-top: 96px; }
-  .ab-prin .ab-prin-pic { width: auto; margin: 0; }
-  /* واژه، جمله و فهرست یک واحدند؛ فقط طرفِ تصویر آینه می‌شود، و هر سه تصویر پنج ستون عرض دارند */
-  .ab-prin { align-content: start; }
-  .ab-prin .ab-prin-word { grid-row: 1; align-self: end; }
-  .ab-prin .ab-prin-text { grid-row: 2; }
-  .ab-prin .ab-prin-pic { grid-row: 1 / span 2; }
-  .ab-prin-1 .ab-prin-word, .ab-prin-1 .ab-prin-text, .ab-prin-3 .ab-prin-word, .ab-prin-3 .ab-prin-text { grid-column: 1 / 7; }
-  .ab-prin-1 .ab-prin-pic, .ab-prin-3 .ab-prin-pic { grid-column: 8 / 13; }
-  .ab-prin-2 .ab-prin-pic { grid-column: 1 / 6; }
-  .ab-prin-2 .ab-prin-word, .ab-prin-2 .ab-prin-text { grid-column: 7 / 13; }
+  .ab-posters { padding-block: 96px; }
+  .ab-poster-list { gap: 96px; margin-top: 64px; }
+  .ab-poster-1 .ab-poster-word { grid-column: 1 / 9; }
+  .ab-poster-1 .ab-poster-text { grid-column: 9 / 13; padding-bottom: 32px; }
+  .ab-poster-2 .ab-poster-word { grid-column: 4 / 13; grid-row: 1; justify-self: end; }
+  .ab-poster-2 .ab-poster-text { grid-column: 1 / 4; grid-row: 1; padding-bottom: 32px; }
+  .ab-poster .ab-poster-word { font-size: var(--ab-t-poster); }
+  .ab-poster-3 .ab-poster-word { grid-column: 1 / 9; }
+  .ab-poster-3 .ab-poster-text { grid-column: 9 / 13; padding-bottom: 32px; }
 }
 
-/* ═══ مالکیت ═══ */
-.ab-own { padding-block: 96px 64px; }
-.ab-own-body { margin-top: 48px; row-gap: 48px; }
-.ab-own-marks { display: flex; align-items: center; gap: 16px; }
-.ab-own-tile { display: grid; place-items: center; width: 96px; height: 96px; background: rgb(var(--c-surface)); border-radius: var(--r3); }
-.ab-own-tile img { width: 64px; height: 64px; border-radius: var(--r2); }
-.ab-own-tile .ab-own-arta { object-fit: cover; object-position: left; border-radius: 0; }
+/* ═══ مالکیت: نوارِ زمردی ═══ */
+.ab-own { background: var(--ab-felt); color: var(--ab-ivory); padding-block: 64px; }
+.ab-own-in { row-gap: 32px; align-items: start; }
+.ab-own-lock { display: flex; align-items: center; gap: 12px; }
+.ab-own-lock img { width: 56px; height: 56px; border-radius: var(--r3); }
+/* نشانِ آرتا عریض است و نمادِ کره در سمتِ چپِ فایل؛ همان را برش می‌زنیم */
+.ab-own-arta { background: var(--ab-ivory); object-fit: cover; object-position: left; }
+.ab-own-h { font-size: var(--ab-t-name); line-height: 1.4; font-weight: 900; letter-spacing: -0.01em; color: var(--ab-ivory); text-wrap: balance; }
 .ab-own-table { display: flex; flex-direction: column; gap: 24px; }
 .ab-own-row { display: grid; grid-template-columns: 8rem 1fr; gap: 16px; align-items: baseline; }
-.ab-own-row:nth-child(4) { margin-top: 24px; }
-.ab-own-row dt { font-size: var(--ab-t-small); color: var(--ab-soft); }
+.ab-own-row dt { font-size: var(--ab-t-small); color: rgb(var(--c-paper) / .7); }
 .ab-own-row dd { font-weight: 700; text-wrap: pretty; }
 
 @media (min-width: 1024px) {
   .ab-own { padding-block: 96px; }
-  .ab-own-h { grid-column: 1 / 10; }
-  .ab-own-body { margin-top: 64px; }
-  .ab-own-marks { grid-column: 1 / 5; align-self: start; }
-  .ab-own-tile { width: 128px; height: 128px; }
-  .ab-own-tile img { width: 96px; height: 96px; }
-  .ab-own-table { grid-column: 5 / 12; }
+  .ab-own-lock { grid-column: 1 / 7; grid-row: 1; }
+  .ab-own-h { grid-column: 1 / 8; grid-row: 2; }
+  .ab-own-table { grid-column: 9 / 13; grid-row: 2; align-self: end; }
 }
 
-/* ═══ پایان ═══ */
-.ab-close { padding-block: 64px 96px; }
-.ab-close .ab-grid { row-gap: 32px; }
-.ab-close-text { display: flex; flex-direction: column; gap: 16px; }
-.ab-close-links { display: flex; flex-direction: column; align-items: flex-start; gap: 16px; }
-.ab-close-meta { font-size: var(--ab-t-small) !important; color: var(--ab-soft); }
-
+/* ═══ پایان: نوارِ سینمایی ═══ */
+.ab-close { position: relative; overflow: clip; min-height: 72svh; display: flex; align-items: flex-end; background: var(--ab-coal); color: var(--ab-ivory); }
+.ab-close-media { position: absolute; inset: 0; }
+.ab-close-media img { object-position: 50% 65%; }
+.ab-close-media::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to top, rgb(6 9 8 / .92) 0%, rgb(6 9 8 / .55) 45%, rgb(6 9 8 / .2) 100%); }
+.ab-close-in { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: flex-start; gap: 24px; padding: 64px var(--ab-m); max-width: 44rem; }
+.ab-close-h { font-size: var(--ab-t-name); line-height: 1.3; font-weight: 900; letter-spacing: -0.015em; }
+.ab-close-lead { color: rgb(var(--c-paper) / .82); line-height: 1.9; text-wrap: pretty; }
+.ab-close-actions { display: flex; flex-wrap: wrap; gap: 12px; }
 @media (min-width: 1024px) {
-  .ab-close { padding-block: 96px; }
-  .ab-close-text { grid-column: 1 / 7; grid-row: 1; }
-  .ab-close-links { grid-column: 8 / 13; grid-row: 1; align-self: end; }
+  .ab-close { min-height: 78svh; }
+  .ab-close-in { padding-block: 96px; }
 }
 
 /* ═══ حرکت ═══ */
 @keyframes abLine { from { transform: translateY(108%); } to { transform: none; } }
 @keyframes abUp { from { opacity: .35; transform: translateY(24px); } to { opacity: 1; transform: none; } }
-@keyframes abCurtain { from { clip-path: inset(30% 0 0 0); } to { clip-path: inset(0 0 0 0); } }
-@keyframes abSettle { from { transform: scale(1.1); } to { transform: scale(1); } }
+@keyframes abDrift { from { background-position-y: 30%; } to { background-position-y: 70%; } }
 
 @media (prefers-reduced-motion: no-preference) {
-  /* ۱) حرکتِ امضا: هر سطر از پشتِ خطِ کرسیِ خودش */
-  .ab-mask > span { animation: abLine .9s cubic-bezier(.16,1,.3,1) both; }
-  .ab-mask-2 > span { animation-delay: .11s; }
-  .ab-hero-copy { animation: abUp .8s .3s cubic-bezier(.16,1,.3,1) both; }
-
+  .ab-mask > span { animation: abLine 1s .2s cubic-bezier(.16,1,.3,1) both; }
+  .ab-mask-2 > span { animation-delay: .34s; }
+  .ab-hero-lead, .ab-hero-actions { animation: abUp .9s .55s cubic-bezier(.16,1,.3,1) both; }
   @supports (animation-timeline: view()) {
-    /* ۲) ورودِ اجزای هر بخش، هر جزء با بازه‌ی خودش تا پله‌ای دیده شوند */
     .ab-rise { animation: abUp linear both; animation-timeline: view(); animation-range: entry 0% entry 55%; }
-    .ab-story-notes p:last-child, .ab-prin-text { animation-range: entry 10% entry 65%; }
-    /* ۳) پرده: عکس از پایین باز می‌شود */
-    .ab-curtain { animation: abCurtain linear both; animation-timeline: view(); animation-range: entry 0% entry 70%; }
-    /* ۴) عکسِ هیرو با اسکرول آرام سرِ جایش می‌نشیند */
-    .ab-parallax { animation: abSettle linear both; animation-timeline: view(); animation-range: cover 0% cover 70%; }
+    /* درونِ حروفِ اصول، عکس آرام جابه‌جا می‌شود */
+    @media (min-width: 1024px) { .ab-poster-word { animation: abDrift linear both; animation-timeline: view(); animation-range: cover 0% cover 100%; } }
   }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ab-idx-shot, .ab-idx-shot img { transition: opacity .3s ease; transform: none; }
+  .ab-idx-shot { clip-path: none; opacity: 0; }
+  .ab-idx-shot.is-on, .ab-idx-shot.was-on { opacity: 1; }
+  .ab-scene { transition: none; }
 }

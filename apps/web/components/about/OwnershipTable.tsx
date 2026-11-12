@@ -2,12 +2,12 @@ import Link from 'next/link'
 import { ArrowLeft, ArrowUpLeft } from 'lucide-react'
 
 /* ─────────────────────────────────────────────────────────────
-   مالکیت — «جمله، جدولِ رانده به سمتِ پایان» (list: statement, table).
+   مالکیت — یک نوارِ تمام‌عرضِ زمردی، تایپوگرافیک.
 
-   جمله‌ی مالک همان متنی است که خودش داد. جدول فقط حقیقت‌های موجود را دارد:
-   شرکتِ مالک، برند، وب‌سایتِ شرکت، دامنه‌ی پلتفرم، راهِ تماس — هیچ شماره‌ی
-   ثبت، جایزه یا آمارِ ساختگی. دو نشانِ واقعی (بیلیارد هاب و آرتا) در
-   ستون‌های شروع، هم‌ترازِ آخرین ردیف
+   جمله‌ی مالک به اندازه‌ی تیتر، دو نشانِ واقعی (بیلیارد هاب و آرتا) کنارِ هم
+   به‌صورتِ یک قفلِ کوچک — بی کارت، بی خطِ پیوند. فهرستِ حقیقت‌ها فقط آن‌چه
+   واقعاً هست: شرکت، برند، وب‌سایتِ شرکت، دامنه، راهِ تماس — هیچ شماره‌ی ثبت،
+   جایزه یا آمارِ ساختگی
    ───────────────────────────────────────────────────────────── */
 
 const ROWS: Array<{ k: string; v: string; href?: string; ext?: boolean; ltr?: boolean }> = [
@@ -21,17 +21,15 @@ const ROWS: Array<{ k: string; v: string; href?: string; ext?: boolean; ltr?: bo
 export function OwnershipTable() {
   return (
     <section className="ab-own" aria-labelledby="ab-own-h">
-      <div className="ab-grid ab-own-head">
-        {/* جمله‌ی مالک، همان‌طور که خودش نوشت، خودش تیترِ بخش است */}
-        <h2 id="ab-own-h" className="ab-display ab-own-h ab-rise">بیلیارد هاب متعلق به شرکت بازرگانی آرتا تجارت بین‌الملل آپادانا میباشد</h2>
-      </div>
-      <div className="ab-grid ab-own-body">
-        <div className="ab-own-marks ab-rise" aria-hidden>
+      <div className="ab-grid ab-own-in">
+        <div className="ab-own-lock ab-rise" aria-hidden>
           {/* eslint-disable-next-line @next/next/no-img-element -- نشانِ ثابت */}
-          <span className="ab-own-tile"><img src="/images/Logo/bh-tile-256-v13.webp" alt="" width={96} height={96} loading="lazy" decoding="async" /></span>
+          <img src="/images/Logo/bh-tile-256-v13.webp" alt="" width={56} height={56} loading="lazy" decoding="async" className="ab-own-bh" />
           {/* eslint-disable-next-line @next/next/no-img-element -- نشانِ ثابت */}
-          <span className="ab-own-tile"><img src="/images/Logo/Arta.svg" alt="" width={96} height={96} loading="lazy" decoding="async" className="ab-own-arta" /></span>
+          <img src="/images/Logo/Arta.svg" alt="" width={56} height={56} loading="lazy" decoding="async" className="ab-own-arta" />
         </div>
+        {/* جمله‌ی مالک، با نگارشی که خودش در بریفِ آبانِ ۱۴۰۵ داد (می‌باشد با نیم‌فاصله) */}
+        <h2 id="ab-own-h" className="ab-own-h ab-rise">بیلیارد هاب متعلق به شرکت بازرگانی آرتا تجارت بین‌الملل آپادانا می‌باشد</h2>
         <dl className="ab-own-table ab-rise">
           {ROWS.map(r => (
             <div key={r.k} className="ab-own-row">
@@ -39,11 +37,11 @@ export function OwnershipTable() {
               <dd>
                 {r.href ? (
                   r.ext ? (
-                    <a href={r.href} target="_blank" rel="noopener noreferrer" className="ab-link">
+                    <a href={r.href} target="_blank" rel="noopener noreferrer" className="ab-link ab-link-inv">
                       <span dir="ltr">{r.v}</span><ArrowUpLeft size={16} aria-hidden /><span className="sr-only">(در پنجره جدید)</span>
                     </a>
                   ) : (
-                    <Link href={r.href} prefetch={false} className="ab-link">
+                    <Link href={r.href} prefetch={false} className="ab-link ab-link-inv">
                       <span dir={r.ltr ? 'ltr' : undefined}>{r.v}</span><ArrowLeft size={16} aria-hidden />
                     </Link>
                   )
