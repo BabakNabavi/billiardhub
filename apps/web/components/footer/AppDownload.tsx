@@ -1,23 +1,23 @@
-import { Smartphone } from 'lucide-react'
-import { APP_STORES } from '@/lib/app-stores'
+import { Download, Smartphone } from 'lucide-react'
+import { ANDROID_APK, APP_STORES } from '@/lib/app-stores'
 import { IosWebAppButton } from './IosWebAppButton'
 
 /* ─────────────────────────────────────────────────────────────
-   «دریافت اپلیکیشن» در فوتر: کافه‌بازار، مایکت، وب‌اپ آیفون.
+   «دریافت اپلیکیشن» در فوتر: کافه‌بازار، دانلودِ مستقیمِ APK، وب‌اپ آیفون.
 
    Server Component است؛ فقط دکمه‌ی آیفون کلاینتی است (باز کردنِ شیت).
-   نشانِ فروشگاهی که هنوز `live` نیست غیرفعال و «به‌زودی» است — نشانیِ
-   صفحه‌ی اپ تا پیش از انتشار ۴۰۴ می‌دهد (lib/app-stores).
+   نشانی‌ها از lib/app-stores می‌آیند.
 
    داخلِ خودِ اپ (TWA اندروید و وب‌اپِ نصب‌شده‌ی آیفون، هر دو standalone)
    پنهان است — بی جاوااسکریپت، با media query.
    ───────────────────────────────────────────────────────────── */
 
-const BADGE_BASE =
-  'inline-flex h-12 items-center gap-2 rounded-xl border border-line bg-surface/70 pe-4 ps-2 text-start'
-const BADGE_ACTIVE =
-  `${BADGE_BASE} transition duration-200 hover:-translate-y-px hover:border-gold-deep/40 hover:shadow-sm ` +
+const BADGE =
+  'inline-flex h-12 items-center gap-2 rounded-xl border border-line bg-surface/70 pe-4 ps-2 text-start ' +
+  'transition duration-200 hover:-translate-y-px hover:border-gold-deep/40 hover:shadow-sm ' +
   'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold-deep'
+
+const ICON_TILE = 'flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-ink text-surface'
 
 function Label({ top, name }: { top: string; name: string }) {
   return (
@@ -35,31 +35,28 @@ export function AppDownload() {
         دریافت اپلیکیشن بیلیارد هاب
       </h2>
       <ul className="flex flex-wrap gap-2 max-lg:justify-center">
-        {APP_STORES.map(store => {
-          const icon = (
-            // eslint-disable-next-line @next/next/no-img-element -- آیکونِ ثابتِ ۲ کیلوبایتی؛ next/image سودی ندارد
-            <img src={store.icon} alt="" width={32} height={32} loading="lazy" decoding="async"
-              className="h-8 w-8 shrink-0 rounded-lg" />
-          )
-          return (
-            <li key={store.id}>
-              {store.live ? (
-                <a href={store.url} target="_blank" rel="noopener noreferrer" className={BADGE_ACTIVE}>
-                  {icon}
-                  <Label top="دریافت از" name={store.name} />
-                </a>
-              ) : (
-                <span className={`${BADGE_BASE} opacity-60`}>
-                  {icon}
-                  <Label top="به‌زودی در" name={store.name} />
-                </span>
-              )}
-            </li>
-          )
-        })}
+        {APP_STORES.map(store => (
+          <li key={store.id}>
+            <a href={store.url} target="_blank" rel="noopener noreferrer" className={BADGE}>
+              {/* eslint-disable-next-line @next/next/no-img-element -- آیکونِ ثابتِ ۲ کیلوبایتی؛ next/image سودی ندارد */}
+              <img src={store.icon} alt="" width={32} height={32} loading="lazy" decoding="async"
+                className="h-8 w-8 shrink-0 rounded-lg" />
+              <Label top="دریافت از" name={store.name} />
+            </a>
+          </li>
+        ))}
         <li>
-          <IosWebAppButton className={BADGE_ACTIVE}>
-            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-ink text-surface">
+          <a href={ANDROID_APK.href} download={ANDROID_APK.fileName}
+            type="application/vnd.android.package-archive" className={BADGE}>
+            <span className={ICON_TILE}>
+              <Download size={18} aria-hidden />
+            </span>
+            <Label top="دانلود مستقیم" name="فایل نصبی اندروید" />
+          </a>
+        </li>
+        <li>
+          <IosWebAppButton className={BADGE}>
+            <span className={ICON_TILE}>
               <Smartphone size={18} aria-hidden />
             </span>
             <Label top="نسخه وب‌اپ" name="مخصوص آیفون" />
