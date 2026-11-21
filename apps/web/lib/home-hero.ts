@@ -117,7 +117,6 @@ async function loadTournament(now = Date.now()): Promise<HeroTournament | null> 
 const BOARDS: [sport: string, sportLabel: string, gender: string, category: string][] = [
   ['snooker', 'اسنوکر', 'آقایان', 'دسته برتر'],
   ['snooker', 'اسنوکر', 'بانوان', 'دسته برتر'],
-  /* پاکت هنوز داده ندارد (آبانِ ۱۴۰۵) — دسته یکِ اسنوکر چرخه را تا آن روز پُر نگه می‌دارد */
   ['snooker', 'اسنوکر', 'آقایان', 'دسته یک'],
   ['snooker', 'اسنوکر', 'آقایان', 'پیشکسوتان'],
   ['pocket', 'پاکت بیلیارد', 'آقایان', 'دسته برتر'],

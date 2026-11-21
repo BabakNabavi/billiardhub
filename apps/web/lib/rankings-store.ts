@@ -42,7 +42,9 @@ export type RankingsStructure = Record<string, Record<string, Record<string, Ran
 export interface RankingStage {
   title: string
   city: string
-  /* شمسی با ارقامِ لاتین، مثلِ «1405/08/03» — فارسی‌شدن هنگامِ نمایش */
+  /* متنِ آزاد با ارقامِ لاتین — «1405/08/03»، یا فقط ماه و سال مثلِ «بهمن 1402»
+     (جدولِ زیرِ ۲۱ سال روز ندارد). فقط toFaDigits می‌خورد و جایی تجزیه نمی‌شود؛
+     الگوی سخت در StagesZ سرستونِ همه‌ی جدول‌ها را خالی می‌کند. */
   date: string
 }
 export type RankingStagesMap = Record<string, Record<string, Record<string, RankingStage[]>>>
