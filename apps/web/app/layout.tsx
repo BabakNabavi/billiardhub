@@ -14,7 +14,7 @@ import AddToHomeScreenGate from '../components/pwa/AddToHomeScreenGate';
 import LiveIndicator from '../components/live/LiveIndicator';
 import { FeatureFlagsProvider } from '../components/features/FeatureFlags';
 import { SITE_URL } from '../lib/site-url';
-import { SEO_IDS } from '../lib/seo/config';
+import { OG_IMAGE, SEO_IDS } from '../lib/seo/config';
 import { Analytics } from '../components/seo/Analytics';
 
 
@@ -60,9 +60,9 @@ export const metadata: Metadata = {
     /* تصویر اشتراک‌گذاری — تا امروز نبود و شبکه‌های اجتماعی خودشان
        چیزی از صفحه برمی‌داشتند. لوگوی تازه اندازه‌ی استاندارد ۱۲۰۰×۶۳۰
        را دارد. */
-    images: [{ url: '/images/Logo/bh-og-v13.png', width: 1200, height: 630, alt: 'بیلیارد هاب' }],
+    images: [OG_IMAGE],
   },
-  twitter: { card: 'summary_large_image', images: ['/images/Logo/bh-og-v13.png'] },
+  twitter: { card: 'summary_large_image', images: [OG_IMAGE.url] },
   manifest: '/manifest.json',
   icons: {
     icon: [

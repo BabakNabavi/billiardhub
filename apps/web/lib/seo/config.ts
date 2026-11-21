@@ -24,3 +24,8 @@ export const SEO_IDS = {
   /** Ahrefs Webmaster Tools — مقدارِ content در متاتگِ ahrefs-site-verification */
   ahrefsVerification: '',
 } as const
+
+/* تصویرِ اشتراک‌گذاری (۱۲۰۰×۶۳۰). صفحه‌ای که openGraph یا twitterِ خودش را
+   دارد، شیءِ ریشه را کامل جایگزین می‌کند و تصویر را از دست می‌دهد — پس
+   باید همین را صریح بدهد. */
+export const OG_IMAGE = { url: '/images/Logo/bh-og-v13.png', width: 1200, height: 630, alt: 'بیلیارد هاب' } as const

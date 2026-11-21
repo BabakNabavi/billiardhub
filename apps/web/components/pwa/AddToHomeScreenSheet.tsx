@@ -1,6 +1,6 @@
 'use client'
 import { useCallback, useEffect, useRef } from 'react'
-import { persistDismissal, type A2hsAction } from '../../lib/pwa/a2hs'
+import { A2HS_STEPS, persistDismissal, type A2hsAction } from '../../lib/pwa/a2hs'
 
 /* ─────────────────────────────────────────────────────────────
    شیت راهنمای «افزودن به صفحه‌ی اصلی» — فقط iOS/Safari.
@@ -18,11 +18,7 @@ import { persistDismissal, type A2hsAction } from '../../lib/pwa/a2hs'
 const TEXT = {
   title: 'بیلیارد هاب را به صفحه اصلی اضافه کنید',
   desc: 'با این کار، می‌توانید سریع‌تر و بدون نیاز به باز کردن مرورگر از بیلیارد هاب استفاده کنید',
-  steps: [
-    'روی دکمه Share در نوار پایین Safari بزنید',
-    'گزینه Add to Home Screen / افزودن به صفحه اصلی را انتخاب کنید',
-    'روی Add / افزودن بزنید',
-  ],
+  steps: A2HS_STEPS,
   gotIt: 'متوجه شدم',
   close: 'بستن راهنما',
   dialogLabel: 'راهنمای افزودن بیلیارد هاب به صفحه اصلی',
@@ -67,18 +63,18 @@ const STEPS = [
   { n: '۳', text: TEXT.steps[2], Icon: CheckIcon },
 ]
 
-/* `persist`: فقط گیتِ خودکار وضعیتِ «بستن/متوجه شدم» را ذخیره می‌کند. بازکردنِ
-   دستی (دکمه‌ی فوتر) نباید سکوتِ دو روزه‌ی قبلی را با «dismiss» بی‌مهلت پاک کند */
-export default function AddToHomeScreenSheet({ onClose, persist = true }: { onClose: () => void; persist?: boolean }) {
+/* تنها بازکننده گیتِ خودکار است و وضعیتِ «بستن/متوجه شدم» همیشه ذخیره می‌شود.
+   (پراپِ `persist` با دکمه‌ی آیفونِ فوتر رفت؛ راهنمای بی‌پنجره حالا در /app است) */
+export default function AddToHomeScreenSheet({ onClose }: { onClose: () => void }) {
   const sheetRef = useRef<HTMLDivElement>(null)
   /* فوکوس باید بعد از بسته‌شدن به همان‌جایی برگردد که بود — وگرنه کاربر
      صفحه‌خوان/کیبورد به ابتدای صفحه پرت می‌شود. */
   const restoreTo = useRef<HTMLElement | null>(null)
 
   const dismiss = useCallback((action: A2hsAction) => {
-    if (persist) persistDismissal(action)
+    persistDismissal(action)
     onClose()
-  }, [onClose, persist])
+  }, [onClose])
 
   useEffect(() => {
     restoreTo.current = document.activeElement as HTMLElement | null
