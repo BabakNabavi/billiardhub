@@ -67,6 +67,10 @@ const GENDER_SIZES: Record<string, number> = {
      بیشترشان دور ریخته می‌شدند */
   'snooker|آقایان|پیشکسوتان': 256,
   'pocket|بانوان|دسته برتر': 64,
+  /* ۳۰ آبانِ ۱۴۰۵: پاکتِ آقایان دسته یک ۳۴۳ نفر (مرحله‌های ۳۶ تا ۴۰) و اسنوکرِ
+     آقایان زیرِ ۲۱ سال ۲۹۶ نفر (دوره‌های ۱۳ تا ۱۷) — هم‌اندازه‌ی دسته‌یکِ اسنوکر */
+  'pocket|آقایان|دسته یک': 512,
+  'snooker|آقایان|زیر ۲۱ سال': 512,
 }
 
 export function categorySize(sport: string, category: string, gender?: string): number {
