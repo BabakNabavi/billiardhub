@@ -239,7 +239,8 @@ export default function AdminUsersPage() {
         )}
       </div>
 
-      {detail && <UserDetailDialog userId={detail} onClose={() => setDetail(null)} />}
+      {detail && <UserDetailDialog userId={detail} onClose={() => setDetail(null)}
+        onRolesChanged={r => setUsers(us => us.map(x => x.id === detail ? { ...x, ...r } : x))} />}
     </div>
   );
 }

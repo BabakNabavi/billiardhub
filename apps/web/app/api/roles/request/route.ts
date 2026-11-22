@@ -1,6 +1,7 @@
 export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { sb, actorFromRequest, audit, clientIp } from '@/lib/finance/db';
+import { lockState, LOCKED_MESSAGE, LOCK_UNKNOWN_MESSAGE } from '@/lib/roles/revoke';
 
 /* درخواست نقش از سوی کاربر.
 
@@ -38,6 +39,13 @@ export async function POST(req: NextRequest) {
      همین حالت را دارد. پس نه ردیفی می‌خواهد و نه تأییدی؛ ردیفش فقط ۷۲ ساعت
      می‌ماند تا نگهبان پاکش کند. */
   if (role === 'user') return NextResponse.json({ ok: true });
+
+  /* نقشی که مدیریت برداشته، تا بازگرداندن از سوی خودِ مدیریت انتخاب‌شدنی نیست
+     (lib/roles/revoke) — وگرنه برداشتن با یک کلیک خنثی می‌شد */
+  /* «نامعلوم» هم بسته است: این مسیر نقش *می‌دهد* (fail closed) */
+  const lock = await lockState(actor.id, role);
+  if (lock === 'locked') return NextResponse.json({ message: LOCKED_MESSAGE }, { status: 403 });
+  if (lock === 'unknown') return NextResponse.json({ message: LOCK_UNKNOWN_MESSAGE }, { status: 503 });
 
   /* مدرک باید از مسیر آپلود خودمان آمده باشد. پذیرفتن هر URLای یعنی
      می‌شد نشانی دلخواه — حتی یک سایت بیرونی — را به‌عنوان مدرک ثبت
@@ -84,6 +92,11 @@ export async function POST(req: NextRequest) {
      `primaryRole` فقط وقتی جابه‌جا می‌شود که کاربر هنوز نقش معناداری
      ندارد؛ وگرنه انتخاب «داور» برای یک باشگاه‌دار، باشگاهش را از
      دستش درمی‌آورد. */
+  /* دوباره، درست پیش از دادنِ نقش: برداشتنِ مدیریت در فاصله‌ی همین درخواست
+     نباید با همین درخواست خنثی شود */
+  if (await lockState(actor.id, role) !== 'free') {
+    return NextResponse.json({ message: LOCKED_MESSAGE }, { status: 403 });
+  }
   const { data: u } = await sb().from('users')
     .select('"primaryRole","secondaryRoles"').eq('id', actor.id).maybeSingle();
   const cur = (u ?? {}) as { primaryRole?: string; secondaryRoles?: string[] };
@@ -94,6 +107,9 @@ export async function POST(req: NextRequest) {
     ...(promote ? { primaryRole: role } : {}),
     updatedAt: new Date().toISOString(),
   }).eq('id', actor.id);
+  /* پروفایلِ پنهان‌شده با «ثبت نهایی» (/api/roles/submit) به صفِ بررسی برمی‌گردد، نه
+     همین‌جا: پیش‌نویسِ رهاشده را نگهبانِ ۷۲ساعته پس می‌گیرد و پروفایل نباید برای
+     کسی که دیگر نقش ندارد در صف بماند */
 
   void audit({
     actorId: actor.id, actorRole: actor.role, action: 'ROLE_SELECTED',

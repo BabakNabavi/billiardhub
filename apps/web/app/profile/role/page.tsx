@@ -9,6 +9,8 @@ import { csrfToken, apiFetch } from '../../../lib/http'
 import PlayerDisciplines, { type PlayerDisciplinesValue } from '../../../components/player/PlayerDisciplines'
 import { emptyPlayerProfile, findPlayerByOwner, newPlayerSlug, savePlayerProfile } from '../../../lib/player-store'
 import Ti from '../../../components/ui/Ti'
+import { MyRolesManager, type LockedRole } from '../../../components/profile/MyRolesManager'
+import { LOCKED_MESSAGE, requestStatusLabel } from '../../../lib/roles/revoke-logic'
 
 // ─── Types (inline — نیاز به import از lib نیست) ──────────────
 type RoleValue =
@@ -23,6 +25,8 @@ interface RoleRequest {
   status: RoleStatus
   docUrl?: string
   rejectionNote?: string
+  /* سرور snake_case می‌فرستد — همین یادداشت می‌گوید ردیف «حذف» بوده یا «رد» */
+  rejection_note?: string | null
   requestedAt: string
 }
 
@@ -60,12 +64,6 @@ function authHeader(): Record<string, string> {
 }
 
 // ─── Constants ────────────────────────────────────────────────
-const STATUS_LABEL: Record<RoleStatus, string> = {
-  pending:  'در انتظار تأیید',
-  approved: 'تأیید شده',
-  rejected: 'رد شده',
-}
-
 const STATUS_COLOR: Record<RoleStatus, string> = {
   pending:  '#f59e0b',
   approved: '#C7A66A',
@@ -99,17 +97,26 @@ function RoleCard({
   request,
   isQueued,
   blocked,
+  locked = false,
   onToggle,
 }: {
   role: RoleMeta
   request?: RoleRequest
   isQueued: boolean
   blocked: boolean
+  /** نقشی که مدیریت برداشته — انتخاب‌شدنی نیست */
+  locked?: boolean
   onToggle: () => void
 }) {
   const status = request?.status
   const isActive = isQueued || status === 'approved' || status === 'pending'
-  const disabled = status === 'approved' || blocked
+  const disabled = status === 'approved' || blocked || locked
+  /* «حذف‌شده» (به دستِ خودش) و «برداشته‌شده توسط مدیریت» با «رد شده» یکی نیستند */
+  const statusText = locked ? 'برداشته‌شده توسط مدیریت'
+    : status ? requestStatusLabel(status, request?.rejection_note) : ''
+  const statusColor = locked ? STATUS_COLOR.rejected
+    : status === 'rejected' && statusText === 'حذف‌شده' ? 'rgba(0,0,0,0.45)'
+    : status ? STATUS_COLOR[status] : undefined
   const Icon = role.Icon
   const rgba = (a: number) => hexToRgba(role.color, a)
 
@@ -117,7 +124,7 @@ function RoleCard({
     <button
       onClick={onToggle}
       disabled={disabled}
-      title={blocked ? 'با انتخاب یک نقش تخصصی، «کاربر عادی» غیرفعال می‌شود' : status ? STATUS_LABEL[status] : undefined}
+      title={blocked ? 'با انتخاب یک نقش تخصصی، «کاربر عادی» غیرفعال می‌شود' : statusText || undefined}
       style={{
         position: 'relative', overflow: 'hidden',
         display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 9,
@@ -186,9 +193,9 @@ function RoleCard({
       </span>
 
       {/* status badge */}
-      {status && (
-        <span style={{ fontSize: 10, color: STATUS_COLOR[status], position: 'relative', zIndex: 1 }}>
-          {STATUS_LABEL[status]}
+      {statusText && (
+        <span style={{ fontSize: 10, color: statusColor, position: 'relative', zIndex: 1 }}>
+          {statusText}
         </span>
       )}
     </button>
@@ -203,7 +210,8 @@ function DocUploadStep({
 }: {
   queued: RoleValue[]
   onBack: () => void
-  onDone: () => void
+  /** نقش‌هایی که سرور واقعا پذیرفت — رد یا خطا پیامش را همان‌جا نشان می‌دهد */
+  onDone: (granted: RoleValue[]) => void
 }) {
   /* مسیر مدرک باید زیر شناسه‌ی خود کاربر باشد؛ /api/upload جز این
      را رد می‌کند تا کسی مدرک دیگری را بازنویسی نکند. */
@@ -217,6 +225,7 @@ function DocUploadStep({
 
   const handleSubmit = async () => {
     setUploading(true)
+    const granted: RoleValue[] = []
 
     for (const roleVal of queued) {
       const meta = ROLE_MAP[roleVal]
@@ -255,16 +264,20 @@ function DocUploadStep({
         }
       }
 
-      // ثبت درخواست نقش
-      await apiFetch('/api/roles/request', {
-        method: 'POST',
-        headers: { ...authHeader(), 'Content-Type': 'application/json' },
-        body: JSON.stringify({ role: roleVal, docUrl }),
-      })
+      // ثبت درخواست نقش — پاسخ خوانده می‌شود: نقشِ قفل‌شده یا خطا «فعال شد» نشان داده نشود
+      try {
+        const res = await apiFetch('/api/roles/request', {
+          method: 'POST',
+          headers: { ...authHeader(), 'Content-Type': 'application/json' },
+          body: JSON.stringify({ role: roleVal, docUrl }),
+        })
+        if (res.ok) granted.push(roleVal)
+        else notify(((await res.json().catch(() => ({}))) as { message?: string })?.message ?? 'ثبت نقش انجام نشد')
+      } catch { notify('خطا در ارتباط با سرور') }
     }
 
     setUploading(false)
-    onDone()
+    onDone(granted)
   }
 
   return (
@@ -410,18 +423,35 @@ export default function RolePage() {
     if (mine && mine.disciplines.length > 0) setPlayerInfo({ gender: mine.gender, entries: mine.disciplines })
   }, [user?.id])
 
-  // بارگذاری درخواست‌های قبلی از NestJS
+  /* نقش‌هایی که مدیریت برداشته — انتخابِ دوباره‌شان بسته است */
+  const [locked, setLocked] = useState<LockedRole[]>([])
+
+  /* ⚠️ پاسخ `{ requests, current, locked }` است. تا آذرِ ۱۴۰۵ این‌جا
+     `Array.isArray(data)` زده می‌شد و فهرست همیشه خالی می‌ماند: آمار، وضعیتِ
+     هر نقش و «مدیریت نقش‌ها» هیچ‌وقت درخواست‌های واقعی را نشان نمی‌دادند. */
+  const loadRequests = async () => {
+    try {
+      const r = await apiFetch('/api/roles/my', { headers: authHeader(), cache: 'no-store' })
+      if (!r.ok) { showToast('خواندن نقش‌ها انجام نشد'); return }
+      const data = await r.json()
+      setRequests(Array.isArray(data?.requests) ? data.requests : [])
+      setLocked(Array.isArray(data?.locked) ? data.locked : [])
+      /* نقش‌های واقعیِ سرور جای استورِ مرورگر — اگر مدیریت نقشی را برداشته باشد،
+         فهرست بالا دیگر دکمه‌ی حذفی نشان نمی‌دهد که ۴۰۹ بگیرد */
+      if (data?.current?.primaryRole) updateUser(data.current)
+    } catch { showToast('خطا در ارتباط با سرور') }
+  }
+
   useEffect(() => {
-    apiFetch('/api/roles/my', { headers: authHeader() })
-      .then(r => r.ok ? r.json() : [])
-      .then(data => setRequests(Array.isArray(data) ? data : []))
-      .catch(() => {})
-      .finally(() => setLoading(false))
+    void loadRequests().finally(() => setLoading(false))
+    // فقط یک‌بار هنگامِ باز شدنِ صفحه؛ loadRequests فقط setterها و updateUserِ پایدارِ استور را می‌خواند
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  // نگاشت role → request برای دسترسی سریع
+  /* نگاشت role → تازه‌ترین درخواست. پاسخ نزولی است و fromEntries آخری را
+     نگه می‌دارد، پس برعکس می‌شود تا تازه‌ترین بماند نه قدیمی‌ترین */
   const requestMap = Object.fromEntries(
-    requests.map(r => [r.role, r])
+    [...requests].reverse().map(r => [r.role, r])
   ) as Record<string, RoleRequest>
 
   // آیا کاربر نقش تخصصی (غیر از «کاربر عادی») تأییدشده/در انتظار دارد؟
@@ -429,6 +459,7 @@ export default function RolePage() {
 
   const toggle = (val: RoleValue) => {
     if (requestMap[val]?.status === 'approved') return
+    if (locked.some(l => l.role === val)) { notify(LOCKED_MESSAGE); return }
     setQueued(prev => {
       const next = new Set(prev)
       if (next.has(val)) { next.delete(val); return next }
@@ -445,21 +476,21 @@ export default function RolePage() {
     })
   }
 
-  const handleDone = () => {
-    showToast('نقش‌های شما فعال شد')
+  /* `granted` = نقش‌هایی که سرور پذیرفت. ردشده‌ها (مثلا نقشِ برداشته‌شده از سوی
+     مدیریت) پیامشان را جدا گرفته‌اند و نباید در استور «نقشِ فعال» بنشینند */
+  const handleDone = (granted: RoleValue[]) => {
     const currentSecondary = user?.secondaryRoles ?? []
     /* «کاربر عادی» نقش نیست و سرور هم ثبتش نمی‌کند؛ نوشتنش این‌جا کاربر را
        تا همگام‌سازیِ بعدی «نقش‌دار» نشان می‌داد */
-    const newRoles = queuedArr.filter(r => r !== 'user' && !currentSecondary.includes(r))
+    const newRoles = granted.filter(r => r !== 'user' && !currentSecondary.includes(r))
     if (newRoles.length > 0) {
       updateUser({ secondaryRoles: [...currentSecondary, ...newRoles] })
     }
     setQueued(new Set())
     setStep('select')
-    apiFetch('/api/roles/my', { headers: authHeader() })
-      .then(r => r.ok ? r.json() : [])
-      .then(data => setRequests(Array.isArray(data) ? data : []))
-      .catch(() => {})
+    void loadRequests()
+    if (granted.length === 0) return
+    showToast('نقش‌های شما فعال شد')
     setTimeout(() => router.push('/dashboard'), 1200)
   }
 
@@ -484,17 +515,22 @@ export default function RolePage() {
     const canHaveTick = queuedArr.some(r => ROLE_MAP[r].requiresDoc)
     if (canHaveTick) { setStep('upload'); return }
 
+    const granted: RoleValue[] = []
     for (const roleVal of queuedArr) {
-      await apiFetch('/api/roles/request', {
-        method: 'POST',
-        headers: { ...authHeader(), 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          role: roleVal,
-          ...(roleVal === 'player' ? { gender: playerInfo.gender, disciplines: playerInfo.entries } : {}),
-        }),
-      })
+      try {
+        const res = await apiFetch('/api/roles/request', {
+          method: 'POST',
+          headers: { ...authHeader(), 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            role: roleVal,
+            ...(roleVal === 'player' ? { gender: playerInfo.gender, disciplines: playerInfo.entries } : {}),
+          }),
+        })
+        if (res.ok) granted.push(roleVal)
+        else notify(((await res.json().catch(() => ({}))) as { message?: string })?.message ?? 'ثبت نقش انجام نشد')
+      } catch { notify('خطا در ارتباط با سرور') }
     }
-    handleDone()
+    handleDone(granted)
   }
 
   /* رشته/دسته‌ها همان‌جا در پروفایل بازیکن می‌نشیند تا پنل بازیکن
@@ -609,49 +645,17 @@ export default function RolePage() {
                 )
               })()}
 
-              {/* ── نقش‌های فعال ──
-                  تا امروز فقط `secondaryRoles` فهرست می‌شد و نقش
-                  **اصلی** اصلا در آن نبود. کاربری که مثلا فروشنده
-                  (اصلی) و باشگاه‌دار (فرعی) بود، این‌جا فقط یکی را
-                  می‌دید و فکر می‌کرد نقش دیگرش از بین رفته.
-
-                  حذف فقط برای نقش‌های فرعی است: نقش اصلی اول باید در
-                  کادر بالا عوض شود، وگرنه کاربر بی‌نقش می‌ماند. */}
-              {activeRoles.length > 0 && (
-                <div style={{ background: '#fff', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 16, padding: '14px 16px', marginBottom: 16, boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
-                  <div style={{ fontSize: 12.5, fontWeight: 800, color: 'rgba(0,0,0,0.55)', marginBottom: 10 }}>نقش‌های فعال شما</div>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-                    {activeRoles.map(r => (
-                      <span key={r} style={{ display: 'inline-flex', alignItems: 'center', gap: 7, fontSize: 12.5, fontWeight: 700, color: '#8F6531', background: 'rgba(199,166,106,0.10)', border: '1px solid rgba(199,166,106,0.3)', borderRadius: 999, padding: '6px 8px 6px 6px' }}>
-                        {ROLE_MAP[r as RoleValue]?.label ?? r}
-                        {r === user?.primaryRole && (
-                          <span style={{ fontSize: 10, fontWeight: 800, color: '#7A5626', background: 'rgba(199,166,106,0.22)', borderRadius: 999, padding: '2px 7px' }}>اصلی</span>
-                        )}
-                        {r !== user?.primaryRole && <button
-                          /* حذف باید *سمت سرور* انجام شود. پیش‌تر فقط
-                             `updateUser` صدا زده می‌شد: نقش از استور
-                             مرورگر پاک می‌شد، پیام «نقش حذف شد» می‌آمد، و
-                             سرور هیچ خبری نداشت — با اولین بارگذاری تازه
-                             نقش برمی‌گشت. سرور هم محافظ دارد: باشگاه‌داری
-                             که باشگاه دارد نمی‌تواند نقشش را بردارد. */
-                          onClick={async () => {
-                            try {
-                              const res = await apiFetch('/api/roles/my?role=' + encodeURIComponent(r), { method: 'DELETE' })
-                              const j = await res.json().catch(() => ({}))
-                              if (!res.ok) { showToast(j?.message ?? 'حذف نقش انجام نشد'); return }
-                              updateUser({ primaryRole: j.primaryRole, secondaryRoles: j.secondaryRoles })
-                              showToast('نقش حذف شد')
-                            } catch { showToast('خطا در ارتباط با سرور') }
-                          }}
-                          title="حذف نقش"
-                          style={{ width: 18, height: 18, borderRadius: '50%', border: 'none', cursor: 'pointer', background: 'rgba(178,59,46,0.12)', color: '#B23B2E', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, lineHeight: 1, fontFamily: 'inherit' }}>
-                          ×
-                        </button>}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              )}
+              {/* ── نقش‌های فعال و حذفِ نقش ──
+                  همه‌ی نقش‌ها (اصلی و فرعی) با دکمه‌ی حذف و پنجره‌ی تأیید؛
+                  حذف سمتِ سرور است و پروفایلِ عمومیِ همان نقش را هم برمی‌دارد. */}
+              <MyRolesManager
+                roles={activeRoles}
+                primaryRole={user?.primaryRole}
+                requests={requests}
+                locked={locked}
+                notify={showToast}
+                onChanged={r => { updateUser(r); void loadRequests() }}
+              />
 
               {/* Stats */}
               {requests.length > 0 && (
@@ -681,6 +685,7 @@ export default function RolePage() {
                     request={requestMap[role.value]}
                     isQueued={queued.has(role.value)}
                     blocked={role.value === 'user' && (queuedArr.some(r => r !== 'user') || hasNonUserRequest)}
+                    locked={locked.some(l => l.role === role.value)}
                     onToggle={() => toggle(role.value)}
                   />
                 ))}

@@ -2,6 +2,9 @@ export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { sb, actorFromRequest, audit, clientIp } from '@/lib/finance/db';
 import { isPlatformOwner } from '@/lib/enforcement/server';
+import { z } from 'zod';
+import { lockedRolesOf, revokeRole } from '@/lib/roles/revoke';
+import { REVOCABLE_ROLES } from '@/lib/roles/revoke-logic';
 
 /* درخواست‌های نقش خود کاربر.
 
@@ -31,9 +34,14 @@ export async function GET(req: NextRequest) {
     .select('"primaryRole","secondaryRoles"').eq('id', actor.id).maybeSingle();
   const row = (u ?? {}) as { primaryRole?: string; secondaryRoles?: string[] };
 
+  /* نقشی که مدیریت برداشته — صفحه انتخابِ دوباره‌اش را می‌بندد و دلیل را نشان می‌دهد */
+  /* خطای خواندنِ قفل نباید کلِ صفحه را بی‌تاریخچه کند؛ گاردِ واقعی سمتِ سرور است */
+  const locked = await lockedRolesOf(actor.id).catch(e => { console.error('[roles/my] locked', e); return []; });
+
   return NextResponse.json({
     requests: data ?? [],
     current: { primaryRole: row.primaryRole ?? 'user', secondaryRoles: row.secondaryRoles ?? [] },
+    locked,
   }, { headers: { 'Cache-Control': 'no-store' } });
 }
 
@@ -99,71 +107,26 @@ export async function PUT(req: NextRequest) {
 
 /* DELETE ?role=… — کاربر نقشی را از خودش برمی‌دارد.
 
-   ── چرا این مسیر لازم شد ──
-   صفحه‌ی /profile/role دکمه‌ی «حذف نقش» داشت که فقط `updateUser` را
-   صدا می‌زد: نقش از استور zustand پاک می‌شد و رابط «نقش حذف شد»
-   می‌گفت، ولی هیچ‌وقت به سرور گفته نمی‌شد. یعنی حذف نمایش محض بود و
-   با اولین بارگذاری تازه برمی‌گشت.
+   همه‌ی کار در lib/roles/revoke است (همان که ادمین هم صدا می‌زند): نقش از
+   ستون‌ها می‌رود، پروفایلِ عمومیِ همان نوع از سایت برداشته می‌شود و
+   درخواست‌های باز بسته می‌شوند. پیش‌تر فقط ستونِ نقش عوض می‌شد و صفحه‌ی
+   عمومیِ مربی یا فروشگاه سرِ جایش می‌ماند.
 
    ── محافظ ──
-   نقشی که به یک دارایی گره خورده برداشته نمی‌شود. باشگاه‌داری که
-   باشگاه دارد نمی‌تواند نقشش را حذف کند — وگرنه باشگاه صاحبی دارد که
-   دیگر باشگاه‌دار نیست و از پنل خودش بیرون می‌افتد.
-
-   `admin` هم از این‌جا برداشته نمی‌شود؛ آن محافظ‌های خودش را در
-   /api/admin/grant-admin دارد (آخرین ادمین، نقش خود…). */
+   باشگاه‌دارِ دارای باشگاهِ *فعال* نمی‌تواند نقشش را بردارد — وگرنه
+   رزرو و تسویه‌ی آن باشگاه صاحبی دارد که از پنلش بیرون افتاده.
+   `admin` هم از این‌جا برداشته نمی‌شود؛ محافظ‌هایش در /api/admin/grant-admin است. */
 export async function DELETE(req: NextRequest) {
   const actor = actorFromRequest(req);
   if (!actor) return NextResponse.json({ message: 'ابتدا وارد شوید' }, { status: 401 });
 
-  const role = (req.nextUrl.searchParams.get('role') ?? '').trim();
-  if (!role) return NextResponse.json({ message: 'نقش مشخص نیست' }, { status: 400 });
+  const parsed = z.enum(REVOCABLE_ROLES, { message: 'این نقش برداشتنی نیست' })
+    .safeParse((req.nextUrl.searchParams.get('role') ?? '').trim());
+  if (!parsed.success) return NextResponse.json({ message: parsed.error.issues[0]?.message ?? 'نقش مشخص نیست' }, { status: 400 });
+  const role = parsed.data;
 
-  if (role === 'admin') {
-    return NextResponse.json(
-      { message: 'دسترسی ادمین از این‌جا برداشته نمی‌شود' }, { status: 403 });
-  }
+  const r = await revokeRole({ userId: actor.id, role, mode: 'self', actorId: actor.id, ip: clientIp(req) });
+  if (!r.ok) return NextResponse.json({ message: r.message }, { status: r.status });
 
-  const { data: u } = await sb().from('users')
-    .select('"primaryRole","secondaryRoles"').eq('id', actor.id).maybeSingle();
-  if (!u) return NextResponse.json({ message: 'کاربر پیدا نشد' }, { status: 404 });
-  const cur = u as { primaryRole?: string; secondaryRoles?: string[] };
-
-  if (role === 'club_owner') {
-    const { count } = await sb().from('clubs')
-      .select('id', { count: 'exact', head: true }).eq('ownerId', actor.id);
-    if ((count ?? 0) > 0) {
-      return NextResponse.json({
-        message: `شما ${count} باشگاه ثبت‌شده دارید و تا وقتی صاحب باشگاه هستید نقش «باشگاه‌دار» برداشته نمی‌شود`,
-      }, { status: 409 });
-    }
-  }
-
-  const nextSecondary = (cur.secondaryRoles ?? []).filter(r => r !== role);
-  /* اگر همین نقش، نقش اصلی بود، به نخستین نقش باقی‌مانده برگرد —
-     وگرنه کاربر بی‌نقش می‌ماند و هیچ داشبوردی برایش باز نمی‌شود. */
-  const nextPrimary = cur.primaryRole === role
-    ? (nextSecondary.find(r => r && r !== 'admin') ?? 'user')
-    : cur.primaryRole;
-
-  const { error } = await sb().from('users').update({
-    secondaryRoles: nextSecondary,
-    primaryRole: nextPrimary,
-    updatedAt: new Date().toISOString(),
-  }).eq('id', actor.id);
-
-  if (error) {
-    console.error('[roles/my] delete', error.message);
-    return NextResponse.json({ message: 'حذف نقش انجام نشد' }, { status: 500 });
-  }
-
-  void audit({
-    actorId: actor.id, actorRole: actor.role, action: 'ROLE_REMOVED_BY_SELF',
-    entityType: 'user', entityId: actor.id,
-    oldValue: { primaryRole: cur.primaryRole, secondaryRoles: cur.secondaryRoles },
-    newValue: { primaryRole: nextPrimary, secondaryRoles: nextSecondary, removed: role },
-    ip: clientIp(req) ?? undefined,
-  });
-
-  return NextResponse.json({ ok: true, primaryRole: nextPrimary, secondaryRoles: nextSecondary });
+  return NextResponse.json({ ok: true, ...r.roles, effects: r.effects });
 }

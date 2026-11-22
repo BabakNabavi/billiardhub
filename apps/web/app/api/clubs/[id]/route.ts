@@ -10,6 +10,7 @@ import { checkProfileData } from '@/lib/profiles/validate';
 import { isUUID, isValidSlug } from '@/lib/slug';
 import { shapeClub } from '@/lib/clubs/public-club';
 import { revalidateHomeFeatured } from '@/lib/home-featured';
+import { lockState, LOCKED_MESSAGE } from '@/lib/roles/revoke';
 
 const CORS = {
   'Vary': 'Origin',
@@ -238,6 +239,13 @@ export async function PUT(
        `approved` یعنی کارت در فهرست دیده شود ولی چون مدرکی بررسی
        نشده، نشان تأیید نگیرد. */
     if (decision === 'verified' || decision === 'approved') {
+      /* مالکی که مدیریت نقشِ باشگاه‌دارش را برداشته، باشگاهِ منتشرشده نمی‌گیرد —
+         اول نقش از «کاربران» بازگردانده شود (lib/roles/revoke) */
+      if (!wasPublished && await lockState(String(club.ownerId), 'club_owner') !== 'free') {
+        return NextResponse.json(
+          { message: 'نقش باشگاه‌دارِ مالک این باشگاه توسط مدیریت برداشته شده است؛ اول نقش را از بخش کاربران بازگردانید' },
+          { status: 409, headers: CORS });
+      }
       /* ── چرا شرطی ──
          جابه‌جایی بین `verified` و `approved` فقط تیک را عوض می‌کند.
          بی‌قید `isActive = true` گذاشتن یعنی برداشتن تیک از باشگاهی
@@ -277,6 +285,10 @@ export async function PUT(
       .from('clubs').select('"verificationStatus","submissionCount"').eq('id', id).maybeSingle();
     const c = cur as { verificationStatus?: string; submissionCount?: number } | null;
     if (c?.verificationStatus === 'rejected') {
+      /* ارسالِ دوباره همان «برگشتنِ نقش» است — برای نقشِ قفل‌شده بسته */
+      if (await lockState(userId, 'club_owner') !== 'free') {
+        return NextResponse.json({ message: LOCKED_MESSAGE }, { status: 403, headers: CORS });
+      }
       body.verificationStatus = 'pending';
       body.rejectionReason = null;
       body.submissionCount = (c.submissionCount ?? 1) + 1;

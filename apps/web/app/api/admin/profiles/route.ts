@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { sb, actorFromRequest, audit } from '@/lib/finance/db';
 import { PROFILE_KINDS, listProfiles, reviewProfile, type ProfileKind } from '@/lib/profiles/server';
 import { can, canAny, PROFILE_KIND_KEY } from '@/lib/admin/permissions';
+import { lockState } from '@/lib/roles/revoke';
 
 /* بررسی پروفایل‌ها توسط ادمین — تأیید/رد، تیک آبی و تأیید جواز کسب
 
@@ -68,11 +69,20 @@ export async function PATCH(req: NextRequest) {
   /* تأیید، رد و جواز کار صفحه‌ی همان نوع (یا «نقش‌ها») است. نوع از دیتابیس
      خوانده می‌شود، نه از بدنه: درخواست دستکاری‌شده نمی‌تواند نوع دیگری بگوید. */
   if (patch.status !== undefined || patch.licenseVerified !== undefined || patch.licenseNote !== undefined) {
-    const { data: row } = await sb().from('profiles').select('kind').eq('id', id).maybeSingle();
-    const kindKey = PROFILE_KIND_KEY[String((row as { kind?: string } | null)?.kind ?? '')];
+    const { data: row } = await sb().from('profiles').select('kind,owner_id,is_demo').eq('id', id).maybeSingle();
+    const r = row as { kind?: string; owner_id?: string; is_demo?: boolean } | null;
+    const kindKey = PROFILE_KIND_KEY[String(r?.kind ?? '')];
     if (!kindKey) return NextResponse.json({ message: 'پروفایل یافت نشد' }, { status: 404 });
     if (!(await canAny(actor.id, [kindKey, 'roles']))) {
       return NextResponse.json({ message: 'دسترسی به این بخش مجاز نیست' }, { status: 403 });
+    }
+    /* پروفایلِ کسی که مدیریت نقشش را برداشته از تبِ «ردشده» دوباره منتشر یا به صف
+       برگردانده نمی‌شود — اول نقش از «کاربران» بازگردانده شود (lib/roles/revoke) */
+    if ((patch.status === 'approved' || patch.status === 'pending') && !r?.is_demo && r?.owner_id
+        && await lockState(r.owner_id, String(r.kind)) !== 'free') {
+      return NextResponse.json(
+        { message: 'نقش صاحب این پروفایل توسط مدیریت برداشته شده است؛ اول نقش را از بخش کاربران بازگردانید' },
+        { status: 409 });
     }
   }
 

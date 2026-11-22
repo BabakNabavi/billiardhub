@@ -4,6 +4,8 @@ import { sb, actorFromRequest, audit, clientIp } from '@/lib/finance/db';
 import { notifyRoleApproved, notifyRoleRejected } from '@/lib/notify';
 import { can } from '@/lib/admin/permissions';
 import { ownerTargetGuard } from '@/lib/enforcement/server';
+import { revocationKindOf } from '@/lib/roles/revoke-logic';
+import { lockState } from '@/lib/roles/revoke';
 
 /* بررسی درخواست‌های نقش توسط ادمین.
 
@@ -120,10 +122,21 @@ export async function PATCH(req: NextRequest) {
   if (action === 'reject' && !note) {
     return NextResponse.json({ message: 'برای رد کردن، علت را بنویسید' }, { status: 400 });
   }
+  /* یادداشتی که با پیشوندِ «برداشتن نقش» شروع شود قفل حساب می‌شد (lib/roles/revoke-logic) —
+     ردِ یک درخواست قفل نیست؛ برداشتنِ نقش از پنجره‌ی کاربر انجام می‌شود */
+  if (action === 'reject' && revocationKindOf(note)) {
+    return NextResponse.json({ message: 'این متن مخصوص برداشتن نقش است؛ علت رد را با عبارت دیگری بنویسید' }, { status: 400 });
+  }
 
   if (action === 'approve') {
     if (!GRANTABLE.has(rr.role)) {
       return NextResponse.json({ message: 'این نقش از این مسیر داده نمی‌شود' }, { status: 400 });
+    }
+    /* نقشِ برداشته‌شده از سوی مدیریت فقط با «بازگرداندن» برمی‌گردد تا قفل هم باز شود */
+    if (await lockState(rr.user_id, rr.role) !== 'free') {
+      return NextResponse.json(
+        { message: 'این نقش توسط مدیریت از کاربر برداشته شده است؛ برای دادنِ دوباره از پنجره‌ی کاربر «بازگرداندن» را بزنید' },
+        { status: 409 });
     }
     const { data: u } = await sb().from('users')
       .select('"primaryRole","secondaryRoles"').eq('id', rr.user_id).maybeSingle();

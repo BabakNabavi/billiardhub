@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { sb, actorFromRequest } from '@/lib/finance/db';
 import { can, PROFILE_KIND_KEY } from '@/lib/admin/permissions';
 import { checkProfileData } from '@/lib/profiles/validate';
+import { lockState, requeueAfterRegrant, LOCKED_MESSAGE } from '@/lib/roles/revoke';
 import {
   PROFILE_KINDS, getProfileByOwner, getProfileBySlug, listProfiles, saveProfile,
   type ProfileKind,
@@ -143,6 +144,15 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ kind: stri
   const actor = actorFromRequest(req);
   if (!actor) return NextResponse.json({ message: 'ابتدا وارد شوید' }, { status: 401 });
 
+  /* ساختن پروفایل نقش را خودکار می‌دهد (پایین‌تر)؛ نقشی که مدیریت برداشته
+     نباید از این راه برگردد — نه ساخت، نه ویرایشِ همان پروفایلِ پنهان */
+  /* «نامعلوم» ذخیره را نمی‌بندد (اختلالِ لحظه‌ای نباید فرمِ همه را بشکند) ولی نقش
+     هم نمی‌دهد — پایین‌تر دوباره پرسیده می‌شود */
+  const lock = await lockState(actor.id, kind);
+  if (lock === 'locked') {
+    return NextResponse.json({ message: LOCKED_MESSAGE }, { status: 403 });
+  }
+
   const b = await req.json().catch(() => ({}));
   const data = b?.data && typeof b.data === 'object' && !Array.isArray(b.data)
     ? b.data as Record<string, unknown> : null;
@@ -208,7 +218,9 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ kind: stri
         .select('"primaryRole","secondaryRoles"').eq('id', actor.id).maybeSingle();
       const cur = (u ?? {}) as { primaryRole?: string; secondaryRoles?: string[] };
       const owned = [cur.primaryRole, ...(cur.secondaryRoles ?? [])].filter(Boolean);
-      if (!owned.includes(kind)) {
+      /* قفل دوباره درست پیش از دادنِ نقش: ذخیره و بارگذاریِ عکس چند ثانیه طول
+         می‌کشد و برداشتنِ مدیریت در همین فاصله نباید خنثی شود */
+      if (!owned.includes(kind) && await lockState(actor.id, kind) === 'free') {
         const roles = [...new Set([...(cur.secondaryRoles ?? []), kind])].filter(Boolean);
         const promote = !cur.primaryRole || cur.primaryRole === 'user';
         await sb().from('users').update({
@@ -216,6 +228,9 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ kind: stri
           ...(promote ? { primaryRole: kind } : {}),
           updatedAt: new Date().toISOString(),
         }).eq('id', actor.id);
+        /* پروفایلی که حذفِ نقش پنهانش کرده بود، با برگشتنِ نقش به صفِ بررسی
+           برمی‌گردد — ویرایش وضعیت را عوض نمی‌کند. ردِ محتوایی دست نمی‌خورد. */
+        if (saved.status === 'rejected' && await requeueAfterRegrant(actor.id, kind)) saved.status = 'pending';
       }
     } catch (roleErr) {
       /* نقش ندادن نباید ذخیره‌ی پروفایل را بشکند؛ لاگ می‌شود و

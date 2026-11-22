@@ -126,7 +126,8 @@ const valid = k => KEYS.includes(k) || k === 'access'
     && (code('app/api/admin/content/[kind]/route.ts').match(/guard\(req, kind\)/g) ?? []).length === 4)
   const prof = code('app/api/admin/profiles/route.ts')
   t('تأیید/ردِ پروفایل کلیدِ نوعِ واقعی (از دیتابیس) را می‌خواهد',
-    /from\('profiles'\)\.select\('kind'\)/.test(prof) && /canAny\(actor\.id, \[kindKey, 'roles'\]\)/.test(prof))
+    /* ستون‌های بیشتر (owner_id برای قفلِ نقش، آذرِ ۱۴۰۵) مجاز است؛ مهم این است که نوع از دیتابیس بیاید */
+    /from\('profiles'\)\.select\('kind[^']*'\)/.test(prof) && /canAny\(actor\.id, \[kindKey, 'roles'\]\)/.test(prof))
   t('تیکِ آبی همچنان verified می‌خواهد', /can\(actor\.id, 'verified'\)/.test(prof))
 }
 

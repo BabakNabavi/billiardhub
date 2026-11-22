@@ -1,6 +1,7 @@
 export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { sb, actorFromRequest, audit, clientIp } from '@/lib/finance/db';
+import { requeueAfterRegrant } from '@/lib/roles/revoke';
 
 /* ═══════════════════════════════════════════════════════════════
    «ثبت نهایی» — پروفایل تکمیل شد، حالا برود روی میز ادمین.
@@ -65,6 +66,10 @@ export async function POST(req: NextRequest) {
     console.error('[roles/submit]', error.message);
     return NextResponse.json({ message: 'ثبت نهایی انجام نشد' }, { status: 500 });
   }
+
+  /* کسی که نقش را خودش حذف کرده بود و حالا با «ثبت نهایی» برگشته: پروفایلی که همان
+     حذف پنهانش کرد دوباره به صفِ بررسی می‌رود (پروفایلِ ردشده برای محتوا نه) */
+  await requeueAfterRegrant(actor.id, role);
 
   void audit({
     actorId: actor.id, actorRole: actor.role, action: 'ROLE_SUBMITTED',

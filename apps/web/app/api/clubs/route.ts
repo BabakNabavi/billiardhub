@@ -8,6 +8,7 @@ import { cardToIban, matchCard, matchIban } from '@/lib/bank-server';
 import { actorFromRequest } from '@/lib/finance/db';
 import { isUUID, isValidSlug } from '@/lib/slug';
 import { revalidateHomeFeatured } from '@/lib/home-featured';
+import { lockState, LOCKED_MESSAGE, LOCK_UNKNOWN_MESSAGE } from '@/lib/roles/revoke';
 
 const CORS_HEADERS = {
   'Vary': 'Origin',
@@ -228,6 +229,15 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    /* ساختنِ باشگاه نقشِ باشگاه‌دار را خودکار می‌دهد (پایین‌تر)؛ اگر مدیریت
+       این نقش را برداشته، از این راه برنمی‌گردد (lib/roles/revoke) */
+    const lock = await lockState(payload.id, 'club_owner');
+    if (lock !== 'free') {
+      return NextResponse.json(
+        { message: lock === 'locked' ? LOCKED_MESSAGE : LOCK_UNKNOWN_MESSAGE },
+        { status: lock === 'locked' ? 403 : 503, headers: CORS_HEADERS });
+    }
+
     const body = await req.json();
     const {
       name, address, city, slug,
@@ -239,6 +249,9 @@ export async function POST(req: NextRequest) {
       bankCard,
       ...rest
     } = body;
+    /* «نمایشی» کارِ ادمین است (/admin/demo-content). از بدنه که می‌رسید، باشگاهِ
+       یک کاربرِ عادی از محافظ‌هایی بیرون می‌افتاد که نمایشی‌ها را کنار می‌گذارند */
+    delete (rest as Record<string, unknown>).is_demo;
 
     if (!name || !address || !city) {
       return NextResponse.json(
@@ -352,7 +365,9 @@ export async function POST(req: NextRequest) {
       const row = (u ?? {}) as { primaryRole?: string; secondaryRoles?: string[] };
       const secondary = Array.isArray(row.secondaryRoles) ? row.secondaryRoles : [];
 
-      if (row.primaryRole !== 'club_owner' && !secondary.includes('club_owner')) {
+      /* قفل دوباره درست پیش از دادنِ نقش (برداشتنِ مدیریت در فاصله‌ی همین درخواست) */
+      if (row.primaryRole !== 'club_owner' && !secondary.includes('club_owner')
+          && await lockState(payload.id, 'club_owner') === 'free') {
         const patch: Record<string, unknown> = {
           /* نقش اصلی فقط وقتی عوض می‌شود که هنوز نقش معناداری نگرفته
              باشد؛ ادمین یا مربی نباید ناخواسته باشگاه‌دار شود. */

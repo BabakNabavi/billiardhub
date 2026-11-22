@@ -283,7 +283,8 @@ export default function DashboardPage() {
   if (isTechnician)   roleCards.push({ href: '/dashboard/technician', icon: '🔧', title: 'پنل خدمات فنی', action: 'تکمیل پروفایل', rgb: '6,182,212', cta: '#0891b2' });
   if (isManufacturer) roleCards.push({ href: '/dashboard/manufacturer', icon: '🏭', title: 'پنل تولیدکننده', action: 'تکمیل پروفایل', rgb: '160,120,64', cta: '#A07840' });
   /* «افزودن نقش» هم دقیقا همان کارت است، نه یک استثنا */
-  roleCards.push({ href: '/profile/role', icon: '➕', title: 'افزودن نقش جدید', action: 'مدیریت نقش‌ها', rgb: '28,28,26', cta: '#111111', dashed: true });
+  /* «حذف» هم در عنوان: مالک دکمه‌ی حذفِ نقش را پیدا نمی‌کرد (آذرِ ۱۴۰۵) */
+  roleCards.push({ href: '/profile/role', icon: '➕', title: 'افزودن یا حذف نقش', action: 'مدیریت نقش‌ها', rgb: '28,28,26', cta: '#111111', dashed: true });
 
   return (
     <AuthGuard>

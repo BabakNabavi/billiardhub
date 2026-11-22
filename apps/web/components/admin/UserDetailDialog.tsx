@@ -14,6 +14,7 @@ import { useEffect, useState } from 'react'
 import { apiFetch } from '../../lib/http'
 import { faDate } from '../../lib/jalali'
 import { X, Loader2, BadgeCheck, ShieldAlert, Copy, Check, Pencil } from 'lucide-react'
+import { UserRolesSection } from './UserRolesSection'
 
 const INK = '#1C1B17', SEC = '#5B564B', MUT = '#6F6A5C', LINE = '#EAE5DA'
 const GOLD_D = '#8F6531', FELT = '#0E7A38', RED = '#B23B2E'
@@ -132,7 +133,12 @@ function Section({ title, children }: { title: string; children: React.ReactNode
   )
 }
 
-export default function UserDetailDialog({ userId, onClose }: { userId: string; onClose: () => void }) {
+export default function UserDetailDialog({ userId, onClose, onRolesChanged }: {
+  userId: string
+  onClose: () => void
+  /** فهرستِ پشتِ پنجره هم نقشِ تازه را نشان دهد */
+  onRolesChanged?: (roles: { primaryRole: string; secondaryRoles: string[] }) => void
+}) {
   const [u, setU] = useState<Row | null>(null)
   const [err, setErr] = useState('')
   const [editing, setEditing] = useState(false)
@@ -142,7 +148,13 @@ export default function UserDetailDialog({ userId, onClose }: { userId: string; 
   const [saved, setSaved] = useState(false)
 
   useEffect(() => {
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
+    /* پنجره‌ی تأییدِ داخلی (برداشتن/بازگرداندنِ نقش) باز است ⟵ Escape مالِ همان است؛
+       بی این، دلیلِ تایپ‌شده و نتیجه با بسته‌شدنِ پنجره‌ی مادر گم می‌شد */
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape') return
+      if (document.querySelector('[role="dialog"][aria-modal="true"]')) return
+      onClose()
+    }
     document.addEventListener('keydown', onKey)
     const prev = document.body.style.overflow
     document.body.style.overflow = 'hidden'
@@ -305,6 +317,10 @@ export default function UserDetailDialog({ userId, onClose }: { userId: string; 
 
           {u && !editing && (
             <>
+              {/* برداشتن و بازگرداندنِ نقش — سربرگ هم با پاسخ به‌روز می‌شود */}
+              <UserRolesSection userId={userId}
+                onChanged={r => { setU(prev => (prev ? { ...prev, ...r } : prev)); onRolesChanged?.(r) }} />
+
               <Section title="تماس">
                 <Field label="موبایل" value={fa(g('phone'))} mono copy />
                 <Field label="تلفن کاری" value={g('work_phone') ? fa(g('work_phone')) : null} mono copy />

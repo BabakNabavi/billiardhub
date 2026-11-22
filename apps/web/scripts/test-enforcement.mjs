@@ -145,7 +145,8 @@ for (const f of ['app/api/admin/grant-admin/route.ts', 'app/api/admin/users/rout
 t('مالک همه‌ی مجوزها را دارد', has('lib/admin/permissions.ts', /accountStateOf\(userId\)\)\.isOwner\) return \[ALL\]/), true)
 t('ادمین کد ملیِ حسابِ محدود را عوض نمی‌کند', has('app/api/admin/users/route.ts', /nidLocked[\s\S]{0,700}effectiveStatus[\s\S]{0,300}isPlatformOwner\(actor\.id\)/), true)
 t('مالک نقشِ اصلیِ ادمین را از دست نمی‌دهد (roles/my)', has('app/api/roles/my/route.ts', /primaryRole === 'admin' && await isPlatformOwner\(actor\.id\)/), true)
-t('مالک نقشِ اصلیِ ادمین را از دست نمی‌دهد (users/me)', has('app/api/users/me/route.ts', /await isPlatformOwner\(userId\)/), true)
+/* آذرِ ۱۴۰۵: مسیر بازنشسته شد (۴۱۰، هیچ نوشتنی) — محافظِ مالک آن‌جا دیگر لازم نیست */
+t('مالک نقشِ اصلیِ ادمین را از دست نمی‌دهد (users/me)', has('app/api/users/me/route.ts', /await isPlatformOwner\(userId\)|status: 410/), true)
 t('proxy: بازگشتِ درگاه از دروازه‌ی وضعیت معاف', has('proxy.ts', /fromGateway \? null : await claimsOf\(req\)/), true)
 t('تریگر با session_user (نه current_user)', /session_user = 'postgres'/.test(readFileSync(join(ROOT, '../../supabase/migrations/113_account_enforcement.sql'), 'utf8')), true)
 t('ادمین از دیتابیس، نه توکن (میزهای باشگاه)', /payload\.role !== 'admin'/.test(read('app/api/clubs/[id]/tables/route.ts') + read('app/api/clubs/[id]/tables/sync/route.ts')), false)
