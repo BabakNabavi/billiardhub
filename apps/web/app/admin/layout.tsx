@@ -78,6 +78,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           }
           /* ستون‌های ۱۲تایی دیگر معنا ندارند وقتی شبکه دوستونی است */
           .admin-scope .grid-cols-12 > [class*="col-span-"] { grid-column: auto; }
+          /* ردیفِ کاملِ عمدی (دکمه‌های عملیات با نام، components/admin/RowAction) —
+             هم‌ویژگی با قاعده‌ی بالا و بعد از آن، پس برنده است */
+          .admin-scope .grid-cols-12 > .col-span-12 { grid-column: 1 / -1; }
           /* عنوان ستون‌های جدول روی موبایل بی‌فایده است */
           .admin-scope .grid-cols-12.bg-gray-50 { display: none; }
 

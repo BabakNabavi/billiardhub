@@ -7,6 +7,7 @@ import ScrollList from '../../../components/ui/ScrollList';
 import { apiFetch } from '../../../lib/http';
 import { Users, Search, CheckCircle, XCircle, Eye, Shield } from 'lucide-react';
 import UserDetailDialog from '../../../components/admin/UserDetailDialog';
+import { RowAction, ROW_ACTIONS_CLASS, ROW_ACTIONS_HEAD_CLASS } from '../../../components/admin/RowAction';
 
 interface User {
   id: string;
@@ -160,7 +161,7 @@ export default function AdminUsersPage() {
           <div className="col-span-2">شهر</div>
           <div className="col-span-2">وضعیت تأیید</div>
           <div className="col-span-1">پروفایل</div>
-          <div className="col-span-2 text-center">عملیات</div>
+          <div className={ROW_ACTIONS_HEAD_CLASS}>عملیات</div>
         </div>
 
         {loading ? (
@@ -202,36 +203,29 @@ export default function AdminUsersPage() {
                     <XCircle size={16} className="text-red-400" />
                   )}
                 </div>
-                <div className="col-span-2 flex items-center justify-center gap-1">
+                {/* موبایل: دکمه‌ها با نام، در ردیفِ زیرِ مشخصات (RowAction) */}
+                <div className={ROW_ACTIONS_CLASS}>
                   {/* پیش‌تر این دکمه به پروفایل عمومی می‌رفت و آن‌جا
                       جز نام چیزی نبود — ادمین هیچ راهی برای دیدن
                       مشخصات یک نفر نداشت. */}
-                  <button onClick={() => setDetail(u.id)}
-                    className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="مشاهده مشخصات">
-                    <Eye size={15} />
-                  </button>
+                  <RowAction label="مشاهده مشخصات" short="مشاهده" tone="blue"
+                    icon={<Eye size={15} aria-hidden />} onClick={() => setDetail(u.id)} />
                   {u.verificationStatus !== 'verified' && (
-                    <button onClick={() => handleVerify(u.id, 'verified')}
-                      className="p-1.5 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors" title="تأیید">
-                      <CheckCircle size={15} />
-                    </button>
+                    <RowAction label="تأیید کاربر" short="تأیید" tone="green"
+                      icon={<CheckCircle size={15} aria-hidden />} onClick={() => handleVerify(u.id, 'verified')} />
                   )}
                   {u.verificationStatus !== 'rejected' && (
-                    <button onClick={() => handleVerify(u.id, 'rejected')}
-                      className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors" title="رد">
-                      <XCircle size={15} />
-                    </button>
+                    <RowAction label="رد کاربر" short="رد" tone="red"
+                      icon={<XCircle size={15} aria-hidden />} onClick={() => handleVerify(u.id, 'rejected')} />
                   )}
                   {/* این دکمه `onClick` نداشت — یک آیکن تزئینی بود که
                       کلیک‌کردنش هیچ کاری نمی‌کرد. مدیریت دسترسی ادمین
                       صفحه‌ی خودش را دارد (با محافظ‌های «آخرین ادمین» و
                       «نقش خود»)، پس این‌جا فقط به همان‌جا می‌بریم و
                       شماره را برای جست‌وجو پیش‌پر می‌کنیم. */}
-                  <button onClick={() => router.push('/admin/access?q=' + encodeURIComponent(u.phone ?? ''))}
-                    className="p-1.5 text-gray-400 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors"
-                    title="مدیریت دسترسی ادمین">
-                    <Shield size={15} />
-                  </button>
+                  <RowAction label="مدیریت دسترسی ادمین" short="دسترسی ادمین" tone="purple"
+                    icon={<Shield size={15} aria-hidden />}
+                    onClick={() => router.push('/admin/access?q=' + encodeURIComponent(u.phone ?? ''))} />
                 </div>
               </div>
             ))}

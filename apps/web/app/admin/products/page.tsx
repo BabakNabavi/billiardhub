@@ -8,6 +8,7 @@ import ScrollList from '../../../components/ui/ScrollList';
 import api from '../../../lib/api';
 import { apiFetch } from '../../../lib/http';
 import { ShoppingBag, Search, CheckCircle, XCircle, Eye, Trash2, Ban, PauseCircle, PlayCircle } from 'lucide-react';
+import { RowAction, ROW_ACTIONS_CLASS, ROW_ACTIONS_HEAD_CLASS } from '../../../components/admin/RowAction';
 import { categoryLabel, MARKET_CATEGORIES, STATUS_LABEL, type ListingStatus } from '../../../lib/market/categories';
 
 interface Product {
@@ -272,7 +273,7 @@ export default function AdminProductsPage() {
           <div className="col-span-2">دسته</div>
           <div className="col-span-2">فروشنده</div>
           <div className="col-span-2">قیمت</div>
-          <div className="col-span-2 text-center">عملیات</div>
+          <div className={ROW_ACTIONS_HEAD_CLASS}>عملیات</div>
         </div>
 
         {loading ? (
@@ -331,54 +332,38 @@ export default function AdminProductsPage() {
                 <div className="col-span-2 text-sm font-medium text-green-700">
                   {product.price?.toLocaleString('fa-IR')} تومان
                 </div>
-                <div className="col-span-2 flex items-center justify-center gap-1">
-                  <button onClick={() => router.push(`/shop/${product.id}`)}
-                    className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="مشاهده">
-                    <Eye size={15} />
-                  </button>
+                {/* موبایل: دکمه‌ها با نام، در ردیفِ زیرِ مشخصات (RowAction) */}
+                <div className={ROW_ACTIONS_CLASS}>
+                  <RowAction label="مشاهده آگهی" short="مشاهده" tone="blue"
+                    icon={<Eye size={15} aria-hidden />} onClick={() => router.push(`/shop/${product.id}`)} />
 
                   {/* ── بازبینی ──
                       «انتشار» فقط وقتی معنا دارد که آگهی منتشر نباشد؛
                       «رد کردن» فقط وقتی هنوز رد نشده. نشان‌دادن دکمه‌ای
                       که کاری نمی‌کند، ادمین را به شک می‌اندازد. */}
                   {product.status !== 'active' && product.status !== 'sold' && (
-                    <button onClick={() => setStatus(product.id, 'active')}
-                      className="p-1.5 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors"
-                      title="انتشار آگهی">
-                      <PlayCircle size={15} />
-                    </button>
+                    <RowAction label="انتشار آگهی" short="انتشار" tone="green"
+                      icon={<PlayCircle size={15} aria-hidden />} onClick={() => setStatus(product.id, 'active')} />
                   )}
                   {product.status !== 'rejected' && (
-                    <button onClick={() => setStatus(product.id, 'rejected')}
-                      className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                      title="رد کردن با دلیل">
-                      <Ban size={15} />
-                    </button>
+                    <RowAction label="رد کردن با دلیل" short="رد" tone="red"
+                      icon={<Ban size={15} aria-hidden />} onClick={() => setStatus(product.id, 'rejected')} />
                   )}
                   {product.status === 'active' && (
-                    <button onClick={() => setStatus(product.id, 'paused')}
-                      className="p-1.5 text-gray-400 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors"
-                      title="توقف موقت">
-                      <PauseCircle size={15} />
-                    </button>
+                    <RowAction label="توقف موقت" short="توقف" tone="orange"
+                      icon={<PauseCircle size={15} aria-hidden />} onClick={() => setStatus(product.id, 'paused')} />
                   )}
 
                   {!product.isVerified && (
-                    <button onClick={() => handleVerify(product.id, true)}
-                      className="p-1.5 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors" title="تأیید">
-                      <CheckCircle size={15} />
-                    </button>
+                    <RowAction label="دادن تیک تأیید" short="تیک تأیید" tone="green"
+                      icon={<CheckCircle size={15} aria-hidden />} onClick={() => handleVerify(product.id, true)} />
                   )}
                   {product.isVerified && (
-                    <button onClick={() => handleVerify(product.id, false)}
-                      className="p-1.5 text-gray-400 hover:text-yellow-600 hover:bg-yellow-50 rounded-lg transition-colors" title="لغو تأیید">
-                      <XCircle size={15} />
-                    </button>
+                    <RowAction label="لغو تیک تأیید" short="لغو تیک" tone="yellow"
+                      icon={<XCircle size={15} aria-hidden />} onClick={() => handleVerify(product.id, false)} />
                   )}
-                  <button onClick={() => handleDelete(product.id)}
-                    className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors" title="حذف">
-                    <Trash2 size={15} />
-                  </button>
+                  <RowAction label="حذف آگهی" short="حذف" tone="red"
+                    icon={<Trash2 size={15} aria-hidden />} onClick={() => handleDelete(product.id)} />
                 </div>
               </div>
             ))}

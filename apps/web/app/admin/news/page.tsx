@@ -5,6 +5,7 @@ import { ask } from '../../../lib/ui/dialogs'
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '../../../store/auth.store';
 import { Newspaper, Plus, X, Save, Edit, Trash2 } from 'lucide-react';
+import { RowAction, ROW_ACTIONS_CLASS, ROW_ACTIONS_HEAD_CLASS } from '../../../components/admin/RowAction';
 import { listContent, createContent, updateContent, deleteContent } from '../../../lib/admin/content-client';
 import { NEWS_SECTIONS, normalizeSection, sectionLabel, EDITORIAL_TAGS } from '../../../lib/news/sections';
 
@@ -323,7 +324,7 @@ export default function AdminNewsPage() {
           <div className="col-span-2">دسته</div>
           <div className="col-span-2">تاریخ</div>
           <div className="col-span-1">وضعیت</div>
-          <div className="col-span-2 text-center">عملیات</div>
+          <div className={ROW_ACTIONS_HEAD_CLASS}>عملیات</div>
         </div>
         <div className="divide-y divide-gray-50">
           {/* ⚠️ بدون این، فهرست خالی و شکست خواندن یک شکل داشتند:
@@ -350,23 +351,20 @@ export default function AdminNewsPage() {
                   {item.published ? 'منتشر' : 'پیش‌نویس'}
                 </span>
               </div>
-              <div className="col-span-2 flex items-center justify-center gap-2">
-                <button onClick={() => void togglePublish(item)}
+              <div className={ROW_ACTIONS_CLASS}>
+                {/* هم‌قدِ RowAction در ردیفِ موبایل (h-11)؛ lg به بالا همان دکمه‌ی کوچکِ قبلی */}
+                <button type="button" onClick={() => void togglePublish(item)}
                   disabled={busyId === item.id}
                   title={item.published ? 'بازگرداندن به پیش‌نویس' : 'انتشار روی سایت'}
-                  className={`rounded-lg px-2 py-1 text-xs font-bold transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${item.published
-                    ? 'text-gray-500 hover:bg-gray-100'
+                  className={`h-11 rounded-lg px-3 text-xs font-bold transition-colors lg:h-auto lg:px-2 lg:py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-deep disabled:opacity-50 disabled:cursor-not-allowed ${item.published
+                    ? 'border border-gray-200 text-gray-600 hover:bg-gray-100 lg:border-0 lg:text-gray-500'
                     : 'bg-green-700 text-white hover:bg-green-800'}`}>
                   {busyId === item.id ? '…' : item.published ? 'لغو انتشار' : 'انتشار'}
                 </button>
-                <button onClick={() => handleEdit(item)} aria-label={`ویرایش ${item.title}`}
-                  className="p-1.5 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors">
-                  <Edit size={15} />
-                </button>
-                <button onClick={() => handleDelete(item.id)} aria-label={`حذف ${item.title}`}
-                  className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors">
-                  <Trash2 size={15} />
-                </button>
+                <RowAction label="ویرایش خبر" short="ویرایش" tone="green" ariaLabel={`ویرایش ${item.title}`}
+                  icon={<Edit size={15} aria-hidden />} onClick={() => handleEdit(item)} />
+                <RowAction label="حذف خبر" short="حذف" tone="red" ariaLabel={`حذف ${item.title}`}
+                  icon={<Trash2 size={15} aria-hidden />} onClick={() => handleDelete(item.id)} />
               </div>
             </div>
           ))}
