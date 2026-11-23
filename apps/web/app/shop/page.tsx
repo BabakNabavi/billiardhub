@@ -149,13 +149,35 @@ function serverAdToListing(a: Record<string, any>): Listing {
   }
 }
 
-async function fetchServerAds(): Promise<Listing[] | null> {
+/* ── همه‌ی آگهی‌ها، صفحه به صفحه (آذرِ ۱۴۰۵) ──
+   پیش‌تر فقط ۱۰۰ آگهیِ تازه می‌آمد و بقیه هیچ‌جا دیده نمی‌شدند. حالا
+   صفحه‌های ۲۰۰تایی تا سقفِ ۱۰۰۰ — جست‌وجو و فیلترها روی همه کار می‌کنند.
+   تکراری (جابه‌جاییِ ترتیب بینِ دو صفحه) با شناسه کنار می‌رود.
+   صفحه‌ی اول همان لحظه نمایش داده می‌شود و بقیه پشتِ سرش اضافه می‌شوند؛
+   خطای شبکه در صفحه‌های بعدی آنچه رسیده را نگه می‌دارد.
+   برمی‌گرداند: false یعنی همان صفحه‌ی اول نرسید. */
+const ADS_PAGE = 200
+const ADS_MAX = 1000
+async function fetchServerAds(onPage: (all: Listing[]) => void): Promise<boolean> {
+  const all: Record<string, unknown>[] = []
+  const seen = new Set<string>()
   try {
-    const r = await fetch('/api/market/ads', { cache: 'no-store' })
-    if (!r.ok) return null
-    const j = await r.json()
-    return Array.isArray(j?.ads) ? j.ads.map(serverAdToListing) : null
-  } catch { return null }
+    for (let offset = 0; offset < ADS_MAX; offset += ADS_PAGE) {
+      const r = await fetch(`/api/market/ads?limit=${ADS_PAGE}&offset=${offset}`, { cache: 'no-store' })
+      if (!r.ok) return offset > 0
+      const j = await r.json()
+      const page: Record<string, unknown>[] = Array.isArray(j?.ads) ? j.ads : []
+      for (const ad of page) {
+        const id = String(ad.id ?? '')
+        if (id && seen.has(id)) continue
+        seen.add(id)
+        all.push(ad)
+      }
+      onPage(all.map(serverAdToListing))
+      if (page.length < ADS_PAGE) break
+    }
+    return true
+  } catch { return all.length > 0 }
 }
 
 /* آگهی‌هایی که از قبل در مرورگر مانده‌اند یک‌بار به سرور منتقل می‌شوند
@@ -383,9 +405,8 @@ export default function MarketNewPage() {
 
     void (async () => {
       await migrateLocalAds()
-      const server = await fetchServerAds()
-      setListings(server ?? [])
-      setReady(true)
+      const ok = await fetchServerAds(list => { setListings(list); setReady(true) })
+      if (!ok) { setListings([]); setReady(true) }
     })()
   }, [])
   useEffect(() => {

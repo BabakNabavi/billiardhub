@@ -72,6 +72,9 @@ export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const mine = searchParams.get('mine') === '1';
   const limit = Math.min(200, Math.max(1, num(searchParams.get('limit'), 100)));
+  /* صفحه‌بندی (آذرِ ۱۴۰۵): بازار تا امروز فقط ۱۰۰ آگهیِ تازه را می‌گرفت و از
+     صدویکمی به بعد هیچ‌جا دیده نمی‌شد. پارامترِ اختیاری؛ شکلِ پاسخ همان است. */
+  const offset = Math.min(10_000, Math.max(0, Math.floor(num(searchParams.get('offset'), 0))));
 
   /* فقط آگهی‌های فوری — برای نوار بالای بازار */
   const urgentOnly = searchParams.get('urgent') === '1';
@@ -94,7 +97,9 @@ export async function GET(req: NextRequest) {
     q = v111
       ? q.order('listed_at', { ascending: false })
       : q.order('bumped_at', { ascending: false, nullsFirst: false })
-    q = q.order('createdAt', { ascending: false }).limit(limit)
+    /* id آخرین شکنِ تساوی است: ردیف‌های هم‌زمان (درجِ گروهی) در مرزِ دو صفحه
+       بی آن ممکن بود جا بیفتند */
+    q = q.order('createdAt', { ascending: false }).order('id', { ascending: false }).range(offset, offset + limit - 1)
 
     if (sellerId) return q.eq('sellerId', sellerId)
     /* فقط آگهی فعال و منقضی‌نشده.
