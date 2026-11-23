@@ -692,7 +692,9 @@ export default function ClubDashboardPage() {
          `postalCode`: باشگاهی که کد پستی ثبت‌شده دارد، استعلامش
          قبلا موفق بوده — حتی اگر مهاجرت ۰۳۹ هنوز اجرا نشده باشد. */
       setPostalVerified(c.postalCodeVerified ?? /^\d{10}$/.test(String(c.postalCode ?? '')));
-      if (c.workingHours) setHoursForm(c.workingHours);
+      /* باشگاهِ بی‌ساعت پیش‌فرض می‌گیرد، نه ساعتِ باشگاهِ قبلی‌ای که در فرم مانده بود
+         (ذخیره‌ی بعدی آن را روی این باشگاه می‌نوشت) */
+      setHoursForm(c.workingHours && typeof c.workingHours === 'object' ? c.workingHours : DEFAULT_HOURS);
       setSurcharge({
         enabled: c.playerSurchargeEnabled === undefined ? true : !!c.playerSurchargeEnabled,
         percent: String(c.playerSurchargePercent ?? 15),
