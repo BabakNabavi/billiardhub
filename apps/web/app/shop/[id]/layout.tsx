@@ -12,8 +12,8 @@ import { thumbUrl } from '@/lib/media/thumb'
 import { isLiveAd, PUBLIC_AD_STATUSES } from '@/lib/market/live'
 
 /* متادیتای صفحه‌ی یک آگهیِ بیلیارد بازار — همان الگوی clubs/[id] و
-   tournaments/[id]: صفحه Client Component است و نمی‌تواند metadata صادر
-   کند، پس این لایه فقط برای SEO است و چیزی جز children رندر نمی‌کند.
+   tournaments/[id]: این لایه فقط برای SEO است و چیزی جز children رندر نمی‌کند.
+   (از آذرِ ۱۴۰۵ خودِ صفحه هم داده را روی سرور می‌خواند — lib/market/public-ad.)
 
    تا امروز همه‌ی آگهی‌ها عنوانِ کلیِ «فروشگاه تجهیزات بیلیارد» را
    داشتند؛ گوگل و هر پیش‌نمایشِ لینک در واتساپ و تلگرام همه‌ی آن‌ها را

@@ -1,6 +1,7 @@
 export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { sb, rpc, actorFromRequest, clientIp } from '@/lib/finance/db';
+import { stripPrivateAd } from '@/lib/market/public-ad';
 import { can } from '@/lib/admin/permissions';
 import { viewerHash } from '@/lib/ads/preroll';
 import { normalizeCategory, normalizeCondition } from '@/lib/market/categories';
@@ -63,11 +64,8 @@ export async function GET(_req: NextRequest, ctx: { params: Promise<{ id: string
   /* ⚠️ یادداشتِ ادمین (مثلا دلیلِ رد) فقط برای صاحبِ آگهی و ادمین.
      پیش‌تر `select('*')` آن را به هر بازدیدکننده‌ای می‌داد — آگهیِ ردشده
      که بعد دوباره فعال می‌شد، دلیلِ ردش را روی صفحه‌ی عمومی داشت. */
-  if (!privileged) delete ad.adminNote;
-  /* ⚠️ آدرسِ فروشنده‌ی شخصی داده‌ی خصوصی است (نشانیِ خانه‌اش). صفحه فقط
-     آدرسِ فروشگاه را نشان می‌دهد و فرم همین را به فروشنده می‌گوید؛ پس
-     پاسخِ خامِ API هم نباید آن را به هر کسی بدهد. */
-  if (!privileged && !ad.storeSlug) delete ad.address;
+  /* حذفِ فیلدهای خصوصی — قاعده در lib/market/public-ad (مشترک با رندرِ سرورِ صفحه) */
+  const out = privileged ? ad : stripPrivateAd(ad);
 
   /* ── شمارنده‌ی بازدید ──
      پیش‌تر هر بارگذاری صفحه یکی بالا می‌برد، یعنی فروشنده با ده بار
@@ -84,7 +82,7 @@ export async function GET(_req: NextRequest, ctx: { params: Promise<{ id: string
       .then(() => { }, () => { });
   }
 
-  return NextResponse.json({ ad }, { headers: { 'Cache-Control': 'no-store' } });
+  return NextResponse.json({ ad: out }, { headers: { 'Cache-Control': 'no-store' } });
 }
 
 export async function PATCH(req: NextRequest, ctx: { params: Promise<{ id: string }> }) {
