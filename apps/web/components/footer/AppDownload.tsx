@@ -1,10 +1,11 @@
 import { Download, Smartphone } from 'lucide-react'
-import { ANDROID_APK, BAZAAR } from '@/lib/app-stores'
+import { ANDROID_APK, BAZAAR, SHOW_APK_IN_FOOTER } from '@/lib/app-stores'
 import { IosWebAppButton } from './IosWebAppButton'
 
 /* ─────────────────────────────────────────────────────────────
    «دریافت اپلیکیشن» در فوتر: کافه‌بازار، دانلودِ مستقیمِ APK، وب‌اپ آیفون.
    (خواستِ مالک: همین سه دکمه، مستقیم — بی رفتن به صفحه‌ی دیگر)
+   ⚠️ دانلودِ مستقیم موقتاً پنهان است: SHOW_APK_IN_FOOTER در lib/app-stores.
 
    Server Component است؛ فقط دکمه‌ی آیفون کلاینتی است (باز کردنِ شیت).
    نشانی‌ها از lib/app-stores می‌آیند.
@@ -44,15 +45,18 @@ export function AppDownload() {
             <Label top="دریافت از" name={BAZAAR.name} />
           </a>
         </li>
-        <li>
-          <a href={ANDROID_APK.href} download={ANDROID_APK.fileName}
-            type="application/vnd.android.package-archive" className={BADGE}>
-            <span className={ICON_TILE}>
-              <Download size={18} aria-hidden />
-            </span>
-            <Label top="دانلود مستقیم" name="فایل نصبی اندروید" />
-          </a>
-        </li>
+        {/* موقتاً خاموش — SHOW_APK_IN_FOOTER در lib/app-stores */}
+        {SHOW_APK_IN_FOOTER && (
+          <li>
+            <a href={ANDROID_APK.href} download={ANDROID_APK.fileName}
+              type="application/vnd.android.package-archive" className={BADGE}>
+              <span className={ICON_TILE}>
+                <Download size={18} aria-hidden />
+              </span>
+              <Label top="دانلود مستقیم" name="فایل نصبی اندروید" />
+            </a>
+          </li>
+        )}
         <li>
           <IosWebAppButton className={BADGE}>
             <span className={ICON_TILE}>

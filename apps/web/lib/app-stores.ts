@@ -30,6 +30,10 @@ export const BAZAAR = {
    فایلِ کهنه ندهد. */
 const APK_VERSION = '1.0.1'
 
+/** دکمه‌ی «دانلود مستقیم» در فوتر — موقتاً خاموش (خواستِ مالک، ۲ آذرِ ۱۴۰۵).
+ *  فایل و نشانی سرِ جایشان‌اند؛ برگرداندن = true */
+export const SHOW_APK_IN_FOOTER = false
+
 export const ANDROID_APK = {
   version: APK_VERSION,
   /** روزِ ساختِ همین فایل (میلادی) */
