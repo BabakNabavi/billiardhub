@@ -80,6 +80,7 @@
     "test:enforcement": "node scripts/test-enforcement.mjs",
     "test:role-revoke": "node scripts/test-role-revoke.mjs",
     "test:working-hours": "node scripts/test-working-hours.mjs",
+    "check:perf-budget": "node scripts/check-perf-budget.mjs",
     "test:identity": "npx --yes tsx scripts/test-identity-verify.mjs",
     "test:story-rights": "npx --yes tsx scripts/test-story-rights.mjs",
     "test:enforcement:live": "node scripts/test-enforcement-live.mjs"

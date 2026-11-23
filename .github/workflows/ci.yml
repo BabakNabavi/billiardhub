@@ -86,3 +86,10 @@ jobs:
           npm run test:enforcement
           npm run test:role-revoke
           npm run test:working-hours
+
+      # سقفِ حجمِ JS و تصویر — جلوگیری از برگشتِ کندی (scripts/check-perf-budget.mjs)
+      - name: سقف حجم
+        # حتی اگر تستی شکست — نتیجه‌ی سقف هم دیده شود
+        if: success() || failure()
+        working-directory: apps/web
+        run: npm run check:perf-budget
