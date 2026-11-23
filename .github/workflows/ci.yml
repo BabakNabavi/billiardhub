@@ -85,3 +85,4 @@ jobs:
           npm run test:closure
           npm run test:enforcement
           npm run test:role-revoke
+          npm run test:working-hours

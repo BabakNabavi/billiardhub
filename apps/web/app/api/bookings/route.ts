@@ -4,6 +4,8 @@ import { sb, rpc, actorFromRequest, audit, clientIp } from '@/lib/finance/db';
 import { priceBooking, hoursOfRange, bookingReference, surchargeOf, sanitizeDiscountRules, type PricedTable } from '@/lib/finance/pricing';
 import { bookingStartsAt } from '@/lib/finance/cancellation';
 import { closureState, isDateClosed, closedHours, BOOKING_HORIZON_DAYS, lastBookableDate } from '@/lib/booking/closure';
+import { hoursOutsideWorking, dayHoursLabel } from '@/lib/booking/working-hours';
+import { toFaDigits } from '@/lib/jalali';
 import { z } from 'zod';
 
 /* ⚠️ Zod روی مرز — قاعده‌ی پروژه. تا امروز این مسیر **هیچ** اعتبارسنجیِ
@@ -96,13 +98,23 @@ export async function POST(req: NextRequest) {
      بمانند. «امروز» به وقت تهران حساب می‌شود؛ با UTC از ۲۰:۳۰ به بعد
      «فردا»ی سرور شروع می‌شد و قفل پیش از نیمه‌شب محلی برداشته می‌شد. */
   /* باشگاه و میز مستقل‌اند — هم‌زمان خوانده می‌شوند، نه پشتِ‌هم (کندیِ «رفتن به درگاه») */
-  const [{ data: clubFlags }, { data: tableRow }] = await Promise.all([
+  const [{ data: clubFlags, error: clubErr }, { data: tableRow }] = await Promise.all([
     sb().from('clubs').select('*').eq('id', clubId).maybeSingle(),
     /* ستون‌ها با * خوانده می‌شوند نه با نام: تا وقتی مهاجرت ۰۳۶ اجرا
        نشده، نام‌بردن از reservationClosed کل کوئری را خطا می‌کرد و
        نتیجه‌اش «این میز ثبت نشده» بود — یعنی هیچ رزروی انجام نمی‌شد. */
     sb().from('tables').select('*').eq('id', tableId).maybeSingle(),
   ]);
+  /* خطای خواندنِ باشگاه ≠ «باشگاه قیدی ندارد». بی این گارد، یک اختلالِ لحظه‌ای
+     در دیتابیس ساعتِ کاری و بستنِ رزرو را با هم دور می‌زد (هر دو به پیش‌فرضِ باز
+     می‌افتادند) و رزروِ ساعتِ ۸ِ باشگاهِ ۱۰ صبح پذیرفته می‌شد. */
+  if (clubErr) {
+    console.error('[bookings] club read:', clubErr.message);
+    return NextResponse.json(
+      { message: 'خطای موقت در خواندن اطلاعات باشگاه؛ لطفا چند لحظه بعد دوباره تلاش کنید' },
+      { status: 503 },
+    );
+  }
   const flags = (clubFlags ?? {}) as { closeTodayReservations?: boolean; reserveClosedUntil?: string | null };
   const closure = closureState({
     closeToday: flags.closeTodayReservations,
@@ -134,6 +146,25 @@ export async function POST(req: NextRequest) {
         { status: 409 },
       );
     }
+  }
+
+  /* ── ساعتِ کاریِ باشگاه ──
+     تا آذرِ ۱۴۰۵ این‌جا پرسیده نمی‌شد و فهرستِ ساعت‌ها هم ثابتِ ۸ تا ۲۳ بود:
+     باشگاهی که ۱۰ صبح باز می‌شود ساعتِ ۸ را رزرو می‌گرفت. این مرجعِ نهایی است —
+     صفحه فقط ساعت‌های مجاز را نشان می‌دهد، ولی درخواستِ دستی یا صفحه‌ی کهنه‌ی
+     مرورگر از همین‌جا رد می‌شود. هر خانه باید *کاملش* در ساعتِ کاری باشد؛
+     قاعده و دادهِ نامعلوم در lib/booking/working-hours. */
+  const workingHours = (clubFlags as { workingHours?: unknown } | null)?.workingHours;
+  const outside = hoursOutsideWorking(workingHours, bookingDate, hours);
+  if (outside.length > 0) {
+    const day = dayHoursLabel(workingHours, bookingDate);
+    return NextResponse.json({
+      message: day?.closed && !day.hasSpill
+        ? 'باشگاه در این روز تعطیل است؛ لطفا روز دیگری انتخاب کنید'
+        : day
+          ? `ساعت کاری باشگاه در این روز: ${toFaDigits(day.text)}؛ ساعت‌های انتخابی بیرون از آن است`
+          : 'ساعت‌های انتخابی بیرون از ساعت کاری باشگاه است',
+    }, { status: 409 });
   }
 
   /* ── قیمت‌گذاری سروری: میز باید واقعا در همین باشگاه ثبت شده باشد ── */

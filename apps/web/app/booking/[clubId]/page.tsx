@@ -14,6 +14,8 @@ import {
   BOOKING_HORIZON_DAYS, todayInTehran, hourInTehran, lastBookableDate,
   closureState, isDateClosed, closedHours, closureLabel, type ClosureState,
 } from '../../../lib/booking/closure';
+/* ساعتِ کاری ⟵ ساعت‌های رزروشدنی؛ همان تابعی که سرور برای فهرست و ثبت می‌خواند */
+import { bookableHours, dayHoursLabel } from '../../../lib/booking/working-hours';
 /* ⚠️ `slotPrice` و `slotDiscountPct` هم از همین‌جا می‌آیند، نه کپیِ
    محلی. پیش‌تر این صفحه نسخه‌ی خودش را داشت در حالی که از همین ماژول
    `playerMultiplier` را می‌گرفت — یعنی دو پیاده‌سازی از یک قاعده، و
@@ -103,6 +105,8 @@ interface Club {
   bankCard?: string; bankCardOwner?: string; bankName?: string;
   /* تنظیم هزینه‌ی بازیکن اضافه — از پنل باشگاه‌دار */
   playerSurchargeEnabled?: boolean; playerSurchargePercent?: number; playerSurchargeFrom?: number;
+  /* ساعتِ کاری — شکل و قاعده در lib/booking/working-hours */
+  workingHours?: unknown;
 }
 
 const TYPE_LABEL: Record<string, string> = {
@@ -127,21 +131,26 @@ function applyPastHours(slots: Slot[], isoDate: string): Slot[] {
   const ch = hourInTehran();
   return slots.map(s => ({ ...s, isPast: s.hour <= ch, isBooked: s.isBooked || s.hour <= ch }));
 }
-/* ساعت‌های کاری پیش‌فرض وقتی سرور فهرست را برنگرداند — همه آزاد فرض
-   نمی‌شوند تا هیچ ساعتی الکی «رزروشده» یا «آزاد» نمایش داده نشود. */
-function openSlots(isoDate: string): Slot[] {
-  return applyPastHours(Array.from({length:16},(_,i)=>({hour:i+8,isBooked:false})), isoDate);
+/* جایگزین وقتی سرور فهرست را برنگرداند (خطای شبکه) — از **ساعتِ کاریِ همان
+   باشگاه**، نه ۸ تا ۲۳ِ ثابتِ قبلی که ساعتِ پیش از بازشدن را هم باز نشان می‌داد.
+   قاعده در lib/booking/working-hours (همان که سرور می‌خواند). */
+function fallbackSlots(isoDate: string, workingHours: unknown): Slot[] {
+  return applyPastHours(bookableHours(workingHours, isoDate).hours.map(hour => ({ hour, isBooked: false })), isoDate);
 }
-function buildRange(slots: Slot[], start: number, end: number): { range: number[]; blocked: boolean } {
+/* ⚠️ ساعتِ غایب در شبکه یعنی «بیرونِ ساعت کاری»، و ساعتِ بسته (بستنِ موقت) هم
+   مانع است. پیش‌تر ساعتِ غایب `continue` می‌شد: با شبکه‌ی پیوسته‌ی ۸ تا ۲۳
+   بی‌خطر بود، ولی حالا شبکه شکاف دارد (بامدادِ شیفتِ شب، بعد عصر) و بازه از
+   روی ساعت‌های بسته می‌پرید. */
+function buildRange(slots: Slot[], start: number, end: number, shut: readonly number[]): { range: number[]; blocked: 'booked' | 'closed' | null } {
   const lo = Math.min(start,end), hi = Math.max(start,end);
   const range: number[] = [];
   for (let h = lo; h <= hi; h++) {
     const slot = slots.find(s => s.hour === h);
-    if (!slot) continue;
-    if (slot.isBooked) return { range:[], blocked:true };
+    if (!slot || shut.includes(h)) return { range:[], blocked:'closed' };
+    if (slot.isBooked) return { range:[], blocked:'booked' };
     range.push(h);
   }
-  return { range, blocked:false };
+  return { range, blocked:null };
 }
 
 
@@ -267,6 +276,9 @@ function BookingContent() {
      کل صفحه را بسته می‌دید — حتی برای روزهایی که باز بودند. */
   const [closure, setClosure] = useState<ClosureState>({ always: false, untilMs: null, closeToday: false });
   const [slotsLoad, setSlotsLoad]   = useState(false);
+  /* «میز|تاریخ»ی که پاسخِ ساعت‌هایش رسیده — پیامِ «ساعتی نیست» فقط بعد از پاسخ،
+     نه در فاصله‌ی یک‌فریمیِ انتخابِ روز تا شروعِ درخواست */
+  const [slotsFor, setSlotsFor]     = useState('');
   const [booking, setBooking]       = useState(false);
   const [error, setError]           = useState('');
   const [acceptTerms, setAcceptTerms] = useState(false);   /* پذیرش قوانین رزرو */
@@ -275,6 +287,8 @@ function BookingContent() {
   const [redirecting, setRedirecting] = useState(false);
 
   const slotsRef = useRef<HTMLDivElement>(null);
+  /* ساعتِ کاری برای جایگزینِ خطای شبکه — ref تا رسیدنِ باشگاه فهرستِ ساعت‌ها را دوباره نگیرد */
+  const clubHoursRef = useRef<unknown>(null);
 
   useEffect(()=>{
     /* وضعیت بستن رزرو از سرور. شکستش صفحه را نمی‌بندد — بدترین حالت
@@ -286,7 +300,7 @@ function BookingContent() {
       .catch(() => { /* بی‌صدا */ });
 
     api.get(`/clubs/${clubId}`).catch(()=>({data:{id:clubId,name:'باشگاه',managerName:''}}))
-      .then(c=>{ setClub(c.data); });
+      .then(c=>{ setClub(c.data); clubHoursRef.current = (c.data as Club | undefined)?.workingHours ?? null; });
 
     /* فقط میزهایی که باشگاه در سیستم ثبت کرده — هیچ میز ساختگی‌ای ساخته نمی‌شود */
     api.get(`/clubs/${clubId}/tables`).catch(()=>({data:[]}))
@@ -359,11 +373,13 @@ function BookingContent() {
     setSlotsLoad(true); setSlots([]); setSelectedSlots([]); setRangeStart(null); setRangeError('');
     api.get(`/bookings/slots?clubId=${clubId}&tableId=${selectedTable.id}&date=${isoDate}`)
       .then(r=>{
-        const raw:Slot[] = Array.isArray(r.data)&&r.data.length>0?r.data:openSlots(isoDate);
-        setSlots(applyPastHours(raw,isoDate)); setSlotsLoad(false);
+        /* آرایه‌ی خالی یعنی «این روز ساعتِ رزروشدنی ندارد» (تعطیل)، نه خطا —
+           پیش‌تر خالی هم به ۸ تا ۲۳ برمی‌گشت و روزِ تعطیل را باز نشان می‌داد */
+        const raw:Slot[] = Array.isArray(r.data) ? r.data : fallbackSlots(isoDate, clubHoursRef.current);
+        setSlots(applyPastHours(raw,isoDate)); setSlotsLoad(false); setSlotsFor(`${selectedTable.id}|${isoDate}`);
         setTimeout(()=>slotsRef.current?.scrollIntoView({behavior:'smooth',block:'nearest'}),100);
       })
-      .catch(()=>{ setSlots(openSlots(isoDate)); setSlotsLoad(false); });
+      .catch(()=>{ setSlots(fallbackSlots(isoDate, clubHoursRef.current)); setSlotsLoad(false); setSlotsFor(`${selectedTable.id}|${isoDate}`); });
   },[selectedTable,isoDate,clubId,released,slotsKey]);
 
   const handleSlotClick = useCallback((hour:number, isBooked:boolean)=>{
@@ -375,10 +391,11 @@ function BookingContent() {
     /* کلیک دوم روی همان ساعت ⇒ یعنی فقط همین یک ساعت رزرو شود */
     if(hour===rangeStart){ setRangeStart(null); setSelectedSlots([hour]); return; }
     if(hour<rangeStart){ setRangeStart(hour); setSelectedSlots([hour]); setRangeError('ابتدا ساعت شروع، سپس ساعت پایان را انتخاب کنید'); return; }
-    const {range,blocked} = buildRange(slots,rangeStart,hour);
-    if(blocked){ setRangeError('این بازه شامل ساعات رزرو شده است، لطفا بازه دیگری انتخاب کنید'); return; }
+    const {range,blocked} = buildRange(slots,rangeStart,hour,isoDate?closedHours(isoDate,closure):[]);
+    if(blocked==='booked'){ setRangeError('این بازه شامل ساعات رزرو شده است، لطفا بازه دیگری انتخاب کنید'); return; }
+    if(blocked==='closed'){ setRangeError('این بازه از ساعتی می‌گذرد که باشگاه بسته است، لطفا بازه دیگری انتخاب کنید'); return; }
     setSelectedSlots(range); setRangeStart(null);
-  },[rangeStart,slots]);
+  },[rangeStart,slots,isoDate,closure]);
 
   const handleTableSelect = (table:Table)=>{ setSelectedTable(table); setSelectedSlots([]); setRangeStart(null); setRangeError(''); setSlots([]); };
 
@@ -471,6 +488,12 @@ function BookingContent() {
   /* ساعت‌های بسته‌ی همین تاریخ — هم برای رنگ قرمز شبکه، هم برای
      نگذاشتن کاربر در دام انتخابی که سرور بعدا رد می‌کند. */
   const blockedHours = isoDate ? closedHours(isoDate, closure) : [];
+  /* ساعتِ کاریِ همان تاریخ برای نمایش بالای شبکه — null یعنی باشگاه ثبت نکرده */
+  const dayHours = isoDate ? dayHoursLabel(club?.workingHours, isoDate) : null;
+  /* بامدادهایی که ادامه‌ی شیفتِ شبِ دیروزند — بی برچسب، «۰:۰۰»ِ بالای شبکه
+     پایانِ شیفتِ امشب خوانده می‌شد و کاربر شبِ اشتباه را رزرو و پرداخت می‌کرد */
+  const spillHours = isoDate ? bookableHours(club?.workingHours, isoDate).spill : [];
+  const slotsReady = !!selectedTable && slotsFor === `${selectedTable.id}|${isoDate}`;
 
   const totalPrice   = Math.round(baseTotal*playerMultiplier(playerCount,surcharge));
   const accentColor  = selectedTable?(TYPE_COLOR[selectedTable.type]??'#C7A66A'):'#C7A66A';
@@ -706,7 +729,9 @@ function BookingContent() {
               jYear={jYear} jMonth={jMonth} selectedDay={jDay}
               todayJY={tJY} todayJM={tJM} todayJD={tJD}
               maxJY={mJY}   maxJM={mJM}   maxJD={mJD}
-              isClosedDay={d => isDateClosed(toISO(jYear, jMonth, d), closure)}
+              /* بسته‌ی دستیِ باشگاه‌دار، یا روزی که طبقِ ساعتِ کاری هیچ ساعتِ رزروشدنی ندارد */
+              isClosedDay={d => isDateClosed(toISO(jYear, jMonth, d), closure)
+                || bookableHours(club?.workingHours, toISO(jYear, jMonth, d)).closedDay}
               onSelect={d=>{setJDay(d);setSelectedSlots([]);setRangeStart(null);}}
               onPrev={prevMonth} onNext={nextMonth}
             />
@@ -746,6 +771,14 @@ function BookingContent() {
                 {rangeStart!==null?`ساعت ${toFa(rangeStart)}:۰۰ شروع شد — حالا ساعت پایان را انتخاب کنید`:'روی ساعت شروع کلیک کنید، سپس ساعت پایان را انتخاب کنید'}
               </div>
 
+              {/* ساعتِ کاریِ همان روز — شبکه فقط همین بازه را نشان می‌دهد */}
+              {dayHours&&!(dayHours.closed&&!dayHours.hasSpill)&&(
+                <div style={{display:'flex',alignItems:'flex-start',gap:'8px',marginBottom:'14px',fontSize:'13px',lineHeight:1.7,color:'rgba(0,0,0,0.55)'}}>
+                  <Clock size={13} style={{color:'#C7A66A',flexShrink:0,marginTop:'4px'}}/>
+                  <span>ساعت کاری این روز: {toFa(dayHours.text)}</span>
+                </div>
+              )}
+
               {rangeError&&(
                 <div style={{display:'flex',alignItems:'center',gap:'8px',padding:'10px 13px',background:'rgba(239,68,68,0.08)',border:'1px solid rgba(239,68,68,0.2)',borderRadius:'10px',marginBottom:'12px',fontSize: '14px',color:'#fca5a5',animation:'fadeUp 0.3s ease both'}}>
                   <AlertCircle size={13} style={{color:'#ef4444',flexShrink:0}}/> {rangeError}
@@ -756,6 +789,12 @@ function BookingContent() {
                 <div style={{display:'flex',alignItems:'center',justifyContent:'center',gap:'10px',padding:'36px',color:'rgba(0,0,0,0.35)',fontSize: '15px'}}>
                   <div style={{width:'18px',height:'18px',border:'2px solid rgba(199,166,106,0.15)',borderTop:'2px solid #C7A66A',borderRadius:'50%',animation:'spin 0.7s linear infinite'}}/>
                   در حال دریافت ساعات...
+                </div>
+              ):slots.length===0&&slotsReady?(
+                /* روزی که طبقِ ساعتِ کاری هیچ خانه‌ی رزروشدنی ندارد */
+                <div role="status" style={{display:'flex',alignItems:'center',justifyContent:'center',gap:'8px',padding:'28px 12px',color:'rgba(0,0,0,0.5)',fontSize:'15px',textAlign:'center'}}>
+                  <Info size={15} style={{color:'#C7A66A',flexShrink:0}}/>
+                  {dayHours?.closed?'باشگاه در این روز تعطیل است؛ روز دیگری را انتخاب کنید':'برای این روز ساعت قابل رزروی در ساعت کاری باشگاه نیست'}
                 </div>
               ):(
                 <div className="slot-grid" style={{display:'grid',gridTemplateColumns:'repeat(5,1fr)',gap:'6px'}}>
@@ -772,9 +811,10 @@ function BookingContent() {
                     const cls     = off?'slot-btn slot-busy':isStart?'slot-btn slot-start':isSel?'slot-btn slot-range':'slot-btn slot-free';
                     const discPct = slotDiscountPct(slot.hour, selectedTable);
                     const hasDisc = discPct > 0 && !off;
+                    const isSpill = spillHours.includes(slot.hour);
                     return (
                       <button key={slot.hour} className={cls} disabled={off}
-                        title={isShut?'باشگاه رزرو این ساعت را بسته است':isGone?'این ساعت گذشته است':undefined}
+                        title={isShut?'باشگاه رزرو این ساعت را بسته است':isGone?'این ساعت گذشته است':isSpill?'ادامه شیفت شب قبل، بامداد همین تاریخ':undefined}
                         onClick={()=>{ if(!isShut) handleSlotClick(slot.hour,slot.isBooked); }}
                         style={{
                           borderColor:isShut?'rgba(220,38,38,0.30)':isGone?'rgba(0,0,0,0.06)':slot.isBooked?'rgba(239,68,68,0.14)':isStart?`rgba(${SEL_RGB},0.60)`:isSel?`rgba(${SEL_RGB},0.45)`:'rgba(0,0,0,0.07)',
@@ -788,6 +828,7 @@ function BookingContent() {
                         {!isShut&&!isGone&&slot.isBooked&&<span style={{fontSize: '9px',opacity:0.6}}>مشغول</span>}
                         {!off&&hasDisc&&<span style={{fontSize: '9px',color:SEL_COLOR,opacity:0.9}}>−{toFa(discPct)}٪</span>}
                         {!off&&!hasDisc&&isStart&&<span style={{fontSize: '9px',opacity:0.8}}>شروع</span>}
+                        {!off&&!hasDisc&&!isStart&&isSpill&&<span style={{fontSize: '9px',opacity:0.75,whiteSpace:'nowrap'}}>شب قبل</span>}
                       </button>
                     );
                   })}

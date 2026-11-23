@@ -2,6 +2,11 @@ export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { sb, rpc, actorFromRequest } from '@/lib/finance/db';
 import { releaseHold } from '@/lib/bookings/release-hold';
+import { bookableHours } from '@/lib/booking/working-hours';
+import { z } from 'zod';
+
+/* تاریخِ تقویمی؛ روزِ هفته و ساعتِ کاری از آن خوانده می‌شود */
+const DateParam = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
 
 /* ساعت‌های آزاد/اشغال یک میز در یک روز.
    ۱) ابتدا رزروهای پرداخت‌نشده‌ی منقضی آزاد می‌شوند (انقضای تنبل، دقیقا در
@@ -16,6 +21,9 @@ export async function GET(req: NextRequest) {
 
   if (!clubId || !tableId || !date) {
     return NextResponse.json({ message: 'clubId، tableId و date الزامی هستند' }, { status: 400 });
+  }
+  if (!DateParam.safeParse(date).success) {
+    return NextResponse.json({ message: 'تاریخ معتبر نیست' }, { status: 400 });
   }
 
   /* ── پاک‌سازیِ هولدها ──
@@ -84,9 +92,12 @@ export async function GET(req: NextRequest) {
 
   const bookedHours = new Set<number>();
 
-  const { data: slotRows, error: slotErr } = await sb()
-    .from('booking_slots').select('hour')
-    .eq('club_id', clubId).eq('table_id', tableId).eq('booking_date', date);
+  /* اشغال و ساعتِ کاری مستقل‌اند — هم‌زمان، نه پشتِ‌هم (کاربر پشتِ این GET منتظر است) */
+  const [{ data: slotRows, error: slotErr }, { data: clubRow, error: clubErr }] = await Promise.all([
+    sb().from('booking_slots').select('hour')
+      .eq('club_id', clubId).eq('table_id', tableId).eq('booking_date', date),
+    sb().from('clubs').select('"workingHours"').eq('id', clubId).maybeSingle(),
+  ]);
 
   if (!slotErr && slotRows) {
     (slotRows as { hour: number }[]).forEach(s => bookedHours.add(Number(s.hour)));
@@ -103,16 +114,21 @@ export async function GET(req: NextRequest) {
     });
   }
 
-  // ساعت‌های ۸ تا ۲۳ (آخرین slot شروع ۲۳:۰۰)
-  const slots = [];
-  for (let hour = 8; hour < 24; hour++) {
-    slots.push({
-      hour,
-      slotStart: `${date}T${String(hour).padStart(2, '0')}:00:00`,
-      slotEnd:   `${date}T${String(hour + 1).padStart(2, '0')}:00:00`,
-      isBooked:  bookedHours.has(hour),
-    });
-  }
+  /* ── فقط ساعت‌های کاریِ همین روز ──
+     تا آذرِ ۱۴۰۵ این‌جا ثابتِ ۸ تا ۲۳ بود، برای هر باشگاه: باشگاهی که ۱۰ صبح
+     باز می‌شود ساعتِ ۸ را رزرو می‌گرفت. قاعده در lib/booking/working-hours است
+     (همان که ثبتِ رزرو و صفحه می‌خوانند). روزِ تعطیل ⟵ آرایه‌ی خالی — صفحه
+     «تعطیل» نشان می‌دهد. خطای خواندنِ باشگاه ⟵ پنجره‌ی پیش‌فرض برای نمایش؛
+     ثبتِ رزرو در آن حالت ۵۰۳ می‌دهد و هرگز بی ساعتِ کاریِ واقعی نمی‌پذیرد. */
+  if (clubErr) console.error('[bookings/slots] club hours:', clubErr.message);
+  const { hours } = bookableHours((clubRow as { workingHours?: unknown } | null)?.workingHours, date);
+
+  const slots = hours.map(hour => ({
+    hour,
+    slotStart: `${date}T${String(hour).padStart(2, '0')}:00:00`,
+    slotEnd:   `${date}T${String(hour + 1).padStart(2, '0')}:00:00`,
+    isBooked:  bookedHours.has(hour),
+  }));
 
   return NextResponse.json(slots, { headers: { 'Cache-Control': 'no-store' } });
 }
