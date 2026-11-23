@@ -32,21 +32,37 @@ export function Analytics() {
   useEffect(() => {
     if (!ga && !clarity) return
     let timer = 0
-    const start = () => {
-      setGo(true)
+    let idle = 0
+    let late = 0
+    let started = false
+    const show = () => setGo(true)
+    /* fromTimer: بازدیدکننده‌ی بی‌تعامل — مثلِ قبل همان ۴ ثانیه پس از load ثبت شود */
+    const start = (fromTimer = false) => {
+      if (started) return
+      started = true
       window.clearTimeout(timer)
-      EVENTS.forEach(e => window.removeEventListener(e, start))
+      EVENTS.forEach(e => window.removeEventListener(e, onEvent))
       window.removeEventListener('load', arm)
+      /* ── لحظه‌ی بیکاری، نه وسطِ اولین لمس (آذرِ ۱۴۰۵) ──
+         بارِ ۲۰۰ کیلوبایت اسکریپت دقیقاً هم‌زمان با اولین لمس، جوابِ همان
+         لمس را کند می‌کرد (INP). حالا در اولین لحظه‌ی بیکاریِ مرورگر — حداکثر
+         ۳ ثانیه بعد؛ سافاری requestIdleCallback ندارد و ۱٫۵ ثانیه صبر می‌کند */
+      if (fromTimer) show()
+      else if (typeof window.requestIdleCallback === 'function') idle = window.requestIdleCallback(show, { timeout: 3000 })
+      else late = window.setTimeout(show, 1500)
     }
-    function arm() { timer = window.setTimeout(start, IDLE_AFTER_LOAD_MS) }
+    const onEvent = () => start()
+    function arm() { timer = window.setTimeout(() => start(true), IDLE_AFTER_LOAD_MS) }
 
-    EVENTS.forEach(e => window.addEventListener(e, start, { once: true, passive: true }))
+    EVENTS.forEach(e => window.addEventListener(e, onEvent, { once: true, passive: true }))
     if (document.readyState === 'complete') arm()
     else window.addEventListener('load', arm, { once: true })
 
     return () => {
       window.clearTimeout(timer)
-      EVENTS.forEach(e => window.removeEventListener(e, start))
+      window.clearTimeout(late)
+      if (idle && typeof window.cancelIdleCallback === 'function') window.cancelIdleCallback(idle)
+      EVENTS.forEach(e => window.removeEventListener(e, onEvent))
       window.removeEventListener('load', arm)
     }
   }, [ga, clarity])

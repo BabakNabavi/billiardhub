@@ -16,6 +16,7 @@ import { FeatureFlagsProvider } from '../components/features/FeatureFlags';
 import { SITE_URL } from '../lib/site-url';
 import { OG_IMAGE, SEO_IDS } from '../lib/seo/config';
 import { Analytics } from '../components/seo/Analytics';
+import { WebVitals } from '../components/seo/WebVitals';
 
 
 /* Bing و Ahrefs متاتگِ استانداردِ Next ندارند — فقط اگر شناسه‌شان پر باشد */
@@ -253,6 +254,7 @@ export default function RootLayout({
         <AddToHomeScreenGate />
         {/* GA4 و Clarity — بی‌شناسه در lib/seo/config چیزی بار نمی‌شود */}
         <Analytics />
+        <WebVitals />
       </body>
     </html>
   );
