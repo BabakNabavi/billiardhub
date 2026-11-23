@@ -122,7 +122,7 @@ const DAYS = [
 ];
 
 const DEFAULT_HOURS: WorkingHours = Object.fromEntries(
-  DAYS.map(d => [d.key, { isOpen: true, open: '09:00', close: '23:00' }])
+  DAYS.map(d => [d.key, { isOpen: true, open: '09:00', close: '24:00' }])
 );
 
 const DEFAULT_STATS: ClubStats = {

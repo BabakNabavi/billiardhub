@@ -95,7 +95,7 @@ head('تعطیل و دادهِ نامعلوم')
 const friClosed = { ...tenToTen, friday: { isOpen: false, open: '10:00', close: '22:00' } }
 t('جمعه‌ی تعطیل ⟵ هیچ', W.bookableHours(friClosed, FRI), { hours: [], spill: [], known: true, closedDay: true })
 t('شنبه پس از جمعه‌ی تعطیل عادی', W.bookableHours(friClosed, SAT).hours, range(10, 21))
-t('بی ساعت ⟵ ۰۹:۰۰ تا ۲۳:۰۰ِ پیش‌فرضِ پنل ⟵ ۹ تا ۲۲', W.bookableHours(null, MON), { hours: range(9, 22), spill: [], known: false, closedDay: false })
+t('بی ساعت ⟵ ۰۹:۰۰ تا ۲۴:۰۰ِ پیش‌فرضِ پنل ⟵ ۹ تا ۲۳', W.bookableHours(null, MON), { hours: range(9, 23), spill: [], known: false, closedDay: false })
 t('شیءِ خالی ⟵ پیش‌فرض', W.bookableHours({}, MON).known, false)
 t('روزِ ناقص ⟵ پیش‌فرض', W.bookableHours({ monday: { isOpen: true, open: '', close: '' } }, MON).known, false)
 t('ساعتِ نادرست ⟵ پیش‌فرض', W.bookableHours({ monday: { isOpen: true, open: '25:00', close: '22:00' } }, MON).known, false)
@@ -131,7 +131,11 @@ t('خانه‌های ادامه‌ی شب برچسبِ «شب قبل» دارن�
 t('خطای خواندنِ باشگاه در ثبتِ رزرو ⟵ ۵۰۳، نه پنجره‌ی پیش‌فرض', /clubErr[\s\S]{0,400}status: 503/.test(post), true)
 /* پیش‌فرضِ دادهِ نامعلوم همان است که باشگاه‌دار در پنل می‌بیند */
 const dash = read('app/dashboard/club/page.tsx')
-t('پیش‌فرضِ پنل همان ۰۹:۰۰ تا ۲۳:۰۰ است', /DEFAULT_HOURS[\s\S]{0,200}open: '09:00', close: '23:00'/.test(dash), true)
+t('پیش‌فرضِ پنل همان ۰۹:۰۰ تا ۲۴:۰۰ است', /DEFAULT_HOURS[\s\S]{0,200}open: '09:00', close: '24:00'/.test(dash), true)
+t('پیش‌فرضِ فرمِ ساختِ باشگاه ۰۹:۰۰ تا ۲۴:۰۰ است', /open: '09:00', close: '24:00'/.test(read('app/clubs/new/page.tsx')), true)
+t('هیچ پیش‌فرضِ ۲۳:۰۰ی در ویرایشگرها نمانده',
+  [read('components/club/WorkingHours.tsx'), read('components/dashboard/club/HoursTab.tsx'), dash, read('app/clubs/new/page.tsx')]
+    .some(x => /close: '23:00'/.test(x)), false)
 
 head('گاردهای ایستا — «۲۴:۰۰» در انتخابگرهای پایان')
 const fts = read('components/ui/FaTimeSelect.tsx')

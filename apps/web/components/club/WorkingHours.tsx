@@ -109,7 +109,7 @@ export default function WorkingHours({ value, onChange }: {
 
       <div style={{ display: 'grid', gap: 8 }}>
         {DAYS.map(d => {
-          const v = value[d.key] ?? { open: '09:00', close: '23:00', isOpen: true }
+          const v = value[d.key] ?? { open: '09:00', close: '24:00', isOpen: true }
           return (
             <div key={d.key} className="wh-row" style={{
               display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap',

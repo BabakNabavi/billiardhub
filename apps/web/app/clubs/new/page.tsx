@@ -102,7 +102,7 @@ export default function NewClubPage() {
     hasProfessionalCoach: false,
     specialFeatures: '',
     workingHours: Object.fromEntries(
-      DAYS.map(d => [d.key, { open: '09:00', close: '23:00', isOpen: true }]),
+      DAYS.map(d => [d.key, { open: '09:00', close: '24:00', isOpen: true }]),
     ) as Hours,
   });
 

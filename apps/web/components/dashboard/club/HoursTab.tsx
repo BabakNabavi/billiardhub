@@ -46,7 +46,7 @@ export default function HoursTab({ hoursForm, setHoursForm, saveHours, hoursSavi
         )}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 24 }}>
           {DAYS.map(day => {
-            const dh: WorkingDay = hoursForm[day.key] ?? { isOpen: true, open: '09:00', close: '23:00' };
+            const dh: WorkingDay = hoursForm[day.key] ?? { isOpen: true, open: '09:00', close: '24:00' };
             const setDay = (patch: Partial<WorkingDay>) =>
               setHoursForm(p => ({ ...p, [day.key]: { ...dh, ...patch } as WorkingDay }));
             return (
