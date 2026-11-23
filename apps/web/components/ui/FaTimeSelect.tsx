@@ -19,8 +19,12 @@ const toFa = (v: string | number) => String(v).replace(/[0-9]/g, d => FA[+d]!)
 const HOURS = Array.from({ length: 24 }, (_, i) => String(i).padStart(2, '0'))
 
 export default function FaTimeSelect({
-  value, onChange, minuteStep = 15, disabled, ariaLabel, compact = false,
+  value, onChange, minuteStep = 15, disabled, ariaLabel, compact = false, allowEndOfDay = false,
 }: {
+  /** «۲۴» هم در فهرستِ ساعت باشد — فقط برای *پایان*ِ بازه (تای ساعتِ کاری، پایانِ
+   *  تخفیف). ۲۴ دقیقه ندارد و همیشه «24:00» ذخیره می‌شود؛ بی آن، آخرین پایان
+   *  ۲۳:۴۵ بود و خانه‌ی ساعتِ ۲۳ هرگز در ساعتِ کاری جا نمی‌شد. */
+  allowEndOfDay?: boolean
   /** `HH:MM` ۲۴ساعتی — همان قالب input type="time" */
   value: string
   onChange: (next: string) => void
@@ -34,9 +38,12 @@ export default function FaTimeSelect({
   const mins = Array.from({ length: Math.floor(60 / minuteStep) }, (_, i) =>
     String(i * minuteStep).padStart(2, '0'))
 
+  const hourList = allowEndOfDay ? [...HOURS, '24'] : HOURS
+  const endOfDay = h === '24'
+
   /* اگر دقیقه‌ی فعلی روی پله نیست، خودش هم در فهرست بیاید تا مقدار
      ذخیره‌شده‌ی قبلی بی‌صدا عوض نشود. */
-  const minuteList = mins.includes(m) ? mins : [...mins, m].sort()
+  const minuteList = endOfDay ? ['00'] : mins.includes(m) ? mins : [...mins, m].sort()
 
   /* ── چرا عرض ثابت برداشته شد ──
      دو جعبه‌ی ۶۲پیکسلی `flexShrink: 0` یعنی هر انتخابگر دست‌کم ۱۳۰px
@@ -62,12 +69,12 @@ export default function FaTimeSelect({
       <Select
         value={h} compact={compact} disabled={disabled} style={box} noChevron center
         ariaLabel={ariaLabel ? `ساعت ${ariaLabel}` : 'ساعت'}
-        options={HOURS.map(x => ({ value: x, label: toFa(x) }))}
-        onChange={v => onChange(`${v}:${m}`)}
+        options={hourList.map(x => ({ value: x, label: toFa(x) }))}
+        onChange={v => onChange(v === '24' ? '24:00' : `${v}:${endOfDay ? '00' : m}`)}
       />
       <span style={{ color: '#6F6A5C', fontWeight: 800, flexShrink: 0 }}>:</span>
       <Select
-        value={m} compact={compact} disabled={disabled} style={box} noChevron center
+        value={endOfDay ? '00' : m} compact={compact} disabled={disabled || endOfDay} style={box} noChevron center
         ariaLabel={ariaLabel ? `دقیقه‌ی ${ariaLabel}` : 'دقیقه'}
         options={minuteList.map(x => ({ value: x, label: toFa(x) }))}
         onChange={v => onChange(`${h}:${v}`)}

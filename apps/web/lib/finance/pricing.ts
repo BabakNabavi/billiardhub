@@ -26,6 +26,9 @@ export interface PriceBreakdown {
 }
 
 const HHMM = /^([01]?[0-9]|2[0-3]):([0-5][0-9])$/
+/* پایانِ بازه «24:00» هم می‌تواند باشد (انتخابگرِ پایان ۲۴ دارد) — بی این،
+   قاعده‌ی «۲۰:۰۰ تا ۲۴:۰۰» موقعِ ذخیره بی‌صدا انداخته می‌شد */
+const HHMM_END = /^(([01]?[0-9]|2[0-3]):([0-5][0-9])|24:00)$/
 
 /**
  * قواعدِ تخفیفِ رسیده از فرم را به شکلِ قابلِ اعتماد درمی‌آورد.
@@ -58,7 +61,7 @@ export function sanitizeDiscountRules(input: unknown): DiscountRule[] | null {
     if (!r || typeof r !== 'object') continue
     const { startTime, endTime, percent, id, label } = r as Record<string, unknown>
     if (typeof startTime !== 'string' || !HHMM.test(startTime)) continue
-    if (typeof endTime !== 'string' || !HHMM.test(endTime)) continue
+    if (typeof endTime !== 'string' || !HHMM_END.test(endTime)) continue
     const p = Number(percent)
     if (!Number.isFinite(p) || p < 0 || p >= 100) continue
     out.push({
@@ -82,9 +85,10 @@ export function slotDiscountPct(hour: number, table: PricedTable): number {
          `eh` صفر می‌شد و شرطِ `hour >= sh && hour < 0` هرگز درست
          نمی‌شد — یعنی قاعده‌ای که باشگاه‌دار «۲۰:۰۰ تا ۰۰:۰۰» گذاشته
          **هیچ ساعتی را پوشش نمی‌داد**. و تنها راهِ پوشاندنِ ساعتِ ۲۳
-         هم همین است، چون انتخابگرِ ساعت بالاتر از ۲۳:۴۵ نمی‌دهد و
+         هم همین بود، چون انتخابگرِ ساعت بالاتر از ۲۳:۴۵ نمی‌داد و
          `hour < eh` با `eh = 23` ساعتِ ۲۳ را بیرون می‌گذارد.
-         تا دیروز دیده نمی‌شد چون ساعتِ ۲۳ اصلا رزرو نمی‌شد. */
+         تا دیروز دیده نمی‌شد چون ساعتِ ۲۳ اصلا رزرو نمی‌شد.
+         حالا انتخابگرِ پایان «۲۴:۰۰» هم دارد و `ehRaw = 24` همان ۲۴ است. */
       const ehRaw = parseInt(String(rule.endTime).split(':')[0] ?? '24', 10)
       const eh = ehRaw === 0 ? 24 : ehRaw
       if (hour >= sh && hour < eh && rule.percent > 0) return rule.percent

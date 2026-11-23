@@ -3020,7 +3020,7 @@ export default function ClubDashboardPage() {
                   </div>
                   <div className="bh-disc-time">
                     <div className="bh-disc-lb">تا ساعت</div>
-                    <FaTimeSelect value={discountForm.endTime} onChange={v => setDiscountForm(p => ({ ...p, endTime: v }))} ariaLabel="پایان تخفیف" compact />
+                    <FaTimeSelect value={discountForm.endTime} onChange={v => setDiscountForm(p => ({ ...p, endTime: v }))} ariaLabel="پایان تخفیف" compact allowEndOfDay />
                   </div>
                   {/* `type="number"` بومی هیچ‌وقت ارقام فارسی نشان نمی‌داد؛
                       FaNumberInput فارسی نمایش می‌دهد و لاتین بیرون می‌دهد.
@@ -3250,7 +3250,7 @@ export default function ClubDashboardPage() {
                           </div>
                           <div className="bh-disc-time">
                             <div className="bh-disc-lb">تا ساعت</div>
-                            <FaTimeSelect value={editDiscountForm.endTime} onChange={v => setEditDiscountForm(p => ({ ...p, endTime: v }))} ariaLabel="پایان تخفیف" compact />
+                            <FaTimeSelect value={editDiscountForm.endTime} onChange={v => setEditDiscountForm(p => ({ ...p, endTime: v }))} ariaLabel="پایان تخفیف" compact allowEndOfDay />
                           </div>
                           <div className="bh-disc-pct">
                             <div className="bh-disc-lb" style={{ textAlign: 'center' }}>٪</div>

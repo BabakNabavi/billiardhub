@@ -85,7 +85,11 @@ t('شبانه‌روزی برچسبِ «شب قبل» ندارد', W.bookableHou
 const allDayAfterClosed = { ...allDay10, sunday: { isOpen: false } }
 t('شبانه‌روزی پس از روزِ تعطیل از ساعتِ شروع باز می‌شود', W.bookableHours(allDayAfterClosed, MON).hours, range(10, 23))
 const end24 = week({ isOpen: true, open: '09:00', close: '24:00' })
-t('۰۹ تا ۲۴:۰۰ ⟵ ۹ تا ۲۳', W.bookableHours(end24, MON).hours, range(9, 23))
+t('۰۹ تا ۲۴:۰۰ ⟵ ۹ تا ۲۳ (خواستِ مالک: ساعتِ ۲۳ رزرو شود)', W.bookableHours(end24, MON).hours, range(9, 23))
+t('ثبتِ رزروِ ساعتِ ۲۳ با پایانِ ۲۴:۰۰ پذیرفته می‌شود', W.hoursOutsideWorking(end24, MON, [22, 23]), [])
+t('پایانِ ۲۴:۰۰ بامدادِ روزِ بعد را باز نمی‌کند', W.bookableHours({ ...week({ isOpen: false }), sunday: { isOpen: true, open: '18:00', close: '24:00' } }, MON).hours, [])
+t('۰۰:۰۰ تا ۲۴:۰۰ ⟵ ۲۴ساعته', W.bookableHours(week({ isOpen: true, open: '00:00', close: '24:00' }), MON).hours, range(0, 23))
+t('شروعِ ۲۴:۰۰ نامعتبر ⟵ پیش‌فرض', W.bookableHours({ monday: { isOpen: true, open: '24:00', close: '24:00' } }, MON).known, false)
 
 head('تعطیل و دادهِ نامعلوم')
 const friClosed = { ...tenToTen, friday: { isOpen: false, open: '10:00', close: '22:00' } }
@@ -102,8 +106,9 @@ const label = (raw, date) => W.dayHoursLabel(raw, date)?.text ?? null
 t('معمولی', W.dayHoursLabel(tenToTen, MON), { closed: false, hasSpill: false, text: '10:00 تا 22:00' })
 t('شبانه با ادامه‌ی شبِ قبل', label(night, MON), '00:00 تا 02:00 ادامه شب قبل و 18:00 تا 02:00 بامداد')
 t('شبانه پس از روزِ تعطیل — بی ادامه', label(onlySun, SUN), '20:00 تا 03:00 بامداد')
-t('تا نیمه‌شب «بامداد» نمی‌گیرد', label(toMid, MON), '14:00 تا 00:00')
-t('۲۴:۰۰ ⟵ ۰۰:۰۰', label(end24, MON), '09:00 تا 00:00')
+t('تا نیمه‌شب («00:00»ِ قدیمی) ⟵ ۲۴:۰۰ و بی «بامداد»', label(toMid, MON), '14:00 تا 24:00')
+t('۲۴:۰۰ همان ۲۴:۰۰ نمایش داده می‌شود', label(end24, MON), '09:00 تا 24:00')
+t('۰۰:۰۰ تا ۲۴:۰۰ ⟵ شبانه‌روزی', label(week({ isOpen: true, open: '00:00', close: '24:00' }), MON), 'شبانه‌روزی')
 t('پایانِ پس از ۶ صبح «روز بعد» است نه «بامداد»', label(week({ isOpen: true, open: '14:00', close: '13:00' }), MON), '00:00 تا 13:00 ادامه شب قبل و 14:00 تا 13:00 روز بعد')
 t('۲۴ساعته ⟵ شبانه‌روزی', label(allDay10, MON), 'شبانه‌روزی')
 t('۰۰:۰۰ تا ۰۰:۰۰ ⟵ شبانه‌روزی', label(allDay, MON), 'شبانه‌روزی')
@@ -127,6 +132,16 @@ t('خطای خواندنِ باشگاه در ثبتِ رزرو ⟵ ۵۰۳، نه
 /* پیش‌فرضِ دادهِ نامعلوم همان است که باشگاه‌دار در پنل می‌بیند */
 const dash = read('app/dashboard/club/page.tsx')
 t('پیش‌فرضِ پنل همان ۰۹:۰۰ تا ۲۳:۰۰ است', /DEFAULT_HOURS[\s\S]{0,200}open: '09:00', close: '23:00'/.test(dash), true)
+
+head('گاردهای ایستا — «۲۴:۰۰» در انتخابگرهای پایان')
+const fts = read('components/ui/FaTimeSelect.tsx')
+t('انتخابگرِ ساعت گزینه‌ی ۲۴ دارد', /allowEndOfDay \? \[\.\.\.HOURS, '24'\]/.test(fts), true)
+t('ساعتِ ۲۴ همیشه 24:00 ذخیره می‌شود', /v === '24' \? '24:00'/.test(fts), true)
+t('«تا»ی ساعتِ کاریِ فرمِ باشگاه ۲۴ دارد', /label="تا"[^\n]*endOfDay/.test(read('components/club/WorkingHours.tsx')), true)
+t('«تا»ی ساعتِ کاریِ پنل ۲۴ دارد', /value=\{dh\.close\}[^\n]*allowEndOfDay/.test(read('components/dashboard/club/HoursTab.tsx')), true)
+t('«از» ۲۴ ندارد (شروعِ ۲۴ بی‌معناست)', /value=\{dh\.open\}[^\n]*allowEndOfDay/.test(read('components/dashboard/club/HoursTab.tsx')), false)
+t('پایانِ هر دو فرمِ تخفیف ۲۴ دارد', (dash.match(/ariaLabel="پایان تخفیف" compact allowEndOfDay/g) ?? []).length, 2)
+t('فرمِ ساختِ باشگاه همان کامپوننتِ ساعتِ کاری را دارد', /from '(@\/|(\.\.\/)+)components\/club\/WorkingHours'/.test(read('app/clubs/new/page.tsx')), true)
 
 console.log(`\n  نتیجه: ${pass} موفق، ${fail} ناموفق`)
 process.exit(fail ? 1 : 0)

@@ -77,7 +77,8 @@ export default function HoursTab({ hoursForm, setHoursForm, saveHours, hoursSavi
                     </div>
                     <div className="wh-cell">
                       <span className="wh-lb" style={{ fontSize: 12, color: '#6B7280' }}>تا</span>
-                      <FaTimeSelect value={dh.close} onChange={v => setDay({ close: v })} ariaLabel="پایان" compact />
+                      {/* ۲۴:۰۰ هم دارد تا خانه‌ی ساعتِ ۲۳ رزروشدنی باشد */}
+                      <FaTimeSelect value={dh.close} onChange={v => setDay({ close: v })} ariaLabel="پایان" compact allowEndOfDay />
                     </div>
                   </>
                 ) : (

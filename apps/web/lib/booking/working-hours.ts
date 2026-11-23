@@ -12,7 +12,8 @@
    ── شکلِ داده (clubs.workingHours) ──
    { saturday: { isOpen: true, open: '10:00', close: '23:45' }, … }
    گامِ ۱۵ دقیقه. close ≤ open یعنی عبور از نیمه‌شب (۱۸:۰۰ تا ۰۲:۰۰)؛
-   close = open یعنی ۲۴ ساعته؛ close = '00:00' یعنی تا نیمه‌شب.
+   close = open یعنی ۲۴ ساعته؛ close = '24:00' (انتخابگرِ «تا» از آذرِ ۱۴۰۵) و
+   '00:00'ِ قدیمی هر دو یعنی تا نیمه‌شب — خانه‌ی ساعتِ ۲۳ رزروشدنی است.
 
    ── قاعده‌ی هر خانه ──
    خانه‌ی ساعتِ h یعنی [h:00, h+1:00). فقط وقتی رزروشدنی است که *کاملش* در
@@ -191,7 +192,12 @@ export function dayHoursLabel(raw: unknown, date: string): DayHoursLabel | null 
   /* شبانه‌روزیِ پیوسته؛ اگر دیروز تعطیل بوده، همین روز از ساعتِ شروع باز می‌شود و
      متنِ عادیِ «… روز بعد» می‌گیرد */
   if (isAllDay(today) && spillUntil >= today.open) return { closed: false, hasSpill: false, text: 'شبانه‌روزی' }
-  let own = `${hhmm(today.open)} تا ${hhmm(today.close)}`
+  if (today.open === 0 && today.close === DAY_MIN) return { closed: false, hasSpill: false, text: 'شبانه‌روزی' }
+  /* بسته‌شدن در نیمه‌شب — چه «24:00» ذخیره شده باشد چه «00:00»ِ قدیمی — «۲۴:۰۰»
+     نمایش داده می‌شود (گزینه‌ی تازه‌ی انتخابگرِ «تا»؛ «00:00»ِ قدیمی در پنل همان
+     ۰۰:۰۰ می‌ماند ولی معنایش یکی است) */
+  const closeText = today.close === 0 || today.close === DAY_MIN ? '24:00' : hhmm(today.close)
+  let own = `${hhmm(today.open)} تا ${closeText}`
   if (isOvernight(today) && today.close > 0) own += today.close <= 6 * 60 ? ' بامداد' : ' روز بعد'
   /* شیفتی که خودش از نیمه‌شبِ امروز شروع می‌شود، ادامه‌ی دیروز را در خود دارد */
   const showSpill = !!spill && spillUntil < today.open

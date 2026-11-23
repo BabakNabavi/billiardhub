@@ -53,13 +53,15 @@ function span(o: string, c: string): number {
    فلش ۳۶ پیکسل padding می‌گذارد، پس هر کشو دست‌کم ۷۰ پیکسل پهن
    می‌شد. چهار کشو در یک ردیف — به‌علاوه‌ی نام روز و نشان مدت — در
    موبایل از عرض صفحه بیرون می‌زد. */
-function TimeSelect({ value, onChange, label }: {
+function TimeSelect({ value, onChange, label, endOfDay = false }: {
   value: string; onChange: (v: string) => void; label: string
+  /** «تا» ۲۴:۰۰ هم دارد تا خانه‌ی ساعتِ ۲۳ رزروشدنی باشد */
+  endOfDay?: boolean
 }) {
   return (
     <div className="wh-time" style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
       <span className="wh-time-lb" style={{ fontSize: 11.5, color: MUT }}>{label}</span>
-      <FaTimeSelect value={value} onChange={onChange} ariaLabel={label} minuteStep={15} compact />
+      <FaTimeSelect value={value} onChange={onChange} ariaLabel={label} minuteStep={15} compact allowEndOfDay={endOfDay} />
     </div>
   )
 }
@@ -142,7 +144,7 @@ export default function WorkingHours({ value, onChange }: {
                 <>
                   <span className="wh-times" style={{ display: 'contents' }}>
                     <TimeSelect label="از" value={v.open} onChange={x => setDay(d.key, { open: x })} />
-                    <TimeSelect label="تا" value={v.close} onChange={x => setDay(d.key, { close: x })} />
+                    <TimeSelect label="تا" value={v.close} onChange={x => setDay(d.key, { close: x })} endOfDay />
                   </span>
 
                   <span className="wh-span" style={{

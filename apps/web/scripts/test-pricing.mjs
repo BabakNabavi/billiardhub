@@ -178,6 +178,10 @@ head('خواندن تنظیمات از میز و باشگاه')
   t('قاعده‌ی روزانه — ۱۲ بیرون', slotDiscountPct(12, day), 0)
   const late = { id: 'z', pricePerHour: 100_000, discountRules: [{ startTime: '20:00', endTime: '23:45', percent: 10 }] }
   t('۲۳:۴۵ — رفتارِ قبلی حفظ شود (۲۳ بیرون)', slotDiscountPct(23, late), 0)
+  /* انتخابگرِ پایان حالا «۲۴:۰۰» هم دارد */
+  const end24 = { id: 'w', pricePerHour: 100_000, discountRules: [{ startTime: '20:00', endTime: '24:00', percent: 15 }] }
+  t('پایانِ ۲۴:۰۰ — ۲۳ داخل', slotDiscountPct(23, end24), 15)
+  t('پایانِ ۲۴:۰۰ — ۱۹ بیرون', slotDiscountPct(19, end24), 0)
 }
 
 /* ── بازه‌ی غیرِ تمام‌ساعت ── */
@@ -211,6 +215,9 @@ head('خواندن تنظیمات از میز و باشگاه')
   t('درصدِ رشته‌ای عدد شود', sanitizeDiscountRules([{ ...ok, percent: '25' }]), [{ ...ok, percent: 25 }])
   t('درصدِ صفر نگه داشته شود', sanitizeDiscountRules([{ ...ok, percent: 0 }]), [{ ...ok, percent: 0 }])
   t('ساعتِ بد انداخته شود', sanitizeDiscountRules([{ ...ok, startTime: '25:00' }]), null)
+  t('⚠️ پایانِ ۲۴:۰۰ نگه داشته شود', sanitizeDiscountRules([{ ...ok, endTime: '24:00' }]), [{ ...ok, endTime: '24:00' }])
+  t('شروعِ ۲۴:۰۰ انداخته شود', sanitizeDiscountRules([{ ...ok, startTime: '24:00' }]), null)
+  t('پایانِ ۲۴:۳۰ انداخته شود', sanitizeDiscountRules([{ ...ok, endTime: '24:30' }]), null)
   t('ساعتِ غیرِ رشته انداخته شود', sanitizeDiscountRules([{ ...ok, endTime: 20 }]), null)
   t('ورودیِ غیرِ آرایه', sanitizeDiscountRules('x'), null)
   t('آرایه‌ی خالی', sanitizeDiscountRules([]), null)
