@@ -290,7 +290,7 @@ head('۱۰) پنل باشگاه — دسترسی سریع، دیالوگ، و ب
   head('نشانِ باشگاه')
   const logo = read('components/club/ClubLogo.tsx')
   const club = read('app/clubs/[id]/page.tsx')
-  const list = read('app/clubs/page.tsx')
+  const list = read('app/clubs/ClubsClient.tsx')
   const dash = read('app/dashboard/club/page.tsx')
 
   t('کامپوننتِ مشترک ساخته شد', /export default function ClubLogo/.test(logo))

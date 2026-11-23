@@ -31,8 +31,8 @@ const LEGACY_IMAGES = {
   'public/images/clubs/wallpaper3.png': 1100 * KB,
   'public/images/clubs/wallpaper4.png': 870 * KB,
   'public/images/clubs/wallpaper21.jpg': 350 * KB,
-  /* جایگزین‌های صفحه‌ی اصلی (IMG در HomeClient، STORE_IMG در home-featured) —
-     نامزدِ تبدیل به WebP */
+  /* در IMGِ HomeClient و STORE_IMGِ home-featured تعریف شده‌اند ولی در
+     هیچ رندری خوانده نمی‌شوند (۲ آذرِ ۱۴۰۵ بررسی شد) — پس روی سیم نمی‌آیند */
   'public/images/learn/learn.png': 531 * KB,
   'public/images/manufactures/IMG_0966.png': 555 * KB,
   'public/images/services/IMG_0963.png': 506 * KB,

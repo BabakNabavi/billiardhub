@@ -19,7 +19,7 @@ t('پیش‌فرض /api است', apiSrc.includes("|| '/api'"), '')
 
 head('هر مسیری که کلاینت صدا می‌زند route دارد')
 const files=['app/admin/products/page.tsx','app/booking/[clubId]/page.tsx','app/clubs/[id]/page.tsx',
- 'app/clubs/new/page.tsx','app/clubs/page.tsx','app/dashboard/club/page.tsx','app/dashboard/page.tsx',
+ 'app/clubs/new/page.tsx','app/clubs/page.tsx','app/clubs/ClubsClient.tsx','app/dashboard/club/page.tsx','app/dashboard/page.tsx',
  'app/login/page.tsx','app/register/page.tsx','app/users/[id]/page.tsx','components/Stories.tsx',
  'components/dashboard/club/GalleryTab.tsx']
 const routes=[]

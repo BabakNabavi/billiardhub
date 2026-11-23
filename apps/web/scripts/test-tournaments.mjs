@@ -968,7 +968,7 @@ const chainSrc = read('lib/market/chain.ts');
 const editAd = read('app/shop/edit/[id]/page.tsx');
 const formFields = read('components/market/AdFormFields.tsx');
 const pcs = read('components/ProvinceCitySelect.tsx');
-const detail2 = read('app/shop/[id]/page.tsx');
+const detail2 = read('app/shop/[id]/ProductDetailClient.tsx');
 const detail2S = strip(detail2);
 const relApi = read('app/api/market/ads/[id]/related/route.ts');
 
@@ -1135,7 +1135,7 @@ t('ارقامِ داخلِ نامِ لاتین فارسی نمی‌شوند',
   read('lib/text-fa.ts').includes('export function keepLatinProps')
   && read('components/market/ProductTitle.tsx').includes('keepLatinProps(head, headClassName)')
   && read('components/market/ProductTitle.tsx').includes('keepLatinProps(tail, tailClassName)')
-  && read('app/shop/[id]/page.tsx').includes('keepLatinProps(s.value)')
+  && read('app/shop/[id]/ProductDetailClient.tsx').includes('keepLatinProps(s.value)')
   /* کلاسِ خودِ عنصر باید ادغام شود نه بازنویسی — وگرنه خطِ برند
      `mk-t`/`bz-t`/`pc-t` و فاصله‌اش را از دست می‌دهد. */
   && read('components/market/ProductTitle.tsx').includes('keepLatinProps(tail, tailClassName)'),
@@ -1774,7 +1774,7 @@ t('«تبلیغات» تا رونمایی پشتِ کلید است',
 
 /* ── بازار: مشخصات، فوری، توافقی، جدید ── */
 console.log('\n― بازار ―');
-const adDetail = read('app/shop/[id]/page.tsx');
+const adDetail = read('app/shop/[id]/ProductDetailClient.tsx');
 const market = stripComments(read('app/shop/page.tsx'));
 const newAdPage = read('app/shop/new/page.tsx');
 
@@ -1885,7 +1885,7 @@ t('پیش‌نمایشِ لینک بدونِ www است',
 /* ── ظاهرِ بازار و فروشگاه ── */
 console.log('\n― ظاهر ―');
 const flat = read('app/sellers/[id]/FlatShop.tsx');
-const detailPg = stripComments(read('app/shop/[id]/page.tsx'));
+const detailPg = stripComments(read('app/shop/[id]/ProductDetailClient.tsx'));
 const sellerPanel = stripComments(read('app/dashboard/seller/page.tsx'));
 
 t('«توافقی» از خودِ اسنپ‌شاتِ جایگاه می‌آید',
@@ -2942,7 +2942,7 @@ console.log('\n― توپ ―');
       .every(f => read(f).includes('if (isFieldHidden(f, specs, specDefs, catTypeId)) continue')),
     'رنگِ توپ نباید روی ستِ اسنوکر بماند');
   t('برچسبِ فهرست‌های source‌دار در صفحه‌ی آگهی حل می‌شود',
-    read('app/shop/[id]/page.tsx').includes("src === 'types[].set_types'"),
+    read('app/shop/[id]/ProductDetailClient.tsx').includes("src === 'types[].set_types'"),
     'وگرنه «نوع ست: full-22» نشان داده می‌شد');
   t('نامِ قدیمیِ «پول» هنوز به نوع نگاشت می‌شود',
     rules.includes("'پول': 'pocket_billiard'"),
@@ -3295,7 +3295,7 @@ console.log('\n― یکپارچگیِ نمایش ―');
 {
   const sr = read('lib/market/spec-rules.ts');
   const sc = read('lib/market/spec-catalog.ts');
-  const detail = read('app/shop/[id]/page.tsx');
+  const detail = read('app/shop/[id]/ProductDetailClient.tsx');
   const list = read('app/shop/page.tsx');
 
   t('ممیزیِ پوششِ فیلدها در ریپو هست',
@@ -3556,7 +3556,7 @@ console.log('\n― استوری: یک منبع، با انقضا ―');
 
   /* حلقه‌ی کارتِ باشگاه روی hasActiveStory && storyMediaUrl است */
   t('ستون‌های استوری در فهرستِ عمومیِ باشگاه انتخاب می‌شوند',
-    /'storyExpiresAt', 'storyMediaUrl', 'storyType', 'storyText'/.test(read('app/api/clubs/route.ts')),
+    /'storyExpiresAt', 'storyMediaUrl', 'storyType', 'storyText'/.test(read('lib/clubs/public-list.ts')),
     'بدونِ رسانه، حلقه‌ی استوری روی /clubs هرگز رندر نمی‌شد');
 
   /* ── کفِ کنتراست ──
@@ -5136,7 +5136,7 @@ console.log('\n― یک سطح برای کارتِ محصول ―');
     ['app/shop/page.tsx', 'mk-row lq-pcard'],
     ['app/HomeClient.tsx', 'bz-card lq-pcard'],
     ['app/sellers/[id]/FlatShop.tsx', 'prod-card-sec1 lq-pcard'],
-    ['app/shop/[id]/page.tsx', 'pd-card lq-pcard'],
+    ['app/shop/[id]/ProductDetailClient.tsx', 'pd-card lq-pcard'],
   ];
   for (const [p, cls] of users) {
     t(`«${cls.split(' ')[0]}» سطحِ مشترک را گرفته`, read(p).includes(cls));
@@ -5149,7 +5149,7 @@ console.log('\n― یک سطح برای کارتِ محصول ―');
     !/\.bz-card \{[^}]*background:/.test(read('app/HomeClient.tsx')));
 
   /* صحنه‌ی رنگی روی صفحه‌های فهرست و جزئیات */
-  for (const p of ['app/shop/page.tsx', 'app/sellers/page.tsx', 'app/clubs/page.tsx', 'app/shop/[id]/page.tsx']) {
+  for (const p of ['app/shop/page.tsx', 'app/sellers/page.tsx', 'app/clubs/ClubsClient.tsx', 'app/shop/[id]/ProductDetailClient.tsx']) {
     /* مسیرِ کامل در برچسب: `app/shop/page.tsx` و `app/shop/[id]/page.tsx`
        هر دو با تکه‌ی دوم «shop» می‌شدند و دو تست هم‌نام چاپ می‌کردند. */
     t(`صحنه در ${p}`, read(p).includes('className="lq-stage"'));

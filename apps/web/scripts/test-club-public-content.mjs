@@ -29,11 +29,11 @@ const t = (name, ok, extra = '') => {
 };
 const head = s => console.log(`\n■ ${s}`);
 
-const clubsApi     = read('app/api/clubs/route.ts');
+const clubsApi     = read('app/api/clubs/route.ts') + read('lib/clubs/public-list.ts');
 const clubApi      = read('app/api/clubs/[id]/route.ts');
 const storiesApi   = read('app/api/clubs/[id]/stories/route.ts');
 const publicPage   = read('app/clubs/[id]/page.tsx');
-const listPage     = read('app/clubs/page.tsx');
+const listPage     = read('app/clubs/ClubsClient.tsx');
 const storiesBar   = read('components/Stories.tsx');
 const gallery      = read('components/dashboard/club/GalleryTab.tsx');
 const panel        = read('app/dashboard/club/page.tsx');

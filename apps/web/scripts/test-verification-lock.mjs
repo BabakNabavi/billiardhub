@@ -191,7 +191,7 @@ const head = s => console.log(`\n■ ${s}`)
    تکرار نکند، ادمین به باشگاهی تیک می‌دهد که هیچ‌کس نمی‌بیندش. */
 {
   head('میزِ تیکِ آبی — همانِ شرطِ فهرستِ عمومی')
-  const api = code('app/api/clubs/route.ts')
+  const api = (code('app/api/clubs/route.ts') + code('lib/clubs/public-list.ts'))
   const page = code('app/admin/verified/page.tsx')
 
   /* شرطِ مرجع: هم isActive، هم یکی از دو وضعیتِ تأیید */
@@ -339,8 +339,8 @@ const head = s => console.log(`\n■ ${s}`)
     && keys.includes('demo-content'))
   /* گاردِ مسیرِ تکی با یک ?all=true دور می‌خورد اگر فهرست هم همان
      تفکیک را نداشته باشد — و فهرست بدتر است: همه‌ی باشگاه‌ها یک‌جا. */
-  t('فهرستِ ادمینی هم ستون‌های خصوصی را جدا می‌کند', /canSeePrivate = await can\(actor!\.id, 'clubs'\)/.test(code('app/api/clubs/route.ts')))
-  t('و از همان فهرستِ مشترک می‌خواند', /stripClubPrivate/.test(code('app/api/clubs/route.ts')) && /stripClubPrivate/.test(code('app/api/clubs/[id]/route.ts')))
+  t('فهرستِ ادمینی هم ستون‌های خصوصی را جدا می‌کند', /canSeePrivate = await can\(actor!\.id, 'clubs'\)/.test((code('app/api/clubs/route.ts') + code('lib/clubs/public-list.ts'))))
+  t('و از همان فهرستِ مشترک می‌خواند', /stripClubPrivate/.test((code('app/api/clubs/route.ts') + code('lib/clubs/public-list.ts'))) && /stripClubPrivate/.test(code('app/api/clubs/[id]/route.ts')))
   /* خودِ سند از نشانی‌اش حساس‌تر است */
   t('سندِ مجوز هم پشتِ کلیدِ clubs است', /!\(await can\(actor\.id, 'clubs'\)\)/.test(code('app/api/clubs/[id]/license-doc/route.ts')))
   /* ویرایش و حذفِ باشگاهِ دیگران هم نباید به ادعای توکن تکیه کند */
