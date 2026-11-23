@@ -24,6 +24,8 @@ export const BANNER_SLIDER_HEIGHT = 320
 
 export interface BannerSlide {
   img: string; title: string; sub: string; link: string; cta: string; accent: string
+  /** نسخه‌ی کوچک برای عرضِ ≤۷۶۸ — گوشی عکسِ ۱۹۲۰ پیکسلی را برای کادرِ ۳۷۵ نکشد */
+  imgSm?: string
 }
 
 export default function BannerSlider({ slides }: { slides: readonly BannerSlide[] }) {
@@ -70,7 +72,11 @@ export default function BannerSlider({ slides }: { slides: readonly BannerSlide[
               pointerEvents: i === activeBanner ? 'auto' : 'none',
             }}
           >
-            <img loading="lazy" decoding="async" src={slide.img} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', transform: i === activeBanner ? 'scale(1.03)' : 'scale(1)', transition: 'transform 5s ease' }} onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+            {/* گوشی نسخه‌ی کوچک (imgSm) را می‌گیرد؛ دسکتاپ همان اصل — ظاهر یکی */}
+            <picture className="contents">
+              {slide.imgSm && <source media="(max-width: 768px)" srcSet={slide.imgSm} />}
+              <img loading="lazy" decoding="async" src={slide.img} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', transform: i === activeBanner ? 'scale(1.03)' : 'scale(1)', transition: 'transform 5s ease' }} onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+            </picture>
             <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to left, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.28) 55%, transparent 100%)' }} />
             <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', padding: '0 clamp(20px,5%,80px)' }}>
               <div style={{ maxWidth: '420px', textAlign: 'right' }}>

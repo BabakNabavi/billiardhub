@@ -177,6 +177,10 @@ const IMG = {
   wall2: '/images/clubs/wallpaper2.webp',
   wall3: '/images/clubs/wallpaper3.webp',
   wall4:  '/images/clubs/wallpaper4.webp',
+  /* نسخه‌ی ۹۶۰ پیکسلیِ همان دو — فقط برای گوشی (<picture> در BannerSlider)؛
+     اصلِ ۱۹۲۰ پیکسلی روی گوشی ۲۱۹ و ۱۳۴ کیلوبایت هدر می‌داد */
+  wall3sm: '/images/clubs/wallpaper3-960.webp',
+  wall4sm: '/images/clubs/wallpaper4-960.webp',
   wall5:  '/images/clubs/wallpaper5.webp',
   wall12: '/images/clubs/wallpaper12.webp',
   wall6: '/images/clubs/wallpaper12.webp',
@@ -303,8 +307,8 @@ const CLUB_IMG_FALLBACK = [IMG.club1, IMG.club2, IMG.club3, IMG.club4, IMG.club5
    عنوانِ اسلاید فقط چیزی را می‌گوید که پشتِ لینکش واقعاً هست. */
 const BANNER_SLIDES = [
   { img:IMG.wall1,  title:'باشگاه‌های بیلیارد ایران', sub:'باشگاه نزدیکت را پیدا کن و میز رزرو کن',  link:'/clubs',       cta:'رزرو میز',       accent:GRN  },
-  { img:IMG.wall3,  title:'مسابقات بیلیارد',  sub:'ثبت‌نام آنلاین در مسابقات باشگاه‌ها',   link:'/tournaments', cta:'ثبت‌نام',        accent:BLU  },
-  { img:IMG.wall4,  title:'مربیان بیلیارد',     sub:'مربیان ثبت‌شده‌ی بیلیارد هاب',           link:'/coaches',     cta:'پیدا کردن مربی',  accent:PRP  },
+  { img:IMG.wall3,  imgSm:IMG.wall3sm, title:'مسابقات بیلیارد',  sub:'ثبت‌نام آنلاین در مسابقات باشگاه‌ها',   link:'/tournaments', cta:'ثبت‌نام',        accent:BLU  },
+  { img:IMG.wall4,  imgSm:IMG.wall4sm, title:'مربیان بیلیارد',     sub:'مربیان ثبت‌شده‌ی بیلیارد هاب',           link:'/coaches',     cta:'پیدا کردن مربی',  accent:PRP  },
   { img:IMG.wall5,  title:'بازار تجهیزات بیلیارد',        sub:'خرید و فروش چوب، میز و لوازم جانبی', link:'/shop',        cta:'خرید کن',        accent:GOLD },
   { img:IMG.wall12, title:'خدمات فنی تخصصی در محل',       sub:'نصب، تعمیر و سرویس حرفه‌ای میزها',   link:'/services',    cta:'درخواست خدمت',  accent:BRN  },
 ];
