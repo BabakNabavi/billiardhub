@@ -35,6 +35,7 @@ import { useTabKeys } from '@/hooks/use-tab-keys'
 import ClubReviews from '../../../components/club/ClubReviews';
 import ClubLogo from '../../../components/club/ClubLogo'
 import { apiFetch } from '../../../lib/http'
+import { DeferredMapFrame } from '../../../components/club/DeferredMapFrame'
 import { ask } from '../../../lib/ui/dialogs'
 import { DISCIPLINES } from '../../../lib/coach-store'
 import VerifiedBadge from '../../../components/VerifiedBadge'
@@ -457,8 +458,26 @@ export function ClubProfileClient({ initialClub }: { initialClub?: Club | null }
   useEffect(() => {
     if (images.length <= 1) return;
     if (prefersReducedMotion()) return;
-    const t = setInterval(() => setSlide(s => (s + 1) % images.length), 4500);
-    return () => clearInterval(t);
+    /* چرخش پس از بارگذاریِ کاملِ صفحه شروع می‌شود، نه از هیدریشن (آذرِ ۱۴۰۵):
+       اسلایدِ دوم که پیش از پایانِ بارگذاری محو شود «بزرگ‌ترین تصویر» (LCP) را
+       چند ثانیه عقب می‌برد — Lighthouse روی گوشی ۹٫۴ ثانیه داد، و آمارِ کاربرانِ
+       واقعیِ گوگل هم همان را می‌شمارد. روی شبکه‌ی تند فرقی دیده نمی‌شود. */
+    /* سقفِ ۶ ثانیه: با تعامل، آمار و نقشه دیر بار می‌شوند و `load` ممکن است
+       خیلی دیر برسد — اسلایدر نباید بی‌پایان بایستد */
+    let t: ReturnType<typeof setInterval> | undefined;
+    let cap: ReturnType<typeof setTimeout> | undefined;
+    const start = () => {
+      if (t) return;
+      window.removeEventListener('load', start);
+      if (cap) clearTimeout(cap);
+      t = setInterval(() => setSlide(s => (s + 1) % images.length), 4500);
+    };
+    if (document.readyState === 'complete') start();
+    else {
+      window.addEventListener('load', start, { once: true });
+      cap = setTimeout(start, 6000);
+    }
+    return () => { window.removeEventListener('load', start); if (cap) clearTimeout(cap); if (t) clearInterval(t); };
   }, [images.length]);
 
   /* اسلایدهایی که یک بار دیده شده‌اند سوار می‌مانند (با opacity صفر) تا محوشدن —
@@ -1240,7 +1259,8 @@ export function ClubProfileClient({ initialClub }: { initialClub?: Club | null }
                     </h2>
                   </div>
                   <div style={{ height: 180 }}>
-                    <iframe src={`https://maps.google.com/maps?q=${club.latitude},${club.longitude}&z=15&output=embed`} style={{ width: '100%', height: '100%', border: 'none', filter: 'invert(0.9) hue-rotate(180deg) brightness(0.85) contrast(0.9)' }} allowFullScreen loading="lazy" referrerPolicy="no-referrer-when-downgrade" />
+                    {/* فقط با رسیدن به کادرِ دید ساخته می‌شود — components/club/DeferredMapFrame */}
+                    <DeferredMapFrame src={`https://maps.google.com/maps?q=${club.latitude},${club.longitude}&z=15&output=embed`} title="نقشه‌ی موقعیت باشگاه" style={{ width: '100%', height: '100%', border: 'none', filter: 'invert(0.9) hue-rotate(180deg) brightness(0.85) contrast(0.9)' }} />
                   </div>
                   <div style={{ padding: '12px 18px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, flexWrap: 'wrap' }}>
                     <div style={{ fontSize: 14, color: 'rgba(0,0,0,0.42)', display: 'flex', alignItems: 'center', gap: 6, flex: 1, minWidth: 0 }}>
