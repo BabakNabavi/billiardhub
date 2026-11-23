@@ -35,7 +35,8 @@ import {
   Hammer, Scissors, Settings, Truck, Radio, Scale, Play, Clapperboard,
 } from 'lucide-react';
 import AdSlot, { usePlacementState, type EntitySnapshot, type PlacementKey, type PlacementState } from '../components/ads/AdSlot';
-import { useHorizontalScroll, scrollSign, getPos, setPos } from '../lib/useHorizontalScroll';
+import { useHorizontalScroll } from '../lib/useHorizontalScroll';
+import { startAutoMarquee } from '../lib/ui/auto-marquee';
 import { MEDIA_VIDEOS, compactViews } from '../lib/media-data';
 import { getHiddenVideoIds, getFeaturedOverride } from '../lib/media-admin-store';
 import { sharedJson } from '../lib/shared-fetch';
@@ -991,7 +992,6 @@ export default function HomeClient({ initialPlacements, initialFeatured, service
   const mktPausedRef = useRef(false);
   /* چرخ ماوس و درگ — حرکت خودکار حین دخالت کاربر می‌ایستد */
   useHorizontalScroll(mktDeskRef, busy => { mktPausedRef.current = busy });
-  const mktTickerRef = useRef<number | null>(null);
 
   /* ── چرا یک پرچم «سوار شد» جدا ──
      سکشن بازار دو فهرست دارد: مارکی دسکتاپ (با تکرار برای حلقه) و
@@ -1022,24 +1022,9 @@ export default function HomeClient({ initialPlacements, initialFeatured, service
     if (mktMounted && isMobile) return;
     const el = mktDeskRef.current;
     if (!el) return;
-    const SPEED = 50;
-    /* در RTL موقعیت اسکرول منفی است؛ مقدار مثبت به ۰ گیر می‌کرد و
-       حرکت خودکار اصلا شروع نمی‌شد. */
-    const sign = scrollSign(el);
-    setPos(el, sign, 0);
-    let last = 0;
-    const tick = (t: number) => {
-      if (last && !mktPausedRef.current) {
-        const half = el.scrollWidth / 2;
-        let p = getPos(el, sign) + (SPEED * (t - last)) / 1000;
-        if (p >= half) p -= half;
-        setPos(el, sign, p);
-      }
-      last = t;
-      mktTickerRef.current = requestAnimationFrame(tick);
-    };
-    mktTickerRef.current = requestAnimationFrame(tick);
-    return () => { if (mktTickerRef.current) cancelAnimationFrame(mktTickerRef.current); };
+    /* حلقه در lib/ui/auto-marquee — بی خواندنِ چیدمان در هر فریم و خواب
+       بیرون از دید (پیش‌تر TBTِ ۹ ثانیه‌ی صفحه‌ی اصلی از همین‌جا بود) */
+    return startAutoMarquee(el, { speed: 50, dir: 1, startAt: 'start', isPaused: () => mktPausedRef.current });
   }, [spin, isMobile, mktMounted]);
 
 
@@ -1047,30 +1032,12 @@ export default function HomeClient({ initialPlacements, initialFeatured, service
   const sellersRef      = useRef<HTMLDivElement>(null);
   const sellersPaused   = useRef(false);
   useHorizontalScroll(sellersRef, busy => { sellersPaused.current = busy });
-  const sellersTickerR  = useRef<number | null>(null);
 
   useEffect(() => {
     if (!spin) return;
     const el = sellersRef.current;
     if (!el) return;
-    const SPEED = 45;
-    /* در RTL موقعیت اسکرول منفی است؛ مقدار مثبت به ۰ گیر می‌کرد و
-       حرکت خودکار اصلا شروع نمی‌شد. */
-    const sign = scrollSign(el);
-    setPos(el, sign, el.scrollWidth / 2);
-    let last = 0;
-    const tick = (t: number) => {
-      if (last && !sellersPaused.current) {
-        const half = el.scrollWidth / 2;
-        let p = getPos(el, sign) - (SPEED * (t - last)) / 1000;
-        if (p <= 0) p += half;
-        setPos(el, sign, p);
-      }
-      last = t;
-      sellersTickerR.current = requestAnimationFrame(tick);
-    };
-    sellersTickerR.current = requestAnimationFrame(tick);
-    return () => { if (sellersTickerR.current) cancelAnimationFrame(sellersTickerR.current); };
+    return startAutoMarquee(el, { speed: 45, dir: -1, startAt: 'middle', isPaused: () => sellersPaused.current });
   }, [spin]);
 
 
