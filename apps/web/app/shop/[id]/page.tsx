@@ -418,7 +418,10 @@ export default function ProductDetailPage() {
               <button type="button" onClick={() => setZoomed(true)}
                 aria-label="بزرگ‌نمایی تصویر"
                 style={{ position: 'absolute', inset: 0, padding: 0, border: 'none', background: 'none', cursor: 'zoom-in', display: 'block' }}>
-                <img loading="lazy" decoding="async" src={gallery[shown]} alt={fullName} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                {/* بزرگ‌ترین تصویرِ صفحه (LCP): تنبل نیست و اولویتِ بالا دارد (Lighthouse:
+                    ۴٫۷ ثانیه تأخیرِ شروع). نشانی همان اصلِ عکس می‌ماند — با نوارِ
+                    بندانگشتی و نمای تمام‌صفحه یکی است و از کش دوباره خوانده می‌شود. */}
+                <img loading="eager" fetchPriority={shown === 0 ? 'high' : undefined} decoding="async" src={gallery[shown]} alt={fullName} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
               </button>
               {/* ── همان برچسب بازار ──
                   قرمز مستطیلی «۱۵٪ تخفیف» با پیل بنفش «٪۱۵» در

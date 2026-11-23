@@ -120,7 +120,7 @@ function ClubCard({ club, view, idx = 0, tournaments = [] }: { club: Club; view:
       >
         {/* thumbnail */}
         <div className="lc-list-img" style={{ flexShrink: 0, position: 'relative', overflow: 'hidden' }}>
-          <img loading="lazy" decoding="async" src={img} alt={club.name} style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.75)' }}
+          <img loading={idx < 2 ? 'eager' : 'lazy'} fetchPriority={idx === 0 ? 'high' : undefined} decoding="async" src={img} alt={club.name} style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.75)' }}
             onError={onImgError} />
           {/* تیک تأیید این‌جا نیست — کنار نام است. روی گوشه‌ی عکس،
               معلوم نبود به چه چیزی تعلق دارد. */}
@@ -211,7 +211,9 @@ function ClubCard({ club, view, idx = 0, tournaments = [] }: { club: Club; view:
       >
         {/* image */}
         <div className="lc-media" style={{ position: 'relative', overflow: 'hidden', flexShrink: 0 }}>
-          <img loading="lazy" decoding="async" src={img} alt={club.name}
+          {/* دو کارتِ اول بالای خطِ اول‌اند و عکسِ اولی بزرگ‌ترین تصویرِ صفحه (LCP) —
+              تنبل نباشند (Lighthouse: ۲٫۷ ثانیه تأخیرِ شروعِ بارگذاری) */}
+          <img loading={idx < 2 ? 'eager' : 'lazy'} fetchPriority={idx === 0 ? 'high' : undefined} decoding="async" src={img} alt={club.name}
             style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.80)', transition: 'transform 400ms cubic-bezier(0.25,0.46,0.45,0.94)', transform: hov ? 'scale(1.06)' : 'scale(1.00)', willChange: 'transform' }}
             onError={onImgError} />
           <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, transparent 40%, rgba(6,13,10,0.88) 100%)' }} />

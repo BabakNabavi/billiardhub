@@ -61,16 +61,20 @@ export interface ProductMediaProps {
   className?: string
   /** کلاسِ اضافی روی خودِ `<img>` (مثلا انیمیشنِ hover صفحه) */
   imgClassName?: string
+  /** کارت‌های اولِ فهرست — بزرگ‌ترین تصویرِ صفحه (LCP) همین‌هاست؛ تنبل نباشند
+   *  و زودتر از بقیه بیایند (Lighthouse: ۲٫۷ ثانیه تأخیرِ شروعِ بارگذاری) */
+  priority?: boolean
 }
 
 export default function ProductMedia({
   src, alt, href, imgCount = 0,
-  saved, onToggleSave, saveLabel, children, className, imgClassName,
+  saved, onToggleSave, saveLabel, children, className, imgClassName, priority = false,
 }: ProductMediaProps) {
   const savedTxt = saveLabel ?? { on: 'برداشتن نشان', off: 'نشان کردن' }
   return (
     <div className={'bh-pm' + (className ? ' ' + className : '')}>
-      <img src={thumbUrl(src, CARD_W)} alt={alt} loading="lazy" decoding="async"
+      <img src={thumbUrl(src, CARD_W)} alt={alt} loading={priority ? 'eager' : 'lazy'} decoding="async"
+        fetchPriority={priority ? 'high' : undefined}
         className={'bh-pm-img' + (imgClassName ? ' ' + imgClassName : '')}
         /* بندانگشتی جواب نداد ⟵ یک بار خودِ عکس؛ بعد پنهان */
         onError={e => { const el = e.currentTarget; if (src && el.src !== new URL(src, location.href).href) { el.src = src; return } el.style.visibility = 'hidden' }} />

@@ -211,7 +211,7 @@ function MarketCard({ l, i, saved, onSave }: { l: Listing; i: number; saved: boo
   return (
     <Link href={`/shop/${l.id}`} className="mk-card lq-pcard" style={{ animationDelay: `${Math.min(i, 12) * 40}ms` }}>
       <ProductMedia
-        src={l.img} alt={full} href={`/shop/${l.id}`}
+        src={l.img} alt={full} href={`/shop/${l.id}`} priority={i < 2}
         imgCount={l.imgCount}
         saved={saved} onToggleSave={onSave}
         imgClassName="mk-zoom">
@@ -253,7 +253,7 @@ function MarketRow({ l, i, saved, onSave }: { l: Listing; i: number; saved: bool
           `ProductMedia` این‌جا با کلاسِ bh-pm--sq نسبت را وامی‌گذارد ولی
           همان نشان‌ها و همان اندازه‌ها را می‌آورد. */}
       <ProductMedia
-        src={l.img} alt={full} href={`/shop/${l.id}`}
+        src={l.img} alt={full} href={`/shop/${l.id}`} priority={i < 2}
         imgCount={l.imgCount}
         saved={saved} onToggleSave={onSave}
         className="bh-pm--sq" />
