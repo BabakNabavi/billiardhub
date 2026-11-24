@@ -19,7 +19,7 @@ import { z } from 'zod'
 import { NextRequest } from 'next/server'
 import { GET as getMatches } from '@/app/api/tournaments/[id]/matches/route'
 import type { Bracket, Match } from './bracket-client'
-import { PUBLIC_STATUSES } from './server'
+import { VIEWABLE_STATUSES } from './server'
 import { TIMED_OUT, withTimeout } from '@/lib/seo/timeout'
 
 /* مرزِ ورودی: پارامترِ مسیر */
@@ -58,11 +58,11 @@ export async function loadPublicBracket(id: string): Promise<Bracket | null> {
       return null
     }
     const j = (await res.json()) as Row
-    /* ⚠️ GETِ matches وضعیت را نمی‌سنجد، ولی صفحه‌ی مسابقه پیش‌نویس و لغوشده را فقط به
-       صاحبش نشان می‌دهد. HTMLِ این‌جا برای هر بازدیدکننده است ⟵ فقط وضعیتِ عمومی؛ بقیه
-       مثلِ قبل با درخواستِ مرورگر (همان رفتارِ پیشین). */
+    /* درخواستِ ساختگیِ این‌جا کوکی ندارد، پس GET پیش‌نویس را ۴۰۴ می‌دهد؛ این سنجش فقط
+       پشتیبان است — HTMLِ این‌جا برای هر بازدیدکننده است. پیش‌نویس برای صاحبش با
+       درخواستِ مرورگر (کوکی‌دار) می‌آید. */
     const status = String((j.tournament as Row | undefined)?.status ?? '')
-    if (!(PUBLIC_STATUSES as string[]).includes(status)) return null
+    if (!VIEWABLE_STATUSES.has(status)) return null
     const rounds = (Array.isArray(j.rounds) ? j.rounds : []) as Row[]
     return {
       tournament: pick(j.tournament, T_KEYS) as unknown as Bracket['tournament'],

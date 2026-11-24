@@ -2,7 +2,8 @@ export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { actorOf, ownsClub, UNAUTHENTICATED, FORBIDDEN } from '@/lib/auth/ownership';
 import { sb, audit, clientIp } from '@/lib/finance/db';
-import { getTournament, cancelTournament } from '@/lib/tournaments/server';
+import { getTournament, cancelTournament, VIEWABLE_STATUSES } from '@/lib/tournaments/server';
+import { REFRESH_COOKIE } from '@/lib/auth/constants';
 import { notifyTournamentCancelled } from '@/lib/notify';
 
 /* یک مسابقه — خواندن، ویرایش، لغو.
@@ -57,13 +58,6 @@ async function guard(req: NextRequest, id: string) {
   return { actor, t };
 }
 
-/* وضعیت‌هایی که هر کسی حق دیدنشان را دارد. `draft` عمدا بیرون است:
-   پیش‌نویس یعنی باشگاه هنوز منتشرش نکرده. */
-const PUBLIC_STATUSES = new Set([
-  'published', 'registration_open', 'registration_closed',
-  'ongoing', 'completed', 'cancelled',
-]);
-
 export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string }> }) {
   const { id } = await ctx.params;
   if (!UUID.test(id)) return NextResponse.json({ message: 'شناسه معتبر نیست' }, { status: 400 });
@@ -76,8 +70,12 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string 
 
      پاسخ عمدا ۴۰۴ است نه ۴۰۳: ۴۰۳ خودش تأیید می‌کند که چنین مسابقه‌ای
      وجود دارد. */
-  if (!PUBLIC_STATUSES.has(t.status)) {
+  if (!VIEWABLE_STATUSES.has(t.status)) {
     const actor = await actorOf(req);
+    /* توکنِ دسترسیِ ۱۵ دقیقه‌ای منقضی ولی نشستِ تمدیدپذیر هست ⟵ ۴۰۱، تا apiFetch تمدید کند و
+       دوباره بپرسد. با ۴۰۴ تمدیدی رخ نمی‌داد و برگزارکننده‌ی پیش‌نویس در پنلِ برگزاری
+       «در دسترس نیست» می‌دید (بازبینی، آذرِ ۱۴۰۵). بی‌نشست همان ۴۰۴. */
+    if (!actor && req.cookies.get(REFRESH_COOKIE)) return NextResponse.json(UNAUTHENTICATED, { status: 401 });
     const allowed = !!actor && await ownsClub(actor, t.club_id, 'tournaments');
     if (!allowed) return NextResponse.json({ message: 'مسابقه یافت نشد' }, { status: 404 });
   }

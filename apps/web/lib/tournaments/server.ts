@@ -65,6 +65,13 @@ export const PUBLIC_STATUSES: TournamentStatus[] = [
   'published', 'registration_open', 'registration_closed', 'ongoing', 'completed',
 ]
 
+/* وضعیت‌هایی که صفحه‌ی *یک* مسابقه (و جدول و نتایجش) برای هر کسی باز است. با
+   فهرستِ بالا یک فرق دارد: لغوشده در فهرست‌ها نمی‌آید ولی نشانیِ مستقیمش باز است.
+   `draft` عمدا بیرون است: پیش‌نویس یعنی باشگاه هنوز منتشرش نکرده.
+   ⚠️ یک منبع برای GET /api/tournaments/[id] و GET …/matches — پیش‌تر دومی هیچ
+   سنجشی نداشت و جدول و بازیکنانِ پیش‌نویس با داشتنِ شناسه خوانده می‌شد (آذرِ ۱۴۰۵). */
+export const VIEWABLE_STATUSES: ReadonlySet<string> = new Set([...PUBLIC_STATUSES, 'cancelled'])
+
 /* ── شروع خودکار ──
    مسابقه‌ای که ساعت شروعش رسیده و جدولش کشیده شده باید از «ثبت‌نام
    بسته» به «در حال برگزاری» برود. کران نساختیم — یک نقطه‌ی خرابی
