@@ -1,4 +1,6 @@
+import type { Metadata } from 'next'
 import { NextRequest } from 'next/server'
+import { cache } from 'react'
 import { z } from 'zod'
 import { ChannelClient } from './ChannelClient'
 import { GET as listMedia } from '@/app/api/media/route'
@@ -17,7 +19,8 @@ import { TIMED_OUT, withTimeout } from '@/lib/seo/timeout'
    useParamsِ کلاینت باید یک هندل را بپرسند */
 const Handle = z.string().regex(/^[A-Za-z0-9_.-]{1,64}$/)
 
-async function loadChannelVideos(raw: string): Promise<PublicVideo[] | null> {
+/* یک‌بار در هر درخواست — متادیتا و خودِ صفحه هر دو همین را می‌خوانند */
+const loadChannelVideos = cache(async (raw: string): Promise<PublicVideo[] | null> => {
   let decoded = raw
   try { decoded = decodeURIComponent(raw) } catch { /* نشانیِ بدشکل همان‌طور که هست */ }
   const h = Handle.safeParse(decoded)
@@ -32,6 +35,31 @@ async function loadChannelVideos(raw: string): Promise<PublicVideo[] | null> {
   } catch (e) {
     console.error('[media] channel initial', e instanceof Error ? e.message : e)
     return null
+  }
+})
+
+/* ⚠️ canonicalِ خودِ کانال: بی این، canonicalِ '/media'ِ media/layout ارث می‌رسید.
+   کانالِ قطعاً خالی noindex؛ «معلوم نشد» (خطا یا مهلت) هرگز noindex نمی‌گیرد. */
+export async function generateMetadata({ params }: { params: Promise<{ handle: string }> }): Promise<Metadata> {
+  const { handle } = await params
+  /* همان مقدارِ رمزگشایی‌شده‌ای که لودر می‌سنجد؛ هندلِ نامعتبر ⟵ noindex و بی canonical
+     (/media/channel/ صفحه ندارد) */
+  let decoded = handle
+  try { decoded = decodeURIComponent(handle) } catch { /* همان‌طور که هست */ }
+  const h = Handle.safeParse(decoded).success ? decoded : ''
+  if (!h) return { robots: { index: false, follow: true } }
+  const items = await loadChannelVideos(handle)
+  const name = items?.[0]?.creatorName || h
+  const title = `${name || 'کانال'} | بیلیارد مدیا`
+  const description = `ویدیوهای ${name || 'این کانال'} در بیلیارد مدیا`
+  const url = `/media/channel/${encodeURIComponent(h)}`
+  return {
+    title: { absolute: `${title} | بیلیارد هاب` },
+    description,
+    alternates: { canonical: url },
+    ...(items && items.length === 0 ? { robots: { index: false, follow: true } } : {}),
+    openGraph: { title, description, url, siteName: 'بیلیارد هاب', locale: 'fa_IR', type: 'profile' },
+    twitter: { card: 'summary_large_image', title, description },
   }
 }
 
