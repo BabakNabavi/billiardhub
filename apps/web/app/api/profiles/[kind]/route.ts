@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { sb, actorFromRequest } from '@/lib/finance/db';
 import { can, PROFILE_KIND_KEY } from '@/lib/admin/permissions';
 import { checkProfileData } from '@/lib/profiles/validate';
+import { withoutPrivateFields } from '@/lib/profiles/private-fields';
 import { lockState, requeueAfterRegrant, LOCKED_MESSAGE } from '@/lib/roles/revoke';
 import {
   PROFILE_KINDS, getProfileByOwner, getProfileBySlug, listProfiles, saveProfile, managerNameOf,
@@ -86,7 +87,12 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ kind: strin
     const isMine = !!actor && actor.id === p.ownerId;
     /* پروفایلِ نمایشی را ادمین ساخته — نامِ او «مدیر» نیست (خواستِ مالک) */
     const managerName = p.isDemo ? '' : await managerNameOf(kind, p.ownerId);
-    return NextResponse.json({ profile: p, isMine, managerName }, { headers: { 'Cache-Control': 'no-store' } });
+    /* ⚠️ کامل فقط برای صاحبش (ویرایشِ درجا کلِ پروفایل را دوباره ذخیره می‌کند و نسخه‌ی
+       ناقص فیلدهایش را پاک می‌کرد). بقیه بی‌شماره‌ی شخصی، پروانه و مدرک — هیچ صفحه‌ی
+       عمومی‌ای نشانشان نمی‌دهد و تا آذرِ ۱۴۰۵ برای هر بازدیدکننده‌ای برمی‌گشتند.
+       پنل‌های ادمین مسیرِ خودشان را دارند (/api/admin/profiles). */
+    const profile = isMine ? p : withoutPrivateFields(p, { keepOwnerId: true });
+    return NextResponse.json({ profile, isMine, managerName }, { headers: { 'Cache-Control': 'no-store' } });
   }
 
   /* ── فهرست کامل برای پنل‌ها ──
@@ -100,8 +106,10 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ kind: strin
     if (!actor) return NextResponse.json({ message: 'ابتدا وارد شوید' }, { status: 401 });
     try {
       const all = await listProfiles(kind, {});
+      /* پنلِ باشگاه فقط نام و شهر و معرفی را می‌خواند — هر کاربرِ واردشده‌ای این فهرست را
+         می‌گیرد، پس بی‌فیلدِ خصوصی (lib/profiles/private-fields) */
       return NextResponse.json(
-        { profiles: all.filter(p => p.status !== 'rejected') },
+        { profiles: all.filter(p => p.status !== 'rejected').map(p => withoutPrivateFields(p, { keepOwnerId: true })) },
         { headers: { 'Cache-Control': 'no-store' } },
       );
     } catch {
@@ -111,7 +119,11 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ kind: strin
 
   try {
     const all = await listProfiles(kind, { status: 'approved', strict: true });
-    return NextResponse.json({ profiles: all }, { headers: { 'Cache-Control': 'no-store' } });
+    /* فهرستِ عمومی — بی‌فیلدِ خصوصی (lib/profiles/private-fields) */
+    return NextResponse.json(
+      { profiles: all.map(p => withoutPrivateFields(p, { keepOwnerId: true })) },
+      { headers: { 'Cache-Control': 'no-store' } },
+    );
   } catch {
     return NextResponse.json({ message: 'خطا در دریافت پروفایل‌ها' }, { status: 500 });
   }

@@ -24,6 +24,7 @@ import { getProfileBySlug, managerNameOf } from './server'
 import type { ProfileKind } from './server'
 import type { PublicProfile } from './client'
 import { withMediaArrays } from './albums'
+import { withoutPrivateFields } from './private-fields'
 import { TIMED_OUT, withTimeout } from '@/lib/seo/timeout'
 
 /* ── آنچه به HTML نمی‌رود ──
@@ -34,8 +35,8 @@ import { TIMED_OUT, withTimeout } from '@/lib/seo/timeout'
    ⚠️ الگو، نه فهرستِ اسم: فیلدِ خصوصیِ تازه‌ای که فرمی بعدا با همین
    پیشوندها اضافه کند، خودبه‌خود بیرون می‌ماند. صفحه‌ی عمومی هیچ‌کدام را
    نمی‌خواند (کد پستی و مختصاتِ تولیدکننده عمومی‌اند و می‌مانند).
-   پاسخِ API کامل می‌ماند و مرورگر پس از سوارشدن همان را می‌گیرد. */
-const PRIVATE_KEY = /^(owner|license|national|birth|iban|sheba|card|password|secret|token)|^certificate$/i
+   قاعده در lib/profiles/private-fields است (مشترک با پاسخِ API)؛ این‌جا ownerId هم
+   نمی‌رود — مالکیت فقط از پاسخِ مرورگر می‌آید. */
 
 /* مرزِ ورودی: پارامترِ مسیر — همان سقفِ ۸۰ نویسه‌ی نامک در api/profiles/[kind] */
 const Slug = z.string().trim().min(1).max(80)
@@ -44,9 +45,6 @@ function decodeSlug(raw: string): string {
   try { return decodeURIComponent(raw) } catch { return raw }
 }
 
-function withoutPrivate(o: Record<string, unknown>): Record<string, unknown> {
-  return Object.fromEntries(Object.entries(o).filter(([k]) => !PRIVATE_KEY.test(k)))
-}
 
 export async function loadPublicProfile<T>(kind: ProfileKind, rawSlug: string): Promise<PublicProfile<T> | null> {
   return (await loadPublicProfileFull<T>(kind, rawSlug))?.profile ?? null
@@ -68,9 +66,9 @@ export async function loadPublicProfileFull<T>(
     const mgr = r.isDemo ? '' : await withTimeout(managerNameOf(kind, r.ownerId), 1000)
     const managerName = mgr === TIMED_OUT ? '' : mgr
     /* همان شکلِ پاسخِ JSONِ API (تاریخ‌ها رشته) */
-    const row = withoutPrivate(JSON.parse(JSON.stringify(r)) as Record<string, unknown>)
+    const row = withoutPrivateFields(JSON.parse(JSON.stringify(r)) as Record<string, unknown>, { keepOwnerId: false })
     /* همان تضمینِ آرایه‌ای که fetchProfileResult در مرورگر می‌زند */
-    row.data = withMediaArrays(withoutPrivate((row.data ?? {}) as Record<string, unknown>))
+    row.data = withMediaArrays((row.data ?? {}) as Record<string, unknown>)
     return { profile: row as unknown as PublicProfile<T>, managerName }
   } catch (e) {
     console.error(`[profile:${kind}] initial read`, e instanceof Error ? e.message : e)

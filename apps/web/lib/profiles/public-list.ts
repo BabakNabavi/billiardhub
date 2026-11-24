@@ -13,19 +13,19 @@ import { listProfiles } from './server'
 import type { ProfileKind } from './server'
 import type { RemoteProfile } from './client'
 import { TIMED_OUT, withTimeout } from '@/lib/seo/timeout'
+import { withoutPrivateFields } from './private-fields'
 
 /** بیلد: خطا ⟵ null (مرورگر خودش می‌گیرد). اجرا: پرتاب ⟵ ISR نسخه‌ی سالمِ قبلی را نگه می‌دارد. */
 const atBuild = process.env.NEXT_PHASE === 'phase-production-build'
 
-const PRIVATE_ROW = ['ownerId', 'licenseNumber', 'licenseUrl', 'licenseNote'] as const
-/* ownerId و پروانه داخلِ data هم تکرار شده‌اند */
-const PRIVATE_DATA = ['ownerPhone', 'ownerName', 'certificate', 'videos', 'albums', 'ownerId', 'licenseNumber', 'licenseUrl', 'licenseNote'] as const
+/* فیلدهای خصوصی با همان قاعده‌ی پاسخِ API (lib/profiles/private-fields)؛ ویدیو و آلبوم هم
+   چون کارتِ فهرست هیچ‌کدام را نمی‌خواند و فقط HTML را سنگین می‌کردند */
 function stripPrivate(row: Record<string, unknown>): Record<string, unknown> {
-  const out = { ...row }
-  for (const k of PRIVATE_ROW) delete out[k]
+  const out = withoutPrivateFields(row, { keepOwnerId: false })
   if (out.data && typeof out.data === 'object') {
     const data = { ...(out.data as Record<string, unknown>) }
-    for (const k of PRIVATE_DATA) delete data[k]
+    delete data.videos
+    delete data.albums
     out.data = data
   }
   return out
@@ -37,7 +37,7 @@ export async function loadPublicProfiles<T>(kind: ProfileKind): Promise<RemotePr
     if (r === TIMED_OUT) throw new Error(`[profiles:${kind}] initial list timed out`)
     /* همان شکلِ پاسخِ JSONِ API (تاریخ‌ها رشته)، بی فیلدهای خصوصی و سنگین: این‌ها در
        HTMLِ ساخته‌شده برای هر بازدیدکننده و ربات می‌نشینند و کارت از هیچ‌کدام نمی‌خواند.
-       (پاسخِ API همچنان کامل است؛ مرورگر پس از سوارشدن همان را می‌گیرد.) */
+       (پاسخِ API هم از آذرِ ۱۴۰۵ بی‌فیلدِ خصوصی است — lib/profiles/private-fields.) */
     const rows = JSON.parse(JSON.stringify(r)) as Record<string, unknown>[]
     return rows.map(stripPrivate) as unknown as RemoteProfile<T>[]
   } catch (e) {

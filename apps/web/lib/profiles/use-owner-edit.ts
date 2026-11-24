@@ -178,6 +178,18 @@ export function useOwnerEdit<T>(
      گارد هم‌زمانی عملا کار نمی‌کرد. */
   const latest = useRef<T | null>(profile)
   const busyRef = useRef(false)
+  /* ── پایه‌ی کامل برای ذخیره (آذرِ ۱۴۰۵) ──
+     پاسخِ عمومیِ GET?slug= فقط برای مالکِ تأییدشده با کوکی (isMine) کامل است؛ بقیه بی
+     شماره‌ی شخصی، پروانه و مدرک می‌گیرند (lib/profiles/private-fields). ولی دکمه‌ها با
+     نشانه‌ی مرورگر یا پرسشِ ?mine=1 هم باز می‌شوند — دقیقا وقتی توکنِ ۱۵ دقیقه‌ای منقضی
+     شده و همین GET «مهمان» حسابش کرده. مسیرِ ذخیره کلِ data را جایگزین می‌کند، پس ذخیره‌ی
+     همان نسخه‌ی ناقص آن فیلدها را پاک می‌کرد. پس تا وقتی سرور مالکیت را تأیید نکرده،
+     پیش از ذخیره نسخه‌ی کاملِ خودِ مالک (?mine=1) زیرِ نسخه‌ی صفحه می‌نشیند.
+     ⚠️ «کامل» به *همان شیء* بسته است، نه یک بولینِ همیشگی: فقط پاسخِ ذخیره‌ی موفق کامل
+     است. پرچمی که پیش از ذخیره روشن می‌شد، با شکستِ ذخیره (قطعیِ شبکه، ۴۰۰، ۴۰۹) روی
+     همان نسخه‌ی ناقص می‌ماند و تلاشِ دوم پاکش می‌کرد؛ و اگر پروفایل از بیرون عوض شود
+     (بازخوانی) شیء هم عوض می‌شود و دوباره پرسیده می‌شود (بازبینی، آذرِ ۱۴۰۵). */
+  const fullRow = useRef<T | null>(null)
   useEffect(() => { latest.current = profile }, [profile])
 
   const apply = useCallback(async (mutate: (draft: T) => T) => {
@@ -185,8 +197,23 @@ export function useOwnerEdit<T>(
     if (!base || !isOwner || busyRef.current) return false
     busyRef.current = true
     setSaving(true); setError('')
-    const next = mutate(base)
     try {
+      let draft: T = base
+      if (serverSaysMine !== true && base !== fullRow.current) {
+        const r = await apiFetch(`/api/profiles/${kind}?mine=1`, { cache: 'no-store' }).catch(() => null)
+        const j = r?.ok
+          ? await r.json().catch(() => null) as { profile?: { slug?: string; data?: Record<string, unknown> } | null } | null
+          : null
+        const own = j?.profile
+        if (!r) { setError('ارتباط با سرور برقرار نشد'); return false }
+        if (!own?.data || own.slug !== slug) {
+          setError('نشست شما با این حساب یکی نیست؛ یک‌بار خارج و دوباره وارد شوید')
+          return false
+        }
+        /* فیلدهای صفحه رویِ نسخه‌ی کامل؛ فقط آنچه در صفحه نیست از نسخه‌ی کامل می‌آید */
+        draft = { ...own.data, ...(base as object) } as T
+      }
+      const next = mutate(draft)
       const res = await saveProfileRemote(kind, slug, next as unknown as Record<string, unknown>)
       if (!res.ok) { setError(res.message ?? 'ذخیره روی سرور انجام نشد'); return false }
 
@@ -204,6 +231,8 @@ export function useOwnerEdit<T>(
          می‌نشانیم، وگرنه صفحه تا بازخوانی بعدی base64 نگه می‌دارد. */
       const saved = (res.profile?.data as T) ?? next
       latest.current = saved
+      /* پاسخِ ذخیره ردیفِ کاملِ خودِ مالک است — ذخیره‌ی بعدی دوباره نمی‌پرسد */
+      fullRow.current = saved
       onSaved(saved)
       return true
     } catch {
@@ -213,7 +242,7 @@ export function useOwnerEdit<T>(
       busyRef.current = false
       setSaving(false)
     }
-  }, [profile, isOwner, kind, slug, onSaved, ownerId])
+  }, [profile, isOwner, kind, slug, onSaved, ownerId, serverSaysMine])
 
   return { isOwner, saving, error, apply }
 }
