@@ -377,7 +377,7 @@ function ClubCard({ club, h = '360px', featured = false }: { club: RealClub; h?:
               pointerEvents: 'none', zIndex: 1 }} />
             {/* باز/بسته badge */}
             {isOpen !== null && <span className="club-open-btn"
-              style={{ position: 'absolute', top: '8px', left: '8px', height: '24px', borderRadius: '20px',
+              style={{ position: 'absolute', top: '8px', insetInlineEnd: '8px', height: '24px', borderRadius: '20px',
                 background: isOpen ? 'rgba(48,197,90,0.08)' : 'rgba(239,68,68,0.08)',
                 backdropFilter: 'blur(16px) saturate(200%)',
                 WebkitBackdropFilter: 'blur(16px) saturate(200%)',
@@ -386,7 +386,7 @@ function ClubCard({ club, h = '360px', featured = false }: { club: RealClub; h?:
                   ? 'inset 0 1px 0 rgba(48,197,90,0.28), 0 3px 10px rgba(0,0,0,0.22)'
                   : 'inset 0 1px 0 rgba(239,68,68,0.28), 0 3px 10px rgba(0,0,0,0.22)',
                 alignItems: 'center', justifyContent: 'center', gap: '5px',
-                cursor: 'pointer', zIndex: 3, padding: '0 9px 0 7px' }}>
+                zIndex: 3, paddingBlock: 0, paddingInlineStart: '9px', paddingInlineEnd: '7px' }}>
               <span className="open-dot" style={{
                 width: '7px', height: '7px', borderRadius: '50%', flexShrink: 0,
                 background: isOpen ? '#30C55A' : '#ef4444',

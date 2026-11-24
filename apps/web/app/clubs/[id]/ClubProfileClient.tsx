@@ -431,7 +431,7 @@ export function ClubProfileClient({ initialClub }: { initialClub?: Club | null }
   }, [loading, notFound, club.latitude, club.longitude]);
 
   const images   = club.images?.length ? club.images : ['/images/clubs/club6.webp'];
-  const { isOpen, closeTime, todayKey } = useClubOpenStatus(club.workingHours);
+  const { isOpen, closeTime, allDay, todayKey } = useClubOpenStatus(club.workingHours);
   const hasStory = !!club.hasActiveStory;
 
   useEffect(() => {
@@ -930,7 +930,7 @@ export function ClubProfileClient({ initialClub }: { initialClub?: Club | null }
           {/* Status badge — top-left corner */}
           {isOpen !== null && <div className="hero-top-btn" data-club-open={isOpen} style={{ position: 'absolute', insetInlineEnd: 'clamp(14px,3vw,28px)', zIndex: 10, display: 'flex', alignItems: 'center', gap: 7, background: isOpen ? 'rgba(48,197,90,0.12)' : 'rgba(239,68,68,0.12)', backdropFilter: 'blur(16px)', border: `1px solid ${isOpen ? 'rgba(48,197,90,0.28)' : 'rgba(239,68,68,0.28)'}`, borderRadius: 20, padding: '7px 14px' }}>
             <span style={{ width: 6, height: 6, borderRadius: '50%', background: isOpen ? '#30C55A' : '#ef4444', animation: 'pulse 2s infinite', display: 'inline-block' }} />
-            <span style={{ fontSize: 14, color: isOpen ? '#30C55A' : '#ef4444', fontWeight: 700 }}>{isOpen ? `باز تا ${toFa(closeTime || '')}` : 'بسته است'}</span>
+            <span style={{ fontSize: 14, color: isOpen ? '#30C55A' : '#ef4444', fontWeight: 700 }}>{isOpen ? (allDay ? 'باز شبانه‌روزی' : `باز تا ${toFa(closeTime || '')}`) : 'بسته است'}</span>
           </div>}
 
 
