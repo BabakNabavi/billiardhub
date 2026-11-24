@@ -1,3 +1,4 @@
+import { preload } from 'react-dom'
 import { RankingClient } from './RankingClient'
 import { loadInitialRankings } from '@/lib/rankings/server-read'
 
@@ -20,6 +21,14 @@ export const revalidate = 60
 const atBuild = process.env.NEXT_PHASE === 'phase-production-build'
 
 export default async function RankingPage() {
+  /* پس‌زمینه‌ی تارِ سربرگ (.rk-hero::before) در CSS است و مرورگر تا خواندنِ استایل
+     پیدایش نمی‌کرد؛ روی گوشی همین لایه بزرگ‌ترین عنصرِ صفحه است و دیر رسیدنش
+     LCP را نیم ثانیه عقب می‌انداخت (آذرِ ۱۴۰۵ — همان کارِ /tournaments).
+     ⚠️ فقط زیرِ ۷۶۸: بالاتر خودِ بنر (<img>ِ ۱۲۸۰) بزرگ‌تر است و این سرنخ فقط
+     پهنای باندش را می‌گرفت — روی ۱۴۴۰ کمی کندتر شد. */
+  preload('/images/ranking/header-768.webp', {
+    as: 'image', fetchPriority: 'high', media: 'not all and (min-width: 768px)',
+  })
   const initial = await loadInitialRankings().catch((e: unknown) => {
     console.error('[ranking] initial load', e)
     if (!atBuild) throw e
