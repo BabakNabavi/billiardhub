@@ -5,7 +5,8 @@ import type { LiveAngle } from './angles'
 
 export interface LiveSession {
   id: string; clubId: string; clubName: string; title: string
-  ownerKey: string
+  /** پاسخِ عمومی دیگر نمی‌فرستدش (شماره‌ی باشگاه‌دار بود) — api/live/route.publicSession */
+  ownerKey?: string
   /** سرور همچنان مقدارِ پیش‌فرض می‌گذارد؛ از باشگاه‌دار پرسیده نمی‌شود
    *  و هیچ‌جا نمایش داده نمی‌شود، پس نمایشش یعنی نشان‌دادنِ چیزی که
    *  کسی انتخابش نکرده. */

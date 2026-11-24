@@ -1,6 +1,6 @@
 export const dynamic = 'force-dynamic'
 import { NextRequest, NextResponse } from 'next/server'
-import { CORS, BUCKET, safeKey, readJsonFresh, writeJson } from '@/lib/social-server'
+import { CORS, BUCKET, bucketFor, safeKey, readJsonFresh, writeJson } from '@/lib/social-server'
 import { getSupabaseServer } from '@/lib/supabase-server'
 import { actorOf, ownsClub, UNAUTHENTICATED, FORBIDDEN } from '@/lib/auth/ownership'
 import { can } from '@/lib/admin/permissions'
@@ -93,13 +93,37 @@ const PROBE_TTL = 15_000;
 /* یک تعریف از «زنده»، نه دو تا — وگرنه روزی که معنای کهنگی عوض شود
    یکی‌شان جا می‌ماند. */
 async function liveSessions(): Promise<LiveSession[]> {
-  const { data } = await getSupabaseServer().storage.from(BUCKET).list(DIR, { limit: 200 })
+  /* جلسه‌ها در باکتِ خصوصی‌اند (lib/social-server: social/live/s/) */
+  const { data } = await getSupabaseServer().storage.from(bucketFor(`${DIR}/`)).list(DIR, { limit: 200 })
   const files = (data ?? []).filter(f => f.name.endsWith('.json'))
   const all = await Promise.all(files.map(f => readJsonFresh<LiveSession | null>(`${DIR}/${f.name}`, null)))
   const now = Date.now()
   return (all.filter(Boolean) as LiveSession[])
     .filter(s => !s.ended && now - s.lastBeat <= STALE)
     .sort((a, b) => b.startedAt - a.startedAt)
+}
+
+/* ── یک جلسه ──
+   جلسه‌ها از آذرِ ۱۴۰۵ در باکتِ خصوصی نوشته می‌شوند. جلسه‌ای که پیش از آن شروع شده و
+   هنوز زنده است (پخشی که لحظه‌ی دیپلوی در جریان بود) از جای قدیم خوانده می‌شود تا
+   قطع نشود؛ اولین ضربانش آن را در جای تازه می‌نویسد. فایل‌های قدیمیِ باکتِ عمومی
+   پاک نمی‌شوند — حذف بی‌اجازه‌ی صریح ممنوع است. */
+async function readSession(id: string): Promise<LiveSession | null> {
+  const s = await readJsonFresh<LiveSession | null>(sPath(id), null)
+  if (s) return s
+  const { data } = await getSupabaseServer().storage.from(BUCKET).download(sPath(id))
+  if (!data) return null
+  try { return JSON.parse(await data.text()) as LiveSession } catch { return null }
+}
+
+/* ⚠️ ownerKey بیرون نمی‌رود (آذرِ ۱۴۰۵): همان dmKey است، یعنی شماره‌ی موبایلِ باشگاه‌دار
+   (lib/auth/ownership)، و هیچ کلاینتی از پاسخ نمی‌خواندش — مالکیت فقط روی سرور و از
+   فایلِ ذخیره‌شده‌ی جلسه سنجیده می‌شود. تا امروز شماره‌ی هر کسی که پخش می‌کرد در این
+   پاسخِ عمومی بود. */
+function publicSession<T extends { ownerKey?: string }>(s: T): Omit<T, 'ownerKey'> {
+  const out: Partial<T> = { ...s }
+  delete out.ownerKey
+  return out as Omit<T, 'ownerKey'>
 }
 
 /* GET            → جلسات فعال
@@ -129,18 +153,18 @@ export async function GET(req: NextRequest) {
     }
   }
   if (id) {
-    const s = await readJsonFresh<LiveSession | null>(sPath(id), null)
+    const s = await readSession(id)
     if (!s || s.ended || Date.now() - s.lastBeat > STALE) {
       return NextResponse.json(null, { headers: { ...CORS, 'Cache-Control': 'no-store' } })
     }
     const angles = await readAngles(id)
-    return NextResponse.json({ ...s, angles }, { headers: { ...CORS, 'Cache-Control': 'no-store' } })
+    return NextResponse.json({ ...publicSession(s), angles }, { headers: { ...CORS, 'Cache-Control': 'no-store' } })
   }
 
   try {
     /* فهرست عمدا زاویه‌ها را نمی‌خواند: برای هر جلسه یک list به‌علاوه‌ی
        چند download بود، روی صفحه‌ای که هر ۱۵ ثانیه تازه می‌شود. */
-    return NextResponse.json(await liveSessions(), { headers: { ...CORS, 'Cache-Control': 'no-store' } })
+    return NextResponse.json((await liveSessions()).map(publicSession), { headers: { ...CORS, 'Cache-Control': 'no-store' } })
   } catch {
     return NextResponse.json([], { headers: { ...CORS, 'Cache-Control': 'no-store' } })
   }
@@ -183,7 +207,7 @@ export async function POST(req: NextRequest) {
   /* ── مالکیتِ مشترکِ بقیه‌ی اکشن‌ها ── */
   const id = String(b?.id || '')
   if (!id) return NextResponse.json({ ok: false }, { status: 400, headers: CORS })
-  const s = await readJsonFresh<LiveSession | null>(sPath(id), null)
+  const s = await readSession(id)
   if (!s) return NextResponse.json({ ok: false, message: 'جلسه یافت نشد' }, { status: 404, headers: CORS })
   /* فقط صاحب پخش می‌تواند تپش/پایان بفرستد.
      شرط قبلی به `b.ownerKey` نگاه می‌کرد و با **حذف** آن از بدنه
