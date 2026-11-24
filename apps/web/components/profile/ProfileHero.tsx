@@ -23,6 +23,7 @@
 'use client'
 import { Fragment, useEffect, useState } from 'react'
 import { preload } from 'react-dom'
+import { thumbUrl } from '@/lib/media/thumb'
 import { useCopyUrl } from '@/hooks/use-copy-url'
 import Link from 'next/link'
 import { MapPin, Check, Link2 as LinkIcon } from 'lucide-react'
@@ -131,8 +132,14 @@ const SLIDE_MS = 5200
 /* ⚠️ نشانی از کاربر می‌آید (بنرِ آپلودشده). یک `)` یا `"` در نام
    فایل، اعلانِ CSS را می‌شکند و در بدترین حالت اجازه‌ی تزریق
    می‌دهد. نقل‌قول + کدگذاری، هر دو. */
+/* ── کاور از سرویسِ عکس (آذرِ ۱۴۰۵) ──
+   عکسِ آپلودی خام سرو می‌شد (کاورِ تولیدکننده ۱۴۱KB JPEG و بزرگ‌ترین عنصرِ صفحه).
+   render/image بزرگ‌نمایی نمی‌کند، پس با عرضِ ۲۰۰۰ همان ابعادِ اصلی را می‌دهد، فقط
+   WebP/AVIF: ۱۴۱⟵۵۶KB با PSNR ۴۱dB (به چشم یکی، زیرِ پرده‌ی تیره‌ی هیرو هم). نشانیِ
+   محلی و data: دست نمی‌خورند (thumbUrl). سرنخِ preload هم از همین تابع می‌گذرد تا
+   درخواست یکی باشد. */
 function cssHref(u: string): string {
-  return encodeURI(u).replace(/["\\]/g, c => encodeURIComponent(c))
+  return encodeURI(thumbUrl(u, 2000, 80)).replace(/["\\]/g, c => encodeURIComponent(c))
 }
 function cssUrl(u: string): string {
   return `url("${cssHref(u)}")`
