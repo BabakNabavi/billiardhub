@@ -891,7 +891,7 @@ const mig79 = read('../../supabase/migrations/079_ad_boosts.sql');
 const boostApi = read('app/api/market/ads/[id]/boost/route.ts');
 const boostCb  = read('app/api/market/boost/callback/[provider]/route.ts');
 const marketApi = read('app/api/market/ads/route.ts');
-const shopPage = read('app/shop/page.tsx');
+const shopPage = read('app/shop/ShopClient.tsx');
 
 t('دو اهرمِ متفاوت، نه دو برچسب',
   /bumped_at    timestamptz/.test(mig79) && /urgent_until timestamptz/.test(mig79),
@@ -904,7 +904,8 @@ t('فهرستِ بازار به تازه‌سازی نگاه می‌کند',
 t('نوارِ فوری در بازار هست',
   /const urgent = useMemo/.test(shopPage) && />فوری<\/h2>/.test(shopPage));
 t('ترتیبِ نوارِ فوری هر ساعت می‌چرخد',
-  /Math\.floor\(now \/ 3600000\)/.test(shopPage),
+  /* از آذرِ ۱۴۰۵ ساعت از لحظه‌ی ساختِ صفحه (renderedAt) است، نه ساعتِ گوشی */
+  /Math\.floor\(renderedAt \/ 3600000\)/.test(shopPage),
   'ترتیبِ ثابت یعنی خریدارِ دیروز ته نوار — همان مشکلی که فوری قرار بود حلش کند');
 t('آگهیِ فوری نشانِ قرمز می‌گیرد', /mk-urg/.test(shopPage));
 t('انقضای فوری در خواندن سنجیده می‌شود',
@@ -1148,7 +1149,7 @@ t('متنِ ترکیبی فونتش عوض نمی‌شود',
   && /u0600-/.test(read('lib/text-fa.ts')),
   'کلاسِ bh-latin در layout فونت را به Arial می‌برد');
 t('برند و مدل به خطِ بالای‌شان نچسبیده‌اند',
-  read('app/shop/page.tsx').includes('.mk-t { display: block; margin-top: 3px;')
+  read('app/shop/ShopClient.tsx').includes('.mk-t { display: block; margin-top: 3px;')
   && homeCl.includes('.bz-t { display:block; margin-top:3px;')
   && read('app/sellers/[id]/FlatShop.tsx').includes('.pc-t { display: block; margin-top: 3px;'),
   'خطِ دوم بی‌فاصله زیرِ عنوان بود');
@@ -1164,11 +1165,14 @@ t('نوارِ فوری حرکتِ خودکار ندارد',
 t('اسکرولِ افقی همچنان کار می‌کند',
   /useHorizontalScroll\(urgRef\)/.test(shopPage)
   && /\.mk-urgrow \{[^}]*overflow-x/.test(shopPage));
-t('ترتیبِ نوارِ فوری هر بار عوض می‌شود',
-  /const \[urgSeed, setUrgSeed\] = useState\(0\)/.test(shopPage)
-  && /}, \[matched, urgSeed\]\)/.test(shopPage)
-  && /setUrgSeed\(Math\.floor\(Math\.random\(\)/.test(shopPage),
-  'دانه بعد از mount گذاشته می‌شود وگرنه هیدریشن می‌شکند');
+/* آذرِ ۱۴۰۵: بازار روی سرور رندر می‌شود؛ دانه‌ی تصادفی روی سرور انتخاب و همان در مرورگر
+   نگه داشته می‌شود — چیدنِ دوباره پس از mount جابه‌جاییِ کارت‌ها را جلوی چشم نشان می‌داد.
+   ترتیب با هر بازسازیِ صفحه (دقیقه‌ای یک بار) عوض می‌شود. */
+t('ترتیبِ نوارِ فوری با هر بازسازیِ صفحه عوض می‌شود',
+  /const urgSeed = orderSeed/.test(shopPage)
+  && /orderSeed=\{Math\.floor\(Math\.random\(\) \* 1e9\)\}/.test(read('app/shop/page.tsx'))
+  && !/setUrgSeed/.test(shopPage),
+  'دانه از سرور می‌آید و پس از سوارشدن عوض نمی‌شود');
 t('آیکونِ فوری نرم چشمک می‌زند',
   /\.mk-urgzap \{ animation: mkZap/.test(shopPage)
   && /@keyframes mkZap \{ 0%, 100% \{ opacity: 1 \} 50% \{ opacity: 0\.35 \} \}/.test(shopPage));
@@ -1286,7 +1290,7 @@ const hSize = sizeOf(shopPage, 'mk-h'), tSize = sizeOf(shopPage, 'mk-t');
 t('کارت عنوان را دو تکه نشان می‌دهد',
   /headClassName="mk-h"/.test(shopPage) && /tailClassName="mk-t"/.test(shopPage));
 t('عنوانِ محصول یک کامپوننتِ مشترک دارد',
-  ['app/shop/page.tsx', 'app/HomeClient.tsx', 'app/sellers/[id]/FlatShop.tsx']
+  ['app/shop/ShopClient.tsx', 'app/HomeClient.tsx', 'app/sellers/[id]/FlatShop.tsx']
     .every(f => /<ProductTitle/.test(read(f))),
   'یک محصول در سه صفحه سه‌جور دیده می‌شد');
 t('دسته و نوع درشت‌تر از برند و مدل است',
@@ -1775,7 +1779,7 @@ t('«تبلیغات» تا رونمایی پشتِ کلید است',
 /* ── بازار: مشخصات، فوری، توافقی، جدید ── */
 console.log('\n― بازار ―');
 const adDetail = read('app/shop/[id]/ProductDetailClient.tsx');
-const market = stripComments(read('app/shop/page.tsx'));
+const market = stripComments(read('app/shop/ShopClient.tsx'));
 const newAdPage = read('app/shop/new/page.tsx');
 
 t('تعریفِ مشخصاتِ فنی یک‌جاست',
@@ -1898,7 +1902,7 @@ t('قیمتِ خط‌خورده از discountPrice می‌آید نه از در�
 t('گریدِ فروشگاه شش‌ستونی است', flat.includes('min-[1200px]:grid-cols-6'),
   'کوچک‌شدنِ کارت حالا کارِ گرید است نه محدودکردنِ عرضِ کارت داخلِ سلول');
 t('نوارِ فوری هم‌ارتفاع و اسکرول‌پذیر است',
-  read('app/shop/page.tsx').includes('min-width: 0; max-width: 100%'),
+  read('app/shop/ShopClient.tsx').includes('min-width: 0; max-width: 100%'),
   'کارتِ یک‌خطی و دوخطی دو ارتفاع می‌گرفتند');
 t('تیترِ کارتِ صفحه‌ی اصلی دوتکه و بولد است',
   /\.bz-h \{[^}]*font-weight:800/.test(read('app/HomeClient.tsx').replace(/\s+/g, ' '))
@@ -3296,7 +3300,7 @@ console.log('\n― یکپارچگیِ نمایش ―');
   const sr = read('lib/market/spec-rules.ts');
   const sc = read('lib/market/spec-catalog.ts');
   const detail = read('app/shop/[id]/ProductDetailClient.tsx');
-  const list = read('app/shop/page.tsx');
+  const list = read('app/shop/ShopClient.tsx');
 
   t('ممیزیِ پوششِ فیلدها در ریپو هست',
     existsSync(join(ROOT, 'scripts/audit-spec-coverage.mjs')),
@@ -3450,7 +3454,7 @@ console.log('\n― استوری: یک منبع، با انقضا ―');
      `storyImage: p.photo` یعنی عکسِ پروفایل رسانه‌ی استوری می‌شد و
      آواتار حلقه را بی‌قیدوشرط می‌کشید. هر مربی یک «استوری» داشت که
      خودش نگذاشته بود و هرگز منقضی نمی‌شد. */
-  for (const p of ['app/coaches/page.tsx', 'app/referees/page.tsx']) {
+  for (const p of ['app/coaches/CoachesClient.tsx', 'app/referees/RefereesClient.tsx']) {
     const src = read(p);
     t(`حلقه‌ی استوریِ شبح در ${p.split('/')[1]} نیست`,
       !src.includes('ClubStoryModal') && !/aria-label="مشاهده استوری"/.test(src)
@@ -3636,7 +3640,7 @@ console.log('\n― استوری: یک منبع، با انقضا ―');
     !/onClick={opts.reveal.toggle} tabIndex={-1}/.test(read('app/register/page.tsx')),
     'نامِ دسترس‌پذیر روی عنصری که فوکوس نمی‌گیرد بی‌فایده است');
   t('نامِ هر تراشه‌ی فیلتر یکتاست',
-    /aria-label=\{`برداشتن فیلترِ \$\{c\.label\}`\}/.test(read('app/shop/page.tsx')),
+    /aria-label=\{`برداشتن فیلترِ \$\{c\.label\}`\}/.test(read('app/shop/ShopClient.tsx')),
     'پنج دکمه با یک نام برای صفحه‌خوان از هم جدا نمی‌شوند');
   /* ── گاردهای «کمانِ سرِ صفحه» حذف شدند ──
      هیروی موج‌دار «components/profile/NotchHero.tsx» دیگر هیچ
@@ -4432,7 +4436,7 @@ console.log('\n― استوری: یک منبع، با انقضا ―');
   /* ── نقطه‌های اسلایدر در کلِ سایت ── */
   {
     const pages = [
-      'app/coaches/page.tsx', 'app/referees/page.tsx', 'app/clubs/[id]/page.tsx',
+      'app/coaches/CoachesClient.tsx', 'app/referees/RefereesClient.tsx', 'app/clubs/[id]/page.tsx',
       'app/manufacturers/[id]/page.tsx', 'app/sellers/[id]/FlatShop.tsx',
       'components/home/BannerSlider.tsx',
     ];
@@ -4501,7 +4505,7 @@ console.log('\n― استوری: یک منبع، با انقضا ―');
     /* نقطه‌های اسلایدرِ هدر دیده نمی‌شوند */
     t('نشانگرِ اسلایدِ فهرست‌ها پنهان است',
       read('app/globals.css').includes('.hero-dots { opacity: 0;')
-      && ['app/coaches/page.tsx', 'app/referees/page.tsx'].every(p => read(p).includes('className="hero-dots"')),
+      && ['app/coaches/CoachesClient.tsx', 'app/referees/RefereesClient.tsx'].every(p => read(p).includes('className="hero-dots"')),
       'دایره‌های ریزِ گوشه‌ی تصویر روی هدر شلوغی می‌کردند');
   }
 
@@ -4905,7 +4909,7 @@ console.log('\n― رشته‌ها روی کارت و در فیلتر ―');
 {
   /* ⚠️ کاربر دید: روی کارت «داور اسنوکر» و در صفحه‌ی خودش «اسنوکر،
      پاکت بیلیارد، هی‌بال». کارت فقط `disciplines[0]` را می‌نوشت. */
-  const ref = strip(read('app/referees/page.tsx'));
+  const ref = strip(read('app/referees/RefereesClient.tsx'));
   t('کارتِ داور همه‌ی رشته‌ها را می‌نویسد',
     ref.includes('const specText = referee.disciplines?.length')
     && !ref.includes("داور {sp?.label ?? 'بیلیارد'}"),
@@ -4914,7 +4918,7 @@ console.log('\n― رشته‌ها روی کارت و در فیلتر ―');
     ref.includes('r.disciplines.includes(filter)'),
     'داورِ سه‌رشته‌ای فقط زیرِ رشته‌ی اولش پیدا می‌شد');
   t('مربی: فیلتر روی همه‌ی رشته‌ها کار می‌کند',
-    strip(read('app/coaches/page.tsx')).includes('c.disciplines.includes(filter)'),
+    strip(read('app/coaches/CoachesClient.tsx')).includes('c.disciplines.includes(filter)'),
     'همان اشکال در صفحه‌ی مربیان هم بود');
   /* ⚠️ کارتِ مربی در صفحه‌ی باشگاه، متنی را نشان می‌داد که باشگاه‌دار
      لحظه‌ی افزودن تایپ کرده بود و همان‌جا منجمد می‌شد. مربی که رشته‌ای
@@ -5022,7 +5026,7 @@ console.log('\n― صحنه روی همه‌ی صفحه‌های اصلی ―');
 {
   const pages = [
     'app/booking/page.tsx', 'app/booking/[clubId]/page.tsx',
-    'app/coaches/page.tsx', 'app/referees/page.tsx', 'app/players/page.tsx',
+    'app/coaches/CoachesClient.tsx', 'app/referees/RefereesClient.tsx', 'app/players/page.tsx',
     'app/news/page.tsx', 'app/tournaments/page.tsx', 'app/services/page.tsx',
     'app/manufacturers/page.tsx', 'app/advertise/page.tsx', 'app/cart/page.tsx',
     'app/checkout/page.tsx', 'app/live/page.tsx', 'app/plans/page.tsx',
@@ -5087,7 +5091,7 @@ console.log('\n― دکمه و فیلد روی سیستمِ موجود ―');
      باگِ واقعی این‌جا بود، نه در استایل‌شیت: آیکون با
      `insetInlineEnd` نوشته شده بود که در راست‌به‌چپ یعنی چپ، و متن
      از زیرش رد می‌شد. گاردِ CSS-only آن را نمی‌دید. */
-  const heroPages = ['app/sellers/page.tsx', 'app/manufacturers/page.tsx'];
+  const heroPages = ['app/sellers/SellersClient.tsx', 'app/manufacturers/page.tsx'];
   for (const p of heroPages) {
     t(`فیلدِ هیرو در ${p.split('/')[1]}`,
       /className="input input-glass input-icon-start-lg/.test(read(p)));
@@ -5132,8 +5136,8 @@ console.log('\n― یک سطح برای کارتِ محصول ―');
     'لبه‌ی سفید روی زمینه‌ی روشنِ بازار کاملاً محو می‌شد');
 
   const users = [
-    ['app/shop/page.tsx', 'mk-card lq-pcard'],
-    ['app/shop/page.tsx', 'mk-row lq-pcard'],
+    ['app/shop/ShopClient.tsx', 'mk-card lq-pcard'],
+    ['app/shop/ShopClient.tsx', 'mk-row lq-pcard'],
     ['app/HomeClient.tsx', 'bz-card lq-pcard'],
     ['app/sellers/[id]/FlatShop.tsx', 'prod-card-sec1 lq-pcard'],
     ['app/shop/[id]/ProductDetailClient.tsx', 'pd-card lq-pcard'],
@@ -5144,12 +5148,12 @@ console.log('\n― یک سطح برای کارتِ محصول ―');
   /* هیچ‌کدام نباید پس‌زمینه/حاشیه‌ی خودش را دوباره تعریف کند، وگرنه
      ترتیبِ سند برنده می‌شود و سطحِ مشترک بی‌اثر می‌ماند. */
   t('کارتِ بازار پس‌زمینه‌ی محلی ندارد',
-    !/\.mk-card \{[^}]*background:/.test(read('app/shop/page.tsx')));
+    !/\.mk-card \{[^}]*background:/.test(read('app/shop/ShopClient.tsx')));
   t('کارتِ صفحه‌ی اصلی پس‌زمینه‌ی محلی ندارد',
     !/\.bz-card \{[^}]*background:/.test(read('app/HomeClient.tsx')));
 
   /* صحنه‌ی رنگی روی صفحه‌های فهرست و جزئیات */
-  for (const p of ['app/shop/page.tsx', 'app/sellers/page.tsx', 'app/clubs/ClubsClient.tsx', 'app/shop/[id]/ProductDetailClient.tsx']) {
+  for (const p of ['app/shop/ShopClient.tsx', 'app/sellers/SellersClient.tsx', 'app/clubs/ClubsClient.tsx', 'app/shop/[id]/ProductDetailClient.tsx']) {
     /* مسیرِ کامل در برچسب: `app/shop/page.tsx` و `app/shop/[id]/page.tsx`
        هر دو با تکه‌ی دوم «shop» می‌شدند و دو تست هم‌نام چاپ می‌کردند. */
     t(`صحنه در ${p}`, read(p).includes('className="lq-stage"'));
