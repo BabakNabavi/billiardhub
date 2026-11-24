@@ -44,7 +44,7 @@ import { makeMatcher } from '@/lib/search/filter'
 /** امتیاز تجمیعی هر متخصص — از ستون ردیف، نه jsonb */
 type Rating = { avg: number; count: number }
 
-export default function TechnicalServicesPage() {
+export function ServicesClient() {
   const [rows, setRows] = useState<Technician[]>([])
   const [ratings, setRatings] = useState<Map<string, Rating>>(new Map())
   const [loading, setLoading] = useState(true)

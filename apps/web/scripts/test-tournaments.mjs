@@ -5027,7 +5027,7 @@ console.log('\n― صحنه روی همه‌ی صفحه‌های اصلی ―');
   const pages = [
     'app/booking/page.tsx', 'app/booking/[clubId]/page.tsx',
     'app/coaches/CoachesClient.tsx', 'app/referees/RefereesClient.tsx', 'app/players/page.tsx',
-    'app/news/page.tsx', 'app/tournaments/page.tsx', 'app/services/page.tsx',
+    'app/news/page.tsx', 'app/tournaments/page.tsx', 'app/services/ServicesClient.tsx',
     'app/manufacturers/page.tsx', 'app/advertise/page.tsx', 'app/cart/page.tsx',
     'app/checkout/page.tsx', 'app/live/page.tsx', 'app/plans/page.tsx',
     'app/ranking/page.tsx', 'app/story-plans/page.tsx',
@@ -5083,7 +5083,7 @@ console.log('\n― دکمه و فیلد روی سیستمِ موجود ―');
     'راست/چپِ فیزیکی در چیدمانِ راست‌به‌چپ ممنوع است');
 
   /* بازیکنان کادرِ جست‌وجو ندارد — به خواستِ مالک حذف شد (آبانِ ۱۴۰۵) */
-  const pages = ['app/tournaments/page.tsx', 'app/news/page.tsx', 'app/services/page.tsx'];
+  const pages = ['app/tournaments/page.tsx', 'app/news/page.tsx', 'app/services/ServicesClient.tsx'];
   for (const p of pages) {
     t(`فیلدِ مشترک در ${p.split('/')[1]}`, /className="input input-glass input-sm/.test(read(p)));
   }
