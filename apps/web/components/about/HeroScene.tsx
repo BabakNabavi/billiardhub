@@ -27,14 +27,31 @@ export function HeroScene() {
     if ((navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData === true) return
 
     let dispose: (() => void) | null = null
-    /* کامپایلِ شیدر بعد از نقاشیِ اولیه، تا LCPِ عکس و hydration معطلِ GPU نمانند */
-    const start = window.setTimeout(() => {
+    /* کامپایلِ شیدر و اولین فریم پس از بارگذاریِ کاملِ صفحه و در لحظه‌ی بیکاریِ مرورگر
+       (آذرِ ۱۴۰۵) — پیش‌تر ۴۰۰ میلی‌ثانیه پس از سوارشدن بود و وسطِ بارگذاری می‌افتاد:
+       Lighthouse روی گوشی یک کارِ ۷ ثانیه‌ای و LCPِ ۸٫۵ ثانیه داد. عکسِ هیرو همان
+       لحظه دیده می‌شود؛ فقط جلوه کمی دیرتر روشن می‌شود. */
+    let timer = 0
+    let idle = 0
+    const boot = () => {
       dispose = createHeroRenderer(host, {
         onReady: () => setReady(true),
         onLost: () => setReady(false),
       })
-    }, 400)
-    return () => { window.clearTimeout(start); dispose?.(); setReady(false) }
+    }
+    const afterLoad = () => {
+      if (typeof window.requestIdleCallback === 'function') idle = window.requestIdleCallback(boot, { timeout: 2500 })
+      else timer = window.setTimeout(boot, 600)
+    }
+    if (document.readyState === 'complete') afterLoad()
+    else window.addEventListener('load', afterLoad, { once: true })
+    return () => {
+      window.removeEventListener('load', afterLoad)
+      window.clearTimeout(timer)
+      if (idle && typeof window.cancelIdleCallback === 'function') window.cancelIdleCallback(idle)
+      dispose?.()
+      setReady(false)
+    }
   }, [])
 
   return <div ref={wrap} aria-hidden className={`ab-scene ${ready ? 'is-ready' : ''}`} />
