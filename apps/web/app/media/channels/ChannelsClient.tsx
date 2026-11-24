@@ -13,7 +13,7 @@
    نیست — روی کارت فهرست به‌ازای هر کانال یک پرس‌وجو می‌خواهد.
    ───────────────────────────────────────────────────────────── */
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { fetchVideos } from '../../../lib/media-user'
 import { channelsFrom, type ShelfChannel } from '../../../lib/media/shelf'
@@ -22,20 +22,26 @@ import { ChannelCard } from '../../../components/media/cards'
 import '../media.css'
 import { makeMatcher } from '@/lib/search/filter'
 
-export default function ChannelsPage() {
+export function ChannelsClient({ initial }: { initial: ShelfChannel[] | null }) {
   const router = useRouter()
   const { mini, toggle } = useRailState()
 
   /* جست‌وجوی کانال برداشته شد (خواستِ مالک، ۱۰ آبانِ ۱۴۰۵) */
   const q = ''
-  const [all, setAll] = useState<ShelfChannel[]>([])
-  const [loading, setLoading] = useState(true)
+  /* کانال‌ها از همان ۴۸ ویدیوی تازه‌ای که fetchVideos({ limit: 48 }) می‌گیرد، روی سرور ساخته
+     و همراهِ HTML می‌آیند (page.tsx) ⟵ بی‌اسکلت (آذرِ ۱۴۰۵). صفحه ISR است، پس درخواستِ پایین
+     همچنان می‌رود و نسخه‌ی تازه را می‌آورد. */
+  const [all, setAll] = useState<ShelfChannel[]>(initial ?? [])
+  const [loading, setLoading] = useState(initial == null)
+  const hadInitial = useRef(initial != null)
   const [failed, setFailed] = useState(false)
 
   useEffect(() => {
     let alive = true
     void fetchVideos({ limit: 48 }).then(r => {
       if (!alive) return
+      /* ⚠️ شکستِ این درخواست فهرستِ سالمِ سرور را به «در دسترس نیست» تبدیل نکند */
+      if (!r.ok && hadInitial.current) { setLoading(false); return }
       setAll(channelsFrom(r.items))
       setFailed(!r.ok)
       setLoading(false)

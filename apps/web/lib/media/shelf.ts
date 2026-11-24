@@ -50,7 +50,11 @@ export interface ShelfChannel {
   poster: string
 }
 
-export function channelsFrom(items: MediaVideo[]): ShelfChannel[] {
+/** فقط همین فیلدها خوانده می‌شوند — رندرِ سرورِ /media/channels بی‌نگاشتِ کاملِ
+ *  publicToMedia (که در ماژولِ کلاینتی است) صدایش می‌زند */
+export type ChannelSource = Pick<MediaVideo, 'views' | 'thumb'> & { creator: Pick<MediaVideo['creator'], 'handle' | 'name'> }
+
+export function channelsFrom(items: ChannelSource[]): ShelfChannel[] {
   const map = new Map<string, ShelfChannel>()
   for (const v of items) {
     const h = v.creator.handle

@@ -14,11 +14,11 @@
    ستونی که وجود ندارد.
    ───────────────────────────────────────────────────────────── */
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
 import { useParams, useRouter } from 'next/navigation'
 import { Loader2 } from 'lucide-react'
-import { fetchVideos } from '../../../../lib/media-user'
+import { fetchVideos, publicToMedia, type PublicVideo } from '../../../../lib/media-user'
 import type { MediaVideo } from '../../../../lib/media-data'
 import { splitShorts } from '../../../../lib/media/shelf'
 import { NavOffset, TopBar, Rail, BottomNav, useRailState } from '../../../../components/media/shell'
@@ -31,14 +31,17 @@ import '../../media.css'
 
 type Tab = 'videos' | 'shorts' | 'lists'
 
-export default function ChannelPage() {
+export function ChannelClient({ initial }: { initial: PublicVideo[] | null }) {
   const params = useParams()
   const router = useRouter()
   const handle = (Array.isArray(params?.handle) ? params.handle[0] : params?.handle) ?? ''
   const { mini, toggle } = useRailState()
 
-  const [rows, setRows] = useState<MediaVideo[]>([])
-  const [loading, setLoading] = useState(true)
+  /* ویدیوهای کانال همراهِ HTML می‌آیند (page.tsx، همان GET /api/media) ⟵ بی‌چرخنده
+     (آذرِ ۱۴۰۵). درخواستِ پایین همچنان می‌رود و نسخه‌ی تازه را می‌آورد. */
+  const [rows, setRows] = useState<MediaVideo[]>(() => (initial ? initial.map(publicToMedia).sort((a, b) => b.ts - a.ts) : []))
+  const [loading, setLoading] = useState(initial == null)
+  const hadInitial = useRef(initial != null)
   const [failed, setFailed] = useState(false)
   const [tab, setTab] = useState<Tab>('videos')
   const [svAt, setSvAt] = useState<number | null>(null)
@@ -53,6 +56,8 @@ export default function ChannelPage() {
     let alive = true
     void fetchVideos({ handle, limit: 48 }).then(r => {
       if (!alive) return
+      /* ⚠️ شکستِ این درخواست ویدیوهای سالمِ سرور را به «بارگذاری نشد» تبدیل نکند */
+      if (!r.ok && hadInitial.current) { setLoading(false); return }
       setRows(r.items.slice().sort((a, b) => b.ts - a.ts))
       /* ⚠️ شکست درخواست نباید «این کانال ویدیویی ندارد» شود */
       setFailed(!r.ok)
