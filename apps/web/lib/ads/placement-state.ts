@@ -61,6 +61,7 @@ export interface EntitySnapshot {
   badge?: string | null
   /** تیک آبی — کارت تبلیغاتی همان تیک کارت عادی را نشان می‌دهد */
   verified?: boolean
+  workingHours?: unknown
   /** آمار واقعی موجودیت (مثلا تعداد میز باشگاه)؛ نبودنش = نداریم */
   stats?: { tables?: number; snooker?: number; pocket?: number; highball?: number }
 }

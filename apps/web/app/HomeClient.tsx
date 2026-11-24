@@ -273,11 +273,13 @@ const FEATURED_COUNT = 8
 export type { RealClub, RealProduct, RealStore } from '../lib/home-types';
 import type { RealClub, RealProduct, RealStore } from '../lib/home-types';
 import { tableSummary } from '../lib/clubs/tables';
+import { useClubOpenStatus } from '@/hooks/use-club-open-status';
 
 /* پاسخ خام APIها */
 interface ApiClub {
   id: string; name: string; city?: string; images?: string[]; hasActiveStory?: boolean
   isVerified?: boolean
+  workingHours?: unknown
   snookerTables?: number; pocketTables?: number; highballTables?: number
   vipSnookerTables?: number; vipPocketTables?: number
 }
@@ -321,7 +323,7 @@ const BANNER_SLIDES = [
 ═══════════════════════════════════════════════════════════════ */
 function ClubCard({ club, h = '360px', featured = false }: { club: RealClub; h?: string; featured?: boolean }) {
   const [hov, setHov]       = useState(false);
-  const [isOpen, setIsOpen] = useState(true);
+  const { isOpen } = useClubOpenStatus(club.workingHours);
   /* تفکیک میزها فقط از عدد اعلام‌شده‌ی خود باشگاه.
 
      پیش‌تر اگر تفکیک نبود، از روی جمع کل یک تقسیم تقریبی می‌ساخت
@@ -374,8 +376,7 @@ function ClubCard({ club, h = '360px', featured = false }: { club: RealClub; h?:
               background: 'linear-gradient(to bottom,transparent,rgba(255,255,255,0.28))',
               pointerEvents: 'none', zIndex: 1 }} />
             {/* باز/بسته badge */}
-            <button className="club-open-btn"
-              onClick={e => { e.preventDefault(); e.stopPropagation(); setIsOpen(s => !s); }}
+            {isOpen !== null && <span className="club-open-btn"
               style={{ position: 'absolute', top: '8px', left: '8px', height: '24px', borderRadius: '20px',
                 background: isOpen ? 'rgba(48,197,90,0.08)' : 'rgba(239,68,68,0.08)',
                 backdropFilter: 'blur(16px) saturate(200%)',
@@ -394,7 +395,7 @@ function ClubCard({ club, h = '360px', featured = false }: { club: RealClub; h?:
               <span style={{ fontSize: '10px', fontWeight: 700, color: isOpen ? '#30C55A' : '#ef4444', letterSpacing: '0.01em' }}>
                 {isOpen ? 'باز' : 'بسته'}
               </span>
-            </button>
+            </span>}
           </div>
 
           {/* ── Desktop info panel ── */}
@@ -871,6 +872,7 @@ export default function HomeClient({ initialPlacements, initialFeatured, service
         img2: thumbUrl(c.images?.[1], CLUB_W) || CLUB_IMG_FALLBACK[(i + 1) % CLUB_IMG_FALLBACK.length]!,
         price: 0, badge: null as string | null, tags: [] as string[],
         hasStory: !!c.hasActiveStory,
+        workingHours: c.workingHours,
         verified: !!c.isVerified,
       })));
 
@@ -961,6 +963,7 @@ export default function HomeClient({ initialPlacements, initialFeatured, service
         : {}),
       rating: 0, reviews: 0, type: 'اسنوکر', img: thumbUrl(e.image, CLUB_W), img2: thumbUrl(e.image, CLUB_W),
       price: 0, badge: e.badge ?? null as string | null, tags: [] as string[], hasStory: false,
+      workingHours: e.workingHours,
       verified: e.verified === true,
     }));
   }, [featClubs, clubSlot.mode, clubSlot.status, realClubs]);

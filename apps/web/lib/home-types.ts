@@ -28,6 +28,7 @@ export interface RealClub {
   badge: string | null
   tags: string[]
   hasStory: boolean
+  workingHours?: unknown
   /** تیک آبی — `verificationStatus === 'verified'`. «منتشر بدون
    *  تیک» (`approved`) هم در فهرست هست ولی تیک نمی‌گیرد. */
   verified: boolean

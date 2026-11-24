@@ -37,6 +37,7 @@ export interface EntitySnapshot {
    *  عادی نشان می‌دهد — وگرنه باشگاه تأییدشده با تبلیغ‌شدن تیکش را
    *  از دست می‌داد. */
   verified?: boolean
+  workingHours?: unknown
   /** آمار واقعی موجودیت — نبودنش یعنی «نداریم»، نه صفر */
   stats?: { tables?: number; snooker?: number; pocket?: number; highball?: number }
 }
@@ -100,7 +101,7 @@ async function resolveClubs(rawRefs: string[]): Promise<Map<string, EntitySnapsh
   const refs = rawRefs.filter(x => UUID.test(x))
   if (!refs.length) return out
   const { data } = await sb().from('clubs')
-    .select('id,name,city,images,logo,"isActive","verificationStatus"')
+    .select('id,name,city,images,logo,"isActive","verificationStatus","workingHours"')
     .in('id', refs)
   for (const r of (data as Record<string, unknown>[] ?? [])) {
     if (r.isActive === false) continue
@@ -113,6 +114,7 @@ async function resolveClubs(rawRefs: string[]): Promise<Map<string, EntitySnapsh
       subtitle: s(r.city),
       href: `/clubs/${s(r.id)}`,
       city: s(r.city),
+      workingHours: r.workingHours,
       verified: s(r.verificationStatus) === 'verified',
     })
   }

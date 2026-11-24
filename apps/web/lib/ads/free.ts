@@ -71,7 +71,7 @@ async function freeProducts(limit: number): Promise<EntitySnapshot[]> {
  */
 async function freeClubs(limit: number): Promise<EntitySnapshot[]> {
   const { data, error } = await sb().from('clubs')
-    .select('id,name,city,images,logo,"isActive","verificationStatus","createdAt",' +
+    .select('id,name,city,images,logo,"isActive","verificationStatus","createdAt","workingHours",' +
       '"snookerTables","pocketTables","highballTables","vipSnookerTables","vipPocketTables"')
     .eq('isActive', true)
     .order('createdAt', { ascending: false })
@@ -98,6 +98,7 @@ async function freeClubs(limit: number): Promise<EntitySnapshot[]> {
       href: `/clubs/${s(r.id)}`,
       city: s(r.city),
       badge: s(r.verificationStatus) === 'verified' ? 'تأیید شده' : null,
+      workingHours: r.workingHours,
       verified: s(r.verificationStatus) === 'verified',
       ...(tables > 0 ? { stats: { tables, snooker, pocket, highball } } : {}),
     }

@@ -6,6 +6,7 @@ import { pressable } from '@/lib/ui/pressable';
 import { prefersReducedMotion } from '@/lib/ui/reduced-motion';
 import { faDec } from '@/lib/jalali';
 import { distanceKm, faDistance, hasCoords } from '@/lib/clubs/distance';
+import { useClubOpenStatus } from '@/hooks/use-club-open-status';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
@@ -34,8 +35,8 @@ import '@/components/profile/profile-page.css'
 import { useTabKeys } from '@/hooks/use-tab-keys'
 import ClubReviews from '../../../components/club/ClubReviews';
 import ClubLogo from '../../../components/club/ClubLogo'
-import { apiFetch } from '../../../lib/http'
 import { DeferredMapFrame } from '../../../components/club/DeferredMapFrame'
+import { apiFetch } from '../../../lib/http'
 import { ask } from '../../../lib/ui/dialogs'
 import { DISCIPLINES } from '../../../lib/coach-store'
 import VerifiedBadge from '../../../components/VerifiedBadge'
@@ -135,26 +136,6 @@ function toFa(v: string | number) {
   return String(v).replace(/[0-9]/g, d => '۰۱۲۳۴۵۶۷۸۹'.charAt(Number(d)));
 }
 /* فرمول و شکلِ نوشتنِ فاصله در lib/clubs/distance — همان که فهرستِ باشگاه‌ها می‌خواند */
-/* ساعت و روز به وقتِ تهران، نه وقتِ دستگاه — صفحه حالا روی سرور هم رندر
-   می‌شود و سرور در منطقه‌ی زمانیِ دیگری است. با ساعتِ دستگاه، «باز است»ِ
-   HTMLِ سرور با رندرِ اولِ مرورگر فرق می‌کرد (عدمِ تطابقِ hydration)؛ برای
-   بازدیدکننده‌ی خارج از ایران هم ساعتِ کاریِ باشگاه به وقتِ تهران معنا دارد. */
-function tehranNow(): { day: string; hour: number } {
-  const p = new Intl.DateTimeFormat('en-US', { timeZone: 'Asia/Tehran', weekday: 'long', hour: 'numeric', hourCycle: 'h23' })
-    .formatToParts(new Date());
-  return {
-    day: (p.find(x => x.type === 'weekday')?.value ?? '').toLowerCase(),
-    hour: Number(p.find(x => x.type === 'hour')?.value ?? 0),
-  };
-}
-
-function calcIsOpen(todayH: any): boolean {
-  if (!todayH || !todayH.isOpen) return false;
-  const now  = tehranNow().hour;
-  const open = parseInt(todayH.open);
-  const cls  = todayH.close === '24:00' ? 24 : parseInt(todayH.close);
-  return now >= open && now < cls;
-}
 
 /* `initialClub` از page.tsx (رندرِ سرور) می‌آید تا HTMLِ اول خودِ باشگاه
    باشد، نه چرخنده‌ی «در حال بارگذاری». نبودش (باشگاهِ پیدانشده/خطا) یعنی
@@ -450,9 +431,7 @@ export function ClubProfileClient({ initialClub }: { initialClub?: Club | null }
   }, [loading, notFound, club.latitude, club.longitude]);
 
   const images   = club.images?.length ? club.images : ['/images/clubs/club6.webp'];
-  const todayKey = tehranNow().day;
-  const todayH   = (club.workingHours ?? {})?.[todayKey as string] as any;
-  const isOpen   = calcIsOpen(todayH);
+  const { isOpen, closeTime, todayKey } = useClubOpenStatus(club.workingHours);
   const hasStory = !!club.hasActiveStory;
 
   useEffect(() => {
@@ -949,10 +928,10 @@ export function ClubProfileClient({ initialClub }: { initialClub?: Club | null }
           </button>
 
           {/* Status badge — top-left corner */}
-          <div className="hero-top-btn" style={{ position: 'absolute', left: 'clamp(14px,3vw,28px)', zIndex: 10, display: 'flex', alignItems: 'center', gap: 7, background: isOpen ? 'rgba(48,197,90,0.12)' : 'rgba(239,68,68,0.12)', backdropFilter: 'blur(16px)', border: `1px solid ${isOpen ? 'rgba(48,197,90,0.28)' : 'rgba(239,68,68,0.28)'}`, borderRadius: 20, padding: '7px 14px' }}>
+          {isOpen !== null && <div className="hero-top-btn" data-club-open={isOpen} style={{ position: 'absolute', insetInlineEnd: 'clamp(14px,3vw,28px)', zIndex: 10, display: 'flex', alignItems: 'center', gap: 7, background: isOpen ? 'rgba(48,197,90,0.12)' : 'rgba(239,68,68,0.12)', backdropFilter: 'blur(16px)', border: `1px solid ${isOpen ? 'rgba(48,197,90,0.28)' : 'rgba(239,68,68,0.28)'}`, borderRadius: 20, padding: '7px 14px' }}>
             <span style={{ width: 6, height: 6, borderRadius: '50%', background: isOpen ? '#30C55A' : '#ef4444', animation: 'pulse 2s infinite', display: 'inline-block' }} />
-            <span style={{ fontSize: 14, color: isOpen ? '#30C55A' : '#ef4444', fontWeight: 700 }}>{isOpen ? `باز تا ${toFa(todayH?.close || '')}` : 'بسته است'}</span>
-          </div>
+            <span style={{ fontSize: 14, color: isOpen ? '#30C55A' : '#ef4444', fontWeight: 700 }}>{isOpen ? `باز تا ${toFa(closeTime || '')}` : 'بسته است'}</span>
+          </div>}
 
 
           {/* ⚠️ کفِ این بلوک با آمدنِ ردیفِ «نشانی اختصاصی» بالاتر رفت.

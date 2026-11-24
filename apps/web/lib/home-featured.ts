@@ -87,7 +87,7 @@ async function loadHomeFeaturedUncached(): Promise<HomeFeatured> {
          NULL. یعنی حلقه‌ی استوری روی کارت باشگاه صفحه‌ی اصلی هرگز
          روشن نمی‌شد. مثل `app/api/clubs/route.ts` از تاریخ انقضا
          مشتق می‌شود تا با گذشتن ۲۴ ساعت خودش خاموش شود. */
-      .select('id,name,city,images,storyExpiresAt,"verificationStatus",snookerTables,pocketTables,highballTables,vipSnookerTables,vipPocketTables')
+      .select('id,name,city,images,storyExpiresAt,"workingHours","verificationStatus",snookerTables,pocketTables,highballTables,vipSnookerTables,vipPocketTables')
       .eq('isActive', true).order('createdAt', { ascending: false }).limit(FEATURED_CLUBS_MAX),
     sb.from('products')
       .select('id,title,brand,model,category,images,price,negotiable,discountPrice,discountPercent,city,condition')
@@ -103,6 +103,7 @@ async function loadHomeFeaturedUncached(): Promise<HomeFeatured> {
   type C = {
     id: string; name: string; city?: string | null; images?: string[] | null; storyExpiresAt?: string | null
     verificationStatus?: string | null
+    workingHours?: unknown
     snookerTables?: number | null; pocketTables?: number | null; highballTables?: number | null
     vipSnookerTables?: number | null; vipPocketTables?: number | null
   }
@@ -129,6 +130,7 @@ async function loadHomeFeaturedUncached(): Promise<HomeFeatured> {
     img2: c.images?.[1] || CLUB_IMG[(i + 1) % CLUB_IMG.length]!,
     price: 0, badge: null, tags: [],
     hasStory: !!c.storyExpiresAt && new Date(c.storyExpiresAt).getTime() > Date.now(),
+    workingHours: c.workingHours,
     verified: c.verificationStatus === 'verified',
   }))
 
