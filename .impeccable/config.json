@@ -1,0 +1,14 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "overused-font",
+        "value": "arial",
+        "createdAt": "2026-11-21T12:31:34.653Z",
+        "reason": "Claude: Arial is only the system fallback for .bh-latin Latin blocks (app/layout.tsx), not a chosen face; CLAUDE.md forbids adding fonts"
+      }
+    ]
+  }
+}

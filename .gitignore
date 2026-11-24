@@ -86,3 +86,6 @@ apps/web/.impeccable/hook.cache.json
 *.p12
 *.pk8
 *.pepk
+
+# کشِ هوکِ impeccable وقتی از ریشه‌ی مخزن اجرا شود
+.impeccable/hook.cache.json
