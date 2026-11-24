@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { MEDIA_CATEGORIES } from '@/lib/media-data'
 import MediaHome from './MediaHome'
+import { loadMediaHomeSeed } from '@/lib/media/home-feed'
 
 /* ─────────────────────────────────────────────────────────────
    پوسته‌ی سروریِ بیلیارد مدیا — فقط برای متادیتای هر دسته.
@@ -30,6 +31,8 @@ export async function generateMetadata({ searchParams }: { searchParams: Search 
   }
 }
 
-export default function MediaPage() {
-  return <MediaHome />
+/* استخرِ خانه همراهِ HTML (lib/media/home-feed) — ترتیب را مرورگر می‌سازد */
+export default async function MediaPage() {
+  const seed = await loadMediaHomeSeed()
+  return <MediaHome seed={seed} />
 }

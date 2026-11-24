@@ -66,6 +66,25 @@ export const publicToMedia = (v: PublicVideo): MediaVideo => ({
    `items` در حالت خطا خالی می‌ماند، پس فراخوان‌های قدیمی نمی‌شکنند. */
 export interface VideoPage { ok: boolean; items: MediaVideo[]; nextCursor: string | null }
 
+/* ── استخرِ خانه‌ی ویدیوها همراهِ HTML (آذرِ ۱۴۰۵) ──
+   همان سه درخواستِ loadHome (ویژه، تازه‌ترین‌ها، پربازدیدها) روی سرور و با کشِ
+   ۳۰ ثانیه (lib/media/home-feed). ترتیبِ نهایی همچنان در مرورگر و با سابقه‌ی همان
+   گوشی ساخته می‌شود — فقط انتظار برای سه درخواستِ پس از بارگذاری حذف شد. */
+export interface MediaHomeSeed {
+  feat: PublicVideo[]
+  latest: { items: PublicVideo[]; nextCursor: string | null }
+  pop: PublicVideo[]
+}
+
+/** همان سه پاسخی که fetchVideos برمی‌گرداند */
+export function seedToPages(s: MediaHomeSeed): [VideoPage, VideoPage, VideoPage] {
+  return [
+    { ok: true, items: s.feat.map(publicToMedia), nextCursor: null },
+    { ok: true, items: s.latest.items.map(publicToMedia), nextCursor: s.latest.nextCursor },
+    { ok: true, items: s.pop.map(publicToMedia), nextCursor: null },
+  ]
+}
+
 export async function fetchVideos(params: {
   category?: string; q?: string; handle?: string; club?: string
   sort?: 'recent' | 'popular'; limit?: number; before?: string; featured?: boolean

@@ -32,7 +32,7 @@ import { X } from 'lucide-react'
 import {
   MEDIA_CATEGORIES, type MediaVideo, type MediaCategoryKey,
 } from '../../lib/media-data'
-import { fetchVideos } from '../../lib/media-user'
+import { fetchVideos, seedToPages, type MediaHomeSeed } from '../../lib/media-user'
 import { splitShorts, channelsFrom, type ShelfChannel } from '../../lib/media/shelf'
 import { inProgress, ratioOf, type WatchMark } from '../../lib/media/watch-progress'
 import { rankFeed } from '../../lib/media/recommend'
@@ -58,10 +58,11 @@ const TABS: { key: Tab; label: string }[] = [
 /* ⚠️ `useSearchParams` در Next باید داخل مرز Suspense باشد، وگرنه
    کل صفحه از پیش‌رندر بیرون می‌افتد و build می‌شکند — همان خطایی که
    این‌جا خورد. پوسته اسکلتون را می‌دهد تا HTML اولیه خالی نباشد. */
-export default function MediaPage() {
+/** `seed`: استخرِ خانه از سرور (lib/media/home-feed)؛ null یعنی مثلِ قبل خودش می‌گیرد */
+export default function MediaPage({ seed = null }: { seed?: MediaHomeSeed | null }) {
   return (
     <Suspense fallback={<MediaBoot />}>
-      <MediaHome />
+      <MediaHome seed={seed} />
     </Suspense>
   )
 }
@@ -74,7 +75,9 @@ function MediaBoot() {
   )
 }
 
-function MediaHome() {
+function MediaHome({ seed }: { seed: MediaHomeSeed | null }) {
+  /* فقط اولین بارگذاریِ خانه از استخرِ سرور؛ بعدی‌ها (پس از بارگذاریِ ویدیو، تلاشِ دوباره) تازه می‌گیرند */
+  const seedRef = useRef(seed)
   const { user } = useAuthStore()
   const { mini, toggle } = useRailState()
   /* سلیقه‌ی بیننده (تاریخچه‌ی همین دستگاه + کانال‌های دنبال‌شده) — lib/media/recommend */
@@ -152,8 +155,11 @@ function MediaHome() {
   const loadHome = useCallback(async () => {
     const id = ++reqId.current
     setLoading(true); setFailed(false)
-    /* استخرِ الگوریتم: تازه‌ترین‌ها + پربازدیدها؛ ترتیبِ نهایی را rankFeed می‌دهد */
-    const [feat, latest, pop] = await Promise.all([
+    /* استخرِ الگوریتم: تازه‌ترین‌ها + پربازدیدها؛ ترتیبِ نهایی را rankFeed می‌دهد.
+       بارِ اول از استخرِ همراهِ HTML (بی انتظار برای سه درخواست)، بعد از شبکه */
+    const seeded = seedRef.current
+    seedRef.current = null
+    const [feat, latest, pop] = seeded ? seedToPages(seeded) : await Promise.all([
       fetchVideos({ featured: true, limit: 1 }),
       fetchVideos({ limit: 48 }),
       fetchVideos({ sort: 'popular', limit: 24 }),
