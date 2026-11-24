@@ -25,7 +25,7 @@
    جدول مسابقه بد است: تماشاگر نمی‌داند چیزی بیرون کادر مانده.
    ───────────────────────────────────────────────────────────── */
 
-import { useEffect, useRef, useState } from 'react'
+import { useLayoutEffect, useRef, useState } from 'react'
 import { Radio, Trophy } from 'lucide-react'
 import { faDigits, slotLabel, isBye, type Bracket, type Match } from '../../lib/tournaments/bracket-client'
 
@@ -57,8 +57,10 @@ export default function BracketTree({
 
   /* ── جاگیری خودکار ──
      `ResizeObserver` هم به تغییر اندازه‌ی پنجره واکنش می‌دهد هم به
-     تغییر خود درخت (مثلا وقتی نتیجه‌ای ثبت و نامی بلندتر شد). */
-  useEffect(() => {
+     تغییر خود درخت (مثلا وقتی نتیجه‌ای ثبت و نامی بلندتر شد).
+     ⚠️ useLayoutEffect (آذرِ ۱۴۰۵): سنجش پیش از نقاشی، تا درختِ اندازه‌ی طبیعی یک فریم
+     دیده نشود و بعد جمع نشود — فوتر زیرش با همان پرش جابه‌جا می‌شد. */
+  useLayoutEffect(() => {
     const wrap = wrapRef.current, tree = treeRef.current
     if (!wrap || !tree) return
     const fit = () => {

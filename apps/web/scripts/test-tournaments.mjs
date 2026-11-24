@@ -383,9 +383,9 @@ t('مقیاسِ خودکار به‌جای اسکرولِ افقی',
   'اسکرول یعنی تماشاگر نمی‌داند چیزی بیرونِ کادر مانده');
 t('در صفحه‌ی معمولی بزرگ‌نمایی نمی‌کند', /: Math\.min\(1, byW\)/.test(tree));
 t('صفحه‌ی براکت از همین کامپوننت می‌خواند',
-  /<BracketTree/.test(read('app/tournaments/[id]/bracket/page.tsx')));
+  /<BracketTree/.test(read('app/tournaments/[id]/bracket/BracketClient.tsx')));
 t('دکمه‌ی بازگشت به جای قبلی برمی‌گردد',
-  /router\.back\(\)/.test(read('app/tournaments/[id]/bracket/page.tsx')),
+  /router\.back\(\)/.test(read('app/tournaments/[id]/bracket/BracketClient.tsx')),
   'لینکِ ثابت همیشه به صفحه‌ی مسابقه می‌رفت، نه به تبی که کاربر در آن بود');
 
 console.log('\n― پنجره‌های تأیید ―');
