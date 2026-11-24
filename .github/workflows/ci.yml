@@ -86,6 +86,8 @@ jobs:
           npm run test:enforcement
           npm run test:role-revoke
           npm run test:working-hours
+          npm run test:club-open-status
+          npm run test:private-fields
 
       # سقفِ حجمِ JS و تصویر — جلوگیری از برگشتِ کندی (scripts/check-perf-budget.mjs)
       - name: سقف حجم

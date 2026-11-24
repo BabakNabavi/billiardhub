@@ -80,6 +80,8 @@
     "test:enforcement": "node scripts/test-enforcement.mjs",
     "test:role-revoke": "node scripts/test-role-revoke.mjs",
     "test:working-hours": "node scripts/test-working-hours.mjs",
+    "test:club-open-status": "node scripts/test-club-open-status.mjs",
+    "test:private-fields": "node scripts/test-private-fields.mjs",
     "check:perf-budget": "node scripts/check-perf-budget.mjs",
     "test:identity": "npx --yes tsx scripts/test-identity-verify.mjs",
     "test:story-rights": "npx --yes tsx scripts/test-story-rights.mjs",
