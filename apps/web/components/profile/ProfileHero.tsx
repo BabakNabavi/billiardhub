@@ -22,6 +22,7 @@
 
 'use client'
 import { Fragment, useEffect, useState } from 'react'
+import { preload } from 'react-dom'
 import { useCopyUrl } from '@/hooks/use-copy-url'
 import Link from 'next/link'
 import { MapPin, Check, Link2 as LinkIcon } from 'lucide-react'
@@ -130,8 +131,11 @@ const SLIDE_MS = 5200
 /* ⚠️ نشانی از کاربر می‌آید (بنرِ آپلودشده). یک `)` یا `"` در نام
    فایل، اعلانِ CSS را می‌شکند و در بدترین حالت اجازه‌ی تزریق
    می‌دهد. نقل‌قول + کدگذاری، هر دو. */
+function cssHref(u: string): string {
+  return encodeURI(u).replace(/["\\]/g, c => encodeURIComponent(c))
+}
 function cssUrl(u: string): string {
-  return `url("${encodeURI(u).replace(/["\\]/g, c => encodeURIComponent(c))}")`
+  return `url("${cssHref(u)}")`
 }
 
 export default function ProfileHero({
@@ -194,6 +198,14 @@ export default function ProfileHero({
   const avatar = photo
     ? <img src={photo} alt={`عکس ${name}`} loading="eager" decoding="async" />
     : <RoleGlyph kind={role} />
+
+  /* ── سرنخِ کاور (آذرِ ۱۴۰۵) ──
+     کاور پس‌زمینه‌ی CSSِ یک div است، نه <img>؛ مرورگر تا ساختنِ استایلِ همان div
+     پیدایش نمی‌کرد و روی فروشگاه بزرگ‌ترین عنصرِ صفحه ۱٫۷ ثانیه دیر شروع می‌شد.
+     preload هنگامِ رندر: رندرِ سرور آن را به head می‌برد. نشانی همان cssHref است تا
+     درخواست یکی باشد، نه دو دانلود. data: (کاورِ قدیمیِ درجا) سرنخ نمی‌گیرد. */
+  const firstCover = slides ? slides[0] : cover
+  if (firstCover && /^(https?:)?\//.test(firstCover)) preload(cssHref(firstCover), { as: 'image', fetchPriority: 'high' })
 
   /* نام به «همه‌چیز جز واژه‌ی آخر» و «واژه‌ی آخر» تقسیم می‌شود تا
      فقط دومی به تیک بچسبد — دلیلش پایین همین فایل. */
