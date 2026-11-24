@@ -75,6 +75,8 @@ const faDigits = (v: string | number) => String(v).replace(/\d/g, d => '۰۱۲۳
    بی امتیازِ مرحله‌ی ۲۴ عددِ درست ساختنی نیست؛ علامتِ غلط روی جدولِ رسمی از
    نبودنش بدتر است. با رسیدنِ جدولِ رسمیِ قبلی و واردکردنش در پنلِ ادمین ⟵ true */
 const TRENDS_ENABLED = false
+/** چند ردیفِ اولِ هر دسته پیش از «نمایش همه» */
+const RANK_PAGE = 50
 
 /* چیپ تغییر رتبه — همان منطق قبلی (previousRank - rank) */
 function TrendChip({ diff, onDark = false }: { diff: number; onDark?: boolean }) {
@@ -187,6 +189,15 @@ export function RankingClient({ initial }: { initial?: { board: RankingsStructur
   const players = sport !== 'highball' && board
     ? categoryPlayersOf(board, sport, gender, category)
     : []
+  /* ── فقط ۵۰ ردیفِ اول دیده می‌شوند (خواستِ مالک، آذرِ ۱۴۰۵) ──
+     جدولِ کامل تا ~۲۰۰۰ عنصر می‌ساخت و نقاشیِ آن روی گوشیِ ضعیف بیشترین زمانِ
+     باز شدنِ صفحه بود. ردیف‌های بعدی در HTML می‌مانند ولی hidden‌اند: نامِ همه‌ی
+     بازیکن‌ها برای گوگل خواندنی می‌ماند (هدفِ صفحه) و مرورگر آن‌ها را نمی‌چیند و
+     نمی‌کشد. «نمایش همه» برای همان دسته باز می‌ماند؛ جست‌وجوی بازیکنی پایین‌تر از
+     ۵۰ جدول را خودش باز می‌کند. */
+  const catKey = `${sport}|${gender}|${category}`
+  const [expandedKey, setExpandedKey] = useState('')
+  const showAll = expandedKey === catKey
   /* مرحله‌ها فقط برای دسته‌ای که سرستون دارد — بقیه همان چیدمانِ دوستونی */
   const stages = sport !== 'highball' ? categoryStagesOf(stagesMap, sport, gender, category) : []
   const withStages = stages.length > 0
@@ -204,6 +215,7 @@ export function RankingClient({ initial }: { initial?: { board: RankingsStructur
     setFocus(null)
     if (!focusRowRank) return
     const r = focusRowRank
+    if (r > RANK_PAGE) setExpandedKey(catKey)
     setFlashRank(r)
     /* scrollIntoView یک‌باره کافی نبود: ردیف‌های بالاتر (content-visibility) تا
        رندر نشوند اندازه‌ی تخمینی دارند و ردیف زیرِ نوارِ چسبانِ فیلترها می‌ماند.
@@ -217,7 +229,8 @@ export function RankingClient({ initial }: { initial?: { board: RankingsStructur
     const go = () => {
       if (stop) return
       const el = document.getElementById(`rk-r-${r}`)
-      if (!el) return off()
+      /* ردیفِ پایین‌تر از ۵۰ پس از بازشدنِ جدول ساخته می‌شود — چند بار صبر */
+      if (!el) { if (++n >= 10) return off(); timer = window.setTimeout(go, 140); return }
       const box = el.getBoundingClientRect()
       const bar = document.querySelector('.rk-ctrls')?.getBoundingClientRect().bottom ?? 0
       const target = bar + (innerHeight - bar - box.height) / 2
@@ -227,7 +240,7 @@ export function RankingClient({ initial }: { initial?: { board: RankingsStructur
       timer = window.setTimeout(go, 140)
     }
     requestAnimationFrame(go)
-  }, [focus, loaded, focusRowRank])
+  }, [focus, loaded, focusRowRank, catKey])
   useEffect(() => {
     if (!flashRank) return
     const t = setTimeout(() => setFlashRank(0), 3600)
@@ -554,7 +567,10 @@ export function RankingClient({ initial }: { initial?: { board: RankingsStructur
                   const firstName = breakAllahLigature(p.firstName?.trim() || guess.firstName)
                   const lastName = breakAllahLigature(p.lastName?.trim() || guess.lastName)
                   return (
-                    <div key={p.rank} id={`rk-r-${p.rank}`} className={`rk-rowwrap${flashRank === p.rank ? ' rk-hit' : ''}`} style={{ animationDelay: `${Math.min(i, 10) * 45}ms` }}>
+                    <div key={p.rank} id={`rk-r-${p.rank}`} className={`rk-rowwrap${flashRank === p.rank ? ' rk-hit' : ''}`}
+                      hidden={!showAll && i >= RANK_PAGE}
+                      /* ردیف‌های پس از ۵۰ با «نمایش همه» یک‌جا و بی انیمیشنِ ورود — روی گوشیِ ضعیف سبک‌تر */
+                      style={i >= RANK_PAGE ? { animation: 'none' } : { animationDelay: `${Math.min(i, 10) * 45}ms` }}>
                       <Link href={p.userId ? `/players/${p.userId}` : '#'} className="rk-row">
                         <span className="chip" style={{ backgroundColor: rankColor(p.rank) }}>{faDigits(p.rank)}</span>
                         <span className="rk-portrait" style={{ display: 'inline-flex', flexShrink: 0 }}><Portrait p={p} size={46} /></span>
@@ -581,6 +597,19 @@ export function RankingClient({ initial }: { initial?: { board: RankingsStructur
                   )
                 })}
               </section>
+
+              {!showAll && players.length > RANK_PAGE && (
+                <div className="mb-1 mt-4 flex justify-center">
+                  <button type="button" className="lq-cta" onClick={() => {
+                    setExpandedKey(catKey)
+                    /* دکمه پس از کلیک نیست؛ فوکوس به اولین ردیفِ تازه، نه ابتدای صفحه */
+                    const first = players[RANK_PAGE]
+                    if (first) requestAnimationFrame(() => document.querySelector<HTMLElement>(`#rk-r-${first.rank} a`)?.focus({ preventScroll: true }))
+                  }}>
+                    نمایش همه‌ی {faDigits(players.length)} نفر
+                  </button>
+                </div>
+              )}
 
               {/* موبایل و تبلت: جدولِ کاملِ دسکتاپ، مثلِ یک عکس */}
               {withStages && (
