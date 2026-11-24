@@ -119,7 +119,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="fa" dir="rtl">
+    /* suppressHydrationWarning: اسکریپتِ «حالتِ سبک» پیش از سوارشدن کلاسِ lite را روی html می‌گذارد */
+    <html lang="fa" dir="rtl" suppressHydrationWarning>
       <head>
         {/* `mobile-web-app-capable` را خود Next از `appleWebApp.capable`
             می‌سازد؛ دستی هم که بود، دوبار در head می‌نشست.
@@ -127,6 +128,15 @@ export default function RootLayout({
             iOS پیش از ۱۵٫۴ فقط همان را می‌فهمد — بدونش آیکون صفحه‌ی
             اصلی به‌جای اپ، سافاری را باز می‌کند. */}
         <meta name="apple-mobile-web-app-capable" content="yes" />
+
+        {/* ── حالتِ سبک برای گوشیِ ضعیف (خواستِ مالک، آذرِ ۱۴۰۵) ──
+            سنجشِ صفحه‌ها نشان داد کندیِ باقی‌مانده بیشتر کارِ نقاشیِ مرورگر است، نه کد —
+            جلوه‌های شیشه‌ای (backdrop-filter) گران‌ترینِ آن‌اند. اندرویدی که حافظه‌ی ۴
+            گیگابایت یا کمتر یا ۴ هسته یا کمتر دارد کلاسِ lite می‌گیرد و globals.css
+            جلوه‌ی شیشه را برایش خاموش می‌کند؛ گوشی و رایانه‌ی قوی همان ظاهر را دارند.
+            آیفون عمداً بیرون است (سافاری حافظه نمی‌گوید و آیفون‌ها قوی‌اند). پیش از
+            اولین نقاشی اجرا می‌شود تا ظاهر وسطِ کار عوض نشود. */}
+        <script dangerouslySetInnerHTML={{ __html: "try{var n=navigator,m=n.deviceMemory,c=n.hardwareConcurrency,a=/Android/i.test(n.userAgent);if(a&&((m&&m<=4)||(c&&c<=4)))document.documentElement.classList.add('lite')}catch(e){}" }} />
 
         {/* ── پیش‌بارگذاری فونت ──
             فونت‌ها `font-display: swap` دارند، پس مرورگر اول با

@@ -1921,3 +1921,20 @@ select:disabled { opacity: 0.55; cursor: not-allowed; }
   .lc-list-img { width: 104px !important; }
   .lc-list-body { padding: 12px !important; gap: 6px !important; }
 }
+
+/* ── حالتِ سبک برای گوشیِ ضعیف (آذرِ ۱۴۰۵) ──
+   کلاسِ lite را اسکریپتِ کوچکِ head در app/layout.tsx فقط روی اندرویدِ کم‌حافظه یا
+   کم‌هسته می‌گذارد. جلوه‌ی شیشه (تارکردنِ پشتِ لایه) گران‌ترین کارِ نقاشیِ این سایت
+   روی چنین گوشی‌هایی است؛ رنگِ نیمه‌شفافِ هر لایه سرِ جایش می‌ماند. !important
+   چون بیشترِ جلوه‌ها در استایلِ درون‌خطی‌اند. */
+html.lite *,
+html.lite *::before,
+html.lite *::after {
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+/* جاهایی که خوانایی به همان تارکردن بسته بود — متنِ روشن روی عکس — در حالتِ سبک
+   زمینه‌ی تیره‌ترِ نیمه‌شفاف می‌گیرند (نتیجه‌ی بازبینی؛ بقیه‌ی لایه‌ها به‌قدرِ کافی پُرند) */
+html.lite .tm .tm-search { background: rgb(8 10 12 / .55); }
+html.lite .club-open-btn { background: rgba(10, 9, 7, .62) !important; }
+html.lite .hh-card { background: rgb(18 16 22 / .82); }
