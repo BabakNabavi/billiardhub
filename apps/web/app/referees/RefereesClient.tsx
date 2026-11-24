@@ -1,0 +1,513 @@
+'use client'
+import { useState, useEffect, useRef } from 'react'
+import { prefersReducedMotion } from '@/lib/ui/reduced-motion'
+import Link from 'next/link'
+import { listRefereeProfiles, badgeFromGrades, type RefereeProfile } from '../../lib/referee-store'
+import { fetchProfilesResult, mapSafely, type RemoteProfile } from '../../lib/profiles/client'
+import VerifiedBadge from '../../components/VerifiedBadge'
+import RoleAvatar from '../../components/profile/RoleAvatar'
+
+/* ─── Tokens ─── */
+const GOLD    = '#C7A66A'
+const GOLD_D  = '#8F6531'
+
+/* page colors (light theme) */
+/* رنگ پایه‌ی صفحه از کلاس مشترک lq-stage می‌آید */
+const TEXT    = '#111110'
+const TEXT_S  = 'rgba(17,17,16,0.52)'
+const TEXT_M  = 'rgba(17,17,16,0.28)'
+
+/* ── چرا بدونِ واژه‌ی نقش و با خطِ عمودی ──
+   کارت قبلا «اسنوکر · پاکت بیلیارد · هی‌بال» با واژه‌ی نقش جلویش
+   بود: آن واژه روی صفحه‌ی داوران تکراری است و نقطه‌ها بینِ
+   عبارت‌های دوکلمه‌ای گم می‌شدند. */
+import { SPEC_SEP, PIN_GREEN } from '@/lib/profile-cards'
+import { makeMatcher } from '@/lib/search/filter'
+
+const SPECS: Record<string, { label: string; color: string; glow: string }> = {
+  snooker:  { label: 'اسنوکر',       color: '#7C3AED', glow: 'rgba(124,58,237,0.30)' },
+  pocket:   { label: 'پاکت بیلیارد', color: GOLD_D,    glow: 'rgba(154,110,56,0.30)' },
+  highball: { label: 'هی‌بال',       color: '#C2410C', glow: 'rgba(194,65,12,0.30)'  },
+}
+
+interface Referee {
+  /* ⚠️ `specialty` فقط *اولین* رشته است و کارت با همان نوشته می‌شد:
+     داوری که اسنوکر و پاکت و هی‌بال دارد روی کارت «داور اسنوکر»
+     می‌شد و در صفحه‌ی خودش هر سه — کاربر همین ناهماهنگی را دید.
+     فهرست کامل کنارش می‌ماند؛ `specialty` برای رنگ و نشان است. */
+  id: string; name: string; specialty: string; disciplines?: string[]; city: string
+  experience: number; grade: string; gradeColor: string
+  bio: string; photo: string
+  verified?: boolean
+}
+
+/* ⚠️ عمدا خالی — پیش از رونمایی پاک شد.
+
+   این آرایه 8 موجودیت ساختگی داشت که روی سایت زنده مثل داده‌ی
+   واقعی دیده می‌شدند: نام، شهر، امتیاز و مشخصاتی که هیچ‌کدام وجود
+   خارجی نداشتند و کلیکشان به هیچ‌جا نمی‌رسید.
+
+   جای این‌ها با موجودیت‌های واقعی سایت پر می‌شود. اگر چیزی نباشد،
+   بخش خالی می‌ماند — که درست است. آرایه نگه داشته شد (نه حذف) تا
+   امضای ماژول و مصرف‌کننده‌هایش دست‌نخورده بمانند. */
+const REFEREES: Referee[] = []
+
+/* approved referees registered via /referees/dashboard → list cards */
+const CUR_JYEAR = (() => { try { return parseInt(new Intl.DateTimeFormat('en-US-u-ca-persian', { year: 'numeric' }).format(new Date()), 10) || 1404 } catch { return 1404 } })()
+
+function mapProfileToListReferee(p: RefereeProfile): Referee {
+  const b = badgeFromGrades(p.grades)
+  const firstYear = p.grades[0]?.year ? parseInt(p.grades[0].year, 10) : 0
+  return {
+    id: p.slug,
+    name: `${p.firstNameFa} ${p.lastNameFa}`.trim(),
+    specialty: p.disciplines[0] ?? 'snooker',
+    disciplines: p.disciplines,
+    city: p.city,
+    experience: firstYear ? Math.max(0, CUR_JYEAR - firstYear) : 0,
+    grade: b?.label ?? 'داور',
+    gradeColor: b?.color ?? GOLD_D,
+    bio: p.shortBio || p.fullBio || '',
+    photo: p.photo || '',
+    verified: p.verified,
+  }
+}
+
+/* ════════ HERO POSTERS — dark, billiard themed (slider) ════════ */
+const REFEREE_POSTERS = [
+  { bg:'linear-gradient(125deg,#0b1322 0%,#17253f 55%,#1e2f4d 100%)', glow:'rgba(199,166,106,0.30)', accent:'rgba(199,166,106,0.55)', motif:'aim'    },
+  { bg:'linear-gradient(130deg,#141414 0%,#272524 55%,#1a1a19 100%)', glow:'rgba(199,166,106,0.30)', accent:'rgba(199,166,106,0.55)', motif:'trophy' },
+  { bg:'linear-gradient(130deg,#07231a 0%,#0e3a2a 55%,#0a2f22 100%)', glow:'rgba(199,166,106,0.26)', accent:'rgba(199,166,106,0.50)', motif:'cues'   },
+  { bg:'linear-gradient(125deg,#1c0e13 0%,#341826 55%,#230f1a 100%)', glow:'rgba(199,166,106,0.26)', accent:'rgba(199,166,106,0.50)', motif:'rack'   },
+  { bg:'linear-gradient(130deg,#08201f 0%,#0d3835 55%,#0a2a28 100%)', glow:'rgba(199,166,106,0.26)', accent:'rgba(199,166,106,0.50)', motif:'eight'  },
+]
+
+const REFEREE_SLIDES = [
+  { title:'داوران رسمی',             sub:'قضاوت دقیق و بی‌طرف' },
+  { title:'از ملی تا بین‌المللی',    sub:'داوران دارای مدرک فدراسیون' },
+  { title:'مسابقه‌ات را حرفه‌ای کن',  sub:'با داوران مجرب' },
+  { title:'داوری تخصصی',             sub:'اسنوکر · پاکت · هی‌بال' },
+  { title:'جامعه‌ی داوران',          sub:'بیلیارد هاب، کنار تو' },
+]
+
+function refereeMotif(motif: string) {
+  const s = 168
+  if (motif === 'trophy') return (
+    <svg width={s} viewBox="0 0 100 104" fill="none" aria-hidden>
+      <path d="M32 20 H68 V34 C68 48 60 56 50 56 C40 56 32 48 32 34 Z" stroke={GOLD} strokeWidth="1.8" opacity="0.85"/>
+      <path d="M32 24 H22 A9 9 0 0 0 33 41" stroke={GOLD} strokeWidth="1.6" opacity="0.7"/>
+      <path d="M68 24 H78 A9 9 0 0 1 67 41" stroke={GOLD} strokeWidth="1.6" opacity="0.7"/>
+      <rect x="46" y="56" width="8" height="12" stroke={GOLD} strokeWidth="1.4" opacity="0.7"/>
+      <path d="M36 68 H64 L60 80 H40 Z" stroke={GOLD} strokeWidth="1.6" opacity="0.8"/>
+      <path d="M50 27 l2.6 5.3 5.8 0.8 -4.2 4.1 1 5.8 -5.2 -2.7 -5.2 2.7 1 -5.8 -4.2 -4.1 5.8 -0.8 Z" fill={GOLD} opacity="0.6"/>
+    </svg>
+  )
+  if (motif === 'aim') return (
+    <svg width={s} viewBox="0 0 100 100" fill="none" aria-hidden>
+      <circle cx="50" cy="50" r="40" stroke={GOLD} strokeWidth="0.8" opacity="0.22"/>
+      <circle cx="50" cy="50" r="28" stroke={GOLD} strokeWidth="1" opacity="0.38"/>
+      <circle cx="50" cy="50" r="16" stroke={GOLD} strokeWidth="1.6" opacity="0.9" fill="rgba(0,0,0,0.18)"/>
+      {[[50,6],[50,94],[6,50],[94,50]].map((pt,i)=>(<rect key={i} x={pt[0]!-3} y={pt[1]!-3} width="6" height="6" fill={GOLD} opacity="0.58" transform={`rotate(45 ${pt[0]} ${pt[1]})`}/>))}
+      <circle cx="44" cy="44" r="3" fill={GOLD} opacity="0.4"/>
+    </svg>
+  )
+  if (motif === 'cues') return (
+    <svg width={s} viewBox="0 0 100 100" fill="none" aria-hidden>
+      <g stroke={GOLD} strokeWidth="2.2" strokeLinecap="round" opacity="0.78"><line x1="12" y1="86" x2="88" y2="16"/><line x1="12" y1="16" x2="88" y2="86"/></g>
+      {[[12,86],[88,16],[12,16],[88,86]].map((pt,i)=>(<circle key={i} cx={pt[0]} cy={pt[1]} r="2.4" fill={GOLD} opacity="0.72"/>))}
+      <circle cx="50" cy="51" r="13" fill="rgba(0,0,0,0.35)" stroke={GOLD} strokeWidth="1.6" opacity="0.95"/>
+      <circle cx="45" cy="46" r="3" fill={GOLD} opacity="0.5"/>
+    </svg>
+  )
+  if (motif === 'rack') {
+    const rows = [[[50,11]],[[41,27],[59,27]],[[32,43],[50,43],[68,43]],[[23,59],[41,59],[59,59],[77,59]],[[14,75],[32,75],[50,75],[68,75],[86,75]]]
+    return (
+      <svg width={s} viewBox="0 0 100 86" fill="none" aria-hidden>
+        {rows.flat().map((pt,i)=>(<circle key={i} cx={pt![0]} cy={pt![1]} r="7.4" stroke={GOLD} strokeWidth="1.3" opacity="0.82"/>))}
+        <circle cx="50" cy="11" r="3" fill={GOLD} opacity="0.6"/>
+      </svg>
+    )
+  }
+  return (
+    <svg width={s} viewBox="0 0 100 100" fill="none" aria-hidden>
+      <circle cx="50" cy="50" r="38" stroke={GOLD} strokeWidth="1.8" opacity="0.85" fill="rgba(0,0,0,0.18)"/>
+      <circle cx="50" cy="50" r="16" fill={GOLD} opacity="0.9"/>
+      {/* ⚠️ `data-no-fa` لازم است: `PersianDigits` هر رقم رندرشده را
+          فارسی می‌کند و شماره‌ی توپ بیلیارد «۸» می‌شد. شماره‌ی توپ
+          یک نشانه است نه عدد در متن فارسی. */}
+      <text x="50" y="51" data-no-fa textAnchor="middle" dominantBaseline="central" fontSize="19" fontWeight="800" fill="#1c0e13">8</text>
+      <ellipse cx="38" cy="36" rx="7" ry="4" fill={GOLD} opacity="0.22" transform="rotate(-30 38 36)"/>
+    </svg>
+  )
+}
+
+function RefereePoster({ variant }: { variant: number }) {
+  const p = REFEREE_POSTERS[variant % REFEREE_POSTERS.length]!
+  return (
+    <div style={{ position:'absolute', inset:0, overflow:'hidden', background:p.bg }}>
+      <div style={{ position:'absolute', inset:0, backgroundImage:'radial-gradient(rgba(255,255,255,0.05) 1px, transparent 1px)', backgroundSize:'18px 18px', opacity:0.6 }}/>
+      <div style={{ position:'absolute', inset:'-20%', background:`radial-gradient(circle at 30% 40%, ${p.glow}, transparent 55%)` }}/>
+      <div style={{ position:'absolute', top:'-25%', bottom:'-25%', left:'52%', width:2, background:`linear-gradient(180deg, transparent, ${p.accent}, transparent)`, transform:'rotate(19deg)', opacity:0.4 }}/>
+      <div style={{ position:'absolute', top:'-25%', bottom:'-25%', left:'58%', width:1, background:`linear-gradient(180deg, transparent, ${p.accent}, transparent)`, transform:'rotate(19deg)', opacity:0.2 }}/>
+      <div style={{ position:'absolute', inset:0, display:'flex', alignItems:'center', justifyContent:'center', transform:'translateX(-15%)', opacity:0.6 }}>
+        <div style={{ display:'flex', filter:'drop-shadow(0 5px 18px rgba(0,0,0,0.45))' }}>{refereeMotif(p.motif)}</div>
+      </div>
+    </div>
+  )
+}
+
+function RefereeHeroSlider() {
+  const [active, setActive]   = useState(0)
+  const [prevIdx, setPrevIdx] = useState<number | null>(null)
+  const activeRef = useRef(0)
+  const fadingRef = useRef(false)
+
+  const advance = (idx: number) => {
+    if (idx === activeRef.current || fadingRef.current) return
+    setPrevIdx(activeRef.current)
+    activeRef.current = idx
+    fadingRef.current = true
+    setActive(idx)
+    setTimeout(() => { setPrevIdx(null); fadingRef.current = false }, 850)
+  }
+
+  useEffect(() => {
+    if (prefersReducedMotion()) return
+    const interval = setInterval(() => {
+      const next = (activeRef.current + 1) % REFEREE_SLIDES.length
+      setPrevIdx(activeRef.current)
+      activeRef.current = next
+      fadingRef.current = true
+      setActive(next)
+      setTimeout(() => { setPrevIdx(null); fadingRef.current = false }, 850)
+    }, 4500)
+    return () => clearInterval(interval)
+  }, [])
+
+  return (
+    <>
+      <style>{`@keyframes kenBurnsR{0%{transform:scale(1.00) translate(0%,0%)}100%{transform:scale(1.14) translate(-2%,1.5%)}}`}</style>
+      <section style={{ position:'relative', height:'clamp(150px,16vw,205px)', overflow:'hidden', background:'#0a0a0a', direction:'rtl' }}>
+        {REFEREE_SLIDES.map((_, i) => (
+          <div key={i} style={{ position:'absolute', inset:0, opacity: i===active?1:0, transition:'opacity 0.90s ease', zIndex: i===active?2:i===prevIdx?1:0, animation:'kenBurnsR 9s ease-in-out infinite alternate', willChange:'transform' }}>
+            <RefereePoster variant={i}/>
+          </div>
+        ))}
+        <div style={{ position:'absolute', inset:0, zIndex:3, background:'linear-gradient(to right, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.28) 55%, transparent 100%)' }}/>
+        <div style={{ position:'absolute', bottom:0, left:0, right:0, height:'55%', zIndex:3, background:'linear-gradient(to top, rgba(0,0,0,0.80), transparent)' }}/>
+
+        <div style={{ position:'absolute', inset:0, zIndex:4, display:'flex', flexDirection:'column', justifyContent:'center', padding:'clamp(12px,2.4vw,32px) clamp(24px,6vw,80px)' }}>
+          <div style={{ maxWidth:1280, width:'100%', margin:'0 auto' }}>
+            {/* `end` در RTL همان چپِ پیشین است */}
+            <div style={{ textAlign:'end', marginBottom:11 }}>
+              <div style={{ display:'inline-flex', alignItems:'center', gap:7, background:'rgba(199,166,106,0.14)', border:'1px solid rgba(199,166,106,0.34)', color:'#D4A843', fontSize:11, fontWeight:800, borderRadius:24, padding:'4px 11px', transform:'translateY(-13px)', animation:'softBlink 2.6s .7s ease-in-out infinite' }}>
+                داوران رسمی را بشناس · بیلیارد هاب
+              </div>
+            </div>
+            <h1 style={{ fontSize:'clamp(25px,4vw,50px)', fontWeight:900, color:'#fff', margin:'0 0 12px', letterSpacing:'-0.03em', lineHeight:1.08, transform:'translateY(-6px)' }}>
+              معرفی داوران
+            </h1>
+            <p style={{ fontSize:'clamp(12px,1.35vw,17px)', color:'#D4A843', margin:'13px 0 0', fontWeight:600, textShadow:'0 0 22px rgba(212,168,67,0.55)' }}>
+              معرفی و آشنایی با داوران بیلیارد کشور
+            </p>
+          </div>
+        </div>
+
+        {/* ── نشانگر اسلاید دیده نمی‌شود ──
+            آن دایره‌های ریز گوشه‌ی تصویر روی هدر شلوغی می‌کردند و
+            هیچ‌کس رویشان کلیک نمی‌کرد؛ اسلایدر خودش می‌چرخد. حذف
+            کاملشان ولی کاربر کیبورد و صفحه‌خوان را از تغییر اسلاید
+            محروم می‌کرد، پس فقط از دید پنهان شده‌اند و با فوکوس
+            دوباره ظاهر می‌شوند. */}
+        <div className="hero-dots" style={{ position:'absolute', bottom:14, left:'clamp(24px,6vw,80px)', zIndex:6, display:'flex', gap:7 }}>
+          {REFEREE_SLIDES.map((_, i) => (
+            <button key={i} onClick={() => advance(i)} aria-label={`اسلاید ${i+1}`} style={{ width: i===active?24:7, height:7, borderRadius:4, border:'none', cursor:'pointer', padding:0, background: i===active?'#C7A66A':'rgba(255,255,255,0.32)', transition:'all 0.4s cubic-bezier(0.22,1,0.36,1)' }}/>
+          ))}
+        </div>
+      </section>
+    </>
+  )
+}
+
+/* ── آواتار با حلقه‌ی طلایی ──
+   پیش‌تر این‌جا حلقه‌ی رنگی استوری بود که رسانه‌اش عکس پروفایل خود
+   داور می‌شد: «استوری»ای که کسی منتشرش نکرده بود و هرگز هم منقضی
+   نمی‌شد. برای داور اصلا سیستم استوری وجود ندارد. */
+function RefereeAvatar({ referee, size }: { referee: Referee; size: string }) {
+  return <RoleAvatar kind="referee" photo={referee.photo} name={referee.name} size={size} />
+}
+
+/* ── Referee card — grid + list ── */
+function RefereeCard({ referee, view, idx }: { referee: Referee; view: 'grid' | 'list'; idx: number }) {
+  const sp = SPECS[referee.specialty]
+  /* همان چیزی که صفحه‌ی داور نشان می‌دهد، نه فقط اولینش */
+  const specText = referee.disciplines?.length
+    ? referee.disciplines.map(d => SPECS[d]?.label ?? d).join(SPEC_SEP)
+    : (sp?.label ?? 'بیلیارد')
+
+  if (view === 'list') {
+    return (
+      <article className="ccard-list" style={{
+        display:'flex', alignItems:'center', gap:14, padding:'11px 13px',
+        borderRadius:12, background: 'rgba(255,255,255,0.78)', border:'1px solid rgba(0,0,0,0.08)',
+        boxShadow:'0 1px 3px rgba(0,0,0,0.05)',
+        animation:`fadeUp .34s ${(idx * 0.04).toFixed(2)}s ease both`,
+      }}>
+        <div style={{ position:'relative', zIndex:2 }}>
+          <RefereeAvatar referee={referee} size="58px"/>
+        </div>
+        <div style={{ flex:1, minWidth:0 }}>
+          <div style={{ display:'flex', alignItems:'center', gap:5, marginBottom:2, minWidth:0 }}>
+            <h3 style={{ fontSize:15, fontWeight:800, color:TEXT, lineHeight:1.2, letterSpacing:'-0.02em', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{referee.name}</h3>
+            {referee.verified && <VerifiedBadge style={{ marginInlineStart: 0 }} />}
+          </div>
+          <p style={{ fontSize:12, color:TEXT_S, marginBottom:5 }}>{specText}</p>
+          <div style={{ display:'flex', alignItems:'center', gap:5, color:TEXT_M }}>
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke={PIN_GREEN} strokeWidth="2" aria-hidden><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            <span style={{ fontSize:11.5, color:TEXT_S }}>{referee.city}</span>
+          </div>
+        </div>
+        <Link href={`/referees/${referee.id}`} className="btnConnect" aria-label="مشاهده پروفایل" style={{
+          flexShrink:0, textDecoration:'none', display:'flex', alignItems:'center', justifyContent:'center',
+          width:40, height:40, border:'1px solid rgba(199,166,106,0.34)', borderRadius:10, color:'#8F6531', background:'rgba(199,166,106,0.12)' }}>
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+        </Link>
+      </article>
+    )
+  }
+
+  return (
+    <article className="ccard" style={{
+      borderRadius:12, overflow:'hidden', background: 'rgba(255,255,255,0.78)',
+      border:'1px solid rgba(0,0,0,0.08)',
+      boxShadow:'0 1px 3px rgba(0,0,0,0.06), 0 8px 22px rgba(0,0,0,0.04)',
+      animation:`fadeUp .38s ${(idx * 0.05).toFixed(2)}s ease both`,
+      display:'flex', flexDirection:'column',
+    }}>
+      {/* cover — default referee poster */}
+      <div style={{ position:'relative', paddingTop:'46%', flexShrink:0, overflow:'hidden', background:'linear-gradient(115deg,#0c1424 0%,#17253f 55%,#1e2f4d 100%)' }}>
+        <div style={{ position:'absolute', inset:0, backgroundImage:'radial-gradient(circle, rgba(255,255,255,0.05) 1px, transparent 1px)', backgroundSize:'14px 14px' }}/>
+        <div style={{ position:'absolute', left:'-12%', top:'-40%', width:'52%', height:'180%', background:'radial-gradient(ellipse, rgba(199,166,106,0.20) 0%, transparent 64%)', filter:'blur(14px)', pointerEvents:'none' }}/>
+        <div style={{ position:'absolute', top:'-20%', bottom:'-20%', left:'56%', width:'1px', background:'linear-gradient(180deg,transparent,rgba(199,166,106,0.5),transparent)', transform:'rotate(-12deg)', pointerEvents:'none' }}/>
+        <img loading="lazy" decoding="async" src="/images/Logo/bh-mark-white-v13.png" alt="" style={{ position:'absolute', top:'9px', insetInlineEnd:'10px', height:'22%', width:'auto', opacity:0.9 }}/>
+        <div style={{ position:'absolute', bottom:0, left:0, right:0, height:'2px', background:`linear-gradient(90deg,transparent,${GOLD},transparent)`, opacity:0.55 }}/>
+      </div>
+      {/* avatar */}
+      <div style={{ display:'flex', justifyContent:'center', marginTop:'-31%', position:'relative', zIndex:2 }}>
+        <RefereeAvatar referee={referee} size="58%"/>
+      </div>
+      {/* body */}
+      <div style={{ padding:'12px 14px 18px', flex:1, display:'flex', flexDirection:'column', alignItems:'center', textAlign:'center' }}>
+        {/* ⚠️ تیک پیش‌تر درون خود h3 و inline بود؛ `verticalAlign` آن
+            را نسبت به خط متن جابه‌جا می‌کرد و کنار نام بالا می‌نشست.
+            حالا هر دو آیتم یک ردیف flex با `alignItems:center`اند —
+            همان الگویی که کارت مربی دارد و درست کار می‌کند. */}
+        <div style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:5, marginBottom:4, maxWidth:'100%' }}>
+          <h3 style={{ fontSize:16, fontWeight:800, color:TEXT, lineHeight:1.2, letterSpacing:'-0.02em', minWidth:0, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{referee.name}</h3>
+          {referee.verified && <VerifiedBadge style={{ marginInlineStart: 0 }} />}
+        </div>
+        {/* `-webkit-box` ارث‌بری text-align را قابل اتکا نمی‌گذارد؛ صریح نوشته می‌شود */}
+        <p style={{ fontSize:12.5, color:TEXT_S, lineHeight:1.35, marginBottom:9, minHeight:'2.7em', textAlign:'center', display:'-webkit-box', WebkitLineClamp:2, WebkitBoxOrient:'vertical', overflow:'hidden' }}>{specText}</p>
+        <div style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:5, marginBottom:13, color:TEXT_M }}>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={PIN_GREEN} strokeWidth="2" aria-hidden><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          <span style={{ fontSize:11.5, color:TEXT_S }}>{referee.city}</span>
+        </div>
+        <div style={{ flex:1 }}/>
+        <Link href={`/referees/${referee.id}`} className="btnConnect" style={{ alignSelf:'stretch', textDecoration:'none', display:'flex', alignItems:'center', justifyContent:'center', gap:7, padding:'9px 12px', border:'1px solid rgba(199,166,106,0.34)', borderRadius:10, fontSize:13, fontWeight:700, color:'#8F6531', background:'rgba(199,166,106,0.12)' }}>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          مشاهده پروفایل
+        </Link>
+      </div>
+    </article>
+  )
+}
+
+/* ════════════════ PAGE ════════════════ */
+/* پروفایلِ تأییدشده‌ی سرور ⟵ شکلِ کارت؛ همان نگاشتِ پاسخِ API */
+const remoteToList = (ps: RemoteProfile<RefereeProfile>[]) => mapSafely(
+  ps.filter(r => r.status === 'approved'),
+  r => mapProfileToListReferee({ ...r.data, slug: r.slug, verified: r.verified } as RefereeProfile),
+)
+
+/** `initialProfiles`: فهرستِ تأییدشده از رندرِ سرور (lib/profiles/public-list) تا کارت‌ها همراهِ
+ *  HTML بیایند؛ null یعنی مسیرِ قبلی (نسخه‌ی این مرورگر، بعد API). */
+export function RefereesClient({ initialProfiles }: { initialProfiles: RemoteProfile<RefereeProfile>[] | null }) {
+  const [filter,    setFilter]    = useState('all')
+  /* جعبه‌ی جست‌وجوی صفحه برداشته شد (خواستِ مالک، ۱۰ آبانِ ۱۴۰۵) — جست‌وجو از نوارِ بالاست.
+       فیلترِ متنی همان‌جا می‌ماند، با عبارتِ خالی بی‌اثر است */
+  const search = ''
+  const [view,      setView]      = useState<'grid' | 'list'>('grid')
+  const [localRefs, setLocalRefs] = useState<Referee[]>(() => initialProfiles ? remoteToList(initialProfiles) : [])
+  const hadServer = useRef(!!initialProfiles)
+  const [loadFailed, setLoadFailed] = useState(false)
+
+  /* همان ایراد صفحه‌ی مربیان: این فهرست فقط از localStorage می‌آمد،
+     پس داوری که ثبت می‌شد برای هیچ بازدیدکننده‌ی دیگری دیده نمی‌شد.
+     اول حافظه‌ی همین مرورگر، بعد فهرست سرور. */
+  useEffect(() => {
+    /* با فهرستِ سرور، نسخه‌ی این مرورگر جایش را نمی‌گیرد (پاسخِ سرور حقیقت است) */
+    if (!hadServer.current) setLocalRefs(listRefereeProfiles().filter(p => p.status === 'approved').map(mapProfileToListReferee))
+    /* ⚠️ `fetchProfilesResult` نه `fetchProfiles`: دومی خطا را می‌بلعید و []
+     می‌داد، پس قطعیِ شبکه روی صفحه «پیدا نشد» می‌گفت. */
+    void (async () => {
+      const res = await fetchProfilesResult<RefereeProfile>('referee')
+      if (res.state === 'error') { setLoadFailed(true); return }
+      const remote = remoteToList(res.profiles)
+      /* پاسخِ سرور، حتی خالی، حقیقت است — همان دلیلِ app/coaches */
+      setLocalRefs(remote)
+    })().catch(err => { console.error('[profiles] list load failed', err); setLoadFailed(true) })
+  }, [])
+  const hit = makeMatcher(search)
+  const referees = [...localRefs, ...REFEREES].filter(r =>
+    /* فیلتر هم روی همه‌ی رشته‌ها: با `specialty` تنها، داور
+       سه‌رشته‌ای فقط زیر رشته‌ی اولش پیدا می‌شد. */
+    (filter === 'all' || (r.disciplines?.length ? r.disciplines.includes(filter) : r.specialty === filter)) &&
+    hit(r.name, r.city)
+  )
+
+  return (
+    <>
+      <style>{`
+        *{box-sizing:border-box;margin:0;padding:0;}
+
+        @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+        @keyframes softBlink{0%,100%{opacity:1}50%{opacity:0.5}}
+
+        /* filter pills */
+        .fpill{transition:all .2s cubic-bezier(.4,0,.2,1);}
+
+        /* cards — LinkedIn style */
+        .ccard{transition:transform .28s cubic-bezier(.4,0,.2,1),box-shadow .28s,border-color .28s;position:relative;}
+        .ccard:hover{
+          transform:translateY(-5px);
+          border-color:rgba(199,166,106,0.38)!important;
+          box-shadow:
+            0 0 0 3px rgba(199,166,106,0.08),
+            0 16px 40px rgba(28,28,26,0.12),
+            0 6px 16px rgba(0,0,0,0.06) !important;
+        }
+        .cavatar{transition:transform .35s cubic-bezier(.4,0,.2,1);}
+        .ccard:hover .cavatar{transform:scale(1.04);}
+        .ccard-list{transition:transform .2s,box-shadow .2s,border-color .2s;}
+        .ccard-list:hover{border-color:rgba(199,166,106,0.38)!important;box-shadow:0 6px 20px rgba(28,28,26,0.10)!important;}
+        .btnConnect{transition:all .3s cubic-bezier(0.22,1,0.36,1);}
+        .btnConnect:hover{transform:translateY(-2px);background:rgba(199,166,106,0.20)!important;box-shadow:0 6px 16px rgba(199,166,106,0.24)!important;}
+
+        /* buttons */
+        .btnBanner{transition:background .18s,transform .14s,box-shadow .18s;}
+        .btnBanner:hover{background:${GOLD_D}!important;transform:translateY(-2px);box-shadow:0 10px 28px rgba(199,166,106,0.32)!important;}
+
+        /* responsive */
+        @media(max-width:1100px){.g5{grid-template-columns:repeat(3,1fr)!important;}}
+        @media(max-width:700px) {.g5{grid-template-columns:repeat(2,1fr)!important;}}
+        @media(max-width:480px) {.g5{grid-template-columns:repeat(2,1fr)!important;}}
+        /* mobile: search + toggles drop to their own row under the pills */
+        /* ⚠️ min-width:0 لازم است: این گروه خودش یک آیتم فلکس است و با
+           min-width:auto کف min-content می‌گیرد — روی ۳۲۰px ۳۳۲ پیکسل
+           می‌شد و دکمه‌های نما ۳۶ پیکسل بیرون قاب می‌افتادند. */
+        .coach-search-group{min-width:0;}
+        @media(max-width:640px){.coach-search-group{flex-basis:100%;margin-inline-start:0!important;}}
+        /* list view: 2 cards per row on desktop, 1 on mobile */
+        .coach-list-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+        @media(max-width:700px){.coach-list-grid{grid-template-columns:1fr;}}
+
+      `}</style>
+
+      <div className="lq-stage" style={{ direction:'rtl', fontFamily:"'Vazirmatn',Tahoma,sans-serif", minHeight:'100vh', color:TEXT }}>
+
+        {/* ══════════════ HERO — poster slider ══════════════ */}
+        <RefereeHeroSlider />
+
+        {/* ══════════════ FILTER ══════════════ */}
+        <div id="referees" style={{
+          position:'sticky', top:'var(--nav-offset)', zIndex:50,
+          background:'rgba(246,244,240,0.90)',
+          backdropFilter:'blur(20px)', WebkitBackdropFilter:'blur(20px)',
+          borderBottom:'1px solid rgba(17,17,16,0.08)',
+          boxShadow:'0 1px 8px rgba(17,17,16,0.05)',
+        }}>
+          <div style={{ maxWidth:1280, margin:'0 auto', padding:'10px clamp(24px,6vw,80px)',
+            display:'flex', alignItems:'center', gap:8, flexWrap:'wrap' }}>
+            {/* ── فیلترها: همان کنترل بخش‌بندی گالری صفحه‌ی پروفایل ──
+                پیش‌تر چهار قرص جدا بودند با استایل اینلاین و دو
+                هندلر hover دستی. `lq-seg` از قبل در globals.css هست،
+                هر چهار حالت را دارد و شکلش با تب گالری یکی است. */}
+            <div className="lq-seg" role="tablist" aria-label="فیلتر رشته">
+              {([
+                { k:'all',      l:'همه داوران' },
+                { k:'snooker',  l:'اسنوکر' },
+                { k:'pocket',   l:'پاکت بیلیارد' },
+                { k:'highball', l:'هی‌بال' },
+              ] as { k:string; l:string }[]).map(({ k, l }) => (
+                <button key={k} type="button" role="tab" aria-selected={filter === k}
+                  onClick={() => setFilter(k)}>{l}</button>
+              ))}
+            </div>
+
+            {/* search + toggles — own row under the pills on mobile, right-aligned */}
+            <div className="coach-search-group" style={{ marginInlineStart:'auto', display:'flex', alignItems:'center', gap:8 }}>
+
+              {/* view toggles — beside search */}
+              <div style={{ display:'flex', gap:6, flexShrink:0 }}>
+                {([['grid', <svg key="g" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>], ['list', <svg key="l" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><circle cx="3.5" cy="6" r="1.5" fill="currentColor" stroke="none"/><circle cx="3.5" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="3.5" cy="18" r="1.5" fill="currentColor" stroke="none"/></svg>]] as const).map(([v, icon]) => {
+                  const on = view === v
+                  return (
+                    <button key={v} onClick={() => setView(v)} aria-label={v === 'grid' ? 'نمای عادی' : 'نمای لیست'} style={{
+                      width:38, height:38, borderRadius:10, cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0,
+                      border: on ? '1px solid rgba(199,166,106,0.40)' : '1px solid rgba(17,17,16,0.10)',
+                      background: on ? 'rgba(199,166,106,0.12)' : 'rgba(255,255,255,0.78)',
+                      color: on ? '#8F6531' : TEXT_S,
+                      boxShadow: on ? '0 4px 12px rgba(199,166,106,0.16)' : 'inset 0 1px 0 rgba(255,255,255,0.9)',
+                    }}>{icon}</button>
+                  )
+                })}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* ── Divider ── */}
+        <div style={{ maxWidth:1280, margin:'22px auto 20px', padding:'0 clamp(24px,6vw,80px)' }}>
+          <div style={{ display:'flex', alignItems:'center', gap:18 }}>
+            <span style={{ fontSize:11, fontWeight:800, color:'rgba(154,110,56,0.72)', whiteSpace:'nowrap' }}>
+              داوران فعال
+            </span>
+          </div>
+        </div>
+
+        {/* ══════════════ GRID ══════════════ */}
+        <div style={{ maxWidth:1280, margin:'0 auto', padding:'0 clamp(24px,6vw,80px) 64px' }}>
+          {referees.length > 0 ? (
+            view === 'list' ? (
+              <div className="coach-list-grid">
+                {referees.map((referee, idx) => (
+                  <RefereeCard key={referee.id} referee={referee} view="list" idx={idx} />
+                ))}
+              </div>
+            ) : (
+              <div className="g5" style={{ display:'grid', gridTemplateColumns:'repeat(5,1fr)', gap:12 }}>
+                {referees.map((referee, idx) => (
+                  <RefereeCard key={referee.id} referee={referee} view="grid" idx={idx} />
+                ))}
+              </div>
+            )
+          ) : (
+            <div style={{ textAlign:'center', padding:'60px 0', color:TEXT_M, fontSize:14 }}>
+              {loadFailed ? 'فهرست بارگذاری نشد — اتصال اینترنت را بررسی کنید و صفحه را دوباره باز کنید' : 'هیچ داوری با این فیلتر پیدا نشد'}
+            </div>
+          )}
+        </div>
+
+      </div>
+
+      {/* ── مودال استوری این‌جا نیست ──
+          رسانه‌اش `storyImage` بود که برابر *عکس پروفایل* پر می‌شد،
+          و اگر خالی بود یک عکس کاتالوگ ساختگی جایش می‌نشست. یعنی
+          سایت از طرف مربی چیزی نشان می‌داد که او نگذاشته بود، و
+          چون فیلد پروفایل بود هرگز منقضی نمی‌شد.
+
+          مربی و داور هنوز سیستم استوری واقعی ندارند؛ تا آن روز
+          حلقه و مودالی هم نباید باشد. */}
+    </>
+  )
+}

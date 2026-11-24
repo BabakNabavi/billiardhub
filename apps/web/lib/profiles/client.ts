@@ -143,6 +143,16 @@ export async function fetchProfiles<T>(kind: ProfileKind): Promise<RemoteProfile
 /* ⚠️ `fetchProfiles` خطا را می‌بلعد و `[]` می‌دهد، پس مصرف‌کننده
    نمی‌تواند «هیچ متخصصی نیست» را از «سرور جواب نداد» جدا کند و
    روی سایت زنده جمله‌ی غلط نشان می‌دهد. این یکی حالت را برمی‌گرداند. */
+/** نگاشتِ فهرست که یک ردیفِ ناقص (آرایه‌ی نبوده و…) را کنار می‌گذارد، نه کلِ صفحه را —
+ *  نگاشت حالا هنگامِ رندرِ سرور هم اجرا می‌شود و پرتابش صفحه را می‌شکست */
+export function mapSafely<A, B>(xs: readonly A[], f: (x: A) => B): B[] {
+  const out: B[] = []
+  for (const x of xs) {
+    try { out.push(f(x)) } catch (e) { console.warn('[profiles] ردیفِ ناقص کنار رفت', e instanceof Error ? e.message : e) }
+  }
+  return out
+}
+
 export type ProfilesResult<T> =
   | { state: 'ok'; profiles: RemoteProfile<T>[] }
   | { state: 'error' }
