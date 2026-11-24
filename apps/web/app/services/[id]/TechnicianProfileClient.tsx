@@ -29,6 +29,7 @@ import { resolveServices } from '@/lib/tech-services'
 import { useVideoEdit } from '@/components/media/useVideoEdit'
 import { detailTitle, type VideoDetail } from '@/lib/media/video-details'
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { csrfToken } from '@/lib/http'
 import { useCopyUrl } from '@/hooks/use-copy-url'
 import type { RefObject } from 'react'
 import { ProfileMissing, ProfileLoading } from '@/components/profile/ProfileMissing'
@@ -133,7 +134,8 @@ export function TechnicianProfileClient({ initial }: { initial: PublicProfile<Te
   /* پروفایل‌های ثبت‌نامی (پنل ⇒ localStorage) بعد از mount خوانده می‌شوند */
   /* پروفایلِ تأییدشده همراهِ HTML می‌آید (page.tsx) ⟵ بی‌اسکلت و بی‌پرش (آذرِ ۱۴۰۵).
      درخواستِ مرورگرِ پایین همچنان می‌رود و مالکیت و نسخه‌ی تازه را می‌آورد؛
-     دکمه‌های ویرایش تا آن پاسخ بسته‌اند، پس نسخه‌ی سرورِ بی‌فیلدِ خصوصی هرگز ذخیره نمی‌شود. */
+     دکمه‌های ویرایش تا آن پاسخ بسته‌اند (ownerId فقط از همان پاسخ)؛ ذخیره هم تا تأییدِ سرور
+     نسخه‌ی کاملِ مالک را زیرِ نسخه‌ی صفحه می‌گذارد (useOwnerEdit). */
   const [stored, setStored]   = useState<Technician | null>(() => (initial ? profileToTechnician(rawOf(initial)) : null))
   const [checked, setChecked] = useState(initial != null)
   /* با نسخه‌ی سرور، کشِ محلی رویش نمی‌نشیند — کهنه‌تر از سرور است */
@@ -171,6 +173,10 @@ export function TechnicianProfileClient({ initial }: { initial: PublicProfile<Te
       const local = getTechnicianProfile(id)
       setStored(local ? profileToTechnician(local) : null)
     }
+    /* بازدیدکننده‌ی بی‌نشست با نسخه‌ی سرور (آذرِ ۱۴۰۵): همه‌چیز همراهِ HTML آمده و این
+       درخواست فقط «مالکِ من است؟» را می‌پرسید — برای مهمان همیشه «نه». روی شبکه‌ی کند
+       یعنی همان پروفایل دوبار دانلود می‌شد. با نشست (کوکیِ CSRF) همچنان می‌رود. */
+    if (hadServer.current && !csrfToken()) return
 
     let alive = true
     void (async () => {

@@ -27,7 +27,7 @@ function strip(o: Record<string, unknown>, keepOwnerId: boolean): Record<string,
 }
 
 /** ردیفِ پروفایل (و `data`ِ داخلش) بی‌فیلدِ خصوصی. `keepOwnerId: false` برای
- *  HTMLِ رندرِ سرور که شناسه را هم لازم ندارد (مالکیت از پاسخِ مرورگر می‌آید). */
+ *  جایی که شناسه هم لازم نیست (کارت‌های فهرستِ رندرِ سرور). */
 export function withoutPrivateFields<T extends object>(row: T, opts: { keepOwnerId: boolean }): T {
   const out = strip(row as Record<string, unknown>, opts.keepOwnerId)
   const data = (row as { data?: unknown }).data

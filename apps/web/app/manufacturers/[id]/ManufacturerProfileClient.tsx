@@ -4,6 +4,7 @@ import { useChannelPublish, type PublishVideo } from '@/components/media/useChan
 import { useVideoEdit } from '@/components/media/useVideoEdit'
 import { detailTitle, type VideoDetail } from '@/lib/media/video-details'
 import { useState, useMemo, useRef, useEffect } from 'react'
+import { csrfToken } from '@/lib/http'
 import { ProfileMissing, ProfileLoading } from '@/components/profile/ProfileMissing'
 import { useProfileImageViewer } from '@/components/ProfileImageViewer'
 import { useProfileVideoViewer } from '@/components/profile/ProfileVideoViewer'
@@ -126,23 +127,28 @@ export function ManufacturerProfileClient({ initial, initialManager = '' }: {
   /* اول داده‌ی ایستا؛ اگر نبود، پروفایل ثبت‌نامی (پنل ⇒ localStorage) */
   /* ⚠️ آذرِ ۱۴۰۵: پروفایلِ تأییدشده همراهِ HTML می‌آید (page.tsx) ⟵ بی‌اسکلت و بی‌پرش.
      درخواستِ مرورگرِ پایین همچنان می‌رود و مالکیت و نسخه‌ی تازه را می‌آورد؛ دکمه‌های
-     ویرایش تا آن پاسخ بسته‌اند، پس نسخه‌ی سرورِ بی‌فیلدِ خصوصی هرگز ذخیره نمی‌شود. */
+     ویرایش تا آن پاسخ بسته‌اند (editOwnerId فقط از همان پاسخ). */
   const [storedMfr, setStoredMfr] = useState<ReturnType<typeof profileToManufacturer> | null>(() => (initial ? profileToManufacturer(rawOf(initial)) : null))
   /* نمای نگاشت‌شده برای ذخیره کافی نیست — پروفایل خام هم می‌ماند */
   const [rawP, setRawP]           = useState<ManufacturerProfile | null>(() => (initial ? rawOf(initial) : null))
   /* با نسخه‌ی سرور، کشِ محلی رویش نمی‌نشیند — کهنه‌تر از سرور است */
   const hadServer = useRef(initial != null)
-  const [ownerId, setOwnerId]     = useState<string | null>(null)
+  /* ownerId از HTML: آگهی‌های صاحب و «فروشگاه هم دارد؟» با آن خوانده می‌شوند، بی درخواستِ دوم */
+  const [ownerId, setOwnerId]     = useState<string | null>(initial?.ownerId ?? null)
+  /* ⚠️ مالکیتِ ویرایش جداست و فقط از پاسخِ مرورگر می‌آید (بازبینی، آذرِ ۱۴۰۵): اگر از
+     HTML می‌آمد، دکمه‌ها پیش از پاسخ باز می‌شدند و پاسخِ دیررسِ همان درخواست نسخه‌ی پیش از
+     ذخیره را روی صفحه می‌نشاند — ذخیره‌ی بعدی تغییرِ اول را پاک می‌کرد */
+  const [editOwnerId, setEditOwnerId] = useState<string | null>(null)
   /* پرچم قطعی سرور — مقایسه‌ی مرورگر بی‌صدا شکست می‌خورد */
   const [mine, setMine]           = useState<boolean | undefined>(undefined)
   const { open: openImage, viewer: imageViewer } = useProfileImageViewer()
   const { open: openVideo, viewer: videoViewer } = useProfileVideoViewer()
 
   /* ⚠️ پیش از هر `return` شرطی — قاعده‌ی هوک‌ها */
-  const edit = useOwnerEdit<ManufacturerProfile>('manufacturer', mfrId, rawP, ownerId, raw => {
+  const edit = useOwnerEdit<ManufacturerProfile>('manufacturer', mfrId, rawP, editOwnerId, raw => {
     setRawP(raw); setStoredMfr(profileToManufacturer(raw))
   }, mine)
-  const { gate: channelGate, ask: askChannel, publish: publishToChannel } = useChannelPublish('manufacturer', ownerId ?? undefined, edit.isOwner, notify)
+  const { gate: channelGate, ask: askChannel, publish: publishToChannel } = useChannelPublish('manufacturer', editOwnerId ?? undefined, edit.isOwner, notify)
   /* ── همان گالری مشترک بقیه‌ی نقش‌ها ──
      ⚠️ این‌جا فقط یک شبکه‌ی عکس بود: نه ویدیویی، نه آلبومی، و حذف با
      *اندیس* انجام می‌شد. حالا همان کامپوننتی رندر می‌شود که مربی،
@@ -342,6 +348,10 @@ export function ManufacturerProfileClient({ initial, initialManager = '' }: {
       const p = getManufacturerProfile(mfrId)
       setStoredMfr(p ? profileToManufacturer(p) : null)
     }
+    /* بازدیدکننده‌ی بی‌نشست با نسخه‌ی سرور (آذرِ ۱۴۰۵): همه‌چیز همراهِ HTML آمده و این
+       درخواست فقط «مالکِ من است؟» را می‌پرسید — برای مهمان همیشه «نه». روی شبکه‌ی کند
+       یعنی همان پروفایل دوبار دانلود می‌شد. با نشست (کوکیِ CSRF) همچنان می‌رود. */
+    if (hadServer.current && !csrfToken()) return
 
     let alive = true
     /* تولیدکننده‌ی ثبت‌نامی کاربران دیگر فقط روی سرور است */
@@ -352,7 +362,7 @@ export function ManufacturerProfileClient({ initial, initialManager = '' }: {
         if (r.state === 'found') {
           const m = r.profile
           const raw = { ...m.data, slug: m.slug, verified: m.verified } as ManufacturerProfile
-          setRawP(raw); setOwnerId(m.ownerId)
+          setRawP(raw); setOwnerId(m.ownerId); setEditOwnerId(m.ownerId)
           setMine(r.isMine === true)
           setManagerName(r.managerName ?? '')
           setStoredMfr(profileToManufacturer(raw))

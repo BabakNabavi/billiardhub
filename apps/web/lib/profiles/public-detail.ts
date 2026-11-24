@@ -20,7 +20,7 @@
 
 import 'server-only'
 import { z } from 'zod'
-import { getProfileBySlug, managerNameOf } from './server'
+import { readProfileBySlug, managerNameOf } from './server'
 import type { ProfileKind } from './server'
 import type { PublicProfile } from './client'
 import { withMediaArrays } from './albums'
@@ -35,8 +35,8 @@ import { TIMED_OUT, withTimeout } from '@/lib/seo/timeout'
    ⚠️ الگو، نه فهرستِ اسم: فیلدِ خصوصیِ تازه‌ای که فرمی بعدا با همین
    پیشوندها اضافه کند، خودبه‌خود بیرون می‌ماند. صفحه‌ی عمومی هیچ‌کدام را
    نمی‌خواند (کد پستی و مختصاتِ تولیدکننده عمومی‌اند و می‌مانند).
-   قاعده در lib/profiles/private-fields است (مشترک با پاسخِ API)؛ این‌جا ownerId هم
-   نمی‌رود — مالکیت فقط از پاسخِ مرورگر می‌آید. */
+   قاعده در lib/profiles/private-fields است (مشترک با پاسخِ API). ownerId می‌ماند (پایین)،
+   ولی «مالکِ من است؟» و دکمه‌های ویرایش فقط از پاسخِ مرورگر می‌آیند. */
 
 /* مرزِ ورودی: پارامترِ مسیر — همان سقفِ ۸۰ نویسه‌ی نامک در api/profiles/[kind] */
 const Slug = z.string().trim().min(1).max(80)
@@ -59,14 +59,17 @@ export async function loadPublicProfileFull<T>(
   const parsed = Slug.safeParse(decodeSlug(rawSlug))
   if (!parsed.success) return null
   try {
-    const r = await withTimeout(getProfileBySlug(kind, parsed.data), 1500)
+    /* همان خواندنِ کش‌شده‌ی layoutِ سئو — یک پرس‌وجو در هر درخواست */
+    const r = await withTimeout(readProfileBySlug(kind, parsed.data), 1500)
     if (r === TIMED_OUT) { console.error(`[profile:${kind}] initial read timed out`); return null }
     if (!r || r.status !== 'approved') return null
     /* پیش از حذفِ ownerId؛ ردیفِ نمایشی نامِ ادمین را نمی‌گیرد (همان قاعده‌ی API) */
     const mgr = r.isDemo ? '' : await withTimeout(managerNameOf(kind, r.ownerId), 1000)
     const managerName = mgr === TIMED_OUT ? '' : mgr
     /* همان شکلِ پاسخِ JSONِ API (تاریخ‌ها رشته) */
-    const row = withoutPrivateFields(JSON.parse(JSON.stringify(r)) as Record<string, unknown>, { keepOwnerId: false })
+    /* ownerId می‌ماند: بازدیدکننده‌ی بی‌نشست درخواستِ دوم را نمی‌زند و استوری و آگهی‌های
+       صاحب با همین خوانده می‌شوند (همان که پاسخِ عمومیِ API هم دارد) */
+    const row = withoutPrivateFields(JSON.parse(JSON.stringify(r)) as Record<string, unknown>, { keepOwnerId: true })
     /* همان تضمینِ آرایه‌ای که fetchProfileResult در مرورگر می‌زند */
     row.data = withMediaArrays((row.data ?? {}) as Record<string, unknown>)
     return { profile: row as unknown as PublicProfile<T>, managerName }

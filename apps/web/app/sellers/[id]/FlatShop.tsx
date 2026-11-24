@@ -4,6 +4,7 @@ import { useChannelPublish, type PublishVideo } from '@/components/media/useChan
 import { useVideoEdit } from '@/components/media/useVideoEdit'
 import { detailTitle, type VideoDetail } from '@/lib/media/video-details'
 import { useState, useMemo, useRef, useEffect } from 'react'
+import { csrfToken } from '@/lib/http'
 import Link from 'next/link'
 import { useRouter, useParams } from 'next/navigation'
 import { toFa, faNum, MONO, toggleSet, Icon, LQ, LQ_NEUTRAL, LQ_FELT_ON } from './shared'
@@ -132,13 +133,16 @@ export default function FlatShop({ initial = null, initialProducts = null }: {
   /* پروفایل ذخیره‌شده‌ی همین فروشگاه (از /dashboard/seller).
      بعد از mount خوانده می‌شود تا SSR و کلاینت یکی باشند. */
   /* ⚠️ آذرِ ۱۴۰۵: فروشگاهِ تأییدشده همراهِ HTML می‌آید (page.tsx) ⟵ بی‌اسکلت.
-     `ownerId` در نسخه‌ی سرور نیست؛ استوری و دکمه‌های ویرایش منتظرِ پاسخِ مرورگرِ
-     پایین می‌مانند، پس نسخه‌ی سرورِ بی‌فیلدِ خصوصی هرگز ذخیره نمی‌شود. */
+     `ownerId` در نسخه‌ی سرور هست (استوری با آن بی درخواستِ دوم خوانده می‌شود)، ولی
+     مالکیتِ ویرایش جداست: editOwnerId فقط از پاسخِ مرورگر. */
   const [profile, setProfile] = useState<SellerProfile | null>(() =>
-    initial ? ({ ...initial.data, slug: initial.slug, verified: initial.verified } as SellerProfile) : null)
+    initial ? ({ ...initial.data, slug: initial.slug, ownerId: initial.ownerId, verified: initial.verified } as SellerProfile) : null)
   /* با نسخه‌ی سرور، کشِ محلی رویش نمی‌نشیند — کهنه‌تر از سرور است */
   const hadServer = useRef(initial != null)
   const [mine, setMine] = useState<boolean | undefined>(undefined)
+  /* ⚠️ فقط از پاسخِ مرورگر (بازبینی): اگر از HTML می‌آمد، دکمه‌ها پیش از پاسخ باز می‌شدند و
+     پاسخِ دیررس نسخه‌ی پیش از ذخیره را روی صفحه می‌نشاند */
+  const [editOwnerId, setEditOwnerId] = useState<string | null>(null)
 
   /* ── ویرایش درجا ──
      ⚠️ پیش از هر `return` شرطی این کامپوننت — قاعده‌ی هوک‌ها.
@@ -146,8 +150,8 @@ export default function FlatShop({ initial = null, initialProducts = null }: {
   /* عکس‌های گالری از پروفایل واقعی */
   const shots = profile?.gallery ?? []
   const vids = profile?.videos ?? []
-  const edit = useOwnerEdit<SellerProfile>('seller', sellerId, profile, profile?.ownerId ?? null, setProfile, mine)
-  const { gate: channelGate, ask: askChannel, publish: publishToChannel } = useChannelPublish('seller', profile?.ownerId ?? undefined, edit.isOwner, notify)
+  const edit = useOwnerEdit<SellerProfile>('seller', sellerId, profile, editOwnerId, setProfile, mine)
+  const { gate: channelGate, ask: askChannel, publish: publishToChannel } = useChannelPublish('seller', editOwnerId ?? undefined, edit.isOwner, notify)
 
   /* ── همان گالری مشترک بقیه‌ی نقش‌ها ──
      ⚠️ این‌جا فقط یک شبکه‌ی عکس بود: نه ویدیویی، نه آلبومی، و حذف با
@@ -267,6 +271,10 @@ export default function FlatShop({ initial = null, initialProducts = null }: {
     if (!hadServer.current) setProfile(getSellerProfile(sellerId))
     setMissing(false)
     setLoadErr(false)
+    /* بازدیدکننده‌ی بی‌نشست با نسخه‌ی سرور (آذرِ ۱۴۰۵): همه‌چیز همراهِ HTML آمده و این
+       درخواست فقط «مالکِ من است؟» را می‌پرسید — برای مهمان همیشه «نه». روی شبکه‌ی کند
+       یعنی همان پروفایل دوبار دانلود می‌شد. با نشست (کوکیِ CSRF) همچنان می‌رود. */
+    if (hadServer.current && !csrfToken()) return
     /* منبع حقیقت سرور است — فروشگاه کاربران دیگر فقط از این‌جا می‌آید */
     void fetchProfileResult<SellerProfile>('seller', sellerId).then(r => {
       if (!alive) return
@@ -277,7 +285,7 @@ export default function FlatShop({ initial = null, initialProducts = null }: {
       /* `ownerId` ستون واقعی ردیف است و باید صریح منتقل شود؛ وگرنه
          مسیر استوری روی ردیف‌هایی که آن را داخل data ندارند خالی
          می‌ماند و همان ناهماهنگی قبلی برعکس تکرار می‌شود. */
-      if (p) setProfile({ ...p.data, slug: p.slug, ownerId: p.ownerId, verified: p.verified } as SellerProfile)
+      if (p) { setProfile({ ...p.data, slug: p.slug, ownerId: p.ownerId, verified: p.verified } as SellerProfile); setEditOwnerId(p.ownerId) }
       else if (!getSellerProfile(sellerId)) setMissing(true)
     })
     return () => { alive = false }

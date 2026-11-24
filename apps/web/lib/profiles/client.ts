@@ -34,11 +34,11 @@ export interface RemoteProfile<T = Record<string, unknown>> {
   updatedAt: string
 }
 
-/** پروفایلی که سرور همراهِ HTML می‌فرستد (lib/profiles/public-detail): بی‌فیلدِ مالک و
-  * پروانه. نوع هم همین را می‌گوید تا کسی از روی آن `ownerId` نخواند — مالکیت فقط از
-  * پاسخِ مرورگر (fetchProfileResult) می‌آید. */
+/** پروفایلی که سرور همراهِ HTML می‌فرستد (lib/profiles/public-detail): بی‌فیلدِ خصوصی
+  * (lib/profiles/private-fields). `ownerId` دارد — استوری و آگهی‌های صاحب با آن خوانده
+  * می‌شوند؛ ذخیره‌ی درجا تا تأییدِ سرور نسخه‌ی کاملِ مالک را زیرش می‌گذارد (useOwnerEdit). */
 export type PublicProfile<T = Record<string, unknown>> =
-  Omit<RemoteProfile<T>, 'ownerId' | 'licenseNumber' | 'licenseUrl' | 'licenseVerified' | 'licenseNote'>
+  Omit<RemoteProfile<T>, 'licenseNumber' | 'licenseUrl' | 'licenseVerified' | 'licenseNote'>
 
 async function json<T>(r: Response): Promise<T | null> {
   if (!r.ok) return null

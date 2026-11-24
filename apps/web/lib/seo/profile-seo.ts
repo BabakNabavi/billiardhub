@@ -1,8 +1,7 @@
 import 'server-only'
 import { cache } from 'react'
 import type { Metadata } from 'next'
-import { sb } from '@/lib/finance/db'
-import type { ProfileKind } from '@/lib/profiles/server'
+import { readProfileBySlug, type ProfileKind } from '@/lib/profiles/server'
 import { SITE_URL } from '@/lib/site-url'
 import { TIMED_OUT, withTimeout } from '@/lib/seo/timeout'
 
@@ -51,11 +50,10 @@ type Lookup = { state: 'found'; row: ProfileRow } | { state: 'none' } | { state:
 /** پروفایل با نامک — یک‌بار در هر درخواست (`cache`)، با مهلت */
 export const loadProfile = cache(async (kind: ProfileKind, slug: string): Promise<Lookup> => {
   try {
-    const res = await withTimeout(
-      sb().from('profiles').select('slug,status,data').eq('kind', kind).eq('slug', slug).maybeSingle(),
-    )
-    if (res === TIMED_OUT || res.error) return { state: 'unknown' }
-    return res.data ? { state: 'found', row: res.data as ProfileRow } : { state: 'none' }
+    /* همان خواندنی که page می‌کند (lib/profiles/server.readProfileBySlug) — یک پرس‌وجو در هر درخواست */
+    const res = await withTimeout(readProfileBySlug(kind, slug))
+    if (res === TIMED_OUT) return { state: 'unknown' }
+    return res ? { state: 'found', row: { slug: res.slug, status: res.status, data: res.data } } : { state: 'none' }
   } catch { return { state: 'unknown' } }
 })
 

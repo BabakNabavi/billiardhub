@@ -10,6 +10,7 @@
 
 import { cleanAlbums, ALBUM_NAME_MAX, NAMED_ALBUM_KINDS } from './albums'
 import { getSupabaseServer } from '../supabase-server'
+import { cache } from 'react'
 
 export type ProfileKind = 'seller' | 'manufacturer' | 'coach' | 'referee' | 'technician' | 'player'
 export const PROFILE_KINDS: ProfileKind[] = ['seller', 'manufacturer', 'coach', 'referee', 'technician', 'player']
@@ -172,6 +173,17 @@ export async function getProfileBySlug(kind: ProfileKind, slug: string): Promise
   if (error || !data) return null
   return toProfile(data as DbRow)
 }
+
+/** پروفایل با نامک برای صفحه‌ی عمومی — **یک‌بار در هر درخواست** (`cache`ِ React).
+ *  layoutِ سئو (lib/seo/profile-seo) و page (lib/profiles/public-detail) هر دو همین را
+ *  می‌خوانند؛ پیش‌تر هر بازدید دو پرس‌وجوی جدا می‌زد (آذرِ ۱۴۰۵).
+ *  ⚠️ برخلافِ getProfileBySlug خطای دیتابیس را پرتاب می‌کند: سئو «نمی‌دانیم» را با
+ *  «نیست» یکی نمی‌کند — وگرنه یک کندیِ لحظه‌ای پروفایلِ واقعی را noindex می‌کرد. */
+export const readProfileBySlug = cache(async (kind: ProfileKind, slug: string): Promise<ProfileRow | null> => {
+  const { data, error } = await sb().from('profiles').select('*').eq('kind', kind).eq('slug', slug).maybeSingle()
+  if (error) throw new Error(error.message)
+  return data ? toProfile(data as DbRow) : null
+})
 
 export async function getProfileByOwner(kind: ProfileKind, ownerId: string): Promise<ProfileRow | null> {
   const { data, error } = await sb().from('profiles').select('*').eq('kind', kind).eq('owner_id', ownerId).maybeSingle()
