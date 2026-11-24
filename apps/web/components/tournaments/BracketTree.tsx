@@ -25,7 +25,7 @@
    جدول مسابقه بد است: تماشاگر نمی‌داند چیزی بیرون کادر مانده.
    ───────────────────────────────────────────────────────────── */
 
-import { useLayoutEffect, useRef, useState } from 'react'
+import { useId, useLayoutEffect, useRef, useState, useSyncExternalStore } from 'react'
 import { Radio, Trophy } from 'lucide-react'
 import { faDigits, slotLabel, isBye, type Bracket, type Match } from '../../lib/tournaments/bracket-client'
 
@@ -51,6 +51,11 @@ export default function BracketTree({
 }: BracketTreeProps) {
   const wrapRef = useRef<HTMLDivElement>(null)
   const treeRef = useRef<HTMLDivElement>(null)
+  /* شناسه‌ی قاب برای اسکریپتِ جاگیریِ پیش از نقاشی (پایین) — یکی روی سرور و مرورگر */
+  const wrapId = `bt-${useId()}`
+  /* اسکریپت فقط در HTMLِ سرور و hydration: رندرِ کلاینتیِ <script> در React 19 خطای
+     توسعه می‌دهد و آن‌جا اجرا هم نمی‌شود (پنلِ برگزاری کلاینتی است) */
+  const ssrPass = useSyncExternalStore(noopSubscribe, () => false, () => true)
   const [scale, setScale] = useState(1)
   /* اندازه‌ی طبیعی درخت — پیش از مقیاس. برای حاشیه‌ی منفی لازم است. */
   const [natural, setNatural] = useState({ w: 0, h: 0 })
@@ -63,6 +68,17 @@ export default function BracketTree({
   useLayoutEffect(() => {
     const wrap = wrapRef.current, tree = treeRef.current
     if (!wrap || !tree) return
+    /* اسکریپتِ HTML انتقال را موقتا خاموش کرده بود (تا جمع‌شدن دیده نشود)؛ از این پس
+       تغییرِ اندازه‌ی پنجره دوباره نرم باشد */
+    if (tree.style.transition === 'none') {
+      /* ⚠️ مقادیرِ اسکریپت پاک می‌شوند پیش از fit: state هنوز ۱ است و اگر fit هم ~۱ بدهد
+         (فونتِ دانا رسید و درخت حالا جا می‌شود) setScale رندری نمی‌سازد و DOM جمع‌شده
+         می‌ماند. در فازِ layout است، پس فریمی بی‌مقیاس دیده نمی‌شود (بازبینی). */
+      tree.style.transform = 'scale(1)'
+      tree.style.marginInline = ''
+      if (tree.parentElement) tree.parentElement.style.marginBottom = ''
+      requestAnimationFrame(() => { tree.style.transition = 'transform .2s ease' })
+    }
     const fit = () => {
       const w = wrap.clientWidth
       /* ⚠️ اندازه باید **بدون** مقیاس خوانده شود، وگرنه هر اندازه‌گیری
@@ -171,7 +187,7 @@ export default function BracketTree({
   const overflowY = natural.h ? natural.h * (1 - scale) : 0
 
   return (
-    <div ref={wrapRef} style={{
+    <div ref={wrapRef} id={wrapId} style={{
       width: '100%', overflow: 'hidden',
       display: 'flex', justifyContent: 'center',
       /* در حالت پرکردن، قاب باید ارتفاع واقعی در دسترس را داشته
@@ -182,8 +198,10 @@ export default function BracketTree({
       {/* در حالت پرکردن مبدأ وسط است و حاشیه‌ی جبرانی لازم نیست:
           جعبه‌ی چیدمان وسط قاب می‌نشیند و تصویر بزرگ‌شده هم حول
           همان مرکز می‌ماند. */}
-      <div style={fill ? undefined : { marginBottom: -overflowY }}>
-        <div ref={treeRef} style={{
+      {/* ⚠️ suppressHydrationWarning: اسکریپتِ پایین پیش از hydration اندازه را روی خودِ DOM
+          می‌گذارد؛ React ویژگی‌ها را بازنویسی نمی‌کند و افکتِ جاگیری همان عدد را حساب می‌کند */}
+      <div style={fill ? undefined : { marginBottom: -overflowY }} suppressHydrationWarning>
+        <div ref={treeRef} data-bt-tree="" suppressHydrationWarning style={{
           display: 'flex', alignItems: 'stretch', width: 'max-content',
           direction: 'rtl',
           transform: `scale(${scale})`,
@@ -244,8 +262,35 @@ export default function BracketTree({
             col(r, 'left', innerRounds.length - 1 - i))}
         </div>
       </div>
+      {/* ── جاگیری پیش از اولین نقاشی (آذرِ ۱۴۰۵) ──
+          صفحه‌های جدول روی سرور رندر می‌شوند و درخت با اندازه‌ی طبیعی (پهن‌تر از گوشی)
+          نقاشی می‌شد و پس از hydration جمع می‌شد؛ فوتر زیرش می‌پرید (CLS ۰٫۲۶). این
+          اسکریپتِ کوچک همان حسابِ fit را هنگامِ خواندنِ HTML انجام می‌دهد — استایل‌ها
+          پیش از اجرای اسکریپتِ درون‌خطی بار شده‌اند. در ناوبریِ درون‌برنامه‌ای اجرا
+          نمی‌شود (اسکریپتِ innerHTML اجرا نمی‌شود) و useLayoutEffect همان کار را می‌کند.
+          حالتِ پرکردن (مانیتورِ سالن) نه: ارتفاعِ قاب آن‌جا از چیدمانِ والد می‌آید. */}
+      {!fill && ssrPass && (
+        <script
+          suppressHydrationWarning
+          dangerouslySetInnerHTML={{ __html: fitScript(wrapId) }}
+        />
+      )}
     </div>
   )
+}
+
+const noopSubscribe = () => () => {}
+
+/* همان حسابِ fit در افکتِ بالا، بی React: مقیاس = min(1, عرضِ قاب ÷ عرضِ طبیعی) و
+   حاشیه‌ی منفیِ جبرانی. شناسه با JSON.stringify امن درج می‌شود. */
+function fitScript(id: string): string {
+  return `(function(){try{var w=document.getElementById(${JSON.stringify(id)});if(!w)return;`
+    + `var t=w.querySelector('[data-bt-tree]');if(!t)return;`
+    + `var cw=w.clientWidth,nw=t.scrollWidth,nh=t.scrollHeight;if(!cw||!nw)return;`
+    + `var s=Math.min(1,cw/nw);if(s>0.999)return;`
+    + `t.style.transition='none';t.style.transform='scale('+s+')';`
+    + `t.style.marginInline=(-nw*(1-s)/2)+'px';t.parentElement.style.marginBottom=(-nh*(1-s))+'px';`
+    + `}catch(e){}})()`
 }
 
 /* ── یک بازی ─────────────────────────────────────────────────── */
