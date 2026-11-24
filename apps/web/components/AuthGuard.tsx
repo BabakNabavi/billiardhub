@@ -15,8 +15,7 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
     }
   }, [hydrated, user, router]);
 
-  // Still hydrating — show cinematic loader
-  if (!hydrated) return (
+  const loader = (
     <div style={{
       minHeight: '100vh', background: '#F7F7F5',
       display: 'flex', flexDirection: 'column',
@@ -30,9 +29,14 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
       <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>
   );
+  // Still hydrating — show cinematic loader
+  if (!hydrated) return loader;
 
-  // Hydrated but no user — redirect happening
-  if (!user) return null;
+  /* Hydrated but no user — redirect happening.
+     ⚠️ همان لودر، نه null (آذرِ ۱۴۰۵): با null بدنه یک‌باره صفر می‌شد و فوتر از
+     زیرِ صفحه تا زیرِ نوار بالا می‌پرید — لایت‌هاوس روی /booking جابه‌جاییِ ۰٫۵۴
+     ثبت کرد. تا رسیدنِ /login همان قاب سر جایش می‌ماند. */
+  if (!user) return loader;
 
   return <>{children}</>;
 }
