@@ -52,8 +52,10 @@ export default function TournamentPublicPage() {
      انتخاب کرده بود. */
   const matchFormat = t?.matchFormat ?? '';
 
+  /* ⚠️ هم‌قدِ صفحه‌ی آماده (۱۰۰vh): با ۶۰vh فوتر روی گوشی در کادرِ اول دیده می‌شد و
+     با رسیدنِ داده پایین می‌پرید — Lighthouse جابه‌جاییِ ۰٫۲۸ (سقفِ گوگل ۰٫۱) داد */
   if (loading) return (
-    <div dir="rtl" style={{ minHeight: '60vh', background: '#F7F7F5', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Vazirmatn, sans-serif', color: '#6F6A5C', fontSize: 14 }}>
+    <div dir="rtl" style={{ minHeight: '100vh', background: '#F7F7F5', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Vazirmatn, sans-serif', color: '#6F6A5C', fontSize: 14 }}>
       در حال بارگذاری…
     </div>
   );
