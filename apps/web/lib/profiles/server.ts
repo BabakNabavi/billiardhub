@@ -447,3 +447,26 @@ export async function deleteDemoProfile(id: string): Promise<boolean> {
     .delete({ count: 'exact' }).eq('id', id).eq('is_demo', true)
   return !error && (count ?? 0) > 0
 }
+
+/* ── نام مدیر ────────────────────────────────────────────────────
+   همان قاعده‌ای که مسیر باشگاه دارد: «نام مدیر» باید نام و نام
+   خانوادگیِ احرازشده‌ی صاحبِ حساب باشد، نه یک رشته‌ی آزاد که هرکس
+   می‌تواند هرچه بخواهد در آن بنویسد.
+
+   ⚠️ عمدا هنگام *خواندن* مشتق می‌شود نه هنگام نوشتن: این‌طور
+   ردیف‌های موجود هم بدونِ ذخیره‌ی دوباره نام می‌گیرند، و اگر کاربر
+   نامش را عوض کند صفحه فورا همان را نشان می‌دهد. */
+/* ⚠️ فهرست بسته: بدون این قید، نام حقوقیِ صاحبِ حساب روی هر شش نقش
+   به هر بازدیدکننده‌ای برمی‌گشت و هر بازدیدِ پروفایل یک کوئریِ
+   اضافه می‌گرفت — روی شبکه‌ی کندِ ایران بی‌دلیل. */
+const SHOWS_MANAGER: ProfileKind[] = ['manufacturer'];
+
+export async function managerNameOf(kind: ProfileKind, ownerId: string): Promise<string> {
+  if (!ownerId || !SHOWS_MANAGER.includes(kind)) return '';
+  const { data, error } = await sb().from('users')
+    .select('"firstName","lastName"').eq('id', ownerId).maybeSingle();
+  /* خطای گذرا نباید بی‌صدا به «مدیری ثبت نشده» ترجمه شود */
+  if (error) { console.error('[profiles] managerName:', error.message); return ''; }
+  const o = data as { firstName?: string; lastName?: string } | null;
+  return `${o?.firstName ?? ''} ${o?.lastName ?? ''}`.trim();
+}

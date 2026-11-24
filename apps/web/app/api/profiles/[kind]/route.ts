@@ -5,7 +5,7 @@ import { can, PROFILE_KIND_KEY } from '@/lib/admin/permissions';
 import { checkProfileData } from '@/lib/profiles/validate';
 import { lockState, requeueAfterRegrant, LOCKED_MESSAGE } from '@/lib/roles/revoke';
 import {
-  PROFILE_KINDS, getProfileByOwner, getProfileBySlug, listProfiles, saveProfile,
+  PROFILE_KINDS, getProfileByOwner, getProfileBySlug, listProfiles, saveProfile, managerNameOf,
   type ProfileKind,
 } from '@/lib/profiles/server';
 
@@ -18,28 +18,8 @@ const kindOf = (v: string): ProfileKind | null =>
 
 const str = (v: unknown, max = 200) => String(v ?? '').trim().slice(0, max);
 
-/* ── نام مدیر ────────────────────────────────────────────────────
-   همان قاعده‌ای که مسیر باشگاه دارد: «نام مدیر» باید نام و نام
-   خانوادگیِ احرازشده‌ی صاحبِ حساب باشد، نه یک رشته‌ی آزاد که هرکس
-   می‌تواند هرچه بخواهد در آن بنویسد.
+/* نامِ مدیر: lib/profiles/server.managerNameOf (مشترک با رندرِ سرورِ صفحه‌ی پروفایل) */
 
-   ⚠️ عمدا هنگام *خواندن* مشتق می‌شود نه هنگام نوشتن: این‌طور
-   ردیف‌های موجود هم بدونِ ذخیره‌ی دوباره نام می‌گیرند، و اگر کاربر
-   نامش را عوض کند صفحه فورا همان را نشان می‌دهد. */
-/* ⚠️ فهرست بسته: بدون این قید، نام حقوقیِ صاحبِ حساب روی هر شش نقش
-   به هر بازدیدکننده‌ای برمی‌گشت و هر بازدیدِ پروفایل یک کوئریِ
-   اضافه می‌گرفت — روی شبکه‌ی کندِ ایران بی‌دلیل. */
-const SHOWS_MANAGER: ProfileKind[] = ['manufacturer'];
-
-async function managerNameOf(kind: ProfileKind, ownerId: string): Promise<string> {
-  if (!ownerId || !SHOWS_MANAGER.includes(kind)) return '';
-  const { data, error } = await sb().from('users')
-    .select('"firstName","lastName"').eq('id', ownerId).maybeSingle();
-  /* خطای گذرا نباید بی‌صدا به «مدیری ثبت نشده» ترجمه شود */
-  if (error) { console.error('[profiles] managerName:', error.message); return ''; }
-  const o = data as { firstName?: string; lastName?: string } | null;
-  return `${o?.firstName ?? ''} ${o?.lastName ?? ''}`.trim();
-}
 
 export async function GET(req: NextRequest, ctx: { params: Promise<{ kind: string }> }) {
   const kind = kindOf((await ctx.params).kind);

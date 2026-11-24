@@ -20,7 +20,7 @@ import { videoMeta, formatDuration } from '@/lib/video-thumb'
 import { notify } from '@/lib/ui/dialogs'
 import '@/components/profile/profile-page.css'
 import { getSellerProfile, type SellerProfile } from '../../../lib/seller-store'
-import { fetchProfileResult } from '../../../lib/profiles/client'
+import { fetchProfileResult, type PublicProfile } from '../../../lib/profiles/client'
 import { useOwnerEdit } from '../../../lib/profiles/use-owner-edit'
 import { compressImage } from '../../../lib/seller-store'
 import { ask } from '../../../lib/ui/dialogs'
@@ -119,7 +119,11 @@ function productsForSeller(rows: ShopProduct[]): Product[] {
 }
 
 /* ═══ صفحه ═══ */
-export default function FlatShop() {
+export default function FlatShop({ initial = null, initialProducts = null }: {
+  initial?: PublicProfile<SellerProfile> | null
+  /** محصولاتِ همین فروشگاه که سرور همراهِ HTML فرستاده؛ درخواستِ مرورگر همچنان می‌رود */
+  initialProducts?: ShopProduct[] | null
+}) {
   /* شناسه‌ی فروشگاه از آدرس (/sellers/[id]) — هر کارت فروشگاه خودش را باز می‌کند،
      نه همیشه فروشگاه شماره‌ی ۱. */
   const params = useParams()
@@ -127,7 +131,13 @@ export default function FlatShop() {
 
   /* پروفایل ذخیره‌شده‌ی همین فروشگاه (از /dashboard/seller).
      بعد از mount خوانده می‌شود تا SSR و کلاینت یکی باشند. */
-  const [profile, setProfile] = useState<SellerProfile | null>(null)
+  /* ⚠️ آذرِ ۱۴۰۵: فروشگاهِ تأییدشده همراهِ HTML می‌آید (page.tsx) ⟵ بی‌اسکلت.
+     `ownerId` در نسخه‌ی سرور نیست؛ استوری و دکمه‌های ویرایش منتظرِ پاسخِ مرورگرِ
+     پایین می‌مانند، پس نسخه‌ی سرورِ بی‌فیلدِ خصوصی هرگز ذخیره نمی‌شود. */
+  const [profile, setProfile] = useState<SellerProfile | null>(() =>
+    initial ? ({ ...initial.data, slug: initial.slug, verified: initial.verified } as SellerProfile) : null)
+  /* با نسخه‌ی سرور، کشِ محلی رویش نمی‌نشیند — کهنه‌تر از سرور است */
+  const hadServer = useRef(initial != null)
   const [mine, setMine] = useState<boolean | undefined>(undefined)
 
   /* ── ویرایش درجا ──
@@ -254,7 +264,7 @@ export default function FlatShop() {
   const [reloadKey, setReloadKey] = useState(0)
   useEffect(() => {
     let alive = true
-    setProfile(getSellerProfile(sellerId))
+    if (!hadServer.current) setProfile(getSellerProfile(sellerId))
     setMissing(false)
     setLoadErr(false)
     /* منبع حقیقت سرور است — فروشگاه کاربران دیگر فقط از این‌جا می‌آید */
@@ -280,7 +290,7 @@ export default function FlatShop() {
      پیش‌تر فروشگاه بی‌محصول، محصولات فروشگاه «۱» را نشان می‌داد —
      کالای یک فروشنده زیر نام فروشنده‌ی دیگر. فروشگاه بی‌محصول باید
      خالی بماند، و حالا واقعا می‌ماند. */
-  const [rows, setRows] = useState<ShopProduct[]>([])
+  const [rows, setRows] = useState<ShopProduct[]>(initialProducts ?? [])
   useEffect(() => {
     let alive = true
     void fetchProductsBySeller(sellerId).then(r => { if (alive) setRows(r) })
@@ -292,7 +302,8 @@ export default function FlatShop() {
   const store = useMemo(() => {
     if (!profile) return { ...STORE, id: sellerId }
     const pick = (v: string | undefined, fallback: string) => (v && v.trim() ? v : fallback)
-    const phones = profile.phones.filter(p => p.trim())
+    /* ⚠️ `?? []`: این نگاشت حالا روی سرور هم اجرا می‌شود؛ ردیفِ قدیمیِ بی‌این آرایه دیگر کلِ صفحه را می‌اندازد، نه فقط مرورگر را */
+    const phones = (profile.phones ?? []).filter(p => p.trim())
     return {
       ...STORE,
       logo:         profile.logo || null,

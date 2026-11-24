@@ -421,12 +421,12 @@ const head = s => console.log(`\n■ ${s}`)
   /* هر هفت نقش باید دروازه داشته باشد — «کاربر عادی» عمداً نه */
   const GATED = [
     ['app/clubs/[id]/page.tsx', 'club'],
-    ['app/coaches/[id]/page.tsx', 'coach'],
-    ['app/referees/[id]/page.tsx', 'referee'],
+    ['app/coaches/[id]/CoachProfileClient.tsx', 'coach'],
+    ['app/referees/[id]/RefereeProfileClient.tsx', 'referee'],
     ['app/players/[id]/page.tsx', 'player'],
-    ['app/services/[id]/page.tsx', 'technician'],
+    ['app/services/[id]/TechnicianProfileClient.tsx', 'technician'],
     ['app/sellers/[id]/FlatShop.tsx', 'seller'],
-    ['app/manufacturers/[id]/page.tsx', 'manufacturer'],
+    ['app/manufacturers/[id]/ManufacturerProfileClient.tsx', 'manufacturer'],
   ]
   for (const [p, role] of GATED) {
     const src = code(p)
@@ -495,9 +495,9 @@ const head = s => console.log(`\n■ ${s}`)
     && pg.indexOf('await askDetails') < pg.indexOf('await onAddImages'))
   /* عنوانِ گالری و عنوانِ مدیا باید یکی باشد */
   for (const [p, who] of [['app/clubs/[id]/page.tsx', 'باشگاه'],
-    ['app/coaches/[id]/page.tsx', 'مربی'], ['app/referees/[id]/page.tsx', 'داور'],
-    ['app/players/[id]/page.tsx', 'بازیکن'], ['app/services/[id]/page.tsx', 'متخصص'],
-    ['app/sellers/[id]/FlatShop.tsx', 'فروشگاه'], ['app/manufacturers/[id]/page.tsx', 'تولیدکننده']]) {
+    ['app/coaches/[id]/CoachProfileClient.tsx', 'مربی'], ['app/referees/[id]/RefereeProfileClient.tsx', 'داور'],
+    ['app/players/[id]/page.tsx', 'بازیکن'], ['app/services/[id]/TechnicianProfileClient.tsx', 'متخصص'],
+    ['app/sellers/[id]/FlatShop.tsx', 'فروشگاه'], ['app/manufacturers/[id]/ManufacturerProfileClient.tsx', 'تولیدکننده']]) {
     const src = code(p)
     t('عنوانِ کاربر در گالریِ ' + who + ' می‌نشیند',
       !/title: file\.name\.replace/.test(src) && /detailTitle\(details, i, file\)/.test(src))
@@ -544,9 +544,9 @@ const head = s => console.log(`\n■ ${s}`)
   t('پیامِ موفقیت قرمز نشان داده نمی‌شود',
     /notify\?\.\(msg, tone\)/.test(ve) && /منتشر شد\.\`, 'ok'\)/.test(hook))
   for (const [p, who] of [['app/clubs/[id]/page.tsx', 'باشگاه'],
-    ['app/coaches/[id]/page.tsx', 'مربی'], ['app/referees/[id]/page.tsx', 'داور'],
-    ['app/players/[id]/page.tsx', 'بازیکن'], ['app/services/[id]/page.tsx', 'متخصص'],
-    ['app/sellers/[id]/FlatShop.tsx', 'فروشگاه'], ['app/manufacturers/[id]/page.tsx', 'تولیدکننده']]) {
+    ['app/coaches/[id]/CoachProfileClient.tsx', 'مربی'], ['app/referees/[id]/RefereeProfileClient.tsx', 'داور'],
+    ['app/players/[id]/page.tsx', 'بازیکن'], ['app/services/[id]/TechnicianProfileClient.tsx', 'متخصص'],
+    ['app/sellers/[id]/FlatShop.tsx', 'فروشگاه'], ['app/manufacturers/[id]/ManufacturerProfileClient.tsx', 'تولیدکننده']]) {
     const src = code(p)
     t('ویرایشِ عنوان در ' + who + ' هست',
       /onEdit: \(\) => editVideo\(v\)/.test(src) && /\{videoEditDialog\}/.test(src)
@@ -575,8 +575,8 @@ const head = s => console.log(`\n■ ${s}`)
   /* ⚠️ `/.[^.]+$/` نقطه نیست، «هر نویسه» است: `clip.mp4` در گالری
      «cli» ذخیره می‌شد ولی با نامِ درست به مدیا می‌رفت. */
   t('نامِ ویدیو در گالری و مدیا یکی است',
-    !['app/coaches/[id]/page.tsx', 'app/referees/[id]/page.tsx', 'app/services/[id]/page.tsx',
-      'app/players/[id]/page.tsx', 'app/manufacturers/[id]/page.tsx', 'app/sellers/[id]/FlatShop.tsx',
+    !['app/coaches/[id]/CoachProfileClient.tsx', 'app/referees/[id]/RefereeProfileClient.tsx', 'app/services/[id]/TechnicianProfileClient.tsx',
+      'app/players/[id]/page.tsx', 'app/manufacturers/[id]/ManufacturerProfileClient.tsx', 'app/sellers/[id]/FlatShop.tsx',
       'app/clubs/[id]/page.tsx', 'components/profile/ProfileGallery.tsx']
       .some(p => /replace\(\/\.\[\^\.\]\+\$\//.test(code(p).replace(/\\./g, '\u0000')) ))
 
@@ -607,7 +607,7 @@ head('خدماتِ متخصص')
   const picker = code('components/tech/ServicePicker.tsx')
   const shown = code('components/tech/ServiceCatalog.tsx')
   const panel = code('app/dashboard/technician/page.tsx')
-  const pub = code('app/services/[id]/page.tsx')
+  const pub = code('app/services/[id]/TechnicianProfileClient.tsx')
   const store = code('lib/technician-store.ts')
 
   /* ⚠️ قاعده‌ی اصلی: فهرستِ خدمات فقط یک جا نوشته می‌شود. فهرستِ دوم،
@@ -651,7 +651,7 @@ head('خدماتِ متخصص')
 head('اطلاعاتِ کسب‌وکار')
 {
   const store = code('lib/technician-store.ts')
-  const pub = code('app/services/[id]/page.tsx')
+  const pub = code('app/services/[id]/TechnicianProfileClient.tsx')
   const panel = code('app/dashboard/technician/page.tsx')
   /* ⚠️ پیش‌فرضِ «بله» یعنی صفحه‌ی هر متخصصی ادعا کند در محلِ مشتری
      خدمت می‌دهد — حرفی که خودش نزده است. */

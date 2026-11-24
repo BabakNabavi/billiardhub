@@ -160,7 +160,8 @@ export function profileToTechnician(p: TechnicianProfile): Technician {
        رد شود، اولین ذخیره‌ی پنل باعث می‌شود کارت «cloth» نشان بدهد
        و فیلتر خدمات هیچ نتیجه‌ای برنگرداند. */
     services: storedToTitles(p.services),
-    projects: p.projects,
+    /* ⚠️ `?? []`: این نگاشت حالا روی سرور هم اجرا می‌شود؛ ردیفِ قدیمیِ بی‌این آرایه دیگر کلِ صفحه را می‌اندازد، نه فقط مرورگر را */
+    projects: p.projects ?? [],
     albums: media.albums,
     gallery: media.gallery,
     videos: media.videos,

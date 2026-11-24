@@ -3133,7 +3133,7 @@ console.log('\n― پروفایلِ مربی و داور ―');
      «نبود» را از «خطای شبکه» جدا می‌کند و صفحه‌ی مربی به آن مهاجرت
      کرد؛ ادعا «از سرور می‌خواند» است، نه «کدام تابع». */
   t('صفحه‌ی عمومی پروفایل را از سرور هم می‌خواند',
-    ['app/coaches/[id]/page.tsx', 'app/referees/[id]/page.tsx']
+    ['app/coaches/[id]/CoachProfileClient.tsx', 'app/referees/[id]/RefereeProfileClient.tsx']
       .every(f => /fetchProfile(Result)?</.test(read(f))),
     'وگرنه پروفایل فقط در مرورگرِ خودِ صاحبش دیده می‌شد');
   t('باکسِ استوری در فرمِ ثبت نیست',
@@ -3231,8 +3231,8 @@ console.log('\n― پروفایلِ مربی و داور ―');
        خانه فقط پوستر است و پخش در نمای تمام‌صفحه انجام می‌شود — پس
        ادعا هم همان رفتارِ تازه را می‌سنجد. */
     [
-      ['app/coaches/[id]/page.tsx', 'components/profile/ProfileGallery.tsx'],
-      ['app/referees/[id]/page.tsx', 'components/profile/ProfileGallery.tsx'],
+      ['app/coaches/[id]/CoachProfileClient.tsx', 'components/profile/ProfileGallery.tsx'],
+      ['app/referees/[id]/RefereeProfileClient.tsx', 'components/profile/ProfileGallery.tsx'],
     ].every(files => {
       const src = files.map(f => read(f)).join('\n');
       /* ⚠️ الگو `key={v.id}` را نمی‌خواهد: با مربع‌شدنِ خانه‌های ویدیو،
@@ -3463,7 +3463,7 @@ console.log('\n― استوری: یک منبع، با انقضا ―');
       'برای مربی و داور اصلاً سیستمِ استوریِ واقعی وجود ندارد');
   }
   /* نامکِ ناشناخته نباید پروفایلِ نمونه را نشان دهد */
-  for (const p of ['app/coaches/[id]/page.tsx', 'app/referees/[id]/page.tsx']) {
+  for (const p of ['app/coaches/[id]/CoachProfileClient.tsx', 'app/referees/[id]/RefereeProfileClient.tsx']) {
     t(`فالبکِ نمونه در ${p.split('/')[1]} برداشته شد`,
       /* کامنت‌ها کنار می‌روند وگرنه توضیحِ خودِ اصلاح، ادعا را سبز می‌کند */
       !stripComments(read(p)).includes('?? D[0]!'),
@@ -3793,7 +3793,7 @@ console.log('\n― استوری: یک منبع، با انقضا ―');
   }
 
   /* پروفایلِ واقعی نباید یک لحظه «پیدا نشد» شود */
-  for (const p of ['app/coaches/[id]/page.tsx', 'app/referees/[id]/page.tsx']) {
+  for (const p of ['app/coaches/[id]/CoachProfileClient.tsx', 'app/referees/[id]/RefereeProfileClient.tsx']) {
     /* ⚠️ نسخه‌ی قبلی `&& !checked) {` می‌خواست، یعنی آکولاد را اجباری
        می‌کرد. بازطراحیِ مربی همان گارد را با بدنه‌ی تک‌خطی نوشت
        (یک `return`ِ تک‌خطی) و ادعا بی‌آنکه رفتاری
@@ -3824,7 +3824,7 @@ console.log('\n― استوری: یک منبع، با انقضا ―');
      می‌سنجد. اگر تایم‌لاین با سال مرتب شود، ردیفِ نشان‌دارِ «بالاترین
      درجه» می‌تواند درجه‌ی دیگری باشد. هر دو باید از یک ترتیب بیایند. */
   {
-    const coach = strip(read('app/coaches/[id]/page.tsx'));
+    const coach = strip(read('app/coaches/[id]/CoachProfileClient.tsx'));
     t('تایم‌لاینِ مربی بر اساسِ رتبه مرتب می‌شود، نه سال',
       /\.sort\(\(a, b\) => GRADES\.findIndex/.test(coach)
       && !/sort\([^)]*Number\(b\.year\)/.test(coach),
@@ -3845,9 +3845,9 @@ console.log('\n― استوری: یک منبع، با انقضا ―');
      عمومی به کاربر می‌گفتند این آدم وجود ندارد. هر صفحه‌ای که
      «پیدا نشد» رندر می‌کند باید نتیجه‌ی سه‌حالتی بخواند. */
   for (const p of [
-    'app/coaches/[id]/page.tsx', 'app/referees/[id]/page.tsx',
-    'app/players/[id]/page.tsx', 'app/services/[id]/page.tsx',
-    'app/manufacturers/[id]/page.tsx',
+    'app/coaches/[id]/CoachProfileClient.tsx', 'app/referees/[id]/RefereeProfileClient.tsx',
+    'app/players/[id]/page.tsx', 'app/services/[id]/TechnicianProfileClient.tsx',
+    'app/manufacturers/[id]/ManufacturerProfileClient.tsx',
   ]) {
     /* ⚠️ فقط وجودِ توکن‌ها کافی نیست: `netFail` می‌تواند تعریف شود و
        هرگز رندر نشود. متنِ واقعی هم خواسته می‌شود — یا در خودِ صفحه،
@@ -3872,7 +3872,7 @@ console.log('\n― استوری: یک منبع، با انقضا ―');
     const hero = strip(read('components/profile/ProfileHero.tsx'));
     const css  = read('components/profile/profile-page.css');
 
-    for (const p of ['app/coaches/[id]/page.tsx', 'app/referees/[id]/page.tsx']) {
+    for (const p of ['app/coaches/[id]/CoachProfileClient.tsx', 'app/referees/[id]/RefereeProfileClient.tsx']) {
       const src = strip(read(p));
       t(`${p.split('/')[1]} همان هیرو و گالریِ مشترک را می‌گیرد`,
         src.includes('<ProfileHero') && src.includes('<ProfileGallery')
@@ -3941,7 +3941,7 @@ console.log('\n― استوری: یک منبع، با انقضا ―');
        ⚠️ نسخه‌ی قبلی آلبوم را فقط از روی `media.album` می‌ساخت، پس
        «آلبومِ تازه» مجبور بود یکی از عکس‌های موجود را داخلش بیندازد.
        کاربر دید که عکسِ تبِ تصاویر خودبه‌خود داخلِ آلبومِ خالی رفت. */
-    for (const [p, tag] of [['app/referees/[id]/page.tsx', 'داور'], ['app/coaches/[id]/page.tsx', 'مربی']]) {
+    for (const [p, tag] of [['app/referees/[id]/RefereeProfileClient.tsx', 'داور'], ['app/coaches/[id]/CoachProfileClient.tsx', 'مربی']]) {
       const src = strip(read(p));
       t(`${tag}: ساختِ آلبوم عکسِ موجود را برنمی‌دارد`,
         src.includes('albums: [...list, n]') && !src.includes('g.album = name') && !src.includes('{ ...g, album: name }'),
@@ -3962,7 +3962,7 @@ console.log('\n― استوری: یک منبع، با انقضا ―');
     /* ⚠️ حذف از داخلِ آلبوم یک‌بار عکسِ *دیگری* را برد: اندیسِ خانه
        اندیسِ زیرمجموعه بود و صفحه با آن روی کلِ گالری فیلتر می‌کرد.
        این ادعا برگشتِ آن را می‌گیرد. */
-    for (const p of ['app/referees/[id]/page.tsx', 'app/coaches/[id]/page.tsx']) {
+    for (const p of ['app/referees/[id]/RefereeProfileClient.tsx', 'app/coaches/[id]/CoachProfileClient.tsx']) {
       const src = strip(read(p));
       t(p.includes('referees') ? 'داور: حذفِ عکس با شناسه است' : 'مربی: حذفِ عکس با شناسه است',
         src.includes('deleteImage = async (id: string)')
@@ -4088,7 +4088,7 @@ console.log('\n― استوری: یک منبع، با انقضا ―');
         oe.includes('busyRef.current') && !oe.includes('|| saving) return false'),
         'مقدارِ state در بسته‌ی قدیمی همیشه false بود و گارد کار نمی‌کرد');
     }
-    for (const p of ['app/referees/[id]/page.tsx', 'app/coaches/[id]/page.tsx']) {
+    for (const p of ['app/referees/[id]/RefereeProfileClient.tsx', 'app/coaches/[id]/CoachProfileClient.tsx']) {
       const src = strip(read(p));
       t(p.includes('referees') ? 'داور: آپلودِ ناموفق حلقه را می‌بندد' : 'مربی: آپلودِ ناموفق حلقه را می‌بندد',
         src.includes('if (!ok) break'),
@@ -4115,7 +4115,7 @@ console.log('\n― استوری: یک منبع، با انقضا ―');
 
     /* بازیکن و خدمات فنی نمای مشترک ندارند و گالریِ اختصاصیِ خودشان
        را دارند، پس جدا سنجیده می‌شوند. */
-    for (const [p, tag] of [['app/players/[id]/page.tsx', 'بازیکن'], ['app/services/[id]/page.tsx', 'خدمات فنی']]) {
+    for (const [p, tag] of [['app/players/[id]/page.tsx', 'بازیکن'], ['app/services/[id]/TechnicianProfileClient.tsx', 'خدمات فنی']]) {
       const src = strip(read(p));
       t(`${tag} ویرایشِ درجا دارد`,
         src.includes('useOwnerEdit') && src.includes('setOwnerId(p.ownerId)')
@@ -4133,7 +4133,7 @@ console.log('\n― استوری: یک منبع، با انقضا ―');
         'نمای نگاشت‌شده برای ذخیره کافی نیست و داده را ناقص بازنویسی می‌کند');
     }
 
-    for (const [p, tag] of [['app/coaches/[id]/page.tsx', 'مربی'], ['app/referees/[id]/page.tsx', 'داور']]) {
+    for (const [p, tag] of [['app/coaches/[id]/CoachProfileClient.tsx', 'مربی'], ['app/referees/[id]/RefereeProfileClient.tsx', 'داور']]) {
       const src = strip(read(p));
 
       /* ── قاعده‌ی هوک‌ها ──
@@ -4236,9 +4236,9 @@ console.log('\n― استوری: یک منبع، با انقضا ―');
     }
 
     for (const [p, tag] of [
-      ['app/coaches/[id]/page.tsx', 'مربی'], ['app/referees/[id]/page.tsx', 'داور'],
-      ['app/players/[id]/page.tsx', 'بازیکن'], ['app/services/[id]/page.tsx', 'خدمات فنی'],
-      ['app/manufacturers/[id]/page.tsx', 'تولیدکننده'], ['app/sellers/[id]/FlatShop.tsx', 'فروشگاه'],
+      ['app/coaches/[id]/CoachProfileClient.tsx', 'مربی'], ['app/referees/[id]/RefereeProfileClient.tsx', 'داور'],
+      ['app/players/[id]/page.tsx', 'بازیکن'], ['app/services/[id]/TechnicianProfileClient.tsx', 'خدمات فنی'],
+      ['app/manufacturers/[id]/ManufacturerProfileClient.tsx', 'تولیدکننده'], ['app/sellers/[id]/FlatShop.tsx', 'فروشگاه'],
     ]) {
       t(`${tag} پرچمِ سرور را به هوک می‌دهد`,
         /* includes نه رجکس — چهارمین بار در همین نشست که الگو از
@@ -4261,8 +4261,8 @@ console.log('\n― استوری: یک منبع، با انقضا ―');
 
     /* متنِ نمونه‌ی آلبوم در هیچ نقشی نماند */
     for (const p of [
-      'app/coaches/[id]/page.tsx', 'app/referees/[id]/page.tsx',
-      'app/players/[id]/page.tsx', 'app/services/[id]/page.tsx',
+      'app/coaches/[id]/CoachProfileClient.tsx', 'app/referees/[id]/RefereeProfileClient.tsx',
+      'app/players/[id]/page.tsx', 'app/services/[id]/TechnicianProfileClient.tsx',
       'components/dashboard/club/GalleryTab.tsx', 'app/dashboard/technician/page.tsx',
     ]) {
       t(`نمونه‌ی نامِ آلبوم در ${p.split('/').slice(-2)[0]} نمانده`,
@@ -4365,10 +4365,10 @@ console.log('\n― استوری: یک منبع، با انقضا ―');
        رندر می‌کند، پس ادعا هم همان را می‌سنجد نه کلاسِ خام. */
     {
       for (const [p, tag] of [
-        ['app/services/[id]/page.tsx', 'خدمات فنی'],
+        ['app/services/[id]/TechnicianProfileClient.tsx', 'خدمات فنی'],
         ['app/players/[id]/page.tsx', 'بازیکن'],
         ['app/sellers/[id]/FlatShop.tsx', 'فروشگاه'],
-        ['app/manufacturers/[id]/page.tsx', 'تولیدکننده'],
+        ['app/manufacturers/[id]/ManufacturerProfileClient.tsx', 'تولیدکننده'],
         ['app/clubs/[id]/page.tsx', 'باشگاه'],
       ]) {
         const src = strip(read(p));
@@ -4394,7 +4394,7 @@ console.log('\n― استوری: یک منبع، با انقضا ―');
       'باشگاه در جدولِ clubs است، نه profiles — useOwnerEdit این‌جا جواب نمی‌دهد');
 
     /* گالری برای مالک حتی وقتی خالی است باید دیده شود */
-    for (const [p, tag] of [['app/players/[id]/page.tsx', 'بازیکن'], ['app/services/[id]/page.tsx', 'خدمات فنی']]) {
+    for (const [p, tag] of [['app/players/[id]/page.tsx', 'بازیکن'], ['app/services/[id]/TechnicianProfileClient.tsx', 'خدمات فنی']]) {
       t(`گالریِ ${tag} برای مالکِ بی‌آلبوم هم رندر می‌شود`,
         read(p).includes('|| edit.isOwner) && ('),
         'وگرنه صاحبِ پروفایل هیچ‌وقت نمی‌تواند اولین عکس را اضافه کند');
@@ -4437,7 +4437,7 @@ console.log('\n― استوری: یک منبع، با انقضا ―');
   {
     const pages = [
       'app/coaches/CoachesClient.tsx', 'app/referees/RefereesClient.tsx', 'app/clubs/[id]/page.tsx',
-      'app/manufacturers/[id]/page.tsx', 'app/sellers/[id]/FlatShop.tsx',
+      'app/manufacturers/[id]/ManufacturerProfileClient.tsx', 'app/sellers/[id]/FlatShop.tsx',
       'components/home/BannerSlider.tsx',
     ];
     t('نشانگرِ اسلاید در همه‌ی صفحه‌ها پنهان است',
@@ -4871,7 +4871,7 @@ console.log('\n― امتیازِ واقعیِ مربی ―');
   /* یک کامپوننت برای هر دو، نه دو نسخه از یک چیز */
   t('کامپوننتِ نظرها مشترک است',
     read('components/club/ClubReviews.tsx').includes("from '../reviews/Reviews'")
-    && strip(read('app/coaches/[id]/page.tsx')).includes('components/reviews/Reviews'),
+    && strip(read('app/coaches/[id]/CoachProfileClient.tsx')).includes('components/reviews/Reviews'),
     'نسخه‌ی دومِ همان کامپوننت یعنی روزی یکی درست شود و آن یکی نه');
   t('شکلِ پاسخِ دو مسیر یکی است',
     api.includes('summary: {') && api.includes('isMine:') && api.includes('edited:'),
@@ -5201,8 +5201,8 @@ console.log('\n― صفحه‌ی باشگاه روی همان لایه‌ی مر
        روی *همه‌ی* فایل‌های بسته لازم است: کافی است یک نفر دوباره
        دست‌سازش کند تا هماهنگی از دست برود. */
     && [
-      ['app/coaches/[id]/page.tsx', 'components/profile/ProfileGallery.tsx'],
-      ['app/referees/[id]/page.tsx', 'components/profile/ProfileGallery.tsx'],
+      ['app/coaches/[id]/CoachProfileClient.tsx', 'components/profile/ProfileGallery.tsx'],
+      ['app/referees/[id]/RefereeProfileClient.tsx', 'components/profile/ProfileGallery.tsx'],
       ['app/clubs/[id]/page.tsx'],
     ].every(files => {
       const src = files.map(p => read(p)).join('\n');
@@ -5221,12 +5221,12 @@ console.log('\n― نمای تمام‌صفحه‌ی عکس پروفایل ―')
      خودشان را داشتند؛ این پنجمی ساخته نشد. */
   t('هوکِ مشترک هست', existsSync(join(ROOT, 'components/ProfileImageViewer.tsx')));
   const pages = [
-    'app/coaches/[id]/page.tsx',
-    'app/referees/[id]/page.tsx',
+    'app/coaches/[id]/CoachProfileClient.tsx',
+    'app/referees/[id]/RefereeProfileClient.tsx',
     'app/clubs/[id]/page.tsx',
     'app/sellers/[id]/FlatShop.tsx',
-    'app/services/[id]/page.tsx',
-    'app/manufacturers/[id]/page.tsx',
+    'app/services/[id]/TechnicianProfileClient.tsx',
+    'app/manufacturers/[id]/ManufacturerProfileClient.tsx',
     'app/users/[id]/page.tsx',
   ];
   for (const p of pages) {
