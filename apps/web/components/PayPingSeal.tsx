@@ -26,16 +26,55 @@
    ⚠️ دامنه‌ی `statics.payping.ir` باید در CSP (هم script-src و هم
    img-src) مجاز باشد، وگرنه نشان بی‌صدا رندر نمی‌شود. */
 
-import { useEffect, useRef } from 'react'
+import { useLayoutEffect, useRef } from 'react'
+
+/* ── اسکریپتِ در راه وقتی فوتر می‌رود (آذرِ ۱۴۰۵) ──
+   اسکریپت `#PPTrust` را *هنگامِ اجرا* می‌جوید، نه هنگامِ افزوده‌شدن، و
+   اسکریپتِ async پس از جداشدن از DOM هم اجرا می‌شود. فوتر روی /login و
+   /register و چند صفحه‌ی دیگر پنهان است (FooterGate)؛ روی شبکه‌ی کند AuthGuard
+   کاربر را از /booking به /login می‌برد پیش از آنکه اسکریپت برسد، و اجرایش
+   با «Cannot read properties of null (reading 'appendChild')» می‌شکست.
+
+   پس اگر فوتر پیش از اجرا برود، یک ظرفِ پنهانِ موقت با همان شناسه در body
+   می‌ماند تا اسکریپت جایی برای نشستن داشته باشد، و پس از اجرا برداشته می‌شود.
+   اگر فوتر پیش از اجرا برگردد، ظرفِ موقت برداشته می‌شود تا اسکریپتِ در راه
+   همان ظرفِ تازه را پیدا کند — اسکریپتِ دوم هم اضافه نمی‌شود، وگرنه دو نشان
+   کنار هم می‌نشست. خودِ اسکریپتِ پی‌پینگ دست نمی‌خورد. */
+let inflight: HTMLScriptElement | null = null
+let parked: HTMLSpanElement | null = null
+
+function park() {
+  if (!inflight || parked) return
+  parked = document.createElement('span')
+  parked.id = 'PPTrust'
+  parked.hidden = true
+  document.body.appendChild(parked)
+}
+
+function unpark() {
+  parked?.remove()
+  parked = null
+}
 
 export default function PayPingSeal() {
   const ref = useRef<HTMLSpanElement>(null)
 
-  useEffect(() => {
+  /* ⚠️ useLayoutEffect نه useEffect: ظرفِ موقت باید در همان commitی برداشته شود که
+     فوترِ تازه به DOM برمی‌گردد. با useEffect فاصله‌ای می‌ماند که دو #PPTrust هم‌زمان
+     هست و getElementById اولی را می‌گیرد — اگر روزی فوتر پس از ظرفِ موقت در body
+     بنشیند، نشان در ظرفِ پنهان می‌افتاد و گم می‌شد. */
+  useLayoutEffect(() => {
     const host = ref.current
     if (!host) return
-    /* در حالت توسعه، React افکت را دوبار اجرا می‌کند و بدون این
-       نگهبان دو نشان کنار هم می‌نشست. */
+
+    /* اسکریپتی هنوز در راه است (فوتر رفته و برگشته، یا اجرای دومِ افکت در حالتِ
+       توسعه): همان این ظرف را پیدا می‌کند؛ اسکریپتِ دوم یعنی دو نشان */
+    if (inflight) {
+      host.dataset.ppLoaded = '1'
+      unpark()
+      return park
+    }
+    /* اسکریپتِ همین ظرف قبلا اجرا شده */
     if (host.dataset.ppLoaded === '1') return
     host.dataset.ppLoaded = '1'
 
@@ -44,7 +83,17 @@ export default function PayPingSeal() {
     s.setAttribute('theme', 'dark')   // لوگوی سرمه‌ای — روی فوتر روشن خواناست
     s.setAttribute('size', 'md')      // ۹۶×۱۱۵ — نزدیک‌ترین اندازه به اینماد
     s.async = true
+    /* `load` پس از اجرا می‌آید؛ `error` یعنی اصلا اجرا نشد — در هر دو حالت دیگر
+       چیزی در راه نیست */
+    const settle = () => {
+      if (inflight === s) inflight = null
+      unpark()
+    }
+    s.addEventListener('load', settle)
+    s.addEventListener('error', settle)
+    inflight = s
     host.appendChild(s)
+    return park
   }, [])
 
   return (
