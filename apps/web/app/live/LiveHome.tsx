@@ -8,6 +8,12 @@ import { useRouter } from 'next/navigation';
 import { Radio, Users, Clock3, Building2, Loader2 } from 'lucide-react';
 import { fetchLiveSessions, type LiveSession } from '../../lib/live/client';
 import { LiveChannelsGrid } from '../../components/live/LiveChannelsGrid';
+import type { PublicChannel } from '../../lib/streaming/public-types';
+
+/** آنچه کارت نشان می‌دهد — همان چیزی که سرور در HTML می‌گذارد (page.tsx)؛ بی ownerKey */
+export type LiveRow = Pick<LiveSession, 'id' | 'title' | 'clubName' | 'startedAt' | 'lastBeat' | 'viewers'>;
+/* همان آستانه‌ی api/live (STALE): جلسه‌ای که ضربانش این‌قدر کهنه است تمام‌شده حساب می‌شود */
+const STALE_MS = 45_000;
 
 const fa = (n: number) => Number(n || 0).toLocaleString('fa-IR');
 
@@ -19,13 +25,22 @@ const since = (ts: number) => {
   return `${fa(Math.floor(m / 60))} ساعت`;
 };
 
-export default function LivePage() {
+export default function LivePage({ initialRows = null, initialChannels = null }: {
+  initialRows?: LiveRow[] | null; initialChannels?: PublicChannel[] | null;
+}) {
   const router = useRouter();
-  const [rows, setRows] = useState<LiveSession[] | null>(null);
-  const [channelCount, setChannelCount] = useState(0);
+  /* فهرستِ اول همراهِ HTML می‌آید (page.tsx، ISRِ ۱۵ ثانیه) ⟵ به‌جای چرخنده و بعد
+     پیامِ «پخشی نیست» در ثانیه‌ی چهارم، همان پیام در اولین نقاشی (آذرِ ۱۴۰۵).
+     اثرِ پایین همان لحظه‌ی سوارشدن جلسه‌های کهنه را کنار می‌گذارد و دوباره می‌پرسد. */
+  const [rows, setRows] = useState<LiveRow[] | null>(initialRows);
+  const [channelCount, setChannelCount] = useState(initialChannels?.length ?? 0);
 
   useEffect(() => {
     let alive = true;
+    /* ⚠️ نسخه‌ی ISR و کشِ سرور هر دو «کهنه-تا-تازه‌سازی»اند: اولین بازدیدکننده پس از
+       یک دوره‌ی خلوت HTMLی می‌گیرد که شاید ساعت‌ها پیش ساخته شده. جلسه‌ای که ضربانش از
+       آستانه گذشته همین حالا کنار می‌رود، پیش از رسیدنِ پاسخِ تازه. */
+    setRows(r => r && r.filter(s => Date.now() - s.lastBeat <= STALE_MS));
     /* undefined یعنی نتوانستیم بپرسیم ⇒ فهرستِ قبلی نگه داشته می‌شود.
        نوشتنِ آرایه‌ی خالی، یک قطعیِ لحظه‌ای را «هیچ پخشی نیست» نشان
        می‌داد و کارت‌های زنده از صفحه می‌پریدند. */
@@ -76,7 +91,7 @@ export default function LivePage() {
 
           {/* کانال‌های سرویسِ پخش (HLS) — جدا از پخشِ مستقیمِ گوشی‌به‌گوشیِ پایین */}
           <div className={channelCount > 0 ? 'mb-6' : ''}>
-            <LiveChannelsGrid hideEmpty heading="کانال‌های زنده‌ی باشگاه‌ها" onCount={setChannelCount} />
+            <LiveChannelsGrid hideEmpty heading="کانال‌های زنده‌ی باشگاه‌ها" onCount={setChannelCount} initial={initialChannels} />
           </div>
 
           {rows === null ? (
@@ -119,7 +134,8 @@ export default function LivePage() {
 
                     <div style={{ display: 'flex', alignItems: 'center', gap: 14, fontSize: 12.5, color: 'rgba(0,0,0,0.45)', flexWrap: 'wrap' }}>
                       <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5 }}><Building2 size={13} /> {s.clubName}</span>
-                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5 }}><Clock3 size={13} /> {since(s.startedAt)}</span>
+                      {/* ساعتِ سرورِ ISR با ساعتِ مرورگر یکی نیست — متنِ «چند دقیقه» ممکن است فرق کند */}
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5 }} suppressHydrationWarning><Clock3 size={13} /> {since(s.startedAt)}</span>
                     </div>
 
                     <div style={{ marginTop: 14, padding: '10px 0', borderRadius: 12, textAlign: 'center', fontSize: 14, fontWeight: 700, background: 'rgba(239,68,68,0.08)', color: '#ef4444', border: '1px solid rgba(239,68,68,0.15)' }}>

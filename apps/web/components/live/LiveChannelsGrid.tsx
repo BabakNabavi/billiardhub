@@ -17,12 +17,14 @@ import type { PublicChannel } from '@/lib/streaming/public-types'
 
 const REFRESH_MS = 30_000
 
-export function LiveChannelsGrid({ clubId, tournamentId, hideEmpty = false, heading, onCount }: {
+export function LiveChannelsGrid({ clubId, tournamentId, hideEmpty = false, heading, onCount, initial = null }: {
   clubId?: string; tournamentId?: string; hideEmpty?: boolean; heading?: string
+  /** فهرستی که سرور همراهِ HTML فرستاده (صفحه‌ی «پخش زنده»)؛ درخواستِ پایین همچنان می‌رود */
+  initial?: PublicChannel[] | null
   /** شمارِ کانال‌های زنده — تا صفحه‌ی میزبان «پخشی نیست» را به‌اشتباه نگوید */
   onCount?: (n: number) => void
 }) {
-  const [rows, setRows] = useState<PublicChannel[] | null>(null)
+  const [rows, setRows] = useState<PublicChannel[] | null>(initial)
   const [failed, setFailed] = useState(false)
 
   useEffect(() => {
