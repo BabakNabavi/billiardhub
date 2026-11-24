@@ -1,5 +1,6 @@
 import { TournamentsClient } from './TournamentsClient'
 import { loadPublicTournaments } from '@/lib/tournaments/public-list'
+import { preload } from 'react-dom'
 
 /* ─────────────────────────────────────────────────────────────
    پوسته‌ی سرورِ فهرستِ مسابقات — همان الگوی باشگاه و رنکینگ.
@@ -17,6 +18,10 @@ export const revalidate = 60
 const atBuild = process.env.NEXT_PHASE === 'phase-production-build'
 
 export default async function TournamentsListPage() {
+  /* عکسِ هیرو پسِ‌زمینه‌ی CSS است و مرورگر تا خواندنِ استایل پیدایش نمی‌کرد
+     (Lighthouse: ۲ ثانیه «تأخیرِ شروع» برای بزرگ‌ترین عنصرِ صفحه). صفحه ISR است،
+     پس این سرنخ در headِ همان HTML می‌نشیند. */
+  preload('/images/tournaments/hero.svg', { as: 'image', fetchPriority: 'high' })
   const initialRows = await loadPublicTournaments().catch((e: unknown) => {
     console.error('[tournaments] initial load', e)
     if (!atBuild) throw e
