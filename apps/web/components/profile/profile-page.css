@@ -1129,9 +1129,20 @@ main.ch-col > section { max-width: 760px; }
   color: color-mix(in srgb, var(--c) 62%, #16150F);
   font-variant-numeric: tabular-nums; font-feature-settings: 'ss03';
 }
-/* ⚠️ «پیشِ رو» باید *کم‌رنگ‌تر از متن* باشد ولی از کفِ ۴٫۵ نیفتد؛
-   `--text-tertiary` روی سفید ۵٫۱:۱ می‌دهد. */
-.ch-ladder .rf-step-next { font-size: 12px; line-height: 1.5; color: var(--text-tertiary, #6E6E6E); }
+/* دکمه‌ی «نمایش همه‌ی درجات» — پله‌های بالاتر از درجه‌ی فرد پیش‌فرض جمع‌اند.
+   متنی و کم‌صدا، تا خودش توجه را به «فاصله» نکشد. لمسِ ۴۴ و فوکوسِ دیدنی. */
+.ch-ladder .rf-ladder-more {
+  display: inline-flex; align-items: center; gap: 6px;
+  min-block-size: 44px; margin-block-start: 4px; padding: 0 12px;
+  border: 0; border-radius: 10px; background: transparent; cursor: pointer;
+  font: inherit; font-size: 12.5px; font-weight: 700;
+  color: var(--text-secondary, #444);
+  transition: background .2s, color .2s;
+}
+.ch-ladder .rf-ladder-more:hover { background: var(--border-soft, rgba(17,17,17,.06)); color: var(--text-primary, #111); }
+.ch-ladder .rf-ladder-more:focus-visible { outline: 2px solid #8F6531; outline-offset: 2px; }
+.ch-ladder .rf-ladder-more svg { transition: transform .2s; }
+.ch-ladder .rf-ladder-more svg[data-open] { transform: rotate(180deg); }
 
 /* نشانِ «مدرک تأیید شده» روی بالاترین پله */
 .ch-ladder .rf-step-badge {
@@ -1153,6 +1164,7 @@ main.ch-col > section { max-width: 760px; }
 
 @media (prefers-reduced-motion: reduce) {
   .ch-ladder .rf-step { transition: none; }
+  .ch-ladder .rf-ladder-more, .ch-ladder .rf-ladder-more svg { transition: none; }
 }
 
 /* ═══ تعویضِ رسانه از خودِ هدر ═══

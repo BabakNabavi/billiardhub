@@ -1,11 +1,13 @@
+'use client'
+
 /* ─────────────────────────────────────────────────────────────
    نردبانِ درجه‌ها — مشترکِ داور و مربی.
 
    ── چرا نردبان و نه خطِ زمان ──
    خطِ زمانِ قبلی فقط چیزی را نشان می‌داد که *گرفته* شده. ولی
    ساختارِ خودِ درجاتِ فدراسیون معنا دارد: بیننده باید ببیند این
-   آدم کجای مسیر ایستاده و چه پیشِ رو دارد. پس همه‌ی پله‌ها رندر
-   می‌شوند — گرفته‌ها با سال و رنگ، بقیه کم‌رنگ به‌عنوان مسیر.
+   آدم کجای مسیر ایستاده. پله‌های گرفته با سال و رنگ رندر
+   می‌شوند؛ بقیه کم‌رنگ و پیش‌فرض جمع‌شده (پایین‌تر را ببینید).
 
    این همان شکلی است که صفحه‌ی داور داشت و حالا صفحه‌ی مربی هم
    می‌گیرد؛ پس یک کامپوننت، نه دو نسخه‌ی موازی.
@@ -15,9 +17,18 @@
 
    ⚠️ هیچ عددِ ساختگی: «تعداد مسابقه»، «شاگرد» و «فصل» در این
    پروژه داده ندارند و ساخته نمی‌شوند.
+
+   ── پله‌های بالاتر جمع‌شده‌اند (آذرِ ۱۴۰۵) ──
+   مالک: «شاید مربی نخواهد کاربر ببیند درجه‌اش چقدر پایین است، یا تا آخرین
+   مدرک چقدر فاصله دارد». پس پیش‌فرض فقط تا بالاترین درجه‌ی گرفته‌شده دیده
+   می‌شود و بقیه‌ی ساختارِ فدراسیون پشتِ دکمه‌ی «نمایش همه‌ی درجات» است.
+   برچسبِ «پیش رو» هم برداشته شد: لحنِ «هنوز نرسیده» داشت، و روی پله‌ی
+   نگرفته‌ی *پایین‌تر* از درجه‌ی فرد اصلا غلط بود. پله‌ی نگرفته حالا فقط
+   کم‌رنگ است و برچسب ندارد.
    ───────────────────────────────────────────────────────────── */
 
-import { Check, ShieldCheck } from 'lucide-react'
+import { useId, useState } from 'react'
+import { Check, ChevronDown, ShieldCheck } from 'lucide-react'
 import { toFaDigits } from '@/lib/jalali'
 import { keepLatinProps } from '@/lib/text-fa'
 
@@ -48,15 +59,23 @@ export interface GradeLadderProps {
 }
 
 export default function GradeLadder({ grades, earned, verified, emptyText }: GradeLadderProps) {
-  /* بالاترین پله‌ای که گرفته شده — مرزِ «رسیده» و «پیشِ رو» */
+  const [showAll, setShowAll] = useState(false)
+  const listId = useId()
+
+  /* بالاترین پله‌ای که گرفته شده — مرزِ پله‌های دیده‌شده و جمع‌شده */
   let topIndex = -1
   grades.forEach((g, i) => { if (earned.has(g.key)) topIndex = i })
 
   if (topIndex < 0) return <p className="ch-empty">{emptyText}</p>
 
+  /* `grades` از پایین به بالاست، پس پله‌های بالاتر انتهای آرایه‌اند */
+  const hidden = grades.length - 1 - topIndex
+  const shown = showAll ? grades : grades.slice(0, topIndex + 1)
+
   return (
-    <ol className="rf-ladder">
-      {grades.map((g, i) => {
+    <>
+    <ol className="rf-ladder" id={listId}>
+      {shown.map((g, i) => {
         const year = earned.get(g.key)
         const has = earned.has(g.key)
         const isTop = i === topIndex
@@ -78,9 +97,7 @@ export default function GradeLadder({ grades, earned, verified, emptyText }: Gra
                     <i key={d} data-on={d < g.dots ? '1' : undefined} />
                   ))}
                 </span>
-                {has
-                  ? <span className="rf-step-year">{year ? toFaDigits(year) : 'ثبت‌شده'}</span>
-                  : <span className="rf-step-next">پیش رو</span>}
+                {has && <span className="rf-step-year">{year ? toFaDigits(year) : 'ثبت‌شده'}</span>}
                 {isTop && verified && (
                   <span className="rf-step-badge">
                     <ShieldCheck size={13} aria-hidden />
@@ -93,5 +110,14 @@ export default function GradeLadder({ grades, earned, verified, emptyText }: Gra
         )
       })}
     </ol>
+    {hidden > 0 && (
+      <button type="button" className="rf-ladder-more"
+        aria-expanded={showAll} aria-controls={listId}
+        onClick={() => setShowAll(v => !v)}>
+        {showAll ? 'نمایش کمتر' : 'نمایش همه‌ی درجات فدراسیون'}
+        <ChevronDown size={14} aria-hidden data-open={showAll ? '1' : undefined} />
+      </button>
+    )}
+    </>
   )
 }
