@@ -8,9 +8,10 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { AdminHeader } from '../../components/admin/AdminHeader';
 import Link from 'next/link';
 import { useAuthStore } from '../../store/auth.store';
-import { ArrowLeft, Eye, Trash2, ShieldCheck, ShieldOff, Inbox, FileSearch } from 'lucide-react';
+import { Eye, Trash2, ShieldCheck, ShieldOff, Inbox, FileSearch } from 'lucide-react';
 import ReviewDetails from '../../components/admin/ReviewDetails';
 import VerifiedBadge from '../../components/VerifiedBadge';
 
@@ -39,7 +40,7 @@ export interface AdminRow {
 type ActionResult = void | { ok: boolean; message?: string };
 
 export default function ProfileAdmin({
-  title, en, desc, panelHint, load, toggle, remove, setVerified,
+  title, desc, panelHint, load, toggle, remove, setVerified,
 }: {
   title: string;
   en: string;
@@ -62,7 +63,7 @@ export default function ProfileAdmin({
      «تیک آبی» — و اشتباهش برگشت‌پذیر نبود. متن کنار آیکون می‌آید. */
   const actBtn = (extra: React.CSSProperties = {}): React.CSSProperties => ({
     display: 'inline-flex', alignItems: 'center', gap: 6,
-    minHeight: 34, padding: '0 10px', borderRadius: 10,
+    minHeight: 44, padding: '0 12px', borderRadius: 10,
     border: `1px solid ${LINE}`, background: '#FAFAF7', cursor: 'pointer',
     fontFamily: 'inherit', fontSize: 12, fontWeight: 800, whiteSpace: 'nowrap',
     textDecoration: 'none', ...extra,
@@ -100,21 +101,8 @@ export default function ProfileAdmin({
   };
 
   return (
-    <div dir="rtl" style={{ minHeight: '70vh', background: '#F7F5F0', fontFamily: 'inherit', color: TEXT, paddingBottom: 64 }}>
-      <div style={{ maxWidth: 920, margin: '0 auto', padding: '24px clamp(16px,3vw,28px) 0' }}>
-
-        {/* سربرگ */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap', marginBottom: 18 }}>
-          <div>
-            <span style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.24em', color: MUT }}>{en}</span>
-            <h1 style={{ fontSize: 'clamp(18px,2.4vw,22px)', fontWeight: 900, margin: '4px 0 0' }}>{title}</h1>
-            <p style={{ fontSize: 12.5, color: MUT, margin: '6px 0 0', lineHeight: 1.8 }}>{desc}</p>
-          </div>
-          <Link href="/admin" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '9px 16px', borderRadius: 10, textDecoration: 'none', fontSize: 12.5, fontWeight: 700, background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.34)', color: GOLD_D }}>
-            <ArrowLeft size={13} /> پنل ادمین
-          </Link>
-        </div>
-
+    <main className="adm-page">
+      <AdminHeader title={title} description={desc} />
         {toast && (
           <div style={{ marginBottom: 12, background: 'rgba(14,122,56,0.08)', border: '1px solid rgba(14,122,56,0.25)', color: '#0E7A38', borderRadius: 12, padding: '10px 14px', fontSize: 12.5, fontWeight: 700 }}>
             {toast}
@@ -216,7 +204,6 @@ export default function ProfileAdmin({
             ))}
           </div>
         )}
-      </div>
-    </div>
+      </main>
   );
 }

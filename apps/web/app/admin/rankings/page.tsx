@@ -4,6 +4,9 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '../../../store/auth.store';
 import { Trophy, Save, Camera, Loader2, X } from 'lucide-react';
+import TabStrip from '../../../components/ui/TabStrip';
+import { Button } from '../../../components/ui/Button';
+import { AdminHeader } from '../../../components/admin/AdminHeader';
 import { uploadFile } from '../../../lib/supabase';
 import { compressAvatar } from '../../../lib/images/compress-avatar';
 import { notify } from '../../../lib/ui/dialogs';
@@ -49,7 +52,7 @@ function AvatarCell({ value, name, onChange }: { value?: string; name: string; o
   return (
     <div className="relative">
       <label className="w-8 h-8 rounded-full overflow-hidden border border-gray-200 bg-gray-50 cursor-pointer
-        hover:border-green-500 focus-within:ring-2 focus-within:ring-green-500 flex items-center justify-center">
+        hover:border-gold-deep focus-within:ring-2 focus-within:ring-gold-deep flex items-center justify-center">
         <span className="sr-only">{`آپلود عکس ${name || "بازیکن"}`}</span>
         <input type="file" accept="image/*" className="sr-only" disabled={busy}
           onChange={e => { void pick(e.target.files?.[0]); e.target.value = "" }} />
@@ -180,21 +183,13 @@ export default function AdminRankingsPage() {
   const toFa = (n: number) => n.toLocaleString('fa-IR');
 
   return (
-    <div className="max-w-5xl mx-auto pb-10">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
-          <Trophy size={24} className="text-amber-500" />
-          مدیریت رنکینگ
-        </h1>
-        <button onClick={handleSave} disabled={onServer === null}
-          className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed ${saved ? 'bg-green-100 text-green-700' : 'bg-green-700 text-white hover:bg-green-800'}`}>
-          <Save size={16} />
-          {saved ? '✅ ذخیره شد' : 'ذخیره'}
-        </button>
-      </div>
+    <main className="adm-page">
+      <AdminHeader
+        icon={<Trophy size={26} className="text-gold-text" aria-hidden />}
+        title="مدیریت رنکینگ" />
 
       {err && (
-        <div className="mb-5 rounded-xl border px-4 py-3 text-sm font-bold"
+        <div className="rounded-card border px-4 py-3 text-sm font-bold"
           style={{ background: 'rgba(178,59,46,0.06)', borderColor: 'rgba(178,59,46,0.28)', color: '#B23B2E' }}>
           {err}
         </div>
@@ -207,7 +202,7 @@ export default function AdminRankingsPage() {
           بدون این هشدار، تنها نشانه‌ی مشکل «صفحه‌ی رنکینگ خالی» بود
           که هیچ ربطی به این صفحه به نظر نمی‌رسید. */}
       {onServer === false && (
-        <div className="mb-5 rounded-xl border px-4 py-3 text-sm font-bold leading-7"
+        <div className="rounded-card border px-4 py-3 text-sm font-bold leading-7"
           style={{ background: 'rgba(199,166,106,0.10)', borderColor: 'rgba(199,166,106,0.34)', color: '#8F6531' }}>
           این جدول هنوز روی سرور ذخیره نشده و فقط روی همین مرورگر است —
           پس در صفحه‌ی رنکینگ سایت چیزی دیده نمی‌شود
@@ -216,36 +211,17 @@ export default function AdminRankingsPage() {
       )}
 
       {/* انتخاب رشته */}
-      <div className="flex gap-3 mb-5">
-        {[
-          { value: 'snooker', label: 'اسنوکر' },
-          { value: 'pocket', label: 'پاکت بیلیارد' },
-        ].map(s => (
-          <button key={s.value} onClick={() => { setSport(s.value); setGender('آقایان'); setCategory('دسته برتر'); }}
-            className={`px-5 py-2.5 rounded-xl text-sm font-bold transition-all ${sport === s.value ? 'bg-green-700 text-white' : 'bg-white border border-gray-200 text-gray-600 hover:border-green-400'}`}>
-            {s.label}
-          </button>
-        ))}
-      </div>
+      <TabStrip value={sport} style={{ marginBottom: 0 }}
+        onChange={v => { setSport(v); setGender('آقایان'); setCategory('دسته برتر'); }}
+        tabs={[{ key: 'snooker', label: 'اسنوکر' }, { key: 'pocket', label: 'پاکت بیلیارد' }]} />
 
-      {/* موبایل: انتخاب‌گرهای افقی به‌جای سایدبار */}
-      <div className="md:hidden mb-4 space-y-2">
-        <div className="flex gap-2">
-          {['آقایان', 'بانوان'].map(g => (
-            <button key={g} onClick={() => { setGender(g); setCategory(Object.keys(rankings[sport]?.[g] ?? {})[0] ?? 'دسته برتر'); }}
-              className={`flex-1 rounded-xl px-3 py-2.5 text-sm font-bold transition-all ${gender === g ? 'bg-green-700 text-white' : 'bg-white border border-gray-200 text-gray-600'}`}>
-              {g}
-            </button>
-          ))}
-        </div>
-        <div className="flex gap-2 overflow-x-auto pb-1" style={{ scrollbarWidth: 'none' }}>
-          {Object.keys(rankings[sport]?.[gender] ?? {}).map(cat => (
-            <button key={cat} onClick={() => setCategory(cat)}
-              className={`shrink-0 rounded-xl px-3.5 py-2 text-xs font-bold transition-all ${category === cat ? 'bg-green-100 text-green-800 border border-green-300' : 'bg-white border border-gray-200 text-gray-600'}`}>
-              {cat}
-            </button>
-          ))}
-        </div>
+      {/* موبایل: جنسیت و دسته با نوار تبِ مشترک به‌جای سایدبار */}
+      <div className="grid gap-3 md:hidden">
+        <TabStrip value={gender} style={{ marginBottom: 0 }}
+          onChange={g => { setGender(g); setCategory(Object.keys(rankings[sport]?.[g] ?? {})[0] ?? 'دسته برتر'); }}
+          tabs={['آقایان', 'بانوان'].map(g => ({ key: g, label: g }))} />
+        <TabStrip value={category} style={{ marginBottom: 0 }} onChange={setCategory}
+          tabs={Object.keys(rankings[sport]?.[gender] ?? {}).map(cat => ({ key: cat, label: cat }))} />
       </div>
 
       <div className="flex flex-col md:flex-row gap-5">
@@ -254,7 +230,7 @@ export default function AdminRankingsPage() {
           {['آقایان', 'بانوان'].map(g => (
             <div key={g} className="bg-white rounded-2xl shadow-sm overflow-hidden">
               <button onClick={() => { setGender(g); setCategory(Object.keys(rankings[sport]?.[g] ?? {})[0] ?? 'دسته برتر'); }}
-                className={`w-full text-right px-4 py-3 font-bold text-sm ${gender === g ? 'bg-green-700 text-white' : 'bg-gray-50 text-gray-700 hover:bg-gray-100'}`}>
+                className={`w-full text-right px-4 py-3 font-bold text-sm ${gender === g ? 'bg-ink text-white' : 'bg-gray-50 text-gray-700 hover:bg-gray-100'}`}>
                 {g === 'آقایان' ? '👨 آقایان' : '👩 بانوان'}
               </button>
               {gender === g && (
@@ -265,7 +241,7 @@ export default function AdminRankingsPage() {
                 <div className="p-1 space-y-1">
                   {Object.keys(rankings[sport]?.[g] ?? {}).map(cat => (
                     <button key={cat} onClick={() => setCategory(cat)}
-                      className={`w-full text-right px-3 py-2 rounded-lg text-sm transition-all ${category === cat ? 'bg-green-100 text-green-800 font-medium' : 'text-gray-600 hover:bg-gray-50'}`}>
+                      className={`w-full text-right px-3 py-2 rounded-lg text-sm transition-all ${category === cat ? 'bg-gold/15 text-gold-text font-medium' : 'text-gray-600 hover:bg-gray-50'}`}>
                       {cat}
                     </button>
                   ))}
@@ -277,7 +253,7 @@ export default function AdminRankingsPage() {
 
         {/* جدول */}
         <div className="flex-1 bg-white rounded-2xl shadow-sm overflow-hidden">
-          <div className="bg-green-700 text-white px-5 py-3 flex items-center justify-between">
+          <div className="bg-ink text-white px-5 py-3 flex items-center justify-between">
             <span className="font-bold">{gender} — {category}</span>
             <span className="text-sm opacity-80">{toFa(categorySize(sport, category, gender))} نفر</span>
           </div>
@@ -289,18 +265,18 @@ export default function AdminRankingsPage() {
             <div className="col-span-2">نام</div>
             <div className="col-span-2">نام خانوادگی</div>
             <div className="col-span-2">استان و شهر</div>
-            <div className="col-span-2">امتیاز</div>
+            <div className="col-span-3">امتیاز</div>
             <div className="col-span-1">رتبه قبل</div>
           </div>
 
           <div className="divide-y divide-gray-50 max-h-[600px] overflow-y-auto">
             {players.map((player, index) => (
-              <div key={index} className={`grid grid-cols-6 sm:grid-cols-12 items-center gap-y-1.5 px-3 sm:px-4 py-2.5 sm:py-2 ${index < 16 ? 'bg-green-50' : ''}`}>
+              <div key={index} className={`grid grid-cols-6 sm:grid-cols-12 items-center gap-x-2 gap-y-2 px-3 sm:gap-x-0 sm:px-4 py-3 sm:py-2 ${index < 16 ? 'bg-gold/10' : ''}`}>
                 <div className="col-span-1 text-center">
                   <span className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold mx-auto ${index === 0 ? 'bg-yellow-400 text-white' :
                       index === 1 ? 'bg-gray-400 text-white' :
                         index === 2 ? 'bg-amber-600 text-white' :
-                          index < 16 ? 'bg-green-200 text-green-800' :
+                          index < 16 ? 'bg-gold/25 text-gold-text' :
                             'bg-gray-100 text-gray-600'
                     }`}>
                     {toFa(index + 1)}
@@ -325,7 +301,7 @@ export default function AdminRankingsPage() {
                     type="text"
                     value={player.firstName ?? ''}
                     onChange={e => updateName(index, e.target.value, undefined)}
-                    className="w-full border border-gray-200 rounded-lg px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+                    className="w-full border border-gray-200 rounded-lg px-2 py-1.5 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-deep"
                     placeholder="نام"
                     aria-label={`نام بازیکن رتبه ${index + 1}`}
                   />
@@ -335,7 +311,7 @@ export default function AdminRankingsPage() {
                     type="text"
                     value={player.lastName ?? ''}
                     onChange={e => updateName(index, undefined, e.target.value)}
-                    className="w-full border border-gray-200 rounded-lg px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+                    className="w-full border border-gray-200 rounded-lg px-2 py-1.5 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-deep"
                     placeholder="نام خانوادگی"
                     aria-label={`نام خانوادگی بازیکن رتبه ${index + 1}`}
                   />
@@ -357,21 +333,21 @@ export default function AdminRankingsPage() {
                     onChange={v => updateCity(index, v.province, v.city)}
                   />
                 </div>
-                <div className="col-span-3 sm:col-span-3 sm:px-1">
+                <div className="col-span-4 sm:col-span-3 sm:px-1">
                   <input
                     type="number"
                     value={player.points || ''}
                     onChange={e => updatePlayer(index, 'points', parseInt(e.target.value) || 0)}
-                    className="w-full border border-gray-200 rounded-lg px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+                    className="w-full border border-gray-200 rounded-lg px-2 py-1.5 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-deep"
                     placeholder="۰"
                   />
                 </div>
-                <div className="col-span-1 sm:px-1">
+                <div className="col-span-2 sm:col-span-1 sm:px-1">
                   <input
                     type="number"
                     value={player.previousRank || ''}
                     onChange={e => updatePlayer(index, 'previousRank', parseInt(e.target.value) || 0)}
-                    className="w-full border border-gray-200 rounded-lg px-1 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 text-center"
+                    className="w-full border border-gray-200 rounded-lg px-1 py-1.5 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-deep text-center"
                     placeholder="-"
                   />
                 </div>
@@ -380,6 +356,14 @@ export default function AdminRankingsPage() {
           </div>
         </div>
       </div>
-    </div>
+
+      {/* ذخیره: روی جدولِ بلند هم همیشه در دسترس */}
+      <div className="adm-sticky-actions">
+        <Button variant="primary" onClick={handleSave} disabled={onServer === null}
+          icon={<Save size={16} aria-hidden />}>
+          {saved ? 'ذخیره شد' : 'ذخیره'}
+        </Button>
+      </div>
+    </main>
   );
 }
