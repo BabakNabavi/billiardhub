@@ -136,7 +136,7 @@ export function HeroCards({ data, newestClubs, newestProducts, stores: allStores
   /* فروشگاه‌ها فقط در گوشی (خواستِ مالک): ردیفِ سوایپی جای کارتِ چهارم دارد؛
      دسته‌ی سه‌کارتیِ دسکتاپ و ردیفِ سه‌تاییِ تبلت نه */
   if (stores.length) cards.push(pos => (
-    <HeroSpotCard key="stores" items={stores} pos={pos} hrefBase="/sellers" fit="logo" everyMs={5000}
+    <HeroSpotCard key="stores" items={stores} pos={pos} hrefBase="/sellers" fit="logo" everyMs={4500}
       label={['فروشگاه تجهیزات', 'فروشگاه‌های تجهیزات']} className="min-[601px]:hidden" />
   ))
   if (cards.length === 0) return null

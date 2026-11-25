@@ -9,7 +9,7 @@ import type { HeroRankingBoard } from './hero-types'
 import { CARD, LABEL } from './hero-classes'
 
 /* ─────────────────────────────────────────────────────────────
-   رنکینگِ چرخان — هر ~۵٫۵ ثانیه (نامنظم) جدولِ بعدی (خواستِ مالک):
+   رنکینگِ چرخان — هر ~۵ ثانیه (نامنظم) جدولِ بعدی (خواستِ مالک):
    اسنوکر آقایان ⟵ اسنوکر بانوان ⟵ … (ترتیب در lib/home-hero).
 
    دسکتاپ و موبایل هر دو چهار نفر (خواستِ مالک، ۱۹ آبانِ ۱۴۰۵؛ پیش‌تر موبایل
@@ -18,7 +18,7 @@ import { CARD, LABEL } from './hero-classes'
    چرخش بالا و پایین نپرد.
    ───────────────────────────────────────────────────────────── */
 
-const EVERY_MS = 5500
+const EVERY_MS = 5000
 
 export function HeroRankingCard({ boards, pos }: { boards: HeroRankingBoard[]; pos: string }) {
   const ref = useRef<HTMLAnchorElement>(null)
