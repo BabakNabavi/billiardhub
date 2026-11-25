@@ -313,14 +313,14 @@ const Mono = ({ children }: { children: React.ReactNode }) => (
 )
 
 function Stat({ label, value, icon, tone, strong, muted }: { label: string; value: number; icon: React.ReactNode; tone?: 'gold' | 'felt'; strong?: boolean; muted?: boolean }) {
-  const color = tone === 'gold' ? GOLD_D : tone === 'felt' ? FELT : muted ? MUT : INK
+  const color = tone === 'gold' ? 'text-gold-text' : tone === 'felt' ? 'text-success' : muted ? 'text-ink-2' : 'text-ink'
   return (
-    <div style={{ background: '#fff', border: `1px solid ${tone === 'gold' ? 'rgba(199,166,106,0.4)' : LINE}`, borderRadius: 18, padding: '16px 18px' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 7, fontSize: 12, color: MUT, marginBottom: 8 }}>
-        <span style={{ color }}>{icon}</span>{label}
+    <div className={`adm-card ${tone === 'gold' ? 'border-gold/40' : ''}`}>
+      <div className="mb-2 flex items-center gap-2 text-xs text-ink-2">
+        <span className={color}>{icon}</span>{label}
       </div>
-      <div style={{ fontSize: strong ? 24 : 20, fontWeight: 900, color, fontVariantNumeric: 'tabular-nums' }}>
-        {fa(value)}<span style={{ fontSize: 11, fontWeight: 700, color: MUT, marginInlineStart: 5 }}>تومان</span>
+      <div className={`font-semibold tabular-nums ${strong ? 'text-2xl' : 'text-xl'} ${color}`}>
+        {fa(value)}<span className="ms-1 text-xs font-normal text-ink-2">تومان</span>
       </div>
     </div>
   )
@@ -328,23 +328,19 @@ function Stat({ label, value, icon, tone, strong, muted }: { label: string; valu
 
 function Table({ head, rows, empty }: { head: string[]; rows: React.ReactNode[][]; empty: string }) {
   if (rows.length === 0) return (
-    <div style={{ background: '#fff', border: `1px solid ${LINE}`, borderRadius: 18, padding: '46px 20px', textAlign: 'center' }}>
-      <p style={{ fontSize: 13.5, color: MUT, margin: 0 }}>{empty}</p>
+    <div className="adm-card py-12 text-center">
+      <p className="m-0 text-sm text-ink-2">{empty}</p>
     </div>
   )
   return (
-    <div style={{ background: '#fff', border: `1px solid ${LINE}`, borderRadius: 18, overflowX: 'auto' }}>
-      <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 620 }}>
+    <div className="adm-table-wrap">
+      <table className="adm-table min-w-[620px]">
         <thead>
-          <tr>{head.map((h, i) => (
-            <th key={i} style={{ textAlign: 'right', fontSize: 11.5, fontWeight: 800, color: MUT, padding: '12px 14px', borderBottom: `1px solid ${LINE}`, whiteSpace: 'nowrap' }}>{h}</th>
-          ))}</tr>
+          <tr>{head.map((h, i) => <th key={i} scope="col">{h}</th>)}</tr>
         </thead>
         <tbody>
           {rows.map((r, i) => (
-            <tr key={i}>{r.map((c, j) => (
-              <td key={j} style={{ fontSize: 12.5, color: INK, padding: '12px 14px', borderBottom: i === rows.length - 1 ? 'none' : `1px solid ${LINE}`, whiteSpace: 'nowrap', fontVariantNumeric: 'tabular-nums' }}>{c}</td>
-            ))}</tr>
+            <tr key={i}>{r.map((c, j) => <td key={j} className="whitespace-nowrap tabular-nums">{c}</td>)}</tr>
           ))}
         </tbody>
       </table>
