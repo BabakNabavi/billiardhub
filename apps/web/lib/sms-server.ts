@@ -96,6 +96,10 @@ export const PATTERNS = [
   'booking_cancelled_refund',
   'booking_cancelled',
   'booking_for_owner',
+  /* ── لغو رزرو برای باشگاه‌دار ──
+     قرینه‌ی `booking_for_owner`. تا امروز باشگاه‌دار از رزرو خبر می‌گرفت ولی از
+     لغوش نه — میزی که فکر می‌کرد پر است خالی می‌ماند. */
+  'booking_cancelled_for_owner',
   'settlement_paid',
   'role_approved',
   'role_approved_tick',

@@ -51,6 +51,17 @@ async function nameOf(userId: string): Promise<string> {
   return `${u.firstName ?? ''} ${u.lastName ?? ''}`.trim()
 }
 
+/** نام نمایشی میز برای پیامک باشگاه‌دار: نام ثبت‌شده، وگرنه «نوع میز + شماره» */
+async function tableNameOf(tableId: string | null): Promise<string> {
+  if (!tableId) return ''
+  const { data } = await sb().from('tables').select('name,number,type').eq('id', tableId).maybeSingle()
+  const t = data as { name?: string; number?: number; type?: string } | null
+  const kind = TABLE_LABEL[t?.type ?? ''] ?? ''
+  return t?.name
+    || [kind, t?.number ? `شماره ${t.number}` : ''].filter(Boolean).join(' ')
+    || ''
+}
+
 /* ── نقش حرفه‌ای ────────────────────────────────────────────────
    خط دوم پیامک، مخصوص هر نقش. عمدا این‌جاست نه در `lib/roles`:
    آن فایل به کلاینت هم می‌رود و این متن‌ها فقط سمت سرور لازم‌اند.
@@ -148,15 +159,7 @@ export async function notifyBookingConfirmed(bookingId: string): Promise<void> {
      نفر ثبت‌اند ولی کس دیگری اداره‌شان می‌کند. اگر «شماره‌ی
      اطلاع‌رسانی» تنظیم شده باشد، پیامک به همان می‌رود. */
   if (club && club.ownerId !== b.userId) {
-    let tableName = ''
-    if (b.tableId) {
-      const { data } = await sb().from('tables').select('name,number,type').eq('id', b.tableId).maybeSingle()
-      const t = data as { name?: string; number?: number; type?: string } | null
-      const kind = TABLE_LABEL[t?.type ?? ''] ?? ''
-      tableName = t?.name
-        || [kind, t?.number ? `شماره ${t.number}` : ''].filter(Boolean).join(' ')
-        || ''
-    }
+    const tableName = await tableNameOf(b.tableId)
     const target = club.notifyPhone ?? (club.ownerId ? await phoneOf(club.ownerId) : null)
     /* نام خود مالک برای خطاب، و نام رزروکننده داخل متن */
     const ownerName = club.ownerId ? await nameOf(club.ownerId) : ''
@@ -165,8 +168,26 @@ export async function notifyBookingConfirmed(bookingId: string): Promise<void> {
   }
 }
 
-/** رزرو لغو شد — با مبلغ بازگشتی */
-export async function notifyBookingCancelled(bookingId: string, refund: number): Promise<void> {
+/** چه کسی رزرو را لغو کرد — تعیین می‌کند باشگاه‌دار خبر بگیرد یا نه */
+export type CancelledBy = 'user' | 'owner' | 'admin'
+
+/**
+ * رزرو لغو شد.
+ *
+ * به کاربر همیشه پیامک می‌رود. متنش بی‌طرف است («رزرو شما … لغو شد»)، پس
+ * وقتی باشگاه یا ادمین لغو کرده هم درست می‌خواند.
+ *
+ * به باشگاه‌دار فقط وقتی که:
+ *  • لغو از سوی خودش نبود — او خودش می‌داند؛
+ *  • رزرو پرداخت‌شده بود — خبر «رزرو جدید» فقط بعد از پرداخت به او رفته
+ *    (`notifyBookingConfirmed`)، پس لغوِ رزروِ پرداخت‌نشده خبری است که هرگز
+ *    سابقه نداشته؛
+ *  • رزروکننده خودِ مالک نبود (همان قاعده‌ی «رزرو جدید»).
+ */
+export async function notifyBookingCancelled(
+  bookingId: string, refund: number,
+  opts: { by: CancelledBy; wasPaid: boolean } = { by: 'user', wasPaid: false },
+): Promise<void> {
   const b = await loadBooking(bookingId)
   if (!b) return
   const club = await clubOf(b.clubId)
@@ -177,6 +198,16 @@ export async function notifyBookingCancelled(bookingId: string, refund: number):
   const cDate = faDate(b.bookingDate)
   if (refund > 0) notifyPattern(await phoneOf(b.userId), 'booking_cancelled_refund', [who, cName, cDate, faNum(refund)])
   else notifyPattern(await phoneOf(b.userId), 'booking_cancelled', [who, cName, cDate])
+
+  if (opts.by === 'owner' || !opts.wasPaid) return
+  if (!club || club.ownerId === b.userId) return
+  const target = club.notifyPhone ?? (club.ownerId ? await phoneOf(club.ownerId) : null)
+  const ownerName = club.ownerId ? await nameOf(club.ownerId) : ''
+  /* «توسط {5}»: نامِ رزروکننده وقتی خودش لغو کرده؛ وقتی ادمین لغو کرده
+     نامِ رزروکننده غلط می‌بود، پس نامِ پشتیبانی. */
+  const by = opts.by === 'admin' ? 'پشتیبانی سایت' : (who || 'رزروکننده')
+  notifyPattern(target, 'booking_cancelled_for_owner',
+    [ownerName, (await tableNameOf(b.tableId)) || 'یک میز', cName, cDate, faTimeRange(b.timeSlots), by])
 }
 
 /** تسویه به حساب باشگاه‌دار واریز شد */

@@ -110,7 +110,12 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string
           newValue: { refund, policy: policyLabel, reason }, ip: clientIp(req) ?? undefined });
 
   /* اطلاع‌رسانی لغو — بی‌صدا */
-  void notifyBookingCancelled(b.id, refund).catch(() => { /* بی‌صدا */ });
+  /* اولویتِ «چه کسی»: خودِ رزروکننده، بعد مالکِ باشگاه، بعد ادمین. مالک
+     خودش لغو کرده را می‌داند و پیامک نمی‌گیرد؛ کاربر و ادمین باشگاه‌دار را
+     خبر می‌کنند. */
+  const by = b.userId === actor.id ? 'user' : owner ? 'owner' : 'admin';
+  void notifyBookingCancelled(b.id, refund, { by, wasPaid: b.payment_status === 'PAID' })
+    .catch(() => { /* بی‌صدا */ });
 
   return NextResponse.json({ ...(data ?? {}), refundAmount: refund, policy: policyLabel });
 }

@@ -28,6 +28,7 @@ const LABEL: Record<string, { fa: string; when: string }> = {
   booking_cancelled_refund: { fa: '۲) لغو رزرو با بازگشت وجه', when: 'وقتی رزرو لغو و مبلغ برگشت داده شود' },
   booking_cancelled:        { fa: '۳) لغو رزرو', when: 'لغو بدون بازگشت وجه' },
   booking_for_owner:        { fa: '۴) رزرو جدید باشگاه', when: 'به باشگاه‌دار، وقتی میزش رزرو شود' },
+  booking_cancelled_for_owner: { fa: '۴ب) لغو رزرو — به باشگاه‌دار', when: 'وقتی کاربر یا ادمین رزرو پرداخت‌شده را لغو کند' },
   settlement_paid:          { fa: '۵) واریز تسویه', when: 'وقتی سهم باشگاه واریز شود' },
   role_approved:            { fa: '۶) تأیید پروفایل', when: 'تأیید نقش بدون تیک آبی' },
   role_approved_tick:       { fa: '۷) تأیید پروفایل با نشان', when: 'تأیید نقش همراه با تیک آبی' },

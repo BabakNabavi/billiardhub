@@ -1637,7 +1637,7 @@ t('بازپرداخت به دستورِ پرداختِ ادمین می‌رود'
   /from\('refunds'\)\.insert/.test(cancelApi)
   && /kind: 'refund'/.test(read('components/admin/PayoutOrders.tsx')));
 t('مشتری پیامکِ لغو با مبلغ می‌گیرد',
-  /notifyBookingCancelled\(b\.id, refund\)/.test(cancelApi)
+  /notifyBookingCancelled\(b\.id, refund,/.test(cancelApi)
   && /booking_cancelled_refund/.test(read('lib/notify.ts')));
 t('وعده‌ی بی‌پشتوانه به باشگاه‌دار داده نمی‌شود',
   !/دلیل لغو — برای مشتری فرستاده می‌شود/.test(clubPage),
