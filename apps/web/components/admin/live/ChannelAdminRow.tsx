@@ -22,7 +22,7 @@ export function ChannelAdminRow({ ch, busy, run, onBlock }: {
   return (
     <li className="flex flex-col gap-3 rounded-card border border-line/10 p-3">
       <div className="flex flex-wrap items-center gap-2">
-        <Link href={`/live/c/${ch.id}`} target="_blank" className="rounded text-sub font-bold text-ink hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-deep">{ch.title}</Link>
+        <Link href={`/live/c/${ch.id}`} target="_blank" className="inline-flex min-h-11 items-center rounded text-sub font-bold text-ink hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-deep">{ch.title}</Link>
         <span className="text-meta text-ink-3">{KIND_LABEL[ch.kind]}{ch.tableLabel ? ` — ${ch.tableLabel}` : ''} · {ch.access === 'public' ? 'عمومی' : 'اعضا'}</span>
         {ch.isLive && <span className="rounded-chip bg-danger/10 px-2 py-1 text-meta font-bold text-danger">● زنده · {faNum(ch.viewers)}</span>}
         {ch.adminBlocked && <span className="rounded-chip bg-danger/10 px-2 py-1 text-meta font-bold text-danger">مسدود</span>}

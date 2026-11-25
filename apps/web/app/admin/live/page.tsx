@@ -8,6 +8,7 @@
    - توقفِ اجباری و پنهان‌کردنِ ضبط از آرشیوِ عمومی
    ───────────────────────────────────────────────────────────── */
 
+import { AdminHeader } from '../../../components/admin/AdminHeader';
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { RadioTower } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
@@ -56,16 +57,16 @@ export default function AdminLivePage() {
   const others = (state?.allClubs ?? []).filter(c => !listed.has(c.id))
 
   return (
-    <main className="mx-auto flex w-full max-w-4xl flex-col gap-6 px-4 pb-24 pt-6">
-      <header className="flex flex-col gap-1">
-        <h1 className="flex items-center gap-2 text-title text-ink"><RadioTower className="h-6 w-6 text-gold-text" aria-hidden /> پخش زنده</h1>
-        {state && (
-          <p className="text-meta text-ink-3">
+    <main className="adm-page">
+      <AdminHeader
+        icon={<RadioTower className="size-6 text-gold-text" aria-hidden />}
+        title="پخش زنده"
+        description={state ? (
+          <>
             سرویس پخش: {state.connected ? `وصل (${state.provider})` : 'API وصل نیست — کانال‌ها فعلا با «وصل کانال آروان» دستی اضافه می‌شوند'}
             {state.month ? ` · ۳۰ روز: ${faNum(state.month.count)} پخش، ${faDec(state.month.hours)} ساعت، ${faDec(state.month.viewerHours)} ساعت‌-بیننده` : ''}
-          </p>
-        )}
-      </header>
+          </>
+        ) : undefined} />
 
       {!state && !loadErr && <div className="h-40 animate-pulse rounded-panel bg-ink/[.05]" aria-label="در حال بارگذاری" />}
       {loadErr && (

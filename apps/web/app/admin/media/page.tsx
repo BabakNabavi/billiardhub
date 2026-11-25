@@ -13,15 +13,16 @@
    صفحه‌ی عمومی، فهرست و نقشه‌ی سایت اثر می‌گذارند.
    ───────────────────────────────────────────────────────────── */
 
+import { AdminHeader } from '../../../components/admin/AdminHeader';
 import { useEffect, useState, useCallback } from 'react';
 import { ask } from '../../../lib/ui/dialogs'
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
+
 import { useAuthStore } from '../../../store/auth.store';
 import { MEDIA_CATEGORIES, compactViews, faDigits } from '../../../lib/media-data';
 import { apiFetch } from '../../../lib/http';
 import {
-  ArrowLeft, Eye, EyeOff, Star, Clapperboard, Trash2, Loader2,
+  Eye, EyeOff, Star, Clapperboard, Trash2, Loader2,
   CheckCircle2, XCircle, ExternalLink,
 } from 'lucide-react';
 
@@ -119,27 +120,19 @@ export default function AdminMediaPage() {
   if (!user || user.primaryRole !== 'admin') return null;
 
   const btn: React.CSSProperties = {
-    display: 'inline-flex', alignItems: 'center', gap: 4, height: 30, padding: '0 10px',
+    display: 'inline-flex', alignItems: 'center', gap: 4, height: 44, minWidth: 44, padding: '0 10px',
     borderRadius: 8, cursor: 'pointer', fontSize: 11.5, fontWeight: 800, fontFamily: 'inherit',
     background: '#FAFAF7', border: `1px solid ${LINE}`, color: SEC,
   };
 
   return (
-    <div dir="rtl" style={{ maxWidth: 1080, margin: '0 auto', padding: '22px 16px 60px', fontFamily: 'var(--font-base)' }}>
-      <Link href="/admin" style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 12.5, color: GOLD_D, textDecoration: 'none', marginBottom: 12 }}>
-        <ArrowLeft size={14} /> بازگشت به پنل مدیریت
-      </Link>
-
-      <div style={{ display: 'flex', alignItems: 'center', gap: 9, marginBottom: 6 }}>
-        <Clapperboard size={19} style={{ color: GOLD_D }} />
-        <h1 style={{ fontSize: 19, fontWeight: 900, color: TEXT, margin: 0 }}>مدیریت بیلیارد مدیا</h1>
-      </div>
-      <p style={{ fontSize: 12.5, color: SEC, lineHeight: 2, margin: '0 0 16px' }}>
-        هر تغییری همین‌جا روی صفحه‌ی عمومی، فهرست و نقشه‌ی سایت اثر می‌گذارد
-        ویدیوی «مخفی» یا «ردشده» برای بازدیدکننده باز نمی‌شود و در نقشه‌ی سایت نمی‌آید
-      </p>
-
+    <main className="adm-page">
+      <AdminHeader
+        icon={<Clapperboard size={26} className="text-gold-text" aria-hidden />}
+        title="مدیریت بیلیارد مدیا"
+        description="هر تغییری همین‌جا روی صفحه‌ی عمومی، فهرست و نقشه‌ی سایت اثر می‌گذارد. ویدیوی «مخفی» یا «ردشده» برای بازدیدکننده باز نمی‌شود و در نقشه‌ی سایت نمی‌آید" />
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 12 }}>
+
         {FILTERS.map(f => (
           <button key={f.key} onClick={() => setFilter(f.key)} style={{
             ...btn, height: 32,
@@ -248,6 +241,6 @@ export default function AdminMediaPage() {
           })}
         </div>
       )}
-    </div>
+    </main>
   );
 }

@@ -25,7 +25,7 @@ export function ClubLiveCard({ club, busy, run, askReason }: {
     <article className="flex flex-col gap-4 rounded-panel border border-line/10 bg-surface p-4 shadow-e0">
       <header className="flex flex-wrap items-center justify-between gap-2">
         <div>
-          <Link href={`/clubs/${club.slug || club.clubId}`} target="_blank" className="rounded text-section text-ink hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-deep">{club.name}</Link>
+          <Link href={`/clubs/${club.slug || club.clubId}`} target="_blank" className="inline-flex min-h-11 items-center rounded text-section text-ink hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-deep">{club.name}</Link>
           <p className="text-meta text-ink-3">
             {s.tier === 'pro' ? 'حرفه‌ای' : 'عادی'} · {faNum(club.channels.length)} کانال از سقف {faNum(club.limit)} ·
             ۳۰ روز: {faDec(club.month.hours)} ساعت، اوج {faNum(club.month.peakViewers)} بیننده

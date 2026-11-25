@@ -1,4 +1,5 @@
 'use client'
+import { AdminHeader } from '../../../components/admin/AdminHeader';
 import { apiFetch } from '../../../lib/http'
 import { useEffect, useState } from 'react'
 import { Power, ShieldCheck, Loader2, Info } from 'lucide-react'
@@ -99,17 +100,12 @@ export default function AdminFeaturesPage() {
   }
 
   return (
-    <div style={{ maxWidth: 860, margin: '0 auto', padding: '22px 18px 60px', direction: 'rtl' }}>
+    <main className="adm-page">
       {/* دکمه‌ی بازگشت را خود app/admin/layout.tsx می‌گذارد — این‌جا تکرار نشود */}
-      <header style={{ margin: '10px 0 22px' }}>
-        <h1 style={{ margin: '0 0 6px', fontSize: 19, fontWeight: 900, color: '#111', display: 'flex', alignItems: 'center', gap: 9 }}>
-          <ShieldCheck size={20} style={{ color: GOLD_D }} /> قابلیت‌های پلتفرم
-        </h1>
-        <p style={{ margin: 0, fontSize: 13, lineHeight: 1.9, color: SEC }}>
-          روشن یا خاموش کردن قابلیت‌ها بدون حذف داده، خاموش‌کردن فقط رابط را پنهان نمی‌کند —
-          سرور هم درخواست‌های مربوط را رد می‌کند
-        </p>
-      </header>
+      <AdminHeader
+        icon={<ShieldCheck size={26} className="text-gold-text" aria-hidden />}
+        title="قابلیت‌های پلتفرم"
+        description="روشن یا خاموش کردن قابلیت‌ها بدون حذف داده، خاموش‌کردن فقط رابط را پنهان نمی‌کند — سرور هم درخواست‌های مربوط را رد می‌کند" />
 
       {loading ? (
         <div style={{ display: 'flex', alignItems: 'center', gap: 9, padding: 30, color: SEC, fontSize: 13 }}>
@@ -182,6 +178,6 @@ export default function AdminFeaturesPage() {
       })}
 
       <style>{'.spin{animation:spin 1s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}'}</style>
-    </div>
+    </main>
   )
 }

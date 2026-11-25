@@ -279,7 +279,7 @@ export default function AdminPage() {
     <div dir="rtl" style={{ minHeight: '100vh', background: '#F7F5F0', color: TEXT, fontFamily: 'Vazirmatn,Tahoma,sans-serif', paddingBottom: 72 }}>
       <style>{`
         @keyframes adUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
-        .ad-wrap { max-width: 1120px; margin: 0 auto; padding: 0 clamp(16px,3vw,28px); }
+        .ad-wrap { max-width: 1120px; margin: 0 auto; padding: 0; /* حاشیه‌ی کناری را .admin-scope می‌دهد */ }
         .ad-stats { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; }
         .ad-stat { display: block; text-decoration: none; background: #fff; border: 1px solid ${LINE};
           border-radius: 14px; padding: 14px 10px; text-align: center;

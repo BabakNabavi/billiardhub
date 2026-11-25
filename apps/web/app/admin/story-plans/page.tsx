@@ -13,6 +13,8 @@
    فقط تعیین می‌کند «خرید بسته معنا دارد یا نه»؛ سهمیه‌ی رایگان نقش
    همیشه اعمال می‌شود. */
 
+import { buttonClasses } from '../../../components/ui/button-classes';
+import { AdminHeader } from '../../../components/admin/AdminHeader';
 import { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
 import { Package, Plus, Save, Power, Loader2, AlertCircle, CheckCircle2, ArrowLeft, Users } from 'lucide-react'
@@ -172,19 +174,16 @@ export default function AdminStoryPlans() {
   }
 
   return (
-    <div dir="rtl" style={{ fontFamily: 'var(--font-base)', padding: 'clamp(14px,2.5vw,28px)', maxWidth: 1120, margin: '0 auto' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6, flexWrap: 'wrap' }}>
-        <Package size={21} style={{ color: GOLD_D }} />
-        <h1 style={{ fontSize: 21, fontWeight: 900, color: INK, margin: 0 }}>بسته‌های استوری</h1>
-        <Link href="/story-plans" style={{ ...BTN, marginInlineStart: 'auto', textDecoration: 'none' }}>
-          <ArrowLeft size={14} /> دیدن صفحه‌ی کاربران
-        </Link>
-      </div>
-      <p style={{ fontSize: 13, color: MUT, margin: '0 0 20px', lineHeight: 1.95 }}>
-        هر بسته را خودتان می‌سازید: چند استوری، در چه بازه‌ای، چند روز اعتبار و چه قیمتی
-        قیمت و تعداد را هر وقت بخواهید عوض کنید — سفارش‌های قبلی دست‌نخورده می‌مانند
-      </p>
-
+    <main className="adm-page">
+      <AdminHeader
+        icon={<Package size={26} className="text-gold-text" aria-hidden />}
+        title="بسته‌های استوری"
+        description="هر بسته را خودتان می‌سازید: چند استوری، در چه بازه‌ای، چند روز اعتبار و چه قیمتی. قیمت و تعداد را هر وقت بخواهید عوض کنید — سفارش‌های قبلی دست‌نخورده می‌مانند"
+        actions={
+          <Link href="/story-plans" className={buttonClasses({ variant: 'secondary', size: 'sm' })}>
+            <ArrowLeft size={14} aria-hidden /> دیدن صفحه‌ی کاربران
+          </Link>
+        } />
       {err && (
         <div style={{ ...CARD, borderColor: 'rgba(178,59,46,0.3)', display: 'flex', gap: 9, alignItems: 'center' }}>
           <AlertCircle size={17} style={{ color: RED }} />
@@ -312,7 +311,7 @@ export default function AdminStoryPlans() {
           background: INK, color: '#fff', fontSize: 13, fontWeight: 800, padding: '10px 20px', borderRadius: 22,
         }}>{toast}</div>
       )}
-    </div>
+    </main>
   )
 }
 

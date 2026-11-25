@@ -3,6 +3,7 @@
 /* گزارش‌های تخلف — بررسی گزارش کاربران درباره‌ی آگهی‌ها و محتوا.
    ادمین می‌تواند وضعیت را عوض کند و یادداشت بگذارد. */
 
+import { AdminHeader } from '../../../components/admin/AdminHeader';
 import { useCallback, useEffect, useState } from 'react'
 import { notify } from '../../../lib/ui/dialogs'
 import Link from 'next/link'
@@ -102,16 +103,11 @@ export default function AdminReports() {
   }
 
   return (
-    <div dir="rtl" style={{ fontFamily: 'var(--font-base)' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 18, flexWrap: 'wrap' }}>
-        <Flag size={21} style={{ color: GOLD_D }} />
-        <h1 style={{ fontSize: 21, fontWeight: 900, color: INK, margin: 0 }}>گزارش‌های تخلف</h1>
-        {counts.OPEN ? (
-          <span style={{ fontSize: 11.5, fontWeight: 800, color: RED, background: 'rgba(178,59,46,0.08)', borderRadius: 20, padding: '4px 11px' }}>
-            {toFaDigits(counts.OPEN)} گزارش بررسی‌نشده
-          </span>
-        ) : null}
-      </div>
+    <main className="adm-page">
+      <AdminHeader
+        icon={<Flag size={26} className="text-gold-text" aria-hidden />}
+        title="گزارش‌های تخلف"
+        description={counts.OPEN ? `${toFaDigits(counts.OPEN)} گزارش بررسی‌نشده` : undefined} />
 
       {/* ── هشدار پیامکی ──
           بدون شماره، ادمین فقط وقتی خبردار می‌شود که خودش این صفحه را
@@ -240,6 +236,6 @@ export default function AdminReports() {
         style={{ position: 'fixed', bottom: `calc(22px + env(safe-area-inset-bottom))`, insetInlineStart: 22, width: 44, height: 44, borderRadius: '50%', border: `1px solid ${LINE}`, background: '#fff', color: SEC, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 8px 24px rgba(28,27,23,0.10)' }}>
         <RotateCcw size={17} />
       </button>
-    </div>
+    </main>
   )
 }

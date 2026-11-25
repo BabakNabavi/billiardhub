@@ -1,5 +1,7 @@
 'use client';
 
+import { Button } from '../../../components/ui/Button';
+import { AdminHeader } from '../../../components/admin/AdminHeader';
 import { useState, useEffect } from 'react';
 import { ask } from '../../../lib/ui/dialogs'
 import { useRouter } from 'next/navigation';
@@ -181,21 +183,19 @@ export default function AdminNewsPage() {
   };
 
   return (
-    <div className="max-w-5xl mx-auto pb-10">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
-          <Newspaper size={24} className="text-red-600" />
-          مدیریت اخبار
-        </h1>
-        <button onClick={() => { setShowForm(true); setEditingId(null); setForm(emptyForm); }}
-          className="bg-green-700 text-white px-5 py-2.5 rounded-xl text-sm font-bold hover:bg-green-800 flex items-center gap-2">
-          <Plus size={16} />
-          خبر جدید
-        </button>
-      </div>
+    <main className="adm-page">
+      <AdminHeader
+        icon={<Newspaper size={26} className="text-gold-text" aria-hidden />}
+        title="مدیریت اخبار"
+        actions={
+          <Button variant="primary" icon={<Plus size={16} aria-hidden />}
+            onClick={() => { setShowForm(true); setEditingId(null); setForm(emptyForm); }}>
+            خبر جدید
+          </Button>
+        } />
 
       {err && (
-        <div className="mb-5 rounded-xl border px-4 py-3 text-sm font-bold"
+        <div role="alert" className="rounded-card border px-4 py-3 text-sm font-bold"
           style={{ background: 'rgba(178,59,46,0.06)', borderColor: 'rgba(178,59,46,0.28)', color: '#B23B2E' }}>
           {err}
         </div>
@@ -319,7 +319,7 @@ export default function AdminNewsPage() {
 
       {/* لیست اخبار */}
       <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
-        <div className="grid grid-cols-12 px-5 py-3 bg-gray-50 text-xs text-gray-500 font-medium border-b">
+        <div className="hidden bg-paper px-4 py-3 text-xs text-ink-2 lg:grid lg:grid-cols-12" aria-hidden>
           <div className="col-span-5">عنوان</div>
           <div className="col-span-2">دسته</div>
           <div className="col-span-2">تاریخ</div>
@@ -335,21 +335,23 @@ export default function AdminNewsPage() {
             </div>
           )}
           {news.map(item => (
-            <div key={item.id} className="grid grid-cols-12 items-center px-5 py-4 hover:bg-gray-50">
-              <div className="col-span-5">
+            <div key={item.id} className="flex flex-col px-4 py-3 hover:bg-paper lg:grid lg:grid-cols-12 lg:items-center">
+              <div className="min-w-0 lg:col-span-5">
                 <div className="font-medium text-sm text-gray-800 line-clamp-1">{item.title}</div>
                 <div className="text-xs text-gray-400 mt-0.5 line-clamp-1">{item.summary}</div>
               </div>
-              <div className="col-span-2">
+              <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-2 lg:contents lg:mt-0">
+              <div className="lg:col-span-2">
                 <span className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded-lg">
                   {sectionLabel(item.category)}
                 </span>
               </div>
-              <div className="col-span-2 text-xs text-gray-500">{item.date}</div>
-              <div className="col-span-1">
+              <div className="text-xs text-ink-2 lg:col-span-2">{item.date}</div>
+              <div className="lg:col-span-1">
                 <span className={`text-xs px-2 py-1 rounded-full ${item.published ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
                   {item.published ? 'منتشر' : 'پیش‌نویس'}
                 </span>
+              </div>
               </div>
               <div className={ROW_ACTIONS_CLASS}>
                 {/* هم‌قدِ RowAction در ردیفِ موبایل (h-11)؛ lg به بالا همان دکمه‌ی کوچکِ قبلی */}
@@ -370,6 +372,6 @@ export default function AdminNewsPage() {
           ))}
         </div>
       </div>
-    </div>
+    </main>
   );
 }

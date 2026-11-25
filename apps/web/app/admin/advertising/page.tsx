@@ -6,6 +6,7 @@
    عمدا هیچ کلید سراسری‌ای وجود ندارد: هر جایگاه Active/Inactive و
    Mode (رایگان/دستی/پولی) خودش را دارد — طبق تصمیم D1. */
 
+import { AdminHeader } from '../../../components/admin/AdminHeader';
 import { useCallback, useEffect, useState } from 'react'
 import { ask, askText } from '../../../lib/ui/dialogs'
 import {
@@ -150,20 +151,16 @@ export default function AdminAdvertising() {
   const openRequests = requests.filter(r => r.status !== 'CLOSED')
 
   return (
-    <div dir="rtl" style={{ fontFamily: 'var(--font-base)', padding: 'clamp(14px,2.5vw,28px)', maxWidth: 1160, margin: '0 auto' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6, flexWrap: 'wrap' }}>
-        <Megaphone size={21} style={{ color: GOLD_D }} />
-        <h1 style={{ fontSize: 21, fontWeight: 900, color: INK, margin: 0 }}>سیستم تبلیغات</h1>
-        {openRequests.length > 0 && (
-          <span style={{ fontSize: 11.5, fontWeight: 800, color: GOLD_D, background: 'rgba(199,166,106,0.13)', borderRadius: 20, padding: '4px 11px' }}>
+    <main className="adm-page">
+      <AdminHeader
+        icon={<Megaphone size={26} className="text-gold-text" aria-hidden />}
+        title="سیستم تبلیغات"
+        description="شش جایگاه مستقل، هر جایگاه فعال/غیرفعال و حالت خودش (رایگان، دستی، پولی) را جدا دارد — هیچ کلید سراسری‌ای وجود ندارد"
+        actions={openRequests.length > 0 && (
+          <span className="rounded-full bg-gold/15 px-3 py-1 text-xs font-semibold text-gold-text">
             {toFaDigits(openRequests.length)} درخواست باز
           </span>
-        )}
-      </div>
-      <p style={{ fontSize: 13, color: MUT, margin: '0 0 20px', lineHeight: 1.95 }}>
-        شش جایگاه مستقل، هر جایگاه فعال/غیرفعال و حالت خودش (رایگان، دستی، پولی) را جدا دارد —
-        هیچ کلید سراسری‌ای وجود ندارد
-      </p>
+        )} />
 
       {err && (
         <div style={{ ...CARD, borderColor: 'rgba(178,59,46,0.3)', display: 'flex', gap: 9, alignItems: 'center' }}>
@@ -248,7 +245,7 @@ export default function AdminAdvertising() {
           background: INK, color: '#fff', fontSize: 13, fontWeight: 800, padding: '10px 20px', borderRadius: 22,
         }}>{toast}</div>
       )}
-    </div>
+    </main>
   )
 }
 

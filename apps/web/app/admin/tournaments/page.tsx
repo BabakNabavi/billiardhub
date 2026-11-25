@@ -8,6 +8,8 @@
    ثبت‌نام و پول دارند — در جدول `tournaments` بودند و هیچ‌جا دیده
    نمی‌شدند. */
 
+import { Button } from '../../../components/ui/Button';
+import { AdminHeader } from '../../../components/admin/AdminHeader';
 import { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
 import TabStrip from '../../../components/ui/TabStrip'
@@ -149,25 +151,18 @@ export default function AdminTournaments() {
   })
 
   return (
-    <div dir="rtl" style={{ fontFamily: 'var(--font-base)', maxWidth: 1000 }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
-        <Trophy size={22} style={{ color: GOLD_D }} />
-        <h1 style={{ fontSize: 21, fontWeight: 900, color: INK, margin: 0 }}>مسابقات باشگاه‌ها</h1>
-      </div>
-      <p style={{ fontSize: 12.5, color: SEC, lineHeight: 2, margin: '0 0 16px' }}>
-        مسابقاتی که باشگاه‌ها ساخته‌اند — با ثبت‌نام و پول واقعی
-        این با «رویدادها» فرق دارد؛ آن‌ها محتوای دستی خود شماست
-      </p>
+    <main className="adm-page">
+      <AdminHeader
+        icon={<Trophy size={26} className="text-gold-text" aria-hidden />}
+        title="مسابقات باشگاه‌ها"
+        description="مسابقاتی که باشگاه‌ها ساخته‌اند — با ثبت‌نام و پول واقعی. این با «رویدادها» فرق دارد؛ آن‌ها محتوای دستی خود شماست"
+        actions={
+          <Button variant="primary" icon={<Plus size={13} aria-hidden />} onClick={() => setShowNew(v => !v)}>
+            مسابقه‌ی جدید
+          </Button>
+        } />
 
-      <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 12 }}>
-        <button onClick={() => setShowNew(v => !v)} style={{
-          flexShrink: 0, display: 'inline-flex', alignItems: 'center', gap: 5,
-          padding: '8px 14px', borderRadius: 999, cursor: 'pointer', fontFamily: 'inherit',
-          fontSize: 12.5, fontWeight: 800,
-          border: '1px solid rgba(48,197,90,0.34)', background: 'rgba(48,197,90,0.12)', color: FELT,
-        }}><Plus size={13} /> مسابقه‌ی جدید</button>
-      </div>
-      <TabStrip value={filter} onChange={setFilter}
+      <TabStrip value={filter} onChange={setFilter} style={{ marginBottom: 0 }}
         tabs={[{ key: '', label: 'همه' }, ...Object.entries(STATUS).map(([k, v]) => ({
           key: k, label: v.label, count: counts[k] || undefined,
         }))]} />
@@ -304,7 +299,7 @@ export default function AdminTournaments() {
 
           <div style={{ display: 'flex', gap: 7, flexWrap: 'wrap' }}>
             <Link href={`/tournaments/${t.id}`} target="_blank" style={{
-              display: 'inline-flex', alignItems: 'center', gap: 5, padding: '7px 13px', borderRadius: 999,
+              display: 'inline-flex', alignItems: 'center', gap: 5, padding: '7px 13px', minHeight: 44, borderRadius: 999,
               fontSize: 12, fontWeight: 700, textDecoration: 'none',
               border: `1px solid ${LINE}`, background: '#fff', color: SEC,
             }}><ExternalLink size={12} /> صفحه‌ی عمومی</Link>
@@ -351,7 +346,7 @@ export default function AdminTournaments() {
           </div>
         </div>
       ))}
-    </div>
+    </main>
   )
 }
 

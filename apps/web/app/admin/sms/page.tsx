@@ -11,6 +11,7 @@
    نیست کد درست وارد شده، ترتیب متغیرها درست است، یا کلید سرویس
    کار می‌کند. */
 
+import { AdminHeader } from '../../../components/admin/AdminHeader';
 import { useCallback, useEffect, useState } from 'react'
 import { MessageSquare, Loader2, Send, Check, AlertCircle, Save } from 'lucide-react'
 import { toFaDigits } from '../../../lib/jalali'
@@ -144,27 +145,23 @@ export default function AdminSms() {
   const done = st ? st.patterns.filter(k => st.ids[k]).length : 0
 
   return (
-    <div dir="rtl" style={{ fontFamily: 'var(--font-base)' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8, flexWrap: 'wrap' }}>
-        <MessageSquare size={21} style={{ color: GOLD_D }} />
-        <h1 style={{ fontSize: 21, fontWeight: 900, color: INK, margin: 0 }}>پیامک‌های سایت</h1>
-        {st ? (
-          <span style={{
-            fontSize: 11.5, fontWeight: 800, borderRadius: 20, padding: '4px 11px',
-            color: done === st.patterns.length ? FELT : GOLD_D,
-            background: done === st.patterns.length ? 'rgba(14,122,56,0.09)' : 'rgba(199,166,106,0.13)',
-          }}>
+    <main className="adm-page">
+      <AdminHeader
+        icon={<MessageSquare size={26} className="text-gold-text" aria-hidden />}
+        title="پیامک‌های سایت"
+        actions={st ? (
+          <span className="rounded-full px-3 py-1 text-xs font-semibold"
+            style={{
+              color: done === st.patterns.length ? FELT : GOLD_D,
+              background: done === st.patterns.length ? 'rgba(14,122,56,0.09)' : 'rgba(199,166,106,0.13)',
+            }}>
             {toFaDigits(done)} از {toFaDigits(st.patterns.length)} الگو آماده
           </span>
-        ) : null}
-      </div>
-
-      <p style={{ fontSize: 12.5, color: SEC, lineHeight: 2, margin: '0 0 16px', maxWidth: 780 }}>
-        هر متن یک‌بار در پنل ملی‌پیامک ثبت و تأیید می‌شود و کدی می‌گیرد، آن کد را این‌جا
-        بگذارید و ذخیره کنید، متن آماده‌ی هر پانزده الگو در فایل <code style={{
-          background: '#F6F4EE', borderRadius: 5, padding: '1px 6px', fontSize: 11.5,
-        }}>docs/sms-patterns.md</code> هست
-      </p>
+        ) : undefined}
+        description={<>
+          هر متن یک‌بار در پنل ملی‌پیامک ثبت و تأیید می‌شود و کدی می‌گیرد، آن کد را این‌جا
+          بگذارید و ذخیره کنید، متن آماده‌ی هر پانزده الگو در فایل <code className="rounded bg-paper px-1 text-xs">docs/sms-patterns.md</code> هست
+        </>} />
 
       {/* ── وضعیت سرویس ──
           بدون این، یک ارسال ناموفق سه علت کاملا متفاوت می‌تواند
@@ -337,11 +334,11 @@ export default function AdminSms() {
           </div>
         </>
       )}
-    </div>
+    </main>
   )
 }
 
-/* نشانگر روشن/خاموش یک پیش‌نیاز */
+
 function Flag2({ ok, label, on, off }: { ok: boolean; label: string; on: string; off: string }) {
   return (
     <span style={{ display: 'inline-flex', alignItems: 'center', gap: 7, fontSize: 12.5 }}>
