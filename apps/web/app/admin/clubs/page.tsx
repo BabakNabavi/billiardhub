@@ -1,5 +1,6 @@
 'use client';
 
+import { AdminHeader } from '../../../components/admin/AdminHeader';
 import { useEffect, useState } from 'react';
 import { notify } from '../../../lib/ui/dialogs'
 import { useRouter } from 'next/navigation';
@@ -127,14 +128,10 @@ export default function AdminClubsPage() {
   if (loading) return <div style={{ textAlign: 'center', padding: '60px 20px', color: '#9ca3af', fontFamily: 'var(--font-base)' }}>در حال بارگذاری...</div>;
 
   return (
-    <div style={{ maxWidth: 900, margin: '0 auto', padding: '32px 16px', fontFamily: 'var(--font-base)', direction: 'rtl' }}>
-      <div style={{ marginBottom: 28 }}>
-        <div style={{ fontSize: 12, color: GOLD, fontWeight: 700, marginBottom: 6 }}>مدیریت</div>
-        <h1 style={{ fontSize: 24, fontWeight: 900, color: '#111', margin: 0 }}>تأیید باشگاه‌ها</h1>
-        <p style={{ fontSize: 13, color: '#6b7280', marginTop: 4 }}>
-          هر دو «تأیید» باشگاه را در سایت منتشر می‌کنند؛ تفاوتشان فقط تیک آبی است، رد یعنی برداشتن از فهرست
-        </p>
-      </div>
+    <main className="adm-page">
+      <AdminHeader
+        title="تأیید باشگاه‌ها"
+        description="هر دو «تأیید» باشگاه را در سایت منتشر می‌کنند؛ تفاوتشان فقط تیک آبی است، رد یعنی برداشتن از فهرست" />
 
       {err && (
         <div style={{ marginBottom: 16, padding: '11px 14px', borderRadius: 12, fontSize: 13, fontWeight: 700,
@@ -340,6 +337,6 @@ export default function AdminClubsPage() {
           </div>
         </div>
       )}
-    </div>
+    </main>
   );
 }

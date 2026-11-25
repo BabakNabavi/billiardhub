@@ -14,6 +14,8 @@
    روی موجودیتی که وجود خارجی ندارد ادعای درستی نیست.
    ───────────────────────────────────────────────────────────── */
 
+import TabStrip from '../../../components/ui/TabStrip';
+import { AdminHeader } from '../../../components/admin/AdminHeader';
 import { useEffect, useState } from 'react'
 import { ask } from '../../../lib/ui/dialogs'
 import { useRouter } from 'next/navigation'
@@ -230,29 +232,15 @@ export default function DemoContentPage() {
     String(r.data.name || `${r.data.firstNameFa ?? ''} ${r.data.lastNameFa ?? ''}`.trim() || r.slug)
 
   return (
-    <div dir="rtl" style={{ maxWidth: 940, margin: '0 auto', padding: '22px 16px 60px', fontFamily: 'var(--font-base)' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 9, marginBottom: 6 }}>
-        <Users size={19} style={{ color: GOLD_D }} />
-        <h1 style={{ fontSize: 19, fontWeight: 900, color: INK, margin: 0 }}>محتوای نمایشی</h1>
-      </div>
-      <p style={{ fontSize: 12.5, color: SEC, lineHeight: 2, margin: '0 0 18px' }}>
-        این‌ها فهرست‌های عمومی را پر می‌کنند تا سایت خالی دیده نشود، همه با نشان «نمایشی» ذخیره
-        می‌شوند و از داده‌ی واقعی جدا می‌مانند — هر وقت کسب‌وکار واقعی جایش را گرفت، یکی را حذف کن
-        تیک «تأییدشده» روی این‌ها نمی‌آید
-      </p>
+    <main className="adm-page">
+      <AdminHeader
+        icon={<Users size={26} className="text-gold-text" aria-hidden />}
+        title="محتوای نمایشی"
+        description="این‌ها فهرست‌های عمومی را پر می‌کنند تا سایت خالی دیده نشود، همه با نشان «نمایشی» ذخیره می‌شوند و از داده‌ی واقعی جدا می‌مانند — هر وقت کسب‌وکار واقعی جایش را گرفت، یکی را حذف کن تیک «تأییدشده» روی این‌ها نمی‌آید" />
 
       {/* انتخاب نوع */}
-      <div style={{ display: 'flex', gap: 7, flexWrap: 'wrap', marginBottom: 18 }}>
-        {KINDS.map(k => (
-          <button key={k.key} onClick={() => setKind(k.key)} style={{
-            padding: '7px 14px', borderRadius: 9, cursor: 'pointer', fontSize: 12.5, fontWeight: 800,
-            fontFamily: 'inherit',
-            background: kind === k.key ? 'rgba(199,166,106,0.14)' : '#FAFAF7',
-            border: `1px solid ${kind === k.key ? 'rgba(199,166,106,0.40)' : LINE}`,
-            color: kind === k.key ? GOLD_D : SEC,
-          }}>{k.fa}</button>
-        ))}
-      </div>
+      <TabStrip value={kind} style={{ marginBottom: 0 }} onChange={k => setKind(k as typeof kind)}
+        tabs={KINDS.map(k => ({ key: k.key, label: k.fa }))} />
 
       {err && (
         <div style={{ color: RED, fontSize: 12.5, fontWeight: 700, padding: '10px 12px', marginBottom: 14,
@@ -363,15 +351,16 @@ export default function DemoContentPage() {
         <div style={{ marginTop: 12 }}>
           <label style={label}>عکس</label>
           <input type="file" accept="image/*" onChange={e => onPhoto(e.target.files?.[0])}
-            style={{ fontSize: 12, color: SEC, fontFamily: 'inherit' }} />
+            style={{ fontSize: 12, color: SEC, fontFamily: 'inherit', minHeight: 44 }} />
           {photo && <img src={photo} alt="" loading="lazy" decoding="async" style={{ marginTop: 8, width: 74, height: 74, objectFit: 'cover', borderRadius: 10, border: `1px solid ${LINE}` }} />}
           <div style={{ fontSize: 10.5, color: MUT, marginTop: 5 }}>
             از عکس چهره‌ی اشخاص واقعی استفاده نکن — عکس میز، باشگاه یا تصویر بدون چهره امن است
           </div>
         </div>
 
+        <div className="adm-sticky-actions">
         <button onClick={() => void create()} disabled={saving} style={{
-          marginTop: 16, height: 38, padding: '0 18px', borderRadius: 10,
+          height: 38, padding: '0 18px', borderRadius: 10,
           cursor: saving ? 'default' : 'pointer', opacity: saving ? 0.6 : 1,
           background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.34)',
           color: GOLD_D, fontSize: 13, fontWeight: 800, fontFamily: 'inherit',
@@ -380,6 +369,7 @@ export default function DemoContentPage() {
           {saving ? <Loader2 size={14} style={{ animation: 'spin 1s linear infinite' }} /> : <Plus size={15} />}
           {saving ? 'در حال ثبت…' : `افزودن ${cur.fa}`}
         </button>
+        </div>
       </div>
 
       {/* فهرست */}
@@ -388,7 +378,7 @@ export default function DemoContentPage() {
           {cur.fa}‌های نمایشی ({rows.length})
         </span>
         <a href={cur.page} target="_blank" rel="noopener noreferrer"
-          style={{ fontSize: 12, fontWeight: 700, color: GOLD_D, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 4 }}>
+          style={{ fontSize: 12, fontWeight: 700, color: GOLD_D, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 4, minHeight: 44 }}>
           دیدن صفحه‌ی عمومی <ExternalLink size={12} />
         </a>
       </div>
@@ -432,6 +422,6 @@ export default function DemoContentPage() {
           ))}
         </ScrollList>
       )}
-    </div>
+    </main>
   )
 }

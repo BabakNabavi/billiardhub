@@ -12,6 +12,7 @@
    شما تأیید یا نادیده‌شان بگیرید.
    ───────────────────────────────────────────────────────────── */
 
+import { AdminHeader } from '../../../components/admin/AdminHeader';
 import { useCallback, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Tag, Plus, Loader2, Check, EyeOff, Save } from 'lucide-react'
@@ -114,21 +115,16 @@ export default function AdminBrandsPage() {
   const active = list.filter(b => b.is_active)
 
   return (
-    <div dir="rtl" style={{ fontFamily: 'var(--font-base)', padding: 'clamp(14px,2.5vw,28px)', maxWidth: 900, margin: '0 auto' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6, flexWrap: 'wrap' }}>
-        <Tag size={21} style={{ color: GOLD_D }} />
-        <h1 style={{ fontSize: 21, fontWeight: 900, color: INK, margin: 0 }}>برندهای بازار</h1>
-        {suggested.length > 0 && (
-          <span style={{ fontSize: 11.5, fontWeight: 800, color: '#B7791F', background: 'rgba(183,121,31,0.10)', borderRadius: 20, padding: '4px 11px' }}>
+    <main className="adm-page">
+      <AdminHeader
+        icon={<Tag size={26} className="text-gold-text" aria-hidden />}
+        title="برندهای بازار"
+        actions={suggested.length > 0 && (
+          <span className="rounded-full bg-yellow-100 px-3 py-1 text-xs font-semibold text-yellow-700">
             {toFaDigits(suggested.length)} پیشنهاد تازه
           </span>
         )}
-      </div>
-      <p style={{ fontSize: 12.5, color: SEC, lineHeight: 2, margin: '0 0 18px' }}>
-        فروشنده می‌تواند برندی بنویسد که در فهرست نیست؛ آن برند این‌جا «پیشنهاد تازه» می‌شود
-        تا وقتی فعالش نکنید، در کشوی ثبت آگهی به کسی نشان داده نمی‌شود — ولی آگهی ثبت‌شده
-        برندش را از دست نمی‌دهد
-      </p>
+        description="فروشنده می‌تواند برندی بنویسد که در فهرست نیست؛ آن برند این‌جا «پیشنهاد تازه» می‌شود تا وقتی فعالش نکنید، در کشوی ثبت آگهی به کسی نشان داده نمی‌شود — ولی آگهی ثبت‌شده برندش را از دست نمی‌دهد" />
 
       {err && (
         <div style={{ ...CARD, background: 'rgba(178,59,46,0.05)', borderColor: 'rgba(178,59,46,0.24)', color: RED, fontSize: 13, fontWeight: 700, padding: '12px 16px' }}>
@@ -190,7 +186,7 @@ export default function AdminBrandsPage() {
           fontSize: 13, fontWeight: 700,
         }}>{toast}</div>
       )}
-    </div>
+    </main>
   )
 }
 

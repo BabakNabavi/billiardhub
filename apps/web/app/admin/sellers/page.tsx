@@ -10,6 +10,7 @@ import { useAuthStore } from '../../../store/auth.store'
 import {  updateSellerProfile, type SellerProfile } from '../../../lib/seller-store'
 import { fetchAdminProfiles, patchAdminProfile } from '../../../lib/admin/profile-rows'
 import ScrollList from '../../../components/ui/ScrollList'
+import { AdminHeader } from '../../../components/admin/AdminHeader'
 import VerifiedBadge from '../../../components/VerifiedBadge'
 
 const ADMIN_PHONE = '09121327283'
@@ -95,20 +96,13 @@ export default function AdminSellersPage() {
   const pending = list.filter(s => s.status === 'pending')
 
   return (
-    <div style={{ direction: 'rtl', fontFamily: "'Vazirmatn',Tahoma,sans-serif", background: BG, minHeight: '100vh', color: TEXT }}>
-      <div style={{ maxWidth: 940, margin: '0 auto', padding: '28px clamp(16px,4vw,32px) 80px' }}>
-
-        <div style={{ marginBottom: 22 }}>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.30)', color: GOLD_D, fontSize: 11, fontWeight: 800, borderRadius: 20, padding: '4px 12px', marginBottom: 10 }}>مدیریت · فروشگاه‌ها</div>
-          <h1 style={{ fontSize: 'clamp(21px,3vw,27px)', fontWeight: 900, letterSpacing: '-0.02em' }}>تایید فروشگاه‌ها</h1>
-          <p style={{ fontSize: 13.5, color: TEXT_S, marginTop: 6 }}>
-            فروشگاه‌های ثبت‌شده را بررسی کنید، فقط فروشگاه‌های تاییدشده در صفحه‌ی فروشگاه‌ها دیده می‌شوند، با آپلود جواز کسب می‌توانید تیک آبی هم بدهید
-          </p>
-          <div style={{ display: 'flex', gap: 10, marginTop: 14, flexWrap: 'wrap' }}>
-            <span style={{ ...btn('rgba(245,158,11,0.10)', '#B45309', '1px solid rgba(245,158,11,0.22)'), cursor: 'default' }}>در انتظار: {pending.length}</span>
-            <span style={{ ...btn('rgba(5,118,66,0.08)', '#057642', '1px solid rgba(5,118,66,0.20)'), cursor: 'default' }}>کل: {list.length}</span>
-          </div>
-        </div>
+    <main className="adm-page">
+      <AdminHeader
+        title="تایید فروشگاه‌ها"
+        description={<>
+          فروشگاه‌های ثبت‌شده را بررسی کنید، فقط فروشگاه‌های تاییدشده در صفحه‌ی فروشگاه‌ها دیده می‌شوند، با آپلود جواز کسب می‌توانید تیک آبی هم بدهید
+          <span className="mt-2 block text-xs text-ink-2">در انتظار: {pending.length} · کل: {list.length}</span>
+        </>} />
 
         {/* شکست سرور باید دیده شود، وگرنه ادمین دکمه را می‌زند و
             فکر می‌کند انجام شد. */}
@@ -228,7 +222,6 @@ export default function AdminSellersPage() {
             })}
           </ScrollList>
         )}
-      </div>
-    </div>
+    </main>
   )
 }

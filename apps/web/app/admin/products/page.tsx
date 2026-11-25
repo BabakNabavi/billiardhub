@@ -1,5 +1,6 @@
 'use client';
 
+import { AdminHeader } from '../../../components/admin/AdminHeader';
 import { useState, useEffect } from 'react';
 import { ask } from '../../../lib/ui/dialogs'
 import { useRouter } from 'next/navigation';
@@ -176,9 +177,9 @@ export default function AdminProductsPage() {
   if (!user || user.primaryRole !== 'admin') return null;
 
   return (
-    <div className="max-w-6xl mx-auto pb-10">
+    <main className="adm-page">
       {err && (
-        <div className="mb-5 rounded-xl border px-4 py-3 text-sm font-bold"
+        <div role="alert" className="rounded-card border px-4 py-3 text-sm font-bold"
           style={{ background: 'rgba(178,59,46,0.06)', borderColor: 'rgba(178,59,46,0.28)', color: '#B23B2E' }}>
           {err}
         </div>
@@ -187,7 +188,7 @@ export default function AdminProductsPage() {
           این‌جاست نه در صفحه‌ی تنظیمات، چون همان کسی که آگهی‌ها را
           بررسی می‌کند باید بتواند روشن/خاموشش کند و اثرش را همان‌جا
           ببیند. */}
-      <div className="mb-5 rounded-xl border px-4 py-3 flex items-center gap-3 flex-wrap"
+      <div className="rounded-card border px-4 py-3 flex items-center gap-3 flex-wrap"
         style={{ background: approvalOn ? 'rgba(183,121,31,0.06)' : 'rgba(14,122,56,0.05)',
                  borderColor: approvalOn ? 'rgba(183,121,31,0.25)' : 'rgba(14,122,56,0.22)' }}>
         <button onClick={() => void toggleApproval()} disabled={savingSetting}
@@ -206,48 +207,47 @@ export default function AdminProductsPage() {
         </span>
       </div>
 
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
-          <ShoppingBag size={24} className="text-purple-600" />
-          آگهی‌های بیلیارد بازار
-        </h1>
-        <div className="flex items-center gap-3">
-          {/* صف انتشار — مهم‌ترین عدد این صفحه وقتی بازبینی روشن است */}
-          {awaitingReview > 0 && (
-            <button onClick={() => setFilterVerification('pending')}
-              className="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm font-bold hover:bg-yellow-200 transition-colors">
-              {awaitingReview.toLocaleString('fa-IR')} در انتظار بررسی
-            </button>
-          )}
-          {pendingCount > 0 && (
-            <span className="bg-amber-50 text-amber-700 px-3 py-1 rounded-full text-sm font-bold">
-              {pendingCount.toLocaleString('fa-IR')} درخواست تیک
+      <AdminHeader
+        icon={<ShoppingBag size={26} className="text-gold-text" aria-hidden />}
+        title="آگهی‌های بیلیارد بازار"
+        description={
+          <span className="flex flex-wrap items-center gap-2">
+            {/* صف انتشار — مهم‌ترین عدد این صفحه وقتی بازبینی روشن است */}
+            {awaitingReview > 0 && (
+              <button type="button" onClick={() => setFilterVerification('pending')}
+                className="rounded-full bg-yellow-100 px-3 py-1 text-xs font-semibold text-yellow-800 transition-colors hover:bg-yellow-200">
+                {awaitingReview.toLocaleString('fa-IR')} در انتظار بررسی
+              </button>
+            )}
+            {pendingCount > 0 && (
+              <span className="rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-700">
+                {pendingCount.toLocaleString('fa-IR')} درخواست تیک
+              </span>
+            )}
+            <span className="rounded-full bg-gold/15 px-3 py-1 text-xs font-semibold text-gold-text">
+              {filtered.length.toLocaleString('fa-IR')} محصول
             </span>
-          )}
-          <span className="bg-purple-100 text-purple-700 px-3 py-1 rounded-full text-sm font-bold">
-            {filtered.length.toLocaleString('fa-IR')} محصول
           </span>
-        </div>
-      </div>
+        } />
 
       {/* فیلترها */}
-      <div className="bg-white rounded-2xl shadow-sm p-5 mb-6">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="relative">
-            <Search size={16} className="absolute right-3 top-3 text-gray-400" />
-            <input type="text" value={search} onChange={e => setSearch(e.target.value)}
+      <div className="adm-card">
+        <div className="adm-toolbar">
+          <div className="adm-grow relative">
+            <Search size={16} aria-hidden className="pointer-events-none absolute start-3 top-1/2 -translate-y-1/2 text-ink-3" />
+            <input type="search" aria-label="جستجو در محصولات" value={search} onChange={e => setSearch(e.target.value)}
               placeholder="جستجو در محصولات..."
-              className="w-full border border-gray-200 rounded-xl pr-9 pl-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500" />
+              className="h-11 w-full rounded-field border border-line/20 bg-surface pe-3 ps-9 text-sm text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-deep" />
           </div>
           <select value={filterCategory} onChange={e => setFilterCategory(e.target.value)}
-            className="border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500">
+            aria-label="فیلتر دسته" className="h-11 flex-1 basis-36">
             <option value="all">همه دسته‌ها</option>
             {MARKET_CATEGORIES.map(c => (
               <option key={c.id} value={c.id}>{c.label}</option>
             ))}
           </select>
           <select value={filterVerification} onChange={e => setFilterVerification(e.target.value)}
-            className="border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500">
+            aria-label="فیلتر وضعیت" className="h-11 flex-1 basis-36">
             <option value="all">همه وضعیت‌ها</option>
             <optgroup label="وضعیت آگهی">
               <option value="pending">در انتظار بررسی</option>
@@ -267,8 +267,8 @@ export default function AdminProductsPage() {
       </div>
 
       {/* جدول */}
-      <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
-        <div className="grid grid-cols-12 px-5 py-3 bg-gray-50 text-xs text-gray-500 font-medium border-b">
+      <div className="overflow-hidden rounded-card border border-line/10 bg-surface">
+        <div className="hidden bg-paper px-4 py-3 text-xs text-ink-2 lg:grid lg:grid-cols-12" aria-hidden>
           <div className="col-span-4">محصول</div>
           <div className="col-span-2">دسته</div>
           <div className="col-span-2">فروشنده</div>
@@ -283,8 +283,8 @@ export default function AdminProductsPage() {
         ) : (
           <ScrollList count={filtered.length} min={8} gap={0} className="divide-y divide-gray-50">
             {filtered.map(product => (
-              <div key={product.id} className={`grid grid-cols-12 items-center px-5 py-3 hover:bg-gray-50 ${product.requestedVerification && !product.isVerified ? 'bg-yellow-50' : ''}`}>
-                <div className="col-span-4 flex items-center gap-3">
+              <div key={product.id} className={`flex flex-col px-4 py-3 hover:bg-paper lg:grid lg:grid-cols-12 lg:items-center ${product.requestedVerification && !product.isVerified ? 'bg-yellow-50' : ''}`}>
+                <div className="flex items-center gap-3 lg:col-span-4">
                   <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center flex-shrink-0 overflow-hidden">
                     {product.images?.length > 0 ? (
                       <img loading="lazy" decoding="async" src={product.images[0]} alt="" className="w-full h-full object-cover" />
@@ -321,16 +321,18 @@ export default function AdminProductsPage() {
                     )}
                   </div>
                 </div>
-                <div className="col-span-2">
+                <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-2 lg:contents">
+                <div className="lg:col-span-2">
                   <span className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded-lg">
                     {categoryLabel(product.category)}
                   </span>
                 </div>
-                <div className="col-span-2 text-sm text-gray-600">
+                <div className="text-sm text-ink-2 lg:col-span-2">
                   {product.seller?.firstName} {product.seller?.lastName}
                 </div>
-                <div className="col-span-2 text-sm font-medium text-green-700">
+                <div className="text-sm font-semibold text-success lg:col-span-2">
                   {product.price?.toLocaleString('fa-IR')} تومان
+                </div>
                 </div>
                 {/* موبایل: دکمه‌ها با نام، در ردیفِ زیرِ مشخصات (RowAction) */}
                 <div className={ROW_ACTIONS_CLASS}>
@@ -426,6 +428,6 @@ export default function AdminProductsPage() {
           </div>
         </div>
       )}
-    </div>
+    </main>
   );
 }
