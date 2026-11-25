@@ -46,6 +46,23 @@ export async function sendPush(
      این تابع جدا شود — نه اینکه این شرط برداشته شود. */
   const { socialInteractionsEnabled } = await import('./features')
   if (!(await socialInteractionsEnabled())) return
+  await deliver(user, payload)
+}
+
+/** پوشِ خدماتی — خبرِ کاری که به خودِ کاربر مربوط است (درخواستِ شاگرد برای مربی).
+ *  همان جداسازی‌ای که توضیحِ بالا خواسته: پرچمِ «تعاملاتِ اجتماعی» رویش نیست. */
+export async function sendServicePush(
+  user: string,
+  payload: { title: string; body: string; url?: string; tag?: string },
+): Promise<void> {
+  if (!ensure() || !user) return
+  await deliver(user, payload)
+}
+
+async function deliver(
+  user: string,
+  payload: { title: string; body: string; url?: string; tag?: string },
+): Promise<void> {
   const list = await readJson<Sub[]>(subPath(user), [])
   if (!list.length) return
   const data = JSON.stringify(payload)

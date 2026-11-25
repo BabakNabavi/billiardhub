@@ -27,6 +27,8 @@ export interface RemoteProfile<T = Record<string, unknown>> {
   ratingCount?: number
   sessionPrice?: number
   sessionMin?: number
+  /** پروفایلِ نمایشی — صاحبی ندارد که درخواست بگیرد (دکمه‌ی درخواستِ کلاس پنهان) */
+  isDemo?: boolean
   licenseNumber: string | null
   licenseUrl: string | null
   licenseVerified: boolean

@@ -81,6 +81,17 @@ async function canReview(userId: string, profileId: string, slug: string): Promi
   if (past.error) console.error('[profile_reviews] sessions:', past.error.message);
   if ((past.count ?? 0) > 0) return true;
 
+  /* ── همان نشانه در سازوکارِ تازه (آذرِ ۱۴۰۵) ──
+     از وقتی شاگرد زمان تعیین نمی‌کند و درخواست می‌فرستد، جای «جلسه‌ی
+     تأییدشده» را «مربی ثبت کرد که تماس گرفت» گرفته (coach_requests، مهاجرتِ
+     ۱۱۸). همان منطق: تأیید با مربی است، ولی پس‌گرفتنی نیست (تماسِ ثبت‌شده
+     برنمی‌گردد) و بعدش گذرِ زمان — یک روز، تا کلاسی هماهنگ و برگزار شود. */
+  const contacted = await sb().from('coach_requests').select('id', { count: 'exact', head: true })
+    .eq('coach_id', profileId).eq('user_id', userId).not('contacted_at', 'is', null)
+    .lt('contacted_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString());
+  if (contacted.error) console.error('[profile_reviews] requests:', contacted.error.message);
+  if ((contacted.count ?? 0) > 0) return true;
+
   /* ── نشانه‌ی درجه‌دو: رزرو میز در باشگاهی که مربی *پذیرفته* ──
      تا وقتی جلسه‌ی مربی تازه است و کسی سابقه‌ای ندارد، این تنها راه
      موجود است. عضویت باشگاه عمدا حساب نمی‌شود: خودسرویس است و هر
@@ -192,7 +203,7 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ kind: stri
   /* لایه‌ی ۲ */
   if (!(await canReview(actor.id, p.id, slug))) {
     return NextResponse.json({
-      message: 'برای ثبت نظر باید جلسه‌ای با این مربی داشته باشید که برگزار شده، یا در باشگاه او رزرو قطعی داشته باشید',
+      message: 'برای ثبت نظر باید دست‌کم یک روز از تماس مربی با شما گذشته باشد، یا در باشگاه او رزرو قطعی داشته باشید',
       code: 'no_relation',
     }, { status: 403 });
   }

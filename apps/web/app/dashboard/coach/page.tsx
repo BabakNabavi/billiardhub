@@ -12,6 +12,7 @@ import VerificationBadges from '../../../components/VerificationBadges'
 import Link from 'next/link'
 import ClubInvites from '../../../components/coach/ClubInvites'
 import SessionInbox from '../../../components/coach/SessionInbox'
+import { CoachRequestInbox } from '../../../components/coach/CoachRequestInbox'
 import { useAuthStore } from '../../../store/auth.store'
 import { isValidSlug } from '../../../lib/slug'
 import { ProfileLoadSpinner, ProfileLoadError } from '../../../components/profile/ProfileLoadGate'
@@ -519,6 +520,9 @@ function safeRemote(raw: unknown): Partial<FormState> {
 
           {/* دعوت‌ها و جلسه‌ها بالای فرم‌اند: تصمیم‌اند، نه ویرایش */}
           <ClubInvites />
+          {/* درخواست‌های تازه (بی‌زمان، آذرِ ۱۴۰۵)؛ صندوقِ قدیمی فقط جلسه‌های
+              زمان‌دارِ پیش از آن را نشان می‌دهد و بی‌جلسه چیزی رندر نمی‌کند */}
+          <CoachRequestInbox />
           <SessionInbox />
 
           {/* 1 — Basic info */}

@@ -4804,9 +4804,10 @@ console.log('\n― جلسه‌ی مربی ―');
   t('مبلغ و مدتِ جلسه فقط برای مربی نوشته می‌شود',
     strip(read('app/api/profiles/[kind]/route.ts')).includes("kind === 'coach' ? numOr(b?.sessionPrice)"),
     'Number(null) صفر است — یک کلاینتِ شلخته مبلغِ مربی را صفر می‌کرد');
+  /* فرمِ زمان‌دارِ شاگرد (SessionRequest) آذرِ ۱۴۰۵ با درخواستِ بی‌زمان
+     جایگزین شد (test-coach-requests)؛ خودِ تبدیلِ ساعتِ تهران هنوز هست */
   t('زمانِ قرار با ساعتِ تهران خوانده می‌شود',
-    strip(read('lib/jalali.ts')).includes('export function tehranInstant')
-    && strip(read('components/coach/SessionRequest.tsx')).includes('tehranInstant(when)'),
+    strip(read('lib/jalali.ts')).includes('export function tehranInstant'),
     'datetime-local را مرورگر با منطقه‌ی خودش تفسیر می‌کند و قرار جابه‌جا می‌شود');
   t('ساعتِ نمایش هم تهران است',
     strip(read('lib/jalali.ts')).includes("timeZone: TEHRAN"),

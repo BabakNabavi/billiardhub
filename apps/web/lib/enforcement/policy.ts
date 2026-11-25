@@ -37,7 +37,9 @@ export const STATUS_LABEL: Record<AccountStatus, string> = {
    خواندن آزاد است. */
 export const FEATURES = {
   market:      { label: 'بیلیارد بازار (آگهی و ارتقا)', prefixes: ['/api/market', '/api/products'] },
-  social:      { label: 'پیام، استوری، نظر و تعامل اجتماعی', prefixes: ['/api/social', '/api/stories', '/api/favorites', '/api/media/social'] },
+  /* درخواستِ کلاس از مربی هم این‌جاست: نام و شماره را با پیامک به کسِ دیگری می‌فرستد —
+     کاربری که برای مزاحمت در پیام محدود شده نباید از این راه پیامک بزند */
+  social:      { label: 'پیام، استوری، نظر و تعامل اجتماعی', prefixes: ['/api/social', '/api/stories', '/api/favorites', '/api/media/social', '/api/coach/requests'] },
   media:       { label: 'بیلیارد مدیا و پخش زنده', prefixes: ['/api/media', '/api/live'] },
   bookings:    { label: 'رزرو میز', prefixes: ['/api/bookings'] },
   tournaments: { label: 'ثبت‌نام مسابقه', prefixes: ['/api/tournaments'] },

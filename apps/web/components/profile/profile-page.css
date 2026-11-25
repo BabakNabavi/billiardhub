@@ -666,10 +666,21 @@ main.ch-col > section { max-width: 760px; }
   color: #fff;
 }
 .ch-ch .ch-book-t p { margin: 0; font-size: 13px; color: rgb(255 255 255 / .74); }
-/* ⚠️ این‌جا کادر نگذار. فرمِ باز خودش زمینه‌ی روشن و بردر دارد، پس
-   یک کادرِ دیگر دورش یعنی سه باکسِ تودرتو: نوارِ تیره، کادرِ روشن،
-   خودِ فرم. مشکلِ کنتراستِ دکمه‌ی بسته هم آن‌جا حل شد که ساخته
-   می‌شود — رنگش توپر شد. */
+/* دکمه‌ی «درخواست کلاس» روی نوارِ *تیره* — پرِ توپر، نه تینتِ ۱۲٪ِ طرحِ LQ:
+   تینت با متنِ #8F6531 روی این زمینه ۲٫۹:۱ می‌داد. کنشِ اصلیِ صفحه است. */
+.ch-ch .ch-book-cta {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  inline-size: 100%; min-block-size: 44px; border-radius: 11px;
+  font-size: 14px; font-weight: 800; text-decoration: none;
+  color: #2A1E08; background: #F4E3BC; border: 1px solid rgb(255 255 255 / .22);
+  transition: background .2s, transform .2s;
+}
+.ch-ch .ch-book-cta:hover { background: #F8ECCF; transform: translateY(-1px); }
+.ch-ch .ch-book-cta:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+@media (prefers-reduced-motion: reduce) {
+  .ch-ch .ch-book-cta { transition: none; }
+  .ch-ch .ch-book-cta:hover { transform: none; }
+}
 
 /* ── ردیفِ راه‌های ارتباطی داخلِ «درباره» ── */
 .ch-ch .ch-links--row { margin-block-start: 16px; }
@@ -1014,30 +1025,6 @@ main.ch-col > section { max-width: 760px; }
 }
 
 
-/* ── تراشه‌های ساعتِ درخواستِ جلسه ──
-   ⚠️ ۴۴ پیکسل، نه ۳۸: این متراکم‌ترین ناحیه‌ی لمسیِ صفحه است (۳۲
-   هدف کنار هم) و مخاطبِ اصلی موبایل است. */
-.sess-slots {
-  display: grid; grid-template-columns: repeat(auto-fill, minmax(62px, 1fr)); gap: 6px;
-}
-.sess-slot {
-  min-block-size: 44px; border-radius: 9px; cursor: pointer;
-  font: inherit; font-size: 13px; font-weight: 700;
-  border: 1px solid #EAE5DA; background: #fff; color: #1C1B17;
-  transition: background .15s, border-color .15s;
-}
-@media (hover: hover) {
-  .sess-slot:hover:not(:disabled) { background: var(--brand-tint); border-color: var(--gold); }
-}
-.sess-slot[data-on] {
-  border-color: var(--gold); background: rgb(var(--gold-ch) / 0.18); color: var(--gold);
-}
-/* ⚠️ `#B3AEA1` روی `#F3F1EB` یعنی ۱٫۹:۱ — خواندنی نبود، و دلیلِ
-   غیرفعال‌کردن به‌جای حذف همین بود که کاربر *ببیند* کدام ساعت
-   بسته است. */
-.sess-slot:disabled { background: #F3F1EB; color: #6F6A5C; cursor: not-allowed; }
-.sess-slot:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
-@media (prefers-reduced-motion: reduce) { .sess-slot { transition: none; } }
 
 
 /* ═══════════════════════════════════════════════════════════

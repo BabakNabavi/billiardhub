@@ -8,7 +8,6 @@ import { csrfToken } from '@/lib/http'
 import ProfileHero from '../../../components/profile/ProfileHero'
 import ProfileGallery from '../../../components/profile/ProfileGallery'
 import Reviews from '../../../components/reviews/Reviews'
-import SessionRequest from '../../../components/coach/SessionRequest'
 import GradeLadder from '../../../components/profile/GradeLadder'
 import ProfileContactLinks from '../../../components/profile/ProfileContactLinks'
 import { useProfileSections } from '@/hooks/use-profile-sections'
@@ -28,8 +27,8 @@ import Link from 'next/link'
 import { useProfileImageViewer } from '@/components/ProfileImageViewer'
 import { useProfileVideoViewer } from '@/components/profile/ProfileVideoViewer'
 import { normalizeDigits } from '@/lib/text-fa'
-import { toFaDigits } from '@/lib/jalali'
-import { CalendarPlus } from 'lucide-react'
+import { toFaDigits, faNum } from '@/lib/jalali'
+import { MessageSquarePlus } from 'lucide-react'
 import { getCoachProfile, badgeFromGrades, disciplineLabel, GRADES, type CoachProfile } from '@/lib/coach-store'
 
 /* همان سقفی که پنل اعمال می‌کند */
@@ -101,7 +100,8 @@ export function CoachProfileClient({ initial }: { initial: PublicProfile<CoachPr
   /* پرچم قطعی سرور — مقایسه‌ی مرورگر فقط فالبک است */
   const [mine, setMine] = useState<boolean | undefined>(undefined)
   const [sessionPrice, setSessionPrice] = useState(() => Number(initial?.sessionPrice ?? 0))
-  const [sessionMin, setSessionMin] = useState(() => Number(initial?.sessionMin ?? 60))
+  /* پروفایلِ نمایشی صاحبی ندارد که درخواستِ کلاس بگیرد ⟵ دکمه‌ها پنهان */
+  const [isDemo, setIsDemo] = useState(() => initial?.isDemo === true)
   const [vidBusy, setVidBusy] = useState(false)
   /* انتشار در بیلیارد مدیا — پنجره فقط وقتی باز می‌شود که کانال
      همین نقش نباشد. آپلود گالری هرگز به نتیجه‌اش وابسته نیست. */
@@ -128,10 +128,10 @@ export function CoachProfileClient({ initial }: { initial: PublicProfile<CoachPr
           setLocalP({ ...(r.profile.data as CoachProfile), slug: r.profile.slug, verified: r.profile.verified })
           setOwnerId(r.profile.ownerId)
           setMine(r.isMine === true)
-          /* مبلغ و مدت جلسه ستون خود ردیف‌اند (مهاجرت ۰۹۱)، نه
-             داخل jsonb — پس از پاسخ سرور خوانده می‌شوند. */
+          /* مبلغ جلسه ستون خود ردیف است (مهاجرت ۰۹۱)، نه داخل jsonb —
+             پس از پاسخ سرور خوانده می‌شود. */
           setSessionPrice(Number(r.profile.sessionPrice ?? 0))
-          setSessionMin(Number(r.profile.sessionMin ?? 60))
+          setIsDemo(r.profile.isDemo === true)
         }
         else if (r.state === 'error') setNetFail(true)
       } catch {
@@ -410,12 +410,12 @@ export function CoachProfileClient({ initial }: { initial: PublicProfile<CoachPr
         }
         actions={
           <>
-            {/* ⚠️ لنگر است نه دکمه‌ی تکراری: فرمِ رزرو یکی است و
-                پایین‌تر رندر می‌شود. دو نمونه یعنی دو state. */}
-            {!edit.isOwner && (
-              <a className="ch-hero-cta" href="#ch-sess-h">
-                <CalendarPlus size={17} aria-hidden />درخواست جلسه
-              </a>
+            {/* درخواستِ کلاس صفحه‌ی خودش را دارد (آذرِ ۱۴۰۵): شاگرد زمان تعیین
+                نمی‌کند، درخواست می‌فرستد و مربی با پیامک خبردار می‌شود */}
+            {!edit.isOwner && !isDemo && (
+              <Link className="ch-hero-cta" href={`/coaches/${encodeURIComponent(coach.id)}/request`}>
+                <MessageSquarePlus size={17} aria-hidden />درخواست کلاس
+              </Link>
             )}
           </>
         }
@@ -480,13 +480,18 @@ export function CoachProfileClient({ initial }: { initial: PublicProfile<CoachPr
               </section>
 
               {/* ── نوارِ رزرو — برای مالکِ پروفایل معنی ندارد ── */}
-              {!edit.isOwner && (
+              {!edit.isOwner && !isDemo && (
                 <section className="ch-book ch-rv" aria-labelledby="ch-sess-h">
                   <div className="ch-book-t">
-                    <h2 id="ch-sess-h">جلسه‌ی خصوصی با {coach.name}</h2>
-                    <p>زمان و مکان را با خود مربی هماهنگ می‌کنید</p>
+                    <h2 id="ch-sess-h">کلاس خصوصی یا مشاوره با {coach.name}</h2>
+                    <p>
+                      درخواستتان را بفرستید، مربی برای هماهنگی با شما تماس می‌گیرد
+                      {sessionPrice > 0 ? ` · هر جلسه ${faNum(sessionPrice)} تومان` : ''}
+                    </p>
                   </div>
-                  <SessionRequest coachSlug={id} price={sessionPrice} minutes={sessionMin} />
+                  <Link className="ch-book-cta" href={`/coaches/${encodeURIComponent(coach.id)}/request`}>
+                    <MessageSquarePlus size={16} aria-hidden />درخواست کلاس یا مشاوره
+                  </Link>
                 </section>
               )}
 
@@ -535,7 +540,7 @@ export function CoachProfileClient({ initial }: { initial: PublicProfile<CoachPr
               <span className="rule" aria-hidden />
             </div>
             <Reviews endpoint={`/api/profiles/coach/${encodeURIComponent(id)}/reviews`} subject="این مربی"
-              cannotReviewNote="برای ثبت نظر باید در باشگاهی که این مربی در آن ثبت شده، رزرو قطعی داشته باشید" />
+              cannotReviewNote="برای ثبت نظر باید دست‌کم یک روز از تماس مربی با شما گذشته باشد، یا در باشگاهی که این مربی در آن ثبت شده رزرو قطعی داشته باشید" />
           </section>
 
         </div>

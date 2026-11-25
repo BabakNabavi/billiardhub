@@ -83,6 +83,7 @@
     "test:club-open-status": "node scripts/test-club-open-status.mjs",
     "test:private-fields": "node scripts/test-private-fields.mjs",
     "test:hero-title": "node scripts/test-hero-title.mjs",
+    "test:coach-requests": "node scripts/test-coach-requests.mjs",
     "check:perf-budget": "node scripts/check-perf-budget.mjs",
     "test:identity": "npx --yes tsx scripts/test-identity-verify.mjs",
     "test:story-rights": "npx --yes tsx scripts/test-story-rights.mjs",

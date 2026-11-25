@@ -111,6 +111,10 @@ export const PATTERNS = [
   'tournament_cancelled',
   'waitlist_promoted',
   'report_created',
+  /* ── درخواستِ شاگرد برای مربی ──
+     شاگرد زمان تعیین نمی‌کند؛ درخواست می‌فرستد و این پیامک با شماره‌ی
+     شاگرد به مربی می‌رسد تا خودش برای هماهنگی تماس بگیرد. */
+  'coach_request',
 
   /* ── امنیت حساب ──
      این دو با بقیه فرق دارند: خبر یک اتفاق عادی نیستند، بلکه تنها
@@ -182,7 +186,10 @@ export async function sendPattern(
 
   if (!smsEnabled()) {
     /* در حالت خاموش فقط لاگ می‌شود تا بشود جریان را دنبال کرد */
-    console.info('[sms:off]', key, to, '|', args.join(' · ').slice(0, 90))
+    /* شماره‌ای که داخلِ متغیرهاست (مثلا شماره‌ی شاگرد در coach_request) هم نیمه‌پوشیده —
+       همان قاعده‌ی لاگِ موفقیت */
+    console.info('[sms:off]', key, to.slice(0, 4) + '***' + to.slice(-3), '|',
+      args.join(' · ').replace(/\d{7,}/g, m => m.slice(0, 4) + '***' + m.slice(-3)).slice(0, 90))
     return { ok: false, skipped: true, message: 'ارسال پیامک خاموش است' }
   }
 
