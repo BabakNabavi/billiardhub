@@ -194,7 +194,7 @@ export default function AdminEventsPage() {
 
       {/* فرم */}
       {showForm && (
-        <div className="bg-white rounded-2xl shadow-sm p-6 mb-6 border-2 border-green-200">
+        <div className="adm-card border-gold/40">
           <div className="flex items-center justify-between mb-5">
             <h2 className="font-bold text-gray-800">{editingId ? 'ویرایش مسابقه' : 'مسابقه جدید'}</h2>
             <button aria-label="بستن فرم" onClick={() => setShowForm(false)} className="text-gray-400 hover:text-gray-600">
@@ -206,14 +206,14 @@ export default function AdminEventsPage() {
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">عنوان مسابقه *</label>
               <input type="text" value={form.title} onChange={e => set('title', e.target.value)}
-                className="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500"
+                className="w-full border border-gray-200 rounded-xl px-4 py-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-deep"
                 placeholder="مثال: مسابقات قهرمانی اسنوکر ایران" />
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">توضیحات</label>
               <textarea value={form.description} onChange={e => set('description', e.target.value)}
-                className="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500"
+                className="w-full border border-gray-200 rounded-xl px-4 py-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-deep"
                 rows={3} placeholder="توضیحات مسابقه..." />
             </div>
 
@@ -221,21 +221,21 @@ export default function AdminEventsPage() {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">رشته</label>
                 <select value={form.sport} onChange={e => set('sport', e.target.value)}
-                  className="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500">
+                  className="w-full border border-gray-200 rounded-xl px-4 py-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-deep">
                   {sports.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
                 </select>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">دسته</label>
                 <select value={form.category} onChange={e => set('category', e.target.value)}
-                  className="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500">
+                  className="w-full border border-gray-200 rounded-xl px-4 py-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-deep">
                   {categories.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
                 </select>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">وضعیت</label>
                 <select value={form.status} onChange={e => set('status', e.target.value)}
-                  className="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500">
+                  className="w-full border border-gray-200 rounded-xl px-4 py-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-deep">
                   <option value="upcoming">آینده</option>
                   <option value="ongoing">در حال برگزاری</option>
                   <option value="finished">پایان یافته</option>
@@ -243,11 +243,11 @@ export default function AdminEventsPage() {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">محل برگزاری</label>
                 <input type="text" value={form.location} onChange={e => set('location', e.target.value)}
-                  className="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500"
+                  className="w-full border border-gray-200 rounded-xl px-4 py-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-deep"
                   placeholder="مثال: سالن المپیک" />
               </div>
               <div className="sm:col-span-2">
@@ -262,33 +262,33 @@ export default function AdminEventsPage() {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">تاریخ شروع</label>
                 <input type="text" value={form.startDate} onChange={e => set('startDate', e.target.value)}
-                  className="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500"
+                  className="w-full border border-gray-200 rounded-xl px-4 py-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-deep"
                   placeholder="۱۴۰۳/۰۶/۱۵" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">تاریخ پایان</label>
                 <input type="text" value={form.endDate} onChange={e => set('endDate', e.target.value)}
-                  className="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500"
+                  className="w-full border border-gray-200 rounded-xl px-4 py-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-deep"
                   placeholder="۱۴۰۳/۰۶/۲۲" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">حداکثر شرکت‌کننده</label>
                 <input type="number" value={form.maxParticipants} onChange={e => set('maxParticipants', parseInt(e.target.value))}
-                  className="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500" />
+                  className="w-full border border-gray-200 rounded-xl px-4 py-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-deep" />
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">جایزه</label>
                 <input type="text" value={form.prize} onChange={e => set('prize', e.target.value)}
-                  className="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500"
+                  className="w-full border border-gray-200 rounded-xl px-4 py-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-deep"
                   placeholder="مثال: ۵۰۰ میلیون تومان" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">برگزارکننده</label>
                 <input type="text" value={form.organizer} onChange={e => set('organizer', e.target.value)}
-                  className="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500"
+                  className="w-full border border-gray-200 rounded-xl px-4 py-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-deep"
                   placeholder="مثال: فدراسیون بیلیارد ایران" />
               </div>
             </div>
@@ -297,11 +297,11 @@ export default function AdminEventsPage() {
               <label className="flex items-center gap-2 cursor-pointer">
                 <input type="checkbox" checked={form.registrationOpen}
                   onChange={e => set('registrationOpen', e.target.checked)}
-                  className="accent-green-600 w-4 h-4" />
+                  className="accent-gold-deep w-4 h-4" />
                 <span className="text-sm font-medium text-gray-700">ثبت‌نام باز است</span>
               </label>
               <button onClick={handleSave}
-                className="bg-green-700 text-white px-6 py-2.5 rounded-xl font-bold hover:bg-green-800 flex items-center gap-2">
+                className="bg-ink text-white px-6 py-2.5 rounded-xl font-bold hover:bg-ink-2 flex items-center gap-2">
                 <Save size={16} />
                 {editingId ? 'ذخیره تغییرات' : 'ثبت مسابقه'}
               </button>

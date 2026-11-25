@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useAuthStore } from '../../../store/auth.store';
 import ScrollList from '../../../components/ui/ScrollList';
 import { apiFetch } from '../../../lib/http';
-import { Users, Search, CheckCircle, XCircle, Eye, Shield } from 'lucide-react';
+import { Users, Search, CheckCircle, XCircle, Eye, Shield, SlidersHorizontal } from 'lucide-react';
 import UserDetailDialog from '../../../components/admin/UserDetailDialog';
 import { AdminHeader } from '../../../components/admin/AdminHeader';
 import { RowAction, ROW_ACTIONS_CLASS, ROW_ACTIONS_HEAD_CLASS } from '../../../components/admin/RowAction';
@@ -58,6 +58,7 @@ export default function AdminUsersPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [detail, setDetail] = useState<string | null>(null);
+  const [showFilters, setShowFilters] = useState(false);
   const [search, setSearch] = useState('');
   const [filterRole, setFilterRole] = useState('all');
   const [filterVerification, setFilterVerification] = useState('all');
@@ -131,7 +132,11 @@ export default function AdminUsersPage() {
               placeholder="جست‌وجوی نام یا شماره…"
               className="h-11 w-full rounded-field border border-line/20 bg-surface pe-3 ps-9 text-sm text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-deep" />
           </div>
-          <label className="flex-1 basis-36">
+          <button type="button" aria-expanded={showFilters} onClick={() => setShowFilters(v => !v)}
+            className="inline-flex h-11 items-center gap-1 rounded-field border border-line/20 bg-surface px-3 text-sm font-semibold text-ink-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-deep md:hidden">
+            <SlidersHorizontal size={14} aria-hidden /> فیلتر
+          </button>
+          <label className={`${showFilters ? "" : "hidden"} flex-1 basis-36 md:block`}>
             <span className="sr-only">فیلتر نقش</span>
             <select value={filterRole} onChange={e => setFilterRole(e.target.value)} className="h-11 w-full">
               <option value="all">همه نقش‌ها</option>
@@ -140,7 +145,7 @@ export default function AdminUsersPage() {
               ))}
             </select>
           </label>
-          <label className="flex-1 basis-36">
+          <label className={`${showFilters ? "" : "hidden"} flex-1 basis-36 md:block`}>
             <span className="sr-only">فیلتر وضعیت تأیید</span>
             <select value={filterVerification} onChange={e => setFilterVerification(e.target.value)} className="h-11 w-full">
               <option value="all">همه وضعیت‌ها</option>

@@ -8,7 +8,7 @@ import { useAuthStore } from '../../../store/auth.store';
 import ScrollList from '../../../components/ui/ScrollList';
 import api from '../../../lib/api';
 import { apiFetch } from '../../../lib/http';
-import { ShoppingBag, Search, CheckCircle, XCircle, Eye, Trash2, Ban, PauseCircle, PlayCircle } from 'lucide-react';
+import { ShoppingBag, Search, CheckCircle, XCircle, Eye, Trash2, Ban, PauseCircle, PlayCircle, SlidersHorizontal } from 'lucide-react';
 import { RowAction, ROW_ACTIONS_CLASS, ROW_ACTIONS_HEAD_CLASS } from '../../../components/admin/RowAction';
 import { categoryLabel, MARKET_CATEGORIES, STATUS_LABEL, type ListingStatus } from '../../../lib/market/categories';
 
@@ -59,6 +59,7 @@ export default function AdminProductsPage() {
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState('');
   const [search, setSearch] = useState('');
+  const [showFilters, setShowFilters] = useState(false);
   const [filterCategory, setFilterCategory] = useState('all');
   const [filterVerification, setFilterVerification] = useState('all');
 
@@ -239,15 +240,19 @@ export default function AdminProductsPage() {
               placeholder="جستجو در محصولات..."
               className="h-11 w-full rounded-field border border-line/20 bg-surface pe-3 ps-9 text-sm text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-deep" />
           </div>
+          <button type="button" aria-expanded={showFilters} onClick={() => setShowFilters(v => !v)}
+            className="inline-flex h-11 items-center gap-1 rounded-field border border-line/20 bg-surface px-3 text-sm font-semibold text-ink-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-deep md:hidden">
+            <SlidersHorizontal size={14} aria-hidden /> فیلتر
+          </button>
           <select value={filterCategory} onChange={e => setFilterCategory(e.target.value)}
-            aria-label="فیلتر دسته" className="h-11 flex-1 basis-36">
+            aria-label="فیلتر دسته" className={`${showFilters ? "" : "hidden"} h-11 flex-1 basis-36 md:block`}>
             <option value="all">همه دسته‌ها</option>
             {MARKET_CATEGORIES.map(c => (
               <option key={c.id} value={c.id}>{c.label}</option>
             ))}
           </select>
           <select value={filterVerification} onChange={e => setFilterVerification(e.target.value)}
-            aria-label="فیلتر وضعیت" className="h-11 flex-1 basis-36">
+            aria-label="فیلتر وضعیت" className={`${showFilters ? "" : "hidden"} h-11 flex-1 basis-36 md:block`}>
             <option value="all">همه وضعیت‌ها</option>
             <optgroup label="وضعیت آگهی">
               <option value="pending">در انتظار بررسی</option>

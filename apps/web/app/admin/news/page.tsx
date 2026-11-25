@@ -203,7 +203,7 @@ export default function AdminNewsPage() {
 
       {/* فرم */}
       {showForm && (
-        <div className="bg-white rounded-2xl shadow-sm p-6 mb-6 border-2 border-green-200">
+        <div className="adm-card border-gold/40">
           <div className="flex items-center justify-between mb-5">
             <h2 className="font-bold text-gray-800">{editingId ? 'ویرایش خبر' : 'خبر جدید'}</h2>
             <button aria-label="بستن فرم" onClick={() => setShowForm(false)} className="text-gray-400 hover:text-gray-600">
@@ -215,15 +215,15 @@ export default function AdminNewsPage() {
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">عنوان خبر *</label>
               <input type="text" value={form.title} onChange={e => setForm({ ...form, title: e.target.value })}
-                className="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500"
+                className="w-full border border-gray-200 rounded-xl px-4 py-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-deep"
                 placeholder="عنوان خبر را وارد کنید" />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">دسته‌بندی</label>
                 <select value={form.category} onChange={e => setForm({ ...form, category: e.target.value })}
-                  className="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500">
+                  className="w-full border border-gray-200 rounded-xl px-4 py-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-deep">
                   <option value="">بدون بخش</option>
                   {categories.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
                 </select>
@@ -231,23 +231,23 @@ export default function AdminNewsPage() {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">تگ‌ها</label>
                 <input type="text" value={form.tags} onChange={e => setForm({ ...form, tags: e.target.value })}
-                  className="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500"
+                  className="w-full border border-gray-200 rounded-xl px-4 py-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-deep"
                   placeholder="با کاما جدا کنید" />
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
                 <label htmlFor="news-cover" className="block text-sm font-medium text-gray-700 mb-1">نشانی تصویر کاور</label>
                 <input id="news-cover" type="url" dir="ltr" value={form.cover} onChange={e => setForm({ ...form, cover: e.target.value })}
-                  className="w-full border border-gray-200 rounded-xl px-4 py-3 text-start focus:outline-none focus:ring-2 focus:ring-green-500"
+                  className="w-full border border-gray-200 rounded-xl px-4 py-3 text-start focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-deep"
                   placeholder="https://…" />
                 <p className="mt-1 text-xs text-gray-400">بدون تصویر، خبر به‌شکل متنی نمایش داده می‌شود</p>
               </div>
               <div>
                 <label htmlFor="news-slug" className="block text-sm font-medium text-gray-700 mb-1">نامک (slug)</label>
                 <input id="news-slug" type="text" dir="ltr" value={form.slug} onChange={e => setForm({ ...form, slug: e.target.value })}
-                  className="w-full border border-gray-200 rounded-xl px-4 py-3 text-start focus:outline-none focus:ring-2 focus:ring-green-500"
+                  className="w-full border border-gray-200 rounded-xl px-4 py-3 text-start focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-deep"
                   placeholder="asia-championship-final" />
                 <p className="mt-1 text-xs text-gray-400">خالی بگذارید تا نشانی از شناسه ساخته شود</p>
               </div>
@@ -264,7 +264,7 @@ export default function AdminNewsPage() {
                   const on = list.includes(t);
                   return (
                     <label key={t} className="flex items-center gap-2 cursor-pointer text-sm">
-                      <input type="checkbox" checked={on} className="accent-green-600 w-4 h-4"
+                      <input type="checkbox" checked={on} className="accent-gold-deep w-4 h-4"
                         onChange={e => {
                           const next = e.target.checked ? [...list, t] : list.filter(x => x !== t);
                           setForm({ ...form, tags: next.join('، ') });
@@ -279,14 +279,14 @@ export default function AdminNewsPage() {
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">خلاصه خبر</label>
               <textarea value={form.summary} onChange={e => setForm({ ...form, summary: e.target.value })}
-                className="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500"
+                className="w-full border border-gray-200 rounded-xl px-4 py-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-deep"
                 rows={3} placeholder="یک پاراگراف خلاصه..." />
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">متن کامل خبر</label>
               <textarea value={form.content} onChange={e => setForm({ ...form, content: e.target.value })}
-                className="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500"
+                className="w-full border border-gray-200 rounded-xl px-4 py-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-deep"
                 rows={8} placeholder="متن کامل خبر..." />
             </div>
 
@@ -294,7 +294,7 @@ export default function AdminNewsPage() {
               <label className="flex items-center gap-2 cursor-pointer">
                 <input type="checkbox" checked={form.published}
                   onChange={e => setForm({ ...form, published: e.target.checked })}
-                  className="accent-green-600 w-4 h-4" />
+                  className="accent-gold-deep w-4 h-4" />
                 <span className="text-sm font-medium text-gray-700">
                   انتشار روی سایت
                   <span className="block text-xs font-normal text-gray-400">
@@ -303,7 +303,7 @@ export default function AdminNewsPage() {
                 </span>
               </label>
               <button onClick={handleSave}
-                className="bg-green-700 text-white px-6 py-2.5 rounded-xl font-bold hover:bg-green-800 flex items-center gap-2">
+                className="bg-ink text-white px-6 py-2.5 rounded-xl font-bold hover:bg-ink-2 flex items-center gap-2">
                 <Save size={16} />
                 {/* ⚠️ برچسب باید همان کاری را بگوید که می‌کند: این
                     دکمه فقط وقتی منتشر می‌کند که تیک «انتشار» خورده
@@ -360,7 +360,7 @@ export default function AdminNewsPage() {
                   title={item.published ? 'بازگرداندن به پیش‌نویس' : 'انتشار روی سایت'}
                   className={`h-11 rounded-lg px-3 text-xs font-bold transition-colors lg:h-auto lg:px-2 lg:py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-deep disabled:opacity-50 disabled:cursor-not-allowed ${item.published
                     ? 'border border-gray-200 text-gray-600 hover:bg-gray-100 lg:border-0 lg:text-gray-500'
-                    : 'bg-green-700 text-white hover:bg-green-800'}`}>
+                    : 'bg-ink text-white hover:bg-ink-2'}`}>
                   {busyId === item.id ? '…' : item.published ? 'لغو انتشار' : 'انتشار'}
                 </button>
                 <RowAction label="ویرایش خبر" short="ویرایش" tone="green" ariaLabel={`ویرایش ${item.title}`}

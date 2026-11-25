@@ -467,26 +467,20 @@ function RefModal({ amount, to, onClose, onSubmit }: {
   const [ref, setRef] = useState('')
   const [busy, setBusy] = useState(false)
   return (
-    <div onClick={onClose} style={{
-      position: 'fixed', inset: 0, zIndex: 200, background: 'rgba(20,18,16,0.45)',
-      display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20,
-    }}>
-      <div onClick={e => e.stopPropagation()} style={{
-        width: '100%', maxWidth: 380, background: '#fff', borderRadius: 18, padding: 22,
-        border: `1px solid ${LINE}`, boxShadow: '0 24px 60px rgba(0,0,0,0.2)',
-      }}>
-        <h3 style={{ fontSize: 16, fontWeight: 900, color: INK, margin: '0 0 4px' }}>ثبت واریز</h3>
+    <div onClick={onClose} className="adm-modal-backdrop">
+      <div onClick={e => e.stopPropagation()} role="dialog" aria-modal="true" aria-labelledby="po-ref-title" className="adm-modal">
+        <h3 id="po-ref-title" style={{ fontSize: 16, fontWeight: 900, color: INK, margin: '0 0 4px' }}>ثبت واریز</h3>
         <p style={{ fontSize: 12.5, color: SEC, margin: '0 0 16px', lineHeight: 1.9 }}>
           <b style={{ color: INK }}>{fa(amount)}</b> تومان به <b style={{ color: INK }}>{to}</b>
         </p>
-        <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: SEC, marginBottom: 6 }}>
+        <label htmlFor="po-ref" style={{ display: 'block', fontSize: 12, fontWeight: 700, color: SEC, marginBottom: 6 }}>
           شماره پیگیری بانک
         </label>
         <p style={{ fontSize: 11.5, color: MUT, margin: '0 0 8px', lineHeight: 1.9 }}>
           از رسید همان انتقال، این عدد استعلام نمی‌شود؛ به‌عنوان سند
           واریز با نام و زمان شما ثبت می‌شود
         </p>
-        <input value={ref} onChange={e => setRef(e.target.value)} autoFocus
+        <input id="po-ref" value={ref} onChange={e => setRef(e.target.value)} autoFocus
           placeholder="مثلا ۱۲۳۴۵۶۷۸"
           style={{
             width: '100%', boxSizing: 'border-box', border: `1px solid ${LINE}`, borderRadius: 10,

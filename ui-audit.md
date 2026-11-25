@@ -175,3 +175,11 @@
 - **درست شد:** بازگشتِ دوم (`verified`، `roles`)، حاشیه‌ی دوتایی (همه‌ی ۹ صفحه، لبه‌ی محتوا ۱۶/۲۴/۱۳۰)، دکمه‌های کوچک‌تر از ۴۴ در `VerifiedRow`، `UserDetailDialog` و `PermissionsDialog`، کارتِ موبایلِ `users` (به‌جای grid-12)، فیلترِ نقشِ `verified` به `select`، تبِ `logs`/`verifications`/`roles` به `TabStrip`، شناسه‌ی بلندِ `logs` با `.adm-break`، عنصرِ بیرون‌زده‌ی `roles` (لکه‌ی تزئینیِ `fixed` حذف شد).
 - **عمداً انجام نشد:** فیلترهای `users` در drawer نرفتند (دو `select` کنارِ هم در `.adm-toolbar` کافی بود)؛ `verified`/`roles` هنوز `ReviewDetails` و `UserRolesSection` و `enforcement/*` را اینلاین دارند (خارج از این گذر).
 - **نمی‌دانم / مانده:** عکسِ ردیف‌های واقعی و پنجره‌ها (`users` ← مشاهده، `access` ← دسترسی‌ها، `roles` ← رد) دیده نشد.
+
+### گذرِ دوم (آذرِ ۱۴۰۵) — مواردِ «عمداً انجام نشد»
+- **فیلترِ موبایل:** `users` و `products` دکمه‌ی «فیلتر» دارند (زیرِ md دو `select` پنهان است و با دکمه باز می‌شود).
+- **`advertising` شکسته شد:** `page.tsx` (فقط داده و ترکیب) + `shared.ts` + `StatsSection` + `PlacementsSection` + `CampaignsSection` + `PlansSection` در همان پوشه. منطق دست‌نخورده؛ فقط جابه‌جایی.
+- **فرم‌های `news`/`events`:** تک‌ستونه روی موبایل، کارت `.adm-card`، حلقه‌ی فوکوس طلایی. فرمِ `ad-plans`/`story-plans` از قبل شبکه‌ی `auto-fit` داشت و دست نخورد.
+- **پنجره‌ی ثبت واریز** در `PayoutOrders` به `.adm-modal` رفت.
+- ⚠️ **اصلاحِ ادعای قبلی:** `UserRolesSection` و `enforcement/*` استایلِ اینلاین ندارند (۰). اینلاینِ باقی‌مانده در: `CommissionPanel` (۳۲)، `PayoutOrders` (۵۴)، `TransactionsReport` (۱۱)، `ReviewDetails` (۳۱) و بدنه‌ی بیشترِ صفحه‌های بخش‌های ۲ تا ۶ (حدودِ ۶۰۰). هنوز برنگشته‌اند.
+- **هنوز ندیده‌ام:** هیچ‌کدام از بخش‌ها با چشم/عکس بازبینی نشد (دسترسیِ تغییرِ نقشِ حسابِ آزمایشی رد شد).
